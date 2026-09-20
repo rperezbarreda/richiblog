@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8">
+    <!-- Color de la barra del navegador en el móvil. Arranca en el color
+         del modo oscuro y el script de abajo lo cambia si toca; al pulsar
+         el botón de tema lo actualiza scripts/tema.js. -->
+    <meta name="theme-color" content="#12091c">
+    <script>
+      (function () {
+        try {
+          if (localStorage.getItem("richi-theme") === "light") {
+            document.documentElement.setAttribute("data-theme", "light");
+            var barra = document.querySelector('meta[name="theme-color"]');
+            if (barra) {
+              barra.setAttribute("content", "#f2ded2");
+            }
+          }
+        } catch (e) {}
+      })();
+    </script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Diario · El Blog de Richi</title>
+    <!-- Cómo se ve el enlace al compartirlo (Bluesky, Discord, Ko-fi…).
+         Sin esto solo sale la URL pelada, sin título ni imagen. Las rutas
+         van absolutas a propósito: las redes no resuelven las relativas. -->
+    <meta name="description" content="El diario del blog en formato calendario: un cuadrito por día y los días con entrada se pueden abrir.">
+    <link rel="canonical" href="https://richi.blog/web/blog/diario.html">
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="El Blog de Richi">
+    <meta property="og:locale" content="es_ES">
+    <meta property="og:title" content="Diario · El Blog de Richi">
+    <meta property="og:description" content="El diario del blog en formato calendario: un cuadrito por día y los días con entrada se pueden abrir.">
+    <meta property="og:url" content="https://richi.blog/web/blog/diario.html">
+    <meta property="og:image" content="https://richi.blog/imagenes/meta/og.webp">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta property="og:image:alt" content="El Blog de Richi — ilustración de Richi sobre fondo morado">
+    <meta name="twitter:card" content="summary_large_image">
+    <link rel="icon" type="image/x-icon" href="/imagenes/favicon.ico">
+    <!-- La única fuente que se precarga. Medido con la red frenada: sin esto el
+         navegador no la descubre hasta parsear el CSS (~800 ms) y el texto baila al
+         cambiar de tipografía; así llega antes del primer pintado y no se nota el
+         cambio. Precargar más fuentes empeoraba el primer pintado 150-210 ms, porque
+         compiten por el ancho de banda con lo que hace falta para pintar. -->
+    <link rel="preload" href="/tipografias/space-grotesk-400.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="alternate" type="application/rss+xml" title="El Blog de Richi — blog, relatos y rol" href="/blog/rss.xml">
+    <!-- ==== CSS ====
+         Esta lista la escribe herramientas/actualizar-cabeceras.py.
+         No la toques a mano: si cambias qué CSS lleva una página,
+         cámbialo en esa herramienta y vuélvela a ejecutar.
+
+         Van escritos aquí, y no cargados por un script, para que el
+         navegador los pida nada más recibir el HTML. Con un script de
+         por medio tardaba ~200 ms más en pintar la página. -->
+    <link rel="stylesheet" href="/estilos/base.css">
+    <link rel="stylesheet" href="/estilos/base.responsive.css">
+    <link rel="stylesheet" href="/estilos/componentes/visor-imagenes.css">
+    <link rel="stylesheet" href="/estilos/componentes/aviso.css">
+    <link rel="stylesheet" href="/estilos/componentes/aviso.responsive.css">
+    <link rel="stylesheet" href="/estilos/componentes/cabecera-ventana.css">
+    <link rel="stylesheet" href="/estilos/componentes/subir.css">
+    <link rel="stylesheet" href="/estilos/paginas/blog.css">
+    <link rel="stylesheet" href="/estilos/paginas/blog.responsive.css">
+    <link rel="stylesheet" href="/estilos/componentes/barra-lateral.css">
+    <link rel="stylesheet" href="/estilos/componentes/barra-lateral.responsive.css">
+    <!-- ==== fin del CSS ==== -->
+    <script src="/scripts/cargador-scripts.js"></script>
+  </head>
+<body>
+    <!-- ==== SIDEBAR / NAVEGACIÓN ==== -->
+    <a class="skip-link" href="#main-content">Saltar al contenido</a>
+    <div id="sidebar-container"></div>
+    <!-- ==== CONTENIDO PRINCIPAL ==== -->
+
+    <main id="main-content">
+        <section id="home" class="home blog-archive-page diario-page">
+            <h1 class="home-title">
+                <em>diario</em>
+            </h1>
+            <p class="blog-archive-year">las entradas etiquetadas como «diario», mes a mes</p>
+
+            <!-- Todo lo de aquí abajo lo monta scripts/paginas/diario.js leyendo
+                 datos/entradas-blog.json: el calendario no se escribe a mano, así
+                 que publicar una entrada nueva con la etiqueta "diario"
+                 la coloca sola en su día. -->
+            <div class="diario-cuerpo">
+                <!-- Un <div> y no un <section>: la regla general de
+                     <section> en base.css trae height: 100%, scroll propio
+                     y contenido centrado, y aquí había que deshacerlo todo
+                     (le pasó a .blog-month y a los bloques de
+                     accesibilidad). -->
+                <div class="diario-ventana">
+                    <div class="recent-entries-header">
+                        <h2>calendario.exe</h2>
+                        <div class="window-controls window-controls-small" data-window-controls aria-hidden="true"></div>
+                    </div>
+
+                    <!-- Los botones de mes van pegados al nombre del mes,
+                         no en los extremos de la ventana: puestos lejos,
+                         había que buscar con la vista qué mes estabas
+                         cambiando. -->
+                    <div class="diario-barra">
+                        <!-- Pone "anterior" a secas y no "mes anterior": el
+                             nombre del mes está justo al lado y con las dos
+                             palabras la barra salía más ancha que el propio
+                             calendario. El aria-label sí lo dice entero, así
+                             que un lector de pantalla anuncia "Mes
+                             anterior". -->
+                        <button class="diario-nav" type="button" data-diario-ir="-1" aria-label="Mes anterior" disabled>
+                            <span aria-hidden="true">←</span> anterior
+                        </button>
+                        <!-- aria-live: al cambiar de mes con el teclado, el
+                             lector de pantalla canta el mes nuevo sin tener
+                             que ir a buscarlo. -->
+                        <p class="diario-mes" data-diario-mes aria-live="polite"></p>
+                        <button class="diario-nav" type="button" data-diario-ir="1" aria-label="Mes siguiente" disabled>
+                            siguiente <span aria-hidden="true">→</span>
+                        </button>
+                    </div>
+
+                    <div class="diario-calendario" data-diario-calendario>
+                        <p class="entries-loading">Cargando el diario…</p>
+                    </div>
+                </div>
+
+                <!-- La misma información del calendario, en lista y con
+                     los títulos enteros: en el móvil los cuadritos se
+                     quedan pequeños y así se puede leer y pulsar cómodo. -->
+                <!-- Sin .recent-entries a propósito: esa clase vive en
+                     paginas/portada.css, que estas páginas no cargan. El marco lo
+                     pone .diario-lista en blog.css (mismo caso que
+                     .blog-post-otras). -->
+                <div class="diario-lista">
+                    <div class="recent-entries-header">
+                        <!-- Lo cambia diario.js al mes que se esté mirando:
+                             entradas_octubre.txt, entradas_noviembre.txt… -->
+                        <h2 data-diario-titulo>entradas.txt</h2>
+                        <div class="window-controls window-controls-small" data-window-controls aria-hidden="true"></div>
+                    </div>
+                    <ul class="entries-list" data-diario-lista></ul>
+                </div>
+            </div>
+
+            <!-- El año lo pone diario.js mirando qué hay publicado: antes
+                 estaba escrito a mano ("2026") y en enero habría seguido
+                 llevando al archivo del año anterior. Empieza escondido
+                 porque mientras no haya ninguna entrada no hay archivo al
+                 que ir; en cuanto publiques la primera, aparece. -->
+            <a class="blog-feed-button" data-boton-blog hidden>ver todo el blog →</a>
+        </section>
+    </main>
+</body>
+</html>

@@ -1,0 +1,690 @@
+/* SOBRE MI — FICHA DE PERSONAJE */
+
+.home.character-sheet {
+    display: flex;
+    flex-direction: column;
+    /* Mismo reset que en contacto.css, blog.css y portada.css: .home
+       trae align-items: center, y en columna eso deja a los hijos
+       sin estirar al ancho del contenedor. .character-sheet-content
+       ya fuerza width: 100% y hoy tapa el problema, pero el reset
+       explícito evita que vuelva si ese width cambia. */
+    align-items: stretch;
+    /* La regla genérica de section (base.css) trae justify-content:
+       center, que en columna centra en vertical. Con la ficha ya
+       desplazable eso la rompía: cuando el contenido pasa del alto
+       disponible, centrarlo lo saca por ARRIBA y por abajo a partes
+       iguales, y a lo de arriba no se llega desplazando (el scroll
+       empieza en cero, no en negativo). Se veía como el retrato
+       cortado por el borde superior nada más entrar. */
+    justify-content: flex-start;
+    padding: 32px 4%;
+    /* Antes era overflow: hidden, apostando a que la ficha entera cabe
+       siempre en pantalla. Cabe en un monitor ancho, pero en cuanto las
+       tarjetas de abajo pasan a dos o tres filas ya no, y lo que
+       sobraba se recortaba sin más. Ahora se desplaza, que es lo que ya
+       hacía en móvil. En pantallas donde todo cabe no aparece ninguna
+       barra, así que no cambia nada visualmente. */
+    overflow-x: hidden;
+    overflow-y: auto;
+    gap: 24px;
+    /* Misma barra fina y con los colores del tema que el menú lateral
+       y las ventanas de la portada: la de por defecto es gris y ancha,
+       y aquí encima se ve contra el fondo de la ficha. */
+    scrollbar-width: thin;
+    scrollbar-color: var(--purple-lighter) transparent;
+}
+
+.home.character-sheet::-webkit-scrollbar {
+    width: 6px;
+}
+
+.home.character-sheet::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.home.character-sheet::-webkit-scrollbar-thumb {
+    background: var(--purple-lighter);
+}
+
+.home.character-sheet::-webkit-scrollbar-thumb:hover {
+    background: var(--yellow);
+}
+
+/* ==== FILA SUPERIOR: RETRATO + TÍTULO/VITALS + ESTADÍSTICAS ==== */
+
+.character-sheet-top {
+    flex: 0 0 auto;
+    width: 100%;
+    min-width: 0;
+    display: flex;
+    align-items: flex-start;
+    flex-wrap: wrap;
+    gap: 24px;
+}
+
+.character-portrait-small {
+    width: 100px;
+    height: 100px;
+    flex-shrink: 0;
+    font-size: 0.875rem;
+}
+
+.character-title-block {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    flex-shrink: 0;
+}
+
+.character-sheet-title {
+    margin: 0;
+    font-size: clamp(2rem, 3.5vw, 2.75rem);
+    letter-spacing: -2px;
+}
+
+.character-vitals-row {
+    flex-direction: column;
+    gap: 8px;
+    width: 260px;
+}
+
+.character-vitals-row .vital {
+    width: 100%;
+}
+
+.character-stats-card {
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    flex: 1;
+    width: auto;
+    max-width: none;
+    min-width: 280px;
+}
+
+/* Sin alto máximo: los 220px de antes daban para la única fila de
+   estadísticas que había cuando iban en tira con scroll. Ahora que se
+   reparten en las filas que hagan falta, ese tope recortaba las de
+   abajo — que es justo lo que se venía a arreglar. */
+.character-stats-card .recent-entries-body {
+    max-height: none;
+    overflow-y: visible;
+}
+
+/* Rejilla en vez de la tira con scroll horizontal que había antes: las
+   seis estadísticas no caben en una línea dentro de la tarjeta, y
+   escondiendo las que sobran tras un arrastre lateral —sin flecha ni
+   barra a la vista— parecía que la tarjeta estaba cortada. Con
+   auto-fit cada una ocupa al menos 126px y se reparten solas en las
+   filas que hagan falta: tres y tres en escritorio, una debajo de
+   otra en móvil. */
+.stats-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(118px, 1fr));
+    gap: 12px;
+    list-style: none;
+}
+
+.stat-box {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-width: 0;
+    border: 2px solid var(--yellow);
+    background: var(--purple-lighter);
+}
+
+/* Un pelín más pequeño y menos espaciado que el resto de etiquetas
+   del sitio: "constitución" pedía 132px en una línea, y con eso solo
+   entraban dos columnas de estadísticas (tarjeta de 572px de alto).
+   Así entran tres en cualquier ancho de escritorio y la tarjeta baja
+   a 401px, sin cortar ningún nombre — medido, no a ojo. */
+.stat-box-name {
+    width: 100%;
+    min-width: 0;
+    margin-top: 14px;
+    color: var(--muted);
+    font-family: "DM Mono", monospace;
+    font-size: 0.625rem;
+    text-align: center;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    white-space: nowrap;
+}
+
+.stat-box-score {
+    margin: 6px 0 14px;
+    color: var(--white);
+    font-size: 2.5rem;
+    font-weight: 500;
+    line-height: 1;
+}
+
+.stat-name-short {
+    display: none;
+}
+
+.stat-box-mod {
+    width: 100%;
+    margin-top: auto;
+    padding: 8px 0;
+    background: var(--yellow);
+    color: var(--yellow-contrast);
+    text-align: center;
+    font-family: "DM Mono", monospace;
+    font-size: 0.875rem;
+    font-weight: 500;
+}
+
+.character-inspiration-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    align-self: flex-start;
+    width: 260px;
+    margin-top: 10px;
+    padding: 8px 16px;
+    border: 2px solid var(--yellow);
+    background: transparent;
+    color: var(--yellow);
+    text-transform: uppercase;
+    font-family: "DM Mono", monospace;
+    font-size: 0.8125rem;
+    letter-spacing: 1px;
+    transition: color 0.15s linear, background-color 0.15s linear, transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.character-inspiration-btn:hover,
+.character-inspiration-btn:focus-visible {
+    color: var(--yellow-contrast);
+    background: var(--yellow);
+    transform: translateY(-2px);
+    box-shadow: 4px 4px 0 var(--yellow-glow-strong);
+}
+
+.character-inspiration-btn:focus-visible {
+    outline: 2px solid var(--yellow);
+    outline-offset: 3px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .character-inspiration-btn {
+        display: none;
+    }
+}
+
+/* ==== CONTENIDO: COLUMNA IZQUIERDA + PRINCIPAL (crece hasta llenar lo que queda) ==== */
+
+/* El min-height es el suelo, y tiene truco. Con el 0 que había antes,
+   este bloque se dejaba aplastar hasta 0px cuando la fila de arriba
+   crecía y las tarjetas desaparecían enteras. Poniéndolo en "auto" (lo
+   normal) pasaba lo contrario: dejaba de tener un alto concreto y las
+   tarjetas volvían a crecer hasta su contenido, así que nunca
+   scrolleaban por dentro. Con un suelo en píxeles se tienen las dos
+   cosas: alto concreto para repartir entre las filas de tarjetas, y un
+   mínimo por debajo del cual no se aplasta. */
+.character-sheet-content {
+    flex: 1 1 auto;
+    width: 100%;
+    min-width: 0;
+    min-height: 240px;
+    display: flex;
+    align-items: stretch;
+    gap: 40px;
+}
+
+/* ==== DATOS BÁSICOS + CONTACTO + PROFICIENCIAS ==== */
+
+.character-portrait-column {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    flex-shrink: 0;
+    /* 272 y no los 300 de antes. El contenido cabría en 250 —lo más
+       ancho es "Piano (Aprendiendo)", 241px con el padding—, pero manda
+       la cabecera: "proficiencias.cfg" mide 152px y necesita 94 más
+       para el hueco de los botones −■✕ y los márgenes. Con menos, el
+       título se metía por debajo de los botones. Aun así sobran 28px
+       de los 300 originales, que se los lleva el trasfondo. */
+    width: 272px;
+    min-height: 0;
+}
+
+.character-portrait-column .character-card {
+    width: 100%;
+}
+
+.character-portrait {
+    display: block;
+    width: 220px;
+    height: 220px;
+    border-radius: 50%;
+    border: 2px solid var(--yellow);
+    background: var(--purple-lighter);
+    object-fit: cover;
+}
+
+.vitals {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    flex-shrink: 0;
+}
+
+.vital {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.vital-label {
+    color: var(--muted);
+    font-family: "DM Mono", monospace;
+    font-size: 0.6875rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.vital .progress-bar {
+    width: 100%;
+    margin: 0;
+    height: 6px;
+}
+
+.character-basics {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin: 0;
+    flex-shrink: 0;
+}
+
+.character-basics-row {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    padding-bottom: 5px;
+    border-bottom: 1px solid var(--border);
+}
+
+.character-basics-row dt {
+    color: var(--yellow);
+    font-family: "DM Mono", monospace;
+    font-size: 0.625rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.character-basics-row dd {
+    margin: 0;
+    color: var(--white);
+    font-size: 0.9375rem;
+}
+
+.character-card-grow {
+    flex: 1;
+}
+
+/* ==== COLUMNA PRINCIPAL: 3 TARJETAS ==== */
+
+/* Rejilla, y no un flex con wrap, por el alto. En un flex con wrap el
+   alto de cada fila lo marca su contenido, NO el alto del contenedor:
+   con las listas largas (habilidades, inventario) las tarjetas crecían
+   hasta 703px dentro de un hueco de 553, se salían por debajo de la
+   ficha —que es overflow: hidden— y el texto quedaba cortado. Y como
+   cada tarjeta medía justo lo que pedía su contenido, el overflow-y
+   de su cuerpo no tenía nada que recortar y tampoco salía la barra:
+   cortado y sin poder desplazarlo.
+   En una rejilla sí se puede decir "las filas se reparten el alto que
+   hay" (grid-auto-rows: 1fr), así que las tarjetas nunca se salen y el
+   que sobra vuelve a ser el cuerpo, que es quien scrollea. Y con
+   auto-fit las columnas se recolocan solas, sin puntos de quiebre:
+   tres en fila en pantalla ancha, dos y una más abajo, o las que
+   quepan. */
+.character-main-column {
+    display: grid;
+    /* min(280px, 100%) y no 280px a secas: cuando la columna entera
+       mide menos de 280 (pasa entre 861 y ~950px de ventana, justo por
+       encima del punto en que se pasa al diseño de móvil), un mínimo
+       fijo de 280 hace que la tarjeta sea más ancha que su hueco y se
+       salga por la derecha. Con el min(), el suelo se rinde antes de
+       desbordar. */
+    grid-template-columns: repeat(auto-fit, minmax(min(280px, 100%), 1fr));
+    /* Las filas se reparten el alto disponible, pero nunca bajan de
+       240px. Sin ese suelo, en cuanto las tarjetas pasaban a dos filas
+       (pantallas de menos de ~1860px, donde además la tira de
+       estadísticas ocupa dos líneas y deja menos hueco abajo) cada
+       ventana se quedaba en 157px de alto con 68px de texto visible:
+       se podía desplazar, sí, pero leer cinco líneas por una mirilla
+       no es leer. Con el suelo, cuando no caben, el que se desplaza es
+       el bloque de abajo entero (ver .character-sheet-content). */
+    grid-auto-rows: minmax(240px, 1fr);
+    gap: 28px;
+    flex: 1;
+    min-width: 0;
+    min-height: 0;
+}
+
+.character-card {
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+}
+
+/* El tope de 420px lo traen de .recent-entries (portada.css), que es para
+   las ventanas de la portada. Aquí las columnas ya las reparte la
+   rejilla, y con el tope puesto dejaban un hueco a la derecha en
+   pantallas muy anchas. */
+.character-main-column > .character-card {
+    max-width: none;
+    /* Los min-width de .character-card-narrow/-wide (280 y 320) venían
+       de cuando esto era un flex y hacían falta para que las tarjetas
+       no se aplastasen. Con la rejilla el suelo ya lo pone el
+       minmax(280px, ...) de las columnas, y dejarlos puestos hacía que
+       la tarjeta del trasfondo (320) fuese más ancha que su columna en
+       pantallas estrechas: hasta 119px de desbordamiento por la
+       derecha, recortados sin más por el overflow-x: hidden. */
+    min-width: 0;
+}
+
+/* Reparto a medida cuando las tres caben en fila. "habilidades" e
+   "inventario" tienen textos de longitud conocida y fija; el trasfondo
+   es prosa y agradece todo el ancho que se le dé, así que se lleva lo
+   que sobre.
+   - 310px para habilidades: la línea más larga ("+5 conocimiento
+     arcano") pide 296 con el circulito y el padding, así que caben
+     todas sin partirse y sobra un pelín de margen.
+   - 345px para inventario: es lo que medía antes. Sus nombres largos
+     ("Espada de plata de Cirilla Fiona Elen Riannon" pide 549) se
+     parten igual a cualquier ancho razonable, así que estrecharlo solo
+     añadiría líneas.
+   El punto de quiebre (1835px de ventana) es el ancho a partir del
+   cual caben de verdad: 310 + 320 (mínimo del trasfondo) + 345 + 56 de
+   huecos = 1031px de columna principal, que se alcanzan a 1826px de
+   ventana. Está medido buscando el píxel exacto, no calculado a ojo:
+   el primer intento lo puse en 1665 y entre 1665 y el ancho real la
+   rejilla se salía hasta 126px por la derecha, que con el
+   overflow-x: hidden de la ficha se habría quedado recortado sin
+   avisar. OJO: este número depende del ancho de la columna izquierda
+   (.character-portrait-column); si se toca, hay que volver a medirlo.
+   Los 9px de margen son por si cambia algo de las fuentes.
+   Por debajo de ese ancho manda el reparto automático de arriba:
+   columnas iguales, y las que no quepan bajan a otra fila. */
+@media (min-width: 1835px) {
+    .character-main-column {
+        grid-template-columns: 310px minmax(320px, 1fr) 345px;
+    }
+}
+
+/* Entre 861 y 1000px la ficha sigue en modo escritorio (el diseño de
+   móvil entra a 860), y ahí las dos columnas ya no caben: la izquierda
+   son 250px fijos de un total de 491, así que a las tarjetas les
+   quedaban 174px y se cortaban hasta los títulos. Se apilan, que es lo
+   que ya hacen más abajo, y la ficha se desplaza como siempre.
+   El resto de cambios de móvil (nombres de estadística abreviados,
+   cosas centradas) se quedan en su sitio a 860: aquí todavía hay ancho
+   de sobra para ellos. */
+@media (max-width: 1000px) {
+    .character-sheet-content {
+        flex-direction: column;
+    }
+
+    .character-portrait-column {
+        width: 100%;
+    }
+}
+
+.character-card-narrow {
+    flex: 1 1 300px;
+    min-width: 280px;
+}
+
+.character-card-wide {
+    flex: 2 1 380px;
+    min-width: 320px;
+}
+
+.character-card-body {
+    flex: 1;
+    min-height: 0;
+    max-height: none;
+    overflow-y: auto;
+}
+
+.character-subsection {
+    padding-top: 14px;
+    border-top: 1px solid var(--border);
+}
+
+/* ==== COMPAÑEROS ==== */
+
+/* Las fichas de compañero iban sueltas y pegadas una a otra. Van
+   dentro de .progress-items (el mismo contenedor que usa "mis
+   progresos" en la portada) y aquí se les da algo más de aire, tanto
+   entre fichas como dentro de cada una: en esta tarjeta hay sitio de
+   sobra y así se leen mejor que apelotonadas. */
+.character-card-wide .progress-items {
+    gap: 14px;
+    margin-top: 12px;
+}
+
+.character-card-wide .currently-item {
+    padding: 12px 14px 14px;
+}
+
+.character-card-wide .currently-item .currently-title {
+    margin-bottom: 6px;
+}
+
+.character-card-wide .currently-item .currently-meta {
+    font-size: 0.5625rem;
+    line-height: 1.5;
+}
+
+/* ==== LISTAS (HABILIDADES / INVENTARIO / PROFICIENCIAS) ==== */
+
+.skills-list,
+.inventory-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 20px;
+    list-style: none;
+    color: var(--muted);
+    font-family: "DM Mono", monospace;
+    font-size: 0.8125rem;
+}
+
+.skills-list:last-child,
+.inventory-list:last-child {
+    margin-bottom: 0;
+}
+
+/* Rejilla de dos columnas (circulito + texto) en vez de un flex. En el
+   flex, el texto era un hijo anónimo —no tiene etiqueta propia— y por
+   eso no había forma de decirle desde el CSS que puede encoger: se
+   plantaba en el ancho de su palabra más larga y, en tarjetas
+   estrechas, "0 intimidación" o "+3 supervivencia" se salían de la
+   línea y se quedaban cortadas. Con minmax(0, 1fr) la columna del
+   texto sí puede encoger, así que parte por los espacios como debe. */
+.skills-list-marked li {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    align-items: center;
+    gap: 10px;
+}
+
+.skill-marker {
+    flex-shrink: 0;
+    width: 12px;
+    height: 12px;
+    border: 2px solid var(--yellow);
+    border-radius: 50%;
+    background: transparent;
+}
+
+.skill-marker.filled {
+    background: var(--yellow);
+}
+
+/* Los fuegos de inspiración usan la misma partícula que los botones
+   de ventana, pero duran bastante más (la animación viaja la misma
+   distancia relativa, solo que más despacio). */
+.firework-particle-inspiration {
+    animation-duration: 1.6s;
+}
+
+/* Las de la etiqueta bi van con los colores de la bandera, que el
+   script pone una a una en cada partícula. El azul es una versión algo
+   más clara del de la bandera: el original (#0038a8) sobre el fondo
+   oscuro del sitio se queda en 2:1 y no se veía. */
+.firework-particle-orgullo {
+    animation-duration: 1.6s;
+}
+
+/* ==== COMPAÑEROS (los gatos) ====
+   Misma ficha que el resto de .currently-item, con dos añadidos: la
+   fecha de nacimiento con su etiqueta —antes iba pegada al final del
+   título y no se entendía de qué fecha era— y el botón que lleva a su
+   santuario. */
+
+.companero-fecha {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    color: var(--muted);
+    font-family: "DM Mono", monospace;
+    font-size: 0.5625rem;
+    letter-spacing: 0.5px;
+}
+
+.companero-fecha-label {
+    padding: 2px 6px;
+    border: 1px solid var(--border);
+    color: var(--yellow);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+/* El botón se pega abajo a la izquierda, alineado con el texto de la
+   ficha (que lleva 12px de sangrado, ver .currently-title). */
+.companero-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin: 10px 0 0 12px;
+    padding: 5px 12px;
+    border: 2px solid var(--yellow);
+    background: transparent;
+    color: var(--yellow);
+    font-family: "DM Mono", monospace;
+    font-size: 0.625rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    text-decoration: none;
+    transition: color 0.15s linear, background-color 0.15s linear;
+}
+
+.companero-btn:hover,
+.companero-btn:focus-visible {
+    background: var(--yellow);
+    color: var(--yellow-contrast);
+}
+
+.companero-btn:focus-visible {
+    outline: 2px solid var(--yellow);
+    outline-offset: 3px;
+}
+
+/* En una columna estrecha la fecha no cabe al lado del nombre: baja a
+   su propia línea en vez de empujar el nombre fuera. */
+.companero-item .currently-item-header {
+    flex-wrap: wrap;
+    gap: 6px 10px;
+}
+
+/* ==== ETIQUETA DE ORGULLO (debajo del retrato) ====
+   Torcida a propósito, como una pegatina puesta a mano encima de la
+   ficha: es lo que hace que se note entre tanto recuadro recto. Los
+   colores de la bandera son los suyos y no los del tema, así que van
+   escritos tal cual y no cambian con el modo claro; lo que sí cambia
+   es el recuadro y el texto, que son los del sitio. */
+
+.character-portrait-block {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    flex-shrink: 0;
+    gap: 10px;
+}
+
+.orgullo-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    margin: 0;
+    padding: 4px 11px;
+    background: var(--purple);
+    border: 2px solid var(--yellow);
+    box-shadow: 3px 3px 0 var(--yellow);
+    color: var(--white);
+    font-family: "DM Mono", monospace;
+    font-size: 0.625rem;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    cursor: pointer;
+    /* La inclinación es solo visual: el texto se lee igual de recto
+       para un lector de pantalla. */
+    transform: rotate(-5deg);
+    transition: color 0.15s linear, background-color 0.15s linear,
+        border-color 0.15s linear, transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+/* Mismo gesto que el botón de inspiración —se rellena, se levanta un
+   poco y le crece la sombra— pero con los colores de la bandera: fondo
+   rosa y sombra azul.
+   El texto va en blanco escrito a pelo, no con var(--white): en modo
+   claro esa variable es marrón oscuro (#241a12) y sobre el rosa quedaba
+   apagado. Blanco sobre #d60270 da 4,9:1, medido. */
+.orgullo-label:hover,
+.orgullo-label:focus-visible {
+    background: #d60270;
+    border-color: #d60270;
+    color: #fff;
+    transform: rotate(-5deg) translateY(-2px);
+    box-shadow: 4px 4px 0 #0038a8;
+}
+
+.orgullo-label:focus-visible {
+    outline: 2px solid var(--yellow);
+    outline-offset: 3px;
+}
+
+/* Con "menos movimiento" puesto, la etiqueta se queda: no es un adorno
+   como el botón de inspiración, es algo que quiero decir. Lo que se va
+   es el saltito (y los fuegos, que los corta el propio script). */
+@media (prefers-reduced-motion: reduce) {
+    .orgullo-label,
+    .orgullo-label:hover,
+    .orgullo-label:focus-visible {
+        transition: none;
+        transform: rotate(-5deg);
+    }
+}
+
+/* Las tres franjas de la bandera bisexual: rosa, morado y azul. El
+   borde claro es para que la franja azul no se pierda contra el fondo
+   oscuro de la etiqueta. */
+.orgullo-bandera {
+    width: 22px;
+    height: 14px;
+    flex-shrink: 0;
+    border: 1px solid var(--white);
+    background: linear-gradient(
+        to bottom,
+        #d60270 0 40%,
+        #9b4f96 40% 60%,
+        #0038a8 60% 100%
+    );
+}

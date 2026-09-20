@@ -1,0 +1,333 @@
+/* SANTUARIOS — ÍNDICE CON FICHAS RESUMEN */
+
+/* Página de alto fijo: las dos fichas se reparten el hueco que queda
+   y se quedan dentro de la pantalla. Antes la página se desplazaba
+   entera (67px de sobra en una ventana de 1280x800) por culpa de las
+   ilustraciones cuadradas, que miden lo mismo de alto que de ancho. */
+.santuarios-page {
+    display: flex;
+    flex-direction: column;
+    /* .home trae align-items: center (es una rejilla); en una columna
+       flex eso deja a los hijos sin estirar al ancho del contenedor. */
+    align-items: stretch;
+    /* Sin esto, el "justify-content: center" de section (base.css)
+       centraría la columna en cuanto sobrase alto y el título bajaría
+       respecto al resto de índices. */
+    justify-content: flex-start;
+    overflow: hidden;
+    padding: 28px 4%;
+}
+
+.santuarios-page > .home-title,
+.santuarios-intro {
+    flex-shrink: 0;
+}
+
+.santuarios-intro {
+    margin-top: 4px;
+    margin-bottom: 24px;
+    color: var(--muted);
+    font-size: 1rem;
+}
+
+.pet-cards {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 28px;
+    /* Se queda con el alto que sobra; las fichas de dentro se ajustan
+       a él (ver .pet-card-art). align-items: flex-start para que cada
+       ficha mida lo que mide: estiradas (que es lo de serie) la
+       ilustración se hacía más alta que ancha y salía un recorte
+       vertical rarísimo en pantallas grandes. */
+    flex: 1;
+    min-height: 0;
+    align-items: flex-start;
+    /* Si la ventana es tan baja que ni con el mínimo de la ilustración
+       caben, esto se desplaza — pero la página no se mueve. */
+    overflow-y: auto;
+}
+
+/* La tarjeta ya no es un <a>: dentro lleva el enlace al artista, y un
+   enlace dentro de otro no es HTML válido. Sigue siendo clicable
+   entera gracias a .pet-card-link::after, que estira el enlace del
+   nombre por encima de todo el recuadro. */
+.pet-card {
+    position: relative;
+    /* Rejilla de dos filas —dibujo y texto— y no una columna flex: en
+       flex, al topar con el alto de la pantalla la caja del dibujo sí
+       encogía, pero la imagen de dentro se quedaba con su alto entero
+       y tapaba el nombre del gato. Con minmax(160px, 1fr) la fila del
+       dibujo es lo que cede, y el nombre y la descripción no se
+       pierden nunca. */
+    display: grid;
+    grid-template-rows: minmax(160px, 1fr) auto;
+    /* Antes era un ancho fijo de 320px. Así las dos tarjetas se
+       reparten el hueco disponible y la ilustración se ve bastante
+       más grande en pantallas anchas. La base de 200 (y no 340) es
+       para que hasta en una ventana de 861px (el corte con el móvil)
+       sigan una al lado de otra: apiladas no caben de alto y volvía
+       el scroll. */
+    flex: 1 1 200px;
+    max-width: 460px;
+    /* No más alta que el hueco disponible: quien cede es la
+       ilustración, que es lo único elástico de la ficha. */
+    max-height: 100%;
+    color: inherit;
+    background: var(--purple-lighter);
+    border: 3px solid var(--yellow);
+    box-shadow: 6px 6px 0 var(--yellow);
+    overflow: hidden;
+    transition: transform 0.15s ease;
+}
+
+.pet-card:hover,
+.pet-card:has(.pet-card-link:focus-visible) {
+    transform: translateY(-4px);
+}
+
+.pet-card:has(.pet-card-link:focus-visible) {
+    outline: 2px solid var(--yellow);
+    outline-offset: 3px;
+}
+
+.pet-card-art {
+    position: relative;
+    display: flex;
+    /* El mínimo y el reparto de alto los lleva la rejilla de la
+       ficha (ver .pet-card): aquí solo hace falta poder encoger. */
+    min-height: 0;
+}
+
+/* Cuadrada, como la propia ilustración: antes se recortaba a una
+   franja de 220px de alto y se perdía medio dibujo. */
+/* Cuadrada mientras quepa: con aspect-ratio y height auto se ve el
+   dibujo entero, y cuando la ventana es baja el alto manda y
+   object-fit recorta por arriba y por abajo en vez de deformarlo. */
+.pet-card-photo {
+    display: block;
+    width: 100%;
+    height: 100%;
+    min-height: 0;
+    aspect-ratio: 1 / 1;
+    object-fit: cover;
+    border-bottom: 3px solid var(--yellow);
+}
+
+.pet-card-credit {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 3px;
+    /* Por encima del enlace estirado, para que el @ del artista se
+       pueda pulsar sin acabar en la ficha del gato. */
+    z-index: 2;
+}
+
+.pet-card-info {
+    padding: 16px 18px;
+}
+
+.pet-card-name {
+    margin: 0 0 8px;
+    color: var(--yellow);
+    font-family: "Space Grotesk", sans-serif;
+    font-style: italic;
+    font-weight: 500;
+    font-size: 1.5rem;
+}
+
+.pet-card-link {
+    color: inherit;
+    text-decoration: none;
+}
+
+/* Estira el enlace del nombre por toda la tarjeta: se mantiene el
+   "pulsa donde sea para entrar" que tenía cuando era un <a>. */
+.pet-card-link::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+}
+
+.pet-card-link:focus-visible {
+    outline: none; /* el recuadro lo pinta .pet-card, ver arriba */
+}
+
+.pet-card-blurb {
+    margin: 0;
+    color: var(--muted);
+    font-size: 0.875rem;
+    line-height: 1.5;
+}
+
+/* SANTUARIOS — PÁGINA INDIVIDUAL DE CADA MASCOTA */
+
+.pet-page {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    padding: 16px;
+}
+
+body:has(.pet-page) main {
+    background: transparent;
+    border: none;
+    box-shadow: none;
+}
+
+.pet-back {
+    display: inline-flex;
+    align-self: flex-start;
+    flex-shrink: 0;
+    margin-bottom: 16px;
+    padding: 8px 18px;
+    border: 2px solid var(--yellow);
+    background: transparent;
+    color: var(--yellow);
+    font-family: "DM Mono", monospace;
+    font-size: 0.8125rem;
+    text-decoration: none;
+    transition: color 0.15s linear, background-color 0.15s linear;
+}
+
+.pet-back:hover,
+.pet-back:focus-visible {
+    color: var(--yellow-contrast);
+    background: var(--yellow);
+}
+
+.pet-back:focus-visible {
+    outline: 2px solid var(--yellow);
+    outline-offset: 3px;
+}
+
+.pet-window {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-height: 0;
+    width: 100%;
+    background: var(--purple-lighter);
+    border: 3px solid var(--yellow);
+    box-shadow: 6px 6px 0 var(--yellow);
+    overflow: hidden;
+}
+
+.pet-window::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background-image: var(--bg-texture);
+    background-size: 90px 90px;
+    background-repeat: repeat;
+    opacity: 0.35;
+    pointer-events: none;
+    z-index: 0;
+}
+
+.pet-window-header {
+    position: relative;
+    z-index: 1;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 14px 20px;
+    background: var(--yellow);
+    user-select: none;
+}
+
+.pet-window-header .window-controls-small {
+    position: static;
+    flex-shrink: 0;
+}
+
+/* Invertidos respecto al resto del sitio. Los −■✕ normales son
+   amarillos con borde amarillo, pensados para las cabeceras oscuras;
+   aquí la barra ya es amarilla, así que se perdían del todo (medido:
+   1,00:1 contra el fondo, o sea el mismo color) y solo se veían los
+   símbolos flotando. */
+.pet-window-header .window-btn {
+    border-color: var(--yellow-contrast);
+    background: var(--yellow-contrast);
+    color: var(--yellow);
+}
+
+.pet-window-title {
+    flex: 1;
+    min-width: 0;
+    margin: 0;
+    color: var(--yellow-contrast);
+    /* Misma tipografía de "ventana" que el resto de barras del sitio
+       (portada, blog, relatos). Antes era Space Grotesk en cursiva, que
+       con el título en formato carpeta ("tali/") parecía más un error
+       de maquetación que un guiño. */
+    font-family: "Jersey 10", "DM Mono", monospace;
+    font-weight: 400;
+    font-size: clamp(1.75rem, 3.2vw, 2.25rem);
+    letter-spacing: 0.3px;
+    line-height: 1.2;
+}
+
+.pet-window-body {
+    position: relative;
+    z-index: 1;
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    padding: 28px 32px;
+}
+
+.pet-description {
+    max-width: 720px;
+    margin: 0 0 24px;
+    color: var(--white);
+    font-size: 1rem;
+    line-height: 1.7;
+}
+
+.photo-gallery {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 16px;
+}
+
+/* Mensaje mientras se carga el listado, o si no hay fotos todavía.
+   Ocupa toda la fila para que no se quede en una columna estrecha. */
+.galeria-vacia {
+    grid-column: 1 / -1;
+    margin: 0;
+    color: var(--muted);
+    font-family: "DM Mono", monospace;
+    font-size: 0.8125rem;
+}
+
+.lightbox-trigger {
+    display: block;
+    padding: 0;
+    border: 2px solid var(--yellow);
+    background: none;
+    cursor: pointer;
+    overflow: hidden;
+}
+
+.lightbox-trigger img {
+    display: block;
+    width: 100%;
+    height: 160px;
+    object-fit: cover;
+    transition: transform 0.15s ease;
+}
+
+.lightbox-trigger:hover img,
+.lightbox-trigger:focus-visible img {
+    transform: scale(1.06);
+}
+
+.lightbox-trigger:focus-visible {
+    outline: 2px solid var(--yellow);
+    outline-offset: 3px;
+}

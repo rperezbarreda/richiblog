@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+    <channel>
+        <title>El Blog de Richi</title>
+        <link>https://richi.blog/</link>
+        <description>Todo lo que voy publicando: entradas del blog, relatos y material de rol.</description>
+        <language>es</language>
+        <lastBuildDate>Sat, 19 Sep 2026 00:00:00 +0000</lastBuildDate>
+        <atom:link href="https://richi.blog/blog/rss.xml" rel="self" type="application/rss+xml"/>
+        <item>
+            <title>Por fin pongo en marcha esto</title>
+            <link>https://richi.blog/web/blog/2026/septiembre/por-fin-pongo-en-marcha-esto.html</link>
+            <guid isPermaLink="true">https://richi.blog/web/blog/2026/septiembre/por-fin-pongo-en-marcha-esto.html</guid>
+            <pubDate>Sat, 19 Sep 2026 00:00:00 +0000</pubDate>
+            <category>blog</category>
+            <category>diario</category>
+            <description>La verdad es que montar todo este sitio web me ha llevado mucho mas tiempo de lo que pensaba, y eso que aún tengo que pulir muchas cosas.</description>
+        </item>
+        <item>
+            <title>La Bestia de Savalta</title>
+            <link>https://ko-fi.com/s/b5f6c245a0</link>
+            <guid isPermaLink="false">https://richi.blog/#rol-la-bestia-de-savalta-14-09-2026</guid>
+            <pubDate>Mon, 14 Sep 2026 00:00:00 +0000</pubDate>
+            <category>rol</category>
+            <category>aventuras</category>
+            <description>Aventura de misterio y horror gótico ambientada en Savalta, una ciudad aislada donde una serie de muertes extrañas está relacionada con una criatura antigua. Los jugadores investigan el origen de la Bestia y quién la controla. Incluye un PDF de 18 páginas con mapa de Savalta (en blanco y negro y a color) y retratos de PNJs.</description>
+        </item>
+        <item>
+            <title>Aire para dos</title>
+            <link>https://richi.blog/web/mis_movidas/relatos/aire_para_dos.html</link>
+            <guid isPermaLink="true">https://richi.blog/web/mis_movidas/relatos/aire_para_dos.html</guid>
+            <pubDate>Mon, 15 Sep 2025 00:00:00 +0000</pubDate>
+            <category>relatos</category>
+            <category>relato corto</category>
+            <description>Ciudad Dos nunca dormía; desde el distrito de nubes hasta las cloacas industriales la megaurbe era un monstruo vivo, iluminado por neones y ahogado en contaminación. Para la mayoría era un hogar, para unos pocos privilegiados el paraíso y, para el resto, una cárcel.</description>
+        </item>
+        <item>
+            <title>Pequeño insecto</title>
+            <link>https://richi.blog/web/mis_movidas/relatos/pequenyo_insecto.html</link>
+            <guid isPermaLink="true">https://richi.blog/web/mis_movidas/relatos/pequenyo_insecto.html</guid>
+            <pubDate>Wed, 25 Jun 2025 00:00:00 +0000</pubDate>
+            <category>relatos</category>
+            <category>relato corto</category>
+            <description>La luz anaranjada de la chimenea se filtraba a través del vidrio curvado de la botella, deformando el reflejo de su rostro marchito. Caél, reducido al tamaño de un grano de arroz, había perdido la cuenta de los días encerrado en el Brisa Marina. Una amarga maldición escapaba de sus labios cada vez que recordaba el fatídico momento en que decidió adentrarse a robar en la torre.</description>
+        </item>
+    </channel>
+</rss>

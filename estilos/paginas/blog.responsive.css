@@ -1,0 +1,336 @@
+/* RESPONSIVE — archivo del blog en móvil */
+
+@media (max-width: 1024px) {
+    /* En estrecho se apilan los meses uno debajo de otro, así que
+       aquí sí scrollea la página y cada mes crece lo que necesite:
+       se deshace el "página fija" del escritorio. */
+    .blog-archive-page {
+        display: block;
+        overflow-y: auto;
+        padding: 32px 6%;
+    }
+
+    .blog-archive-year {
+        margin-top: 0;
+    }
+
+    .blog-months {
+        display: flex;
+        flex-direction: column;
+        /* En escritorio los meses se ajustan a su contenido; apilados
+           tienen que ocupar todo el ancho, o cada uno saldría de un
+           tamaño distinto según lo largo que sea su título. */
+        align-items: stretch;
+        max-width: none;
+        overflow-y: visible;
+    }
+
+    .blog-month {
+        padding: 14px 16px;
+    }
+}
+
+@media (max-width: 860px) {
+    /* Mismo criterio que en escritorio (ver blog.css): nada de fondo
+       con textura alrededor, la entrada llega hasta los bordes. Solo
+       se deja los 60px de arriba para no meterse debajo de la barra
+       superior fija (.mobile-topbar). Sin esto ganaba la regla
+       general de main en root.responsive.css (76px/16px de margen
+       por los cuatro lados) y volvía a verse el hueco con textura
+       que se había quitado en escritorio. */
+    body:has(.blog-post-page) main {
+        margin: 60px 0 0 0;
+        width: 100%;
+    }
+
+    .blog-post-page {
+        display: block;
+        overflow-y: auto;
+        padding: 0;
+    }
+
+    /* El título retro a tamaño de escritorio no cabe en una línea en
+       móvil. Se encoge un poco, y lo que le acompaña (fecha y botón de
+       volver) se ancla arriba en vez de centrarse con el alto completo
+       de la cabecera, que con dos líneas de título lo dejaba flotando. */
+    .blog-post-header {
+        align-items: flex-start;
+        padding: 12px 16px;
+    }
+
+
+    .blog-post-header-meta {
+        /* Al partirse la cabecera, el grupo pasa a ocupar su propia
+           línea completa y se alinea con el título, no a la derecha. */
+        width: 100%;
+        gap: 12px;
+    }
+
+    .blog-post-title {
+        font-size: clamp(1.375rem, 5vw, 1.75rem);
+    }
+
+    .blog-post {
+        flex: none;
+        max-width: none;
+    }
+
+    .blog-post-body-wrap {
+        flex: none;
+        overflow-y: visible;
+        padding: 20px;
+    }
+
+}
+
+/* RESPONSIVE — DIARIO */
+
+/* Bastante antes que los 1024px del resto del archivo. Medido: el
+   calendario mide 562 de ancho, más 26 de hueco y 320 de lista son 908,
+   y a 1280px de ventana a la fila solo le quedan 841: no caben. Medido
+   que hacen falta 1360. Antes el corte estaba en 1150 y en toda esa
+   franja el calendario se encogía al mínimo intentando entrar, sin
+   conseguirlo. */
+@media (max-width: 1360px) {
+    .diario-cuerpo {
+        display: block;
+        overflow-y: auto;
+    }
+
+    /* La lista va DEBAJO del calendario a propósito: lo que se viene a
+       ver es el calendario, y así no hay que pasarlo para llegar. */
+    .diario-lista {
+        margin-top: 26px;
+    }
+}
+
+@media (max-width: 860px) {
+    .diario-barra {
+        gap: 8px;
+    }
+
+    /* Los dos botones a los lados y el mes entero debajo: en una línea
+       de 390px el nombre del mes se partía en dos y descuadraba la
+       barra. */
+    .diario-mes {
+        order: 3;
+        flex: 1 0 100%;
+        text-align: left;
+    }
+
+    /* flex-basis 0 y letra un punto más pequeña para que los dos quepan
+       en la misma línea: con el ancho del contenido (auto) sumaban más
+       que la pantalla y el segundo se caía a una línea nueva. */
+    .diario-nav {
+        flex: 1 1 0;
+        min-width: 0;
+        padding: 10px 6px;
+        font-size: 0.6875rem;
+        white-space: nowrap;
+    }
+
+    /* En móvil el calendario vuelve a ocupar todo el ancho disponible,
+       con el alto siguiendo al ancho de la columna (el truco del
+       padding-bottom en %), en vez del lado fijo de escritorio: aquí
+       no hay sitio de sobra que repartir.
+       Cuadros un poco más altos que anchos: con 7 columnas en 390px
+       cada una se queda en 45px, y un cuadrado de 45 con el número
+       arriba deja el "×2" pegado. */
+    .diario-tabla {
+        width: 100%;
+    }
+
+    .diario-dia {
+        width: auto;
+        height: 0;
+        padding: 0 0 14%;
+    }
+
+    /* En móvil se queda el calendario como estaba: la casilla entera
+       pintada y pulsable, con el número en la esquina. Ahí funciona,
+       porque con 45px de lado no hay sitio para un recuadro dentro de
+       otro y el dedo agradece un objetivo grande. El recuadro solo
+       alrededor del número es cosa de escritorio (ver blog.css). */
+    .diario-lleno {
+        /* 3px y no 2: la tabla va con border-collapse, y cuando dos
+           casillas vecinas traen bordes del mismo grosor gana la de la
+           izquierda o la de arriba — así que del recuadro amarillo solo
+           se veían el lado derecho y el de abajo. El más grueso gana
+           siempre, y el día queda enmarcado por los cuatro lados. */
+        border-width: 3px;
+        border-color: var(--yellow);
+        background: var(--purple-lighter);
+    }
+
+    .diario-enlace {
+        inset: 0;
+        transform: none;
+        display: block;
+        min-width: 0;
+        min-height: 0;
+        padding: 0;
+        border: 0;
+        background: transparent;
+    }
+
+    .diario-numero,
+    .diario-vacio .diario-numero {
+        position: absolute;
+        top: 4px;
+        left: 5px;
+        transform: none;
+        font-size: 0.75rem;
+    }
+
+    .diario-cuantas {
+        position: absolute;
+        right: 5px;
+        bottom: 4px;
+        font-size: 0.6875rem;
+    }
+}
+
+/* Aquí había una regla que escondía la palabra "mes" en pantallas
+   estrechas. Ya no hace falta: los botones ponen "anterior" y
+   "siguiente" a secas en todas partes (ver diario.html). */
+
+/* Pantallas muy estrechas (móviles pequeños, o cualquier móvil con el
+   texto ampliado): la fecha y el botón de volver no caben en la misma
+   línea y el botón se salía por la derecha, recortado por el
+   overflow: hidden de .blog-post. Se les deja partir en dos líneas. */
+@media (max-width: 480px) {
+    .blog-post-header-meta {
+        flex-wrap: wrap;
+    }
+}
+
+/* Por debajo de 1024 el archivo entero pasa a desplazarse como una
+   página normal (ver arriba, .blog-archive-page). El diario tiene que
+   soltar su scroll interno o habría dos: la página movería 99px y el
+   resto se quedaría dentro de una caja, que es justo lo que rompe el
+   botón de "volver arriba" y el gesto de scroll del móvil. */
+@media (max-width: 1024px) {
+    .diario-cuerpo {
+        overflow-y: visible;
+    }
+}
+
+/* Móviles pequeños (320px): dentro de la ventana del calendario a cada
+   botón le quedan 101px y "siguiente →" pedía 114. Un punto menos de
+   letra y menos relleno y entra sin recortarse. Medido a 320 y 360. */
+@media (max-width: 360px) {
+    .diario-nav {
+        padding: 10px 4px;
+        font-size: 0.5625rem;
+        letter-spacing: 0;
+    }
+}
+
+
+/* RESPONSIVE — FILTRO DE ETIQUETAS COMO DESPLEGABLE */
+
+/* Mismo trato que las categorías del portfolio de rol: en una pantalla
+   estrecha la fila de etiquetas se parte en dos o tres líneas y empuja
+   el archivo hacia abajo. Aquí se colapsa en un botón con la etiqueta
+   activa y una lista flotante. Abrir y cerrar lo lleva
+   scripts/paginas/entradas-blog.js poniendo la clase "is-open". */
+@media (max-width: 860px) {
+    /* Ancla de la lista flotante: como va absoluta, esta caja mide lo
+       que la etiqueta "filtrar:" más el botón. */
+    .blog-tags {
+        position: relative;
+        gap: 10px;
+    }
+
+    .blog-tags-toggle {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        flex: 1 1 auto;
+        max-width: 240px;
+        padding: 9px 13px;
+        border: 2px solid var(--yellow);
+        background: transparent;
+        color: var(--yellow);
+        font-family: "DM Mono", monospace;
+        font-size: 0.75rem;
+        font-weight: 500;
+        text-align: left;
+        text-transform: lowercase;
+        letter-spacing: 1px;
+        cursor: pointer;
+    }
+
+    .blog-tags-toggle:focus-visible {
+        outline: 2px solid var(--yellow);
+        outline-offset: 3px;
+    }
+
+    /* Si algún día una etiqueta tiene el nombre largo, que se corte con
+       puntos suspensivos en vez de empujar la flecha fuera. */
+    .blog-tags-toggle-label {
+        overflow: hidden;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+    }
+
+    .blog-tags-toggle-arrow {
+        flex-shrink: 0;
+        font-size: 0.75rem;
+        line-height: 1;
+        transition: transform 0.15s linear;
+    }
+
+    .blog-tags.is-open .blog-tags-toggle-arrow {
+        transform: rotate(180deg);
+    }
+
+    /* Flotante: sale por encima del archivo en vez de empujarlo hacia
+       abajo, para que abrir la lista no mueva la página. */
+    .blog-tags-list {
+        display: none;
+        position: absolute;
+        top: 100%;
+        right: 0;
+        z-index: 20;
+        flex-direction: column;
+        flex-wrap: nowrap;
+        gap: 0;
+        width: 100%;
+        max-width: 240px;
+        margin-top: 4px;
+        border: 2px solid var(--yellow);
+        background: var(--purple-lighter);
+        box-shadow: 5px 5px 0 var(--yellow);
+    }
+
+    .blog-tags.is-open .blog-tags-list {
+        display: flex;
+    }
+
+    /* En fila la activa se marca con el relleno amarillo y aquí igual,
+       que es como se marca lo activo en el resto del sitio. */
+    .blog-tag-btn {
+        width: 100%;
+        padding: 10px 14px;
+        border: 0;
+        border-bottom: 1px solid var(--border);
+        text-align: left;
+    }
+
+    .blog-tag-btn:last-child {
+        border-bottom: none;
+    }
+
+    .blog-tag-btn:focus-visible {
+        outline: 2px solid var(--yellow);
+        outline-offset: -4px;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .blog-tags-toggle-arrow {
+        transition: none;
+    }
+}

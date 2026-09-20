@@ -1,0 +1,72 @@
+/* LIGHTBOX — visor de imágenes ampliadas */
+
+body.lightbox-open {
+    overflow: hidden;
+}
+
+.lightbox-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 600;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 60px 40px;
+    background: rgba(18, 9, 28, 0.92);
+}
+
+.lightbox-overlay[hidden] {
+    display: none;
+}
+
+.lightbox-image {
+    max-width: 90vw;
+    max-height: 85vh;
+    border: 3px solid var(--yellow);
+    box-shadow: 8px 8px 0 var(--yellow);
+    object-fit: contain;
+}
+
+.lightbox-close {
+    position: fixed;
+    top: 24px;
+    right: 32px;
+    width: 44px;
+    height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid var(--yellow);
+    background: var(--yellow);
+    color: var(--yellow-contrast);
+    /* La tipografía venía del bloque duplicado que había en base.css:
+       la cascada va propiedad a propiedad, así que de aquel bloque solo
+       se perdían las que no estuvieran también aquí. Al borrarlo, la ✕
+       se quedó con la fuente heredada. */
+    font-family: "DM Mono", monospace;
+    font-size: 1.125rem;
+    font-weight: 500;
+    cursor: pointer;
+}
+
+.lightbox-close:hover,
+.lightbox-close:focus-visible {
+    background: transparent;
+    color: var(--yellow);
+}
+
+.lightbox-close:focus-visible {
+    outline: 2px solid var(--yellow);
+    outline-offset: 3px;
+}
+
+@media (max-width: 640px) {
+    .lightbox-overlay {
+        padding: 70px 16px 24px;
+    }
+
+    .lightbox-close {
+        top: 16px;
+        right: 16px;
+    }
+}

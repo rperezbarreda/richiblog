@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8">
+    <!-- Color de la barra del navegador en el móvil. Arranca en el color
+         del modo oscuro y el script de abajo lo cambia si toca; al pulsar
+         el botón de tema lo actualiza scripts/tema.js. -->
+    <meta name="theme-color" content="#12091c">
+    <script>
+      (function () {
+        try {
+          if (localStorage.getItem("richi-theme") === "light") {
+            document.documentElement.setAttribute("data-theme", "light");
+            var barra = document.querySelector('meta[name="theme-color"]');
+            if (barra) {
+              barra.setAttribute("content", "#f2ded2");
+            }
+          }
+        } catch (e) {}
+      })();
+    </script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Accesibilidad · El Blog de Richi</title>
+    <!-- Cómo se ve el enlace al compartirlo (Bluesky, Discord, Ko-fi…).
+         Sin esto solo sale la URL pelada, sin título ni imagen. Las rutas
+         van absolutas a propósito: las redes no resuelven las relativas. -->
+    <meta name="description" content="Cómo está pensada esta web para que se pueda usar con teclado, con lector de pantalla y con el texto ampliado — y qué le falta todavía.">
+    <link rel="canonical" href="https://richi.blog/web/accesibilidad/accesibilidad.html">
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="El Blog de Richi">
+    <meta property="og:locale" content="es_ES">
+    <meta property="og:title" content="Accesibilidad · El Blog de Richi">
+    <meta property="og:description" content="Cómo está pensada esta web para que se pueda usar con teclado, con lector de pantalla y con el texto ampliado — y qué le falta todavía.">
+    <meta property="og:url" content="https://richi.blog/web/accesibilidad/accesibilidad.html">
+    <meta property="og:image" content="https://richi.blog/imagenes/meta/og.webp">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta property="og:image:alt" content="El Blog de Richi — ilustración de Richi sobre fondo morado">
+    <meta name="twitter:card" content="summary_large_image">
+    <link rel="icon" type="image/x-icon" href="/imagenes/favicon.ico">
+    <!-- La única fuente que se precarga. Medido con la red frenada: sin esto el
+         navegador no la descubre hasta parsear el CSS (~800 ms) y el texto baila al
+         cambiar de tipografía; así llega antes del primer pintado y no se nota el
+         cambio. Precargar más fuentes empeoraba el primer pintado 150-210 ms, porque
+         compiten por el ancho de banda con lo que hace falta para pintar. -->
+    <link rel="preload" href="/tipografias/space-grotesk-400.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="alternate" type="application/rss+xml" title="El Blog de Richi — blog, relatos y rol" href="/blog/rss.xml">
+    <!-- ==== CSS ====
+         Esta lista la escribe herramientas/actualizar-cabeceras.py.
+         No la toques a mano: si cambias qué CSS lleva una página,
+         cámbialo en esa herramienta y vuélvela a ejecutar.
+
+         Van escritos aquí, y no cargados por un script, para que el
+         navegador los pida nada más recibir el HTML. Con un script de
+         por medio tardaba ~200 ms más en pintar la página. -->
+    <link rel="stylesheet" href="/estilos/base.css">
+    <link rel="stylesheet" href="/estilos/base.responsive.css">
+    <link rel="stylesheet" href="/estilos/componentes/visor-imagenes.css">
+    <link rel="stylesheet" href="/estilos/componentes/aviso.css">
+    <link rel="stylesheet" href="/estilos/componentes/aviso.responsive.css">
+    <link rel="stylesheet" href="/estilos/componentes/cabecera-ventana.css">
+    <link rel="stylesheet" href="/estilos/componentes/subir.css">
+    <link rel="stylesheet" href="/estilos/paginas/accesibilidad.css">
+    <link rel="stylesheet" href="/estilos/componentes/barra-lateral.css">
+    <link rel="stylesheet" href="/estilos/componentes/barra-lateral.responsive.css">
+    <!-- ==== fin del CSS ==== -->
+    <script src="/scripts/cargador-scripts.js"></script>
+  </head>
+<body>
+    <!-- ==== SIDEBAR / NAVEGACIÓN ==== -->
+    <a class="skip-link" href="#main-content">Saltar al contenido</a>
+    <div id="sidebar-container"></div>
+    <!-- ==== CONTENIDO PRINCIPAL ==== -->
+
+    <main id="main-content">
+        <section id="home" class="home acc-page">
+            <h1 class="home-title">
+                <em>accesibilidad</em>
+            </h1>
+
+            <p class="acc-intro">
+                Tengo una discapacidad visual, por lo que esta web está hecha con ello 
+                en mente. En muchísimos sitios web la accesibilidad es algo secundario 
+                y hecho de mala manera, pero aquí no. En este apartado te cuento que 
+                opciones hay para que no tengas que descubirlo por ti misme.
+            </p>
+
+            <div class="acc-bloques">
+
+                <section class="acc-bloque">
+                    <div class="recent-entries-header">
+                        <h2>teclado.cfg</h2>
+                        <div class="window-controls window-controls-small" data-window-controls aria-hidden="true"></div>
+                    </div>
+                    <div class="acc-bloque-cuerpo">
+                        <ul class="acc-lista">
+                            <li>Se puede recorrer la web entera con el teclado, saltando de un enlace al siguiente con la tecla <kbd>Tab</kbd>. El ratón no hace falta para nada.</li>
+                            <li>
+                                <strong>Para subir y bajar</strong> valen las teclas de siempre:
+                                <kbd>↑</kbd> y <kbd>↓</kbd> poco a poco, <kbd>Re Pág</kbd> y
+                                <kbd>Av Pág</kbd> a saltos grandes, puedes usar la <kbd>barra espaciadora</kbd>
+                                (con <kbd>Mayús</kbd> para ir hacia arriba) e <kbd>Inicio</kbd> y
+                                <kbd>Fin</kbd> para plantarte al principio o al final.
+                            </li>
+                            <li>Para ejecutar un enlace o botón, una vez seleccionado, pulsa la tecla <kbd>Enter</kbd>.</li>
+                            <li>Los saltos de navegación de enlaces reaccionan a dónde tengas puesto el ratón.</li>
+                            <li>Si navegas con teclado, lo primero que aparece en cada página es un enlace para <strong>saltar directo al contenido</strong>, y así no tener que pasar por el menú una y otra vez.</li>
+                            <li>Siempre se ve dónde estás: lo que tengas seleccionado se marca con un recuadro amarillo bien visible, no con una rayita que haya que adivinar.</li>
+                            <li>El visor de fotos y el menú desplegable en la vista de móvil se cierran con <kbd>Esc</kbd>. Mientras están abiertos, el teclado se queda dentro de ellos y no se escapa a lo que hay detrás.</li>
+                            <li>El botón para volver arriba de la vista móvil no solo sube la vista: también te deja el foco al principio de la página, para que la siguiente tecla siga por donde toca.</li>
+                        </ul>
+                    </div>
+                </section>
+
+                <section class="acc-bloque">
+                    <div class="recent-entries-header">
+                        <h2>lector.cfg</h2>
+                        <div class="window-controls window-controls-small" data-window-controls aria-hidden="true"></div>
+                    </div>
+                    <div class="acc-bloque-cuerpo">
+                        <p>Si usas un lector de pantalla:</p>
+                        <ul class="acc-lista">
+                            <li>Las páginas están marcadas como escritas en español, con sus títulos y apartados en orden, y con el menú y el contenido señalados como tales para que puedas saltar de uno a otro.</li>
+                            <li>Los adornos —los <span aria-hidden="true">−■✕</span> de las ventanitas, las flechas, los efectos en el cursor— están puestos de forma que un lector de pantalla no los lea: no dicen nada que te haga falta.</li>
+                            <li>Los botones que solo llevan un dibujo tienen su nombre escrito de forma oculta para que los lectores de pantalla lo lean.</li>
+                            <li>Todas las fotos y dibujos llevan descripción. Los que son puro decorado van sin ella a propósito, para no hacerte perder el tiempo.</li>
+                            <li>El calendario del diario es una tabla de verdad, con los días de la semana como cabecera, así que se recorre como una tabla y no como un montón de cuadraditos sueltos.</li>
+                            <li>Los botones que se quedan encendidos o apagados —el tema, los brillitos del cursor, los filtros— dicen en por el lector de pantalla cómo están a cada cambio.</li>
+                        </ul>
+                    </div>
+                </section>
+
+                <section class="acc-bloque">
+                    <div class="recent-entries-header">
+                        <h2>vista.cfg</h2>
+                        <div class="window-controls window-controls-small" data-window-controls aria-hidden="true"></div>
+                    </div>
+                    <div class="acc-bloque-cuerpo">
+                        <ul class="acc-lista">
+                            <li>Hay modo claro y modo oscuro, en el botón del menú. El que elijas se queda guardado en el <strong> localStorage</strong>  para tu próxima visita.</li>
+                            <li>Todos los textos se leen con holgura sobre su fondo, en los dos modos. No lo he dejado a ojo: lo he ido midiendo texto por texto para respetar las Reglas de Contraste (Nivel AA). </li>
+                            <li>Si tienes puesta la letra más grande en el navegador, o usas el zoom, la web crece contigo en vez de quedarse clavada y descuadrarse.</li>
+                            <li>Aunque estreches mucho la ventana, o pongas el zoom al máximo en el móvil, nunca hay que desplazarse hacia los lados para leer una línea.</li>
+                        </ul>
+                    </div>
+                </section>
+
+                <section class="acc-bloque">
+                    <div class="recent-entries-header">
+                        <h2>movimiento.cfg</h2>
+                        <div class="window-controls window-controls-small" data-window-controls aria-hidden="true"></div>
+                    </div>
+                    <div class="acc-bloque-cuerpo">
+                        <ul class="acc-lista">
+                            <li>El rastro de brillitos del cursor se apaga desde el menú, y se queda apagado en el <strong> localStorage</strong>.</li>
+                            <li>Si tienes puesto en tu móvil u ordenador que quieres menos movimiento en pantalla, las animaciones se quedan quietas sin que tengas que tocar nada aquí.</li>
+                            <li>Nada se mueve sin que lo pidas: no hay imágenes que pasen solas, ni vídeos que arranquen de golpe, ni ventanas que salten encima de lo que estabas leyendo.</li>
+                        </ul>
+                    </div>
+                </section>
+
+                <section class="acc-bloque">
+                    <div class="recent-entries-header">
+                        <h2>lo_que_falta.txt</h2>
+                        <div class="window-controls window-controls-small" data-window-controls aria-hidden="true"></div>
+                    </div>
+                    <div class="acc-bloque-cuerpo">
+                        <p>Prefiero contártelo yo a que te lo encuentres:</p>
+                        <ul class="acc-lista">
+                            <li><strong>Si tu navegador tiene desactivado el <strong> JavaScript</strong> localStorage</strong>, la página contendrá errores, verás el texto de cada página, pero no el menú ni las listas de entradas, porque se montan con eso.</li>
+                            <li>El guestbook funciona sobre una hoja de cálculo de Google. Es la única parte de la web que habla con un servidor externo.</li>
+                            <li>Todas estas opciones las he probado yo, con mi lector y mi navegador. Seguro que hay cosas que se me escapan o no se ven del todo bien.</li>
+                        </ul>
+                    </div>
+                </section>
+
+                <section class="acc-bloque">
+                    <div class="recent-entries-header">
+                        <h2>avisame.txt</h2>
+                        <div class="window-controls window-controls-small" data-window-controls aria-hidden="true"></div>
+                    </div>
+                    <div class="acc-bloque-cuerpo">
+                        <p>
+                            Si encuentras algún problema o tienes alguna sugerencia, no te calles: escríbeme a
+                            <a class="acc-enlace" href="mailto:contacto@richi.blog">contacto@<wbr>richi.blog</a>
+                            o déjamelo en el <a class="acc-enlace" href="/web/contacto/contacto.html">guestbook</a>.
+                            Cuéntame qué estabas intentando hacer y con qué (el navegador, el
+                            lector de pantalla, si era el móvil o el ordenador) y a ser posible con capturas de pantalla; con eso me
+                            apaño para solucionarlo.
+                        </p>
+                    </div>
+                </section>
+
+            </div>
+        </section>
+    </main>
+</body>
+</html>

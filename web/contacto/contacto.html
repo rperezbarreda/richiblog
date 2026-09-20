@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8">
+    <!-- Color de la barra del navegador en el móvil. Arranca en el color
+         del modo oscuro y el script de abajo lo cambia si toca; al pulsar
+         el botón de tema lo actualiza scripts/tema.js. -->
+    <meta name="theme-color" content="#12091c">
+    <script>
+      (function () {
+        try {
+          if (localStorage.getItem("richi-theme") === "light") {
+            document.documentElement.setAttribute("data-theme", "light");
+            var barra = document.querySelector('meta[name="theme-color"]');
+            if (barra) {
+              barra.setAttribute("content", "#f2ded2");
+            }
+          }
+        } catch (e) {}
+      })();
+    </script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contacto y guestbook · El Blog de Richi</title>
+    <!-- Cómo se ve el enlace al compartirlo (Bluesky, Discord, Ko-fi…).
+         Sin esto solo sale la URL pelada, sin título ni imagen. Las rutas
+         van absolutas a propósito: las redes no resuelven las relativas. -->
+    <meta name="description" content="Escríbeme por correo o déjame un mensaje en el guestbook.">
+    <link rel="canonical" href="https://richi.blog/web/contacto/contacto.html">
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="El Blog de Richi">
+    <meta property="og:locale" content="es_ES">
+    <meta property="og:title" content="Contacto y guestbook · El Blog de Richi">
+    <meta property="og:description" content="Escríbeme por correo o déjame un mensaje en el guestbook.">
+    <meta property="og:url" content="https://richi.blog/web/contacto/contacto.html">
+    <meta property="og:image" content="https://richi.blog/imagenes/meta/og.webp">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta property="og:image:alt" content="El Blog de Richi — ilustración de Richi sobre fondo morado">
+    <meta name="twitter:card" content="summary_large_image">
+    <link rel="icon" type="image/x-icon" href="/imagenes/favicon.ico">
+    <!-- La única fuente que se precarga. Medido con la red frenada: sin esto el
+         navegador no la descubre hasta parsear el CSS (~800 ms) y el texto baila al
+         cambiar de tipografía; así llega antes del primer pintado y no se nota el
+         cambio. Precargar más fuentes empeoraba el primer pintado 150-210 ms, porque
+         compiten por el ancho de banda con lo que hace falta para pintar. -->
+    <link rel="preload" href="/tipografias/space-grotesk-400.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="alternate" type="application/rss+xml" title="El Blog de Richi — blog, relatos y rol" href="/blog/rss.xml">
+    <!-- ==== CSS ====
+         Esta lista la escribe herramientas/actualizar-cabeceras.py.
+         No la toques a mano: si cambias qué CSS lleva una página,
+         cámbialo en esa herramienta y vuélvela a ejecutar.
+
+         Van escritos aquí, y no cargados por un script, para que el
+         navegador los pida nada más recibir el HTML. Con un script de
+         por medio tardaba ~200 ms más en pintar la página. -->
+    <link rel="stylesheet" href="/estilos/base.css">
+    <link rel="stylesheet" href="/estilos/base.responsive.css">
+    <link rel="stylesheet" href="/estilos/componentes/visor-imagenes.css">
+    <link rel="stylesheet" href="/estilos/componentes/aviso.css">
+    <link rel="stylesheet" href="/estilos/componentes/aviso.responsive.css">
+    <link rel="stylesheet" href="/estilos/componentes/cabecera-ventana.css">
+    <link rel="stylesheet" href="/estilos/componentes/subir.css">
+    <link rel="stylesheet" href="/estilos/paginas/portada.css">
+    <link rel="stylesheet" href="/estilos/paginas/contacto.css">
+    <link rel="stylesheet" href="/estilos/paginas/contacto.responsive.css">
+    <link rel="stylesheet" href="/estilos/componentes/barra-lateral.css">
+    <link rel="stylesheet" href="/estilos/componentes/barra-lateral.responsive.css">
+    <!-- ==== fin del CSS ==== -->
+    <script src="/scripts/cargador-scripts.js"></script>
+  </head>
+<body>
+    <!-- ==== SIDEBAR / NAVEGACIÓN ==== -->
+    <a class="skip-link" href="#main-content">Saltar al contenido</a>
+    <div id="sidebar-container"></div>
+    <!-- ==== CONTENIDO PRINCIPAL ==== -->
+
+    <main id="main-content">
+        <!-- ==== HOME ==== -->
+        <section id="home" class="home contact-page">
+            <h1 class="home-title">
+                <em>contacto</em>
+            </h1>
+
+            <div class="contact-content">
+
+                <!-- ==== CORREO + REDES SOCIALES ==== -->
+                <div class="contact-info-column">
+                    <div class="recent-entries contact-card">
+                        <div class="recent-entries-header">
+                            <h2>correo.txt</h2>
+                            <div class="window-controls window-controls-small" data-window-controls aria-hidden="true"></div>
+                        </div>
+                        <div class="recent-entries-body">
+                            <p class="bio-description">Escríbeme para lo que sea: colaboraciones, dudas sobre alguna entrada, reporte de errores, sugerencias o simplemente para saludar.</p>
+                            <!-- El botón abre el correo; la dirección va debajo
+                                 en pequeño, para quien prefiera copiarla o
+                                 escribirla a mano. Como el botón ya dice a
+                                 dónde va, la dirección de abajo no repite
+                                 enlace: no tiene sentido tener dos seguidos que
+                                 hacen lo mismo. -->
+                            <a class="contact-email-btn" href="mailto:contacto@richi.blog">
+                                <span class="contact-email-btn-icono" aria-hidden="true">✉</span>
+                                escríbeme
+                            </a>
+                            <p class="contact-email-dir">contacto@<wbr>richi.blog</p>
+                        </div>
+                    </div>
+
+                    <div class="recent-entries contact-card">
+                        <div class="recent-entries-header">
+                            <h2>redes.lnk</h2>
+                            <div class="window-controls window-controls-small" data-window-controls aria-hidden="true"></div>
+                        </div>
+                        <div class="recent-entries-body">
+                            <!-- Mismas redes que la portada (antes había aquí
+                                 tres enlaces de relleno apuntando a "#"). -->
+                            <ul class="social-list contact-social-list">
+                                <li>
+                                    <a class="social-btn" href="https://bsky.app/profile/richi.blog" target="_blank" rel="noopener noreferrer">
+                                        <span class="social-btn-icon social-btn-icon-bluesky"></span>
+                                        <span>bluesky</span><span class="visually-hidden"> (se abre en otra pestaña)</span>
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="social-btn" href="https://ko-fi.com/soyrichi" target="_blank" rel="noopener noreferrer">
+                                        <span class="social-btn-icon social-btn-icon-ko-fi"></span>
+                                        <span>ko-fi</span><span class="visually-hidden"> (se abre en otra pestaña)</span>
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="social-btn" href="https://www.goodreads.com/user/show/174727410-ricardo-p-rez-barreda" target="_blank" rel="noopener noreferrer">
+                                        <span class="social-btn-icon social-btn-icon-goodreads"></span>
+                                        <span>goodreads</span><span class="visually-hidden"> (se abre en otra pestaña)</span>
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ==== GUESTBOOK: COMENTARIOS (centro, grande) ==== -->
+                <div class="recent-entries contact-card guestbook-entries-card">
+                    <div class="recent-entries-header">
+                        <h2>guestbook.log</h2>
+                        <div class="window-controls window-controls-small" data-window-controls aria-hidden="true"></div>
+                    </div>
+                    <div class="recent-entries-body guestbook-body">
+                        <ul id="guestbook-entries" class="guestbook-entries">
+                            <li class="guestbook-entries-loading">Cargando mensajes…</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- ==== GUESTBOOK: FORMULARIO (derecha) ==== -->
+                <div class="recent-entries contact-card guestbook-form-card">
+                    <div class="recent-entries-header">
+                        <h2>firmar.exe</h2>
+                        <div class="window-controls window-controls-small" data-window-controls aria-hidden="true"></div>
+                    </div>
+                    <div class="recent-entries-body">
+                        <details class="guestbook-rules">
+                            <summary>normas de la casa</summary>
+                            <ul>
+                                <li>Nada de discursos de odio, acoso ni troleo.</li>
+                                <li>Nada de spam ni publicidad.</li>
+                                <li>No compartas información privada, sobre todo si eres menor de edad.</li>
+                                <li>Sé respetuoso/a conmigo y con quien más lea esto.</li>
+                                <li>Si has escrito algo y se ha borrado es porque lo he borrado yo y considero que no debe aparecer.</li>
+                            </ul>
+                        </details>
+
+                        <form id="guestbook-form" class="guestbook-form" novalidate>
+                            <div class="guestbook-field">
+                                <label for="guestbook-name">nombre</label>
+                                <input type="text" id="guestbook-name" name="name" maxlength="60" autocomplete="name" required>
+                            </div>
+                            <div class="guestbook-field">
+                                <!-- Un <label for> no vale para un cuadro
+                                     editable que no es <textarea>: se enlaza
+                                     con aria-labelledby. -->
+                                <span class="guestbook-label" id="guestbook-message-label">mensaje</span>
+
+                                <div class="guestbook-toolbar" role="toolbar" aria-label="Formato del mensaje">
+                                    <button type="button" class="guestbook-fmt" data-formato="negrita" aria-pressed="false">
+                                        <span class="guestbook-fmt-glifo guestbook-fmt-negrita" aria-hidden="true">B</span>
+                                        <span class="visually-hidden">Negrita</span>
+                                    </button>
+                                    <button type="button" class="guestbook-fmt" data-formato="cursiva" aria-pressed="false">
+                                        <span class="guestbook-fmt-glifo guestbook-fmt-cursiva" aria-hidden="true">I</span>
+                                        <span class="visually-hidden">Cursiva</span>
+                                    </button>
+                                    <button type="button" class="guestbook-fmt" data-formato="tachado" aria-pressed="false">
+                                        <span class="guestbook-fmt-glifo guestbook-fmt-tachado" aria-hidden="true">S</span>
+                                        <span class="visually-hidden">Tachado</span>
+                                    </button>
+                                </div>
+
+                                <div id="guestbook-message"
+                                     class="guestbook-editor"
+                                     contenteditable="true"
+                                     role="textbox"
+                                     aria-multiline="true"
+                                     aria-labelledby="guestbook-message-label"
+                                     aria-describedby="guestbook-contador"
+                                     data-vacio="Escribe aquí tu mensaje…"></div>
+                                <p class="guestbook-contador" id="guestbook-contador">300 caracteres</p>
+                            </div>
+                            <!-- honeypot anti-spam: invisible para personas, los bots suelen rellenarlo -->
+                            <div class="guestbook-honeypot" aria-hidden="true">
+                                <label for="guestbook-website">web</label>
+                                <input type="text" id="guestbook-website" name="website" tabindex="-1" autocomplete="off">
+                            </div>
+                            <button type="submit" class="guestbook-submit">firmar el guestbook</button>
+                            <p id="guestbook-status" class="guestbook-status" role="status" aria-live="polite"></p>
+                        </form>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+    </main>
+
+    <div class="notice notice-bottom-left" data-notice data-notice-key="richi-guestbook-notice-dismissed" role="dialog" aria-labelledby="guestbook-notice-title" hidden>
+        <div class="recent-entries-header">
+            <h2 id="guestbook-notice-title">leeme.txt</h2>
+            <div class="window-controls window-controls-small" data-window-controls aria-hidden="true"></div>
+        </div>
+        <div class="notice-body">
+            <p>Gracias por pasarte por aquí. Si quieres dejarme un mensaje, no dudes en hacerlo.</p>
+            <p>Aviso por si acaso: los mensajes se guardan en una hoja de cálculo de Google, así que lo que escribas acaba allí. Si prefieres no poner tu nombre real, pon el que quieras.</p>
+        </div>
+        <div class="notice-footer">
+            <button type="button" class="notice-dismiss" data-notice-dismiss>entendido</button>
+        </div>
+    </div>
+</body>
+</html>

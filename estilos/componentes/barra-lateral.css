@@ -1,0 +1,482 @@
+/* SIDEBAR */
+
+.sidebar {
+    position: fixed;
+    left: 0;
+    top: 0;
+    width: 280px;
+    height: 100vh;
+    padding: 15px 20px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    z-index: 50;
+}
+
+.sidebar-top {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 auto;
+    min-height: 0;
+}
+
+.sidebar-top::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 24px;
+    background: linear-gradient(to bottom, transparent, var(--surface));
+    opacity: 0;
+    transition: opacity 0.1s linear;
+    pointer-events: none;
+}
+
+.sidebar-top.has-scroll::after {
+    opacity: 1;
+}
+
+.sidebar-logo {
+    margin-bottom: 10px;
+}
+
+.sidebar-logo p {
+    display: block;
+    width: 100%;
+    box-sizing: border-box;
+    text-align: center;
+    background: var(--yellow);
+    color: var(--yellow-contrast);
+    padding: 6px 8px;
+    font-family: "DM Mono", monospace;
+    font-size: 0.7rem;
+    font-weight: 500;
+    letter-spacing: 0.15px;
+    line-height: 1.4;
+    overflow-wrap: break-word;
+}
+
+.sidebar-logo strong {
+    font-weight: 500;
+}
+
+nav {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    margin-top: 4px;
+    padding-left: 6px;
+    padding-bottom: 16px;
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+    overflow-x: hidden;
+    scrollbar-gutter: stable;
+    scrollbar-width: thin;
+    scrollbar-color: var(--purple-lighter) transparent;
+    direction: rtl;
+}
+
+nav * {
+    direction: ltr;
+}
+
+nav::-webkit-scrollbar {
+    width: 5px;
+}
+
+nav::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+nav::-webkit-scrollbar-thumb {
+    background: var(--purple-lighter);
+    border-radius: 0;
+}
+
+nav::-webkit-scrollbar-thumb:hover {
+    background: var(--yellow);
+}
+
+nav a {
+    position: relative;
+    display: block;
+    width: 100%;
+    box-sizing: border-box;
+    padding: 6px 10px 6px 1.15rem;
+    border-radius: 0;
+    color: var(--muted);
+    text-decoration: none;
+    font-family: "DM Mono", monospace;
+    font-size: 0.9375rem;
+    letter-spacing: 0.5px;
+    transition: color 0.1s linear, background-color 0.1s linear;
+}
+
+nav a::before {
+    content: "↪";
+    position: absolute;
+    left: 0.2rem;
+    top: 50%;
+    color: var(--yellow);
+    opacity: 0;
+    transform: translate(-4px, -50%);
+    transition: opacity 0.1s linear, transform 0.1s linear;
+}
+
+nav a:hover,
+nav a:focus-visible,
+nav a.active {
+    color: var(--yellow);
+    background-color: var(--purple-lighter);
+}
+
+nav a:focus-visible {
+    outline: 2px solid var(--yellow);
+    outline-offset: 2px;
+}
+
+nav a:hover::before,
+nav a:focus-visible::before,
+nav a.active::before {
+    opacity: 1;
+    transform: translate(0, -50%);
+}
+
+.nav-group {
+    display: flex;
+    flex-direction: column;
+    align-self: stretch;
+}
+
+.nav-toggle {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 6px 10px 6px 1.15rem;
+    border-radius: 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: none;
+    border: none;
+    color: var(--muted);
+    font-family: inherit;
+    font-size: 0.9375rem;
+    text-align: left;
+    cursor: pointer;
+    transition: color 0.1s linear, background-color 0.1s linear;
+}
+
+.nav-toggle:hover,
+.nav-toggle:focus-visible {
+    color: var(--yellow);
+    background-color: var(--purple-lighter);
+}
+
+.nav-toggle:focus-visible {
+    outline: 2px solid var(--yellow);
+    outline-offset: 2px;
+}
+
+.arrow {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.3rem;
+    height: 1.3rem;
+    flex-shrink: 0;
+    border-radius: 0;
+    background: var(--purple-lighter);
+    color: var(--yellow);
+    font-family: "DM Mono", monospace;
+    font-size: 0.9375rem;
+    font-weight: 700;
+    line-height: 1;
+    transition: background-color 0.1s linear, color 0.1s linear;
+}
+
+.nav-toggle:hover .arrow,
+.nav-toggle:focus-visible .arrow {
+    background: var(--yellow);
+    color: var(--yellow-contrast);
+}
+
+.submenu {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-top: 0;
+    margin-left: 1.15rem;
+    max-height: 0;
+    opacity: 0;
+    visibility: hidden;
+    overflow: hidden;
+    transition: max-height 0.15s linear, opacity 0.1s linear, margin-top 0.15s linear, visibility 0s linear 0.15s;
+}
+
+.nav-group.open > .submenu {
+    max-height: 500px;
+    opacity: 1;
+    visibility: visible;
+    margin-top: 10px;
+    transition: max-height 0.15s linear, opacity 0.1s linear, margin-top 0.15s linear;
+}
+
+.submenu a {
+    padding: 4px 10px 4px 1.15rem;
+    border-radius: 0;
+    color: var(--muted);
+    font-size: 0.75rem;
+    text-decoration: none;
+    transition: color 0.1s linear, background-color 0.1s linear;
+}
+
+.submenu a:hover,
+.submenu a:focus-visible {
+    color: var(--yellow);
+    background-color: var(--purple-lighter);
+}
+
+.submenu a:focus-visible {
+    outline: 2px solid var(--yellow);
+    outline-offset: 2px;
+}
+
+/* SIDEBAR — GATÍN ALEATORIO */
+
+/* Ventanita con una foto del santuario al azar, entre la navegación y
+   los botones de abajo. flex-shrink: 0 para que no la aplaste el menú
+   cuando tiene muchos enlaces: lo que cede espacio es <nav>, que ya
+   lleva su propio scroll. */
+.gatin-random {
+    position: relative;
+    flex-shrink: 0;
+    margin-top: 14px;
+    background: var(--purple-lighter);
+    border: 2px solid var(--yellow);
+    overflow: hidden;
+}
+
+.gatin-random[hidden] {
+    display: none;
+}
+
+.gatin-random-header {
+    position: relative;
+    padding: 6px 48px 5px 10px;
+    background: var(--purple);
+    border-bottom: 2px solid var(--yellow);
+    color: var(--yellow);
+    font-family: "Jersey 10", "DM Mono", monospace;
+    font-size: 1rem;
+    letter-spacing: 0.2px;
+}
+
+.gatin-random-header h2 {
+    min-width: 0;
+    margin: 0;
+    font: inherit;
+    color: inherit;
+}
+
+/* Los −◼✖ de .window-controls-small se colocan contando desde arriba
+   con la cabecera grande de las tarjetas; esta es más baja, así que
+   se recentran aquí. */
+.gatin-random .window-controls-small {
+    top: 50%;
+    right: 8px;
+    transform: translateY(-50%);
+}
+
+/* Ancla del botón de recargar, que va encima de la foto. */
+.gatin-random-body {
+    position: relative;
+}
+
+.gatin-random-foto {
+    display: block;
+    width: 100%;
+    padding: 0;
+    border: 0;
+    background: none;
+    cursor: pointer;
+    overflow: hidden;
+}
+
+.gatin-random-foto img {
+    display: block;
+    width: 100%;
+    /* Cuadrada de verdad: antes era un alto fijo de 120px, que con el
+       ancho de la barra dejaba la foto apaisada. El recorte hace falta
+       igual porque las fotos vienen en horizontal y en vertical, y sin
+       él la ventanita cambiaría de tamaño en cada carga. */
+    aspect-ratio: 1 / 1;
+    height: auto;
+    object-fit: cover;
+    transition: transform 0.15s ease;
+}
+
+.gatin-random-foto:hover img,
+.gatin-random-foto:focus-visible img {
+    transform: scale(1.06);
+}
+
+.gatin-random-foto:focus-visible {
+    outline: 2px solid var(--yellow);
+    outline-offset: -2px;
+}
+
+/* Botón de "otra foto", abajo a la izquierda y por encima de la
+   imagen. Es hermano del .lightbox-trigger, no va dentro, así que
+   pulsarlo no abre el visor (ver scripts/componentes/visor-imagenes.js, que busca
+   el .lightbox-trigger más cercano al elemento pulsado). */
+.gatin-random-reload {
+    position: absolute;
+    left: 6px;
+    bottom: 6px;
+    z-index: 2;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    /* 30px: por encima del mínimo de 24px que pide la WCAG para un
+       objetivo táctil, sin comerse la foto. */
+    width: 30px;
+    height: 30px;
+    padding: 0;
+    border: 2px solid var(--yellow);
+    background: var(--surface);
+    /* El icono va en SVG y se pinta con currentColor, así que el color
+       del botón es también el del dibujo. */
+    color: var(--yellow);
+    line-height: 1;
+    cursor: pointer;
+    transition: background-color 0.15s linear, color 0.15s linear;
+}
+
+.gatin-random-reload-icono {
+    display: block;
+    width: 16px;
+    height: 16px;
+    transition: transform 0.15s ease;
+}
+
+.gatin-random-reload:hover,
+.gatin-random-reload:focus-visible {
+    background: var(--yellow);
+    /* Sin esto el icono se quedaría amarillo sobre amarillo. */
+    color: var(--yellow-contrast);
+}
+
+.gatin-random-reload:focus-visible {
+    outline: 2px solid var(--yellow);
+    outline-offset: 2px;
+}
+
+/* Gira solo el dibujo, no el botón: si girase el botón se le vería dar
+   vueltas al recuadro y al borde. */
+.gatin-random-reload:active .gatin-random-reload-icono {
+    transform: rotate(180deg);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .gatin-random-reload-icono {
+        transition: none;
+    }
+
+    .gatin-random-reload:active .gatin-random-reload-icono {
+        transform: none;
+    }
+}
+
+/* SIDEBAR — TEMA */
+
+.theme-toggle {
+    display: inline-flex;
+    align-self: center;
+    align-items: center;
+    gap: 10px;
+    width: auto;
+    margin-top: 10px;
+    padding: 10px 22px 10px 10px;
+    border: 1px solid var(--border);
+    border-radius: 0;
+    background: var(--purple-lighter);
+    color: var(--muted);
+    font-family: "DM Mono", monospace;
+    font-size: 0.625rem;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: color 0.1s linear, border-color 0.1s linear, background-color 0.1s linear, transform 0.1s linear;
+}
+
+.theme-toggle-text {
+    width: calc(11ch + 10px);
+    white-space: nowrap;
+    text-align: left;
+}
+
+.cursor-trail-toggle-text {
+    width: calc(11ch + 10px);
+    white-space: nowrap;
+    text-align: left;
+}
+
+.theme-toggle-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    width: 1.3rem;
+    height: 1.3rem;
+    border-radius: 50%;
+    background: var(--yellow);
+    color: var(--yellow-contrast);
+    font-size: 0.75rem;
+    line-height: 1;
+    transition: background-color 0.1s linear, color 0.1s linear;
+}
+
+.theme-toggle:hover,
+.theme-toggle:focus-visible {
+    color: var(--yellow);
+    border-color: var(--yellow);
+}
+
+.theme-toggle:focus-visible {
+    outline: 2px solid var(--yellow);
+    outline-offset: 2px;
+}
+
+/* Estado "activado" del rastro del cursor: mismos colores que el
+   logo (fondo amarillo, texto oscuro), para que se note a simple
+   vista sin tener que leer el texto ON/OFF. */
+
+#cursor-trail-toggle[aria-pressed="true"] {
+    background: var(--yellow);
+    border-color: var(--yellow);
+    color: var(--yellow-contrast);
+}
+
+#cursor-trail-toggle[aria-pressed="true"] .theme-toggle-icon {
+    background: var(--yellow-contrast);
+    color: var(--yellow);
+}
+
+#cursor-trail-toggle[aria-pressed="true"]:hover,
+#cursor-trail-toggle[aria-pressed="true"]:focus-visible {
+    color: var(--yellow-contrast);
+    border-color: var(--yellow);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    nav a,
+    nav a::before,
+    .submenu {
+        transition: none;
+    }
+}

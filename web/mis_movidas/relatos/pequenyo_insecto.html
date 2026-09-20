@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8">
+    <!-- Color de la barra del navegador en el móvil. Arranca en el color
+         del modo oscuro y el script de abajo lo cambia si toca; al pulsar
+         el botón de tema lo actualiza scripts/tema.js. -->
+    <meta name="theme-color" content="#12091c">
+    <script>
+      (function () {
+        try {
+          if (localStorage.getItem("richi-theme") === "light") {
+            document.documentElement.setAttribute("data-theme", "light");
+            var barra = document.querySelector('meta[name="theme-color"]');
+            if (barra) {
+              barra.setAttribute("content", "#f2ded2");
+            }
+          }
+        } catch (e) {}
+      })();
+    </script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pequeño insecto · Relatos · El Blog de Richi</title>
+    <!-- Cómo se ve el enlace al compartirlo (Bluesky, Discord, Ko-fi…).
+         Sin esto solo sale la URL pelada, sin título ni imagen. Las rutas
+         van absolutas a propósito: las redes no resuelven las relativas. -->
+    <meta name="description" content="La luz anaranjada de la chimenea se filtraba a través del vidrio curvado de la botella, deformando el reflejo de su rostro marchito. Caél, reducido al…">
+    <link rel="canonical" href="https://richi.blog/web/mis_movidas/relatos/pequenyo_insecto.html">
+    <meta property="og:type" content="article">
+    <meta property="og:site_name" content="El Blog de Richi">
+    <meta property="og:locale" content="es_ES">
+    <meta property="og:title" content="Pequeño insecto · Relatos · El Blog de Richi">
+    <meta property="og:description" content="La luz anaranjada de la chimenea se filtraba a través del vidrio curvado de la botella, deformando el reflejo de su rostro marchito. Caél, reducido al…">
+    <meta property="og:url" content="https://richi.blog/web/mis_movidas/relatos/pequenyo_insecto.html">
+    <meta property="og:image" content="https://richi.blog/imagenes/meta/og.webp">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta property="og:image:alt" content="El Blog de Richi — ilustración de Richi sobre fondo morado">
+    <meta name="twitter:card" content="summary_large_image">
+    <link rel="icon" type="image/x-icon" href="/imagenes/favicon.ico">
+    <!-- La única fuente que se precarga. Medido con la red frenada: sin esto el
+         navegador no la descubre hasta parsear el CSS (~800 ms) y el texto baila al
+         cambiar de tipografía; así llega antes del primer pintado y no se nota el
+         cambio. Precargar más fuentes empeoraba el primer pintado 150-210 ms, porque
+         compiten por el ancho de banda con lo que hace falta para pintar. -->
+    <link rel="preload" href="/tipografias/space-grotesk-400.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="alternate" type="application/rss+xml" title="El Blog de Richi — blog, relatos y rol" href="/blog/rss.xml">
+    <!-- ==== CSS ====
+         Esta lista la escribe herramientas/actualizar-cabeceras.py.
+         No la toques a mano: si cambias qué CSS lleva una página,
+         cámbialo en esa herramienta y vuélvela a ejecutar.
+
+         Van escritos aquí, y no cargados por un script, para que el
+         navegador los pida nada más recibir el HTML. Con un script de
+         por medio tardaba ~200 ms más en pintar la página. -->
+    <link rel="stylesheet" href="/estilos/base.css">
+    <link rel="stylesheet" href="/estilos/base.responsive.css">
+    <link rel="stylesheet" href="/estilos/componentes/visor-imagenes.css">
+    <link rel="stylesheet" href="/estilos/componentes/aviso.css">
+    <link rel="stylesheet" href="/estilos/componentes/aviso.responsive.css">
+    <link rel="stylesheet" href="/estilos/componentes/cabecera-ventana.css">
+    <link rel="stylesheet" href="/estilos/componentes/subir.css">
+    <link rel="stylesheet" href="/estilos/componentes/texto-entrada.css">
+    <link rel="stylesheet" href="/estilos/paginas/relatos.css">
+    <link rel="stylesheet" href="/estilos/paginas/relatos.responsive.css">
+    <link rel="stylesheet" href="/estilos/componentes/barra-lateral.css">
+    <link rel="stylesheet" href="/estilos/componentes/barra-lateral.responsive.css">
+    <!-- ==== fin del CSS ==== -->
+    <script src="/scripts/cargador-scripts.js"></script>
+  </head>
+<body>
+    <!-- ==== SIDEBAR / NAVEGACIÓN ==== -->
+    <a class="skip-link" href="#main-content">Saltar al contenido</a>
+    <div id="sidebar-container"></div>
+    <!-- ==== CONTENIDO PRINCIPAL ==== -->
+
+    <main id="main-content">
+        <!-- ==== HOME ==== -->
+        <section id="home" class="home relato-page">
+            <!-- data-subcategoria: lo que sale debajo del título en los
+                 listados ("relato corto"). Va aquí y no solo en
+                 datos/mis-movidas.json para que
+                 herramientas/generar-posts.py pueda reconstruir el JSON
+                 leyendo las páginas. -->
+            <article class="relato-post" data-subcategoria="relato corto">
+                <div class="relato-post-header">
+                    <h1 class="relato-post-title">Pequeño insecto</h1>
+                    <div class="relato-post-header-meta">
+                        <p class="relato-post-date"><time datetime="2025-06-25">25 jun 2025</time></p>
+                        <a class="relato-post-back" href="/web/mis_movidas/relatos/index_relatos.html">← volver a relatos</a>
+                    </div>
+                </div>
+
+                <div class="relato-post-body-wrap">
+                    <div class="relato-post-layout">
+                        <div class="relato-post-body">
+                            <p>La luz anaranjada de la chimenea se filtraba a través del vidrio curvado de la botella, deformando el reflejo de su rostro marchito. Caél, reducido al tamaño de un grano de arroz, había perdido la cuenta de los días encerrado en el Brisa Marina. Una amarga maldición escapaba de sus labios cada vez que recordaba el fatídico momento en que decidió adentrarse a robar en la torre.</p>
+                            <p>El barco que ahora era su cárcel era una obra maestra en miniatura, el fruto de manos expertas. Su casco de madera oscura, pulido hasta relucir, evocaba la imagen de un navío veterano de incontables travesías. Líneas elegantes recorrían su estructura, atrapada, como él, en un océano sin fin de cristal encantado.</p>
+                            <p>Pequeñas barandillas decoradas con intrincados motivos rodeaban la cubierta, y las velas, confeccionadas con un lienzo finísimo, habían adquirido un tono amarillento que sugería historias de tormentas pasadas. Caél se sorprendía a menudo preguntándose si aquella maqueta era un barco real que, como él, había sido reducido por la magia de la perversa hechicera.</p>
+                            <p>Cuando lo arrojaron dentro de la botella su instinto de supervivencia lo llevó a explorar cada rincón del diminuto navío. Recorrió la cubierta, examinó el interior de la cabina del capitán, e incluso buscó imperfecciones en el cristal que pudieran servirle para escapar. Todo fue en vano; la prisión era perfecta, tan impecable y despiadada como la mente que la había concebido.</p>
+                            <p>Ni sus herramientas de ladrón ni la pequeña daga que siempre llevaba podían perforar el cristal encantado. Había probado todas las combinaciones posibles, y el fracaso solo alimentaba su desesperación.</p>
+                            <p>Al principio, había golpeado el vidrio con toda la fuerza que su cuerpo reducido permitía, gritando insultos a la hechicera. Su voz rebotaba dentro de la botella, pero la respuesta llegó amplificada desde fuera —Ah, pequeño insecto. ¿De verdad crees que alguien te salvará? Aprende ahora el precio de tu osadía.</p>
+                            <p>Con el tiempo, las visitas de la hechicera se volvieron una rutina. A menudo traía invitados, señalando la botella como si fuera una pieza de museo.</p>
+                            <p>—Aquí tienen mi obra más reciente: un ladrón reducido a su justa proporción. Observen cómo este insecto lucha inútilmente por escapar.</p>
+                            <p>Las risas de los visitantes dolían más que sus palabras. Algunos golpeaban el vidrio con curiosidad, observándolo tambalearse como si fuera una atracción de feria. Al principio, Caél se mantenía firme. Caminaba erguido por la cubierta, intentando conservar algo de dignidad, enfrentando las burlas con una mirada desafiante.</p>
+                            <p>Pero la humillación constante, junto con el tormento del hambre y la sed, fue desgastándolo poco a poco hasta que su cuerpo comenzó a traicionarlo. La energía que antes sostenía su orgullo se desvaneció, dejándolo frágil, con movimientos torpes y una mirada apagada que ya no podía ocultar su derrota.</p>
+                            <p>El Brisa Marina, que al principio admiró por su detallada construcción, se había convertido en una burla de su propia existencia. Mordía la madera amarga en un intento vano de engañar al hambre. Intentaba recoger las gotas de condensación que a veces se formaban en las paredes del vidrio, usando las cuerdas del mástil para guiar el agua hasta su boca. Pero era insuficiente. Cada gota obtenida era un pequeño triunfo que apenas le permitía prolongar su agonía.</p>
+                            <p>Fue en uno de esos días interminables cuando una idea surgió de la desesperación, al principio como un susurro en su mente y luego como una certeza ineludible. —Si voy a morir aquí —murmuró con voz áspera—, al menos lo haré luchando.</p>
+                            <p>Su mirada cayó sobre sus herramientas, olvidadas en un rincón de la bodega del barco. La daga relucía débilmente bajo la luz de la luna, como un faro que señalaba su última oportunidad. El plan surgió en su mente, simple y letal; provocar un incendio y reducir a cenizas la diminuta embarcación. Si tenía suerte, el calor rompería el vidrio, o al menos fundiría un agujero lo suficientemente grande para escapar. Si no… al menos pondría fin a su sufrimiento.</p>
+                            <p>Con manos temblorosas, recogió las herramientas. Subió a la cubierta tambaleándose y comenzó a trabajar. Rasgó un pedazo de tela de su ropa, arrancó astillas de la barandilla y las amontonó en el centro. Su aliento era pesado y entrecortado, pero su mente estaba clara por primera vez en días.</p>
+                            <p>Caél utilizó una de las monedas que había conseguido robar para golpear la hoja de su daga, tratando de generar chispas. Era un trabajo arduo, pero la necesidad lo impulsaba. Cada golpe era una declaración de desafío a la hechicera, al destino, al mundo que lo había reducido a esto.</p>
+                            <p>Las primeras chispas no lograron encender la tela. Maldijo entre dientes, concentrándose en el movimiento. Una, dos, tres veces. Finalmente, una chispa prendió, y el fuego comenzó a extenderse lentamente por la mecha. El calor creció rápidamente, llenando el reducido espacio con un humo acre. La madera seca del mástil ardió con furia, iluminando la botella con un resplandor naranja. El ladrón retrocedió mientras tosía; le ardía la garganta y tenía los ojos llorosos , pero no apartó la vista del cristal.</p>
+                            <p>El vidrio empezó a calentarse; su superficie brillante se deformaba ligeramente bajo el intenso calor. Las grietas eran inevitables, ¿no? Lo serían… Pero entonces el humo se volvió sofocante.</p>
+                            <p>Cayó de rodillas, luchando por respirar. La botella ahora era un horno, y el fuego consumía el oxígeno a un ritmo alarmante. El ladrón cerró los ojos por el ardor del humo, tambaleándose mientras tosía aferrándose a la poca esperanza que le quedaba.</p>
+                            <p>De pronto, un sonido agudo cortó el aire. Abrió los ojos justo a tiempo para ver una pequeña fisura formarse en el vidrio. Una sonrisa débil se dibujó en su rostro mientras su visión se nublaba.</p>
+                       </div>
+
+                        <!-- Columna de la derecha: la imagen y "sigue leyendo". Va pegada
+                             arriba mientras se desplaza el texto (ver .relato-post-side). -->
+                        <div class="relato-post-side">
+                            <!-- IMAGEN DE LA ENTRADA -->
+                            <!-- De momento va una de ejemplo: cámbiala por la que quieras.
+                                 Lo suyo es guardarla en /imagenes/blog/ (o en la carpeta de
+                                 relatos) y pasarla antes por optimizar-imagenes.py.
+                                 El alt va vacío a propósito porque es decorativa: así un
+                                 lector de pantalla no la nombra y no estorba la lectura.
+                                 Si la imagen aporta algo al texto, escríbele un alt de
+                                 verdad. width y height son los del archivo, para que el
+                                 navegador reserve el hueco y el texto no salte al cargar. -->
+                            <figure class="relato-post-aside">
+                                <img src="/imagenes/mis_movidas/relatos/pequenyo_insecto.webp" alt="cuadro de un hombre sentado en un barco" width="780" height="1170" loading="lazy" decoding="async">
+                                <figcaption> <a href="https://www.si.edu/object/board-ship:chndm_1912-16-27" target="_blank" rel="noopener noreferrer">On Board Ship</a> de Walter Shirlaw. Cuadro tomado del archivo de imágenes del Smithsonian.</figcaption>
+                            </figure>
+
+                            <div class="relato-post-otras" data-otras-caja>
+                                <div class="recent-entries-header">
+                                    <h2>otros_relatos.txt</h2>
+                                    <div class="window-controls window-controls-small" data-window-controls aria-hidden="true"></div>
+                                </div>
+                                <ul class="entries-list" data-otras-entradas="relatos">
+                                    <li class="entries-loading">Cargando…</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </article>
+        </section>
+    </main>
+</body>
+</html>

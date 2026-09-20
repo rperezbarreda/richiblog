@@ -1,0 +1,59 @@
+/* RESPONSIVE — portfolio de mis movidas (rol) en móvil */
+
+@media (max-width: 860px) {
+    /* En móvil la página vuelve a desplazarse entera: en una pantalla
+       de teléfono no hay alto que repartir entre cabecera y rejilla, y
+       una rejilla con scroll propio dentro de una página que también
+       se desplaza es justo lo que marea. */
+    .rol-page {
+        display: block;
+        overflow-y: auto;
+        padding: 32px 6%;
+    }
+
+    .rol-page > .home-title {
+        margin-bottom: 20px;
+    }
+
+    .rol-page-cabecera {
+        display: block;
+        margin-bottom: 24px;
+    }
+
+    .rol-page-intro {
+        margin-bottom: 20px;
+        max-width: none;
+    }
+
+    .rol-page-disclaimer {
+        max-width: none;
+    }
+
+    .rol-page .filtros {
+        margin-bottom: 24px;
+    }
+
+    .portfolio-grid {
+        display: flex;
+        flex-direction: column;
+        overflow: visible;
+        padding: 0 0 10px;
+    }
+
+    /* La tarjeta horizontal (foto fija de 240px + texto) no cabe en
+       una pantalla estrecha: aquí vuelve a apilarse, foto arriba y
+       texto debajo, con la foto en su proporción normal en vez de
+       estirada al alto del texto. */
+    .portfolio-card {
+        grid-template-columns: 1fr;
+        max-width: 380px;
+    }
+
+    .portfolio-card-photo {
+        width: 100%;
+        height: auto;
+        aspect-ratio: 3 / 4;
+        border-right: none;
+        border-bottom: 3px solid var(--yellow);
+    }
+}

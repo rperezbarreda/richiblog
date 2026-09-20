@@ -1,0 +1,117 @@
+/* RESPONSIVE — la ventana de filtros en móvil */
+
+@media (max-width: 860px) {
+    /* La fila de categorías no cabe en una pantalla estrecha (se
+       partía en dos líneas), así que se colapsa: se ve solo la
+       categoría puesta en un botón con su flechita, y la lista con
+       todas aparece flotando encima del contenido al pulsarlo. El
+       abrir/cerrar lo lleva scripts/componentes/filtros.js poniendo la
+       clase "is-open" en la ventana. Mismo patrón que las etiquetas
+       del blog. */
+
+    /* Ancla de la lista flotante: como va absoluta, esta caja mide lo
+       que la etiqueta "filtrar:" más el botón. */
+    .filtros {
+        position: relative;
+    }
+
+    .filtros-toggle {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        flex: 1 1 auto;
+        max-width: 240px;
+        padding: 9px 13px;
+        border: 2px solid var(--yellow);
+        background: transparent;
+        color: var(--yellow);
+        font-family: "DM Mono", monospace;
+        font-size: 0.75rem;
+        font-weight: 500;
+        text-align: left;
+        text-transform: lowercase;
+        letter-spacing: 1px;
+        cursor: pointer;
+    }
+
+    .filtros-toggle:focus-visible {
+        outline: 2px solid var(--yellow);
+        outline-offset: 3px;
+    }
+
+    /* Si algún día una categoría tiene el nombre largo, que se corte
+       con puntos suspensivos en vez de empujar la flecha fuera. */
+    .filtros-toggle-label {
+        overflow: hidden;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+    }
+
+    .filtros-toggle-arrow {
+        flex-shrink: 0;
+        font-size: 0.75rem;
+        line-height: 1;
+        transition: transform 0.15s linear;
+    }
+
+    .filtros.is-open .filtros-toggle-arrow {
+        transform: rotate(180deg);
+    }
+
+    /* Flotante: sale por encima de lo que haya debajo en vez de
+       empujarlo, para que abrir la lista no mueva la página. */
+    .filtros-list {
+        display: none;
+        position: absolute;
+        top: 100%;
+        right: 0;
+        z-index: 20;
+        flex-direction: column;
+        flex-wrap: nowrap;
+        gap: 0;
+        width: 100%;
+        max-width: 240px;
+        margin-top: 4px;
+        border: 2px solid var(--yellow);
+        background: var(--purple-lighter);
+        box-shadow: 5px 5px 0 var(--yellow);
+    }
+
+    .filtros.is-open .filtros-list {
+        display: flex;
+    }
+
+    /* En fila la categoría puesta se marca con el relleno amarillo y
+       aquí igual, que es como se marca lo activo en el resto del
+       sitio. */
+    .filtro-btn {
+        width: 100%;
+        padding: 10px 14px;
+        border: 0;
+        border-bottom: 1px solid var(--border);
+        text-align: left;
+    }
+
+    .filtro-btn:last-child {
+        border-bottom: none;
+    }
+
+    .filtro-btn:focus-visible {
+        outline: 2px solid var(--yellow);
+        outline-offset: -4px;
+    }
+
+    /* Con el desplegable, el botón ya ocupa el ancho: el enlace del rss
+       se pone a su lado sin empujarlo a otra línea. */
+    .filtros-rss {
+        margin-left: 0;
+        padding: 9px 12px;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .filtros-toggle-arrow {
+        transition: none;
+    }
+}

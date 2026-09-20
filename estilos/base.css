@@ -1,0 +1,552 @@
+/* FUENTES LOCALES */
+
+/* Todas las fuentes del sitio se sirven desde /tipografias/ — ya no hay
+   ninguna petición a Google. Van todas aquí porque base.css es lo
+   único que se carga en TODAS las páginas, incluido el 404 (ver la
+   lista de herramientas/actualizar-cabeceras.py), así que es el único
+   sitio donde una declaración vale para todo el sitio.
+   Declararlas aquí no cuesta ancho de banda: el navegador solo baja
+   el archivo cuando algún elemento de esa página usa esa fuente de
+   verdad, así que Pangolin (74 KB) solo se descarga al abrir una
+   entrada del blog, aunque esté declarada aquí.
+   font-display: swap replica el &display=swap que llevaba el enlace
+   de Google: el texto se ve desde el primer momento con la fuente de
+   respaldo y salta a la definitiva al cargar. */
+
+@font-face {
+    font-family: "DM Mono";
+    src: url("/tipografias/dm-mono-400.woff2") format("woff2");
+    font-weight: 400;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: "DM Mono";
+    src: url("/tipografias/dm-mono-500.woff2") format("woff2");
+    font-weight: 500;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: "Space Grotesk";
+    src: url("/tipografias/space-grotesk-400.woff2") format("woff2");
+    font-weight: 400;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: "Space Grotesk";
+    src: url("/tipografias/space-grotesk-500.woff2") format("woff2");
+    font-weight: 500;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: "Space Grotesk";
+    src: url("/tipografias/space-grotesk-600.woff2") format("woff2");
+    font-weight: 600;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: "Jersey 10";
+    src: url("/tipografias/jersey-10-400.woff2") format("woff2");
+    font-weight: 400;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: "Pangolin";
+    src: url("/tipografias/pangolin-400.woff2") format("woff2");
+    font-weight: 400;
+    font-style: normal;
+    font-display: swap;
+}
+
+:root {
+    color-scheme: dark;
+    --bg-texture: url("/imagenes/dark_bg.webp");
+    --purple: #12091c;
+    --purple-lighter: #2b1a3d;
+    --yellow: #f4c95d;
+    --yellow-contrast: #12091c;
+    --yellow-glow-strong: rgba(244, 201, 93, 0.7);
+    --white: #f4f1f7;
+    --muted: #a9a0b2;
+    --border: rgba(255, 255, 255, 0.08);
+    --surface: rgba(18, 9, 28, 0.94);
+    /* Rojo de aviso de error. Tiene que ser distinto del --yellow (que
+       en claro ya es rojo y marca los mensajes de "ha ido bien") y
+       leerse sobre --purple-lighter, que es el fondo de las tarjetas.
+       Medido: 6,96:1 en oscuro y 7,52:1 en claro. */
+    --error: #f58f8a;
+}
+
+:root[data-theme="light"] {
+    color-scheme: light;
+    --bg-texture: url("/imagenes/white_bg.webp");
+    --purple: #f2ded2;
+    --purple-lighter: #e6dabf;
+    --yellow: #ad1005;
+    --yellow-contrast: #ede4d6;
+    --yellow-glow-strong: rgba(173, 16, 5, 0.35);
+    --white: #241a12;
+    --muted: #6d5e4d;
+    --border: rgba(36, 26, 18, 0.12);
+    --surface: rgba(250, 246, 238, 0.94);
+    --error: #7a1d15;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+button {
+    cursor: pointer;
+}
+
+html {
+    height: 100%;
+    font-size: 135%;
+    scroll-behavior: smooth;
+    scroll-padding-top: 30px;
+}
+
+body {
+    height: 100vh;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    background: var(--purple);
+    color: var(--white);
+    font-family: "Space Grotesk", sans-serif;
+    transition: background-color 0.1s linear, color 0.1s linear;
+}
+
+body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: -1;
+    background-image: var(--bg-texture);
+    background-size: 200px 200px;
+    background-repeat: repeat;
+}
+
+@media (prefers-contrast: more), (prefers-reduced-transparency: reduce) {
+    body::before {
+        display: none;
+    }
+}
+
+/* CRÉDITO DE ILUSTRACIÓN (compartido: portada y fichas de santuarios) */
+
+/* La etiqueta va encima de una ilustración, no sobre el fondo de la
+   página, así que al principio llevaba los colores escritos a mano
+   pensando que daba igual el tema. Daba igual al dibujo, pero no al
+   resto del sitio: era lo único que no cambiaba al pasar a modo claro
+   y cantaba. Ahora usa las variables del tema como todo lo demás.
+   --surface tapa un 94%, lo justo para que el dibujo asome por detrás
+   sin comerse el contraste del texto. */
+.art-credit {
+    margin: 0;
+    padding: 6px 10px;
+    background: var(--surface);
+    color: var(--white);
+    font-family: "DM Mono", monospace;
+    font-size: 0.625rem;
+    letter-spacing: 0.3px;
+}
+
+.art-credit a {
+    color: var(--yellow);
+    text-decoration: none;
+}
+
+.art-credit a:hover,
+.art-credit a:focus-visible {
+    text-decoration: underline;
+}
+
+.art-credit a:focus-visible {
+    outline: 2px solid var(--yellow);
+    outline-offset: 2px;
+}
+
+/* SOLO PARA LECTORES DE PANTALLA */
+
+.visually-hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    padding: 0;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+
+/* SKIP LINK */
+
+.skip-link {
+    position: absolute;
+    top: -100px;
+    left: 10px;
+    z-index: 200;
+    padding: 10px 16px;
+    background: var(--yellow);
+    color: var(--yellow-contrast);
+    font-family: "DM Mono", monospace;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    text-decoration: none;
+    border-radius: 0;
+    transition: top 0.1s linear;
+}
+
+.skip-link:focus {
+    top: 10px;
+}
+
+/* MAIN */
+
+main {
+    position: relative;
+    flex: 1 1 auto;
+    min-height: 0;
+    margin: 36px 44px 28px 316px;
+    width: calc(100% - 360px);
+    background: var(--surface);
+    border: 3px solid var(--yellow);
+    border-radius: 0;
+    box-shadow: 8px 8px 0 var(--yellow);
+    overflow: hidden;
+}
+
+/* Variante para páginas sin sidebar (ej. 404) */
+main.standalone-main {
+    flex: 0 0 auto;
+    align-self: flex-start;
+    margin: 40px 0 0 40px;
+    width: 480px;
+    max-width: calc(100% - 40px);
+}
+
+main.standalone-main .home {
+    height: auto;
+    padding: 32px;
+}
+
+.window-controls {
+    position: absolute;
+    top: 14px;
+    right: 16px;
+    z-index: 5;
+    display: flex;
+    gap: 6px;
+}
+
+.window-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.3rem;
+    height: 1.3rem;
+    border: 2px solid var(--yellow);
+    background: var(--yellow);
+    /* El símbolo de dentro es un SVG que toma currentColor, así que con
+       cambiar el color del botón cambia también el dibujo: eso es lo
+       que hace que las cabeceras invertidas (fichas de gatos, entradas
+       de blog) funcionen sin repetir nada. */
+    color: var(--yellow-contrast);
+    user-select: none;
+}
+
+/* El dibujo, proporcional al botón: así vale igual para el tamaño
+   normal y para el pequeño de las tarjetas sin tener que darle una
+   medida a cada uno. */
+.window-btn-icono {
+    display: block;
+    width: 62%;
+    height: 62%;
+    /* Que los clics los reciba el botón y no el SVG: chispas-botones.js
+       busca el .window-btn más cercano al elemento pulsado. */
+    pointer-events: none;
+}
+
+.quotes-bar {
+    flex: 0 0 auto;
+    margin: 0 44px 44px 316px;
+    padding: 14px 24px;
+    background: var(--surface);
+    border: 3px solid var(--yellow);
+    border-radius: 0;
+    box-shadow: 8px 8px 0 var(--yellow);
+    overflow: hidden;
+}
+
+section {
+    height: 100%;
+    overflow-y: auto;
+    padding: 100px 10%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+/* HOME (base, usado por todas las páginas de contenido) */
+
+.home {
+    position: relative;
+    height: 100%;
+    padding: 40px 2.5%;
+    display: grid;
+    align-items: center;
+    overflow-y: auto;
+}
+
+.home-title {
+    color: var(--white);
+    font-size: clamp(4.375rem, 9vw, 8.75rem);
+    font-weight: 500;
+    line-height: 0.81;
+    letter-spacing: -8px;
+    text-transform: lowercase;
+}
+
+.home-title em {
+    color: var(--yellow);
+    font-family: Georgia, "Times New Roman", serif;
+    font-weight: 400;
+    letter-spacing: -6px;
+}
+
+.bio-description {
+    color: var(--muted);
+    font-size: 0.875rem;
+    line-height: 1.8;
+}
+
+/* SELECTION */
+
+::selection {
+    color: var(--yellow-contrast);
+    background: var(--yellow);
+}
+
+/* SCROLLBAR */
+
+::-webkit-scrollbar {
+    width: 7px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--purple);
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--purple-lighter);
+    border-radius: 0;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--yellow);
+}
+
+/* RASTRO DEL CURSOR */
+
+.cursor-particle {
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 300;
+    font-size: 14px;
+    line-height: 1;
+    pointer-events: none;
+    animation: cursor-particle-fade 0.7s ease-out forwards;
+}
+
+@keyframes cursor-particle-fade {
+    from {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(1);
+    }
+    to {
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(0.3) translateY(-16px);
+    }
+}
+
+/* PARTÍCULAS DE ESTALLIDO (botón de inspiración, botones de ventana) */
+
+.window-btn {
+    cursor: pointer;
+}
+
+.firework-particle {
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 400;
+    font-size: 1rem;
+    color: var(--yellow);
+    pointer-events: none;
+    animation: firework-burst 0.9s ease-out forwards;
+}
+
+@keyframes firework-burst {
+    from {
+        transform: translate(-50%, -50%) translate(0, 0) scale(1);
+        opacity: 1;
+    }
+    to {
+        transform: translate(-50%, -50%) translate(var(--dx), var(--dy)) scale(0.4);
+        opacity: 0;
+    }
+}
+
+/* TARJETAS DE ENTRADA DEL BLOG (portada + archivo del año) */
+
+.entries-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    list-style: none;
+}
+
+.entry-preview {
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--border);
+}
+
+.entry-preview:last-child {
+    padding-bottom: 0;
+    border-bottom: none;
+}
+
+.entry-preview-link {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    width: 100%;
+    text-decoration: none;
+    color: inherit;
+}
+
+.entry-preview-link:focus-visible {
+    outline: 2px solid var(--yellow);
+    outline-offset: 3px;
+}
+
+.entry-preview-title {
+    color: var(--white);
+    font-size: 0.875rem;
+    font-weight: 500;
+    line-height: 1.3;
+}
+
+.entry-preview-link:hover .entry-preview-title,
+.entry-preview-link:focus-visible .entry-preview-title {
+    text-decoration: underline;
+}
+
+.entry-preview-date {
+    flex-shrink: 0;
+    color: var(--muted);
+    font-family: "DM Mono", monospace;
+    font-size: 0.6875rem;
+    white-space: nowrap;
+}
+
+/* Las etiquetas de una entrada ("diario", "opiniones"…). Van FUERA del
+   enlace del título, no dentro: cada una es su propio enlace al archivo
+   del blog filtrado por esa categoría, y un enlace dentro de otro no es
+   HTML válido — el navegador lo deshace por su cuenta y deja de
+   funcionar uno de los dos.
+   Viven aquí y no en webs/blog.css porque las usan la portada (que
+   carga portada.css) y el archivo del año (que carga blog.css): estaban
+   solo en blog.css y en la portada salían sin recuadro y del tamaño del
+   texto normal. */
+.entry-preview-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+    margin-top: 6px;
+}
+
+.entry-tag {
+    display: inline-block;
+    padding: 1px 7px;
+    border: 1px solid var(--border);
+    background: var(--purple);
+    color: var(--muted);
+    font-family: "DM Mono", monospace;
+    font-size: 0.5625rem;
+    letter-spacing: 0.5px;
+    text-decoration: none;
+    transition: color 0.12s linear, border-color 0.12s linear;
+}
+
+/* En modo claro las etiquetas se perdían: gris apagado sobre crema,
+   4,5:1 justos. Aquí van con el rojo del tema —texto, borde y un
+   fondo rojo muy suave— para que se lean como lo que son, una marca
+   de categoría. Medido: 7,4:1 contra el fondo de las tarjetas. */
+:root[data-theme="light"] .entry-tag {
+    border-color: var(--yellow);
+    background: rgba(173, 16, 5, 0.08);
+    color: var(--yellow);
+}
+
+:root[data-theme="light"] .entry-tag:hover,
+:root[data-theme="light"] .entry-tag:focus-visible {
+    background: var(--yellow);
+    color: var(--yellow-contrast);
+}
+
+.entry-tag:hover,
+.entry-tag:focus-visible {
+    border-color: var(--yellow);
+    color: var(--yellow);
+}
+
+.entry-tag:focus-visible {
+    outline: 2px solid var(--yellow);
+    outline-offset: 2px;
+}
+
+.entries-loading,
+.entries-empty,
+.entries-error {
+    color: var(--muted);
+    font-family: "DM Mono", monospace;
+    font-size: 0.8125rem;
+    list-style: none;
+}
+
+/* LIGHTBOX — solo el disparador */
+
+/* El resto del visor (la capa oscura, la imagen, el botón de cerrar)
+   está en estilos/componentes/visor-imagenes.css, que se carga después y por
+   tanto ganaba: lo que había aquí era una copia vieja que no pintaba
+   nada. Se queda solo esto, que no está allí. */
+.lightbox-trigger {
+    display: block;
+    padding: 0;
+    border: none;
+    background: none;
+    cursor: zoom-in;
+}
+
+.lightbox-trigger img {
+    display: block;
+}

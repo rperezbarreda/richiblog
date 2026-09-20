@@ -1,0 +1,28 @@
+/* RESPONSIVE — layout general (main, quotes-bar, section, título grande) */
+
+@media (max-width: 860px) {
+    main {
+        margin: 76px 16px 16px 16px;
+        width: auto;
+    }
+
+    .quotes-bar {
+        margin: 0 16px 16px 16px;
+        padding: 10px 16px;
+    }
+
+    section {
+        padding: 60px 6%;
+    }
+
+    main.standalone-main {
+        margin: 76px 16px 16px 16px;
+        width: auto;
+        max-width: none;
+    }
+
+    .home-title {
+        font-size: clamp(2.25rem, 13vw, 3.5rem);
+        letter-spacing: -3px;
+    }
+}

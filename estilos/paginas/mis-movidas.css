@@ -1,0 +1,277 @@
+/* MIS MOVIDAS — PORTFOLIO (por ahora, "rol") */
+
+/* Página de alto fijo: el título, la intro y la ventana de filtros se
+   quedan siempre a la vista y lo único que se desplaza —cuando hay
+   tanto material que no cabe— es la rejilla de tarjetas, que tiene su
+   propio scroll. Antes la página entera se desplazaba y el título se
+   iba por arriba. */
+.rol-page {
+    display: flex;
+    flex-direction: column;
+    /* .home trae align-items: center (es una rejilla); en una columna
+       flex eso deja a los hijos sin estirar al ancho del contenedor. */
+    align-items: stretch;
+    /* Como en relatos: si no, el "justify-content: center" que trae
+       section en base.css centraría la columna en cuanto sobrara alto
+       y el título bajaría respecto al resto de índices. */
+    justify-content: flex-start;
+    gap: 16px;
+    overflow: hidden;
+    padding: 24px 4%;
+}
+
+.rol-page > .home-title,
+.rol-page-cabecera,
+.rol-page .filtros {
+    flex-shrink: 0;
+}
+
+/* El hueco entre bloques lo pone el gap de la columna: con los
+   márgenes de serie del h1 encima quedaba el doble de separación. */
+.rol-page > .home-title {
+    margin: 0;
+}
+
+/* Intro y aviso uno al lado del otro. En vertical se llevaban 130px de
+   alto por sí solos; en fila ocupan lo que el más alto de los dos. */
+.rol-page-cabecera {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    gap: 16px 28px;
+}
+
+.rol-page-intro {
+    flex: 1 1 320px;
+    margin: 0;
+    max-width: 640px;
+    color: var(--muted);
+    font-size: 1rem;
+    line-height: 1.6;
+}
+
+.rol-page-intro a {
+    color: var(--yellow);
+}
+
+.rol-page-intro a:hover,
+.rol-page-intro a:focus-visible {
+    text-decoration: underline;
+}
+
+.rol-page-intro a:focus-visible {
+    outline: 2px solid var(--yellow);
+    outline-offset: 3px;
+}
+
+/* Aviso del modelo "paga lo que quieras": una nota aparte, no un
+   enlace suelto dentro del párrafo de intro, para que se note a
+   simple vista sin tener que leer todo el texto. */
+.rol-page-disclaimer {
+    flex: 1 1 360px;
+    margin: 0;
+    max-width: 640px;
+    padding: 14px 18px;
+    border-left: 3px solid var(--yellow);
+    background: var(--purple-lighter);
+    color: var(--muted);
+    font-size: 0.875rem;
+    line-height: 1.6;
+}
+
+.rol-page-disclaimer strong {
+    color: var(--yellow);
+    font-weight: 500;
+}
+
+/* ==== REJILLA DE TARJETAS ====
+   Genérico a propósito (nombres "portfolio-*", no "rol-*"): cuando
+   otra sección de mis movidas quiera el mismo trato de portfolio,
+   esto se reutiliza tal cual.
+   Antes esto eran tres paneles de pestañas, uno por categoría. Ahora
+   es una sola rejilla y cada tarjeta lleva su data-categoria: así
+   filtrar es esconder tarjetas, y una categoría nueva no obliga a
+   crear ningún panel (ver scripts/componentes/filtros.js). */
+
+.portfolio-grid {
+    display: grid;
+    /* Dos columnas en cuanto hay sitio para ellas, una si no. Con
+       430px de mínimo salen dos columnas desde una ventana de ~1250,
+       que es donde antes ya hacía falta desplazarse. */
+    grid-template-columns: repeat(auto-fill, minmax(470px, 1fr));
+    /* max-content y no el "auto" de serie: con auto, el alto de la
+       fila se calculaba con la descripción en una sola línea (salía
+       281px), la tarjeta real pedía 526 y el resto se cortaba contra
+       su overflow: hidden. Medido con cinco tarjetas a 1440. */
+    grid-auto-rows: max-content;
+    align-content: start;
+    /* Dos columnas como mucho: 760 + 760 + el hueco. En una pantalla
+       de 2560 salían cuatro, y con la foto fija de 200px eso deja
+       tarjetas estrechas y larguísimas. */
+    max-width: 1580px;
+    gap: 24px;
+    /* Lo que se desplaza es esto, no la página. */
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    /* Hueco para que no se corte la sombra de 6px de las tarjetas. */
+    padding: 4px 10px 10px 0;
+}
+
+/* Barra de desplazamiento a la vista (fina y del color del sitio, como
+   la del menú lateral): si no, en una ventana baja la última tarjeta se
+   corta sin que nada diga que hay más debajo. */
+.portfolio-grid {
+    scrollbar-width: thin;
+    scrollbar-color: var(--yellow) transparent;
+}
+
+.portfolio-grid::-webkit-scrollbar {
+    width: 8px;
+}
+
+.portfolio-grid::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.portfolio-grid::-webkit-scrollbar-thumb {
+    background: var(--yellow);
+}
+
+/* Al filtrar, las tarjetas de fuera se esconden con el atributo
+   hidden. Hace falta decirlo aquí: el "display: grid" de la tarjeta
+   (una clase) le gana al "display: none" que el navegador aplica a
+   [hidden], así que sin esto seguían viéndose todas. */
+.portfolio-card[hidden] {
+    display: none;
+}
+
+/* El aviso de categoría vacía ocupa la fila entera: en una columna
+   estrecha se quedaba partido en dos líneas al lado de un hueco. */
+.portfolio-grid .filtros-vacio {
+    grid-column: 1 / -1;
+}
+
+/* Tarjeta horizontal: foto a un lado, texto al otro — en vez de la
+   foto arriba y el texto debajo. */
+/* Rejilla y no flex. En flex, el alto de la tarjeta dentro de la
+   rejilla de la página se calculaba con la descripción puesta en una
+   sola línea: salía el alto de la foto (281px), el texto real pedía
+   343 y el sobrante se cortaba contra el overflow: hidden. Con
+   grid-template-columns el ancho del texto se resuelve antes que el
+   alto y la tarjeta mide lo que mide de verdad. */
+.portfolio-card {
+    display: grid;
+    /* En píxeles y no en %: un porcentaje aquí se mide contra un ancho
+       que todavía no está resuelto y la foto salía de 151px en una
+       tarjeta de 760. */
+    grid-template-columns: 200px minmax(0, 1fr);
+    /* Tope de ancho para que en una pantalla muy grande el texto no se
+       estire a 1100px por línea; la columna manda hasta ahí. */
+    max-width: 760px;
+    background: var(--purple-lighter);
+    border: 3px solid var(--yellow);
+    box-shadow: 6px 6px 0 var(--yellow);
+    overflow: hidden;
+}
+
+.portfolio-card-photo {
+    display: block;
+    /* Sin alto propio: llena la fila de la rejilla, que la marca el
+       texto de al lado, y object-fit la recorta para que no se
+       deforme. */
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-right: 3px solid var(--yellow);
+    background: var(--purple);
+}
+
+.portfolio-card-info {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    padding: 20px 24px;
+}
+
+.portfolio-card-title {
+    margin: 0 0 4px;
+    color: var(--yellow);
+    font-family: "Space Grotesk", sans-serif;
+    font-style: italic;
+    font-weight: 500;
+    font-size: 1.25rem;
+    line-height: 1.25;
+}
+
+.portfolio-card-system {
+    margin: 0 0 12px;
+    color: var(--muted);
+    font-family: "DM Mono", monospace;
+    font-size: 0.6875rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+/* Sin flex: 1. Lo tenía para empujar los botones abajo, pero eso
+   hacía que la descripción pudiera encogerse por debajo de su texto:
+   dentro de la rejilla, la tarjeta se quedaba con el alto de la foto
+   (250px) y el final del párrafo se cortaba. Ahora quien baja los
+   botones es el margin-top: auto de .portfolio-card-actions. */
+.portfolio-card-desc {
+    margin: 0 0 16px;
+    color: var(--white);
+    font-size: 0.8125rem;
+    line-height: 1.6;
+}
+
+/* Los dos botones (Ko-fi + descarga gratis) van uno junto al otro,
+   y se apilan si no caben en el ancho de la tarjeta. */
+.portfolio-card-actions {
+    margin-top: auto;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px;
+}
+
+.portfolio-card-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 16px;
+    border: 2px solid var(--yellow);
+    background: var(--yellow);
+    color: var(--yellow-contrast);
+    font-family: "DM Mono", monospace;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    text-decoration: none;
+    transition: color 0.15s linear, background-color 0.15s linear;
+}
+
+.portfolio-card-btn:hover,
+.portfolio-card-btn:focus-visible {
+    color: var(--yellow);
+    background: transparent;
+}
+
+.portfolio-card-btn:focus-visible {
+    outline: 2px solid var(--yellow);
+    outline-offset: 3px;
+}
+
+/* Variante secundaria (descarga gratuita vía Drive): mismo tamaño
+   que el botón de Ko-fi, pero sin relleno, para que quede claro que
+   Ko-fi es la opción "de apoyo" y esta es la alternativa gratis. */
+.portfolio-card-btn-secondary {
+    background: transparent;
+    color: var(--yellow);
+}
+
+.portfolio-card-btn-secondary:hover,
+.portfolio-card-btn-secondary:focus-visible {
+    background: var(--yellow);
+    color: var(--yellow-contrast);
+}

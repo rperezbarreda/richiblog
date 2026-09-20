@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8">
+    <!-- Color de la barra del navegador en el móvil. Arranca en el color
+         del modo oscuro y el script de abajo lo cambia si toca; al pulsar
+         el botón de tema lo actualiza scripts/tema.js. -->
+    <meta name="theme-color" content="#12091c">
+    <script>
+      (function () {
+        try {
+          if (localStorage.getItem("richi-theme") === "light") {
+            document.documentElement.setAttribute("data-theme", "light");
+            var barra = document.querySelector('meta[name="theme-color"]');
+            if (barra) {
+              barra.setAttribute("content", "#f2ded2");
+            }
+          }
+        } catch (e) {}
+      })();
+    </script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sobre mí · El Blog de Richi</title>
+    <!-- Cómo se ve el enlace al compartirlo (Bluesky, Discord, Ko-fi…).
+         Sin esto solo sale la URL pelada, sin título ni imagen. Las rutas
+         van absolutas a propósito: las redes no resuelven las relativas. -->
+    <meta name="description" content="Quién soy, en formato ficha de personaje: estadísticas, habilidades, trasfondo e inventario.">
+    <link rel="canonical" href="https://richi.blog/web/sobre_mi/sobre_mi.html">
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="El Blog de Richi">
+    <meta property="og:locale" content="es_ES">
+    <meta property="og:title" content="Sobre mí · El Blog de Richi">
+    <meta property="og:description" content="Quién soy, en formato ficha de personaje: estadísticas, habilidades, trasfondo e inventario.">
+    <meta property="og:url" content="https://richi.blog/web/sobre_mi/sobre_mi.html">
+    <meta property="og:image" content="https://richi.blog/imagenes/meta/og.webp">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta property="og:image:alt" content="El Blog de Richi — ilustración de Richi sobre fondo morado">
+    <meta name="twitter:card" content="summary_large_image">
+    <link rel="icon" type="image/x-icon" href="/imagenes/favicon.ico">
+    <!-- La única fuente que se precarga. Medido con la red frenada: sin esto el
+         navegador no la descubre hasta parsear el CSS (~800 ms) y el texto baila al
+         cambiar de tipografía; así llega antes del primer pintado y no se nota el
+         cambio. Precargar más fuentes empeoraba el primer pintado 150-210 ms, porque
+         compiten por el ancho de banda con lo que hace falta para pintar. -->
+    <link rel="preload" href="/tipografias/space-grotesk-400.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="alternate" type="application/rss+xml" title="El Blog de Richi — blog, relatos y rol" href="/blog/rss.xml">
+    <!-- ==== CSS ====
+         Esta lista la escribe herramientas/actualizar-cabeceras.py.
+         No la toques a mano: si cambias qué CSS lleva una página,
+         cámbialo en esa herramienta y vuélvela a ejecutar.
+
+         Van escritos aquí, y no cargados por un script, para que el
+         navegador los pida nada más recibir el HTML. Con un script de
+         por medio tardaba ~200 ms más en pintar la página. -->
+    <link rel="stylesheet" href="/estilos/base.css">
+    <link rel="stylesheet" href="/estilos/base.responsive.css">
+    <link rel="stylesheet" href="/estilos/componentes/visor-imagenes.css">
+    <link rel="stylesheet" href="/estilos/componentes/aviso.css">
+    <link rel="stylesheet" href="/estilos/componentes/aviso.responsive.css">
+    <link rel="stylesheet" href="/estilos/componentes/cabecera-ventana.css">
+    <link rel="stylesheet" href="/estilos/componentes/subir.css">
+    <link rel="stylesheet" href="/estilos/paginas/portada.css">
+    <link rel="stylesheet" href="/estilos/paginas/sobre-mi.css">
+    <link rel="stylesheet" href="/estilos/paginas/sobre-mi.responsive.css">
+    <link rel="stylesheet" href="/estilos/componentes/barra-lateral.css">
+    <link rel="stylesheet" href="/estilos/componentes/barra-lateral.responsive.css">
+    <!-- ==== fin del CSS ==== -->
+    <script src="/scripts/cargador-scripts.js"></script>
+  </head>
+<body>
+    <!-- ==== SIDEBAR / NAVEGACIÓN ==== -->
+    <a class="skip-link" href="#main-content">Saltar al contenido</a>
+    <div id="sidebar-container"></div>
+    <!-- ==== CONTENIDO PRINCIPAL ==== -->
+
+    <main id="main-content">
+        <!-- ==== HOME ==== -->
+        <section id="home" class="home character-sheet">
+            <div class="character-sheet-top">
+                <!-- El retrato y la etiqueta van juntos en su propia
+                     caja para que la etiqueta quede debajo del dibujo y
+                     no al lado del título. La bandera es un adorno
+                     (aria-hidden): lo que se lee es el texto.
+                     Es un botón porque al pulsarlo lanza los mismos
+                     fuegos artificiales que el de inspiración, con los
+                     colores de la bandera (ver scripts/paginas/sobre-mi.js). -->
+                <div class="character-portrait-block">
+                    <img class="character-portrait character-portrait-small" src="/imagenes/sobre_mi/avatar.webp" width="220" height="220" alt="Ilustración de un esqueleto bebiendo café en una taza naranja, con fondo verde.">
+                    <button id="orgullo-boton" class="orgullo-label" type="button">
+                        <span class="orgullo-bandera" aria-hidden="true"></span>
+                        yep, soy bi
+                    </button>
+                </div>
+
+                <div class="character-title-block">
+                    <h1 class="home-title character-sheet-title">
+                        <em>sobre mi</em>
+                    </h1>
+
+                    <div class="vitals character-vitals-row">
+                        <div class="vital">
+                            <span class="vital-label">vida</span>
+                            <div class="progress-bar" role="progressbar" aria-valuenow="40" aria-valuemin="0" aria-valuemax="100" aria-label="Vida: 40%">
+                                <div class="progress-bar-fill" style="width: 40%;"></div>
+                            </div>
+                        </div>
+                        <div class="vital">
+                            <span class="vital-label">maná</span>
+                            <div class="progress-bar" role="progressbar" aria-valuenow="90" aria-valuemin="0" aria-valuemax="100" aria-label="Maná: 90%">
+                                <div class="progress-bar-fill" style="width: 90%;"></div>
+                            </div>
+                        </div>
+                        <div class="vital">
+                            <span class="vital-label">exp</span>
+                            <div class="progress-bar" role="progressbar" aria-valuenow="30" aria-valuemin="0" aria-valuemax="100" aria-label="Experiencia: 30%">
+                                <div class="progress-bar-fill" style="width: 30%;"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button id="inspiration-button" class="character-inspiration-btn" type="button">
+                        <span aria-hidden="true">✨</span> inspiración
+                    </button>
+                </div>
+
+                <div class="recent-entries character-stats-card">
+                    <div class="recent-entries-header">
+                        <h2>estadisticas.dat</h2>
+                        <div class="window-controls window-controls-small" data-window-controls aria-hidden="true"></div>
+                    </div>
+                    <div class="recent-entries-body">
+                        <ul class="stats-row">
+                            <li class="stat-box">
+                                <span class="stat-box-name"><span class="stat-name-full">fuerza</span><span class="stat-name-short" aria-hidden="true">fue</span></span>
+                                <span class="stat-box-score">12</span>
+                                <span class="stat-box-mod">+1</span>
+                            </li>
+                            <li class="stat-box">
+                                <span class="stat-box-name"><span class="stat-name-full">destreza</span><span class="stat-name-short" aria-hidden="true">des</span></span>
+                                <span class="stat-box-score">9</span>
+                                <span class="stat-box-mod">-1</span>
+                            </li>
+                            <li class="stat-box">
+                                <span class="stat-box-name"><span class="stat-name-full">constitución</span><span class="stat-name-short" aria-hidden="true">con</span></span>
+                                <span class="stat-box-score">14</span>
+                                <span class="stat-box-mod">+2</span>
+                            </li>
+                            <li class="stat-box">
+                                <span class="stat-box-name"><span class="stat-name-full">sabiduría</span><span class="stat-name-short" aria-hidden="true">sab</span></span>
+                                <span class="stat-box-score">17</span>
+                                <span class="stat-box-mod">+3</span>
+                            </li>
+                            <li class="stat-box">
+                                <span class="stat-box-name"><span class="stat-name-full">inteligencia</span><span class="stat-name-short" aria-hidden="true">int</span></span>
+                                <span class="stat-box-score">14</span>
+                                <span class="stat-box-mod">+2</span>
+                            </li>
+                            <li class="stat-box">
+                                <span class="stat-box-name"><span class="stat-name-full">carisma</span><span class="stat-name-short" aria-hidden="true">car</span></span>
+                                <span class="stat-box-score">10</span>
+                                <span class="stat-box-mod">0</span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div class="character-sheet-content">
+
+                <!-- ==== DATOS BÁSICOS + CONTACTO + PROFICIENCIAS ==== -->
+                <div class="character-portrait-column">
+                    <dl class="character-basics">
+                        <div class="character-basics-row">
+                            <dt>nombre</dt>
+                            <dd>Ricardo Pérez Barreda</dd>
+                        </div>
+                        <div class="character-basics-row">
+                            <dt>raza</dt>
+                            <dd>Furtivo Pigmeo</dd>
+                        </div>
+                        <div class="character-basics-row">
+                            <dt>pronombres</dt>
+                            <dd>él / he / him</dd>
+                        </div>
+                        <div class="character-basics-row">
+                            <dt>alineamiento</dt>
+                            <dd>Patoso Bondadoso</dd>
+                        </div>
+                        <div class="character-basics-row">
+                            <dt>clase y nivel</dt>
+                            <dd>Hechicero, nivel 9</dd>
+                        </div>
+                    </dl>
+
+                    <div class="recent-entries character-card character-card-grow">
+                        <div class="recent-entries-header">
+                            <h2>proficiencias.cfg</h2>
+                            <div class="window-controls window-controls-small" data-window-controls aria-hidden="true"></div>
+                        </div>
+                        <div class="recent-entries-body character-card-body">
+                            <ul class="skills-list">
+                                <li>Español (nativo)</li>
+                                <li>Inglés</li>
+                                <li>Máster de rol</li>
+                                <li>Piano (Aprendiendo)</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ==== COLUMNA PRINCIPAL: 3 TARJETAS COMBINADAS ==== -->
+                <div class="character-main-column">
+
+                    <!-- HABILIDADES -->
+                    <div class="recent-entries character-card character-card-narrow">
+                        <div class="recent-entries-header">
+                            <h2>habilidades.lst</h2>
+                            <div class="window-controls window-controls-small" data-window-controls aria-hidden="true"></div>
+                        </div>
+                        <div class="recent-entries-body character-card-body">
+                            <ul class="skills-list skills-list-marked">
+                                <li><span class="skill-marker" aria-hidden="true"></span>-1 acrobacias </li>
+                                <li><span class="skill-marker" aria-hidden="true"></span>+1 atletismo </li>
+                                <li><span class="skill-marker filled" aria-hidden="true"></span>+5 conocimiento arcano <span class="visually-hidden">(competente)</span></li>
+                                <li><span class="skill-marker" aria-hidden="true"></span>&nbsp;0&nbsp;engaño </li>
+                                <li><span class="skill-marker filled" aria-hidden="true"></span>+5 historia <span class="visually-hidden">(competente)</span></li>
+                                <li><span class="skill-marker filled" aria-hidden="true"></span>+3 interpretación <span class="visually-hidden">(competente)</span></li>
+                                <li><span class="skill-marker" aria-hidden="true"></span>&nbsp;0&nbsp;intimidación</li>
+                                <li><span class="skill-marker" aria-hidden="true"></span>+2 investigación</li>
+                                <li><span class="skill-marker" aria-hidden="true"></span>-1 juego de manos</li>
+                                <li><span class="skill-marker filled" aria-hidden="true"></span>+6 medicina <span class="visually-hidden">(competente)</span></li>
+                                <li><span class="skill-marker" aria-hidden="true"></span>+3 naturaleza</li>
+                                <li><span class="skill-marker" aria-hidden="true"></span>+3 percepción</li>
+                                <li><span class="skill-marker" aria-hidden="true"></span>+3 perspicacia</li>
+                                <li><span class="skill-marker filled" aria-hidden="true"></span>+3 persuasión <span class="visually-hidden">(competente)</span></li>
+                                <li><span class="skill-marker" aria-hidden="true"></span>+2 religion</li>
+                                <li><span class="skill-marker" aria-hidden="true"></span>-1 sigilo</li>
+                                <li><span class="skill-marker" aria-hidden="true"></span>+3 supervivencia</li>
+                                <li><span class="skill-marker filled" aria-hidden="true"></span>+6 trato con animales <span class="visually-hidden">(competente)</span></li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <!-- TRASFONDO + COMPAÑEROS -->
+                    <div class="recent-entries character-card character-card-wide">
+                        <div class="recent-entries-header">
+                            <h2>trasfondo.txt</h2>
+                            <div class="window-controls window-controls-small" data-window-controls aria-hidden="true"></div>
+                        </div>
+                        <div class="recent-entries-body character-card-body">
+                            <p class="bio-description">
+                                Nací en la Tierruca (Cantabria) y desde siempre me han gustado los libros y los videojuegos. Empecé a currar de programador web y en esa época empecé a masterear partidas de rol. Ahora tengo una discapacidad visual y tengo demasiado tiempo libre.
+                            </p>
+
+                            <h3 class="progress-section-title character-subsection">compañeros</h3>
+                            <div class="progress-items">
+
+                                <!-- La fecha es la de nacimiento, así que va
+                                     con su etiqueta y no suelta al final del
+                                     título, donde no se entendía de qué era.
+                                     El <time> con datetime en formato ISO es
+                                     para que se lea bien en un lector de
+                                     pantalla y lo entienda un buscador. -->
+                                <div class="currently-item companero-item">
+                                    <div class="currently-item-header">
+                                        <span class="currently-badge">Tali</span>
+                                        <span class="companero-fecha">
+                                            <span class="companero-fecha-label">nacimiento</span>
+                                            <time datetime="2025-11-11">11/11/2025</time>
+                                        </span>
+                                    </div>
+                                    <p class="currently-title">Gatina blanca y naranja</p>
+                                    <small class="currently-meta">Gatina un poquito arisca y solitaria, pero muy tranquilita y vigilando los pájaros en la ventana</small>
+                                    <a class="companero-btn" href="/web/santuarios/tali/tali.html">
+                                        Ver su santuario
+                                        <span aria-hidden="true">→</span>
+                                        <span class="visually-hidden">(Tali)</span>
+                                    </a>
+                                </div>
+
+                                <div class="currently-item companero-item">
+                                    <div class="currently-item-header">
+                                        <span class="currently-badge">Regis</span>
+                                        <span class="companero-fecha">
+                                            <span class="companero-fecha-label">nacimiento</span>
+                                            <time datetime="2025-11-11">11/11/2025</time>
+                                        </span>
+                                    </div>
+                                    <p class="currently-title">Gatín pardo</p>
+                                    <small class="currently-meta">Gatin muy sociable que quiere ser el centro de atención y que le encanta explorar el vecindario.</small>
+                                    <a class="companero-btn" href="/web/santuarios/regis/regis.html">
+                                        Ver su santuario
+                                        <span aria-hidden="true">→</span>
+                                        <span class="visually-hidden">(Regis)</span>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- INVENTARIO + OBJETOS MÁGICOS -->
+                    <div class="recent-entries character-card character-card-narrow">
+                        <div class="recent-entries-header">
+                            <h2>inventario.dat</h2>
+                            <div class="window-controls window-controls-small" data-window-controls aria-hidden="true"></div>
+                        </div>
+                        <div class="recent-entries-body character-card-body">
+                            <ul class="inventory-list">
+                                <li>🎲 dados de rol</li>
+                                <li>🎮 lista interminable de juegos de steam</li>
+                                <li>✏️ libreta de escritura</li>
+                                <li>☕ taza de dunder mifflin</li>
+                                <li>🐈 gatines acurrucados en mi cama</li>
+                            </ul>
+
+                            <h3 class="progress-section-title character-subsection">objetos mágicos</h3>
+                            <ul class="inventory-list">
+                                <li>💻 PC Gamer con lucecitas innecesarias</li>
+                                <li>✨ Gafítas redonditas</li>
+                                <li>📌 Mochila con pins frikis</li>
+                                <li>⚔ Espada de plata de Cirilla Fiona Elen Riannon</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </section>
+    </main>
+</body>
+</html>

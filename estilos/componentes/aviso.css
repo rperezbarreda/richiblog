@@ -1,0 +1,141 @@
+/* COMPONENTE: AVISO EMERGENTE */
+
+.notice {
+    position: fixed;
+    left: 340px;
+    top: 90px;
+    z-index: 500;
+    display: flex;
+    flex-direction: column;
+    width: 320px;
+    /* Tope de alto y texto desplazable por dentro. Sin esto, al crecer
+       el texto el aviso se salía de la pantalla y el botón de
+       "entendido" quedaba fuera: no había forma de cerrarlo. Se resta
+       el top (90) más un margen abajo. */
+    max-height: calc(100vh - 110px);
+    padding: 16px;
+    background: var(--surface);
+    border: 3px solid var(--yellow);
+    box-shadow: 8px 8px 0 var(--yellow);
+    animation: notice-in 0.25s ease-out;
+}
+
+.notice[hidden] {
+    display: none;
+}
+
+/* Variante para colgarlo abajo en vez de arriba. La usa el aviso del
+   guestbook: arriba taparía la lista de comentarios y a la derecha
+   tapaba el botón de firmar, así que se queda en la esquina de menos
+   tránsito, alineado con el borde de la ventana principal. */
+.notice-bottom-left {
+    top: auto;
+    bottom: 48px;
+}
+
+@keyframes notice-in {
+    from {
+        opacity: 0;
+        transform: translateY(16px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .notice {
+        animation: none;
+    }
+}
+
+.notice-body {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    /* Lo que se desplaza cuando el texto no cabe. El botón de cerrar
+       vive fuera de aquí (.notice-footer) justo para que no se lo lleve
+       el scroll y siempre se pueda pulsar. */
+    min-height: 0;
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: var(--purple-lighter) transparent;
+}
+
+.notice-body::-webkit-scrollbar {
+    width: 6px;
+}
+
+.notice-body::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.notice-body::-webkit-scrollbar-thumb {
+    background: var(--purple-lighter);
+}
+
+.notice-footer {
+    position: relative;
+    flex-shrink: 0;
+    padding-top: 10px;
+}
+
+/* Degradado al final del texto cuando queda algo por leer: sin él, en
+   ventanas bajas el párrafo se corta a media línea y no se ve que el
+   cuadro se desplaza. Cuelga del pie (que no se mueve) y no del cuerpo,
+   que se iría con el scroll. */
+.notice.has-scroll .notice-footer::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 100%;
+    height: 26px;
+    background: linear-gradient(to bottom, transparent, var(--surface));
+    pointer-events: none;
+}
+
+.notice-body p {
+    margin: 0;
+    color: var(--muted);
+    font-size: 0.8125rem;
+    line-height: 1.5;
+}
+
+.notice-body code {
+    padding: 1px 5px;
+    background: var(--purple-lighter);
+    color: var(--yellow);
+    font-family: "DM Mono", monospace;
+    font-size: 0.75rem;
+}
+
+.notice-body a {
+    color: var(--yellow);
+    text-decoration: underline;
+}
+
+.notice-dismiss {
+    align-self: flex-start;
+    padding: 8px 18px;
+    border: 2px solid var(--yellow);
+    background: transparent;
+    color: var(--yellow);
+    text-transform: uppercase;
+    font-family: "DM Mono", monospace;
+    font-size: 0.75rem;
+    letter-spacing: 1px;
+    transition: color 0.1s linear, background-color 0.1s linear;
+}
+
+.notice-dismiss:hover,
+.notice-dismiss:focus-visible {
+    color: var(--yellow-contrast);
+    background: var(--yellow);
+}
+
+.notice-dismiss:focus-visible {
+    outline: 2px solid var(--yellow);
+    outline-offset: 3px;
+}

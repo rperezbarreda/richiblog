@@ -1,0 +1,64 @@
+/* RESPONSIVE — portada (index.html) en una sola columna */
+/* Este punto de quiebre es más ancho que el del resto del sitio
+   (1900px en vez de 860px) a propósito: por debajo de esa anchura
+   el texto de la columna de info se queda con menos de 150px de
+   ancho (el diseño de 3 columnas necesita ~2000px para respirar
+   bien), así que aquí se apila antes, aunque la barra lateral siga
+   viéndose en modo escritorio normal (eso lo decide barra-lateral.css
+   por separado, a 860px). */
+
+@media (max-width: 1900px) {
+    .home.home-page {
+        display: block;
+        overflow-y: auto;
+    }
+
+    .home {
+        padding: 32px 6%;
+    }
+
+    /* Apilado, el dibujo deja de ocupar el alto de la sección y se
+       centra. El ancho va aquí (y no un max-height) para que el
+       contenedor mida lo mismo que el dibujo: si se limitara el alto,
+       la caja seguiría reservando los 1161px de ancho original y ni
+       se centraría ni el crédito quedaría encima. 206px es lo que
+       medía de ancho con los 320px de alto de antes. */
+    .pngperson-art {
+        position: relative;
+        height: auto;
+        width: 206px;
+        max-width: 100%;
+        margin: 0 auto;
+    }
+
+    .pngperson {
+        height: auto;
+        width: 100%;
+    }
+
+    .home-content {
+        display: flex;
+        flex-direction: column;
+        align-items: stretch;
+        flex: none;
+        gap: 28px;
+        padding-left: 0;
+        margin-top: 24px;
+    }
+
+    /* El min-width: 300px de escritorio (que reparte las columnas de
+       la portada) aquí no pinta nada: apilada, la columna ocupa todo
+       el ancho igual. Lo que sí hacía era impedir que encogiese por
+       debajo de 300px, así que en móviles estrechos (360px y menos,
+       que son muchos) el contenido se salía por la derecha y había
+       que arrastrar en horizontal para leerlo. */
+    .info-column {
+        max-width: none;
+        min-width: 0;
+    }
+
+    .recent-entries-body {
+        flex: none;
+        max-height: 260px;
+    }
+}

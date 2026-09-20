@@ -1,0 +1,77 @@
+<div class="mobile-topbar">
+    <button id="sidebar-toggle" class="sidebar-toggle" type="button" aria-expanded="false" aria-controls="sidebar">
+        <span aria-hidden="true">☰</span>
+        <span class="visually-hidden">Abrir menú</span>
+    </button>
+    <p class="mobile-topbar-title"><span aria-hidden="true">·🜏·</span> EL BLOG DE RICHI</p>
+</div>
+
+<div id="sidebar-backdrop" class="sidebar-backdrop" hidden></div>
+
+<aside class="sidebar" id="sidebar">
+    <div class="sidebar-logo">
+        <p><span aria-hidden="true">·🜏·</span> EL BLOG DE RICHI</p>
+    </div>
+    <div class="sidebar-top">
+        <nav>
+        <a href="/index.html">home</a>
+            <!-- MIS MOVIDAS -->
+            <div class="nav-group">
+                <button class="nav-toggle" type="button" aria-expanded="false">
+                    <span>mis movidas</span>
+                    <span class="arrow" aria-hidden="true">+</span>
+                </button>
+
+                <div class="submenu">
+                    <a href="/web/mis_movidas/relatos/index_relatos.html">relatos</a>
+                    <a href="/web/mis_movidas/rol/index_rol.html">rol</a>
+                </div>
+            </div>
+
+            <!-- BLOG -->
+            <div class="nav-group">
+                <button class="nav-toggle" type="button" aria-expanded="false">
+                    <span>blog</span>
+                    <span class="arrow" aria-hidden="true">+</span>
+                </button>
+
+                <!-- Los años los pone y los quita solo
+                     herramientas/generar-archivo.py al publicar: en
+                     cuanto escribas la primera entrada, 2026 vuelve a
+                     aparecer aquí sin que tengas que tocar nada. -->
+                <div class="submenu">
+                    <a href="/web/blog/diario.html">diario</a>
+                    <a href="/web/blog/2026/index_2026.html">2026</a>
+                </div>
+            </div>
+
+        <a href="/web/santuarios/index_santuarios.html">santuarios</a>
+        <a href="/web/sobre_mi/sobre_mi.html">sobre mi</a>
+        <a href="/web/contacto/contacto.html">contacto y guestbook</a>
+        <a href="/web/accesibilidad/accesibilidad.html">accesibilidad</a>
+        </nav>
+    </div>
+
+    <!-- GATÍN ALEATORIO -->
+    <!-- Nace oculto: lo enseña scripts/componentes/gatin-random.js solo si
+         consigue leer el listado de fotos. Si falla (sin conexión, o
+         todavía no hay fotos subidas) se queda escondido en vez de
+         dejar un hueco vacío en el menú. -->
+    <div class="gatin-random" data-gatin-random hidden>
+        <div class="gatin-random-header">
+            <h2>gatin_random.exe</h2>
+            <div class="window-controls window-controls-small" data-window-controls aria-hidden="true"></div>
+        </div>
+        <div class="gatin-random-body" data-gatin-body></div>
+    </div>
+
+    <button id="theme-toggle" class="theme-toggle" type="button" aria-pressed="false">
+        <span class="theme-toggle-icon" aria-hidden="true">☾</span>
+        <span class="theme-toggle-text">MODO OSCURO</span>
+    </button>
+
+    <button id="cursor-trail-toggle" class="theme-toggle" type="button" aria-pressed="true">
+        <span class="theme-toggle-icon" aria-hidden="true">✦</span>
+        <span class="cursor-trail-toggle-text">BRILLITO: ON</span>
+    </button>
+</aside>

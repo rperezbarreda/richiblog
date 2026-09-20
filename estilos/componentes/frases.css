@@ -1,0 +1,35 @@
+/* QUOTES */
+
+.quotes-track {
+    display: flex;
+    width: max-content;
+    animation: marquee 30s linear infinite;
+}
+
+.quotes-content {
+    display: flex;
+    flex-shrink: 0;
+    width: max-content;
+    padding-right: 40px;
+    color: var(--yellow);
+    font-family: "DM Mono", monospace;
+    font-size: 0.5rem;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    white-space: nowrap;
+}
+
+@keyframes marquee {
+    from {
+        transform: translateX(0);
+    }
+    to {
+        transform: translateX(-50%);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .quotes-track {
+        animation: none;
+    }
+}

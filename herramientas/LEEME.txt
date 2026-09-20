@@ -1,0 +1,425 @@
+===============================================================
+  EL BLOG DE RICHI — CHULETA DE LAS HERRAMIENTAS
+===============================================================
+
+  Todo se ejecuta DESDE LA CARPETA RAÍZ del sitio (donde está
+  index.html), no desde dentro de herramientas/. Es decir:
+
+      python herramientas/nueva-entrada.py       <- así
+      python nueva-entrada.py                    <- así no
+
+  En Windows, si "python" no le suena, prueba con "py".
+
+  Casi todos aceptan --probar, que enseña lo que haría sin tocar
+  ningún archivo. Si dudas, pásalo primero.
+
+
+---------------------------------------------------------------
+  VER LA WEB EN TU ORDENADOR (ANTES DE SUBIRLA)
+---------------------------------------------------------------
+
+  ABRIR EL ARCHIVO CON DOBLE CLIC NO VALE.
+
+  Lo verás en blanco y negro, con la letra de serie del navegador,
+  sin menú y sin nada de lo que hace el sitio. No está roto: es
+  que todas las rutas del sitio empiezan por "/" (por ejemplo
+  /estilos/base.css), y eso significa "desde la raíz de la web".
+  Abriendo el archivo a pelo no hay ninguna web, así que el
+  navegador va a buscar esas rutas a la raíz de tu disco duro y no
+  encuentra nada.
+
+  Lo que hay que hacer es levantar una web de mentira en tu
+  ordenador. Desde la carpeta raíz del sitio:
+
+      python -m http.server 8000
+
+  Déjalo abierto (mientras esa ventana esté abierta, la web está
+  servida; se corta con Ctrl+C) y abre en el navegador:
+
+      http://localhost:8000
+
+  Ahí se ve exactamente como se verá en Neocities: el menú, los
+  temas claro y oscuro, el guestbook, todo. Para mirar una entrada
+  concreta, pega detrás su ruta:
+
+      http://localhost:8000/web/blog/2026/septiembre/lo-que-sea.html
+
+  Si cambias un archivo, basta con recargar la página (F5). Si has
+  tocado CSS o JS y ves lo de antes, recarga forzando:
+  Ctrl+Shift+R (Cmd+Shift+R en Mac).
+
+
+---------------------------------------------------------------
+  LO QUE VAS A HACER EL 95% DE LAS VECES
+---------------------------------------------------------------
+
+  PUBLICAR UNA ENTRADA DEL BLOG O UN RELATO
+
+      python herramientas/nueva-entrada.py
+
+  Te pregunta si es entrada o relato, el título, la fecha, las
+  etiquetas (o el tipo de relato) y un resumen de una línea. Crea
+  la carpeta y el HTML ya montado, y deja todo lo demás al día: la
+  página del archivo del año (creándola si es un año nuevo), el
+  enlace del menú, los listados y el RSS.
+
+  En un relato te ofrece los tipos que ya existen —microrelato,
+  relato corto— y acepta uno nuevo si lo escribes: el filtro del
+  listado de relatos lo recoge solo.
+
+  También te pregunta por la imagen de la columna derecha: dale
+  una ruta o pulsa Enter para que la entrada nazca sin ella (el
+  hueco se queda comentado dentro del archivo por si la quieres
+  poner luego). Si le das una, saca sus medidas sola.
+
+  Luego abre el archivo que te diga y escribe. Trae un párrafo de
+  muestra para que lo borres.
+
+  Lo que te toca a ti después: el texto. Ahí arriba tienes la
+  chuleta de las etiquetas que puedes usar.
+
+
+  Y CUANDO LA TENGAS ESCRITA, PUBLICARLA
+
+      python herramientas/publicar.py
+
+  Toda entrada y todo relato NACEN COMO BORRADOR. La página existe
+  y la puedes mirar en local (arriba se ve una franja que pone
+  BORRADOR), pero no sale en los listados, ni en el RSS, ni en el
+  sitemap, ni en el archivo del año.
+
+  Es a propósito: antes, al crear una entrada se metía en el acto
+  en los listados y en el RSS. Si la dejabas a medias y unos días
+  después subías el sitio por otra cosa, esa entrada a medio
+  escribir se publicaba sola. Y del RSS ya no se puede sacar: quien
+  esté suscrito se la ha guardado aunque luego la borres.
+
+  publicar.py te enseña los borradores que tengas, eliges y él
+  quita la marca y vuelve a pasar los generadores. Si te has
+  equivocado y quieres volver a esconder algo:
+
+      python herramientas/publicar.py --despublicar <la ruta>
+
+
+  AÑADIR ALGO AL PORTFOLIO DE ROL
+
+      python herramientas/nuevo-rol.py
+
+  Te pregunta la categoría (aventuras, mapas, sistemas... o una
+  nueva que te inventes), el título, el sistema y jugadores, la
+  descripción, la fecha, la portada y los enlaces de Ko-fi y de
+  Drive (este último opcional). Mete la tarjeta la primera y
+  actualiza los listados.
+
+  Si escribes una categoría que no existía, se crea sola: aparece
+  su botón en la ventana de filtros de la página sin tocar nada.
+
+  ANTES: ten la portada guardada en imagenes/mis_movidas/rol/ y
+  pasada por optimizar-imagenes.py.
+
+
+  SUBIR FOTOS DE LOS GATOS
+
+      1. Copia las fotos a imagenes/santuarios/tali/ (o /regis/)
+      2. python herramientas/optimizar-imagenes.py
+      3. python herramientas/generar-galeria.py
+
+  El segundo las pasa a WebP y les quita los metadatos (las fotos
+  de móvil llevan dentro el modelo y muchas veces las coordenadas
+  de dónde se hicieron). El tercero crea las miniaturas y escribe
+  el listado de la galería.
+
+  Los textos alternativos que escribas a mano en
+  datos/fotos-santuarios.json se respetan al volver a ejecutarlo: vale
+  la pena cambiar "Tali, foto 3" por algo de verdad.
+
+
+---------------------------------------------------------------
+  Y CUANDO TERMINES, SIEMPRE
+---------------------------------------------------------------
+
+      python herramientas/generar-sitemap.py
+
+  Y sube el sitio a Neocities. La carpeta herramientas/ NO hace
+  falta subirla: es solo para ti.
+
+
+---------------------------------------------------------------
+  QUÉ PUEDES ESCRIBIR DENTRO DE UNA ENTRADA
+---------------------------------------------------------------
+
+  El cuerpo de una entrada (y de un relato) es HTML a mano, pero
+  solo hacen falta estas etiquetas. Todas están ya con el estilo
+  del sitio, en los dos temas:
+
+      <p>un párrafo</p>
+
+      <h2>un subtítulo</h2>
+      <h3>un subtítulo más pequeño</h3>
+
+      <ul>
+          <li>una lista de puntos</li>
+      </ul>
+
+      <ol>
+          <li>una lista numerada</li>
+      </ol>
+
+      <blockquote><p>una cita</p></blockquote>
+
+      <p>texto con <strong>negrita</strong>, <em>cursiva</em>,
+         <code>algo de código</code> y
+         <a href="/web/santuarios/index_santuarios.html">un enlace</a></p>
+
+      <pre><code>un bloque de código
+      de varias líneas</code></pre>
+
+      <hr>
+
+      <figure>
+          <img src="/imagenes/blog/loquesea.webp" alt="qué se ve"
+               width="800" height="600" loading="lazy">
+          <figcaption>un pie</figcaption>
+      </figure>
+
+      <table>
+          <tr><th>Sistema</th><th>Sesiones</th></tr>
+          <tr><td>D&amp;D 5e</td><td>12</td></tr>
+      </table>
+
+  Tienes un ejemplo con TODO esto junto, comentado y listo para
+  copiar, en:
+
+      herramientas/ejemplo-formatos.html
+
+  (no es una página: es el trozo de dentro de una entrada. Para
+  verlo de verdad, crea una entrada de prueba, pégalo dentro y
+  ábrela en el navegador.)
+
+  Tres cosas que se resuelven solas y no tienes que vigilar:
+  una imagen ancha se ajusta al ancho del texto, un bloque de
+  código largo se desplaza dentro de su caja (no ensancha la
+  página) y una URL kilométrica se parte de línea.
+
+  El alt de una imagen: si la imagen aporta algo, descríbela; si
+  es puro adorno, déjalo vacío (alt="") y así no se lee.
+
+
+---------------------------------------------------------------
+  DÓNDE ESTÁ CADA COSA
+---------------------------------------------------------------
+
+  index.html ........... la portada
+  not_found.html ....... la página de "esto no existe" (404)
+
+  web/ ................. TODAS las páginas del sitio. Cada una en
+                         su carpeta: web/blog/, web/santuarios/,
+                         web/mis_movidas/, web/sobre_mi/...
+                         Es lo que se ve en la dirección del
+                         navegador, así que estos nombres no se
+                         tocan salvo que quieras romper enlaces.
+
+  estilos/ ............. cómo se ve todo
+      base.css             lo común a todas las páginas (colores,
+                           tipografías, tamaños)
+      base.responsive.css  lo mismo, en pantallas pequeñas
+      componentes/         piezas que salen en varias páginas: la
+                           barra lateral, el aviso, el visor de
+                           fotos, los filtros, las cabeceras de
+                           ventana, las frases de abajo
+      paginas/             una hoja por página (portada, blog,
+                           relatos...). La que acaba en
+                           .responsive.css es la de móvil de esa
+                           misma página, al lado de la suya.
+
+  scripts/ ............. lo que se mueve
+      cargador-scripts.js  decide qué scripts carga cada página
+                           (el CSS ya no: sus <link> van escritos en
+                           el <head>, ver actualizar-cabeceras.py)
+      tema.js              el cambio entre modo claro y oscuro
+      componentes/         lo que usan varias páginas (barra
+                           lateral, filtros, visor de fotos,
+                           teclado, gatín aleatorio...)
+      paginas/             lo que usa una sola (el diario, el
+                           guestbook, los listados...)
+
+  fragmentos/ .......... trozos de HTML que se inyectan en todas
+                         las páginas: la barra lateral y las frases
+
+  datos/ ............... los listados que rellenan la web
+      entradas-blog.json      las entradas del blog
+      mis-movidas.json        rol y relatos
+      fotos-santuarios.json   las fotos de los gatos
+      NO se escriben a mano: los genera herramientas/ leyendo
+      las propias páginas (ver más abajo)
+
+  blog/rss.xml ......... el RSS, con TODO lo que publicas (blog,
+                         relatos y rol). Está suelto ahí y no en
+                         datos/ porque es una dirección pública: si
+                         la mueves, quien esté suscrito deja de
+                         recibir nada.
+
+  imagenes/ ............ todas las imágenes
+  tipografias/ ......... las letras (se sirven desde aquí, no
+                         desde Google)
+  herramientas/ ........ esta carpeta. Solo para ti: NO hace
+                         falta subirla a Neocities.
+
+
+---------------------------------------------------------------
+  QUÉ HACE CADA ARCHIVO
+---------------------------------------------------------------
+
+  LOS QUE USAS TÚ
+  ---------------
+  ejemplo-formatos.html  un ejemplo de todos los formatos de texto
+                        que admite una entrada, para copiar y pegar
+  nueva-entrada.py .... crea una entrada de blog o un relato
+                        (siempre como borrador)
+  publicar.py ......... publica un borrador, o despublica algo con
+                        --despublicar
+  nuevo-rol.py ........ añade una tarjeta al portfolio de rol
+  optimizar-imagenes.py  pasa imagenes/ a WebP y les quita los datos
+                        de dentro. Respeta el favicon y los SVG.
+  generar-galeria.py .. miniaturas + datos/fotos-santuarios.json
+
+  LOS QUE SE LLAMAN SOLOS
+  -----------------------
+  (los dos de arriba ya los ejecutan; solo los necesitas sueltos
+  si has tocado alguna página a mano)
+
+  generar-archivo.py .. crea web/blog/<año>/index_<año>.html con
+                        un bloque por mes, y mete el año en el
+                        menú lateral
+  generar-posts.py .... reescribe datos/entradas-blog.json y
+                        datos/mis-movidas.json leyendo las páginas
+  generar-rss.py ...... escribe blog/rss.xml desde datos/entradas-blog.json
+  generar-sitemap.py .. escribe sitemap.xml recorriendo los .html
+  tamanos-portada.py .. saca las versiones pequeñas del dibujo de la
+                        portada (el navegador se baja la que le hace
+                        falta: 45 KB en vez de 187 en un portátil
+                        normal). Solo si cambias el dibujo.
+  actualizar-cabeceras.py  escribe en el <head> de cada página la
+                        lista de CSS que le toca. Solo hace falta
+                        si creas o borras un archivo de estilos, o
+                        si cambias qué páginas usan cuál: eso se
+                        decide en la función hojas_de() de ese
+                        mismo archivo, que es el único sitio donde
+                        está escrito. Con --probar te dice qué
+                        cambiaría sin tocar nada.
+
+  LAS PLANTILLAS
+  --------------
+  plantillas/entrada-blog.html .. de dónde sale una entrada nueva
+  plantillas/entrada-relato.html  ídem para los relatos
+  plantillas/tarjeta-rol.html ... la tarjeta del portfolio
+  plantillas/archivo-anyo.html .. la página del archivo de un año
+  plantillas/archivo-mes.html ... el bloque de un mes dentro de ella
+
+  Si quieres cambiar cómo NACE una entrada (añadir un apartado,
+  quitar la imagen de la derecha...), se cambia en la plantilla,
+  no en el script.
+
+  originales-sustituidas/ ....... copias de seguridad que deja
+                        optimizar-imagenes.py de las imágenes que
+                        sustituye. No hace falta subirla.
+
+
+---------------------------------------------------------------
+  CÓMO ESTÁ MONTADO ESTO (por si un día vuelves)
+---------------------------------------------------------------
+
+  LA PÁGINA MANDA. Los archivos .json NO se escriben a mano: se
+  reconstruyen leyendo las propias páginas. Por eso cada entrada
+  lleva sus datos dentro del HTML:
+
+      <article class="blog-post" data-tags="diario">
+      <article class="relato-post" data-subcategoria="microrelato">
+      <div class="portfolio-card" data-categoria="aventuras"
+                                  data-fecha="14-09-2026">
+
+  Eso mismo es lo que rellena las ventanas de filtros (filtros.lst)
+  del portfolio de rol y del listado de relatos: los botones NO
+  están escritos en el HTML, salen de las categorías que encuentran.
+  Por eso publicar algo con una categoría nueva la añade sola.
+
+  Si cambias el título o la fecha de una entrada, cámbialo en su
+  página y pasa generar-posts.py: el listado (datos/) se entera
+  solo.
+
+  Cuando lo ejecutes, te dice qué cambia respecto a lo que había
+  (lo que se añade, lo que se quita, lo que cambia de fecha). Si
+  alguna línea te sorprende, es que el JSON y el HTML decían
+  cosas distintas — gana la página.
+
+  Y si una página tiene el título o la fecha donde no toca, no la
+  mete en el listado en silencio: te dice cuál y por qué.
+
+
+---------------------------------------------------------------
+  DOS COSAS QUE VAN EN PAREJA
+---------------------------------------------------------------
+
+  Si algún día cambias el COLOR DE FONDO del sitio, hay que
+  tocarlo en tres sitios o el móvil se queda descuadrado:
+
+      estilos/base.css        --purple (el fondo de verdad)
+      scripts/tema.js         COLOR_BARRA (al pulsar el botón)
+      el <head> de las páginas <meta name="theme-color">
+
+  Ese meta es el color de la franja de arriba del navegador en el
+  móvil. Si no cuadra con el fondo, se ve una tira de otro color
+  pegada al borde de la pantalla.
+
+  Y si pones un ENLACE A OTRA WEB, ponle siempre:
+
+      target="_blank" rel="noopener noreferrer"
+
+  target abre la otra web en una pestaña nueva (así no te sacan
+  del sitio) y rel impide que esa web pueda tocar la tuya. Si el
+  enlace es un botón, añádele dentro:
+
+      <span class="visually-hidden"> (se abre en otra pestaña)</span>
+
+  Eso no se ve, pero quien usa lector de pantalla oye el aviso en
+  vez de encontrarse una ventana nueva sin saber por qué. En
+  herramientas/ejemplo-formatos.html hay un enlace de ejemplo.
+
+
+---------------------------------------------------------------
+  SI ALGO SALE MAL
+---------------------------------------------------------------
+
+  "Abro la página y se ve fatal, sin colores ni menú"
+      La estás abriendo con doble clic. Hay que levantar el
+      servidor: mira la sección de arriba, "VER LA WEB EN TU
+      ORDENADOR".
+
+  "He escrito la entrada pero no sale en ningún sitio"
+      Sigue siendo un borrador. Pásale publicar.py.
+
+  "No encuentro la plantilla..."
+      Estás ejecutando desde dentro de herramientas/. Sal a la
+      carpeta raíz.
+
+  "Falta la librería Pillow"
+      pip install pillow        (o: py -m pip install pillow)
+      Solo la necesitan optimizar-imagenes.py y generar-galeria.py.
+
+  "He creado un CSS nuevo y no se aplica"
+      Falta decir qué páginas lo llevan: añádelo en la función
+      hojas_de() de actualizar-cabeceras.py y ejecútala.
+
+  "Ya existe ... y no la voy a pisar"
+      Hay un archivo con ese nombre. Bórralo tú si quieres
+      empezar de cero, o cambia el título.
+
+  Publiqué algo y no sale en la web
+      Pasa generar-posts.py y mira lo que imprime: si la entrada
+      aparece en la lista, el problema está en otro sitio; si no
+      aparece, al final te dirá por qué se ha quedado fuera.
+
+  Quiero deshacer lo que ha hecho un script
+      Ninguno borra nada. Las páginas index_<año>.html sí se
+      reescriben enteras, pero se generan siempre igual: basta
+      con volver a ejecutar generar-archivo.py.

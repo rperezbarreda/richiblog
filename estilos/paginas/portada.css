@@ -1,0 +1,437 @@
+/* HOME */
+
+.home.home-page {
+    display: flex;
+    flex-direction: column;
+    /* .home trae align-items: center para su uso normal en grid: en
+       columna deja de estirar a los hijos al ancho del contenedor y
+       cada uno pasa a medir lo que mida su contenido. .home-content
+       ya fuerza width: 100% y hoy tapa el problema, pero sin este
+       reset explícito basta con que ese width desaparezca en un
+       cambio futuro para que vuelva el mismo bug que hubo en
+       contacto (ver estilos/paginas/contacto.css). */
+    align-items: stretch;
+    overflow: hidden;
+}
+
+.home-content {
+    display: grid;
+    /* Antes era "1fr auto": la columna de la derecha (las dos ventanas)
+       cogía todo lo que pedía y la de texto se quedaba en su min-width
+       de 300px, aunque la pantalla fuese de 1920. Con 300px, la palabra
+       "bienvenidos" a 75px pide 340 y se salía: como .info-column tiene
+       overflow-y: auto, el navegador le pone también overflow-x, así
+       que la recortaba por el lado derecho. Reservándole su sitio en la
+       rejilla cabe entera (mide 340 en el peor caso) y la otra columna
+       se queda con el resto. */
+    grid-template-columns: minmax(360px, 420px) 1fr;
+    align-items: stretch;
+    gap: 40px;
+    z-index: 3;
+    width: 100%;
+    min-width: 0;
+    min-height: 0;
+    flex: 1;
+    padding-left: 490px;
+    box-sizing: border-box;
+}
+
+/* El contenedor es lo que se posiciona: al ir en absoluto sin ancho
+   propio se encoge hasta el ancho del dibujo, así que el crédito de
+   dentro puede anclarse a su borde inferior y cae justo sobre la
+   ilustración, no en la esquina de la sección. */
+.pngperson-art {
+    position: absolute;
+    left: 0;
+    top: 0;
+    height: 100%;
+    z-index: 1;
+}
+
+.pngperson {
+    display: block;
+    height: 100%;
+    width: auto;
+}
+
+/* Crédito del dibujo: franja pegada a su borde inferior. El <img> no
+   admite contenido dentro, de ahí el contenedor de arriba. */
+.pngperson-credit {
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    /* Solo lo ancho que pida el texto (en pantallas anchas el dibujo
+       mide 500px y una franja de lado a lado quedaba casi vacía); si
+       no cabe, max-width lo devuelve a dos líneas. */
+    width: max-content;
+    max-width: 100%;
+    z-index: 2;
+}
+
+/* HOME — COLUMNA 2: INFO */
+
+.info-column {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    max-width: 420px;
+    min-width: 300px;
+    min-height: 0;
+    overflow-y: auto;
+}
+
+.info-column .home-title {
+    font-size: clamp(2.5rem, 4vw, 3.5rem);
+    letter-spacing: -3px;
+}
+
+.info-column .home-title em {
+    letter-spacing: -2px;
+}
+
+/* HOME — REDES SOCIALES (dentro de la columna 2) */
+
+.social-links {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 14px;
+    padding-top: 20px;
+    margin-top: 6px;
+    border-top: 2px solid var(--yellow);
+}
+
+.social-links-label {
+    color: var(--yellow);
+    font-family: Georgia, "Times New Roman", serif;
+    font-style: italic;
+    font-weight: 400;
+    font-size: 1.125rem;
+}
+
+/* Uno debajo de otro y a todo el ancho. En fila se quedaban dos
+   arriba y uno solo debajo (los tres no caben en los 420px de la
+   columna) y parecía un accidente; así además son el mismo botón que
+   en contacto. */
+.social-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    list-style: none;
+}
+
+/* En la portada los botones se quedan solo con el icono, así que sí
+   caben los tres en una fila y ocupan una cuarta parte de lo que
+   ocupaban. */
+.social-list-iconos {
+    flex-direction: row;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+
+.social-list-iconos .social-btn {
+    justify-content: center;
+    /* 44px: el mínimo que se recomienda para pulsar con el dedo. Sin
+       esto, un botón con solo un icono de 20px se queda en 38. */
+    width: 44px;
+    height: 44px;
+    padding: 0;
+}
+
+/* Botones de redes (portada y contacto; los dos cargan este archivo).
+   Van sin relleno y se rellenan al pasar por encima, como el botón de
+   descarga gratis de la ficha de rol: así el icono de cada red se ve
+   sobre el fondo de la página, con sus colores, en vez de sobre un
+   amarillo que le pelea. */
+.social-btn {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 14px;
+    border: 2px solid var(--yellow);
+    background: transparent;
+    color: var(--yellow);
+    font-family: "DM Mono", monospace;
+    font-size: 0.75rem;
+    text-decoration: none;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    transition: color 0.15s linear, background-color 0.15s linear, transform 0.15s ease;
+}
+
+.social-btn:hover,
+.social-btn:focus-visible {
+    color: var(--yellow-contrast);
+    background: var(--yellow);
+    transform: translateY(-2px);
+}
+
+.social-btn:focus-visible {
+    outline: 2px solid var(--yellow);
+    outline-offset: 3px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .social-btn {
+        transition: color 0.15s linear, background-color 0.15s linear;
+    }
+
+    .social-btn:hover,
+    .social-btn:focus-visible {
+        transform: none;
+    }
+}
+
+/* El icono no es una imagen: es un cuadrado del color del botón al que
+   el SVG le recorta la silueta (mask-image lo usa de plantilla, como un
+   sello). Por eso toma currentColor, que ya cambia con el tema y se
+   invierte al pasar el ratón por encima, sin tener que mantener una
+   versión clara y otra oscura de cada logo.
+   Para que funcione, el SVG tiene que ser de UNA sola tinta y sin
+   fondo: solo cuenta la forma, el color que traiga dentro da igual.
+   Si algún archivo falta, el icono no se ve y el botón se queda solo
+   con su texto — comprobado; no aparece ningún cuadrado suelto. */
+.social-btn-icon {
+    display: block;
+    flex-shrink: 0;
+    width: 20px;
+    height: 20px;
+    background-color: currentColor;
+    -webkit-mask-image: var(--social-icono);
+    mask-image: var(--social-icono);
+    -webkit-mask-repeat: no-repeat;
+    mask-repeat: no-repeat;
+    -webkit-mask-position: center;
+    mask-position: center;
+    -webkit-mask-size: contain;
+    mask-size: contain;
+}
+
+.social-btn-icon-bluesky {
+    --social-icono: url("/imagenes/social_media/bluesky.svg");
+}
+
+.social-btn-icon-ko-fi {
+    --social-icono: url("/imagenes/social_media/ko-fi.svg");
+}
+
+.social-btn-icon-goodreads {
+    --social-icono: url("/imagenes/social_media/goodreads.svg");
+}
+
+/* HOME — FILA: NUEVAS ENTRADAS + PROYECTOS MÁS NUEVOS */
+
+.entries-projects-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: stretch;
+    justify-content: center;
+    gap: 28px;
+    min-width: 0;
+    min-height: 0;
+    /* Cuando las dos ventanas no caben una al lado de otra, flex-wrap
+       las pone una debajo de otra — y el alto de una fila envuelta lo
+       manda su contenido, no el contenedor: no encogen aunque no quepan.
+       Con la sección a overflow: hidden, lo que sobraba se recortaba sin
+       más (medido: 64px en pantallas de 1901px de ancho o más y poco
+       alto, al pasar la lista de 3 a 6 entradas). Así lo que sobre se
+       puede alcanzar. */
+    overflow-y: auto;
+    align-content: start;
+}
+
+.recent-entries {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    flex: 1 1 360px;
+    max-width: 420px;
+    padding: 16px;
+    background: var(--purple-lighter);
+    border: 3px solid var(--yellow);
+    box-shadow: 6px 6px 0 var(--yellow);
+    overflow: hidden;
+}
+
+.recent-entries-body {
+    flex: 1;
+    min-height: 0;
+    max-height: none;
+    overflow-y: auto;
+    overflow-x: hidden;
+    overflow-anchor: none;
+    padding-right: 3px;
+    scrollbar-width: thin;
+    scrollbar-color: var(--purple) transparent;
+}
+
+.recent-entries-body:focus-visible {
+    outline: 2px solid var(--yellow);
+    outline-offset: 2px;
+}
+
+.recent-entries-body::-webkit-scrollbar {
+    width: 5px;
+}
+
+.recent-entries-body::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.recent-entries-body::-webkit-scrollbar-thumb {
+    background: var(--purple);
+    border-radius: 0;
+}
+
+.recent-entries-body::-webkit-scrollbar-thumb:hover {
+    background: var(--yellow);
+}
+
+.recent-entries::before,
+.projects-card::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background-image: var(--bg-texture);
+    background-size: 90px 90px;
+    background-repeat: repeat;
+    opacity: 0.35;
+    pointer-events: none;
+    z-index: 0;
+}
+
+.recent-entries > *,
+.projects-card > * {
+    position: relative;
+    z-index: 1;
+}
+
+/* HOME — PROYECTOS MÁS NUEVOS */
+
+.projects-card {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    flex: 1 1 400px;
+    max-width: 420px;
+    padding: 16px;
+    background: var(--purple-lighter);
+    border: 3px solid var(--yellow);
+    box-shadow: 6px 6px 0 var(--yellow);
+    overflow: hidden;
+}
+
+/* Lo de aquí abajo (progress-section-title, progress-items,
+   currently-item...) ya NO lo usa la portada — ahora la tarjeta de
+   arriba es una lista de entries-list como cualquier otra. Sigue
+   vivo porque web/sobre_mi/sobre_mi.html lo usa tal cual para la
+   ficha de personaje (compañeros, objetos mágicos). */
+
+.progress-section-title {
+    margin: 18px 0 10px;
+    color: var(--yellow);
+    font-family: "DM Mono", monospace;
+    font-size: 0.6875rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.progress-section-title:first-child {
+    margin-top: 0;
+}
+
+.progress-items {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.currently-item {
+    padding: 10px 12px;
+    background: var(--purple);
+    border: 1px solid var(--yellow);
+    font-family: "DM Mono", monospace;
+}
+
+.currently-item-header {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 6px;
+}
+
+.currently-badge {
+    padding: 2px 8px;
+    background: var(--yellow);
+    color: var(--yellow-contrast);
+    border: 1px solid var(--yellow);
+    border-bottom: 0;
+    font-size: 0.5625rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.currently-title {
+    margin-bottom: 4px;
+    margin-left: 12px;
+    color: var(--white);
+    font-size: 0.8125rem;
+    font-weight: 500;
+    line-height: 1.25;
+}
+
+.progress-bar {
+    height: 4px;
+    margin: 6px 0 6px 12px;
+    background: var(--purple-lighter);
+    overflow: hidden;
+}
+
+.progress-bar-fill {
+    height: 100%;
+    background: var(--yellow);
+}
+
+.currently-meta {
+    display: block;
+    margin-left: 12px;
+    color: var(--muted);
+    font-size: 0.5rem;
+}
+
+.currently-meta a {
+    color: var(--yellow);
+    text-decoration: underline;
+}
+
+/* En escritorio con espacio de sobra: ventanas más anchas y su
+   contenido repartido en dos columnas, para aprovechar mejor el
+   alto disponible en vez de crecer indefinidamente hacia abajo.
+   El ritmo vertical va algo más apretado que en el resto del sitio a
+   propósito: aquí las dos ventanas van una encima de otra (a 1920px la
+   columna mide 604 y no caben lado a lado), así que cada píxel que se
+   ahorra es un píxel que no hay que desplazar. */
+@media (min-width: 1500px) {
+    .entries-projects-row {
+        gap: 22px;
+    }
+
+    .entries-projects-row .recent-entries,
+    .entries-projects-row .projects-card {
+        max-width: 560px;
+    }
+
+    .entries-projects-row .entries-list {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 10px 20px;
+    }
+
+    .entries-projects-row .entry-preview {
+        padding-bottom: 7px;
+    }
+}

@@ -1,0 +1,164 @@
+/* PÁGINA DE ACCESIBILIDAD */
+
+/* .home viene con display: grid y align-items: center, que en una
+   página larga como esta centra el bloque entero y deja la parte de
+   arriba fuera de alcance (pasó lo mismo en sobre mí). Aquí se
+   endereza: columna, pegado arriba, y que scrollee. */
+.acc-page {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    /* La regla general de <section> en base.css trae
+       justify-content: center. En una columna que scrollea eso deja el
+       principio POR ENCIMA del borde de arriba, y no hay forma de
+       llegar a él: el título se quedaba fuera. */
+    justify-content: flex-start;
+    padding: 36px 4% 48px;
+}
+
+.acc-page .home-title {
+    flex: 0 0 auto;
+    font-size: clamp(2.5rem, 6vw, 5rem);
+    /* El título de esta página es la palabra más larga del sitio: con
+       el interletrado negativo de .home-title las letras se montaban
+       entre sí a tamaño grande. */
+    letter-spacing: -3px;
+}
+
+.acc-intro {
+    max-width: 62ch;
+    margin: 18px 0 30px;
+    color: var(--white);
+    font-size: 0.9375rem;
+    line-height: 1.8;
+}
+
+/* Columnas de verdad (column-count) y no una rejilla. Con rejilla, cada
+   fila mide lo que el bloque más alto de esa fila, y como "teclado.cfg"
+   es el doble de largo que sus vecinos quedaban dos huecos enormes en
+   medio de la página. Así los bloques caen uno detrás de otro y llenan
+   la columna; break-inside evita que uno se parta por la mitad entre
+   dos columnas. */
+.acc-bloques {
+    column-count: 3;
+    column-gap: 24px;
+    max-width: 1500px;
+}
+
+/* Umbral medido: por debajo de esto, tres columnas dejan cada bloque
+   en 255px y las listas salen a dos o tres palabras por línea. Con dos
+   se quedan en 390 y se leen. */
+@media (max-width: 1420px) {
+    .acc-bloques {
+        column-count: 2;
+    }
+}
+
+@media (max-width: 780px) {
+    .acc-bloques {
+        column-count: 1;
+    }
+}
+
+/* El marco va escrito aquí y no reutilizando .recent-entries: esa clase
+   vive en paginas/portada.css, que esta página no carga. La cabecera sí se
+   hereda, porque .recent-entries-header está en la base
+   (components/cabecera-ventana.css), y su margen negativo de -16px cuadra
+   con este padding. */
+.acc-bloque {
+    /* Cada bloque es un <section>, y la regla general de base.css deja a
+       los <section> con height: 100%, scroll propio y contenido
+       centrado: sin esto se estiraban a la altura del más largo. */
+    display: block;
+    height: auto;
+    overflow: visible;
+    /* Que no se parta por la mitad entre dos columnas. */
+    break-inside: avoid;
+    margin-bottom: 24px;
+    padding: 16px;
+    background: var(--purple-lighter);
+    border: 3px solid var(--yellow);
+    box-shadow: 6px 6px 0 var(--yellow);
+}
+
+.acc-bloque-cuerpo {
+    margin-top: 14px;
+    color: var(--white);
+    font-size: 0.875rem;
+    line-height: 1.75;
+}
+
+.acc-bloque-cuerpo p {
+    margin-bottom: 12px;
+}
+
+.acc-lista {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    list-style: none;
+}
+
+/* La viñeta se dibuja a mano para que sea del amarillo del sitio y no
+   del color del texto. Va en ::before y marcada como decorativa por el
+   propio CSS (el contenido generado no lo anuncian los lectores de
+   pantalla), que es justo lo que queremos: el lector ya dice "elemento
+   de lista". */
+.acc-lista li {
+    position: relative;
+    padding-left: 22px;
+}
+
+.acc-lista li::before {
+    content: "▸";
+    position: absolute;
+    top: 0;
+    left: 0;
+    color: var(--yellow);
+}
+
+.acc-bloque-cuerpo strong {
+    color: var(--yellow);
+    font-weight: 500;
+}
+
+.acc-bloque-cuerpo kbd {
+    padding: 1px 6px;
+    border: 1px solid var(--yellow);
+    color: var(--yellow);
+    font-family: "DM Mono", monospace;
+    font-size: 0.75rem;
+}
+
+.acc-enlace {
+    color: var(--yellow);
+    /* Subrayado además del color: quien no distingue bien el amarillo
+       del blanco tiene que poder ver que ahí hay un enlace. */
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    overflow-wrap: anywhere;
+}
+
+.acc-enlace:hover,
+.acc-enlace:focus-visible {
+    color: var(--white);
+}
+
+.acc-enlace:focus-visible {
+    outline: 2px solid var(--yellow);
+    outline-offset: 2px;
+}
+
+@media (max-width: 860px) {
+    .acc-page {
+        padding: 24px 6% 40px;
+    }
+
+    .acc-intro {
+        margin: 14px 0 24px;
+    }
+
+    .acc-bloque {
+        margin-bottom: 20px;
+    }
+}

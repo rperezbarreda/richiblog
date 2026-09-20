@@ -1,0 +1,814 @@
+/* BLOG — ARCHIVO DEL AÑO */
+
+/* El archivo era una rejilla fija de dos columnas con un <details>
+   por mes: había que abrir cada uno para ver nada y sobraba media
+   ventana vacía. Ahora los meses van siempre abiertos, en columnas
+   que se reparten el ancho disponible, y la página no scrollea: el
+   scroll vive dentro de la lista de cada mes. */
+.blog-archive-page {
+    display: flex;
+    flex-direction: column;
+    /* .home trae align-items: center, que en columna centra en
+       horizontal y deja cada hijo del ancho de su contenido: sin esto
+       la rejilla de meses se queda en una tira estrecha en el centro. */
+    align-items: stretch;
+    padding: 36px 4% 40px;
+    overflow: hidden;
+}
+
+.blog-archive-page .home-title {
+    flex: 0 0 auto;
+    font-size: clamp(3.25rem, 6vw, 5.5rem);
+}
+
+.blog-archive-year {
+    flex: 0 0 auto;
+    margin-top: 4px;
+    margin-bottom: 28px;
+    color: var(--muted);
+    font-family: "DM Mono", monospace;
+    font-size: 1rem;
+    letter-spacing: 2px;
+}
+
+/* Botón del feed, al final de la página. Mismo trato que los botones
+   del resto del sitio (amarillo macizo que se vacía al pasar por
+   encima): así se ve a la primera, en vez del enlace pequeño que
+   tenía antes junto al año. El archivo lo genera
+   herramientas/generar-rss.py a partir de los dos listados de
+   datos/: lleva el blog, los relatos y el portfolio de rol. */
+/* Sin esto el botón se seguiría viendo aunque lleve "hidden": una
+   regla con display gana a la del navegador para [hidden]. Es el mismo
+   caso que .portfolio-card[hidden] al filtrar. */
+.blog-feed-button[hidden] {
+    display: none;
+}
+
+.blog-feed-button {
+    display: inline-flex;
+    align-self: flex-start;
+    align-items: center;
+    flex: 0 0 auto;
+    margin-top: 24px;
+    padding: 10px 20px;
+    border: 2px solid var(--yellow);
+    background: var(--yellow);
+    color: var(--yellow-contrast);
+    font-family: "DM Mono", monospace;
+    font-size: 0.8125rem;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    text-decoration: none;
+    transition: color 0.15s linear, background-color 0.15s linear;
+}
+
+.blog-feed-button:hover,
+.blog-feed-button:focus-visible {
+    color: var(--yellow);
+    background: transparent;
+}
+
+.blog-feed-button:focus-visible {
+    outline: 2px solid var(--yellow);
+    outline-offset: 3px;
+}
+
+/* Las columnas se reparten solas según el ancho que haya, y cada mes
+   ocupa lo que ocupe su lista — nada de tarjetas estiradas a pantalla
+   completa con dos entradas dentro. Quien scrollea cuando hay muchos
+   meses es la rejilla, no la página. */
+.blog-months {
+    flex: 1 1 auto;
+    min-height: 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    align-content: start;
+    align-items: start;
+    gap: 22px;
+    padding-bottom: 8px;
+    overflow-y: auto;
+}
+
+/* Misma "ventana falsa" que las tarjetas del resto del sitio
+   (.recent-entries): cabecera con barra y botones −■✕ generados por
+   botones-ventana.js. Padding a 16px en las cuatro esquinas porque
+   .recent-entries-header se coloca con márgenes negativos de -16px
+   pensados para encajar justo con ese padding — si aquí se cambia,
+   hay que tocarlo también en la cabecera o deja de cuadrar en los
+   bordes. */
+.blog-month {
+    /* Cada mes es un <section>, y la regla general de base.css deja a
+       los <section> con height: 100%, scroll propio y el contenido
+       centrado en vertical. Dentro de la rejilla eso hacía que un mes
+       con dos entradas se estirase hasta la altura del mes más largo y
+       colocase su cabecera flotando por el centro. Aquí se deshace:
+       cada mes vuelve a medir lo que mide su lista. */
+    display: block;
+    height: auto;
+    overflow: visible;
+    padding: 16px;
+    background: var(--purple-lighter);
+    border: 3px solid var(--yellow);
+    box-shadow: 6px 6px 0 var(--yellow);
+}
+
+.blog-month .entries-list {
+    margin-top: 2px;
+}
+
+/* BLOG — ENTRADA INDIVIDUAL */
+
+.blog-post-page {
+    display: flex;
+    flex-direction: column;
+    /* Mismo reset que .blog-archive-page y .home.contact-page más
+       abajo/en contacto.css: .home trae align-items: center, y en
+       columna eso deja a los hijos sin estirar al ancho del
+       contenedor. .blog-post ya fuerza width: 100% y hoy tapa el
+       problema, pero el reset explícito evita que vuelva si ese
+       width cambia. */
+    align-items: stretch;
+    overflow: hidden;
+    /* Sin margen: la entrada ocupa hasta el borde, ver más abajo por
+       qué (body:has(.blog-post-page) main). */
+    padding: 0;
+}
+
+/* En el resto del sitio "main" es una tarjeta flotante con margen
+   alrededor, que deja ver el fondo con textura. En una entrada de
+   blog eso es puro espacio desperdiciado alrededor del texto: aquí
+   "main" pasa a ocupar todo el hueco disponible junto al sidebar
+   (nada de margen ni borde propio — el marco de "ventana falsa" lo
+   sigue poniendo .blog-post, pero ahora pegado a los bordes de la
+   pantalla en vez de flotando con hueco alrededor). */
+body:has(.blog-post-page) main {
+    background: transparent;
+    border: none;
+    box-shadow: none;
+}
+
+/* El margen a pantalla completa (pegado al sidebar fijo de 280px) es
+   cosa de escritorio: en móvil el sidebar pasa a ser un cajón que no
+   ocupa espacio propio, así que aquí se usaría el mismo margen fijo
+   de 280px sin sidebar de verdad detrás. La regla de
+   estilos/paginas/blog.responsive.css que devuelve blog-post-page a un
+   layout normal ya está pensada para el corte de 860px — este mismo
+   corte evita que estas dos reglas se lleven la contraria. */
+@media (min-width: 861px) {
+    body:has(.blog-post-page) main {
+        margin: 0 0 0 280px;
+        width: calc(100% - 280px);
+    }
+}
+
+.blog-post-back {
+    display: inline-flex;
+    flex-shrink: 0;
+    padding: 6px 14px;
+    /* Va sobre la barra amarilla de la cabecera, no sobre el cuerpo, así
+       que lleva los colores invertidos: relleno oscuro y texto claro.
+       En hueco se leía bien, pero relleno destaca como el botón que es
+       y no se confunde con el título. */
+    border: 2px solid var(--yellow-contrast);
+    background: var(--yellow-contrast);
+    color: var(--yellow);
+    font-family: "DM Mono", monospace;
+    font-size: 0.75rem;
+    text-decoration: none;
+    transition: color 0.15s linear, background-color 0.15s linear;
+}
+
+.blog-post-back:hover,
+.blog-post-back:focus-visible {
+    color: var(--yellow-contrast);
+    background: transparent;
+}
+
+.blog-post-back:focus-visible {
+    outline: 2px solid var(--yellow-contrast);
+    outline-offset: 3px;
+}
+
+/* Atajo al diario en calendario, al lado del de volver. Mismo botón,
+   con el icono delante. */
+.blog-post-cal {
+    align-items: center;
+    gap: 7px;
+}
+
+.blog-post-cal-icono {
+    display: block;
+    flex-shrink: 0;
+    width: 0.9rem;
+    height: 0.9rem;
+}
+
+.blog-post {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-height: 0;
+    width: 100%;
+    background: var(--purple-lighter);
+    border: 3px solid var(--yellow);
+    box-shadow: 6px 6px 0 var(--yellow);
+    overflow: hidden;
+}
+
+.blog-post::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background-image: var(--bg-texture);
+    background-size: 90px 90px;
+    background-repeat: repeat;
+    opacity: 0.35;
+    pointer-events: none;
+    z-index: 0;
+}
+
+.blog-post-header {
+    position: relative;
+    z-index: 1;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 14px 20px;
+    background: var(--yellow);
+    user-select: none;
+}
+
+.blog-post-header-meta {
+    display: flex;
+    align-items: center;
+    flex-shrink: 0;
+    gap: 14px;
+}
+
+.blog-post-title {
+    flex: 1;
+    min-width: 0;
+    margin: 0;
+    color: var(--yellow-contrast);
+    font-family: "Jersey 10", "DM Mono", monospace;
+    font-weight: 400;
+    font-size: clamp(1.75rem, 3.2vw, 2.25rem);
+    letter-spacing: 0.3px;
+    line-height: 1.2;
+}
+
+.blog-post-body-wrap {
+    position: relative;
+    z-index: 1;
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    padding: 28px 32px;
+}
+
+/* Pangolin es la fuente del texto de la entrada, y solo de eso: el
+   pie (fecha y "volver al archivo") se queda en DM Mono, que es la
+   fuente de interfaz del sitio. */
+.blog-post-body {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    max-width: 720px;
+    color: var(--white);
+    font-family: "Pangolin", "Space Grotesk", sans-serif;
+    font-size: 1rem;
+    line-height: 1.7;
+}
+
+.blog-post-date {
+    margin: 0;
+    color: var(--yellow-contrast);
+    font-family: "DM Mono", monospace;
+    font-size: 0.75rem;
+    letter-spacing: 1px;
+    white-space: nowrap;
+}
+
+/* ==== IMAGEN LATERAL DE LA ENTRADA ==== */
+
+.blog-post-layout {
+    display: flex;
+    align-items: flex-start;
+    gap: 32px;
+    /* Centrado y con tope. Sin esto, en una pantalla de 1920 el texto y
+       la imagen se quedaban pegados a la izquierda y sobraban 590px de
+       fondo a la derecha: un 36% del ancho vacío. Ensanchar el texto no
+       es la solución (ya va a 81 caracteres por línea, en el límite de
+       lo cómodo de leer), así que lo que se hace es centrar el bloque y
+       dejar que la imagen crezca un poco. */
+    max-width: 1100px;
+    margin: 0 auto;
+}
+
+/* min-width: 0 para que pueda encoger: sin esto, el mínimo automático
+   de un hijo flex es su contenido y la imagen acabaría empujando el
+   texto fuera de la caja. */
+.blog-post-layout .blog-post-body {
+    flex: 1 1 auto;
+    min-width: 0;
+}
+
+/* Se queda quieta mientras el texto se desplaza. El "sticky" va
+   referido a .blog-post-body-wrap, que es quien tiene el scroll en
+   escritorio. */
+.blog-post-side {
+    position: sticky;
+    top: 0;
+    /* Y se queda quieta DE VERDAD: con position: sticky, una columna
+       más alta que el hueco visible se desplaza igual hasta enseñar su
+       final (medido: la del blog mide 850px contra 811 de hueco en una
+       ventana de 900, y subía 71px al desplazar el texto). El tope la
+       deja siempre dentro del hueco y lo que cede es la imagen, ver
+       .blog-post-aside. Los 150px descontados son el marco de la
+       página —márgenes de main, borde y barra de título, entre 89 y
+       92— MÁS los 56 de relleno de arriba y abajo del cuerpo. Sin esa
+       segunda parte la columna medía justo lo que el hueco visible y
+       entre las dos cosas sobraban 35px: la página se desplazaba esos
+       35px y la columna, que era lo más alto de la fila, se iba con
+       ellos (no había recorrido donde quedarse pegada). Con el tope
+       así, una entrada corta no se desplaza en absoluto. */
+    max-height: calc(100vh - 150px);
+    /* Crece con la ventana entre 260 y 340px: en pantallas anchas 260
+       se quedaba pequeña al lado de un texto de 720. */
+    flex: 0 0 clamp(260px, 20vw, 340px);
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+/* La imagen es lo elástico de la columna: si la columna no cabe
+   entera, encoge (recortando por arriba y por abajo con object-fit)
+   en vez de dejar que la columna se desplace. El mínimo es para que
+   no acabe convertida en una rendija. */
+.blog-post-aside {
+    display: flex;
+    flex-direction: column;
+    flex: 0 1 auto;
+    min-height: 0;
+    margin: 0;
+}
+
+/* La ventana de "sigue leyendo" llena el hueco que quedaba debajo de la
+   imagen mientras se lee. Se alimenta sola del mismo JSON que los
+   listados (ver scripts/paginas/otras-entradas.js).
+   El recuadro va escrito aquí y no reutilizando .recent-entries como en
+   la portada: esa clase vive en paginas/portada.css, que estas páginas no
+   cargan, así que la tarjeta salía sin fondo ni borde — un encabezado
+   suelto flotando sobre el texto. La cabecera sí se hereda, porque
+   .recent-entries-header está en la base (components/cabecera-ventana.css),
+   y su margen negativo de -16px cuadra con el padding de aquí. */
+.blog-post-otras {
+    position: relative;
+    flex: none;
+    padding: 16px;
+    background: var(--purple);
+    border: 3px solid var(--yellow);
+    box-shadow: 4px 4px 0 var(--yellow);
+}
+
+.blog-post-otras .entries-list {
+    gap: 10px;
+}
+
+.blog-post-aside img {
+    display: block;
+    width: 100%;
+    height: auto;
+    flex: 0 1 auto;
+    min-height: 140px;
+    object-fit: cover;
+    border: 3px solid var(--yellow);
+    box-shadow: 4px 4px 0 var(--yellow);
+}
+
+.blog-post-aside figcaption {
+    margin-top: 12px;
+    color: var(--muted);
+    font-family: "DM Mono", monospace;
+    font-size: 0.6875rem;
+    line-height: 1.5;
+}
+
+/* Por debajo de 1150px la columna no cabe sin estrangular el texto: a
+   860px de ventana al párrafo le quedarían 139px de ancho. Medido el
+   límite en que el texto conserva unos 420px, que es lo mínimo para
+   leer con gusto. A partir de ahí la imagen se va arriba, a lo ancho y
+   sin quedarse fija (fija en una pantalla pequeña se come media
+   ventana). */
+@media (max-width: 1150px) {
+    .blog-post-layout {
+        flex-direction: column;
+        /* En fila, align-items: flex-start (más arriba) deja que cada
+           columna mida lo suyo. Apilado eso pasa a ser el ANCHO, así que
+           el texto dejaba de estirarse al hueco y se quedaba con el ancho
+           de lo más ancho que llevara dentro: con un bloque de código o
+           una tabla, 720px dentro de una pantalla de 390 y el texto
+           cortado por la derecha. Medido. */
+        align-items: stretch;
+    }
+
+    /* Apilada, la columna se va al final: en un móvil lo que se viene a
+       hacer es leer, y tener que pasar la imagen y la lista de "sigue
+       leyendo" antes de llegar al primer párrafo estorba. Al quitar el
+       order queda donde ya estaba en el HTML, que es después del texto
+       — así que el orden visual y el de lectura vuelven a coincidir. */
+    .blog-post-side {
+        position: static;
+        flex: none;
+        align-self: center;
+        width: 100%;
+        max-width: 420px;
+        margin-top: 8px;
+    }
+
+    .blog-post-aside figcaption {
+        text-align: center;
+    }
+}
+
+/* Si la ventana es MUY baja, la columna no cabe ni con la imagen
+   encogida al mínimo (140 de imagen + pie + "sigue leyendo" = 549px,
+   contra los 548 de hueco que deja una ventana de 640). Ahí se
+   desactiva el pegado y la columna baja con el texto, que siempre se
+   puede desplazar. El corte estaba en 790px, de cuando la imagen no
+   encogía; medido de nuevo, ahora aguanta pegada hasta los 700. */
+@media (max-height: 660px) {
+    .blog-post-side {
+        position: static;
+    }
+}
+
+/* ==== ETIQUETAS Y FILTRO ==== */
+
+.blog-tags {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.blog-tags[hidden] {
+    display: none;
+}
+
+/* El botón del desplegable solo existe en móvil (ver
+   blog.responsive.css): aquí, en escritorio, las etiquetas se ven todas
+   en fila y no hace falta. */
+.blog-tags-toggle {
+    display: none;
+}
+
+.blog-tags-label {
+    color: var(--muted);
+    font-family: "DM Mono", monospace;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.blog-tags-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.blog-tag-btn {
+    padding: 6px 14px;
+    border: 2px solid var(--yellow);
+    background: transparent;
+    color: var(--yellow);
+    font-family: "DM Mono", monospace;
+    font-size: 0.75rem;
+    letter-spacing: 0.5px;
+    transition: color 0.15s linear, background-color 0.15s linear;
+}
+
+.blog-tag-btn:hover {
+    color: var(--yellow-contrast);
+    background: var(--yellow);
+}
+
+/* El filtro activo se marca con aria-pressed, que es lo que anuncia un
+   lector de pantalla, y el CSS se cuelga de ese mismo atributo: así no
+   hay forma de que lo que se ve y lo que se lee se desincronicen. */
+.blog-tag-btn[aria-pressed="true"] {
+    color: var(--yellow-contrast);
+    background: var(--yellow);
+}
+
+.blog-tag-btn:focus-visible {
+    outline: 2px solid var(--yellow);
+    outline-offset: 3px;
+}
+
+/* .entry-preview-tags y .entry-tag se mudaron a estilos/base.css: estaban
+   aquí, y la portada no carga blog.css, así que allí las etiquetas
+   salían sin estilo — a tamaño de texto normal y sin recuadro. */
+
+.blog-month[hidden] {
+    display: none;
+}
+
+/* BLOG — DIARIO EN CALENDARIO */
+
+/* La barra del mes, ya dentro de la ventana: los dos botones pegados al
+   nombre del mes y el grupo centrado. Antes iba a lo ancho de la página
+   con los botones en los extremos, y había que cruzar media pantalla
+   con la vista para saber qué mes se estaba cambiando. */
+.diario-barra {
+    display: flex;
+    flex: 0 0 auto;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin: 14px 0 12px;
+}
+
+.diario-nav {
+    flex: 0 0 auto;
+    padding: 6px 11px;
+    border: 2px solid var(--yellow);
+    background: transparent;
+    color: var(--yellow);
+    font-family: "DM Mono", monospace;
+    font-size: 0.6875rem;
+    text-transform: lowercase;
+    letter-spacing: 0.5px;
+    cursor: pointer;
+    transition: color 0.15s linear, background-color 0.15s linear;
+}
+
+.diario-nav:hover:enabled,
+.diario-nav:focus-visible:enabled {
+    background: var(--yellow);
+    color: var(--yellow-contrast);
+}
+
+.diario-nav:focus-visible {
+    outline: 2px solid var(--yellow);
+    outline-offset: 3px;
+}
+
+/* En los extremos el botón se apaga en vez de desaparecer: si cambiara
+   de sitio, el foco del teclado daría un salto. Se deja el borde
+   visible para que se siga entendiendo que ahí hay un botón, solo que
+   no lleva a ninguna parte. */
+.diario-nav:disabled {
+    border-color: var(--muted);
+    color: var(--muted);
+    cursor: default;
+}
+
+.diario-mes {
+    /* Sin flex: 1 — creciendo, empujaba los botones a los extremos. */
+    flex: 0 0 auto;
+    /* Ancho fijo con hueco de sobra: el mes más largo es "septiembre de
+       2026" (18 caracteres) y el más corto "mayo de 2026" (12). Sin un
+       mínimo, la barra encogía y crecía al cambiar de mes y los botones
+       bailaban de sitio. */
+    min-width: 23ch;
+    padding: 0 12px;
+    text-align: center;
+    color: var(--white);
+    font-family: "DM Mono", monospace;
+    font-size: 0.875rem;
+    letter-spacing: 1px;
+}
+
+/* Calendario a la izquierda y la lista del mes a la derecha. Quien
+   scrollea es esto, no la página: .blog-archive-page está a
+   overflow: hidden. */
+.diario-cuerpo {
+    flex: 1 1 auto;
+    min-height: 0;
+    display: flex;
+    /* Las dos ventanas del mismo alto: la lista sola, con dos entradas,
+       se quedaba como un recorte flotando al lado de un calendario
+       enorme. Lo que sobre por dentro lo absorbe el scroll de la propia
+       lista. */
+    align-items: stretch;
+    gap: 26px;
+    overflow-y: auto;
+    padding-bottom: 8px;
+}
+
+/* La ventana del calendario. Mismo marco que .diario-lista y que
+   .blog-post-otras, escrito aquí porque .recent-entries vive en
+   paginas/portada.css y esta página no la carga. Los 16px de padding cuadran
+   con el margen negativo de .recent-entries-header. */
+.diario-ventana {
+    /* El lado de una casilla. Sale del alto de la ventana además del
+       ancho, para que el calendario entero quepa en pantalla sin
+       scroll: en un portátil bajito manda la altura (6vh) y en un
+       monitor grande manda el tope de 56px, para que no salgan
+       cuadrados enormes. Medido en 1920x1080, 1600x900, 1440x900,
+       1366x768 y 1280x720. */
+    --dia: clamp(34px, min(5.6vw, 7vh), 74px);
+    flex: 0 0 auto;
+    padding: 16px;
+    /* Fondo oscuro (el mismo del papel), no --purple-lighter: las líneas
+       de la rejilla del calendario SON --purple-lighter, así que sobre un
+       fondo de ese color desaparecían y el mes se quedaba sin cuadrícula.
+       Mismo criterio que .blog-post-otras. */
+    background: var(--purple);
+    border: 3px solid var(--yellow);
+    box-shadow: 6px 6px 0 var(--yellow);
+}
+
+/* El calendario, centrado dentro de la ventana: la barra del mes es un
+   pelín más ancha que la tabla, así que sin esto la rejilla se quedaba
+   pegada a la izquierda con un hueco a la derecha. */
+.diario-calendario {
+    flex: 1 1 auto;
+    min-width: 0;
+    display: flex;
+    justify-content: center;
+}
+
+.diario-tabla {
+    /* Siete casillas de lado fijo, no el ancho que sobre: así el
+       calendario mide lo mismo tenga la ventana el tamaño que tenga. */
+    width: calc(var(--dia) * 7);
+    border-collapse: collapse;
+    /* Todas las columnas iguales aunque un día lleve un "×2" detrás:
+       si no, la semana con dos entradas sale más ancha que las demás. */
+    table-layout: fixed;
+}
+
+.diario-tabla th {
+    padding-bottom: 10px;
+    color: var(--muted);
+    font-family: "DM Mono", monospace;
+    font-size: 0.75rem;
+    font-weight: 400;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+}
+
+/* El <abbr> trae subrayado de puntos y un cursor de interrogación por
+   defecto; aquí solo está para que el lector de pantalla diga "lunes"
+   en vez de "L". */
+.diario-tabla abbr {
+    text-decoration: none;
+    cursor: inherit;
+}
+
+.diario-dia {
+    position: relative;
+    /* Cuadradas y del tamaño que diga --dia. */
+    width: var(--dia);
+    height: var(--dia);
+    padding: 0;
+    border: 2px solid var(--purple-lighter);
+    vertical-align: top;
+}
+
+/* Casilla de relleno: fuera del mes. Lleva también .diario-dia para
+   quedarse del mismo tamaño — sin eso, una fila entera de relleno (la
+   sexta, en los meses cortos) se quedaba sin altura y el calendario
+   volvía a medir distinto según el mes. */
+.diario-hueco {
+    border: 0;
+}
+
+/* El número va centrado en la casilla y bastante grande: es lo único
+   que hay que leer de un calendario, y antes estaba de refilón en una
+   esquina. En un día con entrada, el recuadro marcado es SOLO el
+   número, no la casilla entera: con la casilla pintada el mes parecía
+   un tablero de ajedrez y no se distinguía de un día seleccionado. */
+.diario-numero {
+    font-family: "DM Mono", monospace;
+    /* Crece y encoge con la casilla: a tamaño fijo, en una ventana baja
+       el número no cabía en su cuadrito. */
+    font-size: clamp(0.8125rem, calc(var(--dia) * 0.33), 1.0625rem);
+    line-height: 1;
+}
+
+.diario-vacio .diario-numero,
+.diario-enlace {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.diario-vacio .diario-numero {
+    color: var(--muted);
+}
+
+.diario-enlace {
+    gap: 3px;
+    /* Casi toda la casilla, dejando un respiro por los lados. */
+    min-width: calc(var(--dia) - 9px);
+    min-height: calc(var(--dia) - 9px);
+    padding: 2px 5px;
+    border: 2px solid var(--yellow);
+    background: var(--purple-lighter);
+    color: var(--yellow);
+    text-decoration: none;
+    transition: color 0.15s linear, background-color 0.15s linear;
+}
+
+.diario-enlace:hover,
+.diario-enlace:focus-visible {
+    background: var(--yellow);
+    color: var(--yellow-contrast);
+}
+
+.diario-enlace:focus-visible {
+    outline: 2px solid var(--yellow);
+    outline-offset: 2px;
+}
+
+.diario-cuantas {
+    align-self: flex-start;
+    font-family: "DM Mono", monospace;
+    font-size: 0.625rem;
+    line-height: 1.2;
+}
+
+/* Hoy, marcado sin depender solo del color. */
+.diario-hoy {
+    outline: 2px dashed var(--yellow);
+    outline-offset: -6px;
+}
+
+/* Mismo caso que .blog-post-otras: .recent-entries vive en
+   paginas/portada.css, que esta página no carga, así que el marco se escribe
+   aquí. Los 16px de padding cuadran con el margen negativo de
+   .recent-entries-header (components/cabecera-ventana.css). */
+/* max-height y scroll propio: si algún mes tiene muchas entradas, la
+   lista se queda dentro de su ventana en vez de estirar la fila y
+   obligar al calendario a encogerse para caber. */
+/* Diario a cero: sin lista al lado ni meses que pasar, la ventana se
+   queda del tamaño del mensaje en vez de estirarse a toda la pantalla
+   (arriba hay align-items: stretch, que con una sola frase dentro
+   dejaba un marco vacío enorme). La clase la pone diario.js. */
+.diario-cuerpo-vacio {
+    align-items: flex-start;
+    overflow-y: visible;
+}
+
+.diario-sin-nada {
+    max-width: 46ch;
+    margin: 0;
+    padding: 6px 4px 10px;
+    line-height: 1.5;
+}
+
+.diario-lista {
+    flex: 0 0 clamp(240px, 24vw, 320px);
+    max-height: 100%;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    padding: 16px;
+    background: var(--purple-lighter);
+    border: 3px solid var(--yellow);
+    box-shadow: 6px 6px 0 var(--yellow);
+}
+
+.diario-lista .entries-list {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+    margin-top: 2px;
+}
+
+/* Ventanas bajas (portátiles de 720-768 de alto): el título y sus
+   márgenes se llevan un trozo del alto que no se encoge solo, y el
+   calendario se quedaba 12px por debajo de caber. Recortando aquí la
+   parte fija, entra sin scroll y las casillas siguen siendo del mismo
+   tamaño. Medido a 1440x700, 1152x720, 1280x720 y 1366x768. */
+@media (max-height: 830px) and (min-width: 1151px) {
+    .diario-page {
+        padding-top: 20px;
+        padding-bottom: 22px;
+    }
+
+    .diario-page .home-title {
+        font-size: clamp(2.25rem, 4vw, 3.25rem);
+    }
+
+    .diario-page .blog-archive-year {
+        margin-bottom: 14px;
+    }
+
+    .diario-page .blog-feed-button {
+        margin-top: 14px;
+    }
+}

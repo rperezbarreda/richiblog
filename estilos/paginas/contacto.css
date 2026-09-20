@@ -1,0 +1,520 @@
+/* CONTACTO */
+
+.home.contact-page {
+    display: flex;
+    flex-direction: column;
+    /* .home trae align-items: center para su uso normal en grid: en
+       columna eso deja de estirar a los hijos al ancho del contenedor
+       y cada uno pasa a medir lo que mida su contenido (fit-content).
+       Con eso, un mensaje del guestbook sin espacios (una racha larga
+       de caracteres) podía ensanchar .contact-content y toda la
+       columna de comentarios sin tope real, descuadrando la página
+       entera. Con stretch el ancho queda fijado por el contenedor
+       siempre, pase lo que pase en el contenido. */
+    align-items: stretch;
+    /* Márgenes laterales al mínimo (fijos en px, no en %, para que no
+       crezcan con el ancho de la ventana) — que las tarjetas se coman
+       casi todo el ancho disponible. */
+    padding: 28px 18px 24px;
+    overflow: hidden;
+}
+
+/* El titular ocupaba casi un tercio del alto de la ventana. Aquí se
+   le pone techo y se recorta el margen para que ese espacio se lo
+   queden el guestbook y el formulario, que es donde está lo que
+   interesa leer. */
+.contact-page .home-title {
+    flex: 0 0 auto;
+    margin-bottom: 20px;
+    font-size: clamp(3.25rem, 6vw, 5.5rem);
+}
+
+.contact-content {
+    flex: 1 1 auto;
+    min-height: 0;
+    display: flex;
+    align-items: stretch;
+    gap: 16px;
+}
+
+/* ==== CORREO + REDES SOCIALES ==== */
+
+.contact-info-column {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    flex-shrink: 0;
+    width: 260px;
+    min-height: 0;
+}
+
+/* .recent-entries lleva max-width: 420px porque en la portada las
+   tarjetas son estrechas a propósito. Aquí ese tope era justo lo que
+   dejaba medio ancho de ventana sin usar: las tarjetas no crecían por
+   mucho que sobrara sitio. Se lo quitamos para que manden los flex de
+   más abajo. */
+.contact-card {
+    width: 100%;
+    max-width: none;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+}
+
+.contact-card .recent-entries-body {
+    flex: 1;
+    min-height: 0;
+    max-height: none;
+    overflow-y: auto;
+}
+
+/* La que se estira para llenar la columna es la del correo, y la de
+   redes se queda con su alto natural. Antes era al revés, y como
+   "flex: 1" también deja encoger hasta cero, la tarjeta de redes se
+   quedaba con lo que sobrase: con los enlaces de texto de antes daba
+   igual (ocupaban 40px), pero con los botones pide 147 y en pantallas
+   normales solo se veían dos de los tres — o ninguno. El texto del
+   correo, en cambio, se desplaza sin que se pierda nada. */
+.contact-info-column .contact-card:first-child {
+    flex: 1;
+}
+
+.contact-info-column .contact-card:last-child {
+    flex: 0 0 auto;
+}
+
+/* Antes la dirección era el enlace, a 0.9375rem, y en la tarjeta
+   estrecha se partía en dos líneas. Ahora la acción es un botón con
+   texto corto —que cabe siempre— y la dirección va debajo en pequeño,
+   para copiarla o para quien use otro programa de correo. */
+.contact-email-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 14px;
+    padding: 11px 14px;
+    border: 2px solid var(--yellow);
+    background: var(--yellow);
+    color: var(--yellow-contrast);
+    font-family: "DM Mono", monospace;
+    font-size: 0.8125rem;
+    text-transform: uppercase;
+    letter-spacing: 1.2px;
+    text-align: center;
+    text-decoration: none;
+    transition: color 0.15s linear, background-color 0.15s linear;
+}
+
+.contact-email-btn:hover,
+.contact-email-btn:focus-visible {
+    background: transparent;
+    color: var(--yellow);
+}
+
+.contact-email-btn:focus-visible {
+    outline: 2px solid var(--yellow);
+    outline-offset: 3px;
+}
+
+.contact-email-btn-icono {
+    flex-shrink: 0;
+    font-size: 0.9375rem;
+    line-height: 1;
+}
+
+.contact-email-dir {
+    margin-top: 10px;
+    color: var(--muted);
+    font-family: "DM Mono", monospace;
+    font-size: 0.6875rem;
+    letter-spacing: 0.5px;
+    text-align: center;
+    /* El corte va después de la arroba (el <wbr> del HTML), que es donde
+       se parte un correo de toda la vida; esto queda de red de seguridad
+       por si algún día la dirección crece. */
+    overflow-wrap: anywhere;
+    /* Para poder seleccionarla con el ratón sin pelearse. */
+    user-select: all;
+}
+
+/* En la tarjeta de contacto los botones van uno debajo de otro y
+   ocupando todo el ancho: alineados a la izquierda y de anchos
+   distintos quedaban en escalera. */
+.contact-social-list {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+}
+
+/* ==== GUESTBOOK: COMENTARIOS (centro, grande) ==== */
+
+.guestbook-entries-card {
+    flex: 2;
+    min-width: 0;
+    min-height: 0;
+}
+
+.guestbook-entries {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    list-style: none;
+}
+
+.guestbook-entry {
+    padding: 16px 18px;
+    background: var(--purple);
+}
+
+.guestbook-entry-header {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 10px;
+    margin-bottom: 8px;
+}
+
+.guestbook-entry-name {
+    color: var(--white);
+    font-weight: 500;
+    font-size: 1.0625rem;
+}
+
+.guestbook-entry-date {
+    flex-shrink: 0;
+    color: var(--muted);
+    font-family: "DM Mono", monospace;
+    font-size: 0.6875rem;
+}
+
+.guestbook-entry-message {
+    margin: 0;
+    color: var(--muted);
+    font-size: 0.9375rem;
+    line-height: 1.6;
+    overflow-wrap: break-word;
+}
+
+/* ==== GUESTBOOK: MI RESPUESTA A UN MENSAJE ====
+   Solo aparece si la fila de la hoja tiene algo escrito en la
+   columna "Respuesta" (ver herramientas/guestbook-apps-script.txt). Va
+   sangrada y con los colores invertidos respecto al resto de la
+   tarjeta — fondo amarillo y texto oscuro, los mismos dos colores
+   que las barras de las ventanas falsas y los botones — para que se
+   lea de un vistazo como algo mío colgando del mensaje, y no como
+   otro mensaje más del guestbook. */
+
+.guestbook-reply {
+    margin: 14px 0 0 16px;
+    padding: 12px 14px;
+    background: var(--yellow);
+    color: var(--yellow-contrast);
+}
+
+.guestbook-reply-header {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 10px;
+    margin-bottom: 6px;
+}
+
+.guestbook-reply-name {
+    color: var(--yellow-contrast);
+    font-family: "DM Mono", monospace;
+    font-size: 0.6875rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+/* Sobre el amarillo, la fecha no puede ir en --muted (gris claro
+   pensado para fondos oscuros): se quedaría ilegible. Va del mismo
+   color que el resto y se distingue solo por tamaño y fuente —
+   bajarle la opacidad para "apagarla" tampoco valía, porque en el
+   tema claro se quedaba por debajo del mínimo de contraste. */
+.guestbook-reply-date {
+    flex-shrink: 0;
+    color: var(--yellow-contrast);
+    font-family: "DM Mono", monospace;
+    font-size: 0.625rem;
+}
+
+/* pre-line: respeta los saltos de línea que escribas en la celda
+   de la hoja (sin tener que meter HTML en el texto), pero sigue
+   colapsando los espacios de más. */
+.guestbook-reply-message {
+    margin: 0;
+    color: var(--yellow-contrast);
+    font-size: 0.875rem;
+    line-height: 1.6;
+    white-space: pre-line;
+    overflow-wrap: break-word;
+}
+
+.guestbook-entries-loading,
+.guestbook-entries-empty,
+.guestbook-entries-error {
+    color: var(--muted);
+    font-family: "DM Mono", monospace;
+    font-size: 0.8125rem;
+}
+
+/* ==== GUESTBOOK: FORMULARIO (derecha) ==== */
+
+.guestbook-form-card {
+    flex: 1.4;
+    min-width: 320px;
+    min-height: 0;
+}
+
+.guestbook-rules {
+    margin-bottom: 20px;
+    padding: 10px 14px;
+    border: 1px solid var(--border);
+    color: var(--muted);
+    font-size: 0.8125rem;
+}
+
+.guestbook-rules summary {
+    cursor: pointer;
+    color: var(--yellow);
+    font-family: "DM Mono", monospace;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.guestbook-rules summary:focus-visible {
+    outline: 2px solid var(--yellow);
+    outline-offset: 3px;
+}
+
+.guestbook-rules ul {
+    margin-top: 10px;
+    padding-left: 18px;
+    max-height: 140px;
+    overflow-y: auto;
+    line-height: 1.6;
+}
+
+.guestbook-form-card .recent-entries-body {
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+}
+
+/* El formulario se estira hasta el fondo de la tarjeta, y dentro de
+   él manda el campo del mensaje: así el cuadro de escribir crece con la
+   ventana en vez de quedarse en una altura fija con un hueco muerto
+   debajo. Ojo con la cadena de min-height: 0 — va en la tarjeta, en el
+   body, en el form y en el campo; si falta en alguno, el cuadro deja de
+   encoger y desborda la tarjeta. */
+.guestbook-form {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    min-height: 0;
+    gap: 14px;
+}
+
+.guestbook-field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.guestbook-field:has(.guestbook-editor) {
+    flex: 1;
+    min-height: 0;
+}
+
+.guestbook-field label,
+.guestbook-label {
+    color: var(--yellow);
+    font-family: "DM Mono", monospace;
+    font-size: 0.6875rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.guestbook-field input,
+.guestbook-editor {
+    padding: 10px 12px;
+    border: 2px solid var(--border);
+    background: var(--purple);
+    color: var(--white);
+    font-family: "DM Mono", monospace;
+    font-size: 0.875rem;
+}
+
+.guestbook-field input:focus-visible,
+.guestbook-editor:focus-visible,
+.guestbook-editor:focus {
+    outline: none;
+    border-color: var(--yellow);
+}
+
+/* EL CUADRO DE ESCRIBIR CON FORMATO */
+
+/* Es un div editable, no un <textarea>: un textarea solo sabe texto
+   pelado y aquí hace falta ver la negrita mientras se escribe. Lo que
+   se guarda siguen siendo marcas de texto (*negrita*), ver
+   scripts/paginas/guestbook-texto.js. */
+.guestbook-editor {
+    flex: 1;
+    min-height: 120px;
+    overflow-y: auto;
+    line-height: 1.6;
+    /* Sin esto, una palabra larga o un enlace pegado se salen del
+       cuadro por la derecha. */
+    overflow-wrap: anywhere;
+}
+
+/* Texto de ayuda mientras está vacío. Va por CSS y no como contenido
+   real para que no se envíe sin querer ni lo lea el lector de pantalla
+   como si fuera lo escrito. */
+.guestbook-editor.is-vacio::before {
+    content: attr(data-vacio);
+    color: var(--muted);
+    pointer-events: none;
+}
+
+.guestbook-toolbar {
+    display: flex;
+    gap: 6px;
+}
+
+.guestbook-fmt {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 2rem;
+    height: 2rem;
+    padding: 0;
+    border: 2px solid var(--border);
+    background: var(--purple);
+    color: var(--white);
+    font-size: 0.875rem;
+    line-height: 1;
+    cursor: pointer;
+    transition: color 0.12s linear, border-color 0.12s linear, background-color 0.12s linear;
+}
+
+.guestbook-fmt:hover {
+    border-color: var(--yellow);
+    color: var(--yellow);
+}
+
+.guestbook-fmt:focus-visible {
+    outline: 2px solid var(--yellow);
+    outline-offset: 2px;
+}
+
+/* Puesto o no puesto se ve por el relleno, no solo por el color: el
+   estado sale además en aria-pressed, así que un lector de pantalla lo
+   dice sin depender de la vista. */
+.guestbook-fmt[aria-pressed="true"] {
+    border-color: var(--yellow);
+    background: var(--yellow);
+    color: var(--yellow-contrast);
+}
+
+.guestbook-fmt-glifo {
+    font-family: Georgia, "Times New Roman", serif;
+}
+
+.guestbook-fmt-negrita {
+    font-weight: 700;
+}
+
+.guestbook-fmt-cursiva {
+    font-style: italic;
+}
+
+.guestbook-fmt-tachado {
+    text-decoration: line-through;
+}
+
+.guestbook-contador {
+    color: var(--muted);
+    font-family: "DM Mono", monospace;
+    font-size: 0.625rem;
+    letter-spacing: 0.5px;
+    text-align: right;
+}
+
+.guestbook-contador.is-poco {
+    color: var(--yellow);
+}
+
+/* El formato dentro de un mensaje ya publicado. */
+.guestbook-entry-message strong,
+.guestbook-reply-message strong {
+    color: inherit;
+    font-weight: 700;
+}
+
+.guestbook-entry-message em,
+.guestbook-reply-message em {
+    font-style: italic;
+}
+
+/* honeypot: oculto para personas, visible para bots poco cuidadosos */
+.guestbook-honeypot {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    padding: 0;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+
+.guestbook-submit {
+    align-self: center;
+    padding: 10px 28px;
+    border: 2px solid var(--yellow);
+    background: var(--yellow);
+    color: var(--yellow-contrast);
+    text-transform: uppercase;
+    font-family: "DM Mono", monospace;
+    font-size: 0.8125rem;
+    letter-spacing: 1px;
+    transition: color 0.1s linear, background-color 0.1s linear;
+}
+
+.guestbook-submit:hover,
+.guestbook-submit:focus-visible {
+    color: var(--yellow);
+    background: transparent;
+}
+
+.guestbook-submit:focus-visible {
+    outline: 2px solid var(--yellow);
+    outline-offset: 3px;
+}
+
+.guestbook-submit:disabled {
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+
+.guestbook-status {
+    margin: 0;
+    min-height: 1.2em;
+    color: var(--muted);
+    font-family: "DM Mono", monospace;
+    font-size: 0.8125rem;
+}
+
+.guestbook-status.is-error {
+    color: var(--error);
+}
+
+.guestbook-status.is-success {
+    color: var(--yellow);
+}

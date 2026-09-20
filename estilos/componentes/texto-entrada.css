@@ -1,0 +1,294 @@
+/* COMPONENTE: EL TEXTO DE UNA ENTRADA
+   Todo lo que se puede escribir dentro de una entrada del blog o de un
+   relato: subtítulos, listas, citas, código, imágenes entre párrafos,
+   tablas y enlaces.
+   Va en un componente y no dentro de paginas/blog.css porque los
+   relatos cargan relatos.css y no blog.css: si estuviera allí, un
+   relato con una lista o un enlace saldría con el estilo de serie del
+   navegador. Lo cargan solo las páginas de lectura (ver "es_lectura"
+   en herramientas/actualizar-cabeceras.py). */
+
+/* ==== FRANJA DE BORRADOR ====
+   Mientras el <article> lleve data-borrador, la entrada no sale en
+   ningún listado ni en el RSS (lo saltan los generadores de
+   herramientas/) y aquí se ve esta franja, para que al mirar la página
+   en local no haya duda de si está publicada o no. La escribe el CSS a
+   partir del atributo: así el aviso y el "no publicar" son la misma
+   cosa y no se pueden desincronizar. Lo quita
+   herramientas/publicar.py.
+
+   Va colgada de la CABECERA y no del <article>: el ::before del
+   artículo ya está cogido por la textura de papel, y usarlo la tapaba
+   entera. Aquí, además, la cabecera no se desplaza con el texto, así
+   que el aviso se ve siempre. flex-basis: 100% la manda a su propia
+   línea dentro de la barra (la cabecera es un flex con wrap).
+
+   Esta hoja la cargan exactamente las páginas que pueden ser borrador:
+   las entradas del blog y los relatos. */
+.blog-post[data-borrador] .blog-post-header::after,
+.relato-post[data-borrador] .relato-post-header::after {
+    content: "BORRADOR · no sale en los listados ni en el RSS";
+    flex: 0 0 100%;
+    /* Sin esto, el 100% es el ancho de contenido y el relleno y el
+       borde se suman por fuera: la franja se salía 32px por la
+       derecha. */
+    box-sizing: border-box;
+    padding: 7px 14px;
+    border: 2px dashed var(--yellow);
+    background: var(--purple);
+    color: var(--yellow);
+    font-family: "DM Mono", monospace;
+    font-size: 0.78rem;
+    letter-spacing: 0.06em;
+    text-align: center;
+}
+
+/* ==== LO QUE SE ESCRIBE DENTRO DE UNA ENTRADA ====
+   Hasta ahora el cuerpo solo tenía estilo para los párrafos: en cuanto
+   una entrada llevaba un subtítulo, una lista o un enlace, salía con la
+   pinta de serie del navegador (los enlaces, azules). Esto le da el
+   aspecto del sitio a todo lo que se puede escribir dentro.
+   Los mismos estilos valen para el blog y para los relatos, así que van
+   con los dos selectores: la alternativa era repetir el bloque en
+   paginas/relatos.css y que se fueran separando con el tiempo.
+   Los márgenes van casi todos a 0 porque el cuerpo es una columna flex
+   con gap: 16px — el hueco entre bloques ya lo pone el contenedor. */
+
+.blog-post-body,
+.relato-post-body {
+    /* Una URL larga sin espacios (o una palabra kilométrica) se parte en
+       vez de estirar la columna y sacar el texto fuera. */
+    overflow-wrap: anywhere;
+}
+
+/* ---- subtítulos ---- */
+/* En Space Grotesk y no en Pangolin: Pangolin es la letra del texto
+   corrido, y un subtítulo en la misma letra y casi el mismo tamaño no
+   se distingue de un párrafo en negrita. */
+.blog-post-body h2,
+.relato-post-body h2,
+.blog-post-body h3,
+.relato-post-body h3,
+.blog-post-body h4,
+.relato-post-body h4 {
+    margin: 12px 0 0;
+    color: var(--yellow);
+    font-family: "Space Grotesk", sans-serif;
+    font-weight: 500;
+    line-height: 1.25;
+}
+
+.blog-post-body h2,
+.relato-post-body h2 {
+    font-size: 1.375rem;
+}
+
+.blog-post-body h3,
+.relato-post-body h3 {
+    font-size: 1.125rem;
+}
+
+.blog-post-body h4,
+.relato-post-body h4 {
+    font-size: 1rem;
+    color: var(--white);
+}
+
+/* ---- enlaces dentro del texto ---- */
+.blog-post-body a,
+.relato-post-body a {
+    color: var(--yellow);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+}
+
+.blog-post-body a:hover,
+.relato-post-body a:hover,
+.blog-post-body a:focus-visible,
+.relato-post-body a:focus-visible {
+    color: var(--yellow-contrast);
+    background: var(--yellow);
+    text-decoration: none;
+}
+
+.blog-post-body a:focus-visible,
+.relato-post-body a:focus-visible {
+    outline: 2px solid var(--yellow);
+    outline-offset: 2px;
+}
+
+/* ---- listas ---- */
+.blog-post-body ul,
+.relato-post-body ul,
+.blog-post-body ol,
+.relato-post-body ol {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin: 0;
+    /* El sangrado de serie (40px) deja las viñetas fuera de la columna
+       de texto; 22px las pone justo al lado. */
+    padding-left: 22px;
+}
+
+.blog-post-body li,
+.relato-post-body li {
+    /* Las viñetas y los números en amarillo, el texto en blanco: es el
+       mismo truco que en las listas de la página de accesibilidad. */
+    list-style: disc;
+    color: var(--white);
+}
+
+.blog-post-body ol > li,
+.relato-post-body ol > li {
+    list-style: decimal;
+}
+
+.blog-post-body li::marker,
+.relato-post-body li::marker {
+    color: var(--yellow);
+}
+
+/* Una lista dentro de otra: sin esto el hueco de 8px se aplicaba también
+   entre la lista de dentro y su párrafo, y quedaba descolgada. */
+.blog-post-body li > ul,
+.relato-post-body li > ul,
+.blog-post-body li > ol,
+.relato-post-body li > ol {
+    margin-top: 8px;
+}
+
+/* ---- citas ---- */
+.blog-post-body blockquote,
+.relato-post-body blockquote {
+    margin: 0;
+    padding: 12px 18px;
+    border-left: 3px solid var(--yellow);
+    background: var(--purple);
+    color: var(--muted);
+    font-style: italic;
+}
+
+.blog-post-body blockquote p,
+.relato-post-body blockquote p {
+    margin: 0;
+}
+
+/* ---- código ---- */
+.blog-post-body code,
+.relato-post-body code {
+    padding: 1px 6px;
+    border: 1px solid var(--border);
+    background: var(--purple);
+    color: var(--yellow);
+    font-family: "DM Mono", monospace;
+    /* 0.85em y no rem: así encoge con el texto que lo rodea, esté donde
+       esté (un párrafo, un subtítulo, una lista). */
+    font-size: 0.85em;
+}
+
+.blog-post-body pre,
+.relato-post-body pre {
+    margin: 0;
+    padding: 14px 16px;
+    border: 2px solid var(--yellow);
+    background: var(--purple);
+    color: var(--white);
+    font-family: "DM Mono", monospace;
+    font-size: 0.8125rem;
+    line-height: 1.6;
+    /* Tope y mínimo: sin esto, una línea de código larga ensancha la
+       columna del texto en vez de desplazarse dentro de su caja. */
+    max-width: 100%;
+    min-width: 0;
+    /* Una línea de código larga no se parte: se desplaza dentro de su
+       propia caja en vez de sacar la página de sitio. */
+    overflow-x: auto;
+}
+
+.blog-post-body pre code,
+.relato-post-body pre code {
+    padding: 0;
+    border: none;
+    background: none;
+    color: inherit;
+    font-size: inherit;
+}
+
+/* ---- imágenes metidas entre párrafos ---- */
+/* (la de la columna de la derecha es .blog-post-aside, más abajo) */
+.blog-post-body figure,
+.relato-post-body figure {
+    margin: 0;
+}
+
+.blog-post-body img,
+.relato-post-body img {
+    display: block;
+    /* Medido: una imagen de 780px de ancho se salía de la columna de
+       720. Con esto se ajusta sola y conserva su proporción. */
+    max-width: 100%;
+    height: auto;
+    border: 3px solid var(--yellow);
+    box-shadow: 4px 4px 0 var(--yellow);
+}
+
+.blog-post-body figcaption,
+.relato-post-body figcaption {
+    margin-top: 10px;
+    color: var(--muted);
+    font-family: "DM Mono", monospace;
+    font-size: 0.6875rem;
+    line-height: 1.5;
+}
+
+/* ---- tablas ---- */
+/* display: block para que una tabla ancha se desplace dentro de su caja
+   en un móvil, en vez de ensanchar la columna del texto. */
+.blog-post-body table,
+.relato-post-body table {
+    display: block;
+    overflow-x: auto;
+    width: max-content;
+    max-width: 100%;
+    border-collapse: collapse;
+    font-family: "DM Mono", monospace;
+    font-size: 0.8125rem;
+}
+
+.blog-post-body th,
+.relato-post-body th,
+.blog-post-body td,
+.relato-post-body td {
+    padding: 8px 14px;
+    border: 1px solid var(--border);
+    text-align: left;
+}
+
+.blog-post-body th,
+.relato-post-body th {
+    background: var(--purple);
+    color: var(--yellow);
+    font-weight: 500;
+}
+
+/* ---- separador ---- */
+.blog-post-body hr,
+.relato-post-body hr {
+    width: 100%;
+    margin: 8px 0;
+    border: none;
+    border-top: 2px solid var(--border);
+}
+
+/* ---- detalles sueltos ---- */
+.blog-post-body strong,
+.relato-post-body strong {
+    color: var(--yellow);
+    font-weight: 700;
+}
+
+.blog-post-body p,
+.relato-post-body p {
+    margin: 0;
+}

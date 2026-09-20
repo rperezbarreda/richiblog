@@ -1,0 +1,50 @@
+/* RESPONSIVE — santuarios en móvil */
+
+@media (max-width: 860px) {
+    /* En móvil, como estaba: la página se desplaza entera y las
+       ilustraciones se ven cuadradas y enteras, una debajo de otra. */
+    .santuarios-page {
+        display: block;
+        overflow-y: auto;
+        padding: 32px 6%;
+    }
+
+    .pet-cards {
+        display: flex;
+        overflow: visible;
+    }
+
+    .pet-card {
+        width: 100%;
+        max-width: 380px;
+        max-height: none;
+    }
+
+    .pet-card-art {
+        min-height: 0;
+    }
+
+    .pet-card-photo {
+        height: auto;
+    }
+
+    .pet-page {
+        display: block;
+        overflow-y: auto;
+        padding: 32px 6%;
+    }
+
+    .pet-window {
+        flex: none;
+    }
+
+    .pet-window-body {
+        flex: none;
+        overflow-y: visible;
+        padding: 20px;
+    }
+
+    .photo-gallery {
+        grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    }
+}

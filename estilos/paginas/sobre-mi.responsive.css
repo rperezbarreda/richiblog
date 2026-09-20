@@ -1,0 +1,131 @@
+/* RESPONSIVE — ficha de personaje en una sola columna */
+/* En móvil no forzamos "sin scroll": con todo apilado no cabría
+   en una pantalla pequeña, así que aquí la página vuelve a
+   desplazarse con normalidad (igual que el resto del sitio en
+   móvil), en vez del layout fijo de escritorio. */
+
+@media (max-width: 860px) {
+    .home.character-sheet {
+        display: block;
+        overflow-y: auto;
+        padding: 32px 6%;
+    }
+
+    .character-sheet-top {
+        flex-direction: column;
+        align-items: stretch;
+        /* El flex-wrap: wrap que necesita la fila de escritorio aquí, en
+           columna y sin un alto definido, hacía que el navegador
+           estirase la tarjeta de estadísticas muchísimo más de lo que
+           pide su contenido: 1049px para 525px de contenido, o sea casi
+           500px de morado vacío debajo de las estadísticas. Apiladas no
+           hay nada que envolver, así que se desactiva. */
+        flex-wrap: nowrap;
+        margin-bottom: 24px;
+    }
+
+    .character-portrait-block {
+        align-self: center;
+    }
+
+    .character-title-block {
+        align-items: center;
+        text-align: center;
+    }
+
+    .character-inspiration-btn {
+        align-self: center;
+    }
+
+    .character-vitals-row {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .character-vitals-row .vital {
+        width: 100%;
+        max-width: 260px;
+    }
+
+    .character-stats-card {
+        min-width: 0;
+    }
+
+    .character-sheet-content {
+        flex-direction: column;
+        min-height: 0;
+    }
+
+    .character-portrait-column {
+        width: 100%;
+        align-items: center;
+        overflow-y: visible;
+    }
+
+    .character-basics {
+        width: 100%;
+        max-width: 320px;
+    }
+
+    .character-portrait-column .character-card {
+        width: 100%;
+        max-width: 320px;
+    }
+
+    .character-main-column {
+        display: flex;
+        flex-direction: column;
+        width: 100%;
+        min-width: 0;
+        min-height: 0;
+    }
+
+    /* Mismo caso que .character-stats-card justo arriba: el min-width
+       de escritorio (280px y 320px) no deja que las tarjetas encojan,
+       y en móviles estrechos se salían por la derecha recortando el
+       contenido. Apiladas al 100% ya no hace falta ningún mínimo. */
+    .character-card-narrow,
+    .character-card-wide {
+        width: 100%;
+        max-width: 420px;
+        min-width: 0;
+        flex: none;
+    }
+
+    /* Sin tope de alto: en móvil la página ya se desplaza entera, así
+       que recortar cada ventana a 260px solo añadía un scroll dentro de
+       otro. Cada tarjeta mide ahora lo que mida su texto. */
+    .character-card-body {
+        max-height: none;
+        overflow-y: visible;
+    }
+
+    /* Con el mínimo de 118px de escritorio, en pantallas de 320px solo
+       entra una columna y las seis estadísticas se van a 960px de alto.
+       Los nombres van abreviados en móvil (ver .stat-name-short), así
+       que con 96 caben dos columnas y baja a 474px. */
+    .stats-row {
+        grid-template-columns: repeat(auto-fit, minmax(96px, 1fr));
+    }
+
+    .stat-box-name {
+        position: relative;
+    }
+
+
+    .stat-name-full {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        margin: -1px;
+        padding: 0;
+        overflow: hidden;
+        clip: rect(0, 0, 0, 0);
+        white-space: nowrap;
+        border: 0;
+    }
+
+    .stat-name-short {
+        display: inline;
+    }
+}

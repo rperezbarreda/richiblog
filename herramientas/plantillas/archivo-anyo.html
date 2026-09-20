@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8">
+    <!-- Color de la barra del navegador en el móvil. Arranca en el color
+         del modo oscuro y el script de abajo lo cambia si toca; al pulsar
+         el botón de tema lo actualiza scripts/tema.js. -->
+    <meta name="theme-color" content="#12091c">
+    <script>
+      (function () {
+        try {
+          if (localStorage.getItem("richi-theme") === "light") {
+            document.documentElement.setAttribute("data-theme", "light");
+            var barra = document.querySelector('meta[name="theme-color"]');
+            if (barra) {
+              barra.setAttribute("content", "#f2ded2");
+            }
+          }
+        } catch (e) {}
+      })();
+    </script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Blog {{ANYO}} · El Blog de Richi</title>
+    <!-- Cómo se ve el enlace al compartirlo (Bluesky, Discord, Ko-fi…).
+         Sin esto solo sale la URL pelada, sin título ni imagen. Las rutas
+         van absolutas a propósito: las redes no resuelven las relativas. -->
+    <meta name="description" content="Todas las entradas del blog publicadas en {{ANYO}}, ordenadas por mes.">
+    <link rel="canonical" href="https://richi.blog/web/blog/{{ANYO}}/index_{{ANYO}}.html">
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="El Blog de Richi">
+    <meta property="og:locale" content="es_ES">
+    <meta property="og:title" content="Blog {{ANYO}} · El Blog de Richi">
+    <meta property="og:description" content="Todas las entradas del blog publicadas en {{ANYO}}, ordenadas por mes.">
+    <meta property="og:url" content="https://richi.blog/web/blog/{{ANYO}}/index_{{ANYO}}.html">
+    <meta property="og:image" content="https://richi.blog/imagenes/meta/og.webp">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta property="og:image:alt" content="El Blog de Richi — ilustración de Richi sobre fondo morado">
+    <meta name="twitter:card" content="summary_large_image">
+    <link rel="icon" type="image/x-icon" href="/imagenes/favicon.ico">
+    <!-- La única fuente que se precarga. Medido con la red frenada: sin esto el
+         navegador no la descubre hasta parsear el CSS (~800 ms) y el texto baila al
+         cambiar de tipografía; así llega antes del primer pintado y no se nota el
+         cambio. Precargar más fuentes empeoraba el primer pintado 150-210 ms, porque
+         compiten por el ancho de banda con lo que hace falta para pintar. -->
+    <link rel="preload" href="/tipografias/space-grotesk-400.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="alternate" type="application/rss+xml" title="El Blog de Richi — blog, relatos y rol" href="/blog/rss.xml">
+    <!-- ==== CSS ====
+         Esta lista la escribe herramientas/actualizar-cabeceras.py.
+         No la toques a mano: si cambias qué CSS lleva una página,
+         cámbialo en esa herramienta y vuélvela a ejecutar.
+
+         Van escritos aquí, y no cargados por un script, para que el
+         navegador los pida nada más recibir el HTML. Con un script de
+         por medio tardaba ~200 ms más en pintar la página. -->
+    <link rel="stylesheet" href="/estilos/base.css">
+    <link rel="stylesheet" href="/estilos/base.responsive.css">
+    <link rel="stylesheet" href="/estilos/componentes/visor-imagenes.css">
+    <link rel="stylesheet" href="/estilos/componentes/aviso.css">
+    <link rel="stylesheet" href="/estilos/componentes/aviso.responsive.css">
+    <link rel="stylesheet" href="/estilos/componentes/cabecera-ventana.css">
+    <link rel="stylesheet" href="/estilos/componentes/subir.css">
+    <link rel="stylesheet" href="/estilos/paginas/blog.css">
+    <link rel="stylesheet" href="/estilos/paginas/blog.responsive.css">
+    <link rel="stylesheet" href="/estilos/componentes/barra-lateral.css">
+    <link rel="stylesheet" href="/estilos/componentes/barra-lateral.responsive.css">
+    <!-- ==== fin del CSS ==== -->
+    <script src="/scripts/cargador-scripts.js"></script>
+  </head>
+<body>
+    <!-- ==== SIDEBAR / NAVEGACIÓN ==== -->
+    <a class="skip-link" href="#main-content">Saltar al contenido</a>
+    <div id="sidebar-container"></div>
+    <!-- ==== CONTENIDO PRINCIPAL ==== -->
+
+    <main id="main-content">
+        <!-- ==== HOME ==== -->
+        <section id="home" class="home blog-archive-page">
+            <h1 class="home-title">
+                <em>blog</em>
+            </h1>
+            <p class="blog-archive-year">{{ANYO}}</p>
+
+            <!-- Los botones de etiqueta los genera entradas-blog.js a partir de
+                 lo que haya en datos/entradas-blog.json: si mañana publicas algo con una
+                 etiqueta nueva, aparece sola sin tocar este HTML. -->
+            <div class="blog-tags" data-blog-tags hidden>
+                <span class="blog-tags-label" id="blog-tags-label">filtrar:</span>
+
+                <!-- Este botón solo se ve en móvil (en escritorio lo esconde
+                     el CSS): ahí la fila de etiquetas no cabe de una vez, así
+                     que se colapsa en una lista flotante y el botón enseña la
+                     etiqueta activa. Mismo patrón que las categorías del
+                     portfolio de rol. Lo rellena entradas-blog.js. -->
+                <button class="blog-tags-toggle" type="button" data-blog-tags-toggle
+                        aria-expanded="false" aria-controls="blog-tags-lista">
+                    <span class="visually-hidden">Etiqueta: </span>
+                    <span class="blog-tags-toggle-label" data-blog-tags-label>todas</span>
+                    <span class="blog-tags-toggle-arrow" aria-hidden="true">▾</span>
+                </button>
+
+                <div class="blog-tags-list" id="blog-tags-lista" role="group" aria-labelledby="blog-tags-label"></div>
+
+            </div>
+
+            <!-- Un bloque por mes, siempre abierto. Para añadir un mes
+                 nuevo basta con copiar uno de estos y cambiar el título
+                 y el data-month; entradas-blog.js lo rellena solo desde
+                 datos/entradas-blog.json. -->
+            <div id="blog-archive" class="blog-months">
+
+{{MESES}}            </div>
+
+            <!-- Al final del todo: la rejilla de meses se queda con el
+                 espacio que sobra (flex: 1) y esto cae abajo. El feed
+                 va además declarado en el <head> de todas las páginas,
+                 así que los lectores lo encuentran solos; este botón es
+                 para quien lo busque a ojo. -->
+            <a class="blog-feed-button" href="/blog/rss.xml">seguir por rss →</a>
+        </section>
+    </main>
+</body>
+</html>

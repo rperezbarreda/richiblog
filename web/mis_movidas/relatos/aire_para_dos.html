@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8">
+    <!-- Color de la barra del navegador en el móvil. Arranca en el color
+         del modo oscuro y el script de abajo lo cambia si toca; al pulsar
+         el botón de tema lo actualiza scripts/tema.js. -->
+    <meta name="theme-color" content="#12091c">
+    <script>
+      (function () {
+        try {
+          if (localStorage.getItem("richi-theme") === "light") {
+            document.documentElement.setAttribute("data-theme", "light");
+            var barra = document.querySelector('meta[name="theme-color"]');
+            if (barra) {
+              barra.setAttribute("content", "#f2ded2");
+            }
+          }
+        } catch (e) {}
+      })();
+    </script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aire para dos · Relatos · El Blog de Richi</title>
+    <!-- Cómo se ve el enlace al compartirlo (Bluesky, Discord, Ko-fi…).
+         Sin esto solo sale la URL pelada, sin título ni imagen. Las rutas
+         van absolutas a propósito: las redes no resuelven las relativas. -->
+    <meta name="description" content="Ciudad Dos nunca dormía; desde el distrito de nubes hasta las cloacas industriales la megaurbe era un monstruo vivo, iluminado por neones y ahogado en…">
+    <link rel="canonical" href="https://richi.blog/web/mis_movidas/relatos/aire_para_dos.html">
+    <meta property="og:type" content="article">
+    <meta property="og:site_name" content="El Blog de Richi">
+    <meta property="og:locale" content="es_ES">
+    <meta property="og:title" content="Aire para dos · Relatos · El Blog de Richi">
+    <meta property="og:description" content="Ciudad Dos nunca dormía; desde el distrito de nubes hasta las cloacas industriales la megaurbe era un monstruo vivo, iluminado por neones y ahogado en…">
+    <meta property="og:url" content="https://richi.blog/web/mis_movidas/relatos/aire_para_dos.html">
+    <meta property="og:image" content="https://richi.blog/imagenes/meta/og.webp">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta property="og:image:alt" content="El Blog de Richi — ilustración de Richi sobre fondo morado">
+    <meta name="twitter:card" content="summary_large_image">
+    <link rel="icon" type="image/x-icon" href="/imagenes/favicon.ico">
+    <!-- La única fuente que se precarga. Medido con la red frenada: sin esto el
+         navegador no la descubre hasta parsear el CSS (~800 ms) y el texto baila al
+         cambiar de tipografía; así llega antes del primer pintado y no se nota el
+         cambio. Precargar más fuentes empeoraba el primer pintado 150-210 ms, porque
+         compiten por el ancho de banda con lo que hace falta para pintar. -->
+    <link rel="preload" href="/tipografias/space-grotesk-400.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="alternate" type="application/rss+xml" title="El Blog de Richi — blog, relatos y rol" href="/blog/rss.xml">
+    <!-- ==== CSS ====
+         Esta lista la escribe herramientas/actualizar-cabeceras.py.
+         No la toques a mano: si cambias qué CSS lleva una página,
+         cámbialo en esa herramienta y vuélvela a ejecutar.
+
+         Van escritos aquí, y no cargados por un script, para que el
+         navegador los pida nada más recibir el HTML. Con un script de
+         por medio tardaba ~200 ms más en pintar la página. -->
+    <link rel="stylesheet" href="/estilos/base.css">
+    <link rel="stylesheet" href="/estilos/base.responsive.css">
+    <link rel="stylesheet" href="/estilos/componentes/visor-imagenes.css">
+    <link rel="stylesheet" href="/estilos/componentes/aviso.css">
+    <link rel="stylesheet" href="/estilos/componentes/aviso.responsive.css">
+    <link rel="stylesheet" href="/estilos/componentes/cabecera-ventana.css">
+    <link rel="stylesheet" href="/estilos/componentes/subir.css">
+    <link rel="stylesheet" href="/estilos/componentes/texto-entrada.css">
+    <link rel="stylesheet" href="/estilos/paginas/relatos.css">
+    <link rel="stylesheet" href="/estilos/paginas/relatos.responsive.css">
+    <link rel="stylesheet" href="/estilos/componentes/barra-lateral.css">
+    <link rel="stylesheet" href="/estilos/componentes/barra-lateral.responsive.css">
+    <!-- ==== fin del CSS ==== -->
+    <script src="/scripts/cargador-scripts.js"></script>
+  </head>
+<body>
+    <!-- ==== SIDEBAR / NAVEGACIÓN ==== -->
+    <a class="skip-link" href="#main-content">Saltar al contenido</a>
+    <div id="sidebar-container"></div>
+    <!-- ==== CONTENIDO PRINCIPAL ==== -->
+
+    <main id="main-content">
+        <!-- ==== HOME ==== -->
+        <section id="home" class="home relato-page">
+            <!-- data-subcategoria: lo que sale debajo del título en los
+                 listados ("relato corto"). Va aquí y no solo en
+                 datos/mis-movidas.json para que
+                 herramientas/generar-posts.py pueda reconstruir el JSON
+                 leyendo las páginas. -->
+            <article class="relato-post" data-subcategoria="relato corto">
+                <div class="relato-post-header">
+                    <h1 class="relato-post-title">Aire para dos</h1>
+                    <div class="relato-post-header-meta">
+                        <p class="relato-post-date"><time datetime="2025-09-15">15 sept 2025</time></p>
+                        <a class="relato-post-back" href="/web/mis_movidas/relatos/index_relatos.html">← volver a relatos</a>
+                    </div>
+                </div>
+
+                <div class="relato-post-body-wrap">
+                    <div class="relato-post-layout">
+                        <div class="relato-post-body">
+                            <p>Ciudad Dos nunca dormía; desde el distrito de nubes hasta las cloacas industriales la megaurbe era un monstruo vivo, iluminado por neones y ahogado en contaminación. Para la mayoría era un hogar, para unos pocos privilegiados el paraíso y, para el resto, una cárcel.</p>
+                            <p>Ágatha permanecía este último grupo; había crecido entre los interminables suburbios de las fábricas de procesamiento químico, respirando un aire que sabia a metal oxidado. Sabía que nadie en Ciudad Dos vivía mucho tiempo, no sin dinero para pagar aire limpio, agua purificada y comida descontaminada. Su vida era una lucha constante por mantener a flote todo lo que tenía, y ahora lo único que le importaba estaba al borde del colapso.</p>
+                            <p>Recordaba cuando conoció a Mara. Era una mecánica de un taller clandestino del límite de la ciudad y, aunque sus manos estaban cubiertas siempre de grasa y callos, tenía una sonrisa que iluminaba su mundo. Esa sonrisa era ahora un eco lejano, eclipsada por la enfermedad que la consumía.</p>
+                            <p>“Me encontraré bien, cielo”, le había dicho Mara hacía unos pocos días, entre toses y encías sangrantes, mientras intentaba ocultar el dolor que le cruzaba el rostro. Pero Ágatha sabía la verdad. Su tiempo se acababa, y el único tratamiento experimental que podía salvarla costaba más de lo que dos vidas juntas podían reunir.</p>
+                            <p>Ágatha pensaba en ello mientras la luz azulada del contrato digital parpadeaba. Sus manos temblaban mientras volvía a leer bien todas las cláusulas. Tres días. Era todo lo que el reality de televisión pedía. La estadística, sin embargo, decía otra cosa: casi nadie duraba más de unas pocas horas en el Estanque de Quimeras.</p>
+                            <p>Ella lo sabía. Lo había visto en programas anteriores, en las grabaciones que habían desaparecido entre las sombras de la zona, gritando antes de que la cámara se apagase. Pero las clausulas eran claras, cuanta más audiencia consiguiese más dinero ganaría, y había una que no podía ignorar; incluso si moría una parte del dinero iba a un beneficiario designado, y tenía claro que con ello podía costearse el tratamiento.</p>
+                            <p>El representante del show, un hombre de rostro inexpresivo y piel casi translúcida, esperó mientras ella leía una última vez las condiciones.</p>
+                            <p>—¿Estás segura? —preguntó con indiferencia.</p>
+                            <p>—No tengo opción —respondió Ágatha, firmando sin titubear.</p>
+                            <p>—Perfecto. Ahora, procedamos con el implante ocular.</p>
+                            <p>* * * * *</p>
+                            <p>El paso al Estanque de Quimeras era un agujero en la civilización. El muro de contención que separaba la zona del resto de Ciudad Dos estaba corroído por años de abandono, cubierto de óxido y grafitis que advertían: “Bienvenidos al infierno”. Ágatha respiró profundamente a través del filtro de su máscara antes de cruzar el hueco en la alambrada.</p>
+                            <p>La primera bocanada de aire del Estanque era como tragar veneno. Incluso con la máscara el olor era insoportable; una mezcla de químicos quemados, metal caliente y algo orgánico, podrido. Notó como un zumbido en el interior del ojo y un leve pitido resonó en su cabeza, la cámara parecía haber empezado a grabar por si sola.</p>
+                            <p>—Este es el Estanque de Quimeras—dijo con dificultad mientras se acostumbraba al regusto metálico que dejaba en la boca el aire contaminado—. El lugar que Ciudad Dos dejó morir.</p>
+                            <p>La vista era desoladora: edificios en ruinas, derruidos por explosiones y colapsos. Las calles estaban cubiertas de escombros, llena de charcos de agua negra y fragmentos de chatarra y maquinaria oxidada. Las plantas que crecían entre las grietas del pavimento eran de un verde fosforescente, y se retorcían en formas imposibles.</p>
+                            <p>Se acercó a uno de los charcos, de alguna forma se conseguía ver parte de su reflejo, por lo que saludó a cámara saludando y dijo:</p>
+                            <p>—Me llamo Ágatha. Si estás viendo esto, probablemente ya esté muerta —su voz se entrecortó un poco al pensar en ello, pero tragó saliva y continuó con más seguridad—. Pero está bien. Lo hago por Mara. Es todo lo que importa. Tiene una enfermedad pulmonar causada por el aire de la ciudad. No tenemos dinero para el tratamiento, y este programa es nuestra única opción. Si muero aquí ella tendrá al menos una oportunidad de sobrevivir con lo que paga el reality.</p>
+                            <p>Agatha se arrodilló en la carretera para acercar un poco más su rostro al charco y se quitó la máscara, quería que se le viera el rostro, aunque eso hiciera que le ardiera la garganta.</p>
+                            <p>—Hola, Mara. —Su voz temblaba—. No sé si alguna vez verás esto, pero quiero que sepas algo.</p>
+                            <p>Ágatha tragó saliva, intentando contener las lágrimas —Te amo. Siempre lo he hecho. Desde el día en que me enseñaste cómo arreglar esa moto vieja, y te reíste porque apreté el tornillo al revés.</p>
+                            <p>La imagen de Mara riendo, con sus manos cubiertas de grasa y la luz del atardecer en su rostro, llenó su mente y no pudo aguantar a romper a llorar —Lo único que lamento es no haber podido darte una vida mejor. Pero esto… esto es todo lo que puedo hacer.</p>
+                            <p>Tras recomponerse se volvió a colocar la máscara antes de limpiarse los mocos con la manga del abrigo y se alejó de allí, tenía un plan en mente.</p>
+                            <p>—No voy a durar mucho aquí, lo sé —dijo en voz alta, más para sí misma que para los espectadores. —Pero si puedo mantenerme oculta el tiempo suficiente, todo esto valdrá la pena.</p>
+                            <p>Había estudiado los programas anteriores. Los participantes que sobrevivían más tiempo solían encontrar refugios alejados y de difícil acceso.</p>
+                            <p>—La clave es evitar a las bandas —dijo en voz baja mientras se adentraba en un callejón—. He visto otros episodios. Lo peor no son las quimeras, son las personas./p>
+                            <p>Su plan era simple: llegar a la antigua estación de monorraíl. Estaba medio derruida y probablemente fuera peligrosa, pero las estructuras colapsadas y los túneles subterráneos ofrecían un buen lugar para esconderse. Además, nadie quería quedarse mucho tiempo cerca de los charcos contaminados que la rodeaban.</p>
+                            <p>Al llegar, Ágatha se movió con cautela. El edificio era un esqueleto de hormigón y acero oxidado, con vigas retorcidas que parecían listas para ceder. Bajó a una plataforma que daba a un andén, donde los escombros formaban pequeñas barricadas naturales.</p>
+                            <p>Cuando ya llevaba un rato explorando para encontrar algún refugio seguro un ruido la interrumpió. Pasos y un chirriar metálico. Se escondió detrás de una columna derruida.</p>
+                            <p>—¿Oyeron eso? —dijo una voz áspera.</p>
+                            <p>Tres figuras emergieron de las sombras. Vestían ropas hechas de retales: abrigos de cuero rasgados, botas viejas reforzadas con metal, y máscaras de gas improvisadas con filtros oxidados. Uno llevaba un tubo metálico como arma, otro una pistola vieja y corroída, y el tercero, más alto, tenía un cuchillo de hoja dentada.</p>
+                            <p>Lo que más llamó la atención de Ágatha fueron sus cuerpos. Sus manos y brazos mostraban mutaciones: dedos alargados, piel grisácea con llagas abiertas, y ojos que brillaban con un tenue tono amarillento bajo las lentes de las máscaras.</p>
+                            <p>—Mira lo que tenemos aquí —dijo el hombre del cuchillo, acercándose con una sonrisa torcida—. Una de las ratas del reality.</p>
+                            <p>Agatha entró en pánico y trató de retroceder, pero chocó contra un montón de escombros.</p>
+                            <p>—Sabía que aparecerían más idiotas —dijo el del tubo metálico—. El reality siempre envía carne fresca para alimentar al Estanque.</p>
+                            <p>El del cuchillo dio un salto inhumano y se puso detrás de Ágatha, y de un tirón le arrebató la mochila que llevaba.</p>
+                            <p>—Filtros, agua… y comida— dijo con una voz muy áspera—. Muy útil.</p>
+                            <p>Ágatha intentó hablar, pero el miedo la paralizó. Cuando finalmente encontró su voz, sonó débil.</p>
+                            <p>—Por favor… pueden quedarse con todo. Solo déjenme ir.</p>
+                            <p>—¿Dejarte ir? —dijo el hombre del tubo— ¿Por qué haríamos eso? ¿Crees que puedes venir aquí, grabarnos como si fuéramos monos de circo, y salir ilesa?</p>
+                            <p>El del cuchillo se acercó a ella y le puso la mano en el cuello, quitándole la máscara mientras le amenazaba con su arma; sentía el frio del acero corroído en su espalda.</p>
+                            <p>—Quizá deberíamos divertirnos un poco antes de dejar que el Estanque la consuma.</p>
+                            <p>Ágatha se estremeció. Le entraron náuseas y parecía que se le iba a escapar el corazón del pecho. Entonces, lo escucharon.</p>
+                            <p>Un sonido profundo, gutural y lleno de chasquidos, como si el mismísimo aire se rasgara. Todos se volvieron hacia la entrada de la estación. De las sombras emergió una figura enorme, deforme, con extremidades demasiado largas y piel cubierta de llagas abiertas que brillaban con un resplandor enfermizo. Los múltiples ojos de la criatura ardían con una luz amarillenta mientras soltaba un gruñido que hizo temblar el suelo.</p>
+                            <p>—¡Una puta quimera! —gritó el de la pistola, retrocediendo.</p>
+                            <p>La criatura se abalanzó con una velocidad aterradora. El hombre del tubo intentó alzar su arma, pero fue inútil. En un instante, la bestia lo derribó con lo que parecía un aguijón, desgarrándolo como si fuera de papel.</p>
+                            <p>El caos se desató. Los miembros de la banda corrieron en diferentes direcciones, dejando caer los suministros que habían robado. Ágatha, paralizada, miraba cómo la criatura destrozaba a su atacante. Su instinto le gritaba que corriera, pero no podía apartar la vista.</p>
+                            <p>El hombre del cuchillo la soltó e intento luchar, pero el arma oxidada era inútil contra la piel gruesa y deformada de la quimera. La criatura lo golpeó con una de sus extremidades, enviándolo a volar contra una columna de hormigón que se desmoronó sobre él.</p>
+                            <p>El suelo temblaba con cada movimiento de la criatura, que ahora giraba su atención hacia Ágatha. Su cámara seguía grabando, capturando cada segundo del horror.</p>
+                            <p>Finalmente, sus piernas respondieron. Corrió hacia el interior de los túneles, dejando atrás los gritos y los sonidos de la batalla. Sus pulmones ardían con cada respiración, y las lágrimas nublaban su visión mientras se adentraba en la oscuridad.</p>
+                        </div>
+
+                        <!-- Columna de la derecha: la imagen y "sigue leyendo". Va pegada
+                             arriba mientras se desplaza el texto (ver .relato-post-side). -->
+                        <div class="relato-post-side">
+                            <!-- IMAGEN DE LA ENTRADA -->
+                            <!-- De momento va una de ejemplo: cámbiala por la que quieras.
+                                 Lo suyo es guardarla en /imagenes/blog/ (o en la carpeta de
+                                 relatos) y pasarla antes por optimizar-imagenes.py.
+                                 El alt va vacío a propósito porque es decorativa: así un
+                                 lector de pantalla no la nombra y no estorba la lectura.
+                                 Si la imagen aporta algo al texto, escríbele un alt de
+                                 verdad. width y height son los del archivo, para que el
+                                 navegador reserve el hueco y el texto no salte al cargar. -->
+                            <figure class="relato-post-aside">
+                                <img src="/imagenes/mis_movidas/relatos/aire_para_dos.webp" alt="almacen abandonado, con bloques de construcción y tuberías en blanco y negro" width="780" height="1170" loading="lazy" decoding="async">
+                                <figcaption> <a href="https://www.pexels.com/@peter-dyllong-2158803154/" target="_blank" rel="noopener noreferrer">Fotografía hecha por Perer Dyllong</a>, imagen tomada de la web Pexels</figcaption>
+                            </figure>
+
+                            <div class="relato-post-otras" data-otras-caja>
+                                <div class="recent-entries-header">
+                                    <h2>otros_relatos.txt</h2>
+                                    <div class="window-controls window-controls-small" data-window-controls aria-hidden="true"></div>
+                                </div>
+                                <ul class="entries-list" data-otras-entradas="relatos">
+                                    <li class="entries-loading">Cargando…</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </article>
+        </section>
+    </main>
+</body>
+</html>

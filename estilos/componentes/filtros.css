@@ -1,0 +1,111 @@
+/* COMPONENTE: FILTRO POR CATEGORÍA */
+
+/* Misma pinta que el filtro de etiquetas del archivo del blog (ver
+   .blog-tags en estilos/paginas/blog.css): una fila de "filtrar:" y botones,
+   sin recuadro de ventana. Estaba dentro de una ventana falsa
+   (filtros.lst) y quedaba desparejado con el blog.
+   Los botones de dentro los escribe scripts/componentes/filtros.js. */
+
+.filtros {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.filtros[hidden] {
+    display: none;
+}
+
+.filtros-label {
+    color: var(--muted);
+    font-family: "DM Mono", monospace;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+/* El botón del desplegable solo existe en móvil (ver
+   components_responsives/filtros.responsive.css): aquí las categorías
+   se ven todas en fila y no hace falta. */
+.filtros-toggle {
+    display: none;
+}
+
+.filtros-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.filtro-btn {
+    padding: 6px 14px;
+    border: 2px solid var(--yellow);
+    background: transparent;
+    color: var(--yellow);
+    font-family: "DM Mono", monospace;
+    font-size: 0.75rem;
+    letter-spacing: 0.5px;
+    cursor: pointer;
+    transition: color 0.15s linear, background-color 0.15s linear;
+}
+
+.filtro-btn:hover {
+    color: var(--yellow-contrast);
+    background: var(--yellow);
+}
+
+/* El filtro activo se marca con aria-pressed, que es lo que anuncia un
+   lector de pantalla, y el CSS se cuelga de ese mismo atributo: así no
+   hay forma de que lo que se ve y lo que se lee se desincronicen. */
+.filtro-btn[aria-pressed="true"] {
+    color: var(--yellow-contrast);
+    background: var(--yellow);
+}
+
+.filtro-btn:focus-visible {
+    outline: 2px solid var(--yellow);
+    outline-offset: 3px;
+}
+
+/* Aviso de "aquí todavía no hay nada", para una categoría que existe
+   pero está vacía. Lleva role="status" en el HTML, así que al cambiar
+   de filtro se lee solo. */
+.filtros-vacio {
+    margin: 0;
+    color: var(--muted);
+    font-family: "DM Mono", monospace;
+    font-size: 0.8125rem;
+}
+
+.filtros-vacio[hidden] {
+    display: none;
+}
+
+/* Enlace al RSS al final de la fila de filtros. El feed lleva el blog,
+   los relatos y el rol, así que se ofrece también desde estas páginas;
+   metido en esta misma fila no gasta ni un píxel de alto extra. */
+.filtros-rss {
+    margin-left: auto;
+    padding: 6px 14px;
+    border: 2px solid var(--yellow);
+    background: var(--yellow);
+    color: var(--yellow-contrast);
+    font-family: "DM Mono", monospace;
+    font-size: 0.75rem;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    text-decoration: none;
+    transition: color 0.15s linear, background-color 0.15s linear;
+}
+
+.filtros-rss:hover,
+.filtros-rss:focus-visible {
+    background: transparent;
+    color: var(--yellow);
+}
+
+.filtros-rss:focus-visible {
+    outline: 2px solid var(--yellow);
+    outline-offset: 3px;
+}

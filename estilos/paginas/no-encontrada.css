@@ -1,0 +1,110 @@
+/* NOT FOUND */
+
+.not-found-content {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+/* ==== VENTANA FALSA CON EL GATETE ====
+   Mismo marco que las ventanitas del resto del sitio: la cabecera es
+   el componente compartido (.recent-entries-header, que ya viene en la
+   base) y los botones −■✕ los pinta botones-ventana.js solo.
+   Dentro va un dibujo hecho con caracteres braille (⣿). No son ASCII
+   de los de siempre: ninguna tipografía del sitio los trae, así que el
+   navegador tira de la del sistema. Por eso la familia se declara
+   aquí aparte y con varias opciones — y por eso el dibujo se hizo con
+   un solo tipo de carácter: si todos caen en la misma tipografía de
+   repuesto, todas las líneas miden lo mismo y el dibujo no se
+   descuadra. */
+
+.ventana-gatete {
+    padding: 16px;
+    background: var(--purple-lighter);
+    border: 3px solid var(--yellow);
+    box-shadow: 6px 6px 0 var(--yellow);
+}
+
+.gatete-arte {
+    margin: 0 auto;
+    /* Los caracteres braille tienen que ir pegados: con la separación
+       normal entre líneas el dibujo sale a rayas. */
+    line-height: 1;
+    /* El tamaño se ajusta al ancho de la pantalla: un dibujo de 30
+       columnas solo se ve entero si caben las 30. Medido a 320, 390 y
+       1440. */
+    font-size: clamp(0.38rem, 2.45vw, 0.62rem);
+    font-family: "DejaVu Sans Mono", "Noto Sans Symbols 2", "Segoe UI Symbol",
+        "Apple Symbols", ui-monospace, monospace;
+    color: var(--yellow);
+    text-align: center;
+    /* Son caracteres de adorno: que no estorben al seleccionar texto. */
+    user-select: none;
+}
+
+.gatete-pie {
+    margin: 12px 0 0;
+    color: var(--muted);
+    font-family: "DM Mono", monospace;
+    font-size: 0.6875rem;
+    letter-spacing: 0.5px;
+    text-align: center;
+}
+
+.gatete-cursor {
+    display: inline-block;
+    margin-left: 2px;
+    animation: gatete-parpadeo 1.1s steps(1) infinite;
+}
+
+@keyframes gatete-parpadeo {
+    0%, 50% {
+        opacity: 1;
+    }
+    50.01%, 100% {
+        opacity: 0;
+    }
+}
+
+/* Si pides menos movimiento, el cursor se queda encendido y quieto. */
+@media (prefers-reduced-motion: reduce) {
+    .gatete-cursor {
+        animation: none;
+        opacity: 1;
+    }
+}
+
+.not-found-link {
+    display: inline-block;
+    align-self: flex-start;
+    padding: 8px 16px;
+    border: 2px solid var(--yellow);
+    color: var(--yellow);
+    font-family: "DM Mono", monospace;
+    font-size: 0.75rem;
+    text-decoration: none;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    transition: color 0.1s linear, background-color 0.1s linear;
+}
+
+.not-found-link:hover,
+.not-found-link:focus-visible {
+    color: var(--yellow-contrast);
+    background: var(--yellow);
+}
+
+.not-found-link:focus-visible {
+    outline: 2px solid var(--yellow);
+    outline-offset: 3px;
+}
+
+/* En una pantalla de 320px la ventana no cabía por 14px y la página se
+   podía desplazar de lado: se le quita relleno para que el dibujo
+   quepa entero (que es lo que importa en un dibujo hecho de
+   caracteres). Medido a 320, 360 y 390. */
+@media (max-width: 400px) {
+    .ventana-gatete {
+        padding: 12px;
+    }
+}

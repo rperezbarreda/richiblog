@@ -1,0 +1,417 @@
+/* MIS MOVIDAS — RELATOS (listado + lectura, igual que el blog) */
+
+/* Página de alto fijo, montada igual que el portfolio de rol: el
+   título, la intro y la ventana de filtros se quedan a la vista y lo
+   único que se desplaza —cuando hay más relatos de los que caben— es
+   el listado, dentro de su ventana. */
+.relatos-page {
+    display: flex;
+    flex-direction: column;
+    /* .home trae align-items: center (es una rejilla); en una columna
+       flex eso deja a los hijos sin estirar al ancho del contenedor. */
+    align-items: stretch;
+    /* Sin esto, el "justify-content: center" que trae section en
+       base.css centra la columna entera: con dos relatos sobraba alto
+       y el título bajaba 154px, muy por debajo de donde está en el
+       resto de índices. */
+    justify-content: flex-start;
+    gap: 16px;
+    overflow: hidden;
+    padding: 24px 4%;
+}
+
+.relatos-page > .home-title,
+.relatos-page-intro,
+.relatos-page .filtros {
+    flex-shrink: 0;
+}
+
+/* El hueco entre bloques lo pone el gap de la columna. */
+.relatos-page > .home-title {
+    margin: 0;
+}
+
+.relatos-page-intro {
+    margin: 0;
+    max-width: 640px;
+    color: var(--muted);
+    font-size: 1rem;
+    line-height: 1.6;
+}
+
+/* Misma "ventana falsa" que .blog-month/.recent-entries: cabecera
+   con barra y botones −■✕ generados por botones-ventana.js
+   (.recent-entries-header y .entries-list son componentes
+   compartidos, ya definidos en estilos/componentes/cabecera-ventana.css y
+   estilos/base.css — aquí solo hace falta la caja que los envuelve). */
+.relatos-list-card {
+    display: flex;
+    flex-direction: column;
+    /* Crece con el listado hasta donde llegue el hueco y ahí se para:
+       lo que no cabe se desplaza dentro en vez de mover la página
+       entera. Con "flex: 1" la ventana se estiraba siempre hasta
+       abajo y con dos relatos quedaba medio metro de vacío dentro. */
+    flex: 0 1 auto;
+    min-height: 0;
+    /* Dos columnas de listado caben de sobra en 1000px; más ancho solo
+       dejaría el título de cada relato perdido en una línea larguísima. */
+    max-width: 1000px;
+    padding: 16px;
+    background: var(--purple-lighter);
+    border: 3px solid var(--yellow);
+    box-shadow: 6px 6px 0 var(--yellow);
+}
+
+.relatos-list-body {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    margin-top: 2px;
+    /* Hueco para que el recuadro del foco de un enlace no quede
+       pegado al borde de la ventana ni se corte al desplazar. */
+    padding: 2px 4px;
+}
+
+/* Misma barra fina que en el portfolio de rol, para que se note que el
+   listado sigue por debajo. */
+.relatos-list-body {
+    scrollbar-width: thin;
+    scrollbar-color: var(--yellow) transparent;
+}
+
+.relatos-list-body::-webkit-scrollbar {
+    width: 8px;
+}
+
+.relatos-list-body::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.relatos-list-body::-webkit-scrollbar-thumb {
+    background: var(--yellow);
+}
+
+/* Dos columnas en cuanto hay sitio, una si no. Antes era una sola
+   columna de 640px de ancho máximo y la mitad derecha de la ventana
+   se quedaba vacía. */
+.relatos-list-card .entries-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    align-content: start;
+    gap: 10px 28px;
+}
+
+/* En una rejilla, ":last-child" ya no quiere decir "el último de la
+   columna": la línea de separación se quita solo en la última fila
+   sobraría de uno en uno. Se deja en todos, que es lo que separa una
+   entrada de la de abajo. */
+.relatos-list-card .entry-preview:last-child {
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--border);
+}
+
+.relatos-list-card .entry-preview[hidden] {
+    display: none;
+}
+
+/* RELATOS — LECTURA INDIVIDUAL (mismo patrón que .blog-post-page) */
+
+.relato-page {
+    display: flex;
+    flex-direction: column;
+    /* Mismo reset que .blog-post-page: .home trae align-items:
+       center, y en columna eso deja a los hijos sin estirar al ancho
+       del contenedor. */
+    align-items: stretch;
+    overflow: hidden;
+    /* Sin margen: la entrada ocupa hasta el borde, igual que un post
+       del blog (ver body:has(.relato-page) main más abajo). */
+    padding: 0;
+}
+
+body:has(.relato-page) main {
+    background: transparent;
+    border: none;
+    box-shadow: none;
+}
+
+/* Igual que en blog.css: el margen a pantalla completa pegado al
+   sidebar de 280px es cosa de escritorio. La regla de
+   estilos/paginas/relatos.responsive.css que devuelve .relato-page a
+   un layout normal está pensada para el mismo corte de 860px — este
+   corte evita que ambas reglas se lleven la contraria. */
+@media (min-width: 861px) {
+    body:has(.relato-page) main {
+        margin: 0 0 0 280px;
+        width: calc(100% - 280px);
+    }
+}
+
+.relato-post {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-height: 0;
+    width: 100%;
+    background: var(--purple-lighter);
+    border: 3px solid var(--yellow);
+    box-shadow: 6px 6px 0 var(--yellow);
+    overflow: hidden;
+}
+
+.relato-post::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background-image: var(--bg-texture);
+    background-size: 90px 90px;
+    background-repeat: repeat;
+    opacity: 0.35;
+    pointer-events: none;
+    z-index: 0;
+}
+
+.relato-post-header {
+    position: relative;
+    z-index: 1;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 14px 20px;
+    background: var(--yellow);
+    user-select: none;
+}
+
+.relato-post-header-meta {
+    display: flex;
+    align-items: center;
+    flex-shrink: 0;
+    gap: 14px;
+}
+
+.relato-post-title {
+    flex: 1;
+    min-width: 0;
+    margin: 0;
+    color: var(--yellow-contrast);
+    font-family: "Jersey 10", "DM Mono", monospace;
+    font-weight: 400;
+    font-size: clamp(1.75rem, 3.2vw, 2.25rem);
+    letter-spacing: 0.3px;
+    line-height: 1.2;
+}
+
+.relato-post-body-wrap {
+    position: relative;
+    z-index: 1;
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    padding: 28px 32px;
+}
+
+.relato-post-body {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    max-width: 720px;
+    color: var(--white);
+    font-family: "Pangolin", "Space Grotesk", sans-serif;
+    font-size: 1rem;
+    line-height: 1.7;
+}
+
+.relato-post-back {
+    display: inline-flex;
+    flex-shrink: 0;
+    padding: 6px 14px;
+    /* Va sobre la barra amarilla de la cabecera, no sobre el cuerpo, así
+       que lleva los colores invertidos: relleno oscuro y texto claro.
+       En hueco se leía bien, pero relleno destaca como el botón que es
+       y no se confunde con el título. */
+    border: 2px solid var(--yellow-contrast);
+    background: var(--yellow-contrast);
+    color: var(--yellow);
+    font-family: "DM Mono", monospace;
+    font-size: 0.75rem;
+    text-decoration: none;
+    transition: color 0.15s linear, background-color 0.15s linear;
+}
+
+.relato-post-back:hover,
+.relato-post-back:focus-visible {
+    color: var(--yellow-contrast);
+    background: transparent;
+}
+
+.relato-post-back:focus-visible {
+    outline: 2px solid var(--yellow-contrast);
+    outline-offset: 3px;
+}
+
+.relato-post-date {
+    margin: 0;
+    color: var(--yellow-contrast);
+    font-family: "DM Mono", monospace;
+    font-size: 0.75rem;
+    letter-spacing: 1px;
+    white-space: nowrap;
+}
+
+/* ==== IMAGEN LATERAL DE LA ENTRADA ==== */
+
+.relato-post-layout {
+    display: flex;
+    align-items: flex-start;
+    gap: 32px;
+    /* Centrado y con tope. Sin esto, en una pantalla de 1920 el texto y
+       la imagen se quedaban pegados a la izquierda y sobraban 590px de
+       fondo a la derecha: un 36% del ancho vacío. Ensanchar el texto no
+       es la solución (ya va a 81 caracteres por línea, en el límite de
+       lo cómodo de leer), así que lo que se hace es centrar el bloque y
+       dejar que la imagen crezca un poco. */
+    max-width: 1100px;
+    margin: 0 auto;
+}
+
+/* min-width: 0 para que pueda encoger: sin esto, el mínimo automático
+   de un hijo flex es su contenido y la imagen acabaría empujando el
+   texto fuera de la caja. */
+.relato-post-layout .relato-post-body {
+    flex: 1 1 auto;
+    min-width: 0;
+}
+
+/* Se queda quieta mientras el texto se desplaza. El "sticky" va
+   referido a .relato-post-body-wrap, que es quien tiene el scroll en
+   escritorio. */
+.relato-post-side {
+    position: sticky;
+    top: 0;
+    /* Y se queda quieta DE VERDAD: con position: sticky, una columna
+       más alta que el hueco visible se desplaza igual hasta enseñar su
+       final (medido: la del blog mide 850px contra 811 de hueco en una
+       ventana de 900, y subía 71px al desplazar el texto). El tope la
+       deja siempre dentro del hueco y lo que cede es la imagen, ver
+       .relato-post-aside. Los 150px descontados son el marco de la
+       página —márgenes de main, borde y barra de título, entre 89 y
+       92— MÁS los 56 de relleno de arriba y abajo del cuerpo. Sin esa
+       segunda parte la columna medía justo lo que el hueco visible y
+       entre las dos cosas sobraban 35px: la página se desplazaba esos
+       35px y la columna, que era lo más alto de la fila, se iba con
+       ellos (no había recorrido donde quedarse pegada). Con el tope
+       así, una entrada corta no se desplaza en absoluto. */
+    max-height: calc(100vh - 150px);
+    /* Crece con la ventana entre 260 y 340px: en pantallas anchas 260
+       se quedaba pequeña al lado de un texto de 720. */
+    flex: 0 0 clamp(260px, 20vw, 340px);
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+/* La imagen es lo elástico de la columna: si la columna no cabe
+   entera, encoge (recortando por arriba y por abajo con object-fit)
+   en vez de dejar que la columna se desplace. El mínimo es para que
+   no acabe convertida en una rendija. */
+.relato-post-aside {
+    display: flex;
+    flex-direction: column;
+    flex: 0 1 auto;
+    min-height: 0;
+    margin: 0;
+}
+
+/* La ventana de "sigue leyendo" llena el hueco que quedaba debajo de la
+   imagen mientras se lee. Se alimenta sola del mismo JSON que los
+   listados (ver scripts/paginas/otras-entradas.js).
+   El recuadro va escrito aquí y no reutilizando .recent-entries como en
+   la portada: esa clase vive en paginas/portada.css, que estas páginas no
+   cargan, así que la tarjeta salía sin fondo ni borde — un encabezado
+   suelto flotando sobre el texto. La cabecera sí se hereda, porque
+   .recent-entries-header está en la base (components/cabecera-ventana.css),
+   y su margen negativo de -16px cuadra con el padding de aquí. */
+.relato-post-otras {
+    position: relative;
+    flex: none;
+    padding: 16px;
+    background: var(--purple);
+    border: 3px solid var(--yellow);
+    box-shadow: 4px 4px 0 var(--yellow);
+}
+
+.relato-post-otras .entries-list {
+    gap: 10px;
+}
+
+.relato-post-aside img {
+    display: block;
+    width: 100%;
+    height: auto;
+    flex: 0 1 auto;
+    min-height: 140px;
+    object-fit: cover;
+    border: 3px solid var(--yellow);
+    box-shadow: 4px 4px 0 var(--yellow);
+}
+
+.relato-post-aside figcaption {
+    margin-top: 12px;
+    color: var(--muted);
+    font-family: "DM Mono", monospace;
+    font-size: 0.6875rem;
+    line-height: 1.5;
+}
+
+/* Por debajo de 1150px la columna no cabe sin estrangular el texto: a
+   860px de ventana al párrafo le quedarían 139px de ancho. Medido el
+   límite en que el texto conserva unos 420px, que es lo mínimo para
+   leer con gusto. A partir de ahí la imagen se va arriba, a lo ancho y
+   sin quedarse fija (fija en una pantalla pequeña se come media
+   ventana). */
+@media (max-width: 1150px) {
+    .relato-post-layout {
+        flex-direction: column;
+        /* En fila, align-items: flex-start (más arriba) deja que cada
+           columna mida lo suyo. Apilado eso pasa a ser el ANCHO, así que
+           el texto dejaba de estirarse al hueco y se quedaba con el ancho
+           de lo más ancho que llevara dentro: con un bloque de código o
+           una tabla, 720px dentro de una pantalla de 390 y el texto
+           cortado por la derecha. Medido. */
+        align-items: stretch;
+    }
+
+    /* Apilada, la columna se va al final: en un móvil lo que se viene a
+       hacer es leer, y tener que pasar la imagen y la lista de "sigue
+       leyendo" antes de llegar al primer párrafo estorba. Al quitar el
+       order queda donde ya estaba en el HTML, que es después del texto
+       — así que el orden visual y el de lectura vuelven a coincidir. */
+    .relato-post-side {
+        position: static;
+        flex: none;
+        align-self: center;
+        width: 100%;
+        max-width: 420px;
+        margin-top: 8px;
+    }
+
+    .relato-post-aside figcaption {
+        text-align: center;
+    }
+}
+
+/* Si la ventana es MUY baja, la columna no cabe ni con la imagen
+   encogida al mínimo (140 de imagen + pie + "sigue leyendo" = 549px,
+   contra los 548 de hueco que deja una ventana de 640). Ahí se
+   desactiva el pegado y la columna baja con el texto, que siempre se
+   puede desplazar. El corte estaba en 790px, de cuando la imagen no
+   encogía; medido de nuevo, ahora aguanta pegada hasta los 700. */
+@media (max-height: 660px) {
+    .relato-post-side {
+        position: static;
+    }
+}

@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8">
+    <!-- Color de la barra del navegador en el móvil. Arranca en el color
+         del modo oscuro y el script de abajo lo cambia si toca; al pulsar
+         el botón de tema lo actualiza scripts/tema.js. -->
+    <meta name="theme-color" content="#12091c">
+    <script>
+      (function () {
+        try {
+          if (localStorage.getItem("richi-theme") === "light") {
+            document.documentElement.setAttribute("data-theme", "light");
+            var barra = document.querySelector('meta[name="theme-color"]');
+            if (barra) {
+              barra.setAttribute("content", "#f2ded2");
+            }
+          }
+        } catch (e) {}
+      })();
+    </script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rol · Mis movidas · El Blog de Richi</title>
+    <!-- Cómo se ve el enlace al compartirlo (Bluesky, Discord, Ko-fi…).
+         Sin esto solo sale la URL pelada, sin título ni imagen. Las rutas
+         van absolutas a propósito: las redes no resuelven las relativas. -->
+    <meta name="description" content="Portfolio de material de rol: aventuras, mapas y sistemas, en formato paga lo que quieras.">
+    <link rel="canonical" href="https://richi.blog/web/mis_movidas/rol/index_rol.html">
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="El Blog de Richi">
+    <meta property="og:locale" content="es_ES">
+    <meta property="og:title" content="Rol · El Blog de Richi">
+    <meta property="og:description" content="Portfolio de material de rol: aventuras, mapas y sistemas, en formato paga lo que quieras.">
+    <meta property="og:url" content="https://richi.blog/web/mis_movidas/rol/index_rol.html">
+    <meta property="og:image" content="https://richi.blog/imagenes/meta/og.webp">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta property="og:image:alt" content="El Blog de Richi — ilustración de Richi sobre fondo morado">
+    <meta name="twitter:card" content="summary_large_image">
+    <link rel="icon" type="image/x-icon" href="/imagenes/favicon.ico">
+    <!-- La única fuente que se precarga. Medido con la red frenada: sin esto el
+         navegador no la descubre hasta parsear el CSS (~800 ms) y el texto baila al
+         cambiar de tipografía; así llega antes del primer pintado y no se nota el
+         cambio. Precargar más fuentes empeoraba el primer pintado 150-210 ms, porque
+         compiten por el ancho de banda con lo que hace falta para pintar. -->
+    <link rel="preload" href="/tipografias/space-grotesk-400.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="alternate" type="application/rss+xml" title="El Blog de Richi — blog, relatos y rol" href="/blog/rss.xml">
+    <!-- ==== CSS ====
+         Esta lista la escribe herramientas/actualizar-cabeceras.py.
+         No la toques a mano: si cambias qué CSS lleva una página,
+         cámbialo en esa herramienta y vuélvela a ejecutar.
+
+         Van escritos aquí, y no cargados por un script, para que el
+         navegador los pida nada más recibir el HTML. Con un script de
+         por medio tardaba ~200 ms más en pintar la página. -->
+    <link rel="stylesheet" href="/estilos/base.css">
+    <link rel="stylesheet" href="/estilos/base.responsive.css">
+    <link rel="stylesheet" href="/estilos/componentes/visor-imagenes.css">
+    <link rel="stylesheet" href="/estilos/componentes/aviso.css">
+    <link rel="stylesheet" href="/estilos/componentes/aviso.responsive.css">
+    <link rel="stylesheet" href="/estilos/componentes/cabecera-ventana.css">
+    <link rel="stylesheet" href="/estilos/componentes/subir.css">
+    <link rel="stylesheet" href="/estilos/paginas/mis-movidas.css">
+    <link rel="stylesheet" href="/estilos/paginas/mis-movidas.responsive.css">
+    <link rel="stylesheet" href="/estilos/componentes/filtros.css">
+    <link rel="stylesheet" href="/estilos/componentes/filtros.responsive.css">
+    <link rel="stylesheet" href="/estilos/componentes/barra-lateral.css">
+    <link rel="stylesheet" href="/estilos/componentes/barra-lateral.responsive.css">
+    <!-- ==== fin del CSS ==== -->
+    <script src="/scripts/cargador-scripts.js"></script>
+  </head>
+<body>
+    <!-- ==== SIDEBAR / NAVEGACIÓN ==== -->
+    <a class="skip-link" href="#main-content">Saltar al contenido</a>
+    <div id="sidebar-container"></div>
+    <!-- ==== CONTENIDO PRINCIPAL ==== -->
+
+    <main id="main-content">
+        <!-- ==== HOME ==== -->
+        <section id="home" class="home rol-page">
+            <h1 class="home-title">
+                <em>rol</em>
+            </h1>
+
+            <!-- Intro y aviso en la misma fila: en vertical se comían
+                 130px de alto y la página no cabía en una pantalla de
+                 800, que es lo que obligaba a hacer scroll. -->
+            <div class="rol-page-cabecera">
+                <p class="rol-page-intro">Portfolio de lo que voy creando y compartiendo para partidas de rol. Todo está disponible en mi <a href="https://ko-fi.com/soyrichi" target="_blank" rel="noopener noreferrer">tienda de Ko-fi</a>.</p>
+
+                <p class="rol-page-disclaimer"><strong>Aviso:</strong> todo mi contenido de rol está en formato "paga lo que quieras" — en Ko-fi puedes apoyarme con alguna donación o llevártelo gratis, pero si prefieres no pasar por Ko-fi tienes también un enlace de descarga directa y gratuita en Drive.</p>
+            </div>
+
+            <!-- Los botones de dentro NO se escriben a mano: los pone
+                 scripts/componentes/filtros.js con las categorías que lleven
+                 las tarjetas en data-categoria, más las que se declaren
+                 aquí en data-filtros-categorias (para que una categoría
+                 todavía vacía siga teniendo su botón). Publicar algo con
+                 una categoría nueva la añade sola. -->
+            <div class="filtros" data-filtros
+                 data-filtros-items=".portfolio-card"
+                 data-filtros-categorias="aventuras, mapas, sistemas">
+                <span class="filtros-label" id="filtros-label">filtrar:</span>
+
+                <!-- Este botón solo se ve en móvil (en escritorio lo
+                     esconde el CSS): ahí la fila de categorías no cabe
+                     y se colapsa en una lista flotante. -->
+                <button class="filtros-toggle" type="button" data-filtros-toggle
+                        aria-expanded="false" aria-controls="filtros-lista">
+                    <span class="visually-hidden">Categoría: </span>
+                    <span class="filtros-toggle-label" data-filtros-label>todas</span>
+                    <span class="filtros-toggle-arrow" aria-hidden="true">▾</span>
+                </button>
+
+                <div class="filtros-list" id="filtros-lista" role="group" aria-labelledby="filtros-label"></div>
+
+                <!-- El feed lleva también los relatos y el portfolio de
+                     rol, así que tiene sentido ofrecerlo aquí. Va dentro
+                     de la fila de filtros para no gastar otra línea de
+                     alto. -->
+                <a class="filtros-rss" href="/blog/rss.xml">rss →</a>
+
+            </div>
+
+            <!-- Una sola rejilla con todo, a dos columnas. Antes esto
+                 eran tres paneles de pestañas; ahora cada tarjeta dice a
+                 qué categoría pertenece y el filtro esconde las demás,
+                 que es lo que permite que una categoría nueva no tenga
+                 que tocar esta página. -->
+            <div class="portfolio-grid" tabindex="0" role="region" aria-label="Portfolio de rol, con scroll">
+
+                <!-- data-fecha: cuándo se publicó. data-categoria: en qué
+                     filtro entra. Van aquí y no solo en
+                     datos/mis-movidas.json para que
+                     herramientas/generar-posts.py pueda reconstruir el
+                     listado leyendo esta página, igual que hace con las
+                     entradas del blog y los relatos. Fecha en dd-mm-aaaa. -->
+                <div class="portfolio-card" data-categoria="aventuras" data-fecha="14-09-2026">
+                    <img class="portfolio-card-photo" src="/imagenes/mis_movidas/rol/thumbnail_la_bestia_de_savalta.webp" alt="Portada de la aventura La Bestia de Savalta" loading="lazy">
+                    <div class="portfolio-card-info">
+                        <!-- h2 y no h3: al quitar los encabezados de
+                             categoría, los títulos saltaban de h1 a h3. -->
+                        <h2 class="portfolio-card-title">La Bestia de Savalta</h2>
+                        <p class="portfolio-card-system">D&amp;D 5e · 2-5 jugadores</p>
+                        <p class="portfolio-card-desc">Aventura de misterio y horror gótico ambientada en Savalta, una ciudad aislada donde una serie de muertes extrañas está relacionada con una criatura antigua. Los jugadores investigan el origen de la Bestia y quién la controla. Incluye un PDF de 18 páginas con mapa de Savalta (en blanco y negro y a color) y retratos de PNJs.</p>
+                        <!-- El texto escondido va dentro del enlace a
+                             propósito: a la vista pone solo "Ver en Ko-fi",
+                             pero quien usa lector de pantalla saca la lista de
+                             enlaces de la página y oiría "Ver en Ko-fi" tres o
+                             cuatro veces seguidas sin saber de qué aventura es
+                             cada uno. Y de paso avisa de que se abre en otra
+                             pestaña. -->
+                        <div class="portfolio-card-actions">
+                            <a class="portfolio-card-btn" href="https://ko-fi.com/s/b5f6c245a0" target="_blank" rel="noopener noreferrer">Ver en Ko-fi →<span class="visually-hidden"> — La Bestia de Savalta (se abre en otra pestaña)</span></a>
+                            <a class="portfolio-card-btn portfolio-card-btn-secondary" href="https://drive.google.com/file/d/1JDNQkgMyVraqDI1r7t6MqHT1lX9TkfXz/view?usp=sharing" target="_blank" rel="noopener noreferrer">Descargar gratis ↓<span class="visually-hidden"> — La Bestia de Savalta (se abre en otra pestaña)</span></a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Lo rellena filtros.js cuando la categoría elegida no
+                     tiene nada dentro. role="status" para que se lea
+                     solo al cambiar de filtro. -->
+                <p class="filtros-vacio" data-filtros-vacio role="status" hidden></p>
+            </div>
+        </section>
+    </main>
+</body>
+</html>

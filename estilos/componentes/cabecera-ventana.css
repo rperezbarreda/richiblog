@@ -1,0 +1,66 @@
+/* COMPONENTE: CABECERA DE VENTANA FALSA */
+
+/* Estaba en portada.css, y por eso las páginas de blog (que nunca cargan
+   portada.css) llevaban meses con los botones de ventana de
+   .blog-post-header a tamaño normal (28px) en vez de pequeño, sin que
+   se notara a simple vista salvo comparando con el resto del sitio.
+   Se usa en tarjetas de casi todas las páginas de contenido —
+   portada, sobre mí, contacto, santuarios, blog — así que va en la
+   lista base de herramientas/actualizar-cabeceras.py, como el visor de
+   imágenes o el aviso emergente, para que cualquier página nueva la
+   tenga sin tener que acordarse de nada. */
+
+.recent-entries-header {
+    position: relative;
+    margin: -16px -16px 16px -16px;
+    /* El hueco de la derecha es para los botones −■✕, que están
+       posicionados encima. Va en rem y no en píxeles porque los botones
+       también miden en rem (0.9rem cada uno): con los 56px de antes,
+       que salían de medirlos suponiendo 14px, se quedaban 22px cortos y
+       un título largo como "nuevas_entradas.txt" se metía por debajo en
+       pantallas estrechas. 3.7rem = los tres botones + sus separaciones
+       + los 12px que se dejan al borde. */
+    padding: 12px 3.7rem 10px 16px;
+    background: var(--purple);
+    border-bottom: 2px solid var(--yellow);
+    color: var(--yellow);
+    font-family: "Jersey 10", "DM Mono", monospace;
+    font-size: 1.15rem;
+    letter-spacing: 0.2px;
+}
+
+.recent-entries-header h2 {
+    min-width: 0;
+    /* Último seguro: si algún día hay un nombre de fichero más largo
+       que el hueco, que parta a dos líneas en vez de salirse. */
+    overflow-wrap: anywhere;
+    font: inherit;
+    color: inherit;
+}
+
+.window-controls-small {
+    position: absolute;
+    top: 10px;
+    right: 12px;
+    z-index: 5;
+    gap: 4px;
+}
+
+/* El dibujo de dentro va en % del botón (ver .window-btn-icono en
+   base.css), así que aquí solo hay que cambiar el cuadrado. */
+.window-controls-small .window-btn {
+    width: 0.9rem;
+    height: 0.9rem;
+}
+
+/* En pantallas muy estrechas (320px y similares) los títulos largos no
+   caben: "nuevas_entradas.txt" pide 191px y en la tarjeta de la portada
+   solo quedan 146 una vez descontado el hueco de los botones, así que
+   se partía en dos líneas — y en un nombre de fichero se nota. Bajando
+   la tipografía se queda en 137 y cabe entero en una línea. Medido a
+   320, 360 y 390. */
+@media (max-width: 360px) {
+    .recent-entries-header {
+        font-size: 0.85rem;
+    }
+}

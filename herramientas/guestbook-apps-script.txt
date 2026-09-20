@@ -1,0 +1,225 @@
+// ============================================================
+// CÓDIGO PARA GOOGLE APPS SCRIPT — GUESTBOOK DE "EL BLOG DE RICHI"
+// ============================================================
+//
+// Instrucciones completas (léelas antes de tocar nada):
+//
+// 1. Ve a https://sheets.google.com y crea una hoja de cálculo nueva.
+//
+// 2. En la fila 1, escribe estas cinco cabeceras, una por columna:
+//       A1: Fecha            B1: Nombre    C1: Mensaje
+//       D1: Fecha respuesta  E1: Respuesta
+//
+//    Las columnas A, B y C las rellena el script solo cada vez que
+//    alguien firma. Las columnas D y E las rellenas TÚ a mano
+//    cuando quieras responder a un mensaje (ver el apartado
+//    "CÓMO RESPONDER" al final de estas instrucciones).
+//
+// 3. En esa misma hoja, ve a Extensiones → Apps Script.
+//
+// 4. Se abrirá un editor con un archivo "Código.gs" con una función
+//    de ejemplo. Borra todo su contenido y pega el código de más
+//    abajo entero.
+//
+// 5. Pulsa el icono de guardar (o Ctrl+S).
+//
+// 6. Pulsa "Implementar" (Deploy) → "Nueva implementación".
+//      - Tipo: "Aplicación web" (Web app)
+//      - Ejecutar como: "Yo" (tu cuenta)
+//      - Quién tiene acceso: "Cualquier usuario" (Anyone)
+//    Pulsa "Implementar".
+//
+// 7. Google te pedirá autorizar el script (es tu propia hoja, así
+//    que es seguro) — sigue los pasos, incluido el aviso de
+//    "app no verificada" (es normal, es tu propio script).
+//
+// 8. Te dará una URL que termina en "/exec". Cópiala entera.
+//
+// 9. Pégala en js/guestbook.js, en la constante GUESTBOOK_API_URL
+//    (al principio del archivo), sustituyendo el texto de marcador
+//    de posición.
+//
+// Si en el futuro cambias el código del script, tendrás que volver
+// a "Implementar" → "Gestionar implementaciones" → editar (icono
+// del lápiz) → "Nueva versión" → Implementar, o la URL seguirá
+// sirviendo la versión antigua.
+//
+// ============================================================
+// CÓMO RESPONDER A UN MENSAJE
+// ============================================================
+//
+// Busca en la hoja la fila del mensaje al que quieras responder y:
+//
+//   - Escribe tu respuesta en la columna E ("Respuesta").
+//   - Si quieres que se vea la fecha, ponla en la columna D
+//     ("Fecha respuesta"). Puedes escribirla como 15/09/2026 o
+//     dejar que Sheets la formatee como fecha: la web entiende las
+//     dos. Si la dejas vacía, la respuesta se ve igual pero sin
+//     fecha.
+//
+// La respuesta aparecerá en la web colgando de ese mensaje, con
+// otro formato (sangrada y con una barra amarilla a la izquierda).
+// Si dejas la columna E vacía, ese mensaje se ve como siempre, sin
+// nada debajo — o sea que puedes responder solo a los que quieras.
+//
+// Los saltos de línea que escribas dentro de la celda (Alt+Enter en
+// Sheets) se respetan en la web.
+//
+// OJO: si ya tenías el script publicado con la versión anterior
+// (sólo tres columnas), después de pegar este código nuevo hay que
+// volver a implementarlo como "Nueva versión" (ver arriba), o la
+// web seguirá sin recibir las respuestas.
+//
+// ============================================================
+// CONTRA EL SPAM
+// ============================================================
+//
+// La URL de este script es pública (va escrita en el JavaScript de
+// la web, no hay forma de esconderla), así que cualquiera puede
+// mandarle mensajes sin pasar por el formulario. El código de abajo
+// filtra cuatro cosas antes de escribir nada en la hoja:
+//
+//   1. El campo trampa ("website"), que está oculto en el formulario
+//      y ninguna persona rellena. Antes solo se miraba en el
+//      navegador, así que quien escribiese directo a la URL se lo
+//      saltaba; ahora se mira aquí también, que es lo que de verdad
+//      cuenta.
+//   2. Mensajes con más de 2 enlaces.
+//   3. Ráfagas: como mucho 5 mensajes cada 10 minutos en total.
+//   4. Mensajes repetidos (mismo nombre y mismo texto).
+//
+// Los números están arriba del todo del doPost, en MAX_MENSAJES_POR_
+// VENTANA, VENTANA_MINUTOS y MAX_ENLACES, por si algún día se te
+// quedan cortos o largos.
+//
+// Nada de esto avisa a quien lo manda: siempre responde lo mismo,
+// haya guardado o no. Es a propósito — si le dijésemos a un bot
+// "rechazado por spam", aprendería a esquivarlo.
+//
+// Si aun así se cuela algo, borrar la fila de la hoja lo quita de la
+// web al instante.
+//
+// ============================================================
+
+function doGet(e) {
+  const sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
+  const rows = sheet.getDataRange().getValues();
+  const entries = [];
+
+  // Empieza en 1 para saltarse la fila de cabeceras
+  for (let i = 1; i < rows.length; i++) {
+    const fecha = rows[i][0];
+    const nombre = rows[i][1];
+    const mensaje = rows[i][2];
+    // Columnas D y E (respuesta escrita a mano). Pueden venir vacías,
+    // e incluso no existir si todavía no has respondido a nada: de ahí
+    // el "|| null" en vez de darlas por hechas.
+    const fechaRespuesta = rows[i][3];
+    const respuesta = rows[i][4];
+
+    if (nombre && mensaje) {
+      entries.push({
+        date: fecha,
+        name: nombre,
+        message: mensaje,
+        replyDate: fechaRespuesta || null,
+        reply: respuesta || null
+      });
+    }
+  }
+
+  return ContentService
+    .createTextOutput(JSON.stringify(entries))
+    .setMimeType(ContentService.MimeType.JSON);
+}
+
+// ---- Ajustes anti-spam (puedes cambiarlos si te quedan cortos) ----
+const MAX_MENSAJES_POR_VENTANA = 5;   // como mucho 5 mensajes...
+const VENTANA_MINUTOS = 10;           // ...cada 10 minutos, en total
+const MAX_ENLACES = 2;                // enlaces permitidos por mensaje
+
+function doPost(e) {
+  const sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
+
+  const nombre = (e.parameter.name || "").toString().trim().slice(0, 60);
+  const mensaje = (e.parameter.message || "").toString().trim().slice(0, 300);
+  const trampa = (e.parameter.website || "").toString().trim();
+
+  // Pase lo que pase se responde lo mismo: si a un bot le dijéramos
+  // "rechazado" y por qué, aprendería a esquivarlo. Callando, no sabe
+  // si ha colado o no.
+  if (!nombre || !mensaje) {
+    return respuestaOk();
+  }
+
+  // 1. El campo trampa. Está oculto en el formulario, así que ninguna
+  //    persona lo rellena; los bots sí. La web ya lo comprobaba, pero
+  //    solo en el navegador: quien escriba directamente a esta URL se
+  //    lo saltaba entero. Por eso se comprueba también aquí.
+  if (trampa) {
+    return respuestaOk();
+  }
+
+  // 2. Mensajes plagados de enlaces: la firma clásica del spam.
+  const enlaces = (mensaje.match(/https?:\/\/|www\./gi) || []).length;
+  if (enlaces > MAX_ENLACES) {
+    return respuestaOk();
+  }
+
+  // El candado evita que dos envíos a la vez se pisen al contar y
+  // escribir (sin él, una ráfaga podría colarse entera).
+  const candado = LockService.getScriptLock();
+  try {
+    candado.waitLock(5000);
+  } catch (err) {
+    return respuestaOk();
+  }
+
+  try {
+    const filas = sheet.getDataRange().getValues();
+
+    // 3. Ritmo: cuántos mensajes han entrado en la última ventana.
+    //    Se limita el total y no "un mensaje cada X segundos" a
+    //    propósito: así dos personas que firmen seguidas no se
+    //    estorban, pero una ráfaga de bot se corta a los pocos.
+    const desde = new Date().getTime() - VENTANA_MINUTOS * 60 * 1000;
+    let recientes = 0;
+    for (let i = 1; i < filas.length; i++) {
+      const fecha = filas[i][0];
+      if (fecha instanceof Date && fecha.getTime() >= desde) {
+        recientes++;
+      }
+    }
+    if (recientes >= MAX_MENSAJES_POR_VENTANA) {
+      return respuestaOk();
+    }
+
+    // 4. Repetidos: el mismo mensaje enviado otra vez no se duplica.
+    for (let i = 1; i < filas.length; i++) {
+      if (
+        (filas[i][1] || "").toString().trim() === nombre &&
+        (filas[i][2] || "").toString().trim() === mensaje
+      ) {
+        return respuestaOk();
+      }
+    }
+
+    // Solo escribe A, B y C: las columnas D y E (fecha respuesta y
+    // respuesta) se quedan vacías a propósito, para rellenarlas tú
+    // cuando quieras responder.
+    sheet.appendRow([new Date(), nombre, mensaje]);
+  } finally {
+    candado.releaseLock();
+  }
+
+  return respuestaOk();
+}
+
+// La misma respuesta para todo: guardado, rechazado por spam o
+// descartado por repetido. La web no la llega a leer de todos modos
+// (va en modo "no-cors"), así que no se pierde nada por callar.
+function respuestaOk() {
+  return ContentService
+    .createTextOutput(JSON.stringify({ status: "success" }))
+    .setMimeType(ContentService.MimeType.JSON);
+}
