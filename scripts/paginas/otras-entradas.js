@@ -41,10 +41,15 @@ async function initializeOtrasEntradas() {
         const datos = await respuesta.json();
         const items = Array.isArray(datos) ? datos : [];
 
-        const aqui = window.location.pathname;
+        // Sin ".html" ni "/" al final: el servidor puede entregar la
+        // página con o sin extensión y la ruta de aquí debe seguir
+        // coincidiendo con la "url" del JSON para no listarse a sí misma.
+        const sinExtension = (ruta) =>
+            (ruta || "").replace(/\.html$/, "").replace(/\/+$/, "");
+        const aqui = sinExtension(window.location.pathname);
         const otras = items
             .filter((item) => (fuente.filtro ? fuente.filtro(item) : true))
-            .filter((item) => (item.url || "") !== aqui)
+            .filter((item) => sinExtension(item.url) !== aqui)
             .sort((a, b) => fechaOtras(b.date) - fechaOtras(a.date))
             .slice(0, OTRAS_MAXIMO);
 

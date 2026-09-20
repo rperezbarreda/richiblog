@@ -22,22 +22,30 @@
 // tal cual.
 
 (function loadPageScripts() {
-    const path = window.location.pathname;
+    // Ruta normalizada: sin ".html" al final ni "/" sobrante. Así las
+    // comprobaciones de abajo funcionan igual si el servidor entrega
+    // la página como /web/santuarios/tali/tali.html o como
+    // /web/santuarios/tali/tali (Neocities y Cloudflare pueden servir
+    // las dos formas). Sin esto, en la segunda no se cargaba el JS de
+    // la página y se quedaba en "Cargando…".
+    const path =
+        window.location.pathname.replace(/\.html$/, "").replace(/\/+$/, "") ||
+        "/";
 
     function script(src) {
         document.write('<script defer src="' + src + '"></' + 'script>');
     }
 
-    const isHome = path === "/" || path === "/index.html";
+    const isHome = path === "/" || path === "/index";
     const isSobreMi = path.includes("/sobre_mi/");
     const isContacto = path.includes("/contacto/");
-    const isBlogArchive = /\/blog\/\d+\/index_\d+\.html$/.test(path);
-    const isDiario = path.endsWith("/blog/diario.html");
+    const isBlogArchive = /\/blog\/\d+\/index_\d+$/.test(path);
+    const isDiario = path.endsWith("/blog/diario");
     const isRol = path.includes("/mis_movidas/rol/");
-    const isRelatosList = path.endsWith("/mis_movidas/relatos/index_relatos.html");
+    const isRelatosList = path.endsWith("/mis_movidas/relatos/index_relatos");
     // Solo las fichas de cada gato: el índice de santuarios no tiene galería.
-    const isFichaSantuario = /\/santuarios\/[^/]+\/[^/]+\.html$/.test(path);
-    const isNotFound = path.endsWith("/not_found.html");
+    const isFichaSantuario = /\/santuarios\/[^/]+\/[^/]+$/.test(path);
+    const isNotFound = path.endsWith("/not_found");
     // Páginas de lectura: una entrada del blog (no el archivo del año)
     // o un relato (no su índice). Ahí va la ventana de "sigue leyendo".
     const isLectura =
