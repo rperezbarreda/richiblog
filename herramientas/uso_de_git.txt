@@ -1,0 +1,248 @@
+GUÍA RÁPIDA DE GIT
+==================
+
+FLUJO NORMAL PARA SUBIR CAMBIOS
+--------------------------------
+
+1. Hago cambios en el proyecto
+   --------------------------------
+   Edito, creo o elimino archivos normalmente.
+
+
+2. Compruebo qué ha cambiado
+   --------------------------------
+   git status
+   Me muestra archivos modificados, nuevos o eliminados.
+
+
+3. Reviso exactamente qué he cambiado
+   ------------------------------------
+   git diff
+   Muestra las diferencias respecto al último commit.
+
+
+4. Añado los cambios al staging
+   --------------------------------
+   git add .
+   El "." significa "añadir todos los cambios".
+
+   También puedo añadir un archivo concreto:
+   git add Program.cs
+
+
+5. Compruebo qué voy a guardar
+   --------------------------------
+   git status
+   Ahora los archivos deberían aparecer como:
+
+   Changes to be committed
+
+
+6. Creo el commit
+   --------------------------------
+   git commit -m "Descripción del cambio"
+
+   Ejemplo:
+   git commit -m "Añadir sistema de login"
+
+
+7. Subo el commit a GitHub
+   --------------------------------
+   git push
+
+   Como ya hicimos:
+   git push -u origin main
+
+   el "-u" normalmente ya no hace falta.
+   A partir de ahora basta con:
+
+   git push
+
+RESUMEN DEL FLUJO
+-----------------
+
+    Modifico archivos
+          |
+          v
+    git status
+          |
+          v
+    git diff
+          |
+          v
+    git add .
+          |
+          v
+    git status
+          |
+          v
+    git commit -m "Descripción"
+          |
+          v
+    git push
+          |
+          v
+       GitHub
+
+
+LOS 5 COMANDOS QUE MÁS VAS A USAR
+----------------------------------
+
+git status
+    Ver qué ha cambiado.
+
+git diff
+    Ver exactamente qué has cambiado.
+
+git add .
+    Preparar todos los cambios para el commit.
+
+git commit -m "mensaje"
+    Crear un punto en la historia.
+
+git push
+    Subir los commits a GitHub.
+
+VER EL HISTORIAL
+----------------
+
+    git log --oneline
+
+Ejemplo:
+
+    82a91fd Añadir búsqueda de artículos
+    7bc42e1 Corregir validación
+    fa9e5b0 Inicio 20-09-26
+
+
+VER LAS RAMAS
+-------------
+
+    git branch
+
+La rama actual aparece con:
+
+    * main
+
+
+VER EL REMOTO
+-------------
+
+    git remote -v
+
+Debería aparecer:
+
+    origin  https://github.com/USUARIO/richiblog.git (fetch)
+    origin  https://github.com/USUARIO/richiblog.git (push)
+
+
+MUY IMPORTANTE: PULL
+--------------------
+
+Si trabajas tú solo en el proyecto y eres el único que modifica
+el repositorio remoto, normalmente tu flujo será:
+
+    modificar
+       |
+       v
+    git add .
+       |
+       v
+    git commit
+       |
+       v
+    git push
+
+
+Pero si otra persona ha subido cambios a GitHub, primero debes
+traer esos cambios:
+
+    git pull
+
+Y después trabajar/subir tus cambios.
+
+
+REGLA MENTAL
+------------
+
+Piensa siempre:
+
+    git status
+        ↓
+    ¿Qué he cambiado?
+
+    git diff
+        ↓
+    ¿Qué contiene exactamente el cambio?
+
+    git add .
+        ↓
+    Quiero incluir estos cambios
+
+    git commit -m "..."
+        ↓
+    Guardo el cambio en la historia
+
+    git push
+        ↓
+    Lo subo a GitHub
+
+
+COMANDO TODO-EN-UNO PARA EL DÍA A DÍA
+-------------------------------------
+
+Cuando ya tengas claro qué has cambiado:
+
+    git add .
+    git commit -m "Descripción del cambio"
+    git push
+
+
+BUENOS MENSAJES DE COMMIT
+-------------------------
+
+Usa mensajes que expliquen qué has hecho:
+
+    git commit -m "Añadir formulario de contacto"
+
+    git commit -m "Corregir error en login"
+
+    git commit -m "Actualizar estilos de la página principal"
+
+    git commit -m "Añadir validación de usuarios"
+
+
+EVITA MENSAJES COMO:
+
+    git commit -m "cambios"
+
+    git commit -m "cosas"
+
+    git commit -m "prueba"
+
+    git commit -m "asdf"
+
+
+IDEA IMPORTANTE
+---------------
+
+Un commit NO es lo mismo que hacer un push.
+
+    git commit
+        =
+    Guardar el cambio en el historial LOCAL de Git.
+
+    git push
+        =
+    Subir esos commits al repositorio REMOTO (GitHub).
+
+
+Por eso:
+
+    git commit
+        ↓
+    Tu ordenador
+
+    git push
+        ↓
+    GitHub
