@@ -5,8 +5,17 @@
         <link>https://richi.blog/</link>
         <description>Todo lo que voy publicando: entradas del blog, relatos y material de rol.</description>
         <language>es</language>
-        <lastBuildDate>Sat, 19 Sep 2026 00:00:00 +0000</lastBuildDate>
+        <lastBuildDate>Sun, 20 Sep 2026 00:00:00 +0000</lastBuildDate>
         <atom:link href="https://richi.blog/blog/rss.xml" rel="self" type="application/rss+xml"/>
+        <item>
+            <title>Puto Tebas de los cojones</title>
+            <link>https://richi.blog/web/blog/2026/septiembre/puto-tebas-de-los-cojones.html</link>
+            <guid isPermaLink="true">https://richi.blog/web/blog/2026/septiembre/puto-tebas-de-los-cojones.html</guid>
+            <pubDate>Sun, 20 Sep 2026 00:00:00 +0000</pubDate>
+            <category>blog</category>
+            <category>diario</category>
+            <description>Por fin me he atrevido a publicar el sitio web, con algún que otro error que he podido solventar rápido. Lo que no me esperaba y no me acordaba era del puñetero fútbol.</description>
+        </item>
         <item>
             <title>Por fin pongo en marcha esto</title>
             <link>https://richi.blog/web/blog/2026/septiembre/por-fin-pongo-en-marcha-esto.html</link>
