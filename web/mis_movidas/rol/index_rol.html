@@ -99,7 +99,7 @@
                  una categoría nueva la añade sola. -->
             <div class="filtros" data-filtros
                  data-filtros-items=".portfolio-card"
-                 data-filtros-categorias="aventuras, mapas, sistemas">
+                 data-filtros-categorias="aventuras, mapas, sistemas, recursos">
                 <span class="filtros-label" id="filtros-label">filtrar:</span>
 
                 <!-- Este botón solo se ve en móvil (en escritorio lo
@@ -128,6 +128,28 @@
                  que es lo que permite que una categoría nueva no tenga
                  que tocar esta página. -->
             <div class="portfolio-grid" tabindex="0" role="region" aria-label="Portfolio de rol, con scroll">
+
+                <div class="portfolio-card" data-categoria="recursos" data-fecha="23-09-2026">
+                    <img class="portfolio-card-photo" src="/imagenes/mis_movidas/rol/thumbnail_hojas_a5.webp" alt="Vista de los colores disponibles" loading="lazy">
+                    <div class="portfolio-card-info">
+                        <!-- h2 y no h3: sin encabezados de categoría, los
+                             títulos saltaban de h1 a h3. -->
+                        <h2 class="portfolio-card-title">Fichas DnD 5e - Formato A5</h2>
+                        <p class="portfolio-card-system">DnD 5e</p>
+                        <p class="portfolio-card-desc">Fichas de rol de Dungeons and Dragons imprimibles en un cómodo formato para hojas DIN A5 en nueve colores distintos.</p>
+                        <!-- El texto escondido va dentro del enlace a
+                             propósito: a la vista pone solo "Ver en Ko-fi",
+                             pero quien usa lector de pantalla saca la lista de
+                             enlaces de la página y oiría "Ver en Ko-fi" tres o
+                             cuatro veces seguidas sin saber de qué aventura es
+                             cada uno. Y de paso avisa de que se abre en otra
+                             pestaña. -->
+                        <div class="portfolio-card-actions">
+                            <a class="portfolio-card-btn" href="https://ko-fi.com/s/7254549137" target="_blank" rel="noopener noreferrer">Ver en Ko-fi →<span class="visually-hidden"> — Fichas DnD 5e - Formato A5 (se abre en otra pestaña)</span></a>
+                            <a class="portfolio-card-btn portfolio-card-btn-secondary" href="https://drive.google.com/file/d/1UsoSQFA8bUqnj6Yx2KJ8wfBfP22q522k/view?usp=sharing" target="_blank" rel="noopener noreferrer">Descargar gratis ↓<span class="visually-hidden"> — Fichas DnD 5e - Formato A5 (se abre en otra pestaña)</span></a>
+                        </div>
+                    </div>
+                </div>
 
                 <!-- data-fecha: cuándo se publicó. data-categoria: en qué
                      filtro entra. Van aquí y no solo en
