@@ -346,21 +346,65 @@ section {
 
 /* SCROLLBAR */
 
+/* UNA SOLA BARRA PARA TODO EL SITIO. Se define aquí y en ningún sitio
+   más: si hay que cambiarla, se cambia en estas cuatro reglas y cambia
+   en todas partes. Antes cada caja traía la suya y había cinco barras
+   distintas conviviendo —amarilla en el portfolio y en los relatos,
+   gris en el menú y en el archivo del blog, morada en la portada y en
+   la ficha de sobre mí, otro morado en el aviso— y encima con anchos
+   de 5, 6, 7 y 8px según dónde cayera.
+   El color es el del tema (--yellow: amarillo en oscuro, rojo en
+   claro), el mismo de los bordes y los botones, así que la barra se
+   lee como parte de la ventana y no como algo del navegador.
+
+   Sobre el contraste, que aquí importa más que en otras webs porque
+   casi todo lo que se desplaza lo hace DENTRO de una caja y, si no se
+   ve la barra, no hay forma de saber que debajo queda más. Medido
+   contra los dos fondos sobre los que cae (el papel y el de las
+   ventanas), quedándome con el peor de los dos: el morado que tenían
+   varias daba 1,6:1 en oscuro y 1,15:1 en claro —existía pero no se
+   veía— y el gris --muted que lo sustituyó, 6,3:1 y 4,5:1. Con el
+   color del tema son 10,1:1 en oscuro y 5,3:1 en claro, así que este
+   cambio no afloja nada: aprieta.
+
+   Las dos propiedades de abajo no van juntas por capricho:
+   scrollbar-color SE HEREDA, así que puesta en :root llega sola a
+   todas las cajas; scrollbar-width NO se hereda —lo comprobé: puesta
+   solo en :root, las 40 cajas con scroll del sitio seguían calculando
+   "auto" y saliendo con la barra gorda del sistema—, así que esa sí
+   hace falta declararla para todos los elementos.
+   Las reglas ::-webkit- son para los navegadores que todavía no
+   entienden las dos de arriba; Chrome y Firefox las ignoran en cuanto
+   ven scrollbar-color. Las cajas que quieran guardar el hueco de la
+   barra aunque no haga falta siguen poniendo scrollbar-gutter por su
+   cuenta: eso es de sitio, no de color. */
+:root {
+    scrollbar-color: var(--yellow) transparent;
+}
+
+* {
+    scrollbar-width: thin;
+}
+
 ::-webkit-scrollbar {
-    width: 7px;
+    width: 8px;
+    height: 8px;
 }
 
 ::-webkit-scrollbar-track {
-    background: var(--purple);
+    background: transparent;
 }
 
 ::-webkit-scrollbar-thumb {
-    background: var(--purple-lighter);
+    background: var(--yellow);
     border-radius: 0;
 }
 
+/* Al pasar el ratón se apaga en vez de encenderse: como ya está del
+   color fuerte, el aviso de "estás encima" tiene que ir al revés que
+   en los botones. */
 ::-webkit-scrollbar-thumb:hover {
-    background: var(--yellow);
+    background: var(--white);
 }
 
 /* RASTRO DEL CURSOR */

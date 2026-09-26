@@ -59,20 +59,6 @@
        el scroll y siempre se pueda pulsar. */
     min-height: 0;
     overflow-y: auto;
-    scrollbar-width: thin;
-    scrollbar-color: var(--purple-lighter) transparent;
-}
-
-.notice-body::-webkit-scrollbar {
-    width: 6px;
-}
-
-.notice-body::-webkit-scrollbar-track {
-    background: transparent;
-}
-
-.notice-body::-webkit-scrollbar-thumb {
-    background: var(--purple-lighter);
 }
 
 .notice-footer {

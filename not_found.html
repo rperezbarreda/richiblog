@@ -19,8 +19,32 @@
         } catch (e) {}
       })();
     </script>
-    tent="El Blog de Richi — ilustración de Richi sobre fondo morado">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Página no encontrada · El Blog de Richi</title>
+    <!-- Cómo se ve el enlace al compartirlo (Bluesky, Discord, Ko-fi…).
+         Sin esto solo sale la URL pelada, sin título ni imagen. Las rutas
+         van absolutas a propósito: las redes no resuelven las relativas. -->
+    <meta name="description" content="Esta página no existe. El gatito está en ello.">
+    <link rel="canonical" href="https://richi.blog/not_found.html">
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="El Blog de Richi">
+    <meta property="og:locale" content="es_ES">
+    <meta property="og:title" content="Página no encontrada · El Blog de Richi">
+    <meta property="og:description" content="Esta página no existe. El gatito está en ello.">
+    <meta property="og:url" content="https://richi.blog/not_found.html">
+    <meta property="og:image" content="https://richi.blog/imagenes/meta/og.webp">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta property="og:image:alt" content="El Blog de Richi — ilustración de Richi sobre fondo morado">
     <meta name="twitter:card" content="summary_large_image">
+    <link rel="icon" type="image/x-icon" href="/imagenes/favicon.ico">
+    <!-- La única fuente que se precarga. Medido con la red frenada: sin esto el
+         navegador no la descubre hasta parsear el CSS (~800 ms) y el texto baila al
+         cambiar de tipografía; así llega antes del primer pintado y no se nota el
+         cambio. Precargar más fuentes empeoraba el primer pintado 150-210 ms, porque
+         compiten por el ancho de banda con lo que hace falta para pintar. -->
+    <link rel="preload" href="/tipografias/space-grotesk-400.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="alternate" type="application/rss+xml" title="El Blog de Richi — blog, relatos y rol" href="/blog/rss.xml">
     <!-- ==== CSS ====
          Esta lista la escribe herramientas/actualizar-cabeceras.py.
          No la toques a mano: si cambias qué CSS lleva una página,
@@ -84,31 +108,7 @@
                     <p class="gatete-pie">error 404 &middot; pagina no encontrada<span class="gatete-cursor" aria-hidden="true">_</span></p>
                 </div>
 
-                <a class="not-found-link" href="index.html" content="width=device-width, initial-scale=1.0">
-    <link rel="icon" type="image/x-icon" href="/imagenes/favicon.ico">
-    <!-- La única fuente que se precarga. Medido con la red frenada: sin esto el
-         navegador no la descubre hasta parsear el CSS (~800 ms) y el texto baila al
-         cambiar de tipografía; así llega antes del primer pintado y no se nota el
-         cambio. Precargar más fuentes empeoraba el primer pintado 150-210 ms, porque
-         compiten por el ancho de banda con lo que hace falta para pintar. -->
-    <link rel="preload" href="/tipografias/space-grotesk-400.woff2" as="font" type="font/woff2" crossorigin>
-    <link rel="alternate" type="application/rss+xml" title="El Blog de Richi — blog, relatos y rol" href="/blog/rss.xml">
-    <title>Página no encontrada · El Blog de Richi</title>
-    <!-- Cómo se ve el enlace al compartirlo (Bluesky, Discord, Ko-fi…).
-         Sin esto solo sale la URL pelada, sin título ni imagen. Las rutas
-         van absolutas a propósito: las redes no resuelven las relativas. -->
-    <meta name="description" content="Esta página no existe. El gatito está en ello.">
-    <link rel="canonical" href="https://richi.blog/not_found.html">
-    <meta property="og:type" content="website">
-    <meta property="og:site_name" content="El Blog de Richi">
-    <meta property="og:locale" content="es_ES">
-    <meta property="og:title" content="Página no encontrada · El Blog de Richi">
-    <meta property="og:description" content="Esta página no existe. El gatito está en ello.">
-    <meta property="og:url" content="https://richi.blog/not_found.html">
-    <meta property="og:image" content="https://richi.blog/imagenes/meta/og.webp">
-    <meta property="og:image:width" content="1200">
-    <meta property="og:image:height" content="630">
-    <meta property="og:image:alt" condex.html">← volver al inicio</a>
+                <a class="not-found-link" href="/index.html">← volver al inicio</a>
             </div>
         </section>
     </main>

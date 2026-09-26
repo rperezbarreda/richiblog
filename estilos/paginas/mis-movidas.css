@@ -118,26 +118,6 @@
     padding: 4px 10px 10px 0;
 }
 
-/* Barra de desplazamiento a la vista (fina y del color del sitio, como
-   la del menú lateral): si no, en una ventana baja la última tarjeta se
-   corta sin que nada diga que hay más debajo. */
-.portfolio-grid {
-    scrollbar-width: thin;
-    scrollbar-color: var(--yellow) transparent;
-}
-
-.portfolio-grid::-webkit-scrollbar {
-    width: 8px;
-}
-
-.portfolio-grid::-webkit-scrollbar-track {
-    background: transparent;
-}
-
-.portfolio-grid::-webkit-scrollbar-thumb {
-    background: var(--yellow);
-}
-
 /* Al filtrar, las tarjetas de fuera se esconden con el atributo
    hidden. Hace falta decirlo aquí: el "display: grid" de la tarjeta
    (una clase) le gana al "display: none" que el navegador aplica a

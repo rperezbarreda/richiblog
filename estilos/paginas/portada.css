@@ -263,30 +263,11 @@
     overflow-x: hidden;
     overflow-anchor: none;
     padding-right: 3px;
-    scrollbar-width: thin;
-    scrollbar-color: var(--purple) transparent;
 }
 
 .recent-entries-body:focus-visible {
     outline: 2px solid var(--yellow);
     outline-offset: 2px;
-}
-
-.recent-entries-body::-webkit-scrollbar {
-    width: 5px;
-}
-
-.recent-entries-body::-webkit-scrollbar-track {
-    background: transparent;
-}
-
-.recent-entries-body::-webkit-scrollbar-thumb {
-    background: var(--purple);
-    border-radius: 0;
-}
-
-.recent-entries-body::-webkit-scrollbar-thumb:hover {
-    background: var(--yellow);
 }
 
 .recent-entries::before,

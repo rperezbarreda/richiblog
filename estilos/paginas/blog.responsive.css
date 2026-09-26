@@ -27,6 +27,28 @@
 
     .blog-month {
         padding: 14px 16px;
+        /* Aquí no hay fila que limite la tarjeta ni ventana fija que
+           llenar: la página entera scrollea, así que el mes crece con
+           su lista y nada se corta por dentro. Se deshace el tope y
+           el recorte que sí hacen falta en escritorio. */
+        max-height: none;
+        overflow: visible;
+    }
+
+    /* Una sola columna: con la pantalla estrecha, dos columnas de
+       entradas dejan los títulos partidos en cuatro líneas. Y sin
+       scroll propio, que apilado ya scrollea la página: una caja que
+       se desplaza dentro de otra que se desplaza es un lío para
+       cualquiera, y más con el zoom subido. */
+    .blog-month .entries-list {
+        grid-template-columns: 1fr;
+        overflow-y: visible;
+        scrollbar-gutter: auto;
+    }
+
+    .blog-month .entry-preview:last-child {
+        padding-bottom: 0;
+        border-bottom: none;
     }
 }
 

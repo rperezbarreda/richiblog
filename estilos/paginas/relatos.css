@@ -72,25 +72,6 @@
     padding: 2px 4px;
 }
 
-/* Misma barra fina que en el portfolio de rol, para que se note que el
-   listado sigue por debajo. */
-.relatos-list-body {
-    scrollbar-width: thin;
-    scrollbar-color: var(--yellow) transparent;
-}
-
-.relatos-list-body::-webkit-scrollbar {
-    width: 8px;
-}
-
-.relatos-list-body::-webkit-scrollbar-track {
-    background: transparent;
-}
-
-.relatos-list-body::-webkit-scrollbar-thumb {
-    background: var(--yellow);
-}
-
 /* Dos columnas en cuanto hay sitio, una si no. Antes era una sola
    columna de 640px de ancho máximo y la mitad derecha de la ventana
    se quedaba vacía. */

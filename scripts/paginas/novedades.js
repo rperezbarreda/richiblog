@@ -11,11 +11,12 @@
 // portada.
 
 const MIS_MOVIDAS_URL = "/datos/mis-movidas.json";
-// Mismo criterio que la ventana de entradas de al lado: la ventana
-// scrollea, así que enseña más de las que caben a la vista. Con 3, un
-// relato publicado hoy pero fechado hace un año no aparecía en la
-// portada por ningún lado.
-const HOME_PROJECTS_COUNT = 6;
+// Cuatro y no seis: la ventana las coloca en dos columnas, así que un
+// número par llena las dos filas enteras y no deja ninguna suelta al
+// final (con 5 publicadas quedaba una sola en la columna izquierda y
+// cantaba). Cuatro entran a la vista sin tener que desplazar nada.
+// Si quieres ver más, están todas en su listado.
+const HOME_PROJECTS_COUNT = 4;
 
 initializeMisMovidasFeed();
 

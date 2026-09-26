@@ -12,12 +12,13 @@
 // que crea la entrada y pasa los generadores.
 
 const BLOG_POSTS_URL = "/datos/entradas-blog.json";
-// Cuántas entradas enseña la ventana de la portada. La ventana tiene
-// scroll propio (ver .recent-entries-body en paginas/portada.css), así que
-// caben más de las que se ven de una vez: con 3 nunca había nada que
-// desplazar y algo recién publicado con fecha vieja se quedaba fuera
-// de la portada sin más.
-const HOME_RECENT_COUNT = 6;
+
+// Cuatro y no seis: la ventana las coloca en dos columnas, así que un
+// número par llena las dos filas enteras y no deja ninguna suelta al
+// final (con 5 publicadas quedaba una sola en la columna izquierda y
+// cantaba). Cuatro entran a la vista sin tener que desplazar nada.
+// Si quieres ver más, están todas en su listado.
+const HOME_RECENT_COUNT = 4;
 
 initializeBlogPosts();
 
@@ -192,6 +193,17 @@ function urlDeEtiqueta(post, tag) {
 // Los botones salen de las etiquetas que existan de verdad en el JSON, así
 // que no hay ninguna lista que mantener a mano. Filtrar solo esconde <li>
 // y bloques de mes: no se vuelve a pedir nada ni se repinta.
+//
+// Se pueden tener VARIAS puestas a la vez y se suman: con "diario" y
+// "pelis" se ven las entradas que lleven cualquiera de las dos, no solo
+// las que lleven las dos (que casi siempre serían ninguna). Volver a
+// pulsar una la quita. "todas" no es una etiqueta más: al pulsarla se
+// vacía la selección entera, y si se quita la última que quedaba se
+// vuelve sola a "todas" — así no hay forma de acabar en una página en
+// blanco sin saber por qué.
+
+// Qué etiquetas están puestas ahora mismo. Vacío = todas.
+const ETIQUETAS_PUESTAS = new Set();
 
 function initializeTagFilters(archiveRoot) {
     const caja = document.querySelector("[data-blog-tags]");
@@ -219,7 +231,7 @@ function initializeTagFilters(archiveRoot) {
             b.textContent = tag;
             b.setAttribute("data-tag", tag);
             b.setAttribute("aria-pressed", tag === "todas" ? "true" : "false");
-            b.addEventListener("click", () => aplicarFiltro(archiveRoot, tag));
+            b.addEventListener("click", () => alternarEtiqueta(archiveRoot, tag));
             lista.appendChild(b);
         });
         caja.hidden = false;
@@ -230,19 +242,35 @@ function initializeTagFilters(archiveRoot) {
     // ?tag=... Estando ya aquí no hace falta recargar: se filtra en el
     // sitio y se deja la dirección actualizada, para que el enlace
     // siga valiendo si alguien lo copia o recarga.
+    // Ojo: esto NO suma a lo que hubiera puesto. Pulsar la etiqueta de
+    // una entrada es decir "enséñame esto", igual que si se llegara al
+    // enlace desde fuera; para sumar están los botones de arriba.
     archiveRoot.addEventListener("click", (evento) => {
         const etiqueta = evento.target.closest(".entry-tag");
         if (!etiqueta) {
             return;
         }
         evento.preventDefault();
-        aplicarFiltro(archiveRoot, etiqueta.getAttribute("data-tag") || "todas");
+        const suya = etiqueta.getAttribute("data-tag") || "";
+        ETIQUETAS_PUESTAS.clear();
+        if (suya) {
+            ETIQUETAS_PUESTAS.add(suya);
+        }
+        pintarFiltroEtiquetas(archiveRoot, true);
     });
 
-    // Se llega desde la portada con ?tag=diario: se aplica al abrir.
-    const pedida = new URLSearchParams(window.location.search).get("tag");
-    if (pedida && todas.indexOf(pedida) !== -1) {
-        aplicarFiltro(archiveRoot, pedida);
+    // Se llega desde la portada con ?tag=diario, o con varias separadas
+    // por comas (?tag=diario,pelis), que es como las deja este mismo
+    // script al filtrar: se aplican al abrir. Las que ya no existan en
+    // este año se ignoran sin más.
+    // partirEtiquetas ya corta por comas y por espacios, así que sirve
+    // igual para "diario,pelis" que para una sola.
+    const pedidas = partirEtiquetas(
+        new URLSearchParams(window.location.search).get("tag")
+    ).filter((tag) => todas.indexOf(tag) !== -1);
+    if (pedidas.length) {
+        pedidas.forEach((tag) => ETIQUETAS_PUESTAS.add(tag));
+        pintarFiltroEtiquetas(archiveRoot, false);
     }
 }
 
@@ -255,14 +283,41 @@ function partirEtiquetas(crudas) {
         .filter(Boolean);
 }
 
-function aplicarFiltro(archiveRoot, tag) {
+// Pulsar un botón: "todas" vacía la selección; cualquier otro la pone o
+// la quita según estuviera. Quitar la última deja la selección vacía,
+// que es exactamente lo mismo que "todas".
+function alternarEtiqueta(archiveRoot, tag) {
+    const limpiando = tag === "todas";
+    if (limpiando) {
+        ETIQUETAS_PUESTAS.clear();
+    } else if (ETIQUETAS_PUESTAS.has(tag)) {
+        ETIQUETAS_PUESTAS.delete(tag);
+    } else {
+        ETIQUETAS_PUESTAS.add(tag);
+    }
+
+    // El desplegable de móvil se queda abierto mientras se van marcando
+    // etiquetas: cerrarlo en cada toque obligaría a volver a abrirlo
+    // para poner la siguiente. Con "todas" sí se cierra, porque ahí ya
+    // se ha terminado de elegir.
+    pintarFiltroEtiquetas(archiveRoot, limpiando);
+}
+
+function pintarFiltroEtiquetas(archiveRoot, cerrar) {
     document.querySelectorAll(".blog-tag-btn").forEach((b) => {
-        b.setAttribute("aria-pressed", b.getAttribute("data-tag") === tag ? "true" : "false");
+        const suya = b.getAttribute("data-tag");
+        const puesta =
+            suya === "todas" ? ETIQUETAS_PUESTAS.size === 0 : ETIQUETAS_PUESTAS.has(suya);
+        b.setAttribute("aria-pressed", puesta ? "true" : "false");
     });
 
+    // Se suman, no se cruzan: basta con que la entrada lleve UNA de las
+    // puestas. Cruzarlas (pedir que las lleve todas) dejaría la página
+    // vacía en cuanto se marcan dos etiquetas que no coinciden nunca.
     archiveRoot.querySelectorAll(".entry-preview").forEach((li) => {
         const suyas = partirEtiquetas(li.getAttribute("data-tags"));
-        li.hidden = tag !== "todas" && !suyas.includes(tag);
+        li.hidden =
+            ETIQUETAS_PUESTAS.size !== 0 && !suyas.some((tag) => ETIQUETAS_PUESTAS.has(tag));
     });
 
     // Un mes sin nada que enseñar se esconde entero: dejarlo con su cabecera
@@ -272,17 +327,32 @@ function aplicarFiltro(archiveRoot, tag) {
         mes.hidden = !quedan;
     });
 
-    // En móvil el botón del desplegable enseña cuál está puesta.
+    // En móvil el botón del desplegable enseña qué hay puesto. Con una
+    // se dice cuál es; con varias no caben los nombres en el botón, así
+    // que se dice cuántas y la lista de abajo enseña cuáles.
     const etiquetaBoton = document.querySelector("[data-blog-tags-label]");
     if (etiquetaBoton) {
-        etiquetaBoton.textContent = tag;
+        etiquetaBoton.textContent = resumenEtiquetas(ETIQUETAS_PUESTAS);
     }
     const caja = document.querySelector("[data-blog-tags]");
-    if (caja) {
+    if (caja && cerrar) {
         cerrarDesplegableTags(caja);
     }
 
-    guardarFiltroEnUrl(tag);
+    guardarFiltroEnUrl([...ETIQUETAS_PUESTAS]);
+}
+
+// Lo que se lee en el botón del desplegable de móvil: "todas", el
+// nombre suelto o "3 etiquetas". Los nombres de varias no caben ahí;
+// cuáles son se ve en la lista de abajo, con sus botones marcados.
+function resumenEtiquetas(puestas) {
+    if (puestas.size === 0) {
+        return "todas";
+    }
+    if (puestas.size === 1) {
+        return [...puestas][0];
+    }
+    return `${puestas.size} etiquetas`;
 }
 
 // =========================================
@@ -363,15 +433,18 @@ function cerrarDesplegableTags(caja) {
     }
 }
 
-function guardarFiltroEnUrl(tag) {
+// Las etiquetas puestas van en la dirección separadas por comas, para
+// que el enlace se pueda copiar o recargar con la misma vista. Sin
+// ninguna, el parámetro desaparece en vez de quedarse vacío.
+function guardarFiltroEnUrl(tags) {
     if (!window.history || !window.history.replaceState) {
         return;
     }
     const url = new URL(window.location.href);
-    if (tag === "todas") {
+    if (!tags.length) {
         url.searchParams.delete("tag");
     } else {
-        url.searchParams.set("tag", tag);
+        url.searchParams.set("tag", tags.join(","));
     }
     window.history.replaceState(null, "", url);
 }

@@ -27,27 +27,6 @@
     overflow-x: hidden;
     overflow-y: auto;
     gap: 24px;
-    /* Misma barra fina y con los colores del tema que el menú lateral
-       y las ventanas de la portada: la de por defecto es gris y ancha,
-       y aquí encima se ve contra el fondo de la ficha. */
-    scrollbar-width: thin;
-    scrollbar-color: var(--purple-lighter) transparent;
-}
-
-.home.character-sheet::-webkit-scrollbar {
-    width: 6px;
-}
-
-.home.character-sheet::-webkit-scrollbar-track {
-    background: transparent;
-}
-
-.home.character-sheet::-webkit-scrollbar-thumb {
-    background: var(--purple-lighter);
-}
-
-.home.character-sheet::-webkit-scrollbar-thumb:hover {
-    background: var(--yellow);
 }
 
 /* ==== FILA SUPERIOR: RETRATO + TÍTULO/VITALS + ESTADÍSTICAS ==== */
@@ -228,7 +207,19 @@
     flex: 1 1 auto;
     width: 100%;
     min-width: 0;
-    min-height: 240px;
+    /* El suelo. 240px era demasiado bajo: la columna de la izquierda
+       necesita 500 (279 la lista de datos + 20 de hueco + 201 la
+       tarjeta de proficiencias) y, al no llegar, la tarjeta se quedaba
+       aplastada hasta desaparecer. Con 500 entra entera en cualquier
+       portátil y la página, que ya se desplaza, se encarga del resto.
+       No se puede poner "min-content": eso lo estira hasta el
+       contenido de las tarjetas de la derecha (2124px a 1366) y
+       entonces dejan de scrollear por dentro, que es justo lo que se
+       quería evitar.
+       Si algún día la lista de proficiencias crece y no cabe, súbelo:
+       aun así no se perderá nada, porque la columna se desplaza por
+       dentro como red de seguridad. */
+    min-height: 500px;
     display: flex;
     align-items: stretch;
     gap: 40px;
@@ -249,6 +240,10 @@
        de los 300 originales, que se los lleva el trasfondo. */
     width: 272px;
     min-height: 0;
+    /* Y si aun así no cabe (ventanas muy bajas, o con la página muy
+       ampliada), la columna se desplaza por dentro en vez de recortar
+       lo de abajo. */
+    overflow-y: auto;
 }
 
 .character-portrait-column .character-card {
@@ -322,8 +317,18 @@
     font-size: 0.9375rem;
 }
 
+/* flex: 1 ponía la base en 0: la tarjeta salía sin alto propio y solo
+   crecía con el hueco que sobrara. Como la lista de datos de arriba
+   mide 279px y no se encoge, en cuanto la columna bajaba de ~300px la
+   tarjeta se quedaba en nada y sus cuatro líneas desaparecían — se
+   veía la barra de "proficiencias.cfg" y debajo, nada. Medido: pasaba
+   en 1024, 1152, 1280, 1366, 1440, 1536 y 1600 de ancho; o sea, en
+   casi cualquier portátil.
+   Con la base en "auto" nunca baja de lo que mide su contenido, y
+   sigue creciendo cuando hay sitio (a 1920 se estira igual que
+   antes). */
 .character-card-grow {
-    flex: 1;
+    flex: 1 0 auto;
 }
 
 /* ==== COLUMNA PRINCIPAL: 3 TARJETAS ==== */

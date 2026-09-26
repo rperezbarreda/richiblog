@@ -75,31 +75,15 @@ nav {
     min-height: 0;
     overflow-y: auto;
     overflow-x: hidden;
+    /* El hueco de la barra, reservado siempre: sin esto el menú se
+       ensanchaba y encogía al aparecer y desaparecer la barra. El
+       color y el grosor los pone base.css para todo el sitio. */
     scrollbar-gutter: stable;
-    scrollbar-width: thin;
-    scrollbar-color: var(--purple-lighter) transparent;
     direction: rtl;
 }
 
 nav * {
     direction: ltr;
-}
-
-nav::-webkit-scrollbar {
-    width: 5px;
-}
-
-nav::-webkit-scrollbar-track {
-    background: transparent;
-}
-
-nav::-webkit-scrollbar-thumb {
-    background: var(--purple-lighter);
-    border-radius: 0;
-}
-
-nav::-webkit-scrollbar-thumb:hover {
-    background: var(--yellow);
 }
 
 nav a {
@@ -478,5 +462,23 @@ nav a.active::before {
     nav a::before,
     .submenu {
         transition: none;
+    }
+}
+
+/* Ventanas bajas: en un portátil de 768 de alto el menú necesita 396px
+   y solo tenía 282, así que las dos últimas entradas —contacto y
+   accesibilidad— se quedaban fuera de la vista. La foto del gatín es
+   lo único de la barra que se puede encoger sin perder nada, así que
+   en pantallas bajas se recorta y el menú vuelve a caber entero.
+   Medido: a 1366x768 pasa de verse 5 de 7 entradas a verse las 7. Por
+   debajo de eso (1280x720, 1024x650) sigue haciendo falta desplazar un
+   poco, pero ahora la barra se ve.
+   Va al final del archivo a propósito: la regla que le da el tamaño a
+   la foto (.gatin-random-foto img) está más arriba y, con la misma
+   especificidad, gana la última. */
+@media (max-height: 860px) {
+    .gatin-random-foto img {
+        aspect-ratio: auto;
+        height: 120px;
     }
 }

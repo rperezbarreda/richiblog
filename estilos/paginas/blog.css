@@ -82,6 +82,15 @@
     min-height: 0;
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    /* Las filas se reparten el alto visible (1fr), pero nunca bajan de
+       280px, que es lo que mide la cabecera del mes más dos entradas y
+       pico. Con un mes solo, su fila mide toda la ventana y la tarjeta
+       cabe entera; con muchos meses las filas se quedan en esos 280px
+       y entonces sí scrollea la rejilla. Sin este reparto, la tarjeta
+       de un mes largo crecía por su cuenta y quien acababa scrolleando
+       era la rejilla: la barra salía FUERA de la ventana del mes, al
+       borde de la página, y la última entrada quedaba cortada. */
+    grid-auto-rows: minmax(280px, 1fr);
     align-content: start;
     align-items: start;
     gap: 22px;
@@ -102,18 +111,65 @@
        centrado en vertical. Dentro de la rejilla eso hacía que un mes
        con dos entradas se estirase hasta la altura del mes más largo y
        colocase su cabecera flotando por el centro. Aquí se deshace:
-       cada mes vuelve a medir lo que mide su lista. */
-    display: block;
+       la tarjeta mide lo que mide su lista (align-items: start en la
+       rejilla) y solo se planta cuando llega al alto de su fila. */
+    display: flex;
+    flex-direction: column;
     height: auto;
-    overflow: visible;
+    /* El tope. Es el alto de su hueco en la rejilla, que grid-auto-rows
+       deja definido; a partir de ahí lo que sobra lo absorbe el scroll
+       de la lista, dentro de la ventana. */
+    max-height: 100%;
+    min-height: 0;
+    overflow: hidden;
     padding: 16px;
     background: var(--purple-lighter);
     border: 3px solid var(--yellow);
     box-shadow: 6px 6px 0 var(--yellow);
 }
 
+/* En el archivo las entradas van en columnas, no en una tira de una
+   sola línea por entrada: con la ventana a todo lo ancho, un título y
+   una fecha ocupaban 1400px de renglón y se leía fatal. Las columnas
+   se calculan solas (auto-fill): cuatro en un monitor grande, dos en
+   un portátil, una cuando el mes comparte fila con otros meses y su
+   tarjeta se queda estrecha. */
 .blog-month .entries-list {
     margin-top: 2px;
+    flex: 1 1 auto;
+    min-height: 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    align-content: start;
+    /* Separación vertical como antes; en horizontal hace falta más
+       hueco para que dos entradas seguidas no parezcan una sola. */
+    gap: 10px 22px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    /* El hueco de la barra va reservado siempre, como en el menú
+       lateral. Dos motivos: al filtrar por etiqueta la lista deja de
+       desbordar, y sin el hueco fijo las columnas cambiaban de ancho y
+       el texto saltaba de sitio; y con la barra siempre en el mismo
+       carril se ve a la primera que esa ventana se desplaza. */
+    scrollbar-gutter: stable;
+}
+
+/* En una sola columna la última entrada no lleva raya porque no hay
+   nada debajo de lo que separarla. En varias columnas sí lo hay —la
+   de al lado—, así que la lleva como todas: si no, una entrada
+   suelta aparecía sin subrayar y parecía de otro tipo. */
+.blog-month .entry-preview:last-child {
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--border);
+}
+
+/* "Cargando entradas…" y "todavía no hay entradas este mes" son una
+   frase, no una entrada: ocupan la fila entera en vez de quedarse
+   encajonados en la primera columna. */
+.blog-month .entries-loading,
+.blog-month .entries-empty,
+.blog-month .entries-error {
+    grid-column: 1 / -1;
 }
 
 /* BLOG — ENTRADA INDIVIDUAL */

@@ -343,6 +343,15 @@
   están escritos en el HTML, salen de las categorías que encuentran.
   Por eso publicar algo con una categoría nueva la añade sola.
 
+  Se pueden marcar VARIOS filtros a la vez, tanto aquí como en las
+  etiquetas del archivo del blog, y se suman: con "mapas" y
+  "recursos" puestos se ve lo que sea de cualquiera de las dos.
+  Volver a pulsar uno lo quita, y "todas" los quita todos de golpe
+  (si quitas el último, vuelve sola a "todas"). Lo que haya puesto
+  queda en la dirección separado por comas —?cat=mapas,recursos,
+  ?tag=diario,pelis—, así que el enlace se puede copiar o recargar
+  y se ve lo mismo.
+
   Si cambias el título o la fecha de una entrada, cámbialo en su
   página y pasa generar-posts.py: el listado (datos/) se entera
   solo.

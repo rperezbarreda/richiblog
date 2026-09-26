@@ -28,8 +28,19 @@
 // ese script avisa cuando termina con:
 //     document.dispatchEvent(new CustomEvent("filtros:actualizar"));
 // y aquí se vuelven a contar las categorías.
+//
+// Se pueden tener VARIAS puestas a la vez y se suman: con "mapas" y
+// "recursos" se ve lo que sea de cualquiera de las dos. Volver a pulsar
+// una la quita. "todas" no es una categoría más: al pulsarla se vacía
+// la selección entera, y si se quita la última que quedaba se vuelve
+// sola a "todas", para no dejar la página en blanco sin explicación.
 
 const FILTROS_TODAS = "todas";
+
+// Qué categorías están puestas en cada caja de filtros. Vacío = todas.
+// Va por caja y no en una variable suelta porque nada impide que una
+// página acabe teniendo dos listados con su propio filtro.
+const FILTROS_PUESTAS = new WeakMap();
 
 montarFiltros();
 
@@ -64,16 +75,31 @@ function montarFiltros() {
             boton.textContent = categoria;
             boton.setAttribute("data-categoria", categoria);
             boton.setAttribute("aria-pressed", "false");
-            boton.addEventListener("click", () => aplicarFiltro(caja, categoria));
+            boton.addEventListener("click", () => alternarFiltro(caja, categoria));
             lista.appendChild(boton);
         });
 
         montarDesplegable(caja);
 
-        // ?cat=... para poder enlazar una categoría concreta. Si la
-        // categoría pedida ya no existe, se ignora y se ven todas.
-        const pedida = new URLSearchParams(window.location.search).get("cat");
-        aplicarFiltro(caja, categorias.indexOf(pedida) !== -1 ? pedida : FILTROS_TODAS);
+        // ?cat=... para poder enlazar una categoría concreta, o varias
+        // separadas por comas (?cat=mapas,recursos), que es como las
+        // deja este mismo script. Las que ya no existan se ignoran.
+        //
+        // Esto se vuelve a ejecutar cada vez que un listado termina de
+        // pintarse (filtros:actualizar), así que lo que estuviera
+        // puesto manda sobre la dirección: si no, al llegar los relatos
+        // por fetch se perdería lo que se acabara de elegir.
+        const guardadas = FILTROS_PUESTAS.get(caja);
+        const puestas =
+            guardadas ||
+            new Set(
+                (new URLSearchParams(window.location.search).get("cat") || "")
+                    .split(",")
+                    .map((c) => c.trim())
+                    .filter((c) => categorias.indexOf(c) !== -1)
+            );
+        FILTROS_PUESTAS.set(caja, puestas);
+        pintarFiltro(caja, false);
     });
 }
 
@@ -95,16 +121,43 @@ function categoriasDe(caja, items) {
     return [...new Set([...declaradas, ...usadas])].sort((a, b) => a.localeCompare(b, "es"));
 }
 
-function aplicarFiltro(caja, categoria) {
+// Pulsar un botón: "todas" vacía la selección; cualquier otro la pone o
+// la quita según estuviera. Quitar la última deja la selección vacía,
+// que es exactamente lo mismo que "todas".
+function alternarFiltro(caja, categoria) {
+    const puestas = FILTROS_PUESTAS.get(caja) || new Set();
+    const limpiando = categoria === FILTROS_TODAS;
+    if (limpiando) {
+        puestas.clear();
+    } else if (puestas.has(categoria)) {
+        puestas.delete(categoria);
+    } else {
+        puestas.add(categoria);
+    }
+    FILTROS_PUESTAS.set(caja, puestas);
+
+    // El desplegable de móvil se queda abierto mientras se van marcando
+    // categorías: cerrarlo en cada toque obligaría a volver a abrirlo
+    // para poner la siguiente. Con "todas" sí se cierra, porque ahí ya
+    // se ha terminado de elegir.
+    pintarFiltro(caja, limpiando);
+}
+
+function pintarFiltro(caja, cerrar) {
+    const puestas = FILTROS_PUESTAS.get(caja) || new Set();
+
     caja.querySelectorAll(".filtro-btn").forEach((boton) => {
-        const suya = boton.getAttribute("data-categoria") === categoria;
-        boton.setAttribute("aria-pressed", suya ? "true" : "false");
+        const suya = boton.getAttribute("data-categoria");
+        const activa = suya === FILTROS_TODAS ? puestas.size === 0 : puestas.has(suya);
+        boton.setAttribute("aria-pressed", activa ? "true" : "false");
     });
 
+    // Se suman, no se cruzan: cada elemento lleva UNA categoría, así que
+    // cruzarlas no dejaría nunca nada a la vista.
     const items = elementosFiltrables(caja);
     let visibles = 0;
     items.forEach((item) => {
-        const fuera = categoria !== FILTROS_TODAS && categoriaDe(item) !== categoria;
+        const fuera = puestas.size !== 0 && !puestas.has(categoriaDe(item));
         item.hidden = fuera;
         if (!fuera) {
             visibles += 1;
@@ -118,15 +171,43 @@ function aplicarFiltro(caja, categoria) {
     if (vacio) {
         vacio.hidden = visibles !== 0;
         vacio.textContent =
-            visibles === 0 ? `Todavía no hay nada en «${categoria}». Próximamente.` : "";
+            visibles === 0
+                ? `Todavía no hay nada en ${listaEnTexto([...puestas])}. Próximamente.`
+                : "";
     }
 
     const etiqueta = caja.querySelector("[data-filtros-label]");
     if (etiqueta) {
-        etiqueta.textContent = categoria;
+        etiqueta.textContent = resumenCategorias(puestas);
     }
-    cerrarDesplegable(caja);
-    guardarFiltroEnUrl(categoria);
+    if (cerrar) {
+        cerrarDesplegable(caja);
+    }
+    guardarFiltroEnUrl([...puestas]);
+}
+
+// Lo que se lee en el botón del desplegable de móvil: "todas", el
+// nombre suelto o "3 categorías". Los nombres de varias no caben ahí;
+// cuáles son se ve en la lista de abajo, con sus botones marcados.
+function resumenCategorias(puestas) {
+    if (puestas.size === 0) {
+        return FILTROS_TODAS;
+    }
+    if (puestas.size === 1) {
+        return [...puestas][0];
+    }
+    return `${puestas.size} categorías`;
+}
+
+// «mapas», «mapas» ni «sistemas», «a», «b» ni «c»: el aviso de vacío es
+// una frase, y "no hay nada en «mapas», «sistemas»" no se lee como tal.
+function listaEnTexto(nombres) {
+    const entrecomillados = nombres.map((n) => `«${n}»`);
+    if (entrecomillados.length <= 1) {
+        return entrecomillados.join("");
+    }
+    const ultimo = entrecomillados.pop();
+    return `${entrecomillados.join(", ")} ni ${ultimo}`;
 }
 
 // =========================================
@@ -207,15 +288,18 @@ function cerrarDesplegable(caja) {
     }
 }
 
-function guardarFiltroEnUrl(categoria) {
+// Las categorías puestas van en la dirección separadas por comas, para
+// que el enlace se pueda copiar o recargar con la misma vista. Sin
+// ninguna, el parámetro desaparece en vez de quedarse vacío.
+function guardarFiltroEnUrl(categorias) {
     if (!window.history || !window.history.replaceState) {
         return;
     }
     const url = new URL(window.location.href);
-    if (categoria === FILTROS_TODAS) {
+    if (!categorias.length) {
         url.searchParams.delete("cat");
     } else {
-        url.searchParams.set("cat", categoria);
+        url.searchParams.set("cat", categorias.join(","));
     }
     window.history.replaceState(null, "", url);
 }
