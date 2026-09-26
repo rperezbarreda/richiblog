@@ -1,6 +1,13 @@
 {
     "regis": [
         {
+            "archivo": "PXL_20260919_233000549~2.webp",
+            "mini": "PXL_20260919_233000549~2-mini.webp",
+            "ancho": 1920,
+            "alto": 1080,
+            "alt": "Regis tumbado en mi cama y enroscado."
+        },
+        {
             "archivo": "PXL_20260826_074511861.webp",
             "mini": "PXL_20260826_074511861-mini.webp",
             "ancho": 1920,
@@ -234,6 +241,27 @@
     ],
     "tali": [
         {
+            "archivo": "PXL_20260925_223745244.webp",
+            "mini": "PXL_20260925_223745244-mini.webp",
+            "ancho": 1920,
+            "alto": 1080,
+            "alt": "Tali tumbada encima de un mueble dormida."
+        },
+        {
+            "archivo": "PXL_20260918_005758499.webp",
+            "mini": "PXL_20260918_005758499-mini.webp",
+            "ancho": 1920,
+            "alto": 1080,
+            "alt": "Tali tumbada encima de un mueble mirando a cámara aburrida."
+        },
+        {
+            "archivo": "PXL_20260917_172912577~2.webp",
+            "mini": "PXL_20260917_172912577~2-mini.webp",
+            "ancho": 1080,
+            "alto": 1920,
+            "alt": "Tali mirando a cámara desde el alfeizar de mi ventana."
+        },
+        {
             "archivo": "PXL_20260911_091742532.webp",
             "mini": "PXL_20260911_091742532-mini.webp",
             "ancho": 1080,
@@ -245,7 +273,7 @@
             "mini": "PXL_20260820_212949270.MP~2-mini.webp",
             "ancho": 1502,
             "alto": 1920,
-            "alt": "Tali mordisqueando un palo de matatabi que le sujeta una mano."
+            "alt": "Tali mordisqueando un palo de matatabi que le sujeta mi mano."
         },
         {
             "archivo": "PXL_20260816_190925609.MP~2.webp",

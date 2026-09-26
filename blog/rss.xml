@@ -5,8 +5,17 @@
         <link>https://richi.blog/</link>
         <description>Todo lo que voy publicando: entradas del blog, relatos y material de rol.</description>
         <language>es</language>
-        <lastBuildDate>Wed, 23 Sep 2026 00:00:00 +0000</lastBuildDate>
+        <lastBuildDate>Sat, 26 Sep 2026 00:00:00 +0000</lastBuildDate>
         <atom:link href="https://richi.blog/blog/rss.xml" rel="self" type="application/rss+xml"/>
+        <item>
+            <title>Semanita de estar solo en casa</title>
+            <link>https://richi.blog/web/blog/2026/septiembre/semanita-de-estar-solo-en-casa.html</link>
+            <guid isPermaLink="true">https://richi.blog/web/blog/2026/septiembre/semanita-de-estar-solo-en-casa.html</guid>
+            <pubDate>Sat, 26 Sep 2026 00:00:00 +0000</pubDate>
+            <category>blog</category>
+            <category>diario</category>
+            <description>Estos días he andado algo desmotivado para escribir nuevas entradas en el blog, pero hoy si que lo estoy, así que al lío.</description>
+        </item>
         <item>
             <title>Tomé la horrible decisión de ver Crepùsculo</title>
             <link>https://richi.blog/web/blog/2026/septiembre/tome-la-horrible-decision-de-ver-crepusculo.html</link>
