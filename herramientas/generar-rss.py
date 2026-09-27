@@ -26,7 +26,7 @@
 # los demás y listo: quien esté suscrito lo verá la próxima vez que su
 # lector pase a mirar.
 #
-# nueva-entrada.py y nuevo-rol.py ya lo ejecutan solos al terminar, así
+# nuevo.py y nuevo.py --rol ya lo ejecutan solos al terminar, así
 # que en el día a día no hace falta llamarlo a mano.
 #
 # El resumen de cada cosa se saca de su propia página (el primer
@@ -52,7 +52,7 @@ DESCRIPCION_CANAL = (
 )
 IDIOMA = "es"
 
-RAIZ = Path(__file__).resolve().parent.parent
+from comun import RAIZ
 JSON_BLOG = RAIZ / "datos" / "entradas-blog.json"
 JSON_MOVIDAS = RAIZ / "datos" / "mis-movidas.json"
 ROL = RAIZ / "web" / "mis_movidas" / "rol" / "index_rol.html"

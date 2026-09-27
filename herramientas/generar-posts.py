@@ -48,13 +48,10 @@
 # Y en los relatos, igual con relato-post-title / relato-post-date y
 # data-subcategoria.
 #
-# Y el portfolio de rol, que no son páginas sueltas sino tarjetas
-# dentro de web/mis_movidas/rol/index_rol.html:
-#
-#     título          <h2 class="portfolio-card-title">…</h2>
-#     categoría       <div class="portfolio-card" data-categoria="aventuras">
-#     fecha           <div class="portfolio-card" data-fecha="14-09-2026">
-#     enlace          el primer botón de la tarjeta (el de Ko-fi)
+# El portfolio de rol es la excepción: no son páginas sueltas ni
+# tarjetas escritas en el HTML, sino las fichas de datos/rol.json, que
+# es donde se escriben y de donde las pinta scripts/paginas/rol.js. De
+# cada una sale el título, la categoría, la fecha y el enlace de Ko-fi.
 
 import json
 import re
@@ -62,10 +59,17 @@ import sys
 import unicodedata
 from pathlib import Path
 
-RAIZ = Path(__file__).resolve().parent.parent
+from comun import (
+    RAIZ,
+    escribir_json,
+    limpiar_html,
+    paginas,
+    sin_tildes,
+    url_de,
+)
 BLOG = RAIZ / "web" / "blog"
 RELATOS = RAIZ / "web" / "mis_movidas" / "relatos"
-ROL = RAIZ / "web" / "mis_movidas" / "rol" / "index_rol.html"
+JSON_ROL = RAIZ / "datos" / "rol.json"
 JSON_BLOG = RAIZ / "datos" / "entradas-blog.json"
 JSON_MOVIDAS = RAIZ / "datos" / "mis-movidas.json"
 
@@ -88,11 +92,6 @@ MESES = {
 }
 
 
-def sin_tildes(texto):
-    return "".join(
-        c for c in unicodedata.normalize("NFD", texto) if unicodedata.category(c) != "Mn"
-    )
-
 
 def buscar(patron, texto):
     encontrado = re.search(patron, texto, re.S)
@@ -105,10 +104,6 @@ def partir_etiquetas(crudas):
     etiqueta llamada 'diario,' con su propio botón en el filtro."""
     return [e for e in re.split(r"[\s,]+", crudas.strip().lower()) if e]
 
-
-def limpiar_html(texto):
-    """Quita etiquetas de dentro de un título y deja el texto pelado."""
-    return re.sub(r"\s+", " ", re.sub(r"<[^>]+>", "", texto)).strip()
 
 
 def leer_fecha(texto):
@@ -144,28 +139,16 @@ def clave_orden(entrada):
 # secas: la plantilla explica en un comentario qué es data-borrador, y
 # buscando por el texto pelado ese comentario contaba como marca y la
 # entrada no se publicaba nunca.
-RE_BORRADOR = re.compile(r'<article class="(?:blog|relato)-post"[^>]*\bdata-borrador\b')
 
 
-def es_borrador(archivo):
-    try:
-        return bool(RE_BORRADOR.search(archivo.read_text(encoding="utf-8")))
-    except OSError:
-        return False
-
-def paginas(carpeta, patron):
-    """Las páginas de contenido: fuera índices, páginas sueltas y
-    borradores."""
-    for p in sorted(carpeta.rglob(patron)):
-        if p.name.startswith("index_") or p.name == "diario.html":
-            continue
-        if es_borrador(p):
-            continue
-        yield p
 
 
-def url_de(ruta):
-    return "/" + ruta.relative_to(RAIZ).as_posix()
+
+def carpeta_de_coleccion(ruta):
+    """Si el relato está en una subcarpeta de relatos/, esa carpeta es
+    su colección ("writeober26"). Si está suelto, no hay colección."""
+    relativa = ruta.relative_to(RELATOS).parts
+    return relativa[0] if len(relativa) > 1 else ""
 
 
 def leer_entrada(ruta, prefijo):
@@ -210,45 +193,53 @@ def recoger_blog():
     return entradas, avisos
 
 
-# El portfolio de rol no son páginas sueltas: son tarjetas dentro de
-# web/mis_movidas/rol/index_rol.html, todas en la misma rejilla. De ahí
-# salen el título, la categoría (data-categoria), la fecha (data-fecha)
-# y el enlace, que es el primer botón de la tarjeta: el de Ko-fi.
-# Antes la categoría era el id del panel de pestañas; las pestañas ya no
-# existen —ahora se filtra con la ventana filtros.lst— y cada tarjeta
-# dice a cuál pertenece.
+# El portfolio de rol vive en datos/rol.json, que es el archivo que se
+# toca (a mano o con nuevo.py --rol) y del que la propia página saca sus
+# tarjetas. Aquí solo se traduce al formato del listado: de cada ficha
+# se queda el título, la categoría, la fecha y el enlace de Ko-fi, que
+# es lo que necesitan la portada y el RSS.
+# Antes las tarjetas estaban escritas dentro de index_rol.html y esto
+# las leía de allí con expresiones regulares; se cambió porque esa
+# página crecía ~2 KB por cosa publicada y había que editar HTML para
+# añadir nada.
 def recoger_rol():
     entradas, avisos = [], []
-    if not ROL.is_file():
+    if not JSON_ROL.is_file():
         return entradas, avisos
 
-    texto = ROL.read_text(encoding="utf-8")
-    for tarjeta in re.finditer(
-        r'<div class="portfolio-card"(.*?)(?=<div class="portfolio-card"|</div>\s*</section>|$)',
-        texto,
-        re.S,
-    ):
-        trozo = tarjeta.group(0)
-        titulo = buscar(r'<h2 class="portfolio-card-title">(.*?)</h2>', trozo)
-        subcategoria = buscar(r'data-categoria="([^"]*)"', trozo)
-        fecha = buscar(r'data-fecha="([^"]*)"', trozo)
-        enlace = buscar(r'<a class="portfolio-card-btn"[^>]*href="([^"]*)"', trozo)
+    try:
+        fichas = json.loads(JSON_ROL.read_text(encoding="utf-8"))
+    except json.JSONDecodeError as error:
+        avisos.append((JSON_ROL, [f"no entiendo el JSON: {error}"]))
+        return entradas, avisos
+    if not isinstance(fichas, list):
+        avisos.append((JSON_ROL, ["esperaba una lista de fichas entre [ ]"]))
+        return entradas, avisos
+
+    for ficha in fichas:
+        if not isinstance(ficha, dict):
+            avisos.append((JSON_ROL, ["hay algo en la lista que no es una ficha"]))
+            continue
+        titulo = (ficha.get("title") or "").strip()
+        subcategoria = (ficha.get("subcategory") or "").strip()
+        fecha = (ficha.get("date") or "").strip()
+        enlace = (ficha.get("kofi") or "").strip()
         fallos = []
         if not titulo:
-            fallos.append("no encuentro el título de la tarjeta")
+            fallos.append("la ficha no tiene título (title)")
         if not subcategoria:
-            fallos.append("la tarjeta no dice de qué categoría es (data-categoria)")
+            fallos.append("la ficha no dice de qué categoría es (subcategory)")
         if not fecha or len(fecha.split("-")) != 3:
-            fallos.append(f'falta o no entiendo data-fecha (encontré: {fecha!r})')
+            fallos.append(f"falta o no entiendo date, que va en dd-mm-aaaa (encontré: {fecha!r})")
         if not enlace:
-            fallos.append("la tarjeta no tiene botón con enlace")
+            fallos.append("la ficha no tiene enlace de Ko-fi (kofi)")
         if fallos:
-            nombre = limpiar_html(titulo) if titulo else "tarjeta sin título"
-            avisos.append((ROL, [f"[{nombre}] {f}" for f in fallos]))
+            nombre = titulo or "ficha sin título"
+            avisos.append((JSON_ROL, [f"[{nombre}] {f}" for f in fallos]))
             continue
         entradas.append(
             {
-                "title": limpiar_html(titulo),
+                "title": titulo,
                 "category": "rol",
                 "subcategory": subcategoria,
                 "date": fecha,
@@ -269,15 +260,23 @@ def recoger_movidas():
             buscar(r'<article class="relato-post"[^>]*data-subcategoria="([^"]*)"', texto)
             or ""
         )
-        entradas.append(
-            {
-                "title": titulo,
-                "category": "relatos",
-                "subcategory": sub,
-                "date": fecha,
-                "url": url_de(ruta),
-            }
-        )
+        entrada = {
+            "title": titulo,
+            "category": "relatos",
+            "subcategory": sub,
+            "date": fecha,
+            "url": url_de(ruta),
+        }
+        # Un relato dentro de una subcarpeta de relatos/ pertenece a una
+        # colección: hoy, el reto de escritura diaria. Se apunta a cuál
+        # para que el listado de relatos NO los liste de uno en uno —son
+        # 31 y taparían todo lo demás durante un mes— y para que la
+        # portada los resuma en una sola línea. En el RSS sí entran
+        # sueltos: quien está suscrito quiere cada texto.
+        coleccion = carpeta_de_coleccion(ruta)
+        if coleccion:
+            entrada["collection"] = coleccion
+        entradas.append(entrada)
 
     rol, avisos_rol = recoger_rol()
     todas = rol + entradas
@@ -327,8 +326,7 @@ def escribir(destino, datos, probar):
         print(f"  {destino.relative_to(RAIZ)} ya estaba al día")
         return False
     if not probar:
-        destino.parent.mkdir(parents=True, exist_ok=True)
-        destino.write_text(nuevo, encoding="utf-8")
+        escribir_json(destino, datos)
     print(f"  {destino.relative_to(RAIZ)} {'se reescribiría' if probar else 'reescrito'}")
     return True
 

@@ -20,7 +20,7 @@
 #
 # CÓMO USARLO
 # -----------
-# Normalmente no hace falta ejecutarlo a mano: nueva-entrada.py ya lo
+# Normalmente no hace falta ejecutarlo a mano: nuevo.py ya lo
 # llama. Si lo quieres suelto, desde la carpeta raíz del sitio:
 #
 #     python herramientas/generar-archivo.py
@@ -40,16 +40,12 @@ import re
 import sys
 from pathlib import Path
 
-RAIZ = Path(__file__).resolve().parent.parent
+from comun import MESES, RAIZ, es_borrador, escribir_como_estaba, leer_texto
 BLOG = RAIZ / "web" / "blog"
 SIDEBAR = RAIZ / "fragmentos" / "barra-lateral.html"
 PLANTILLA_ANYO = RAIZ / "herramientas" / "plantillas" / "archivo-anyo.html"
 PLANTILLA_MES = RAIZ / "herramientas" / "plantillas" / "archivo-mes.html"
 
-MESES = [
-    "enero", "febrero", "marzo", "abril", "mayo", "junio",
-    "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre",
-]
 ENLACE_DIARIO = '<a href="/web/blog/diario.html">diario</a>'
 
 
@@ -63,14 +59,8 @@ ENLACE_DIARIO = '<a href="/web/blog/diario.html">diario</a>'
 # secas: la plantilla explica en un comentario qué es data-borrador, y
 # buscando por el texto pelado ese comentario contaba como marca y la
 # entrada no se publicaba nunca.
-RE_BORRADOR = re.compile(r'<article class="(?:blog|relato)-post"[^>]*\bdata-borrador\b')
 
 
-def es_borrador(archivo):
-    try:
-        return bool(RE_BORRADOR.search(archivo.read_text(encoding="utf-8")))
-    except OSError:
-        return False
 
 def meses_con_entradas():
     """{año: [nº de mes, …]} mirando qué carpetas tienen páginas dentro."""
@@ -123,12 +113,19 @@ def html_del_anyo(anyo, meses):
 
 
 def escribir(destino, contenido, probar):
-    anterior = destino.read_text(encoding="utf-8") if destino.is_file() else None
+    """Respetando los saltos de línea que ya tuviera la página: la
+    mitad del sitio está guardado con los de Windows y, escribiendo a
+    lo bruto, git marcaba el archivo entero como cambiado aunque solo
+    se hubiera añadido un mes. Ver comun.py."""
+    anterior = leer_texto(destino)[0] if destino.is_file() else None
     if anterior == contenido:
         return "igual"
     if not probar:
         destino.parent.mkdir(parents=True, exist_ok=True)
-        destino.write_text(contenido, encoding="utf-8")
+        if destino.is_file():
+            escribir_como_estaba(destino, contenido)
+        else:
+            destino.write_text(contenido, encoding="utf-8")
     return "nuevo" if anterior is None else "actualizado"
 
 
@@ -148,7 +145,7 @@ def actualizar_menu(anyos, probar):
         print(f"  No encuentro {SIDEBAR.relative_to(RAIZ)}; el menú se queda como está.")
         return "sin menu"
 
-    texto = SIDEBAR.read_text(encoding="utf-8")
+    texto, _ = leer_texto(SIDEBAR)
     marca = texto.find("<span>blog</span>")
     if marca == -1:
         print("  No encuentro el grupo 'blog' en el menú; lo dejo como está.")
@@ -178,7 +175,7 @@ def actualizar_menu(anyos, probar):
     if completo == texto:
         return "igual"
     if not probar:
-        SIDEBAR.write_text(completo, encoding="utf-8")
+        escribir_como_estaba(SIDEBAR, completo)
     return "actualizado"
 
 

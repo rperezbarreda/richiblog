@@ -27,14 +27,16 @@ async function initializeMisMovidasFeed() {
     }
 
     try {
-        const response = await fetch(MIS_MOVIDAS_URL);
+        const response = await window.pedirDatos(MIS_MOVIDAS_URL);
         if (!response.ok) {
             throw new Error("La respuesta no fue correcta");
         }
         const items = await response.json();
-        const sorted = Array.isArray(items)
-            ? items.slice().sort((a, b) => parseItemDate(b.date) - parseItemDate(a.date))
-            : [];
+        const sorted = colapsarColecciones(
+            Array.isArray(items)
+                ? items.slice().sort((a, b) => parseItemDate(b.date) - parseItemDate(a.date))
+                : []
+        );
 
         if (sorted.length === 0) {
             list.innerHTML = '<li class="entries-empty">Todavía no hay nada publicado.</li>';
@@ -46,6 +48,26 @@ async function initializeMisMovidasFeed() {
         list.innerHTML =
             '<li class="entries-error">No se han podido cargar los proyectos ahora mismo.</li>';
     }
+}
+
+// De un reto de escritura diaria solo se enseña el último día, no los
+// cuatro últimos: si no, durante octubre esta ventana serían cuatro
+// líneas del mismo reto y no se vería nada más de lo que publico. La
+// lista llega ya ordenada de nuevo a viejo, así que el primero de cada
+// colección que aparece es el más reciente.
+function colapsarColecciones(ordenados) {
+    const vistas = {};
+    return ordenados.filter((item) => {
+        const coleccion = (item.collection || "").trim();
+        if (!coleccion) {
+            return true;
+        }
+        if (vistas[coleccion]) {
+            return false;
+        }
+        vistas[coleccion] = true;
+        return true;
+    });
 }
 
 // =========================================
@@ -121,6 +143,11 @@ function etiquetasDe(item) {
     }
 
     const pagina = PAGINAS_POR_CATEGORIA[categoria.toLowerCase()];
+    // Lo que pertenece a una colección (el reto de escritura diaria) no
+    // se lista en la página de relatos, así que filtrarla por esa
+    // subcategoría llevaría a una lista vacía. Su etiqueta se pinta sin
+    // enlace, como la del portfolio de rol.
+    const enColeccion = !!(item.collection || "").trim();
     const etiquetas = [];
     if (categoria) {
         etiquetas.push(pintarEtiqueta(categoria, pagina));
@@ -129,7 +156,9 @@ function etiquetasDe(item) {
         etiquetas.push(
             pintarEtiqueta(
                 subcategoria,
-                pagina ? `${pagina}?cat=${encodeURIComponent(subcategoria)}` : ""
+                pagina && !enColeccion
+                    ? `${pagina}?cat=${encodeURIComponent(subcategoria)}`
+                    : ""
             )
         );
     }

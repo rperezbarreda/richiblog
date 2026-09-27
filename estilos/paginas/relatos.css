@@ -44,6 +44,15 @@
    (.recent-entries-header y .entries-list son componentes
    compartidos, ya definidos en estilos/componentes/cabecera-ventana.css y
    estilos/base.css — aquí solo hace falta la caja que los envuelve). */
+/* Sin esto la ventana se seguiría viendo aunque lleve "hidden": una
+   regla con display gana a la del navegador para [hidden]. Mismo caso
+   que .portfolio-card[hidden] al filtrar. Se esconde cuando el filtro
+   «retos» deja el listado sin nada que enseñar, porque entonces lo que
+   se ve son las tarjetas de los retos. */
+.relatos-list-card[hidden] {
+    display: none;
+}
+
 .relatos-list-card {
     display: flex;
     flex-direction: column;

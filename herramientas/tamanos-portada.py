@@ -38,7 +38,7 @@ except ImportError:
     print("  Falta la librería Pillow:  pip install pillow")
     sys.exit(1)
 
-RAIZ = Path(__file__).resolve().parent.parent
+from comun import RAIZ
 CARPETA = RAIZ / "imagenes" / "main"
 
 # Los dos dibujos, uno por tema.

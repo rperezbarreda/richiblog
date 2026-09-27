@@ -1,0 +1,454 @@
+/* RETO LITERARIO — página del reto (Writeober y los que vengan) */
+
+/* En escritorio, a dos columnas: a la izquierda lo que se lee una vez
+   —título, de qué va el reto, cómo va y el botón de volver— y a la
+   derecha la rejilla de días a toda la altura, que es lo que se mira
+   de verdad y a lo que se vuelve cada día. Antes iba todo en una
+   columna y la rejilla quedaba en la mitad de abajo, medio cortada,
+   con el botón de volver empujado fuera de la vista.
+   En móvil esto se deshace y vuelve a ser una sola columna
+   (reto.responsive.css). */
+.reto-page {
+    display: grid;
+    grid-template-columns: minmax(300px, 1fr) minmax(0, 1.05fr);
+    /* Dos filas para lo de la izquierda y una tercera que se come el
+       hueco que sobre; la ventana de la derecha las cruza enteras. */
+    grid-template-rows: auto auto 1fr;
+    /* .home trae align-items: center, que aquí dejaría las dos
+       columnas flotando en mitad de la pantalla. */
+    align-items: start;
+    justify-content: start;
+    gap: 10px 36px;
+    /* "auto" y no "hidden": normalmente cabe todo y no se desplaza
+       nada, pero con el espaciado de texto forzado (el que usa quien
+       necesita las letras más separadas) el título solo pasa a medir
+       casi 600px y lo de abajo se salía de la página, tapando el
+       botón de volver. Con auto, en ese caso la página se desplaza y
+       no se pierde nada, que es justo lo que pide esa norma. */
+    overflow-y: auto;
+    padding: 24px 4%;
+}
+
+.reto-titulo {
+    grid-column: 1;
+    grid-row: 1;
+}
+
+.reto-cabecera {
+    grid-column: 1;
+    grid-row: 2;
+    /* Sin esto, un enlace largo (el del post original) ensancha la
+       columna y se come el sitio de la rejilla. */
+    min-width: 0;
+}
+
+/* El título de esta página es más pequeño que el de las demás: el de
+   serie (hasta 8,75rem) no cabe en media pantalla, y "writeober" se
+   salía de su columna. Mismo tamaño que el del archivo del blog. */
+.reto-page .home-title {
+    font-size: clamp(3.25rem, 6vw, 5.5rem);
+}
+
+/* El botón de volver encima del título, y el año debajo. En columna
+   porque el título es enorme (es el mismo de todas las secciones) y
+   al lado no cabría nada. */
+.reto-titulo {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+}
+
+.reto-titulo .home-title {
+    margin: 0;
+}
+
+/* El año, como en el archivo del blog: debajo del título, pequeño y
+   en la letra de máquina. Junto al título se lee "writeober 2026". */
+.reto-anyo {
+    margin: 0;
+    color: var(--muted);
+    font-family: "DM Mono", monospace;
+    font-size: 1rem;
+    letter-spacing: 2px;
+}
+
+/* Volver al listado de relatos. Mismo botón en hueco que el resto de
+   los "volver" del sitio: se ve que es un botón sin competir con el
+   título, que es lo que manda en esta página. */
+.reto-volver {
+    display: inline-flex;
+    align-items: center;
+    align-self: flex-start;
+    flex: 0 0 auto;
+    padding: 8px 16px;
+    border: 2px solid var(--yellow);
+    background: transparent;
+    color: var(--yellow);
+    font-family: "DM Mono", monospace;
+    font-size: 0.8125rem;
+    text-decoration: none;
+    transition: color 0.15s linear, background-color 0.15s linear;
+}
+
+.reto-volver:hover,
+.reto-volver:focus-visible {
+    background: var(--yellow);
+    color: var(--yellow-contrast);
+}
+
+.reto-volver:focus-visible {
+    outline: 2px solid var(--yellow);
+    outline-offset: 3px;
+}
+
+/* El segundo botón, el de después de la rejilla, solo hace falta en
+   móvil: ahí la página se desplaza entera y al llegar al día 31 el de
+   arriba se ha quedado muy lejos. En escritorio la rejilla se
+   desplaza por dentro, el de arriba no se mueve de su sitio y un
+   segundo botón sobra. */
+.reto-volver-abajo {
+    display: none;
+}
+
+/* Lo de arriba: qué es el reto, quién lo propone y por dónde va. */
+.reto-cabecera {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    max-width: 720px;
+}
+
+.reto-intro {
+    margin: 0;
+    color: var(--white);
+    font-size: 1rem;
+    line-height: 1.6;
+}
+
+.reto-datos {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px 16px;
+    margin: 0;
+    color: var(--muted);
+    font-family: "DM Mono", monospace;
+    font-size: 0.8125rem;
+}
+
+.reto-hashtag {
+    color: var(--yellow);
+    letter-spacing: 1px;
+}
+
+.reto-origen {
+    color: var(--yellow);
+    text-decoration: underline;
+}
+
+.reto-origen:hover,
+.reto-origen:focus-visible {
+    text-decoration: none;
+}
+
+.reto-origen:focus-visible {
+    outline: 2px solid var(--yellow);
+    outline-offset: 3px;
+}
+
+/* EL AVANCE */
+
+.reto-avance {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    max-width: 420px;
+}
+
+/* Esto es lo que de verdad dice cómo va el reto: es texto, se lee solo
+   y no depende de ver una barra de colores. La barra de debajo es un
+   adorno y va aria-hidden en el HTML. */
+.reto-avance-texto {
+    margin: 0;
+    color: var(--white);
+    font-family: "DM Mono", monospace;
+    font-size: 0.875rem;
+    letter-spacing: 1px;
+}
+
+.reto-avance-barra {
+    --avance: 0%;
+    position: relative;
+    height: 14px;
+    border: 2px solid var(--yellow);
+    background: var(--purple);
+}
+
+.reto-avance-barra::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    width: var(--avance);
+    background: var(--yellow);
+    /* Sin transición al cargar: la barra se pinta ya en su sitio, y
+       una animación de medio segundo con cada visita cansa. */
+}
+
+/* LA VENTANA CON LOS DÍAS */
+
+/* Misma "ventana falsa" que .relatos-list-card y .blog-month: cabecera
+   con barra y botones −■✕ que pone botones-ventana.js. Los 16px de
+   padding cuadran con el margen negativo de .recent-entries-header. */
+.reto-card {
+    /* La columna de la derecha, entera: cruza las tres filas y se
+       estira a toda la altura que haya. */
+    grid-column: 2;
+    grid-row: 1 / -1;
+    align-self: stretch;
+    display: flex;
+    flex-direction: column;
+    /* Nunca por debajo de la cabecera más una fila de casillas. Sin
+       este suelo, cuando arriba crecía mucho (espaciado de texto
+       forzado) la ventana se encogía hasta 38px y su contenido se
+       salía por debajo, tapando el botón de volver. Ahora se planta
+       aquí y lo que no cabe lo absorbe el scroll de la página. */
+    min-height: 220px;
+    /* Y por si acaso: lo que sobre se recorta dentro de la ventana en
+       vez de pintarse encima de lo de abajo. */
+    overflow: hidden;
+    max-width: none;
+    padding: 16px;
+    background: var(--purple-lighter);
+    border: 3px solid var(--yellow);
+    box-shadow: 6px 6px 0 var(--yellow);
+}
+
+.reto-card-body {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    margin-top: 2px;
+    /* Hueco para que el recuadro del foco de una casilla no quede
+       pegado al borde de la ventana ni debajo de la barra. */
+    padding: 4px 6px 4px 2px;
+}
+
+/* La rejilla: tantas columnas como quepan. 140px de mínimo es lo que
+   necesita la palabra más larga que suelen tener estos retos sin
+   partirse, y con la ventana ya en media pantalla deja tres o cuatro
+   columnas, que es como se ve el mes de un vistazo. */
+.reto-dias {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 10px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    /* Es un <ol>: los números de día ya van dentro de cada casilla, así
+       que el contador del navegador sobra y encima descuadraba la
+       rejilla. */
+}
+
+.reto-dia-casilla {
+    display: flex;
+}
+
+/* Una casilla. Alto mínimo generoso a propósito: son objetivos de
+   pulsación (WCAG pide 24x24 como mínimo; aquí pasan de 70) y con poca
+   visión un cuadro grande se acierta a la primera. */
+.reto-dia {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    width: 100%;
+    min-height: 74px;
+    padding: 10px 12px;
+    border: 2px solid var(--border);
+    background: var(--purple);
+    text-decoration: none;
+    transition: color 0.15s linear, background-color 0.15s linear,
+        border-color 0.15s linear;
+}
+
+.reto-dia-num {
+    color: var(--muted);
+    font-family: "DM Mono", monospace;
+    font-size: 0.6875rem;
+    letter-spacing: 1px;
+}
+
+.reto-dia-palabra {
+    color: var(--white);
+    font-size: 0.9375rem;
+    font-weight: 500;
+    line-height: 1.25;
+    /* La palabra del día manda: si es larguísima, que parta en vez de
+       ensanchar la columna y descuadrar la rejilla entera. */
+    overflow-wrap: anywhere;
+}
+
+.reto-dia-titulo {
+    margin-top: 2px;
+    color: var(--muted);
+    font-size: 0.75rem;
+    line-height: 1.3;
+    overflow-wrap: anywhere;
+}
+
+/* Escrito: la casilla es un enlace y se ve que lo es. */
+.reto-dia.is-hecho {
+    border-color: var(--yellow);
+}
+
+.reto-dia.is-hecho .reto-dia-num,
+.reto-dia.is-hecho .reto-dia-palabra {
+    color: var(--yellow);
+}
+
+.reto-dia.is-hecho:hover,
+.reto-dia.is-hecho:focus-visible {
+    background: var(--yellow);
+}
+
+.reto-dia.is-hecho:hover .reto-dia-num,
+.reto-dia.is-hecho:hover .reto-dia-palabra,
+.reto-dia.is-hecho:hover .reto-dia-titulo,
+.reto-dia.is-hecho:focus-visible .reto-dia-num,
+.reto-dia.is-hecho:focus-visible .reto-dia-palabra,
+.reto-dia.is-hecho:focus-visible .reto-dia-titulo {
+    color: var(--yellow-contrast);
+}
+
+.reto-dia.is-hecho:focus-visible {
+    outline: 2px solid var(--yellow);
+    outline-offset: 3px;
+}
+
+/* Sin escribir: se ve que está ahí y que todavía no lleva a ninguna
+   parte. Nada de opacidad, que hunde el contraste: se cambia el color
+   y se quita el borde amarillo, que es la marca de "esto se puede
+   pulsar". */
+.reto-dia.is-pendiente .reto-dia-palabra {
+    color: var(--muted);
+    font-weight: 400;
+}
+
+/* LAS TARJETAS DE LOS RETOS, EN EL LISTADO DE RELATOS */
+
+/* Solo se ven al pulsar el filtro «retos». Una por reto: el contenedor
+   las apila con el mismo hueco que hay entre los demás bloques de la
+   página. */
+.reto-avisos {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    /* Con un reto sobra sitio; con tres, no. En vez de aplastar el
+       listado de abajo hasta hacerlo desaparecer, las tarjetas se
+       quedan con lo que haya y se desplazan por dentro. */
+    flex: 0 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+    padding-right: 4px;
+}
+
+.reto-avisos[hidden] {
+    display: none;
+}
+
+/* Cada tarjeta, a lo ancho y alineada con el listado (los mismos
+   1000px de .relatos-list-card, para que los dos bordes cuadren). */
+.reto-aviso {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 12px 20px;
+    flex-shrink: 0;
+    width: 100%;
+    max-width: 1000px;
+    padding: 16px;
+    background: var(--purple-lighter);
+    border: 3px solid var(--yellow);
+    box-shadow: 6px 6px 0 var(--yellow);
+}
+
+.reto-aviso[hidden] {
+    display: none;
+}
+
+.reto-aviso-texto {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    /* Se queda con todo el ancho que sobre del botón, pero nunca baja
+       de 260px: por debajo, la descripción salía en columna de cuatro
+       palabras por línea. */
+    flex: 1 1 260px;
+    min-width: 0;
+}
+
+.reto-aviso-nombre {
+    margin: 0;
+    color: var(--white);
+    font-size: 1.0625rem;
+    font-weight: 500;
+}
+
+/* La descripción entera, sin cortar: es lo que explica el reto a quien
+   llega de nuevas. Se lee con el mismo cuerpo y el mismo interlineado
+   que la intro de la página. */
+.reto-aviso-desc {
+    margin: 0;
+    color: var(--white);
+    font-size: 0.9375rem;
+    line-height: 1.6;
+}
+
+.reto-aviso-desc:empty {
+    display: none;
+}
+
+.reto-aviso-avance,
+.reto-aviso-ultimo {
+    margin: 0;
+    color: var(--muted);
+    font-family: "DM Mono", monospace;
+    font-size: 0.75rem;
+}
+
+.reto-aviso-ultimo[hidden] {
+    display: none;
+}
+
+.reto-aviso-enlace {
+    display: inline-flex;
+    align-items: center;
+    flex: 0 0 auto;
+    padding: 10px 18px;
+    border: 2px solid var(--yellow);
+    background: var(--yellow);
+    color: var(--yellow-contrast);
+    font-family: "DM Mono", monospace;
+    font-size: 0.8125rem;
+    text-transform: lowercase;
+    letter-spacing: 1px;
+    text-decoration: none;
+    transition: color 0.15s linear, background-color 0.15s linear;
+}
+
+.reto-aviso-enlace:hover,
+.reto-aviso-enlace:focus-visible {
+    background: transparent;
+    color: var(--yellow);
+}
+
+.reto-aviso-enlace:focus-visible {
+    outline: 2px solid var(--yellow);
+    outline-offset: 3px;
+}
+
+/* Y el listado nunca baja de esto: aunque las tarjetas ocupen mucho,
+   tiene que seguir viéndose que debajo hay una lista. */
+.reto-avisos:not([hidden]) ~ .relatos-list-card {
+    min-height: 160px;
+}

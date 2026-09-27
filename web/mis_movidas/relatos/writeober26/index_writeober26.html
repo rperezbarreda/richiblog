@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8">
+    <!-- Color de la barra del navegador en el móvil. Arranca en el color
+         del modo oscuro y el script de abajo lo cambia si toca; al pulsar
+         el botón de tema lo actualiza scripts/tema.js. -->
+    <meta name="theme-color" content="#12091c">
+    <script>
+      (function () {
+        try {
+          if (localStorage.getItem("richi-theme") === "light") {
+            document.documentElement.setAttribute("data-theme", "light");
+            var barra = document.querySelector('meta[name="theme-color"]');
+            if (barra) {
+              barra.setAttribute("content", "#f2ded2");
+            }
+          }
+        } catch (e) {}
+      })();
+    </script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Writeober 2026 · Relatos · El Blog de Richi</title>
+    <!-- Cómo se ve el enlace al compartirlo (Bluesky, Discord, Ko-fi…).
+         Sin esto solo sale la URL pelada, sin título ni imagen. Las rutas
+         van absolutas a propósito: las redes no resuelven las relativas. -->
+    <meta name="description" content="Un texto al día durante octubre, cada uno con la palabra que toca. Writeober 2026.">
+    <link rel="canonical" href="https://richi.blog/web/mis_movidas/relatos/writeober26/index_writeober26.html">
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="El Blog de Richi">
+    <meta property="og:locale" content="es_ES">
+    <meta property="og:title" content="Writeober 2026 · El Blog de Richi">
+    <meta property="og:description" content="Un texto al día durante octubre, cada uno con la palabra que toca. Writeober 2026.">
+    <meta property="og:url" content="https://richi.blog/web/mis_movidas/relatos/writeober26/index_writeober26.html">
+    <meta property="og:image" content="https://richi.blog/imagenes/meta/og.webp">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta property="og:image:alt" content="El Blog de Richi — ilustración de Richi sobre fondo morado">
+    <meta name="twitter:card" content="summary_large_image">
+    <link rel="icon" type="image/x-icon" href="/imagenes/favicon.ico">
+    <!-- La única fuente que se precarga. Medido con la red frenada: sin esto el
+         navegador no la descubre hasta parsear el CSS (~800 ms) y el texto baila al
+         cambiar de tipografía; así llega antes del primer pintado y no se nota el
+         cambio. Precargar más fuentes empeoraba el primer pintado 150-210 ms, porque
+         compiten por el ancho de banda con lo que hace falta para pintar. -->
+    <link rel="preload" href="/tipografias/space-grotesk-400.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="alternate" type="application/rss+xml" title="El Blog de Richi — blog, relatos y rol" href="/blog/rss.xml">
+    <!-- ==== CSS ====
+         Esta lista la escribe herramientas/actualizar-cabeceras.py.
+         No la toques a mano: si cambias qué CSS lleva una página,
+         cámbialo en esa herramienta y vuélvela a ejecutar.
+
+         Van escritos aquí, y no cargados por un script, para que el
+         navegador los pida nada más recibir el HTML. Con un script de
+         por medio tardaba ~200 ms más en pintar la página.
+
+         El ?v= de cada uno es el resumen de su contenido: cambia solo
+         cuando cambia el archivo, y es lo que hace que al subir a
+         Neocities se vea el cambio en vez de la versión guardada en la
+         caché del navegador. -->
+    <link rel="stylesheet" href="/estilos/base.css?v=369ab20d">
+    <link rel="stylesheet" href="/estilos/base.responsive.css?v=623f6381">
+    <link rel="stylesheet" href="/estilos/componentes/visor-imagenes.css?v=4ad3b842">
+    <link rel="stylesheet" href="/estilos/componentes/aviso.css?v=5e4cd612">
+    <link rel="stylesheet" href="/estilos/componentes/aviso.responsive.css?v=7ca39f22">
+    <link rel="stylesheet" href="/estilos/componentes/cabecera-ventana.css?v=abe3c1d9">
+    <link rel="stylesheet" href="/estilos/componentes/subir.css?v=0d5ba8b4">
+    <link rel="stylesheet" href="/estilos/paginas/reto.css?v=23fe747f">
+    <link rel="stylesheet" href="/estilos/paginas/reto.responsive.css?v=7da46ec8">
+    <link rel="stylesheet" href="/estilos/componentes/barra-lateral.css?v=14bb37f0">
+    <link rel="stylesheet" href="/estilos/componentes/barra-lateral.responsive.css?v=a73e7469">
+    <!-- ==== fin del CSS ==== -->
+    <script src="/scripts/cargador-scripts.js?v=1e5ac5d0"></script>
+  </head>
+<body>
+    <!-- ==== SIDEBAR / NAVEGACIÓN ==== -->
+    <a class="skip-link" href="#main-content">Saltar al contenido</a>
+    <div id="sidebar-container"></div>
+    <!-- ==== CONTENIDO PRINCIPAL ==== -->
+
+    <main id="main-content">
+        <!-- ==== HOME ==== -->
+        <section id="home" class="home reto-page">
+            <!-- La cabecera: el botón de volver, el título y el año.
+                 El botón va el primero del contenido a propósito —es
+                 la primera parada del tabulador después del menú— y
+                 mismo criterio que en una entrada de blog o un relato,
+                 donde también se sale por arriba. -->
+            <div class="reto-titulo">
+                <a class="reto-volver" href="/web/mis_movidas/relatos/index_relatos.html">← volver a relatos</a>
+                <h1 class="home-title">
+                    <em>writeober</em>
+                </h1>
+                <!-- El año, aparte del título: mismo patrón que el
+                     archivo del blog (.blog-archive-year), que también
+                     es una sección con un año dentro. -->
+                <p class="reto-anyo">2026</p>
+            </div>
+
+            <!-- Lo de aquí dentro (la intro, quién lo propone, el
+                 hashtag, el enlace al post original y el avance) lo
+                 rellena scripts/paginas/reto.js con lo que haya en
+                 datos/reto-writeober26.json. El texto escrito abajo es
+                 lo que se ve mientras llega, y lo que queda si alguien
+                 entra sin JavaScript. -->
+            <div class="reto-cabecera">
+                <p class="reto-intro" data-reto-intro>Una palabra cada día de octubre. Vale cualquier cosa escrita —relato, haiku, poema— mientras lleve dentro la palabra del día.</p>
+
+                <p class="reto-datos">
+                    <span class="reto-hashtag" data-reto-hashtag>#Writeober26</span>
+                    <span>lo propone <span data-reto-propone>@labibliotekat.bsky.social</span></span>
+                    <a class="reto-origen" data-reto-origen href="https://bsky.app/profile/labibliotekat.bsky.social/post/3mw4cimxs4k2x" target="_blank" rel="noopener noreferrer">ver el reto original<span class="visually-hidden"> en Bluesky (se abre en otra pestaña)</span> →</a>
+                </p>
+
+                <div class="reto-avance">
+                    <!-- Esto es lo que dice cómo va: es texto y se lee
+                         solo. La barra de debajo es un adorno, por eso
+                         va aria-hidden. -->
+                    <p class="reto-avance-texto" data-reto-avance>0 días escritos de 31</p>
+                    <div class="reto-avance-barra" data-reto-barra aria-hidden="true"></div>
+                </div>
+            </div>
+
+            <!-- La rejilla de días. Una casilla por día: las escritas
+                 enlazan a su página y las que faltan salen apagadas. -->
+            <div class="reto-card">
+                <div class="recent-entries-header">
+                    <h2>writeober26.lst</h2>
+                    <div class="window-controls window-controls-small" data-window-controls aria-hidden="true"></div>
+                </div>
+                <div class="reto-card-body" tabindex="0" role="region" aria-label="Días del reto, con scroll">
+                    <ol class="reto-dias" data-reto-dias data-reto-datos="/datos/reto-writeober26.json">
+                        <li class="entries-loading">Cargando los días…</li>
+                    </ol>
+                </div>
+            </div>
+
+            <!-- El mismo botón abajo: con 31 casillas, al llegar al
+                 final del listado el de arriba se ha quedado lejos. -->
+            <a class="reto-volver reto-volver-abajo" href="/web/mis_movidas/relatos/index_relatos.html">← volver a relatos</a>
+        </section>
+    </main>
+</body>
+</html>

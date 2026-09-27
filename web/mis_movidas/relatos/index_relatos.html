@@ -52,22 +52,29 @@
 
          Van escritos aquí, y no cargados por un script, para que el
          navegador los pida nada más recibir el HTML. Con un script de
-         por medio tardaba ~200 ms más en pintar la página. -->
-    <link rel="stylesheet" href="/estilos/base.css">
-    <link rel="stylesheet" href="/estilos/base.responsive.css">
-    <link rel="stylesheet" href="/estilos/componentes/visor-imagenes.css">
-    <link rel="stylesheet" href="/estilos/componentes/aviso.css">
-    <link rel="stylesheet" href="/estilos/componentes/aviso.responsive.css">
-    <link rel="stylesheet" href="/estilos/componentes/cabecera-ventana.css">
-    <link rel="stylesheet" href="/estilos/componentes/subir.css">
-    <link rel="stylesheet" href="/estilos/paginas/relatos.css">
-    <link rel="stylesheet" href="/estilos/paginas/relatos.responsive.css">
-    <link rel="stylesheet" href="/estilos/componentes/filtros.css">
-    <link rel="stylesheet" href="/estilos/componentes/filtros.responsive.css">
-    <link rel="stylesheet" href="/estilos/componentes/barra-lateral.css">
-    <link rel="stylesheet" href="/estilos/componentes/barra-lateral.responsive.css">
+         por medio tardaba ~200 ms más en pintar la página.
+
+         El ?v= de cada uno es el resumen de su contenido: cambia solo
+         cuando cambia el archivo, y es lo que hace que al subir a
+         Neocities se vea el cambio en vez de la versión guardada en la
+         caché del navegador. -->
+    <link rel="stylesheet" href="/estilos/base.css?v=369ab20d">
+    <link rel="stylesheet" href="/estilos/base.responsive.css?v=623f6381">
+    <link rel="stylesheet" href="/estilos/componentes/visor-imagenes.css?v=4ad3b842">
+    <link rel="stylesheet" href="/estilos/componentes/aviso.css?v=5e4cd612">
+    <link rel="stylesheet" href="/estilos/componentes/aviso.responsive.css?v=7ca39f22">
+    <link rel="stylesheet" href="/estilos/componentes/cabecera-ventana.css?v=abe3c1d9">
+    <link rel="stylesheet" href="/estilos/componentes/subir.css?v=0d5ba8b4">
+    <link rel="stylesheet" href="/estilos/paginas/relatos.css?v=606d6920">
+    <link rel="stylesheet" href="/estilos/paginas/relatos.responsive.css?v=0275f085">
+    <link rel="stylesheet" href="/estilos/componentes/filtros.css?v=ae17435b">
+    <link rel="stylesheet" href="/estilos/componentes/filtros.responsive.css?v=2aa46f2c">
+    <link rel="stylesheet" href="/estilos/paginas/reto.css?v=23fe747f">
+    <link rel="stylesheet" href="/estilos/paginas/reto.responsive.css?v=7da46ec8">
+    <link rel="stylesheet" href="/estilos/componentes/barra-lateral.css?v=14bb37f0">
+    <link rel="stylesheet" href="/estilos/componentes/barra-lateral.responsive.css?v=a73e7469">
     <!-- ==== fin del CSS ==== -->
-    <script src="/scripts/cargador-scripts.js"></script>
+    <script src="/scripts/cargador-scripts.js?v=1e5ac5d0"></script>
   </head>
 <body>
     <!-- ==== SIDEBAR / NAVEGACIÓN ==== -->
@@ -91,7 +98,7 @@
                  sola, sin tocar esta página. -->
             <div class="filtros" data-filtros
                  data-filtros-items="#relatos-list .entry-preview"
-                 data-filtros-categorias="microrelato, relato corto">
+                 data-filtros-categorias="microrelato, relato corto, retos">
                 <span class="filtros-label" id="filtros-label">filtrar:</span>
 
                 <!-- Este botón solo se ve en móvil (en escritorio lo
@@ -114,13 +121,22 @@
 
             </div>
 
+            <!-- Las tarjetas de los retos. Salen SOLO al pulsar el
+                 filtro «retos»: ahí es donde tiene sentido contar de
+                 qué va cada uno, con su descripción entera. En «todas»
+                 el reto ya aparece en el listado de abajo como una
+                 entrada más.
+                 Las monta scripts/paginas/relatos.js, una por cada
+                 reto que haya en su lista RETOS_URLS. -->
+            <div class="reto-avisos" data-reto-avisos hidden></div>
+
             <!-- Un único listado, sin dividir por año/mes: relatos.js
                  lo rellena solo desde datos/mis-movidas.json (el mismo
                  fichero que también alimenta la portada), quedándose
                  con las entradas de categoría "relatos". Y ese JSON
                  sale de las propias páginas de los relatos, así que
                  para publicar uno se usa
-                 herramientas/nueva-entrada.py y no hay que tocar nada
+                 herramientas/nuevo.py y no hay que tocar nada
                  de aquí. -->
             <div class="relatos-list-card">
                 <div class="recent-entries-header">

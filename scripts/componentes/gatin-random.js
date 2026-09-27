@@ -57,7 +57,7 @@ async function initializeGatinRandom() {
 
     let fotos = [];
     try {
-        const respuesta = await fetch(GATIN_FOTOS_URL);
+        const respuesta = await window.pedirDatos(GATIN_FOTOS_URL);
         if (!respuesta.ok) {
             throw new Error("La respuesta no fue correcta");
         }

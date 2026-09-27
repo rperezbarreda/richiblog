@@ -167,11 +167,18 @@ function pintarFiltro(caja, cerrar) {
     // Una categoría declarada pero todavía sin nada dentro deja la
     // rejilla en blanco: sin este aviso parece que la página se ha
     // roto. role="status" en el HTML hace que se lea solo al cambiar.
+    //
+    // Solo cuando hay algún filtro puesto: si no hay ninguno y tampoco
+    // hay nada que enseñar, es que el listado entero está vacío, y eso
+    // ya lo dice el propio listado ("todavía no hay nada publicado").
+    // Sin esta condición salía un "Todavía no hay nada en ." con el
+    // hueco de la categoría en blanco.
     const vacio = document.querySelector("[data-filtros-vacio]");
     if (vacio) {
-        vacio.hidden = visibles !== 0;
+        const filtrando = puestas.size !== 0;
+        vacio.hidden = visibles !== 0 || !filtrando;
         vacio.textContent =
-            visibles === 0
+            visibles === 0 && filtrando
                 ? `Todavía no hay nada en ${listaEnTexto([...puestas])}. Próximamente.`
                 : "";
     }
@@ -184,6 +191,13 @@ function pintarFiltro(caja, cerrar) {
         cerrarDesplegable(caja);
     }
     guardarFiltroEnUrl([...puestas]);
+
+    // Quien quiera enseñar u ocultar algo según el filtro puesto —las
+    // tarjetas de los retos, en el listado de relatos— se engancha
+    // aquí en vez de mirar los botones por su cuenta.
+    document.dispatchEvent(
+        new CustomEvent("filtros:cambiado", { detail: { puestas: [...puestas] } })
+    );
 }
 
 // Lo que se lee en el botón del desplegable de móvil: "todas", el

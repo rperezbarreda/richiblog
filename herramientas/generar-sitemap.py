@@ -30,7 +30,7 @@ from pathlib import Path
 
 SITIO = "https://richi.blog"
 
-RAIZ = Path(__file__).resolve().parent.parent
+from comun import RAIZ, es_borrador
 SALIDA = RAIZ / "sitemap.xml"
 
 EXCLUIDOS = {"not_found.html"}
@@ -49,17 +49,8 @@ def orden(ruta):
 # herramientas/publicar.py.
 #
 # Se busca en la propia etiqueta <article> y no en todo el archivo a
-# secas: la plantilla explica en un comentario qué es data-borrador, y
-# buscando por el texto pelado ese comentario contaba como marca y la
-# entrada no se publicaba nunca.
-RE_BORRADOR = re.compile(r'<article class="(?:blog|relato)-post"[^>]*\bdata-borrador\b')
 
 
-def es_borrador(archivo):
-    try:
-        return bool(RE_BORRADOR.search(archivo.read_text(encoding="utf-8")))
-    except OSError:
-        return False
 
 def generar():
     paginas = []

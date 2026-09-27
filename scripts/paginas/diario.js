@@ -104,7 +104,7 @@ async function initializeDiario() {
     }
 
     try {
-        const respuesta = await fetch("/datos/entradas-blog.json");
+        const respuesta = await window.pedirDatos("/datos/entradas-blog.json");
         if (!respuesta.ok) {
             throw new Error("La respuesta no fue correcta");
         }

@@ -26,7 +26,7 @@ async function initializeGaleria() {
     const gato = contenedor.getAttribute("data-galeria");
 
     try {
-        const respuesta = await fetch(GALERIA_URL);
+        const respuesta = await window.pedirDatos(GALERIA_URL);
         if (!respuesta.ok) {
             throw new Error("La respuesta no fue correcta");
         }

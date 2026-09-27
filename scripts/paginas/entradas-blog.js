@@ -8,7 +8,7 @@
 //
 // El JSON ya no se escribe a mano: lo genera
 // herramientas/generar-posts.py leyendo las propias páginas. Para
-// publicar, lo más cómodo es  python herramientas/nueva-entrada.py ,
+// publicar, lo más cómodo es  python herramientas/nuevo.py ,
 // que crea la entrada y pasa los generadores.
 
 const BLOG_POSTS_URL = "/datos/entradas-blog.json";
@@ -31,7 +31,7 @@ async function initializeBlogPosts() {
     }
 
     try {
-        const response = await fetch(BLOG_POSTS_URL);
+        const response = await window.pedirDatos(BLOG_POSTS_URL);
         if (!response.ok) {
             throw new Error("La respuesta no fue correcta");
         }

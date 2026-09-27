@@ -52,21 +52,26 @@
 
          Van escritos aquí, y no cargados por un script, para que el
          navegador los pida nada más recibir el HTML. Con un script de
-         por medio tardaba ~200 ms más en pintar la página. -->
-    <link rel="stylesheet" href="/estilos/base.css">
-    <link rel="stylesheet" href="/estilos/base.responsive.css">
-    <link rel="stylesheet" href="/estilos/componentes/visor-imagenes.css">
-    <link rel="stylesheet" href="/estilos/componentes/aviso.css">
-    <link rel="stylesheet" href="/estilos/componentes/aviso.responsive.css">
-    <link rel="stylesheet" href="/estilos/componentes/cabecera-ventana.css">
-    <link rel="stylesheet" href="/estilos/componentes/subir.css">
-    <link rel="stylesheet" href="/estilos/componentes/texto-entrada.css">
-    <link rel="stylesheet" href="/estilos/paginas/blog.css">
-    <link rel="stylesheet" href="/estilos/paginas/blog.responsive.css">
-    <link rel="stylesheet" href="/estilos/componentes/barra-lateral.css">
-    <link rel="stylesheet" href="/estilos/componentes/barra-lateral.responsive.css">
+         por medio tardaba ~200 ms más en pintar la página.
+
+         El ?v= de cada uno es el resumen de su contenido: cambia solo
+         cuando cambia el archivo, y es lo que hace que al subir a
+         Neocities se vea el cambio en vez de la versión guardada en la
+         caché del navegador. -->
+    <link rel="stylesheet" href="/estilos/base.css?v=369ab20d">
+    <link rel="stylesheet" href="/estilos/base.responsive.css?v=623f6381">
+    <link rel="stylesheet" href="/estilos/componentes/visor-imagenes.css?v=4ad3b842">
+    <link rel="stylesheet" href="/estilos/componentes/aviso.css?v=5e4cd612">
+    <link rel="stylesheet" href="/estilos/componentes/aviso.responsive.css?v=7ca39f22">
+    <link rel="stylesheet" href="/estilos/componentes/cabecera-ventana.css?v=abe3c1d9">
+    <link rel="stylesheet" href="/estilos/componentes/subir.css?v=0d5ba8b4">
+    <link rel="stylesheet" href="/estilos/componentes/texto-entrada.css?v=706b88bc">
+    <link rel="stylesheet" href="/estilos/paginas/blog.css?v=cebd37b4">
+    <link rel="stylesheet" href="/estilos/paginas/blog.responsive.css?v=06abf89d">
+    <link rel="stylesheet" href="/estilos/componentes/barra-lateral.css?v=14bb37f0">
+    <link rel="stylesheet" href="/estilos/componentes/barra-lateral.responsive.css?v=a73e7469">
     <!-- ==== fin del CSS ==== -->
-    <script src="/scripts/cargador-scripts.js"></script>
+    <script src="/scripts/cargador-scripts.js?v=1e5ac5d0"></script>
   </head>
 <body>
     <!-- ==== SIDEBAR / NAVEGACIÓN ==== -->
@@ -167,7 +172,7 @@
                              arriba mientras se desplaza el texto (ver .blog-post-side). -->
                         <div class="blog-post-side">
                             <!-- IMAGEN DE LA ENTRADA
-                                 La pone nueva-entrada.py si le dices una al
+                                 La pone nuevo.py si le dices una al
                                  crear la entrada; si no, aquí no hay nada y la
                                  columna se queda solo con "sigue leyendo".
                                  Para añadirla después: guárdala en

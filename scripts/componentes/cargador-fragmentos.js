@@ -18,7 +18,10 @@ async function loadComponent(elementId, file, onLoaded) {
     }
 
     try {
-        const response = await fetch(file);
+        // Con su versión en la dirección: si no, al cambiar la barra
+        // lateral quien ya había entrado seguía viendo la de antes
+        // (ver el comentario de cargador-scripts.js).
+        const response = await fetch(window.conVersion(file));
 
         if (!response.ok) {
             throw new Error(`No se pudo cargar ${file}`);

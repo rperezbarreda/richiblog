@@ -2,7 +2,7 @@
 # =========================================
 # PUBLICAR UN BORRADOR
 # =========================================
-# Toda entrada o relato que crea nueva-entrada.py nace como BORRADOR:
+# Toda entrada o relato que crea nuevo.py nace como BORRADOR:
 # la página existe y la puedes ver en local, pero no sale en los
 # listados, ni en el RSS, ni en el sitemap, ni en el archivo del año.
 #
@@ -45,23 +45,11 @@
 
 import argparse
 import re
-import subprocess
 import sys
 from pathlib import Path
 
-RAIZ = Path(__file__).resolve().parent.parent
+from comun import RAIZ, escribir_como_estaba, leer_texto, pasar_generadores
 WEB = RAIZ / "web"
-
-# Los mismos que pasa nueva-entrada.py al terminar, en el mismo orden:
-# el archivo del año primero (que ahora sí verá la entrada), luego las
-# cabeceras, los listados y el RSS, que lee de ellos.
-GENERADORES = (
-    "generar-archivo.py",
-    "actualizar-cabeceras.py",
-    "generar-posts.py",
-    "generar-rss.py",
-    "generar-sitemap.py",
-)
 
 # La etiqueta <article> de la entrada, que es el único sitio donde
 # cuenta la marca. Mirar "data-borrador" en todo el archivo no vale: la
@@ -117,39 +105,33 @@ def publicados():
     return encontrados
 
 
+# Publicar y despublicar escriben con escribir_como_estaba: la mitad de
+# las páginas están guardadas con saltos de línea de Windows y, con
+# write_text, quitar un atributo dejaba el archivo ENTERO marcado como
+# modificado en git. Ver comun.py.
+
 def quitar_marca(archivo):
-    texto = archivo.read_text(encoding="utf-8")
+    texto, _ = leer_texto(archivo)
     etiqueta = marca_de(texto)
     if not etiqueta or "data-borrador" not in etiqueta.group(0):
         return False
     limpia = ATRIBUTO.sub("", etiqueta.group(0), count=1)
-    archivo.write_text(
-        texto[: etiqueta.start()] + limpia + texto[etiqueta.end():], encoding="utf-8"
+    escribir_como_estaba(
+        archivo, texto[: etiqueta.start()] + limpia + texto[etiqueta.end():]
     )
     return True
 
 
 def poner_marca(archivo):
-    texto = archivo.read_text(encoding="utf-8")
+    texto, _ = leer_texto(archivo)
     etiqueta = marca_de(texto)
     if not etiqueta or "data-borrador" in etiqueta.group(0):
         return False
-    marcada = etiqueta.group(0).replace(
-        '-post"', '-post" data-borrador', 1
-    )
-    archivo.write_text(
-        texto[: etiqueta.start()] + marcada + texto[etiqueta.end():], encoding="utf-8"
+    marcada = etiqueta.group(0).replace('-post"', '-post" data-borrador', 1)
+    escribir_como_estaba(
+        archivo, texto[: etiqueta.start()] + marcada + texto[etiqueta.end():]
     )
     return True
-
-
-def pasar_generadores():
-    for script in GENERADORES:
-        ruta = RAIZ / "herramientas" / script
-        if not ruta.is_file():
-            continue
-        print(f"\n  ---- {script} ----")
-        subprocess.run([sys.executable, str(ruta)], cwd=RAIZ, check=False)
 
 
 def elegir(lista, verbo):

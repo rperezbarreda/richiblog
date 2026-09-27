@@ -5,8 +5,8 @@
   Todo se ejecuta DESDE LA CARPETA RAÍZ del sitio (donde está
   index.html), no desde dentro de herramientas/. Es decir:
 
-      python herramientas/nueva-entrada.py       <- así
-      python nueva-entrada.py                    <- así no
+      python herramientas/nuevo.py       <- así
+      python nuevo.py                    <- así no
 
   En Windows, si "python" no le suena, prueba con "py".
 
@@ -55,9 +55,10 @@
 
   PUBLICAR UNA ENTRADA DEL BLOG O UN RELATO
 
-      python herramientas/nueva-entrada.py
+      python herramientas/nuevo.py
 
-  Te pregunta si es entrada o relato, el título, la fecha, las
+  Te pregunta qué vas a publicar (entrada, relato, algo de rol o un
+  día del reto) y luego el título, la fecha, las
   etiquetas (o el tipo de relato) y un resumen de una línea. Crea
   la carpeta y el HTML ya montado, y deja todo lo demás al día: la
   página del archivo del año (creándola si es un año nuevo), el
@@ -103,19 +104,85 @@
 
   AÑADIR ALGO AL PORTFOLIO DE ROL
 
-      python herramientas/nuevo-rol.py
+      python herramientas/nuevo.py --rol
 
   Te pregunta la categoría (aventuras, mapas, sistemas... o una
   nueva que te inventes), el título, el sistema y jugadores, la
   descripción, la fecha, la portada y los enlaces de Ko-fi y de
-  Drive (este último opcional). Mete la tarjeta la primera y
-  actualiza los listados.
+  Drive (este último opcional). Añade la ficha la primera de
+  datos/rol.json y actualiza los listados.
+
+  Las tarjetas del portfolio son lo único del sitio que NO está
+  escrito dentro de su página: viven en datos/rol.json y las pinta
+  scripts/paginas/rol.js al abrir. Eran ~2 KB de HTML cada una, así
+  que index_rol.html crecía con cada cosa publicada y había que
+  editar HTML para añadir nada. Puedes tocar ese JSON a mano
+  perfectamente: cada ficha lleva title, subcategory (la categoría),
+  date (dd-mm-aaaa), image, alt, system, description, kofi y drive.
+  Drive puede ir vacío: entonces la tarjeta sale con un solo botón.
 
   Si escribes una categoría que no existía, se crea sola: aparece
   su botón en la ventana de filtros de la página sin tocar nada.
 
   ANTES: ten la portada guardada en imagenes/mis_movidas/rol/ y
   pasada por optimizar-imagenes.py.
+
+
+  EL RETO DE ESCRITURA (WRITEOBER)
+
+      python herramientas/nuevo.py --reto
+
+  Un reto de un texto al día no cabe en el listado de relatos: son
+  31 y taparían todo lo demás durante un mes. Por eso tiene página
+  propia, en web/mis_movidas/relatos/writeober26/, con una rejilla
+  de 31 casillas —día y palabra— donde las escritas enlazan y las
+  que faltan salen apagadas. En escritorio ancho va a dos columnas:
+  a la izquierda de qué va el reto y cómo va, y a la derecha la
+  rejilla a toda la altura. Por debajo de 1100px de ancho y en móvil
+  se pone todo en vertical.
+
+  En el listado de relatos el reto sale como UNA entrada más, con la
+  etiqueta «retos» y un «8 de 31 días» al lado: un reto cuenta como
+  una obra, no como 31. Y al pulsar el filtro «retos» esa línea deja
+  sitio a su tarjeta, con la descripción entera y el botón a la
+  página. O sea: en «todas» el reto es una línea más, y en «retos»
+  se ve de qué va sin tener que entrar.
+
+  ANTES DE EMPEZAR: pon las 31 palabras en
+  datos/reto-writeober26.json, una por día. Es lo único que hay que
+  escribir a mano; lo demás lo apunta la herramienta.
+
+  Cada mañana, el comando de arriba solo. Sin decirle nada coge el
+  día de hoy, saca su palabra y crea la página. Escribe el texto
+  dentro y, cuando esté, publícalo como cualquier relato:
+
+      python herramientas/publicar.py
+
+  La casilla del día se enciende justo al publicarlo, no al crearlo:
+  mientras es borrador no sale en ningún sitio, igual que el resto.
+
+  Los días del reto SÍ salen en el RSS uno a uno (quien está
+  suscrito quiere cada texto) y en la portada se resumen en una
+  sola línea, la del último día escrito.
+
+  PARA EL RETO DEL AÑO QUE VIENE (el sitio ya aguanta varios a la
+  vez, cada uno con su página y su tarjeta):
+
+      1. Copia datos/reto-writeober26.json con otro nombre y cambia
+         dentro «nombre», «coleccion», «pagina», el hashtag, la
+         descripción y las fechas de los 31 días.
+      2. Copia la carpeta writeober26/ con su index_ dentro, y en él
+         cambia el data-reto-datos de la rejilla para que apunte a tu
+         JSON nuevo, el título (<h1>) y el año de debajo, y el
+         nombre de la ventana (writeober26.lst).
+      3. Añade ese JSON a la lista RETOS_URLS, arriba del todo de
+         scripts/paginas/relatos.js. Con eso ya sale su línea y su
+         tarjeta en el listado.
+      4. En nuevo.py, cambia JSON_RETO, CARPETA_RETO y
+         SUBCATEGORIA_RETO (están arriba del todo).
+
+  Los retos viejos se quedan como están: siguen saliendo en el
+  listado y en su filtro.
 
 
   SUBIR FOTOS DE LOS GATOS
@@ -139,6 +206,29 @@
 ---------------------------------------------------------------
 
       python herramientas/generar-sitemap.py
+
+  Y SI HAS TOCADO ALGÚN CSS O ALGÚN JS, además:
+
+      python herramientas/actualizar-cabeceras.py
+
+  Esto es lo que hace que el cambio se vea en la web. El navegador
+  se guarda el CSS y el JS para no volver a pedirlos, así que sin
+  esto quien ya hubiera entrado seguiría viendo los de antes
+  durante días (a ti te pasaba igual: por eso el ctrl+F5). La
+  herramienta le pega a cada archivo una versión sacada de su
+  contenido —base.css?v=8f3a1c2d— y el navegador, al ver otra
+  dirección, se lo baja otra vez. Los archivos que no has tocado
+  conservan su versión y siguen saliendo de la caché, así que no
+  se rebaja nada de más.
+
+  Medido con un servidor que cachea como un hosting de verdad:
+  primera visita, 27 archivos; segunda visita sin cambios, 0; tras
+  tocar dos archivos, 3 (los dos y el cargador, que lleva la lista
+  de versiones dentro).
+
+  Publicar una entrada NO necesita esto: nuevo.py y
+  publicar.py ya la pasan, y los listados de datos/ se piden de
+  una forma que siempre comprueba si han cambiado.
 
   Y sube el sitio a Neocities. La carpeta herramientas/ NO hace
   falta subirla: es solo para ti.
@@ -247,11 +337,17 @@
                          las páginas: la barra lateral y las frases
 
   datos/ ............... los listados que rellenan la web
+      rol.json                el portfolio de rol. ESTE SÍ se
+                              escribe a mano (o con nuevo.py --rol):
+                              es el original, no una copia
+      reto-writeober26.json   las 31 palabras del reto de escritura
+                              y qué día lleva ya su página. También
+                              se escribe a mano
       entradas-blog.json      las entradas del blog
       mis-movidas.json        rol y relatos
       fotos-santuarios.json   las fotos de los gatos
-      NO se escriben a mano: los genera herramientas/ leyendo
-      las propias páginas (ver más abajo)
+      Los tres últimos NO se escriben a mano: los genera
+      herramientas/ leyendo las páginas y rol.json (ver más abajo)
 
   blog/rss.xml ......... el RSS, con TODO lo que publicas (blog,
                          relatos y rol). Está suelto ahí y no en
@@ -274,14 +370,25 @@
   ---------------
   ejemplo-formatos.html  un ejemplo de todos los formatos de texto
                         que admite una entrada, para copiar y pegar
-  nueva-entrada.py .... crea una entrada de blog o un relato
-                        (siempre como borrador)
+  nuevo.py ............. publica cualquier cosa. Sin decirle nada
+                        te pregunta qué es; o se lo dices con
+                        --entrada, --relato, --rol o --reto. Lo que
+                        lleva página propia nace como borrador.
   publicar.py ......... publica un borrador, o despublica algo con
                         --despublicar
-  nuevo-rol.py ........ añade una tarjeta al portfolio de rol
   optimizar-imagenes.py  pasa imagenes/ a WebP y les quita los datos
                         de dentro. Respeta el favicon y los SVG.
   generar-galeria.py .. miniaturas + datos/fotos-santuarios.json
+
+  EL CAJÓN COMPARTIDO
+  -------------------
+  comun.py ............ no se ejecuta: es lo que usan todas las
+                        demás (la carpeta del sitio, los meses,
+                        preguntar, escapar, leer y escribir sin
+                        romper los saltos de línea, pasar los
+                        generadores...). Estaba copiado en cuatro
+                        sitios y por eso un arreglo llegaba a unos
+                        scripts y a otros no.
 
   LOS QUE SE LLAMAN SOLOS
   -----------------------
@@ -312,7 +419,7 @@
   --------------
   plantillas/entrada-blog.html .. de dónde sale una entrada nueva
   plantillas/entrada-relato.html  ídem para los relatos
-  plantillas/tarjeta-rol.html ... la tarjeta del portfolio
+  plantillas/dia-reto.html ...... un día del reto de escritura
   plantillas/archivo-anyo.html .. la página del archivo de un año
   plantillas/archivo-mes.html ... el bloque de un mes dentro de ella
 
@@ -329,14 +436,19 @@
   CÓMO ESTÁ MONTADO ESTO (por si un día vuelves)
 ---------------------------------------------------------------
 
-  LA PÁGINA MANDA. Los archivos .json NO se escriben a mano: se
+  LA PÁGINA MANDA. Los listados de datos/ NO se escriben a mano: se
   reconstruyen leyendo las propias páginas. Por eso cada entrada
   lleva sus datos dentro del HTML:
 
       <article class="blog-post" data-tags="diario">
       <article class="relato-post" data-subcategoria="microrelato">
-      <div class="portfolio-card" data-categoria="aventuras"
-                                  data-fecha="14-09-2026">
+
+  Con UNA excepción, el portfolio de rol: ahí no hay una página por
+  cosa, sino tarjetas en una rejilla, y tenerlas escritas en el HTML
+  significaba que index_rol.html crecía sin parar. Manda
+  datos/rol.json: de ahí saca la página sus tarjetas y de ahí saca
+  generar-posts.py la parte de rol de mis-movidas.json. Es el único
+  archivo de datos/ que se escribe.
 
   Eso mismo es lo que rellena las ventanas de filtros (filtros.lst)
   del portfolio de rol y del listado de relatos: los botones NO

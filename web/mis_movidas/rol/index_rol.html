@@ -52,22 +52,27 @@
 
          Van escritos aquí, y no cargados por un script, para que el
          navegador los pida nada más recibir el HTML. Con un script de
-         por medio tardaba ~200 ms más en pintar la página. -->
-    <link rel="stylesheet" href="/estilos/base.css">
-    <link rel="stylesheet" href="/estilos/base.responsive.css">
-    <link rel="stylesheet" href="/estilos/componentes/visor-imagenes.css">
-    <link rel="stylesheet" href="/estilos/componentes/aviso.css">
-    <link rel="stylesheet" href="/estilos/componentes/aviso.responsive.css">
-    <link rel="stylesheet" href="/estilos/componentes/cabecera-ventana.css">
-    <link rel="stylesheet" href="/estilos/componentes/subir.css">
-    <link rel="stylesheet" href="/estilos/paginas/mis-movidas.css">
-    <link rel="stylesheet" href="/estilos/paginas/mis-movidas.responsive.css">
-    <link rel="stylesheet" href="/estilos/componentes/filtros.css">
-    <link rel="stylesheet" href="/estilos/componentes/filtros.responsive.css">
-    <link rel="stylesheet" href="/estilos/componentes/barra-lateral.css">
-    <link rel="stylesheet" href="/estilos/componentes/barra-lateral.responsive.css">
+         por medio tardaba ~200 ms más en pintar la página.
+
+         El ?v= de cada uno es el resumen de su contenido: cambia solo
+         cuando cambia el archivo, y es lo que hace que al subir a
+         Neocities se vea el cambio en vez de la versión guardada en la
+         caché del navegador. -->
+    <link rel="stylesheet" href="/estilos/base.css?v=369ab20d">
+    <link rel="stylesheet" href="/estilos/base.responsive.css?v=623f6381">
+    <link rel="stylesheet" href="/estilos/componentes/visor-imagenes.css?v=4ad3b842">
+    <link rel="stylesheet" href="/estilos/componentes/aviso.css?v=5e4cd612">
+    <link rel="stylesheet" href="/estilos/componentes/aviso.responsive.css?v=7ca39f22">
+    <link rel="stylesheet" href="/estilos/componentes/cabecera-ventana.css?v=abe3c1d9">
+    <link rel="stylesheet" href="/estilos/componentes/subir.css?v=0d5ba8b4">
+    <link rel="stylesheet" href="/estilos/paginas/mis-movidas.css?v=e0ce67c1">
+    <link rel="stylesheet" href="/estilos/paginas/mis-movidas.responsive.css?v=3ed08052">
+    <link rel="stylesheet" href="/estilos/componentes/filtros.css?v=ae17435b">
+    <link rel="stylesheet" href="/estilos/componentes/filtros.responsive.css?v=2aa46f2c">
+    <link rel="stylesheet" href="/estilos/componentes/barra-lateral.css?v=14bb37f0">
+    <link rel="stylesheet" href="/estilos/componentes/barra-lateral.responsive.css?v=a73e7469">
     <!-- ==== fin del CSS ==== -->
-    <script src="/scripts/cargador-scripts.js"></script>
+    <script src="/scripts/cargador-scripts.js?v=1e5ac5d0"></script>
   </head>
 <body>
     <!-- ==== SIDEBAR / NAVEGACIÓN ==== -->
@@ -126,58 +131,17 @@
                  eran tres paneles de pestañas; ahora cada tarjeta dice a
                  qué categoría pertenece y el filtro esconde las demás,
                  que es lo que permite que una categoría nueva no tenga
-                 que tocar esta página. -->
-            <div class="portfolio-grid" tabindex="0" role="region" aria-label="Portfolio de rol, con scroll">
+                 que tocar esta página.
 
-                <div class="portfolio-card" data-categoria="recursos" data-fecha="23-09-2026">
-                    <img class="portfolio-card-photo" src="/imagenes/mis_movidas/rol/thumbnail_hojas_a5.webp" alt="Vista de los colores disponibles" loading="lazy">
-                    <div class="portfolio-card-info">
-                        <!-- h2 y no h3: sin encabezados de categoría, los
-                             títulos saltaban de h1 a h3. -->
-                        <h2 class="portfolio-card-title">Fichas DnD 5e - Formato A5</h2>
-                        <p class="portfolio-card-system">DnD 5e</p>
-                        <p class="portfolio-card-desc">Fichas de rol de Dungeons and Dragons imprimibles en un cómodo formato para hojas DIN A5 en nueve colores distintos.</p>
-                        <!-- El texto escondido va dentro del enlace a
-                             propósito: a la vista pone solo "Ver en Ko-fi",
-                             pero quien usa lector de pantalla saca la lista de
-                             enlaces de la página y oiría "Ver en Ko-fi" tres o
-                             cuatro veces seguidas sin saber de qué aventura es
-                             cada uno. Y de paso avisa de que se abre en otra
-                             pestaña. -->
-                        <div class="portfolio-card-actions">
-                            <a class="portfolio-card-btn" href="https://ko-fi.com/s/7254549137" target="_blank" rel="noopener noreferrer">Ver en Ko-fi →<span class="visually-hidden"> — Fichas DnD 5e - Formato A5 (se abre en otra pestaña)</span></a>
-                            <a class="portfolio-card-btn portfolio-card-btn-secondary" href="https://drive.google.com/file/d/1UsoSQFA8bUqnj6Yx2KJ8wfBfP22q522k/view?usp=sharing" target="_blank" rel="noopener noreferrer">Descargar gratis ↓<span class="visually-hidden"> — Fichas DnD 5e - Formato A5 (se abre en otra pestaña)</span></a>
-                        </div>
-                    </div>
-                </div>
+                 Y las tarjetas NO se escriben aquí: salen de
+                 datos/rol.json y las pinta scripts/paginas/rol.js.
+                 Estaban escritas a mano y ocupaban ~2 KB cada una, así
+                 que esta página crecía con cada cosa publicada y había
+                 que editar HTML para añadir nada. Ahora se toca el JSON
+                 (o se pasa herramientas/nuevo.py --rol) y ya está. -->
+            <div class="portfolio-grid" data-rol-grid tabindex="0" role="region" aria-label="Portfolio de rol, con scroll">
 
-                <!-- data-fecha: cuándo se publicó. data-categoria: en qué
-                     filtro entra. Van aquí y no solo en
-                     datos/mis-movidas.json para que
-                     herramientas/generar-posts.py pueda reconstruir el
-                     listado leyendo esta página, igual que hace con las
-                     entradas del blog y los relatos. Fecha en dd-mm-aaaa. -->
-                <div class="portfolio-card" data-categoria="aventuras" data-fecha="14-09-2026">
-                    <img class="portfolio-card-photo" src="/imagenes/mis_movidas/rol/thumbnail_la_bestia_de_savalta.webp" alt="Portada de la aventura La Bestia de Savalta" loading="lazy">
-                    <div class="portfolio-card-info">
-                        <!-- h2 y no h3: al quitar los encabezados de
-                             categoría, los títulos saltaban de h1 a h3. -->
-                        <h2 class="portfolio-card-title">La Bestia de Savalta</h2>
-                        <p class="portfolio-card-system">D&amp;D 5e · 2-5 jugadores</p>
-                        <p class="portfolio-card-desc">Aventura de misterio y horror gótico ambientada en Savalta, una ciudad aislada donde una serie de muertes extrañas está relacionada con una criatura antigua. Los jugadores investigan el origen de la Bestia y quién la controla. Incluye un PDF de 18 páginas con mapa de Savalta (en blanco y negro y a color) y retratos de PNJs.</p>
-                        <!-- El texto escondido va dentro del enlace a
-                             propósito: a la vista pone solo "Ver en Ko-fi",
-                             pero quien usa lector de pantalla saca la lista de
-                             enlaces de la página y oiría "Ver en Ko-fi" tres o
-                             cuatro veces seguidas sin saber de qué aventura es
-                             cada uno. Y de paso avisa de que se abre en otra
-                             pestaña. -->
-                        <div class="portfolio-card-actions">
-                            <a class="portfolio-card-btn" href="https://ko-fi.com/s/b5f6c245a0" target="_blank" rel="noopener noreferrer">Ver en Ko-fi →<span class="visually-hidden"> — La Bestia de Savalta (se abre en otra pestaña)</span></a>
-                            <a class="portfolio-card-btn portfolio-card-btn-secondary" href="https://drive.google.com/file/d/1JDNQkgMyVraqDI1r7t6MqHT1lX9TkfXz/view?usp=sharing" target="_blank" rel="noopener noreferrer">Descargar gratis ↓<span class="visually-hidden"> — La Bestia de Savalta (se abre en otra pestaña)</span></a>
-                        </div>
-                    </div>
-                </div>
+                <p class="entries-loading" data-rol-estado>Cargando el portfolio…</p>
 
                 <!-- Lo rellena filtros.js cuando la categoría elegida no
                      tiene nada dentro. role="status" para que se lea

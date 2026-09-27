@@ -10,15 +10,39 @@
 // Uso en el HTML:
 //   <ul class="entries-list" data-otras-entradas="blog"></ul>
 //   <ul class="entries-list" data-otras-entradas="relatos"></ul>
+//   <ul class="entries-list" data-otras-entradas="coleccion:writeober26"></ul>
+//
+// La última forma es para los textos de un reto de escritura diaria:
+// ahí lo que apetece leer después no es otro relato cualquiera, sino
+// otro día del mismo reto.
 //
 // La entrada que se está leyendo se descarta comparando su ruta con la
 // de la página actual, para no ofrecer un enlace a donde ya estás.
 
 const OTRAS_FUENTES = {
     blog: { url: "/datos/entradas-blog.json", filtro: null },
-    relatos: { url: "/datos/mis-movidas.json", filtro: (item) => item.category === "relatos" },
+    relatos: {
+        url: "/datos/mis-movidas.json",
+        // Los de una colección tienen la suya propia (abajo), así que
+        // aquí no se mezclan: quien lee un relato suelto no quiere que
+        // le ofrezcan el día 14 de un reto.
+        filtro: (item) => item.category === "relatos" && !(item.collection || "").trim(),
+    },
 };
 const OTRAS_MAXIMO = 4;
+
+// "coleccion:writeober26" -> los textos de esa colección.
+function fuenteDe(clave) {
+    const nombre = (clave || "").trim();
+    if (nombre.indexOf("coleccion:") === 0) {
+        const coleccion = nombre.slice("coleccion:".length);
+        return {
+            url: "/datos/mis-movidas.json",
+            filtro: (item) => (item.collection || "").trim() === coleccion,
+        };
+    }
+    return OTRAS_FUENTES[nombre];
+}
 
 initializeOtrasEntradas();
 
@@ -28,13 +52,13 @@ async function initializeOtrasEntradas() {
         return;
     }
 
-    const fuente = OTRAS_FUENTES[lista.getAttribute("data-otras-entradas")];
+    const fuente = fuenteDe(lista.getAttribute("data-otras-entradas"));
     if (!fuente) {
         return;
     }
 
     try {
-        const respuesta = await fetch(fuente.url);
+        const respuesta = await window.pedirDatos(fuente.url);
         if (!respuesta.ok) {
             throw new Error("La respuesta no fue correcta");
         }

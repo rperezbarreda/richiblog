@@ -54,7 +54,7 @@ LADO_MINI = 600   # medido: la rejilla nunca dibuja más de 265x160, así que
                   # con 600 van sobradas incluso en pantallas de alta densidad
 CALIDAD = 80
 
-RAIZ = Path(__file__).resolve().parent.parent
+from comun import RAIZ, escribir_json
 SANTUARIOS = RAIZ / "imagenes" / "santuarios"
 JSON_FOTOS = RAIZ / "datos" / "fotos-santuarios.json"
 
@@ -134,9 +134,7 @@ def generar():
         resultado[gato] = lista
 
     JSON_FOTOS.parent.mkdir(parents=True, exist_ok=True)
-    JSON_FOTOS.write_text(
-        json.dumps(resultado, ensure_ascii=False, indent=4) + "\n", encoding="utf-8"
-    )
+    escribir_json(JSON_FOTOS, resultado)
 
     print(f"\n  {creadas} miniatura(s) creadas, {saltadas} ya estaban.")
     if peso_grandes:

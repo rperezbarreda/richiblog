@@ -63,7 +63,7 @@ MAX_LADO = 1920
 CALIDAD = 82          # 0-100; por encima de 85 se nota poco y pesa bastante más
 CALIDAD_ANIMADA = 70  # las animaciones pesan mucho más: se aprieta algo más
 
-RAIZ = Path(__file__).resolve().parent.parent
+from comun import RAIZ
 IMGS = RAIZ / "imagenes"
 COPIA = RAIZ / "herramientas" / "originales-sustituidas"
 
