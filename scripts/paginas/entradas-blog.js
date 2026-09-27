@@ -46,6 +46,10 @@ async function initializeBlogPosts() {
         if (archiveRoot) {
             renderArchive(archiveRoot, sorted);
             initializeTagFilters(archiveRoot);
+            // Después de las etiquetas: el buscador necesita que los
+            // botones ya estén puestos para no deshacer lo que llegue
+            // por la dirección (?tag=diario&buscar=sims).
+            initializeBuscador(archiveRoot, sorted);
         }
     } catch (error) {
         if (homeList) {
@@ -98,7 +102,10 @@ function renderHomeEntries(homeList, posts) {
         return;
     }
 
-    homeList.innerHTML = latest.map(postToEntryCard).join("");
+    // En la portada, sin el tiempo de lectura: ahí la ventana es
+    // estrecha y lo que importa es el titular. Los minutos están en el
+    // archivo del año, que es donde se elige qué leer.
+    homeList.innerHTML = latest.map((post) => postToEntryCard(post, false)).join("");
 }
 
 // =========================================
@@ -127,7 +134,7 @@ function renderArchive(archiveRoot, posts) {
             return;
         }
 
-        list.innerHTML = monthPosts.map(postToEntryCard).join("");
+        list.innerHTML = monthPosts.map((post) => postToEntryCard(post, true)).join("");
     });
 }
 
@@ -135,7 +142,7 @@ function renderArchive(archiveRoot, posts) {
 // COMPARTIDO
 // =========================================
 
-function postToEntryCard(post) {
+function postToEntryCard(post, conMinutos) {
     const title = escapeHtml(post.title || "Sin título");
     const date = formatPostDate(post.date);
     const url = post.url || "#";
@@ -165,11 +172,27 @@ function postToEntryCard(post) {
         `<li class="entry-preview"${marcaTags}>` +
         `<a class="entry-preview-link" href="${escapeHtml(urlSegura(url))}">` +
         `<span class="entry-preview-title">${title}</span>` +
+        '<span class="entry-preview-meta">' +
         `<time class="entry-preview-date" datetime="${escapeHtml(fechaISO(post.date))}">${date}</time>` +
+        (conMinutos ? minutosDe(post) : "") +
+        "</span>" +
         "</a>" +
         etiquetas +
         "</li>"
     );
+}
+
+// El tiempo de lectura lo calcula herramientas/generar-posts.py al
+// escribir el listado (cuenta las palabras del cuerpo de la entrada),
+// así que aquí solo se pinta. Las cosas sin texto que leer —las fichas
+// del portfolio de rol, que son enlaces a Ko-fi— no traen el dato y no
+// enseñan nada.
+function minutosDe(item) {
+    const minutos = Number(item && item.minutos);
+    if (!minutos || minutos < 1) {
+        return "";
+    }
+    return `<span class="entry-preview-minutos">${minutos} min</span>`;
 }
 
 // El archivo del año al que lleva una etiqueta. El año sale de la propia
@@ -311,21 +334,7 @@ function pintarFiltroEtiquetas(archiveRoot, cerrar) {
         b.setAttribute("aria-pressed", puesta ? "true" : "false");
     });
 
-    // Se suman, no se cruzan: basta con que la entrada lleve UNA de las
-    // puestas. Cruzarlas (pedir que las lleve todas) dejaría la página
-    // vacía en cuanto se marcan dos etiquetas que no coinciden nunca.
-    archiveRoot.querySelectorAll(".entry-preview").forEach((li) => {
-        const suyas = partirEtiquetas(li.getAttribute("data-tags"));
-        li.hidden =
-            ETIQUETAS_PUESTAS.size !== 0 && !suyas.some((tag) => ETIQUETAS_PUESTAS.has(tag));
-    });
-
-    // Un mes sin nada que enseñar se esconde entero: dejarlo con su cabecera
-    // y el hueco vacío debajo parece que se ha roto algo.
-    archiveRoot.querySelectorAll(".blog-month").forEach((mes) => {
-        const quedan = [...mes.querySelectorAll(".entry-preview")].some((li) => !li.hidden);
-        mes.hidden = !quedan;
-    });
+    aplicarFiltros(archiveRoot);
 
     // En móvil el botón del desplegable enseña qué hay puesto. Con una
     // se dice cuál es; con varias no caben los nombres en el botón, así
@@ -342,6 +351,47 @@ function pintarFiltroEtiquetas(archiveRoot, cerrar) {
     guardarFiltroEnUrl([...ETIQUETAS_PUESTAS]);
 }
 
+// Esconder y enseñar entradas es lo mismo para las etiquetas y para el
+// buscador, así que lo hace una sola función: una entrada se ve si pasa
+// LAS DOS cosas. Cuando esto estaba dentro del filtro de etiquetas,
+// escribir en el buscador deshacía el filtro y al contrario.
+function aplicarFiltros(archiveRoot) {
+    archiveRoot.querySelectorAll(".entry-preview").forEach((li) => {
+        li.hidden = !pasaEtiquetas(li) || !pasaBusquedaDelComponente(li);
+    });
+
+    // Un mes sin nada que enseñar se esconde entero: dejarlo con su cabecera
+    // y el hueco vacío debajo parece que se ha roto algo.
+    archiveRoot.querySelectorAll(".blog-month").forEach((mes) => {
+        const quedan = [...mes.querySelectorAll(".entry-preview")].some((li) => !li.hidden);
+        mes.hidden = !quedan;
+    });
+
+    // Ya está escondido lo que toca: ahora el buscador resalta lo que
+    // coincide en lo que ha quedado a la vista y pone la cuenta al día.
+    if (window.buscador) {
+        window.buscador.repasar();
+    }
+}
+
+// Sin el componente cargado (una página que no lo lleve), no filtra
+// nada y el filtro de etiquetas sigue funcionando igual.
+function pasaBusquedaDelComponente(li) {
+    return window.buscador ? window.buscador.pasa(li) : true;
+}
+
+// Se suman, no se cruzan: basta con que la entrada lleve UNA de las
+// puestas. Cruzarlas (pedir que las lleve todas) dejaría la página
+// vacía en cuanto se marcan dos etiquetas que no coinciden nunca.
+function pasaEtiquetas(li) {
+    if (ETIQUETAS_PUESTAS.size === 0) {
+        return true;
+    }
+    return partirEtiquetas(li.getAttribute("data-tags")).some((tag) =>
+        ETIQUETAS_PUESTAS.has(tag)
+    );
+}
+
 // Lo que se lee en el botón del desplegable de móvil: "todas", el
 // nombre suelto o "3 etiquetas". Los nombres de varias no caben ahí;
 // cuáles son se ve en la lista de abajo, con sus botones marcados.
@@ -353,6 +403,98 @@ function resumenEtiquetas(puestas) {
         return [...puestas][0];
     }
     return `${puestas.size} etiquetas`;
+}
+
+// =========================================
+// EL BUSCADOR, EN ESTA PÁGINA
+// =========================================
+// Quien busca es scripts/componentes/buscador.js, que es el mismo de
+// los relatos y del portfolio de rol. Aquí solo se hacen las dos cosas
+// que son de esta página:
+//
+//   1. Esconder lo que no pasa. El buscador no esconde nada por su
+//      cuenta: avisa, y esconde quien ya lo hacía (aquí, el filtro de
+//      etiquetas de arriba), para que las dos cosas se sumen en vez de
+//      pisarse.
+//   2. El apunte de "y 2 en 2025". El archivo es de un año, así que
+//      buscar algo de otro dejaría la página vacía sin explicar por
+//      qué; como el JSON con TODAS las entradas ya está cargado, se
+//      mira ahí y se ofrece el enlace al archivo de ese año, ya
+//      buscando lo mismo.
+
+const ANYO_DE_LA_PAGINA = { valor: 0 };
+const TODAS_LAS_ENTRADAS = { lista: [] };
+
+function initializeBuscador(archiveRoot, posts) {
+    ANYO_DE_LA_PAGINA.valor = anyoDeLaPagina(archiveRoot);
+    TODAS_LAS_ENTRADAS.lista = Array.isArray(posts) ? posts : [];
+
+    if (!window.buscador) {
+        return;
+    }
+
+    // Lo que el componente pega a la cuenta ("3 entradas con «x» · y 2
+    // en 2025"). Le llega ya normalizado, sin tildes ni mayúsculas.
+    window.buscadorApunte = apunteDeOtrosAnyos;
+
+    document.addEventListener("buscar:cambiado", () => aplicarFiltros(archiveRoot));
+    window.buscador.aplicar();
+}
+
+// El año de esta página, para saber qué entradas del JSON son de otros
+// años. Sale de los propios bloques de mes (data-month="2026-09"), que
+// es de donde se rellena todo lo demás.
+function anyoDeLaPagina(archiveRoot) {
+    const mes = archiveRoot.querySelector("[data-month]");
+    const anyo = mes && Number((mes.getAttribute("data-month") || "").split("-")[0]);
+    return anyo || new Date().getFullYear();
+}
+
+// Cuántas entradas de OTROS años coinciden, por año y de más nuevo a
+// más viejo, como enlaces a su archivo. No cuentan las etiquetas
+// puestas: son de este año y en otro puede que no existan.
+function apunteDeOtrosAnyos(aguja) {
+    if (!aguja) {
+        return "";
+    }
+    const normalizar = window.buscador.normalizar;
+    const porAnyo = new Map();
+    TODAS_LAS_ENTRADAS.lista.forEach((post) => {
+        const fecha = parsePostDate(post.date);
+        if (isNaN(fecha.getTime()) || fecha.getFullYear() === ANYO_DE_LA_PAGINA.valor) {
+            return;
+        }
+        // Lo mismo que mira el buscador en las entradas de esta página:
+        // título, fecha y etiquetas.
+        const suyos = [post.title, formatPostDate(post.date)]
+            .concat(window.buscador.formasDeFecha(fechaISO(post.date)))
+            .concat(Array.isArray(post.tags) ? post.tags : []);
+        if (suyos.some((texto) => normalizar(texto).indexOf(aguja) !== -1)) {
+            const anyo = fecha.getFullYear();
+            porAnyo.set(anyo, (porAnyo.get(anyo) || 0) + 1);
+        }
+    });
+    if (!porAnyo.size) {
+        return "";
+    }
+    return (
+        "y " +
+        [...porAnyo.entries()]
+            .sort((a, b) => b[0] - a[0])
+            .map(
+                ([anyo, cuantas]) =>
+                    `<a class="buscar-apunte" href="${enlaceDeAnyo(anyo)}">` +
+                    `${cuantas} en ${anyo}</a>`
+            )
+            .join(", ")
+    );
+}
+
+function enlaceDeAnyo(anyo) {
+    return escapeHtml(
+        `/web/blog/${anyo}/index_${anyo}.html?buscar=` +
+            encodeURIComponent(window.buscador.texto)
+    );
 }
 
 // =========================================
@@ -435,7 +577,8 @@ function cerrarDesplegableTags(caja) {
 
 // Las etiquetas puestas van en la dirección separadas por comas, para
 // que el enlace se pueda copiar o recargar con la misma vista. Sin
-// ninguna, el parámetro desaparece en vez de quedarse vacío.
+// ninguna, el parámetro desaparece en vez de quedarse vacío. El ?buscar=
+// lo pone el componente del buscador, cada uno toca solo el suyo.
 function guardarFiltroEnUrl(tags) {
     if (!window.history || !window.history.replaceState) {
         return;

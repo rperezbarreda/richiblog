@@ -1,0 +1,160 @@
+/* BUSCADOR (archivo del blog, relatos y portfolio de rol) */
+
+/* Mismo aire que la fila de filtros que suele ir justo debajo: una
+   etiqueta en monoespaciada, el campo con el borde amarillo del sitio, y
+   la cuenta en una línea propia (flex-basis: 100%) para que al cambiar
+   de "3 entradas" a "ninguna entrada" no se mueva nada de sitio. */
+.buscar {
+    display: flex;
+    flex: 0 0 auto;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 14px;
+}
+
+/* Una regla con display gana a la del navegador para [hidden], así que
+   sin esto el buscador se seguiría viendo cuando no hay nada que
+   buscar. Mismo caso que .filtros[hidden]. */
+.buscar[hidden] {
+    display: none;
+}
+
+.buscar-label {
+    color: var(--muted);
+    font-family: "DM Mono", monospace;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+/* El ✕ va dentro del campo, así que necesita un sitio al que agarrarse.
+   Y es lo que crece: el campo se queda con el hueco que sobre en la
+   fila —hasta 46ch, que a partir de ahí es una raya larguísima con
+   cuatro letras dentro— en vez de tener un ancho fijo. Con 26ch fijos
+   el placeholder más largo salía cortado ("título, sistema o ca…") y lo
+   que escribías se iba desplazando dentro de una caja pequeña. */
+.buscar-caja {
+    position: relative;
+    display: flex;
+    align-items: center;
+    /* Que pida 30ch de salida es lo que hace que en escritorio el
+       campo salga ancho de verdad: el texto de dentro ("título,
+       sistema o categoría") se lee entero, y lo que se escribe no se
+       va desplazando dentro de una caja pequeña. Puede encoger por
+       debajo de eso si la fila no da más de sí (móvil). */
+    flex: 1 1 30ch;
+    min-width: 0;
+    max-width: 52ch;
+}
+
+.buscar-campo {
+    width: 100%;
+    max-width: 100%;
+    /* El hueco de la derecha es para el ✕, y el ✕ solo está cuando hay
+       algo escrito: mientras el campo está vacío se le devuelven esos
+       22px al texto de dentro, que es justo cuando se está leyendo la
+       sugerencia ("título, etiqueta o fecha"). Se nota en el móvil, que
+       es donde el campo va justo. */
+    padding: 7px 12px;
+    border: 2px solid var(--yellow);
+    background: transparent;
+    color: var(--white);
+    font-family: "DM Mono", monospace;
+    font-size: 0.8125rem;
+    letter-spacing: 0.5px;
+}
+
+.buscar-campo::placeholder {
+    color: var(--muted);
+    opacity: 1;   /* Firefox se lo baja por su cuenta y quedaba ilegible */
+}
+
+.buscar-campo:focus-visible {
+    outline: 2px solid var(--yellow);
+    outline-offset: 2px;
+}
+
+/* La cruz que trae Chrome en un type="search" se quita: no sale en todos
+   los navegadores, no se puede pintar y se juntaría con la nuestra. */
+.buscar-campo::-webkit-search-cancel-button,
+.buscar-campo::-webkit-search-decoration {
+    -webkit-appearance: none;
+    appearance: none;
+}
+
+.buscar-limpiar {
+    position: absolute;
+    right: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    /* 28px de lado: el mínimo cómodo para darle con el dedo sin que el
+       botón se coma el campo. */
+    width: 28px;
+    height: 28px;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: var(--yellow);
+    font-size: 0.875rem;
+    line-height: 1;
+    cursor: pointer;
+}
+
+.buscar-limpiar[hidden] {
+    display: none;
+}
+
+.buscar-limpiar:hover {
+    color: var(--white);
+}
+
+.buscar-limpiar:focus-visible {
+    outline: 2px solid var(--yellow);
+    outline-offset: 1px;
+}
+
+/* La cuenta va al lado del campo, no debajo: estas páginas no scrollean
+   y cada línea que se gasta arriba se la quita al listado (en el
+   portfolio de rol, medido, una línea entera son ~26px menos de
+   tarjetas a la vista). Si no cabe —en el móvil— se cae sola a la línea
+   de abajo, que para eso la fila envuelve. */
+.buscar-cuenta {
+    /* No crece: lo que sobra es para el campo. Si no cabe a su lado
+       —en el móvil— se cae sola a la línea de abajo. */
+    flex: 0 1 auto;
+    min-width: 12ch;
+    margin: 0;
+    min-height: 1.2em;   /* el hueco está siempre, así nada baila al escribir */
+    color: var(--muted);
+    font-family: "DM Mono", monospace;
+    font-size: 0.75rem;
+    letter-spacing: 0.5px;
+}
+
+/* Cuando no hay nada que enseñar, el listado se queda vacío y esta línea
+   es lo único que explica por qué: en amarillo, que es el color con el
+   que el sitio dice las cosas importantes. */
+.buscar-cuenta.is-vacio {
+    color: var(--yellow);
+}
+
+.buscar-apunte {
+    color: var(--yellow);
+    text-decoration: underline;
+}
+
+.buscar-apunte:focus-visible {
+    outline: 2px solid var(--yellow);
+    outline-offset: 2px;
+}
+
+/* Lo que coincide, resaltado. El <mark> del navegador viene con su
+   amarillo de rotulador y texto negro, que en el tema oscuro canta y en
+   el claro se lee mal; se le ponen los colores del tema. Lleva clase
+   propia para no pisar un <mark> que se escriba dentro de una entrada. */
+.buscar-marca {
+    background: var(--yellow);
+    color: var(--yellow-contrast);
+}

@@ -1,0 +1,170 @@
+[
+    {
+        "url": "/index.html",
+        "titulo": "El Blog de Richi",
+        "seccion": "portada",
+        "fecha": "20-09-2026",
+        "actualizada": "27-09-2026",
+        "resumen": "671ec40d"
+    },
+    {
+        "url": "/web/blog/2026/index_2026.html",
+        "titulo": "Blog 2026",
+        "seccion": "blog",
+        "fecha": "20-09-2026",
+        "actualizada": "26-09-2026",
+        "resumen": "75283997"
+    },
+    {
+        "url": "/web/blog/diario.html",
+        "titulo": "Diario",
+        "seccion": "blog",
+        "fecha": "20-09-2026",
+        "actualizada": "26-09-2026",
+        "resumen": "e680f14e"
+    },
+    {
+        "url": "/web/blog/2026/septiembre/semanita-de-estar-solo-en-casa.html",
+        "titulo": "Semanita de estar solo en casa",
+        "seccion": "blog",
+        "fecha": "26-09-2026",
+        "actualizada": "26-09-2026",
+        "resumen": "9a1622cc"
+    },
+    {
+        "url": "/web/blog/2026/septiembre/tome-la-horrible-decision-de-ver-crepusculo.html",
+        "titulo": "Tomé la horrible decisión de ver Crepúsculo",
+        "seccion": "blog",
+        "fecha": "23-09-2026",
+        "actualizada": "25-09-2026",
+        "resumen": "47a9f4e6"
+    },
+    {
+        "url": "/web/blog/2026/septiembre/dia-de-velocidad-x4-de-los-sims.html",
+        "titulo": "Día de velocidad x4 de los sims",
+        "seccion": "blog",
+        "fecha": "21-09-2026",
+        "actualizada": "25-09-2026",
+        "resumen": "83f76f5b"
+    },
+    {
+        "url": "/web/blog/2026/septiembre/puto-tebas-de-los-cojones.html",
+        "titulo": "Puto Tebas de los cojones",
+        "seccion": "blog",
+        "fecha": "20-09-2026",
+        "actualizada": "25-09-2026",
+        "resumen": "77b61017"
+    },
+    {
+        "url": "/web/blog/2026/septiembre/por-fin-pongo-en-marcha-esto.html",
+        "titulo": "Por fin pongo en marcha esto",
+        "seccion": "blog",
+        "fecha": "20-09-2026",
+        "actualizada": "25-09-2026",
+        "resumen": "9093229b"
+    },
+    {
+        "url": "/web/mis_movidas/relatos/index_relatos.html",
+        "titulo": "Relatos",
+        "seccion": "relatos",
+        "fecha": "20-09-2026",
+        "actualizada": "26-09-2026",
+        "resumen": "35ba1e85"
+    },
+    {
+        "url": "/web/mis_movidas/relatos/writeober26/index_writeober26.html",
+        "titulo": "Writeober 2026",
+        "seccion": "relatos",
+        "fecha": "26-09-2026",
+        "actualizada": "26-09-2026",
+        "resumen": "297b17a4"
+    },
+    {
+        "url": "/web/mis_movidas/relatos/aire_para_dos.html",
+        "titulo": "Aire para dos",
+        "seccion": "relatos",
+        "fecha": "20-09-2026",
+        "actualizada": "25-09-2026",
+        "resumen": "4c584b1d"
+    },
+    {
+        "url": "/web/mis_movidas/relatos/pequenyo_insecto.html",
+        "titulo": "Pequeño insecto",
+        "seccion": "relatos",
+        "fecha": "20-09-2026",
+        "actualizada": "25-06-2026",
+        "resumen": "97aadc07"
+    },
+    {
+        "url": "/web/mis_movidas/rol/index_rol.html",
+        "titulo": "Rol",
+        "seccion": "rol",
+        "fecha": "20-09-2026",
+        "actualizada": "27-09-2026",
+        "resumen": "08e06ccf"
+    },
+    {
+        "url": "/web/santuarios/regis/regis.html",
+        "titulo": "Regis",
+        "seccion": "santuarios",
+        "fecha": "20-09-2026",
+        "actualizada": "25-09-2026",
+        "resumen": "ec3da88c"
+    },
+    {
+        "url": "/web/santuarios/index_santuarios.html",
+        "titulo": "Santuarios",
+        "seccion": "santuarios",
+        "fecha": "20-09-2026",
+        "actualizada": "25-09-2026",
+        "resumen": "be7e4d4f"
+    },
+    {
+        "url": "/web/santuarios/tali/tali.html",
+        "titulo": "Tali",
+        "seccion": "santuarios",
+        "fecha": "20-09-2026",
+        "actualizada": "25-09-2026",
+        "resumen": "ed3f1909"
+    },
+    {
+        "url": "/web/accesibilidad/accesibilidad.html",
+        "titulo": "Accesibilidad",
+        "seccion": "otras",
+        "fecha": "20-09-2026",
+        "actualizada": "25-09-2026",
+        "resumen": "59eff6aa"
+    },
+    {
+        "url": "/web/changelog/changelog.html",
+        "titulo": "Changelog",
+        "seccion": "otras",
+        "fecha": "27-09-2026",
+        "actualizada": "27-09-2026",
+        "resumen": "8a98e362"
+    },
+    {
+        "url": "/web/contacto/contacto.html",
+        "titulo": "Contacto y guestbook",
+        "seccion": "otras",
+        "fecha": "20-09-2026",
+        "actualizada": "25-09-2026",
+        "resumen": "bcd2d888"
+    },
+    {
+        "url": "/web/mapa/mapa.html",
+        "titulo": "Mapa del sitio",
+        "seccion": "otras",
+        "fecha": "27-09-2026",
+        "actualizada": "27-09-2026",
+        "resumen": "a31171a9"
+    },
+    {
+        "url": "/web/sobre_mi/sobre_mi.html",
+        "titulo": "Sobre mí",
+        "seccion": "otras",
+        "fecha": "20-09-2026",
+        "actualizada": "25-09-2026",
+        "resumen": "700dd6fe"
+    }
+]

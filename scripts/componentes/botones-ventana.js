@@ -58,6 +58,11 @@ initializeWindowControlsComponent();
 // volver a pintar los que ya estaban no cambia nada.
 document.addEventListener("sidebar:loaded", initializeWindowControlsComponent);
 
+// Y lo mismo con las ventanas que se pintan más tarde desde un JSON (los
+// bloques del changelog): quien las pinta avisa con este evento y aquí
+// se rellenan sus botones.
+document.addEventListener("ventanas:actualizar", initializeWindowControlsComponent);
+
 function initializeWindowControlsComponent() {
     document.querySelectorAll("[data-window-controls]").forEach((mount) => {
         mount.innerHTML = WINDOW_CONTROLS_MARKUP;

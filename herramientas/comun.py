@@ -218,14 +218,16 @@ def paginas(carpeta, patron="*.html"):
 
 # El orden importa: primero el archivo del año (que crea index_<año>.html
 # y el enlace del menú si es un año o un mes nuevo), luego los listados,
-# el RSS que lee de ellos, el sitemap, y las cabeceras al final, que le
-# ponen su bloque de CSS a las páginas nuevas y dejan cada archivo con su
-# versión anti-caché al día.
+# el RSS que lee de ellos, el sitemap, el mapa del sitio (que necesita
+# las fechas de los listados), y las cabeceras al final, que le ponen su
+# bloque de CSS a las páginas nuevas y dejan cada archivo con su versión
+# anti-caché al día.
 GENERADORES = (
     "generar-archivo.py",
     "generar-posts.py",
     "generar-rss.py",
     "generar-sitemap.py",
+    "generar-mapa.py",
     "actualizar-cabeceras.py",
 )
 

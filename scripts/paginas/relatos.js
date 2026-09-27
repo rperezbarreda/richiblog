@@ -170,7 +170,13 @@ function ajustarTarjetasDeRetos(puestas) {
         return;
     }
     const hayTarjetas = TARJETAS_RETOS.children.length > 0;
-    const seVen = hayTarjetas && puestas.indexOf(RETOS_ETIQUETA) !== -1;
+    // Mientras se busca algo, las tarjetas no salen aunque esté puesto
+    // el filtro «retos»: buscando se pide "enséñame lo que coincida", y
+    // una tarjeta que describe el reto entero no es un resultado. El
+    // reto sigue apareciendo en el listado como una entrada más, y ahí
+    // sí se filtra por lo escrito.
+    const buscando = !!(window.buscador && window.buscador.texto);
+    const seVen = hayTarjetas && !buscando && puestas.indexOf(RETOS_ETIQUETA) !== -1;
     TARJETAS_RETOS.hidden = !seVen;
 
     // Con las tarjetas a la vista, la línea del reto en el listado
@@ -292,11 +298,27 @@ function relatoToEntryCard(relato) {
         `<li class="entry-preview" data-categoria="${escapeHtml(subcategoria)}">` +
         `<a class="entry-preview-link" href="${escapeHtml(urlSegura(url))}">` +
         `<span class="entry-preview-title">${title}</span>` +
+        '<span class="entry-preview-meta">' +
         `<time class="entry-preview-date" datetime="${escapeHtml(fechaISO(relato.date))}">${date}</time>` +
+        minutosDe(relato) +
+        "</span>" +
         "</a>" +
         etiqueta +
         "</li>"
     );
+}
+
+// El tiempo de lectura lo calcula herramientas/generar-posts.py al
+// escribir el listado (cuenta las palabras del cuerpo de la entrada),
+// así que aquí solo se pinta. Las cosas sin texto que leer —las fichas
+// del portfolio de rol, que son enlaces a Ko-fi— no traen el dato y no
+// enseñan nada.
+function minutosDe(item) {
+    const minutos = Number(item && item.minutos);
+    if (!minutos || minutos < 1) {
+        return "";
+    }
+    return `<span class="entry-preview-minutos">${minutos} min</span>`;
 }
 
 // Escapa también las comillas, no solo < y >. El truco de meter el

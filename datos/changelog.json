@@ -1,0 +1,42 @@
+[
+    {
+        "fecha": "27-09-2026",
+        "titulo": "Creación del changelog y mapa del sitio",
+        "cosas": [
+            "Cambio en la accesibilidad, ahora el texto del footer del indez tiene un botón para detener el movimiento.",
+            "Creación en el index de los botones para las nuevas páginas de changelog y mapa del sitio, no las he incluido en el navbar porque al ser algo tan técnico poca gente va a querer navegar, por eso el único acceso es en la página de index.",
+            "Creación de la página de changelog con todos los cambios de programación del sitio web que no incluye las subidas de contenido",
+            "Creación del mapa del sitio, para acceder a todas las páginas del sitio web y ver un histórico de sus cambios, con filtros de búsqueda y ordenación en la tabla."
+        ]
+    },
+    {
+        "fecha": "26-09-2026",
+        "titulo": "Buscador, filtros en etiquetas y tiempo de lectura",
+        "cosas": [
+            "Buscador en el archivo del blog, en el listado de relatos y en el portfolio de rol. Busca por título, fecha y etiqueta —sin tildes ni mayúsculas, así que «crepusculo» encuentra «Crepùsculo»— y resalta lo que coincide. Se suma a los filtros en vez de pelearse con ellos.",
+            "Cada entrada dice lo que se tarda en leerla, contando las palabras al generar los listados.",
+            "Las entradas con apartados llevan un índice arriba para saltar de uno a otro.",
+            "El aviso del portfolio de rol es ahora su propia ventanita, y va al lado del título en vez de debajo: el portfolio empieza mucho más arriba."
+        ]
+    },
+    {
+        "fecha": "25-09-2026",
+        "titulo": "Reestructuración de los CSS, arreglo del Error 404 y nueva categorìa de retos",
+        "cosas": [
+            "Se han modificado tanto los css como los scripts que lo cargan para que tengan una url dinámica, haciendo que si subo algún cambio se vea siempre reflejado, ya que la caché impedía ver muchas veces los cambios y las nuevas entradas y era un poco molesto.",
+            "Todas las barras de scroll del sitio van con los colores del tema.",
+            "El portfolio de rol sale de datos/rol.json en vez de estar escrito dentro de la página.",
+            "Los iconos de redes se ven en el modo de alto contraste de Windows, donde antes desaparecían.",
+            "Arreglo de la página del Error 404 que no redirigía bien al index.",
+            "En el apartado de relatos se ha creado una nueva página para ir añadiendo retos literarios, con su propia navegación particular (una nueva vista para ver todos los días y palabras de los retos en formato tabla)"
+        ]
+    },
+    {
+        "fecha": "20-09-2026",
+        "titulo": "Inauguración del blog",
+        "cosas": [
+            "Subida del sitio web a Neocities",
+            "Subida del sitio web a un repositorio privado de github"
+        ]
+    }
+]

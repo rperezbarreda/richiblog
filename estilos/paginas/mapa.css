@@ -1,0 +1,335 @@
+/* PÁGINA DEL MAPA DEL SITIO */
+
+/* Mismo enderezado que accesibilidad y changelog: .home viene con
+   display: grid y align-items: center, y en una página larga eso deja
+   la parte de arriba fuera de alcance. */
+.mapa-page {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    justify-content: flex-start;
+    padding: 36px 4% 48px;
+}
+
+.mapa-page .home-title {
+    flex: 0 0 auto;
+    font-size: clamp(2.25rem, 5vw, 4rem);
+    letter-spacing: -2px;
+}
+
+.mapa-intro {
+    max-width: 62ch;
+    margin: 18px 0 24px;
+    color: var(--white);
+    font-size: 0.9375rem;
+    line-height: 1.8;
+}
+
+/* El buscador va justo encima de la tabla, con un poco de aire. Lo
+   demás (el campo, el ✕ y la cuenta) sale de
+   estilos/componentes/buscador.css, que es el mismo de los otros
+   listados. */
+.mapa-page .buscar {
+    margin-bottom: 14px;
+}
+
+.mapa-cuenta {
+    margin: 0 0 12px;
+    color: var(--muted);
+    font-family: "DM Mono", monospace;
+    font-size: 0.75rem;
+    letter-spacing: 0.5px;
+}
+
+/* En qué orden está la tabla ahora mismo, escrito con palabras: la
+   flecha de la cabecera dice hacia dónde, pero no dice si es de la A a
+   la Z o de lo más nuevo a lo más viejo. Lo escribe
+   scripts/paginas/mapa.js, el mismo texto que se dice en voz alta. */
+.mapa-cuenta [data-mapa-orden] {
+    color: var(--yellow);
+}
+
+/* La tabla entera, dentro de la ventana de siempre. */
+.mapa-caja {
+    max-width: 900px;
+}
+
+/* En una pantalla estrecha la tabla no cabe de ancho: en vez de
+   apretarla hasta que cada título salga a una palabra por línea, se
+   desplaza de lado. Con tabindex para poder hacerlo también con el
+   teclado. */
+.mapa-scroll {
+    overflow-x: auto;
+    padding: 16px;
+    background: var(--purple-lighter);
+    border: 3px solid var(--yellow);
+    box-shadow: 6px 6px 0 var(--yellow);
+}
+
+.mapa-scroll:focus-visible {
+    outline: 2px solid var(--yellow);
+    outline-offset: 3px;
+}
+
+.mapa-tabla {
+    width: 100%;
+    /* Sin esto cada celda lleva su propio borde y se ve un enrejado
+       doble, que en una tabla larga marea. */
+    border-collapse: collapse;
+    font-size: 0.9375rem;
+}
+
+.mapa-tabla th {
+    padding: 0 12px 10px 0;
+    border-bottom: 2px solid var(--yellow);
+    color: var(--yellow);
+    font-family: "DM Mono", monospace;
+    font-size: 0.75rem;
+    font-weight: 500;
+    text-align: left;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    white-space: nowrap;
+}
+
+/* ==== BOTONES PARA ORDENAR ==== */
+
+/* Cada cabecera es un botón: pulsarlo ordena la tabla por esa columna y
+   volver a pulsarlo le da la vuelta. Con recuadro y todo a propósito,
+   como los filtros del blog: una palabra subrayada no se ve como algo
+   que se pueda pulsar, y aquí hace falta que se vea. */
+.mapa-ordenar {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    /* 8px por la izquierda, los mismos que llevan las celdas de abajo:
+       así el texto de la cabecera cae justo encima del de su columna. */
+    padding: 5px 8px;
+    border: 2px solid var(--yellow);
+    background: transparent;
+    color: var(--yellow);
+    /* De la cabecera: mono, pequeña, en mayúsculas. */
+    font: inherit;
+    letter-spacing: inherit;
+    text-transform: inherit;
+    transition: color 0.15s linear, background-color 0.15s linear;
+}
+
+.mapa-ordenar:hover {
+    background: var(--yellow);
+    color: var(--yellow-contrast);
+}
+
+.mapa-ordenar:focus-visible {
+    outline: 2px solid var(--yellow);
+    outline-offset: 3px;
+}
+
+/* La columna por la que está ordenada la tabla, maciza: es la misma
+   marca que lleva el filtro activo del blog. Cuelga de aria-sort, que
+   es lo que anuncia un lector de pantalla, así que lo que se ve y lo
+   que se oye salen del mismo sitio. */
+.mapa-tabla th:not([aria-sort="none"]) .mapa-ordenar {
+    background: var(--yellow);
+    color: var(--yellow-contrast);
+}
+
+/* El hueco de la flecha está reservado siempre, aunque esté vacío: si
+   no, al ordenar por una columna las demás se corrían de sitio. */
+.mapa-flecha {
+    display: inline-block;
+    width: 0.9em;
+    text-align: center;
+}
+
+.mapa-tabla th[aria-sort="ascending"] .mapa-flecha::before {
+    content: "\2191";
+}
+
+.mapa-tabla th[aria-sort="descending"] .mapa-flecha::before {
+    content: "\2193";
+}
+
+.mapa-tabla td {
+    padding: 9px 12px 9px 8px;
+    border-bottom: 1px solid var(--border);
+    color: var(--white);
+    vertical-align: baseline;
+}
+
+.mapa-tabla tr:last-child td {
+    border-bottom: 0;
+}
+
+.mapa-pagina a {
+    color: var(--white);
+    text-decoration: none;
+}
+
+.mapa-pagina a:hover,
+.mapa-pagina a:focus-visible {
+    color: var(--yellow);
+    text-decoration: underline;
+}
+
+.mapa-pagina a:focus-visible {
+    outline: 2px solid var(--yellow);
+    outline-offset: 3px;
+}
+
+/* La sección y la fecha son datos, no texto: en monoespaciada quedan
+   en columna aunque cambien de largo, como las fechas de los listados. */
+.mapa-seccion,
+.mapa-fecha,
+.mapa-actualizada {
+    color: var(--muted);
+    font-family: "DM Mono", monospace;
+    font-size: 0.75rem;
+    white-space: nowrap;
+}
+
+@media (max-width: 860px) {
+    .mapa-page {
+        padding: 32px 6% 40px;
+    }
+
+    .mapa-caja {
+        max-width: none;
+    }
+}
+
+/* En un móvil las tres columnas no caben: la fecha sola pide 116px y el
+   título necesita al menos 100, sobre los 268 que quedan en una
+   pantalla de 390. Medido: se salían 145px por la derecha y había que
+   arrastrar la tabla de lado para ver desde cuándo está cada página.
+   Así que cada fila pasa a ser un bloque —el título arriba y debajo la
+   sección y la fecha, en pequeño— y no hay que arrastrar nada.
+   La cabecera no se esconde: son los botones de ordenar, y si aquí no
+   se vieran, en un móvil no habría manera de reordenar la tabla. Se
+   queda arriba como una tira de botones, que es lo que ya parecía en
+   pantalla ancha. */
+@media (max-width: 700px) {
+    /* La tabla deja de maquetarse como tabla (si no, el ancho lo manda
+       la fila más larga y vuelve a haber que arrastrar de lado); lo que
+       NO se pierde es lo que es, porque los role= van escritos en el
+       HTML — ver scripts/paginas/mapa.js. */
+    .mapa-tabla,
+    .mapa-tabla tbody {
+        display: block;
+        width: 100%;
+    }
+
+    /* Los cuatro botones en una tira que parte de línea cuando no
+       caben, con la raya amarilla de siempre separándolos de los datos.
+       Sigue siendo el <thead> de la tabla: quien la escucha oye el
+       nombre de la columna en cada celda igual que antes. */
+    .mapa-tabla thead {
+        display: block;
+    }
+
+    .mapa-tabla thead tr {
+        display: flex;
+        flex-wrap: wrap;
+        /* Apretados a propósito: con 6px de hueco y 8 de relleno,
+           "creada" y "actualizada" sumaban 275px en los 272 que hay en
+           una pantalla de 390, y se caía una a cada línea. Con esto
+           caben las dos juntas y la cabecera son dos líneas en vez de
+           tres. */
+        gap: 5px;
+        padding: 0 0 12px;
+        border-bottom: 2px solid var(--yellow);
+    }
+
+    .mapa-ordenar {
+        padding: 5px 6px;
+    }
+
+    .mapa-tabla th {
+        padding: 0;
+        border: 0;
+        white-space: normal;
+    }
+
+    /* Rejilla y no bloques sueltos: el título ocupa la fila entera y
+       debajo van la sección y la fecha, cada una en su hueco. Puestos
+       en línea a secas, cuando la fecha no cabía se caía a la línea de
+       abajo y el punto de separación se quedaba solo al final de la
+       anterior. */
+    /* display: grid de aquí abajo gana a lo que el navegador hace con
+       [hidden] (display: none), así que una fila escondida por la
+       búsqueda se seguía viendo. */
+    .mapa-tabla tr[hidden] {
+        display: none;
+    }
+
+    .mapa-tabla tr {
+        display: grid;
+        /* minmax(0, …) en las dos: sin eso, el título —que ocupa la fila
+           entera— arrastraba el ancho de la rejilla hasta caber en una
+           línea (medido: 425px en una pantalla de 390) y la tabla volvía
+           a salirse de lado. Así el que parte en varias líneas es el
+           título, que es lo suyo. */
+        grid-template-columns: minmax(0, max-content) minmax(0, 1fr);
+        width: 100%;
+        gap: 3px 0;
+        padding: 10px 0;
+        border-bottom: 1px solid var(--border);
+    }
+
+    .mapa-pagina {
+        grid-column: 1 / -1;
+        min-width: 0;
+    }
+
+    /* La columna de "actualizada" no cabe en una tercera posición, y
+       cuando es una raya no dice nada: se va. Cuando sí dice algo, se
+       cae a su propia línea con su etiqueta delante, que aquí ya no hay
+       cabecera de tabla a la vista que explique qué es ese dato. */
+    .mapa-tabla td.mapa-actualizada {
+        grid-column: 1 / -1;
+    }
+
+    /* Con el nombre de la tabla delante a propósito: ".mapa-tabla td"
+       de aquí arriba pone display: block y gana por especificidad a una
+       clase suelta, así que la raya se seguía viendo. */
+    .mapa-tabla td.mapa-actualizada-sin {
+        display: none;
+    }
+
+    .mapa-actualizada::before {
+        content: "actualizada: ";
+    }
+
+    /* Con tbody delante: la fila de la cabecera también es la última de
+       su thead, y sin eso se quedaba sin la raya amarilla de abajo. */
+    .mapa-tabla tbody tr:last-child {
+        border-bottom: 0;
+    }
+
+    .mapa-tabla td {
+        display: block;
+        padding: 0;
+        border: 0;
+    }
+
+    /* El punto de separación va en el CSS, para que quien escuche la
+       fila no oiga un punto suelto en medio. */
+    .mapa-fecha::before {
+        content: "·";
+        margin: 0 6px;
+    }
+}
+
+/* Y en las pantallas más estrechas (360px y menos, que las hay) tampoco caben
+   la sección y la fecha en la misma línea: 225px de texto en 206 de
+   hueco. Cada una a su línea, sin el punto de separación, que ahí ya no
+   separa nada. */
+@media (max-width: 360px) {
+    .mapa-tabla tr {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .mapa-fecha::before {
+        content: none;
+    }
+}

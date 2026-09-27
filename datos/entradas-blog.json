@@ -5,7 +5,8 @@
         "url": "/web/blog/2026/septiembre/semanita-de-estar-solo-en-casa.html",
         "tags": [
             "diario"
-        ]
+        ],
+        "minutos": 2
     },
     {
         "title": "Tomé la horrible decisión de ver Crepùsculo",
@@ -14,7 +15,8 @@
         "tags": [
             "opiniones",
             "pelis"
-        ]
+        ],
+        "minutos": 4
     },
     {
         "title": "Día de velocidad x4 de los sims",
@@ -22,7 +24,8 @@
         "url": "/web/blog/2026/septiembre/dia-de-velocidad-x4-de-los-sims.html",
         "tags": [
             "diario"
-        ]
+        ],
+        "minutos": 2
     },
     {
         "title": "Puto Tebas de los cojones",
@@ -30,7 +33,8 @@
         "url": "/web/blog/2026/septiembre/puto-tebas-de-los-cojones.html",
         "tags": [
             "diario"
-        ]
+        ],
+        "minutos": 2
     },
     {
         "title": "Por fin pongo en marcha esto",
@@ -38,6 +42,7 @@
         "url": "/web/blog/2026/septiembre/por-fin-pongo-en-marcha-esto.html",
         "tags": [
             "diario"
-        ]
+        ],
+        "minutos": 2
     }
 ]

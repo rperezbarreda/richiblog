@@ -44,6 +44,8 @@
 #                     (separadas por espacios; si alguna lleva coma se
 #                     limpia al leerla)
 #     enlace          la ruta del archivo dentro del sitio
+#     minutos         cuánto se tarda en leerla, contando las palabras
+#                     del cuerpo (ver PALABRAS_POR_MINUTO más abajo)
 #
 # Y en los relatos, igual con relato-post-title / relato-post-date y
 # data-subcategoria.
@@ -91,6 +93,41 @@ MESES = {
     "dic": 12, "diciembre": 12,
 }
 
+
+
+# =========================================
+# TIEMPO DE LECTURA
+# =========================================
+# 200 palabras por minuto es lo que se suele dar por bueno leyendo en
+# pantalla en español (las cuentas que andan por ahí van de 180 a 240;
+# 200 deja el número redondo y no exagera). El resultado es orientativo
+# y así se escribe: "4 min", no "4 minutos y medio".
+PALABRAS_POR_MINUTO = 200
+
+RE_COMENTARIO = re.compile(r"<!--.*?-->", re.S)
+
+
+def cuerpo_de(texto, prefijo):
+    """El texto de la entrada, sin la cabecera ni la columna de al lado.
+
+    La columna (blog-post-side) lleva el pie de una imagen y la ventana
+    de "sigue leyendo", que no son la entrada: contándolos, dos entradas
+    igual de largas salían con minutos distintos según cuántas cosas
+    tuvieran al lado."""
+    inicio = texto.find(f'<div class="{prefijo}-post-body">')
+    if inicio == -1:
+        return ""
+    fin = texto.find(f'<div class="{prefijo}-post-side"', inicio)
+    return texto[inicio:fin if fin != -1 else len(texto)]
+
+
+def minutos_de(cuerpo):
+    """Cuántos minutos se tarda en leer eso, como mínimo uno."""
+    limpio = RE_COMENTARIO.sub(" ", cuerpo)
+    palabras = len(re.sub(r"<[^>]+>", " ", limpio).split())
+    if not palabras:
+        return 0
+    return max(1, round(palabras / PALABRAS_POR_MINUTO))
 
 
 def buscar(patron, texto):
@@ -187,6 +224,7 @@ def recoger_blog():
                 "date": fecha,
                 "url": url_de(ruta),
                 "tags": partir_etiquetas(crudas),
+                "minutos": minutos_de(cuerpo_de(texto, "blog")),
             }
         )
     entradas.sort(key=clave_orden)
@@ -266,6 +304,7 @@ def recoger_movidas():
             "subcategory": sub,
             "date": fecha,
             "url": url_de(ruta),
+            "minutos": minutos_de(cuerpo_de(texto, "relato")),
         }
         # Un relato dentro de una subcarpeta de relatos/ pertenece a una
         # colección: hoy, el reto de escritura diaria. Se apunta a cuál

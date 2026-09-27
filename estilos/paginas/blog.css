@@ -301,7 +301,19 @@ body:has(.blog-post-page) main {
 .blog-post-header-meta {
     display: flex;
     align-items: center;
-    flex-shrink: 0;
+    /* Puede encoger (antes no) para que, cuando la ventana se queda
+       corta, esta fila se apriete y envuelva en vez de empujar hacia
+       fuera de la entrada, que va a overflow: hidden. Cada pieza de
+       dentro lleva su propio nowrap, así que lo que se parte es la fila,
+       no la fecha. */
+    flex-shrink: 1;
+    min-width: 0;
+    /* Que envuelva: con el espaciado de texto forzado y una ventana de
+       1024, la fila (fecha, minutos y los dos botones) pedía 876px en
+       una cabecera de 738 y lo que sobraba se cortaba, porque la
+       entrada va a overflow: hidden. Envolviendo, los botones se caen a
+       la línea de abajo y no se pierde nada. */
+    flex-wrap: wrap;
     gap: 14px;
 }
 

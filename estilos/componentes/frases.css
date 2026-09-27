@@ -1,9 +1,24 @@
 /* QUOTES */
 
+/* La barra pasa a ser dos cosas en fila: la ventanilla por la que se ve
+   pasar el texto y el botón de pararlo. El recuadro, el fondo y el
+   overflow siguen en .quotes-bar (estilos/base.css). */
+.quotes-viewport {
+    flex: 1 1 auto;
+    min-width: 0;
+    overflow: hidden;
+}
+
 .quotes-track {
     display: flex;
     width: max-content;
     animation: marquee 30s linear infinite;
+}
+
+/* Parada del todo, no "corriendo pero invisible": así no gasta batería
+   ni sigue moviendo nada por detrás. */
+.quotes-track.esta-parado {
+    animation-play-state: paused;
 }
 
 .quotes-content {
@@ -19,6 +34,44 @@
     white-space: nowrap;
 }
 
+/* El botón de parar. Más grande que la letra de las frases a propósito:
+   con 0.5rem no se leería, y esto hay que poder pulsarlo. */
+.quotes-pausa {
+    display: flex;
+    flex: 0 0 auto;
+    align-items: center;
+    gap: 6px;
+    /* 28px de alto: el mínimo cómodo para el dedo sin hacer más gorda la
+       barra, que mide 14px de padding arriba y abajo. */
+    min-height: 28px;
+    padding: 4px 10px;
+    border: 2px solid var(--yellow);
+    background: transparent;
+    color: var(--yellow);
+    font-family: "DM Mono", monospace;
+    font-size: 0.6875rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    cursor: pointer;
+    transition: color 0.15s linear, background-color 0.15s linear;
+}
+
+.quotes-pausa:hover,
+.quotes-pausa:focus-visible {
+    color: var(--yellow-contrast);
+    background: var(--yellow);
+}
+
+.quotes-pausa:focus-visible {
+    outline: 2px solid var(--yellow);
+    outline-offset: 2px;
+}
+
+.quotes-pausa-icono {
+    font-size: 0.625rem;
+    line-height: 1;
+}
+
 @keyframes marquee {
     from {
         transform: translateX(0);
@@ -31,5 +84,12 @@
 @media (prefers-reduced-motion: reduce) {
     .quotes-track {
         animation: none;
+    }
+
+    /* Si el sistema ya pide no mover nada, aquí no se mueve nada y el
+       botón no tiene qué parar. Lo esconde también frases.js, por si el
+       navegador no entiende esta consulta. */
+    .quotes-pausa {
+        display: none;
     }
 }

@@ -76,7 +76,17 @@
     background: var(--purple-lighter);
     border: 3px solid var(--yellow);
     box-shadow: 6px 6px 0 var(--yellow);
-    overflow: hidden;
+    /* Antes: overflow: hidden. La ilustración solo puede encoger hasta
+       160px, así que cuando el hueco se queda corto lo que sobraba se
+       cortaba — y lo que sobra siempre es el texto de abajo, que va
+       después. Se comía la descripción entera de cada gato con el
+       espaciado de texto forzado (224px de recorte en una ventana de
+       1440x900), y también sin forzar nada en ventanas bajas (59px en
+       una de 900x700). Ahora la ficha se desplaza por dentro, como las
+       demás ventanas del sitio: nada se pierde, y con el teclado la
+       mueve scripts/componentes/teclado-scroll.js al tener dentro el
+       foco el enlace del nombre. */
+    overflow: hidden auto;
     transition: transform 0.15s ease;
 }
 

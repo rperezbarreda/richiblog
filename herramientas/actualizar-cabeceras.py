@@ -126,6 +126,8 @@ def hojas_de(ruta):
     es_rol = "/mis_movidas/rol/" in ruta
     es_relatos = "/mis_movidas/relatos/" in ruta
     es_accesibilidad = "/accesibilidad/" in ruta
+    es_changelog = "/changelog/" in ruta
+    es_mapa = "/mapa/" in ruta
     es_404 = ruta.endswith("/not_found.html")
     # La página de un reto de escritura: vive en una subcarpeta de
     # relatos/ y se llama index_<loquesea>.html. No es una página de
@@ -146,6 +148,9 @@ def hojas_de(ruta):
 
     if es_lectura:
         hojas.append("/estilos/componentes/texto-entrada.css")
+        # El tiempo de lectura y el índice de apartados: los monta
+        # scripts/componentes/lectura.js en estas mismas páginas.
+        hojas.append("/estilos/componentes/lectura.css")
 
     if es_portada:
         hojas += [
@@ -170,6 +175,10 @@ def hojas_de(ruta):
             "/estilos/paginas/blog.css",
             "/estilos/paginas/blog.responsive.css",
         ]
+        # El buscador, solo en el archivo del año: es la única página
+        # del blog que lleva un listado que filtrar.
+        if re.search(r"/index_\d+\.html$", ruta):
+            hojas.append("/estilos/componentes/buscador.css")
     elif es_santuarios:
         hojas += [
             "/estilos/paginas/santuarios.css",
@@ -180,9 +189,11 @@ def hojas_de(ruta):
             "/estilos/paginas/mis-movidas.css",
             "/estilos/paginas/mis-movidas.responsive.css",
             # La ventana de filtros (filtros.lst) la comparten rol y
-            # relatos, así que va en su propio archivo de componente.
+            # relatos, así que va en su propio archivo de componente. El
+            # buscador, igual: lo llevan estas dos y el archivo del blog.
             "/estilos/componentes/filtros.css",
             "/estilos/componentes/filtros.responsive.css",
+            "/estilos/componentes/buscador.css",
         ]
     elif es_reto:
         # La página del reto no usa nada de relatos.css: es una rejilla
@@ -202,6 +213,7 @@ def hojas_de(ruta):
             hojas += [
                 "/estilos/componentes/filtros.css",
                 "/estilos/componentes/filtros.responsive.css",
+                "/estilos/componentes/buscador.css",
                 "/estilos/paginas/reto.css",
                 "/estilos/paginas/reto.responsive.css",
             ]
@@ -209,6 +221,16 @@ def hojas_de(ruta):
         # Sin portada.css: esta página no usa nada de la portada, se
         # dibuja sus propios marcos (ver el comentario de .acc-bloque).
         hojas.append("/estilos/paginas/accesibilidad.css")
+    elif es_changelog:
+        # Igual que accesibilidad: marcos propios, nada de portada.css.
+        hojas.append("/estilos/paginas/changelog.css")
+    elif es_mapa:
+        hojas += [
+            "/estilos/paginas/mapa.css",
+            # La tabla se puede filtrar con el mismo buscador que el
+            # archivo del blog, los relatos y el portfolio de rol.
+            "/estilos/componentes/buscador.css",
+        ]
 
     # El resto de páginas de contenido siempre llevan barra lateral.
     hojas += [

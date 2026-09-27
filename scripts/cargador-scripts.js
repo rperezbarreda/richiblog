@@ -50,27 +50,31 @@
 (function versionesDeArchivos() {
     const VERSIONES = {
         // ==== generado ====
-        "/fragmentos/barra-lateral.html": "d5c7d400",
-        "/fragmentos/frases.html": "f5d6fe01",
+        "/fragmentos/barra-lateral.html": "2ed3ac79",
+        "/fragmentos/frases.html": "81a36459",
         "/scripts/componentes/aviso.js": "7b9fce19",
         "/scripts/componentes/barra-lateral.js": "da4175b8",
-        "/scripts/componentes/botones-ventana.js": "f5a53aa0",
+        "/scripts/componentes/botones-ventana.js": "c77fe3fa",
+        "/scripts/componentes/buscador.js": "e2007b48",
         "/scripts/componentes/cargador-fragmentos.js": "11a98bcb",
         "/scripts/componentes/chispas-botones.js": "ced17e38",
-        "/scripts/componentes/filtros.js": "a8f1ddaa",
-        "/scripts/componentes/frases.js": "6f0bdf49",
+        "/scripts/componentes/filtros.js": "ed75481d",
+        "/scripts/componentes/frases.js": "999803de",
         "/scripts/componentes/gatin-random.js": "212dad18",
+        "/scripts/componentes/lectura.js": "55ef46ad",
         "/scripts/componentes/rastro-cursor.js": "3ca8334c",
         "/scripts/componentes/subir.js": "2e242c61",
         "/scripts/componentes/teclado-scroll.js": "5847ef8b",
         "/scripts/componentes/visor-imagenes.js": "48184405",
+        "/scripts/paginas/changelog.js": "b47d27a6",
         "/scripts/paginas/diario.js": "f2880aea",
-        "/scripts/paginas/entradas-blog.js": "ddff4a7b",
+        "/scripts/paginas/entradas-blog.js": "0d73ea30",
         "/scripts/paginas/guestbook-texto.js": "5ef34bf3",
         "/scripts/paginas/guestbook.js": "4d3c0d57",
+        "/scripts/paginas/mapa.js": "98984720",
         "/scripts/paginas/novedades.js": "4d11ce1e",
-        "/scripts/paginas/otras-entradas.js": "316273ce",
-        "/scripts/paginas/relatos.js": "510dab2f",
+        "/scripts/paginas/otras-entradas.js": "a1706f7f",
+        "/scripts/paginas/relatos.js": "9307705c",
         "/scripts/paginas/reto.js": "f75ee6a7",
         "/scripts/paginas/rol.js": "eeaebb8f",
         "/scripts/paginas/santuarios.js": "ee3077b4",
@@ -130,6 +134,10 @@
     // Solo las fichas de cada gato: el índice de santuarios no tiene galería.
     const isFichaSantuario = /\/santuarios\/[^/]+\/[^/]+$/.test(path);
     const isNotFound = path.endsWith("/not_found");
+    // El changelog no está en el menú: se llega desde el botón de la
+    // portada. Aquí da igual, el JS se carga por la ruta.
+    const isChangelog = path.includes("/changelog/");
+    const isMapa = path.includes("/mapa/");
     // Páginas de lectura: una entrada del blog (no el archivo del año)
     // o un relato (no su índice). Ahí va la ventana de "sigue leyendo".
     const isLectura =
@@ -177,18 +185,24 @@
         script("/scripts/paginas/guestbook-texto.js");
         script("/scripts/paginas/guestbook.js");
     } else if (isBlogArchive) {
+        // Antes que entradas-blog.js: cuando el archivo termina de
+        // pintarse le pide al buscador que aplique lo que venga en
+        // ?buscar=, así que tiene que estar ya cargado.
+        script("/scripts/componentes/buscador.js");
         script("/scripts/paginas/entradas-blog.js");
     } else if (isDiario) {
         script("/scripts/paginas/diario.js");
     } else if (isRol) {
-        // Antes que rol.js, igual que en relatos: así el componente ya
-        // está escuchando cuando el portfolio termina de pintarse y
+        // Antes que rol.js, igual que en relatos: así los componentes
+        // ya están escuchando cuando el portfolio termina de pintarse y
         // avisa de que hay categorías nuevas que contar.
+        script("/scripts/componentes/buscador.js");
         script("/scripts/componentes/filtros.js");
         script("/scripts/paginas/rol.js");
     } else if (isRelatosList) {
-        // Antes que relatos.js: así el componente ya está escuchando
-        // cuando el listado termina de pintarse y avisa.
+        // Antes que relatos.js: así los componentes ya están
+        // escuchando cuando el listado termina de pintarse y avisa.
+        script("/scripts/componentes/buscador.js");
         script("/scripts/componentes/filtros.js");
         script("/scripts/paginas/relatos.js");
         // La tarjeta del reto que va encima del listado.
@@ -196,8 +210,20 @@
     } else if (isReto) {
         script("/scripts/paginas/reto.js");
     } else if (isLectura) {
+        // Antes que otras-entradas.js: ese avisa con la ficha de esta
+        // entrada en cuanto le llega el listado, y lectura.js tiene que
+        // estar ya escuchando.
+        script("/scripts/componentes/lectura.js");
         script("/scripts/paginas/otras-entradas.js");
     } else if (isFichaSantuario) {
         script("/scripts/paginas/santuarios.js");
+    } else if (isChangelog) {
+        script("/scripts/paginas/changelog.js");
+    } else if (isMapa) {
+        // Antes que mapa.js, como en el archivo del blog: la tabla se
+        // pinta sola cuando llega el JSON y ahí mismo le pide al
+        // buscador que aplique lo que venga en ?buscar=.
+        script("/scripts/componentes/buscador.js");
+        script("/scripts/paginas/mapa.js");
     }
 })();

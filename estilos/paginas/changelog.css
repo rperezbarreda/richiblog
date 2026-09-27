@@ -1,0 +1,94 @@
+/* PÁGINA DE CHANGELOG */
+
+/* Mismo enderezado que la página de accesibilidad: .home viene con
+   display: grid y align-items: center, y en una página larga eso centra
+   el bloque entero y deja la parte de arriba fuera de alcance. */
+.changelog-page {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    /* La regla general de <section> en base.css trae
+       justify-content: center; en una columna que scrollea, eso deja el
+       principio por encima del borde y no hay forma de llegar a él. */
+    justify-content: flex-start;
+    padding: 36px 4% 48px;
+}
+
+.changelog-page .home-title {
+    flex: 0 0 auto;
+    font-size: clamp(2.5rem, 6vw, 5rem);
+    /* Como en accesibilidad: una palabra larga con el interletrado
+       negativo de .home-title monta unas letras sobre otras. */
+    letter-spacing: -2px;
+}
+
+.changelog-intro {
+    max-width: 62ch;
+    margin: 18px 0 30px;
+    color: var(--white);
+    font-size: 0.9375rem;
+    line-height: 1.8;
+}
+
+/* Una columna sola y estrecha, al revés que accesibilidad (que va a
+   tres): esto se lee en orden, de lo más nuevo a lo más viejo, y en
+   columnas habría que ir subiendo y bajando la vista para seguir la
+   cronología. */
+.changelog-lista {
+    display: flex;
+    flex-direction: column;
+    gap: 22px;
+    max-width: 800px;
+}
+
+/* El marco va escrito aquí y no reutilizando .recent-entries: esa clase
+   vive en paginas/portada.css, que esta página no carga. La cabecera sí
+   se hereda, porque .recent-entries-header está en la base
+   (componentes/cabecera-ventana.css), y su margen negativo de -16px
+   cuadra con este padding de 16. */
+.changelog-bloque {
+    /* Cada bloque es un <section>, y la regla general de base.css deja a
+       los <section> con height: 100%, scroll propio y el contenido
+       centrado en vertical. Aquí se deshace. */
+    height: auto;
+    display: block;
+    overflow: visible;
+    padding: 16px;
+    background: var(--purple-lighter);
+    border: 3px solid var(--yellow);
+    box-shadow: 6px 6px 0 var(--yellow);
+}
+
+.changelog-titulo {
+    margin: 0 0 10px;
+    color: var(--yellow);
+    font-family: "Space Grotesk", sans-serif;
+    font-style: italic;
+    font-size: 1.125rem;
+}
+
+.changelog-cosas {
+    margin: 0;
+    padding-left: 1.3em;
+    color: var(--white);
+    font-size: 0.9375rem;
+    line-height: 1.7;
+}
+
+.changelog-cosas li {
+    margin-bottom: 8px;
+}
+
+.changelog-cosas li::marker {
+    color: var(--yellow);
+}
+
+@media (max-width: 860px) {
+    .changelog-page {
+        padding: 32px 6% 40px;
+    }
+
+    .changelog-lista {
+        max-width: none;
+    }
+}

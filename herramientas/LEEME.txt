@@ -196,9 +196,102 @@
   de dónde se hicieron). El tercero crea las miniaturas y escribe
   el listado de la galería.
 
+  Al terminar las miniaturas te pregunta la descripción de cada foto
+  nueva: es lo que se lee en voz alta cuando alguien no puede ver la
+  foto, así que mejor "Tali dormida en el teclado" que "gato". Enter
+  la deja para otro día y "fin" deja de preguntar por las que queden;
+  las que queden sin describir se vuelven a preguntar la próxima vez.
+  Con --sin-preguntar no pregunta nada.
+
   Los textos alternativos que escribas a mano en
-  datos/fotos-santuarios.json se respetan al volver a ejecutarlo: vale
-  la pena cambiar "Tali, foto 3" por algo de verdad.
+  datos/fotos-santuarios.json se respetan al volver a ejecutarlo y no
+  se vuelven a preguntar.
+
+
+  APUNTAR UN CAMBIO EN EL CHANGELOG
+
+  La página del changelog (web/changelog/changelog.html) sale entera
+  de datos/changelog.json, así que apuntar algo es añadir un bloque
+  ahí arriba del todo y nada más:
+
+      {
+          "fecha": "01-10-2026",
+          "titulo": "De qué va el día",
+          "cosas": [
+              "una cosa que cambiaste",
+              "y otra"
+          ]
+      }
+
+  La fecha va en dd-mm-aaaa, como en todo el sitio, y "titulo" es
+  opcional. Se ordenan solas de lo más nuevo a lo más viejo, así que
+  da igual dónde pegues el bloque dentro del archivo.
+
+  A esa página NO se llega por el menú a propósito: la única puerta
+  es el botón "changelog.txt" de la portada. No hace falta para usar
+  la web, es para quien tenga curiosidad de cómo está hecha.
+
+
+  EL MAPA DEL SITIO
+
+  La tabla de web/mapa/mapa.html —todas las páginas con su sección y
+  desde cuándo están— la escribe generar-mapa.py recorriendo la web.
+  No hay que mantener ninguna lista: al publicar algo aparece solo.
+
+  Cada página lleva dos fechas: desde cuándo está y cuándo se tocó por
+  última vez.
+
+  LA DE CREACIÓN. La de una entrada o un relato es su fecha de
+  publicación. Las demás páginas no tienen fecha en ninguna parte, así
+  que la herramienta apunta la de hoy LA PRIMERA VEZ que ve cada una y
+  no la vuelve a tocar nunca. Dos cosas que salen de ahí:
+
+    - Todo lo que ya existía sale con la fecha del día que se pasó
+      esto por primera vez. Si alguna te importa, cámbiala a mano en
+      datos/mapa-del-sitio.json: no se pisa.
+    - No se mira la fecha del archivo a propósito: se pierde al copiar
+      la carpeta o al descomprimir un zip, y entonces pondría que la
+      web entera nació el día que cambiaste de ordenador.
+
+  LA DE ACTUALIZACIÓN. Tampoco es la del archivo, por lo mismo: se
+  guarda un resumen del contenido de cada página y, cuando cambia, se
+  apunta ese día. Del resumen se deja fuera el <head>, porque
+  actualizar-cabeceras.py lo reescribe en TODAS las páginas cada vez
+  que tocas un CSS y si no, cambiar un color pondría la web entera
+  como actualizada. Una página que no se ha tocado desde que nació
+  sale con una raya en esa columna.
+
+  EL ORDEN Y LA BÚSQUEDA. La página abre ordenada por nombre, de la A
+  a la Z. Cada cabecera es un botón que ordena por esa columna —las dos
+  de texto de la A a la Z y las dos de fecha de lo más nuevo a lo más
+  viejo— y al volver a pulsarlo le da la vuelta. Encima de la tabla va
+  el mismo buscador que el archivo del blog, los relatos y el portfolio
+  de rol: filtra las filas mientras escribes, por nombre, por sección o
+  por fecha, y lo buscado se queda en la dirección (?buscar=) para
+  poder compartirlo.
+
+  Las dos cosas pasan en el navegador (scripts/paginas/mapa.js): no
+  cambian nada del JSON ni hay que volver a pasar ninguna herramienta.
+  El orden que escribe generar-mapa.py —por secciones y de lo más nuevo
+  a lo más viejo— solo decide cómo se lee el JSON a mano.
+
+  A esa página tampoco se llega por el menú: está detrás del botón
+  "mapa_del_sitio.txt" de la portada, al lado del changelog. Las dos,
+  el mapa y el changelog, llevan arriba un botón para volver a la
+  portada, que si no habría que tirar de la flecha del navegador.
+
+
+  EL TIEMPO DE LECTURA
+
+  No hay que hacer nada: generar-posts.py cuenta las palabras del
+  cuerpo de cada entrada y apunta los minutos en el listado (200
+  palabras por minuto). Sale al lado de la fecha, tanto en los
+  listados como en la propia entrada. Si reescribes una entrada, se
+  pone al día la próxima vez que pases el generador.
+
+  Y si una entrada lleva apartados —los <h2> del ejemplo de
+  formatos—, arriba del texto sale sola una lista para saltar de uno
+  a otro. Hacen falta dos o más: con uno no hay nada que elegir.
 
 
 ---------------------------------------------------------------
@@ -206,6 +299,7 @@
 ---------------------------------------------------------------
 
       python herramientas/generar-sitemap.py
+      python herramientas/generar-mapa.py
 
   Y SI HAS TOCADO ALGÚN CSS O ALGÚN JS, además:
 
@@ -229,6 +323,21 @@
   Publicar una entrada NO necesita esto: nuevo.py y
   publicar.py ya la pasan, y los listados de datos/ se piden de
   una forma que siempre comprueba si han cambiado.
+
+  Y ANTES DE SUBIR, SI QUIERES ESTAR TRANQUILO:
+
+      python herramientas/enlaces-rotos.py
+
+  Recorre el sitio entero y comprueba que todo lo que apunta a algo
+  existe: enlaces entre páginas, imágenes, CSS, JS, fuentes y las
+  rutas de dentro de los .json. No toca nada, solo mira. Si dice
+  "nada roto", nada roto. También lista al final los archivos a los
+  que no apunta nadie, que suele ser lo que quedó de una prueba.
+
+  Con --externos comprueba además los enlaces de fuera (Ko-fi,
+  Bluesky, Goodreads...). Eso va lento y hay webs que a un programa
+  le contestan mal y a un navegador bien, así que lo que diga de
+  esos es "míralo", no "está roto".
 
   Y sube el sitio a Neocities. La carpeta herramientas/ NO hace
   falta subirla: es solo para ti.
@@ -378,7 +487,13 @@
                         --despublicar
   optimizar-imagenes.py  pasa imagenes/ a WebP y les quita los datos
                         de dentro. Respeta el favicon y los SVG.
-  generar-galeria.py .. miniaturas + datos/fotos-santuarios.json
+  generar-galeria.py .. miniaturas + datos/fotos-santuarios.json, y
+                        pregunta la descripción de las fotos nuevas
+                        (--sin-preguntar para que no lo haga)
+  enlaces-rotos.py .... comprueba que todo lo que se enlaza existe,
+                        y lista lo que no usa nadie. No cambia nada.
+                        Con --externos mira también los enlaces de
+                        fuera.
 
   EL CAJÓN COMPARTIDO
   -------------------
@@ -402,6 +517,8 @@
                         datos/mis-movidas.json leyendo las páginas
   generar-rss.py ...... escribe blog/rss.xml desde datos/entradas-blog.json
   generar-sitemap.py .. escribe sitemap.xml recorriendo los .html
+  generar-mapa.py ..... escribe datos/mapa-del-sitio.json, que es de
+                        donde sale la tabla de web/mapa/mapa.html
   tamanos-portada.py .. saca las versiones pequeñas del dibujo de la
                         portada (el navegador se baja la que le hace
                         falta: 45 KB en vez de 187 en un portátil

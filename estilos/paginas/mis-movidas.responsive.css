@@ -11,7 +11,7 @@
         padding: 32px 6%;
     }
 
-    .rol-page > .home-title {
+    .rol-page .home-title {
         margin-bottom: 20px;
     }
 
@@ -21,11 +21,12 @@
     }
 
     .rol-page-intro {
+        margin-top: 0;
         margin-bottom: 20px;
         max-width: none;
     }
 
-    .rol-page-disclaimer {
+    .rol-page-aviso {
         max-width: none;
     }
 

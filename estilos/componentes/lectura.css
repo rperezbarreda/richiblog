@@ -1,0 +1,79 @@
+/* COMPONENTE: AYUDAS DE LECTURA (entradas del blog y relatos) */
+
+/* "4 min de lectura", al lado de la fecha. Mismo trato que la fecha
+   —misma tipografía, mismo tamaño, mismo color— porque son la misma
+   clase de dato: cosas que saber antes de empezar a leer.
+   Lo pone scripts/componentes/lectura.js, así que no está en el HTML de
+   ninguna entrada. */
+.lectura-minutos {
+    margin: 0;
+    flex-shrink: 0;
+    color: var(--yellow-contrast);
+    font-family: "DM Mono", monospace;
+    font-size: 0.75rem;
+    letter-spacing: 1px;
+    white-space: nowrap;
+}
+
+/* El punto de separación va en el CSS y no en el texto: quien escucha
+   la página oiría "punto" en medio de la cabecera. */
+.lectura-minutos::before {
+    content: "·";
+    margin-right: 10px;
+}
+
+/* El índice, al principio del texto. Recuadro fino y no una ventana
+   entera: es un apaño para saltar, no una sección de la entrada. */
+.lectura-indice {
+    margin: 0 0 22px;
+    padding: 12px 16px;
+    border-left: 3px solid var(--yellow);
+    background: var(--purple-lighter);
+}
+
+.lectura-indice-titulo {
+    margin: 0 0 8px;
+    color: var(--yellow);
+    font-family: "DM Mono", monospace;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.lectura-indice-lista {
+    margin: 0;
+    padding-left: 1.4em;
+    color: var(--muted);
+}
+
+.lectura-indice-lista li {
+    margin: 0 0 4px;
+}
+
+/* Con la clase del nav delante a propósito: el índice vive DENTRO del
+   cuerpo de la entrada, y ahí texto-entrada.css pinta cualquier enlace
+   de amarillo y subrayado. Eso está bien para un enlace en mitad de un
+   párrafo, pero aquí son cinco seguidos y quedaban como un cartel. */
+.lectura-indice .lectura-indice-enlace {
+    color: var(--white);
+    font-size: 0.9375rem;
+    text-decoration: none;
+}
+
+.lectura-indice .lectura-indice-enlace:hover,
+.lectura-indice .lectura-indice-enlace:focus-visible {
+    color: var(--yellow);
+    text-decoration: underline;
+}
+
+.lectura-indice .lectura-indice-enlace:focus-visible {
+    outline: 2px solid var(--yellow);
+    outline-offset: 3px;
+}
+
+/* Al saltar a un apartado, que no se quede pegado al borde de arriba de
+   la caja que se desplaza. */
+.blog-post-body h2,
+.relato-post-body h2 {
+    scroll-margin-top: 16px;
+}

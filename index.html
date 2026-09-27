@@ -58,20 +58,20 @@
          cuando cambia el archivo, y es lo que hace que al subir a
          Neocities se vea el cambio en vez de la versión guardada en la
          caché del navegador. -->
-    <link rel="stylesheet" href="/estilos/base.css?v=369ab20d">
+    <link rel="stylesheet" href="/estilos/base.css?v=002e74f6">
     <link rel="stylesheet" href="/estilos/base.responsive.css?v=623f6381">
     <link rel="stylesheet" href="/estilos/componentes/visor-imagenes.css?v=4ad3b842">
     <link rel="stylesheet" href="/estilos/componentes/aviso.css?v=5e4cd612">
     <link rel="stylesheet" href="/estilos/componentes/aviso.responsive.css?v=7ca39f22">
     <link rel="stylesheet" href="/estilos/componentes/cabecera-ventana.css?v=abe3c1d9">
     <link rel="stylesheet" href="/estilos/componentes/subir.css?v=0d5ba8b4">
-    <link rel="stylesheet" href="/estilos/paginas/portada.css?v=16e96203">
+    <link rel="stylesheet" href="/estilos/paginas/portada.css?v=a1c680b1">
     <link rel="stylesheet" href="/estilos/paginas/portada.responsive.css?v=17c1c0d6">
-    <link rel="stylesheet" href="/estilos/componentes/frases.css?v=b813f599">
+    <link rel="stylesheet" href="/estilos/componentes/frases.css?v=72e4a829">
     <link rel="stylesheet" href="/estilos/componentes/barra-lateral.css?v=14bb37f0">
     <link rel="stylesheet" href="/estilos/componentes/barra-lateral.responsive.css?v=a73e7469">
     <!-- ==== fin del CSS ==== -->
-    <script src="/scripts/cargador-scripts.js?v=1e5ac5d0"></script>
+    <script src="/scripts/cargador-scripts.js?v=af548fe4"></script>
   </head>
 <body>
         <!-- ==== SIDEBAR / NAVEGACIÓN ==== -->
@@ -181,6 +181,10 @@
 
                 </div>
 
+                <!-- La columna de la derecha: las dos ventanas y,
+                     debajo y por fuera de ellas, los enlaces a las
+                     páginas que no están en el menú. -->
+                <div class="columna-ventanas">
                 <div class="entries-projects-row">
                     <div class="recent-entries">
                         <div class="recent-entries-header">
@@ -213,6 +217,17 @@
                         </div>
                     </div>
                 </div>
+
+                    <!-- Ni el changelog ni el mapa están en el menú a
+                         propósito: se llega a los dos solo desde aquí.
+                         No hacen falta para usar la web; son para quien
+                         tenga curiosidad por cómo está hecha o busque
+                         algo y no recuerde dónde estaba. -->
+                    <div class="home-extras">
+                        <a class="home-extra-boton" href="/web/changelog/changelog.html">changelog.txt →</a>
+                        <a class="home-extra-boton" href="/web/mapa/mapa.html">mapa_del_sitio.txt →</a>
+                    </div>
+                </div>
             </div>
         </section>
     </main>
@@ -226,7 +241,7 @@
         </div>
         <div class="notice-body">
             <p>Aquí no hay cookies ni se rastea nada: no cuento las visitas, no hay anuncios y no hay contenido de terceros. Ni siquiera las fonts, que están guardadas en el propio servidor.</p>
-            <p>Lo único que se guarda son unos pocos parametros en el <strong>localStorage</strong>, pero se queda en tu navegador y no tengo acceso a ello: el modo claro u oscuro, los brillitos del cursor, que ya has leído esto y qué foto del gatín aleatoria te ha tocado. Si tienes dudas pulsa <kbd>F12</kbd> y busca en la sección de <strong>Almacenamiento Local</strong>.</p>
+            <p>Lo único que se guarda son unos pocos parametros en el <strong>localStorage</strong>, pero se queda en tu navegador y no tengo acceso a ello: el modo claro u oscuro, los brillitos del cursor, si has parado las frases de abajo, que ya has leído esto y qué foto del gatín aleatoria te ha tocado. Si tienes dudas pulsa <kbd>F12</kbd> y busca en la sección de <strong>Almacenamiento Local</strong>.</p>
             <p>La excepción es el guestbook: los mensajes se guardan en una hoja de cálculo de Google, así que lo que firmes acaba allí.</p>
             <p>Tengo una discapacidad visual, así que esto está web está hecha para usarse con teclado, con lector de pantalla y con la letra grande. Tienes mas información en la parte de <a href="/web/accesibilidad/accesibilidad.html">accesibilidad</a>. Si algo no te funciona, dímelo en el <a href="/web/contacto/contacto.html">guestbook</a>.</p>
         </div>

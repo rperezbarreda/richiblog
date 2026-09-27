@@ -1,17 +1,38 @@
 <div class="quotes-bar">
-    <div class="quotes-track">
-        <div class="quotes-content">
-            ▶ un caballero debe ser valeroso ◀
-            &nbsp;&nbsp;
-            ▶ su corazón solo conoce la virtud ◀
-            &nbsp;&nbsp;
-            ▶ su espada defiende a los desvalidos ◀
-            &nbsp;&nbsp;
-            ▶ su fuerza sostiene a los débiles ◀
-            &nbsp;&nbsp;
-            ▶ su palabra solo dice la verdad ◀
-            &nbsp;&nbsp;
-            ▶ su ira aniquila al malvado ◀
+    <!-- La ventanilla por la que se ve pasar el texto. El botón de parar
+         va fuera de ella, o se iría moviendo con las frases. -->
+    <div class="quotes-viewport">
+        <div class="quotes-track">
+            <div class="quotes-content">
+                ▶ un caballero debe ser valeroso ◀
+                &nbsp;&nbsp;
+                ▶ su corazón solo conoce la virtud ◀
+                &nbsp;&nbsp;
+                ▶ su espada defiende a los desvalidos ◀
+                &nbsp;&nbsp;
+                ▶ su fuerza sostiene a los débiles ◀
+                &nbsp;&nbsp;
+                ▶ su palabra solo dice la verdad ◀
+                &nbsp;&nbsp;
+                ▶ su ira aniquila al malvado ◀
+            </div>
         </div>
     </div>
+
+    <!-- Parar las frases. Algo que se mueve solo y no para nunca marea a
+         mucha gente y hace imposible leer lo de al lado a quien tiene
+         problemas de atención o de visión, así que tiene que haber una
+         forma de pararlo a la vista, no solo en los ajustes del sistema
+         (que ya se respetan: con "reducir movimiento" puesto esto no se
+         mueve, y entonces el botón sobra y lo esconde frases.js).
+         Lo pone a mano el HTML y no el script para que exista aunque el
+         JavaScript falle.
+         Sin aria-pressed a propósito: lo que cambia es lo que hace el
+         botón ("parar" / "seguir"), y eso ya lo dice su nombre. Un
+         "parar" marcado como pulsado se lee al revés de lo que hace. -->
+    <button class="quotes-pausa" type="button" data-quotes-pausa
+            aria-label="parar las frases">
+        <span class="quotes-pausa-icono" aria-hidden="true">❚❚</span>
+        <span class="quotes-pausa-texto">parar</span>
+    </button>
 </div>

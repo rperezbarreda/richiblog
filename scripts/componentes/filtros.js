@@ -49,6 +49,19 @@ montarFiltros();
 // acabar de pintar.
 document.addEventListener("filtros:actualizar", montarFiltros);
 
+// Se ha escrito en el buscador (scripts/componentes/buscador.js). Él no
+// esconde nada: avisa, y se vuelve a repartir lo que se ve desde aquí,
+// que es donde vive esa decisión. Sin montar otra vez los botones: las
+// categorías son las mismas, y remontarlos perdería lo que hubiera
+// puesto.
+function pasaElBuscador(item) {
+    return window.buscador ? window.buscador.pasa(item) : true;
+}
+
+document.addEventListener("buscar:cambiado", () => {
+    document.querySelectorAll("[data-filtros]").forEach((caja) => pintarFiltro(caja, false));
+});
+
 function montarFiltros() {
     document.querySelectorAll("[data-filtros]").forEach((caja) => {
         const items = elementosFiltrables(caja);
@@ -154,10 +167,17 @@ function pintarFiltro(caja, cerrar) {
 
     // Se suman, no se cruzan: cada elemento lleva UNA categoría, así que
     // cruzarlas no dejaría nunca nada a la vista.
+    //
+    // El buscador es la otra condición, y con la categoría se CRUZA: con
+    // "mapas" puesto y "bosque" escrito sale lo que sea un mapa Y lleve
+    // "bosque". Quien esconde es esto y solo esto —el buscador no toca
+    // ningún hidden— porque si los dos escondieran por su cuenta, el
+    // último en pasar desharía lo del otro.
     const items = elementosFiltrables(caja);
     let visibles = 0;
     items.forEach((item) => {
-        const fuera = puestas.size !== 0 && !puestas.has(categoriaDe(item));
+        const fuera =
+            (puestas.size !== 0 && !puestas.has(categoriaDe(item))) || !pasaElBuscador(item);
         item.hidden = fuera;
         if (!fuera) {
             visibles += 1;
@@ -175,7 +195,13 @@ function pintarFiltro(caja, cerrar) {
     // hueco de la categoría en blanco.
     const vacio = document.querySelector("[data-filtros-vacio]");
     if (vacio) {
-        const filtrando = puestas.size !== 0;
+        // Y solo cuando no se está buscando nada: si la página se ha
+        // quedado vacía por lo que se ha escrito, quien lo explica es la
+        // cuenta del buscador ("ningún relato con «zzz»"), y un
+        // "todavía no hay nada en «microrelato»" al lado diría algo que
+        // no es verdad — haberlos, los puede haber.
+        const buscando = !!(window.buscador && window.buscador.texto);
+        const filtrando = puestas.size !== 0 && !buscando;
         vacio.hidden = visibles !== 0 || !filtrando;
         vacio.textContent =
             visibles === 0 && filtrando
@@ -191,6 +217,12 @@ function pintarFiltro(caja, cerrar) {
         cerrarDesplegable(caja);
     }
     guardarFiltroEnUrl([...puestas]);
+
+    // Se ha cambiado de categoría, así que lo que se ve es otra cosa:
+    // el buscador vuelve a resaltar y a poner su cuenta al día.
+    if (window.buscador) {
+        window.buscador.repasar();
+    }
 
     // Quien quiera enseñar u ocultar algo según el filtro puesto —las
     // tarjetas de los retos, en el listado de relatos— se engancha

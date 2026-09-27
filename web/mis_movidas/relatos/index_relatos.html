@@ -58,23 +58,24 @@
          cuando cambia el archivo, y es lo que hace que al subir a
          Neocities se vea el cambio en vez de la versión guardada en la
          caché del navegador. -->
-    <link rel="stylesheet" href="/estilos/base.css?v=369ab20d">
+    <link rel="stylesheet" href="/estilos/base.css?v=002e74f6">
     <link rel="stylesheet" href="/estilos/base.responsive.css?v=623f6381">
     <link rel="stylesheet" href="/estilos/componentes/visor-imagenes.css?v=4ad3b842">
     <link rel="stylesheet" href="/estilos/componentes/aviso.css?v=5e4cd612">
     <link rel="stylesheet" href="/estilos/componentes/aviso.responsive.css?v=7ca39f22">
     <link rel="stylesheet" href="/estilos/componentes/cabecera-ventana.css?v=abe3c1d9">
     <link rel="stylesheet" href="/estilos/componentes/subir.css?v=0d5ba8b4">
-    <link rel="stylesheet" href="/estilos/paginas/relatos.css?v=606d6920">
+    <link rel="stylesheet" href="/estilos/paginas/relatos.css?v=03ec97a8">
     <link rel="stylesheet" href="/estilos/paginas/relatos.responsive.css?v=0275f085">
     <link rel="stylesheet" href="/estilos/componentes/filtros.css?v=ae17435b">
     <link rel="stylesheet" href="/estilos/componentes/filtros.responsive.css?v=2aa46f2c">
+    <link rel="stylesheet" href="/estilos/componentes/buscador.css?v=fe35be15">
     <link rel="stylesheet" href="/estilos/paginas/reto.css?v=23fe747f">
     <link rel="stylesheet" href="/estilos/paginas/reto.responsive.css?v=7da46ec8">
     <link rel="stylesheet" href="/estilos/componentes/barra-lateral.css?v=14bb37f0">
     <link rel="stylesheet" href="/estilos/componentes/barra-lateral.responsive.css?v=a73e7469">
     <!-- ==== fin del CSS ==== -->
-    <script src="/scripts/cargador-scripts.js?v=1e5ac5d0"></script>
+    <script src="/scripts/cargador-scripts.js?v=af548fe4"></script>
   </head>
 <body>
     <!-- ==== SIDEBAR / NAVEGACIÓN ==== -->
@@ -89,6 +90,46 @@
                 <em>relatos</em>
             </h1>
             <p class="relatos-page-intro">Relatos cortos que voy escribiendo, al margen de mis partidas de rol. Cada uno se lee entero en su propia página, como las entradas del blog.</p>
+
+            <!-- El buscador. Filtra mientras se escribe lo que ya está
+                 en la página, sin pedir nada al servidor ni usar
+                 ninguna librería. Mira el título, la fecha y la etiqueta de cada relato, sin
+                 tildes ni mayúsculas.
+                 Lo monta scripts/componentes/buscador.js —el mismo del
+                 archivo del blog— y lo que mira se le dice aquí, en
+                 los data-buscar-*. Se suma al filtro de abajo: con una
+                 categoría puesta y algo escrito, se piden las dos
+                 cosas a la vez.
+
+                 Es un <form> para que en el móvil el teclado saque la
+                 tecla de buscar y para que los lectores de pantalla lo
+                 anuncien como un buscador (role="search"); el envío se
+                 cancela, porque no hay nada que enviar. -->
+            <form class="buscar" role="search" data-buscar
+                  data-buscar-items="#relatos-list .entry-preview"
+                  data-buscar-en=".entry-preview-title, .entry-preview-date, .entry-tag"
+                  data-buscar-nombre="relato|relatos|ningún">
+                <label class="buscar-label" for="buscar-campo">buscar:</label>
+                <div class="buscar-caja">
+                    <input class="buscar-campo" type="search" id="buscar-campo"
+                           name="buscar" placeholder="título, etiqueta o fecha"
+                           autocomplete="off" spellcheck="false"
+                           aria-describedby="buscar-cuenta">
+                    <!-- El ✕ del navegador en un type="search" no sale en
+                         todos (ni en Firefox, ni en el móvil), así que el
+                         botón de limpiar es nuestro. Solo aparece cuando
+                         hay algo escrito. -->
+                    <button class="buscar-limpiar" type="button" data-buscar-limpiar hidden>
+                        <span aria-hidden="true">✕</span>
+                        <span class="visually-hidden">Limpiar la búsqueda</span>
+                    </button>
+                </div>
+                <!-- Cuántos han quedado. role="status" para que un lector
+                     de pantalla lo diga al terminar de escribir, sin
+                     interrumpir cada letra. -->
+                <p class="buscar-cuenta" id="buscar-cuenta" role="status"
+                   data-buscar-cuenta></p>
+            </form>
 
             <!-- Igual que en el portfolio de rol: los botones los pone
                  scripts/componentes/filtros.js con las subcategorías que

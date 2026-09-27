@@ -71,6 +71,20 @@ async function initializeOtrasEntradas() {
         const sinExtension = (ruta) =>
             (ruta || "").replace(/\.html$/, "").replace(/\/+$/, "");
         const aqui = sinExtension(window.location.pathname);
+
+        // De paso que tenemos el listado en la mano, se le pasa a
+        // scripts/componentes/lectura.js la ficha de ESTA entrada: ahí
+        // está el tiempo de lectura, y así no hay que pedir el mismo
+        // archivo dos veces en la misma página. Se avisa antes de nada
+        // más, porque abajo puede que esta función se vaya sin llegar al
+        // final (cuando no hay ninguna otra entrada que ofrecer).
+        const suya = items.find((item) => sinExtension(item.url) === aqui);
+        if (suya) {
+            document.dispatchEvent(
+                new CustomEvent("lectura:entrada", { detail: suya })
+            );
+        }
+
         const otras = items
             .filter((item) => (fuente.filtro ? fuente.filtro(item) : true))
             .filter((item) => sinExtension(item.url) !== aqui)
@@ -118,10 +132,26 @@ function otraAHtml(item) {
         '<li class="entry-preview">' +
         `<a class="entry-preview-link" href="${escapeOtras(urlSeguraOtras(item.url))}">` +
         `<span class="entry-preview-title">${escapeOtras(item.title || "Sin título")}</span>` +
+        '<span class="entry-preview-meta">' +
         `<time class="entry-preview-date" datetime="${escapeOtras(fechaISOOtras(item.date))}">${formatoFechaOtras(item.date)}</time>` +
+        minutosOtras(item) +
+        "</span>" +
         "</a>" +
         "</li>"
     );
+}
+
+// El tiempo de lectura lo calcula herramientas/generar-posts.py al
+// escribir el listado (cuenta las palabras del cuerpo de la entrada),
+// así que aquí solo se pinta. Las cosas sin texto que leer —las fichas
+// del portfolio de rol, que son enlaces a Ko-fi— no traen el dato y no
+// enseñan nada.
+function minutosOtras(item) {
+    const minutos = Number(item && item.minutos);
+    if (!minutos || minutos < 1) {
+        return "";
+    }
+    return `<span class="entry-preview-minutos">${minutos} min</span>`;
 }
 
 // "25-06-2025" -> "2025-06-25", que es como entienden una fecha un

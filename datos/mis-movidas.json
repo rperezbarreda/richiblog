@@ -18,13 +18,15 @@
         "category": "relatos",
         "subcategory": "relato corto",
         "date": "15-09-2025",
-        "url": "/web/mis_movidas/relatos/aire_para_dos.html"
+        "url": "/web/mis_movidas/relatos/aire_para_dos.html",
+        "minutos": 8
     },
     {
         "title": "Pequeño insecto",
         "category": "relatos",
         "subcategory": "relato corto",
         "date": "25-06-2025",
-        "url": "/web/mis_movidas/relatos/pequenyo_insecto.html"
+        "url": "/web/mis_movidas/relatos/pequenyo_insecto.html",
+        "minutos": 5
     }
 ]

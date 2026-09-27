@@ -20,7 +20,6 @@
     padding: 24px 4%;
 }
 
-.rol-page > .home-title,
 .rol-page-cabecera,
 .rol-page .filtros {
     flex-shrink: 0;
@@ -28,22 +27,33 @@
 
 /* El hueco entre bloques lo pone el gap de la columna: con los
    márgenes de serie del h1 encima quedaba el doble de separación. */
-.rol-page > .home-title {
+.rol-page .home-title {
     margin: 0;
 }
 
-/* Intro y aviso uno al lado del otro. En vertical se llevaban 130px de
-   alto por sí solos; en fila ocupan lo que el más alto de los dos. */
+/* El título con su intro a la izquierda y el aviso a la derecha. Antes
+   el aviso iba debajo del título, a lo ancho de la página: se llevaba
+   una franja enorme por encima del portfolio y era lo primero que se
+   veía al entrar, por delante de las propias cosas publicadas. Al lado
+   del título ocupa alto que de todas formas gasta el título, y el
+   portfolio empieza mucho más arriba. */
 .rol-page-cabecera {
     display: flex;
     flex-wrap: wrap;
-    align-items: flex-start;
-    gap: 16px 28px;
+    align-items: center;
+    gap: 16px 32px;
+}
+
+/* La columna de la izquierda. El 380 de base es para que el aviso no
+   se quede en una tira estrechísima: por debajo de eso, los dos se
+   apilan solos. */
+.rol-page-titular {
+    flex: 1 1 380px;
+    min-width: 0;
 }
 
 .rol-page-intro {
-    flex: 1 1 320px;
-    margin: 0;
+    margin: 8px 0 0;
     max-width: 640px;
     color: var(--muted);
     font-size: 1rem;
@@ -67,13 +77,23 @@
 /* Aviso del modelo "paga lo que quieras": una nota aparte, no un
    enlace suelto dentro del párrafo de intro, para que se note a
    simple vista sin tener que leer todo el texto. */
-.rol-page-disclaimer {
-    flex: 1 1 360px;
-    margin: 0;
-    max-width: 640px;
-    padding: 14px 18px;
-    border-left: 3px solid var(--yellow);
+/* El aviso va en una ventanita falsa como las demás tarjetas del sitio
+   (aviso.txt), con su cabecera y sus botones −■✕. Antes era un párrafo
+   con una raya amarilla a la izquierda y no se parecía a nada del resto
+   de la web. El padding de 16px es el que esperan los márgenes
+   negativos de .recent-entries-header: si se cambia aquí, hay que
+   tocarlo también allí o la cabecera deja de encajar con los bordes. */
+.rol-page-aviso {
+    flex: 1 1 340px;
+    max-width: 560px;
+    padding: 16px;
     background: var(--purple-lighter);
+    border: 3px solid var(--yellow);
+    box-shadow: 6px 6px 0 var(--yellow);
+}
+
+.rol-page-disclaimer {
+    margin: 0;
     color: var(--muted);
     font-size: 0.875rem;
     line-height: 1.6;
