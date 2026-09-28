@@ -50,7 +50,7 @@
 (function versionesDeArchivos() {
     const VERSIONES = {
         // ==== generado ====
-        "/fragmentos/barra-lateral.html": "2ed3ac79",
+        "/fragmentos/barra-lateral.html": "049bc769",
         "/fragmentos/frases.html": "81a36459",
         "/scripts/componentes/aviso.js": "7b9fce19",
         "/scripts/componentes/barra-lateral.js": "da4175b8",
@@ -65,15 +65,16 @@
         "/scripts/componentes/rastro-cursor.js": "3ca8334c",
         "/scripts/componentes/subir.js": "2e242c61",
         "/scripts/componentes/teclado-scroll.js": "5847ef8b",
+        "/scripts/componentes/texto-tamano.js": "0ff087da",
         "/scripts/componentes/visor-imagenes.js": "48184405",
         "/scripts/paginas/changelog.js": "b47d27a6",
-        "/scripts/paginas/diario.js": "f2880aea",
-        "/scripts/paginas/entradas-blog.js": "0d73ea30",
+        "/scripts/paginas/diario.js": "a145507e",
+        "/scripts/paginas/entradas-blog.js": "57493648",
         "/scripts/paginas/guestbook-texto.js": "5ef34bf3",
         "/scripts/paginas/guestbook.js": "4d3c0d57",
         "/scripts/paginas/mapa.js": "98984720",
         "/scripts/paginas/novedades.js": "4d11ce1e",
-        "/scripts/paginas/otras-entradas.js": "a1706f7f",
+        "/scripts/paginas/otras-entradas.js": "44aaa9e9",
         "/scripts/paginas/relatos.js": "9307705c",
         "/scripts/paginas/reto.js": "f75ee6a7",
         "/scripts/paginas/rol.js": "eeaebb8f",
@@ -101,6 +102,30 @@
     window.pedirDatos = function (ruta) {
         return fetch(ruta, { cache: "no-cache" });
     };
+})();
+
+// =========================================
+// EL TAMAÑO DEL TEXTO, ANTES DE PINTAR
+// =========================================
+// El mando "Aa" guarda en qué tamaño quiere leerse la web, y hay que
+// ponerlo ANTES del primer pintado: si esperáramos al script del mando
+// (que va con defer, o sea al final), la página se pintaría a tamaño
+// normal y daría un salto al llegar. Es lo mismo que hace el trocito
+// del tema en el <head> de cada página, y por eso vive aquí, que es lo
+// único que se ejecuta pronto y en todas las páginas a la vez.
+//
+// Aquí solo se comprueba que lo guardado esté dentro de lo razonable;
+// la lista de tamaños de verdad está en
+// scripts/componentes/texto-tamano.js, que es quien la maneja.
+(function aplicarTamanoGuardado() {
+    try {
+        var escala = parseFloat(localStorage.getItem("richi-texto"));
+        if (escala >= 0.9 && escala <= 1.5) {
+            document.documentElement.style.setProperty("--escala", escala);
+        }
+    } catch (error) {
+        // Navegando en privado no se puede leer. Se queda el de siempre.
+    }
 })();
 
 (function loadPageScripts() {
@@ -161,6 +186,12 @@
     // página que la tenga (el 404 sale antes, arriba).
     script("/scripts/componentes/gatin-random.js");
     script("/scripts/tema.js");
+    // El mando "Aa" del tamaño del texto: su HTML va con el resto del
+    // armazón, en fragmentos/barra-lateral.html, así que lo lleva
+    // cualquier página que tenga barra lateral. En el 404, que no la
+    // tiene, no sale el mando, pero el tamaño elegido se respeta igual
+    // (lo pone la escala de aquí arriba).
+    script("/scripts/componentes/texto-tamano.js");
     script("/scripts/componentes/botones-ventana.js");
     script("/scripts/componentes/rastro-cursor.js");
     script("/scripts/componentes/chispas-botones.js");

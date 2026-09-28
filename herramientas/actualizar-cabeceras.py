@@ -116,6 +116,9 @@ def hojas_de(ruta):
         # decide el propio CSS), pero lo puede necesitar cualquier
         # página, el 404 incluido.
         "/estilos/componentes/subir.css",
+        # El mando "Aa" que agranda el texto: va flotando en una esquina
+        # de cualquier página.
+        "/estilos/componentes/texto-tamano.css",
     ]
 
     es_portada = ruta in ("/", "/index.html")

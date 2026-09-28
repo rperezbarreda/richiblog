@@ -4,7 +4,7 @@
     position: fixed;
     left: 0;
     top: 0;
-    width: 280px;
+    width: var(--lateral-ancho);
     height: 100vh;
     padding: 15px 20px;
     display: flex;
@@ -91,6 +91,10 @@ nav a {
     display: block;
     width: 100%;
     box-sizing: border-box;
+    /* Última red: si una palabra sola no cabe (con el texto muy grande
+       en una pantalla muy estrecha, "accesibilidad"), que se parta en
+       dos líneas en vez de salirse y quedar cortada a medias. */
+    overflow-wrap: break-word;
     padding: 6px 10px 6px 1.15rem;
     border-radius: 0;
     color: var(--muted);
@@ -377,6 +381,16 @@ nav a.active::before {
 }
 
 /* SIDEBAR — TEMA */
+
+/* La caja que junta el botón del tema y el del tamaño del texto. En
+   escritorio es como si no existiera —display: contents— y cada uno
+   vuelve a ser hijo directo de la barra, como toda la vida: el del tema
+   aquí abajo y el del tamaño flotando en la esquina de arriba
+   (position: fixed). En móvil sí es una caja de verdad y los pone en
+   fila; eso está en barra-lateral.responsive.css. */
+.sidebar-ajustes {
+    display: contents;
+}
 
 .theme-toggle {
     display: inline-flex;

@@ -281,6 +281,58 @@
   portada, que si no habría que tirar de la flecha del navegador.
 
 
+  EL TAMAÑO DEL TEXTO
+
+  Arriba a la derecha hay un botón con una "Aa" que se abre con un + y
+  un −: hacen el texto de TODA la web más grande o más pequeño, en cinco
+  pasos del 90% al 150%. Lo elegido se guarda en el navegador de quien
+  lo pulsa y sigue puesto la próxima vez que entre.
+
+  En móvil no flota en la esquina: baja al final del menú, en fila con
+  el botón del tema, porque son las dos cosas que se tocan para ver
+  mejor la web. Ahí el desplegable del + y el − sale hacia arriba, que
+  abajo no hay sitio. El HTML es el mismo en los dos casos (está en
+  fragmentos/barra-lateral.html, dentro de .sidebar-ajustes); lo único
+  que cambia es el CSS.
+
+  Por dentro no toca ni un tamaño de letra: cambia una sola variable,
+  --escala, por la que se multiplica el tamaño de raíz (estilos/base.css).
+  Como los tamaños del sitio van en rem, con eso crece todo solo. Lo
+  llevan scripts/componentes/texto-tamano.js (el mando) y
+  scripts/cargador-scripts.js (que deja puesta la escala antes del
+  primer pintado, para que la página no dé un salto al cargar).
+
+  SI AÑADES CSS NUEVO. Los tamaños, en rem, y ya está. Lo único que hay
+  que pensar son los tamaños en PÍXELES que tengan que crecer con el
+  texto: esos se multiplican a mano, como --barra-alto (la barra del
+  móvil), --lateral-ancho (el menú) o el mínimo de las casillas de
+  estadísticas de "sobre mí". Y al revés: lo que NO debe crecer porque
+  es un dibujo y no texto —el gatete del 404— se divide por --escala.
+
+  LO QUE SE COMPROBÓ. Las páginas, en los cinco tamaños, a 1920, 1440,
+  1280, 900, 390 y 320: que no se corte nada, que no haya que arrastrar
+  de lado y que con el tamaño de siempre no se mueva ni un píxel de lo
+  que ya estaba medido.
+
+
+  EL HUECO DE ABAJO EN MÓVIL
+
+  En muchos teléfonos la tira de botones de navegación (atrás, inicio,
+  recientes) o la barra de gestos se queda por encima de la página y
+  tapa lo que haya al final. Para eso está --hueco-abajo (en
+  estilos/base.css): en escritorio vale 0 y en móvil, 16px o lo que diga
+  el teléfono si sabe decirlo (env(safe-area-inset-bottom)).
+
+  Lo usa el <body> como relleno de abajo —así todo lo que va en el flujo
+  termina antes— y, a mano, las cosas que flotan fijas y no están en ese
+  flujo: el botón de volver arriba, el aviso emergente y el visor de
+  imágenes. Si añades algo pegado al borde de abajo en móvil, súmaselo.
+
+  De paso, los altos de pantalla pasaron de 100vh a 100dvh: vh cuenta la
+  pantalla entera aunque la barra del navegador esté tapando un trozo, y
+  dvh cuenta lo que se ve de verdad.
+
+
   EL TIEMPO DE LECTURA
 
   No hay que hacer nada: generar-posts.py cuenta las palabras del
@@ -494,6 +546,11 @@
                         y lista lo que no usa nadie. No cambia nada.
                         Con --externos mira también los enlaces de
                         fuera.
+  nombres-repetidos.py  busca funciones con el mismo nombre en dos
+                        .js distintos. Aquí los scripts comparten
+                        el ámbito global: dos con el mismo nombre
+                        se pisan y gana el último que se cargue.
+                        No cambia nada. Pásalo si tocas el JS.
 
   EL CAJÓN COMPARTIDO
   -------------------

@@ -417,6 +417,9 @@ function listaDelMes(mes) {
                 '<span class="entry-preview-title">' +
                 escapeDiario(item.title || "Sin título") +
                 "</span>" +
+                // La fecha y los minutos, en la misma línea, igual que en
+                // el archivo del blog y en "sigue leyendo".
+                '<span class="entry-preview-meta">' +
                 // <time> con la fecha también en formato de máquina: es
                 // lo que hace que se entienda como fecha y no como texto.
                 '<time class="entry-preview-date" datetime="' +
@@ -427,9 +430,22 @@ function listaDelMes(mes) {
                     month: "short",
                     year: "numeric",
                 }) +
-                "</time></a></li>"
+                "</time>" +
+                minutosDiario(item) +
+                "</span></a></li>"
         )
         .join("");
+}
+
+// Lo que se tarda en leer la entrada. Lo cuenta
+// herramientas/generar-posts.py al escribir el listado, así que aquí
+// solo se pinta; si una entrada no lo trae, no sale nada.
+function minutosDiario(item) {
+    const minutos = Number(item && item.minutos);
+    if (!minutos || minutos < 1) {
+        return "";
+    }
+    return '<span class="entry-preview-minutos">' + minutos + " min</span>";
 }
 
 // getDay() cuenta 0 = domingo; aquí la semana empieza en lunes.

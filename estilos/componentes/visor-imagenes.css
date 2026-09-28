@@ -62,7 +62,9 @@ body.lightbox-open {
 
 @media (max-width: 640px) {
     .lightbox-overlay {
-        padding: 70px 16px 24px;
+        /* Los 24 de abajo, más el hueco de los botones del teléfono
+           (ver --hueco-abajo en estilos/base.css). */
+        padding: 70px 16px calc(24px + var(--hueco-abajo));
     }
 
     .lightbox-close {

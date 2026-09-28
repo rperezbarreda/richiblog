@@ -1,5 +1,16 @@
 [
     {
+        "fecha": "28-09-2026",
+        "titulo": "Tamaño del texto y arreglos de lectura",
+        "cosas": [
+            "Botón nuevo «Aa» para agrandar el texto de toda la web: se abre con un + y un − y va en cinco pasos, del 90% al 150%. El tamaño elegido se queda guardado en el localStorage. En escritorio flota arriba a la derecha y en el móvil está al final del menú, al lado del botón del tema.",
+            "La ventana de «sigue leyendo» del final de una entrada ofrece ahora dos entradas al azar en vez de las cuatro más nuevas: así no salen siempre las mismas y lo de hace meses también asoma.",
+            "La foto que acompaña a una entrada ya no se recorta cuando la ventana es baja o hay mucho zoom: se ve entera y lo que no cabe se alcanza desplazando esa columna.",
+            "En el móvil se deja un hueco libre al final de la pantalla: en muchos teléfonos los botones de navegación tapaban la última tira de la página.",
+            "En el diario también se ve lo que se tarda en leer cada entrada, como en el resto de listados."
+        ]
+    },
+    {
         "fecha": "27-09-2026",
         "titulo": "Creación del changelog y mapa del sitio",
         "cosas": [

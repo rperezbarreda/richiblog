@@ -65,10 +65,47 @@
         <div class="gatin-random-body" data-gatin-body></div>
     </div>
 
-    <button id="theme-toggle" class="theme-toggle" type="button" aria-pressed="false">
-        <span class="theme-toggle-icon" aria-hidden="true">☾</span>
-        <span class="theme-toggle-text">MODO OSCURO</span>
-    </button>
+    <!-- ==== AJUSTES: TEMA Y TAMAÑO DEL TEXTO ====
+         En móvil estos dos van juntos, en fila, al final del menú: son
+         las dos cosas que se tocan para ver mejor la web y se buscan en
+         el mismo sitio.
+
+         En escritorio esta caja es display: contents —o sea, como si no
+         existiera— y cada uno vuelve a su sitio de siempre: el del tema
+         al final de la barra y el del tamaño flotando en la esquina de
+         arriba a la derecha (position: fixed, ver
+         estilos/componentes/texto-tamano.css). -->
+    <div class="sidebar-ajustes">
+        <button id="theme-toggle" class="theme-toggle" type="button" aria-pressed="false">
+            <span class="theme-toggle-icon" aria-hidden="true">☾</span>
+            <span class="theme-toggle-text">MODO OSCURO</span>
+        </button>
+
+        <div class="tamano" data-tamano>
+            <button class="tamano-boton" type="button" data-tamano-boton
+                    aria-expanded="false" aria-controls="tamano-panel">
+                <span class="tamano-aa" aria-hidden="true">Aa</span>
+                <span class="visually-hidden">Tamaño del texto</span>
+            </button>
+
+            <div class="tamano-panel" id="tamano-panel" data-tamano-panel hidden>
+                <button class="tamano-paso" type="button" data-tamano-menos aria-disabled="false">
+                    <span aria-hidden="true">−</span>
+                    <span class="visually-hidden">Texto más pequeño</span>
+                </button>
+                <!-- Al cambiar de tamaño esto se lee solo, que si no el único
+                     aviso de que ha pasado algo es que la letra cambia (y quien
+                     lo pulsa puede no estar viéndola). -->
+                <p class="tamano-valor" role="status">
+                    <span class="visually-hidden">Texto al </span><span data-tamano-valor>100%</span>
+                </p>
+                <button class="tamano-paso" type="button" data-tamano-mas aria-disabled="false">
+                    <span aria-hidden="true">+</span>
+                    <span class="visually-hidden">Texto más grande</span>
+                </button>
+            </div>
+        </div>
+    </div>
 
     <button id="cursor-trail-toggle" class="theme-toggle" type="button" aria-pressed="true">
         <span class="theme-toggle-icon" aria-hidden="true">✦</span>

@@ -70,6 +70,33 @@
 }
 
 :root {
+    /* CUÁNTO SE AGRANDA EL TEXTO DE TODA LA WEB.
+       La cambia el mando "Aa" de arriba a la derecha (ver
+       scripts/componentes/texto-tamano.js) y la deja puesta antes del
+       primer pintado scripts/cargador-scripts.js, leyendo lo que se
+       guardó la última vez. Vale 1 mientras nadie la toque.
+
+       Multiplica el tamaño de raíz, y como aquí los tamaños van en rem
+       —los 171 font-size del CSS menos uno—, con eso crece todo. Lo
+       poco que va en píxeles y tiene que seguirla lo hace a mano, con
+       un calc: de momento, la barra fija del móvil. */
+    --escala: 1;
+    /* Lo que mide la barra amarilla del móvil. Sale de aquí, y no de un
+       60px suelto en cada sitio, porque la barra tiene que crecer con
+       el texto y hay cuatro cosas que se colocan justo debajo de ella. */
+    --barra-alto: calc(60px * var(--escala));
+    /* Y lo que mide de ancho la barra lateral. Igual: con el texto al
+       150% en 280px no cabía "accesibilidad" y se cortaba. Multiplicar
+       en vez de poner rem a secas para que con el tamaño de siempre
+       midan exactamente los 280px de toda la vida y no se mueva ni un
+       píxel de lo que ya estaba medido. */
+    --lateral-ancho: calc(280px * var(--escala));
+    /* Hueco que se deja libre abajo del todo. En escritorio, ninguno;
+       en móvil lo pone estilos/base.responsive.css, porque ahí los
+       botones del propio teléfono (atrás, inicio...) se comen la tira
+       de abajo de la pantalla y tapaban lo que hubiera allí. */
+    --hueco-abajo: 0px;
+
     color-scheme: dark;
     --bg-texture: url("/imagenes/dark_bg.webp");
     --purple: #12091c;
@@ -115,13 +142,26 @@ button {
 
 html {
     height: 100%;
-    font-size: 135%;
+    /* 135% del tamaño que tenga puesto el navegador (ojo: NO un tamaño
+       fijo, para que quien lo haya subido en su navegador siga
+       mandando), por lo que diga el mando "Aa". */
+    font-size: calc(135% * var(--escala));
     scroll-behavior: smooth;
     scroll-padding-top: 30px;
 }
 
 body {
+    /* dvh es el alto que se ve DE VERDAD: en un móvil, vh cuenta la
+       pantalla entera aunque la barra del navegador esté tapando un
+       trozo, y el final de la página se quedaba debajo. El 100vh de
+       antes se queda como respaldo para navegadores viejos, que
+       ignoran la línea siguiente. */
     height: 100vh;
+    height: 100dvh;
+    /* Y por debajo de eso, el hueco de los botones del teléfono. Como
+       todo el sitio va con box-sizing: border-box, este relleno le come
+       alto al contenido en vez de empujarlo fuera. */
+    padding-bottom: var(--hueco-abajo);
     overflow: hidden;
     display: flex;
     flex-direction: column;
@@ -260,8 +300,11 @@ main {
     position: relative;
     flex: 1 1 auto;
     min-height: 0;
-    margin: 36px 44px 28px 316px;
-    width: calc(100% - 360px);
+    /* 36px de aire entre la barra lateral y el marco, y 44 por la
+       derecha: los mismos de siempre, pero contados desde el ancho de
+       la barra, que ahora crece con el texto. */
+    margin: 36px 44px 28px calc(var(--lateral-ancho) + 36px);
+    width: calc(100% - var(--lateral-ancho) - 80px);
     background: var(--surface);
     border: 3px solid var(--yellow);
     border-radius: 0;
@@ -371,7 +414,11 @@ section {
     letter-spacing: -6px;
 }
 
+/* Con el texto al 150% en una pantalla de 320 la palabra más larga no
+   cabía en la caja y se comía 8px por la derecha. Que se parta antes de
+   salirse. */
 .bio-description {
+    overflow-wrap: break-word;
     color: var(--muted);
     font-size: 0.875rem;
     line-height: 1.8;

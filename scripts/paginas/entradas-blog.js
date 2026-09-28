@@ -348,7 +348,7 @@ function pintarFiltroEtiquetas(archiveRoot, cerrar) {
         cerrarDesplegableTags(caja);
     }
 
-    guardarFiltroEnUrl([...ETIQUETAS_PUESTAS]);
+    guardarEtiquetaEnUrl([...ETIQUETAS_PUESTAS]);
 }
 
 // Esconder y enseñar entradas es lo mismo para las etiquetas y para el
@@ -579,7 +579,12 @@ function cerrarDesplegableTags(caja) {
 // que el enlace se pueda copiar o recargar con la misma vista. Sin
 // ninguna, el parámetro desaparece en vez de quedarse vacío. El ?buscar=
 // lo pone el componente del buscador, cada uno toca solo el suyo.
-function guardarFiltroEnUrl(tags) {
+// Se llama así, y no guardarFiltroEnUrl, porque ese nombre ya lo usa
+// scripts/componentes/filtros.js para lo suyo (el ?cat= de rol y
+// relatos). Aquí todos los scripts comparten el mismo global: dos
+// funciones con el mismo nombre se pisan aunque hoy no coincidan en
+// ninguna página. Lo comprueba herramientas/nombres-repetidos.py.
+function guardarEtiquetaEnUrl(tags) {
     if (!window.history || !window.history.replaceState) {
         return;
     }

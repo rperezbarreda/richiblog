@@ -42,10 +42,10 @@
 
     /* Mismo criterio que .blog-post-page en móvil (ver
        blog.responsive.css): nada de fondo con textura alrededor, la
-       entrada llega hasta los bordes, con solo los 60px de arriba
+       entrada llega hasta los bordes, con solo el alto de la barra
        para no meterse debajo de la barra superior fija. */
     body:has(.relato-page) main {
-        margin: 60px 0 0 0;
+        margin: var(--barra-alto) 0 0 0;
         width: 100%;
     }
 

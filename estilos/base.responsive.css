@@ -1,6 +1,17 @@
 /* RESPONSIVE — layout general (main, quotes-bar, section, título grande) */
 
 @media (max-width: 860px) {
+    /* EL HUECO DE ABAJO. En muchos teléfonos la tira de botones de
+       navegación (atrás, inicio, recientes) o la barra de gestos se
+       queda por encima de la página y tapa lo que haya al final. Con
+       esto, todo termina un poco antes y no se pierde nada.
+       El env() es para los móviles que sí saben decir cuánto ocupa esa
+       tira; el 16px es el suelo para los que no dicen nada, que son la
+       mayoría. */
+    :root {
+        --hueco-abajo: max(env(safe-area-inset-bottom, 0px), 16px);
+    }
+
     main {
         margin: 76px 16px 16px 16px;
         width: auto;
@@ -12,7 +23,7 @@
     }
 
     section {
-        padding: 60px 6%;
+        padding: var(--barra-alto) 6%;
     }
 
     main.standalone-main {

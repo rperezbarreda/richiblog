@@ -6,9 +6,13 @@
         left: 16px;
         right: 16px;
         top: auto;
-        bottom: 16px;
+        /* Los 16 de siempre, más el hueco de los botones del teléfono
+           (ver --hueco-abajo en estilos/base.css). */
+        bottom: calc(16px + var(--hueco-abajo));
         width: auto;
-        /* 60 de la barra superior fija + 16 de margen abajo + 16 de aire */
-        max-height: calc(100vh - 92px);
+        /* 60 de la barra superior fija + 16 de margen abajo + 16 de
+           aire, y lo que ocupe ese hueco. En dvh, que es el alto que se
+           ve de verdad en un móvil. */
+        max-height: calc(100dvh - 92px - var(--hueco-abajo));
     }
 }

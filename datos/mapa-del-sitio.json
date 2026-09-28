@@ -8,20 +8,12 @@
         "resumen": "671ec40d"
     },
     {
-        "url": "/web/blog/2026/index_2026.html",
-        "titulo": "Blog 2026",
+        "url": "/web/blog/2026/septiembre/la-tali-casi-hace-que-me-de-un-ataque-de-panico.html",
+        "titulo": "La Tali casi hace que me dé un ataque de pánico",
         "seccion": "blog",
-        "fecha": "20-09-2026",
-        "actualizada": "26-09-2026",
-        "resumen": "75283997"
-    },
-    {
-        "url": "/web/blog/diario.html",
-        "titulo": "Diario",
-        "seccion": "blog",
-        "fecha": "20-09-2026",
-        "actualizada": "26-09-2026",
-        "resumen": "e680f14e"
+        "fecha": "28-09-2026",
+        "actualizada": "28-09-2026",
+        "resumen": "8d269718"
     },
     {
         "url": "/web/blog/2026/septiembre/semanita-de-estar-solo-en-casa.html",
@@ -48,6 +40,22 @@
         "resumen": "83f76f5b"
     },
     {
+        "url": "/web/blog/2026/index_2026.html",
+        "titulo": "Blog 2026",
+        "seccion": "blog",
+        "fecha": "20-09-2026",
+        "actualizada": "26-09-2026",
+        "resumen": "75283997"
+    },
+    {
+        "url": "/web/blog/diario.html",
+        "titulo": "Diario",
+        "seccion": "blog",
+        "fecha": "20-09-2026",
+        "actualizada": "26-09-2026",
+        "resumen": "e680f14e"
+    },
+    {
         "url": "/web/blog/2026/septiembre/puto-tebas-de-los-cojones.html",
         "titulo": "Puto Tebas de los cojones",
         "seccion": "blog",
@@ -59,17 +67,9 @@
         "url": "/web/blog/2026/septiembre/por-fin-pongo-en-marcha-esto.html",
         "titulo": "Por fin pongo en marcha esto",
         "seccion": "blog",
-        "fecha": "20-09-2026",
+        "fecha": "19-09-2026",
         "actualizada": "25-09-2026",
         "resumen": "9093229b"
-    },
-    {
-        "url": "/web/mis_movidas/relatos/index_relatos.html",
-        "titulo": "Relatos",
-        "seccion": "relatos",
-        "fecha": "20-09-2026",
-        "actualizada": "26-09-2026",
-        "resumen": "35ba1e85"
     },
     {
         "url": "/web/mis_movidas/relatos/writeober26/index_writeober26.html",
@@ -80,10 +80,18 @@
         "resumen": "297b17a4"
     },
     {
+        "url": "/web/mis_movidas/relatos/index_relatos.html",
+        "titulo": "Relatos",
+        "seccion": "relatos",
+        "fecha": "20-09-2026",
+        "actualizada": "26-09-2026",
+        "resumen": "35ba1e85"
+    },
+    {
         "url": "/web/mis_movidas/relatos/aire_para_dos.html",
         "titulo": "Aire para dos",
         "seccion": "relatos",
-        "fecha": "20-09-2026",
+        "fecha": "15-09-2025",
         "actualizada": "25-09-2026",
         "resumen": "4c584b1d"
     },
@@ -91,7 +99,7 @@
         "url": "/web/mis_movidas/relatos/pequenyo_insecto.html",
         "titulo": "Pequeño insecto",
         "seccion": "relatos",
-        "fecha": "20-09-2026",
+        "fecha": "25-06-2025",
         "actualizada": "25-06-2026",
         "resumen": "97aadc07"
     },
@@ -128,28 +136,12 @@
         "resumen": "ed3f1909"
     },
     {
-        "url": "/web/accesibilidad/accesibilidad.html",
-        "titulo": "Accesibilidad",
-        "seccion": "otras",
-        "fecha": "20-09-2026",
-        "actualizada": "25-09-2026",
-        "resumen": "59eff6aa"
-    },
-    {
         "url": "/web/changelog/changelog.html",
         "titulo": "Changelog",
         "seccion": "otras",
         "fecha": "27-09-2026",
-        "actualizada": "27-09-2026",
+        "actualizada": "28-09-2026",
         "resumen": "8a98e362"
-    },
-    {
-        "url": "/web/contacto/contacto.html",
-        "titulo": "Contacto y guestbook",
-        "seccion": "otras",
-        "fecha": "20-09-2026",
-        "actualizada": "25-09-2026",
-        "resumen": "bcd2d888"
     },
     {
         "url": "/web/mapa/mapa.html",
@@ -158,6 +150,22 @@
         "fecha": "27-09-2026",
         "actualizada": "27-09-2026",
         "resumen": "a31171a9"
+    },
+    {
+        "url": "/web/accesibilidad/accesibilidad.html",
+        "titulo": "Accesibilidad",
+        "seccion": "otras",
+        "fecha": "20-09-2026",
+        "actualizada": "28-09-2026",
+        "resumen": "ee75e391"
+    },
+    {
+        "url": "/web/contacto/contacto.html",
+        "titulo": "Contacto y guestbook",
+        "seccion": "otras",
+        "fecha": "20-09-2026",
+        "actualizada": "25-09-2026",
+        "resumen": "bcd2d888"
     },
     {
         "url": "/web/sobre_mi/sobre_mi.html",

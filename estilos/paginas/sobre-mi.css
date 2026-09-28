@@ -99,7 +99,11 @@
    otra en móvil. */
 .stats-row {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(118px, 1fr));
+    /* El mínimo de cada columna crece con el texto: si no, al poner el
+       texto al 150% las casillas seguían midiendo 118px y "constitución"
+       se cortaba a "constitució". Multiplicado por la escala para que
+       con el tamaño de siempre midan exactamente los 118px medidos. */
+    grid-template-columns: repeat(auto-fit, minmax(calc(118px * var(--escala)), 1fr));
     gap: 12px;
     list-style: none;
 }

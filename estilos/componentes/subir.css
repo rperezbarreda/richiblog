@@ -10,7 +10,10 @@
     .subir {
         position: fixed;
         right: 16px;
-        bottom: 16px;
+        /* Los 16 de siempre, más el hueco de los botones del teléfono
+           (ver --hueco-abajo en estilos/base.css): si no, en algunos
+           móviles este botón caía justo encima de ellos. */
+        bottom: calc(16px + var(--hueco-abajo));
         /* Por debajo del aviso emergente (500) y del visor (600), que en
            móvil ocupan la parte de abajo entera, y por encima del resto.
            Así no se monta encima de un aviso abierto. */

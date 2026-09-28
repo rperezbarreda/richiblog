@@ -32,8 +32,18 @@
     line-height: 1;
     /* El tamaño se ajusta al ancho de la pantalla: un dibujo de 30
        columnas solo se ve entero si caben las 30. Medido a 320, 390 y
-       1440. */
-    font-size: clamp(0.38rem, 2.45vw, 0.62rem);
+       1440.
+       Dividido por la escala del mando "Aa" a propósito: esto es un
+       dibujo, no texto. Si creciera con el resto, en una pantalla de
+       320 con el texto al 150% el gatete pedía 386px de ancho y la
+       página se podía arrastrar de lado (medido). Agrandar la letra
+       tiene que hacer que se lea mejor lo que pone, no que el gato no
+       quepa. El zoom del navegador sí lo agranda, como siempre. */
+    font-size: clamp(
+        calc(0.38rem / var(--escala)),
+        2.45vw,
+        calc(0.62rem / var(--escala))
+    );
     font-family: "DejaVu Sans Mono", "Noto Sans Symbols 2", "Segoe UI Symbol",
         "Apple Symbols", ui-monospace, monospace;
     color: var(--yellow);

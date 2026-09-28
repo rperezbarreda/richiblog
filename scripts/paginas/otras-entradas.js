@@ -18,6 +18,13 @@
 //
 // La entrada que se está leyendo se descarta comparando su ruta con la
 // de la página actual, para no ofrecer un enlace a donde ya estás.
+//
+// Y de lo que queda salen DOS, al azar. Antes eran las cuatro más
+// nuevas, que en una web que se lee de arriba abajo son siempre las
+// mismas cuatro: lo de hace meses no lo veía nadie. Sorteándolas, cada
+// visita ofrece algo distinto y todo lo publicado tiene su oportunidad.
+// Dos y no más porque esto va en una columna estrecha, al lado del
+// texto, y no es la lista de entradas: es un "y si te apetece, esto".
 
 const OTRAS_FUENTES = {
     blog: { url: "/datos/entradas-blog.json", filtro: null },
@@ -29,7 +36,7 @@ const OTRAS_FUENTES = {
         filtro: (item) => item.category === "relatos" && !(item.collection || "").trim(),
     },
 };
-const OTRAS_MAXIMO = 4;
+const OTRAS_MAXIMO = 2;
 
 // "coleccion:writeober26" -> los textos de esa colección.
 function fuenteDe(clave) {
@@ -85,11 +92,16 @@ async function initializeOtrasEntradas() {
             );
         }
 
-        const otras = items
+        const candidatas = items
             .filter((item) => (fuente.filtro ? fuente.filtro(item) : true))
-            .filter((item) => sinExtension(item.url) !== aqui)
-            .sort((a, b) => fechaOtras(b.date) - fechaOtras(a.date))
-            .slice(0, OTRAS_MAXIMO);
+            .filter((item) => sinExtension(item.url) !== aqui);
+
+        // Al azar, y ya puestas en orden de fecha entre ellas: sorteadas
+        // son dos cualesquiera, pero enseñar la vieja encima de la nueva
+        // sin motivo se lee raro.
+        const otras = barajar(candidatas)
+            .slice(0, OTRAS_MAXIMO)
+            .sort((a, b) => fechaOtras(b.date) - fechaOtras(a.date));
 
         if (otras.length === 0) {
             // Si no hay nada más publicado, la ventana entera se quita:
@@ -106,6 +118,19 @@ async function initializeOtrasEntradas() {
         lista.innerHTML =
             '<li class="entries-error">No se han podido cargar ahora mismo.</li>';
     }
+}
+
+// Baraja una copia (Fisher-Yates). Una copia porque el listado que
+// llega es el mismo objeto que usan otros scripts de la página.
+function barajar(lista) {
+    const copia = lista.slice();
+    for (let i = copia.length - 1; i > 0; i -= 1) {
+        const j = Math.floor(Math.random() * (i + 1));
+        const guarda = copia[i];
+        copia[i] = copia[j];
+        copia[j] = guarda;
+    }
+    return copia;
 }
 
 function fechaOtras(cruda) {

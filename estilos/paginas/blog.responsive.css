@@ -55,13 +55,13 @@
 @media (max-width: 860px) {
     /* Mismo criterio que en escritorio (ver blog.css): nada de fondo
        con textura alrededor, la entrada llega hasta los bordes. Solo
-       se deja los 60px de arriba para no meterse debajo de la barra
+       se deja el alto de la barra de arriba para no meterse debajo
        superior fija (.mobile-topbar). Sin esto ganaba la regla
        general de main en root.responsive.css (76px/16px de margen
        por los cuatro lados) y volvía a verse el hueco con textura
        que se había quitado en escritorio. */
     body:has(.blog-post-page) main {
-        margin: 60px 0 0 0;
+        margin: var(--barra-alto) 0 0 0;
         width: 100%;
     }
 

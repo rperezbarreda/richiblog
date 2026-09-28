@@ -126,14 +126,19 @@ body:has(.relato-page) main {
 }
 
 /* Igual que en blog.css: el margen a pantalla completa pegado al
-   sidebar de 280px es cosa de escritorio. La regla de
+   sidebar (que mide --lateral-ancho) es cosa de escritorio. La regla de
    estilos/paginas/relatos.responsive.css que devuelve .relato-page a
    un layout normal está pensada para el mismo corte de 860px — este
    corte evita que ambas reglas se lleven la contraria. */
 @media (min-width: 861px) {
     body:has(.relato-page) main {
-        margin: 0 0 0 280px;
-        width: calc(100% - 280px);
+        /* Pegado a la barra lateral, midiendo lo que mida: con el texto
+           agrandado la barra se ensancha (--lateral-ancho), y con los
+           280px fijos de antes la cabecera pasaba por debajo y se comía
+           el principio del título (medido: 61px a 1860 con el texto al
+           130%). */
+        margin: 0 0 0 var(--lateral-ancho);
+        width: calc(100% - var(--lateral-ancho));
     }
 }
 
@@ -171,7 +176,14 @@ body:has(.relato-page) main {
     flex-wrap: wrap;
     justify-content: space-between;
     gap: 16px;
-    padding: 14px 20px;
+    /* Por la derecha, hueco para el mando "Aa": en estas páginas "main"
+       llega hasta el borde de la pantalla, así que la cabecera pasa por
+       debajo del mando y le comía el final al botón del calendario
+       (medido: 43px a 1440 y 43 a 1024). Los 30px de más son los 14 que
+       el mando deja de margen, su reborde y un poco de aire.
+       En móvil no hace falta —el mando se va a la barra del título, que
+       está por encima— y lo deshace blog.responsive.css / relatos.responsive.css. */
+    padding: 14px calc(2.4rem + 30px) 14px 20px;
     background: var(--yellow);
     user-select: none;
 }
@@ -308,23 +320,40 @@ body:has(.relato-page) main {
        ellos (no había recorrido donde quedarse pegada). Con el tope
        así, una entrada corta no se desplaza en absoluto. */
     max-height: calc(100vh - 150px);
+    /* Y si no cabe, se desplaza por dentro. Antes lo que cedía era la
+       foto, que encogía recortándose por arriba y por abajo: con la
+       ventana baja o con mucho zoom se quedaba en una rendija de 140px
+       de los 359 que mide, y por debajo de 560px de alto el final de la
+       columna directamente se perdía (la entrada va a overflow: hidden).
+       Ahora la foto se ve entera siempre y lo que no cabe se alcanza
+       desplazando esta columna. */
+    overflow-y: auto;
+    /* Con aire entre el contenido y la barra de scroll: pegada, se
+       comía la sombra de la foto y parecía parte del marco. El
+       scrollbar-gutter deja ese hueco reservado siempre, así que la
+       foto mide lo mismo haya barra o no. */
+    padding-right: 14px;
+    scrollbar-gutter: stable;
     /* Crece con la ventana entre 260 y 340px: en pantallas anchas 260
-       se quedaba pequeña al lado de un texto de 720. */
-    flex: 0 0 clamp(260px, 20vw, 340px);
+       se quedaba pequeña al lado de un texto de 720. Esa medida es la
+       del CONTENIDO; los 24px de más son el hueco de la barra de scroll
+       (14 de aire y 10 de barra), para que la foto y la ventanita midan
+       exactamente lo mismo que antes de que esta columna se desplazara.
+       Sin eso encogían 24px y el título "otras_entradas.txt" pasaba a
+       dos líneas. */
+    flex: 0 0 calc(clamp(260px, 20vw, 340px) + 24px);
     display: flex;
     flex-direction: column;
     gap: 24px;
 }
 
-/* La imagen es lo elástico de la columna: si la columna no cabe
-   entera, encoge (recortando por arriba y por abajo con object-fit)
-   en vez de dejar que la columna se desplace. El mínimo es para que
-   no acabe convertida en una rendija. */
+/* La foto ya no encoge: se ve como es y, si la columna no cabe, se
+   desplaza (ver el overflow de arriba). Antes era al revés —la foto
+   era lo elástico— y acababa recortada a un tercio de su alto. */
 .relato-post-aside {
     display: flex;
     flex-direction: column;
-    flex: 0 1 auto;
-    min-height: 0;
+    flex: 0 0 auto;
     margin: 0;
 }
 
@@ -354,9 +383,7 @@ body:has(.relato-page) main {
     display: block;
     width: 100%;
     height: auto;
-    flex: 0 1 auto;
-    min-height: 140px;
-    object-fit: cover;
+    flex: 0 0 auto;
     border: 3px solid var(--yellow);
     box-shadow: 4px 4px 0 var(--yellow);
 }
@@ -376,6 +403,36 @@ body:has(.relato-page) main {
    sin quedarse fija (fija en una pantalla pequeña se come media
    ventana). */
 @media (max-width: 1150px) {
+    /* Y con la columna apilada, quien se desplaza pasa a ser la página
+       entera y no el cuerpo del texto por dentro, igual que en móvil.
+       La cabecera es alta (título, fecha y dos botones) y no encoge:
+       dentro de un marco de alto fijo se quedaba con media pantalla
+       mientras se lee —medido: 404px de 700 con el texto al 150%, y con
+       el espaciado forzado ya no cabía ni la cabecera entera—. Yéndose
+       hacia arriba al desplazar, el texto se queda con toda la ventana. */
+    .relato-page {
+        display: block;
+        overflow-y: auto;
+    }
+
+    .relato-post {
+        flex: none;
+        max-width: none;
+    }
+
+    .relato-post-body-wrap {
+        flex: none;
+        overflow-y: visible;
+        /* Hueco para el mando "Aa" por la derecha: aquí el texto se
+           desplaza por debajo de él (la cabecera ya no lo tapa), y sin
+           este hueco cada línea pasaba 37px por detrás del botón y se
+           perdía la última palabra. Arriba de 1150 no hace falta —lo
+           que hay debajo del mando es la cabecera, que se queda
+           quieta— y en móvil tampoco, que ahí el mando vive en la
+           barra del título. */
+        padding-right: calc(2.4rem + 30px);
+    }
+
     .relato-post-layout {
         flex-direction: column;
         /* En fila, align-items: flex-start (más arriba) deja que cada
@@ -399,6 +456,15 @@ body:has(.relato-page) main {
         width: 100%;
         max-width: 420px;
         margin-top: 8px;
+        /* Y sin el tope de alto ni el scroll propio: los dos son para
+           cuando la columna va al lado del texto y tiene que quedarse
+           dentro del hueco visible. Apilada debajo, quien se desplaza
+           es la entrada entera, y una columna con scroll dentro de otra
+           con scroll es un lío (y dejaba el final fuera de alcance). */
+        max-height: none;
+        overflow-y: visible;
+        /* Sin barra de scroll no hace falta el hueco que se le deja. */
+        padding-right: 0;
     }
 
     .relato-post-aside figcaption {
@@ -415,5 +481,14 @@ body:has(.relato-page) main {
 @media (max-height: 660px) {
     .relato-post-side {
         position: static;
+        /* Al no quedarse pegada, el tope de alto y el scroll propio
+           sobran: la columna se desplaza con el texto, como el resto de
+           la entrada. Dejándolos puestos salía un scroll dentro de otro
+           scroll, que es justo lo que nadie quiere en una ventana
+           bajita. */
+        max-height: none;
+        overflow-y: visible;
+        /* Sin barra de scroll no hace falta el hueco que se le deja. */
+        padding-right: 0;
     }
 }
