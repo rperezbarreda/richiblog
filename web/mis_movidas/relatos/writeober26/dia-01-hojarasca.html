@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8">
+    <!-- Color de la barra del navegador en el móvil. Arranca en el color
+         del modo oscuro y el script de abajo lo cambia si toca; al pulsar
+         el botón de tema lo actualiza scripts/tema.js. -->
+    <meta name="theme-color" content="#12091c">
+    <script>
+      (function () {
+        try {
+          if (localStorage.getItem("richi-theme") === "light") {
+            document.documentElement.setAttribute("data-theme", "light");
+            var barra = document.querySelector('meta[name="theme-color"]');
+            if (barra) {
+              barra.setAttribute("content", "#f2ded2");
+            }
+          }
+        } catch (e) {}
+      })();
+    </script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>El Rey del Valle · Relatos · El Blog de Richi</title>
+    <!-- Cómo se ve el enlace al compartirlo (Bluesky, Discord, Ko-fi…).
+         Sin esto solo sale la URL pelada, sin título ni imagen. Las rutas
+         van absolutas a propósito: las redes no resuelven las relativas. -->
+    <meta name="description" content="Día 1 del reto de escritura, con la palabra «hojarasca».">
+    <link rel="canonical" href="https://richi.blog/web/mis_movidas/relatos/writeober26/dia-01-hojarasca.html">
+    <meta property="og:type" content="article">
+    <meta property="og:site_name" content="El Blog de Richi">
+    <meta property="og:locale" content="es_ES">
+    <meta property="og:title" content="El Rey del Valle · Relatos · El Blog de Richi">
+    <meta property="og:description" content="Día 1 del reto de escritura, con la palabra «hojarasca».">
+    <meta property="og:url" content="https://richi.blog/web/mis_movidas/relatos/writeober26/dia-01-hojarasca.html">
+    <meta property="og:image" content="https://richi.blog/imagenes/meta/og.webp">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta property="og:image:alt" content="El Blog de Richi — ilustración de Richi sobre fondo morado">
+    <meta name="twitter:card" content="summary_large_image">
+    <link rel="icon" type="image/x-icon" href="/imagenes/favicon.ico">
+    <!-- La única fuente que se precarga. Medido con la red frenada: sin esto el
+         navegador no la descubre hasta parsear el CSS (~800 ms) y el texto baila al
+         cambiar de tipografía; así llega antes del primer pintado y no se nota el
+         cambio. Precargar más fuentes empeoraba el primer pintado 150-210 ms, porque
+         compiten por el ancho de banda con lo que hace falta para pintar. -->
+    <link rel="preload" href="/tipografias/space-grotesk-400.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="alternate" type="application/rss+xml" title="El Blog de Richi — blog, relatos y rol" href="/blog/rss.xml">
+    <!-- ==== CSS ====
+         Esta lista la escribe herramientas/actualizar-cabeceras.py.
+         No la toques a mano: si cambias qué CSS lleva una página,
+         cámbialo en esa herramienta y vuélvela a ejecutar.
+
+         Van escritos aquí, y no cargados por un script, para que el
+         navegador los pida nada más recibir el HTML. Con un script de
+         por medio tardaba ~200 ms más en pintar la página.
+
+         El ?v= de cada uno es el resumen de su contenido: cambia solo
+         cuando cambia el archivo, y es lo que hace que al subir a
+         Neocities se vea el cambio en vez de la versión guardada en la
+         caché del navegador. -->
+    <link rel="stylesheet" href="/estilos/base.css?v=73b9e630">
+    <link rel="stylesheet" href="/estilos/base.responsive.css?v=24021cbc">
+    <link rel="stylesheet" href="/estilos/componentes/visor-imagenes.css?v=95ee9317">
+    <link rel="stylesheet" href="/estilos/componentes/aviso.css?v=5e4cd612">
+    <link rel="stylesheet" href="/estilos/componentes/aviso.responsive.css?v=4b547ea8">
+    <link rel="stylesheet" href="/estilos/componentes/cabecera-ventana.css?v=abe3c1d9">
+    <link rel="stylesheet" href="/estilos/componentes/subir.css?v=da55ea85">
+    <link rel="stylesheet" href="/estilos/componentes/texto-tamano.css?v=28848ad1">
+    <link rel="stylesheet" href="/estilos/componentes/texto-entrada.css?v=706b88bc">
+    <link rel="stylesheet" href="/estilos/componentes/lectura.css?v=ebd9740d">
+    <link rel="stylesheet" href="/estilos/paginas/relatos.css?v=2e0d0b87">
+    <link rel="stylesheet" href="/estilos/paginas/relatos.responsive.css?v=45d2372b">
+    <link rel="stylesheet" href="/estilos/componentes/barra-lateral.css?v=7f3a2928">
+    <link rel="stylesheet" href="/estilos/componentes/barra-lateral.responsive.css?v=cb1768a5">
+    <!-- ==== fin del CSS ==== -->
+    <script src="/scripts/cargador-scripts.js?v=deea89de"></script>
+  </head>
+<body>
+    <!-- ==== SIDEBAR / NAVEGACIÓN ==== -->
+    <a class="skip-link" href="#main-content">Saltar al contenido</a>
+    <div id="sidebar-container"></div>
+    <!-- ==== CONTENIDO PRINCIPAL ==== -->
+
+    <main id="main-content">
+        <!-- ==== HOME ==== -->
+        <section id="home" class="home relato-page">
+            <!-- Un día del reto de escritura. Lo crea
+                 herramientas/nuevo.py --reto: esta plantilla es la de
+                 un relato normal con dos cambios —se vuelve al reto y
+                 no al listado de relatos, y la ventana de al lado
+                 enseña otros días del mismo reto—.
+                 data-subcategoria dice de qué reto es, y por estar
+                 dentro de la carpeta writeober26/ generar-posts.py lo
+                 apunta como parte de esa colección, que es lo que hace
+                 que NO se liste de uno en uno entre los relatos. -->
+            <!-- data-borrador: mientras esté puesto, este relato NO sale
+                 en los listados, ni en el RSS, ni en el sitemap, y arriba
+                 se ve una franja avisando. Todo relato nuevo nace así,
+                 para que uno a medio escribir no se publique solo al
+                 subir el sitio. Para publicarlo:
+
+                     python3 herramientas/publicar.py
+
+                 (que es lo mismo que borrar "data-borrador" de la línea
+                 de abajo y volver a pasar los generadores). -->
+            <article class="relato-post" data-subcategoria="writeober26">
+                <div class="relato-post-header">
+                    <h1 class="relato-post-title">El Rey del Valle</h1>
+                    <div class="relato-post-header-meta">
+                        <p class="relato-post-date"><time datetime="2026-10-01">01 oct 2026</time></p>
+                        <a class="relato-post-back" href="/web/mis_movidas/relatos/writeober26/index_writeober26.html">← volver al reto</a>
+                    </div>
+                </div>
+
+                <div class="relato-post-body-wrap">
+                    <div class="relato-post-layout">
+                        <div class="relato-post-body">
+                            <p>Jamás encontraron su cuerpo.</p>
+                            <p>La policía encontró su ropa desperdigada entre la <strong>hojarasca</strong> de un robledal, a pocos metros del sendero que bordeaba el valle. La camisa estaba doblada sobre una piedra, los pantalones descansaban entre las raíces de un árbol junto a la mochila escolar y los zapatos aparecieron uno junto al otro, como si alguien se los hubiera quitado con cuidado. No había desgarros, manchas de sangre ni señales de lucha. Tampoco encontraron huellas que permitieran seguir el rastro del niño; era como si se hubiera desvanecido.</p>
+                            <p>Durante meses los equipos de búsqueda peinaron el valle de arriba abajo; registraron las cuevas, rastrearon los arroyos y se adentraron en los rincones más espesos del bosque. No dejaron piedra sin remover ni palmo de tierra sin examinar. Los perros perdían el rastro siempre en el mismo punto donde se encontró la ropa del niño: un claro rodeado de robles centenarios donde, según los agentes, no había nada que pudiera explicar semejante anomalía. Incluso excavaron la zona por si existía algún sumidero oculto a simple vista, pero fue inútil.</p>
+                            <p>La prensa se cebó con la incompetencia de las autoridades y los padres suplicaron que no abandonaran la búsqueda. Pero al cabo de los meses las batidas cesaron, el caso ya no interesaba a los periodistas y el expediente terminó archivado.</p>
+                            <p>Con el tiempo todos aceptaron que el niño estaba muerto.</p>
+                            <p>Todos menos los padres del niño, que nunca dejaron de martirizarse ni preguntarse en qué momento se habían equivocado.</p>
+                            <p>Habían querido darle una infancia feliz y para alimentar su imaginación le contaban un cuento cada noche antes de dormir. Al ver lo mucho que le gustaba oírlas incluso se organizaron para ir contándoselas por turnos; otras, entrelazaban aventuras cuyos personajes reaparecían al cabo de varios días, como viejos amigos que regresaban de un largo viaje. El niño adoraba aquellas historias y siempre pedía una más, incluso cuando sus ojos se cerraban solos de tanto sueño que tenía.</p>
+                            <p>Sin embargo, había algo que les preocupaba; el niño sentía un miedo irracional hacia los animales y los espacios naturales. Se escondía cuando encontraba una araña en su habitación, lloraba al oír aullar a los perros del vecino durante la noche y, cuando el colegio organizó una excursión a un manantial cercano, se negó en rotundo a asistir. </p>
+                            <p>Fue entonces cuando a sus padres se les ocurrió inventar al Rey del Valle.</p>
+                            <p>El Rey era un ser que gobernaba sobre todas las criaturas vivientes de aquellas tierras. Las bestias obedecían sus órdenes, los árboles inclinaban sus ramas a su paso y hasta el viento parecía esperar su permiso antes de cambiar de dirección. Era él quien decidía cuándo terminaba el invierno, cuándo florecían los campos y cuándo las lluvias debían dar paso al sol.</p>
+                            <p>Pero, por encima de todo, era un rey bondadoso; protegía a los animales, cuidaba de los árboles y velaba por cualquiera que entrase en sus dominios. Nadie que se encontrara bajo su amparo podía sufrir daño alguno.</p>
+                            <p>Con el tiempo, el Rey dejó de ser un simple personaje de sus cuentos. Tenía un reino, una corte y una historia propia. Había zorros que ejercían de mensajeros, ciervos que custodiaban los caminos y aves que llevaban noticias de un extremo a otro del valle.</p>
+                            <p>Durante la investigación varios inspectores entrevistaron a sus profesores y compañeros de clase; los adultos coincidían en describirlo como un niño alegre, sociable y aplicado. Sacaba buenas notas, jamás se metía en problemas y parecía llevarse bien con todo el mundo. Ninguno había observado nada que hiciera presagiar lo ocurrido.</p>
+                            <p>Sus amigos, en cambio, aportaron una información que llamó la atención de los investigadores. Al parecer, durante los recreos, el niño solía contarles las historias que inventaban sus padres. Al principio, todos disfrutaban escuchándolo, pero cuando empezó a hablar del Rey del Valle como si se tratara de alguien a quien pudiera conocer en persona, los mayores comenzaron a burlarse de él.</p>
+                            <p>Lo tacharon de bebé por creer aún en los cuentos de hadas, El niño se enfadó, les aseguró que el Rey era tan real como cualquiera de ellos y que, si no le creían, les enseñaría una prueba. Por continuar mofándose de él lo retaron a conseguir una fotografía para poder tomarlo en serio.</p>
+                            <p>Cuando los investigadores preguntaron a sus padres por aquella conversación estos descubrieron que faltaba algo en la casa: la vieja cámara de fotos que solían llevarse durante las vacaciones. Habían dado por hecho que estaría guardada en algún cajón, pero no volvieron a encontrarla.</p>
+                            <p>Las últimas pistas confirmaron que el niño se había adentrado en el bosque por voluntad propia aquella tarde y decidieron peinar todo el bosque sin éxito.</p>
+                            <p>Se formularon toda clase de hipótesis. Quizá se había perdido y había muerto de frío durante la noche. Tal vez un animal salvaje lo había atacado y arrastrado sus restos hasta una guarida inaccesible. También hubo quien insinuó que alguien se lo había llevado, alimentando las teorías más truculentas que tanto gustan a la prensa.</p>
+                            <p>Ninguna explicación logró imponerse sobre las demás, el hecho de encontrar su ropa en aquel claro donde se perdía el rastro era un completo misterio.</p>
+                            <p>La verdad es que nadie sabe con certeza qué le ocurrió al niño. Lo único que sabemos es que aquella tarde entró en el bosque con un propósito: conocer y fotografiar al Rey del Valle.</p>
+                            <p>Lo que nadie esperaba es que lo consiguiera.</p>
+                            <p>Lo encontró en un claro, bajo la sombra de los robles más antiguos del valle. No sintió miedo al verlo. ¿Cómo iba a tenerlo?, el Rey era exactamente como lo había imaginado, aunque mucho más antiguo y majestuoso de lo que sus padres habían sabido describir.</p>
+                            <p>Y el Rey, que llevaba mucho tiempo observando a aquel pequeño desde los límites de su reino, se alegró de conocerlo por fin. Al parecer ya conocía de su valentía, de su curiosidad y de las muchas noches que había pasado soñando con visitarlo. Por eso, cuando el niño le explicó que sus amigos no creían en él, el Rey sonrió y le tendió la mano, invitándolo a unirse a su corte, asegurándole que todas aquellas historias que le contaban sus padres antes de dormir eran totalmente ciertas.</p>
+                            <p>El niño aceptó sin pensárselo dos veces, cruzó el claro de la mano del Rey y se adentró con él entre los robles.</p>
+                        </div>
+
+                        <!-- Columna de la derecha: la imagen y "sigue leyendo". Va pegada
+                             arriba mientras se desplaza el texto (ver .relato-post-side). -->
+                        <div class="relato-post-side">
+                            <!-- IMAGEN DEL RELATO
+                                 La pone nuevo.py si le dices una al
+                                 crear el relato; si no, aquí no hay nada.
+                                 Para añadirla después, copia este bloque:
+
+                                  -->
+                                <figure class="relato-post-aside">
+                                     <img src="/imagenes/mis_movidas/relatos/writeober26/eL_rey_del_valle.webp" alt="Cuadro de un bosque otoñal" width="780" height="1170" loading="lazy" decoding="async">
+                                    <figcaption> <a href="https://www.si.edu/object/forest-interior-stream:saam_1973.155" target="_blank" rel="noopener noreferrer"> Forest Interior with Stream</a> de John Frederick Kensett . Cuadro tomado del archivo de imágenes del Smithsonian.</figcaption>
+                                 </figure>
+                            <div class="relato-post-otras" data-otras-caja>
+                                <div class="recent-entries-header">
+                                    <h2>otros_dias.txt</h2>
+                                    <div class="window-controls window-controls-small" data-window-controls aria-hidden="true"></div>
+                                </div>
+                                <ul class="entries-list" data-otras-entradas="coleccion:writeober26">
+                                    <li class="entries-loading">Cargando…</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </article>
+        </section>
+    </main>
+</body>
+</html>

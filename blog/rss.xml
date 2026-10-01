@@ -5,8 +5,17 @@
         <link>https://richi.blog/</link>
         <description>Todo lo que voy publicando: entradas del blog, relatos y material de rol.</description>
         <language>es</language>
-        <lastBuildDate>Mon, 28 Sep 2026 00:00:00 +0000</lastBuildDate>
+        <lastBuildDate>Thu, 01 Oct 2026 00:00:00 +0000</lastBuildDate>
         <atom:link href="https://richi.blog/blog/rss.xml" rel="self" type="application/rss+xml"/>
+        <item>
+            <title>El Rey del Valle</title>
+            <link>https://richi.blog/web/mis_movidas/relatos/writeober26/dia-01-hojarasca.html</link>
+            <guid isPermaLink="true">https://richi.blog/web/mis_movidas/relatos/writeober26/dia-01-hojarasca.html</guid>
+            <pubDate>Thu, 01 Oct 2026 00:00:00 +0000</pubDate>
+            <category>relatos</category>
+            <category>writeober26</category>
+            <description>Jamás encontraron su cuerpo.</description>
+        </item>
         <item>
             <title>La Tali casi hace que me dé un ataque de pánico</title>
             <link>https://richi.blog/web/blog/2026/septiembre/la-tali-casi-hace-que-me-de-un-ataque-de-panico.html</link>
