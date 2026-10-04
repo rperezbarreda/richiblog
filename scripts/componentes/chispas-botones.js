@@ -1,10 +1,15 @@
 // =========================================
 // BOTONES DE VENTANA — PEQUEÑO ESTALLIDO AL PULSARLOS
 // =========================================
-// Los botones "−▢✕" de las cabeceras son decorativos en todo el
-// sitio (no minimizan ni cierran nada de verdad), así que aquí les
-// añadimos solo un efecto divertido al pulsarlos, reutilizando el
-// mismo tipo de partícula que ya usa el botón de inspiración.
+// De los botones "−■✕" de las cabeceras, el de cerrar sigue siendo
+// decorativo (no cierra nada de verdad), así que a ese le añadimos un
+// efecto divertido al pulsarlo, reutilizando el mismo tipo de partícula
+// que ya usa el botón de inspiración.
+//
+// Los otros dos ya hacen lo que dicen desde que existe
+// scripts/componentes/ventanas-plegables.js: plegar la ventana y
+// devolverla a su tamaño. Esos no sueltan brillos, que la respuesta a
+// pulsarlos es la propia ventana plegándose.
 //
 // Se usa delegación de eventos en "document" para que funcione con
 // cualquier botón de ventana de cualquier página, sin tener que
@@ -25,6 +30,14 @@ function initializeWindowBtnEffects() {
     document.addEventListener("click", (event) => {
         const button = event.target.closest(".window-btn");
         if (!button) {
+            return;
+        }
+        // El de cerrar, siempre. Los de minimizar y maximizar, solo si
+        // están en un sitio donde no hay nada que plegar: el 404 lleva
+        // los −■✕ sueltos sobre la pantalla entera, sin barra de título,
+        // y ahí los tres siguen siendo de adorno.
+        const enBarra = button.closest(".ventana-barra");
+        if (enBarra && button.dataset.ventanaAccion !== "cerrar") {
             return;
         }
         spawnWindowBtnBurst(event.clientX, event.clientY);

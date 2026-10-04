@@ -41,7 +41,8 @@ SCRIPTS = RAIZ / "scripts"
 # y no llega al ámbito global.
 RE_GLOBAL = re.compile(
     r"^(?:async\s+)?function\s+([A-Za-z_$][\w$]*)"
-    r"|^(?:const|let|var)\s+([A-Za-z_$][\w$]*)",
+    r"|^(const|let|class)\s+([A-Za-z_$][\w$]*)"
+    r"|^var\s+([A-Za-z_$][\w$]*)",
     re.M,
 )
 
@@ -70,19 +71,39 @@ def revisar():
         texto = js.read_text(encoding="utf-8")
         nombre_archivo = js.relative_to(RAIZ).as_posix()
         for hallazgo in RE_GLOBAL.finditer(texto):
-            nombre = hallazgo.group(1) or hallazgo.group(2)
-            donde[nombre][nombre_archivo] = cuerpo_de(texto, nombre)
+            # Los grupos del patrón de arriba, en orden: 1 el nombre de
+            # una función, 2 la palabra (const/let/class), 3 el nombre que
+            # va detrás de esa palabra, 4 el nombre de un var.
+            nombre = hallazgo.group(1) or hallazgo.group(3) or hallazgo.group(4)
+            # Si es const, let o class se apunta cuál: eso cambia si
+            # repetirlo es grave o no (ver más abajo).
+            clase = hallazgo.group(2) or ""
+            donde[nombre][nombre_archivo] = (clase, cuerpo_de(texto, nombre))
 
     chocan = []
     iguales = []
     for nombre, archivos in sorted(donde.items()):
         if len(archivos) < 2:
             continue
-        cuerpos = {c.strip() for c in archivos.values()}
-        if len(cuerpos) == 1:
+        cuerpos = {c.strip() for _, c in archivos.values()}
+        declarados = {k for k, _ in archivos.values() if k}
+        if declarados:
+            # const, let y class NO se pueden repetir, ni siendo
+            # calcaditos: dos "const x" en dos archivos de la misma
+            # página tiran "Identifier \'x\' has already been declared" y
+            # el segundo archivo deja de ejecutarse ENTERO. Con function
+            # no pasa, que la segunda pisa a la primera y en paz.
+            #
+            # Esto pasó de verdad y costó encontrarlo: un const repetido
+            # entre entradas-blog.js y novedades.js dejó novedades.exe en
+            # "Cargando proyectos…" para siempre, sin más pista que un
+            # error en la consola. Si hace falta una constante en dos
+            # sitios, se mete DENTRO de la función.
+            chocan.append((nombre, sorted(archivos), sorted(declarados)[0]))
+        elif len(cuerpos) == 1:
             iguales.append((nombre, sorted(archivos)))
         else:
-            chocan.append((nombre, sorted(archivos)))
+            chocan.append((nombre, sorted(archivos), ""))
 
     print(f"\n  {len(donde)} nombres globales en {len(list(SCRIPTS.rglob('*.js')))} archivos")
 
@@ -102,8 +123,12 @@ def revisar():
     print(f"\n  ---- OJO: {len(chocan)} nombre(s) que SÍ se pisan ----")
     print("  (dos cosas distintas con el mismo nombre: gana la del archivo")
     print("   que se cargue después. Cambia uno de los dos.)")
-    for nombre, archivos in chocan:
-        print(f"     {nombre}")
+    for nombre, archivos, clase in chocan:
+        if clase:
+            print(f"     {nombre}  ({clase} repetido: REVIENTA el segundo archivo")
+            print(f"        entero. Mételo dentro de la función que lo usa.)")
+        else:
+            print(f"     {nombre}")
         for archivo in archivos:
             print(f"        {archivo}")
     print()

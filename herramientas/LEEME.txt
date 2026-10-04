@@ -152,9 +152,26 @@
   datos/reto-writeober26.json, una por día. Es lo único que hay que
   escribir a mano; lo demás lo apunta la herramienta.
 
-  Cada mañana, el comando de arriba solo. Sin decirle nada coge el
-  día de hoy, saca su palabra y crea la página. Escribe el texto
-  dentro y, cuando esté, publícalo como cualquier relato:
+  Cada vez que te sientes a escribir, el comando de arriba solo. Sin
+  decirle nada coge EL SIGUIENTE DÍA QUE TE FALTE, por orden, saca su
+  palabra y crea la página.
+
+  Por orden y no por la fecha de hoy, que es como estaba al principio
+  y daba problemas de verdad: si te saltabas un día —o te ponías al
+  día el domingo— la fecha de hoy te mandaba al día que tocaba por
+  calendario y te dejaba huecos detrás sin avisar. Pasó: escribí el 1,
+  abrí el script y me ofreció el 3. Y de paso se acabaron las
+  sorpresas por la hora, que a las doce y pico de la noche «hoy» ya
+  era otro día para el ordenador.
+
+  Si dejas un hueco a propósito y luego vuelves a por él, el script te
+  lo dice al elegirlo («te faltaba el día 2…»), para que sepas que no
+  está yendo al que esperabas. Y para escribir uno fuera de orden:
+
+      python herramientas/nuevo.py --reto --dia 7
+
+  Escribe el texto dentro y, cuando esté, publícalo como cualquier
+  relato:
 
       python herramientas/publicar.py
 
@@ -232,6 +249,161 @@
   la web, es para quien tenga curiosidad de cómo está hecha.
 
 
+  BUSCAR EN TODA LA WEB
+
+  Hay dos buscadores y hacen cosas distintas. Conviene tenerlo claro
+  antes de tocar ninguno:
+
+    - EL FILTRO (scripts/componentes/buscador.js) esconde filas de una
+      lista que YA está en la pantalla: el archivo del blog, los relatos,
+      el portfolio de rol, el mapa. No puede encontrar una palabra que
+      esté dentro de un relato, porque ese texto no está en esa página.
+
+    - LA BÚSQUEDA (web/buscar/buscar.html) busca en TODO: títulos,
+      secciones, categorías y el texto de dentro de las entradas y los
+      relatos. Para eso hace falta un listado aparte con ese texto.
+
+  POR DÓNDE SE ENTRA. Por la barra de la portada y por el botón de la
+  lupa del final del menú, que abre la ventana "buscador.exe" con el
+  campo.
+
+  EN LA PORTADA VA SOLO LA BARRA: sin ventana alrededor, sin título y
+  sin explicar lo que hace. Encima de dos ventanas que ya tienen su
+  barra de título y sus −■✕, una tercera igual convertía la columna en
+  una lista de cajas iguales donde ya no destacaba ninguna; y una caja
+  de búsqueda con su lupa al lado se entiende sin que nadie la presente.
+
+  Lo que sí sigue estando es el NOMBRE del campo, escondido a la vista
+  (visually-hidden). Un placeholder no es una etiqueta: desaparece en
+  cuanto escribes una letra y hay lectores de pantalla que ni lo leen.
+  Quitarlo de la vista es una decisión de sitio; quitarlo del todo sería
+  dejar el campo sin nombre. Las dos son FORMULARIOS DE VERDAD, con su action y su
+  method="get": al enviarlos se va a /web/buscar/buscar.html?q=loquesea.
+  No es un detalle de purista —así la búsqueda funciona aunque el
+  JavaScript falle o tarde, la dirección se puede compartir y guardar en
+  favoritos, y el botón de atrás hace lo que se espera.
+
+  NINGUNA DE LAS DOS CARGA NADA. datos/buscador.json son 57 KB (22
+  comprimidos) y van a crecer con cada entrada que escribas. Pedirlo en
+  la portada y en el menú sería bajárselo en TODAS las visitas para
+  usarlo casi nunca. Solo lo pide la página de los resultados, que es
+  donde hace falta. Si algún día añades otro sitio desde donde buscar,
+  que mande a esa página igual: no lo cargues ahí.
+
+  EL LISTADO lo escribe herramientas/generar-buscador.py recorriendo la
+  web y sacando el texto del <main> de cada página. Va en la lista
+  GENERADORES de comun.py, así que nuevo.py y publicar.py ya lo pasan
+  solos.
+
+  Lo que NO entra en el texto: el menú, la cabecera con los atajos, la
+  ventanita de "sigue leyendo", el buscador, los filtros y los avisos de
+  "Cargando…". Si no se quitaran, buscar "volver al archivo" sacaría las
+  30 entradas del blog a la vez. La lista de lo que se salta está en
+  SALTAR_CLASES, dentro de esa herramienta.
+
+  Y se saca con el analizador de HTML de Python, no con expresiones
+  regulares. Una expresión regular no sabe contar etiquetas: al quitar
+  un <div> con otros <div> dentro se paraba en el PRIMER cierre y dejaba
+  suelto el resto, y así se colaba el "Cargando…" en el texto de todas
+  las entradas.
+
+  LAS COSAS QUE NO SON PÁGINAS —las fichas del portfolio de rol, las
+  recomendaciones— no tienen su texto en ningún HTML: se pintan solas
+  desde sus JSON. Ésas se leen directamente de datos/rol.json y
+  datos/recomendaciones.json.
+
+  CÓMO BUSCA, por si algún día sale raro:
+
+    - Sin tildes por los dos lados: "cafe" encuentra "café" y al revés.
+      La "ñ" se queda como está, que en español no es una n con un
+      adorno sino otra letra: buscar "ano" no debe sacar "año".
+    - Varias palabras: salen las páginas que las tengan TODAS.
+    - SOLO AL PRINCIPIO DE UNA PALABRA, no en cualquier parte. Buscando
+      el trozo suelto salían perlas: "tali" encontraba "metálico", "ano"
+      encontraba "manos" y "rol" encontraba "desarrollado". Medido sobre
+      el texto de la web: de las 14 coincidencias de "tali", 4 eran
+      "metálico". Exigiendo que empiece palabra se quedan las que sirven
+      ("panad" encuentra "panadería", "sol" encuentra "solo" y "solía")
+      y se van las que no.
+    - El orden es por puntos: lo que coincide en el título va antes que
+      lo que coincide en mitad de un relato, y empezar por lo buscado
+      puntúa más que llevarlo en medio.
+
+  LOS RESULTADOS SON UNA LISTA Y NO UNA TABLA, aunque el mapa sí lo sea y
+  se parezcan. En el mapa cada fila son tres datos cortos y alineados,
+  que es para lo que están las tablas. Aquí cada resultado lleva además
+  un párrafo de texto de largo variable: metido en una celda descuadra la
+  rejilla y, escuchándolo, obliga a oír "columna 4" antes de cada trozo.
+  Se queda el aspecto del mapa y por dentro es una lista, que es lo que
+  es.
+
+  LO ENCONTRADO VA EN <mark>, que significa "esto está marcado porque
+  viene a cuento" y algunos lectores de pantalla lo anuncian; un <span>
+  de otro color no significa nada. Y además del fondo lleva un subrayado
+  grueso: un resalte que solo se distinga por el color se lo pierde quien
+  no distinga ese color, y en los dos temas de blanco y negro puros el
+  fondo del <mark> y el de la página son el mismo.
+
+  SI LE METES MANO. El trozo de texto que se enseña se monta con nodos
+  (createTextNode) y no pegando HTML en un innerHTML. Es a propósito: ese
+  texto sale de lo que tú escribes en las entradas, y pegándolo a mano
+  cualquier cosa que llevara un < acabaría interpretándose como
+  etiquetas. No lo cambies por innerHTML aunque parezca más corto.
+
+
+  LOS TÍTULOS DE LA PORTADA
+
+  En las dos ventanas de la portada —nuevas_entradas.txt y
+  novedades.exe— los títulos se cortan a 28 letras, por palabras, con
+  puntos suspensivos. Lo hace tituloCortado(), en scripts/paginas/
+  entradas-blog.js y en scripts/paginas/novedades.js.
+
+  POR QUÉ 28: ahí caben entre 22 y 40 letras según el ancho de la
+  pantalla (medido). 28 entra en casi todos; donde no (a 320 de ancho, o
+  con el texto al 150% en pantallas estrechas) el CSS remata con sus
+  propios puntos suspensivos, que para eso está.
+
+  Y POR PALABRAS Y NO POR LETRAS: "Tomé la horrible decisión…" se lee
+  como una frase a medias, que es lo que es. "Tomé la horrible deci…" se
+  lee como un error.
+
+  EL TÍTULO ENTERO NO SE PIERDE: el trozo que se ve lleva aria-hidden y
+  al lado va el título completo escondido a la vista, así que lo que
+  anuncia un lector de pantalla es el título de verdad. Cortar lo que se
+  ve es una decisión de sitio; cortar lo que se oye sería esconder
+  información.
+
+  AQUÍ HABÍA DOS COLUMNAS en pantallas de 1500 para arriba y se han
+  quitado: partían la ventana en columnas de 203 a 233 píxeles, donde no
+  caben ni 24 letras, y la de la derecha se salía del marco —se veía
+  media palabra y no había forma de llegar a esas entradas—. En una sola
+  columna la ventana da entre 269 y 379 píxeles.
+
+  Si algún día vuelven las dos columnas, la rejilla tiene que ir con
+  minmax(0, 1fr) y NO con 1fr a secas: "1fr" quiere decir
+  minmax(auto, 1fr), y ese "auto" deja que la columna crezca hasta lo
+  que mida su contenido sin partir. Es exactamente lo que se salía.
+
+
+  CUIDADO CON LOS const REPETIDOS
+
+  Todos los scripts comparten el mismo ámbito global, y eso ya se sabía.
+  Lo que no estaba claro es que no todo se pisa igual:
+
+    - Dos function con el mismo nombre conviven: la segunda pisa a la
+      primera y, si son iguales, no pasa nada. Por eso escapeHtml lleva
+      años copiado en cuatro archivos sin dar guerra.
+
+    - Dos const (o let, o class) con el mismo nombre NO conviven: el
+      segundo tira "Identifier ya declarado" y el archivo entero deja de
+      ejecutarse. Pasó al poner el corte de títulos: un const repetido
+      entre entradas-blog.js y novedades.js dejó novedades.exe en
+      "Cargando proyectos…" y sin más pista que un error en la consola.
+
+  Si hace falta una constante en dos sitios, va DENTRO de la función que
+  la usa. herramientas/nombres-repetidos.py ya lo comprueba y lo marca
+  como grave aunque los dos sean idénticos.
+
   EL MAPA DEL SITIO
 
   La tabla de web/mapa/mapa.html —todas las páginas con su sección y
@@ -281,38 +453,508 @@
   portada, que si no habría que tirar de la flecha del navegador.
 
 
-  EL TAMAÑO DEL TEXTO
+  LAS RECOMENDACIONES
 
-  Arriba a la derecha hay un botón con una "Aa" que se abre con un + y
-  un −: hacen el texto de TODA la web más grande o más pequeño, en cinco
-  pasos del 90% al 150%. Lo elegido se guarda en el navegador de quien
-  lo pulsa y sigue puesto la próxima vez que entre.
+  La página web/recomendaciones/recomendaciones.html sale entera de
+  datos/recomendaciones.json. No hay que pasar ningún generador: se
+  edita, se guarda y ya está.
 
-  En móvil no flota en la esquina: baja al final del menú, en fila con
-  el botón del tema, porque son las dos cosas que se tocan para ver
-  mejor la web. Ahí el desplegable del + y el − sale hacia arriba, que
-  abajo no hay sitio. El HTML es el mismo en los dos casos (está en
-  fragmentos/barra-lateral.html, dentro de .sidebar-ajustes); lo único
-  que cambia es el CSS.
+  LO MÁS CÓMODO ES LA HERRAMIENTA:
 
-  Por dentro no toca ni un tamaño de letra: cambia una sola variable,
-  --escala, por la que se multiplica el tamaño de raíz (estilos/base.css).
-  Como los tamaños del sitio van en rem, con eso crece todo solo. Lo
-  llevan scripts/componentes/texto-tamano.js (el mando) y
-  scripts/cargador-scripts.js (que deja puesta la escala antes del
-  primer pintado, para que la página no dé un salto al cargar).
+      python herramientas/nueva-recomendacion.py
 
-  SI AÑADES CSS NUEVO. Los tamaños, en rem, y ya está. Lo único que hay
-  que pensar son los tamaños en PÍXELES que tengan que crecer con el
-  texto: esos se multiplican a mano, como --barra-alto (la barra del
-  móvil), --lateral-ancho (el menú) o el mínimo de las casillas de
-  estadísticas de "sobre mí". Y al revés: lo que NO debe crecer porque
-  es un dibujo y no texto —el gatete del 404— se divide por --escala.
+  Te pregunta en qué categoría vas a añadir —una en concreta o "todas",
+  que solo quiere decir que entonces pregunta la categoría en cada
+  cosa— y luego el título, el autor, el año, el texto y lo demás. Al
+  terminar pregunta si añades otra, así que para una tarde de rellenar
+  basta con pasarla una vez. Comprueba de paso que la portada exista y
+  que el enlace empiece por http.
 
-  LO QUE SE COMPROBÓ. Las páginas, en los cinco tamaños, a 1920, 1440,
-  1280, 900, 390 y 320: que no se corte nada, que no haya que arrastrar
-  de lado y que con el tamaño de siempre no se mueva ni un píxel de lo
-  que ya estaba medido.
+      python herramientas/nueva-recomendacion.py --listar
+      python herramientas/nueva-recomendacion.py --categoria libros
+      python herramientas/nueva-recomendacion.py --categoria pelis \
+             --titulo "Donnie Darko" --anyo 2001 --texto "..." \
+             --imprescindible
+
+  Si le das una categoría que no existe, te ofrece crearla.
+
+  Y a mano también se puede, claro: es un archivo de texto.
+
+  El archivo es una lista de categorías, y cada categoría lleva su
+  nombre (el de la ventanita) y sus cosas:
+
+      [
+          {
+              "nombre": "libros.txt",
+              "clave": "libros",
+              "cosas": [
+                  {
+                      "titulo": "Nombre de la cosa",
+                      "autor": "Quien la hizo",
+                      "anyo": "1965",
+                      "texto": "Por qué la recomiendas. Esto es lo que
+                                sale al abrir la ficha.",
+                      "imprescindible": true,
+                      "imagen": "/imagenes/recomendaciones/loquesea.webp",
+                      "alt": "Portada de Loquesea",
+                      "enlace": "https://donde-sea.com/loquesea",
+                      "enlaceTexto": "ver en Bandcamp"
+                  }
+              ]
+          }
+      ]
+
+  Solo "titulo" hace falta; lo demás se puede dejar fuera y la ficha se
+  arregla sin ello. "imprescindible" pone la estrella. Las portadas van
+  en imagenes/recomendaciones/ (pásales optimizar-imagenes.py, que las
+  deja en WebP) y tienen que ser archivos de esta web: una imagen
+  traída de fuera se cae el día menos pensado y además le cuenta a otro
+  servidor quién está mirando tu página.
+
+  Si quieres otra categoría, añade otro bloque a la lista; si quieres
+  quitar una, bórralo. Una categoría sin cosas no desaparece: enseña un
+  "todavía no hay nada por aquí", que es lo que hay ahora mismo en las
+  seis.
+
+  LOS FILTROS DE ARRIBA. Son el mismo componente que el portfolio de rol
+  y el listado de relatos (scripts/componentes/filtros.js), y los
+  botones salen solos de lo que haya en el JSON: una categoría nueva
+  aparece entre ellos sin tocar la página. Aquí van en el orden del
+  archivo y no por orden alfabético (eso es el
+  data-filtros-orden="aparicion" del HTML), para que los botones y las
+  ventanitas estén en el mismo orden.
+
+  CÓMO SE VE. En escritorio es una galería: cada cosa es su portada, y
+  al pasar por encima el texto sale en una cajita flotante al lado. Si
+  algo no tiene portada no se queda un hueco vacío: se pinta un recuadro
+  con el título dentro, como el lomo de un libro.
+
+  En el móvil no hay ratón ni sitio para una caja flotante, así que lo
+  mismo se convierte en una lista y el texto se abre debajo de cada
+  cosa, como un desplegable.
+
+  Por dentro cada ficha es un <details> de los de verdad: en el móvil se
+  toca, con el teclado se llega con el tabulador y se abre con Enter, y
+  con ratón además se abre al pasar por encima. Un clic la deja fijada
+  abierta hasta que la vuelvas a pulsar, y Escape la cierra. Lo
+  importante es que el texto no vive solo en un :hover, que quien no
+  tiene ratón se quedaría sin leerlo.
+
+
+  LA VENTANA DE ACCESIBILIDAD
+
+  El botón "Aa" abre una ventana con todo lo que se puede tocar para ver
+  mejor la web, y debajo un trozo de texto de ejemplo que cambia a la vez
+  que los mandos. Dentro hay siete cosas: el tamaño del texto (un
+  deslizador de cinco pasos), la separación entre líneas, la letra, el
+  tema, la velocidad de la voz, los efectos visuales (el brillito del
+  cursor y el filtro CRT) y el movimiento. Y abajo del todo, un botón
+  para dejarlo todo como estaba.
+
+  DÓNDE ESTÁ EL BOTÓN. En escritorio flota en la esquina de arriba a la
+  derecha. En móvil se mete DENTRO de la barra amarilla del título, a la
+  derecha, enfrente del botón del menú: antes estaba al final del menú y
+  había que abrir el cajón para llegar, que es mucho pedir para lo que
+  justamente se busca cuando no se lee bien lo que hay en pantalla.
+
+  Un detalle que costó encontrar: el botón NO puede vivir dentro del
+  <aside> del menú. El menú se esconde en móvil con un transform, y un
+  elemento transformado pasa a ser el marco de referencia de todo lo que
+  lleva dentro, position: fixed incluido. Metido ahí, el botón se iba con
+  el cajón fuera de la pantalla (medido: aparecía en x = -66px). Por eso
+  en fragmentos/barra-lateral.html está suelto, justo detrás de la barra
+  del título. De paso queda segundo en el orden del tabulador, que para
+  lo que es no está nada mal.
+
+  EL BOTÓN DE "DEJARLO TODO COMO ESTABA" devuelve los siete mandos a como
+  venían y BORRA lo guardado en vez de guardar los valores de fábrica:
+  quien no ha tocado nunca nada y quien ha pulsado este botón quedan
+  exactamente igual, y el día que cambie lo de fábrica les valdrá a los
+  dos. Avisa con un texto que sale debajo y que los lectores de pantalla
+  leen solos (role="status"), porque si no, quien no ve la página no
+  tendría forma de saber que ha pasado algo.
+
+  EL DESLIZADOR es un <input type="range"> de los de serie y no una barra
+  inventada con divs: así viene de fábrica con las flechas del teclado,
+  con Inicio y Fin, con el arrastre del dedo y anunciándose solo a los
+  lectores de pantalla. Lo único que se le añade es un aria-valuetext con
+  el porcentaje, porque "3 de 4" no le dice nada a nadie.
+
+  CÓMO FUNCIONA POR DENTRO. Ningún mando toca una regla de CSS. Cada uno
+  cambia una sola cosa en el <html> y el CSS hace el resto:
+
+      --escala            multiplica el tamaño de raíz (base.css)
+      data-interlineado   la separación del texto largo (ajustes.css)
+      data-letra          cambia las cinco fuentes de golpe (base.css)
+      data-theme          cuál de los seis temas (base.css, tema.js)
+      data-crt            el filtro CRT (ajustes.css)
+      data-voz            a qué velocidad se lee (leer-en-voz.js)
+      data-movimiento     para lo que parpadea (sin-movimiento.css)
+
+  Como los tamaños del sitio van en rem, con la escala crece todo solo.
+  Lo lleva scripts/componentes/ajustes.js, y lo que deja puesto lo
+  guardado ANTES del primer pintado —para que no haya salto al cargar—
+  es scripts/cargador-scripts.js, que va sin defer en el <head>.
+
+  LA VENTANA es un <dialog> de los de verdad, abierto con showModal().
+  Con eso el navegador se encarga solo de oscurecer el fondo, atrapar el
+  tabulador dentro, cerrar con Escape, dejar inerte el resto de la
+  página para los lectores de pantalla y devolver el foco al botón. A
+  mano serían cien líneas y media docena de formas de hacerlo mal.
+  La barra de arriba se parece a las demás ventanas falsas pero NO lleva
+  su clase: aquí el ✕ cierra de verdad, que en una ventana que se abre
+  encima es lo que todo el mundo espera.
+
+  LAS FUENTES. Son cinco variables en :root (--fuente-texto,
+  --fuente-mono, --fuente-ventana, --fuente-titular y --fuente-mano) y
+  el mando las cambia todas de golpe por la Atkinson Hyperlegible, que
+  está dibujada en el Braille Institute para quien ve poco. SI AÑADES
+  CSS NUEVO, pide la fuente por la variable y no por su nombre: si no,
+  ese trozo se quedará con la letra vieja cuando alguien encienda el
+  mando. Son 112 sitios repartidos por 30 archivos, por eso van así.
+  Las barras de título usan la proporcional y no la Mono a propósito:
+  la Jersey 10 que sustituyen es muy estrecha y con la Mono
+  "gatin_random.exe" se salía de la ventanita del gatín.
+
+  SI TOCAS LOS TAMAÑOS. Lo único que hay que pensar son las medidas en
+  PÍXELES que tengan que crecer con el texto: ésas se multiplican a mano
+  por --escala, como --barra-alto (la barra del móvil), --lateral-ancho
+  (el menú) o el mínimo de las casillas de estadísticas de "sobre mí". Y
+  al revés: lo que NO debe crecer porque es un dibujo y no texto —el
+  gatete del 404— se divide por --escala.
+
+  LO QUE SE COMPROBÓ. Las páginas en los cinco tamaños, con las dos
+  letras y los tres interlineados, a 1920, 1440, 900, 390 y 320: que no
+  se corte nada, que no haya que arrastrar de lado, que con los ajustes
+  de fábrica no se mueva ni un píxel de lo que ya estaba medido, y que
+  la ventana se abra, se recorra y se cierre entera con el teclado.
+
+
+  LOS OCHO TEMAS
+
+  Oscuro, claro, oscuro puro, claro puro, tranquilo, terminal verde,
+  terminal azul y terminal rojo. Se eligen en la ventana de
+  accesibilidad, con un botón por tema: con ocho opciones, unos pocos
+  botones que alternaran obligarían a adivinar a dónde te lleva cada
+  pulsación.
+
+  VAN EN DOS GRUPOS, y no por gusto. Arriba, "para leer": los cinco que
+  están medidos para pasarse la tarde con ellos. Abajo, "de adorno": los
+  tres de terminal, con una nota debajo que dice lo que son y avisa de
+  que el rojo no llega al contraste mínimo. Cada grupo tiene su propio
+  título, que además es su nombre para quien escucha la página
+  (aria-labelledby con los dos: "color de tema" y "para leer").
+
+  CUÁL SALE SI NO HAS ELEGIDO NINGUNO: el que diga tu aparato. Si tienes
+  el móvil o el ordenador en modo claro, la web arranca en claro; si no,
+  en oscuro. Antes arrancaba siempre en oscuro, y quien tiene el sistema
+  en claro porque ve mejor así se comía una web oscura sin haber pedido
+  nada. Esto NO se guarda: mientras no toques el mando, la web va detrás
+  de lo que diga el sistema, y si un día cambia, cambia con él.
+
+  OJO CON UNA CONSECUENCIA DE ESO: aquí el tema oscuro SÍ se guarda
+  cuando lo eliges, y es la única excepción a la regla del resto de
+  ajustes (donde lo de fábrica se borra en vez de guardarse). Desde que
+  manda el sistema, "no hay nada guardado" ya no quiere decir "quiere el
+  oscuro" sino "todavía no ha elegido". Borrando la clave al elegir el
+  oscuro, quien tuviera el sistema en claro y pulsara "oscuro" se lo
+  encontraba en claro otra vez al recargar. Lo de borrar se lo queda el
+  botón de "dejarlo todo como estaba", que es donde tiene sentido
+  (scripts/tema.js, olvidarTemaGuardado).
+
+  CADA BOTÓN VA PINTADO CON LOS COLORES DE SU TEMA, para saber lo que te
+  vas a encontrar antes de pulsarlo. Esos colores están escritos a mano
+  en estilos/componentes/ajustes.css y NO con var(--purple) y compañía,
+  porque esas variables valen lo del tema que esté puesto ahora mismo: si
+  se usaran, los seis botones saldrían del mismo color. SI CAMBIAS UNA
+  PALETA, cambia también su pareja de ahí. El elegido se marca con un
+  halo del color del tema activo, que es lo único que no se confunde con
+  la propia muestra. En móvil van en una sola columna: en dos no caben.
+
+  LOS DOS PUROS son alto contraste de verdad: el fondo de un lado y TODO
+  lo demás del otro, sin grises, sin amarillo y sin diferencia entre el
+  texto principal y lo secundario. Es a propósito; cualquier color
+  intermedio sería justo lo que viene a quitarse de encima quien los
+  enciende. También se apaga la rejilla del fondo (--bg-texture: none),
+  que es ruido detrás del texto. Las fotos y los dibujos siguen en color:
+  son contenido, no interfaz.
+
+  EL TRANQUILO no es el claro con otros colores: es para quien le molesta
+  la pantalla, que no es lo mismo que ver poco. Migraña, fotofobia,
+  mareo visual. Ahí lo que estorba no es la falta de contraste sino lo
+  contrario: el blanco puro deslumbra, los colores saturados cansan, una
+  rejilla de fondo marea y una sombra dura vibra. Así que el fondo es
+  papel roto (#f2efe9) y no blanco, no hay rejilla, el amarillo chillón
+  pasa a un azul apagado —y eso baja la saturación de todo el sitio de
+  golpe, porque ese color lo usan los enlaces, los títulos y los
+  recuadros— y la tinta es un marrón muy oscuro en vez de negro.
+
+  Que sea suave no quiere decir que se lea peor: texto normal Lc 91,6
+  sobre el fondo y 87,5 sobre las tarjetas; el azul de los enlaces, 79,3
+  y 75,2; el gris de lo secundario, 80,7 y 76,5. El listón son 75.
+
+  Va de la mano del mando de "movimiento: quieto", pero son cosas
+  distintas a propósito: hay quien quiere los colores suaves y los
+  brillitos puestos, y al revés.
+
+  LOS TRES DE TERMINAL imitan un monitor de fósforo: negro y un solo
+  color. Dos de los tres se leen bien, medido:
+
+      verde  #33ff66  Lc 87,5   el de los monitores P1
+      azul   #44ddff  Lc 75,9   justo por encima del listón
+      rojo   #ff0000  Lc 37,5   ni la mitad
+
+  El azul tira a azul de cielo y no a azul de verdad porque el azul puro
+  (#0000ff) es el color con menos brillo que existe: sobre negro da
+  Lc 16, que no llega ni para un borde. #44ddff es el azul más oscuro que
+  sigue leyéndose como azul y no como verde y aun así pasa el mínimo.
+
+  EL ROJO ES EL ÚNICO DE LOS OCHO QUE NO CUMPLE EL LISTÓN DEL SITIO, Y
+  ESTÁ ELEGIDO ASÍ A SABIENDAS. El rojo es el color con menos brillo que
+  hay. La escala, medida sobre negro:
+
+      #ff0000  Lc 37   el que está puesto: rojo puro
+      #ff8585  Lc 56   el más rojo que aún se lee con holgura
+      #ffb8b8  Lc 75   rosa, y ya cumple el listón
+
+  Para cumplirlo habría que llegar al rosa, que ya no es el tema que se
+  buscaba; y como a medio camino iba a incumplirlo igual, se dejó el rojo
+  puro. En WCAG da 5,25:1: pasa el Nivel AA de texto normal y nada más.
+  Es un tema de adorno que se elige queriendo, y los otros siete cumplen
+  todo. La nota que hay debajo de su grupo en la ventana lo dice con
+  todas las letras: están para jugar, el verde y el azul se leen bien y
+  el rojo no llega. Si algún día lo quieres accesible, sube el rojo a #ffb8b8 en
+  estilos/base.css y en su muestra de estilos/componentes/ajustes.css.
+
+  DÓNDE ESTÁ CADA PIEZA. Los colores, en :root y los siete bloques
+  :root[data-theme="..."] de estilos/base.css. Los botones y el guardado,
+  en scripts/tema.js. Y el color de la franja del navegador en el móvil
+  está en TRES sitios que hay que cambiar a la vez si tocas un fondo: ahí
+  mismo en base.css, en COLOR_BARRA de tema.js, y en el trocito de
+  <script> del <head> de cada página (que lo escribe también
+  herramientas/plantillas/, así que las páginas nuevas ya lo llevan).
+
+  POR QUÉ ESE <script> EN EL <head>. Pone el tema elegido ANTES de que se
+  pinte nada. Si esperara al resto de scripts, la página aparecería con
+  el tema de fábrica y daría un fogonazo al cambiar. Es lo mismo que se
+  hace con el tamaño del texto y la letra, solo que eso vive en
+  scripts/cargador-scripts.js.
+
+
+  EL FILTRO CRT
+
+  Rayas horizontales, las esquinas apagadas y redondeadas como el cristal
+  de un monitor de tubo, y un parpadeo muy flojo. Se enciende y se apaga
+  en la ventana de accesibilidad, en "efectos visuales", al lado del
+  brillito del cursor. En los dos temas de terminal, además, las barras
+  de título llevan un guión bajo parpadeando al final, como el cursor de
+  una consola.
+
+  No hay ni un elemento para esto: lo dibuja un ::after del propio <html>
+  (estilos/componentes/ajustes.css), así que sale en TODAS las páginas
+  —el 404 incluido, que no tiene barra lateral— sin meter un div en
+  ninguna parte y sin que ningún scroll ni ningún overflow lo recorte.
+  Lo que hace que se pueda seguir pulsando y seleccionando lo de debajo
+  es pointer-events: none; sin eso la página entera dejaría de responder.
+
+  VA APAGADO DE FÁBRICA y tiene que seguir así: unas rayas por encima del
+  texto le quitan contraste, y esta web está medida entera para que no le
+  falte. Quien lo encienda sabe lo que hace y lo quita con el mismo
+  botón. El parpadeo, que es muy flojo, se apaga solo para quien haya
+  pedido menos movimiento en su sistema; las rayas se quedan.
+
+  La ventana de accesibilidad no se ve rayada, y es una suerte: los
+  <dialog> abiertos con showModal() se pintan en una capa aparte, por
+  encima de cualquier z-index, así que los mandos se leen limpios
+  mientras se está decidiendo si dejarlo puesto.
+
+
+  ESCUCHAR UNA ENTRADA
+
+  Las entradas del blog y los relatos llevan un botón que las lee en voz
+  alta, lo primero de la columna de la foto. Ahí y no en la cabecera de
+  la entrada, que es donde estaba al principio: allí se peleaba por el
+  sitio con el título, la fecha y los dos atajos, y en cuanto la ventana
+  se estrechaba la fila se partía. Lo hace el propio navegador con
+  las voces del sistema de quien visita: no hay servidor, ni cuenta, ni
+  sale nada de su ordenador, y no pesa un solo byte más.
+
+  SI NO HAY VOZ EN ESPAÑOL el botón no desaparece: al pulsarlo abre, justo
+  debajo, una ventana de las falsas del sitio —con su cabecera, así que
+  se pliega con el − como todas— explicando por qué no puede y cómo se
+  añade una voz en cada sistema. Un botón escondido deja a quien lo necesita sin saber que
+  existía, y uno que no hace nada parece roto. Los pasos van en plan
+  "abre los ajustes y busca «voz»", sin rutas de menú exactas, porque
+  ésas cambian con cada versión de Windows y de Android y estarían mal
+  en un año. Si el navegador es tan viejo que no tiene la función, ahí
+  sí se esconde: no hay nada que explicar.
+
+  SE VA RESALTANDO LO QUE SUENA. El párrafo que se está leyendo se pinta
+  con el fondo de los botones mientras dura, y la página se desplaza sola
+  para que no se pierda de vista (si quien visita ha pedido menos
+  movimiento en su sistema, salta en vez de deslizarse). Sirve para
+  seguir el hilo leyendo y escuchando a la vez, que es como lee mucha
+  gente con poca vista o con dislexia. El texto se parte por frases, no
+  por letras: resaltar palabra a palabra obliga a los ojos a perseguir el
+  resalte, que cansa más que ayuda.
+
+  LA VELOCIDAD se elige en dos sitios: en la ventana de accesibilidad y
+  DEBAJO DEL PROPIO BOTÓN de escuchar. Lo segundo no es un capricho: es
+  el único de todos los ajustes que se descubre usándolo. Nadie sabe si
+  una voz le va rápida hasta que la oye, y para entonces está leyendo una
+  entrada, no mirando los ajustes; obligarle a parar, abrir la ventana,
+  buscar el mando y volver a darle al play es la clase de paseo que hace
+  que la gente deje de usar una cosa.
+
+  Los dos sitios son el MISMO ajuste: escriben data-voz en el <html> y lo
+  guardan en la misma clave, y se avisan con el evento
+  "ajustes:actualizar" para marcarse igual. Tres pasos: lenta (0,75),
+  normal o rápida (1,35). Como va en el <html>, vale para todas las
+  entradas sin volver a tocarla. Cambiarla
+  a mitad de lectura no corta lo que suena: lo pone la frase siguiente,
+  porque la API no deja cambiar el ritmo de una frase ya empezada.
+
+  Lo lleva scripts/componentes/leer-en-voz.js. Tres cosas raras de esa
+  API, por si alguna vez hay que tocarlo: la lista de voces llega vacía
+  la primera vez y se rellena luego (por eso se espera al aviso
+  "voiceschanged"); no hay ningún evento de "se acabó la cola", así que
+  para saber cuándo vuelve el botón a su sitio hay que ir mirando; y
+  speaking vale "false" un instante ENTRE una frase y la siguiente, así
+  que hay que verlo callado dos veces seguidas antes de dar la lectura
+  por terminada. Con una sola, el resalte se apagaba a mitad.
+
+
+  DEJARLO TODO QUIETO
+
+  "Movimiento: quieto", en la ventana de accesibilidad, para el parpadeo
+  del filtro CRT, el cursor de los temas de terminal, el del gatete del
+  404, la cinta de frases de la portada y las transiciones de medio
+  sitio. Lo hace estilos/componentes/sin-movimiento.css.
+
+  POR QUÉ SI YA SE RESPETA prefers-reduced-motion (en 27 sitios del CSS,
+  y eso no cambia): porque ése es un ajuste de TODO el aparato. Quien lo
+  enciende lo enciende para todo, y mucha gente no lo tiene puesto —o no
+  sabe que existe— y aun así un parpadeo le da dolor de cabeza aquí. Al
+  revés no funciona: si el sistema pide menos movimiento, poner "normal"
+  aquí no lo devuelve. Manda el aparato.
+
+  DOS COSAS QUE COSTARON, por si tocas ese archivo:
+
+    - La regla general va con un selector universal, que pesa poquísimo
+      (0-2-0) pero gana porque el archivo se carga EL ÚLTIMO, en la
+      lista ULTIMAS de actualizar-cabeceras.py. Los dos parpadeos del
+      CRT y de los temas de terminal llevan selectores más largos y le
+      ganaban, así que se repiten con data-movimiento delante.
+
+    - La cinta de frases no se para con eso: frases.js le calcula la
+      duración y se la escribe en el atributo style, y un estilo escrito
+      ahí le gana a cualquier hoja. Se para con animation-play-state, que
+      ésa no la escribe nadie en el style.
+
+  Y no se pone "animation: none" sino una duración de un milisegundo:
+  hay animaciones que dejan algo puesto al terminar (las chispas se
+  desvanecen con "forwards") y cortadas en seco se quedarían a medias y
+  para siempre en pantalla.
+
+
+  CÓMO SALE LA WEB EN PAPEL
+
+  Hay hoja de impresión (estilos/componentes/impresion.css, también en
+  ULTIMAS). Mucha gente que ve poco no lee en pantalla: imprime, o pasa a
+  PDF para leerlo con su visor, a su tamaño. Sin esto salía en papel el
+  menú entero, la rejilla del fondo, los botones y la entrada a trozos.
+
+  QUÉ HACE: fuera el menú, el botón de accesibilidad y su ventana, el
+  aviso, la cinta de frases, el de subir, los −■✕, el de escuchar, el
+  buscador, los filtros y los "volver a". Todo a una columna, negro
+  sobre blanco, y detrás de cada enlace del texto su dirección entre
+  paréntesis, que en papel es de lo poco que se puede hacer mejor que en
+  pantalla.
+
+  EL TRUCO ESTÁ EN LAS VARIABLES, no en ir elemento por elemento. Lo
+  primero que intenté fue un selector universal poniéndolo todo en
+  negro, y un selector universal pesa menos que cualquier regla con una
+  clase: la entrada salía igual de morada. Cambiando las variables
+  (--purple, --white, --yellow...), que es por donde pide el color todo
+  el CSS de esta web, el papel es en la práctica un tema más.
+
+  Y TODAS EN NEGRO, que tampoco es pereza: aquí se quitan todos los
+  rellenos, así que ningún color se ve nunca como fondo, solo como letra
+  o como línea. Dejar alguna en blanco "porque es un color de fondo" fue
+  el fallo de la primera versión: --purple es fondo casi siempre, pero
+  en los botones marcados y en las cabeceras de tabla es la LETRA, y
+  salían en blanco sobre blanco.
+
+
+  LOS AVISOS DEL GUESTBOOK
+
+  Al darle a enviar con algo sin rellenar salía un único "Rellena tu
+  nombre y un mensaje antes de enviar" debajo del botón, dijera lo que
+  dijera el formulario. Tres problemas, y los tres cuestan sobre todo a
+  quien no ve la pantalla: no decía CUÁL de los dos faltaba, no decía QUÉ
+  HACER, y el aviso salía al final del formulario mientras el foco se
+  quedaba donde estaba —oías que algo iba mal y tenías que ir a buscarlo
+  a ciegas—.
+
+  Ahora cada campo tiene su aviso debajo, enlazado desde el campo con
+  aria-describedby (así se lee al llegar a él, no solo al aparecer), el
+  campo se marca con aria-invalid —que es lo que hace que un lector diga
+  "no válido" al pasar— y el foco se va al primero que falte. Las pautas
+  3.3.1 y 3.3.3 piden exactamente eso: decir cuál es el error y sugerir
+  cómo arreglarlo.
+
+  El aviso se quita en cuanto empiezas a escribir: dejar un campo en rojo
+  mientras lo estás arreglando es decirle a alguien que se ha equivocado
+  cuando ya está corrigiéndolo.
+
+  LAS SIGLAS
+
+  CRT, RSS, AAA, APCA, DnD. Van en <abbr title="lo que significa">: los
+  navegadores lo enseñan al dejar el ratón encima y algunos lectores de
+  pantalla lo leen en vez de deletrear. Se marcan con un subrayado de
+  puntos (estilos/base.css), no con color: un aviso que solo se
+  distingue por el color se lo pierde quien no distingue ese color.
+
+  Las de los juegos de rol salen solas: scripts/paginas/rol.js mira la
+  primera palabra del campo "system" contra una lista corta escrita a
+  mano (ROL_SIGLAS) y le pone el nombre entero. Si algún día metes un
+  juego nuevo, añádelo ahí.
+
+
+  LOS ENLACES QUE SALEN DE LA WEB
+
+  Los enlaces que llevan a otra web salen con una flechita ↗ detrás. Las
+  reglas de accesibilidad piden dos cosas que un dibujo solo no cumple, y
+  las dos las pone scripts/componentes/enlaces-fuera.js:
+
+    - Que el aviso no dependa SOLO de ver algo. A cada enlace de fuera se
+      le añade un trocito de texto escondido a la vista —"(enlace
+      externo)"— que sí se lee en voz alta y pasa a formar parte del
+      nombre del enlace.
+
+    - Que si el enlace abre otra pestaña se avise ANTES, no después
+      (WCAG 3.2.5). Un cambio de ventana que no esperas deja perdido a
+      cualquiera, y más a quien navega con lector de pantalla o con la
+      pantalla muy ampliada. Esos llevan además "se abre en otra
+      pestaña".
+
+  Si el enlace YA lo dice escrito a mano, no se repite: el script mira lo
+  que pone antes de añadir nada. Y en los enlaces que son solo un icono
+  (los de redes sociales) se pone el aviso escondido pero no la flecha,
+  que ahí se amontona con el dibujo.
+
+  LA FLECHITA va de fondo con una máscara, no como carácter ni como
+  contenido de un ::after. Un carácter lo dibuja la fuente de quien
+  visita y sale de cualquier tamaño y descentrado (ya pasó con los
+  botones de las ventanas), y el contenido de un ::after lo leen en voz
+  alta algunos lectores de pantalla, que anunciarían "flecha hacia el
+  noreste" en medio de cada frase. Con máscara toma el color del texto y
+  no lo lee nadie.
+
+  El script repasa la página entera cada vez que aparece algo nuevo (un
+  MutationObserver). Antes iba detrás de tres avisos sueltos y se dejaba
+  sin marcar lo que pintaban los otros cuatro listados; con el vigilante
+  no hay que acordarse de nada al añadir un listado nuevo.
 
 
   EL HUECO DE ABAJO EN MÓVIL
@@ -331,6 +973,88 @@
   De paso, los altos de pantalla pasaron de 100vh a 100dvh: vh cuenta la
   pantalla entera aunque la barra del navegador esté tapando un trozo, y
   dvh cuenta lo que se ve de verdad.
+
+
+  LOS COLORES Y EL CONTRASTE
+
+  SI VAS A TOCAR UN COLOR, LEE ESTO. Los colores del sitio están en
+  estilos/base.css, en :root (modo oscuro) y en :root[data-theme="light"]
+  (modo claro), y no están puestos a ojo.
+
+  El listón no es el de siempre. Hasta ahora se medían con WCAG 2, el
+  cociente de toda la vida (4,5:1 para texto normal). Esa cuenta tiene un
+  fallo conocido justo en el caso de esta web —gris claro sobre fondo
+  oscuro, que le sale mucho mejor de lo que se lee de verdad—, y por eso
+  el gris de lo secundario daba 7,7:1 y aun así costaba leerlo. Ahora se
+  miden además con APCA, el baremo nuevo, que no da un cociente sino un
+  Lc de 0 a 108:
+
+      Lc 90  lo preferible para letra pequeña
+      Lc 75  el mínimo para un texto normal de leer
+      Lc 60  el mínimo para texto grande o en negrita
+      Lc 45  lo que no es texto (bordes, iconos)
+
+  TODO el texto del sitio llega al mínimo que le toca, en los dos modos,
+  y de paso cumple WCAG hasta el Nivel AAA, que es el alto. Lo que hay
+  que mirar de un color nuevo no es solo el fondo de la página
+  (--purple): también el de dentro de las tarjetas (--purple-lighter),
+  que es el que menos perdona, y el amarillo/rojo cuando hace de fondo de
+  un botón.
+
+  DOS TRAMPAS QUE YA HAN PASADO. Una: un fondo semitransparente encima de
+  otro color cuenta como la mezcla de los dos, no como el color de
+  arriba; las etiquetas del modo claro llevaban un rojo al 8% y ese tinte
+  era lo peor medido de toda la web. Y dos: un enlace al que no le llega
+  ninguna regla se queda con el azul de serie del navegador, que sobre
+  morado es ilegible; pasó con el crédito del pie de una foto.
+
+
+  LAS VENTANAS QUE SE PLIEGAN
+
+  Las barras de título de las ventanas falsas llevaban tres botones de
+  adorno. Ya no: el − pliega la ventana y deja solo la barra, el ■ la
+  devuelve a su tamaño y el ✕ se queda de broma, con sus brillos.
+
+  Se pulsa la barra ENTERA, no solo los cuadraditos: en el móvil miden
+  trece píxeles de lado y acertarles con el dedo era una lotería,
+  mientras que la barra son casi cuarenta de alto de punta a punta.
+  Tocar la barra alterna entre plegada y abierta; el − y el ■ hacen
+  cada uno lo suyo, como en una ventana de verdad.
+
+  El cuadradito que en ese momento no hace nada se queda en hueco (el
+  borde sí, el relleno no): así se ve de un vistazo que una ventana
+  abierta se pliega con el − y que una plegada se abre con el ■. Es el
+  único cambio que se nota en una página recién cargada.
+
+  NO SE GUARDA. Al recargar, todas las ventanas vuelven a estar
+  abiertas: plegar es para quitarse algo de en medio un rato, no un
+  ajuste como el tema o el tamaño del texto.
+
+  CON EL TECLADO Y CON LECTOR DE PANTALLA. Encima de cada barra hay un
+  botón invisible que la cubre entera: se llega con el tabulador, se
+  pulsa con Enter o con la barra espaciadora y, al tenerlo, la barra se
+  recuadra. Se llama como la ventana ("calendario.exe") y dice si está
+  abierta o contraída. Al plegar, lo de dentro se esconde de verdad
+  (display: none), así que tampoco se queda leyéndose una lista que no
+  está a la vista.
+
+  NO HAY QUE TOCAR NINGUNA PÁGINA. scripts/componentes/ventanas-plegables.js
+  busca las barras que hay (las tres clases de siempre:
+  .recent-entries-header, .gatin-random-header y .pet-window-header) y
+  les monta el mando encima, también a las que se pintan más tarde desde
+  un JSON. Una tarjeta nueva con la cabecera de siempre se pliega sola.
+  Si algún día aparece otra clase de barra, se añade a VENTANA_BARRAS de
+  ese archivo y ya está.
+
+  DOS DETALLES PARA QUIEN TOQUE EL CSS. El esconder lo hace
+  estilos/componentes/ventanas-plegables.css, que va la ÚLTIMA de la
+  lista de cada página (la variable ULTIMAS de actualizar-cabeceras.py):
+  tiene que poder con el display que cada página le haya dado a lo de
+  dentro de sus ventanas, y así se consigue sin !important, que en esta
+  web no aparece en ningún archivo. Y el ancho de los −■✕ sale de dos
+  variables, --window-btn-tinta y --window-btn-fondo (estilos/base.css):
+  una cabecera al revés —la barra amarilla de la ficha de un gato—
+  cambia esas dos y se da la vuelta al botón entero.
 
 
   EL TIEMPO DE LECTURA
@@ -484,9 +1208,12 @@
                            misma página, al lado de la suya.
 
   scripts/ ............. lo que se mueve
-      cargador-scripts.js  decide qué scripts carga cada página
-                           (el CSS ya no: sus <link> van escritos en
-                           el <head>, ver actualizar-cabeceras.py)
+      cargador-scripts.js  lo que tiene que estar puesto antes de
+                           pintar: el ?v= anticaché y los ajustes de
+                           accesibilidad guardados. Ni el CSS ni el
+                           JS se piden ya desde aquí: sus etiquetas
+                           van escritas en el <head> de cada página
+                           (ver actualizar-cabeceras.py)
       tema.js              el cambio entre modo claro y oscuro
       componentes/         lo que usan varias páginas (barra
                            lateral, filtros, visor de fotos,
@@ -546,6 +1273,9 @@
                         y lista lo que no usa nadie. No cambia nada.
                         Con --externos mira también los enlaces de
                         fuera.
+  nueva-recomendacion.py  añade cosas a datos/recomendaciones.json
+                        preguntándote los datos. Con --listar enseña
+                        lo que ya hay y con --categoria va directa.
   nombres-repetidos.py  busca funciones con el mismo nombre en dos
                         .js distintos. Aquí los scripts comparten
                         el ámbito global: dos con el mismo nombre
@@ -580,12 +1310,16 @@
                         portada (el navegador se baja la que le hace
                         falta: 45 KB en vez de 187 en un portátil
                         normal). Solo si cambias el dibujo.
+  generar-buscador.py . escribe datos/buscador.json, el listado con
+                        el texto de toda la web que usa la página de
+                        buscar. Lo pasan solos nuevo.py y publicar.py.
   actualizar-cabeceras.py  escribe en el <head> de cada página la
-                        lista de CSS que le toca. Solo hace falta
-                        si creas o borras un archivo de estilos, o
-                        si cambias qué páginas usan cuál: eso se
-                        decide en la función hojas_de() de ese
-                        mismo archivo, que es el único sitio donde
+                        lista de CSS y la de JS que le tocan, con su
+                        ?v= anticaché. Hace falta si creas o borras
+                        un archivo de estilos o de scripts, o si
+                        cambias qué páginas usan cuál: eso se decide
+                        en hojas_de() y scripts_de() de ese mismo
+                        archivo, que son los únicos sitios donde
                         está escrito. Con --probar te dice qué
                         cambiaría sin tocar nada.
 
@@ -604,6 +1338,77 @@
   originales-sustituidas/ ....... copias de seguridad que deja
                         optimizar-imagenes.py de las imágenes que
                         sustituye. No hace falta subirla.
+
+
+---------------------------------------------------------------
+  LO QUE TARDA EN CARGAR
+---------------------------------------------------------------
+
+  Medido con el navegador frenado a propósito: 3G rápido (150 ms de ida
+  y vuelta) y el móvil haciendo como que va cuatro veces más lento. Es a
+  lo que hay que mirar; en tu ordenador con fibra todo va bien siempre y
+  no se ve nada.
+
+  LA REGLA DE ORO: el navegador no puede pedir lo que no sabe que
+  existe. Cada archivo que haga falta pedir ANTES de descubrir otro es
+  un viaje entero de ida y vuelta puesto en fila. Por eso el CSS, el JS
+  y el menú van anunciados en el <head> de cada página, escritos por
+  actualizar-cabeceras.py: el navegador lo ve todo en cuanto le llega el
+  HTML y lo pide a la vez.
+
+  LO QUE SE ARREGLÓ, Y LO QUE SE GANÓ:
+
+    - El JS lo repartía cargador-scripts.js, que miraba la URL ya dentro
+      del navegador. Hasta que ese archivo no se bajaba y se ejecutaba,
+      el navegador ni sabía que los demás scripts existían: no empezaban
+      a bajarse hasta los 814 ms. Ahora van escritos en el <head> y
+      empiezan a los 190, con el CSS.
+
+    - El menú (fragmentos/barra-lateral.html) lo pedía barra-lateral.js,
+      que era uno de esos scripts. Tres viajes en fila para pintar la
+      navegación: HTML, scripts, menú. Ahora lo pide un <script> de una
+      línea escrito en el <head>, delante del CSS, y barra-lateral.js se
+      sube al viaje que ya iba.
+
+  Resultado, en las doce páginas medidas: el menú aparece entre 635 y
+  965 ms en vez de entre 1350 y 1660 (la mitad), y la página termina de
+  cargar entre 150 y 430 ms antes. El primer pintado no se movió, y es
+  normal: nunca dependió del JS, sino del CSS, que ya iba bien.
+
+  OJO CON UNA TRAMPA QUE SALIÓ DE ESTO. Al llegar el menú tan pronto,
+  puede estar ya en memoria cuando arranca barra-lateral.js. El aviso de
+  "ya está el menú" (sidebar:loaded) salía entonces ENTRE un script con
+  defer y el siguiente, y los que venían detrás todavía no se habían
+  enganchado: el botón de accesibilidad aparecía pero no abría nada. Por
+  eso cargador-fragmentos.js espera a DOMContentLoaded antes de avisar.
+  Si algún día añades otro fragmento que se pida pronto, no quites esa
+  espera.
+
+  Y cuidado con document.readyState para esto: pasa a "interactive" en
+  cuanto se acaba de leer el HTML, o sea ANTES de que corran los scripts
+  con defer. Solo "complete" es de fiar.
+
+  LO QUE NO SE TOCÓ, Y POR QUÉ:
+
+    - Los archivos de CSS y de JS siguen sueltos, uno por cosa. Juntarlos
+      en un paquete ahorraría viajes, pero rompería lo que hace que a
+      partir de la segunda página casi todo salga de la caché, y sobre
+      todo rompería lo que hace que esto se pueda leer y arreglar. Si
+      alguna vez va justo, ahí hay margen.
+
+    - datos/fotos-santuarios.json son 21 KB y se pide en todas las
+      páginas solo para sacar UNA foto del gatín. No estorba (llega
+      tarde y no retrasa nada de lo que se ve), pero si algún día
+      molesta, generar un listado chiquitín aparte en
+      herramientas/generar-galeria.py lo arregla.
+
+  CÓMO VOLVER A MEDIRLO. Las fuentes ya van con font-display: swap y la
+  del texto va precargada en el <head>; eso está medido y mejor no
+  tocarlo. Para lo demás: abre las herramientas del navegador, pestaña
+  Red, pon la velocidad en "3G rápido", recarga con la caché vacía y
+  mira cuándo aparece el menú. Si algo tarda más que antes, lo primero
+  que hay que mirar es si algún archivo nuevo se está pidiendo desde un
+  script en vez de ir anunciado en el <head>.
 
 
 ---------------------------------------------------------------

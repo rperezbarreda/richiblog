@@ -197,7 +197,7 @@
 .portfolio-card-title {
     margin: 0 0 4px;
     color: var(--yellow);
-    font-family: "Space Grotesk", sans-serif;
+    font-family: var(--fuente-texto);
     font-style: italic;
     font-weight: 500;
     font-size: 1.25rem;
@@ -207,7 +207,7 @@
 .portfolio-card-system {
     margin: 0 0 12px;
     color: var(--muted);
-    font-family: "DM Mono", monospace;
+    font-family: var(--fuente-mono);
     font-size: 0.6875rem;
     text-transform: uppercase;
     letter-spacing: 1px;
@@ -243,7 +243,7 @@
     border: 2px solid var(--yellow);
     background: var(--yellow);
     color: var(--yellow-contrast);
-    font-family: "DM Mono", monospace;
+    font-family: var(--fuente-mono);
     font-size: 0.75rem;
     text-transform: uppercase;
     letter-spacing: 1px;

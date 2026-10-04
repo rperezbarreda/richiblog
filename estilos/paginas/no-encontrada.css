@@ -55,7 +55,7 @@
 .gatete-pie {
     margin: 12px 0 0;
     color: var(--muted);
-    font-family: "DM Mono", monospace;
+    font-family: var(--fuente-mono);
     font-size: 0.6875rem;
     letter-spacing: 0.5px;
     text-align: center;
@@ -90,7 +90,7 @@
     padding: 8px 16px;
     border: 2px solid var(--yellow);
     color: var(--yellow);
-    font-family: "DM Mono", monospace;
+    font-family: var(--fuente-mono);
     font-size: 0.75rem;
     text-decoration: none;
     text-transform: uppercase;

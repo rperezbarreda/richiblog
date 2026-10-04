@@ -140,7 +140,7 @@
 .pet-card-name {
     margin: 0 0 8px;
     color: var(--yellow);
-    font-family: "Space Grotesk", sans-serif;
+    font-family: var(--fuente-texto);
     font-style: italic;
     font-weight: 500;
     font-size: 1.5rem;
@@ -195,7 +195,7 @@ body:has(.pet-page) main {
     border: 2px solid var(--yellow);
     background: transparent;
     color: var(--yellow);
-    font-family: "DM Mono", monospace;
+    font-family: var(--fuente-mono);
     font-size: 0.8125rem;
     text-decoration: none;
     transition: color 0.15s linear, background-color 0.15s linear;
@@ -250,8 +250,22 @@ body:has(.pet-page) main {
     user-select: none;
 }
 
+/* Aquí los −■✕ no van flotando en una esquina: van en la propia fila,
+   que es flex. "relative" sin desplazamientos no mueve nada de sitio;
+   está para que el z-index cuente (en un elemento sin posicionar se
+   ignora) y así queden por encima del mando que cubre la barra para
+   plegarla — si no, los clics en los botones los recogería el mando y
+   los tres harían lo mismo. Ver
+   estilos/componentes/ventanas-plegables.css. */
 .pet-window-header .window-controls-small {
-    position: static;
+    position: relative;
+    /* Los top/right que traen .window-controls y .window-controls-small
+       son para cuando van flotando en una esquina; con "static" no
+       contaban y ahora sí, así que se desactivan a mano. Sin esto los
+       botones se iban 12px a la izquierda y 10px hacia abajo. */
+    top: auto;
+    right: auto;
+    z-index: 5;
     flex-shrink: 0;
 }
 
@@ -259,14 +273,19 @@ body:has(.pet-page) main {
    amarillos con borde amarillo, pensados para las cabeceras oscuras;
    aquí la barra ya es amarilla, así que se perdían del todo (medido:
    1,00:1 contra el fondo, o sea el mismo color) y solo se veían los
-   símbolos flotando. */
+   símbolos flotando. Las dos variables salen de .window-btn, en
+   base.css: cambiándolas se da la vuelta al botón entero (borde, fondo
+   y símbolo) de una vez. */
 .pet-window-header .window-btn {
-    border-color: var(--yellow-contrast);
-    background: var(--yellow-contrast);
-    color: var(--yellow);
+    --window-btn-tinta: var(--yellow-contrast);
+    --window-btn-fondo: var(--yellow);
 }
 
 .pet-window-title {
+    /* Que parta por donde sea antes que salirse: con el texto al
+       150% una palabra larga no cabe en el hueco que queda a la
+       izquierda del mando de accesibilidad. */
+    overflow-wrap: break-word;
     flex: 1;
     min-width: 0;
     margin: 0;
@@ -275,7 +294,7 @@ body:has(.pet-page) main {
        (portada, blog, relatos). Antes era Space Grotesk en cursiva, que
        con el título en formato carpeta ("tali/") parecía más un error
        de maquetación que un guiño. */
-    font-family: "Jersey 10", "DM Mono", monospace;
+    font-family: var(--fuente-ventana);
     font-weight: 400;
     font-size: clamp(1.75rem, 3.2vw, 2.25rem);
     letter-spacing: 0.3px;
@@ -311,7 +330,7 @@ body:has(.pet-page) main {
     grid-column: 1 / -1;
     margin: 0;
     color: var(--muted);
-    font-family: "DM Mono", monospace;
+    font-family: var(--fuente-mono);
     font-size: 0.8125rem;
 }
 

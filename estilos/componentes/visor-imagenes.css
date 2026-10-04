@@ -43,7 +43,7 @@ body.lightbox-open {
        la cascada va propiedad a propiedad, así que de aquel bloque solo
        se perdían las que no estuvieran también aquí. Al borrarlo, la ✕
        se quedó con la fuente heredada. */
-    font-family: "DM Mono", monospace;
+    font-family: var(--fuente-mono);
     font-size: 1.125rem;
     font-weight: 500;
     cursor: pointer;

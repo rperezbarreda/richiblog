@@ -52,7 +52,7 @@
     background: var(--yellow);
     color: var(--yellow-contrast);
     padding: 6px 8px;
-    font-family: "DM Mono", monospace;
+    font-family: var(--fuente-mono);
     font-size: 0.7rem;
     font-weight: 500;
     letter-spacing: 0.15px;
@@ -99,7 +99,7 @@ nav a {
     border-radius: 0;
     color: var(--muted);
     text-decoration: none;
-    font-family: "DM Mono", monospace;
+    font-family: var(--fuente-mono);
     font-size: 0.9375rem;
     letter-spacing: 0.5px;
     transition: color 0.1s linear, background-color 0.1s linear;
@@ -180,7 +180,7 @@ nav a.active::before {
     border-radius: 0;
     background: var(--purple-lighter);
     color: var(--yellow);
-    font-family: "DM Mono", monospace;
+    font-family: var(--fuente-mono);
     font-size: 0.9375rem;
     font-weight: 700;
     line-height: 1;
@@ -259,7 +259,7 @@ nav a.active::before {
     background: var(--purple);
     border-bottom: 2px solid var(--yellow);
     color: var(--yellow);
-    font-family: "Jersey 10", "DM Mono", monospace;
+    font-family: var(--fuente-ventana);
     font-size: 1rem;
     letter-spacing: 0.2px;
 }
@@ -267,6 +267,12 @@ nav a.active::before {
 .gatin-random-header h2 {
     min-width: 0;
     margin: 0;
+    /* "gatin_random.exe" es una sola palabra para el navegador (ni el
+       guion bajo ni el punto son sitios donde partir), y en una barra
+       lateral de ancho fijo con el texto al 150% no cabe: se salía por
+       la derecha en vez de partirse. Con esto parte donde haga falta y
+       la ventanita crece a dos líneas, que es lo que tiene que pasar. */
+    overflow-wrap: anywhere;
     font: inherit;
     color: inherit;
 }
@@ -382,15 +388,13 @@ nav a.active::before {
 
 /* SIDEBAR — TEMA */
 
-/* La caja que junta el botón del tema y el del tamaño del texto. En
-   escritorio es como si no existiera —display: contents— y cada uno
-   vuelve a ser hijo directo de la barra, como toda la vida: el del tema
-   aquí abajo y el del tamaño flotando en la esquina de arriba
-   (position: fixed). En móvil sí es una caja de verdad y los pone en
-   fila; eso está en barra-lateral.responsive.css. */
-.sidebar-ajustes {
-    display: contents;
-}
+/* Aquí abajo había una caja (.sidebar-ajustes) que juntaba el botón del
+   tema, el del tamaño y el del brillito. Ya no hay nada que juntar: los
+   tres mandos viven dentro de la ventana de accesibilidad y el botón que
+   la abre flota por su cuenta, fuera de la barra lateral —tiene que
+   estar fuera o en móvil se va con el cajón; está explicado en
+   fragmentos/barra-lateral.html—. La clase .theme-toggle se sigue
+   usando, pero ahora dentro de la ventana. */
 
 .theme-toggle {
     display: inline-flex;
@@ -404,18 +408,12 @@ nav a.active::before {
     border-radius: 0;
     background: var(--purple-lighter);
     color: var(--muted);
-    font-family: "DM Mono", monospace;
+    font-family: var(--fuente-mono);
     font-size: 0.625rem;
     letter-spacing: 1px;
     text-transform: uppercase;
     cursor: pointer;
     transition: color 0.1s linear, border-color 0.1s linear, background-color 0.1s linear, transform 0.1s linear;
-}
-
-.theme-toggle-text {
-    width: calc(11ch + 10px);
-    white-space: nowrap;
-    text-align: left;
 }
 
 .cursor-trail-toggle-text {
@@ -450,23 +448,26 @@ nav a.active::before {
     outline-offset: 2px;
 }
 
-/* Estado "activado" del rastro del cursor: mismos colores que el
-   logo (fondo amarillo, texto oscuro), para que se note a simple
-   vista sin tener que leer el texto ON/OFF. */
+/* Estado "encendido" de los botones de efectos visuales: mismos colores
+   que el logo (fondo amarillo, texto oscuro), para que se note a simple
+   vista sin tener que leer el ON/OFF.
+   Por clase y no por id: antes solo valía para el del rastro del cursor
+   y el del filtro CRT se quedaba igual encendido que apagado. Son los
+   dos únicos botones con esta pinta que quedan. */
 
-#cursor-trail-toggle[aria-pressed="true"] {
+.theme-toggle[aria-pressed="true"] {
     background: var(--yellow);
     border-color: var(--yellow);
     color: var(--yellow-contrast);
 }
 
-#cursor-trail-toggle[aria-pressed="true"] .theme-toggle-icon {
+.theme-toggle[aria-pressed="true"] .theme-toggle-icon {
     background: var(--yellow-contrast);
     color: var(--yellow);
 }
 
-#cursor-trail-toggle[aria-pressed="true"]:hover,
-#cursor-trail-toggle[aria-pressed="true"]:focus-visible {
+.theme-toggle[aria-pressed="true"]:hover,
+.theme-toggle[aria-pressed="true"]:focus-visible {
     color: var(--yellow-contrast);
     border-color: var(--yellow);
 }

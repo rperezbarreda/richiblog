@@ -106,6 +106,13 @@ function renderHomeEntries(homeList, posts) {
     // estrecha y lo que importa es el titular. Los minutos están en el
     // archivo del año, que es donde se elige qué leer.
     homeList.innerHTML = latest.map((post) => postToEntryCard(post, false)).join("");
+
+    // Y los títulos, cortados a lo que quepa de verdad en la caja. Lo
+    // mide scripts/componentes/recortar-titulos.js; aquí solo se le
+    // avisa de que ya hay lista que medir.
+    if (typeof window.recortarTitulos === "function") {
+        window.recortarTitulos(homeList);
+    }
 }
 
 // =========================================
@@ -143,7 +150,11 @@ function renderArchive(archiveRoot, posts) {
 // =========================================
 
 function postToEntryCard(post, conMinutos) {
-    const title = escapeHtml(post.title || "Sin título");
+    // El título va ENTERO. En la portada lo recorta después
+    // scripts/componentes/recortar-titulos.js, midiendo el hueco que
+    // tiene de verdad; aquí no se puede saber, que depende del ancho de
+    // la pantalla y del tamaño de letra elegido.
+    const title = escapeHtml((post.title || "Sin título").trim());
     const date = formatPostDate(post.date);
     const url = post.url || "#";
 

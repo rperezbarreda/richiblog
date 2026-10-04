@@ -24,7 +24,7 @@
     background: var(--purple);
     border-bottom: 2px solid var(--yellow);
     color: var(--yellow);
-    font-family: "Jersey 10", "DM Mono", monospace;
+    font-family: var(--fuente-ventana);
     font-size: 1.15rem;
     letter-spacing: 0.2px;
 }

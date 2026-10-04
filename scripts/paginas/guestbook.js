@@ -42,6 +42,8 @@ function initializeGuestbook() {
         event.preventDefault();
         handleSubmit(form, entriesList);
     });
+
+    engancharLimpiezaGuestbook(form);
 }
 
 function disableForm(form, reason) {
@@ -211,9 +213,20 @@ async function handleSubmit(form, entriesList) {
     }
 
     if (!name || !message) {
-        setStatus(form, "Rellena tu nombre y un mensaje antes de enviar.", "error");
+        marcarErroresGuestbook(form, {
+            nombre: !name
+                ? "Falta tu nombre. Puede ser el que quieras: un apodo vale."
+                : "",
+            mensaje: !message
+                ? "Falta el mensaje. Escribe lo que quieras dejarme, aunque sea una línea."
+                : "",
+        });
         return;
     }
+
+    // Si llega aquí es que ya está todo: se limpian las marcas de la
+    // vez anterior antes de enviar.
+    limpiarErroresGuestbook(form);
 
     submitBtn.disabled = true;
     setStatus(form, "Enviando…", "");
@@ -272,4 +285,127 @@ function setStatus(form, text, kind) {
     } else if (kind === "success") {
         status.classList.add("is-success");
     }
+}
+
+
+// =========================================
+// LOS AVISOS DE CADA CAMPO
+// =========================================
+// Antes, al darle a enviar con algo sin rellenar, salía un único
+// "Rellena tu nombre y un mensaje antes de enviar" debajo del botón,
+// dijera lo que dijera el formulario. Tres problemas, y los tres son de
+// los que más cuestan a quien no ve la pantalla:
+//
+//   - No decía CUÁL de los dos faltaba. Si habías escrito el mensaje y
+//     te habías dejado el nombre, el aviso te hacía repasar los dos.
+//   - No decía QUÉ HACER. "Falta tu nombre" a secas tampoco ayuda a
+//     quien no sabe si vale un apodo.
+//   - El aviso salía al final del formulario, lejos del campo, y el
+//     foco se quedaba donde estaba: con el lector de pantalla oías que
+//     algo iba mal y tenías que ir a buscarlo a ciegas.
+//
+// Ahora cada campo tiene su propio aviso debajo, enlazado con
+// aria-describedby desde el campo (así se lee al llegar a él, no solo
+// al aparecer), el campo se marca con aria-invalid —que es lo que hace
+// que un lector diga "no válido" al pasar por encima— y el foco se va
+// al primero que falte. Las pautas 3.3.1 y 3.3.3 de la WCAG piden
+// exactamente esas dos cosas: decir cuál es el error y sugerir cómo
+// arreglarlo.
+//
+// El aviso de abajo del botón se queda, pero resumiendo: es el que
+// anuncia el role="status" para quien no estuviera mirando.
+function marcarErroresGuestbook(form, errores) {
+    const campos = camposDeGuestbook(form);
+    let primero = null;
+
+    Object.keys(campos).forEach((cual) => {
+        const campo = campos[cual].campo;
+        const aviso = campos[cual].aviso;
+        const texto = errores[cual] || "";
+        if (!campo || !aviso) {
+            return;
+        }
+        aviso.textContent = texto;
+        aviso.hidden = !texto;
+        if (texto) {
+            campo.setAttribute("aria-invalid", "true");
+            if (!primero) {
+                primero = campo;
+            }
+        } else {
+            campo.removeAttribute("aria-invalid");
+        }
+    });
+
+    const cuantos = Object.keys(errores).filter((k) => errores[k]).length;
+    setStatus(
+        form,
+        cuantos > 1
+            ? "Faltan dos cosas por rellenar; te las marco abajo."
+            : "Falta una cosa por rellenar; te la marco abajo.",
+        "error"
+    );
+
+    // El foco al primero que falte, para no tener que buscarlo. Se hace
+    // después del aviso para que el lector de pantalla cuente primero
+    // lo que pasa y luego dónde ha aterrizado.
+    if (primero) {
+        primero.focus();
+    }
+}
+
+function limpiarErroresGuestbook(form) {
+    const campos = camposDeGuestbook(form);
+    Object.keys(campos).forEach((cual) => {
+        if (campos[cual].campo) {
+            campos[cual].campo.removeAttribute("aria-invalid");
+        }
+        if (campos[cual].aviso) {
+            campos[cual].aviso.textContent = "";
+            campos[cual].aviso.hidden = true;
+        }
+    });
+}
+
+function camposDeGuestbook(form) {
+    return {
+        nombre: {
+            campo: form.querySelector("#guestbook-name"),
+            aviso: form.querySelector("#guestbook-name-error"),
+        },
+        mensaje: {
+            campo: form.querySelector("#guestbook-message"),
+            aviso: form.querySelector("#guestbook-message-error"),
+        },
+    };
+}
+
+// En cuanto se empieza a escribir, la marca se va: dejar un campo en
+// rojo mientras lo estás arreglando es decirle a alguien que se ha
+// equivocado cuando ya está corrigiéndolo.
+function engancharLimpiezaGuestbook(form) {
+    const campos = camposDeGuestbook(form);
+    Object.keys(campos).forEach((cual) => {
+        const campo = campos[cual].campo;
+        const aviso = campos[cual].aviso;
+        if (!campo || !aviso) {
+            return;
+        }
+        campo.addEventListener("input", () => {
+            if (campo.getAttribute("aria-invalid") !== "true") {
+                return;
+            }
+            campo.removeAttribute("aria-invalid");
+            aviso.textContent = "";
+            aviso.hidden = true;
+
+            // Y cuando ya no queda ninguno marcado, se borra también el
+            // resumen de debajo del botón: dejarlo diciendo "falta una
+            // cosa" cuando ya está todo puesto es peor que no decir
+            // nada, sobre todo para quien solo tiene ese texto.
+            if (!form.querySelector('[aria-invalid="true"]')) {
+                setStatus(form, "", "");
+            }
+        });
+    });
 }

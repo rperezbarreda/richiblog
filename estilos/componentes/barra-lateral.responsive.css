@@ -23,7 +23,15 @@
         right: 0;
         z-index: 110;
         height: var(--barra-alto);
-        padding: 0 14px;
+        /* A la derecha se deja el hueco del botón de accesibilidad, que
+           flota encima de esta barra (está en ajustes.css: 2.4rem de
+           ancho y pegado a 14px del borde). Sin este hueco el título no
+           sabe que tiene algo delante y se le mete por debajo: con el
+           texto al 150% "EL BLOG DE RICHI" acababa pasando por detrás
+           del botón. Con el hueco se corta con sus puntos suspensivos,
+           que es justo para lo que está el overflow de aquí abajo.
+           Los 24px son los 14 del botón más 10 de aire. */
+        padding: 0 calc(2.4rem + 24px) 0 14px;
         background: var(--yellow);
     }
 
@@ -33,7 +41,7 @@
         text-overflow: ellipsis;
         white-space: nowrap;
         color: var(--yellow-contrast);
-        font-family: "DM Mono", monospace;
+        font-family: var(--fuente-mono);
         font-size: 0.75rem;
         font-weight: 500;
     }
@@ -128,77 +136,8 @@
         background: rgba(0, 0, 0, 0.5);
     }
 
-    /* En móvil los botones se quedan solo con el icono, más grande. El
-       texto no se quita con display: none, que también se lo quita al
-       lector de pantalla y dejaba botones que se anunciaban como "☾" o
-       "?": se esconde a la vista pero sigue ahí, que es lo que hace
-       .visually-hidden en base.css. */
-    .theme-toggle-text,
-    .cursor-trail-toggle-text {
-        position: absolute;
-        width: 1px;
-        height: 1px;
-        margin: -1px;
-        padding: 0;
-        overflow: hidden;
-        clip: rect(0, 0, 0, 0);
-        white-space: nowrap;
-        border: 0;
-    }
-
-    /* Los dos botones de ajustes, en fila y centrados al final del
-       menú. En escritorio esta caja no existe (display: contents) y
-       cada uno vuelve a su sitio. Es position: relative porque el
-       desplegable del tamaño se cuelga de ella (ver
-       estilos/componentes/texto-tamano.css). */
-    .sidebar-ajustes {
-        position: relative;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 12px;
-        margin-top: 10px;
-    }
-
-    /* Los dos, del mismo tamaño y con el mismo recuadro: en móvil se
-       ven juntos y tienen que parecer lo que son, dos botones
-       hermanos. El de fuera es del color del fondo, como en el del
-       tamaño: aquí no se nota (el menú es de ese color), pero los deja
-       midiendo exactamente lo mismo. */
-    .sidebar-ajustes .theme-toggle,
-    .sidebar-ajustes .tamano-boton {
-        flex: 0 0 auto;
-        width: 2.7rem;
-        height: 2.7rem;
-        margin-top: 0;
-        padding: 0;
-        border: 2px solid var(--yellow);
-        box-shadow: 0 0 0 3px var(--purple);
-        background: var(--purple-lighter);
-    }
-
-    .sidebar-ajustes .theme-toggle {
-        justify-content: center;
-        gap: 0;
-    }
-
-    /* Los estados de los dos, otra vez: la regla de arriba pone un
-       fondo y, al ir este archivo el último de la lista, se comía el
-       "abierto" del mando (que se pone amarillo) y el "encima" del
-       botón del tema. Con la caja delante gana ésta. */
-    .sidebar-ajustes .tamano-boton:hover,
-    .sidebar-ajustes .tamano-boton[aria-expanded="true"] {
-        background: var(--yellow);
-        color: var(--yellow-contrast);
-    }
-
-    .sidebar-ajustes .theme-toggle:hover,
-    .sidebar-ajustes .theme-toggle:focus-visible {
-        color: var(--yellow);
-    }
-
-    /* Fuera de la fila (el del rastro del cursor, que en móvil ni
-       sale) se queda como estaba. */
+    /* Los botones del tema y del brillito, que ahora viven dentro de la
+       ventana de accesibilidad, con algo más de aire para el dedo. */
     .theme-toggle {
         padding: 14px;
     }

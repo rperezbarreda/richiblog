@@ -7,13 +7,46 @@
          el botón de tema lo actualiza scripts/tema.js. -->
     <meta name="theme-color" content="#12091c">
     <script>
+      // El tema, puesto ANTES de que se pinte nada: si esperara al resto
+      // de scripts, la página aparecería con el tema de fábrica y daría
+      // un fogonazo al cambiar. Por eso va escrito aquí, en el <head> de
+      // cada página, y no en un archivo aparte.
+      //
+      // Dos pasos, y en este orden:
+      //   1. Si hay un tema elegido, ése y ya está.
+      //   2. Si no hay ninguno, manda el aparato: con el modo claro
+      //      puesto, la web arranca en claro. Antes arrancaba siempre en
+      //      oscuro y quien tiene el móvil en claro porque ve mejor así
+      //      se comía una web oscura sin haber pedido nada. Esto NO se
+      //      guarda: mientras no se toque el mando, la web sigue a lo
+      //      que diga el sistema.
+      //
+      // Si cambias uno de estos colores, cámbialo también en
+      // estilos/base.css y en COLOR_BARRA de scripts/tema.js.
       (function () {
         try {
-          if (localStorage.getItem("richi-theme") === "light") {
-            document.documentElement.setAttribute("data-theme", "light");
+          var temas = {
+            claro: ["light", "#f3e1d6"],
+            "oscuro-puro": ["puro-oscuro", "#000000"],
+            "claro-puro": ["puro-claro", "#ffffff"],
+            tranquilo: ["tranquilo", "#f2efe9"],
+            "tranquilo-oscuro": ["tranquilo-oscuro", "#1b1e22"],
+            "terminal-verde": ["terminal-verde", "#000000"],
+            "terminal-azul": ["terminal-azul", "#000000"],
+            "terminal-rojo": ["terminal-rojo", "#000000"],
+            "terminal-ambar": ["terminal-ambar", "#000000"]
+          };
+          var guardado = localStorage.getItem("richi-theme");
+          var elegido = temas[guardado];
+          if (!elegido && !guardado &&
+              window.matchMedia("(prefers-color-scheme: light)").matches) {
+            elegido = temas.claro;
+          }
+          if (elegido) {
+            document.documentElement.setAttribute("data-theme", elegido[0]);
             var barra = document.querySelector('meta[name="theme-color"]');
             if (barra) {
-              barra.setAttribute("content", "#f2ded2");
+              barra.setAttribute("content", elegido[1]);
             }
           }
         } catch (e) {}

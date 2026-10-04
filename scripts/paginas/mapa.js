@@ -20,6 +20,7 @@ const MAPA_SECCIONES = {
     relatos: "relatos",
     rol: "rol",
     santuarios: "santuarios",
+    recomendaciones: "recomendaciones",
     otras: "otras páginas",
 };
 

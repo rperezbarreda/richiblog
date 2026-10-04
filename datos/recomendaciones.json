@@ -1,0 +1,65 @@
+[
+    {
+        "nombre": "libros.txt",
+        "clave": "libros",
+        "cosas": [
+            {
+                "titulo": "El Conde de Montecristo",
+                "autor": "Alexandre Dumas",
+                "anyo": "1846",
+                "texto": "Es mi libro favorito, la mejor historia de venganza jamás escrita. Se hace super ameno y adictivo aun teniendo más de 1300 páginas. A ratos es como una telenovela en la que sólo quieres saber que pasa a continuación por el chisme. Es super entretenido de leer. Attendre et espérer.",
+                "imprescindible": true,
+                "imagen": "/imagenes/recomendaciones/el_conde_de_montecristo.webp",
+                "alt": "Portada del libro El Conde de Montecristo, por Alexandre Dumas",
+                "enlace": "https://www.goodreads.com/book/show/22060147-el-conde-de-montecristo",
+                "enlaceTexto": "Enlace a Goodreads"
+            },
+            {
+                "titulo": "El Café de las Leyendas",
+                "autor": "Travis Baldree",
+                "anyo": "2022",
+                "texto": "Muy cortito y reconfortante, si nunca has leído nada de cozy fantasy te recomiendo que empieces por aquí.",
+                "imagen": "/imagenes/recomendaciones/el_cafe_de_las_leyendas.webp",
+                "alt": "Portada de El Café de las Leyendas, por Travis Baldree",
+                "enlace": "https://www.goodreads.com/book/show/63895103-el-caf-de-las-leyendas",
+                "enlaceTexto": "Enlace a Goodreads"
+            },
+            {
+                "titulo": "La Espada del Destino",
+                "autor": "Andrzej Sapkowski",
+                "anyo": "1992",
+                "texto": "En general recomiendo toda la saga de Geralt de Rivia, aunque es el segundo tomo de historias cortas es el pistoletazo de salida de lo que será la historia de Geralt y Ciri es mi favorito. Aparte, la traducción tiene muchísimo mimo y trabajo.",
+                "imprescindible": true,
+                "imagen": "/imagenes/recomendaciones/la_espada_del_destino.webp",
+                "alt": "Portada de La Espada del Destino, por Andrzej Sapkowski",
+                "enlace": "https://www.goodreads.com/book/show/9036325-la-espada-del-destino",
+                "enlaceTexto": "Enlace a Goodreads"
+            }
+        ]
+    },
+    {
+        "nombre": "series.txt",
+        "clave": "series",
+        "cosas": []
+    },
+    {
+        "nombre": "pelis.txt",
+        "clave": "pelis",
+        "cosas": []
+    },
+    {
+        "nombre": "juegos.txt",
+        "clave": "juegos",
+        "cosas": []
+    },
+    {
+        "nombre": "anime.txt",
+        "clave": "anime",
+        "cosas": []
+    },
+    {
+        "nombre": "musica.txt",
+        "clave": "musica",
+        "cosas": []
+    }
+]

@@ -93,7 +93,7 @@
     padding: 1px 5px;
     background: var(--purple-lighter);
     color: var(--yellow);
-    font-family: "DM Mono", monospace;
+    font-family: var(--fuente-mono);
     font-size: 0.75rem;
 }
 
@@ -109,7 +109,7 @@
     background: transparent;
     color: var(--yellow);
     text-transform: uppercase;
-    font-family: "DM Mono", monospace;
+    font-family: var(--fuente-mono);
     font-size: 0.75rem;
     letter-spacing: 1px;
     transition: color 0.1s linear, background-color 0.1s linear;

@@ -1,5 +1,17 @@
 [
     {
+        "fecha": "04-10-2026",
+        "titulo": "Nuevos cambios de accesibilidad y reestructuración de todo el sitio web",
+        "cosas": [
+            "Reestructuración de los apartados personales, movido todo a la categoría mi rincón, y añadida la página de recomendaciones personales.",
+            "Añadido en el index y en la parte de navegación un botón y barra de búsqueda de todos las páginas del blog y de su contenido.",
+            "Añadido en todos los relatos y entradas del blog un botón para poder utilizar el texto a voz y otras opciones de accesibilidad.",
+            "Reestructuración de los apartados y opciones de accesibilidad de toda la web, ahora usando el botón de accesibilidad se abre una ventana modal con todas las opciones de accesibilidad del sitio y un texto de ejemplo para ver los cambios.",
+            "Añadidos nuevos temas de color y efectos visuales para la web, así como mas opciones de accesibilidad como poder ampliar el tamaño de letra, la separación de párrafos o cambiar a un tipo de fuente mas legible.",
+            "Ahora las ventanas que simulan un programa de ordenador pueden minimizarse y reabrirse como añadido visual."
+        ]
+    },
+    {
         "fecha": "28-09-2026",
         "titulo": "Tamaño del texto y arreglos de lectura",
         "cosas": [

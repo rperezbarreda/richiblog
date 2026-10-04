@@ -80,7 +80,9 @@ CARPETAS_EXCLUIDAS = {"herramientas", "fragmentos"}
 
 # El orden en que salen las secciones en la tabla. Lo que no esté aquí
 # va al final, por orden alfabético.
-ORDEN_SECCIONES = ["portada", "blog", "relatos", "rol", "santuarios", "otras"]
+ORDEN_SECCIONES = [
+    "portada", "blog", "relatos", "rol", "santuarios", "recomendaciones", "otras",
+]
 
 
 # Lo que se mira para saber si una página ha cambiado: su <body>, sin
@@ -109,6 +111,8 @@ def seccion_de(url):
         return "rol"
     if url.startswith("/web/santuarios/"):
         return "santuarios"
+    if url.startswith("/web/recomendaciones/"):
+        return "recomendaciones"
     return "otras"
 
 

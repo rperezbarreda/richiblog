@@ -119,7 +119,17 @@ function applyCursorTrailState(button) {
 
 function saveCursorTrailPreference(enabled) {
     try {
-        localStorage.setItem(CURSOR_TRAIL_STORAGE_KEY, String(enabled));
+        // Encendido es lo de fábrica, y lo de fábrica no se guarda: se
+        // borra la clave. Así quien no ha tocado nada y quien lo ha
+        // vuelto a encender quedan igual, y el botón de "dejarlo todo
+        // como estaba" de la ventana de accesibilidad no deja ni rastro
+        // en el almacén. Es la misma regla que sigue guardarAjuste() en
+        // scripts/componentes/ajustes.js.
+        if (enabled) {
+            localStorage.removeItem(CURSOR_TRAIL_STORAGE_KEY);
+        } else {
+            localStorage.setItem(CURSOR_TRAIL_STORAGE_KEY, "false");
+        }
     } catch (error) {
         // localStorage puede fallar (modo privado, cuota, etc.)
         // No es crítico: el efecto seguirá aplicado en esta página.

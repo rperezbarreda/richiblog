@@ -1,0 +1,126 @@
+/* COMPONENTE: VENTANAS QUE SE PLIEGAN DE VERDAD */
+
+/* Las barras de título de las ventanas falsas (−■✕) eran de adorno. Ya
+   no: el − pliega la ventana y deja solo la barra, y el ■ la devuelve a
+   su tamaño. El ✕ sigue siendo una broma y solo suelta brillos.
+   Quien lo mueve es scripts/componentes/ventanas-plegables.js, que a
+   cada barra le pone la clase .ventana-barra, a su ventana
+   .ventana-plegable, y marca la que esté plegada con
+   [data-plegada="si"].
+
+   POR QUÉ ESTA HOJA VA LA ÚLTIMA DE LA LISTA
+   Lo que hace plegar una ventana es esconder todo lo que no es la
+   barra, y eso tiene que ganarle al "display" que cada página le haya
+   puesto a esos trozos (flex, grid, block...). Los selectores de abajo
+   ya pesan más que los de las páginas, pero cargándola al final se gana
+   también cualquier empate sin tener que inflarlos ni recurrir a
+   !important, que en esta web no se usa en ningún sitio. Lo decide
+   hojas_de() en herramientas/actualizar-cabeceras.py. */
+
+/* ==== LA BARRA, QUE AHORA ES UN INTERRUPTOR ==== */
+
+/* Toda la barra responde, no solo los tres cuadraditos: en el móvil
+   miden 0,9rem de lado (unos 13 px) y acertarles con el dedo es una
+   lotería, mientras que la barra entera son casi 40 px de alto de punta
+   a punta. El texto deja de poder seleccionarse porque arrastrar sobre
+   el título para copiarlo acabaría plegando la ventana; es lo que ya
+   hacía la barra de las fichas de los gatos. */
+.ventana-barra {
+    cursor: pointer;
+    user-select: none;
+}
+
+/* El mando de verdad: un botón transparente que cubre la barra entera.
+   Va así, y no envolviendo el título, porque hay títulos que se
+   reescriben solos mientras se usa la página (el de las entradas del
+   diario cambia de mes) y se llevarían el botón por delante.
+   Encima queda el título, que se lee tal cual, y los −■✕, que tienen su
+   propio z-index más alto para que cada uno siga haciendo lo suyo.
+
+   El nombre que oye quien usa un lector de pantalla es el del título
+   (aria-labelledby, que lo pone el script), y si está plegada o no lo
+   dice aria-expanded: "calendario.exe, botón, contraído". */
+.ventana-barra-mando {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    width: 100%;
+    margin: 0;
+    padding: 0;
+    background: none;
+    border: 0;
+    color: inherit;
+    font: inherit;
+    cursor: pointer;
+}
+
+/* El recuadro del foco va metido para dentro (offset negativo) porque
+   el mando ocupa la barra justa: por fuera se le comería el borde de la
+   ventana. currentColor y no --yellow a secas: en la barra amarilla de
+   la ficha de un gato el amarillo no se vería, y ahí currentColor es el
+   color del propio título, que por definición contrasta con su barra. */
+.ventana-barra-mando:focus-visible {
+    outline: 2px solid currentColor;
+    outline-offset: -4px;
+}
+
+/* ==== PLEGADA ==== */
+
+/* Esconder todo menos la barra. Es la regla importante de este archivo
+   y por eso lleva tres clases/atributos: los trozos de dentro de una
+   ventana suelen traer su propio display (.rec-lista es grid,
+   .entries-list es flex...) y hay que poder taparlo. */
+.ventana-plegable[data-plegada="si"] > :not(.ventana-barra) {
+    display: none;
+}
+
+/* Y que la ventana se encoja de verdad. Lo de height/min-height/
+   max-height es para las que vienen con una altura puesta desde su
+   página (las dos tarjetas de la portada van a la misma altura, la
+   ventana de un aviso tiene tope y scroll): sin esto se quedarían
+   igual de altas pero vacías. El padding de abajo se va porque, plegada,
+   lo único que hay dentro es la barra, que llega pegada a los bordes
+   por sus márgenes negativos. */
+.ventana-plegable[data-plegada="si"] {
+    height: auto;
+    min-height: 0;
+    max-height: none;
+    padding-bottom: 0;
+}
+
+.ventana-plegable[data-plegada="si"] > .ventana-barra {
+    margin-bottom: 0;
+    /* Un pelín más de hueco a la derecha que el de siempre (3,7rem).
+       Hay ventanas cuyo ancho lo manda lo que tienen dentro —la del
+       calendario del diario— y, plegadas, lo único que queda dentro es
+       el título: la ventana se encoge hasta él y el texto acaba pegado
+       al primer cuadradito, sin un respiro. Con esto siempre queda un
+       dedo de aire. En las demás no se nota: ahí el título no llega ni
+       de lejos a esa esquina. */
+    padding-right: 4.4rem;
+}
+
+/* ==== CUÁL DE LOS DOS TOCA ==== */
+
+/* El botón que en ese momento no hace nada se queda en hueco: el borde
+   y el símbolo sí, el relleno no. Así se ve de un vistazo que una
+   ventana abierta se pliega con el − (el ■ está apagado) y que una
+   plegada se abre con el ■. Sin esto, pulsar ■ en una ventana abierta
+   no haría nada y parecería que está roto.
+   --window-btn-tinta es el color del borde, que lo pone .window-btn en
+   base.css y lo cambia la barra de los gatos: así el hueco funciona en
+   las dos sin repetir colores aquí. */
+.ventana-plegable:not([data-plegada="si"]) > .ventana-barra [data-ventana-accion="desplegar"],
+.ventana-plegable[data-plegada="si"] > .ventana-barra [data-ventana-accion="plegar"] {
+    background: transparent;
+    color: var(--window-btn-tinta);
+}
+
+/* Al pasar por encima se rellena, toque o no toque: es la forma de
+   saber que el cuadradito es un botón antes de pulsarlo. Va después de
+   la regla del hueco a propósito, que pesan lo mismo y gana la última. */
+.ventana-barra [data-ventana-accion="plegar"]:hover,
+.ventana-barra [data-ventana-accion="desplegar"]:hover {
+    background: var(--window-btn-tinta);
+    color: var(--window-btn-fondo);
+}

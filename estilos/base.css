@@ -69,10 +69,74 @@
     font-display: swap;
 }
 
+/* ---- LA LETRA "MÁS LEGIBLE" ---- */
+
+/* Atkinson Hyperlegible, del Braille Institute. Está dibujada a
+   propósito para quien ve poco: separa las formas que se confunden
+   (la l de la I y del 1, el 0 lleva raya, la rn no parece una m) y
+   abre más los huecos de las letras.
+   Son dos familias hermanas: la normal para lo que se lee de corrido
+   y la Mono para lo que aquí va en monoespaciada (fechas, etiquetas,
+   barras de título). Solo se bajan si alguien enciende esa letra en
+   la ventana de accesibilidad, así que a quien no la use no le cuesta
+   ni un byte, igual que pasa con Pangolin.
+   Solo hay dos grosores, 400 y 700. Donde el sitio pide 500 o 600 el
+   navegador coge el 400 y el 700 respectivamente, que es lo correcto:
+   lo que NO queremos es que se invente una negrita deformando la
+   letra, y declarando los dos grosores de verdad no lo hace. */
+
+@font-face {
+    font-family: "Atkinson Hyperlegible";
+    src: url("/tipografias/atkinson-400.woff2") format("woff2");
+    font-weight: 400;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: "Atkinson Hyperlegible";
+    src: url("/tipografias/atkinson-700.woff2") format("woff2");
+    font-weight: 700;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: "Atkinson Hyperlegible";
+    src: url("/tipografias/atkinson-400-italica.woff2") format("woff2");
+    font-weight: 400;
+    font-style: italic;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: "Atkinson Hyperlegible Mono";
+    src: url("/tipografias/atkinson-mono-400.woff2") format("woff2");
+    font-weight: 400;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: "Atkinson Hyperlegible Mono";
+    src: url("/tipografias/atkinson-mono-700.woff2") format("woff2");
+    font-weight: 700;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: "Atkinson Hyperlegible Mono";
+    src: url("/tipografias/atkinson-mono-400-italica.woff2") format("woff2");
+    font-weight: 400;
+    font-style: italic;
+    font-display: swap;
+}
+
 :root {
     /* CUÁNTO SE AGRANDA EL TEXTO DE TODA LA WEB.
        La cambia el mando "Aa" de arriba a la derecha (ver
-       scripts/componentes/texto-tamano.js) y la deja puesta antes del
+       scripts/componentes/ajustes.js) y la deja puesta antes del
        primer pintado scripts/cargador-scripts.js, leyendo lo que se
        guardó la última vez. Vale 1 mientras nadie la toque.
 
@@ -81,6 +145,25 @@
        poco que va en píxeles y tiene que seguirla lo hace a mano, con
        un calc: de momento, la barra fija del móvil. */
     --escala: 1;
+    /* ===== LAS CINCO FUENTES, EN VARIABLES =====
+       Van así y no escritas a pelo en cada regla porque hay un mando
+       que las cambia TODAS de golpe por la Atkinson Hyperlegible (ver
+       :root[data-letra="legible"] más abajo). Son 112 sitios repartidos
+       por 30 archivos: sin variables habría que tocarlos uno a uno cada
+       vez, y bastaría olvidarse de uno para que ese trozo se quedara
+       con la letra vieja.
+       Si añades CSS nuevo, usa estas variables y no el nombre de la
+       fuente, que si no ese trozo no cambiará con el mando. */
+    /* Lo que se lee de corrido: párrafos, entradas, menú. */
+    --fuente-texto: "Space Grotesk", sans-serif;
+    /* Datos y rótulos: fechas, etiquetas, botones, formularios. */
+    --fuente-mono: "DM Mono", monospace;
+    /* Las barras de título de las ventanas falsas. */
+    --fuente-ventana: "Jersey 10", "DM Mono", monospace;
+    /* Los titulares grandes en cursiva ("bienvenidos a mi blog!"). */
+    --fuente-titular: Georgia, "Times New Roman", serif;
+    /* La de aire escrito a mano, para las notas sueltas. */
+    --fuente-mano: "Pangolin", "Space Grotesk", sans-serif;
     /* Lo que mide la barra amarilla del móvil. Sale de aquí, y no de un
        60px suelto en cada sitio, porque la barra tiene que crecer con
        el texto y hay cuatro cosas que se colocan justo debajo de ella. */
@@ -97,15 +180,37 @@
        de abajo de la pantalla y tapaban lo que hubiera allí. */
     --hueco-abajo: 0px;
 
+    /* ===== LOS COLORES, Y POR QUÉ SON ESTOS =====
+       Están medidos con APCA, que es el baremo de contraste nuevo, y no
+       solo con el cociente de toda la vida (WCAG 2). Los dos miden lo
+       mismo —si un texto se lee sobre su fondo— pero WCAG 2 tiene un
+       fallo conocido justo en el caso de esta web: el gris claro sobre
+       fondo oscuro le sale mucho mejor de lo que se lee de verdad. El
+       --muted de antes (#a9a0b2) daba 7,7:1, de sobra para WCAG, y en
+       APCA se quedaba en Lc 52 de los 75 que pide un texto normal.
+
+       Así que el listón aquí es APCA Lc 75 para cualquier texto, sobre
+       CUALQUIERA de los fondos donde pueda caer: el de la página
+       (--purple) y el de dentro de las tarjetas (--purple-lighter), que
+       es el que menos perdona. Hay un script que lo comprueba entero,
+       las dos paletas y todas las páginas; si cambias un color de aquí,
+       pásalo. */
     color-scheme: dark;
     --bg-texture: url("/imagenes/dark_bg.webp");
     --purple: #12091c;
     --purple-lighter: #2b1a3d;
-    --yellow: #f4c95d;
+    /* Una pizca más claro que el #f4c95d de siempre (a ojo no se
+       distingue): con aquel, el amarillo sobre el fondo de las tarjetas
+       se quedaba en Lc 74,6 y no llegaba por los pelos. */
+    --yellow: #f5ce6c;
     --yellow-contrast: #12091c;
-    --yellow-glow-strong: rgba(244, 201, 93, 0.7);
+    --yellow-glow-strong: rgba(245, 206, 108, 0.7);
     --white: #f4f1f7;
-    --muted: #a9a0b2;
+    /* El gris de lo secundario: fechas, etiquetas, pies de foto, el
+       menú. Antes #a9a0b2 (Lc 50-52, que es lo que marcaba el test).
+       Ahora Lc 78-80, y los títulos en --white siguen once puntos por
+       encima, así que lo secundario se sigue viendo secundario. */
+    --muted: #d6d2da;
     --border: rgba(255, 255, 255, 0.08);
     --surface: rgba(18, 9, 28, 0.94);
     /* Rojo de aviso de error. Tiene que ser distinto del --yellow (que
@@ -116,18 +221,290 @@
 }
 
 :root[data-theme="light"] {
+    /* Mismo listón que arriba: APCA Lc 75 para todo el texto. Aquí el
+       problema no era el gris claro sobre oscuro sino el revés —rojo y
+       marrón sobre crema— y el arreglo se reparte entre los cuatro
+       colores en vez de cargárselo a uno: el rojo baja un poco, el gris
+       baja un poco y los dos cremas suben un poco. Así ninguno cambia
+       tanto como para que el tema deje de parecerse a sí mismo, y el
+       peor de los cruces se queda en Lc 77. */
     color-scheme: light;
     --bg-texture: url("/imagenes/white_bg.webp");
-    --purple: #f2ded2;
-    --purple-lighter: #e6dabf;
-    --yellow: #ad1005;
+    --purple: #f3e1d6;
+    --purple-lighter: #ede5d1;
+    /* Sigue siendo el mismo rojo, un punto más hondo: antes se quedaba
+       en Lc 62 dentro de las tarjetas. */
+    --yellow: #800c04;
     --yellow-contrast: #ede4d6;
-    --yellow-glow-strong: rgba(173, 16, 5, 0.35);
+    --yellow-glow-strong: rgba(128, 12, 4, 0.35);
     --white: #241a12;
-    --muted: #6d5e4d;
+    --muted: #4c4236;
     --border: rgba(36, 26, 18, 0.12);
     --surface: rgba(250, 246, 238, 0.94);
     --error: #7a1d15;
+}
+
+/* ===== LOS DOS TEMAS PUROS =====
+   Alto contraste de verdad: el fondo de un lado y TODO lo demás del
+   otro. No hay grises, ni amarillo, ni la diferencia entre el texto
+   principal y lo secundario. Es a propósito: quien enciende esto quiere
+   que no haya medias tintas, y cualquier color intermedio que dejara
+   sería justo lo que viene a quitarse de encima.
+
+   Por eso tampoco hace falta medirlos: blanco sobre negro es el máximo
+   que puede dar una pantalla (APCA Lc 106, WCAG 21:1) y no hay ningún
+   par que se quede corto.
+
+   La rejilla del fondo se apaga (--bg-texture: none): es un dibujo
+   morado que no pinta nada aquí, y de paso quita ruido detrás del
+   texto, que es la otra cosa que estorba cuando se ve poco.
+
+   Las fotos y los dibujos siguen en color: son contenido, no interfaz,
+   y pasarlos a blanco y negro sería quitarle información a quien mira
+   un gato. */
+
+:root[data-theme="puro-oscuro"] {
+    color-scheme: dark;
+    --bg-texture: none;
+    --purple: #000000;
+    --purple-lighter: #000000;
+    --yellow: #ffffff;
+    --yellow-contrast: #000000;
+    --yellow-glow-strong: rgba(255, 255, 255, 0.7);
+    --white: #ffffff;
+    --muted: #ffffff;
+    /* Las rayitas finas que en los otros temas son casi invisibles aquí
+       se ven del todo: en un modo de alto contraste, un separador que no
+       se ve no separa nada. */
+    --border: #ffffff;
+    --surface: #000000;
+    --error: #ffffff;
+}
+
+:root[data-theme="puro-claro"] {
+    color-scheme: light;
+    --bg-texture: none;
+    --purple: #ffffff;
+    --purple-lighter: #ffffff;
+    --yellow: #000000;
+    --yellow-contrast: #ffffff;
+    --yellow-glow-strong: rgba(0, 0, 0, 0.7);
+    --white: #000000;
+    --muted: #000000;
+    --border: #000000;
+    --surface: #ffffff;
+    --error: #000000;
+}
+
+/* ===== LOS DOS DE TERMINAL =====
+   Un monitor de fósforo de los de antes: fondo negro y todo del mismo
+   color, como los puros pero en verde y en rojo. El fondo de las
+   tarjetas no es negro del todo sino un negro teñido, lo justo para que
+   se note dónde empieza una ventana sin encender nada.
+
+   EL VERDE es el de los monitores de fósforo P1 y no tiene ninguna
+   pega: #33ff66 sobre negro da APCA Lc 87, de los más altos del sitio.
+
+   EL ROJO ES EL ÚNICO DE LOS SEIS QUE NO CUMPLE EL LISTÓN DEL SITIO, Y
+   ESTÁ ELEGIDO ASÍ A SABIENDAS. El rojo es el color con menos brillo que
+   hay: sobre negro, el rojo puro da APCA Lc 37 y WCAG 5,25:1, o sea que
+   pasa el Nivel AA justito y no llega ni al AA grande ni, de lejos, al
+   Lc 75 que cumple todo lo demás. Para que llegara habría que subirlo a
+   #ffb8b8, que ya no es rojo sino rosa; se probó y no era lo que se
+   buscaba. Como el resultado iba a incumplirlo igual, mejor que sea el
+   rojo de verdad y no un salmón a medio camino.
+   Es un tema de adorno que se elige queriendo, y el de fábrica, los dos
+   puros, el claro y el verde siguen cumpliéndolo todo. */
+
+:root[data-theme="terminal-verde"] {
+    color-scheme: dark;
+    --bg-texture: none;
+    --purple: #000000;
+    --purple-lighter: #04170a;
+    --yellow: #33ff66;
+    --yellow-contrast: #000000;
+    --yellow-glow-strong: rgba(51, 255, 102, 0.7);
+    --white: #33ff66;
+    --muted: #33ff66;
+    --border: #33ff66;
+    --surface: #000000;
+    --error: #33ff66;
+}
+
+:root[data-theme="terminal-rojo"] {
+    color-scheme: dark;
+    --bg-texture: none;
+    --purple: #000000;
+    --purple-lighter: #1a0000;
+    --yellow: #ff0000;
+    --yellow-contrast: #000000;
+    --yellow-glow-strong: rgba(255, 0, 0, 0.7);
+    --white: #ff0000;
+    --muted: #ff0000;
+    --border: #ff0000;
+    --surface: #000000;
+    --error: #ff0000;
+}
+
+/* El tercero de terminal. El azul puro (#0000ff) es el color con menos
+   brillo que existe: sobre negro da Lc 16, ni la mitad de lo que hace
+   falta hasta para un borde. Así que éste tira a azul de cielo, que es
+   el azul más claro que sigue leyéndose como azul y no como verde:
+   #44ddff da Lc 75,9 sobre negro, o sea que CUMPLE el mínimo de texto
+   normal, igual que el verde (Lc 87,5) y al revés que el rojo
+   (Lc 37,5). */
+:root[data-theme="terminal-azul"] {
+    color-scheme: dark;
+    --bg-texture: none;
+    --purple: #000000;
+    --purple-lighter: #001018;
+    --yellow: #44ddff;
+    --yellow-contrast: #000000;
+    --yellow-glow-strong: rgba(68, 221, 255, 0.7);
+    --white: #44ddff;
+    --muted: #44ddff;
+    --border: #44ddff;
+    --surface: #000000;
+    --error: #44ddff;
+}
+
+/* ===== EL TEMA TRANQUILO =====
+   Para quien le molesta la pantalla, que no es lo mismo que ver poco.
+   Migraña, fotofobia, mareo visual: ahí lo que estorba no es la falta
+   de contraste sino lo contrario —el blanco puro deslumbra, los colores
+   saturados cansan, una rejilla de fondo marea y una sombra dura
+   vibra—. Por eso NO es el tema claro con otros colores:
+
+     - El fondo no es blanco puro sino un papel roto (#f2efe9), que es
+       lo que recomienda media bibliografía de dislexia y fotofobia.
+     - No hay rejilla de fondo (--bg-texture: none).
+     - El amarillo chillón se cambia por un azul apagado, y eso baja la
+       saturación de todo el sitio de golpe: ese color lo usan los
+       enlaces, los títulos y los recuadros.
+     - Y la tinta no es negro puro sino un marrón muy oscuro, que
+       "vibra" menos sobre el papel roto.
+
+   Que sea suave no quiere decir que se lea peor: está medido como todo
+   lo demás y pasa de sobra. Texto normal Lc 91,6 sobre el fondo y 87,5
+   sobre las tarjetas; el azul de los enlaces, 79,3 y 75,2; el gris de
+   los textos secundarios, 80,7 y 76,5. El mínimo de esta web es 75.
+
+   Va de la mano del mando de "movimiento: quieto" de la ventana de
+   accesibilidad, pero son cosas distintas a propósito: hay quien quiere
+   los colores suaves y los brillitos puestos, y al revés. */
+:root[data-theme="tranquilo"] {
+    color-scheme: light;
+    --bg-texture: none;
+    --purple: #f2efe9;
+    --purple-lighter: #ebe8e1;
+    --yellow: #3f4f66;
+    --yellow-contrast: #ffffff;
+    /* Sin halo: el resplandor de los botones es justo de lo que aquí se
+       quiere huir. */
+    --yellow-glow-strong: rgba(63, 79, 102, 0.25);
+    --white: #2e2a26;
+    --muted: #4f4a44;
+    --border: rgba(46, 42, 38, 0.18);
+    --surface: #f6f4f0;
+    --error: #8a3a32;
+}
+
+/* ===== EL TRANQUILO, DE NOCHE =====
+   El mismo encargo que el tranquilo de día —migraña, fotofobia, mareo
+   visual— pero para quien además lee a oscuras. No es el tema oscuro
+   con otros colores, igual que aquél no era el claro con otros colores:
+
+     - El fondo no es negro puro sino un gris muy oscuro con algo de
+       azul (#1b1e22). El negro puro con texto blanco encima es lo que
+       produce el "halation", ese reborde borroso que hace que las
+       letras parezcan vibrar; con astigmatismo es insoportable y es
+       justo lo que se viene a evitar.
+     - La tinta tampoco es blanco puro, sino un hueso cálido (#e2ddd5),
+       por lo mismo pero al revés.
+     - El acento es un arena apagado en vez del amarillo chillón: baja
+       la saturación de golpe en los enlaces, los títulos y los marcos.
+     - Y sin rejilla de fondo, como su hermano de día.
+
+   Medido como todo: texto normal Lc 84,5 sobre el fondo y 83,5 sobre
+   las tarjetas; el arena de los enlaces, 81,8 y 80,7; el gris de los
+   textos secundarios, 79,1 y 78,1. El mínimo de esta web es 75. */
+:root[data-theme="tranquilo-oscuro"] {
+    color-scheme: dark;
+    --bg-texture: none;
+    --purple: #1b1e22;
+    --purple-lighter: #212529;
+    --yellow: #e6d8b8;
+    --yellow-contrast: #1b1e22;
+    /* Sin halo, como en el tranquilo de día: el resplandor de los
+       botones es de lo que aquí se quiere huir. */
+    --yellow-glow-strong: rgba(230, 216, 184, 0.25);
+    --white: #e2ddd5;
+    --muted: #dad4cb;
+    --border: rgba(226, 221, 213, 0.2);
+    --surface: #171a1d;
+    --error: #f6cbc3;
+}
+
+/* El cuarto de terminal: el ámbar de los monitores de fósforo P3, que
+   es el otro color clásico junto al verde. El ámbar de verdad
+   (#ffb000) se queda en Lc 68,6 sobre negro, por debajo del mínimo del
+   sitio, así que va un punto más claro (#ffc83d): Lc 78,2, sigue
+   leyéndose como ámbar y cumple. El rojo sigue siendo el único de los
+   cuatro que no llega. */
+:root[data-theme="terminal-ambar"] {
+    color-scheme: dark;
+    --bg-texture: none;
+    --purple: #000000;
+    --purple-lighter: #1a1200;
+    --yellow: #ffc83d;
+    --yellow-contrast: #000000;
+    --yellow-glow-strong: rgba(255, 200, 61, 0.7);
+    --white: #ffc83d;
+    --muted: #ffc83d;
+    --border: #ffc83d;
+    --surface: #000000;
+    --error: #ffc83d;
+}
+
+/* ===== LA LETRA "MÁS LEGIBLE" =====
+   El mando de la ventana de accesibilidad pone data-letra="legible" en
+   el <html> y con eso cambian las cinco fuentes de golpe. No hace falta
+   tocar ninguna regla más: todas piden su fuente por la variable.
+
+   Las cinco van a Atkinson, no solo la del texto: si alguien enciende
+   esto es porque le cuesta leer, y dejar la pixelada de las barras de
+   título o la de aire manuscrito a medias sería dejarle sin arreglar
+   justo lo más difícil. La Mono se queda para lo que ya era
+   monoespaciado, que ahí la alineación en columnas sí importa (las
+   fechas de un listado, el calendario del diario).
+
+   Detrás de cada una se deja la de siempre como respaldo: si algún día
+   falta un archivo, se cae a la que había y no a la del sistema. */
+/* ===== LA SEPARACIÓN ENTRE LÍNEAS =====
+   El otro mando de la ventana. Los números viven aquí y no en el
+   JavaScript: así se cambian sin tocar código, y el script solo tiene
+   que poner el nombre del escalón en el <html>. Quién lo aplica, y a
+   qué, está en estilos/componentes/ajustes.css. */
+:root[data-interlineado="amplio"] {
+    --interlineado: 2;
+}
+
+:root[data-interlineado="muy-amplio"] {
+    --interlineado: 2.4;
+}
+
+:root[data-letra="legible"] {
+    --fuente-texto: "Atkinson Hyperlegible", "Space Grotesk", sans-serif;
+    --fuente-mono: "Atkinson Hyperlegible Mono", "DM Mono", monospace;
+    /* Las barras de título llevan la PROPORCIONAL y no la Mono, al revés
+       que el resto de lo monoespaciado. Dos razones: la Jersey 10 que
+       sustituye es una pixelada muy estrecha y la Mono ocupa un tercio
+       más, con lo que "gatin_random.exe" se salía de la ventanita del
+       gatín; y aquí no hay nada que alinear en columnas, que es para lo
+       único que hace falta una monoespaciada. */
+    --fuente-ventana: "Atkinson Hyperlegible", "Jersey 10", sans-serif;
+    --fuente-titular: "Atkinson Hyperlegible", Georgia, serif;
+    --fuente-mano: "Atkinson Hyperlegible", "Space Grotesk", sans-serif;
 }
 
 * {
@@ -167,7 +544,7 @@ body {
     flex-direction: column;
     background: var(--purple);
     color: var(--white);
-    font-family: "Space Grotesk", sans-serif;
+    font-family: var(--fuente-texto);
     transition: background-color 0.1s linear, color 0.1s linear;
 }
 
@@ -202,7 +579,7 @@ body::before {
     padding: 6px 10px;
     background: var(--surface);
     color: var(--white);
-    font-family: "DM Mono", monospace;
+    font-family: var(--fuente-mono);
     font-size: 0.625rem;
     letter-spacing: 0.3px;
 }
@@ -255,7 +632,7 @@ body::before {
     border: 2px solid var(--yellow);
     background: transparent;
     color: var(--yellow);
-    font-family: "DM Mono", monospace;
+    font-family: var(--fuente-mono);
     font-size: 0.8125rem;
     text-decoration: none;
     transition: color 0.15s linear, background-color 0.15s linear;
@@ -282,7 +659,7 @@ body::before {
     padding: 10px 16px;
     background: var(--yellow);
     color: var(--yellow-contrast);
-    font-family: "DM Mono", monospace;
+    font-family: var(--fuente-mono);
     font-size: 0.8125rem;
     font-weight: 600;
     text-decoration: none;
@@ -336,18 +713,29 @@ main.standalone-main .home {
 }
 
 .window-btn {
+    /* Los dos colores del botón, en variables y no escritos a pelo, por
+       dos razones. Una: una cabecera que vaya al revés (la barra
+       amarilla de la ficha de un gato) cambia estas dos y ya está, sin
+       repetir las tres propiedades de abajo. Y dos: así el botón se
+       puede dibujar "en hueco" —fondo transparente y el símbolo del
+       color de la tinta— sin tener que adivinar de qué color era el
+       borde, que es lo que hace
+       estilos/componentes/ventanas-plegables.css con el botón que en
+       ese momento no hace nada. */
+    --window-btn-tinta: var(--yellow);
+    --window-btn-fondo: var(--yellow-contrast);
     display: flex;
     align-items: center;
     justify-content: center;
     width: 1.3rem;
     height: 1.3rem;
-    border: 2px solid var(--yellow);
-    background: var(--yellow);
+    border: 2px solid var(--window-btn-tinta);
+    background: var(--window-btn-tinta);
     /* El símbolo de dentro es un SVG que toma currentColor, así que con
        cambiar el color del botón cambia también el dibujo: eso es lo
        que hace que las cabeceras invertidas (fichas de gatos, entradas
        de blog) funcionen sin repetir nada. */
-    color: var(--yellow-contrast);
+    color: var(--window-btn-fondo);
     user-select: none;
 }
 
@@ -400,6 +788,10 @@ section {
 
 .home-title {
     color: var(--white);
+    /* Partir por donde sea antes que salirse: con el texto al 150% en
+       una pantalla de 320, "bienvenidos" solo ya no cabe de una línea
+       y se iba por el borde. */
+    overflow-wrap: break-word;
     font-size: clamp(4.375rem, 9vw, 8.75rem);
     font-weight: 500;
     line-height: 0.81;
@@ -409,7 +801,7 @@ section {
 
 .home-title em {
     color: var(--yellow);
-    font-family: Georgia, "Times New Roman", serif;
+    font-family: var(--fuente-titular);
     font-weight: 400;
     letter-spacing: -6px;
 }
@@ -605,7 +997,7 @@ section {
 .entry-preview-date {
     flex-shrink: 0;
     color: var(--muted);
-    font-family: "DM Mono", monospace;
+    font-family: var(--fuente-mono);
     font-size: 0.6875rem;
     white-space: nowrap;
 }
@@ -616,7 +1008,7 @@ section {
 .entry-preview-minutos {
     flex-shrink: 0;
     color: var(--muted);
-    font-family: "DM Mono", monospace;
+    font-family: var(--fuente-mono);
     font-size: 0.6875rem;
     white-space: nowrap;
 }
@@ -648,20 +1040,24 @@ section {
     border: 1px solid var(--border);
     background: var(--purple);
     color: var(--muted);
-    font-family: "DM Mono", monospace;
+    font-family: var(--fuente-mono);
     font-size: 0.5625rem;
     letter-spacing: 0.5px;
     text-decoration: none;
     transition: color 0.12s linear, border-color 0.12s linear;
 }
 
-/* En modo claro las etiquetas se perdían: gris apagado sobre crema,
-   4,5:1 justos. Aquí van con el rojo del tema —texto, borde y un
-   fondo rojo muy suave— para que se lean como lo que son, una marca
-   de categoría. Medido: 7,4:1 contra el fondo de las tarjetas. */
+/* En modo claro las etiquetas se perdían: gris apagado sobre crema.
+   Aquí van con el rojo del tema —texto y borde— para que se lean como
+   lo que son, una marca de categoría.
+   Llevaban además un fondo rojo muy suave, rgba(173,16,5,.08), y se ha
+   quitado: ese tinte oscurecía el crema justo debajo del texto rojo y
+   era lo peor medido de toda la web (Lc 55 de los 75 que hacen falta).
+   Bajándole la transparencia tampoco llegaba, así que fuera: el borde
+   ya dice que es una etiqueta, y sin él el rojo se lee a Lc 78. */
 :root[data-theme="light"] .entry-tag {
     border-color: var(--yellow);
-    background: rgba(173, 16, 5, 0.08);
+    background: transparent;
     color: var(--yellow);
 }
 
@@ -686,7 +1082,7 @@ section {
 .entries-empty,
 .entries-error {
     color: var(--muted);
-    font-family: "DM Mono", monospace;
+    font-family: var(--fuente-mono);
     font-size: 0.8125rem;
     list-style: none;
 }
@@ -707,4 +1103,118 @@ section {
 
 .lightbox-trigger img {
     display: block;
+}
+
+/* ==== LOS ENLACES QUE SALEN DE LA WEB ==== */
+
+/* La flechita que marca un enlace a otra web. La pone
+   scripts/componentes/enlaces-fuera.js, que además mete dentro del
+   enlace un "(enlace externo)" escondido a la vista: un dibujo solo no
+   vale, porque quien escucha la página no lo ve.
+
+   Va de fondo y con máscara, no como carácter ni como texto de un
+   ::after. Un carácter lo dibuja la fuente de quien visita la web y sale
+   de cualquier tamaño (ya pasó con los botones de las ventanas), y el
+   contenido de un ::after lo leen en voz alta algunos lectores de
+   pantalla: anunciarían "flecha hacia el noreste" en medio de la frase.
+   Con máscara el dibujo toma el color del texto y no lo lee nadie.
+
+   En em y no en píxeles: así crece con el texto que acompaña, incluido
+   cuando se agranda con el mando de accesibilidad. */
+.enlace-fuera::after {
+    content: "";
+    display: inline-block;
+    width: 0.62em;
+    height: 0.62em;
+    margin-left: 0.28em;
+    vertical-align: -0.02em;
+    background-color: currentColor;
+    -webkit-mask: var(--flecha-fuera) no-repeat center / contain;
+    mask: var(--flecha-fuera) no-repeat center / contain;
+}
+
+/* ===== LAS SIGLAS =====
+   CRT, RSS, AAA, DnD... Van en <abbr title="lo que significa">, y eso
+   hace dos cosas: los navegadores lo enseñan al dejar el ratón encima, y
+   algunos lectores de pantalla lo leen en vez de deletrear las letras.
+
+   Se marcan con un subrayado de puntos. El de serie de los navegadores
+   es casi invisible y además cambia de uno a otro, así que se pone a
+   mano. No va en color: un aviso que solo se distingue por el color se
+   lo pierde quien no distingue ese color (pauta 1.4.1), y aquí además
+   el color ya significa otra cosa en media web —los enlaces—.
+
+   El cursor de interrogación es la pista de que ahí hay algo que mirar;
+   quien navega con teclado o con lector no lo necesita porque el texto
+   del title le llega por otro lado. */
+abbr[title] {
+    text-decoration: underline dotted;
+    text-underline-offset: 0.2em;
+    cursor: help;
+}
+
+/* Dentro de un enlace o de un botón no se subraya: ahí ya hay un
+   subrayado o un recuadro que dice lo que es, y dos rayas seguidas se
+   leen como un error de pintado. El title sigue estando. */
+a abbr[title],
+button abbr[title] {
+    text-decoration: none;
+    cursor: inherit;
+}
+
+/* CUANDO EL ENLACE ES UNA TARJETA Y NO UNA FRASE.
+   En los listados, el enlace no es un trozo de texto sino una caja en
+   columna: título arriba, fecha y etiquetas debajo. La flecha, que
+   cuelga del enlace entero, se convertía ahí en un trozo más de esa
+   columna y se iba ella sola a una línea aparte, debajo del título. Se
+   ve en novedades.exe de la portada: "Fichas DnD 5e" y debajo una
+   flecha suelta.
+
+   Así que en esos casos la flecha se le pone AL TÍTULO, que es donde
+   acaba el texto, y se le quita al enlace. El :has() es lo que permite
+   preguntar "¿este enlace lleva un título dentro?"; va dentro de un
+   @supports para que en un navegador que no lo entienda se quede como
+   estaba —la flecha en su línea— en vez de salir dos veces. */
+@supports selector(:has(*)) {
+    .enlace-fuera:has(.entry-preview-title)::after {
+        display: none;
+    }
+
+    .enlace-fuera .entry-preview-title::after {
+        content: "";
+        display: inline-block;
+        width: 0.62em;
+        height: 0.62em;
+        margin-left: 0.28em;
+        vertical-align: -0.02em;
+        background-color: currentColor;
+        -webkit-mask: var(--flecha-fuera) no-repeat center / contain;
+        mask: var(--flecha-fuera) no-repeat center / contain;
+    }
+}
+
+/* EN EL MODO DE ALTO CONTRASTE DE WINDOWS la flecha desaparecía, y es
+   un fallo fino de explicar: ese modo tira los colores de la web y pone
+   los suyos, y entre lo que sustituye está background-color. Como el
+   dibujo de la flecha ES un background-color recortado con una máscara,
+   se quedaba blanca sobre fondo blanco mientras el texto del enlace se
+   iba al azul del sistema. Medido forzando el modo: texto en
+   rgb(0,0,159) y flecha en rgb(255,255,255).
+   currentColor tampoco vale aquí, porque es justamente lo que el modo
+   deja de respetar en esta propiedad. Hay que nombrar el color del
+   sistema: LinkText es el que usa para los enlaces, así que la flecha
+   vuelve a ir del mismo color que su enlace, sea cual sea el que haya
+   elegido quien visita. Es el mismo apaño que ya llevan los iconos de
+   redes en estilos/paginas/portada.css.
+   El aviso escondido ("enlace externo") nunca dependió de esto: quien
+   escucha la página se enteraba igual. Esto es para quien ve. */
+@media (forced-colors: active) {
+    .enlace-fuera::after,
+    .enlace-fuera .entry-preview-title::after {
+        background-color: LinkText;
+    }
+}
+
+:root {
+    --flecha-fuera: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M9 4h11v11h-2.6V8.4L6.3 19.5 4.5 17.7 15.6 6.6H9z'/%3E%3C/svg%3E");
 }

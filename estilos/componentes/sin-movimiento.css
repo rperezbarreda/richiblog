@@ -1,0 +1,75 @@
+/* COMPONENTE: DEJARLO TODO QUIETO */
+
+/* El mando "movimiento: quieto" de la ventana de accesibilidad pone
+   data-movimiento="quieto" en el <html> y aquí se para todo lo que se
+   mueve: el parpadeo del filtro CRT, el cursor de los temas de
+   terminal, el del gatete del 404, la cinta de frases de la portada,
+   las chispas de los botones y las transiciones de medio sitio.
+
+   POR QUÉ HACE FALTA SI YA ESTÁ prefers-reduced-motion
+   ----------------------------------------------------
+   Esa regla del sistema ya se respeta en 27 sitios del CSS, y se queda
+   como está. Pero es un ajuste de todo el ordenador o el móvil: quien
+   lo enciende lo enciende para TODO, y mucha gente no lo tiene puesto
+   —o no sabe que existe— y aun así un parpadeo le da dolor de cabeza en
+   esta web en concreto. Esto es lo mismo, a mano y solo aquí.
+
+   Y al revés no: si el sistema pide menos movimiento, elegir "normal"
+   aquí NO lo devuelve. Las reglas del sistema siguen donde estaban y
+   esto solo suma. Lo que pide el aparato manda.
+
+   ESTE ARCHIVO SE CARGA EL ÚLTIMO (va en ULTIMAS, en
+   herramientas/actualizar-cabeceras.py) y eso es parte de cómo
+   funciona: cuando dos reglas pesan lo mismo gana la que llega después,
+   así que estando al final se evita tener que inflar los selectores. En
+   esta web no se usa !important en ningún archivo y aquí tampoco. */
+
+/* LA REGLA GENERAL. Cubre de un tiro casi todo, porque casi todas las
+   animaciones y transiciones del sitio van puestas sobre una sola clase
+   (peso 0-1-0) y esto pesa más (0-2-0).
+
+   No se pone "animation: none" sino una duración de un milisegundo y
+   una sola vuelta: hay animaciones que DEJAN algo puesto al terminar
+   (las chispas del cursor se desvanecen con "forwards"), y cortándolas
+   en seco se quedarían a medias y para siempre en pantalla. Así llegan
+   al final de inmediato, que es lo que se busca. */
+:root[data-movimiento="quieto"] *,
+:root[data-movimiento="quieto"] *::before,
+:root[data-movimiento="quieto"] *::after {
+    animation-duration: 1ms;
+    animation-iteration-count: 1;
+    transition-duration: 1ms;
+    scroll-behavior: auto;
+}
+
+/* LAS DOS EXCEPCIONES. Los dos parpadeos del filtro CRT y de los temas
+   de terminal se escriben con selectores más largos que la regla de
+   arriba (llevan el tema y el estado del filtro), así que le ganarían.
+   Se repiten aquí añadiéndoles data-movimiento, que suma peso sin
+   trucos: es una condición de verdad, no un selector repetido para
+   hacer bulto. */
+:root[data-movimiento="quieto"][data-crt="si"]::after {
+    animation: none;
+}
+
+:root[data-movimiento="quieto"][data-theme^="terminal-"] .recent-entries-header h2::after,
+:root[data-movimiento="quieto"][data-theme^="terminal-"] .gatin-random-header h2::after {
+    animation: none;
+}
+
+/* LA CINTA DE FRASES de la portada necesita trato aparte, y por un
+   motivo que no se ve leyendo el CSS: scripts/componentes/frases.js le
+   calcula la duración según lo larga que sea la fila y se la escribe
+   EN EL ATRIBUTO style del elemento. Un estilo escrito ahí le gana a
+   cualquier regla de cualquier hoja (salvo con !important, que aquí no
+   se usa), así que la duración de un milisegundo de arriba no le hacía
+   nada: medido, se quedaba en sus 46 segundos tan tranquila.
+
+   Lo que sí funciona es pararla en vez de acelerarla, que además es lo
+   suyo: play-state no lo escribe nadie en el style, y una cinta parada
+   no gasta batería ni sigue moviéndose por detrás. Es exactamente lo
+   mismo que hace su propio botón de pausa, que sigue estando y se
+   recuerda aparte: los dos valen y no se estorban. */
+:root[data-movimiento="quieto"] .quotes-track {
+    animation-play-state: paused;
+}

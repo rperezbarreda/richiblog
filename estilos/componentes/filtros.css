@@ -19,7 +19,7 @@
 
 .filtros-label {
     color: var(--muted);
-    font-family: "DM Mono", monospace;
+    font-family: var(--fuente-mono);
     font-size: 0.75rem;
     text-transform: uppercase;
     letter-spacing: 1px;
@@ -43,7 +43,7 @@
     border: 2px solid var(--yellow);
     background: transparent;
     color: var(--yellow);
-    font-family: "DM Mono", monospace;
+    font-family: var(--fuente-mono);
     font-size: 0.75rem;
     letter-spacing: 0.5px;
     cursor: pointer;
@@ -74,7 +74,7 @@
 .filtros-vacio {
     margin: 0;
     color: var(--muted);
-    font-family: "DM Mono", monospace;
+    font-family: var(--fuente-mono);
     font-size: 0.8125rem;
 }
 
@@ -91,7 +91,7 @@
     border: 2px solid var(--yellow);
     background: var(--yellow);
     color: var(--yellow-contrast);
-    font-family: "DM Mono", monospace;
+    font-family: var(--fuente-mono);
     font-size: 0.75rem;
     letter-spacing: 0.5px;
     text-transform: uppercase;

@@ -44,6 +44,11 @@ async function initializeMisMovidasFeed() {
         }
 
         list.innerHTML = sorted.slice(0, HOME_PROJECTS_COUNT).map(itemToEntryCard).join("");
+        // Los títulos, cortados a lo que quepa en la caja. Lo mide
+        // scripts/componentes/recortar-titulos.js.
+        if (typeof window.recortarTitulos === "function") {
+            window.recortarTitulos(list);
+        }
     } catch (error) {
         list.innerHTML =
             '<li class="entries-error">No se han podido cargar los proyectos ahora mismo.</li>';
@@ -120,7 +125,11 @@ function atributosDeSalida(destino) {
 }
 
 function itemToEntryCard(item) {
-    const title = escapeHtml(item.title || "Sin título");
+    // Entero: lo recorta después scripts/componentes/recortar-titulos.js
+    // midiendo la caja, igual que en la ventana de al lado. Las dos
+    // están en la misma fila de la portada y si una partiera los
+    // títulos y la otra no, la fila saldría con un escalón.
+    const title = escapeHtml((item.title || "Sin título").trim());
     const destino = urlSegura(item.url || "#");
     const salida = atributosDeSalida(destino);
 

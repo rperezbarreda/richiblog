@@ -10,6 +10,26 @@
 //   loadComponent("mi-contenedor", "/components/mi-cosa.html", () => {
 //       inicializarMiCosa();
 //   });
+//
+// CUIDADO CON EL AVISO: NO SE DA ANTES DE TIEMPO
+// ----------------------------------------------
+// El aviso de "ya está puesto" (onLoaded, y el sidebar:loaded que manda
+// barra-lateral.js) espera a que el navegador haya terminado de leer la
+// página. No es una manía: media docena de scripts se enganchan a ese
+// aviso —el de los ajustes, el del tema, el del gatín, el de los
+// enlaces de fuera— y todos van con defer, o sea que se ejecutan uno
+// detrás de otro al final.
+//
+// Desde que el menú se pide en el <head> (ver actualizar-cabeceras.py),
+// el trozo de HTML puede estar ya aquí cuando arranca barra-lateral.js.
+// Si el aviso saliera en ese mismo momento, saldría ENTRE un script y el
+// siguiente: los que vinieran detrás todavía no se habrían enganchado y
+// se lo perderían. Pasó, y de la peor manera posible: el botón de
+// accesibilidad aparecía pero no abría nada.
+//
+// Esperando a DOMContentLoaded no hay carrera que valga: para entonces
+// se han ejecutado todos los scripts con defer, estén o no listos los
+// fragmentos.
 
 async function loadComponent(elementId, file, onLoaded) {
     const container = document.getElementById(elementId);
@@ -18,23 +38,59 @@ async function loadComponent(elementId, file, onLoaded) {
     }
 
     try {
-        // Con su versión en la dirección: si no, al cambiar la barra
-        // lateral quien ya había entrado seguía viendo la de antes
-        // (ver el comentario de cargador-scripts.js).
-        const response = await fetch(window.conVersion(file));
+        // ¿Lo pidió ya cargador-scripts.js nada más empezar? La barra
+        // lateral sí: la pide él, antes de que el navegador termine de
+        // leer la página, porque es lo primero que hace falta ver. Si
+        // está, aquí no se pide nada; se espera a lo que ya venía de
+        // camino. Si no (cualquier otro fragmento, o si aquello falló),
+        // se pide ahora como siempre.
+        const adelanto = window.adelantoDeFragmentos || {};
+        let html = adelanto[file] ? await adelanto[file] : null;
 
-        if (!response.ok) {
-            throw new Error(`No se pudo cargar ${file}`);
+        if (html === null) {
+            // Con su versión en la dirección: si no, al cambiar la
+            // barra lateral quien ya había entrado seguía viendo la de
+            // antes (ver el comentario de cargador-scripts.js).
+            const response = await fetch(window.conVersion(file));
+
+            if (!response.ok) {
+                throw new Error(`No se pudo cargar ${file}`);
+            }
+
+            html = await response.text();
         }
 
-        const html = await response.text();
         container.innerHTML = html;
 
         if (typeof onLoaded === "function") {
+            await cuandoEsteLeidaLaPagina();
             onLoaded();
         }
 
     } catch (error) {
         console.error(`Error cargando el componente (${file}):`, error);
     }
+}
+
+// La espera de arriba. Se prepara AQUÍ, al cargarse este archivo, y no
+// dentro de loadComponent(): este archivo va con defer, así que esto
+// corre seguro antes de que la página esté leída y el apunte llega a
+// tiempo.
+//
+// Ojo con document.readyState, que para esto engaña: pasa a
+// "interactive" en cuanto se acaba de leer el HTML, o sea ANTES de que
+// se ejecuten los scripts con defer. Preguntarle si vale "loading" daba
+// que no cuando todavía quedaban scripts por correr, que es justo el
+// caso que esto quiere evitar. Solo "complete" (que llega más tarde, con
+// las imágenes) es una respuesta de fiar.
+const FRAGMENTOS_PAGINA_LEIDA = new Promise((seguir) => {
+    if (document.readyState === "complete") {
+        seguir();
+        return;
+    }
+    document.addEventListener("DOMContentLoaded", seguir, { once: true });
+});
+
+function cuandoEsteLeidaLaPagina() {
+    return FRAGMENTOS_PAGINA_LEIDA;
 }

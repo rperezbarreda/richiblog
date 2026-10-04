@@ -16,7 +16,8 @@
 //
 //   <div class="filtros" data-filtros
 //        data-filtros-items=".portfolio-card"
-//        data-filtros-categorias="aventuras, mapas, sistemas">
+//        data-filtros-categorias="aventuras, mapas, sistemas"
+//        data-filtros-orden="aparicion">   <- opcional, ver categoriasDe
 //       <span class="filtros-label" id="filtros-label">filtrar:</span>
 //       <button data-filtros-toggle …>   <- solo se ve en móvil
 //       <div class="filtros-list" id="filtros-lista" role="group"
@@ -131,7 +132,17 @@ function categoriasDe(caja, items) {
         .map((c) => c.trim())
         .filter(Boolean);
     const usadas = items.map(categoriaDe).filter(Boolean);
-    return [...new Set([...declaradas, ...usadas])].sort((a, b) => a.localeCompare(b, "es"));
+    const todas = [...new Set([...declaradas, ...usadas])];
+    // Por orden alfabético, que es lo que se espera de una lista de
+    // categorías sueltas. Con data-filtros-orden="aparicion" se respeta
+    // en cambio el orden en que salen en la página: eso lo usan las
+    // recomendaciones, donde los botones acompañan a unas ventanitas
+    // que ya vienen ordenadas a mano en su JSON y encontrarlos en otro
+    // orden despista.
+    if ((caja.getAttribute("data-filtros-orden") || "").trim() === "aparicion") {
+        return todas;
+    }
+    return todas.sort((a, b) => a.localeCompare(b, "es"));
 }
 
 // Pulsar un botón: "todas" vacía la selección; cualquier otro la pone o

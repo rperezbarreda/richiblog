@@ -1,25 +1,42 @@
 // =========================================
-// CARGA DINÁMICA DE JS SEGÚN LA URL
+// LO QUE TIENE QUE PASAR ANTES DE PINTAR
 // =========================================
-// Sustituye el bloque de <script defer> repetido en cada página. Mira
-// la ruta actual y escribe solo los scripts que esa página necesita.
+// Este archivo es el único JS CON ARCHIVO PROPIO que se ejecuta sin
+// "defer", o sea el único que retrasa el primer pintado. Por eso lleva
+// dentro solo dos cosas, y las dos tienen que pasar antes de que se vea
+// nada:
 //
-// El CSS ya no funciona así: sus <link> van escritos en el <head> de
-// cada página (los pone herramientas/actualizar-cabeceras.py) porque
-// medido costaba ~200 ms de pantalla en blanco tener que pedir un
-// script antes de descubrir las hojas de estilo. Con el JS no pasa:
-// los <script> que escribe este archivo llevan "defer", o sea que no
-// retrasan el pintado, así que aquí no se gana nada por escribirlos a
-// mano y sí se pierde en comodidad.
+//   1. La lista de versiones (el ?v= anticaché) y window.conVersion(),
+//      que es lo que usan los pocos archivos que se piden ya dentro del
+//      navegador.
+//   2. Los ajustes de accesibilidad guardados (tamaño del texto, letra,
+//      separación entre líneas, filtro CRT): si llegaran con el resto
+//      de scripts, la página se pintaría a tamaño normal y daría un
+//      salto delante de los ojos de quien justamente necesita que no.
 //
-// IMPORTANTE: este script se ejecuta SIN "defer" y colocado justo
-// donde antes iban los <script defer>, para que document.write() los
-// inserte ahí mismo mientras el navegador aún está leyendo el HTML.
-// Los scripts que escribe sí llevan "defer", así que se siguen
-// ejecutando en orden y después de parsear todo el HTML, exactamente
-// igual que si estuvieran escritos a mano. Si se moviera a "defer",
-// document.write() borraría el documento entero — por eso se queda
-// tal cual.
+// (La barra lateral se pide incluso antes que esto: con un <script> de
+// una línea escrito en el <head> de cada página, delante del CSS. Está
+// explicado en herramientas/actualizar-cabeceras.py.)
+//
+// LO QUE ANTES ESTABA AQUÍ Y YA NO
+// --------------------------------
+// Este archivo también repartía el JS de cada página: miraba la URL y
+// escribía con document.write() los <script defer> que tocaban. Ahora
+// esa lista la escribe herramientas/actualizar-cabeceras.py en el
+// <head> de cada página, igual que ya hacía con el CSS.
+//
+// El motivo es medido: mientras los scripts los pedía este archivo, el
+// navegador no se enteraba de que existían hasta haberlo bajado y
+// ejecutado, así que no empezaban a bajarse hasta los 814 ms (con la
+// red frenada a 3G). Escritos en el <head> empiezan a los 190, con el
+// CSS. "defer" nunca retrasó el pintado —ese era el argumento para
+// dejarlo así—, pero sí retrasaba todo lo que se puede tocar: el menú
+// tardaba millón y medio de milisegundos en aparecer.
+//
+// De regalo se fue un apaño feo: este archivo tenía que adivinar qué
+// tipo de página era quitándole el ".html" a la URL, porque Neocities
+// sirve las páginas con y sin extensión, y alguna se quedaba sin su JS.
+// Escrito en cada página, eso no puede pasar.
 
 // =========================================
 // VERSIONES DE LOS ARCHIVOS (ANTI-CACHÉ)
@@ -50,37 +67,8 @@
 (function versionesDeArchivos() {
     const VERSIONES = {
         // ==== generado ====
-        "/fragmentos/barra-lateral.html": "049bc769",
+        "/fragmentos/barra-lateral.html": "01b79f68",
         "/fragmentos/frases.html": "81a36459",
-        "/scripts/componentes/aviso.js": "7b9fce19",
-        "/scripts/componentes/barra-lateral.js": "da4175b8",
-        "/scripts/componentes/botones-ventana.js": "c77fe3fa",
-        "/scripts/componentes/buscador.js": "e2007b48",
-        "/scripts/componentes/cargador-fragmentos.js": "11a98bcb",
-        "/scripts/componentes/chispas-botones.js": "ced17e38",
-        "/scripts/componentes/filtros.js": "ed75481d",
-        "/scripts/componentes/frases.js": "999803de",
-        "/scripts/componentes/gatin-random.js": "212dad18",
-        "/scripts/componentes/lectura.js": "55ef46ad",
-        "/scripts/componentes/rastro-cursor.js": "3ca8334c",
-        "/scripts/componentes/subir.js": "2e242c61",
-        "/scripts/componentes/teclado-scroll.js": "5847ef8b",
-        "/scripts/componentes/texto-tamano.js": "0ff087da",
-        "/scripts/componentes/visor-imagenes.js": "48184405",
-        "/scripts/paginas/changelog.js": "b47d27a6",
-        "/scripts/paginas/diario.js": "a145507e",
-        "/scripts/paginas/entradas-blog.js": "57493648",
-        "/scripts/paginas/guestbook-texto.js": "5ef34bf3",
-        "/scripts/paginas/guestbook.js": "4d3c0d57",
-        "/scripts/paginas/mapa.js": "98984720",
-        "/scripts/paginas/novedades.js": "4d11ce1e",
-        "/scripts/paginas/otras-entradas.js": "44aaa9e9",
-        "/scripts/paginas/relatos.js": "9307705c",
-        "/scripts/paginas/reto.js": "f75ee6a7",
-        "/scripts/paginas/rol.js": "eeaebb8f",
-        "/scripts/paginas/santuarios.js": "ee3077b4",
-        "/scripts/paginas/sobre-mi.js": "540d5eb5",
-        "/scripts/tema.js": "341539a1",
         // ==== fin del generado ====
     };
 
@@ -115,146 +103,53 @@
 // único que se ejecuta pronto y en todas las páginas a la vez.
 //
 // Aquí solo se comprueba que lo guardado esté dentro de lo razonable;
-// la lista de tamaños de verdad está en
-// scripts/componentes/texto-tamano.js, que es quien la maneja.
-(function aplicarTamanoGuardado() {
+// las listas de verdad están en scripts/componentes/ajustes.js, que es
+// quien maneja los mandos.
+(function aplicarAjustesGuardados() {
+    var raiz = document.documentElement;
     try {
         var escala = parseFloat(localStorage.getItem("richi-texto"));
         if (escala >= 0.9 && escala <= 1.5) {
-            document.documentElement.style.setProperty("--escala", escala);
+            raiz.style.setProperty("--escala", escala);
+        }
+
+        // La separación entre líneas del texto largo. Se comprueba
+        // contra la lista en vez de contra un intervalo porque un valor
+        // raro aquí no haría nada visible y luego el mando no sabría
+        // qué botón marcar.
+        var linea = localStorage.getItem("richi-interlineado");
+        if (linea === "amplio" || linea === "muy-amplio") {
+            raiz.setAttribute("data-interlineado", linea);
+        }
+
+        // La letra. Este es el que MÁS falta que se ponga pronto: si
+        // llegara con el resto de scripts, la página se pintaría entera
+        // con una fuente y saltaría a la otra delante de los ojos.
+        if (localStorage.getItem("richi-letra") === "legible") {
+            raiz.setAttribute("data-letra", "legible");
+        }
+
+        // Y el filtro de pantalla vieja, por lo mismo: encendiéndolo
+        // tarde se vería la página limpia y de pronto llena de rayas.
+        if (localStorage.getItem("richi-crt") === "si") {
+            raiz.setAttribute("data-crt", "si");
+        }
+
+        // Dejarlo todo quieto. Éste también corre prisa: puesto tarde,
+        // se vería arrancar el parpadeo y pararse justo delante, que es
+        // peor que no pararlo.
+        if (localStorage.getItem("richi-movimiento") === "quieto") {
+            raiz.setAttribute("data-movimiento", "quieto");
+        }
+
+        // La velocidad de la voz no cambia nada de lo que se ve, pero se
+        // deja puesta aquí con el resto para que el mando la encuentre
+        // ya aplicada y marque el botón que toca.
+        var voz = localStorage.getItem("richi-voz");
+        if (voz === "lenta" || voz === "rapida") {
+            raiz.setAttribute("data-voz", voz);
         }
     } catch (error) {
-        // Navegando en privado no se puede leer. Se queda el de siempre.
-    }
-})();
-
-(function loadPageScripts() {
-    // Ruta normalizada: sin ".html" al final ni "/" sobrante. Así las
-    // comprobaciones de abajo funcionan igual si el servidor entrega
-    // la página como /web/santuarios/tali/tali.html o como
-    // /web/santuarios/tali/tali (Neocities y Cloudflare pueden servir
-    // las dos formas). Sin esto, en la segunda no se cargaba el JS de
-    // la página y se quedaba en "Cargando…".
-    const path =
-        window.location.pathname.replace(/\.html$/, "").replace(/\/+$/, "") ||
-        "/";
-
-    function script(src) {
-        document.write(
-            '<script defer src="' + window.conVersion(src) + '"></' + "script>"
-        );
-    }
-
-    const isHome = path === "/" || path === "/index";
-    const isSobreMi = path.includes("/sobre_mi/");
-    const isContacto = path.includes("/contacto/");
-    const isBlogArchive = /\/blog\/\d+\/index_\d+$/.test(path);
-    const isDiario = path.endsWith("/blog/diario");
-    const isRol = path.includes("/mis_movidas/rol/");
-    const isRelatosList = path.endsWith("/mis_movidas/relatos/index_relatos");
-    // La página de un reto de escritura: una subcarpeta de relatos/ con
-    // su propio index_. Va comprobada ANTES que isLectura, que si no se
-    // la traga (está dentro de relatos/ y no es el listado).
-    const isReto = /\/mis_movidas\/relatos\/[^/]+\/index_[^/]+$/.test(path);
-    // Solo las fichas de cada gato: el índice de santuarios no tiene galería.
-    const isFichaSantuario = /\/santuarios\/[^/]+\/[^/]+$/.test(path);
-    const isNotFound = path.endsWith("/not_found");
-    // El changelog no está en el menú: se llega desde el botón de la
-    // portada. Aquí da igual, el JS se carga por la ruta.
-    const isChangelog = path.includes("/changelog/");
-    const isMapa = path.includes("/mapa/");
-    // Páginas de lectura: una entrada del blog (no el archivo del año)
-    // o un relato (no su índice). Ahí va la ventana de "sigue leyendo".
-    const isLectura =
-        (/\/blog\/\d+\//.test(path) && !isBlogArchive) ||
-        (path.includes("/mis_movidas/relatos/") && !isRelatosList && !isReto);
-
-    if (isNotFound) {
-        // El 404 no lleva sidebar ni componentes de navegación.
-        script("/scripts/componentes/botones-ventana.js");
-        script("/scripts/componentes/rastro-cursor.js");
-        script("/scripts/componentes/chispas-botones.js");
-        script("/scripts/componentes/subir.js");
-        script("/scripts/componentes/teclado-scroll.js");
-        return;
-    }
-
-    // Base: la necesita cualquier página de contenido del sitio.
-    script("/scripts/componentes/cargador-fragmentos.js");
-    script("/scripts/componentes/barra-lateral.js");
-    // Vive dentro de la barra lateral, así que lo lleva cualquier
-    // página que la tenga (el 404 sale antes, arriba).
-    script("/scripts/componentes/gatin-random.js");
-    script("/scripts/tema.js");
-    // El mando "Aa" del tamaño del texto: su HTML va con el resto del
-    // armazón, en fragmentos/barra-lateral.html, así que lo lleva
-    // cualquier página que tenga barra lateral. En el 404, que no la
-    // tiene, no sale el mando, pero el tamaño elegido se respeta igual
-    // (lo pone la escala de aquí arriba).
-    script("/scripts/componentes/texto-tamano.js");
-    script("/scripts/componentes/botones-ventana.js");
-    script("/scripts/componentes/rastro-cursor.js");
-    script("/scripts/componentes/chispas-botones.js");
-    script("/scripts/componentes/visor-imagenes.js");
-    // Igual que el lightbox: va en la base para que cualquier página
-    // pueda montar un aviso emergente sin tocar este archivo.
-    script("/scripts/componentes/aviso.js");
-    script("/scripts/componentes/subir.js");
-    // Sin esto la página no se mueve con el teclado: ver el comentario
-    // de arriba del propio archivo.
-    script("/scripts/componentes/teclado-scroll.js");
-
-    if (isHome) {
-        script("/scripts/componentes/frases.js");
-        script("/scripts/paginas/entradas-blog.js");
-        script("/scripts/paginas/novedades.js");
-    } else if (isSobreMi) {
-        script("/scripts/paginas/sobre-mi.js");
-    } else if (isContacto) {
-        // Antes que guestbook.js: le da el cuadro de texto con formato
-        // y el pintado seguro de los mensajes.
-        script("/scripts/paginas/guestbook-texto.js");
-        script("/scripts/paginas/guestbook.js");
-    } else if (isBlogArchive) {
-        // Antes que entradas-blog.js: cuando el archivo termina de
-        // pintarse le pide al buscador que aplique lo que venga en
-        // ?buscar=, así que tiene que estar ya cargado.
-        script("/scripts/componentes/buscador.js");
-        script("/scripts/paginas/entradas-blog.js");
-    } else if (isDiario) {
-        script("/scripts/paginas/diario.js");
-    } else if (isRol) {
-        // Antes que rol.js, igual que en relatos: así los componentes
-        // ya están escuchando cuando el portfolio termina de pintarse y
-        // avisa de que hay categorías nuevas que contar.
-        script("/scripts/componentes/buscador.js");
-        script("/scripts/componentes/filtros.js");
-        script("/scripts/paginas/rol.js");
-    } else if (isRelatosList) {
-        // Antes que relatos.js: así los componentes ya están
-        // escuchando cuando el listado termina de pintarse y avisa.
-        script("/scripts/componentes/buscador.js");
-        script("/scripts/componentes/filtros.js");
-        script("/scripts/paginas/relatos.js");
-        // La tarjeta del reto que va encima del listado.
-        script("/scripts/paginas/reto.js");
-    } else if (isReto) {
-        script("/scripts/paginas/reto.js");
-    } else if (isLectura) {
-        // Antes que otras-entradas.js: ese avisa con la ficha de esta
-        // entrada en cuanto le llega el listado, y lectura.js tiene que
-        // estar ya escuchando.
-        script("/scripts/componentes/lectura.js");
-        script("/scripts/paginas/otras-entradas.js");
-    } else if (isFichaSantuario) {
-        script("/scripts/paginas/santuarios.js");
-    } else if (isChangelog) {
-        script("/scripts/paginas/changelog.js");
-    } else if (isMapa) {
-        // Antes que mapa.js, como en el archivo del blog: la tabla se
-        // pinta sola cuando llega el JSON y ahí mismo le pide al
-        // buscador que aplique lo que venga en ?buscar=.
-        script("/scripts/componentes/buscador.js");
-        script("/scripts/paginas/mapa.js");
+        // Navegando en privado no se puede leer. Se queda lo de siempre.
     }
 })();

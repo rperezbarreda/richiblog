@@ -17,6 +17,21 @@
     letter-spacing: -2px;
 }
 
+/* Un enlace suelto dentro de un párrafo se queda con el azul que trae
+   de serie el navegador si nadie le dice otra cosa, y ese azul sobre el
+   morado del sitio da Lc 54,7 cuando el mínimo de aquí son 75 (medido).
+   Pasa en cualquier párrafo que no sea el cuerpo de una entrada, que
+   ésos sí tienen su regla en texto-entrada.css. */
+.mapa-intro a {
+    color: var(--yellow);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+}
+
+.mapa-intro a:hover {
+    text-decoration-thickness: 2px;
+}
+
 .mapa-intro {
     max-width: 62ch;
     margin: 18px 0 24px;
@@ -36,7 +51,7 @@
 .mapa-cuenta {
     margin: 0 0 12px;
     color: var(--muted);
-    font-family: "DM Mono", monospace;
+    font-family: var(--fuente-mono);
     font-size: 0.75rem;
     letter-spacing: 0.5px;
 }
@@ -83,7 +98,7 @@
     padding: 0 12px 10px 0;
     border-bottom: 2px solid var(--yellow);
     color: var(--yellow);
-    font-family: "DM Mono", monospace;
+    font-family: var(--fuente-mono);
     font-size: 0.75rem;
     font-weight: 500;
     text-align: left;
@@ -183,7 +198,7 @@
 .mapa-fecha,
 .mapa-actualizada {
     color: var(--muted);
-    font-family: "DM Mono", monospace;
+    font-family: var(--fuente-mono);
     font-size: 0.75rem;
     white-space: nowrap;
 }

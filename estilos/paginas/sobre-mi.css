@@ -127,7 +127,7 @@
     min-width: 0;
     margin-top: 14px;
     color: var(--muted);
-    font-family: "DM Mono", monospace;
+    font-family: var(--fuente-mono);
     font-size: 0.625rem;
     text-align: center;
     text-transform: uppercase;
@@ -154,7 +154,7 @@
     background: var(--yellow);
     color: var(--yellow-contrast);
     text-align: center;
-    font-family: "DM Mono", monospace;
+    font-family: var(--fuente-mono);
     font-size: 0.875rem;
     font-weight: 500;
 }
@@ -172,7 +172,7 @@
     background: transparent;
     color: var(--yellow);
     text-transform: uppercase;
-    font-family: "DM Mono", monospace;
+    font-family: var(--fuente-mono);
     font-size: 0.8125rem;
     letter-spacing: 1px;
     transition: color 0.15s linear, background-color 0.15s linear, transform 0.15s ease, box-shadow 0.15s ease;
@@ -279,7 +279,7 @@
 
 .vital-label {
     color: var(--muted);
-    font-family: "DM Mono", monospace;
+    font-family: var(--fuente-mono);
     font-size: 0.6875rem;
     text-transform: uppercase;
     letter-spacing: 1px;
@@ -309,7 +309,7 @@
 
 .character-basics-row dt {
     color: var(--yellow);
-    font-family: "DM Mono", monospace;
+    font-family: var(--fuente-mono);
     font-size: 0.625rem;
     text-transform: uppercase;
     letter-spacing: 1px;
@@ -501,7 +501,7 @@
     margin-bottom: 20px;
     list-style: none;
     color: var(--muted);
-    font-family: "DM Mono", monospace;
+    font-family: var(--fuente-mono);
     font-size: 0.8125rem;
 }
 
@@ -563,7 +563,7 @@
     align-items: center;
     gap: 6px;
     color: var(--muted);
-    font-family: "DM Mono", monospace;
+    font-family: var(--fuente-mono);
     font-size: 0.5625rem;
     letter-spacing: 0.5px;
 }
@@ -587,7 +587,7 @@
     border: 2px solid var(--yellow);
     background: transparent;
     color: var(--yellow);
-    font-family: "DM Mono", monospace;
+    font-family: var(--fuente-mono);
     font-size: 0.625rem;
     text-transform: uppercase;
     letter-spacing: 1px;
@@ -638,7 +638,7 @@
     border: 2px solid var(--yellow);
     box-shadow: 3px 3px 0 var(--yellow);
     color: var(--white);
-    font-family: "DM Mono", monospace;
+    font-family: var(--fuente-mono);
     font-size: 0.625rem;
     text-transform: uppercase;
     letter-spacing: 1.5px;

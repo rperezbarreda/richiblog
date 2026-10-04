@@ -103,7 +103,7 @@
 
 .social-links-label {
     color: var(--yellow);
-    font-family: Georgia, "Times New Roman", serif;
+    font-family: var(--fuente-titular);
     font-style: italic;
     font-weight: 400;
     font-size: 1.125rem;
@@ -164,7 +164,7 @@
     border: 2px solid var(--yellow);
     background: var(--yellow);
     color: var(--yellow-contrast);
-    font-family: "DM Mono", monospace;
+    font-family: var(--fuente-mono);
     font-size: 0.6875rem;
     text-transform: lowercase;
     letter-spacing: 1px;
@@ -215,7 +215,7 @@
     border: 2px solid var(--yellow);
     background: transparent;
     color: var(--yellow);
-    font-family: "DM Mono", monospace;
+    font-family: var(--fuente-mono);
     font-size: 0.75rem;
     text-decoration: none;
     text-transform: uppercase;
@@ -326,8 +326,21 @@
     display: flex;
     flex-direction: column;
     min-height: 0;
-    flex: 1 1 360px;
-    max-width: 420px;
+    /* El MISMO reparto que .projects-card (antes eran 360 y 400). Lo
+       pide lo de las dos columnas: cada ventana decide por su cuenta si
+       su lista cabe a dos columnas (@container, más abajo), así que
+       cuarenta píxeles de diferencia bastaban para que una se partiera
+       en dos y la de al lado no. Medido a 1500px de ancho: con 360 y
+       400 las cajas salían de 468 y 508, una a cada lado del tope, y la
+       portada quedaba con una ventana a una columna y la de al lado a
+       dos. Iguales, las dos deciden siempre lo mismo. */
+    flex: 1 1 380px;
+    /* Por --escala, como el resto de medidas en píxeles que tienen que
+       crecer con el texto (--barra-alto, --lateral-ancho...). Sin esto,
+       con el texto al 150% la caja se quedaba igual de ancha y los
+       títulos salían recortados a un tercio: medido, pasaba en siete de
+       los nueve anchos probados. */
+    max-width: calc(420px * var(--escala));
     padding: 16px;
     background: var(--purple-lighter);
     border: 3px solid var(--yellow);
@@ -376,12 +389,53 @@
     display: flex;
     flex-direction: column;
     min-height: 0;
-    flex: 1 1 400px;
-    max-width: 420px;
+    /* El mismo reparto que su gemela .recent-entries: ver allí. */
+    flex: 1 1 380px;
+    /* Por --escala, igual que su gemela .recent-entries: si una crece
+       con el texto y la otra no, la fila sale con una ventana más ancha
+       que la otra. */
+    max-width: calc(420px * var(--escala));
     padding: 16px;
     background: var(--purple-lighter);
     border: 3px solid var(--yellow);
     box-shadow: 6px 6px 0 var(--yellow);
+    overflow: hidden;
+}
+
+/* ==== LOS TÍTULOS DE LAS DOS VENTANAS, A UNA LÍNEA ==== */
+
+/* En nuevas_entradas.txt y en novedades.exe cada título ocupa UNA línea
+   y lo que no cabe se corta con puntos suspensivos. Sin esto, un título
+   largo se partía en dos o tres líneas y las dos ventanas quedaban de
+   alturas distintas: una fila con un escalón en medio, y la columna
+   entera descolocada.
+
+   Solo aquí. En el listado del blog, en el de relatos y en el "sigue
+   leyendo" los títulos siguen enteros: ahí hay sitio y el título ES el
+   contenido. Estas dos ventanas son un adelanto de lo último, no el
+   listado.
+
+   Quien corta es scripts/componentes/recortar-titulos.js, que mide el
+   hueco y busca el corte por palabras más largo que entre. Lo de aquí
+   es el seguro: si ese script no llega a correr (o un título cambia
+   después), el navegador remata por el borde y la línea sigue siendo
+   una, que es lo que sostiene la fila.
+
+   NO SE PIERDE NADA PARA QUIEN ESCUCHA: el texto sigue completo en el
+   HTML, solo se recorta al pintarlo, así que el nombre del enlace que
+   anuncia un lector de pantalla es el título entero. Lo que se corta es
+   lo que se ve, y para eso está el enlace.
+
+   La fecha y el "4 min" tampoco envuelven aquí, por lo mismo: en una
+   tarjeta estrecha se iban a dos líneas y volvía el escalón. */
+.entries-projects-row .entry-preview-title {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.entries-projects-row .entry-preview-meta {
+    flex-wrap: nowrap;
     overflow: hidden;
 }
 
@@ -394,7 +448,7 @@
 .progress-section-title {
     margin: 18px 0 10px;
     color: var(--yellow);
-    font-family: "DM Mono", monospace;
+    font-family: var(--fuente-mono);
     font-size: 0.6875rem;
     text-transform: uppercase;
     letter-spacing: 1px;
@@ -414,7 +468,7 @@
     padding: 10px 12px;
     background: var(--purple);
     border: 1px solid var(--yellow);
-    font-family: "DM Mono", monospace;
+    font-family: var(--fuente-mono);
 }
 
 .currently-item-header {
@@ -483,16 +537,73 @@
 
     .entries-projects-row .recent-entries,
     .entries-projects-row .projects-card {
-        max-width: 560px;
-    }
-
-    .entries-projects-row .entries-list {
-        display: grid;
-        grid-template-columns: repeat(2, 1fr);
-        gap: 10px 20px;
+        max-width: calc(560px * var(--escala));
     }
 
     .entries-projects-row .entry-preview {
         padding-bottom: 7px;
+    }
+}
+
+/* ==== LAS LISTAS, A DOS COLUMNAS CUANDO CABEN ==== */
+
+/* En pantallas anchas las dos ventanas son altas y estrechas, con cuatro
+   o seis entradas una debajo de otra y un buen trozo de la columna
+   vacío a los lados. A dos columnas la lista mide la mitad de alto y
+   deja de necesitar scroll.
+   Pero SOLO CUANDO CABEN, y eso no lo puede decir un @media: lo que hay
+   que medir no es la pantalla, es la ventanita. Y no miden lo mismo —a
+   1920 la ventana queda en 526px y a 2200, con la rejilla de tres
+   columnas, en 385— así que cualquier ancho de pantalla que se eligiera
+   acertaría en unos sitios y partiría la lista en columnas de 150px en
+   otros. Eso es lo que pasaba antes y por eso se quitaron: los títulos
+   se cortaban a mitad de palabra y la segunda columna se salía del
+   marco.
+   Un @container pregunta por el ancho de la CAJA, que es el dato que
+   hace falta. Si el navegador es viejo y no sabe de esto, el bloque se
+   ignora entero y la lista se queda a una columna: se pierde el
+   aprovechamiento, no la página.
+
+   EL TOPE VA EN em Y NO EN PÍXELES para que crezca con el texto: en em,
+   un @container mide contra la letra de la propia caja, que es la de la
+   página (--escala). Lo que importa no son los píxeles de la columna,
+   son las LETRAS que caben en ella, y con el texto al 150% las mismas
+   letras ocupan un 50% más. Así se piden solos. Con un tope en píxeles,
+   al 90% la ventana se partía antes de tiempo y al 150% no se partía
+   nunca.
+   18em son 350px con el texto normal. Medido en 110 combinaciones de
+   ancho de pantalla, tamaño de texto y ventana: la columna más estrecha
+   que sale de ahí da para 18 letras de título, y ni la fecha ni las
+   etiquetas se salen en ninguna. Un tope más alto (20em) dejaba sin dos
+   columnas todo el 150%, que es justo quien más agradece no tener que
+   desplazar la lista. */
+.entries-projects-row .recent-entries-body {
+    container-type: inline-size;
+    container-name: ventana-portada;
+}
+
+@container ventana-portada (min-width: 18em) {
+    .entries-list {
+        display: grid;
+        /* minmax(0, 1fr) y NO 1fr: "1fr" es en realidad
+           minmax(auto, 1fr), y auto en una columna con white-space:
+           nowrap dentro es "lo que pida el texto sin partirse". Las dos
+           columnas se hinchaban hasta el título más largo y la de la
+           derecha se salía de la ventana. Con el 0 de mínimo, la
+           columna puede ser más estrecha que su contenido y es el
+           contenido el que se recorta. */
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 10px 16px;
+        align-content: start;
+    }
+
+    /* La raya de abajo de cada entrada separa una fila de la siguiente,
+       no una columna de la de al lado: la última de cada columna se
+       queda sin ella. Con :last-child solo se la quitaba a una de las
+       dos y la otra se quedaba con una raya suelta debajo. */
+    .entries-list .entry-preview:nth-last-child(2):nth-child(odd),
+    .entries-list .entry-preview:last-child {
+        padding-bottom: 0;
+        border-bottom: none;
     }
 }

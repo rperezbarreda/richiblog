@@ -9,7 +9,7 @@
     margin: 0;
     flex-shrink: 0;
     color: var(--yellow-contrast);
-    font-family: "DM Mono", monospace;
+    font-family: var(--fuente-mono);
     font-size: 0.75rem;
     letter-spacing: 1px;
     white-space: nowrap;
@@ -34,7 +34,7 @@
 .lectura-indice-titulo {
     margin: 0 0 8px;
     color: var(--yellow);
-    font-family: "DM Mono", monospace;
+    font-family: var(--fuente-mono);
     font-size: 0.75rem;
     text-transform: uppercase;
     letter-spacing: 1px;
@@ -76,4 +76,266 @@
 .blog-post-body h2,
 .relato-post-body h2 {
     scroll-margin-top: 16px;
+}
+
+/* ==== ESCUCHAR LA ENTRADA ==== */
+
+/* ==== SU VENTANA: texto_a_voz.mp3 ==== */
+
+/* Los mandos de la lectura en voz alta van en una ventana falsa de las
+   del sitio, lo primero de la columna de la foto. Es la misma caja que
+   .blog-post-otras ("otras_entradas.txt"), que es su vecina de abajo, y
+   por eso repite sus medidas en vez de heredarlas: .blog-post-otras vive
+   en paginas/blog.css y los relatos no cargan esa hoja.
+
+   LOS 16px DE RELLENO NO SON DECORATIVOS: la cabecera compartida
+   (.recent-entries-header, en componentes/cabecera-ventana.css) se
+   coloca con márgenes negativos de -16px para llegar pegada a los
+   bordes. Si se cambia este padding, la barra de título se sale de la
+   ventana justo esa diferencia.
+
+   Sin margen abajo: las dos columnas (.blog-post-side y
+   .relato-post-side) son flex con gap de 24px, así que el hueco con la
+   foto ya está puesto. El margen de abajo es solo para el caso raro de
+   una entrada sin columna, donde esto cae al principio del texto.
+   La monta scripts/componentes/leer-en-voz.js. */
+.voz-ventana {
+    position: relative;
+    flex: none;
+    margin: 0 0 18px;
+    padding: 16px;
+    background: var(--purple);
+    border: 3px solid var(--yellow);
+    box-shadow: 4px 4px 0 var(--yellow);
+}
+
+.blog-post-side > .voz-ventana,
+.relato-post-side > .voz-ventana {
+    margin-bottom: 0;
+}
+
+/* El botón va lo primero de la ventana, debajo de su barra de título.
+   Antes estaba en la cabecera amarilla de la entrada, peleándose por el
+   sitio con el título, la fecha y los dos atajos; aquí tiene ancho de
+   sobra y los colores vuelven a ser los normales del sitio.
+   Lo monta scripts/componentes/leer-en-voz.js. */
+.voz-boton {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    width: 100%;
+    margin-bottom: 14px;
+    padding: 10px 14px;
+    border: 2px solid var(--yellow);
+    background: transparent;
+    color: var(--yellow);
+    font-family: var(--fuente-mono);
+    font-size: 0.8125rem;
+    letter-spacing: 1px;
+    transition: color 0.12s linear, background-color 0.12s linear;
+}
+
+.voz-boton:hover,
+.voz-boton[aria-pressed="true"] {
+    background: var(--yellow);
+    color: var(--yellow-contrast);
+}
+
+.voz-boton:focus-visible {
+    outline: 2px solid var(--yellow);
+    outline-offset: 3px;
+}
+
+/* ==== LA VELOCIDAD, DEBAJO DEL BOTÓN ==== */
+
+/* Los mismos tres pasos que hay en la ventana de accesibilidad, aquí
+   abajo. Van más pequeños y sin relleno a propósito: el que manda en
+   esta columna es el de escuchar, y éstos son el ajuste fino que se
+   toca una vez. Si pesaran lo mismo, la columna se convertiría en una
+   fila de cuatro botones iguales y habría que leerlos todos para saber
+   cuál es el que arranca la lectura. */
+.voz-velocidad {
+    margin-bottom: 14px;
+}
+
+/* Lo último de la ventana no lleva hueco abajo: ya lo pone el relleno
+   de la propia ventana, y sumados dejaban una franja vacía de 30px que
+   parecía que faltaba algo por cargar. */
+.voz-ventana > .voz-velocidad:last-child {
+    margin-bottom: 0;
+}
+
+.voz-velocidad-nombre {
+    margin: 0 0 5px;
+    color: var(--muted);
+    font-family: var(--fuente-mono);
+    font-size: 0.625rem;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+}
+
+.voz-velocidad-mandos {
+    display: flex;
+    gap: 5px;
+}
+
+.voz-velocidad-boton {
+    flex: 1;
+    padding: 6px 4px;
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--muted);
+    font-family: var(--fuente-mono);
+    font-size: 0.6875rem;
+    transition: color 0.12s linear, background-color 0.12s linear,
+        border-color 0.12s linear;
+}
+
+.voz-velocidad-boton:hover {
+    border-color: var(--yellow);
+    color: var(--yellow);
+}
+
+/* El elegido, relleno. No basta con cambiarle el color de la letra: un
+   botón marcado tiene que notarse sin tener que compararlo con los de
+   al lado, y el relleno es lo que más se nota de lejos y con poca
+   vista. */
+.voz-velocidad-boton[aria-pressed="true"] {
+    border-color: var(--yellow);
+    background: var(--yellow);
+    color: var(--yellow-contrast);
+}
+
+.voz-velocidad-boton:focus-visible {
+    outline: 2px solid var(--yellow);
+    outline-offset: 2px;
+}
+
+.voz-icono {
+    font-size: 0.75rem;
+    line-height: 1;
+}
+
+/* ==== CUANDO NO HAY NINGUNA VOZ INSTALADA ==== */
+
+/* En vez de esconder el botón —que deja a quien lo necesita sin saber
+   que existía— se explica por qué no puede y cómo se arregla. Va justo
+   debajo del botón, en una ventana falsa de las del sitio: lleva la
+   cabecera de siempre, así que se pliega con el − como todas las demás
+   y se puede dejar recogida sin perderla. */
+.voz-aviso {
+    margin: 0 0 18px;
+    /* 16px, los mismos que .voz-ventana y por el mismo motivo: la
+       cabecera compartida se coloca con márgenes negativos de -16px
+       para llegar pegada a los bordes. Estaba a 0 y la barra de título
+       se salía 16px por cada lado, tapando el marco amarillo de la
+       ventana por arriba, por la izquierda y por la derecha. Solo se
+       veía con la web abierta en un sistema sin ninguna voz en español
+       instalada, que es cuando aparece esta ventana. */
+    padding: 16px;
+    background: var(--purple-lighter);
+    border: 3px solid var(--yellow);
+    box-shadow: 6px 6px 0 var(--yellow);
+}
+
+.voz-aviso[hidden] {
+    display: none;
+}
+
+.voz-aviso-cuerpo {
+    padding: 0;
+}
+
+.voz-aviso p {
+    margin: 0 0 10px;
+    color: var(--white);
+    font-size: 0.875rem;
+    line-height: 1.7;
+}
+
+.voz-aviso-lista {
+    margin: 0 0 12px;
+    padding-left: 20px;
+    color: var(--white);
+    font-size: 0.875rem;
+    line-height: 1.7;
+}
+
+.voz-aviso-lista li + li {
+    margin-top: 8px;
+}
+
+.voz-aviso-lista strong {
+    color: var(--yellow);
+}
+
+.voz-aviso-nota {
+    font-size: 0.8125rem;
+}
+
+.voz-aviso a {
+    color: var(--yellow);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+}
+
+.voz-aviso a:hover,
+.voz-aviso a:focus-visible {
+    color: var(--yellow-contrast);
+    background: var(--yellow);
+}
+
+.voz-aviso-cerrar {
+    padding: 8px 16px;
+    border: 2px solid var(--yellow);
+    background: transparent;
+    color: var(--yellow);
+    font-family: var(--fuente-mono);
+    font-size: 0.75rem;
+    transition: color 0.12s linear, background-color 0.12s linear;
+}
+
+.voz-aviso-cerrar:hover {
+    background: var(--yellow);
+    color: var(--yellow-contrast);
+}
+
+.voz-aviso-cerrar:focus-visible,
+.voz-aviso a:focus-visible {
+    outline: 2px solid var(--yellow);
+    outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .voz-boton,
+    .voz-aviso-cerrar {
+        transition: none;
+    }
+}
+
+/* ==== EL TROZO QUE SUENA ==== */
+
+/* Mientras la voz lee, el párrafo que suena se ilumina. Los colores son
+   los del amarillo del tema con su contraste, que es la pareja que ya
+   usan todos los botones y la única que está garantizada legible en los
+   seis temas sin tener que medir nada nuevo.
+   El margen negativo compensa el relleno, para que el resaltado se salga
+   un poco por los lados y no quede pegado al texto. */
+.voz-leyendo {
+    margin-left: -8px;
+    margin-right: -8px;
+    padding: 2px 8px;
+    background: var(--yellow);
+    color: var(--yellow-contrast);
+}
+
+/* Lo de dentro (enlaces, negritas, cursivas) también, que si no se
+   quedan del color de antes sobre el amarillo. */
+.voz-leyendo a,
+.voz-leyendo strong,
+.voz-leyendo em,
+.voz-leyendo code {
+    color: inherit;
+    background: transparent;
 }

@@ -116,7 +116,7 @@ function tarjetaRol(ficha) {
         // h2 y no h3: sin encabezados de categoría, los títulos
         // saltaban de h1 a h3.
         `<h2 class="portfolio-card-title">${titulo}</h2>` +
-        (sistema ? `<p class="portfolio-card-system">${escaparHtml(sistema)}</p>` : "") +
+        (sistema ? `<p class="portfolio-card-system">${sistemaDeRol(sistema)}</p>` : "") +
         (descripcion
             ? `<p class="portfolio-card-desc">${escaparHtml(descripcion)}</p>`
             : "") +
@@ -192,4 +192,39 @@ function rutaSegura(url) {
         return limpia;
     }
     return "#";
+}
+
+
+// =========================================
+// LAS SIGLAS DE LOS SISTEMAS
+// =========================================
+// "DnD 5e" lo entiende quien juega. Quien no, no, y un lector de
+// pantalla además lo deletrea o lo intenta pronunciar. Si el sistema
+// empieza por una sigla de las de aquí abajo, se le pone su nombre
+// entero con <abbr title>, que es lo que los navegadores enseñan al
+// pasar por encima y lo que algunos lectores leen.
+//
+// Es una lista corta y escrita a mano a propósito: inventarse qué
+// significa una sigla a partir de las letras sale mal, y aquí lo que
+// hay son cuatro juegos. Si algún día pones uno nuevo, añádelo.
+const ROL_SIGLAS = {
+    DND: "Dungeons &amp; Dragons",
+    "D&D": "Dungeons &amp; Dragons",
+    PBTA: "Powered by the Apocalypse",
+    FATE: "Fate",
+    COC: "Call of Cthulhu",
+    CDR: "La Call de Rol",
+};
+
+function sistemaDeRol(sistema) {
+    const limpio = escaparHtml(sistema);
+    const primera = sistema.trim().split(/\s+/)[0] || "";
+    const nombre = ROL_SIGLAS[primera.toUpperCase()];
+    if (!nombre) {
+        return limpio;
+    }
+    // Solo la primera palabra va dentro del <abbr>: el resto ("5e",
+    // "2-5 jugadores") no es ninguna sigla.
+    const resto = limpio.slice(escaparHtml(primera).length);
+    return `<abbr title="${nombre}">${escaparHtml(primera)}</abbr>${resto}`;
 }

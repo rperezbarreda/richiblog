@@ -1,0 +1,418 @@
+/* PÁGINA DE RECOMENDACIONES */
+
+/* DOS FORMAS DE VERLA
+   En escritorio es una galería: cada cosa es su portada, y al pasar por
+   encima (o al abrirla con el teclado) el texto sale en una cajita
+   flotante al lado, que la coloca scripts/paginas/recomendaciones.js.
+   En móvil eso no vale —ni hay ratón ni hay sitio para una caja
+   flotante—, así que se convierte en una lista y el texto se abre
+   debajo de cada cosa, como un desplegable de toda la vida. Ese cambio
+   está al final del archivo. */
+
+/* Mismo enderezado que accesibilidad, changelog y el mapa: .home viene
+   con display: grid y align-items: center, y en una página larga eso
+   deja la parte de arriba fuera de alcance. */
+.recomendaciones-page {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    justify-content: flex-start;
+    padding: 36px 4% 48px;
+}
+
+.recomendaciones-page .home-title {
+    flex: 0 0 auto;
+    font-size: clamp(2.25rem, 5vw, 4rem);
+    letter-spacing: -2px;
+}
+
+.recomendaciones-intro {
+    max-width: 62ch;
+    margin: 18px 0 20px;
+    color: var(--white);
+    font-size: 0.9375rem;
+    line-height: 1.8;
+}
+
+/* Las ventanitas, en dos columnas si hay sitio: son seis listas y una
+   debajo de otra dejaría media pantalla vacía a la derecha. Rejilla y
+   no columns: con columns, al crecer una lista las de abajo saltan de
+   columna delante de tus narices. align-items: start para que cada una
+   mida lo suyo y no se estiren todas al alto de la más larga de su
+   fila. */
+/* La fila de filtros, con su aire antes de las ventanitas. */
+.recomendaciones-page .filtros {
+    margin-bottom: 20px;
+}
+
+.recomendaciones-page .filtros-vacio {
+    margin: 0 0 20px;
+}
+
+.recomendaciones-caja {
+    display: grid;
+    /* min(520px, 100%) y no 520px a secas: en una pantalla estrecha el
+       mínimo mandaría y la ventanita se saldría por la derecha (la
+       misma trampa que ya había en sobre-mi.css). */
+    grid-template-columns: repeat(auto-fill, minmax(min(520px, 100%), 1fr));
+    align-items: start;
+    gap: 24px;
+    max-width: 1200px;
+}
+
+/* El filtro de categorías esconde con el atributo hidden, y el
+   display: block de aquí abajo le ganaría: así que se dice a mano. */
+.rec-bloque[hidden] {
+    display: none;
+}
+
+.rec-bloque {
+    /* La regla general de <section> en base.css les da height: 100% y
+       scroll propio; aquí se deshace, como en el changelog. */
+    height: auto;
+    display: block;
+    overflow: visible;
+    margin: 0;
+    padding: 16px;
+    background: var(--purple-lighter);
+    border: 3px solid var(--yellow);
+    box-shadow: 6px 6px 0 var(--yellow);
+}
+
+/* ==== LA GALERÍA ==== */
+
+.rec-lista {
+    display: grid;
+    /* Portadas de 112px: caben cuatro en la ventanita más estrecha y al
+       título de debajo aún le quedan dos líneas. */
+    grid-template-columns: repeat(auto-fill, minmax(112px, 1fr));
+    gap: 14px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.rec-item {
+    height: 100%;
+}
+
+.rec-cabeza {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    height: 100%;
+    cursor: pointer;
+    /* El triángulo que trae de serie el navegador se quita: aquí la
+       pista de que se puede abrir es la portada, que se despega. */
+    list-style: none;
+}
+
+.rec-cabeza::-webkit-details-marker {
+    display: none;
+}
+
+.rec-cabeza:focus-visible {
+    outline: 2px solid var(--yellow);
+    outline-offset: 3px;
+}
+
+/* La portada. Si no hay, el hueco no se queda vacío: se pinta una
+   "portada" con el título dentro, como el lomo de un libro. */
+.rec-portada {
+    display: block;
+    width: 100%;
+    aspect-ratio: 2 / 3;
+    object-fit: cover;
+    border: 2px solid var(--yellow);
+    background: var(--purple);
+    transition: box-shadow 0.12s linear, transform 0.12s linear;
+}
+
+.rec-portada-vacia {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 8px;
+    overflow: hidden;
+    color: var(--muted);
+    font-family: var(--fuente-mono);
+    font-size: 0.6875rem;
+    line-height: 1.4;
+    text-align: center;
+}
+
+/* Al pasar por encima, al abrirla o al llegar con el teclado, la
+   portada se despega de la pared. */
+.rec-cabeza:hover .rec-portada,
+.rec-cabeza:focus-visible .rec-portada,
+.rec-item[open] .rec-portada {
+    box-shadow: 4px 4px 0 var(--yellow);
+    transform: translate(-2px, -2px);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .rec-portada {
+        transition: none;
+    }
+
+    .rec-cabeza:hover .rec-portada,
+    .rec-cabeza:focus-visible .rec-portada,
+    .rec-item[open] .rec-portada {
+        transform: none;
+    }
+}
+
+.rec-nombre {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+}
+
+/* Si no hay portada, el título ya está escrito dentro del recuadro:
+   debajo se apartaría de la vista para no leerlo dos veces, pero sigue
+   ahí para quien escucha la ficha (es lo que le da nombre). */
+.rec-item:has(.rec-portada-vacia) .rec-nombre {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    padding: 0;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+
+.rec-titulo {
+    color: var(--white);
+    font-size: 0.8125rem;
+    line-height: 1.3;
+    transition: color 0.12s linear;
+}
+
+.rec-cabeza:hover .rec-titulo,
+.rec-cabeza:focus-visible .rec-titulo,
+.rec-item[open] .rec-titulo {
+    color: var(--yellow);
+}
+
+/* Autor, estudio, año: datos, así que en monoespaciada, como las
+   fechas de los listados. Debajo de la portada no caben; se quedan
+   para la caja flotante. */
+.rec-meta {
+    display: none;
+    color: var(--muted);
+    font-family: var(--fuente-mono);
+    font-size: 0.6875rem;
+    letter-spacing: 0.5px;
+}
+
+.rec-marca {
+    margin-left: 4px;
+    color: var(--yellow);
+    font-size: 0.75rem;
+}
+
+/* La flecha del desplegable solo tiene sentido en la lista del móvil. */
+.rec-flecha {
+    display: none;
+}
+
+/* ==== LA CAJA FLOTANTE ==== */
+
+/* position: fixed y no absolute: así no la recorta el scroll de la
+   sección ni el overflow: hidden de "main", y puede salirse de su
+   ventanita sin problema. Dónde cae exactamente lo calcula
+   scripts/paginas/recomendaciones.js, que la pega al lado de la
+   portada y la mete para dentro si se iba a salir de la pantalla. */
+.rec-texto {
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 300;
+    width: 320px;
+    max-width: calc(100vw - 24px);
+    padding: 14px 16px;
+    background: var(--purple-lighter);
+    border: 3px solid var(--yellow);
+    box-shadow: 6px 6px 0 var(--yellow);
+}
+
+.rec-texto-titulo {
+    display: block;
+    margin-bottom: 2px;
+    color: var(--yellow);
+    font-family: var(--fuente-texto);
+    font-size: 0.9375rem;
+    line-height: 1.3;
+}
+
+.rec-texto .rec-meta {
+    display: block;
+    margin-bottom: 10px;
+}
+
+.rec-texto p {
+    margin: 0;
+    color: var(--white);
+    font-size: 0.875rem;
+    line-height: 1.7;
+}
+
+.rec-enlace {
+    display: inline-block;
+    margin-top: 10px;
+    color: var(--yellow);
+    font-family: var(--fuente-mono);
+    font-size: 0.75rem;
+    text-decoration: none;
+    border-bottom: 1px solid var(--yellow);
+}
+
+.rec-enlace:hover,
+.rec-enlace:focus-visible {
+    color: var(--yellow-contrast);
+    background: var(--yellow);
+}
+
+.rec-enlace:focus-visible {
+    outline: 2px solid var(--yellow);
+    outline-offset: 2px;
+}
+
+/* ==== EN MÓVIL: UNA LISTA, Y EL TEXTO DEBAJO ==== */
+
+/* Mismo corte que el resto del sitio. Aquí no hay ratón que pasar por
+   encima ni ancho para una caja flotante al lado, así que cada cosa
+   vuelve a ser una fila que se abre hacia abajo al tocarla. */
+@media (max-width: 860px) {
+    .recomendaciones-page {
+        padding: 32px 6% 40px;
+    }
+
+    .rec-lista {
+        display: block;
+    }
+
+    .rec-item-caja + .rec-item-caja {
+        margin-top: 8px;
+    }
+
+    .rec-item {
+        height: auto;
+        border: 2px solid transparent;
+    }
+
+    .rec-item[open] {
+        border-color: var(--yellow);
+        background: var(--purple);
+    }
+
+    .rec-cabeza {
+        flex-direction: row;
+        align-items: center;
+        gap: 12px;
+        /* Sitio de sobra para el dedo: la fila entera es lo que se toca. */
+        padding: 10px 8px;
+    }
+
+    /* La portada, pequeña y al lado del título. Y si no hay portada no
+       se inventa: el recuadro con el título dentro es cosa de la
+       galería. */
+    .rec-portada {
+        flex: 0 0 auto;
+        width: 2.6rem;
+        aspect-ratio: 2 / 3;
+    }
+
+    .rec-portada-vacia {
+        display: none;
+    }
+
+    /* Aquí el recuadro no sale, así que el título vuelve a ser la fila. */
+    .rec-item:has(.rec-portada-vacia) .rec-nombre {
+        position: static;
+        width: auto;
+        height: auto;
+        margin: 0;
+        overflow: visible;
+        clip: auto;
+        white-space: normal;
+    }
+
+    .rec-cabeza:hover .rec-portada,
+    .rec-cabeza:focus-visible .rec-portada,
+    .rec-item[open] .rec-portada {
+        box-shadow: none;
+        transform: none;
+    }
+
+    .rec-titulo {
+        font-size: 0.9375rem;
+    }
+
+    .rec-meta {
+        display: block;
+    }
+
+    .rec-flecha {
+        display: block;
+        flex: 0 0 auto;
+        margin-left: auto;
+        color: var(--muted);
+        font-size: 0.75rem;
+        transition: transform 0.12s linear, color 0.12s linear;
+    }
+
+    .rec-item[open] .rec-flecha {
+        color: var(--yellow);
+        transform: rotate(180deg);
+    }
+
+    /* El texto deja de flotar y vuelve al flujo, debajo de su fila. */
+    .rec-texto {
+        position: static;
+        width: auto;
+        max-width: none;
+        padding: 0 8px 10px;
+        background: transparent;
+        border: 0;
+        box-shadow: none;
+    }
+
+    /* La sangría de la izquierda lo alinea con el título, no con la
+       portada: se lee como si colgara de él. */
+    .rec-item:has(.rec-portada:not(.rec-portada-vacia)) .rec-texto {
+        padding-left: calc(2.6rem + 20px);
+    }
+
+    /* En la caja flotante el título hace falta (la portada se queda
+       lejos); aquí lo tienes justo encima, así que sobra. */
+    .rec-texto-titulo {
+        display: none;
+    }
+
+    .rec-texto .rec-meta {
+        display: none;
+    }
+}
+
+@media (max-width: 860px) and (prefers-reduced-motion: reduce) {
+    .rec-flecha {
+        transition: none;
+    }
+}
+
+/* En una pantalla muy estrecha la portada se lleva un tercio del ancho
+   y al título no le queda nada: se va, que es un adorno. El texto y los
+   datos, que es lo que se viene a leer, se quedan. */
+@media (max-width: 420px) {
+    .rec-portada {
+        display: none;
+    }
+
+    .rec-item:has(.rec-portada) .rec-texto {
+        padding-left: 8px;
+    }
+}

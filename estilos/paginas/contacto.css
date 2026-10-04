@@ -97,7 +97,7 @@
     border: 2px solid var(--yellow);
     background: var(--yellow);
     color: var(--yellow-contrast);
-    font-family: "DM Mono", monospace;
+    font-family: var(--fuente-mono);
     font-size: 0.8125rem;
     text-transform: uppercase;
     letter-spacing: 1.2px;
@@ -126,7 +126,7 @@
 .contact-email-dir {
     margin-top: 10px;
     color: var(--muted);
-    font-family: "DM Mono", monospace;
+    font-family: var(--fuente-mono);
     font-size: 0.6875rem;
     letter-spacing: 0.5px;
     text-align: center;
@@ -184,7 +184,7 @@
 .guestbook-entry-date {
     flex-shrink: 0;
     color: var(--muted);
-    font-family: "DM Mono", monospace;
+    font-family: var(--fuente-mono);
     font-size: 0.6875rem;
 }
 
@@ -222,7 +222,7 @@
 
 .guestbook-reply-name {
     color: var(--yellow-contrast);
-    font-family: "DM Mono", monospace;
+    font-family: var(--fuente-mono);
     font-size: 0.6875rem;
     font-weight: 500;
     text-transform: uppercase;
@@ -237,7 +237,7 @@
 .guestbook-reply-date {
     flex-shrink: 0;
     color: var(--yellow-contrast);
-    font-family: "DM Mono", monospace;
+    font-family: var(--fuente-mono);
     font-size: 0.625rem;
 }
 
@@ -257,7 +257,7 @@
 .guestbook-entries-empty,
 .guestbook-entries-error {
     color: var(--muted);
-    font-family: "DM Mono", monospace;
+    font-family: var(--fuente-mono);
     font-size: 0.8125rem;
 }
 
@@ -280,7 +280,7 @@
 .guestbook-rules summary {
     cursor: pointer;
     color: var(--yellow);
-    font-family: "DM Mono", monospace;
+    font-family: var(--fuente-mono);
     font-size: 0.75rem;
     text-transform: uppercase;
     letter-spacing: 1px;
@@ -333,7 +333,7 @@
 .guestbook-field label,
 .guestbook-label {
     color: var(--yellow);
-    font-family: "DM Mono", monospace;
+    font-family: var(--fuente-mono);
     font-size: 0.6875rem;
     text-transform: uppercase;
     letter-spacing: 1px;
@@ -345,7 +345,7 @@
     border: 2px solid var(--border);
     background: var(--purple);
     color: var(--white);
-    font-family: "DM Mono", monospace;
+    font-family: var(--fuente-mono);
     font-size: 0.875rem;
 }
 
@@ -422,7 +422,7 @@
 }
 
 .guestbook-fmt-glifo {
-    font-family: Georgia, "Times New Roman", serif;
+    font-family: var(--fuente-titular);
 }
 
 .guestbook-fmt-negrita {
@@ -439,7 +439,7 @@
 
 .guestbook-contador {
     color: var(--muted);
-    font-family: "DM Mono", monospace;
+    font-family: var(--fuente-mono);
     font-size: 0.625rem;
     letter-spacing: 0.5px;
     text-align: right;
@@ -481,7 +481,7 @@
     background: var(--yellow);
     color: var(--yellow-contrast);
     text-transform: uppercase;
-    font-family: "DM Mono", monospace;
+    font-family: var(--fuente-mono);
     font-size: 0.8125rem;
     letter-spacing: 1px;
     transition: color 0.1s linear, background-color 0.1s linear;
@@ -503,11 +503,39 @@
     opacity: 0.6;
 }
 
+/* EL AVISO DE CADA CAMPO. Va debajo del campo que falla, no al final
+   del formulario: así se ve y se oye donde está el problema.
+
+   No va solo en color: lleva el "falta" escrito y una flecha delante.
+   Un aviso que solo se distingue por ser rojo no lo ve quien no
+   distingue el rojo, que es la pauta 1.4.1 de la WCAG. El color es un
+   refuerzo, no el mensaje.
+
+   Y el campo marcado se perfila también, que lo pone el aria-invalid
+   que le escribe scripts/paginas/guestbook.js: así no hay que fiarse
+   solo de leer el aviso de abajo. */
+.guestbook-error {
+    margin: 4px 0 0;
+    color: var(--error);
+    font-family: var(--fuente-mono);
+    font-size: 0.75rem;
+    line-height: 1.4;
+}
+
+.guestbook-error::before {
+    content: "▸ ";
+}
+
+.guestbook-form [aria-invalid="true"] {
+    border-color: var(--error);
+    box-shadow: 0 0 0 2px var(--error);
+}
+
 .guestbook-status {
     margin: 0;
     min-height: 1.2em;
     color: var(--muted);
-    font-family: "DM Mono", monospace;
+    font-family: var(--fuente-mono);
     font-size: 0.8125rem;
 }
 

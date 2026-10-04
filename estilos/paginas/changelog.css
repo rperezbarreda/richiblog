@@ -62,7 +62,7 @@
 .changelog-titulo {
     margin: 0 0 10px;
     color: var(--yellow);
-    font-family: "Space Grotesk", sans-serif;
+    font-family: var(--fuente-texto);
     font-style: italic;
     font-size: 1.125rem;
 }

@@ -68,7 +68,7 @@
 .reto-anyo {
     margin: 0;
     color: var(--muted);
-    font-family: "DM Mono", monospace;
+    font-family: var(--fuente-mono);
     font-size: 1rem;
     letter-spacing: 2px;
 }
@@ -85,7 +85,7 @@
     border: 2px solid var(--yellow);
     background: transparent;
     color: var(--yellow);
-    font-family: "DM Mono", monospace;
+    font-family: var(--fuente-mono);
     font-size: 0.8125rem;
     text-decoration: none;
     transition: color 0.15s linear, background-color 0.15s linear;
@@ -133,7 +133,7 @@
     gap: 8px 16px;
     margin: 0;
     color: var(--muted);
-    font-family: "DM Mono", monospace;
+    font-family: var(--fuente-mono);
     font-size: 0.8125rem;
 }
 
@@ -172,7 +172,7 @@
 .reto-avance-texto {
     margin: 0;
     color: var(--white);
-    font-family: "DM Mono", monospace;
+    font-family: var(--fuente-mono);
     font-size: 0.875rem;
     letter-spacing: 1px;
 }
@@ -258,6 +258,12 @@
    pulsación (WCAG pide 24x24 como mínimo; aquí pasan de 70) y con poca
    visión un cuadro grande se acierta a la primera. */
 .reto-dia {
+    /* Un <a> sin color se queda con el azul de serie del navegador. Aquí
+       no se ve, porque todo lo que lleva dentro tiene el suyo, pero el
+       día que se le añada una palabra suelta saldría en ese azul, que
+       sobre el morado da Lc 54,7 y el mínimo del sitio son 75. Mejor
+       dejarlo dicho. */
+    color: var(--white);
     display: flex;
     flex-direction: column;
     gap: 2px;
@@ -273,7 +279,7 @@
 
 .reto-dia-num {
     color: var(--muted);
-    font-family: "DM Mono", monospace;
+    font-family: var(--fuente-mono);
     font-size: 0.6875rem;
     letter-spacing: 1px;
 }
@@ -412,7 +418,7 @@
 .reto-aviso-ultimo {
     margin: 0;
     color: var(--muted);
-    font-family: "DM Mono", monospace;
+    font-family: var(--fuente-mono);
     font-size: 0.75rem;
 }
 
@@ -428,7 +434,7 @@
     border: 2px solid var(--yellow);
     background: var(--yellow);
     color: var(--yellow-contrast);
-    font-family: "DM Mono", monospace;
+    font-family: var(--fuente-mono);
     font-size: 0.8125rem;
     text-transform: lowercase;
     letter-spacing: 1px;

@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8">
+    <!-- Color de la barra del navegador en el móvil. Arranca en el color
+         del modo oscuro y el script de abajo lo cambia si toca; al pulsar
+         el botón de tema lo actualiza scripts/tema.js. -->
+    <meta name="theme-color" content="#12091c">
+    <script>
+      // El tema, puesto ANTES de que se pinte nada: si esperara al resto
+      // de scripts, la página aparecería con el tema de fábrica y daría
+      // un fogonazo al cambiar. Por eso va escrito aquí, en el <head> de
+      // cada página, y no en un archivo aparte.
+      //
+      // Dos pasos, y en este orden:
+      //   1. Si hay un tema elegido, ése y ya está.
+      //   2. Si no hay ninguno, manda el aparato: con el modo claro
+      //      puesto, la web arranca en claro. Antes arrancaba siempre en
+      //      oscuro y quien tiene el móvil en claro porque ve mejor así
+      //      se comía una web oscura sin haber pedido nada. Esto NO se
+      //      guarda: mientras no se toque el mando, la web sigue a lo
+      //      que diga el sistema.
+      //
+      // Si cambias uno de estos colores, cámbialo también en
+      // estilos/base.css y en COLOR_BARRA de scripts/tema.js.
+      (function () {
+        try {
+          var temas = {
+            claro: ["light", "#f3e1d6"],
+            "oscuro-puro": ["puro-oscuro", "#000000"],
+            "claro-puro": ["puro-claro", "#ffffff"],
+            tranquilo: ["tranquilo", "#f2efe9"],
+            "tranquilo-oscuro": ["tranquilo-oscuro", "#1b1e22"],
+            "terminal-verde": ["terminal-verde", "#000000"],
+            "terminal-azul": ["terminal-azul", "#000000"],
+            "terminal-rojo": ["terminal-rojo", "#000000"],
+            "terminal-ambar": ["terminal-ambar", "#000000"]
+          };
+          var guardado = localStorage.getItem("richi-theme");
+          var elegido = temas[guardado];
+          if (!elegido && !guardado &&
+              window.matchMedia("(prefers-color-scheme: light)").matches) {
+            elegido = temas.claro;
+          }
+          if (elegido) {
+            document.documentElement.setAttribute("data-theme", elegido[0]);
+            var barra = document.querySelector('meta[name="theme-color"]');
+            if (barra) {
+              barra.setAttribute("content", elegido[1]);
+            }
+          }
+        } catch (e) {}
+      })();
+    </script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mamá · Relatos · El Blog de Richi</title>
+    <!-- Cómo se ve el enlace al compartirlo (Bluesky, Discord, Ko-fi…).
+         Sin esto solo sale la URL pelada, sin título ni imagen. Las rutas
+         van absolutas a propósito: las redes no resuelven las relativas. -->
+    <meta name="description" content="Día 2 del reto de escritura, con la palabra «colmillo».">
+    <link rel="canonical" href="https://richi.blog/web/mis_movidas/relatos/writeober26/dia-02-colmillo.html">
+    <meta property="og:type" content="article">
+    <meta property="og:site_name" content="El Blog de Richi">
+    <meta property="og:locale" content="es_ES">
+    <meta property="og:title" content="Mamá · Relatos · El Blog de Richi">
+    <meta property="og:description" content="Día 2 del reto de escritura, con la palabra «colmillo».">
+    <meta property="og:url" content="https://richi.blog/web/mis_movidas/relatos/writeober26/dia-02-colmillo.html">
+    <meta property="og:image" content="https://richi.blog/imagenes/meta/og.webp">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta property="og:image:alt" content="El Blog de Richi — ilustración de Richi sobre fondo morado">
+    <meta name="twitter:card" content="summary_large_image">
+    <link rel="icon" type="image/x-icon" href="/imagenes/favicon.ico">
+    <!-- La única fuente que se precarga. Medido con la red frenada: sin esto el
+         navegador no la descubre hasta parsear el CSS (~800 ms) y el texto baila al
+         cambiar de tipografía; así llega antes del primer pintado y no se nota el
+         cambio. Precargar más fuentes empeoraba el primer pintado 150-210 ms, porque
+         compiten por el ancho de banda con lo que hace falta para pintar. -->
+    <link rel="preload" href="/tipografias/space-grotesk-400.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="alternate" type="application/rss+xml" title="El Blog de Richi — blog, relatos y rol" href="/blog/rss.xml">
+    <!-- El menú, pedido LO PRIMERO. No está escrito en el HTML de cada
+         página: vive en fragmentos/barra-lateral.html y lo pide
+         scripts/componentes/barra-lateral.js, que va con defer y por
+         tanto no corre hasta que el navegador ha terminado de leer la
+         página. Medido con la red frenada, el menú no aparecía hasta
+         1,5 s: el HTML tardaba 190 ms, los scripts se ejecutaban sobre
+         los 1000 y solo entonces empezaba el viaje a por el trozo.
+
+         Esta línea lo pide aquí mismo, antes incluso que el CSS, y
+         guarda la promesa. Cuando barra-lateral.js arranca no empieza
+         ningún viaje: se sube al que ya iba. El menú pasó a estar a los
+         786 ms, la mitad.
+
+         Va escrita a pelo y no en un archivo aparte a propósito: un
+         archivo aparte habría que pedirlo, y pedirlo es justo lo que se
+         está intentando no hacer. Si algo falla se queda sin adelanto y
+         loadComponent() lo pide como siempre. -->
+    <script>window.adelantoDeFragmentos={};try{window.adelantoDeFragmentos["/fragmentos/barra-lateral.html"]=fetch("/fragmentos/barra-lateral.html?v=01b79f68").then(function(r){return r.ok?r.text():null}).catch(function(){return null})}catch(e){}</script>
+    <!-- ==== CSS ====
+         Esta lista la escribe herramientas/actualizar-cabeceras.py.
+         No la toques a mano: si cambias qué CSS lleva una página,
+         cámbialo en esa herramienta y vuélvela a ejecutar.
+
+         Van escritos aquí, y no cargados por un script, para que el
+         navegador los pida nada más recibir el HTML. Con un script de
+         por medio tardaba ~200 ms más en pintar la página.
+
+         El ?v= de cada uno es el resumen de su contenido: cambia solo
+         cuando cambia el archivo, y es lo que hace que al subir a
+         Neocities se vea el cambio en vez de la versión guardada en la
+         caché del navegador. -->
+    <link rel="stylesheet" href="/estilos/base.css?v=7b045c04">
+    <link rel="stylesheet" href="/estilos/base.responsive.css?v=24021cbc">
+    <link rel="stylesheet" href="/estilos/componentes/visor-imagenes.css?v=c75e69bd">
+    <link rel="stylesheet" href="/estilos/componentes/aviso.css?v=aa14ed7b">
+    <link rel="stylesheet" href="/estilos/componentes/aviso.responsive.css?v=4b547ea8">
+    <link rel="stylesheet" href="/estilos/componentes/cabecera-ventana.css?v=df2807ad">
+    <link rel="stylesheet" href="/estilos/componentes/subir.css?v=da55ea85">
+    <link rel="stylesheet" href="/estilos/componentes/ajustes.css?v=105f8df0">
+    <link rel="stylesheet" href="/estilos/componentes/texto-entrada.css?v=e90e572a">
+    <link rel="stylesheet" href="/estilos/componentes/lectura.css?v=264f4348">
+    <link rel="stylesheet" href="/estilos/paginas/relatos.css?v=cf99bed4">
+    <link rel="stylesheet" href="/estilos/paginas/relatos.responsive.css?v=45d2372b">
+    <link rel="stylesheet" href="/estilos/componentes/barra-lateral.css?v=588851ec">
+    <link rel="stylesheet" href="/estilos/componentes/barra-lateral.responsive.css?v=45e554fd">
+    <link rel="stylesheet" href="/estilos/paginas/buscar.css?v=692b762d">
+    <link rel="stylesheet" href="/estilos/componentes/ventanas-plegables.css?v=c901afd7">
+    <link rel="stylesheet" href="/estilos/componentes/impresion.css?v=7aceeb4b">
+    <link rel="stylesheet" href="/estilos/componentes/sin-movimiento.css?v=78601159">
+    <!-- ==== fin del CSS ==== -->
+    <script src="/scripts/cargador-scripts.js?v=e3343d73"></script>
+    <!-- ==== JS ====
+         Esta lista también la escribe la herramienta, a partir de
+         scripts_de(). No la toques a mano.
+
+         Todos van con "defer": se bajan mientras el navegador lee el
+         HTML, no retrasan el pintado y se ejecutan al final, en este
+         mismo orden, que en unos cuantos casos importa.
+
+         Están escritos aquí y no los pide un script, por lo mismo que
+         el CSS: así el navegador los descubre en cuanto le llega el
+         HTML. Pidiéndolos desde el cargador no empezaban a bajarse
+         hasta 600 ms después, y con ellos se retrasaba todo lo que se
+         puede tocar (el menú el que más). -->
+    <script defer src="/scripts/componentes/cargador-fragmentos.js?v=d67e08bf"></script>
+    <script defer src="/scripts/componentes/barra-lateral.js?v=da4175b8"></script>
+    <script defer src="/scripts/componentes/gatin-random.js?v=212dad18"></script>
+    <script defer src="/scripts/tema.js?v=626220df"></script>
+    <script defer src="/scripts/componentes/ajustes.js?v=c2f09964"></script>
+    <script defer src="/scripts/componentes/buscar-lupa.js?v=cca8f0d0"></script>
+    <script defer src="/scripts/componentes/botones-ventana.js?v=cab0ce9c"></script>
+    <script defer src="/scripts/componentes/ventanas-plegables.js?v=40711cd7"></script>
+    <script defer src="/scripts/componentes/rastro-cursor.js?v=0d9a7e7f"></script>
+    <script defer src="/scripts/componentes/chispas-botones.js?v=7b0937d6"></script>
+    <script defer src="/scripts/componentes/enlaces-fuera.js?v=130dc9ce"></script>
+    <script defer src="/scripts/componentes/visor-imagenes.js?v=48184405"></script>
+    <script defer src="/scripts/componentes/aviso.js?v=7b9fce19"></script>
+    <script defer src="/scripts/componentes/subir.js?v=2e242c61"></script>
+    <script defer src="/scripts/componentes/teclado-scroll.js?v=5847ef8b"></script>
+    <script defer src="/scripts/componentes/lectura.js?v=55ef46ad"></script>
+    <script defer src="/scripts/componentes/leer-en-voz.js?v=08a58e42"></script>
+    <script defer src="/scripts/paginas/otras-entradas.js?v=44aaa9e9"></script>
+    <!-- ==== fin del JS ==== -->
+  </head>
+<body>
+    <!-- ==== SIDEBAR / NAVEGACIÓN ==== -->
+    <a class="skip-link" href="#main-content">Saltar al contenido</a>
+    <div id="sidebar-container"></div>
+    <!-- ==== CONTENIDO PRINCIPAL ==== -->
+
+    <main id="main-content">
+        <!-- ==== HOME ==== -->
+        <section id="home" class="home relato-page">
+            <!-- Un día del reto de escritura. Lo crea
+                 herramientas/nuevo.py --reto: esta plantilla es la de
+                 un relato normal con dos cambios —se vuelve al reto y
+                 no al listado de relatos, y la ventana de al lado
+                 enseña otros días del mismo reto—.
+                 data-subcategoria dice de qué reto es, y por estar
+                 dentro de la carpeta writeober26/ generar-posts.py lo
+                 apunta como parte de esa colección, que es lo que hace
+                 que NO se liste de uno en uno entre los relatos. -->
+            <!-- data-borrador: mientras esté puesto, este relato NO sale
+                 en los listados, ni en el RSS, ni en el sitemap, y arriba
+                 se ve una franja avisando. Todo relato nuevo nace así,
+                 para que uno a medio escribir no se publique solo al
+                 subir el sitio. Para publicarlo:
+
+                     python3 herramientas/publicar.py
+
+                 (que es lo mismo que borrar "data-borrador" de la línea
+                 de abajo y volver a pasar los generadores). -->
+            <article class="relato-post" data-subcategoria="writeober26">
+                <div class="relato-post-header">
+                    <h1 class="relato-post-title">Mamá</h1>
+                    <div class="relato-post-header-meta">
+                        <p class="relato-post-date"><time datetime="2026-10-02">02 oct 2026</time></p>
+                        <a class="relato-post-back" href="/web/mis_movidas/relatos/writeober26/index_writeober26.html">← volver al reto</a>
+                    </div>
+                </div>
+
+                <div class="relato-post-body-wrap">
+                    <div class="relato-post-layout">
+                        <div class="relato-post-body">
+                            <p>El olor a atún procesado le llegó a su hocico mientras hacía su ronda nocturna. Con cierta desconfianza decidió empezar la escalada por la escalera de incendios hasta el apartamento de la tercera planta. Al oír pisadas detrás de ella se apresuró a subir, pegando un brinco hasta el alféizar de la ventana, decidida a ser la primera en devorar aquel manjar.</p>
+                            <p>La señora Clodiff siempre dejaba a los gatos callejeros como ella comida muy rica, y la empezó a engullir tan rápido como le permitía su mandíbula. Consiguió limpiar la mitad del plato antes de que la mujer la apartase con delicadeza para dejar sitio a los otros gatos que habían trepado tras ella. Intentó zafarse como pudo pero, cuando por fin sus patitas tocaron las baldosas de hormigón de la ventana, los recién llegados ya se habían adueñado del festín.</p>
+                            <p>Les bufó, mas por frustración que por enfado y, ante los comentarios de gata glotona que la anciana musitaba entre dientes, decidió que no merecía la pena seguir perdiendo el tiempo. Se acicaló mientras pensaba en su siguiente movimiento; la mujer era muy puntual a la hora de alimentar a los gatos callejeros desde su apartamento, por lo que calculó que debía de faltar muy poco para que los humanos cerraran la estación de metro.</p>
+                            <p>Bajó la escalera pensando sobre ello. Aún no entendía por qué la gente abandonaba aquel sitio en banda a la misma hora. Quizá les gustaba tan poco como ella el estruendo de los trenes que, al cabo de un raro, necesitaban alejarse para descansar los oídos, pero no comprendía por qué volvían al día siguiente. </p>
+                            <p>Tampoco entendía por que cerraban las entradas si podían entrar y salir cuando quisieran; finalmente, llegó a la conclusión que intentar comprender a los humanos era una pérdida de tiempo.</p>
+                            <p>Se entretuvo un rato en llegar por culpa de varias personas que intentaban fotografiarla o llamar su atención. De pequeña se habría detenido encantada para recibir algunos mimos, pero aprendió por las malas que eso podía ser muy arriesgado; sobre todo por aquellos extraños que intentaban atraerla con comida.</p>
+                            <p>Se había topado con algunos humanos que escondían veneno o alfileres entre los bocados que ofrecían, y desde entonces prefería mantenerse alejada de cualquier mano desconocida. También había escuchado historias de otros gatos que habían tenido peor suerte que ella, pero otros hablaban de hogares y mantitas cálidas, con comida rica y mimos. Le costaba creer en esas cosas, pero tampoco tenía motivos para pensar que todos los humanos se comportasen igual.</p>
+                            <p>Sin entretenerse más bajó los escalones del metro y se coló entre las rendijas de la verja que protegía una de las entradas. Nunca había entendido por qué los humanos no utilizaban aquel hueco, aunque supuso que quizá eran demasiado gordos para pasar entre los barrotes; pero enseguida se olvidó de aquella cuestión al percibir el olor húmedo y penetrante de los túneles.</p>
+                            <p>Allí abajo estaba lo que ella llamaba el túnel infinito, un laberinto de pasadizos que conocía casi tan bien como las rayas de su cola y donde siempre había alguna presa que llevarse a la boca.</p>
+                            <p>Su primer recuerdo se remontaba a cuando todavía vivía con su madre, pues había nacido entre un par de túneles de mantenimiento que los humanos llaman la línea dos. El estruendo de los trenes era insoportable, pero también despertaba su curiosidad, y un día decidió averiguar adónde iban aquellas bestias metálicas. Por desgracia terminó perdiéndose y jamás volvió a ver a su madre o sus hermanos; aunque, con el tiempo, aprendió a orientarse por las corrientes de aire, los olores y los sonidos que rebotaban contra las paredes.</p>
+                            <p>Desde entonces había recorrido aquellos pasadizos innumerables veces, hasta el punto de conocer cada recoveco y cada salida. No tardó en llegar a la zona donde los túneles conectaban con los desagües, un lugar especialmente concurrido por los ratones que buscaban refugio entre los paneles de ventilación.</p>
+                            <p>Tuvo suerte aquella noche pues encontró a uno que intentaba abrirse paso por una de las rendijas sin prestar atención a lo que sucedía a su alrededor. Se agazapó y esperó el momento oportuno antes de abalanzarse sobre él, de modo que el pobre animal apenas tuvo tiempo de reaccionar. </p>
+                            <p>Mientras sujetaba a su presa con los <strong>colmillos</strong>, se planteó dejarla con vida unos instantes para jugar con ella, pero enseguida recordó lo hambrientos que estarían sus seis pequeños y decidió que ya tendría tiempo para divertirse en otra ocasión.</p>
+                            <p>Antes de emprender el camino de vuelta, se quedó inmóvil y aguzó el oído. Más allá de los paneles de ventilación se escuchaban unos leves arañazos, señal de que debía de haber otros ratones por la zona. Aquello era una buena noticia, porque si había ratones también habría comida suficiente para sus criaturas durante los próximos días. Con el cuello de su presa firmemente sujeto entre los dientes, volvió sobre sus pasos hasta alcanzar la salida que daba a la plaza Norte.</p>
+                            <p>Sin embargo, cuando empezó a subir los escalones, percibió un olor que la hizo detenerse. La humedad se había vuelto más intensa y el aire estaba impregnado de ese aroma frío que precedía a la lluvia. Levantó el hocico y confirmó sus sospechas al sentir las primeras gotas sobre los bigotes.</p>
+                            <p>Aquello la irritaba profundamente, no solo porque detestaba el frío, sino porque su abundante pelaje absorbía tanta agua que, cuando se empapaba, cada paso se convertía en una agonía por lo mal que tenía sus rodillas. Además, los últimos aguaceros habían sido tan fuertes que podían mantenerla escondida durante horas, impidiéndole salir a buscar más comida. No podía permitirse semejante contratiempo, pues sus seis pequeños dependían de ella y todavía tenían mucho que aprender antes de poder valerse por sí mismos.</p>
+                            <p>A pesar de todo, salió a la superficie y se apresuró a cruzar las calles, sorteando los zapatos y los paraguas de los humanos que se volvían a mirarla. Algunos intentaron atraerla siseando mientras que otros se apartaron con una mueca de desagrado al verla pasar con el ratón colgando de la boca y el pelo cada vez más empapado. Ella no les prestó atención y continuó hasta la plaza, donde esperaba encontrar refugio bajo el toldo de la tintorería que hacía esquina con su callejón.</p>
+                            <p>Cuando llegó, sacudió las patas para quitarse el agua y se dispuso a recorrer los últimos metros hasta su escondite, pero algo la inquietó antes de que pudiera avanzar. Pese al frío y al ruido de la lluvia, no escuchaba el llanto de sus hijos.</p>
+                            <p>Al principio pensó que estarían dormidos, acurrucados unos contra otros bajo los cartones que había reunido para protegerlos de la intemperie. Sin embargo, cuanto más se acercaba al escondite, más extraña le parecía aquella ausencia de sonidos, así que dejó caer el ratón y echó a correr hacia el hueco que había entre los contenedores.</p>
+                            <p>Al llegar, descubrió que no quedaba ni rastro de sus pequeñas criaturas. Recorrió la callejuela de arriba abajo, olfateó detrás de los cubos de basura y se metió en todos los rincones en los que podrían haberse refugiado, incluso en aquellos tan estrechos que apenas le permitían darse la vuelta. Los llamó una y otra vez, cada vez más alterada, pero sus maullidos solo encontraron el eco de las paredes y el golpeteo constante de la lluvia contra el suelo.</p>
+                            <p>Entonces reparó en que también habían desaparecido los cartones que utilizaba como cama. Se quedó olfateando el lugar donde había estado su nido, tratando de encontrar algún rastro que le permitiera comprender qué había sucedido, hasta que llegó a la única conclusión que le pareció posible: algún humano había descubierto a sus pequeños y se los había llevado consigo.</p>
+                            <p>No sabía adónde los habrían llevado ni qué pretendían hacer con ellos. Quizá quisieran darles un hogar, como decían aquellas historias que había escuchado alguna vez, o quizá simplemente los hubieran apartado de allí porque les molestaba su presencia. Los humanos eran imprevisibles y nunca había conseguido entender sus costumbres, pero, por primera vez, deseó con todas sus fuerzas que aquellos extraños fueran de los buenos.</p>
+                            <p>Volvió bajo el toldo de la tintorería con el cuerpo empapado y las patas entumecidas por el frío. El ratón seguía en el suelo, exactamente donde lo había dejado, y durante un buen rato se limitó a mirarlo sin moverse, con las orejas gachas y la mirada fija en la entrada del callejón, como si todavía esperase ver aparecer a alguno de sus pequeños.</p>
+                            <p>Permaneció allí durante horas, acurrucada bajo el escaso refugio que le ofrecía la tela, con el corazón encogido por una ausencia que no alcanzaba a comprender. Cuando finalmente cerró los ojos lo hizo sin abandonar del todo la esperanza de que, al despertar, sus seis pequeños volvieran a estar esperándola en el escondite.</p>
+                        </div>
+
+                        <!-- Columna de la derecha: la imagen y "sigue leyendo". Va pegada
+                             arriba mientras se desplaza el texto (ver .relato-post-side). -->
+                        <div class="relato-post-side">
+                            <!-- IMAGEN DEL RELATO
+                                 La pone nuevo.py si le dices una al
+                                 crear el relato; si no, aquí no hay nada.
+                                 Para añadirla después, copia este bloque:
+-->
+                                 <figure class="relato-post-aside">
+                                     <img src="/imagenes/mis_movidas/relatos/writeober26/mama.webp" alt="" width="780" height="1170" loading="lazy" decoding="async">
+                                     <figcaption><a href="https://www.pexels.com/photo/stray-cat-in-city-at-night-19382225/" target="_blank" rel="noopener noreferrer">Foto tomada por Orhan Pergel</a></figcaption>
+                                 </figure> 
+
+
+                            <div class="relato-post-otras" data-otras-caja>
+                                <div class="recent-entries-header">
+                                    <h2>otros_dias.txt</h2>
+                                    <div class="window-controls window-controls-small" data-window-controls aria-hidden="true"></div>
+                                </div>
+                                <ul class="entries-list" data-otras-entradas="coleccion:writeober26">
+                                    <li class="entries-loading">Cargando…</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </article>
+        </section>
+    </main>
+</body>
+</html>

@@ -1,0 +1,290 @@
+/* COMPONENTE: CÓMO SALE LA WEB EN PAPEL */
+
+/* POR QUÉ ESTO EXISTE
+   -------------------
+   Mucha gente que ve poco no lee en pantalla: imprime, o manda a PDF
+   para leerlo con su propio visor, a su tamaño y con su contraste. Sin
+   una hoja de impresión salía en papel el menú entero, la rejilla del
+   fondo, los botones y las ventanitas con sus −■✕, y la entrada en
+   medio a trozos. Con ésta sale el texto y poco más.
+
+   LAS DIRECCIONES SE ESCRIBEN. En papel un enlace no se puede pulsar,
+   así que detrás de cada uno sale su dirección entre paréntesis. Es de
+   lo poco que la impresión puede hacer mejor que la pantalla.
+
+   NEGRO SOBRE BLANCO, siempre, sea cual sea el tema que esté puesto en
+   la pantalla. No es por ahorrar tinta: un fondo oscuro impreso sale
+   gris sucio y el texto encima deja de leerse, y hay impresoras que
+   directamente no pintan los fondos. Lo mismo con el filtro CRT: unas
+   rayas encima del texto en papel son rayas y ya está.
+
+   Este archivo va en ULTIMAS (herramientas/actualizar-cabeceras.py)
+   para que se cargue el último y no haya que pelear con nadie: cuando
+   dos reglas pesan lo mismo gana la de después. */
+
+@media print {
+    /* ---- EL PAPEL ---- */
+    @page {
+        margin: 2cm;
+    }
+
+    /* ---- LA PALETA DE PAPEL ----
+       No se va elemento por elemento poniéndolo todo en negro: eso
+       había que intentarlo con un selector universal, y un selector
+       universal pesa menos que CUALQUIER regla con una clase, así que
+       perdía en casi todo el sitio (medido: la entrada salía igual de
+       morada). Se cambian las VARIABLES, que es por donde pide el color
+       absolutamente todo el CSS de esta web. En la práctica, papel es
+       un tema más.
+
+       El selector lleva ", :root[data-theme]" porque los seis temas se
+       escriben así y si no le ganarían a un ":root" pelado. Con el
+       atributo pesan lo mismo, y como este archivo se carga el último,
+       gana éste. Sin trucos y sin !important. */
+    :root,
+    :root[data-theme] {
+        --bg-texture: none;
+        /* TODO NEGRO, Y NO ES PEREZA. Aquí abajo se quitan TODOS los
+           rellenos (background-color: transparent), así que en papel
+           ningún color de estas variables se ve nunca como fondo: solo
+           como letra o como línea. Y de letra o de línea, en papel, lo
+           que se lee es negro.
+           Dejar alguna en blanco "porque es un color de fondo" era el
+           fallo de la primera versión: --purple es fondo casi siempre,
+           pero en los botones marcados y en las cabeceras de tabla es
+           la LETRA, y esos salían en blanco sobre blanco (medido: el
+           "todas" del archivo del blog y el "página" del mapa). */
+        --purple: #000000;
+        --purple-lighter: #000000;
+        --surface: #000000;
+        --white: #000000;
+        --yellow: #000000;
+        --yellow-contrast: #000000;
+        --border: #000000;
+        --error: #000000;
+        --yellow-glow-strong: transparent;
+        /* El gris de los textos secundarios se queda gris, pero uno que
+           una impresora de tinta normal sepa pintar: por debajo de un
+           40% se convierte en una nube de puntos y se lee peor que si
+           fuera negro del todo. */
+        --muted: #3a3a3a;
+    }
+
+    body {
+        background: #ffffff;
+        color: #000000;
+    }
+
+    /* Las sombras duras de las ventanitas y los brillos del texto: en
+       pantalla son el estilo del sitio, en papel son manchas negras.
+       Aquí sí hace falta ir elemento por elemento, pero con ":root
+       body" delante, que pesa lo justo para ganarle a las reglas con
+       una clase sin llegar a pisar nada más. */
+    :root body *,
+    :root body *::before,
+    :root body *::after {
+        background-image: none;
+        /* Y tampoco rellenos: las bandas amarillas de las cabeceras, los
+           recuadros de las tarjetas y los botones salían en papel como
+           manchas negras de tinta (--yellow pasa a negro aquí arriba
+           para que los BORDES y los subrayados se vean, que es lo que
+           de verdad hace falta). Sin relleno queda texto negro sobre
+           blanco y las líneas marcando la estructura, que es lo que se
+           lee bien. */
+        background-color: transparent;
+        box-shadow: none;
+        text-shadow: none;
+    }
+
+    /* Y los botones que se quedan MARCADOS necesitan su propia regla:
+       el relleno de "pulsado" se escribe con el estado dentro del
+       selector ([aria-pressed="true"]) y eso pesa más que la regla de
+       arriba, así que se le colaba. Salían en papel como un rectángulo
+       negro con la letra negra encima: medido, el "todas" del archivo
+       del blog y el "página" del mapa desaparecían del todo.
+       No se esconden porque unos cuantos son el encabezado de una
+       columna de tabla (el mapa se ordena pulsando el título), y sin
+       ellos la tabla impresa se queda sin cabecera. */
+    :root body [aria-pressed="true"],
+    :root body [aria-pressed="true"]::before,
+    :root body [aria-pressed="true"]::after,
+    /* Lo mismo con la columna por la que está ordenado el mapa, que se
+       marca con aria-sort en vez de con aria-pressed. En papel la tabla
+       sale ordenada como esté y ya: el recuadro que decía "por aquí se
+       está ordenando" no hace falta, y sí hacía falta su cabecera. */
+    :root body th:not([aria-sort="none"]) .mapa-ordenar {
+        background-color: transparent;
+    }
+
+    /* El filtro CRT, que lo dibuja un ::after del propio <html> y por
+       tanto no lo recoge la regla de arriba. */
+    :root[data-crt="si"]::after {
+        display: none;
+    }
+
+    /* ---- LO QUE NO SE IMPRIME ---- */
+    /* Todo lo que es para manejar la web, no para leerla: el menú, el
+       botón de accesibilidad y su ventana, el aviso de cookies, la
+       cinta de frases, el botón de subir, los −■✕ de las ventanitas, el
+       de escuchar la entrada con su aviso, el buscador y los filtros, y
+       el gatín del menú.
+       El "saltar al contenido" tampoco: en papel no hay nada que
+       saltar. */
+    .skip-link,
+    .mobile-topbar,
+    .sidebar,
+    .sidebar-backdrop,
+    .ajustes-abrir,
+    .ajustes,
+    .notice,
+    #quotes-container,
+    .subir,
+    .window-controls,
+    .window-controls-small,
+    /* La ventana entera de texto_a_voz.mp3, no solo sus botones: antes
+       era un botón suelto en la columna y ahora tiene marco y barra de
+       título, y escondiendo solo lo de dentro quedaba en el papel una
+       caja vacía con un nombre de fichero. */
+    .voz-ventana,
+    .voz-aviso,
+    .buscador,
+    .filtros,
+    .gatin-random,
+    .lightbox,
+    .nav-toggle,
+    .blog-tags-toggle,
+    .rec-flecha,
+    /* Los atajos de la cabecera de una entrada ("volver al archivo",
+       "calendario") y la ventanita de "sigue leyendo": son para seguir
+       navegando, y en papel no se navega. Quien imprime una entrada
+       quiere esa entrada. */
+    .blog-post-back,
+    .relato-post-back,
+    .pet-back,
+    .reto-volver,
+    .volver-inicio,
+    [data-otras-caja],
+    [data-otras-entradas] {
+        display: none;
+    }
+
+    /* ---- EL TEXTO ---- */
+    /* El contenido ocupa la hoja entera: en pantalla deja sitio al menú
+       de la izquierda, y en papel ese sitio no lo quiere nadie. */
+    main,
+    #main-content {
+        max-width: none;
+        margin: 0;
+        padding: 0;
+    }
+
+    /* En puntos y no en píxeles: el píxel no quiere decir nada en papel
+       y cada impresora lo interpreta como le parece. */
+    body {
+        font-size: 11pt;
+        line-height: 1.5;
+    }
+
+    /* UNA SOLA COLUMNA. En pantalla la entrada va en dos (el texto a la
+       izquierda y la foto a la derecha), y eso en papel desperdicia
+       media hoja: la foto ocupa un palmo y debajo queda un hueco en
+       blanco hasta el final de la página mientras el texto sigue en una
+       columna estrecha. En una sola, el texto va de margen a margen y
+       la foto cae después, donde le toque. Son las mismas cajas, solo
+       cambia cómo se reparten. */
+    .blog-post-layout,
+    .relato-post-layout {
+        display: block;
+    }
+
+    .blog-post-aside,
+    .relato-post-aside {
+        max-width: 11cm;
+        margin: 0 auto;
+    }
+
+    /* ---- LAS DIRECCIONES DE LOS ENLACES ---- */
+    /* Solo las de dentro del texto. Las de los listados y las tarjetas
+       se dejan en paz: ahí serían una dirección detrás de cada título y
+       no se leería nada.
+       Esta regla sustituye a la flechita de los enlaces de fuera (que
+       también es un ::after): en papel la flecha no dice nada y la
+       dirección sí. */
+    main p a[href]::after,
+    main li a[href]::after,
+    main blockquote a[href]::after {
+        content: " (" attr(href) ")";
+        background: none;
+        -webkit-mask: none;
+        mask: none;
+        width: auto;
+        height: auto;
+        margin: 0;
+        font-size: 0.85em;
+        word-break: break-all;
+    }
+
+    /* Menos las anclas de la propia página y los correos, que o no
+       llevan a ningún sitio en papel o ya están escritos. */
+    main a[href^="#"]::after,
+    main a[href^="mailto:"]::after {
+        content: "";
+    }
+
+    /* ---- LOS CORTES DE PÁGINA ---- */
+    /* Un título solo al final de una hoja, o una foto partida por la
+       mitad, es de lo que más cuesta de leer en papel. */
+    h1,
+    h2,
+    h3,
+    h4 {
+        break-after: avoid;
+        page-break-after: avoid;
+    }
+
+    figure,
+    img,
+    blockquote,
+    pre,
+    table {
+        break-inside: avoid;
+        page-break-inside: avoid;
+    }
+
+    /* Y que no se quede una línea suelta de un párrafo colgando en otra
+       hoja. */
+    p,
+    li {
+        orphans: 3;
+        widows: 3;
+    }
+
+    /* EL MARCO GRANDE SE QUITA. En pantalla la entrada vive dentro de
+       una caja con su borde, como una ventana. En papel esa caja mide
+       varias hojas, así que el borde sale cortado por abajo en una y
+       por arriba en la siguiente, y parece un error de impresión. Los
+       recuadros pequeños (una foto, una tarjeta) sí se quedan: ésos
+       caben enteros y ayudan a ver dónde empieza y acaba cada cosa. */
+    .home,
+    .blog-post,
+    .relato-post,
+    .blog-post-page,
+    .acc-bloque,
+    main > section {
+        border: 0;
+        padding-left: 0;
+        padding-right: 0;
+    }
+
+    /* Las ventanitas falsas se quedan, pero sin su disfraz: en papel un
+       recuadro con una barra de título de pega es ruido, y lo que
+       importa es lo que lleva dentro. El título de la barra sí se
+       queda: muchas veces es el nombre del apartado. */
+    .recent-entries-header,
+    .gatin-random-header,
+    .pet-window-header {
+        padding: 0;
+        border: 0;
+        background: none;
+    }
+}

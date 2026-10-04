@@ -6,6 +6,36 @@
     <p class="mobile-topbar-title"><span aria-hidden="true">·🜏·</span> EL BLOG DE RICHI</p>
 </div>
 
+<!-- ==== EL BOTÓN QUE ABRE LOS AJUSTES ====
+     Antes aquí vivían tres mandos sueltos (tema, tamaño y brillito).
+     Ahora son uno solo que abre la ventana de accesibilidad, con todo
+     dentro y un texto de ejemplo para ir viendo los cambios.
+
+     POR QUÉ ESTÁ AQUÍ Y NO DENTRO DEL MENÚ
+     --------------------------------------
+     El botón flota con position: fixed, y eso en móvil solo funciona si
+     NO está dentro del cajón: el cajón se esconde con un transform, y un
+     elemento transformado se convierte en el marco de referencia de todo
+     lo que lleva dentro, incluso de lo que va fixed. Dentro del <aside>
+     el botón se iba con el cajón fuera de la pantalla —medido: aparecía
+     en x = -66px— y no había forma de pulsarlo.
+
+     Fuera del cajón, el único marco de referencia es la ventana del
+     navegador: en escritorio flota en la esquina de arriba a la derecha
+     y en móvil se coloca encima de la barra amarilla del título, a la
+     derecha, enfrente del botón del menú. Lo decide
+     estilos/componentes/ajustes.css.
+
+     Y de paso queda segundo en el orden del tabulador, justo detrás del
+     botón del menú y en el mismo orden en que se ven: quien llega con el
+     teclado o con un lector de pantalla se topa con los ajustes de
+     accesibilidad al principio, que es donde hacen falta. -->
+<button class="ajustes-abrir" type="button" data-ajustes-abrir
+        aria-haspopup="dialog">
+    <span class="ajustes-abrir-aa" aria-hidden="true">Aa</span>
+    <span class="ajustes-abrir-texto">ACCESIBILIDAD</span>
+</button>
+
 <div id="sidebar-backdrop" class="sidebar-backdrop" hidden></div>
 
 <aside class="sidebar" id="sidebar">
@@ -45,11 +75,41 @@
                 </div>
             </div>
 
-        <a href="/web/santuarios/index_santuarios.html">santuarios</a>
-        <a href="/web/sobre_mi/sobre_mi.html">sobre mi</a>
+            <!-- MI RINCÓN -->
+            <!-- Lo que soy y lo que me gusta, junto: la ficha, los
+                 gatos y las recomendaciones. "mis movidas" es lo que
+                 hago; esto es lo otro. -->
+            <div class="nav-group">
+                <button class="nav-toggle" type="button" aria-expanded="false">
+                    <span>mi rincón</span>
+                    <span class="arrow" aria-hidden="true">+</span>
+                </button>
+
+                <div class="submenu">
+                    <a href="/web/sobre_mi/sobre_mi.html">quién soy</a>
+                    <a href="/web/santuarios/index_santuarios.html">santuarios</a>
+                    <a href="/web/recomendaciones/recomendaciones.html">recomendaciones</a>
+                </div>
+            </div>
+
         <a href="/web/contacto/contacto.html">contacto y guestbook</a>
         <a href="/web/accesibilidad/accesibilidad.html">accesibilidad</a>
         </nav>
+
+        <!-- ==== BUSCAR, DESDE CUALQUIER PÁGINA ====
+             Va dentro del menú y no flotando por ahí: es navegación, y
+             es donde alguien va a buscarlo. Abre una ventana con el
+             campo en vez de llevar el campo aquí metido, por sitio: en
+             el cajón del móvil, una caja de texto más entre los enlaces
+             estorba a quien solo quiere ir a una sección.
+
+             aria-haspopup="dialog" avisa de que esto no lleva a ninguna
+             parte: abre algo encima. -->
+        <button class="buscar-lupa-boton" type="button" data-buscar-lupa
+                aria-haspopup="dialog">
+            <span class="buscar-lupa" aria-hidden="true"></span>
+            <span class="buscar-lupa-texto">buscar</span>
+        </button>
     </div>
 
     <!-- GATÍN ALEATORIO -->
@@ -65,50 +125,246 @@
         <div class="gatin-random-body" data-gatin-body></div>
     </div>
 
-    <!-- ==== AJUSTES: TEMA Y TAMAÑO DEL TEXTO ====
-         En móvil estos dos van juntos, en fila, al final del menú: son
-         las dos cosas que se tocan para ver mejor la web y se buscan en
-         el mismo sitio.
+</aside>
 
-         En escritorio esta caja es display: contents —o sea, como si no
-         existiera— y cada uno vuelve a su sitio de siempre: el del tema
-         al final de la barra y el del tamaño flotando en la esquina de
-         arriba a la derecha (position: fixed, ver
-         estilos/componentes/texto-tamano.css). -->
-    <div class="sidebar-ajustes">
-        <button id="theme-toggle" class="theme-toggle" type="button" aria-pressed="false">
-            <span class="theme-toggle-icon" aria-hidden="true">☾</span>
-            <span class="theme-toggle-text">MODO OSCURO</span>
+<!-- ==== LA VENTANA DE BUSCAR ====
+     Un <dialog> de los de verdad, como el de accesibilidad: con
+     showModal() el navegador oscurece el fondo, atrapa el tabulador
+     dentro, cierra con Escape, deja inerte el resto de la página para
+     los lectores y devuelve el foco al botón al cerrar.
+
+     Dentro va el MISMO formulario que la portada, con su action y su
+     method="get": al enviarlo se va a /web/buscar/ con la palabra en la
+     dirección. Aquí tampoco se carga ningún listado: esta ventana no
+     busca, manda a buscar. Lo abre scripts/componentes/buscar-lupa.js. -->
+<dialog class="buscar-modal" data-buscar-modal aria-labelledby="buscar-modal-titulo">
+    <div class="ajustes-barra">
+        <h2 id="buscar-modal-titulo">buscador.exe</h2>
+        <button class="ajustes-cerrar" type="button" data-buscar-modal-cerrar>
+            <svg class="window-btn-icono" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                <path d="M5.5 5.5L18.5 18.5M18.5 5.5L5.5 18.5" fill="none"
+                      stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
+            </svg>
+            <span class="visually-hidden">Cerrar la búsqueda</span>
         </button>
-
-        <div class="tamano" data-tamano>
-            <button class="tamano-boton" type="button" data-tamano-boton
-                    aria-expanded="false" aria-controls="tamano-panel">
-                <span class="tamano-aa" aria-hidden="true">Aa</span>
-                <span class="visually-hidden">Tamaño del texto</span>
-            </button>
-
-            <div class="tamano-panel" id="tamano-panel" data-tamano-panel hidden>
-                <button class="tamano-paso" type="button" data-tamano-menos aria-disabled="false">
-                    <span aria-hidden="true">−</span>
-                    <span class="visually-hidden">Texto más pequeño</span>
+    </div>
+    <div class="buscar-modal-cuerpo">
+        <form class="buscar-form" role="search" method="get"
+              action="/web/buscar/buscar.html">
+            <label class="buscar-form-label" for="buscar-modal-campo">buscar en toda la web:</label>
+            <div class="buscar-form-caja">
+                <input class="buscar-form-campo" type="search"
+                       id="buscar-modal-campo" name="q"
+                       placeholder="una palabra, un título…"
+                       autocomplete="off" spellcheck="false">
+                <button class="buscar-form-enviar" type="submit">
+                    <span class="buscar-lupa" aria-hidden="true"></span>
+                    <span class="buscar-form-enviar-texto">buscar</span>
                 </button>
-                <!-- Al cambiar de tamaño esto se lee solo, que si no el único
-                     aviso de que ha pasado algo es que la letra cambia (y quien
-                     lo pulsa puede no estar viéndola). -->
-                <p class="tamano-valor" role="status">
-                    <span class="visually-hidden">Texto al </span><span data-tamano-valor>100%</span>
-                </p>
-                <button class="tamano-paso" type="button" data-tamano-mas aria-disabled="false">
-                    <span aria-hidden="true">+</span>
-                    <span class="visually-hidden">Texto más grande</span>
+            </div>
+            <p class="buscar-ayuda">
+                Mira el título, la sección, las categorías y
+                <strong>lo que pone dentro</strong> de las entradas y los
+                relatos. Da igual con tildes o sin ellas.
+            </p>
+        </form>
+    </div>
+</dialog>
+
+<!-- ==== LA VENTANA DE ACCESIBILIDAD ====
+     Un <dialog> de los de verdad, abierto con showModal(): el navegador
+     se encarga solo de oscurecer el fondo (::backdrop), de atrapar el
+     tabulador dentro, de cerrar con Escape y de dejar inerte el resto de
+     la página. Todo eso a mano serían cien líneas de JavaScript y media
+     docena de formas de hacerlo mal.
+
+     La barra de arriba se parece a las de las demás ventanas falsas pero
+     NO lleva su clase: aquí el ✕ cierra de verdad, porque en una ventana
+     que se abre encima es lo que todo el mundo espera. En el resto del
+     sitio sigue siendo una broma con brillos. -->
+<dialog class="ajustes" data-ajustes aria-labelledby="ajustes-titulo">
+    <div class="ajustes-barra">
+        <h2 id="ajustes-titulo">accesibilidad.cfg</h2>
+        <button class="ajustes-cerrar" type="button" data-ajustes-cerrar>
+            <svg class="window-btn-icono" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                <path d="M5.5 5.5L18.5 18.5M18.5 5.5L5.5 18.5" fill="none"
+                      stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
+            </svg>
+            <span class="visually-hidden">Cerrar los ajustes</span>
+        </button>
+    </div>
+
+    <div class="ajustes-cuerpo">
+        <!-- AQUÍ DENTRO VAN SOLO LOS MANDOS, una fila por ajuste.
+             La muestra (ejemplo.txt), la nota del final y la caja que
+             agrupa estas filas NO están escritas aquí: las monta
+             scripts/componentes/ajustes.js nada más arrancar.
+
+             No es un capricho. Este fragmento se pide aparte y se guarda
+             en la caché del navegador, y basta con que arriba quede una
+             copia vieja —o con que al copiar la carpeta se quede sin
+             cambiar uno solo de los archivos— para que falte justo el
+             trozo del final y el panel salga a medias sin que nada
+             parezca roto. Montándolo desde el script, el panel llega
+             entero o no llega. -->
+        <!-- ---- TAMAÑO DEL TEXTO ----
+             Un <input type="range"> de los de serie y no botones ni nada
+             inventado: ya viene con las flechas del teclado, con Inicio y
+             Fin, se anuncia solo a los lectores de pantalla y lo
+             entienden hasta los navegadores más viejos. Las cinco marcas
+             del carril salen del <datalist>.
+             El porcentaje de al lado lleva role="status" para que al
+             moverlo se lea solo: si no, el único aviso de que ha pasado
+             algo es que la letra cambia de tamaño, y quien lo mueve
+             puede no estar viéndola. -->
+        <div class="ajustes-fila">
+            <label class="ajustes-nombre" for="ajustes-tamano">tamaño del texto</label>
+            <div class="ajustes-deslizador">
+                <span class="ajustes-aa ajustes-aa-pequena" aria-hidden="true">Aa</span>
+                <input class="ajustes-rango" type="range" id="ajustes-tamano"
+                       min="0" max="4" step="1" value="1"
+                       list="ajustes-tamano-marcas" data-tamano-rango>
+                <datalist id="ajustes-tamano-marcas">
+                    <option value="0"></option>
+                    <option value="1"></option>
+                    <option value="2"></option>
+                    <option value="3"></option>
+                    <option value="4"></option>
+                </datalist>
+                <span class="ajustes-aa ajustes-aa-grande" aria-hidden="true">Aa</span>
+            </div>
+            <p class="ajustes-valor" role="status">
+                <span class="visually-hidden">Texto al </span><span data-tamano-valor>100%</span>
+            </p>
+        </div>
+
+        <!-- ---- SEPARACIÓN ENTRE LÍNEAS ---- -->
+        <div class="ajustes-fila">
+            <p class="ajustes-nombre" id="ajustes-interlineado-nombre">separación entre líneas</p>
+            <div class="ajustes-mandos" role="group" aria-labelledby="ajustes-interlineado-nombre">
+                <button class="ajustes-opcion" type="button" data-interlineado="" aria-pressed="true">por defecto</button>
+                <button class="ajustes-opcion" type="button" data-interlineado="amplio" aria-pressed="false">amplia</button>
+                <button class="ajustes-opcion" type="button" data-interlineado="muy-amplio" aria-pressed="false">muy amplia</button>
+            </div>
+        </div>
+
+        <!-- ---- LA LETRA ---- -->
+        <div class="ajustes-fila">
+            <p class="ajustes-nombre" id="ajustes-letra-nombre">la letra</p>
+            <div class="ajustes-mandos" role="group" aria-labelledby="ajustes-letra-nombre">
+                <button class="ajustes-opcion" type="button" data-letra="" aria-pressed="true">por defecto</button>
+                <button class="ajustes-opcion" type="button" data-letra="legible" aria-pressed="false">más legible</button>
+            </div>
+        </div>
+
+        <!-- ---- VELOCIDAD DE LA VOZ ----
+             De la lectura en voz alta de las entradas. Se queda aquí
+             aunque la página que estés mirando no tenga nada que leer:
+             es un ajuste tuyo, como los de arriba, y buscarlo solo
+             dentro de una entrada sería más raro que encontrarlo de
+             más. Lo lee scripts/componentes/leer-en-voz.js. -->
+        <div class="ajustes-fila">
+            <p class="ajustes-nombre" id="ajustes-voz-nombre">velocidad de la voz</p>
+            <div class="ajustes-mandos" role="group" aria-labelledby="ajustes-voz-nombre">
+                <button class="ajustes-opcion" type="button" data-voz="lenta" aria-pressed="false">lenta</button>
+                <button class="ajustes-opcion" type="button" data-voz="" aria-pressed="true">normal</button>
+                <button class="ajustes-opcion" type="button" data-voz="rapida" aria-pressed="false">rápida</button>
+            </div>
+        </div>
+
+        <!-- ---- EL TEMA ----
+             Cuatro botones y no dos que alternen: con cuatro opciones,
+             alternar obliga a adivinar a dónde te lleva cada pulsación.
+             Los lleva scripts/tema.js por el data-tema. -->
+        <div class="ajustes-fila">
+            <p class="ajustes-nombre" id="ajustes-tema-nombre">color de tema</p>
+            <!-- Cada botón va pintado con los colores de SU tema (los pone
+                 estilos/componentes/ajustes.css a partir del data-tema), para
+                 saber lo que te vas a encontrar antes de pulsarlo. El elegido
+                 se marca con un halo del color del tema que esté puesto, que
+                 es lo único que no puede confundirse con la muestra.
+
+                 EN DOS GRUPOS, y no por orden ni por gusto: arriba los que
+                 están medidos para leer con ellos todo el día, abajo los que
+                 son un disfraz. Cada grupo tiene su propio título, que
+                 además es su nombre para quien escucha la página. -->
+            <p class="ajustes-grupo-titulo" id="ajustes-tema-leer">para leer</p>
+            <div class="ajustes-mandos ajustes-temas" role="group" aria-labelledby="ajustes-tema-nombre ajustes-tema-leer">
+                <button class="ajustes-opcion" type="button" data-tema="oscuro" aria-pressed="true">
+                    <span class="ajustes-emoji" aria-hidden="true">🌙</span>oscuro</button>
+                <button class="ajustes-opcion" type="button" data-tema="claro" aria-pressed="false">
+                    <span class="ajustes-emoji" aria-hidden="true">☀️</span>claro</button>
+                <button class="ajustes-opcion" type="button" data-tema="oscuro-puro" aria-pressed="false">
+                    <span class="ajustes-emoji" aria-hidden="true">🌑</span>oscuro puro</button>
+                <button class="ajustes-opcion" type="button" data-tema="claro-puro" aria-pressed="false">
+                    <span class="ajustes-emoji" aria-hidden="true">🌕</span>claro puro</button>
+                <button class="ajustes-opcion" type="button" data-tema="tranquilo-oscuro" aria-pressed="false">
+                    <span class="ajustes-emoji" aria-hidden="true">🌿</span>tranquilo oscuro</button>
+                <button class="ajustes-opcion" type="button" data-tema="tranquilo" aria-pressed="false">
+                    <span class="ajustes-emoji" aria-hidden="true">🍃</span>tranquilo</button>
+            </div>
+
+            <p class="ajustes-grupo-titulo" id="ajustes-tema-adorno">de adorno</p>
+            <div class="ajustes-mandos ajustes-temas" role="group" aria-labelledby="ajustes-tema-nombre ajustes-tema-adorno">
+                <button class="ajustes-opcion" type="button" data-tema="terminal-verde" aria-pressed="false">
+                    <span class="ajustes-emoji" aria-hidden="true">🟢</span>terminal verde</button>
+                <button class="ajustes-opcion" type="button" data-tema="terminal-azul" aria-pressed="false">
+                    <span class="ajustes-emoji" aria-hidden="true">🔵</span>terminal azul</button>
+                <button class="ajustes-opcion" type="button" data-tema="terminal-rojo" aria-pressed="false">
+                    <span class="ajustes-emoji" aria-hidden="true">🔴</span>terminal rojo</button>
+                <button class="ajustes-opcion" type="button" data-tema="terminal-ambar" aria-pressed="false">
+                    <span class="ajustes-emoji" aria-hidden="true">🟡</span>terminal ámbar</button>
+            </div>
+            <p class="ajustes-grupo-nota">
+                Estas opciones de consola antigua no respetan el contraste mínimo de
+                accesibilidad, son meramente estéticas.
+            </p>
+        </div>
+
+        <!-- ---- EFECTOS VISUALES ----
+             Los adornos que no tienen que ver con leer mejor sino con
+             cómo se ve la web. Van aquí, al final y juntos, para que se
+             distingan de los mandos de arriba, que sí son de lectura.
+
+             El del brillito es el MISMO botón de antes, con su id
+             intacto: se lo queda scripts/componentes/rastro-cursor.js
+             buscándolo por id cuando se carga este fragmento, así que al
+             mudarlo aquí no hubo que tocar ni una línea de ese archivo. -->
+        <div class="ajustes-fila">
+            <p class="ajustes-nombre">efectos visuales</p>
+            <div class="ajustes-mandos ajustes-mandos-anchos">
+                <button id="cursor-trail-toggle" class="theme-toggle" type="button" aria-pressed="true">
+                    <span class="theme-toggle-icon" aria-hidden="true">✦</span>
+                    <span class="cursor-trail-toggle-text">BRILLITO: ON</span>
+                </button>
+                <button class="theme-toggle" type="button" data-crt-boton aria-pressed="false">
+                    <span class="theme-toggle-icon" aria-hidden="true">▧</span>
+                    <span class="ajustes-crt-texto">FILTRO <abbr title="Cathode Ray Tube: los monitores de tubo de antes, con sus rayas y las esquinas apagadas">CRT</abbr>: <span data-crt-estado>OFF</span></span>
                 </button>
             </div>
         </div>
-    </div>
 
-    <button id="cursor-trail-toggle" class="theme-toggle" type="button" aria-pressed="true">
-        <span class="theme-toggle-icon" aria-hidden="true">✦</span>
-        <span class="cursor-trail-toggle-text">BRILLITO: ON</span>
-    </button>
-</aside>
+        <!-- ---- MOVIMIENTO ----
+             Para dejar quieto todo lo que se mueve: el parpadeo del
+             filtro CRT, el cursor de los temas de terminal, el del
+             gatete del 404, la cinta de frases y las transiciones.
+
+             Ya se respeta lo que pida el sistema (prefers-reduced-motion,
+             en 27 sitios del CSS) y eso no cambia. Pero ese ajuste es de
+             todo el aparato: hay quien no lo tiene puesto, o no sabe que
+             existe, y aun así un parpadeo le da dolor de cabeza aquí.
+             Esto es lo mismo, a mano y solo en esta web.
+
+             Al revés no funciona: si el sistema pide menos movimiento,
+             poner "normal" aquí no lo devuelve. Manda el aparato.
+             Lo para estilos/componentes/sin-movimiento.css. -->
+        <div class="ajustes-fila">
+            <p class="ajustes-nombre" id="ajustes-movimiento-nombre">animaciones</p>
+            <div class="ajustes-mandos" role="group" aria-labelledby="ajustes-movimiento-nombre">
+                <button class="ajustes-opcion" type="button" data-movimiento="" aria-pressed="true">normal</button>
+                <button class="ajustes-opcion" type="button" data-movimiento="quieto" aria-pressed="false">sin animaciones</button>
+            </div>
+        </div>
+    </div>
+</dialog>
+

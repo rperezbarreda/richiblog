@@ -39,10 +39,29 @@ const WINDOW_CONTROLS_ICONOS = {
         ' stroke="currentColor" stroke-width="3" stroke-linecap="round"/>',
 };
 
+// Qué hace cada uno. Lo recoge scripts/componentes/ventanas-plegables.js
+// por delegación, mirando este data-ventana-accion: minimizar pliega la
+// ventana de verdad, maximizar la devuelve a su tamaño, y cerrar se
+// queda de adorno con sus brillos (chispas-botones.js).
+//
+// Siguen siendo <span> y no <button> a propósito: el contenedor va con
+// aria-hidden="true" —son tres dibujos, lo que hay que leer ya lo dice
+// el título de la barra— y dentro de algo escondido para un lector de
+// pantalla no puede haber nada que reciba el foco. El mando de verdad,
+// el que se usa con el teclado, es el botón que cubre toda la barra y lo
+// pone ventanas-plegables.js.
+const WINDOW_CONTROLS_ACCIONES = {
+    minimizar: "plegar",
+    maximizar: "desplegar",
+    cerrar: "cerrar",
+};
+
 const WINDOW_CONTROLS_MARKUP = Object.keys(WINDOW_CONTROLS_ICONOS)
     .map(
         (nombre) =>
-            '<span class="window-btn">' +
+            '<span class="window-btn" data-ventana-accion="' +
+            WINDOW_CONTROLS_ACCIONES[nombre] +
+            '">' +
             '<svg class="window-btn-icono" viewBox="0 0 24 24" aria-hidden="true"' +
             ' focusable="false">' +
             WINDOW_CONTROLS_ICONOS[nombre] +

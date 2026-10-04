@@ -1,0 +1,439 @@
+/* PÁGINA: BUSCAR EN TODA LA WEB */
+
+/* Sigue el aire del mapa del sitio —la misma caja, la misma sección y
+   fecha en mono— pero los resultados son una LISTA y no una tabla. En el
+   mapa cada fila son tres datos cortos y alineados, que es para lo que
+   están las tablas. Aquí cada resultado lleva además un párrafo de texto
+   de largo variable: metido en una celda descuadra la rejilla y, al
+   escucharlo, obliga a oír "columna 4" antes de cada trozo.
+
+   Lo pinta scripts/paginas/buscar.js. */
+
+/* ==== EL FORMULARIO ==== */
+
+/* No es el buscador de los listados (estilos/componentes/buscador.css):
+   aquel filtra lo que ya está en pantalla y éste manda a otra página, así
+   que lleva su botón de enviar y pesa más en la página, que es lo que se
+   viene a hacer aquí. */
+.buscar-form {
+    max-width: 640px;
+    margin: 18px 0 10px;
+}
+
+.buscar-form-label {
+    display: block;
+    margin-bottom: 8px;
+    color: var(--yellow);
+    font-family: var(--fuente-mono);
+    font-size: 0.75rem;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+}
+
+.buscar-form-caja {
+    display: flex;
+    gap: 8px;
+}
+
+.buscar-form-campo {
+    flex: 1;
+    min-width: 0;
+    padding: 12px 14px;
+    border: 2px solid var(--yellow);
+    background: var(--purple-lighter);
+    color: var(--white);
+    font-family: var(--fuente-texto);
+    font-size: 1rem;
+}
+
+.buscar-form-campo::placeholder {
+    color: var(--muted);
+    opacity: 1;
+}
+
+.buscar-form-campo:focus-visible {
+    outline: 2px solid var(--yellow);
+    outline-offset: 3px;
+}
+
+.buscar-form-enviar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-shrink: 0;
+    padding: 12px 18px;
+    border: 2px solid var(--yellow);
+    background: var(--yellow);
+    color: var(--yellow-contrast);
+    font-family: var(--fuente-mono);
+    font-size: 0.8125rem;
+    letter-spacing: 1px;
+    transition: color 0.12s linear, background-color 0.12s linear;
+}
+
+.buscar-form-enviar:hover {
+    background: var(--purple);
+    color: var(--yellow);
+}
+
+.buscar-form-enviar:focus-visible {
+    outline: 2px solid var(--yellow);
+    outline-offset: 3px;
+}
+
+/* La lupa, dibujada con un borde redondo y una rayita girada en vez de
+   con un carácter 🔍 o con una imagen. Por lo mismo que el resto de los
+   iconos del sitio: un carácter lo dibuja la fuente que tenga quien
+   visita y sale de cualquier tamaño y descentrado, y una imagen es un
+   archivo más que pedir. Así toma el color del texto y crece con él.
+
+   EL HUECO ES MÁS GRANDE QUE EL CÍRCULO a propósito: el mango sale por
+   abajo a la derecha, y si la caja midiera lo que el círculo, el dibujo
+   se saldría de su sitio. Medido en el barrido de tamaños: se salía 5
+   píxeles por los dos lados en las 190 cargas en que aparece. No
+   recortaba nada ni descuadraba la página, pero con el texto al 150% un
+   dibujo que se sale de su caja acaba tocando lo que tiene al lado.
+   Así que la caja mide 1em, el círculo se dibuja con ::before dentro y
+   el mango con ::after: los dos caben. */
+.buscar-lupa {
+    position: relative;
+    display: inline-block;
+    width: 1em;
+    height: 1em;
+    vertical-align: -0.12em;
+}
+
+.buscar-lupa::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 0.68em;
+    height: 0.68em;
+    border: 2px solid currentColor;
+    border-radius: 50%;
+}
+
+.buscar-lupa::after {
+    content: "";
+    position: absolute;
+    top: 0.58em;
+    left: 0.56em;
+    width: 2px;
+    height: 0.38em;
+    background: currentColor;
+    transform: rotate(-45deg);
+    transform-origin: top center;
+}
+
+.buscar-ayuda {
+    max-width: 62ch;
+    margin: 12px 0 0;
+    color: var(--muted);
+    font-size: 0.875rem;
+    line-height: 1.7;
+}
+
+.buscar-ayuda strong {
+    color: var(--white);
+}
+
+/* ==== LA CUENTA ==== */
+
+.buscar-cuenta {
+    margin: 18px 0 14px;
+    min-height: 1.3em;
+    color: var(--yellow);
+    font-family: var(--fuente-mono);
+    font-size: 0.8125rem;
+}
+
+/* ==== LOS RESULTADOS ==== */
+
+.buscar-resultados {
+    max-width: 900px;
+}
+
+.busq-lista {
+    margin: 0;
+    padding: 0;
+    /* Es una <ol> porque el orden importa (lo más probable arriba), pero
+       los números no se enseñan: un "1." delante de cada resultado no
+       dice nada y encima se confunde con la fecha. El orden se sigue
+       anunciando a quien escucha, que es a quien le sirve. */
+    list-style: none;
+}
+
+.busq-item {
+    padding: 16px 18px;
+    border: 2px solid var(--border);
+    background: var(--purple-lighter);
+}
+
+.busq-item + .busq-item {
+    margin-top: 10px;
+}
+
+.busq-titulo {
+    margin: 0 0 6px;
+    font-family: var(--fuente-texto);
+    font-size: 1.0625rem;
+    line-height: 1.4;
+}
+
+.busq-titulo a {
+    color: var(--yellow);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+}
+
+.busq-titulo a:hover {
+    text-decoration-thickness: 2px;
+}
+
+.busq-titulo a:focus-visible {
+    outline: 2px solid var(--yellow);
+    outline-offset: 3px;
+}
+
+/* La línea de la sección, la fecha y las categorías. En mono y pequeña,
+   como las cabeceras del mapa: es el dato de dónde está la cosa, no la
+   cosa. */
+.busq-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 10px;
+    margin: 0 0 8px;
+    color: var(--muted);
+    font-family: var(--fuente-mono);
+    font-size: 0.6875rem;
+    letter-spacing: 0.5px;
+}
+
+.busq-seccion {
+    padding: 2px 7px;
+    border: 1px solid var(--yellow);
+    color: var(--yellow);
+    text-transform: uppercase;
+}
+
+.busq-categoria {
+    padding: 2px 7px;
+    border: 1px solid var(--border);
+}
+
+.busq-fecha {
+    padding: 2px 0;
+}
+
+.busq-trozo {
+    margin: 0;
+    color: var(--white);
+    font-size: 0.9375rem;
+    line-height: 1.7;
+}
+
+/* Lo encontrado, resaltado. Va en <mark>, que significa "esto está
+   marcado porque viene a cuento" y algunos lectores de pantalla lo
+   anuncian; un <span> de otro color no significa nada.
+
+   Y NO SE DISTINGUE SOLO POR EL COLOR: lleva también un subrayado
+   grueso. Un resalte que solo sea un fondo de color se lo pierde quien no
+   distinga ese color, que es la pauta 1.4.1. Con el subrayado se ve
+   igual en los ocho temas, incluidos los dos de blanco y negro puros,
+   donde el fondo del <mark> y el de la página son el mismo. */
+.busq-trozo mark,
+.busq-titulo mark,
+.busq-meta mark {
+    padding: 0 2px;
+    background: var(--yellow);
+    color: var(--yellow-contrast);
+    text-decoration: underline;
+    text-decoration-thickness: 2px;
+    text-underline-offset: 2px;
+}
+
+/* ==== EL BOTÓN DE VER MÁS ==== */
+
+.busq-mas {
+    display: block;
+    width: 100%;
+    margin-top: 12px;
+    padding: 12px;
+    border: 2px dashed var(--muted);
+    background: transparent;
+    color: var(--muted);
+    font-family: var(--fuente-mono);
+    font-size: 0.8125rem;
+    transition: color 0.12s linear, border-color 0.12s linear;
+}
+
+.busq-mas:hover {
+    border-color: var(--yellow);
+    color: var(--yellow);
+}
+
+.busq-mas:focus-visible {
+    outline: 2px solid var(--yellow);
+    outline-offset: 3px;
+}
+
+/* ==== CUANDO NO HAY NADA ==== */
+
+.busq-nada {
+    max-width: 62ch;
+    padding: 18px;
+    border: 2px dashed var(--border);
+    color: var(--white);
+    font-size: 0.9375rem;
+    line-height: 1.7;
+}
+
+.busq-nada p {
+    margin: 0 0 10px;
+}
+
+.busq-nada p:last-child {
+    margin-bottom: 0;
+}
+
+.busq-nada a {
+    color: var(--yellow);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+}
+
+/* ==== LA BARRA DE LA PORTADA ==== */
+
+/* En la portada va solo la barra: ni ventana alrededor, ni título, ni
+   explicación. Encima de dos ventanas que ya tienen su barra de título y
+   sus −■✕, una tercera igual convertía la columna en una lista de cajas
+   iguales donde ya no destacaba ninguna; y una caja de búsqueda con su
+   lupa al lado se entiende sin que nadie la presente.
+
+   Es el mismo formulario que la página de buscar y que la ventana del
+   menú, solo que sin el nombre a la vista y un poco más bajo. */
+.buscar-form-suelta {
+    margin: 0 0 14px;
+    max-width: none;
+}
+
+.buscar-form-suelta .buscar-form-campo {
+    padding: 10px 12px;
+    font-size: 0.9375rem;
+}
+
+.buscar-form-suelta .buscar-form-enviar {
+    padding: 10px 14px;
+}
+
+/* ==== LA LUPA DEL MENÚ Y SU VENTANA ==== */
+
+/* El botón del final del menú. Se parece a los enlaces de al lado para
+   que no cante, pero lleva la lupa delante: es lo único de ahí que no
+   lleva a una página sino que abre algo. */
+.buscar-lupa-boton {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    margin-top: 6px;
+    padding: 10px 14px;
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--white);
+    font-family: var(--fuente-texto);
+    font-size: 0.9375rem;
+    text-align: left;
+    transition: color 0.12s linear, border-color 0.12s linear;
+}
+
+.buscar-lupa-boton:hover {
+    border-color: var(--yellow);
+    color: var(--yellow);
+}
+
+.buscar-lupa-boton:focus-visible {
+    outline: 2px solid var(--yellow);
+    outline-offset: 2px;
+}
+
+/* La ventana. Las mismas medidas y el mismo vestido que la de
+   accesibilidad: son hermanas y conviene que se note. */
+.buscar-modal {
+    width: min(30rem, calc(100vw - 32px));
+    margin: auto;
+    padding: 0;
+    background: var(--purple-lighter);
+    border: 3px solid var(--yellow);
+    box-shadow: 8px 8px 0 var(--yellow);
+    color: var(--white);
+}
+
+.buscar-modal::backdrop {
+    /* Negro y no el morado del tema: lo de debajo tiene que apagarse en
+       los ocho temas, y en los claros un velo morado casi no se vería. */
+    background: rgba(0, 0, 0, 0.72);
+}
+
+.buscar-modal-cuerpo {
+    padding: 18px;
+}
+
+.buscar-modal .buscar-form {
+    margin: 0;
+}
+
+@media (max-width: 860px) {
+    .buscar-modal {
+        width: calc(100vw - 24px);
+    }
+
+    .buscar-modal-cuerpo {
+        padding: 14px;
+    }
+
+    /* En una pantalla estrecha el campo y el botón no caben en fila sin
+       dejar el campo en un pellizco: se ponen uno encima del otro y el
+       botón, que ahí tiene su nombre escrito al lado de la lupa, se
+       queda de ancho completo.
+
+       MENOS EN LA BARRA SUELTA DE LA PORTADA. Ahí el botón es solo la
+       lupa —su nombre va escondido, que al lado de un campo que ya dice
+       "buscar en toda la web" no añadía nada—, y apilado se convertía en
+       una franja amarilla de lado a lado con un dibujito en medio y
+       nada más. Esa se queda en fila: medido, el campo aguanta 198
+       píxeles a 320 de ancho, que da de sobra. */
+    .buscar-form-caja {
+        flex-wrap: wrap;
+    }
+
+    .buscar-form-campo {
+        flex-basis: 100%;
+    }
+
+    .buscar-form-enviar {
+        flex: 1;
+        justify-content: center;
+    }
+
+    .buscar-form-suelta .buscar-form-caja {
+        flex-wrap: nowrap;
+    }
+
+    .buscar-form-suelta .buscar-form-campo {
+        flex-basis: auto;
+    }
+
+    .buscar-form-suelta .buscar-form-enviar {
+        flex: 0 0 auto;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .buscar-lupa-boton,
+    .buscar-form-enviar,
+    .busq-mas {
+        transition: none;
+    }
+}

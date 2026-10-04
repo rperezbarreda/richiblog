@@ -5,8 +5,26 @@
         <link>https://richi.blog/</link>
         <description>Todo lo que voy publicando: entradas del blog, relatos y material de rol.</description>
         <language>es</language>
-        <lastBuildDate>Thu, 01 Oct 2026 00:00:00 +0000</lastBuildDate>
+        <lastBuildDate>Sun, 04 Oct 2026 00:00:00 +0000</lastBuildDate>
         <atom:link href="https://richi.blog/blog/rss.xml" rel="self" type="application/rss+xml"/>
+        <item>
+            <title>Semanita saturada de planes</title>
+            <link>https://richi.blog/web/blog/2026/octubre/semanita-saturada-de-planes.html</link>
+            <guid isPermaLink="true">https://richi.blog/web/blog/2026/octubre/semanita-saturada-de-planes.html</guid>
+            <pubDate>Sun, 04 Oct 2026 00:00:00 +0000</pubDate>
+            <category>blog</category>
+            <category>diario</category>
+            <description>La verdad es que he dejado un poco abandonado el blog, almenos en lo que se refiere a ir actualizando mi vida en estos post.</description>
+        </item>
+        <item>
+            <title>Mamá</title>
+            <link>https://richi.blog/web/mis_movidas/relatos/writeober26/dia-02-colmillo.html</link>
+            <guid isPermaLink="true">https://richi.blog/web/mis_movidas/relatos/writeober26/dia-02-colmillo.html</guid>
+            <pubDate>Fri, 02 Oct 2026 00:00:00 +0000</pubDate>
+            <category>relatos</category>
+            <category>writeober26</category>
+            <description>El olor a atún procesado le llegó a su hocico mientras hacía su ronda nocturna. Con cierta desconfianza decidió empezar la escalada por la escalera de incendios hasta el apartamento de la tercera planta. Al oír pisadas detrás de ella se apresuró a subir, pegando un brinco hasta el alféizar de la ventana, decidida a ser la primera en devorar aquel manjar.</description>
+        </item>
         <item>
             <title>El Rey del Valle</title>
             <link>https://richi.blog/web/mis_movidas/relatos/writeober26/dia-01-hojarasca.html</link>
@@ -59,7 +77,7 @@
             <pubDate>Mon, 21 Sep 2026 00:00:00 +0000</pubDate>
             <category>blog</category>
             <category>diario</category>
-            <description>¿Os acordáis de que ayer me quejaba un poco de lo especialmente pesados que estaban mis sobrinos? Bueno, pues me han pegado algún virus estomacal que meha dejado toda la noche dando vueltas en la cama y llevo todo el día malito de la tripa.</description>
+            <description>¿Os acordáis de que ayer me quejaba un poco de lo especialmente pesados que estaban mis sobrinos? Bueno, pues me han pegado algún virus estomacal que me ha dejado toda la noche dando vueltas en la cama y llevo todo el día malito de la tripa.</description>
         </item>
         <item>
             <title>Puto Tebas de los cojones</title>

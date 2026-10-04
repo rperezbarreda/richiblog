@@ -96,6 +96,30 @@ FUERA = {"herramientas", "fragmentos"}
 # escriben en el mismo orden en el <head>, y el de más abajo gana si dos
 # dicen cosas distintas sobre lo mismo.
 
+# Hojas que van al FINAL de la lista de cualquier página, después de las
+# de su sección. Cuando dos reglas pesan lo mismo gana la que se carga
+# después, así que aquí abajo va lo que tiene que poder con lo que haya
+# puesto cualquier página.
+#
+# Por ahora solo las ventanas que se plieguen: plegar una consiste en
+# esconder todo lo que no sea su barra de título, y eso tiene que ganarle
+# al display (flex, grid, block...) que su página le haya dado a esos
+# trozos. Así se consigue sin inflar los selectores ni usar !important,
+# que en esta web no aparece en ningún archivo.
+ULTIMAS = [
+    "/estilos/componentes/ventanas-plegables.css",
+    # Cómo sale la web en papel. Va aquí abajo porque tiene que poder
+    # con el estilo de cualquier página: en papel se quita el menú, los
+    # botones y los fondos, salga de donde salga.
+    "/estilos/componentes/impresion.css",
+    # Y lo último de lo último: el mando de "dejarlo todo quieto". Tiene
+    # que poder parar CUALQUIER animación o transición de cualquier
+    # página, así que estando al final le gana a todas sin tener que
+    # inflar sus selectores ni usar !important.
+    "/estilos/componentes/sin-movimiento.css",
+]
+
+
 def hojas_de(ruta):
     """ruta es la dirección pública de la página, tal cual sale en la
     barra del navegador: "/index.html", "/web/blog/diario.html"..."""
@@ -116,9 +140,9 @@ def hojas_de(ruta):
         # decide el propio CSS), pero lo puede necesitar cualquier
         # página, el 404 incluido.
         "/estilos/componentes/subir.css",
-        # El mando "Aa" que agranda el texto: va flotando en una esquina
-        # de cualquier página.
-        "/estilos/componentes/texto-tamano.css",
+        # El botón "Aa" que abre la ventana de accesibilidad: va
+        # flotando en una esquina de cualquier página.
+        "/estilos/componentes/ajustes.css",
     ]
 
     es_portada = ruta in ("/", "/index.html")
@@ -131,6 +155,8 @@ def hojas_de(ruta):
     es_accesibilidad = "/accesibilidad/" in ruta
     es_changelog = "/changelog/" in ruta
     es_mapa = "/mapa/" in ruta
+    es_buscar = "/buscar/" in ruta
+    es_recomendaciones = "/recomendaciones/" in ruta
     es_404 = ruta.endswith("/not_found.html")
     # La página de un reto de escritura: vive en una subcarpeta de
     # relatos/ y se llama index_<loquesea>.html. No es una página de
@@ -147,7 +173,7 @@ def hojas_de(ruta):
 
     if es_404:
         # El 404 no lleva barra lateral, así que se corta aquí.
-        return hojas + ["/estilos/paginas/no-encontrada.css"]
+        return hojas + ["/estilos/paginas/no-encontrada.css"] + ULTIMAS
 
     if es_lectura:
         hojas.append("/estilos/componentes/texto-entrada.css")
@@ -227,6 +253,15 @@ def hojas_de(ruta):
     elif es_changelog:
         # Igual que accesibilidad: marcos propios, nada de portada.css.
         hojas.append("/estilos/paginas/changelog.css")
+    elif es_recomendaciones:
+        # Igual que accesibilidad o el changelog: marcos propios, nada
+        # de portada.css. Y el filtro de categorías, el mismo que el
+        # portfolio de rol y el listado de relatos.
+        hojas += [
+            "/estilos/paginas/recomendaciones.css",
+            "/estilos/componentes/filtros.css",
+            "/estilos/componentes/filtros.responsive.css",
+        ]
     elif es_mapa:
         hojas += [
             "/estilos/paginas/mapa.css",
@@ -239,8 +274,228 @@ def hojas_de(ruta):
     hojas += [
         "/estilos/componentes/barra-lateral.css",
         "/estilos/componentes/barra-lateral.responsive.css",
+        # La lupa del menú y su ventana de buscar viven dentro de esa
+        # barra, así que van con ella. Aquí abajo y no en la base porque
+        # el 404 se sale antes: no tiene menú, y cargarle estos estilos
+        # sería pedirle 3 KB para nada.
+        "/estilos/paginas/buscar.css",
     ]
-    return hojas
+    return hojas + ULTIMAS
+
+
+# =========================================
+# QUÉ JS LLEVA CADA PÁGINA
+# =========================================
+# Esta lista vivía dentro de scripts/cargador-scripts.js: ese archivo
+# miraba la URL ya dentro del navegador y escribía los <script> que
+# tocaban. Funcionaba, pero costaba caro y por la misma razón que costó
+# el CSS en su día: el navegador no se entera de que existen esos
+# scripts hasta que ha pedido el cargador y lo ha ejecutado.
+#
+# Medido con la red frenada (3G rápido, 150 ms de ida y vuelta) y el
+# móvil haciendo como que va lento:
+#
+#   - Los scripts de la página no empezaban a pedirse hasta los 814 ms.
+#     Escritos aquí se piden a los 190, con el CSS.
+#   - La barra lateral tardaba 1,5 s en aparecer, porque su archivo
+#     (barra-lateral.js) era uno de esos y encima tiene que pedir
+#     después el trozo de HTML.
+#
+# "defer" no retrasa el pintado, que era el argumento de antes, pero sí
+# retrasa TODO lo demás: el menú, los botones de las ventanas, el mando
+# de accesibilidad. Esos 600 ms se notan.
+#
+# El orden importa y es el mismo de antes: unos cuantos scripts esperan
+# a que otro haya montado algo (los −■✕ antes de plegar, el buscador
+# antes del listado que avisa). Los comentarios de cada tramo explican
+# cuál y por qué.
+#
+# De paso se arregla un apaño: el cargador tenía que adivinar el tipo de
+# página quitándole el ".html" a la URL, porque Neocities sirve las
+# páginas con y sin extensión y por el camino se quedaba alguna sin su
+# JS. Aquí eso no puede pasar: cada página lleva escrito el suyo.
+
+
+def scripts_de(ruta):
+    """Igual que hojas_de(), pero con el JS. "ruta" es la dirección
+    pública de la página: "/index.html", "/web/blog/diario.html"..."""
+    # Sin ".html" ni barra final, que es como se escribían las
+    # comprobaciones cuando esto vivía en el navegador.
+    camino = re.sub(r"\.html$", "", ruta).rstrip("/") or "/"
+
+    es_portada = camino in ("/", "/index")
+    es_sobre_mi = "/sobre_mi/" in camino
+    es_contacto = "/contacto/" in camino
+    es_archivo_blog = bool(re.search(r"/blog/\d+/index_\d+$", camino))
+    es_diario = camino.endswith("/blog/diario")
+    es_rol = "/mis_movidas/rol/" in camino
+    es_lista_relatos = camino.endswith("/mis_movidas/relatos/index_relatos")
+    # La página de un reto de escritura: una subcarpeta de relatos/ con
+    # su propio index_. Se mira ANTES que es_lectura, que si no se la
+    # traga (está dentro de relatos/ y no es el listado).
+    es_reto = bool(re.search(r"/mis_movidas/relatos/[^/]+/index_[^/]+$", camino))
+    # Solo las fichas de cada gato: el índice de santuarios no tiene
+    # galería.
+    es_ficha_santuario = bool(re.search(r"/santuarios/[^/]+/[^/]+$", camino))
+    es_404 = camino.endswith("/not_found")
+    es_changelog = "/changelog/" in camino
+    es_mapa = "/mapa/" in camino
+    es_buscar = "/buscar/" in camino
+    es_recomendaciones = "/recomendaciones/" in camino
+    # Páginas de lectura: una entrada del blog (no el archivo del año)
+    # o un relato (no su índice). Ahí va la ventana de "sigue leyendo".
+    es_lectura = bool(
+        (re.search(r"/blog/\d+/", camino) and not es_archivo_blog)
+        or (
+            "/mis_movidas/relatos/" in camino
+            and not es_lista_relatos
+            and not es_reto
+        )
+    )
+
+    if es_404:
+        # El 404 no lleva barra lateral ni componentes de navegación.
+        return [
+            "/scripts/componentes/botones-ventana.js",
+            # Después de botones-ventana.js: este monta el mando de
+            # plegar sobre las barras de título, y los −■✕ de dentro los
+            # pone el otro. En el 404 la ventanita del gatete ASCII
+            # también se pliega; los −■✕ grandes de la pantalla entera
+            # no, que esos no tienen barra (siguen soltando brillos).
+            "/scripts/componentes/ventanas-plegables.js",
+            "/scripts/componentes/rastro-cursor.js",
+            "/scripts/componentes/chispas-botones.js",
+            "/scripts/componentes/enlaces-fuera.js",
+            "/scripts/componentes/subir.js",
+            "/scripts/componentes/teclado-scroll.js",
+        ]
+
+    # Base: la necesita cualquier página de contenido del sitio.
+    js = [
+        "/scripts/componentes/cargador-fragmentos.js",
+        "/scripts/componentes/barra-lateral.js",
+        # Vive dentro de la barra lateral, así que lo lleva cualquier
+        # página que la tenga (el 404 sale antes, arriba).
+        "/scripts/componentes/gatin-random.js",
+        "/scripts/tema.js",
+        # La ventana de accesibilidad, que es donde viven el tamaño del
+        # texto, la separación entre líneas, la letra, el tema, la voz y
+        # los efectos. Su HTML va con el resto del armazón, en
+        # fragmentos/barra-lateral.html, así que lo lleva cualquier
+        # página que tenga barra lateral. En el 404, que no la tiene, no
+        # sale el mando, pero lo que se haya elegido se respeta igual
+        # (lo pone cargador-scripts.js).
+        "/scripts/componentes/ajustes.js",
+        # La lupa del final del menú, que abre la ventana de buscar. Va
+        # en la base porque la barra lateral está en todas las páginas de
+        # contenido (el 404 sale antes, arriba, y no tiene menú).
+        "/scripts/componentes/buscar-lupa.js",
+        "/scripts/componentes/botones-ventana.js",
+        # El − y el ■ de las barras de título, que ya plegan la ventana
+        # de verdad. Va en la base porque esas barras están en casi
+        # todas las páginas, y después de botones-ventana.js, que es
+        # quien pone los cuadraditos que este engancha.
+        "/scripts/componentes/ventanas-plegables.js",
+        "/scripts/componentes/rastro-cursor.js",
+        "/scripts/componentes/chispas-botones.js",
+        # Marca los enlaces que llevan fuera de la web. Va en la base
+        # porque hay enlaces de ésos en media docena de páginas.
+        "/scripts/componentes/enlaces-fuera.js",
+        "/scripts/componentes/visor-imagenes.js",
+        # Igual que el visor: va en la base para que cualquier página
+        # pueda montar un aviso emergente sin tocar esta lista.
+        "/scripts/componentes/aviso.js",
+        "/scripts/componentes/subir.js",
+        # Sin esto la página no se mueve con el teclado: ver el
+        # comentario de arriba del propio archivo.
+        "/scripts/componentes/teclado-scroll.js",
+    ]
+
+    if es_portada:
+        js += [
+            "/scripts/componentes/frases.js",
+            # Antes que los dos que pintan las ventanas: ellos le
+            # llaman en cuanto tienen la lista puesta, y si no está
+            # cargado se la saltan y los títulos se quedan enteros.
+            "/scripts/componentes/recortar-titulos.js",
+            "/scripts/paginas/entradas-blog.js",
+            "/scripts/paginas/novedades.js",
+        ]
+    elif es_sobre_mi:
+        js.append("/scripts/paginas/sobre-mi.js")
+    elif es_contacto:
+        # Antes que guestbook.js: le da el cuadro de texto con formato y
+        # el pintado seguro de los mensajes.
+        js += [
+            "/scripts/paginas/guestbook-texto.js",
+            "/scripts/paginas/guestbook.js",
+        ]
+    elif es_archivo_blog:
+        # Antes que entradas-blog.js: cuando el archivo termina de
+        # pintarse le pide al buscador que aplique lo que venga en
+        # ?buscar=, así que tiene que estar ya cargado.
+        js += [
+            "/scripts/componentes/buscador.js",
+            "/scripts/paginas/entradas-blog.js",
+        ]
+    elif es_diario:
+        js.append("/scripts/paginas/diario.js")
+    elif es_rol:
+        # Antes que rol.js, igual que en relatos: así los componentes ya
+        # están escuchando cuando el portfolio termina de pintarse y
+        # avisa de que hay categorías nuevas que contar.
+        js += [
+            "/scripts/componentes/buscador.js",
+            "/scripts/componentes/filtros.js",
+            "/scripts/paginas/rol.js",
+        ]
+    elif es_lista_relatos:
+        js += [
+            "/scripts/componentes/buscador.js",
+            "/scripts/componentes/filtros.js",
+            "/scripts/paginas/relatos.js",
+            # La tarjeta del reto que va encima del listado.
+            "/scripts/paginas/reto.js",
+        ]
+    elif es_reto:
+        js.append("/scripts/paginas/reto.js")
+    elif es_lectura:
+        # Antes que otras-entradas.js: ese avisa con la ficha de esta
+        # entrada en cuanto le llega el listado, y lectura.js tiene que
+        # estar ya escuchando.
+        js.append("/scripts/componentes/lectura.js")
+        # Después de lectura.js: el botón de escuchar se cuelga del
+        # "4 min" que pinta ese, y si no lo encuentra se queda esperando
+        # al aviso de que ya está puesto.
+        js.append("/scripts/componentes/leer-en-voz.js")
+        js.append("/scripts/paginas/otras-entradas.js")
+    elif es_ficha_santuario:
+        js.append("/scripts/paginas/santuarios.js")
+    elif es_changelog:
+        js.append("/scripts/paginas/changelog.js")
+    elif es_recomendaciones:
+        # Antes que recomendaciones.js: así el filtro ya está escuchando
+        # cuando la página termina de pintar las ventanitas y avisa de
+        # que hay categorías que contar.
+        js += [
+            "/scripts/componentes/filtros.js",
+            "/scripts/paginas/recomendaciones.js",
+        ]
+    elif es_buscar:
+        # La página de buscar en toda la web. No lleva el buscador de los
+        # listados: aquel filtra lo que ya está en pantalla y éste busca
+        # en un listado aparte con el texto de todo.
+        js.append("/scripts/paginas/buscar.js")
+    elif es_mapa:
+        # Antes que mapa.js, como en el archivo del blog: la tabla se
+        # pinta sola cuando llega el JSON y ahí mismo le pide al buscador
+        # que aplique lo que venga en ?buscar=.
+        js += [
+            "/scripts/componentes/buscador.js",
+            "/scripts/paginas/mapa.js",
+        ]
+
+    return js
 
 
 # =========================================
@@ -250,13 +505,17 @@ def hojas_de(ruta):
 CARGADOR = "/scripts/cargador-scripts.js"
 
 # Lo que entra en la lista de cargador-scripts.js: lo que el navegador
-# pide por su cuenta después de cargar la página. Los JSON de datos/ no
-# están (ver la explicación de arriba), y el propio cargador tampoco:
-# ese lleva su v= escrito en el <head>, y ponerlo además en su propia
-# lista sería una pescadilla mordiéndose la cola (al cambiar la lista
-# cambia el archivo, y al cambiar el archivo cambia su resumen).
+# pide por su cuenta después de cargar la página. Hoy son solo los
+# fragmentos de HTML (la barra lateral y las frases), que se piden con
+# fetch() desde el propio navegador.
+#
+# El JS ya no está aquí: desde que cada página lleva sus <script>
+# escritos en el <head>, su ?v= lo pone esta misma herramienta al
+# escribirlos, igual que el del CSS. La lista pasó de 40 líneas a dos, y
+# eso se nota: cargador-scripts.js es lo único que bloquea el pintado.
+#
+# Los JSON de datos/ tampoco están (ver la explicación de arriba).
 VERSIONADAS = {
-    "scripts": (".js",),
     "fragmentos": (".html",),
 }
 
@@ -335,16 +594,70 @@ CABECERA = f"""    {ABRE}
 """
 
 
+ABRE_JS = "<!-- ==== JS ===="
+CIERRA_JS = "<!-- ==== fin del JS ==== -->"
+
+CABECERA_JS = f"""    {ABRE_JS}
+         Esta lista también la escribe la herramienta, a partir de
+         scripts_de(). No la toques a mano.
+
+         Todos van con "defer": se bajan mientras el navegador lee el
+         HTML, no retrasan el pintado y se ejecutan al final, en este
+         mismo orden, que en unos cuantos casos importa.
+
+         Están escritos aquí y no los pide un script, por lo mismo que
+         el CSS: así el navegador los descubre en cuanto le llega el
+         HTML. Pidiéndolos desde el cargador no empezaban a bajarse
+         hasta 600 ms después, y con ellos se retrasaba todo lo que se
+         puede tocar (el menú el que más). -->
+"""
+
+
+BARRA_LATERAL = "/fragmentos/barra-lateral.html"
+
+ADELANTO = """    <!-- El menú, pedido LO PRIMERO. No está escrito en el HTML de cada
+         página: vive en fragmentos/barra-lateral.html y lo pide
+         scripts/componentes/barra-lateral.js, que va con defer y por
+         tanto no corre hasta que el navegador ha terminado de leer la
+         página. Medido con la red frenada, el menú no aparecía hasta
+         1,5 s: el HTML tardaba 190 ms, los scripts se ejecutaban sobre
+         los 1000 y solo entonces empezaba el viaje a por el trozo.
+
+         Esta línea lo pide aquí mismo, antes incluso que el CSS, y
+         guarda la promesa. Cuando barra-lateral.js arranca no empieza
+         ningún viaje: se sube al que ya iba. El menú pasó a estar a los
+         786 ms, la mitad.
+
+         Va escrita a pelo y no en un archivo aparte a propósito: un
+         archivo aparte habría que pedirlo, y pedirlo es justo lo que se
+         está intentando no hacer. Si algo falla se queda sin adelanto y
+         loadComponent() lo pide como siempre. -->
+    <script>window.adelantoDeFragmentos={};try{window.adelantoDeFragmentos["%s"]=fetch("%s").then(function(r){return r.ok?r.text():null}).catch(function(){return null})}catch(e){}</script>
+"""
+
+
 def bloque(ruta):
     links = "\n".join(
         f'    <link rel="stylesheet" href="{con_version(h)}">' for h in hojas_de(ruta)
     )
-    # El cargador de JS se queda: los <script> van con "defer", así que
-    # no retrasan el pintado y ahí no se gana nada por escribirlos a
-    # mano. Su v= va aquí porque es el único JS que pide el HTML; el de
-    # los demás sale de la lista que él mismo lleva dentro.
-    scripts = f'    <script src="{con_version(CARGADOR)}"></script>'
-    return f"{CABECERA}{links}\n    {CIERRA}\n{scripts}"
+    # El cargador va SIN defer y antes que los demás: es quien pone el
+    # tamaño del texto, la letra y el filtro CRT antes del primer
+    # pintado, y quien deja preparado window.conVersion() para los que
+    # vienen detrás.
+    cargador = f'    <script src="{con_version(CARGADOR)}"></script>'
+    defer = "\n".join(
+        f'    <script defer src="{con_version(s)}"></script>'
+        for s in scripts_de(ruta)
+    )
+    # El 404 no lleva barra lateral: ahí no hay nada que adelantar.
+    adelanto = ""
+    if "/scripts/componentes/barra-lateral.js" in scripts_de(ruta):
+        adelanto = ADELANTO % (BARRA_LATERAL, con_version(BARRA_LATERAL))
+
+    return (
+        f"{adelanto}{CABECERA}{links}\n    {CIERRA}\n{cargador}\n"
+        f"{CABECERA_JS}{defer}\n    {CIERRA_JS}"
+    )
 
 
 # La línea del cargador, con o sin su ?v=: hay que reconocer las dos
@@ -361,9 +674,15 @@ VIEJO = re.compile(
     r'[ \t]*<script src="/scripts/cargador-estilos\.js"></script>'
 )
 
-# Lo que hay a partir de la segunda vez.
+# Lo que hay a partir de la segunda vez. El bloque del JS va con "?":
+# las páginas que todavía no lo tengan (la primera vez que se pasa la
+# herramienta después de este cambio) se reconocen igual y lo reciben.
 YA_PUESTO = re.compile(
-    r"[ \t]*" + re.escape(ABRE) + r".*?" + re.escape(CIERRA) + r"\n" + LINEA_CARGADOR,
+    # El adelanto del menú, si ya está puesto: va delante del CSS y
+    # también hay que sustituirlo (su ?v= cambia al tocar el fragmento).
+    r"(?:[ \t]*<!-- El menú, pedido LO PRIMERO\..*?</script>\n)?"
+    r"[ \t]*" + re.escape(ABRE) + r".*?" + re.escape(CIERRA) + r"\n" + LINEA_CARGADOR
+    + r"(?:\n[ \t]*" + re.escape(ABRE_JS) + r".*?" + re.escape(CIERRA_JS) + r")?",
     re.S,
 )
 

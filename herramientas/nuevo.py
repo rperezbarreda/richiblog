@@ -26,7 +26,7 @@
 #     python herramientas/nuevo.py --rol --titulo "El Faro de Kerm" \
 #            --categoria aventuras --kofi https://ko-fi.com/s/xxxx
 #
-#     python herramientas/nuevo.py --reto            (el día de hoy)
+#     python herramientas/nuevo.py --reto            (el siguiente que falte)
 #     python herramientas/nuevo.py --reto --dia 7
 #
 # QUÉ HACE CADA UNA
@@ -468,8 +468,24 @@ def hacer_rol(args):
 # =========================================
 
 def elegir_dia(reto, pedido):
-    """El que digas; si no dices nada, el de hoy; y si hoy no toca (o ya
-    está escrito), el primero que falte."""
+    """El que digas con --dia; si no dices nada, EL SIGUIENTE QUE FALTE
+    POR ESCRIBIR, por orden de día.
+
+    POR QUÉ NO EL DE HOY, QUE ERA LO DE ANTES
+    -----------------------------------------
+    Porque un reto de escritura se escribe en orden, no a la vez que pasa
+    el calendario. Si te saltas un día —o te pones al día el domingo— la
+    fecha de hoy te manda al día que toca por calendario y te deja huecos
+    detrás: escribiste el 1, abriste el script el 3 y te ofreció el 3,
+    con el 2 sin escribir y sin avisar. Eso pasó de verdad.
+
+    Yendo por orden, el script siempre ofrece el siguiente que falta y los
+    huecos se van cerrando solos. Y de paso se acaban las sorpresas por la
+    hora: a las doce y pico de la noche, "hoy" ya era otro día para el
+    ordenador y te saltaba uno sin que hubieras hecho nada raro.
+
+    Para escribir uno fuera de orden sigue estando --dia N, que es
+    explícito y no se equivoca."""
     dias = reto["dias"]
     por_numero = {int(d.get("dia") or 0): d for d in dias if isinstance(d, dict)}
 
@@ -480,20 +496,29 @@ def elegir_dia(reto, pedido):
             sys.exit(1)
         return dia
 
-    hoy = dt.date.today()
-    de_hoy = None
-    for dia in dias:
-        if leer_fecha(dia.get("fecha", "")) == hoy:
-            de_hoy = dia
-            break
-    if de_hoy and not (de_hoy.get("url") or "").strip():
-        return de_hoy
-
-    pendientes = [d for d in dias if not (d.get("url") or "").strip()]
+    # Por número de día y no por el orden en que estén en el archivo: el
+    # JSON lo puede tocar cualquiera a mano y el orden de dentro no es
+    # una promesa.
+    pendientes = sorted(
+        (d for d in dias if not (d.get("url") or "").strip()),
+        key=lambda d: int(d.get("dia") or 0),
+    )
     if not pendientes:
         print("  Están todos los días escritos. Enhorabuena.")
         sys.exit(0)
-    return pendientes[0]
+
+    siguiente = pendientes[0]
+    # Si quedan huecos por detrás del último escrito, se dice: puede que
+    # fuera a propósito, pero puede que te lo hayas saltado sin querer.
+    escritos = [
+        int(d.get("dia") or 0) for d in dias if (d.get("url") or "").strip()
+    ]
+    if escritos and int(siguiente.get("dia") or 0) < max(escritos):
+        print(
+            f"  (Te faltaba el día {siguiente.get('dia')}, que se había"
+            f" quedado por detrás del {max(escritos)}.)"
+        )
+    return siguiente
 
 
 def hacer_reto(args):
@@ -598,7 +623,9 @@ def main():
     parser.add_argument("--kofi", help="rol: enlace de Ko-fi")
     parser.add_argument("--drive", help="rol: enlace de Drive ('' para ninguno)")
     # Reto
-    parser.add_argument("--dia", type=int, help="reto: qué día (por defecto, el de hoy)")
+    parser.add_argument(
+        "--dia", type=int,
+        help="reto: qué día (por defecto, el siguiente sin escribir)")
     parser.add_argument("--palabra", help="reto: solo si ese día aún no la tiene")
     args = parser.parse_args()
 

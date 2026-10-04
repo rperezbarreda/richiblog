@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8">
+    <!-- Color de la barra del navegador en el móvil. Arranca en el color
+         del modo oscuro y el script de abajo lo cambia si toca; al pulsar
+         el botón de tema lo actualiza scripts/tema.js. -->
+    <meta name="theme-color" content="#12091c">
+    <script>
+      // El tema, puesto ANTES de que se pinte nada: si esperara al resto
+      // de scripts, la página aparecería con el tema de fábrica y daría
+      // un fogonazo al cambiar. Por eso va escrito aquí, en el <head> de
+      // cada página, y no en un archivo aparte.
+      //
+      // Dos pasos, y en este orden:
+      //   1. Si hay un tema elegido, ése y ya está.
+      //   2. Si no hay ninguno, manda el aparato: con el modo claro
+      //      puesto, la web arranca en claro. Antes arrancaba siempre en
+      //      oscuro y quien tiene el móvil en claro porque ve mejor así
+      //      se comía una web oscura sin haber pedido nada. Esto NO se
+      //      guarda: mientras no se toque el mando, la web sigue a lo
+      //      que diga el sistema.
+      //
+      // Si cambias uno de estos colores, cámbialo también en
+      // estilos/base.css y en COLOR_BARRA de scripts/tema.js.
+      (function () {
+        try {
+          var temas = {
+            claro: ["light", "#f3e1d6"],
+            "oscuro-puro": ["puro-oscuro", "#000000"],
+            "claro-puro": ["puro-claro", "#ffffff"],
+            tranquilo: ["tranquilo", "#f2efe9"],
+            "tranquilo-oscuro": ["tranquilo-oscuro", "#1b1e22"],
+            "terminal-verde": ["terminal-verde", "#000000"],
+            "terminal-azul": ["terminal-azul", "#000000"],
+            "terminal-rojo": ["terminal-rojo", "#000000"],
+            "terminal-ambar": ["terminal-ambar", "#000000"]
+          };
+          var guardado = localStorage.getItem("richi-theme");
+          var elegido = temas[guardado];
+          if (!elegido && !guardado &&
+              window.matchMedia("(prefers-color-scheme: light)").matches) {
+            elegido = temas.claro;
+          }
+          if (elegido) {
+            document.documentElement.setAttribute("data-theme", elegido[0]);
+            var barra = document.querySelector('meta[name="theme-color"]');
+            if (barra) {
+              barra.setAttribute("content", elegido[1]);
+            }
+          }
+        } catch (e) {}
+      })();
+    </script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Recomendaciones · El Blog de Richi</title>
+    <!-- Cómo se ve el enlace al compartirlo (Bluesky, Discord, Ko-fi…).
+         Sin esto solo sale la URL pelada, sin título ni imagen. Las rutas
+         van absolutas a propósito: las redes no resuelven las relativas. -->
+    <meta name="description" content="Libros, series, pelis, juegos, anime y música que recomiendo, con una nota de por qué.">
+    <link rel="canonical" href="https://richi.blog/web/recomendaciones/recomendaciones.html">
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="El Blog de Richi">
+    <meta property="og:locale" content="es_ES">
+    <meta property="og:title" content="Recomendaciones · El Blog de Richi">
+    <meta property="og:description" content="Libros, series, pelis, juegos, anime y música que recomiendo, con una nota de por qué.">
+    <meta property="og:url" content="https://richi.blog/web/recomendaciones/recomendaciones.html">
+    <meta property="og:image" content="https://richi.blog/imagenes/meta/og.webp">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta property="og:image:alt" content="El Blog de Richi — ilustración de Richi sobre fondo morado">
+    <meta name="twitter:card" content="summary_large_image">
+    <link rel="icon" type="image/x-icon" href="/imagenes/favicon.ico">
+    <!-- La única fuente que se precarga. Medido con la red frenada: sin esto el
+         navegador no la descubre hasta parsear el CSS (~800 ms) y el texto baila al
+         cambiar de tipografía; así llega antes del primer pintado y no se nota el
+         cambio. Precargar más fuentes empeoraba el primer pintado 150-210 ms, porque
+         compiten por el ancho de banda con lo que hace falta para pintar. -->
+    <link rel="preload" href="/tipografias/space-grotesk-400.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="alternate" type="application/rss+xml" title="El Blog de Richi — blog, relatos y rol" href="/blog/rss.xml">
+    <!-- El menú, pedido LO PRIMERO. No está escrito en el HTML de cada
+         página: vive en fragmentos/barra-lateral.html y lo pide
+         scripts/componentes/barra-lateral.js, que va con defer y por
+         tanto no corre hasta que el navegador ha terminado de leer la
+         página. Medido con la red frenada, el menú no aparecía hasta
+         1,5 s: el HTML tardaba 190 ms, los scripts se ejecutaban sobre
+         los 1000 y solo entonces empezaba el viaje a por el trozo.
+
+         Esta línea lo pide aquí mismo, antes incluso que el CSS, y
+         guarda la promesa. Cuando barra-lateral.js arranca no empieza
+         ningún viaje: se sube al que ya iba. El menú pasó a estar a los
+         786 ms, la mitad.
+
+         Va escrita a pelo y no en un archivo aparte a propósito: un
+         archivo aparte habría que pedirlo, y pedirlo es justo lo que se
+         está intentando no hacer. Si algo falla se queda sin adelanto y
+         loadComponent() lo pide como siempre. -->
+    <script>window.adelantoDeFragmentos={};try{window.adelantoDeFragmentos["/fragmentos/barra-lateral.html"]=fetch("/fragmentos/barra-lateral.html?v=01b79f68").then(function(r){return r.ok?r.text():null}).catch(function(){return null})}catch(e){}</script>
+    <!-- ==== CSS ====
+         Esta lista la escribe herramientas/actualizar-cabeceras.py.
+         No la toques a mano: si cambias qué CSS lleva una página,
+         cámbialo en esa herramienta y vuélvela a ejecutar.
+
+         Van escritos aquí, y no cargados por un script, para que el
+         navegador los pida nada más recibir el HTML. Con un script de
+         por medio tardaba ~200 ms más en pintar la página.
+
+         El ?v= de cada uno es el resumen de su contenido: cambia solo
+         cuando cambia el archivo, y es lo que hace que al subir a
+         Neocities se vea el cambio en vez de la versión guardada en la
+         caché del navegador. -->
+    <link rel="stylesheet" href="/estilos/base.css?v=7b045c04">
+    <link rel="stylesheet" href="/estilos/base.responsive.css?v=24021cbc">
+    <link rel="stylesheet" href="/estilos/componentes/visor-imagenes.css?v=c75e69bd">
+    <link rel="stylesheet" href="/estilos/componentes/aviso.css?v=aa14ed7b">
+    <link rel="stylesheet" href="/estilos/componentes/aviso.responsive.css?v=4b547ea8">
+    <link rel="stylesheet" href="/estilos/componentes/cabecera-ventana.css?v=df2807ad">
+    <link rel="stylesheet" href="/estilos/componentes/subir.css?v=da55ea85">
+    <link rel="stylesheet" href="/estilos/componentes/ajustes.css?v=105f8df0">
+    <link rel="stylesheet" href="/estilos/paginas/recomendaciones.css?v=0f63e3d7">
+    <link rel="stylesheet" href="/estilos/componentes/filtros.css?v=ae4abb2d">
+    <link rel="stylesheet" href="/estilos/componentes/filtros.responsive.css?v=04de297b">
+    <link rel="stylesheet" href="/estilos/componentes/barra-lateral.css?v=588851ec">
+    <link rel="stylesheet" href="/estilos/componentes/barra-lateral.responsive.css?v=45e554fd">
+    <link rel="stylesheet" href="/estilos/paginas/buscar.css?v=692b762d">
+    <link rel="stylesheet" href="/estilos/componentes/ventanas-plegables.css?v=c901afd7">
+    <link rel="stylesheet" href="/estilos/componentes/impresion.css?v=7aceeb4b">
+    <link rel="stylesheet" href="/estilos/componentes/sin-movimiento.css?v=78601159">
+    <!-- ==== fin del CSS ==== -->
+    <script src="/scripts/cargador-scripts.js?v=e3343d73"></script>
+    <!-- ==== JS ====
+         Esta lista también la escribe la herramienta, a partir de
+         scripts_de(). No la toques a mano.
+
+         Todos van con "defer": se bajan mientras el navegador lee el
+         HTML, no retrasan el pintado y se ejecutan al final, en este
+         mismo orden, que en unos cuantos casos importa.
+
+         Están escritos aquí y no los pide un script, por lo mismo que
+         el CSS: así el navegador los descubre en cuanto le llega el
+         HTML. Pidiéndolos desde el cargador no empezaban a bajarse
+         hasta 600 ms después, y con ellos se retrasaba todo lo que se
+         puede tocar (el menú el que más). -->
+    <script defer src="/scripts/componentes/cargador-fragmentos.js?v=d67e08bf"></script>
+    <script defer src="/scripts/componentes/barra-lateral.js?v=da4175b8"></script>
+    <script defer src="/scripts/componentes/gatin-random.js?v=212dad18"></script>
+    <script defer src="/scripts/tema.js?v=626220df"></script>
+    <script defer src="/scripts/componentes/ajustes.js?v=c2f09964"></script>
+    <script defer src="/scripts/componentes/buscar-lupa.js?v=cca8f0d0"></script>
+    <script defer src="/scripts/componentes/botones-ventana.js?v=cab0ce9c"></script>
+    <script defer src="/scripts/componentes/ventanas-plegables.js?v=40711cd7"></script>
+    <script defer src="/scripts/componentes/rastro-cursor.js?v=0d9a7e7f"></script>
+    <script defer src="/scripts/componentes/chispas-botones.js?v=7b0937d6"></script>
+    <script defer src="/scripts/componentes/enlaces-fuera.js?v=130dc9ce"></script>
+    <script defer src="/scripts/componentes/visor-imagenes.js?v=48184405"></script>
+    <script defer src="/scripts/componentes/aviso.js?v=7b9fce19"></script>
+    <script defer src="/scripts/componentes/subir.js?v=2e242c61"></script>
+    <script defer src="/scripts/componentes/teclado-scroll.js?v=5847ef8b"></script>
+    <script defer src="/scripts/componentes/filtros.js?v=539b45ae"></script>
+    <script defer src="/scripts/paginas/recomendaciones.js?v=a7707410"></script>
+    <!-- ==== fin del JS ==== -->
+  </head>
+<body>
+    <!-- ==== SIDEBAR / NAVEGACIÓN ==== -->
+    <a class="skip-link" href="#main-content">Saltar al contenido</a>
+    <div id="sidebar-container"></div>
+    <!-- ==== CONTENIDO PRINCIPAL ==== -->
+
+    <main id="main-content">
+        <!-- ==== HOME ==== -->
+        <section id="home" class="home recomendaciones-page">
+            <h1 class="home-title">
+                <em>recomendaciones</em>
+            </h1>
+
+            <p class="recomendaciones-intro">
+                Cosas que me han gustado lo bastante como para querer
+                contárselas a alguien. No hay notas ni rankings: si está
+                aquí es porque lo recomiendo. Toca o pasa por encima de
+                cualquiera para leer por qué.
+            </p>
+
+            <!-- ==== FILTRO POR CATEGORÍA ====
+                 Los botones NO se escriben aquí: los monta
+                 scripts/componentes/filtros.js con lo que encuentre en
+                 el data-categoria de cada ventanita, así que una
+                 categoría nueva en el JSON aparece sola. -->
+            <div class="filtros" data-filtros
+                 data-filtros-items=".rec-bloque"
+                 data-filtros-orden="aparicion">
+                <span class="filtros-label" id="filtros-label">filtrar:</span>
+
+                <!-- Este botón solo se ve en móvil (en escritorio lo
+                     esconde el CSS): ahí la fila de categorías no cabe
+                     y se colapsa en una lista flotante. -->
+                <button class="filtros-toggle" type="button" data-filtros-toggle
+                        aria-expanded="false" aria-controls="filtros-lista">
+                    <span class="visually-hidden">Filtrando por: </span>
+                    <span class="filtros-toggle-label" data-filtros-label>todas</span>
+                    <span class="filtros-toggle-arrow" aria-hidden="true">▾</span>
+                </button>
+
+                <div class="filtros-list" id="filtros-lista" role="group" aria-labelledby="filtros-label"></div>
+            </div>
+
+            <p class="filtros-vacio" data-filtros-vacio role="status" hidden></p>
+
+            <!-- Las listas no se escriben aquí: salen de
+                 datos/recomendaciones.json, que es un archivo de texto con
+                 una categoría por bloque. Las pinta
+                 scripts/paginas/recomendaciones.js. -->
+            <div class="recomendaciones-caja" data-recomendaciones>
+                <p class="entries-loading">Cargando las recomendaciones…</p>
+            </div>
+        </section>
+    </main>
+</body>
+</html>

@@ -208,11 +208,15 @@ body:has(.relato-page) main {
 }
 
 .relato-post-title {
+    /* Que parta por donde sea antes que salirse: con el texto al
+       150% una palabra larga no cabe en el hueco que queda a la
+       izquierda del mando de accesibilidad. */
+    overflow-wrap: break-word;
     flex: 1;
     min-width: 0;
     margin: 0;
     color: var(--yellow-contrast);
-    font-family: "Jersey 10", "DM Mono", monospace;
+    font-family: var(--fuente-ventana);
     font-weight: 400;
     font-size: clamp(1.75rem, 3.2vw, 2.25rem);
     letter-spacing: 0.3px;
@@ -234,7 +238,7 @@ body:has(.relato-page) main {
     gap: 16px;
     max-width: 720px;
     color: var(--white);
-    font-family: "Pangolin", "Space Grotesk", sans-serif;
+    font-family: var(--fuente-mano);
     font-size: 1rem;
     line-height: 1.7;
 }
@@ -250,7 +254,7 @@ body:has(.relato-page) main {
     border: 2px solid var(--yellow-contrast);
     background: var(--yellow-contrast);
     color: var(--yellow);
-    font-family: "DM Mono", monospace;
+    font-family: var(--fuente-mono);
     font-size: 0.75rem;
     text-decoration: none;
     transition: color 0.15s linear, background-color 0.15s linear;
@@ -270,7 +274,7 @@ body:has(.relato-page) main {
 .relato-post-date {
     margin: 0;
     color: var(--yellow-contrast);
-    font-family: "DM Mono", monospace;
+    font-family: var(--fuente-mono);
     font-size: 0.75rem;
     letter-spacing: 1px;
     white-space: nowrap;
@@ -391,9 +395,31 @@ body:has(.relato-page) main {
 .relato-post-aside figcaption {
     margin-top: 12px;
     color: var(--muted);
-    font-family: "DM Mono", monospace;
+    font-family: var(--fuente-mono);
     font-size: 0.6875rem;
     line-height: 1.5;
+}
+
+/* Un pie de foto puede llevar el crédito de quien la hizo, y ese enlace
+   se quedaba con el azul de serie del navegador: ilegible sobre el
+   morado (Lc 52) y lo único de toda la web sin su color. Las reglas de
+   enlaces de texto-entrada.css no llegan aquí porque esta figura vive
+   fuera del cuerpo del texto, en la columna de al lado. */
+.relato-post-aside figcaption a {
+    color: var(--yellow);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+}
+
+.relato-post-aside figcaption a:hover,
+.relato-post-aside figcaption a:focus-visible {
+    color: var(--yellow-contrast);
+    background: var(--yellow);
+}
+
+.relato-post-aside figcaption a:focus-visible {
+    outline: 2px solid var(--yellow);
+    outline-offset: 2px;
 }
 
 /* Por debajo de 1150px la columna no cabe sin estrangular el texto: a

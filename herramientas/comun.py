@@ -228,7 +228,23 @@ GENERADORES = (
     "generar-rss.py",
     "generar-sitemap.py",
     "generar-mapa.py",
+    # Después de los listados y antes de las cabeceras: éste lee el HTML
+    # ya montado de cada página para sacarle el texto, así que tiene que
+    # ir cuando las entradas nuevas ya existen.
+    "generar-buscador.py",
     "actualizar-cabeceras.py",
+    # El último, cuando ya está todo escrito: no genera nada, solo mira
+    # que ninguna hoja de estilo tenga un comentario mal cerrado. Va
+    # aquí y no a mano porque ese fallo el navegador no lo canta: se
+    # come en silencio la regla que venga detrás y la página se ve rara
+    # sin que nada parezca roto. Pasó con las dos columnas de la ventana
+    # de accesibilidad.
+    "css-sano.py",
+    # Y que ningún tema de color se haya quedado a medias: un tema vive
+    # en seis sitios (los colores, el script, el pre-pintado de cada
+    # página, la muestra del botón, el botón y la página de
+    # accesibilidad) y faltando en uno falla raro y en silencio.
+    "temas-completos.py",
 )
 
 

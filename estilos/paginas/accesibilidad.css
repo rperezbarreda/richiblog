@@ -126,7 +126,7 @@
     padding: 1px 6px;
     border: 1px solid var(--yellow);
     color: var(--yellow);
-    font-family: "DM Mono", monospace;
+    font-family: var(--fuente-mono);
     font-size: 0.75rem;
 }
 
