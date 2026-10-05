@@ -71,7 +71,11 @@ from comun import (
 )
 
 SALIDA = RAIZ / "datos" / "mapa-del-sitio.json"
-LISTADOS = (RAIZ / "datos" / "entradas-blog.json", RAIZ / "datos" / "mis-movidas.json")
+LISTADOS = (
+    RAIZ / "datos" / "entradas-blog.json",
+    RAIZ / "datos" / "mis-movidas.json",
+    RAIZ / "datos" / "notas-rol.json",
+)
 
 # Lo mismo que se queda fuera del sitemap: lo que no es una página de la
 # web que alguien pueda visitar.
@@ -81,7 +85,8 @@ CARPETAS_EXCLUIDAS = {"herramientas", "fragmentos"}
 # El orden en que salen las secciones en la tabla. Lo que no esté aquí
 # va al final, por orden alfabético.
 ORDEN_SECCIONES = [
-    "portada", "blog", "relatos", "rol", "santuarios", "recomendaciones", "otras",
+    "portada", "blog", "relatos", "rol", "notas de rol", "santuarios",
+    "recomendaciones", "otras",
 ]
 
 
@@ -109,6 +114,11 @@ def seccion_de(url):
         return "relatos"
     if url.startswith("/web/mis_movidas/rol/"):
         return "rol"
+    # El portfolio de rol (lo que se publica) y las notas de las partidas
+    # (lo que se juega) son dos cosas distintas y van en secciones
+    # distintas, aunque las dos sean de rol.
+    if url.startswith("/web/notas_rol/"):
+        return "notas de rol"
     if url.startswith("/web/santuarios/"):
         return "santuarios"
     if url.startswith("/web/recomendaciones/"):

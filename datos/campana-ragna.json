@@ -1,0 +1,44 @@
+{
+    "nombre": "campaña de Ragna",
+    "clave": "ragna",
+    "pagina": "/web/notas_rol/ragna/index_ragna.html",
+    "intro": "Las notas que tomo después de cada partida.",
+    "sistema": "DnD 5.5e",
+    "director": "Nacho",
+    "personajes": [
+        {
+            "nombre": "Faëlar",
+            "jugador": "Richi",
+            "clase": "Elfo Druida Lvl 3",
+            "color": "verde"
+        },
+        {
+            "nombre": "Melissa",
+            "jugador": "Andrea",
+            "clase": "Humana Pícara Lvl 3",
+            "color": "azul"
+        },
+        {
+            "nombre": "Denelia",
+            "jugador": "Julia",
+            "clase": "Elfa Maga Lvl 3",
+            "color": "morado"
+        },
+        {
+            "nombre": "Thenarys",
+            "jugador": "María",
+            "clase": "Elfo Paladín Lvl 3",
+            "color": "rojo"
+        }
+    ],
+    "sinopsis": "Unidos a la Gran Caravana de manos del comerciante Sigil, exploramos el mundo tras la expulsión de los gigantes por parte de Ragnar.",
+    "sesiones": [
+        {
+            "numero": 1,
+            "fecha": "03-10-2026",
+            "titulo": "El robo de la mercancía",
+            "url": "/web/notas_rol/ragna/sesion-01.html",
+            "pdf": "https://drive.google.com/file/d/19Ld6RR8xYK_UHMI-HYlTkk2tdvLghFqQ/view?usp=sharing"
+        }
+    ]
+}

@@ -13,6 +13,7 @@
 #   - las entradas del blog (diario incluido)
 #   - los relatos
 #   - lo que subas al portfolio de rol
+#   - las notas de las partidas de rol
 # Cada cosa va marcada con su categoría, así que un lector de feeds
 # puede enseñar de qué es cada una.
 #
@@ -55,6 +56,7 @@ IDIOMA = "es"
 from comun import RAIZ
 JSON_BLOG = RAIZ / "datos" / "entradas-blog.json"
 JSON_MOVIDAS = RAIZ / "datos" / "mis-movidas.json"
+JSON_NOTAS = RAIZ / "datos" / "notas-rol.json"
 ROL = RAIZ / "web" / "mis_movidas" / "rol" / "index_rol.html"
 SALIDA = RAIZ / "blog" / "rss.xml"
 RUTA_FEED = "/blog/rss.xml"
@@ -180,6 +182,34 @@ def cosas_de_mis_movidas():
     return cosas
 
 
+# Las notas de las partidas de rol. Van en el feed porque son páginas
+# nuevas con texto dentro y quien esté suscrito las quiere como quiere un
+# relato; a la portada, en cambio, no van (ver generar-posts.py).
+#
+# El resumen sale del primer párrafo de la primera hoja del cuaderno, que
+# es lo más parecido a "de qué iba esta partida" que hay escrito.
+def cosas_de_notas_rol():
+    if not JSON_NOTAS.is_file():
+        return []
+    sesiones = json.loads(JSON_NOTAS.read_text(encoding="utf-8"))
+    cosas = []
+    for e in sesiones if isinstance(sesiones, list) else []:
+        titulo, url = e.get("title"), e.get("url")
+        if not titulo or not url:
+            continue
+        campana = (e.get("campana") or "").strip()
+        cosas.append({
+            "titulo": titulo,
+            "fecha": e["date"],
+            "enlace": SITIO + url,
+            "guid": SITIO + url,
+            "guid_es_enlace": True,
+            "resumen": primer_parrafo(url, "cuaderno-hoja-cuerpo"),
+            "categorias": [c for c in ("notas de rol", campana) if c],
+        })
+    return cosas
+
+
 def pieza(cosa):
     trozos = [
         "        <item>",
@@ -198,7 +228,7 @@ def pieza(cosa):
 
 
 def generar():
-    cosas = cosas_del_blog() + cosas_de_mis_movidas()
+    cosas = cosas_del_blog() + cosas_de_mis_movidas() + cosas_de_notas_rol()
     cosas.sort(key=lambda c: leer_fecha(c["fecha"]), reverse=True)
 
     ultima = (

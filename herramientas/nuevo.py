@@ -2,7 +2,7 @@
 # =========================================
 # PUBLICAR ALGO NUEVO
 # =========================================
-# Una sola herramienta para las cuatro cosas que se publican en el
+# Una sola herramienta para las cinco cosas que se publican en el
 # sitio. Antes eran tres scripts distintos (nueva-entrada.py,
 # nuevo-rol.py y nuevo-dia-reto.py) que hacían lo mismo con otros
 # nombres: preguntar cuatro datos, montar el archivo desde una
@@ -29,6 +29,10 @@
 #     python herramientas/nuevo.py --reto            (el siguiente que falte)
 #     python herramientas/nuevo.py --reto --dia 7
 #
+#     python herramientas/nuevo.py --sesion          (la siguiente que toque)
+#     python herramientas/nuevo.py --sesion --campana ragna --numero 4 \
+#            --fecha 03-10-2026 --titulo "El mercado"
+#
 # QUÉ HACE CADA UNA
 # -----------------
 #   entrada / relato  Crea la página en web/blog/<año>/<mes>/ o en
@@ -40,14 +44,18 @@
 #                     la página del portfolio saca sus tarjetas.
 #   reto              Crea el texto de un día del reto de escritura,
 #                     sacando la palabra de su JSON.
+#   sesion            Crea las notas de una partida de rol en la carpeta
+#                     de su campaña, con dos hojas de cuaderno en blanco,
+#                     y la apunta en el JSON de la campaña.
 #
-# Y en los cuatro casos pasa los generadores al terminar, así que los
+# Y en los cinco casos pasa los generadores al terminar, así que los
 # listados, el RSS y el sitemap se enteran solos.
 #
 # NACE COMO BORRADOR
 # ------------------
-# Todo lo que lleva página propia (entrada, relato y día del reto) se
-# crea con la marca data-borrador puesta: existe y la puedes mirar en
+# Todo lo que lleva página propia (entrada, relato, día del reto y notas
+# de una partida) se crea con la marca data-borrador puesta: existe y la
+# puedes mirar en
 # local, pero NO sale en los listados, ni en el RSS, ni en el sitemap, y
 # arriba se ve una franja que lo dice. Cuando la tengas escrita:
 #
@@ -92,6 +100,13 @@ IMGS_ROL = "/imagenes/mis_movidas/rol/"
 JSON_RETO = RAIZ / "datos" / "reto-writeober26.json"
 CARPETA_RETO = RAIZ / "web" / "mis_movidas" / "relatos" / "writeober26"
 SUBCATEGORIA_RETO = "writeober26"
+
+# Las campañas de rol: una por archivo en datos/campana-<clave>.json. No
+# hay una lista escrita en ningún sitio a propósito —se buscan por el
+# nombre del archivo—, así que para empezar una campaña nueva basta con
+# copiar uno de esos JSON y su carpeta.
+CAMPANAS = RAIZ / "datos"
+PATRON_CAMPANA = "campana-*.json"
 
 CUERPO_MUESTRA = (
     "Escribe aquí la entrada. Este párrafo está de muestra: bórralo y "
@@ -594,9 +609,199 @@ def hacer_reto(args):
 
 
 # =========================================
+# LAS NOTAS DE UNA PARTIDA DE ROL
+# =========================================
+# Lo mismo que un día del reto, pero por campañas: se elige la campaña, se
+# coge el número de sesión que toca y se deja la página montada con la
+# fecha puesta y dos hojas de cuaderno en blanco para escribir dentro.
+#
+# Quién manda es el JSON de la campaña (datos/campana-<clave>.json): de ahí
+# sale su nombre, su carpeta y las sesiones que ya hay, y ahí se apunta la
+# nueva. La ficha de la campaña —el sistema, los personajes, la sinopsis—
+# se escribe a mano en ese mismo archivo y esto no la toca.
+
+
+def campanas_que_hay():
+    """[(archivo, datos)] de las campañas, por orden de archivo."""
+    encontradas = []
+    for archivo in sorted(CAMPANAS.glob(PATRON_CAMPANA)):
+        datos = leer_json(archivo, {})
+        if isinstance(datos, dict) and (datos.get("nombre") or "").strip():
+            encontradas.append((archivo, datos))
+    return encontradas
+
+
+def elegir_campana(pedida):
+    """La campaña que diga --campana, o la única que haya, o se pregunta."""
+    campanas = campanas_que_hay()
+    if not campanas:
+        print(f"  No encuentro ninguna campaña en datos/{PATRON_CAMPANA}.")
+        print("  Para empezar una, copia datos/campana-ragna.json con otro")
+        print("  nombre y copia también su carpeta en web/notas_rol/.")
+        return None, None
+
+    if pedida:
+        buscada = pedida.strip().lower()
+        for archivo, datos in campanas:
+            if (datos.get("clave") or "").strip().lower() == buscada:
+                return archivo, datos
+        claves = ", ".join((d.get("clave") or "?") for _, d in campanas)
+        print(f"  No tengo ninguna campaña que se llame {pedida!r}. Hay: {claves}.")
+        return None, None
+
+    if len(campanas) == 1:
+        return campanas[0]
+
+    nombres = [(d.get("nombre") or d.get("clave") or "?") for _, d in campanas]
+    elegido = elegir("¿De qué campaña son las notas?", nombres, permitir_nueva=False)
+    return campanas[nombres.index(elegido)]
+
+
+def siguiente_sesion(campana, pedido):
+    """El número que diga --numero; si no, el siguiente al más alto que
+    haya. Al revés que el reto de escritura, aquí no se va rellenando
+    huecos: una campaña no tiene 31 casillas esperando, las sesiones se
+    juegan en orden y la que toca es siempre la de después de la última."""
+    sesiones = campana.get("sesiones") or []
+    numeros = [int(s.get("numero") or 0) for s in sesiones if isinstance(s, dict)]
+    if pedido:
+        if pedido in numeros:
+            print(f"  La sesión {pedido} ya está apuntada en esta campaña.")
+            print("  Si quieres rehacerla, borra su página y su línea del JSON.")
+            return None
+        return pedido
+    return (max(numeros) + 1) if numeros else 1
+
+
+def hacer_sesion(args):
+    archivo_campana, campana = elegir_campana(args.campana)
+    if not campana:
+        return 1
+
+    nombre = (campana.get("nombre") or "").strip()
+    clave = (campana.get("clave") or "").strip()
+    pagina = (campana.get("pagina") or "").strip()
+    if not clave or not pagina:
+        print(f"  A {archivo_campana.relative_to(RAIZ)} le falta \"clave\" o \"pagina\".")
+        return 1
+
+    carpeta = (RAIZ / pagina.lstrip("/")).parent
+    if not carpeta.is_dir():
+        print(f"  No encuentro la carpeta de la campaña: {carpeta.relative_to(RAIZ)}")
+        return 1
+
+    numero = siguiente_sesion(campana, args.numero)
+    if numero is None:
+        return 1
+
+    print(f"\n  NOTAS DE UNA PARTIDA — {nombre.upper()}, SESIÓN {numero}\n")
+
+    crudo = args.fecha or preguntar(
+        "¿Qué día se jugó? (dd-mm-aaaa)", dt.date.today().strftime("%d-%m-%Y")
+    )
+    fecha = leer_fecha(crudo)
+    if not fecha:
+        print(f"  No entiendo la fecha {crudo!r}. Ponla como dd-mm-aaaa.")
+        return 1
+
+    # El título es opcional: una sesión se llama "Sesión 4" y ya se
+    # entiende. Si le pones nombre, sale detrás ("Sesión 4 · El mercado").
+    titulo_corto = (
+        args.titulo
+        if args.titulo is not None
+        else preguntar("Nombre de la sesión (Enter para ninguno)")
+    ).strip()
+    # El nombre va detrás con una raya y no con el punto medio del resto
+    # del sitio a propósito: el punto medio es el que separa el título de
+    # la sección y del nombre de la web en el <title> de la pestaña, y
+    # quien lee esos títulos de vuelta (el buscador y el mapa) se queda
+    # con lo de delante del primero. Con un punto medio aquí, "Sesión 4 ·
+    # El mercado" salía en los resultados como "Sesión 4" a secas.
+    sesion = f"Sesión {numero}"
+    titulo = sesion
+    if titulo_corto:
+        titulo += f" — {titulo_corto}"
+
+    destino = carpeta / f"sesion-{numero:02d}.html"
+    if destino.exists():
+        print(f"\n  Ya existe {destino.relative_to(RAIZ)}; no lo piso.")
+        return 1
+
+    plantilla = PLANTILLAS / "sesion-rol.html"
+    if not plantilla.is_file():
+        print(f"  No encuentro la plantilla {plantilla.relative_to(RAIZ)}.")
+        return 1
+
+    fecha_corta = fecha.strftime("%d-%m-%Y")
+    url = "/" + destino.relative_to(RAIZ).as_posix()
+    texto = rellenar(
+        plantilla.read_text(encoding="utf-8"),
+        {
+            "TITULO": escapar(titulo),
+            # Solo "Sesión N", sin el nombre: es lo que repite la cabecera
+            # de cada hoja, y ahí el nombre entero no cabría.
+            "SESION": escapar(sesion),
+            "FECHA": fecha_larga(fecha),
+            "FECHA_ISO": fecha_iso(fecha),
+            # La fecha tal cual la escribes en el cuaderno, que es como
+            # sale en la cabecera de cada hoja.
+            "FECHA_CORTA": escapar(fecha_corta),
+            "URL": url,
+            "DESCRIPCION": escapar(
+                args.descripcion
+                or f"Notas de la sesión {numero} de la {nombre}, jugada el {fecha_corta}."
+            ),
+            "CAMPANA": escapar(clave),
+            "CAMPANA_NOMBRE": escapar(nombre),
+            "CAMPANA_URL": escapar(pagina),
+            # De dónde saca la página el PDF y los saltos a la sesión de
+            # al lado: de su propio JSON. Se escribe aquí y no se deduce
+            # en el script del navegador para que lo compruebe
+            # herramientas/enlaces-rotos.py como cualquier otra ruta.
+            "CAMPANA_DATOS": escapar(
+                "/" + archivo_campana.relative_to(RAIZ).as_posix()
+            ),
+        },
+    )
+    destino.write_text(texto, encoding="utf-8")
+
+    campana.setdefault("sesiones", []).append(
+        {
+            "numero": numero,
+            "fecha": fecha_corta,
+            "titulo": titulo_corto,
+            "url": url,
+            # El cuaderno escaneado, si lo hay. Nace en blanco: el PDF se
+            # suele subir después de pasar las notas a limpio, y entonces
+            # se pega aquí su enlace y el botón de descargar aparece solo
+            # en la página de la sesión.
+            "pdf": (args.pdf or "").strip(),
+        }
+    )
+    escribir_json(archivo_campana, campana)
+
+    print(f"\n  Creado {destino.relative_to(RAIZ)}  (de momento, BORRADOR)")
+    print(f"  Estará en  https://richi.blog{url}")
+    print("\n  Dentro hay dos hojas de cuaderno con un ejemplo de cada cosa")
+    print("  (párrafos, listas, personajes en negrita, lugares en cursiva y el")
+    print("  corte entre escenas). Borra lo de muestra y pasa a limpio las")
+    print("  notas; si hacen falta más hojas, copia el bloque de una entera.")
+    if not (args.pdf or "").strip():
+        print("\n  Si subes el cuaderno escaneado a Drive, pega su enlace en")
+        print(f"  {archivo_campana.relative_to(RAIZ)}, en el \"pdf\" de esta sesión,")
+        print("  y debajo del post-it sale el botón de descargarlo.")
+    print("\n  Cuando estén listas:")
+    print("\n      python3 herramientas/publicar.py")
+
+    pasar_generadores()
+    print("\n  Listo. Ojo: hasta que no lo publiques sigue siendo un borrador.")
+    return 0
+
+
+# =========================================
 
 TIPOS = ["Una entrada del blog", "Un relato", "Algo del portfolio de rol",
-         "Un día del reto de escritura"]
+         "Un día del reto de escritura", "Las notas de una partida de rol"]
 
 
 def main():
@@ -606,6 +811,8 @@ def main():
     que.add_argument("--relato", action="store_true", help="un relato")
     que.add_argument("--rol", action="store_true", help="una ficha del portfolio de rol")
     que.add_argument("--reto", action="store_true", help="un día del reto de escritura")
+    que.add_argument("--sesion", action="store_true",
+                     help="las notas de una partida de rol")
 
     # Comunes
     parser.add_argument("--titulo")
@@ -627,12 +834,20 @@ def main():
         "--dia", type=int,
         help="reto: qué día (por defecto, el siguiente sin escribir)")
     parser.add_argument("--palabra", help="reto: solo si ese día aún no la tiene")
+    # Notas de rol
+    parser.add_argument("--campana", help="sesión: de qué campaña (su clave)")
+    parser.add_argument("--pdf", help="sesión: enlace al PDF de las notas")
+    parser.add_argument(
+        "--numero", type=int,
+        help="sesión: qué número (por defecto, el siguiente de la campaña)")
     args = parser.parse_args()
 
     if args.rol:
         return hacer_rol(args)
     if args.reto:
         return hacer_reto(args)
+    if args.sesion:
+        return hacer_sesion(args)
     if args.relato:
         return hacer_entrada(args, True)
     if args.entrada:
@@ -649,6 +864,8 @@ def main():
         return hacer_rol(args)
     if elegido == TIPOS[3]:
         return hacer_reto(args)
+    if elegido == TIPOS[4]:
+        return hacer_sesion(args)
     return hacer_entrada(args, False)
 
 

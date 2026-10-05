@@ -112,8 +112,25 @@
        marca con aria-sort en vez de con aria-pressed. En papel la tabla
        sale ordenada como esté y ya: el recuadro que decía "por aquí se
        está ordenando" no hace falta, y sí hacía falta su cabecera. */
-    :root body th:not([aria-sort="none"]) .mapa-ordenar {
+    :root body th:not([aria-sort="none"]) .mapa-ordenar,
+    /* Y lo mismo, por lo mismo, con una fila de la lista de sesiones de
+       una campaña de rol: su relleno se escribe con el estado dentro del
+       selector (:hover, :focus-visible) y eso pesa más que la regla de
+       arriba. Al imprimir una página que se había recorrido con el
+       tabulador, la fila que tuviera el foco salía como un rectángulo
+       negro con la letra negra encima. */
+    :root body a.campana-sesion:hover,
+    :root body a.campana-sesion:focus-visible {
         background-color: transparent;
+    }
+
+    /* El recuadro que marca la casilla enfocada de una lista de cosas
+       pendientes. En pantalla dice dónde está el teclado; en papel es un
+       segundo cuadrado alrededor del primero y parece un error de
+       impresión. No lo recoge la regla de arriba porque es un outline,
+       no un relleno. */
+    :root body .cuaderno-tareas > li::before {
+        outline: none;
     }
 
     /* El filtro CRT, que lo dibuja un ::after del propio <html> y por
@@ -162,6 +179,22 @@
     .relato-post-back,
     .pet-back,
     .reto-volver,
+    .cuaderno-post-back,
+    .campana-volver,
+    /* El botón de plegar las escenas y el de deshacer lo marcado en las
+       cosas pendientes: en papel no se pliega ni se marca nada. La
+       cuenta de hechas sí se queda, que eso es información. Y las
+       escenas se abren todas antes de imprimir, eso lo hace
+       scripts/paginas/cuaderno.js. */
+    .cuaderno-plegar-todo,
+    .cuaderno-tareas-deshacer,
+    /* Y los botones de pasar página: en papel están todas las hojas
+       puestas una detrás de otra, así que no hay nada que pasar. */
+    .cuaderno-paginacion,
+    /* Y el pie de la nota: el botón del PDF y los saltos a la sesión de
+       al lado. Lo primero es una descarga y lo segundo es navegar, y en
+       papel no se hace ni una cosa ni la otra. */
+    .cuaderno-pie,
     .volver-inicio,
     [data-otras-caja],
     [data-otras-entradas] {
@@ -197,6 +230,59 @@
         display: block;
     }
 
+    /* LAS NOTAS DE UNA PARTIDA, SUELTAS.
+       En pantalla lo que se desplaza es el cuaderno por dentro, dentro de
+       un marco que no se mueve; en papel eso imprimía solo lo que cabía
+       en una pantalla y el resto no salía en ninguna parte. Aquí se
+       sueltan todas las alturas y todos los scrolls: las hojas se ponen
+       una debajo de otra, el post-it de las cosas pendientes cae al
+       final, y lo que no quepa pasa a la hoja siguiente. */
+    .cuaderno-page,
+    .cuaderno-post,
+    .cuaderno-post-body-wrap,
+    .cuaderno-reparto,
+    .cuaderno-columna,
+    .cuaderno-lateral,
+    .cuaderno,
+    .cuaderno-hoja,
+    .cuaderno-hoja-cuerpo,
+    .cuaderno-postit {
+        display: block;
+        height: auto;
+        min-height: 0;
+        max-height: none;
+        overflow: visible;
+    }
+
+    /* Y el post-it, derecho y sin sombras: en pantalla va torcido y con
+       una esquina doblada, que son adornos de pantalla. Torcido en papel
+       sale torcido de verdad —no hay forma de enderezarlo después— y el
+       triángulo de la esquina se imprime como una mancha gris. */
+    .cuaderno-postit {
+        transform: none;
+        box-shadow: none;
+    }
+
+    .cuaderno-postit::after {
+        display: none;
+    }
+
+    /* Las hojas que no están en pantalla llevan el atributo hidden, y
+       eso las esconde también al imprimir. Quien pulsa "imprimir" quiere
+       las notas enteras, no la cara por la que se había quedado.
+       (El script las destapa antes de imprimir; esto es el cinturón por
+       si llegara a imprimirse sin JavaScript de por medio.) */
+    .cuaderno-hoja[hidden] {
+        display: block;
+    }
+
+    /* El hueco entre hojas lo ponía el "gap" de la fila, y en bloque no
+       existe. */
+    .cuaderno-hoja,
+    .cuaderno-postit {
+        margin-bottom: 1cm;
+    }
+
     .blog-post-aside,
     .relato-post-aside {
         max-width: 11cm;
@@ -227,7 +313,11 @@
     /* Menos las anclas de la propia página y los correos, que o no
        llevan a ningún sitio en papel o ya están escritos. */
     main a[href^="#"]::after,
-    main a[href^="mailto:"]::after {
+    main a[href^="mailto:"]::after,
+    /* Y las filas de la lista de sesiones de una campaña: están dentro
+       de un <li>, así que la regla de arriba las pillaba, pero son un
+       listado —justo lo que esa regla dice que hay que dejar en paz—. */
+    main li a.campana-sesion::after {
         content: "";
     }
 
@@ -246,7 +336,12 @@
     img,
     blockquote,
     pre,
-    table {
+    table,
+    /* Una escena de una partida y el post-it de las cosas pendientes:
+       partidos por la mitad entre dos hojas no se leen. Una hoja entera
+       del cuaderno no se pide, que puede ser más larga que un folio. */
+    .cuaderno-escena,
+    .cuaderno-postit {
         break-inside: avoid;
         page-break-inside: avoid;
     }

@@ -7,6 +7,8 @@
 #
 #     datos/entradas-blog.json          (portada, archivo del año, diario, RSS)
 #     datos/mis-movidas.json   (portada y listado de relatos)
+#     datos/notas-rol.json     (índice de cada campaña y RSS; a la portada
+#                               NO va a propósito, ver más abajo)
 #
 # POR QUÉ
 # -------
@@ -71,9 +73,16 @@ from comun import (
 )
 BLOG = RAIZ / "web" / "blog"
 RELATOS = RAIZ / "web" / "mis_movidas" / "relatos"
+NOTAS_ROL = RAIZ / "web" / "notas_rol"
 JSON_ROL = RAIZ / "datos" / "rol.json"
 JSON_BLOG = RAIZ / "datos" / "entradas-blog.json"
 JSON_MOVIDAS = RAIZ / "datos" / "mis-movidas.json"
+# Las notas de las partidas de rol van en su propio listado y NO en
+# mis-movidas.json, a propósito: ese es el que leen la portada
+# (novedades.exe) y el listado de relatos, y las notas de una partida no
+# son algo que se publique para que lo lea nadie —son para acordarse—.
+# Al RSS sí entran: generar-rss.py lee también este archivo.
+JSON_NOTAS = RAIZ / "datos" / "notas-rol.json"
 
 # Los meses tal y como los escribe la web en la fecha de cada entrada
 # (es lo que devuelve toLocaleDateString en español). Se aceptan también
@@ -287,6 +296,59 @@ def recoger_rol():
     return entradas, avisos
 
 
+# =========================================
+# LAS NOTAS DE LAS PARTIDAS DE ROL
+# =========================================
+# Una sesión es una página como una entrada, con dos diferencias: su
+# <article> se llama cuaderno-post y lleva data-campana diciendo de qué
+# campaña es. De ahí sale su listado, que es lo que usa el índice de la
+# campaña para saber qué sesiones están publicadas de verdad.
+
+
+def cuerpo_de_notas(texto):
+    """El texto de las hojas, para contar los minutos. Aquí no vale
+    cuerpo_de(): las notas no tienen un .cuaderno-post-body, tienen
+    varias hojas dentro de .cuaderno-post-body-wrap."""
+    inicio = texto.find('<div class="cuaderno-post-body-wrap">')
+    if inicio == -1:
+        return ""
+    fin = texto.find("</article>", inicio)
+    return texto[inicio:fin if fin != -1 else len(texto)]
+
+
+def recoger_notas_rol():
+    entradas, avisos = [], []
+    if not NOTAS_ROL.is_dir():
+        return entradas, avisos
+
+    for ruta in paginas(NOTAS_ROL, "*.html"):
+        titulo, fecha, texto, fallos = leer_entrada(ruta, "cuaderno")
+        campana = (
+            buscar(
+                r'<article class="cuaderno-post"[^>]*data-campana="([^"]*)"', texto
+            )
+            or ""
+        ).strip()
+        if not campana:
+            fallos = fallos + [
+                'no dice de qué campaña es (falta data-campana en el <article>)'
+            ]
+        if fallos:
+            avisos.append((ruta, fallos))
+            continue
+        entradas.append(
+            {
+                "title": titulo,
+                "campana": campana,
+                "date": fecha,
+                "url": url_de(ruta),
+                "minutos": minutos_de(cuerpo_de_notas(texto)),
+            }
+        )
+    entradas.sort(key=clave_orden)
+    return entradas, avisos
+
+
 def recoger_movidas():
     entradas, avisos = [], []
     for ruta in paginas(RELATOS, "*.html"):
@@ -376,6 +438,7 @@ def generar(probar=False):
 
     blog, avisos_blog = recoger_blog()
     movidas, avisos_movidas, cuantas_rol = recoger_movidas()
+    notas, avisos_notas = recoger_notas_rol()
 
     print(f"  {len(blog)} entrada(s) de blog")
     for e in blog:
@@ -386,7 +449,15 @@ def generar(probar=False):
     for e in movidas:
         print(f"     {e['date']}  {e['title'][:38]:38}  [{e['category']}]")
 
-    cambios = comparar(JSON_BLOG, blog) + comparar(JSON_MOVIDAS, movidas)
+    print(f"\n  {len(notas)} sesión(es) de rol apuntada(s)")
+    for e in notas:
+        print(f"     {e['date']}  {e['title'][:38]:38}  [{e['campana']}]")
+
+    cambios = (
+        comparar(JSON_BLOG, blog)
+        + comparar(JSON_MOVIDAS, movidas)
+        + comparar(JSON_NOTAS, notas)
+    )
     if cambios:
         print("\n  Lo que cambia respecto a lo que había en los JSON:")
         for linea in cambios:
@@ -400,8 +471,9 @@ def generar(probar=False):
     print()
     escribir(JSON_BLOG, blog, probar)
     escribir(JSON_MOVIDAS, movidas, probar)
+    escribir(JSON_NOTAS, notas, probar)
 
-    avisos = avisos_blog + avisos_movidas
+    avisos = avisos_blog + avisos_movidas + avisos_notas
     if avisos:
         print("\n  OJO, estas páginas se han quedado fuera del listado:")
         for ruta, fallos in avisos:

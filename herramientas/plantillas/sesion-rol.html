@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8">
+    <!-- Color de la barra del navegador en el móvil. Arranca en el color
+         del modo oscuro y el script de abajo lo cambia si toca; al pulsar
+         el botón de tema lo actualiza scripts/tema.js. -->
+    <meta name="theme-color" content="#12091c">
+    <script>
+      // El tema, puesto ANTES de que se pinte nada: si esperara al resto
+      // de scripts, la página aparecería con el tema de fábrica y daría
+      // un fogonazo al cambiar. Por eso va escrito aquí, en el <head> de
+      // cada página, y no en un archivo aparte.
+      //
+      // Dos pasos, y en este orden:
+      //   1. Si hay un tema elegido, ése y ya está.
+      //   2. Si no hay ninguno, manda el aparato: con el modo claro
+      //      puesto, la web arranca en claro. Antes arrancaba siempre en
+      //      oscuro y quien tiene el móvil en claro porque ve mejor así
+      //      se comía una web oscura sin haber pedido nada. Esto NO se
+      //      guarda: mientras no se toque el mando, la web sigue a lo
+      //      que diga el sistema.
+      //
+      // Si cambias uno de estos colores, cámbialo también en
+      // estilos/base.css y en COLOR_BARRA de scripts/tema.js.
+      (function () {
+        try {
+          var temas = {
+            claro: ["light", "#f3e1d6"],
+            "oscuro-puro": ["puro-oscuro", "#000000"],
+            "claro-puro": ["puro-claro", "#ffffff"],
+            tranquilo: ["tranquilo", "#f2efe9"],
+            "tranquilo-oscuro": ["tranquilo-oscuro", "#1b1e22"],
+            "terminal-verde": ["terminal-verde", "#000000"],
+            "terminal-azul": ["terminal-azul", "#000000"],
+            "terminal-rojo": ["terminal-rojo", "#000000"],
+            "terminal-ambar": ["terminal-ambar", "#000000"]
+          };
+          var guardado = localStorage.getItem("richi-theme");
+          var elegido = temas[guardado];
+          if (!elegido && !guardado &&
+              window.matchMedia("(prefers-color-scheme: light)").matches) {
+            elegido = temas.claro;
+          }
+          if (elegido) {
+            document.documentElement.setAttribute("data-theme", elegido[0]);
+            var barra = document.querySelector('meta[name="theme-color"]');
+            if (barra) {
+              barra.setAttribute("content", elegido[1]);
+            }
+          }
+        } catch (e) {}
+      })();
+    </script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{TITULO}} · {{CAMPANA_NOMBRE}} · El Blog de Richi</title>
+    <!-- Cómo se ve el enlace al compartirlo (Bluesky, Discord, Ko-fi…).
+         Sin esto solo sale la URL pelada, sin título ni imagen. Las rutas
+         van absolutas a propósito: las redes no resuelven las relativas. -->
+    <meta name="description" content="{{DESCRIPCION}}">
+    <link rel="canonical" href="https://richi.blog{{URL}}">
+    <meta property="og:type" content="article">
+    <meta property="og:site_name" content="El Blog de Richi">
+    <meta property="og:locale" content="es_ES">
+    <meta property="og:title" content="{{TITULO}} · {{CAMPANA_NOMBRE}} · El Blog de Richi">
+    <meta property="og:description" content="{{DESCRIPCION}}">
+    <meta property="og:url" content="https://richi.blog{{URL}}">
+    <meta property="og:image" content="https://richi.blog/imagenes/meta/og.webp">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta property="og:image:alt" content="El Blog de Richi — ilustración de Richi sobre fondo morado">
+    <meta name="twitter:card" content="summary_large_image">
+    <link rel="icon" type="image/x-icon" href="/imagenes/favicon.ico">
+    <link rel="preload" href="/tipografias/space-grotesk-400.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="alternate" type="application/rss+xml" title="El Blog de Richi — blog, relatos y rol" href="/blog/rss.xml">
+    <!-- El menú, pedido LO PRIMERO. No está escrito en el HTML de cada
+         página: vive en fragmentos/barra-lateral.html y lo pide
+         scripts/componentes/barra-lateral.js, que va con defer y por
+         tanto no corre hasta que el navegador ha terminado de leer la
+         página. Medido con la red frenada, el menú no aparecía hasta
+         1,5 s: el HTML tardaba 190 ms, los scripts se ejecutaban sobre
+         los 1000 y solo entonces empezaba el viaje a por el trozo.
+
+         Esta línea lo pide aquí mismo, antes incluso que el CSS, y
+         guarda la promesa. Cuando barra-lateral.js arranca no empieza
+         ningún viaje: se sube al que ya iba. El menú pasó a estar a los
+         786 ms, la mitad.
+
+         Va escrita a pelo y no en un archivo aparte a propósito: un
+         archivo aparte habría que pedirlo, y pedirlo es justo lo que se
+         está intentando no hacer. Si algo falla se queda sin adelanto y
+         loadComponent() lo pide como siempre. -->
+    <script>window.adelantoDeFragmentos={};try{window.adelantoDeFragmentos["/fragmentos/barra-lateral.html"]=fetch("/fragmentos/barra-lateral.html?v=e79bcaf8").then(function(r){return r.ok?r.text():null}).catch(function(){return null})}catch(e){}</script>
+    <!-- ==== CSS ====
+         Esta lista la escribe herramientas/actualizar-cabeceras.py.
+         No la toques a mano: si cambias qué CSS lleva una página,
+         cámbialo en esa herramienta y vuélvela a ejecutar.
+
+         Van escritos aquí, y no cargados por un script, para que el
+         navegador los pida nada más recibir el HTML. Con un script de
+         por medio tardaba ~200 ms más en pintar la página.
+
+         El ?v= de cada uno es el resumen de su contenido: cambia solo
+         cuando cambia el archivo, y es lo que hace que al subir a
+         Neocities se vea el cambio en vez de la versión guardada en la
+         caché del navegador. -->
+    <link rel="stylesheet" href="/estilos/base.css?v=7b045c04">
+    <link rel="stylesheet" href="/estilos/base.responsive.css?v=24021cbc">
+    <link rel="stylesheet" href="/estilos/componentes/visor-imagenes.css?v=c75e69bd">
+    <link rel="stylesheet" href="/estilos/componentes/aviso.css?v=aa14ed7b">
+    <link rel="stylesheet" href="/estilos/componentes/aviso.responsive.css?v=4b547ea8">
+    <link rel="stylesheet" href="/estilos/componentes/cabecera-ventana.css?v=df2807ad">
+    <link rel="stylesheet" href="/estilos/componentes/subir.css?v=da55ea85">
+    <link rel="stylesheet" href="/estilos/componentes/ajustes.css?v=105f8df0">
+    <link rel="stylesheet" href="/estilos/paginas/notas-rol.css?v=21c6b81a">
+    <link rel="stylesheet" href="/estilos/paginas/notas-rol.responsive.css?v=ea525e75">
+    <link rel="stylesheet" href="/estilos/componentes/barra-lateral.css?v=588851ec">
+    <link rel="stylesheet" href="/estilos/componentes/barra-lateral.responsive.css?v=45e554fd">
+    <link rel="stylesheet" href="/estilos/paginas/buscar.css?v=692b762d">
+    <link rel="stylesheet" href="/estilos/componentes/ventanas-plegables.css?v=c901afd7">
+    <link rel="stylesheet" href="/estilos/componentes/impresion.css?v=f2417ee6">
+    <link rel="stylesheet" href="/estilos/componentes/sin-movimiento.css?v=78601159">
+    <!-- ==== fin del CSS ==== -->
+    <script src="/scripts/cargador-scripts.js?v=ac61f433"></script>
+    <!-- ==== JS ====
+         Esta lista también la escribe la herramienta, a partir de
+         scripts_de(). No la toques a mano.
+
+         Todos van con "defer": se bajan mientras el navegador lee el
+         HTML, no retrasan el pintado y se ejecutan al final, en este
+         mismo orden, que en unos cuantos casos importa.
+
+         Están escritos aquí y no los pide un script, por lo mismo que
+         el CSS: así el navegador los descubre en cuanto le llega el
+         HTML. Pidiéndolos desde el cargador no empezaban a bajarse
+         hasta 600 ms después, y con ellos se retrasaba todo lo que se
+         puede tocar (el menú el que más). -->
+    <script defer src="/scripts/componentes/cargador-fragmentos.js?v=d67e08bf"></script>
+    <script defer src="/scripts/componentes/barra-lateral.js?v=da4175b8"></script>
+    <script defer src="/scripts/componentes/gatin-random.js?v=212dad18"></script>
+    <script defer src="/scripts/tema.js?v=626220df"></script>
+    <script defer src="/scripts/componentes/ajustes.js?v=1c57b8ee"></script>
+    <script defer src="/scripts/componentes/buscar-lupa.js?v=cca8f0d0"></script>
+    <script defer src="/scripts/componentes/botones-ventana.js?v=cab0ce9c"></script>
+    <script defer src="/scripts/componentes/ventanas-plegables.js?v=40711cd7"></script>
+    <script defer src="/scripts/componentes/rastro-cursor.js?v=0d9a7e7f"></script>
+    <script defer src="/scripts/componentes/chispas-botones.js?v=7b0937d6"></script>
+    <script defer src="/scripts/componentes/enlaces-fuera.js?v=130dc9ce"></script>
+    <script defer src="/scripts/componentes/visor-imagenes.js?v=48184405"></script>
+    <script defer src="/scripts/componentes/aviso.js?v=7b9fce19"></script>
+    <script defer src="/scripts/componentes/subir.js?v=2e242c61"></script>
+    <script defer src="/scripts/componentes/teclado-scroll.js?v=5847ef8b"></script>
+    <script defer src="/scripts/paginas/cuaderno.js?v=bcdb835e"></script>
+    <!-- ==== fin del JS ==== -->
+  </head>
+<body>
+    <!-- ==== SIDEBAR / NAVEGACIÓN ==== -->
+    <a class="skip-link" href="#main-content">Saltar al contenido</a>
+    <div id="sidebar-container"></div>
+    <!-- ==== CONTENIDO PRINCIPAL ==== -->
+
+    <main id="main-content">
+        <!-- ==== HOME ==== -->
+        <section id="home" class="home cuaderno-page">
+            <!-- LAS NOTAS DE UNA PARTIDA
+                 Lo crea herramientas/nuevo.py --sesion. Se escribe a mano
+                 dentro, como una entrada del blog, pero en vez de una
+                 columna de texto son HOJAS de cuaderno: dos por fila en
+                 escritorio, una debajo de otra en el móvil.
+
+                 CÓMO SE ESCRIBE
+                 ---------------
+                 Cada <div class="cuaderno-hoja"> es una hoja. Se
+                 escribe en la primera y, cuando se llena, se copia el
+                 bloque entero para la segunda —y para una tercera, y una
+                 cuarta, las que haga falta—. El número de la esquina
+                 (.cuaderno-hoja-numero) se cambia a mano, que es lo mismo
+                 que hacer en un cuaderno de verdad.
+
+                 CADA HOJA SE DESPLAZA POR DENTRO, ella sola, como si
+                 fuera un papel que no se acaba nunca. El marco de la
+                 página no se mueve: ni la barra de arriba, ni el post-it,
+                 ni la otra hoja.
+
+                 Y SE PASA PÁGINA. En pantalla ancha se ven dos hojas
+                 enfrentadas, como un cuaderno abierto; en una estrecha,
+                 una. Cuando hay más de las que caben, debajo salen los
+                 botones de pasar página —los monta el script— y se va
+                 pasando sin salir de aquí. Con pocas hojas no salen: no
+                 habría a dónde pasar.
+
+                 QUÉ SE PUEDE PONER DENTRO
+                 -------------------------
+                   <p>                   un párrafo
+                   <ul><li>              una lista de cosas que pasaron
+                   <strong>              un personaje (sale resaltado)
+                   <em>                  un lugar (sale en cursiva)
+                   <h3>                  un apartado dentro de la hoja
+
+                 LO QUE SE CONSIGUE
+                 ------------------
+                 Los objetos que caen en la partida, con su propio
+                 formato para que no se lean como un punto más de la
+                 narración:
+
+                   <p>Conseguimos reunir provisiones para el viaje:</p>
+                   <ul class="cuaderno-objetos">
+                       <li><strong>4</strong> kits curativos</li>
+                       <li>Hierbas misteriosas (velocidad)</li>
+                       <li><strong>6</strong> provisiones para el viaje</li>
+                   </ul>
+
+                 Salen en letra de máquina, con un rombo delante y una
+                 raya de puntos en el margen, como una cuenta encerrada en
+                 el cuaderno. La cantidad en <strong> es opcional.
+
+                 LOS PERSONAJES DE LA MESA, CADA UNO DE SU COLOR
+                 ----------------------------------------------
+                 A los nuestros se les añade una clase al <strong> y el
+                 nombre sale de su color:
+
+                   <strong class="pj-verde">Faëlar</strong>
+                   <strong class="pj-azul">Melissa</strong>
+                   <strong class="pj-rojo">Thenarys</strong>
+                   <strong class="pj-morado">Denelia</strong>
+
+                 Los que no son de los jugadores (Sigil, un tabernero) se
+                 quedan con el <strong> a secas, en el amarillo del tema:
+                 así se ve de un vistazo quién de los nuestros estaba en
+                 cada escena. Quién lleva cada color está apuntado también
+                 en el JSON de la campaña, para que en su ficha salga
+                 igual.
+
+                 En los temas de blanco y negro puros y en los de terminal
+                 los cuatro salen del color del tema: ahí hay un solo
+                 color a propósito. No se pierde nada, porque el nombre va
+                 en negrita de todas formas.
+
+                 LAS ESCENAS
+                 -----------
+                 Lo que en el Word eran los **** aquí es una escena, y
+                 cada escena se pliega y se despliega pulsando su nombre.
+                 Se copia este bloque entero y se le cambia el nombre:
+
+                   <details class="cuaderno-escena" open>
+                       <summary class="cuaderno-escena-titulo">
+                           <span class="cuaderno-escena-flecha" aria-hidden="true"></span>
+                           <span class="cuaderno-escena-nombre">Cómo se llama</span>
+                       </summary>
+                       <div class="cuaderno-escena-cuerpo">
+                           ... lo que pasó en esa escena ...
+                       </div>
+                   </details>
+
+                 El "open" es con lo que nace abierta. Quitándolo, nace
+                 plegada: útil para una escena larga que no hace falta
+                 leer cada vez. Arriba del cuaderno sale solo un botón
+                 para plegarlas o desplegarlas todas de golpe.
+
+                 EL POST-IT DE LAS COSAS PENDIENTES
+                 ----------------------------------
+                 Va fuera del cuaderno, a la derecha, y NO se desplaza:
+                 por largas que sean las notas, lo que queda por hacer
+                 sigue estando delante. Dentro, una lista de tareas es un
+                 <ul> con su clase y ya está:
+
+                   <ul class="cuaderno-tareas">
+                       <li>Lo que queda por hacer.</li>
+                       <li class="hecho">Lo que ya está hecho.</li>
+                   </ul>
+
+                 Sale con su casilla, y se puede marcar y desmarcar
+                 pulsándola. Lo que se marque así se queda guardado en
+                 ESE navegador y nada más; para que quede escrito —y para
+                 que lo vea quien entre— se le pone la clase "hecho" al
+                 <li> aquí, en el archivo.
+
+                 Si una partida no deja nada pendiente, se borra el
+                 <aside> entero y el cuaderno ocupa todo el ancho.
+
+                 EL PDF Y LA SESIÓN DE AL LADO
+                 -----------------------------
+                 Debajo del post-it no hay nada escrito: el botón de
+                 descargar el PDF y los saltos a la sesión anterior y a la
+                 siguiente los pone solo scripts/paginas/cuaderno.js
+                 leyendo el JSON de la campaña. Para que salga el botón del
+                 PDF se le apunta su dirección a esta sesión:
+
+                     "sesiones": [
+                         { "numero": 1, ..., "pdf": "https://..." }
+                     ]
+
+                 Y los saltos aparecen a medida que se publican las
+                 sesiones de al lado, sin tocar esta página.
+
+                 Todo cuadra con los renglones del papel, así que no hay
+                 que añadir márgenes ni <br>: cada cosa ya cae en su
+                 línea. -->
+            <!-- data-borrador: mientras esté puesto, estas notas NO salen
+                 en el índice de la campaña, ni en el buscador, ni en el
+                 mapa, ni en el RSS, ni en el sitemap, y arriba se ve una
+                 franja avisando. Toda sesión nueva nace así, para que una
+                 a medio pasar a limpio no se publique sola al subir el
+                 sitio. Para publicarla:
+
+                     python3 herramientas/publicar.py -->
+            <article class="cuaderno-post" data-borrador data-campana="{{CAMPANA}}">
+                <div class="cuaderno-post-header">
+                    <h1 class="cuaderno-post-title">{{TITULO}}</h1>
+                    <div class="cuaderno-post-header-meta">
+                        <p class="cuaderno-post-date"><time datetime="{{FECHA_ISO}}">{{FECHA}}</time></p>
+                        <a class="cuaderno-post-back" href="{{CAMPANA_URL}}">← volver a la campaña</a>
+                    </div>
+                </div>
+
+                <div class="cuaderno-post-body-wrap">
+                    <!-- El reparto: el cuaderno a la izquierda y el post-it a
+                         la derecha, que se queda quieto. -->
+                    <div class="cuaderno-reparto">
+                        <!-- La columna del cuaderno: las hojas arriba y, si
+                             hacen falta, los botones de pasar página debajo.
+                             Esos botones los monta el script; aquí solo está
+                             el hueco donde van. -->
+                        <div class="cuaderno-columna">
+                            <div class="cuaderno">
+                            <div class="cuaderno-hoja">
+                                <div class="cuaderno-hoja-cabecera" aria-hidden="true">
+                                    <p class="cuaderno-hoja-titulo">{{SESION}} — {{FECHA_CORTA}}</p>
+                                    <p class="cuaderno-hoja-numero">1</p>
+                                </div>
+                                <!-- Cada hoja se desplaza por dentro, así que
+                                     es una zona con su nombre y su parada de
+                                     tabulador. El nombre se lo vuelve a poner
+                                     el script a partir del número de arriba,
+                                     así que al copiar una hoja basta con
+                                     cambiar ese número. -->
+                                <div class="cuaderno-hoja-cuerpo" tabindex="0" role="region"
+                                     aria-label="Hoja 1, con scroll">
+                                    <p>Aquí van las notas de la partida. Borra esto y escribe lo que pasó.</p>
+
+                                    <details class="cuaderno-escena" open>
+                                        <summary class="cuaderno-escena-titulo">
+                                            <span class="cuaderno-escena-flecha" aria-hidden="true"></span>
+                                            <span class="cuaderno-escena-nombre">La primera escena</span>
+                                        </summary>
+                                        <div class="cuaderno-escena-cuerpo">
+                                            <ul>
+                                                <li>Una cosa que pasó.</li>
+                                                <li><strong class="pj-verde">Un personaje de la mesa</strong> dijo algo que conviene no olvidar.</li>
+                                                <li><strong>Alguien que no es de la mesa</strong> contestó.</li>
+                                                <li>Llegamos a <em>un sitio</em> y allí había alguien esperando.</li>
+                                            </ul>
+                                        </div>
+                                    </details>
+
+                                    <details class="cuaderno-escena" open>
+                                        <summary class="cuaderno-escena-titulo">
+                                            <span class="cuaderno-escena-flecha" aria-hidden="true"></span>
+                                            <span class="cuaderno-escena-nombre">La segunda escena</span>
+                                        </summary>
+                                        <div class="cuaderno-escena-cuerpo">
+                                            <p>Donde antes iban los asteriscos, ahora empieza otra escena.</p>
+                                            <p>Y esto es lo que se consiguió:</p>
+                                            <ul class="cuaderno-objetos">
+                                                <li><strong>2</strong> pociones curativas</li>
+                                                <li>Un mapa medio roto</li>
+                                            </ul>
+                                        </div>
+                                    </details>
+                                </div>
+                            </div>
+
+                            <div class="cuaderno-hoja">
+                                <div class="cuaderno-hoja-cabecera" aria-hidden="true">
+                                    <p class="cuaderno-hoja-titulo">{{SESION}} — {{FECHA_CORTA}}</p>
+                                    <p class="cuaderno-hoja-numero">2</p>
+                                </div>
+                                <!-- Cada hoja se desplaza por dentro, así que
+                                     es una zona con su nombre y su parada de
+                                     tabulador. El nombre se lo vuelve a poner
+                                     el script a partir del número de arriba,
+                                     así que al copiar una hoja basta con
+                                     cambiar ese número. -->
+                                <div class="cuaderno-hoja-cuerpo" tabindex="0" role="region"
+                                     aria-label="Hoja 2, con scroll">
+                                    <details class="cuaderno-escena" open>
+                                        <summary class="cuaderno-escena-titulo">
+                                            <span class="cuaderno-escena-flecha" aria-hidden="true"></span>
+                                            <span class="cuaderno-escena-nombre">La tercera escena</span>
+                                        </summary>
+                                        <div class="cuaderno-escena-cuerpo">
+                                            <p>Y aquí sigue la partida, en la hoja siguiente.</p>
+                                        </div>
+                                    </details>
+                                </div>
+                            </div>
+
+                            <div class="cuaderno-hoja">
+                                <div class="cuaderno-hoja-cabecera" aria-hidden="true">
+                                    <p class="cuaderno-hoja-titulo">{{SESION}} — {{FECHA_CORTA}}</p>
+                                    <p class="cuaderno-hoja-numero">3</p>
+                                </div>
+                                <!-- Cada hoja se desplaza por dentro, así que
+                                     es una zona con su nombre y su parada de
+                                     tabulador. El nombre se lo vuelve a poner
+                                     el script a partir del número de arriba,
+                                     así que al copiar una hoja basta con
+                                     cambiar ese número. -->
+                                <div class="cuaderno-hoja-cuerpo" tabindex="0" role="region"
+                                     aria-label="Hoja 3, con scroll">
+                                    <details class="cuaderno-escena" open>
+                                        <summary class="cuaderno-escena-titulo">
+                                            <span class="cuaderno-escena-flecha" aria-hidden="true"></span>
+                                            <span class="cuaderno-escena-nombre">Cómo acabó la cosa</span>
+                                        </summary>
+                                        <div class="cuaderno-escena-cuerpo">
+                                            <p>Esta tercera hoja está para que se vea cómo se pasa página: con dos hojas por cara, ésta cae en la cara siguiente.</p>
+                                        </div>
+                                    </details>
+                                </div>
+                            </div>
+                            </div>
+                        </div>
+
+                        <!-- LA COLUMNA DE LA DERECHA: el post-it y, debajo,
+                             el PDF y el salto a la sesión de al lado. -->
+                        <div class="cuaderno-lateral">
+                            <!-- EL POST-IT
+                                 Lo que quedó por hacer. Vive fuera del
+                                 cuaderno, así que no se desplaza con él:
+                                 por largas que sean las notas, sigue
+                                 delante.
+                                 Si la partida no deja nada pendiente, se
+                                 borra el <aside> entero y el cuaderno
+                                 ocupa todo el ancho. -->
+                            <aside class="cuaderno-postit">
+                                <h2 class="cuaderno-postit-titulo">Cosas pendientes</h2>
+                                <ul class="cuaderno-tareas">
+                                    <li>Lo que quedó a medias para la próxima.</li>
+                                    <li>Preguntarle a alguien por algo.</li>
+                                    <li class="hecho">Y esto ya está hecho.</li>
+                                </ul>
+                            </aside>
+
+                            <!-- EL PIE DE LA NOTA
+                                 Aquí no hay nada escrito: lo rellena
+                                 scripts/paginas/cuaderno.js con lo que diga
+                                 el JSON de la campaña.
+
+                                   · el botón de descargar el PDF, si esta
+                                     sesión tiene uno apuntado en su "pdf"
+                                     dentro de datos/campana-{{CAMPANA}}.json;
+                                   · los saltos a la sesión anterior y a la
+                                     siguiente, que aparecen solos a medida
+                                     que se publican.
+
+                                 Si no hay ni PDF ni vecinas, el hueco se
+                                 queda vacío y no se ve. -->
+                            <div class="cuaderno-pie" data-cuaderno-pie
+                                 data-campana-datos="{{CAMPANA_DATOS}}"></div>
+                        </div>
+                    </div>
+                </div>
+            </article>
+        </section>
+    </main>
+</body>
+</html>

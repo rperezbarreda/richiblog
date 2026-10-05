@@ -101,7 +101,13 @@ CARPETAS_HUERFANOS = ("imagenes", "estilos", "scripts", "tipografias", "fragment
 # =========================================
 
 RE_ATRIBUTOS = re.compile(
-    r"""\b(?:href|src|poster|data-reto-datos)\s*=\s*["']([^"']*)["']""", re.I
+    # data-reto-datos y data-campana-datos no son enlaces, pero apuntan al
+    # JSON del que esa página saca su contenido: si se borra o se cambia
+    # de nombre, la página se queda vacía y nadie se entera. Van aquí para
+    # que cuenten como una referencia más.
+    r"""\b(?:href|src|poster|data-reto-datos|data-campana-datos)"""
+    r"""\s*=\s*["']([^"']*)["']""",
+    re.I,
 )
 RE_SRCSET = re.compile(r"""\bsrcset\s*=\s*["']([^"']*)["']""", re.I)
 RE_META_IMAGEN = re.compile(

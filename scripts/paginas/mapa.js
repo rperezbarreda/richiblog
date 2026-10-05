@@ -19,6 +19,7 @@ const MAPA_SECCIONES = {
     blog: "blog",
     relatos: "relatos",
     rol: "rol",
+    "notas de rol": "notas de rol",
     santuarios: "santuarios",
     recomendaciones: "recomendaciones",
     otras: "otras páginas",

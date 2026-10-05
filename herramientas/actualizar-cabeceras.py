@@ -83,6 +83,8 @@ PLANTILLAS = {
     "herramientas/plantillas/entrada-blog.html": "/web/blog/2026/enero/una-entrada.html",
     "herramientas/plantillas/entrada-relato.html": "/web/mis_movidas/relatos/un-relato.html",
     "herramientas/plantillas/archivo-anyo.html": "/web/blog/2026/index_2026.html",
+    "herramientas/plantillas/sesion-rol.html": "/web/notas_rol/ragna/sesion-99.html",
+    "herramientas/plantillas/campana-rol.html": "/web/notas_rol/ragna/index_ragna.html",
 }
 
 # Carpetas que no son el sitio.
@@ -152,6 +154,11 @@ def hojas_de(ruta):
     es_santuarios = "/santuarios/" in ruta
     es_rol = "/mis_movidas/rol/" in ruta
     es_relatos = "/mis_movidas/relatos/" in ruta
+    # Las notas de las partidas de rol: el índice de una campaña y las
+    # notas de cada partida. Las dos llevan la misma hoja, así que aquí no
+    # hace falta distinguirlas (en scripts_de sí: el JavaScript solo lo
+    # necesita el índice).
+    es_notas_rol = "/notas_rol/" in ruta
     es_accesibilidad = "/accesibilidad/" in ruta
     es_changelog = "/changelog/" in ruta
     es_mapa = "/mapa/" in ruta
@@ -223,6 +230,16 @@ def hojas_de(ruta):
             "/estilos/componentes/filtros.css",
             "/estilos/componentes/filtros.responsive.css",
             "/estilos/componentes/buscador.css",
+        ]
+    elif es_notas_rol:
+        # Las dos páginas de una campaña (su índice y las notas de cada
+        # partida) comparten hoja: tienen la mitad de las piezas en común
+        # y separarlas serían dos archivos de 200 líneas con lo mismo
+        # dentro. Nada de relatos.css ni de texto-entrada.css: las hojas
+        # del cuaderno se dibujan solas, con sus propios renglones.
+        hojas += [
+            "/estilos/paginas/notas-rol.css",
+            "/estilos/paginas/notas-rol.responsive.css",
         ]
     elif es_reto:
         # La página del reto no usa nada de relatos.css: es una rejilla
@@ -334,6 +351,15 @@ def scripts_de(ruta):
     # su propio index_. Se mira ANTES que es_lectura, que si no se la
     # traga (está dentro de relatos/ y no es el listado).
     es_reto = bool(re.search(r"/mis_movidas/relatos/[^/]+/index_[^/]+$", camino))
+    # El índice de una campaña de rol: ahí se pinta la ficha y la lista de
+    # sesiones. Las notas de una partida son HTML escrito a mano y no
+    # necesitan ningún script propio.
+    es_campana_rol = bool(re.search(r"/notas_rol/[^/]+/index_[^/]+$", camino))
+    # Y las notas de una partida: ahí el script pliega las escenas y
+    # marca las cosas pendientes. La página funciona sin él —las escenas
+    # las pliega el navegador solo, que son <details>—, pero con él se
+    # pueden plegar todas de golpe y marcar las casillas.
+    es_sesion_rol = "/notas_rol/" in camino and not es_campana_rol
     # Solo las fichas de cada gato: el índice de santuarios no tiene
     # galería.
     es_ficha_santuario = bool(re.search(r"/santuarios/[^/]+/[^/]+$", camino))
@@ -459,6 +485,10 @@ def scripts_de(ruta):
         ]
     elif es_reto:
         js.append("/scripts/paginas/reto.js")
+    elif es_campana_rol:
+        js.append("/scripts/paginas/notas-rol.js")
+    elif es_sesion_rol:
+        js.append("/scripts/paginas/cuaderno.js")
     elif es_lectura:
         # Antes que otras-entradas.js: ese avisa con la ficha de esta
         # entrada en cuanto le llega el listado, y lectura.js tiene que

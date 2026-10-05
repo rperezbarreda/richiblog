@@ -242,6 +242,21 @@ function armarAjustesPanel(ventana) {
         filas.forEach((fila) => lista.appendChild(fila));
     }
 
+    // ---- los dos mandos del final, si no estuvieran ----
+    // Mismo criterio que la muestra, la nota y el botón de reiniciar: lo
+    // que monta este archivo llega siempre. Si el fragmento que ha
+    // llegado es una copia vieja —guardada en la caché del navegador, o
+    // simplemente un archivo de hace dos versiones— se queda a medias
+    // justo por el final, que es donde viven estos dos. Pasó: el filtro
+    // CRT salía como "FILTRO" a secas, sin el ON/OFF, y la fila de
+    // animaciones no salía en absoluto.
+    //
+    // Si el fragmento SÍ los trae, estas dos no tocan nada.
+    arreglarAjustesCrt(lista);
+    if (!lista.querySelector("[data-movimiento]")) {
+        lista.appendChild(armarAjustesMovimiento());
+    }
+
     // ---- la columna de la derecha: la muestra y la nota ----
     // Las dos juntas en una caja porque en escritorio son UNA columna, y
     // una fila flexible con tres cajas dentro saldrían tres columnas.
@@ -287,6 +302,91 @@ function armarAjustesPanel(ventana) {
     // repasado la página cuando esto corre.
     document.dispatchEvent(new CustomEvent("ventanas:actualizar"));
 }
+
+// EL BOTÓN DEL FILTRO CRT, CON SU ON/OFF
+//
+// El botón dice "FILTRO CRT: OFF" y lo que cambia al pulsarlo es solo el
+// trocito del final, que va en su propio <span data-crt-estado> (ver
+// pintarAjustesCrt, más abajo: reescribir el texto entero se llevaba por
+// delante el <abbr> que explica qué es CRT).
+//
+// Si ese trocito no está —fragmento viejo—, pintarAjustesCrt no encuentra
+// dónde escribir y el botón se queda diciendo "FILTRO" para siempre, sin
+// que nada parezca roto. Así que aquí se rehace la etiqueta entera.
+function arreglarAjustesCrt(lista) {
+    const boton = lista.querySelector("[data-crt-boton]");
+    if (!boton || boton.querySelector("[data-crt-estado]")) {
+        return;
+    }
+
+    let texto = boton.querySelector(".ajustes-crt-texto");
+    if (!texto) {
+        texto = document.createElement("span");
+        texto.className = "ajustes-crt-texto";
+        boton.appendChild(texto);
+    }
+    texto.textContent = "FILTRO ";
+
+    const sigla = document.createElement("abbr");
+    sigla.title =
+        "Cathode Ray Tube: los monitores de tubo de antes, con sus rayas " +
+        "y las esquinas apagadas";
+    sigla.textContent = "CRT";
+    texto.appendChild(sigla);
+    texto.appendChild(document.createTextNode(": "));
+
+    const estado = document.createElement("span");
+    estado.setAttribute("data-crt-estado", "");
+    estado.textContent = "OFF";
+    texto.appendChild(estado);
+}
+
+
+// LA FILA DE LAS ANIMACIONES
+//
+// "normal" o "sin animaciones". Lo que hace está en
+// estilos/componentes/sin-movimiento.css; aquí solo se monta la fila por
+// si el fragmento no la trae. Quien le engancha el clic es
+// engancharAjustesOpciones("movimiento"), que corre después de esto.
+//
+// El <p> del nombre lleva id y el grupo lo apunta con aria-labelledby:
+// así un lector de pantalla dice "animaciones, grupo" al entrar en los
+// dos botones, en vez de soltar "normal" sin decir normal de qué.
+function armarAjustesMovimiento() {
+    const fila = document.createElement("div");
+    fila.className = "ajustes-fila";
+
+    const nombre = document.createElement("p");
+    nombre.className = "ajustes-nombre";
+    nombre.id = "ajustes-movimiento-nombre";
+    nombre.textContent = "animaciones";
+    fila.appendChild(nombre);
+
+    const mandos = document.createElement("div");
+    mandos.className = "ajustes-mandos";
+    mandos.setAttribute("role", "group");
+    mandos.setAttribute("aria-labelledby", nombre.id);
+
+    [
+        ["", "normal"],
+        ["quieto", "sin animaciones"],
+    ].forEach(([valor, etiqueta]) => {
+        const boton = document.createElement("button");
+        boton.type = "button";
+        boton.className = "ajustes-opcion";
+        boton.setAttribute("data-movimiento", valor);
+        // El marcado de verdad lo pone pintarAjustesOpciones() en cuanto
+        // termina de armarse el panel; esto es solo para no dejarlo sin
+        // atributo mientras tanto.
+        boton.setAttribute("aria-pressed", "false");
+        boton.textContent = etiqueta;
+        mandos.appendChild(boton);
+    });
+
+    fila.appendChild(mandos);
+    return fila;
+}
+
 
 // La muestra, en una ventana falsa de las del sitio.
 //

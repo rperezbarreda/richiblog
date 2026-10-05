@@ -1,0 +1,1896 @@
+/* NOTAS DE ROL — la página de una campaña y las notas de cada partida */
+
+/* Dos páginas distintas y las dos viven aquí, porque comparten la mitad
+   de las piezas (el botón de volver, los marcos de ventana, los colores
+   de los nombres de personaje):
+
+     .campana-page   el índice de una campaña: su ficha y sus sesiones
+     .cuaderno-page  las notas de una partida, en hojas de cuaderno
+
+   Lo que decide qué página lleva esta hoja está en
+   herramientas/actualizar-cabeceras.py (hojas_de). */
+
+
+/* =========================================
+   LA PÁGINA DE UNA CAMPAÑA
+   ========================================= */
+
+/* Mismo reparto que la página de un reto (reto.css), y por lo mismo: a
+   la izquierda lo que se lee una vez —el título, de qué va, la ficha— y
+   a la derecha el índice de sesiones a toda la altura, que es lo que se
+   mira de verdad y a lo que se vuelve después de cada partida.
+   En móvil esto se deshace y vuelve a ser una sola columna
+   (notas-rol.responsive.css). */
+.campana-page {
+    display: grid;
+    grid-template-columns: minmax(300px, 1fr) minmax(0, 1.05fr);
+    /* Tres filas para lo de la izquierda (título, intro, ficha) y una
+       cuarta que se come el hueco que sobre; la ventana de la derecha
+       las cruza enteras. */
+    grid-template-rows: auto auto auto 1fr;
+    /* .home trae align-items: center, que aquí dejaría las dos columnas
+       flotando en mitad de la pantalla. */
+    align-items: start;
+    justify-content: start;
+    gap: 10px 36px;
+    /* "auto" y no "hidden", igual que en reto.css: normalmente cabe todo
+       y no se desplaza nada, pero con el espaciado de texto forzado la
+       ficha crece y lo de abajo se saldría de la página, tapando el
+       botón de volver. */
+    overflow-y: auto;
+    padding: 24px 4%;
+}
+
+/* El botón de volver encima del título y el nombre de la campaña
+   debajo. En columna porque el título es el enorme de todas las
+   secciones y al lado no cabría nada. */
+.campana-titulo {
+    grid-column: 1;
+    grid-row: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+}
+
+/* Más pequeño que el de serie (hasta 8,75rem): "notas de rol" en media
+   pantalla se salía de su columna. Mismo tamaño que el del reto y el
+   del archivo del blog. */
+.campana-page .home-title {
+    margin: 0;
+    font-size: clamp(3.25rem, 6vw, 5.5rem);
+}
+
+/* El nombre de la campaña, como el año en el archivo del blog: debajo
+   del título, pequeño y en la letra de máquina. Juntos se leen
+   "notas de rol — campaña de Ragna". */
+.campana-nombre {
+    margin: 0;
+    color: var(--muted);
+    font-family: var(--fuente-mono);
+    font-size: 1rem;
+    letter-spacing: 2px;
+}
+
+.campana-cabecera {
+    grid-column: 1;
+    grid-row: 2;
+    /* Sin esto, una intro larga ensancha la columna y se come el sitio
+       del índice. */
+    min-width: 0;
+    max-width: 720px;
+}
+
+.campana-intro {
+    margin: 0;
+    color: var(--white);
+    font-size: 1rem;
+    line-height: 1.6;
+}
+
+/* Mismo botón en hueco que el resto de los "volver" del sitio. */
+.campana-volver {
+    display: inline-flex;
+    align-items: center;
+    align-self: flex-start;
+    flex: 0 0 auto;
+    padding: 8px 16px;
+    border: 2px solid var(--yellow);
+    background: transparent;
+    color: var(--yellow);
+    font-family: var(--fuente-mono);
+    font-size: 0.8125rem;
+    text-decoration: none;
+    transition: color 0.15s linear, background-color 0.15s linear;
+}
+
+.campana-volver:hover,
+.campana-volver:focus-visible {
+    background: var(--yellow);
+    color: var(--yellow-contrast);
+}
+
+.campana-volver:focus-visible {
+    outline: 2px solid var(--yellow);
+    outline-offset: 3px;
+}
+
+/* El segundo botón, el de después del índice, solo hace falta en móvil:
+   ahí la página se desplaza entera y al llegar al final de la lista el
+   de arriba se ha quedado lejos. En escritorio el índice se desplaza por
+   dentro y el de arriba no se mueve de su sitio. */
+.campana-volver-abajo {
+    display: none;
+}
+
+
+/* LA FICHA DE LA CAMPAÑA */
+
+/* Una ventana falsa más, con las mismas medidas que las de la portada.
+   Los 16px de padding son los que la cabecera se come con sus márgenes
+   negativos (ver .recent-entries-header en cabecera-ventana.css): sin
+   ellos la barra de título sobresale por los tres lados. */
+.campana-ficha {
+    grid-column: 1;
+    grid-row: 3;
+    min-width: 0;
+    max-width: 720px;
+    padding: 16px;
+    background: var(--purple-lighter);
+    border: 3px solid var(--yellow);
+    box-shadow: 6px 6px 0 var(--yellow);
+}
+
+.campana-ficha-cuerpo {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+/* La lista de datos es una <dl>, así que hay que quitarle los márgenes y
+   la sangría que el navegador le pone de serie al <dd>. */
+.campana-ficha-lista {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin: 0;
+}
+
+/* Cada dato de la ficha: el nombre del campo arriba, en la letra de
+   máquina y en gris, y el valor debajo. Es una <dl> de verdad, así que
+   un lector de pantalla dice "sistema: D&D 5e" y no dos cosas sueltas. */
+.campana-dato {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    margin: 0;
+}
+
+.campana-dato-nombre {
+    color: var(--muted);
+    font-family: var(--fuente-mono);
+    font-size: 0.75rem;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+}
+
+/* margin-inline-start: 0 además del margin: el <dd> trae 40px de
+   sangría de serie y sin quitarla los valores salen desplazados a la
+   derecha de sus nombres. */
+.campana-dato-valor {
+    margin: 0;
+    margin-inline-start: 0;
+    color: var(--white);
+    font-size: 1rem;
+    line-height: 1.55;
+}
+
+/* Los personajes, uno por línea. Lista sin viñetas: los nombres ya
+   destacan solos y las viñetas aquí solo meten ruido. */
+.campana-personajes {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.campana-personaje {
+    color: var(--white);
+    font-size: 1rem;
+    line-height: 1.5;
+}
+
+.campana-personaje-nombre {
+    color: var(--yellow);
+}
+
+/* Lo que va detrás del nombre (quién lo lleva, qué es) en gris y más
+   pequeño, para que la lista se lea de un vistazo por los nombres. */
+.campana-personaje-extra {
+    color: var(--muted);
+    font-family: var(--fuente-mono);
+    font-size: 0.8125rem;
+}
+
+/* Lo que todavía está por rellenar. Sale solo en local, mientras el
+   JSON de la campaña tenga el campo en blanco: así no se olvida, y en
+   cuanto se escribe algo desaparece. */
+.campana-dato-vacio {
+    color: var(--muted);
+    font-family: var(--fuente-mono);
+    font-size: 0.8125rem;
+    font-style: italic;
+}
+
+
+/* EL ÍNDICE DE SESIONES */
+
+.campana-card {
+    /* La columna de la derecha, entera: cruza las cuatro filas y se
+       estira a toda la altura que haya. */
+    grid-column: 2;
+    grid-row: 1 / -1;
+    align-self: stretch;
+    display: flex;
+    flex-direction: column;
+    /* Nunca por debajo de la cabecera más un par de filas. Sin este
+       suelo, cuando la columna de la izquierda crece mucho (espaciado de
+       texto forzado) la ventana se encoge y su contenido se sale por
+       debajo. Lo que no cabe lo absorbe el scroll de la página. */
+    min-height: 220px;
+    overflow: hidden;
+    max-width: none;
+    padding: 16px;
+    background: var(--purple-lighter);
+    border: 3px solid var(--yellow);
+    box-shadow: 6px 6px 0 var(--yellow);
+}
+
+.campana-card-body {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    margin-top: 2px;
+    /* Hueco para que el recuadro del foco de una sesión no quede pegado
+       al borde de la ventana ni debajo de la barra. */
+    padding: 4px 6px 4px 2px;
+}
+
+.campana-sesiones {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin: 0;
+    padding: 0;
+    /* Es un <ol>: el número de sesión ya va escrito dentro de cada
+       fila, así que el contador del navegador sobra. */
+    list-style: none;
+}
+
+/* Una sesión. Es una fila entera pulsable, no un enlace en medio del
+   texto: así el objetivo es grande (lo que piden las normas para quien
+   apunta con el dedo o con un ratón que le baila) y se ve de un vistazo
+   dónde empieza y acaba cada una. */
+.campana-sesion {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 2px;
+    padding: 10px 12px;
+    border: 2px solid var(--border);
+    background: transparent;
+    color: var(--white);
+    font-size: 1rem;
+    text-decoration: none;
+    transition: border-color 0.15s linear, background-color 0.15s linear;
+}
+
+a.campana-sesion:hover,
+a.campana-sesion:focus-visible {
+    border-color: var(--yellow);
+    background: var(--purple);
+}
+
+a.campana-sesion:focus-visible {
+    outline: 2px solid var(--yellow);
+    outline-offset: 2px;
+}
+
+/* La línea de arriba: el número a la izquierda y la fecha a la derecha.
+   Que envuelva, porque con el texto al 150% en una ventana estrecha las
+   dos cosas no caben de una línea. */
+.campana-sesion-meta {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 2px 12px;
+}
+
+.campana-sesion-num {
+    flex: 0 0 auto;
+    color: var(--yellow);
+    font-family: var(--fuente-mono);
+    font-size: 0.8125rem;
+    letter-spacing: 1px;
+    white-space: nowrap;
+}
+
+.campana-sesion-titulo {
+    min-width: 0;
+    overflow-wrap: break-word;
+    line-height: 1.4;
+}
+
+/* Una sesión sin nombre no deja una línea en blanco debajo del número. */
+.campana-sesion-titulo:empty {
+    display: none;
+}
+
+.campana-sesion-fecha {
+    flex: 0 0 auto;
+    color: var(--muted);
+    font-family: var(--fuente-mono);
+    font-size: 0.8125rem;
+    white-space: nowrap;
+}
+
+/* Una sesión creada pero todavía sin publicar: existe el archivo y se
+   puede abrir en local, pero no enlaza desde aquí porque fuera de tu
+   ordenador no está. Sale apagada y con un aviso, igual que las
+   casillas pendientes del reto de escritura. */
+.campana-sesion.is-pendiente {
+    border-style: dashed;
+    color: var(--muted);
+}
+
+.campana-sesion-aviso {
+    flex: 0 0 auto;
+    color: var(--muted);
+    font-family: var(--fuente-mono);
+    font-size: 0.75rem;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+}
+
+
+/* =========================================
+   LAS NOTAS DE UNA PARTIDA
+   ========================================= */
+
+/* El mismo armazón que un relato (relatos.css): la página es un marco
+   con su barra de título amarilla y lo de dentro se desplaza solo, sin
+   mover la cabecera. Lo que cambia es el contenido: en vez de una
+   columna de texto, hojas de cuaderno. */
+.cuaderno-page {
+    display: flex;
+    flex-direction: column;
+    /* .home trae align-items: center, y en columna eso deja a los hijos
+       sin estirar al ancho del contenedor. */
+    align-items: stretch;
+    overflow: hidden;
+    padding: 0;
+}
+
+body:has(.cuaderno-page) main {
+    background: transparent;
+    border: none;
+    box-shadow: none;
+}
+
+/* Igual que en relatos.css: el margen a pantalla completa pegado a la
+   barra lateral es cosa de escritorio, y el corte en 861 evita que esta
+   regla y la de notas-rol.responsive.css se lleven la contraria. */
+@media (min-width: 861px) {
+    body:has(.cuaderno-page) main {
+        margin: 0 0 0 var(--lateral-ancho);
+        width: calc(100% - var(--lateral-ancho));
+    }
+}
+
+.cuaderno-post {
+    /* EL RENGLÓN, de aquí para abajo.
+       Un alto de línea EN LONGITUD (y no el número suelto que se suele
+       poner), que es el mismo que usa la franja del degradado de los
+       renglones del papel. Está declarado aquí arriba, en la página
+       entera, y no en la hoja, porque también lo usan las casillas del
+       post-it, que vive fuera del cuaderno.
+       Y var(--interlineado, 1.9) porque --interlineado solo existe
+       cuando se ha tocado el mando de separación entre líneas (lo pone
+       el <html>, ver base.css): sin tocar nada se usa 1,9 y al tocarlo
+       todo se separa a la vez, texto y rayas. */
+    --renglon: calc(1em * var(--interlineado, 1.9));
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-height: 0;
+    width: 100%;
+    background: var(--purple-lighter);
+    border: 3px solid var(--yellow);
+    box-shadow: 6px 6px 0 var(--yellow);
+    overflow: hidden;
+}
+
+.cuaderno-post::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background-image: var(--bg-texture);
+    background-size: 90px 90px;
+    background-repeat: repeat;
+    opacity: 0.35;
+    pointer-events: none;
+    z-index: 0;
+}
+
+.cuaderno-post-header {
+    position: relative;
+    z-index: 1;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 16px;
+    /* Por la derecha, hueco para el mando "Aa": en estas páginas "main"
+       llega hasta el borde de la pantalla, así que la cabecera pasa por
+       debajo del mando y le comería el final al botón de volver. Lo
+       deshace notas-rol.responsive.css en móvil, donde el mando se va a
+       la barra del título. */
+    padding: 14px calc(2.4rem + 30px) 14px 20px;
+    background: var(--yellow);
+    user-select: none;
+}
+
+.cuaderno-post-header-meta {
+    display: flex;
+    align-items: center;
+    /* Que encoja y que envuelva, por lo mismo que en una entrada: con el
+       espaciado de texto forzado la fila pide más de lo que mide la
+       cabecera, y la página va a overflow: hidden. Cada pieza lleva su
+       nowrap, así que lo que se parte es la fila, no la fecha. */
+    flex-shrink: 1;
+    min-width: 0;
+    flex-wrap: wrap;
+    gap: 14px;
+}
+
+.cuaderno-post-title {
+    /* Que parta por donde sea antes que salirse: con el texto al 150%
+       una palabra larga no cabe en el hueco que queda a la izquierda del
+       mando de accesibilidad. */
+    overflow-wrap: break-word;
+    /* Los 14rem de base son lo que hace que la barra se parta en dos
+       líneas cuando no cabe todo, en vez de aplastar el título.
+       Con "flex: 1" a secas el título sale de una base de CERO, así que
+       nunca empujaba a nadie: a 1100 de ancho, entre la fecha, el botón
+       de plegar y el de volver no le dejaban sitio y "Sesión 1 — El robo
+       de la mercancía" se partía letra a letra, una por línea, en una
+       columna de 40px. Medido. Con una base de verdad, lo que se va a la
+       línea de abajo es el grupo de la derecha, que es lo que tiene que
+       pasar.
+       min-width: 0 se queda para que, ya partido, pueda encogerse por
+       debajo de esos 14rem en una pantalla estrecha. */
+    flex: 1 1 20rem;
+    min-width: 0;
+    margin: 0;
+    color: var(--yellow-contrast);
+    font-family: var(--fuente-ventana);
+    font-weight: 400;
+    font-size: clamp(1.75rem, 3.2vw, 2.25rem);
+    letter-spacing: 0.3px;
+    line-height: 1.2;
+}
+
+.cuaderno-post-date {
+    flex-shrink: 0;
+    margin: 0;
+    color: var(--yellow-contrast);
+    font-family: var(--fuente-mono);
+    font-size: 0.8125rem;
+    letter-spacing: 1px;
+    white-space: nowrap;
+}
+
+.cuaderno-post-back {
+    display: inline-flex;
+    flex-shrink: 0;
+    align-items: center;
+    padding: 6px 12px;
+    border: 2px solid var(--yellow-contrast);
+    background: transparent;
+    color: var(--yellow-contrast);
+    font-family: var(--fuente-mono);
+    font-size: 0.75rem;
+    letter-spacing: 1px;
+    text-decoration: none;
+    white-space: nowrap;
+    transition: color 0.15s linear, background-color 0.15s linear;
+}
+
+.cuaderno-post-back:hover,
+.cuaderno-post-back:focus-visible {
+    background: var(--yellow-contrast);
+    color: var(--yellow);
+}
+
+.cuaderno-post-back:focus-visible {
+    outline: 2px solid var(--yellow-contrast);
+    outline-offset: 3px;
+}
+
+/* EL REPARTO: EL CUADERNO Y EL POST-IT
+
+   La mesa donde está todo: a la izquierda el cuaderno, que es lo que se
+   lee, y a la derecha el post-it de las cosas pendientes, estrecho y
+   pegado al margen.
+
+   LO QUE SE DESPLAZA ES SOLO EL CUADERNO. El marco de la página no se
+   mueve —ni la barra de arriba con el título y la fecha, ni el post-it—,
+   así que por largas que sean las notas, lo que queda por hacer sigue
+   estando delante y no hay que subir a buscar el botón de volver. Es lo
+   mismo que hace la ventana de accesibilidad y la página de un reto.
+
+   Son flex metidos uno dentro de otro y nada más. Nada de rejilla con
+   casillas, ni de position: sticky, ni de display: contents: esas tres
+   ya se probaron en la ventana de accesibilidad y ninguna se veía igual
+   en todos los navegadores. Una fila donde solo una columna se desplaza
+   es lo único que ha funcionado siempre. */
+.cuaderno-post-body-wrap {
+    position: relative;
+    z-index: 1;
+    flex: 1;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    /* "hidden" y no "auto": aquí ya no se desplaza nada, se desplaza el
+       cuaderno de dentro. */
+    overflow: hidden;
+    padding: 24px 28px;
+}
+
+.cuaderno-reparto {
+    --hoja-hueco: 24px;
+    flex: 1;
+    min-height: 0;
+    display: flex;
+    align-items: stretch;
+    gap: var(--hoja-hueco);
+}
+
+/* La columna del cuaderno: las hojas arriba y los botones de pasar
+   página debajo. Existe para que esos botones queden debajo del CUADERNO
+   y no debajo de todo —si colgaran del reparto, que es una fila, se
+   pondrían al lado del post-it—. */
+.cuaderno-columna {
+    flex: 1 1 auto;
+    min-width: 0;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+}
+
+/* LA COLUMNA DE LA DERECHA: el post-it arriba y, debajo, el PDF y el
+   salto a la sesión de al lado. Existe por lo mismo que la columna del
+   cuaderno: sin ella, el post-it y el pie serían dos cosas de la misma
+   FILA y saldrían uno al lado del otro en vez de uno debajo del otro.
+
+   El ancho se lo queda esta columna (antes lo pedía el post-it), para
+   que la nota y lo que va debajo midan lo mismo. */
+.cuaderno-lateral {
+    flex: 0 0 clamp(13rem, 24%, 19rem);
+    min-width: 0;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    /* Pegada arriba: la nota mide lo que mida y el hueco que sobre se
+       queda abajo, como una nota pegada en el borde del cuaderno. */
+    align-self: flex-start;
+    max-height: 100%;
+}
+
+
+/* EL CUADERNO */
+
+/* Las hojas, en una fila que envuelve: dos enfrentadas cuando hay sitio
+   —que es lo que se ve en un cuaderno abierto— y una sola, a todo lo
+   ancho, cuando no lo hay. Lo decide el 26rem de ahí abajo: por debajo
+   de eso una hoja deja de parecer una hoja y pasa a ser una columna de
+   periódico.
+   Una fila que envuelve y no una rejilla a propósito: con
+   grid-template-columns, un número impar de hojas deja un hueco vacío al
+   final. */
+.cuaderno {
+    /* Cuántas hojas caben enfrentadas y si hay que pasar página o no: lo
+       decide el CSS (ver notas-rol.responsive.css) y lo LEE el script en
+       scripts/paginas/cuaderno.js. Así el corte entre "cuaderno abierto"
+       y "una hoja" vive donde viven los demás cortes del sitio, en una
+       media query, y no repartido entre el CSS y el JavaScript. */
+    --paginar: 1;
+    flex: 1 1 auto;
+    min-width: 0;
+    min-height: 0;
+    /* Sin JavaScript no hay paso de página: salen todas las hojas
+       seguidas y lo que se desplaza es el cuaderno entero, como antes.
+       Con JavaScript, .is-paginado apaga este scroll (aquí abajo) porque
+       entonces en pantalla solo hay la cara que toca, que cabe siempre. */
+    overflow-y: auto;
+    /* Un poco de aire por la derecha para que la sombra de la hoja no
+       quede pegada a la barra de desplazamiento. */
+    padding-right: 6px;
+    display: flex;
+    flex-wrap: wrap;
+    /* Las hojas de una misma fila, igual de altas: la más llena manda y
+       la otra se estira hasta ella, con sus renglones en blanco. Es lo
+       que pasa en un cuaderno de verdad —las dos páginas miden lo mismo
+       aunque una esté a medio escribir—.
+       Y align-content se deja como viene (stretch) a propósito: cuando
+       las notas son cortas y sobra sitio, la hoja se estira hasta abajo
+       y el cuaderno se ve lleno de renglones en vez de dejar un palmo de
+       hueco debajo. Cuando no sobra, no estira nada. */
+    align-items: stretch;
+    gap: var(--hoja-hueco);
+}
+
+/* CON PASO DE PÁGINA (lo normal: el script lo enciende al arrancar)
+
+   En pantalla solo está la cara que toca —una hoja, o dos enfrentadas—,
+   así que el cuaderno no necesita desplazarse: lo que se desplaza es
+   cada hoja por dentro, ella sola. Y las hojas de una cara no envuelven
+   nunca: si no cupieran dos, el script pone una. */
+.cuaderno.is-paginado {
+    overflow: hidden;
+    flex-wrap: nowrap;
+    padding-right: 0;
+}
+
+/* Las hojas de una cara ocupan el alto entero del cuaderno. Ese alto es
+   el que hace que su interior tenga de dónde desplazarse: sin un alto
+   fijo, la hoja crecería con el texto y no habría scroll que valga. */
+.cuaderno.is-paginado > .cuaderno-hoja {
+    height: 100%;
+}
+
+/* Y LA HOJA QUE NO TOCA, FUERA DE VERDAD.
+   Esta regla parece que sobra —"hidden" ya esconde cualquier cosa— y es
+   justo al revés: lo que esconde hidden es un display: none que trae el
+   navegador de serie, y .cuaderno-hoja le pone display: flex un poco más
+   abajo. Las dos reglas pesan lo mismo, así que gana la última en
+   cargarse, que es la nuestra, y las hojas escondidas seguían ahí
+   repartiéndose el ancho: medido, con tres hojas y una sola en pantalla,
+   la que se veía ocupaba un tercio del cuaderno y las otras dos dejaban
+   dos huecos en blanco. */
+.cuaderno-hoja[hidden] {
+    display: none;
+}
+
+/* Una hoja pide 26rem y crece hasta llenar lo que le toque: sola ocupa
+   la fila entera, y de dos en dos se reparten. Antes pedía media fila
+   justa y no crecía, y con el post-it al lado las dos hojas se quedaban
+   estrechas y sobraba sitio a la derecha. */
+.cuaderno-hoja {
+    flex: 1 1 22rem;
+    max-width: 100%;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    /* El papel. Es var(--surface) y no un color de papel inventado a
+       propósito: así la hoja sigue al tema que haya puesto —en los dos
+       terminales es negra, en los claros es clara— y el contraste con el
+       texto está ya medido para los diez. */
+    background: var(--surface);
+    border: 2px solid var(--border);
+    /* La sombra dura de todo el sitio, más fina que la de las ventanas:
+       es una hoja de papel, no un marco de programa. */
+    box-shadow: 4px 4px 0 var(--yellow);
+}
+
+/* La cabecera de la hoja: la sesión y la fecha, como en el cuaderno, y
+   el número de hoja en la esquina. Doble raya debajo, que es lo que
+   lleva un cuaderno en la primera línea. */
+.cuaderno-hoja-cabecera {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 12px 16px 10px;
+    border-bottom: 3px double var(--yellow);
+    user-select: none;
+}
+
+.cuaderno-hoja-titulo {
+    min-width: 0;
+    overflow-wrap: break-word;
+    margin: 0;
+    color: var(--yellow);
+    font-family: var(--fuente-mono);
+    font-size: 0.8125rem;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+}
+
+.cuaderno-hoja-numero {
+    flex: 0 0 auto;
+    margin: 0;
+    color: var(--muted);
+    font-family: var(--fuente-mono);
+    font-size: 0.8125rem;
+}
+
+/* EL PAPEL RAYADO
+
+   Los renglones no son una imagen: son un degradado que se repite cada
+   línea de texto, así que cuadran con el texto sea del tamaño que sea y
+   esté como esté la separación entre líneas. El truco es --renglon, que
+   está declarado arriba del todo, en .cuaderno-post, y que es a la vez
+   el alto de línea del texto y el paso del degradado.
+
+   Lo de dentro NO cambia de tamaño de letra —ni los apartados, ni las
+   listas— por esto mismo: en cuanto una línea mide otra cosa, deja de
+   caer donde está pintada su raya. Los apartados se distinguen por la
+   letra de máquina y el color, no por ser más grandes. */
+.cuaderno-hoja-cuerpo {
+    flex: 1;
+    /* Una hoja nunca sale más corta que ocho renglones: dos líneas de
+       notas en una hoja de 60px de alto no parecen una hoja. */
+    min-height: calc(var(--renglon) * 8);
+    /* ---- EL SCROLL DE CADA HOJA ----
+       Cada hoja se desplaza por dentro, ella sola. Con el paso de página
+       encendido, la hoja mide lo que mide el cuaderno y esto es lo que
+       hace que lo de dentro se pueda recorrer; sin él, la hoja crece con
+       el texto y esto no hace nada.
+       El hueco de la barra se reserva siempre (scrollbar-gutter), para
+       que al pasar de una hoja larga a una corta el texto no dé un salto
+       de 15px a un lado. */
+    overflow-y: auto;
+    scrollbar-gutter: stable;
+    /* El hueco de la izquierda es para la raya del margen: la raya va a
+       1,1em del borde y el texto empieza detrás. Arriba, un renglón de
+       aire para que la primera línea no nazca pegada a la doble raya. */
+    padding: var(--renglon) 16px var(--renglon) 2.2em;
+    color: var(--white);
+    /* La letra de aire manuscrito del sitio: es lo que hace que esto
+       parezca un cuaderno y no un documento. Con el mando de letra
+       legible puesto se cae a la Atkinson como todo lo demás (ver
+       --fuente-mano en base.css). */
+    font-family: var(--fuente-mano);
+    font-size: 1rem;
+    line-height: var(--renglon);
+    background-image:
+        /* La raya del margen, de arriba abajo. Cuatro paradas y no dos
+           con dos posiciones cada una: la forma corta es de hace cuatro
+           años y aquí no se gana nada arriesgando. */
+        linear-gradient(to right,
+            transparent 1.1em,
+            var(--yellow) 1.1em,
+            var(--yellow) calc(1.1em + 2px),
+            transparent calc(1.1em + 2px)),
+        /* Los renglones. La raya va al final de cada franja, que es
+           justo por debajo de donde se apoya el texto. */
+        repeating-linear-gradient(to bottom,
+            transparent 0,
+            transparent calc(var(--renglon) - 1px),
+            var(--border) calc(var(--renglon) - 1px),
+            var(--border) var(--renglon));
+    /* "local" y no lo de siempre: los renglones tienen que desplazarse
+       CON el texto. De serie el fondo se queda pegado al marco de la
+       hoja, así que al bajar por unas notas largas el texto se movía y
+       las rayas no, y a los dos renglones ya no caía nada donde tocaba. */
+    background-attachment: local;
+}
+
+/* Con el paso de página, la hoja mide lo que mide el cuaderno y lo de
+   dentro se desplaza. El suelo de ocho renglones sobra aquí —y encima
+   estorba: en una ventana baja obligaba a la hoja a salirse por abajo. */
+.cuaderno.is-paginado .cuaderno-hoja-cuerpo {
+    min-height: 0;
+}
+
+/* LOS TEMAS DE TERMINAL NO LLEVAN RENGLONES
+
+   En los demás temas --border es una raya floja (un blanco o un negro al
+   20%) y los renglones quedan por detrás del texto, que es donde tienen
+   que estar. En los de terminal no hay medias tintas: --border es el
+   verde (o el azul, o el ámbar) a todo color, el mismo que el texto, y la
+   hoja salía con veinte rayas tan fuertes como lo escrito. Se lee, pero
+   cansa, y quien enciende un tema por ver mejor no necesita eso.
+
+   Así que ahí se quedan solo con la raya del margen: una línea fuerte en
+   vez de veinte. Y de paso tiene sentido —en una pantalla de fósforo
+   nunca hubo papel rayado—.
+
+   El selector va por "empieza por terminal" para que valga también para
+   el tema de terminal que se añada mañana. */
+:root[data-theme^="terminal"] .cuaderno-hoja-cuerpo {
+    background-image:
+        linear-gradient(to right,
+            transparent 1.1em,
+            var(--yellow) 1.1em,
+            var(--yellow) calc(1.1em + 2px),
+            transparent calc(1.1em + 2px));
+}
+
+/* Todo cae en los renglones: cada cosa ocupa líneas enteras y entre dos
+   cosas queda una línea en blanco. Nada de márgenes a medias, que es lo
+   que descuadraría el papel.
+   Las dos listas de selectores van en pareja porque lo de dentro de una
+   escena tiene que caer en los renglones igual que lo de fuera. */
+.cuaderno-hoja-cuerpo > *,
+.cuaderno-escena-cuerpo > * {
+    margin: 0 0 var(--renglon);
+}
+
+.cuaderno-hoja-cuerpo > *:last-child,
+.cuaderno-escena-cuerpo > *:last-child {
+    margin-bottom: 0;
+}
+
+/* Los dos trozos de una escena (el nombre y lo que lleva dentro) no
+   llevan margen propio: el hueco de después lo pone la escena entera. */
+.cuaderno-escena > summary,
+.cuaderno-escena-cuerpo {
+    margin: 0;
+}
+
+.cuaderno-hoja-cuerpo ul,
+.cuaderno-hoja-cuerpo ol {
+    padding-left: 1.3em;
+}
+
+.cuaderno-hoja-cuerpo li {
+    margin: 0;
+}
+
+/* Un <li> SUELTO, sin su <ul> alrededor. Pasa al escribir deprisa y el
+   navegador lo pinta igual que si lo tuviera, así que aquí se le da la
+   misma sangría que a los de dentro de una lista y se le quita el renglón
+   en blanco que le ponía la regla de arriba (la de "todo lo que vaya
+   dentro de una hoja o de una escena deja un renglón detrás", que está
+   pensada para párrafos, no para puntos de una lista). Sin esto, la hoja
+   escrita con <ul> y la escrita sin él salían distintas en la misma
+   sesión. */
+.cuaderno-hoja-cuerpo > li,
+.cuaderno-escena-cuerpo > li {
+    margin: 0 0 0 1.3em;
+}
+
+/* Un apartado dentro de la hoja. Mismo tamaño que el texto (ver arriba:
+   cambiarlo rompería los renglones) y se distingue por la letra de
+   máquina, las mayúsculas y el subrayado, que es como se marca un
+   apartado escribiendo a mano. */
+.cuaderno-hoja-cuerpo h2,
+.cuaderno-hoja-cuerpo h3,
+.cuaderno-hoja-cuerpo h4 {
+    color: var(--yellow);
+    font-family: var(--fuente-mono);
+    font-size: 1rem;
+    font-weight: 400;
+    letter-spacing: 1px;
+    line-height: var(--renglon);
+    text-transform: uppercase;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+}
+
+/* Un personaje. Va en el amarillo del sitio y no en negrita a secas:
+   la letra manuscrita engorda poco y en una hoja llena no se veía cuál
+   era el nombre. El color NO es lo único que lo marca —sigue siendo un
+   <strong>, así que un lector de pantalla lo dice igual y en blanco y
+   negro se nota por el trazo—, que es lo que piden las normas. */
+.cuaderno-hoja-cuerpo strong {
+    color: var(--yellow);
+    font-weight: 700;
+}
+
+/* LOS PERSONAJES DE LOS JUGADORES, CADA UNO DE SU COLOR
+   -----------------------------------------------------
+   Los de la mesa llevan color propio; los demás (Sigil, Apaaka, un
+   tabernero) se quedan en el amarillo de arriba. Así, de un vistazo, se
+   ve quién de los nuestros estaba en cada escena.
+
+   Se escribe poniéndole la clase al <strong> de siempre:
+
+       <strong class="pj-verde">Faëlar</strong>
+       <strong class="pj-azul">Melissa</strong>
+       <strong class="pj-rojo">Thenarys</strong>
+       <strong class="pj-morado">Denelia</strong>
+
+   El color es un ADORNO: sigue siendo un <strong>, o sea negrita, que es
+   lo que distingue el nombre para quien no vea los colores (es lo que
+   pide la norma 1.4.1 de la WCAG: el color no puede ser lo único que
+   diga algo).
+
+   DE DÓNDE SALEN ESTOS COLORES
+   ----------------------------
+   No están elegidos a ojo: son los más vivos que pasan de Lc 76 en APCA
+   sobre el papel de cada tema, que es el mismo baremo que cumple el
+   resto del texto del sitio. Eso tiene una consecuencia que se ve: en
+   los temas oscuros el rojo sale coral y el morado lila. Un rojo de
+   verdad sobre un papel casi negro se queda en Lc 40 y pico, ilegible;
+   subirlo de brillo es lo que lo aclara. En los temas claros sí salen
+   los cuatro saturados, porque ahí el color va oscuro sobre papel claro
+   y le sobra margen.
+
+   Y HAY TRES FAMILIAS DE TEMAS SIN COLORES, A PROPÓSITO:
+     · blanco y negro puros: ahí solo hay #000 y #fff, y meter cuatro
+       colores sería deshacer justo lo que ese tema es.
+     · los de terminal: son de un solo fósforo; cuatro colores en una
+       pantalla de fósforo verde no es que se lea mal, es que no es eso.
+   En esas seis, los nombres se quedan como los demás —amarillo del tema
+   y negrita— y no se pierde nada, porque la negrita nunca era el adorno:
+   era la señal. */
+.cuaderno-post,
+.campana-page {
+    --pj-verde: #7fe496;
+    --pj-azul: #a8d3ff;
+    --pj-rojo: #ffc0b7;
+    --pj-morado: #dec4ff;
+}
+
+:root[data-theme="light"] .cuaderno-post,
+:root[data-theme="light"] .campana-page,
+:root[data-theme="tranquilo"] .cuaderno-post,
+:root[data-theme="tranquilo"] .campana-page {
+    --pj-verde: #006b19;
+    --pj-azul: #005da2;
+    --pj-rojo: #b10011;
+    --pj-morado: #8500d1;
+}
+
+:root[data-theme="puro-claro"] .cuaderno-post,
+:root[data-theme="puro-claro"] .campana-page,
+:root[data-theme="puro-oscuro"] .cuaderno-post,
+:root[data-theme="puro-oscuro"] .campana-page,
+:root[data-theme^="terminal"] .cuaderno-post,
+:root[data-theme^="terminal"] .campana-page {
+    --pj-verde: var(--yellow);
+    --pj-azul: var(--yellow);
+    --pj-rojo: var(--yellow);
+    --pj-morado: var(--yellow);
+}
+
+.cuaderno-hoja-cuerpo .pj-verde {
+    color: var(--pj-verde);
+}
+
+.cuaderno-hoja-cuerpo .pj-azul {
+    color: var(--pj-azul);
+}
+
+.cuaderno-hoja-cuerpo .pj-rojo {
+    color: var(--pj-rojo);
+}
+
+.cuaderno-hoja-cuerpo .pj-morado {
+    color: var(--pj-morado);
+}
+
+/* Y los mismos cuatro colores en la ficha de la campaña, para que el
+   nombre que se ve ahí sea el mismo color que luego aparece en las
+   notas. Quién lleva cada color lo dice el JSON de la campaña
+   ("color": "verde"), no este archivo. */
+.campana-personaje-nombre.pj-verde {
+    color: var(--pj-verde);
+}
+
+.campana-personaje-nombre.pj-azul {
+    color: var(--pj-azul);
+}
+
+.campana-personaje-nombre.pj-rojo {
+    color: var(--pj-rojo);
+}
+
+.campana-personaje-nombre.pj-morado {
+    color: var(--pj-morado);
+}
+
+/* Un lugar. En cursiva, como en el Word, y en el blanco normal: si
+   también fuera amarillo no se distinguiría de los personajes. */
+.cuaderno-hoja-cuerpo em {
+    color: var(--white);
+    font-style: italic;
+}
+
+/* LO QUE SE CONSIGUE: EL BOTÍN
+
+   Los objetos que caen en una partida no son una cosa que pasó: son una
+   cuenta. Puestos como un punto más de la lista se leían como el resto de
+   la narración y había que buscarlos; así se ven de lejos y se repasan de
+   un vistazo, que es para lo que se apuntan.
+
+       <p>Conseguimos reunir provisiones para el viaje:</p>
+       <ul class="cuaderno-objetos">
+           <li><strong>4</strong> kits curativos</li>
+           <li>Hierbas misteriosas (velocidad)</li>
+           <li><strong>6</strong> provisiones para el viaje</li>
+       </ul>
+
+   Lo que lo distingue son tres cosas y ninguna es el color: la letra de
+   máquina (el resto de la hoja va en manuscrita), un rombo delante en vez
+   de un punto, y la raya de puntos del margen izquierdo, como cuando uno
+   encierra una cuenta en el cuaderno. La cantidad en <strong> es
+   opcional, y sale en el amarillo del tema.
+
+   Y SIGUE CUADRANDO CON LOS RENGLONES: el tamaño de letra no se toca
+   (1rem, como todo lo que vive dentro de una hoja) y cada objeto ocupa un
+   renglón justo. Lo que se mueve es el dibujo, no la medida: con bajar el
+   font-size, la lista dejaba de caer sobre las rayas del papel y se veía
+   enseguida que algo no encajaba. */
+.cuaderno-objetos {
+    list-style: none;
+    /* La sangría de la lista y la raya del margen. El padding-left pisa
+       el de .cuaderno-hoja-cuerpo ul (1,3em), que aquí no hace falta
+       porque el rombo ya va dentro de cada línea. */
+    padding-left: 1em;
+    border-left: 2px dashed var(--yellow);
+    /* Un poco separada del texto que la presenta, sin romper el renglón:
+       el hueco de arriba y de abajo lo pone la regla general de "todo lo
+       que va dentro de una hoja deja un renglón detrás". */
+    margin-left: 0.3em;
+}
+
+.cuaderno-objetos > li {
+    position: relative;
+    padding-left: 1.5em;
+    font-family: var(--fuente-mono);
+    font-size: 1rem;
+    line-height: var(--renglon);
+    letter-spacing: 0.5px;
+}
+
+/* El rombo. Dibujado con un borde de verdad y girado, no con un carácter:
+   un carácter lo dibuja la fuente de quien visita la web y sale de
+   cualquier tamaño, y en el modo de alto contraste de Windows un borde
+   sólido se repinta y se sigue viendo (es lo mismo que se hizo con las
+   flechas de las escenas y con el palote de las casillas). */
+.cuaderno-objetos > li::before {
+    content: "";
+    position: absolute;
+    left: 0.25em;
+    top: calc((var(--renglon) - 0.46em) / 2);
+    width: 0.46em;
+    height: 0.46em;
+    border: 2px solid var(--yellow);
+    box-sizing: border-box;
+    transform: rotate(45deg);
+}
+
+/* LAS ESCENAS
+
+   Donde en el Word iban los ****, aquí hay una escena con su nombre, y
+   pulsando el nombre se pliega y se despliega. Una partida de cuatro
+   horas son seis o siete escenas: plegadas, el cuaderno entero se ve de
+   un vistazo y se baja a la que interesa.
+
+   Es un <details> de toda la vida y no un montaje de botones y clases:
+   lo pliega el navegador él solo, funciona sin JavaScript, se abre con
+   la barra espaciadora y un lector de pantalla ya dice "contraído" o
+   "expandido" sin que haya que explicárselo. Lo único que hace el script
+   (scripts/paginas/cuaderno.js) es el botón de plegarlas todas y
+   abrirlas antes de imprimir.
+   Si el navegador no entendiera <details>, el script lo nota y pone
+   data-sin-plegar en el <html>: entonces se quitan las flechas y el
+   botón, y las escenas se quedan todas abiertas, que es lo que hace el
+   navegador por su cuenta. Sin sorpresas. */
+.cuaderno-escena {
+    /* La raya de arriba es la que separa una escena de la anterior, como
+       la rayita que uno hace en el cuaderno al cambiar de escena. La
+       primera no la lleva: no hay nada de lo que separarla.
+
+       El hueco de debajo de la raya es un renglón MENOS lo que mide la
+       propia raya. Medido: con el renglón entero, cada escena salía 2px
+       más alta de lo que toca y lo de debajo se iba despegando de las
+       rayas del papel, dos píxeles por escena. Con seis escenas eso ya
+       es media línea de desfase. */
+    border-top: 2px dashed var(--border);
+    padding-top: calc(var(--renglon) - 2px);
+}
+
+.cuaderno-escena:first-child {
+    border-top: 0;
+    padding-top: 0;
+}
+
+/* El nombre de la escena: una línea justa, como todo lo demás. */
+.cuaderno-escena-titulo {
+    display: flex;
+    align-items: baseline;
+    gap: 0.5em;
+    color: var(--yellow);
+    cursor: pointer;
+    font-family: var(--fuente-mono);
+    font-size: 1rem;
+    letter-spacing: 1px;
+    line-height: var(--renglon);
+    /* Fuera el triangulito que pone el navegador: se dibuja uno propio
+       aquí al lado, que así toma el color del tema y crece con la letra.
+       Son dos reglas para lo mismo porque cada navegador lo pone a su
+       manera. */
+    list-style: none;
+}
+
+.cuaderno-escena-titulo::-webkit-details-marker {
+    display: none;
+}
+
+.cuaderno-escena-titulo:hover .cuaderno-escena-nombre,
+.cuaderno-escena-titulo:focus-visible .cuaderno-escena-nombre {
+    text-decoration: underline;
+    text-underline-offset: 3px;
+}
+
+.cuaderno-escena-titulo:focus-visible {
+    outline: 2px solid var(--yellow);
+    outline-offset: 2px;
+}
+
+/* La flecha. Dos lados de un cuadrado girados, o sea un ángulo: ">"
+   plegada y "v" abierta. Va dibujada y no escrita con un carácter (▸)
+   porque un carácter lo dibuja la fuente de quien visita y sale de
+   cualquier tamaño y descentrado, y una imagen sería un archivo más que
+   pedir. En em, para que crezca con la letra.
+
+   Son DOS LADOS y no un triángulo relleno por el modo de colores
+   forzados de Windows: ahí el sistema repinta todos los bordes de su
+   color, los transparentes incluidos, y un triángulo hecho de bordes
+   transparentes se convertía en un cuadrado macizo — el mismo cuadrado
+   plegada que abierta, o sea ninguna información—. Los lados que aquí
+   miden cero siguen midiendo cero pase lo que pase con el color, así que
+   el ángulo se mantiene y se sigue viendo hacia dónde mira. */
+.cuaderno-escena-flecha {
+    flex: none;
+    width: 0.38em;
+    height: 0.38em;
+    border: solid currentColor;
+    border-width: 0.14em 0.14em 0 0;
+    /* Girada 45°, la esquina de arriba a la derecha queda mirando a la
+       derecha. El desplazamiento la sube a la altura del texto: la fila
+       se alinea por la base de las letras y un cuadradito no tiene. */
+    transform: translateY(-0.12em) rotate(45deg);
+    transition: transform 0.15s linear;
+}
+
+/* Abierta, el ángulo mira hacia abajo. */
+.cuaderno-escena[open] > .cuaderno-escena-titulo .cuaderno-escena-flecha {
+    transform: translateY(-0.22em) rotate(135deg);
+}
+
+.cuaderno-escena-nombre {
+    min-width: 0;
+    overflow-wrap: break-word;
+    text-transform: uppercase;
+}
+
+/* Lo de dentro, un pelín metido hacia la derecha: así se ve de un
+   vistazo dónde empieza y dónde acaba cada escena. */
+.cuaderno-escena-cuerpo {
+    padding-left: 1em;
+}
+
+/* Si el navegador no sabe plegar, la flecha no dice nada y encima
+   mentiría (saldría siempre mirando a la derecha, como si todo
+   estuviera plegado, con todo abierto). */
+:root[data-sin-plegar] .cuaderno-escena-flecha {
+    display: none;
+}
+
+:root[data-sin-plegar] .cuaderno-escena-titulo {
+    cursor: default;
+}
+
+
+/* EL BOTÓN DE PLEGARLAS TODAS
+
+   Lo monta el script en la barra de arriba, al lado de la fecha y del
+   botón de volver, y solo si el navegador sabe plegar y hay al menos dos
+   escenas. Por eso no está escrito en el HTML de las notas: un botón que
+   no hace nada es peor que no tenerlo.
+
+   Va en la barra y no encima del cuaderno por dos razones: la barra no
+   se desplaza, así que el botón está siempre a mano por mucho que bajes
+   en unas notas largas; y encima del cuaderno habría que decidir si se
+   alinea con las hojas o con el post-it, y cualquiera de las dos cosas
+   quedaba descolgada.
+   Mismo aspecto que el botón de volver que tiene al lado: en esa barra
+   la tinta es --yellow-contrast, no --yellow. */
+.cuaderno-plegar-todo {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 12px;
+    border: 2px solid var(--yellow-contrast);
+    background: transparent;
+    color: var(--yellow-contrast);
+    font-family: var(--fuente-mono);
+    font-size: 0.75rem;
+    letter-spacing: 1px;
+    white-space: nowrap;
+    transition: color 0.15s linear, background-color 0.15s linear;
+}
+
+.cuaderno-plegar-todo:hover,
+.cuaderno-plegar-todo:focus-visible {
+    background: var(--yellow-contrast);
+    color: var(--yellow);
+}
+
+.cuaderno-plegar-todo:focus-visible {
+    outline: 2px solid var(--yellow-contrast);
+    outline-offset: 3px;
+}
+
+/* El mismo ángulo que el de las escenas, y por las mismas razones. */
+.cuaderno-plegar-todo-flecha {
+    flex: none;
+    width: 0.38em;
+    height: 0.38em;
+    border: solid currentColor;
+    border-width: 0.14em 0.14em 0 0;
+    transform: translateY(-0.12em) rotate(135deg);
+}
+
+/* Cuando están todas plegadas, el botón las abre y el ángulo se da la
+   vuelta. Es un botón de dos estados, así que lleva aria-pressed y el
+   dibujo tiene que acompañar. */
+.cuaderno-plegar-todo[aria-pressed="true"] .cuaderno-plegar-todo-flecha {
+    transform: translateY(0.1em) rotate(-45deg);
+}
+
+
+/* PASAR PÁGINA
+
+   Los botones de debajo del cuaderno. Los monta el script y solo salen
+   si hay más hojas de las que caben en una cara: con dos hojas y las dos
+   en pantalla no habría a dónde pasar.
+
+   No se desplazan con nada —viven debajo del cuaderno, fuera de él—, así
+   que están siempre donde se dejaron. */
+/* Y cuando no hay nada que pasar —en el móvil, donde salen todas las
+   hojas seguidas, o cuando caben todas de una vez— la barra se esconde
+   con hidden. Esta regla hace falta para que hidden funcione: lo que
+   esconde es un display: none que trae el navegador, y la regla de aquí
+   abajo le pone display: flex pesando lo mismo y cargándose después.
+   El mismo despiste que con las hojas; en el móvil los botones salían
+   debajo de las tres hojas sin hacer nada. */
+.cuaderno-paginacion[hidden] {
+    display: none;
+}
+
+.cuaderno-paginacion {
+    flex: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 8px 14px;
+    margin-top: 14px;
+}
+
+.cuaderno-paginacion-boton {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 14px;
+    border: 2px solid var(--yellow);
+    background: transparent;
+    color: var(--yellow);
+    font-family: var(--fuente-mono);
+    font-size: 0.8125rem;
+    letter-spacing: 1px;
+    white-space: nowrap;
+    transition: color 0.15s linear, background-color 0.15s linear;
+}
+
+.cuaderno-paginacion-boton:hover:not(:disabled),
+.cuaderno-paginacion-boton:focus-visible {
+    background: var(--yellow);
+    color: var(--yellow-contrast);
+}
+
+.cuaderno-paginacion-boton:focus-visible {
+    outline: 2px solid var(--yellow);
+    outline-offset: 3px;
+}
+
+/* En la primera cara no hay anterior y en la última no hay siguiente. El
+   botón se queda puesto y apagado en vez de desaparecer: si se fuera, el
+   que queda daría un salto a mitad de la fila justo cuando lo vas a
+   pulsar otra vez.
+   El gris de "apagado" NO es lo único que lo dice: va disabled de
+   verdad, así que el teclado se lo salta y un lector de pantalla lo
+   anuncia como no disponible. */
+.cuaderno-paginacion-boton:disabled {
+    border-color: var(--border);
+    color: var(--muted);
+    cursor: default;
+}
+
+/* El ángulo de los botones, dibujado con dos lados de un cuadrado, lo
+   mismo que el de las escenas y por lo mismo (ver allí): en el modo de
+   colores forzados de Windows, un triángulo de bordes transparentes se
+   convierte en un cuadrado macizo y deja de decir hacia dónde va. */
+.cuaderno-paginacion-flecha {
+    flex: none;
+    width: 0.38em;
+    height: 0.38em;
+    border: solid currentColor;
+    border-width: 0.14em 0.14em 0 0;
+}
+
+.cuaderno-paginacion-flecha.hacia-atras {
+    transform: translateX(0.12em) rotate(-135deg);
+}
+
+.cuaderno-paginacion-flecha.hacia-delante {
+    transform: translateX(-0.12em) rotate(45deg);
+}
+
+/* EL PASO DE HOJA
+
+   La hoja que llega entra girando sobre su lomo, como una página que se
+   deja caer. Se anima SOLO la hoja nueva y no la que se va: para que la
+   vieja se fuera volando habría que tener las dos en pantalla a la vez y
+   una encima de otra, o sea sacarlas del sitio con position: absolute, y
+   eso con un cuaderno que se reparte el ancho a ojo es pedir problemas.
+   Con la que llega basta: el gesto se entiende igual.
+
+   Dónde está el lomo lo decide el script (scripts/paginas/cuaderno.js):
+   con las dos hojas enfrentadas, cada una se abre desde el centro, como
+   un libro; con una sola, desde el lado por el que viene.
+
+   La perspectiva se pone solo mientras dura el paso. Es un detalle, pero
+   "perspective" convierte el cuaderno en un contexto 3D y eso cambia
+   cómo se pinta todo lo de dentro; dejándolo puesto siempre, el texto de
+   las hojas se rasteriza aparte y en algunos equipos se ve ligeramente
+   más blando. Mientras gira no importa; parado, sí. */
+.cuaderno.is-pasando {
+    perspective: 1800px;
+}
+
+.cuaderno-hoja.bisagra-izquierda,
+.cuaderno-hoja.bisagra-derecha {
+    /* La curva es la de "algo que cae y se posa": sale rápido y frena al
+       final. Un cuarto de segundo largo: lo justo para que se vea el
+       gesto sin que haya que esperar a leer. */
+    animation: cuaderno-hoja-cae 0.34s cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+
+.cuaderno-hoja.bisagra-izquierda {
+    transform-origin: left center;
+}
+
+.cuaderno-hoja.bisagra-derecha {
+    transform-origin: right center;
+    animation-name: cuaderno-hoja-cae-al-reves;
+}
+
+/* Girada hacia dentro de la pantalla y no hacia fuera: así parece que la
+   hoja venía de DEBAJO de la anterior, que es de donde viene una hoja en
+   un cuaderno. Hacia fuera parecía que caía encima. */
+@keyframes cuaderno-hoja-cae {
+    from {
+        transform: rotateY(72deg);
+        opacity: 0.2;
+    }
+    to {
+        transform: rotateY(0);
+        opacity: 1;
+    }
+}
+
+@keyframes cuaderno-hoja-cae-al-reves {
+    from {
+        transform: rotateY(-72deg);
+        opacity: 0.2;
+    }
+    to {
+        transform: rotateY(0);
+        opacity: 1;
+    }
+}
+
+/* El mando "movimiento: quieto" de la ventana de accesibilidad ya corta
+   esto de un tiro (ver sin-movimiento.css), pero quien lo tenga pedido
+   en su ordenador no tiene por qué pasar por ahí. En los dos casos la
+   hoja aparece puesta y ya: el script cambia la hoja PRIMERO y anima
+   después, así que sin animación no se pierde nada. */
+@media (prefers-reduced-motion: reduce) {
+    .cuaderno-hoja.bisagra-izquierda,
+    .cuaderno-hoja.bisagra-derecha {
+        animation: none;
+    }
+}
+
+/* Por dónde vas. Es texto y se lee solo: lleva role="status" para que un
+   lector de pantalla cante la cara nueva al pasar, sin tener que ir a
+   buscarla. */
+.cuaderno-paginacion-cuenta {
+    margin: 0;
+    color: var(--muted);
+    font-family: var(--fuente-mono);
+    font-size: 0.8125rem;
+    letter-spacing: 1px;
+    text-align: center;
+}
+
+
+/* EL POST-IT DE LAS COSAS PENDIENTES
+
+   Lo que queda por hacer no es una hoja más del cuaderno: es la nota que
+   uno pega en el borde para no perderla de vista. Así que va aparte,
+   estrecha, en amarillo y quieta — por largas que sean las notas, el
+   post-it no se mueve de su sitio, porque vive fuera de lo que se
+   desplaza.
+
+   Amarillo de verdad (--yellow con --yellow-contrast encima) y no papel
+   con un borde de color: ese par es el de las barras de título de todo
+   el sitio, o sea el que ya está medido en los diez temas, y es lo que
+   hace que esto se lea como un post-it y no como otra hoja. En los temas
+   de terminal sale del color del fósforo, que es lo que toca ahí.
+
+   QUE PAREZCA UNO DE VERDAD
+   -------------------------
+   Cuatro adornos, y los cuatro son adornos: si un navegador no entiende
+   alguno, la nota sigue siendo un rectángulo amarillo con su lista.
+
+     1. Torcida. 1,1 grados, que es poco a propósito: lo justo para que
+        se note que está PEGADA y no encajada, sin que el texto deje de
+        caer en horizontal. Un post-it de los de la tira va a cinco o
+        seis grados y a ese ángulo una lista larga se lee peor, y esto es
+        justo lo que hay que poder leer de un vistazo. En el móvil se
+        quita del todo (ver notas-rol.responsive.css): ahí la nota ocupa
+        todo el ancho y lo que sobresale al torcerse se saldría de la
+        pantalla.
+     2. La banda del pegamento arriba, un poco más oscura, que es por
+        donde se pega.
+     3. La esquina de abajo a la derecha doblada.
+     4. Dos sombras: la dura de todo el sitio y, debajo, una blanda y
+        corta —la que hace un papel apoyado—.
+
+   Los adornos 2 y 3 son un negro al 7 y al 16 por ciento sobre el color
+   de la nota, no un color escrito: así valen en los diez temas sin tener
+   que elegir diez amarillos. En los dos temas puros se quitan, porque
+   ahí solo hay negro y blanco y un negro al 7% ya es un gris.
+
+   Y EL TEXTO, MÁS PEQUEÑO que el del cuaderno: la nota es estrecha y a
+   16px casi todo lo pendiente se partía en dos líneas. Con bajarle el
+   font-size se arregla todo lo de dentro de golpe, porque los renglones,
+   las casillas y los huecos de esta nota están en em —miden en letras,
+   no en píxeles—, así que se encogen con ella y siguen cuadrando. */
+.cuaderno-postit {
+    /* El ancho ya lo pide .cuaderno-lateral; aquí la nota solo dice que
+       no se estire para llenar la columna. */
+    flex: 0 1 auto;
+    min-width: 0;
+    /* Y si la lista no cupiera, lo que se desplaza es LA LISTA, no la
+       nota entera: así el título y la cuenta de "x de y hechas" se
+       quedan siempre a la vista. Desplazando la nota entera, la cuenta
+       se iba por debajo del borde y parecía que estaba cortada. */
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    position: relative;
+    padding: 14px 16px 16px;
+    background:
+        linear-gradient(to bottom,
+            rgba(0, 0, 0, 0.07) 0,
+            rgba(0, 0, 0, 0.07) 2.6em,
+            transparent 2.6em),
+        var(--yellow);
+    color: var(--yellow-contrast);
+    box-shadow:
+        4px 4px 0 var(--purple-lighter),
+        0 7px 14px -7px rgba(0, 0, 0, 0.55);
+    transform: rotate(-1.1deg);
+    font-size: 0.875rem;
+    line-height: var(--renglon);
+}
+
+/* La esquina doblada. Un triángulo oscuro en la esquina de abajo a la
+   derecha: el 315deg hace que el degradado vaya hacia arriba-izquierda,
+   así que la mitad llena es justo la de abajo-derecha. */
+.cuaderno-postit::after {
+    content: "";
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    width: 1.7em;
+    height: 1.7em;
+    background: linear-gradient(315deg,
+        rgba(0, 0, 0, 0.16) 0,
+        rgba(0, 0, 0, 0.16) 50%,
+        transparent 50%);
+    pointer-events: none;
+}
+
+/* En blanco y negro puros, los dos adornos de sombra fuera: un negro al
+   7% sobre blanco es un gris, y ese tema es solo #000 y #fff. La nota se
+   queda torcida y con su sombra dura, que no llevan color ninguno. */
+:root[data-theme^="puro"] .cuaderno-postit {
+    background: var(--yellow);
+    box-shadow: 4px 4px 0 var(--purple-lighter);
+}
+
+:root[data-theme^="puro"] .cuaderno-postit::after {
+    display: none;
+}
+
+/* El título y la cuenta, quietos; la lista, lo único que se desplaza si
+   hay más cosas pendientes de las que caben. */
+.cuaderno-postit-titulo,
+.cuaderno-postit .cuaderno-tareas-pie {
+    flex: none;
+}
+
+.cuaderno-postit .cuaderno-tareas {
+    /* 0 de crecer: la nota mide lo que mida su contenido y no se estira
+       para llenar nada. */
+    flex: 0 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+}
+
+.cuaderno-postit-titulo {
+    margin: 0 0 var(--renglon);
+    color: var(--yellow-contrast);
+    font-family: var(--fuente-mono);
+    /* Un punto por debajo del texto de la lista: es un rótulo en
+       mayúsculas y de máquina, y en mayúsculas se lee igual más pequeño.
+       Así lo primero que se ve de la nota es lo que queda por hacer y no
+       la palabra "pendientes". */
+    font-size: 0.8125rem;
+    font-weight: 400;
+    letter-spacing: 1px;
+    line-height: var(--renglon);
+    text-transform: uppercase;
+    /* La raya de debajo del título, como la de una libreta de notas.
+       currentColor para que sirva en los diez temas sin decir un color. */
+    border-bottom: 2px solid currentColor;
+    padding-bottom: calc(var(--renglon) / 2 - 2px);
+}
+
+/* Lo que se escriba dentro del post-it, en el color del post-it. Son
+   cuatro reglas sueltas y no una sola porque cada una pisa a la suya de
+   la hoja, que pide --yellow o --white sobre el papel y aquí sería
+   amarillo sobre amarillo. */
+.cuaderno-postit p,
+.cuaderno-postit li,
+.cuaderno-postit strong,
+.cuaderno-postit em {
+    color: var(--yellow-contrast);
+}
+
+.cuaderno-postit a {
+    color: var(--yellow-contrast);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+}
+
+.cuaderno-postit a:focus-visible,
+.cuaderno-postit .cuaderno-tareas-deshacer:focus-visible,
+.cuaderno-postit .cuaderno-tareas > li:has(.cuaderno-tarea-casilla:focus-visible)::before {
+    outline: 2px solid var(--yellow-contrast);
+    outline-offset: 2px;
+}
+
+/* Las casillas, en la tinta del post-it. Y las hechas NO se ponen en
+   gris aquí: sobre el amarillo, un gris apagado deja de leerse. Se
+   quedan con la casilla marcada y el tachado, que son dos señales y
+   ninguna de las dos es el color. */
+.cuaderno-postit .cuaderno-tareas > li::before,
+.cuaderno-postit .cuaderno-tareas > li.hecho::before {
+    border-color: var(--yellow-contrast);
+}
+
+.cuaderno-postit .cuaderno-tareas > li.hecho::after {
+    border-color: var(--yellow-contrast);
+}
+
+.cuaderno-postit .cuaderno-tareas > li.hecho {
+    color: var(--yellow-contrast);
+}
+
+.cuaderno-postit .cuaderno-tareas-pie,
+.cuaderno-postit .cuaderno-tareas-deshacer {
+    color: var(--yellow-contrast);
+}
+
+.cuaderno-postit .cuaderno-tareas-deshacer:hover,
+.cuaderno-postit .cuaderno-tareas-deshacer:focus-visible {
+    color: var(--yellow-contrast);
+    text-decoration: none;
+}
+
+
+/* DEBAJO DEL POST-IT: EL PDF Y LA SESIÓN DE AL LADO
+
+   Dos cosas que no son las notas pero que van con ellas: el cuaderno de
+   verdad escaneado en PDF, y el salto a la sesión anterior y a la
+   siguiente para leer la campaña del tirón sin pasar por el índice.
+
+   Lo rellena scripts/paginas/cuaderno.js con lo que diga el JSON de la
+   campaña, así que aquí no hay nada escrito a mano: el día que se añada
+   la sesión 2, la 1 empieza a tener un "siguiente" sola. Si el script no
+   corre, el hueco se queda vacío y :empty lo quita de en medio — no se
+   pierde nada que no esté también en el índice de la campaña, que está a
+   un enlace de aquí arriba. */
+.cuaderno-pie {
+    flex: none;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    /* Un poco más que el hueco de siempre: la nota está torcida y su
+       esquina de abajo baja un par de píxeles. */
+    margin-top: 18px;
+}
+
+.cuaderno-pie:empty {
+    display: none;
+}
+
+/* El botón del PDF. Como los de pasar página —mismo borde, misma letra de
+   máquina— pero a todo lo ancho de la columna: es el único botón que hay
+   ahí y a lo ancho se acierta mejor con el dedo. */
+/* En bloque y con el texto centrado, NO en flex. Con flex, los dos
+   trocitos que le añade solo scripts/componentes/enlaces-fuera.js —la
+   flechita de "esto sale de la web" y el aviso escondido— pasaban a ser
+   dos columnas más y la flecha se iba al borde derecho del botón,
+   separada del texto. En bloque van donde tienen que ir: pegadas a la
+   última palabra. */
+.cuaderno-pdf {
+    display: block;
+    padding: 9px 12px;
+    border: 2px solid var(--yellow);
+    color: var(--yellow);
+    font-family: var(--fuente-mono);
+    font-size: 0.8125rem;
+    letter-spacing: 1px;
+    text-align: center;
+    text-decoration: none;
+    transition: color 0.15s linear, background-color 0.15s linear;
+}
+
+.cuaderno-pdf:hover,
+.cuaderno-pdf:focus-visible {
+    background: var(--yellow);
+    color: var(--yellow-contrast);
+    text-decoration: none;
+}
+
+.cuaderno-pdf:focus-visible {
+    outline: 2px solid var(--yellow);
+    outline-offset: 3px;
+}
+
+/* La flecha de bajar. Un carácter y no un dibujo porque es exactamente lo
+   mismo que hace el "←" del botón de volver a la campaña, y así se
+   comporta igual con el mando del tamaño del texto. aria-hidden en el
+   HTML: lo que se lee en voz alta es el texto de al lado. */
+.cuaderno-pdf-flecha {
+    margin-right: 0.4em;
+}
+
+/* Los saltos. Un <nav> de verdad —esto SÍ lleva a otra página, al revés
+   que los botones de pasar hoja— con su clase, para no quedarse a lo que
+   diga la regla de "nav" a secas de barra-lateral.css. */
+.cuaderno-saltos {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.cuaderno-salto {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    padding: 8px 10px;
+    border: 2px solid var(--border);
+    color: var(--white);
+    font-size: 0.8125rem;
+    text-decoration: none;
+    transition: border-color 0.15s linear;
+}
+
+.cuaderno-salto:hover,
+.cuaderno-salto:focus-visible {
+    border-color: var(--yellow);
+    color: var(--white);
+    text-decoration: none;
+}
+
+.cuaderno-salto:focus-visible {
+    outline: 2px solid var(--yellow);
+    outline-offset: 2px;
+}
+
+/* Las dos flechas van delante, a la izquierda, aunque una apunte a la
+   derecha: en una columna estrecha los dos enlaces son una LISTA, y en
+   una lista todo empieza en el mismo sitio. Poniendo la del siguiente al
+   final, los dos textos quedaban desalineados y parecían dos cosas
+   distintas. Lo que distingue a cada uno es a dónde apunta la flecha y lo
+   que dice encima ("sesión anterior" / "sesión siguiente"). */
+.cuaderno-salto-flecha {
+    flex: none;
+    color: var(--yellow);
+}
+
+/* Dos líneas: arriba de qué va el enlace y abajo cuál es la sesión. El
+   "sesión anterior" en letra de máquina y pequeñito, que es una etiqueta,
+   no el nombre. */
+.cuaderno-salto-texto {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.cuaderno-salto-cual {
+    color: var(--muted);
+    font-family: var(--fuente-mono);
+    font-size: 0.75rem;
+    letter-spacing: 1px;
+    text-transform: lowercase;
+}
+
+.cuaderno-salto-nombre {
+    overflow-wrap: break-word;
+}
+
+
+/* LAS COSAS PENDIENTES, COMO UNA LISTA DE TAREAS
+
+   Un <ul class="cuaderno-tareas"> y ya está: cada cosa sale con su
+   casilla delante, y las hechas con la casilla marcada, tachadas y en
+   gris. Tachado Y marcado Y en gris, tres cosas a la vez, porque una
+   sola no vale: el tachado no lo dice un lector de pantalla, el gris no
+   se ve en blanco y negro y la casilla sola se pierde en una lista
+   larga.
+
+   La casilla va en ::before y ::after del propio <li>, colocada aparte
+   del texto: si fuera un trozo más de la línea, cambiaría el alto de esa
+   línea y el renglón del papel dejaría de caer debajo. Así no la toca.
+
+   Marcarlas se puede (lo engancha scripts/paginas/cuaderno.js), pero lo
+   que se marca ahí se queda guardado en ESE navegador. Lo que ve quien
+   entra en la web es lo que esté escrito en el archivo: un <li> con
+   class="hecho". */
+.cuaderno-tareas {
+    padding-left: 0;
+    list-style: none;
+}
+
+.cuaderno-tareas > li {
+    position: relative;
+    /* Sitio para la casilla, que va colocada encima de este hueco. */
+    padding-left: 1.9em;
+}
+
+/* La casilla. Centrada a ojo en el renglón: la mitad de lo que sobra
+   entre el alto de la línea y el alto de la casilla. */
+.cuaderno-tareas > li::before {
+    content: "";
+    position: absolute;
+    left: 0.15em;
+    top: calc((var(--renglon) - 1.05em) / 2);
+    width: 1.05em;
+    height: 1.05em;
+    border: 2px solid var(--muted);
+    box-sizing: border-box;
+}
+
+/* La marca de hecho: dos lados de un cuadrado girados 45°, que es un
+   palote de los de toda la vida. En em, como todo lo demás. */
+.cuaderno-tareas > li.hecho::after {
+    content: "";
+    position: absolute;
+    left: 0.48em;
+    top: calc((var(--renglon) - 1.05em) / 2 + 0.12em);
+    width: 0.32em;
+    height: 0.62em;
+    border: solid var(--yellow);
+    border-width: 0 0.18em 0.18em 0;
+    transform: rotate(45deg);
+}
+
+.cuaderno-tareas > li.hecho::before {
+    border-color: var(--yellow);
+}
+
+.cuaderno-tareas > li.hecho {
+    color: var(--muted);
+    text-decoration: line-through;
+    /* Fina a propósito: con la letra manuscrita, la raya de serie es tan
+       gorda que se come la mitad de las letras y hay que adivinar lo que
+       ponía. Tachado es tachado, no borrado. */
+    text-decoration-thickness: 1px;
+}
+
+/* Lo pulsable. El <label> lo monta el script alrededor de lo que haya
+   escrito, y se mete hacia la izquierda para cubrir también el hueco de
+   la casilla: si no, pulsar justo encima del cuadradito no hacía nada,
+   que es lo primero que hace cualquiera. */
+.cuaderno-tarea {
+    display: block;
+    margin-left: -1.9em;
+    padding-left: 1.9em;
+    cursor: pointer;
+}
+
+/* La casilla de verdad: existe, se puede tabular y un lector de pantalla
+   la lee, pero no se ve —lo que se ve es el cuadradito dibujado arriba—.
+   Nada de display: none, que la quitaría del tabulador y del lector. */
+.cuaderno-tarea-casilla {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    padding: 0;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+
+/* Y como la casilla no se ve, el recuadro del foco se lo tiene que poner
+   el cuadradito dibujado. Es para lo que está :has(): ir del <input> de
+   dentro al <li> de fuera. */
+.cuaderno-tareas > li:has(.cuaderno-tarea-casilla:focus-visible)::before {
+    outline: 2px solid var(--yellow);
+    outline-offset: 2px;
+}
+
+/* La cuenta y el botón de deshacer, debajo de la lista. Los monta el
+   script: el botón solo aparece si lo marcado en este navegador no
+   coincide con lo que pone el archivo, que es cuando sirve de algo. */
+.cuaderno-tareas-pie {
+    display: flex;
+    align-items: baseline;
+    flex-wrap: wrap;
+    gap: 4px 12px;
+    color: var(--muted);
+    font-family: var(--fuente-mono);
+    font-size: 0.8125rem;
+    line-height: var(--renglon);
+}
+
+.cuaderno-tareas-deshacer {
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: var(--muted);
+    font: inherit;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+}
+
+.cuaderno-tareas-deshacer:hover,
+.cuaderno-tareas-deshacer:focus-visible {
+    color: var(--yellow);
+}
+
+.cuaderno-tareas-deshacer:focus-visible {
+    outline: 2px solid var(--yellow);
+    outline-offset: 3px;
+}
+
+/* Las notas se pueden enlazar entre ellas (a la sesión anterior, a un
+   relato). Subrayado y en amarillo, como cualquier enlace dentro de un
+   texto del sitio. */
+.cuaderno-hoja-cuerpo a {
+    color: var(--yellow);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+}
+
+.cuaderno-hoja-cuerpo a:hover {
+    text-decoration: none;
+}
+
+.cuaderno-hoja-cuerpo a:focus-visible {
+    outline: 2px solid var(--yellow);
+    outline-offset: 2px;
+}

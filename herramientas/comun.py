@@ -190,7 +190,9 @@ def escribir_json(archivo, datos):
 
 # La marca que lleva una entrada a medio escribir. Mientras esté puesta
 # no sale en los listados, ni en el RSS, ni en el sitemap.
-RE_BORRADOR = re.compile(r'<article class="(?:blog|relato)-post"[^>]*\bdata-borrador\b')
+RE_BORRADOR = re.compile(
+    r'<article class="(?:blog|relato|cuaderno)-post"[^>]*\bdata-borrador\b'
+)
 
 
 def es_borrador(archivo):

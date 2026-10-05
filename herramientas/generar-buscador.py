@@ -115,6 +115,20 @@ SALTAR_CLASES = {
     "relato-post-back",
     "reto-volver",
     "pet-back",
+    # Las notas de una partida: la cabecera (título y fecha, que se
+    # guardan aparte) y la cabecerita que cada hoja del cuaderno repite
+    # con la sesión y la fecha. Si no se quitara, buscar "sesión" sacaría
+    # todas las partidas por su decorado.
+    "cuaderno-post-header",
+    "cuaderno-post-back",
+    "cuaderno-hoja-cabecera",
+    "campana-volver",
+    # El nombre de la campaña y su intro: están escritos en el HTML como
+    # respaldo para quien entre sin JavaScript, pero el bueno es el del
+    # JSON (ver extras_de_campanas) y, contándolos los dos, el texto de la
+    # página salía duplicado.
+    "campana-nombre",
+    "campana-intro",
 }
 SALTAR_ATRIBUTOS = {"data-otras-caja", "data-otras-entradas"}
 SALTAR_ETIQUETAS = {"script", "style", "svg", "noscript", "template"}
@@ -200,6 +214,7 @@ RE_ESPACIOS = re.compile(r"\s+")
 LISTADOS = (
     RAIZ / "datos" / "entradas-blog.json",
     RAIZ / "datos" / "mis-movidas.json",
+    RAIZ / "datos" / "notas-rol.json",
 )
 
 
@@ -214,6 +229,8 @@ def seccion_de(url):
         return "relatos"
     if url.startswith("/web/mis_movidas/rol/"):
         return "rol"
+    if url.startswith("/web/notas_rol/"):
+        return "notas de rol"
     if url.startswith("/web/santuarios/"):
         return "santuarios"
     if url.startswith("/web/recomendaciones/"):
@@ -255,7 +272,7 @@ def datos_de_los_listados():
             if not url.startswith("/"):
                 continue
             categorias = []
-            for clave in ("tags", "category", "subcategory", "collection"):
+            for clave in ("tags", "category", "subcategory", "collection", "campana"):
                 valor = entrada.get(clave)
                 if isinstance(valor, list):
                     categorias += [str(v).strip() for v in valor if str(v).strip()]
@@ -296,6 +313,48 @@ def fichas_de_rol():
     return salida
 
 
+# La ficha de cada campaña de rol. Su página se pinta sola con JavaScript
+# (el sistema, quién dirige, los personajes, la sinopsis), así que ese
+# texto no está en el HTML y buscando "ragna" o el nombre de un personaje
+# no saldría nada.
+#
+# Esto NO devuelve fichas sueltas como el portfolio de rol: la página ya
+# está en el listado —es un .html como cualquier otra— y meterla otra vez
+# la sacaría dos veces en los resultados. Devuelve el texto y la categoría
+# que hay que SUMARLE a la que ya está, por su dirección.
+def extras_de_campanas():
+    extras = {}
+    for archivo in sorted((RAIZ / "datos").glob("campana-*.json")):
+        campana = leer_json(archivo, {}) or {}
+        if not isinstance(campana, dict):
+            continue
+        pagina = (campana.get("pagina") or "").strip()
+        if not pagina:
+            continue
+        personajes = [
+            (p.get("nombre") or "").strip()
+            for p in (campana.get("personajes") or [])
+            if isinstance(p, dict)
+        ]
+        trozos = [
+            campana.get("nombre"),
+            campana.get("intro"),
+            campana.get("sistema"),
+            campana.get("director"),
+            campana.get("sinopsis"),
+        ]
+        clave = (campana.get("clave") or "").strip()
+        extras[pagina] = {
+            "categorias": [clave] if clave else [],
+            "texto": " ".join(
+                t.strip()
+                for t in trozos + personajes
+                if isinstance(t, str) and t.strip()
+            ),
+        }
+    return extras
+
+
 def fichas_de_recomendaciones():
     """Lo que hay en las recomendaciones. El JSON va por bloques (libros,
     series...) y cada bloque tiene sus cosas dentro."""
@@ -322,6 +381,7 @@ def fichas_de_recomendaciones():
 
 def generar(probar=False):
     listados = datos_de_los_listados()
+    campanas = extras_de_campanas()
     fichas = []
 
     for archivo in sorted(RAIZ.rglob("*.html")):
@@ -334,16 +394,25 @@ def generar(probar=False):
         url = "/" + relativo.as_posix()
         pagina = archivo.read_text(encoding="utf-8", errors="replace")
         extra = listados.get(url, {})
-        fichas.append(
-            {
-                "url": url,
-                "titulo": titulo_de(pagina, url),
-                "seccion": seccion_de(url),
-                "fecha": extra.get("fecha", ""),
-                "categorias": extra.get("categorias", []),
-                "texto": "" if url in SOLO_TITULO else texto_de(pagina),
-            }
-        )
+        ficha = {
+            "url": url,
+            "titulo": titulo_de(pagina, url),
+            "seccion": seccion_de(url),
+            "fecha": extra.get("fecha", ""),
+            "categorias": extra.get("categorias", []),
+            "texto": "" if url in SOLO_TITULO else texto_de(pagina),
+        }
+        # El índice de una campaña de rol: se le suma lo que su JSON pinta
+        # dentro y que en el HTML no está escrito (ver extras_de_campanas).
+        campana = campanas.get(url)
+        if campana:
+            ficha["categorias"] = sorted(
+                set(ficha["categorias"]) | set(campana["categorias"])
+            )
+            ficha["texto"] = " ".join(
+                t for t in (ficha["texto"], campana["texto"]) if t
+            )
+        fichas.append(ficha)
 
     fichas += fichas_de_rol()
     fichas += fichas_de_recomendaciones()

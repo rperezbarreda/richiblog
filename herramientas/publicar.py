@@ -55,7 +55,7 @@ WEB = RAIZ / "web"
 # cuenta la marca. Mirar "data-borrador" en todo el archivo no vale: la
 # plantilla trae un comentario explicando qué es, y ese comentario
 # contaba como marca.
-ARTICULO = re.compile(r'<article class="(?:blog|relato)-post"[^>]*>')
+ARTICULO = re.compile(r'<article class="(?:blog|relato|cuaderno)-post"[^>]*>')
 
 # El atributo, con o sin valor, y comiéndose el espacio de delante para
 # no dejar dos seguidos.
@@ -68,7 +68,9 @@ def marca_de(texto):
 
 
 def titulo_de(texto):
-    m = re.search(r'<h1 class="(?:blog|relato)-post-title">(.*?)</h1>', texto, re.S)
+    m = re.search(
+        r'<h1 class="(?:blog|relato|cuaderno)-post-title">(.*?)</h1>', texto, re.S
+    )
     if not m:
         return "(sin título)"
     return " ".join(re.sub(r"<[^>]+>", "", m.group(1)).split())
