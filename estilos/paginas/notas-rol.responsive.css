@@ -101,8 +101,27 @@
         flex-direction: column;
         align-items: stretch;
         gap: 18px;
-        overflow-y: visible;
+        /* AUTO, no VISIBLE. Con "visible" la página no se podía bajar en
+           el móvil: lo de dentro medía 1284px, el hueco 586, y como el
+           <main> va con overflow: hidden (para que no se desplace el
+           marco del sitio), lo que sobraba se quedaba cortado y sin
+           forma de llegar a ello — ni rueda, ni dedo, ni teclado. Lo
+           que se desplaza es esta sección, igual que en el listado de
+           relatos y en el reto. */
+        overflow-y: auto;
         padding: 28px 6%;
+    }
+
+    /* Y que no se encoja nada. Al pasar a columna, los cuatro trozos
+       pasan a ser cosas de un flex y por defecto un flex APRIETA lo que
+       no cabe: medido, la ventana del índice se quedaba en 38px —solo su
+       barra de título— con 185px de sesiones dentro. En una columna que
+       se desplaza, cada trozo mide lo que mida y lo que sobra se baja. */
+    .campana-titulo,
+    .campana-cabecera,
+    .campana-ficha,
+    .campana-card {
+        flex: none;
     }
 
     /* El índice deja de ser una ventana a toda la altura que se desplaza
