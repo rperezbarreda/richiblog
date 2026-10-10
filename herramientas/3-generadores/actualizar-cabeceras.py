@@ -281,21 +281,25 @@ def hojas_de(ruta):
         hojas += ["/estilos/paginas/notas-rol.responsive.css"]
         # La ventana que se abre encima: la ficha de un NPC en la página de
         # npcs, y la ficha de un personaje, el botín y las misiones en el
-        # índice de la campaña. Las notas de una partida no abren ninguna,
-        # así que no la llevan.
+        # índice de la campaña. Y en las notas de una partida, la ficha de
+        # quien se pulse en el texto (un NPC o uno de la mesa).
         #
         # Y la lupa, que es la imagen a pantalla completa: el retrato de un
         # NPC y las fotos de los objetos del botín.
-        if not es_sesion_rol:
-            hojas += [
-                "/estilos/componentes/ventana-modal.css",
-                "/estilos/componentes/ventana-modal.responsive.css",
-                "/estilos/componentes/lupa.css",
-            ]
-        if es_npcs_rol:
+        hojas += [
+            "/estilos/componentes/ventana-modal.css",
+            "/estilos/componentes/ventana-modal.responsive.css",
+            "/estilos/componentes/lupa.css",
+        ]
+        # La hoja de los npcs: su página, y las notas de una partida, que
+        # abren la misma ficha de NPC al pulsar un nombre.
+        if es_npcs_rol or es_sesion_rol:
             hojas += [
                 "/estilos/paginas/npcs-rol.css",
                 "/estilos/paginas/npcs-rol.responsive.css",
+            ]
+        if es_npcs_rol:
+            hojas += [
                 "/estilos/componentes/filtros.css",
                 "/estilos/componentes/filtros.responsive.css",
                 # El buscador de la rejilla, el mismo que el archivo del
@@ -604,8 +608,20 @@ def scripts_de(ruta):
         # tareas.js antes: monta las casillas de las cosas pendientes, y
         # cuaderno.js no depende de ellas pero sí al revés (el botón de
         # plegar se cuela en la misma barra).
+        #
+        # Y antes de cuaderno.js, lo que hace falta para abrir la ficha de
+        # quien se pulse en las notas: la ventana, la lupa, y los dos
+        # scripts que ya saben dibujar esas fichas (npcs-rol.js la de un
+        # NPC, notas-rol.js la de uno de la mesa). Los dos se cargan aquí
+        # solo por sus funciones: cada uno arranca únicamente si encuentra
+        # su lista ([data-npcs-lista], [data-campana-sesiones]), y en las
+        # notas no está ninguna.
         js += [
             "/scripts/componentes/tareas.js",
+            "/scripts/componentes/ventana-modal.js",
+            "/scripts/componentes/lupa.js",
+            "/scripts/paginas/notas-rol.js",
+            "/scripts/paginas/npcs-rol.js",
             "/scripts/paginas/cuaderno.js",
         ]
     elif es_lectura:

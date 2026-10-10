@@ -13,6 +13,8 @@
 //      estaban.
 //   4. El botón del PDF y los saltos a la sesión de al lado, debajo del
 //      post-it.
+//   5. La gente del texto: su token al pasar el ratón y su ficha al
+//      pulsar el nombre.
 //
 // LAS CASILLAS DE LAS COSAS PENDIENTES NO ESTÁN AQUÍ: las monta
 // scripts/componentes/tareas.js. Se sacaron a un componente el día que
@@ -58,6 +60,9 @@ function initializeCuaderno() {
     // está montado y el pie aparece cuando lleguen. Si no llegan, el
     // hueco se queda vacío y el CSS lo quita de en medio.
     montarPieDeNotas();
+    // Lo mismo: va a por el JSON de los NPC y, si no llega, los nombres
+    // se quedan como estaban, en negrita y sin más.
+    montarTokensDeNpcs(cuaderno);
 }
 
 // El nombre de cada hoja para quien no la ve. Se saca del número que hay
@@ -689,4 +694,306 @@ function prepararImpresionCuaderno() {
             papel.addEventListener("change", cambio);
         }
     }
+}
+
+
+// =========================================
+// LA GENTE DE LAS NOTAS: SU CARA Y SU FICHA
+// =========================================
+// En las notas, la gente va en <strong>: los de la mesa con su pj-color y
+// los NPC a secas. Cada nombre que sea alguien de verdad hace dos cosas:
+//
+//   · Al pasar el ratón (o llegar con el tabulador) sale un globo con su
+//     token —el redondel con marco amarillo de la página de npcs—, su
+//     nombre y lo que es. Para ponerle cara a alguien que salió hace tres
+//     partidas.
+//   · Al pulsarlo se abre SU FICHA en una ventana, la misma que en la
+//     página de npcs (un NPC) o en el índice de la campaña (uno de la
+//     mesa). Las fichas no se dibujan aquí: las dibujan abrirFichaNpc()
+//     de npcs-rol.js y abrirLaFichaDeUnPj() de notas-rol.js, que esta
+//     página carga para eso (ver actualizar-cabeceras.py).
+//
+// QUIÉN ES QUIÉN lo dicen los JSON: datos/notas_rol/npcs-<clave>.json para
+// los NPC y "personajes" del de la campaña para la mesa. Un <strong> que
+// no sea nadie de esas listas (un caballo, algo que se quiso resaltar) se
+// queda como estaba: no se adivina nada. Se compara sin tildes ni
+// mayúsculas, y también vale el nombre de pila suelto («Brandr» por
+// «Brandr Vindahl») si nadie más empieza igual. Si en las notas está
+// escrito distinto que en el JSON, no casa: se arregla escribiéndolo igual.
+//
+// EL NOMBRE PASA A SER UN BOTÓN, metido dentro del <strong> (que conserva
+// su color y su negrita). Es un botón y no un enlace porque no se cambia
+// de página: se abre una ventana encima, y aria-haspopup="dialog" lo
+// dice. Como hace algo, tiene que poder hacerse con el teclado: por eso
+// entra en el tabulador, y el globo sale también al llegar con él.
+//
+// El globo va con aria-hidden: la cara es un añadido, y lo que dice
+// (nombre y qué es) se oye entero en el nombre del botón. Cumple lo de un
+// contenido que sale al pasar el ratón (WCAG 1.4.13): se puede pasar el
+// ratón por encima del globo sin que se vaya, y Escape lo cierra.
+//
+// position: fixed y no absolute: en esta web el que hace scroll no
+// siempre es la ventana (base.css le da overflow a las <section>), así que
+// unas coordenadas de página se descolocaban. Fijo a la pantalla, y en
+// cuanto algo se desplaza el globo se va.
+
+async function montarTokensDeNpcs(cuaderno) {
+    const articulo = cuaderno.closest("[data-campana]") || document.querySelector("[data-campana]");
+    const clave = ((articulo && articulo.getAttribute("data-campana")) || "").trim();
+    // Solo letras, números, guion y guion bajo: esto acaba en una
+    // dirección y no tiene por qué llevar otra cosa.
+    if (!/^[a-z0-9_-]+$/i.test(clave) || typeof window.pedirDatos !== "function") {
+        return;
+    }
+    const pedir = async (url) => {
+        try {
+            const respuesta = await window.pedirDatos(url);
+            return respuesta.ok ? await respuesta.json() : null;
+        } catch (error) {
+            return null;
+        }
+    };
+    const [reparto, campana] = await Promise.all([
+        pedir("/datos/notas_rol/npcs-" + clave + ".json"),
+        pedir("/datos/notas_rol/campana-" + clave + ".json"),
+    ]);
+
+    // Los NPC, con las sesiones de la campaña pegadas: así su ficha puede
+    // enlazar la sesión en la que apareció, igual que en la página de npcs.
+    const datosNpc = reparto && typeof reparto === "object" ? reparto : {};
+    if (campana && Array.isArray(campana.sesiones)) {
+        datosNpc.sesiones = campana.sesiones;
+    }
+    const npcs = Array.isArray(datosNpc.personajes) ? datosNpc.personajes : [];
+    // La mesa, ya repasada por personajesDe() de notas-rol.js: la misma
+    // lectura que usa el índice de la campaña para sus fichas.
+    const mesa = campana && typeof personajesDe === "function"
+        ? personajesDe(campana.personajes) : [];
+
+    const npcQueSea = buscadorDeNpcs(npcs);
+    const pjQueSea = buscadorDeNpcs(mesa);
+    const puedeAbrir = window.ventanaModal && typeof window.ventanaModal.abrir === "function";
+
+    let globo = null;
+    let esconderLuego = null;
+    // El botón cuya ficha se acaba de abrir. Al cerrarla, la ventana le
+    // devuelve el foco y el ratón sigue encima (el navegador vuelve a avisar
+    // de que ha entrado); ninguna de las dos cosas es alguien pidiendo el
+    // globo. Medido: salía otra vez y tapaba el nombre de la línea de abajo.
+    // Se queda callado hasta que el ratón sale del nombre o el foco se va.
+    let vueltaDeFicha = null;
+    const hayFichaAbierta = () => !!document.querySelector('[role="dialog"]:not([hidden])');
+
+    const esconder = () => {
+        clearTimeout(esconderLuego);
+        if (globo) {
+            globo.hidden = true;
+        }
+        document.querySelectorAll(".cuaderno-npc.esta-mirandose").forEach((uno) =>
+            uno.classList.remove("esta-mirandose"));
+    };
+    const esconderEnUnRato = () => {
+        clearTimeout(esconderLuego);
+        // Un poco de margen para poder llevar el ratón del nombre al globo
+        // sin que se cierre por el camino.
+        esconderLuego = setTimeout(esconder, 180);
+    };
+    const ensenar = (nombre, cara) => {
+        if (!globo) {
+            globo = globoDeNpc();
+            globo.addEventListener("mouseenter", () => clearTimeout(esconderLuego));
+            globo.addEventListener("mouseleave", esconderEnUnRato);
+        }
+        esconder();
+        rellenarGloboDeNpc(globo, cara);
+        nombre.classList.add("esta-mirandose");
+        globo.hidden = false;
+        colocarGloboDeNpc(globo, nombre);
+    };
+
+    cuaderno.querySelectorAll("strong").forEach((nombre) => {
+        const deLaMesa = [...nombre.classList].some((clase) => clase.indexOf("pj-") === 0);
+        const quien = deLaMesa ? pjQueSea(nombre.textContent) : npcQueSea(nombre.textContent);
+        if (!quien) {
+            return;
+        }
+        // Lo que sale en el globo: la mesa trae su línea de qué es ya
+        // montada ("Elfo Druida nivel 3 · lo lleva Richi").
+        const cara = {
+            nombre: quien.nombre,
+            token: quien.token,
+            que: deLaMesa ? quien.extra : quien.que,
+        };
+        nombre.classList.add("cuaderno-npc");
+
+        let objetivo = nombre;
+        if (puedeAbrir) {
+            const boton = document.createElement("button");
+            boton.type = "button";
+            boton.className = "cuaderno-npc-boton";
+            boton.setAttribute("aria-haspopup", "dialog");
+            const que = (cara.que || "").toString().trim();
+            boton.setAttribute("aria-label",
+                (quien.nombre || "").toString().trim() + (que ? ", " + que : "") + ". Abre su ficha");
+            // El texto se MUEVE dentro del botón, no se copia: así lo que
+            // se lee y se busca en la página sigue siendo lo mismo.
+            while (nombre.firstChild) {
+                boton.appendChild(nombre.firstChild);
+            }
+            nombre.appendChild(boton);
+            boton.addEventListener("click", () => {
+                esconder();
+                vueltaDeFicha = boton;
+                if (deLaMesa && typeof abrirLaFichaDeUnPj === "function") {
+                    abrirLaFichaDeUnPj(quien, boton);
+                } else if (!deLaMesa && typeof abrirFichaNpc === "function") {
+                    abrirFichaNpc(quien, datosNpc, boton);
+                }
+            });
+            // Solo al llegar con el teclado, y no cuando el foco vuelve de
+            // cerrar su ficha: medido, el navegador cuenta esa vuelta como
+            // foco de teclado (se cierra con Escape), y el globo salía otra
+            // vez encima del texto y tapaba el nombre de al lado.
+            boton.addEventListener("focus", () => {
+                if (vueltaDeFicha !== boton && boton.matches(":focus-visible")) {
+                    ensenar(nombre, cara);
+                }
+            });
+            boton.addEventListener("blur", () => {
+                // Al abrir la ficha el foco se va a la ventana: eso no
+                // cuenta como irse.
+                if (vueltaDeFicha === boton && !hayFichaAbierta()) {
+                    vueltaDeFicha = null;
+                }
+                esconderEnUnRato();
+            });
+            objetivo = boton;
+        }
+        objetivo.addEventListener("mouseenter", () => {
+            if (vueltaDeFicha !== objetivo) {
+                ensenar(nombre, cara);
+            }
+        });
+        objetivo.addEventListener("mouseleave", () => {
+            if (vueltaDeFicha === objetivo && !hayFichaAbierta()) {
+                vueltaDeFicha = null;
+            }
+            esconderEnUnRato();
+        });
+    });
+
+    document.addEventListener("keydown", (evento) => {
+        if (evento.key === "Escape" && globo && !globo.hidden) {
+            esconder();
+        }
+    });
+    // Cualquier scroll, el de la ventana o el de una <section> (por eso
+    // en captura): el globo está fijo a la pantalla y se quedaría flotando
+    // lejos de su nombre.
+    window.addEventListener("scroll", esconder, true);
+    window.addEventListener("resize", esconder);
+}
+
+// De un texto a la ficha del NPC que se llama así, o null.
+function buscadorDeNpcs(gente) {
+    const plano = (texto) => (texto || "").toString()
+        .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+        .toLowerCase().replace(/\s+/g, " ").trim();
+    const enteros = new Map();
+    const dePila = new Map();
+    gente.forEach((npc) => {
+        if (!npc || !(npc.nombre || "").toString().trim()) {
+            return;
+        }
+        const entero = plano(npc.nombre);
+        if (!enteros.has(entero)) {
+            enteros.set(entero, npc);
+        }
+        const primero = entero.split(" ")[0];
+        if (primero !== entero) {
+            // Si dos empiezan igual, el nombre de pila no dice quién es.
+            dePila.set(primero, dePila.has(primero) ? null : npc);
+        }
+    });
+    return (texto) => {
+        const buscado = plano(texto);
+        if (enteros.has(buscado)) {
+            return enteros.get(buscado);
+        }
+        return dePila.get(buscado) || null;
+    };
+}
+
+function globoDeNpc() {
+    const globo = document.createElement("div");
+    globo.className = "cuaderno-npc-globo";
+    globo.setAttribute("aria-hidden", "true");
+    globo.hidden = true;
+
+    const marco = document.createElement("span");
+    marco.className = "cuaderno-npc-marco";
+    globo.appendChild(marco);
+
+    const nombre = document.createElement("span");
+    nombre.className = "cuaderno-npc-nombre";
+    globo.appendChild(nombre);
+
+    const que = document.createElement("span");
+    que.className = "cuaderno-npc-que";
+    globo.appendChild(que);
+
+    document.body.appendChild(globo);
+    return globo;
+}
+
+function rellenarGloboDeNpc(globo, npc) {
+    const marco = globo.querySelector(".cuaderno-npc-marco");
+    marco.textContent = "";
+    const ruta = imagenSeguraCuaderno(npc.token);
+    if (ruta) {
+        const img = document.createElement("img");
+        img.className = "cuaderno-npc-img";
+        img.src = imagenSeguraCuaderno(ruta);
+        img.alt = "";
+        img.decoding = "async";
+        marco.appendChild(img);
+    } else {
+        // Sin token, su inicial, como en la página de npcs.
+        const inicial = document.createElement("span");
+        inicial.className = "cuaderno-npc-inicial";
+        inicial.textContent = (npc.nombre || "?").toString().trim().charAt(0).toUpperCase();
+        marco.appendChild(inicial);
+    }
+    globo.querySelector(".cuaderno-npc-nombre").textContent = (npc.nombre || "").toString().trim();
+    const que = (npc.que || "").toString().trim();
+    const linea = globo.querySelector(".cuaderno-npc-que");
+    linea.textContent = que;
+    linea.hidden = !que;
+}
+
+// Debajo del nombre y centrado con él; si no cabe debajo, encima. Y sin
+// salirse de la pantalla por los lados.
+function colocarGloboDeNpc(globo, nombre) {
+    const sitio = nombre.getBoundingClientRect();
+    const ancho = globo.offsetWidth;
+    const alto = globo.offsetHeight;
+    const margen = 8;
+    let izquierda = sitio.left + sitio.width / 2 - ancho / 2;
+    izquierda = Math.max(margen, Math.min(izquierda, window.innerWidth - ancho - margen));
+    let arriba = sitio.bottom + margen;
+    if (arriba + alto > window.innerHeight - margen) {
+        arriba = Math.max(margen, sitio.top - alto - margen);
+    }
+    globo.style.left = Math.round(izquierda) + "px";
+    globo.style.top = Math.round(arriba) + "px";
+}
+
+// Para el src del token: una dirección de esta web o una http(s). Un
+// data: o un javascript: no se pone.
+function imagenSeguraCuaderno(url) {
+    const limpia = (url || "").toString().trim();
+    if (/^\/(?!\/)/.test(limpia) || /^https?:\/\//i.test(limpia)) {
+        return limpia;
+    }
+    return "";
 }

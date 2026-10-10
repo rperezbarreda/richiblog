@@ -636,6 +636,33 @@
   escribe: las escenas, los personajes en color, la lista de objetos
   conseguidos y el post-it de las cosas pendientes.
 
+  LA GENTE DE LAS NOTAS: SU CARA Y SU FICHA. Cada nombre de las notas
+  que sea alguien de verdad —un NPC o uno de la mesa— hace dos cosas:
+
+    · al pasar el ratón (o llegar con el tabulador) sale un globo con su
+      token, su nombre y lo que es;
+    · al pulsarlo se abre SU FICHA en una ventana, la misma que en la
+      página de npcs (un NPC) o en el índice de la campaña (uno de la
+      mesa).
+
+  No hay que marcar nada: basta con escribirlo en <strong>, como siempre
+  (los de la mesa con su pj-color), y que se llame IGUAL que en el JSON:
+  datos/notas_rol/npcs-<clave>.json para los NPC y "personajes" del de
+  la campaña para la mesa. Las tildes y las mayúsculas dan igual, y vale
+  el nombre de pila suelto si nadie más empieza igual. Si un nombre no
+  hace nada, es que está escrito distinto en los dos sitios (pasó con
+  «Rukkus» y «Apacca»). Un <strong> que no sea nadie —un caballo, algo
+  que se quiso resaltar— se queda como estaba.
+
+  Los nombres que lo tienen llevan un subrayado de puntos. Son botones
+  de verdad (entran en el tabulador y se abren con Enter), pero se leen
+  igual que antes: misma letra, mismo color.
+
+  Las fichas no se dibujan dos veces: las notas cargan npcs-rol.js y
+  notas-rol.js solo por sus funciones (abrirFichaNpc y
+  abrirLaFichaDeUnPj), y esos dos solo arrancan en su propia página. Lo
+  de las notas está en scripts/paginas/cuaderno.js (montarTokensDeNpcs).
+
   El PDF de las notas escaneadas se apunta en el "pdf" de esa sesión,
   dentro del JSON de la campaña, y el botón de descargarlo aparece solo.
 
@@ -860,9 +887,10 @@
 
   LA VENTANA QUE SE ABRE ENCIMA
 
-  Cuatro sitios de la sección de rol abren una ventana modal: la ficha
-  de un NPC, la de un personaje de la mesa, «el botín» y las misiones
-  pendientes. Las cuatro son el MISMO componente:
+  Cinco sitios de la sección de rol abren una ventana modal: la ficha
+  de un NPC, la de un personaje de la mesa, «el botín», las misiones
+  pendientes y, en las notas de una partida, la ficha de quien se pulse
+  en el texto. Todas son el MISMO componente:
 
       scripts/componentes/ventana-modal.js
       estilos/componentes/ventana-modal.css (+ .responsive.css)

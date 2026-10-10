@@ -2451,3 +2451,131 @@ body:has(.cuaderno-page) main {
     font-size: 1em;
     line-height: 1;
 }
+
+
+/* =========================================
+   EL TOKEN DE UN NPC AL PASAR POR SU NOMBRE
+   =========================================
+   En las notas de una partida, los nombres de la gente que está en los
+   JSON (NPC y los de la mesa; los marca cuaderno.js con .cuaderno-npc).
+   Al pasar el ratón sale un globo con su token, y al pulsar, su ficha. */
+
+/* El nombre avisa de que tiene algo detrás con un subrayado de puntos,
+   como las siglas del sitio: no con un color, que se lo perdería quien no
+   lo distingue. */
+.cuaderno-npc {
+    text-decoration: underline dotted;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 0.2em;
+}
+
+/* El nombre es un botón (abre su ficha), pero se tiene que seguir leyendo
+   como el nombre que era: la letra, el color y la negrita del <strong> que
+   lo lleva. */
+.cuaderno-npc-boton {
+    display: inline;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    background: none;
+    color: inherit;
+    font: inherit;
+    letter-spacing: inherit;
+    text-align: inherit;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.cuaderno-npc-boton:focus-visible {
+    outline: 2px solid var(--yellow);
+    outline-offset: 2px;
+}
+
+/* Y mientras se mira, el subrayado se vuelve continuo y amarillo: así se
+   ve de quién es el globo cuando hay dos nombres en la misma línea. */
+.cuaderno-npc.esta-mirandose {
+    text-decoration-style: solid;
+    text-decoration-color: var(--yellow);
+    text-decoration-thickness: 2px;
+}
+
+/* El globo. Fijo a la pantalla: lo coloca cuaderno.js (colocarGloboDeNpc)
+   con left/top. Una ventanita del sitio en pequeño: su borde y su sombra
+   dura amarilla. */
+.cuaderno-npc-globo {
+    position: fixed;
+    z-index: 900;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.35rem;
+    width: 10rem;
+    padding: 0.8rem 0.7rem 0.7rem;
+    border: 2px solid var(--yellow);
+    background: var(--purple-lighter);
+    box-shadow: 4px 4px 0 var(--yellow);
+    text-align: center;
+}
+
+/* [hidden] pierde contra el display: flex de arriba si no se dice. */
+.cuaderno-npc-globo[hidden] {
+    display: none;
+}
+
+/* El token: el mismo redondel con marco amarillo que en la página de npcs
+   (.npc-token-marco), que aquí no está cargada. */
+.cuaderno-npc-marco {
+    width: 6.5rem;
+    aspect-ratio: 1 / 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    border: 3px solid var(--yellow);
+    border-radius: 50%;
+    background: var(--purple);
+}
+
+.cuaderno-npc-img {
+    width: 100%;
+    height: 100%;
+    display: block;
+    object-fit: cover;
+}
+
+.cuaderno-npc-inicial {
+    color: var(--yellow);
+    font-family: var(--fuente-titular);
+    font-size: 2rem;
+    line-height: 1;
+}
+
+.cuaderno-npc-nombre {
+    color: var(--white);
+    font-family: var(--fuente-mono);
+    font-size: 0.875rem;
+    font-weight: 700;
+    line-height: 1.3;
+}
+
+.cuaderno-npc-que {
+    color: var(--muted);
+    font-family: var(--fuente-mono);
+    font-size: 0.75rem;
+    line-height: 1.4;
+}
+
+.cuaderno-npc-que[hidden] {
+    display: none;
+}
+
+/* En papel no hay ratón: ni globo ni subrayado. */
+@media print {
+    .cuaderno-npc-globo {
+        display: none;
+    }
+
+    .cuaderno-npc {
+        text-decoration: none;
+    }
+}
