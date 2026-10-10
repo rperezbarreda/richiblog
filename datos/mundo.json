@@ -1,0 +1,29 @@
+[
+    {
+        "titulo": "Mapamundi de Cralëa",
+        "url": "/web/mundo/mapa_mapamundi_de_cralea.html",
+        "carpeta": "mapas",
+        "etiquetas": [
+            "mapa"
+        ],
+        "grupo": "mapas",
+        "sub": [],
+        "que": "mapa interactivo",
+        "vista": "/imagenes/mundo/vista_mapa_mapamundi_de_cralea.svg",
+        "resumen": ""
+    },
+    {
+        "titulo": "Cómo se escribe esto",
+        "url": "/web/mundo/como_se_escribe_esto.html",
+        "carpeta": "sin carpeta",
+        "etiquetas": [
+            "ejemplo"
+        ],
+        "grupo": "lo demás",
+        "sub": [
+            "ejemplo"
+        ],
+        "que": "La chuleta del formato",
+        "resumen": "Esta página no cuenta nada del mundo: está para ver cómo queda cada cosa y qué se puede escribir. Bórrala cuando ya no haga falta."
+    }
+]

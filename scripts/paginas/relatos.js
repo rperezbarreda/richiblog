@@ -7,7 +7,7 @@
 // con TODO lo publicado (rol, relatos y lo que venga después),
 // donde cada entrada dice a qué categoría pertenece. Aquí solo se
 // pintan las que tienen category "relatos". Para publicar uno
-// nuevo: herramientas/nuevo.py crea la página y reconstruye
+// nuevo: herramientas/1-publicar/nuevo.py crea la página y reconstruye
 // ese JSON leyéndola, así que aquí no hay nada que tocar.
 //
 // Cada <li> se pinta con data-categoria (la subcategoría del relato:
@@ -308,7 +308,7 @@ function relatoToEntryCard(relato) {
     );
 }
 
-// El tiempo de lectura lo calcula herramientas/generar-posts.py al
+// El tiempo de lectura lo calcula herramientas/3-generadores/generar-posts.py al
 // escribir el listado (cuenta las palabras del cuerpo de la entrada),
 // así que aquí solo se pinta. Las cosas sin texto que leer —las fichas
 // del portfolio de rol, que son enlaces a Ko-fi— no traen el dato y no

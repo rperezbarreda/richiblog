@@ -6,48 +6,69 @@ Allow: /
 
 # Mapa del sitio: la lista de páginas que existen, para que los
 # buscadores no tengan que adivinarlas siguiendo enlaces.
-# Lo regenera herramientas/generar-sitemap.py.
+# Lo regenera herramientas/3-generadores/generar-sitemap.py.
 Sitemap: https://richi.blog/sitemap.xml
 
-# If you do not want AI bots to crawl your site, remove the # from the following lines:
-#User-agent: AI2Bot
-#User-agent: Ai2Bot-Dolma
-#User-agent: Amazonbot
-#User-agent: anthropic-ai
-#User-agent: Applebot-Extended
-#User-agent: Bytespider
-#User-agent: CCBot
-#User-agent: ChatGPT-User
-#User-agent: Claude-Web
-#User-agent: ClaudeBot
-#User-agent: cohere-ai
-#User-agent: Diffbot
-#User-agent: DuckAssistBot
-#User-agent: FacebookBot
-#User-agent: FriendlyCrawler
-#User-agent: Google-Extended
-#User-agent: GoogleOther
-#User-agent: GoogleOther-Image
-#User-agent: GoogleOther-Video
-#User-agent: GPTBot
-#User-agent: iaskspider/2.0
-#User-agent: ICC-Crawler
-#User-agent: ImagesiftBot
-#User-agent: img2dataset
-#User-agent: ISSCyberRiskCrawler
-#User-agent: Kangaroo Bot
-#User-agent: Meta-ExternalAgent
-#User-agent: Meta-ExternalFetcher
-#User-agent: OAI-SearchBot
-#User-agent: omgili
-#User-agent: omgilibot
-#User-agent: PanguBot
-#User-agent: PerplexityBot
-#User-agent: PetalBot
-#User-agent: Scrapy
-#User-agent: Sidetrade indexer bot
-#User-agent: Timpibot
-#User-agent: VelenPublicWebCrawler
-#User-agent: Webzio-Extended
-#User-agent: YouBot
-#Disallow: /
+# LOS RASTREADORES DE IA, FUERA.
+#
+# Lo que hay debajo le dice a los robots que recogen texto para entrenar
+# modelos (y a los que leen la web para contestar en un chat) que aquí no
+# entren. Esto es lo que trae Neocities de serie; estaba comentado y
+# ahora está puesto.
+#
+# QUÉ HACE Y QUÉ NO
+# -----------------
+# robots.txt es un cartel, no una puerta cerrada: le pide a cada robot
+# que no entre, y el robot decide si hace caso. Los de las empresas
+# grandes lo respetan; uno que vaya a lo suyo, no. Lo que SÍ consigue es
+# que lo que recojan los que sí hacen caso no incluya tus relatos ni tus
+# entradas.
+#
+# Esto NO afecta a Google ni a Bing para buscar: el "User-agent: *" de
+# arriba sigue dejándolos entrar, así que la web se sigue encontrando en
+# el buscador. Lo que se bloquea aquí es Google-Extended (el que recoge
+# para entrenar), que es otro distinto.
+#
+# Para dejarles pasar otra vez, vuelve a poner una # delante de cada
+# línea de aquí abajo.
+User-agent: AI2Bot
+User-agent: Ai2Bot-Dolma
+User-agent: Amazonbot
+User-agent: anthropic-ai
+User-agent: Applebot-Extended
+User-agent: Bytespider
+User-agent: CCBot
+User-agent: ChatGPT-User
+User-agent: Claude-Web
+User-agent: ClaudeBot
+User-agent: cohere-ai
+User-agent: Diffbot
+User-agent: DuckAssistBot
+User-agent: FacebookBot
+User-agent: FriendlyCrawler
+User-agent: Google-Extended
+User-agent: GoogleOther
+User-agent: GoogleOther-Image
+User-agent: GoogleOther-Video
+User-agent: GPTBot
+User-agent: iaskspider/2.0
+User-agent: ICC-Crawler
+User-agent: ImagesiftBot
+User-agent: img2dataset
+User-agent: ISSCyberRiskCrawler
+User-agent: Kangaroo Bot
+User-agent: Meta-ExternalAgent
+User-agent: Meta-ExternalFetcher
+User-agent: OAI-SearchBot
+User-agent: omgili
+User-agent: omgilibot
+User-agent: PanguBot
+User-agent: PerplexityBot
+User-agent: PetalBot
+User-agent: Scrapy
+User-agent: Sidetrade indexer bot
+User-agent: Timpibot
+User-agent: VelenPublicWebCrawler
+User-agent: Webzio-Extended
+User-agent: YouBot
+Disallow: /

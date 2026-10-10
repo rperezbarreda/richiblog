@@ -1,0 +1,597 @@
+/* EL MAPA DE UN MUNDO — la página de un .cmap de Chronicler */
+
+/* La escribe herramientas/3-generadores/generar-mundo.py con la plantilla
+   herramientas/plantillas/mundo-mapa.html. La página lleva ADEMÁS
+   mundo.css, porque la cabecera, el título y los botones de volver son los
+   mismos que en un artículo de la wiki: aquí solo está el mapa.
+
+   CÓMO ESTÁ MONTADO, QUE ES LO QUE EXPLICA CASI TODO LO DE ABAJO:
+
+     .mapa-caja          el marco, con los mandos arriba
+     .mapa-lienzo        la ventana por la que se ve el mapa. Se desplaza
+                         ella sola (overflow: auto), y eso es el 90% del
+                         invento: con el zoom puesto, el mapa se mueve con
+                         el dedo, con la rueda, con la barra y con las
+                         flechas del teclado sin que haga falta
+                         JavaScript para nada de eso.
+     .mapa-svg           el dibujo. El zoom es su anchura, y nada más:
+                         width: calc(100% * var(--mapa-zoom)). Al pasar
+                         del 100% no cabe en la ventana y aparecen las
+                         barras, que es exactamente lo que se quiere.
+     .mapa-sitios        el mapa en texto: todo lo que hay dibujado, con
+                         nombre y enlace. No es un añadido, es la otra
+                         mitad (el porqué, en mundo_mapas.py).
+
+   SIN JAVASCRIPT el mapa se ve entero, con las capas como estuvieran
+   guardadas en Chronicler, y la lista funciona. Lo único que desaparece
+   son los mandos, porque sin JavaScript no harían nada. */
+
+
+/* ====================================================================
+   EL MARCO Y LOS MANDOS
+   ==================================================================== */
+
+.mapa-caja {
+    display: flex;
+    flex-direction: column;
+    /* QUE NO SE ENCOJA. La página es una columna flexible que se desplaza
+       (.mundo-page), así que por defecto reparte el alto que haya entre lo
+       que lleva dentro: medido a 1440x900, al mapa le quedaban 164px de los
+       554 que medía, y a 390 de ancho se quedaba en CERO. Lo que tiene que
+       pasar es lo contrario: el mapa mide lo que mide y la página se
+       desplaza. */
+    flex: 0 0 auto;
+    /* El globo que sale al pasar por encima de un sitio se coloca contra
+       esta caja (ver .mapa-globo). */
+    position: relative;
+    border: 2px solid var(--yellow);
+    background: var(--surface);
+}
+
+.mapa-mandos {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px 20px;
+    padding: 10px 12px;
+    border-bottom: 2px solid var(--yellow);
+}
+
+/* Sin JavaScript no hay zoom ni capas que encender: unos botones que no
+   hacen nada son peor que ninguno. Lo pone .js en el <html>, que es lo que
+   hace el sitio en cuanto arranca un script. */
+html:not(.js) .mapa-mandos,
+html:not(.js) .mapa-ayuda {
+    display: none;
+}
+
+.mapa-zoom {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.mapa-boton {
+    /* 44px de alto y de ancho: es lo que mide un dedo. Lo mismo que el
+       resto de los botones del sitio. */
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 44px;
+    min-height: 44px;
+    padding: 0 10px;
+    border: 2px solid var(--yellow);
+    background: transparent;
+    color: var(--yellow);
+    font-family: var(--fuente-mono);
+    font-size: 1rem;
+    line-height: 1;
+    cursor: pointer;
+}
+
+.mapa-boton-ancho {
+    font-size: 0.875rem;
+}
+
+.mapa-boton:hover,
+.mapa-boton:focus-visible {
+    background: var(--yellow);
+    color: var(--yellow-contrast);
+}
+
+.mapa-boton:focus-visible {
+    outline: 2px solid var(--yellow);
+    outline-offset: 2px;
+}
+
+.mapa-boton[disabled] {
+    border-color: var(--border);
+    color: var(--muted);
+    cursor: default;
+}
+
+.mapa-boton[disabled]:hover {
+    background: transparent;
+    color: var(--muted);
+}
+
+.mapa-zoom-cifra {
+    min-width: 5ch;
+    color: var(--white);
+    font-family: var(--fuente-mono);
+    font-size: 0.875rem;
+    text-align: center;
+}
+
+/* Las capas van en un <fieldset>, que es lo que son: un grupo de casillas
+   con su título. Hay que quitarle el marco que le pone el navegador. */
+.mapa-capas {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 4px 14px;
+    margin: 0;
+    padding: 0;
+    border: 0;
+}
+
+.mapa-capas-titulo {
+    padding: 0;
+    color: var(--yellow);
+    font-family: var(--fuente-mono);
+    font-size: 0.8125rem;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+}
+
+.mapa-capa-casilla {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    min-height: 44px;
+    color: var(--white);
+    font-family: var(--fuente-mono);
+    font-size: 0.875rem;
+    cursor: pointer;
+}
+
+.mapa-capa-casilla input {
+    width: 18px;
+    height: 18px;
+    accent-color: var(--yellow);
+}
+
+/* El contorno de siempre, que si no la casilla se queda con el del
+   navegador —una raya fina de un azul que no es de ningún tema— y es la
+   única cosa de la página que se enfoca de otra manera. */
+.mapa-capa-casilla input:focus-visible {
+    outline: 2px solid var(--yellow);
+    outline-offset: 2px;
+}
+
+
+/* ====================================================================
+   EL LIENZO
+   ==================================================================== */
+
+.mapa-lienzo {
+    /* LO ALTO QUE PUEDE PONERSE EL MAPA. Está en una propiedad y no
+       escrito dos veces porque lo usan dos reglas —esta caja y el dibujo
+       de dentro— y tienen que decir lo mismo: si no coinciden, al
+       «ajustar» el mapa sale cortado por abajo. mundo-mapa.responsive.css
+       cambia solo este número. */
+    --mapa-alto: 70vh;
+    overflow: auto;
+    /* Para que el mapa no se coma la página entera: con el zoom al máximo
+       sigue habiendo sitio para volver atrás y para la lista. */
+    max-height: var(--mapa-alto);
+    background: var(--purple-lighter);
+    /* Que el dedo mueva el MAPA y no la página. Y overscroll-behavior para
+       que al llegar al borde del mapa no empiece a moverse la página
+       detrás, que es de lo más desconcertante que hay. */
+    touch-action: pan-x pan-y;
+    overscroll-behavior: contain;
+}
+
+.mapa-lienzo:focus-visible {
+    /* Por dentro: un contorno por fuera se solaparía con el borde amarillo
+       de la caja y no se vería. */
+    outline: 2px solid var(--yellow);
+    outline-offset: -2px;
+}
+
+/* Que se puede arrastrar (o sea: que hay zoom puesto y el mapa no cabe) y
+   que se está arrastrando ahora mismo. Las dos las pone y las quita
+   mundo-mapa.js. */
+.mapa-lienzo.se-puede-arrastrar {
+    cursor: grab;
+}
+
+.mapa-lienzo.esta-arrastrando {
+    cursor: grabbing;
+}
+
+.mapa-svg {
+    display: block;
+    /* EL ZOOM, ENTERO, ES ESTA LÍNEA. El 1 de --mapa-zoom es «todo el
+       ancho del lienzo», o sea el mapa entero; 2 es el doble, y entonces
+       la mitad se sale y aparecen las barras de desplazamiento. El <svg>
+       lleva width y height en el propio atributo, así que el alto lo
+       calcula el navegador guardando la proporción. */
+    /* El color de lo que venga sin color del .cmap: las formas y los pines
+       lo piden con fill="currentColor", así que cambia con el tema en vez
+       de salir negro. */
+    color: var(--yellow);
+    width: calc(100% * var(--mapa-zoom, 1));
+    height: auto;
+    /* Y QUE QUEPA TAMBIÉN A LO ALTO. Esto se añadió después de medir: en
+       una pantalla de 1920 el dibujo salía de 1426x802 dentro de una caja
+       de 630 de alto, o sea que al «ajustar» —que es «el mapa entero»—
+       había que desplazarse para ver el sur. Con el tope de alto, al mapa
+       entero no le hace falta ninguna barra en ninguna pantalla (medido de
+       320 a 2560: sobra 0 por los dos lados).
+
+       Lo que hace el navegador con esto es recortar la CAJA del <svg>, no
+       el dibujo: el dibujo lo encaja dentro guardando la proporción,
+       porque el SVG lleva preserveAspectRatio="xMidYMid meet". Así que en
+       una pantalla muy ancha y baja quedan dos bandas del color del fondo
+       a los lados del mapa, con el mapa centrado. Medido: 1426x630 de caja
+       y 1120x630 de mapa, sin deformar.
+
+       El tope sube con el zoom, que si no, no habría zoom. */
+    max-height: calc(var(--mapa-zoom, 1) * var(--mapa-alto));
+}
+
+/* Las capas apagadas. Con una clase y no con [hidden]: lo que esconde
+   [hidden] es un display: none que trae el navegador, y en SVG esa pelea
+   la pierde cualquier regla de aquí. Así manda esto y se ve venir. */
+.mapa-capa.es-apagada {
+    display: none;
+}
+
+/* LO QUE SE PUEDE APAGAR. El interruptor de «regiones» quita las manchas
+   de color de en medio para poder mirar la imagen del mapa, que es lo que
+   quiere ver quien lo ha dibujado a mano (se van las dos capas de formas:
+   el dibujo y las que llevan a algún sitio). El de «pines» quita las
+   chinchetas. Los dos están en los mandos, y sin JavaScript no se pintan
+   porque no harían nada. */
+.mapa-dibujos.es-apagada,
+.mapa-formas.es-apagada,
+.mapa-pines.es-apagada {
+    display: none;
+}
+
+/* EL DIBUJO: las formas que no tienen nombre ni enlace (fronteras, costas,
+   regiones que todavía no son nada). Se pintan flojas y no se pueden
+   pulsar: lo que no lleva a ninguna parte no debe parecer que sí. */
+.mapa-dibujo {
+    fill-opacity: 0.1;
+    stroke-opacity: 0.45;
+    pointer-events: none;
+}
+
+/* LAS REGIONES CON NOMBRE. El color sale del .cmap, en un atributo del
+   propio polígono; aquí solo se dice lo transparentes que son. */
+.mapa-forma path {
+    fill-opacity: 0.16;
+    stroke-opacity: 0.8;
+}
+
+.mapa-forma.es-enlace {
+    cursor: pointer;
+}
+
+/* Al pasar por encima, y al pasar por su fila de la lista de abajo
+   (.esta-mirado lo pone mundo-mapa.js). Las dos cosas se pintan igual a
+   propósito: así se entiende que la lista y el dibujo son lo mismo. */
+/* El relleno Y el contorno. El grosor no se puede poner en píxeles: va en
+   unidades del lienzo, y lo que en un mapa de ocho mil píxeles es una
+   línea fina, en uno de mil es un churro. De ahí --mapa-grosor, que la
+   escribe el generador en el propio SVG con la medida de ESE mapa; aquí
+   solo se dice "el triple". */
+.mapa-forma.es-enlace:hover path,
+.mapa-forma.esta-mirado path {
+    fill-opacity: 0.45;
+    stroke-opacity: 1;
+    stroke-width: calc(var(--mapa-grosor, 6) * 3);
+}
+
+.mapa-pin-bola {
+    fill-opacity: 0.85;
+    stroke-opacity: 1;
+}
+
+.mapa-pin.es-enlace {
+    cursor: pointer;
+}
+
+.mapa-pin.es-enlace:hover .mapa-pin-bola,
+.mapa-pin.esta-mirado .mapa-pin-bola {
+    fill-opacity: 1;
+    stroke: var(--yellow);
+}
+
+.mapa-pin-icono {
+    fill: var(--yellow-contrast);
+    pointer-events: none;
+}
+
+/* ====================================================================
+   EL GLOBO
+   ====================================================================
+   La ventanita que sale al pasar por encima de un sitio. Es HTML y no el
+   <title> del SVG (ese lo quita mundo-mapa.js al arrancar) porque el globo
+   del sistema tarda un segundo, sale en la tipografía del sistema
+   operativo y no cabe más que una línea. Éste sale al momento, con la
+   tipografía y los colores del tema, y dice además a dónde lleva.
+
+   Sin JavaScript no existe: entonces el <title> se queda donde está y el
+   globo lo pone el navegador, que es mejor que nada. */
+
+.mapa-globo {
+    position: absolute;
+    /* Encima del dibujo, por debajo de los mandos. */
+    z-index: 2;
+    max-width: min(20rem, 70%);
+    padding: 6px 10px;
+    border: 2px solid var(--yellow);
+    /* Opaco del todo y no var(--surface): esto se pone encima de la imagen
+       del mapa, que puede ser de cualquier color. */
+    background: var(--purple);
+    font-family: var(--fuente-mono);
+    font-size: 0.875rem;
+    line-height: 1.35;
+    /* Que no se coma el ratón: si el globo recibiera el puntero, al
+       moverse debajo de él se taparía a sí mismo y parpadearía. */
+    pointer-events: none;
+}
+
+/* La trampa de siempre: [hidden] lo esconde con un display: none del
+   navegador, y cualquier regla de aquí que ponga display le gana. */
+.mapa-globo[hidden] {
+    display: none;
+}
+
+.mapa-globo-icono {
+    margin-right: 6px;
+}
+
+.mapa-globo-nombre {
+    color: var(--yellow);
+    font-weight: 400;
+}
+
+.mapa-globo-que {
+    display: block;
+    color: var(--muted);
+    font-size: 0.75rem;
+}
+
+.mapa-ayuda {
+    margin: 0;
+    color: var(--muted);
+    font-family: var(--fuente-mono);
+    font-size: 0.8125rem;
+    line-height: 1.5;
+}
+
+.mapa-ayuda kbd {
+    padding: 1px 6px;
+    border: 1px solid var(--yellow);
+    color: var(--yellow);
+    font-family: var(--fuente-mono);
+    font-size: 0.75rem;
+}
+
+
+/* ====================================================================
+   LA LISTA DE SITIOS
+   ====================================================================
+   El mapa en texto. Lleva los mismos enlaces que el dibujo, en orden
+   alfabético, y es lo que se recorre con el tabulador: el SVG va con
+   aria-hidden y sus enlaces con tabindex="-1" para no contar dos veces lo
+   mismo (el porqué, en mundo_mapas.py). */
+
+/* OJO: esto es un <nav>, y barra-lateral.css le da a TODO <nav> del sitio
+   lo de la barra lateral. No es solo pintura: flex: 1 1 auto, min-height:
+   0, overflow-y: auto y direction: rtl. Dentro de .mundo-page, que es una
+   columna flexible, esta lista se quedaba en CERO píxeles de alto con 481
+   por dentro. Es la misma trampa que .mundo-backlinks y que .mundo-grupo
+   con <section>; aquí la lista es la mitad del mapa, así que se nota
+   entera. */
+.mapa-sitios {
+    display: flex;
+    flex-direction: column;
+    flex: 0 0 auto;
+    gap: 12px;
+    min-height: auto;
+    overflow: visible;
+    direction: ltr;
+    scrollbar-gutter: auto;
+    position: static;
+    width: auto;
+    height: auto;
+    margin-top: 0;
+    padding: 0;
+    background: none;
+}
+
+.mapa-sitios-titulo {
+    margin: 0;
+    padding-bottom: 8px;
+    border-bottom: 2px solid var(--yellow);
+    color: var(--yellow);
+    font-family: var(--fuente-mono);
+    font-size: 1rem;
+    font-weight: 400;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+}
+
+.mapa-sitios-lista {
+    display: grid;
+    /* min(100%, …) para que en una pantalla de 320px la columna no se
+       salga: sin eso, minmax con un mínimo fijo desborda. */
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 13rem), 1fr));
+    gap: 8px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+/* Lo mismo con cada fila: "nav a" le da el ancho entero, el relleno del
+   menú y el ↪ que sale al pasar por encima. */
+.mapa-sitio::before {
+    content: none;
+}
+
+.mapa-sitio {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: auto;
+    min-height: 44px;
+    padding: 8px 10px;
+    border: 1px solid var(--border);
+    color: var(--white);
+    /* La tipografía, dicha a propósito: "nav a" le pone la de los menús a
+       las filas que son un enlace y deja las demás con la del texto, y la
+       lista salía con dos letras distintas mezcladas. */
+    font-family: var(--fuente-texto);
+    font-size: 0.9375rem;
+    letter-spacing: 0;
+    line-height: 1.4;
+    text-decoration: none;
+}
+
+.mapa-sitio.es-enlace {
+    /* Subrayado además del color: quien no distingue bien un gris de otro
+       tiene que poder ver cuáles de estas filas llevan a algún sitio. */
+    text-decoration: underline;
+    text-underline-offset: 3px;
+}
+
+.mapa-sitio.es-enlace:hover,
+.mapa-sitio.es-enlace:focus-visible {
+    border-color: var(--yellow);
+    background: var(--purple-lighter);
+    color: var(--yellow);
+}
+
+.mapa-sitio.es-enlace:focus-visible {
+    outline: 2px solid var(--yellow);
+    outline-offset: 2px;
+}
+
+.mapa-sitio-color {
+    flex: 0 0 auto;
+    width: 14px;
+    height: 14px;
+    /* El color viene del .cmap en una propiedad propia; si la forma no
+       traía color, se queda con el del texto. */
+    background: var(--mapa-color, currentColor);
+    border: 1px solid var(--border);
+}
+
+.mapa-sitio-icono {
+    flex: 0 0 auto;
+    font-size: 1rem;
+    line-height: 1;
+}
+
+.mapa-sitio-nombre {
+    flex: 1 1 auto;
+    overflow-wrap: anywhere;
+}
+
+.mapa-sitio-nota {
+    flex: 0 0 auto;
+    color: var(--muted);
+    font-family: var(--fuente-mono);
+    font-size: 0.75rem;
+    text-decoration: none;
+}
+
+
+/* ====================================================================
+   EL ALTO CONTRASTE DEL SISTEMA
+   ====================================================================
+   Con el alto contraste de Windows, los colores del mapa no valen: el
+   sistema repinta todo con los suyos. El relleno de las regiones se quita
+   —si no, taparía la imagen del mapa, que esa sí se sigue viendo— y lo que
+   queda es el contorno, que es lo que de verdad dice dónde está cada
+   cosa. */
+@media (forced-colors: active) {
+    .mapa-dibujo,
+    .mapa-forma path {
+        fill: transparent !important;
+        stroke: CanvasText !important;
+        fill-opacity: 1;
+        stroke-opacity: 1;
+    }
+
+    .mapa-forma.es-enlace path {
+        stroke: LinkText !important;
+    }
+
+    .mapa-forma.es-enlace:hover path,
+    .mapa-forma.esta-mirado path {
+        fill: Highlight !important;
+        stroke: Highlight !important;
+    }
+
+    .mapa-pin-bola {
+        fill: LinkText !important;
+        stroke: CanvasText !important;
+    }
+
+    .mapa-sitio-color {
+        background: CanvasText;
+    }
+
+    .mapa-globo {
+        background: Canvas;
+        border-color: CanvasText;
+        color: CanvasText;
+    }
+
+    .mapa-globo-nombre,
+    .mapa-globo-que {
+        color: CanvasText;
+    }
+}
+
+
+/* ====================================================================
+   AL IMPRIMIR
+   ====================================================================
+   El mapa entero y la lista detrás. Los mandos no se imprimen: un botón
+   de zoom en un papel no hace nada. */
+@media print {
+    .mapa-mandos,
+    .mapa-ayuda,
+    .mapa-globo {
+        display: none;
+    }
+
+    .mapa-caja {
+        border-color: #000;
+    }
+
+    .mapa-lienzo {
+        max-height: none;
+        overflow: visible;
+    }
+
+    .mapa-svg {
+        /* El zoom que hubiera puesto en pantalla no pinta nada aquí: en
+           papel el mapa va entero. */
+        width: 100%;
+    }
+
+    .mapa-dibujo,
+    .mapa-forma path {
+        fill-opacity: 0.08;
+        stroke-opacity: 0.6;
+    }
+}

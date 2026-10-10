@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8">
+    <!-- ==== TEMA ====
+         El tema elegido, puesto antes del primer pintado para que no haya
+         fogonazo. Lo escribe la herramienta leyendo scripts/tema.js. -->
+    <meta name="theme-color" content="#12091c">
+    <script>
+      (function () {
+        // Una marca de que el JavaScript funciona, puesta ANTES del primer
+        // pintado. Sirve para que una hoja de estilo pueda decir "esto
+        // solo si hay JavaScript": un spoiler tapado, por ejemplo, que sin
+        // JavaScript sería texto perdido y con él se destapa al pulsarlo.
+        // Aquí y no en otro sitio porque es el único script que corre
+        // antes de pintar: puesto más tarde habría fogonazo.
+        document.documentElement.classList.add("js");
+        try {
+          var temas = {
+            "claro": ["light", "#f3e1d6"],
+            "oscuro-puro": ["puro-oscuro", "#000000"],
+            "claro-puro": ["puro-claro", "#ffffff"],
+            "tranquilo": ["tranquilo", "#f2efe9"],
+            "tranquilo-oscuro": ["tranquilo-oscuro", "#1b1e22"],
+            "terminal-verde": ["terminal-verde", "#000000"],
+            "terminal-azul": ["terminal-azul", "#000000"],
+            "terminal-rojo": ["terminal-rojo", "#000000"],
+            "terminal-ambar": ["terminal-ambar", "#000000"]
+          };
+          var guardado = localStorage.getItem("richi-theme");
+          var elegido = temas[guardado];
+          if (!elegido && !guardado &&
+              window.matchMedia("(prefers-color-scheme: light)").matches) {
+            elegido = temas.claro;
+          }
+          if (elegido) {
+            document.documentElement.setAttribute("data-theme", elegido[0]);
+            var barra = document.querySelector('meta[name="theme-color"]');
+            if (barra) { barra.setAttribute("content", elegido[1]); }
+          }
+        } catch (e) {}
+      })();
+    </script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NPC — campaña de Ragna · Notas de rol · El Blog de Richi</title>
+    <!-- Cómo se ve el enlace al compartirlo (Bluesky, Discord, Ko-fi…).
+         Sin esto solo sale la URL pelada, sin título ni imagen. Las rutas
+         van absolutas a propósito: las redes no resuelven las relativas. -->
+    <meta name="description" content="La gente que nos vamos encontrando en la campaña de Ragna: quién es cada uno, de qué se le conoce y qué sabemos de él.">
+    <link rel="canonical" href="https://richi.blog/web/notas_rol/ragna/npcs_ragna.html">
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="El Blog de Richi">
+    <meta property="og:locale" content="es_ES">
+    <meta property="og:title" content="NPC — campaña de Ragna · Notas de rol · El Blog de Richi">
+    <meta property="og:description" content="La gente que nos vamos encontrando en la campaña de Ragna: quién es cada uno, de qué se le conoce y qué sabemos de él.">
+    <meta property="og:url" content="https://richi.blog/web/notas_rol/ragna/npcs_ragna.html">
+    <meta property="og:image" content="https://richi.blog/imagenes/meta/og.webp">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta property="og:image:alt" content="El Blog de Richi — ilustración de Richi sobre fondo morado">
+    <meta name="twitter:card" content="summary_large_image">
+    <link rel="icon" type="image/x-icon" href="/imagenes/favicon.ico">
+    <link rel="preload" href="/tipografias/space-grotesk-400.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="alternate" type="application/rss+xml" title="El Blog de Richi — blog, relatos y rol" href="/blog/rss.xml">
+    <!-- ==== ADELANTO DEL MENÚ ====
+         El menú, pedido LO PRIMERO para que no llegue tarde. Lo escribe
+         la herramienta; el porqué está en ella. -->
+    <script>window.adelantoDeFragmentos={};try{window.adelantoDeFragmentos["/fragmentos/barra-lateral.html"]=fetch("/fragmentos/barra-lateral.html?v=739425f1").then(function(r){return r.ok?r.text():null}).catch(function(){return null})}catch(e){}</script>
+    <!-- ==== CSS ====
+         La escribe herramientas/3-generadores/actualizar-cabeceras.py.
+         No la toques a mano (el porqué, en esa herramienta). -->
+    <link rel="stylesheet" href="/estilos/paquete-comun.css?v=9ae9d5fe">
+    <link rel="stylesheet" href="/estilos/paginas/notas-rol.css?v=7fe84211">
+    <link rel="stylesheet" href="/estilos/paginas/notas-rol.responsive.css?v=5e380254">
+    <link rel="stylesheet" href="/estilos/componentes/ventana-modal.css?v=9cb1fbd5">
+    <link rel="stylesheet" href="/estilos/componentes/ventana-modal.responsive.css?v=a920f364">
+    <link rel="stylesheet" href="/estilos/componentes/lupa.css?v=a1169615">
+    <link rel="stylesheet" href="/estilos/paginas/npcs-rol.css?v=c3717a49">
+    <link rel="stylesheet" href="/estilos/paginas/npcs-rol.responsive.css?v=aab589bf">
+    <link rel="stylesheet" href="/estilos/componentes/filtros.css?v=ae4abb2d">
+    <link rel="stylesheet" href="/estilos/componentes/filtros.responsive.css?v=04de297b">
+    <link rel="stylesheet" href="/estilos/componentes/buscador.css?v=b303a8b2">
+    <link rel="stylesheet" href="/estilos/componentes/barra-lateral.css?v=e510b648">
+    <link rel="stylesheet" href="/estilos/componentes/barra-lateral.responsive.css?v=45e554fd">
+    <link rel="stylesheet" href="/estilos/paginas/buscar.css?v=692b762d">
+    <link rel="stylesheet" href="/estilos/paquete-cierre.css?v=7d910eba">
+    <!-- ==== fin del CSS ==== -->
+    <script src="/scripts/cargador-scripts.js?v=476f3b11"></script>
+    <!-- ==== JS ====
+         Igual que el CSS: la escribe la herramienta, a partir de
+         scripts_de(). Van con defer y en este orden, que importa. -->
+    <script defer src="/scripts/paquete-comun.js?v=bf514c0f"></script>
+    <script defer src="/scripts/componentes/buscador.js?v=e2007b48"></script>
+    <script defer src="/scripts/componentes/filtros.js?v=a9f9dfd8"></script>
+    <script defer src="/scripts/componentes/ventana-modal.js?v=9a18c89a"></script>
+    <script defer src="/scripts/componentes/lupa.js?v=eabe6924"></script>
+    <script defer src="/scripts/paginas/npcs-rol.js?v=404b3c96"></script>
+    <!-- ==== fin del JS ==== -->
+  </head>
+<body>
+    <!-- ==== SIDEBAR / NAVEGACIÓN ==== -->
+    <a class="skip-link" href="#main-content">Saltar al contenido</a>
+    <div id="sidebar-container"></div>
+    <!-- ==== CONTENIDO PRINCIPAL ==== -->
+
+    <main id="main-content">
+        <!-- ==== HOME ==== -->
+        <section id="home" class="home npcs-page">
+            <!-- LOS NPC DE UNA CAMPAÑA
+
+                 Aquí NO hay nadie escrito: todo sale de
+                 datos/npcs-ragna.json y lo pinta
+                 scripts/paginas/npcs-rol.js. Para añadir a alguien
+                 se abre ese archivo y se copia un bloque; no hay que
+                 tocar esta página.
+
+                 CÓMO ES UN PERSONAJE EN EL JSON
+                 -------------------------------
+                   {
+                       "nombre": "Sigil",
+                       "categoria": "la Gran Caravana",
+                       "que": "Comerciante",
+                       "donde": "la Gran Caravana",
+                       "relacion": "aliado",
+                       "estado": "vivo",
+                       "token": "/imagenes/notas_rol/ragna/sigil-token.webp",
+                       "ilustracion": "/imagenes/notas_rol/ragna/sigil.webp",
+                       "notas": ["lo que sepamos de él"],
+                       "primera": 1
+                   }
+
+                 Lo único que hace falta es el nombre. Lo que falte no
+                 sale, y mientras no haya foto se dibuja su inicial dentro
+                 del marco.
+
+                 LOS GRUPOS son las "categoria" que haya, en el orden en
+                 que aparezcan en el archivo. Escribir una nueva la crea
+                 sola, con su botón de filtro.
+
+                 Y UNO PUEDE ESTAR EN VARIOS. "categoria" admite una lista,
+                 y también vale escribirlo en plural:
+
+                       "categorias": ["la Gran Caravana", "Sirevia"]
+
+                 Entonces su token sale en los dos grupos; no es una copia,
+                 es la misma ficha. La tabernera de Sirevia que luego se
+                 une a la caravana se busca en los dos sitios.
+
+                 AQUÍ SOLO HAY NPC. Los personajes de los jugadores no
+                 están en esta página: salen del JSON de la campaña y se
+                 ven en «la mesa», una ventana del índice de la campaña.
+
+                 LAS IMÁGENES van en imagenes/notas_rol/ragna/ y se pasan
+                 por herramientas/2-imagenes/optimizar-imagenes.py como las demás. El
+                 token, cuadrado (que se recorta en redondo); la
+                 ilustración, de pie (3 de ancho por 4 de alto). -->
+            <div class="npcs-cabecera">
+                <a class="npcs-volver" data-npcs-volver
+                   href="/web/notas_rol/ragna/index_ragna.html">← volver a la campaña</a>
+                <h1 class="home-title">npcs</h1>
+                <p class="npcs-nombre" data-npcs-nombre>campaña de Ragna</p>
+                <p class="npcs-intro" data-npcs-intro>La gente que nos vamos encontrando por el camino.</p>
+            </div>
+
+            <!-- EL BUSCADOR. El mismo componente que el archivo del
+                 blog, los relatos y el portfolio. Mira el nombre y el
+                 "qué es" de cada token, y además su categoría, aunque no
+                 se escriba en la tarjeta: buscar "caravana" saca a los de
+                 la caravana.
+
+                 Se cruza con los botones de categoría de abajo: con
+                 "Sirevia" puesto y "taber" escrito sale quien sea de
+                 Sirevia Y lleve "taber". -->
+            <form class="buscar" role="search" data-buscar
+                  data-buscar-items=".npc-celda"
+                  data-buscar-en=".npc-token-nombre, .npc-token-que"
+                  data-buscar-nombre="ficha|fichas|ninguna">
+                <label class="buscar-label" for="buscar-campo">buscar:</label>
+                <div class="buscar-caja">
+                    <input class="buscar-campo" type="search" id="buscar-campo"
+                           placeholder="un nombre, un oficio, un sitio…"
+                           autocomplete="off" spellcheck="false">
+                    <button class="buscar-limpiar" type="button" data-buscar-limpiar
+                            aria-label="Borrar lo buscado" hidden>✕</button>
+                </div>
+                <p class="buscar-cuenta" role="status" data-buscar-cuenta></p>
+            </form>
+
+            <!-- Los botones de filtrar NO se escriben: los monta
+                 scripts/componentes/filtros.js con las categorías que
+                 encuentre. Lo que esconde son los TOKENS, uno por uno
+                 (quien está en dos grupos tiene un token en cada uno); el
+                 título de un grupo que se quede sin nadie lo esconde
+                 scripts/paginas/npcs-rol.js, que es quien los cuenta. -->
+            <div class="filtros" data-filtros
+                 data-filtros-items=".npc-celda"
+                 data-filtros-orden="aparicion">
+                <span class="filtros-label" id="filtros-label">filtrar:</span>
+
+                <!-- Este botón solo se ve en móvil (en escritorio lo
+                     esconde el CSS): ahí la fila de categorías no cabe
+                     y se colapsa en una lista flotante. -->
+                <button class="filtros-toggle" type="button" data-filtros-toggle
+                        aria-expanded="false" aria-controls="filtros-lista">
+                    <span class="visually-hidden">Filtrando por: </span>
+                    <span class="filtros-toggle-label" data-filtros-label>todas</span>
+                    <span class="filtros-toggle-arrow" aria-hidden="true">▾</span>
+                </button>
+
+                <div class="filtros-list" id="filtros-lista" role="group" aria-labelledby="filtros-label"></div>
+            </div>
+
+            <p class="filtros-vacio" data-filtros-vacio role="status" hidden></p>
+
+            <ul class="npcs-lista" data-npcs-lista
+                data-npcs-datos="/datos/npcs-ragna.json"
+                data-campana-datos="/datos/campana-ragna.json">
+                <li class="entries-loading">Cargando el reparto…</li>
+            </ul>
+
+            <!-- El mismo botón abajo: cuando el reparto crece, al llegar
+                 al final el de arriba se ha quedado lejos. -->
+            <a class="npcs-volver" href="/index.html">← volver al inicio</a>
+        </section>
+    </main>
+</body>
+</html>

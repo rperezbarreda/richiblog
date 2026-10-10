@@ -7,7 +7,7 @@
 // elegir una foto distinta en cada carga ya cambia sola al navegar.
 //
 // Lee el mismo datos/fotos-santuarios.json que la galería, así que las
-// fotos nuevas que genere herramientas/generar-galeria.py aparecen
+// fotos nuevas que genere herramientas/2-imagenes/generar-galeria.py aparecen
 // aquí solas, sin tocar este archivo.
 //
 // La miniatura es la que se ve; la foto grande solo se descarga si

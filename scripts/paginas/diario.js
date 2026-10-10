@@ -438,7 +438,7 @@ function listaDelMes(mes) {
 }
 
 // Lo que se tarda en leer la entrada. Lo cuenta
-// herramientas/generar-posts.py al escribir el listado, así que aquí
+// herramientas/3-generadores/generar-posts.py al escribir el listado, así que aquí
 // solo se pinta; si una entrada no lo trae, no sale nada.
 function minutosDiario(item) {
     const minutos = Number(item && item.minutos);

@@ -1,0 +1,664 @@
+/* ====================================================================
+   LOS NPC — la gente de una campaña de rol
+   ====================================================================
+
+   Una página por campaña, al lado de su índice de sesiones. Lo que se ve
+   es una rejilla de TOKENS —el retrato redondo de cada uno, como en una
+   mesa virtual— repartidos por grupos, y al pulsar uno se abre su ficha
+   en una ventana con la ilustración grande.
+
+   QUIÉN MANDA: datos/npcs-<clave>.json. Ahí está todo: el nombre,
+   el grupo, las dos imágenes y lo que se sepa de cada uno. Esta hoja no
+   nombra a nadie ni conoce ninguna categoría: los grupos salen de lo que
+   ponga el JSON, así que inventarse uno nuevo no toca ni este archivo ni
+   el script.
+
+   LOS TOKENS SON REDONDOS y el resto del sitio es de esquinas duras. Es
+   a propósito: un token redondo es lo que se ve en cualquier mesa de rol
+   y hace que la rejilla se lea como un reparto y no como otro listado de
+   tarjetas. El marco sigue siendo el amarillo del tema, y la sombra, la
+   dura de siempre. */
+
+.npcs-page {
+    /* .home trae center en los dos ejes: aquí la página es una columna
+       que empieza arriba y ocupa todo el ancho. */
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    justify-content: flex-start;
+    gap: 18px;
+    /* auto y no hidden: con el texto agrandado y muchos personajes esto
+       crece, y el <main> del sitio va con overflow: hidden para que el
+       marco no se mueva. Si aquí fuera "visible", lo que sobrara se
+       quedaría cortado y sin forma de llegar a ello. */
+    overflow-y: auto;
+    padding: 24px 4%;
+}
+
+/* Y que no se encoja nada: en una columna flex que se desplaza, cada
+   trozo mide lo que mida y lo que sobra se baja. Sin esto, el flex
+   aprieta la rejilla y los tokens de abajo se quedan cortados. */
+.npcs-page > * {
+    flex: none;
+}
+
+.npcs-cabecera {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+    max-width: 60rem;
+}
+
+/* El titular, del mismo tamaño que el del índice de la campaña y el del
+   archivo del blog: a 8,75rem (el de serie) "npcs" se sale. */
+.npcs-page .home-title {
+    margin: 0;
+    font-size: clamp(2.75rem, 5vw, 4.5rem);
+    line-height: 1.05;
+    overflow-wrap: break-word;
+}
+
+.npcs-nombre {
+    margin: 0;
+    color: var(--yellow);
+    font-family: var(--fuente-mono);
+    font-size: 1rem;
+    letter-spacing: 1px;
+}
+
+.npcs-intro {
+    margin: 0;
+    max-width: 48rem;
+    color: var(--white);
+    font-size: 1rem;
+    line-height: 1.6;
+}
+
+/* El botón de volver a la campaña, igual que el de volver al inicio del
+   índice: mismo tamaño, misma letra y mismo recuadro. */
+.npcs-volver {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    align-self: flex-start;
+    padding: 8px 14px;
+    border: 2px solid var(--yellow);
+    color: var(--yellow);
+    font-family: var(--fuente-mono);
+    font-size: 0.8125rem;
+    letter-spacing: 1px;
+    text-decoration: none;
+    transition: color 0.15s linear, background-color 0.15s linear;
+}
+
+.npcs-volver:hover,
+.npcs-volver:focus-visible {
+    background: var(--yellow);
+    color: var(--yellow-contrast);
+    text-decoration: none;
+}
+
+.npcs-volver:focus-visible {
+    outline: 2px solid var(--yellow);
+    outline-offset: 3px;
+}
+
+
+/* ====================================================================
+   LOS GRUPOS
+   ====================================================================
+   Un grupo por categoría, con su nombre y la cuenta de cuánta gente
+   lleva. Lo que FILTRAN los botones de arriba son los grupos enteros, no
+   los tokens sueltos: así, al quedarse con "la Gran Caravana", lo que
+   desaparece es todo lo demás con su título incluido, y no quedan
+   títulos huérfanos encima de un hueco vacío. Eso lo hace el componente
+   de siempre (scripts/componentes/filtros.js) mirando el data-categoria
+   de cada grupo. */
+
+.npcs-lista {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+/* La trampa de siempre: lo que esconde [hidden] es un display: none que
+   trae el navegador, y la regla de aquí abajo le pone display: flex
+   pesando lo mismo y cargándose después. Sin esto, filtrar no escondía
+   nada. */
+.npc-grupo[hidden] {
+    display: none;
+}
+
+/* Y lo mismo con cada token. La trampa es la misma —[hidden] pesa lo que
+   una clase— y aquí hace falta porque lo que esconde el filtro y el
+   buscador son las CELDAS, una por token: quien está en dos grupos tiene
+   dos celdas, cada una con su data-categoria, y así filtrar por una no lo
+   saca de la otra. El título del grupo que se queda sin nadie lo esconde
+   scripts/paginas/npcs-rol.js, que es quien puede contarlas. */
+.npc-celda[hidden] {
+    display: none;
+}
+
+.npc-celda {
+    margin: 0;
+}
+
+.npc-grupo {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+/* ====================================================================
+   LOS APARTADOS
+   ====================================================================
+   Una región grande con sus grupos dentro: «Sirevia» con Sirevia, los
+   bandidos y Chitxia. Se escriben a mano en el JSON de la campaña (ver
+   scripts/paginas/npcs-rol.js); sin apartados, cada grupo sale suelto y
+   esta parte no pinta nada. */
+
+.npc-apartado[hidden] {
+    display: none;
+}
+
+.npc-apartado {
+    display: block;
+}
+
+/* LA CAJA QUE SE PLIEGA: un <details> de verdad, que se abre y se cierra
+   solo. Va en bloque y no en flex a propósito: el contenido de un
+   <details> no es una caja con la que se pueda hacer flex de forma fiable
+   en todos los navegadores (lo mismo que .mundo-grupo en la wiki). Los
+   huecos se dan con márgenes. */
+.npc-apartado-caja {
+    display: block;
+}
+
+.npc-apartado-caja > .npc-apartado-grupos {
+    margin-top: 16px;
+}
+
+/* EL TIRADOR DE PLEGAR es el <summary>, y hay que quitarle el triangulito
+   que le pone el navegador (que es distinto en cada uno) para poner el
+   nuestro, que es la flecha de .npc-apartado-flecha.
+
+   El <h2> va dentro, así que el tirador no pinta nada más que ser el
+   sitio donde se pulsa. */
+.npc-apartado-tirador {
+    display: block;
+    list-style: none;
+    cursor: pointer;
+}
+
+.npc-apartado-tirador::-webkit-details-marker {
+    display: none;
+}
+
+.npc-apartado-tirador:hover .npc-apartado-titulo,
+.npc-apartado-tirador:focus-visible .npc-apartado-titulo {
+    background: var(--purple-lighter);
+}
+
+.npc-apartado-tirador:focus-visible {
+    outline: 2px solid var(--yellow);
+    outline-offset: 2px;
+}
+
+/* La flecha, que gira al cerrar. Sin transición si se ha pedido que no se
+   mueva nada (eso lo lleva base.css para todo el sitio). */
+.npc-apartado-flecha {
+    display: inline-block;
+    font-family: var(--fuente-mono);
+    font-style: normal;
+    transition: transform 0.15s ease;
+}
+
+.npc-apartado-caja:not([open]) .npc-apartado-flecha {
+    transform: rotate(-90deg);
+}
+
+.npc-apartado-titulo {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 2px 10px;
+    margin: 0;
+    padding-bottom: 10px;
+    /* Más gorda que la de un grupo: es el encabezado de arriba del todo y
+       tiene que verse que lo de debajo cuelga de él. */
+    border-bottom: 3px solid var(--yellow);
+    color: var(--yellow);
+    font-family: var(--fuente-titular);
+    font-size: 1.375rem;
+    font-style: italic;
+    font-weight: 400;
+}
+
+.npc-apartado-grupos {
+    display: flex;
+    flex-direction: column;
+    gap: 22px;
+    margin: 0;
+    /* Sangrado para que se vea de un vistazo qué cuelga de qué, pero poco:
+       en una pantalla estrecha, cada píxel de sangría es un píxel menos
+       para los tokens. */
+    padding: 0 0 0 10px;
+    border-left: 2px solid var(--border);
+    list-style: none;
+}
+
+/* El título de un grupo DENTRO de un apartado: más pequeño y sin la raya
+   de abajo, que ya la tiene el apartado. */
+.npc-grupo-titulo.es-de-dentro {
+    padding-bottom: 0;
+    border-bottom: 0;
+    color: var(--white);
+    font-size: 0.9375rem;
+}
+
+.npc-grupo-titulo.es-de-dentro::before {
+    content: "↳ ";
+    color: var(--yellow);
+}
+
+.npc-grupo-titulo {
+    display: flex;
+    /* Que la cuenta se baje a la línea de abajo cuando no quepa: en 320px
+       con el texto al 125%, «1 ficha» se salía por la derecha. */
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 2px 10px;
+    margin: 0;
+    padding-bottom: 8px;
+    border-bottom: 2px solid var(--yellow);
+    color: var(--yellow);
+    font-family: var(--fuente-mono);
+    font-size: 1rem;
+    font-weight: 400;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+}
+
+/* La cuenta, en el gris de los datos secundarios. No es un adorno: con
+   los grupos plegados por el filtro, saber cuánta gente hay en cada uno
+   es la mitad de lo que se viene a mirar. */
+.npc-grupo-cuenta {
+    color: var(--muted);
+    font-size: 0.8125rem;
+    letter-spacing: 0;
+    text-transform: none;
+}
+
+.npc-rejilla {
+    display: grid;
+    /* auto-fill y no auto-fit: con tres personajes en un grupo, auto-fit
+       los estira hasta ocupar la fila entera y salen tres tokens
+       gigantes; con auto-fill se quedan de su tamaño y el hueco sobra a
+       la derecha, que es lo que hace cualquier rejilla de fichas. */
+    grid-template-columns: repeat(auto-fill, minmax(7.5rem, 1fr));
+    gap: 18px 14px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+
+/* ====================================================================
+   EL TOKEN
+   ====================================================================
+   Un botón, no un enlace: no lleva a ninguna página, abre una ventana
+   aquí mismo. Dentro, el retrato redondo y el nombre debajo. */
+
+.npc-token {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+    padding: 6px 2px;
+    border: 0;
+    background: transparent;
+    color: var(--white);
+    font-family: inherit;
+    font-size: 0.875rem;
+    text-align: center;
+    cursor: pointer;
+}
+
+.npc-token:focus-visible {
+    outline: 2px solid var(--yellow);
+    outline-offset: 2px;
+}
+
+/* El marco del retrato. El aspect-ratio lo deja cuadrado midiendo lo que
+   le toque en la rejilla, así que los tokens crecen con la pantalla y
+   con el mando del tamaño del texto sin tener que decir ningún píxel. */
+.npc-token-marco {
+    position: relative;
+    width: 100%;
+    max-width: 6.5rem;
+    aspect-ratio: 1 / 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    border: 3px solid var(--yellow);
+    border-radius: 50%;
+    background: var(--purple-lighter);
+    /* SIN LA SOMBRA DURA del resto del sitio: aquí son redondeles, y la
+       sombra desplazada a abajo-derecha no se leía como una sombra sino
+       como un segundo borde mal puesto, más gordo por un lado. En un
+       rectángulo cuadra; en un círculo, no. El marco de color ya dice de
+       sobra que el retrato es una pieza y no una mancha en la página. */
+    transition: transform 0.15s linear;
+}
+
+.npc-token-img {
+    width: 100%;
+    height: 100%;
+    display: block;
+    object-fit: cover;
+}
+
+/* MIENTRAS NO HAYA FOTO: la inicial del nombre dentro del marco. Es un
+   hueco a propósito y no un error: se ve que ese personaje existe y que
+   le falta el retrato, en vez de dejar un cuadro roto o un marco vacío
+   que parece que no ha cargado. aria-hidden en el HTML, porque el nombre
+   ya está escrito justo debajo. */
+.npc-token-mono {
+    color: var(--yellow);
+    font-family: var(--fuente-titular);
+    font-size: 2rem;
+    line-height: 1;
+    user-select: none;
+}
+
+.npc-token:hover .npc-token-marco,
+.npc-token:focus-visible .npc-token-marco {
+    transform: translate(-2px, -2px);
+}
+
+.npc-token-nombre {
+    display: block;
+    overflow-wrap: break-word;
+    line-height: 1.3;
+}
+
+.npc-token:hover .npc-token-nombre,
+.npc-token:focus-visible .npc-token-nombre {
+    color: var(--yellow);
+}
+
+/* QUÉ ES, debajo del nombre y en pequeño. Antes esto solo estaba dentro de
+   la ficha, y se subió aquí el día que la página estrenó buscador: sin
+   ello, escribir "tabernera" encontraba a la tabernera pero en la rejilla
+   no se veía por qué había salido ella. Ahora se resalta aquí mismo.
+
+   Tres líneas como mucho: hay quien tiene media biografía en ese campo
+   ("Comerciante, al mando de la Gran Caravana") y sin tope un token
+   empujaba a los de su fila el doble de alto que los demás. */
+.npc-token-que {
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 3;
+    line-clamp: 3;
+    overflow: hidden;
+    color: var(--muted);
+    font-family: var(--fuente-mono);
+    font-size: 0.75rem;
+    line-height: 1.35;
+    overflow-wrap: break-word;
+}
+
+.npc-token:hover .npc-token-que,
+.npc-token:focus-visible .npc-token-que {
+    color: var(--white);
+}
+
+/* Quien ya no está, apagado y con una marca. Dos señales y ninguna es el
+   color: el token se queda a media luz Y le cruza una banda. Lo que
+   significa se lee entero en su ficha. */
+.npc-token.esta-fuera .npc-token-marco {
+    opacity: 0.55;
+}
+
+.npc-token.esta-fuera .npc-token-marco::after {
+    content: "";
+    position: absolute;
+    left: -10%;
+    right: -10%;
+    top: 50%;
+    height: 0;
+    border-top: 3px solid var(--yellow);
+    transform: rotate(-30deg);
+}
+
+
+/* ====================================================================
+   LA FICHA DE UN NPC, DENTRO DE SU VENTANA
+   ====================================================================
+   La ventana en sí (el fondo, la barra con la ✕, el Escape, el foco) es
+   del componente: estilos/componentes/ventana-modal.css. Lo de aquí es
+   solo lo que va DENTRO, que es cosa de esta página.
+
+   La ilustración a la izquierda y la ficha a la derecha. Va en su propia
+   caja y no directamente en el cuerpo de la ventana porque el cuerpo es
+   del componente y las otras dos ventanas (la mesa, el botín) no quieren
+   dos columnas. */
+.npc-ficha-dos {
+    display: flex;
+    align-items: flex-start;
+    gap: 20px;
+}
+
+.npc-visor-arte {
+    flex: 0 0 clamp(9rem, 32%, 17rem);
+    aspect-ratio: 3 / 4;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    border: 2px solid var(--border);
+    background: var(--purple-lighter);
+}
+
+/* Mientras no haya retrato: pequeño y cuadrado. Un marco de 3x4 vacío
+   al lado del texto parece una foto que no ha cargado; así se ve que es
+   el hueco que le toca. */
+.npc-visor-arte.sin-foto {
+    flex: 0 0 7rem;
+    aspect-ratio: 1 / 1;
+    border-style: dashed;
+}
+
+.npc-visor-arte.sin-foto .npc-visor-arte-mono {
+    font-size: 2.5rem;
+}
+
+/* CON RETRATO, EL MARCO ES UN BOTÓN. Hay que quitarle lo que el navegador
+   le pone a un <button> (relleno, borde, fuente) y dejarlo igual que el
+   <div> de cuando no hay foto; lo único que se añade es el cursor y el
+   aviso al pasar por encima. */
+.npc-visor-arte.es-pulsable {
+    padding: 0;
+    font: inherit;
+    color: inherit;
+    cursor: zoom-in;
+}
+
+.npc-visor-arte.es-pulsable:hover,
+.npc-visor-arte.es-pulsable:focus-visible {
+    border-color: var(--yellow);
+}
+
+.npc-visor-arte.es-pulsable:focus-visible {
+    outline: 2px solid var(--yellow);
+    outline-offset: 2px;
+}
+
+.npc-visor-arte-img {
+    width: 100%;
+    height: 100%;
+    display: block;
+    object-fit: cover;
+}
+
+.npc-visor-arte-mono {
+    color: var(--yellow);
+    font-family: var(--fuente-titular);
+    font-size: 4rem;
+    line-height: 1;
+    user-select: none;
+}
+
+.npc-visor-ficha {
+    flex: 1 1 auto;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.npc-visor-nombre {
+    margin: 0;
+    color: var(--white);
+    font-family: var(--fuente-titular);
+    font-size: clamp(1.5rem, 3vw, 2rem);
+    line-height: 1.15;
+    overflow-wrap: break-word;
+}
+
+/* La línea de debajo del nombre: qué es. En el amarillo del tema, que es
+   lo que marca lo importante en todo el sitio. */
+.npc-visor-que {
+    margin: -8px 0 0;
+    color: var(--yellow);
+    font-size: 1rem;
+    line-height: 1.5;
+}
+
+/* LOS DATOS, en una <dl> de verdad: así un lector de pantalla dice
+   "dónde, Chitxia" y no dos textos sueltos uno detrás de otro. Es el
+   mismo montaje que la ficha de la campaña. */
+.npc-datos {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin: 0;
+}
+
+.npc-dato {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 4px 10px;
+}
+
+.npc-dato-nombre {
+    flex: none;
+    color: var(--muted);
+    font-family: var(--fuente-mono);
+    font-size: 0.75rem;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+}
+
+.npc-dato-valor {
+    /* El <dd> trae 40px de sangría de serie, y en un dato de una línea
+       eso lo deja flotando en medio de la ventana. */
+    margin: 0;
+    margin-inline-start: 0;
+    min-width: 0;
+    color: var(--white);
+    font-size: 1rem;
+    line-height: 1.5;
+    overflow-wrap: break-word;
+}
+
+/* LA MARQUITA de la relación y del estado. El color es un ADORNO: al
+   lado va la palabra escrita ("aliado", "muerto"), que es lo que se lee
+   y lo que dice un lector de pantalla. Así, quien no distinga los
+   colores —o esté en blanco y negro, o en el modo de alto contraste de
+   Windows— no se pierde nada (pauta 1.4.1).
+
+   El cuadradito va con borde Y relleno: en alto contraste el relleno lo
+   repinta el sistema, pero el borde aguanta y la forma se sigue viendo.
+   Mismo truco que las casillas de las cosas pendientes. */
+.npc-marca {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 0.5em;
+}
+
+.npc-marca-punto {
+    flex: none;
+    align-self: center;
+    width: 0.6em;
+    height: 0.6em;
+    box-sizing: border-box;
+    border: 2px solid var(--npc-marca-color, var(--muted));
+    background: var(--npc-marca-color, var(--muted));
+    transform: rotate(45deg);
+}
+
+.npc-marca.es-bueno {
+    --npc-marca-color: var(--pj-verde);
+}
+
+.npc-marca.es-malo {
+    --npc-marca-color: var(--pj-rojo);
+}
+
+.npc-marca.es-raro {
+    --npc-marca-color: var(--pj-morado);
+}
+
+.npc-marca.es-normal {
+    --npc-marca-color: var(--yellow);
+}
+
+.npc-visor-notas {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin: 0;
+    padding-left: 1.2em;
+    color: var(--white);
+    font-size: 1rem;
+    line-height: 1.6;
+}
+
+.npc-visor-notas > li {
+    margin: 0;
+}
+
+/* El enlace a la sesión en la que apareció. Como el de volver, pero sin
+   recuadro: es una línea más de la ficha, no un botón. */
+.npc-visor-primera {
+    color: var(--yellow);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+}
+
+.npc-visor-primera:hover,
+.npc-visor-primera:focus-visible {
+    text-decoration: none;
+}
+
+.npc-visor-primera:focus-visible {
+    outline: 2px solid var(--yellow);
+    outline-offset: 2px;
+}
+
+/* Un personaje del que todavía no se ha escrito nada: en vez de dejar la
+   ventana medio vacía se dice que está por rellenar, igual que en la
+   ficha de la campaña. */
+.npc-vacio {
+    color: var(--muted);
+    font-size: 0.8125rem;
+    font-style: italic;
+}

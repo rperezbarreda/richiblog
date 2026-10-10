@@ -298,3 +298,61 @@
         background-image: none;
     }
 }
+
+/* «LA MESA», dentro de su ventana, en pantallas estrechas.
+   El mismo corte que la ficha de un NPC y por lo mismo: con la
+   ilustración al lado, a 700px de ventana al texto le quedan unos 300 y
+   "Elfo Paladín nivel 3" se parte en cuatro líneas. */
+@media (max-width: 760px) {
+    .mesa-ficha {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    /* Ni a lo ancho del todo ni de pie: una ilustración de 3/4 a 700px de
+       ancho ocupa la ventana entera y hay que bajar para leer el primer
+       dato. Centrada y con la altura medida en la pantalla, se queda a la
+       vista junto al nombre.
+
+       :not(.sin-foto) a propósito: el hueco de "todavía no hay retrato"
+       es cuadrado y pequeño porque así se lee como un hueco. Sin esta
+       salvedad, en el móvil se estiraba al 70% de la ventana y volvía a
+       parecer una foto que no ha cargado, que es justo lo que se quería
+       evitar. */
+    .mesa-arte:not(.sin-foto) {
+        flex: none;
+        align-self: center;
+        width: min(15rem, 70%);
+        max-height: 38vh;
+    }
+
+    .mesa-arte.sin-foto {
+        align-self: center;
+    }
+}
+
+/* LOS RETRATOS DE LA FICHA EN UN TELÉFONO: dos y dos.
+   Medido a 390px con la letra a su tamaño de serie: a la tarjeta de la
+   campaña le quedan unos 300px, y a cuatro retratos de 6.5rem no les
+   llega. En fila libre salían dos arriba, uno y uno, que parece que
+   sobran.
+
+   Dos columnas y punto: cuatro personajes quedan en un cuadrado de 2x2,
+   que es como se ven en la mesa de verdad. Con tres salen dos y uno, y con
+   cinco, dos, dos y uno; en todos los casos mejor que una fila rota. */
+@media (max-width: 520px) {
+    .campana-personajes {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        justify-items: center;
+    }
+
+    .campana-personaje {
+        width: 100%;
+    }
+
+    .campana-personaje-token {
+        width: 100%;
+        max-width: 6rem;
+    }
+}

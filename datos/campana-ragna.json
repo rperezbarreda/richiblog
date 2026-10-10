@@ -2,6 +2,7 @@
     "nombre": "campaña de Ragna",
     "clave": "ragna",
     "pagina": "/web/notas_rol/ragna/index_ragna.html",
+    "npcs": "/web/notas_rol/ragna/npcs_ragna.html",
     "intro": "Las notas que tomo después de cada partida.",
     "sistema": "DnD 5.5e",
     "director": "Nacho",
@@ -9,26 +10,119 @@
         {
             "nombre": "Faëlar",
             "jugador": "Richi",
-            "clase": "Elfo Druida Lvl 3",
-            "color": "verde"
+            "clase": "Elfo Druida",
+            "nivel": 3,
+            "color": "verde",
+            "token": "",
+            "ilustracion": "",
+            "equipo": [],
+            "notas": []
         },
         {
             "nombre": "Melissa",
             "jugador": "Andrea",
-            "clase": "Humana Pícara Lvl 3",
-            "color": "azul"
+            "clase": "Humana Pícara",
+            "nivel": 3,
+            "color": "azul",
+            "token": "",
+            "ilustracion": "",
+            "equipo": [
+                "Una piedra mensajera que le dio Sigil, para hablar a distancia."
+            ],
+            "notas": []
         },
         {
             "nombre": "Denelia",
             "jugador": "Julia",
-            "clase": "Elfa Maga Lvl 3",
-            "color": "morado"
+            "clase": "Elfa Maga",
+            "nivel": 3,
+            "color": "morado",
+            "token": "",
+            "ilustracion": "",
+            "equipo": [],
+            "notas": []
         },
         {
             "nombre": "Thenarys",
             "jugador": "María",
-            "clase": "Elfo Paladín Lvl 3",
-            "color": "rojo"
+            "clase": "Elfo Paladín",
+            "nivel": 3,
+            "color": "rojo",
+            "token": "",
+            "ilustracion": "",
+            "equipo": [],
+            "notas": [
+                "Escolta de Sigil, junto con Sozil."
+            ]
+        }
+    ],
+    "botin": [
+        {
+            "que": "4 kits curativos",
+            "de": 1,
+            "tipo": "pociones"
+        },
+        {
+            "que": "Hierbas misteriosas (velocidad)",
+            "de": 1,
+            "tipo": "pociones"
+        },
+        {
+            "que": "6 provisiones para el viaje",
+            "de": 1,
+            "tipo": "equipo"
+        },
+        {
+            "que": "Piedra mensajera",
+            "de": 1,
+            "tipo": "objetos mágicos",
+            "quien": "Melissa"
+        }
+    ],
+    "misiones": [
+        {
+            "nombre": "la mercancía robada",
+            "cosas": [
+                {
+                    "que": "Encontrar la base de los bandidos, oculta en una cueva en las montañas.",
+                    "de": 1
+                },
+                {
+                    "que": "Recuperar la mercancía robada.",
+                    "de": 1
+                }
+            ]
+        },
+        {
+            "nombre": "la Gran Caravana",
+            "cosas": [
+                {
+                    "que": "Hacernos con un carromato para transportar la mercancía.",
+                    "de": 1
+                }
+            ]
+        },
+        {
+            "nombre": "Chitxia",
+            "cosas": [
+                {
+                    "que": "Terminar de ayudar a replantar el huerto en Chitxia.",
+                    "de": 1
+                }
+            ]
+        },
+        {
+            "nombre": "el mundo",
+            "cosas": [
+                {
+                    "que": "Investigar sobre los gigantes y espíritus del bosque.",
+                    "de": 1
+                },
+                {
+                    "que": "Tener cuidado con los animales peligrosos como los osobúhos.",
+                    "de": 1
+                }
+            ]
         }
     ],
     "sinopsis": "Unidos a la Gran Caravana de manos del comerciante Sigil, exploramos el mundo tras la expulsión de los gigantes por parte de Ragnar.",

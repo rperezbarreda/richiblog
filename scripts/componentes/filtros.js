@@ -43,6 +43,18 @@ const FILTROS_TODAS = "todas";
 // página acabe teniendo dos listados con su propio filtro.
 const FILTROS_PUESTAS = new WeakMap();
 
+// LO QUE PEDÍA LA DIRECCIÓN AL ABRIR, leído AQUÍ y no cuando se montan los
+// botones. Parece un rodeo y no lo es: en un listado que llega por fetch
+// (la wiki del mundo, los relatos) los botones se montan más tarde, y por
+// el camino el buscador repinta el filtro con la selección vacía, lo que
+// guarda un filtro vacío en la dirección y se lleva por delante el ?cat=
+// con el que se acababa de llegar. Se notaba al pulsar una etiqueta en una
+// página del mundo: aterrizabas en el índice sin el filtro puesto.
+const FILTROS_DE_LA_URL = (new URLSearchParams(window.location.search).get("cat") || "")
+    .split(",")
+    .map((c) => c.trim())
+    .filter(Boolean);
+
 montarFiltros();
 
 // El listado de relatos llega por fetch, así que cuando esto se
@@ -107,14 +119,31 @@ function montarFiltros() {
         const puestas =
             guardadas ||
             new Set(
-                (new URLSearchParams(window.location.search).get("cat") || "")
-                    .split(",")
-                    .map((c) => c.trim())
-                    .filter((c) => categorias.indexOf(c) !== -1)
+                FILTROS_DE_LA_URL
+                    .map((pedida) => comoSeLlamaDeVerdad(pedida, categorias))
+                    .filter(Boolean)
             );
         FILTROS_PUESTAS.set(caja, puestas);
         pintarFiltro(caja, false);
     });
+}
+
+// La categoría que pide la dirección, buscada SIN mirar mayúsculas ni
+// tildes: un ?cat=pais tiene que encontrar la etiqueta «País». Devuelve el
+// nombre tal y como está escrito en la página, que es el que entiende todo
+// lo demás, o "" si no existe ninguna así.
+function comoSeLlamaDeVerdad(pedida, categorias) {
+    const llana = aplanarFiltro(pedida);
+    return categorias.find((c) => aplanarFiltro(c) === llana) || "";
+}
+
+function aplanarFiltro(texto) {
+    return (texto || "")
+        .toString()
+        .trim()
+        .toLowerCase()
+        .normalize("NFD")
+        .replace(/[̀-ͯ]/g, "");
 }
 
 function elementosFiltrables(caja) {
@@ -122,8 +151,24 @@ function elementosFiltrables(caja) {
     return selector ? [...document.querySelectorAll(selector)] : [];
 }
 
-function categoriaDe(elemento) {
-    return (elemento.getAttribute("data-categoria") || "").trim();
+// LAS CATEGORÍAS DE UNA COSA, siempre como lista.
+//
+// Casi todo el sitio pone UNA en data-categoria ("mapas", "Sirevia") y
+// entonces la lista tiene un elemento. Pero una página de la wiki del
+// mundo puede tener varias etiquetas a la vez —una ciudad es "ciudad" y
+// "comercio" y "río"— y ahí van separadas por comas:
+//
+//     data-categoria="ciudad, comercio, río"
+//
+// Separar siempre por comas no cambia nada para quien pone una sola:
+// "mapas" sin comas sale como ["mapas"]. Lo que sí permite es que una cosa
+// salga al filtrar por cualquiera de las suyas, que es lo que se espera de
+// una etiqueta.
+function categoriasDeUno(elemento) {
+    return (elemento.getAttribute("data-categoria") || "")
+        .split(",")
+        .map((c) => c.trim())
+        .filter(Boolean);
 }
 
 function categoriasDe(caja, items) {
@@ -131,7 +176,7 @@ function categoriasDe(caja, items) {
         .split(",")
         .map((c) => c.trim())
         .filter(Boolean);
-    const usadas = items.map(categoriaDe).filter(Boolean);
+    const usadas = items.reduce((todas, item) => todas.concat(categoriasDeUno(item)), []);
     const todas = [...new Set([...declaradas, ...usadas])];
     // Por orden alfabético, que es lo que se espera de una lista de
     // categorías sueltas. Con data-filtros-orden="aparicion" se respeta
@@ -176,8 +221,10 @@ function pintarFiltro(caja, cerrar) {
         boton.setAttribute("aria-pressed", activa ? "true" : "false");
     });
 
-    // Se suman, no se cruzan: cada elemento lleva UNA categoría, así que
-    // cruzarlas no dejaría nunca nada a la vista.
+    // Se suman, no se cruzan: con "mapas" y "recursos" puestos sale lo que
+    // sea de cualquiera de los dos. Cruzarlas (lo que fuera de los dos a
+    // la vez) no dejaría nada a la vista donde cada cosa lleva una sola
+    // categoría, que es casi todo el sitio.
     //
     // El buscador es la otra condición, y con la categoría se CRUZA: con
     // "mapas" puesto y "bosque" escrito sale lo que sea un mapa Y lleve
@@ -187,8 +234,10 @@ function pintarFiltro(caja, cerrar) {
     const items = elementosFiltrables(caja);
     let visibles = 0;
     items.forEach((item) => {
+        const suyas = categoriasDeUno(item);
         const fuera =
-            (puestas.size !== 0 && !puestas.has(categoriaDe(item))) || !pasaElBuscador(item);
+            (puestas.size !== 0 && !suyas.some((c) => puestas.has(c)))
+            || !pasaElBuscador(item);
         item.hidden = fuera;
         if (!fuera) {
             visibles += 1;

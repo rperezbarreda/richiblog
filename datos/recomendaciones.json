@@ -34,6 +34,60 @@
                 "alt": "Portada de La Espada del Destino, por Andrzej Sapkowski",
                 "enlace": "https://www.goodreads.com/book/show/9036325-la-espada-del-destino",
                 "enlaceTexto": "Enlace a Goodreads"
+            },
+            {
+                "titulo": "El Hobbit",
+                "autor": "J.R.R. Tolkien",
+                "anyo": "1937",
+                "texto": "Es la perfecta iniciación al mundo del Señor de los Anillos, cortito y muy ligerito de leer, el audiolibro es una pasada.",
+                "imprescindible": true,
+                "imagen": "/imagenes/recomendaciones/el_hobbit.webp",
+                "alt": "Portada de El Hobbit, por J R R Tolkien",
+                "enlace": "https://www.goodreads.com/book/show/227221.El_hobbit",
+                "enlaceTexto": "Enlace a Goodreads"
+            },
+            {
+                "titulo": "Frankenstein o El moderno Prometeo",
+                "autor": "Mary Wollstonecraft Shelley",
+                "anyo": "1818",
+                "texto": "Las películas no tienen nada que ver con lo que ocurre en el libro, es el comienzo de la ciencia ficción en la literatura y a ratos, con las reflexiones del monstruo, se vuelve casi filosófico.",
+                "imprescindible": true,
+                "imagen": "/imagenes/recomendaciones/frankenstein.webp",
+                "alt": "Frankenstein o El Moderno Prometeo, de Mary Shelley",
+                "enlace": "https://www.goodreads.com/book/show/2031313.Frankenstein_o_El_moderno_Prometeo",
+                "enlaceTexto": "Enlace a Goodreads"
+            },
+            {
+                "titulo": "Juego de Tronos",
+                "autor": "George R.R. Martin",
+                "anyo": "1996",
+                "texto": "Pese a que el final de la serie de HBO deja muchísimo que desear el libro es de sobresaliente, por todo el worldbuilding y las tramas políticas que tiene y la crudeza de alguna de las escenas. Pese a lo grande que es se hace muy amena la lectura, cada capítulo es un punto de vista distinto de los protagonistas y en sucesivos libros se van ampliando los personajes.",
+                "imprescindible": true,
+                "imagen": "/imagenes/recomendaciones/juego_de_tronos.webp",
+                "alt": "Juego de Tronos, por George R R Martin",
+                "enlace": "https://www.goodreads.com/book/show/1453612.Juego_de_tronos",
+                "enlaceTexto": "Enlace a Goodreads"
+            },
+            {
+                "titulo": "Siete reporteros y un periódico",
+                "autor": "Pilar Lozano Carbayo",
+                "anyo": "2005",
+                "texto": "Es el libro que mas me releí en mi infancia, es muy disfrutón y se lee en una tarde.",
+                "imagen": "/imagenes/recomendaciones/siete_reporteros_y_un_periodico.webp",
+                "alt": "Siete reporteros y un periódico, de Pilar Lozano Carbayo",
+                "enlace": "https://www.goodreads.com/book/show/4135941-siete-reporteros-y-un-peri-dico",
+                "enlaceTexto": "Enlace a Goodreads"
+            },
+            {
+                "titulo": "La Metamorfosis",
+                "autor": "Franz Kafka",
+                "anyo": "1915",
+                "texto": "Pobre Gregorio Samsa. Super cortito y de mucha introspección.",
+                "imprescindible": true,
+                "imagen": "/imagenes/recomendaciones/la_metamorfosis.webp",
+                "alt": "La Metamorfosis, de Franz Kafka",
+                "enlace": "https://www.goodreads.com/book/show/59186.La_metamorfosis",
+                "enlaceTexto": "Enlace a Goodreads"
             }
         ]
     },

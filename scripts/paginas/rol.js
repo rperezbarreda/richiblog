@@ -9,7 +9,7 @@
 // datos/mis-movidas.json.
 //
 // QUIÉN MANDA: datos/rol.json. Es el archivo que se toca (a mano o con
-// herramientas/nuevo.py --rol). De ahí saca también generar-posts.py la
+// herramientas/1-publicar/nuevo.py --rol). De ahí saca también generar-posts.py la
 // parte de rol de datos/mis-movidas.json, que es lo que alimenta la
 // portada (novedades.exe) y el RSS. O sea: un solo sitio donde
 // escribir, y todo lo demás se entera solo.
@@ -188,7 +188,11 @@ function escaparHtml(texto) {
 // de un href ejecuta código con solo pulsarla.
 function rutaSegura(url) {
     const limpia = (url || "").trim();
-    if (/^(https?:|mailto:|\/|#)/i.test(limpia)) {
+    // Una dirección de ESTA web (que empiece por "/" pero no por "//",
+    // que sería otra web), una http(s) entera, un correo o un ancla. Lo
+    // demás —"javascript:", "data:", "//otrositio.com"— no es una
+    // dirección: es código o es irse de aquí sin que se note.
+    if (/^\/(?!\/)/.test(limpia) || /^(https?:\/\/|mailto:|#)/i.test(limpia)) {
         return limpia;
     }
     return "#";

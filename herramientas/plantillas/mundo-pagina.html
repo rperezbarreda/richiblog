@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8">
+    <!-- ==== TEMA ====
+         El tema elegido, puesto antes del primer pintado para que no haya
+         fogonazo. Lo escribe la herramienta leyendo scripts/tema.js. -->
+    <meta name="theme-color" content="#12091c">
+    <script>
+      (function () {
+        try {
+          var temas = {
+            "claro": ["light", "#f3e1d6"],
+            "oscuro-puro": ["puro-oscuro", "#000000"],
+            "claro-puro": ["puro-claro", "#ffffff"],
+            "tranquilo": ["tranquilo", "#f2efe9"],
+            "tranquilo-oscuro": ["tranquilo-oscuro", "#1b1e22"],
+            "terminal-verde": ["terminal-verde", "#000000"],
+            "terminal-azul": ["terminal-azul", "#000000"],
+            "terminal-rojo": ["terminal-rojo", "#000000"],
+            "terminal-ambar": ["terminal-ambar", "#000000"]
+          };
+          var guardado = localStorage.getItem("richi-theme");
+          var elegido = temas[guardado];
+          if (!elegido && !guardado &&
+              window.matchMedia("(prefers-color-scheme: light)").matches) {
+            elegido = temas.claro;
+          }
+          if (elegido) {
+            document.documentElement.setAttribute("data-theme", elegido[0]);
+            var barra = document.querySelector('meta[name="theme-color"]');
+            if (barra) { barra.setAttribute("content", elegido[1]); }
+          }
+        } catch (e) {}
+      })();
+    </script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{TITULO}} · Wiki Cralëa · El Blog de Richi</title>
+    <!-- Cómo se ve el enlace al compartirlo (Bluesky, Discord, Ko-fi…).
+         Sin esto solo sale la URL pelada, sin título ni imagen. Las rutas
+         van absolutas a propósito: las redes no resuelven las relativas. -->
+    <meta name="description" content="{{DESCRIPCION}}">
+    <link rel="canonical" href="https://richi.blog/web/mundo/{{SLUG}}.html">
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="El Blog de Richi">
+    <meta property="og:locale" content="es_ES">
+    <meta property="og:title" content="{{TITULO}} · Wiki Cralëa · El Blog de Richi">
+    <meta property="og:description" content="{{DESCRIPCION}}">
+    <meta property="og:url" content="https://richi.blog/web/mundo/{{SLUG}}.html">
+    <meta property="og:image" content="https://richi.blog/imagenes/meta/og.webp">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta property="og:image:alt" content="El Blog de Richi — ilustración de Richi sobre fondo morado">
+    <meta name="twitter:card" content="summary_large_image">
+    <link rel="icon" type="image/x-icon" href="/imagenes/favicon.ico">
+    <!-- La única fuente que se precarga. Medido con la red frenada: sin esto el
+         navegador no la descubre hasta parsear el CSS (~800 ms) y el texto baila al
+         cambiar de tipografía; así llega antes del primer pintado y no se nota el
+         cambio. Precargar más fuentes empeoraba el primer pintado 150-210 ms, porque
+         compiten por el ancho de banda con lo que hace falta para pintar. -->
+    <link rel="preload" href="/tipografias/space-grotesk-400.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="alternate" type="application/rss+xml" title="El Blog de Richi — blog, relatos y rol" href="/blog/rss.xml">
+    <!-- ==== ADELANTO DEL MENÚ ====
+         El menú, pedido LO PRIMERO para que no llegue tarde. Lo escribe
+         la herramienta; el porqué está en ella. -->
+    <script>window.adelantoDeFragmentos={};try{window.adelantoDeFragmentos["/fragmentos/barra-lateral.html"]=fetch("/fragmentos/barra-lateral.html?v=92f43351").then(function(r){return r.ok?r.text():null}).catch(function(){return null})}catch(e){}</script>
+    <!-- ==== CSS ====
+         La escribe herramientas/3-generadores/actualizar-cabeceras.py.
+         No la toques a mano (el porqué, en esa herramienta). -->
+    <link rel="stylesheet" href="/estilos/paquete-comun.css?v=9ae9d5fe">
+    <link rel="stylesheet" href="/estilos/paginas/recomendaciones.css?v=0f63e3d7">
+    <link rel="stylesheet" href="/estilos/componentes/filtros.css?v=ae4abb2d">
+    <link rel="stylesheet" href="/estilos/componentes/filtros.responsive.css?v=04de297b">
+    <link rel="stylesheet" href="/estilos/componentes/barra-lateral.css?v=588851ec">
+    <link rel="stylesheet" href="/estilos/componentes/barra-lateral.responsive.css?v=45e554fd">
+    <link rel="stylesheet" href="/estilos/paginas/buscar.css?v=692b762d">
+    <link rel="stylesheet" href="/estilos/paquete-cierre.css?v=7d910eba">
+    <!-- ==== fin del CSS ==== -->
+    <script src="/scripts/cargador-scripts.js?v=368c7151"></script>
+    <!-- ==== JS ====
+         Igual que el CSS: la escribe la herramienta, a partir de
+         scripts_de(). Van con defer y en este orden, que importa. -->
+    <script defer src="/scripts/paquete-comun.js?v=bf514c0f"></script>
+    <script defer src="/scripts/componentes/filtros.js?v=539b45ae"></script>
+    <script defer src="/scripts/paginas/recomendaciones.js?v=a7707410"></script>
+    <!-- ==== fin del JS ==== -->
+    </head>
+<body>
+    <!-- ==== SIDEBAR / NAVEGACIÓN ==== -->
+    <a class="skip-link" href="#main-content">Saltar al contenido</a>
+    <div id="sidebar-container"></div>
+    <!-- ==== CONTENIDO PRINCIPAL ==== -->
+
+    <main id="main-content">
+        <!-- ==== HOME ==== -->
+        <section id="home" class="home mundo-page">
+            <!-- ESTA PÁGINA NO SE EDITA A MANO.
+                 La escribe entera herramientas/3-generadores/generar-mundo.py
+                 a partir de un archivo .md de la carpeta mundo/, que es la
+                 bóveda de Chronicler. Lo que se escriba aquí se pierde la
+                 próxima vez que se pase el generador.
+
+                 Para cambiar lo que pone: se abre la página en Chronicler
+                 (o el .md con cualquier editor) y se pasa
+
+                     python herramientas/3-generadores/generar-mundo.py
+
+                 Esta misma página es la plantilla: lo que está entre
+                 llaves dobles lo rellena el generador. -->
+            <div class="mundo-cabecera">
+                <a class="mundo-volver" href="/web/mundo/index_mundo.html">← volver a la wiki</a>
+                <h1 class="mundo-titulo">{{TITULO}}</h1>
+                {{SUBTITULO_BLOQUE}}
+                {{ETIQUETAS}}
+            </div>
+
+            <div class="mundo-columnas">
+                <!-- EL ARTÍCULO. Sale del cuerpo del .md: encabezados,
+                     listas, tablas, citas, imágenes y los enlaces a otras
+                     páginas del mundo. Lo que enlaza a una página que
+                     todavía no existe sale marcado y sin enlace. -->
+                <article class="mundo-articulo">{{CUERPO}}</article>
+
+                <!-- LA FICHA. Sale del frontmatter del .md: el campo
+                     "image" arriba y debajo cada campo que haya, en el
+                     orden en que esté escrito. Si la página no tiene
+                     frontmatter, esto no sale. -->
+                {{FICHA}}
+            </div>
+
+            {{BACKLINKS}}
+
+            <a class="mundo-volver mundo-volver-abajo" href="/web/mundo/index_mundo.html">← volver a la wiki</a>
+        </section>
+    </main>
+</body>
+</html>

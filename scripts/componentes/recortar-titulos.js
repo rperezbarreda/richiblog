@@ -50,7 +50,7 @@
 //
 // OJO CON LOS NOMBRES: todos los scripts comparten el mismo ámbito
 // global, así que lo de aquí lleva "recorte" o "recortar" en el nombre.
-// Se comprueba con herramientas/nombres-repetidos.py.
+// Se comprueba con herramientas/4-comprobar/nombres-repetidos.py.
 
 // Las cajas cuyos títulos se recortan. Solo la portada: en el listado
 // del blog, en el de relatos y en el "sigue leyendo" los títulos siguen

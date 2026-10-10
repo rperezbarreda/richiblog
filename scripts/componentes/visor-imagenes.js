@@ -100,7 +100,9 @@ function openLightbox(trigger) {
     // Si el botón trae una versión grande aparte (galería del santuario,
     // donde lo que se ve en la rejilla es una miniatura), se amplía esa.
     // Si no, la propia imagen, como en el resto del sitio.
-    lightboxImage.src = trigger.dataset.completa || img.currentSrc || img.src;
+    lightboxImage.src = imagenSeguraLightbox(
+        trigger.dataset.completa || img.currentSrc || img.src
+    );
     lightboxImage.alt = img.alt || "";
     lightboxOverlay.hidden = false;
     document.body.classList.add("lightbox-open");
@@ -112,6 +114,20 @@ function openLightbox(trigger) {
 
     const closeBtn = lightboxOverlay.querySelector(".lightbox-close");
     closeBtn.focus();
+}
+
+// La dirección sale de un data- del HTML y de la propia imagen, que las
+// escribes tú, pero acaba en un src: se comprueba cómo empieza, igual
+// que en el resto del sitio. Vale una dirección de esta web (una "/" que
+// no sea "//", que sería otra web), una http(s) entera o un data: de
+// imagen. Lo demás no se pone.
+function imagenSeguraLightbox(url) {
+    const limpia = (url || "").toString().trim();
+    if (/^\/(?!\/)/.test(limpia) || /^https?:\/\//i.test(limpia)
+        || /^data:image\//i.test(limpia)) {
+        return limpia;
+    }
+    return "";
 }
 
 function closeLightbox() {

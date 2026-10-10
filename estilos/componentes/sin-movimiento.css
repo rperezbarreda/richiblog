@@ -19,7 +19,7 @@
    esto solo suma. Lo que pide el aparato manda.
 
    ESTE ARCHIVO SE CARGA EL ÚLTIMO (va en ULTIMAS, en
-   herramientas/actualizar-cabeceras.py) y eso es parte de cómo
+   herramientas/3-generadores/actualizar-cabeceras.py) y eso es parte de cómo
    funciona: cuando dos reglas pesan lo mismo gana la que llega después,
    así que estando al final se evita tener que inflar los selectores. En
    esta web no se usa !important en ningún archivo y aquí tampoco. */

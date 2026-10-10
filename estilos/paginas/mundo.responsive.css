@@ -1,0 +1,120 @@
+/* EL MUNDO EN PANTALLAS ESTRECHAS */
+
+/* LA FICHA AL LADO, pero solo cuando caben las dos columnas de verdad.
+   El corte sale de medir, con el texto a su tamaño (21,6px): a 1280 de
+   ventana, con el menú a la izquierda y una ficha de 17rem a la derecha,
+   al artículo le quedaban 41 caracteres por línea; a 1440 son 45, que ya
+   se lee. Por debajo de eso, una columna.
+
+   El tope de la ficha es 17rem y no más: en una página con cuatro campos
+   de una línea, una ficha ancha es un marco medio vacío. */
+@media (min-width: 1400px) {
+    .mundo-columnas {
+        grid-template-columns: minmax(0, 1fr) minmax(0, 17rem);
+    }
+}
+
+/* EN UNA COLUMNA, LA FICHA VA ARRIBA DEL TODO. En el HTML está DESPUÉS del
+   artículo —que es el orden en que se lee y el que oye un lector de
+   pantalla— y aquí se sube con grid-row.
+
+   Es lo contrario de lo que suele hacerse, y es a propósito: en una
+   pantalla estrecha, bajar tres pantallas de artículo para enterarse de
+   que la ciudad tiene doce mil habitantes no le sirve a nadie. La ficha es
+   el resumen, y un resumen va antes.
+
+   grid-row y no "order": order sobre una rejilla no funcionaba en este
+   navegador (ver el comentario de .campana-card en notas-rol.css). */
+@media (max-width: 1399px) {
+    .mundo-ficha {
+        grid-row: 1;
+        /* Que no se estire a lo ancho del todo: una ficha de 900px con
+           seis campos de una línea se lee fatal. */
+        max-width: 28rem;
+    }
+
+    .mundo-articulo {
+        grid-row: 2;
+    }
+
+    .mundo-columnas {
+        gap: 22px;
+    }
+}
+
+/* El mismo corte que la barra lateral: a partir de aquí el menú es un
+   cajón y la barra amarilla del título manda arriba. */
+@media (max-width: 860px) {
+    .mundo-page,
+    .mundo-indice-page {
+        gap: 12px;
+        padding: 24px 6%;
+    }
+
+    .mundo-ficha {
+        max-width: none;
+    }
+
+    /* Las fichas del índice, a lo ancho: a 390px la rejilla de 17rem
+       dejaba una sola columna con medio hueco muerto a la derecha. */
+    .mundo-items {
+        grid-template-columns: 1fr;
+    }
+
+    /* Y el botón de volver de abajo a lo ancho y centrado, como el resto
+       de botones grandes en móvil: es más fácil de acertar con el dedo. */
+    .mundo-volver-abajo {
+        align-self: stretch;
+        justify-content: center;
+        margin-top: 16px;
+    }
+}
+
+@media (max-width: 480px) {
+    .mundo-page,
+    .mundo-indice-page {
+        padding: 20px 5%;
+    }
+
+    .mundo-ficha {
+        padding: 14px;
+    }
+
+    /* El título de un artículo, un punto menos: a 320px, "Las Marcas
+       Bajas" a 3,25rem se parte en tres líneas. */
+    .mundo-titulo {
+        font-size: clamp(1.75rem, 8vw, 2.25rem);
+    }
+}
+
+
+/* ====================================================================
+   LA PORTADA, EN DOS COLUMNAS
+   ====================================================================
+   El índice a la izquierda y los mapas a la derecha, pero solo cuando
+   caben de verdad. El corte sale de medir con el texto a su tamaño
+   (21,6px de raíz): a 1280 de ventana, con el menú lateral puesto y una
+   columna de mapas de 20rem, a las tarjetas del índice les quedaban dos
+   por fila muy justas; a 1400 van tres y la silueta del mapa se ve.
+
+   Por debajo de eso, una sola columna y los mapas ENTRE la cabecera y el
+   índice: en un móvil, el mapa es a lo que más se entra, y dejarlo al
+   final de una lista de cincuenta páginas es esconderlo. */
+@media (min-width: 1400px) {
+    .mundo-indice-page {
+        grid-template-columns: minmax(0, 1fr) minmax(0, 20rem);
+        grid-template-areas:
+            "cabecera vistas"
+            "indice   vistas";
+        column-gap: 26px;
+    }
+}
+
+/* En pantallas muy estrechas, la silueta del mapa ocupa menos: ahí lo que
+   se quiere es llegar a la lista, no mirar el dibujo en miniatura. */
+@media (max-width: 480px) {
+    .mundo-vista-marco {
+        max-height: 40vh;
+        overflow: hidden;
+    }
+}

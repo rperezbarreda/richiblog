@@ -1,37 +1,23 @@
 // =========================================
-// LAS NOTAS DE UNA PARTIDA — escenas y tareas
+// LAS NOTAS DE UNA PARTIDA — escenas, hojas y pie
 // =========================================
 // Esto solo corre en las páginas de notas de rol (las que tienen un
-// .cuaderno dentro). Hace tres cosas, y ninguna de ellas es imprescindible:
-// la página ya funciona sin JavaScript, con las escenas plegándose solas
+// .cuaderno dentro). Hace cuatro cosas, y ninguna es imprescindible: la
+// página ya funciona sin JavaScript, con las escenas plegándose solas
 // —eso lo hace el navegador, porque son <details>— y las casillas de las
 // cosas pendientes dibujadas según lo que ponga el archivo.
 //
 //   1. El botón de plegar o desplegar todas las escenas de golpe.
-//   2. Marcar y desmarcar las cosas pendientes, con su cuenta debajo.
-//   3. Abrir todas las escenas antes de imprimir y volver a dejarlas como
-//      estaban después.
+//   2. Pasar de hoja, con su giro de página.
+//   3. Abrir todas las escenas antes de imprimir y dejarlas después como
+//      estaban.
+//   4. El botón del PDF y los saltos a la sesión de al lado, debajo del
+//      post-it.
 //
-// LO QUE SE MARCA SE GUARDA EN ESTE NAVEGADOR Y NADA MÁS
-// -----------------------------------------------------
-// Las notas son un archivo HTML escrito a mano: lo que ve quien entra en
-// la web es lo que ponga ahí (un <li class="hecho">). Marcar una casilla
-// aquí no cambia el archivo —no puede—, así que se guarda en el
-// localStorage del navegador de quien la marca.
-//
-// Eso está bien pensado, no es una limitación disimulada: la lista de
-// pendientes de una partida es de quien la escribió, y que alguien de
-// fuera marque una casilla no tiene que cambiársela a nadie más. Y para
-// Richi vale igual: va marcando según se resuelven las cosas y al
-// terminar la campaña lo pasa al archivo, o no.
-//
-// Para que no haya dudas de qué es qué, cuando lo marcado aquí no
-// coincide con lo escrito sale un "volver a lo escrito" debajo de la
-// lista. Si coincide, no sale: no habría nada que deshacer.
-
-// La clave con la que se guarda. Lleva la dirección de la página dentro
-// para que dos sesiones no se pisen lo marcado.
-const CUADERNO_CLAVE = "richi-tareas";
+// LAS CASILLAS DE LAS COSAS PENDIENTES NO ESTÁN AQUÍ: las monta
+// scripts/componentes/tareas.js. Se sacaron a un componente el día que
+// la página de "en lo que ando" quiso el mismo post-it, que es cuando
+// una cosa deja de ser "de las notas de rol" y pasa a ser del sitio.
 
 // Lo que mide una hoja como mínimo: lo mismo que el flex-basis de
 // .cuaderno-hoja en notas-rol.css. Si se cambia allí, se cambia aquí.
@@ -49,11 +35,6 @@ const CUADERNO_HOJA_MINIMA_REM = 22;
 // por tanto no se enlaza desde la de al lado.
 const CUADERNO_LISTADO_URL = "/datos/notas-rol.json";
 
-// Se guarda {texto de la tarea: true/false} y no la posición en la lista,
-// a propósito: si se añade una tarea nueva a mitad de la lista, por
-// posición se correría todo y aparecerían marcadas las que no son. Por
-// texto, lo peor que pasa es que al reescribir una tarea vuelva a como
-// está en el archivo, que es exactamente lo que tiene que pasar.
 initializeCuaderno();
 
 function initializeCuaderno() {
@@ -71,7 +52,6 @@ function initializeCuaderno() {
         montarPlegarTodo(cuaderno);
         prepararImpresionCuaderno();
     }
-    montarTareas();
     nombrarHojas(cuaderno);
     montarPasarPagina(cuaderno);
     // Esto va a buscar dos JSON, así que no se espera: el cuaderno ya
@@ -426,6 +406,14 @@ async function montarPieDeNotas() {
     if (pdf && /^https?:\/\//i.test(pdf)) {
         pie.appendChild(botonDePdf(pdf));
     }
+
+    // El reparto de la campaña, si lo tiene. Desde unas notas es
+    // justo lo que apetece mirar ("¿quién era Rukkus?"), y así no hay
+    // que pasar por el índice de la campaña para llegar.
+    const reparto = (campana.npcs || "").toString().trim();
+    if (reparto && /^\//.test(reparto)) {
+        pie.appendChild(botonDeReparto(reparto));
+    }
     if (anterior || siguiente) {
         pie.appendChild(navDeSaltos(anterior, siguiente));
     }
@@ -435,7 +423,7 @@ async function montarPieDeNotas() {
 // direcciones se comparan sin extensión. (Mismo criterio que en
 // scripts/paginas/notas-rol.js; va con otro nombre porque todos los
 // scripts comparten el mismo ámbito global —se comprueba con
-// herramientas/nombres-repetidos.py—.)
+// herramientas/4-comprobar/nombres-repetidos.py—.)
 function sinExtensionCuaderno(ruta) {
     return (ruta || "").toString().trim().replace(/\.html$/, "").replace(/\/+$/, "");
 }
@@ -443,7 +431,11 @@ function sinExtensionCuaderno(ruta) {
 function botonDePdf(url) {
     const enlace = document.createElement("a");
     enlace.className = "cuaderno-pdf";
-    enlace.href = url;
+    // Comprobada otra vez aquí, aunque quien llama ya mire que empiece
+    // por http: la comprobación tiene que estar donde se USA la
+    // dirección, que es lo que sigue siendo verdad el día que a esta
+    // función la llame otro sitio.
+    enlace.href = rutaSeguraCuaderno(url);
     // En otra pestaña porque es un archivo de fuera (Drive) y volver
     // atrás desde un visor de PDF no siempre devuelve a la página. Que
     // se abre en otra pestaña lo avisa solo
@@ -460,6 +452,25 @@ function botonDePdf(url) {
 
     const texto = document.createElement("span");
     texto.textContent = "descargar las notas en PDF";
+    enlace.appendChild(texto);
+    return enlace;
+}
+
+function botonDeReparto(url) {
+    const enlace = document.createElement("a");
+    // Misma pinta que el botón del PDF: son los dos enlaces del pie y
+    // uno al lado del otro tienen que verse como lo mismo.
+    enlace.className = "cuaderno-pdf";
+    enlace.href = url;
+
+    const flecha = document.createElement("span");
+    flecha.className = "cuaderno-pdf-flecha";
+    flecha.setAttribute("aria-hidden", "true");
+    flecha.textContent = "→";
+    enlace.appendChild(flecha);
+
+    const texto = document.createElement("span");
+    texto.textContent = "npcs";
     enlace.appendChild(texto);
     return enlace;
 }
@@ -488,7 +499,7 @@ function unSalto(cual, sentido) {
 
     const enlace = document.createElement("a");
     enlace.className = "cuaderno-salto";
-    enlace.href = sesion.url;
+    enlace.href = rutaSeguraCuaderno(sesion.url);
     // rel="prev"/"next" para quien lee la página con un navegador o una
     // extensión que sepa saltar de una a otra con el teclado.
     enlace.rel = sentido === "anterior" ? "prev" : "next";
@@ -514,6 +525,20 @@ function unSalto(cual, sentido) {
 
     enlace.appendChild(texto);
     return enlace;
+}
+
+// Las direcciones que salen del JSON de la campaña acaban en un href, y
+// una que empezara por "javascript:" sería código que se ejecuta al
+// pulsar. Se comprueba cómo empieza. El PDF y el reparto ya se miraban
+// cada uno por su lado; esto es lo mismo para los saltos.
+function rutaSeguraCuaderno(url) {
+    const limpia = (url || "").toString().trim();
+    // Una dirección de ESTA web (que empiece por "/" pero no por "//",
+    // que sería otra) o una http(s) entera. Lo demás no se pone.
+    if (/^\/(?!\/)/.test(limpia) || /^https?:\/\//i.test(limpia)) {
+        return limpia;
+    }
+    return "#";
 }
 
 function nombreDeSesion(sesion, publicada) {
@@ -663,164 +688,5 @@ function prepararImpresionCuaderno() {
         if (typeof papel.addEventListener === "function") {
             papel.addEventListener("change", cambio);
         }
-    }
-}
-
-
-// =========================================
-// LAS COSAS PENDIENTES
-// =========================================
-
-function montarTareas() {
-    const listas = [...document.querySelectorAll(".cuaderno-tareas")];
-    if (!listas.length) {
-        return;
-    }
-    const guardado = leerTareasGuardadas();
-
-    listas.forEach((lista, numero) => {
-        const tareas = [...lista.children].filter((li) => li.tagName === "LI");
-        if (!tareas.length) {
-            return;
-        }
-
-        const pie = document.createElement("p");
-        pie.className = "cuaderno-tareas-pie";
-
-        const cuenta = document.createElement("span");
-        // role="status" para que, al marcar una casilla, un lector de
-        // pantalla lea la cuenta nueva sin que haya que ir a buscarla.
-        cuenta.setAttribute("role", "status");
-        pie.appendChild(cuenta);
-
-        const deshacer = document.createElement("button");
-        deshacer.type = "button";
-        deshacer.className = "cuaderno-tareas-deshacer";
-        deshacer.textContent = "volver a lo escrito";
-        deshacer.hidden = true;
-        pie.appendChild(deshacer);
-
-        const fichas = tareas.map((li) => prepararTarea(li, guardado));
-
-        const repasar = () => {
-            const hechas = fichas.filter((f) => f.li.classList.contains("hecho"));
-            cuenta.textContent =
-                fichas.length === 1
-                    ? hechas.length + " de 1 hecha"
-                    : hechas.length + " de " + fichas.length + " hechas";
-            deshacer.hidden = !fichas.some(
-                (f) => f.li.classList.contains("hecho") !== f.escrito
-            );
-        };
-
-        fichas.forEach((ficha) => {
-            ficha.casilla.addEventListener("change", () => {
-                ficha.li.classList.toggle("hecho", ficha.casilla.checked);
-                guardarTarea(ficha.clave, ficha.casilla.checked, ficha.escrito);
-                repasar();
-            });
-        });
-
-        deshacer.addEventListener("click", () => {
-            fichas.forEach((ficha) => {
-                ficha.casilla.checked = ficha.escrito;
-                ficha.li.classList.toggle("hecho", ficha.escrito);
-                guardarTarea(ficha.clave, ficha.escrito, ficha.escrito);
-            });
-            repasar();
-            // El foco se queda en el aire al esconderse el botón que se
-            // acaba de pulsar: se lleva a la primera casilla, que es lo
-            // más cercano y lo siguiente que se va a tocar.
-            if (fichas.length) {
-                fichas[0].casilla.focus();
-            }
-        });
-
-        repasar();
-        lista.parentNode.insertBefore(pie, lista.nextSibling);
-        // Una lista sin nombre delante no se distingue de otra en el
-        // mismo archivo; la cuenta lleva el número por si hay dos.
-        if (listas.length > 1) {
-            cuenta.id = "cuaderno-tareas-cuenta-" + (numero + 1);
-        }
-    });
-}
-
-// Una tarea: se envuelve lo que haya escrito en un <label> con su casilla
-// delante, para poder marcarla. Lo escrito no se toca —puede llevar
-// <strong>, <em> o un enlace dentro—: se mueve entero.
-function prepararTarea(li, guardado) {
-    const escrito = li.classList.contains("hecho");
-    const clave = (li.textContent || "").replace(/\s+/g, " ").trim();
-
-    const etiqueta = document.createElement("label");
-    etiqueta.className = "cuaderno-tarea";
-
-    const casilla = document.createElement("input");
-    casilla.type = "checkbox";
-    casilla.className = "cuaderno-tarea-casilla";
-    etiqueta.appendChild(casilla);
-
-    while (li.firstChild) {
-        etiqueta.appendChild(li.firstChild);
-    }
-    li.appendChild(etiqueta);
-
-    const marcada = Object.prototype.hasOwnProperty.call(guardado, clave)
-        ? !!guardado[clave]
-        : escrito;
-    casilla.checked = marcada;
-    li.classList.toggle("hecho", marcada);
-
-    return { li, casilla, clave, escrito };
-}
-
-
-// =========================================
-// LO MARCADO, GUARDADO
-// =========================================
-// Todo entre try/catch: en una ventana privada, o con el almacenamiento
-// bloqueado, localStorage no falla al leerlo sino al tocarlo, y una
-// página que se cae entera porque no ha podido recordar una casilla
-// marcada no tiene ninguna gracia.
-
-function claveDeLaPagina() {
-    try {
-        return CUADERNO_CLAVE + ":" + window.location.pathname;
-    } catch (error) {
-        return CUADERNO_CLAVE;
-    }
-}
-
-function leerTareasGuardadas() {
-    try {
-        const crudo = localStorage.getItem(claveDeLaPagina());
-        const datos = crudo ? JSON.parse(crudo) : null;
-        return datos && typeof datos === "object" && !Array.isArray(datos)
-            ? datos
-            : {};
-    } catch (error) {
-        return {};
-    }
-}
-
-// Lo que coincide con el archivo NO se guarda, se borra: así, el día que
-// se pase lo marcado al archivo, lo guardado aquí se queda vacío solo y
-// no hay una copia vieja esperando a contradecirlo.
-function guardarTarea(clave, marcada, escrito) {
-    try {
-        const datos = leerTareasGuardadas();
-        if (marcada === escrito) {
-            delete datos[clave];
-        } else {
-            datos[clave] = marcada;
-        }
-        if (Object.keys(datos).length) {
-            localStorage.setItem(claveDeLaPagina(), JSON.stringify(datos));
-        } else {
-            localStorage.removeItem(claveDeLaPagina());
-        }
-    } catch (error) {
-        // Sin guardar, pero la casilla se queda marcada hasta recargar.
     }
 }

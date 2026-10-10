@@ -25,7 +25,7 @@
 //
 // OJO CON LOS NOMBRES: todos los scripts comparten el mismo ámbito
 // global, así que lo de aquí lleva "lupa" en el nombre. Se comprueba con
-// herramientas/nombres-repetidos.py.
+// herramientas/4-comprobar/nombres-repetidos.py.
 
 const LUPA = {
     ventana: null,

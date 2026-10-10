@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8">
+    <!-- ==== TEMA ====
+         El tema elegido, puesto antes del primer pintado para que no haya
+         fogonazo. Lo escribe la herramienta leyendo scripts/tema.js. -->
+    <meta name="theme-color" content="#12091c">
+    <script>
+      (function () {
+        // Una marca de que el JavaScript funciona, puesta ANTES del primer
+        // pintado. Sirve para que una hoja de estilo pueda decir "esto
+        // solo si hay JavaScript": un spoiler tapado, por ejemplo, que sin
+        // JavaScript sería texto perdido y con él se destapa al pulsarlo.
+        // Aquí y no en otro sitio porque es el único script que corre
+        // antes de pintar: puesto más tarde habría fogonazo.
+        document.documentElement.classList.add("js");
+        try {
+          var temas = {
+            "claro": ["light", "#f3e1d6"],
+            "oscuro-puro": ["puro-oscuro", "#000000"],
+            "claro-puro": ["puro-claro", "#ffffff"],
+            "tranquilo": ["tranquilo", "#f2efe9"],
+            "tranquilo-oscuro": ["tranquilo-oscuro", "#1b1e22"],
+            "terminal-verde": ["terminal-verde", "#000000"],
+            "terminal-azul": ["terminal-azul", "#000000"],
+            "terminal-rojo": ["terminal-rojo", "#000000"],
+            "terminal-ambar": ["terminal-ambar", "#000000"]
+          };
+          var guardado = localStorage.getItem("richi-theme");
+          var elegido = temas[guardado];
+          if (!elegido && !guardado &&
+              window.matchMedia("(prefers-color-scheme: light)").matches) {
+            elegido = temas.claro;
+          }
+          if (elegido) {
+            document.documentElement.setAttribute("data-theme", elegido[0]);
+            var barra = document.querySelector('meta[name="theme-color"]');
+            if (barra) { barra.setAttribute("content", elegido[1]); }
+          }
+        } catch (e) {}
+      })();
+    </script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>En lo que ando · El Blog de Richi</title>
+    <!-- Cómo se ve el enlace al compartirlo (Bluesky, Discord, Ko-fi…).
+         Sin esto solo sale la URL pelada, sin título ni imagen. Las rutas
+         van absolutas a propósito: las redes no resuelven las relativas. -->
+    <meta name="description" content="Lo que tengo entre manos ahora mismo: lo que leo, lo que veo, lo que juego, por dónde va la campaña de rol y lo que ando escribiendo.">
+    <link rel="canonical" href="https://richi.blog/web/en_lo_que_ando/en_lo_que_ando.html">
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="El Blog de Richi">
+    <meta property="og:locale" content="es_ES">
+    <meta property="og:title" content="En lo que ando · El Blog de Richi">
+    <meta property="og:description" content="Lo que tengo entre manos ahora mismo: lo que leo, lo que veo, lo que juego, por dónde va la campaña de rol y lo que ando escribiendo.">
+    <meta property="og:url" content="https://richi.blog/web/en_lo_que_ando/en_lo_que_ando.html">
+    <meta property="og:image" content="https://richi.blog/imagenes/meta/og.webp">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta property="og:image:alt" content="El Blog de Richi — ilustración de Richi sobre fondo morado">
+    <meta name="twitter:card" content="summary_large_image">
+    <link rel="icon" type="image/x-icon" href="/imagenes/favicon.ico">
+    <!-- La única fuente que se precarga. Medido con la red frenada: sin esto el
+         navegador no la descubre hasta parsear el CSS (~800 ms) y el texto baila al
+         cambiar de tipografía; así llega antes del primer pintado y no se nota el
+         cambio. Precargar más fuentes empeoraba el primer pintado 150-210 ms, porque
+         compiten por el ancho de banda con lo que hace falta para pintar. -->
+    <link rel="preload" href="/tipografias/space-grotesk-400.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="alternate" type="application/rss+xml" title="El Blog de Richi — blog, relatos y rol" href="/blog/rss.xml">
+    <!-- ==== ADELANTO DEL MENÚ ====
+         El menú, pedido LO PRIMERO para que no llegue tarde. Lo escribe
+         la herramienta; el porqué está en ella. -->
+    <script>window.adelantoDeFragmentos={};try{window.adelantoDeFragmentos["/fragmentos/barra-lateral.html"]=fetch("/fragmentos/barra-lateral.html?v=739425f1").then(function(r){return r.ok?r.text():null}).catch(function(){return null})}catch(e){}</script>
+    <!-- ==== CSS ====
+         La escribe herramientas/3-generadores/actualizar-cabeceras.py.
+         No la toques a mano (el porqué, en esa herramienta). -->
+    <link rel="stylesheet" href="/estilos/paquete-comun.css?v=9ae9d5fe">
+    <link rel="stylesheet" href="/estilos/paginas/en-lo-que-ando.css?v=4dde8c7f">
+    <link rel="stylesheet" href="/estilos/componentes/postit.css?v=d705bf09">
+    <link rel="stylesheet" href="/estilos/paginas/en-lo-que-ando.responsive.css?v=637843e4">
+    <link rel="stylesheet" href="/estilos/componentes/barra-lateral.css?v=e510b648">
+    <link rel="stylesheet" href="/estilos/componentes/barra-lateral.responsive.css?v=45e554fd">
+    <link rel="stylesheet" href="/estilos/paginas/buscar.css?v=692b762d">
+    <link rel="stylesheet" href="/estilos/paquete-cierre.css?v=7d910eba">
+    <!-- ==== fin del CSS ==== -->
+    <script src="/scripts/cargador-scripts.js?v=476f3b11"></script>
+    <!-- ==== JS ====
+         Igual que el CSS: la escribe la herramienta, a partir de
+         scripts_de(). Van con defer y en este orden, que importa. -->
+    <script defer src="/scripts/paquete-comun.js?v=bf514c0f"></script>
+    <script defer src="/scripts/componentes/tareas.js?v=8fab08ee"></script>
+    <script defer src="/scripts/paginas/en-lo-que-ando.js?v=b52387e7"></script>
+    <!-- ==== fin del JS ==== -->
+    </head>
+<body>
+    <!-- ==== SIDEBAR / NAVEGACIÓN ==== -->
+    <a class="skip-link" href="#main-content">Saltar al contenido</a>
+    <div id="sidebar-container"></div>
+    <!-- ==== CONTENIDO PRINCIPAL ==== -->
+
+    <main id="main-content">
+        <!-- ==== HOME ==== -->
+        <section id="home" class="home ando-page" data-ando-datos="/datos/en-lo-que-ando.json">
+            <!-- EN LO QUE ANDO
+                 Cuatro bloques y ninguno escrito aquí: todo sale de
+                 datos/en-lo-que-ando.json y lo pinta
+                 scripts/paginas/en-lo-que-ando.js. Un bloque sin nada
+                 escrito NO SALE, que es medio sentido de la página: tres
+                 marcos vacíos dirían justo lo contrario de lo que esto
+                 quiere decir.
+
+                 PARA CAMBIAR LO QUE PONE hay dos formas y las dos valen:
+                 abrir el JSON y escribir, o pasar
+                 «python herramientas/1-publicar/en-lo-que-ando.py», que
+                 pregunta bloque a bloque.
+
+                 LA PARTIDA DE ROL NO SE ESCRIBE: sale sola de
+                 datos/notas-rol.json y del JSON de la campaña. Publicar
+                 unas notas es lo que la actualiza. -->
+            <h1 class="home-title">
+                <em>en lo que ando</em>
+            </h1>
+
+            <p class="ando-intro" data-ando-intro>Lo que tengo entre manos ahora mismo.</p>
+            <p class="ando-fecha" data-ando-fecha hidden></p>
+
+            <p class="ando-vacio" data-ando-vacio hidden>Ahora mismo no tengo nada apuntado por aquí. Vuelve otro día.</p>
+
+            <div class="ando-rejilla">
+                <!-- 1. LO QUE LEO, VEO Y JUEGO -->
+                <div class="ando-bloque" data-ando-ahora hidden>
+                    <div class="recent-entries-header">
+                        <h2>ahora_mismo.log</h2>
+                        <div class="window-controls window-controls-small" data-window-controls aria-hidden="true"></div>
+                    </div>
+                    <div class="ando-bloque-cuerpo" data-ando-ahora-cuerpo></div>
+                </div>
+
+                <!-- 2. LA PARTIDA DE ROL, automática -->
+                <div class="ando-bloque" data-ando-rol hidden>
+                    <div class="recent-entries-header">
+                        <h2>la_partida.log</h2>
+                        <div class="window-controls window-controls-small" data-window-controls aria-hidden="true"></div>
+                    </div>
+                    <div class="ando-bloque-cuerpo" data-ando-rol-cuerpo></div>
+                </div>
+
+                <!-- 3. LO QUE ESTOY ESCRIBIENDO -->
+                <div class="ando-bloque" data-ando-escribiendo hidden>
+                    <div class="recent-entries-header">
+                        <h2>escribiendo.txt</h2>
+                        <div class="window-controls window-controls-small" data-window-controls aria-hidden="true"></div>
+                    </div>
+                    <div class="ando-bloque-cuerpo" data-ando-escribiendo-cuerpo></div>
+                </div>
+
+                <!-- 4. LOS PENDIENTES, EN UN POST-IT
+                     El mismo post-it que el de las notas de una partida:
+                     estilos/componentes/postit.css lo dibuja y
+                     scripts/componentes/tareas.js le pone las casillas.
+                     No lleva marco de ventana a propósito: es una nota
+                     pegada al lado, no otro programa abierto. -->
+                <div class="cuaderno-postit ando-postit" data-ando-pendientes hidden>
+                    <h2 class="cuaderno-postit-titulo">pendientes</h2>
+                    <div data-ando-pendientes-cuerpo></div>
+                </div>
+            </div>
+
+            <!-- El botón de volver abajo: en móvil, al llegar al final de
+                 los cuatro bloques, el menú se ha quedado muy lejos. -->
+            <a class="ando-volver" href="/index.html">← volver al inicio</a>
+        </section>
+    </main>
+</body>
+</html>

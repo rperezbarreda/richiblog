@@ -16,13 +16,13 @@
 //
 // (La barra lateral se pide incluso antes que esto: con un <script> de
 // una línea escrito en el <head> de cada página, delante del CSS. Está
-// explicado en herramientas/actualizar-cabeceras.py.)
+// explicado en herramientas/3-generadores/actualizar-cabeceras.py.)
 //
 // LO QUE ANTES ESTABA AQUÍ Y YA NO
 // --------------------------------
 // Este archivo también repartía el JS de cada página: miraba la URL y
 // escribía con document.write() los <script defer> que tocaban. Ahora
-// esa lista la escribe herramientas/actualizar-cabeceras.py en el
+// esa lista la escribe herramientas/3-generadores/actualizar-cabeceras.py en el
 // <head> de cada página, igual que ya hacía con el CSS.
 //
 // El motivo es medido: mientras los scripts los pedía este archivo, el
@@ -55,7 +55,7 @@
 // no has tocado conservan su v=, siguen en la caché y no se vuelven a
 // pedir. Lo mejor de las dos cosas.
 //
-// La lista de abajo la escribe herramientas/actualizar-cabeceras.py,
+// La lista de abajo la escribe herramientas/3-generadores/actualizar-cabeceras.py,
 // que es también quien pone el ?v= de los CSS en el <head> de cada
 // página. NO LA TOQUES A MANO: pásale la herramienta después de
 // cambiar cualquier CSS o JS y antes de subir a Neocities.
@@ -67,7 +67,7 @@
 (function versionesDeArchivos() {
     const VERSIONES = {
         // ==== generado ====
-        "/fragmentos/barra-lateral.html": "e79bcaf8",
+        "/fragmentos/barra-lateral.html": "739425f1",
         "/fragmentos/frases.html": "81a36459",
         // ==== fin del generado ====
     };

@@ -1,15 +1,13 @@
 [
     {
-        "fecha": "05-10-2026",
-        "titulo": "Nueva sección de notas de rol",
+        "fecha": "10-10-2026",
+        "titulo": "Reestructuración del menú, añadido la sección nueva de rol para añadir la wiki de mi mundo homebrew y las notas de partidas y recomendaciones personales.",
         "cosas": [
-            "Añadido un apartado nuevo en la navegación, «notas de rol», con una entrada por campaña. Dentro de cada una hay una ficha con el sistema, quién dirige, los personajes y de qué va, y debajo el índice de las sesiones jugadas.",
-            "Las notas de cada partida se ven como las hojas de un cuaderno, con sus renglones y la raya del margen. Cada hoja se desplaza por su cuenta y se pasa de hoja con unos botones, sin salir de la página y sin que se mueva nada más; al pasar, la hoja que llega entra girando como una página de verdad.",
-            "Lo que queda pendiente de cada partida va en un post-it aparte que no se mueve de su sitio, con sus casillas para ir marcando lo que se va resolviendo. El texto es más pequeño que el del cuaderno y la nota va un poco torcida, con su banda de pegamento y una esquina doblada.",
-            "Los personajes de la mesa salen cada uno de su color (Faëlar en verde, Melissa en azul, Thenarys en rojo y Denelia en morado), tanto en las notas como en la ficha de la campaña; los demás se quedan en el amarillo de siempre. Siguen yendo en negrita, así que se distinguen igual sin ver los colores, y en los temas de blanco y negro puros y en los de terminal salen del color del tema, que ahí hay uno solo a propósito.",
-            "Los objetos que se consiguen en una partida se pueden poner con su propio formato, en letra de máquina y con un rombo delante, para que no se lean como un punto más de lo que pasó.",
-            "Debajo del post-it, el botón para descargar las notas en PDF y el salto a la sesión anterior y a la siguiente, que aparecen solos a medida que se publican.",
-            "Arreglados el ON/OFF del filtro CRT y los botones de animaciones de la ventana de accesibilidad, que según de dónde viniera el menú podían no aparecer."
+                "Alañadido nuevo apartado para añadir notas de partidas de rol, con su sección para las notas, inventario, misiones y npcs.",
+                "Añadiuda nueva sección para añadir la wiki de mi mundo homebrew, con su sección para el mapamundi y entradas tipo wiki.",
+                "Reestructuración del navegador para organizar y separar mejor lo que tiene que ver de partidas de rol con los recursos que creo para ello.",
+                "Añadido apartado de mi rincón para ver recomendaciones personales de libros, películas, series y videojuegos, con su sección para cada tipo de recomendación.",
+                "Añadido el apartado de mi rincón para ver que contenitod estoy consumiendo y en que me estoy dedicando ahora, tanto de escritura como de mejoras en la web."
         ]
     },
     {

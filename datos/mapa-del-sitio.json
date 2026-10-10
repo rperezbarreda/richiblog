@@ -5,7 +5,7 @@
         "seccion": "portada",
         "fecha": "20-09-2026",
         "actualizada": "02-10-2026",
-        "resumen": "26649559"
+        "resumen": "8c1a51ee"
     },
     {
         "url": "/web/blog/2026/octubre/semanita-saturada-de-planes.html",
@@ -13,7 +13,7 @@
         "seccion": "blog",
         "fecha": "04-10-2026",
         "actualizada": "04-10-2026",
-        "resumen": "e464a634"
+        "resumen": "274f515d"
     },
     {
         "url": "/web/blog/2026/septiembre/la-tali-casi-hace-que-me-de-un-ataque-de-panico.html",
@@ -21,7 +21,7 @@
         "seccion": "blog",
         "fecha": "28-09-2026",
         "actualizada": "03-10-2026",
-        "resumen": "d5a16f5a"
+        "resumen": "e75f76e4"
     },
     {
         "url": "/web/blog/2026/septiembre/semanita-de-estar-solo-en-casa.html",
@@ -29,7 +29,7 @@
         "seccion": "blog",
         "fecha": "26-09-2026",
         "actualizada": "03-10-2026",
-        "resumen": "f8162065"
+        "resumen": "d2068b9f"
     },
     {
         "url": "/web/blog/2026/septiembre/tome-la-horrible-decision-de-ver-crepusculo.html",
@@ -37,7 +37,7 @@
         "seccion": "blog",
         "fecha": "23-09-2026",
         "actualizada": "03-10-2026",
-        "resumen": "f5f8bb41"
+        "resumen": "a4fbbe19"
     },
     {
         "url": "/web/blog/2026/septiembre/dia-de-velocidad-x4-de-los-sims.html",
@@ -45,7 +45,7 @@
         "seccion": "blog",
         "fecha": "21-09-2026",
         "actualizada": "03-10-2026",
-        "resumen": "0f40b745"
+        "resumen": "93ae2251"
     },
     {
         "url": "/web/blog/2026/index_2026.html",
@@ -53,7 +53,7 @@
         "seccion": "blog",
         "fecha": "20-09-2026",
         "actualizada": "04-10-2026",
-        "resumen": "03e7a1c5"
+        "resumen": "48ac5213"
     },
     {
         "url": "/web/blog/diario.html",
@@ -61,15 +61,15 @@
         "seccion": "blog",
         "fecha": "20-09-2026",
         "actualizada": "26-09-2026",
-        "resumen": "e680f14e"
+        "resumen": "0e5d4b83"
     },
     {
         "url": "/web/blog/2026/septiembre/puto-tebas-de-los-cojones.html",
         "titulo": "Puto Tebas de los cojones",
         "seccion": "blog",
         "fecha": "20-09-2026",
-        "actualizada": "25-09-2026",
-        "resumen": "77b61017"
+        "actualizada": "10-10-2026",
+        "resumen": "931b07a1"
     },
     {
         "url": "/web/blog/2026/septiembre/por-fin-pongo-en-marcha-esto.html",
@@ -77,7 +77,7 @@
         "seccion": "blog",
         "fecha": "19-09-2026",
         "actualizada": "03-10-2026",
-        "resumen": "d6618196"
+        "resumen": "e90f3227"
     },
     {
         "url": "/web/mis_movidas/relatos/writeober26/dia-02-colmillo.html",
@@ -85,7 +85,7 @@
         "seccion": "relatos",
         "fecha": "02-10-2026",
         "actualizada": "02-10-2026",
-        "resumen": "6730b62f"
+        "resumen": "db7f24a0"
     },
     {
         "url": "/web/mis_movidas/relatos/writeober26/dia-01-hojarasca.html",
@@ -93,7 +93,7 @@
         "seccion": "relatos",
         "fecha": "01-10-2026",
         "actualizada": "01-10-2026",
-        "resumen": "0ad1235d"
+        "resumen": "7ac25087"
     },
     {
         "url": "/web/mis_movidas/relatos/writeober26/index_writeober26.html",
@@ -101,7 +101,7 @@
         "seccion": "relatos",
         "fecha": "26-09-2026",
         "actualizada": "26-09-2026",
-        "resumen": "297b17a4"
+        "resumen": "c0988469"
     },
     {
         "url": "/web/mis_movidas/relatos/index_relatos.html",
@@ -109,7 +109,7 @@
         "seccion": "relatos",
         "fecha": "20-09-2026",
         "actualizada": "02-10-2026",
-        "resumen": "15176866"
+        "resumen": "5feea115"
     },
     {
         "url": "/web/mis_movidas/relatos/aire_para_dos.html",
@@ -117,7 +117,7 @@
         "seccion": "relatos",
         "fecha": "15-09-2025",
         "actualizada": "25-09-2026",
-        "resumen": "4c584b1d"
+        "resumen": "8e81151d"
     },
     {
         "url": "/web/mis_movidas/relatos/pequenyo_insecto.html",
@@ -125,7 +125,7 @@
         "seccion": "relatos",
         "fecha": "25-06-2025",
         "actualizada": "25-06-2026",
-        "resumen": "97aadc07"
+        "resumen": "422506f0"
     },
     {
         "url": "/web/mis_movidas/rol/index_rol.html",
@@ -133,23 +133,47 @@
         "seccion": "rol",
         "fecha": "20-09-2026",
         "actualizada": "02-10-2026",
-        "resumen": "c844e515"
+        "resumen": "a146ff04"
     },
     {
         "url": "/web/notas_rol/ragna/index_ragna.html",
         "titulo": "Campaña de Ragna",
         "seccion": "notas de rol",
         "fecha": "05-10-2026",
-        "actualizada": "05-10-2026",
-        "resumen": "a3158181"
+        "actualizada": "10-10-2026",
+        "resumen": "01f41948"
+    },
+    {
+        "url": "/web/notas_rol/ragna/npcs_ragna.html",
+        "titulo": "NPC — campaña de Ragna",
+        "seccion": "notas de rol",
+        "fecha": "05-10-2026",
+        "actualizada": "06-10-2026",
+        "resumen": "c8f8703d"
     },
     {
         "url": "/web/notas_rol/ragna/sesion-01.html",
         "titulo": "Sesión 1 — El robo de la mercancía",
         "seccion": "notas de rol",
         "fecha": "03-10-2026",
-        "actualizada": "05-10-2026",
-        "resumen": "b4998b32"
+        "actualizada": "09-10-2026",
+        "resumen": "b63c72e7"
+    },
+    {
+        "url": "/web/mundo/como_se_escribe_esto.html",
+        "titulo": "Cómo se escribe esto",
+        "seccion": "wiki cralëa",
+        "fecha": "09-10-2026",
+        "actualizada": "09-10-2026",
+        "resumen": "13002500"
+    },
+    {
+        "url": "/web/mundo/index_mundo.html",
+        "titulo": "Wiki Cralëa",
+        "seccion": "wiki cralëa",
+        "fecha": "09-10-2026",
+        "actualizada": "09-10-2026",
+        "resumen": "53954543"
     },
     {
         "url": "/web/santuarios/regis/regis.html",
@@ -157,7 +181,7 @@
         "seccion": "santuarios",
         "fecha": "20-09-2026",
         "actualizada": "25-09-2026",
-        "resumen": "ec3da88c"
+        "resumen": "4416596f"
     },
     {
         "url": "/web/santuarios/index_santuarios.html",
@@ -165,7 +189,7 @@
         "seccion": "santuarios",
         "fecha": "20-09-2026",
         "actualizada": "25-09-2026",
-        "resumen": "be7e4d4f"
+        "resumen": "532e5ecb"
     },
     {
         "url": "/web/santuarios/tali/tali.html",
@@ -173,7 +197,7 @@
         "seccion": "santuarios",
         "fecha": "20-09-2026",
         "actualizada": "25-09-2026",
-        "resumen": "ed3f1909"
+        "resumen": "8bb4c2d1"
     },
     {
         "url": "/web/recomendaciones/recomendaciones.html",
@@ -181,7 +205,15 @@
         "seccion": "recomendaciones",
         "fecha": "01-10-2026",
         "actualizada": "01-10-2026",
-        "resumen": "cf083d18"
+        "resumen": "23296382"
+    },
+    {
+        "url": "/web/en_lo_que_ando/en_lo_que_ando.html",
+        "titulo": "En lo que ando",
+        "seccion": "otras",
+        "fecha": "06-10-2026",
+        "actualizada": "06-10-2026",
+        "resumen": "21b2311f"
     },
     {
         "url": "/web/buscar/buscar.html",
@@ -189,7 +221,7 @@
         "seccion": "otras",
         "fecha": "02-10-2026",
         "actualizada": "02-10-2026",
-        "resumen": "68306ef7"
+        "resumen": "40a4e3c2"
     },
     {
         "url": "/web/changelog/changelog.html",
@@ -197,7 +229,7 @@
         "seccion": "otras",
         "fecha": "27-09-2026",
         "actualizada": "28-09-2026",
-        "resumen": "8a98e362"
+        "resumen": "a912ad0d"
     },
     {
         "url": "/web/mapa/mapa.html",
@@ -205,7 +237,7 @@
         "seccion": "otras",
         "fecha": "27-09-2026",
         "actualizada": "02-10-2026",
-        "resumen": "0945df77"
+        "resumen": "9d00d3f1"
     },
     {
         "url": "/web/accesibilidad/accesibilidad.html",
@@ -213,7 +245,7 @@
         "seccion": "otras",
         "fecha": "20-09-2026",
         "actualizada": "04-10-2026",
-        "resumen": "736701a5"
+        "resumen": "822d21eb"
     },
     {
         "url": "/web/contacto/contacto.html",
@@ -221,7 +253,7 @@
         "seccion": "otras",
         "fecha": "20-09-2026",
         "actualizada": "02-10-2026",
-        "resumen": "f935abd6"
+        "resumen": "4848e395"
     },
     {
         "url": "/web/sobre_mi/sobre_mi.html",
@@ -229,6 +261,6 @@
         "seccion": "otras",
         "fecha": "20-09-2026",
         "actualizada": "01-10-2026",
-        "resumen": "e7dadde5"
+        "resumen": "14af5f98"
     }
 ]

@@ -3,7 +3,7 @@
 /* Todas las fuentes del sitio se sirven desde /tipografias/ — ya no hay
    ninguna petición a Google. Van todas aquí porque base.css es lo
    único que se carga en TODAS las páginas, incluido el 404 (ver la
-   lista de herramientas/actualizar-cabeceras.py), así que es el único
+   lista de herramientas/3-generadores/actualizar-cabeceras.py), así que es el único
    sitio donde una declaración vale para todo el sitio.
    Declararlas aquí no cuesta ancho de banda: el navegador solo baja
    el archivo cuando algún elemento de esa página usa esa fuente de

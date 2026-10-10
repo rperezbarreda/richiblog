@@ -1,0 +1,49 @@
+{
+    "intro": "Lo que tengo entre manos ahora mismo. Esto no es un archivo ni un histórico: lo de aquí se va cambiando por lo siguiente, así que si vuelves dentro de un mes pondrá otra cosa.",
+    "actualizado": "09-10-2026",
+    "ahora": [
+        {
+            "que": "leyendo",
+            "titulo": "El ojo de la novia frenopática",
+            "de": "Matt Dinniman",
+            "nota": "",
+            "porcentaje": 14,
+            "enlace": "https://www.goodreads.com/book/show/254125747-el-ojo-de-la-novia-frenop-tica"
+        },
+        {
+            "que": "viendo",
+            "titulo": "",
+            "de": "",
+            "nota": "",
+            "porcentaje": null,
+            "enlace": ""
+        },
+        {
+            "que": "jugando",
+            "titulo": "Draco and the Seven Scales",
+            "de": "Ice Goat Games",
+            "nota": "",
+            "porcentaje": null,
+            "enlace": "https://store.steampowered.com/app/2559690/Draco_and_the_Seven_Scales/"
+        }
+    ],
+    "escribiendo": [
+        {
+            "titulo": "Writeober 2026",
+            "tipo": "reto de escritura",
+            "estado": "2 días de 31",
+            "nota": "Un relato corto por día, con la palabra que toque.",
+            "enlace": "/web/mis_movidas/relatos/writeober26/index_writeober26.html"
+        }
+    ],
+    "pendientes": [
+        {
+            "cosa": "Writeober2026 - Día 3",
+            "hecho": false
+        },
+        {
+            "cosa": "Añadir recomendaciones en la web",
+            "hecho": false
+        }
+    ]
+}

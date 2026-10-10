@@ -35,7 +35,7 @@
    del resto del sitio (amarillo macizo que se vacía al pasar por
    encima): así se ve a la primera, en vez del enlace pequeño que
    tenía antes junto al año. El archivo lo genera
-   herramientas/generar-rss.py a partir de los dos listados de
+   herramientas/3-generadores/generar-rss.py a partir de los dos listados de
    datos/: lleva el blog, los relatos y el portfolio de rol. */
 /* Sin esto el botón se seguiría viendo aunque lleve "hidden": una
    regla con display gana a la del navegador para [hidden]. Es el mismo

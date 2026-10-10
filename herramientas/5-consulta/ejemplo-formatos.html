@@ -1,0 +1,127 @@
+<!--
+===============================================================
+  EJEMPLO DE TODO LO QUE PUEDES ESCRIBIR DENTRO DE UNA ENTRADA
+===============================================================
+
+  Esto NO es una página: es el trozo de dentro de una entrada, para
+  copiar y pegar. Va entre las etiquetas que ya trae la entrada:
+
+      <div class="blog-post-body">
+          ...aquí...
+      </div>
+
+  Vale igual para un relato (allí la caja se llama
+  <div class="relato-post-body">, pero el contenido es el mismo).
+
+  PARA VERLO DE VERDAD: crea una entrada de prueba con
+  "python herramientas/1-publicar/nuevo.py", pega esto dentro, ábrela en
+  el navegador y borra la entrada cuando termines de mirar.
+
+  Todo lo que hay aquí tiene ya estilo propio en los dos temas, claro
+  y oscuro. Lo que no esté en esta lista saldrá con la pinta de serie
+  del navegador (que canta bastante), así que si necesitas algo más
+  dímelo y se le da estilo.
+-->
+
+<!-- ===== PÁRRAFOS =====
+     Uno por cada párrafo. El hueco entre ellos ya lo pone el sitio:
+     no hace falta dejar líneas en blanco ni <br>. -->
+<p>Este es un párrafo normal. Así se ve el texto corrido de una entrada, que es lo que vas a escribir el 95% del tiempo.</p>
+
+<p>Y este es otro párrafo, para que se vea la separación entre uno y otro.</p>
+
+<!-- ===== SUBTÍTULOS =====
+     h2 para los apartados y h3 para los de dentro de un apartado.
+     No uses h1: el h1 de la página es el título de la entrada, y
+     tener dos despista a un lector de pantalla y a Google. -->
+<h2>Un apartado de la entrada</h2>
+
+<p>Texto del apartado.</p>
+
+<h3>Algo dentro de ese apartado</h3>
+
+<p>Y su texto.</p>
+
+<!-- ===== NEGRITA, CURSIVA Y DEMÁS =====
+     strong es "esto importa" y em es "esto va con énfasis". Se ven
+     como negrita y cursiva, pero además un lector de pantalla los
+     entona; <b> e <i> no dicen nada, así que mejor estos. -->
+<p>Se puede poner <strong>algo en negrita</strong>, <em>algo en cursiva</em>, <s>algo tachado</s> y <code>algo de código suelto</code> en mitad de una frase.</p>
+
+<!-- ===== ENLACES =====
+     Los de dentro del sitio empiezan por / (sin el dominio).
+     A los de fuera conviene ponerles target y rel, que es lo que abre
+     el enlace en otra pestaña sin dejar que la otra web toque la tuya. -->
+<p>Un <a href="/web/santuarios/index_santuarios.html">enlace a otra página del sitio</a> y un <a href="https://ko-fi.com/soyrichi" target="_blank" rel="noopener noreferrer">enlace de fuera</a>.</p>
+
+<!-- ===== LISTAS =====
+     ul para puntos, ol cuando el orden importa. -->
+<ul>
+    <li>Un punto de una lista.</li>
+    <li>Otro punto, que puede llevar <strong>negrita</strong> o <a href="/index.html">un enlace</a> dentro.</li>
+    <li>Y un punto largo, para ver cómo se parte cuando ocupa más de una línea seguida y sigue sangrado por debajo de sí mismo.</li>
+</ul>
+
+<ol>
+    <li>Primero esto.</li>
+    <li>Después esto otro.</li>
+</ol>
+
+<!-- ===== CITAS =====
+     El párrafo va dentro del blockquote, no suelto. -->
+<blockquote>
+    <p>Una cita, de un libro, de una partida o de lo que sea.</p>
+</blockquote>
+
+<!-- ===== CÓDIGO EN BLOQUE =====
+     pre + code. Lo que escribas dentro sale tal cual, con sus
+     espacios, así que la sangría cuenta: pégalo pegado al margen.
+     Una línea larga se desplaza dentro de su propia caja, no
+     ensancha la página. Si escribes < o & dentro, ponlos como
+     &lt; y &amp; o el navegador se cree que son etiquetas. -->
+<pre><code>python herramientas/1-publicar/nuevo.py
+python herramientas/3-generadores/generar-sitemap.py</code></pre>
+
+<!-- ===== IMÁGENES DENTRO DEL TEXTO =====
+     (la de la columna de la derecha ya la pone el script al crear la
+     entrada; esta es para meter una en mitad de lo que escribes)
+
+     - Guárdala en imagenes/blog/ y pásala por optimizar-imagenes.py.
+     - width y height son los del archivo: reservan el hueco para que
+       el texto no pegue un salto cuando la imagen carga.
+     - loading="lazy" para que no se descargue hasta que haga falta.
+     - alt: si la imagen aporta algo, descríbela en una frase; si es
+       puro adorno, déjalo vacío (alt="") y así no se lee en voz alta.
+     - Si no necesita pie, quita el figure y deja solo el img. -->
+<figure>
+    <img src="/imagenes/blog/una-foto.webp" alt="Describe aquí lo que se ve en la foto" width="800" height="600" loading="lazy" decoding="async">
+    <figcaption>Un pie para la imagen.</figcaption>
+</figure>
+
+<!-- ===== SEPARADOR =====
+     Para marcar un corte fuerte dentro de la entrada. -->
+<hr>
+
+<!-- ===== TABLAS =====
+     th para la fila de cabecera y td para el resto. En un móvil, una
+     tabla ancha se desplaza dentro de su caja en vez de descuadrar la
+     página. -->
+<table>
+    <tr>
+        <th>Sistema</th>
+        <th>Sesiones</th>
+        <th>Qué tal</th>
+    </tr>
+    <tr>
+        <td>D&amp;D 5e</td>
+        <td>12</td>
+        <td>campaña larga</td>
+    </tr>
+    <tr>
+        <td>Vaesen</td>
+        <td>3</td>
+        <td>one-shots</td>
+    </tr>
+</table>
+
+<p>Y con esto se acaba el ejemplo.</p>

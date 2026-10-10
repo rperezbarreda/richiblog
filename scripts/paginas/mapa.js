@@ -2,7 +2,7 @@
 // MAPA DEL SITIO — la tabla de todas las páginas
 // =========================================
 // Sale de datos/mapa-del-sitio.json, que escribe
-// herramientas/generar-mapa.py recorriendo la web entera. Aquí no se
+// herramientas/3-generadores/generar-mapa.py recorriendo la web entera. Aquí no se
 // decide nada: ni qué páginas hay, ni de qué sección son, ni desde
 // cuándo están. Solo se pinta la tabla.
 //
@@ -76,7 +76,7 @@ const MAPA_SENTIDOS = {
 };
 
 // Con qué orden se abre la página: por nombre, de la A a la Z. El JSON
-// viene ordenado por secciones (lo hace herramientas/generar-mapa.py),
+// viene ordenado por secciones (lo hace herramientas/3-generadores/generar-mapa.py),
 // pero para buscar una página concreta —que es a lo que se viene— la
 // lista alfabética es la que se recorre sola. Las secciones siguen a
 // un botón de distancia.
@@ -107,7 +107,7 @@ async function initializeMapa() {
 
         if (paginas.length === 0) {
             caja.innerHTML =
-                '<p class="entries-empty">El mapa está vacío. Pasa herramientas/generar-mapa.py.</p>';
+                '<p class="entries-empty">El mapa está vacío. Pasa herramientas/3-generadores/generar-mapa.py.</p>';
             return;
         }
 

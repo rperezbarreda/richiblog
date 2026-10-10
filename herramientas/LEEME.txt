@@ -2,16 +2,90 @@
   EL BLOG DE RICHI — CHULETA DE LAS HERRAMIENTAS
 ===============================================================
 
+  SI NO TE ACUERDAS DE CUÁL ES, NO HACE FALTA QUE TE ACUERDES:
+
+      python herramientas/menu.py
+
+  Sale una lista en castellano de lo que puedes hacer (escribir una
+  entrada, apuntar una partida, preparar las imágenes, repasar el
+  sitio...), eliges un número y él llama a la herramienta que toca.
+  No hace nada por su cuenta: es un índice. Todo lo de abajo se
+  puede seguir usando suelto si ya sabes cuál quieres.
+
   Todo se ejecuta DESDE LA CARPETA RAÍZ del sitio (donde está
   index.html), no desde dentro de herramientas/. Es decir:
 
-      python herramientas/nuevo.py       <- así
-      python nuevo.py                    <- así no
+      python herramientas/1-publicar/nuevo.py       <- así
+      python nuevo.py                               <- así no
 
   En Windows, si "python" no le suena, prueba con "py".
 
   Casi todos aceptan --probar, que enseña lo que haría sin tocar
   ningún archivo. Si dudas, pásalo primero.
+
+
+---------------------------------------------------------------
+  CÓMO ESTÁ ORDENADA LA CARPETA
+---------------------------------------------------------------
+
+  Las carpetas van numeradas por el orden en que se usan en una
+  tarde normal: escribes algo (1), preparas las fotos (2), y lo
+  demás se pasa solo (3) o lo pasas tú para repasar antes de subir
+  (4).
+
+      herramientas/
+          menu.py ............. el "¿qué quieres hacer?"
+          comun.py ............ el cajón compartido. No se ejecuta.
+          LEEME.txt ........... esto
+          mundo-origen.txt .... dónde está la bóveda de Chronicler
+                                (lo escribe importar-mundo.py)
+          plantillas/ ......... los moldes de las páginas nuevas
+
+          1-publicar/ ......... LO QUE USAS CASI SIEMPRE
+              nuevo.py              escribir algo nuevo
+              publicar.py           sacar un borrador a la web
+              nuevo-personaje.py    los NPC de una campaña
+              nueva-recomendacion.py
+              en-lo-que-ando.py     lo que pone «en lo que ando»
+              importar-mundo.py     traer la bóveda de Chronicler
+
+          2-imagenes/ ......... ANTES DE SUBIR FOTOS
+              traer-imagen.py       traer una de tu ordenador
+              optimizar-imagenes.py
+              generar-galeria.py
+              tamanos-portada.py
+
+          3-generadores/ ...... SE PASAN SOLOS
+              (los llaman nuevo.py y publicar.py; solo los
+               necesitas sueltos si has tocado una página a mano)
+              generar-archivo.py
+              generar-posts.py
+              generar-rss.py
+              generar-sitemap.py
+              generar-mapa.py
+              generar-buscador.py
+              generar-mundo.py      la wiki del mundo y sus mapas
+              mundo_formato.py      (lo lee generar-mundo.py)
+              mundo_mapas.py        (lo lee generar-mundo.py)
+              actualizar-cabeceras.py
+
+          4-comprobar/ ........ MIRAN, NO TOCAN
+              enlaces-rotos.py
+              css-sano.py
+              temas-completos.py
+              nombres-repetidos.py
+              inyecciones.py
+
+          5-consulta/ ......... PARA MIRAR, NO SE EJECUTAN
+              ejemplo-formatos.html   todos los formatos de texto
+                                      que admite una entrada
+              uso_de_git.txt
+              guestbook-apps-script.txt
+
+  LAS DE 1 Y 2 LAS PASAS TÚ. Las de 3 van solas detrás de las de 1.
+  Las de 4 no cambian nada: están para pasarlas antes de subir y
+  quedarte tranquilo, y la opción 15 del menú las pasa las cinco
+  de golpe.
 
 
 ---------------------------------------------------------------
@@ -55,7 +129,7 @@
 
   PUBLICAR UNA ENTRADA DEL BLOG O UN RELATO
 
-      python herramientas/nuevo.py
+      python herramientas/1-publicar/nuevo.py
 
   Te pregunta qué vas a publicar (entrada, relato, algo de rol o un
   día del reto) y luego el título, la fecha, las
@@ -82,7 +156,7 @@
 
   Y CUANDO LA TENGAS ESCRITA, PUBLICARLA
 
-      python herramientas/publicar.py
+      python herramientas/1-publicar/publicar.py
 
   Toda entrada y todo relato NACEN COMO BORRADOR. La página existe
   y la puedes mirar en local (arriba se ve una franja que pone
@@ -99,12 +173,12 @@
   quita la marca y vuelve a pasar los generadores. Si te has
   equivocado y quieres volver a esconder algo:
 
-      python herramientas/publicar.py --despublicar <la ruta>
+      python herramientas/1-publicar/publicar.py --despublicar <la ruta>
 
 
   AÑADIR ALGO AL PORTFOLIO DE ROL
 
-      python herramientas/nuevo.py --rol
+      python herramientas/1-publicar/nuevo.py --rol
 
   Te pregunta la categoría (aventuras, mapas, sistemas... o una
   nueva que te inventes), el título, el sistema y jugadores, la
@@ -128,9 +202,78 @@
   pasada por optimizar-imagenes.py.
 
 
+  TRAER UNA IMAGEN
+
+      python herramientas/2-imagenes/traer-imagen.py
+
+  Le pegas la ruta de una imagen que tengas por ahí y la deja DENTRO
+  del sitio: en su carpeta, con su nombre, en WebP y al tamaño que
+  haga falta. Al terminar te escribe la ruta tal y como va en el
+  JSON, para copiarla.
+
+  La ruta, tal cual la copias del explorador de Windows. Da igual si
+  trae comillas:
+
+      e:\rpere\Descargas\ejemplo.jpg
+      "C:\Users\richi\Pictures\sigil.png"
+      ~/Descargas/mapa.png
+
+  TE PREGUNTA DÓNDE VA, y según lo que elijas deja la imagen de un
+  tamaño o de otro:
+
+      token de un NPC o de un personaje ... 564 px, recortada a cuadrado
+      ilustración de una ficha ............ 1000 px
+      objeto del botín .................... 600 px, cuadrada
+      imagen de la wiki del mundo ......... 1600 px
+      imagen de una entrada del blog ...... 1400 px
+      portada de una recomendación ........ 800 px
+      foto de un santuario ................ 1400 px
+
+  No son caprichos: son los tamaños que de verdad se ven en la web,
+  multiplicados por dos para que no se vean borrosos en una pantalla
+  de las finas. Subir una foto de 4000 píxeles para enseñarla a 140
+  es hacer esperar por nada a quien entre.
+
+  LO QUE HACE CON ELLA: la pasa a WebP, la encoge si hace falta (NUNCA
+  la agranda: estirar una imagen pequeña solo la emborrona), recorta a
+  cuadrado lo que tiene que ser cuadrado —tirando hacia arriba, que un
+  retrato recortado por el centro se queda sin cabeza—, le quita los
+  metadatos (el modelo del móvil, la fecha y las coordenadas de dónde
+  se hizo) y la gira si venía tumbada.
+
+  LO TUYO NO SE TOCA: el archivo original se queda donde estaba. Y si
+  ya hay una imagen con ese nombre tampoco se machaca: la nueva se
+  guarda con un -2 detrás y se te dice.
+
+  CON TODO ESCRITO DE UNA VEZ, para no contestar nada:
+
+      python herramientas/2-imagenes/traer-imagen.py ^
+             --de "e:\rpere\Descargas\sigil.jpg" --para npc-token ^
+             --nombre Sigil --campana ragna
+
+  Y con --probar te dice qué haría sin tocar nada.
+
+  LA HERRAMIENTA DE AÑADIR NPC YA LO HACE SOLA: cuando te pregunte por
+  el token o por la ilustración, pégale la ruta de fuera en vez del
+  nombre de un archivo y la trae y la apunta de una vez.
+
+      python herramientas/1-publicar/nuevo-personaje.py
+
+  Lo distingue por la pinta: "sigil_tkn.webp" es un archivo que ya
+  está dentro; "e:\rpere\Descargas\sigil.jpg" es una imagen de tu
+  ordenador que hay que traer.
+
+  SI DICE QUE FALTA PILLOW: es la librería que abre las imágenes, y se
+  instala una sola vez:
+
+      pip install pillow
+
+  (en Windows, si pip no le suena:  py -m pip install pillow)
+
+
   EL RETO DE ESCRITURA (WRITEOBER)
 
-      python herramientas/nuevo.py --reto
+      python herramientas/1-publicar/nuevo.py --reto
 
   Un reto de un texto al día no cabe en el listado de relatos: son
   31 y taparían todo lo demás durante un mes. Por eso tiene página
@@ -168,12 +311,12 @@
   lo dice al elegirlo («te faltaba el día 2…»), para que sepas que no
   está yendo al que esperabas. Y para escribir uno fuera de orden:
 
-      python herramientas/nuevo.py --reto --dia 7
+      python herramientas/1-publicar/nuevo.py --reto --dia 7
 
   Escribe el texto dentro y, cuando esté, publícalo como cualquier
   relato:
 
-      python herramientas/publicar.py
+      python herramientas/1-publicar/publicar.py
 
   La casilla del día se enciende justo al publicarlo, no al crearlo:
   mientras es borrador no sale en ningún sitio, igual que el resto.
@@ -205,8 +348,8 @@
   SUBIR FOTOS DE LOS GATOS
 
       1. Copia las fotos a imagenes/santuarios/tali/ (o /regis/)
-      2. python herramientas/optimizar-imagenes.py
-      3. python herramientas/generar-galeria.py
+      2. python herramientas/2-imagenes/optimizar-imagenes.py
+      3. python herramientas/2-imagenes/generar-galeria.py
 
   El segundo las pasa a WebP y les quita los metadatos (las fotos
   de móvil llevan dentro el modelo y muchas veces las coordenadas
@@ -290,7 +433,7 @@
   donde hace falta. Si algún día añades otro sitio desde donde buscar,
   que mande a esa página igual: no lo cargues ahí.
 
-  EL LISTADO lo escribe herramientas/generar-buscador.py recorriendo la
+  EL LISTADO lo escribe herramientas/3-generadores/generar-buscador.py recorriendo la
   web y sacando el texto del <main> de cada página. Va en la lista
   GENERADORES de comun.py, así que nuevo.py y publicar.py ya lo pasan
   solos.
@@ -401,7 +544,7 @@
       "Cargando proyectos…" y sin más pista que un error en la consola.
 
   Si hace falta una constante en dos sitios, va DENTRO de la función que
-  la usa. herramientas/nombres-repetidos.py ya lo comprueba y lo marca
+  la usa. herramientas/4-comprobar/nombres-repetidos.py ya lo comprueba y lo marca
   como grave aunque los dos sean idénticos.
 
   EL MAPA DEL SITIO
@@ -453,6 +596,743 @@
   portada, que si no habría que tirar de la flecha del navegador.
 
 
+  LAS NOTAS DE ROL
+
+  Un apartado por campaña, y cada campaña tiene tres cosas:
+
+      datos/campana-<clave>.json      la ficha (sistema, quién dirige,
+                                      los personajes de la mesa, la
+                                      sinopsis) y la lista de sesiones
+      web/notas_rol/<clave>/index_<clave>.html     su índice
+      web/notas_rol/<clave>/sesion-NN.html         las notas de cada
+                                                   partida, a mano
+
+  Las notas de una partida se crean con la herramienta de siempre, que
+  elige la campaña, coge el número que toca y deja la página montada
+  con la fecha puesta y tres hojas de cuaderno en blanco:
+
+      python herramientas/1-publicar/nuevo.py --sesion
+
+  Nacen como BORRADOR. Cuando estén pasadas a limpio:
+
+      python herramientas/1-publicar/publicar.py
+
+  Dentro de la página hay un comentario largo explicando cómo se
+  escribe: las escenas, los personajes en color, la lista de objetos
+  conseguidos y el post-it de las cosas pendientes.
+
+  El PDF de las notas escaneadas se apunta en el "pdf" de esa sesión,
+  dentro del JSON de la campaña, y el botón de descargarlo aparece solo.
+
+  PARA UNA CAMPAÑA NUEVA: se copia datos/campana-ragna.json con otro
+  nombre, se copia su carpeta de web/notas_rol/, se cambian los {{...}}
+  de dentro y se añade su enlace al menú (fragmentos/barra-lateral.html).
+
+
+  LOS PERSONAJES DE LA MESA
+
+  Van en "personajes", dentro del JSON de la campaña, y salen en TRES
+  sitios: en la ficha del índice, en la ventana «la mesa» y (los
+  colores) en las notas de cada partida.
+  Están escritos una sola vez a propósito: en dos archivos acabaría
+  habiendo dos Faëlar.
+
+      "personajes": [
+          {
+              "nombre": "Faëlar",
+              "jugador": "Richi",          <- quién lo lleva
+              "clase": "Elfo Druida",
+              "nivel": 3,                  <- aparte de la clase: sube
+              "color": "verde",            <- verde / azul / rojo / morado
+              "token": "/imagenes/notas_rol/ragna/faelar-token.webp",
+              "ilustracion": "/imagenes/notas_rol/ragna/faelar.webp",
+              "equipo": ["lo que lleva encima"],
+              "notas": ["lo que haya que recordar"],
+              "dndbeyond": "https://www.dndbeyond.com/characters/1234567",
+              "pdf": "/imagenes/notas_rol/ragna/fichas/faelar.pdf"
+          }
+      ]
+
+  El nivel va aparte de la clase para que subir de nivel sea cambiar un
+  número. Las dos fotos son las mismas medidas que las de un NPC (más
+  abajo) y las dos son opcionales: mientras no estén sale su inicial.
+  "equipo" y "notas" solo se ven en la ventana de la mesa.
+
+  LA FICHA DE VERDAD, EN LOS DOS SITIOS DONDE VIVE. Al final de la
+  ventana de un personaje salen dos botones, y cada uno aparece solo si
+  está escrito lo suyo:
+
+      dndbeyond  la dirección de su ficha en D&D Beyond, que es la que
+                 se toca en la partida. Se abre en otra pestaña, con su
+                 flechita y su aviso de que sale de la web (eso lo pone
+                 el sitio solo).
+      pdf        un PDF de la ficha, para cuando no hay internet o para
+                 cuando la campaña se acaba y la página de Beyond deja
+                 de importar. Se descarga al pulsarlo. Déjalo donde
+                 quieras dentro del sitio; lo suyo es una carpeta
+                 fichas/ dentro de las imágenes de la campaña.
+
+  EN LA FICHA DEL ÍNDICE salen como una fila de retratos redondos, cada
+  uno con su nombre debajo y del color del personaje. La clase, el nivel
+  y quién lo lleva NO van escritos ahí: ocupaban tres líneas debajo de
+  cada retrato y dejaban la ficha larguísima. Están en el nombre del
+  botón —o sea, lo dice un lector de pantalla y sale al dejar el ratón
+  encima— y escritos enteros en la ventana que abre el propio retrato.
+
+  YA NO HAY BOTÓN DE «LA MESA»: la ventana se abre pulsando el retrato
+  de cualquiera. Es un botón menos arriba y un sitio menos donde buscar
+  a alguien.
+
+  LA VENTANA ES LA FICHA DE UNO: la del que se haya pulsado y nada más,
+  igual que la de un NPC, y se titula con su nombre («faelar.nfo»).
+  Antes llevaba arriba una fila con los cuatro tokens y había que volver
+  a elegir ahí dentro, que desde que los retratos están en la página era
+  elegir dos veces lo mismo. Para ver a otro se cierra y se pulsa el
+  suyo, que está justo detrás.
+
+  Si la campaña no tiene a nadie en "personajes", no salen los retratos
+  y no hay forma de abrir ninguna ficha, que es lo que toca: no hay.
+
+
+  EL BOTÍN ACUMULADO
+
+  Lo que el grupo va juntando. Va en "botin", también en el JSON de la
+  campaña, y sale en una ventana que abre el botón «el botín →» del
+  índice. SE ESCRIBE A MANO, porque hay que apuntar también lo que se
+  gasta y eso no se puede sacar de las notas: en una sesión se consiguen
+  tres cosas y se gastan dos, y eso lo sabe quien estuvo allí.
+
+      "botin": [
+          { "que": "4 kits curativos", "de": 1, "tipo": "pociones" },
+          { "que": "Hierbas misteriosas", "de": 1, "quien": "Melissa",
+            "tipo": "pociones" },
+          { "que": "6 provisiones", "de": 1, "tipo": "equipo",
+            "gastado": true }
+      ]
+
+      que      lo que es. Lo único que hace falta.
+      de       el número de la sesión en que se consiguió.
+      quien    quién lo lleva. Puede ser uno de la mesa o "el carro".
+      tipo     en qué apartado va (ver aquí abajo).
+      imagen   una foto del objeto (ver aquí abajo).
+      gastado  true para lo que ya se ha usado: se queda TACHADO y en
+               gris, con la palabra "gastado" delante, en vez de
+               borrarlo. Así se ve lo que hubo y lo que queda, que es
+               media discusión de cada partida.
+
+  LOS APARTADOS. La ventana reparte las cosas por "tipo", y salen
+  SIEMPRE en este orden, que no es alfabético a propósito: va de lo que
+  se usa en una pelea a lo que se usa fuera, y el dinero al final porque
+  es lo que se mira aparte.
+
+      armas · armaduras · pociones · equipo · objetos mágicos ·
+      dinero · otras cosas
+
+  Y SON PESTAÑAS: una por apartado, con la cuenta al lado, más una
+  primera, «todas», que los enseña todos seguidos y con su título —que
+  es como estaba antes de que hubiera pestañas. Tienen la pinta de los
+  botones de filtrar del resto del sitio porque son la misma idea, y por
+  dentro son una botonera de pestañas de verdad: las flechas pasan de
+  una a otra, Inicio y Fin van a los extremos.
+
+  Un apartado sin nada no sale. Lo que no lleve "tipo" —o lo lleve mal
+  escrito— cae en "otras cosas", que es el último: nunca desaparece nada
+  por haberse equivocado al escribirlo. Y si todo el botín cae en un solo
+  apartado no se ponen pestañas: una pestaña única no elige nada.
+
+  LA CUENTA DEL PIE («4 cosas · 1 gastada · quedan 3») es de TODO el
+  botín y no de la pestaña puesta, a propósito: es lo que se mira al
+  abrir, y cambiar de pestaña no cambia lo que se tiene.
+
+  LAS FOTOS DE LOS OBJETOS. Lo que lleve "imagen" sale con un
+  cuadradito a la derecha, y pulsándolo se ve en grande. Lo que no la
+  lleve se queda con su rombo delante, como siempre; una cosa y otra se
+  pueden mezclar en la misma lista.
+
+      { "que": "Piedra mensajera", "de": 1, "tipo": "objetos mágicos",
+        "imagen": "/imagenes/notas_rol/ragna/botin/piedra.webp" }
+
+  La foto se trae con la herramienta de siempre, que la deja cuadrada y
+  del tamaño que toca en imagenes/notas_rol/<campaña>/botin/:
+
+      python herramientas/2-imagenes/traer-imagen.py --para botin
+
+  No hace falta acordarse de la palabra exacta: cada apartado se come
+  también sus formas de siempre ("arma", "escudos", "oro", "magia"…).
+  La lista está en scripts/paginas/notas-rol.js, en TIPOS_DE_BOTIN, que
+  es donde se añade uno nuevo.
+
+  Sin "botin" en el JSON el botón no sale. Lo que se apunte se busca
+  desde la lupa, así que al tocarlo conviene pasar el buscador:
+
+      python herramientas/3-generadores/generar-buscador.py
+
+
+  LAS MISIONES PENDIENTES
+
+  Lo que el grupo tiene a medias: a quién hay que ir a ver, qué hay
+  que llevar a dónde, qué prometió alguien. Va en "misiones", en el
+  JSON de la campaña, y sale en la ventana que abre el botón
+  «pendientes →» del índice.
+
+      "misiones": [
+          {
+              "nombre": "la mercancía robada",
+              "cosas": [
+                  { "que": "Encontrar la base de los bandidos.", "de": 1 },
+                  { "que": "Hablar con Sigil.", "hecha": true }
+              ]
+          }
+      ]
+
+      nombre   el apartado. Normalmente quién te lo encargó o dónde
+               pasa. Sale como título y se puede plegar.
+      que      la misión. Lo único que hace falta.
+      de       en qué sesión salió, si se sabe.
+      hecha    true para lo que ya está: se queda con la casilla
+               marcada y tachado, en vez de borrarlo. Lo hecho es
+               media campaña.
+
+  SE VE COMO UN POST-IT, el mismo papel amarillo que la nota de cosas
+  pendientes de una partida. No es un adorno: las dos listas son la
+  misma cosa —lo que queda por hacer— y se reconocen por el papel
+  antes de leer una palabra. La ventana sale más estrecha que las
+  demás por lo mismo: una nota de 58rem no es una nota, es una pared.
+
+  LOS APARTADOS SE PLIEGAN pulsando su título, y nacen todos abiertos.
+  Lo que se pliegue aquí NO se recuerda, a diferencia de la wiki o de
+  las regiones de los npcs: aquí no hay cincuenta apartados, hay tres
+  o cuatro, y lo que se viene a ver es justo lo que hay dentro.
+
+  LAS CASILLAS NO SE PUEDEN MARCAR, y es a propósito. En el post-it de
+  una partida sí se pueden, y lo que marcas se guarda en TU navegador;
+  aquí eso haría pensar que una misión está apuntada como hecha cuando
+  en el archivo sigue pendiente. Lo que vale es lo que ponga el JSON.
+
+  SIN "misiones" EN EL JSON el botón no sale, como pasa con el botín.
+
+
+  LA VENTANA QUE SE ABRE ENCIMA
+
+  Cuatro sitios de la sección de rol abren una ventana modal: la ficha
+  de un NPC, la de un personaje de la mesa, «el botín» y las misiones
+  pendientes. Las cuatro son el MISMO componente:
+
+      scripts/componentes/ventana-modal.js
+      estilos/componentes/ventana-modal.css (+ .responsive.css)
+
+  Él pone el fondo oscuro, la barra con el nombre y la ✕, el Escape,
+  el clic fuera para cerrar, el foco al abrir y devolverlo al cerrar, y
+  dejar INERTE todo lo de detrás mientras está abierta (que es lo que
+  impide que el tabulador se pasee por la página tapada). Cada página
+  solo dice qué va dentro.
+
+  Está sacado aparte justo por eso: el foco, el inert y el Escape son la
+  parte que no conviene escribir tres veces, porque las tres saldrían un
+  poco distintas y dos de ellas, mal.
+
+  SOLO HAY UNA ABIERTA A LA VEZ, a propósito: dos ventanas encima de
+  otra son dos trampas de foco anidadas, y de ahí no se sale con el
+  teclado.
+
+  NO ES UN <dialog>, y no es purismo: la ventana de accesibilidad se
+  hizo en su día con <dialog> y en este navegador salía dibujada en
+  mitad de la página desde que cargaba, detrás del contenido.
+
+
+  LOS NPC DE UNA CAMPAÑA
+
+  La gente que os vais encontrando: una rejilla de tokens repartida por
+  grupos, y al pulsar uno se abre su ficha con la ilustración grande.
+  Vive en web/notas_rol/<clave>/npcs_<clave>.html y sale entera de
+  datos/npcs-<clave>.json. La página no lleva a nadie escrito dentro: se
+  edita el JSON y ya está.
+
+  NO ESTÁ EN EL MENÚ, y es a propósito: no es una sección del sitio,
+  es una parte de la campaña. Se entra por el botón «npcs →» del índice
+  de su campaña. Con dos campañas, el menú tendría cuatro líneas para
+  dos cosas y la mitad no querría decir nada para quien llega de fuera.
+
+  AQUÍ SOLO HAY NPC. Los personajes de los jugadores no están en esta
+  página: salen del JSON de la campaña y se ven en «la mesa», una
+  ventana del índice (ver LOS PERSONAJES DE LA MESA, más arriba).
+
+  UNO PUEDE ESTAR EN VARIOS GRUPOS. "categoria" admite una lista, y
+  también vale escribirlo en plural:
+
+      "categorias": ["la Gran Caravana", "Sirevia"]
+
+  Entonces su token SALE EN LOS DOS GRUPOS. No es una copia: es la misma
+  ficha, y pulsando cualquiera de los dos tokens se abre la misma. Es lo
+  que quiere decir pertenecer a dos sitios: a la tabernera de Sirevia
+  que luego se une a la caravana se la busca en los dos.
+
+  LOS GRUPOS SE PUEDEN AGRUPAR, que suena a trabalenguas y es lo que
+  hace falta en cuanto hay más de cinco: un APARTADO es una región que
+  mete varios grupos debajo. Se escribe a mano en el JSON de la campaña,
+  antes de "personajes":
+
+      "apartados": [
+          { "nombre": "la Gran Caravana", "categorias": ["Gran Caravana"] },
+          { "nombre": "Sirevia",
+            "categorias": ["Sirevia", "Bandidos de Sirevia", "Chitxia"] }
+      ]
+
+  Y la página sale en dos niveles: Sirevia arriba, y debajo sus tres
+  grupos. La cuenta del apartado cuenta PERSONAS, no fichas: quien está
+  en dos grupos del mismo sitio tiene dos tokens y es uno. Un grupo que
+  se llame igual que su apartado, o que sea el único que tiene dentro,
+  sale sin título propio para no decir dos veces lo mismo.
+
+  LOS APARTADOS SE PLIEGAN Y SE DESPLIEGAN pulsando su título (o con el
+  teclado: es un <details> de verdad, no un invento). Lo que dejes
+  cerrado se queda cerrado la próxima vez que entres, guardado en el
+  navegador de quien mira, en la misma caja donde el sitio guarda el tema
+  y el tamaño del texto.
+
+  Y mientras buscas o filtras se abren solos, para que no se te esconda
+  detrás de un apartado plegado alguien que sí sale; al borrar lo
+  buscado vuelven a como los dejaste. Eso NO se guarda: abrirlo el
+  buscador no es decisión tuya.
+
+  SIN "apartados" NO CAMBIA NADA: cada grupo sale suelto, como siempre.
+  Y un grupo que no esté en ningún apartado tampoco se pierde: sale al
+  final, suelto. La herramienta de añadir NPC, cuando la campaña tiene
+  apartados y escribes un grupo nuevo, te pregunta en cuál va.
+
+  EL RETRATO DE LA FICHA SE PUEDE VER EN GRANDE: pulsando la
+  ilustración de la ventana se abre a pantalla completa, con su nombre
+  debajo. Se cierra con la ✕, pulsando el fondo o con Escape; ese Escape
+  cierra solo el retrato y deja la ficha abierta, que es lo que se
+  espera.
+
+  Eso es un componente (scripts/componentes/lupa.js y
+  estilos/componentes/lupa.css), así que lo mismo vale para las fotos
+  de los objetos del botín. Vivía aquí dentro hasta que el botín quiso
+  lo mismo: una cosa que usan dos páginas ya no es de ninguna.
+
+  ARRIBA HAY UN BUSCADOR, el mismo que el archivo del blog y los
+  relatos. Mira el nombre y el "qué es" de cada ficha, y además su
+  categoría aunque no esté escrita en la tarjeta: buscar "caravana" saca
+  a los de la caravana. Se CRUZA con los botones de categoría: con
+  "Sirevia" puesto y "taber" escrito sale quien sea de Sirevia Y lleve
+  "taber". Un grupo que se quede sin nadie se esconde entero, título
+  incluido, y la cuenta de cada grupo se pone al día sola.
+
+  LO MÁS CÓMODO ES LA HERRAMIENTA:
+
+      python herramientas/1-publicar/nuevo-personaje.py
+
+  Te pregunta de qué campaña (si solo hay una, ni eso) y luego va campo
+  a campo: nombre, grupo, qué es, dónde, cómo se lleva con el grupo,
+  cómo está, las fotos, las notas y en qué sesión apareció. Al guardar
+  pregunta si metes a otro, así que para los seis o siete que salen en
+  una partida basta con pasarla una vez.
+
+  El grupo se elige de un menú con los que ya existen, o se escribe uno
+  nuevo: las categorías no están escritas en ninguna parte, así que
+  inventarse una la crea sola, con su botón de filtrar incluido.
+
+  Y PREGUNTA POR VARIOS: después del primero vuelve a preguntar, y se
+  sigue hasta dar un Enter en blanco. Con uno solo lo escribe como
+  "categoria"; con varios, como "categorias" en lista.
+
+      python herramientas/1-publicar/nuevo-personaje.py --campana ragna
+      python herramientas/1-publicar/nuevo-personaje.py --campana ragna \
+             --nombre "Rukkus" --grupo "Sirevia" --grupo "el bosque" \
+             --que "Humano, cazador" --relacion neutral --estado vivo \
+             --nota "Nos avisó de lo de Apaaka." --sesion 1
+
+  Con --nombre puesto no pregunta nada y añade uno solo, que es lo
+  cómodo para meter varios seguidos desde el historial de la terminal.
+
+  LAS FOTOS NO LAS PREPARA: las apunta. Van en
+  imagenes/notas_rol/<clave>/ y son dos por persona, las dos
+  opcionales:
+
+      <loquesea>-token.webp   el de la rejilla. CUADRADO (se recorta en
+                              redondo), unos 320x320, plano corto.
+      <loquesea>.webp         el de la ficha. DE PIE, 3 de ancho por 4
+                              de alto (600x800 va sobrado).
+
+  Mientras no estén, en su sitio sale la inicial del nombre dentro del
+  marco. Pásalas antes por optimizar-imagenes.py, como las del blog.
+
+  Y a mano también se puede, que es un archivo de texto:
+
+      {
+          "campana": "ragna",
+          "nombre": "campaña de Ragna",
+          "pagina": "/web/notas_rol/ragna/npcs_ragna.html",
+          "intro": "La gente que nos vamos encontrando.",
+          "personajes": [
+              {
+                  "nombre": "Sigil",
+                  "categoria": "la Gran Caravana",
+                  "que": "Comerciante",
+                  "donde": "la Gran Caravana",
+                  "relacion": "aliado",
+                  "estado": "vivo",
+                  "token": "/imagenes/notas_rol/ragna/sigil-token.webp",
+                  "ilustracion": "/imagenes/notas_rol/ragna/sigil.webp",
+                  "notas": ["lo que sepamos de él"],
+                  "primera": 1
+              }
+          ]
+      }
+
+  Solo "nombre" hace falta; lo que falte no sale.
+
+  LAS CLAVES NO SON LO QUE SE LEE: en la ficha, "donde" sale como
+  «residencia» y "relacion" como «actitud con el grupo», que es lo que
+  son de verdad —«dónde» podía entenderse como dónde se le conoció, y
+  «con el grupo» no decía si era lo que piensa de ellos o qué pintan
+  juntos. Los rótulos están en scripts/paginas/npcs-rol.js, en
+  fichaDeNpc; las claves del JSON se quedan como están.
+
+  En "relacion" y en
+  "estado" puedes escribir lo que quieras: aliado, neutral, enemigo,
+  vivo, muerto y desaparecido salen con su marquita de color, y
+  cualquier otra palabra sale igual con la marca en gris. Quien esté
+  muerto o desaparecido sale además apagado y tachado en la rejilla.
+
+  SÍ HAY QUE PASAR EL BUSCADOR al añadir gente (lo hace la herramienta
+  sola al terminar): datos/buscador.json es un archivo generado, y sin
+  rehacerlo buscar un nombre nuevo no encontraría nada.
+
+      python herramientas/3-generadores/generar-buscador.py
+
+
+
+  EN LO QUE ANDO
+
+  La página web/en_lo_que_ando/en_lo_que_ando.html lleva cuatro bloques
+  y tres salen de datos/en-lo-que-ando.json: lo que estoy leyendo,
+  viendo y jugando; lo que ando escribiendo; y un post-it de pendientes
+  con sus casillas. El cuarto, la partida de rol, SE ESCRIBE SOLO.
+
+  LO MÁS CÓMODO ES LA HERRAMIENTA:
+
+      python herramientas/1-publicar/en-lo-que-ando.py
+
+  Sale un menú con los cinco trozos y se toca el que se quiera; lo que
+  no se toque se queda como estaba. De cada cosa pregunta el título, de
+  quién es, por dónde vas (en %, se puede dejar en blanco), una nota y
+  un enlace. Al guardar pone la fecha de "última
+  vez que toqué esto" sin que haya que acordarse, y pasa el buscador
+  (lo que pone esta página no está escrito en su HTML, así que sin
+  rehacer datos/buscador.json no se encontraría buscando).
+
+  Si ya sabes a qué vienes:
+
+      python herramientas/1-publicar/en-lo-que-ando.py --ver
+      python herramientas/1-publicar/en-lo-que-ando.py --leyendo
+      python herramientas/1-publicar/en-lo-que-ando.py --pendientes
+
+  Para dejar un trozo en blanco se contesta un guion ("-") en el
+  título: ese bloque deja de salir en la web. UN BLOQUE SIN NADA
+  ESCRITO NO SALE, que es medio sentido de la página: tres marcos
+  vacíos dirían justo lo contrario de lo que esto quiere decir.
+
+  EL BLOQUE DE LA PARTIDA NO SE TOCA DESDE AQUÍ. Sale de
+  datos/notas-rol.json (la última sesión publicada, cuántas van) y del
+  JSON de su campaña (el nombre, el sistema, los dos botones).
+  Publicar unas notas es lo que lo actualiza. Si hubiera que venir a
+  cambiarlo a mano, el día que se olvidara la página estaría mintiendo.
+
+  Y a mano también se puede, claro:
+
+      {
+          "intro": "la línea que explica qué es esta página",
+          "actualizado": "06-10-2026",
+          "ahora": [
+              { "que": "leyendo",
+                "titulo": "El Conde de Montecristo",
+                "de": "Alexandre Dumas",
+                "nota": "por la mitad y enganchadísimo",
+                "porcentaje": 45,
+                "enlace": "" }
+          ],
+          "escribiendo": [
+              { "titulo": "Writeober 2026", "tipo": "reto",
+                "estado": "día 4 de 31", "nota": "",
+                "enlace": "/web/mis_movidas/relatos/..." }
+          ],
+          "pendientes": [
+              { "cosa": "pasar a limpio la sesión 2", "hecho": false }
+          ]
+      }
+
+  Lo único que hace falta de cada cosa es el título (o "cosa", en los
+  pendientes). Los tres huecos de "ahora" son siempre esos tres y en
+  ese orden; la herramienta los repone si falta alguno.
+
+  EL PORCENTAJE es por dónde vas, de 0 a 100, y es opcional: sin él esa
+  cosa no saca barra. Sale una barra con la cifra escrita al lado ("45%
+  leído", "80% visto", "30% jugado"), y la cifra ES EL DATO: la barra
+  lleva aria-hidden y es solo el adorno, como los colores del resto del
+  sitio. Vale para los tres huecos, no solo para los libros y las
+  series: una partida a medias también tiene un "por dónde voy".
+
+  Para quitarlo se deja en blanco al pasar la herramienta, o se pone
+  "porcentaje": null en el archivo.
+
+  EL POST-IT es el mismo que el de las notas de una partida: lo dibuja
+  estilos/componentes/postit.css y le pone las casillas
+  scripts/componentes/tareas.js. Lo que se marque en la web se guarda
+  en el navegador de quien lo marque y NO cambia el archivo; para que
+  cambie de verdad hay que venir aquí (opción 5 de la herramienta).
+
+
+  EL MUNDO (la wiki)
+
+  web/mundo/ es una wiki del mundo donde pasan las partidas: una página
+  por lugar, por persona y por cosa, con su ficha al lado, sus etiquetas
+  y los enlaces entre ellas.
+
+  NO SE ESCRIBE EN EL SITIO. Se escribe en Chronicler, que es una
+  aplicación de wiki que guarda cada página como un archivo .md en el
+  ordenador, y lo que hay en la carpeta mundo/ ES esa bóveda: se apunta
+  Chronicler ahí y se escribe en la aplicación.
+
+  SI LA BÓVEDA LA TIENES EN OTRO SITIO —que es lo normal: donde la
+  dejaste al instalar Chronicler— no hace falta moverla. Le pasas la
+  ruta a esto una vez y él se encarga:
+
+      python herramientas/1-publicar/importar-mundo.py "C:\Users\Richi\Mundo"
+
+  Se trae las páginas, los mapas y las imágenes a mundo/, se apunta de
+  dónde vienen en herramientas/mundo-origen.txt y pasa el generador
+  detrás, así que con eso solo ya está el mundo publicado. La segunda
+  vez no hace falta la ruta:
+
+      python herramientas/1-publicar/importar-mundo.py
+
+  (es la opción 12 del menú, y si no hay ninguna ruta apuntada te la
+  pregunta)
+
+  ES UN ESPEJO. Lo que esté en mundo/ y ya no esté en la bóveda se
+  quita, porque si no una página que renombraste en Chronicler se
+  quedaría publicada dos veces, con el nombre viejo y con el nuevo. Te
+  dice cuáles antes de tocar nada y pregunta. Con --anadir no quita
+  nada, y con --probar no hace nada: solo mira la bóveda y te cuenta lo
+  que haría, que es como conviene pasarlo la primera vez.
+
+  LO DE CHRONICLER SE QUEDA EN CHRONICLER. Ni se trae ni se publica lo
+  que hay en .chronicler-cache/ (su caché), en _system/templates/ (tus
+  plantillas, que son moldes y no páginas) ni en ninguna carpeta que
+  empiece por punto. Al terminar dice cuántos archivos se ha dejado y en
+  qué carpetas, para que se vea que no falta nada que hiciera falta. La
+  lista está en comun.py (es_del_mundo), y la usan las DOS herramientas:
+  si solo lo supiera el importador, el generador publicaría las
+  plantillas en cuanto apuntaras Chronicler directamente a mundo/.
+
+  LO QUE NO SABE QUÉ ES, LO CUENTA. Al terminar sale un inventario de
+  todo lo que hay en la bóveda y no es ni página, ni mapa, ni imagen:
+  qué extensión, cuántos, cuánto pesan y, si es texto, las primeras
+  letras de lo que lleva dentro. No se trae (con --todo sí, sin
+  publicarlo), pero sale, que es lo que avisa de que Chronicler ha
+  aprendido a guardar algo nuevo. Así se descubrió el formato de los
+  mapas.
+
+  Para pasarlo a la web:
+
+      python herramientas/3-generadores/generar-mundo.py
+
+  Eso lee los .md de mundo/, escribe una página HTML por cada uno en
+  web/mundo/, copia las imágenes a imagenes/mundo/ y deja el índice en
+  datos/mundo.json (que es de donde sale la portada). Detrás hay que
+  pasar los de siempre, porque hay páginas nuevas: el sitemap, el mapa,
+  el buscador y las cabeceras. La opción 16 del menú los pasa todos.
+
+  CON --probar NO ESCRIBE NADA y cuenta lo que haría. Conviene pasarlo
+  así la primera vez y cada vez que se toque mucho:
+
+      python herramientas/3-generadores/generar-mundo.py --probar
+
+  AL TERMINAR DICE CUATRO COSAS, y las cuatro sirven:
+    · qué páginas están enlazadas pero no escritas todavía (los
+      "enlaces rojos"), que es la lista de lo siguiente que hacer;
+    · a qué páginas no enlaza ninguna otra, que solo se encuentran
+      buscándolas;
+    · qué imágenes pesan demasiado;
+    · y QUÉ NO HA SABIDO CONVERTIR. Eso último es lo importante: el
+      conversor no adivina. Lo que no entiende lo deja como está y lo
+      canta, con el nombre de la página. Si no sale ningún aviso, lo
+      que hay en la web es lo que hay en la bóveda.
+
+  LO QUE ENTIENDE está escrito en mundo/LEEME.txt, que es donde se va a
+  mirar estando dentro. En corto: el frontmatter entero (incluido el
+  "layout" de la infobox), el Markdown de siempre, los wikilinks en sus
+  cuatro formas, las imágenes ![[así]], los spoilers ||así||, las
+  inserciones {{insert: Página}} y el HTML de las galerías.
+
+  POR QUÉ ESTÁ ESCRITO A MANO. El conversor son tres archivos
+  (mundo_formato.py, que lee el formato de las páginas; mundo_mapas.py,
+  que lee el de los mapas; y generar-mundo.py, que arma las páginas) y
+  no usa ninguna librería, por lo mismo que el resto del sitio: aquí no
+  hay dependencias. Entiende el trozo de Markdown y de YAML que usa
+  Chronicler, que está documentado y es acotado, y de lo demás avisa en
+  vez de inventárselo.
+
+
+  LOS MAPAS DEL MUNDO
+
+  Un mapa interactivo de Chronicler es un archivo .cmap de la bóveda
+  —un JSON con el tamaño del lienzo, las capas de fondo y el contorno
+  de cada región— y sale como una página más:
+
+      mundo/Mapamundi de Cralëa.cmap
+      web/mundo/mapa_mapamundi_de_cralea.html
+
+  SE PINTA EN SVG DENTRO DE LA PROPIA PÁGINA. Ni canvas ni librería de
+  mapas: así cada región es un enlace de verdad, el mapa se ve sin
+  JavaScript, se imprime y pesa lo que pesa el dibujo y nada más. Lo
+  único que pone el JavaScript es el zoom, el arrastre, el globo y
+  encender y apagar cosas; sin él, el mapa se ve entero y los mandos no
+  se pintan.
+
+  EL ZOOM VA CON LA RUEDA DEL RATÓN, y hacia donde esté el puntero: lo
+  que estás mirando se queda donde está. Con el mapa entero (100%) la
+  rueda hacia abajo mueve la PÁGINA, como en cualquier otro sitio, que
+  una rueda secuestrada dentro de un texto es de lo que más molesta; y
+  con mayúsculas pulsada mueve el mapa de lado. Los botones de + y − van
+  por saltos (100, 150, 200, 300, 400, 600%) y la rueda va suave entre
+  los mismos topes.
+
+  LAS REGIONES SE PUEDEN APAGAR, con el interruptor de «regiones». Un
+  mapa dibujado a mano ya trae sus fronteras pintadas, así que las
+  manchas de color por encima tapan justo lo que quieres mirar; apagarlas
+  deja la imagen limpia y los sitios se siguen pulsando desde la lista.
+  Los pines no se apagan: ésos no tapan nada.
+
+  AL PASAR POR ENCIMA DE UN SITIO sale un globo con su nombre y con a
+  dónde lleva. Es HTML y no el globo del navegador (el <title> del SVG):
+  ése tarda un segundo, sale con la tipografía del sistema y no cabe más
+  que una línea. Cuando hay JavaScript se quitan los <title> —para que no
+  salgan los dos— y cuando no lo hay se quedan, que es mejor que nada.
+
+  LOS PINES son las chinchetas de Chronicler: su color, su emoji y a
+  dónde llevan. Uno marcado como invisible en la aplicación no se
+  publica, y se dice al terminar cuántos eran. También se pueden apagar
+  en el mapa, con el interruptor de «pines».
+
+  UN PIN MIDE SIEMPRE LO MISMO EN PANTALLA (15 px de radio), lo mire
+  quien lo mire y con el zoom que sea. En el SVG está dibujado en
+  unidades del mapa, así que el zoom lo engordaba con todo lo demás y al
+  600% tapaba medio continente; mundo-mapa.js le pone un "scale" que
+  contrarresta el zoom. Un pin no es geografía, es un señalador.
+
+
+  LA PORTADA DE LA WIKI, POR APARTADOS
+
+  web/mundo/index_mundo.html —la Wiki Cralëa— no reparte las páginas por
+  las carpetas de la bóveda, sino por unos apartados grandes —países,
+  lugares, personajes, religión, cosas, mapas— y, dentro de cada uno, por
+  las etiquetas que le queden a cada página. Una carpeta es cómo tienes
+  guardados los archivos; eso no tiene por qué ser cómo se busca una
+  cosa.
+
+  CADA APARTADO SE PLIEGA. Son <details>, o sea que se abren y se
+  cierran con el ratón y con el teclado sin que haya nada que
+  programar, y lo que dejes plegado se recuerda en tu navegador. Al
+  buscar o al filtrar se abren solos los que tengan algo dentro y se
+  vuelven a plegar al borrar la búsqueda: encontrar tres páginas y no
+  verlas porque el apartado estaba cerrado sería peor que no
+  encontrarlas.
+
+  Y EN PANTALLA ANCHA SON DOS COLUMNAS: el índice a la izquierda y los
+  mapas a la derecha, con la silueta de cada uno (de 1400px para arriba;
+  por debajo, una columna y los mapas entre la cabecera y el índice). La
+  silueta es un .svg que escribe el generador en imagenes/mundo/, con las
+  formas del mapa simplificadas a lo bruto: se reconoce el mundo de un
+  vistazo y pesa lo que una foto pequeña.
+
+  EL NOMBRE DE LA WIKI está escrito en cuatro sitios y no en un ajuste,
+  porque cambiarlo es cosa de una vez: el menú
+  (fragmentos/barra-lateral.html), la portada
+  (web/mundo/index_mundo.html), las dos plantillas de
+  herramientas/plantillas/mundo-*.html y el nombre de la sección en
+  generar-mapa.py y generar-buscador.py. La CARPETA sigue llamándose
+  mundo/ a propósito: renombrarla rompería todos los enlaces que ya
+  estén por ahí fuera.
+
+  QUIÉN MANDA: datos/mundo-categorias.json, que se edita a mano y no lo
+  reescribe nadie. Es una lista de apartados, cada uno con las etiquetas
+  que caen en él:
+
+      [ { "nombre": "países",
+          "etiquetas": ["pais", "país", "reino", "imperio"] }, … ]
+
+  Una página va al PRIMER apartado del que lleve alguna etiqueta, y las
+  que le sobren son las que la reparten por dentro: una página con
+  «Pais, Reino, Azarasia» va a «países» y sale debajo de «azarasia». Si
+  le quedan varias, sale una vez por cada una (la cuenta de arriba cuenta
+  páginas distintas, no tarjetas). Las mayúsculas y las tildes dan
+  igual.
+
+  El orden de los apartados en la portada es el del archivo. Lo que no
+  caiga en ninguno va al final, en «lo demás», y al terminar se cantan
+  las etiquetas de esas páginas: ésa es la lista de lo que falta por
+  añadir al archivo (o de lo que está escrito de dos maneras).
+
+  DEBAJO DEL MAPA ESTÁ LA LISTA DE SITIOS, y no es un extra: es el mapa
+  en texto. Un dibujo no dice nada a quien no lo ve bien, ni a un
+  lector de pantalla, ni al tabulador, así que todo lo que hay en el
+  mapa está también ahí, en orden alfabético y con el mismo enlace. Por
+  eso el dibujo va con aria-hidden y sus enlaces sin tabulador: no se
+  esconde nada, es que lo mismo no se cuenta dos veces. Pasar por una
+  fila de la lista enciende su región en el mapa.
+
+  LO QUE NO TIENE NOMBRE NO SE PUEDE PULSAR. En el mapamundi de ejemplo
+  hay 123 formas y 106 no tienen ni nombre ni enlace: son el dibujo
+  (fronteras, costas, lo que todavía no es nada). Se pintan flojas y ya
+  está; un tabulador que pasa por 106 cosas sin nombre no es navegar.
+
+  LOS CONTORNOS SE SIMPLIFICAN, porque van dentro del HTML. El mapamundi
+  trae 29.321 puntos; con el algoritmo de Ramer-Douglas-Peucker a 3px
+  de tolerancia —sobre un lienzo de 7.680, o sea un 0,04% del ancho— se
+  quedan en 13.581 y a simple vista es el mismo dibujo. Se cambia con
+  --detalle (0 los deja enteros y la página pesa el doble).
+
+  LAS IMÁGENES SE BUSCAN COMO LAS BUSCA CHRONICLER: por el nombre, estén
+  en la carpeta que estén (_imagenes/mapas/, _imagenes/banderas_y_heraldica/…).
+  Da igual que la página o el mapa las nombren con la carpeta delante, con
+  la barra de Windows o solo por el nombre; y si lo que piden es un .png y
+  lo que hay es el mismo archivo en .webp, usa el que hay y lo dice. Esto
+  está así desde que al traer la bóveda de verdad no se veía ninguna
+  imagen: estaban todas, pero nombradas con su carpeta delante.
+
+  LAS IMÁGENES DE FONDO SE ENCOGEN a 2.560 de ancho y se pasan a WebP:
+  el fondo del mapamundi es un PNG de 7680x4320 y varios megas que no
+  se ven, porque por muy grande que sea la pantalla el mapa no se pinta
+  más grande que eso. Para encogerlas hace falta Pillow, la misma que
+  2-imagenes/optimizar-imagenes.py; si no está, se copian tal cual y se
+  avisa.
+
+  UNA REGIÓN PUEDE LLEVAR A UNA PÁGINA DE LA WIKI (targetPage) O A OTRO
+  MAPA (targetMap), y si lleva a una página que todavía no está escrita
+  sale en la lista marcada como «sin página» y en el informe del final,
+  con las demás que faltan. Al revés también: la página de un sitio que
+  está dibujado en un mapa lleva el mapa en su «se habla de esto en»,
+  que es la única forma de llegar desde el sitio al mapa donde está. Y
+  un [[enlace]] normal desde cualquier artículo puede llevar al mapa,
+  porque en la bóveda un mapa es un archivo con su nombre, como una
+  página.
+
+  CADA ARTÍCULO ES UN HTML DE VERDAD, no una página que se pinta sola
+  con JavaScript. Eso es a propósito: cada uno tiene su dirección y se
+  puede enlazar y compartir, se lee sin JavaScript (que es lo que hace
+  que lo encuentre Google y que se imprima), y su texto está dentro del
+  archivo, así que el buscador del sitio lo indexa como cualquier otra
+  página.
+
+  LO QUE SE PUBLICA ES TODO: no hay páginas privadas. Los ||spoilers||
+  salen tapados y se destapan al pulsarlos, pero eso es un juego visual
+  y no un secreto: están en el código de la página. Lo que de verdad no
+  se pueda contar, no se pone.
+
+
   LAS RECOMENDACIONES
 
   La página web/recomendaciones/recomendaciones.html sale entera de
@@ -461,7 +1341,7 @@
 
   LO MÁS CÓMODO ES LA HERRAMIENTA:
 
-      python herramientas/nueva-recomendacion.py
+      python herramientas/1-publicar/nueva-recomendacion.py
 
   Te pregunta en qué categoría vas a añadir —una en concreta o "todas",
   que solo quiere decir que entonces pregunta la categoría en cada
@@ -470,9 +1350,9 @@
   basta con pasarla una vez. Comprueba de paso que la portada exista y
   que el enlace empiece por http.
 
-      python herramientas/nueva-recomendacion.py --listar
-      python herramientas/nueva-recomendacion.py --categoria libros
-      python herramientas/nueva-recomendacion.py --categoria pelis \
+      python herramientas/1-publicar/nueva-recomendacion.py --listar
+      python herramientas/1-publicar/nueva-recomendacion.py --categoria libros
+      python herramientas/1-publicar/nueva-recomendacion.py --categoria pelis \
              --titulo "Donnie Darko" --anyo 2001 --texto "..." \
              --imprescindible
 
@@ -1074,12 +1954,12 @@
   Y CUANDO TERMINES, SIEMPRE
 ---------------------------------------------------------------
 
-      python herramientas/generar-sitemap.py
-      python herramientas/generar-mapa.py
+      python herramientas/3-generadores/generar-sitemap.py
+      python herramientas/3-generadores/generar-mapa.py
 
   Y SI HAS TOCADO ALGÚN CSS O ALGÚN JS, además:
 
-      python herramientas/actualizar-cabeceras.py
+      python herramientas/3-generadores/actualizar-cabeceras.py
 
   Esto es lo que hace que el cambio se vea en la web. El navegador
   se guarda el CSS y el JS para no volver a pedirlos, así que sin
@@ -1102,7 +1982,7 @@
 
   Y ANTES DE SUBIR, SI QUIERES ESTAR TRANQUILO:
 
-      python herramientas/enlaces-rotos.py
+      python herramientas/4-comprobar/enlaces-rotos.py
 
   Recorre el sitio entero y comprueba que todo lo que apunta a algo
   existe: enlaces entre páginas, imágenes, CSS, JS, fuentes y las
@@ -1165,7 +2045,7 @@
   Tienes un ejemplo con TODO esto junto, comentado y listo para
   copiar, en:
 
-      herramientas/ejemplo-formatos.html
+      herramientas/5-consulta/ejemplo-formatos.html
 
   (no es una página: es el trozo de dentro de una entrada. Para
   verlo de verdad, crea una entrada de prueba, pégalo dentro y
@@ -1254,33 +2134,142 @@
   QUÉ HACE CADA ARCHIVO
 ---------------------------------------------------------------
 
-  LOS QUE USAS TÚ
-  ---------------
-  ejemplo-formatos.html  un ejemplo de todos los formatos de texto
-                        que admite una entrada, para copiar y pegar
-  nuevo.py ............. publica cualquier cosa. Sin decirle nada
+  (los nombres van con su carpeta: es lo que hay que escribir)
+
+  EL ÍNDICE
+  ---------
+  menu.py ............. el "¿qué quieres hacer?". Lista en castellano
+                        lo que puedes hacer y llama a la que toque.
+                        No hace nada por su cuenta.
+
+  1-PUBLICAR: LO QUE USAS CASI SIEMPRE
+  ------------------------------------
+  1-publicar/nuevo.py .. publica cualquier cosa. Sin decirle nada
                         te pregunta qué es; o se lo dices con
                         --entrada, --relato, --rol o --reto. Lo que
                         lleva página propia nace como borrador.
-  publicar.py ......... publica un borrador, o despublica algo con
-                        --despublicar
-  optimizar-imagenes.py  pasa imagenes/ a WebP y les quita los datos
-                        de dentro. Respeta el favicon y los SVG.
-  generar-galeria.py .. miniaturas + datos/fotos-santuarios.json, y
-                        pregunta la descripción de las fotos nuevas
+  1-publicar/publicar.py  publica un borrador, o despublica algo
+                        con --despublicar
+  1-publicar/nueva-recomendacion.py  añade cosas a
+                        datos/recomendaciones.json preguntándote los
+                        datos. Con --listar enseña lo que ya hay y con
+                        --categoria va directa.
+  1-publicar/en-lo-que-ando.py  cambia lo que pone la página de «en lo
+                        que ando»: lo que leo, veo y juego, lo que
+                        escribo y el post-it de pendientes. Pone la
+                        fecha sola y pasa el buscador al terminar.
+                        El bloque de la partida de rol no se toca
+                        desde aquí: se escribe solo.
+
+  1-publicar/nuevo-personaje.py  añade gente al quién es quién de una
+                        campaña de rol, preguntándote los datos. Las
+                        fotos las preparas tú y él las apunta. Al
+                        terminar pasa el buscador, que es lo único que
+                        hace falta rehacer.
+
+  1-publicar/importar-mundo.py  se trae la bóveda de Chronicler a
+                        mundo/ —páginas, mapas e imágenes— y pasa el
+                        generador detrás. Le pasas la ruta la primera
+                        vez y se la apunta en mundo-origen.txt. Es un
+                        espejo: quita de mundo/ lo que ya no esté en la
+                        bóveda, avisando antes (--anadir para que no lo
+                        haga, --probar para que no haga nada). De lo
+                        que no sabe qué es hace un inventario y te lo
+                        enseña.
+
+  2-IMAGENES: ANTES DE SUBIR FOTOS
+  --------------------------------
+  2-imagenes/traer-imagen.py  coge una imagen de donde la tengas
+                        (descargas, escritorio, un pendrive), la deja
+                        dentro del sitio en su carpeta, en WebP y al
+                        tamaño que toque, y te escribe la ruta para el
+                        JSON. Ver TRAER UNA IMAGEN, más arriba.
+  2-imagenes/optimizar-imagenes.py  pasa imagenes/ a WebP y les quita
+                        los datos de dentro. Respeta el favicon y los
+                        SVG.
+  2-imagenes/generar-galeria.py  miniaturas +
+                        datos/fotos-santuarios.json, y pregunta la
+                        descripción de las fotos nuevas
                         (--sin-preguntar para que no lo haga)
-  enlaces-rotos.py .... comprueba que todo lo que se enlaza existe,
-                        y lista lo que no usa nadie. No cambia nada.
-                        Con --externos mira también los enlaces de
-                        fuera.
-  nueva-recomendacion.py  añade cosas a datos/recomendaciones.json
-                        preguntándote los datos. Con --listar enseña
-                        lo que ya hay y con --categoria va directa.
-  nombres-repetidos.py  busca funciones con el mismo nombre en dos
-                        .js distintos. Aquí los scripts comparten
-                        el ámbito global: dos con el mismo nombre
-                        se pisan y gana el último que se cargue.
-                        No cambia nada. Pásalo si tocas el JS.
+  2-imagenes/tamanos-portada.py  saca las versiones pequeñas del
+                        dibujo de la portada (el navegador se baja la
+                        que le hace falta: 45 KB en vez de 187 en un
+                        portátil normal). Solo si cambias el dibujo.
+
+  3-GENERADORES: SE LLAMAN SOLOS
+  ------------------------------
+  (nuevo.py y publicar.py ya los ejecutan en orden; solo los
+  necesitas sueltos si has tocado alguna página a mano, y para eso
+  está la opción 16 del menú)
+
+  3-generadores/generar-archivo.py  crea web/blog/<año>/index_<año>.html
+                        con un bloque por mes, y mete el año en el
+                        menú lateral
+  3-generadores/generar-posts.py  reescribe datos/entradas-blog.json,
+                        datos/mis-movidas.json y datos/notas-rol.json
+                        leyendo las páginas
+  3-generadores/generar-rss.py  escribe blog/rss.xml
+  3-generadores/generar-mundo.py  convierte la bóveda de Chronicler
+                        que hay en mundo/ en las páginas de web/mundo/,
+                        los .cmap incluidos (cada mapa, una página con
+                        su SVG y su lista de sitios). Con --probar no
+                        escribe nada y con --detalle se dice cuánto se
+                        simplifican los contornos. Al terminar canta lo
+                        que no ha sabido convertir, los enlaces a
+                        páginas que no existen y las imágenes pesadas.
+                        Se apoya en mundo_formato.py (el Markdown y el
+                        frontmatter) y en mundo_mapas.py (los mapas);
+                        esos dos no se pasan sueltos.
+
+  3-generadores/generar-sitemap.py  escribe sitemap.xml recorriendo
+                        los .html
+  3-generadores/generar-mapa.py  escribe datos/mapa-del-sitio.json, que
+                        es de donde sale la tabla de web/mapa/mapa.html
+  3-generadores/generar-buscador.py  escribe datos/buscador.json, el
+                        listado con el texto de toda la web que usa la
+                        página de buscar.
+  3-generadores/actualizar-cabeceras.py  escribe en el <head> de cada página la
+                        lista de CSS y la de JS que le tocan, con su
+                        ?v= anticaché. Hace falta si creas o borras
+                        un archivo de estilos o de scripts, o si
+                        cambias qué páginas usan cuál: eso se decide
+                        en hojas_de() y scripts_de() de ese mismo
+                        archivo, que son los únicos sitios donde
+                        está escrito. Con --probar te dice qué
+                        cambiaría sin tocar nada.
+
+  4-COMPROBAR: MIRAN Y NO TOCAN NADA
+  ----------------------------------
+  (la opción 15 del menú las pasa las cinco de golpe)
+
+  4-comprobar/enlaces-rotos.py  comprueba que todo lo que se enlaza
+                        existe, y lista lo que no usa nadie. Con
+                        --externos mira también los enlaces de fuera.
+  4-comprobar/css-sano.py  mira que ninguna hoja de estilo tenga un
+                        comentario o una llave mal cerrada. Ese fallo
+                        el navegador no lo canta: se come en silencio
+                        la regla que venga detrás.
+  4-comprobar/temas-completos.py  mira que ningún tema de color se
+                        haya quedado a medias. Un tema vive en seis
+                        sitios y es muy fácil olvidarse de uno.
+  4-comprobar/nombres-repetidos.py  busca funciones con el mismo
+                        nombre en dos .js distintos. Aquí los scripts
+                        comparten el ámbito global: dos con el mismo
+                        nombre se pisan y gana el último que se
+                        cargue. Pásalo si tocas el JS.
+  4-comprobar/inyecciones.py  busca por dónde se podría colar código:
+                        texto pegado como HTML sin escapar, direcciones
+                        puestas en un href o un src sin comprobar, y
+                        eval(). Pásalo siempre que toques el JS.
+
+  5-CONSULTA: PARA MIRAR, NO SE EJECUTAN
+  --------------------------------------
+  5-consulta/ejemplo-formatos.html  un ejemplo de todos los formatos
+                        de texto que admite una entrada, para copiar
+                        y pegar
+  5-consulta/uso_de_git.txt  cómo llevar el sitio con git
+  5-consulta/guestbook-apps-script.txt  el script del guestbook, para
+                        pegarlo en Google Apps Script
 
   EL CAJÓN COMPARTIDO
   -------------------
@@ -1291,37 +2280,6 @@
                         generadores...). Estaba copiado en cuatro
                         sitios y por eso un arreglo llegaba a unos
                         scripts y a otros no.
-
-  LOS QUE SE LLAMAN SOLOS
-  -----------------------
-  (los dos de arriba ya los ejecutan; solo los necesitas sueltos
-  si has tocado alguna página a mano)
-
-  generar-archivo.py .. crea web/blog/<año>/index_<año>.html con
-                        un bloque por mes, y mete el año en el
-                        menú lateral
-  generar-posts.py .... reescribe datos/entradas-blog.json y
-                        datos/mis-movidas.json leyendo las páginas
-  generar-rss.py ...... escribe blog/rss.xml desde datos/entradas-blog.json
-  generar-sitemap.py .. escribe sitemap.xml recorriendo los .html
-  generar-mapa.py ..... escribe datos/mapa-del-sitio.json, que es de
-                        donde sale la tabla de web/mapa/mapa.html
-  tamanos-portada.py .. saca las versiones pequeñas del dibujo de la
-                        portada (el navegador se baja la que le hace
-                        falta: 45 KB en vez de 187 en un portátil
-                        normal). Solo si cambias el dibujo.
-  generar-buscador.py . escribe datos/buscador.json, el listado con
-                        el texto de toda la web que usa la página de
-                        buscar. Lo pasan solos nuevo.py y publicar.py.
-  actualizar-cabeceras.py  escribe en el <head> de cada página la
-                        lista de CSS y la de JS que le tocan, con su
-                        ?v= anticaché. Hace falta si creas o borras
-                        un archivo de estilos o de scripts, o si
-                        cambias qué páginas usan cuál: eso se decide
-                        en hojas_de() y scripts_de() de ese mismo
-                        archivo, que son los únicos sitios donde
-                        está escrito. Con --probar te dice qué
-                        cambiaría sin tocar nada.
 
   LAS PLANTILLAS
   --------------
@@ -1338,6 +2296,140 @@
   originales-sustituidas/ ....... copias de seguridad que deja
                         optimizar-imagenes.py de las imágenes que
                         sustituye. No hace falta subirla.
+
+
+---------------------------------------------------------------
+  QUE NADIE PUEDA COLAR CÓDIGO EN LA WEB
+---------------------------------------------------------------
+
+  Media web se pinta en el navegador: las entradas, el mapa, el
+  buscador, el reparto de una campaña, los mensajes del guestbook. Todo
+  eso sale de un JSON o de lo que alguien escriba, y acaba metido en la
+  página. Si ese texto se mete como HTML sin más, quien controle el
+  texto controla la página.
+
+  POR DÓNDE PODRÍA ENTRAR
+  -----------------------
+    1. LA DIRECCIÓN. ?q=, ?buscar=, ?cat=, ?tag=. Cualquiera puede
+       mandarte un enlace con lo que quiera ahí metido.
+    2. LO QUE SE ESCRIBE en el buscador de una página.
+    3. EL GUESTBOOK: los mensajes los escribe quien pasa por ahí.
+    4. LOS JSON de datos/: los escribes tú, pero si uno se corrompe o se
+       pega algo copiado de internet, lo que haya dentro sale en la web.
+
+  CÓMO SE PARA
+  ------------
+    · EL TEXTO QUE SE PINTA va escapado (escapeHtml, escapar,
+      escaparHtmlNotas...) o se monta con createElement y textContent,
+      que no tiene este problema. El guestbook va por la segunda vía:
+      no hay un solo innerHTML con un mensaje dentro.
+    · LAS DIRECCIONES que acaban en un href o un src se comprueban
+      antes de ponerlas (urlSegura, rutaSegura*...): valen una dirección
+      de esta web ("/" pero no "//", que sería otra web) o una http(s)
+      entera; lo demás —"javascript:", "data:"— no se pone. Una
+      dirección que empiece por "javascript:" no es una dirección: es
+      código que se ejecuta al pulsar.
+    · EL GUESTBOOK, ADEMÁS, se defiende en el servidor (ver
+      herramientas/5-consulta/guestbook-apps-script.txt): corta el
+      nombre a 60 y el mensaje a 300, tiene campo trampa, límite de
+      enlaces y límite de ritmo. Eso no se puede saltar escribiendo a
+      la URL a mano, que es lo que sí se saltaba comprobándolo solo en
+      el navegador.
+
+  CÓMO SE COMPRUEBA
+  -----------------
+      python herramientas/4-comprobar/inyecciones.py
+
+  Repasa los .js y canta tres cosas: HTML pegado sin escapar,
+  direcciones puestas sin comprobar, y eval(). Pásalo SIEMPRE que
+  toques el JS. Lleva dentro una lista de sitios ya revisados, con el
+  porqué de cada uno; si uno de esos trozos cambia, el aviso vuelve a
+  salir.
+
+  Y se ha probado disparando de verdad: 120 intentos con doce cargas
+  distintas (<script>, <img onerror>, <svg onload>, javascript:,
+  ontoggle, @import...) contra diez páginas y sus parámetros, más
+  envenenar todos los JSON de datos/ y la respuesta del guestbook. Así
+  salió el único agujero que había: el botón de "volver a la campaña"
+  de la página de npcs se tragaba un "javascript:" del JSON, porque era
+  el único href de esa página sin comprobar.
+
+  LO QUE NO HAY, y conviene saberlo
+  ---------------------------------
+  No hay cabecera Content-Security-Policy: Neocities no deja poner
+  cabeceras. Se podría meter una en un <meta> de cada página, y sería
+  una segunda red por debajo de todo lo de arriba, pero hay que
+  calcular el hash de los dos trozos de JavaScript que van escritos en
+  el <head> (el del tema y el del menú) y meterlos en la regla. Está
+  por hacer; mientras tanto, lo que protege la web es lo de arriba.
+
+
+---------------------------------------------------------------
+  LA CABECERA DE LAS PÁGINAS Y LOS PAQUETES
+---------------------------------------------------------------
+
+  El <head> de cada página lo escribe entero
+  herramientas/3-generadores/actualizar-cabeceras.py: el pre-pintado del
+  tema, el adelanto del menú, la lista de CSS y la de JS. NO SE TOCA A
+  MANO; se toca la herramienta y se vuelve a pasar.
+
+  POR QUÉ ESTÁ TODO AHÍ Y NO LO PIDE UN SCRIPT
+  --------------------------------------------
+  Medido: con un script de por medio, el CSS tardaba ~200 ms más en
+  pintar la página y los JS no empezaban a bajarse hasta 600 ms después.
+  Escrito en el <head>, el navegador lo descubre nada más recibir el
+  HTML. El pre-pintado del tema va ahí por lo mismo: si esperara a
+  scripts/tema.js la página se pintaría con el tema de fábrica y daría
+  un fogonazo al cambiar.
+
+  LOS PAQUETES
+  ------------
+  Once hojas de estilo y quince scripts los lleva TODA página del sitio.
+  Eran veintiséis líneas iguales en los 38 archivos y veintiséis viajes
+  del navegador, así que la herramienta los pega en tres archivos:
+
+      estilos/paquete-comun.css    las ocho que van ANTES de la hoja
+                                   de la página
+      estilos/paquete-cierre.css   las tres que van DESPUÉS
+      scripts/paquete-comun.js     los quince scripts comunes
+
+  Son TRES y no uno porque el orden del CSS decide quién gana, y los
+  comunes no van todos seguidos: ocho van siempre antes de la hoja de la
+  página y tres siempre después. Juntándolos en uno, esos tres
+  adelantarían a la hoja de la página y cambiaría lo que se ve.
+
+  Y no hay un paquete por página porque sale peor: hay 19 combinaciones
+  distintas de CSS para 31 páginas, serían 19 paquetes de ~200 KB y cada
+  página se bajaría el suyo entero en vez de reaprovechar la base que ya
+  tenía de la anterior.
+
+  LO QUE SE GANÓ, medido con la red frenada a 3G rápido:
+      portada:  37 peticiones -> 14, pintado 980 -> 816 ms
+      entrada:  37 peticiones -> 14, pintado 1080 -> 884 ms
+  Y la cabecera de cada archivo pasó de ~160 líneas a ~80.
+
+  SON ARCHIVOS GENERADOS: llevan dentro una copia de los de verdad y
+  arriba la lista de lo que llevan. No los edites —se pisan en cuanto
+  pases la herramienta—: se toca estilos/base.css o el que sea y se
+  vuelve a pasar
+
+      python herramientas/3-generadores/actualizar-cabeceras.py
+
+  SÍ HAY QUE SUBIRLOS A NEOCITIES: son los que piden las páginas.
+
+  SI AÑADES una hoja o un script que lleven TODAS las páginas, mételo en
+  su sitio de hojas_de()/scripts_de() y también en la lista PAQUETES de
+  esa misma herramienta. Si no cuadran, al pasarla te avisa.
+
+  LO QUE PASA SI UN SCRIPT FALLA. Antes, si uno se caía, los demás
+  seguían corriendo porque cada uno era su propio <script>. Ahora los
+  quince comunes son uno solo: si uno se cae por dentro, se lleva por
+  delante a los que vengan detrás. Por eso conviene pasar
+
+      python herramientas/4-comprobar/nombres-repetidos.py
+
+  cuando toques el JS, y mirar la consola del navegador (F12) después de
+  un cambio gordo.
 
 
 ---------------------------------------------------------------
@@ -1400,7 +2492,7 @@
       páginas solo para sacar UNA foto del gatín. No estorba (llega
       tarde y no retrasa nada de lo que se ve), pero si algún día
       molesta, generar un listado chiquitín aparte en
-      herramientas/generar-galeria.py lo arregla.
+      herramientas/2-imagenes/generar-galeria.py lo arregla.
 
   CÓMO VOLVER A MEDIRLO. Las fuentes ya van con font-display: swap y la
   del texto va precargada en el <head>; eso está medido y mejor no
@@ -1483,7 +2575,7 @@
 
   Eso no se ve, pero quien usa lector de pantalla oye el aviso en
   vez de encontrarse una ventana nueva sin saber por qué. En
-  herramientas/ejemplo-formatos.html hay un enlace de ejemplo.
+  herramientas/5-consulta/ejemplo-formatos.html hay un enlace de ejemplo.
 
 
 ---------------------------------------------------------------

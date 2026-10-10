@@ -54,7 +54,7 @@
 
                 <div class="submenu">
                     <a href="/web/mis_movidas/relatos/index_relatos.html">relatos</a>
-                    <a href="/web/mis_movidas/rol/index_rol.html">rol</a>
+                    <a href="/web/mis_movidas/rol/index_rol.html">recursos de rol</a>
                 </div>
             </div>
 
@@ -66,7 +66,7 @@
                 </button>
 
                 <!-- Los años los pone y los quita solo
-                     herramientas/generar-archivo.py al publicar: en
+                     herramientas/3-generadores/generar-archivo.py al publicar: en
                      cuanto escribas la primera entrada, 2026 vuelve a
                      aparecer aquí sin que tengas que tocar nada. -->
                 <div class="submenu">
@@ -75,23 +75,51 @@
                 </div>
             </div>
 
-            <!-- NOTAS DE ROL -->
-            <!-- Grupo propio y no una entrada más dentro de "mis
-                 movidas": ahí va lo que publico (relatos, material de
-                 rol) y esto es lo contrario, un cuaderno de partidas que
-                 guardo para acordarme. Y va a crecer por campañas, no por
-                 piezas sueltas: cada campaña, un enlace aquí.
+            <!-- ROLEITO -->
+            <!-- Todo lo de jugar, junto: el cuaderno de las partidas y el
+                 mundo donde pasan. Son dos cosas distintas —una es lo que
+                 pasó y la otra es dónde pasa— pero se vienen a buscar a la
+                 vez, así que cuelgan del mismo sitio.
 
-                 PARA AÑADIR UNA CAMPAÑA: una línea más aquí dentro,
-                 apuntando a su index_<campaña>.html. -->
+                 OJO: esto es un grupo DENTRO de otro grupo. El menú
+                 aguanta dos niveles sin tocar nada (el script abre todos
+                 los padres de la página en la que estás y el CSS usa el
+                 selector de hijo directo), pero más de dos ya sería un
+                 menú en el que hay que buscar, y entonces mejor una
+                 página. -->
             <div class="nav-group">
                 <button class="nav-toggle" type="button" aria-expanded="false">
-                    <span>notas de rol</span>
+                    <span>roleito</span>
                     <span class="arrow" aria-hidden="true">+</span>
                 </button>
 
                 <div class="submenu">
-                    <a href="/web/notas_rol/ragna/index_ragna.html">campaña de Ragna</a>
+                    <!-- NOTAS DE ROL
+                         Un cuaderno de partidas, por campañas. PARA AÑADIR
+                         UNA: una línea más aquí dentro, apuntando a su
+                         index_<campaña>.html.
+
+                         Y SOLO ÉSA. La página de npcs de la campaña NO va
+                         en el menú a propósito: no es una sección del
+                         sitio, es una parte de la campaña, y se entra
+                         desde su índice. -->
+                    <div class="nav-group">
+                        <button class="nav-toggle" type="button" aria-expanded="false">
+                            <span>notas de rol</span>
+                            <span class="arrow" aria-hidden="true">+</span>
+                        </button>
+
+                        <div class="submenu">
+                            <a href="/web/notas_rol/ragna/index_ragna.html">campaña de Ragna</a>
+                        </div>
+                    </div>
+
+                    <!-- LA WIKI
+                         No se escribe en el sitio: se escribe en
+                         Chronicler, en la carpeta mundo/, y se pasa a la
+                         web con
+                         python herramientas/3-generadores/generar-mundo.py -->
+                    <a href="/web/mundo/index_mundo.html">wiki cralëa</a>
                 </div>
             </div>
 
@@ -107,6 +135,7 @@
 
                 <div class="submenu">
                     <a href="/web/sobre_mi/sobre_mi.html">quién soy</a>
+                    <a href="/web/en_lo_que_ando/en_lo_que_ando.html">en lo que ando</a>
                     <a href="/web/santuarios/index_santuarios.html">santuarios</a>
                     <a href="/web/recomendaciones/recomendaciones.html">recomendaciones</a>
                 </div>

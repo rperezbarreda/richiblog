@@ -9,7 +9,7 @@
 //
 // QUIÉN MANDA: datos/reto-writeober26.json. Ahí están las 31 palabras y,
 // de cada día que publicas, su título y su dirección (los rellena
-// herramientas/nuevo.py --reto al crear la página). Las palabras las
+// herramientas/1-publicar/nuevo.py --reto al crear la página). Las palabras las
 // escribes tú una vez, al principio.
 //
 // Esto solo corre en la página de un reto. En el listado de relatos,
@@ -204,7 +204,11 @@ function escaparHtmlReto(texto) {
 
 function rutaSeguraReto(url) {
     const limpia = (url || "").trim();
-    if (/^(https?:|mailto:|\/|#)/i.test(limpia)) {
+    // Una dirección de ESTA web (que empiece por "/" pero no por "//",
+    // que sería otra web), una http(s) entera, un correo o un ancla. Lo
+    // demás —"javascript:", "data:", "//otrositio.com"— no es una
+    // dirección: es código o es irse de aquí sin que se note.
+    if (/^\/(?!\/)/.test(limpia) || /^(https?:\/\/|mailto:|#)/i.test(limpia)) {
         return limpia;
     }
     return "#";

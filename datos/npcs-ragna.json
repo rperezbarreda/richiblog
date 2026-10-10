@@ -1,0 +1,271 @@
+{
+    "campana": "ragna",
+    "nombre": "campaña de Ragna",
+    "pagina": "/web/notas_rol/ragna/npcs_ragna.html",
+    "intro": "La gente que nos vamos encontrando por el camino. Pulsa en cualquiera para ver su ficha.",
+    "apartados": [
+        {
+            "nombre": "la Gran Caravana",
+            "categorias": [
+                "Gran Caravana"
+            ]
+        },
+        {
+            "nombre": "Sirevia",
+            "categorias": [
+                "Sirevia",
+                "Bandidos de Sirevia",
+                "Chitxia"
+            ]
+        },
+        {
+            "nombre": "NPCs Personales",
+            "categorias": [
+                "Familia de Melissa",
+                "Familia de Faëlar"
+            ]
+        }
+    ],
+    "personajes": [
+        {
+            "nombre": "Sigil",
+            "categoria": "Gran Caravana",
+            "que": "Tiefling",
+            "donde": "Gran Caravana",
+            "relacion": "aliado",
+            "estado": "vivo",
+            "token": "/imagenes/notas_rol/ragna/sigil_tkn.webp",
+            "ilustracion": "/imagenes/notas_rol/ragna/sigil.webp",
+            "notas": [
+                "Nuestro jefe, un carismático y joven tiefling que dirige nuestra caravana."
+            ]
+        },
+        {
+            "nombre": "Tovin",
+            "categoria": "Gran Caravana",
+            "que": "Kobold",
+            "donde": "Gran Caravana",
+            "relacion": "aliado",
+            "estado": "vivo",
+            "token": "/imagenes/notas_rol/ragna/tovin_tkn.webp",
+            "ilustracion": "/imagenes/notas_rol/ragna/tovin.webp",
+            "notas": [
+                "Comerciante de mercancias generales, tiene perretes."
+            ]
+        },
+        {
+            "nombre": "Borin",
+            "categoria": "Gran Caravana",
+            "que": "Enano",
+            "donde": "Gran Caravana",
+            "relacion": "aliado",
+            "estado": "vivo",
+            "token": "/imagenes/notas_rol/ragna/borin_tkn.webp",
+            "ilustracion": "/imagenes/notas_rol/ragna/borin.webp",
+            "notas": [
+                "Herrero en la caravana de Sigil."
+            ]
+        },
+        {
+            "nombre": "Ayala",
+            "categoria": "Sirevia",
+            "que": "Mediana",
+            "donde": "El Sueño del Elemental",
+            "relacion": "neutral",
+            "estado": "vivo",
+            "token": "/imagenes/notas_rol/ragna/ayala_tkn.webp",
+            "ilustracion": "/imagenes/notas_rol/ragna/ayala.webp",
+            "notas": [
+                "Posadera de El Sueño del Elemental.",
+                "Antipática."
+            ]
+        },
+        {
+            "nombre": "Reeni",
+            "categoria": "Sirevia",
+            "que": "Humano",
+            "donde": "El Sueño del Elemental",
+            "relacion": "neutral",
+            "estado": "vivo",
+            "token": "/imagenes/notas_rol/ragna/reeni_tkn.webp",
+            "ilustracion": "/imagenes/notas_rol/ragna/reeni.webp",
+            "notas": [
+                "Cazador de Sirevia.",
+                "Padre de Areeni."
+            ]
+        },
+        {
+            "nombre": "Ruukus",
+            "categoria": "Sirevia",
+            "que": "Humano",
+            "donde": "El Sueño del Elemental",
+            "relacion": "neutral",
+            "estado": "vivo",
+            "token": "/imagenes/notas_rol/ragna/ruukus_tkn.webp",
+            "ilustracion": "/imagenes/notas_rol/ragna/ruukus.webp",
+            "notas": [
+                "Cazador de Sirevia"
+            ]
+        },
+        {
+            "nombre": "Areeni",
+            "categoria": "Sirevia",
+            "que": "Humana",
+            "donde": "Sirevia",
+            "relacion": "neutral",
+            "estado": "vivo",
+            "token": "",
+            "ilustracion": "",
+            "notas": [
+                "Entusiasmada por el puesto de pergaminos de Denelia.",
+                "Hija de Reeni."
+            ]
+        },
+        {
+            "nombre": "Elvira",
+            "categoria": "Gran Caravana",
+            "que": "Humana",
+            "donde": "Gran Caravana",
+            "relacion": "aliado",
+            "estado": "vivo",
+            "token": "/imagenes/notas_rol/ragna/elvira_tkn.webp",
+            "ilustracion": "/imagenes/notas_rol/ragna/elvira.webp",
+            "notas": [
+                "Herborista y comerciante de pociones."
+            ]
+        },
+        {
+            "nombre": "Apaaka",
+            "categoria": "Sirevia",
+            "que": "Humana?",
+            "donde": "",
+            "relacion": "desconocida",
+            "estado": "viva",
+            "token": "",
+            "ilustracion": "",
+            "notas": [
+                "Líder de Sirevia.",
+                "Por algún motivo deja campar a sus anchas a bandidos."
+            ],
+            "primera": 1
+        },
+        {
+            "nombre": "Terkus",
+            "categorias": [
+                "Sirevia",
+                "Bandidos de Sirevia"
+            ],
+            "que": "Humano",
+            "donde": "Sirevia",
+            "relacion": "enemigo",
+            "estado": "muerto",
+            "token": "",
+            "ilustracion": "",
+            "notas": [
+                "Líder del ataque a nuestra caravana en Sirevia.",
+                "Tras interrogarlo nos dijo dónde encontrar al resto de su banda."
+            ]
+        },
+        {
+            "nombre": "Ermitaño desconocido",
+            "categoria": "Sirevia",
+            "que": "Humano?",
+            "donde": "Bosques de Sirevia",
+            "relacion": "desconocida",
+            "estado": "vivo",
+            "token": "",
+            "ilustracion": "",
+            "notas": [
+                "Personaje muy misterioso.",
+                "Nos advirtió de los espíritus del bosque.",
+                "Sabe usar muy bien el arco."
+            ]
+        },
+        {
+            "nombre": "Rise",
+            "categorias": [
+                "Sirevia",
+                "Chitxia"
+            ],
+            "que": "Humano",
+            "donde": "Chitxia",
+            "relacion": "aliado",
+            "estado": "vivo",
+            "token": "",
+            "ilustracion": "",
+            "notas": [
+                "Anciano líder del pueblo de Chitxia.",
+                "Nos pidió ayuda con sus planctaciones a cambio de dejarnos un carro.",
+                "Seguidor de Mielikki."
+            ]
+        },
+        {
+            "nombre": "Brandr Vindahl",
+            "categorias": [
+                "Familia de Melissa"
+            ],
+            "que": "Humano",
+            "donde": "Sirevia",
+            "relacion": "aliado",
+            "estado": "vivo",
+            "token": "/imagenes/notas_rol/ragna/brandr-vindahl_tkn.webp",
+            "ilustracion": "/imagenes/notas_rol/ragna/brandr-vindahl.webp",
+            "notas": [
+                "Padre de Melissa"
+            ]
+        },
+        {
+            "nombre": "Isa Vindahl",
+            "categoria": "Familia de Melissa",
+            "que": "Humana",
+            "donde": "Sirevia",
+            "relacion": "aliado",
+            "estado": "vivo",
+            "token": "/imagenes/notas_rol/ragna/isa-vindahl_tkn.webp",
+            "ilustracion": "/imagenes/notas_rol/ragna/isa-vindahl.webp",
+            "notas": [
+                "Madre de Melissa"
+            ]
+        },
+        {
+            "nombre": "Obrandr Vindahl",
+            "categoria": "Familia de Melissa",
+            "que": "Humano",
+            "donde": "Sirevia",
+            "relacion": "aliado",
+            "estado": "vivo",
+            "token": "/imagenes/notas_rol/ragna/obrandr-vindahl_tkn.webp",
+            "ilustracion": "/imagenes/notas_rol/ragna/obrandr-vindahl.webp",
+            "notas": [
+                "Hermano de Melissa"
+            ]
+        },
+        {
+            "nombre": "Mita",
+            "categoria": "Familia de Faëlar",
+            "que": "Insecto Feérico",
+            "donde": "Bosque de Hadas",
+            "relacion": "aliado",
+            "estado": "vivo",
+            "token": "/imagenes/notas_rol/ragna/mita_tkn.webp",
+            "ilustracion": "/imagenes/notas_rol/ragna/mita.webp",
+            "notas": [
+                "Familiar de Faëlar",
+                "Nombre original: Palomita"
+            ]
+        },
+        {
+            "nombre": "Sozil",
+            "categoria": "Gran Caravana",
+            "que": "Semiorco",
+            "donde": "Gran Caravana",
+            "relacion": "aliado",
+            "estado": "desaparecido",
+            "token": "",
+            "ilustracion": "",
+            "notas": [
+                "Escolta de Sigil"
+            ]
+        }
+    ]
+}

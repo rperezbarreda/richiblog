@@ -43,7 +43,7 @@
 // Aquí no hay módulos: todos los scripts comparten el mismo ámbito
 // global y dos funciones con el mismo nombre se pisan (ya pasó con una
 // mover()). Por eso todo lo de aquí lleva "ajustes" en el nombre. Se
-// comprueba con herramientas/nombres-repetidos.py.
+// comprueba con herramientas/4-comprobar/nombres-repetidos.py.
 
 // Los cinco tamaños, del más pequeño al más grande. El 1 es el de
 // siempre y está en la lista a propósito: se vuelve a él con el −, sin

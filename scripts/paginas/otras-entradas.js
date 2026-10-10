@@ -166,7 +166,7 @@ function otraAHtml(item) {
     );
 }
 
-// El tiempo de lectura lo calcula herramientas/generar-posts.py al
+// El tiempo de lectura lo calcula herramientas/3-generadores/generar-posts.py al
 // escribir el listado (cuenta las palabras del cuerpo de la entrada),
 // así que aquí solo se pinta. Las cosas sin texto que leer —las fichas
 // del portfolio de rol, que son enlaces a Ko-fi— no traen el dato y no

@@ -2,34 +2,25 @@
 <html lang="es">
   <head>
     <meta charset="UTF-8">
-    <!-- Color de la barra del navegador en el móvil. Arranca en el color
-         del modo oscuro y el script de abajo lo cambia si toca; al pulsar
-         el botón de tema lo actualiza scripts/tema.js. -->
+    <!-- ==== TEMA ====
+         El tema elegido, puesto antes del primer pintado para que no haya
+         fogonazo. Lo escribe la herramienta leyendo scripts/tema.js. -->
     <meta name="theme-color" content="#12091c">
     <script>
-      // El tema, puesto ANTES de que se pinte nada: si esperara al resto
-      // de scripts, la página aparecería con el tema de fábrica y daría
-      // un fogonazo al cambiar. Por eso va escrito aquí, en el <head> de
-      // cada página, y no en un archivo aparte.
-      //
-      // Dos pasos, y en este orden:
-      //   1. Si hay un tema elegido, ése y ya está.
-      //   2. Si no hay ninguno, manda el aparato: con el modo claro
-      //      puesto, la web arranca en claro. Antes arrancaba siempre en
-      //      oscuro y quien tiene el móvil en claro porque ve mejor así
-      //      se comía una web oscura sin haber pedido nada. Esto NO se
-      //      guarda: mientras no se toque el mando, la web sigue a lo
-      //      que diga el sistema.
-      //
-      // Si cambias uno de estos colores, cámbialo también en
-      // estilos/base.css y en COLOR_BARRA de scripts/tema.js.
       (function () {
+        // Una marca de que el JavaScript funciona, puesta ANTES del primer
+        // pintado. Sirve para que una hoja de estilo pueda decir "esto
+        // solo si hay JavaScript": un spoiler tapado, por ejemplo, que sin
+        // JavaScript sería texto perdido y con él se destapa al pulsarlo.
+        // Aquí y no en otro sitio porque es el único script que corre
+        // antes de pintar: puesto más tarde habría fogonazo.
+        document.documentElement.classList.add("js");
         try {
           var temas = {
-            claro: ["light", "#f3e1d6"],
+            "claro": ["light", "#f3e1d6"],
             "oscuro-puro": ["puro-oscuro", "#000000"],
             "claro-puro": ["puro-claro", "#ffffff"],
-            tranquilo: ["tranquilo", "#f2efe9"],
+            "tranquilo": ["tranquilo", "#f2efe9"],
             "tranquilo-oscuro": ["tranquilo-oscuro", "#1b1e22"],
             "terminal-verde": ["terminal-verde", "#000000"],
             "terminal-azul": ["terminal-azul", "#000000"],
@@ -45,9 +36,7 @@
           if (elegido) {
             document.documentElement.setAttribute("data-theme", elegido[0]);
             var barra = document.querySelector('meta[name="theme-color"]');
-            if (barra) {
-              barra.setAttribute("content", elegido[1]);
-            }
+            if (barra) { barra.setAttribute("content", elegido[1]); }
           }
         } catch (e) {}
       })();
@@ -79,50 +68,21 @@
     <link rel="preload" href="/tipografias/space-grotesk-400.woff2" as="font" type="font/woff2" crossorigin>
     <link rel="alternate" type="application/rss+xml" title="El Blog de Richi — blog, relatos y rol" href="/blog/rss.xml">
     <!-- ==== CSS ====
-         Esta lista la escribe herramientas/actualizar-cabeceras.py.
-         No la toques a mano: si cambias qué CSS lleva una página,
-         cámbialo en esa herramienta y vuélvela a ejecutar.
-
-         Van escritos aquí, y no cargados por un script, para que el
-         navegador los pida nada más recibir el HTML. Con un script de
-         por medio tardaba ~200 ms más en pintar la página.
-
-         El ?v= de cada uno es el resumen de su contenido: cambia solo
-         cuando cambia el archivo, y es lo que hace que al subir a
-         Neocities se vea el cambio en vez de la versión guardada en la
-         caché del navegador. -->
-    <link rel="stylesheet" href="/estilos/base.css?v=7b045c04">
-    <link rel="stylesheet" href="/estilos/base.responsive.css?v=24021cbc">
-    <link rel="stylesheet" href="/estilos/componentes/visor-imagenes.css?v=c75e69bd">
-    <link rel="stylesheet" href="/estilos/componentes/aviso.css?v=aa14ed7b">
-    <link rel="stylesheet" href="/estilos/componentes/aviso.responsive.css?v=4b547ea8">
-    <link rel="stylesheet" href="/estilos/componentes/cabecera-ventana.css?v=df2807ad">
-    <link rel="stylesheet" href="/estilos/componentes/subir.css?v=da55ea85">
-    <link rel="stylesheet" href="/estilos/componentes/ajustes.css?v=105f8df0">
+         La escribe herramientas/3-generadores/actualizar-cabeceras.py.
+         No la toques a mano (el porqué, en esa herramienta). -->
+    <link rel="stylesheet" href="/estilos/paquete-comun.css?v=9ae9d5fe">
     <link rel="stylesheet" href="/estilos/paginas/no-encontrada.css?v=2d9bc618">
-    <link rel="stylesheet" href="/estilos/componentes/ventanas-plegables.css?v=c901afd7">
-    <link rel="stylesheet" href="/estilos/componentes/impresion.css?v=f2417ee6">
-    <link rel="stylesheet" href="/estilos/componentes/sin-movimiento.css?v=78601159">
+    <link rel="stylesheet" href="/estilos/paquete-cierre.css?v=7d910eba">
     <!-- ==== fin del CSS ==== -->
-    <script src="/scripts/cargador-scripts.js?v=ac61f433"></script>
+    <script src="/scripts/cargador-scripts.js?v=476f3b11"></script>
     <!-- ==== JS ====
-         Esta lista también la escribe la herramienta, a partir de
-         scripts_de(). No la toques a mano.
-
-         Todos van con "defer": se bajan mientras el navegador lee el
-         HTML, no retrasan el pintado y se ejecutan al final, en este
-         mismo orden, que en unos cuantos casos importa.
-
-         Están escritos aquí y no los pide un script, por lo mismo que
-         el CSS: así el navegador los descubre en cuanto le llega el
-         HTML. Pidiéndolos desde el cargador no empezaban a bajarse
-         hasta 600 ms después, y con ellos se retrasaba todo lo que se
-         puede tocar (el menú el que más). -->
+         Igual que el CSS: la escribe la herramienta, a partir de
+         scripts_de(). Van con defer y en este orden, que importa. -->
     <script defer src="/scripts/componentes/botones-ventana.js?v=cab0ce9c"></script>
     <script defer src="/scripts/componentes/ventanas-plegables.js?v=40711cd7"></script>
     <script defer src="/scripts/componentes/rastro-cursor.js?v=0d9a7e7f"></script>
     <script defer src="/scripts/componentes/chispas-botones.js?v=7b0937d6"></script>
-    <script defer src="/scripts/componentes/enlaces-fuera.js?v=130dc9ce"></script>
+    <script defer src="/scripts/componentes/enlaces-fuera.js?v=db5674a8"></script>
     <script defer src="/scripts/componentes/subir.js?v=2e242c61"></script>
     <script defer src="/scripts/componentes/teclado-scroll.js?v=5847ef8b"></script>
     <!-- ==== fin del JS ==== -->

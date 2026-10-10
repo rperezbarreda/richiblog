@@ -206,8 +206,12 @@ nav a.active::before {
     transition: max-height 0.15s linear, opacity 0.1s linear, margin-top 0.15s linear, visibility 0s linear 0.15s;
 }
 
+/* 800px y no 500: un submenú puede llevar OTRO grupo dentro (roleito →
+   notas de rol → campañas), y al abrir el de dentro el de fuera tiene que
+   dar de sí para los dos. Es un tope, no una altura: lo que no llega no
+   deja hueco. */
 .nav-group.open > .submenu {
-    max-height: 500px;
+    max-height: 800px;
     opacity: 1;
     visibility: visible;
     margin-top: 10px;
@@ -233,6 +237,28 @@ nav a.active::before {
     outline: 2px solid var(--yellow);
     outline-offset: 2px;
 }
+
+/* UN GRUPO DENTRO DE OTRO (roleito → notas de rol). El botón de dentro se
+   viste como los enlaces de su alrededor —más pequeño y en gris— porque
+   está al mismo nivel que ellos: lo único que lo distingue es que, en vez
+   de llevar a una página, abre otras dos. */
+.submenu .nav-toggle {
+    font-size: 0.75rem;
+    padding: 4px 10px 4px 1.15rem;
+}
+
+.submenu .arrow {
+    width: 1.05rem;
+    height: 1.05rem;
+    font-size: 0.75rem;
+}
+
+/* Y lo que cuelga de él, un poco más adentro todavía, para que se vea de
+   dónde cuelga sin tener que abrirlo y cerrarlo. */
+.submenu .submenu {
+    margin-left: 0.9rem;
+}
+
 
 /* SIDEBAR — GATÍN ALEATORIO */
 

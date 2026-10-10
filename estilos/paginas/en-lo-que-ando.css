@@ -1,0 +1,377 @@
+/* EN LO QUE ANDO — lo que tengo entre manos ahora mismo */
+
+/* Cuatro bloques en dos columnas: lo que leo/veo/juego y la campaña
+   arriba, lo que escribo y los pendientes debajo. Lo pinta
+   scripts/paginas/en-lo-que-ando.js con datos/en-lo-que-ando.json; un
+   bloque sin nada escrito no sale, así que la rejilla tiene que aguantar
+   con uno, con dos o con los cuatro. Por eso NO se le dice a nadie en qué
+   fila va: se colocan por orden, como una rejilla de verdad.
+
+   Marcos propios y nada de portada.css, como accesibilidad, el changelog
+   o las recomendaciones (ver hojas_de en
+   herramientas/3-generadores/actualizar-cabeceras.py). */
+
+.ando-page {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    /* .home trae justify-content: center, que en una columna que se
+       desplaza es la peor combinación que hay: lo de dentro se centra a lo
+       alto y lo que sobra se sale por ARRIBA, donde no hay scroll que
+       alcance. Medido: el titular empezaba 73px por encima del borde y se
+       veía cortado por la mitad. */
+    justify-content: flex-start;
+    gap: 14px;
+    /* "auto" y no "hidden", como en las demás páginas largas: con el
+       espaciado de texto forzado o con la letra al 150% esto crece, y lo
+       que sobre tiene que poder alcanzarse. El <main> va con
+       overflow: hidden para que no se desplace el marco del sitio. */
+    overflow-y: auto;
+    padding: 24px 4%;
+}
+
+.ando-page .home-title {
+    margin: 0;
+    font-size: clamp(2.5rem, 7vw, 5rem);
+    line-height: 1;
+}
+
+.ando-intro {
+    max-width: 62ch;
+    margin: 0;
+    color: var(--white);
+    font-size: 1rem;
+    line-height: 1.6;
+}
+
+/* Cuándo se tocó esto por última vez. Es el dato que convierte la página
+   en algo creíble: sin fecha, "ahora mismo estoy leyendo X" puede ser de
+   hace dos años. */
+.ando-fecha {
+    margin: 0;
+    color: var(--muted);
+    font-family: var(--fuente-mono);
+    font-size: 0.8125rem;
+}
+
+.ando-fecha[hidden],
+.ando-vacio[hidden] {
+    display: none;
+}
+
+.ando-vacio {
+    margin: 0;
+    color: var(--muted);
+    font-size: 1rem;
+    font-style: italic;
+}
+
+
+/* ====================================================================
+   LA REJILLA DE BLOQUES
+   ==================================================================== */
+
+.ando-rejilla {
+    display: grid;
+    /* Dos columnas fijas y no auto-fit: con auto-fit, en una pantalla
+       ancha los cuatro bloques se ponen en fila y cada uno se queda en
+       300px con el texto partido en cinco líneas. Dos es lo que se lee
+       bien, y abajo de 1100 pasa a una. */
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    /* start: si no, los bloques de una fila se estiran hasta la altura
+       del más alto y uno con dos líneas se queda con medio marco vacío. */
+    align-items: start;
+    gap: 22px 28px;
+    margin-top: 6px;
+}
+
+/* La trampa de siempre: lo que esconde [hidden] es un display: none que
+   trae el navegador, y pesa lo mismo que una clase. Sin esto, los bloques
+   que no tienen nada escrito saldrían igual, vacíos. */
+.ando-bloque[hidden] {
+    display: none;
+}
+
+/* Una ventana falsa más, con las mismas medidas que las de la portada y
+   que la ficha de una campaña. Los 16px de padding son los que la cabecera
+   se come con sus márgenes negativos (ver .recent-entries-header en
+   cabecera-ventana.css): sin ellos la barra de título sobresale. */
+.ando-bloque {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    padding: 16px;
+    background: var(--purple-lighter);
+    border: 3px solid var(--yellow);
+    box-shadow: 6px 6px 0 var(--yellow);
+}
+
+.ando-bloque-cuerpo {
+    margin-top: 2px;
+}
+
+
+/* ====================================================================
+   LO QUE HAY DENTRO DE UN BLOQUE
+   ====================================================================
+   Una <dl> de verdad: la etiqueta ("leyendo") es el término y lo que sea
+   la definición, así un lector de pantalla dice "leyendo, El Conde de
+   Montecristo" y no dos textos sueltos seguidos. Es el mismo montaje que
+   la ficha de una campaña. */
+
+.ando-lista {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    margin: 0;
+}
+
+.ando-cosa {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    margin: 0;
+}
+
+.ando-cosa-que {
+    color: var(--muted);
+    font-family: var(--fuente-mono);
+    font-size: 0.75rem;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+}
+
+/* margin-inline-start además del margin: el <dd> trae 40px de sangría de
+   serie y sin quitarla los valores salen desplazados a la derecha. */
+.ando-cosa-valor {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    margin: 0;
+    margin-inline-start: 0;
+    min-width: 0;
+    color: var(--white);
+    font-size: 1rem;
+    line-height: 1.5;
+}
+
+.ando-cosa-titulo {
+    color: var(--yellow);
+    font-weight: 700;
+    overflow-wrap: break-word;
+}
+
+/* Quién lo escribió, quién lo hizo, cuándo fue. En gris y en letra de
+   máquina, como el "lo lleva Richi" de la ficha de una campaña: la lista
+   se lee de un vistazo por los títulos y esto es lo de después. */
+.ando-cosa-de {
+    color: var(--muted);
+    font-family: var(--fuente-mono);
+    font-size: 0.8125rem;
+    line-height: 1.5;
+}
+
+/* POR DÓNDE VAS, en tanto por ciento. La cifra va escrita a la derecha
+   ("45% leído") y ES EL DATO; la barra lleva aria-hidden y es el adorno,
+   que es el criterio de todo el sitio (pauta 1.4.1: el color —o aquí la
+   longitud de una barra— no puede ser lo único que diga algo).
+
+   El relleno se mide con un style que pone el JavaScript, que es la única
+   forma: son 101 valores posibles y no caben en una hoja de estilo. */
+.ando-barra {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 4px;
+}
+
+.ando-barra-riel {
+    flex: 1 1 auto;
+    min-width: 0;
+    height: 0.75rem;
+    display: block;
+    overflow: hidden;
+    border: 2px solid var(--yellow);
+    background: var(--purple-lighter);
+}
+
+.ando-barra-lleno {
+    display: block;
+    height: 100%;
+    background: var(--yellow);
+    /* Sin transición a propósito: esto se pinta una vez al cargar y no
+       cambia, así que animarlo solo sería una barra que crece sola
+       delante de quien ha venido a leer. */
+}
+
+.ando-barra-cifra {
+    flex: none;
+    color: var(--muted);
+    font-family: var(--fuente-mono);
+    font-size: 0.75rem;
+    white-space: nowrap;
+}
+
+/* EN EL ALTO CONTRASTE DE WINDOWS el sistema repinta los fondos y el
+   relleno de la barra desaparece: quedaría un riel vacío al 0% diga lo
+   que diga. Con un borde a la derecha del trozo lleno se sigue viendo
+   dónde acaba, porque los bordes el sistema sí los respeta. Y la cifra
+   escrita al lado sigue estando, que es lo que de verdad lo dice. */
+@media (forced-colors: active) {
+    .ando-barra-lleno {
+        border-right: 3px solid CanvasText;
+    }
+}
+
+.ando-cosa-nota {
+    margin: 2px 0 0;
+    color: var(--white);
+    font-size: 0.9375rem;
+    line-height: 1.55;
+}
+
+
+/* LO QUE ANDO ESCRIBIENDO. Una lista sin viñetas: los títulos ya destacan
+   solos y las viñetas aquí solo meten ruido. */
+.ando-escritos {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.ando-escrito {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    margin: 0;
+    min-width: 0;
+}
+
+.ando-escrito-pie {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 0 0.5em;
+    color: var(--muted);
+    font-family: var(--fuente-mono);
+    font-size: 0.8125rem;
+}
+
+/* El punto entre trozos lo pone el CSS y no el JavaScript: así nunca sobra
+   ni falta un separador, haya un trozo o haya tres. */
+.ando-trozo + .ando-trozo::before {
+    content: "· ";
+}
+
+
+/* LOS ENLACES de dentro de un bloque. Subrayados siempre: aquí hay títulos
+   enlazados y títulos que no, y sin subrayado no habría forma de saber
+   cuál se puede pulsar sin ir probando (y el color no vale solo: pauta
+   1.4.1). */
+.ando-enlace {
+    color: inherit;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+}
+
+.ando-enlace:hover,
+.ando-enlace:focus-visible {
+    text-decoration: none;
+}
+
+.ando-enlace:focus-visible {
+    outline: 2px solid var(--yellow);
+    outline-offset: 3px;
+}
+
+
+/* LOS DOS BOTONES del bloque de la partida: las notas y la página de npcs.
+   Los mismos que el "npcs →" del índice de una campaña. */
+.ando-botones {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin: 14px 0 0;
+}
+
+.ando-boton {
+    display: inline-flex;
+    align-items: center;
+    padding: 6px 12px;
+    border: 2px solid var(--yellow);
+    color: var(--yellow);
+    font-family: var(--fuente-mono);
+    font-size: 0.8125rem;
+    text-decoration: none;
+}
+
+.ando-boton:hover,
+.ando-boton:focus-visible {
+    background: var(--yellow);
+    color: var(--yellow-contrast);
+}
+
+.ando-boton:focus-visible {
+    outline: 2px solid var(--yellow);
+    outline-offset: 2px;
+}
+
+
+/* ====================================================================
+   EL POST-IT DE LOS PENDIENTES
+   ====================================================================
+   La nota es de estilos/componentes/postit.css, que la sacó de las notas
+   de una partida el día que esta página quiso la misma. Aquí solo se dice
+   dónde va y hasta dónde crece: el post-it de una partida vive en una
+   columna estrecha y se estira a lo que haya, y éste está en una rejilla
+   de dos columnas al lado de ventanas.
+
+   Igual que los bloques: [hidden] pesa lo mismo que el display: flex que
+   trae .cuaderno-postit, así que hay que decirlo. */
+.ando-postit[hidden] {
+    display: none;
+}
+
+.ando-postit {
+    /* Nunca más ancho que una nota de verdad: un post-it de 700px no es un
+       post-it, es un folio. Lo que sobre en su columna se queda a la
+       derecha, que es donde se nota que es una nota pegada. */
+    max-width: 22rem;
+    align-self: start;
+    /* El giro lo pone .cuaderno-postit (-1,1deg) y aquí se deja igual,
+       pero con un poco de sitio alrededor: en la rejilla, una esquina
+       girada se metía debajo del bloque de al lado. */
+    margin: 4px 0 6px 4px;
+}
+
+/* El post-it no lleva marco de ventana, así que su título hace de
+   encabezado de sección de verdad. Se queda como lo deja postit.css; esto
+   solo le quita el margen que el navegador le pone a un <h2>. */
+.ando-postit .cuaderno-postit-titulo {
+    margin: 0 0 8px;
+}
+
+.ando-volver {
+    align-self: flex-start;
+    margin-top: 10px;
+    padding: 8px 14px;
+    border: 2px solid var(--yellow);
+    color: var(--yellow);
+    font-family: var(--fuente-mono);
+    font-size: 0.875rem;
+    text-decoration: none;
+}
+
+.ando-volver:hover,
+.ando-volver:focus-visible {
+    background: var(--yellow);
+    color: var(--yellow-contrast);
+}
+
+.ando-volver:focus-visible {
+    outline: 2px solid var(--yellow);
+    outline-offset: 2px;
+}

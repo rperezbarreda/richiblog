@@ -54,15 +54,19 @@ def preguntar(texto, por_defecto=""):
     return input(f"  {texto}{pista}: ").strip() or por_defecto
 
 
-def elegir(titulo, opciones, permitir_nueva=True):
+def elegir(titulo, opciones, permitir_nueva=True, por_defecto="1"):
     """Un menú numerado. Devuelve la opción elegida, o lo que escriba
-    quien prefiera inventarse una (una categoría nueva, por ejemplo)."""
+    quien prefiera inventarse una (una categoría nueva, por ejemplo).
+
+    por_defecto es lo que vale un Enter en blanco. Normalmente "1", que es
+    lo cómodo; con "" un Enter devuelve una cadena vacía, que es como se
+    sale de un bucle de "¿alguno más?" sin tener que escribir nada."""
     print(f"\n  {titulo}")
     for i, opcion in enumerate(opciones, start=1):
         print(f"     {i}. {opcion}")
     if permitir_nueva:
         print("     (o escribe una nueva)")
-    elegido = preguntar("Elige", "1")
+    elegido = preguntar("Elige", por_defecto)
     try:
         return opciones[int(elegido) - 1]
     except (ValueError, IndexError):
@@ -218,35 +222,140 @@ def paginas(carpeta, patron="*.html"):
         yield p
 
 
+# =========================================
+# LA BÓVEDA DEL MUNDO
+# =========================================
+# Qué es el mundo y qué es la aplicación, dentro de una bóveda de
+# Chronicler. Vive aquí porque lo usan DOS herramientas y tienen que estar
+# de acuerdo: 1-publicar/importar-mundo.py, que se trae la bóveda, y
+# 3-generadores/generar-mundo.py, que la publica. Si la que trae se trajera
+# algo que la que publica ignora, quedaría ocupando sitio en mundo/; y al
+# revés es peor, porque entonces se publica.
+
+# Carpetas que no son el mundo, miren donde miren dentro de la bóveda.
+CARPETAS_QUE_NO_SON_EL_MUNDO = {
+    ".git", ".obsidian", ".trash", ".DS_Store", "__pycache__", "node_modules",
+    # Lo de Chronicler: sus copias de trabajo y lo que guarda en caché.
+    ".chronicler", ".chronicler-cache", ".cache",
+}
+
+# Y esto por la ruta entera, contando desde la raíz de la bóveda:
+# _system/templates son las PLANTILLAS de Chronicler —los moldes para
+# crear páginas nuevas, con sus huecos sin rellenar—, no páginas del
+# mundo. Publicarlas sería publicar un formulario en blanco.
+RUTAS_QUE_NO_SON_EL_MUNDO = ("_system/templates",)
+
+ARCHIVOS_QUE_NO_SON_EL_MUNDO = {".DS_Store", "Thumbs.db", "desktop.ini"}
+
+
+def es_del_mundo(archivo, boveda):
+    """Si un archivo de la bóveda es del mundo (y se trae y se publica) o
+    es de la aplicación (y no se toca)."""
+    nombre = archivo.name
+    if nombre in ARCHIVOS_QUE_NO_SON_EL_MUNDO or nombre.startswith("._"):
+        return False
+    try:
+        partes = archivo.relative_to(boveda).parts
+    except ValueError:
+        return False
+    for parte in partes[:-1]:
+        # Cualquier carpeta que empiece por punto: las esconde el sistema
+        # porque no son para que las mires, y eso vale igual aquí.
+        if parte in CARPETAS_QUE_NO_SON_EL_MUNDO or parte.startswith("."):
+            return False
+    camino = "/".join(partes)
+    for ruta in RUTAS_QUE_NO_SON_EL_MUNDO:
+        if camino == ruta or camino.startswith(ruta + "/"):
+            return False
+    return not nombre.startswith(".")
+
+
+# =========================================
+# LAS CAMPAÑAS DE ROL
+# =========================================
+# Una campaña por archivo en datos/campana-<clave>.json. No hay una lista
+# escrita en ningún sitio a propósito —se buscan por el nombre del
+# archivo—, así que para empezar una campaña nueva basta con copiar uno de
+# esos JSON y su carpeta.
+#
+# Esto vive aquí, y no en la herramienta que lo estrenó, porque lo usan
+# dos: la que crea las notas de una partida (nuevo.py --sesion) y la que
+# añade gente a los npcs (nuevo-personaje.py). Copiado en las dos,
+# el día que cambiara el nombre del archivo habría que acordarse de las
+# dos.
+
+CAMPANAS = RAIZ / "datos"
+PATRON_CAMPANA = "campana-*.json"
+
+
+def campanas_que_hay():
+    """[(archivo, datos)] de las campañas, por orden de archivo."""
+    encontradas = []
+    for archivo in sorted(CAMPANAS.glob(PATRON_CAMPANA)):
+        datos = leer_json(archivo, {})
+        if isinstance(datos, dict) and (datos.get("nombre") or "").strip():
+            encontradas.append((archivo, datos))
+    return encontradas
+
+
+def elegir_campana(pedida, pregunta="¿De qué campaña?"):
+    """La campaña que diga --campana, o la única que haya, o se pregunta.
+    Devuelve (archivo, datos), o (None, None) si no hay forma."""
+    campanas = campanas_que_hay()
+    if not campanas:
+        print(f"  No encuentro ninguna campaña en datos/{PATRON_CAMPANA}.")
+        print("  Para empezar una, copia datos/campana-ragna.json con otro")
+        print("  nombre y copia también su carpeta en web/notas_rol/.")
+        return None, None
+
+    if pedida:
+        buscada = pedida.strip().lower()
+        for archivo, datos in campanas:
+            if (datos.get("clave") or "").strip().lower() == buscada:
+                return archivo, datos
+        claves = ", ".join((d.get("clave") or "?") for _, d in campanas)
+        print(f"  No tengo ninguna campaña que se llame {pedida!r}. Hay: {claves}.")
+        return None, None
+
+    if len(campanas) == 1:
+        return campanas[0]
+
+    nombres = [(d.get("nombre") or d.get("clave") or "?") for _, d in campanas]
+    elegido = elegir(pregunta, nombres, permitir_nueva=False)
+    return campanas[nombres.index(elegido)]
+
+
 # El orden importa: primero el archivo del año (que crea index_<año>.html
 # y el enlace del menú si es un año o un mes nuevo), luego los listados,
 # el RSS que lee de ellos, el sitemap, el mapa del sitio (que necesita
 # las fechas de los listados), y las cabeceras al final, que le ponen su
 # bloque de CSS a las páginas nuevas y dejan cada archivo con su versión
 # anti-caché al día.
+# Las rutas van con su subcarpeta porque desde que las herramientas están
+# repartidas por carpetas, el nombre suelto ya no basta para encontrarlas.
 GENERADORES = (
-    "generar-archivo.py",
-    "generar-posts.py",
-    "generar-rss.py",
-    "generar-sitemap.py",
-    "generar-mapa.py",
+    "3-generadores/generar-archivo.py",
+    "3-generadores/generar-posts.py",
+    "3-generadores/generar-rss.py",
+    "3-generadores/generar-sitemap.py",
+    "3-generadores/generar-mapa.py",
     # Después de los listados y antes de las cabeceras: éste lee el HTML
     # ya montado de cada página para sacarle el texto, así que tiene que
     # ir cuando las entradas nuevas ya existen.
-    "generar-buscador.py",
-    "actualizar-cabeceras.py",
+    "3-generadores/generar-buscador.py",
+    "3-generadores/actualizar-cabeceras.py",
     # El último, cuando ya está todo escrito: no genera nada, solo mira
     # que ninguna hoja de estilo tenga un comentario mal cerrado. Va
     # aquí y no a mano porque ese fallo el navegador no lo canta: se
     # come en silencio la regla que venga detrás y la página se ve rara
     # sin que nada parezca roto. Pasó con las dos columnas de la ventana
     # de accesibilidad.
-    "css-sano.py",
+    "4-comprobar/css-sano.py",
     # Y que ningún tema de color se haya quedado a medias: un tema vive
     # en seis sitios (los colores, el script, el pre-pintado de cada
     # página, la muestra del botón, el botón y la página de
     # accesibilidad) y faltando en uno falla raro y en silencio.
-    "temas-completos.py",
+    "4-comprobar/temas-completos.py",
 )
 
 

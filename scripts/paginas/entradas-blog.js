@@ -7,8 +7,8 @@
 // siempre del mismo datos/entradas-blog.json.
 //
 // El JSON ya no se escribe a mano: lo genera
-// herramientas/generar-posts.py leyendo las propias páginas. Para
-// publicar, lo más cómodo es  python herramientas/nuevo.py ,
+// herramientas/3-generadores/generar-posts.py leyendo las propias páginas. Para
+// publicar, lo más cómodo es  python herramientas/1-publicar/nuevo.py ,
 // que crea la entrada y pasa los generadores.
 
 const BLOG_POSTS_URL = "/datos/entradas-blog.json";
@@ -193,7 +193,7 @@ function postToEntryCard(post, conMinutos) {
     );
 }
 
-// El tiempo de lectura lo calcula herramientas/generar-posts.py al
+// El tiempo de lectura lo calcula herramientas/3-generadores/generar-posts.py al
 // escribir el listado (cuenta las palabras del cuerpo de la entrada),
 // así que aquí solo se pinta. Las cosas sin texto que leer —las fichas
 // del portfolio de rol, que son enlaces a Ko-fi— no traen el dato y no
@@ -594,7 +594,7 @@ function cerrarDesplegableTags(caja) {
 // scripts/componentes/filtros.js para lo suyo (el ?cat= de rol y
 // relatos). Aquí todos los scripts comparten el mismo global: dos
 // funciones con el mismo nombre se pisan aunque hoy no coincidan en
-// ninguna página. Lo comprueba herramientas/nombres-repetidos.py.
+// ninguna página. Lo comprueba herramientas/4-comprobar/nombres-repetidos.py.
 function guardarEtiquetaEnUrl(tags) {
     if (!window.history || !window.history.replaceState) {
         return;

@@ -6,7 +6,7 @@
    relatos cargan relatos.css y no blog.css: si estuviera allí, un
    relato con una lista o un enlace saldría con el estilo de serie del
    navegador. Lo cargan solo las páginas de lectura (ver "es_lectura"
-   en herramientas/actualizar-cabeceras.py). */
+   en herramientas/3-generadores/actualizar-cabeceras.py). */
 
 /* ==== FRANJA DE BORRADOR ====
    Mientras el <article> lleve data-borrador, la entrada no sale en
@@ -15,7 +15,7 @@
    en local no haya duda de si está publicada o no. La escribe el CSS a
    partir del atributo: así el aviso y el "no publicar" son la misma
    cosa y no se pueden desincronizar. Lo quita
-   herramientas/publicar.py.
+   herramientas/1-publicar/publicar.py.
 
    Va colgada de la CABECERA y no del <article>: el ::before del
    artículo ya está cogido por la textura de papel, y usarlo la tapaba

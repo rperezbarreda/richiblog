@@ -1,0 +1,70 @@
+/* LOS NPC EN PANTALLAS ESTRECHAS */
+
+/* La ventana de la ficha, en una sola columna. El corte sale de medir:
+   con la ilustración al lado, a 700px de ventana a la ficha le quedaban
+   unos 300px y "el Sueño del Elemental, en Sirevia" se partía en cuatro
+   líneas. Debajo, la ilustración se ve mejor y el texto va de lado a
+   lado. */
+@media (max-width: 760px) {
+    .npc-ficha-dos {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    /* Ni a lo ancho del todo ni de pie: una ilustración de 3/4 a 700px
+       de ancho ocupa la ventana entera y hay que bajar para leer el
+       primer dato. Se queda centrada y con la altura medida en la
+       pantalla, que es lo que la mantiene a la vista junto al nombre. */
+    .npc-visor-arte {
+        flex: none;
+        align-self: center;
+        width: min(16rem, 70%);
+        max-height: 40vh;
+    }
+}
+
+/* El mismo corte que la barra lateral: a partir de aquí el menú es un
+   cajón y la barra amarilla del título manda arriba. */
+@media (max-width: 860px) {
+    .npcs-page {
+        padding: 20px 6%;
+        gap: 16px;
+    }
+
+    /* Tokens más pequeños. Medido a 390px: a la rejilla le quedan 317,
+       así que con los 7,5rem de escritorio entra UNA columna y media y
+       sobra medio hueco muerto. Con 4,75 caben dos holgadas a 390, tres
+       a 500 y cuatro a 600, que es lo que hace que esto siga pareciendo
+       un reparto y no una lista. */
+    .npc-rejilla {
+        grid-template-columns: repeat(auto-fill, minmax(4.75rem, 1fr));
+        gap: 14px 10px;
+    }
+
+    .npc-token-marco {
+        max-width: 5rem;
+    }
+
+    .npc-token {
+        font-size: 0.8125rem;
+    }
+
+    .npc-token-mono {
+        font-size: 1.5rem;
+    }
+
+    /* Con la rejilla encogida, el "qué es" de debajo del nombre cabe en
+       dos líneas y no en tres: a 4,75rem de ancho, tres líneas de 11px
+       hacen el token más alto que la foto. */
+    .npc-token-que {
+        -webkit-line-clamp: 2;
+        line-clamp: 2;
+        font-size: 0.6875rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .npcs-page {
+        padding: 18px 5%;
+    }
+}

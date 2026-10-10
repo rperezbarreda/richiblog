@@ -3,7 +3,7 @@
 // =========================================
 // La ficha de cada gato ya no lleva las fotos escritas a mano: se
 // montan aquí a partir del listado que genera
-// herramientas/generar-galeria.py. Para añadir fotos nuevas basta con
+// herramientas/2-imagenes/generar-galeria.py. Para añadir fotos nuevas basta con
 // dejarlas en imagenes/santuarios/<gato>/, ejecutar ese script y subir lo
 // que salga — sin tocar ni una línea de HTML.
 //

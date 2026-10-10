@@ -36,7 +36,7 @@
 // -------------------
 // Todos los scripts comparten el mismo ámbito global y dos funciones con
 // el mismo nombre se pisan, así que todo lo de aquí lleva "voz" en el
-// nombre. Se comprueba con herramientas/nombres-repetidos.py.
+// nombre. Se comprueba con herramientas/4-comprobar/nombres-repetidos.py.
 
 const VOZ_ESPERA_VOCES = 2500;
 

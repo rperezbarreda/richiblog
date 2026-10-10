@@ -1,0 +1,59 @@
+/* EN LO QUE ANDO EN PANTALLAS ESTRECHAS */
+
+/* El mismo corte que el índice de una campaña, y por lo mismo: dos
+   ventanas con una <dl> dentro necesitan unos 400px cada una para que el
+   título y el autor no se partan en cuatro líneas. Por debajo de 1100, una
+   columna. */
+@media (max-width: 1100px) {
+    .ando-rejilla {
+        grid-template-columns: 1fr;
+        gap: 20px;
+    }
+
+    /* En una sola columna el post-it puede ocupar lo que quiera hasta su
+       tope: al lado ya no hay nada que se le meta debajo. */
+    .ando-postit {
+        max-width: 24rem;
+    }
+}
+
+/* El mismo corte que la barra lateral: a partir de aquí el menú es un
+   cajón y la barra amarilla del título manda arriba. */
+@media (max-width: 860px) {
+    .ando-page {
+        gap: 12px;
+        padding: 24px 6%;
+    }
+
+    .ando-rejilla {
+        gap: 18px;
+    }
+
+    /* A lo ancho del todo: en el móvil, un post-it de 24rem con 310px de
+       sitio se queda igual de ancho que lo demás, así que el tope solo
+       serviría para que no se viera que es una nota. Se deja crecer y es
+       el giro el que lo cuenta. */
+    .ando-postit {
+        max-width: none;
+        margin-left: 0;
+    }
+
+    /* Y el botón de volver a lo ancho y centrado, como el resto de botones
+       grandes en móvil: es más fácil de acertar con el dedo. */
+    .ando-volver {
+        align-self: stretch;
+        justify-content: center;
+        display: flex;
+        margin-top: 20px;
+    }
+}
+
+@media (max-width: 480px) {
+    .ando-page {
+        padding: 20px 5%;
+    }
+
+    .ando-bloque {
+        padding: 14px;
+    }
+}

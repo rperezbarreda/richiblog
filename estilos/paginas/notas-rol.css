@@ -8,7 +8,7 @@
      .cuaderno-page  las notas de una partida, en hojas de cuaderno
 
    Lo que decide qué página lleva esta hoja está en
-   herramientas/actualizar-cabeceras.py (hojas_de). */
+   herramientas/3-generadores/actualizar-cabeceras.py (hojas_de). */
 
 
 /* =========================================
@@ -75,10 +75,64 @@
 .campana-cabecera {
     grid-column: 1;
     grid-row: 2;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 14px;
     /* Sin esto, una intro larga ensancha la columna y se come el sitio
        del índice. */
     min-width: 0;
     max-width: 720px;
+}
+
+/* LOS TRES BOTONES DE LA CAMPAÑA: los npcs, la mesa y el botín.
+   Rellenos y no en hueco como los "volver": son lo único de esta página
+   que abre algo nuevo, y los botones en hueco son los de salir.
+
+   Los tres iguales aunque uno sea un <a> y dos sean <button>: lo que
+   distingue "ir a otra página" de "abrir una ventana" no es el color, es
+   lo que pasa al pulsarlos, y eso ya lo anuncia el aria-haspopup. Hacer
+   dos estilos sería dar a entender una diferencia que no hay que mirar. */
+.campana-botones {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin: 0;
+}
+
+/* La trampa de siempre: [hidden] pesa lo mismo que esta clase y carga
+   antes, así que sin esto los dos botones de la ventana saldrían puestos
+   aunque la campaña no tenga mesa ni botín. */
+.campana-boton[hidden] {
+    display: none;
+}
+
+.campana-boton {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 9px 16px;
+    border: 2px solid var(--yellow);
+    background: var(--yellow);
+    color: var(--yellow-contrast);
+    font-family: var(--fuente-mono);
+    font-size: 0.8125rem;
+    letter-spacing: 1px;
+    text-decoration: none;
+    cursor: pointer;
+    transition: color 0.15s linear, background-color 0.15s linear;
+}
+
+.campana-boton:hover,
+.campana-boton:focus-visible {
+    background: transparent;
+    color: var(--yellow);
+    text-decoration: none;
+}
+
+.campana-boton:focus-visible {
+    outline: 2px solid var(--yellow);
+    outline-offset: 3px;
 }
 
 .campana-intro {
@@ -185,34 +239,116 @@
     line-height: 1.55;
 }
 
-/* Los personajes, uno por línea. Lista sin viñetas: los nombres ya
-   destacan solos y las viñetas aquí solo meten ruido. */
+/* LOS PERSONAJES, EN FILA DE RETRATOS. Antes era una lista de nombres a
+   secas con la mesa detrás de un botón aparte; ahora cada personaje ES el
+   botón que abre la mesa en su página, así que lo que se ve es el token.
+
+   La fila se parte sola (flex-wrap) porque son cuatro tokens de 6.5rem y
+   con el texto al 200% ya no caben seguidos en una columna estrecha.
+   Lista sin viñetas: los retratos ya separan a uno de otro de sobra. */
 .campana-personajes {
     display: flex;
-    flex-direction: column;
-    gap: 4px;
+    flex-wrap: wrap;
+    gap: 14px;
     margin: 0;
     padding: 0;
     list-style: none;
 }
 
 .campana-personaje {
+    flex: 0 0 auto;
     color: var(--white);
     font-size: 1rem;
     line-height: 1.5;
 }
 
-.campana-personaje-nombre {
-    color: var(--yellow);
+/* El botón de cada personaje: una columna con el retrato arriba y el
+   nombre debajo, del color del personaje. Es lo único que se pulsa para
+   ver a alguien, así que lleva el amarillo de foco de siempre. */
+.campana-personaje-token {
+    width: 6.5rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 2px;
+    border: 0;
+    background: transparent;
+    color: var(--white);
+    font-family: inherit;
+    font-size: 0.875rem;
+    text-align: center;
+    cursor: pointer;
 }
 
-/* Lo que va detrás del nombre (quién lo lleva, qué es) en gris y más
-   pequeño, para que la lista se lea de un vistazo por los nombres. */
-.campana-personaje-extra {
-    color: var(--muted);
-    font-family: var(--fuente-mono);
-    font-size: 0.8125rem;
+.campana-personaje-token:focus-visible {
+    outline: 2px solid var(--yellow);
+    outline-offset: 2px;
 }
+
+/* El marco redondo, del color del personaje. Los cuatro colores pasan de
+   Lc 76 sobre el papel de cada tema, muy por encima del Lc 45 que piden
+   las normas para lo que no es texto.
+
+   SIN LA SOMBRA DURA del resto del sitio, igual que los tokens de los
+   NPC: desplazada a abajo-derecha de un círculo no se lee como sombra
+   sino como un borde mal puesto. */
+.campana-personaje-marco {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    border: 3px solid var(--mesa-color, var(--yellow));
+    border-radius: 50%;
+    background: var(--purple-lighter);
+    transition: transform 0.15s linear;
+}
+
+.campana-personaje-img {
+    width: 100%;
+    height: 100%;
+    display: block;
+    object-fit: cover;
+}
+
+/* MIENTRAS NO HAYA FOTO: la inicial del nombre dentro del marco, que es
+   un hueco a propósito y no un error. Lleva aria-hidden en el HTML,
+   porque el nombre va escrito justo debajo. */
+.campana-personaje-mono {
+    color: var(--mesa-color, var(--yellow));
+    font-family: var(--fuente-titular);
+    font-size: 2rem;
+    line-height: 1;
+    user-select: none;
+}
+
+.campana-personaje-token:hover .campana-personaje-marco,
+.campana-personaje-token:focus-visible .campana-personaje-marco {
+    transform: translate(-2px, -2px);
+}
+
+/* El nombre en negrita y de su color. La negrita no es decoración: es la
+   señal que queda cuando no se ven los colores. El color lo pone
+   --mesa-color, que cuelga del botón según el color del JSON de la
+   campaña ("color": "verde") y vuelve al amarillo en los temas de blanco
+   y negro y de terminal. */
+.campana-personaje-nombre {
+    display: block;
+    color: var(--mesa-color, var(--yellow));
+    font-weight: 700;
+    line-height: 1.3;
+    overflow-wrap: break-word;
+}
+
+/* LO QUE ES CADA UNO (clase, nivel, quién lo lleva) NO se escribe aquí
+   debajo: medido, ocupaba tres líneas bajo cada círculo y la ficha de la
+   campaña se iba de alto. Va en el nombre del botón —que es lo que lee
+   un lector de pantalla y lo que sale al dejar el ratón encima— y
+   escrito entero en la ventana que abre el token. Lo pone
+   scripts/paginas/notas-rol.js. */
 
 /* Lo que todavía está por rellenar. Sale solo en local, mientras el
    JSON de la campaña tenga el campo en blanco: así no se olvida, y en
@@ -222,6 +358,463 @@
     font-family: var(--fuente-mono);
     font-size: 0.8125rem;
     font-style: italic;
+}
+
+
+/* EL BOTÍN ACUMULADO
+   -------------------
+   Lo que hay DENTRO de la ventana que abre el botón «el botín →». La
+   ventana en sí (el fondo, la barra, la ✕) es del componente:
+   estilos/componentes/ventana-modal.css. Lo pinta
+   scripts/paginas/notas-rol.js con lo que haya en "botin" en el JSON de
+   la campaña; si no hay nada, el botón ni sale.
+
+   Estaba fija en el índice y se pasó a una ventana el día que la campaña
+   tuvo tres cosas que enseñar: con la ficha, el botín y las sesiones
+   puestos a la vez había que bajar media pantalla para llegar a lo que se
+   viene a hacer aquí, que es entrar en una sesión. */
+
+/* LAS PESTAÑAS (todas · armas · armaduras · pociones · equipo · objetos
+   mágicos · dinero · otras cosas). Tienen la pinta de los botones de
+   filtrar del resto del sitio —estilos/componentes/filtros.css—, porque
+   son la misma idea: enseñar solo un montón de cosas. Se copian los
+   valores en vez de reutilizar .filtro-btn a propósito: aquello lo monta
+   el componente de filtros leyendo data-categoria de un listado, y esto
+   vive dentro de una ventana y no tiene nada que ver.
+
+   Por dentro son una botonera de pestañas de verdad (role="tablist"), o
+   sea que las flechas pasan de una a otra. Con un apartado solo no se
+   ponen: lo decide el JavaScript. */
+.campana-botin-pestanas {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    padding-bottom: 16px;
+    margin-bottom: 18px;
+    border-bottom: 2px solid var(--border);
+}
+
+/* En bloque y con el texto centrado, NO en flex: el número va pegado al
+   nombre como una palabra más. En flex, cuando un nombre largo («objetos
+   mágicos» a 320px con la letra al 150%) se parte en dos líneas, el
+   nombre se queda con todo el ancho y el número se iba al otro extremo
+   del botón, como si fuera de otro sitio. */
+.campana-botin-pestana {
+    display: block;
+    text-align: center;
+    padding: 6px 14px;
+    border: 2px solid var(--yellow);
+    background: transparent;
+    color: var(--yellow);
+    font-family: var(--fuente-mono);
+    font-size: 0.75rem;
+    letter-spacing: 0.5px;
+    cursor: pointer;
+    transition: color 0.15s linear, background-color 0.15s linear;
+}
+
+.campana-botin-pestana:hover {
+    color: var(--yellow-contrast);
+    background: var(--yellow);
+}
+
+/* LA QUE ESTÁ PUESTA se marca con aria-selected, que es lo que anuncia un
+   lector de pantalla, y el CSS se cuelga de ese mismo atributo: así no hay
+   forma de que lo que se ve y lo que se lee se desincronicen. Es lo mismo
+   que hace .filtro-btn con aria-pressed. */
+.campana-botin-pestana[aria-selected="true"] {
+    color: var(--yellow-contrast);
+    background: var(--yellow);
+}
+
+.campana-botin-pestana:focus-visible {
+    outline: 2px solid var(--yellow);
+    outline-offset: 3px;
+}
+
+/* Cuántas cosas hay en esa pestaña. Se distingue del nombre SOLO por el
+   tamaño: del color no se toca nada a propósito. En gris no se puede
+   —encima del amarillo de la pestaña puesta, --muted se queda en nada— y
+   apagándolo con transparencia tampoco, porque eso baja el contraste a
+   un número que ya no se puede medir de un vistazo. Heredando el color
+   de la pestaña vale en los dos estados y en los diez temas. */
+.campana-botin-pestana-cuenta {
+    margin-left: 7px;
+    font-size: 0.6875rem;
+    letter-spacing: 0;
+}
+
+/* El panel que llenan. No lleva barra propia: quien se desplaza es la
+   ventana, como en la ficha de un personaje. */
+.campana-botin-panel {
+    display: block;
+}
+
+.campana-botin-panel:focus-visible {
+    outline: 2px solid var(--yellow);
+    outline-offset: 4px;
+}
+
+/* LOS APARTADOS (armas, armaduras, pociones, equipo, objetos mágicos,
+   dinero, otras cosas), cada uno con su título. Salen así en la pestaña
+   de «todas»; en una pestaña suelta va la lista a secas, porque el título
+   lo dice ya la propia pestaña.
+
+   Un <section> por apartado, y aquí hay que deshacer la regla global de
+   <section> de base.css, que les pone height: 100% y su propio scroll:
+   dentro de la ventana eso dejaba cada apartado en una caja de la altura
+   de la ventana con una barra diminuta dentro. Lo mismo que hubo que
+   hacer con los grupos de la wiki. */
+.campana-botin-grupo {
+    display: block;
+    flex: 0 0 auto;
+    height: auto;
+    overflow: visible;
+    justify-content: initial;
+    padding: 0;
+    margin: 0 0 22px;
+}
+
+.campana-botin-grupo:last-of-type {
+    margin-bottom: 18px;
+}
+
+/* El título del apartado. En monoespaciada y en minúscula como el resto
+   de los rótulos de la sección de rol, con la raya debajo que separa un
+   apartado del siguiente.
+
+   flex-wrap porque al 200% de texto el nombre y la cuenta no caben
+   seguidos en una ventana estrecha: se parten en dos líneas en vez de
+   desbordar. */
+.campana-botin-grupo-titulo {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 2px 10px;
+    margin: 0 0 10px;
+    padding-bottom: 6px;
+    border-bottom: 1px solid var(--border);
+    color: var(--yellow);
+    font-family: var(--fuente-mono);
+    font-size: 0.875rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: lowercase;
+}
+
+/* Cuántas cosas hay en el apartado, al lado del nombre: en gris y sin
+   negrita, que es información de segunda y no tiene que competir con el
+   nombre del apartado. */
+.campana-botin-grupo-cuenta {
+    color: var(--muted);
+    font-size: 0.75rem;
+    font-weight: 400;
+    letter-spacing: 0;
+}
+
+.campana-botin-lista {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+/* Cada cosa: lo que es arriba y, debajo, de dónde salió y quién la lleva.
+   El rombo delante es el mismo que llevan los objetos que se consiguen en
+   una partida (.cuaderno-objetos) y el equipo de un personaje
+   (.npc-equipo): en toda la sección de rol, un rombo es una cosa que se
+   tiene. Va en ::before y no como viñeta de lista para poder darle el
+   color del tema. */
+.campana-botin-cosa {
+    display: grid;
+    /* Tres columnas: el rombo, el texto y —si la hay— la foto. */
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    gap: 0 0.6em;
+    margin: 0;
+    align-items: start;
+}
+
+.campana-botin-cosa::before {
+    content: "◆";
+    grid-column: 1;
+    grid-row: 1;
+    color: var(--yellow);
+    font-family: var(--fuente-mono);
+    font-size: 0.8em;
+    line-height: 1.9;
+}
+
+/* LO QUE TIENE FOTO NO LLEVA ROMBO: la foto ya dice dónde empieza cada
+   cosa, y las dos a la vez son dos viñetas para lo mismo. Lo que no
+   tiene foto se queda con el suyo, que si no la lista se quedaría sin
+   nada que separe una cosa de la siguiente.
+
+   visibility: hidden y NO content: none, que sería lo obvio: el rombo
+   tiene que seguir ocupando su sitio. Quitándolo del todo, las cosas con
+   foto empezaban medio centímetro más a la izquierda que las demás y la
+   lista quedaba con el borde izquierdo en zigzag. Así el hueco se queda
+   y no lo ve ni lo lee nadie. */
+.campana-botin-cosa.tiene-foto::before {
+    visibility: hidden;
+}
+
+/* El cuadradito de la derecha. Cruza las dos filas (el nombre y la línea
+   de debajo) para quedarse alineado con el bloque entero y no con la
+   primera línea. */
+.campana-botin-foto {
+    grid-column: 3;
+    grid-row: 1 / span 2;
+    align-self: center;
+    width: 3rem;
+    height: 3rem;
+    padding: 0;
+    overflow: hidden;
+    border: 2px solid var(--border);
+    background: var(--purple-lighter);
+    cursor: pointer;
+}
+
+.campana-botin-foto:hover,
+.campana-botin-foto:focus-visible {
+    border-color: var(--yellow);
+}
+
+.campana-botin-foto:focus-visible {
+    outline: 2px solid var(--yellow);
+    outline-offset: 2px;
+}
+
+.campana-botin-foto-img {
+    width: 100%;
+    height: 100%;
+    display: block;
+    object-fit: cover;
+}
+
+/* Lo gastado, también en su foto: apagada, como el nombre tachado. No es
+   la única señal —está el tachado y la palabra "gastado"—, así que vale
+   que sea solo un color. */
+.campana-botin-cosa.esta-gastado .campana-botin-foto-img {
+    opacity: 0.45;
+}
+
+.campana-botin-que {
+    grid-column: 2;
+    color: var(--white);
+    font-family: var(--fuente-mono);
+    font-size: 0.875rem;
+    line-height: 1.55;
+}
+
+/* La línea de debajo: "sesión 1 · lo lleva Melissa". Los trozos se separan
+   con un punto que pone el CSS, así el JavaScript solo pega los trozos y
+   nunca sobra ni falta un separador. */
+.campana-botin-donde {
+    grid-column: 2;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 0 0.5em;
+    color: var(--muted);
+    font-family: var(--fuente-mono);
+    font-size: 0.75rem;
+    line-height: 1.6;
+}
+
+.campana-botin-trozo + .campana-botin-trozo::before,
+.campana-botin-gastado + .campana-botin-trozo::before {
+    content: "· ";
+}
+
+/* LO GASTADO. Tachado Y con la palabra "gastado" escrita delante: el
+   tachado se ve, pero no se oye, y un lector de pantalla no dice nada de
+   un line-through. La palabra es el dato; la raya es el adorno. */
+.campana-botin-cosa.esta-gastado .campana-botin-que {
+    color: var(--muted);
+    text-decoration: line-through;
+    text-decoration-thickness: 1px;
+}
+
+.campana-botin-cosa.esta-gastado::before {
+    color: var(--muted);
+}
+
+.campana-botin-gastado {
+    color: var(--yellow);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+}
+
+/* QUIÉN LO LLEVA, en el amarillo del tema.
+   Lo bonito habría sido ponerlo del color de cada personaje, como en todo
+   lo demás. No se puede: medido con APCA, los cuatro colores sobre el
+   morado de esta ventana (que es más claro que el papel de la página) se
+   quedan en Lc 67 en el tema claro y en Lc 69 en el tranquilo, por debajo
+   del 75 que pide una letra de 12px. El amarillo pasa en los diez temas, y
+   el nombre está escrito, que es lo que de verdad dice quién lo lleva. */
+.campana-botin-quien {
+    color: var(--yellow);
+}
+
+/* La cuenta del pie, separada por una raya: "9 cosas · 2 gastadas". */
+.campana-botin-cuenta {
+    margin: 0;
+    padding-top: 10px;
+    border-top: 1px solid var(--border);
+    color: var(--muted);
+    font-family: var(--fuente-mono);
+    font-size: 0.75rem;
+}
+
+
+/* LAS MISIONES PENDIENTES
+   -----------------------
+   Lo que hay DENTRO de la ventana que abre el botón «pendientes →»: lo
+   que el grupo tiene a medias, repartido por apartados que se pliegan.
+
+   ES EL MISMO POST-IT que la nota de cosas pendientes de una partida
+   (estilos/componentes/postit.css), papel amarillo incluido, y no es un
+   adorno: las dos listas son la misma cosa —lo que queda por hacer— y se
+   reconocen por el papel antes de leer una palabra. De ahí salen también
+   las casillas y el tachado de lo ya hecho.
+
+   Lo de aquí abajo es solo lo que cambia por estar dentro de una
+   ventana. */
+/* LA VENTANA, MÁS ESTRECHA de lo normal. Una ventana de 58rem con un
+   post-it dentro no es un post-it: es una pared amarilla. A 34rem la nota
+   tiene el ancho de una de verdad y las misiones se leen en una línea o
+   dos.
+
+   .modal-misiones la pone el JavaScript en la CAPA de fuera (el fondo
+   oscuro), no en la ventana: por eso el selector lleva las dos, una
+   dentro de otra. */
+.modal-misiones .modal-ventana {
+    width: min(34rem, 100%);
+}
+
+/* Las dos clases juntas y no solo .misiones-nota: postit.css se carga
+   DESPUÉS que esta hoja, así que con una sola clase ganaría él y la nota
+   se quedaba torcida dentro de la ventana. */
+.cuaderno-postit.misiones-nota {
+    /* NI TORCIDA NI ESTRECHA. El post-it de una partida vive pegado al
+       borde del cuaderno, y ahí el grado de giro es lo que lo hace
+       parecer pegado. Dentro de una ventana, girar el papel lo saca por
+       las esquinas, le pide una barra de desplazamiento horizontal a la
+       ventana entera y deja todas las rayas en cuesta. El ancho lo manda
+       la ventana, que ya es estrecha. */
+    transform: none;
+    width: 100%;
+    max-width: none;
+    padding: 18px 20px 20px;
+}
+
+/* UN APARTADO ES UN <details>, que se pliega y se despliega solo, con el
+   teclado y con el lector de pantalla. Como las regiones de los npcs y
+   los apartados de la wiki.
+
+   La raya de arriba separa un apartado del siguiente, en la tinta del
+   propio post-it (currentColor) para que valga en los diez temas sin
+   decir un color. El primero no la lleva: ahí arriba no hay nada de lo
+   que separarse. */
+.misiones-apartado + .misiones-apartado {
+    margin-top: 0.9em;
+    padding-top: 0.9em;
+    border-top: 1px solid currentColor;
+}
+
+/* El tirador de plegar. Hay que quitarle el triangulito que le pone el
+   navegador (distinto en cada uno) para poner el nuestro, que es la
+   flecha de .misiones-flecha. */
+.misiones-tirador {
+    display: block;
+    list-style: none;
+    cursor: pointer;
+}
+
+.misiones-tirador::-webkit-details-marker {
+    display: none;
+}
+
+.misiones-tirador:focus-visible {
+    outline: 2px solid var(--yellow-contrast);
+    outline-offset: 2px;
+}
+
+/* El título del apartado, en la tinta del post-it. En mayúsculas y de
+   máquina, como el título de la nota. flex-wrap porque con el texto al
+   200% el nombre y la cuenta no caben seguidos. */
+.misiones-titulo {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 2px 8px;
+    margin: 0;
+    color: var(--yellow-contrast);
+    font-family: var(--fuente-mono);
+    font-size: 0.8125rem;
+    font-weight: 700;
+    letter-spacing: 1px;
+    line-height: var(--renglon);
+    text-transform: uppercase;
+}
+
+.misiones-tirador:hover .misiones-titulo {
+    text-decoration: underline;
+    text-underline-offset: 3px;
+}
+
+/* La flecha, que gira al cerrar. Sin transición si se ha pedido que no
+   se mueva nada (eso lo lleva base.css para todo el sitio). */
+.misiones-flecha {
+    display: inline-block;
+    font-weight: 400;
+    transition: transform 0.15s ease;
+}
+
+.misiones-apartado:not([open]) .misiones-flecha {
+    transform: rotate(-90deg);
+}
+
+/* Cuántas quedan en el apartado. Ni en gris ni apagada: sobre el papel
+   amarillo, un gris deja de leerse. Se distingue del título por no ir en
+   negrita ni en mayúsculas, que es señal de sobra. */
+.misiones-cuenta {
+    font-weight: 400;
+    letter-spacing: 0;
+    text-transform: lowercase;
+}
+
+/* La lista de dentro, pegada a su título. El relleno y la casilla los
+   pone .cuaderno-tareas; aquí solo el hueco de arriba y el de los lados,
+   que dentro de un apartado se sangra un poco para que se vea de qué
+   cuelga. */
+.misiones-apartado .cuaderno-tareas {
+    margin: calc(var(--renglon) / 3) 0 0;
+    padding-left: 0.6em;
+}
+
+/* En qué sesión salió, detrás de la misión. En la misma tinta pero más
+   pequeño, que es información de segunda. */
+.misiones-de {
+    margin-left: 0.6em;
+    font-family: var(--fuente-mono);
+    font-size: 0.8em;
+    white-space: nowrap;
+}
+
+.misiones-de::before {
+    content: "· ";
+}
+
+/* La cuenta de todo, al pie de la nota, con su raya encima. */
+.misiones-pie {
+    margin: 0.9em 0 0;
+    padding-top: calc(var(--renglon) / 2);
+    border-top: 2px solid currentColor;
+    font-family: var(--fuente-mono);
+    font-size: 0.8125rem;
 }
 
 
@@ -921,9 +1514,19 @@ body:has(.cuaderno-page) main {
        pantalla de fósforo verde no es que se lea mal, es que no es eso.
    En esas seis, los nombres se quedan como los demás —amarillo del tema
    y negrita— y no se pierde nada, porque la negrita nunca era el adorno:
-   era la señal. */
+   era la señal.
+
+   Y .modal en las tres listas, que no es un sitio más: la ventana que se
+   abre encima —la ficha de un NPC, la mesa, el botín— NO está dentro de
+   ninguna página: la cuelga el JavaScript del <body> para poder taparlo
+   todo. O sea que las cuatro variables de aquí arriba no le llegaban, y
+   dentro de la ventana se quedaban en nada: la marquita de "aliado" salía
+   gris en vez de verde y el nombre de uno de la mesa salía del color de
+   siempre. */
 .cuaderno-post,
-.campana-page {
+.campana-page,
+.npcs-page,
+.modal {
     --pj-verde: #7fe496;
     --pj-azul: #a8d3ff;
     --pj-rojo: #ffc0b7;
@@ -932,8 +1535,12 @@ body:has(.cuaderno-page) main {
 
 :root[data-theme="light"] .cuaderno-post,
 :root[data-theme="light"] .campana-page,
+:root[data-theme="light"] .npcs-page,
 :root[data-theme="tranquilo"] .cuaderno-post,
-:root[data-theme="tranquilo"] .campana-page {
+:root[data-theme="tranquilo"] .campana-page,
+:root[data-theme="tranquilo"] .npcs-page,
+:root[data-theme="light"] .modal,
+:root[data-theme="tranquilo"] .modal {
     --pj-verde: #006b19;
     --pj-azul: #005da2;
     --pj-rojo: #b10011;
@@ -942,10 +1549,16 @@ body:has(.cuaderno-page) main {
 
 :root[data-theme="puro-claro"] .cuaderno-post,
 :root[data-theme="puro-claro"] .campana-page,
+:root[data-theme="puro-claro"] .npcs-page,
 :root[data-theme="puro-oscuro"] .cuaderno-post,
 :root[data-theme="puro-oscuro"] .campana-page,
+:root[data-theme="puro-oscuro"] .npcs-page,
 :root[data-theme^="terminal"] .cuaderno-post,
-:root[data-theme^="terminal"] .campana-page {
+:root[data-theme^="terminal"] .campana-page,
+:root[data-theme^="terminal"] .npcs-page,
+:root[data-theme="puro-claro"] .modal,
+:root[data-theme="puro-oscuro"] .modal,
+:root[data-theme^="terminal"] .modal {
     --pj-verde: var(--yellow);
     --pj-azul: var(--yellow);
     --pj-rojo: var(--yellow);
@@ -965,26 +1578,6 @@ body:has(.cuaderno-page) main {
 }
 
 .cuaderno-hoja-cuerpo .pj-morado {
-    color: var(--pj-morado);
-}
-
-/* Y los mismos cuatro colores en la ficha de la campaña, para que el
-   nombre que se ve ahí sea el mismo color que luego aparece en las
-   notas. Quién lleva cada color lo dice el JSON de la campaña
-   ("color": "verde"), no este archivo. */
-.campana-personaje-nombre.pj-verde {
-    color: var(--pj-verde);
-}
-
-.campana-personaje-nombre.pj-azul {
-    color: var(--pj-azul);
-}
-
-.campana-personaje-nombre.pj-rojo {
-    color: var(--pj-rojo);
-}
-
-.campana-personaje-nombre.pj-morado {
     color: var(--pj-morado);
 }
 
@@ -1418,194 +2011,6 @@ body:has(.cuaderno-page) main {
 }
 
 
-/* EL POST-IT DE LAS COSAS PENDIENTES
-
-   Lo que queda por hacer no es una hoja más del cuaderno: es la nota que
-   uno pega en el borde para no perderla de vista. Así que va aparte,
-   estrecha, en amarillo y quieta — por largas que sean las notas, el
-   post-it no se mueve de su sitio, porque vive fuera de lo que se
-   desplaza.
-
-   Amarillo de verdad (--yellow con --yellow-contrast encima) y no papel
-   con un borde de color: ese par es el de las barras de título de todo
-   el sitio, o sea el que ya está medido en los diez temas, y es lo que
-   hace que esto se lea como un post-it y no como otra hoja. En los temas
-   de terminal sale del color del fósforo, que es lo que toca ahí.
-
-   QUE PAREZCA UNO DE VERDAD
-   -------------------------
-   Cuatro adornos, y los cuatro son adornos: si un navegador no entiende
-   alguno, la nota sigue siendo un rectángulo amarillo con su lista.
-
-     1. Torcida. 1,1 grados, que es poco a propósito: lo justo para que
-        se note que está PEGADA y no encajada, sin que el texto deje de
-        caer en horizontal. Un post-it de los de la tira va a cinco o
-        seis grados y a ese ángulo una lista larga se lee peor, y esto es
-        justo lo que hay que poder leer de un vistazo. En el móvil se
-        quita del todo (ver notas-rol.responsive.css): ahí la nota ocupa
-        todo el ancho y lo que sobresale al torcerse se saldría de la
-        pantalla.
-     2. La banda del pegamento arriba, un poco más oscura, que es por
-        donde se pega.
-     3. La esquina de abajo a la derecha doblada.
-     4. Dos sombras: la dura de todo el sitio y, debajo, una blanda y
-        corta —la que hace un papel apoyado—.
-
-   Los adornos 2 y 3 son un negro al 7 y al 16 por ciento sobre el color
-   de la nota, no un color escrito: así valen en los diez temas sin tener
-   que elegir diez amarillos. En los dos temas puros se quitan, porque
-   ahí solo hay negro y blanco y un negro al 7% ya es un gris.
-
-   Y EL TEXTO, MÁS PEQUEÑO que el del cuaderno: la nota es estrecha y a
-   16px casi todo lo pendiente se partía en dos líneas. Con bajarle el
-   font-size se arregla todo lo de dentro de golpe, porque los renglones,
-   las casillas y los huecos de esta nota están en em —miden en letras,
-   no en píxeles—, así que se encogen con ella y siguen cuadrando. */
-.cuaderno-postit {
-    /* El ancho ya lo pide .cuaderno-lateral; aquí la nota solo dice que
-       no se estire para llenar la columna. */
-    flex: 0 1 auto;
-    min-width: 0;
-    /* Y si la lista no cupiera, lo que se desplaza es LA LISTA, no la
-       nota entera: así el título y la cuenta de "x de y hechas" se
-       quedan siempre a la vista. Desplazando la nota entera, la cuenta
-       se iba por debajo del borde y parecía que estaba cortada. */
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
-    position: relative;
-    padding: 14px 16px 16px;
-    background:
-        linear-gradient(to bottom,
-            rgba(0, 0, 0, 0.07) 0,
-            rgba(0, 0, 0, 0.07) 2.6em,
-            transparent 2.6em),
-        var(--yellow);
-    color: var(--yellow-contrast);
-    box-shadow:
-        4px 4px 0 var(--purple-lighter),
-        0 7px 14px -7px rgba(0, 0, 0, 0.55);
-    transform: rotate(-1.1deg);
-    font-size: 0.875rem;
-    line-height: var(--renglon);
-}
-
-/* La esquina doblada. Un triángulo oscuro en la esquina de abajo a la
-   derecha: el 315deg hace que el degradado vaya hacia arriba-izquierda,
-   así que la mitad llena es justo la de abajo-derecha. */
-.cuaderno-postit::after {
-    content: "";
-    position: absolute;
-    right: 0;
-    bottom: 0;
-    width: 1.7em;
-    height: 1.7em;
-    background: linear-gradient(315deg,
-        rgba(0, 0, 0, 0.16) 0,
-        rgba(0, 0, 0, 0.16) 50%,
-        transparent 50%);
-    pointer-events: none;
-}
-
-/* En blanco y negro puros, los dos adornos de sombra fuera: un negro al
-   7% sobre blanco es un gris, y ese tema es solo #000 y #fff. La nota se
-   queda torcida y con su sombra dura, que no llevan color ninguno. */
-:root[data-theme^="puro"] .cuaderno-postit {
-    background: var(--yellow);
-    box-shadow: 4px 4px 0 var(--purple-lighter);
-}
-
-:root[data-theme^="puro"] .cuaderno-postit::after {
-    display: none;
-}
-
-/* El título y la cuenta, quietos; la lista, lo único que se desplaza si
-   hay más cosas pendientes de las que caben. */
-.cuaderno-postit-titulo,
-.cuaderno-postit .cuaderno-tareas-pie {
-    flex: none;
-}
-
-.cuaderno-postit .cuaderno-tareas {
-    /* 0 de crecer: la nota mide lo que mida su contenido y no se estira
-       para llenar nada. */
-    flex: 0 1 auto;
-    min-height: 0;
-    overflow-y: auto;
-}
-
-.cuaderno-postit-titulo {
-    margin: 0 0 var(--renglon);
-    color: var(--yellow-contrast);
-    font-family: var(--fuente-mono);
-    /* Un punto por debajo del texto de la lista: es un rótulo en
-       mayúsculas y de máquina, y en mayúsculas se lee igual más pequeño.
-       Así lo primero que se ve de la nota es lo que queda por hacer y no
-       la palabra "pendientes". */
-    font-size: 0.8125rem;
-    font-weight: 400;
-    letter-spacing: 1px;
-    line-height: var(--renglon);
-    text-transform: uppercase;
-    /* La raya de debajo del título, como la de una libreta de notas.
-       currentColor para que sirva en los diez temas sin decir un color. */
-    border-bottom: 2px solid currentColor;
-    padding-bottom: calc(var(--renglon) / 2 - 2px);
-}
-
-/* Lo que se escriba dentro del post-it, en el color del post-it. Son
-   cuatro reglas sueltas y no una sola porque cada una pisa a la suya de
-   la hoja, que pide --yellow o --white sobre el papel y aquí sería
-   amarillo sobre amarillo. */
-.cuaderno-postit p,
-.cuaderno-postit li,
-.cuaderno-postit strong,
-.cuaderno-postit em {
-    color: var(--yellow-contrast);
-}
-
-.cuaderno-postit a {
-    color: var(--yellow-contrast);
-    text-decoration: underline;
-    text-underline-offset: 3px;
-}
-
-.cuaderno-postit a:focus-visible,
-.cuaderno-postit .cuaderno-tareas-deshacer:focus-visible,
-.cuaderno-postit .cuaderno-tareas > li:has(.cuaderno-tarea-casilla:focus-visible)::before {
-    outline: 2px solid var(--yellow-contrast);
-    outline-offset: 2px;
-}
-
-/* Las casillas, en la tinta del post-it. Y las hechas NO se ponen en
-   gris aquí: sobre el amarillo, un gris apagado deja de leerse. Se
-   quedan con la casilla marcada y el tachado, que son dos señales y
-   ninguna de las dos es el color. */
-.cuaderno-postit .cuaderno-tareas > li::before,
-.cuaderno-postit .cuaderno-tareas > li.hecho::before {
-    border-color: var(--yellow-contrast);
-}
-
-.cuaderno-postit .cuaderno-tareas > li.hecho::after {
-    border-color: var(--yellow-contrast);
-}
-
-.cuaderno-postit .cuaderno-tareas > li.hecho {
-    color: var(--yellow-contrast);
-}
-
-.cuaderno-postit .cuaderno-tareas-pie,
-.cuaderno-postit .cuaderno-tareas-deshacer {
-    color: var(--yellow-contrast);
-}
-
-.cuaderno-postit .cuaderno-tareas-deshacer:hover,
-.cuaderno-postit .cuaderno-tareas-deshacer:focus-visible {
-    color: var(--yellow-contrast);
-    text-decoration: none;
-}
-
-
 /* DEBAJO DEL POST-IT: EL PDF Y LA SESIÓN DE AL LADO
 
    Dos cosas que no son las notas pero que van con ellas: el cuaderno de
@@ -1741,142 +2146,6 @@ body:has(.cuaderno-page) main {
 }
 
 
-/* LAS COSAS PENDIENTES, COMO UNA LISTA DE TAREAS
-
-   Un <ul class="cuaderno-tareas"> y ya está: cada cosa sale con su
-   casilla delante, y las hechas con la casilla marcada, tachadas y en
-   gris. Tachado Y marcado Y en gris, tres cosas a la vez, porque una
-   sola no vale: el tachado no lo dice un lector de pantalla, el gris no
-   se ve en blanco y negro y la casilla sola se pierde en una lista
-   larga.
-
-   La casilla va en ::before y ::after del propio <li>, colocada aparte
-   del texto: si fuera un trozo más de la línea, cambiaría el alto de esa
-   línea y el renglón del papel dejaría de caer debajo. Así no la toca.
-
-   Marcarlas se puede (lo engancha scripts/paginas/cuaderno.js), pero lo
-   que se marca ahí se queda guardado en ESE navegador. Lo que ve quien
-   entra en la web es lo que esté escrito en el archivo: un <li> con
-   class="hecho". */
-.cuaderno-tareas {
-    padding-left: 0;
-    list-style: none;
-}
-
-.cuaderno-tareas > li {
-    position: relative;
-    /* Sitio para la casilla, que va colocada encima de este hueco. */
-    padding-left: 1.9em;
-}
-
-/* La casilla. Centrada a ojo en el renglón: la mitad de lo que sobra
-   entre el alto de la línea y el alto de la casilla. */
-.cuaderno-tareas > li::before {
-    content: "";
-    position: absolute;
-    left: 0.15em;
-    top: calc((var(--renglon) - 1.05em) / 2);
-    width: 1.05em;
-    height: 1.05em;
-    border: 2px solid var(--muted);
-    box-sizing: border-box;
-}
-
-/* La marca de hecho: dos lados de un cuadrado girados 45°, que es un
-   palote de los de toda la vida. En em, como todo lo demás. */
-.cuaderno-tareas > li.hecho::after {
-    content: "";
-    position: absolute;
-    left: 0.48em;
-    top: calc((var(--renglon) - 1.05em) / 2 + 0.12em);
-    width: 0.32em;
-    height: 0.62em;
-    border: solid var(--yellow);
-    border-width: 0 0.18em 0.18em 0;
-    transform: rotate(45deg);
-}
-
-.cuaderno-tareas > li.hecho::before {
-    border-color: var(--yellow);
-}
-
-.cuaderno-tareas > li.hecho {
-    color: var(--muted);
-    text-decoration: line-through;
-    /* Fina a propósito: con la letra manuscrita, la raya de serie es tan
-       gorda que se come la mitad de las letras y hay que adivinar lo que
-       ponía. Tachado es tachado, no borrado. */
-    text-decoration-thickness: 1px;
-}
-
-/* Lo pulsable. El <label> lo monta el script alrededor de lo que haya
-   escrito, y se mete hacia la izquierda para cubrir también el hueco de
-   la casilla: si no, pulsar justo encima del cuadradito no hacía nada,
-   que es lo primero que hace cualquiera. */
-.cuaderno-tarea {
-    display: block;
-    margin-left: -1.9em;
-    padding-left: 1.9em;
-    cursor: pointer;
-}
-
-/* La casilla de verdad: existe, se puede tabular y un lector de pantalla
-   la lee, pero no se ve —lo que se ve es el cuadradito dibujado arriba—.
-   Nada de display: none, que la quitaría del tabulador y del lector. */
-.cuaderno-tarea-casilla {
-    position: absolute;
-    width: 1px;
-    height: 1px;
-    margin: -1px;
-    padding: 0;
-    overflow: hidden;
-    clip: rect(0, 0, 0, 0);
-    white-space: nowrap;
-    border: 0;
-}
-
-/* Y como la casilla no se ve, el recuadro del foco se lo tiene que poner
-   el cuadradito dibujado. Es para lo que está :has(): ir del <input> de
-   dentro al <li> de fuera. */
-.cuaderno-tareas > li:has(.cuaderno-tarea-casilla:focus-visible)::before {
-    outline: 2px solid var(--yellow);
-    outline-offset: 2px;
-}
-
-/* La cuenta y el botón de deshacer, debajo de la lista. Los monta el
-   script: el botón solo aparece si lo marcado en este navegador no
-   coincide con lo que pone el archivo, que es cuando sirve de algo. */
-.cuaderno-tareas-pie {
-    display: flex;
-    align-items: baseline;
-    flex-wrap: wrap;
-    gap: 4px 12px;
-    color: var(--muted);
-    font-family: var(--fuente-mono);
-    font-size: 0.8125rem;
-    line-height: var(--renglon);
-}
-
-.cuaderno-tareas-deshacer {
-    padding: 0;
-    border: 0;
-    background: transparent;
-    color: var(--muted);
-    font: inherit;
-    text-decoration: underline;
-    text-underline-offset: 3px;
-}
-
-.cuaderno-tareas-deshacer:hover,
-.cuaderno-tareas-deshacer:focus-visible {
-    color: var(--yellow);
-}
-
-.cuaderno-tareas-deshacer:focus-visible {
-    outline: 2px solid var(--yellow);
-    outline-offset: 3px;
-}
-
 /* Las notas se pueden enlazar entre ellas (a la sesión anterior, a un
    relato). Subrayado y en amarillo, como cualquier enlace dentro de un
    texto del sitio. */
@@ -1893,4 +2162,282 @@ body:has(.cuaderno-page) main {
 .cuaderno-hoja-cuerpo a:focus-visible {
     outline: 2px solid var(--yellow);
     outline-offset: 2px;
+}
+
+
+/* ====================================================================
+   «LA MESA» — LOS PERSONAJES DE LOS JUGADORES
+   ====================================================================
+   Lo que hay DENTRO de la ventana que abre el retrato de un personaje en
+   la ficha de la campaña. La ventana en sí es del componente
+   (estilos/componentes/ventana-modal.css); esto es solo su contenido, que
+   lo monta scripts/paginas/notas-rol.js con lo que haya en "personajes"
+   en el JSON de la campaña.
+
+   DENTRO VA UNO SOLO: el que se haya pulsado, igual que la ficha de un
+   NPC. Antes llevaba arriba una fila con los cuatro tokens y había que
+   volver a elegir ahí dentro; desde que los retratos están en la página,
+   eso era elegir dos veces lo mismo.
+
+   LOS COLORES de cada uno son los mismos de siempre —los declara el bloque
+   de LOS PERSONAJES DE LOS JUGADORES, más arriba— y aquí llegan porque la
+   ventana está en esa lista: la cuelga el JavaScript del <body>, fuera de
+   .campana-page, y sin eso se quedarían en nada. */
+
+
+/* De qué color es cada uno. Lo dice el JSON de la campaña
+   ("color": "verde"); los cuatro colores están declarados más arriba.
+
+   La misma variable sirve en los tres sitios donde sale un personaje: su
+   retrato en la ficha de la campaña (.campana-personaje-token), el nombre
+   que va debajo y el nombre dentro de su ventana (.mesa-nombre). */
+.mesa-nombre.pj-verde,
+.campana-personaje-token.pj-verde,
+.campana-personaje-nombre.pj-verde {
+    --mesa-color: var(--pj-verde);
+}
+
+.mesa-nombre.pj-azul,
+.campana-personaje-token.pj-azul,
+.campana-personaje-nombre.pj-azul {
+    --mesa-color: var(--pj-azul);
+}
+
+.mesa-nombre.pj-rojo,
+.campana-personaje-token.pj-rojo,
+.campana-personaje-nombre.pj-rojo {
+    --mesa-color: var(--pj-rojo);
+}
+
+.mesa-nombre.pj-morado,
+.campana-personaje-token.pj-morado,
+.campana-personaje-nombre.pj-morado {
+    --mesa-color: var(--pj-morado);
+}
+
+
+/* LA FICHA: la ilustración a un lado y lo suyo al otro. Ya no es un panel
+   de pestañas —dentro de la ventana no hay más que uno—, así que tampoco
+   lleva foco propio: quien se desplaza es la ventana entera. */
+.mesa-ficha {
+    display: flex;
+    align-items: flex-start;
+    gap: 20px;
+}
+
+.mesa-arte {
+    flex: 0 0 clamp(8rem, 28%, 14rem);
+    aspect-ratio: 3 / 4;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    border: 2px solid var(--border);
+    background: var(--purple-lighter);
+}
+
+/* Mientras no haya retrato: pequeño y cuadrado. Un marco de 3x4 vacío al
+   lado del texto parece una foto que no ha cargado; así se ve que es el
+   hueco que le toca. */
+.mesa-arte.sin-foto {
+    flex: 0 0 6rem;
+    aspect-ratio: 1 / 1;
+    border-style: dashed;
+}
+
+.mesa-arte.sin-foto .mesa-arte-mono {
+    font-size: 2.25rem;
+}
+
+.mesa-arte-img {
+    width: 100%;
+    height: 100%;
+    display: block;
+    object-fit: cover;
+}
+
+.mesa-arte-mono {
+    color: var(--yellow);
+    font-family: var(--fuente-titular);
+    font-size: 3.5rem;
+    line-height: 1;
+    user-select: none;
+}
+
+.mesa-texto {
+    flex: 1 1 auto;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.mesa-nombre {
+    margin: 0;
+    color: var(--mesa-color, var(--white));
+    font-family: var(--fuente-titular);
+    font-size: clamp(1.5rem, 3vw, 2rem);
+    line-height: 1.15;
+    overflow-wrap: break-word;
+}
+
+/* La clase, en el amarillo del tema: es lo que marca lo importante en todo
+   el sitio, y aquí el color del personaje ya lo lleva el nombre de arriba. */
+.mesa-clase {
+    margin: -8px 0 0;
+    color: var(--yellow);
+    font-size: 1rem;
+    line-height: 1.5;
+}
+
+/* Los datos, en una <dl> de verdad: así un lector de pantalla dice "nivel,
+   3" y no dos textos sueltos uno detrás de otro. */
+.mesa-datos {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin: 0;
+}
+
+.mesa-dato {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 4px 10px;
+}
+
+.mesa-dato-nombre {
+    flex: none;
+    color: var(--muted);
+    font-family: var(--fuente-mono);
+    font-size: 0.75rem;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+}
+
+/* margin-inline-start además del margin: el <dd> trae 40px de sangría de
+   serie y sin quitarla los valores salen desplazados a la derecha. */
+.mesa-dato-valor {
+    margin: 0;
+    margin-inline-start: 0;
+    min-width: 0;
+    color: var(--white);
+    font-size: 1rem;
+    line-height: 1.5;
+    overflow-wrap: break-word;
+}
+
+/* El encabezado de un apartado ("lo que lleva encima"). Del mismo palo que
+   los nombres de los datos, para que se lea como una etiqueta más y no
+   como otro título dentro de la ventana. */
+.mesa-apartado {
+    margin: 4px 0 -6px;
+    color: var(--muted);
+    font-family: var(--fuente-mono);
+    font-size: 0.75rem;
+    font-weight: 400;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+}
+
+/* EL EQUIPO. Con el mismo formato que los objetos que se consiguen en una
+   partida (.cuaderno-objetos) y que el botín: letra de máquina y un rombo
+   delante. En toda la sección de rol, un rombo es una cosa que se tiene.
+   Va en ::before y no como viñeta de lista para poder darle el color del
+   tema; no lleva significado, que lo que dice la línea está escrito. */
+.mesa-equipo {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    color: var(--white);
+    font-family: var(--fuente-mono);
+    font-size: 0.875rem;
+    line-height: 1.55;
+}
+
+.mesa-equipo > li {
+    display: flex;
+    gap: 0.6em;
+    margin: 0;
+}
+
+.mesa-equipo > li::before {
+    content: "◆";
+    flex: none;
+    color: var(--yellow);
+    /* Un pelín más pequeño que la letra: a tamaño completo el rombo pesa
+       más que la palabra que tiene al lado. */
+    font-size: 0.8em;
+    line-height: 1.9;
+}
+
+.mesa-notas {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin: 0;
+    padding-left: 1.2em;
+    color: var(--white);
+    font-size: 1rem;
+    line-height: 1.6;
+}
+
+.mesa-notas > li {
+    margin: 0;
+}
+
+/* LOS DOS BOTONES DE SU FICHA: la de D&D Beyond y el PDF. Al final de la
+   ventana, porque no son para leer aquí: son para irse a otro sitio, y
+   eso es lo último que se hace.
+
+   Son ENLACES con pinta de botón, no <button>: uno lleva a otra web y el
+   otro descarga un archivo. Llevan la misma pinta que los botones de
+   arriba del índice (.campana-boton) a propósito —se pulsan y te llevan
+   a algo— pero un punto más pequeños, que aquí no son lo principal. */
+.mesa-fichas {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin: 18px 0 0;
+    padding-top: 16px;
+    border-top: 1px solid var(--border);
+}
+
+.mesa-ficha-enlace {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    /* 44px de alto: lo que mide un dedo, como el resto del sitio. */
+    min-height: 44px;
+    padding: 8px 14px;
+    border: 2px solid var(--yellow);
+    background: transparent;
+    color: var(--yellow);
+    font-family: var(--fuente-mono);
+    font-size: 0.8125rem;
+    letter-spacing: 0.5px;
+    text-decoration: none;
+    transition: color 0.15s linear, background-color 0.15s linear;
+}
+
+.mesa-ficha-enlace:hover,
+.mesa-ficha-enlace:focus-visible {
+    color: var(--yellow-contrast);
+    background: var(--yellow);
+}
+
+.mesa-ficha-enlace:focus-visible {
+    outline: 2px solid var(--yellow);
+    outline-offset: 3px;
+}
+
+/* La flechita (↗ de "se abre fuera", ↓ de "se descarga"). Es un adorno:
+   lo que hace cada uno está escrito con letras, y lo de la pestaña nueva
+   también, en un texto que solo oye quien usa lector de pantalla. */
+.mesa-ficha-icono {
+    font-size: 1em;
+    line-height: 1;
 }

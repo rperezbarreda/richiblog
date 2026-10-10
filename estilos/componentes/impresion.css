@@ -18,7 +18,7 @@
    directamente no pintan los fondos. Lo mismo con el filtro CRT: unas
    rayas encima del texto en papel son rayas y ya está.
 
-   Este archivo va en ULTIMAS (herramientas/actualizar-cabeceras.py)
+   Este archivo va en ULTIMAS (herramientas/3-generadores/actualizar-cabeceras.py)
    para que se cargue el último y no haya que pelear con nadie: cuando
    dos reglas pesan lo mismo gana la de después. */
 
@@ -181,6 +181,13 @@
     .reto-volver,
     .cuaderno-post-back,
     .campana-volver,
+    .npcs-volver,
+    /* Los tres botones de la campaña y la ventana que abren dos de
+       ellos: en papel una ventana no existe (se abre pulsando) y un
+       enlace es navegar. Lo que sí se imprime es la rejilla con las caras
+       y los nombres, que es la chuleta que uno se lleva a la mesa. */
+    .campana-botones,
+    .modal,
     /* El botón de plegar las escenas y el de deshacer lo marcado en las
        cosas pendientes: en papel no se pliega ni se marca nada. La
        cuenta de hechas sí se queda, que eso es información. Y las
@@ -228,6 +235,41 @@
     .blog-post-layout,
     .relato-post-layout {
         display: block;
+    }
+
+    /* LA PÁGINA DE NPC, SUELTA. En pantalla la página se desplaza por
+       dentro; en papel eso imprimía solo el primer grupo y el resto no
+       salía en ninguna parte. */
+    .npcs-page,
+    /* Y "en lo que ando", por lo mismo: en pantalla la columna se
+       desplaza por dentro y en papel eso imprime el primer bloque y nada
+       más. Los cuatro bloques se ponen uno debajo de otro. */
+    .ando-page,
+    .ando-rejilla {
+        display: block;
+        height: auto;
+        min-height: 0;
+        max-height: none;
+        overflow: visible;
+    }
+
+    /* Que un bloque no se parta entre dos hojas si cabe entero. */
+    .ando-bloque,
+    .ando-postit {
+        break-inside: avoid;
+        margin-bottom: 0.6cm;
+    }
+
+    /* Y que un grupo no se parta entre dos hojas si cabe entero. */
+    .npc-grupo {
+        break-inside: avoid;
+        margin-bottom: 0.8cm;
+    }
+
+    /* El marco del token se queda (es un borde, y los bordes sí se
+       imprimen); lo que se va es la sombra, que en papel es una mancha. */
+    .npc-token-marco {
+        box-shadow: none;
     }
 
     /* LAS NOTAS DE UNA PARTIDA, SUELTAS.

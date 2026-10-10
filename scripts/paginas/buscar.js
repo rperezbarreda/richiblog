@@ -2,7 +2,7 @@
 // PÁGINA: BUSCAR EN TODA LA WEB
 // =========================================
 // Lee lo que venga en ?q= de la dirección, pide datos/buscador.json
-// —que escribe herramientas/generar-buscador.py recorriendo la web— y
+// —que escribe herramientas/3-generadores/generar-buscador.py recorriendo la web— y
 // pinta los resultados: título, sección y fecha como en el mapa del
 // sitio, y debajo el trozo de texto donde aparece lo que buscabas, con
 // la palabra resaltada.
@@ -34,7 +34,7 @@
 //
 // OJO CON LOS NOMBRES: aquí no hay módulos, todos los scripts comparten
 // el mismo ámbito global. Por eso lo de aquí lleva "busq" en el nombre.
-// Se comprueba con herramientas/nombres-repetidos.py.
+// Se comprueba con herramientas/4-comprobar/nombres-repetidos.py.
 
 const BUSQ_DATOS = "/datos/buscador.json";
 
@@ -269,7 +269,7 @@ function fichaBusq(resultado) {
     const cabeza = document.createElement("p");
     cabeza.className = "busq-titulo";
     const enlace = document.createElement("a");
-    enlace.href = ficha.url;
+    enlace.href = rutaSeguraBusq(ficha.url);
     enlace.appendChild(resaltarBusq(ficha.titulo));
     cabeza.appendChild(enlace);
     li.appendChild(cabeza);
@@ -293,6 +293,23 @@ function fichaBusq(resultado) {
         li.appendChild(parrafo);
     }
     return li;
+}
+
+// El listado lo escribe generar-buscador.py, pero de ahí sale la
+// dirección de cada resultado y acaba en un href: una que empezara por
+// "javascript:" sería código que se ejecuta al pulsar. Se comprueba cómo
+// empieza y, si no es una dirección de las que valen, no se pone.
+// Mismo criterio que en reto.js, relatos.js, rol.js y notas-rol.js.
+function rutaSeguraBusq(url) {
+    const limpia = (url || "").toString().trim();
+    // Una dirección de ESTA web (que empiece por "/" pero no por "//",
+    // que sería otra web), una http(s) entera, un correo o un ancla. Lo
+    // demás —"javascript:", "data:", "//otrositio.com"— no es una
+    // dirección: es código o es irse de aquí sin que se note.
+    if (/^\/(?!\/)/.test(limpia) || /^(https?:\/\/|mailto:|#)/i.test(limpia)) {
+        return limpia;
+    }
+    return "#";
 }
 
 function trozoBusq(clase, texto) {

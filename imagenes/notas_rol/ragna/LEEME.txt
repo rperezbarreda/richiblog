@@ -1,0 +1,33 @@
+LAS IMÁGENES DEL «QUIÉN ES QUIÉN» DE LA CAMPAÑA
+===============================================
+
+Aquí van los retratos de la gente de esta campaña. Dos por personaje, y
+los dos son opcionales: mientras no estén, en su sitio sale la inicial
+del nombre dentro del marco.
+
+  <clave>-token.webp   el token de la rejilla.
+                       CUADRADO (se recorta en redondo), unos 320x320.
+                       Es lo que se ve sin abrir nada, así que que se le
+                       vea bien la cara: un plano corto, no un cuerpo
+                       entero.
+
+  <clave>.webp         la ilustración de la ficha.
+                       DE PIE, 3 de ancho por 4 de alto (600x800 va
+                       sobrado). Se recorta para llenar el marco, así
+                       que lo importante, centrado.
+
+La <clave> la eliges tú; lo único que importa es que la ruta coincida con
+lo que ponga datos/personajes-<campaña>.json:
+
+    "token": "/imagenes/notas_rol/ragna/sigil-token.webp",
+    "ilustracion": "/imagenes/notas_rol/ragna/sigil.webp"
+
+Si solo hay una de las dos, se usa la que haya: con solo el token, la
+ficha lo enseña a lo grande.
+
+ANTES DE SUBIRLAS, pásalas por:
+
+    python3 herramientas/2-imagenes/optimizar-imagenes.py
+
+que es lo que las convierte a .webp y las deja del peso que toca, igual
+que con las fotos del blog.

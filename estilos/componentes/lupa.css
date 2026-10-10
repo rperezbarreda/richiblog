@@ -1,0 +1,102 @@
+/* COMPONENTE: LA LUPA (una imagen a pantalla completa)
+
+   Una imagen grande encima de todo lo demás, con su nombre debajo. La
+   monta scripts/componentes/lupa.js y la quita al cerrarse; ahí está el
+   porqué de no ser otra ventana modal.
+
+   Estaba dentro de estilos/paginas/npcs-rol.css, que es donde se estrenó
+   (el retrato de un NPC en grande). Se sacó aquí el día que el botín de
+   una campaña quiso lo mismo con las fotos de los objetos. Las clases
+   perdieron el "npc-" de delante al mudarse: aquí ya no es de los npcs.
+
+       <div class="lupa">
+           <button class="lupa-cerrar">✕</button>
+           <img class="lupa-img">
+           <p class="lupa-pie">Sigil</p>
+       </div>
+*/
+
+.lupa {
+    position: fixed;
+    inset: 0;
+    /* Por encima de la ventana modal, que es lo que hay debajo. */
+    z-index: 1200;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    padding: 24px;
+    /* El fondo del propio tema, casi opaco. La primera versión era un
+       negro fijo y se veía bien... hasta el tema claro: el nombre de
+       debajo usa el color de texto del tema, que ahí es casi negro, y
+       quedaba negro sobre negro. Lo de alrededor tiene que ser del tema
+       para que el texto de encima siga valiendo. */
+    background: var(--surface);
+}
+
+.lupa-img {
+    max-width: min(96vw, 1400px);
+    /* Lo que quede de alto quitando el botón de cerrar y el nombre. */
+    max-height: 78vh;
+    object-fit: contain;
+    border: 2px solid var(--yellow);
+    background: var(--purple-lighter);
+}
+
+.lupa-pie {
+    margin: 0;
+    color: var(--white);
+    font-family: var(--fuente-mono);
+    font-size: 0.9375rem;
+    text-align: center;
+}
+
+.lupa-cerrar {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    /* 44px: lo que mide un dedo, como el resto de los botones del sitio. */
+    min-width: 44px;
+    min-height: 44px;
+    border: 2px solid var(--yellow);
+    background: var(--purple);
+    color: var(--yellow);
+    font-family: var(--fuente-mono);
+    font-size: 1.125rem;
+    line-height: 1;
+    cursor: pointer;
+}
+
+.lupa-cerrar:hover,
+.lupa-cerrar:focus-visible {
+    background: var(--yellow);
+    color: var(--yellow-contrast);
+}
+
+.lupa-cerrar:focus-visible {
+    outline: 2px solid var(--yellow);
+    outline-offset: 2px;
+}
+
+/* En alto contraste, el fondo casi negro lo repinta el sistema; lo que
+   hace falta es que el marco del dibujo siga viéndose. */
+@media (forced-colors: active) {
+    .lupa {
+        background: Canvas;
+    }
+
+    .lupa-img {
+        border-color: CanvasText;
+    }
+}
+
+/* No se imprime: es una capa de la pantalla. */
+@media print {
+    .lupa {
+        display: none;
+    }
+}

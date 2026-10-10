@@ -9,7 +9,7 @@
 //
 // EL TIEMPO DE LECTURA NO SE CUENTA AQUÍ
 // --------------------------------------
-// Lo calcula herramientas/generar-posts.py al escribir el listado, y
+// Lo calcula herramientas/3-generadores/generar-posts.py al escribir el listado, y
 // esta página lo recibe de scripts/paginas/otras-entradas.js —que ya se
 // trae ese listado para la ventana de "sigue leyendo"— en el evento
 // "lectura:entrada". Contarlo otra vez aquí, con el texto del navegador
@@ -24,7 +24,7 @@
 // cuerpo). Con uno solo no hay nada que elegir, y con ninguno —que es
 // como están casi todas— no se pinta nada: no hay ni una caja vacía.
 // Los <h2> se escriben a mano en el HTML de la entrada, como explica
-// herramientas/ejemplo-formatos.html.
+// herramientas/5-consulta/ejemplo-formatos.html.
 
 const LECTURA_MINIMO_APARTADOS = 2;
 
