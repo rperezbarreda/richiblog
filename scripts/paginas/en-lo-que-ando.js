@@ -5,12 +5,12 @@
 //
 //   1. AHORA MISMO     lo que estoy leyendo, viendo y jugando.
 //   2. LA PARTIDA      la campaña de rol. Éste NO se escribe: sale solo de
-//                      datos/notas-rol.json y del JSON de la campaña.
+//                      datos/notas_rol/notas-rol.json y del JSON de la campaña.
 //   3. ESCRIBIENDO     lo que tengo a medias.
 //   4. PENDIENTES      un post-it con casillas, el mismo que el de las
 //                      notas de una partida (scripts/componentes/tareas.js).
 //
-// QUIÉN MANDA: datos/en-lo-que-ando.json, que dice la propia página en
+// QUIÉN MANDA: datos/mi_rincon/en-lo-que-ando.json, que dice la propia página en
 // data-ando-datos. Un bloque que no tenga nada escrito NO SALE: una página
 // de "en lo que ando" con tres marcos vacíos dice justo lo contrario de lo
 // que quiere decir.
@@ -48,7 +48,7 @@
 // De dónde sale el bloque de la campaña. Es el mismo listado que usa el
 // índice de una campaña para saber qué sesiones están publicadas de
 // verdad: una sesión creada pero todavía en borrador no está aquí.
-const ANDO_SESIONES_URL = "/datos/notas-rol.json";
+const ANDO_SESIONES_URL = "/datos/notas_rol/notas-rol.json";
 
 initializeEnLoQueAndo();
 
@@ -261,7 +261,7 @@ function tituloDeAndo(cosa) {
 // =========================================
 // LA PARTIDA DE ROL — este bloque se escribe solo
 // =========================================
-// No hay nada que apuntar: las sesiones ya están en datos/notas-rol.json
+// No hay nada que apuntar: las sesiones ya están en datos/notas_rol/notas-rol.json
 // (lo escribe herramientas/3-generadores/generar-posts.py al publicar una)
 // y de la más reciente se saca su campaña. Publicar unas notas es lo que
 // actualiza esto, que es como tiene que ser: si hubiera que venir aquí a
@@ -308,7 +308,7 @@ async function pintarLaPartida() {
         // una URL y no cuesta nada asegurarse.
         try {
             const respuesta = await window.pedirDatos(
-                "/datos/campana-" + clave + ".json"
+                "/datos/notas_rol/campana-" + clave + ".json"
             );
             if (respuesta.ok) {
                 campana = await respuesta.json();

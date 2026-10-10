@@ -40,13 +40,13 @@
          Sin esto solo sale la URL pelada, sin título ni imagen. Las rutas
          van absolutas a propósito: las redes no resuelven las relativas. -->
     <meta name="description" content="{{DESCRIPCION}}">
-    <link rel="canonical" href="https://richi.blog/web/mundo/{{SLUG}}.html">
+    <link rel="canonical" href="https://richi.blog/web/wiki/{{SLUG}}.html">
     <meta property="og:type" content="website">
     <meta property="og:site_name" content="El Blog de Richi">
     <meta property="og:locale" content="es_ES">
     <meta property="og:title" content="{{TITULO}} · Wiki Cralëa · El Blog de Richi">
     <meta property="og:description" content="{{DESCRIPCION}}">
-    <meta property="og:url" content="https://richi.blog/web/mundo/{{SLUG}}.html">
+    <meta property="og:url" content="https://richi.blog/web/wiki/{{SLUG}}.html">
     <meta property="og:image" content="https://richi.blog/imagenes/meta/og.webp">
     <meta property="og:image:width" content="1200">
     <meta property="og:image:height" content="630">
@@ -96,7 +96,7 @@
         <section id="home" class="home mundo-page mundo-mapa-page">
             <!-- ESTA PÁGINA NO SE EDITA A MANO.
                  La escribe entera herramientas/3-generadores/generar-mundo.py
-                 a partir de un archivo .cmap de la carpeta mundo/, que es un
+                 a partir de un archivo .cmap de la carpeta wiki/, que es un
                  mapa interactivo de Chronicler. Lo que se escriba aquí se
                  pierde la próxima vez que se pase el generador.
 
@@ -108,7 +108,7 @@
                  Esta misma página es la plantilla: lo que está entre llaves
                  dobles lo rellena el generador. -->
             <div class="mundo-cabecera">
-                <a class="mundo-volver" href="/web/mundo/index_mundo.html">← volver a la wiki</a>
+                <a class="mundo-volver" href="/web/wiki/index_wiki.html">← volver a la wiki</a>
                 <h1 class="mundo-titulo">{{TITULO}}</h1>
                 <p class="mundo-subtitulo">mapa · {{CUANTOS}}</p>
             </div>
@@ -145,7 +145,7 @@
                  enlaces y en orden alfabético. -->
             {{SITIOS}}
 
-            <a class="mundo-volver mundo-volver-abajo" href="/web/mundo/index_mundo.html">← volver a la wiki</a>
+            <a class="mundo-volver mundo-volver-abajo" href="/web/wiki/index_wiki.html">← volver a la wiki</a>
         </section>
     </main>
 </body>

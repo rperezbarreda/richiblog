@@ -1,16 +1,16 @@
 // =========================================
-// PORTFOLIO DE ROL — leído desde datos/rol.json
+// PORTFOLIO DE ROL — leído desde datos/mis_movidas/rol.json
 // =========================================
 // Las tarjetas estaban escritas a mano dentro de index_rol.html, unos
 // 2 KB cada una: con veinte cosas publicadas la página pesaría más de
 // 50 KB de datos que en realidad no son la página, y había que editar
 // HTML para publicar algo. Ahora la página va vacía y las tarjetas
-// salen de datos/rol.json, igual que el listado de relatos sale de
-// datos/mis-movidas.json.
+// salen de datos/mis_movidas/rol.json, igual que el listado de relatos sale de
+// datos/mis_movidas/mis-movidas.json.
 //
-// QUIÉN MANDA: datos/rol.json. Es el archivo que se toca (a mano o con
+// QUIÉN MANDA: datos/mis_movidas/rol.json. Es el archivo que se toca (a mano o con
 // herramientas/1-publicar/nuevo.py --rol). De ahí saca también generar-posts.py la
-// parte de rol de datos/mis-movidas.json, que es lo que alimenta la
+// parte de rol de datos/mis_movidas/mis-movidas.json, que es lo que alimenta la
 // portada (novedades.exe) y el RSS. O sea: un solo sitio donde
 // escribir, y todo lo demás se entera solo.
 //
@@ -30,7 +30,7 @@
 //   drive        enlace de descarga directa. Opcional: sin él, la
 //                tarjeta se queda con un solo botón.
 
-const ROL_URL = "/datos/rol.json";
+const ROL_URL = "/datos/mis_movidas/rol.json";
 
 initializeRol();
 

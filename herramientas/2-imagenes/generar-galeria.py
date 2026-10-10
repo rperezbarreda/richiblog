@@ -3,7 +3,7 @@
 # GALERÍA DEL SANTUARIO — miniaturas + listado
 # =========================================
 # Mira las fotos que ya tengas en imagenes/santuarios/<gato>/, crea una
-# miniatura de cada una y escribe datos/fotos-santuarios.json, que es de
+# miniatura de cada una y escribe datos/mi_rincon/fotos-santuarios.json, que es de
 # donde la web saca la galería.
 #
 # POR QUÉ HACEN FALTA LAS MINIATURAS
@@ -67,7 +67,7 @@ CALIDAD = 80
 
 from comun import RAIZ, escribir_json, preguntar
 SANTUARIOS = RAIZ / "imagenes" / "santuarios"
-JSON_FOTOS = RAIZ / "datos" / "fotos-santuarios.json"
+JSON_FOTOS = RAIZ / "datos" / "mi_rincon" / "fotos-santuarios.json"
 
 SUFIJO_MINI = "-mini"
 PORTADA = "thumbnail.webp"

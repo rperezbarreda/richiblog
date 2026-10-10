@@ -1,7 +1,7 @@
 // =========================================
 // MAPA DEL SITIO — la tabla de todas las páginas
 // =========================================
-// Sale de datos/mapa-del-sitio.json, que escribe
+// Sale de datos/sitio/mapa-del-sitio.json, que escribe
 // herramientas/3-generadores/generar-mapa.py recorriendo la web entera. Aquí no se
 // decide nada: ni qué páginas hay, ni de qué sección son, ni desde
 // cuándo están. Solo se pinta la tabla.
@@ -10,7 +10,7 @@
 // una lista maquillada: quien usa un lector de pantalla puede moverse
 // por ella celda a celda y oír a qué columna pertenece cada dato.
 
-const MAPA_URL = "/datos/mapa-del-sitio.json";
+const MAPA_URL = "/datos/sitio/mapa-del-sitio.json";
 
 // Cómo se llama cada sección en la tabla. Lo que no esté aquí sale tal
 // cual, así que una sección nueva no se queda en blanco.

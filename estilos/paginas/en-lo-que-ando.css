@@ -2,7 +2,7 @@
 
 /* Cuatro bloques en dos columnas: lo que leo/veo/juego y la campaña
    arriba, lo que escribo y los pendientes debajo. Lo pinta
-   scripts/paginas/en-lo-que-ando.js con datos/en-lo-que-ando.json; un
+   scripts/paginas/en-lo-que-ando.js con datos/mi_rincon/en-lo-que-ando.json; un
    bloque sin nada escrito no sale, así que la rejilla tiene que aguantar
    con uno, con dos o con los cuatro. Por eso NO se le dice a nadie en qué
    fila va: se colocan por orden, como una rejilla de verdad.

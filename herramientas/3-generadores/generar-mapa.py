@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # =========================================
-# MAPA DEL SITIO — datos/mapa-del-sitio.json
+# MAPA DEL SITIO — datos/sitio/mapa-del-sitio.json
 # =========================================
 # Escribe la lista de TODAS las páginas de la web, con su título, de qué
 # sección son y desde cuándo existen. De ahí saca su tabla
@@ -18,7 +18,7 @@
 # DE DÓNDE SALE LA FECHA DE CREACIÓN
 # ----------------------------------
 # Una entrada del blog o un relato ya tienen fecha de publicación en su
-# listado (datos/entradas-blog.json y datos/mis-movidas.json): se usa
+# listado (datos/blog/entradas-blog.json y datos/mis_movidas/mis-movidas.json): se usa
 # esa, que es la buena.
 #
 # Las demás páginas —la portada, sobre mí, contacto…— no tienen fecha en
@@ -27,7 +27,7 @@
 # saldría que la web entera nació el día que cambiaste de ordenador. Así
 # que se hace de otra forma: la primera vez que esta herramienta ve una
 # página, apunta la fecha de hoy y NO la vuelve a tocar nunca más. Lo
-# que hay escrito en datos/mapa-del-sitio.json manda siempre.
+# que hay escrito en datos/sitio/mapa-del-sitio.json manda siempre.
 #
 # Eso quiere decir dos cosas:
 #   - Las páginas que ya existían el día que se pasó esto por primera
@@ -78,11 +78,11 @@ from comun import (
     limpiar_html,
 )
 
-SALIDA = RAIZ / "datos" / "mapa-del-sitio.json"
+SALIDA = RAIZ / "datos" / "sitio" / "mapa-del-sitio.json"
 LISTADOS = (
-    RAIZ / "datos" / "entradas-blog.json",
-    RAIZ / "datos" / "mis-movidas.json",
-    RAIZ / "datos" / "notas-rol.json",
+    RAIZ / "datos" / "blog" / "entradas-blog.json",
+    RAIZ / "datos" / "mis_movidas" / "mis-movidas.json",
+    RAIZ / "datos" / "notas_rol" / "notas-rol.json",
 )
 
 # Lo mismo que se queda fuera del sitemap: lo que no es una página de la
@@ -143,10 +143,9 @@ def seccion_de(url):
     if url.startswith("/web/recomendaciones/"):
         return "recomendaciones"
     # La wiki del mundo: una sección propia y no "otras". Son muchas
-    # páginas y se buscan juntas. La carpeta sigue llamándose mundo/ —
-    # cambiarla rompería todos los enlaces que ya estén por ahí—, pero lo
-    # que se lee es el nombre de la wiki.
-    if url.startswith("/web/mundo/"):
+    # páginas y se buscan juntas. Lo que se lee es el nombre de la wiki,
+    # no el de la carpeta.
+    if url.startswith("/web/wiki/"):
         return "wiki cralëa"
     return "otras"
 

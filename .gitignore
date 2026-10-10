@@ -1,0 +1,13 @@
+# Los originales que guarda el optimizador de imágenes al sustituirlos por
+# WebP. Son copias de seguridad de tu disco: no van a Neocities y no tienen
+# por qué ocupar sitio aquí.
+herramientas/originales-sustituidas/
+
+# Lo que deja Python al importar las herramientas.
+__pycache__/
+*.pyc
+
+# Basurilla de los sistemas operativos.
+.DS_Store
+Thumbs.db
+desktop.ini

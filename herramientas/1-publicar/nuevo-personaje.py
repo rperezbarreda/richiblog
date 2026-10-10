@@ -2,7 +2,7 @@
 # =========================================
 # AÑADIR GENTE AL «NPC» DE UNA CAMPAÑA
 # =========================================
-# Rellena datos/npcs-<campaña>.json, que es de donde sale la rejilla
+# Rellena datos/notas_rol/npcs-<campaña>.json, que es de donde sale la rejilla
 # de tokens de web/notas_rol/<campaña>/npcs_<campaña>.html. Es lo
 # mismo que editar ese archivo a mano, pero sin pelearse con las comas y
 # las comillas, y comprobando de paso que las fotos existen y que la
@@ -46,7 +46,7 @@
 #
 # AL TERMINAR PASA EL BUSCADOR, y nada más. La página dla página de npcs
 # lee el JSON tal cual, así que ahí se ve al momento; lo que sí hay que
-# rehacer es datos/buscador.json, porque ese es un archivo generado y sin
+# rehacer es datos/sitio/buscador.json, porque ese es un archivo generado y sin
 # pasarlo buscar un nombre nuevo no encontraría nada.
 
 import sys
@@ -85,7 +85,7 @@ SI = ("s", "si", "sí")
 
 
 def json_de(clave):
-    return RAIZ / "datos" / f"npcs-{clave}.json"
+    return RAIZ / "datos" / "notas_rol" / f"npcs-{clave}.json"
 
 
 def carpeta_de_fotos(clave):
@@ -129,7 +129,7 @@ def avisar_de_la_pagina(clave, campana):
         print("     Cópiala de herramientas/plantillas/npcs-rol.html y")
         print("     cambia los {{...}} por los de esta campaña.")
     if not (campana.get("npcs") or "").strip():
-        print(f'     Y añade a datos/campana-{clave}.json esta línea:')
+        print(f'     Y añade a datos/notas_rol/campana-{clave}.json esta línea:')
         print(f'         "npcs": "/web/notas_rol/{clave}/personajes_{clave}.html",')
     print("     Lo que apuntes aquí se guarda igual y aparecerá en cuanto esté.")
 

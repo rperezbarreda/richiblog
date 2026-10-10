@@ -9,7 +9,7 @@
 # POR QUÉ
 # -------
 # Antes, al crear una entrada, se metía en el acto en
-# datos/entradas-blog.json y en blog/rss.xml. Si la dejabas a medias y
+# datos/blog/entradas-blog.json y en blog/rss.xml. Si la dejabas a medias y
 # unos días después subías el sitio por cualquier otra cosa, esa
 # entrada a medio escribir se publicaba sola — y en el RSS es peor,
 # porque quien esté suscrito ya se la ha guardado aunque luego la

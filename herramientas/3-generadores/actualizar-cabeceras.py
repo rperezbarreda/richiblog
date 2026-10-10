@@ -192,9 +192,9 @@ def hojas_de(ruta):
     # La wiki del mundo. Son TRES páginas distintas: la portada, que lleva
     # buscador y filtros; cada artículo, que no lleva ninguno de los dos; y
     # cada mapa, que lleva lo suyo (el zoom, las capas y el dibujo).
-    es_mundo = "/web/mundo/" in ruta
-    es_mundo_indice = ruta.endswith("/mundo/index_mundo.html")
-    es_mundo_mapa = bool(re.search(r"/mundo/mapa_[^/]+\.html$", ruta))
+    es_mundo = "/web/wiki/" in ruta
+    es_mundo_indice = ruta.endswith("/wiki/index_wiki.html")
+    es_mundo_mapa = bool(re.search(r"/wiki/mapa_[^/]+\.html$", ruta))
     es_404 = ruta.endswith("/not_found.html")
     # La página de un reto de escritura: vive en una subcarpeta de
     # relatos/ y se llama index_<loquesea>.html. No es una página de
@@ -457,9 +457,9 @@ def scripts_de(ruta):
     es_buscar = "/buscar/" in camino
     es_recomendaciones = "/recomendaciones/" in camino
     es_ando = "/en_lo_que_ando/" in camino
-    es_mundo = "/web/mundo/" in camino
-    es_mundo_indice = camino.endswith("/mundo/index_mundo")
-    es_mundo_mapa = bool(re.search(r"/mundo/mapa_[^/]+$", camino))
+    es_mundo = "/web/wiki/" in camino
+    es_mundo_indice = camino.endswith("/wiki/index_wiki")
+    es_mundo_mapa = bool(re.search(r"/wiki/mapa_[^/]+$", camino))
     # Páginas de lectura: una entrada del blog (no el archivo del año)
     # o un relato (no su índice). Ahí va la ventana de "sigue leyendo".
     es_lectura = bool(

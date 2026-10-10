@@ -2,7 +2,7 @@
 # =========================================
 # AÑADIR RECOMENDACIONES
 # =========================================
-# Rellena datos/recomendaciones.json, que es de donde salen las
+# Rellena datos/mi_rincon/recomendaciones.json, que es de donde salen las
 # ventanitas de web/recomendaciones/recomendaciones.html. Es lo mismo
 # que editar el archivo a mano, pero sin pelearse con las comas y las
 # comillas, y comprobando de paso que la portada existe y que el enlace
@@ -60,7 +60,7 @@ from comun import (
     preguntar,
 )
 
-JSON = RAIZ / "datos" / "recomendaciones.json"
+JSON = RAIZ / "datos" / "mi_rincon" / "recomendaciones.json"
 CARPETA_IMAGENES = "/imagenes/recomendaciones/"
 
 
@@ -234,7 +234,7 @@ def crear_categoria(datos, clave):
 
 def main():
     parser = argparse.ArgumentParser(
-        description="Añade cosas a datos/recomendaciones.json."
+        description="Añade cosas a datos/mi_rincon/recomendaciones.json."
     )
     parser.add_argument("--listar", action="store_true",
                         help="enseña lo que ya hay y se sale")

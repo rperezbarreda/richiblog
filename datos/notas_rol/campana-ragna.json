@@ -58,25 +58,28 @@
     ],
     "botin": [
         {
-            "que": "4 kits curativos",
-            "de": 1,
-            "tipo": "pociones"
-        },
-        {
             "que": "Hierbas misteriosas (velocidad)",
-            "de": 1,
-            "tipo": "pociones"
+            "tipo": "pociones",
+            "quien": "Melissa",
+            "imagen": "/imagenes/notas_rol/ragna/botin/hierbas-misteriosas-velocidad.webp"
         },
         {
-            "que": "6 provisiones para el viaje",
-            "de": 1,
-            "tipo": "equipo"
+            "que": "x4 Kits curativos",
+            "tipo": "equipo",
+            "quien": "el carro",
+            "imagen": "/imagenes/notas_rol/ragna/botin/x4-kits-curativos.webp"
+        },
+        {
+            "que": "x6 Provisiones",
+            "tipo": "otras cosas",
+            "quien": "el carro",
+            "imagen": "/imagenes/notas_rol/ragna/botin/x6-provisiones.webp"
         },
         {
             "que": "Piedra mensajera",
-            "de": 1,
             "tipo": "objetos mágicos",
-            "quien": "Melissa"
+            "quien": "Melissa",
+            "imagen": "/imagenes/notas_rol/ragna/botin/piedra-mensajera.webp"
         }
     ],
     "misiones": [

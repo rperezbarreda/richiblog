@@ -1,0 +1,10 @@
+# Lo que NO entra en la wiki aunque esté en la bóveda de Chronicler.
+# Una ruta por línea, desde la raíz de la bóveda. Si acaba en "/",
+# la carpeta entera. Lo escribe importar-mundo.py --elegir y lo leen
+# él y generar-mundo.py. Se puede tocar a mano.
+cosas/El Libro de la Sal.md
+gente/Apaaka.md
+gente/Humana.md
+lugares/Las Marcas Bajas.md
+lugares/Río Lento.md
+lugares/Valderín.md

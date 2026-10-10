@@ -5,17 +5,17 @@
 # Convierte la carpeta donde escribes el mundo —una bóveda de Chronicler,
 # que son archivos .md de toda la vida— en páginas HTML del sitio.
 #
-#     mundo/                         lo que escribes (Chronicler apunta aquí)
+#     wiki/                         lo que escribes (Chronicler apunta aquí)
 #         lugares/Valderín.md
 #         gente/Apaaka.md
 #         imagenes/valderin.webp
 #         Mapamundi de Cralëa.cmap   un mapa interactivo
 #
-#     web/mundo/valderin.html        lo que sale
-#     web/mundo/mapa_mapamundi_de_cralea.html   el mapa, en SVG
-#     web/mundo/index_mundo.html     la portada, con el índice y el buscador
-#     imagenes/mundo/valderin.webp   las imágenes, copiadas
-#     datos/mundo.json               el índice, para el buscador del sitio
+#     web/wiki/valderin.html        lo que sale
+#     web/wiki/mapa_mapamundi_de_cralea.html   el mapa, en SVG
+#     web/wiki/index_wiki.html     la portada, con el índice y el buscador
+#     imagenes/wiki/valderin.webp   las imágenes, copiadas
+#     datos/wiki/mundo.json               el índice, para el buscador del sitio
 #
 # CÓMO USARLO
 # -----------
@@ -25,8 +25,8 @@
 # Con --probar no escribe nada: dice lo que haría y canta los avisos, que
 # es lo que conviene pasar la primera vez.
 #
-# LA CARPETA mundo/ ES LA FUENTE Y NO SE TOCA. Esto solo lee de ahí. Lo que
-# se escribe a mano es el .md; lo de web/mundo/ se vuelve a hacer entero
+# LA CARPETA wiki/ ES LA FUENTE Y NO SE TOCA. Esto solo lee de ahí. Lo que
+# se escribe a mano es el .md; lo de web/wiki/ se vuelve a hacer entero
 # cada vez, así que no tiene sentido editarlo (se pierde al pasar esto).
 #
 # QUÉ PASA CON LO QUE NO ENTIENDE
@@ -58,23 +58,23 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
-from comun import (RAIZ, es_del_mundo, escribir_json,  # noqa: E402
+from comun import (RAIZ, es_del_mundo, esta_fuera, wiki_fuera, escribir_json,  # noqa: E402
                    escribir_texto, leer_json, leer_texto,
                    pasar_generadores)
 from mundo_formato import (Avisos, Conversor, Guardados,  # noqa: E402
                             leer_frontmatter, partir)
 import mundo_mapas  # noqa: E402
 
-VAULT = RAIZ / "mundo"
-SALIDA = RAIZ / "web" / "mundo"
-IMAGENES = RAIZ / "imagenes" / "mundo"
-INDICE = RAIZ / "datos" / "mundo.json"
+VAULT = RAIZ / "wiki"
+SALIDA = RAIZ / "web" / "wiki"
+IMAGENES = RAIZ / "imagenes" / "wiki"
+INDICE = RAIZ / "datos" / "wiki" / "mundo.json"
 # Los apartados de la portada: ver clasificar(). Se edita a mano.
-CATEGORIAS = RAIZ / "datos" / "mundo-categorias.json"
+CATEGORIAS = RAIZ / "datos" / "wiki" / "mundo-categorias.json"
 PLANTILLA = RAIZ / "herramientas" / "plantillas" / "mundo-pagina.html"
 PLANTILLA_INDICE = RAIZ / "herramientas" / "plantillas" / "mundo-index.html"
 PLANTILLA_MAPA = RAIZ / "herramientas" / "plantillas" / "mundo-mapa.html"
-URL = "/web/mundo/"
+URL = "/web/wiki/"
 
 # Las imágenes que se copian tal cual. WebP es a lo que las pasa
 # herramientas/2-imagenes/optimizar-imagenes.py, y lo demás se copia igual
@@ -111,7 +111,7 @@ def slug(texto):
 # =========================================
 
 def leer_vault():
-    """Todas las páginas, imágenes y mapas de mundo/.
+    """Todas las páginas, imágenes y mapas de wiki/.
 
     El NOMBRE de una página es el del archivo sin ".md", que es con el que
     se la enlaza desde otra ([[Valderín]]), aunque el frontmatter diga otro
@@ -122,6 +122,10 @@ def leer_vault():
     paginas = {}
     imagenes = {}
     mapas = {}
+    # Lo que has elegido dejar fuera (herramientas/wiki-fuera.txt). Solo
+    # páginas y mapas: las imágenes se publican si alguna página las usa.
+    fuera = wiki_fuera()
+    dejadas = []
     for archivo in sorted(VAULT.rglob("*")):
         if not archivo.is_file():
             continue
@@ -129,6 +133,10 @@ def leer_vault():
         # Chronicler, sus plantillas, lo que empiece por punto. La regla
         # está en comun.py porque la comparten esto y el importador.
         if not es_del_mundo(archivo, VAULT):
+            continue
+        if (archivo.suffix.lower() in (".md",) + tuple(MAPAS_OK)
+                and esta_fuera(archivo.relative_to(VAULT).as_posix(), fuera)):
+            dejadas.append(archivo.relative_to(VAULT).as_posix())
             continue
         if archivo.suffix.lower() == ".md":
             nombre = archivo.stem
@@ -167,6 +175,14 @@ def leer_vault():
             # veces con la carpeta delante. Guardadas por ruta se pueden
             # buscar de las dos maneras (ver pedir_imagen).
             imagenes[archivo.relative_to(VAULT).as_posix().lower()] = archivo
+    if dejadas:
+        print(f"\n  {len(dejadas)} cosa(s) de la bóveda que has dejado fuera"
+              " (herramientas/wiki-fuera.txt):")
+        for ruta in dejadas[:12]:
+            print(f"     {ruta}")
+        if len(dejadas) > 12:
+            print(f"     … y {len(dejadas) - 12} más.")
+        print("  No se publican, y lo que enlace a ellas sale como «sin página».")
     return paginas, imagenes, mapas
 
 
@@ -407,7 +423,7 @@ def imagenes_de_la_ficha(datos, ruta_de_imagen, avisos):
 def poner_slugs(paginas, mapas):
     """El nombre de archivo de cada página y de cada mapa, que es su
     dirección en la web y por tanto lo que no puede repetirse. Los mapas
-    llevan "mapa_" delante: así se distinguen de un vistazo en web/mundo/ y
+    llevan "mapa_" delante: así se distinguen de un vistazo en web/wiki/ y
     una página y un mapa con el mismo nombre no se pisan."""
     for ficha in paginas.values():
         ficha["slug"] = slug(ficha["nombre"])
@@ -463,7 +479,7 @@ def convertir_todo(paginas, imagenes, mapas, avisos_por_pagina):
             return ""
         if apano and cuaderno[0] is not None:
             cuaderno[0].di("no tengo %s" % _como_lo_pide(nombre), apano)
-        return "/imagenes/mundo/" + archivo.name
+        return "/imagenes/wiki/" + archivo.name
 
     # Primera vuelta: leer y convertir.
     for ficha in sorted(paginas.values(), key=lambda f: f["nombre"].lower()):
@@ -602,7 +618,7 @@ except ImportError:
 
 
 def nombre_de_capa(archivo):
-    """Cómo se va a llamar en imagenes/mundo/ la imagen de fondo de un
+    """Cómo se va a llamar en imagenes/wiki/ la imagen de fondo de un
     mapa. Hay que saberlo ANTES de prepararla, porque es lo que se escribe
     dentro del SVG."""
     if not HAY_PILLOW:
@@ -653,7 +669,7 @@ def convertir_mapas(mapas, paginas, imagenes, avisos_por_pagina, detalle):
             cuaderno[0].di("no tengo %s" % _como_lo_pide(nombre), apano)
         final = nombre_de_capa(archivo)
         capas_por_preparar[final] = archivo
-        return "/imagenes/mundo/" + final
+        return "/imagenes/wiki/" + final
 
     def de_pagina(nombre):
         ficha = paginas.get(nombre.strip().lower())
@@ -684,7 +700,7 @@ def convertir_mapas(mapas, paginas, imagenes, avisos_por_pagina, detalle):
         mapa["escondidos"] = hecho["escondidos"]
         # Y la silueta del mapa, para la portada de la wiki.
         mapa["vista"] = mundo_mapas.pintar_vista(leido)
-        mapa["vista_url"] = "/imagenes/mundo/vista_%s.svg" % mapa["slug"]
+        mapa["vista_url"] = "/imagenes/wiki/vista_%s.svg" % mapa["slug"]
 
         # QUIÉN SALE EN QUÉ MAPA. Una región que lleva a una página es un
         # enlace a esa página, así que el mapa aparece en su "se habla de
@@ -757,7 +773,7 @@ def preparar_capas(capas, probar):
 
 
 def escribir_vistas(mapas, probar):
-    """Las siluetas de los mapas, en imagenes/mundo/. Y de paso se llevan
+    """Las siluetas de los mapas, en imagenes/wiki/. Y de paso se llevan
     por delante las de los mapas que ya no estén."""
     escritas = 0
     buenas = set()
@@ -837,7 +853,7 @@ def pintar_etiquetas(etiquetas):
         # La etiqueta va codificada para la dirección: una con espacios o
         # con tildes («Mar Ciego», «religión») dejaba una dirección rota
         # que el navegador apañaba como podía.
-        trozos.append('<a class="mundo-etiqueta" href="%sindex_mundo.html?cat=%s">%s</a>'
+        trozos.append('<a class="mundo-etiqueta" href="%sindex_wiki.html?cat=%s">%s</a>'
                       % (URL, html.escape(urllib.parse.quote(e), quote=True), html.escape(e)))
     trozos.append("</p>")
     return "".join(trozos)
@@ -895,7 +911,7 @@ def escribir_paginas(paginas, probar):
 # carpetas son cómo tienes guardados los archivos, y eso no tiene por qué
 # ser cómo se busca una cosa.
 #
-# QUIÉN MANDA: datos/mundo-categorias.json, que se edita a mano. Cada
+# QUIÉN MANDA: datos/wiki/mundo-categorias.json, que se edita a mano. Cada
 # página cae en el PRIMER apartado del que lleve alguna etiqueta, y las
 # etiquetas que le sobren son las que la reparten por dentro. Lo que no
 # caiga en ninguno va a «lo demás», y al terminar se cantan las etiquetas
@@ -946,7 +962,7 @@ def clasificar(etiquetas, categorias):
 
 def escribir_indice(paginas, mapas, probar, categorias=()):
     """La portada: el índice por apartados. Las fichas y los botones de
-    etiqueta los pinta el navegador con datos/mundo.json, igual que el
+    etiqueta los pinta el navegador con datos/wiki/mundo.json, igual que el
     resto de listados del sitio."""
     fichas = []
     for ficha in sorted(paginas.values(), key=lambda f: f["titulo"].lower()):
@@ -1000,7 +1016,7 @@ def escribir_indice(paginas, mapas, probar, categorias=()):
 
 
 def copiar_imagenes(imagenes, usadas, probar):
-    """Las imágenes que se usan, a imagenes/mundo/.
+    """Las imágenes que se usan, a imagenes/wiki/.
 
     TODAS JUNTAS Y SIN CARPETAS, aunque en la bóveda estén repartidas en
     _imagenes/mapas/ y _imagenes/banderas_y_heraldica/: en la web las
@@ -1030,12 +1046,12 @@ def copiar_imagenes(imagenes, usadas, probar):
 
 
 def limpiar_lo_que_sobra(paginas, mapas, probar):
-    """Las páginas de web/mundo/ que ya no tienen su .md (o su .cmap): se
+    """Las páginas de web/wiki/ que ya no tienen su .md (o su .cmap): se
     han borrado o renombrado en la bóveda. Se quitan, porque si no se
     quedan colgando en el sitemap y en el buscador."""
     buenos = ({f["slug"] + ".html" for f in paginas.values()}
               | {m["slug"] + ".html" for m in mapas.values()}
-              | {"index_mundo.html"})
+              | {"index_wiki.html"})
     sobran = [p for p in SALIDA.glob("*.html") if p.name not in buenos] if SALIDA.is_dir() else []
     if not probar:
         for p in sobran:
@@ -1049,7 +1065,7 @@ def limpiar_lo_que_sobra(paginas, mapas, probar):
 
 def main():
     parser = argparse.ArgumentParser(
-        description="Convierte la bóveda de mundo/ en las páginas de web/mundo/.")
+        description="Convierte la bóveda de wiki/ en las páginas de web/wiki/.")
     parser.add_argument("--probar", action="store_true",
                         help="no escribe nada: dice lo que haría y canta los avisos")
     parser.add_argument("--detalle", type=float, default=None, metavar="PX",
@@ -1081,7 +1097,7 @@ def main():
 
     usadas = set()
     for ficha in paginas.values():
-        for m in re.finditer(r'/imagenes/mundo/([^"]+)"', ficha["cuerpo_html"] + ficha["ficha_html"]):
+        for m in re.finditer(r'/imagenes/wiki/([^"]+)"', ficha["cuerpo_html"] + ficha["ficha_html"]):
             usadas.add(m.group(1).lower())
 
     SALIDA.mkdir(parents=True, exist_ok=True)
@@ -1138,7 +1154,7 @@ def main():
     # LAS ETIQUETAS QUE NO SON DE NINGÚN APARTADO. No es un error —una
     # etiqueta suelta reparte bien por dentro—, pero si lo que esperabas
     # era un apartado «religión» y las páginas están en «lo demás», es que
-    # falta la etiqueta en datos/mundo-categorias.json o está escrita de
+    # falta la etiqueta en datos/wiki/mundo-categorias.json o está escrita de
     # otra manera. Esto es esa lista.
     if categorias:
         sueltas = {}
@@ -1166,7 +1182,7 @@ def main():
               + (f" … y {len(huerfanas) - 10} más" if len(huerfanas) > 10 else ""))
 
     # DOS IMÁGENES QUE SE LLAMAN IGUAL en carpetas distintas. En la
-    # bóveda conviven; en imagenes/mundo/ no, porque ahí van todas juntas.
+    # bóveda conviven; en imagenes/wiki/ no, porque ahí van todas juntas.
     # La segunda no se copia, así que donde se use saldría la primera: hay
     # que renombrar una de las dos.
     if repetidas:

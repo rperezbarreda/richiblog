@@ -100,8 +100,8 @@
         "titulo": "Writeober 2026",
         "seccion": "relatos",
         "fecha": "26-09-2026",
-        "actualizada": "26-09-2026",
-        "resumen": "c0988469"
+        "actualizada": "10-10-2026",
+        "resumen": "80e4373a"
     },
     {
         "url": "/web/mis_movidas/relatos/index_relatos.html",
@@ -141,39 +141,47 @@
         "seccion": "notas de rol",
         "fecha": "05-10-2026",
         "actualizada": "10-10-2026",
-        "resumen": "01f41948"
+        "resumen": "3a176c2d"
     },
     {
         "url": "/web/notas_rol/ragna/npcs_ragna.html",
         "titulo": "NPC — campaña de Ragna",
         "seccion": "notas de rol",
         "fecha": "05-10-2026",
-        "actualizada": "06-10-2026",
-        "resumen": "c8f8703d"
+        "actualizada": "10-10-2026",
+        "resumen": "5c28f8dd"
     },
     {
         "url": "/web/notas_rol/ragna/sesion-01.html",
         "titulo": "Sesión 1 — El robo de la mercancía",
         "seccion": "notas de rol",
         "fecha": "03-10-2026",
-        "actualizada": "09-10-2026",
-        "resumen": "b63c72e7"
+        "actualizada": "10-10-2026",
+        "resumen": "d6a8f254"
     },
     {
-        "url": "/web/mundo/como_se_escribe_esto.html",
+        "url": "/web/wiki/mapa_mapamundi_de_cralea.html",
+        "titulo": "Mapamundi de Cralëa",
+        "seccion": "wiki cralëa",
+        "fecha": "10-10-2026",
+        "actualizada": "10-10-2026",
+        "resumen": "26fbf1ac"
+    },
+    {
+        "url": "/web/wiki/como_se_escribe_esto.html",
         "titulo": "Cómo se escribe esto",
         "seccion": "wiki cralëa",
         "fecha": "09-10-2026",
-        "actualizada": "09-10-2026",
-        "resumen": "13002500"
+        "actualizada": "10-10-2026",
+        "resumen": "10aedc2c"
     },
     {
-        "url": "/web/mundo/index_mundo.html",
+        "url": "/web/wiki/index_wiki.html",
         "titulo": "Wiki Cralëa",
         "seccion": "wiki cralëa",
         "fecha": "09-10-2026",
-        "actualizada": "09-10-2026",
-        "resumen": "53954543"
+        "actualizada": "10-10-2026",
+        "resumen": "da03fe38"
     },
     {
         "url": "/web/santuarios/regis/regis.html",
@@ -212,8 +220,8 @@
         "titulo": "En lo que ando",
         "seccion": "otras",
         "fecha": "06-10-2026",
-        "actualizada": "06-10-2026",
-        "resumen": "21b2311f"
+        "actualizada": "10-10-2026",
+        "resumen": "55483914"
     },
     {
         "url": "/web/buscar/buscar.html",

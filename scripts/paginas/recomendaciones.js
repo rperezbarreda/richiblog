@@ -2,7 +2,7 @@
 // RECOMENDACIONES
 // =========================================
 // Libros, series, pelis, juegos, anime y música que recomiendo. Sale de
-// datos/recomendaciones.json: una ventanita por categoría y, dentro,
+// datos/mi_rincon/recomendaciones.json: una ventanita por categoría y, dentro,
 // una ficha por cosa. Aquí no se decide nada más que cómo se pinta.
 //
 // CÓMO SE ABRE CADA FICHA
@@ -16,7 +16,7 @@
 // Lo importante es que el texto NO vive solo en un :hover: quien no
 // tiene ratón llega a él igual.
 
-const RECOMENDACIONES_URL = "/datos/recomendaciones.json";
+const RECOMENDACIONES_URL = "/datos/mi_rincon/recomendaciones.json";
 
 initializeRecomendaciones();
 

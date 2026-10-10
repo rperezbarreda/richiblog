@@ -1,7 +1,7 @@
 [
     {
         "titulo": "Mapamundi de Cralëa",
-        "url": "/web/mundo/mapa_mapamundi_de_cralea.html",
+        "url": "/web/wiki/mapa_mapamundi_de_cralea.html",
         "carpeta": "mapas",
         "etiquetas": [
             "mapa"
@@ -9,12 +9,12 @@
         "grupo": "mapas",
         "sub": [],
         "que": "mapa interactivo",
-        "vista": "/imagenes/mundo/vista_mapa_mapamundi_de_cralea.svg",
+        "vista": "/imagenes/wiki/vista_mapa_mapamundi_de_cralea.svg",
         "resumen": ""
     },
     {
         "titulo": "Cómo se escribe esto",
-        "url": "/web/mundo/como_se_escribe_esto.html",
+        "url": "/web/wiki/como_se_escribe_esto.html",
         "carpeta": "sin carpeta",
         "etiquetas": [
             "ejemplo"

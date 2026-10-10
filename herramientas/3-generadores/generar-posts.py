@@ -5,9 +5,9 @@
 # Recorre las páginas que ya tienes escritas y reescribe los dos
 # archivos de los que la web saca sus listados:
 #
-#     datos/entradas-blog.json          (portada, archivo del año, diario, RSS)
-#     datos/mis-movidas.json   (portada y listado de relatos)
-#     datos/notas-rol.json     (índice de cada campaña y RSS; a la portada
+#     datos/blog/entradas-blog.json          (portada, archivo del año, diario, RSS)
+#     datos/mis_movidas/mis-movidas.json   (portada y listado de relatos)
+#     datos/notas_rol/notas-rol.json     (índice de cada campaña y RSS; a la portada
 #                               NO va a propósito, ver más abajo)
 #
 # POR QUÉ
@@ -53,7 +53,7 @@
 # data-subcategoria.
 #
 # El portfolio de rol es la excepción: no son páginas sueltas ni
-# tarjetas escritas en el HTML, sino las fichas de datos/rol.json, que
+# tarjetas escritas en el HTML, sino las fichas de datos/mis_movidas/rol.json, que
 # es donde se escriben y de donde las pinta scripts/paginas/rol.js. De
 # cada una sale el título, la categoría, la fecha y el enlace de Ko-fi.
 
@@ -80,15 +80,15 @@ from comun import (
 BLOG = RAIZ / "web" / "blog"
 RELATOS = RAIZ / "web" / "mis_movidas" / "relatos"
 NOTAS_ROL = RAIZ / "web" / "notas_rol"
-JSON_ROL = RAIZ / "datos" / "rol.json"
-JSON_BLOG = RAIZ / "datos" / "entradas-blog.json"
-JSON_MOVIDAS = RAIZ / "datos" / "mis-movidas.json"
+JSON_ROL = RAIZ / "datos" / "mis_movidas" / "rol.json"
+JSON_BLOG = RAIZ / "datos" / "blog" / "entradas-blog.json"
+JSON_MOVIDAS = RAIZ / "datos" / "mis_movidas" / "mis-movidas.json"
 # Las notas de las partidas de rol van en su propio listado y NO en
 # mis-movidas.json, a propósito: ese es el que leen la portada
 # (novedades.exe) y el listado de relatos, y las notas de una partida no
 # son algo que se publique para que lo lea nadie —son para acordarse—.
 # Al RSS sí entran: generar-rss.py lee también este archivo.
-JSON_NOTAS = RAIZ / "datos" / "notas-rol.json"
+JSON_NOTAS = RAIZ / "datos" / "notas_rol" / "notas-rol.json"
 
 # Los meses tal y como los escribe la web en la fecha de cada entrada
 # (es lo que devuelve toLocaleDateString en español). Se aceptan también
@@ -246,7 +246,7 @@ def recoger_blog():
     return entradas, avisos
 
 
-# El portfolio de rol vive en datos/rol.json, que es el archivo que se
+# El portfolio de rol vive en datos/mis_movidas/rol.json, que es el archivo que se
 # toca (a mano o con nuevo.py --rol) y del que la propia página saca sus
 # tarjetas. Aquí solo se traduce al formato del listado: de cada ficha
 # se queda el título, la categoría, la fecha y el enlace de Ko-fi, que

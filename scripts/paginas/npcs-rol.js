@@ -5,7 +5,7 @@
 // uno en una ventana (el componente de scripts/componentes/ventana-modal.js).
 //
 // QUIÉN MANDA: el JSON que diga la propia página en data-npcs-datos de la
-// lista. Hoy es datos/npcs-ragna.json. Ahí se escribe todo a mano: el
+// lista. Hoy es datos/notas_rol/npcs-ragna.json. Ahí se escribe todo a mano: el
 // nombre, el grupo, las dos imágenes y lo que se sepa.
 //
 // PARA UNA CAMPAÑA NUEVA no hay que tocar este archivo: se copia la

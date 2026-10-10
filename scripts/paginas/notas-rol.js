@@ -7,7 +7,7 @@
 //
 // QUIÉN MANDA: el JSON de la campaña, que la propia página dice en el
 // atributo data-campana-datos de la lista. Hoy es
-// datos/campana-ragna.json. Ahí se escriben a mano la ficha y la intro,
+// datos/notas_rol/campana-ragna.json. Ahí se escriben a mano la ficha y la intro,
 // y las sesiones las va añadiendo herramientas/1-publicar/nuevo.py --sesion al
 // crear cada página.
 //
@@ -24,7 +24,7 @@
 // Así que para quitar un campo de verdad —una campaña sin director,
 // porque la diriges tú— se borra su línea del JSON.
 
-const NOTAS_LISTADO_URL = "/datos/notas-rol.json";
+const NOTAS_LISTADO_URL = "/datos/notas_rol/notas-rol.json";
 
 // Los colores que puede llevar un personaje de los jugadores. Son los
 // cuatro que están escritos en estilos/paginas/notas-rol.css; si se añade
@@ -77,7 +77,7 @@ async function initializeNotasRol() {
 // Qué sesiones están PUBLICADAS de verdad. No basta con que el JSON de
 // la campaña tenga la dirección: la página se crea antes de pasar las
 // notas a limpio y nace como borrador, y un borrador no está en
-// datos/notas-rol.json. Así la fila se enciende exactamente cuando se
+// datos/notas_rol/notas-rol.json. Así la fila se enciende exactamente cuando se
 // publica, con el mismo criterio que el resto del sitio y sin nada que
 // sincronizar a mano. Es lo mismo que hace scripts/paginas/reto.js con
 // los días del reto de escritura.
@@ -929,10 +929,11 @@ function listaDeBotin(cosas, donde) {
             fila.appendChild(pie);
         }
 
-        // LA FOTO DEL OBJETO, un cuadradito a la derecha. Va en la
-        // columna de la derecha y no delante del texto porque es lo
-        // segundo que se mira: primero se lee la lista, y la foto está
-        // para reconocer algo que no se sabe qué es.
+        // LA FOTO DEL OBJETO, un cuadradito con reborde DELANTE del
+        // nombre, en el sitio del rombo: lo que tiene foto la usa de
+        // viñeta. Se mete la primera de la fila (insertBefore), para que
+        // el orden del HTML sea el mismo que el que se ve y el tabulador
+        // no salte hacia atrás.
         //
         // Pulsándola se ve en grande (la lupa, el mismo componente que
         // los retratos de los NPC), así que es un <button> de verdad y
@@ -965,7 +966,7 @@ function listaDeBotin(cosas, donde) {
                 que: "Imagen de",
                 devolverA: boton,
             }));
-            fila.appendChild(boton);
+            fila.insertBefore(boton, fila.firstChild);
         }
 
         lista.appendChild(fila);

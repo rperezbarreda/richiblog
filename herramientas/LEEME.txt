@@ -6,9 +6,21 @@
 
       python herramientas/menu.py
 
-  Sale una lista en castellano de lo que puedes hacer (escribir una
-  entrada, apuntar una partida, preparar las imágenes, repasar el
-  sitio...), eliges un número y él llama a la herramienta que toca.
+  Sale una lista de APARTADOS, los mismos que el menú de la web:
+
+      1. Blog            entradas y borradores
+      2. Mis movidas     relatos y el reto de escritura
+      3. Rol             notas de partida, NPC, botín, recursos de rol
+      4. Wiki Cralëa     traerla de Chronicler y elegir qué se publica
+      5. Mi rincón       en lo que ando, recomendaciones, los gatos
+      6. Imágenes        traerlas de tu ordenador y dejarlas a punto
+      7. Antes de subir  repasar el sitio y rehacer lo generado
+
+  Eliges uno, dentro salen sus herramientas, y él llama a la que toca.
+  Si ya sabes cuál, «3.3» va directo a la tercera cosa del apartado 3
+  (el botín). «Publicar un borrador» sale en los tres apartados donde
+  se escribe algo que nace como borrador; es la misma herramienta.
+
   No hace nada por su cuenta: es un índice. Todo lo de abajo se
   puede seguir usando suelto si ya sabes cuál quieres.
 
@@ -39,12 +51,15 @@
           LEEME.txt ........... esto
           mundo-origen.txt .... dónde está la bóveda de Chronicler
                                 (lo escribe importar-mundo.py)
+          wiki-fuera.txt ...... lo de la bóveda que NO se publica
+                                (importar-mundo.py --elegir)
           plantillas/ ......... los moldes de las páginas nuevas
 
           1-publicar/ ......... LO QUE USAS CASI SIEMPRE
               nuevo.py              escribir algo nuevo
               publicar.py           sacar un borrador a la web
               nuevo-personaje.py    los NPC de una campaña
+              botin.py              el botín de una campaña
               nueva-recomendacion.py
               en-lo-que-ando.py     lo que pone «en lo que ando»
               importar-mundo.py     traer la bóveda de Chronicler
@@ -84,8 +99,8 @@
 
   LAS DE 1 Y 2 LAS PASAS TÚ. Las de 3 van solas detrás de las de 1.
   Las de 4 no cambian nada: están para pasarlas antes de subir y
-  quedarte tranquilo, y la opción 15 del menú las pasa las cinco
-  de golpe.
+  quedarte tranquilo, y «Antes de subir → Repasar el sitio entero»
+  del menú las pasa las cinco de golpe.
 
 
 ---------------------------------------------------------------
@@ -184,10 +199,10 @@
   nueva que te inventes), el título, el sistema y jugadores, la
   descripción, la fecha, la portada y los enlaces de Ko-fi y de
   Drive (este último opcional). Añade la ficha la primera de
-  datos/rol.json y actualiza los listados.
+  datos/mis_movidas/rol.json y actualiza los listados.
 
   Las tarjetas del portfolio son lo único del sitio que NO está
-  escrito dentro de su página: viven en datos/rol.json y las pinta
+  escrito dentro de su página: viven en datos/mis_movidas/rol.json y las pinta
   scripts/paginas/rol.js al abrir. Eran ~2 KB de HTML cada una, así
   que index_rol.html crecía con cada cosa publicada y había que
   editar HTML para añadir nada. Puedes tocar ese JSON a mano
@@ -292,7 +307,7 @@
   se ve de qué va sin tener que entrar.
 
   ANTES DE EMPEZAR: pon las 31 palabras en
-  datos/reto-writeober26.json, una por día. Es lo único que hay que
+  datos/mis_movidas/reto-writeober26.json, una por día. Es lo único que hay que
   escribir a mano; lo demás lo apunta la herramienta.
 
   Cada vez que te sientes a escribir, el comando de arriba solo. Sin
@@ -328,7 +343,7 @@
   PARA EL RETO DEL AÑO QUE VIENE (el sitio ya aguanta varios a la
   vez, cada uno con su página y su tarjeta):
 
-      1. Copia datos/reto-writeober26.json con otro nombre y cambia
+      1. Copia datos/mis_movidas/reto-writeober26.json con otro nombre y cambia
          dentro «nombre», «coleccion», «pagina», el hashtag, la
          descripción y las fechas de los 31 días.
       2. Copia la carpeta writeober26/ con su index_ dentro, y en él
@@ -364,14 +379,14 @@
   Con --sin-preguntar no pregunta nada.
 
   Los textos alternativos que escribas a mano en
-  datos/fotos-santuarios.json se respetan al volver a ejecutarlo y no
+  datos/mi_rincon/fotos-santuarios.json se respetan al volver a ejecutarlo y no
   se vuelven a preguntar.
 
 
   APUNTAR UN CAMBIO EN EL CHANGELOG
 
   La página del changelog (web/changelog/changelog.html) sale entera
-  de datos/changelog.json, así que apuntar algo es añadir un bloque
+  de datos/sitio/changelog.json, así que apuntar algo es añadir un bloque
   ahí arriba del todo y nada más:
 
       {
@@ -426,7 +441,7 @@
   JavaScript falle o tarde, la dirección se puede compartir y guardar en
   favoritos, y el botón de atrás hace lo que se espera.
 
-  NINGUNA DE LAS DOS CARGA NADA. datos/buscador.json son 57 KB (22
+  NINGUNA DE LAS DOS CARGA NADA. datos/sitio/buscador.json son 57 KB (22
   comprimidos) y van a crecer con cada entrada que escribas. Pedirlo en
   la portada y en el menú sería bajárselo en TODAS las visitas para
   usarlo casi nunca. Solo lo pide la página de los resultados, que es
@@ -452,8 +467,8 @@
 
   LAS COSAS QUE NO SON PÁGINAS —las fichas del portfolio de rol, las
   recomendaciones— no tienen su texto en ningún HTML: se pintan solas
-  desde sus JSON. Ésas se leen directamente de datos/rol.json y
-  datos/recomendaciones.json.
+  desde sus JSON. Ésas se leen directamente de datos/mis_movidas/rol.json y
+  datos/mi_rincon/recomendaciones.json.
 
   CÓMO BUSCA, por si algún día sale raro:
 
@@ -563,7 +578,7 @@
 
     - Todo lo que ya existía sale con la fecha del día que se pasó
       esto por primera vez. Si alguna te importa, cámbiala a mano en
-      datos/mapa-del-sitio.json: no se pisa.
+      datos/sitio/mapa-del-sitio.json: no se pisa.
     - No se mira la fecha del archivo a propósito: se pierde al copiar
       la carpeta o al descomprimir un zip, y entonces pondría que la
       web entera nació el día que cambiaste de ordenador.
@@ -600,7 +615,7 @@
 
   Un apartado por campaña, y cada campaña tiene tres cosas:
 
-      datos/campana-<clave>.json      la ficha (sistema, quién dirige,
+      datos/notas_rol/campana-<clave>.json      la ficha (sistema, quién dirige,
                                       los personajes de la mesa, la
                                       sinopsis) y la lista de sesiones
       web/notas_rol/<clave>/index_<clave>.html     su índice
@@ -624,7 +639,7 @@
   El PDF de las notas escaneadas se apunta en el "pdf" de esa sesión,
   dentro del JSON de la campaña, y el botón de descargarlo aparece solo.
 
-  PARA UNA CAMPAÑA NUEVA: se copia datos/campana-ragna.json con otro
+  PARA UNA CAMPAÑA NUEVA: se copia datos/notas_rol/campana-ragna.json con otro
   nombre, se copia su carpeta de web/notas_rol/, se cambian los {{...}}
   de dentro y se añade su enlace al menú (fragmentos/barra-lateral.html).
 
@@ -698,9 +713,36 @@
 
   Lo que el grupo va juntando. Va en "botin", también en el JSON de la
   campaña, y sale en una ventana que abre el botón «el botín →» del
-  índice. SE ESCRIBE A MANO, porque hay que apuntar también lo que se
-  gasta y eso no se puede sacar de las notas: en una sesión se consiguen
-  tres cosas y se gastan dos, y eso lo sabe quien estuvo allí.
+  índice. No sale de las notas, porque hay que apuntar también lo que se
+  gasta: en una sesión se consiguen tres cosas y se gastan dos, y eso lo
+  sabe quien estuvo allí. LO MÁS CÓMODO ES LA HERRAMIENTA:
+
+      python herramientas/1-publicar/botin.py
+
+  (o el menú: Rol → Llevar el botín de una campaña). Enseña la lista por
+  apartados, igual que la ventana de la web, y debajo lo que se puede
+  hacer:
+
+      a  añadir algo     qué es, apartado, sesión, quién lo lleva y foto
+      g  gastar algo     todo, o UNA PARTE si empieza por un número:
+                         «4 kits curativos», gastas 1 → «3 kits
+                         curativos». Al gastar lo último se tacha.
+      d  devolver        deshace un gastado
+      c  cambiar algo    cualquiera de sus datos, uno a uno
+      q  quitar          del todo, para lo que se apuntó por error. Si
+                         se ha usado, mejor gastar: así se ve lo que hubo.
+
+  Cada cambio se guarda al momento, y al terminar pasa el buscador. La
+  foto se le puede dar como la ruta de tu ordenador
+  (e:\rpere\Descargas\piedra.jpg): la trae, la recorta a cuadrado y la
+  deja en imagenes/notas_rol/<campaña>/botin/.
+
+  Para meter una cosa sin preguntas:
+
+      python herramientas/1-publicar/botin.py --campana ragna ^
+             --anadir "Espada corta" --tipo armas --sesion 2 --quien Thenarys
+
+  Y a mano también se puede, que es un JSON:
 
       "botin": [
           { "que": "4 kits curativos", "de": 1, "tipo": "pociones" },
@@ -745,9 +787,11 @@
   abrir, y cambiar de pestaña no cambia lo que se tiene.
 
   LAS FOTOS DE LOS OBJETOS. Lo que lleve "imagen" sale con un
-  cuadradito a la derecha, y pulsándolo se ve en grande. Lo que no la
-  lleve se queda con su rombo delante, como siempre; una cosa y otra se
-  pueden mezclar en la misma lista.
+  cuadradito con reborde DELANTE del nombre, en el sitio del rombo, y
+  pulsándolo se ve en grande. Lo que no la lleve se queda con su rombo,
+  como siempre; una cosa y otra se pueden mezclar en la misma lista.
+  El reborde va en el gris de lo secundario (--muted) y no en --border,
+  que en cuatro temas es casi transparente y no llegaba a Lc 45.
 
       { "que": "Piedra mensajera", "de": 1, "tipo": "objetos mágicos",
         "imagen": "/imagenes/notas_rol/ragna/botin/piedra.webp" }
@@ -760,10 +804,12 @@
   No hace falta acordarse de la palabra exacta: cada apartado se come
   también sus formas de siempre ("arma", "escudos", "oro", "magia"…).
   La lista está en scripts/paginas/notas-rol.js, en TIPOS_DE_BOTIN, que
-  es donde se añade uno nuevo.
+  es donde se añade uno nuevo; y copiada en TIPOS de botin.py, que avisa
+  si escribes uno que la web no conoce. Si añades uno, añádelo en las dos.
 
   Sin "botin" en el JSON el botón no sale. Lo que se apunte se busca
-  desde la lupa, así que al tocarlo conviene pasar el buscador:
+  desde la lupa, así que si lo tocas a mano conviene pasar el buscador
+  (la herramienta ya lo hace):
 
       python herramientas/3-generadores/generar-buscador.py
 
@@ -845,7 +891,7 @@
   La gente que os vais encontrando: una rejilla de tokens repartida por
   grupos, y al pulsar uno se abre su ficha con la ilustración grande.
   Vive en web/notas_rol/<clave>/npcs_<clave>.html y sale entera de
-  datos/npcs-<clave>.json. La página no lleva a nadie escrito dentro: se
+  datos/notas_rol/npcs-<clave>.json. La página no lleva a nadie escrito dentro: se
   edita el JSON y ya está.
 
   NO ESTÁ EN EL MENÚ, y es a propósito: no es una sección del sitio,
@@ -997,7 +1043,7 @@
   muerto o desaparecido sale además apagado y tachado en la rejilla.
 
   SÍ HAY QUE PASAR EL BUSCADOR al añadir gente (lo hace la herramienta
-  sola al terminar): datos/buscador.json es un archivo generado, y sin
+  sola al terminar): datos/sitio/buscador.json es un archivo generado, y sin
   rehacerlo buscar un nombre nuevo no encontraría nada.
 
       python herramientas/3-generadores/generar-buscador.py
@@ -1007,7 +1053,7 @@
   EN LO QUE ANDO
 
   La página web/en_lo_que_ando/en_lo_que_ando.html lleva cuatro bloques
-  y tres salen de datos/en-lo-que-ando.json: lo que estoy leyendo,
+  y tres salen de datos/mi_rincon/en-lo-que-ando.json: lo que estoy leyendo,
   viendo y jugando; lo que ando escribiendo; y un post-it de pendientes
   con sus casillas. El cuarto, la partida de rol, SE ESCRIBE SOLO.
 
@@ -1021,7 +1067,7 @@
   un enlace. Al guardar pone la fecha de "última
   vez que toqué esto" sin que haya que acordarse, y pasa el buscador
   (lo que pone esta página no está escrito en su HTML, así que sin
-  rehacer datos/buscador.json no se encontraría buscando).
+  rehacer datos/sitio/buscador.json no se encontraría buscando).
 
   Si ya sabes a qué vienes:
 
@@ -1035,7 +1081,7 @@
   vacíos dirían justo lo contrario de lo que esto quiere decir.
 
   EL BLOQUE DE LA PARTIDA NO SE TOCA DESDE AQUÍ. Sale de
-  datos/notas-rol.json (la última sesión publicada, cuántas van) y del
+  datos/notas_rol/notas-rol.json (la última sesión publicada, cuántas van) y del
   JSON de su campaña (el nombre, el sistema, los dos botones).
   Publicar unas notas es lo que lo actualiza. Si hubiera que venir a
   cambiarlo a mano, el día que se olvidara la página estaría mintiendo.
@@ -1086,13 +1132,13 @@
 
   EL MUNDO (la wiki)
 
-  web/mundo/ es una wiki del mundo donde pasan las partidas: una página
+  web/wiki/ es una wiki del mundo donde pasan las partidas: una página
   por lugar, por persona y por cosa, con su ficha al lado, sus etiquetas
   y los enlaces entre ellas.
 
   NO SE ESCRIBE EN EL SITIO. Se escribe en Chronicler, que es una
   aplicación de wiki que guarda cada página como un archivo .md en el
-  ordenador, y lo que hay en la carpeta mundo/ ES esa bóveda: se apunta
+  ordenador, y lo que hay en la carpeta wiki/ ES esa bóveda: se apunta
   Chronicler ahí y se escribe en la aplicación.
 
   SI LA BÓVEDA LA TIENES EN OTRO SITIO —que es lo normal: donde la
@@ -1101,17 +1147,51 @@
 
       python herramientas/1-publicar/importar-mundo.py "C:\Users\Richi\Mundo"
 
-  Se trae las páginas, los mapas y las imágenes a mundo/, se apunta de
+  Se trae las páginas, los mapas y las imágenes a wiki/, se apunta de
   dónde vienen en herramientas/mundo-origen.txt y pasa el generador
   detrás, así que con eso solo ya está el mundo publicado. La segunda
   vez no hace falta la ruta:
 
       python herramientas/1-publicar/importar-mundo.py
 
-  (es la opción 12 del menú, y si no hay ninguna ruta apuntada te la
-  pregunta)
+  (en el menú, Wiki Cralëa → Traer la wiki desde Chronicler; si no hay
+  ninguna ruta apuntada te la pregunta)
 
-  ES UN ESPEJO. Lo que esté en mundo/ y ya no esté en la bóveda se
+  ELEGIR QUÉ ENTRA. No todo lo de la bóveda tiene que estar en la web:
+  una página a medio escribir, un sitio que todavía no ha salido en la
+  partida. Cada vez que traes la wiki te pregunta si quieres cambiar lo
+  que entra (Enter es que no), y para ir directo a eso:
+
+      python herramientas/1-publicar/importar-mundo.py --elegir
+
+  Sale la lista de páginas y mapas por carpetas:
+
+      gente/
+         [ ]   4. Apaaka
+         [x]   5. Humana
+
+  [x] entra y [ ] se queda fuera. Se cambia escribiendo números («4»,
+  «5-8», «1 3 7»), una carpeta entera («gente/»: si entra algo de ella
+  la saca toda, si no entra nada la mete toda) o «todo» / «nada». Enter
+  en blanco para terminar.
+
+  LO QUE DEJAS FUERA SE QUEDA FUERA. Se apunta en
+  herramientas/wiki-fuera.txt y lo respetan LAS DOS herramientas: ni se
+  trae ni lo publica generar-mundo.py, aunque siga en tu bóveda y aunque
+  Chronicler escriba directamente en wiki/. Lo que enlace a algo que está
+  fuera sale como «sin página», igual que un enlace a algo sin escribir.
+
+  Las imágenes no se eligen: generar-mundo.py solo publica las que use
+  alguna página que entre.
+
+  wiki-fuera.txt se puede escribir a mano: una ruta por línea, desde la
+  raíz de la bóveda. Una línea que acabe en «/» deja fuera la carpeta
+  entera, incluido lo que le añadas en el futuro.
+
+  Si no tienes bóveda de fuera, --elegir trabaja sobre wiki/: eliges y
+  vuelve a generar, sin traer nada.
+
+  ES UN ESPEJO. Lo que esté en wiki/ y ya no esté en la bóveda se
   quita, porque si no una página que renombraste en Chronicler se
   quedaría publicada dos veces, con el nombre viejo y con el nuevo. Te
   dice cuáles antes de tocar nada y pregunta. Con --anadir no quita
@@ -1125,7 +1205,7 @@
   qué carpetas, para que se vea que no falta nada que hiciera falta. La
   lista está en comun.py (es_del_mundo), y la usan las DOS herramientas:
   si solo lo supiera el importador, el generador publicaría las
-  plantillas en cuanto apuntaras Chronicler directamente a mundo/.
+  plantillas en cuanto apuntaras Chronicler directamente a wiki/.
 
   LO QUE NO SABE QUÉ ES, LO CUENTA. Al terminar sale un inventario de
   todo lo que hay en la bóveda y no es ni página, ni mapa, ni imagen:
@@ -1139,11 +1219,12 @@
 
       python herramientas/3-generadores/generar-mundo.py
 
-  Eso lee los .md de mundo/, escribe una página HTML por cada uno en
-  web/mundo/, copia las imágenes a imagenes/mundo/ y deja el índice en
-  datos/mundo.json (que es de donde sale la portada). Detrás hay que
+  Eso lee los .md de wiki/, escribe una página HTML por cada uno en
+  web/wiki/, copia las imágenes a imagenes/wiki/ y deja el índice en
+  datos/wiki/mundo.json (que es de donde sale la portada). Detrás hay que
   pasar los de siempre, porque hay páginas nuevas: el sitemap, el mapa,
-  el buscador y las cabeceras. La opción 16 del menú los pasa todos.
+  el buscador y las cabeceras. En el menú, «Antes de subir → Volver a
+  generar…» los pasa todos.
 
   CON --probar NO ESCRIBE NADA y cuenta lo que haría. Conviene pasarlo
   así la primera vez y cada vez que se toque mucho:
@@ -1161,7 +1242,7 @@
       canta, con el nombre de la página. Si no sale ningún aviso, lo
       que hay en la web es lo que hay en la bóveda.
 
-  LO QUE ENTIENDE está escrito en mundo/LEEME.txt, que es donde se va a
+  LO QUE ENTIENDE está escrito en wiki/LEEME.txt, que es donde se va a
   mirar estando dentro. En corto: el frontmatter entero (incluido el
   "layout" de la infobox), el Markdown de siempre, los wikilinks en sus
   cuatro formas, las imágenes ![[así]], los spoilers ||así||, las
@@ -1182,8 +1263,8 @@
   —un JSON con el tamaño del lienzo, las capas de fondo y el contorno
   de cada región— y sale como una página más:
 
-      mundo/Mapamundi de Cralëa.cmap
-      web/mundo/mapa_mapamundi_de_cralea.html
+      wiki/Mapamundi de Cralëa.cmap
+      web/wiki/mapa_mapamundi_de_cralea.html
 
   SE PINTA EN SVG DENTRO DE LA PROPIA PÁGINA. Ni canvas ni librería de
   mapas: así cada región es un enlace de verdad, el mapa se ve sin
@@ -1226,7 +1307,7 @@
 
   LA PORTADA DE LA WIKI, POR APARTADOS
 
-  web/mundo/index_mundo.html —la Wiki Cralëa— no reparte las páginas por
+  web/wiki/index_wiki.html —la Wiki Cralëa— no reparte las páginas por
   las carpetas de la bóveda, sino por unos apartados grandes —países,
   lugares, personajes, religión, cosas, mapas— y, dentro de cada uno, por
   las etiquetas que le queden a cada página. Una carpeta es cómo tienes
@@ -1244,20 +1325,26 @@
   Y EN PANTALLA ANCHA SON DOS COLUMNAS: el índice a la izquierda y los
   mapas a la derecha, con la silueta de cada uno (de 1400px para arriba;
   por debajo, una columna y los mapas entre la cabecera y el índice). La
-  silueta es un .svg que escribe el generador en imagenes/mundo/, con las
+  silueta es un .svg que escribe el generador en imagenes/wiki/, con las
   formas del mapa simplificadas a lo bruto: se reconoce el mundo de un
   vistazo y pesa lo que una foto pequeña.
 
   EL NOMBRE DE LA WIKI está escrito en cuatro sitios y no en un ajuste,
   porque cambiarlo es cosa de una vez: el menú
   (fragmentos/barra-lateral.html), la portada
-  (web/mundo/index_mundo.html), las dos plantillas de
+  (web/wiki/index_wiki.html), las dos plantillas de
   herramientas/plantillas/mundo-*.html y el nombre de la sección en
-  generar-mapa.py y generar-buscador.py. La CARPETA sigue llamándose
-  mundo/ a propósito: renombrarla rompería todos los enlaces que ya
-  estén por ahí fuera.
+  generar-mapa.py y generar-buscador.py.
 
-  QUIÉN MANDA: datos/mundo-categorias.json, que se edita a mano y no lo
+  LAS CARPETAS SE LLAMAN wiki/ (la bóveda), web/wiki/ (las páginas) e
+  imagenes/wiki/ (sus imágenes). Hasta el 10-10-2026 se llamaban mundo/,
+  y por eso los archivos de dentro de herramientas/, estilos/ y scripts/
+  (generar-mundo.py, mundo.css, mundo.js, datos/wiki/mundo.json...) y las
+  clases .mundo-* siguen con el nombre viejo: son nombres de piezas, no
+  direcciones, y no se ven desde fuera. Las direcciones viejas
+  (/web/mundo/...) dejaron de existir con el cambio.
+
+  QUIÉN MANDA: datos/wiki/mundo-categorias.json, que se edita a mano y no lo
   reescribe nadie. Es una lista de apartados, cada uno con las etiquetas
   que caen en él:
 
@@ -1336,7 +1423,7 @@
   LAS RECOMENDACIONES
 
   La página web/recomendaciones/recomendaciones.html sale entera de
-  datos/recomendaciones.json. No hay que pasar ningún generador: se
+  datos/mi_rincon/recomendaciones.json. No hay que pasar ningún generador: se
   edita, se guarda y ya está.
 
   LO MÁS CÓMODO ES LA HERRAMIENTA:
@@ -2104,18 +2191,43 @@
   fragmentos/ .......... trozos de HTML que se inyectan en todas
                          las páginas: la barra lateral y las frases
 
-  datos/ ............... los listados que rellenan la web
-      rol.json                el portfolio de rol. ESTE SÍ se
-                              escribe a mano (o con nuevo.py --rol):
-                              es el original, no una copia
-      reto-writeober26.json   las 31 palabras del reto de escritura
-                              y qué día lleva ya su página. También
-                              se escribe a mano
-      entradas-blog.json      las entradas del blog
-      mis-movidas.json        rol y relatos
-      fotos-santuarios.json   las fotos de los gatos
-      Los tres últimos NO se escriben a mano: los genera
-      herramientas/ leyendo las páginas y rol.json (ver más abajo)
+  datos/ ............... los JSON que rellenan la web, en una
+                         carpeta por apartado, como el menú:
+
+      blog/
+          entradas-blog.json      las entradas (GENERADO)
+      mis_movidas/
+          mis-movidas.json        relatos y recursos de rol (GENERADO)
+          rol.json                los recursos de rol. ESTE SE ESCRIBE
+                                  (a mano o con nuevo.py --rol): es el
+                                  original, no una copia
+          reto-writeober26.json   las 31 palabras del reto y qué día
+                                  lleva ya su página. A mano
+      notas_rol/
+          notas-rol.json          las sesiones publicadas (GENERADO)
+          campana-<clave>.json    la campaña: mesa, botín, misiones,
+                                  sesiones. A mano o con botin.py
+          npcs-<clave>.json       sus NPC. A mano o con
+                                  nuevo-personaje.py
+      wiki/
+          mundo.json              el índice de la wiki (GENERADO por
+                                  generar-mundo.py)
+          mundo-categorias.json   los apartados de su portada. A mano
+      mi_rincon/
+          en-lo-que-ando.json     a mano o con en-lo-que-ando.py
+          recomendaciones.json    a mano o con nueva-recomendacion.py
+          fotos-santuarios.json   las fotos de los gatos (lo escribe
+                                  generar-galeria.py; los alt, a mano)
+      sitio/
+          buscador.json           el texto de toda la web (GENERADO)
+          mapa-del-sitio.json     la tabla del mapa (GENERADO)
+          changelog.json          el changelog. A mano
+
+  Lo GENERADO no se toca a mano: se reescribe al pasar las
+  herramientas. Las rutas llevan la subcarpeta en todas partes
+  (/datos/blog/entradas-blog.json): si mueves un JSON de carpeta, hay
+  que cambiarlo en el script de la página, en la herramienta que lo
+  escribe y en el data-…-datos del HTML si lo lleva.
 
   blog/rss.xml ......... el RSS, con TODO lo que publicas (blog,
                          relatos y rol). Está suelto ahí y no en
@@ -2138,9 +2250,11 @@
 
   EL ÍNDICE
   ---------
-  menu.py ............. el "¿qué quieres hacer?". Lista en castellano
-                        lo que puedes hacer y llama a la que toque.
-                        No hace nada por su cuenta.
+  menu.py ............. el "¿qué quieres hacer?". Siete apartados
+                        (blog, mis movidas, rol, wiki, mi rincón,
+                        imágenes, antes de subir) y dentro de cada uno
+                        sus herramientas. «3.3» va directo. No hace
+                        nada por su cuenta.
 
   1-PUBLICAR: LO QUE USAS CASI SIEMPRE
   ------------------------------------
@@ -2151,7 +2265,7 @@
   1-publicar/publicar.py  publica un borrador, o despublica algo
                         con --despublicar
   1-publicar/nueva-recomendacion.py  añade cosas a
-                        datos/recomendaciones.json preguntándote los
+                        datos/mi_rincon/recomendaciones.json preguntándote los
                         datos. Con --listar enseña lo que ya hay y con
                         --categoria va directa.
   1-publicar/en-lo-que-ando.py  cambia lo que pone la página de «en lo
@@ -2167,15 +2281,20 @@
                         terminar pasa el buscador, que es lo único que
                         hace falta rehacer.
 
+  1-publicar/botin.py .. lleva el botín de una campaña: añadir,
+                        gastar (todo o una parte), devolver, cambiar y
+                        quitar. Guarda al momento y pasa el buscador.
+
   1-publicar/importar-mundo.py  se trae la bóveda de Chronicler a
-                        mundo/ —páginas, mapas e imágenes— y pasa el
+                        wiki/ —páginas, mapas e imágenes— y pasa el
                         generador detrás. Le pasas la ruta la primera
                         vez y se la apunta en mundo-origen.txt. Es un
-                        espejo: quita de mundo/ lo que ya no esté en la
+                        espejo: quita de wiki/ lo que ya no esté en la
                         bóveda, avisando antes (--anadir para que no lo
-                        haga, --probar para que no haga nada). De lo
-                        que no sabe qué es hace un inventario y te lo
-                        enseña.
+                        haga, --probar para que no haga nada). Con
+                        --elegir sale la lista para decidir qué entra
+                        (wiki-fuera.txt). De lo que no sabe qué es hace
+                        un inventario y te lo enseña.
 
   2-IMAGENES: ANTES DE SUBIR FOTOS
   --------------------------------
@@ -2188,7 +2307,7 @@
                         los datos de dentro. Respeta el favicon y los
                         SVG.
   2-imagenes/generar-galeria.py  miniaturas +
-                        datos/fotos-santuarios.json, y pregunta la
+                        datos/mi_rincon/fotos-santuarios.json, y pregunta la
                         descripción de las fotos nuevas
                         (--sin-preguntar para que no lo haga)
   2-imagenes/tamanos-portada.py  saca las versiones pequeñas del
@@ -2200,17 +2319,17 @@
   ------------------------------
   (nuevo.py y publicar.py ya los ejecutan en orden; solo los
   necesitas sueltos si has tocado alguna página a mano, y para eso
-  está la opción 16 del menú)
+  está «Antes de subir → Volver a generar…» en el menú)
 
   3-generadores/generar-archivo.py  crea web/blog/<año>/index_<año>.html
                         con un bloque por mes, y mete el año en el
                         menú lateral
-  3-generadores/generar-posts.py  reescribe datos/entradas-blog.json,
-                        datos/mis-movidas.json y datos/notas-rol.json
+  3-generadores/generar-posts.py  reescribe datos/blog/entradas-blog.json,
+                        datos/mis_movidas/mis-movidas.json y datos/notas_rol/notas-rol.json
                         leyendo las páginas
   3-generadores/generar-rss.py  escribe blog/rss.xml
   3-generadores/generar-mundo.py  convierte la bóveda de Chronicler
-                        que hay en mundo/ en las páginas de web/mundo/,
+                        que hay en wiki/ en las páginas de web/wiki/,
                         los .cmap incluidos (cada mapa, una página con
                         su SVG y su lista de sitios). Con --probar no
                         escribe nada y con --detalle se dice cuánto se
@@ -2223,9 +2342,9 @@
 
   3-generadores/generar-sitemap.py  escribe sitemap.xml recorriendo
                         los .html
-  3-generadores/generar-mapa.py  escribe datos/mapa-del-sitio.json, que
+  3-generadores/generar-mapa.py  escribe datos/sitio/mapa-del-sitio.json, que
                         es de donde sale la tabla de web/mapa/mapa.html
-  3-generadores/generar-buscador.py  escribe datos/buscador.json, el
+  3-generadores/generar-buscador.py  escribe datos/sitio/buscador.json, el
                         listado con el texto de toda la web que usa la
                         página de buscar.
   3-generadores/actualizar-cabeceras.py  escribe en el <head> de cada página la
@@ -2240,7 +2359,7 @@
 
   4-COMPROBAR: MIRAN Y NO TOCAN NADA
   ----------------------------------
-  (la opción 15 del menú las pasa las cinco de golpe)
+  («Antes de subir → Repasar el sitio entero» las pasa las cinco)
 
   4-comprobar/enlaces-rotos.py  comprueba que todo lo que se enlaza
                         existe, y lista lo que no usa nadie. Con
@@ -2488,7 +2607,7 @@
       todo rompería lo que hace que esto se pueda leer y arreglar. Si
       alguna vez va justo, ahí hay margen.
 
-    - datos/fotos-santuarios.json son 21 KB y se pide en todas las
+    - datos/mi_rincon/fotos-santuarios.json son 21 KB y se pide en todas las
       páginas solo para sacar UNA foto del gatín. No estorba (llega
       tarde y no retrasa nada de lo que se ve), pero si algún día
       molesta, generar un listado chiquitín aparte en
@@ -2517,7 +2636,7 @@
   Con UNA excepción, el portfolio de rol: ahí no hay una página por
   cosa, sino tarjetas en una rejilla, y tenerlas escritas en el HTML
   significaba que index_rol.html crecía sin parar. Manda
-  datos/rol.json: de ahí saca la página sus tarjetas y de ahí saca
+  datos/mis_movidas/rol.json: de ahí saca la página sus tarjetas y de ahí saca
   generar-posts.py la parte de rol de mis-movidas.json. Es el único
   archivo de datos/ que se escribe.
 

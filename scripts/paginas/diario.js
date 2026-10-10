@@ -5,7 +5,7 @@
 // cuadrito por día, donde los días que tienen entrada de diario se
 // pueden abrir y los vacíos quedan apagados.
 //
-// Los datos salen de datos/entradas-blog.json, el mismo archivo que alimenta la
+// Los datos salen de datos/blog/entradas-blog.json, el mismo archivo que alimenta la
 // portada y el archivo del año; aquí solo se quedan las entradas
 // etiquetadas como "diario". Publicar una entrada nueva con esa
 // etiqueta la coloca sola en su día: no hay nada que escribir a mano.
@@ -104,7 +104,7 @@ async function initializeDiario() {
     }
 
     try {
-        const respuesta = await window.pedirDatos("/datos/entradas-blog.json");
+        const respuesta = await window.pedirDatos("/datos/blog/entradas-blog.json");
         if (!respuesta.ok) {
             throw new Error("La respuesta no fue correcta");
         }

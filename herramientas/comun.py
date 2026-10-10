@@ -229,7 +229,7 @@ def paginas(carpeta, patron="*.html"):
 # Chronicler. Vive aquí porque lo usan DOS herramientas y tienen que estar
 # de acuerdo: 1-publicar/importar-mundo.py, que se trae la bóveda, y
 # 3-generadores/generar-mundo.py, que la publica. Si la que trae se trajera
-# algo que la que publica ignora, quedaría ocupando sitio en mundo/; y al
+# algo que la que publica ignora, quedaría ocupando sitio en wiki/; y al
 # revés es peor, porque entonces se publica.
 
 # Carpetas que no son el mundo, miren donde miren dentro de la bóveda.
@@ -270,10 +270,62 @@ def es_del_mundo(archivo, boveda):
     return not nombre.startswith(".")
 
 
+# LO QUE TÚ DEJAS FUERA. Lo de arriba es lo que no es del mundo; esto es lo
+# que SÍ es del mundo pero no quieres publicar todavía: una página a medio
+# escribir, un sitio que aún no ha salido en la partida. Se elige con
+#
+#     python herramientas/1-publicar/importar-mundo.py --elegir
+#
+# y se apunta en herramientas/wiki-fuera.txt, una ruta por línea, contando
+# desde la raíz de la bóveda. Lo leen las DOS herramientas, por lo mismo
+# que es_del_mundo: si solo lo supiera el importador, el generador volvería
+# a publicar la página en cuanto Chronicler escribiera directamente en
+# wiki/ (pasó: se quitaron seis páginas a mano y volvieron al generar).
+#
+# Se puede escribir a mano. Una línea que acabe en "/" deja fuera la
+# carpeta entera, con lo que se añada a ella en el futuro incluido. Las
+# mayúsculas dan igual, como en Windows.
+WIKI_FUERA = HERRAMIENTAS / "wiki-fuera.txt"
+
+
+def wiki_fuera():
+    """Las líneas de wiki-fuera.txt, tal y como están escritas."""
+    if not WIKI_FUERA.is_file():
+        return []
+    reglas = []
+    for linea in WIKI_FUERA.read_text(encoding="utf-8").splitlines():
+        linea = linea.strip().replace("\\", "/").lstrip("/")
+        if linea and not linea.startswith("#"):
+            reglas.append(linea)
+    return reglas
+
+
+def esta_fuera(relativo, reglas):
+    """Si un archivo de la bóveda (su ruta desde la raíz de la bóveda) está
+    en la lista de lo que se deja fuera."""
+    ruta = str(relativo).replace("\\", "/").lower()
+    for regla in reglas:
+        regla = regla.lower()
+        if ruta == regla or (regla.endswith("/") and ruta.startswith(regla)):
+            return True
+    return False
+
+
+def guardar_wiki_fuera(reglas):
+    lineas = [
+        "# Lo que NO entra en la wiki aunque esté en la bóveda de Chronicler.",
+        "# Una ruta por línea, desde la raíz de la bóveda. Si acaba en \"/\",",
+        "# la carpeta entera. Lo escribe importar-mundo.py --elegir y lo leen",
+        "# él y generar-mundo.py. Se puede tocar a mano.",
+    ]
+    WIKI_FUERA.write_text("\n".join(lineas + sorted(reglas, key=str.lower)) + "\n",
+                          encoding="utf-8")
+
+
 # =========================================
 # LAS CAMPAÑAS DE ROL
 # =========================================
-# Una campaña por archivo en datos/campana-<clave>.json. No hay una lista
+# Una campaña por archivo en datos/notas_rol/campana-<clave>.json. No hay una lista
 # escrita en ningún sitio a propósito —se buscan por el nombre del
 # archivo—, así que para empezar una campaña nueva basta con copiar uno de
 # esos JSON y su carpeta.
@@ -284,7 +336,7 @@ def es_del_mundo(archivo, boveda):
 # el día que cambiara el nombre del archivo habría que acordarse de las
 # dos.
 
-CAMPANAS = RAIZ / "datos"
+CAMPANAS = RAIZ / "datos" / "notas_rol"
 PATRON_CAMPANA = "campana-*.json"
 
 
@@ -303,8 +355,8 @@ def elegir_campana(pedida, pregunta="¿De qué campaña?"):
     Devuelve (archivo, datos), o (None, None) si no hay forma."""
     campanas = campanas_que_hay()
     if not campanas:
-        print(f"  No encuentro ninguna campaña en datos/{PATRON_CAMPANA}.")
-        print("  Para empezar una, copia datos/campana-ragna.json con otro")
+        print(f"  No encuentro ninguna campaña en datos/notas_rol/{PATRON_CAMPANA}.")
+        print("  Para empezar una, copia datos/notas_rol/campana-ragna.json con otro")
         print("  nombre y copia también su carpeta en web/notas_rol/.")
         return None, None
 

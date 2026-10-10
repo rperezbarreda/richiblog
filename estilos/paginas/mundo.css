@@ -9,7 +9,7 @@
 
    Las páginas de artículo NO se escriben a mano: las escribe entera
    herramientas/3-generadores/generar-mundo.py a partir de los .md de la
-   carpeta mundo/, que es la bóveda de Chronicler.
+   carpeta wiki/, que es la bóveda de Chronicler.
 
    Marcos propios y nada de portada.css, como el changelog, las
    recomendaciones o «en lo que ando» (ver hojas_de en
@@ -722,7 +722,7 @@ html:not(.js) .mundo-spoiler {
    interactivo» en una lista no se parece en nada a verlo.
 
    La silueta es un <img> con un .svg que escribe el generador
-   (imagenes/mundo/vista_*.svg). Las tarjetas las pinta
+   (imagenes/wiki/vista_*.svg). Las tarjetas las pinta
    scripts/paginas/mundo.js; si no hay ningún mapa, esto va con [hidden]. */
 
 .mundo-vistas[hidden] {

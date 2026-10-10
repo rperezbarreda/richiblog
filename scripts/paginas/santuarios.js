@@ -1,5 +1,5 @@
 // =========================================
-// GALERÍA DEL SANTUARIO — leída desde datos/fotos-santuarios.json
+// GALERÍA DEL SANTUARIO — leída desde datos/mi_rincon/fotos-santuarios.json
 // =========================================
 // La ficha de cada gato ya no lleva las fotos escritas a mano: se
 // montan aquí a partir del listado que genera
@@ -13,7 +13,7 @@
 //
 //   <div class="photo-gallery" data-galeria="tali"></div>
 
-const GALERIA_URL = "/datos/fotos-santuarios.json";
+const GALERIA_URL = "/datos/mi_rincon/fotos-santuarios.json";
 
 initializeGaleria();
 

@@ -1,7 +1,7 @@
 // =========================================
 // PÁGINA: BUSCAR EN TODA LA WEB
 // =========================================
-// Lee lo que venga en ?q= de la dirección, pide datos/buscador.json
+// Lee lo que venga en ?q= de la dirección, pide datos/sitio/buscador.json
 // —que escribe herramientas/3-generadores/generar-buscador.py recorriendo la web— y
 // pinta los resultados: título, sección y fecha como en el mapa del
 // sitio, y debajo el trozo de texto donde aparece lo que buscabas, con
@@ -36,7 +36,7 @@
 // el mismo ámbito global. Por eso lo de aquí lleva "busq" en el nombre.
 // Se comprueba con herramientas/4-comprobar/nombres-repetidos.py.
 
-const BUSQ_DATOS = "/datos/buscador.json";
+const BUSQ_DATOS = "/datos/sitio/buscador.json";
 
 // Cuánto texto se enseña alrededor de lo encontrado. Lo justo para que
 // se entienda la frase sin convertir el resultado en un muro.

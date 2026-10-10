@@ -155,14 +155,6 @@
         "texto": "accesibilidad Tengo una discapacidad visual, por lo que esta web está hecha con ello en mente. En muchísimos sitios web la accesibilidad es algo secundario y hecho de mala manera, pero aquí no. En este apartado te cuento que opciones hay para que no tengas que descubirlo por ti misme. Se puede recorrer la web entera con el teclado, saltando de un enlace al siguiente con la tecla Tab . El ratón no hace falta para nada. Para subir y bajar valen las teclas de siempre: ↑ y ↓ poco a poco, Re Pág y Av Pág a saltos grandes, puedes usar la barra espaciadora (con Mayús para ir hacia arriba) e Inicio y Fin para plantarte al principio o al final. Para ejecutar un enlace o botón, una vez seleccionado, pulsa la tecla Enter . Los saltos de navegación de enlaces reaccionan a dónde tengas puesto el ratón. Hay una búsqueda de toda la web en la portada y en el botón de la lupa del menú. Mira los títulos, las categorías y lo que pone dentro de las entradas y los relatos. Si navegas con teclado, lo primero que aparece en cada página es un enlace para saltar directo al contenido , y así no tener que pasar por el menú una y otra vez. El visor de fotos y el menú desplegable en la vista de móvil se cierran con Esc . Mientras están abiertos, el teclado se queda dentro de ellos y no se escapa a lo que hay detrás. El botón para volver arriba de la vista móvil no solo sube la vista: también te deja el foco al principio de la página, para que la siguiente tecla siga por donde toca. Si usas un lector de pantalla: Las páginas están marcadas como escritas en español, con sus títulos y apartados en orden, y con el menú y el contenido señalados como tales para que puedas saltar de uno a otro. Los adornos —los −■✕ de las ventanitas, las flechas, los efectos en el cursor— están puestos de forma que un lector de pantalla se los salte y no los lea. Los botones que solo llevan un dibujo tienen el nombre de lo que representan, escrito de forma oculta para que los lectores de pantalla lo lean. Todas las fotos y dibujos llevan descripción. El calendario del diario es una tabla de verdad, con los días de la semana como cabecera, así que se recorre como una tabla y no como un montón de cuadraditos sueltos. Las siglas (CRT, RSS, DnD...) llevan escrito su nombre entero por detrás, así que no se oyen deletreadas. Los enlaces que te sacan de esta web llevan una flecha detrás y avisa de que se abrirá una nueva pestaña fuera de este sitio web. Los botones que se quedan encendidos o apagados —el tema, los brillitos del cursor, los filtros— dicen su estado en cada cambio. Arriba a la derecha hay un botón con una Aa (en el móvil, dentro de la barra amarilla del título, a la derecha, para tenerlo siempre a mano): abre una ventana modal con todos los ajustes de accesibilidad y al lado una ventanita ejemplo.txt con un texto de prueba para poder ver los cambios. Dentro de esa ventana: el tamaño del texto de toda la web, del 90% al 150% en cinco pasos; la separación entre líneas , en tres pasos, el tipo de fuente , que se puede cambiar por la Atkinson Hyperlegible , dibujada en el Braille Institute para ser mas accesible y distinguir caracteres similares; el color de tema , son diez distintos, separados en temas claros y oscuros y otros mas estéticos que no cumplen del todo los colores de contraste; la velocidad del texto a voz que lee las entradas, en tres pasos; y, en «efectos visuales», el brillito del cursor y el filtro CRT , que pone las rayas y las esquinas apagadas de un monitor de tubo. A la derecha, bajo el texto de ejemplo, hay un botón «reiniciar cambios» , que devuelven todos los ajustes al estado original, por si te lías probando. Si no has elegido tema, la web hace caso al de tu sistema: con el móvil o el ordenador en modo claro, sale en claro. En cuanto elijas uno manda el tuyo, y el botón de «reiniciar cambios» devuelve el mando al sistema. Todo lo que elijas se queda guardado en el localStorage de tu navegador y sigue puesto la próxima vez que entres. Se aplica antes de que la página se pinte, así que no verás ningún salto al cargar. Todos los textos se leen con holgura sobre su fondo, en los dos modos. No lo he dejado a ojo: lo he ido midiendo texto por texto, y no solo con las Reglas de Contraste de toda la vida (que cumple de sobra, Nivel AAA ) sino también con APCA , el baremo nuevo, que es más exigente con los grises claros sobre fondo oscuro y es el que de verdad se parece a lo que se lee. La única excepción es el tema «terminal rojo»: el rojo es el color con menos brillo que hay, y uno de verdad sobre negro no llega a ese listón ni al Nivel AAA. Los otros dos de terminal sí lo pasan (el verde con holgura, el azul justo). Ese tema y el filtro CRT son adornos que se encienden queriendo, y te lo aviso ahí mismo antes de que lo elijas; todo lo demás cumple. Si prefieres leer en papel o en PDF, imprime la página y ya está : sale solo el texto, en negro sobre blanco, a una columna y sin el menú ni los botones, y con la dirección de cada enlace escrita detrás para que no se pierda. Si tienes puesta la letra más grande en el navegador, o usas el zoom, la web crece contigo en vez de quedarse clavada y descuadrarse. Aunque estreches mucho la ventana, o pongas el zoom al máximo en el móvil, nunca hay que desplazarse hacia los lados para leer una línea. Si usas el modo de alto contraste de Windows, la web se pliega a tus colores: los iconos y las flechitas se repintan con los que tengas puestos en vez de desaparecer. Las entradas del blog y los relatos se pueden escuchar en voz alta : hay una ventanita llamada texto_a_voz.mp3 al principio de la columna de la foto, con el botón de escuchar dentro (y se pliega con su − si no la vas a usar). Lo lee el propio navegador con las voces que tengas instaladas en tu sistema, así que el texto no sale de tu ordenador ni pasa por ningún servidor. El párrafo que suena se va resaltando y la página lo sigue sola, para que puedas leer y escuchar a la vez. La velocidad se cambia ahí mismo, debajo del botón, o en la ventana de la Aa : son el mismo ajuste y se mueven a la vez. Si no tienes ninguna voz en español, el botón te explica cómo añadir una en vez de no hacer nada. En la ventana de la Aa hay un mando de animaciones : ponlo en «sin animaciones» y se para todo lo que parpadea o se desplaza —el filtro CRT, el cursor de los temas de terminal, la cinta de frases y las transiciones— sin tener que apagar nada más. El rastro de brillitos del cursor se apaga desde esa misma ventana. Si tienes puesto en tu móvil u ordenador que quieres menos movimiento en pantalla, las animaciones se quedan quietas sin que tengas que tocar nada aquí. Lo único que se mueve solo es la barra de frases del final de la portada, y tiene al lado un botón para pararla. Se queda parada también la próxima vez que entres. Por lo demás, nada se mueve sin que lo pidas: no hay imágenes que pasen solas, ni vídeos que arranquen de golpe, ni ventanas que salten encima de lo que estabas leyendo. Prefiero contártelo yo a que te lo encuentres: Si tu navegador tiene desactivado el JavaScript localStorage , la página contendrá errores, verás el texto de cada página, pero no el menú ni las listas de entradas, porque se montan con eso. El guestbook funciona sobre una hoja de cálculo de Google. Es la única parte de la web que habla con un servidor externo. Todas estas opciones las he probado yo, con mi lector y mi navegador. Seguro que hay cosas que se me escapan o no se ven del todo bien. Si encuentras algún problema o tienes alguna sugerencia, no te calles: escríbeme a contacto@ richi.blog o déjamelo en el guestbook . Cuéntame qué estabas intentando hacer y con qué (el navegador, el lector de pantalla, si era el móvil o el ordenador) y a ser posible con capturas de pantalla; con eso me apaño para solucionarlo."
     },
     {
-        "url": "/web/mundo/apaaka.html",
-        "titulo": "Apaaka",
-        "seccion": "wiki cralëa",
-        "fecha": "",
-        "categorias": [],
-        "texto": "← volver a la wiki Apaaka La Vieja etiquetas: gente Valderín gremios Apaaka manda en Valderín desde hace cuarenta años sin haber ocupado nunca un cargo. Empezó pesando sal en el puerto fluvial y acabó decidiendo quién pesa la sal. Lo que se sabe Nació en las Marcas , o eso dice. No se le conoce familia, salvo una hija que nadie ha visto de cerca. Nunca firma nada de su puño. Dónde empezó El Río Lento no tiene corriente que se note, y de ahí el nombre. Cruza Las Marcas Bajas de norte a sur y pasa por debajo de los siete puentes de Valderín . Nadie sabe lo que hay en el fondo. Los barqueros no miran. Lo que se cuenta Que está muerta desde el invierno del 351 . Que el Puente Roto se cayó la segunda vez por orden suya. Que el Libro de la Sal lo escribió ella. Apaaka raza Humana oficio Maestra de gremios estado Viva (oficialmente) dónde Valderín Se habla de esto en El Libro de la Sal Valderín ← volver a la wiki"
-    },
-    {
         "url": "/web/blog/2026/index_2026.html",
         "titulo": "Blog 2026",
         "seccion": "blog",
@@ -186,7 +178,7 @@
         "categorias": [
             "ragna"
         ],
-        "texto": "notas de rol npcs → campaña de Ragna Las notas que tomo después de cada partida. DnD 5.5e Nacho Unidos a la Gran Caravana de manos del comerciante Sigil, exploramos el mundo tras la expulsión de los gigantes por parte de Ragnar. 4 kits curativos Hierbas misteriosas (velocidad) 6 provisiones para el viaje Piedra mensajera Faëlar Melissa Denelia Thenarys"
+        "texto": "notas de rol npcs → campaña de Ragna Las notas que tomo después de cada partida. DnD 5.5e Nacho Unidos a la Gran Caravana de manos del comerciante Sigil, exploramos el mundo tras la expulsión de los gigantes por parte de Ragnar. Hierbas misteriosas (velocidad) x4 Kits curativos x6 Provisiones Piedra mensajera Faëlar Melissa Denelia Thenarys"
     },
     {
         "url": "/web/changelog/changelog.html",
@@ -205,12 +197,12 @@
         "texto": "contacto Escríbeme para lo que sea: colaboraciones, dudas sobre alguna entrada, reporte de errores, sugerencias o simplemente para saludar. ✉ escríbeme contacto@ richi.blog bluesky (se abre en otra pestaña) ko-fi (se abre en otra pestaña) goodreads (se abre en otra pestaña) normas de la casa Nada de discursos de odio, acoso ni troleo. Nada de spam ni publicidad. No compartas información privada, sobre todo si eres menor de edad. Sé respetuoso/a conmigo y con quien más lea esto. Si has escrito algo y se ha borrado es porque lo he borrado yo y considero que no debe aparecer. nombre mensaje B Negrita I Cursiva S Tachado 300 caracteres web firmar el guestbook"
     },
     {
-        "url": "/web/mundo/como_se_escribe_esto.html",
+        "url": "/web/wiki/como_se_escribe_esto.html",
         "titulo": "Cómo se escribe esto",
         "seccion": "wiki cralëa",
         "fecha": "",
         "categorias": [],
-        "texto": "← volver a la wiki Cómo se escribe esto La chuleta del formato etiquetas: ejemplo Esta página no cuenta nada del mundo: está para ver cómo queda cada cosa y qué se puede escribir. Bórrala cuando ya no haga falta. El texto Va en negrita , en cursiva , tachado y con código suelto. Un enlace a otra página y uno de fuera a Chronicler . Una nota al pie, que se numera sola y lleva de vuelta 1 . Las listas Una cosa. Otra, con una lista dentro: lo de dentro, y más de dentro. Y la última. También numeradas. Y así. Las tablas Los dos puntos de la línea de debajo del encabezado dicen hacia dónde se alinea cada columna: A la izquierda Al centro A la derecha sal 2 2 cobres grano 14 1 cobre Los enlaces del mundo A otra página: Valderín . Con otro texto: la ciudad . A un apartado suyo: Valderín . Y a una que no existe todavía: Una Página Que No He Escrito , que sale marcada y sin llevar a ninguna parte. Los spoilers y las inserciones Lo que va entre dobles barras sale tapado hasta que se pulsa. Una página metida dentro de otra Lo de siempre. En Las Marcas Bajas son mayoría. Las imágenes En el cuerpo van con la exclamación delante: Y si el archivo no está, se dice en vez de dejar un hueco: falta la imagen «esta-imagen-no-existe.webp» Notas Y aquí está, abajo del todo. ↩ Cómo se escribe esto Página de ejemplo para qué Ver de un vistazo todo lo que entiende el conversor Esta página Borrar sin miedo escrito en Chronicler En columnas mandos_izquierda Lo de la izquierda mandos_derecha Lo de la derecha ← volver a la wiki"
+        "texto": "← volver a la wiki Cómo se escribe esto La chuleta del formato etiquetas: ejemplo Esta página no cuenta nada del mundo: está para ver cómo queda cada cosa y qué se puede escribir. Bórrala cuando ya no haga falta. El texto Va en negrita , en cursiva , tachado y con código suelto. Un enlace a otra página y uno de fuera a Chronicler . Una nota al pie, que se numera sola y lleva de vuelta 1 . Las listas Una cosa. Otra, con una lista dentro: lo de dentro, y más de dentro. Y la última. También numeradas. Y así. Las tablas Los dos puntos de la línea de debajo del encabezado dicen hacia dónde se alinea cada columna: A la izquierda Al centro A la derecha sal 2 2 cobres grano 14 1 cobre Los enlaces del mundo A otra página: Valderín . Con otro texto: la ciudad . A un apartado suyo: Valderín . Y a una que no existe todavía: Una Página Que No He Escrito , que sale marcada y sin llevar a ninguna parte. Los spoilers y las inserciones Lo que va entre dobles barras sale tapado hasta que se pulsa. Una página metida dentro de otra No hay ninguna página que se llame «Humana». Las imágenes En el cuerpo van con la exclamación delante: Y si el archivo no está, se dice en vez de dejar un hueco: falta la imagen «esta-imagen-no-existe.webp» Notas Y aquí está, abajo del todo. ↩ Cómo se escribe esto Página de ejemplo para qué Ver de un vistazo todo lo que entiende el conversor Esta página Borrar sin miedo escrito en Chronicler En columnas mandos_izquierda Lo de la izquierda mandos_derecha Lo de la derecha ← volver a la wiki"
     },
     {
         "url": "/web/blog/diario.html",
@@ -259,14 +251,6 @@
         "texto": "Es la perfecta iniciación al mundo del Señor de los Anillos, cortito y muy ligerito de leer, el audiolibro es una pasada. J.R.R. Tolkien"
     },
     {
-        "url": "/web/mundo/el_libro_de_la_sal.html",
-        "titulo": "El Libro de la Sal",
-        "seccion": "wiki cralëa",
-        "fecha": "",
-        "categorias": [],
-        "texto": "← volver a la wiki El Libro de la Sal etiquetas: objeto gremios Donde está apuntado, puente por puente, quién debe qué a quién en Valderín . Quien lo tenga manda, y por eso nadie lo ha visto nunca abierto. Se le atribuyen Las Siete Firmas , que nadie ha encontrado todavía. El Libro de la Sal Objeto quién lo tiene Apaaka material Piel y tinta de agalla ← volver a la wiki"
-    },
-    {
         "url": "/web/en_lo_que_ando/en_lo_que_ando.html",
         "titulo": "En lo que ando",
         "seccion": "otras",
@@ -283,14 +267,6 @@
             "libros"
         ],
         "texto": "Las películas no tienen nada que ver con lo que ocurre en el libro, es el comienzo de la ciencia ficción en la literatura y a ratos, con las reflexiones del monstruo, se vuelve casi filosófico. Mary Wollstonecraft Shelley"
-    },
-    {
-        "url": "/web/mundo/humana.html",
-        "titulo": "Humana",
-        "seccion": "wiki cralëa",
-        "fecha": "",
-        "categorias": [],
-        "texto": "← volver a la wiki Humana etiquetas: razas Lo de siempre. En Las Marcas Bajas son mayoría. Se habla de esto en Apaaka ← volver a la wiki"
     },
     {
         "url": "/web/recomendaciones/recomendaciones.html",
@@ -323,14 +299,6 @@
         "texto": "Pobre Gregorio Samsa. Super cortito y de mucha introspección. Franz Kafka"
     },
     {
-        "url": "/web/mundo/las_marcas_bajas.html",
-        "titulo": "Las Marcas Bajas",
-        "seccion": "wiki cralëa",
-        "fecha": "",
-        "categorias": [],
-        "texto": "← volver a la wiki Las Marcas Bajas etiquetas: región Tierra llana, agua mala y nadie que la reclame. Valderín es lo único parecido a una ciudad en cien leguas. Las Marcas Bajas Región ciudades Valderín Se habla de esto en Apaaka Humana Río Lento Valderín ← volver a la wiki"
-    },
-    {
         "url": "/web/mapa/mapa.html",
         "titulo": "Mapa del sitio",
         "seccion": "otras",
@@ -339,7 +307,7 @@
         "texto": ""
     },
     {
-        "url": "/web/mundo/mapa_mapamundi_de_cralea.html",
+        "url": "/web/wiki/mapa_mapamundi_de_cralea.html",
         "titulo": "Mapamundi de Cralëa",
         "seccion": "wiki cralëa",
         "fecha": "",
@@ -397,14 +365,6 @@
         "texto": "rol Portfolio de lo que voy creando y compartiendo para partidas de rol. Todo está disponible en mi tienda de Ko-fi . Aviso: todo mi contenido de rol está en formato \"paga lo que quieras\" — en Ko-fi puedes apoyarme con alguna donación o llevártelo gratis, pero si prefieres no pasar por Ko-fi tienes también un enlace de descarga directa y gratuita en Drive."
     },
     {
-        "url": "/web/mundo/rio_lento.html",
-        "titulo": "Río Lento",
-        "seccion": "wiki cralëa",
-        "fecha": "",
-        "categorias": [],
-        "texto": "← volver a la wiki Río Lento etiquetas: río Valderín El Río Lento no tiene corriente que se note, y de ahí el nombre. Cruza Las Marcas Bajas de norte a sur y pasa por debajo de los siete puentes de Valderín . Nadie sabe lo que hay en el fondo. Los barqueros no miran. Río Lento Río nace en Las cumbres de ceniza desemboca El mar interior largo 400 leguas Se habla de esto en Apaaka Valderín ← volver a la wiki"
-    },
-    {
         "url": "/web/santuarios/index_santuarios.html",
         "titulo": "Santuarios",
         "seccion": "santuarios",
@@ -431,15 +391,7 @@
         "texto": "Llegó a mi vida en diciembre de 2024, una semana antes de navidad. Desde siempre ha sido una gata cariñosa pero s´´olo cuando ella quiere, es un poco asustadiza y evita estar cerca cuando hay mucha gente o ruido. Le pirran los churus y los juguetes con plumas."
     },
     {
-        "url": "/web/mundo/valderin.html",
-        "titulo": "Valderín",
-        "seccion": "wiki cralëa",
-        "fecha": "",
-        "categorias": [],
-        "texto": "← volver a la wiki Valderín La ciudad de los puentes etiquetas: ciudad comercio río Valderín se levanta sobre los siete puentes que cruzan el Río Lento , y cada uno de ellos pertenece a un gremio distinto. Quien controla un puente controla lo que pasa por él, que es la única ley que ha tenido nunca la ciudad. Los siete puentes El más viejo es el Puente de la Sal , levantado antes de que la ciudad tuviera nombre. Los otros seis se fueron añadiendo según hacía falta: Puente de la Sal — el de los salineros, y el único de piedra. Puente Roto — se cayó dos veces y nadie lo ha vuelto a levantar entero. Puente de los Cuervos — donde se cuelga a quien roba en el mercado. No cruces el Puente Roto de noche. No por lo que hay debajo: por lo que cobran los que lo vigilan. Quién manda aquí Oficialmente nadie. En la práctica, Apaaka lleva cuarenta años decidiendo qué gremio cobra en qué puente, y eso es mandar. Gremio Puente Qué cobran Salineros de la Sal 2 cobres Barqueros Roto nada Carniceros de los Cuervos 5 cobres El secreto peor guardado es que Apaaka lleva muerta dos inviernos y su hija firma por ella . Ver también: Río Lento , Las Marcas Bajas y los salineros . Valderín Ciudad libre población ~12.000 Gobierno gobierna la Vieja Apaaka fundada Año 312 de la Ceniza región Las Marcas Bajas lema Ni rey | ni amo Se habla de esto en Apaaka Cómo se escribe esto El Libro de la Sal Las Marcas Bajas Río Lento ← volver a la wiki"
-    },
-    {
-        "url": "/web/mundo/index_mundo.html",
+        "url": "/web/wiki/index_wiki.html",
         "titulo": "Wiki Cralëa",
         "seccion": "wiki cralëa",
         "fecha": "",

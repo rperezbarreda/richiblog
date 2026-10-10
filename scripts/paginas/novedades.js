@@ -1,16 +1,16 @@
 // =========================================
 // PORTADA — "proyectos más nuevos" (mis movidas)
 // =========================================
-// Lee datos/mis-movidas.json (el mismo fichero del que se alimenta
+// Lee datos/mis_movidas/mis-movidas.json (el mismo fichero del que se alimenta
 // el listado de relatos) y muestra en la portada las entradas más
 // recientes de CUALQUIER categoría — rol, relatos y las que
 // añadas — mezcladas y ordenadas por fecha. Sustituye a la
 // antigua tarjeta de "mis progresos" (backlog de juegos/libros a
 // mano): esto se actualiza solo con lo que ya publiques en
-// datos/mis-movidas.json, sin tocar este archivo ni el HTML de la
+// datos/mis_movidas/mis-movidas.json, sin tocar este archivo ni el HTML de la
 // portada.
 
-const MIS_MOVIDAS_URL = "/datos/mis-movidas.json";
+const MIS_MOVIDAS_URL = "/datos/mis_movidas/mis-movidas.json";
 // Cuatro y no seis: la ventana las coloca en dos columnas, así que un
 // número par llena las dos filas enteras y no deja ninguna suelta al
 // final (con 5 publicadas quedaba una sola en la columna izquierda y
@@ -101,7 +101,7 @@ function parseItemDate(rawDate) {
 // Van FUERA del enlace del título: un enlace dentro de otro no es
 // HTML válido y el navegador lo deshace por su cuenta.
 
-// A dónde lleva cada categoría de datos/mis-movidas.json. Si algún día
+// A dónde lleva cada categoría de datos/mis_movidas/mis-movidas.json. Si algún día
 // añades una sección nueva, basta con ponerla aquí; mientras tanto su
 // etiqueta se pinta sin enlace en vez de llevar a una página que no
 // existe.

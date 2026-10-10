@@ -6,7 +6,7 @@
 // página entera: no hace falta ningún temporizador ni nada raro, con
 // elegir una foto distinta en cada carga ya cambia sola al navegar.
 //
-// Lee el mismo datos/fotos-santuarios.json que la galería, así que las
+// Lee el mismo datos/mi_rincon/fotos-santuarios.json que la galería, así que las
 // fotos nuevas que genere herramientas/2-imagenes/generar-galeria.py aparecen
 // aquí solas, sin tocar este archivo.
 //
@@ -18,7 +18,7 @@
 // El botón 🔁 saca otra foto sin recargar: el listado se queda en
 // memoria desde la primera vez, así que no vuelve a pedir el JSON.
 
-const GATIN_FOTOS_URL = "/datos/fotos-santuarios.json";
+const GATIN_FOTOS_URL = "/datos/mi_rincon/fotos-santuarios.json";
 // Se recuerda la última foto enseñada para no repetirla en la
 // siguiente página: con dos o tres fotos, el azar puro repite
 // demasiado y parece que el cuadro esté roto.

@@ -3,7 +3,7 @@
 # TRAER EL MUNDO DESDE CHRONICLER
 # =========================================
 # Le pasas la carpeta donde tienes la bóveda y él hace lo demás: la mira,
-# te cuenta lo que hay, se trae las páginas y las imágenes a mundo/ y pasa
+# te cuenta lo que hay, se trae las páginas y las imágenes a wiki/ y pasa
 # el generador, que convierte todo a páginas de la web.
 #
 #     python herramientas/1-publicar/importar-mundo.py "C:\\Users\\Richi\\Mundo"
@@ -14,7 +14,7 @@
 #
 #     python herramientas/1-publicar/importar-mundo.py
 #
-# ES UN ESPEJO, NO UN AÑADIR. Lo que esté en mundo/ y ya no esté en la
+# ES UN ESPEJO, NO UN AÑADIR. Lo que esté en wiki/ y ya no esté en la
 # bóveda se quita, porque si no, una página que renombraste en Chronicler
 # se quedaría publicada dos veces: con el nombre viejo y con el nuevo. Se
 # te dice cuáles antes de tocarlas. Con --anadir no quita nada.
@@ -44,6 +44,24 @@
 # sin publicarlo, que es lo que hace falta para poder mirarlo y convertirlo
 # algún día (es así como se descubrió el formato de los mapas).
 #
+# ELEGIR QUÉ ENTRA. No todo lo que hay en la bóveda tiene que estar en la
+# web: una página a medio escribir, un sitio que todavía no ha salido en la
+# partida. Cada vez que lo pasas te pregunta si quieres cambiar lo que
+# entra (Enter es que no), y para ir directo a eso:
+#
+#     python herramientas/1-publicar/importar-mundo.py --elegir
+#
+# Sale la lista de páginas y mapas por carpetas, con [x] lo que entra y
+# [ ] lo que no, y se cambia escribiendo números («3», «5-8»), el nombre
+# de una carpeta («gente/») o «todo» / «nada». Lo que dejes fuera se apunta
+# en herramientas/wiki-fuera.txt y SE QUEDA FUERA hasta que lo vuelvas a
+# marcar: ni se trae ni lo publica generar-mundo.py, aunque siga en la
+# bóveda. Las imágenes no se eligen: el generador solo publica las que use
+# alguna página.
+#
+# Si no hay bóveda de fuera (Chronicler escribe directamente en wiki/),
+# --elegir trabaja sobre wiki/: elige y vuelve a generar, sin traer nada.
+#
 # ANTES DE TOCAR NADA, PRUÉBALO EN SECO:
 #
 #     python herramientas/1-publicar/importar-mundo.py <ruta> --probar
@@ -62,9 +80,10 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from comun import (RAIZ, RUTAS_QUE_NO_SON_EL_MUNDO,  # noqa: E402
-                   es_del_mundo, pasar_generadores, preguntar)
+                   WIKI_FUERA, es_del_mundo, esta_fuera, guardar_wiki_fuera,
+                   pasar_generadores, preguntar, wiki_fuera)
 
-DESTINO = RAIZ / "mundo"
+DESTINO = RAIZ / "wiki"
 ORIGEN_APUNTADO = RAIZ / "herramientas" / "mundo-origen.txt"
 
 PAGINAS = {".md"}
@@ -81,7 +100,7 @@ MAPAS = {".cmap"}
 # empiece por punto— está en comun.py y no aquí, porque tiene que ser LO
 # MISMO que ignora el generador al publicar: ver es_del_mundo.
 
-# El archivo que esta herramienta escribe dentro de mundo/ y que no viene
+# El archivo que esta herramienta escribe dentro de wiki/ y que no viene
 # de la bóveda: no hay que borrarlo al hacer el espejo.
 NUESTROS = {"LEEME.txt"}
 
@@ -99,7 +118,7 @@ def kb(n):
 def donde_esta_la_boveda(pedida):
     """La ruta que te hayan dado, o la de la última vez. Se comprueba que
     exista y que parezca una bóveda antes de hacer nada: equivocarse de
-    carpeta aquí significaría vaciar mundo/ y llenarlo de otra cosa."""
+    carpeta aquí significaría vaciar wiki/ y llenarlo de otra cosa."""
     if pedida:
         ruta = Path(pedida).expanduser()
     else:
@@ -139,7 +158,7 @@ def donde_esta_la_boveda(pedida):
         print("  encima, o la de las copias de seguridad?\n")
         return None
 
-    # Si lo que te han dado es la propia carpeta mundo/, no hay nada que
+    # Si lo que te han dado es la propia carpeta wiki/, no hay nada que
     # traer: ya está donde tiene que estar. Pasa que es lo más fácil de
     # confundir, porque Chronicler puede estar apuntando justo ahí.
     if ruta == DESTINO.resolve():
@@ -152,7 +171,7 @@ def donde_esta_la_boveda(pedida):
     # Y que no sea ningún otro sitio de dentro, que sería un lío de los gordos.
     if ruta == RAIZ.resolve() or RAIZ.resolve() in ruta.parents:
         print(f"\n  {ruta} está dentro del propio sitio.")
-        print("  La bóveda tiene que ser una carpeta de fuera; mundo/ es la copia")
+        print("  La bóveda tiene que ser una carpeta de fuera; wiki/ es la copia")
         print("  que hace esta herramienta, no el original.\n")
         return None
     return ruta
@@ -251,11 +270,121 @@ def asomarse(archivo, letras=300):
 
 
 # =========================================
+# ELEGIR QUÉ ENTRA
+# =========================================
+
+def rangos(texto, maximo):
+    """«3», «5-8», «1 4 7», «2,3»: los números que se han escrito. None si
+    hay algo que no es un número, para no cambiar nada a medias."""
+    elegidos = set()
+    for trozo in texto.replace(",", " ").split():
+        if "-" in trozo:
+            a, _, b = trozo.partition("-")
+            if not (a.isdigit() and b.isdigit()):
+                return None
+            a, b = sorted((int(a), int(b)))
+            elegidos.update(range(a, b + 1))
+        elif trozo.isdigit():
+            elegidos.add(int(trozo))
+        else:
+            return None
+    return {n for n in elegidos if 1 <= n <= maximo}
+
+
+def elegir_que_entra(boveda, paginas, mapas):
+    """La pantalla de [x] / [ ]. Devuelve True si ha cambiado algo (y lo ha
+    guardado en wiki-fuera.txt)."""
+    reglas = wiki_fuera()
+    cosas = sorted(
+        [(a.relative_to(boveda).as_posix(), "página") for a in paginas]
+        + [(a.relative_to(boveda).as_posix(), "mapa") for a in mapas],
+        key=lambda c: (c[0].count("/") > 0, c[0].rsplit("/", 1)[0].lower() if "/" in c[0] else "", c[0].lower()),
+    )
+    if not cosas:
+        print("\n  No hay páginas ni mapas que elegir.")
+        return False
+    fuera = {ruta for ruta, _ in cosas if esta_fuera(ruta, reglas)}
+    antes = set(fuera)
+
+    def carpeta(ruta):
+        return ruta.rsplit("/", 1)[0] + "/" if "/" in ruta else ""
+
+    while True:
+        print("\n  ---- QUÉ ENTRA EN LA WIKI ----")
+        print("  [x] entra · [ ] se queda fuera\n")
+        actual = None
+        for n, (ruta, que) in enumerate(cosas, start=1):
+            if carpeta(ruta) != actual:
+                actual = carpeta(ruta)
+                print(f"  {actual or '(en la raíz)'}")
+            marca = " " if ruta in fuera else "x"
+            nombre = ruta.rsplit("/", 1)[-1].rsplit(".", 1)[0]
+            extra = "  (mapa)" if que == "mapa" else ""
+            print(f"     [{marca}] {n:>3}. {nombre}{extra}")
+        print(f"\n  Entran {len(cosas) - len(fuera)} de {len(cosas)}.")
+        print("  Escribe números para cambiarlos (3, 5-8), una carpeta (gente/),")
+        print("  «todo» o «nada». Enter en blanco para terminar.")
+        dicho = preguntar("¿Qué cambio?").strip()
+        if not dicho:
+            break
+        if dicho.lower() == "todo":
+            fuera.clear()
+            continue
+        if dicho.lower() == "nada":
+            fuera = {ruta for ruta, _ in cosas}
+            continue
+        if dicho.endswith("/") or dicho.endswith("\\"):
+            buscada = dicho.replace("\\", "/").strip("/").lower() + "/"
+            dentro = [r for r, _ in cosas if carpeta(r).lower() == buscada]
+            if not dentro:
+                print(f"     No hay ninguna carpeta {dicho!r} con páginas.")
+                continue
+            # Si entra alguna, la carpeta se saca entera; si no entra
+            # ninguna, se mete entera. Es lo que uno espera al «pulsarla».
+            if any(r not in fuera for r in dentro):
+                fuera.update(dentro)
+            else:
+                fuera.difference_update(dentro)
+            continue
+        numeros = rangos(dicho, len(cosas))
+        if not numeros:
+            print(f"     No entiendo {dicho!r}.")
+            continue
+        for n in numeros:
+            ruta = cosas[n - 1][0]
+            fuera.symmetric_difference_update({ruta})
+
+    if fuera == antes:
+        print("\n  No cambia nada de lo que entra.")
+        return False
+
+    # Las carpetas enteras escritas a mano se respetan mientras todo lo de
+    # dentro siga fuera: así lo que añadas en el futuro a esa carpeta
+    # también se queda fuera. Si has vuelto a meter algo de una, la regla
+    # de carpeta se deshace en sus archivos.
+    nuevas = set()
+    for regla in reglas:
+        if regla.endswith("/"):
+            dentro = [r for r, _ in cosas if esta_fuera(r, [regla])]
+            if all(r in fuera for r in dentro):
+                nuevas.add(regla)
+    nuevas.update(r for r in fuera if not esta_fuera(r, nuevas))
+    # Lo apuntado de algo que ya no está en la bóveda se conserva: puede
+    # ser una página que se ha movido de carpeta un momento.
+    existentes = {r.lower() for r, _ in cosas}
+    nuevas.update(r for r in reglas if not r.endswith("/") and r.lower() not in existentes)
+    guardar_wiki_fuera(nuevas)
+    print(f"\n  Apuntado en {WIKI_FUERA.relative_to(RAIZ)}:"
+          f" {len(fuera)} cosa(s) fuera.")
+    return True
+
+
+# =========================================
 # TRAERLO
 # =========================================
 
 def dentro_de(destino, carpeta):
-    """Que lo que vamos a escribir esté DE VERDAD dentro de mundo/. Un
+    """Que lo que vamos a escribir esté DE VERDAD dentro de wiki/. Un
     nombre de archivo con ".." en la bóveda escribiría fuera del sitio, y
     eso no puede pasar ni por accidente."""
     try:
@@ -293,7 +422,7 @@ def traer(archivos, boveda, probar):
 
 
 def lo_que_sobra(traidos, boveda):
-    """Lo que hay en mundo/ y ya no está en la bóveda. Se devuelve para
+    """Lo que hay en wiki/ y ya no está en la bóveda. Se devuelve para
     poder enseñarlo ANTES de borrar nada."""
     deberia = {(DESTINO / a.relative_to(boveda)).resolve() for a in traidos}
     sobran = []
@@ -337,15 +466,25 @@ def main():
     parser.add_argument("--probar", action="store_true",
                         help="no copia ni borra nada: solo mira y te lo cuenta")
     parser.add_argument("--anadir", action="store_true",
-                        help="no quita de mundo/ lo que ya no esté en la bóveda")
+                        help="no quita de wiki/ lo que ya no esté en la bóveda")
     parser.add_argument("--todo", action="store_true",
                         help="trae también lo que no sean páginas, mapas ni imágenes")
     parser.add_argument("--sin-generar", action="store_true",
                         help="solo trae los archivos; no pasa el generador")
+    parser.add_argument("--elegir", action="store_true",
+                        help="enseña la lista de páginas y mapas para elegir qué entra")
     args = parser.parse_args()
 
     boveda = donde_esta_la_boveda(args.ruta)
     if boveda is None:
+        # Sin bóveda de fuera se puede elegir igual sobre wiki/: es lo que
+        # pasa si Chronicler escribe directamente ahí.
+        if args.elegir and DESTINO.is_dir() and any(DESTINO.rglob("*.md")):
+            print(f"\n  Elijo sobre {DESTINO.relative_to(RAIZ)}/, sin traer nada.")
+            pags, maps, _, _, _ = inventario(DESTINO)
+            if elegir_que_entra(DESTINO, pags, maps) and not args.probar:
+                pasar_generadores(("3-generadores/generar-mundo.py",))
+            return 0
         return 1
 
     print(f"\n  ---- {boveda} ----")
@@ -402,18 +541,44 @@ def main():
         print("\n  No hay ninguna página ni ningún mapa que traer.\n")
         return 1
 
-    a_traer = (list(paginas) + list(mapas) + list(imagenes)
-               + (list(otros) if args.todo else []))
+    # ELEGIR QUÉ ENTRA: con --elegir directamente, y si no, se pregunta
+    # (Enter es que no, y se queda lo que hubiera apuntado).
+    if args.elegir:
+        elegir_que_entra(boveda, paginas, mapas)
+    elif not args.probar:
+        if preguntar("\n¿Quieres cambiar qué páginas entran en la wiki? (s/N)", "n").lower() in SI:
+            elegir_que_entra(boveda, paginas, mapas)
+
+    reglas = wiki_fuera()
+    fuera_paginas = [a for a in list(paginas) + list(mapas)
+                     if esta_fuera(a.relative_to(boveda).as_posix(), reglas)]
+    if fuera_paginas:
+        print(f"\n  {len(fuera_paginas)} página(s)/mapa(s) que has dejado fuera"
+              f" ({WIKI_FUERA.relative_to(RAIZ)}): no me los traigo.")
+    a_traer = ([a for a in list(paginas) + list(mapas) if a not in fuera_paginas]
+               + list(imagenes) + (list(otros) if args.todo else []))
 
     # LO QUE SOBRA, ANTES de tocarlo: borrar sin avisar es la forma más
-    # rápida de perder algo que no se sabía que estaba ahí.
+    # rápida de perder algo que no se sabía que estaba ahí. Se separa lo
+    # que ya no está en la bóveda de lo que sí está pero has dejado fuera.
     sobran = [] if args.anadir else lo_que_sobra(a_traer, boveda)
-    if sobran:
-        print(f"\n  ---- {len(sobran)} archivo(s) en mundo/ que ya no están en la bóveda ----")
-        for archivo in sobran[:12]:
+    elegidas_fuera = [a for a in sobran
+                      if esta_fuera(a.relative_to(DESTINO).as_posix(), reglas)]
+    borradas = [a for a in sobran if a not in elegidas_fuera]
+    if elegidas_fuera:
+        print(f"\n  ---- {len(elegidas_fuera)} archivo(s) en wiki/ que has dejado fuera ----")
+        for archivo in elegidas_fuera[:12]:
             print(f"     {archivo.relative_to(DESTINO).as_posix()}")
-        if len(sobran) > 12:
-            print(f"     … y {len(sobran) - 12} más.")
+        if len(elegidas_fuera) > 12:
+            print(f"     … y {len(elegidas_fuera) - 12} más.")
+        print("  (siguen en tu bóveda: solo se quitan de la copia del sitio)")
+    if borradas:
+        print(f"\n  ---- {len(borradas)} archivo(s) en wiki/ que ya no están en la bóveda ----")
+        for archivo in borradas[:12]:
+            print(f"     {archivo.relative_to(DESTINO).as_posix()}")
+        if len(borradas) > 12:
+            print(f"     … y {len(borradas) - 12} más.")
+    if sobran:
         if not args.probar:
             print("\n  Los quito, para que no se queden publicados.")
             print("  (si quieres conservarlos, corta aquí y vuelve con --anadir)")
@@ -425,7 +590,7 @@ def main():
     quitados = tirar(sobran, args.probar)
 
     if fuera:
-        print(f"\n  OJO: {len(fuera)} archivo(s) con una ruta que se sale de mundo/.")
+        print(f"\n  OJO: {len(fuera)} archivo(s) con una ruta que se sale de wiki/.")
         print("  No los he copiado. Mira cómo se llaman:")
         for f in fuera[:5]:
             print(f"     {f}")

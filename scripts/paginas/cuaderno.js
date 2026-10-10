@@ -33,7 +33,7 @@ const CUADERNO_HOJA_MINIMA_REM = 22;
 // Qué sesiones están publicadas de verdad. Lo mismo que lee el índice de
 // la campaña: una sesión creada pero todavía en borrador no está aquí, y
 // por tanto no se enlaza desde la de al lado.
-const CUADERNO_LISTADO_URL = "/datos/notas-rol.json";
+const CUADERNO_LISTADO_URL = "/datos/notas_rol/notas-rol.json";
 
 initializeCuaderno();
 
@@ -318,7 +318,7 @@ function botonDePagina(nombre, sentido, flechaDelante) {
 // EL PIE DE LA NOTA: EL PDF Y LA SESIÓN DE AL LADO
 // =========================================
 // Debajo del post-it van dos cosas, y las dos salen del JSON de la
-// campaña (datos/campana-<clave>.json), que es donde ya vive la lista de
+// campaña (datos/notas_rol/campana-<clave>.json), que es donde ya vive la lista de
 // sesiones:
 //
 //   · el PDF de las notas escaneadas, si esa sesión tiene uno apuntado

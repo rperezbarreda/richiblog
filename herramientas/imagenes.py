@@ -91,7 +91,7 @@ SITIOS = {
     },
     "mundo": {
         "que": "una imagen de la wiki del mundo",
-        "carpeta": "mundo/_imagenes",
+        "carpeta": "wiki/_imagenes",
         "sufijo": "",
         "lado": 1600,
         "cuadrada": False,

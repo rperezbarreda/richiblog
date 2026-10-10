@@ -7,7 +7,7 @@
    mesa virtual— repartidos por grupos, y al pulsar uno se abre su ficha
    en una ventana con la ilustración grande.
 
-   QUIÉN MANDA: datos/npcs-<clave>.json. Ahí está todo: el nombre,
+   QUIÉN MANDA: datos/notas_rol/npcs-<clave>.json. Ahí está todo: el nombre,
    el grupo, las dos imágenes y lo que se sepa de cada uno. Esta hoja no
    nombra a nadie ni conoce ninguna categoría: los grupos salen de lo que
    ponga el JSON, así que inventarse uno nuevo no toca ni este archivo ni

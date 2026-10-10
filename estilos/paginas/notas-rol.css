@@ -529,8 +529,8 @@
    color del tema. */
 .campana-botin-cosa {
     display: grid;
-    /* Tres columnas: el rombo, el texto y —si la hay— la foto. */
-    grid-template-columns: auto minmax(0, 1fr) auto;
+    /* Dos columnas: delante el rombo —o la foto, si la hay— y el texto. */
+    grid-template-columns: auto minmax(0, 1fr);
     gap: 0 0.6em;
     margin: 0;
     align-items: start;
@@ -546,32 +546,42 @@
     line-height: 1.9;
 }
 
-/* LO QUE TIENE FOTO NO LLEVA ROMBO: la foto ya dice dónde empieza cada
-   cosa, y las dos a la vez son dos viñetas para lo mismo. Lo que no
-   tiene foto se queda con el suyo, que si no la lista se quedaría sin
-   nada que separe una cosa de la siguiente.
+/* LO QUE TIENE FOTO NO LLEVA ROMBO: la foto va EN SU SITIO, delante del
+   nombre, y hace de viñeta. Las dos a la vez serían dos viñetas para lo
+   mismo. Lo que no tiene foto se queda con su rombo, que si no la lista
+   se quedaría sin nada que separe una cosa de la siguiente.
 
-   visibility: hidden y NO content: none, que sería lo obvio: el rombo
-   tiene que seguir ocupando su sitio. Quitándolo del todo, las cosas con
-   foto empezaban medio centímetro más a la izquierda que las demás y la
-   lista quedaba con el borde izquierdo en zigzag. Así el hueco se queda
-   y no lo ve ni lo lee nadie. */
+   Aquí sí es content: none y no visibility: hidden: la foto ocupa la
+   columna del rombo, así que el rombo no tiene que guardar ningún hueco. */
 .campana-botin-cosa.tiene-foto::before {
-    visibility: hidden;
+    content: none;
 }
 
-/* El cuadradito de la derecha. Cruza las dos filas (el nombre y la línea
-   de debajo) para quedarse alineado con el bloque entero y no con la
-   primera línea. */
+.campana-botin-cosa.tiene-foto {
+    gap: 0 0.8em;
+}
+
+/* La foto, delante del nombre y con su reborde. Cruza las dos filas (el
+   nombre y la línea de debajo) para quedarse alineada con el bloque
+   entero y no solo con la primera línea.
+
+   Va la PRIMERA también en el HTML (notas-rol.js), no solo aquí: así el
+   tabulador llega a ella en el mismo orden en que se ve, y no se depende
+   de que la rejilla reordene nada. */
 .campana-botin-foto {
-    grid-column: 3;
+    grid-column: 1;
     grid-row: 1 / span 2;
     align-self: center;
     width: 3rem;
     height: 3rem;
     padding: 0;
     overflow: hidden;
-    border: 2px solid var(--border);
+    /* El reborde en el gris de lo secundario y NO en --border, que en el
+       oscuro, el claro y los dos tranquilos es casi transparente: medido
+       con APCA sobre el fondo de esta ventana daba Lc 0, 12, 19 y 7, y lo
+       que no es texto pide 45. Con --muted da entre 76 y 108 en los nueve
+       temas que tienen que pasar. Al pasar el ratón, amarillo. */
+    border: 2px solid var(--muted);
     background: var(--purple-lighter);
     cursor: pointer;
 }

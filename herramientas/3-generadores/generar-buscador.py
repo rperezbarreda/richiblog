@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # =========================================
-# ÍNDICE DE BÚSQUEDA — datos/buscador.json
+# ÍNDICE DE BÚSQUEDA — datos/sitio/buscador.json
 # =========================================
 # Escribe el listado que usa web/buscar/buscar.html: todas las páginas de
 # la web con su título, su sección, su fecha, sus categorías y —esto es
@@ -10,7 +10,7 @@
 # cuentas, aunque no lo pongas en el título ni sea una categoría.
 #
 # NO CONFUNDIR CON LOS OTROS DOS LISTADOS:
-#   - datos/mapa-del-sitio.json es la tabla de web/mapa/mapa.html: qué
+#   - datos/sitio/mapa-del-sitio.json es la tabla de web/mapa/mapa.html: qué
 #     páginas hay y desde cuándo. Sin texto.
 #   - sitemap.xml es para los buscadores de fuera.
 #   - éste es para buscar DENTRO de la web, y es el único que lleva el
@@ -65,7 +65,7 @@ from html.parser import HTMLParser
 
 from comun import RAIZ, es_borrador, escribir_json, leer_json, limpiar_html
 
-SALIDA = RAIZ / "datos" / "buscador.json"
+SALIDA = RAIZ / "datos" / "sitio" / "buscador.json"
 
 EXCLUIDOS = {"not_found.html"}
 CARPETAS_EXCLUIDAS = {"herramientas", "fragmentos"}
@@ -218,9 +218,9 @@ RE_ETIQUETA = re.compile(r"<[^>]+>")
 RE_ESPACIOS = re.compile(r"\s+")
 
 LISTADOS = (
-    RAIZ / "datos" / "entradas-blog.json",
-    RAIZ / "datos" / "mis-movidas.json",
-    RAIZ / "datos" / "notas-rol.json",
+    RAIZ / "datos" / "blog" / "entradas-blog.json",
+    RAIZ / "datos" / "mis_movidas" / "mis-movidas.json",
+    RAIZ / "datos" / "notas_rol" / "notas-rol.json",
 )
 
 
@@ -241,7 +241,7 @@ def seccion_de(url):
         return "santuarios"
     if url.startswith("/web/recomendaciones/"):
         return "recomendaciones"
-    if url.startswith("/web/mundo/"):
+    if url.startswith("/web/wiki/"):
         return "wiki cralëa"
     return "otras"
 
@@ -299,7 +299,7 @@ def fichas_de_rol():
     una lleva a Ko-fi o a Drive, así que se apuntan con su enlace de
     fuera y la página de la búsqueda las marca como tales."""
     salida = []
-    for ficha in leer_json(RAIZ / "datos" / "rol.json", []) or []:
+    for ficha in leer_json(RAIZ / "datos" / "mis_movidas" / "rol.json", []) or []:
         titulo = (ficha.get("title") or "").strip()
         if not titulo:
             continue
@@ -332,7 +332,7 @@ def fichas_de_rol():
 # que hay que SUMARLE a la que ya está, por su dirección.
 def extras_de_campanas():
     extras = {}
-    for archivo in sorted((RAIZ / "datos").glob("campana-*.json")):
+    for archivo in sorted((RAIZ / "datos" / "notas_rol").glob("campana-*.json")):
         campana = leer_json(archivo, {}) or {}
         if not isinstance(campana, dict):
             continue
@@ -370,11 +370,11 @@ def extras_de_campanas():
 
         # Y lo mismo con la página de npcs de esa campaña, que es otra
         # página vacía en el HTML: los nombres, lo que es cada uno y lo
-        # que se sabe de ellos viven en datos/npcs-<clave>.json y
+        # que se sabe de ellos viven en datos/notas_rol/npcs-<clave>.json y
         # los pinta el navegador. Sin esto, buscar "Terkus" o "tabernera"
         # no encontraba nada.
         quien = (campana.get("npcs") or "").strip()
-        reparto = leer_json(RAIZ / "datos" / ("npcs-%s.json" % clave), {}) if clave else {}
+        reparto = leer_json(RAIZ / "datos" / "notas_rol" / ("npcs-%s.json" % clave), {}) if clave else {}
         if quien and isinstance(reparto, dict):
             palabras = []
             # Los personajes de los jugadores salen ahí arriba, en «la
@@ -415,7 +415,7 @@ def fichas_de_recomendaciones():
     """Lo que hay en las recomendaciones. El JSON va por bloques (libros,
     series...) y cada bloque tiene sus cosas dentro."""
     salida = []
-    for bloque in leer_json(RAIZ / "datos" / "recomendaciones.json", []) or []:
+    for bloque in leer_json(RAIZ / "datos" / "mi_rincon" / "recomendaciones.json", []) or []:
         categoria = (bloque.get("clave") or "").strip()
         for cosa in bloque.get("cosas") or []:
             titulo = (cosa.get("titulo") or "").strip()
@@ -437,7 +437,7 @@ def fichas_de_recomendaciones():
 
 # Lo que pone la página de "en lo que ando". Igual que las campañas: la
 # página está vacía en el HTML y lo que se ve lo pinta el navegador con
-# datos/en-lo-que-ando.json, así que buscando lo que estoy leyendo no
+# datos/mi_rincon/en-lo-que-ando.json, así que buscando lo que estoy leyendo no
 # saldría nada. No devuelve una ficha suelta —la página ya está en el
 # listado— sino el texto que hay que SUMARLE.
 #
@@ -445,7 +445,7 @@ def fichas_de_recomendaciones():
 # campaña, que sale en su propia ficha, y repetirlo haría que buscar
 # "Ragna" sacara esta página antes que las notas.
 def extras_de_en_lo_que_ando():
-    datos = leer_json(RAIZ / "datos" / "en-lo-que-ando.json", {}) or {}
+    datos = leer_json(RAIZ / "datos" / "mi_rincon" / "en-lo-que-ando.json", {}) or {}
     if not isinstance(datos, dict):
         return {}
     palabras = [datos.get("intro")]

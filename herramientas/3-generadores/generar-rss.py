@@ -61,9 +61,9 @@ DESCRIPCION_CANAL = (
 IDIOMA = "es"
 
 from comun import RAIZ
-JSON_BLOG = RAIZ / "datos" / "entradas-blog.json"
-JSON_MOVIDAS = RAIZ / "datos" / "mis-movidas.json"
-JSON_NOTAS = RAIZ / "datos" / "notas-rol.json"
+JSON_BLOG = RAIZ / "datos" / "blog" / "entradas-blog.json"
+JSON_MOVIDAS = RAIZ / "datos" / "mis_movidas" / "mis-movidas.json"
+JSON_NOTAS = RAIZ / "datos" / "notas_rol" / "notas-rol.json"
 ROL = RAIZ / "web" / "mis_movidas" / "rol" / "index_rol.html"
 SALIDA = RAIZ / "blog" / "rss.xml"
 RUTA_FEED = "/blog/rss.xml"

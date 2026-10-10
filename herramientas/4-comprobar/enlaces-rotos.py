@@ -106,8 +106,8 @@ CARPETAS_HUERFANOS = ("imagenes", "estilos", "scripts", "tipografias", "fragment
 # apunta nadie" cada vez, y una lista con ruido se deja de mirar.
 LOS_LEEN_LAS_HERRAMIENTAS = {
     # Los apartados de la portada del mundo: los lee
-    # 3-generadores/generar-mundo.py al escribir datos/mundo.json.
-    "datos/mundo-categorias.json",
+    # 3-generadores/generar-mundo.py al escribir datos/wiki/mundo.json.
+    "datos/wiki/mundo-categorias.json",
 }
 
 
@@ -142,7 +142,7 @@ RE_IMPORT_CSS = re.compile(r"""@import\s+(?:url\()?["']([^"']+)["']""", re.I)
 # "archivos a los que no apunta nadie" justo cuando más se usan.
 RE_FUENTE_PAQUETE = re.compile(r"^\s*fuente:\s*(/\S+)\s*$", re.M)
 # En los .js solo se buscan rutas absolutas del sitio, que es como están
-# escritas todas: "/datos/rol.json", "/scripts/paginas/rol.js"...
+# escritas todas: "/datos/mis_movidas/rol.json", "/scripts/paginas/rol.js"...
 RE_RUTA_JS = re.compile(r"""["'`](/[^"'`\s>]+\.[A-Za-z0-9]{2,5})["'`]""")
 
 
@@ -247,7 +247,7 @@ def de_js(texto):
 
 def indice_nombres(cache={}):
     """Índice nombre de archivo -> dónde está, para las imágenes. Hace
-    falta porque en datos/fotos-santuarios.json las fotos se guardan solo
+    falta porque en datos/mi_rincon/fotos-santuarios.json las fotos se guardan solo
     con su nombre ("PXL_2026...webp"): la carpeta la monta el JavaScript
     con el nombre del gato, así que en el JSON no hay ninguna ruta que
     comprobar tal cual."""

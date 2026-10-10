@@ -1,17 +1,17 @@
 // =========================================
-// ENTRADAS DEL BLOG — leídas desde datos/entradas-blog.json
+// ENTRADAS DEL BLOG — leídas desde datos/blog/entradas-blog.json
 // =========================================
 // Un único punto de datos para no tener que actualizar dos sitios
 // a mano cada vez que se publica: este script rellena tanto
 // "nuevas entradas" de la portada como el archivo del año, leyendo
-// siempre del mismo datos/entradas-blog.json.
+// siempre del mismo datos/blog/entradas-blog.json.
 //
 // El JSON ya no se escribe a mano: lo genera
 // herramientas/3-generadores/generar-posts.py leyendo las propias páginas. Para
 // publicar, lo más cómodo es  python herramientas/1-publicar/nuevo.py ,
 // que crea la entrada y pasa los generadores.
 
-const BLOG_POSTS_URL = "/datos/entradas-blog.json";
+const BLOG_POSTS_URL = "/datos/blog/entradas-blog.json";
 
 // Cuatro y no seis: la ventana las coloca en dos columnas, así que un
 // número par llena las dos filas enteras y no deja ninguna suelta al

@@ -1,7 +1,7 @@
 // =========================================
-// RELATOS — leídos desde datos/mis-movidas.json
+// RELATOS — leídos desde datos/mis_movidas/mis-movidas.json
 // =========================================
-// datos/mis-movidas.json es el mismo fichero del que también se
+// datos/mis_movidas/mis-movidas.json es el mismo fichero del que también se
 // alimenta la portada (novedades.js) y, más adelante,
 // cualquier otra sección de "mis movidas": un único punto de datos
 // con TODO lo publicado (rol, relatos y lo que venga después),
@@ -14,7 +14,7 @@
 // microrelato, relato corto...). De ahí saca sus botones la ventana
 // de filtros — ver scripts/componentes/filtros.js.
 
-const RELATOS_URL = "/datos/mis-movidas.json";
+const RELATOS_URL = "/datos/mis_movidas/mis-movidas.json";
 
 // LOS RETOS DE ESCRITURA
 // ----------------------
@@ -24,7 +24,7 @@ const RELATOS_URL = "/datos/mis-movidas.json";
 // reto cuenta como una obra, no como 31.
 // Para el reto del año que viene, se añade su JSON a esta lista y ya:
 // el nombre y la dirección de su página van dentro del propio archivo.
-const RETOS_URLS = ["/datos/reto-writeober26.json"];
+const RETOS_URLS = ["/datos/mis_movidas/reto-writeober26.json"];
 const RETOS_ETIQUETA = "retos";
 
 initializeRelatos();

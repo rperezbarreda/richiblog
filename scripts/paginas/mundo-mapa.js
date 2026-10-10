@@ -2,7 +2,7 @@
 // EL MAPA DE UN MUNDO
 // =========================================
 // El zoom, el arrastre y las capas de la página de un mapa
-// (web/mundo/mapa_<loquesea>.html, que escribe
+// (web/wiki/mapa_<loquesea>.html, que escribe
 // herramientas/3-generadores/generar-mundo.py a partir de un .cmap de
 // Chronicler).
 //

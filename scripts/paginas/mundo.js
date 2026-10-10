@@ -5,10 +5,10 @@
 // en la que están escritas, con su buscador y sus botones de etiqueta.
 //
 // AQUÍ NO HAY NINGÚN TEXTO DEL MUNDO. Cada página de la wiki es un HTML de
-// verdad (web/mundo/<loquesea>.html), escrito por
+// verdad (web/wiki/<loquesea>.html), escrito por
 // herramientas/3-generadores/generar-mundo.py a partir de la bóveda de
-// Chronicler que hay en mundo/. Esto solo pinta la LISTA, y la lista sale
-// de datos/mundo.json, que escribe esa misma herramienta.
+// Chronicler que hay en wiki/. Esto solo pinta la LISTA, y la lista sale
+// de datos/wiki/mundo.json, que escribe esa misma herramienta.
 //
 // Está hecho así y no al revés —una sola página que pinte los artículos
 // con JavaScript— por tres motivos que se notan: cada artículo tiene su
@@ -23,7 +23,7 @@
 // una carpeta es cómo tienes guardados los archivos, y eso no tiene por
 // qué ser cómo se busca una cosa.
 //
-// Quién va en qué apartado lo decide datos/mundo-categorias.json y lo
+// Quién va en qué apartado lo decide datos/wiki/mundo-categorias.json y lo
 // calcula el generador: aquí llega hecho, en los campos "grupo" y "sub" de
 // cada ficha, y hasta el ORDEN de los apartados es el que traiga el JSON.
 //
@@ -75,7 +75,7 @@ function pintarElMundo(caja, fichas) {
     }
 
     // Por apartados, EN EL ORDEN EN QUE LLEGAN: el JSON ya viene ordenado
-    // como diga datos/mundo-categorias.json, y reordenar aquí sería
+    // como diga datos/wiki/mundo-categorias.json, y reordenar aquí sería
     // decidir dos veces lo mismo en dos sitios distintos.
     const orden = [];
     const porGrupo = new Map();

@@ -7,7 +7,7 @@
 // su rejilla: una casilla por día, con la palabra que toca. La casilla
 // enlaza si ese día ya está escrito; si no, sale apagada.
 //
-// QUIÉN MANDA: datos/reto-writeober26.json. Ahí están las 31 palabras y,
+// QUIÉN MANDA: datos/mis_movidas/reto-writeober26.json. Ahí están las 31 palabras y,
 // de cada día que publicas, su título y su dirección (los rellena
 // herramientas/1-publicar/nuevo.py --reto al crear la página). Las palabras las
 // escribes tú una vez, al principio.
@@ -22,7 +22,7 @@
 // rejilla. Copiar la carpeta, cambiar ese atributo y añadir el JSON
 // a la lista RETOS_URLS de relatos.js es todo.
 
-const RETO_LISTADO_URL = "/datos/mis-movidas.json";
+const RETO_LISTADO_URL = "/datos/mis_movidas/mis-movidas.json";
 
 initializeReto();
 
@@ -69,7 +69,7 @@ async function initializeReto() {
 
 // Qué días están PUBLICADOS de verdad. No basta con que el JSON del
 // reto tenga la dirección: la página se crea antes de escribirla y nace
-// como borrador, y un borrador no está en datos/mis-movidas.json. Así
+// como borrador, y un borrador no está en datos/mis_movidas/mis-movidas.json. Así
 // la casilla se enciende exactamente cuando el texto se publica, con el
 // mismo criterio que el resto del sitio, sin nada que sincronizar a
 // mano.

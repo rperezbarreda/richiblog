@@ -47,13 +47,13 @@
          Sin esto solo sale la URL pelada, sin título ni imagen. Las rutas
          van absolutas a propósito: las redes no resuelven las relativas. -->
     <meta name="description" content="La wiki de Cralëa: sus países, sus lugares, su gente y sus mapas, con lo que sabemos de cada uno.">
-    <link rel="canonical" href="https://richi.blog/web/mundo/index_mundo.html">
+    <link rel="canonical" href="https://richi.blog/web/wiki/index_wiki.html">
     <meta property="og:type" content="website">
     <meta property="og:site_name" content="El Blog de Richi">
     <meta property="og:locale" content="es_ES">
     <meta property="og:title" content="Wiki Cralëa · El Blog de Richi">
     <meta property="og:description" content="La wiki de Cralëa: sus países, sus lugares, su gente y sus mapas, con lo que sabemos de cada uno.">
-    <meta property="og:url" content="https://richi.blog/web/mundo/index_mundo.html">
+    <meta property="og:url" content="https://richi.blog/web/wiki/index_wiki.html">
     <meta property="og:image" content="https://richi.blog/imagenes/meta/og.webp">
     <meta property="og:image:width" content="1200">
     <meta property="og:image:height" content="630">
@@ -70,12 +70,12 @@
     <!-- ==== ADELANTO DEL MENÚ ====
          El menú, pedido LO PRIMERO para que no llegue tarde. Lo escribe
          la herramienta; el porqué está en ella. -->
-    <script>window.adelantoDeFragmentos={};try{window.adelantoDeFragmentos["/fragmentos/barra-lateral.html"]=fetch("/fragmentos/barra-lateral.html?v=739425f1").then(function(r){return r.ok?r.text():null}).catch(function(){return null})}catch(e){}</script>
+    <script>window.adelantoDeFragmentos={};try{window.adelantoDeFragmentos["/fragmentos/barra-lateral.html"]=fetch("/fragmentos/barra-lateral.html?v=f81d2b47").then(function(r){return r.ok?r.text():null}).catch(function(){return null})}catch(e){}</script>
     <!-- ==== CSS ====
          La escribe herramientas/3-generadores/actualizar-cabeceras.py.
          No la toques a mano (el porqué, en esa herramienta). -->
     <link rel="stylesheet" href="/estilos/paquete-comun.css?v=9ae9d5fe">
-    <link rel="stylesheet" href="/estilos/paginas/mundo.css?v=224e078c">
+    <link rel="stylesheet" href="/estilos/paginas/mundo.css?v=3068e792">
     <link rel="stylesheet" href="/estilos/componentes/filtros.css?v=ae4abb2d">
     <link rel="stylesheet" href="/estilos/componentes/filtros.responsive.css?v=04de297b">
     <link rel="stylesheet" href="/estilos/componentes/buscador.css?v=b303a8b2">
@@ -85,14 +85,14 @@
     <link rel="stylesheet" href="/estilos/paginas/buscar.css?v=692b762d">
     <link rel="stylesheet" href="/estilos/paquete-cierre.css?v=7d910eba">
     <!-- ==== fin del CSS ==== -->
-    <script src="/scripts/cargador-scripts.js?v=476f3b11"></script>
+    <script src="/scripts/cargador-scripts.js?v=906f71e7"></script>
     <!-- ==== JS ====
          Igual que el CSS: la escribe la herramienta, a partir de
          scripts_de(). Van con defer y en este orden, que importa. -->
-    <script defer src="/scripts/paquete-comun.js?v=bf514c0f"></script>
+    <script defer src="/scripts/paquete-comun.js?v=9a077389"></script>
     <script defer src="/scripts/componentes/buscador.js?v=e2007b48"></script>
     <script defer src="/scripts/componentes/filtros.js?v=a9f9dfd8"></script>
-    <script defer src="/scripts/paginas/mundo.js?v=6307451b"></script>
+    <script defer src="/scripts/paginas/mundo.js?v=e2d1c98c"></script>
     <!-- ==== fin del JS ==== -->
     </head>
 <body>
@@ -105,7 +105,7 @@
         <!-- ==== HOME ==== -->
         <section id="home" class="home mundo-indice-page">
             <!-- LA PORTADA DEL MUNDO
-                 El índice NO está escrito aquí: sale de datos/mundo.json,
+                 El índice NO está escrito aquí: sale de datos/wiki/mundo.json,
                  que escribe herramientas/3-generadores/generar-mundo.py al
                  convertir la bóveda, y lo pinta
                  scripts/paginas/mundo.js.
@@ -175,13 +175,13 @@
                  cabecera en una estrecha. Las tarjetas las pinta
                  scripts/paginas/mundo.js con los mapas que haya en el
                  JSON, y la silueta de cada uno es un .svg que escribe el
-                 generador (imagenes/mundo/vista_*.svg). Si no hay ningún
+                 generador (imagenes/wiki/vista_*.svg). Si no hay ningún
                  mapa, esto se queda escondido. -->
             <aside class="mundo-vistas" data-mundo-vistas aria-labelledby="mundo-vistas-titulo" hidden>
                 <h2 class="mundo-vistas-titulo" id="mundo-vistas-titulo">los mapas</h2>
             </aside>
 
-            <div class="mundo-indice" data-mundo-indice data-mundo-datos="/datos/mundo.json">
+            <div class="mundo-indice" data-mundo-indice data-mundo-datos="/datos/wiki/mundo.json">
                 <p class="entries-loading">Cargando la wiki…</p>
             </div>
 

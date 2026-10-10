@@ -65,17 +65,17 @@
     <!-- ==== ADELANTO DEL MENÚ ====
          El menú, pedido LO PRIMERO para que no llegue tarde. Lo escribe
          la herramienta; el porqué está en ella. -->
-    <script>window.adelantoDeFragmentos={};try{window.adelantoDeFragmentos["/fragmentos/barra-lateral.html"]=fetch("/fragmentos/barra-lateral.html?v=739425f1").then(function(r){return r.ok?r.text():null}).catch(function(){return null})}catch(e){}</script>
+    <script>window.adelantoDeFragmentos={};try{window.adelantoDeFragmentos["/fragmentos/barra-lateral.html"]=fetch("/fragmentos/barra-lateral.html?v=f81d2b47").then(function(r){return r.ok?r.text():null}).catch(function(){return null})}catch(e){}</script>
     <!-- ==== CSS ====
          La escribe herramientas/3-generadores/actualizar-cabeceras.py.
          No la toques a mano (el porqué, en esa herramienta). -->
     <link rel="stylesheet" href="/estilos/paquete-comun.css?v=9ae9d5fe">
-    <link rel="stylesheet" href="/estilos/paginas/notas-rol.css?v=7fe84211">
+    <link rel="stylesheet" href="/estilos/paginas/notas-rol.css?v=58adc230">
     <link rel="stylesheet" href="/estilos/paginas/notas-rol.responsive.css?v=5e380254">
     <link rel="stylesheet" href="/estilos/componentes/ventana-modal.css?v=9cb1fbd5">
     <link rel="stylesheet" href="/estilos/componentes/ventana-modal.responsive.css?v=a920f364">
     <link rel="stylesheet" href="/estilos/componentes/lupa.css?v=a1169615">
-    <link rel="stylesheet" href="/estilos/paginas/npcs-rol.css?v=c3717a49">
+    <link rel="stylesheet" href="/estilos/paginas/npcs-rol.css?v=545a9ee4">
     <link rel="stylesheet" href="/estilos/paginas/npcs-rol.responsive.css?v=aab589bf">
     <link rel="stylesheet" href="/estilos/componentes/filtros.css?v=ae4abb2d">
     <link rel="stylesheet" href="/estilos/componentes/filtros.responsive.css?v=04de297b">
@@ -85,16 +85,16 @@
     <link rel="stylesheet" href="/estilos/paginas/buscar.css?v=692b762d">
     <link rel="stylesheet" href="/estilos/paquete-cierre.css?v=7d910eba">
     <!-- ==== fin del CSS ==== -->
-    <script src="/scripts/cargador-scripts.js?v=476f3b11"></script>
+    <script src="/scripts/cargador-scripts.js?v=906f71e7"></script>
     <!-- ==== JS ====
          Igual que el CSS: la escribe la herramienta, a partir de
          scripts_de(). Van con defer y en este orden, que importa. -->
-    <script defer src="/scripts/paquete-comun.js?v=bf514c0f"></script>
+    <script defer src="/scripts/paquete-comun.js?v=9a077389"></script>
     <script defer src="/scripts/componentes/buscador.js?v=e2007b48"></script>
     <script defer src="/scripts/componentes/filtros.js?v=a9f9dfd8"></script>
     <script defer src="/scripts/componentes/ventana-modal.js?v=9a18c89a"></script>
     <script defer src="/scripts/componentes/lupa.js?v=eabe6924"></script>
-    <script defer src="/scripts/paginas/npcs-rol.js?v=404b3c96"></script>
+    <script defer src="/scripts/paginas/npcs-rol.js?v=56fb2525"></script>
     <!-- ==== fin del JS ==== -->
   </head>
 <body>
@@ -109,7 +109,7 @@
             <!-- LOS NPC DE UNA CAMPAÑA
 
                  Aquí NO hay nadie escrito: todo sale de
-                 datos/npcs-ragna.json y lo pinta
+                 datos/notas_rol/npcs-ragna.json y lo pinta
                  scripts/paginas/npcs-rol.js. Para añadir a alguien
                  se abre ese archivo y se copia un bloque; no hay que
                  tocar esta página.
@@ -213,8 +213,8 @@
             <p class="filtros-vacio" data-filtros-vacio role="status" hidden></p>
 
             <ul class="npcs-lista" data-npcs-lista
-                data-npcs-datos="/datos/npcs-ragna.json"
-                data-campana-datos="/datos/campana-ragna.json">
+                data-npcs-datos="/datos/notas_rol/npcs-ragna.json"
+                data-campana-datos="/datos/notas_rol/campana-ragna.json">
                 <li class="entries-loading">Cargando el reparto…</li>
             </ul>
 

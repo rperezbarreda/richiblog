@@ -1,7 +1,7 @@
 // =========================================
 // CHANGELOG — lo que va cambiando en la web
 // =========================================
-// La lista sale de datos/changelog.json, que es el único archivo que se
+// La lista sale de datos/sitio/changelog.json, que es el único archivo que se
 // toca para apuntar algo. Cada bloque es un día:
 //
 //   {
@@ -17,7 +17,7 @@
 // del botón de la portada. No es algo que haya que leer para usar la
 // web, sino para quien tenga curiosidad por cómo está hecha.
 
-const CHANGELOG_URL = "/datos/changelog.json";
+const CHANGELOG_URL = "/datos/sitio/changelog.json";
 
 initializeChangelog();
 

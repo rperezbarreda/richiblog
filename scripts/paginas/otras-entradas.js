@@ -27,9 +27,9 @@
 // texto, y no es la lista de entradas: es un "y si te apetece, esto".
 
 const OTRAS_FUENTES = {
-    blog: { url: "/datos/entradas-blog.json", filtro: null },
+    blog: { url: "/datos/blog/entradas-blog.json", filtro: null },
     relatos: {
-        url: "/datos/mis-movidas.json",
+        url: "/datos/mis_movidas/mis-movidas.json",
         // Los de una colección tienen la suya propia (abajo), así que
         // aquí no se mezclan: quien lee un relato suelto no quiere que
         // le ofrezcan el día 14 de un reto.
@@ -44,7 +44,7 @@ function fuenteDe(clave) {
     if (nombre.indexOf("coleccion:") === 0) {
         const coleccion = nombre.slice("coleccion:".length);
         return {
-            url: "/datos/mis-movidas.json",
+            url: "/datos/mis_movidas/mis-movidas.json",
             filtro: (item) => (item.collection || "").trim() === coleccion,
         };
     }

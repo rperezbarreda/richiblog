@@ -40,7 +40,7 @@
 #                     sus etiquetas y todo el bloque de <meta> (el que
 #                     decide cómo se ve el enlace al compartirlo). Si el
 #                     archivo ya existe NO lo pisa.
-#   rol               Añade la ficha a datos/rol.json, que es de donde
+#   rol               Añade la ficha a datos/mis_movidas/rol.json, que es de donde
 #                     la página del portfolio saca sus tarjetas.
 #   reto              Crea el texto de un día del reto de escritura,
 #                     sacando la palabra de su JSON.
@@ -102,10 +102,10 @@ from comun import (
 TIPOS_RELATO = ["microrelato", "relato corto"]
 
 ROL = RAIZ / "web" / "mis_movidas" / "rol" / "index_rol.html"
-JSON_ROL = RAIZ / "datos" / "rol.json"
+JSON_ROL = RAIZ / "datos" / "mis_movidas" / "rol.json"
 IMGS_ROL = "/imagenes/mis_movidas/rol/"
 
-JSON_RETO = RAIZ / "datos" / "reto-writeober26.json"
+JSON_RETO = RAIZ / "datos" / "mis_movidas" / "reto-writeober26.json"
 CARPETA_RETO = RAIZ / "web" / "mis_movidas" / "relatos" / "writeober26"
 SUBCATEGORIA_RETO = "writeober26"
 
@@ -616,7 +616,7 @@ def hacer_reto(args):
 # coge el número de sesión que toca y se deja la página montada con la
 # fecha puesta y dos hojas de cuaderno en blanco para escribir dentro.
 #
-# Quién manda es el JSON de la campaña (datos/campana-<clave>.json): de ahí
+# Quién manda es el JSON de la campaña (datos/notas_rol/campana-<clave>.json): de ahí
 # sale su nombre, su carpeta y las sesiones que ya hay, y ahí se apunta la
 # nueva. La ficha de la campaña —el sistema, los personajes, la sinopsis—
 # se escribe a mano en ese mismo archivo y esto no la toca.

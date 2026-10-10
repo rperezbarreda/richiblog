@@ -2,7 +2,7 @@
 # =========================================
 # EN LO QUE ANDO — cambiar lo que pone la página
 # =========================================
-# Rellena datos/en-lo-que-ando.json, que es de donde sale
+# Rellena datos/mi_rincon/en-lo-que-ando.json, que es de donde sale
 # web/en_lo_que_ando/en_lo_que_ando.html. Es lo mismo que abrir el archivo
 # y escribir, pero sin pelearse con las comas y las comillas, y poniendo
 # la fecha de "última vez que toqué esto" sin que haya que acordarse.
@@ -28,7 +28,7 @@
 #     python herramientas/1-publicar/en-lo-que-ando.py --ver
 #
 # LO QUE NO SE TOCA AQUÍ: el bloque de la partida de rol. Ése se escribe
-# solo con lo que haya en datos/notas-rol.json y en el JSON de la campaña;
+# solo con lo que haya en datos/notas_rol/notas-rol.json y en el JSON de la campaña;
 # publicar unas notas es lo que lo actualiza. Si hubiera que venir aquí a
 # cambiarlo a mano, el día que se olvidara la página estaría mintiendo.
 #
@@ -53,7 +53,7 @@ from comun import (  # noqa: E402
     preguntar,
 )
 
-ARCHIVO = RAIZ / "datos" / "en-lo-que-ando.json"
+ARCHIVO = RAIZ / "datos" / "mi_rincon" / "en-lo-que-ando.json"
 
 # Los tres huecos de "ahora mismo" y en qué orden salen. Están escritos
 # aquí y no sacados del archivo a propósito: son siempre estos tres, y así
