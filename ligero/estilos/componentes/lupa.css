@@ -1,0 +1,68 @@
+/* Copia sin comentarios. La escribe actualizar-cabeceras.py: no se edita.
+   fuente: /estilos/componentes/lupa.css
+*/
+.lupa {
+    position: fixed;
+    inset: 0;
+    z-index: 1200;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    padding: 24px;
+    background: var(--surface);
+}
+.lupa-img {
+    max-width: min(96vw, 1400px);
+    max-height: 78vh;
+    object-fit: contain;
+    border: 2px solid var(--yellow);
+    background: var(--purple-lighter);
+}
+.lupa-pie {
+    margin: 0;
+    color: var(--white);
+    font-family: var(--fuente-mono);
+    font-size: 0.9375rem;
+    text-align: center;
+}
+.lupa-cerrar {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 44px;
+    min-height: 44px;
+    border: 2px solid var(--yellow);
+    background: var(--purple);
+    color: var(--yellow);
+    font-family: var(--fuente-mono);
+    font-size: 1.125rem;
+    line-height: 1;
+    cursor: pointer;
+}
+.lupa-cerrar:hover,
+.lupa-cerrar:focus-visible {
+    background: var(--yellow);
+    color: var(--yellow-contrast);
+}
+.lupa-cerrar:focus-visible {
+    outline: 2px solid var(--yellow);
+    outline-offset: 2px;
+}
+@media (forced-colors: active) {
+    .lupa {
+        background: Canvas;
+    }
+    .lupa-img {
+        border-color: CanvasText;
+    }
+}
+@media print {
+    .lupa {
+        display: none;
+    }
+}

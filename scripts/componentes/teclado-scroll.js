@@ -31,6 +31,18 @@
 // Qué zona se mueve: la que contiene el foco. Si estás dentro de una
 // tarjeta con scroll propio, se mueve esa tarjeta; si no, la página.
 // Así las flechas hacen lo que uno espera en cada sitio.
+//
+// Y 3. Las OTRAS cajas con scroll (una tarjeta de «sobre mí» con más texto
+// del que cabe, una tabla de la wiki más ancha que el móvil): si dentro no
+// hay nada que se pueda enfocar, el tabulador no entra y con el teclado no
+// hay forma de ver lo que queda escondido. A ésas se les da también un
+// tabindex y un nombre, mientras tengan algo que desplazar.
+//
+// UNA LISTA SIGUE SIENDO UNA LISTA. Si lo que se desplaza es un <ul> (el
+// mes del archivo del blog, las tareas del post-it), NO se le pone
+// role="region": ese rol le quitaba lo de ser lista, y un lector de
+// pantalla dejaba de decir «lista, 6 elementos». Lleva solo el tabindex y
+// el nombre, que en una lista también valen.
 
 const TECLADO_SALTO_LINEA = 0.12; // parte de la altura visible por flecha
 const TECLADO_SALTO_PAGINA = 0.9; // parte de la altura visible por AvPág
@@ -40,6 +52,12 @@ const TECLADO_ESCRIBIENDO = ["INPUT", "TEXTAREA", "SELECT"];
 // La barra espaciadora activa botones, enlaces y <summary>: si el foco
 // está en uno de esos, mandan ellos.
 const TECLADO_PULSABLES = ["BUTTON", "A", "SUMMARY", "INPUT", "TEXTAREA", "SELECT", "OPTION"];
+// Lo que ya tiene su papel y no se le cambia por "region".
+const TECLADO_CON_PAPEL = ["UL", "OL", "DL", "TABLE"];
+// Lo que se puede enfocar: si una caja ya tiene algo de esto dentro, el
+// tabulador entra solo y no hace falta tocarla.
+const TECLADO_ENFOCABLE =
+    'a[href], button, input, select, textarea, summary, [tabindex]:not([tabindex="-1"])';
 
 let tecladoMarcada = null; // la zona que ahora mismo lleva el rótulo
 
@@ -50,12 +68,16 @@ function initializeTecladoScroll() {
         return;
     }
 
-    marcarRegion();
+    const marcarTodo = () => {
+        marcarRegion();
+        marcarCajas();
+    };
+    marcarTodo();
     // Los listados se rellenan por fetch, así que al arrancar puede que
     // todavía no haya contenido suficiente para desplazar nada.
-    window.setTimeout(marcarRegion, 900);
-    window.addEventListener("resize", marcarRegion, { passive: true });
-    window.addEventListener("load", marcarRegion);
+    window.setTimeout(marcarTodo, 900);
+    window.addEventListener("resize", marcarTodo, { passive: true });
+    window.addEventListener("load", marcarTodo);
 
     document.addEventListener("keydown", manejarTecla);
 }
@@ -107,12 +129,25 @@ function marcarRegion() {
     if (pagina.getAttribute("role") === "region" && pagina !== tecladoMarcada) {
         return;
     }
-    if (pagina.getAttribute("tabindex") === null) {
-        pagina.setAttribute("tabindex", "0");
-    }
-    pagina.setAttribute("role", "region");
-    pagina.setAttribute("aria-label", "Contenido de la página, con scroll");
+    marcar(pagina, "Contenido de la página, con scroll");
     tecladoMarcada = pagina;
+}
+
+// Pone tabindex, nombre y —si no es una lista o una tabla— el rol de
+// región. Apunta lo que ha puesto para quitar luego eso y nada más.
+function marcar(zona, nombre) {
+    if (zona.getAttribute("tabindex") === null) {
+        zona.setAttribute("tabindex", "0");
+    }
+    if (TECLADO_CON_PAPEL.indexOf(zona.tagName) === -1 && !zona.hasAttribute("role")) {
+        zona.setAttribute("role", "region");
+        zona.setAttribute("data-teclado-rol", "");
+    }
+    if (!zona.hasAttribute("aria-label") && !zona.hasAttribute("aria-labelledby")) {
+        zona.setAttribute("aria-label", nombre);
+        zona.setAttribute("data-teclado-nombre", "");
+    }
+    zona.setAttribute("data-teclado-marca", "");
 }
 
 function desmarcar(zona) {
@@ -121,8 +156,62 @@ function desmarcar(zona) {
     if (zona.getAttribute("tabindex") === "0") {
         zona.removeAttribute("tabindex");
     }
-    zona.removeAttribute("role");
-    zona.removeAttribute("aria-label");
+    if (zona.hasAttribute("data-teclado-rol")) {
+        zona.removeAttribute("role");
+    }
+    if (zona.hasAttribute("data-teclado-nombre")) {
+        zona.removeAttribute("aria-label");
+    }
+    zona.removeAttribute("data-teclado-rol");
+    zona.removeAttribute("data-teclado-nombre");
+    zona.removeAttribute("data-teclado-marca");
+}
+
+// Las demás cajas con scroll de dentro de <main> a las que el tabulador
+// no llega. El nombre sale del título de su ventana si lo tiene
+// («sobre_mi.txt, con scroll»); si es una tabla, «Tabla, con scroll».
+function marcarCajas() {
+    const principal = document.querySelector("main");
+    if (!principal) {
+        return;
+    }
+    principal.querySelectorAll("[data-teclado-marca]").forEach((zona) => {
+        if (zona !== tecladoMarcada && !puedeDesplazarse(zona)) {
+            desmarcar(zona);
+        }
+    });
+    principal.querySelectorAll("*").forEach((zona) => {
+        if (zona === tecladoMarcada || zona.hasAttribute("data-teclado-marca")) {
+            return;
+        }
+        if (!puedeDesplazarse(zona) && !seSaleDeLado(zona)) {
+            return;
+        }
+        if (zona.getAttribute("tabindex") !== null || zona.querySelector(TECLADO_ENFOCABLE)) {
+            return;
+        }
+        marcar(zona, nombreDeCaja(zona));
+    });
+}
+
+function nombreDeCaja(zona) {
+    if (zona.querySelector("table") || zona.tagName === "TABLE") {
+        return "Tabla, con scroll";
+    }
+    const ventana = zona.closest(".recent-entries, .character-card");
+    const titulo = ventana && ventana.querySelector("h2, h3");
+    const texto = titulo ? titulo.textContent.trim() : "";
+    return texto ? texto + ", con scroll" : "Zona con scroll";
+}
+
+// Las tablas anchas se desplazan de lado, no de arriba abajo. Aquí sin
+// margen de tolerancia: lo que se sale de lado es texto que no se ve.
+function seSaleDeLado(elemento) {
+    if (!elemento || elemento.scrollWidth - elemento.clientWidth <= 1) {
+        return false;
+    }
+    const como = window.getComputedStyle(elemento).overflowX;
+    return como === "auto" || como === "scroll";
 }
 
 function manejarTecla(evento) {

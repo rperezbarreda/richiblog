@@ -328,3 +328,38 @@ def copiar_tal_cual(origen, carpeta_rel, nombre, probar=False):
     carpeta.mkdir(parents=True, exist_ok=True)
     shutil.copy2(fuente, destino)
     return ruta_json, f"{destino.stat().st_size // 1024} KB"
+
+
+# =========================================
+# LA VERSIÓN PEQUEÑA DE UNA IMAGEN QUE YA ESTÁ DENTRO
+# =========================================
+# Para lo que se enseña pequeño muchas veces seguidas: los tokens de los
+# NPC son de 564 px y en la rejilla se ven a 102-140, así que una página
+# de npcs se bajaba casi un mega de retratos para enseñarlos del tamaño de
+# un sello. La pequeña se guarda al lado, con un sufijo ("-mini"), y la
+# grande se queda para donde se ve grande (la ficha).
+#
+# Devuelve la ruta pública de la pequeña, o None si no ha podido (no está
+# la imagen o no está Pillow). Si ya existe y es más nueva que la grande,
+# no la rehace. Nunca la agranda.
+
+def hacer_pequena(ruta_publica, lado, sufijo="-mini", probar=False):
+    origen = RAIZ / ruta_publica.lstrip("/")
+    if not origen.is_file():
+        return None
+    destino = origen.with_name(origen.stem + sufijo + ".webp")
+    publica = "/" + destino.relative_to(RAIZ).as_posix()
+    if destino.is_file() and destino.stat().st_mtime >= origen.stat().st_mtime:
+        return publica
+    if probar:
+        return publica
+    Image, ImageOps = pillow()
+    if Image is None:
+        return None
+    with Image.open(origen) as img:
+        plano = ImageOps.exif_transpose(img)
+        if plano.mode not in ("RGB", "RGBA"):
+            plano = plano.convert("RGBA" if "A" in plano.getbands() else "RGB")
+        plano.thumbnail((lado, lado), Image.LANCZOS)
+        plano.save(destino, "WEBP", quality=CALIDAD, method=6)
+    return publica

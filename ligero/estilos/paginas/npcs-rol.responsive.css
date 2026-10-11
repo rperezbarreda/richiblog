@@ -1,0 +1,44 @@
+/* Copia sin comentarios. La escribe actualizar-cabeceras.py: no se edita.
+   fuente: /estilos/paginas/npcs-rol.responsive.css
+*/
+@media (max-width: 760px) {
+    .npc-ficha-dos {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    .npc-visor-arte {
+        flex: none;
+        align-self: center;
+        width: min(16rem, 70%);
+        max-height: 40vh;
+    }
+}
+@media (max-width: 860px) {
+    .npcs-page {
+        padding: 20px 6%;
+        gap: 16px;
+    }
+    .npc-rejilla {
+        grid-template-columns: repeat(auto-fill, minmax(4.75rem, 1fr));
+        gap: 14px 10px;
+    }
+    .npc-token-marco {
+        max-width: 5rem;
+    }
+    .npc-token {
+        font-size: 0.8125rem;
+    }
+    .npc-token-mono {
+        font-size: 1.5rem;
+    }
+    .npc-token-que {
+        -webkit-line-clamp: 2;
+        line-clamp: 2;
+        font-size: 0.6875rem;
+    }
+}
+@media (max-width: 480px) {
+    .npcs-page {
+        padding: 18px 5%;
+    }
+}

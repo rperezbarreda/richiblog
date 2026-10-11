@@ -69,6 +69,7 @@
               optimizar-imagenes.py
               generar-galeria.py
               tamanos-portada.py
+              tokens-pequenos.py    los tokens de NPC en pequeño (solo)
 
           3-generadores/ ...... SE PASAN SOLOS
               (los llaman nuevo.py y publicar.py; solo los
@@ -79,10 +80,13 @@
               generar-sitemap.py
               generar-mapa.py
               generar-buscador.py
+              textos-npcs.py        el nombre y la intro de la página de npcs
+              quitar-comentarios.py lo de las plantillas, fuera de lo publicado
               generar-mundo.py      la wiki del mundo y sus mapas
               mundo_formato.py      (lo lee generar-mundo.py)
               mundo_mapas.py        (lo lee generar-mundo.py)
               actualizar-cabeceras.py
+              ligero.py             (lo lee actualizar-cabeceras.py)
 
           4-comprobar/ ........ MIRAN, NO TOCAN
               enlaces-rotos.py
@@ -368,7 +372,8 @@
 
   El segundo las pasa a WebP y les quita los metadatos (las fotos
   de móvil llevan dentro el modelo y muchas veces las coordenadas
-  de dónde se hicieron). El tercero crea las miniaturas y escribe
+  de dónde se hicieron). Solo mira las fotos nuevas: las que ya pasó
+  las tiene apuntadas y ni las nombra. El tercero crea las miniaturas y escribe
   el listado de la galería.
 
   Al terminar las miniaturas te pregunta la descripción de cada foto
@@ -654,9 +659,13 @@
   «Rukkus» y «Apacca»). Un <strong> que no sea nadie —un caballo, algo
   que se quiso resaltar— se queda como estaba.
 
-  Los nombres que lo tienen llevan un subrayado de puntos. Son botones
-  de verdad (entran en el tabulador y se abren con Enter), pero se leen
-  igual que antes: misma letra, mismo color.
+  Los nombres que lo tienen llevan un subrayado de puntos. El propio
+  <strong> se vuelve botón (role="button", entra en el tabulador y se
+  abre con Enter o Espacio), así que se leen igual que antes: misma
+  letra, mismo color. Antes se envolvía en un <button>, y el lector de
+  pantalla anunciaba el nombre dos veces y se perdía la negrita en
+  algunos navegadores; ahora el lector dice «Sigil, comerciante. Abre
+  su ficha» una sola vez.
 
   Las fichas no se dibujan dos veces: las notas cargan npcs-rol.js y
   notas-rol.js solo por sus funciones (abrirFichaNpc y
@@ -1032,6 +1041,21 @@
   Mientras no estén, en su sitio sale la inicial del nombre dentro del
   marco. Pásalas antes por optimizar-imagenes.py, como las del blog.
 
+  EL TOKEN, EN PEQUEÑO. En la rejilla, en la fila de retratos de la
+  campaña y en el globo de las notas, el token se ve a 102-140 px, y es
+  un archivo de 564: la página de npcs se bajaba ~700 KB de retratos para
+  enseñarlos del tamaño de un sello. Por eso, al lado de cada token hay
+  una copia de 280 px con "-mini" en el nombre, y el JSON la apunta:
+
+      "token": "/imagenes/notas_rol/ragna/sigil_tkn.webp",
+      "token_mini": "/imagenes/notas_rol/ragna/sigil_tkn-mini.webp",
+
+  NO HAY QUE HACER NADA: la hace herramientas/2-imagenes/tokens-pequenos.py,
+  que pasan solos los generadores y nuevo-personaje.py (rehace el mini si
+  el token es más nuevo). Si un token no tiene mini, la web usa el grande,
+  como siempre; y si el mini falta o no carga, también. La ficha usa
+  siempre el grande (o la ilustración).
+
   Y a mano también se puede, que es un archivo de texto:
 
       {
@@ -1370,7 +1394,8 @@
   (generar-mundo.py, mundo.css, mundo.js, datos/wiki/mundo.json...) y las
   clases .mundo-* siguen con el nombre viejo: son nombres de piezas, no
   direcciones, y no se ven desde fuera. Las direcciones viejas
-  (/web/mundo/...) dejaron de existir con el cambio.
+  (/web/mundo/...) llevan a las nuevas: ver LAS DIRECCIONES QUE SE
+  MUDAN, abajo.
 
   QUIÉN MANDA: datos/wiki/mundo-categorias.json, que se edita a mano y no lo
   reescribe nadie. Es una lista de apartados, cada uno con las etiquetas
@@ -1952,6 +1977,36 @@
   no hay que acordarse de nada al añadir un listado nuevo.
 
 
+  LO QUE SE REVISÓ EL 11-10-2026
+
+  Con axe-core (las pautas WCAG 2.2 A y AA y sus buenas prácticas) en
+  las 35 páginas, en el tema oscuro y el claro y en escritorio y móvil,
+  más a mano lo que axe no ve: que todo lo que recibe el foco lo enseñe,
+  que nada se salga a 320 de ancho ni con el texto al 150 %, y que con
+  el sistema pidiendo menos movimiento no quede nada animándose. Lo que
+  salió y cómo quedó:
+
+    · La barra del título en el móvil es un <header> y la cinta de frases
+      un <aside> con nombre: antes eran texto fuera de cualquier región,
+      y quien salta de región en región con un lector se los saltaba.
+    · El post-it y la ficha de la wiki son role="note" (una nota al
+      margen) y la columna de mapas y el lienzo del mapa, role="region":
+      un <aside> dentro de <main> es una región complementaria anidada, y
+      ésas tienen que ir al nivel de arriba.
+    · scripts/componentes/teclado-scroll.js le ponía role="region" a lo
+      que tuviera scroll aunque fuera un <ul>, y eso le quitaba lo de ser
+      lista: un lector dejaba de decir «lista, 6 elementos». Ya no lo
+      hace con listas ni tablas. Y ahora también hace enfocables las
+      cajas con scroll a las que el tabulador no llegaba (las tarjetas de
+      «sobre mí» con más texto del que cabe, una tabla de la wiki que no
+      cabe en el móvil).
+    · En las notas de la sesión 1 había escenas con los <li> sueltos,
+      sin su <ul>: se han envuelto, como en la plantilla.
+    · El recuadro del foco de las tarjetas de los gatos y de las casillas
+      del post-it dependía de :has(); ahora tiene un respaldo con
+      :focus-within para un navegador que no lo entienda.
+
+
   EL HUECO DE ABAJO EN MÓVIL
 
   En muchos teléfonos la tira de botones de navegación (atrás, inicio,
@@ -2111,7 +2166,32 @@
   esos es "míralo", no "está roto".
 
   Y sube el sitio a Neocities. La carpeta herramientas/ NO hace
-  falta subirla: es solo para ti.
+  falta subirla: es solo para ti. La carpeta ligero/ SÍ: es lo que piden
+  las páginas (ver LA CABECERA DE LAS PÁGINAS, más abajo).
+
+
+---------------------------------------------------------------
+  LOS COMENTARIOS DE LAS PÁGINAS
+---------------------------------------------------------------
+
+  Las plantillas de herramientas/plantillas/ van llenas de comentarios
+  que explican cómo se escribe cada cosa. Sirven mientras escribes, así
+  que una página nueva los trae y los conserva MIENTRAS ES BORRADOR. Al
+  publicarla se van: los quita
+  herramientas/3-generadores/quitar-comentarios.py, que pasan solos
+  nuevo.py, publicar.py y generar-mundo.py. Eran 128 KB repartidos por
+  37 archivos, entre un cuarto y un tercio de cada página.
+
+  LO QUE SE QUEDA:
+    · Las marcas del <head> (<!-- ==== CSS ==== --> y compañía): son
+      como actualizar-cabeceras.py encuentra lo que tiene que reescribir.
+    · El código comentado: un comentario que empieza por "<" es HTML que
+      has escondido a propósito, no una explicación.
+    · Lo que empiece por "!":   <!--! esto se queda -->
+      Es la forma de guardar cualquier nota de texto en una página
+      publicada.
+
+  Si necesitas la guía otra vez, está en la plantilla de siempre.
 
 
 ---------------------------------------------------------------
@@ -2180,14 +2260,18 @@
 ---------------------------------------------------------------
 
   index.html ........... la portada
-  not_found.html ....... la página de "esto no existe" (404)
+  not_found.html ....... la página de "esto no existe" (404), que
+                         además lleva a su sitio las direcciones
+                         viejas (ver LAS DIRECCIONES QUE SE MUDAN)
 
   web/ ................. TODAS las páginas del sitio. Cada una en
                          su carpeta: web/blog/, web/santuarios/,
                          web/mis_movidas/, web/sobre_mi/...
                          Es lo que se ve en la dirección del
                          navegador, así que estos nombres no se
-                         tocan salvo que quieras romper enlaces.
+                         tocan salvo que quieras romper enlaces
+                         (y si los cambias, apunta la mudanza en
+                         scripts/paginas/redirecciones.js).
 
   estilos/ ............. cómo se ve todo
       base.css             lo común a todas las páginas (colores,
@@ -2268,6 +2352,10 @@
                          desde Google)
   herramientas/ ........ esta carpeta. Solo para ti: NO hace
                          falta subirla a Neocities.
+  ligero/ .............. el CSS y el JS SIN COMENTARIOS, que es lo
+                         que piden las páginas. Lo escribe entero
+                         actualizar-cabeceras.py: no se edita. SÍ se
+                         sube a Neocities.
 
 
 ---------------------------------------------------------------
@@ -2331,9 +2419,17 @@
                         dentro del sitio en su carpeta, en WebP y al
                         tamaño que toque, y te escribe la ruta para el
                         JSON. Ver TRAER UNA IMAGEN, más arriba.
-  2-imagenes/optimizar-imagenes.py  pasa imagenes/ a WebP y les quita
-                        los datos de dentro. Respeta el favicon y los
-                        SVG.
+  2-imagenes/optimizar-imagenes.py  pasa imagenes/ a WebP, encoge lo que
+                        pase de 1920 px y les quita los datos de dentro.
+                        SOLO MIRA LO NUEVO: lo que ya ha pasado se apunta
+                        (con una huella del contenido) en
+                        herramientas/imagenes-pasadas.json y no se
+                        vuelve a mirar ni a nombrar; con --todas se
+                        olvida de la lista. Los .webp nuevos también se
+                        miran (los metadatos se quitan sin recomprimir, y
+                        solo se encoge si sale más ligero). No toca nunca
+                        el favicon, imagenes/social_media/ ni ningún SVG
+                        (EXCLUIDAS, dentro del script).
   2-imagenes/generar-galeria.py  miniaturas +
                         datos/mi_rincon/fotos-santuarios.json, y pregunta la
                         descripción de las fotos nuevas
@@ -2342,6 +2438,9 @@
                         dibujo de la portada (el navegador se baja la
                         que le hace falta: 45 KB en vez de 187 en un
                         portátil normal). Solo si cambias el dibujo.
+  2-imagenes/tokens-pequenos.py  hace la copia de 280 px de cada token
+                        de NPC y de la mesa y la apunta en el JSON como
+                        "token_mini". Va sola con los generadores.
 
   3-GENERADORES: SE LLAMAN SOLOS
   ------------------------------
@@ -2375,6 +2474,12 @@
   3-generadores/generar-buscador.py  escribe datos/sitio/buscador.json, el
                         listado con el texto de toda la web que usa la
                         página de buscar.
+  3-generadores/textos-npcs.py  copia el "nombre" y la "intro" de cada
+                        datos/notas_rol/npcs-<clave>.json a su página
+                        de npcs, para que lo escrito en el HTML y lo que
+                        llega del JSON digan lo mismo y la página no dé
+                        un salto al cargar. Va sola con los generadores
+                        y con nuevo-personaje.py. --probar no escribe.
   3-generadores/actualizar-cabeceras.py  escribe en el <head> de cada página la
                         lista de CSS y la de JS que le tocan, con su
                         ?v= anticaché. Hace falta si creas o borras
@@ -2383,7 +2488,13 @@
                         en hojas_de() y scripts_de() de ese mismo
                         archivo, que son los únicos sitios donde
                         está escrito. Con --probar te dice qué
-                        cambiaría sin tocar nada.
+                        cambiaría sin tocar nada. Escribe también
+                        ligero/ (el CSS y el JS sin comentarios) con
+                        la ayuda de ligero.py.
+  3-generadores/quitar-comentarios.py  quita de las páginas publicadas
+                        los comentarios que traen de su plantilla. Los
+                        borradores se quedan con su guía. Ver LOS
+                        COMENTARIOS DE LAS PÁGINAS.
 
   4-COMPROBAR: MIRAN Y NO TOCAN NADA
   ----------------------------------
@@ -2407,7 +2518,11 @@
   4-comprobar/inyecciones.py  busca por dónde se podría colar código:
                         texto pegado como HTML sin escapar, direcciones
                         puestas en un href o un src sin comprobar, y
-                        eval(). Pásalo siempre que toques el JS.
+                        eval(). Y en las páginas, los <script> escritos
+                        dentro que el navegador bloquearía porque no
+                        están en su lista de permitidos (ver LA LISTA DE
+                        SCRIPTS PERMITIDOS). Pásalo siempre que toques
+                        el JS o un <script> de una página.
 
   5-CONSULTA: PARA MIRAR, NO SE EJECUTAN
   --------------------------------------
@@ -2501,14 +2616,82 @@
   de la página de npcs se tragaba un "javascript:" del JSON, porque era
   el único href de esa página sin comprobar.
 
-  LO QUE NO HAY, y conviene saberlo
-  ---------------------------------
-  No hay cabecera Content-Security-Policy: Neocities no deja poner
-  cabeceras. Se podría meter una en un <meta> de cada página, y sería
-  una segunda red por debajo de todo lo de arriba, pero hay que
-  calcular el hash de los dos trozos de JavaScript que van escritos en
-  el <head> (el del tema y el del menú) y meterlos en la regla. Está
-  por hacer; mientras tanto, lo que protege la web es lo de arriba.
+  LA LISTA DE SCRIPTS PERMITIDOS (la segunda red)
+  -----------------------------------------------
+  Neocities no deja poner cabeceras, así que va en un <meta> al
+  principio del <head> de cada página:
+
+      <meta http-equiv="Content-Security-Policy" content="...">
+
+  Le dice al navegador qué puede cargar y ejecutar esa página. Si algo
+  se colara pese a todo lo de arriba, el navegador no lo ejecuta:
+
+    · SCRIPTS: los .js del propio sitio, y los que van escritos dentro
+      de la página (el del tema y el del menú del <head>) solo si su
+      huella —un sha256 de lo que llevan dentro— está en la lista.
+      Un <script> metido de tapadillo, un onerror="…" o un
+      "javascript:" no pasan.
+    · ESTILOS, LETRAS E IMÁGENES: del propio sitio (las imágenes,
+      también data:, que usan algunos iconos). Los style="" escritos
+      en las etiquetas sí valen: hay muchos y no son peligrosos.
+    · CONEXIONES: el propio sitio y Google Apps Script (el guestbook).
+    · NADA de <object>, ni <base> de otra web, ni formularios que
+      manden a otra web.
+
+  LA ESCRIBE actualizar-cabeceras.py, sola, en todas las páginas, con
+  las huellas de lo que lleve cada una en ese momento. Ojo con esto:
+
+      SI CAMBIAS A MANO UN <script> ESCRITO DENTRO DE UNA PÁGINA (aunque
+      sea un espacio), PASA actualizar-cabeceras.py. Si no, la huella
+      ya no coincide y el navegador lo bloquea en silencio: el tema no
+      se aplica o el menú no se adelanta. inyecciones.py lo canta antes
+      de subir.
+
+  Si un día la web tiene que conectarse a otro sitio (otro servicio
+  como el del guestbook), hay que añadirlo en CSP_GOOGLE / politica(),
+  dentro de actualizar-cabeceras.py; si no, el navegador corta la
+  conexión. Se ve en la consola del navegador como "Content Security
+  Policy".
+
+  Probado: las 35 páginas y todo lo que se puede pulsar en ellas sin
+  una sola queja, y un <script> y un onerror metidos a propósito,
+  bloqueados, con el tema y el menú funcionando.
+
+
+---------------------------------------------------------------
+  LAS DIRECCIONES QUE SE MUDAN
+---------------------------------------------------------------
+
+  Cuando una página cambia de sitio, quien tenga guardada la dirección
+  vieja (o la encuentre en un buscador) llegaría a la página de "esto
+  no existe". Neocities no deja hacer redirecciones, pero sí enseña
+  not_found.html para cualquier dirección que no exista, y ahí es
+  donde se arregla: scripts/paginas/redirecciones.js, que solo carga
+  esa página, mira la dirección pedida y, si está en su lista, te
+  lleva a la nueva sin que se vea el 404 (y sin dejar la vieja en el
+  historial, así que «atrás» funciona).
+
+  LA LISTA está al principio del archivo, una línea por mudanza, de
+  la vieja a la nueva:
+
+      const REDIRECCIONES = [
+          ["/web/mundo/index_mundo.html", "/web/wiki/index_wiki.html"],
+          ["/web/mundo/", "/web/wiki/"],
+      ];
+
+  Se mira por el principio de la dirección, así que una línea que
+  acaba en "/" muda la carpeta entera: /web/mundo/sirevia.html lleva a
+  /web/wiki/sirevia.html. Las más concretas, primero. Lo que lleve
+  detrás (?buscar=…, #algo) se conserva.
+
+  Solo lleva a direcciones de esta web (que empiecen por "/"), y una
+  dirección que no esté en la lista sigue dando el 404 de siempre.
+
+  PARA AÑADIR UNA: una línea más en la lista, y pasar
+  actualizar-cabeceras.py (por el ?v= del archivo). Para probarla en
+  tu ordenador hace falta un servidor que enseñe not_found.html cuando
+  no encuentra algo; el python -m http.server normal no lo hace, así
+  que lo fácil es probarla ya subida.
 
 
 ---------------------------------------------------------------
@@ -2563,6 +2746,38 @@
       python herramientas/3-generadores/actualizar-cabeceras.py
 
   SÍ HAY QUE SUBIRLOS A NEOCITIES: son los que piden las páginas.
+
+  SIN COMENTARIOS
+  ---------------
+  El código de este sitio está escrito para leerse: cada regla y cada
+  función lleva su porqué al lado, y eso es la documentación. Pero el
+  navegador de quien entra se lo bajaba todo, y medido los comentarios
+  eran entre la mitad y tres cuartas partes de cada archivo:
+
+      paquete-comun.js    118 KB → 61 KB   (comprimido 35 → 14)
+      paquete-comun.css    90 KB → 40 KB   (comprimido 27 →  7)
+      notas-rol.css        83 KB → 34 KB   (comprimido 24 →  5)
+
+  Así que los paquetes salen ya sin comentarios, y lo demás que piden
+  las páginas es una COPIA sin ellos en ligero/: en el <head> pone
+  /ligero/estilos/paginas/notas-rol.css y no /estilos/paginas/notas-rol.css.
+  Los originales no se tocan nunca: se edita estilos/ y scripts/ como
+  siempre y se pasa actualizar-cabeceras.py, que rehace las copias que
+  hayan cambiado y quita de ligero/ las que ya no pide nadie.
+
+  Cada copia lleva arriba "fuente: <el original>", que es como sabe
+  enlaces-rotos.py que el original se usa (igual que con los paquetes).
+
+  LO DELICADO es quitar comentarios de JavaScript sin romper nada: un
+  "//" puede estar dentro de una cadena ("https://...") y un "/*" dentro
+  de una expresión regular. Lo hace herramientas/3-generadores/ligero.py
+  leyendo el código como lo lee el navegador (sabe cuándo está en una
+  cadena, en una plantilla `${...}` o en una expresión regular). No junta
+  líneas ni cambia nombres: lo que queda se lee igual en el inspector.
+  COMPROBADO archivo a archivo, comparando el árbol de sintaxis del
+  original y el de la copia (acorn para el JS, css-tree para el CSS): los
+  85 salen idénticos. Si alguna vez se toca ligero.py, hay que volver a
+  comprobarlo así.
 
   SI AÑADES una hoja o un script que lleven TODAS las páginas, mételo en
   su sitio de hojas_de()/scripts_de() y también en la lista PAQUETES de
@@ -2640,6 +2855,45 @@
       tarde y no retrasa nada de lo que se ve), pero si algún día
       molesta, generar un listado chiquitín aparte en
       herramientas/2-imagenes/generar-galeria.py lo arregla.
+
+  LO QUE SE GANÓ EL 11-10-2026, medido igual (3G rápido y la CPU cuatro
+  veces más lenta, en móvil):
+
+    - El CSS y el JS sin comentarios (ver SIN COMENTARIOS, arriba) y los
+      comentarios fuera del HTML publicado: el primer pintado pasó de
+      ~1650 a ~1050 ms en todas las páginas medidas, la carga entera un
+      25-30 % antes, y cada página pesa un 25-35 % menos (el diario,
+      497 → 317 KB; la portada, 622 → 416).
+    - Los tokens en pequeño: la página de npcs, de 1068 a 599 KB.
+    - El avatar de «sobre mí» va con srcset: 61 KB en vez de 157.
+    - Los saltos de maqueta (CLS, lo que se mueve mientras carga; por
+      debajo de 0,1 se considera bueno):
+          npcs     0,41 → 0,006  el texto de la intro estaba distinto en
+                                 el HTML y en el JSON, y los filtros se
+                                 escondían mientras cargaba la lista.
+          sesión   0,16 → 0,07   el botón de plegar viene escrito en la
+                                 página en vez de meterlo el script.
+          diario   0,10 → 0,03   el aviso de "Cargando" ocupa ya lo que
+                                 va a ocupar el calendario.
+
+    LA INTRO DE LA PÁGINA DE NPCS está escrita dos veces: en el HTML y
+    en "intro" de datos/notas_rol/npcs-<clave>.json, que la pisa al
+    cargar. MANDA EL JSON: cámbiala ahí, y
+    herramientas/3-generadores/textos-npcs.py (va sola con los
+    generadores y con nuevo-personaje.py) la copia a la página. Si no
+    coincidieran, la página daría un salto al llegar el JSON. Lo mismo
+    con el "nombre" de la campaña.
+
+  LO QUE SE MIDIÓ Y NO SE HIZO, para no volver a medirlo:
+
+    - Precargar la letra de los títulos (Pangolin). Quita casi todo el
+      salto que queda en la portada (CLS 0,067 → 0,006), pero el primer
+      pintado pasa de ~1280 a ~1630 ms, porque la letra compite con el
+      CSS. 0,067 ya está por debajo de 0,1, así que no compensa.
+    - Un listado chiquitín de fotos para el gatín (lo de
+      fotos-santuarios.json, más arriba): comprimido, como viaja de
+      verdad, son 3,3 KB contra 2,6. Y la galería de los gatos usa el
+      mismo JSON, que así ya está en la caché. No compensa.
 
   CÓMO VOLVER A MEDIRLO. Las fuentes ya van con font-display: swap y la
   del texto va precargada en el <head>; eso está medido y mejor no

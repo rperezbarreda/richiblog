@@ -15,21 +15,6 @@
 */
 
 /* ======== /estilos/base.css ======== */
-/* FUENTES LOCALES */
-
-/* Todas las fuentes del sitio se sirven desde /tipografias/ — ya no hay
-   ninguna petición a Google. Van todas aquí porque base.css es lo
-   único que se carga en TODAS las páginas, incluido el 404 (ver la
-   lista de herramientas/3-generadores/actualizar-cabeceras.py), así que es el único
-   sitio donde una declaración vale para todo el sitio.
-   Declararlas aquí no cuesta ancho de banda: el navegador solo baja
-   el archivo cuando algún elemento de esa página usa esa fuente de
-   verdad, así que Pangolin (74 KB) solo se descarga al abrir una
-   entrada del blog, aunque esté declarada aquí.
-   font-display: swap replica el &display=swap que llevaba el enlace
-   de Google: el texto se ve desde el primer momento con la fuente de
-   respaldo y salta a la definitiva al cargar. */
-
 @font-face {
     font-family: "DM Mono";
     src: url("/tipografias/dm-mono-400.woff2") format("woff2");
@@ -37,7 +22,6 @@
     font-style: normal;
     font-display: swap;
 }
-
 @font-face {
     font-family: "DM Mono";
     src: url("/tipografias/dm-mono-500.woff2") format("woff2");
@@ -45,7 +29,6 @@
     font-style: normal;
     font-display: swap;
 }
-
 @font-face {
     font-family: "Space Grotesk";
     src: url("/tipografias/space-grotesk-400.woff2") format("woff2");
@@ -53,7 +36,6 @@
     font-style: normal;
     font-display: swap;
 }
-
 @font-face {
     font-family: "Space Grotesk";
     src: url("/tipografias/space-grotesk-500.woff2") format("woff2");
@@ -61,7 +43,6 @@
     font-style: normal;
     font-display: swap;
 }
-
 @font-face {
     font-family: "Space Grotesk";
     src: url("/tipografias/space-grotesk-600.woff2") format("woff2");
@@ -69,7 +50,6 @@
     font-style: normal;
     font-display: swap;
 }
-
 @font-face {
     font-family: "Jersey 10";
     src: url("/tipografias/jersey-10-400.woff2") format("woff2");
@@ -77,7 +57,6 @@
     font-style: normal;
     font-display: swap;
 }
-
 @font-face {
     font-family: "Pangolin";
     src: url("/tipografias/pangolin-400.woff2") format("woff2");
@@ -85,23 +64,6 @@
     font-style: normal;
     font-display: swap;
 }
-
-/* ---- LA LETRA "MÁS LEGIBLE" ---- */
-
-/* Atkinson Hyperlegible, del Braille Institute. Está dibujada a
-   propósito para quien ve poco: separa las formas que se confunden
-   (la l de la I y del 1, el 0 lleva raya, la rn no parece una m) y
-   abre más los huecos de las letras.
-   Son dos familias hermanas: la normal para lo que se lee de corrido
-   y la Mono para lo que aquí va en monoespaciada (fechas, etiquetas,
-   barras de título). Solo se bajan si alguien enciende esa letra en
-   la ventana de accesibilidad, así que a quien no la use no le cuesta
-   ni un byte, igual que pasa con Pangolin.
-   Solo hay dos grosores, 400 y 700. Donde el sitio pide 500 o 600 el
-   navegador coge el 400 y el 700 respectivamente, que es lo correcto:
-   lo que NO queremos es que se invente una negrita deformando la
-   letra, y declarando los dos grosores de verdad no lo hace. */
-
 @font-face {
     font-family: "Atkinson Hyperlegible";
     src: url("/tipografias/atkinson-400.woff2") format("woff2");
@@ -109,7 +71,6 @@
     font-style: normal;
     font-display: swap;
 }
-
 @font-face {
     font-family: "Atkinson Hyperlegible";
     src: url("/tipografias/atkinson-700.woff2") format("woff2");
@@ -117,7 +78,6 @@
     font-style: normal;
     font-display: swap;
 }
-
 @font-face {
     font-family: "Atkinson Hyperlegible";
     src: url("/tipografias/atkinson-400-italica.woff2") format("woff2");
@@ -125,7 +85,6 @@
     font-style: italic;
     font-display: swap;
 }
-
 @font-face {
     font-family: "Atkinson Hyperlegible Mono";
     src: url("/tipografias/atkinson-mono-400.woff2") format("woff2");
@@ -133,7 +92,6 @@
     font-style: normal;
     font-display: swap;
 }
-
 @font-face {
     font-family: "Atkinson Hyperlegible Mono";
     src: url("/tipografias/atkinson-mono-700.woff2") format("woff2");
@@ -141,7 +99,6 @@
     font-style: normal;
     font-display: swap;
 }
-
 @font-face {
     font-family: "Atkinson Hyperlegible Mono";
     src: url("/tipografias/atkinson-mono-400-italica.woff2") format("woff2");
@@ -149,108 +106,34 @@
     font-style: italic;
     font-display: swap;
 }
-
 :root {
-    /* CUÁNTO SE AGRANDA EL TEXTO DE TODA LA WEB.
-       La cambia el mando "Aa" de arriba a la derecha (ver
-       scripts/componentes/ajustes.js) y la deja puesta antes del
-       primer pintado scripts/cargador-scripts.js, leyendo lo que se
-       guardó la última vez. Vale 1 mientras nadie la toque.
-
-       Multiplica el tamaño de raíz, y como aquí los tamaños van en rem
-       —los 171 font-size del CSS menos uno—, con eso crece todo. Lo
-       poco que va en píxeles y tiene que seguirla lo hace a mano, con
-       un calc: de momento, la barra fija del móvil. */
     --escala: 1;
-    /* ===== LAS CINCO FUENTES, EN VARIABLES =====
-       Van así y no escritas a pelo en cada regla porque hay un mando
-       que las cambia TODAS de golpe por la Atkinson Hyperlegible (ver
-       :root[data-letra="legible"] más abajo). Son 112 sitios repartidos
-       por 30 archivos: sin variables habría que tocarlos uno a uno cada
-       vez, y bastaría olvidarse de uno para que ese trozo se quedara
-       con la letra vieja.
-       Si añades CSS nuevo, usa estas variables y no el nombre de la
-       fuente, que si no ese trozo no cambiará con el mando. */
-    /* Lo que se lee de corrido: párrafos, entradas, menú. */
     --fuente-texto: "Space Grotesk", sans-serif;
-    /* Datos y rótulos: fechas, etiquetas, botones, formularios. */
     --fuente-mono: "DM Mono", monospace;
-    /* Las barras de título de las ventanas falsas. */
     --fuente-ventana: "Jersey 10", "DM Mono", monospace;
-    /* Los titulares grandes en cursiva ("bienvenidos a mi blog!"). */
     --fuente-titular: Georgia, "Times New Roman", serif;
-    /* La de aire escrito a mano, para las notas sueltas. */
     --fuente-mano: "Pangolin", "Space Grotesk", sans-serif;
-    /* Lo que mide la barra amarilla del móvil. Sale de aquí, y no de un
-       60px suelto en cada sitio, porque la barra tiene que crecer con
-       el texto y hay cuatro cosas que se colocan justo debajo de ella. */
     --barra-alto: calc(60px * var(--escala));
-    /* Y lo que mide de ancho la barra lateral. Igual: con el texto al
-       150% en 280px no cabía "accesibilidad" y se cortaba. Multiplicar
-       en vez de poner rem a secas para que con el tamaño de siempre
-       midan exactamente los 280px de toda la vida y no se mueva ni un
-       píxel de lo que ya estaba medido. */
     --lateral-ancho: calc(280px * var(--escala));
-    /* Hueco que se deja libre abajo del todo. En escritorio, ninguno;
-       en móvil lo pone estilos/base.responsive.css, porque ahí los
-       botones del propio teléfono (atrás, inicio...) se comen la tira
-       de abajo de la pantalla y tapaban lo que hubiera allí. */
     --hueco-abajo: 0px;
-
-    /* ===== LOS COLORES, Y POR QUÉ SON ESTOS =====
-       Están medidos con APCA, que es el baremo de contraste nuevo, y no
-       solo con el cociente de toda la vida (WCAG 2). Los dos miden lo
-       mismo —si un texto se lee sobre su fondo— pero WCAG 2 tiene un
-       fallo conocido justo en el caso de esta web: el gris claro sobre
-       fondo oscuro le sale mucho mejor de lo que se lee de verdad. El
-       --muted de antes (#a9a0b2) daba 7,7:1, de sobra para WCAG, y en
-       APCA se quedaba en Lc 52 de los 75 que pide un texto normal.
-
-       Así que el listón aquí es APCA Lc 75 para cualquier texto, sobre
-       CUALQUIERA de los fondos donde pueda caer: el de la página
-       (--purple) y el de dentro de las tarjetas (--purple-lighter), que
-       es el que menos perdona. Hay un script que lo comprueba entero,
-       las dos paletas y todas las páginas; si cambias un color de aquí,
-       pásalo. */
     color-scheme: dark;
     --bg-texture: url("/imagenes/dark_bg.webp");
     --purple: #12091c;
     --purple-lighter: #2b1a3d;
-    /* Una pizca más claro que el #f4c95d de siempre (a ojo no se
-       distingue): con aquel, el amarillo sobre el fondo de las tarjetas
-       se quedaba en Lc 74,6 y no llegaba por los pelos. */
     --yellow: #f5ce6c;
     --yellow-contrast: #12091c;
     --yellow-glow-strong: rgba(245, 206, 108, 0.7);
     --white: #f4f1f7;
-    /* El gris de lo secundario: fechas, etiquetas, pies de foto, el
-       menú. Antes #a9a0b2 (Lc 50-52, que es lo que marcaba el test).
-       Ahora Lc 78-80, y los títulos en --white siguen once puntos por
-       encima, así que lo secundario se sigue viendo secundario. */
     --muted: #d6d2da;
     --border: rgba(255, 255, 255, 0.08);
     --surface: rgba(18, 9, 28, 0.94);
-    /* Rojo de aviso de error. Tiene que ser distinto del --yellow (que
-       en claro ya es rojo y marca los mensajes de "ha ido bien") y
-       leerse sobre --purple-lighter, que es el fondo de las tarjetas.
-       Medido: 6,96:1 en oscuro y 7,52:1 en claro. */
     --error: #f58f8a;
 }
-
 :root[data-theme="light"] {
-    /* Mismo listón que arriba: APCA Lc 75 para todo el texto. Aquí el
-       problema no era el gris claro sobre oscuro sino el revés —rojo y
-       marrón sobre crema— y el arreglo se reparte entre los cuatro
-       colores en vez de cargárselo a uno: el rojo baja un poco, el gris
-       baja un poco y los dos cremas suben un poco. Así ninguno cambia
-       tanto como para que el tema deje de parecerse a sí mismo, y el
-       peor de los cruces se queda en Lc 77. */
     color-scheme: light;
     --bg-texture: url("/imagenes/white_bg.webp");
     --purple: #f3e1d6;
     --purple-lighter: #ede5d1;
-    /* Sigue siendo el mismo rojo, un punto más hondo: antes se quedaba
-       en Lc 62 dentro de las tarjetas. */
     --yellow: #800c04;
     --yellow-contrast: #ede4d6;
     --yellow-glow-strong: rgba(128, 12, 4, 0.35);
@@ -260,26 +143,6 @@
     --surface: rgba(250, 246, 238, 0.94);
     --error: #7a1d15;
 }
-
-/* ===== LOS DOS TEMAS PUROS =====
-   Alto contraste de verdad: el fondo de un lado y TODO lo demás del
-   otro. No hay grises, ni amarillo, ni la diferencia entre el texto
-   principal y lo secundario. Es a propósito: quien enciende esto quiere
-   que no haya medias tintas, y cualquier color intermedio que dejara
-   sería justo lo que viene a quitarse de encima.
-
-   Por eso tampoco hace falta medirlos: blanco sobre negro es el máximo
-   que puede dar una pantalla (APCA Lc 106, WCAG 21:1) y no hay ningún
-   par que se quede corto.
-
-   La rejilla del fondo se apaga (--bg-texture: none): es un dibujo
-   morado que no pinta nada aquí, y de paso quita ruido detrás del
-   texto, que es la otra cosa que estorba cuando se ve poco.
-
-   Las fotos y los dibujos siguen en color: son contenido, no interfaz,
-   y pasarlos a blanco y negro sería quitarle información a quien mira
-   un gato. */
-
 :root[data-theme="puro-oscuro"] {
     color-scheme: dark;
     --bg-texture: none;
@@ -290,14 +153,10 @@
     --yellow-glow-strong: rgba(255, 255, 255, 0.7);
     --white: #ffffff;
     --muted: #ffffff;
-    /* Las rayitas finas que en los otros temas son casi invisibles aquí
-       se ven del todo: en un modo de alto contraste, un separador que no
-       se ve no separa nada. */
     --border: #ffffff;
     --surface: #000000;
     --error: #ffffff;
 }
-
 :root[data-theme="puro-claro"] {
     color-scheme: light;
     --bg-texture: none;
@@ -312,27 +171,6 @@
     --surface: #ffffff;
     --error: #000000;
 }
-
-/* ===== LOS DOS DE TERMINAL =====
-   Un monitor de fósforo de los de antes: fondo negro y todo del mismo
-   color, como los puros pero en verde y en rojo. El fondo de las
-   tarjetas no es negro del todo sino un negro teñido, lo justo para que
-   se note dónde empieza una ventana sin encender nada.
-
-   EL VERDE es el de los monitores de fósforo P1 y no tiene ninguna
-   pega: #33ff66 sobre negro da APCA Lc 87, de los más altos del sitio.
-
-   EL ROJO ES EL ÚNICO DE LOS SEIS QUE NO CUMPLE EL LISTÓN DEL SITIO, Y
-   ESTÁ ELEGIDO ASÍ A SABIENDAS. El rojo es el color con menos brillo que
-   hay: sobre negro, el rojo puro da APCA Lc 37 y WCAG 5,25:1, o sea que
-   pasa el Nivel AA justito y no llega ni al AA grande ni, de lejos, al
-   Lc 75 que cumple todo lo demás. Para que llegara habría que subirlo a
-   #ffb8b8, que ya no es rojo sino rosa; se probó y no era lo que se
-   buscaba. Como el resultado iba a incumplirlo igual, mejor que sea el
-   rojo de verdad y no un salmón a medio camino.
-   Es un tema de adorno que se elige queriendo, y el de fábrica, los dos
-   puros, el claro y el verde siguen cumpliéndolo todo. */
-
 :root[data-theme="terminal-verde"] {
     color-scheme: dark;
     --bg-texture: none;
@@ -347,7 +185,6 @@
     --surface: #000000;
     --error: #33ff66;
 }
-
 :root[data-theme="terminal-rojo"] {
     color-scheme: dark;
     --bg-texture: none;
@@ -362,14 +199,6 @@
     --surface: #000000;
     --error: #ff0000;
 }
-
-/* El tercero de terminal. El azul puro (#0000ff) es el color con menos
-   brillo que existe: sobre negro da Lc 16, ni la mitad de lo que hace
-   falta hasta para un borde. Así que éste tira a azul de cielo, que es
-   el azul más claro que sigue leyéndose como azul y no como verde:
-   #44ddff da Lc 75,9 sobre negro, o sea que CUMPLE el mínimo de texto
-   normal, igual que el verde (Lc 87,5) y al revés que el rojo
-   (Lc 37,5). */
 :root[data-theme="terminal-azul"] {
     color-scheme: dark;
     --bg-texture: none;
@@ -384,31 +213,6 @@
     --surface: #000000;
     --error: #44ddff;
 }
-
-/* ===== EL TEMA TRANQUILO =====
-   Para quien le molesta la pantalla, que no es lo mismo que ver poco.
-   Migraña, fotofobia, mareo visual: ahí lo que estorba no es la falta
-   de contraste sino lo contrario —el blanco puro deslumbra, los colores
-   saturados cansan, una rejilla de fondo marea y una sombra dura
-   vibra—. Por eso NO es el tema claro con otros colores:
-
-     - El fondo no es blanco puro sino un papel roto (#f2efe9), que es
-       lo que recomienda media bibliografía de dislexia y fotofobia.
-     - No hay rejilla de fondo (--bg-texture: none).
-     - El amarillo chillón se cambia por un azul apagado, y eso baja la
-       saturación de todo el sitio de golpe: ese color lo usan los
-       enlaces, los títulos y los recuadros.
-     - Y la tinta no es negro puro sino un marrón muy oscuro, que
-       "vibra" menos sobre el papel roto.
-
-   Que sea suave no quiere decir que se lea peor: está medido como todo
-   lo demás y pasa de sobra. Texto normal Lc 91,6 sobre el fondo y 87,5
-   sobre las tarjetas; el azul de los enlaces, 79,3 y 75,2; el gris de
-   los textos secundarios, 80,7 y 76,5. El mínimo de esta web es 75.
-
-   Va de la mano del mando de "movimiento: quieto" de la ventana de
-   accesibilidad, pero son cosas distintas a propósito: hay quien quiere
-   los colores suaves y los brillitos puestos, y al revés. */
 :root[data-theme="tranquilo"] {
     color-scheme: light;
     --bg-texture: none;
@@ -416,8 +220,6 @@
     --purple-lighter: #ebe8e1;
     --yellow: #3f4f66;
     --yellow-contrast: #ffffff;
-    /* Sin halo: el resplandor de los botones es justo de lo que aquí se
-       quiere huir. */
     --yellow-glow-strong: rgba(63, 79, 102, 0.25);
     --white: #2e2a26;
     --muted: #4f4a44;
@@ -425,26 +227,6 @@
     --surface: #f6f4f0;
     --error: #8a3a32;
 }
-
-/* ===== EL TRANQUILO, DE NOCHE =====
-   El mismo encargo que el tranquilo de día —migraña, fotofobia, mareo
-   visual— pero para quien además lee a oscuras. No es el tema oscuro
-   con otros colores, igual que aquél no era el claro con otros colores:
-
-     - El fondo no es negro puro sino un gris muy oscuro con algo de
-       azul (#1b1e22). El negro puro con texto blanco encima es lo que
-       produce el "halation", ese reborde borroso que hace que las
-       letras parezcan vibrar; con astigmatismo es insoportable y es
-       justo lo que se viene a evitar.
-     - La tinta tampoco es blanco puro, sino un hueso cálido (#e2ddd5),
-       por lo mismo pero al revés.
-     - El acento es un arena apagado en vez del amarillo chillón: baja
-       la saturación de golpe en los enlaces, los títulos y los marcos.
-     - Y sin rejilla de fondo, como su hermano de día.
-
-   Medido como todo: texto normal Lc 84,5 sobre el fondo y 83,5 sobre
-   las tarjetas; el arena de los enlaces, 81,8 y 80,7; el gris de los
-   textos secundarios, 79,1 y 78,1. El mínimo de esta web es 75. */
 :root[data-theme="tranquilo-oscuro"] {
     color-scheme: dark;
     --bg-texture: none;
@@ -452,8 +234,6 @@
     --purple-lighter: #212529;
     --yellow: #e6d8b8;
     --yellow-contrast: #1b1e22;
-    /* Sin halo, como en el tranquilo de día: el resplandor de los
-       botones es de lo que aquí se quiere huir. */
     --yellow-glow-strong: rgba(230, 216, 184, 0.25);
     --white: #e2ddd5;
     --muted: #dad4cb;
@@ -461,13 +241,6 @@
     --surface: #171a1d;
     --error: #f6cbc3;
 }
-
-/* El cuarto de terminal: el ámbar de los monitores de fósforo P3, que
-   es el otro color clásico junto al verde. El ámbar de verdad
-   (#ffb000) se queda en Lc 68,6 sobre negro, por debajo del mínimo del
-   sitio, así que va un punto más claro (#ffc83d): Lc 78,2, sigue
-   leyéndose como ámbar y cumple. El rojo sigue siendo el único de los
-   cuatro que no llega. */
 :root[data-theme="terminal-ambar"] {
     color-scheme: dark;
     --bg-texture: none;
@@ -482,79 +255,36 @@
     --surface: #000000;
     --error: #ffc83d;
 }
-
-/* ===== LA LETRA "MÁS LEGIBLE" =====
-   El mando de la ventana de accesibilidad pone data-letra="legible" en
-   el <html> y con eso cambian las cinco fuentes de golpe. No hace falta
-   tocar ninguna regla más: todas piden su fuente por la variable.
-
-   Las cinco van a Atkinson, no solo la del texto: si alguien enciende
-   esto es porque le cuesta leer, y dejar la pixelada de las barras de
-   título o la de aire manuscrito a medias sería dejarle sin arreglar
-   justo lo más difícil. La Mono se queda para lo que ya era
-   monoespaciado, que ahí la alineación en columnas sí importa (las
-   fechas de un listado, el calendario del diario).
-
-   Detrás de cada una se deja la de siempre como respaldo: si algún día
-   falta un archivo, se cae a la que había y no a la del sistema. */
-/* ===== LA SEPARACIÓN ENTRE LÍNEAS =====
-   El otro mando de la ventana. Los números viven aquí y no en el
-   JavaScript: así se cambian sin tocar código, y el script solo tiene
-   que poner el nombre del escalón en el <html>. Quién lo aplica, y a
-   qué, está en estilos/componentes/ajustes.css. */
 :root[data-interlineado="amplio"] {
     --interlineado: 2;
 }
-
 :root[data-interlineado="muy-amplio"] {
     --interlineado: 2.4;
 }
-
 :root[data-letra="legible"] {
     --fuente-texto: "Atkinson Hyperlegible", "Space Grotesk", sans-serif;
     --fuente-mono: "Atkinson Hyperlegible Mono", "DM Mono", monospace;
-    /* Las barras de título llevan la PROPORCIONAL y no la Mono, al revés
-       que el resto de lo monoespaciado. Dos razones: la Jersey 10 que
-       sustituye es una pixelada muy estrecha y la Mono ocupa un tercio
-       más, con lo que "gatin_random.exe" se salía de la ventanita del
-       gatín; y aquí no hay nada que alinear en columnas, que es para lo
-       único que hace falta una monoespaciada. */
     --fuente-ventana: "Atkinson Hyperlegible", "Jersey 10", sans-serif;
     --fuente-titular: "Atkinson Hyperlegible", Georgia, serif;
     --fuente-mano: "Atkinson Hyperlegible", "Space Grotesk", sans-serif;
 }
-
 * {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
 }
-
 button {
     cursor: pointer;
 }
-
 html {
     height: 100%;
-    /* 135% del tamaño que tenga puesto el navegador (ojo: NO un tamaño
-       fijo, para que quien lo haya subido en su navegador siga
-       mandando), por lo que diga el mando "Aa". */
     font-size: calc(135% * var(--escala));
     scroll-behavior: smooth;
     scroll-padding-top: 30px;
 }
-
 body {
-    /* dvh es el alto que se ve DE VERDAD: en un móvil, vh cuenta la
-       pantalla entera aunque la barra del navegador esté tapando un
-       trozo, y el final de la página se quedaba debajo. El 100vh de
-       antes se queda como respaldo para navegadores viejos, que
-       ignoran la línea siguiente. */
     height: 100vh;
     height: 100dvh;
-    /* Y por debajo de eso, el hueco de los botones del teléfono. Como
-       todo el sitio va con box-sizing: border-box, este relleno le come
-       alto al contenido en vez de empujarlo fuera. */
     padding-bottom: var(--hueco-abajo);
     overflow: hidden;
     display: flex;
@@ -564,7 +294,6 @@ body {
     font-family: var(--fuente-texto);
     transition: background-color 0.1s linear, color 0.1s linear;
 }
-
 body::before {
     content: "";
     position: fixed;
@@ -575,22 +304,11 @@ body::before {
     background-size: 200px 200px;
     background-repeat: repeat;
 }
-
 @media (prefers-contrast: more), (prefers-reduced-transparency: reduce) {
     body::before {
         display: none;
     }
 }
-
-/* CRÉDITO DE ILUSTRACIÓN (compartido: portada y fichas de santuarios) */
-
-/* La etiqueta va encima de una ilustración, no sobre el fondo de la
-   página, así que al principio llevaba los colores escritos a mano
-   pensando que daba igual el tema. Daba igual al dibujo, pero no al
-   resto del sitio: era lo único que no cambiaba al pasar a modo claro
-   y cantaba. Ahora usa las variables del tema como todo lo demás.
-   --surface tapa un 94%, lo justo para que el dibujo asome por detrás
-   sin comerse el contraste del texto. */
 .art-credit {
     margin: 0;
     padding: 6px 10px;
@@ -600,24 +318,18 @@ body::before {
     font-size: 0.625rem;
     letter-spacing: 0.3px;
 }
-
 .art-credit a {
     color: var(--yellow);
     text-decoration: none;
 }
-
 .art-credit a:hover,
 .art-credit a:focus-visible {
     text-decoration: underline;
 }
-
 .art-credit a:focus-visible {
     outline: 2px solid var(--yellow);
     outline-offset: 2px;
 }
-
-/* SOLO PARA LECTORES DE PANTALLA */
-
 .visually-hidden {
     position: absolute;
     width: 1px;
@@ -629,16 +341,6 @@ body::before {
     white-space: nowrap;
     border: 0;
 }
-
-/* VOLVER AL INICIO
-   Para las páginas que no están en el menú (el changelog y el mapa):
-   desde ellas no hay ningún enlace marcado como "estás aquí", así que
-   sin esto la única forma de salir es el "home" del menú, que en móvil
-   está dentro del cajón. Va ARRIBA del título y no al final: así es la
-   primera parada del tabulador después del menú, igual que en las
-   entradas del blog y en la página del reto.
-   Vive aquí, en la base, porque lo usan dos páginas que cargan hojas
-   distintas: repetirlo en las dos era copiarlo. */
 .volver-inicio {
     display: inline-flex;
     align-items: center;
@@ -654,20 +356,15 @@ body::before {
     text-decoration: none;
     transition: color 0.15s linear, background-color 0.15s linear;
 }
-
 .volver-inicio:hover,
 .volver-inicio:focus-visible {
     background: var(--yellow);
     color: var(--yellow-contrast);
 }
-
 .volver-inicio:focus-visible {
     outline: 2px solid var(--yellow);
     outline-offset: 3px;
 }
-
-/* SKIP LINK */
-
 .skip-link {
     position: absolute;
     top: -100px;
@@ -683,20 +380,13 @@ body::before {
     border-radius: 0;
     transition: top 0.1s linear;
 }
-
 .skip-link:focus {
     top: 10px;
 }
-
-/* MAIN */
-
 main {
     position: relative;
     flex: 1 1 auto;
     min-height: 0;
-    /* 36px de aire entre la barra lateral y el marco, y 44 por la
-       derecha: los mismos de siempre, pero contados desde el ancho de
-       la barra, que ahora crece con el texto. */
     margin: 36px 44px 28px calc(var(--lateral-ancho) + 36px);
     width: calc(100% - var(--lateral-ancho) - 80px);
     background: var(--surface);
@@ -705,8 +395,6 @@ main {
     box-shadow: 8px 8px 0 var(--yellow);
     overflow: hidden;
 }
-
-/* Variante para páginas sin sidebar (ej. 404) */
 main.standalone-main {
     flex: 0 0 auto;
     align-self: flex-start;
@@ -714,12 +402,10 @@ main.standalone-main {
     width: 480px;
     max-width: calc(100% - 40px);
 }
-
 main.standalone-main .home {
     height: auto;
     padding: 32px;
 }
-
 .window-controls {
     position: absolute;
     top: 14px;
@@ -728,17 +414,7 @@ main.standalone-main .home {
     display: flex;
     gap: 6px;
 }
-
 .window-btn {
-    /* Los dos colores del botón, en variables y no escritos a pelo, por
-       dos razones. Una: una cabecera que vaya al revés (la barra
-       amarilla de la ficha de un gato) cambia estas dos y ya está, sin
-       repetir las tres propiedades de abajo. Y dos: así el botón se
-       puede dibujar "en hueco" —fondo transparente y el símbolo del
-       color de la tinta— sin tener que adivinar de qué color era el
-       borde, que es lo que hace
-       estilos/componentes/ventanas-plegables.css con el botón que en
-       ese momento no hace nada. */
     --window-btn-tinta: var(--yellow);
     --window-btn-fondo: var(--yellow-contrast);
     display: flex;
@@ -748,29 +424,17 @@ main.standalone-main .home {
     height: 1.3rem;
     border: 2px solid var(--window-btn-tinta);
     background: var(--window-btn-tinta);
-    /* El símbolo de dentro es un SVG que toma currentColor, así que con
-       cambiar el color del botón cambia también el dibujo: eso es lo
-       que hace que las cabeceras invertidas (fichas de gatos, entradas
-       de blog) funcionen sin repetir nada. */
     color: var(--window-btn-fondo);
     user-select: none;
 }
-
-/* El dibujo, proporcional al botón: así vale igual para el tamaño
-   normal y para el pequeño de las tarjetas sin tener que darle una
-   medida a cada uno. */
 .window-btn-icono {
     display: block;
     width: 62%;
     height: 62%;
-    /* Que los clics los reciba el botón y no el SVG: chispas-botones.js
-       busca el .window-btn más cercano al elemento pulsado. */
     pointer-events: none;
 }
-
 .quotes-bar {
     flex: 0 0 auto;
-    /* La ventanilla de las frases y el botón de pararlas, en fila. */
     display: flex;
     align-items: center;
     gap: 14px;
@@ -782,7 +446,6 @@ main.standalone-main .home {
     box-shadow: 8px 8px 0 var(--yellow);
     overflow: hidden;
 }
-
 section {
     height: 100%;
     overflow-y: auto;
@@ -791,9 +454,6 @@ section {
     flex-direction: column;
     justify-content: center;
 }
-
-/* HOME (base, usado por todas las páginas de contenido) */
-
 .home {
     position: relative;
     height: 100%;
@@ -802,12 +462,8 @@ section {
     align-items: center;
     overflow-y: auto;
 }
-
 .home-title {
     color: var(--white);
-    /* Partir por donde sea antes que salirse: con el texto al 150% en
-       una pantalla de 320, "bienvenidos" solo ya no cabe de una línea
-       y se iba por el borde. */
     overflow-wrap: break-word;
     font-size: clamp(4.375rem, 9vw, 8.75rem);
     font-weight: 500;
@@ -815,96 +471,42 @@ section {
     letter-spacing: -8px;
     text-transform: lowercase;
 }
-
 .home-title em {
     color: var(--yellow);
     font-family: var(--fuente-titular);
     font-weight: 400;
     letter-spacing: -6px;
 }
-
-/* Con el texto al 150% en una pantalla de 320 la palabra más larga no
-   cabía en la caja y se comía 8px por la derecha. Que se parta antes de
-   salirse. */
 .bio-description {
     overflow-wrap: break-word;
     color: var(--muted);
     font-size: 0.875rem;
     line-height: 1.8;
 }
-
-/* SELECTION */
-
 ::selection {
     color: var(--yellow-contrast);
     background: var(--yellow);
 }
-
-/* SCROLLBAR */
-
-/* UNA SOLA BARRA PARA TODO EL SITIO. Se define aquí y en ningún sitio
-   más: si hay que cambiarla, se cambia en estas cuatro reglas y cambia
-   en todas partes. Antes cada caja traía la suya y había cinco barras
-   distintas conviviendo —amarilla en el portfolio y en los relatos,
-   gris en el menú y en el archivo del blog, morada en la portada y en
-   la ficha de sobre mí, otro morado en el aviso— y encima con anchos
-   de 5, 6, 7 y 8px según dónde cayera.
-   El color es el del tema (--yellow: amarillo en oscuro, rojo en
-   claro), el mismo de los bordes y los botones, así que la barra se
-   lee como parte de la ventana y no como algo del navegador.
-
-   Sobre el contraste, que aquí importa más que en otras webs porque
-   casi todo lo que se desplaza lo hace DENTRO de una caja y, si no se
-   ve la barra, no hay forma de saber que debajo queda más. Medido
-   contra los dos fondos sobre los que cae (el papel y el de las
-   ventanas), quedándome con el peor de los dos: el morado que tenían
-   varias daba 1,6:1 en oscuro y 1,15:1 en claro —existía pero no se
-   veía— y el gris --muted que lo sustituyó, 6,3:1 y 4,5:1. Con el
-   color del tema son 10,1:1 en oscuro y 5,3:1 en claro, así que este
-   cambio no afloja nada: aprieta.
-
-   Las dos propiedades de abajo no van juntas por capricho:
-   scrollbar-color SE HEREDA, así que puesta en :root llega sola a
-   todas las cajas; scrollbar-width NO se hereda —lo comprobé: puesta
-   solo en :root, las 40 cajas con scroll del sitio seguían calculando
-   "auto" y saliendo con la barra gorda del sistema—, así que esa sí
-   hace falta declararla para todos los elementos.
-   Las reglas ::-webkit- son para los navegadores que todavía no
-   entienden las dos de arriba; Chrome y Firefox las ignoran en cuanto
-   ven scrollbar-color. Las cajas que quieran guardar el hueco de la
-   barra aunque no haga falta siguen poniendo scrollbar-gutter por su
-   cuenta: eso es de sitio, no de color. */
 :root {
     scrollbar-color: var(--yellow) transparent;
 }
-
 * {
     scrollbar-width: thin;
 }
-
 ::-webkit-scrollbar {
     width: 8px;
     height: 8px;
 }
-
 ::-webkit-scrollbar-track {
     background: transparent;
 }
-
 ::-webkit-scrollbar-thumb {
     background: var(--yellow);
     border-radius: 0;
 }
-
-/* Al pasar el ratón se apaga en vez de encenderse: como ya está del
-   color fuerte, el aviso de "estás encima" tiene que ir al revés que
-   en los botones. */
 ::-webkit-scrollbar-thumb:hover {
     background: var(--white);
 }
-
-/* RASTRO DEL CURSOR */
-
 .cursor-particle {
     position: fixed;
     top: 0;
@@ -915,7 +517,6 @@ section {
     pointer-events: none;
     animation: cursor-particle-fade 0.7s ease-out forwards;
 }
-
 @keyframes cursor-particle-fade {
     from {
         opacity: 1;
@@ -926,13 +527,9 @@ section {
         transform: translate(-50%, -50%) scale(0.3) translateY(-16px);
     }
 }
-
-/* PARTÍCULAS DE ESTALLIDO (botón de inspiración, botones de ventana) */
-
 .window-btn {
     cursor: pointer;
 }
-
 .firework-particle {
     position: fixed;
     top: 0;
@@ -943,7 +540,6 @@ section {
     pointer-events: none;
     animation: firework-burst 0.9s ease-out forwards;
 }
-
 @keyframes firework-burst {
     from {
         transform: translate(-50%, -50%) translate(0, 0) scale(1);
@@ -954,26 +550,20 @@ section {
         opacity: 0;
     }
 }
-
-/* TARJETAS DE ENTRADA DEL BLOG (portada + archivo del año) */
-
 .entries-list {
     display: flex;
     flex-direction: column;
     gap: 10px;
     list-style: none;
 }
-
 .entry-preview {
     padding-bottom: 10px;
     border-bottom: 1px solid var(--border);
 }
-
 .entry-preview:last-child {
     padding-bottom: 0;
     border-bottom: none;
 }
-
 .entry-preview-link {
     display: flex;
     flex-direction: column;
@@ -982,35 +572,26 @@ section {
     text-decoration: none;
     color: inherit;
 }
-
 .entry-preview-link:focus-visible {
     outline: 2px solid var(--yellow);
     outline-offset: 3px;
 }
-
 .entry-preview-title {
     color: var(--white);
     font-size: 0.875rem;
     font-weight: 500;
     line-height: 1.3;
 }
-
 .entry-preview-link:hover .entry-preview-title,
 .entry-preview-link:focus-visible .entry-preview-title {
     text-decoration: underline;
 }
-
-/* La fecha y el tiempo de lectura, en la misma línea. Hace falta una
-   caja para los dos porque .entry-preview-link es una columna: sueltos,
-   cada uno se iba a una línea. Envuelve por si en una tarjeta estrecha
-   no caben los dos. */
 .entry-preview-meta {
     display: flex;
     align-items: baseline;
     flex-wrap: wrap;
     gap: 0 8px;
 }
-
 .entry-preview-date {
     flex-shrink: 0;
     color: var(--muted);
@@ -1018,10 +599,6 @@ section {
     font-size: 0.6875rem;
     white-space: nowrap;
 }
-
-/* "4 min". El punto de separación lo pone el CSS y no el texto: así un
-   lector de pantalla lee "26 sept 2026, 4 min" y no un punto suelto en
-   medio. */
 .entry-preview-minutos {
     flex-shrink: 0;
     color: var(--muted);
@@ -1029,28 +606,16 @@ section {
     font-size: 0.6875rem;
     white-space: nowrap;
 }
-
 .entry-preview-minutos::before {
     content: "·";
     margin-right: 4px;
 }
-
-/* Las etiquetas de una entrada ("diario", "opiniones"…). Van FUERA del
-   enlace del título, no dentro: cada una es su propio enlace al archivo
-   del blog filtrado por esa categoría, y un enlace dentro de otro no es
-   HTML válido — el navegador lo deshace por su cuenta y deja de
-   funcionar uno de los dos.
-   Viven aquí y no en webs/blog.css porque las usan la portada (que
-   carga portada.css) y el archivo del año (que carga blog.css): estaban
-   solo en blog.css y en la portada salían sin recuadro y del tamaño del
-   texto normal. */
 .entry-preview-tags {
     display: flex;
     flex-wrap: wrap;
     gap: 5px;
     margin-top: 6px;
 }
-
 .entry-tag {
     display: inline-block;
     padding: 1px 7px;
@@ -1063,38 +628,25 @@ section {
     text-decoration: none;
     transition: color 0.12s linear, border-color 0.12s linear;
 }
-
-/* En modo claro las etiquetas se perdían: gris apagado sobre crema.
-   Aquí van con el rojo del tema —texto y borde— para que se lean como
-   lo que son, una marca de categoría.
-   Llevaban además un fondo rojo muy suave, rgba(173,16,5,.08), y se ha
-   quitado: ese tinte oscurecía el crema justo debajo del texto rojo y
-   era lo peor medido de toda la web (Lc 55 de los 75 que hacen falta).
-   Bajándole la transparencia tampoco llegaba, así que fuera: el borde
-   ya dice que es una etiqueta, y sin él el rojo se lee a Lc 78. */
 :root[data-theme="light"] .entry-tag {
     border-color: var(--yellow);
     background: transparent;
     color: var(--yellow);
 }
-
 :root[data-theme="light"] .entry-tag:hover,
 :root[data-theme="light"] .entry-tag:focus-visible {
     background: var(--yellow);
     color: var(--yellow-contrast);
 }
-
 .entry-tag:hover,
 .entry-tag:focus-visible {
     border-color: var(--yellow);
     color: var(--yellow);
 }
-
 .entry-tag:focus-visible {
     outline: 2px solid var(--yellow);
     outline-offset: 2px;
 }
-
 .entries-loading,
 .entries-empty,
 .entries-error {
@@ -1103,13 +655,6 @@ section {
     font-size: 0.8125rem;
     list-style: none;
 }
-
-/* LIGHTBOX — solo el disparador */
-
-/* El resto del visor (la capa oscura, la imagen, el botón de cerrar)
-   está en estilos/componentes/visor-imagenes.css, que se carga después y por
-   tanto ganaba: lo que había aquí era una copia vieja que no pintaba
-   nada. Se queda solo esto, que no está allí. */
 .lightbox-trigger {
     display: block;
     padding: 0;
@@ -1117,27 +662,9 @@ section {
     background: none;
     cursor: zoom-in;
 }
-
 .lightbox-trigger img {
     display: block;
 }
-
-/* ==== LOS ENLACES QUE SALEN DE LA WEB ==== */
-
-/* La flechita que marca un enlace a otra web. La pone
-   scripts/componentes/enlaces-fuera.js, que además mete dentro del
-   enlace un "(enlace externo)" escondido a la vista: un dibujo solo no
-   vale, porque quien escucha la página no lo ve.
-
-   Va de fondo y con máscara, no como carácter ni como texto de un
-   ::after. Un carácter lo dibuja la fuente de quien visita la web y sale
-   de cualquier tamaño (ya pasó con los botones de las ventanas), y el
-   contenido de un ::after lo leen en voz alta algunos lectores de
-   pantalla: anunciarían "flecha hacia el noreste" en medio de la frase.
-   Con máscara el dibujo toma el color del texto y no lo lee nadie.
-
-   En em y no en píxeles: así crece con el texto que acompaña, incluido
-   cuando se agranda con el mando de accesibilidad. */
 .enlace-fuera::after {
     content: "";
     display: inline-block;
@@ -1149,54 +676,20 @@ section {
     -webkit-mask: var(--flecha-fuera) no-repeat center / contain;
     mask: var(--flecha-fuera) no-repeat center / contain;
 }
-
-/* ===== LAS SIGLAS =====
-   CRT, RSS, AAA, DnD... Van en <abbr title="lo que significa">, y eso
-   hace dos cosas: los navegadores lo enseñan al dejar el ratón encima, y
-   algunos lectores de pantalla lo leen en vez de deletrear las letras.
-
-   Se marcan con un subrayado de puntos. El de serie de los navegadores
-   es casi invisible y además cambia de uno a otro, así que se pone a
-   mano. No va en color: un aviso que solo se distingue por el color se
-   lo pierde quien no distingue ese color (pauta 1.4.1), y aquí además
-   el color ya significa otra cosa en media web —los enlaces—.
-
-   El cursor de interrogación es la pista de que ahí hay algo que mirar;
-   quien navega con teclado o con lector no lo necesita porque el texto
-   del title le llega por otro lado. */
 abbr[title] {
     text-decoration: underline dotted;
     text-underline-offset: 0.2em;
     cursor: help;
 }
-
-/* Dentro de un enlace o de un botón no se subraya: ahí ya hay un
-   subrayado o un recuadro que dice lo que es, y dos rayas seguidas se
-   leen como un error de pintado. El title sigue estando. */
 a abbr[title],
 button abbr[title] {
     text-decoration: none;
     cursor: inherit;
 }
-
-/* CUANDO EL ENLACE ES UNA TARJETA Y NO UNA FRASE.
-   En los listados, el enlace no es un trozo de texto sino una caja en
-   columna: título arriba, fecha y etiquetas debajo. La flecha, que
-   cuelga del enlace entero, se convertía ahí en un trozo más de esa
-   columna y se iba ella sola a una línea aparte, debajo del título. Se
-   ve en novedades.exe de la portada: "Fichas DnD 5e" y debajo una
-   flecha suelta.
-
-   Así que en esos casos la flecha se le pone AL TÍTULO, que es donde
-   acaba el texto, y se le quita al enlace. El :has() es lo que permite
-   preguntar "¿este enlace lleva un título dentro?"; va dentro de un
-   @supports para que en un navegador que no lo entienda se quede como
-   estaba —la flecha en su línea— en vez de salir dos veces. */
 @supports selector(:has(*)) {
     .enlace-fuera:has(.entry-preview-title)::after {
         display: none;
     }
-
     .enlace-fuera .entry-preview-title::after {
         content: "";
         display: inline-block;
@@ -1209,68 +702,37 @@ button abbr[title] {
         mask: var(--flecha-fuera) no-repeat center / contain;
     }
 }
-
-/* EN EL MODO DE ALTO CONTRASTE DE WINDOWS la flecha desaparecía, y es
-   un fallo fino de explicar: ese modo tira los colores de la web y pone
-   los suyos, y entre lo que sustituye está background-color. Como el
-   dibujo de la flecha ES un background-color recortado con una máscara,
-   se quedaba blanca sobre fondo blanco mientras el texto del enlace se
-   iba al azul del sistema. Medido forzando el modo: texto en
-   rgb(0,0,159) y flecha en rgb(255,255,255).
-   currentColor tampoco vale aquí, porque es justamente lo que el modo
-   deja de respetar en esta propiedad. Hay que nombrar el color del
-   sistema: LinkText es el que usa para los enlaces, así que la flecha
-   vuelve a ir del mismo color que su enlace, sea cual sea el que haya
-   elegido quien visita. Es el mismo apaño que ya llevan los iconos de
-   redes en estilos/paginas/portada.css.
-   El aviso escondido ("enlace externo") nunca dependió de esto: quien
-   escucha la página se enteraba igual. Esto es para quien ve. */
 @media (forced-colors: active) {
     .enlace-fuera::after,
     .enlace-fuera .entry-preview-title::after {
         background-color: LinkText;
     }
 }
-
 :root {
     --flecha-fuera: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M9 4h11v11h-2.6V8.4L6.3 19.5 4.5 17.7 15.6 6.6H9z'/%3E%3C/svg%3E");
 }
 
 /* ======== /estilos/base.responsive.css ======== */
-/* RESPONSIVE — layout general (main, quotes-bar, section, título grande) */
-
 @media (max-width: 860px) {
-    /* EL HUECO DE ABAJO. En muchos teléfonos la tira de botones de
-       navegación (atrás, inicio, recientes) o la barra de gestos se
-       queda por encima de la página y tapa lo que haya al final. Con
-       esto, todo termina un poco antes y no se pierde nada.
-       El env() es para los móviles que sí saben decir cuánto ocupa esa
-       tira; el 16px es el suelo para los que no dicen nada, que son la
-       mayoría. */
     :root {
         --hueco-abajo: max(env(safe-area-inset-bottom, 0px), 16px);
     }
-
     main {
         margin: 76px 16px 16px 16px;
         width: auto;
     }
-
     .quotes-bar {
         margin: 0 16px 16px 16px;
         padding: 10px 16px;
     }
-
     section {
         padding: var(--barra-alto) 6%;
     }
-
     main.standalone-main {
         margin: 76px 16px 16px 16px;
         width: auto;
         max-width: none;
     }
-
     .home-title {
         font-size: clamp(2.25rem, 13vw, 3.5rem);
         letter-spacing: -3px;
@@ -1278,12 +740,9 @@ button abbr[title] {
 }
 
 /* ======== /estilos/componentes/visor-imagenes.css ======== */
-/* LIGHTBOX — visor de imágenes ampliadas */
-
 body.lightbox-open {
     overflow: hidden;
 }
-
 .lightbox-overlay {
     position: fixed;
     inset: 0;
@@ -1294,11 +753,9 @@ body.lightbox-open {
     padding: 60px 40px;
     background: rgba(18, 9, 28, 0.92);
 }
-
 .lightbox-overlay[hidden] {
     display: none;
 }
-
 .lightbox-image {
     max-width: 90vw;
     max-height: 85vh;
@@ -1306,7 +763,6 @@ body.lightbox-open {
     box-shadow: 8px 8px 0 var(--yellow);
     object-fit: contain;
 }
-
 .lightbox-close {
     position: fixed;
     top: 24px;
@@ -1319,34 +775,24 @@ body.lightbox-open {
     border: 2px solid var(--yellow);
     background: var(--yellow);
     color: var(--yellow-contrast);
-    /* La tipografía venía del bloque duplicado que había en base.css:
-       la cascada va propiedad a propiedad, así que de aquel bloque solo
-       se perdían las que no estuvieran también aquí. Al borrarlo, la ✕
-       se quedó con la fuente heredada. */
     font-family: var(--fuente-mono);
     font-size: 1.125rem;
     font-weight: 500;
     cursor: pointer;
 }
-
 .lightbox-close:hover,
 .lightbox-close:focus-visible {
     background: transparent;
     color: var(--yellow);
 }
-
 .lightbox-close:focus-visible {
     outline: 2px solid var(--yellow);
     outline-offset: 3px;
 }
-
 @media (max-width: 640px) {
     .lightbox-overlay {
-        /* Los 24 de abajo, más el hueco de los botones del teléfono
-           (ver --hueco-abajo en estilos/base.css). */
         padding: 70px 16px calc(24px + var(--hueco-abajo));
     }
-
     .lightbox-close {
         top: 16px;
         right: 16px;
@@ -1354,8 +800,6 @@ body.lightbox-open {
 }
 
 /* ======== /estilos/componentes/aviso.css ======== */
-/* COMPONENTE: AVISO EMERGENTE */
-
 .notice {
     position: fixed;
     left: 340px;
@@ -1364,10 +808,6 @@ body.lightbox-open {
     display: flex;
     flex-direction: column;
     width: 320px;
-    /* Tope de alto y texto desplazable por dentro. Sin esto, al crecer
-       el texto el aviso se salía de la pantalla y el botón de
-       "entendido" quedaba fuera: no había forma de cerrarlo. Se resta
-       el top (90) más un margen abajo. */
     max-height: calc(100vh - 110px);
     padding: 16px;
     background: var(--surface);
@@ -1375,20 +815,13 @@ body.lightbox-open {
     box-shadow: 8px 8px 0 var(--yellow);
     animation: notice-in 0.25s ease-out;
 }
-
 .notice[hidden] {
     display: none;
 }
-
-/* Variante para colgarlo abajo en vez de arriba. La usa el aviso del
-   guestbook: arriba taparía la lista de comentarios y a la derecha
-   tapaba el botón de firmar, así que se queda en la esquina de menos
-   tránsito, alineado con el borde de la ventana principal. */
 .notice-bottom-left {
     top: auto;
     bottom: 48px;
 }
-
 @keyframes notice-in {
     from {
         opacity: 0;
@@ -1399,34 +832,23 @@ body.lightbox-open {
         transform: translateY(0);
     }
 }
-
 @media (prefers-reduced-motion: reduce) {
     .notice {
         animation: none;
     }
 }
-
 .notice-body {
     display: flex;
     flex-direction: column;
     gap: 10px;
-    /* Lo que se desplaza cuando el texto no cabe. El botón de cerrar
-       vive fuera de aquí (.notice-footer) justo para que no se lo lleve
-       el scroll y siempre se pueda pulsar. */
     min-height: 0;
     overflow-y: auto;
 }
-
 .notice-footer {
     position: relative;
     flex-shrink: 0;
     padding-top: 10px;
 }
-
-/* Degradado al final del texto cuando queda algo por leer: sin él, en
-   ventanas bajas el párrafo se corta a media línea y no se ve que el
-   cuadro se desplaza. Cuelga del pie (que no se mueve) y no del cuerpo,
-   que se iría con el scroll. */
 .notice.has-scroll .notice-footer::before {
     content: "";
     position: absolute;
@@ -1437,14 +859,12 @@ body.lightbox-open {
     background: linear-gradient(to bottom, transparent, var(--surface));
     pointer-events: none;
 }
-
 .notice-body p {
     margin: 0;
     color: var(--muted);
     font-size: 0.8125rem;
     line-height: 1.5;
 }
-
 .notice-body code {
     padding: 1px 5px;
     background: var(--purple-lighter);
@@ -1452,12 +872,10 @@ body.lightbox-open {
     font-family: var(--fuente-mono);
     font-size: 0.75rem;
 }
-
 .notice-body a {
     color: var(--yellow);
     text-decoration: underline;
 }
-
 .notice-dismiss {
     align-self: flex-start;
     padding: 8px 18px;
@@ -1470,61 +888,33 @@ body.lightbox-open {
     letter-spacing: 1px;
     transition: color 0.1s linear, background-color 0.1s linear;
 }
-
 .notice-dismiss:hover,
 .notice-dismiss:focus-visible {
     color: var(--yellow-contrast);
     background: var(--yellow);
 }
-
 .notice-dismiss:focus-visible {
     outline: 2px solid var(--yellow);
     outline-offset: 3px;
 }
 
 /* ======== /estilos/componentes/aviso.responsive.css ======== */
-/* RESPONSIVE — aviso emergente en móvil */
-
 @media (max-width: 860px) {
     .notice,
     .notice-bottom-left {
         left: 16px;
         right: 16px;
         top: auto;
-        /* Los 16 de siempre, más el hueco de los botones del teléfono
-           (ver --hueco-abajo en estilos/base.css). */
         bottom: calc(16px + var(--hueco-abajo));
         width: auto;
-        /* 60 de la barra superior fija + 16 de margen abajo + 16 de
-           aire, y lo que ocupe ese hueco. En dvh, que es el alto que se
-           ve de verdad en un móvil. */
         max-height: calc(100dvh - 92px - var(--hueco-abajo));
     }
 }
 
 /* ======== /estilos/componentes/cabecera-ventana.css ======== */
-/* COMPONENTE: CABECERA DE VENTANA FALSA */
-
-/* Estaba en portada.css, y por eso las páginas de blog (que nunca cargan
-   portada.css) llevaban meses con los botones de ventana de
-   .blog-post-header a tamaño normal (28px) en vez de pequeño, sin que
-   se notara a simple vista salvo comparando con el resto del sitio.
-   Se usa en tarjetas de casi todas las páginas de contenido —
-   portada, sobre mí, contacto, santuarios, blog — así que va en la
-   lista base de herramientas/3-generadores/actualizar-cabeceras.py, como el visor de
-   imágenes o el aviso emergente, para que cualquier página nueva la
-   tenga sin tener que acordarse de nada. */
-
 .recent-entries-header {
     position: relative;
     margin: -16px -16px 16px -16px;
-    /* El hueco de la derecha es para los botones −■✕, que están
-       posicionados encima. Va en rem y no en píxeles porque los botones
-       también miden en rem (0.9rem cada uno): con los 56px de antes,
-       que salían de medirlos suponiendo 14px, se quedaban 22px cortos y
-       un título largo como "nuevas_entradas.txt" se metía por debajo en
-       pantallas estrechas. 3.7rem = los tres botones + sus separaciones
-       + los 12px que se dejan al borde. */
     padding: 12px 3.7rem 10px 16px;
     background: var(--purple);
     border-bottom: 2px solid var(--yellow);
@@ -1533,16 +923,12 @@ body.lightbox-open {
     font-size: 1.15rem;
     letter-spacing: 0.2px;
 }
-
 .recent-entries-header h2 {
     min-width: 0;
-    /* Último seguro: si algún día hay un nombre de fichero más largo
-       que el hueco, que parta a dos líneas en vez de salirse. */
     overflow-wrap: anywhere;
     font: inherit;
     color: inherit;
 }
-
 .window-controls-small {
     position: absolute;
     top: 10px;
@@ -1550,20 +936,10 @@ body.lightbox-open {
     z-index: 5;
     gap: 4px;
 }
-
-/* El dibujo de dentro va en % del botón (ver .window-btn-icono en
-   base.css), así que aquí solo hay que cambiar el cuadrado. */
 .window-controls-small .window-btn {
     width: 0.9rem;
     height: 0.9rem;
 }
-
-/* En pantallas muy estrechas (320px y similares) los títulos largos no
-   caben: "nuevas_entradas.txt" pide 191px y en la tarjeta de la portada
-   solo quedan 146 una vez descontado el hueco de los botones, así que
-   se partía en dos líneas — y en un nombre de fichero se nota. Bajando
-   la tipografía se queda en 137 y cabe entero en una línea. Medido a
-   320, 360 y 390. */
 @media (max-width: 360px) {
     .recent-entries-header {
         font-size: 0.85rem;
@@ -1571,31 +947,18 @@ body.lightbox-open {
 }
 
 /* ======== /estilos/componentes/subir.css ======== */
-/* COMPONENTE: BOTÓN "VOLVER ARRIBA" */
-
-/* En escritorio no existe: ahí las páginas caben o tienen su propio
-   scroll corto, y un botón flotante solo estorbaría. */
 .subir {
     display: none;
 }
-
 @media (max-width: 860px) {
     .subir {
         position: fixed;
         right: 16px;
-        /* Los 16 de siempre, más el hueco de los botones del teléfono
-           (ver --hueco-abajo en estilos/base.css): si no, en algunos
-           móviles este botón caía justo encima de ellos. */
         bottom: calc(16px + var(--hueco-abajo));
-        /* Por debajo del aviso emergente (500) y del visor (600), que en
-           móvil ocupan la parte de abajo entera, y por encima del resto.
-           Así no se monta encima de un aviso abierto. */
         z-index: 450;
         display: flex;
         align-items: center;
         justify-content: center;
-        /* 46px: por encima del mínimo de 44 que se recomienda para
-           pulsar con el dedo. */
         width: 46px;
         height: 46px;
         padding: 0;
@@ -1604,8 +967,6 @@ body.lightbox-open {
         color: var(--yellow);
         box-shadow: 3px 3px 0 var(--yellow);
         cursor: pointer;
-        /* Oculto mientras no se haya bajado. Se anima la opacidad y no
-           display, que no se puede animar. */
         opacity: 0;
         visibility: hidden;
         transform: translateY(8px);
@@ -1613,7 +974,6 @@ body.lightbox-open {
                     visibility 0s linear 0.15s,
                     background-color 0.15s linear, color 0.15s linear;
     }
-
     .subir.is-visible {
         opacity: 1;
         visibility: visible;
@@ -1622,32 +982,27 @@ body.lightbox-open {
                     visibility 0s,
                     background-color 0.15s linear, color 0.15s linear;
     }
-
     .subir:hover,
     .subir:active,
     .subir:focus-visible {
         background: var(--yellow);
         color: var(--yellow-contrast);
     }
-
     .subir:focus-visible {
         outline: 2px solid var(--yellow);
         outline-offset: 3px;
     }
-
     .subir-icono {
         display: block;
         width: 22px;
         height: 22px;
     }
 }
-
 @media (prefers-reduced-motion: reduce) {
     .subir {
         transition: background-color 0.15s linear, color 0.15s linear;
         transform: none;
     }
-
     .subir.is-visible {
         transition: background-color 0.15s linear, color 0.15s linear;
         transform: none;
@@ -1655,21 +1010,6 @@ body.lightbox-open {
 }
 
 /* ======== /estilos/componentes/ajustes.css ======== */
-/* COMPONENTE: LA VENTANA DE ACCESIBILIDAD */
-
-/* Sustituye a estilos/componentes/texto-tamano.css, que era solo el
-   panelito del tamaño. Ahora el botón "Aa" abre una ventana con todo
-   lo que se puede tocar para ver mejor la web —tamaño, separación entre
-   líneas, letra, tema y brillito— y un texto de ejemplo debajo que se
-   mueve a la vez que los mandos.
-   Quien la abre y la mueve es scripts/componentes/ajustes.js. */
-
-/* ==== EL BOTÓN QUE ABRE ==== */
-
-/* En escritorio flota en la esquina de arriba a la derecha, igual que
-   antes. Por encima de todo lo demás (z-index alto) a propósito: es lo
-   que se busca cuando no se lee bien lo que hay debajo, así que no
-   puede quedar tapado por una ventanita ni por la barra del móvil. */
 .ajustes-abrir {
     position: fixed;
     top: 14px;
@@ -1680,14 +1020,6 @@ body.lightbox-open {
     justify-content: center;
     width: 2.7rem;
     height: 2.7rem;
-    /* MACIZO, no en hueco como antes. Era lo que pedía Richi: el botón
-       de accesibilidad es de las pocas cosas que tienen que verse a la
-       primera, y relleno pesa mucho más que perfilado. El reborde de
-       fuera es del color del fondo de la página: sobre el fondo de
-       siempre no se ve (es el mismo color), pero encima de una cabecera
-       amarilla —las entradas del blog y los relatos tienen una, y el
-       botón cae justo ahí— es lo que lo despega del amarillo de detrás.
-       Sin él, botón amarillo sobre barra amarilla y desaparece. */
     border: 2px solid var(--yellow);
     box-shadow: 0 0 0 3px var(--purple);
     background: var(--yellow);
@@ -1698,31 +1030,20 @@ body.lightbox-open {
     line-height: 1;
     transition: color 0.15s linear, background-color 0.15s linear;
 }
-
 .ajustes-abrir:hover {
     background: var(--purple);
     color: var(--yellow);
 }
-
 .ajustes-abrir:focus-visible {
     outline: 2px solid var(--yellow);
     outline-offset: 5px;
 }
-
-/* La "A" grande y la "a" pequeña, que es el dibujo de siempre para
-   esto. Se hace con el tamaño de letra y no con una imagen para que
-   crezca con el resto del texto. */
 .ajustes-abrir-aa {
     font-size: 1.05em;
 }
-
 .ajustes-abrir-aa::first-letter {
     font-size: 1.3em;
 }
-
-/* En escritorio el botón es un cuadrado con "Aa" y nada más, pero el
-   nombre sigue estando ahí para quien escucha la página: si no, lo
-   único que se anunciaría es "Aa", que no dice qué abre. */
 .ajustes-abrir-texto {
     position: absolute;
     width: 1px;
@@ -1734,27 +1055,12 @@ body.lightbox-open {
     white-space: nowrap;
     border: 0;
 }
-
-/* ==== LA VENTANA ==== */
-
-/* Un <dialog> de verdad: el navegador se encarga del fondo oscurecido,
-   de atrapar el tabulador dentro, de cerrar con Escape y de devolver el
-   foco al botón. Aquí solo hay que vestirlo.
-   Los márgenes auto lo centran, y el max-height con el scroll dentro
-   es para cuando hay poca pantalla: con el texto al 150% y un móvil
-   tumbado, la ventana es más alta que el hueco. */
 .ajustes {
     width: min(30rem, calc(100vw - 32px));
     max-height: min(42rem, calc(100dvh - 32px));
     margin: auto;
     padding: 0;
     overflow: hidden;
-    /* Columna: la barra de título mide lo que mide y el cuerpo se queda
-       con el resto. Antes el cuerpo repetía el cálculo del max-height de
-       aquí arriba menos 4rem "a ojo" para la barra; así no hay dos sitios
-       que tengan que cuadrar, y sobre todo el cuerpo pasa a tener un alto
-       DEFINIDO, que es lo que necesita la rejilla de dos columnas de más
-       abajo para poder repartirlo. */
     display: flex;
     flex-direction: column;
     background: var(--purple-lighter);
@@ -1762,20 +1068,9 @@ body.lightbox-open {
     box-shadow: 8px 8px 0 var(--yellow);
     color: var(--white);
 }
-
 .ajustes::backdrop {
-    /* Negro y no el morado del tema: lo de debajo tiene que apagarse en
-       los dos modos, y en el claro un velo morado casi no se notaría. */
     background: rgba(0, 0, 0, 0.72);
 }
-
-/* La barra de título. Se parece a las de las demás ventanas falsas del
-   sitio pero NO lleva su clase (.recent-entries-header) a propósito:
-   esa la recoge ventanas-plegables.js y convertiría toda la barra en un
-   interruptor de plegar, que aquí no viene a cuento. Y sobre todo,
-   aquí el ✕ CIERRA de verdad: en una ventana que se abre encima es lo
-   que todo el mundo espera. En el resto del sitio sigue siendo una
-   broma con brillos. */
 .ajustes-barra {
     display: flex;
     align-items: center;
@@ -1789,16 +1084,12 @@ body.lightbox-open {
     font-size: 1.15rem;
     letter-spacing: 0.2px;
 }
-
 .ajustes-barra h2 {
     min-width: 0;
-    /* break-word y no anywhere: que parta entre palabras si hace falta,
-       pero no a mitad de "accesibilidad". */
     overflow-wrap: break-word;
     font: inherit;
     color: inherit;
 }
-
 .ajustes-cerrar {
     display: flex;
     align-items: center;
@@ -1811,45 +1102,29 @@ body.lightbox-open {
     color: var(--yellow-contrast);
     transition: color 0.12s linear, background-color 0.12s linear;
 }
-
 .ajustes-cerrar:hover {
     background: transparent;
     color: var(--yellow);
 }
-
 .ajustes-cerrar:focus-visible {
     outline: 2px solid var(--yellow);
     outline-offset: 3px;
 }
-
 .ajustes-cuerpo {
-    /* Se queda con lo que deje la barra de título (ver el flex de
-       .ajustes). El min-height: 0 no es opcional: sin él, un hijo de una
-       columna flexible no baja de su alto natural y no habría nada que
-       desplazar. */
     flex: 1 1 auto;
     min-height: 0;
     overflow-y: auto;
     padding: 16px;
     scrollbar-gutter: stable;
 }
-
-/* Al llegar a un mando con el tabulador, el navegador lo acerca pegado
-   al borde. Con esto deja siempre un dedo de aire. (Antes reservaba
-   10rem por abajo, que era el hueco de la muestra cuando iba pegada al
-   fondo del panel; ya no va pegada, así que sobraba.) */
 .ajustes-fila {
     scroll-margin: 16px 0;
 }
-
-/* ==== CADA MANDO ==== */
-
 .ajustes-fila + .ajustes-fila {
     margin-top: 16px;
     padding-top: 16px;
     border-top: 1px solid var(--border);
 }
-
 .ajustes-nombre {
     margin: 0 0 8px;
     color: var(--muted);
@@ -1858,38 +1133,26 @@ body.lightbox-open {
     letter-spacing: 1px;
     text-transform: uppercase;
 }
-
 .ajustes-mandos {
     display: flex;
     flex-wrap: wrap;
     align-items: center;
     gap: 8px;
 }
-
-/* El tema y el brillito vienen con su propio tamaño y su margen de
-   cuando vivían al final de la barra lateral; aquí van en una columna
-   y empezando por la izquierda, no centrados. */
 .ajustes-mandos-anchos {
     flex-direction: column;
     align-items: stretch;
 }
-
 .ajustes-mandos-anchos .theme-toggle {
     align-self: stretch;
     justify-content: flex-start;
     margin-top: 0;
 }
-
-/* ==== EL DESLIZADOR DEL TAMAÑO ==== */
-
 .ajustes-deslizador {
     display: flex;
     align-items: center;
     gap: 12px;
 }
-
-/* La "A" chica a la izquierda y la grande a la derecha: dicen hacia
-   dónde va cada lado sin tener que leer nada. */
 .ajustes-aa {
     flex: 0 0 auto;
     color: var(--white);
@@ -1897,19 +1160,12 @@ body.lightbox-open {
     font-weight: 600;
     line-height: 1;
 }
-
 .ajustes-aa-pequena {
     font-size: 0.75rem;
 }
-
 .ajustes-aa-grande {
     font-size: 1.25rem;
 }
-
-/* El <input type="range"> de serie, vestido. appearance: none quita el
-   dibujo del navegador; lo que NO quita —y por eso se usa éste y no una
-   barra inventada con divs— son las flechas del teclado, Inicio y Fin,
-   el arrastre con el dedo y que se anuncie solo como lo que es. */
 .ajustes-rango {
     flex: 1 1 auto;
     min-width: 0;
@@ -1921,31 +1177,19 @@ body.lightbox-open {
     -webkit-appearance: none;
     cursor: pointer;
 }
-
-/* El carril. Va en dos reglas porque cada navegador tiene su nombre
-   para esta pieza y, si se juntan en una, el que no reconoce la del
-   otro tira la regla entera. */
 .ajustes-rango::-webkit-slider-runnable-track {
     height: 4px;
     background: var(--muted);
     border-radius: 0;
 }
-
 .ajustes-rango::-moz-range-track {
     height: 4px;
     background: var(--muted);
     border-radius: 0;
 }
-
-/* El agarre. 1,6rem —unos 35px con el tamaño de siempre— para que se
-   pueda coger con el dedo sin apuntar: es el mando que usa precisamente
-   quien no ve bien lo que está apuntando. */
 .ajustes-rango::-webkit-slider-thumb {
     width: 1.6rem;
     height: 1.6rem;
-    /* Centrado sobre el carril a mano: en Chrome el agarre se alinea
-       arriba y hay que subirlo la mitad de lo que mide, menos la mitad
-       del carril. */
     margin-top: calc((4px - 1.6rem) / 2);
     background: var(--yellow);
     border: 3px solid var(--yellow-contrast);
@@ -1955,7 +1199,6 @@ body.lightbox-open {
     -webkit-appearance: none;
     cursor: pointer;
 }
-
 .ajustes-rango::-moz-range-thumb {
     width: 1.6rem;
     height: 1.6rem;
@@ -1965,15 +1208,10 @@ body.lightbox-open {
     border-radius: 50%;
     cursor: pointer;
 }
-
 .ajustes-rango:focus-visible {
     outline: 2px solid var(--yellow);
     outline-offset: 4px;
 }
-
-/* Las cinco marcas del carril, que salen del <datalist>. Solo las pinta
-   Firefox por su cuenta; en el resto se dibujan con un degradado de
-   rayitas sobre el carril, que es la única forma de tenerlas en todos. */
 .ajustes-rango {
     --marca: var(--muted);
     background-image: repeating-linear-gradient(
@@ -1985,11 +1223,9 @@ body.lightbox-open {
     background-size: calc(100% - 2px) 12px;
     background-repeat: no-repeat;
 }
-
 .ajustes-rango::-moz-range-track {
     background-image: none;
 }
-
 .ajustes-valor {
     margin: 10px 0 0;
     min-width: 5ch;
@@ -2002,10 +1238,6 @@ body.lightbox-open {
     white-space: nowrap;
     border: 2px solid var(--border);
 }
-
-/* Los botones de elegir una de varias (separación y letra). Mismo
-   dibujo que los filtros de etiquetas del blog, que ya es el lenguaje
-   de "esto se elige" en esta web. */
 .ajustes-opcion {
     padding: 6px 12px;
     border: 2px solid var(--yellow);
@@ -2015,44 +1247,23 @@ body.lightbox-open {
     font-size: 0.75rem;
     transition: color 0.15s linear, background-color 0.15s linear;
 }
-
 .ajustes-opcion:hover {
     background: var(--yellow);
     color: var(--yellow-contrast);
 }
-
 .ajustes-opcion[aria-pressed="true"] {
     background: var(--yellow);
     color: var(--yellow-contrast);
 }
-
 .ajustes-opcion:focus-visible {
     outline: 2px solid var(--yellow);
     outline-offset: 2px;
 }
-
-/* ==== LOS BOTONES DEL TEMA ==== */
-
-/* Cada uno va pintado con los colores del tema que ofrece: el fondo, la
-   tinta y el borde son los de verdad, así que el botón es una muestra de
-   lo que vas a ver al pulsarlo. Antes todos eran iguales y había que
-   probarlos uno a uno para saber cuál era cuál.
-
-   Los colores van escritos aquí a mano y no con var(--purple) y
-   compañía, porque esas variables valen lo del tema que esté puesto
-   AHORA: si se usaran, los seis botones saldrían del mismo color. Si
-   cambias una paleta en base.css, cambia también su pareja de aquí. */
-
 .ajustes-temas {
-    /* En rejilla de dos y no en fila: con seis botones y nombres de
-       largo distinto, una fila suelta los parte de cualquier manera y la
-       cuadrícula se pierde. Así son seis muestras del mismo tamaño,
-       que es lo que se quiere mirar. */
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 8px;
 }
-
 .ajustes-temas .ajustes-opcion {
     display: flex;
     align-items: center;
@@ -2063,65 +1274,46 @@ body.lightbox-open {
     color: var(--muestra-tinta);
     text-align: left;
 }
-
 .ajustes-opcion[data-tema="oscuro"] {
     --muestra-fondo: #12091c;
     --muestra-tinta: #f5ce6c;
 }
-
 .ajustes-opcion[data-tema="claro"] {
     --muestra-fondo: #f3e1d6;
     --muestra-tinta: #800c04;
 }
-
 .ajustes-opcion[data-tema="oscuro-puro"] {
     --muestra-fondo: #000000;
     --muestra-tinta: #ffffff;
 }
-
 .ajustes-opcion[data-tema="claro-puro"] {
     --muestra-fondo: #ffffff;
     --muestra-tinta: #000000;
 }
-
 .ajustes-opcion[data-tema="tranquilo"] {
     --muestra-fondo: #f2efe9;
     --muestra-tinta: #3f4f66;
 }
-
 [data-tema="tranquilo-oscuro"] {
     --muestra-fondo: #1b1e22;
     --muestra-tinta: #e6d8b8;
 }
-
 .ajustes-opcion[data-tema="terminal-verde"] {
     --muestra-fondo: #000000;
     --muestra-tinta: #33ff66;
 }
-
 .ajustes-opcion[data-tema="terminal-azul"] {
     --muestra-fondo: #000000;
     --muestra-tinta: #44ddff;
 }
-
 .ajustes-opcion[data-tema="terminal-rojo"] {
     --muestra-fondo: #000000;
     --muestra-tinta: #ff0000;
 }
-
 [data-tema="terminal-ambar"] {
     --muestra-fondo: #000000;
     --muestra-tinta: #ffc83d;
 }
-
-/* ---- LOS DOS GRUPOS ----
-   Los temas van en dos bloques: arriba los que se pueden usar para leer
-   y abajo los de adorno. Cada uno con su propio título, que además es
-   el nombre del grupo para quien escucha la página (aria-labelledby).
-
-   El segundo lleva debajo una nota explicando qué son, y la nota NO es
-   un adorno: el rojo de terminal no llega al contraste mínimo ni de
-   lejos, y quien lo elija tiene derecho a saberlo antes y no después. */
 .ajustes-grupo-titulo {
     margin: 14px 0 6px;
     color: var(--muted);
@@ -2130,67 +1322,32 @@ body.lightbox-open {
     letter-spacing: 1px;
     text-transform: uppercase;
 }
-
 .ajustes-grupo-nota {
     margin: 8px 0 0;
     color: var(--muted);
     font-size: 0.75rem;
     line-height: 1.5;
 }
-
-/* Al pasar por encima no se cambian los colores —son la muestra— sino
-   que se engorda el borde hacia fuera. */
 .ajustes-temas .ajustes-opcion:hover {
     background: var(--muestra-fondo);
     color: var(--muestra-tinta);
     box-shadow: 0 0 0 2px var(--muestra-tinta);
 }
-
-/* El elegido, con un halo del color del tema que está puesto ahora
-   mismo: es lo único de la fila que no puede confundirse con la propia
-   muestra. El segundo anillo, del fondo de la ventana, lo despega de la
-   muestra de al lado. */
 .ajustes-temas .ajustes-opcion[aria-pressed="true"] {
     background: var(--muestra-fondo);
     color: var(--muestra-tinta);
     box-shadow: 0 0 0 2px var(--purple-lighter), 0 0 0 5px var(--yellow);
 }
-
 .ajustes-temas .ajustes-opcion:focus-visible {
     outline: 2px solid var(--yellow);
     outline-offset: 5px;
 }
-
-/* El dibujito de cada tema. Va con aria-hidden en el HTML: es un apoyo
-   para encontrar el botón de un vistazo, no algo que haya que oír (un
-   lector de pantalla diría "luna oscuro" y "luna llena claro puro").
-
-   Van encima de un botón que ya está pintado con los colores de su
-   tema, así que son un apoyo de más, no la única pista.
-   Un pelín más grande que el texto, que si no al lado de una
-   monoespaciada de 0,75rem no se distingue qué es. */
 .ajustes-emoji {
     margin-right: 6px;
     font-size: 1.1em;
-    /* line-height: 1 para que la fila de botones no crezca de alto por
-       culpa del emoji, que suele traer más altura que la letra. */
     line-height: 1;
     vertical-align: -0.1em;
 }
-
-/* ==== EL EJEMPLO: ejemplo.txt ==== */
-
-/* No necesita ni una línea de JavaScript para cambiar: está dentro de
-   la página, así que hereda el tamaño, la letra y la separación como
-   todo lo demás y se mueve a la vez que se tocan los mandos.
-
-   Es una ventana falsa de las del sitio: lleva la cabecera compartida
-   (.recent-entries-header), así que los −■✕ se los rellena
-   scripts/componentes/botones-ventana.js y el − la pliega de verdad
-   (ventanas-plegables.js), igual que en el resto de la web. Por eso
-   hace falta el position: relative (los −■✕ van encima, en absoluto) y
-   los 16px de relleno, que son los que cuadran con los márgenes
-   negativos de esa cabecera. */
 .ajustes-ejemplo {
     position: relative;
     margin: 16px 0 0;
@@ -2198,7 +1355,6 @@ body.lightbox-open {
     background: var(--purple);
     border: 3px solid var(--yellow);
 }
-
 .ajustes-ejemplo-titulo {
     margin: 0 0 6px;
     color: var(--yellow);
@@ -2206,40 +1362,23 @@ body.lightbox-open {
     font-size: 1.25rem;
     font-style: italic;
 }
-
 .ajustes-ejemplo-texto {
     margin: 0;
     color: var(--white);
     font-size: 0.9375rem;
     line-height: 1.8;
 }
-
-/* Negrita y cursiva. Van escritas porque dentro de la muestra no hay
-   ninguna otra regla que les dé color: lo heredan del párrafo, que es
-   justo lo que se quiere comprobar. */
 .ajustes-ejemplo-texto strong {
     font-weight: 700;
 }
-
 .ajustes-ejemplo-texto em {
     font-style: italic;
 }
-
-/* El enlace de mentira. Es un <span> y no un <a> a propósito —ver el
-   comentario de scripts/componentes/ajustes.js—, así que aquí hay que
-   darle el aspecto que en el resto del sitio trae el <a> de serie:
-   amarillo y subrayado separado de la línea de base. */
 .ajustes-ejemplo-enlace {
     color: var(--yellow);
     text-decoration: underline;
     text-underline-offset: 3px;
 }
-
-/* El muestrario de caracteres. Pequeño y apretado porque es una tira
-   larga y lo que interesa es ver la forma de cada signo, no leerlo.
-   El overflow-wrap: anywhere es obligatorio: son "palabras" de cuarenta
-   caracteres sin un espacio donde partir, y sin esto se salían de la
-   ventana en cuanto la columna se estrechaba. */
 .ajustes-ejemplo-letras {
     margin: 10px 0 0;
     color: var(--white);
@@ -2247,26 +1386,18 @@ body.lightbox-open {
     line-height: 1.6;
     overflow-wrap: anywhere;
 }
-
 .ajustes-ejemplo-letras-mono {
     margin-top: 6px;
     color: var(--muted);
     font-family: var(--fuente-mono);
     font-size: 0.75rem;
 }
-
-/* Los dos botones del sitio: el macizo y el hueco. Son los mismos
-   colores y las mismas medidas que .ajustes-opcion, que es el botón de
-   verdad que hay unos centímetros a la izquierda; repetidos aquí y no
-   reutilizando esa clase porque estos no son botones —son <span>— y
-   heredar el estilo de un mando de verdad invitaría a pulsarlos. */
 .ajustes-ejemplo-botones {
     display: flex;
     flex-wrap: wrap;
     gap: 8px;
     margin: 12px 0 0;
 }
-
 .ajustes-ejemplo-boton {
     padding: 6px 12px;
     border: 2px solid var(--yellow);
@@ -2275,32 +1406,21 @@ body.lightbox-open {
     font-family: var(--fuente-mono);
     font-size: 0.75rem;
 }
-
 .ajustes-ejemplo-boton-macizo {
     background: var(--yellow);
     color: var(--yellow-contrast);
 }
-
 .ajustes-ejemplo-datos {
     margin: 12px 0 0;
     color: var(--muted);
     font-family: var(--fuente-mono);
     font-size: 0.75rem;
 }
-
-/* ==== EL BOTÓN DE REINICIAR, EN LA COLUMNA DE LA DERECHA ==== */
-
-/* Lo mueve ahí scripts/componentes/ajustes.js. Al salirse de la lista de
-   mandos pierde la raya y el hueco que le daba ".ajustes-fila +
-   .ajustes-fila", así que se los ponemos aquí: debajo de la muestra, con
-   su propio aire y sin raya, que la raya separaba un mando de otro y
-   aquí ya no hay nada de lo que separarlo. */
 .ajustes-fila-reiniciar {
     margin: 0;
     padding: 0;
     border-top: 0;
 }
-
 .ajustes-pie {
     margin: 16px 0 0;
     padding-top: 16px;
@@ -2309,42 +1429,23 @@ body.lightbox-open {
     font-size: 0.8125rem;
     line-height: 1.7;
 }
-
 .ajustes-pie a {
     color: var(--yellow);
     text-decoration: underline;
     text-underline-offset: 3px;
 }
-
 .ajustes-pie a:hover,
 .ajustes-pie a:focus-visible {
     color: var(--yellow-contrast);
     background: var(--yellow);
 }
-
 .ajustes-pie a:focus-visible {
     outline: 2px solid var(--yellow);
     outline-offset: 2px;
 }
-
-/* ==== SI EL NAVEGADOR NO SABE DE <dialog> ==== */
-
-/* Un <dialog> sin el atributo open lo esconde el propio navegador. Si no
-   conoce la etiqueta, no hay tal regla: el panel entero se queda pintado
-   en medio de la página desde que se carga, detrás del contenido. Así es
-   como se descubrió —en la pantalla de Richi salía la caja de fondo sin
-   haber pulsado nada—, y de paso explicaba por qué la columna de la
-   derecha no se veía: estaba, pero debajo de la página.
-
-   Estas dos reglas lo arreglan sin depender de nada moderno: la primera
-   lo esconde como haría el navegador, y la segunda lo pone centrado
-   encima de todo cuando scripts/componentes/ajustes.js lo abre a mano.
-   Donde <dialog> sí funciona, la clase no se pone nunca y esto no hace
-   nada. */
 .ajustes:not([open]) {
     display: none;
 }
-
 .ajustes.ajustes-a-mano {
     position: fixed;
     top: 50%;
@@ -2352,79 +1453,19 @@ body.lightbox-open {
     transform: translate(-50%, -50%);
     z-index: 1000;
 }
-
-/* El fondo oscurecido, que sin <dialog> tampoco existe (::backdrop es
-   suyo). Se hace con una sombra de desparrame enorme, que se pinta por
-   FUERA de la caja y nunca por encima de lo que hay dentro. Con un
-   ::after puesto detrás no valía: acababa tapando el texto del propio
-   panel y los nombres de los mandos salían apagados. */
 .ajustes.ajustes-a-mano {
     box-shadow: 8px 8px 0 var(--yellow), 0 0 0 100vmax rgba(0, 0, 0, 0.72);
 }
-
-/* ==== EN ESCRITORIO: DOS COLUMNAS ==== */
-
-/* Los mandos a la izquierda y ejemplo.txt a la derecha, en vez de todo
-   en una tira de más de 1.500 píxeles de alto que había que desplazar
-   dos pantallas enteras. Medido en la ventana de 648 de ancho: el pie
-   —el enlace a la página de accesibilidad— quedaba a 447 píxeles por
-   debajo del borde, o sea que había que buscarlo sin saber que estaba.
-
-   POR QUÉ UN @media Y NO UN @container como en la portada: aquí lo que
-   hay que decidir no es cómo repartir una caja, es CUÁNTO MIDE la caja.
-   La ventana pasa de 30rem a 56rem, y un @container no puede ensanchar
-   su propio contenedor —se preguntaría a sí mismo—. Así que manda la
-   pantalla, que es lo que de verdad limita.
-
-   LOS 1.180px SON MEDIDOS, no redondos: por debajo de ahí, con el texto
-   al 125% o al 150%, la columna de la muestra se quedaba en menos de
-   400 píxeles y el texto de ejemplo salía a cuatro palabras por línea,
-   que para enseñar cómo se va a leer la web no vale de nada.
-
-   QUÉ SE DESPLAZA Y QUÉ NO. Lo que se desplaza es SOLO la columna de los
-   mandos; el cuerpo se queda quieto. Así la columna de la derecha no
-   puede irse de la vista por el motivo más simple que hay: no está
-   dentro de nada que se desplace.
-
-   DE QUÉ NO ESTÁ HECHO ESTO, que es la parte que costó cuatro vueltas.
-   Nada de display: contents, nada de order, nada de position: sticky,
-   nada de rejilla. Las tres primeras versiones usaban una de esas cosas
-   y las tres se veían mal en el ordenador de Richi, cada una a su
-   manera. Esto es una fila flexible con dos cajas dentro: flexbox es de
-   2012 y lo entiende cualquier cosa que se pueda llamar navegador hoy.
-
-   Y el panel lo arma scripts/componentes/ajustes.js, no el HTML: así no
-   puede llegar a medias por una copia vieja del fragmento en la caché.
-   Lo que se perdió por el camino es poca cosa: entre 861 y 1180 píxeles
-   la muestra ya no va pegada abajo, cae al final del panel. Por debajo
-   de 861 ya era así. */
 @media (min-width: 1180px) {
     .ajustes {
         width: min(56rem, calc(100vw - 48px));
     }
-
-    /* El cuerpo deja de desplazarse —de eso se encarga la columna de los
-       mandos— y pasa a repartir. */
     .ajustes-cuerpo {
         display: flex;
         align-items: stretch;
         overflow: hidden;
         scrollbar-gutter: auto;
     }
-
-    /* La columna de los mandos: la que se desplaza, y la que lleva la
-       raya que separa las dos columnas.
-       EL min-height: 0 NO ES OPCIONAL: un hijo de una caja flexible no
-       baja de su alto natural sin él, y sin bajar no hay nada que
-       desplazar —la lista se saldría por abajo y el scroll no
-       aparecería nunca.
-       LA RAYA VA AQUÍ y no en la pieza de al lado porque esta columna se
-       estira a lo alto de todo el panel; puesta en la otra, se quedaría
-       a media altura y parecería un trozo suelto de otra cosa.
-       Del mismo gris que las rayas que separan un mando de otro, para
-       que se lea como lo que es —una división de dentro del panel— y no
-       como el borde de otra ventana. A 2px y no a 1 porque esta cruza a
-       las otras: si midieran igual, el cruce no se entendería. */
     .ajustes-lista {
         flex: 1 1 0;
         min-width: 0;
@@ -2434,10 +1475,6 @@ body.lightbox-open {
         border-right: 2px solid var(--border);
         scrollbar-gutter: stable;
     }
-
-    /* La columna de la derecha: la ventanita y, debajo, la nota, en una
-       caja que NO se desplaza. La caja la crea el script junto con todo
-       lo demás, así que no puede faltar ni llegar a medias. */
     .ajustes-lado {
         flex: 0 0 40%;
         min-width: 0;
@@ -2447,60 +1484,29 @@ body.lightbox-open {
         flex-direction: column;
         gap: 14px;
     }
-
-    /* La ventanita se queda con el hueco que sobre, y lo que se desplaza
-       es LO DE DENTRO, no la columna entera.
-       Es lo que hace falta desde que la muestra lleva el muestrario de
-       caracteres: con el texto al 125% ya no cabía, y al desbordar la
-       columna se llevaba por delante el botón de reiniciar y la nota,
-       que son justo las dos cosas que tienen que estar siempre a mano.
-       Así la ventana se encoge, su cuerpo se desplaza —como el de
-       cualquier otra ventana del sitio: la de nuevas entradas hace lo
-       mismo— y debajo quedan fijos el botón y la nota. */
     .ajustes-ejemplo {
         flex: 0 1 auto;
         min-height: 0;
         display: flex;
         flex-direction: column;
         margin: 0;
-        /* Marco entero: aquí no llega a ningún borde, es una ventana
-           más de las del sitio. */
         box-shadow: 4px 4px 0 var(--yellow);
     }
-
     .ajustes-ejemplo-cuerpo {
         min-height: 0;
         overflow-y: auto;
         scrollbar-gutter: stable;
     }
-
     .ajustes-fila-reiniciar,
     .ajustes-pie {
         flex: 0 0 auto;
     }
-
     .ajustes-pie {
         margin: 0;
         padding-top: 0;
         border-top: 0;
     }
 }
-
-/* ==== LA SEPARACIÓN ENTRE LÍNEAS ==== */
-
-/* El mando (o el cargador, al arrancar) pone data-interlineado en el
-   <html> con el nombre del escalón, y los números salen de base.css. Sin
-   atributo esta regla no existe y cada sitio se queda con la separación
-   que tenía.
-
-   Se aplica al TEXTO LARGO y no a toda la página a propósito: separar
-   las líneas de un botón o de una fila del menú no ayuda a leer y sí
-   descoloca la página entera.
-   Los selectores parecen largos de más, y es aposta: hay reglas con
-   line-height repartidas por todo el CSS de las páginas, que se carga
-   DESPUÉS de esta hoja, así que había que pesar más que ellas. Un
-   ".blog-post-body p" suelto pesa (0,1,1) y éstos (0,3,1), así que
-   ganan sin depender del orden. */
 :root[data-interlineado] .blog-post-body p,
 :root[data-interlineado] .blog-post-body li,
 :root[data-interlineado] .relato-post-body p,
@@ -2514,29 +1520,10 @@ body.lightbox-open {
 :root[data-interlineado] .ajustes-ejemplo-texto {
     line-height: var(--interlineado);
 }
-
-/* ==== EN MÓVIL ==== */
-
-/* Mismo corte que la barra lateral. Ahí el botón flotando en la esquina
-   se comía sitio y quedaba encima del contenido, así que baja al final
-   del menú y pasa a ser un botón ancho más, con su nombre escrito: al
-   lado de "modo oscuro" y "brillito" tenía sentido un cuadrado con
-   "Aa", pero ahora va solo y conviene que diga qué es. */
 @media (max-width: 860px) {
-    /* El botón se queda flotando, pero pegado a la barra amarilla del
-       título y a su derecha: es lo que más falta hace tener siempre a
-       mano, y al final del menú obligaba a abrir el cajón para llegar.
-       Flota (position: fixed) en vez de estar dentro de la barra porque
-       la barra y este botón viven en trozos distintos del HTML; desde
-       el CSS no se puede mover un elemento de un sitio a otro, pero sí
-       colocarlo justo encima. Centrado en la barra con el mismo cálculo
-       que usa todo lo que se alinea con ella.
-       Y con los colores al revés, como el botón del menú que tiene
-       enfrente: la barra ya es amarilla. */
     .ajustes-abrir {
         top: calc((var(--barra-alto) - 2.4rem) / 2);
         right: 14px;
-        /* Por encima de la barra, que va a 110. */
         z-index: 115;
         width: 2.4rem;
         height: 2.4rem;
@@ -2545,54 +1532,31 @@ body.lightbox-open {
         background: var(--yellow-contrast);
         color: var(--yellow);
     }
-
     .ajustes-abrir:hover {
         background: var(--yellow);
         color: var(--yellow-contrast);
     }
-
     .ajustes-abrir:focus-visible {
         outline: 2px solid var(--yellow-contrast);
         outline-offset: 2px;
     }
-
-    /* El nombre vuelve a esconderse: en la barra solo cabe el "Aa", y
-       el título de la web ya se lleva el sitio que queda. */
     .ajustes-abrir-aa {
         font-size: 1.05em;
     }
-
     .ajustes {
         width: calc(100vw - 24px);
     }
-
     .ajustes-cuerpo {
         padding: 14px;
     }
-
-    /* Las muestras de tema, en una sola columna. En dos no caben: a 320
-       de ancho "terminal verde" se sale del botón, y con el texto al
-       150% a 390 también. En columna cada una es una franja ancha de
-       lado a lado, que además es un blanco mucho más fácil para el dedo.
-       Es la lista desplegable que pedía Richi, solo que sin desplegar: un
-       <select> no puede enseñar los colores de cada tema, que es
-       justamente para lo que están. */
     .ajustes-temas {
         grid-template-columns: 1fr;
     }
-
-    /* Con el texto al 150% "accesibilidad.cfg" no cabía de una línea y se
-       partía a mitad de palabra. En rem no hay forma de acertar —el rem
-       crece con el mando del tamaño pero el ancho de la pantalla no—, así
-       que aquí el título mide en parte por el ancho que haya: cabe igual
-       en un móvil de 320 que en uno de 430, y al 90% o al 150%. */
     .ajustes-barra {
         padding: 10px 10px 8px 14px;
         font-size: clamp(0.8rem, 4.6vw, 1.15rem);
     }
-
 }
-
 @media (prefers-reduced-motion: reduce) {
     .ajustes-abrir,
     .ajustes-cerrar,
@@ -2600,68 +1564,31 @@ body.lightbox-open {
         transition: none;
     }
 }
-
-/* ==== EL FILTRO DE PANTALLA VIEJA ==== */
-
-/* Rayas horizontales y las esquinas apagadas, como un monitor de tubo.
-   No hay ni un elemento para esto: lo dibuja un ::after del propio
-   <html>, así que sale en TODAS las páginas —el 404 incluido, que no
-   tiene barra lateral— sin meter un div en ninguna parte y sin que
-   ningún scroll ni ningún overflow lo recorte.
-
-   Va apagado de fábrica a propósito: unas rayas encima del texto le
-   quitan contraste, y esta web se ha medido entera para que no le falte.
-   Quien lo encienda sabe lo que hace, y se quita con el mismo botón.
-
-   pointer-events: none es lo que hace que se pueda pulsar y seleccionar
-   todo lo que hay debajo: sin eso la página entera dejaría de responder.
-
-   La ventana de accesibilidad NO se ve rayada, y es una suerte: los
-   <dialog> abiertos con showModal() se pintan en una capa aparte, por
-   encima de cualquier z-index, así que los mandos se leen limpios
-   mientras se está decidiendo si dejarlo puesto. */
 :root[data-crt="si"]::after {
     content: "";
     position: fixed;
     inset: 0;
-    /* Por encima de todo lo de la página (lo más alto que había era 600)
-       pero por debajo de la capa de los <dialog>, donde no llega ningún
-       z-index. */
     z-index: 900;
     pointer-events: none;
     background:
-        /* Las rayas: una línea oscura cada tres píxeles. En píxeles y no
-           en rem a propósito: son las líneas de un tubo, no texto, y no
-           deben crecer con el mando del tamaño. */
         repeating-linear-gradient(
             to bottom,
             rgba(0, 0, 0, 0.16) 0 1px,
             transparent 1px 3px
         ),
-        /* Y las esquinas apagadas, que es lo que de verdad lo hace
-           parecer un tubo y no un código de barras. */
         radial-gradient(
             ellipse at center,
             transparent 50%,
             rgba(0, 0, 0, 0.32) 100%
         );
-    /* El abombamiento del cristal: las esquinas redondeadas del propio
-       tubo y una sombra por dentro del borde, que es lo que da la
-       sensación de que la pantalla sobresale. Son dos líneas y es lo que
-       separa "unas rayas" de "un monitor". */
     border-radius: 1.6rem;
     box-shadow: inset 0 0 7rem 1.4rem rgba(0, 0, 0, 0.45);
 }
-
-/* Un parpadeo muy flojo, de los que se notan sin mirarlos. Solo para
-   quien no haya pedido menos movimiento: un parpadeo es justo de las
-   cosas que molestan a quien lo pide, y las rayas se quedan igual. */
 @media (prefers-reduced-motion: no-preference) {
     :root[data-crt="si"]::after {
         animation: crt-parpadeo 5s steps(30) infinite;
     }
 }
-
 @keyframes crt-parpadeo {
     0%,
     100% {
@@ -2671,18 +1598,6 @@ body.lightbox-open {
         opacity: 0.93;
     }
 }
-
-/* ==== DEJARLO TODO COMO ESTABA ==== */
-
-/* Un mando más, con las mismas medidas, el mismo borde y la misma letra
-   que los de arriba (.ajustes-opcion). Antes iba de rayas y en el gris
-   de lo secundario, para que no compitiera con los mandos de verdad;
-   pero desde que vive en la columna de la derecha, al lado de la
-   muestra, ya no compite con nada y lo de las rayas lo hacía parecer un
-   hueco por rellenar más que un botón.
-   Sigue en gris y no en amarillo: es la salida de emergencia, no algo
-   que haya que pulsar. Al pasar por encima se pone amarillo como los
-   demás. */
 .ajustes-reiniciar {
     display: flex;
     align-items: center;
@@ -2698,28 +1613,19 @@ body.lightbox-open {
     letter-spacing: 1px;
     transition: color 0.12s linear, border-color 0.12s linear;
 }
-
-/* La flecha de deshacer. En em para que crezca con la letra del botón,
-   y flex: none para que no la encoja el texto de al lado. */
 .ajustes-reiniciar-icono {
     flex: none;
     width: 1.15em;
     height: 1.15em;
 }
-
-/* De rayas y en el gris de lo secundario, no en amarillo: es la salida
-   de emergencia, no algo que haya que pulsar. Al pasar por encima sí se
-   enciende, para que no parezca apagado. */
 .ajustes-reiniciar:hover {
     border-color: var(--yellow);
     color: var(--yellow);
 }
-
 .ajustes-reiniciar:focus-visible {
     outline: 2px solid var(--yellow);
     outline-offset: 2px;
 }
-
 .ajustes-reiniciar-aviso {
     margin: 10px 0 0;
     color: var(--yellow);
@@ -2727,26 +1633,15 @@ body.lightbox-open {
     font-size: 0.75rem;
     line-height: 1.6;
 }
-
 .ajustes-reiniciar-aviso[hidden] {
     display: none;
 }
-
-/* ==== EL CURSOR DE LOS TEMAS DE TERMINAL ==== */
-
-/* Un guion bajo parpadeando al final de las barras de título, como el
-   de una consola esperando a que escribas. Solo en los dos temas de
-   terminal: en los demás no viene a cuento.
-   Se para para quien haya pedido menos movimiento, que un parpadeo
-   constante es justo de las cosas que molestan a quien lo pide; ahí se
-   queda el guion quieto, que el adorno sigue estando. */
 :root[data-theme^="terminal-"] .recent-entries-header h2::after,
 :root[data-theme^="terminal-"] .gatin-random-header h2::after {
     content: "_";
     margin-left: 0.15em;
     animation: terminal-cursor 1.1s steps(1) infinite;
 }
-
 @keyframes terminal-cursor {
     0%,
     49% {
@@ -2757,7 +1652,6 @@ body.lightbox-open {
         opacity: 0;
     }
 }
-
 @media (prefers-reduced-motion: reduce) {
     :root[data-theme^="terminal-"] .recent-entries-header h2::after,
     :root[data-theme^="terminal-"] .gatin-random-header h2::after {

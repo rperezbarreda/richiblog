@@ -99,7 +99,7 @@ EXT_MEDIA = {".webp", ".jpg", ".jpeg", ".png", ".gif", ".svg", ".avif", ".ico", 
 # Dónde se busca lo que no usa nadie. datos/ y fragmentos/ entran porque
 # a esos sí les apunta siempre algo (un script o una página); imagenes/,
 # estilos/, scripts/ y tipografias/ son donde se acumula lo que sobra.
-CARPETAS_HUERFANOS = ("imagenes", "estilos", "scripts", "tipografias", "fragmentos", "datos")
+CARPETAS_HUERFANOS = ("imagenes", "estilos", "scripts", "tipografias", "fragmentos", "datos", "ligero")
 
 # Archivos que no enlaza ninguna página A PROPÓSITO, porque quien los lee
 # es una herramienta y no el navegador. Sin esto salen en la lista de "no
@@ -144,6 +144,21 @@ RE_FUENTE_PAQUETE = re.compile(r"^\s*fuente:\s*(/\S+)\s*$", re.M)
 # En los .js solo se buscan rutas absolutas del sitio, que es como están
 # escritas todas: "/datos/mis_movidas/rol.json", "/scripts/paginas/rol.js"...
 RE_RUTA_JS = re.compile(r"""["'`](/[^"'`\s>]+\.[A-Za-z0-9]{2,5})["'`]""")
+
+
+# Las direcciones VIEJAS de scripts/paginas/redirecciones.js (lo que hay a
+# la izquierda de cada mudanza) no existen a propósito: son las que el 404
+# manda a su sitio nuevo. No son enlaces rotos.
+RE_MUDANZA = re.compile(r"""\[\s*["'`](/[^"'`]*)["'`]\s*,\s*["'`]/""")
+
+
+def direcciones_que_se_mudan():
+    viejas = set()
+    for ruta in (RAIZ / "scripts" / "paginas" / "redirecciones.js",
+                 RAIZ / "ligero" / "scripts" / "paginas" / "redirecciones.js"):
+        if ruta.is_file():
+            viejas.update(RE_MUDANZA.findall(ruta.read_text(encoding="utf-8")))
+    return viejas
 
 
 RE_COMENTARIO_HTML = re.compile(r"<!--.*?-->", re.S)
@@ -441,7 +456,10 @@ def referencias(medias_rutas=None):
             for linea, ref in de_css(texto):
                 yield ruta, linea, ref, None
         elif ext in EXT_JS:
+            viejas = direcciones_que_se_mudan() if ruta.name == "redirecciones.js" else ()
             for linea, ref in de_js(texto):
+                if ref in viejas:
+                    continue
                 yield ruta, linea, ref, None
         elif ext in EXT_JSON:
             for linea, ref, queja in de_json(ruta, texto):

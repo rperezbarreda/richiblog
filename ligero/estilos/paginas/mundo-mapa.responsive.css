@@ -1,0 +1,32 @@
+/* Copia sin comentarios. La escribe actualizar-cabeceras.py: no se edita.
+   fuente: /estilos/paginas/mundo-mapa.responsive.css
+*/
+@media (max-width: 860px) {
+    .mapa-mandos {
+        gap: 6px 12px;
+        padding: 8px 10px;
+    }
+    .mapa-capas {
+        flex-basis: 100%;
+    }
+    .mapa-lienzo {
+        --mapa-alto: 50vh;
+    }
+}
+@media (max-width: 480px) {
+    .mapa-lienzo {
+        --mapa-alto: 45vh;
+    }
+    .mapa-zoom-cifra {
+        min-width: 4ch;
+        font-size: 0.8125rem;
+    }
+    .mapa-sitio {
+        font-size: 0.875rem;
+    }
+}
+@media (max-height: 520px) and (orientation: landscape) {
+    .mapa-lienzo {
+        --mapa-alto: 75vh;
+    }
+}

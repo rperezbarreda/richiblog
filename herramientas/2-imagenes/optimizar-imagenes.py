@@ -35,13 +35,34 @@
 # - Si el WebP sale MÁS GRANDE que el original (pasa con iconos
 #   pequeños y con PNG de pocos colores), se queda el original y te
 #   lo dice. Convertir por convertir no es optimizar.
-# - No toca el favicon (.ico): tiene que seguir siendo .ico.
 # - Los originales que sí se sustituyen no se borran: se guardan en
 #   herramientas/originales-sustituidas/ por si acaso. Esa carpeta no
 #   hace falta subirla a Neocities.
 #
-# Puedes ejecutarlo tantas veces como quieras: lo ya convertido se lo
-# salta.
+# LO QUE YA HA PASADO NO SE VUELVE A MIRAR
+# ----------------------------------------
+# Cada imagen que pasa por aquí se apunta en
+# herramientas/imagenes-pasadas.json con una huella de su CONTENIDO (no
+# de la fecha del archivo, que se pierde al copiar la carpeta o al
+# descomprimir un zip). La vez siguiente, lo que esté apuntado y no haya
+# cambiado ni se mira ni se nombra: solo sale lo nuevo. Si cambias una
+# imagen por otra con el mismo nombre, la huella ya no cuadra y se vuelve
+# a mirar.
+#
+#     python herramientas/2-imagenes/optimizar-imagenes.py --todas
+#
+# se olvida de la lista y lo mira todo otra vez.
+#
+# UN .webp NUEVO TAMBIÉN SE MIRA. Antes se saltaban todos por ser WebP, y
+# así se colaban fotos de 4000 px y con los datos del móvil dentro (pasó
+# con tres del blog). Ahora, si un WebP nuevo pasa de MAX_LADO o lleva
+# metadatos, se encoge o se limpia; si no, solo se apunta. No se
+# recomprime nada que no lo necesite: cada recompresión pierde algo.
+#
+# LO QUE NO SE TOCA NUNCA, y ni se nombra: el favicon (tiene que seguir
+# siendo .ico), los iconos de las redes (imagenes/social_media/, SVG que
+# el CSS pinta del color del tema) y cualquier otro SVG o ICO. Ver
+# EXCLUIDAS, aquí abajo.
 
 import sys
 from pathlib import Path
@@ -79,6 +100,114 @@ CARPETAS_IGNORADAS = {"herramientas", "originales-sustituidas"}
 
 CONVERTIBLES = {".jpg", ".jpeg", ".png", ".gif", ".bmp", ".tif", ".tiff"}
 INTOCABLES = {".ico", ".svg"}
+# Por la ruta, desde imagenes/: un archivo, o una carpeta si acaba en "/".
+EXCLUIDAS = ("favicon.ico", "social_media/")
+
+# La lista de lo que ya ha pasado (ver arriba). En herramientas/, que no
+# se sube a Neocities; sí va en git, para que valga en cualquier ordenador.
+PASADAS = RAIZ / "herramientas" / "imagenes-pasadas.json"
+
+
+def huella(archivo):
+    import hashlib
+    return hashlib.sha1(archivo.read_bytes()).hexdigest()[:16]
+
+
+def leer_pasadas():
+    import json
+    try:
+        datos = json.loads(PASADAS.read_text(encoding="utf-8"))
+        return datos if isinstance(datos, dict) else {}
+    except (OSError, ValueError):
+        return {}
+
+
+def guardar_pasadas(pasadas):
+    import json
+    PASADAS.write_text(json.dumps(dict(sorted(pasadas.items())), ensure_ascii=False, indent=1) + "\n",
+                       encoding="utf-8")
+
+
+def excluida(rel_imagenes):
+    """Si una ruta (desde imagenes/) no se toca nunca."""
+    ruta = rel_imagenes.as_posix()
+    if rel_imagenes.suffix.lower() in INTOCABLES:
+        return True
+    return any(ruta == e or (e.endswith("/") and ruta.startswith(e)) for e in EXCLUIDAS)
+
+
+def sin_metadatos_webp(crudo):
+    """El mismo WebP sin sus bloques de metadatos (EXIF y XMP), SIN
+    recomprimir la imagen: un WebP es una lista de bloques y la foto va en
+    uno y los datos del móvil en otros, así que basta con quitar esos.
+    Devuelve los bytes nuevos, o None si no es un WebP que se entienda."""
+    import struct
+    if len(crudo) < 12 or crudo[:4] != b"RIFF" or crudo[8:12] != b"WEBP":
+        return None
+    bloques, i = [], 12
+    while i + 8 <= len(crudo):
+        tipo = crudo[i:i + 4]
+        largo = struct.unpack("<I", crudo[i + 4:i + 8])[0]
+        fin = i + 8 + largo + (largo & 1)
+        if fin > len(crudo):
+            return None
+        if tipo not in (b"EXIF", b"XMP "):
+            bloque = bytearray(crudo[i:fin])
+            if tipo == b"VP8X":
+                # Los avisos de "aquí hay EXIF / XMP" de la cabecera.
+                bloque[8] &= ~(0x08 | 0x04) & 0xFF
+            bloques.append(bytes(bloque))
+        i = fin
+    cuerpo = b"WEBP" + b"".join(bloques)
+    return b"RIFF" + struct.pack("<I", len(cuerpo)) + cuerpo
+
+
+def repasar_webp(origen, probar):
+    """Un WebP que no ha pasado por aquí: si lleva metadatos se le quitan
+    (sin recomprimir), y si es enorme se encoge, pero solo si sale más
+    ligero. Devuelve una frase con lo hecho, o None si estaba bien (y
+    entonces no se toca)."""
+    with Image.open(origen) as img:
+        animada = getattr(img, "n_frames", 1) > 1
+        grande = max(img.size) > MAX_LADO and not animada
+        datos = bool(img.info.get("exif")) or bool(img.info.get("xmp"))
+    if not (grande or datos):
+        return None
+    if probar:
+        return " y ".join(m for m, si in (("a encoger", grande), ("sin metadatos", datos)) if si)
+
+    antes = origen.stat().st_size
+    copia = COPIA / origen.relative_to(IMGS)
+    copia.parent.mkdir(parents=True, exist_ok=True)
+    shutil.copy2(origen, copia)
+    hecho = []
+
+    if datos:
+        limpio = sin_metadatos_webp(origen.read_bytes())
+        if limpio:
+            origen.write_bytes(limpio)
+            hecho.append("sin metadatos")
+
+    if grande:
+        import io
+        with Image.open(origen) as img:
+            plano = img.convert("RGBA" if img.mode in ("RGBA", "LA", "P") else "RGB")
+            plano.thumbnail((MAX_LADO, MAX_LADO), Image.LANCZOS)
+            salida = io.BytesIO()
+            plano.save(salida, "WEBP", quality=CALIDAD, method=6)
+        # Solo si pesa menos: encoger una foto que ya venía muy comprimida
+        # puede dar un archivo más pesado (pasó: 248 KB -> 480), y eso no
+        # es optimizar.
+        if salida.tell() < origen.stat().st_size:
+            origen.write_bytes(salida.getvalue())
+            hecho.append("encogida")
+        else:
+            hecho.append("de tamaño se queda (encogida pesaba más)")
+
+    if not hecho:
+        return None
+    despues = origen.stat().st_size
+    return f"{' y '.join(hecho)}: {antes/1024:.1f} KB -> {despues/1024:.1f} KB"
 
 
 def archivos_de_texto():
@@ -172,7 +301,7 @@ def convertir(origen, probar):
     return destino, antes, despues
 
 
-def procesar(probar=False):
+def procesar(probar=False, todas=False):
     if not IMGS.is_dir():
         print(f"No encuentro la carpeta {IMGS.relative_to(RAIZ)}.")
         return
@@ -184,22 +313,46 @@ def procesar(probar=False):
     cambios = []
     fallidas = []
     total_antes = total_despues = 0
-    convertidas = intactas = ya_estaban = 0
+    convertidas = intactas = ya_estaban = excluidas = repasadas = 0
+    pasadas = {} if todas else leer_pasadas()
+    # Lo que sigue en la carpeta: lo apuntado de algo que ya no está se
+    # olvida al guardar.
+    vistas = {}
+
+    def apuntar(archivo):
+        clave = archivo.relative_to(IMGS).as_posix()
+        vistas[clave] = huella(archivo)
 
     for origen in imagenes:
         rel = origen.relative_to(RAIZ)
         ext = origen.suffix.lower()
 
-        if ext in INTOCABLES:
-            print(f"  {str(rel):52} se deja como está ({ext})")
-            intactas += 1
+        if excluida(origen.relative_to(IMGS)):
+            excluidas += 1
             continue
 
-        if ext == ".webp":
+        if ext not in CONVERTIBLES and ext != ".webp":
+            continue
+
+        # YA PASADA y sin cambios: ni se mira.
+        clave = origen.relative_to(IMGS).as_posix()
+        if pasadas.get(clave) == huella(origen):
+            vistas[clave] = pasadas[clave]
             ya_estaban += 1
             continue
 
-        if ext not in CONVERTIBLES:
+        if ext == ".webp":
+            try:
+                hecho = repasar_webp(origen, probar)
+            except Exception as error:
+                print(f"  {str(rel):52} NO se ha podido revisar: {error}")
+                fallidas.append(str(rel))
+                continue
+            if hecho:
+                print(f"  {str(rel):52} {hecho}")
+                repasadas += 1
+            if not probar:
+                apuntar(origen)
             continue
 
         # Si una imagen concreta da problemas, se dice cuál y se sigue con
@@ -219,6 +372,9 @@ def procesar(probar=False):
         if resultado is None:
             print(f"  {str(rel):52} el WebP salía más grande: se queda el original")
             intactas += 1
+            # Apuntada igual: la próxima vez no hay que volver a probarlo.
+            if not probar:
+                apuntar(origen)
             continue
 
         destino, antes, despues = resultado
@@ -239,13 +395,19 @@ def procesar(probar=False):
             guardado = COPIA / rel.relative_to("imagenes")
             guardado.parent.mkdir(parents=True, exist_ok=True)
             shutil.move(str(origen), str(guardado))
+            apuntar(destino)
 
     if cambios:
         print("\n  Actualizando enlaces en el código:")
         actualizar_referencias(cambios, probar)
 
-    print(f"\n  {convertidas} convertida(s), {intactas} dejada(s) como estaban,"
-          f" {ya_estaban} ya eran WebP.")
+    if not probar:
+        guardar_pasadas(vistas)
+
+    print(f"\n  {convertidas} convertida(s) a WebP, {repasadas} WebP encogido(s) o limpiado(s),"
+          f" {intactas} dejada(s) como estaban.")
+    print(f"  {ya_estaban} ya habían pasado y no se han mirado;"
+          f" {excluidas} que no se tocan nunca (favicon, iconos de redes, SVG).")
     if fallidas:
         print(f"  {len(fallidas)} no se pudieron convertir: {', '.join(fallidas)}")
     if not probar and total_antes:
@@ -257,4 +419,4 @@ def procesar(probar=False):
 
 
 if __name__ == "__main__":
-    procesar(probar="--probar" in sys.argv)
+    procesar(probar="--probar" in sys.argv, todas="--todas" in sys.argv)

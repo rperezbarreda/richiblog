@@ -116,6 +116,13 @@
    de siempre (scripts/componentes/filtros.js) mirando el data-categoria
    de cada grupo. */
 
+/* Mientras llega el reparto, el aviso de "Cargando" ocupa sitio: así el
+   botón de volver de abajo no se ve un segundo y sale disparado cuando
+   se pinta la rejilla (medido: era la otra mitad del salto de maqueta). */
+.npcs-lista > .entries-loading {
+    min-height: 60vh;
+}
+
 .npcs-lista {
     display: flex;
     flex-direction: column;

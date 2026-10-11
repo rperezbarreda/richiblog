@@ -501,7 +501,9 @@ def main():
     print(f"\n  {anadidos} ficha(s) nueva(s).")
     print("  Ya se ven en la página; paso el buscador para que también")
     print("  se encuentren buscando su nombre.")
-    pasar_generadores(("3-generadores/generar-buscador.py",))
+    pasar_generadores(("2-imagenes/tokens-pequenos.py",
+                       "3-generadores/textos-npcs.py",
+                       "3-generadores/generar-buscador.py"))
     return 0
 
 

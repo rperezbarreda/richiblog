@@ -82,6 +82,8 @@ import hashlib
 import re
 
 from comun import RAIZ, leer_texto, escribir_texto
+# El CSS y el JS sin comentarios, que es lo que se sirve (ver ligero.py).
+from ligero import sin_comentarios
 
 # Las plantillas son páginas a medio hacer: no tienen URL propia, así
 # que se les dice a mano qué tipo de página van a ser al copiarse.
@@ -478,6 +480,9 @@ def scripts_de(ruta):
     if es_404:
         # El 404 no lleva barra lateral ni componentes de navegación.
         return [
+            # Lo primero: si lo pedido es una dirección vieja de algo que
+            # se ha movido (la wiki era mundo/), se va a la nueva.
+            "/scripts/paginas/redirecciones.js",
             "/scripts/componentes/botones-ventana.js",
             # Después de botones-ventana.js: este monta el mando de
             # plegar sobre las barras de título, y los −■✕ de dentro los
@@ -712,6 +717,11 @@ VERSIONADAS = {
 
 def version_de(ruta_publica):
     """Resumen corto del contenido, o "" si el archivo no está."""
+    # Una copia de ligero/ puede no estar escrita todavía (con --probar no
+    # se escribe nada): su versión sale de lo que se va a escribir.
+    for servida, texto in LIGERAS.values():
+        if servida == ruta_publica:
+            return hashlib.sha1(texto.encode("utf-8")).hexdigest()[:8]
     archivo = RAIZ / ruta_publica.lstrip("/")
     if not archivo.is_file():
         return ""
@@ -734,6 +744,70 @@ def rutas_versionadas():
             ruta = "/" + archivo.relative_to(RAIZ).as_posix()
             if ruta != CARGADOR:
                 yield ruta
+
+
+# =========================================
+# LO QUE SE SIRVE: LAS COPIAS SIN COMENTARIOS
+# =========================================
+# Las páginas no piden estilos/paginas/notas-rol.css sino
+# ligero/estilos/paginas/notas-rol.css: el mismo archivo sin comentarios,
+# que eran entre la mitad y tres cuartas partes de lo que se bajaba (el
+# porqué y el cómo, en ligero.py). Los originales son la documentación y
+# no se tocan; ligero/ se escribe entero aquí y no se edita a mano.
+#
+# Cada copia lleva arriba "fuente: <el original>": así sabe
+# 4-comprobar/enlaces-rotos.py que el original se usa (igual que con los
+# paquetes), y quien la abra en el navegador sabe de dónde sale.
+LIGERO = "/ligero"
+LIGERAS = {}  # ruta original -> (ruta servida, texto)
+CABECERA_LIGERA = (
+    "/* Copia sin comentarios. La escribe actualizar-cabeceras.py: no se edita.\n"
+    "   fuente: %s\n"
+    "*/\n"
+)
+
+
+def servida(ruta_publica):
+    """Lo que piden las páginas en lugar de 'ruta_publica'. Los paquetes
+    se piden tal cual (ya salen sin comentarios); lo demás, su copia."""
+    if ruta_publica in DESTINOS_DE_PAQUETES or not ruta_publica.endswith((".css", ".js")):
+        return ruta_publica
+    if ruta_publica not in LIGERAS:
+        archivo = RAIZ / ruta_publica.lstrip("/")
+        if not archivo.is_file():
+            return ruta_publica
+        texto = CABECERA_LIGERA % ruta_publica + sin_comentarios(
+            ruta_publica, archivo.read_text(encoding="utf-8"))
+        LIGERAS[ruta_publica] = (LIGERO + ruta_publica, texto)
+    return LIGERAS[ruta_publica][0]
+
+
+def escribir_ligeras(probar=False):
+    """Escribe las copias que han cambiado y quita de ligero/ las que ya
+    no pide nadie. Devuelve (escritas, quitadas)."""
+    escritas, quitadas = [], []
+    deben = set()
+    for servida_, texto in LIGERAS.values():
+        destino = RAIZ / servida_.lstrip("/")
+        deben.add(destino)
+        antes = destino.read_text(encoding="utf-8") if destino.is_file() else None
+        if antes != texto:
+            escritas.append(servida_)
+            if not probar:
+                destino.parent.mkdir(parents=True, exist_ok=True)
+                escribir_texto(destino, texto)
+    carpeta = RAIZ / LIGERO.lstrip("/")
+    if carpeta.is_dir():
+        for archivo in sorted(carpeta.rglob("*")):
+            if archivo.is_file() and archivo not in deben:
+                quitadas.append("/" + archivo.relative_to(RAIZ).as_posix())
+                if not probar:
+                    archivo.unlink()
+        if not probar:
+            for sub in sorted(carpeta.rglob("*"), key=lambda x: -len(x.parts)):
+                if sub.is_dir() and not any(sub.iterdir()):
+                    sub.rmdir()
+    return escritas, quitadas
 
 
 ABRE_VERSIONES = "        // ==== generado ===="
@@ -843,6 +917,9 @@ PAQUETES = (
 )
 
 
+DESTINOS_DE_PAQUETES = {destino for destino, _ in PAQUETES}
+
+
 def escribir_paquetes(probar=False):
     """Escribe los tres paquetes pegando sus archivos. Devuelve los que
     ha tenido que reescribir."""
@@ -864,7 +941,8 @@ def escribir_paquetes(probar=False):
                 print(f"  AVISO: el paquete {destino} nombra {miembro}, que no está.")
                 continue
             trozos.append("\n/* ======== %s ======== */\n" % miembro)
-            trozos.append(archivo.read_text(encoding="utf-8"))
+            # Sin comentarios, como todo lo que se sirve (ver ligero.py).
+            trozos.append(sin_comentarios(miembro, archivo.read_text(encoding="utf-8")))
         texto = "".join(trozos)
         # En JavaScript los /* */ también valen, así que el separador
         # sirve igual para los dos; lo que no vale es dejar un archivo sin
@@ -934,28 +1012,22 @@ def con_paquetes(lista):
 ABRE = "<!-- ==== CSS ===="
 CIERRA = "<!-- ==== fin del CSS ==== -->"
 
-# LOS COMENTARIOS DE LA CABECERA VAN CORTOS A PROPÓSITO.
-#
-# Esto se escribe en las 38 páginas del sitio, así que cada línea de
-# explicación se copia 38 veces: las que había antes (el porqué de que
-# los <link> vayan aquí y no los pida un script, lo que significa el ?v=,
-# por qué el menú se adelanta...) ocupaban un tercio de la cabecera de
-# cada archivo. El porqué de cada cosa está AQUÍ, en esta herramienta,
-# que es donde se toca, y resumido en herramientas/LEEME.txt. En la
-# página queda solo lo que hace falta saber mirándola: que esto lo
-# escribe una herramienta y que no se toca a mano.
-CABECERA = f"""    {ABRE}
-         La escribe herramientas/3-generadores/actualizar-cabeceras.py.
-         No la toques a mano (el porqué, en esa herramienta). -->
+# LAS MARCAS VAN SOLAS, SIN EXPLICACIÓN. Esto se escribe en todas las
+# páginas, así que cada línea de explicación se copiaba treinta y tantas
+# veces y la bajaba cada visita. El porqué de cada cosa está AQUÍ, que es
+# donde se toca, y en herramientas/LEEME.txt («LA CABECERA DE LAS
+# PÁGINAS»): ahí pone que este bloque lo escribe la herramienta y no se
+# toca a mano. Las marcas se quedan porque son como esta herramienta
+# encuentra el bloque la vez siguiente (y quitar-comentarios.py las
+# respeta por eso, ver MARCAS allí).
+CABECERA = f"""    {ABRE} -->
 """
 
 
 ABRE_JS = "<!-- ==== JS ===="
 CIERRA_JS = "<!-- ==== fin del JS ==== -->"
 
-CABECERA_JS = f"""    {ABRE_JS}
-         Igual que el CSS: la escribe la herramienta, a partir de
-         scripts_de(). Van con defer y en este orden, que importa. -->
+CABECERA_JS = f"""    {ABRE_JS} -->
 """
 
 
@@ -980,25 +1052,23 @@ BARRA_LATERAL = "/fragmentos/barra-lateral.html"
 # como siempre.
 ABRE_ADELANTO = "<!-- ==== ADELANTO DEL MENÚ ===="
 
-ADELANTO = f"""    {ABRE_ADELANTO}
-         El menú, pedido LO PRIMERO para que no llegue tarde. Lo escribe
-         la herramienta; el porqué está en ella. -->
+ADELANTO = f"""    {ABRE_ADELANTO} -->
     <script>window.adelantoDeFragmentos={{}};try{{window.adelantoDeFragmentos["%s"]=fetch("%s").then(function(r){{return r.ok?r.text():null}}).catch(function(){{return null}})}}catch(e){{}}</script>
 """
 
 
 def bloque(ruta):
     links = "\n".join(
-        f'    <link rel="stylesheet" href="{con_version(h)}">'
+        f'    <link rel="stylesheet" href="{con_version(servida(h))}">'
         for h in con_paquetes(hojas_de(ruta))
     )
     # El cargador va SIN defer y antes que los demás: es quien pone el
     # tamaño del texto, la letra y el filtro CRT antes del primer
     # pintado, y quien deja preparado window.conVersion() para los que
     # vienen detrás.
-    cargador = f'    <script src="{con_version(CARGADOR)}"></script>'
+    cargador = f'    <script src="{con_version(servida(CARGADOR))}"></script>'
     defer = "\n".join(
-        f'    <script defer src="{con_version(s)}"></script>'
+        f'    <script defer src="{con_version(servida(s))}"></script>'
         for s in con_paquetes(scripts_de(ruta))
     )
     # El 404 no lleva barra lateral: ahí no hay nada que adelantar.
@@ -1081,18 +1151,17 @@ def bloque_del_tema():
         '            "%s": ["%s", "%s"]' % (clave, atributo, barra)
         for clave, atributo, barra in temas
     )
-    return f"""    {ABRE_TEMA}
-         El tema elegido, puesto antes del primer pintado para que no haya
-         fogonazo. Lo escribe la herramienta leyendo scripts/tema.js. -->
+    # LA CLASE "js" del <html>: una marca de que el JavaScript funciona,
+    # puesta ANTES del primer pintado. Sirve para que una hoja de estilo
+    # pueda decir "esto solo si hay JavaScript": un spoiler tapado, por
+    # ejemplo, que sin JavaScript sería texto perdido y con él se destapa
+    # al pulsarlo. Va aquí porque es el único script que corre antes de
+    # pintar: puesto más tarde habría fogonazo. (El comentario estaba
+    # dentro del script y se copiaba en cada página; vive aquí.)
+    return f"""    {ABRE_TEMA} -->
     <meta name="theme-color" content="{COLOR_DE_FABRICA}">
     <script>
       (function () {{
-        // Una marca de que el JavaScript funciona, puesta ANTES del primer
-        // pintado. Sirve para que una hoja de estilo pueda decir "esto
-        // solo si hay JavaScript": un spoiler tapado, por ejemplo, que sin
-        // JavaScript sería texto perdido y con él se destapa al pulsarlo.
-        // Aquí y no en otro sitio porque es el único script que corre
-        // antes de pintar: puesto más tarde habría fogonazo.
         document.documentElement.classList.add("js");
         try {{
           var temas = {{
@@ -1128,7 +1197,7 @@ TEMA_PUESTO = re.compile(
 # La línea del cargador, con o sin su ?v=: hay que reconocer las dos
 # para no dejar de encontrar el bloque justo cuando ya está bien.
 LINEA_CARGADOR = (
-    r'[ \t]*<script src="/scripts/cargador-scripts\.js(?:\?v=[^"]*)?"></script>'
+    r'[ \t]*<script src="(?:/ligero)?/scripts/cargador-scripts\.js(?:\?v=[^"]*)?"></script>'
 )
 
 # Lo que había antes de pasar esta herramienta por primera vez: el
@@ -1154,6 +1223,74 @@ YA_PUESTO = re.compile(
     + r"(?:\n[ \t]*" + re.escape(ABRE_JS) + r".*?" + re.escape(CIERRA_JS) + r")?",
     re.S,
 )
+
+
+# =========================================
+# LA POLÍTICA DE SEGURIDAD (Content-Security-Policy)
+# =========================================
+# Una segunda red debajo de lo que ya protege la web (todo lo que se pinta
+# va escapado y las direcciones se comprueban; ver
+# 4-comprobar/inyecciones.py). Le dice al navegador de dónde puede venir
+# cada cosa, y así, aunque un día se colara un <script> en una página,
+# el navegador no lo ejecutaría.
+#
+# Neocities no deja poner cabeceras, así que va en un <meta>, el PRIMERO
+# del <head> después del charset: lo que hubiera antes no lo cubriría.
+#
+# LOS SCRIPTS ESCRITOS EN LA PÁGINA (el pre-pintado del tema, el adelanto
+# del menú, el del dibujo de la portada) se permiten uno a uno por su
+# HUELLA (sha256 de su texto exacto), que esta herramienta calcula al
+# escribir la cabecera. Por eso:
+#
+#     SI TOCAS A MANO UN <script> ESCRITO EN UNA PÁGINA, PASA ESTO DETRÁS.
+#
+# Si no, su huella ya no cuadra y el navegador no lo ejecuta (lo dice en la
+# consola, F12). Los scripts de archivo (/ligero/..., los paquetes) no
+# necesitan nada: valen todos los de esta misma web.
+#
+# Lo demás:
+#   - estilos: los de la web y los escritos en línea (style="..."). Meter
+#     estilos no ejecuta nada, y el mapa de la wiki y «sobre mí» llevan
+#     style= dentro;
+#   - imágenes: las de la web y las "data:" (la flechita de los enlaces de
+#     fuera está dibujada así en el CSS);
+#   - peticiones: las de la web y las del guestbook, que habla con Google
+#     (script.google.com, que contesta desde script.googleusercontent.com);
+#   - ni plugins, ni <base>, ni formularios que manden a otra web.
+CSP_GOOGLE = "https://script.google.com https://script.googleusercontent.com"
+RE_SCRIPT_EN_LINEA = re.compile(r"<script(?![^>]*\bsrc=)[^>]*>(.*?)</script>", re.S)
+RE_CSP = re.compile(r'[ \t]*<meta http-equiv="Content-Security-Policy"[^>]*>\n')
+RE_CHARSET = re.compile(r'(<meta charset="[^"]*">\n)', re.I)
+
+
+def politica(texto):
+    import base64
+    sin = RE_CSP.sub("", texto)
+    huellas = sorted({
+        "'sha256-%s'" % base64.b64encode(hashlib.sha256(m.group(1).encode("utf-8")).digest()).decode()
+        for m in RE_SCRIPT_EN_LINEA.finditer(sin)
+    })
+    return "; ".join([
+        "default-src 'self'",
+        "script-src 'self'" + "".join(" " + h for h in huellas),
+        "style-src 'self' 'unsafe-inline'",
+        "img-src 'self' data:",
+        "font-src 'self'",
+        "connect-src 'self' " + CSP_GOOGLE,
+        "object-src 'none'",
+        "base-uri 'self'",
+        "form-action 'self'",
+    ])
+
+
+def poner_csp(texto):
+    """La página con su <meta> de seguridad al día, justo después del
+    charset. Si no tiene charset (no es una página entera), tal cual."""
+    if not RE_CHARSET.search(texto):
+        return texto
+    sin = RE_CSP.sub("", texto)
+    meta = '    <meta http-equiv="Content-Security-Policy" content="%s">\n' % politica(sin)
+    return RE_CHARSET.sub(lambda m: m.group(1) + meta, sin, count=1)
 
 
 def paginas():
@@ -1228,6 +1365,10 @@ def main():
             saltadas.append(archivo.relative_to(RAIZ).as_posix())
             continue
 
+        # Lo último, cuando ya está todo escrito: la política de seguridad
+        # lleva las huellas de los scripts que haya quedado en la página.
+        salida = poner_csp(salida)
+
         if salida == original:
             iguales.append(archivo.relative_to(RAIZ).as_posix())
         else:
@@ -1236,6 +1377,13 @@ def main():
             )
             if not probar:
                 escribir_texto(archivo, salida, crlf)
+
+    escritas, quitadas = escribir_ligeras(probar)
+    if escritas:
+        print(("Copias sin comentarios escritas en ligero/: %d" if not probar
+               else "Copias sin comentarios que se escribirían: %d") % len(escritas))
+    if quitadas:
+        print("Quitadas de ligero/ (ya no las pide nadie): %s" % ", ".join(quitadas))
 
     if cambiadas:
         print("Actualizadas:" if not probar else "Se actualizarían:")

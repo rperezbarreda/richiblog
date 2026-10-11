@@ -1,0 +1,16 @@
+/* Copia sin comentarios. La escribe actualizar-cabeceras.py: no se edita.
+   fuente: /estilos/componentes/ventana-modal.responsive.css
+*/
+@media (max-width: 760px) {
+    .modal {
+        padding: 24px 14px;
+    }
+}
+@media (max-width: 480px) {
+    .modal {
+        padding: 16px 10px calc(16px + var(--hueco-abajo));
+    }
+    .modal-cuerpo {
+        padding: 16px;
+    }
+}

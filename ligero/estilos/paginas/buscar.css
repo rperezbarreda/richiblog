@@ -1,0 +1,303 @@
+/* Copia sin comentarios. La escribe actualizar-cabeceras.py: no se edita.
+   fuente: /estilos/paginas/buscar.css
+*/
+.buscar-form {
+    max-width: 640px;
+    margin: 18px 0 10px;
+}
+.buscar-form-label {
+    display: block;
+    margin-bottom: 8px;
+    color: var(--yellow);
+    font-family: var(--fuente-mono);
+    font-size: 0.75rem;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+}
+.buscar-form-caja {
+    display: flex;
+    gap: 8px;
+}
+.buscar-form-campo {
+    flex: 1;
+    min-width: 0;
+    padding: 12px 14px;
+    border: 2px solid var(--yellow);
+    background: var(--purple-lighter);
+    color: var(--white);
+    font-family: var(--fuente-texto);
+    font-size: 1rem;
+}
+.buscar-form-campo::placeholder {
+    color: var(--muted);
+    opacity: 1;
+}
+.buscar-form-campo:focus-visible {
+    outline: 2px solid var(--yellow);
+    outline-offset: 3px;
+}
+.buscar-form-enviar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-shrink: 0;
+    padding: 12px 18px;
+    border: 2px solid var(--yellow);
+    background: var(--yellow);
+    color: var(--yellow-contrast);
+    font-family: var(--fuente-mono);
+    font-size: 0.8125rem;
+    letter-spacing: 1px;
+    transition: color 0.12s linear, background-color 0.12s linear;
+}
+.buscar-form-enviar:hover {
+    background: var(--purple);
+    color: var(--yellow);
+}
+.buscar-form-enviar:focus-visible {
+    outline: 2px solid var(--yellow);
+    outline-offset: 3px;
+}
+.buscar-lupa {
+    position: relative;
+    display: inline-block;
+    width: 1em;
+    height: 1em;
+    vertical-align: -0.12em;
+}
+.buscar-lupa::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 0.68em;
+    height: 0.68em;
+    border: 2px solid currentColor;
+    border-radius: 50%;
+}
+.buscar-lupa::after {
+    content: "";
+    position: absolute;
+    top: 0.58em;
+    left: 0.56em;
+    width: 2px;
+    height: 0.38em;
+    background: currentColor;
+    transform: rotate(-45deg);
+    transform-origin: top center;
+}
+.buscar-ayuda {
+    max-width: 62ch;
+    margin: 12px 0 0;
+    color: var(--muted);
+    font-size: 0.875rem;
+    line-height: 1.7;
+}
+.buscar-ayuda strong {
+    color: var(--white);
+}
+.buscar-cuenta {
+    margin: 18px 0 14px;
+    min-height: 1.3em;
+    color: var(--yellow);
+    font-family: var(--fuente-mono);
+    font-size: 0.8125rem;
+}
+.buscar-resultados {
+    max-width: 900px;
+}
+.busq-lista {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+.busq-item {
+    padding: 16px 18px;
+    border: 2px solid var(--border);
+    background: var(--purple-lighter);
+}
+.busq-item + .busq-item {
+    margin-top: 10px;
+}
+.busq-titulo {
+    margin: 0 0 6px;
+    font-family: var(--fuente-texto);
+    font-size: 1.0625rem;
+    line-height: 1.4;
+}
+.busq-titulo a {
+    color: var(--yellow);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+}
+.busq-titulo a:hover {
+    text-decoration-thickness: 2px;
+}
+.busq-titulo a:focus-visible {
+    outline: 2px solid var(--yellow);
+    outline-offset: 3px;
+}
+.busq-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 10px;
+    margin: 0 0 8px;
+    color: var(--muted);
+    font-family: var(--fuente-mono);
+    font-size: 0.6875rem;
+    letter-spacing: 0.5px;
+}
+.busq-seccion {
+    padding: 2px 7px;
+    border: 1px solid var(--yellow);
+    color: var(--yellow);
+    text-transform: uppercase;
+}
+.busq-categoria {
+    padding: 2px 7px;
+    border: 1px solid var(--border);
+}
+.busq-fecha {
+    padding: 2px 0;
+}
+.busq-trozo {
+    margin: 0;
+    color: var(--white);
+    font-size: 0.9375rem;
+    line-height: 1.7;
+}
+.busq-trozo mark,
+.busq-titulo mark,
+.busq-meta mark {
+    padding: 0 2px;
+    background: var(--yellow);
+    color: var(--yellow-contrast);
+    text-decoration: underline;
+    text-decoration-thickness: 2px;
+    text-underline-offset: 2px;
+}
+.busq-mas {
+    display: block;
+    width: 100%;
+    margin-top: 12px;
+    padding: 12px;
+    border: 2px dashed var(--muted);
+    background: transparent;
+    color: var(--muted);
+    font-family: var(--fuente-mono);
+    font-size: 0.8125rem;
+    transition: color 0.12s linear, border-color 0.12s linear;
+}
+.busq-mas:hover {
+    border-color: var(--yellow);
+    color: var(--yellow);
+}
+.busq-mas:focus-visible {
+    outline: 2px solid var(--yellow);
+    outline-offset: 3px;
+}
+.busq-nada {
+    max-width: 62ch;
+    padding: 18px;
+    border: 2px dashed var(--border);
+    color: var(--white);
+    font-size: 0.9375rem;
+    line-height: 1.7;
+}
+.busq-nada p {
+    margin: 0 0 10px;
+}
+.busq-nada p:last-child {
+    margin-bottom: 0;
+}
+.busq-nada a {
+    color: var(--yellow);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+}
+.buscar-form-suelta {
+    margin: 0 0 14px;
+    max-width: none;
+}
+.buscar-form-suelta .buscar-form-campo {
+    padding: 10px 12px;
+    font-size: 0.9375rem;
+}
+.buscar-form-suelta .buscar-form-enviar {
+    padding: 10px 14px;
+}
+.buscar-lupa-boton {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    margin-top: 6px;
+    padding: 10px 14px;
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--white);
+    font-family: var(--fuente-texto);
+    font-size: 0.9375rem;
+    text-align: left;
+    transition: color 0.12s linear, border-color 0.12s linear;
+}
+.buscar-lupa-boton:hover {
+    border-color: var(--yellow);
+    color: var(--yellow);
+}
+.buscar-lupa-boton:focus-visible {
+    outline: 2px solid var(--yellow);
+    outline-offset: 2px;
+}
+.buscar-modal {
+    width: min(30rem, calc(100vw - 32px));
+    margin: auto;
+    padding: 0;
+    background: var(--purple-lighter);
+    border: 3px solid var(--yellow);
+    box-shadow: 8px 8px 0 var(--yellow);
+    color: var(--white);
+}
+.buscar-modal::backdrop {
+    background: rgba(0, 0, 0, 0.72);
+}
+.buscar-modal-cuerpo {
+    padding: 18px;
+}
+.buscar-modal .buscar-form {
+    margin: 0;
+}
+@media (max-width: 860px) {
+    .buscar-modal {
+        width: calc(100vw - 24px);
+    }
+    .buscar-modal-cuerpo {
+        padding: 14px;
+    }
+    .buscar-form-caja {
+        flex-wrap: wrap;
+    }
+    .buscar-form-campo {
+        flex-basis: 100%;
+    }
+    .buscar-form-enviar {
+        flex: 1;
+        justify-content: center;
+    }
+    .buscar-form-suelta .buscar-form-caja {
+        flex-wrap: nowrap;
+    }
+    .buscar-form-suelta .buscar-form-campo {
+        flex-basis: auto;
+    }
+    .buscar-form-suelta .buscar-form-enviar {
+        flex: 0 0 auto;
+    }
+}
+@media (prefers-reduced-motion: reduce) {
+    .buscar-lupa-boton,
+    .buscar-form-enviar,
+    .busq-mas {
+        transition: none;
+    }
+}

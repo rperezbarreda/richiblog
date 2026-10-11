@@ -1,0 +1,223 @@
+/* Copia sin comentarios. La escribe actualizar-cabeceras.py: no se edita.
+   fuente: /estilos/componentes/lectura.css
+*/
+.lectura-minutos {
+    margin: 0;
+    flex-shrink: 0;
+    color: var(--yellow-contrast);
+    font-family: var(--fuente-mono);
+    font-size: 0.75rem;
+    letter-spacing: 1px;
+    white-space: nowrap;
+}
+.lectura-minutos::before {
+    content: "·";
+    margin-right: 10px;
+}
+.lectura-indice {
+    margin: 0 0 22px;
+    padding: 12px 16px;
+    border-left: 3px solid var(--yellow);
+    background: var(--purple-lighter);
+}
+.lectura-indice-titulo {
+    margin: 0 0 8px;
+    color: var(--yellow);
+    font-family: var(--fuente-mono);
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+.lectura-indice-lista {
+    margin: 0;
+    padding-left: 1.4em;
+    color: var(--muted);
+}
+.lectura-indice-lista li {
+    margin: 0 0 4px;
+}
+.lectura-indice .lectura-indice-enlace {
+    color: var(--white);
+    font-size: 0.9375rem;
+    text-decoration: none;
+}
+.lectura-indice .lectura-indice-enlace:hover,
+.lectura-indice .lectura-indice-enlace:focus-visible {
+    color: var(--yellow);
+    text-decoration: underline;
+}
+.lectura-indice .lectura-indice-enlace:focus-visible {
+    outline: 2px solid var(--yellow);
+    outline-offset: 3px;
+}
+.blog-post-body h2,
+.relato-post-body h2 {
+    scroll-margin-top: 16px;
+}
+.voz-ventana {
+    position: relative;
+    flex: none;
+    margin: 0 0 18px;
+    padding: 16px;
+    background: var(--purple);
+    border: 3px solid var(--yellow);
+    box-shadow: 4px 4px 0 var(--yellow);
+}
+.blog-post-side > .voz-ventana,
+.relato-post-side > .voz-ventana {
+    margin-bottom: 0;
+}
+.voz-boton {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    width: 100%;
+    margin-bottom: 14px;
+    padding: 10px 14px;
+    border: 2px solid var(--yellow);
+    background: transparent;
+    color: var(--yellow);
+    font-family: var(--fuente-mono);
+    font-size: 0.8125rem;
+    letter-spacing: 1px;
+    transition: color 0.12s linear, background-color 0.12s linear;
+}
+.voz-boton:hover,
+.voz-boton[aria-pressed="true"] {
+    background: var(--yellow);
+    color: var(--yellow-contrast);
+}
+.voz-boton:focus-visible {
+    outline: 2px solid var(--yellow);
+    outline-offset: 3px;
+}
+.voz-velocidad {
+    margin-bottom: 14px;
+}
+.voz-ventana > .voz-velocidad:last-child {
+    margin-bottom: 0;
+}
+.voz-velocidad-nombre {
+    margin: 0 0 5px;
+    color: var(--muted);
+    font-family: var(--fuente-mono);
+    font-size: 0.625rem;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+}
+.voz-velocidad-mandos {
+    display: flex;
+    gap: 5px;
+}
+.voz-velocidad-boton {
+    flex: 1;
+    padding: 6px 4px;
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--muted);
+    font-family: var(--fuente-mono);
+    font-size: 0.6875rem;
+    transition: color 0.12s linear, background-color 0.12s linear,
+        border-color 0.12s linear;
+}
+.voz-velocidad-boton:hover {
+    border-color: var(--yellow);
+    color: var(--yellow);
+}
+.voz-velocidad-boton[aria-pressed="true"] {
+    border-color: var(--yellow);
+    background: var(--yellow);
+    color: var(--yellow-contrast);
+}
+.voz-velocidad-boton:focus-visible {
+    outline: 2px solid var(--yellow);
+    outline-offset: 2px;
+}
+.voz-icono {
+    font-size: 0.75rem;
+    line-height: 1;
+}
+.voz-aviso {
+    margin: 0 0 18px;
+    padding: 16px;
+    background: var(--purple-lighter);
+    border: 3px solid var(--yellow);
+    box-shadow: 6px 6px 0 var(--yellow);
+}
+.voz-aviso[hidden] {
+    display: none;
+}
+.voz-aviso-cuerpo {
+    padding: 0;
+}
+.voz-aviso p {
+    margin: 0 0 10px;
+    color: var(--white);
+    font-size: 0.875rem;
+    line-height: 1.7;
+}
+.voz-aviso-lista {
+    margin: 0 0 12px;
+    padding-left: 20px;
+    color: var(--white);
+    font-size: 0.875rem;
+    line-height: 1.7;
+}
+.voz-aviso-lista li + li {
+    margin-top: 8px;
+}
+.voz-aviso-lista strong {
+    color: var(--yellow);
+}
+.voz-aviso-nota {
+    font-size: 0.8125rem;
+}
+.voz-aviso a {
+    color: var(--yellow);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+}
+.voz-aviso a:hover,
+.voz-aviso a:focus-visible {
+    color: var(--yellow-contrast);
+    background: var(--yellow);
+}
+.voz-aviso-cerrar {
+    padding: 8px 16px;
+    border: 2px solid var(--yellow);
+    background: transparent;
+    color: var(--yellow);
+    font-family: var(--fuente-mono);
+    font-size: 0.75rem;
+    transition: color 0.12s linear, background-color 0.12s linear;
+}
+.voz-aviso-cerrar:hover {
+    background: var(--yellow);
+    color: var(--yellow-contrast);
+}
+.voz-aviso-cerrar:focus-visible,
+.voz-aviso a:focus-visible {
+    outline: 2px solid var(--yellow);
+    outline-offset: 2px;
+}
+@media (prefers-reduced-motion: reduce) {
+    .voz-boton,
+    .voz-aviso-cerrar {
+        transition: none;
+    }
+}
+.voz-leyendo {
+    margin-left: -8px;
+    margin-right: -8px;
+    padding: 2px 8px;
+    background: var(--yellow);
+    color: var(--yellow-contrast);
+}
+.voz-leyendo a,
+.voz-leyendo strong,
+.voz-leyendo em,
+.voz-leyendo code {
+    color: inherit;
+    background: transparent;
+}

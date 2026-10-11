@@ -10,48 +10,10 @@
 */
 
 /* ======== /estilos/componentes/ventanas-plegables.css ======== */
-/* COMPONENTE: VENTANAS QUE SE PLIEGAN DE VERDAD */
-
-/* Las barras de título de las ventanas falsas (−■✕) eran de adorno. Ya
-   no: el − pliega la ventana y deja solo la barra, y el ■ la devuelve a
-   su tamaño. El ✕ sigue siendo una broma y solo suelta brillos.
-   Quien lo mueve es scripts/componentes/ventanas-plegables.js, que a
-   cada barra le pone la clase .ventana-barra, a su ventana
-   .ventana-plegable, y marca la que esté plegada con
-   [data-plegada="si"].
-
-   POR QUÉ ESTA HOJA VA LA ÚLTIMA DE LA LISTA
-   Lo que hace plegar una ventana es esconder todo lo que no es la
-   barra, y eso tiene que ganarle al "display" que cada página le haya
-   puesto a esos trozos (flex, grid, block...). Los selectores de abajo
-   ya pesan más que los de las páginas, pero cargándola al final se gana
-   también cualquier empate sin tener que inflarlos ni recurrir a
-   !important, que en esta web no se usa en ningún sitio. Lo decide
-   hojas_de() en herramientas/3-generadores/actualizar-cabeceras.py. */
-
-/* ==== LA BARRA, QUE AHORA ES UN INTERRUPTOR ==== */
-
-/* Toda la barra responde, no solo los tres cuadraditos: en el móvil
-   miden 0,9rem de lado (unos 13 px) y acertarles con el dedo es una
-   lotería, mientras que la barra entera son casi 40 px de alto de punta
-   a punta. El texto deja de poder seleccionarse porque arrastrar sobre
-   el título para copiarlo acabaría plegando la ventana; es lo que ya
-   hacía la barra de las fichas de los gatos. */
 .ventana-barra {
     cursor: pointer;
     user-select: none;
 }
-
-/* El mando de verdad: un botón transparente que cubre la barra entera.
-   Va así, y no envolviendo el título, porque hay títulos que se
-   reescriben solos mientras se usa la página (el de las entradas del
-   diario cambia de mes) y se llevarían el botón por delante.
-   Encima queda el título, que se lee tal cual, y los −■✕, que tienen su
-   propio z-index más alto para que cada uno siga haciendo lo suyo.
-
-   El nombre que oye quien usa un lector de pantalla es el del título
-   (aria-labelledby, que lo pone el script), y si está plegada o no lo
-   dice aria-expanded: "calendario.exe, botón, contraído". */
 .ventana-barra-mando {
     position: absolute;
     inset: 0;
@@ -65,72 +27,28 @@
     font: inherit;
     cursor: pointer;
 }
-
-/* El recuadro del foco va metido para dentro (offset negativo) porque
-   el mando ocupa la barra justa: por fuera se le comería el borde de la
-   ventana. currentColor y no --yellow a secas: en la barra amarilla de
-   la ficha de un gato el amarillo no se vería, y ahí currentColor es el
-   color del propio título, que por definición contrasta con su barra. */
 .ventana-barra-mando:focus-visible {
     outline: 2px solid currentColor;
     outline-offset: -4px;
 }
-
-/* ==== PLEGADA ==== */
-
-/* Esconder todo menos la barra. Es la regla importante de este archivo
-   y por eso lleva tres clases/atributos: los trozos de dentro de una
-   ventana suelen traer su propio display (.rec-lista es grid,
-   .entries-list es flex...) y hay que poder taparlo. */
 .ventana-plegable[data-plegada="si"] > :not(.ventana-barra) {
     display: none;
 }
-
-/* Y que la ventana se encoja de verdad. Lo de height/min-height/
-   max-height es para las que vienen con una altura puesta desde su
-   página (las dos tarjetas de la portada van a la misma altura, la
-   ventana de un aviso tiene tope y scroll): sin esto se quedarían
-   igual de altas pero vacías. El padding de abajo se va porque, plegada,
-   lo único que hay dentro es la barra, que llega pegada a los bordes
-   por sus márgenes negativos. */
 .ventana-plegable[data-plegada="si"] {
     height: auto;
     min-height: 0;
     max-height: none;
     padding-bottom: 0;
 }
-
 .ventana-plegable[data-plegada="si"] > .ventana-barra {
     margin-bottom: 0;
-    /* Un pelín más de hueco a la derecha que el de siempre (3,7rem).
-       Hay ventanas cuyo ancho lo manda lo que tienen dentro —la del
-       calendario del diario— y, plegadas, lo único que queda dentro es
-       el título: la ventana se encoge hasta él y el texto acaba pegado
-       al primer cuadradito, sin un respiro. Con esto siempre queda un
-       dedo de aire. En las demás no se nota: ahí el título no llega ni
-       de lejos a esa esquina. */
     padding-right: 4.4rem;
 }
-
-/* ==== CUÁL DE LOS DOS TOCA ==== */
-
-/* El botón que en ese momento no hace nada se queda en hueco: el borde
-   y el símbolo sí, el relleno no. Así se ve de un vistazo que una
-   ventana abierta se pliega con el − (el ■ está apagado) y que una
-   plegada se abre con el ■. Sin esto, pulsar ■ en una ventana abierta
-   no haría nada y parecería que está roto.
-   --window-btn-tinta es el color del borde, que lo pone .window-btn en
-   base.css y lo cambia la barra de los gatos: así el hueco funciona en
-   las dos sin repetir colores aquí. */
 .ventana-plegable:not([data-plegada="si"]) > .ventana-barra [data-ventana-accion="desplegar"],
 .ventana-plegable[data-plegada="si"] > .ventana-barra [data-ventana-accion="plegar"] {
     background: transparent;
     color: var(--window-btn-tinta);
 }
-
-/* Al pasar por encima se rellena, toque o no toque: es la forma de
-   saber que el cuadradito es un botón antes de pulsarlo. Va después de
-   la regla del hueco a propósito, que pesan lo mismo y gana la última. */
 .ventana-barra [data-ventana-accion="plegar"]:hover,
 .ventana-barra [data-ventana-accion="desplegar"]:hover {
     background: var(--window-btn-tinta);
@@ -138,62 +56,13 @@
 }
 
 /* ======== /estilos/componentes/impresion.css ======== */
-/* COMPONENTE: CÓMO SALE LA WEB EN PAPEL */
-
-/* POR QUÉ ESTO EXISTE
-   -------------------
-   Mucha gente que ve poco no lee en pantalla: imprime, o manda a PDF
-   para leerlo con su propio visor, a su tamaño y con su contraste. Sin
-   una hoja de impresión salía en papel el menú entero, la rejilla del
-   fondo, los botones y las ventanitas con sus −■✕, y la entrada en
-   medio a trozos. Con ésta sale el texto y poco más.
-
-   LAS DIRECCIONES SE ESCRIBEN. En papel un enlace no se puede pulsar,
-   así que detrás de cada uno sale su dirección entre paréntesis. Es de
-   lo poco que la impresión puede hacer mejor que la pantalla.
-
-   NEGRO SOBRE BLANCO, siempre, sea cual sea el tema que esté puesto en
-   la pantalla. No es por ahorrar tinta: un fondo oscuro impreso sale
-   gris sucio y el texto encima deja de leerse, y hay impresoras que
-   directamente no pintan los fondos. Lo mismo con el filtro CRT: unas
-   rayas encima del texto en papel son rayas y ya está.
-
-   Este archivo va en ULTIMAS (herramientas/3-generadores/actualizar-cabeceras.py)
-   para que se cargue el último y no haya que pelear con nadie: cuando
-   dos reglas pesan lo mismo gana la de después. */
-
 @media print {
-    /* ---- EL PAPEL ---- */
     @page {
         margin: 2cm;
     }
-
-    /* ---- LA PALETA DE PAPEL ----
-       No se va elemento por elemento poniéndolo todo en negro: eso
-       había que intentarlo con un selector universal, y un selector
-       universal pesa menos que CUALQUIER regla con una clase, así que
-       perdía en casi todo el sitio (medido: la entrada salía igual de
-       morada). Se cambian las VARIABLES, que es por donde pide el color
-       absolutamente todo el CSS de esta web. En la práctica, papel es
-       un tema más.
-
-       El selector lleva ", :root[data-theme]" porque los seis temas se
-       escriben así y si no le ganarían a un ":root" pelado. Con el
-       atributo pesan lo mismo, y como este archivo se carga el último,
-       gana éste. Sin trucos y sin !important. */
     :root,
     :root[data-theme] {
         --bg-texture: none;
-        /* TODO NEGRO, Y NO ES PEREZA. Aquí abajo se quitan TODOS los
-           rellenos (background-color: transparent), así que en papel
-           ningún color de estas variables se ve nunca como fondo: solo
-           como letra o como línea. Y de letra o de línea, en papel, lo
-           que se lee es negro.
-           Dejar alguna en blanco "porque es un color de fondo" era el
-           fallo de la primera versión: --purple es fondo casi siempre,
-           pero en los botones marcados y en las cabeceras de tabla es
-           la LETRA, y esos salían en blanco sobre blanco (medido: el
-           "todas" del archivo del blog y el "página" del mapa). */
         --purple: #000000;
         --purple-lighter: #000000;
         --surface: #000000;
@@ -203,90 +72,34 @@
         --border: #000000;
         --error: #000000;
         --yellow-glow-strong: transparent;
-        /* El gris de los textos secundarios se queda gris, pero uno que
-           una impresora de tinta normal sepa pintar: por debajo de un
-           40% se convierte en una nube de puntos y se lee peor que si
-           fuera negro del todo. */
         --muted: #3a3a3a;
     }
-
     body {
         background: #ffffff;
         color: #000000;
     }
-
-    /* Las sombras duras de las ventanitas y los brillos del texto: en
-       pantalla son el estilo del sitio, en papel son manchas negras.
-       Aquí sí hace falta ir elemento por elemento, pero con ":root
-       body" delante, que pesa lo justo para ganarle a las reglas con
-       una clase sin llegar a pisar nada más. */
     :root body *,
     :root body *::before,
     :root body *::after {
         background-image: none;
-        /* Y tampoco rellenos: las bandas amarillas de las cabeceras, los
-           recuadros de las tarjetas y los botones salían en papel como
-           manchas negras de tinta (--yellow pasa a negro aquí arriba
-           para que los BORDES y los subrayados se vean, que es lo que
-           de verdad hace falta). Sin relleno queda texto negro sobre
-           blanco y las líneas marcando la estructura, que es lo que se
-           lee bien. */
         background-color: transparent;
         box-shadow: none;
         text-shadow: none;
     }
-
-    /* Y los botones que se quedan MARCADOS necesitan su propia regla:
-       el relleno de "pulsado" se escribe con el estado dentro del
-       selector ([aria-pressed="true"]) y eso pesa más que la regla de
-       arriba, así que se le colaba. Salían en papel como un rectángulo
-       negro con la letra negra encima: medido, el "todas" del archivo
-       del blog y el "página" del mapa desaparecían del todo.
-       No se esconden porque unos cuantos son el encabezado de una
-       columna de tabla (el mapa se ordena pulsando el título), y sin
-       ellos la tabla impresa se queda sin cabecera. */
     :root body [aria-pressed="true"],
     :root body [aria-pressed="true"]::before,
     :root body [aria-pressed="true"]::after,
-    /* Lo mismo con la columna por la que está ordenado el mapa, que se
-       marca con aria-sort en vez de con aria-pressed. En papel la tabla
-       sale ordenada como esté y ya: el recuadro que decía "por aquí se
-       está ordenando" no hace falta, y sí hacía falta su cabecera. */
     :root body th:not([aria-sort="none"]) .mapa-ordenar,
-    /* Y lo mismo, por lo mismo, con una fila de la lista de sesiones de
-       una campaña de rol: su relleno se escribe con el estado dentro del
-       selector (:hover, :focus-visible) y eso pesa más que la regla de
-       arriba. Al imprimir una página que se había recorrido con el
-       tabulador, la fila que tuviera el foco salía como un rectángulo
-       negro con la letra negra encima. */
     :root body a.campana-sesion:hover,
     :root body a.campana-sesion:focus-visible {
         background-color: transparent;
     }
-
-    /* El recuadro que marca la casilla enfocada de una lista de cosas
-       pendientes. En pantalla dice dónde está el teclado; en papel es un
-       segundo cuadrado alrededor del primero y parece un error de
-       impresión. No lo recoge la regla de arriba porque es un outline,
-       no un relleno. */
     :root body .cuaderno-tareas > li::before {
         outline: none;
     }
-
-    /* El filtro CRT, que lo dibuja un ::after del propio <html> y por
-       tanto no lo recoge la regla de arriba. */
     :root[data-crt="si"]::after {
         display: none;
     }
-
-    /* ---- LO QUE NO SE IMPRIME ---- */
-    /* Todo lo que es para manejar la web, no para leerla: el menú, el
-       botón de accesibilidad y su ventana, el aviso de cookies, la
-       cinta de frases, el botón de subir, los −■✕ de las ventanitas, el
-       de escuchar la entrada con su aviso, el buscador y los filtros, y
-       el gatín del menú.
-       El "saltar al contenido" tampoco: en papel no hay nada que
-       saltar. */
     .skip-link,
     .mobile-topbar,
     .sidebar,
@@ -298,10 +111,6 @@
     .subir,
     .window-controls,
     .window-controls-small,
-    /* La ventana entera de texto_a_voz.mp3, no solo sus botones: antes
-       era un botón suelto en la columna y ahora tiene marco y barra de
-       título, y escondiendo solo lo de dentro quedaba en el papel una
-       caja vacía con un nombre de fichero. */
     .voz-ventana,
     .voz-aviso,
     .buscador,
@@ -311,10 +120,6 @@
     .nav-toggle,
     .blog-tags-toggle,
     .rec-flecha,
-    /* Los atajos de la cabecera de una entrada ("volver al archivo",
-       "calendario") y la ventanita de "sigue leyendo": son para seguir
-       navegando, y en papel no se navega. Quien imprime una entrada
-       quiere esa entrada. */
     .blog-post-back,
     .relato-post-back,
     .pet-back,
@@ -322,68 +127,32 @@
     .cuaderno-post-back,
     .campana-volver,
     .npcs-volver,
-    /* Los tres botones de la campaña y la ventana que abren dos de
-       ellos: en papel una ventana no existe (se abre pulsando) y un
-       enlace es navegar. Lo que sí se imprime es la rejilla con las caras
-       y los nombres, que es la chuleta que uno se lleva a la mesa. */
     .campana-botones,
     .modal,
-    /* El botón de plegar las escenas y el de deshacer lo marcado en las
-       cosas pendientes: en papel no se pliega ni se marca nada. La
-       cuenta de hechas sí se queda, que eso es información. Y las
-       escenas se abren todas antes de imprimir, eso lo hace
-       scripts/paginas/cuaderno.js. */
     .cuaderno-plegar-todo,
     .cuaderno-tareas-deshacer,
-    /* Y los botones de pasar página: en papel están todas las hojas
-       puestas una detrás de otra, así que no hay nada que pasar. */
     .cuaderno-paginacion,
-    /* Y el pie de la nota: el botón del PDF y los saltos a la sesión de
-       al lado. Lo primero es una descarga y lo segundo es navegar, y en
-       papel no se hace ni una cosa ni la otra. */
     .cuaderno-pie,
     .volver-inicio,
     [data-otras-caja],
     [data-otras-entradas] {
         display: none;
     }
-
-    /* ---- EL TEXTO ---- */
-    /* El contenido ocupa la hoja entera: en pantalla deja sitio al menú
-       de la izquierda, y en papel ese sitio no lo quiere nadie. */
     main,
     #main-content {
         max-width: none;
         margin: 0;
         padding: 0;
     }
-
-    /* En puntos y no en píxeles: el píxel no quiere decir nada en papel
-       y cada impresora lo interpreta como le parece. */
     body {
         font-size: 11pt;
         line-height: 1.5;
     }
-
-    /* UNA SOLA COLUMNA. En pantalla la entrada va en dos (el texto a la
-       izquierda y la foto a la derecha), y eso en papel desperdicia
-       media hoja: la foto ocupa un palmo y debajo queda un hueco en
-       blanco hasta el final de la página mientras el texto sigue en una
-       columna estrecha. En una sola, el texto va de margen a margen y
-       la foto cae después, donde le toque. Son las mismas cajas, solo
-       cambia cómo se reparten. */
     .blog-post-layout,
     .relato-post-layout {
         display: block;
     }
-
-    /* LA PÁGINA DE NPC, SUELTA. En pantalla la página se desplaza por
-       dentro; en papel eso imprimía solo el primer grupo y el resto no
-       salía en ninguna parte. */
     .npcs-page,
-    /* Y "en lo que ando", por lo mismo: en pantalla la columna se
-       desplaza por dentro y en papel eso imprime el primer bloque y nada
-       más. Los cuatro bloques se ponen uno debajo de otro. */
     .ando-page,
     .ando-rejilla {
         display: block;
@@ -392,33 +161,18 @@
         max-height: none;
         overflow: visible;
     }
-
-    /* Que un bloque no se parta entre dos hojas si cabe entero. */
     .ando-bloque,
     .ando-postit {
         break-inside: avoid;
         margin-bottom: 0.6cm;
     }
-
-    /* Y que un grupo no se parta entre dos hojas si cabe entero. */
     .npc-grupo {
         break-inside: avoid;
         margin-bottom: 0.8cm;
     }
-
-    /* El marco del token se queda (es un borde, y los bordes sí se
-       imprimen); lo que se va es la sombra, que en papel es una mancha. */
     .npc-token-marco {
         box-shadow: none;
     }
-
-    /* LAS NOTAS DE UNA PARTIDA, SUELTAS.
-       En pantalla lo que se desplaza es el cuaderno por dentro, dentro de
-       un marco que no se mueve; en papel eso imprimía solo lo que cabía
-       en una pantalla y el resto no salía en ninguna parte. Aquí se
-       sueltan todas las alturas y todos los scrolls: las hojas se ponen
-       una debajo de otra, el post-it de las cosas pendientes cae al
-       final, y lo que no quepa pasa a la hoja siguiente. */
     .cuaderno-page,
     .cuaderno-post,
     .cuaderno-post-body-wrap,
@@ -435,49 +189,25 @@
         max-height: none;
         overflow: visible;
     }
-
-    /* Y el post-it, derecho y sin sombras: en pantalla va torcido y con
-       una esquina doblada, que son adornos de pantalla. Torcido en papel
-       sale torcido de verdad —no hay forma de enderezarlo después— y el
-       triángulo de la esquina se imprime como una mancha gris. */
     .cuaderno-postit {
         transform: none;
         box-shadow: none;
     }
-
     .cuaderno-postit::after {
         display: none;
     }
-
-    /* Las hojas que no están en pantalla llevan el atributo hidden, y
-       eso las esconde también al imprimir. Quien pulsa "imprimir" quiere
-       las notas enteras, no la cara por la que se había quedado.
-       (El script las destapa antes de imprimir; esto es el cinturón por
-       si llegara a imprimirse sin JavaScript de por medio.) */
     .cuaderno-hoja[hidden] {
         display: block;
     }
-
-    /* El hueco entre hojas lo ponía el "gap" de la fila, y en bloque no
-       existe. */
     .cuaderno-hoja,
     .cuaderno-postit {
         margin-bottom: 1cm;
     }
-
     .blog-post-aside,
     .relato-post-aside {
         max-width: 11cm;
         margin: 0 auto;
     }
-
-    /* ---- LAS DIRECCIONES DE LOS ENLACES ---- */
-    /* Solo las de dentro del texto. Las de los listados y las tarjetas
-       se dejan en paz: ahí serían una dirección detrás de cada título y
-       no se leería nada.
-       Esta regla sustituye a la flechita de los enlaces de fuera (que
-       también es un ::after): en papel la flecha no dice nada y la
-       dirección sí. */
     main p a[href]::after,
     main li a[href]::after,
     main blockquote a[href]::after {
@@ -491,21 +221,11 @@
         font-size: 0.85em;
         word-break: break-all;
     }
-
-    /* Menos las anclas de la propia página y los correos, que o no
-       llevan a ningún sitio en papel o ya están escritos. */
     main a[href^="#"]::after,
     main a[href^="mailto:"]::after,
-    /* Y las filas de la lista de sesiones de una campaña: están dentro
-       de un <li>, así que la regla de arriba las pillaba, pero son un
-       listado —justo lo que esa regla dice que hay que dejar en paz—. */
     main li a.campana-sesion::after {
         content: "";
     }
-
-    /* ---- LOS CORTES DE PÁGINA ---- */
-    /* Un título solo al final de una hoja, o una foto partida por la
-       mitad, es de lo que más cuesta de leer en papel. */
     h1,
     h2,
     h3,
@@ -513,35 +233,21 @@
         break-after: avoid;
         page-break-after: avoid;
     }
-
     figure,
     img,
     blockquote,
     pre,
     table,
-    /* Una escena de una partida y el post-it de las cosas pendientes:
-       partidos por la mitad entre dos hojas no se leen. Una hoja entera
-       del cuaderno no se pide, que puede ser más larga que un folio. */
     .cuaderno-escena,
     .cuaderno-postit {
         break-inside: avoid;
         page-break-inside: avoid;
     }
-
-    /* Y que no se quede una línea suelta de un párrafo colgando en otra
-       hoja. */
     p,
     li {
         orphans: 3;
         widows: 3;
     }
-
-    /* EL MARCO GRANDE SE QUITA. En pantalla la entrada vive dentro de
-       una caja con su borde, como una ventana. En papel esa caja mide
-       varias hojas, así que el borde sale cortado por abajo en una y
-       por arriba en la siguiente, y parece un error de impresión. Los
-       recuadros pequeños (una foto, una tarjeta) sí se quedan: ésos
-       caben enteros y ayudan a ver dónde empieza y acaba cada cosa. */
     .home,
     .blog-post,
     .relato-post,
@@ -552,11 +258,6 @@
         padding-left: 0;
         padding-right: 0;
     }
-
-    /* Las ventanitas falsas se quedan, pero sin su disfraz: en papel un
-       recuadro con una barra de título de pega es ruido, y lo que
-       importa es lo que lleva dentro. El título de la barra sí se
-       queda: muchas veces es el nombre del apartado. */
     .recent-entries-header,
     .gatin-random-header,
     .pet-window-header {
@@ -567,41 +268,6 @@
 }
 
 /* ======== /estilos/componentes/sin-movimiento.css ======== */
-/* COMPONENTE: DEJARLO TODO QUIETO */
-
-/* El mando "movimiento: quieto" de la ventana de accesibilidad pone
-   data-movimiento="quieto" en el <html> y aquí se para todo lo que se
-   mueve: el parpadeo del filtro CRT, el cursor de los temas de
-   terminal, el del gatete del 404, la cinta de frases de la portada,
-   las chispas de los botones y las transiciones de medio sitio.
-
-   POR QUÉ HACE FALTA SI YA ESTÁ prefers-reduced-motion
-   ----------------------------------------------------
-   Esa regla del sistema ya se respeta en 27 sitios del CSS, y se queda
-   como está. Pero es un ajuste de todo el ordenador o el móvil: quien
-   lo enciende lo enciende para TODO, y mucha gente no lo tiene puesto
-   —o no sabe que existe— y aun así un parpadeo le da dolor de cabeza en
-   esta web en concreto. Esto es lo mismo, a mano y solo aquí.
-
-   Y al revés no: si el sistema pide menos movimiento, elegir "normal"
-   aquí NO lo devuelve. Las reglas del sistema siguen donde estaban y
-   esto solo suma. Lo que pide el aparato manda.
-
-   ESTE ARCHIVO SE CARGA EL ÚLTIMO (va en ULTIMAS, en
-   herramientas/3-generadores/actualizar-cabeceras.py) y eso es parte de cómo
-   funciona: cuando dos reglas pesan lo mismo gana la que llega después,
-   así que estando al final se evita tener que inflar los selectores. En
-   esta web no se usa !important en ningún archivo y aquí tampoco. */
-
-/* LA REGLA GENERAL. Cubre de un tiro casi todo, porque casi todas las
-   animaciones y transiciones del sitio van puestas sobre una sola clase
-   (peso 0-1-0) y esto pesa más (0-2-0).
-
-   No se pone "animation: none" sino una duración de un milisegundo y
-   una sola vuelta: hay animaciones que DEJAN algo puesto al terminar
-   (las chispas del cursor se desvanecen con "forwards"), y cortándolas
-   en seco se quedarían a medias y para siempre en pantalla. Así llegan
-   al final de inmediato, que es lo que se busca. */
 :root[data-movimiento="quieto"] *,
 :root[data-movimiento="quieto"] *::before,
 :root[data-movimiento="quieto"] *::after {
@@ -610,35 +276,13 @@
     transition-duration: 1ms;
     scroll-behavior: auto;
 }
-
-/* LAS DOS EXCEPCIONES. Los dos parpadeos del filtro CRT y de los temas
-   de terminal se escriben con selectores más largos que la regla de
-   arriba (llevan el tema y el estado del filtro), así que le ganarían.
-   Se repiten aquí añadiéndoles data-movimiento, que suma peso sin
-   trucos: es una condición de verdad, no un selector repetido para
-   hacer bulto. */
 :root[data-movimiento="quieto"][data-crt="si"]::after {
     animation: none;
 }
-
 :root[data-movimiento="quieto"][data-theme^="terminal-"] .recent-entries-header h2::after,
 :root[data-movimiento="quieto"][data-theme^="terminal-"] .gatin-random-header h2::after {
     animation: none;
 }
-
-/* LA CINTA DE FRASES de la portada necesita trato aparte, y por un
-   motivo que no se ve leyendo el CSS: scripts/componentes/frases.js le
-   calcula la duración según lo larga que sea la fila y se la escribe
-   EN EL ATRIBUTO style del elemento. Un estilo escrito ahí le gana a
-   cualquier regla de cualquier hoja (salvo con !important, que aquí no
-   se usa), así que la duración de un milisegundo de arriba no le hacía
-   nada: medido, se quedaba en sus 46 segundos tan tranquila.
-
-   Lo que sí funciona es pararla en vez de acelerarla, que además es lo
-   suyo: play-state no lo escribe nadie en el style, y una cinta parada
-   no gasta batería ni sigue moviéndose por detrás. Es exactamente lo
-   mismo que hace su propio botón de pausa, que sigue estando y se
-   recuerda aparte: los dos valen y no se estorban. */
 :root[data-movimiento="quieto"] .quotes-track {
     animation-play-state: paused;
 }

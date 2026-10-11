@@ -85,6 +85,16 @@
     .mundo-titulo {
         font-size: clamp(1.75rem, 8vw, 2.25rem);
     }
+
+    /* Las tablas, con menos relleno en las celdas: medido a 390, la de
+       ejemplo pedía 318 px y había 315, así que salía un scroll de lado de
+       3 px para no ver casi nada. Con 8 px de lado cabe. Si una tabla no
+       cabe de ninguna manera, sigue el scroll, y teclado-scroll.js le da
+       entonces su parada de tabulador. */
+    .mundo-tabla th,
+    .mundo-tabla td {
+        padding: 6px 8px;
+    }
 }
 
 

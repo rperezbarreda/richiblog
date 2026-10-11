@@ -2,18 +2,11 @@
 <html lang="es">
   <head>
     <meta charset="UTF-8">
-    <!-- ==== TEMA ====
-         El tema elegido, puesto antes del primer pintado para que no haya
-         fogonazo. Lo escribe la herramienta leyendo scripts/tema.js. -->
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-+uP1lyzGOI8g/bdAAwFWWkjElUBxZW5JXPath5Rfj3A=' 'sha256-WzJfmZ3zA0hDtnR6cKyKt1o+8g4NfGJTELgMCUrrBFw=' 'sha256-oTE6cjgemXW7aRTQClslYZ63TgpgQ/lGSr9GtNhYyhs='; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self' https://script.google.com https://script.googleusercontent.com; object-src 'none'; base-uri 'self'; form-action 'self'">
+    <!-- ==== TEMA ==== -->
     <meta name="theme-color" content="#12091c">
     <script>
       (function () {
-        // Una marca de que el JavaScript funciona, puesta ANTES del primer
-        // pintado. Sirve para que una hoja de estilo pueda decir "esto
-        // solo si hay JavaScript": un spoiler tapado, por ejemplo, que sin
-        // JavaScript sería texto perdido y con él se destapa al pulsarlo.
-        // Aquí y no en otro sitio porque es el único script que corre
-        // antes de pintar: puesto más tarde habría fogonazo.
         document.documentElement.classList.add("js");
         try {
           var temas = {
@@ -43,9 +36,6 @@
     </script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>El Blog de Richi</title>
-    <!-- Cómo se ve el enlace al compartirlo (Bluesky, Discord, Ko-fi…).
-         Sin esto solo sale la URL pelada, sin título ni imagen. Las rutas
-         van absolutas a propósito: las redes no resuelven las relativas. -->
     <meta name="description" content="Blog personal: partidas de rol, relatos cortos, fotos de mis gatos y lo que se tercie.">
     <link rel="canonical" href="https://richi.blog/">
     <meta property="og:type" content="website">
@@ -60,72 +50,35 @@
     <meta property="og:image:alt" content="El Blog de Richi — ilustración de Richi sobre fondo morado">
     <meta name="twitter:card" content="summary_large_image">
     <link rel="icon" type="image/x-icon" href="/imagenes/favicon.ico">
-    <!-- La única fuente que se precarga. Medido con la red frenada: sin esto el
-         navegador no la descubre hasta parsear el CSS (~800 ms) y el texto baila al
-         cambiar de tipografía; así llega antes del primer pintado y no se nota el
-         cambio. Precargar más fuentes empeoraba el primer pintado 150-210 ms, porque
-         compiten por el ancho de banda con lo que hace falta para pintar. -->
     <link rel="preload" href="/tipografias/space-grotesk-400.woff2" as="font" type="font/woff2" crossorigin>
     <link rel="alternate" type="application/rss+xml" title="El Blog de Richi — blog, relatos y rol" href="/blog/rss.xml">
-    <!-- ==== ADELANTO DEL MENÚ ====
-         El menú, pedido LO PRIMERO para que no llegue tarde. Lo escribe
-         la herramienta; el porqué está en ella. -->
-    <script>window.adelantoDeFragmentos={};try{window.adelantoDeFragmentos["/fragmentos/barra-lateral.html"]=fetch("/fragmentos/barra-lateral.html?v=f81d2b47").then(function(r){return r.ok?r.text():null}).catch(function(){return null})}catch(e){}</script>
-    <!-- ==== CSS ====
-         La escribe herramientas/3-generadores/actualizar-cabeceras.py.
-         No la toques a mano (el porqué, en esa herramienta). -->
-    <link rel="stylesheet" href="/estilos/paquete-comun.css?v=9ae9d5fe">
-    <link rel="stylesheet" href="/estilos/paginas/portada.css?v=7f4fe343">
-    <link rel="stylesheet" href="/estilos/paginas/portada.responsive.css?v=17c1c0d6">
-    <link rel="stylesheet" href="/estilos/componentes/frases.css?v=94be519e">
-    <link rel="stylesheet" href="/estilos/componentes/barra-lateral.css?v=e510b648">
-    <link rel="stylesheet" href="/estilos/componentes/barra-lateral.responsive.css?v=45e554fd">
-    <link rel="stylesheet" href="/estilos/paginas/buscar.css?v=692b762d">
-    <link rel="stylesheet" href="/estilos/paquete-cierre.css?v=7d910eba">
+    <!-- ==== ADELANTO DEL MENÚ ==== -->
+    <script>window.adelantoDeFragmentos={};try{window.adelantoDeFragmentos["/fragmentos/barra-lateral.html"]=fetch("/fragmentos/barra-lateral.html?v=50a31cd5").then(function(r){return r.ok?r.text():null}).catch(function(){return null})}catch(e){}</script>
+    <!-- ==== CSS ==== -->
+    <link rel="stylesheet" href="/estilos/paquete-comun.css?v=a7bebe47">
+    <link rel="stylesheet" href="/ligero/estilos/paginas/portada.css?v=2449d1cf">
+    <link rel="stylesheet" href="/ligero/estilos/paginas/portada.responsive.css?v=04bf7a42">
+    <link rel="stylesheet" href="/ligero/estilos/componentes/frases.css?v=d4ab2b73">
+    <link rel="stylesheet" href="/ligero/estilos/componentes/barra-lateral.css?v=ae1f7bab">
+    <link rel="stylesheet" href="/ligero/estilos/componentes/barra-lateral.responsive.css?v=36f396a1">
+    <link rel="stylesheet" href="/ligero/estilos/paginas/buscar.css?v=e32b461e">
+    <link rel="stylesheet" href="/estilos/paquete-cierre.css?v=3c277d98">
     <!-- ==== fin del CSS ==== -->
-    <script src="/scripts/cargador-scripts.js?v=906f71e7"></script>
-    <!-- ==== JS ====
-         Igual que el CSS: la escribe la herramienta, a partir de
-         scripts_de(). Van con defer y en este orden, que importa. -->
-    <script defer src="/scripts/paquete-comun.js?v=9a077389"></script>
-    <script defer src="/scripts/componentes/frases.js?v=999803de"></script>
-    <script defer src="/scripts/componentes/recortar-titulos.js?v=b1fff3dc"></script>
-    <script defer src="/scripts/paginas/entradas-blog.js?v=a19a6c3b"></script>
-    <script defer src="/scripts/paginas/novedades.js?v=89afaaea"></script>
+    <script src="/ligero/scripts/cargador-scripts.js?v=04752c83"></script>
+    <!-- ==== JS ==== -->
+    <script defer src="/scripts/paquete-comun.js?v=c9aa4d63"></script>
+    <script defer src="/ligero/scripts/componentes/frases.js?v=b9192569"></script>
+    <script defer src="/ligero/scripts/componentes/recortar-titulos.js?v=8b81e074"></script>
+    <script defer src="/ligero/scripts/paginas/entradas-blog.js?v=c3307def"></script>
+    <script defer src="/ligero/scripts/paginas/novedades.js?v=6cf7c9d9"></script>
     <!-- ==== fin del JS ==== -->
   </head>
 <body>
-        <!-- ==== SIDEBAR / NAVEGACIÓN ==== -->
     <a class="skip-link" href="#main-content">Saltar al contenido</a>
     <div id="sidebar-container"></div>
-    <!-- ==== CONTENIDO PRINCIPAL ==== -->
 
     <main id="main-content">
-        <!-- ==== HOME ==== -->
         <section id="home" class="home home-page">
-            <!-- La ilustración y su crédito van juntos en un mismo bloque para
-                 que la etiqueta se pegue al borde inferior del dibujo y no al de
-                 la sección: el <img> no admite contenido dentro, así que el
-                 crédito se ancla a este contenedor, que mide exactamente lo que
-                 mide el dibujo. -->
-            <!-- El dibujo va en tres tamaños y el navegador se baja el que
-                 le hace falta, que no es poca cosa: en casi todas las
-                 pantallas se ve a 206px de ancho, y bajarse el de 1161
-                 para eso son 187 KB en la página más pesada del sitio (y
-                 encima es lo último que tarda en aparecer).
-
-                 sizes le dice de antemano cuánto va a ocupar, porque
-                 cuando elige todavía no ha leído el CSS:
-                   - por debajo de 1900px de ventana mide 206px fijos (lo
-                     pone .pngperson-art en portada.responsive.css);
-                   - por encima, el alto manda: es el 100% de la sección,
-                     que sale sobre un 55% del alto de la ventana.
-                 Si un navegador viejo no entiende el "vh", se baja el
-                 grande: lo de siempre, no se rompe nada.
-
-                 Las tres medidas están en los dos temas. Si algún día
-                 cambias el dibujo, las dos pequeñas las vuelve a sacar
-                 herramientas/2-imagenes/tamanos-portada.py. -->
             <div class="pngperson-art">
                 <img class="pngperson" id="pngperson-img" width="1161" height="1800"
                      sizes="(min-width: 1901px) 55vh, 210px" alt="Ilustración de Richi">
@@ -160,21 +113,6 @@
 
                     <div class="social-links">
                         <h2 class="social-links-label">enlaces a redes sociales</h2>
-                        <!-- El icono es un <span> vacío que el CSS rellena con
-                             el SVG a modo de plantilla (ver .social-btn-icon en
-                             estilos/paginas/portada.css).
-                             Aquí los botones van solo con el icono, en fila. El
-                             nombre de la red NO se borra: se esconde a la vista
-                             con .visually-hidden y sigue ahí para el lector de
-                             pantalla, que si no anunciaría tres enlaces sin
-                             nombre. El title es para quien pasa el ratón. En
-                             contacto los botones siguen con su texto, que allí
-                             hay sitio de sobra.
-                             Se abren en otra pestaña (target="_blank") para no
-                             sacarte del sitio; el "(se abre en otra pestaña)"
-                             escondido avisa de ello a quien no ve que se abre
-                             una ventana nueva. rel="noopener noreferrer" es lo
-                             que impide que la web de destino pueda tocar esta. -->
                         <ul class="social-list social-list-iconos">
                             <li>
                                 <a class="social-btn" href="https://bsky.app/profile/richi.blog" title="bluesky"
@@ -202,37 +140,8 @@
 
                 </div>
 
-                <!-- La columna de la derecha: las dos ventanas y,
-                     debajo y por fuera de ellas, los enlaces a las
-                     páginas que no están en el menú. -->
                 <div class="columna-ventanas">
 
-                <!-- ==== BUSCAR EN TODA LA WEB ====
-                     Solo la barra, sin ventana alrededor y sin explicar
-                     lo que hace: una caja de búsqueda con su lupa se
-                     entiende sola, y encima de dos ventanas con su barra
-                     de título y sus −■✕, una tercera igual convertía la
-                     columna en una lista de cajas iguales donde ya no
-                     destacaba ninguna.
-
-                     ES UN FORMULARIO DE VERDAD, con su action y su
-                     method="get", y no una caja que mande a ningún sitio
-                     con JavaScript: así funciona aunque el JavaScript
-                     falle o tarde, y la dirección que sale se puede
-                     compartir o guardar en favoritos.
-
-                     Y NO CARGA NADA: el listado con el texto de toda la
-                     web son 57 KB, y pedirlos aquí sería bajárselos
-                     enteros en cada visita a la portada sin haber
-                     buscado nada. Esto solo manda a /web/buscar/ con la
-                     palabra puesta; el listado lo pide esa página.
-
-                     EL NOMBRE DEL CAMPO SIGUE ESTANDO, escondido a la
-                     vista. Un placeholder NO es una etiqueta: desaparece
-                     en cuanto escribes una letra, y hay lectores de
-                     pantalla que ni lo leen. Quitarlo de la vista es una
-                     decisión de sitio; quitarlo del todo sería dejar el
-                     campo sin nombre. -->
                 <form class="buscar-form buscar-form-suelta" role="search" method="get"
                       action="/web/buscar/buscar.html">
                     <label class="visually-hidden" for="buscar-portada">buscar en toda la web</label>
@@ -262,11 +171,6 @@
                         </div>
                     </div>
 
-                    <!-- Se rellena solo desde datos/mis_movidas/mis-movidas.json
-                         (novedades.js): mezcla lo último de
-                         rol y relatos (y cualquier sección de mis
-                         movidas que añadas), sin tocar este HTML
-                         cada vez que publiques algo nuevo. -->
                     <div class="projects-card">
                         <div class="recent-entries-header">
                             <h2>novedades.exe</h2>
@@ -281,11 +185,6 @@
                     </div>
                 </div>
 
-                    <!-- Ni el changelog ni el mapa están en el menú a
-                         propósito: se llega a los dos solo desde aquí.
-                         No hacen falta para usar la web; son para quien
-                         tenga curiosidad por cómo está hecha o busque
-                         algo y no recuerde dónde estaba. -->
                     <div class="home-extras">
                         <a class="home-extra-boton" href="/web/changelog/changelog.html">changelog.txt →</a>
                         <a class="home-extra-boton" href="/web/mapa/mapa.html">mapa_del_sitio.txt →</a>
@@ -304,9 +203,9 @@
         </div>
         <div class="notice-body">
             <p>Aquí no hay cookies ni se rastea nada: no cuento las visitas, no hay anuncios y no hay contenido de terceros. Ni siquiera las fonts, que están guardadas en el propio servidor.</p>
-            <p>Lo único que se guarda son unos pocos parametros en el <strong>localStorage</strong>, pero se queda en tu navegador y no tengo acceso a ello: el modo claro u oscuro, los brillitos del cursor, si has parado las frases de abajo, que ya has leído esto y qué foto del gatín aleatoria te ha tocado. Si tienes dudas pulsa <kbd>F12</kbd> y busca en la sección de <strong>Almacenamiento Local</strong>.</p>
+            <p>Lo único que se guarda son unos pocos parámetros en el <strong>localStorage</strong>, pero se queda en tu navegador y no tengo acceso a ello: el modo claro u oscuro, los brillitos del cursor, si has parado las frases de abajo, que ya has leído esto y qué foto del gatín aleatoria te ha tocado. Si tienes dudas pulsa <kbd>F12</kbd> y busca en la sección de <strong>Almacenamiento Local</strong>.</p>
             <p>La excepción es el guestbook: los mensajes se guardan en una hoja de cálculo de Google, así que lo que firmes acaba allí.</p>
-            <p>Tengo una discapacidad visual, así que esto está web está hecha para usarse con teclado, con lector de pantalla y con la letra grande. Tienes mas información en la parte de <a href="/web/accesibilidad/accesibilidad.html">accesibilidad</a>. Si algo no te funciona, dímelo en el <a href="/web/contacto/contacto.html">guestbook</a>.</p>
+            <p>Tengo una discapacidad visual, así que esta web está hecha para usarse con teclado, con lector de pantalla y con la letra grande. Tienes más información en la parte de <a href="/web/accesibilidad/accesibilidad.html">accesibilidad</a>. Si algo no te funciona, dímelo en el <a href="/web/contacto/contacto.html">guestbook</a>.</p>
         </div>
         <div class="notice-footer">
             <button type="button" class="notice-dismiss" data-notice-dismiss>entendido</button>

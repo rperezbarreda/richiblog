@@ -46,7 +46,8 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 import re
 
-from comun import MESES, RAIZ, es_borrador, escribir_como_estaba, leer_texto
+from comun import (MESES, RAIZ, es_borrador, escribir_como_estaba, leer_texto,
+                   limpiar_comentarios_html)
 BLOG = RAIZ / "web" / "blog"
 SIDEBAR = RAIZ / "fragmentos" / "barra-lateral.html"
 PLANTILLA_ANYO = RAIZ / "herramientas" / "plantillas" / "archivo-anyo.html"
@@ -113,9 +114,11 @@ def html_del_anyo(anyo, meses):
     ]
     # Una línea en blanco entre bloques y otra al final, como estaba
     # escrito a mano.
-    return plantilla.replace("{{MESES}}", "\n".join(trozos) + "\n").replace(
+    # Sin los comentarios de la plantilla: la página del año siempre está
+    # publicada (ver quitar-comentarios.py).
+    return limpiar_comentarios_html(plantilla.replace("{{MESES}}", "\n".join(trozos) + "\n").replace(
         "{{ANYO}}", str(anyo)
-    )
+    ))[0]
 
 
 def escribir(destino, contenido, probar):

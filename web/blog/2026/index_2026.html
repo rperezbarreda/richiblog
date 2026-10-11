@@ -2,18 +2,11 @@
 <html lang="es">
   <head>
     <meta charset="UTF-8">
-    <!-- ==== TEMA ====
-         El tema elegido, puesto antes del primer pintado para que no haya
-         fogonazo. Lo escribe la herramienta leyendo scripts/tema.js. -->
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-WzJfmZ3zA0hDtnR6cKyKt1o+8g4NfGJTELgMCUrrBFw=' 'sha256-oTE6cjgemXW7aRTQClslYZ63TgpgQ/lGSr9GtNhYyhs='; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self' https://script.google.com https://script.googleusercontent.com; object-src 'none'; base-uri 'self'; form-action 'self'">
+    <!-- ==== TEMA ==== -->
     <meta name="theme-color" content="#12091c">
     <script>
       (function () {
-        // Una marca de que el JavaScript funciona, puesta ANTES del primer
-        // pintado. Sirve para que una hoja de estilo pueda decir "esto
-        // solo si hay JavaScript": un spoiler tapado, por ejemplo, que sin
-        // JavaScript sería texto perdido y con él se destapa al pulsarlo.
-        // Aquí y no en otro sitio porque es el único script que corre
-        // antes de pintar: puesto más tarde habría fogonazo.
         document.documentElement.classList.add("js");
         try {
           var temas = {
@@ -43,9 +36,6 @@
     </script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Blog 2026 · El Blog de Richi</title>
-    <!-- Cómo se ve el enlace al compartirlo (Bluesky, Discord, Ko-fi…).
-         Sin esto solo sale la URL pelada, sin título ni imagen. Las rutas
-         van absolutas a propósito: las redes no resuelven las relativas. -->
     <meta name="description" content="Todas las entradas del blog publicadas en 2026, ordenadas por mes.">
     <link rel="canonical" href="https://richi.blog/web/blog/2026/index_2026.html">
     <meta property="og:type" content="website">
@@ -60,67 +50,38 @@
     <meta property="og:image:alt" content="El Blog de Richi — ilustración de Richi sobre fondo morado">
     <meta name="twitter:card" content="summary_large_image">
     <link rel="icon" type="image/x-icon" href="/imagenes/favicon.ico">
-    <!-- La única fuente que se precarga. Medido con la red frenada: sin esto el
-         navegador no la descubre hasta parsear el CSS (~800 ms) y el texto baila al
-         cambiar de tipografía; así llega antes del primer pintado y no se nota el
-         cambio. Precargar más fuentes empeoraba el primer pintado 150-210 ms, porque
-         compiten por el ancho de banda con lo que hace falta para pintar. -->
     <link rel="preload" href="/tipografias/space-grotesk-400.woff2" as="font" type="font/woff2" crossorigin>
     <link rel="alternate" type="application/rss+xml" title="El Blog de Richi — blog, relatos y rol" href="/blog/rss.xml">
-    <!-- ==== ADELANTO DEL MENÚ ====
-         El menú, pedido LO PRIMERO para que no llegue tarde. Lo escribe
-         la herramienta; el porqué está en ella. -->
-    <script>window.adelantoDeFragmentos={};try{window.adelantoDeFragmentos["/fragmentos/barra-lateral.html"]=fetch("/fragmentos/barra-lateral.html?v=f81d2b47").then(function(r){return r.ok?r.text():null}).catch(function(){return null})}catch(e){}</script>
-    <!-- ==== CSS ====
-         La escribe herramientas/3-generadores/actualizar-cabeceras.py.
-         No la toques a mano (el porqué, en esa herramienta). -->
-    <link rel="stylesheet" href="/estilos/paquete-comun.css?v=9ae9d5fe">
-    <link rel="stylesheet" href="/estilos/paginas/blog.css?v=3b4f9ed5">
-    <link rel="stylesheet" href="/estilos/paginas/blog.responsive.css?v=f326042d">
-    <link rel="stylesheet" href="/estilos/componentes/buscador.css?v=b303a8b2">
-    <link rel="stylesheet" href="/estilos/componentes/barra-lateral.css?v=e510b648">
-    <link rel="stylesheet" href="/estilos/componentes/barra-lateral.responsive.css?v=45e554fd">
-    <link rel="stylesheet" href="/estilos/paginas/buscar.css?v=692b762d">
-    <link rel="stylesheet" href="/estilos/paquete-cierre.css?v=7d910eba">
+    <!-- ==== ADELANTO DEL MENÚ ==== -->
+    <script>window.adelantoDeFragmentos={};try{window.adelantoDeFragmentos["/fragmentos/barra-lateral.html"]=fetch("/fragmentos/barra-lateral.html?v=50a31cd5").then(function(r){return r.ok?r.text():null}).catch(function(){return null})}catch(e){}</script>
+    <!-- ==== CSS ==== -->
+    <link rel="stylesheet" href="/estilos/paquete-comun.css?v=a7bebe47">
+    <link rel="stylesheet" href="/ligero/estilos/paginas/blog.css?v=bd7222a7">
+    <link rel="stylesheet" href="/ligero/estilos/paginas/blog.responsive.css?v=107014cc">
+    <link rel="stylesheet" href="/ligero/estilos/componentes/buscador.css?v=8425040e">
+    <link rel="stylesheet" href="/ligero/estilos/componentes/barra-lateral.css?v=ae1f7bab">
+    <link rel="stylesheet" href="/ligero/estilos/componentes/barra-lateral.responsive.css?v=36f396a1">
+    <link rel="stylesheet" href="/ligero/estilos/paginas/buscar.css?v=e32b461e">
+    <link rel="stylesheet" href="/estilos/paquete-cierre.css?v=3c277d98">
     <!-- ==== fin del CSS ==== -->
-    <script src="/scripts/cargador-scripts.js?v=906f71e7"></script>
-    <!-- ==== JS ====
-         Igual que el CSS: la escribe la herramienta, a partir de
-         scripts_de(). Van con defer y en este orden, que importa. -->
-    <script defer src="/scripts/paquete-comun.js?v=9a077389"></script>
-    <script defer src="/scripts/componentes/buscador.js?v=e2007b48"></script>
-    <script defer src="/scripts/paginas/entradas-blog.js?v=a19a6c3b"></script>
+    <script src="/ligero/scripts/cargador-scripts.js?v=04752c83"></script>
+    <!-- ==== JS ==== -->
+    <script defer src="/scripts/paquete-comun.js?v=c9aa4d63"></script>
+    <script defer src="/ligero/scripts/componentes/buscador.js?v=4107f902"></script>
+    <script defer src="/ligero/scripts/paginas/entradas-blog.js?v=c3307def"></script>
     <!-- ==== fin del JS ==== -->
   </head>
 <body>
-    <!-- ==== SIDEBAR / NAVEGACIÓN ==== -->
     <a class="skip-link" href="#main-content">Saltar al contenido</a>
     <div id="sidebar-container"></div>
-    <!-- ==== CONTENIDO PRINCIPAL ==== -->
 
     <main id="main-content">
-        <!-- ==== HOME ==== -->
         <section id="home" class="home blog-archive-page">
             <h1 class="home-title">
                 <em>blog</em>
             </h1>
             <p class="blog-archive-year">2026</p>
 
-            <!-- El buscador. Filtra las entradas que ya están en la
-                 página mientras se escribe: no pide nada al servidor ni
-                 usa ninguna librería. Mira el título, la fecha y las
-                 etiquetas, sin tildes ni mayúsculas, así que
-                 "crepusculo" encuentra "Crepùsculo" y "septiembre"
-                 encuentra lo que se ve escrito como "21 sept 2026".
-
-                 Lo monta scripts/componentes/buscador.js, que es el
-                 mismo de los relatos y del portfolio de rol: lo que
-                 mira se le dice aquí, en los data-buscar-*.
-
-                 Es un <form> para que en el móvil el teclado saque la
-                 tecla de buscar y para que los lectores de pantalla lo
-                 anuncien como un buscador (role="search"); el envío se
-                 cancela, porque no hay nada que enviar. -->
             <form class="buscar" role="search" data-buscar
                   data-buscar-items="#blog-archive .entry-preview"
                   data-buscar-en=".entry-preview-title, .entry-preview-date, .entry-tag"
@@ -131,33 +92,18 @@
                            name="buscar" placeholder="título, etiqueta o fecha"
                            autocomplete="off" spellcheck="false"
                            aria-describedby="buscar-cuenta">
-                    <!-- El ✕ del navegador en un type="search" no sale en
-                         todos (ni en Firefox, ni en el móvil), así que el
-                         botón de limpiar es nuestro. Solo aparece cuando
-                         hay algo escrito. -->
                     <button class="buscar-limpiar" type="button" data-buscar-limpiar hidden>
                         <span aria-hidden="true">✕</span>
                         <span class="visually-hidden">Limpiar la búsqueda</span>
                     </button>
                 </div>
-                <!-- Cuántas han quedado. role="status" para que un lector
-                     de pantalla lo diga al terminar de escribir, sin
-                     interrumpir cada letra. -->
                 <p class="buscar-cuenta" id="buscar-cuenta" role="status"
                    data-buscar-cuenta></p>
             </form>
 
-            <!-- Los botones de etiqueta los genera entradas-blog.js a partir de
-                 lo que haya en datos/blog/entradas-blog.json: si mañana publicas algo con una
-                 etiqueta nueva, aparece sola sin tocar este HTML. -->
             <div class="blog-tags" data-blog-tags hidden>
                 <span class="blog-tags-label" id="blog-tags-label">filtrar:</span>
 
-                <!-- Este botón solo se ve en móvil (en escritorio lo esconde
-                     el CSS): ahí la fila de etiquetas no cabe de una vez, así
-                     que se colapsa en una lista flotante y el botón enseña la
-                     etiqueta activa. Mismo patrón que las categorías del
-                     portfolio de rol. Lo rellena entradas-blog.js. -->
                 <button class="blog-tags-toggle" type="button" data-blog-tags-toggle
                         aria-expanded="false" aria-controls="blog-tags-lista">
                     <span class="visually-hidden">Filtrando por: </span>
@@ -169,10 +115,6 @@
 
             </div>
 
-            <!-- Un bloque por mes, siempre abierto. Para añadir un mes
-                 nuevo basta con copiar uno de estos y cambiar el título
-                 y el data-month; entradas-blog.js lo rellena solo desde
-                 datos/blog/entradas-blog.json. -->
             <div id="blog-archive" class="blog-months">
 
                 <section class="blog-month">
@@ -197,11 +139,6 @@
 
             </div>
 
-            <!-- Al final del todo: la rejilla de meses se queda con el
-                 espacio que sobra (flex: 1) y esto cae abajo. El feed
-                 va además declarado en el <head> de todas las páginas,
-                 así que los lectores lo encuentran solos; este botón es
-                 para quien lo busque a ojo. -->
             <a class="blog-feed-button" href="/blog/rss.xml">seguir por rss →</a>
         </section>
     </main>

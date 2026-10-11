@@ -1,0 +1,69 @@
+/* Copia sin comentarios. La escribe actualizar-cabeceras.py: no se edita.
+   fuente: /estilos/paginas/mundo.responsive.css
+*/
+@media (min-width: 1400px) {
+    .mundo-columnas {
+        grid-template-columns: minmax(0, 1fr) minmax(0, 17rem);
+    }
+}
+@media (max-width: 1399px) {
+    .mundo-ficha {
+        grid-row: 1;
+        max-width: 28rem;
+    }
+    .mundo-articulo {
+        grid-row: 2;
+    }
+    .mundo-columnas {
+        gap: 22px;
+    }
+}
+@media (max-width: 860px) {
+    .mundo-page,
+    .mundo-indice-page {
+        gap: 12px;
+        padding: 24px 6%;
+    }
+    .mundo-ficha {
+        max-width: none;
+    }
+    .mundo-items {
+        grid-template-columns: 1fr;
+    }
+    .mundo-volver-abajo {
+        align-self: stretch;
+        justify-content: center;
+        margin-top: 16px;
+    }
+}
+@media (max-width: 480px) {
+    .mundo-page,
+    .mundo-indice-page {
+        padding: 20px 5%;
+    }
+    .mundo-ficha {
+        padding: 14px;
+    }
+    .mundo-titulo {
+        font-size: clamp(1.75rem, 8vw, 2.25rem);
+    }
+    .mundo-tabla th,
+    .mundo-tabla td {
+        padding: 6px 8px;
+    }
+}
+@media (min-width: 1400px) {
+    .mundo-indice-page {
+        grid-template-columns: minmax(0, 1fr) minmax(0, 20rem);
+        grid-template-areas:
+            "cabecera vistas"
+            "indice   vistas";
+        column-gap: 26px;
+    }
+}
+@media (max-width: 480px) {
+    .mundo-vista-marco {
+        max-height: 40vh;
+        overflow: hidden;
+    }
+}

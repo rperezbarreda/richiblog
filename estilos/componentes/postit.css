@@ -326,6 +326,21 @@
     outline-offset: 2px;
 }
 
+/* RESPALDO PARA UN NAVEGADOR SIN :has(). Sin él, la casilla (que no se
+   ve) recibiría el foco y no se pintaría ningún recuadro: con el teclado
+   no se sabría dónde se está. :focus-within es de 2017 y lo entiende
+   cualquiera; sale también al pulsar con el ratón, que es el precio. */
+@supports not selector(:has(*)) {
+    .cuaderno-tareas > li:focus-within::before {
+        outline: 2px solid var(--yellow);
+        outline-offset: 2px;
+    }
+
+    .cuaderno-postit .cuaderno-tareas > li:focus-within::before {
+        outline-color: var(--yellow-contrast);
+    }
+}
+
 /* La cuenta y el botón de deshacer, debajo de la lista. Los monta el
    script: el botón solo aparece si lo marcado en este navegador no
    coincide con lo que pone el archivo, que es cuando sirve de algo. */

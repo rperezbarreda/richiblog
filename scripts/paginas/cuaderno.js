@@ -601,6 +601,10 @@ function montarPlegarTodo(cuaderno) {
     // Con una sola escena el botón sobra: ya está su propio nombre al
     // lado, que hace lo mismo.
     if (escenas.length < 2) {
+        const escrito = document.querySelector("[data-plegar-todo]");
+        if (escrito) {
+            escrito.remove();
+        }
         return;
     }
     // Va en la barra de arriba, que no se desplaza: así está siempre a
@@ -612,20 +616,30 @@ function montarPlegarTodo(cuaderno) {
         return;
     }
 
-    const boton = document.createElement("button");
-    boton.type = "button";
-    boton.className = "cuaderno-plegar-todo";
+    // EL BOTÓN VIENE ESCRITO EN LA PÁGINA ([data-plegar-todo]) y aquí
+    // solo se le da vida. Antes se creaba aquí, y al meterse en la barra
+    // la partía en dos líneas en el móvil y empujaba el cuaderno entero
+    // 49 px hacia abajo cuando ya se estaba leyendo (medido: era casi todo
+    // el salto de maqueta de la página). Escrito, ocupa su sitio desde el
+    // primer pintado; el CSS solo lo enseña si hay JavaScript (html.js).
+    // Si una página vieja no lo trae, se crea como antes.
+    let boton = barra.querySelector("[data-plegar-todo]");
+    if (!boton) {
+        boton = document.createElement("button");
+        boton.type = "button";
+        boton.className = "cuaderno-plegar-todo";
+        const flecha = document.createElement("span");
+        flecha.className = "cuaderno-plegar-todo-flecha";
+        flecha.setAttribute("aria-hidden", "true");
+        boton.appendChild(flecha);
+        boton.appendChild(document.createElement("span"));
+        const volver = barra.querySelector(".cuaderno-post-back");
+        barra.insertBefore(boton, volver || null);
+    }
     // aria-pressed y no un texto suelto: así un lector de pantalla dice
     // si está pulsado o no, que es la mitad de lo que hace falta saber.
     boton.setAttribute("aria-pressed", "false");
-
-    const flecha = document.createElement("span");
-    flecha.className = "cuaderno-plegar-todo-flecha";
-    flecha.setAttribute("aria-hidden", "true");
-    boton.appendChild(flecha);
-
-    const nombre = document.createElement("span");
-    boton.appendChild(nombre);
+    const nombre = boton.querySelector("span:not(.cuaderno-plegar-todo-flecha)");
 
     const ponerNombre = () => {
         const plegadas = escenas.every((escena) => !escena.open);
@@ -651,10 +665,6 @@ function montarPlegarTodo(cuaderno) {
     });
 
     ponerNombre();
-    // Delante del botón de volver, que es el que tiene que quedar el
-    // último: es la salida, y la salida va al final.
-    const volver = barra.querySelector(".cuaderno-post-back");
-    barra.insertBefore(boton, volver || null);
 }
 
 
@@ -721,11 +731,12 @@ function prepararImpresionCuaderno() {
 // «Brandr Vindahl») si nadie más empieza igual. Si en las notas está
 // escrito distinto que en el JSON, no casa: se arregla escribiéndolo igual.
 //
-// EL NOMBRE PASA A SER UN BOTÓN, metido dentro del <strong> (que conserva
-// su color y su negrita). Es un botón y no un enlace porque no se cambia
-// de página: se abre una ventana encima, y aria-haspopup="dialog" lo
-// dice. Como hace algo, tiene que poder hacerse con el teclado: por eso
-// entra en el tabulador, y el globo sale también al llegar con él.
+// EL NOMBRE PASA A SER UN BOTÓN: el propio <strong>, con role="button"
+// (conserva su color y su negrita, y no se mueve nada al montarse). Es un
+// botón y no un enlace porque no se cambia de página: se abre una ventana
+// encima, y aria-haspopup="dialog" lo dice. Como hace algo, tiene que
+// poder hacerse con el teclado: por eso entra en el tabulador, se pulsa
+// con Enter o Espacio, y el globo sale también al llegar con él.
 //
 // El globo va con aria-hidden: la cara es un añadido, y lo que dice
 // (nombre y qué es) se oye entero en el nombre del botón. Cumple lo de un
@@ -821,26 +832,36 @@ async function montarTokensDeNpcs(cuaderno) {
         // montada ("Elfo Druida nivel 3 · lo lleva Richi").
         const cara = {
             nombre: quien.nombre,
-            token: quien.token,
+            // El globo mide 6,5rem: la pequeña le sobra.
+            token: quien.token_mini || quien.token,
+            tokenGrande: quien.token,
             que: deLaMesa ? quien.extra : quien.que,
         };
         nombre.classList.add("cuaderno-npc");
 
         let objetivo = nombre;
         if (puedeAbrir) {
-            const boton = document.createElement("button");
-            boton.type = "button";
-            boton.className = "cuaderno-npc-boton";
+            // EL PROPIO <strong> HACE DE BOTÓN, con role="button", su
+            // tabindex y Enter y Espacio. Antes se metía un <button> dentro,
+            // y un <button> el navegador lo pinta como una caja que no se
+            // parte entre líneas: al montarse, el texto de alrededor se
+            // recolocaba y la página daba un salto (medido: 0,06 de CLS en
+            // la sesión 1). Así no se mueve ni una letra.
+            const boton = nombre;
+            boton.setAttribute("role", "button");
+            boton.setAttribute("tabindex", "0");
             boton.setAttribute("aria-haspopup", "dialog");
             const que = (cara.que || "").toString().trim();
             boton.setAttribute("aria-label",
                 (quien.nombre || "").toString().trim() + (que ? ", " + que : "") + ". Abre su ficha");
-            // El texto se MUEVE dentro del botón, no se copia: así lo que
-            // se lee y se busca en la página sigue siendo lo mismo.
-            while (nombre.firstChild) {
-                boton.appendChild(nombre.firstChild);
-            }
-            nombre.appendChild(boton);
+            // Lo que un <button> hace solo: Enter y Espacio lo pulsan. El
+            // Espacio, sin bajar la página (preventDefault).
+            boton.addEventListener("keydown", (evento) => {
+                if (evento.key === "Enter" || evento.key === " " || evento.key === "Spacebar") {
+                    evento.preventDefault();
+                    boton.click();
+                }
+            });
             boton.addEventListener("click", () => {
                 esconder();
                 vueltaDeFicha = boton;
@@ -956,6 +977,13 @@ function rellenarGloboDeNpc(globo, npc) {
         img.src = imagenSeguraCuaderno(ruta);
         img.alt = "";
         img.decoding = "async";
+        // Si la pequeña no carga, la grande.
+        const grande = imagenSeguraCuaderno(npc.tokenGrande);
+        if (grande && grande !== ruta) {
+            img.addEventListener("error", () => {
+                img.src = grande;
+            }, { once: true });
+        }
         marco.appendChild(img);
     } else {
         // Sin token, su inicial, como en la página de npcs.

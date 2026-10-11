@@ -38,7 +38,8 @@
             "ilustracion": "/imagenes/notas_rol/ragna/sigil.webp",
             "notas": [
                 "Nuestro jefe, un carismático y joven tiefling que dirige nuestra caravana."
-            ]
+            ],
+            "token_mini": "/imagenes/notas_rol/ragna/sigil_tkn-mini.webp"
         },
         {
             "nombre": "Tovin",
@@ -51,7 +52,8 @@
             "ilustracion": "/imagenes/notas_rol/ragna/tovin.webp",
             "notas": [
                 "Comerciante de mercancias generales, tiene perretes."
-            ]
+            ],
+            "token_mini": "/imagenes/notas_rol/ragna/tovin_tkn-mini.webp"
         },
         {
             "nombre": "Borin",
@@ -64,7 +66,8 @@
             "ilustracion": "/imagenes/notas_rol/ragna/borin.webp",
             "notas": [
                 "Herrero en la caravana de Sigil."
-            ]
+            ],
+            "token_mini": "/imagenes/notas_rol/ragna/borin_tkn-mini.webp"
         },
         {
             "nombre": "Ayala",
@@ -78,7 +81,8 @@
             "notas": [
                 "Posadera de El Sueño del Elemental.",
                 "Antipática."
-            ]
+            ],
+            "token_mini": "/imagenes/notas_rol/ragna/ayala_tkn-mini.webp"
         },
         {
             "nombre": "Reeni",
@@ -92,7 +96,8 @@
             "notas": [
                 "Cazador de Sirevia.",
                 "Padre de Areeni."
-            ]
+            ],
+            "token_mini": "/imagenes/notas_rol/ragna/reeni_tkn-mini.webp"
         },
         {
             "nombre": "Ruukus",
@@ -105,7 +110,8 @@
             "ilustracion": "/imagenes/notas_rol/ragna/ruukus.webp",
             "notas": [
                 "Cazador de Sirevia"
-            ]
+            ],
+            "token_mini": "/imagenes/notas_rol/ragna/ruukus_tkn-mini.webp"
         },
         {
             "nombre": "Areeni",
@@ -132,7 +138,8 @@
             "ilustracion": "/imagenes/notas_rol/ragna/elvira.webp",
             "notas": [
                 "Herborista y comerciante de pociones."
-            ]
+            ],
+            "token_mini": "/imagenes/notas_rol/ragna/elvira_tkn-mini.webp"
         },
         {
             "nombre": "Apaaka",
@@ -212,7 +219,8 @@
             "ilustracion": "/imagenes/notas_rol/ragna/brandr-vindahl.webp",
             "notas": [
                 "Padre de Melissa"
-            ]
+            ],
+            "token_mini": "/imagenes/notas_rol/ragna/brandr-vindahl_tkn-mini.webp"
         },
         {
             "nombre": "Isa Vindahl",
@@ -225,7 +233,8 @@
             "ilustracion": "/imagenes/notas_rol/ragna/isa-vindahl.webp",
             "notas": [
                 "Madre de Melissa"
-            ]
+            ],
+            "token_mini": "/imagenes/notas_rol/ragna/isa-vindahl_tkn-mini.webp"
         },
         {
             "nombre": "Obrandr Vindahl",
@@ -238,7 +247,8 @@
             "ilustracion": "/imagenes/notas_rol/ragna/obrandr-vindahl.webp",
             "notas": [
                 "Hermano de Melissa"
-            ]
+            ],
+            "token_mini": "/imagenes/notas_rol/ragna/obrandr-vindahl_tkn-mini.webp"
         },
         {
             "nombre": "Mita",
@@ -252,7 +262,8 @@
             "notas": [
                 "Familiar de Faëlar",
                 "Nombre original: Palomita"
-            ]
+            ],
+            "token_mini": "/imagenes/notas_rol/ragna/mita_tkn-mini.webp"
         },
         {
             "nombre": "Sozil",

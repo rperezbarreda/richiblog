@@ -1,0 +1,251 @@
+/* Copia sin comentarios. La escribe actualizar-cabeceras.py: no se edita.
+   fuente: /estilos/paginas/santuarios.css
+*/
+.santuarios-page {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    justify-content: flex-start;
+    overflow: hidden;
+    padding: 28px 4%;
+}
+.santuarios-page > .home-title,
+.santuarios-intro {
+    flex-shrink: 0;
+}
+.santuarios-intro {
+    margin-top: 4px;
+    margin-bottom: 24px;
+    color: var(--muted);
+    font-size: 1rem;
+}
+.pet-cards {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 28px;
+    flex: 1;
+    min-height: 0;
+    align-items: flex-start;
+    overflow-y: auto;
+}
+.pet-card {
+    position: relative;
+    display: grid;
+    grid-template-rows: minmax(160px, 1fr) auto;
+    flex: 1 1 200px;
+    max-width: 460px;
+    max-height: 100%;
+    color: inherit;
+    background: var(--purple-lighter);
+    border: 3px solid var(--yellow);
+    box-shadow: 6px 6px 0 var(--yellow);
+    overflow: hidden auto;
+    transition: transform 0.15s ease;
+}
+.pet-card:hover,
+.pet-card:has(.pet-card-link:focus-visible) {
+    transform: translateY(-4px);
+}
+.pet-card:has(.pet-card-link:focus-visible) {
+    outline: 2px solid var(--yellow);
+    outline-offset: 3px;
+}
+.pet-card-art {
+    position: relative;
+    display: flex;
+    min-height: 0;
+}
+.pet-card-photo {
+    display: block;
+    width: 100%;
+    height: 100%;
+    min-height: 0;
+    aspect-ratio: 1 / 1;
+    object-fit: cover;
+    border-bottom: 3px solid var(--yellow);
+}
+.pet-card-credit {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 3px;
+    z-index: 2;
+}
+.pet-card-info {
+    padding: 16px 18px;
+}
+.pet-card-name {
+    margin: 0 0 8px;
+    color: var(--yellow);
+    font-family: var(--fuente-texto);
+    font-style: italic;
+    font-weight: 500;
+    font-size: 1.5rem;
+}
+.pet-card-link {
+    color: inherit;
+    text-decoration: none;
+}
+.pet-card-link::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+}
+.pet-card-link:focus-visible {
+    outline: none;
+}
+@supports not selector(:has(*)) {
+    .pet-card:focus-within {
+        outline: 2px solid var(--yellow);
+        outline-offset: 3px;
+    }
+}
+.pet-card-blurb {
+    margin: 0;
+    color: var(--muted);
+    font-size: 0.875rem;
+    line-height: 1.5;
+}
+.pet-page {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    padding: 16px;
+}
+body:has(.pet-page) main {
+    background: transparent;
+    border: none;
+    box-shadow: none;
+}
+.pet-back {
+    display: inline-flex;
+    align-self: flex-start;
+    flex-shrink: 0;
+    margin-bottom: 16px;
+    padding: 8px 18px;
+    border: 2px solid var(--yellow);
+    background: transparent;
+    color: var(--yellow);
+    font-family: var(--fuente-mono);
+    font-size: 0.8125rem;
+    text-decoration: none;
+    transition: color 0.15s linear, background-color 0.15s linear;
+}
+.pet-back:hover,
+.pet-back:focus-visible {
+    color: var(--yellow-contrast);
+    background: var(--yellow);
+}
+.pet-back:focus-visible {
+    outline: 2px solid var(--yellow);
+    outline-offset: 3px;
+}
+.pet-window {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-height: 0;
+    width: 100%;
+    background: var(--purple-lighter);
+    border: 3px solid var(--yellow);
+    box-shadow: 6px 6px 0 var(--yellow);
+    overflow: hidden;
+}
+.pet-window::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background-image: var(--bg-texture);
+    background-size: 90px 90px;
+    background-repeat: repeat;
+    opacity: 0.35;
+    pointer-events: none;
+    z-index: 0;
+}
+.pet-window-header {
+    position: relative;
+    z-index: 1;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 14px 20px;
+    background: var(--yellow);
+    user-select: none;
+}
+.pet-window-header .window-controls-small {
+    position: relative;
+    top: auto;
+    right: auto;
+    z-index: 5;
+    flex-shrink: 0;
+}
+.pet-window-header .window-btn {
+    --window-btn-tinta: var(--yellow-contrast);
+    --window-btn-fondo: var(--yellow);
+}
+.pet-window-title {
+    overflow-wrap: break-word;
+    flex: 1;
+    min-width: 0;
+    margin: 0;
+    color: var(--yellow-contrast);
+    font-family: var(--fuente-ventana);
+    font-weight: 400;
+    font-size: clamp(1.75rem, 3.2vw, 2.25rem);
+    letter-spacing: 0.3px;
+    line-height: 1.2;
+}
+.pet-window-body {
+    position: relative;
+    z-index: 1;
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    padding: 28px 32px;
+}
+.pet-description {
+    max-width: 720px;
+    margin: 0 0 24px;
+    color: var(--white);
+    font-size: 1rem;
+    line-height: 1.7;
+}
+.photo-gallery {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 16px;
+}
+.galeria-vacia {
+    grid-column: 1 / -1;
+    margin: 0;
+    color: var(--muted);
+    font-family: var(--fuente-mono);
+    font-size: 0.8125rem;
+}
+.lightbox-trigger {
+    display: block;
+    padding: 0;
+    border: 2px solid var(--yellow);
+    background: none;
+    cursor: pointer;
+    overflow: hidden;
+}
+.lightbox-trigger img {
+    display: block;
+    width: 100%;
+    height: 160px;
+    object-fit: cover;
+    transition: transform 0.15s ease;
+}
+.lightbox-trigger:hover img,
+.lightbox-trigger:focus-visible img {
+    transform: scale(1.06);
+}
+.lightbox-trigger:focus-visible {
+    outline: 2px solid var(--yellow);
+    outline-offset: 3px;
+}

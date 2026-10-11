@@ -58,7 +58,8 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
-from comun import (RAIZ, es_del_mundo, esta_fuera, wiki_fuera, escribir_json,  # noqa: E402
+from comun import (RAIZ, es_del_mundo, esta_fuera, wiki_fuera, escribir_json,
+                   limpiar_comentarios_html,  # noqa: E402
                    escribir_texto, leer_json, leer_texto,
                    pasar_generadores)
 from mundo_formato import (Avisos, Conversor, Guardados,  # noqa: E402
@@ -341,7 +342,10 @@ def _como_texto(valor):
 def pintar_infobox(datos, filas, imagenes_html):
     if not filas and not imagenes_html and not datos.get("infobox"):
         return ""
-    trozos = ['<aside class="mundo-ficha" aria-labelledby="mundo-ficha-titulo">']
+    # role="note": es información al margen del artículo. Un <aside> a
+    # secas dentro de <main> es una región complementaria anidada, y las
+    # complementarias tienen que ir al nivel de arriba (axe, WAI-ARIA).
+    trozos = ['<aside class="mundo-ficha" role="note" aria-labelledby="mundo-ficha-titulo">']
     trozos.append('<h2 class="mundo-ficha-titulo" id="mundo-ficha-titulo">%s</h2>'
                   % html.escape(str(datos.get("title") or "Ficha")))
     if imagenes_html:
@@ -797,6 +801,8 @@ def escribir_mapas(mapas, probar):
     if not mapas:
         return 0
     molde, _ = leer_texto(PLANTILLA_MAPA)
+    # Sin los comentarios de la plantilla: estas páginas salen publicadas.
+    molde = limpiar_comentarios_html(molde)[0]
     escritos = 0
     for mapa in mapas.values():
         cuantos = cuantos_sitios(mapa)
@@ -878,6 +884,8 @@ def pintar_backlinks(ficha):
 
 def escribir_paginas(paginas, probar):
     molde, _ = leer_texto(PLANTILLA)
+    # Sin los comentarios de la plantilla: estas páginas salen publicadas.
+    molde = limpiar_comentarios_html(molde)[0]
     escritas = 0
     for ficha in paginas.values():
         relleno = molde
@@ -1285,6 +1293,9 @@ def main():
     if not args.probar:
         print()
         pasar_generadores((
+            # Las páginas de la wiki salen de plantillas con su guía en
+            # comentarios: fuera antes de publicarlas.
+            "3-generadores/quitar-comentarios.py",
             "3-generadores/generar-sitemap.py",
             "3-generadores/generar-mapa.py",
             "3-generadores/generar-buscador.py",

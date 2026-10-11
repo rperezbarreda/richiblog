@@ -2,18 +2,11 @@
 <html lang="es">
   <head>
     <meta charset="UTF-8">
-    <!-- ==== TEMA ====
-         El tema elegido, puesto antes del primer pintado para que no haya
-         fogonazo. Lo escribe la herramienta leyendo scripts/tema.js. -->
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-WzJfmZ3zA0hDtnR6cKyKt1o+8g4NfGJTELgMCUrrBFw='; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self' https://script.google.com https://script.googleusercontent.com; object-src 'none'; base-uri 'self'; form-action 'self'">
+    <!-- ==== TEMA ==== -->
     <meta name="theme-color" content="#12091c">
     <script>
       (function () {
-        // Una marca de que el JavaScript funciona, puesta ANTES del primer
-        // pintado. Sirve para que una hoja de estilo pueda decir "esto
-        // solo si hay JavaScript": un spoiler tapado, por ejemplo, que sin
-        // JavaScript sería texto perdido y con él se destapa al pulsarlo.
-        // Aquí y no en otro sitio porque es el único script que corre
-        // antes de pintar: puesto más tarde habría fogonazo.
         document.documentElement.classList.add("js");
         try {
           var temas = {
@@ -43,9 +36,6 @@
     </script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Página no encontrada · El Blog de Richi</title>
-    <!-- Cómo se ve el enlace al compartirlo (Bluesky, Discord, Ko-fi…).
-         Sin esto solo sale la URL pelada, sin título ni imagen. Las rutas
-         van absolutas a propósito: las redes no resuelven las relativas. -->
     <meta name="description" content="Esta página no existe. El gatito está en ello.">
     <link rel="canonical" href="https://richi.blog/not_found.html">
     <meta property="og:type" content="website">
@@ -60,31 +50,23 @@
     <meta property="og:image:alt" content="El Blog de Richi — ilustración de Richi sobre fondo morado">
     <meta name="twitter:card" content="summary_large_image">
     <link rel="icon" type="image/x-icon" href="/imagenes/favicon.ico">
-    <!-- La única fuente que se precarga. Medido con la red frenada: sin esto el
-         navegador no la descubre hasta parsear el CSS (~800 ms) y el texto baila al
-         cambiar de tipografía; así llega antes del primer pintado y no se nota el
-         cambio. Precargar más fuentes empeoraba el primer pintado 150-210 ms, porque
-         compiten por el ancho de banda con lo que hace falta para pintar. -->
     <link rel="preload" href="/tipografias/space-grotesk-400.woff2" as="font" type="font/woff2" crossorigin>
     <link rel="alternate" type="application/rss+xml" title="El Blog de Richi — blog, relatos y rol" href="/blog/rss.xml">
-    <!-- ==== CSS ====
-         La escribe herramientas/3-generadores/actualizar-cabeceras.py.
-         No la toques a mano (el porqué, en esa herramienta). -->
-    <link rel="stylesheet" href="/estilos/paquete-comun.css?v=9ae9d5fe">
-    <link rel="stylesheet" href="/estilos/paginas/no-encontrada.css?v=2d9bc618">
-    <link rel="stylesheet" href="/estilos/paquete-cierre.css?v=7d910eba">
+    <!-- ==== CSS ==== -->
+    <link rel="stylesheet" href="/estilos/paquete-comun.css?v=a7bebe47">
+    <link rel="stylesheet" href="/ligero/estilos/paginas/no-encontrada.css?v=fb6812c8">
+    <link rel="stylesheet" href="/estilos/paquete-cierre.css?v=3c277d98">
     <!-- ==== fin del CSS ==== -->
-    <script src="/scripts/cargador-scripts.js?v=906f71e7"></script>
-    <!-- ==== JS ====
-         Igual que el CSS: la escribe la herramienta, a partir de
-         scripts_de(). Van con defer y en este orden, que importa. -->
-    <script defer src="/scripts/componentes/botones-ventana.js?v=cab0ce9c"></script>
-    <script defer src="/scripts/componentes/ventanas-plegables.js?v=40711cd7"></script>
-    <script defer src="/scripts/componentes/rastro-cursor.js?v=0d9a7e7f"></script>
-    <script defer src="/scripts/componentes/chispas-botones.js?v=7b0937d6"></script>
-    <script defer src="/scripts/componentes/enlaces-fuera.js?v=db5674a8"></script>
-    <script defer src="/scripts/componentes/subir.js?v=2e242c61"></script>
-    <script defer src="/scripts/componentes/teclado-scroll.js?v=5847ef8b"></script>
+    <script src="/ligero/scripts/cargador-scripts.js?v=04752c83"></script>
+    <!-- ==== JS ==== -->
+    <script defer src="/ligero/scripts/paginas/redirecciones.js?v=d41d49cf"></script>
+    <script defer src="/ligero/scripts/componentes/botones-ventana.js?v=c4e3c110"></script>
+    <script defer src="/ligero/scripts/componentes/ventanas-plegables.js?v=5528f2bf"></script>
+    <script defer src="/ligero/scripts/componentes/rastro-cursor.js?v=c904e6fc"></script>
+    <script defer src="/ligero/scripts/componentes/chispas-botones.js?v=c07f25ec"></script>
+    <script defer src="/ligero/scripts/componentes/enlaces-fuera.js?v=9c796806"></script>
+    <script defer src="/ligero/scripts/componentes/subir.js?v=66472337"></script>
+    <script defer src="/ligero/scripts/componentes/teclado-scroll.js?v=6ec4c4ac"></script>
     <!-- ==== fin del JS ==== -->
   </head>
   <body>
@@ -96,14 +78,6 @@
                 <p class="bio-description">
                     <strong>Alto ahí fiera</strong> ✋ — la página que andas buscando o no existe o está en mantenimiento, así que ten paciencia 😎
                 </p>
-                <!-- Ventana falsa con el gatete dentro. Aquí antes había
-                     un WebP animado de 452 KB (40 fotogramas) que era la
-                     mitad de lo que cargaba esta página; esto son unos
-                     1,7 KB de texto escritos en el propio HTML.
-                     El dibujo va con aria-hidden porque es decoración: lo
-                     que hay que leer ya lo dicen el 404 de arriba y la
-                     línea de abajo. Si se anunciara, un lector de pantalla
-                     soltaría quinientos caracteres de puntitos. -->
                 <div class="ventana-gatete">
                     <div class="recent-entries-header">
                         <h2>gatete.error</h2>

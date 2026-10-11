@@ -1,0 +1,202 @@
+/* Copia sin comentarios. La escribe actualizar-cabeceras.py: no se edita.
+   fuente: /estilos/componentes/postit.css
+*/
+.cuaderno-postit {
+    --renglon: calc(1em * var(--interlineado, 1.9));
+    flex: 0 1 auto;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    position: relative;
+    padding: 14px 16px 16px;
+    background:
+        linear-gradient(to bottom,
+            rgba(0, 0, 0, 0.07) 0,
+            rgba(0, 0, 0, 0.07) 2.6em,
+            transparent 2.6em),
+        var(--yellow);
+    color: var(--yellow-contrast);
+    box-shadow:
+        4px 4px 0 var(--purple-lighter),
+        0 7px 14px -7px rgba(0, 0, 0, 0.55);
+    transform: rotate(-1.1deg);
+    font-size: 0.875rem;
+    line-height: var(--renglon);
+}
+.cuaderno-postit::after {
+    content: "";
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    width: 1.7em;
+    height: 1.7em;
+    background: linear-gradient(315deg,
+        rgba(0, 0, 0, 0.16) 0,
+        rgba(0, 0, 0, 0.16) 50%,
+        transparent 50%);
+    pointer-events: none;
+}
+:root[data-theme^="puro"] .cuaderno-postit {
+    background: var(--yellow);
+    box-shadow: 4px 4px 0 var(--purple-lighter);
+}
+:root[data-theme^="puro"] .cuaderno-postit::after {
+    display: none;
+}
+.cuaderno-postit-titulo,
+.cuaderno-postit .cuaderno-tareas-pie {
+    flex: none;
+}
+.cuaderno-postit .cuaderno-tareas {
+    flex: 0 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+}
+.cuaderno-postit-titulo {
+    margin: 0 0 var(--renglon);
+    color: var(--yellow-contrast);
+    font-family: var(--fuente-mono);
+    font-size: 0.8125rem;
+    font-weight: 400;
+    letter-spacing: 1px;
+    line-height: var(--renglon);
+    text-transform: uppercase;
+    border-bottom: 2px solid currentColor;
+    padding-bottom: calc(var(--renglon) / 2 - 2px);
+}
+.cuaderno-postit p,
+.cuaderno-postit li,
+.cuaderno-postit strong,
+.cuaderno-postit em {
+    color: var(--yellow-contrast);
+}
+.cuaderno-postit a {
+    color: var(--yellow-contrast);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+}
+.cuaderno-postit a:focus-visible,
+.cuaderno-postit .cuaderno-tareas-deshacer:focus-visible,
+.cuaderno-postit .cuaderno-tareas > li:has(.cuaderno-tarea-casilla:focus-visible)::before {
+    outline: 2px solid var(--yellow-contrast);
+    outline-offset: 2px;
+}
+.cuaderno-postit .cuaderno-tareas > li::before,
+.cuaderno-postit .cuaderno-tareas > li.hecho::before {
+    border-color: var(--yellow-contrast);
+}
+.cuaderno-postit .cuaderno-tareas > li.hecho::after {
+    border-color: var(--yellow-contrast);
+}
+.cuaderno-postit .cuaderno-tareas > li.hecho {
+    color: var(--yellow-contrast);
+}
+.cuaderno-postit .cuaderno-tareas-pie,
+.cuaderno-postit .cuaderno-tareas-deshacer {
+    color: var(--yellow-contrast);
+}
+.cuaderno-postit .cuaderno-tareas-deshacer:hover,
+.cuaderno-postit .cuaderno-tareas-deshacer:focus-visible {
+    color: var(--yellow-contrast);
+    text-decoration: none;
+}
+.cuaderno-tareas {
+    padding-left: 0;
+    list-style: none;
+}
+.cuaderno-tareas > li {
+    position: relative;
+    padding-left: 1.9em;
+}
+.cuaderno-tareas > li::before {
+    content: "";
+    position: absolute;
+    left: 0.15em;
+    top: calc((var(--renglon) - 1.05em) / 2);
+    width: 1.05em;
+    height: 1.05em;
+    border: 2px solid var(--muted);
+    box-sizing: border-box;
+}
+.cuaderno-tareas > li.hecho::after {
+    content: "";
+    position: absolute;
+    left: 0.48em;
+    top: calc((var(--renglon) - 1.05em) / 2 + 0.12em);
+    width: 0.32em;
+    height: 0.62em;
+    border: solid var(--yellow);
+    border-width: 0 0.18em 0.18em 0;
+    transform: rotate(45deg);
+}
+.cuaderno-tareas > li.hecho::before {
+    border-color: var(--yellow);
+}
+.cuaderno-tareas > li.hecho {
+    color: var(--muted);
+    text-decoration: line-through;
+    text-decoration-thickness: 1px;
+}
+.cuaderno-tarea {
+    display: block;
+    margin-left: -1.9em;
+    padding-left: 1.9em;
+    cursor: pointer;
+}
+.cuaderno-tarea-casilla {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    padding: 0;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+.cuaderno-tareas > li:has(.cuaderno-tarea-casilla:focus-visible)::before {
+    outline: 2px solid var(--yellow);
+    outline-offset: 2px;
+}
+@supports not selector(:has(*)) {
+    .cuaderno-tareas > li:focus-within::before {
+        outline: 2px solid var(--yellow);
+        outline-offset: 2px;
+    }
+    .cuaderno-postit .cuaderno-tareas > li:focus-within::before {
+        outline-color: var(--yellow-contrast);
+    }
+}
+.cuaderno-tareas-pie {
+    display: flex;
+    align-items: baseline;
+    flex-wrap: wrap;
+    gap: 4px 12px;
+    color: var(--muted);
+    font-family: var(--fuente-mono);
+    font-size: 0.8125rem;
+    line-height: var(--renglon);
+}
+.cuaderno-tareas-deshacer {
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: var(--muted);
+    font: inherit;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+}
+.cuaderno-tareas-deshacer:hover,
+.cuaderno-tareas-deshacer:focus-visible {
+    color: var(--yellow);
+}
+.cuaderno-tareas-deshacer:focus-visible {
+    outline: 2px solid var(--yellow);
+    outline-offset: 3px;
+}
+@media (forced-colors: active) {
+    .cuaderno-postit {
+        border: 1px solid CanvasText;
+    }
+}

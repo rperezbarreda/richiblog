@@ -164,6 +164,16 @@
     outline: none; /* el recuadro lo pinta .pet-card, ver arriba */
 }
 
+/* RESPALDO PARA UN NAVEGADOR SIN :has(): ahí el recuadro de la tarjeta no
+   saldría y el enlace se ha quitado el suyo, así que con el teclado no se
+   vería dónde está el foco. :focus-within lo entiende cualquiera. */
+@supports not selector(:has(*)) {
+    .pet-card:focus-within {
+        outline: 2px solid var(--yellow);
+        outline-offset: 3px;
+    }
+}
+
 .pet-card-blurb {
     margin: 0;
     color: var(--muted);

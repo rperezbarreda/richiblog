@@ -1,0 +1,74 @@
+/* Copia sin comentarios. La escribe actualizar-cabeceras.py: no se edita.
+   fuente: /estilos/componentes/frases.css
+*/
+.quotes-viewport {
+    flex: 1 1 auto;
+    min-width: 0;
+    overflow: hidden;
+}
+.quotes-track {
+    display: flex;
+    width: max-content;
+    animation: marquee 30s linear infinite;
+}
+.quotes-track.esta-parado {
+    animation-play-state: paused;
+}
+.quotes-content {
+    display: flex;
+    flex-shrink: 0;
+    width: max-content;
+    padding-right: 40px;
+    color: var(--yellow);
+    font-family: var(--fuente-mono);
+    font-size: 0.5rem;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    white-space: nowrap;
+}
+.quotes-pausa {
+    display: flex;
+    flex: 0 0 auto;
+    align-items: center;
+    gap: 6px;
+    min-height: 28px;
+    padding: 4px 10px;
+    border: 2px solid var(--yellow);
+    background: transparent;
+    color: var(--yellow);
+    font-family: var(--fuente-mono);
+    font-size: 0.6875rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    cursor: pointer;
+    transition: color 0.15s linear, background-color 0.15s linear;
+}
+.quotes-pausa:hover,
+.quotes-pausa:focus-visible {
+    color: var(--yellow-contrast);
+    background: var(--yellow);
+}
+.quotes-pausa:focus-visible {
+    outline: 2px solid var(--yellow);
+    outline-offset: 2px;
+}
+.quotes-pausa-icono {
+    font-size: 0.625rem;
+    line-height: 1;
+}
+@keyframes marquee {
+    from {
+        transform: translateX(0);
+    }
+    to {
+        transform: translateX(-50%);
+    }
+}
+@media (prefers-reduced-motion: reduce) {
+    .quotes-track {
+        animation: none;
+    }
+    .quotes-pausa {
+        display: none;
+    }
+}

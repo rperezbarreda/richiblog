@@ -2,18 +2,11 @@
 <html lang="es">
   <head>
     <meta charset="UTF-8">
-    <!-- ==== TEMA ====
-         El tema elegido, puesto antes del primer pintado para que no haya
-         fogonazo. Lo escribe la herramienta leyendo scripts/tema.js. -->
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-WzJfmZ3zA0hDtnR6cKyKt1o+8g4NfGJTELgMCUrrBFw=' 'sha256-oTE6cjgemXW7aRTQClslYZ63TgpgQ/lGSr9GtNhYyhs='; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self' https://script.google.com https://script.googleusercontent.com; object-src 'none'; base-uri 'self'; form-action 'self'">
+    <!-- ==== TEMA ==== -->
     <meta name="theme-color" content="#12091c">
     <script>
       (function () {
-        // Una marca de que el JavaScript funciona, puesta ANTES del primer
-        // pintado. Sirve para que una hoja de estilo pueda decir "esto
-        // solo si hay JavaScript": un spoiler tapado, por ejemplo, que sin
-        // JavaScript sería texto perdido y con él se destapa al pulsarlo.
-        // Aquí y no en otro sitio porque es el único script que corre
-        // antes de pintar: puesto más tarde habría fogonazo.
         document.documentElement.classList.add("js");
         try {
           var temas = {
@@ -43,9 +36,6 @@
     </script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Campaña de Ragna · Notas de rol · El Blog de Richi</title>
-    <!-- Cómo se ve el enlace al compartirlo (Bluesky, Discord, Ko-fi…).
-         Sin esto solo sale la URL pelada, sin título ni imagen. Las rutas
-         van absolutas a propósito: las redes no resuelven las relativas. -->
     <meta name="description" content="Las notas de cada partida de la campaña de Ragna, tal y como las escribo al terminar de jugar.">
     <link rel="canonical" href="https://richi.blog/web/notas_rol/ragna/index_ragna.html">
     <meta property="og:type" content="website">
@@ -62,87 +52,46 @@
     <link rel="icon" type="image/x-icon" href="/imagenes/favicon.ico">
     <link rel="preload" href="/tipografias/space-grotesk-400.woff2" as="font" type="font/woff2" crossorigin>
     <link rel="alternate" type="application/rss+xml" title="El Blog de Richi — blog, relatos y rol" href="/blog/rss.xml">
-    <!-- ==== ADELANTO DEL MENÚ ====
-         El menú, pedido LO PRIMERO para que no llegue tarde. Lo escribe
-         la herramienta; el porqué está en ella. -->
-    <script>window.adelantoDeFragmentos={};try{window.adelantoDeFragmentos["/fragmentos/barra-lateral.html"]=fetch("/fragmentos/barra-lateral.html?v=f81d2b47").then(function(r){return r.ok?r.text():null}).catch(function(){return null})}catch(e){}</script>
-    <!-- ==== CSS ====
-         La escribe herramientas/3-generadores/actualizar-cabeceras.py.
-         No la toques a mano (el porqué, en esa herramienta). -->
-    <link rel="stylesheet" href="/estilos/paquete-comun.css?v=9ae9d5fe">
-    <link rel="stylesheet" href="/estilos/paginas/notas-rol.css?v=ab8a7e22">
-    <link rel="stylesheet" href="/estilos/componentes/postit.css?v=d705bf09">
-    <link rel="stylesheet" href="/estilos/paginas/notas-rol.responsive.css?v=5e380254">
-    <link rel="stylesheet" href="/estilos/componentes/ventana-modal.css?v=9cb1fbd5">
-    <link rel="stylesheet" href="/estilos/componentes/ventana-modal.responsive.css?v=a920f364">
-    <link rel="stylesheet" href="/estilos/componentes/lupa.css?v=a1169615">
-    <link rel="stylesheet" href="/estilos/componentes/barra-lateral.css?v=e510b648">
-    <link rel="stylesheet" href="/estilos/componentes/barra-lateral.responsive.css?v=45e554fd">
-    <link rel="stylesheet" href="/estilos/paginas/buscar.css?v=692b762d">
-    <link rel="stylesheet" href="/estilos/paquete-cierre.css?v=7d910eba">
+    <!-- ==== ADELANTO DEL MENÚ ==== -->
+    <script>window.adelantoDeFragmentos={};try{window.adelantoDeFragmentos["/fragmentos/barra-lateral.html"]=fetch("/fragmentos/barra-lateral.html?v=50a31cd5").then(function(r){return r.ok?r.text():null}).catch(function(){return null})}catch(e){}</script>
+    <!-- ==== CSS ==== -->
+    <link rel="stylesheet" href="/estilos/paquete-comun.css?v=a7bebe47">
+    <link rel="stylesheet" href="/ligero/estilos/paginas/notas-rol.css?v=1b17fb2e">
+    <link rel="stylesheet" href="/ligero/estilos/componentes/postit.css?v=c6f04f61">
+    <link rel="stylesheet" href="/ligero/estilos/paginas/notas-rol.responsive.css?v=9c1d26db">
+    <link rel="stylesheet" href="/ligero/estilos/componentes/ventana-modal.css?v=95db68e9">
+    <link rel="stylesheet" href="/ligero/estilos/componentes/ventana-modal.responsive.css?v=e927767d">
+    <link rel="stylesheet" href="/ligero/estilos/componentes/lupa.css?v=0eda6554">
+    <link rel="stylesheet" href="/ligero/estilos/componentes/barra-lateral.css?v=ae1f7bab">
+    <link rel="stylesheet" href="/ligero/estilos/componentes/barra-lateral.responsive.css?v=36f396a1">
+    <link rel="stylesheet" href="/ligero/estilos/paginas/buscar.css?v=e32b461e">
+    <link rel="stylesheet" href="/estilos/paquete-cierre.css?v=3c277d98">
     <!-- ==== fin del CSS ==== -->
-    <script src="/scripts/cargador-scripts.js?v=906f71e7"></script>
-    <!-- ==== JS ====
-         Igual que el CSS: la escribe la herramienta, a partir de
-         scripts_de(). Van con defer y en este orden, que importa. -->
-    <script defer src="/scripts/paquete-comun.js?v=9a077389"></script>
-    <script defer src="/scripts/componentes/ventana-modal.js?v=9a18c89a"></script>
-    <script defer src="/scripts/componentes/lupa.js?v=eabe6924"></script>
-    <script defer src="/scripts/paginas/notas-rol.js?v=72f1692b"></script>
+    <script src="/ligero/scripts/cargador-scripts.js?v=04752c83"></script>
+    <!-- ==== JS ==== -->
+    <script defer src="/scripts/paquete-comun.js?v=c9aa4d63"></script>
+    <script defer src="/ligero/scripts/componentes/ventana-modal.js?v=427a4c21"></script>
+    <script defer src="/ligero/scripts/componentes/lupa.js?v=0377a579"></script>
+    <script defer src="/ligero/scripts/paginas/notas-rol.js?v=280164a5"></script>
     <!-- ==== fin del JS ==== -->
   </head>
 <body>
-    <!-- ==== SIDEBAR / NAVEGACIÓN ==== -->
     <a class="skip-link" href="#main-content">Saltar al contenido</a>
     <div id="sidebar-container"></div>
-    <!-- ==== CONTENIDO PRINCIPAL ==== -->
 
     <main id="main-content">
-        <!-- ==== HOME ==== -->
         <section id="home" class="home campana-page">
-            <!-- LA PÁGINA DE UNA CAMPAÑA
-                 Dos cosas: la ficha (qué se juega, con quién y de qué va)
-                 y el índice de sesiones. Las dos las pinta
-                 scripts/paginas/notas-rol.js con lo que haya en el JSON
-                 que dice data-campana-datos, aquí abajo.
-
-                 PARA UNA CAMPAÑA NUEVA no hay que tocar ni este archivo
-                 ni el script: se copia esta carpeta, se cambia ese
-                 atributo (y los textos del <head>), se crea su JSON
-                 copiando datos/notas_rol/campana-ragna.json y se añade su enlace
-                 al menú, en fragmentos/barra-lateral.html. -->
             <div class="campana-titulo">
                 <a class="campana-volver" href="/index.html">← volver al inicio</a>
                 <h1 class="home-title">
                     <em>notas de rol</em>
                 </h1>
-                <!-- El nombre de la campaña, debajo del título, igual que
-                     el año en el archivo del blog: juntos se leen
-                     "notas de rol — campaña de Ragna". -->
                 <p class="campana-nombre" data-campana-nombre>campaña de Ragna</p>
             </div>
 
             <div class="campana-cabecera">
                 <p class="campana-intro" data-campana-intro>Las notas que tomo después de cada partida, tal cual las escribo.</p>
 
-                <!-- LOS BOTONES DE LA CAMPAÑA.
-                     El primero lleva a otra página; el del botín abre una
-                     ventana encima de ésta, y por eso es <button> y no un
-                     enlace: lo que distingue una cosa de la otra es si vas
-                     a cambiar de pantalla o no, y el teclado y un lector
-                     de pantalla lo anuncian distinto
-                     (aria-haspopup="dialog").
-
-                     Los de la ventana NO se escriben con su texto
-                     aquí: los enciende scripts/paginas/notas-rol.js solo
-                     si la campaña tiene algo dentro. Una campaña recién
-                     empezada no enseña botones que abren ventanas
-                     vacías.
-
-                     YA NO HAY BOTÓN DE «LA MESA»: la ventana sigue
-                     estando, pero se abre pulsando el token de cada
-                     personaje en la ficha de aquí abajo, que es donde se
-                     le busca. -->
                 <p class="campana-botones">
                     <a class="campana-boton" data-campana-npcs href="/web/notas_rol/ragna/npcs_ragna.html">npcs →</a>
                     <button class="campana-boton" type="button"
@@ -152,10 +101,6 @@
                 </p>
             </div>
 
-            <!-- LA FICHA DE LA CAMPAÑA
-                 Sistema, quién dirige, los personajes y de qué va. Lo que
-                 esté en blanco en el JSON no sale: una ficha a medias es
-                 mejor que una ficha con huecos. -->
             <div class="campana-ficha" data-campana-ficha hidden>
                 <div class="recent-entries-header">
                     <h2>campana.nfo</h2>
@@ -164,7 +109,6 @@
                 <div class="campana-ficha-cuerpo" data-campana-ficha-cuerpo></div>
             </div>
 
-            <!-- EL ÍNDICE DE SESIONES -->
             <div class="campana-card">
                 <div class="recent-entries-header">
                     <h2>sesiones.lst</h2>
@@ -177,8 +121,6 @@
                 </div>
             </div>
 
-            <!-- El mismo botón abajo: cuando la lista de sesiones crece,
-                 al llegar al final el de arriba se ha quedado lejos. -->
             <a class="campana-volver campana-volver-abajo" href="/index.html">← volver al inicio</a>
         </section>
     </main>

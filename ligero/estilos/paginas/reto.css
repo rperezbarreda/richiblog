@@ -1,0 +1,312 @@
+/* Copia sin comentarios. La escribe actualizar-cabeceras.py: no se edita.
+   fuente: /estilos/paginas/reto.css
+*/
+.reto-page {
+    display: grid;
+    grid-template-columns: minmax(300px, 1fr) minmax(0, 1.05fr);
+    grid-template-rows: auto auto 1fr;
+    align-items: start;
+    justify-content: start;
+    gap: 10px 36px;
+    overflow-y: auto;
+    padding: 24px 4%;
+}
+.reto-titulo {
+    grid-column: 1;
+    grid-row: 1;
+}
+.reto-cabecera {
+    grid-column: 1;
+    grid-row: 2;
+    min-width: 0;
+}
+.reto-page .home-title {
+    font-size: clamp(3.25rem, 6vw, 5.5rem);
+}
+.reto-titulo {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+}
+.reto-titulo .home-title {
+    margin: 0;
+}
+.reto-anyo {
+    margin: 0;
+    color: var(--muted);
+    font-family: var(--fuente-mono);
+    font-size: 1rem;
+    letter-spacing: 2px;
+}
+.reto-volver {
+    display: inline-flex;
+    align-items: center;
+    align-self: flex-start;
+    flex: 0 0 auto;
+    padding: 8px 16px;
+    border: 2px solid var(--yellow);
+    background: transparent;
+    color: var(--yellow);
+    font-family: var(--fuente-mono);
+    font-size: 0.8125rem;
+    text-decoration: none;
+    transition: color 0.15s linear, background-color 0.15s linear;
+}
+.reto-volver:hover,
+.reto-volver:focus-visible {
+    background: var(--yellow);
+    color: var(--yellow-contrast);
+}
+.reto-volver:focus-visible {
+    outline: 2px solid var(--yellow);
+    outline-offset: 3px;
+}
+.reto-volver-abajo {
+    display: none;
+}
+.reto-cabecera {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    max-width: 720px;
+}
+.reto-intro {
+    margin: 0;
+    color: var(--white);
+    font-size: 1rem;
+    line-height: 1.6;
+}
+.reto-datos {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px 16px;
+    margin: 0;
+    color: var(--muted);
+    font-family: var(--fuente-mono);
+    font-size: 0.8125rem;
+}
+.reto-hashtag {
+    color: var(--yellow);
+    letter-spacing: 1px;
+}
+.reto-origen {
+    color: var(--yellow);
+    text-decoration: underline;
+}
+.reto-origen:hover,
+.reto-origen:focus-visible {
+    text-decoration: none;
+}
+.reto-origen:focus-visible {
+    outline: 2px solid var(--yellow);
+    outline-offset: 3px;
+}
+.reto-avance {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    max-width: 420px;
+}
+.reto-avance-texto {
+    margin: 0;
+    color: var(--white);
+    font-family: var(--fuente-mono);
+    font-size: 0.875rem;
+    letter-spacing: 1px;
+}
+.reto-avance-barra {
+    --avance: 0%;
+    position: relative;
+    height: 14px;
+    border: 2px solid var(--yellow);
+    background: var(--purple);
+}
+.reto-avance-barra::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    width: var(--avance);
+    background: var(--yellow);
+}
+.reto-card {
+    grid-column: 2;
+    grid-row: 1 / -1;
+    align-self: stretch;
+    display: flex;
+    flex-direction: column;
+    min-height: 220px;
+    overflow: hidden;
+    max-width: none;
+    padding: 16px;
+    background: var(--purple-lighter);
+    border: 3px solid var(--yellow);
+    box-shadow: 6px 6px 0 var(--yellow);
+}
+.reto-card-body {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    margin-top: 2px;
+    padding: 4px 6px 4px 2px;
+}
+.reto-dias {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 10px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+.reto-dia-casilla {
+    display: flex;
+}
+.reto-dia {
+    color: var(--white);
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    width: 100%;
+    min-height: 74px;
+    padding: 10px 12px;
+    border: 2px solid var(--border);
+    background: var(--purple);
+    text-decoration: none;
+    transition: color 0.15s linear, background-color 0.15s linear,
+        border-color 0.15s linear;
+}
+.reto-dia-num {
+    color: var(--muted);
+    font-family: var(--fuente-mono);
+    font-size: 0.6875rem;
+    letter-spacing: 1px;
+}
+.reto-dia-palabra {
+    color: var(--white);
+    font-size: 0.9375rem;
+    font-weight: 500;
+    line-height: 1.25;
+    overflow-wrap: anywhere;
+}
+.reto-dia-titulo {
+    margin-top: 2px;
+    color: var(--muted);
+    font-size: 0.75rem;
+    line-height: 1.3;
+    overflow-wrap: anywhere;
+}
+.reto-dia.is-hecho {
+    border-color: var(--yellow);
+}
+.reto-dia.is-hecho .reto-dia-num,
+.reto-dia.is-hecho .reto-dia-palabra {
+    color: var(--yellow);
+}
+.reto-dia.is-hecho:hover,
+.reto-dia.is-hecho:focus-visible {
+    background: var(--yellow);
+}
+.reto-dia.is-hecho:hover .reto-dia-num,
+.reto-dia.is-hecho:hover .reto-dia-palabra,
+.reto-dia.is-hecho:hover .reto-dia-titulo,
+.reto-dia.is-hecho:focus-visible .reto-dia-num,
+.reto-dia.is-hecho:focus-visible .reto-dia-palabra,
+.reto-dia.is-hecho:focus-visible .reto-dia-titulo {
+    color: var(--yellow-contrast);
+}
+.reto-dia.is-hecho:focus-visible {
+    outline: 2px solid var(--yellow);
+    outline-offset: 3px;
+}
+.reto-dia.is-pendiente .reto-dia-palabra {
+    color: var(--muted);
+    font-weight: 400;
+}
+.reto-avisos {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    flex: 0 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+    padding-right: 4px;
+}
+.reto-avisos[hidden] {
+    display: none;
+}
+.reto-aviso {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 12px 20px;
+    flex-shrink: 0;
+    width: 100%;
+    max-width: 1000px;
+    padding: 16px;
+    background: var(--purple-lighter);
+    border: 3px solid var(--yellow);
+    box-shadow: 6px 6px 0 var(--yellow);
+}
+.reto-aviso[hidden] {
+    display: none;
+}
+.reto-aviso-texto {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    flex: 1 1 260px;
+    min-width: 0;
+}
+.reto-aviso-nombre {
+    margin: 0;
+    color: var(--white);
+    font-size: 1.0625rem;
+    font-weight: 500;
+}
+.reto-aviso-desc {
+    margin: 0;
+    color: var(--white);
+    font-size: 0.9375rem;
+    line-height: 1.6;
+}
+.reto-aviso-desc:empty {
+    display: none;
+}
+.reto-aviso-avance,
+.reto-aviso-ultimo {
+    margin: 0;
+    color: var(--muted);
+    font-family: var(--fuente-mono);
+    font-size: 0.75rem;
+}
+.reto-aviso-ultimo[hidden] {
+    display: none;
+}
+.reto-aviso-enlace {
+    display: inline-flex;
+    align-items: center;
+    flex: 0 0 auto;
+    padding: 10px 18px;
+    border: 2px solid var(--yellow);
+    background: var(--yellow);
+    color: var(--yellow-contrast);
+    font-family: var(--fuente-mono);
+    font-size: 0.8125rem;
+    text-transform: lowercase;
+    letter-spacing: 1px;
+    text-decoration: none;
+    transition: color 0.15s linear, background-color 0.15s linear;
+}
+.reto-aviso-enlace:hover,
+.reto-aviso-enlace:focus-visible {
+    background: transparent;
+    color: var(--yellow);
+}
+.reto-aviso-enlace:focus-visible {
+    outline: 2px solid var(--yellow);
+    outline-offset: 3px;
+}
+.reto-avisos:not([hidden]) ~ .relatos-list-card {
+    min-height: 160px;
+}

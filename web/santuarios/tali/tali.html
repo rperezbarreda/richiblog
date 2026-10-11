@@ -2,18 +2,11 @@
 <html lang="es">
   <head>
     <meta charset="UTF-8">
-    <!-- ==== TEMA ====
-         El tema elegido, puesto antes del primer pintado para que no haya
-         fogonazo. Lo escribe la herramienta leyendo scripts/tema.js. -->
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-WzJfmZ3zA0hDtnR6cKyKt1o+8g4NfGJTELgMCUrrBFw=' 'sha256-oTE6cjgemXW7aRTQClslYZ63TgpgQ/lGSr9GtNhYyhs='; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self' https://script.google.com https://script.googleusercontent.com; object-src 'none'; base-uri 'self'; form-action 'self'">
+    <!-- ==== TEMA ==== -->
     <meta name="theme-color" content="#12091c">
     <script>
       (function () {
-        // Una marca de que el JavaScript funciona, puesta ANTES del primer
-        // pintado. Sirve para que una hoja de estilo pueda decir "esto
-        // solo si hay JavaScript": un spoiler tapado, por ejemplo, que sin
-        // JavaScript sería texto perdido y con él se destapa al pulsarlo.
-        // Aquí y no en otro sitio porque es el único script que corre
-        // antes de pintar: puesto más tarde habría fogonazo.
         document.documentElement.classList.add("js");
         try {
           var temas = {
@@ -43,9 +36,6 @@
     </script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Tali · Santuarios · El Blog de Richi</title>
-    <!-- Cómo se ve el enlace al compartirlo (Bluesky, Discord, Ko-fi…).
-         Sin esto solo sale la URL pelada, sin título ni imagen. Las rutas
-         van absolutas a propósito: las redes no resuelven las relativas. -->
     <meta name="description" content="Fotos de Tali, gatina blanca y naranja, un poquito arisca y muy de vigilar pájaros.">
     <link rel="canonical" href="https://richi.blog/web/santuarios/tali/tali.html">
     <meta property="og:type" content="website">
@@ -60,44 +50,30 @@
     <meta property="og:image:alt" content="El Blog de Richi — ilustración de Richi sobre fondo morado">
     <meta name="twitter:card" content="summary_large_image">
     <link rel="icon" type="image/x-icon" href="/imagenes/favicon.ico">
-    <!-- La única fuente que se precarga. Medido con la red frenada: sin esto el
-         navegador no la descubre hasta parsear el CSS (~800 ms) y el texto baila al
-         cambiar de tipografía; así llega antes del primer pintado y no se nota el
-         cambio. Precargar más fuentes empeoraba el primer pintado 150-210 ms, porque
-         compiten por el ancho de banda con lo que hace falta para pintar. -->
     <link rel="preload" href="/tipografias/space-grotesk-400.woff2" as="font" type="font/woff2" crossorigin>
     <link rel="alternate" type="application/rss+xml" title="El Blog de Richi — blog, relatos y rol" href="/blog/rss.xml">
-    <!-- ==== ADELANTO DEL MENÚ ====
-         El menú, pedido LO PRIMERO para que no llegue tarde. Lo escribe
-         la herramienta; el porqué está en ella. -->
-    <script>window.adelantoDeFragmentos={};try{window.adelantoDeFragmentos["/fragmentos/barra-lateral.html"]=fetch("/fragmentos/barra-lateral.html?v=f81d2b47").then(function(r){return r.ok?r.text():null}).catch(function(){return null})}catch(e){}</script>
-    <!-- ==== CSS ====
-         La escribe herramientas/3-generadores/actualizar-cabeceras.py.
-         No la toques a mano (el porqué, en esa herramienta). -->
-    <link rel="stylesheet" href="/estilos/paquete-comun.css?v=9ae9d5fe">
-    <link rel="stylesheet" href="/estilos/paginas/santuarios.css?v=986133fb">
-    <link rel="stylesheet" href="/estilos/paginas/santuarios.responsive.css?v=beaddcda">
-    <link rel="stylesheet" href="/estilos/componentes/barra-lateral.css?v=e510b648">
-    <link rel="stylesheet" href="/estilos/componentes/barra-lateral.responsive.css?v=45e554fd">
-    <link rel="stylesheet" href="/estilos/paginas/buscar.css?v=692b762d">
-    <link rel="stylesheet" href="/estilos/paquete-cierre.css?v=7d910eba">
+    <!-- ==== ADELANTO DEL MENÚ ==== -->
+    <script>window.adelantoDeFragmentos={};try{window.adelantoDeFragmentos["/fragmentos/barra-lateral.html"]=fetch("/fragmentos/barra-lateral.html?v=50a31cd5").then(function(r){return r.ok?r.text():null}).catch(function(){return null})}catch(e){}</script>
+    <!-- ==== CSS ==== -->
+    <link rel="stylesheet" href="/estilos/paquete-comun.css?v=a7bebe47">
+    <link rel="stylesheet" href="/ligero/estilos/paginas/santuarios.css?v=91877df7">
+    <link rel="stylesheet" href="/ligero/estilos/paginas/santuarios.responsive.css?v=61f0388b">
+    <link rel="stylesheet" href="/ligero/estilos/componentes/barra-lateral.css?v=ae1f7bab">
+    <link rel="stylesheet" href="/ligero/estilos/componentes/barra-lateral.responsive.css?v=36f396a1">
+    <link rel="stylesheet" href="/ligero/estilos/paginas/buscar.css?v=e32b461e">
+    <link rel="stylesheet" href="/estilos/paquete-cierre.css?v=3c277d98">
     <!-- ==== fin del CSS ==== -->
-    <script src="/scripts/cargador-scripts.js?v=906f71e7"></script>
-    <!-- ==== JS ====
-         Igual que el CSS: la escribe la herramienta, a partir de
-         scripts_de(). Van con defer y en este orden, que importa. -->
-    <script defer src="/scripts/paquete-comun.js?v=9a077389"></script>
-    <script defer src="/scripts/paginas/santuarios.js?v=c149968a"></script>
+    <script src="/ligero/scripts/cargador-scripts.js?v=04752c83"></script>
+    <!-- ==== JS ==== -->
+    <script defer src="/scripts/paquete-comun.js?v=c9aa4d63"></script>
+    <script defer src="/ligero/scripts/paginas/santuarios.js?v=b8750eb5"></script>
     <!-- ==== fin del JS ==== -->
   </head>
 <body>
-    <!-- ==== SIDEBAR / NAVEGACIÓN ==== -->
     <a class="skip-link" href="#main-content">Saltar al contenido</a>
     <div id="sidebar-container"></div>
-    <!-- ==== CONTENIDO PRINCIPAL ==== -->
 
     <main id="main-content">
-        <!-- ==== HOME ==== -->
         <section id="home" class="home pet-page">
             <a class="pet-back" href="/web/santuarios/index_santuarios.html">← volver a santuarios</a>
 
@@ -110,9 +86,6 @@
                 <div class="pet-window-body">
                     <p class="pet-description">Llegó a mi vida en diciembre de 2024, una semana antes de navidad. Desde siempre ha sido una gata cariñosa pero s´´olo cuando ella quiere, es un poco asustadiza y evita estar cerca cuando hay mucha gente o ruido. Le pirran los churus y los juguetes con plumas.</p>
 
-                    <!-- La rellena scripts/paginas/santuarios.js desde datos/mi_rincon/fotos-santuarios.json:
-                         para añadir fotos, déjalas en imagenes/santuarios/tali/
-                         y ejecuta herramientas/2-imagenes/generar-galeria.py. -->
                     <div class="photo-gallery" data-galeria="tali">
                         <p class="galeria-vacia">Cargando fotos…</p>
                     </div>

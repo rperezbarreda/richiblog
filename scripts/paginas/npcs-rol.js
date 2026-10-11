@@ -462,7 +462,10 @@ function tokenDeNpc(quien, datos) {
     const marco = document.createElement("span");
     marco.className = "npc-token-marco";
     marco.appendChild(
-        retratoNpc(quien.token, quien.nombre, "npc-token-img", "npc-token-mono")
+        // En la rejilla, la pequeña (280 px): aquí se ve a 102-140. La
+        // grande se queda para la ficha.
+        retratoNpc(quien.token_mini || quien.token, quien.nombre, "npc-token-img",
+            "npc-token-mono", quien.token)
     );
     boton.appendChild(marco);
 
@@ -513,12 +516,21 @@ function tokenDeNpc(quien, datos) {
 // Las dos clases van enteras y no pegadas con un "+": escritas a trozos
 // (clase + "-img") no se encuentran buscándolas, y herramientas/css-sano
 // y el repaso de clases sin usar las daban por muertas estando vivas.
-function retratoNpc(ruta, nombre, claseImg, claseMono) {
+function retratoNpc(ruta, nombre, claseImg, claseMono, respaldo) {
     const limpia = imagenSeguraNpc(ruta);
     if (limpia) {
         const img = document.createElement("img");
         img.className = claseImg;
         img.src = limpia;
+        // SI LA PEQUEÑA NO CARGA, LA GRANDE. La pequeña ("token_mini") la
+        // hace herramientas/2-imagenes/tokens-pequenos.py; si falta o se
+        // ha borrado, mejor la grande que un hueco.
+        const grande = imagenSeguraNpc(respaldo);
+        if (grande && grande !== limpia) {
+            img.addEventListener("error", () => {
+                img.src = grande;
+            }, { once: true });
+        }
         img.alt = "";
         // Dos cosas que el navegador hace mejor que nosotros: no bajar lo
         // que no se ve todavía, y saber el hueco antes de pintar para que

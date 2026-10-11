@@ -809,6 +809,17 @@ body:has(.blog-post-page) main {
     justify-content: center;
 }
 
+/* MIENTRAS CARGA, EL HUECO DEL CALENDARIO. El calendario lo pinta
+   diario.js cuando llegan las entradas, y hasta entonces aquí había una
+   línea de "Cargando el diario…": al llegar, la caja crecía de 22 a 270
+   px y empujaba la lista de al lado (medido: era el salto de maqueta de
+   la página). El calendario mide siempre lo mismo —seis semanas de
+   --dia más la fila de los días—, así que se reserva eso. */
+.diario-calendario > .entries-loading {
+    min-height: calc(var(--dia) * 6 + 0.97rem + 10px);
+    margin: 0;
+}
+
 .diario-tabla {
     /* Siete casillas de lado fijo, no el ancho que sobre: así el
        calendario mide lo mismo tenga la ventana el tamaño que tenga. */

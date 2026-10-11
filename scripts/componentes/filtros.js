@@ -83,6 +83,16 @@ function montarFiltros() {
             return;
         }
 
+        // TODAVÍA NO HAY NADA QUE FILTRAR: la lista se pinta desde un JSON
+        // y aún no ha llegado. No se esconde la fila: esconderla aquí y
+        // volver a enseñarla al llegar los datos empujaba la lista entera
+        // hacia abajo cuando ya se estaba mirando (medido en la página de
+        // npcs: 59 px, la mitad del salto de maqueta). Se espera a los
+        // datos, que vuelven a llamar aquí con "filtros:actualizar".
+        if (!items.length) {
+            return;
+        }
+
         const categorias = categoriasDe(caja, items);
 
         // Con una categoría o ninguna los botones no dicen nada: se

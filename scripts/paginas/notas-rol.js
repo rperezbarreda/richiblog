@@ -234,6 +234,9 @@ function personajesDe(crudos) {
             nivel: Number(p.nivel) || 0,
             jugador: (p.jugador || "").toString().trim(),
             token: (p.token || "").toString().trim(),
+            // La pequeña, para donde se ve pequeño (la fila de retratos, el
+            // globo de las notas). La hace tokens-pequenos.py.
+            token_mini: (p.token_mini || "").toString().trim(),
             ilustracion: (p.ilustracion || "").toString().trim(),
             // SU FICHA, EN LOS DOS SITIOS DONDE VIVE: la de D&D Beyond,
             // que es la que se toca en la partida, y un PDF para cuando
@@ -288,7 +291,8 @@ function listaDePersonajes(gente) {
         const marco = document.createElement("span");
         marco.className = "campana-personaje-marco";
         marco.appendChild(
-            retratoDeMesa(quien.token, quien.nombre, "campana-personaje-img", "campana-personaje-mono")
+            retratoDeMesa(quien.token_mini || quien.token, quien.nombre,
+                "campana-personaje-img", "campana-personaje-mono", quien.token)
         );
         boton.appendChild(marco);
 
@@ -579,12 +583,21 @@ function tituloDeLaMesa(texto) {
 // mismo: leerlo sería decir el nombre dos veces. Las clases van enteras y
 // no pegadas con un "+": escritas a trozos no se encuentran buscándolas y
 // el repaso de clases sin usar las daría por muertas estando vivas.
-function retratoDeMesa(ruta, nombre, claseImg, claseMono) {
+function retratoDeMesa(ruta, nombre, claseImg, claseMono, respaldo) {
     const limpia = imagenSeguraDeMesa(ruta);
     if (limpia) {
         const img = document.createElement("img");
         img.className = claseImg;
         img.src = limpia;
+        // SI LA PEQUEÑA NO CARGA, LA GRANDE. La pequeña ("token_mini") la
+        // hace herramientas/2-imagenes/tokens-pequenos.py; si falta o se
+        // ha borrado, mejor la grande que un hueco.
+        const grande = imagenSeguraDeMesa(respaldo);
+        if (grande && grande !== limpia) {
+            img.addEventListener("error", () => {
+                img.src = grande;
+            }, { once: true });
+        }
         img.alt = "";
         img.loading = "lazy";
         img.decoding = "async";

@@ -1,0 +1,40 @@
+/* Copia sin comentarios. La escribe actualizar-cabeceras.py: no se edita.
+   fuente: /estilos/paginas/portada.responsive.css
+*/
+@media (max-width: 1900px) {
+    .home.home-page {
+        display: block;
+        overflow-y: auto;
+    }
+    .home {
+        padding: 32px 6%;
+    }
+    .pngperson-art {
+        position: relative;
+        height: auto;
+        width: 206px;
+        max-width: 100%;
+        margin: 0 auto;
+    }
+    .pngperson {
+        height: auto;
+        width: 100%;
+    }
+    .home-content {
+        display: flex;
+        flex-direction: column;
+        align-items: stretch;
+        flex: none;
+        gap: 28px;
+        padding-left: 0;
+        margin-top: 24px;
+    }
+    .info-column {
+        max-width: none;
+        min-width: 0;
+    }
+    .recent-entries-body {
+        flex: none;
+        max-height: 260px;
+    }
+}

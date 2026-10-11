@@ -1,0 +1,292 @@
+/* Copia sin comentarios. La escribe actualizar-cabeceras.py: no se edita.
+   fuente: /estilos/paginas/relatos.css
+*/
+.relatos-page {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    justify-content: flex-start;
+    gap: 16px;
+    overflow: hidden;
+    padding: 24px 4%;
+}
+.relatos-page > .home-title,
+.relatos-page-intro,
+.relatos-page .filtros {
+    flex-shrink: 0;
+}
+.relatos-page > .home-title {
+    margin: 0;
+}
+.relatos-page-intro {
+    margin: 0;
+    max-width: 640px;
+    color: var(--muted);
+    font-size: 1rem;
+    line-height: 1.6;
+}
+.relatos-list-card[hidden] {
+    display: none;
+}
+.relatos-list-card {
+    display: flex;
+    flex-direction: column;
+    flex: 0 1 auto;
+    min-height: 0;
+    max-width: 1000px;
+    padding: 16px;
+    background: var(--purple-lighter);
+    border: 3px solid var(--yellow);
+    box-shadow: 6px 6px 0 var(--yellow);
+}
+.relatos-list-body {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    margin-top: 2px;
+    padding: 2px 4px;
+}
+.relatos-list-card .entries-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    align-content: start;
+    gap: 10px 28px;
+}
+.relatos-list-card .entry-preview:last-child {
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--border);
+}
+.relatos-list-card .entry-preview[hidden] {
+    display: none;
+}
+.relato-page {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    overflow: hidden;
+    padding: 0;
+}
+body:has(.relato-page) main {
+    background: transparent;
+    border: none;
+    box-shadow: none;
+}
+@media (min-width: 861px) {
+    body:has(.relato-page) main {
+        margin: 0 0 0 var(--lateral-ancho);
+        width: calc(100% - var(--lateral-ancho));
+    }
+}
+.relato-post {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-height: 0;
+    width: 100%;
+    background: var(--purple-lighter);
+    border: 3px solid var(--yellow);
+    box-shadow: 6px 6px 0 var(--yellow);
+    overflow: hidden;
+}
+.relato-post::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background-image: var(--bg-texture);
+    background-size: 90px 90px;
+    background-repeat: repeat;
+    opacity: 0.35;
+    pointer-events: none;
+    z-index: 0;
+}
+.relato-post-header {
+    position: relative;
+    z-index: 1;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 14px calc(2.4rem + 30px) 14px 20px;
+    background: var(--yellow);
+    user-select: none;
+}
+.relato-post-header-meta {
+    display: flex;
+    align-items: center;
+    flex-shrink: 1;
+    min-width: 0;
+    flex-wrap: wrap;
+    gap: 14px;
+}
+.relato-post-title {
+    overflow-wrap: break-word;
+    flex: 1;
+    min-width: 0;
+    margin: 0;
+    color: var(--yellow-contrast);
+    font-family: var(--fuente-ventana);
+    font-weight: 400;
+    font-size: clamp(1.75rem, 3.2vw, 2.25rem);
+    letter-spacing: 0.3px;
+    line-height: 1.2;
+}
+.relato-post-body-wrap {
+    position: relative;
+    z-index: 1;
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    padding: 28px 32px;
+}
+.relato-post-body {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    max-width: 720px;
+    color: var(--white);
+    font-family: var(--fuente-mano);
+    font-size: 1rem;
+    line-height: 1.7;
+}
+.relato-post-back {
+    display: inline-flex;
+    flex-shrink: 0;
+    padding: 6px 14px;
+    border: 2px solid var(--yellow-contrast);
+    background: var(--yellow-contrast);
+    color: var(--yellow);
+    font-family: var(--fuente-mono);
+    font-size: 0.75rem;
+    text-decoration: none;
+    transition: color 0.15s linear, background-color 0.15s linear;
+}
+.relato-post-back:hover,
+.relato-post-back:focus-visible {
+    color: var(--yellow-contrast);
+    background: transparent;
+}
+.relato-post-back:focus-visible {
+    outline: 2px solid var(--yellow-contrast);
+    outline-offset: 3px;
+}
+.relato-post-date {
+    margin: 0;
+    color: var(--yellow-contrast);
+    font-family: var(--fuente-mono);
+    font-size: 0.75rem;
+    letter-spacing: 1px;
+    white-space: nowrap;
+}
+.relato-post-layout {
+    display: flex;
+    align-items: flex-start;
+    gap: 32px;
+    max-width: 1100px;
+    margin: 0 auto;
+}
+.relato-post-layout .relato-post-body {
+    flex: 1 1 auto;
+    min-width: 0;
+}
+.relato-post-side {
+    position: sticky;
+    top: 0;
+    max-height: calc(100vh - 150px);
+    overflow-y: auto;
+    padding-right: 14px;
+    scrollbar-gutter: stable;
+    flex: 0 0 calc(clamp(260px, 20vw, 340px) + 24px);
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+.relato-post-aside {
+    display: flex;
+    flex-direction: column;
+    flex: 0 0 auto;
+    margin: 0;
+}
+.relato-post-otras {
+    position: relative;
+    flex: none;
+    padding: 16px;
+    background: var(--purple);
+    border: 3px solid var(--yellow);
+    box-shadow: 4px 4px 0 var(--yellow);
+}
+.relato-post-otras .entries-list {
+    gap: 10px;
+}
+.relato-post-aside img {
+    display: block;
+    width: 100%;
+    height: auto;
+    flex: 0 0 auto;
+    border: 3px solid var(--yellow);
+    box-shadow: 4px 4px 0 var(--yellow);
+}
+.relato-post-aside figcaption {
+    margin-top: 12px;
+    color: var(--muted);
+    font-family: var(--fuente-mono);
+    font-size: 0.6875rem;
+    line-height: 1.5;
+}
+.relato-post-aside figcaption a {
+    color: var(--yellow);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+}
+.relato-post-aside figcaption a:hover,
+.relato-post-aside figcaption a:focus-visible {
+    color: var(--yellow-contrast);
+    background: var(--yellow);
+}
+.relato-post-aside figcaption a:focus-visible {
+    outline: 2px solid var(--yellow);
+    outline-offset: 2px;
+}
+@media (max-width: 1150px) {
+    .relato-page {
+        display: block;
+        overflow-y: auto;
+    }
+    .relato-post {
+        flex: none;
+        max-width: none;
+    }
+    .relato-post-body-wrap {
+        flex: none;
+        overflow-y: visible;
+        padding-right: calc(2.4rem + 30px);
+    }
+    .relato-post-layout {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    .relato-post-side {
+        position: static;
+        flex: none;
+        align-self: center;
+        width: 100%;
+        max-width: 420px;
+        margin-top: 8px;
+        max-height: none;
+        overflow-y: visible;
+        padding-right: 0;
+    }
+    .relato-post-aside figcaption {
+        text-align: center;
+    }
+}
+@media (max-height: 660px) {
+    .relato-post-side {
+        position: static;
+        max-height: none;
+        overflow-y: visible;
+        padding-right: 0;
+    }
+}

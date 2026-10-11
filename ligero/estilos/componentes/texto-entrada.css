@@ -1,0 +1,198 @@
+/* Copia sin comentarios. La escribe actualizar-cabeceras.py: no se edita.
+   fuente: /estilos/componentes/texto-entrada.css
+*/
+.blog-post[data-borrador] .blog-post-header::after,
+.relato-post[data-borrador] .relato-post-header::after {
+    content: "BORRADOR · no sale en los listados ni en el RSS";
+    flex: 0 0 100%;
+    box-sizing: border-box;
+    padding: 7px 14px;
+    border: 2px dashed var(--yellow);
+    background: var(--purple);
+    color: var(--yellow);
+    font-family: var(--fuente-mono);
+    font-size: 0.78rem;
+    letter-spacing: 0.06em;
+    text-align: center;
+}
+.blog-post-body,
+.relato-post-body {
+    overflow-wrap: anywhere;
+}
+.blog-post-body h2,
+.relato-post-body h2,
+.blog-post-body h3,
+.relato-post-body h3,
+.blog-post-body h4,
+.relato-post-body h4 {
+    margin: 12px 0 0;
+    color: var(--yellow);
+    font-family: var(--fuente-texto);
+    font-weight: 500;
+    line-height: 1.25;
+}
+.blog-post-body h2,
+.relato-post-body h2 {
+    font-size: 1.375rem;
+}
+.blog-post-body h3,
+.relato-post-body h3 {
+    font-size: 1.125rem;
+}
+.blog-post-body h4,
+.relato-post-body h4 {
+    font-size: 1rem;
+    color: var(--white);
+}
+.blog-post-body a,
+.relato-post-body a {
+    color: var(--yellow);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+}
+.blog-post-body a:hover,
+.relato-post-body a:hover,
+.blog-post-body a:focus-visible,
+.relato-post-body a:focus-visible {
+    color: var(--yellow-contrast);
+    background: var(--yellow);
+    text-decoration: none;
+}
+.blog-post-body a:focus-visible,
+.relato-post-body a:focus-visible {
+    outline: 2px solid var(--yellow);
+    outline-offset: 2px;
+}
+.blog-post-body ul,
+.relato-post-body ul,
+.blog-post-body ol,
+.relato-post-body ol {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin: 0;
+    padding-left: 22px;
+}
+.blog-post-body li,
+.relato-post-body li {
+    list-style: disc;
+    color: var(--white);
+}
+.blog-post-body ol > li,
+.relato-post-body ol > li {
+    list-style: decimal;
+}
+.blog-post-body li::marker,
+.relato-post-body li::marker {
+    color: var(--yellow);
+}
+.blog-post-body li > ul,
+.relato-post-body li > ul,
+.blog-post-body li > ol,
+.relato-post-body li > ol {
+    margin-top: 8px;
+}
+.blog-post-body blockquote,
+.relato-post-body blockquote {
+    margin: 0;
+    padding: 12px 18px;
+    border-left: 3px solid var(--yellow);
+    background: var(--purple);
+    color: var(--muted);
+    font-style: italic;
+}
+.blog-post-body blockquote p,
+.relato-post-body blockquote p {
+    margin: 0;
+}
+.blog-post-body code,
+.relato-post-body code {
+    padding: 1px 6px;
+    border: 1px solid var(--border);
+    background: var(--purple);
+    color: var(--yellow);
+    font-family: var(--fuente-mono);
+    font-size: 0.85em;
+}
+.blog-post-body pre,
+.relato-post-body pre {
+    margin: 0;
+    padding: 14px 16px;
+    border: 2px solid var(--yellow);
+    background: var(--purple);
+    color: var(--white);
+    font-family: var(--fuente-mono);
+    font-size: 0.8125rem;
+    line-height: 1.6;
+    max-width: 100%;
+    min-width: 0;
+    overflow-x: auto;
+}
+.blog-post-body pre code,
+.relato-post-body pre code {
+    padding: 0;
+    border: none;
+    background: none;
+    color: inherit;
+    font-size: inherit;
+}
+.blog-post-body figure,
+.relato-post-body figure {
+    margin: 0;
+}
+.blog-post-body img,
+.relato-post-body img {
+    display: block;
+    max-width: 100%;
+    height: auto;
+    border: 3px solid var(--yellow);
+    box-shadow: 4px 4px 0 var(--yellow);
+}
+.blog-post-body figcaption,
+.relato-post-body figcaption {
+    margin-top: 10px;
+    color: var(--muted);
+    font-family: var(--fuente-mono);
+    font-size: 0.6875rem;
+    line-height: 1.5;
+}
+.blog-post-body table,
+.relato-post-body table {
+    display: block;
+    overflow-x: auto;
+    width: max-content;
+    max-width: 100%;
+    border-collapse: collapse;
+    font-family: var(--fuente-mono);
+    font-size: 0.8125rem;
+}
+.blog-post-body th,
+.relato-post-body th,
+.blog-post-body td,
+.relato-post-body td {
+    padding: 8px 14px;
+    border: 1px solid var(--border);
+    text-align: left;
+}
+.blog-post-body th,
+.relato-post-body th {
+    background: var(--purple);
+    color: var(--yellow);
+    font-weight: 500;
+}
+.blog-post-body hr,
+.relato-post-body hr {
+    width: 100%;
+    margin: 8px 0;
+    border: none;
+    border-top: 2px solid var(--border);
+}
+.blog-post-body strong,
+.relato-post-body strong {
+    color: var(--yellow);
+    font-weight: 700;
+}
+.blog-post-body p,
+.relato-post-body p {
+    margin: 0;
+}

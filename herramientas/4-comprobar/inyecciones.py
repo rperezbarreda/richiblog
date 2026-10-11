@@ -34,6 +34,12 @@ Esto repasa los .js y canta tres cosas:
   3. Un eval(), un new Function() o un setTimeout("texto"), que son
      formas de ejecutar texto como si fuera código.
 
+Y en las páginas, una cuarta:
+
+  4. Un <script> escrito dentro de la página cuya huella no está en la
+     lista de permitidos de esa página (el <meta> Content-Security-Policy
+     que escribe actualizar-cabeceras.py). El navegador lo bloquearía.
+
 NO CAMBIA NADA: solo mira y te lo cuenta. Y es un repaso de bulto, no un
 analizador de JavaScript: puede cantar algo que esté bien (un href que
 siempre vale, por ejemplo). Lo que no debería es callarse algo que esté
@@ -43,7 +49,7 @@ CÓMO USARLO
 -----------
     python herramientas/4-comprobar/inyecciones.py
 
-Lo pasa también la opción 12 del menú, con el resto de comprobaciones.
+Lo pasa también «Repasar el sitio entero», en el menú (Antes de subir).
 """
 
 import re
@@ -247,10 +253,69 @@ def mirar(js):
     return nombre, avisos
 
 
+# ---- LA LISTA DE SCRIPTS PERMITIDOS DE CADA PÁGINA ----
+#
+# Cada página lleva en el <head> un <meta http-equiv="Content-Security-
+# Policy">: la lista de lo que el navegador deja ejecutar. Los scripts que
+# vienen de un archivo .js del propio sitio pasan siempre; los que van
+# escritos dentro de la página (<script>...</script>, sin src) solo pasan
+# si su huella (un sha256 de lo que llevan dentro) está en esa lista. Así,
+# un script que alguien consiguiera colar en la página no se ejecuta.
+#
+# La lista la escribe actualizar-cabeceras.py. Si se cambia A MANO un
+# script escrito en la página (aunque sea un espacio) y no se pasa, la
+# huella ya no coincide y el navegador lo bloquea: el tema no se aplica,
+# el menú no se adelanta... sin ningún error a la vista. Esto lo canta
+# antes de subir.
+RE_SCRIPT_EN_LINEA = re.compile(r"<script(?![^>]*\bsrc=)[^>]*>(.*?)</script>", re.S)
+RE_CSP = re.compile(r'<meta http-equiv="Content-Security-Policy" content="([^"]*)"[^>]*>')
+
+
+def huella(codigo):
+    import base64
+    import hashlib
+    return "'sha256-%s'" % base64.b64encode(
+        hashlib.sha256(codigo.encode("utf-8")).digest()).decode()
+
+
+def paginas_publicadas():
+    for nombre in ("index.html", "not_found.html"):
+        if (RAIZ / nombre).is_file():
+            yield RAIZ / nombre
+    yield from sorted((RAIZ / "web").rglob("*.html"))
+
+
+def mirar_csp(pagina):
+    """Lo que le falta a la lista de esa página, o None si está bien."""
+    # El navegador lee los saltos de Windows como "\n" antes de calcular la
+    # huella, así que aquí también.
+    texto = pagina.read_bytes().decode("utf-8").replace("\r\n", "\n")
+    m = RE_CSP.search(texto)
+    if not m:
+        return "no lleva la lista de scripts permitidos"
+    sin_meta = texto[:m.start()] + texto[m.end():]
+    permitidas = set(m.group(1).replace(";", " ").split())
+    faltan = [s for s in RE_SCRIPT_EN_LINEA.finditer(sin_meta)
+              if huella(s.group(1)) not in permitidas]
+    if faltan:
+        return "%d script(s) escritos en la página que el navegador bloquearía" % len(faltan)
+    return None
+
+
 def main():
     if not SCRIPTS.is_dir():
         print("  No encuentro scripts/. ¿Estás en la carpeta raíz del sitio?")
         return 1
+
+    print("\n  ---- scripts escritos en las páginas ----\n")
+    mal = [(p, que) for p in paginas_publicadas() for que in [mirar_csp(p)] if que]
+    if not mal:
+        print("  Todos están en la lista de permitidos de su página.")
+    else:
+        for pagina, que in mal:
+            print("  %s: %s" % (pagina.relative_to(RAIZ).as_posix(), que))
+        print("\n  Pasa python herramientas/3-generadores/actualizar-cabeceras.py:")
+        print("  rehace la lista con lo que lleva cada página ahora.")
 
     total = 0
     mirados = 0

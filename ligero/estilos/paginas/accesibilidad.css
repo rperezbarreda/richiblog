@@ -1,0 +1,110 @@
+/* Copia sin comentarios. La escribe actualizar-cabeceras.py: no se edita.
+   fuente: /estilos/paginas/accesibilidad.css
+*/
+.acc-page {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    justify-content: flex-start;
+    padding: 36px 4% 48px;
+}
+.acc-page .home-title {
+    flex: 0 0 auto;
+    font-size: clamp(2.5rem, 6vw, 5rem);
+    letter-spacing: -3px;
+}
+.acc-intro {
+    max-width: 62ch;
+    margin: 18px 0 30px;
+    color: var(--white);
+    font-size: 0.9375rem;
+    line-height: 1.8;
+}
+.acc-bloques {
+    column-count: 3;
+    column-gap: 24px;
+    max-width: 1500px;
+}
+@media (max-width: 1420px) {
+    .acc-bloques {
+        column-count: 2;
+    }
+}
+@media (max-width: 780px) {
+    .acc-bloques {
+        column-count: 1;
+    }
+}
+.acc-bloque {
+    display: block;
+    height: auto;
+    overflow: visible;
+    break-inside: avoid;
+    margin-bottom: 24px;
+    padding: 16px;
+    background: var(--purple-lighter);
+    border: 3px solid var(--yellow);
+    box-shadow: 6px 6px 0 var(--yellow);
+}
+.acc-bloque-cuerpo {
+    margin-top: 14px;
+    color: var(--white);
+    font-size: 0.875rem;
+    line-height: 1.75;
+}
+.acc-bloque-cuerpo p {
+    margin-bottom: 12px;
+}
+.acc-lista {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    list-style: none;
+}
+.acc-lista li {
+    position: relative;
+    padding-left: 22px;
+}
+.acc-lista li::before {
+    content: "▸";
+    position: absolute;
+    top: 0;
+    left: 0;
+    color: var(--yellow);
+}
+.acc-bloque-cuerpo strong {
+    color: var(--yellow);
+    font-weight: 500;
+}
+.acc-bloque-cuerpo kbd {
+    padding: 1px 6px;
+    border: 1px solid var(--yellow);
+    color: var(--yellow);
+    font-family: var(--fuente-mono);
+    font-size: 0.75rem;
+}
+.acc-enlace {
+    color: var(--yellow);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    overflow-wrap: anywhere;
+}
+.acc-enlace:hover,
+.acc-enlace:focus-visible {
+    color: var(--white);
+}
+.acc-enlace:focus-visible {
+    outline: 2px solid var(--yellow);
+    outline-offset: 2px;
+}
+@media (max-width: 860px) {
+    .acc-page {
+        padding: 24px 6% 40px;
+    }
+    .acc-intro {
+        margin: 14px 0 24px;
+    }
+    .acc-bloque {
+        margin-bottom: 20px;
+    }
+}

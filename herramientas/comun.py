@@ -199,6 +199,57 @@ RE_BORRADOR = re.compile(
 )
 
 
+# LOS COMENTARIOS DE LAS PÁGINAS PUBLICADAS. Lo que explica la plantilla
+# sobra en la página publicada (ver 3-generadores/quitar-comentarios.py,
+# que es quien lo pasa por todo lo publicado). Se quedan las marcas de
+# actualizar-cabeceras.py, el código comentado (empieza por "<") y lo que
+# empiece por "!".
+COMENTARIO = re.compile(r"<!--(.*?)-->", re.S)
+# Lo que no se toca por dentro: ahí "<!--" es texto.
+CRUDO = re.compile(r"<(script|style)\b.*?</\1\s*>", re.S | re.I)
+
+
+# Las marcas que busca actualizar-cabeceras.py (ABRE, CIERRA, ABRE_JS,
+# CIERRA_JS, ABRE_TEMA y ABRE_ADELANTO). Si cambian allí, cambian aquí.
+MARCAS = ("==== CSS ====", "==== fin del CSS ====", "==== JS ====",
+          "==== fin del JS ====", "==== TEMA ====", "==== ADELANTO DEL MENÚ ====")
+
+
+def se_queda(cuerpo):
+    limpio = cuerpo.strip()
+    return limpio.startswith(MARCAS) or limpio.startswith("<") or limpio.startswith("!")
+
+
+
+def limpiar_comentarios_html(texto):
+    """(texto sin comentarios de explicación, cuántos se han ido)."""
+    crudos = [(m.start(), m.end()) for m in CRUDO.finditer(texto)]
+
+    def dentro_de_crudo(i):
+        return any(a <= i < b for a, b in crudos)
+
+    quitados = 0
+    trozos = []
+    ultimo = 0
+    for m in COMENTARIO.finditer(texto):
+        if dentro_de_crudo(m.start()) or se_queda(m.group(1)):
+            continue
+        inicio, fin = m.start(), m.end()
+        # Si el comentario ocupa sus propias líneas, se va con ellas: con
+        # su sangría delante y su salto detrás. Si no, solo él.
+        linea_ini = texto.rfind("\n", 0, inicio) + 1
+        linea_fin = texto.find("\n", fin)
+        linea_fin = len(texto) if linea_fin == -1 else linea_fin
+        if not texto[linea_ini:inicio].strip() and not texto[fin:linea_fin].strip():
+            inicio = linea_ini
+            fin = min(linea_fin + 1, len(texto))
+        trozos.append(texto[ultimo:inicio])
+        ultimo = fin
+        quitados += 1
+    trozos.append(texto[ultimo:])
+    return "".join(trozos), quitados
+
+
 def es_borrador(archivo):
     try:
         return bool(RE_BORRADOR.search(Path(archivo).read_text(encoding="utf-8")))
@@ -388,6 +439,16 @@ def elegir_campana(pedida, pregunta="¿De qué campaña?"):
 GENERADORES = (
     "3-generadores/generar-archivo.py",
     "3-generadores/generar-posts.py",
+    # Los comentarios de explicación de las plantillas, fuera de lo
+    # publicado (los borradores se quedan con su guía). Después de
+    # generar-archivo, que escribe páginas nuevas desde una plantilla.
+    "3-generadores/quitar-comentarios.py",
+    # Los tokens de los NPC y de la mesa, en pequeño, para donde se ven
+    # pequeños. Antes del buscador, que lee esos JSON.
+    "2-imagenes/tokens-pequenos.py",
+    # El nombre y la intro de la página de npcs, los mismos que su JSON:
+    # si no, la página salta al llegar el JSON.
+    "3-generadores/textos-npcs.py",
     "3-generadores/generar-rss.py",
     "3-generadores/generar-sitemap.py",
     "3-generadores/generar-mapa.py",

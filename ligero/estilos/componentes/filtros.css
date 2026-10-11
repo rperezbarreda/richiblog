@@ -1,0 +1,81 @@
+/* Copia sin comentarios. La escribe actualizar-cabeceras.py: no se edita.
+   fuente: /estilos/componentes/filtros.css
+*/
+.filtros {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+.filtros[hidden] {
+    display: none;
+}
+.filtros-label {
+    color: var(--muted);
+    font-family: var(--fuente-mono);
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+.filtros-toggle {
+    display: none;
+}
+.filtros-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+.filtro-btn {
+    padding: 6px 14px;
+    border: 2px solid var(--yellow);
+    background: transparent;
+    color: var(--yellow);
+    font-family: var(--fuente-mono);
+    font-size: 0.75rem;
+    letter-spacing: 0.5px;
+    cursor: pointer;
+    transition: color 0.15s linear, background-color 0.15s linear;
+}
+.filtro-btn:hover {
+    color: var(--yellow-contrast);
+    background: var(--yellow);
+}
+.filtro-btn[aria-pressed="true"] {
+    color: var(--yellow-contrast);
+    background: var(--yellow);
+}
+.filtro-btn:focus-visible {
+    outline: 2px solid var(--yellow);
+    outline-offset: 3px;
+}
+.filtros-vacio {
+    margin: 0;
+    color: var(--muted);
+    font-family: var(--fuente-mono);
+    font-size: 0.8125rem;
+}
+.filtros-vacio[hidden] {
+    display: none;
+}
+.filtros-rss {
+    margin-left: auto;
+    padding: 6px 14px;
+    border: 2px solid var(--yellow);
+    background: var(--yellow);
+    color: var(--yellow-contrast);
+    font-family: var(--fuente-mono);
+    font-size: 0.75rem;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    text-decoration: none;
+    transition: color 0.15s linear, background-color 0.15s linear;
+}
+.filtros-rss:hover,
+.filtros-rss:focus-visible {
+    background: transparent;
+    color: var(--yellow);
+}
+.filtros-rss:focus-visible {
+    outline: 2px solid var(--yellow);
+    outline-offset: 3px;
+}

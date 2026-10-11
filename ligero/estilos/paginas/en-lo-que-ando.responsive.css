@@ -1,0 +1,39 @@
+/* Copia sin comentarios. La escribe actualizar-cabeceras.py: no se edita.
+   fuente: /estilos/paginas/en-lo-que-ando.responsive.css
+*/
+@media (max-width: 1100px) {
+    .ando-rejilla {
+        grid-template-columns: 1fr;
+        gap: 20px;
+    }
+    .ando-postit {
+        max-width: 24rem;
+    }
+}
+@media (max-width: 860px) {
+    .ando-page {
+        gap: 12px;
+        padding: 24px 6%;
+    }
+    .ando-rejilla {
+        gap: 18px;
+    }
+    .ando-postit {
+        max-width: none;
+        margin-left: 0;
+    }
+    .ando-volver {
+        align-self: stretch;
+        justify-content: center;
+        display: flex;
+        margin-top: 20px;
+    }
+}
+@media (max-width: 480px) {
+    .ando-page {
+        padding: 20px 5%;
+    }
+    .ando-bloque {
+        padding: 14px;
+    }
+}

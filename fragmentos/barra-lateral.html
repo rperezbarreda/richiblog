@@ -1,35 +1,11 @@
-<div class="mobile-topbar">
+<header class="mobile-topbar">
     <button id="sidebar-toggle" class="sidebar-toggle" type="button" aria-expanded="false" aria-controls="sidebar">
         <span aria-hidden="true">☰</span>
         <span class="visually-hidden">Abrir menú</span>
     </button>
     <p class="mobile-topbar-title"><span aria-hidden="true">·🜏·</span> EL BLOG DE RICHI</p>
-</div>
+</header>
 
-<!-- ==== EL BOTÓN QUE ABRE LOS AJUSTES ====
-     Antes aquí vivían tres mandos sueltos (tema, tamaño y brillito).
-     Ahora son uno solo que abre la ventana de accesibilidad, con todo
-     dentro y un texto de ejemplo para ir viendo los cambios.
-
-     POR QUÉ ESTÁ AQUÍ Y NO DENTRO DEL MENÚ
-     --------------------------------------
-     El botón flota con position: fixed, y eso en móvil solo funciona si
-     NO está dentro del cajón: el cajón se esconde con un transform, y un
-     elemento transformado se convierte en el marco de referencia de todo
-     lo que lleva dentro, incluso de lo que va fixed. Dentro del <aside>
-     el botón se iba con el cajón fuera de la pantalla —medido: aparecía
-     en x = -66px— y no había forma de pulsarlo.
-
-     Fuera del cajón, el único marco de referencia es la ventana del
-     navegador: en escritorio flota en la esquina de arriba a la derecha
-     y en móvil se coloca encima de la barra amarilla del título, a la
-     derecha, enfrente del botón del menú. Lo decide
-     estilos/componentes/ajustes.css.
-
-     Y de paso queda segundo en el orden del tabulador, justo detrás del
-     botón del menú y en el mismo orden en que se ven: quien llega con el
-     teclado o con un lector de pantalla se topa con los ajustes de
-     accesibilidad al principio, que es donde hacen falta. -->
 <button class="ajustes-abrir" type="button" data-ajustes-abrir
         aria-haspopup="dialog">
     <span class="ajustes-abrir-aa" aria-hidden="true">Aa</span>
@@ -45,7 +21,6 @@
     <div class="sidebar-top">
         <nav>
         <a href="/index.html">home</a>
-            <!-- MIS MOVIDAS -->
             <div class="nav-group">
                 <button class="nav-toggle" type="button" aria-expanded="false">
                     <span>mis movidas</span>
@@ -58,35 +33,18 @@
                 </div>
             </div>
 
-            <!-- BLOG -->
             <div class="nav-group">
                 <button class="nav-toggle" type="button" aria-expanded="false">
                     <span>blog</span>
                     <span class="arrow" aria-hidden="true">+</span>
                 </button>
 
-                <!-- Los años los pone y los quita solo
-                     herramientas/3-generadores/generar-archivo.py al publicar: en
-                     cuanto escribas la primera entrada, 2026 vuelve a
-                     aparecer aquí sin que tengas que tocar nada. -->
                 <div class="submenu">
                     <a href="/web/blog/diario.html">diario</a>
                     <a href="/web/blog/2026/index_2026.html">2026</a>
                 </div>
             </div>
 
-            <!-- ROLEITO -->
-            <!-- Todo lo de jugar, junto: el cuaderno de las partidas y el
-                 mundo donde pasan. Son dos cosas distintas —una es lo que
-                 pasó y la otra es dónde pasa— pero se vienen a buscar a la
-                 vez, así que cuelgan del mismo sitio.
-
-                 OJO: esto es un grupo DENTRO de otro grupo. El menú
-                 aguanta dos niveles sin tocar nada (el script abre todos
-                 los padres de la página en la que estás y el CSS usa el
-                 selector de hijo directo), pero más de dos ya sería un
-                 menú en el que hay que buscar, y entonces mejor una
-                 página. -->
             <div class="nav-group">
                 <button class="nav-toggle" type="button" aria-expanded="false">
                     <span>roleito</span>
@@ -94,15 +52,6 @@
                 </button>
 
                 <div class="submenu">
-                    <!-- NOTAS DE ROL
-                         Un cuaderno de partidas, por campañas. PARA AÑADIR
-                         UNA: una línea más aquí dentro, apuntando a su
-                         index_<campaña>.html.
-
-                         Y SOLO ÉSA. La página de npcs de la campaña NO va
-                         en el menú a propósito: no es una sección del
-                         sitio, es una parte de la campaña, y se entra
-                         desde su índice. -->
                     <div class="nav-group">
                         <button class="nav-toggle" type="button" aria-expanded="false">
                             <span>notas de rol</span>
@@ -114,19 +63,10 @@
                         </div>
                     </div>
 
-                    <!-- LA WIKI
-                         No se escribe en el sitio: se escribe en
-                         Chronicler, en la carpeta wiki/, y se pasa a la
-                         web con
-                         python herramientas/3-generadores/generar-mundo.py -->
                     <a href="/web/wiki/index_wiki.html">wiki cralëa</a>
                 </div>
             </div>
 
-            <!-- MI RINCÓN -->
-            <!-- Lo que soy y lo que me gusta, junto: la ficha, los
-                 gatos y las recomendaciones. "mis movidas" es lo que
-                 hago; esto es lo otro. -->
             <div class="nav-group">
                 <button class="nav-toggle" type="button" aria-expanded="false">
                     <span>mi rincón</span>
@@ -145,15 +85,6 @@
         <a href="/web/accesibilidad/accesibilidad.html">accesibilidad</a>
         </nav>
 
-        <!-- ==== BUSCAR, DESDE CUALQUIER PÁGINA ====
-             Va dentro del menú y no flotando por ahí: es navegación, y
-             es donde alguien va a buscarlo. Abre una ventana con el
-             campo en vez de llevar el campo aquí metido, por sitio: en
-             el cajón del móvil, una caja de texto más entre los enlaces
-             estorba a quien solo quiere ir a una sección.
-
-             aria-haspopup="dialog" avisa de que esto no lleva a ninguna
-             parte: abre algo encima. -->
         <button class="buscar-lupa-boton" type="button" data-buscar-lupa
                 aria-haspopup="dialog">
             <span class="buscar-lupa" aria-hidden="true"></span>
@@ -161,11 +92,6 @@
         </button>
     </div>
 
-    <!-- GATÍN ALEATORIO -->
-    <!-- Nace oculto: lo enseña scripts/componentes/gatin-random.js solo si
-         consigue leer el listado de fotos. Si falla (sin conexión, o
-         todavía no hay fotos subidas) se queda escondido en vez de
-         dejar un hueco vacío en el menú. -->
     <div class="gatin-random" data-gatin-random hidden>
         <div class="gatin-random-header">
             <h2>gatin_random.exe</h2>
@@ -176,16 +102,6 @@
 
 </aside>
 
-<!-- ==== LA VENTANA DE BUSCAR ====
-     Un <dialog> de los de verdad, como el de accesibilidad: con
-     showModal() el navegador oscurece el fondo, atrapa el tabulador
-     dentro, cierra con Escape, deja inerte el resto de la página para
-     los lectores y devuelve el foco al botón al cerrar.
-
-     Dentro va el MISMO formulario que la portada, con su action y su
-     method="get": al enviarlo se va a /web/buscar/ con la palabra en la
-     dirección. Aquí tampoco se carga ningún listado: esta ventana no
-     busca, manda a buscar. Lo abre scripts/componentes/buscar-lupa.js. -->
 <dialog class="buscar-modal" data-buscar-modal aria-labelledby="buscar-modal-titulo">
     <div class="ajustes-barra">
         <h2 id="buscar-modal-titulo">buscador.exe</h2>
@@ -220,17 +136,6 @@
     </div>
 </dialog>
 
-<!-- ==== LA VENTANA DE ACCESIBILIDAD ====
-     Un <dialog> de los de verdad, abierto con showModal(): el navegador
-     se encarga solo de oscurecer el fondo (::backdrop), de atrapar el
-     tabulador dentro, de cerrar con Escape y de dejar inerte el resto de
-     la página. Todo eso a mano serían cien líneas de JavaScript y media
-     docena de formas de hacerlo mal.
-
-     La barra de arriba se parece a las de las demás ventanas falsas pero
-     NO lleva su clase: aquí el ✕ cierra de verdad, porque en una ventana
-     que se abre encima es lo que todo el mundo espera. En el resto del
-     sitio sigue siendo una broma con brillos. -->
 <dialog class="ajustes" data-ajustes aria-labelledby="ajustes-titulo">
     <div class="ajustes-barra">
         <h2 id="ajustes-titulo">accesibilidad.cfg</h2>
@@ -244,28 +149,6 @@
     </div>
 
     <div class="ajustes-cuerpo">
-        <!-- AQUÍ DENTRO VAN SOLO LOS MANDOS, una fila por ajuste.
-             La muestra (ejemplo.txt), la nota del final y la caja que
-             agrupa estas filas NO están escritas aquí: las monta
-             scripts/componentes/ajustes.js nada más arrancar.
-
-             No es un capricho. Este fragmento se pide aparte y se guarda
-             en la caché del navegador, y basta con que arriba quede una
-             copia vieja —o con que al copiar la carpeta se quede sin
-             cambiar uno solo de los archivos— para que falte justo el
-             trozo del final y el panel salga a medias sin que nada
-             parezca roto. Montándolo desde el script, el panel llega
-             entero o no llega. -->
-        <!-- ---- TAMAÑO DEL TEXTO ----
-             Un <input type="range"> de los de serie y no botones ni nada
-             inventado: ya viene con las flechas del teclado, con Inicio y
-             Fin, se anuncia solo a los lectores de pantalla y lo
-             entienden hasta los navegadores más viejos. Las cinco marcas
-             del carril salen del <datalist>.
-             El porcentaje de al lado lleva role="status" para que al
-             moverlo se lea solo: si no, el único aviso de que ha pasado
-             algo es que la letra cambia de tamaño, y quien lo mueve
-             puede no estar viéndola. -->
         <div class="ajustes-fila">
             <label class="ajustes-nombre" for="ajustes-tamano">tamaño del texto</label>
             <div class="ajustes-deslizador">
@@ -287,7 +170,6 @@
             </p>
         </div>
 
-        <!-- ---- SEPARACIÓN ENTRE LÍNEAS ---- -->
         <div class="ajustes-fila">
             <p class="ajustes-nombre" id="ajustes-interlineado-nombre">separación entre líneas</p>
             <div class="ajustes-mandos" role="group" aria-labelledby="ajustes-interlineado-nombre">
@@ -297,7 +179,6 @@
             </div>
         </div>
 
-        <!-- ---- LA LETRA ---- -->
         <div class="ajustes-fila">
             <p class="ajustes-nombre" id="ajustes-letra-nombre">la letra</p>
             <div class="ajustes-mandos" role="group" aria-labelledby="ajustes-letra-nombre">
@@ -306,12 +187,6 @@
             </div>
         </div>
 
-        <!-- ---- VELOCIDAD DE LA VOZ ----
-             De la lectura en voz alta de las entradas. Se queda aquí
-             aunque la página que estés mirando no tenga nada que leer:
-             es un ajuste tuyo, como los de arriba, y buscarlo solo
-             dentro de una entrada sería más raro que encontrarlo de
-             más. Lo lee scripts/componentes/leer-en-voz.js. -->
         <div class="ajustes-fila">
             <p class="ajustes-nombre" id="ajustes-voz-nombre">velocidad de la voz</p>
             <div class="ajustes-mandos" role="group" aria-labelledby="ajustes-voz-nombre">
@@ -321,22 +196,8 @@
             </div>
         </div>
 
-        <!-- ---- EL TEMA ----
-             Cuatro botones y no dos que alternen: con cuatro opciones,
-             alternar obliga a adivinar a dónde te lleva cada pulsación.
-             Los lleva scripts/tema.js por el data-tema. -->
         <div class="ajustes-fila">
             <p class="ajustes-nombre" id="ajustes-tema-nombre">color de tema</p>
-            <!-- Cada botón va pintado con los colores de SU tema (los pone
-                 estilos/componentes/ajustes.css a partir del data-tema), para
-                 saber lo que te vas a encontrar antes de pulsarlo. El elegido
-                 se marca con un halo del color del tema que esté puesto, que
-                 es lo único que no puede confundirse con la muestra.
-
-                 EN DOS GRUPOS, y no por orden ni por gusto: arriba los que
-                 están medidos para leer con ellos todo el día, abajo los que
-                 son un disfraz. Cada grupo tiene su propio título, que
-                 además es su nombre para quien escucha la página. -->
             <p class="ajustes-grupo-titulo" id="ajustes-tema-leer">para leer</p>
             <div class="ajustes-mandos ajustes-temas" role="group" aria-labelledby="ajustes-tema-nombre ajustes-tema-leer">
                 <button class="ajustes-opcion" type="button" data-tema="oscuro" aria-pressed="true">
@@ -370,15 +231,6 @@
             </p>
         </div>
 
-        <!-- ---- EFECTOS VISUALES ----
-             Los adornos que no tienen que ver con leer mejor sino con
-             cómo se ve la web. Van aquí, al final y juntos, para que se
-             distingan de los mandos de arriba, que sí son de lectura.
-
-             El del brillito es el MISMO botón de antes, con su id
-             intacto: se lo queda scripts/componentes/rastro-cursor.js
-             buscándolo por id cuando se carga este fragmento, así que al
-             mudarlo aquí no hubo que tocar ni una línea de ese archivo. -->
         <div class="ajustes-fila">
             <p class="ajustes-nombre">efectos visuales</p>
             <div class="ajustes-mandos ajustes-mandos-anchos">
@@ -393,20 +245,6 @@
             </div>
         </div>
 
-        <!-- ---- MOVIMIENTO ----
-             Para dejar quieto todo lo que se mueve: el parpadeo del
-             filtro CRT, el cursor de los temas de terminal, el del
-             gatete del 404, la cinta de frases y las transiciones.
-
-             Ya se respeta lo que pida el sistema (prefers-reduced-motion,
-             en 27 sitios del CSS) y eso no cambia. Pero ese ajuste es de
-             todo el aparato: hay quien no lo tiene puesto, o no sabe que
-             existe, y aun así un parpadeo le da dolor de cabeza aquí.
-             Esto es lo mismo, a mano y solo en esta web.
-
-             Al revés no funciona: si el sistema pide menos movimiento,
-             poner "normal" aquí no lo devuelve. Manda el aparato.
-             Lo para estilos/componentes/sin-movimiento.css. -->
         <div class="ajustes-fila">
             <p class="ajustes-nombre" id="ajustes-movimiento-nombre">animaciones</p>
             <div class="ajustes-mandos" role="group" aria-labelledby="ajustes-movimiento-nombre">

@@ -1,0 +1,217 @@
+/* Copia sin comentarios. La escribe actualizar-cabeceras.py: no se edita.
+   fuente: /estilos/paginas/mapa.css
+*/
+.mapa-page {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    justify-content: flex-start;
+    padding: 36px 4% 48px;
+}
+.mapa-page .home-title {
+    flex: 0 0 auto;
+    font-size: clamp(2.25rem, 5vw, 4rem);
+    letter-spacing: -2px;
+}
+.mapa-intro a {
+    color: var(--yellow);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+}
+.mapa-intro a:hover {
+    text-decoration-thickness: 2px;
+}
+.mapa-intro {
+    max-width: 62ch;
+    margin: 18px 0 24px;
+    color: var(--white);
+    font-size: 0.9375rem;
+    line-height: 1.8;
+}
+.mapa-page .buscar {
+    margin-bottom: 14px;
+}
+.mapa-cuenta {
+    margin: 0 0 12px;
+    color: var(--muted);
+    font-family: var(--fuente-mono);
+    font-size: 0.75rem;
+    letter-spacing: 0.5px;
+}
+.mapa-cuenta [data-mapa-orden] {
+    color: var(--yellow);
+}
+.mapa-caja {
+    max-width: 900px;
+}
+.mapa-scroll {
+    overflow-x: auto;
+    padding: 16px;
+    background: var(--purple-lighter);
+    border: 3px solid var(--yellow);
+    box-shadow: 6px 6px 0 var(--yellow);
+}
+.mapa-scroll:focus-visible {
+    outline: 2px solid var(--yellow);
+    outline-offset: 3px;
+}
+.mapa-tabla {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.9375rem;
+}
+.mapa-tabla th {
+    padding: 0 12px 10px 0;
+    border-bottom: 2px solid var(--yellow);
+    color: var(--yellow);
+    font-family: var(--fuente-mono);
+    font-size: 0.75rem;
+    font-weight: 500;
+    text-align: left;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    white-space: nowrap;
+}
+.mapa-ordenar {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 5px 8px;
+    border: 2px solid var(--yellow);
+    background: transparent;
+    color: var(--yellow);
+    font: inherit;
+    letter-spacing: inherit;
+    text-transform: inherit;
+    transition: color 0.15s linear, background-color 0.15s linear;
+}
+.mapa-ordenar:hover {
+    background: var(--yellow);
+    color: var(--yellow-contrast);
+}
+.mapa-ordenar:focus-visible {
+    outline: 2px solid var(--yellow);
+    outline-offset: 3px;
+}
+.mapa-tabla th:not([aria-sort="none"]) .mapa-ordenar {
+    background: var(--yellow);
+    color: var(--yellow-contrast);
+}
+.mapa-flecha {
+    display: inline-block;
+    width: 0.9em;
+    text-align: center;
+}
+.mapa-tabla th[aria-sort="ascending"] .mapa-flecha::before {
+    content: "\2191";
+}
+.mapa-tabla th[aria-sort="descending"] .mapa-flecha::before {
+    content: "\2193";
+}
+.mapa-tabla td {
+    padding: 9px 12px 9px 8px;
+    border-bottom: 1px solid var(--border);
+    color: var(--white);
+    vertical-align: baseline;
+}
+.mapa-tabla tr:last-child td {
+    border-bottom: 0;
+}
+.mapa-pagina a {
+    color: var(--white);
+    text-decoration: none;
+}
+.mapa-pagina a:hover,
+.mapa-pagina a:focus-visible {
+    color: var(--yellow);
+    text-decoration: underline;
+}
+.mapa-pagina a:focus-visible {
+    outline: 2px solid var(--yellow);
+    outline-offset: 3px;
+}
+.mapa-seccion,
+.mapa-fecha,
+.mapa-actualizada {
+    color: var(--muted);
+    font-family: var(--fuente-mono);
+    font-size: 0.75rem;
+    white-space: nowrap;
+}
+@media (max-width: 860px) {
+    .mapa-page {
+        padding: 32px 6% 40px;
+    }
+    .mapa-caja {
+        max-width: none;
+    }
+}
+@media (max-width: 700px) {
+    .mapa-tabla,
+    .mapa-tabla tbody {
+        display: block;
+        width: 100%;
+    }
+    .mapa-tabla thead {
+        display: block;
+    }
+    .mapa-tabla thead tr {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 5px;
+        padding: 0 0 12px;
+        border-bottom: 2px solid var(--yellow);
+    }
+    .mapa-ordenar {
+        padding: 5px 6px;
+    }
+    .mapa-tabla th {
+        padding: 0;
+        border: 0;
+        white-space: normal;
+    }
+    .mapa-tabla tr[hidden] {
+        display: none;
+    }
+    .mapa-tabla tr {
+        display: grid;
+        grid-template-columns: minmax(0, max-content) minmax(0, 1fr);
+        width: 100%;
+        gap: 3px 0;
+        padding: 10px 0;
+        border-bottom: 1px solid var(--border);
+    }
+    .mapa-pagina {
+        grid-column: 1 / -1;
+        min-width: 0;
+    }
+    .mapa-tabla td.mapa-actualizada {
+        grid-column: 1 / -1;
+    }
+    .mapa-tabla td.mapa-actualizada-sin {
+        display: none;
+    }
+    .mapa-actualizada::before {
+        content: "actualizada: ";
+    }
+    .mapa-tabla tbody tr:last-child {
+        border-bottom: 0;
+    }
+    .mapa-tabla td {
+        display: block;
+        padding: 0;
+        border: 0;
+    }
+    .mapa-fecha::before {
+        content: "·";
+        margin: 0 6px;
+    }
+}
+@media (max-width: 360px) {
+    .mapa-tabla tr {
+        grid-template-columns: minmax(0, 1fr);
+    }
+    .mapa-fecha::before {
+        content: none;
+    }
+}

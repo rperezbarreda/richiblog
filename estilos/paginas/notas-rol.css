@@ -1800,7 +1800,14 @@ body:has(.cuaderno-page) main {
    quedaba descolgada.
    Mismo aspecto que el botón de volver que tiene al lado: en esa barra
    la tinta es --yellow-contrast, no --yellow. */
+/* Viene escrito en la página (ver montarPlegarTodo en cuaderno.js), pero
+   solo hace algo con JavaScript: sin él no se enseña. Y en un navegador
+   sin <details> tampoco, que ahí no hay nada que plegar. */
 .cuaderno-plegar-todo {
+    display: none;
+}
+
+html.js:not([data-sin-plegar]) .cuaderno-plegar-todo {
     display: inline-flex;
     align-items: center;
     gap: 8px;
@@ -2469,24 +2476,13 @@ body:has(.cuaderno-page) main {
     text-underline-offset: 0.2em;
 }
 
-/* El nombre es un botón (abre su ficha), pero se tiene que seguir leyendo
-   como el nombre que era: la letra, el color y la negrita del <strong> que
-   lo lleva. */
-.cuaderno-npc-boton {
-    display: inline;
-    margin: 0;
-    padding: 0;
-    border: 0;
-    background: none;
-    color: inherit;
-    font: inherit;
-    letter-spacing: inherit;
-    text-align: inherit;
-    text-decoration: none;
+/* El nombre es un botón (role="button", abre su ficha): la mano al pasar,
+   y el recuadro del foco al llegar con el teclado. */
+.cuaderno-npc[role="button"] {
     cursor: pointer;
 }
 
-.cuaderno-npc-boton:focus-visible {
+.cuaderno-npc[role="button"]:focus-visible {
     outline: 2px solid var(--yellow);
     outline-offset: 2px;
 }

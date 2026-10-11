@@ -114,7 +114,7 @@ APARTADOS = [
          "Pegas la ruta y la deja en su carpeta, en WebP y a su tamaño."),
         ("Preparar las imágenes antes de subirlas",
          "2-imagenes/optimizar-imagenes.py", [],
-         "Pasa imagenes/ a WebP, las encoge y les quita los datos de dentro."),
+         "Solo lo nuevo: a WebP, a su tamaño y sin los datos del móvil."),
         ("Sacar los tamaños del dibujo de la portada",
          "2-imagenes/tamanos-portada.py", [],
          "Solo si has cambiado el dibujo de la portada."),

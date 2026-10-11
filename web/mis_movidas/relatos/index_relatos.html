@@ -2,18 +2,11 @@
 <html lang="es">
   <head>
     <meta charset="UTF-8">
-    <!-- ==== TEMA ====
-         El tema elegido, puesto antes del primer pintado para que no haya
-         fogonazo. Lo escribe la herramienta leyendo scripts/tema.js. -->
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-WzJfmZ3zA0hDtnR6cKyKt1o+8g4NfGJTELgMCUrrBFw=' 'sha256-oTE6cjgemXW7aRTQClslYZ63TgpgQ/lGSr9GtNhYyhs='; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self' https://script.google.com https://script.googleusercontent.com; object-src 'none'; base-uri 'self'; form-action 'self'">
+    <!-- ==== TEMA ==== -->
     <meta name="theme-color" content="#12091c">
     <script>
       (function () {
-        // Una marca de que el JavaScript funciona, puesta ANTES del primer
-        // pintado. Sirve para que una hoja de estilo pueda decir "esto
-        // solo si hay JavaScript": un spoiler tapado, por ejemplo, que sin
-        // JavaScript sería texto perdido y con él se destapa al pulsarlo.
-        // Aquí y no en otro sitio porque es el único script que corre
-        // antes de pintar: puesto más tarde habría fogonazo.
         document.documentElement.classList.add("js");
         try {
           var temas = {
@@ -43,9 +36,6 @@
     </script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Relatos · Mis movidas · El Blog de Richi</title>
-    <!-- Cómo se ve el enlace al compartirlo (Bluesky, Discord, Ko-fi…).
-         Sin esto solo sale la URL pelada, sin título ni imagen. Las rutas
-         van absolutas a propósito: las redes no resuelven las relativas. -->
     <meta name="description" content="Relatos cortos que voy escribiendo, al margen de mis partidas de rol.">
     <link rel="canonical" href="https://richi.blog/web/mis_movidas/relatos/index_relatos.html">
     <meta property="og:type" content="website">
@@ -60,72 +50,44 @@
     <meta property="og:image:alt" content="El Blog de Richi — ilustración de Richi sobre fondo morado">
     <meta name="twitter:card" content="summary_large_image">
     <link rel="icon" type="image/x-icon" href="/imagenes/favicon.ico">
-    <!-- La única fuente que se precarga. Medido con la red frenada: sin esto el
-         navegador no la descubre hasta parsear el CSS (~800 ms) y el texto baila al
-         cambiar de tipografía; así llega antes del primer pintado y no se nota el
-         cambio. Precargar más fuentes empeoraba el primer pintado 150-210 ms, porque
-         compiten por el ancho de banda con lo que hace falta para pintar. -->
     <link rel="preload" href="/tipografias/space-grotesk-400.woff2" as="font" type="font/woff2" crossorigin>
     <link rel="alternate" type="application/rss+xml" title="El Blog de Richi — blog, relatos y rol" href="/blog/rss.xml">
-    <!-- ==== ADELANTO DEL MENÚ ====
-         El menú, pedido LO PRIMERO para que no llegue tarde. Lo escribe
-         la herramienta; el porqué está en ella. -->
-    <script>window.adelantoDeFragmentos={};try{window.adelantoDeFragmentos["/fragmentos/barra-lateral.html"]=fetch("/fragmentos/barra-lateral.html?v=f81d2b47").then(function(r){return r.ok?r.text():null}).catch(function(){return null})}catch(e){}</script>
-    <!-- ==== CSS ====
-         La escribe herramientas/3-generadores/actualizar-cabeceras.py.
-         No la toques a mano (el porqué, en esa herramienta). -->
-    <link rel="stylesheet" href="/estilos/paquete-comun.css?v=9ae9d5fe">
-    <link rel="stylesheet" href="/estilos/paginas/relatos.css?v=cf99bed4">
-    <link rel="stylesheet" href="/estilos/paginas/relatos.responsive.css?v=45d2372b">
-    <link rel="stylesheet" href="/estilos/componentes/filtros.css?v=ae4abb2d">
-    <link rel="stylesheet" href="/estilos/componentes/filtros.responsive.css?v=04de297b">
-    <link rel="stylesheet" href="/estilos/componentes/buscador.css?v=b303a8b2">
-    <link rel="stylesheet" href="/estilos/paginas/reto.css?v=9e17bb7d">
-    <link rel="stylesheet" href="/estilos/paginas/reto.responsive.css?v=7da46ec8">
-    <link rel="stylesheet" href="/estilos/componentes/barra-lateral.css?v=e510b648">
-    <link rel="stylesheet" href="/estilos/componentes/barra-lateral.responsive.css?v=45e554fd">
-    <link rel="stylesheet" href="/estilos/paginas/buscar.css?v=692b762d">
-    <link rel="stylesheet" href="/estilos/paquete-cierre.css?v=7d910eba">
+    <!-- ==== ADELANTO DEL MENÚ ==== -->
+    <script>window.adelantoDeFragmentos={};try{window.adelantoDeFragmentos["/fragmentos/barra-lateral.html"]=fetch("/fragmentos/barra-lateral.html?v=50a31cd5").then(function(r){return r.ok?r.text():null}).catch(function(){return null})}catch(e){}</script>
+    <!-- ==== CSS ==== -->
+    <link rel="stylesheet" href="/estilos/paquete-comun.css?v=a7bebe47">
+    <link rel="stylesheet" href="/ligero/estilos/paginas/relatos.css?v=a91aa6be">
+    <link rel="stylesheet" href="/ligero/estilos/paginas/relatos.responsive.css?v=a6b1d4ad">
+    <link rel="stylesheet" href="/ligero/estilos/componentes/filtros.css?v=64cb8685">
+    <link rel="stylesheet" href="/ligero/estilos/componentes/filtros.responsive.css?v=f999e952">
+    <link rel="stylesheet" href="/ligero/estilos/componentes/buscador.css?v=8425040e">
+    <link rel="stylesheet" href="/ligero/estilos/paginas/reto.css?v=e55bbe5c">
+    <link rel="stylesheet" href="/ligero/estilos/paginas/reto.responsive.css?v=27bbe0d1">
+    <link rel="stylesheet" href="/ligero/estilos/componentes/barra-lateral.css?v=ae1f7bab">
+    <link rel="stylesheet" href="/ligero/estilos/componentes/barra-lateral.responsive.css?v=36f396a1">
+    <link rel="stylesheet" href="/ligero/estilos/paginas/buscar.css?v=e32b461e">
+    <link rel="stylesheet" href="/estilos/paquete-cierre.css?v=3c277d98">
     <!-- ==== fin del CSS ==== -->
-    <script src="/scripts/cargador-scripts.js?v=906f71e7"></script>
-    <!-- ==== JS ====
-         Igual que el CSS: la escribe la herramienta, a partir de
-         scripts_de(). Van con defer y en este orden, que importa. -->
-    <script defer src="/scripts/paquete-comun.js?v=9a077389"></script>
-    <script defer src="/scripts/componentes/buscador.js?v=e2007b48"></script>
-    <script defer src="/scripts/componentes/filtros.js?v=a9f9dfd8"></script>
-    <script defer src="/scripts/paginas/relatos.js?v=8f64f063"></script>
-    <script defer src="/scripts/paginas/reto.js?v=c1409057"></script>
+    <script src="/ligero/scripts/cargador-scripts.js?v=04752c83"></script>
+    <!-- ==== JS ==== -->
+    <script defer src="/scripts/paquete-comun.js?v=c9aa4d63"></script>
+    <script defer src="/ligero/scripts/componentes/buscador.js?v=4107f902"></script>
+    <script defer src="/ligero/scripts/componentes/filtros.js?v=f742f6df"></script>
+    <script defer src="/ligero/scripts/paginas/relatos.js?v=a90e948a"></script>
+    <script defer src="/ligero/scripts/paginas/reto.js?v=0ebca640"></script>
     <!-- ==== fin del JS ==== -->
   </head>
 <body>
-    <!-- ==== SIDEBAR / NAVEGACIÓN ==== -->
     <a class="skip-link" href="#main-content">Saltar al contenido</a>
     <div id="sidebar-container"></div>
-    <!-- ==== CONTENIDO PRINCIPAL ==== -->
 
     <main id="main-content">
-        <!-- ==== HOME ==== -->
         <section id="home" class="home relatos-page">
             <h1 class="home-title">
                 <em>relatos</em>
             </h1>
             <p class="relatos-page-intro">Relatos cortos que voy escribiendo, al margen de mis partidas de rol. Cada uno se lee entero en su propia página, como las entradas del blog.</p>
 
-            <!-- El buscador. Filtra mientras se escribe lo que ya está
-                 en la página, sin pedir nada al servidor ni usar
-                 ninguna librería. Mira el título, la fecha y la etiqueta de cada relato, sin
-                 tildes ni mayúsculas.
-                 Lo monta scripts/componentes/buscador.js —el mismo del
-                 archivo del blog— y lo que mira se le dice aquí, en
-                 los data-buscar-*. Se suma al filtro de abajo: con una
-                 categoría puesta y algo escrito, se piden las dos
-                 cosas a la vez.
-
-                 Es un <form> para que en el móvil el teclado saque la
-                 tecla de buscar y para que los lectores de pantalla lo
-                 anuncien como un buscador (role="search"); el envío se
-                 cancela, porque no hay nada que enviar. -->
             <form class="buscar" role="search" data-buscar
                   data-buscar-items="#relatos-list .entry-preview"
                   data-buscar-en=".entry-preview-title, .entry-preview-date, .entry-tag"
@@ -136,36 +98,20 @@
                            name="buscar" placeholder="título, etiqueta o fecha"
                            autocomplete="off" spellcheck="false"
                            aria-describedby="buscar-cuenta">
-                    <!-- El ✕ del navegador en un type="search" no sale en
-                         todos (ni en Firefox, ni en el móvil), así que el
-                         botón de limpiar es nuestro. Solo aparece cuando
-                         hay algo escrito. -->
                     <button class="buscar-limpiar" type="button" data-buscar-limpiar hidden>
                         <span aria-hidden="true">✕</span>
                         <span class="visually-hidden">Limpiar la búsqueda</span>
                     </button>
                 </div>
-                <!-- Cuántos han quedado. role="status" para que un lector
-                     de pantalla lo diga al terminar de escribir, sin
-                     interrumpir cada letra. -->
                 <p class="buscar-cuenta" id="buscar-cuenta" role="status"
                    data-buscar-cuenta></p>
             </form>
 
-            <!-- Igual que en el portfolio de rol: los botones los pone
-                 scripts/componentes/filtros.js con las subcategorías que
-                 traigan los relatos, más las declaradas aquí (para que
-                 una que todavía no tenga nada siga teniendo su botón).
-                 Publicar un relato con una subcategoría nueva la añade
-                 sola, sin tocar esta página. -->
             <div class="filtros" data-filtros
                  data-filtros-items="#relatos-list .entry-preview"
                  data-filtros-categorias="microrelato, relato corto, retos">
                 <span class="filtros-label" id="filtros-label">filtrar:</span>
 
-                <!-- Este botón solo se ve en móvil (en escritorio lo
-                     esconde el CSS): ahí la fila de categorías no cabe
-                     y se colapsa en una lista flotante. -->
                 <button class="filtros-toggle" type="button" data-filtros-toggle
                         aria-expanded="false" aria-controls="filtros-lista">
                     <span class="visually-hidden">Filtrando por: </span>
@@ -175,31 +121,12 @@
 
                 <div class="filtros-list" id="filtros-lista" role="group" aria-labelledby="filtros-label"></div>
 
-                <!-- El feed lleva también los relatos y el portfolio de
-                     rol, así que tiene sentido ofrecerlo aquí. Va dentro
-                     de la fila de filtros para no gastar otra línea de
-                     alto. -->
                 <a class="filtros-rss" href="/blog/rss.xml"><abbr title="Really Simple Syndication: un archivo que avisa a tu lector de noticias cuando publico algo">rss</abbr> <span aria-hidden="true">→</span></a>
 
             </div>
 
-            <!-- Las tarjetas de los retos. Salen SOLO al pulsar el
-                 filtro «retos»: ahí es donde tiene sentido contar de
-                 qué va cada uno, con su descripción entera. En «todas»
-                 el reto ya aparece en el listado de abajo como una
-                 entrada más.
-                 Las monta scripts/paginas/relatos.js, una por cada
-                 reto que haya en su lista RETOS_URLS. -->
             <div class="reto-avisos" data-reto-avisos hidden></div>
 
-            <!-- Un único listado, sin dividir por año/mes: relatos.js
-                 lo rellena solo desde datos/mis_movidas/mis-movidas.json (el mismo
-                 fichero que también alimenta la portada), quedándose
-                 con las entradas de categoría "relatos". Y ese JSON
-                 sale de las propias páginas de los relatos, así que
-                 para publicar uno se usa
-                 herramientas/1-publicar/nuevo.py y no hay que tocar nada
-                 de aquí. -->
             <div class="relatos-list-card">
                 <div class="recent-entries-header">
                     <h2>relatos.lst</h2>
@@ -209,8 +136,6 @@
                     <ul id="relatos-list" class="entries-list" data-relatos-list>
                         <li class="entries-loading">Cargando relatos…</li>
                     </ul>
-                    <!-- Lo rellena filtros.js cuando la subcategoría
-                         elegida no tiene ningún relato todavía. -->
                     <p class="filtros-vacio" data-filtros-vacio role="status" hidden></p>
                 </div>
             </div>

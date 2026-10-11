@@ -1,0 +1,87 @@
+/* Copia sin comentarios. La escribe actualizar-cabeceras.py: no se edita.
+   fuente: /estilos/componentes/filtros.responsive.css
+*/
+@media (max-width: 860px) {
+    .filtros {
+        position: relative;
+    }
+    .filtros-toggle {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        flex: 1 1 auto;
+        max-width: 240px;
+        padding: 9px 13px;
+        border: 2px solid var(--yellow);
+        background: transparent;
+        color: var(--yellow);
+        font-family: var(--fuente-mono);
+        font-size: 0.75rem;
+        font-weight: 500;
+        text-align: left;
+        text-transform: lowercase;
+        letter-spacing: 1px;
+        cursor: pointer;
+    }
+    .filtros-toggle:focus-visible {
+        outline: 2px solid var(--yellow);
+        outline-offset: 3px;
+    }
+    .filtros-toggle-label {
+        overflow: hidden;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+    }
+    .filtros-toggle-arrow {
+        flex-shrink: 0;
+        font-size: 0.75rem;
+        line-height: 1;
+        transition: transform 0.15s linear;
+    }
+    .filtros.is-open .filtros-toggle-arrow {
+        transform: rotate(180deg);
+    }
+    .filtros-list {
+        display: none;
+        position: absolute;
+        top: 100%;
+        right: 0;
+        z-index: 20;
+        flex-direction: column;
+        flex-wrap: nowrap;
+        gap: 0;
+        width: 100%;
+        max-width: 240px;
+        margin-top: 4px;
+        border: 2px solid var(--yellow);
+        background: var(--purple-lighter);
+        box-shadow: 5px 5px 0 var(--yellow);
+    }
+    .filtros.is-open .filtros-list {
+        display: flex;
+    }
+    .filtro-btn {
+        width: 100%;
+        padding: 10px 14px;
+        border: 0;
+        border-bottom: 1px solid var(--border);
+        text-align: left;
+    }
+    .filtro-btn:last-child {
+        border-bottom: none;
+    }
+    .filtro-btn:focus-visible {
+        outline: 2px solid var(--yellow);
+        outline-offset: -4px;
+    }
+    .filtros-rss {
+        margin-left: 0;
+        padding: 9px 12px;
+    }
+}
+@media (prefers-reduced-motion: reduce) {
+    .filtros-toggle-arrow {
+        transition: none;
+    }
+}

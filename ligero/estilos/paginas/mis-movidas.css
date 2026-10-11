@@ -1,0 +1,169 @@
+/* Copia sin comentarios. La escribe actualizar-cabeceras.py: no se edita.
+   fuente: /estilos/paginas/mis-movidas.css
+*/
+.rol-page {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    justify-content: flex-start;
+    gap: 16px;
+    overflow: hidden;
+    padding: 24px 4%;
+}
+.rol-page-cabecera,
+.rol-page .filtros {
+    flex-shrink: 0;
+}
+.rol-page .home-title {
+    margin: 0;
+}
+.rol-page-cabecera {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 16px 32px;
+}
+.rol-page-titular {
+    flex: 1 1 380px;
+    min-width: 0;
+}
+.rol-page-intro {
+    margin: 8px 0 0;
+    max-width: 640px;
+    color: var(--muted);
+    font-size: 1rem;
+    line-height: 1.6;
+}
+.rol-page-intro a {
+    color: var(--yellow);
+}
+.rol-page-intro a:hover,
+.rol-page-intro a:focus-visible {
+    text-decoration: underline;
+}
+.rol-page-intro a:focus-visible {
+    outline: 2px solid var(--yellow);
+    outline-offset: 3px;
+}
+.rol-page-aviso {
+    flex: 1 1 340px;
+    max-width: 560px;
+    padding: 16px;
+    background: var(--purple-lighter);
+    border: 3px solid var(--yellow);
+    box-shadow: 6px 6px 0 var(--yellow);
+}
+.rol-page-disclaimer {
+    margin: 0;
+    color: var(--muted);
+    font-size: 0.875rem;
+    line-height: 1.6;
+}
+.rol-page-disclaimer strong {
+    color: var(--yellow);
+    font-weight: 500;
+}
+.portfolio-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(470px, 1fr));
+    grid-auto-rows: max-content;
+    align-content: start;
+    max-width: 1580px;
+    gap: 24px;
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    padding: 4px 10px 10px 0;
+}
+.portfolio-card[hidden] {
+    display: none;
+}
+.portfolio-grid .filtros-vacio {
+    grid-column: 1 / -1;
+}
+.portfolio-card {
+    display: grid;
+    grid-template-columns: 200px minmax(0, 1fr);
+    max-width: 760px;
+    background: var(--purple-lighter);
+    border: 3px solid var(--yellow);
+    box-shadow: 6px 6px 0 var(--yellow);
+    overflow: hidden;
+}
+.portfolio-card-photo {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-right: 3px solid var(--yellow);
+    background: var(--purple);
+}
+.portfolio-card-info {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    padding: 20px 24px;
+}
+.portfolio-card-title {
+    margin: 0 0 4px;
+    color: var(--yellow);
+    font-family: var(--fuente-texto);
+    font-style: italic;
+    font-weight: 500;
+    font-size: 1.25rem;
+    line-height: 1.25;
+}
+.portfolio-card-system {
+    margin: 0 0 12px;
+    color: var(--muted);
+    font-family: var(--fuente-mono);
+    font-size: 0.6875rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+.portfolio-card-desc {
+    margin: 0 0 16px;
+    color: var(--white);
+    font-size: 0.8125rem;
+    line-height: 1.6;
+}
+.portfolio-card-actions {
+    margin-top: auto;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px;
+}
+.portfolio-card-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 16px;
+    border: 2px solid var(--yellow);
+    background: var(--yellow);
+    color: var(--yellow-contrast);
+    font-family: var(--fuente-mono);
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    text-decoration: none;
+    transition: color 0.15s linear, background-color 0.15s linear;
+}
+.portfolio-card-btn:hover,
+.portfolio-card-btn:focus-visible {
+    color: var(--yellow);
+    background: transparent;
+}
+.portfolio-card-btn:focus-visible {
+    outline: 2px solid var(--yellow);
+    outline-offset: 3px;
+}
+.portfolio-card-btn-secondary {
+    background: transparent;
+    color: var(--yellow);
+}
+.portfolio-card-btn-secondary:hover,
+.portfolio-card-btn-secondary:focus-visible {
+    background: var(--yellow);
+    color: var(--yellow-contrast);
+}
