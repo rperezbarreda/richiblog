@@ -1,27 +1,108 @@
 [
     {
-        "_": "LAS CATEGORÍAS DE LA PORTADA DEL MUNDO. Cada página de la wiki cae en la PRIMERA de aquí cuyas etiquetas tenga, y dentro del apartado se reparte por las etiquetas que le queden. Lo que no caiga en ninguna va al final, en «lo demás». Cambia los nombres, el orden y las etiquetas a tu gusto: esto se lee tal cual al pasar generar-mundo.py, y él te dice al terminar qué etiquetas se han quedado fuera de todas.",
+        "_": "LAS CATEGORÍAS DE LA PORTADA DEL MUNDO. Primero el MAPAMUNDI: todas sus regiones y países llevan la etiqueta «Mapamundi» y la de su parte del mundo (Azarasia, Partaria, Tierras Encantadas o Archipiélagos), que es la que los reparte por dentro. Luego, los apartados de siempre. Cada página de la wiki cae en la PRIMERA de aquí cuyas etiquetas tenga, y dentro del apartado se reparte por las etiquetas que le queden. Lo que no caiga en ninguna va al final, en «lo demás». Cambia los nombres, el orden y las etiquetas a tu gusto: esto se lee tal cual al pasar generar-mundo.py, y él te dice al terminar qué etiquetas se han quedado fuera de todas. Un apartado puede llevar \"orden\" con el orden de sus subapartados, como el del mapamundi; si no, van por orden alfabético.",
+        "nombre": "Mapamundi",
+        "etiquetas": [
+            "mapamundi"
+        ],
+        "orden": [
+            "Azarasia",
+            "Partaria",
+            "Tierras Encantadas",
+            "Archipiélagos"
+        ]
+    },
+    {
         "nombre": "países",
-        "etiquetas": ["pais", "país", "paises", "países", "reino", "reinos", "imperio", "nación", "nacion", "ducado", "república", "republica"]
+        "etiquetas": [
+            "pais",
+            "país",
+            "paises",
+            "países",
+            "reino",
+            "reinos",
+            "imperio",
+            "nación",
+            "nacion",
+            "ducado",
+            "república",
+            "republica"
+        ]
     },
     {
         "nombre": "lugares",
-        "etiquetas": ["lugar", "lugares", "ciudad", "ciudades", "pueblo", "región", "region", "isla", "islas", "río", "rio", "montaña", "montana", "bosque", "mar"]
+        "etiquetas": [
+            "lugar",
+            "lugares",
+            "ciudad",
+            "ciudades",
+            "pueblo",
+            "región",
+            "region",
+            "isla",
+            "islas",
+            "río",
+            "rio",
+            "montaña",
+            "montana",
+            "bosque",
+            "mar"
+        ]
     },
     {
         "nombre": "personajes",
-        "etiquetas": ["personaje", "personajes", "gente", "npc", "npcs", "raza", "razas", "criatura", "criaturas"]
+        "etiquetas": [
+            "personaje",
+            "personajes",
+            "gente",
+            "npc",
+            "npcs",
+            "raza",
+            "razas",
+            "criatura",
+            "criaturas"
+        ]
     },
     {
         "nombre": "religión",
-        "etiquetas": ["religión", "religion", "dios", "dioses", "diosa", "culto", "cultos", "iglesia", "fe", "mito", "mitos"]
+        "etiquetas": [
+            "religión",
+            "religion",
+            "dios",
+            "dioses",
+            "diosa",
+            "culto",
+            "cultos",
+            "iglesia",
+            "fe",
+            "mito",
+            "mitos"
+        ]
     },
     {
         "nombre": "cosas",
-        "etiquetas": ["objeto", "objetos", "cosa", "cosas", "artefacto", "artefactos", "arma", "armas", "libro", "libros", "gremio", "gremios", "organización", "organizacion"]
+        "etiquetas": [
+            "objeto",
+            "objetos",
+            "cosa",
+            "cosas",
+            "artefacto",
+            "artefactos",
+            "arma",
+            "armas",
+            "libro",
+            "libros",
+            "gremio",
+            "gremios",
+            "organización",
+            "organizacion"
+        ]
     },
     {
         "nombre": "mapas",
-        "etiquetas": ["mapa", "mapas"]
+        "etiquetas": [
+            "mapa",
+            "mapas"
+        ]
     }
 ]

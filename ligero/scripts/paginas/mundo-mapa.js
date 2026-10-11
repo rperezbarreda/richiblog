@@ -196,6 +196,28 @@ function prepararCapasDeMapa(caja) {
 function prepararRegionesDeMapa(caja) {
     apagarConCasilla(caja, "[data-mapa-regiones]", ".mapa-dibujos, .mapa-formas");
     apagarConCasilla(caja, "[data-mapa-pines]", ".mapa-pines");
+    prepararNivelesDeMapa(caja);
+}
+function prepararNivelesDeMapa(caja) {
+    const casillas = [...caja.querySelectorAll("[data-mapa-nivel-casilla]")];
+    const regiones = caja.querySelector('[data-mapa-nivel="regiones"]');
+    const paises = caja.querySelector('[data-mapa-nivel="paises"]');
+    const dibujos = caja.querySelector(".mapa-dibujos");
+    if (!casillas.length || !regiones || !paises) {
+        return;
+    }
+    const aplicar = () => {
+        const marcada = casillas.find((c) => c.checked);
+        const cual = marcada ? marcada.value : "paises";
+        regiones.classList.toggle("es-apagada", cual !== "regiones");
+        paises.classList.toggle("es-apagada", cual === "nada");
+        paises.classList.toggle("es-solo-sueltos", cual === "regiones");
+        if (dibujos) {
+            dibujos.classList.toggle("es-apagada", cual === "nada");
+        }
+    };
+    casillas.forEach((casilla) => casilla.addEventListener("change", aplicar));
+    aplicar();
 }
 function apagarConCasilla(caja, cual, selector) {
     const casilla = caja.querySelector(cual);

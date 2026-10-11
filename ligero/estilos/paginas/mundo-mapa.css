@@ -133,6 +133,9 @@ html:not(.js) .mapa-ayuda {
 .mapa-capa.es-apagada {
     display: none;
 }
+.mapa-paises.es-solo-sueltos > .mapa-forma:not(.es-suelto) {
+    display: none;
+}
 .mapa-dibujos.es-apagada,
 .mapa-formas.es-apagada,
 .mapa-pines.es-apagada {

@@ -348,7 +348,110 @@ def detalle_de(mapa):
     return max(mapa["ancho"], mapa["alto"]) * DETALLE_RELATIVO
 
 
-def pintar(mapa, pagina_a, mapa_a, imagen_a, detalle=None, avisar=None):
+# =========================================
+# REGIONES Y PAÍSES
+# =========================================
+# En el mapamundi hay dos tamaños de cosa: las REGIONES (Azarasia, Partaria,
+# un archipiélago entero) y los PAÍSES que hay dentro de ellas. Dibujadas
+# las dos a la vez, una región tapa a sus países. Así que el mapa enseña
+# una cosa u otra, y se cambia con los mandos («ver: países / regiones»).
+#
+# No hace falta marcarlas en Chronicler: una forma con nombre que tiene
+# dentro otra forma con nombre ES una región. Lo demás son países. Un país
+# que no está dentro de ninguna región (una isla grande e independiente)
+# sale en los dos modos, porque si no, en el de regiones, desaparecería
+# del mapa.
+
+def _area(puntos):
+    a = 0.0
+    for i, (x1, y1) in enumerate(puntos):
+        x2, y2 = puntos[(i + 1) % len(puntos)]
+        a += x1 * y2 - x2 * y1
+    return abs(a) / 2
+
+
+def _caja(puntos):
+    xs = [p[0] for p in puntos]
+    ys = [p[1] for p in puntos]
+    return min(xs), min(ys), max(xs), max(ys)
+
+
+def _dentro(punto, puntos):
+    x, y = punto
+    dentro = False
+    j = len(puntos) - 1
+    for i in range(len(puntos)):
+        xi, yi = puntos[i]
+        xj, yj = puntos[j]
+        if (yi > y) != (yj > y) and x < (xj - xi) * (y - yi) / (yj - yi) + xi:
+            dentro = not dentro
+        j = i
+    return dentro
+
+
+def niveles(formas, region_de=None):
+    """{índice de la forma: "region" | "pais" | "suelto"} para las formas
+    con nombre. "suelto" es un país que no está en ninguna región.
+
+    QUIÉN MANDA: las páginas de la wiki. Si alguna página dice en su ficha
+    «región: [[Partaria]]», region_de lo trae ({"reino de kasa": "partaria"})
+    y eso decide: Partaria es una región y el Reino de Kasa un país suyo.
+    Así se corrige a mano lo que el dibujo no deja claro (unas islas que
+    asoman fuera de la raya de su archipiélago).
+
+    Sin ninguna página que lo diga, se adivina por el dibujo:
+    Una forma B está dentro de otra A si A es más grande y la mayoría de
+    una muestra de puntos de B (y su centro) caen dentro de A. Con muestra y
+    no con todos los puntos: el mapamundi tiene 29.000 y compararlos todos
+    con todos tardaba minutos."""
+    con_nombre = [(i, f) for i, f in enumerate(formas)
+                  if f["etiqueta"] or f["pagina"] or f["mapa"]]
+    if region_de:
+        regiones = set(region_de.values())
+        salida = {}
+        for i, f in con_nombre:
+            nombre = (f["etiqueta"] or f["pagina"] or f["mapa"]).strip().lower()
+            if nombre in regiones:
+                salida[i] = "region"
+            elif nombre in region_de:
+                salida[i] = "pais"
+            else:
+                salida[i] = "suelto"
+        return salida
+    datos = {}
+    for i, f in con_nombre:
+        pts = f["puntos"]
+        paso = max(1, len(pts) // 24)
+        muestra = pts[::paso]
+        cx = sum(p[0] for p in pts) / len(pts)
+        cy = sum(p[1] for p in pts) / len(pts)
+        datos[i] = (_area(pts), _caja(pts), muestra + [(cx, cy)], pts)
+    contiene = {i: False for i, _ in con_nombre}
+    dentro_de_algo = {i: False for i, _ in con_nombre}
+    for a, _ in con_nombre:
+        area_a, caja_a, _, pts_a = datos[a]
+        for b, _ in con_nombre:
+            if a == b:
+                continue
+            area_b, caja_b, muestra_b, _ = datos[b]
+            if area_b >= area_a:
+                continue
+            if (caja_b[2] < caja_a[0] or caja_b[0] > caja_a[2]
+                    or caja_b[3] < caja_a[1] or caja_b[1] > caja_a[3]):
+                continue
+            if sum(_dentro(p, pts_a) for p in muestra_b) > len(muestra_b) / 2:
+                contiene[a] = True
+                dentro_de_algo[b] = True
+    salida = {}
+    for i, _ in con_nombre:
+        if contiene[i]:
+            salida[i] = "region"
+        else:
+            salida[i] = "pais" if dentro_de_algo[i] else "suelto"
+    return salida
+
+
+def pintar(mapa, pagina_a, mapa_a, imagen_a, detalle=None, avisar=None, region_de=None):
     """El HTML de un mapa.
 
     pagina_a(nombre) y mapa_a(nombre) devuelven (dirección, existe); si
@@ -414,9 +517,11 @@ def pintar(mapa, pagina_a, mapa_a, imagen_a, detalle=None, avisar=None):
     # El dibujo primero y lo que se puede pulsar después, porque en SVG
     # manda el último: un polígono decorativo pintado encima de una región
     # enlazada se comería los clics.
-    dibujo, vivas = [], []
+    dibujo, vivas, vivas_regiones = [], [], []
+    nivel_de = niveles(mapa["formas"], region_de)
+    hay_niveles = "region" in nivel_de.values()
     cuantas = 0
-    for forma in mapa["formas"]:
+    for indice, forma in enumerate(mapa["formas"]):
         nombre = forma["etiqueta"] or forma["pagina"] or forma["mapa"]
         destinos = _destinos(forma, pagina_a, mapa_a)
 
@@ -436,9 +541,10 @@ def pintar(mapa, pagina_a, mapa_a, imagen_a, detalle=None, avisar=None):
 
         cuantas += 1
         cual = "s%d" % cuantas
+        nivel = nivel_de.get(indice, "pais")
         for uno in destinos:
             sitios.append(dict(uno, id=cual, nombre=nombre, color=color,
-                               tipo="forma", icono=""))
+                               tipo="forma", icono="", region=(nivel == "region")))
         # El polígono lleva al primero que exista. Si la región apunta a una
         # página Y a otro mapa —que es raro pero pasa—, el dibujo lleva a la
         # página y el mapa sale como una fila más de la lista, que es la
@@ -453,18 +559,30 @@ def pintar(mapa, pagina_a, mapa_a, imagen_a, detalle=None, avisar=None):
         # nombre va también en un atributo.
         titulo = "<title>%s</title>" % html.escape(nombre)
         datos = _datos_del_globo(nombre, _nota(elegido["destino"], url), "")
+        suelto = " es-suelto" if (hay_niveles and nivel == "suelto") else ""
+        destino_lista = vivas_regiones if nivel == "region" else vivas
         if url:
             # tabindex="-1": se puede pulsar con el ratón, pero no sale en
             # el recorrido del tabulador. Lo que se recorre es la lista.
-            vivas.append('<a class="mapa-forma es-enlace" href="%s" data-mapa-sitio="%s"%s'
-                         ' tabindex="-1">%s%s</a>'
-                         % (html.escape(url, quote=True), cual, datos, titulo, poligono))
+            destino_lista.append('<a class="mapa-forma es-enlace%s" href="%s" data-mapa-sitio="%s"%s'
+                                 ' tabindex="-1">%s%s</a>'
+                                 % (suelto, html.escape(url, quote=True), cual, datos,
+                                    titulo, poligono))
         else:
-            vivas.append('<g class="mapa-forma" data-mapa-sitio="%s"%s>%s%s</g>'
-                         % (cual, datos, titulo, poligono))
+            destino_lista.append('<g class="mapa-forma%s" data-mapa-sitio="%s"%s>%s%s</g>'
+                                 % (suelto, cual, datos, titulo, poligono))
 
     trozos.append('<g class="mapa-dibujos">%s</g>' % "".join(dibujo))
-    trozos.append('<g class="mapa-formas">%s</g>' % "".join(vivas))
+    if hay_niveles:
+        # Las regiones, apagadas de salida: se empieza viendo los países.
+        # Sin JavaScript se quedan así, que es lo más útil (los países son
+        # lo que más se busca, y las regiones están en la lista de abajo).
+        trozos.append('<g class="mapa-formas mapa-regiones es-apagada" data-mapa-nivel="regiones">'
+                      '%s</g>' % "".join(vivas_regiones))
+        trozos.append('<g class="mapa-formas mapa-paises" data-mapa-nivel="paises">%s</g>'
+                      % "".join(vivas))
+    else:
+        trozos.append('<g class="mapa-formas">%s</g>' % "".join(vivas))
 
     # ---- LOS PINES ----
     pines = []
@@ -523,6 +641,7 @@ def pintar(mapa, pagina_a, mapa_a, imagen_a, detalle=None, avisar=None):
         "imagenes": imagenes,
         "puntos": (puntos_antes, puntos_despues),
         "dibujo": len(dibujo),
+        "niveles": hay_niveles,
         "escondidos": escondidos,
     }
 
@@ -547,14 +666,19 @@ def pintar(mapa, pagina_a, mapa_a, imagen_a, detalle=None, avisar=None):
 # que cada punto de más es peso que no se nota. Con el mapamundi pasa de
 # 29.321 puntos a unos 2.000.
 
-def pintar_vista(mapa, detalle=None):
+def pintar_vista(mapa, detalle=None, region_de=None):
     ancho, alto = mapa["ancho"], mapa["alto"]
     if detalle is None:
         detalle = max(ancho, alto) / 320
     grosor = max(2, round(max(ancho, alto) / 600))
     trozos = ['<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 %d %d"'
               ' width="%d" height="%d" role="img">' % (ancho, alto, ancho, alto)]
-    for forma in mapa["formas"]:
+    # Los países y no las regiones: una región pintada encima tapa a los
+    # suyos y la silueta sale como un borrón de un color.
+    nivel_de = niveles(mapa["formas"], region_de)
+    for indice, forma in enumerate(mapa["formas"]):
+        if nivel_de.get(indice) == "region":
+            continue
         puntos = simplificar(forma["puntos"], detalle)
         if len(puntos) < 3:
             continue
@@ -630,6 +754,15 @@ def _destinos(crudo, pagina_a, mapa_a):
         url, existe = (pagina_a if destino == "pagina" else mapa_a)(nombre)
         cosas.append({"destino": destino, "apunta_a": nombre,
                       "url": url if existe else "", "existe": existe})
+    if not cosas and crudo.get("etiqueta"):
+        # Sin «lleva a» puesto en el mapa, pero con nombre: si hay una
+        # página de la wiki que se llama igual, lleva a ella. Así no hace
+        # falta enlazar a mano en Chronicler cada una de las 120 regiones,
+        # y una página nueva queda enlazada desde el mapa en cuanto existe.
+        url, existe = pagina_a(crudo["etiqueta"])
+        if existe:
+            cosas.append({"destino": "pagina", "apunta_a": crudo["etiqueta"],
+                          "url": url, "existe": True})
     if not cosas:
         # Tiene nombre pero no lleva a ninguna parte: es un sitio del mapa
         # que está dibujado y nada más. Sale en la lista igual.
@@ -684,6 +817,8 @@ def pintar_lista(sitios, titulo_id="mapa-sitios-titulo"):
         # ninguna parte: un nombre sin enlace y sin explicación parece un
         # enlace roto, y lo que es en realidad es trabajo pendiente.
         aviso = _nota(sitio["destino"], sitio["url"])
+        if not aviso and sitio.get("region"):
+            aviso = "región"
         nota = ('<span class="mapa-sitio-nota">%s</span>' % aviso) if aviso else ""
         dentro = marca + icono + nombre + nota
         if sitio["url"]:
@@ -708,7 +843,7 @@ def pintar_lista(sitios, titulo_id="mapa-sitios-titulo"):
 # sitio. El mapa se sigue viendo entero y las capas salen como estuvieran
 # guardadas en Chronicler.
 
-def pintar_mandos(capas, hay_formas=True, hay_pines=False):
+def pintar_mandos(capas, hay_formas=True, hay_pines=False, hay_niveles=False):
     trozos = ['<div class="mapa-mandos" data-mapa-mandos>']
     trozos.append(
         '<div class="mapa-zoom" role="group" aria-label="Zoom del mapa">'
@@ -730,7 +865,18 @@ def pintar_mandos(capas, hay_formas=True, hay_pines=False):
     # Las capas van en el mismo grupo, pero solo si hay más de una: un
     # interruptor para quedarse sin mapa no es un interruptor.
     casillas = []
-    if hay_formas:
+    if hay_formas and hay_niveles:
+        # Países o regiones (ver niveles()), o nada encima de la imagen.
+        # Son radios: una cosa u otra, nunca las dos, porque una región
+        # tapa a sus países.
+        for valor, texto, marcado in (("paises", "países", True),
+                                      ("regiones", "regiones", False),
+                                      ("nada", "solo la imagen", False)):
+            casillas.append(
+                '<label class="mapa-capa-casilla"><input type="radio" name="mapa-nivel"'
+                ' value="%s" data-mapa-nivel-casilla%s> %s</label>'
+                % (valor, " checked" if marcado else "", texto))
+    elif hay_formas:
         casillas.append(
             '<label class="mapa-capa-casilla"><input type="checkbox"'
             ' data-mapa-regiones checked> regiones</label>')

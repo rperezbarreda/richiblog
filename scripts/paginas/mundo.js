@@ -149,18 +149,45 @@ function bloqueDeGrupoMundo(grupo, fichas) {
             porEtiqueta.get(e).push(ficha);
         });
     });
-    [...porEtiqueta.keys()].sort((a, b) => a.localeCompare(b, "es")).forEach((e) => {
-        const sub = document.createElement("div");
-        sub.className = "mundo-sub";
-        sub.setAttribute("data-mundo-sub", e);
-        const suyo = document.createElement("h3");
-        suyo.className = "mundo-sub-titulo";
-        suyo.textContent = e;
-        sub.appendChild(suyo);
-        sub.appendChild(listaDeFichasMundo(porEtiqueta.get(e)));
-        bloque.appendChild(sub);
+    // En el orden en que llegan: el generador ya los ordena (el "orden"
+    // de datos/wiki/mundo-categorias.json, o el alfabético si no lo hay).
+    [...porEtiqueta.keys()].forEach((e) => {
+        bloque.appendChild(subapartadoMundo(grupo, e, porEtiqueta.get(e)));
     });
     return bloque;
+}
+
+// UN SUBAPARTADO TAMBIÉN SE PLIEGA (Azarasia dentro de Mapamundi, los
+// eventos dentro de historia…): otro <details>, con su flecha y su cuenta,
+// y lo que dejes plegado se recuerda igual que los apartados, con la
+// clave «apartado/subapartado».
+function subapartadoMundo(grupo, nombre, fichas) {
+    const clave = grupo + "/" + nombre;
+    const sub = document.createElement("details");
+    sub.className = "mundo-sub";
+    sub.setAttribute("data-mundo-sub", nombre);
+    sub.setAttribute("data-mundo-clave", clave);
+    sub.open = !MUNDO_CERRADOS.has(clave);
+    sub.addEventListener("toggle", () => recordarPlegadoMundo(sub, clave));
+
+    const cabecera = document.createElement("summary");
+    cabecera.className = "mundo-sub-cabecera";
+    const flecha = document.createElement("span");
+    flecha.className = "mundo-sub-flecha";
+    flecha.setAttribute("aria-hidden", "true");
+    flecha.textContent = "▾";
+    cabecera.appendChild(flecha);
+    const suyo = document.createElement("h3");
+    suyo.className = "mundo-sub-titulo";
+    suyo.textContent = nombre;
+    cabecera.appendChild(suyo);
+    const cuenta = document.createElement("span");
+    cuenta.className = "mundo-grupo-cuenta";
+    cuenta.setAttribute("data-mundo-sub-cuenta", "");
+    cabecera.appendChild(cuenta);
+    sub.appendChild(cabecera);
+    sub.appendChild(listaDeFichasMundo(fichas));
+    return sub;
 }
 
 // QUÉ APARTADOS ESTÁN PLEGADOS. Se guarda la lista de los cerrados y no
@@ -181,7 +208,10 @@ function leerCerradosMundo() {
 }
 
 function recordarGrupoMundo(bloque) {
-    const grupo = bloque.getAttribute("data-mundo-grupo");
+    recordarPlegadoMundo(bloque, bloque.getAttribute("data-mundo-grupo"));
+}
+
+function recordarPlegadoMundo(bloque, grupo) {
     // Mientras se busca o se filtra los apartados se abren solos (ver
     // repasarGruposMundo); eso no es una decisión de quien mira, así que
     // no se guarda.
@@ -219,7 +249,10 @@ function pintarLosMapasDelMundo(fichas) {
     if (!caja) {
         return;
     }
-    const mapas = fichas.filter((f) => (f.vista || "").toString().trim());
+    // Los mapas traen su silueta ("vista") y la línea de tiempo su versión
+    // en pequeño ("mini"): las dos cosas van en esta columna.
+    const mapas = fichas.filter((f) => (f.vista || "").toString().trim() ||
+        (f.mini && Array.isArray(f.mini.cosas)));
     // Sin mapas no hay columna: un título suelto encima de un hueco no
     // dice nada.
     caja.hidden = !mapas.length;
@@ -227,7 +260,249 @@ function pintarLosMapasDelMundo(fichas) {
         return;
     }
     caja.querySelectorAll(".mundo-vista").forEach((vieja) => vieja.remove());
-    mapas.forEach((ficha) => caja.appendChild(tarjetaDeMapaMundo(ficha)));
+    mapas.forEach((ficha) => caja.appendChild(
+        ficha.mini ? tarjetaDeLineaMundo(ficha) : tarjetaDeMapaMundo(ficha)));
+    // Con la columna ya a la vista, los recuadros miden lo que miden: ahora
+    // se puede apartar lo que se pise (ver colocarLineaEnPequenoMundo).
+    caja.querySelectorAll(".mundo-mini-lista").forEach(colocarLineaEnPequenoMundo);
+
+    // La línea de tiempo también va en esta columna (la escribe
+    // generar-linea-tiempo.py, con "linea": true), y entonces la columna ya
+    // no es solo de mapas. La columna está escondida hasta aquí, así que
+    // el cambio de título no se ve.
+    const titulo = caja.querySelector(".mundo-vistas-titulo");
+    if (titulo) {
+        const hayLinea = mapas.some((f) => f.linea === true);
+        const hayMapas = mapas.some((f) => f.linea !== true);
+        titulo.textContent = hayLinea
+            ? (hayMapas ? "mapas y línea de tiempo" : "la línea de tiempo")
+            : "los mapas";
+    }
+}
+
+// =========================================
+// LA LÍNEA DE TIEMPO, EN PEQUEÑO
+// =========================================
+// Lo mismo que en su página, pero de bolsillo: la línea de arriba abajo,
+// cada evento en un recuadrito con su año y su nombre (y que lleva a su
+// página) y cada era como una franja con su nombre (que lleva a su sitio
+// en la línea grande). Las posiciones vienen calculadas en el JSON, en rem
+// de la escala de la página (ver mini() en
+// herramientas/3-generadores/mundo_linea.py); aquí solo se pasan a píxeles.
+//
+// NO ES UN ENLACE ENTERO, como la tarjeta de un mapa: dentro hay un enlace
+// por evento, y un enlace no puede ir dentro de otro. El título de abajo
+// es el que lleva a la línea entera.
+//
+// Es una lista (<ol>) en el orden del tiempo, así que un lector de
+// pantalla la lee como lo que es: era, evento, evento, era…
+
+// Píxeles por cada rem de la escala de la página. Con 6, dos eventos
+// seguidos quedan como poco a 39 px (el tramo mínimo es 6,5 rem), y dos del
+// mismo lado, al doble: sitio para un recuadro de dos líneas.
+const MINI_PX_POR_REM = 6;
+const MINI_ARRIBA = 14;
+const MINI_ABAJO = 44;
+
+function tarjetaDeLineaMundo(ficha) {
+    const caja = document.createElement("div");
+    caja.className = "mundo-vista mundo-vista-linea";
+
+    const marco = document.createElement("div");
+    marco.className = "mundo-mini";
+    const mini = ficha.mini || {};
+    const alto = Number(mini.alto) || 0;
+    const lista = document.createElement("ol");
+    lista.className = "mundo-mini-lista";
+    lista.setAttribute("aria-label", "La línea de tiempo, en pequeño");
+    lista.style.height = Math.round(MINI_ARRIBA + alto * MINI_PX_POR_REM + MINI_ABAJO) + "px";
+
+    const eje = document.createElement("span");
+    eje.className = "mundo-mini-eje";
+    eje.setAttribute("aria-hidden", "true");
+    eje.style.top = MINI_ARRIBA + "px";
+    eje.style.height = Math.round(alto * MINI_PX_POR_REM) + "px";
+    lista.appendChild(eje);
+
+    (Array.isArray(mini.cosas) ? mini.cosas : []).forEach((cosa) => {
+        const y = MINI_ARRIBA + (Number(cosa.y) || 0) * MINI_PX_POR_REM;
+        const hasta = MINI_ARRIBA + (Number(cosa.hasta) || 0) * MINI_PX_POR_REM;
+        let item = null;
+        if (cosa.tipo === "era") {
+            item = eraEnPequenoMundo(cosa);
+            item.dataset.hasta = String(hasta);
+        } else if (cosa.tipo === "evento") {
+            item = eventoEnPequenoMundo(cosa);
+        } else if (cosa.tipo === "hoy") {
+            item = document.createElement("li");
+            item.className = "mundo-mini-hoy";
+            item.textContent = (cosa.texto || "").toString().trim();
+        } else if (cosa.tipo === "corte") {
+            item = document.createElement("li");
+            item.className = "mundo-mini-corte";
+            item.setAttribute("aria-hidden", "true");
+            item.textContent = "≈";
+        }
+        if (item) {
+            // Dónde le toca según la escala. colocarLineaEnPequenoMundo lo
+            // baja si se pisa con lo de antes.
+            item.dataset.y = String(y);
+            item.style.top = Math.round(y) + "px";
+            lista.appendChild(item);
+        }
+    });
+    marco.appendChild(lista);
+    caja.appendChild(marco);
+
+    const enlace = document.createElement("a");
+    enlace.className = "mundo-vista-titulo mundo-mini-titulo";
+    enlace.href = rutaSeguraMundo(ficha.url);
+    enlace.textContent = (ficha.titulo || "").toString().trim();
+    caja.appendChild(enlace);
+
+    const que = document.createElement("span");
+    que.className = "mundo-vista-que";
+    que.textContent = (ficha.que || "").toString().trim();
+    caja.appendChild(que);
+    return caja;
+}
+
+function eraEnPequenoMundo(cosa) {
+    const item = document.createElement("li");
+    item.className = "mundo-mini-era" + (cosa.par === false ? " es-impar" : "");
+    // Su color, solo si es un #rrggbb de verdad: va a parar a un estilo.
+    const color = (cosa.color || "").toString().trim();
+    if (/^#[0-9a-fA-F]{6}$/.test(color)) {
+        item.style.setProperty("--era-color", color);
+    }
+
+    const enlace = document.createElement("a");
+    enlace.className = "mundo-mini-era-nombre";
+    enlace.href = rutaSeguraMundo(cosa.url);
+    enlace.textContent = (cosa.nombre || "").toString().trim();
+    // Los años no caben en el rótulo; se oyen y salen al pasar el ratón.
+    const fechas = (cosa.fechas || "").toString().trim();
+    if (fechas) {
+        enlace.title = fechas;
+        const oculto = document.createElement("span");
+        oculto.className = "visually-hidden";
+        oculto.textContent = ", era, " + fechas;
+        enlace.appendChild(oculto);
+    }
+    item.appendChild(enlace);
+    return item;
+}
+
+function eventoEnPequenoMundo(cosa) {
+    const item = document.createElement("li");
+    item.className = "mundo-mini-evento es-" + (cosa.lado === "derecha" ? "derecha" : "izquierda");
+
+    const enlace = document.createElement("a");
+    enlace.className = "mundo-mini-recuadro";
+    enlace.href = rutaSeguraMundo(cosa.url);
+    const fecha = document.createElement("span");
+    fecha.className = "mundo-mini-fecha";
+    fecha.textContent = (cosa.fecha || "").toString().trim();
+    const nombre = document.createElement("span");
+    nombre.className = "mundo-mini-nombre";
+    nombre.textContent = (cosa.nombre || "").toString().trim();
+    enlace.appendChild(fecha);
+    enlace.appendChild(nombre);
+    item.appendChild(enlace);
+    return item;
+}
+
+// QUE NADA SE PISE. A escala, dos eventos cercanos pueden quedar a 39 px,
+// y un recuadro con un nombre largo ocupa tres líneas; y el rótulo de una
+// era va en medio, encima de la línea. Así que se repasa todo en orden y,
+// si algo empezaría antes de que acabe lo de su mismo lado (o el rótulo de
+// la era de antes), se baja lo justo, y con él todo lo que viene detrás.
+// El orden y las distancias relativas se conservan; solo se estira.
+//
+// Se vuelve a hacer si cambia el tamaño de los recuadros (el botón de
+// tamaño de letra, o al girar el móvil).
+const MINI_HOLGURA = 5;
+
+function colocarLineaEnPequenoMundo(lista) {
+    const items = Array.from(lista.children).filter((e) => e.dataset && e.dataset.y);
+    let extra = 0;
+    const fondo = { izquierda: -Infinity, derecha: -Infinity, centro: -Infinity };
+    const mudanzas = [];   // [y según la escala, lo que se ha bajado desde ahí]
+    items.forEach((item) => {
+        const base = Number(item.dataset.y) || 0;
+        let y = base + extra;
+        if (item.classList.contains("mundo-mini-evento")) {
+            const caja = item.querySelector(".mundo-mini-recuadro");
+            const alto = caja ? caja.offsetHeight : 0;
+            const lado = item.classList.contains("es-derecha") ? "derecha" : "izquierda";
+            const arriba = y - 9;
+            const tope = Math.max(fondo[lado], fondo.centro) + MINI_HOLGURA;
+            if (arriba < tope) {
+                extra += tope - arriba;
+                y = base + extra;
+            }
+            fondo[lado] = y - 9 + alto;
+        } else if (item.classList.contains("mundo-mini-era") ||
+                   item.classList.contains("mundo-mini-hoy")) {
+            // El rótulo de una era y el de «hoy» van en el centro, encima
+            // de la línea: no pueden pisar ningún recuadro de los dos lados.
+            const rotulo = item.querySelector(".mundo-mini-era-nombre") || item;
+            const alto = rotulo.offsetHeight + 3;
+            const tope = Math.max(fondo.izquierda, fondo.derecha, fondo.centro) + MINI_HOLGURA;
+            if (y < tope) {
+                extra += tope - y;
+                y = base + extra;
+            }
+            fondo.centro = y + alto;
+        }
+        mudanzas.push([base, extra]);
+        item.style.top = Math.round(y) + "px";
+    });
+
+    // Cada y de la escala, con lo que se haya bajado lo de antes.
+    const final = (yEscala) => {
+        let bajado = 0;
+        mudanzas.forEach(([base, extraAhi]) => {
+            if (base <= yEscala) {
+                bajado = extraAhi;
+            }
+        });
+        return yEscala + bajado;
+    };
+    items.forEach((item) => {
+        if (item.classList.contains("mundo-mini-era")) {
+            const desde = parseFloat(item.style.top) || 0;
+            const hasta = final(Number(item.dataset.hasta) || 0);
+            item.style.height = Math.max(Math.round(hasta - desde), 2) + "px";
+        }
+    });
+
+    const ultimo = Math.max(fondo.izquierda, fondo.derecha, fondo.centro, 0);
+    const eje = lista.querySelector(".mundo-mini-eje");
+    const ultimoPunto = items.filter((e) => e.classList.contains("mundo-mini-evento")).pop();
+    const hoy = items.find((e) => e.classList.contains("mundo-mini-hoy"));
+    const finEje = Math.max(ultimoPunto ? parseFloat(ultimoPunto.style.top) : 0,
+        hoy ? parseFloat(hoy.style.top) : 0,
+        ...items.filter((e) => e.classList.contains("mundo-mini-era"))
+            .map((e) => (parseFloat(e.style.top) || 0) + (parseFloat(e.style.height) || 0)));
+    if (eje) {
+        eje.style.height = Math.max(Math.round(finEje - MINI_ARRIBA), 0) + "px";
+    }
+    lista.style.height = Math.round(Math.max(ultimo, finEje) + 12) + "px";
+
+    if (!lista.dataset.vigilada && typeof ResizeObserver === "function") {
+        lista.dataset.vigilada = "1";
+        let anchos = "";
+        const vigia = new ResizeObserver(() => {
+            const ahora = Array.from(lista.querySelectorAll(".mundo-mini-recuadro"))
+                .map((e) => e.offsetWidth + "x" + e.offsetHeight).join(",");
+            if (ahora !== anchos) {
+                anchos = ahora;
+                colocarLineaEnPequenoMundo(lista);
+            }
+        });
+        lista.querySelectorAll(".mundo-mini-recuadro").forEach((e) => vigia.observe(e));
+    }
 }
 
 function tarjetaDeMapaMundo(ficha) {
@@ -346,13 +621,42 @@ function rutaSeguraMundo(url) {
 document.addEventListener("filtros:cambiado", repasarGruposMundo);
 document.addEventListener("filtros:actualizar", repasarGruposMundo);
 
+// SIN BOTONES DE ETIQUETAS, quien esconde lo que no pasa la búsqueda es
+// esto: el buscador dice quién pasa (window.buscador.pasa) y avisa con
+// "buscar:cambiado", pero no esconde nada él mismo (ver
+// scripts/componentes/buscador.js). Si algún día vuelve filtros.js a la
+// portada, esto se quita: lo haría él.
+document.addEventListener("buscar:cambiado", () => {
+    if (!window.buscador) {
+        return;
+    }
+    document.querySelectorAll("[data-mundo-indice] .mundo-ficha-item").forEach((item) => {
+        item.hidden = !window.buscador.pasa(item);
+    });
+    repasarGruposMundo();
+});
+
 function repasarGruposMundo() {
     // Primero los subapartados: un título de etiqueta encima de un hueco
     // vacío es lo mismo que un apartado vacío, pero más pequeño.
+    const rebuscandoSub = !!(window.buscador && window.buscador.texto);
     document.querySelectorAll(".mundo-sub").forEach((sub) => {
         const vivos = [...sub.querySelectorAll(".mundo-ficha-item")]
             .filter((item) => !item.hidden).length;
         sub.hidden = vivos === 0;
+        const cuenta = sub.querySelector("[data-mundo-sub-cuenta]");
+        if (cuenta) {
+            cuenta.textContent = vivos === 1 ? "1" : String(vivos);
+        }
+        // Igual que los apartados (abajo): abierto mientras se busca, y
+        // como estaba al dejar de buscar.
+        if (rebuscandoSub && vivos && !sub.open) {
+            sub.setAttribute("data-mundo-forzado", "");
+            sub.open = true;
+        } else if (!rebuscandoSub && sub.hasAttribute("data-mundo-forzado")) {
+            sub.open = false;
+            sub.removeAttribute("data-mundo-forzado");
+        }
     });
 
     // ¿Se está buscando o filtrando algo? Entonces los apartados se abren

@@ -342,6 +342,34 @@ function prepararCapasDeMapa(caja) {
 function prepararRegionesDeMapa(caja) {
     apagarConCasilla(caja, "[data-mapa-regiones]", ".mapa-dibujos, .mapa-formas");
     apagarConCasilla(caja, "[data-mapa-pines]", ".mapa-pines");
+    prepararNivelesDeMapa(caja);
+}
+
+// PAÍSES O REGIONES. En un mapa con las dos cosas (ver niveles() en
+// herramientas/3-generadores/mundo_mapas.py) se ve una u otra: una región
+// pintada encima tapa a sus países. Los países que no son de ninguna
+// región (una isla independiente) llevan es-suelto y salen también con
+// las regiones, que si no se quedaría un hueco en el mapa.
+function prepararNivelesDeMapa(caja) {
+    const casillas = [...caja.querySelectorAll("[data-mapa-nivel-casilla]")];
+    const regiones = caja.querySelector('[data-mapa-nivel="regiones"]');
+    const paises = caja.querySelector('[data-mapa-nivel="paises"]');
+    const dibujos = caja.querySelector(".mapa-dibujos");
+    if (!casillas.length || !regiones || !paises) {
+        return;
+    }
+    const aplicar = () => {
+        const marcada = casillas.find((c) => c.checked);
+        const cual = marcada ? marcada.value : "paises";
+        regiones.classList.toggle("es-apagada", cual !== "regiones");
+        paises.classList.toggle("es-apagada", cual === "nada");
+        paises.classList.toggle("es-solo-sueltos", cual === "regiones");
+        if (dibujos) {
+            dibujos.classList.toggle("es-apagada", cual === "nada");
+        }
+    };
+    casillas.forEach((casilla) => casilla.addEventListener("change", aplicar));
+    aplicar();
 }
 
 function apagarConCasilla(caja, cual, selector) {

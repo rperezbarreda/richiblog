@@ -1,0 +1,440 @@
+/* =========================================
+   LA LÍNEA DE TIEMPO DE LA WIKI
+   =========================================
+   web/wiki/linea-de-tiempo/linea_de_tiempo.html. La escribe entera
+   herramientas/3-generadores/generar-linea-tiempo.py a partir de
+   datos/wiki/linea-de-tiempo.json; el marco de la página es el de un
+   artículo de la wiki (.mundo-page, en mundo.css).
+
+   CÓMO ESTÁ HECHA. Una caja (.linea) con listas ordenadas (.linea-lista)
+   de eventos, del más antiguo al más reciente. Si hay ERAS, cada era es un
+   <section class="linea-era"> con su cabecera (.linea-era-cabecera, que
+   mide hasta lo siguiente igual que un evento) y su lista; lo que cae
+   fuera de toda era va en listas sueltas. Cada <li> de evento lleva:
+
+       .linea-punto     el redondel, sobre la línea
+       .linea-tarjeta   la fecha, el nombre (enlace a su página) y el resumen
+       .linea-tramo     el trozo de línea HASTA EL SIGUIENTE evento, con las
+                        rayitas de los años dentro
+
+   El <li> mide lo que diga --tramo (lo calcula el generador según los años
+   que hay hasta el siguiente), y si su tarjeta es más alta, lo que mida la
+   tarjeta: el tramo se estira con él y las rayitas van en %, así que se
+   reparten bien igual. El último evento no lleva tramo: ahí acaba la línea.
+
+   NADA DE position: sticky, grid order ni display: contents (fallan en
+   algún navegador de los que se usan aquí). Todo es flujo normal y
+   position: absolute dentro de cada <li>.
+
+   En pantallas estrechas la línea se va a la izquierda y todas las tarjetas
+   a la derecha (mundo-linea.responsive.css). */
+
+.linea-page {
+    /* Lo que hay a cada lado de la línea antes de que empiece una tarjeta:
+       ahí van las rayitas con su año y el palito que une la tarjeta con su
+       punto. Lo más largo que va ahí es un año abreviado con su sigla
+       ("139 M AEM", unos 4 rem en la letra de las rayas). */
+    --linea-hueco: 5rem;
+    /* Dónde va la línea, desde la izquierda de la lista. */
+    --linea-eje: 50%;
+    --linea-grosor: 6px;
+    --linea-color: var(--muted);
+    --linea-punto: 1.1rem;
+}
+
+.linea {
+    position: relative;
+    margin: 0;
+    /* Arriba, medio punto: el primero va centrado en el borde de arriba de
+       su <li>. */
+    padding: calc(var(--linea-punto) / 2 + 8px) 0 16px;
+    list-style: none;
+}
+
+/* Cada lista de eventos: una sola si no hay eras, o una por era. */
+.linea-lista {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.linea-evento {
+    position: relative;
+    /* Sin esto, el margen negativo de arriba de la tarjeta se sale del
+       <li> (los márgenes de un primer hijo «atraviesan» al padre) y
+       arrastra el <li> entero hacia arriba, punto incluido: la tarjeta
+       quedaba con el borde de arriba a la altura del punto en vez de con
+       la fecha. flow-root lo encierra. */
+    display: flow-root;
+    /* box-sizing de serie es border-box en este sitio, así que min-height
+       cuenta el padding: el tramo mide eso y ni un píxel más. */
+    min-height: var(--tramo, 0);
+    margin: 0;
+    /* Lo que queda entre el final de una tarjeta y el punto del siguiente
+       cuando la tarjeta es la que manda. Más que la subida de la tarjeta
+       de abajo (ver .linea-tarjeta), para que no se toquen. */
+    padding: 0 0 1.75rem;
+}
+
+.linea-evento.es-ultimo {
+    padding-bottom: 0;
+}
+
+/* LAS ERAS. Cada una es un <section> que va desde el año en que empieza
+   (su borde de arriba, con la raya de puntos) hasta el principio de la
+   siguiente, o hasta su final si deja un hueco sin era detrás. Se tiñe de
+   un tono muy suave, una sí y otra menos, para que se vea dónde acaba una
+   y empieza la otra sin tapar nada: las tarjetas van encima, con su fondo.
+
+   El tinte es un ::before con opacidad y no un color-mix(), que en algún
+   navegador de los que se usan aquí todavía no está. */
+.linea-era {
+    position: relative;
+    /* La trampa de siempre: base.css le da a TODA <section> height: 100%,
+       overflow-y: auto, 100 px de relleno arriba y abajo y flex centrado,
+       porque allí una sección es una pantalla entera. Aquí es un trozo de
+       la línea, y ese relleno partía la línea en dos con un hueco de 70 px
+       entre una era y la siguiente. */
+    display: block;
+    height: auto;
+    overflow: visible;
+    padding: 0;
+}
+
+.linea-era::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: var(--yellow);
+    opacity: 0.07;
+    pointer-events: none;
+}
+
+.linea-era.es-impar::before {
+    opacity: 0.035;
+}
+
+/* Los años de las rayitas y lo que dice un corte van sobre su propio
+   fondo opaco: encima de la franja de color de una era, el texto pequeño
+   se quedaba por debajo de Lc 75 (medido: 67 en «tranquilo», 69 en el
+   claro). Así se lee igual dentro y fuera de las eras. */
+.linea-raya-anyo,
+.linea-corte-texto {
+    padding: 1px 3px;
+    background: var(--purple);
+}
+
+/* Una era con su propio color ("color" en el JSON): la franja de ese
+   color, algo más marcada, y una banda gruesa a la izquierda del rótulo.
+   El texto sigue con los colores del tema: un color cualquiera no tiene
+   por qué leerse bien en los diez. */
+.linea-era[style*="--era-color"]::before {
+    background: var(--era-color);
+    opacity: 0.16;
+}
+
+.linea-era[style*="--era-color"] .linea-era-rotulo {
+    border-left: 8px solid var(--era-color);
+}
+
+.linea-era::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    right: 0;
+    left: 0;
+    border-top: 2px dashed var(--yellow);
+    pointer-events: none;
+}
+
+/* La fila del principio de una era: mide, como un evento, lo que haya
+   hasta lo siguiente (--tramo), y lleva el rótulo con su nombre encima de
+   la línea. */
+.linea-era-cabecera,
+.linea-era-fin {
+    position: relative;
+    display: flow-root;
+    min-height: var(--tramo, 0);
+    padding: 0.6rem 0 1.75rem;
+}
+
+.linea-era-cabecera.es-ultimo,
+.linea-era-fin.es-ultimo {
+    min-height: 0;
+    padding-bottom: 0.6rem;
+}
+
+.linea-era-rotulo {
+    position: relative;
+    z-index: 2;
+    width: fit-content;
+    max-width: min(80%, 26rem);
+    margin: 0 auto;
+    padding: 0.4rem 0.9rem 0.5rem;
+    border: 2px solid var(--yellow);
+    /* Opaco: --surface (el de la caja) es un 94 % y dejaba ver la línea y
+       los años de las rayitas por detrás del texto. */
+    background: var(--purple);
+    text-align: center;
+}
+
+.linea-era-nombre {
+    margin: 0;
+    color: var(--yellow);
+    font-family: var(--fuente-mono);
+    font-size: 1rem;
+    font-weight: 400;
+    letter-spacing: 1px;
+    line-height: 1.25;
+    text-transform: uppercase;
+}
+
+.linea-era-fechas {
+    margin: 0.15rem 0 0;
+    color: var(--muted);
+    font-family: var(--fuente-mono);
+    font-size: 0.8rem;
+}
+
+.linea-era-resumen {
+    margin: 0.35rem 0 0;
+    color: var(--white);
+    font-size: 0.85rem;
+    line-height: 1.45;
+}
+
+/* «Hoy»: donde acaba la línea. */
+.linea-hoy {
+    position: relative;
+    padding: 0.4rem 0 0.8rem;
+}
+
+.linea-hoy-texto {
+    position: relative;
+    z-index: 2;
+    width: fit-content;
+    margin: 0 auto;
+    padding: 0.2rem 0.7rem;
+    border: 2px solid var(--muted);
+    background: var(--purple);
+    color: var(--white);
+    font-family: var(--fuente-mono);
+    font-size: 0.8rem;
+}
+
+/* Donde acaba una era que no tiene otra justo detrás. */
+.linea-era-fin-texto {
+    position: relative;
+    z-index: 2;
+    width: fit-content;
+    margin: 0 auto;
+    padding: 0.15rem 0.6rem;
+    border: 1px dashed var(--yellow);
+    background: var(--purple);
+    color: var(--muted);
+    font-family: var(--fuente-mono);
+    font-size: 0.75rem;
+}
+
+/* EL TRAMO: la línea hasta el siguiente punto. */
+.linea-tramo {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: var(--linea-eje);
+    width: var(--linea-grosor);
+    margin-left: calc(var(--linea-grosor) / -2);
+    border-radius: 3px;
+    background: var(--linea-color);
+}
+
+/* EL PUNTO, centrado sobre el arranque de su tramo. */
+.linea-punto {
+    position: absolute;
+    top: 0;
+    left: var(--linea-eje);
+    z-index: 1;
+    width: var(--linea-punto);
+    height: var(--linea-punto);
+    margin: calc(var(--linea-punto) / -2) 0 0 calc(var(--linea-punto) / -2);
+    border: 3px solid var(--linea-color);
+    border-radius: 50%;
+    background: var(--yellow);
+}
+
+/* LAS RAYITAS DE LOS AÑOS. Cada una va en el % del tramo que le toca. */
+.linea-raya {
+    position: absolute;
+    left: 50%;
+    width: 14px;
+    height: 3px;
+    margin: -1.5px 0 0 -7px;
+    border-radius: 2px;
+    background: var(--linea-color);
+}
+
+.linea-raya.es-grande {
+    width: 22px;
+    margin-left: -11px;
+}
+
+/* El año, a la derecha de la línea y pegado a su raya. Queda dentro del
+   hueco que hay hasta las tarjetas de ese lado (--linea-hueco). */
+.linea-raya-anyo {
+    position: absolute;
+    top: 50%;
+    left: calc(100% + 6px);
+    transform: translateY(-50%);
+    color: var(--muted);
+    font-family: var(--fuente-mono);
+    font-size: 0.7rem;
+    line-height: 1;
+    white-space: nowrap;
+}
+
+/* EL CORTE: un hueco tan grande que no cabe a escala. La línea se
+   interrumpe con un «≈» y se dice cuántos años faltan. */
+.linea-corte {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    display: block;
+    transform: translate(-50%, -50%);
+    padding: 4px 0;
+    /* El mismo fondo que la caja de la página (<main>), para que la línea
+       se vea interrumpida y no tapada por un cuadradito de otro color. */
+    background: var(--surface);
+}
+
+.linea-corte-signo {
+    display: block;
+    color: var(--white);
+    font-size: 1.4rem;
+    font-weight: 700;
+    line-height: 1;
+    text-align: center;
+}
+
+.linea-corte-texto {
+    position: absolute;
+    top: 50%;
+    left: calc(100% + 10px);
+    transform: translateY(-50%);
+    /* En dos líneas («12 623 / años»): en una se metía en el hueco de
+       las tarjetas del otro lado. */
+    width: 3.4rem;
+    color: var(--muted);
+    font-family: var(--fuente-mono);
+    font-size: 0.7rem;
+    line-height: 1.2;
+}
+
+/* LA TARJETA. Sube un poco para que la fecha quede a la altura de su
+   punto, y el palito (::before) la une con él. */
+.linea-tarjeta {
+    position: relative;
+    width: calc(var(--linea-eje) - var(--linea-hueco));
+    margin-top: -0.95rem;
+    padding: 0.45rem 0.75rem 0.6rem;
+    border: 2px solid var(--yellow);
+    background: var(--purple-lighter);
+}
+
+.linea-evento.es-derecha .linea-tarjeta {
+    margin-left: calc(var(--linea-eje) + var(--linea-hueco));
+    width: calc(100% - var(--linea-eje) - var(--linea-hueco));
+}
+
+.linea-tarjeta::before {
+    content: "";
+    position: absolute;
+    top: 0.95rem;
+    left: 100%;
+    width: calc(var(--linea-hueco) - var(--linea-punto) / 2 + 2px);
+    height: 2px;
+    margin-top: -1px;
+    background: var(--yellow);
+}
+
+.linea-evento.es-derecha .linea-tarjeta::before {
+    right: 100%;
+    left: auto;
+}
+
+/* Toda la tarjeta lleva al evento, no solo el nombre: el enlace se estira
+   por encima con ::after. El foco se ve en la tarjeta entera. */
+.linea-tarjeta:hover,
+.linea-tarjeta:focus-within {
+    background: var(--purple);
+}
+
+.linea-tarjeta:focus-within {
+    outline: 2px solid var(--yellow);
+    outline-offset: 3px;
+}
+
+.linea-fecha {
+    margin: 0;
+    color: var(--yellow);
+    font-family: var(--fuente-mono);
+    font-size: 0.85rem;
+    line-height: 1.2;
+}
+
+.linea-nombre {
+    margin: 0.15rem 0 0;
+    font-family: var(--fuente-texto);
+    font-size: 1.05rem;
+    line-height: 1.25;
+}
+
+.linea-enlace {
+    color: var(--white);
+    text-decoration: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 3px;
+}
+
+.linea-enlace::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+}
+
+.linea-enlace:focus-visible {
+    outline: none; /* lo pinta la tarjeta, ver arriba */
+}
+
+.linea-resumen {
+    margin: 0.3rem 0 0;
+    color: var(--muted);
+    font-size: 0.85rem;
+    line-height: 1.45;
+}
+
+.linea-vacia {
+    margin: 0;
+    color: var(--muted);
+}
+
+/* En la página de cada evento, el año entre paréntesis de «antes» y
+   «después». */
+.linea-ficha-anyo {
+    color: var(--muted);
+    font-family: var(--fuente-mono);
+    font-size: 0.85em;
+    white-space: nowrap;
+}
+
+/* Al llegar desde «verlo en su sitio» o «volver a la línea», el evento
+   del que vienes se marca un momento. */
+.linea-evento:target .linea-tarjeta {
+    outline: 3px solid var(--yellow);
+    outline-offset: 3px;
+}
+
+@media print {
+    .linea-tarjeta {
+        break-inside: avoid;
+    }
+}

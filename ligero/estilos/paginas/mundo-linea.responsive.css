@@ -1,0 +1,35 @@
+/* Copia sin comentarios. La escribe actualizar-cabeceras.py: no se edita.
+   fuente: /estilos/paginas/mundo-linea.responsive.css
+*/
+@media (max-width: 860px) {
+    .linea-page {
+        --linea-eje: 4.6rem;
+        --linea-hueco: 1.4rem;
+    }
+    .linea-evento.es-izquierda .linea-tarjeta,
+    .linea-evento.es-derecha .linea-tarjeta {
+        width: auto;
+        margin-left: calc(var(--linea-eje) + var(--linea-hueco));
+    }
+    .linea-evento.es-izquierda .linea-tarjeta::before,
+    .linea-evento.es-derecha .linea-tarjeta::before {
+        right: 100%;
+        left: auto;
+    }
+    .linea-era-rotulo,
+    .linea-era-fin-texto,
+    .linea-hoy-texto {
+        max-width: none;
+        margin-left: calc(var(--linea-eje) - 0.8rem);
+        text-align: left;
+    }
+    .linea-raya-anyo,
+    .linea-corte-texto {
+        right: calc(100% + 6px);
+        left: auto;
+    }
+    .linea-corte-texto {
+        right: calc(100% + 10px);
+        text-align: right;
+    }
+}

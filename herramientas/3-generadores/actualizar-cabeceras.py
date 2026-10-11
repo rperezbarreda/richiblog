@@ -196,7 +196,10 @@ def hojas_de(ruta):
     # cada mapa, que lleva lo suyo (el zoom, las capas y el dibujo).
     es_mundo = "/web/wiki/" in ruta
     es_mundo_indice = ruta.endswith("/wiki/index_wiki.html")
-    es_mundo_mapa = bool(re.search(r"/wiki/mapa_[^/]+\.html$", ruta))
+    es_mundo_mapa = bool(re.search(r"/wiki/(?:.+/)?mapa_[^/]+\.html$", ruta))
+    # Y la línea de tiempo, que es un artículo más con su propia hoja (la
+    # escribe generar-linea-tiempo.py; los eventos son artículos normales).
+    es_mundo_linea = es_mundo and ruta.endswith("/linea_de_tiempo.html")
     es_404 = ruta.endswith("/not_found.html")
     # La página de un reto de escritura: vive en una subcarpeta de
     # relatos/ y se llama index_<loquesea>.html. No es una página de
@@ -350,16 +353,18 @@ def hojas_de(ruta):
         # Marcos propios, como el changelog o las recomendaciones.
         hojas += ["/estilos/paginas/mundo.css"]
         if es_mundo_indice:
-            hojas += [
-                "/estilos/componentes/filtros.css",
-                "/estilos/componentes/filtros.responsive.css",
-                "/estilos/componentes/buscador.css",
-            ]
+            # Solo el buscador: los botones de etiquetas se quitaron (eran
+            # treinta y no ayudaban a encontrar nada que no encuentre él).
+            hojas += ["/estilos/componentes/buscador.css"]
         if es_mundo_mapa:
             hojas += ["/estilos/paginas/mundo-mapa.css"]
+        if es_mundo_linea:
+            hojas += ["/estilos/paginas/mundo-linea.css"]
         hojas += ["/estilos/paginas/mundo.responsive.css"]
         if es_mundo_mapa:
             hojas += ["/estilos/paginas/mundo-mapa.responsive.css"]
+        if es_mundo_linea:
+            hojas += ["/estilos/paginas/mundo-linea.responsive.css"]
     elif es_ando:
         # Marcos propios, como el changelog o las recomendaciones. Y el
         # post-it, que aquí es un bloque más de la rejilla.
@@ -465,7 +470,7 @@ def scripts_de(ruta):
     es_ando = "/en_lo_que_ando/" in camino
     es_mundo = "/web/wiki/" in camino
     es_mundo_indice = camino.endswith("/wiki/index_wiki")
-    es_mundo_mapa = bool(re.search(r"/wiki/mapa_[^/]+$", camino))
+    es_mundo_mapa = bool(re.search(r"/wiki/(?:.+/)?mapa_[^/]+$", camino))
     # Páginas de lectura: una entrada del blog (no el archivo del año)
     # o un relato (no su índice). Ahí va la ventana de "sigue leyendo".
     es_lectura = bool(
@@ -662,10 +667,7 @@ def scripts_de(ruta):
             js.append("/scripts/paginas/mundo-mapa.js")
         else:
             if es_mundo_indice:
-                js += [
-                    "/scripts/componentes/buscador.js",
-                    "/scripts/componentes/filtros.js",
-                ]
+                js += ["/scripts/componentes/buscador.js"]
             js.append("/scripts/paginas/mundo.js")
     elif es_ando:
         # tareas.js ANTES que el de la página: ése pinta la lista de

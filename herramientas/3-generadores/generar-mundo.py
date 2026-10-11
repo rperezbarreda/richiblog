@@ -2,14 +2,15 @@
 # =========================================
 # LA WIKI DEL MUNDO
 # =========================================
-# Convierte la carpeta donde escribes el mundo —una bóveda de Chronicler,
-# que son archivos .md de toda la vida— en páginas HTML del sitio.
+# Convierte la carpeta donde escribes el mundo —archivos .md de toda la
+# vida, escritos a mano (empezó siendo una bóveda de Chronicler, y por eso
+# entiende su formato)— en páginas HTML del sitio.
 #
-#     wiki/                         lo que escribes (Chronicler apunta aquí)
-#         lugares/Valderín.md
+#     wiki/                         lo que escribes
+#         lugares/Valderín.md       (nueva-pagina-wiki.py los empieza)
 #         gente/Apaaka.md
-#         imagenes/valderin.webp
-#         Mapamundi de Cralëa.cmap   un mapa interactivo
+#         _imagenes/valderin.webp
+#         Mapamundi de Cralëa.cmap   el mapa interactivo, de Chronicler
 #
 #     web/wiki/valderin.html        lo que sale
 #     web/wiki/mapa_mapamundi_de_cralea.html   el mapa, en SVG
@@ -65,6 +66,11 @@ from comun import (RAIZ, es_del_mundo, esta_fuera, wiki_fuera, escribir_json,
 from mundo_formato import (Avisos, Conversor, Guardados,  # noqa: E402
                             leer_frontmatter, partir)
 import mundo_mapas  # noqa: E402
+# La línea de tiempo: sus eventos se enlazan desde la bóveda ([[La Gran
+# Sequía]]) como si fueran páginas, y al revés. Lo suyo está ahí.
+import mundo_linea  # noqa: E402
+# Los mapas de situación de cada país (un recorte del mapa con él resaltado).
+import mundo_situacion  # noqa: E402
 
 VAULT = RAIZ / "wiki"
 SALIDA = RAIZ / "web" / "wiki"
@@ -379,7 +385,7 @@ def pintar_infobox(datos, filas, imagenes_html):
     return "".join(trozos)
 
 
-def imagenes_de_la_ficha(datos, ruta_de_imagen, avisos):
+def imagenes_de_la_ficha(datos, ruta_de_imagen, avisos, situacion=None):
     """El campo "image": una sola, un carrusel, o un carrusel con pies.
 
         image: valderin.webp
@@ -387,9 +393,9 @@ def imagenes_de_la_ficha(datos, ruta_de_imagen, avisos):
         image: [[dia.webp, "De día"], [noche.webp, "De noche"]]
     """
     crudo = datos.get("image")
-    if not crudo:
-        return ""
     fotos = []
+    if not crudo:
+        crudo = []
     for item in (crudo if isinstance(crudo, list) else [crudo]):
         if isinstance(item, list):
             fotos.append((str(item[0]), str(item[1]) if len(item) > 1 else ""))
@@ -397,6 +403,23 @@ def imagenes_de_la_ficha(datos, ruta_de_imagen, avisos):
             fotos.append((str(item), ""))
 
     trozos = []
+    # EL MAPA DE SITUACIÓN, si la página se llama como una forma de un mapa
+    # (ver mundo_situacion.py). El último, debajo de la imagen que tenga.
+    if situacion:
+        url, titulo_pagina, mapa_titulo, mapa_url = situacion
+        trozos_situacion = (
+            '<li class="mundo-ficha-foto"><figure>'
+            '<img class="mundo-ficha-img" src="%s" alt="%s" width="%d" height="%d"'
+            ' loading="lazy" decoding="async">'
+            '<figcaption>Dónde está, en el <a class="mundo-enlace" href="%s">%s</a></figcaption>'
+            '</figure></li>'
+            % (html.escape(url, quote=True),
+               html.escape("Mapa de situación: %s resaltado en el %s" % (titulo_pagina, mapa_titulo),
+                           quote=True),
+               mundo_situacion.ANCHO, mundo_situacion.ALTO,
+               html.escape(mapa_url, quote=True), html.escape(mapa_titulo)))
+    else:
+        trozos_situacion = ""
     for nombre, pie in fotos:
         ruta = ruta_de_imagen(nombre.strip())
         if not ruta:
@@ -408,6 +431,8 @@ def imagenes_de_la_ficha(datos, ruta_de_imagen, avisos):
         if pie:
             foto = "<figure>%s<figcaption>%s</figcaption></figure>" % (foto, html.escape(pie))
         trozos.append('<li class="mundo-ficha-foto">%s</li>' % foto)
+    if trozos_situacion:
+        trozos.append(trozos_situacion)
     if not trozos:
         return ""
     if len(trozos) == 1:
@@ -429,11 +454,20 @@ def poner_slugs(paginas, mapas):
     dirección en la web y por tanto lo que no puede repetirse. Los mapas
     llevan "mapa_" delante: así se distinguen de un vistazo en web/wiki/ y
     una página y un mapa con el mismo nombre no se pisan."""
+    # EN LAS MISMAS CARPETAS QUE EN LA BÓVEDA: wiki/Mapamundi/Azarasia/
+    # Reino de Prunia.md sale en web/wiki/mapamundi/azarasia/
+    # reino_de_prunia.html. Cada trozo del camino pasa por slug(), igual que
+    # el nombre: sin tildes ni espacios, que es como van las direcciones.
+    def _carpeta(cosa):
+        trozos = [slug(t) for t in str(cosa.get("carpeta") or "").split("/")
+                  if t not in ("", ".")]
+        return "/".join(trozos) + "/" if trozos else ""
+
     for ficha in paginas.values():
-        ficha["slug"] = slug(ficha["nombre"])
+        ficha["slug"] = _carpeta(ficha) + slug(ficha["nombre"])
         ficha["url"] = URL + ficha["slug"] + ".html"
     for mapa in mapas.values():
-        mapa["slug"] = "mapa_" + slug(mapa["nombre"])
+        mapa["slug"] = _carpeta(mapa) + "mapa_" + slug(mapa["nombre"])
         mapa["url"] = URL + mapa["slug"] + ".html"
 
     vistos = {}
@@ -446,7 +480,7 @@ def poner_slugs(paginas, mapas):
         vistos[cosa["slug"]] = cosa["nombre"]
 
 
-def convertir_todo(paginas, imagenes, mapas, avisos_por_pagina):
+def convertir_todo(paginas, imagenes, mapas, avisos_por_pagina, eventos=None, situaciones=None):
     """Convierte cada página y devuelve lo que hace falta para escribirlas.
     Se hace en dos vueltas porque una página necesita saber de las demás:
     qué páginas existen (para los enlaces rojos) y quién la enlaza (para
@@ -462,6 +496,10 @@ def convertir_todo(paginas, imagenes, mapas, avisos_por_pagina):
         mapa = mapas.get(clave)
         if mapa:
             return mapa["url"], True
+        # Y a un evento de la línea de tiempo, por su nombre.
+        evento = (eventos or {}).get(clave)
+        if evento:
+            return evento["url"], True
         return URL + slug(nombre) + ".html", False
 
     indices = indice_de_imagenes(imagenes)
@@ -521,7 +559,8 @@ def convertir_todo(paginas, imagenes, mapas, avisos_por_pagina):
         ficha["ficha_html"] = pintar_infobox(
             datos,
             filas_de_la_infobox(datos, lambda v: _una_linea(chico, v)),
-            imagenes_de_la_ficha(datos, ruta_de_imagen, avisos),
+            imagenes_de_la_ficha(datos, ruta_de_imagen, avisos,
+                                 (situaciones or {}).get(ficha["nombre"].strip().lower())),
         )
         ficha["enlaces"] += chico.enlaces
         # El resumen para el buscador y para el índice: el primer párrafo,
@@ -683,11 +722,24 @@ def convertir_mapas(mapas, paginas, imagenes, avisos_por_pagina, detalle):
         otro = mapas.get(nombre.strip().lower())
         return (otro["url"], True) if otro else ("", False)
 
+    # QUÉ PAÍS ES DE QUÉ REGIÓN, según las fichas de las páginas: el
+    # campo «región» ([[Partaria]]). Con eso el mapa sabe qué formas son
+    # regiones y cuáles países (ver niveles() en mundo_mapas.py).
+    region_de = {}
+    for ficha in paginas.values():
+        valor = ficha["datos"].get("región") or ficha["datos"].get("region")
+        if not valor:
+            continue
+        nombre = re.sub(r"^\[\[|\]\]$", "", str(valor).strip()).split("|")[0].strip()
+        if nombre:
+            region_de[ficha["nombre"].strip().lower()] = nombre.lower()
+
     for mapa in sorted(mapas.values(), key=lambda m: m["nombre"].lower()):
         leido, avisos = mapa["leido"], mapa["avisos"]
         cuaderno[0] = avisos
         hecho = mundo_mapas.pintar(leido, de_pagina, de_mapa, de_imagen,
-                                   detalle=detalle, avisar=avisos.di)
+                                   detalle=detalle, avisar=avisos.di,
+                                   region_de=region_de)
         mapa["titulo"] = leido["titulo"] or mapa["nombre"]
         mapa["ancho"], mapa["alto"] = leido["ancho"], leido["alto"]
         mapa["svg"] = hecho["svg"]
@@ -698,13 +750,14 @@ def convertir_mapas(mapas, paginas, imagenes, avisos_por_pagina, detalle):
         # regiones que apagar.
         hay_formas = bool(hecho["dibujo"]) or any(s["tipo"] == "forma" for s in hecho["sitios"])
         hay_pines = any(s["tipo"] == "pin" for s in hecho["sitios"])
-        mapa["mandos"] = mundo_mapas.pintar_mandos(hecho["capas"], hay_formas, hay_pines)
+        mapa["mandos"] = mundo_mapas.pintar_mandos(hecho["capas"], hay_formas, hay_pines,
+                                                   hecho.get("niveles", False))
         mapa["puntos"] = hecho["puntos"]
         mapa["dibujo"] = hecho["dibujo"]
         mapa["escondidos"] = hecho["escondidos"]
         # Y la silueta del mapa, para la portada de la wiki.
-        mapa["vista"] = mundo_mapas.pintar_vista(leido)
-        mapa["vista_url"] = "/imagenes/wiki/vista_%s.svg" % mapa["slug"]
+        mapa["vista"] = mundo_mapas.pintar_vista(leido, region_de=region_de)
+        mapa["vista_url"] = "/imagenes/wiki/vista_%s.svg" % mapa["slug"].replace("/", "_")
 
         # QUIÉN SALE EN QUÉ MAPA. Una región que lleva a una página es un
         # enlace a esa página, así que el mapa aparece en su "se habla de
@@ -819,6 +872,7 @@ def escribir_mapas(mapas, probar):
         ):
             relleno = relleno.replace(marca, valor)
         destino = SALIDA / (mapa["slug"] + ".html")
+        destino.parent.mkdir(parents=True, exist_ok=True)
         if not probar and (not destino.is_file() or leer_texto(destino)[0] != relleno):
             escribir_texto(destino, relleno)
             escritos += 1
@@ -856,10 +910,12 @@ def pintar_etiquetas(etiquetas):
         return ""
     trozos = ['<p class="mundo-etiquetas"><span class="mundo-etiquetas-label">etiquetas:</span>']
     for e in etiquetas:
-        # La etiqueta va codificada para la dirección: una con espacios o
+        # Lleva a la portada con la etiqueta buscada (allí ya no hay
+        # botones de etiquetas, pero el buscador mira las etiquetas de cada
+        # página). Va codificada para la dirección: una con espacios o
         # con tildes («Mar Ciego», «religión») dejaba una dirección rota
         # que el navegador apañaba como podía.
-        trozos.append('<a class="mundo-etiqueta" href="%sindex_wiki.html?cat=%s">%s</a>'
+        trozos.append('<a class="mundo-etiqueta" href="%sindex_wiki.html?buscar=%s">%s</a>'
                       % (URL, html.escape(urllib.parse.quote(e), quote=True), html.escape(e)))
     trozos.append("</p>")
     return "".join(trozos)
@@ -872,8 +928,9 @@ def pintar_backlinks(ficha):
     for o in ficha["backlinks"]:
         # Un mapa se avisa: si no, un nombre suelto en esta lista parece
         # otro artículo y al pulsarlo aparece un dibujo.
-        nota = ('<span class="mundo-backlink-nota">mapa</span>'
-                if o.get("mapa") else "")
+        nota = ('<span class="mundo-backlink-nota">mapa</span>' if o.get("mapa")
+                else '<span class="mundo-backlink-nota">evento</span>' if o.get("evento")
+                else "")
         filas.append('<li><a class="mundo-enlace" href="%s">%s</a>%s</li>'
                      % (html.escape(o["url"], quote=True),
                         html.escape(o["titulo"]), nota))
@@ -904,6 +961,7 @@ def escribir_paginas(paginas, probar):
         ):
             relleno = relleno.replace(marca, valor)
         destino = SALIDA / (ficha["slug"] + ".html")
+        destino.parent.mkdir(parents=True, exist_ok=True)
         if not probar and (not destino.is_file() or leer_texto(destino)[0] != relleno):
             escribir_texto(destino, relleno)
             escritas += 1
@@ -948,7 +1006,27 @@ def leer_categorias():
         if not nombre or not isinstance(etiquetas, list):
             continue
         categorias.append((nombre, {_llano(e) for e in etiquetas if str(e).strip()}))
+        # El orden de los subapartados dentro de éste, si se da ("orden":
+        # ["Azarasia", "Partaria", …]). Si no, por orden alfabético.
+        orden = uno.get("orden")
+        if isinstance(orden, list):
+            ORDEN_DE_SUBAPARTADOS[nombre] = [_llano(o) for o in orden if str(o).strip()]
     return categorias
+
+
+ORDEN_DE_SUBAPARTADOS = {}
+
+
+def _orden_del_sub(grupo, sub):
+    """Para ordenar las fichas de un apartado por su subapartado: el que
+    diga "orden" en las categorías, y si no, por el nombre."""
+    if not sub:
+        return (-1, "")
+    primero = _llano(sub[0])
+    orden = ORDEN_DE_SUBAPARTADOS.get(grupo) or []
+    if primero in orden:
+        return (orden.index(primero), "")
+    return (len(orden), primero)
 
 
 def _llano(texto):
@@ -1017,7 +1095,10 @@ def escribir_indice(paginas, mapas, probar, categorias=()):
     # categorías: la portada los pinta según van llegando, así que el
     # orden se decide aquí y no en el navegador. «Lo demás» al final.
     orden = {nombre: n for n, (nombre, _) in enumerate(categorias)}
-    fichas.sort(key=lambda f: (orden.get(f["grupo"], len(orden)), f["titulo"].lower()))
+    # Y dentro de cada apartado, por subapartado: la portada los pinta en
+    # el orden en que le llegan.
+    fichas.sort(key=lambda f: (orden.get(f["grupo"], len(orden)),
+                               _orden_del_sub(f["grupo"], f["sub"]), f["titulo"].lower()))
     if not probar:
         escribir_json(INDICE, fichas)
     return fichas
@@ -1053,18 +1134,101 @@ def copiar_imagenes(imagenes, usadas, probar):
     return copiadas, pesadas, repetidas
 
 
+# =========================================
+# LOS MAPAS DE SITUACIÓN
+# =========================================
+
+SITUACION = IMAGENES / "situacion"
+
+
+def preparar_situaciones(paginas, mapas, imagenes, probar):
+    """Un mapa de situación por cada página que se llame como una forma con
+    nombre de algún mapa. Devuelve ({nombre en minúsculas: (url, título de
+    la página, título del mapa, url del mapa)}, cuántos se han dibujado)."""
+    if not mundo_situacion.HAY_PILLOW or not mapas:
+        return {}, 0
+    from PIL import Image
+    Image.MAX_IMAGE_PIXELS = None
+    indices = indice_de_imagenes(imagenes)
+    salida, hechas, buenas = {}, 0, set()
+    este = Path(mundo_situacion.__file__)
+    for mapa in sorted(mapas.values(), key=lambda m: m["nombre"].lower()):
+        crudo, _ = leer_texto(mapa["archivo"])
+        leido = mundo_mapas.leer_cmap(crudo, lambda *a: None)
+        if not leido:
+            continue
+        fondo_archivo = None
+        for capa in leido["capas"]:
+            if capa.get("imagen"):
+                fondo_archivo, _ = pedir_imagen(indices, capa["imagen"])
+                if fondo_archivo:
+                    break
+        if not fondo_archivo:
+            continue
+        formas = {}
+        for forma in leido["formas"]:
+            nombre = (forma["etiqueta"] or forma["pagina"] or "").strip().lower()
+            if nombre:
+                formas.setdefault(nombre, []).append(forma["puntos"])
+        # Las fronteras finas de alrededor: las de los países, no las de
+        # las regiones (que pasan por encima de todo y lían el dibujo).
+        nivel = mundo_mapas.niveles(leido["formas"])
+        vecinos_todos = [(i, f["puntos"]) for i, f in enumerate(leido["formas"])
+                         if nivel.get(i) in ("pais", "suelto")]
+        titulo_mapa = leido.get("titulo") or mapa["nombre"]
+        fondo = None
+        for clave, ficha in paginas.items():
+            poligonos = formas.get(ficha["nombre"].strip().lower())
+            if not poligonos or clave in salida:
+                continue
+            archivo = slug(ficha["nombre"]) + ".webp"
+            destino = SITUACION / archivo
+            buenas.add(archivo)
+            if not probar and not mundo_situacion.al_dia(
+                    destino, [mapa["archivo"], fondo_archivo, este]):
+                if fondo is None:
+                    fondo = Image.open(fondo_archivo).convert("RGB")
+                vecinos = [p for _, p in vecinos_todos if p not in poligonos]
+                mundo_situacion.dibujar(fondo, leido["ancho"], leido["alto"],
+                                        poligonos, vecinos, destino)
+                hechas += 1
+            salida[clave] = ("/imagenes/wiki/situacion/" + archivo,
+                             str(ficha["datos"].get("title") if ficha.get("datos") else "")
+                             or ficha["nombre"], titulo_mapa, mapa["url"])
+    # Los de páginas o formas que ya no están.
+    if not probar and SITUACION.is_dir():
+        for viejo in SITUACION.glob("*.webp"):
+            if viejo.name not in buenas:
+                viejo.unlink()
+    return salida, hechas
+
+
 def limpiar_lo_que_sobra(paginas, mapas, probar):
-    """Las páginas de web/wiki/ que ya no tienen su .md (o su .cmap): se
-    han borrado o renombrado en la bóveda. Se quitan, porque si no se
-    quedan colgando en el sitemap y en el buscador."""
+    """Las páginas de web/wiki/ (y sus subcarpetas) que ya no tienen su .md
+    (o su .cmap): se han borrado, renombrado o cambiado de carpeta en la
+    bóveda. Se quitan, porque si no se quedan colgando en el sitemap y en
+    el buscador. Y las carpetas que se queden vacías, también."""
     buenos = ({f["slug"] + ".html" for f in paginas.values()}
               | {m["slug"] + ".html" for m in mapas.values()}
               | {"index_wiki.html"})
-    sobran = [p for p in SALIDA.glob("*.html") if p.name not in buenos] if SALIDA.is_dir() else []
+    sobran = []
+    if SALIDA.is_dir():
+        for p in sorted(SALIDA.rglob("*.html")):
+            relativo = p.relative_to(SALIDA).as_posix()
+            # Lo de la línea de tiempo no sale de la bóveda: lo escribe y
+            # lo limpia mundo_linea.py (en web/wiki/linea-de-tiempo/).
+            if mundo_linea.es_de_la_linea(p):
+                continue
+            if relativo not in buenos:
+                sobran.append(p)
     if not probar:
         for p in sobran:
             p.unlink()
-    return [p.name for p in sobran]
+        for carpeta in sorted((c for c in SALIDA.rglob("*") if c.is_dir()),
+                              key=lambda c: -len(c.parts)):
+            if not any(carpeta.iterdir()):
+                carpeta.rmdir()
+    return [p.relative_to(SALIDA).as_posix() for p in sobran]
 
 
 # =========================================
@@ -1096,8 +1260,20 @@ def main():
 
     poner_slugs(paginas, mapas)
     avisos_por_pagina = []
-    paginas = convertir_todo(paginas, imagenes, mapas, avisos_por_pagina)
+    _, eventos = mundo_linea.leer()
+    eventos_por_nombre = mundo_linea.por_nombre(eventos)
+    situaciones, hechas_sit = preparar_situaciones(paginas, mapas, imagenes, args.probar)
+    paginas = convertir_todo(paginas, imagenes, mapas, avisos_por_pagina, eventos_por_nombre,
+                             situaciones)
     capas = convertir_mapas(mapas, paginas, imagenes, avisos_por_pagina, args.detalle)
+    # Un evento que nombra una página ([[Valderín]] en su texto) sale en el
+    # «se habla de esto en» de esa página, igual que un artículo o un mapa.
+    for evento in eventos:
+        for nombre in set(n.lower() for n in mundo_linea.enlaces_de(evento)):
+            otra = paginas.get(nombre)
+            if otra:
+                otra["backlinks"].append({"titulo": evento["nombre"], "url": evento["url"],
+                                          "mapa": False, "evento": True})
     # Los mapas han añadido backlinks después de que convertir_todo los
     # ordenara, así que se vuelven a ordenar con todo dentro.
     for ficha in paginas.values():
@@ -1120,6 +1296,9 @@ def main():
 
     print(f"\n  {len(paginas)} página(s) en la bóveda"
           + (f" y {len(mapas)} mapa(s)." if mapas else "."))
+    if situaciones:
+        print(f"  {len(situaciones)} mapa(s) de situación"
+              + (f", {hechas_sit} dibujado(s) ahora." if hechas_sit else ", ya al día."))
     if args.probar:
         print("  (--probar: no se ha escrito nada)")
     else:
@@ -1137,7 +1316,8 @@ def main():
     faltan = {}
     for ficha in paginas.values():
         for nombre in ficha["enlaces"]:
-            if nombre.strip().lower() not in paginas and nombre.strip().lower() not in mapas:
+            clave = nombre.strip().lower()
+            if clave not in paginas and clave not in mapas and clave not in eventos_por_nombre:
                 faltan.setdefault(nombre.strip(), []).append(ficha["titulo"])
     # Y lo mismo desde los mapas: una región dibujada que apunta a una
     # página que no está escrita. En un mapa esto es lo normal y es la
@@ -1290,6 +1470,17 @@ def main():
     #
     # Pasarlos siempre cuesta un par de segundos y no puede salir mal: los
     # cuatro miran lo que hay y solo escriben lo que de verdad cambia.
+    # LA LÍNEA DE TIEMPO, después de escribir las páginas y el índice: sus
+    # eventos dicen qué páginas los enlazan (y eso se mira en lo escrito) y
+    # su ficha va dentro de datos/wiki/mundo.json, que se acaba de rehacer.
+    linea = mundo_linea.generar(args.probar)
+    if linea["eventos"]:
+        print(f"\n  ---- la línea de tiempo: {len(linea['eventos'])} evento(s) ----")
+        for nombre, lista in linea["avisos"]:
+            print(f"  {nombre}")
+            for que, donde in lista:
+                print("     " + que + (": " + str(donde) if donde else ""))
+
     if not args.probar:
         print()
         pasar_generadores((

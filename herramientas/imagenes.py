@@ -96,6 +96,13 @@ SITIOS = {
         "lado": 1600,
         "cuadrada": False,
     },
+    "evento": {
+        "que": "la imagen de un evento de la línea de tiempo",
+        "carpeta": "imagenes/wiki/eventos",
+        "sufijo": "",
+        "lado": 1600,
+        "cuadrada": False,
+    },
     "blog": {
         "que": "una imagen de una entrada del blog",
         "carpeta": "imagenes/blog/{anyo}",

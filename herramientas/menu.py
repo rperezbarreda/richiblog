@@ -84,16 +84,16 @@ APARTADOS = [
         PUBLICAR,
     ]),
 
-    ("Wiki Cralëa", "traer la wiki de Chronicler y elegir qué se publica", [
-        ("Traer la wiki desde Chronicler",
-         "1-publicar/importar-mundo.py", [],
-         "Se trae lo que entra —páginas, mapas e imágenes— y lo publica."),
-        ("Elegir qué páginas entran en la wiki",
-         "1-publicar/importar-mundo.py", ["--elegir"],
-         "La lista con [x] y [ ]. Lo que quede fuera no se publica."),
-        ("Pasar la wiki a la web sin traer nada",
+    ("Wiki Cralëa", "escribir sus páginas, la línea de tiempo y pasarla a la web", [
+        ("Escribir una página nueva de la wiki",
+         "1-publicar/nueva-pagina-wiki.py", [],
+         "Crea el .md en wiki/ con su cabecera; luego lo escribes a mano."),
+        ("Llevar la línea de tiempo",
+         "1-publicar/linea-de-tiempo.py", [],
+         "Añadir, cambiar o quitar eventos. Cada uno tiene su página."),
+        ("Pasar la wiki a la web",
          "3-generadores/generar-mundo.py", [],
-         "Convierte lo que ya hay en la carpeta wiki/ en páginas."),
+         "Convierte los .md y el mapa de la carpeta wiki/ en páginas."),
     ]),
 
     ("Mi rincón", "en lo que ando, recomendaciones y los gatos", [

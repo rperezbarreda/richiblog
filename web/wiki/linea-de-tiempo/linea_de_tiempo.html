@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-WzJfmZ3zA0hDtnR6cKyKt1o+8g4NfGJTELgMCUrrBFw=' 'sha256-oTE6cjgemXW7aRTQClslYZ63TgpgQ/lGSr9GtNhYyhs='; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self' https://script.google.com https://script.googleusercontent.com; object-src 'none'; base-uri 'self'; form-action 'self'">
+    <!-- ==== TEMA ==== -->
+    <meta name="theme-color" content="#12091c">
+    <script>
+      (function () {
+        document.documentElement.classList.add("js");
+        try {
+          var temas = {
+            "claro": ["light", "#f3e1d6"],
+            "oscuro-puro": ["puro-oscuro", "#000000"],
+            "claro-puro": ["puro-claro", "#ffffff"],
+            "tranquilo": ["tranquilo", "#f2efe9"],
+            "tranquilo-oscuro": ["tranquilo-oscuro", "#1b1e22"],
+            "terminal-verde": ["terminal-verde", "#000000"],
+            "terminal-azul": ["terminal-azul", "#000000"],
+            "terminal-rojo": ["terminal-rojo", "#000000"],
+            "terminal-ambar": ["terminal-ambar", "#000000"]
+          };
+          var guardado = localStorage.getItem("richi-theme");
+          var elegido = temas[guardado];
+          if (!elegido && !guardado &&
+              window.matchMedia("(prefers-color-scheme: light)").matches) {
+            elegido = temas.claro;
+          }
+          if (elegido) {
+            document.documentElement.setAttribute("data-theme", elegido[0]);
+            var barra = document.querySelector('meta[name="theme-color"]');
+            if (barra) { barra.setAttribute("content", elegido[1]); }
+          }
+        } catch (e) {}
+      })();
+    </script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Línea de tiempo · Wiki Cralëa · El Blog de Richi</title>
+    <meta name="description" content="Línea de tiempo: 11 eventos, de 800.000.000 AEM a 753 DEM.">
+    <link rel="canonical" href="https://richi.blog/web/wiki/linea-de-tiempo/linea_de_tiempo.html">
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="El Blog de Richi">
+    <meta property="og:locale" content="es_ES">
+    <meta property="og:title" content="Línea de tiempo · Wiki Cralëa · El Blog de Richi">
+    <meta property="og:description" content="Línea de tiempo: 11 eventos, de 800.000.000 AEM a 753 DEM.">
+    <meta property="og:url" content="https://richi.blog/web/wiki/linea-de-tiempo/linea_de_tiempo.html">
+    <meta property="og:image" content="https://richi.blog/imagenes/meta/og.webp">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta property="og:image:alt" content="El Blog de Richi — ilustración de Richi sobre fondo morado">
+    <meta name="twitter:card" content="summary_large_image">
+    <link rel="icon" type="image/x-icon" href="/imagenes/favicon.ico">
+    <link rel="preload" href="/tipografias/space-grotesk-400.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="alternate" type="application/rss+xml" title="El Blog de Richi — blog, relatos y rol" href="/blog/rss.xml">
+    <!-- ==== ADELANTO DEL MENÚ ==== -->
+    <script>window.adelantoDeFragmentos={};try{window.adelantoDeFragmentos["/fragmentos/barra-lateral.html"]=fetch("/fragmentos/barra-lateral.html?v=50a31cd5").then(function(r){return r.ok?r.text():null}).catch(function(){return null})}catch(e){}</script>
+    <!-- ==== CSS ==== -->
+    <link rel="stylesheet" href="/estilos/paquete-comun.css?v=a7bebe47">
+    <link rel="stylesheet" href="/ligero/estilos/paginas/mundo.css?v=54a03352">
+    <link rel="stylesheet" href="/ligero/estilos/paginas/mundo-linea.css?v=b05bb292">
+    <link rel="stylesheet" href="/ligero/estilos/paginas/mundo.responsive.css?v=88a3cf05">
+    <link rel="stylesheet" href="/ligero/estilos/paginas/mundo-linea.responsive.css?v=c43efff0">
+    <link rel="stylesheet" href="/ligero/estilos/componentes/barra-lateral.css?v=ae1f7bab">
+    <link rel="stylesheet" href="/ligero/estilos/componentes/barra-lateral.responsive.css?v=36f396a1">
+    <link rel="stylesheet" href="/ligero/estilos/paginas/buscar.css?v=e32b461e">
+    <link rel="stylesheet" href="/estilos/paquete-cierre.css?v=3c277d98">
+    <!-- ==== fin del CSS ==== -->
+    <script src="/ligero/scripts/cargador-scripts.js?v=04752c83"></script>
+    <!-- ==== JS ==== -->
+    <script defer src="/scripts/paquete-comun.js?v=c9aa4d63"></script>
+    <script defer src="/ligero/scripts/paginas/mundo.js?v=0a9ee4e3"></script>
+    <!-- ==== fin del JS ==== -->
+    </head>
+<body>
+    <a class="skip-link" href="#main-content">Saltar al contenido</a>
+    <div id="sidebar-container"></div>
+
+    <main id="main-content">
+        <section id="home" class="home mundo-page linea-page">
+            <div class="mundo-cabecera">
+                <a class="mundo-volver" href="/web/wiki/index_wiki.html">← volver a la wiki</a>
+                <h1 class="mundo-titulo">Línea de tiempo</h1>
+                <p class="mundo-subtitulo">Lo que ha pasado en Cralëa, de lo más antiguo a lo más reciente. Los años se cuentan antes (AEM) y después (DEM) de la Era Muda, que nadie sabe cuánto duró.</p>
+            </div>
+
+            <div class="linea">
+<section id="era_sinfonia_estelar_en_armonia" class="linea-era es-par" style="--era-color: #0042ff" aria-labelledby="era_sinfonia_estelar_en_armonia-titulo"><div class="linea-era-cabecera" style="--tramo: 6.5rem"><div class="linea-era-rotulo"><h2 class="linea-era-nombre" id="era_sinfonia_estelar_en_armonia-titulo">Sinfonía Estelar en armonía</h2><p class="linea-era-fechas">de 800.000.000 AEM a 400.000.000 AEM</p></div><div class="linea-tramo" aria-hidden="true"></div></div>
+<ol class="linea-lista" aria-label="Eventos de Sinfonía Estelar en armonía">
+<li id="evento_surgimiento_arcontes_primordiales" class="linea-evento es-izquierda" style="--tramo: 8.0rem"><span class="linea-punto" aria-hidden="true"></span><div class="linea-tarjeta"><p class="linea-fecha">800.000.000 AEM</p><h3 class="linea-nombre"><a class="linea-enlace" href="/web/wiki/linea-de-tiempo/evento_surgimiento_arcontes_primordiales.html">Surgimiento Arcontes Primordiales</a></h3></div><div class="linea-tramo" aria-hidden="true"><span class="linea-corte"><span class="linea-corte-signo">≈</span><span class="linea-corte-texto">150.000.000 años</span></span></div></li>
+<li id="evento_nacimiento_azaras_y_parta" class="linea-evento es-derecha" style="--tramo: 8.0rem"><span class="linea-punto" aria-hidden="true"></span><div class="linea-tarjeta"><p class="linea-fecha">650.000.000 AEM</p><h3 class="linea-nombre"><a class="linea-enlace" href="/web/wiki/linea-de-tiempo/evento_nacimiento_azaras_y_parta.html">Nacimiento Azaras y Parta</a></h3></div><div class="linea-tramo" aria-hidden="true"><span class="linea-corte"><span class="linea-corte-signo">≈</span><span class="linea-corte-texto">250.000.000 años</span></span></div></li>
+</ol>
+</section>
+<section id="era_era_de_los_desgarros" class="linea-era es-impar" style="--era-color: #a31b8b" aria-labelledby="era_era_de_los_desgarros-titulo"><div class="linea-era-cabecera" style="--tramo: 6.5rem"><div class="linea-era-rotulo"><h2 class="linea-era-nombre" id="era_era_de_los_desgarros-titulo">Era de los Desgarros</h2><p class="linea-era-fechas">de 400.000.000 AEM a 140.000.000 AEM</p></div><div class="linea-tramo" aria-hidden="true"></div></div>
+<ol class="linea-lista" aria-label="Eventos de Era de los Desgarros">
+<li id="evento_conflicto_de_la_primera_disonancia" class="linea-evento es-izquierda" style="--tramo: 8.0rem"><span class="linea-punto" aria-hidden="true"></span><div class="linea-tarjeta"><p class="linea-fecha">400.000.000 AEM</p><h3 class="linea-nombre"><a class="linea-enlace" href="/web/wiki/linea-de-tiempo/evento_conflicto_de_la_primera_disonancia.html">Conflicto de la Primera Disonancia</a></h3></div><div class="linea-tramo" aria-hidden="true"><span class="linea-corte"><span class="linea-corte-signo">≈</span><span class="linea-corte-texto">260.000.000 años</span></span></div></li>
+</ol>
+</section>
+<section id="era_era_putrida" class="linea-era es-par" style="--era-color: #4eaf23" aria-labelledby="era_era_putrida-titulo"><div class="linea-era-cabecera" style="--tramo: 6.5rem"><div class="linea-era-rotulo"><h2 class="linea-era-nombre" id="era_era_putrida-titulo">Era Pútrida</h2><p class="linea-era-fechas">de 140.000.000 AEM a 0 AEM</p></div><div class="linea-tramo" aria-hidden="true"></div></div>
+<ol class="linea-lista" aria-label="Eventos de Era Pútrida">
+<li id="evento_fin_del_conflicto_y_nacimiento_de_cralea" class="linea-evento es-derecha" style="--tramo: 17.95rem"><span class="linea-punto" aria-hidden="true"></span><div class="linea-tarjeta"><p class="linea-fecha">140.000.000 AEM</p><h3 class="linea-nombre"><a class="linea-enlace" href="/web/wiki/linea-de-tiempo/evento_fin_del_conflicto_y_nacimiento_de_cralea.html">Fin del conflicto y Nacimiento de Cralëa</a></h3></div><div class="linea-tramo" aria-hidden="true"><span class="linea-raya" style="top: 10.0%"></span><span class="linea-raya es-grande" style="top: 20.0%"><span class="linea-raya-anyo">139 M AEM</span></span><span class="linea-raya" style="top: 30.0%"></span><span class="linea-raya es-grande" style="top: 40.0%"><span class="linea-raya-anyo">138 M AEM</span></span><span class="linea-raya" style="top: 50.0%"></span><span class="linea-raya es-grande" style="top: 60.0%"><span class="linea-raya-anyo">137 M AEM</span></span><span class="linea-raya" style="top: 70.0%"></span><span class="linea-raya es-grande" style="top: 80.0%"><span class="linea-raya-anyo">136 M AEM</span></span><span class="linea-raya" style="top: 90.0%"></span></div></li>
+<li id="evento_creacion_del_jardin_del_ultimo_canto" class="linea-evento es-izquierda" style="--tramo: 8.0rem"><span class="linea-punto" aria-hidden="true"></span><div class="linea-tarjeta"><p class="linea-fecha">135.000.000 AEM</p><h3 class="linea-nombre"><a class="linea-enlace" href="/web/wiki/linea-de-tiempo/evento_creacion_del_jardin_del_ultimo_canto.html">Creación del Jardín del Último Canto</a></h3></div><div class="linea-tramo" aria-hidden="true"><span class="linea-corte"><span class="linea-corte-signo">≈</span><span class="linea-corte-texto">134.986.000 años</span></span></div></li>
+<li id="evento_primeros_registros_nithir_conocidos" class="linea-evento es-derecha" style="--tramo: 6.5rem"><span class="linea-punto" aria-hidden="true"></span><div class="linea-tarjeta"><p class="linea-fecha">14.000 AEM</p><h3 class="linea-nombre"><a class="linea-enlace" href="/web/wiki/linea-de-tiempo/evento_primeros_registros_nithir_conocidos.html">Primeros registros Nithir conocidos</a></h3></div><div class="linea-tramo" aria-hidden="true"></div></li>
+<li id="evento_cataclismo_de_aiszag_y_despertar_de_los_mirakhalim" class="linea-evento es-izquierda" style="--tramo: 6.5rem"><span class="linea-punto" aria-hidden="true"></span><div class="linea-tarjeta"><p class="linea-fecha">24 AEM</p><h3 class="linea-nombre"><a class="linea-enlace" href="/web/wiki/linea-de-tiempo/evento_cataclismo_de_aiszag_y_despertar_de_los_mirakhalim.html">Cataclismo de Aiszág y despertar de los Mirakhalim</a></h3></div><div class="linea-tramo" aria-hidden="true"></div></li>
+</ol>
+</section>
+<section id="era_era_muda" class="linea-era es-impar" style="--era-color: #636363" aria-labelledby="era_era_muda-titulo"><div class="linea-era-cabecera" style="--tramo: 6.5rem"><div class="linea-era-rotulo"><h2 class="linea-era-nombre" id="era_era_muda-titulo">Era Muda</h2><p class="linea-era-fechas">de 0 AEM a 0 DEM</p></div><div class="linea-tramo" aria-hidden="true"></div></div>
+<ol class="linea-lista" aria-label="Eventos de Era Muda">
+<li id="evento_ultimos_registros_y_fin_de_la_civilizacion_nithir" class="linea-evento es-derecha" style="--tramo: 8.0rem"><span class="linea-punto" aria-hidden="true"></span><div class="linea-tarjeta"><p class="linea-fecha">0 AEM</p><h3 class="linea-nombre"><a class="linea-enlace" href="/web/wiki/linea-de-tiempo/evento_ultimos_registros_y_fin_de_la_civilizacion_nithir.html">Últimos registros y fin de la Civilización Nithir</a></h3></div><div class="linea-tramo" aria-hidden="true"><span class="linea-corte"><span class="linea-corte-signo">≈</span><span class="linea-corte-texto">duración incierta</span></span></div></li>
+<li id="evento_destierro_de_los_mirakhalim" class="linea-evento es-izquierda" style="--tramo: 6.5rem"><span class="linea-punto" aria-hidden="true"></span><div class="linea-tarjeta"><p class="linea-fecha">−13.000 DEM</p><h3 class="linea-nombre"><a class="linea-enlace" href="/web/wiki/linea-de-tiempo/evento_destierro_de_los_mirakhalim.html">Destierro de los Mirakhalim</a></h3></div><div class="linea-tramo" aria-hidden="true"></div></li>
+</ol>
+</section>
+<section id="era_era_del_expolio" class="linea-era es-par" style="--era-color: #ecde41" aria-labelledby="era_era_del_expolio-titulo"><div class="linea-era-cabecera" style="--tramo: 6.5rem"><div class="linea-era-rotulo"><h2 class="linea-era-nombre" id="era_era_del_expolio-titulo">Era del Expolio</h2><p class="linea-era-fechas">de 0 DEM a hoy</p></div><div class="linea-tramo" aria-hidden="true"></div></div>
+<ol class="linea-lista" aria-label="Eventos de Era del Expolio">
+<li id="evento_los_kurghar_redactan_la_vista_de_la_primera_luz" class="linea-evento es-derecha" style="--tramo: 6.5rem"><span class="linea-punto" aria-hidden="true"></span><div class="linea-tarjeta"><p class="linea-fecha">0 DEM</p><h3 class="linea-nombre"><a class="linea-enlace" href="/web/wiki/linea-de-tiempo/evento_los_kurghar_redactan_la_vista_de_la_primera_luz.html">Los Kurghar redactan la Vista de la Primera Luz</a></h3></div><div class="linea-tramo" aria-hidden="true"></div></li>
+<li id="evento_comienzo_del_exilio_de_la_herida" class="linea-evento es-izquierda" style="--tramo: 6.5rem"><span class="linea-punto" aria-hidden="true"></span><div class="linea-tarjeta"><p class="linea-fecha">753 DEM</p><h3 class="linea-nombre"><a class="linea-enlace" href="/web/wiki/linea-de-tiempo/evento_comienzo_del_exilio_de_la_herida.html">Comienzo del Exilio de La Herida</a></h3></div><div class="linea-tramo" aria-hidden="true"></div></li>
+</ol>
+<div class="linea-hoy"><p class="linea-hoy-texto">hoy · 1340 DEM</p></div>
+</section>
+</div>
+
+            <a class="mundo-volver mundo-volver-abajo" href="/web/wiki/index_wiki.html">← volver a la wiki</a>
+        </section>
+    </main>
+</body>
+</html>

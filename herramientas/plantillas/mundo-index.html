@@ -109,9 +109,8 @@
 
             <p class="mundo-indice-intro">
                 La wiki del mundo donde pasan las partidas: sus lugares, su
-                gente y sus cosas. Está escrita por dentro en
-                <abbr title="una aplicación de wiki que guarda las páginas como archivos de texto en el ordenador">Chronicler</abbr>
-                y pasa a la web con una herramienta, así que lo que hay aquí
+                gente y sus cosas. Está escrita a mano, en
+                archivos de texto, y pasa a la web con una herramienta, así que lo que hay aquí
                 es lo mismo que tengo yo abierto mientras juego.
             </p>
 
@@ -137,22 +136,7 @@
             <!-- Los botones de filtrar los monta
                  scripts/componentes/filtros.js con las etiquetas que
                  encuentre en el JSON. Una etiqueta nueva aparece sola. -->
-            <div class="filtros" data-filtros
-                 data-filtros-items=".mundo-ficha-item"
-                 data-filtros-orden="aparicion">
-                <span class="filtros-label" id="filtros-label">etiquetas:</span>
 
-                <button class="filtros-toggle" type="button" data-filtros-toggle
-                        aria-expanded="false" aria-controls="filtros-lista">
-                    <span class="visually-hidden">Filtrando por: </span>
-                    <span class="filtros-toggle-label" data-filtros-label>todas</span>
-                    <span class="filtros-toggle-arrow" aria-hidden="true">▾</span>
-                </button>
-
-                <div class="filtros-list" id="filtros-lista" role="group" aria-labelledby="filtros-label"></div>
-            </div>
-
-            <p class="filtros-vacio" data-filtros-vacio role="status" hidden></p>
 
             <div class="mundo-indice" data-mundo-indice data-mundo-datos="/datos/wiki/mundo.json">
                 <p class="entries-loading">Cargando el mundo…</p>

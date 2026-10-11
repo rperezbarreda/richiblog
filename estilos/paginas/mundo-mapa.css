@@ -255,6 +255,12 @@ html:not(.js) .mapa-ayuda {
    el dibujo y las que llevan a algún sitio). El de «pines» quita las
    chinchetas. Los dos están en los mandos, y sin JavaScript no se pintan
    porque no harían nada. */
+/* Con «ver: regiones», de los países solo quedan los que no son de
+   ninguna región (es-suelto; ver mundo-mapa.js). */
+.mapa-paises.es-solo-sueltos > .mapa-forma:not(.es-suelto) {
+    display: none;
+}
+
 .mapa-dibujos.es-apagada,
 .mapa-formas.es-apagada,
 .mapa-pines.es-apagada {

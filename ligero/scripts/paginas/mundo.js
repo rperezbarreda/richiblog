@@ -85,18 +85,37 @@ function bloqueDeGrupoMundo(grupo, fichas) {
             porEtiqueta.get(e).push(ficha);
         });
     });
-    [...porEtiqueta.keys()].sort((a, b) => a.localeCompare(b, "es")).forEach((e) => {
-        const sub = document.createElement("div");
-        sub.className = "mundo-sub";
-        sub.setAttribute("data-mundo-sub", e);
-        const suyo = document.createElement("h3");
-        suyo.className = "mundo-sub-titulo";
-        suyo.textContent = e;
-        sub.appendChild(suyo);
-        sub.appendChild(listaDeFichasMundo(porEtiqueta.get(e)));
-        bloque.appendChild(sub);
+    [...porEtiqueta.keys()].forEach((e) => {
+        bloque.appendChild(subapartadoMundo(grupo, e, porEtiqueta.get(e)));
     });
     return bloque;
+}
+function subapartadoMundo(grupo, nombre, fichas) {
+    const clave = grupo + "/" + nombre;
+    const sub = document.createElement("details");
+    sub.className = "mundo-sub";
+    sub.setAttribute("data-mundo-sub", nombre);
+    sub.setAttribute("data-mundo-clave", clave);
+    sub.open = !MUNDO_CERRADOS.has(clave);
+    sub.addEventListener("toggle", () => recordarPlegadoMundo(sub, clave));
+    const cabecera = document.createElement("summary");
+    cabecera.className = "mundo-sub-cabecera";
+    const flecha = document.createElement("span");
+    flecha.className = "mundo-sub-flecha";
+    flecha.setAttribute("aria-hidden", "true");
+    flecha.textContent = "▾";
+    cabecera.appendChild(flecha);
+    const suyo = document.createElement("h3");
+    suyo.className = "mundo-sub-titulo";
+    suyo.textContent = nombre;
+    cabecera.appendChild(suyo);
+    const cuenta = document.createElement("span");
+    cuenta.className = "mundo-grupo-cuenta";
+    cuenta.setAttribute("data-mundo-sub-cuenta", "");
+    cabecera.appendChild(cuenta);
+    sub.appendChild(cabecera);
+    sub.appendChild(listaDeFichasMundo(fichas));
+    return sub;
 }
 const MUNDO_CERRADOS = leerCerradosMundo();
 function leerCerradosMundo() {
@@ -108,7 +127,9 @@ function leerCerradosMundo() {
     }
 }
 function recordarGrupoMundo(bloque) {
-    const grupo = bloque.getAttribute("data-mundo-grupo");
+    recordarPlegadoMundo(bloque, bloque.getAttribute("data-mundo-grupo"));
+}
+function recordarPlegadoMundo(bloque, grupo) {
     if (bloque.hasAttribute("data-mundo-forzado")) {
         return;
     }
@@ -127,13 +148,197 @@ function pintarLosMapasDelMundo(fichas) {
     if (!caja) {
         return;
     }
-    const mapas = fichas.filter((f) => (f.vista || "").toString().trim());
+    const mapas = fichas.filter((f) => (f.vista || "").toString().trim() ||
+        (f.mini && Array.isArray(f.mini.cosas)));
     caja.hidden = !mapas.length;
     if (!mapas.length) {
         return;
     }
     caja.querySelectorAll(".mundo-vista").forEach((vieja) => vieja.remove());
-    mapas.forEach((ficha) => caja.appendChild(tarjetaDeMapaMundo(ficha)));
+    mapas.forEach((ficha) => caja.appendChild(
+        ficha.mini ? tarjetaDeLineaMundo(ficha) : tarjetaDeMapaMundo(ficha)));
+    caja.querySelectorAll(".mundo-mini-lista").forEach(colocarLineaEnPequenoMundo);
+    const titulo = caja.querySelector(".mundo-vistas-titulo");
+    if (titulo) {
+        const hayLinea = mapas.some((f) => f.linea === true);
+        const hayMapas = mapas.some((f) => f.linea !== true);
+        titulo.textContent = hayLinea
+            ? (hayMapas ? "mapas y línea de tiempo" : "la línea de tiempo")
+            : "los mapas";
+    }
+}
+const MINI_PX_POR_REM = 6;
+const MINI_ARRIBA = 14;
+const MINI_ABAJO = 44;
+function tarjetaDeLineaMundo(ficha) {
+    const caja = document.createElement("div");
+    caja.className = "mundo-vista mundo-vista-linea";
+    const marco = document.createElement("div");
+    marco.className = "mundo-mini";
+    const mini = ficha.mini || {};
+    const alto = Number(mini.alto) || 0;
+    const lista = document.createElement("ol");
+    lista.className = "mundo-mini-lista";
+    lista.setAttribute("aria-label", "La línea de tiempo, en pequeño");
+    lista.style.height = Math.round(MINI_ARRIBA + alto * MINI_PX_POR_REM + MINI_ABAJO) + "px";
+    const eje = document.createElement("span");
+    eje.className = "mundo-mini-eje";
+    eje.setAttribute("aria-hidden", "true");
+    eje.style.top = MINI_ARRIBA + "px";
+    eje.style.height = Math.round(alto * MINI_PX_POR_REM) + "px";
+    lista.appendChild(eje);
+    (Array.isArray(mini.cosas) ? mini.cosas : []).forEach((cosa) => {
+        const y = MINI_ARRIBA + (Number(cosa.y) || 0) * MINI_PX_POR_REM;
+        const hasta = MINI_ARRIBA + (Number(cosa.hasta) || 0) * MINI_PX_POR_REM;
+        let item = null;
+        if (cosa.tipo === "era") {
+            item = eraEnPequenoMundo(cosa);
+            item.dataset.hasta = String(hasta);
+        } else if (cosa.tipo === "evento") {
+            item = eventoEnPequenoMundo(cosa);
+        } else if (cosa.tipo === "hoy") {
+            item = document.createElement("li");
+            item.className = "mundo-mini-hoy";
+            item.textContent = (cosa.texto || "").toString().trim();
+        } else if (cosa.tipo === "corte") {
+            item = document.createElement("li");
+            item.className = "mundo-mini-corte";
+            item.setAttribute("aria-hidden", "true");
+            item.textContent = "≈";
+        }
+        if (item) {
+            item.dataset.y = String(y);
+            item.style.top = Math.round(y) + "px";
+            lista.appendChild(item);
+        }
+    });
+    marco.appendChild(lista);
+    caja.appendChild(marco);
+    const enlace = document.createElement("a");
+    enlace.className = "mundo-vista-titulo mundo-mini-titulo";
+    enlace.href = rutaSeguraMundo(ficha.url);
+    enlace.textContent = (ficha.titulo || "").toString().trim();
+    caja.appendChild(enlace);
+    const que = document.createElement("span");
+    que.className = "mundo-vista-que";
+    que.textContent = (ficha.que || "").toString().trim();
+    caja.appendChild(que);
+    return caja;
+}
+function eraEnPequenoMundo(cosa) {
+    const item = document.createElement("li");
+    item.className = "mundo-mini-era" + (cosa.par === false ? " es-impar" : "");
+    const color = (cosa.color || "").toString().trim();
+    if (/^#[0-9a-fA-F]{6}$/.test(color)) {
+        item.style.setProperty("--era-color", color);
+    }
+    const enlace = document.createElement("a");
+    enlace.className = "mundo-mini-era-nombre";
+    enlace.href = rutaSeguraMundo(cosa.url);
+    enlace.textContent = (cosa.nombre || "").toString().trim();
+    const fechas = (cosa.fechas || "").toString().trim();
+    if (fechas) {
+        enlace.title = fechas;
+        const oculto = document.createElement("span");
+        oculto.className = "visually-hidden";
+        oculto.textContent = ", era, " + fechas;
+        enlace.appendChild(oculto);
+    }
+    item.appendChild(enlace);
+    return item;
+}
+function eventoEnPequenoMundo(cosa) {
+    const item = document.createElement("li");
+    item.className = "mundo-mini-evento es-" + (cosa.lado === "derecha" ? "derecha" : "izquierda");
+    const enlace = document.createElement("a");
+    enlace.className = "mundo-mini-recuadro";
+    enlace.href = rutaSeguraMundo(cosa.url);
+    const fecha = document.createElement("span");
+    fecha.className = "mundo-mini-fecha";
+    fecha.textContent = (cosa.fecha || "").toString().trim();
+    const nombre = document.createElement("span");
+    nombre.className = "mundo-mini-nombre";
+    nombre.textContent = (cosa.nombre || "").toString().trim();
+    enlace.appendChild(fecha);
+    enlace.appendChild(nombre);
+    item.appendChild(enlace);
+    return item;
+}
+const MINI_HOLGURA = 5;
+function colocarLineaEnPequenoMundo(lista) {
+    const items = Array.from(lista.children).filter((e) => e.dataset && e.dataset.y);
+    let extra = 0;
+    const fondo = { izquierda: -Infinity, derecha: -Infinity, centro: -Infinity };
+    const mudanzas = [];
+    items.forEach((item) => {
+        const base = Number(item.dataset.y) || 0;
+        let y = base + extra;
+        if (item.classList.contains("mundo-mini-evento")) {
+            const caja = item.querySelector(".mundo-mini-recuadro");
+            const alto = caja ? caja.offsetHeight : 0;
+            const lado = item.classList.contains("es-derecha") ? "derecha" : "izquierda";
+            const arriba = y - 9;
+            const tope = Math.max(fondo[lado], fondo.centro) + MINI_HOLGURA;
+            if (arriba < tope) {
+                extra += tope - arriba;
+                y = base + extra;
+            }
+            fondo[lado] = y - 9 + alto;
+        } else if (item.classList.contains("mundo-mini-era") ||
+                   item.classList.contains("mundo-mini-hoy")) {
+            const rotulo = item.querySelector(".mundo-mini-era-nombre") || item;
+            const alto = rotulo.offsetHeight + 3;
+            const tope = Math.max(fondo.izquierda, fondo.derecha, fondo.centro) + MINI_HOLGURA;
+            if (y < tope) {
+                extra += tope - y;
+                y = base + extra;
+            }
+            fondo.centro = y + alto;
+        }
+        mudanzas.push([base, extra]);
+        item.style.top = Math.round(y) + "px";
+    });
+    const final = (yEscala) => {
+        let bajado = 0;
+        mudanzas.forEach(([base, extraAhi]) => {
+            if (base <= yEscala) {
+                bajado = extraAhi;
+            }
+        });
+        return yEscala + bajado;
+    };
+    items.forEach((item) => {
+        if (item.classList.contains("mundo-mini-era")) {
+            const desde = parseFloat(item.style.top) || 0;
+            const hasta = final(Number(item.dataset.hasta) || 0);
+            item.style.height = Math.max(Math.round(hasta - desde), 2) + "px";
+        }
+    });
+    const ultimo = Math.max(fondo.izquierda, fondo.derecha, fondo.centro, 0);
+    const eje = lista.querySelector(".mundo-mini-eje");
+    const ultimoPunto = items.filter((e) => e.classList.contains("mundo-mini-evento")).pop();
+    const hoy = items.find((e) => e.classList.contains("mundo-mini-hoy"));
+    const finEje = Math.max(ultimoPunto ? parseFloat(ultimoPunto.style.top) : 0,
+        hoy ? parseFloat(hoy.style.top) : 0,
+        ...items.filter((e) => e.classList.contains("mundo-mini-era"))
+            .map((e) => (parseFloat(e.style.top) || 0) + (parseFloat(e.style.height) || 0)));
+    if (eje) {
+        eje.style.height = Math.max(Math.round(finEje - MINI_ARRIBA), 0) + "px";
+    }
+    lista.style.height = Math.round(Math.max(ultimo, finEje) + 12) + "px";
+    if (!lista.dataset.vigilada && typeof ResizeObserver === "function") {
+        lista.dataset.vigilada = "1";
+        let anchos = "";
+        const vigia = new ResizeObserver(() => {
+            const ahora = Array.from(lista.querySelectorAll(".mundo-mini-recuadro"))
+                .map((e) => e.offsetWidth + "x" + e.offsetHeight).join(",");
+            if (ahora !== anchos) {
+                anchos = ahora;
+                colocarLineaEnPequenoMundo(lista);
+            }
+        });
+        lista.querySelectorAll(".mundo-mini-recuadro").forEach((e) => vigia.observe(e));
+    }
 }
 function tarjetaDeMapaMundo(ficha) {
     const enlace = document.createElement("a");
@@ -211,11 +416,32 @@ function rutaSeguraMundo(url) {
 }
 document.addEventListener("filtros:cambiado", repasarGruposMundo);
 document.addEventListener("filtros:actualizar", repasarGruposMundo);
+document.addEventListener("buscar:cambiado", () => {
+    if (!window.buscador) {
+        return;
+    }
+    document.querySelectorAll("[data-mundo-indice] .mundo-ficha-item").forEach((item) => {
+        item.hidden = !window.buscador.pasa(item);
+    });
+    repasarGruposMundo();
+});
 function repasarGruposMundo() {
+    const rebuscandoSub = !!(window.buscador && window.buscador.texto);
     document.querySelectorAll(".mundo-sub").forEach((sub) => {
         const vivos = [...sub.querySelectorAll(".mundo-ficha-item")]
             .filter((item) => !item.hidden).length;
         sub.hidden = vivos === 0;
+        const cuenta = sub.querySelector("[data-mundo-sub-cuenta]");
+        if (cuenta) {
+            cuenta.textContent = vivos === 1 ? "1" : String(vivos);
+        }
+        if (rebuscandoSub && vivos && !sub.open) {
+            sub.setAttribute("data-mundo-forzado", "");
+            sub.open = true;
+        } else if (!rebuscandoSub && sub.hasAttribute("data-mundo-forzado")) {
+            sub.open = false;
+            sub.removeAttribute("data-mundo-forzado");
+        }
     });
     const rebuscando = !!(window.buscador && window.buscador.texto)
         || [...document.querySelectorAll(".filtro-btn")]

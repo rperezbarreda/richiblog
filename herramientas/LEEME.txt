@@ -11,7 +11,7 @@
       1. Blog            entradas y borradores
       2. Mis movidas     relatos y el reto de escritura
       3. Rol             notas de partida, NPC, botín, recursos de rol
-      4. Wiki Cralëa     traerla de Chronicler y elegir qué se publica
+      4. Wiki Cralëa     escribir sus páginas, la línea de tiempo y publicarla
       5. Mi rincón       en lo que ando, recomendaciones, los gatos
       6. Imágenes        traerlas de tu ordenador y dejarlas a punto
       7. Antes de subir  repasar el sitio y rehacer lo generado
@@ -62,7 +62,9 @@
               botin.py              el botín de una campaña
               nueva-recomendacion.py
               en-lo-que-ando.py     lo que pone «en lo que ando»
-              importar-mundo.py     traer la bóveda de Chronicler
+              nueva-pagina-wiki.py  una página nueva de la wiki
+              importar-mundo.py     (fuera del menú) traer una bóveda de Chronicler
+              linea-de-tiempo.py    los eventos de la línea de tiempo
 
           2-imagenes/ ......... ANTES DE SUBIR FOTOS
               traer-imagen.py       traer una de tu ordenador
@@ -85,6 +87,8 @@
               generar-mundo.py      la wiki del mundo y sus mapas
               mundo_formato.py      (lo lee generar-mundo.py)
               mundo_mapas.py        (lo lee generar-mundo.py)
+              generar-linea-tiempo.py  la línea de tiempo de la wiki
+              mundo_linea.py        (lo leen los dos de arriba)
               actualizar-cabeceras.py
               ligero.py             (lo lee actualizar-cabeceras.py)
 
@@ -1188,84 +1192,40 @@
   por lugar, por persona y por cosa, con su ficha al lado, sus etiquetas
   y los enlaces entre ellas.
 
-  NO SE ESCRIBE EN EL SITIO. Se escribe en Chronicler, que es una
-  aplicación de wiki que guarda cada página como un archivo .md en el
-  ordenador, y lo que hay en la carpeta wiki/ ES esa bóveda: se apunta
-  Chronicler ahí y se escribe en la aplicación.
+  SE ESCRIBE A MANO. Cada página es un archivo de texto (.md) dentro de
+  wiki/, en la carpeta de su apartado (wiki/lugares/Valderín.md), y el
+  nombre del archivo es el de la página: es como se la enlaza desde
+  otra, [[Valderín]]. Para empezar una:
 
-  SI LA BÓVEDA LA TIENES EN OTRO SITIO —que es lo normal: donde la
-  dejaste al instalar Chronicler— no hace falta moverla. Le pasas la
-  ruta a esto una vez y él se encarga:
+      python herramientas/1-publicar/nueva-pagina-wiki.py
 
-      python herramientas/1-publicar/importar-mundo.py "C:\Users\Richi\Mundo"
+  (en el menú, Wiki Cralëa → Escribir una página nueva de la wiki).
+  Pregunta el nombre, el apartado de la portada, una línea de subtítulo
+  y qué es, y crea el .md con la cabecera puesta y un esqueleto. Luego
+  se abre con cualquier editor de texto y se escribe. Cómo se escribe
+  cada cosa —negrita, listas, tablas, [[enlaces]], la ficha de la
+  derecha, imágenes, spoilers— está en wiki/Cómo se escribe esto.md, que
+  además sale publicada para verlo de un vistazo.
 
-  Se trae las páginas, los mapas y las imágenes a wiki/, se apunta de
-  dónde vienen en herramientas/mundo-origen.txt y pasa el generador
-  detrás, así que con eso solo ya está el mundo publicado. La segunda
-  vez no hace falta la ruta:
+  LAS IMÁGENES de la wiki van en wiki/_imagenes/ y se nombran por el
+  nombre del archivo. generar-mundo.py solo publica las que use alguna
+  página, y las copia a imagenes/wiki/.
 
-      python herramientas/1-publicar/importar-mundo.py
+  EL MAPA sigue siendo el .cmap de Chronicler (wiki/Mapamundi de
+  Cralëa.cmap, con las regiones y sus fronteras) y su imagen de fondo,
+  wiki/_imagenes/mapamundi_fronteras.webp (el nombre que pide el .cmap).
+  Para cambiarlo: se sustituye el .cmap (o la imagen) y se pasa la wiki
+  a la web. La imagen de fondo, a 2560 px de ancho como mucho: el mapa
+  nunca se pinta más grande, y el original de 7680 pesaba 55 MB.
 
-  (en el menú, Wiki Cralëa → Traer la wiki desde Chronicler; si no hay
-  ninguna ruta apuntada te la pregunta)
-
-  ELEGIR QUÉ ENTRA. No todo lo de la bóveda tiene que estar en la web:
-  una página a medio escribir, un sitio que todavía no ha salido en la
-  partida. Cada vez que traes la wiki te pregunta si quieres cambiar lo
-  que entra (Enter es que no), y para ir directo a eso:
-
-      python herramientas/1-publicar/importar-mundo.py --elegir
-
-  Sale la lista de páginas y mapas por carpetas:
-
-      gente/
-         [ ]   4. Apaaka
-         [x]   5. Humana
-
-  [x] entra y [ ] se queda fuera. Se cambia escribiendo números («4»,
-  «5-8», «1 3 7»), una carpeta entera («gente/»: si entra algo de ella
-  la saca toda, si no entra nada la mete toda) o «todo» / «nada». Enter
-  en blanco para terminar.
-
-  LO QUE DEJAS FUERA SE QUEDA FUERA. Se apunta en
-  herramientas/wiki-fuera.txt y lo respetan LAS DOS herramientas: ni se
-  trae ni lo publica generar-mundo.py, aunque siga en tu bóveda y aunque
-  Chronicler escriba directamente en wiki/. Lo que enlace a algo que está
-  fuera sale como «sin página», igual que un enlace a algo sin escribir.
-
-  Las imágenes no se eligen: generar-mundo.py solo publica las que use
-  alguna página que entre.
-
-  wiki-fuera.txt se puede escribir a mano: una ruta por línea, desde la
-  raíz de la bóveda. Una línea que acabe en «/» deja fuera la carpeta
-  entera, incluido lo que le añadas en el futuro.
-
-  Si no tienes bóveda de fuera, --elegir trabaja sobre wiki/: eliges y
-  vuelve a generar, sin traer nada.
-
-  ES UN ESPEJO. Lo que esté en wiki/ y ya no esté en la bóveda se
-  quita, porque si no una página que renombraste en Chronicler se
-  quedaría publicada dos veces, con el nombre viejo y con el nuevo. Te
-  dice cuáles antes de tocar nada y pregunta. Con --anadir no quita
-  nada, y con --probar no hace nada: solo mira la bóveda y te cuenta lo
-  que haría, que es como conviene pasarlo la primera vez.
-
-  LO DE CHRONICLER SE QUEDA EN CHRONICLER. Ni se trae ni se publica lo
-  que hay en .chronicler-cache/ (su caché), en _system/templates/ (tus
-  plantillas, que son moldes y no páginas) ni en ninguna carpeta que
-  empiece por punto. Al terminar dice cuántos archivos se ha dejado y en
-  qué carpetas, para que se vea que no falta nada que hiciera falta. La
-  lista está en comun.py (es_del_mundo), y la usan las DOS herramientas:
-  si solo lo supiera el importador, el generador publicaría las
-  plantillas en cuanto apuntaras Chronicler directamente a wiki/.
-
-  LO QUE NO SABE QUÉ ES, LO CUENTA. Al terminar sale un inventario de
-  todo lo que hay en la bóveda y no es ni página, ni mapa, ni imagen:
-  qué extensión, cuántos, cuánto pesan y, si es texto, las primeras
-  letras de lo que lleva dentro. No se trae (con --todo sí, sin
-  publicarlo), pero sale, que es lo que avisa de que Chronicler ha
-  aprendido a guardar algo nuevo. Así se descubrió el formato de los
-  mapas.
+  ANTES VENÍA DE CHRONICLER, entera, con herramientas/1-publicar/
+  importar-mundo.py, que se traía la bóveda y dejaba elegir qué entraba.
+  Ya no está en el menú; el archivo sigue ahí por si un día vuelve a
+  hacer falta. Lo que eligió dejar fuera sigue en
+  herramientas/wiki-fuera.txt (una ruta por línea, desde wiki/; si acaba
+  en «/», la carpeta entera), y generar-mundo.py lo sigue respetando: lo
+  que esté ahí no se publica. nueva-pagina-wiki.py quita de esa lista la
+  página que crea, si estaba.
 
   Para pasarlo a la web:
 
@@ -1360,16 +1320,29 @@
   LA PORTADA DE LA WIKI, POR APARTADOS
 
   web/wiki/index_wiki.html —la Wiki Cralëa— no reparte las páginas por
-  las carpetas de la bóveda, sino por unos apartados grandes —países,
-  lugares, personajes, religión, cosas, mapas— y, dentro de cada uno, por
-  las etiquetas que le queden a cada página. Una carpeta es cómo tienes
+  las carpetas de la bóveda, sino por unos apartados grandes —el
+  MAPAMUNDI (Azarasia, Partaria, Tierras Encantadas, Archipiélagos),
+  personajes, religión, cosas, mapas— y, dentro de cada uno, por las
+  etiquetas que le queden a cada página.
+
+  ARRIBA SOLO HAY BUSCADOR: los botones de etiquetas se quitaron el
+  11-10-2026 (con el mapamundi eran una pared de treinta botones). El
+  buscador mira también las etiquetas de cada página, así que buscar
+  «Partaria» saca todo lo de Partaria, y la etiqueta que se pulsa en una
+  página lleva a la portada con ella buscada (?buscar=Partaria). Quien
+  esconde lo que no pasa la búsqueda es mundo.js (al no estar filtros.js
+  en esa página). Una carpeta es cómo tienes
   guardados los archivos; eso no tiene por qué ser cómo se busca una
   cosa.
+
+  Y CADA SUBAPARTADO TAMBIÉN (Azarasia, Partaria… dentro de Mapamundi,
+  los eventos dentro de historia), con su flecha y su cuenta, y se
+  recuerda igual que los apartados.
 
   CADA APARTADO SE PLIEGA. Son <details>, o sea que se abren y se
   cierran con el ratón y con el teclado sin que haya nada que
   programar, y lo que dejes plegado se recuerda en tu navegador. Al
-  buscar o al filtrar se abren solos los que tengan algo dentro y se
+  buscar se abren solos los que tengan algo dentro y se
   vuelven a plegar al borrar la búsqueda: encontrar tres páginas y no
   verlas porque el apartado estaba cerrado sería peor que no
   encontrarlas.
@@ -1401,8 +1374,13 @@
   reescribe nadie. Es una lista de apartados, cada uno con las etiquetas
   que caen en él:
 
-      [ { "nombre": "países",
+      [ { "nombre": "Mapamundi", "etiquetas": ["mapamundi"],
+          "orden": ["Azarasia", "Partaria", "Tierras Encantadas", "Archipiélagos"] },
+        { "nombre": "países",
           "etiquetas": ["pais", "país", "reino", "imperio"] }, … ]
+
+  "orden" es opcional: el orden de los subapartados de ese apartado. Sin
+  él, por orden alfabético.
 
   Una página va al PRIMER apartado del que lleve alguna etiqueta, y las
   que le sobren son las que la reparten por dentro: una página con
@@ -1428,6 +1406,77 @@
   hay 123 formas y 106 no tienen ni nombre ni enlace: son el dibujo
   (fronteras, costas, lo que todavía no es nada). Se pintan flojas y ya
   está; un tabulador que pasa por 106 cosas sin nombre no es navegar.
+
+  UNA REGIÓN LLEVA A LA PÁGINA QUE SE LLAMA COMO ELLA. Si en el mapa no
+  tiene puesto a dónde lleva, pero hay una página de la wiki con su mismo
+  nombre («Reino de Prunia» → wiki/Azarasia/Reino de Prunia.md), lleva a
+  esa. Así están enlazadas las 120 regiones del mapamundi sin tocar el
+  .cmap, y una página nueva queda enlazada desde el mapa en cuanto existe
+  (está en _destinos, en herramientas/3-generadores/mundo_mapas.py).
+
+  REGIONES Y PAÍSES. El mapamundi tiene dos tamaños de cosa: las
+  REGIONES (Azarasia, Partaria, Tierras Encantadas, un archipiélago…) y
+  los PAÍSES que hay dentro. Pintadas a la vez, una región tapa a sus
+  países, así que el mapa enseña una cosa u otra: en sus mandos, «ver:
+  países / regiones / solo la imagen». Se empieza viendo los países. Un
+  país que no es de ninguna región (Reino de Zaustilla, Isla de
+  Telvetia, Cuna de Quimeras: islas grandes e independientes) sale en
+  los dos modos. La silueta de la portada pinta los países.
+
+  QUIÉN ES REGIÓN Y QUIÉN PAÍS lo dicen las páginas: el campo «región»
+  de la ficha (región: "[[Partaria]]"). Lo que alguna página nombra como
+  su región es una región; lo que tiene región es un país suyo. Así,
+  para mover un país de región, o para que una forma nueva del mapa sea
+  región, basta con cambiar las fichas y pasar la wiki. Si ninguna
+  página lo dijera, se adivina por el dibujo (lo que tiene otra forma
+  dentro es región). Está en niveles(), en mundo_mapas.py.
+
+  LAS PÁGINAS están en wiki/Mapamundi/, por partes del mundo:
+
+      wiki/Mapamundi/Azarasia/           el continente y sus países, más
+          Islas de Labros/               las Islas de Labros, la Isla de
+          Isla de Arbenia/               Arbenia, Zaustilla y Telvetia
+      wiki/Mapamundi/Partaria/           el continente y sus países
+      wiki/Mapamundi/Tierras Encantadas/ la región y sus países, y
+          Archipiélago Fragmentado/      el Archipiélago Fragmentado
+      wiki/Mapamundi/Archipiélagos/      el Archipiélago de Lunas, el de
+          …                              las Costras, los Faros del Mar
+                                         Ciego y la Cuna de Quimeras
+
+  EN LA WEB, LAS MISMAS CARPETAS. web/wiki/ repite la estructura de
+  wiki/, con los nombres pasados a dirección (sin tildes ni espacios):
+  wiki/Mapamundi/Azarasia/Islas de Labros/Corte de Labros.md sale en
+  web/wiki/mapamundi/azarasia/islas_de_labros/corte_de_labros.html. Si
+  mueves un .md de carpeta, su página se muda sola al pasar la wiki (y la
+  vieja se borra). La línea de tiempo, que no sale de wiki/, va en su
+  propia carpeta: web/wiki/linea-de-tiempo/ (con guion, para que no
+  pueda chocar nunca con una carpeta de la bóveda).
+
+  EL MAPA DE SITUACIÓN. Cada página que se llama como una forma del mapa
+  lleva en su ficha un recorte del mapamundi con ella resaltada: el resto
+  oscurecido, su contorno en amarillo y las fronteras de alrededor en
+  fino (y un círculo si es una isla diminuta). Debajo, «Dónde está, en el
+  Mapamundi de Cralëa», con enlace al mapa. Si la página tiene su propia
+  imagen, el mapa va debajo de ella. Los hace
+  herramientas/3-generadores/mundo_situacion.py al pasar la wiki, en
+  imagenes/wiki/situacion/ (640x427, unos 35 KB cada uno; 116 son unos
+  4 MB), y solo rehace los que hagan falta: si cambias el .cmap, la
+  imagen del mapa o la forma de dibujarlos, se rehacen todos.
+
+  Cada una lleva las etiquetas «Mapamundi» y su parte del mundo, que es
+  lo que la pone en el apartado MAPAMUNDI de la portada, repartida en
+  Azarasia, Partaria, Tierras Encantadas y Archipiélagos (en ese orden:
+  el "orden" de ese apartado en datos/wiki/mundo-categorias.json). Las
+  regiones tienen además la lista de sus países.
+
+  EN EL .CMAP se cambiaron a mano, el 11-10-2026, para que cuadre con
+  esto: Isla de Terredia → Isla de Arbenia, Archipiélago Yit → Islas de
+  Labros, Islas Fragmentadas → Archipiélago Fragmentado, Zona Perdida →
+  Tierras Encantadas, Partaria del Norte y del Sur → Partaria (dos formas
+  con el mismo nombre), y se quitaron Isla de Esmirma, Isla de Telvet,
+  Isla noseque y una Cuna de Quimeras que estaba dibujada dos veces.
+  Si vuelves a exportar el mapa desde Chronicler, haz allí los mismos
+  cambios o se deshacen.
 
   LOS CONTORNOS SE SIMPLIFICAN, porque van dentro del HTML. El mapamundi
   trae 29.321 puntos; con el algoritmo de Ramer-Douglas-Peucker a 3px
@@ -1471,6 +1520,113 @@
   salen tapados y se destapan al pulsarlos, pero eso es un juego visual
   y no un secreto: están en el código de la página. Lo que de verdad no
   se pueda contar, no se pone.
+
+
+  LA LÍNEA DE TIEMPO
+
+  Los eventos importantes del mundo, en una línea vertical de lo más
+  antiguo (arriba) a lo más reciente (abajo), con las tarjetas a un lado
+  y a otro. Vive en web/wiki/linea-de-tiempo/linea_de_tiempo.html, cada evento tiene su
+  página (web/wiki/linea-de-tiempo/evento_<nombre>.html, igual que un artículo de la
+  wiki: su texto, una ficha con el año, el evento de antes y el de
+  después) y en la portada de la wiki sale una tarjeta con un dibujito,
+  debajo del mapamundi, y los eventos en el apartado «historia».
+
+  LA TARJETA DE LA PORTADA es la línea en pequeño, de arriba abajo y a
+  la misma escala, con texto: cada evento en un recuadrito con su año y
+  su nombre, que lleva a su página, y cada era con su rótulo, que lleva
+  a su sitio en la línea grande. La pinta scripts/paginas/mundo.js con
+  lo que escribe el generador en el campo "mini" de la ficha de la línea
+  (datos/wiki/mundo.json). Si dos recuadros se pisarían (eventos muy
+  cerca en el tiempo, o un nombre largo), el script baja lo de debajo lo
+  justo: el orden se mantiene y la escala solo se estira.
+
+  NO SALE DE CHRONICLER: sale de datos/wiki/linea-de-tiempo.json. Lo
+  cómodo es la herramienta (en el menú: Wiki Cralëa → Llevar la línea
+  de tiempo):
+
+      python herramientas/1-publicar/linea-de-tiempo.py
+
+  Cada evento lleva un nombre y un año (un número entero; antes del año
+  0, en negativo: -25500), y si quieres:
+
+      hasta                si dura varios años (una guerra), el año en que
+                           acaba. Sale «−11420 a −11380».
+      cómo se lee el año   si no es el número tal cual ("342 de la Era
+                           Nueva", "hacia el -12000"). El año sigue
+                           haciendo falta: es lo que ordena la línea.
+      resumen              una o dos frases para la tarjeta. Mejor por
+                           debajo de 180 letras.
+      texto                lo de su página, en el mismo Markdown que la
+                           wiki. Se escribe párrafo a párrafo, o se pega
+                           la ruta de un .md donde lo tengas.
+      imagen               la ruta de tu ordenador (se trae a
+                           imagenes/wiki/eventos/ en WebP) o el nombre de
+                           una que ya esté en imagenes/wiki/.
+
+  LAS ERAS son los trozos grandes de la historia, como nuestra Edad
+  Media o la Edad Contemporánea. Se llevan desde la misma herramienta
+  (opción «e. las eras») y cada una tiene un nombre, desde qué año y, si
+  quieres, hasta cuál y una frase que la cuente. Sin «hasta», una era
+  dura hasta que empieza la siguiente (y la última, hasta hoy); con
+  «hasta» antes de la siguiente, queda un hueco sin era y en la línea se
+  marca «aquí acaba…». Dos eras no se pueden pisar: si una empieza antes
+  de que acabe la anterior, la anterior se corta ahí y se avisa.
+
+  En la línea, cada era es una franja de fondo (un tono sí y otro menos)
+  que empieza con una raya de puntos y un rótulo con su nombre y sus
+  años, y los eventos que caen dentro son suyos: no hay que decírselo a
+  cada evento, se sabe por el año. En la página de cada evento sale su
+  era en la ficha, y en la portada, al lado del año. En el HTML, cada
+  era es un <section> con su <h2>, y los eventos pasan a <h3>.
+
+  EL CALENDARIO DE CRALËA. Los años se cuentan Antes (AEM) y Después
+  (DEM) de la Era Muda, y así se escriben en el JSON y así salen en la
+  web: "800.000.000 AEM", "-13.000 DEM", "753 DEM". Lo dice esto, al
+  principio de datos/wiki/linea-de-tiempo.json:
+
+      "calendario": {"antes": "AEM", "despues": "DEM"},
+      "hoy": "1340 DEM",
+
+  Lo que dura la Era Muda no se sabe (de 0 AEM a 0 DEM, y −13.000 DEM es
+  13.000 años antes de que acabe), así que la línea no lo mide: ese
+  tramo sale siempre cortado con su «≈» y «duración incierta». «hoy» es
+  donde acaba la línea (sale abajo, «hoy · 1340 DEM»), y la última era,
+  si no dice hasta cuándo, llega hasta ahí. En la herramienta, los años
+  se escriben igual: «14.000 AEM», «-13.000 DEM» (un número sin sigla es
+  DEM). Sin "calendario" en el JSON, los años son números a secas.
+
+  LAS ERAS PUEDEN LLEVAR SU COLOR ("color": "#0042ff"), y entonces su
+  franja es de ese color, en la línea y en la portada. Son los de tu
+  dibujo de la línea. El texto sigue con los colores del tema, que son
+  los que se leen bien en los diez.
+
+  SE ENLAZAN CON LA WIKI EN LOS DOS SENTIDOS. En el texto de un evento,
+  [[Valderín]] lleva a esa página de la wiki. Y en una página de la
+  wiki, [[La Gran Sequía]] lleva al evento, como si fuera una
+  página más. Los dos salen en el «se habla de esto en» del otro (con
+  la nota «evento»). Por eso generar-mundo.py rehace la línea cada vez
+  que pasa la wiki. Si cambias el NOMBRE de un evento, cambia también
+  los [[enlaces]] que lo nombren en las páginas de la wiki.
+
+  LA ESCALA. Los eventos se separan según los años que hay entre ellos,
+  pero comprimido: el hueco típico entre dos eventos (la mediana) se
+  pinta a unos 9 rem y los demás en proporción. Un hueco enorme, que a
+  escala serían metros de línea vacía, se CORTA: sale un «≈» en la línea
+  y cuántos años faltan. Y uno muy pequeño se estira lo justo para que
+  quepan las tarjetas. Las rayitas son años redondos (cada 1000, cada
+  50…, según la escala) y una de cada cinco lleva el año escrito, como
+  una regla. Los números están al principio de
+  herramientas/3-generadores/mundo_linea.py (OBJETIVO, MINIMO, MAXIMO,
+  CORTE) por si un día quieres la línea más apretada o más suelta.
+
+  En el móvil (por debajo de 860 px) la línea se va a la izquierda y
+  todas las tarjetas a la derecha. Los estilos están en
+  estilos/paginas/mundo-linea.css y mundo-linea.responsive.css.
+
+  SIN EVENTOS NO SE PUBLICA NADA: ni la página ni la tarjeta de la
+  portada. Con el primero aparece todo. Quitar un evento quita su
+  página.
 
 
   LAS RECOMENDACIONES
@@ -2401,7 +2557,15 @@
                         gastar (todo o una parte), devolver, cambiar y
                         quitar. Guarda al momento y pasa el buscador.
 
-  1-publicar/importar-mundo.py  se trae la bóveda de Chronicler a
+  1-publicar/linea-de-tiempo.py  lleva los eventos de la línea de
+                        tiempo de la wiki: añadir, cambiar y quitar. Al
+                        terminar escribe las páginas. Ver LA LÍNEA DE
+                        TIEMPO.
+  1-publicar/nueva-pagina-wiki.py  crea el .md de una página nueva de
+                        la wiki, con su cabecera, en la carpeta de su
+                        apartado. Luego se escribe a mano.
+  1-publicar/importar-mundo.py  (ya no está en el menú) se trae la
+                        bóveda de Chronicler a
                         wiki/ —páginas, mapas e imágenes— y pasa el
                         generador detrás. Le pasas la ruta la primera
                         vez y se la apunta en mundo-origen.txt. Es un
@@ -2455,7 +2619,7 @@
                         datos/mis_movidas/mis-movidas.json y datos/notas_rol/notas-rol.json
                         leyendo las páginas
   3-generadores/generar-rss.py  escribe blog/rss.xml
-  3-generadores/generar-mundo.py  convierte la bóveda de Chronicler
+  3-generadores/generar-mundo.py  convierte los .md y los .cmap
                         que hay en wiki/ en las páginas de web/wiki/,
                         los .cmap incluidos (cada mapa, una página con
                         su SVG y su lista de sitios). Con --probar no
@@ -2467,6 +2631,11 @@
                         frontmatter) y en mundo_mapas.py (los mapas);
                         esos dos no se pasan sueltos.
 
+  3-generadores/generar-linea-tiempo.py  escribe la página de la
+                        línea de tiempo y la de cada evento desde
+                        datos/wiki/linea-de-tiempo.json. Lo pasan solos
+                        linea-de-tiempo.py y generar-mundo.py; las piezas
+                        están en mundo_linea.py.
   3-generadores/generar-sitemap.py  escribe sitemap.xml recorriendo
                         los .html
   3-generadores/generar-mapa.py  escribe datos/sitio/mapa-del-sitio.json, que

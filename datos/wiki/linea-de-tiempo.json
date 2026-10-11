@@ -1,0 +1,83 @@
+{
+    "_": "LA LÍNEA DE TIEMPO DE LA WIKI. Cada evento: \"nombre\", \"fecha\" (el año, un número; negativo para antes del año 0), y si quieres \"hasta\" (si dura varios años), \"fecha_texto\" (cómo se lee el año, si no es el número tal cual), \"resumen\" (para la tarjeta), \"texto\" (su página, en Markdown, con [[enlaces]] a la wiki) e \"imagen\". Cada era: \"nombre\", \"desde\", y si quieres \"hasta\" (si no, hasta que empieza la siguiente) y \"resumen\". Se ordenan solos. Lo más cómodo es herramientas/1-publicar/linea-de-tiempo.py; si lo cambias a mano, pasa herramientas/3-generadores/generar-linea-tiempo.py.",
+    "titulo": "Línea de tiempo",
+    "intro": "Lo que ha pasado en Cralëa, de lo más antiguo a lo más reciente. Los años se cuentan antes (AEM) y después (DEM) de la Era Muda, que nadie sabe cuánto duró.",
+    "calendario": {
+        "antes": "AEM",
+        "despues": "DEM"
+    },
+    "hoy": "1340 DEM",
+    "eras": [
+        {
+            "nombre": "Sinfonía Estelar en armonía",
+            "desde": "800.000.000 AEM",
+            "color": "#0042ff"
+        },
+        {
+            "nombre": "Era de los Desgarros",
+            "desde": "400.000.000 AEM",
+            "color": "#a31b8b"
+        },
+        {
+            "nombre": "Era Pútrida",
+            "desde": "140.000.000 AEM",
+            "color": "#4eaf23"
+        },
+        {
+            "nombre": "Era Muda",
+            "desde": "0 AEM",
+            "color": "#636363"
+        },
+        {
+            "nombre": "Era del Expolio",
+            "desde": "0 DEM",
+            "color": "#ecde41"
+        }
+    ],
+    "eventos": [
+        {
+            "nombre": "Surgimiento Arcontes Primordiales",
+            "fecha": "800.000.000 AEM"
+        },
+        {
+            "nombre": "Nacimiento Azaras y Parta",
+            "fecha": "650.000.000 AEM"
+        },
+        {
+            "nombre": "Conflicto de la Primera Disonancia",
+            "fecha": "400.000.000 AEM"
+        },
+        {
+            "nombre": "Fin del conflicto y Nacimiento de Cralëa",
+            "fecha": "140.000.000 AEM"
+        },
+        {
+            "nombre": "Creación del Jardín del Último Canto",
+            "fecha": "135.000.000 AEM"
+        },
+        {
+            "nombre": "Primeros registros Nithir conocidos",
+            "fecha": "14.000 AEM"
+        },
+        {
+            "nombre": "Cataclismo de Aiszág y despertar de los Mirakhalim",
+            "fecha": "24 AEM"
+        },
+        {
+            "nombre": "Últimos registros y fin de la Civilización Nithir",
+            "fecha": "0 AEM"
+        },
+        {
+            "nombre": "Destierro de los Mirakhalim",
+            "fecha": "-13.000 DEM"
+        },
+        {
+            "nombre": "Los Kurghar redactan la Vista de la Primera Luz",
+            "fecha": "0 DEM"
+        },
+        {
+            "nombre": "Comienzo del Exilio de La Herida",
+            "fecha": "753 DEM"
+        }
+    ]
+}

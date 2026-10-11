@@ -108,6 +108,13 @@ LOS_LEEN_LAS_HERRAMIENTAS = {
     # Los apartados de la portada del mundo: los lee
     # 3-generadores/generar-mundo.py al escribir datos/wiki/mundo.json.
     "datos/wiki/mundo-categorias.json",
+    # Los eventos de la línea de tiempo: los leen
+    # 3-generadores/generar-linea-tiempo.py y 1-publicar/linea-de-tiempo.py.
+    "datos/wiki/linea-de-tiempo.json",
+    # Las hojas de la página de la línea de tiempo. Mientras no haya ningún
+    # evento esa página no existe, y nadie las pide; con el primero, sí.
+    "estilos/paginas/mundo-linea.css",
+    "estilos/paginas/mundo-linea.responsive.css",
 }
 
 
