@@ -57,7 +57,9 @@
         grid-template-columns: minmax(0, 1fr) minmax(0, 20rem);
         grid-template-areas:
             "cabecera vistas"
+            "regiones vistas"
             "indice   vistas";
+        grid-template-rows: auto auto 1fr;
         column-gap: 26px;
     }
 }

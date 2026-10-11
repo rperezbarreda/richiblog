@@ -14,7 +14,10 @@
 # mapa de situación se rehace solo. Lo usa generar-mundo.py; no se pasa
 # suelto.
 #
-#     imagenes/wiki/situacion/<nombre>.webp      1200x800, unos 100 KB
+#     imagenes/wiki/situacion/<nombre>.webp        1200x800, unos 75 KB
+#     imagenes/wiki/situacion/peque/<nombre>.webp  360x240, unos 15 KB: la
+#         miniatura de las regiones en la portada de la wiki («Busca una
+#         región»); solo de las regiones, no de cada país
 #
 # Solo se rehace lo que haga falta: si la imagen ya está y es más nueva que
 # el .cmap, que la imagen de fondo y que este archivo, se deja. Cambiar
@@ -31,7 +34,6 @@ except ImportError:
 ANCHO, ALTO = 1200, 800          # 3:2. Va a lo ancho del artículo (unos 860px)
                                  # y se amplía con la lupa, así que sobra algo
 SUPER = 2                        # se dibuja al doble y se encoge: bordes suaves
-GROSOR = ANCHO / 640             # las rayas se pensaron a 640 de ancho
 MARGEN = 0.45                    # lo que se ve alrededor, en proporción a la forma
 LADO_MINIMO = 0.22               # una isla pequeña no sale a pantalla completa:
                                  # como poco, este trozo del ancho del mapa. Más
@@ -41,6 +43,8 @@ OSCURO = 0.42                    # cuánto brillo le queda a lo que no es el pa�
 AMARILLO = (245, 206, 108, 255)
 FRONTERA = (255, 255, 255, 110)
 CALIDAD = 75
+PEQUE = (360, 240)               # la miniatura de la portada
+CALIDAD_PEQUE = 72
 
 
 def _caja(poligonos):
@@ -67,10 +71,15 @@ def encuadre(poligonos, ancho_mapa, alto_mapa):
     return ax, ay, ax + cw, ay + ch
 
 
-def dibujar(fondo, ancho_mapa, alto_mapa, poligonos, vecinos, destino):
+def dibujar(fondo, ancho_mapa, alto_mapa, poligonos, vecinos, destino,
+            tamano=(ANCHO, ALTO), calidad=CALIDAD):
     """Escribe el mapa de situación en destino. fondo es la imagen del mapa
     ya abierta (RGB); poligonos, los de la forma a resaltar; vecinos, los
-    de las demás formas, para las fronteras finas."""
+    de las demás formas, para las fronteras finas. tamano, para la
+    miniatura (PEQUE): las rayas no encogen por debajo de lo que miden a
+    640, o en pequeño el contorno amarillo se perdería."""
+    ANCHO, ALTO = tamano
+    GROSOR = max(1, ANCHO / 640)     # las rayas se pensaron a 640 de ancho
     x0, y0, x1, y1 = encuadre(poligonos, ancho_mapa, alto_mapa)
     escala = fondo.width / ancho_mapa
     trozo = fondo.crop((round(x0 * escala), round(y0 * escala),
@@ -114,7 +123,7 @@ def dibujar(fondo, ancho_mapa, alto_mapa, poligonos, vecinos, destino):
     lienzo = Image.alpha_composite(lienzo, capa).convert("RGB")
     lienzo = lienzo.resize((ANCHO, ALTO), Image.LANCZOS)
     destino.parent.mkdir(parents=True, exist_ok=True)
-    lienzo.save(destino, "WEBP", quality=CALIDAD, method=6)
+    lienzo.save(destino, "WEBP", quality=calidad, method=6)
 
 
 def al_dia(destino, fuentes):

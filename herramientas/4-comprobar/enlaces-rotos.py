@@ -124,12 +124,12 @@ LOS_LEEN_LAS_HERRAMIENTAS = {
 
 RE_ATRIBUTOS = re.compile(
     # data-reto-datos, data-campana-datos, data-npcs-datos,
-    # data-ando-datos y data-mundo-datos no son enlaces, pero apuntan al JSON del que esa
+    # data-ando-datos, data-mundo-datos y data-mundo-regiones-datos no son enlaces, pero apuntan al JSON del que esa
     # página saca su contenido: si se borra o se cambia de nombre, la
     # página se queda vacía y nadie se entera. Van aquí para que cuenten
     # como una referencia más.
     r"""\b(?:href|src|poster|data-reto-datos|data-campana-datos"""
-    r"""|data-npcs-datos|data-ando-datos|data-mundo-datos)"""
+    r"""|data-npcs-datos|data-ando-datos|data-mundo-datos|data-mundo-regiones-datos)"""
     r"""\s*=\s*["']([^"']*)["']""",
     re.I,
 )

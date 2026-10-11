@@ -7,6 +7,7 @@ async function initializeMundo() {
     if (!caja || typeof window.pedirDatos !== "function") {
         return;
     }
+    pintarRegionesMundo();
     const fuente = (caja.getAttribute("data-mundo-datos") || "").trim();
     if (!fuente) {
         return;
@@ -96,6 +97,7 @@ function subapartadoMundo(grupo, nombre, fichas) {
     sub.className = "mundo-sub";
     sub.setAttribute("data-mundo-sub", nombre);
     sub.setAttribute("data-mundo-clave", clave);
+    sub.id = idDeSubMundo(nombre);
     sub.open = !MUNDO_CERRADOS.has(clave);
     sub.addEventListener("toggle", () => recordarPlegadoMundo(sub, clave));
     const cabecera = document.createElement("summary");
@@ -114,8 +116,54 @@ function subapartadoMundo(grupo, nombre, fichas) {
     cuenta.setAttribute("data-mundo-sub-cuenta", "");
     cabecera.appendChild(cuenta);
     sub.appendChild(cabecera);
-    sub.appendChild(listaDeFichasMundo(fichas));
+    if (fichas.some((f) => (f.region || "").toString().trim())) {
+        sub.appendChild(porRegionesMundo(nombre, fichas));
+    } else {
+        sub.appendChild(listaDeFichasMundo(fichas));
+    }
     return sub;
+}
+function idDeSubMundo(nombre) {
+    return "mundo-" + (nombre || "").toString()
+        .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+        .toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+}
+function porRegionesMundo(parte, fichas) {
+    const llano = (texto) => (texto || "").toString().trim().toLowerCase();
+    const deParte = llano(parte);
+    const regiones = new Map();
+    fichas.forEach((f) => {
+        const suya = llano(f.region);
+        if (suya && suya !== deParte) {
+            regiones.set(suya, (f.region || "").toString().trim());
+        }
+    });
+    const caja = document.createElement("div");
+    caja.className = "mundo-por-regiones";
+    const directas = fichas
+        .filter((f) => !regiones.has(llano(f.region)) && !regiones.has(llano(f.titulo)))
+        .sort((a, b) => (llano(a.titulo) === deParte ? -1 : 0) - (llano(b.titulo) === deParte ? -1 : 0));
+    if (directas.length) {
+        caja.appendChild(listaDeFichasMundo(directas, true));
+    }
+    [...regiones.keys()].sort((a, b) => a.localeCompare(b, "es")).forEach((llave) => {
+        const propia = fichas.find((f) => llano(f.titulo) === llave);
+        const hijas = fichas.filter((f) => llano(f.region) === llave);
+        const bloque = document.createElement("div");
+        bloque.className = "mundo-region";
+        const titulo = document.createElement("h4");
+        titulo.className = "mundo-region-titulo";
+        titulo.textContent = propia ? propia.titulo : regiones.get(llave);
+        const cuenta = document.createElement("span");
+        cuenta.className = "mundo-grupo-cuenta";
+        cuenta.setAttribute("data-mundo-region-cuenta", "");
+        titulo.appendChild(document.createTextNode(" "));
+        titulo.appendChild(cuenta);
+        bloque.appendChild(titulo);
+        bloque.appendChild(listaDeFichasMundo(propia ? [propia, ...hijas] : hijas, true));
+        caja.appendChild(bloque);
+    });
+    return caja;
 }
 const MUNDO_CERRADOS = leerCerradosMundo();
 function leerCerradosMundo() {
@@ -369,13 +417,13 @@ function etiquetasDeReparto(ficha) {
         .map((e) => (e || "").toString().trim())
         .filter(Boolean);
 }
-function listaDeFichasMundo(fichas) {
+function listaDeFichasMundo(fichas, corta) {
     const lista = document.createElement("ul");
-    lista.className = "mundo-items";
-    fichas.forEach((ficha) => lista.appendChild(itemDelMundo(ficha)));
+    lista.className = corta ? "mundo-items es-corta" : "mundo-items";
+    fichas.forEach((ficha) => lista.appendChild(itemDelMundo(ficha, corta)));
     return lista;
 }
-function itemDelMundo(ficha) {
+function itemDelMundo(ficha, corto) {
     const item = document.createElement("li");
     item.className = "mundo-ficha-item";
     const etiquetas = (Array.isArray(ficha.etiquetas) ? ficha.etiquetas : [])
@@ -390,6 +438,10 @@ function itemDelMundo(ficha) {
     titulo.className = "mundo-item-titulo";
     titulo.textContent = ficha.titulo.toString().trim();
     enlace.appendChild(titulo);
+    if (corto) {
+        item.appendChild(enlace);
+        return item;
+    }
     const que = (ficha.que || "").toString().trim();
     if (que) {
         const linea = document.createElement("span");
@@ -423,10 +475,23 @@ document.addEventListener("buscar:cambiado", () => {
     document.querySelectorAll("[data-mundo-indice] .mundo-ficha-item").forEach((item) => {
         item.hidden = !window.buscador.pasa(item);
     });
+    const regiones = document.querySelector("[data-mundo-regiones]");
+    if (regiones && regiones.hasAttribute("data-mundo-cargado")) {
+        regiones.hidden = !!window.buscador.texto;
+    }
     repasarGruposMundo();
 });
 function repasarGruposMundo() {
     const rebuscandoSub = !!(window.buscador && window.buscador.texto);
+    document.querySelectorAll(".mundo-region").forEach((region) => {
+        const vivos = [...region.querySelectorAll(".mundo-ficha-item")]
+            .filter((item) => !item.hidden).length;
+        region.hidden = vivos === 0;
+        const cuenta = region.querySelector("[data-mundo-region-cuenta]");
+        if (cuenta) {
+            cuenta.textContent = String(vivos);
+        }
+    });
     document.querySelectorAll(".mundo-sub").forEach((sub) => {
         const vivos = [...sub.querySelectorAll(".mundo-ficha-item")]
             .filter((item) => !item.hidden).length;
@@ -532,4 +597,96 @@ function abrirAmpliadaMundo(boton, img) {
         alt: nombre,
         devolverA: boton,
     });
+}
+async function pintarRegionesMundo() {
+    const caja = document.querySelector("[data-mundo-regiones]");
+    if (!caja) {
+        return;
+    }
+    const fuente = (caja.getAttribute("data-mundo-regiones-datos") || "").trim();
+    let partes = null;
+    try {
+        const respuesta = await window.pedirDatos(fuente);
+        if (!respuesta.ok) {
+            throw new Error("La respuesta no fue correcta");
+        }
+        partes = await respuesta.json();
+    } catch (error) {
+        return;
+    }
+    if (!Array.isArray(partes) || !partes.length) {
+        return;
+    }
+    const lista = document.createElement("ul");
+    lista.className = "mundo-partes";
+    partes.forEach((parte) => {
+        if (!parte || !(parte.nombre || "").toString().trim()) {
+            return;
+        }
+        const item = document.createElement("li");
+        item.className = "mundo-parte";
+        item.appendChild(teselaDeRegionMundo(parte, "mundo-parte-enlace"));
+        const hijas = Array.isArray(parte.hijas) ? parte.hijas : [];
+        if (hijas.length) {
+            const suyas = document.createElement("ul");
+            suyas.className = "mundo-parte-hijas";
+            hijas.forEach((hija) => {
+                const li = document.createElement("li");
+                li.appendChild(teselaDeRegionMundo(hija, "mundo-hija"));
+                suyas.appendChild(li);
+            });
+            item.appendChild(suyas);
+        }
+        lista.appendChild(item);
+    });
+    caja.appendChild(lista);
+    caja.setAttribute("data-mundo-cargado", "");
+    caja.hidden = !!(window.buscador && window.buscador.texto);
+}
+function teselaDeRegionMundo(cosa, clase) {
+    const nombre = (cosa.nombre || "").toString().trim();
+    const enlace = document.createElement("a");
+    enlace.className = clase;
+    const url = (cosa.url || "").toString().trim();
+    enlace.href = url ? rutaSeguraMundo(url) : "#" + idDeSubMundo(nombre);
+    if (!url) {
+        enlace.addEventListener("click", () => abrirHastaMundo(idDeSubMundo(nombre)));
+    }
+    const imagen = rutaSeguraMundo(cosa.imagen);
+    if (imagen !== "#") {
+        const img = document.createElement("img");
+        img.className = clase + "-img";
+        img.src = imagen;
+        img.alt = "";
+        img.width = 360;
+        img.height = 240;
+        img.setAttribute("loading", "lazy");
+        img.setAttribute("decoding", "async");
+        enlace.appendChild(img);
+    }
+    const texto = document.createElement("span");
+    texto.className = clase + "-texto";
+    const fuerte = document.createElement("strong");
+    fuerte.className = clase + "-nombre";
+    fuerte.textContent = nombre;
+    texto.appendChild(fuerte);
+    const n = Number(cosa.cuenta) || 0;
+    if (n) {
+        const cuenta = document.createElement("span");
+        cuenta.className = clase + "-cuenta";
+        cuenta.textContent = n === 1 ? "1 página" : n + " páginas";
+        texto.appendChild(cuenta);
+    }
+    enlace.appendChild(texto);
+    return enlace;
+}
+function abrirHastaMundo(id) {
+    const destino = document.getElementById(id);
+    let paso = destino;
+    while (paso) {
+        if (paso.tagName === "DETAILS" && !paso.open) {
+            paso.open = true;
+        }
+        paso = paso.parentElement;
+    }
 }

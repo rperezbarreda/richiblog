@@ -38,16 +38,11 @@
     opacity: 1;
 }
 .sidebar-logo {
-    display: flex;
-    align-items: stretch;
-    gap: 8px;
     margin-bottom: 10px;
 }
 .sidebar-logo p {
     display: block;
-    flex: 1 1 auto;
-    min-width: 0;
-    margin: 0;
+    width: 100%;
     box-sizing: border-box;
     text-align: center;
     background: var(--yellow);
@@ -61,18 +56,21 @@
     overflow-wrap: break-word;
 }
 .lateral-plegar {
+    position: absolute;
+    top: 14px;
+    right: -24px;
+    z-index: 1;
     display: flex;
     align-items: center;
     justify-content: center;
-    flex: 0 0 auto;
-    width: 2.4rem;
-    min-height: 2.4rem;
+    width: 1.6rem;
+    height: 1.6rem;
     margin: 0;
     padding: 0;
     border: 2px solid var(--yellow);
-    background: transparent;
+    background: var(--purple);
     color: var(--yellow);
-    font-size: 1.1rem;
+    font-size: 0.9rem;
     line-height: 1;
     cursor: pointer;
 }
@@ -87,13 +85,13 @@
 }
 @media (min-width: 861px) {
     :root.lateral-plegada {
-        --lateral-hueco: calc(2.4rem + 20px);
+        --lateral-hueco: calc(1.6rem - 16px);
     }
     .lateral-plegada .sidebar {
         width: var(--lateral-hueco);
-        padding: 15px 10px;
+        padding: 0;
     }
-    .lateral-plegada .sidebar-logo p,
+    .lateral-plegada .sidebar-logo,
     .lateral-plegada .sidebar-top,
     .lateral-plegada .gatin-random {
         display: none;

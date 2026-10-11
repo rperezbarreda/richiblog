@@ -53,6 +53,9 @@
     .sidebar-logo {
         display: none;
     }
+    .lateral-plegar {
+        display: none;
+    }
     .sidebar {
         top: var(--barra-alto);
         height: calc(100dvh - var(--barra-alto));

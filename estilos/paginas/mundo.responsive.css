@@ -115,7 +115,12 @@
         grid-template-columns: minmax(0, 1fr) minmax(0, 20rem);
         grid-template-areas:
             "cabecera vistas"
+            "regiones vistas"
             "indice   vistas";
+        /* Si la columna de la derecha es más alta que la cabecera y las
+           regiones juntas, lo que sobra se lo queda la fila del índice y
+           no aparece un hueco entre las regiones y el índice. */
+        grid-template-rows: auto auto 1fr;
         column-gap: 26px;
     }
 }

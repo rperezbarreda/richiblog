@@ -42,6 +42,8 @@ async function initializeMundo() {
     if (!caja || typeof window.pedirDatos !== "function") {
         return;
     }
+    // A la vez, sin esperarse: son dos archivos que no dependen uno de otro.
+    pintarRegionesMundo();
     const fuente = (caja.getAttribute("data-mundo-datos") || "").trim();
     if (!fuente) {
         return;
@@ -167,6 +169,9 @@ function subapartadoMundo(grupo, nombre, fichas) {
     sub.className = "mundo-sub";
     sub.setAttribute("data-mundo-sub", nombre);
     sub.setAttribute("data-mundo-clave", clave);
+    // Para que la tarjeta de una parte del mundo sin página propia
+    // (Archipiélagos, en «busca una región») pueda llevar hasta aquí.
+    sub.id = idDeSubMundo(nombre);
     sub.open = !MUNDO_CERRADOS.has(clave);
     sub.addEventListener("toggle", () => recordarPlegadoMundo(sub, clave));
 
@@ -186,8 +191,79 @@ function subapartadoMundo(grupo, nombre, fichas) {
     cuenta.setAttribute("data-mundo-sub-cuenta", "");
     cabecera.appendChild(cuenta);
     sub.appendChild(cabecera);
-    sub.appendChild(listaDeFichasMundo(fichas));
+    // Si sus páginas dicen de qué región son (el mapamundi), cada país va
+    // debajo de su región y en una lista de nombres, no de tarjetas.
+    if (fichas.some((f) => (f.region || "").toString().trim())) {
+        sub.appendChild(porRegionesMundo(nombre, fichas));
+    } else {
+        sub.appendChild(listaDeFichasMundo(fichas));
+    }
     return sub;
+}
+
+function idDeSubMundo(nombre) {
+    return "mundo-" + (nombre || "").toString()
+        .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+        .toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+}
+
+// =========================================
+// LOS PAÍSES, BAJO SU REGIÓN
+// =========================================
+// Como en los portales de geografía de las wikis grandes: dentro de una
+// parte del mundo, primero lo que cuelga de ella directamente (la propia
+// Azarasia y sus países sueltos) y después un bloque por región (Islas de
+// Labros, con sus países). Y en LISTA DE NOMBRES, no en tarjetas: el
+// resumen de estas páginas era «X está en Y», que con la región encima ya
+// no dice nada, y ciento y pico tarjetas iguales no se recorren con la
+// vista; una lista en columnas sí.
+//
+// La región de cada página llega hecha en el JSON ("region", el campo
+// «región» de su ficha). Una página es una REGIÓN si alguna otra la tiene
+// como región.
+function porRegionesMundo(parte, fichas) {
+    const llano = (texto) => (texto || "").toString().trim().toLowerCase();
+    const deParte = llano(parte);
+    const regiones = new Map();
+    fichas.forEach((f) => {
+        const suya = llano(f.region);
+        if (suya && suya !== deParte) {
+            regiones.set(suya, (f.region || "").toString().trim());
+        }
+    });
+
+    const caja = document.createElement("div");
+    caja.className = "mundo-por-regiones";
+
+    // Lo que cuelga de la parte directamente: ni es de una región de aquí
+    // ni es una región. La página de la propia parte, la primera.
+    const directas = fichas
+        .filter((f) => !regiones.has(llano(f.region)) && !regiones.has(llano(f.titulo)))
+        .sort((a, b) => (llano(a.titulo) === deParte ? -1 : 0) - (llano(b.titulo) === deParte ? -1 : 0));
+    if (directas.length) {
+        caja.appendChild(listaDeFichasMundo(directas, true));
+    }
+
+    [...regiones.keys()].sort((a, b) => a.localeCompare(b, "es")).forEach((llave) => {
+        const propia = fichas.find((f) => llano(f.titulo) === llave);
+        const hijas = fichas.filter((f) => llano(f.region) === llave);
+        const bloque = document.createElement("div");
+        bloque.className = "mundo-region";
+        const titulo = document.createElement("h4");
+        titulo.className = "mundo-region-titulo";
+        titulo.textContent = propia ? propia.titulo : regiones.get(llave);
+        const cuenta = document.createElement("span");
+        cuenta.className = "mundo-grupo-cuenta";
+        cuenta.setAttribute("data-mundo-region-cuenta", "");
+        titulo.appendChild(document.createTextNode(" "));
+        titulo.appendChild(cuenta);
+        bloque.appendChild(titulo);
+        // La página de la región, la primera de su lista: así el buscador
+        // la encuentra igual que a las demás.
+        bloque.appendChild(listaDeFichasMundo(propia ? [propia, ...hijas] : hijas, true));
+        caja.appendChild(bloque);
+    });
+    return caja;
 }
 
 // QUÉ APARTADOS ESTÁN PLEGADOS. Se guarda la lista de los cerrados y no
@@ -542,17 +618,17 @@ function etiquetasDeReparto(ficha) {
         .filter(Boolean);
 }
 
-function listaDeFichasMundo(fichas) {
+function listaDeFichasMundo(fichas, corta) {
     const lista = document.createElement("ul");
-    lista.className = "mundo-items";
-    fichas.forEach((ficha) => lista.appendChild(itemDelMundo(ficha)));
+    lista.className = corta ? "mundo-items es-corta" : "mundo-items";
+    fichas.forEach((ficha) => lista.appendChild(itemDelMundo(ficha, corta)));
     return lista;
 }
 
 // Se monta con createElement y no con innerHTML: cada dato es un texto
 // suelto y textContent lo pone tal cual, sin que haya que acordarse de
 // escapar nada.
-function itemDelMundo(ficha) {
+function itemDelMundo(ficha, corto) {
     const item = document.createElement("li");
     item.className = "mundo-ficha-item";
     // Esto es lo que leen el filtro Y el buscador. Las etiquetas van todas
@@ -574,6 +650,12 @@ function itemDelMundo(ficha) {
     titulo.className = "mundo-item-titulo";
     titulo.textContent = ficha.titulo.toString().trim();
     enlace.appendChild(titulo);
+
+    // En la lista corta (el mapamundi), solo el nombre.
+    if (corto) {
+        item.appendChild(enlace);
+        return item;
+    }
 
     const que = (ficha.que || "").toString().trim();
     if (que) {
@@ -633,6 +715,12 @@ document.addEventListener("buscar:cambiado", () => {
     document.querySelectorAll("[data-mundo-indice] .mundo-ficha-item").forEach((item) => {
         item.hidden = !window.buscador.pasa(item);
     });
+    // Mientras se busca, la rejilla de regiones se quita: lo que importa
+    // entonces es lo que se ha encontrado, que está debajo.
+    const regiones = document.querySelector("[data-mundo-regiones]");
+    if (regiones && regiones.hasAttribute("data-mundo-cargado")) {
+        regiones.hidden = !!window.buscador.texto;
+    }
     repasarGruposMundo();
 });
 
@@ -640,6 +728,17 @@ function repasarGruposMundo() {
     // Primero los subapartados: un título de etiqueta encima de un hueco
     // vacío es lo mismo que un apartado vacío, pero más pequeño.
     const rebuscandoSub = !!(window.buscador && window.buscador.texto);
+    // Las regiones dentro de un subapartado: fuera si no queda ninguna de
+    // sus páginas, y su cuenta con las que queden.
+    document.querySelectorAll(".mundo-region").forEach((region) => {
+        const vivos = [...region.querySelectorAll(".mundo-ficha-item")]
+            .filter((item) => !item.hidden).length;
+        region.hidden = vivos === 0;
+        const cuenta = region.querySelector("[data-mundo-region-cuenta]");
+        if (cuenta) {
+            cuenta.textContent = String(vivos);
+        }
+    });
     document.querySelectorAll(".mundo-sub").forEach((sub) => {
         const vivos = [...sub.querySelectorAll(".mundo-ficha-item")]
             .filter((item) => !item.hidden).length;
@@ -795,4 +894,115 @@ function abrirAmpliadaMundo(boton, img) {
         alt: nombre,
         devolverA: boton,
     });
+}
+
+
+// =========================================
+// BUSCA UNA REGIÓN
+// =========================================
+// Lo primero de la portada, como en el portal de geografía de A Wiki of
+// Ice and Fire: cada parte del mundo con su mapa de situación en pequeño,
+// y debajo sus regiones, igual. Sale de datos/wiki/mundo-regiones.json,
+// que escribe generar-mundo.py (y las miniaturas, mundo_situacion.py).
+//
+// Las imágenes llevan alt="": el nombre va al lado, en texto, y un mapa
+// de situación en miniatura no cuenta nada que el nombre no diga.
+
+async function pintarRegionesMundo() {
+    const caja = document.querySelector("[data-mundo-regiones]");
+    if (!caja) {
+        return;
+    }
+    const fuente = (caja.getAttribute("data-mundo-regiones-datos") || "").trim();
+    let partes = null;
+    try {
+        const respuesta = await window.pedirDatos(fuente);
+        if (!respuesta.ok) {
+            throw new Error("La respuesta no fue correcta");
+        }
+        partes = await respuesta.json();
+    } catch (error) {
+        // Sin regiones la portada sigue valiendo: el índice está debajo.
+        return;
+    }
+    if (!Array.isArray(partes) || !partes.length) {
+        return;
+    }
+    const lista = document.createElement("ul");
+    lista.className = "mundo-partes";
+    partes.forEach((parte) => {
+        if (!parte || !(parte.nombre || "").toString().trim()) {
+            return;
+        }
+        const item = document.createElement("li");
+        item.className = "mundo-parte";
+        item.appendChild(teselaDeRegionMundo(parte, "mundo-parte-enlace"));
+        const hijas = Array.isArray(parte.hijas) ? parte.hijas : [];
+        if (hijas.length) {
+            const suyas = document.createElement("ul");
+            suyas.className = "mundo-parte-hijas";
+            hijas.forEach((hija) => {
+                const li = document.createElement("li");
+                li.appendChild(teselaDeRegionMundo(hija, "mundo-hija"));
+                suyas.appendChild(li);
+            });
+            item.appendChild(suyas);
+        }
+        lista.appendChild(item);
+    });
+    caja.appendChild(lista);
+    caja.setAttribute("data-mundo-cargado", "");
+    caja.hidden = !!(window.buscador && window.buscador.texto);
+}
+
+function teselaDeRegionMundo(cosa, clase) {
+    const nombre = (cosa.nombre || "").toString().trim();
+    const enlace = document.createElement("a");
+    enlace.className = clase;
+    // Sin página propia (Archipiélagos): a su apartado de la lista.
+    const url = (cosa.url || "").toString().trim();
+    enlace.href = url ? rutaSeguraMundo(url) : "#" + idDeSubMundo(nombre);
+    if (!url) {
+        enlace.addEventListener("click", () => abrirHastaMundo(idDeSubMundo(nombre)));
+    }
+    const imagen = rutaSeguraMundo(cosa.imagen);
+    if (imagen !== "#") {
+        const img = document.createElement("img");
+        img.className = clase + "-img";
+        img.src = imagen;
+        img.alt = "";
+        img.width = 360;
+        img.height = 240;
+        img.setAttribute("loading", "lazy");
+        img.setAttribute("decoding", "async");
+        enlace.appendChild(img);
+    }
+    const texto = document.createElement("span");
+    texto.className = clase + "-texto";
+    const fuerte = document.createElement("strong");
+    fuerte.className = clase + "-nombre";
+    fuerte.textContent = nombre;
+    texto.appendChild(fuerte);
+    const n = Number(cosa.cuenta) || 0;
+    if (n) {
+        const cuenta = document.createElement("span");
+        cuenta.className = clase + "-cuenta";
+        cuenta.textContent = n === 1 ? "1 página" : n + " páginas";
+        texto.appendChild(cuenta);
+    }
+    enlace.appendChild(texto);
+    return enlace;
+}
+
+// El apartado al que lleva una tarjeta sin página, abierto aunque se
+// hubiera dejado plegado: llevar a un título cerrado es llevar a nada.
+function abrirHastaMundo(id) {
+    const destino = document.getElementById(id);
+    let paso = destino;
+    while (paso) {
+        if (paso.tagName === "DETAILS" && !paso.open) {
+            paso.open = true;
+        }
+        paso = paso.parentElement;
+    }
 }

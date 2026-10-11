@@ -67,7 +67,7 @@
 (function versionesDeArchivos() {
     const VERSIONES = {
         // ==== generado ====
-        "/fragmentos/barra-lateral.html": "a9f96dab",
+        "/fragmentos/barra-lateral.html": "e6721b10",
         "/fragmentos/frases.html": "2720019e",
         // ==== fin del generado ====
     };

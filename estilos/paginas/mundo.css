@@ -724,6 +724,7 @@ html:not(.js) .mundo-spoiler {
     grid-template-columns: minmax(0, 1fr);
     grid-template-areas:
         "cabecera"
+        "regiones"
         "vistas"
         "indice";
     align-content: start;
@@ -766,6 +767,182 @@ html:not(.js) .mundo-spoiler {
 }
 
 
+/* «Para empezar: el Mapamundi, la línea de tiempo o una región». */
+.mundo-indice-accesos {
+    max-width: 62ch;
+    margin: 0;
+    color: var(--white);
+    font-size: 0.9375rem;
+    line-height: 1.6;
+}
+
+/* En amarillo, como el resto de enlaces de la wiki: con el color de serie
+   del navegador se quedaban en Lc 54 sobre los temas oscuros. */
+.mundo-indice-accesos a {
+    color: var(--yellow);
+    text-underline-offset: 3px;
+}
+
+.mundo-indice-accesos a:hover,
+.mundo-indice-accesos a:focus-visible {
+    text-decoration-thickness: 2px;
+}
+
+
+/* ====================================================================
+   BUSCA UNA REGIÓN
+   ====================================================================
+   Lo primero de la portada, sacado del portal de geografía de A Wiki of
+   Ice and Fire: cada parte del mundo con su mapa de situación en pequeño
+   y, debajo, sus regiones. Lo pinta scripts/paginas/mundo.js con
+   datos/wiki/mundo-regiones.json; mientras se busca algo, se esconde.
+
+       <div class="mundo-regiones">
+           <h2 class="mundo-regiones-titulo">
+           <ul class="mundo-partes">
+               <li class="mundo-parte">
+                   <a class="mundo-parte-enlace"> img + nombre + cuenta
+                   <ul class="mundo-parte-hijas">
+                       <li><a class="mundo-hija"> img + nombre + cuenta  */
+
+.mundo-regiones[hidden] {
+    display: none;
+}
+
+.mundo-regiones {
+    grid-area: regiones;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+/* Que el enlace «una región» de la intro no deje el título pegado arriba
+   del todo, debajo de nada. */
+.mundo-regiones-titulo {
+    scroll-margin-top: 16px;
+}
+
+.mundo-regiones-titulo:focus {
+    outline: none;
+}
+
+.mundo-partes {
+    display: grid;
+    /* 11rem: dos por fila en la columna de la izquierda a 1440 (unos
+       530px) y tres o cuatro cuando hay sitio. Con 15rem salía una por
+       fila y cada miniatura medía media pantalla. */
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 11rem), 1fr));
+    gap: 14px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.mundo-parte {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    min-width: 0;
+    margin: 0;
+    padding: 10px;
+    border: 2px solid var(--border);
+    background: var(--purple-lighter);
+}
+
+.mundo-parte-enlace,
+.mundo-hija {
+    color: var(--white);
+    text-decoration: none;
+}
+
+.mundo-parte-enlace {
+    display: block;
+}
+
+.mundo-parte-enlace-img {
+    display: block;
+    width: 100%;
+    height: auto;
+    border: 2px solid var(--border);
+}
+
+.mundo-parte-enlace-texto {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 2px 8px;
+    margin-top: 6px;
+}
+
+.mundo-parte-enlace-nombre {
+    color: var(--yellow);
+    font-size: 1.0625rem;
+    overflow-wrap: break-word;
+}
+
+.mundo-parte-enlace-cuenta,
+.mundo-hija-cuenta {
+    color: var(--muted);
+    font-family: var(--fuente-mono);
+    font-size: 0.75rem;
+}
+
+.mundo-parte-hijas {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin: 0;
+    padding: 8px 0 0;
+    border-top: 1px solid var(--border);
+    list-style: none;
+}
+
+.mundo-hija {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 2px;
+}
+
+.mundo-hija-img {
+    flex: 0 0 auto;
+    width: 3.5rem;
+    height: auto;
+    border: 1px solid var(--border);
+}
+
+.mundo-hija-texto {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+
+.mundo-hija-nombre {
+    color: var(--yellow);
+    font-size: 0.875rem;
+    font-weight: 500;
+    overflow-wrap: break-word;
+}
+
+.mundo-parte-enlace:hover .mundo-parte-enlace-img,
+.mundo-parte-enlace:focus-visible .mundo-parte-enlace-img,
+.mundo-hija:hover .mundo-hija-img,
+.mundo-hija:focus-visible .mundo-hija-img {
+    border-color: var(--yellow);
+}
+
+.mundo-parte-enlace:hover .mundo-parte-enlace-nombre,
+.mundo-hija:hover .mundo-hija-nombre {
+    text-decoration: underline;
+}
+
+.mundo-parte-enlace:focus-visible,
+.mundo-hija:focus-visible {
+    outline: 2px solid var(--yellow);
+    outline-offset: 2px;
+}
+
+
 /* ====================================================================
    LOS MAPAS, EN SU COLUMNA
    ====================================================================
@@ -792,7 +969,8 @@ html:not(.js) .mundo-spoiler {
     align-self: start;
 }
 
-.mundo-vistas-titulo {
+.mundo-vistas-titulo,
+.mundo-regiones-titulo {
     margin: 0;
     padding-bottom: 8px;
     border-bottom: 2px solid var(--yellow);
@@ -1256,6 +1434,61 @@ html:not(.js) .mundo-spoiler {
 
 .mundo-ficha-item[hidden] {
     display: none;
+}
+
+/* LA LISTA CORTA: los países del mapamundi, por regiones (ver
+   porRegionesMundo en mundo.js). Nombres en columnas en vez de tarjetas:
+   el resumen de estas páginas era «X está en Y», que con la región encima
+   no dice nada. Subrayados, porque aquí no hay recuadro que diga que se
+   pueden pulsar. */
+.mundo-items.es-corta {
+    /* 10rem: dos columnas en la de la izquierda a 1440 (530px); con 12
+       no cabían y salía una sola, una lista larguísima. */
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 10rem), 1fr));
+    gap: 2px 20px;
+}
+
+.mundo-items.es-corta .mundo-item {
+    height: auto;
+    padding: 4px 2px;
+    border: 0;
+    background: none;
+}
+
+.mundo-items.es-corta .mundo-item-titulo {
+    font-size: 0.9375rem;
+    font-weight: 400;
+    text-decoration: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 3px;
+}
+
+.mundo-items.es-corta .mundo-item:hover .mundo-item-titulo {
+    text-decoration-thickness: 2px;
+}
+
+.mundo-por-regiones {
+    margin-top: 8px;
+}
+
+.mundo-region[hidden] {
+    display: none;
+}
+
+.mundo-region {
+    margin-top: 16px;
+}
+
+.mundo-region-titulo {
+    margin: 0 0 6px;
+    padding-bottom: 4px;
+    border-bottom: 1px solid var(--border);
+    color: var(--white);
+    font-family: var(--fuente-mono);
+    font-size: 0.8125rem;
+    font-weight: 400;
+    letter-spacing: 1px;
+    text-transform: uppercase;
 }
 
 .mundo-ficha-item {

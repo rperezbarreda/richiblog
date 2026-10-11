@@ -1335,6 +1335,26 @@
   guardados los archivos; eso no tiene por qué ser cómo se busca una
   cosa.
 
+  ORGANIZADA COMO UN PORTAL DE GEOGRAFÍA (la idea sale del de A Wiki of
+  Ice and Fire, awoiaf.westeros.org/index.php/Portal:Geography):
+
+    - «Para empezar»: una línea con el mapamundi, la línea de tiempo y
+      un enlace a las regiones. Está escrita a mano en index_wiki.html.
+    - BUSCA UNA REGIÓN: una tarjeta por parte del mundo (en el "orden"
+      de mundo-categorias.json) con su mapa de situación en pequeño, y
+      dentro sus regiones, igual. Una región es una página que alguna
+      otra tiene como «región» en su ficha. Sale de
+      datos/wiki/mundo-regiones.json, que escribe generar-mundo.py, y las
+      miniaturas (360x240, unos 15 KB) de imagenes/wiki/situacion/peque/.
+      Una parte sin página propia (Archipiélagos) se dibuja con todas sus
+      páginas resaltadas, y su tarjeta lleva a su apartado de la lista.
+      Mientras se busca algo, esta rejilla se esconde.
+    - EL ÍNDICE: en el mapamundi, cada país debajo de su región y en una
+      lista de nombres en columnas, no en tarjetas (el resumen de estas
+      páginas era «X está en Y», que con la región encima ya no dice
+      nada). Los demás apartados (historia, lo demás) siguen con tarjeta.
+    - A la derecha, como antes, los mapas y la línea de tiempo.
+
   Y CADA SUBAPARTADO TAMBIÉN (Azarasia, Partaria… dentro de Mapamundi,
   los eventos dentro de historia), con su flecha y su cuenta, y se
   recuerda igual que los apartados.
@@ -2881,8 +2901,9 @@
   tema, el adelanto del menú, la lista de CSS y la de JS. NO SE TOCA A
   MANO; se toca la herramienta y se vuelve a pasar.
 
-  LA BARRA LATERAL PLEGADA. En escritorio, el botón ☰ de al lado de «EL
-  BLOG DE RICHI» deja la barra en una tira con ese botón y el contenido
+  LA BARRA LATERAL PLEGADA. En escritorio, el botón ☰ montado en el
+  borde de la barra, entre ella y el contenido y a la altura de «EL BLOG
+  DE RICHI», deja la barra en una tira con ese botón y el contenido
   se queda con el sitio (en móvil no sale: ahí la barra ya es un cajón).
   Se recuerda entre páginas (richi-lateral, en el navegador), y quien lo
   pone al cargar es el pre-pintado del tema, por lo mismo que el tema: si

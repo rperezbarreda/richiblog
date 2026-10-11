@@ -41,18 +41,12 @@
 }
 
 .sidebar-logo {
-    /* El título y, a su derecha, el botón de plegar la barra. */
-    display: flex;
-    align-items: stretch;
-    gap: 8px;
     margin-bottom: 10px;
 }
 
 .sidebar-logo p {
     display: block;
-    flex: 1 1 auto;
-    min-width: 0;
-    margin: 0;
+    width: 100%;
     box-sizing: border-box;
     text-align: center;
     background: var(--yellow);
@@ -66,28 +60,41 @@
     overflow-wrap: break-word;
 }
 
-/* EL BOTÓN DE PLEGAR LA BARRA (☰, a la derecha del título). Solo en
-   escritorio: en móvil todo .sidebar-logo se esconde, porque ahí la barra
-   ya es un cajón que se abre y se cierra con el botón de arriba.
+/* EL BOTÓN DE PLEGAR LA BARRA (☰). Montado en el borde derecho de la
+   barra, mitad dentro y mitad en el hueco que la separa del contenido, a
+   la altura del título. Solo en escritorio: en móvil se esconde (en
+   barra-lateral.responsive.css), porque ahí la barra ya es un cajón que
+   se abre y se cierra con el botón de arriba.
 
-   Plegada, la barra se queda en una tira con este botón y nada más, y el
-   contenido se queda con el sitio (main se coloca con --lateral-hueco, en
-   estilos/base.css). La clase "lateral-plegada" va en el <html> y la pone
-   el script del tema ANTES de pintar, para que al cambiar de página no se
-   vea la barra entera un instante y luego plegarse. */
+   Plegada, la barra se queda en una tira estrecha, el botón sigue montado
+   en su borde y el contenido se queda con el sitio (main se coloca con
+   --lateral-hueco, en estilos/base.css). La clase "lateral-plegada" va en
+   el <html> y la pone el script del tema ANTES de pintar, para que al
+   cambiar de página no se vea la barra entera un instante y luego
+   plegarse.
+
+   Medidas: 1.6rem de botón (lo que mide de alto el título), que sale
+   24px por fuera del borde. Así quedan unos 10px hasta el título por
+   dentro y 12 hasta el marco del contenido por fuera (medido a 1440 con
+   el texto de siempre). Centrado justo en el borde se pegaba al título. */
 .lateral-plegar {
+    position: absolute;
+    top: 14px;
+    right: -24px;
+    z-index: 1;
     display: flex;
     align-items: center;
     justify-content: center;
-    flex: 0 0 auto;
-    width: 2.4rem;
-    min-height: 2.4rem;
+    width: 1.6rem;
+    height: 1.6rem;
     margin: 0;
     padding: 0;
     border: 2px solid var(--yellow);
-    background: transparent;
+    /* Opaco: el borde de la barra pasa por debajo y no tiene que verse a
+       través del botón. */
+    background: var(--purple);
     color: var(--yellow);
-    font-size: 1.1rem;
+    font-size: 0.9rem;
     line-height: 1;
     cursor: pointer;
 }
@@ -108,16 +115,18 @@
    cajón saldría vacío). */
 @media (min-width: 861px) {
     :root.lateral-plegada {
-        /* El botón y el relleno de la barra a cada lado. */
-        --lateral-hueco: calc(2.4rem + 20px);
+        /* La tira: lo justo para que el botón, montado en su borde, quede
+           a 8px del borde de la pantalla (lo que mide menos los 24px que
+           sale por fuera). */
+        --lateral-hueco: calc(1.6rem - 16px);
     }
 
     .lateral-plegada .sidebar {
         width: var(--lateral-hueco);
-        padding: 15px 10px;
+        padding: 0;
     }
 
-    .lateral-plegada .sidebar-logo p,
+    .lateral-plegada .sidebar-logo,
     .lateral-plegada .sidebar-top,
     .lateral-plegada .gatin-random {
         display: none;

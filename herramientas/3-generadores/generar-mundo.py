@@ -497,7 +497,7 @@ def poner_slugs(paginas, mapas):
         vistos[cosa["slug"]] = cosa["nombre"]
 
 
-def convertir_todo(paginas, imagenes, mapas, avisos_por_pagina, eventos=None, situaciones=None):
+def convertir_todo(paginas, imagenes, mapas, avisos_por_pagina, eventos=None):
     """Convierte cada página y devuelve lo que hace falta para escribirlas.
     Se hace en dos vueltas porque una página necesita saber de las demás:
     qué páginas existen (para los enlaces rojos) y quién la enlaza (para
@@ -578,8 +578,7 @@ def convertir_todo(paginas, imagenes, mapas, avisos_por_pagina, eventos=None, si
             filas_de_la_infobox(datos, lambda v: _una_linea(chico, v)),
             imagenes_de_la_ficha(datos, ruta_de_imagen, avisos),
         )
-        ficha["situacion_html"] = figura_de_situacion(
-            (situaciones or {}).get(ficha["nombre"].strip().lower()))
+
         ficha["enlaces"] += chico.enlaces
         # El resumen para el buscador y para el índice: el primer párrafo,
         # sin etiquetas.
@@ -694,6 +693,23 @@ def nombre_de_capa(archivo):
     return slug(archivo.stem) + ".webp"
 
 
+def regiones_de(paginas):
+    """QUÉ PAÍS ES DE QUÉ REGIÓN, según las fichas de las páginas: el campo
+    «región» ([[Partaria]]). {nombre en minúsculas: región en minúsculas}.
+    Lo usan el mapa (qué formas son regiones), los mapas de situación (qué
+    regiones llevan miniatura) y la portada (los países, bajo su región)."""
+    salida = {}
+    for ficha in paginas.values():
+        datos = ficha.get("datos") or {}
+        valor = datos.get("región") or datos.get("region")
+        if not valor:
+            continue
+        nombre = re.sub(r"^\[\[|\]\]$", "", str(valor).strip()).split("|")[0].strip()
+        if nombre:
+            salida[ficha["nombre"].strip().lower()] = nombre.lower()
+    return salida
+
+
 def convertir_mapas(mapas, paginas, imagenes, avisos_por_pagina, detalle):
     """Lee los .cmap, los pinta y deja en cada uno lo que hace falta para
     escribir su página. Devuelve las imágenes de fondo que hay que
@@ -740,17 +756,9 @@ def convertir_mapas(mapas, paginas, imagenes, avisos_por_pagina, detalle):
         otro = mapas.get(nombre.strip().lower())
         return (otro["url"], True) if otro else ("", False)
 
-    # QUÉ PAÍS ES DE QUÉ REGIÓN, según las fichas de las páginas: el
-    # campo «región» ([[Partaria]]). Con eso el mapa sabe qué formas son
+    # QUÉ PAÍS ES DE QUÉ REGIÓN: con eso el mapa sabe qué formas son
     # regiones y cuáles países (ver niveles() en mundo_mapas.py).
-    region_de = {}
-    for ficha in paginas.values():
-        valor = ficha["datos"].get("región") or ficha["datos"].get("region")
-        if not valor:
-            continue
-        nombre = re.sub(r"^\[\[|\]\]$", "", str(valor).strip()).split("|")[0].strip()
-        if nombre:
-            region_de[ficha["nombre"].strip().lower()] = nombre.lower()
+    region_de = regiones_de(paginas)
 
     for mapa in sorted(mapas.values(), key=lambda m: m["nombre"].lower()):
         leido, avisos = mapa["leido"], mapa["avisos"]
@@ -1030,10 +1038,13 @@ def leer_categorias():
         orden = uno.get("orden")
         if isinstance(orden, list):
             ORDEN_DE_SUBAPARTADOS[nombre] = [_llano(o) for o in orden if str(o).strip()]
+            # Y tal cual, con sus tildes: la portada los escribe.
+            _ORDEN_CRUDO[nombre] = [str(o).strip() for o in orden if str(o).strip()]
     return categorias
 
 
 ORDEN_DE_SUBAPARTADOS = {}
+_ORDEN_CRUDO = {}
 
 
 def _orden_del_sub(grupo, sub):
@@ -1070,8 +1081,12 @@ def escribir_indice(paginas, mapas, probar, categorias=()):
     etiqueta los pinta el navegador con datos/wiki/mundo.json, igual que el
     resto de listados del sitio."""
     fichas = []
+    region_de = regiones_de(paginas)
     for ficha in sorted(paginas.values(), key=lambda f: f["titulo"].lower()):
         grupo, sub = clasificar(ficha["etiquetas"], categorias)
+        # Su región, con el título de su página (la portada pone cada país
+        # debajo de su región, como los portales de geografía).
+        suya = paginas.get(region_de.get(ficha["nombre"].strip().lower(), ""))
         fichas.append({
             "titulo": ficha["titulo"],
             "url": ficha["url"],
@@ -1085,6 +1100,7 @@ def escribir_indice(paginas, mapas, probar, categorias=()):
             "sub": sub,
             "que": ficha["subtitulo"] or str(ficha["datos"].get("infobox") or ""),
             "resumen": ficha["resumen"],
+            "region": suya["titulo"] if suya else "",
         })
     # Los mapas, todos juntos en su apartado y no en la carpeta en la que
     # estén guardados: en la portada se buscan como "los mapas", no como
@@ -1121,6 +1137,71 @@ def escribir_indice(paginas, mapas, probar, categorias=()):
     if not probar:
         escribir_json(INDICE, fichas)
     return fichas
+
+
+# =========================================
+# «BUSCA UNA REGIÓN», EN LA PORTADA
+# =========================================
+# La portada de la wiki empieza, como los portales de geografía de las
+# wikis grandes (el de A Wiki of Ice and Fire, que es de donde sale la
+# idea), por una rejilla de miniaturas: cada parte del mundo y, debajo, sus
+# regiones, cada una con su mapa de situación en pequeño. Lo pinta
+# scripts/paginas/mundo.js con datos/wiki/mundo-regiones.json, que se
+# escribe aquí.
+
+REGIONES = RAIZ / "datos" / "wiki" / "mundo-regiones.json"
+
+
+def partes_del_mapamundi():
+    """Las partes del mundo, en orden: el "orden" del apartado del
+    mapamundi en datos/wiki/mundo-categorias.json (Azarasia, Partaria…).
+    Hay que haber leído las categorías antes (leer_categorias)."""
+    for grupo, orden in ORDEN_DE_SUBAPARTADOS.items():
+        if _llano(grupo) == "mapamundi":
+            return [str(o).strip() for o in _ORDEN_CRUDO.get(grupo, orden)]
+    return []
+
+
+def _parte_de(carpeta):
+    """Mapamundi/Azarasia/Islas de Labros → Azarasia."""
+    trozos = [t for t in str(carpeta or "").split("/") if t]
+    return trozos[1] if len(trozos) > 1 and _llano(trozos[0]) == "mapamundi" else ""
+
+
+def escribir_regiones(paginas, partes, peques, de_partes, probar):
+    region_de = regiones_de(paginas)
+    cuantas = {}
+    for region in region_de.values():
+        cuantas[region] = cuantas.get(region, 0) + 1
+    salida = []
+    for parte in partes:
+        llave = parte.lower()
+        suyas = [f for f in paginas.values() if _llano(_parte_de(f["carpeta"])) == _llano(parte)]
+        if not suyas:
+            continue
+        propia = paginas.get(llave)
+        # Las regiones de esta parte: las páginas suyas que son «región» de
+        # alguna otra, menos la propia parte (Azarasia es región de sus
+        # países, pero es la tarjeta grande, no una de sus hijas).
+        hijas = []
+        for f in sorted(suyas, key=lambda f: f["titulo"].lower()):
+            clave = f["nombre"].strip().lower()
+            if clave == llave or clave not in cuantas:
+                continue
+            hijas.append({"nombre": f["titulo"], "url": f["url"],
+                          "imagen": peques.get(clave, ""), "cuenta": cuantas[clave]})
+        salida.append({
+            "nombre": propia["titulo"] if propia else parte,
+            # Sin página propia (Archipiélagos), la tarjeta lleva a su
+            # apartado en la lista de abajo.
+            "url": propia["url"] if propia else "",
+            "imagen": peques.get(llave) or de_partes.get(llave, ""),
+            "cuenta": len(suyas),
+            "hijas": hijas,
+        })
+    if not probar:
+        escribir_json(REGIONES, salida)
+    return salida
 
 
 def copiar_imagenes(imagenes, usadas, probar):
@@ -1160,17 +1241,51 @@ def copiar_imagenes(imagenes, usadas, probar):
 SITUACION = IMAGENES / "situacion"
 
 
-def preparar_situaciones(paginas, mapas, imagenes, probar):
+def preparar_situaciones(paginas, mapas, imagenes, probar, partes=()):
     """Un mapa de situación por cada página que se llame como una forma con
-    nombre de algún mapa. Devuelve ({nombre en minúsculas: (url, título de
-    la página, título del mapa, url del mapa)}, cuántos se han dibujado)."""
+    nombre de algún mapa. Devuelve:
+
+      · {nombre en minúsculas: (url, título de la página, título del mapa,
+        url del mapa)}, para el artículo;
+      · cuántos se han dibujado ahora;
+      · {nombre en minúsculas: url de la miniatura}, solo de las REGIONES
+        (las que son «región» de alguna página) y de las partes del mundo:
+        son las de la portada (ver escribir_regiones);
+      · {parte en minúsculas: url de la miniatura} de las partes del mundo
+        que no tienen página ni forma propia (Archipiélagos): se dibujan
+        con las formas de todas sus páginas juntas resaltadas.
+    """
     if not mundo_situacion.HAY_PILLOW or not mapas:
-        return {}, 0
+        return {}, 0, {}, {}
     from PIL import Image
     Image.MAX_IMAGE_PIXELS = None
     indices = indice_de_imagenes(imagenes)
-    salida, hechas, buenas = {}, 0, set()
+    salida, peques, de_partes, hechas, buenas = {}, {}, {}, 0, set()
     este = Path(mundo_situacion.__file__)
+    con_peque = set(regiones_de(paginas).values()) | {p.lower() for p in partes}
+    PEQUE_DIR = SITUACION / "peque"
+
+    def dibuja(fondo_abierto, leido, poligonos, vecinos, archivo, fuentes, peque,
+               grande=True):
+        """Dibuja (si hace falta) la grande y, si peque, la miniatura.
+        Devuelve cuántas ha dibujado y el fondo, abierto la primera vez que
+        se necesita (es una imagen de 2560 de ancho: se abre una vez)."""
+        hechas_aqui = 0
+        destinos = [(SITUACION / archivo, {})] if grande else []
+        if peque:
+            destinos.append((PEQUE_DIR / archivo, {"tamano": mundo_situacion.PEQUE,
+                                                    "calidad": mundo_situacion.CALIDAD_PEQUE}))
+        for destino, ajustes in destinos:
+            buenas.add(destino)
+            if probar or mundo_situacion.al_dia(destino, fuentes):
+                continue
+            if fondo_abierto[0] is None:
+                fondo_abierto[0] = Image.open(fuentes[1]).convert("RGB")
+            mundo_situacion.dibujar(fondo_abierto[0], leido["ancho"], leido["alto"],
+                                    poligonos, vecinos, destino, **ajustes)
+            hechas_aqui += 1
+        return hechas_aqui
+
     for mapa in sorted(mapas.values(), key=lambda m: m["nombre"].lower()):
         crudo, _ = leer_texto(mapa["archivo"])
         leido = mundo_mapas.leer_cmap(crudo, lambda *a: None)
@@ -1195,31 +1310,47 @@ def preparar_situaciones(paginas, mapas, imagenes, probar):
         vecinos_todos = [(i, f["puntos"]) for i, f in enumerate(leido["formas"])
                          if nivel.get(i) in ("pais", "suelto")]
         titulo_mapa = leido.get("titulo") or mapa["nombre"]
-        fondo = None
+        fuentes = [mapa["archivo"], fondo_archivo, este]
+        fondo = [None]
         for clave, ficha in paginas.items():
             poligonos = formas.get(ficha["nombre"].strip().lower())
             if not poligonos or clave in salida:
                 continue
             archivo = slug(ficha["nombre"]) + ".webp"
-            destino = SITUACION / archivo
-            buenas.add(archivo)
-            if not probar and not mundo_situacion.al_dia(
-                    destino, [mapa["archivo"], fondo_archivo, este]):
-                if fondo is None:
-                    fondo = Image.open(fondo_archivo).convert("RGB")
-                vecinos = [p for _, p in vecinos_todos if p not in poligonos]
-                mundo_situacion.dibujar(fondo, leido["ancho"], leido["alto"],
-                                        poligonos, vecinos, destino)
-                hechas += 1
+            vecinos = [p for _, p in vecinos_todos if p not in poligonos]
+            hechas += dibuja(fondo, leido, poligonos, vecinos, archivo, fuentes,
+                             clave in con_peque)
+            if clave in con_peque:
+                peques[clave] = "/imagenes/wiki/situacion/peque/" + archivo
             salida[clave] = ("/imagenes/wiki/situacion/" + archivo,
                              str(ficha["datos"].get("title") if ficha.get("datos") else "")
                              or ficha["nombre"], titulo_mapa, mapa["url"])
+        # LAS PARTES DEL MUNDO SIN PÁGINA (Archipiélagos): todas las formas
+        # de las páginas de su carpeta, resaltadas a la vez.
+        for parte in partes:
+            llave = parte.lower()
+            if llave in paginas or llave in de_partes:
+                continue
+            suyas = [f for f in paginas.values()
+                     if _llano(_parte_de(f["carpeta"])) == _llano(parte)]
+            poligonos = [pol for f in suyas
+                         for pol in formas.get(f["nombre"].strip().lower(), [])]
+            if not poligonos:
+                continue
+            archivo = slug(parte) + ".webp"
+            vecinos = [p for _, p in vecinos_todos if p not in poligonos]
+            # Solo la miniatura: sin página, la grande no la enseña nadie.
+            hechas += dibuja(fondo, leido, poligonos, vecinos, archivo, fuentes, True,
+                             grande=False)
+            de_partes[llave] = "/imagenes/wiki/situacion/peque/" + archivo
     # Los de páginas o formas que ya no están.
-    if not probar and SITUACION.is_dir():
-        for viejo in SITUACION.glob("*.webp"):
-            if viejo.name not in buenas:
-                viejo.unlink()
-    return salida, hechas
+    if not probar:
+        for carpeta in (SITUACION, PEQUE_DIR):
+            if carpeta.is_dir():
+                for viejo in carpeta.glob("*.webp"):
+                    if viejo not in buenas:
+                        viejo.unlink()
+    return salida, hechas, peques, de_partes
 
 
 def limpiar_lo_que_sobra(paginas, mapas, probar):
@@ -1281,9 +1412,16 @@ def main():
     avisos_por_pagina = []
     _, eventos = mundo_linea.leer()
     eventos_por_nombre = mundo_linea.por_nombre(eventos)
-    situaciones, hechas_sit = preparar_situaciones(paginas, mapas, imagenes, args.probar)
-    paginas = convertir_todo(paginas, imagenes, mapas, avisos_por_pagina, eventos_por_nombre,
-                             situaciones)
+    paginas = convertir_todo(paginas, imagenes, mapas, avisos_por_pagina, eventos_por_nombre)
+    # Los mapas de situación, DESPUÉS de convertir: hace falta el campo
+    # «región» de cada ficha para saber cuáles son regiones (esas llevan
+    # además su miniatura para la portada).
+    categorias = leer_categorias()
+    partes = partes_del_mapamundi()
+    situaciones, hechas_sit, peques, de_partes = preparar_situaciones(
+        paginas, mapas, imagenes, args.probar, partes)
+    for clave, ficha in paginas.items():
+        ficha["situacion_html"] = figura_de_situacion(situaciones.get(clave))
     capas = convertir_mapas(mapas, paginas, imagenes, avisos_por_pagina, args.detalle)
     # Un evento que nombra una página ([[Valderín]] en su texto) sale en el
     # «se habla de esto en» de esa página, igual que un artículo o un mapa.
@@ -1307,8 +1445,8 @@ def main():
     escritas = escribir_paginas(paginas, args.probar)
     escritos = escribir_mapas(mapas, args.probar)
     escritos += escribir_vistas(mapas, args.probar)
-    categorias = leer_categorias()
     fichas = escribir_indice(paginas, mapas, args.probar, categorias)
+    escribir_regiones(paginas, partes, peques, de_partes, args.probar)
     copiadas, pesadas, repetidas = copiar_imagenes(imagenes, usadas, args.probar)
     hechas, saltadas, enteras, gordas = preparar_capas(capas, args.probar)
     sobran = limpiar_lo_que_sobra(paginas, mapas, args.probar)

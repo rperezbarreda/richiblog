@@ -69,6 +69,11 @@
         display: none;
     }
 
+    /* Ni el botón de plegar la barra: en móvil la barra ya es un cajón. */
+    .lateral-plegar {
+        display: none;
+    }
+
     .sidebar {
         top: var(--barra-alto);
         /* dvh y no vh: en un móvil, vh cuenta la pantalla entera aunque
