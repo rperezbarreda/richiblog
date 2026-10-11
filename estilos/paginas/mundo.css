@@ -201,6 +201,58 @@
     border: 2px solid var(--border);
 }
 
+/* EL MAPA DE SITUACIÓN: el país resaltado en el mapamundi. A lo ancho del
+   artículo (antes iba en la ficha, a 17rem, y una isla era un punto). */
+.mundo-situacion {
+    max-width: 100%;
+}
+
+.mundo-situacion-img {
+    width: 100%;
+    height: auto;
+    display: block;
+    border: 2px solid var(--border);
+}
+
+.mundo-situacion figcaption {
+    margin-top: 6px;
+    color: var(--muted);
+    font-family: var(--fuente-mono);
+    font-size: 0.8125rem;
+}
+
+/* LA IMAGEN QUE SE AMPLÍA. mundo.js envuelve cada imagen de un artículo
+   en este botón (sin JavaScript no hay botón, y la imagen se queda como
+   estaba). Sin nada de botón por fuera: la imagen es lo que se ve, y lo
+   que dice que se puede pulsar es la lupa del cursor y el borde amarillo
+   al pasar por encima o llegar con el tabulador. */
+.mundo-ampliar {
+    display: block;
+    max-width: 100%;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    background: none;
+    cursor: zoom-in;
+}
+
+/* Donde la imagen va a lo ancho (el mapa de situación, la ficha), el
+   botón también: un botón no se estira solo como un bloque cualquiera. */
+.mundo-situacion .mundo-ampliar,
+.mundo-ficha .mundo-ampliar {
+    width: 100%;
+}
+
+.mundo-ampliar:hover > img,
+.mundo-ampliar:focus-visible > img {
+    border-color: var(--yellow);
+}
+
+.mundo-ampliar:focus-visible {
+    outline: 2px solid var(--yellow);
+    outline-offset: 3px;
+}
+
 /* Una imagen que falta. No se esconde: se dice, porque es lo que hace que
    se arregle. */
 .mundo-falta {

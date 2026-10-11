@@ -2,7 +2,7 @@
 <html lang="es">
   <head>
     <meta charset="UTF-8">
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-WzJfmZ3zA0hDtnR6cKyKt1o+8g4NfGJTELgMCUrrBFw=' 'sha256-oTE6cjgemXW7aRTQClslYZ63TgpgQ/lGSr9GtNhYyhs='; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self' https://script.google.com https://script.googleusercontent.com; object-src 'none'; base-uri 'self'; form-action 'self'">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-aDtzI6QgHfitL7afCewTh/rpYprDOJvupEIYVZKPk8Y=' 'sha256-rvN+1tIA3+ANdrrH0MKt+Oew0mb4ntdbJRm6JH/Rt8M='; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self' https://script.google.com https://script.googleusercontent.com; object-src 'none'; base-uri 'self'; form-action 'self'">
     <!-- ==== TEMA ==== -->
     <meta name="theme-color" content="#12091c">
     <script>
@@ -31,6 +31,9 @@
             var barra = document.querySelector('meta[name="theme-color"]');
             if (barra) { barra.setAttribute("content", elegido[1]); }
           }
+          if (localStorage.getItem("richi-lateral") === "plegada") {
+            document.documentElement.classList.add("lateral-plegada");
+          }
         } catch (e) {}
       })();
     </script>
@@ -53,21 +56,21 @@
     <link rel="preload" href="/tipografias/space-grotesk-400.woff2" as="font" type="font/woff2" crossorigin>
     <link rel="alternate" type="application/rss+xml" title="El Blog de Richi — blog, relatos y rol" href="/blog/rss.xml">
     <!-- ==== ADELANTO DEL MENÚ ==== -->
-    <script>window.adelantoDeFragmentos={};try{window.adelantoDeFragmentos["/fragmentos/barra-lateral.html"]=fetch("/fragmentos/barra-lateral.html?v=50a31cd5").then(function(r){return r.ok?r.text():null}).catch(function(){return null})}catch(e){}</script>
+    <script>window.adelantoDeFragmentos={};try{window.adelantoDeFragmentos["/fragmentos/barra-lateral.html"]=fetch("/fragmentos/barra-lateral.html?v=a9f96dab").then(function(r){return r.ok?r.text():null}).catch(function(){return null})}catch(e){}</script>
     <!-- ==== CSS ==== -->
-    <link rel="stylesheet" href="/estilos/paquete-comun.css?v=a7bebe47">
+    <link rel="stylesheet" href="/estilos/paquete-comun.css?v=e43f1eeb">
     <link rel="stylesheet" href="/ligero/estilos/componentes/texto-entrada.css?v=47c67664">
     <link rel="stylesheet" href="/ligero/estilos/componentes/lectura.css?v=432ef7e1">
-    <link rel="stylesheet" href="/ligero/estilos/paginas/relatos.css?v=a91aa6be">
+    <link rel="stylesheet" href="/ligero/estilos/paginas/relatos.css?v=c8a67636">
     <link rel="stylesheet" href="/ligero/estilos/paginas/relatos.responsive.css?v=a6b1d4ad">
-    <link rel="stylesheet" href="/ligero/estilos/componentes/barra-lateral.css?v=ae1f7bab">
+    <link rel="stylesheet" href="/ligero/estilos/componentes/barra-lateral.css?v=ee70ad46">
     <link rel="stylesheet" href="/ligero/estilos/componentes/barra-lateral.responsive.css?v=36f396a1">
     <link rel="stylesheet" href="/ligero/estilos/paginas/buscar.css?v=e32b461e">
     <link rel="stylesheet" href="/estilos/paquete-cierre.css?v=3c277d98">
     <!-- ==== fin del CSS ==== -->
-    <script src="/ligero/scripts/cargador-scripts.js?v=04752c83"></script>
+    <script src="/ligero/scripts/cargador-scripts.js?v=085948e9"></script>
     <!-- ==== JS ==== -->
-    <script defer src="/scripts/paquete-comun.js?v=c9aa4d63"></script>
+    <script defer src="/scripts/paquete-comun.js?v=ffd56d5d"></script>
     <script defer src="/ligero/scripts/componentes/lectura.js?v=5af09396"></script>
     <script defer src="/ligero/scripts/componentes/leer-en-voz.js?v=eb97f889"></script>
     <script defer src="/ligero/scripts/paginas/otras-entradas.js?v=7dcd6e8b"></script>

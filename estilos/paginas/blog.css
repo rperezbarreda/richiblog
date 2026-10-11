@@ -218,8 +218,8 @@ body:has(.blog-post-page) main {
            280px fijos de antes la cabecera pasaba por debajo y se comía
            el principio del título (medido: 61px a 1860 con el texto al
            130%). */
-        margin: 0 0 0 var(--lateral-ancho);
-        width: calc(100% - var(--lateral-ancho));
+        margin: 0 0 0 var(--lateral-hueco);
+        width: calc(100% - var(--lateral-hueco));
     }
 }
 

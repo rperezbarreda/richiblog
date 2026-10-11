@@ -63,6 +63,34 @@ function initializeSidebar() {
     initializeActivePage();
     initializeScrollFade();
     initializeMobileToggle();
+    prepararPlegarLateral();
+}
+const LATERAL_GUARDADO = "richi-lateral";
+function prepararPlegarLateral() {
+    const boton = document.getElementById("lateral-plegar");
+    if (!boton) {
+        return;
+    }
+    const raiz = document.documentElement;
+    const ponerEstado = () => {
+        const plegada = raiz.classList.contains("lateral-plegada");
+        boton.setAttribute("aria-expanded", plegada ? "false" : "true");
+        boton.title = plegada ? "Desplegar el menú" : "Plegar el menú";
+    };
+    ponerEstado();
+    boton.addEventListener("click", () => {
+        const plegada = raiz.classList.toggle("lateral-plegada");
+        ponerEstado();
+        try {
+            if (plegada) {
+                localStorage.setItem(LATERAL_GUARDADO, "plegada");
+            } else {
+                localStorage.removeItem(LATERAL_GUARDADO);
+            }
+        } catch (error) {
+        }
+        window.dispatchEvent(new Event("resize"));
+    });
 }
 function initializeMobileToggle() {
     const toggle = document.getElementById("sidebar-toggle");

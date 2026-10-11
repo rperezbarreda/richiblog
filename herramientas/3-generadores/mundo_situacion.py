@@ -5,7 +5,8 @@
 # Para cada página de la wiki que se llame como una forma de un mapa (un
 # país, una región), un recorte del mapa con ESA forma resaltada: el resto
 # oscurecido, su contorno marcado y las fronteras de alrededor en fino. Va
-# en la ficha de su página, debajo de la imagen que tenga, si tiene alguna.
+# en el artículo de su página, después del primer párrafo, y se amplía
+# pulsándolo (la lupa, ver scripts/paginas/mundo.js).
 #
 # Sale del dibujo de fondo del mapa (la capa con imagen del .cmap, p. ej.
 # wiki/_imagenes/mapamundi_fronteras.webp) y de las formas del propio
@@ -13,7 +14,7 @@
 # mapa de situación se rehace solo. Lo usa generar-mundo.py; no se pasa
 # suelto.
 #
-#     imagenes/wiki/situacion/<nombre>.webp      640x427, unos 40 KB
+#     imagenes/wiki/situacion/<nombre>.webp      1200x800, unos 100 KB
 #
 # Solo se rehace lo que haga falta: si la imagen ya está y es más nueva que
 # el .cmap, que la imagen de fondo y que este archivo, se deja. Cambiar
@@ -27,15 +28,19 @@ try:
 except ImportError:
     HAY_PILLOW = False
 
-ANCHO, ALTO = 640, 427           # 3:2, lo que cabe bien en la ficha
+ANCHO, ALTO = 1200, 800          # 3:2. Va a lo ancho del artículo (unos 860px)
+                                 # y se amplía con la lupa, así que sobra algo
 SUPER = 2                        # se dibuja al doble y se encoge: bordes suaves
+GROSOR = ANCHO / 640             # las rayas se pensaron a 640 de ancho
 MARGEN = 0.45                    # lo que se ve alrededor, en proporción a la forma
-LADO_MINIMO = 0.16               # una isla pequeña no sale a pantalla completa:
-                                 # como poco, este trozo del ancho del mapa
+LADO_MINIMO = 0.22               # una isla pequeña no sale a pantalla completa:
+                                 # como poco, este trozo del ancho del mapa. Más
+                                 # pequeño y el dibujo de fondo se estira tanto
+                                 # que se ve borroso.
 OSCURO = 0.42                    # cuánto brillo le queda a lo que no es el país
 AMARILLO = (245, 206, 108, 255)
 FRONTERA = (255, 255, 255, 110)
-CALIDAD = 78
+CALIDAD = 75
 
 
 def _caja(poligonos):
@@ -85,24 +90,27 @@ def dibujar(fondo, ancho_mapa, alto_mapa, poligonos, vecinos, destino):
 
     capa = Image.new("RGBA", (W, H), (0, 0, 0, 0))
     raya = ImageDraw.Draw(capa)
+    def g(px):
+        return max(1, round(px * GROSOR * SUPER))
+
     for pol in vecinos:
         puntos = [a_pixel(p) for p in pol]
-        raya.line(puntos + puntos[:1], fill=FRONTERA, width=1 * SUPER, joint="curve")
+        raya.line(puntos + puntos[:1], fill=FRONTERA, width=g(1), joint="curve")
     for pol in poligonos:
         puntos = [a_pixel(p) for p in pol]
-        raya.line(puntos + puntos[:1], fill=(0, 0, 0, 200), width=6 * SUPER, joint="curve")
-        raya.line(puntos + puntos[:1], fill=AMARILLO, width=3 * SUPER, joint="curve")
+        raya.line(puntos + puntos[:1], fill=(0, 0, 0, 200), width=g(6), joint="curve")
+        raya.line(puntos + puntos[:1], fill=AMARILLO, width=g(3), joint="curve")
     # UNA ISLA DIMINUTA se pierde aunque esté resaltada (Kukulna mide unos
     # pocos píxeles en el recorte): se le pone un círculo alrededor, como
     # en los mapas de situación de toda la vida.
     todos = [a_pixel(p) for pol in poligonos for p in pol]
     xs, ys = [p[0] for p in todos], [p[1] for p in todos]
     lado = max(max(xs) - min(xs), max(ys) - min(ys))
-    if lado < 60 * SUPER:
+    if lado < 60 * GROSOR * SUPER:
         cx, cy = (max(xs) + min(xs)) / 2, (max(ys) + min(ys)) / 2
-        r = max(lado / 2 + 18 * SUPER, 34 * SUPER)
-        raya.ellipse((cx - r, cy - r, cx + r, cy + r), outline=(0, 0, 0, 200), width=6 * SUPER)
-        raya.ellipse((cx - r, cy - r, cx + r, cy + r), outline=AMARILLO, width=3 * SUPER)
+        r = max(lado / 2 + 18 * GROSOR * SUPER, 34 * GROSOR * SUPER)
+        raya.ellipse((cx - r, cy - r, cx + r, cy + r), outline=(0, 0, 0, 200), width=g(6))
+        raya.ellipse((cx - r, cy - r, cx + r, cy + r), outline=AMARILLO, width=g(3))
     lienzo = Image.alpha_composite(lienzo, capa).convert("RGB")
     lienzo = lienzo.resize((ANCHO, ALTO), Image.LANCZOS)
     destino.parent.mkdir(parents=True, exist_ok=True)

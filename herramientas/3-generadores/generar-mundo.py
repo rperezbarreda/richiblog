@@ -385,7 +385,7 @@ def pintar_infobox(datos, filas, imagenes_html):
     return "".join(trozos)
 
 
-def imagenes_de_la_ficha(datos, ruta_de_imagen, avisos, situacion=None):
+def imagenes_de_la_ficha(datos, ruta_de_imagen, avisos):
     """El campo "image": una sola, un carrusel, o un carrusel con pies.
 
         image: valderin.webp
@@ -403,23 +403,6 @@ def imagenes_de_la_ficha(datos, ruta_de_imagen, avisos, situacion=None):
             fotos.append((str(item), ""))
 
     trozos = []
-    # EL MAPA DE SITUACIÓN, si la página se llama como una forma de un mapa
-    # (ver mundo_situacion.py). El último, debajo de la imagen que tenga.
-    if situacion:
-        url, titulo_pagina, mapa_titulo, mapa_url = situacion
-        trozos_situacion = (
-            '<li class="mundo-ficha-foto"><figure>'
-            '<img class="mundo-ficha-img" src="%s" alt="%s" width="%d" height="%d"'
-            ' loading="lazy" decoding="async">'
-            '<figcaption>Dónde está, en el <a class="mundo-enlace" href="%s">%s</a></figcaption>'
-            '</figure></li>'
-            % (html.escape(url, quote=True),
-               html.escape("Mapa de situación: %s resaltado en el %s" % (titulo_pagina, mapa_titulo),
-                           quote=True),
-               mundo_situacion.ANCHO, mundo_situacion.ALTO,
-               html.escape(mapa_url, quote=True), html.escape(mapa_titulo)))
-    else:
-        trozos_situacion = ""
     for nombre, pie in fotos:
         ruta = ruta_de_imagen(nombre.strip())
         if not ruta:
@@ -431,8 +414,6 @@ def imagenes_de_la_ficha(datos, ruta_de_imagen, avisos, situacion=None):
         if pie:
             foto = "<figure>%s<figcaption>%s</figcaption></figure>" % (foto, html.escape(pie))
         trozos.append('<li class="mundo-ficha-foto">%s</li>' % foto)
-    if trozos_situacion:
-        trozos.append(trozos_situacion)
     if not trozos:
         return ""
     if len(trozos) == 1:
@@ -443,6 +424,42 @@ def imagenes_de_la_ficha(datos, ruta_de_imagen, avisos, situacion=None):
     # mejor y además se imprimen.
     return ('<div class="mundo-ficha-fotos es-varias"><ul>%s</ul></div>'
             % "".join(trozos))
+
+
+def figura_de_situacion(situacion):
+    """EL MAPA DE SITUACIÓN, si la página se llama como una forma de un
+    mapa (ver mundo_situacion.py). Va en el artículo y no en la ficha: en
+    la ficha, a 17rem, una isla del mapamundi era un punto. En el artículo
+    sale a lo ancho del texto, y pulsándolo se ve en grande (la lupa; la
+    pone scripts/paginas/mundo.js en todas las imágenes de la wiki)."""
+    if not situacion:
+        return ""
+    url, titulo_pagina, mapa_titulo, mapa_url = situacion
+    return (
+        '<figure class="mundo-situacion">'
+        '<img class="mundo-situacion-img" src="%s" alt="%s" width="%d" height="%d"'
+        ' loading="lazy" decoding="async">'
+        '<figcaption>Dónde está %s, en el <a class="mundo-enlace" href="%s">%s</a></figcaption>'
+        '</figure>'
+        % (html.escape(url, quote=True),
+           html.escape("Mapa de situación: %s resaltado en el %s" % (titulo_pagina, mapa_titulo),
+                       quote=True),
+           mundo_situacion.ANCHO, mundo_situacion.ALTO,
+           html.escape(titulo_pagina),
+           html.escape(mapa_url, quote=True), html.escape(mapa_titulo)))
+
+
+def tras_el_primer_parrafo(cuerpo, trozo):
+    """Mete trozo en el artículo después del primer párrafo, si el
+    artículo empieza por uno ("Corte de Labros está en las Islas de
+    Labros."), que es lo que sitúa al lector antes del mapa. Si empieza
+    por otra cosa (un encabezado, una lista), al principio del todo."""
+    if not trozo:
+        return cuerpo
+    if cuerpo.startswith("<p") and "</p>" in cuerpo:
+        corte = cuerpo.index("</p>") + len("</p>")
+        return cuerpo[:corte] + trozo + cuerpo[corte:]
+    return trozo + cuerpo
 
 
 # =========================================
@@ -559,9 +576,10 @@ def convertir_todo(paginas, imagenes, mapas, avisos_por_pagina, eventos=None, si
         ficha["ficha_html"] = pintar_infobox(
             datos,
             filas_de_la_infobox(datos, lambda v: _una_linea(chico, v)),
-            imagenes_de_la_ficha(datos, ruta_de_imagen, avisos,
-                                 (situaciones or {}).get(ficha["nombre"].strip().lower())),
+            imagenes_de_la_ficha(datos, ruta_de_imagen, avisos),
         )
+        ficha["situacion_html"] = figura_de_situacion(
+            (situaciones or {}).get(ficha["nombre"].strip().lower()))
         ficha["enlaces"] += chico.enlaces
         # El resumen para el buscador y para el índice: el primer párrafo,
         # sin etiquetas.
@@ -955,7 +973,8 @@ def escribir_paginas(paginas, probar):
             ("{{DESCRIPCION}}", html.escape(ficha["resumen"] or ficha["titulo"], quote=True)),
             ("{{SLUG}}", ficha["slug"]),
             ("{{FICHA}}", ficha["ficha_html"]),
-            ("{{CUERPO}}", ficha["cuerpo_html"]),
+            ("{{CUERPO}}", tras_el_primer_parrafo(ficha["cuerpo_html"],
+                                                  ficha.get("situacion_html", ""))),
             ("{{ETIQUETAS}}", pintar_etiquetas(ficha["etiquetas"])),
             ("{{BACKLINKS}}", pintar_backlinks(ficha)),
         ):

@@ -1453,15 +1453,24 @@
   pueda chocar nunca con una carpeta de la bóveda).
 
   EL MAPA DE SITUACIÓN. Cada página que se llama como una forma del mapa
-  lleva en su ficha un recorte del mapamundi con ella resaltada: el resto
+  lleva un recorte del mapamundi con ella resaltada: el resto
   oscurecido, su contorno en amarillo y las fronteras de alrededor en
-  fino (y un círculo si es una isla diminuta). Debajo, «Dónde está, en el
-  Mapamundi de Cralëa», con enlace al mapa. Si la página tiene su propia
-  imagen, el mapa va debajo de ella. Los hace
+  fino (y un círculo si es una isla diminuta). Va en el ARTÍCULO, a lo
+  ancho del texto y después del primer párrafo (no en la ficha: a 17rem
+  una isla era un punto). Debajo, «Dónde está <la página>, en el
+  Mapamundi de Cralëa», con enlace al mapa. Los hace
   herramientas/3-generadores/mundo_situacion.py al pasar la wiki, en
-  imagenes/wiki/situacion/ (640x427, unos 35 KB cada uno; 116 son unos
-  4 MB), y solo rehace los que hagan falta: si cambias el .cmap, la
+  imagenes/wiki/situacion/ (1200x800, unos 75 KB cada uno; 116 son unos
+  9 MB), y solo rehace los que hagan falta: si cambias el .cmap, la
   imagen del mapa o la forma de dibujarlos, se rehacen todos.
+
+  LAS IMÁGENES SE AMPLÍAN. Cualquier imagen de una página de la wiki (el
+  mapa de situación, las fotos de la ficha, las del artículo) se ve en
+  grande al pulsarla, con la lupa (scripts/componentes/lupa.js, la misma
+  del retrato de un NPC). Lo monta scripts/paginas/mundo.js: envuelve
+  cada imagen en un botón, así que funciona también con el teclado, y se
+  cierra con la ✕, pulsando fuera o con Escape. Las que ya están dentro de
+  un enlace o de un spoiler se dejan como están.
 
   Cada una lleva las etiquetas «Mapamundi» y su parte del mundo, que es
   lo que la pone en el apartado MAPAMUNDI de la portada, repartida en
@@ -2871,6 +2880,16 @@
   herramientas/3-generadores/actualizar-cabeceras.py: el pre-pintado del
   tema, el adelanto del menú, la lista de CSS y la de JS. NO SE TOCA A
   MANO; se toca la herramienta y se vuelve a pasar.
+
+  LA BARRA LATERAL PLEGADA. En escritorio, el botón ☰ de al lado de «EL
+  BLOG DE RICHI» deja la barra en una tira con ese botón y el contenido
+  se queda con el sitio (en móvil no sale: ahí la barra ya es un cajón).
+  Se recuerda entre páginas (richi-lateral, en el navegador), y quien lo
+  pone al cargar es el pre-pintado del tema, por lo mismo que el tema: si
+  esperara al menú, cada página enseñaría la barra entera un instante.
+  Lo que se coloque al lado de la barra tiene que medirse con
+  --lateral-hueco (estilos/base.css) y no con --lateral-ancho, o al
+  plegarla se queda un hueco vacío donde estaba.
 
   POR QUÉ ESTÁ TODO AHÍ Y NO LO PIDE UN SCRIPT
   --------------------------------------------

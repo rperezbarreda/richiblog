@@ -7,6 +7,7 @@
 //         ruta: "/imagenes/notas_rol/ragna/sigil.webp",
 //         texto: "Sigil",            // lo que se escribe debajo
 //         que: "Retrato de",         // "Retrato de Sigil" (alt y título)
+//         alt: "…",                  // opcional: otro texto alternativo
 //         devolverA: boton,          // dónde dejar el foco al cerrar
 //     });
 //
@@ -64,8 +65,11 @@ function abrirLaLupa(opciones) {
     cerrarLaLupa();
 
     const texto = (ajustes.texto || "").toString().trim();
-    const que = (ajustes.que || "Imagen de").toString().trim();
-    const comoSeLlama = texto ? que + " " + texto : que;
+    // que: "" vale, y es no poner nada delante (la wiki, que ya trae el
+    // pie entero). Solo si no viene se pone "Imagen de".
+    const que = (ajustes.que === undefined || ajustes.que === null
+        ? "Imagen de" : ajustes.que).toString().trim();
+    const comoSeLlama = [que, texto].filter(Boolean).join(" ") || "Imagen";
 
     const capa = document.createElement("div");
     capa.className = "lupa";
@@ -84,7 +88,7 @@ function abrirLaLupa(opciones) {
     const img = document.createElement("img");
     img.className = "lupa-img";
     img.src = ruta;
-    img.alt = comoSeLlama;
+    img.alt = (ajustes.alt || "").toString().trim() || comoSeLlama;
     capa.appendChild(img);
 
     if (texto) {

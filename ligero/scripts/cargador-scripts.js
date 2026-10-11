@@ -3,7 +3,7 @@
 */
 (function versionesDeArchivos() {
     const VERSIONES = {
-        "/fragmentos/barra-lateral.html": "50a31cd5",
+        "/fragmentos/barra-lateral.html": "a9f96dab",
         "/fragmentos/frases.html": "2720019e",
     };
     window.conVersion = function (ruta) {

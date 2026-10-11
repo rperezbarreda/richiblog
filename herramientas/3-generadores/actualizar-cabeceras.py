@@ -360,6 +360,10 @@ def hojas_de(ruta):
             hojas += ["/estilos/paginas/mundo-mapa.css"]
         if es_mundo_linea:
             hojas += ["/estilos/paginas/mundo-linea.css"]
+        # Un ARTÍCULO lleva la lupa: sus imágenes (el mapa de situación,
+        # las fotos de la ficha) se ven en grande al pulsarlas.
+        if not (es_mundo_indice or es_mundo_mapa or es_mundo_linea):
+            hojas += ["/estilos/componentes/lupa.css"]
         hojas += ["/estilos/paginas/mundo.responsive.css"]
         if es_mundo_mapa:
             hojas += ["/estilos/paginas/mundo-mapa.responsive.css"]
@@ -668,6 +672,10 @@ def scripts_de(ruta):
         else:
             if es_mundo_indice:
                 js += ["/scripts/componentes/buscador.js"]
+            elif not camino.endswith("/linea_de_tiempo"):
+                # La lupa, ANTES que mundo.js: es él quien la usa para
+                # ampliar las imágenes, y mira si está nada más cargar.
+                js += ["/scripts/componentes/lupa.js"]
             js.append("/scripts/paginas/mundo.js")
     elif es_ando:
         # tareas.js ANTES que el de la página: ése pinta la lista de
@@ -1160,6 +1168,11 @@ def bloque_del_tema():
     # al pulsarlo. Va aquí porque es el único script que corre antes de
     # pintar: puesto más tarde habría fogonazo. (El comentario estaba
     # dentro del script y se copiaba en cada página; vive aquí.)
+    #
+    # Y LA BARRA LATERAL PLEGADA ("lateral-plegada" en el <html>), por lo
+    # mismo: el botón ☰ de al lado del título la pliega y lo apunta en
+    # richi-lateral; si se pusiera al cargar el menú, en cada página se
+    # vería la barra entera un momento y luego plegarse.
     return f"""    {ABRE_TEMA} -->
     <meta name="theme-color" content="{COLOR_DE_FABRICA}">
     <script>
@@ -1179,6 +1192,9 @@ def bloque_del_tema():
             document.documentElement.setAttribute("data-theme", elegido[0]);
             var barra = document.querySelector('meta[name="theme-color"]');
             if (barra) {{ barra.setAttribute("content", elegido[1]); }}
+          }}
+          if (localStorage.getItem("richi-lateral") === "plegada") {{
+            document.documentElement.classList.add("lateral-plegada");
           }}
         }} catch (e) {{}}
       }})();

@@ -496,3 +496,40 @@ function destaparMundo(tapado) {
     tapado.removeAttribute("role");
     tapado.removeAttribute("tabindex");
 }
+prepararAmpliarMundo();
+function prepararAmpliarMundo() {
+    if (!window.lupa) {
+        return;
+    }
+    const imagenes = document.querySelectorAll(
+        ".mundo-articulo img, .mundo-ficha img"
+    );
+    imagenes.forEach((img) => {
+        if (img.closest("a, button, .mundo-spoiler")) {
+            return;
+        }
+        const nombre = (img.getAttribute("alt") || "").trim();
+        const boton = document.createElement("button");
+        boton.type = "button";
+        boton.className = "mundo-ampliar";
+        boton.setAttribute(
+            "aria-label",
+            nombre ? "Ver en grande: " + nombre : "Ver la imagen en grande"
+        );
+        img.parentNode.insertBefore(boton, img);
+        boton.appendChild(img);
+        boton.addEventListener("click", () => abrirAmpliadaMundo(boton, img));
+    });
+}
+function abrirAmpliadaMundo(boton, img) {
+    const figura = boton.closest("figure");
+    const pie = figura ? figura.querySelector("figcaption") : null;
+    const nombre = (img.getAttribute("alt") || "").trim();
+    window.lupa.abrir({
+        ruta: img.currentSrc || img.getAttribute("src"),
+        texto: pie ? pie.textContent.trim() : nombre,
+        que: "",
+        alt: nombre,
+        devolverA: boton,
+    });
+}

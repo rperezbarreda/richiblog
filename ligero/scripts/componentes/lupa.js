@@ -17,8 +17,9 @@ function abrirLaLupa(opciones) {
     }
     cerrarLaLupa();
     const texto = (ajustes.texto || "").toString().trim();
-    const que = (ajustes.que || "Imagen de").toString().trim();
-    const comoSeLlama = texto ? que + " " + texto : que;
+    const que = (ajustes.que === undefined || ajustes.que === null
+        ? "Imagen de" : ajustes.que).toString().trim();
+    const comoSeLlama = [que, texto].filter(Boolean).join(" ") || "Imagen";
     const capa = document.createElement("div");
     capa.className = "lupa";
     capa.setAttribute("role", "dialog");
@@ -34,7 +35,7 @@ function abrirLaLupa(opciones) {
     const img = document.createElement("img");
     img.className = "lupa-img";
     img.src = ruta;
-    img.alt = comoSeLlama;
+    img.alt = (ajustes.alt || "").toString().trim() || comoSeLlama;
     capa.appendChild(img);
     if (texto) {
         const pie = document.createElement("p");

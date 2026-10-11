@@ -41,12 +41,18 @@
 }
 
 .sidebar-logo {
+    /* El título y, a su derecha, el botón de plegar la barra. */
+    display: flex;
+    align-items: stretch;
+    gap: 8px;
     margin-bottom: 10px;
 }
 
 .sidebar-logo p {
     display: block;
-    width: 100%;
+    flex: 1 1 auto;
+    min-width: 0;
+    margin: 0;
     box-sizing: border-box;
     text-align: center;
     background: var(--yellow);
@@ -58,6 +64,64 @@
     letter-spacing: 0.15px;
     line-height: 1.4;
     overflow-wrap: break-word;
+}
+
+/* EL BOTÓN DE PLEGAR LA BARRA (☰, a la derecha del título). Solo en
+   escritorio: en móvil todo .sidebar-logo se esconde, porque ahí la barra
+   ya es un cajón que se abre y se cierra con el botón de arriba.
+
+   Plegada, la barra se queda en una tira con este botón y nada más, y el
+   contenido se queda con el sitio (main se coloca con --lateral-hueco, en
+   estilos/base.css). La clase "lateral-plegada" va en el <html> y la pone
+   el script del tema ANTES de pintar, para que al cambiar de página no se
+   vea la barra entera un instante y luego plegarse. */
+.lateral-plegar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 auto;
+    width: 2.4rem;
+    min-height: 2.4rem;
+    margin: 0;
+    padding: 0;
+    border: 2px solid var(--yellow);
+    background: transparent;
+    color: var(--yellow);
+    font-size: 1.1rem;
+    line-height: 1;
+    cursor: pointer;
+}
+
+.lateral-plegar:hover,
+.lateral-plegar:focus-visible {
+    background: var(--yellow);
+    color: var(--yellow-contrast);
+}
+
+.lateral-plegar:focus-visible {
+    outline: 2px solid var(--yellow);
+    outline-offset: 2px;
+}
+
+/* Con un corte de escritorio y no a pelo: la clase se queda puesta si se
+   estrecha la ventana, y en móvil no tiene que hacer nada (si no, el
+   cajón saldría vacío). */
+@media (min-width: 861px) {
+    :root.lateral-plegada {
+        /* El botón y el relleno de la barra a cada lado. */
+        --lateral-hueco: calc(2.4rem + 20px);
+    }
+
+    .lateral-plegada .sidebar {
+        width: var(--lateral-hueco);
+        padding: 15px 10px;
+    }
+
+    .lateral-plegada .sidebar-logo p,
+    .lateral-plegada .sidebar-top,
+    .lateral-plegada .gatin-random {
+        display: none;
+    }
 }
 
 .sidebar-logo strong {

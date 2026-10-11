@@ -115,6 +115,7 @@
     --fuente-mano: "Pangolin", "Space Grotesk", sans-serif;
     --barra-alto: calc(60px * var(--escala));
     --lateral-ancho: calc(280px * var(--escala));
+    --lateral-hueco: var(--lateral-ancho);
     --hueco-abajo: 0px;
     color-scheme: dark;
     --bg-texture: url("/imagenes/dark_bg.webp");
@@ -387,8 +388,8 @@ main {
     position: relative;
     flex: 1 1 auto;
     min-height: 0;
-    margin: 36px 44px 28px calc(var(--lateral-ancho) + 36px);
-    width: calc(100% - var(--lateral-ancho) - 80px);
+    margin: 36px 44px 28px calc(var(--lateral-hueco) + 36px);
+    width: calc(100% - var(--lateral-hueco) - 80px);
     background: var(--surface);
     border: 3px solid var(--yellow);
     border-radius: 0;
@@ -438,7 +439,7 @@ main.standalone-main .home {
     display: flex;
     align-items: center;
     gap: 14px;
-    margin: 0 44px 44px 316px;
+    margin: 0 44px 44px calc(var(--lateral-hueco) + 36px);
     padding: 14px 24px;
     background: var(--surface);
     border: 3px solid var(--yellow);

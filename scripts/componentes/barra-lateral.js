@@ -7,6 +7,46 @@ function initializeSidebar() {
     initializeActivePage();
     initializeScrollFade();
     initializeMobileToggle();
+    prepararPlegarLateral();
+}
+
+
+// PLEGAR LA BARRA, EN ESCRITORIO. El botón ☰ de al lado del título deja
+// la barra en una tira y el contenido se queda con el sitio. Se recuerda
+// entre páginas (richi-lateral en localStorage) y quien lo pone al cargar
+// es el script del tema, en la cabecera de cada página, antes de pintar:
+// aquí solo se cambia y se apunta. En móvil este botón no se ve.
+const LATERAL_GUARDADO = "richi-lateral";
+
+function prepararPlegarLateral() {
+    const boton = document.getElementById("lateral-plegar");
+    if (!boton) {
+        return;
+    }
+    const raiz = document.documentElement;
+    const ponerEstado = () => {
+        const plegada = raiz.classList.contains("lateral-plegada");
+        boton.setAttribute("aria-expanded", plegada ? "false" : "true");
+        boton.title = plegada ? "Desplegar el menú" : "Plegar el menú";
+    };
+    ponerEstado();
+    boton.addEventListener("click", () => {
+        const plegada = raiz.classList.toggle("lateral-plegada");
+        ponerEstado();
+        try {
+            if (plegada) {
+                localStorage.setItem(LATERAL_GUARDADO, "plegada");
+            } else {
+                localStorage.removeItem(LATERAL_GUARDADO);
+            }
+        } catch (error) {
+            // Sin almacenamiento (ventana privada): se pliega igual, solo
+            // que en la página siguiente vuelve a salir entera.
+        }
+        // Lo que mide su sitio al cambiar de tamaño (la línea de tiempo
+        // pequeña de la wiki, los mapas) lo hace con un "resize".
+        window.dispatchEvent(new Event("resize"));
+    });
 }
 
 // =========================================

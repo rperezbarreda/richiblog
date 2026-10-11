@@ -73,8 +73,8 @@ body:has(.relato-page) main {
 }
 @media (min-width: 861px) {
     body:has(.relato-page) main {
-        margin: 0 0 0 var(--lateral-ancho);
-        width: calc(100% - var(--lateral-ancho));
+        margin: 0 0 0 var(--lateral-hueco);
+        width: calc(100% - var(--lateral-hueco));
     }
 }
 .relato-post {

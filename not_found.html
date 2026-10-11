@@ -2,7 +2,7 @@
 <html lang="es">
   <head>
     <meta charset="UTF-8">
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-WzJfmZ3zA0hDtnR6cKyKt1o+8g4NfGJTELgMCUrrBFw='; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self' https://script.google.com https://script.googleusercontent.com; object-src 'none'; base-uri 'self'; form-action 'self'">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-aDtzI6QgHfitL7afCewTh/rpYprDOJvupEIYVZKPk8Y='; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self' https://script.google.com https://script.googleusercontent.com; object-src 'none'; base-uri 'self'; form-action 'self'">
     <!-- ==== TEMA ==== -->
     <meta name="theme-color" content="#12091c">
     <script>
@@ -31,6 +31,9 @@
             var barra = document.querySelector('meta[name="theme-color"]');
             if (barra) { barra.setAttribute("content", elegido[1]); }
           }
+          if (localStorage.getItem("richi-lateral") === "plegada") {
+            document.documentElement.classList.add("lateral-plegada");
+          }
         } catch (e) {}
       })();
     </script>
@@ -53,11 +56,11 @@
     <link rel="preload" href="/tipografias/space-grotesk-400.woff2" as="font" type="font/woff2" crossorigin>
     <link rel="alternate" type="application/rss+xml" title="El Blog de Richi — blog, relatos y rol" href="/blog/rss.xml">
     <!-- ==== CSS ==== -->
-    <link rel="stylesheet" href="/estilos/paquete-comun.css?v=a7bebe47">
+    <link rel="stylesheet" href="/estilos/paquete-comun.css?v=e43f1eeb">
     <link rel="stylesheet" href="/ligero/estilos/paginas/no-encontrada.css?v=fb6812c8">
     <link rel="stylesheet" href="/estilos/paquete-cierre.css?v=3c277d98">
     <!-- ==== fin del CSS ==== -->
-    <script src="/ligero/scripts/cargador-scripts.js?v=04752c83"></script>
+    <script src="/ligero/scripts/cargador-scripts.js?v=085948e9"></script>
     <!-- ==== JS ==== -->
     <script defer src="/ligero/scripts/paginas/redirecciones.js?v=d41d49cf"></script>
     <script defer src="/ligero/scripts/componentes/botones-ventana.js?v=c4e3c110"></script>

@@ -38,11 +38,16 @@
     opacity: 1;
 }
 .sidebar-logo {
+    display: flex;
+    align-items: stretch;
+    gap: 8px;
     margin-bottom: 10px;
 }
 .sidebar-logo p {
     display: block;
-    width: 100%;
+    flex: 1 1 auto;
+    min-width: 0;
+    margin: 0;
     box-sizing: border-box;
     text-align: center;
     background: var(--yellow);
@@ -54,6 +59,45 @@
     letter-spacing: 0.15px;
     line-height: 1.4;
     overflow-wrap: break-word;
+}
+.lateral-plegar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 auto;
+    width: 2.4rem;
+    min-height: 2.4rem;
+    margin: 0;
+    padding: 0;
+    border: 2px solid var(--yellow);
+    background: transparent;
+    color: var(--yellow);
+    font-size: 1.1rem;
+    line-height: 1;
+    cursor: pointer;
+}
+.lateral-plegar:hover,
+.lateral-plegar:focus-visible {
+    background: var(--yellow);
+    color: var(--yellow-contrast);
+}
+.lateral-plegar:focus-visible {
+    outline: 2px solid var(--yellow);
+    outline-offset: 2px;
+}
+@media (min-width: 861px) {
+    :root.lateral-plegada {
+        --lateral-hueco: calc(2.4rem + 20px);
+    }
+    .lateral-plegada .sidebar {
+        width: var(--lateral-hueco);
+        padding: 15px 10px;
+    }
+    .lateral-plegada .sidebar-logo p,
+    .lateral-plegada .sidebar-top,
+    .lateral-plegada .gatin-random {
+        display: none;
+    }
 }
 .sidebar-logo strong {
     font-weight: 500;

@@ -130,6 +130,42 @@
     display: block;
     border: 2px solid var(--border);
 }
+.mundo-situacion {
+    max-width: 100%;
+}
+.mundo-situacion-img {
+    width: 100%;
+    height: auto;
+    display: block;
+    border: 2px solid var(--border);
+}
+.mundo-situacion figcaption {
+    margin-top: 6px;
+    color: var(--muted);
+    font-family: var(--fuente-mono);
+    font-size: 0.8125rem;
+}
+.mundo-ampliar {
+    display: block;
+    max-width: 100%;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    background: none;
+    cursor: zoom-in;
+}
+.mundo-situacion .mundo-ampliar,
+.mundo-ficha .mundo-ampliar {
+    width: 100%;
+}
+.mundo-ampliar:hover > img,
+.mundo-ampliar:focus-visible > img {
+    border-color: var(--yellow);
+}
+.mundo-ampliar:focus-visible {
+    outline: 2px solid var(--yellow);
+    outline-offset: 3px;
+}
 .mundo-falta {
     color: var(--muted);
     font-family: var(--fuente-mono);
