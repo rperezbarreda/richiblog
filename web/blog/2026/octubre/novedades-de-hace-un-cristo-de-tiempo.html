@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-BQ/v14Y5wdP2zucyzFCWbhiBJ2HCDiKyHz4MPDj+Jbw=' 'sha256-WzJfmZ3zA0hDtnR6cKyKt1o+8g4NfGJTELgMCUrrBFw='; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self' https://script.google.com https://script.googleusercontent.com; object-src 'none'; base-uri 'self'; form-action 'self'">
+    <!-- ==== TEMA ==== -->
+    <meta name="theme-color" content="#12091c">
+    <script>
+      (function () {
+        document.documentElement.classList.add("js");
+        try {
+          var temas = {
+            "claro": ["light", "#f3e1d6"],
+            "oscuro-puro": ["puro-oscuro", "#000000"],
+            "claro-puro": ["puro-claro", "#ffffff"],
+            "tranquilo": ["tranquilo", "#f2efe9"],
+            "tranquilo-oscuro": ["tranquilo-oscuro", "#1b1e22"],
+            "terminal-verde": ["terminal-verde", "#000000"],
+            "terminal-azul": ["terminal-azul", "#000000"],
+            "terminal-rojo": ["terminal-rojo", "#000000"],
+            "terminal-ambar": ["terminal-ambar", "#000000"]
+          };
+          var guardado = localStorage.getItem("richi-theme");
+          var elegido = temas[guardado];
+          if (!elegido && !guardado &&
+              window.matchMedia("(prefers-color-scheme: light)").matches) {
+            elegido = temas.claro;
+          }
+          if (elegido) {
+            document.documentElement.setAttribute("data-theme", elegido[0]);
+            var barra = document.querySelector('meta[name="theme-color"]');
+            if (barra) { barra.setAttribute("content", elegido[1]); }
+          }
+        } catch (e) {}
+      })();
+    </script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Novedades de hace un cristo de tiempo · El Blog de Richi</title>
+    <meta name="description" content="Resumen de lo que ha pasado en mi vida desde la última entrada en el blog">
+    <link rel="canonical" href="https://richi.blog/web/blog/2026/octubre/novedades-de-hace-un-cristo-de-tiempo.html">
+    <meta property="og:type" content="article">
+    <meta property="og:site_name" content="El Blog de Richi">
+    <meta property="og:locale" content="es_ES">
+    <meta property="og:title" content="Novedades de hace un cristo de tiempo · El Blog de Richi">
+    <meta property="og:description" content="Resumen de lo que ha pasado en mi vida desde la última entrada en el blog">
+    <meta property="og:url" content="https://richi.blog/web/blog/2026/octubre/novedades-de-hace-un-cristo-de-tiempo.html">
+    <meta property="og:image" content="https://richi.blog/imagenes/meta/og.webp">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta property="og:image:alt" content="El Blog de Richi — ilustración de Richi sobre fondo morado">
+    <meta name="twitter:card" content="summary_large_image">
+    <link rel="icon" type="image/x-icon" href="/imagenes/favicon.ico">
+    <link rel="preload" href="/tipografias/space-grotesk-400.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="alternate" type="application/rss+xml" title="El Blog de Richi — blog, relatos y rol" href="/blog/rss.xml">
+    <!-- ==== ADELANTO DEL MENÚ ==== -->
+    <script>window.adelantoDeFragmentos={};try{window.adelantoDeFragmentos["/fragmentos/barra-lateral.html"]=fetch("/fragmentos/barra-lateral.html?v=b3b4bf4f").then(function(r){return r.ok?r.text():null}).catch(function(){return null})}catch(e){}</script>
+    <!-- ==== CSS ==== -->
+    <link rel="stylesheet" href="/estilos/paquete-comun.css?v=ca5c8327">
+    <link rel="stylesheet" href="/ligero/estilos/componentes/texto-entrada.css?v=47c67664">
+    <link rel="stylesheet" href="/ligero/estilos/componentes/lectura.css?v=432ef7e1">
+    <link rel="stylesheet" href="/ligero/estilos/paginas/blog.css?v=bd7222a7">
+    <link rel="stylesheet" href="/ligero/estilos/paginas/blog.responsive.css?v=107014cc">
+    <link rel="stylesheet" href="/ligero/estilos/componentes/barra-lateral.css?v=ae1f7bab">
+    <link rel="stylesheet" href="/ligero/estilos/componentes/barra-lateral.responsive.css?v=36f396a1">
+    <link rel="stylesheet" href="/ligero/estilos/paginas/buscar.css?v=e32b461e">
+    <link rel="stylesheet" href="/estilos/paquete-cierre.css?v=1dfc1560">
+    <!-- ==== fin del CSS ==== -->
+    <script src="/ligero/scripts/cargador-scripts.js?v=3c90246c"></script>
+    <!-- ==== JS ==== -->
+    <script defer src="/scripts/paquete-comun.js?v=b731158f"></script>
+    <script defer src="/ligero/scripts/componentes/lectura.js?v=5af09396"></script>
+    <script defer src="/ligero/scripts/componentes/leer-en-voz.js?v=eb97f889"></script>
+    <script defer src="/ligero/scripts/paginas/otras-entradas.js?v=7dcd6e8b"></script>
+    <!-- ==== fin del JS ==== -->
+  </head>
+<body>
+    <a class="skip-link" href="#main-content">Saltar al contenido</a>
+    <div id="sidebar-container"></div>
+
+    <main id="main-content">
+        <section id="home" class="home blog-post-page">
+            <article class="blog-post" data-tags="diario">
+                <div class="blog-post-header">
+                    <h1 class="blog-post-title">Novedades de hace un cristo de tiempo</h1>
+                    <div class="blog-post-header-meta">
+                        <p class="blog-post-date"><time datetime="2026-10-13">13 oct 2026</time></p>
+                        <a class="blog-post-back" href="/web/blog/2026/index_2026.html">← volver al archivo</a>
+                        <a class="blog-post-back blog-post-cal" href="/web/blog/diario.html">
+                            <svg class="blog-post-cal-icono" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                                <rect x="3" y="5" width="18" height="16" rx="1" fill="none"
+                                      stroke="currentColor" stroke-width="2"/>
+                                <path d="M3 10H21" fill="none" stroke="currentColor" stroke-width="2"/>
+                                <path d="M8 2.5V6M16 2.5V6" fill="none" stroke="currentColor"
+                                      stroke-width="2" stroke-linecap="round"/>
+                                <rect x="10.5" y="13.5" width="3.5" height="3.5" fill="currentColor"/>
+                            </svg>
+                            calendario
+                        </a>
+                    </div>
+                </div>
+
+                <div class="blog-post-body-wrap">
+                    <div class="blog-post-layout">
+                        <div class="blog-post-body">
+                            <p>Aunque parezca que tengo el blog abandonado porque hace un montón que no posteo ninguna entrada, nada mas lejos de la realidad.</p>
+                            <p>Estos días de inactividad han sido un poquete caóticos en mi vida. En primer lugar el volver a la rutina de vivir con mis padres y que automáticamente esto se convierta en una guardería pues es algo a lo que cuesta acostumbrarse de nuevo.</p>
+                            <p>Mis sobrinos han estado algo maletes con virus estomacales (recemos porque no me los peguen de nuevo) y aparte mi cuñada nos ha dejado a los críos todos los días hasta la noche porque tiene que estudiar para unas oposiciones esta semana, asi que básicamente hay que estar atento de cuatro nenes muy pequeños.</p>
+                            <p>Aparte de eso en mi vida mas o menos todo bien, dejé un poco de lado lo de tomarme en serio lo de comer bien y salir todos los días por el mal tiempo y un poco por el estrés de tanto crio, o al menos es la excusa que pongo; pero estos días he retomado salir de nuevo a andar diez mil pasos (justo es la ruta que rodea un par de pueblos por mi zona) y aunque cuesta volver a acostumbrarme es agradable sentirse bien tras hacerlo.</p>
+                            <p>Aparte, aprovechando el viaje he empezado a usar ese tiempo para ponerme audiolibros. Me he enganchado mucho a que me lean El Quijote, que son unas cuarenta horas de lectura, así que para este mes yo creo que durará. Ah, en uno de mis paseos he sacado la foto de este post.</p>
+                            <p>Lo que me preocupa un poco es que dentro de nada es el cambio de hora, y como va a anochecer mas pronto cada vez me va a costar mas el salir a la calle por mi discapacidad visual, veo horrible o nada de noche y prefiero evitar salir a esas horas.</p>
+                            <p>También estos días he empezado a ir a un curso de lengua de signos que imparten en mi pueblo, bueno, a la segunda parte. El año pasado ya hicimos este curso (íbamos unas once personas) pero este año somos mucho menos. Tenía miedo de haberme olvidado de cosas, pero poquito a poco ya me he ido acordando de todo. El curso va a durar unas cuantas semanas hasta mediado de noviembre, y estoy algo nervioso porque el año pasado no nos examinamos, pero en este sí y nos pueden dar el título, aunque es algo que no es que me haga mucha falta.</p>
+                            <p>Mas cosas que he hecho; estos días me he pasado el Draco and the Seven Scales, un jueguito corto estilo Zelda antiguo en 2d con gráficos de la Gameboy.  En verdad es muy disfrutón, pero la limitación de la pantalla al hacerlo tan retro ha hecho que no me gustasen mucho los bosses de cada mazmorra, la verdad.</p>
+                            <p>Y en cuanto a lecturas, después de leerme El Fantasma de la Ópera, justo en octubre salía el siguiente libro de Carl el Mazmorrero. De momento estoy aún enfrascado en la lectura, y sigue siendo tan entretenido como el resto, aunque con mas pajas mentales, pero lo dicho, entretenido de leer.</p>
+                            <p>Y ya para finalizar, los proyectos personales.</p>
+                            <p>Tenía pensado hacer este mes el desafió de escritura del Writeober, pero me da algo de ansiedad haber fallado ya varios días. Si quiero completar el reto de hacer relatos (bueno, en mi caso quiero hacerlos un poquete extensos y lleva algo mas de tiempo) pero para nada los voy a terminar en octubre, los iré haciendo de a poquito y según tenga tiempo y ganas.</p>
+                            <p>Aparte de eso, estoy trabajando en añadir a la web una wiki del mundo de fantasía que tengo. Aún tengo que trabajar mucho en el worldbuilding, pero es algo que me hace mucha ilusión tanto compartirlo como tenerlo en una web para acceder rápido a la información.</p>
+                            <p>Y poquete más, la verdad, este mes es muy de volver a las dinámicas que tenía y seguir currando, aprovechando que no tengo médicos (y con suerte no me pongo pachucho) y aprovechando también las horas de luz que me queden hasta que llegue el invierno. </p>
+                            <p>¡Un saludete a quien me lea!</p>
+                        </div>
+                        <div class="blog-post-side">
+                            <figure class="blog-post-aside">
+                                <img src="/imagenes/blog/2026/13-10-2026.webp" alt="Foto de una vaca tudanca con enormes cuernos en un prado" loading="lazy" decoding="async">
+                                <figcaption>Foto tomada por mí en uno de mis paseos de una vaca tudanca.</figcaption>
+                            </figure>
+
+                            <div class="blog-post-otras" data-otras-caja>
+                                <div class="recent-entries-header">
+                                    <h2>otras_entradas.txt</h2>
+                                    <div class="window-controls window-controls-small" data-window-controls aria-hidden="true"></div>
+                                </div>
+                                <ul class="entries-list" data-otras-entradas="blog">
+                                    <li class="entries-loading">Cargando…</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </article>
+        </section>
+    </main>
+</body>
+</html>
