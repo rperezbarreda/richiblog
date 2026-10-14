@@ -90,11 +90,59 @@ function pintarElMundo(caja, fichas) {
         porGrupo.get(grupo).push(ficha);
     });
 
+    // UN BOTÓN POR SECCIÓN, y cada uno abre su ventana con lo que tiene
+    // dentro (ver abrirSeccionMundo). Antes salía todo seguido en la
+    // portada: ciento y pico países, luego la historia, luego lo demás, y
+    // lo que no fuera el mapamundi quedaba a seis pantallas de bajada.
+    const botones = document.createElement("ul");
+    botones.className = "mundo-secciones";
+    botones.setAttribute("data-mundo-secciones", "");
     orden.forEach((grupo) => {
-        caja.appendChild(bloqueDeGrupoMundo(grupo, porGrupo.get(grupo)));
+        const fichas = porGrupo.get(grupo);
+        const li = document.createElement("li");
+        const boton = document.createElement("button");
+        boton.type = "button";
+        boton.className = "mundo-seccion";
+        boton.setAttribute("aria-haspopup", "dialog");
+        const nombre = document.createElement("span");
+        nombre.className = "mundo-seccion-nombre";
+        nombre.textContent = grupo;
+        boton.appendChild(nombre);
+        const cuenta = document.createElement("span");
+        cuenta.className = "mundo-seccion-cuenta";
+        const n = new Set(fichas.map((f) => f.url)).size;
+        cuenta.textContent = grupo === "mapas"
+            ? (n === 1 ? "1 mapa" : n + " mapas")
+            : (n === 1 ? "1 página" : n + " páginas");
+        boton.appendChild(cuenta);
+        boton.addEventListener("click", () => abrirSeccionMundo(grupo, fichas, boton));
+        li.appendChild(boton);
+        botones.appendChild(li);
     });
+    caja.appendChild(botones);
+    MUNDO_SECCIONES.porGrupo = porGrupo;
+    MUNDO_SECCIONES.botones = botones;
+
+    // LO QUE SE BUSCA sí sale en la portada, todo junto y por secciones:
+    // buscar y tener que abrir cuatro ventanas para ver dónde ha salido
+    // algo sería peor que no buscar. Esto solo se ve mientras hay algo
+    // escrito en el buscador (ver "buscar:cambiado", abajo).
+    const resultados = document.createElement("div");
+    resultados.className = "mundo-resultados";
+    resultados.setAttribute("data-mundo-resultados", "");
+    resultados.hidden = true;
+    orden.forEach((grupo) => {
+        resultados.appendChild(bloqueDeGrupoMundo(grupo, porGrupo.get(grupo)));
+    });
+    caja.appendChild(resultados);
 
     pintarLosMapasDelMundo(buenas);
+
+    // Llegar con #mundo-<parte> (las migas de una entrada, la tarjeta de
+    // Archipiélagos en «busca una región») abre la ventana del mapamundi
+    // en esa parte.
+    abrirDesdeLaDireccionMundo();
+    window.addEventListener("hashchange", abrirDesdeLaDireccionMundo);
 
     // Los botones de etiqueta los monta el componente de siempre contando
     // los data-categoria que acaban de aparecer, y el buscador vuelve a
@@ -244,14 +292,43 @@ function porRegionesMundo(parte, fichas) {
         caja.appendChild(listaDeFichasMundo(directas, true));
     }
 
-    [...regiones.keys()].sort((a, b) => a.localeCompare(b, "es")).forEach((llave) => {
+    // UNA ZONA DENTRO DE OTRA (Archipiélago Fragmentado, dentro de Tierras
+    // Encantadas): su bloque va justo debajo del de su zona, y no se
+    // repite dentro de él como un país más.
+    const madreDe = (llave) => {
         const propia = fichas.find((f) => llano(f.titulo) === llave);
-        const hijas = fichas.filter((f) => llano(f.region) === llave);
+        const suya = propia ? llano(propia.region) : "";
+        return regiones.has(suya) ? suya : "";
+    };
+    const porNombre = (a, b) => a.localeCompare(b, "es");
+    const enOrden = [];
+    [...regiones.keys()].filter((k) => !madreDe(k)).sort(porNombre).forEach((llave) => {
+        enOrden.push(llave);
+        [...regiones.keys()].filter((k) => madreDe(k) === llave).sort(porNombre)
+            .forEach((hija) => enOrden.push(hija));
+    });
+    // (Por si alguna se queda fuera: dos zonas que se tienen la una a la
+    // otra de región. Mejor que salgan a que se pierdan.)
+    [...regiones.keys()].forEach((k) => {
+        if (!enOrden.includes(k)) {
+            enOrden.push(k);
+        }
+    });
+    enOrden.forEach((llave) => {
+        const propia = fichas.find((f) => llano(f.titulo) === llave);
+        const hijas = fichas.filter((f) => llano(f.region) === llave && !regiones.has(llano(f.titulo)));
+        const madre = madreDe(llave);
         const bloque = document.createElement("div");
-        bloque.className = "mundo-region";
+        bloque.className = madre ? "mundo-region es-dentro" : "mundo-region";
         const titulo = document.createElement("h4");
         titulo.className = "mundo-region-titulo";
         titulo.textContent = propia ? propia.titulo : regiones.get(llave);
+        if (madre) {
+            const dentro = document.createElement("span");
+            dentro.className = "mundo-region-dentro";
+            dentro.textContent = " · en " + regiones.get(madre);
+            titulo.appendChild(dentro);
+        }
         const cuenta = document.createElement("span");
         cuenta.className = "mundo-grupo-cuenta";
         cuenta.setAttribute("data-mundo-region-cuenta", "");
@@ -646,19 +723,28 @@ function itemDelMundo(ficha, corto) {
     enlace.className = "mundo-item";
     enlace.href = rutaSeguraMundo(ficha.url);
 
-    // Su bandera, pequeña, delante del nombre (alt="": el nombre va al
-    // lado, escrito). Solo en la lista corta, la del mapamundi.
-    const bandera = rutaSeguraMundo(ficha.bandera);
-    if (corto && bandera !== "#") {
-        const img = document.createElement("img");
-        img.className = "mundo-item-bandera";
-        img.src = bandera;
-        img.alt = "";
-        img.width = 36;
-        img.height = 24;
-        img.setAttribute("loading", "lazy");
-        img.setAttribute("decoding", "async");
-        enlace.appendChild(img);
+    // EN LA REJILLA DEL MAPAMUNDI, la bandera arriba y el nombre debajo
+    // (alt="": el nombre va escrito justo debajo). Un país sin bandera
+    // lleva el hueco igual, vacío, para que la rejilla no baile.
+    // Una región no tiene bandera: lleva su mapa de situación en pequeño.
+    if (corto) {
+        const bandera = rutaSeguraMundo(ficha.bandera || ficha.miniatura);
+        if (bandera !== "#") {
+            const img = document.createElement("img");
+            img.className = "mundo-item-bandera";
+            img.src = bandera;
+            img.alt = "";
+            img.width = 150;
+            img.height = 100;
+            img.setAttribute("loading", "lazy");
+            img.setAttribute("decoding", "async");
+            enlace.appendChild(img);
+        } else {
+            const hueco = document.createElement("span");
+            hueco.className = "mundo-item-bandera es-hueco";
+            hueco.setAttribute("aria-hidden", "true");
+            enlace.appendChild(hueco);
+        }
     }
 
     const titulo = document.createElement("strong");
@@ -735,6 +821,16 @@ document.addEventListener("buscar:cambiado", () => {
     const regiones = document.querySelector("[data-mundo-regiones]");
     if (regiones && regiones.hasAttribute("data-mundo-cargado")) {
         regiones.hidden = !!window.buscador.texto;
+    }
+    // Y los botones de las secciones dejan sitio a lo encontrado.
+    const buscando = !!window.buscador.texto;
+    const resultados = document.querySelector("[data-mundo-resultados]");
+    const secciones = document.querySelector("[data-mundo-secciones]");
+    if (resultados) {
+        resultados.hidden = !buscando;
+    }
+    if (secciones) {
+        secciones.hidden = buscando;
     }
     repasarGruposMundo();
 });
@@ -962,6 +1058,11 @@ async function pintarRegionesMundo() {
             suyas.className = "mundo-parte-hijas";
             hijas.forEach((hija) => {
                 const li = document.createElement("li");
+                // Una zona dentro de otra, un poco metida (ver "dentro" en
+                // escribir_regiones).
+                if ((hija.dentro || "").toString().trim()) {
+                    li.className = "es-dentro";
+                }
                 li.appendChild(teselaDeRegionMundo(hija, "mundo-hija"));
                 suyas.appendChild(li);
             });
@@ -981,8 +1082,15 @@ function teselaDeRegionMundo(cosa, clase) {
     // Sin página propia (Archipiélagos): a su apartado de la lista.
     const url = (cosa.url || "").toString().trim();
     enlace.href = url ? rutaSeguraMundo(url) : "#" + idDeSubMundo(nombre);
+    // (La ventana la abre el cambio de dirección: ver
+    // abrirDesdeLaDireccionMundo. Si ya se estaba en esa dirección, el
+    // cambio no salta, así que se abre también al pulsar.)
     if (!url) {
-        enlace.addEventListener("click", () => abrirHastaMundo(idDeSubMundo(nombre)));
+        enlace.addEventListener("click", () => {
+            if (decodeURIComponent(window.location.hash.slice(1)) === idDeSubMundo(nombre)) {
+                abrirDesdeLaDireccionMundo();
+            }
+        });
     }
     const imagen = rutaSeguraMundo(cosa.imagen);
     if (imagen !== "#") {
@@ -1013,18 +1121,6 @@ function teselaDeRegionMundo(cosa, clase) {
     return enlace;
 }
 
-// El apartado al que lleva una tarjeta sin página, abierto aunque se
-// hubiera dejado plegado: llevar a un título cerrado es llevar a nada.
-function abrirHastaMundo(id) {
-    const destino = document.getElementById(id);
-    let paso = destino;
-    while (paso) {
-        if (paso.tagName === "DETAILS" && !paso.open) {
-            paso.open = true;
-        }
-        paso = paso.parentElement;
-    }
-}
 
 
 // =========================================
@@ -1064,4 +1160,98 @@ function prepararEmblemasMundo() {
         caja.classList.add("con-botones");
         enseñar(0);
     });
+}
+
+
+// =========================================
+// LAS SECCIONES, EN SU VENTANA
+// =========================================
+// Cada botón de la portada abre la ventana de siempre (ventana-modal.js,
+// la de los NPC y el botín) con su sección dentro: el mapamundi por partes
+// del mundo y regiones, con los países en rejilla y su bandera; la
+// historia; lo demás. La ventana se encarga del foco, del Escape y de
+// dejar inerte lo de detrás.
+
+const MUNDO_SECCIONES = { porGrupo: null, botones: null };
+
+function abrirSeccionMundo(grupo, fichas, boton, irA) {
+    if (!window.ventanaModal) {
+        return;
+    }
+    window.ventanaModal.abrir({
+        titulo: grupo.toString().toLowerCase().replace(/\s+/g, "_") + ".lst",
+        clase: "modal-mundo",
+        devolverA: boton,
+        llenar: (cuerpo) => {
+            cuerpo.appendChild(contenidoDeSeccionMundo(grupo, fichas));
+            if (irA) {
+                const destino = cuerpo.querySelector("#" + irA);
+                if (destino) {
+                    // Después de pintarse, para que tenga sitio al que bajar.
+                    requestAnimationFrame(() => destino.scrollIntoView({ block: "start" }));
+                    return destino;
+                }
+            }
+            return null;
+        },
+    });
+}
+
+function contenidoDeSeccionMundo(grupo, fichas) {
+    const caja = document.createElement("div");
+    caja.className = "mundo-seccion-contenido";
+    const sueltas = fichas.filter((f) => !etiquetasDeReparto(f).length);
+    if (sueltas.length) {
+        caja.appendChild(listaDeFichasMundo(sueltas));
+    }
+    const porEtiqueta = new Map();
+    fichas.forEach((ficha) => {
+        etiquetasDeReparto(ficha).forEach((e) => {
+            if (!porEtiqueta.has(e)) {
+                porEtiqueta.set(e, []);
+            }
+            porEtiqueta.get(e).push(ficha);
+        });
+    });
+    [...porEtiqueta.keys()].forEach((nombre) => {
+        const suyas = porEtiqueta.get(nombre);
+        const parte = document.createElement("div");
+        parte.className = "mundo-seccion-parte";
+        const titulo = document.createElement("h3");
+        titulo.className = "mundo-seccion-parte-titulo";
+        // tabindex -1: es a donde se lleva el foco al llegar desde fuera
+        // (#mundo-archipielagos), para que el lector de pantalla empiece ahí.
+        titulo.id = "ventana-" + idDeSubMundo(nombre);
+        titulo.tabIndex = -1;
+        titulo.textContent = nombre;
+        const cuenta = document.createElement("span");
+        cuenta.className = "mundo-grupo-cuenta";
+        const n = new Set(suyas.map((f) => f.url)).size;
+        cuenta.textContent = " " + n;
+        titulo.appendChild(cuenta);
+        parte.appendChild(titulo);
+        parte.appendChild(suyas.some((f) => (f.region || "").toString().trim())
+            ? porRegionesMundo(nombre, suyas)
+            : listaDeFichasMundo(suyas));
+        caja.appendChild(parte);
+    });
+    return caja;
+}
+
+function abrirDesdeLaDireccionMundo() {
+    const hash = decodeURIComponent((window.location.hash || "").slice(1));
+    if (!/^mundo-[a-z0-9-]+$/.test(hash) || !MUNDO_SECCIONES.porGrupo) {
+        return;
+    }
+    // Qué sección tiene esa parte del mundo.
+    for (const [grupo, fichas] of MUNDO_SECCIONES.porGrupo) {
+        const tiene = fichas.some((f) => etiquetasDeReparto(f)
+            .some((e) => idDeSubMundo(e) === hash));
+        if (tiene) {
+            const boton = [...MUNDO_SECCIONES.botones.querySelectorAll(".mundo-seccion")]
+                .find((b) => b.querySelector(".mundo-seccion-nombre").textContent === grupo);
+            abrirSeccionMundo(grupo, fichas, boton || null, "ventana-" + hash);
+            return;
+        }
+    }
 }

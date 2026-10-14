@@ -14,7 +14,8 @@
         "que": "",
         "resumen": "Azarasia es uno de los continentes del mundo.",
         "region": "",
-        "bandera": ""
+        "bandera": "",
+        "miniatura": "/imagenes/wiki/situacion/peque/azarasia.webp"
     },
     {
         "titulo": "Califato de Jhel'Zadir",
@@ -31,7 +32,8 @@
         "que": "",
         "resumen": "Califato de Jhel'Zadir está en Azarasia.",
         "region": "Azarasia",
-        "bandera": "/imagenes/wiki/califato_jhelzadir.webp"
+        "bandera": "/imagenes/wiki/califato_jhelzadir.webp",
+        "miniatura": ""
     },
     {
         "titulo": "Cantón de Piedraspuras",
@@ -48,7 +50,8 @@
         "que": "",
         "resumen": "Cantón de Piedraspuras está en Azarasia.",
         "region": "Azarasia",
-        "bandera": "/imagenes/wiki/canton_piedraspuras.webp"
+        "bandera": "/imagenes/wiki/canton_piedraspuras.webp",
+        "miniatura": ""
     },
     {
         "titulo": "Condado de Burcrecia",
@@ -65,7 +68,8 @@
         "que": "",
         "resumen": "Condado de Burcrecia está en Azarasia.",
         "region": "Azarasia",
-        "bandera": "/imagenes/wiki/condado_burcrecia.webp"
+        "bandera": "/imagenes/wiki/condado_burcrecia.webp",
+        "miniatura": ""
     },
     {
         "titulo": "Corte de Labros",
@@ -82,7 +86,8 @@
         "que": "",
         "resumen": "Corte de Labros está en las Islas de Labros.",
         "region": "Islas de Labros",
-        "bandera": "/imagenes/wiki/corte_labros.webp"
+        "bandera": "/imagenes/wiki/corte_labros.webp",
+        "miniatura": ""
     },
     {
         "titulo": "Dominios de Bor'Korr el Sanguinario",
@@ -99,7 +104,8 @@
         "que": "",
         "resumen": "Dominios de Bor'Korr el Sanguinario está en Azarasia.",
         "region": "Azarasia",
-        "bandera": "/imagenes/wiki/dominios_borkorr.webp"
+        "bandera": "/imagenes/wiki/dominios_borkorr.webp",
+        "miniatura": ""
     },
     {
         "titulo": "Emirato de Adrash",
@@ -116,7 +122,8 @@
         "que": "",
         "resumen": "Emirato de Adrash está en Azarasia.",
         "region": "Azarasia",
-        "bandera": "/imagenes/wiki/emirato_adrash.webp"
+        "bandera": "/imagenes/wiki/emirato_adrash.webp",
+        "miniatura": ""
     },
     {
         "titulo": "Gran Condado de Marturia",
@@ -133,7 +140,8 @@
         "que": "",
         "resumen": "Gran Condado de Marturia está en Azarasia.",
         "region": "Azarasia",
-        "bandera": "/imagenes/wiki/gran_condado_marturia.webp"
+        "bandera": "/imagenes/wiki/gran_condado_marturia.webp",
+        "miniatura": ""
     },
     {
         "titulo": "Horda de Yerzhal",
@@ -150,7 +158,8 @@
         "que": "",
         "resumen": "Horda de Yerzhal está en Azarasia.",
         "region": "Azarasia",
-        "bandera": "/imagenes/wiki/horda_yerzhal.webp"
+        "bandera": "/imagenes/wiki/horda_yerzhal.webp",
+        "miniatura": ""
     },
     {
         "titulo": "Imperio de Nueva Valindra",
@@ -167,7 +176,8 @@
         "que": "",
         "resumen": "Imperio de Nueva Valindra está en Azarasia.",
         "region": "Azarasia",
-        "bandera": "/imagenes/wiki/imperio_nueva_valindra.webp"
+        "bandera": "/imagenes/wiki/imperio_nueva_valindra.webp",
+        "miniatura": ""
     },
     {
         "titulo": "Isla de Arbenia",
@@ -184,7 +194,8 @@
         "que": "",
         "resumen": "Isla de Arbenia es una región del mapamundi.",
         "region": "",
-        "bandera": ""
+        "bandera": "",
+        "miniatura": "/imagenes/wiki/situacion/peque/isla_de_arbenia.webp"
     },
     {
         "titulo": "Isla de Telvetia",
@@ -201,7 +212,8 @@
         "que": "",
         "resumen": "Isla de Telvetia es una isla grande e independiente.",
         "region": "",
-        "bandera": ""
+        "bandera": "",
+        "miniatura": ""
     },
     {
         "titulo": "Islas de Labros",
@@ -218,7 +230,8 @@
         "que": "",
         "resumen": "Islas de Labros es una región del mapamundi.",
         "region": "",
-        "bandera": ""
+        "bandera": "",
+        "miniatura": "/imagenes/wiki/situacion/peque/islas_de_labros.webp"
     },
     {
         "titulo": "Marca de Elyarath",
@@ -235,7 +248,8 @@
         "que": "",
         "resumen": "Marca de Elyarath está en Azarasia.",
         "region": "Azarasia",
-        "bandera": "/imagenes/wiki/marca_elyarath.webp"
+        "bandera": "/imagenes/wiki/marca_elyarath.webp",
+        "miniatura": ""
     },
     {
         "titulo": "Marquesado de Setra",
@@ -252,7 +266,8 @@
         "que": "",
         "resumen": "Marquesado de Setra está en Azarasia.",
         "region": "Azarasia",
-        "bandera": "/imagenes/wiki/marquesado_setra.webp"
+        "bandera": "/imagenes/wiki/marquesado_setra.webp",
+        "miniatura": ""
     },
     {
         "titulo": "Obispado de Habaza",
@@ -269,7 +284,8 @@
         "que": "",
         "resumen": "Obispado de Habaza está en Azarasia.",
         "region": "Azarasia",
-        "bandera": "/imagenes/wiki/obispado_habaza.webp"
+        "bandera": "/imagenes/wiki/obispado_habaza.webp",
+        "miniatura": ""
     },
     {
         "titulo": "Orden de Clodia",
@@ -286,7 +302,8 @@
         "que": "",
         "resumen": "Orden de Clodia está en Azarasia.",
         "region": "Azarasia",
-        "bandera": "/imagenes/wiki/orden_clodia.webp"
+        "bandera": "/imagenes/wiki/orden_clodia.webp",
+        "miniatura": ""
     },
     {
         "titulo": "Paraje de Ágrimar",
@@ -303,7 +320,8 @@
         "que": "",
         "resumen": "Paraje de Ágrimar está en las Islas de Labros.",
         "region": "Islas de Labros",
-        "bandera": "/imagenes/wiki/paraje_agrimar.webp"
+        "bandera": "/imagenes/wiki/paraje_agrimar.webp",
+        "miniatura": ""
     },
     {
         "titulo": "Principado de Lúnica",
@@ -320,7 +338,8 @@
         "que": "",
         "resumen": "Principado de Lúnica está en Azarasia.",
         "region": "Azarasia",
-        "bandera": "/imagenes/wiki/principado_lunica.webp"
+        "bandera": "/imagenes/wiki/principado_lunica.webp",
+        "miniatura": ""
     },
     {
         "titulo": "Reino de Donotebra",
@@ -337,7 +356,8 @@
         "que": "",
         "resumen": "Reino de Donotebra está en la Isla de Arbenia.",
         "region": "Isla de Arbenia",
-        "bandera": "/imagenes/wiki/reino_donotebra.webp"
+        "bandera": "/imagenes/wiki/reino_donotebra.webp",
+        "miniatura": ""
     },
     {
         "titulo": "Reino de Dreustán",
@@ -354,7 +374,8 @@
         "que": "",
         "resumen": "Reino de Dreustán está en Azarasia.",
         "region": "Azarasia",
-        "bandera": "/imagenes/wiki/reino_dreustan.webp"
+        "bandera": "/imagenes/wiki/reino_dreustan.webp",
+        "miniatura": ""
     },
     {
         "titulo": "Reino de Nocravel",
@@ -371,7 +392,8 @@
         "que": "",
         "resumen": "Reino de Nocravel está en Azarasia.",
         "region": "Azarasia",
-        "bandera": "/imagenes/wiki/reino_nocravel.webp"
+        "bandera": "/imagenes/wiki/reino_nocravel.webp",
+        "miniatura": ""
     },
     {
         "titulo": "Reino de Oritania",
@@ -388,7 +410,8 @@
         "que": "",
         "resumen": "Reino de Oritania está en Azarasia.",
         "region": "Azarasia",
-        "bandera": "/imagenes/wiki/reino_oritania.webp"
+        "bandera": "/imagenes/wiki/reino_oritania.webp",
+        "miniatura": ""
     },
     {
         "titulo": "Reino de Prunia",
@@ -405,7 +428,8 @@
         "que": "",
         "resumen": "Reino de Prunia está en Azarasia.",
         "region": "Azarasia",
-        "bandera": "/imagenes/wiki/reino_prunia.webp"
+        "bandera": "/imagenes/wiki/reino_prunia.webp",
+        "miniatura": ""
     },
     {
         "titulo": "Reino de Solazada",
@@ -422,7 +446,8 @@
         "que": "",
         "resumen": "Reino de Solazada está en Azarasia.",
         "region": "Azarasia",
-        "bandera": "/imagenes/wiki/reino_solazada.webp"
+        "bandera": "/imagenes/wiki/reino_solazada.webp",
+        "miniatura": ""
     },
     {
         "titulo": "Reino de Terredia",
@@ -439,7 +464,8 @@
         "que": "",
         "resumen": "Reino de Terredia está en Azarasia.",
         "region": "Azarasia",
-        "bandera": "/imagenes/wiki/reino_terredia.webp"
+        "bandera": "/imagenes/wiki/reino_terredia.webp",
+        "miniatura": ""
     },
     {
         "titulo": "Reino de Zaustilla",
@@ -456,7 +482,8 @@
         "que": "",
         "resumen": "Reino de Zaustilla es una isla grande e independiente.",
         "region": "",
-        "bandera": ""
+        "bandera": "",
+        "miniatura": ""
     },
     {
         "titulo": "República Mercantil de Denatria",
@@ -473,7 +500,8 @@
         "que": "",
         "resumen": "República Mercantil de Denatria está en Azarasia.",
         "region": "Azarasia",
-        "bandera": "/imagenes/wiki/republica_denatria.webp"
+        "bandera": "/imagenes/wiki/republica_denatria.webp",
+        "miniatura": ""
     },
     {
         "titulo": "Señorío de Pizaria",
@@ -490,7 +518,8 @@
         "que": "",
         "resumen": "Señorío de Pizaria está en la Isla de Arbenia.",
         "region": "Isla de Arbenia",
-        "bandera": "/imagenes/wiki/senorio_pizaria.webp"
+        "bandera": "/imagenes/wiki/senorio_pizaria.webp",
+        "miniatura": ""
     },
     {
         "titulo": "Sultanato de Doresia",
@@ -507,7 +536,8 @@
         "que": "",
         "resumen": "Sultanato de Doresia está en Azarasia.",
         "region": "Azarasia",
-        "bandera": "/imagenes/wiki/sultanato_doresia.webp"
+        "bandera": "/imagenes/wiki/sultanato_doresia.webp",
+        "miniatura": ""
     },
     {
         "titulo": "Territorios Unidos de Arbenia",
@@ -524,7 +554,8 @@
         "que": "",
         "resumen": "Territorios Unidos de Arbenia está en la Isla de Arbenia.",
         "region": "Isla de Arbenia",
-        "bandera": "/imagenes/wiki/territorios_unidos_arbenia.webp"
+        "bandera": "/imagenes/wiki/territorios_unidos_arbenia.webp",
+        "miniatura": ""
     },
     {
         "titulo": "Tierras de Traena",
@@ -541,7 +572,8 @@
         "que": "",
         "resumen": "Tierras de Traena está en Azarasia.",
         "region": "Azarasia",
-        "bandera": "/imagenes/wiki/tierras_traena.webp"
+        "bandera": "/imagenes/wiki/tierras_traena.webp",
+        "miniatura": ""
     },
     {
         "titulo": "Unión de Cuerza",
@@ -558,7 +590,8 @@
         "que": "",
         "resumen": "Unión de Cuerza está en Azarasia.",
         "region": "Azarasia",
-        "bandera": "/imagenes/wiki/union_de_cuerza.webp"
+        "bandera": "/imagenes/wiki/union_de_cuerza.webp",
+        "miniatura": ""
     },
     {
         "titulo": "Unión de las Cumbres Calcinadas",
@@ -575,7 +608,8 @@
         "que": "",
         "resumen": "Unión de las Cumbres Calcinadas está en Azarasia.",
         "region": "Azarasia",
-        "bandera": "/imagenes/wiki/cumbres_calcinadas.webp"
+        "bandera": "/imagenes/wiki/cumbres_calcinadas.webp",
+        "miniatura": ""
     },
     {
         "titulo": "Academia de Rosamica",
@@ -592,7 +626,8 @@
         "que": "",
         "resumen": "Academia de Rosamica está en Partaria.",
         "region": "Partaria",
-        "bandera": ""
+        "bandera": "",
+        "miniatura": ""
     },
     {
         "titulo": "Alianza de Sepón",
@@ -609,7 +644,8 @@
         "que": "",
         "resumen": "Alianza de Sepón está en Partaria.",
         "region": "Partaria",
-        "bandera": ""
+        "bandera": "",
+        "miniatura": ""
     },
     {
         "titulo": "Bosque de Utalis",
@@ -626,7 +662,8 @@
         "que": "",
         "resumen": "Bosque de Utalis está en Partaria.",
         "region": "Partaria",
-        "bandera": ""
+        "bandera": "",
+        "miniatura": ""
     },
     {
         "titulo": "Ciudad Santa de Ablanamaz",
@@ -643,7 +680,8 @@
         "que": "",
         "resumen": "Ciudad Santa de Ablanamaz está en Partaria.",
         "region": "Partaria",
-        "bandera": ""
+        "bandera": "",
+        "miniatura": ""
     },
     {
         "titulo": "Coronas del Viento",
@@ -660,7 +698,8 @@
         "que": "",
         "resumen": "Coronas del Viento está en Partaria.",
         "region": "Partaria",
-        "bandera": ""
+        "bandera": "",
+        "miniatura": ""
     },
     {
         "titulo": "Cumbres de Ath",
@@ -677,7 +716,8 @@
         "que": "",
         "resumen": "Cumbres de Ath está en Partaria.",
         "region": "Partaria",
-        "bandera": ""
+        "bandera": "",
+        "miniatura": ""
     },
     {
         "titulo": "Custodios de Parta",
@@ -694,7 +734,8 @@
         "que": "",
         "resumen": "Custodios de Parta está en Partaria.",
         "region": "Partaria",
-        "bandera": ""
+        "bandera": "",
+        "miniatura": ""
     },
     {
         "titulo": "Imperio Friscadio",
@@ -711,7 +752,8 @@
         "que": "",
         "resumen": "Imperio Friscadio está en Partaria.",
         "region": "Partaria",
-        "bandera": ""
+        "bandera": "",
+        "miniatura": ""
     },
     {
         "titulo": "Maharato de Sulkaladésh",
@@ -728,7 +770,8 @@
         "que": "",
         "resumen": "Maharato de Sulkaladésh está en Partaria.",
         "region": "Partaria",
-        "bandera": ""
+        "bandera": "",
+        "miniatura": ""
     },
     {
         "titulo": "Mandato de Acratang",
@@ -745,7 +788,8 @@
         "que": "",
         "resumen": "Mandato de Acratang está en Partaria.",
         "region": "Partaria",
-        "bandera": ""
+        "bandera": "",
+        "miniatura": ""
     },
     {
         "titulo": "Mandato de Nisi",
@@ -762,7 +806,8 @@
         "que": "",
         "resumen": "Mandato de Nisi está en Partaria.",
         "region": "Partaria",
-        "bandera": ""
+        "bandera": "",
+        "miniatura": ""
     },
     {
         "titulo": "Mandato de Panchan",
@@ -779,7 +824,8 @@
         "que": "",
         "resumen": "Mandato de Panchan está en Partaria.",
         "region": "Partaria",
-        "bandera": ""
+        "bandera": "",
+        "miniatura": ""
     },
     {
         "titulo": "Mandato de Taz-Ju",
@@ -796,7 +842,8 @@
         "que": "",
         "resumen": "Mandato de Taz-Ju está en Partaria.",
         "region": "Partaria",
-        "bandera": ""
+        "bandera": "",
+        "miniatura": ""
     },
     {
         "titulo": "Mandato de Zó",
@@ -813,7 +860,8 @@
         "que": "",
         "resumen": "Mandato de Zó está en Partaria.",
         "region": "Partaria",
-        "bandera": ""
+        "bandera": "",
+        "miniatura": ""
     },
     {
         "titulo": "Mercado de Dao-Yeni",
@@ -830,7 +878,8 @@
         "que": "",
         "resumen": "Mercado de Dao-Yeni está en Partaria.",
         "region": "Partaria",
-        "bandera": ""
+        "bandera": "",
+        "miniatura": ""
     },
     {
         "titulo": "Partaria",
@@ -847,7 +896,8 @@
         "que": "",
         "resumen": "Partaria es uno de los continentes del mundo.",
         "region": "",
-        "bandera": ""
+        "bandera": "",
+        "miniatura": "/imagenes/wiki/situacion/peque/partaria.webp"
     },
     {
         "titulo": "Páramo de Parta",
@@ -864,7 +914,8 @@
         "que": "",
         "resumen": "Páramo de Parta está en Partaria.",
         "region": "Partaria",
-        "bandera": ""
+        "bandera": "",
+        "miniatura": ""
     },
     {
         "titulo": "Reino de Kasa",
@@ -881,7 +932,8 @@
         "que": "",
         "resumen": "Reino de Kasa está en Partaria.",
         "region": "Partaria",
-        "bandera": ""
+        "bandera": "",
+        "miniatura": ""
     },
     {
         "titulo": "Ruinas de Goa",
@@ -898,7 +950,8 @@
         "que": "",
         "resumen": "Ruinas de Goa está en Partaria.",
         "region": "Partaria",
-        "bandera": ""
+        "bandera": "",
+        "miniatura": ""
     },
     {
         "titulo": "Tierras Reflejadas",
@@ -915,7 +968,8 @@
         "que": "",
         "resumen": "Tierras Reflejadas está en Partaria.",
         "region": "Partaria",
-        "bandera": ""
+        "bandera": "",
+        "miniatura": ""
     },
     {
         "titulo": "Tribu Boscalise",
@@ -932,7 +986,8 @@
         "que": "",
         "resumen": "Tribu Boscalise está en Partaria.",
         "region": "Partaria",
-        "bandera": ""
+        "bandera": "",
+        "miniatura": ""
     },
     {
         "titulo": "Tribu Gogango",
@@ -949,7 +1004,8 @@
         "que": "",
         "resumen": "Tribu Gogango está en Partaria.",
         "region": "Partaria",
-        "bandera": ""
+        "bandera": "",
+        "miniatura": ""
     },
     {
         "titulo": "Tribu Kránimos",
@@ -966,7 +1022,8 @@
         "que": "",
         "resumen": "Tribu Kránimos está en Partaria.",
         "region": "Partaria",
-        "bandera": ""
+        "bandera": "",
+        "miniatura": ""
     },
     {
         "titulo": "Tribu Molosgo",
@@ -983,7 +1040,8 @@
         "que": "",
         "resumen": "Tribu Molosgo está en Partaria.",
         "region": "Partaria",
-        "bandera": ""
+        "bandera": "",
+        "miniatura": ""
     },
     {
         "titulo": "Tribu Ordasco",
@@ -1000,7 +1058,8 @@
         "que": "",
         "resumen": "Tribu Ordasco está en Partaria.",
         "region": "Partaria",
-        "bandera": ""
+        "bandera": "",
+        "miniatura": ""
     },
     {
         "titulo": "Tribu Tuzno",
@@ -1017,7 +1076,8 @@
         "que": "",
         "resumen": "Tribu Tuzno está en Partaria.",
         "region": "Partaria",
-        "bandera": ""
+        "bandera": "",
+        "miniatura": ""
     },
     {
         "titulo": "Tribu Utná",
@@ -1034,7 +1094,8 @@
         "que": "",
         "resumen": "Tribu Utná está en Partaria.",
         "region": "Partaria",
-        "bandera": ""
+        "bandera": "",
+        "miniatura": ""
     },
     {
         "titulo": "Tribu Vadalacra",
@@ -1051,7 +1112,8 @@
         "que": "",
         "resumen": "Tribu Vadalacra está en Partaria.",
         "region": "Partaria",
-        "bandera": ""
+        "bandera": "",
+        "miniatura": ""
     },
     {
         "titulo": "Valle de Után",
@@ -1068,364 +1130,8 @@
         "que": "",
         "resumen": "Valle de Után está en Partaria.",
         "region": "Partaria",
-        "bandera": ""
-    },
-    {
-        "titulo": "Archipiélago Fragmentado",
-        "url": "/web/wiki/mapamundi/tierras_encantadas/archipielago_fragmentado/archipielago_fragmentado.html",
-        "carpeta": "Mapamundi/Tierras Encantadas/Archipiélago Fragmentado",
-        "etiquetas": [
-            "Mapamundi",
-            "Tierras Encantadas"
-        ],
-        "grupo": "Mapamundi",
-        "sub": [
-            "Tierras Encantadas"
-        ],
-        "que": "",
-        "resumen": "El Archipiélago Fragmentado es una región de las Tierras Encantadas.",
-        "region": "Tierras Encantadas",
-        "bandera": ""
-    },
-    {
-        "titulo": "Costa de Vlasquie",
-        "url": "/web/wiki/mapamundi/tierras_encantadas/archipielago_fragmentado/costa_de_vlasquie.html",
-        "carpeta": "Mapamundi/Tierras Encantadas/Archipiélago Fragmentado",
-        "etiquetas": [
-            "Mapamundi",
-            "Tierras Encantadas"
-        ],
-        "grupo": "Mapamundi",
-        "sub": [
-            "Tierras Encantadas"
-        ],
-        "que": "",
-        "resumen": "Costa de Vlasquie está en el Archipiélago Fragmentado, en las Tierras Encantadas.",
-        "region": "Archipiélago Fragmentado",
-        "bandera": ""
-    },
-    {
-        "titulo": "Dominio de Lyca",
-        "url": "/web/wiki/mapamundi/tierras_encantadas/archipielago_fragmentado/dominio_de_lyca.html",
-        "carpeta": "Mapamundi/Tierras Encantadas/Archipiélago Fragmentado",
-        "etiquetas": [
-            "Mapamundi",
-            "Tierras Encantadas"
-        ],
-        "grupo": "Mapamundi",
-        "sub": [
-            "Tierras Encantadas"
-        ],
-        "que": "",
-        "resumen": "Dominio de Lyca está en el Archipiélago Fragmentado, en las Tierras Encantadas.",
-        "region": "Archipiélago Fragmentado",
-        "bandera": ""
-    },
-    {
-        "titulo": "Forja de Aureb",
-        "url": "/web/wiki/mapamundi/tierras_encantadas/archipielago_fragmentado/forja_de_aureb.html",
-        "carpeta": "Mapamundi/Tierras Encantadas/Archipiélago Fragmentado",
-        "etiquetas": [
-            "Mapamundi",
-            "Tierras Encantadas"
-        ],
-        "grupo": "Mapamundi",
-        "sub": [
-            "Tierras Encantadas"
-        ],
-        "que": "",
-        "resumen": "Forja de Aureb está en el Archipiélago Fragmentado, en las Tierras Encantadas.",
-        "region": "Archipiélago Fragmentado",
-        "bandera": ""
-    },
-    {
-        "titulo": "Franja de Turia",
-        "url": "/web/wiki/mapamundi/tierras_encantadas/franja_de_turia.html",
-        "carpeta": "Mapamundi/Tierras Encantadas",
-        "etiquetas": [
-            "Mapamundi",
-            "Tierras Encantadas"
-        ],
-        "grupo": "Mapamundi",
-        "sub": [
-            "Tierras Encantadas"
-        ],
-        "que": "",
-        "resumen": "Franja de Turia está en las Tierras Encantadas.",
-        "region": "Tierras Encantadas",
-        "bandera": ""
-    },
-    {
-        "titulo": "Horda de Uspán",
-        "url": "/web/wiki/mapamundi/tierras_encantadas/horda_de_uspan.html",
-        "carpeta": "Mapamundi/Tierras Encantadas",
-        "etiquetas": [
-            "Mapamundi",
-            "Tierras Encantadas"
-        ],
-        "grupo": "Mapamundi",
-        "sub": [
-            "Tierras Encantadas"
-        ],
-        "que": "",
-        "resumen": "Horda de Uspán está en las Tierras Encantadas.",
-        "region": "Tierras Encantadas",
-        "bandera": ""
-    },
-    {
-        "titulo": "Horda Quebrada",
-        "url": "/web/wiki/mapamundi/tierras_encantadas/archipielago_fragmentado/horda_quebrada.html",
-        "carpeta": "Mapamundi/Tierras Encantadas/Archipiélago Fragmentado",
-        "etiquetas": [
-            "Mapamundi",
-            "Tierras Encantadas"
-        ],
-        "grupo": "Mapamundi",
-        "sub": [
-            "Tierras Encantadas"
-        ],
-        "que": "",
-        "resumen": "Horda Quebrada está en el Archipiélago Fragmentado, en las Tierras Encantadas.",
-        "region": "Archipiélago Fragmentado",
-        "bandera": ""
-    },
-    {
-        "titulo": "Imperio de Lezeris",
-        "url": "/web/wiki/mapamundi/tierras_encantadas/imperio_de_lezeris.html",
-        "carpeta": "Mapamundi/Tierras Encantadas",
-        "etiquetas": [
-            "Mapamundi",
-            "Tierras Encantadas"
-        ],
-        "grupo": "Mapamundi",
-        "sub": [
-            "Tierras Encantadas"
-        ],
-        "que": "",
-        "resumen": "Imperio de Lezeris está en las Tierras Encantadas.",
-        "region": "Tierras Encantadas",
-        "bandera": ""
-    },
-    {
-        "titulo": "Infierno Frondoso",
-        "url": "/web/wiki/mapamundi/tierras_encantadas/infierno_frondoso.html",
-        "carpeta": "Mapamundi/Tierras Encantadas",
-        "etiquetas": [
-            "Mapamundi",
-            "Tierras Encantadas"
-        ],
-        "grupo": "Mapamundi",
-        "sub": [
-            "Tierras Encantadas"
-        ],
-        "que": "",
-        "resumen": "Infierno Frondoso está en las Tierras Encantadas.",
-        "region": "Tierras Encantadas",
-        "bandera": ""
-    },
-    {
-        "titulo": "Liga de Golota",
-        "url": "/web/wiki/mapamundi/tierras_encantadas/liga_de_golota.html",
-        "carpeta": "Mapamundi/Tierras Encantadas",
-        "etiquetas": [
-            "Mapamundi",
-            "Tierras Encantadas"
-        ],
-        "grupo": "Mapamundi",
-        "sub": [
-            "Tierras Encantadas"
-        ],
-        "que": "",
-        "resumen": "Liga de Golota está en las Tierras Encantadas.",
-        "region": "Tierras Encantadas",
-        "bandera": ""
-    },
-    {
-        "titulo": "Morada de Eeli",
-        "url": "/web/wiki/mapamundi/tierras_encantadas/archipielago_fragmentado/morada_de_eeli.html",
-        "carpeta": "Mapamundi/Tierras Encantadas/Archipiélago Fragmentado",
-        "etiquetas": [
-            "Mapamundi",
-            "Tierras Encantadas"
-        ],
-        "grupo": "Mapamundi",
-        "sub": [
-            "Tierras Encantadas"
-        ],
-        "que": "",
-        "resumen": "Morada de Eeli está en el Archipiélago Fragmentado, en las Tierras Encantadas.",
-        "region": "Archipiélago Fragmentado",
-        "bandera": ""
-    },
-    {
-        "titulo": "Ojo de Aglas",
-        "url": "/web/wiki/mapamundi/tierras_encantadas/ojo_de_aglas.html",
-        "carpeta": "Mapamundi/Tierras Encantadas",
-        "etiquetas": [
-            "Mapamundi",
-            "Tierras Encantadas"
-        ],
-        "grupo": "Mapamundi",
-        "sub": [
-            "Tierras Encantadas"
-        ],
-        "que": "",
-        "resumen": "Ojo de Aglas está en las Tierras Encantadas.",
-        "region": "Tierras Encantadas",
-        "bandera": ""
-    },
-    {
-        "titulo": "Palacio de Jan",
-        "url": "/web/wiki/mapamundi/tierras_encantadas/palacio_de_jan.html",
-        "carpeta": "Mapamundi/Tierras Encantadas",
-        "etiquetas": [
-            "Mapamundi",
-            "Tierras Encantadas"
-        ],
-        "grupo": "Mapamundi",
-        "sub": [
-            "Tierras Encantadas"
-        ],
-        "que": "",
-        "resumen": "Palacio de Jan está en las Tierras Encantadas.",
-        "region": "Tierras Encantadas",
-        "bandera": ""
-    },
-    {
-        "titulo": "Paraje de Cereno",
-        "url": "/web/wiki/mapamundi/tierras_encantadas/archipielago_fragmentado/paraje_de_cereno.html",
-        "carpeta": "Mapamundi/Tierras Encantadas/Archipiélago Fragmentado",
-        "etiquetas": [
-            "Mapamundi",
-            "Tierras Encantadas"
-        ],
-        "grupo": "Mapamundi",
-        "sub": [
-            "Tierras Encantadas"
-        ],
-        "que": "",
-        "resumen": "Paraje de Cereno está en el Archipiélago Fragmentado, en las Tierras Encantadas.",
-        "region": "Archipiélago Fragmentado",
-        "bandera": ""
-    },
-    {
-        "titulo": "Páramo de Esnirma",
-        "url": "/web/wiki/mapamundi/tierras_encantadas/archipielago_fragmentado/paramo_de_esnirma.html",
-        "carpeta": "Mapamundi/Tierras Encantadas/Archipiélago Fragmentado",
-        "etiquetas": [
-            "Mapamundi",
-            "Tierras Encantadas"
-        ],
-        "grupo": "Mapamundi",
-        "sub": [
-            "Tierras Encantadas"
-        ],
-        "que": "",
-        "resumen": "Páramo de Esnirma está en el Archipiélago Fragmentado, en las Tierras Encantadas.",
-        "region": "Archipiélago Fragmentado",
-        "bandera": ""
-    },
-    {
-        "titulo": "Reino de Ópalis",
-        "url": "/web/wiki/mapamundi/tierras_encantadas/reino_de_opalis.html",
-        "carpeta": "Mapamundi/Tierras Encantadas",
-        "etiquetas": [
-            "Mapamundi",
-            "Tierras Encantadas"
-        ],
-        "grupo": "Mapamundi",
-        "sub": [
-            "Tierras Encantadas"
-        ],
-        "que": "",
-        "resumen": "Reino de Ópalis está en las Tierras Encantadas.",
-        "region": "Tierras Encantadas",
-        "bandera": ""
-    },
-    {
-        "titulo": "Ruinas de Nereth",
-        "url": "/web/wiki/mapamundi/tierras_encantadas/ruinas_de_nereth.html",
-        "carpeta": "Mapamundi/Tierras Encantadas",
-        "etiquetas": [
-            "Mapamundi",
-            "Tierras Encantadas"
-        ],
-        "grupo": "Mapamundi",
-        "sub": [
-            "Tierras Encantadas"
-        ],
-        "que": "",
-        "resumen": "Ruinas de Nereth está en las Tierras Encantadas.",
-        "region": "Tierras Encantadas",
-        "bandera": ""
-    },
-    {
-        "titulo": "Ruinas de Thalvyr",
-        "url": "/web/wiki/mapamundi/tierras_encantadas/archipielago_fragmentado/ruinas_de_thalvyr.html",
-        "carpeta": "Mapamundi/Tierras Encantadas/Archipiélago Fragmentado",
-        "etiquetas": [
-            "Mapamundi",
-            "Tierras Encantadas"
-        ],
-        "grupo": "Mapamundi",
-        "sub": [
-            "Tierras Encantadas"
-        ],
-        "que": "",
-        "resumen": "Ruinas de Thalvyr está en el Archipiélago Fragmentado, en las Tierras Encantadas.",
-        "region": "Archipiélago Fragmentado",
-        "bandera": ""
-    },
-    {
-        "titulo": "Santo Camino de Kada",
-        "url": "/web/wiki/mapamundi/tierras_encantadas/santo_camino_de_kada.html",
-        "carpeta": "Mapamundi/Tierras Encantadas",
-        "etiquetas": [
-            "Mapamundi",
-            "Tierras Encantadas"
-        ],
-        "grupo": "Mapamundi",
-        "sub": [
-            "Tierras Encantadas"
-        ],
-        "que": "",
-        "resumen": "Santo Camino de Kada está en las Tierras Encantadas.",
-        "region": "Tierras Encantadas",
-        "bandera": ""
-    },
-    {
-        "titulo": "Techo de Az'Nu",
-        "url": "/web/wiki/mapamundi/tierras_encantadas/archipielago_fragmentado/techo_de_az_nu.html",
-        "carpeta": "Mapamundi/Tierras Encantadas/Archipiélago Fragmentado",
-        "etiquetas": [
-            "Mapamundi",
-            "Tierras Encantadas"
-        ],
-        "grupo": "Mapamundi",
-        "sub": [
-            "Tierras Encantadas"
-        ],
-        "que": "",
-        "resumen": "Techo de Az'Nu está en el Archipiélago Fragmentado, en las Tierras Encantadas.",
-        "region": "Archipiélago Fragmentado",
-        "bandera": ""
-    },
-    {
-        "titulo": "Tierras Encantadas",
-        "url": "/web/wiki/mapamundi/tierras_encantadas/tierras_encantadas.html",
-        "carpeta": "Mapamundi/Tierras Encantadas",
-        "etiquetas": [
-            "Mapamundi",
-            "Tierras Encantadas"
-        ],
-        "grupo": "Mapamundi",
-        "sub": [
-            "Tierras Encantadas"
-        ],
-        "que": "",
-        "resumen": "Las Tierras Encantadas son la zona norte del mundo, al lado de Partaria.",
-        "region": "",
-        "bandera": ""
+        "bandera": "",
+        "miniatura": ""
     },
     {
         "titulo": "Ac'atapec",
@@ -1442,7 +1148,8 @@
         "que": "",
         "resumen": "Ac'atapec está en el Archipielago de las Costras.",
         "region": "Archipielago de las Costras",
-        "bandera": ""
+        "bandera": "",
+        "miniatura": ""
     },
     {
         "titulo": "Ahíu",
@@ -1459,7 +1166,8 @@
         "que": "",
         "resumen": "Ahíu está en los Faros del Mar Ciego.",
         "region": "Faros del Mar Ciego",
-        "bandera": ""
+        "bandera": "",
+        "miniatura": ""
     },
     {
         "titulo": "Amequeleke",
@@ -1476,7 +1184,8 @@
         "que": "",
         "resumen": "Amequeleke está en el Archipielago de las Costras.",
         "region": "Archipielago de las Costras",
-        "bandera": ""
+        "bandera": "",
+        "miniatura": ""
     },
     {
         "titulo": "Archipielago de las Costras",
@@ -1493,7 +1202,8 @@
         "que": "",
         "resumen": "Archipielago de las Costras es una región del mapamundi.",
         "region": "",
-        "bandera": ""
+        "bandera": "",
+        "miniatura": "/imagenes/wiki/situacion/peque/archipielago_de_las_costras.webp"
     },
     {
         "titulo": "Archipiélago de Lunas",
@@ -1510,7 +1220,26 @@
         "que": "",
         "resumen": "Archipiélago de Lunas es una región del mapamundi.",
         "region": "",
-        "bandera": ""
+        "bandera": "",
+        "miniatura": "/imagenes/wiki/situacion/peque/archipielago_de_lunas.webp"
+    },
+    {
+        "titulo": "Archipiélago Fragmentado",
+        "url": "/web/wiki/mapamundi/archipielagos/tierras_encantadas/archipielago_fragmentado/archipielago_fragmentado.html",
+        "carpeta": "Mapamundi/Archipiélagos/Tierras Encantadas/Archipiélago Fragmentado",
+        "etiquetas": [
+            "Mapamundi",
+            "Archipiélagos"
+        ],
+        "grupo": "Mapamundi",
+        "sub": [
+            "Archipiélagos"
+        ],
+        "que": "",
+        "resumen": "El Archipiélago Fragmentado es una región de las Tierras Encantadas.",
+        "region": "Tierras Encantadas",
+        "bandera": "",
+        "miniatura": "/imagenes/wiki/situacion/peque/archipielago_fragmentado.webp"
     },
     {
         "titulo": "Aruta",
@@ -1527,7 +1256,8 @@
         "que": "",
         "resumen": "Aruta está en los Faros del Mar Ciego.",
         "region": "Faros del Mar Ciego",
-        "bandera": ""
+        "bandera": "",
+        "miniatura": ""
     },
     {
         "titulo": "Baronía de Ronco",
@@ -1544,7 +1274,8 @@
         "que": "",
         "resumen": "Baronía de Ronco está en el Archipiélago de Lunas.",
         "region": "Archipiélago de Lunas",
-        "bandera": "/imagenes/wiki/baronia_ronco.webp"
+        "bandera": "/imagenes/wiki/baronia_ronco.webp",
+        "miniatura": ""
     },
     {
         "titulo": "Corona de Mogla",
@@ -1561,7 +1292,26 @@
         "que": "",
         "resumen": "Corona de Mogla está en el Archipiélago de Lunas.",
         "region": "Archipiélago de Lunas",
-        "bandera": "/imagenes/wiki/corona_mogla.webp"
+        "bandera": "/imagenes/wiki/corona_mogla.webp",
+        "miniatura": ""
+    },
+    {
+        "titulo": "Costa de Vlasquie",
+        "url": "/web/wiki/mapamundi/archipielagos/tierras_encantadas/archipielago_fragmentado/costa_de_vlasquie.html",
+        "carpeta": "Mapamundi/Archipiélagos/Tierras Encantadas/Archipiélago Fragmentado",
+        "etiquetas": [
+            "Mapamundi",
+            "Archipiélagos"
+        ],
+        "grupo": "Mapamundi",
+        "sub": [
+            "Archipiélagos"
+        ],
+        "que": "",
+        "resumen": "Costa de Vlasquie está en el Archipiélago Fragmentado, en las Tierras Encantadas.",
+        "region": "Archipiélago Fragmentado",
+        "bandera": "",
+        "miniatura": ""
     },
     {
         "titulo": "Cuna de Quimeras",
@@ -1578,7 +1328,26 @@
         "que": "",
         "resumen": "Cuna de Quimeras es una isla grande e independiente.",
         "region": "",
-        "bandera": ""
+        "bandera": "",
+        "miniatura": ""
+    },
+    {
+        "titulo": "Dominio de Lyca",
+        "url": "/web/wiki/mapamundi/archipielagos/tierras_encantadas/archipielago_fragmentado/dominio_de_lyca.html",
+        "carpeta": "Mapamundi/Archipiélagos/Tierras Encantadas/Archipiélago Fragmentado",
+        "etiquetas": [
+            "Mapamundi",
+            "Archipiélagos"
+        ],
+        "grupo": "Mapamundi",
+        "sub": [
+            "Archipiélagos"
+        ],
+        "que": "",
+        "resumen": "Dominio de Lyca está en el Archipiélago Fragmentado, en las Tierras Encantadas.",
+        "region": "Archipiélago Fragmentado",
+        "bandera": "",
+        "miniatura": ""
     },
     {
         "titulo": "Faros del Mar Ciego",
@@ -1595,7 +1364,44 @@
         "que": "",
         "resumen": "Faros del Mar Ciego es una región del mapamundi.",
         "region": "",
-        "bandera": ""
+        "bandera": "",
+        "miniatura": "/imagenes/wiki/situacion/peque/faros_del_mar_ciego.webp"
+    },
+    {
+        "titulo": "Forja de Aureb",
+        "url": "/web/wiki/mapamundi/archipielagos/tierras_encantadas/archipielago_fragmentado/forja_de_aureb.html",
+        "carpeta": "Mapamundi/Archipiélagos/Tierras Encantadas/Archipiélago Fragmentado",
+        "etiquetas": [
+            "Mapamundi",
+            "Archipiélagos"
+        ],
+        "grupo": "Mapamundi",
+        "sub": [
+            "Archipiélagos"
+        ],
+        "que": "",
+        "resumen": "Forja de Aureb está en el Archipiélago Fragmentado, en las Tierras Encantadas.",
+        "region": "Archipiélago Fragmentado",
+        "bandera": "",
+        "miniatura": ""
+    },
+    {
+        "titulo": "Franja de Turia",
+        "url": "/web/wiki/mapamundi/archipielagos/tierras_encantadas/franja_de_turia.html",
+        "carpeta": "Mapamundi/Archipiélagos/Tierras Encantadas",
+        "etiquetas": [
+            "Mapamundi",
+            "Archipiélagos"
+        ],
+        "grupo": "Mapamundi",
+        "sub": [
+            "Archipiélagos"
+        ],
+        "que": "",
+        "resumen": "Franja de Turia está en las Tierras Encantadas.",
+        "region": "Tierras Encantadas",
+        "bandera": "",
+        "miniatura": ""
     },
     {
         "titulo": "Haluka",
@@ -1612,7 +1418,8 @@
         "que": "",
         "resumen": "Haluka está en los Faros del Mar Ciego.",
         "region": "Faros del Mar Ciego",
-        "bandera": ""
+        "bandera": "",
+        "miniatura": ""
     },
     {
         "titulo": "Hokupuko",
@@ -1629,7 +1436,80 @@
         "que": "",
         "resumen": "Hokupuko está en los Faros del Mar Ciego.",
         "region": "Faros del Mar Ciego",
-        "bandera": ""
+        "bandera": "",
+        "miniatura": ""
+    },
+    {
+        "titulo": "Horda de Uspán",
+        "url": "/web/wiki/mapamundi/archipielagos/tierras_encantadas/horda_de_uspan.html",
+        "carpeta": "Mapamundi/Archipiélagos/Tierras Encantadas",
+        "etiquetas": [
+            "Mapamundi",
+            "Archipiélagos"
+        ],
+        "grupo": "Mapamundi",
+        "sub": [
+            "Archipiélagos"
+        ],
+        "que": "",
+        "resumen": "Horda de Uspán está en las Tierras Encantadas.",
+        "region": "Tierras Encantadas",
+        "bandera": "",
+        "miniatura": ""
+    },
+    {
+        "titulo": "Horda Quebrada",
+        "url": "/web/wiki/mapamundi/archipielagos/tierras_encantadas/archipielago_fragmentado/horda_quebrada.html",
+        "carpeta": "Mapamundi/Archipiélagos/Tierras Encantadas/Archipiélago Fragmentado",
+        "etiquetas": [
+            "Mapamundi",
+            "Archipiélagos"
+        ],
+        "grupo": "Mapamundi",
+        "sub": [
+            "Archipiélagos"
+        ],
+        "que": "",
+        "resumen": "Horda Quebrada está en el Archipiélago Fragmentado, en las Tierras Encantadas.",
+        "region": "Archipiélago Fragmentado",
+        "bandera": "",
+        "miniatura": ""
+    },
+    {
+        "titulo": "Imperio de Lezeris",
+        "url": "/web/wiki/mapamundi/archipielagos/tierras_encantadas/imperio_de_lezeris.html",
+        "carpeta": "Mapamundi/Archipiélagos/Tierras Encantadas",
+        "etiquetas": [
+            "Mapamundi",
+            "Archipiélagos"
+        ],
+        "grupo": "Mapamundi",
+        "sub": [
+            "Archipiélagos"
+        ],
+        "que": "",
+        "resumen": "Imperio de Lezeris está en las Tierras Encantadas.",
+        "region": "Tierras Encantadas",
+        "bandera": "",
+        "miniatura": ""
+    },
+    {
+        "titulo": "Infierno Frondoso",
+        "url": "/web/wiki/mapamundi/archipielagos/tierras_encantadas/infierno_frondoso.html",
+        "carpeta": "Mapamundi/Archipiélagos/Tierras Encantadas",
+        "etiquetas": [
+            "Mapamundi",
+            "Archipiélagos"
+        ],
+        "grupo": "Mapamundi",
+        "sub": [
+            "Archipiélagos"
+        ],
+        "que": "",
+        "resumen": "Infierno Frondoso está en las Tierras Encantadas.",
+        "region": "Tierras Encantadas",
+        "bandera": "",
+        "miniatura": ""
     },
     {
         "titulo": "Itzalcál",
@@ -1646,7 +1526,8 @@
         "que": "",
         "resumen": "Itzalcál está en el Archipielago de las Costras.",
         "region": "Archipielago de las Costras",
-        "bandera": ""
+        "bandera": "",
+        "miniatura": ""
     },
     {
         "titulo": "Kaelova",
@@ -1663,7 +1544,8 @@
         "que": "",
         "resumen": "Kaelova está en los Faros del Mar Ciego.",
         "region": "Faros del Mar Ciego",
-        "bandera": ""
+        "bandera": "",
+        "miniatura": ""
     },
     {
         "titulo": "Kukulna",
@@ -1680,7 +1562,26 @@
         "que": "",
         "resumen": "Kukulna está en el Archipielago de las Costras.",
         "region": "Archipielago de las Costras",
-        "bandera": ""
+        "bandera": "",
+        "miniatura": ""
+    },
+    {
+        "titulo": "Liga de Golota",
+        "url": "/web/wiki/mapamundi/archipielagos/tierras_encantadas/liga_de_golota.html",
+        "carpeta": "Mapamundi/Archipiélagos/Tierras Encantadas",
+        "etiquetas": [
+            "Mapamundi",
+            "Archipiélagos"
+        ],
+        "grupo": "Mapamundi",
+        "sub": [
+            "Archipiélagos"
+        ],
+        "que": "",
+        "resumen": "Liga de Golota está en las Tierras Encantadas.",
+        "region": "Tierras Encantadas",
+        "bandera": "",
+        "miniatura": ""
     },
     {
         "titulo": "Marquesado de Al-Darís",
@@ -1697,7 +1598,26 @@
         "que": "",
         "resumen": "Marquesado de Al-Darís está en el Archipiélago de Lunas.",
         "region": "Archipiélago de Lunas",
-        "bandera": "/imagenes/wiki/marquesado_aldaris.webp"
+        "bandera": "/imagenes/wiki/marquesado_aldaris.webp",
+        "miniatura": ""
+    },
+    {
+        "titulo": "Morada de Eeli",
+        "url": "/web/wiki/mapamundi/archipielagos/tierras_encantadas/archipielago_fragmentado/morada_de_eeli.html",
+        "carpeta": "Mapamundi/Archipiélagos/Tierras Encantadas/Archipiélago Fragmentado",
+        "etiquetas": [
+            "Mapamundi",
+            "Archipiélagos"
+        ],
+        "grupo": "Mapamundi",
+        "sub": [
+            "Archipiélagos"
+        ],
+        "que": "",
+        "resumen": "Morada de Eeli está en el Archipiélago Fragmentado, en las Tierras Encantadas.",
+        "region": "Archipiélago Fragmentado",
+        "bandera": "",
+        "miniatura": ""
     },
     {
         "titulo": "Mulz'aka",
@@ -1714,7 +1634,8 @@
         "que": "",
         "resumen": "Mulz'aka está en el Archipielago de las Costras.",
         "region": "Archipielago de las Costras",
-        "bandera": ""
+        "bandera": "",
+        "miniatura": ""
     },
     {
         "titulo": "Nahuatzal",
@@ -1731,7 +1652,8 @@
         "que": "",
         "resumen": "Nahuatzal está en el Archipielago de las Costras.",
         "region": "Archipielago de las Costras",
-        "bandera": ""
+        "bandera": "",
+        "miniatura": ""
     },
     {
         "titulo": "Nalchalcoatl",
@@ -1748,7 +1670,8 @@
         "que": "",
         "resumen": "Nalchalcoatl está en el Archipielago de las Costras.",
         "region": "Archipielago de las Costras",
-        "bandera": ""
+        "bandera": "",
+        "miniatura": ""
     },
     {
         "titulo": "Nalu'elé",
@@ -1765,7 +1688,8 @@
         "que": "",
         "resumen": "Nalu'elé está en los Faros del Mar Ciego.",
         "region": "Faros del Mar Ciego",
-        "bandera": ""
+        "bandera": "",
+        "miniatura": ""
     },
     {
         "titulo": "Nara-Mana",
@@ -1782,7 +1706,8 @@
         "que": "",
         "resumen": "Nara-Mana está en los Faros del Mar Ciego.",
         "region": "Faros del Mar Ciego",
-        "bandera": ""
+        "bandera": "",
+        "miniatura": ""
     },
     {
         "titulo": "Níctebrakka",
@@ -1799,7 +1724,62 @@
         "que": "",
         "resumen": "Níctebrakka está en el Archipielago de las Costras.",
         "region": "Archipielago de las Costras",
-        "bandera": ""
+        "bandera": "",
+        "miniatura": ""
+    },
+    {
+        "titulo": "Ojo de Aglas",
+        "url": "/web/wiki/mapamundi/archipielagos/tierras_encantadas/ojo_de_aglas.html",
+        "carpeta": "Mapamundi/Archipiélagos/Tierras Encantadas",
+        "etiquetas": [
+            "Mapamundi",
+            "Archipiélagos"
+        ],
+        "grupo": "Mapamundi",
+        "sub": [
+            "Archipiélagos"
+        ],
+        "que": "",
+        "resumen": "Ojo de Aglas está en las Tierras Encantadas.",
+        "region": "Tierras Encantadas",
+        "bandera": "",
+        "miniatura": ""
+    },
+    {
+        "titulo": "Palacio de Jan",
+        "url": "/web/wiki/mapamundi/archipielagos/tierras_encantadas/palacio_de_jan.html",
+        "carpeta": "Mapamundi/Archipiélagos/Tierras Encantadas",
+        "etiquetas": [
+            "Mapamundi",
+            "Archipiélagos"
+        ],
+        "grupo": "Mapamundi",
+        "sub": [
+            "Archipiélagos"
+        ],
+        "que": "",
+        "resumen": "Palacio de Jan está en las Tierras Encantadas.",
+        "region": "Tierras Encantadas",
+        "bandera": "",
+        "miniatura": ""
+    },
+    {
+        "titulo": "Paraje de Cereno",
+        "url": "/web/wiki/mapamundi/archipielagos/tierras_encantadas/archipielago_fragmentado/paraje_de_cereno.html",
+        "carpeta": "Mapamundi/Archipiélagos/Tierras Encantadas/Archipiélago Fragmentado",
+        "etiquetas": [
+            "Mapamundi",
+            "Archipiélagos"
+        ],
+        "grupo": "Mapamundi",
+        "sub": [
+            "Archipiélagos"
+        ],
+        "que": "",
+        "resumen": "Paraje de Cereno está en el Archipiélago Fragmentado, en las Tierras Encantadas.",
+        "region": "Archipiélago Fragmentado",
+        "bandera": "",
+        "miniatura": ""
     },
     {
         "titulo": "Popalola",
@@ -1816,7 +1796,26 @@
         "que": "",
         "resumen": "Popalola está en los Faros del Mar Ciego.",
         "region": "Faros del Mar Ciego",
-        "bandera": ""
+        "bandera": "",
+        "miniatura": ""
+    },
+    {
+        "titulo": "Páramo de Esnirma",
+        "url": "/web/wiki/mapamundi/archipielagos/tierras_encantadas/archipielago_fragmentado/paramo_de_esnirma.html",
+        "carpeta": "Mapamundi/Archipiélagos/Tierras Encantadas/Archipiélago Fragmentado",
+        "etiquetas": [
+            "Mapamundi",
+            "Archipiélagos"
+        ],
+        "grupo": "Mapamundi",
+        "sub": [
+            "Archipiélagos"
+        ],
+        "que": "",
+        "resumen": "Páramo de Esnirma está en el Archipiélago Fragmentado, en las Tierras Encantadas.",
+        "region": "Archipiélago Fragmentado",
+        "bandera": "",
+        "miniatura": ""
     },
     {
         "titulo": "Reino de Yor",
@@ -1833,7 +1832,80 @@
         "que": "",
         "resumen": "Reino de Yor está en el Archipiélago de Lunas.",
         "region": "Archipiélago de Lunas",
-        "bandera": "/imagenes/wiki/reino_yor.webp"
+        "bandera": "/imagenes/wiki/reino_yor.webp",
+        "miniatura": ""
+    },
+    {
+        "titulo": "Reino de Ópalis",
+        "url": "/web/wiki/mapamundi/archipielagos/tierras_encantadas/reino_de_opalis.html",
+        "carpeta": "Mapamundi/Archipiélagos/Tierras Encantadas",
+        "etiquetas": [
+            "Mapamundi",
+            "Archipiélagos"
+        ],
+        "grupo": "Mapamundi",
+        "sub": [
+            "Archipiélagos"
+        ],
+        "que": "",
+        "resumen": "Reino de Ópalis está en las Tierras Encantadas.",
+        "region": "Tierras Encantadas",
+        "bandera": "",
+        "miniatura": ""
+    },
+    {
+        "titulo": "Ruinas de Nereth",
+        "url": "/web/wiki/mapamundi/archipielagos/tierras_encantadas/ruinas_de_nereth.html",
+        "carpeta": "Mapamundi/Archipiélagos/Tierras Encantadas",
+        "etiquetas": [
+            "Mapamundi",
+            "Archipiélagos"
+        ],
+        "grupo": "Mapamundi",
+        "sub": [
+            "Archipiélagos"
+        ],
+        "que": "",
+        "resumen": "Ruinas de Nereth está en las Tierras Encantadas.",
+        "region": "Tierras Encantadas",
+        "bandera": "",
+        "miniatura": ""
+    },
+    {
+        "titulo": "Ruinas de Thalvyr",
+        "url": "/web/wiki/mapamundi/archipielagos/tierras_encantadas/archipielago_fragmentado/ruinas_de_thalvyr.html",
+        "carpeta": "Mapamundi/Archipiélagos/Tierras Encantadas/Archipiélago Fragmentado",
+        "etiquetas": [
+            "Mapamundi",
+            "Archipiélagos"
+        ],
+        "grupo": "Mapamundi",
+        "sub": [
+            "Archipiélagos"
+        ],
+        "que": "",
+        "resumen": "Ruinas de Thalvyr está en el Archipiélago Fragmentado, en las Tierras Encantadas.",
+        "region": "Archipiélago Fragmentado",
+        "bandera": "",
+        "miniatura": ""
+    },
+    {
+        "titulo": "Santo Camino de Kada",
+        "url": "/web/wiki/mapamundi/archipielagos/tierras_encantadas/santo_camino_de_kada.html",
+        "carpeta": "Mapamundi/Archipiélagos/Tierras Encantadas",
+        "etiquetas": [
+            "Mapamundi",
+            "Archipiélagos"
+        ],
+        "grupo": "Mapamundi",
+        "sub": [
+            "Archipiélagos"
+        ],
+        "que": "",
+        "resumen": "Santo Camino de Kada está en las Tierras Encantadas.",
+        "region": "Tierras Encantadas",
+        "bandera": "",
+        "miniatura": ""
     },
     {
         "titulo": "Talaiva",
@@ -1850,7 +1922,44 @@
         "que": "",
         "resumen": "Talaiva está en los Faros del Mar Ciego.",
         "region": "Faros del Mar Ciego",
-        "bandera": ""
+        "bandera": "",
+        "miniatura": ""
+    },
+    {
+        "titulo": "Techo de Az'Nu",
+        "url": "/web/wiki/mapamundi/archipielagos/tierras_encantadas/archipielago_fragmentado/techo_de_az_nu.html",
+        "carpeta": "Mapamundi/Archipiélagos/Tierras Encantadas/Archipiélago Fragmentado",
+        "etiquetas": [
+            "Mapamundi",
+            "Archipiélagos"
+        ],
+        "grupo": "Mapamundi",
+        "sub": [
+            "Archipiélagos"
+        ],
+        "que": "",
+        "resumen": "Techo de Az'Nu está en el Archipiélago Fragmentado, en las Tierras Encantadas.",
+        "region": "Archipiélago Fragmentado",
+        "bandera": "",
+        "miniatura": ""
+    },
+    {
+        "titulo": "Tierras Encantadas",
+        "url": "/web/wiki/mapamundi/archipielagos/tierras_encantadas/tierras_encantadas.html",
+        "carpeta": "Mapamundi/Archipiélagos/Tierras Encantadas",
+        "etiquetas": [
+            "Mapamundi",
+            "Archipiélagos"
+        ],
+        "grupo": "Mapamundi",
+        "sub": [
+            "Archipiélagos"
+        ],
+        "que": "",
+        "resumen": "Las Tierras Encantadas son la zona norte del mundo, al lado de Partaria.",
+        "region": "",
+        "bandera": "",
+        "miniatura": "/imagenes/wiki/situacion/peque/tierras_encantadas.webp"
     },
     {
         "titulo": "Tzeibalba",
@@ -1867,7 +1976,8 @@
         "que": "",
         "resumen": "Tzeibalba está en el Archipielago de las Costras.",
         "region": "Archipielago de las Costras",
-        "bandera": ""
+        "bandera": "",
+        "miniatura": ""
     },
     {
         "titulo": "Tzintara",
@@ -1884,7 +1994,8 @@
         "que": "",
         "resumen": "Tzintara está en el Archipielago de las Costras.",
         "region": "Archipielago de las Costras",
-        "bandera": ""
+        "bandera": "",
+        "miniatura": ""
     },
     {
         "titulo": "Tzompoc",
@@ -1901,7 +2012,8 @@
         "que": "",
         "resumen": "Tzompoc está en el Archipielago de las Costras.",
         "region": "Archipielago de las Costras",
-        "bandera": ""
+        "bandera": "",
+        "miniatura": ""
     },
     {
         "titulo": "Uluka",
@@ -1918,7 +2030,8 @@
         "que": "",
         "resumen": "Uluka está en los Faros del Mar Ciego.",
         "region": "Faros del Mar Ciego",
-        "bandera": ""
+        "bandera": "",
+        "miniatura": ""
     },
     {
         "titulo": "Vanu Reki",
@@ -1935,7 +2048,8 @@
         "que": "",
         "resumen": "Vanu Reki está en los Faros del Mar Ciego.",
         "region": "Faros del Mar Ciego",
-        "bandera": ""
+        "bandera": "",
+        "miniatura": ""
     },
     {
         "titulo": "Varamo'a",
@@ -1952,7 +2066,8 @@
         "que": "",
         "resumen": "Varamo'a está en los Faros del Mar Ciego.",
         "region": "Faros del Mar Ciego",
-        "bandera": ""
+        "bandera": "",
+        "miniatura": ""
     },
     {
         "titulo": "Yaxch'umekte",
@@ -1969,7 +2084,8 @@
         "que": "",
         "resumen": "Yaxch'umekte está en el Archipielago de las Costras.",
         "region": "Archipielago de las Costras",
-        "bandera": ""
+        "bandera": "",
+        "miniatura": ""
     },
     {
         "titulo": "Mapamundi de Cralëa",
@@ -2344,6 +2460,7 @@
         "que": "La chuleta del formato",
         "resumen": "Esta página no cuenta nada del mundo: está para ver cómo queda cada cosa y qué se puede escribir. Bórrala cuando ya no haga falta.",
         "region": "",
-        "bandera": ""
+        "bandera": "",
+        "miniatura": ""
     }
 ]

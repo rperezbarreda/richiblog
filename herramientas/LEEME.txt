@@ -1329,7 +1329,7 @@
 
   web/wiki/index_wiki.html —la Wiki Cralëa— no reparte las páginas por
   las carpetas de la bóveda, sino por unos apartados grandes —el
-  MAPAMUNDI (Azarasia, Partaria, Tierras Encantadas, Archipiélagos),
+  MAPAMUNDI (Azarasia, Partaria, Archipiélagos),
   personajes, religión, cosas, mapas— y, dentro de cada uno, por las
   etiquetas que le queden a cada página.
 
@@ -1357,10 +1357,20 @@
       Una parte sin página propia (Archipiélagos) se dibuja con todas sus
       páginas resaltadas, y su tarjeta lleva a su apartado de la lista.
       Mientras se busca algo, esta rejilla se esconde.
-    - EL ÍNDICE: en el mapamundi, cada país debajo de su región y en una
-      lista de nombres en columnas, no en tarjetas (el resumen de estas
-      páginas era «X está en Y», que con la región encima ya no dice
-      nada). Los demás apartados (historia, lo demás) siguen con tarjeta.
+    - UN BOTÓN POR SECCIÓN (Mapamundi, mapas, historia, lo demás), justo
+      debajo del buscador. Cada uno abre su VENTANA (la de siempre,
+      ventana-modal.js) con lo que tiene dentro; ya no sale todo seguido
+      en la portada. Mientras se busca algo, los botones se quitan y sale
+      lo encontrado en la propia portada, por secciones.
+    - EN LA VENTANA DEL MAPAMUNDI, por partes del mundo y regiones, cada
+      país en una rejilla: su bandera grande arriba y el nombre debajo
+      (una región, sin bandera, lleva su mapa de situación en pequeño; un
+      país sin bandera, el hueco vacío). Una región dentro de otra
+      (Archipiélago Fragmentado, en Tierras Encantadas) sale justo debajo
+      de la suya, un poco metida. Los demás apartados (historia, lo demás)
+      siguen con tarjeta.
+    - Llegar a la portada con #mundo-<parte> (las migas de una entrada, la
+      tarjeta de Archipiélagos) abre la ventana del mapamundi en esa parte.
     - A la derecha, como antes, los mapas y la línea de tiempo.
 
   Y CADA SUBAPARTADO TAMBIÉN (Azarasia, Partaria… dentro de Mapamundi,
@@ -1403,7 +1413,7 @@
   que caen en él:
 
       [ { "nombre": "Mapamundi", "etiquetas": ["mapamundi"],
-          "orden": ["Azarasia", "Partaria", "Tierras Encantadas", "Archipiélagos"] },
+          "orden": ["Azarasia", "Partaria", "Archipiélagos"] },
         { "nombre": "países",
           "etiquetas": ["pais", "país", "reino", "imperio"] }, … ]
 
@@ -1465,11 +1475,13 @@
           Islas de Labros/               las Islas de Labros, la Isla de
           Isla de Arbenia/               Arbenia, Zaustilla y Telvetia
       wiki/Mapamundi/Partaria/           el continente y sus países
-      wiki/Mapamundi/Tierras Encantadas/ la región y sus países, y
-          Archipiélago Fragmentado/      el Archipiélago Fragmentado
       wiki/Mapamundi/Archipiélagos/      el Archipiélago de Lunas, el de
           …                              las Costras, los Faros del Mar
-                                         Ciego y la Cuna de Quimeras
+                                         Ciego, la Cuna de Quimeras y
+          Tierras Encantadas/            las Tierras Encantadas (desde el
+              Archipiélago Fragmentado/  15-10-2026; antes eran una parte
+                                         del mundo aparte), con el
+                                         Archipiélago Fragmentado dentro
 
   EN LA WEB, LAS MISMAS CARPETAS. web/wiki/ repite la estructura de
   wiki/, con los nombres pasados a dirección (sin tildes ni espacios):
@@ -1525,7 +1537,7 @@
 
   Cada una lleva las etiquetas «Mapamundi» y su parte del mundo, que es
   lo que la pone en el apartado MAPAMUNDI de la portada, repartida en
-  Azarasia, Partaria, Tierras Encantadas y Archipiélagos (en ese orden:
+  Azarasia, Partaria y Archipiélagos (en ese orden:
   el "orden" de ese apartado en datos/wiki/mundo-categorias.json). Las
   regiones tienen además la lista de sus países.
 

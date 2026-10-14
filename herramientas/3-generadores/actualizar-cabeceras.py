@@ -356,6 +356,12 @@ def hojas_de(ruta):
             # Solo el buscador: los botones de etiquetas se quitaron (eran
             # treinta y no ayudaban a encontrar nada que no encuentre él).
             hojas += ["/estilos/componentes/buscador.css"]
+            # Y la ventana: cada sección de la portada (el mapamundi, la
+            # historia…) se abre en ella.
+            hojas += [
+                "/estilos/componentes/ventana-modal.css",
+                "/estilos/componentes/ventana-modal.responsive.css",
+            ]
         if es_mundo_mapa:
             hojas += ["/estilos/paginas/mundo-mapa.css"]
         if es_mundo_linea:
@@ -671,7 +677,8 @@ def scripts_de(ruta):
             js.append("/scripts/paginas/mundo-mapa.js")
         else:
             if es_mundo_indice:
-                js += ["/scripts/componentes/buscador.js"]
+                js += ["/scripts/componentes/buscador.js",
+                       "/scripts/componentes/ventana-modal.js"]
             elif not camino.endswith("/linea_de_tiempo"):
                 # La lupa, ANTES que mundo.js: es él quien la usa para
                 # ampliar las imágenes, y mira si está nada más cargar.

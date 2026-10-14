@@ -46,10 +46,45 @@ function pintarElMundo(caja, fichas) {
         }
         porGrupo.get(grupo).push(ficha);
     });
+    const botones = document.createElement("ul");
+    botones.className = "mundo-secciones";
+    botones.setAttribute("data-mundo-secciones", "");
     orden.forEach((grupo) => {
-        caja.appendChild(bloqueDeGrupoMundo(grupo, porGrupo.get(grupo)));
+        const fichas = porGrupo.get(grupo);
+        const li = document.createElement("li");
+        const boton = document.createElement("button");
+        boton.type = "button";
+        boton.className = "mundo-seccion";
+        boton.setAttribute("aria-haspopup", "dialog");
+        const nombre = document.createElement("span");
+        nombre.className = "mundo-seccion-nombre";
+        nombre.textContent = grupo;
+        boton.appendChild(nombre);
+        const cuenta = document.createElement("span");
+        cuenta.className = "mundo-seccion-cuenta";
+        const n = new Set(fichas.map((f) => f.url)).size;
+        cuenta.textContent = grupo === "mapas"
+            ? (n === 1 ? "1 mapa" : n + " mapas")
+            : (n === 1 ? "1 página" : n + " páginas");
+        boton.appendChild(cuenta);
+        boton.addEventListener("click", () => abrirSeccionMundo(grupo, fichas, boton));
+        li.appendChild(boton);
+        botones.appendChild(li);
     });
+    caja.appendChild(botones);
+    MUNDO_SECCIONES.porGrupo = porGrupo;
+    MUNDO_SECCIONES.botones = botones;
+    const resultados = document.createElement("div");
+    resultados.className = "mundo-resultados";
+    resultados.setAttribute("data-mundo-resultados", "");
+    resultados.hidden = true;
+    orden.forEach((grupo) => {
+        resultados.appendChild(bloqueDeGrupoMundo(grupo, porGrupo.get(grupo)));
+    });
+    caja.appendChild(resultados);
     pintarLosMapasDelMundo(buenas);
+    abrirDesdeLaDireccionMundo();
+    window.addEventListener("hashchange", abrirDesdeLaDireccionMundo);
     document.dispatchEvent(new CustomEvent("filtros:actualizar"));
 }
 function bloqueDeGrupoMundo(grupo, fichas) {
@@ -146,14 +181,38 @@ function porRegionesMundo(parte, fichas) {
     if (directas.length) {
         caja.appendChild(listaDeFichasMundo(directas, true));
     }
-    [...regiones.keys()].sort((a, b) => a.localeCompare(b, "es")).forEach((llave) => {
+    const madreDe = (llave) => {
         const propia = fichas.find((f) => llano(f.titulo) === llave);
-        const hijas = fichas.filter((f) => llano(f.region) === llave);
+        const suya = propia ? llano(propia.region) : "";
+        return regiones.has(suya) ? suya : "";
+    };
+    const porNombre = (a, b) => a.localeCompare(b, "es");
+    const enOrden = [];
+    [...regiones.keys()].filter((k) => !madreDe(k)).sort(porNombre).forEach((llave) => {
+        enOrden.push(llave);
+        [...regiones.keys()].filter((k) => madreDe(k) === llave).sort(porNombre)
+            .forEach((hija) => enOrden.push(hija));
+    });
+    [...regiones.keys()].forEach((k) => {
+        if (!enOrden.includes(k)) {
+            enOrden.push(k);
+        }
+    });
+    enOrden.forEach((llave) => {
+        const propia = fichas.find((f) => llano(f.titulo) === llave);
+        const hijas = fichas.filter((f) => llano(f.region) === llave && !regiones.has(llano(f.titulo)));
+        const madre = madreDe(llave);
         const bloque = document.createElement("div");
-        bloque.className = "mundo-region";
+        bloque.className = madre ? "mundo-region es-dentro" : "mundo-region";
         const titulo = document.createElement("h4");
         titulo.className = "mundo-region-titulo";
         titulo.textContent = propia ? propia.titulo : regiones.get(llave);
+        if (madre) {
+            const dentro = document.createElement("span");
+            dentro.className = "mundo-region-dentro";
+            dentro.textContent = " · en " + regiones.get(madre);
+            titulo.appendChild(dentro);
+        }
         const cuenta = document.createElement("span");
         cuenta.className = "mundo-grupo-cuenta";
         cuenta.setAttribute("data-mundo-region-cuenta", "");
@@ -434,17 +493,24 @@ function itemDelMundo(ficha, corto) {
     const enlace = document.createElement("a");
     enlace.className = "mundo-item";
     enlace.href = rutaSeguraMundo(ficha.url);
-    const bandera = rutaSeguraMundo(ficha.bandera);
-    if (corto && bandera !== "#") {
-        const img = document.createElement("img");
-        img.className = "mundo-item-bandera";
-        img.src = bandera;
-        img.alt = "";
-        img.width = 36;
-        img.height = 24;
-        img.setAttribute("loading", "lazy");
-        img.setAttribute("decoding", "async");
-        enlace.appendChild(img);
+    if (corto) {
+        const bandera = rutaSeguraMundo(ficha.bandera || ficha.miniatura);
+        if (bandera !== "#") {
+            const img = document.createElement("img");
+            img.className = "mundo-item-bandera";
+            img.src = bandera;
+            img.alt = "";
+            img.width = 150;
+            img.height = 100;
+            img.setAttribute("loading", "lazy");
+            img.setAttribute("decoding", "async");
+            enlace.appendChild(img);
+        } else {
+            const hueco = document.createElement("span");
+            hueco.className = "mundo-item-bandera es-hueco";
+            hueco.setAttribute("aria-hidden", "true");
+            enlace.appendChild(hueco);
+        }
     }
     const titulo = document.createElement("strong");
     titulo.className = "mundo-item-titulo";
@@ -490,6 +556,15 @@ document.addEventListener("buscar:cambiado", () => {
     const regiones = document.querySelector("[data-mundo-regiones]");
     if (regiones && regiones.hasAttribute("data-mundo-cargado")) {
         regiones.hidden = !!window.buscador.texto;
+    }
+    const buscando = !!window.buscador.texto;
+    const resultados = document.querySelector("[data-mundo-resultados]");
+    const secciones = document.querySelector("[data-mundo-secciones]");
+    if (resultados) {
+        resultados.hidden = !buscando;
+    }
+    if (secciones) {
+        secciones.hidden = buscando;
     }
     repasarGruposMundo();
 });
@@ -646,6 +721,9 @@ async function pintarRegionesMundo() {
             suyas.className = "mundo-parte-hijas";
             hijas.forEach((hija) => {
                 const li = document.createElement("li");
+                if ((hija.dentro || "").toString().trim()) {
+                    li.className = "es-dentro";
+                }
                 li.appendChild(teselaDeRegionMundo(hija, "mundo-hija"));
                 suyas.appendChild(li);
             });
@@ -664,7 +742,11 @@ function teselaDeRegionMundo(cosa, clase) {
     const url = (cosa.url || "").toString().trim();
     enlace.href = url ? rutaSeguraMundo(url) : "#" + idDeSubMundo(nombre);
     if (!url) {
-        enlace.addEventListener("click", () => abrirHastaMundo(idDeSubMundo(nombre)));
+        enlace.addEventListener("click", () => {
+            if (decodeURIComponent(window.location.hash.slice(1)) === idDeSubMundo(nombre)) {
+                abrirDesdeLaDireccionMundo();
+            }
+        });
     }
     const imagen = rutaSeguraMundo(cosa.imagen);
     if (imagen !== "#") {
@@ -694,16 +776,6 @@ function teselaDeRegionMundo(cosa, clase) {
     enlace.appendChild(texto);
     return enlace;
 }
-function abrirHastaMundo(id) {
-    const destino = document.getElementById(id);
-    let paso = destino;
-    while (paso) {
-        if (paso.tagName === "DETAILS" && !paso.open) {
-            paso.open = true;
-        }
-        paso = paso.parentElement;
-    }
-}
 function prepararEmblemasMundo() {
     document.querySelectorAll("[data-mundo-emblemas]").forEach((caja) => {
         const cuales = [...caja.querySelectorAll("[data-mundo-emblema]")];
@@ -732,4 +804,80 @@ function prepararEmblemasMundo() {
         caja.classList.add("con-botones");
         enseñar(0);
     });
+}
+const MUNDO_SECCIONES = { porGrupo: null, botones: null };
+function abrirSeccionMundo(grupo, fichas, boton, irA) {
+    if (!window.ventanaModal) {
+        return;
+    }
+    window.ventanaModal.abrir({
+        titulo: grupo.toString().toLowerCase().replace(/\s+/g, "_") + ".lst",
+        clase: "modal-mundo",
+        devolverA: boton,
+        llenar: (cuerpo) => {
+            cuerpo.appendChild(contenidoDeSeccionMundo(grupo, fichas));
+            if (irA) {
+                const destino = cuerpo.querySelector("#" + irA);
+                if (destino) {
+                    requestAnimationFrame(() => destino.scrollIntoView({ block: "start" }));
+                    return destino;
+                }
+            }
+            return null;
+        },
+    });
+}
+function contenidoDeSeccionMundo(grupo, fichas) {
+    const caja = document.createElement("div");
+    caja.className = "mundo-seccion-contenido";
+    const sueltas = fichas.filter((f) => !etiquetasDeReparto(f).length);
+    if (sueltas.length) {
+        caja.appendChild(listaDeFichasMundo(sueltas));
+    }
+    const porEtiqueta = new Map();
+    fichas.forEach((ficha) => {
+        etiquetasDeReparto(ficha).forEach((e) => {
+            if (!porEtiqueta.has(e)) {
+                porEtiqueta.set(e, []);
+            }
+            porEtiqueta.get(e).push(ficha);
+        });
+    });
+    [...porEtiqueta.keys()].forEach((nombre) => {
+        const suyas = porEtiqueta.get(nombre);
+        const parte = document.createElement("div");
+        parte.className = "mundo-seccion-parte";
+        const titulo = document.createElement("h3");
+        titulo.className = "mundo-seccion-parte-titulo";
+        titulo.id = "ventana-" + idDeSubMundo(nombre);
+        titulo.tabIndex = -1;
+        titulo.textContent = nombre;
+        const cuenta = document.createElement("span");
+        cuenta.className = "mundo-grupo-cuenta";
+        const n = new Set(suyas.map((f) => f.url)).size;
+        cuenta.textContent = " " + n;
+        titulo.appendChild(cuenta);
+        parte.appendChild(titulo);
+        parte.appendChild(suyas.some((f) => (f.region || "").toString().trim())
+            ? porRegionesMundo(nombre, suyas)
+            : listaDeFichasMundo(suyas));
+        caja.appendChild(parte);
+    });
+    return caja;
+}
+function abrirDesdeLaDireccionMundo() {
+    const hash = decodeURIComponent((window.location.hash || "").slice(1));
+    if (!/^mundo-[a-z0-9-]+$/.test(hash) || !MUNDO_SECCIONES.porGrupo) {
+        return;
+    }
+    for (const [grupo, fichas] of MUNDO_SECCIONES.porGrupo) {
+        const tiene = fichas.some((f) => etiquetasDeReparto(f)
+            .some((e) => idDeSubMundo(e) === hash));
+        if (tiene) {
+            const boton = [...MUNDO_SECCIONES.botones.querySelectorAll(".mundo-seccion")]
+                .find((b) => b.querySelector(".mundo-seccion-nombre").textContent === grupo);
+            abrirSeccionMundo(grupo, fichas, boton || null, "ventana-" + hash);
+            return;
+        }
+    }
 }

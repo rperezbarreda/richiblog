@@ -1211,7 +1211,7 @@ def clasificar(etiquetas, categorias):
     return LO_DEMAS, [e for e, _ in suyas]
 
 
-def escribir_indice(paginas, mapas, probar, categorias=()):
+def escribir_indice(paginas, mapas, probar, categorias=(), peques=None):
     """La portada: el índice por apartados. Las fichas y los botones de
     etiqueta los pinta el navegador con datos/wiki/mundo.json, igual que el
     resto de listados del sitio."""
@@ -1238,6 +1238,9 @@ def escribir_indice(paginas, mapas, probar, categorias=()):
             "region": suya["titulo"] if suya else "",
             # Su bandera, si tiene: la portada la pone junto al nombre.
             "bandera": ficha.get("bandera_url") or "",
+            # Y si es una región (no tiene bandera), su mapa de situación en
+            # pequeño, que es lo que sale en su hueco de la rejilla.
+            "miniatura": (peques or {}).get(ficha["nombre"].strip().lower(), ""),
         })
     # Los mapas, todos juntos en su apartado y no en la carpeta en la que
     # estén guardados: en la portada se buscan como "los mapas", no como
@@ -1320,13 +1323,25 @@ def escribir_regiones(paginas, partes, peques, de_partes, probar):
         # Las regiones de esta parte: las páginas suyas que son «región» de
         # alguna otra, menos la propia parte (Azarasia es región de sus
         # países, pero es la tarjeta grande, no una de sus hijas).
+        # Una región dentro de otra (Archipiélago Fragmentado, dentro de
+        # Tierras Encantadas) va justo detrás de la suya, y marcada.
+        def madre(f):
+            suya = region_de.get(f["nombre"].strip().lower(), "")
+            return paginas[suya] if suya in cuantas and suya != llave and suya in paginas else None
+
+        def orden(f):
+            m = madre(f)
+            return ((m["titulo"] if m else f["titulo"]).lower(), 1 if m else 0, f["titulo"].lower())
+
         hijas = []
-        for f in sorted(suyas, key=lambda f: f["titulo"].lower()):
+        for f in sorted(suyas, key=orden):
             clave = f["nombre"].strip().lower()
             if clave == llave or clave not in cuantas:
                 continue
+            m = madre(f)
             hijas.append({"nombre": f["titulo"], "url": f["url"],
-                          "imagen": peques.get(clave, ""), "cuenta": cuantas[clave]})
+                          "imagen": peques.get(clave, ""), "cuenta": cuantas[clave],
+                          "dentro": m["titulo"] if m else ""})
         salida.append({
             "nombre": propia["titulo"] if propia else parte,
             # Sin página propia (Archipiélagos), la tarjeta lleva a su
@@ -1582,7 +1597,7 @@ def main():
     escritas = escribir_paginas(paginas, args.probar)
     escritos = escribir_mapas(mapas, args.probar)
     escritos += escribir_vistas(mapas, args.probar)
-    fichas = escribir_indice(paginas, mapas, args.probar, categorias)
+    fichas = escribir_indice(paginas, mapas, args.probar, categorias, peques)
     escribir_regiones(paginas, partes, peques, de_partes, args.probar)
     copiadas, pesadas, repetidas = copiar_imagenes(imagenes, usadas, args.probar)
     hechas, saltadas, enteras, gordas = preparar_capas(capas, args.probar)

@@ -63,6 +63,12 @@
         grid-template-columns: 1fr;
     }
 
+    /* Menos la rejilla de banderas: de una en una sería una lista
+       larguísima de banderas grandes. Dos por fila. */
+    .mundo-items.es-corta {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
     /* Y el botón de volver de abajo a lo ancho y centrado, como el resto
        de botones grandes en móvil: es más fácil de acertar con el dedo. */
     .mundo-volver-abajo {
@@ -117,11 +123,11 @@
         grid-template-columns: minmax(0, 1fr) minmax(0, 20rem);
         grid-template-areas:
             "cabecera vistas"
-            "regiones vistas"
-            "indice   vistas";
-        /* Si la columna de la derecha es más alta que la cabecera y las
-           regiones juntas, lo que sobra se lo queda la fila del índice y
-           no aparece un hueco entre las regiones y el índice. */
+            "indice   vistas"
+            "regiones vistas";
+        /* Si la columna de la derecha es más alta que lo de la izquierda,
+           lo que sobra se lo queda la última fila (las regiones) y no
+           aparece un hueco entre los botones y las regiones. */
         grid-template-rows: auto auto 1fr;
         column-gap: 26px;
     }

@@ -1,6 +1,6 @@
 [
     {
-        "_": "LAS CATEGORÍAS DE LA PORTADA DEL MUNDO. Primero el MAPAMUNDI: todas sus regiones y países llevan la etiqueta «Mapamundi» y la de su parte del mundo (Azarasia, Partaria, Tierras Encantadas o Archipiélagos), que es la que los reparte por dentro. Luego, los apartados de siempre. Cada página de la wiki cae en la PRIMERA de aquí cuyas etiquetas tenga, y dentro del apartado se reparte por las etiquetas que le queden. Lo que no caiga en ninguna va al final, en «lo demás». Cambia los nombres, el orden y las etiquetas a tu gusto: esto se lee tal cual al pasar generar-mundo.py, y él te dice al terminar qué etiquetas se han quedado fuera de todas. Un apartado puede llevar \"orden\" con el orden de sus subapartados, como el del mapamundi; si no, van por orden alfabético.",
+        "_": "LAS CATEGORÍAS DE LA PORTADA DEL MUNDO. Primero el MAPAMUNDI: todas sus regiones y países llevan la etiqueta «Mapamundi» y la de su parte del mundo (Azarasia, Partaria o Archipiélagos; Tierras Encantadas es una zona de Archipiélagos), que es la que los reparte por dentro. Luego, los apartados de siempre. Cada página de la wiki cae en la PRIMERA de aquí cuyas etiquetas tenga, y dentro del apartado se reparte por las etiquetas que le queden. Lo que no caiga en ninguna va al final, en «lo demás». Cambia los nombres, el orden y las etiquetas a tu gusto: esto se lee tal cual al pasar generar-mundo.py, y él te dice al terminar qué etiquetas se han quedado fuera de todas. Un apartado puede llevar \"orden\" con el orden de sus subapartados, como el del mapamundi; si no, van por orden alfabético.",
         "nombre": "Mapamundi",
         "etiquetas": [
             "mapamundi"
@@ -8,7 +8,6 @@
         "orden": [
             "Azarasia",
             "Partaria",
-            "Tierras Encantadas",
             "Archipiélagos"
         ]
     },

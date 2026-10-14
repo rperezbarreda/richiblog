@@ -59,9 +59,11 @@
     <script>window.adelantoDeFragmentos={};try{window.adelantoDeFragmentos["/fragmentos/barra-lateral.html"]=fetch("/fragmentos/barra-lateral.html?v=e6721b10").then(function(r){return r.ok?r.text():null}).catch(function(){return null})}catch(e){}</script>
     <!-- ==== CSS ==== -->
     <link rel="stylesheet" href="/estilos/paquete-comun.css?v=e43f1eeb">
-    <link rel="stylesheet" href="/ligero/estilos/paginas/mundo.css?v=375d7626">
+    <link rel="stylesheet" href="/ligero/estilos/paginas/mundo.css?v=b3cddb2a">
     <link rel="stylesheet" href="/ligero/estilos/componentes/buscador.css?v=8425040e">
-    <link rel="stylesheet" href="/ligero/estilos/paginas/mundo.responsive.css?v=1d72d99b">
+    <link rel="stylesheet" href="/ligero/estilos/componentes/ventana-modal.css?v=95db68e9">
+    <link rel="stylesheet" href="/ligero/estilos/componentes/ventana-modal.responsive.css?v=e927767d">
+    <link rel="stylesheet" href="/ligero/estilos/paginas/mundo.responsive.css?v=f74b2ed2">
     <link rel="stylesheet" href="/ligero/estilos/componentes/barra-lateral.css?v=ef2928ea">
     <link rel="stylesheet" href="/ligero/estilos/componentes/barra-lateral.responsive.css?v=fb0768a1">
     <link rel="stylesheet" href="/ligero/estilos/paginas/buscar.css?v=e32b461e">
@@ -71,7 +73,8 @@
     <!-- ==== JS ==== -->
     <script defer src="/scripts/paquete-comun.js?v=ffd56d5d"></script>
     <script defer src="/ligero/scripts/componentes/buscador.js?v=4107f902"></script>
-    <script defer src="/ligero/scripts/paginas/mundo.js?v=776978a4"></script>
+    <script defer src="/ligero/scripts/componentes/ventana-modal.js?v=427a4c21"></script>
+    <script defer src="/ligero/scripts/paginas/mundo.js?v=a63e2c17"></script>
     <!-- ==== fin del JS ==== -->
     </head>
 <body>
@@ -98,7 +101,7 @@
             </p>
 
             <form class="buscar" role="search" data-buscar
-                  data-buscar-items=".mundo-ficha-item"
+                  data-buscar-items="[data-mundo-indice] .mundo-ficha-item"
                   data-buscar-en=".mundo-item-titulo, .mundo-item-que, .mundo-item-resumen"
                   data-buscar-nombre="página|páginas|ninguna">
                 <label class="buscar-label" for="buscar-campo">buscar:</label>
