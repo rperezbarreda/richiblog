@@ -1,6 +1,6 @@
 ---
 title: "Paraje de Ágrimar"
-tags: [Mapamundi, Azarasia]
+tags: [Mapamundi, Archipiélagos]
 región: "[[Islas de Labros]]"
 bandera: paraje_agrimar.webp
 ---

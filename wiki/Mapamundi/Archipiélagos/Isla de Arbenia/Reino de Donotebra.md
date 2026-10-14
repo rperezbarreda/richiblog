@@ -1,6 +1,6 @@
 ---
 title: "Reino de Donotebra"
-tags: [Mapamundi, Azarasia]
+tags: [Mapamundi, Archipiélagos]
 región: "[[Isla de Arbenia]]"
 bandera: reino_donotebra.webp
 ---

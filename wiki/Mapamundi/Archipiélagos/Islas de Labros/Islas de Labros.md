@@ -1,6 +1,6 @@
 ---
 title: "Islas de Labros"
-tags: [Mapamundi, Azarasia]
+tags: [Mapamundi, Archipiélagos]
 ---
 
 **Islas de Labros** es una región del mapamundi.

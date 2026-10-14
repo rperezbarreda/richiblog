@@ -1,6 +1,6 @@
 ---
 title: "Corte de Labros"
-tags: [Mapamundi, Azarasia]
+tags: [Mapamundi, Archipiélagos]
 región: "[[Islas de Labros]]"
 bandera: corte_labros.webp
 ---

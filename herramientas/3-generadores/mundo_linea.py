@@ -969,10 +969,22 @@ def pagina_de_evento(molde, evento, antes, despues, enlazan, ruta, era, avisos):
         # La plantilla pone /web/wiki/{{SLUG}}.html en la dirección
         # canónica: el evento vive en la carpeta de la línea.
         ("{{SLUG}}", CARPETA + "/" + evento["slug"]),
-        ("{{FICHA}}", pintar_ficha(evento, antes, despues, era, avisos)),
+        # En su columna, como la ficha de cualquier entrada (la columna es
+        # lo que se sube arriba en pantalla estrecha: mundo.responsive.css).
+        ("{{FICHA}}", '<div class="mundo-lateral">%s</div>'
+                      % pintar_ficha(evento, antes, despues, era, avisos)),
         ("{{CUERPO}}", cuerpo),
         ("{{ETIQUETAS}}", etiqueta),
         ("{{BACKLINKS}}", pintar_backlinks(enlazan)),
+        # Dónde estás, como en el resto de entradas de la wiki (ver
+        # pintar_migas en generar-mundo.py): la wiki, la línea de tiempo
+        # (en el sitio de este evento) y el evento.
+        ("{{MIGAS}}", '<div class="mundo-migas" role="navigation" aria-label="Dónde estás"><ol>'
+                      '<li><a href="%sindex_wiki.html">Wiki Cralëa</a></li>'
+                      '<li><a href="%s%s#%s">Línea de tiempo</a></li>'
+                      '<li aria-current="page">%s</li></ol></div>'
+                      % (WIKI_URL, URL, PAGINA, html.escape(evento["slug"], quote=True),
+                         html.escape(evento["nombre"]))),
     ))
     # Desde un evento se vuelve a la línea, no a la portada de la wiki.
     return relleno.replace(

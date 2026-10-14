@@ -391,18 +391,20 @@ def pintar_infobox(datos, filas, imagenes_html, emblemas_html=""):
     return "".join(trozos)
 
 
+# Dónde va la bandera en la ficha mientras falta el mapa de situación,
+# que se dibuja después de convertir las páginas (preparar_situaciones
+# necesita la «región» de cada ficha). La cambia poner_emblemas.
+MARCA_EMBLEMAS = "\ue010emblemas\ue011"
+
+
 def emblemas_de_la_ficha(datos, ruta_de_imagen, avisos, titulo):
-    """LA BANDERA Y EL BLASÓN, en el mismo hueco, arriba de la ficha:
+    """LA BANDERA Y EL BLASÓN de una página:
 
         bandera: reino_prunia.webp
         blasón: reino_prunia_blason.webp      (o blason:, o escudo:)
 
-    Con los dos, scripts/paginas/mundo.js deja ver uno y pone dos botones
-    para cambiar (como un carrusel de dos); sin JavaScript salen los dos,
-    uno debajo de otro. Con uno solo, ese y sin botones.
-
-    Devuelve (html, dirección de la bandera o ""): la bandera la usa
-    también la portada, junto al nombre de cada país."""
+    Devuelve ([(nombre, dirección, alt)], dirección de la bandera o ""). La
+    bandera la usa también la portada, junto al nombre de cada país."""
     cuales = []
     for nombre, claves in (("Bandera", ("bandera",)),
                            ("Blasón", ("blasón", "blason", "escudo"))):
@@ -413,20 +415,34 @@ def emblemas_de_la_ficha(datos, ruta_de_imagen, avisos, titulo):
         if not ruta:
             avisos.di("%s que no encuentro" % nombre.lower(), str(valor).strip())
             continue
-        cuales.append((nombre, ruta))
-    if not cuales:
-        return "", ""
+        cuales.append((nombre, ruta, "%s de %s" % (nombre, titulo)))
+    bandera = next((r for n, r, _ in cuales if n == "Bandera"), "")
+    return cuales, bandera
+
+
+def poner_emblemas(ficha, situacion):
+    """Cambia la marca de la ficha por su carrusel: la bandera, el blasón
+    y el MAPA DE SITUACIÓN, en el mismo hueco, arriba del todo. Con más de
+    uno, scripts/paginas/mundo.js pone flechas para pasar de uno a otro
+    (sin JavaScript salen todos, uno debajo de otro). El mapa solo entra si
+    hay bandera o blasón: sin ellos, la ficha sería el mismo mapa que hay a
+    lo grande en el artículo, repetido."""
+    cuales = list(ficha.get("emblemas") or [])
+    if cuales and situacion:
+        url, titulo_pagina, mapa_titulo, _ = situacion
+        cuales.append(("Mapa", url, "Mapa de situación: %s resaltado en el %s"
+                       % (titulo_pagina, mapa_titulo)))
     trozos = []
-    for nombre, ruta in cuales:
+    for nombre, ruta, alt in cuales:
         trozos.append(
             '<li class="mundo-emblema" data-mundo-emblema="%s"><figure>'
             '<img class="mundo-emblema-img" src="%s" alt="%s" loading="lazy" decoding="async">'
             '<figcaption>%s</figcaption></figure></li>'
             % (html.escape(nombre, quote=True), html.escape(ruta, quote=True),
-               html.escape("%s de %s" % (nombre, titulo), quote=True), html.escape(nombre)))
-    bandera = next((r for n, r in cuales if n == "Bandera"), "")
-    return ('<div class="mundo-emblemas" data-mundo-emblemas><ul class="mundo-emblemas-lista">%s</ul></div>'
-            % "".join(trozos)), bandera
+               html.escape(alt, quote=True), html.escape(nombre)))
+    html_ = ('<div class="mundo-emblemas" data-mundo-emblemas><ul class="mundo-emblemas-lista">%s</ul></div>'
+             % "".join(trozos)) if trozos else ""
+    ficha["ficha_html"] = ficha["ficha_html"].replace(MARCA_EMBLEMAS, html_)
 
 
 def imagenes_de_la_ficha(datos, ruta_de_imagen, avisos):
@@ -617,13 +633,15 @@ def convertir_todo(paginas, imagenes, mapas, avisos_por_pagina, eventos=None):
         # La infobox usa el mismo conversor para los valores, porque un
         # campo puede llevar un [[enlace]] dentro.
         chico = Conversor(ruta_de_pagina, ruta_de_imagen, avisos, None)
-        emblemas_html, ficha["bandera_url"] = emblemas_de_la_ficha(
+        ficha["emblemas"], ficha["bandera_url"] = emblemas_de_la_ficha(
             datos, ruta_de_imagen, avisos, str(datos.get("title") or ficha["nombre"]))
         ficha["ficha_html"] = pintar_infobox(
             datos,
             filas_de_la_infobox(datos, lambda v: _una_linea(chico, v)),
             imagenes_de_la_ficha(datos, ruta_de_imagen, avisos),
-            emblemas_html,
+            # Una marca: el carrusel lleva también el mapa de situación,
+            # que aún no está (ver poner_emblemas).
+            MARCA_EMBLEMAS if ficha["emblemas"] else "",
         )
 
         ficha["enlaces"] += chico.enlaces
@@ -1320,28 +1338,6 @@ def escribir_regiones(paginas, partes, peques, de_partes, probar):
         if not suyas:
             continue
         propia = paginas.get(llave)
-        # Las regiones de esta parte: las páginas suyas que son «región» de
-        # alguna otra, menos la propia parte (Azarasia es región de sus
-        # países, pero es la tarjeta grande, no una de sus hijas).
-        # Una región dentro de otra (Archipiélago Fragmentado, dentro de
-        # Tierras Encantadas) va justo detrás de la suya, y marcada.
-        def madre(f):
-            suya = region_de.get(f["nombre"].strip().lower(), "")
-            return paginas[suya] if suya in cuantas and suya != llave and suya in paginas else None
-
-        def orden(f):
-            m = madre(f)
-            return ((m["titulo"] if m else f["titulo"]).lower(), 1 if m else 0, f["titulo"].lower())
-
-        hijas = []
-        for f in sorted(suyas, key=orden):
-            clave = f["nombre"].strip().lower()
-            if clave == llave or clave not in cuantas:
-                continue
-            m = madre(f)
-            hijas.append({"nombre": f["titulo"], "url": f["url"],
-                          "imagen": peques.get(clave, ""), "cuenta": cuantas[clave],
-                          "dentro": m["titulo"] if m else ""})
         salida.append({
             "nombre": propia["titulo"] if propia else parte,
             # Sin página propia (Archipiélagos), la tarjeta lleva a su
@@ -1349,7 +1345,6 @@ def escribir_regiones(paginas, partes, peques, de_partes, probar):
             "url": propia["url"] if propia else "",
             "imagen": peques.get(llave) or de_partes.get(llave, ""),
             "cuenta": len(suyas),
-            "hijas": hijas,
         })
     if not probar:
         escribir_json(REGIONES, salida)
@@ -1418,7 +1413,7 @@ def preparar_situaciones(paginas, mapas, imagenes, probar, partes=()):
     PEQUE_DIR = SITUACION / "peque"
 
     def dibuja(fondo_abierto, leido, poligonos, vecinos, archivo, fuentes, peque,
-               grande=True):
+               grande=True, siempre=False):
         """Dibuja (si hace falta) la grande y, si peque, la miniatura.
         Devuelve cuántas ha dibujado y el fondo, abierto la primera vez que
         se necesita (es una imagen de 2560 de ancho: se abre una vez)."""
@@ -1429,7 +1424,7 @@ def preparar_situaciones(paginas, mapas, imagenes, probar, partes=()):
                                                     "calidad": mundo_situacion.CALIDAD_PEQUE}))
         for destino, ajustes in destinos:
             buenas.add(destino)
-            if probar or mundo_situacion.al_dia(destino, fuentes):
+            if probar or (not siempre and mundo_situacion.al_dia(destino, fuentes)):
                 continue
             if fondo_abierto[0] is None:
                 fondo_abierto[0] = Image.open(fuentes[1]).convert("RGB")
@@ -1492,8 +1487,12 @@ def preparar_situaciones(paginas, mapas, imagenes, probar, partes=()):
             archivo = slug(parte) + ".webp"
             vecinos = [p for _, p in vecinos_todos if p not in poligonos]
             # Solo la miniatura: sin página, la grande no la enseña nadie.
+            # Y SIEMPRE: lo que la hace cambiar no es solo el mapa, también
+            # qué zonas son de esa parte (mover una carpeta de la bóveda de
+            # una parte a otra), y eso no se ve en la fecha de ningún
+            # archivo. Son tres miniaturas pequeñas.
             hechas += dibuja(fondo, leido, poligonos, vecinos, archivo, fuentes, True,
-                             grande=False)
+                             grande=False, siempre=True)
             de_partes[llave] = "/imagenes/wiki/situacion/peque/" + archivo
     # Los de páginas o formas que ya no están.
     if not probar:
@@ -1574,6 +1573,7 @@ def main():
         paginas, mapas, imagenes, args.probar, partes)
     for clave, ficha in paginas.items():
         ficha["situacion_html"] = figura_de_situacion(situaciones.get(clave))
+        poner_emblemas(ficha, situaciones.get(clave))
     capas = convertir_mapas(mapas, paginas, imagenes, avisos_por_pagina, args.detalle)
     # Un evento que nombra una página ([[Valderín]] en su texto) sale en el
     # «se habla de esto en» de esa página, igual que un artículo o un mapa.

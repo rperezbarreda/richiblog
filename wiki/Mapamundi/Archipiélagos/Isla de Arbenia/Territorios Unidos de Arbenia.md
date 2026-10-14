@@ -1,6 +1,6 @@
 ---
 title: "Territorios Unidos de Arbenia"
-tags: [Mapamundi, Azarasia]
+tags: [Mapamundi, Archipiélagos]
 región: "[[Isla de Arbenia]]"
 bandera: territorios_unidos_arbenia.webp
 ---

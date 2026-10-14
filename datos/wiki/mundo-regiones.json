@@ -3,72 +3,18 @@
         "nombre": "Azarasia",
         "url": "/web/wiki/mapamundi/azarasia/azarasia.html",
         "imagen": "/imagenes/wiki/situacion/peque/azarasia.webp",
-        "cuenta": 34,
-        "hijas": [
-            {
-                "nombre": "Isla de Arbenia",
-                "url": "/web/wiki/mapamundi/azarasia/isla_de_arbenia/isla_de_arbenia.html",
-                "imagen": "/imagenes/wiki/situacion/peque/isla_de_arbenia.webp",
-                "cuenta": 3,
-                "dentro": ""
-            },
-            {
-                "nombre": "Islas de Labros",
-                "url": "/web/wiki/mapamundi/azarasia/islas_de_labros/islas_de_labros.html",
-                "imagen": "/imagenes/wiki/situacion/peque/islas_de_labros.webp",
-                "cuenta": 2,
-                "dentro": ""
-            }
-        ]
+        "cuenta": 25
     },
     {
         "nombre": "Partaria",
         "url": "/web/wiki/mapamundi/partaria/partaria.html",
         "imagen": "/imagenes/wiki/situacion/peque/partaria.webp",
-        "cuenta": 29,
-        "hijas": []
+        "cuenta": 29
     },
     {
         "nombre": "Archipiélagos",
         "url": "",
         "imagen": "/imagenes/wiki/situacion/peque/archipielagos.webp",
-        "cuenta": 53,
-        "hijas": [
-            {
-                "nombre": "Archipielago de las Costras",
-                "url": "/web/wiki/mapamundi/archipielagos/archipielago_de_las_costras/archipielago_de_las_costras.html",
-                "imagen": "/imagenes/wiki/situacion/peque/archipielago_de_las_costras.webp",
-                "cuenta": 12,
-                "dentro": ""
-            },
-            {
-                "nombre": "Archipiélago de Lunas",
-                "url": "/web/wiki/mapamundi/archipielagos/archipielago_de_lunas/archipielago_de_lunas.html",
-                "imagen": "/imagenes/wiki/situacion/peque/archipielago_de_lunas.webp",
-                "cuenta": 4,
-                "dentro": ""
-            },
-            {
-                "nombre": "Faros del Mar Ciego",
-                "url": "/web/wiki/mapamundi/archipielagos/faros_del_mar_ciego/faros_del_mar_ciego.html",
-                "imagen": "/imagenes/wiki/situacion/peque/faros_del_mar_ciego.webp",
-                "cuenta": 12,
-                "dentro": ""
-            },
-            {
-                "nombre": "Tierras Encantadas",
-                "url": "/web/wiki/mapamundi/archipielagos/tierras_encantadas/tierras_encantadas.html",
-                "imagen": "/imagenes/wiki/situacion/peque/tierras_encantadas.webp",
-                "cuenta": 11,
-                "dentro": ""
-            },
-            {
-                "nombre": "Archipiélago Fragmentado",
-                "url": "/web/wiki/mapamundi/archipielagos/tierras_encantadas/archipielago_fragmentado/archipielago_fragmentado.html",
-                "imagen": "/imagenes/wiki/situacion/peque/archipielago_fragmentado.webp",
-                "cuenta": 9,
-                "dentro": "Tierras Encantadas"
-            }
-        ]
+        "cuenta": 62
     }
 ]

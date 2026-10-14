@@ -465,10 +465,10 @@ html:not(.js) .mundo-spoiler {
     min-width: 0;
 }
 
-/* LA BANDERA Y EL BLASÓN, arriba de la ficha y en el mismo hueco (ver
-   emblemas_de_la_ficha en generar-mundo.py). Con los dos, mundo.js deja
-   ver uno y pone dos botones para cambiar; sin JavaScript salen los dos,
-   uno debajo de otro, cada uno con su nombre debajo.
+/* LA BANDERA, EL BLASÓN Y EL MAPA, arriba de la ficha y en el mismo
+   hueco (ver poner_emblemas en generar-mundo.py). Con más de uno, mundo.js
+   deja ver uno y pone flechas para pasar de uno a otro; sin JavaScript
+   salen todos, uno debajo de otro, cada uno con su nombre debajo.
 
    El hueco es siempre 3:2 y la imagen va "contain" dentro: así al
    cambiar de la bandera a un blasón alto no salta todo lo de debajo. */
@@ -511,8 +511,8 @@ html:not(.js) .mundo-spoiler {
     text-align: center;
 }
 
-/* Con los botones puestos, el nombre de debajo ya lo dice el botón
-   pulsado: se queda para el lector de pantalla y nada más. */
+/* Con el carrusel puesto, el nombre de debajo ya lo dice el carrusel
+   («Bandera · 1 de 3»): se queda para el lector de pantalla y nada más. */
 .mundo-emblemas.con-botones figcaption {
     position: absolute;
     width: 1px;
@@ -525,40 +525,82 @@ html:not(.js) .mundo-spoiler {
     border: 0;
 }
 
-.mundo-emblemas-botones {
+/* Las flechas del carrusel y, entre ellas, cuál se ve («Mapa · 3 de 3»). */
+.mundo-carrusel {
     display: flex;
-    justify-content: center;
+    align-items: center;
+    justify-content: space-between;
     gap: 8px;
     margin-top: 8px;
 }
 
-.mundo-emblemas-boton {
-    min-height: 2rem;
-    padding: 4px 12px;
+.mundo-carrusel-cual {
+    margin: 0;
+    color: var(--white);
+    font-family: var(--fuente-mono);
+    font-size: 0.75rem;
+    text-align: center;
+}
+
+.mundo-carrusel-flecha {
+    flex: 0 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.2rem;
+    height: 2.2rem;
+    padding: 0;
     border: 2px solid var(--yellow);
     background: transparent;
     color: var(--yellow);
-    font-family: var(--fuente-mono);
-    font-size: 0.75rem;
+    font-size: 1.25rem;
+    line-height: 1;
     cursor: pointer;
 }
 
-.mundo-emblemas-boton[aria-pressed="true"],
-.mundo-emblemas-boton:hover {
+.mundo-carrusel-flecha:hover,
+.mundo-carrusel-flecha:focus-visible {
     background: var(--yellow);
     color: var(--yellow-contrast);
 }
 
-.mundo-emblemas-boton:focus-visible {
+.mundo-carrusel-flecha:focus-visible {
     outline: 2px solid var(--yellow);
     outline-offset: 2px;
 }
 
-/* EL CONTENIDO DE LA PÁGINA, debajo de la ficha: un enlace a cada
-   apartado, como el índice de una wiki. */
+/* EL CONTENIDO DE LA PÁGINA: un enlace a cada apartado, como el índice
+   de una wiki. En pantalla ancha FLOTA abajo a la derecha, siempre a
+   mano mientras se lee, y casi transparente para no tapar nada: al pasar
+   el ratón por encima o llegar con el tabulador se ve entero. En pantalla
+   estrecha va en su sitio, debajo de la ficha (ahí flotando taparía
+   medio texto). Fixed y no sticky: sticky no funcionaba en el navegador
+   de Richi. */
 .mundo-contenido {
     padding: 14px 16px;
     border: 2px solid var(--border);
+    background: var(--surface);
+}
+
+@media (min-width: 861px) {
+    .mundo-contenido {
+        position: fixed;
+        right: 64px;
+        bottom: 48px;
+        z-index: 40;
+        width: min(17rem, 30vw);
+        max-height: 60vh;
+        overflow-y: auto;
+        border-color: var(--yellow);
+        box-shadow: 4px 4px 0 var(--yellow);
+        opacity: 0.18;
+        transition: opacity 0.15s linear;
+    }
+
+    .mundo-contenido:hover,
+    .mundo-contenido:focus-within {
+        opacity: 1;
+    }
 }
 
 .mundo-contenido-titulo {
@@ -1032,10 +1074,49 @@ html:not(.js) .mundo-spoiler {
     gap: 22px;
 }
 
-.mundo-seccion-parte-titulo {
-    margin: 0 0 4px;
-    padding-bottom: 6px;
+/* Cada parte de la ventana se pliega: <details>, block y no flex (ver
+   .mundo-sub). */
+.mundo-seccion-parte {
+    display: block;
+}
+
+.mundo-seccion-parte-cabecera {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 4px 10px;
+    padding: 4px 4px 6px;
     border-bottom: 2px solid var(--yellow);
+    cursor: pointer;
+    list-style: none;
+    scroll-margin-top: 8px;
+}
+
+.mundo-seccion-parte-cabecera::-webkit-details-marker {
+    display: none;
+}
+
+.mundo-seccion-parte-cabecera:hover,
+.mundo-seccion-parte-cabecera:focus-visible {
+    background: var(--purple-lighter);
+}
+
+.mundo-seccion-parte-cabecera:focus-visible {
+    outline: 2px solid var(--yellow);
+    outline-offset: 2px;
+}
+
+.mundo-seccion-parte:not([open]) .mundo-sub-flecha {
+    transform: rotate(-90deg);
+}
+
+.mundo-seccion-parte > .mundo-items {
+    margin-top: 14px;
+}
+
+.mundo-seccion-parte-titulo {
+    display: inline;
+    margin: 0;
     color: var(--yellow);
     font-family: var(--fuente-mono);
     font-size: 1rem;
@@ -1045,9 +1126,6 @@ html:not(.js) .mundo-spoiler {
     scroll-margin-top: 8px;
 }
 
-.mundo-seccion-parte-titulo:focus {
-    outline: none;
-}
 
 .mundo-indice-accesos {
     max-width: 62ch;
@@ -1074,17 +1152,18 @@ html:not(.js) .mundo-spoiler {
    BUSCA UNA REGIÓN
    ====================================================================
    Lo primero de la portada, sacado del portal de geografía de A Wiki of
-   Ice and Fire: cada parte del mundo con su mapa de situación en pequeño
-   y, debajo, sus regiones. Lo pinta scripts/paginas/mundo.js con
-   datos/wiki/mundo-regiones.json; mientras se busca algo, se esconde.
+   Ice and Fire: cada parte del mundo con su mapa de situación en pequeño,
+   su nombre y cuántas páginas tiene. Nada más: con sus regiones debajo,
+   cada tarjeta medía distinto y la rejilla se descolocaba. Las regiones
+   y los países están en la ventana del mapamundi. Lo pinta
+   scripts/paginas/mundo.js con datos/wiki/mundo-regiones.json; mientras
+   se busca algo, se esconde.
 
        <div class="mundo-regiones">
            <h2 class="mundo-regiones-titulo">
            <ul class="mundo-partes">
                <li class="mundo-parte">
-                   <a class="mundo-parte-enlace"> img + nombre + cuenta
-                   <ul class="mundo-parte-hijas">
-                       <li><a class="mundo-hija"> img + nombre + cuenta  */
+                   <a class="mundo-parte-enlace"> img + nombre + cuenta  */
 
 .mundo-regiones[hidden] {
     display: none;
@@ -1120,24 +1199,18 @@ html:not(.js) .mundo-spoiler {
 }
 
 .mundo-parte {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
     min-width: 0;
     margin: 0;
-    padding: 10px;
-    border: 2px solid var(--border);
-    background: var(--purple-lighter);
-}
-
-.mundo-parte-enlace,
-.mundo-hija {
-    color: var(--white);
-    text-decoration: none;
 }
 
 .mundo-parte-enlace {
     display: block;
+    height: 100%;
+    padding: 10px;
+    border: 2px solid var(--border);
+    background: var(--purple-lighter);
+    color: var(--white);
+    text-decoration: none;
 }
 
 .mundo-parte-enlace-img {
@@ -1161,77 +1234,24 @@ html:not(.js) .mundo-spoiler {
     overflow-wrap: break-word;
 }
 
-.mundo-parte-enlace-cuenta,
-.mundo-hija-cuenta {
+.mundo-parte-enlace-cuenta {
     color: var(--muted);
     font-family: var(--fuente-mono);
     font-size: 0.75rem;
 }
 
-.mundo-parte-hijas {
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-    margin: 0;
-    padding: 8px 0 0;
-    border-top: 1px solid var(--border);
-    list-style: none;
-}
-
-.mundo-parte-hijas .es-dentro {
-    margin-left: 14px;
-    padding-left: 8px;
-    border-left: 2px solid var(--border);
-}
-
-.mundo-parte-hijas .es-dentro .mundo-hija-img {
-    width: 2.75rem;
-}
-
-.mundo-hija {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    padding: 2px;
-}
-
-.mundo-hija-img {
-    flex: 0 0 auto;
-    width: 3.5rem;
-    height: auto;
-    border: 1px solid var(--border);
-}
-
-.mundo-hija-texto {
-    display: flex;
-    flex-direction: column;
-    min-width: 0;
-}
-
-.mundo-hija-nombre {
-    color: var(--yellow);
-    font-size: 0.875rem;
-    font-weight: 500;
-    /* Guiones de verdad antes que partir a lo bruto: «Archipiélago
-       Fragmentado» salía «Fragmentad / o». */
-    hyphens: auto;
-    overflow-wrap: break-word;
-}
-
+.mundo-parte-enlace:hover,
+.mundo-parte-enlace:focus-visible,
 .mundo-parte-enlace:hover .mundo-parte-enlace-img,
-.mundo-parte-enlace:focus-visible .mundo-parte-enlace-img,
-.mundo-hija:hover .mundo-hija-img,
-.mundo-hija:focus-visible .mundo-hija-img {
+.mundo-parte-enlace:focus-visible .mundo-parte-enlace-img {
     border-color: var(--yellow);
 }
 
-.mundo-parte-enlace:hover .mundo-parte-enlace-nombre,
-.mundo-hija:hover .mundo-hija-nombre {
+.mundo-parte-enlace:hover .mundo-parte-enlace-nombre {
     text-decoration: underline;
 }
 
-.mundo-parte-enlace:focus-visible,
-.mundo-hija:focus-visible {
+.mundo-parte-enlace:focus-visible {
     outline: 2px solid var(--yellow);
     outline-offset: 2px;
 }

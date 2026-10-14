@@ -1,6 +1,6 @@
 ---
 title: "Isla de Telvetia"
-tags: [Mapamundi, Azarasia]
+tags: [Mapamundi, Archipiélagos]
 ---
 
 **Isla de Telvetia** es una isla grande e independiente.

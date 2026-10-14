@@ -1,6 +1,6 @@
 ---
 title: "Señorío de Pizaria"
-tags: [Mapamundi, Azarasia]
+tags: [Mapamundi, Archipiélagos]
 región: "[[Isla de Arbenia]]"
 bandera: senorio_pizaria.webp
 ---

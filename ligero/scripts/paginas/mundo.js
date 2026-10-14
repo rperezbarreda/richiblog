@@ -715,20 +715,6 @@ async function pintarRegionesMundo() {
         const item = document.createElement("li");
         item.className = "mundo-parte";
         item.appendChild(teselaDeRegionMundo(parte, "mundo-parte-enlace"));
-        const hijas = Array.isArray(parte.hijas) ? parte.hijas : [];
-        if (hijas.length) {
-            const suyas = document.createElement("ul");
-            suyas.className = "mundo-parte-hijas";
-            hijas.forEach((hija) => {
-                const li = document.createElement("li");
-                if ((hija.dentro || "").toString().trim()) {
-                    li.className = "es-dentro";
-                }
-                li.appendChild(teselaDeRegionMundo(hija, "mundo-hija"));
-                suyas.appendChild(li);
-            });
-            item.appendChild(suyas);
-        }
         lista.appendChild(item);
     });
     caja.appendChild(lista);
@@ -782,25 +768,42 @@ function prepararEmblemasMundo() {
         if (cuales.length < 2) {
             return;
         }
-        const botones = document.createElement("div");
-        botones.className = "mundo-emblemas-botones";
-        botones.setAttribute("role", "group");
-        botones.setAttribute("aria-label", "Qué ver");
-        const enseñar = (elegido) => {
-            cuales.forEach((li, n) => {
-                li.hidden = n !== elegido;
-                botones.children[n].setAttribute("aria-pressed", n === elegido ? "true" : "false");
-            });
-        };
-        cuales.forEach((li, n) => {
+        caja.setAttribute("role", "group");
+        caja.setAttribute("aria-roledescription", "carrusel");
+        caja.setAttribute("aria-label", "Bandera, blasón y mapa");
+        const mandos = document.createElement("div");
+        mandos.className = "mundo-carrusel";
+        const flecha = (texto, nombre) => {
             const boton = document.createElement("button");
             boton.type = "button";
-            boton.className = "mundo-emblemas-boton";
-            boton.textContent = li.getAttribute("data-mundo-emblema") || "";
-            boton.addEventListener("click", () => enseñar(n));
-            botones.appendChild(boton);
-        });
-        caja.appendChild(botones);
+            boton.className = "mundo-carrusel-flecha";
+            boton.setAttribute("aria-label", nombre);
+            const dibujo = document.createElement("span");
+            dibujo.setAttribute("aria-hidden", "true");
+            dibujo.textContent = texto;
+            boton.appendChild(dibujo);
+            return boton;
+        };
+        const antes = flecha("‹", "Anterior");
+        const despues = flecha("›", "Siguiente");
+        const cual = document.createElement("p");
+        cual.className = "mundo-carrusel-cual";
+        cual.setAttribute("aria-live", "polite");
+        let ahora = 0;
+        const enseñar = (n) => {
+            ahora = (n + cuales.length) % cuales.length;
+            cuales.forEach((li, k) => {
+                li.hidden = k !== ahora;
+            });
+            cual.textContent = (cuales[ahora].getAttribute("data-mundo-emblema") || "")
+                + " · " + (ahora + 1) + " de " + cuales.length;
+        };
+        antes.addEventListener("click", () => enseñar(ahora - 1));
+        despues.addEventListener("click", () => enseñar(ahora + 1));
+        mandos.appendChild(antes);
+        mandos.appendChild(cual);
+        mandos.appendChild(despues);
+        caja.appendChild(mandos);
         caja.classList.add("con-botones");
         enseñar(0);
     });
@@ -815,7 +818,7 @@ function abrirSeccionMundo(grupo, fichas, boton, irA) {
         clase: "modal-mundo",
         devolverA: boton,
         llenar: (cuerpo) => {
-            cuerpo.appendChild(contenidoDeSeccionMundo(grupo, fichas));
+            cuerpo.appendChild(contenidoDeSeccionMundo(grupo, fichas, irA));
             if (irA) {
                 const destino = cuerpo.querySelector("#" + irA);
                 if (destino) {
@@ -827,7 +830,7 @@ function abrirSeccionMundo(grupo, fichas, boton, irA) {
         },
     });
 }
-function contenidoDeSeccionMundo(grupo, fichas) {
+function contenidoDeSeccionMundo(grupo, fichas, irA) {
     const caja = document.createElement("div");
     caja.className = "mundo-seccion-contenido";
     const sueltas = fichas.filter((f) => !etiquetasDeReparto(f).length);
@@ -843,24 +846,40 @@ function contenidoDeSeccionMundo(grupo, fichas) {
             porEtiqueta.get(e).push(ficha);
         });
     });
+    const llano = (texto) => (texto || "").toString().trim().toLowerCase();
     [...porEtiqueta.keys()].forEach((nombre) => {
         const suyas = porEtiqueta.get(nombre);
-        const parte = document.createElement("div");
+        const conRegion = suyas.some((f) => llano(f.region));
+        const regiones = new Set(suyas.map((f) => llano(f.region)).filter(Boolean));
+        const lista = conRegion
+            ? suyas.filter((f) => !regiones.has(llano(f.titulo)) && llano(f.titulo) !== llano(nombre))
+                .sort((a, b) => a.titulo.localeCompare(b.titulo, "es"))
+            : suyas;
+        const parte = document.createElement("details");
         parte.className = "mundo-seccion-parte";
+        const id = "ventana-" + idDeSubMundo(nombre);
+        parte.open = irA === id;
+        const cabecera = document.createElement("summary");
+        cabecera.className = "mundo-seccion-parte-cabecera";
+        cabecera.id = id;
+        const flecha = document.createElement("span");
+        flecha.className = "mundo-sub-flecha";
+        flecha.setAttribute("aria-hidden", "true");
+        flecha.textContent = "▾";
+        cabecera.appendChild(flecha);
         const titulo = document.createElement("h3");
         titulo.className = "mundo-seccion-parte-titulo";
-        titulo.id = "ventana-" + idDeSubMundo(nombre);
-        titulo.tabIndex = -1;
         titulo.textContent = nombre;
+        cabecera.appendChild(titulo);
         const cuenta = document.createElement("span");
         cuenta.className = "mundo-grupo-cuenta";
-        const n = new Set(suyas.map((f) => f.url)).size;
-        cuenta.textContent = " " + n;
-        titulo.appendChild(cuenta);
-        parte.appendChild(titulo);
-        parte.appendChild(suyas.some((f) => (f.region || "").toString().trim())
-            ? porRegionesMundo(nombre, suyas)
-            : listaDeFichasMundo(suyas));
+        const n = new Set(lista.map((f) => f.url)).size;
+        cuenta.textContent = conRegion
+            ? (n === 1 ? "1 país" : n + " países")
+            : (n === 1 ? "1 página" : n + " páginas");
+        cabecera.appendChild(cuenta);
+        parte.appendChild(cabecera);
+        parte.appendChild(listaDeFichasMundo(lista, conRegion));
         caja.appendChild(parte);
     });
     return caja;

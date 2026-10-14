@@ -1349,26 +1349,27 @@
     - «Para empezar»: una línea con el mapamundi, la línea de tiempo y
       un enlace a las regiones. Está escrita a mano en index_wiki.html.
     - BUSCA UNA REGIÓN: una tarjeta por parte del mundo (en el "orden"
-      de mundo-categorias.json) con su mapa de situación en pequeño, y
-      dentro sus regiones, igual. Una región es una página que alguna
-      otra tiene como «región» en su ficha. Sale de
+      de mundo-categorias.json) con su mapa de situación en pequeño, su
+      nombre y cuántas páginas tiene; nada más (con sus regiones debajo,
+      cada tarjeta medía distinto). Sale de
       datos/wiki/mundo-regiones.json, que escribe generar-mundo.py, y las
       miniaturas (360x240, unos 15 KB) de imagenes/wiki/situacion/peque/.
       Una parte sin página propia (Archipiélagos) se dibuja con todas sus
-      páginas resaltadas, y su tarjeta lleva a su apartado de la lista.
+      páginas resaltadas (esa miniatura se rehace SIEMPRE: lo que la
+      cambia es qué carpetas tiene dentro, y eso no se ve en la fecha de
+      ningún archivo), y su tarjeta abre su parte en la ventana.
       Mientras se busca algo, esta rejilla se esconde.
     - UN BOTÓN POR SECCIÓN (Mapamundi, mapas, historia, lo demás), justo
       debajo del buscador. Cada uno abre su VENTANA (la de siempre,
       ventana-modal.js) con lo que tiene dentro; ya no sale todo seguido
       en la portada. Mientras se busca algo, los botones se quitan y sale
       lo encontrado en la propia portada, por secciones.
-    - EN LA VENTANA DEL MAPAMUNDI, por partes del mundo y regiones, cada
-      país en una rejilla: su bandera grande arriba y el nombre debajo
-      (una región, sin bandera, lleva su mapa de situación en pequeño; un
-      país sin bandera, el hueco vacío). Una región dentro de otra
-      (Archipiélago Fragmentado, en Tierras Encantadas) sale justo debajo
-      de la suya, un poco metida. Los demás apartados (historia, lo demás)
-      siguen con tarjeta.
+    - EN LA VENTANA DEL MAPAMUNDI, una parte del mundo por apartado, que
+      se pliega y se despliega (cerrados de serie), y dentro SOLO LOS
+      PAÍSES, sin las páginas de las regiones, en una rejilla: la bandera
+      grande arriba y el nombre debajo (sin bandera, el hueco vacío). Los
+      demás apartados (historia, lo demás) siguen con tarjeta. Al BUSCAR
+      sí salen las regiones, cada país debajo de la suya.
     - Llegar a la portada con #mundo-<parte> (las migas de una entrada, la
       tarjeta de Archipiélagos) abre la ventana del mapamundi en esa parte.
     - A la derecha, como antes, los mapas y la línea de tiempo.
@@ -1471,17 +1472,20 @@
 
   LAS PÁGINAS están en wiki/Mapamundi/, por partes del mundo:
 
-      wiki/Mapamundi/Azarasia/           el continente y sus países, más
-          Islas de Labros/               las Islas de Labros, la Isla de
-          Isla de Arbenia/               Arbenia, Zaustilla y Telvetia
+      wiki/Mapamundi/Azarasia/           el continente y sus países
       wiki/Mapamundi/Partaria/           el continente y sus países
       wiki/Mapamundi/Archipiélagos/      el Archipiélago de Lunas, el de
           …                              las Costras, los Faros del Mar
-                                         Ciego, la Cuna de Quimeras y
-          Tierras Encantadas/            las Tierras Encantadas (desde el
-              Archipiélago Fragmentado/  15-10-2026; antes eran una parte
-                                         del mundo aparte), con el
-                                         Archipiélago Fragmentado dentro
+          Islas de Labros/               Ciego, la Cuna de Quimeras, las
+          Isla de Arbenia/               Islas de Labros, la Isla de
+                                         Arbenia, Zaustilla, Telvetia y
+          Tierras Encantadas/            las Tierras Encantadas, con el
+              Archipiélago Fragmentado/  Archipiélago Fragmentado dentro
+                                         (todo esto, desde el 15-10-2026;
+                                         antes Labros, Arbenia, Zaustilla
+                                         y Telvetia eran de Azarasia, y
+                                         las Tierras Encantadas, una
+                                         parte del mundo aparte)
 
   EN LA WEB, LAS MISMAS CARPETAS. web/wiki/ repite la estructura de
   wiki/, con los nombres pasados a dirección (sin tildes ni espacios):
@@ -1504,15 +1508,17 @@
   9 MB), y solo rehace los que hagan falta: si cambias el .cmap, la
   imagen del mapa o la forma de dibujarlos, se rehacen todos.
 
-  LA BANDERA Y EL BLASÓN van arriba del todo de la ficha, en el mismo
-  hueco, con dos botones debajo («Bandera», «Blasón») para cambiar de una
-  a otra. Se ponen en el frontmatter de la página:
+  LA BANDERA, EL BLASÓN Y EL MAPA van arriba del todo de la ficha, en el
+  mismo hueco, como un carrusel: dos flechas debajo para pasar de uno a
+  otro y, entre ellas, cuál se ve («Mapa · 2 de 2»). El mapa es el de
+  situación, y solo entra si hay bandera o blasón (si no, sería el mismo
+  que hay a lo grande en el artículo). Se ponen en el frontmatter:
 
       bandera: reino_prunia.webp
       blasón: reino_prunia_blason.webp      (o blason:, o escudo:)
 
   y las imágenes van en wiki/_imagenes/banderas/ (como las demás de la
-  wiki, se buscan por el nombre). Con una sola, sale esa y sin botones.
+  wiki, se buscan por el nombre).
   La bandera sale también en la portada, pequeña, delante del nombre de
   cada país. Las 33 primeras (las que subiste el 14-10-2026 a
   imagenes/wiki/banderas/) se pasaron a WebP de 600x400 (de 4,6 MB a
@@ -1523,9 +1529,14 @@
   LA NAVEGACIÓN DE CADA ENTRADA, como en una wiki de las de siempre:
   arriba, DÓNDE ESTÁS (Wiki Cralëa › Mapamundi › Azarasia › Islas de
   Labros › Corte de Labros: sale de la «región» de cada ficha y de la
-  carpeta), y debajo de la ficha el CONTENIDO de la página, con un
-  enlace al mapa de situación, a cada apartado (## y ###) y a «se habla
-  de esto en». Con menos de dos cosas no sale.
+  carpeta), y el CONTENIDO de la página, con un enlace al mapa de
+  situación, a cada apartado (## y ###) y a «se habla de esto en». Con
+  menos de dos cosas no sale. En pantalla ancha FLOTA abajo a la derecha,
+  casi transparente para no estorbar, y se ve entero al pasar el ratón o
+  llegar con el tabulador (axe se queja del contraste mientras está
+  difuminado: es a propósito). En móvil va en su sitio, bajo la ficha.
+  Los eventos de la línea de tiempo llevan sus migas también (Wiki
+  Cralëa › Línea de tiempo › el evento).
 
   LAS IMÁGENES SE AMPLÍAN. Cualquier imagen de una página de la wiki (el
   mapa de situación, las fotos de la ficha, las del artículo) se ve en

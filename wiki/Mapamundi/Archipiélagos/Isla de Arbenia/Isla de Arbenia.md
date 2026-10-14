@@ -1,6 +1,6 @@
 ---
 title: "Isla de Arbenia"
-tags: [Mapamundi, Azarasia]
+tags: [Mapamundi, Archipiélagos]
 ---
 
 **Isla de Arbenia** es una región del mapamundi.
