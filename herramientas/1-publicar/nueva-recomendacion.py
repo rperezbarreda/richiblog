@@ -52,6 +52,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 import argparse
 
+from imagenes import ruta_o_traida  # noqa: E402
 from comun import (
     RAIZ,
     elegir,
@@ -61,7 +62,6 @@ from comun import (
 )
 
 JSON = RAIZ / "datos" / "mi_rincon" / "recomendaciones.json"
-CARPETA_IMAGENES = "/imagenes/recomendaciones/"
 
 
 # =========================================
@@ -172,13 +172,14 @@ def pedir_cosa(args, titulos):
     if esencial:
         cosa["imprescindible"] = True
 
-    imagen = args.imagen if args.imagen is not None else preguntar(
-        "Portada (nombre del archivo, Enter para saltar)"
-    )
-    imagen = imagen.strip()
+    # La ruta de tu ordenador (se trae, se pasa a WebP y se deja a su
+    # tamaño), o el nombre de una que ya esté en imagenes/recomendaciones/.
+    imagen = ruta_o_traida(
+        args.imagen if args.imagen is not None else preguntar(
+            "Portada (la ruta donde la tengas, o el nombre de una del sitio;"
+            " Enter para saltar)"),
+        "recomendaciones", titulo)
     if imagen:
-        if not imagen.startswith("/"):
-            imagen = CARPETA_IMAGENES + imagen.lstrip("/")
         cosa["imagen"] = imagen
         if not (RAIZ / imagen.lstrip("/")).is_file():
             print(f"     OJO: no encuentro {imagen} en el sitio.")
@@ -243,7 +244,7 @@ def main():
     parser.add_argument("--autor")
     parser.add_argument("--anyo")
     parser.add_argument("--texto", help="por qué lo recomiendas")
-    parser.add_argument("--imagen", help="nombre del archivo en imagenes/recomendaciones/")
+    parser.add_argument("--imagen", help="la portada: la ruta de tu ordenador o el nombre de una del sitio")
     parser.add_argument("--alt", help="descripción de la portada")
     parser.add_argument("--enlace")
     parser.add_argument("--enlace-texto", dest="enlace_texto")

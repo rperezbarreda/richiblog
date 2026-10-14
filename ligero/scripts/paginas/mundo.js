@@ -434,6 +434,18 @@ function itemDelMundo(ficha, corto) {
     const enlace = document.createElement("a");
     enlace.className = "mundo-item";
     enlace.href = rutaSeguraMundo(ficha.url);
+    const bandera = rutaSeguraMundo(ficha.bandera);
+    if (corto && bandera !== "#") {
+        const img = document.createElement("img");
+        img.className = "mundo-item-bandera";
+        img.src = bandera;
+        img.alt = "";
+        img.width = 36;
+        img.height = 24;
+        img.setAttribute("loading", "lazy");
+        img.setAttribute("decoding", "async");
+        enlace.appendChild(img);
+    }
     const titulo = document.createElement("strong");
     titulo.className = "mundo-item-titulo";
     titulo.textContent = ficha.titulo.toString().trim();
@@ -561,6 +573,7 @@ function destaparMundo(tapado) {
     tapado.removeAttribute("role");
     tapado.removeAttribute("tabindex");
 }
+prepararEmblemasMundo();
 prepararAmpliarMundo();
 function prepararAmpliarMundo() {
     if (!window.lupa) {
@@ -588,7 +601,8 @@ function prepararAmpliarMundo() {
 }
 function abrirAmpliadaMundo(boton, img) {
     const figura = boton.closest("figure");
-    const pie = figura ? figura.querySelector("figcaption") : null;
+    const pie = figura && !boton.closest(".mundo-emblema")
+        ? figura.querySelector("figcaption") : null;
     const nombre = (img.getAttribute("alt") || "").trim();
     window.lupa.abrir({
         ruta: img.currentSrc || img.getAttribute("src"),
@@ -689,4 +703,33 @@ function abrirHastaMundo(id) {
         }
         paso = paso.parentElement;
     }
+}
+function prepararEmblemasMundo() {
+    document.querySelectorAll("[data-mundo-emblemas]").forEach((caja) => {
+        const cuales = [...caja.querySelectorAll("[data-mundo-emblema]")];
+        if (cuales.length < 2) {
+            return;
+        }
+        const botones = document.createElement("div");
+        botones.className = "mundo-emblemas-botones";
+        botones.setAttribute("role", "group");
+        botones.setAttribute("aria-label", "Qué ver");
+        const enseñar = (elegido) => {
+            cuales.forEach((li, n) => {
+                li.hidden = n !== elegido;
+                botones.children[n].setAttribute("aria-pressed", n === elegido ? "true" : "false");
+            });
+        };
+        cuales.forEach((li, n) => {
+            const boton = document.createElement("button");
+            boton.type = "button";
+            boton.className = "mundo-emblemas-boton";
+            boton.textContent = li.getAttribute("data-mundo-emblema") || "";
+            boton.addEventListener("click", () => enseñar(n));
+            botones.appendChild(boton);
+        });
+        caja.appendChild(botones);
+        caja.classList.add("con-botones");
+        enseñar(0);
+    });
 }

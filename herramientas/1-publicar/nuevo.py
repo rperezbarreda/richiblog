@@ -77,6 +77,7 @@ import argparse
 import datetime as dt
 import re
 
+from imagenes import ruta_o_traida  # noqa: E402
 from comun import (
     MESES,
     PLANTILLAS,
@@ -193,17 +194,23 @@ def pedir_entrada(args, es_relato):
     # entrada nace sin ella y la columna se queda solo con "sigue
     # leyendo". Antes salía siempre una de ejemplo (la portada de una
     # aventura de rol) que había que acordarse de quitar.
-    datos["imagen"] = args.imagen
-    if datos["imagen"] is None:
-        datos["imagen"] = preguntar(
-            "Imagen de la columna derecha (ruta dentro del sitio, Enter para ninguna)"
+    #
+    # Vale la ruta de tu ordenador (se trae al sitio, pasada a WebP y a su
+    # tamaño), una del sitio o el nombre de una que ya esté en su carpeta.
+    crudo = args.imagen
+    if crudo is None:
+        crudo = preguntar(
+            "Imagen de la columna derecha (la ruta donde la tengas, o una del"
+            " sitio; Enter para ninguna)"
         )
-    datos["imagen"] = (datos["imagen"] or "").strip()
+    if es_relato:
+        datos["imagen"] = ruta_o_traida(crudo, "relatos", datos["titulo"])
+    else:
+        datos["imagen"] = ruta_o_traida(crudo, "blog", datos["titulo"],
+                                        anyo=datos["fecha"].year)
     datos["alt"] = ""
     datos["pie"] = ""
     if datos["imagen"]:
-        if not datos["imagen"].startswith("/"):
-            datos["imagen"] = "/imagenes/blog/" + datos["imagen"].lstrip("/")
         datos["alt"] = args.alt if args.alt is not None else preguntar(
             "Descripción de la imagen (Enter si es puro adorno)"
         )
@@ -380,11 +387,13 @@ def pedir_rol(args, categorias):
         sys.exit(1)
     datos["fecha"] = fecha
 
-    datos["imagen"] = args.imagen or preguntar(
-        "Imagen de portada (ruta dentro del sitio)", IMGS_ROL + "thumbnail_.webp"
-    )
-    if not datos["imagen"].startswith("/"):
-        datos["imagen"] = IMGS_ROL + datos["imagen"].lstrip("/")
+    # La ruta de tu ordenador (se trae y se pasa a WebP), una del sitio o
+    # el nombre de una que ya esté en imagenes/mis_movidas/rol/.
+    datos["imagen"] = ruta_o_traida(
+        args.imagen or preguntar(
+            "Imagen de portada (la ruta donde la tengas, o una del sitio)",
+            IMGS_ROL + "thumbnail_.webp"),
+        "rol", datos["titulo"]) or IMGS_ROL + "thumbnail_.webp"
     datos["alt"] = args.alt or preguntar(
         "Descripción de la imagen (para quien no la ve)",
         f"Portada de {datos['titulo']}",
@@ -785,7 +794,7 @@ def main():
     parser.add_argument("--titulo")
     parser.add_argument("--fecha", help="dd-mm-aaaa (por defecto, hoy)")
     parser.add_argument("--descripcion")
-    parser.add_argument("--imagen", help="ruta de la imagen dentro del sitio")
+    parser.add_argument("--imagen", help="la imagen: la ruta de tu ordenador o una del sitio")
     parser.add_argument("--alt", help="descripción de la imagen")
     # Entrada y relato
     parser.add_argument("--etiquetas", help="entradas: separadas por espacios o comas")

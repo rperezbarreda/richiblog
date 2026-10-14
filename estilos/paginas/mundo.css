@@ -456,6 +456,191 @@ html:not(.js) .mundo-spoiler {
    el orden en que esté escrito. Es una ventana falsa más de las del sitio,
    con su borde y su sombra dura. */
 
+/* LA COLUMNA DE LA DERECHA: la ficha y, debajo, el contenido de la
+   página. */
+.mundo-lateral {
+    display: flex;
+    flex-direction: column;
+    gap: 22px;
+    min-width: 0;
+}
+
+/* LA BANDERA Y EL BLASÓN, arriba de la ficha y en el mismo hueco (ver
+   emblemas_de_la_ficha en generar-mundo.py). Con los dos, mundo.js deja
+   ver uno y pone dos botones para cambiar; sin JavaScript salen los dos,
+   uno debajo de otro, cada uno con su nombre debajo.
+
+   El hueco es siempre 3:2 y la imagen va "contain" dentro: así al
+   cambiar de la bandera a un blasón alto no salta todo lo de debajo. */
+.mundo-emblemas {
+    margin: 0 0 14px;
+}
+
+.mundo-emblemas-lista {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.mundo-emblema[hidden] {
+    display: none;
+}
+
+.mundo-emblema figure {
+    margin: 0;
+}
+
+.mundo-emblema-img {
+    display: block;
+    width: 100%;
+    height: auto;
+    aspect-ratio: 3 / 2;
+    object-fit: contain;
+    border: 2px solid var(--border);
+    background: var(--purple);
+}
+
+.mundo-emblema figcaption {
+    margin-top: 4px;
+    color: var(--muted);
+    font-family: var(--fuente-mono);
+    font-size: 0.75rem;
+    text-align: center;
+}
+
+/* Con los botones puestos, el nombre de debajo ya lo dice el botón
+   pulsado: se queda para el lector de pantalla y nada más. */
+.mundo-emblemas.con-botones figcaption {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    padding: 0;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+
+.mundo-emblemas-botones {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    margin-top: 8px;
+}
+
+.mundo-emblemas-boton {
+    min-height: 2rem;
+    padding: 4px 12px;
+    border: 2px solid var(--yellow);
+    background: transparent;
+    color: var(--yellow);
+    font-family: var(--fuente-mono);
+    font-size: 0.75rem;
+    cursor: pointer;
+}
+
+.mundo-emblemas-boton[aria-pressed="true"],
+.mundo-emblemas-boton:hover {
+    background: var(--yellow);
+    color: var(--yellow-contrast);
+}
+
+.mundo-emblemas-boton:focus-visible {
+    outline: 2px solid var(--yellow);
+    outline-offset: 2px;
+}
+
+/* EL CONTENIDO DE LA PÁGINA, debajo de la ficha: un enlace a cada
+   apartado, como el índice de una wiki. */
+.mundo-contenido {
+    padding: 14px 16px;
+    border: 2px solid var(--border);
+}
+
+.mundo-contenido-titulo {
+    margin: 0 0 8px;
+    color: var(--yellow);
+    font-family: var(--fuente-mono);
+    font-size: 0.8125rem;
+    font-weight: 400;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+}
+
+.mundo-contenido ol {
+    margin: 0;
+    padding-left: 1.4em;
+    color: var(--muted);
+    font-size: 0.875rem;
+    line-height: 1.5;
+}
+
+.mundo-contenido ol ol {
+    padding-left: 1.2em;
+    list-style: lower-alpha;
+}
+
+.mundo-contenido li {
+    margin: 2px 0;
+}
+
+.mundo-contenido a {
+    color: var(--white);
+    text-underline-offset: 3px;
+}
+
+.mundo-contenido a:hover,
+.mundo-contenido a:focus-visible {
+    color: var(--yellow);
+}
+
+/* Que un apartado al que se salta desde el contenido no quede pegado al
+   borde de arriba. */
+.mundo-articulo [id],
+.mundo-backlinks h2 {
+    scroll-margin-top: 16px;
+}
+
+/* DÓNDE ESTÁS: Wiki Cralëa › Mapamundi › Azarasia › … La flecha va con
+   CSS (y "/ ''" para que el lector de pantalla no la lea: ya dice que es
+   una lista de pasos). */
+.mundo-migas ol {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 4px 0;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    font-family: var(--fuente-mono);
+    font-size: 0.8125rem;
+}
+
+.mundo-migas li {
+    color: var(--white);
+}
+
+.mundo-migas li + li::before {
+    content: "›";
+    content: "›" / "";
+    margin: 0 8px;
+    color: var(--muted);
+}
+
+.mundo-migas a {
+    color: var(--yellow);
+    text-underline-offset: 3px;
+}
+
+.mundo-migas a:hover,
+.mundo-migas a:focus-visible {
+    text-decoration-thickness: 2px;
+}
+
 .mundo-ficha {
     min-width: 0;
     padding: 16px;
@@ -1448,7 +1633,21 @@ html:not(.js) .mundo-spoiler {
     gap: 2px 20px;
 }
 
+/* La bandera junto al nombre, si el país tiene. Es adorno: el nombre ya
+   está escrito al lado (alt=""). */
+.mundo-item-bandera {
+    flex: 0 0 auto;
+    width: 1.8em;
+    height: auto;
+    aspect-ratio: 3 / 2;
+    object-fit: cover;
+    border: 1px solid var(--border);
+}
+
 .mundo-items.es-corta .mundo-item {
+    flex-direction: row;
+    align-items: center;
+    gap: 8px;
     height: auto;
     padding: 4px 2px;
     border: 0;

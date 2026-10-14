@@ -26,7 +26,9 @@
    grid-row y no "order": order sobre una rejilla no funcionaba en este
    navegador (ver el comentario de .campana-card en notas-rol.css). */
 @media (max-width: 1399px) {
-    .mundo-ficha {
+    /* La columna de la derecha entera (la ficha y el contenido de la
+       página), no solo la ficha. */
+    .mundo-lateral {
         grid-row: 1;
         /* Que no se estire a lo ancho del todo: una ficha de 900px con
            seis campos de una línea se lee fatal. */
@@ -51,7 +53,7 @@
         padding: 24px 6%;
     }
 
-    .mundo-ficha {
+    .mundo-lateral {
         max-width: none;
     }
 

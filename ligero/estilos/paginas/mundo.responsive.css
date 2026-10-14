@@ -7,7 +7,7 @@
     }
 }
 @media (max-width: 1399px) {
-    .mundo-ficha {
+    .mundo-lateral {
         grid-row: 1;
         max-width: 28rem;
     }
@@ -24,7 +24,7 @@
         gap: 12px;
         padding: 24px 6%;
     }
-    .mundo-ficha {
+    .mundo-lateral {
         max-width: none;
     }
     .mundo-items {

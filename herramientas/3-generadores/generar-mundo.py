@@ -104,7 +104,10 @@ ANCHO_DE_CAPA = 2560
 
 # Los campos del frontmatter que NO son una fila de la infobox: o son el
 # título, o dicen cómo pintarla.
-APARTE = {"title", "subtitle", "infobox", "image", "layout", "tags"}
+APARTE = {"title", "subtitle", "infobox", "image", "layout", "tags",
+          # La bandera y el blasón van arriba de la ficha, en su hueco (ver
+          # emblemas_de_la_ficha), no como una fila más.
+          "bandera", "blasón", "blason", "escudo"}
 
 
 def slug(texto):
@@ -345,13 +348,16 @@ def _como_texto(valor):
     return str(valor)
 
 
-def pintar_infobox(datos, filas, imagenes_html):
-    if not filas and not imagenes_html and not datos.get("infobox"):
+def pintar_infobox(datos, filas, imagenes_html, emblemas_html=""):
+    if not filas and not imagenes_html and not emblemas_html and not datos.get("infobox"):
         return ""
     # role="note": es información al margen del artículo. Un <aside> a
     # secas dentro de <main> es una región complementaria anidada, y las
     # complementarias tienen que ir al nivel de arriba (axe, WAI-ARIA).
     trozos = ['<aside class="mundo-ficha" role="note" aria-labelledby="mundo-ficha-titulo">']
+    # La bandera y el blasón, ARRIBA DEL TODO, como en las wikis de países.
+    if emblemas_html:
+        trozos.append(emblemas_html)
     trozos.append('<h2 class="mundo-ficha-titulo" id="mundo-ficha-titulo">%s</h2>'
                   % html.escape(str(datos.get("title") or "Ficha")))
     if imagenes_html:
@@ -383,6 +389,44 @@ def pintar_infobox(datos, filas, imagenes_html):
         trozos.append("</dl>")
     trozos.append("</aside>")
     return "".join(trozos)
+
+
+def emblemas_de_la_ficha(datos, ruta_de_imagen, avisos, titulo):
+    """LA BANDERA Y EL BLASÓN, en el mismo hueco, arriba de la ficha:
+
+        bandera: reino_prunia.webp
+        blasón: reino_prunia_blason.webp      (o blason:, o escudo:)
+
+    Con los dos, scripts/paginas/mundo.js deja ver uno y pone dos botones
+    para cambiar (como un carrusel de dos); sin JavaScript salen los dos,
+    uno debajo de otro. Con uno solo, ese y sin botones.
+
+    Devuelve (html, dirección de la bandera o ""): la bandera la usa
+    también la portada, junto al nombre de cada país."""
+    cuales = []
+    for nombre, claves in (("Bandera", ("bandera",)),
+                           ("Blasón", ("blasón", "blason", "escudo"))):
+        valor = next((datos.get(c) for c in claves if datos.get(c)), None)
+        if not valor:
+            continue
+        ruta = ruta_de_imagen(str(valor).strip())
+        if not ruta:
+            avisos.di("%s que no encuentro" % nombre.lower(), str(valor).strip())
+            continue
+        cuales.append((nombre, ruta))
+    if not cuales:
+        return "", ""
+    trozos = []
+    for nombre, ruta in cuales:
+        trozos.append(
+            '<li class="mundo-emblema" data-mundo-emblema="%s"><figure>'
+            '<img class="mundo-emblema-img" src="%s" alt="%s" loading="lazy" decoding="async">'
+            '<figcaption>%s</figcaption></figure></li>'
+            % (html.escape(nombre, quote=True), html.escape(ruta, quote=True),
+               html.escape("%s de %s" % (nombre, titulo), quote=True), html.escape(nombre)))
+    bandera = next((r for n, r in cuales if n == "Bandera"), "")
+    return ('<div class="mundo-emblemas" data-mundo-emblemas><ul class="mundo-emblemas-lista">%s</ul></div>'
+            % "".join(trozos)), bandera
 
 
 def imagenes_de_la_ficha(datos, ruta_de_imagen, avisos):
@@ -436,7 +480,7 @@ def figura_de_situacion(situacion):
         return ""
     url, titulo_pagina, mapa_titulo, mapa_url = situacion
     return (
-        '<figure class="mundo-situacion">'
+        '<figure class="mundo-situacion" id="donde-esta">'
         '<img class="mundo-situacion-img" src="%s" alt="%s" width="%d" height="%d"'
         ' loading="lazy" decoding="async">'
         '<figcaption>Dónde está %s, en el <a class="mundo-enlace" href="%s">%s</a></figcaption>'
@@ -573,10 +617,13 @@ def convertir_todo(paginas, imagenes, mapas, avisos_por_pagina, eventos=None):
         # La infobox usa el mismo conversor para los valores, porque un
         # campo puede llevar un [[enlace]] dentro.
         chico = Conversor(ruta_de_pagina, ruta_de_imagen, avisos, None)
+        emblemas_html, ficha["bandera_url"] = emblemas_de_la_ficha(
+            datos, ruta_de_imagen, avisos, str(datos.get("title") or ficha["nombre"]))
         ficha["ficha_html"] = pintar_infobox(
             datos,
             filas_de_la_infobox(datos, lambda v: _una_linea(chico, v)),
             imagenes_de_la_ficha(datos, ruta_de_imagen, avisos),
+            emblemas_html,
         )
 
         ficha["enlaces"] += chico.enlaces
@@ -965,13 +1012,99 @@ def pintar_backlinks(ficha):
             % "".join(filas))
 
 
+# =========================================
+# LA NAVEGACIÓN DE CADA ENTRADA
+# =========================================
+# Como en una wiki de las de siempre: arriba, DÓNDE ESTÁS (Wiki Cralëa ›
+# Mapamundi › Azarasia › Islas de Labros › Corte de Labros), y al lado del
+# artículo, debajo de la ficha, el CONTENIDO de la página con un enlace a
+# cada apartado.
+
+def pintar_migas(ficha, paginas, region_de):
+    """El camino hasta la página, por sus regiones: la «región» de su
+    ficha, la región de esa, etc. Lo de arriba del todo lo pone su carpeta
+    de la bóveda (Mapamundi/<parte>): una parte sin página propia
+    (Archipiélagos) lleva a su apartado de la portada."""
+    portada = URL + "index_wiki.html"
+    cadena = []
+    vista = {ficha["nombre"].strip().lower()}
+    clave = region_de.get(ficha["nombre"].strip().lower())
+    while clave and clave not in vista and clave in paginas:
+        vista.add(clave)
+        cadena.insert(0, paginas[clave])
+        clave = region_de.get(clave)
+    migas = [("Wiki Cralëa", portada)]
+    parte = _parte_de(ficha["carpeta"])
+    if parte:
+        migas.append(("Mapamundi", portada + "#mundo-regiones-titulo"))
+        arriba = cadena[0] if cadena else ficha
+        if _llano(arriba["nombre"]) != _llano(parte):
+            # Las regiones no siempre dicen de qué parte son (Islas de
+            # Labros no lleva «región»): la parte sale de la carpeta. Con
+            # página, a su página; sin ella (Archipiélagos), a su apartado
+            # de la lista de la portada (el id lo pone idDeSubMundo en
+            # mundo.js: "mundo-" + el nombre sin tildes).
+            suya = paginas.get(parte.lower())
+            migas.append((suya["titulo"], suya["url"]) if suya
+                         else (parte, portada + "#mundo-" + slug(parte).replace("_", "-")))
+    for otra in cadena:
+        migas.append((otra["titulo"], otra["url"]))
+    trozos = ['<li><a href="%s">%s</a></li>' % (html.escape(u, quote=True), html.escape(t))
+              for t, u in migas]
+    trozos.append('<li aria-current="page">%s</li>' % html.escape(ficha["titulo"]))
+    # Un <div> con role y no un <nav>: barra-lateral.css le pone a todo
+    # <nav> (y a sus enlaces) el aspecto del menú, columna incluida.
+    return ('<div class="mundo-migas" role="navigation" aria-label="Dónde estás">'
+            '<ol>%s</ol></div>' % "".join(trozos))
+
+
+def pintar_contenido(cuerpo, con_backlinks):
+    """El índice de la página: el mapa de situación, cada encabezado del
+    artículo (los h3, dentro del h2 de encima) y «se habla de esto en».
+    Con menos de dos cosas no sale: un índice de una línea no ayuda."""
+    entradas = []
+    if 'id="donde-esta"' in cuerpo:
+        entradas.append((2, "donde-esta", "Dónde está"))
+    for m in re.finditer(r'<h([23]) id="([^"]+)">(.*?)</h\1>', cuerpo, re.S):
+        texto = html.unescape(re.sub(r"<[^>]+>", "", m.group(3))).strip()
+        if texto:
+            entradas.append((int(m.group(1)), m.group(2), texto))
+    if con_backlinks:
+        entradas.append((2, "mundo-backlinks-titulo", "Se habla de esto en"))
+    if len(entradas) < 2:
+        return ""
+    trozos, abierta = [], False
+    for nivel, ancla, texto in entradas:
+        enlace = '<a href="#%s">%s</a>' % (html.escape(ancla, quote=True), html.escape(texto))
+        if nivel == 3 and trozos:
+            if not abierta:
+                # Dentro del último h2: se reabre su <li>.
+                trozos[-1] = trozos[-1][:-len("</li>")] + "<ol>"
+                abierta = True
+            trozos.append("<li>%s</li>" % enlace)
+            continue
+        if abierta:
+            trozos.append("</ol></li>")
+            abierta = False
+        trozos.append("<li>%s</li>" % enlace)
+    if abierta:
+        trozos.append("</ol></li>")
+    # <div> con role, no <nav>: lo mismo que las migas (pintar_migas).
+    return ('<div class="mundo-contenido" role="navigation" aria-labelledby="mundo-contenido-titulo">'
+            '<h2 class="mundo-contenido-titulo" id="mundo-contenido-titulo">Contenido</h2>'
+            '<ol>%s</ol></div>' % "".join(trozos))
+
+
 def escribir_paginas(paginas, probar):
     molde, _ = leer_texto(PLANTILLA)
     # Sin los comentarios de la plantilla: estas páginas salen publicadas.
     molde = limpiar_comentarios_html(molde)[0]
     escritas = 0
+    region_de = regiones_de(paginas)
     for ficha in paginas.values():
         relleno = molde
+        cuerpo = tras_el_primer_parrafo(ficha["cuerpo_html"], ficha.get("situacion_html", ""))
+        lateral = ficha["ficha_html"] + pintar_contenido(cuerpo, bool(ficha["backlinks"]))
         for marca, valor in (
             ("{{TITULO}}", html.escape(ficha["titulo"])),
             ("{{SUBTITULO}}", html.escape(ficha["subtitulo"])),
@@ -980,9 +1113,11 @@ def escribir_paginas(paginas, probar):
              if ficha["subtitulo"] else ""),
             ("{{DESCRIPCION}}", html.escape(ficha["resumen"] or ficha["titulo"], quote=True)),
             ("{{SLUG}}", ficha["slug"]),
-            ("{{FICHA}}", ficha["ficha_html"]),
-            ("{{CUERPO}}", tras_el_primer_parrafo(ficha["cuerpo_html"],
-                                                  ficha.get("situacion_html", ""))),
+            ("{{MIGAS}}", pintar_migas(ficha, paginas, region_de)),
+            # La ficha y, debajo, el contenido de la página, en la columna
+            # de la derecha (o arriba, en pantalla estrecha).
+            ("{{FICHA}}", '<div class="mundo-lateral">%s</div>' % lateral if lateral else ""),
+            ("{{CUERPO}}", cuerpo),
             ("{{ETIQUETAS}}", pintar_etiquetas(ficha["etiquetas"])),
             ("{{BACKLINKS}}", pintar_backlinks(ficha)),
         ):
@@ -1101,6 +1236,8 @@ def escribir_indice(paginas, mapas, probar, categorias=()):
             "que": ficha["subtitulo"] or str(ficha["datos"].get("infobox") or ""),
             "resumen": ficha["resumen"],
             "region": suya["titulo"] if suya else "",
+            # Su bandera, si tiene: la portada la pone junto al nombre.
+            "bandera": ficha.get("bandera_url") or "",
         })
     # Los mapas, todos juntos en su apartado y no en la carpeta en la que
     # estén guardados: en la portada se buscan como "los mapas", no como

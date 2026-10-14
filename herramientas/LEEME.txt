@@ -221,11 +221,19 @@
   Si escribes una categoría que no existía, se crea sola: aparece
   su botón en la ventana de filtros de la página sin tocar nada.
 
-  ANTES: ten la portada guardada en imagenes/mis_movidas/rol/ y
-  pasada por optimizar-imagenes.py.
+  LA PORTADA: cuando te la pida, pega la ruta donde la tengas
+  (e:\rpere\Descargas\portada.jpg) y se trae sola a
+  imagenes/mis_movidas/rol/, en WebP y a su tamaño. También vale el
+  nombre de una que ya esté ahí.
 
 
   TRAER UNA IMAGEN
+
+  LAS HERRAMIENTAS QUE PIDEN UNA IMAGEN la traen solas: la entrada del
+  blog, el relato, la ficha de rol, la recomendación, el NPC, el botín
+  y la línea de tiempo aceptan la ruta de tu ordenador tal cual (y
+  también el nombre de una que ya esté en el sitio). Esto de abajo es
+  para cuando quieras traer una suelta, sin ninguna de ellas.
 
       python herramientas/2-imagenes/traer-imagen.py
 
@@ -1483,6 +1491,29 @@
   imagenes/wiki/situacion/ (1200x800, unos 75 KB cada uno; 116 son unos
   9 MB), y solo rehace los que hagan falta: si cambias el .cmap, la
   imagen del mapa o la forma de dibujarlos, se rehacen todos.
+
+  LA BANDERA Y EL BLASÓN van arriba del todo de la ficha, en el mismo
+  hueco, con dos botones debajo («Bandera», «Blasón») para cambiar de una
+  a otra. Se ponen en el frontmatter de la página:
+
+      bandera: reino_prunia.webp
+      blasón: reino_prunia_blason.webp      (o blason:, o escudo:)
+
+  y las imágenes van en wiki/_imagenes/banderas/ (como las demás de la
+  wiki, se buscan por el nombre). Con una sola, sale esa y sin botones.
+  La bandera sale también en la portada, pequeña, delante del nombre de
+  cada país. Las 33 primeras (las que subiste el 14-10-2026 a
+  imagenes/wiki/banderas/) se pasaron a WebP de 600x400 (de 4,6 MB a
+  unos 460 KB) y se movieron a wiki/_imagenes/banderas/: imagenes/wiki/
+  la escribe el generador, y lo que se deja ahí a mano no lo enlaza
+  nadie.
+
+  LA NAVEGACIÓN DE CADA ENTRADA, como en una wiki de las de siempre:
+  arriba, DÓNDE ESTÁS (Wiki Cralëa › Mapamundi › Azarasia › Islas de
+  Labros › Corte de Labros: sale de la «región» de cada ficha y de la
+  carpeta), y debajo de la ficha el CONTENIDO de la página, con un
+  enlace al mapa de situación, a cada apartado (## y ###) y a «se habla
+  de esto en». Con menos de dos cosas no sale.
 
   LAS IMÁGENES SE AMPLÍAN. Cualquier imagen de una página de la wiki (el
   mapa de situación, las fotos de la ficha, las del artículo) se ve en

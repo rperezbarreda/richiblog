@@ -8,6 +8,6 @@ tags: [Mapamundi, Archipiélagos]
 ## Países
 
 - [[Baronía de Ronco]]
-- [[Corona de Magla]]
+- [[Corona de Mogla]]
 - [[Marquesado de Al-Darís]]
 - [[Reino de Yor]]

@@ -646,6 +646,21 @@ function itemDelMundo(ficha, corto) {
     enlace.className = "mundo-item";
     enlace.href = rutaSeguraMundo(ficha.url);
 
+    // Su bandera, pequeña, delante del nombre (alt="": el nombre va al
+    // lado, escrito). Solo en la lista corta, la del mapamundi.
+    const bandera = rutaSeguraMundo(ficha.bandera);
+    if (corto && bandera !== "#") {
+        const img = document.createElement("img");
+        img.className = "mundo-item-bandera";
+        img.src = bandera;
+        img.alt = "";
+        img.width = 36;
+        img.height = 24;
+        img.setAttribute("loading", "lazy");
+        img.setAttribute("decoding", "async");
+        enlace.appendChild(img);
+    }
+
     const titulo = document.createElement("strong");
     titulo.className = "mundo-item-titulo";
     titulo.textContent = ficha.titulo.toString().trim();
@@ -854,6 +869,7 @@ function destaparMundo(tapado) {
 // Las que ya están dentro de un enlace se dejan: pulsarlas ya lleva a
 // algún sitio. Y las de un spoiler también, que pulsar ahí es destaparlo.
 
+prepararEmblemasMundo();
 prepararAmpliarMundo();
 
 function prepararAmpliarMundo() {
@@ -885,7 +901,10 @@ function abrirAmpliadaMundo(boton, img) {
     // El pie que tenga debajo, si lo tiene, es lo que se escribe debajo en
     // grande; si no, el texto alternativo.
     const figura = boton.closest("figure");
-    const pie = figura ? figura.querySelector("figcaption") : null;
+    // La bandera y el blasón: su pie es solo «Bandera», y en grande se
+    // escribe entero («Bandera de Reino de Prunia», el alt).
+    const pie = figura && !boton.closest(".mundo-emblema")
+        ? figura.querySelector("figcaption") : null;
     const nombre = (img.getAttribute("alt") || "").trim();
     window.lupa.abrir({
         ruta: img.currentSrc || img.getAttribute("src"),
@@ -1005,4 +1024,44 @@ function abrirHastaMundo(id) {
         }
         paso = paso.parentElement;
     }
+}
+
+
+// =========================================
+// LA BANDERA Y EL BLASÓN
+// =========================================
+// Van en el mismo hueco, arriba de la ficha. Con los dos, se ve uno y
+// debajo hay un botón por cada uno («Bandera», «Blasón»): el pulsado es el
+// que se ve, como un carrusel de dos. Botones con aria-pressed y no
+// pestañas: son dos imágenes, no dos paneles con contenido. Sin
+// JavaScript salen las dos, una debajo de otra.
+
+function prepararEmblemasMundo() {
+    document.querySelectorAll("[data-mundo-emblemas]").forEach((caja) => {
+        const cuales = [...caja.querySelectorAll("[data-mundo-emblema]")];
+        if (cuales.length < 2) {
+            return;
+        }
+        const botones = document.createElement("div");
+        botones.className = "mundo-emblemas-botones";
+        botones.setAttribute("role", "group");
+        botones.setAttribute("aria-label", "Qué ver");
+        const enseñar = (elegido) => {
+            cuales.forEach((li, n) => {
+                li.hidden = n !== elegido;
+                botones.children[n].setAttribute("aria-pressed", n === elegido ? "true" : "false");
+            });
+        };
+        cuales.forEach((li, n) => {
+            const boton = document.createElement("button");
+            boton.type = "button";
+            boton.className = "mundo-emblemas-boton";
+            boton.textContent = li.getAttribute("data-mundo-emblema") || "";
+            boton.addEventListener("click", () => enseñar(n));
+            botones.appendChild(boton);
+        });
+        caja.appendChild(botones);
+        caja.classList.add("con-botones");
+        enseñar(0);
+    });
 }

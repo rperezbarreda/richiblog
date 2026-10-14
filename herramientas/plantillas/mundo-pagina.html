@@ -108,7 +108,9 @@
                  Esta misma página es la plantilla: lo que está entre
                  llaves dobles lo rellena el generador. -->
             <div class="mundo-cabecera">
-                <a class="mundo-volver" href="/web/wiki/index_wiki.html">← volver a la wiki</a>
+                <!-- DÓNDE ESTÁS: Wiki Cralëa › Mapamundi › Azarasia › …
+                     Lo escribe el generador con las regiones de cada ficha. -->
+                {{MIGAS}}
                 <h1 class="mundo-titulo">{{TITULO}}</h1>
                 {{SUBTITULO_BLOQUE}}
                 {{ETIQUETAS}}
@@ -121,10 +123,13 @@
                      todavía no existe sale marcado y sin enlace. -->
                 <article class="mundo-articulo">{{CUERPO}}</article>
 
-                <!-- LA FICHA. Sale del frontmatter del .md: el campo
-                     "image" arriba y debajo cada campo que haya, en el
-                     orden en que esté escrito. Si la página no tiene
-                     frontmatter, esto no sale. -->
+                <!-- LA FICHA. Sale del frontmatter del .md: la bandera y
+                     el blasón arriba del todo (campos "bandera" y "blasón",
+                     en el mismo hueco, con botones para cambiar), luego el
+                     campo "image" y debajo cada campo que haya, en el orden
+                     en que esté escrito. Y debajo de la ficha, el CONTENIDO
+                     de la página (sus apartados). Si no hay nada de eso,
+                     esto no sale. -->
                 {{FICHA}}
             </div>
 

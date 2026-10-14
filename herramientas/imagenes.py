@@ -131,6 +131,13 @@ SITIOS = {
         "lado": 1400,
         "cuadrada": False,
     },
+    "rol": {
+        "que": "la portada de una aventura de rol",
+        "carpeta": "imagenes/mis_movidas/rol",
+        "sufijo": "",
+        "lado": 1200,
+        "cuadrada": False,
+    },
     "otra": {
         "que": "otra cosa (se pregunta la carpeta)",
         "carpeta": "imagenes",
@@ -349,6 +356,41 @@ def copiar_tal_cual(origen, carpeta_rel, nombre, probar=False):
 # Devuelve la ruta pública de la pequeña, o None si no ha podido (no está
 # la imagen o no está Pillow). Si ya existe y es más nueva que la grande,
 # no la rehace. Nunca la agranda.
+
+def ruta_o_traida(dicho, sitio, nombre, **campos):
+    """Lo que contestas cuando una herramienta pregunta por una imagen,
+    sea lo que sea:
+
+      · la ruta de tu ordenador (e:\\rpere\\Descargas\\foto.jpg, con
+        comillas o sin ellas): se trae al sitio, en su carpeta, pasada a
+        WebP y al tamaño que toca (lo de traer(), arriba);
+      · una ruta del sitio (/imagenes/blog/2026/foto.webp): tal cual;
+      · solo el nombre de una que ya está (foto.webp): en la carpeta de
+        ese sitio.
+
+    sitio es una clave de SITIOS ("blog", "relatos"…); campos, lo que pida
+    su carpeta ({anyo}, {campana}…); nombre, de quién es (el título), que
+    es como se llamará el archivo traído. Devuelve la ruta tal y como se
+    escribe en la página ("/imagenes/…"), o "" si no se ha dado ninguna o
+    no se ha podido traer. Lo usan nuevo.py y nueva-recomendacion.py; el
+    botín, la línea de tiempo y los NPC hacen lo mismo cada uno a su
+    manera, de antes de que esto existiera."""
+    dicho = (dicho or "").strip()
+    if not dicho:
+        return ""
+    ajustes = SITIOS[sitio]
+    carpeta = ajustes["carpeta"].format(**campos)
+    if parece_de_fuera(dicho):
+        ruta, aviso = traer(dicho, carpeta, nombre_para(nombre, ajustes["sufijo"]),
+                            lado=ajustes["lado"], cuadrada=ajustes["cuadrada"])
+        if not ruta:
+            print(f"     No he podido traerla: {aviso}")
+            return ""
+        print(f"     Traída a {ruta}  ({aviso})")
+        return ruta
+    limpia = limpiar_ruta(dicho)
+    return limpia if limpia.startswith("/") else f"/{carpeta}/{limpia.lstrip('/')}"
+
 
 def hacer_pequena(ruta_publica, lado, sufijo="-mini", probar=False):
     origen = RAIZ / ruta_publica.lstrip("/")
