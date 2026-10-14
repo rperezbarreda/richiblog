@@ -464,7 +464,7 @@
         "que": "",
         "resumen": "Academia de Rosamica está en Partaria.",
         "region": "Partaria",
-        "bandera": "",
+        "bandera": "/imagenes/wiki/academia_de_rosamica.webp",
         "miniatura": ""
     },
     {
@@ -482,7 +482,7 @@
         "que": "",
         "resumen": "Alianza de Sepón está en Partaria.",
         "region": "Partaria",
-        "bandera": "",
+        "bandera": "/imagenes/wiki/alianza_de_sepon.webp",
         "miniatura": ""
     },
     {
@@ -500,7 +500,7 @@
         "que": "",
         "resumen": "Bosque de Utalis está en Partaria.",
         "region": "Partaria",
-        "bandera": "",
+        "bandera": "/imagenes/wiki/bosque_de_utalis.webp",
         "miniatura": ""
     },
     {
@@ -518,7 +518,7 @@
         "que": "",
         "resumen": "Ciudad Santa de Ablanamaz está en Partaria.",
         "region": "Partaria",
-        "bandera": "",
+        "bandera": "/imagenes/wiki/ciudad_santa_de_ablanamaz.webp",
         "miniatura": ""
     },
     {
@@ -536,7 +536,7 @@
         "que": "",
         "resumen": "Coronas del Viento está en Partaria.",
         "region": "Partaria",
-        "bandera": "",
+        "bandera": "/imagenes/wiki/coronas_del_viento.webp",
         "miniatura": ""
     },
     {
@@ -554,7 +554,7 @@
         "que": "",
         "resumen": "Cumbres de Ath está en Partaria.",
         "region": "Partaria",
-        "bandera": "",
+        "bandera": "/imagenes/wiki/cumbres_de_ath.webp",
         "miniatura": ""
     },
     {
@@ -572,7 +572,7 @@
         "que": "",
         "resumen": "Custodios de Parta está en Partaria.",
         "region": "Partaria",
-        "bandera": "",
+        "bandera": "/imagenes/wiki/custodios_de_parta.webp",
         "miniatura": ""
     },
     {
@@ -590,7 +590,7 @@
         "que": "",
         "resumen": "Imperio Friscadio está en Partaria.",
         "region": "Partaria",
-        "bandera": "",
+        "bandera": "/imagenes/wiki/imperio_friscadio.webp",
         "miniatura": ""
     },
     {
@@ -608,7 +608,7 @@
         "que": "",
         "resumen": "Maharato de Sulkaladésh está en Partaria.",
         "region": "Partaria",
-        "bandera": "",
+        "bandera": "/imagenes/wiki/maharato_de_sulkaladesh.webp",
         "miniatura": ""
     },
     {
@@ -626,7 +626,7 @@
         "que": "",
         "resumen": "Mandato de Acratang está en Partaria.",
         "region": "Partaria",
-        "bandera": "",
+        "bandera": "/imagenes/wiki/mandato_de_acratang.webp",
         "miniatura": ""
     },
     {
@@ -644,7 +644,7 @@
         "que": "",
         "resumen": "Mandato de Nisi está en Partaria.",
         "region": "Partaria",
-        "bandera": "",
+        "bandera": "/imagenes/wiki/mandato_de_nisi.webp",
         "miniatura": ""
     },
     {
@@ -662,7 +662,7 @@
         "que": "",
         "resumen": "Mandato de Panchan está en Partaria.",
         "region": "Partaria",
-        "bandera": "",
+        "bandera": "/imagenes/wiki/mandato_de_panchan.webp",
         "miniatura": ""
     },
     {
@@ -680,7 +680,7 @@
         "que": "",
         "resumen": "Mandato de Taz-Ju está en Partaria.",
         "region": "Partaria",
-        "bandera": "",
+        "bandera": "/imagenes/wiki/mandato_de_taz_ju.webp",
         "miniatura": ""
     },
     {
@@ -698,7 +698,7 @@
         "que": "",
         "resumen": "Mandato de Zó está en Partaria.",
         "region": "Partaria",
-        "bandera": "",
+        "bandera": "/imagenes/wiki/mandato_de_zo.webp",
         "miniatura": ""
     },
     {
@@ -716,7 +716,7 @@
         "que": "",
         "resumen": "Mercado de Dao-Yeni está en Partaria.",
         "region": "Partaria",
-        "bandera": "",
+        "bandera": "/imagenes/wiki/mercado_de_dao_yeni.webp",
         "miniatura": ""
     },
     {
@@ -752,7 +752,7 @@
         "que": "",
         "resumen": "Páramo de Parta está en Partaria.",
         "region": "Partaria",
-        "bandera": "",
+        "bandera": "/imagenes/wiki/paramo_de_parta.webp",
         "miniatura": ""
     },
     {
@@ -770,7 +770,7 @@
         "que": "",
         "resumen": "Reino de Kasa está en Partaria.",
         "region": "Partaria",
-        "bandera": "",
+        "bandera": "/imagenes/wiki/reino_de_kasa.webp",
         "miniatura": ""
     },
     {
@@ -788,7 +788,7 @@
         "que": "",
         "resumen": "Ruinas de Goa está en Partaria.",
         "region": "Partaria",
-        "bandera": "",
+        "bandera": "/imagenes/wiki/ruinas_de_goa.webp",
         "miniatura": ""
     },
     {
@@ -806,7 +806,7 @@
         "que": "",
         "resumen": "Tierras Reflejadas está en Partaria.",
         "region": "Partaria",
-        "bandera": "",
+        "bandera": "/imagenes/wiki/tierras_reflejadas.webp",
         "miniatura": ""
     },
     {
@@ -824,7 +824,7 @@
         "que": "",
         "resumen": "Tribu Boscalise está en Partaria.",
         "region": "Partaria",
-        "bandera": "",
+        "bandera": "/imagenes/wiki/tribu_boscalise.webp",
         "miniatura": ""
     },
     {
@@ -842,7 +842,7 @@
         "que": "",
         "resumen": "Tribu Gogango está en Partaria.",
         "region": "Partaria",
-        "bandera": "",
+        "bandera": "/imagenes/wiki/tribu_gogango.webp",
         "miniatura": ""
     },
     {
@@ -860,7 +860,7 @@
         "que": "",
         "resumen": "Tribu Kránimos está en Partaria.",
         "region": "Partaria",
-        "bandera": "",
+        "bandera": "/imagenes/wiki/tribu_kranimos.webp",
         "miniatura": ""
     },
     {
@@ -878,7 +878,7 @@
         "que": "",
         "resumen": "Tribu Molosgo está en Partaria.",
         "region": "Partaria",
-        "bandera": "",
+        "bandera": "/imagenes/wiki/tribu_molosgo.webp",
         "miniatura": ""
     },
     {
@@ -896,7 +896,7 @@
         "que": "",
         "resumen": "Tribu Ordasco está en Partaria.",
         "region": "Partaria",
-        "bandera": "",
+        "bandera": "/imagenes/wiki/tribu_ordasco.webp",
         "miniatura": ""
     },
     {
@@ -914,7 +914,7 @@
         "que": "",
         "resumen": "Tribu Tuzno está en Partaria.",
         "region": "Partaria",
-        "bandera": "",
+        "bandera": "/imagenes/wiki/tribu_tuzno.webp",
         "miniatura": ""
     },
     {
@@ -932,7 +932,7 @@
         "que": "",
         "resumen": "Tribu Utná está en Partaria.",
         "region": "Partaria",
-        "bandera": "",
+        "bandera": "/imagenes/wiki/tribu_utna.webp",
         "miniatura": ""
     },
     {
@@ -950,7 +950,7 @@
         "que": "",
         "resumen": "Tribu Vadalacra está en Partaria.",
         "region": "Partaria",
-        "bandera": "",
+        "bandera": "/imagenes/wiki/tribu_vadalacra.webp",
         "miniatura": ""
     },
     {
@@ -968,7 +968,7 @@
         "que": "",
         "resumen": "Valle de Után está en Partaria.",
         "region": "Partaria",
-        "bandera": "",
+        "bandera": "/imagenes/wiki/valle_de_utan.webp",
         "miniatura": ""
     },
     {
@@ -986,7 +986,7 @@
         "que": "",
         "resumen": "Ac'atapec está en el Archipielago de las Costras.",
         "region": "Archipielago de las Costras",
-        "bandera": "",
+        "bandera": "/imagenes/wiki/ac_atapec.webp",
         "miniatura": ""
     },
     {
@@ -1004,7 +1004,7 @@
         "que": "",
         "resumen": "Ahíu está en los Faros del Mar Ciego.",
         "region": "Faros del Mar Ciego",
-        "bandera": "",
+        "bandera": "/imagenes/wiki/ahiu.webp",
         "miniatura": ""
     },
     {
@@ -1022,7 +1022,7 @@
         "que": "",
         "resumen": "Amequeleke está en el Archipielago de las Costras.",
         "region": "Archipielago de las Costras",
-        "bandera": "",
+        "bandera": "/imagenes/wiki/amequeleke.webp",
         "miniatura": ""
     },
     {
@@ -1094,7 +1094,7 @@
         "que": "",
         "resumen": "Aruta está en los Faros del Mar Ciego.",
         "region": "Faros del Mar Ciego",
-        "bandera": "",
+        "bandera": "/imagenes/wiki/aruta.webp",
         "miniatura": ""
     },
     {
@@ -1166,7 +1166,7 @@
         "que": "",
         "resumen": "Costa de Vlasquie está en el Archipiélago Fragmentado, en las Tierras Encantadas.",
         "region": "Archipiélago Fragmentado",
-        "bandera": "",
+        "bandera": "/imagenes/wiki/costa_de_vlasquie.webp",
         "miniatura": ""
     },
     {
@@ -1184,7 +1184,7 @@
         "que": "",
         "resumen": "Cuna de Quimeras es una isla grande e independiente.",
         "region": "",
-        "bandera": "",
+        "bandera": "/imagenes/wiki/cuna_de_quimeras.webp",
         "miniatura": ""
     },
     {
@@ -1202,7 +1202,7 @@
         "que": "",
         "resumen": "Dominio de Lyca está en el Archipiélago Fragmentado, en las Tierras Encantadas.",
         "region": "Archipiélago Fragmentado",
-        "bandera": "",
+        "bandera": "/imagenes/wiki/dominio_de_lyca.webp",
         "miniatura": ""
     },
     {
@@ -1238,7 +1238,7 @@
         "que": "",
         "resumen": "Forja de Aureb está en el Archipiélago Fragmentado, en las Tierras Encantadas.",
         "region": "Archipiélago Fragmentado",
-        "bandera": "",
+        "bandera": "/imagenes/wiki/forja_de_aureb.webp",
         "miniatura": ""
     },
     {
@@ -1256,7 +1256,7 @@
         "que": "",
         "resumen": "Franja de Turia está en las Tierras Encantadas.",
         "region": "Tierras Encantadas",
-        "bandera": "",
+        "bandera": "/imagenes/wiki/franja_de_turia.webp",
         "miniatura": ""
     },
     {
@@ -1274,7 +1274,7 @@
         "que": "",
         "resumen": "Haluka está en los Faros del Mar Ciego.",
         "region": "Faros del Mar Ciego",
-        "bandera": "",
+        "bandera": "/imagenes/wiki/haluka.webp",
         "miniatura": ""
     },
     {
@@ -1292,7 +1292,7 @@
         "que": "",
         "resumen": "Hokupuko está en los Faros del Mar Ciego.",
         "region": "Faros del Mar Ciego",
-        "bandera": "",
+        "bandera": "/imagenes/wiki/hokupuko.webp",
         "miniatura": ""
     },
     {
@@ -1310,7 +1310,7 @@
         "que": "",
         "resumen": "Horda de Uspán está en las Tierras Encantadas.",
         "region": "Tierras Encantadas",
-        "bandera": "",
+        "bandera": "/imagenes/wiki/horda_de_uspan.webp",
         "miniatura": ""
     },
     {
@@ -1328,7 +1328,7 @@
         "que": "",
         "resumen": "Horda Quebrada está en el Archipiélago Fragmentado, en las Tierras Encantadas.",
         "region": "Archipiélago Fragmentado",
-        "bandera": "",
+        "bandera": "/imagenes/wiki/horda_quebrada.webp",
         "miniatura": ""
     },
     {
@@ -1346,7 +1346,7 @@
         "que": "",
         "resumen": "Imperio de Lezeris está en las Tierras Encantadas.",
         "region": "Tierras Encantadas",
-        "bandera": "",
+        "bandera": "/imagenes/wiki/imperio_de_lezeris.webp",
         "miniatura": ""
     },
     {
@@ -1364,7 +1364,7 @@
         "que": "",
         "resumen": "Infierno Frondoso está en las Tierras Encantadas.",
         "region": "Tierras Encantadas",
-        "bandera": "",
+        "bandera": "/imagenes/wiki/infierno_frondoso.webp",
         "miniatura": ""
     },
     {
@@ -1400,7 +1400,7 @@
         "que": "",
         "resumen": "Isla de Telvetia es una isla grande e independiente.",
         "region": "",
-        "bandera": "",
+        "bandera": "/imagenes/wiki/isla_de_telvetia.webp",
         "miniatura": ""
     },
     {
@@ -1436,7 +1436,7 @@
         "que": "",
         "resumen": "Itzalcál está en el Archipielago de las Costras.",
         "region": "Archipielago de las Costras",
-        "bandera": "",
+        "bandera": "/imagenes/wiki/itzalcal.webp",
         "miniatura": ""
     },
     {
@@ -1454,7 +1454,7 @@
         "que": "",
         "resumen": "Kaelova está en los Faros del Mar Ciego.",
         "region": "Faros del Mar Ciego",
-        "bandera": "",
+        "bandera": "/imagenes/wiki/kaelova.webp",
         "miniatura": ""
     },
     {
@@ -1472,7 +1472,7 @@
         "que": "",
         "resumen": "Kukulna está en el Archipielago de las Costras.",
         "region": "Archipielago de las Costras",
-        "bandera": "",
+        "bandera": "/imagenes/wiki/kukulna.webp",
         "miniatura": ""
     },
     {
@@ -1490,7 +1490,7 @@
         "que": "",
         "resumen": "Liga de Golota está en las Tierras Encantadas.",
         "region": "Tierras Encantadas",
-        "bandera": "",
+        "bandera": "/imagenes/wiki/liga_de_golota.webp",
         "miniatura": ""
     },
     {
@@ -1526,7 +1526,7 @@
         "que": "",
         "resumen": "Morada de Eeli está en el Archipiélago Fragmentado, en las Tierras Encantadas.",
         "region": "Archipiélago Fragmentado",
-        "bandera": "",
+        "bandera": "/imagenes/wiki/morada_de_eeli.webp",
         "miniatura": ""
     },
     {
@@ -1544,7 +1544,7 @@
         "que": "",
         "resumen": "Mulz'aka está en el Archipielago de las Costras.",
         "region": "Archipielago de las Costras",
-        "bandera": "",
+        "bandera": "/imagenes/wiki/mulz_aka.webp",
         "miniatura": ""
     },
     {
@@ -1562,7 +1562,7 @@
         "que": "",
         "resumen": "Nahuatzal está en el Archipielago de las Costras.",
         "region": "Archipielago de las Costras",
-        "bandera": "",
+        "bandera": "/imagenes/wiki/nahuatzal.webp",
         "miniatura": ""
     },
     {
@@ -1580,7 +1580,7 @@
         "que": "",
         "resumen": "Nalchalcoatl está en el Archipielago de las Costras.",
         "region": "Archipielago de las Costras",
-        "bandera": "",
+        "bandera": "/imagenes/wiki/nalchalcoatl.webp",
         "miniatura": ""
     },
     {
@@ -1598,7 +1598,7 @@
         "que": "",
         "resumen": "Nalu'elé está en los Faros del Mar Ciego.",
         "region": "Faros del Mar Ciego",
-        "bandera": "",
+        "bandera": "/imagenes/wiki/nalu_ele.webp",
         "miniatura": ""
     },
     {
@@ -1616,7 +1616,7 @@
         "que": "",
         "resumen": "Nara-Mana está en los Faros del Mar Ciego.",
         "region": "Faros del Mar Ciego",
-        "bandera": "",
+        "bandera": "/imagenes/wiki/nara_mana.webp",
         "miniatura": ""
     },
     {
@@ -1634,7 +1634,7 @@
         "que": "",
         "resumen": "Níctebrakka está en el Archipielago de las Costras.",
         "region": "Archipielago de las Costras",
-        "bandera": "",
+        "bandera": "/imagenes/wiki/nictebrakka.webp",
         "miniatura": ""
     },
     {
@@ -1652,7 +1652,7 @@
         "que": "",
         "resumen": "Ojo de Aglas está en las Tierras Encantadas.",
         "region": "Tierras Encantadas",
-        "bandera": "",
+        "bandera": "/imagenes/wiki/ojo_de_aglas.webp",
         "miniatura": ""
     },
     {
@@ -1670,7 +1670,7 @@
         "que": "",
         "resumen": "Palacio de Jan está en las Tierras Encantadas.",
         "region": "Tierras Encantadas",
-        "bandera": "",
+        "bandera": "/imagenes/wiki/palacio_de_jan.webp",
         "miniatura": ""
     },
     {
@@ -1688,7 +1688,7 @@
         "que": "",
         "resumen": "Paraje de Cereno está en el Archipiélago Fragmentado, en las Tierras Encantadas.",
         "region": "Archipiélago Fragmentado",
-        "bandera": "",
+        "bandera": "/imagenes/wiki/paraje_de_cereno.webp",
         "miniatura": ""
     },
     {
@@ -1724,7 +1724,7 @@
         "que": "",
         "resumen": "Popalola está en los Faros del Mar Ciego.",
         "region": "Faros del Mar Ciego",
-        "bandera": "",
+        "bandera": "/imagenes/wiki/popalola.webp",
         "miniatura": ""
     },
     {
@@ -1742,7 +1742,7 @@
         "que": "",
         "resumen": "Páramo de Esnirma está en el Archipiélago Fragmentado, en las Tierras Encantadas.",
         "region": "Archipiélago Fragmentado",
-        "bandera": "",
+        "bandera": "/imagenes/wiki/paramo_de_esnirma.webp",
         "miniatura": ""
     },
     {
@@ -1796,7 +1796,7 @@
         "que": "",
         "resumen": "Reino de Zaustilla es una isla grande e independiente.",
         "region": "",
-        "bandera": "",
+        "bandera": "/imagenes/wiki/reino_de_zaustilla.webp",
         "miniatura": ""
     },
     {
@@ -1814,7 +1814,7 @@
         "que": "",
         "resumen": "Reino de Ópalis está en las Tierras Encantadas.",
         "region": "Tierras Encantadas",
-        "bandera": "",
+        "bandera": "/imagenes/wiki/reino_de_opalis.webp",
         "miniatura": ""
     },
     {
@@ -1832,7 +1832,7 @@
         "que": "",
         "resumen": "Ruinas de Nereth está en las Tierras Encantadas.",
         "region": "Tierras Encantadas",
-        "bandera": "",
+        "bandera": "/imagenes/wiki/ruinas_de_nereth.webp",
         "miniatura": ""
     },
     {
@@ -1850,7 +1850,7 @@
         "que": "",
         "resumen": "Ruinas de Thalvyr está en el Archipiélago Fragmentado, en las Tierras Encantadas.",
         "region": "Archipiélago Fragmentado",
-        "bandera": "",
+        "bandera": "/imagenes/wiki/ruinas_de_thalvyr.webp",
         "miniatura": ""
     },
     {
@@ -1868,7 +1868,7 @@
         "que": "",
         "resumen": "Santo Camino de Kada está en las Tierras Encantadas.",
         "region": "Tierras Encantadas",
-        "bandera": "",
+        "bandera": "/imagenes/wiki/santo_camino_de_kada.webp",
         "miniatura": ""
     },
     {
@@ -1904,7 +1904,7 @@
         "que": "",
         "resumen": "Talaiva está en los Faros del Mar Ciego.",
         "region": "Faros del Mar Ciego",
-        "bandera": "",
+        "bandera": "/imagenes/wiki/talaiva.webp",
         "miniatura": ""
     },
     {
@@ -1922,7 +1922,7 @@
         "que": "",
         "resumen": "Techo de Az'Nu está en el Archipiélago Fragmentado, en las Tierras Encantadas.",
         "region": "Archipiélago Fragmentado",
-        "bandera": "",
+        "bandera": "/imagenes/wiki/techo_de_az_nu.webp",
         "miniatura": ""
     },
     {
@@ -1976,7 +1976,7 @@
         "que": "",
         "resumen": "Tzeibalba está en el Archipielago de las Costras.",
         "region": "Archipielago de las Costras",
-        "bandera": "",
+        "bandera": "/imagenes/wiki/tzeibalba.webp",
         "miniatura": ""
     },
     {
@@ -1994,7 +1994,7 @@
         "que": "",
         "resumen": "Tzintara está en el Archipielago de las Costras.",
         "region": "Archipielago de las Costras",
-        "bandera": "",
+        "bandera": "/imagenes/wiki/tzintara.webp",
         "miniatura": ""
     },
     {
@@ -2012,7 +2012,7 @@
         "que": "",
         "resumen": "Tzompoc está en el Archipielago de las Costras.",
         "region": "Archipielago de las Costras",
-        "bandera": "",
+        "bandera": "/imagenes/wiki/tzompoc.webp",
         "miniatura": ""
     },
     {
@@ -2030,7 +2030,7 @@
         "que": "",
         "resumen": "Uluka está en los Faros del Mar Ciego.",
         "region": "Faros del Mar Ciego",
-        "bandera": "",
+        "bandera": "/imagenes/wiki/uluka.webp",
         "miniatura": ""
     },
     {
@@ -2048,7 +2048,7 @@
         "que": "",
         "resumen": "Vanu Reki está en los Faros del Mar Ciego.",
         "region": "Faros del Mar Ciego",
-        "bandera": "",
+        "bandera": "/imagenes/wiki/vanu_reki.webp",
         "miniatura": ""
     },
     {
@@ -2066,7 +2066,7 @@
         "que": "",
         "resumen": "Varamo'a está en los Faros del Mar Ciego.",
         "region": "Faros del Mar Ciego",
-        "bandera": "",
+        "bandera": "/imagenes/wiki/varamo_a.webp",
         "miniatura": ""
     },
     {
@@ -2084,7 +2084,7 @@
         "que": "",
         "resumen": "Yaxch'umekte está en el Archipielago de las Costras.",
         "region": "Archipielago de las Costras",
-        "bandera": "",
+        "bandera": "/imagenes/wiki/yaxch_umekte.webp",
         "miniatura": ""
     },
     {

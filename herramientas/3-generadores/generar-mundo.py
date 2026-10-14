@@ -424,11 +424,11 @@ def poner_emblemas(ficha, situacion):
     """Cambia la marca de la ficha por su carrusel: la bandera, el blasón
     y el MAPA DE SITUACIÓN, en el mismo hueco, arriba del todo. Con más de
     uno, scripts/paginas/mundo.js pone flechas para pasar de uno a otro
-    (sin JavaScript salen todos, uno debajo de otro). El mapa solo entra si
-    hay bandera o blasón: sin ellos, la ficha sería el mismo mapa que hay a
-    lo grande en el artículo, repetido."""
+    (sin JavaScript salen todos, uno debajo de otro). El mapa entra
+    siempre que lo haya: es el único sitio donde sale (el artículo ya no
+    lo lleva a lo grande)."""
     cuales = list(ficha.get("emblemas") or [])
-    if cuales and situacion:
+    if situacion:
         url, titulo_pagina, mapa_titulo, _ = situacion
         cuales.append(("Mapa", url, "Mapa de situación: %s resaltado en el %s"
                        % (titulo_pagina, mapa_titulo)))
@@ -442,6 +442,9 @@ def poner_emblemas(ficha, situacion):
                html.escape(alt, quote=True), html.escape(nombre)))
     html_ = ('<div class="mundo-emblemas" data-mundo-emblemas><ul class="mundo-emblemas-lista">%s</ul></div>'
              % "".join(trozos)) if trozos else ""
+    if not html_ and ficha.get("ficha_vacia"):
+        ficha["ficha_html"] = ""
+        return
     ficha["ficha_html"] = ficha["ficha_html"].replace(MARCA_EMBLEMAS, html_)
 
 
@@ -484,42 +487,6 @@ def imagenes_de_la_ficha(datos, ruta_de_imagen, avisos):
     # mejor y además se imprimen.
     return ('<div class="mundo-ficha-fotos es-varias"><ul>%s</ul></div>'
             % "".join(trozos))
-
-
-def figura_de_situacion(situacion):
-    """EL MAPA DE SITUACIÓN, si la página se llama como una forma de un
-    mapa (ver mundo_situacion.py). Va en el artículo y no en la ficha: en
-    la ficha, a 17rem, una isla del mapamundi era un punto. En el artículo
-    sale a lo ancho del texto, y pulsándolo se ve en grande (la lupa; la
-    pone scripts/paginas/mundo.js en todas las imágenes de la wiki)."""
-    if not situacion:
-        return ""
-    url, titulo_pagina, mapa_titulo, mapa_url = situacion
-    return (
-        '<figure class="mundo-situacion" id="donde-esta">'
-        '<img class="mundo-situacion-img" src="%s" alt="%s" width="%d" height="%d"'
-        ' loading="lazy" decoding="async">'
-        '<figcaption>Dónde está %s, en el <a class="mundo-enlace" href="%s">%s</a></figcaption>'
-        '</figure>'
-        % (html.escape(url, quote=True),
-           html.escape("Mapa de situación: %s resaltado en el %s" % (titulo_pagina, mapa_titulo),
-                       quote=True),
-           mundo_situacion.ANCHO, mundo_situacion.ALTO,
-           html.escape(titulo_pagina),
-           html.escape(mapa_url, quote=True), html.escape(mapa_titulo)))
-
-
-def tras_el_primer_parrafo(cuerpo, trozo):
-    """Mete trozo en el artículo después del primer párrafo, si el
-    artículo empieza por uno ("Corte de Labros está en las Islas de
-    Labros."), que es lo que sitúa al lector antes del mapa. Si empieza
-    por otra cosa (un encabezado, una lista), al principio del todo."""
-    if not trozo:
-        return cuerpo
-    if cuerpo.startswith("<p") and "</p>" in cuerpo:
-        corte = cuerpo.index("</p>") + len("</p>")
-        return cuerpo[:corte] + trozo + cuerpo[corte:]
-    return trozo + cuerpo
 
 
 # =========================================
@@ -635,14 +602,14 @@ def convertir_todo(paginas, imagenes, mapas, avisos_por_pagina, eventos=None):
         chico = Conversor(ruta_de_pagina, ruta_de_imagen, avisos, None)
         ficha["emblemas"], ficha["bandera_url"] = emblemas_de_la_ficha(
             datos, ruta_de_imagen, avisos, str(datos.get("title") or ficha["nombre"]))
-        ficha["ficha_html"] = pintar_infobox(
-            datos,
-            filas_de_la_infobox(datos, lambda v: _una_linea(chico, v)),
-            imagenes_de_la_ficha(datos, ruta_de_imagen, avisos),
-            # Una marca: el carrusel lleva también el mapa de situación,
-            # que aún no está (ver poner_emblemas).
-            MARCA_EMBLEMAS if ficha["emblemas"] else "",
-        )
+        filas = filas_de_la_infobox(datos, lambda v: _una_linea(chico, v))
+        fotos = imagenes_de_la_ficha(datos, ruta_de_imagen, avisos)
+        # Una marca SIEMPRE: el carrusel lleva el mapa de situación, que aún
+        # no está (ver poner_emblemas), y una región sin bandera también lo
+        # lleva. Si al final no hay nada que poner y la ficha no tenía nada
+        # más, se quita entera (ficha_vacia).
+        ficha["ficha_vacia"] = not pintar_infobox(datos, filas, fotos)
+        ficha["ficha_html"] = pintar_infobox(datos, filas, fotos, MARCA_EMBLEMAS)
 
         ficha["enlaces"] += chico.enlaces
         # El resumen para el buscador y para el índice: el primer párrafo,
@@ -1077,12 +1044,10 @@ def pintar_migas(ficha, paginas, region_de):
 
 
 def pintar_contenido(cuerpo, con_backlinks):
-    """El índice de la página: el mapa de situación, cada encabezado del
-    artículo (los h3, dentro del h2 de encima) y «se habla de esto en».
+    """El índice de la página: cada encabezado del artículo (los h3,
+    dentro del h2 de encima) y «se habla de esto en».
     Con menos de dos cosas no sale: un índice de una línea no ayuda."""
     entradas = []
-    if 'id="donde-esta"' in cuerpo:
-        entradas.append((2, "donde-esta", "Dónde está"))
     for m in re.finditer(r'<h([23]) id="([^"]+)">(.*?)</h\1>', cuerpo, re.S):
         texto = html.unescape(re.sub(r"<[^>]+>", "", m.group(3))).strip()
         if texto:
@@ -1121,7 +1086,7 @@ def escribir_paginas(paginas, probar):
     region_de = regiones_de(paginas)
     for ficha in paginas.values():
         relleno = molde
-        cuerpo = tras_el_primer_parrafo(ficha["cuerpo_html"], ficha.get("situacion_html", ""))
+        cuerpo = ficha["cuerpo_html"]
         lateral = ficha["ficha_html"] + pintar_contenido(cuerpo, bool(ficha["backlinks"]))
         for marca, valor in (
             ("{{TITULO}}", html.escape(ficha["titulo"])),
@@ -1572,7 +1537,6 @@ def main():
     situaciones, hechas_sit, peques, de_partes = preparar_situaciones(
         paginas, mapas, imagenes, args.probar, partes)
     for clave, ficha in paginas.items():
-        ficha["situacion_html"] = figura_de_situacion(situaciones.get(clave))
         poner_emblemas(ficha, situaciones.get(clave))
     capas = convertir_mapas(mapas, paginas, imagenes, avisos_por_pagina, args.detalle)
     # Un evento que nombra una página ([[Valderín]] en su texto) sale en el

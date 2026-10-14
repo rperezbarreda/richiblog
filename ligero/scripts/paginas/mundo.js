@@ -50,6 +50,9 @@ function pintarElMundo(caja, fichas) {
     botones.className = "mundo-secciones";
     botones.setAttribute("data-mundo-secciones", "");
     orden.forEach((grupo) => {
+        if (grupo === "mapas") {
+            return;
+        }
         const fichas = porGrupo.get(grupo);
         const li = document.createElement("li");
         const boton = document.createElement("button");

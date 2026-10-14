@@ -1359,7 +1359,8 @@
       cambia es qué carpetas tiene dentro, y eso no se ve en la fecha de
       ningún archivo), y su tarjeta abre su parte en la ventana.
       Mientras se busca algo, esta rejilla se esconde.
-    - UN BOTÓN POR SECCIÓN (Mapamundi, mapas, historia, lo demás), justo
+    - UN BOTÓN POR SECCIÓN (Mapamundi, historia, lo demás; los mapas no,
+      que ya están a la vista en la columna de la derecha), justo
       debajo del buscador. Cada uno abre su VENTANA (la de siempre,
       ventana-modal.js) con lo que tiene dentro; ya no sale todo seguido
       en la portada. Mientras se busca algo, los botones se quitan y sale
@@ -1511,8 +1512,9 @@
   LA BANDERA, EL BLASÓN Y EL MAPA van arriba del todo de la ficha, en el
   mismo hueco, como un carrusel: dos flechas debajo para pasar de uno a
   otro y, entre ellas, cuál se ve («Mapa · 2 de 2»). El mapa es el de
-  situación, y solo entra si hay bandera o blasón (si no, sería el mismo
-  que hay a lo grande en el artículo). Se ponen en el frontmatter:
+  situación, y es el único sitio donde sale: el artículo ya no lo lleva
+  a lo grande (se quitó el 15-10-2026). Una región, sin bandera, lleva
+  solo el mapa. Se ponen en el frontmatter:
 
       bandera: reino_prunia.webp
       blasón: reino_prunia_blason.webp      (o blason:, o escudo:)
@@ -1525,6 +1527,20 @@
   unos 460 KB) y se movieron a wiki/_imagenes/banderas/: imagenes/wiki/
   la escribe el generador, y lo que se deja ahí a mano no lo enlaza
   nadie.
+
+  LAS OTRAS 74 BANDERAS (las de los países que no tenían) las dibujó
+  Claude el 15-10-2026 con un script, para que no hubiera huecos: el
+  tipo de país pesa en el dibujo (las tribus llevan zigzag o dientes, los
+  mandatos de Partaria comparten disposición, las ruinas van en colores
+  apagados, las cumbres llevan montes…) y el resto sale del nombre. Son
+  de relleno: cuando tengas la de verdad, pon su archivo en
+  wiki/_imagenes/banderas/ y cambia el campo bandera: de esa página.
+
+  TEXTO DE RELLENO. Los 107 países llevan, también desde el 15-10-2026,
+  unos apartados de relleno (Historia, con Orígenes dentro; Gobierno y
+  sociedad; Cultura), cada párrafo empezando por «*Texto de relleno.*»,
+  para que se vea cómo queda el contenido de la página. Se buscan por
+  esa frase y se cambian por lo de verdad.
 
   LA NAVEGACIÓN DE CADA ENTRADA, como en una wiki de las de siempre:
   arriba, DÓNDE ESTÁS (Wiki Cralëa › Mapamundi › Azarasia › Islas de

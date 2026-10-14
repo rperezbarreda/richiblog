@@ -98,6 +98,11 @@ function pintarElMundo(caja, fichas) {
     botones.className = "mundo-secciones";
     botones.setAttribute("data-mundo-secciones", "");
     orden.forEach((grupo) => {
+        // Los mapas no llevan botón: ya están a la vista en la columna de
+        // la derecha, con su dibujo (ver pintarLosMapasDelMundo).
+        if (grupo === "mapas") {
+            return;
+        }
         const fichas = porGrupo.get(grupo);
         const li = document.createElement("li");
         const boton = document.createElement("button");
