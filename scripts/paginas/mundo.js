@@ -315,7 +315,7 @@ function idDeSubMundo(nombre) {
 // La región de cada página llega hecha en el JSON ("region", el campo
 // «región» de su ficha). Una página es una REGIÓN si alguna otra la tiene
 // como región.
-function porRegionesMundo(parte, fichas) {
+function porRegionesMundo(parte, fichas, soloPaises) {
     const llano = (texto) => (texto || "").toString().trim().toLowerCase();
     const deParte = llano(parte);
     const regiones = new Map();
@@ -330,11 +330,29 @@ function porRegionesMundo(parte, fichas) {
     caja.className = "mundo-por-regiones";
 
     // Lo que cuelga de la parte directamente: ni es de una región de aquí
-    // ni es una región. La página de la propia parte, la primera.
+    // ni es una región. La página de la propia parte, la primera (y en la
+    // ventana de la portada, soloPaises, ni sale: ahí van solo países).
     const directas = fichas
         .filter((f) => !regiones.has(llano(f.region)) && !regiones.has(llano(f.titulo)))
+        .filter((f) => !soloPaises || llano(f.titulo) !== deParte)
         .sort((a, b) => (llano(a.titulo) === deParte ? -1 : 0) - (llano(b.titulo) === deParte ? -1 : 0));
-    if (directas.length) {
+    if (directas.length && soloPaises && regiones.size) {
+        // Con regiones al lado, lo suelto lleva su título: son los que no
+        // son de ninguna (Telvetia, Zaustilla, la Cuna de Quimeras).
+        const bloque = document.createElement("div");
+        bloque.className = "mundo-region";
+        const titulo = document.createElement("h4");
+        titulo.className = "mundo-region-titulo";
+        titulo.textContent = "Independientes ";
+        const cuenta = document.createElement("span");
+        cuenta.className = "mundo-grupo-cuenta";
+        cuenta.setAttribute("data-mundo-region-cuenta", "");
+        cuenta.textContent = String(directas.length);
+        titulo.appendChild(cuenta);
+        bloque.appendChild(titulo);
+        bloque.appendChild(listaDeFichasMundo(directas, true));
+        caja.appendChild(bloque);
+    } else if (directas.length) {
         caja.appendChild(listaDeFichasMundo(directas, true));
     }
 
@@ -382,8 +400,12 @@ function porRegionesMundo(parte, fichas) {
         titulo.appendChild(cuenta);
         bloque.appendChild(titulo);
         // La página de la región, la primera de su lista: así el buscador
-        // la encuentra igual que a las demás.
-        bloque.appendChild(listaDeFichasMundo(propia ? [propia, ...hijas] : hijas, true));
+        // la encuentra igual que a las demás. En la ventana, solo países.
+        const suyas = propia && !soloPaises ? [propia, ...hijas] : hijas;
+        if (soloPaises) {
+            cuenta.textContent = String(suyas.length);
+        }
+        bloque.appendChild(listaDeFichasMundo(suyas, true));
         caja.appendChild(bloque);
     });
     return caja;
@@ -1285,6 +1307,9 @@ function contenidoDeSeccionMundo(grupo, fichas, irA) {
         // las que alguna otra página tiene como «región».
         const conRegion = suyas.some((f) => llano(f.region));
         const regiones = new Set(suyas.map((f) => llano(f.region)).filter(Boolean));
+        // ¿Tiene regiones propias, aparte de ella misma (los archipiélagos
+        // de Archipiélagos)? Entonces, un apartado por región.
+        const conSubregiones = [...regiones].some((r) => r !== llano(nombre));
         const lista = conRegion
             ? suyas.filter((f) => !regiones.has(llano(f.titulo)) && llano(f.titulo) !== llano(nombre))
                 .sort((a, b) => a.titulo.localeCompare(b.titulo, "es"))
@@ -1316,7 +1341,9 @@ function contenidoDeSeccionMundo(grupo, fichas, irA) {
             : (n === 1 ? "1 página" : n + " páginas");
         cabecera.appendChild(cuenta);
         parte.appendChild(cabecera);
-        parte.appendChild(listaDeFichasMundo(lista, conRegion));
+        parte.appendChild(conSubregiones
+            ? porRegionesMundo(nombre, suyas, true)
+            : listaDeFichasMundo(lista, conRegion));
         caja.appendChild(parte);
     });
     return caja;
@@ -1364,6 +1391,7 @@ function prepararContenidoMundo() {
     } catch (error) {
         // Sin almacenamiento: abierto.
     }
+    ajustarContenidoMundo(plegable);
     plegable.addEventListener("toggle", () => {
         try {
             if (plegable.open) {
@@ -1540,4 +1568,42 @@ function prepararAzarMundo(fichas) {
         const una = todas[Math.floor(Math.random() * todas.length)];
         window.location.href = rutaSeguraMundo(una.url);
     });
+}
+
+
+// QUE NO TAPE LA FICHA. En escritorio el contenido va fijo abajo a la
+// derecha, justo debajo de donde está la ficha; con una página larga (el
+// calendario tiene veintiún apartados) crecía hacia arriba y se le ponía
+// encima. Así que mide lo que queda libre entre el final de la ficha y el
+// fondo de la pantalla, y como mucho ocupa eso (con su propio scroll si
+// no cabe). Al bajar y perderse la ficha de vista, tiene todo el sitio.
+function ajustarContenidoMundo(plegable) {
+    const caja = plegable.closest(".mundo-contenido");
+    const ficha = document.querySelector(".mundo-ficha");
+    if (!caja) {
+        return;
+    }
+    const ajustar = () => {
+        if (getComputedStyle(caja).position !== "fixed") {
+            caja.style.maxHeight = "";
+            return;
+        }
+        const abajo = parseFloat(getComputedStyle(caja).bottom) || 0;
+        let tope = 16;
+        if (ficha) {
+            const suya = ficha.getBoundingClientRect();
+            if (suya.bottom > 0) {
+                tope = Math.max(tope, suya.bottom + 16);
+            }
+        }
+        const libre = window.innerHeight - abajo - tope;
+        // Nunca menos de lo que mide con tres o cuatro apartados, ni más
+        // del 60% de la pantalla.
+        caja.style.maxHeight = Math.round(Math.min(Math.max(libre, 150), window.innerHeight * 0.6)) + "px";
+    };
+    ajustar();
+    // El scroll es el de la sección de la página, no el de la ventana: se
+    // escucha en captura para oírlo venga de donde venga.
+    document.addEventListener("scroll", ajustar, { capture: true, passive: true });
+    window.addEventListener("resize", ajustar);
 }

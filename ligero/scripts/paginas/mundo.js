@@ -200,7 +200,7 @@ function idDeSubMundo(nombre) {
         .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
         .toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
 }
-function porRegionesMundo(parte, fichas) {
+function porRegionesMundo(parte, fichas, soloPaises) {
     const llano = (texto) => (texto || "").toString().trim().toLowerCase();
     const deParte = llano(parte);
     const regiones = new Map();
@@ -214,8 +214,23 @@ function porRegionesMundo(parte, fichas) {
     caja.className = "mundo-por-regiones";
     const directas = fichas
         .filter((f) => !regiones.has(llano(f.region)) && !regiones.has(llano(f.titulo)))
+        .filter((f) => !soloPaises || llano(f.titulo) !== deParte)
         .sort((a, b) => (llano(a.titulo) === deParte ? -1 : 0) - (llano(b.titulo) === deParte ? -1 : 0));
-    if (directas.length) {
+    if (directas.length && soloPaises && regiones.size) {
+        const bloque = document.createElement("div");
+        bloque.className = "mundo-region";
+        const titulo = document.createElement("h4");
+        titulo.className = "mundo-region-titulo";
+        titulo.textContent = "Independientes ";
+        const cuenta = document.createElement("span");
+        cuenta.className = "mundo-grupo-cuenta";
+        cuenta.setAttribute("data-mundo-region-cuenta", "");
+        cuenta.textContent = String(directas.length);
+        titulo.appendChild(cuenta);
+        bloque.appendChild(titulo);
+        bloque.appendChild(listaDeFichasMundo(directas, true));
+        caja.appendChild(bloque);
+    } else if (directas.length) {
         caja.appendChild(listaDeFichasMundo(directas, true));
     }
     const madreDe = (llave) => {
@@ -256,7 +271,11 @@ function porRegionesMundo(parte, fichas) {
         titulo.appendChild(document.createTextNode(" "));
         titulo.appendChild(cuenta);
         bloque.appendChild(titulo);
-        bloque.appendChild(listaDeFichasMundo(propia ? [propia, ...hijas] : hijas, true));
+        const suyas = propia && !soloPaises ? [propia, ...hijas] : hijas;
+        if (soloPaises) {
+            cuenta.textContent = String(suyas.length);
+        }
+        bloque.appendChild(listaDeFichasMundo(suyas, true));
         caja.appendChild(bloque);
     });
     return caja;
@@ -901,6 +920,7 @@ function contenidoDeSeccionMundo(grupo, fichas, irA) {
         const suyas = porEtiqueta.get(nombre);
         const conRegion = suyas.some((f) => llano(f.region));
         const regiones = new Set(suyas.map((f) => llano(f.region)).filter(Boolean));
+        const conSubregiones = [...regiones].some((r) => r !== llano(nombre));
         const lista = conRegion
             ? suyas.filter((f) => !regiones.has(llano(f.titulo)) && llano(f.titulo) !== llano(nombre))
                 .sort((a, b) => a.titulo.localeCompare(b.titulo, "es"))
@@ -929,7 +949,9 @@ function contenidoDeSeccionMundo(grupo, fichas, irA) {
             : (n === 1 ? "1 página" : n + " páginas");
         cabecera.appendChild(cuenta);
         parte.appendChild(cabecera);
-        parte.appendChild(listaDeFichasMundo(lista, conRegion));
+        parte.appendChild(conSubregiones
+            ? porRegionesMundo(nombre, suyas, true)
+            : listaDeFichasMundo(lista, conRegion));
         caja.appendChild(parte);
     });
     return caja;
@@ -963,6 +985,7 @@ function prepararContenidoMundo() {
         }
     } catch (error) {
     }
+    ajustarContenidoMundo(plegable);
     plegable.addEventListener("toggle", () => {
         try {
             if (plegable.open) {
@@ -1110,4 +1133,30 @@ function prepararAzarMundo(fichas) {
         const una = todas[Math.floor(Math.random() * todas.length)];
         window.location.href = rutaSeguraMundo(una.url);
     });
+}
+function ajustarContenidoMundo(plegable) {
+    const caja = plegable.closest(".mundo-contenido");
+    const ficha = document.querySelector(".mundo-ficha");
+    if (!caja) {
+        return;
+    }
+    const ajustar = () => {
+        if (getComputedStyle(caja).position !== "fixed") {
+            caja.style.maxHeight = "";
+            return;
+        }
+        const abajo = parseFloat(getComputedStyle(caja).bottom) || 0;
+        let tope = 16;
+        if (ficha) {
+            const suya = ficha.getBoundingClientRect();
+            if (suya.bottom > 0) {
+                tope = Math.max(tope, suya.bottom + 16);
+            }
+        }
+        const libre = window.innerHeight - abajo - tope;
+        caja.style.maxHeight = Math.round(Math.min(Math.max(libre, 150), window.innerHeight * 0.6)) + "px";
+    };
+    ajustar();
+    document.addEventListener("scroll", ajustar, { capture: true, passive: true });
+    window.addEventListener("resize", ajustar);
 }

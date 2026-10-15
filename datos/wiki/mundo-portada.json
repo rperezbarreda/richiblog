@@ -6,6 +6,11 @@
     },
     "cambios": [
         {
+            "titulo": "El Ciclo de los Heraldos",
+            "url": "/web/wiki/calendario/el_ciclo_de_los_heraldos.html",
+            "fecha": "2026-10-15"
+        },
+        {
             "titulo": "El Sol",
             "url": "/web/wiki/cosmologia/el_sol.html",
             "fecha": "2026-10-15"
@@ -28,11 +33,6 @@
         {
             "titulo": "Lurmeri",
             "url": "/web/wiki/cosmologia/lurmeri.html",
-            "fecha": "2026-10-15"
-        },
-        {
-            "titulo": "Nevadra",
-            "url": "/web/wiki/cosmologia/nevadra.html",
             "fecha": "2026-10-15"
         }
     ]

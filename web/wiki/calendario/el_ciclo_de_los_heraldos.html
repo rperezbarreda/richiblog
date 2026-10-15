@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-aDtzI6QgHfitL7afCewTh/rpYprDOJvupEIYVZKPk8Y=' 'sha256-mFdvcZNIOMjRiszaJziqlonbhQfSshRF3q+UHikmMLQ='; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self' https://script.google.com https://script.googleusercontent.com; object-src 'none'; base-uri 'self'; form-action 'self'">
+    <!-- ==== TEMA ==== -->
+    <meta name="theme-color" content="#12091c">
+    <script>
+      (function () {
+        document.documentElement.classList.add("js");
+        try {
+          var temas = {
+            "claro": ["light", "#f3e1d6"],
+            "oscuro-puro": ["puro-oscuro", "#000000"],
+            "claro-puro": ["puro-claro", "#ffffff"],
+            "tranquilo": ["tranquilo", "#f2efe9"],
+            "tranquilo-oscuro": ["tranquilo-oscuro", "#1b1e22"],
+            "terminal-verde": ["terminal-verde", "#000000"],
+            "terminal-azul": ["terminal-azul", "#000000"],
+            "terminal-rojo": ["terminal-rojo", "#000000"],
+            "terminal-ambar": ["terminal-ambar", "#000000"]
+          };
+          var guardado = localStorage.getItem("richi-theme");
+          var elegido = temas[guardado];
+          if (!elegido && !guardado &&
+              window.matchMedia("(prefers-color-scheme: light)").matches) {
+            elegido = temas.claro;
+          }
+          if (elegido) {
+            document.documentElement.setAttribute("data-theme", elegido[0]);
+            var barra = document.querySelector('meta[name="theme-color"]');
+            if (barra) { barra.setAttribute("content", elegido[1]); }
+          }
+          if (localStorage.getItem("richi-lateral") === "plegada") {
+            document.documentElement.classList.add("lateral-plegada");
+          }
+        } catch (e) {}
+      })();
+    </script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>El Ciclo de los Heraldos · Wiki Cralëa · El Blog de Richi</title>
+    <meta name="description" content="El mundo sigue un calendario de 12 meses de 28 días, cada uno asociado a una virtud o un concepto vinculado a los Heraldos de la Virtud y la Ruina. Al final del año hay cuatro días sagrados dedicados a la Mesa del Ord…">
+    <link rel="canonical" href="https://richi.blog/web/wiki/calendario/el_ciclo_de_los_heraldos.html">
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="El Blog de Richi">
+    <meta property="og:locale" content="es_ES">
+    <meta property="og:title" content="El Ciclo de los Heraldos · Wiki Cralëa · El Blog de Richi">
+    <meta property="og:description" content="El mundo sigue un calendario de 12 meses de 28 días, cada uno asociado a una virtud o un concepto vinculado a los Heraldos de la Virtud y la Ruina. Al final del año hay cuatro días sagrados dedicados a la Mesa del Ord…">
+    <meta property="og:url" content="https://richi.blog/web/wiki/calendario/el_ciclo_de_los_heraldos.html">
+    <meta property="og:image" content="https://richi.blog/imagenes/meta/og.webp">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta property="og:image:alt" content="El Blog de Richi — ilustración de Richi sobre fondo morado">
+    <meta name="twitter:card" content="summary_large_image">
+    <link rel="icon" type="image/x-icon" href="/imagenes/favicon.ico">
+    <link rel="preload" href="/tipografias/space-grotesk-400.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="alternate" type="application/rss+xml" title="El Blog de Richi — blog, relatos y rol" href="/blog/rss.xml">
+    <!-- ==== ADELANTO DEL MENÚ ==== -->
+    <script>window.adelantoDeFragmentos={};try{window.adelantoDeFragmentos["/fragmentos/barra-lateral.html"]=fetch("/fragmentos/barra-lateral.html?v=e6721b10").then(function(r){return r.ok?r.text():null}).catch(function(){return null})}catch(e){}</script>
+    <!-- ==== CSS ==== -->
+    <link rel="stylesheet" href="/estilos/paquete-comun.css?v=e43f1eeb">
+    <link rel="stylesheet" href="/ligero/estilos/paginas/mundo.css?v=a45c7b2c">
+    <link rel="stylesheet" href="/ligero/estilos/componentes/lupa.css?v=0eda6554">
+    <link rel="stylesheet" href="/ligero/estilos/paginas/mundo.responsive.css?v=5c393dbd">
+    <link rel="stylesheet" href="/ligero/estilos/componentes/barra-lateral.css?v=ef2928ea">
+    <link rel="stylesheet" href="/ligero/estilos/componentes/barra-lateral.responsive.css?v=fb0768a1">
+    <link rel="stylesheet" href="/ligero/estilos/paginas/buscar.css?v=e32b461e">
+    <link rel="stylesheet" href="/estilos/paquete-cierre.css?v=3c277d98">
+    <!-- ==== fin del CSS ==== -->
+    <script src="/ligero/scripts/cargador-scripts.js?v=7c09f1b2"></script>
+    <!-- ==== JS ==== -->
+    <script defer src="/scripts/paquete-comun.js?v=ffd56d5d"></script>
+    <script defer src="/ligero/scripts/componentes/lupa.js?v=1992d040"></script>
+    <script defer src="/ligero/scripts/paginas/mundo.js?v=824a9b88"></script>
+    <!-- ==== fin del JS ==== -->
+    </head>
+<body>
+    <a class="skip-link" href="#main-content">Saltar al contenido</a>
+    <div id="sidebar-container"></div>
+
+    <main id="main-content">
+        <section id="home" class="home mundo-page">
+            <div class="mundo-cabecera">
+                <div class="mundo-migas" role="navigation" aria-label="Dónde estás"><ol><li><a href="/web/wiki/index_wiki.html">Wiki Cralëa</a></li><li aria-current="page">El Ciclo de los Heraldos</li></ol></div>
+                <h1 class="mundo-titulo">El Ciclo de los Heraldos</h1>
+                <p class="mundo-subtitulo">El calendario de Cralëa</p>
+                <p class="mundo-etiquetas"><span class="mundo-etiquetas-label">etiquetas:</span><a class="mundo-etiqueta" href="/web/wiki/index_wiki.html?buscar=Calendario">Calendario</a></p>
+            </div>
+
+            <div class="mundo-columnas">
+                <article class="mundo-articulo"><p>El mundo sigue un <strong>calendario de 12 meses de 28 días</strong>, cada uno asociado a una virtud o un concepto vinculado a los Heraldos de la Virtud y la Ruina. Al final del año hay <strong>cuatro días sagrados</strong> dedicados a la Mesa del Orden Natural, que marcan el fin de un ciclo y el inicio de otro. Cada mes está lleno de festividades que honran a los Heraldos y reflejan su influencia en la vida cotidiana.</p>
+<h2 id="el_ano_de_un_vistazo">El año de un vistazo</h2>
+<div class="mundo-tabla"><table><thead><tr><th></th><th>Mes</th><th>Heraldo</th><th>Estación</th><th>Festividad principal</th></tr></thead><tbody><tr><td>1</td><td>⚔️ Mes de Valentía</td><td>Clodia, la Madre del Valor</td><td>❄️ empieza el invierno</td><td>La Prueba del Héroe</td></tr><tr><td>2</td><td>🕶️ Mes del Susurro</td><td>Verdos, el Padre de Mentiras</td><td>invierno</td><td>La Noche de los Susurros</td></tr><tr><td>3</td><td>📜 Mes de Lealtad</td><td>Sedril, el Custodio</td><td>invierno</td><td>El Juramento Eterno</td></tr><tr><td>4</td><td>🎭 Mes de Astucia</td><td>Morlon, el Rufián</td><td>🌿 empieza la primavera</td><td>El Día de la Máscara</td></tr><tr><td>5</td><td>🍞 Mes de Misericordia</td><td>Demadia, la Dama Caritativa</td><td>primavera</td><td>La Mano Abierta</td></tr><tr><td>6</td><td>🦂 Mes de Penitencia</td><td>Runis, la Dama Cruel</td><td>primavera</td><td>El Juicio de la Sangre</td></tr><tr><td>7</td><td>📖 Mes del Arcano</td><td>Aglas, el Sabio</td><td>☀️ empieza el verano</td><td>La Iluminación</td></tr><tr><td>8</td><td>⚖️ Mes de Justicia</td><td>Labros, el Juez</td><td>verano</td><td>El Día del Ojo por Ojo</td></tr><tr><td>9</td><td>🔥 Mes del Sacrificio</td><td>Bagros, el Mártir</td><td>verano</td><td>El Camino de la Prueba</td></tr><tr><td>10</td><td>⛓️ Mes de Cadena</td><td>Cahir, el Esclavo</td><td>🍂 empieza el otoño</td><td>El Alzamiento de las Cadenas</td></tr><tr><td>11</td><td>⚒️ Mes de Unidad</td><td>Metra, el Forjador</td><td>otoño</td><td>El Pacto de Sangre</td></tr><tr><td>12</td><td>🌙 Mes de Espectro</td><td>Naria, la Sombría</td><td>❄️ vuelve el invierno</td><td>La Noche de los Lamentos</td></tr><tr><td>—</td><td>🌿 Fin del Ciclo</td><td>la Mesa del Orden Natural</td><td></td><td>cuatro días sagrados</td></tr></tbody></table></div>
+<h2 id="un_mes">Un mes</h2>
+<p>Como cada mes tiene 28 días, que son justo cuatro semanas, <strong>todos los meses empiezan en Día del Sol</strong> y acaban en Día de la Luna: el día 9 de un mes cae siempre en Día del Río, sea el mes que sea.</p>
+<div class="mundo-tabla"><table><thead><tr><th>☀️ Sol</th><th>🌊 Río</th><th>🌳 Cosecha</th><th>🍃 Brisa</th><th>⚡ Tormenta</th><th>🌫️ Niebla</th><th>🌙 Luna</th></tr></thead><tbody><tr><td>1</td><td>2</td><td>3</td><td>4</td><td>5</td><td>6</td><td>7</td></tr><tr><td>8</td><td>9</td><td>10</td><td>11</td><td>12</td><td>13</td><td>14</td></tr><tr><td>15</td><td>16</td><td>17</td><td>18</td><td>19</td><td>20</td><td>21</td></tr><tr><td>22</td><td>23</td><td>24</td><td>25</td><td>26</td><td>27</td><td>28</td></tr></tbody></table></div>
+<h2 id="los_meses_del_ano">Los meses del año</h2>
+<h3 id="mes_de_valentia">Mes de Valentía</h3>
+<p><em>Regido por Clodia, la Madre del Valor.</em> ⚔️🔥</p>
+<p>Un mes de desafíos y batallas, donde se pone a prueba la fortaleza y el honor de los guerreros. Es el <strong>inicio del año y el comienzo del invierno</strong> ❄️: un mes frío, en el que los primeros días del año traen consigo duras nevadas.</p>
+<ul><li><strong>Festividad principal:</strong> <em>La Prueba del Héroe</em>. Duelos rituales y pruebas de resistencia deciden quién es digno del favor de Clodia.</li><li><strong>Otros eventos:</strong> se celebran torneos de combate y pruebas de valentía.</li></ul>
+<h3 id="mes_del_susurro">Mes del Susurro</h3>
+<p><em>Regido por Verdos, el Padre de Mentiras.</em> 🕶️🩸</p>
+<p>Un mes donde la desconfianza se extiende y las intrigas se tejen en las sombras.</p>
+<ul><li><strong>Festividad principal:</strong> <em>La Noche de los Susurros</em>. Un día en el que los acuerdos secretos y las traiciones se concretan en reuniones clandestinas.</li><li><strong>Otros eventos:</strong> se teme la llegada de espías y traidores; muchos nobles refuerzan su seguridad.</li></ul>
+<h3 id="mes_de_lealtad">Mes de Lealtad</h3>
+<p><em>Regido por Sedril, el Custodio.</em> 📜⚖️</p>
+<p>Un tiempo de renovación de pactos, promesas y justicia.</p>
+<ul><li><strong>Festividad principal:</strong> <em>El Juramento Eterno</em>. Se firman contratos sagrados y se renuevan alianzas bajo la luz de las estrellas.</li><li><strong>Otros eventos:</strong> las bodas reales y los acuerdos comerciales suelen formalizarse este mes.</li></ul>
+<h3 id="mes_de_astucia">Mes de Astucia</h3>
+<p><em>Regido por Morlon, el Rufián.</em> 🎭🌊</p>
+<p>Un mes de engaño y supervivencia, donde los oportunistas prosperan. <strong>Fin del invierno, inicio de la primavera</strong> 🌿: la nieve comienza a derretirse y las primeras lluvias marcan el cambio de temporada.</p>
+<ul><li><strong>Festividad principal:</strong> <em>El Día de la Máscara</em>. Una celebración en la que todos ocultan su identidad con disfraces y participan en juegos de engaño.</li><li><strong>Otros eventos:</strong> es común la proliferación de ladrones y estafadores, lo que lleva a los mercaderes a tomar precauciones.</li></ul>
+<h3 id="mes_de_misericordia">Mes de Misericordia</h3>
+<p><em>Regido por Demadia, la Dama Caritativa.</em> 💧🍞</p>
+<p>Un mes de compasión y generosidad, donde se ayuda a los más necesitados.</p>
+<ul><li><strong>Festividad principal:</strong> <em>La Mano Abierta</em>. Un día en el que los ricos distribuyen comida y recursos entre los pobres.</li><li><strong>Otros eventos:</strong> se considera la mejor época para sembrar los primeros cultivos de la temporada.</li></ul>
+<h3 id="mes_de_penitencia">Mes de Penitencia</h3>
+<p><em>Regido por Runis, la Dama Cruel.</em> 🦂🩸</p>
+<p>Un tiempo de castigos y sacrificios, donde la crueldad se impone como ley.</p>
+<ul><li><strong>Festividad principal:</strong> <em>El Juicio de la Sangre</em>. Se celebran combates brutales donde solo los más fuertes sobreviven.</li><li><strong>Otros eventos:</strong> se refuerzan las prisiones y se llevan a cabo ejecuciones públicas.</li></ul>
+<h3 id="mes_del_arcano">Mes del Arcano</h3>
+<p><em>Regido por Aglas, el Sabio.</em> 📖🌞</p>
+<p>Un mes de estudio, descubrimientos y transmisión del conocimiento. <strong>Fin de la primavera, inicio del verano</strong> ☀️: los días se vuelven más largos y cálidos.</p>
+<ul><li><strong>Festividad principal:</strong> <em>La Iluminación</em>. Se encienden lámparas en las bibliotecas y se organizan debates filosóficos.</li><li><strong>Otros eventos:</strong> es la mejor época para iniciar estudios o construir academias.</li></ul>
+<h3 id="mes_de_justicia">Mes de Justicia</h3>
+<p><em>Regido por Labros, el Juez.</em> ⚖️🔥</p>
+<p>Un mes donde se saldan cuentas y se castigan las injusticias con sangre.</p>
+<ul><li><strong>Festividad principal:</strong> <em>El Día del Ojo por Ojo</em>. Se permite la venganza como un derecho sagrado durante una jornada.</li><li><strong>Otros eventos:</strong> se celebran juicios de combate, donde el más fuerte es considerado el justo.</li></ul>
+<h3 id="mes_del_sacrificio">Mes del Sacrificio</h3>
+<p><em>Regido por Bagros, el Mártir.</em> 🔥🌿</p>
+<p>Un mes de resistencia y entrega, donde se valora la dedicación extrema.</p>
+<ul><li><strong>Festividad principal:</strong> <em>El Camino de la Prueba</em>. Quienes buscan redimirse realizan grandes sacrificios personales.</li><li><strong>Otros eventos:</strong> marca el fin de la época de cosechas, y se ofrecen tributos a los dioses.</li></ul>
+<h3 id="mes_de_cadena">Mes de Cadena</h3>
+<p><em>Regido por Cahir, el Esclavo.</em> ⛓️❄️</p>
+<p>Un tiempo de rebelión y colapso, donde los oprimidos se alzan contra sus opresores. <strong>Fin del verano, inicio del otoño</strong> 🍂: las temperaturas comienzan a descender y los vientos aumentan.</p>
+<ul><li><strong>Festividad principal:</strong> <em>El Alzamiento de las Cadenas</em>. Se inician revueltas y muchos esclavos intentan escapar.</li><li><strong>Otros eventos:</strong> se desatan conflictos políticos y enfrentamientos sociales.</li></ul>
+<h3 id="mes_de_unidad">Mes de Unidad</h3>
+<p><em>Regido por Metra, el Forjador.</em> ⚒️🤝</p>
+<p>Un mes de construcción, hermandad y fortalecimiento de las comunidades.</p>
+<ul><li><strong>Festividad principal:</strong> <em>El Pacto de Sangre</em>. Se refuerzan los lazos entre clanes y ejércitos con ceremonias de hermandad.</li><li><strong>Otros eventos:</strong> se realizan torneos de herrería y construcciones comunitarias.</li></ul>
+<h3 id="mes_de_espectro">Mes de Espectro</h3>
+<p><em>Regido por Naria, la Sombría.</em> 🌙🖤</p>
+<p>Un mes de presagios oscuros, donde la tristeza y el miedo reinan. <strong>Fin del otoño, inicio del invierno</strong> ❄️: el frío regresa y las noches se alargan.</p>
+<ul><li><strong>Festividad principal:</strong> <em>La Noche de los Lamentos</em>. Un día de duelo y desesperación en el que se recuerda a los caídos.</li><li><strong>Otros eventos:</strong> se hacen ofrendas a la luna negra para intentar apaciguar su influencia.</li></ul>
+<h2 id="los_cuatro_dias_del_fin_del_ciclo">Los cuatro días del Fin del Ciclo</h2>
+<p>Después del último mes del año, el mundo entra en un periodo sagrado de transición, dedicado a la <strong>Mesa del Orden Natural</strong>. El conflicto entre la Virtud y la Ruina se suspende momentáneamente y la existencia queda gobernada solo por la Mesa. Estos cuatro días simbolizan la muerte de un ciclo y el renacimiento de otro: el final y el inicio de todas las cosas. Cada uno se venera de una manera, con rituales que reflejan la fuerza primordial de su Heraldo.</p>
+<h3 id="dia_del_sendero">Día del Sendero</h3>
+<p><em>Dedicado a Elvir, la Muerte y el Descanso.</em> 🌫️</p>
+<p>Es el día en el que se honra a los muertos y se facilita su tránsito al descanso eterno; un momento de reflexión sobre lo que se ha perdido y la fugacidad de la vida.</p>
+<ul><li><strong>Festividad principal:</strong> <em>El Paso Silencioso</em>. Se hacen procesiones en silencio a los cementerios, donde se dejan ofrendas de velas y flores para los difuntos.</li><li>🕯️ Se encienden faroles en las casas y en los caminos para guiar a las almas errantes.</li><li>⚰️ Se evita pronunciar el nombre de los fallecidos en voz alta, pues se cree que llamarlos puede atraerlos de vuelta.</li><li>🍂 Los ancianos cuentan historias sobre vidas pasadas, recordando las enseñanzas de los que se han ido.</li></ul>
+<h3 id="dia_del_renacer">Día del Renacer</h3>
+<p><em>Dedicado a Lusdra, la Vida y la Suerte.</em> 🌸</p>
+<p>Es un día de celebración y nuevos comienzos. Se cree que la suerte de todo el año venidero se decide en este día, así que es costumbre hacer actos simbólicos de renovación.</p>
+<ul><li><strong>Festividad principal:</strong> <em>El Primer Brote</em>. Las familias plantan semillas o árboles jóvenes, que simbolizan la vida que seguirá creciendo en el próximo ciclo.</li><li>🎲 Se celebran juegos de azar y desafíos de habilidad para atraer la buena fortuna.</li><li>🍃 Las casas se decoran con flores y ramas frescas para recibir la bendición de Lusdra.</li><li>🍼 Los recién nacidos se presentan a la comunidad con rituales de bienvenida y nombres nuevos.</li></ul>
+<h3 id="dia_de_la_purga">Día de la Purga</h3>
+<p><em>Dedicado a Imedia, la Peste y la Decadencia.</em> ☠️</p>
+<p>Es un día de purificación y de reconocer la fragilidad de la existencia. Se cree que Imedia visita las ciudades en esta jornada, para juzgar si la humanidad ha aprendido de su decadencia o necesita ser castigada.</p>
+<ul><li><strong>Festividad principal:</strong> <em>La Quema de las Impurezas</em>. Se encienden grandes hogueras en plazas y aldeas, donde se arrojan objetos viejos y símbolos de los pecados del año pasado.</li><li>🔥 Se queman hierbas medicinales en los hogares para limpiar el aire de enfermedades.</li><li>🛀 La gente se da baños de purificación en ríos o con aguas bendecidas.</li><li>🐀 Se deja comida en los bordes de las ciudades para los animales carroñeros, a los que se tiene por heraldos de Imedia.</li></ul>
+<h3 id="dia_del_cambio">Día del Cambio</h3>
+<p><em>Dedicado a Calad, la Destrucción y la Renovación.</em> ⚡</p>
+<p>Es el último día del año, cuando todo lo viejo muere y lo nuevo nace. Se cree que cualquier acción tomada este día resonará a lo largo del próximo ciclo, así que es un tiempo de decisiones trascendentales.</p>
+<ul><li><strong>Festividad principal:</strong> <em>El Círculo Roto</em>. Se destruyen objetos antiguos o dañados, que simbolizan el fin del pasado y la llegada de lo desconocido.</li><li>⏳ Se escriben deseos en pergaminos que se queman en una gran pira al anochecer.</li><li>🌪️ Si hay tormenta este día, se toma como presagio de un año de grandes cambios.</li><li>🔄 Los líderes de ciudades y clanes hacen juramentos de renovación o anuncian reformas importantes.</li></ul>
+<h2 id="los_dias_de_la_semana">Los días de la semana</h2>
+<p>La semana tiene <strong>siete días</strong>, cada uno ligado a un aspecto de la naturaleza y del ciclo del mundo, con su propio significado, sus actividades, sus supersticiones y sus rituales.</p>
+<div class="mundo-tabla"><table><thead><tr><th>Día</th><th>Representa</th><th>Costumbres y creencias</th></tr></thead><tbody><tr><td>☀️ Día del Sol</td><td>la energía, la fuerza y el inicio de los ciclos</td><td>el mejor día para empezar proyectos o viajes; trabajar trae prosperidad, pero descansar al sol en exceso es pereza y atrae mala suerte; los guerreros entrenan para fortalecer cuerpo y espíritu</td></tr><tr><td>🌊 Día del Río</td><td>el flujo del tiempo, la purificación y la adaptabilidad</td><td>ceremonias de limpieza física y espiritual; bañarse en aguas naturales; los contratos firmados fluyen sin obstáculos, pero las promesas rotas traen desgracia</td></tr><tr><td>🌳 Día de Cosecha</td><td>el crecimiento, la estabilidad y las raíces</td><td>reflexión, aprendizaje y enseñanza; se plantan árboles o se cuidan jardines; los nacidos este día serán fuertes de espíritu y longevos</td></tr><tr><td>🍃 Día de la Brisa</td><td>la comunicación, la sabiduría y el cambio</td><td>sabios y consejeros se reúnen a debatir; el viento lleva los deseos al oído de los Heraldos; los viajeros rezan por un trayecto seguro</td></tr><tr><td>⚡ Día de la Tormenta</td><td>la determinación, la autoridad y las decisiones firmes</td><td>el mejor día para anuncios y resoluciones; duelos y torneos en honor a la fuerza y el honor; si truena, se avecina un gran cambio</td></tr><tr><td>🌫️ Día de la Niebla</td><td>la incertidumbre, los misterios y los sueños</td><td>introspección, meditación y rituales espirituales; el velo entre vivos y muertos es más delgado; los oráculos reciben más visitas</td></tr><tr><td>🌙 Día de la Luna</td><td>el descanso, la introspección y la magia</td><td>día sagrado de la hechicería; ceremonias bajo la luna, sobre todo con luna llena; quien nace este día está destinado a un gran propósito, aunque su camino será difícil</td></tr></tbody></table></div></article>
+
+                <div class="mundo-lateral"><div class="mundo-contenido" role="navigation" aria-labelledby="mundo-contenido-titulo"><details class="mundo-contenido-plegable" open data-mundo-contenido><summary class="mundo-contenido-cabecera"><span class="mundo-sub-flecha" aria-hidden="true">▾</span><h2 class="mundo-contenido-titulo" id="mundo-contenido-titulo">Contenido</h2></summary><ol><li><a href="#el_ano_de_un_vistazo">El año de un vistazo</a></li><li><a href="#un_mes">Un mes</a></li><li><a href="#los_meses_del_ano">Los meses del año</a><ol><li><a href="#mes_de_valentia">Mes de Valentía</a></li><li><a href="#mes_del_susurro">Mes del Susurro</a></li><li><a href="#mes_de_lealtad">Mes de Lealtad</a></li><li><a href="#mes_de_astucia">Mes de Astucia</a></li><li><a href="#mes_de_misericordia">Mes de Misericordia</a></li><li><a href="#mes_de_penitencia">Mes de Penitencia</a></li><li><a href="#mes_del_arcano">Mes del Arcano</a></li><li><a href="#mes_de_justicia">Mes de Justicia</a></li><li><a href="#mes_del_sacrificio">Mes del Sacrificio</a></li><li><a href="#mes_de_cadena">Mes de Cadena</a></li><li><a href="#mes_de_unidad">Mes de Unidad</a></li><li><a href="#mes_de_espectro">Mes de Espectro</a></li></ol></li><li><a href="#los_cuatro_dias_del_fin_del_ciclo">Los cuatro días del Fin del Ciclo</a><ol><li><a href="#dia_del_sendero">Día del Sendero</a></li><li><a href="#dia_del_renacer">Día del Renacer</a></li><li><a href="#dia_de_la_purga">Día de la Purga</a></li><li><a href="#dia_del_cambio">Día del Cambio</a></li></ol></li><li><a href="#los_dias_de_la_semana">Los días de la semana</a></li></ol></details></div><aside class="mundo-ficha" role="note" aria-labelledby="mundo-ficha-titulo"><h2 class="mundo-ficha-titulo" id="mundo-ficha-titulo">El Ciclo de los Heraldos</h2><p class="mundo-ficha-que">Calendario</p><dl class="mundo-ficha-datos"><div class="mundo-ficha-fila"><dt>meses</dt><dd>12, de 28 días</dd></div><div class="mundo-ficha-fila"><dt>semana</dt><dd>7 días</dd></div><div class="mundo-ficha-fila"><dt>fin del ciclo</dt><dd>4 días sagrados</dd></div><div class="mundo-ficha-fila"><dt>días al año</dt><dd>340</dd></div></dl></aside></div>
+            </div>
+
+            
+
+            <a class="mundo-volver mundo-volver-abajo" href="/web/wiki/index_wiki.html">← volver a la wiki</a>
+        </section>
+    </main>
+</body>
+</html>

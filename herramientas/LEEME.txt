@@ -1567,6 +1567,24 @@
   para que se vea cómo queda el contenido de la página. Se buscan por
   esa frase y se cambian por lo de verdad.
 
+  EL CALENDARIO, EL CICLO DE LOS HERALDOS (wiki/Calendario/, el
+  15-10-2026, de la página de Notion): una entrada de la wiki con la
+  tabla del año (mes, Heraldo, estación y festividad), la rejilla de un
+  mes (28 días = 4 semanas justas, así que todos los meses empiezan en
+  Día del Sol), cada mes con su texto, los cuatro días del Fin del Ciclo
+  y los días de la semana. Sale en la sección «historia» (la etiqueta
+  «calendario» está en la de historia, en mundo-categorias.json).
+
+  EN LA VENTANA DEL MAPAMUNDI, una parte del mundo que tiene regiones
+  dentro (Archipiélagos) va repartida en un apartado por región (cada
+  archipiélago, las Tierras Encantadas, y el Archipiélago Fragmentado
+  justo debajo de ellas), más uno de «Independientes» con los países que
+  no son de ninguna (Telvetia, Zaustilla, la Cuna de Quimeras).
+
+  EL CONTENIDO DE UNA ENTRADA no tapa la ficha: mientras la ficha se ve,
+  mide como mucho el hueco que queda entre ella y el fondo de la pantalla
+  (con su propio scroll); al bajar y perderla de vista, crece.
+
   LA COSMOLOGÍA (wiki/Cosmología/, el 15-10-2026, sacada del PDF de
   Notion): «La Cosmología de Cralëa» (el Jardín del Último Canto y los
   Mundos Tributo), La Luna, El Sol, Nevadra, Lurmeri y Gomath. Cada una
