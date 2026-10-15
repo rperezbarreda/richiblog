@@ -1,7 +1,8 @@
 ---
 # plantilla: Raza
-# para: un pueblo o una especie, como las razas de D&D (elfos, enanos…); sus subrazas van en páginas aparte
+# para: una raza o una subraza, como en D&D (elfos; elfos altos, drow…): luego pregunta cuál
 # orden: 6
+# especial: raza
 # carpeta: Razas/{{nombre}}
 title: "{{nombre}}"
 subtitle: ""

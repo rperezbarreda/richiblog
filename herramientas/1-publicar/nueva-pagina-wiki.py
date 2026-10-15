@@ -11,9 +11,9 @@
 #
 #     wiki/Lugares/Valderín.md
 #
-# Pregunta el nombre y QUÉ TIPO DE PÁGINA es (país, región, asentamiento,
-# lugar, personaje, raza, deidad, religión, organización, monstruo,
-# objeto mágico, acontecimiento, era, astro, festividad, idioma) y la
+# Pregunta el nombre y QUÉ TIPO DE PÁGINA es (lugar, personaje, raza o
+# subraza, deidad, religión, organización, monstruo, objeto mágico,
+# acontecimiento, era, astro, festividad, idioma) y la
 # crea con su PLANTILLA: la ficha con todos los campos que suele llevar
 # esa clase de página en una wiki de un mundo de fantasía, y los apartados
 # de siempre, cada uno con una nota escondida que dice qué va ahí. Los
@@ -28,13 +28,23 @@
 #     # plantilla: País              el nombre en la lista
 #     # para: un reino, un…          la explicación de al lado
 #     # orden: 1                     dónde sale en la lista
-#     # pregunta region: ¿De qué…?   algo que preguntar; lo que se conteste
-#                                    va donde ponga {{region}}
+#     # pregunta raza: ¿De qué…?     algo que preguntar; lo que se conteste
+#                                    va donde ponga {{raza}}
+#     # elige sub: ¿Qué es? | Astros=Astro | Constelaciones=Constelación | Otro
+#                                    un menú: {{sub}} es lo elegido y
+#                                    {{sub_uno}} lo de detrás del «=» (en
+#                                    singular, para la ficha); «Otro» deja
+#                                    escribir uno nuevo
+#     # busca donde: ¿Dónde está?    busca entre las páginas que hay (vale
+#                                    escribir solo un trozo) y deja elegir;
+#                                    si no está, va escrito sin enlace
 #     # carpeta: Personajes          dónde se guarda, dentro de wiki/
-#     # carpeta: junto a {{region}}  o en la carpeta de esa otra página
-#                                    (y entonces {{parte}} es la parte del
-#                                    mapamundi en la que está)
+#     # carpeta: junto a {{raza}}    o en la carpeta de esa otra página
 #     # si no está: Razas/{{raza}}   dónde, si esa otra página no existe
+#     # oculta: sí                   no sale en la lista (la Subraza: se
+#                                    llega a ella desde «Raza»)
+#     # especial: raza               la Raza: pregunta si es raza o
+#                                    subraza (ver flujo_de_raza)
 #
 # {{nombre}} es siempre el nombre de la página. Lo que no se conteste se
 # queda vacío (un [[{{algo}}]] sin contestar desaparece entero).
@@ -51,6 +61,7 @@
 #
 #     python herramientas/3-generadores/generar-mundo.py
 
+import difflib
 import re
 import sys
 from pathlib import Path
@@ -126,18 +137,21 @@ def esqueleto(nombre, etiqueta, subtitulo, que):
 # LAS PLANTILLAS
 # =========================================
 
-RE_META = re.compile(r"^#\s*(plantilla|para|orden|carpeta|si no está|pregunta\s+\w+)\s*:\s*(.*)$")
+RE_META = re.compile(r"^#\s*(plantilla|para|orden|carpeta|si no está|oculta|especial"
+                     r"|pregunta\s+\w+|elige\s+\w+|busca\s+\w+)\s*:\s*(.*)$")
 
 
 def leer_plantillas():
-    """[{nombre, para, orden, carpeta, preguntas: [(clave, texto)], texto}]"""
+    """[{nombre, para, orden, carpeta, si_no, oculta, especial,
+    preguntas: [(tipo, clave, texto)], texto, archivo}]"""
     salida = []
     if not PLANTILLAS.is_dir():
         return salida
     for archivo in sorted(PLANTILLAS.glob("*.md")):
         texto = archivo.read_text(encoding="utf-8")
         una = {"nombre": re.sub(r"^\d+\w?\s*", "", archivo.stem), "para": "", "orden": 999,
-               "carpeta": "", "si_no": "", "preguntas": [], "texto": texto}
+               "carpeta": "", "si_no": "", "oculta": False, "especial": "",
+               "preguntas": [], "texto": texto, "archivo": archivo}
         for linea in texto.split("\n"):
             m = RE_META.match(linea.strip())
             if not m:
@@ -153,27 +167,104 @@ def leer_plantillas():
                 una["carpeta"] = valor
             elif clave == "si no está":
                 una["si_no"] = valor
+            elif clave == "oculta":
+                una["oculta"] = valor.lower() in SI
+            elif clave == "especial":
+                una["especial"] = valor.lower()
             else:
-                una["preguntas"].append((clave.split()[1], valor))
+                tipo, nombre = clave.split()
+                una["preguntas"].append((tipo, nombre, valor))
         salida.append(una)
     return sorted(salida, key=lambda u: (u["orden"], u["nombre"].lower()))
 
 
+def paginas_de_la_wiki():
+    """Todas las páginas de la wiki (sin las plantillas): [archivo]."""
+    return [a for a in VAULT.rglob("*.md") if "_system" not in a.relative_to(VAULT).parts]
+
+
 def pagina_llamada(nombre):
-    """El .md de la wiki que se llama así (sin mirar mayúsculas), o None."""
-    bajo = nombre.strip().lower()
-    for archivo in VAULT.rglob("*.md"):
-        if archivo.stem.lower() == bajo and "_system" not in archivo.relative_to(VAULT).parts:
+    """El .md de la wiki que se llama así (sin mirar mayúsculas ni
+    tildes), o None."""
+    bajo = sin_tildes(nombre.strip()).lower()
+    for archivo in paginas_de_la_wiki():
+        if sin_tildes(archivo.stem).lower() == bajo:
             return archivo
     return None
 
 
-def rellenar(plantilla, valores):
+def elegir_de_lista(pregunta, opciones):
+    """Un menú numerado; devuelve el índice elegido (desde 0)."""
+    print("\n  " + pregunta)
+    for n, texto in enumerate(opciones, start=1):
+        print(f"     {n:>2}. {texto}")
+    while True:
+        dicho = preguntar("Elige", "1")
+        if dicho.isdigit() and 1 <= int(dicho) <= len(opciones):
+            return int(dicho) - 1
+        print("     Tiene que ser uno de los números de la lista.")
+
+
+def preguntar_eleccion(texto):
+    """«¿Pregunta? | Opción=en singular | Opción | Otro» -> (valor, singular).
+    «Otro» deja escribir uno nuevo."""
+    trozos = [t.strip() for t in texto.split("|")]
+    pregunta, opciones = trozos[0], [t for t in trozos[1:] if t]
+    pares = [(o.split("=", 1) + [o])[:2] if "=" in o else [o, o] for o in opciones]
+    i = elegir_de_lista(pregunta, [p[0] for p in pares])
+    valor, uno = pares[i]
+    if valor.lower() == "otro":
+        valor = ""
+        while not valor:
+            valor = preguntar("Escríbelo (en plural si es un apartado: «Cometas»)")
+        uno = preguntar("¿Y uno solo cómo se dice? (para la ficha: «Cometa»)", valor)
+    return valor.strip(), uno.strip()
+
+
+def buscar_pagina(texto):
+    """Busca entre las páginas que ya hay la que se diga. Devuelve
+    (nombre, con_enlace): con_enlace es False si no existe y se queda
+    escrito tal cual."""
+    while True:
+        dicho = preguntar(texto + " (Enter: ninguno)").strip().strip("[]").strip()
+        if not dicho:
+            return "", False
+        exacta = pagina_llamada(dicho)
+        if exacta:
+            print(f"     → [[{exacta.stem}]]")
+            return exacta.stem, True
+        buscado = sin_tildes(dicho).lower()
+        nombres = sorted({a.stem for a in paginas_de_la_wiki()}, key=str.lower)
+        parecidas = [n for n in nombres if buscado in sin_tildes(n).lower()]
+        if len(parecidas) < 8:
+            for n in difflib.get_close_matches(dicho, nombres, 8, 0.6):
+                if n not in parecidas:
+                    parecidas.append(n)
+        parecidas = parecidas[:8]
+        if not parecidas:
+            print(f"     No hay ninguna página que se parezca a «{dicho}».")
+            if preguntar("¿Lo dejo escrito así, sin enlace? (S/n)", "s").lower() in SI:
+                return dicho, False
+            continue
+        i = elegir_de_lista(f"¿Cuál es? (he buscado «{dicho}»)",
+                            parecidas + [f"ninguna: dejar «{dicho}» escrito sin enlace",
+                                         "ninguna: buscar otra cosa"])
+        if i < len(parecidas):
+            return parecidas[i], True
+        if i == len(parecidas):
+            return dicho, False
+
+
+def rellenar(plantilla, valores, sin_enlace=()):
     """El texto de la plantilla con los huecos rellenos y sin las líneas que
     son solo para esta herramienta."""
     lineas = [l for l in plantilla["texto"].split("\n") if not RE_META.match(l.strip())]
     texto = "\n".join(lineas)
-    for clave, valor in valores.items():
+    for clave in sorted(valores, key=len, reverse=True):
+        valor = valores[clave]
+        if valor and clave in sin_enlace:
+            # Lo que no es una página de la wiki va escrito, no enlazado.
+            texto = texto.replace("[[{{%s}}]]" % clave, valor)
         if valor:
             texto = texto.replace("{{%s}}" % clave, valor)
         else:
@@ -191,46 +282,98 @@ def con_subtitulo(texto, subtitulo):
     return re.sub(r'^subtitle:.*$', "subtitle: " + entre_comillas(subtitulo), texto, count=1, flags=re.M)
 
 
-def desde_plantilla(plantilla, nombre):
+def desde_plantilla(plantilla, nombre, fijos=None):
     """(carpeta dentro de wiki/, texto de la página)."""
     valores = {"nombre": nombre}
-    for clave, pregunta in plantilla["preguntas"]:
-        valor = preguntar(pregunta).strip().strip("[]").strip()
-        # Si es el nombre de una página que ya existe, tal y como se llama
-        # ella: «elfos» y «Elfos» serían dos apartados distintos en la
-        # portada (las etiquetas se escriben como se escriben).
-        otra = pagina_llamada(valor) if valor else None
-        valores[clave] = otra.stem if otra else valor
+    valores.update(fijos or {})
+    sin_enlace = set()
+    for tipo, clave, texto in plantilla["preguntas"]:
+        if clave in valores:
+            continue
+        if tipo == "elige":
+            valores[clave], valores[clave + "_uno"] = preguntar_eleccion(texto)
+        elif tipo == "busca":
+            valor, enlazado = buscar_pagina(texto)
+            valores[clave] = valor
+            if valor and not enlazado:
+                sin_enlace.add(clave)
+        else:
+            valor = preguntar(texto).strip().strip("[]").strip()
+            # Si es el nombre de una página que ya existe, tal y como se
+            # llama ella: «elfos» y «Elfos» serían dos apartados distintos
+            # en la portada (las etiquetas se escriben como se escriben).
+            otra = pagina_llamada(valor) if valor else None
+            valores[clave] = otra.stem if otra else valor
 
     carpeta = plantilla["carpeta"] or "otros"
     m = re.match(r"^junto a \{\{(\w+)\}\}$", carpeta)
     if m:
-        # En la carpeta de otra página (un país, junto a su región), y la
-        # parte del mapamundi es la carpeta de debajo de Mapamundi/.
+        # En la carpeta de otra página (una subraza, junto a su raza).
         otra = pagina_llamada(valores.get(m.group(1), "")) if valores.get(m.group(1)) else None
         if otra:
-            relativa = otra.parent.relative_to(VAULT)
-            carpeta = relativa.as_posix()
-            if len(relativa.parts) > 1 and relativa.parts[0].lower() == "mapamundi":
-                valores.setdefault("parte", relativa.parts[1])
-        elif plantilla["si_no"]:
-            # Sin esa página (la raza de una subraza que aún no existe):
-            # donde diga la plantilla.
-            if valores.get(m.group(1)):
-                print(f"     No hay ninguna página que se llame «{valores[m.group(1)]}» todavía:"
-                      " la guardo en su carpeta igualmente.")
-            carpeta = plantilla["si_no"]
+            carpeta = otra.parent.relative_to(VAULT).as_posix()
         else:
-            if valores.get(m.group(1)):
-                print(f"     No encuentro ninguna página que se llame «{valores[m.group(1)]}».")
-            parte = preguntar("¿En qué parte del mapamundi va? (Azarasia, Partaria, Archipiélagos)")
-            valores["parte"] = parte
-            carpeta = "Mapamundi/" + parte if parte else "Mapamundi"
-    # Lo que quede por rellenar en la carpeta ({{parte}} en la de una región).
+            carpeta = plantilla["si_no"] or "otros"
     for clave, valor in valores.items():
         carpeta = carpeta.replace("{{%s}}" % clave, valor)
     carpeta = re.sub(r"/?\{\{\w+\}\}", "", carpeta).strip("/") or "otros"
-    return carpeta, rellenar(plantilla, valores)
+    return carpeta, rellenar(plantilla, valores, sin_enlace)
+
+
+# =========================================
+# LAS RAZAS Y SUS SUBRAZAS
+# =========================================
+# Una sola entrada en la lista: «Raza». Después se elige si es una raza
+# (que podrá tener subrazas) o una subraza de una de las que ya hay; o de
+# una que aún no existe, y entonces se crea también la raza.
+
+def razas_que_hay():
+    """Los nombres de las páginas que son razas: llevan la etiqueta Razas
+    y no son subraza de nadie."""
+    salida = []
+    for archivo in paginas_de_la_wiki():
+        cabeza = archivo.read_text(encoding="utf-8").split("\n---", 1)[0]
+        etiquetas = re.search(r"^tags:\s*\[(.*)\]", cabeza, re.M)
+        if not etiquetas or "razas" not in [sin_tildes(e.strip()).lower()
+                                            for e in etiquetas.group(1).split(",")]:
+            continue
+        if re.search(r"^subraza de:", cabeza, re.M):
+            continue
+        salida.append(archivo.stem)
+    return sorted(salida, key=str.lower)
+
+
+def nombre_nuevo(pregunta):
+    while True:
+        nombre = preguntar(pregunta).strip()
+        if not nombre:
+            continue
+        malos = [c for c in nombre if c in PROHIBIDO]
+        if malos:
+            print(f"     No puede llevar {' '.join(malos)}: es el nombre de un archivo.")
+            continue
+        if pagina_llamada(nombre):
+            print(f"     Ya hay una página que se llama así: {pagina_llamada(nombre).relative_to(RAIZ)}")
+            continue
+        return nombre
+
+
+def flujo_de_raza(plantilla_raza, plantillas, nombre):
+    subraza = next((p for p in plantillas if p["especial"] == "subraza"), None)
+    razas = razas_que_hay()
+    opciones = [f"Es una raza (podrá tener subrazas)"]
+    opciones += [f"Es una subraza de {r}" for r in razas] if subraza else []
+    if subraza:
+        opciones.append("Es una subraza de una raza que aún no existe (la creo también)")
+    i = elegir_de_lista(f"¿{nombre} es una raza o una subraza?", opciones)
+    if i == 0:
+        return desde_plantilla(plantilla_raza, nombre)
+    if i <= len(razas):
+        return desde_plantilla(subraza, nombre, {"raza": razas[i - 1]})
+    raza = nombre_nuevo("¿Cómo se llama la raza? (Elfos, Enanos…)")
+    carpeta, texto = desde_plantilla(plantilla_raza, raza)
+    escribir_pagina(raza, carpeta, texto)
+    return desde_plantilla(subraza, nombre, {"raza": raza})
 
 
 def main():
@@ -253,7 +396,8 @@ def main():
             print(f"     Ya hay una que se llama así: {ya[0].relative_to(RAIZ)}")
             nombre = ""
 
-    plantillas = leer_plantillas()
+    todas = leer_plantillas()
+    plantillas = [p for p in todas if not p["oculta"]]
     if plantillas:
         print("\n  ¿Qué tipo de página es?")
         for n, una in enumerate(plantillas, start=1):
@@ -266,7 +410,10 @@ def main():
             print("     Tiene que ser uno de los números de la lista.")
         if int(dicho) <= len(plantillas):
             plantilla = plantillas[int(dicho) - 1]
-            carpeta, texto = desde_plantilla(plantilla, nombre)
+            if plantilla["especial"] == "raza":
+                carpeta, texto = flujo_de_raza(plantilla, todas, nombre)
+            else:
+                carpeta, texto = desde_plantilla(plantilla, nombre)
             texto = con_subtitulo(texto, preguntar(
                 "Subtítulo, una línea debajo del título (Enter: ninguno)"))
             return crear(nombre, carpeta, texto)
@@ -291,11 +438,16 @@ def main():
     return crear(nombre, carpeta, esqueleto(nombre, etiqueta, subtitulo, que))
 
 
-def crear(nombre, carpeta, texto):
+def escribir_pagina(nombre, carpeta, texto):
     destino = VAULT / carpeta / (nombre + ".md")
     destino.parent.mkdir(parents=True, exist_ok=True)
     destino.write_text(texto, encoding="utf-8")
     print(f"\n  Creada: {destino.relative_to(RAIZ)}")
+    return destino
+
+
+def crear(nombre, carpeta, texto):
+    destino = escribir_pagina(nombre, carpeta, texto)
     # Si esa ruta estaba en la lista de lo que se deja fuera (de cuando la
     # wiki venía de Chronicler), se quita: la acabas de escribir para que
     # salga.

@@ -1,23 +1,27 @@
 ---
 # plantilla: Astro
-# para: un planeta, una luna, una estrella o cualquier cosa del cielo de Cralëa
+# para: lo que hay en el cielo de Cralëa: un astro, un mundo tributo, una constelación…
 # orden: 14
+# elige sub: ¿Qué es? | Astros=Astro | Mundos tributo=Mundo tributo | Constelaciones=Constelación | Otro
 # carpeta: Cosmología
 title: "{{nombre}}"
 subtitle: ""
-infobox: "Astro"
-tags: [Cosmología, Astros]
+infobox: "{{sub_uno}}"
+tags: [Cosmología, {{sub}}]
 image:
 tipo:
 nombre nithir:
 significado:
 color:
 órbita:
+estrellas:
+forma:
 visible:
 influencia:
 ---
 
-<!-- LA ENTRADILLA: qué es y cómo se ve desde Cralëa. -->
+<!-- LA ENTRADILLA: qué es y cómo se ve desde Cralëa. Una constelación: qué
+figura dibuja y en qué época del año se ve. -->
 **{{nombre}}** es
 
 ## Descripción

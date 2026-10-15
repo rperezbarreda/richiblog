@@ -1219,9 +1219,25 @@
   LAS PLANTILLAS DE PÁGINA (desde el 15-10-2026). Una por cada tipo de
   página, sacadas de cómo organizan las suyas las wikis de mundos de
   fantasía (A Wiki of Ice and Fire, Tolkien Gateway, la de Pathfinder,
-  la de Forgotten Realms): País, Región, Asentamiento, Lugar, Personaje,
-  Raza, Subraza, Deidad, Religión, Organización, Monstruo, Objeto mágico,
-  Acontecimiento, Era, Astro, Festividad e Idioma. Cada una trae:
+  la de Forgotten Realms): Lugar, Personaje, Raza (y Subraza), Deidad,
+  Religión, Organización, Monstruo, Objeto mágico, Acontecimiento, Era,
+  Astro, Festividad e Idioma. No hay de país ni de región: el mapamundi
+  ya está completo. Algunas preguntan algo más al crearlas:
+
+    - LUGAR (ciudad, aldea, fortaleza, mazmorra, ruina, templo,
+      paraje…): qué tipo de sitio es, de una lista (o uno nuevo: «Otro»),
+      que es su apartado dentro de «lugares»; y en qué país o zona está.
+      Vale escribir un trozo del nombre («zadir»): busca entre las
+      páginas que hay y deja elegir. Si no está, se queda escrito sin
+      enlace.
+    - RAZA: si es una raza (que podrá tener subrazas) o una subraza de
+      una de las que ya hay, de una lista; o de una que aún no existe, y
+      entonces crea también la página de la raza (ver LAS RAZAS, COMO EN
+      D&D, más abajo).
+    - ASTRO: si es un astro, un mundo tributo, una constelación u otra
+      cosa (que se escribe), que es su apartado dentro de «cosmología».
+
+  Cada una trae:
 
     - la ficha de la derecha con los campos que suele llevar ese tipo
       (un país: capital, forma de gobierno, gobernante, población,
@@ -1253,9 +1269,9 @@
       («Elfos · 2 subrazas»).
 
   La raza y sus subrazas se guardan juntas en wiki/Razas/<Raza>/ y
-  llevan la etiqueta de la raza (tags: [Razas, Elfos]). Si creas una
-  subraza antes que su raza, va igualmente a wiki/Razas/<Raza>/, y la
-  raza, cuando la crees, la encuentra sola. Se usa «subraza de» y no
+  llevan la etiqueta de la raza (tags: [Razas, Elfos]). En la lista de
+  la herramienta solo sale «Raza»: la plantilla Subraza está escondida
+  (# oculta: sí) y se llega a ella al decir que es una subraza. Se usa «subraza de» y no
   «raza» porque «raza» es también un campo de la ficha de un personaje.
 
   SE PUEDE PUBLICAR A MEDIO RELLENAR: lo que no se ha escrito no sale.
@@ -2803,6 +2819,15 @@
                          que piden las páginas. Lo escribe entero
                          actualizar-cabeceras.py: no se edita. SÍ se
                          sube a Neocities.
+  wiki/ ................ lo que escribes de la wiki (los .md, el .cmap
+                         del mapa, las imágenes originales y las
+                         plantillas). Es el ORIGEN: generar-mundo.py
+                         lo pasa a web/wiki/ (las páginas),
+                         imagenes/wiki/ (las imágenes) y datos/wiki/
+                         (los índices), que es lo que se sube. NO hace
+                         falta subirla a Neocities: ninguna página la
+                         pide. Pero no la borres de tu ordenador: sin
+                         ella no se puede volver a generar la wiki.
 
 
 ---------------------------------------------------------------

@@ -2,6 +2,8 @@
 # plantilla: Subraza
 # para: una variante de una raza, como en D&D: elfos altos, drow, enanos de las colinas…
 # orden: 6
+# oculta: sí
+# especial: subraza
 # pregunta raza: ¿De qué raza es? (el nombre de su página: Elfos, Enanos…)
 # carpeta: junto a {{raza}}
 # si no está: Razas/{{raza}}
