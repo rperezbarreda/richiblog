@@ -115,7 +115,14 @@ function marcarCajas() {
 }
 function nombreDeCaja(zona) {
     if (zona.querySelector("table") || zona.tagName === "TABLE") {
-        return "Tabla, con scroll";
+        const leyenda = zona.querySelector("caption");
+        let titulo = leyenda ? leyenda.textContent.trim() : "";
+        for (let antes = zona.previousElementSibling; !titulo && antes; antes = antes.previousElementSibling) {
+            if (/^H[2-6]$/.test(antes.tagName)) {
+                titulo = antes.textContent.trim();
+            }
+        }
+        return titulo ? "Tabla: " + titulo + ", con scroll" : "Tabla, con scroll";
     }
     const ventana = zona.closest(".recent-entries, .character-card");
     const titulo = ventana && ventana.querySelector("h2, h3");

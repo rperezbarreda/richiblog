@@ -13,7 +13,7 @@ El mundo sigue un **calendario de 12 meses de 28 días**, cada uno asociado a un
 
 ## El año de un vistazo
 
-| | Mes | Heraldo | Estación | Festividad principal |
+| nº | Mes | Heraldo | Estación | Festividad principal |
 | --- | --- | --- | --- | --- |
 | 1 | ⚔️ Mes de Valentía | Clodia, la Madre del Valor | ❄️ empieza el invierno | La Prueba del Héroe |
 | 2 | 🕶️ Mes del Susurro | Verdos, el Padre de Mentiras | invierno | La Noche de los Susurros |
