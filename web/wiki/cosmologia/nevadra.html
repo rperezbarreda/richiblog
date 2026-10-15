@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-aDtzI6QgHfitL7afCewTh/rpYprDOJvupEIYVZKPk8Y=' 'sha256-mFdvcZNIOMjRiszaJziqlonbhQfSshRF3q+UHikmMLQ='; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self' https://script.google.com https://script.googleusercontent.com; object-src 'none'; base-uri 'self'; form-action 'self'">
+    <!-- ==== TEMA ==== -->
+    <meta name="theme-color" content="#12091c">
+    <script>
+      (function () {
+        document.documentElement.classList.add("js");
+        try {
+          var temas = {
+            "claro": ["light", "#f3e1d6"],
+            "oscuro-puro": ["puro-oscuro", "#000000"],
+            "claro-puro": ["puro-claro", "#ffffff"],
+            "tranquilo": ["tranquilo", "#f2efe9"],
+            "tranquilo-oscuro": ["tranquilo-oscuro", "#1b1e22"],
+            "terminal-verde": ["terminal-verde", "#000000"],
+            "terminal-azul": ["terminal-azul", "#000000"],
+            "terminal-rojo": ["terminal-rojo", "#000000"],
+            "terminal-ambar": ["terminal-ambar", "#000000"]
+          };
+          var guardado = localStorage.getItem("richi-theme");
+          var elegido = temas[guardado];
+          if (!elegido && !guardado &&
+              window.matchMedia("(prefers-color-scheme: light)").matches) {
+            elegido = temas.claro;
+          }
+          if (elegido) {
+            document.documentElement.setAttribute("data-theme", elegido[0]);
+            var barra = document.querySelector('meta[name="theme-color"]');
+            if (barra) { barra.setAttribute("content", elegido[1]); }
+          }
+          if (localStorage.getItem("richi-lateral") === "plegada") {
+            document.documentElement.classList.add("lateral-plegada");
+          }
+        } catch (e) {}
+      })();
+    </script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nevadra · Wiki Cralëa · El Blog de Richi</title>
+    <meta name="description" content="Nevadra es el mundo más cercano y está cubierto casi por completo por océanos profundos y cielos perpetuamente agitados. Desde Cralëa se observa como una esfera azulada y blanquecina, surcada por vetas de nubes que ja…">
+    <link rel="canonical" href="https://richi.blog/web/wiki/cosmologia/nevadra.html">
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="El Blog de Richi">
+    <meta property="og:locale" content="es_ES">
+    <meta property="og:title" content="Nevadra · Wiki Cralëa · El Blog de Richi">
+    <meta property="og:description" content="Nevadra es el mundo más cercano y está cubierto casi por completo por océanos profundos y cielos perpetuamente agitados. Desde Cralëa se observa como una esfera azulada y blanquecina, surcada por vetas de nubes que ja…">
+    <meta property="og:url" content="https://richi.blog/web/wiki/cosmologia/nevadra.html">
+    <meta property="og:image" content="https://richi.blog/imagenes/meta/og.webp">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta property="og:image:alt" content="El Blog de Richi — ilustración de Richi sobre fondo morado">
+    <meta name="twitter:card" content="summary_large_image">
+    <link rel="icon" type="image/x-icon" href="/imagenes/favicon.ico">
+    <link rel="preload" href="/tipografias/space-grotesk-400.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="alternate" type="application/rss+xml" title="El Blog de Richi — blog, relatos y rol" href="/blog/rss.xml">
+    <!-- ==== ADELANTO DEL MENÚ ==== -->
+    <script>window.adelantoDeFragmentos={};try{window.adelantoDeFragmentos["/fragmentos/barra-lateral.html"]=fetch("/fragmentos/barra-lateral.html?v=e6721b10").then(function(r){return r.ok?r.text():null}).catch(function(){return null})}catch(e){}</script>
+    <!-- ==== CSS ==== -->
+    <link rel="stylesheet" href="/estilos/paquete-comun.css?v=e43f1eeb">
+    <link rel="stylesheet" href="/ligero/estilos/paginas/mundo.css?v=f811f62e">
+    <link rel="stylesheet" href="/ligero/estilos/componentes/lupa.css?v=0eda6554">
+    <link rel="stylesheet" href="/ligero/estilos/paginas/mundo.responsive.css?v=f74b2ed2">
+    <link rel="stylesheet" href="/ligero/estilos/componentes/barra-lateral.css?v=ef2928ea">
+    <link rel="stylesheet" href="/ligero/estilos/componentes/barra-lateral.responsive.css?v=fb0768a1">
+    <link rel="stylesheet" href="/ligero/estilos/paginas/buscar.css?v=e32b461e">
+    <link rel="stylesheet" href="/estilos/paquete-cierre.css?v=3c277d98">
+    <!-- ==== fin del CSS ==== -->
+    <script src="/ligero/scripts/cargador-scripts.js?v=7c09f1b2"></script>
+    <!-- ==== JS ==== -->
+    <script defer src="/scripts/paquete-comun.js?v=ffd56d5d"></script>
+    <script defer src="/ligero/scripts/componentes/lupa.js?v=1992d040"></script>
+    <script defer src="/ligero/scripts/paginas/mundo.js?v=860e5908"></script>
+    <!-- ==== fin del JS ==== -->
+    </head>
+<body>
+    <a class="skip-link" href="#main-content">Saltar al contenido</a>
+    <div id="sidebar-container"></div>
+
+    <main id="main-content">
+        <section id="home" class="home mundo-page">
+            <div class="mundo-cabecera">
+                <div class="mundo-migas" role="navigation" aria-label="Dónde estás"><ol><li><a href="/web/wiki/index_wiki.html">Wiki Cralëa</a></li><li aria-current="page">Nevadra</li></ol></div>
+                <h1 class="mundo-titulo">Nevadra</h1>
+                <p class="mundo-subtitulo">la Tormenta</p>
+                <p class="mundo-etiquetas"><span class="mundo-etiquetas-label">etiquetas:</span><a class="mundo-etiqueta" href="/web/wiki/index_wiki.html?buscar=Cosmolog%C3%ADa">Cosmología</a><a class="mundo-etiqueta" href="/web/wiki/index_wiki.html?buscar=Mundos%20tributo">Mundos tributo</a></p>
+            </div>
+
+            <div class="mundo-columnas">
+                <article class="mundo-articulo"><p>Nevadra es el mundo más cercano y está cubierto casi por completo por océanos profundos y cielos perpetuamente agitados. Desde Cralëa se observa como una esfera azulada y blanquecina, surcada por vetas de nubes que jamás se disipan.</p>
+<h2 id="la_tormenta_infinita">La Tormenta Infinita</h2>
+<p>Su rasgo más distintivo es la Tormenta Infinita: un sistema ciclónico colosal que envuelve el planeta entero y que nunca se disipa, como si el propio mundo respirara a través del conflicto.</p>
+<p>Esta tormenta no es un fenómeno local, sino una estructura global. Cinturones de nubes giran en direcciones opuestas, mares enteros se levantan en mareas titánicas, y relámpagos de una intensidad imposible atraviesan la atmósfera como grietas de luz.</p>
+<h2 id="lo_que_vieron_los_nithir">Lo que vieron los Nithir</h2>
+<p>Los Nithir lo llamaron Tormenta porque en él creyeron ver un reflejo fiel del instante primordial. Para ellos, Nevadra no era solo un planeta, sino una memoria en movimiento. La guerra entre Azaras y Parta no había desaparecido del todo: seguía ocurriendo allí, una y otra vez, en forma de vientos enfrentados, mareas colisionando y cielos desgarrados por su lucha.</p>
+<p>En las escuelas antiguas se enseñaba que observar Nevadra era contemplar, de forma lenta y comprensible, la guerra que dio origen al mundo.</p>
+<h2 id="la_imagen">La imagen</h2>
+<p><em>Imagen de referencia, no de Cralëa:</em> <a class="mundo-enlace enlace-fuera" target="_blank" rel="noopener noreferrer" href="https://science.nasa.gov/photojournal/neptune-full-disk-view/">Neptune Full Disk View</a> (PIA01492), Neptuno visto por el Voyager 2. NASA/JPL.</p></article>
+
+                <div class="mundo-lateral"><div class="mundo-contenido" role="navigation" aria-labelledby="mundo-contenido-titulo"><details class="mundo-contenido-plegable" open data-mundo-contenido><summary class="mundo-contenido-cabecera"><span class="mundo-sub-flecha" aria-hidden="true">▾</span><h2 class="mundo-contenido-titulo" id="mundo-contenido-titulo">Contenido</h2></summary><ol><li><a href="#la_tormenta_infinita">La Tormenta Infinita</a></li><li><a href="#lo_que_vieron_los_nithir">Lo que vieron los Nithir</a></li><li><a href="#la_imagen">La imagen</a></li><li><a href="#mundo-backlinks-titulo">Se habla de esto en</a></li></ol></details></div><aside class="mundo-ficha" role="note" aria-labelledby="mundo-ficha-titulo"><h2 class="mundo-ficha-titulo" id="mundo-ficha-titulo">Nevadra</h2><p class="mundo-ficha-que">Mundo tributo</p><dl class="mundo-ficha-datos"><div class="mundo-ficha-fila"><dt>significa</dt><dd>Tormenta</dd></div><div class="mundo-ficha-fila"><dt>posición</dt><dd>el mundo tributo más cercano</dd></div></dl></aside></div>
+            </div>
+
+            <nav class="mundo-backlinks" aria-labelledby="mundo-backlinks-titulo"><h2 id="mundo-backlinks-titulo">Se habla de esto en</h2><ul><li><a class="mundo-enlace" href="/web/wiki/cosmologia/la_cosmologia_de_cralea.html">La Cosmología de Cralëa</a></li></ul></nav>
+
+            <a class="mundo-volver mundo-volver-abajo" href="/web/wiki/index_wiki.html">← volver a la wiki</a>
+        </section>
+    </main>
+</body>
+</html>

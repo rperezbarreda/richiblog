@@ -1,7 +1,8 @@
 [
     {
-        "_": "LAS CATEGORÍAS DE LA PORTADA DEL MUNDO. Primero el MAPAMUNDI: todas sus regiones y países llevan la etiqueta «Mapamundi» y la de su parte del mundo (Azarasia, Partaria o Archipiélagos; Tierras Encantadas es una zona de Archipiélagos), que es la que los reparte por dentro. Luego, los apartados de siempre. Cada página de la wiki cae en la PRIMERA de aquí cuyas etiquetas tenga, y dentro del apartado se reparte por las etiquetas que le queden. Lo que no caiga en ninguna va al final, en «lo demás». Cambia los nombres, el orden y las etiquetas a tu gusto: esto se lee tal cual al pasar generar-mundo.py, y él te dice al terminar qué etiquetas se han quedado fuera de todas. Un apartado puede llevar \"orden\" con el orden de sus subapartados, como el del mapamundi; si no, van por orden alfabético.",
+        "_": "LAS CATEGORÍAS DE LA PORTADA DEL MUNDO. Primero el MAPAMUNDI: todas sus regiones y países llevan la etiqueta «Mapamundi» y la de su parte del mundo (Azarasia, Partaria o Archipiélagos; Tierras Encantadas es una zona de Archipiélagos), que es la que los reparte por dentro. Luego, los apartados de siempre. Cada página de la wiki cae en la PRIMERA de aquí cuyas etiquetas tenga, y dentro del apartado se reparte por las etiquetas que le queden. Lo que no caiga en ninguna va al final, en «lo demás». Cambia los nombres, el orden y las etiquetas a tu gusto: esto se lee tal cual al pasar generar-mundo.py, y él te dice al terminar qué etiquetas se han quedado fuera de todas. Un apartado puede llevar \"orden\" con el orden de sus subapartados, como el del mapamundi; si no, van por orden alfabético. Cada apartado lleva su \"icono\" (un emoji), que sale en su botón de la portada. Los apartados salen como botón aunque aún no tengan ninguna página.",
         "nombre": "Mapamundi",
+        "icono": "🗺️",
         "etiquetas": [
             "mapamundi"
         ],
@@ -12,24 +13,31 @@
         ]
     },
     {
-        "nombre": "países",
+        "nombre": "cosmología",
+        "icono": "🌌",
         "etiquetas": [
-            "pais",
-            "país",
-            "paises",
-            "países",
-            "reino",
-            "reinos",
-            "imperio",
-            "nación",
-            "nacion",
-            "ducado",
-            "república",
-            "republica"
+            "cosmología",
+            "cosmologia"
+        ],
+        "orden": [
+            "Astros",
+            "Mundos tributo"
+        ]
+    },
+    {
+        "nombre": "historia",
+        "icono": "📜",
+        "etiquetas": [
+            "historia",
+            "evento",
+            "eventos",
+            "era",
+            "eras"
         ]
     },
     {
         "nombre": "lugares",
+        "icono": "🏰",
         "etiquetas": [
             "lugar",
             "lugares",
@@ -50,20 +58,29 @@
     },
     {
         "nombre": "personajes",
+        "icono": "👤",
         "etiquetas": [
             "personaje",
             "personajes",
             "gente",
             "npc",
-            "npcs",
-            "raza",
-            "razas",
-            "criatura",
-            "criaturas"
+            "npcs"
         ]
     },
     {
-        "nombre": "religión",
+        "nombre": "razas",
+        "icono": "🧝",
+        "etiquetas": [
+            "raza",
+            "razas",
+            "especie",
+            "especies",
+            "pueblo antiguo"
+        ]
+    },
+    {
+        "nombre": "religiones",
+        "icono": "🕯️",
         "etiquetas": [
             "religión",
             "religion",
@@ -79,29 +96,46 @@
         ]
     },
     {
-        "nombre": "cosas",
+        "nombre": "organizaciones",
+        "icono": "🏛️",
         "etiquetas": [
-            "objeto",
-            "objetos",
-            "cosa",
-            "cosas",
-            "artefacto",
-            "artefactos",
-            "arma",
-            "armas",
-            "libro",
-            "libros",
+            "organización",
+            "organizacion",
+            "organizaciones",
             "gremio",
             "gremios",
-            "organización",
-            "organizacion"
+            "orden",
+            "órdenes",
+            "ordenes",
+            "facción",
+            "faccion",
+            "facciones",
+            "hermandad"
+        ]
+    },
+    {
+        "nombre": "monstruos",
+        "icono": "🐉",
+        "etiquetas": [
+            "monstruo",
+            "monstruos",
+            "criatura",
+            "criaturas",
+            "bestia",
+            "bestias"
         ]
     },
     {
         "nombre": "mapas",
+        "icono": "🧭",
         "etiquetas": [
             "mapa",
             "mapas"
         ]
+    },
+    {
+        "nombre": "lo demás",
+        "icono": "🔮",
+        "etiquetas": []
     }
 ]

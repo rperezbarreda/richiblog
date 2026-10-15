@@ -1072,10 +1072,53 @@ def pintar_contenido(cuerpo, con_backlinks):
         trozos.append("<li>%s</li>" % enlace)
     if abierta:
         trozos.append("</ol></li>")
-    # <div> con role, no <nav>: lo mismo que las migas (pintar_migas).
+    # <div> con role, no <nav>: lo mismo que las migas (pintar_migas). Y
+    # dentro un <details>, para poder plegarlo (lo recuerda mundo.js).
     return ('<div class="mundo-contenido" role="navigation" aria-labelledby="mundo-contenido-titulo">'
-            '<h2 class="mundo-contenido-titulo" id="mundo-contenido-titulo">Contenido</h2>'
-            '<ol>%s</ol></div>' % "".join(trozos))
+            '<details class="mundo-contenido-plegable" open data-mundo-contenido>'
+            '<summary class="mundo-contenido-cabecera">'
+            '<span class="mundo-sub-flecha" aria-hidden="true">▾</span>'
+            '<h2 class="mundo-contenido-titulo" id="mundo-contenido-titulo">Contenido</h2></summary>'
+            '<ol>%s</ol></details></div>' % "".join(trozos))
+
+
+def rejilla_de_paises(ficha, paginas, region_de):
+    """LOS PAÍSES DE UNA REGIÓN, en la rejilla de banderas de la portada (la
+    bandera grande y el nombre debajo; las mismas clases, así que se ven
+    igual). Salen de la «región» de cada ficha, no de la lista que haya
+    escrita en el .md: así no se queda atrás si un país cambia de sitio.
+    "" si no es región de nadie."""
+    suya = ficha["nombre"].strip().lower()
+    hijos = sorted((f for f in paginas.values()
+                    if region_de.get(f["nombre"].strip().lower()) == suya and f is not ficha),
+                   key=lambda f: f["titulo"].lower())
+    if not hijos:
+        return ""
+    trozos = []
+    for f in hijos:
+        bandera = f.get("bandera_url")
+        dibujo = ('<img class="mundo-item-bandera" src="%s" alt="" width="150" height="100"'
+                  ' loading="lazy" decoding="async">' % html.escape(bandera, quote=True)
+                  if bandera else
+                  '<span class="mundo-item-bandera es-hueco" aria-hidden="true"></span>')
+        trozos.append('<li class="mundo-ficha-item"><a class="mundo-item" href="%s">%s'
+                      '<strong class="mundo-item-titulo">%s</strong></a></li>'
+                      % (html.escape(f["url"], quote=True), dibujo, html.escape(f["titulo"])))
+    return '<ul class="mundo-items es-corta">%s</ul>' % "".join(trozos)
+
+
+def con_rejilla_de_paises(cuerpo, rejilla):
+    """Pone la rejilla en el apartado «Países» del artículo, en lugar de la
+    lista que hubiera; si no hay apartado, lo añade al final."""
+    if not rejilla:
+        return cuerpo
+    titulo = '<h2 id="paises">Países</h2>'
+    m = re.search(re.escape(titulo) + r"\s*<ul>.*?</ul>", cuerpo, re.S)
+    if m:
+        return cuerpo[:m.start()] + titulo + "\n" + rejilla + cuerpo[m.end():]
+    if titulo in cuerpo:
+        return cuerpo.replace(titulo, titulo + "\n" + rejilla, 1)
+    return cuerpo + "\n" + titulo + "\n" + rejilla
 
 
 def escribir_paginas(paginas, probar):
@@ -1086,8 +1129,12 @@ def escribir_paginas(paginas, probar):
     region_de = regiones_de(paginas)
     for ficha in paginas.values():
         relleno = molde
-        cuerpo = ficha["cuerpo_html"]
-        lateral = ficha["ficha_html"] + pintar_contenido(cuerpo, bool(ficha["backlinks"]))
+        cuerpo = con_rejilla_de_paises(ficha["cuerpo_html"],
+                                       rejilla_de_paises(ficha, paginas, region_de))
+        # El contenido ANTES que la ficha: en escritorio da igual (flota abajo
+        # a la derecha), y en móvil así sale arriba del todo, como en una
+        # wiki de las de siempre.
+        lateral = pintar_contenido(cuerpo, bool(ficha["backlinks"])) + ficha["ficha_html"]
         for marca, valor in (
             ("{{TITULO}}", html.escape(ficha["titulo"])),
             ("{{SUBTITULO}}", html.escape(ficha["subtitulo"])),

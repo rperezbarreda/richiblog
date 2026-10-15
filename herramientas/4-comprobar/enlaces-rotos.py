@@ -129,7 +129,7 @@ RE_ATRIBUTOS = re.compile(
     # página se queda vacía y nadie se entera. Van aquí para que cuenten
     # como una referencia más.
     r"""\b(?:href|src|poster|data-reto-datos|data-campana-datos"""
-    r"""|data-npcs-datos|data-ando-datos|data-mundo-datos|data-mundo-regiones-datos)"""
+    r"""|data-npcs-datos|data-ando-datos|data-mundo-datos|data-mundo-regiones-datos|data-mundo-categorias)"""
     r"""\s*=\s*["']([^"']*)["']""",
     re.I,
 )

@@ -44,6 +44,7 @@ async function initializeMundo() {
     }
     // A la vez, sin esperarse: son dos archivos que no dependen uno de otro.
     pintarRegionesMundo();
+    const pedidas = leerCategoriasMundo(caja);
     const fuente = (caja.getAttribute("data-mundo-datos") || "").trim();
     if (!fuente) {
         return;
@@ -62,10 +63,31 @@ async function initializeMundo() {
         return;
     }
 
-    pintarElMundo(caja, Array.isArray(fichas) ? fichas : []);
+    pintarElMundo(caja, Array.isArray(fichas) ? fichas : [], await pedidas);
 }
 
-function pintarElMundo(caja, fichas) {
+// LAS CATEGORÍAS, con su icono y su orden (datos/wiki/mundo-categorias.json,
+// el mismo archivo que usa el generador para repartir las páginas). De ahí
+// salen los botones de la portada, también los de las categorías que aún no
+// tienen ninguna página. Si no llega, salen solo las que tengan algo.
+async function leerCategoriasMundo(caja) {
+    const fuente = (caja.getAttribute("data-mundo-categorias") || "").trim();
+    if (!fuente) {
+        return [];
+    }
+    try {
+        const respuesta = await window.pedirDatos(fuente);
+        if (!respuesta.ok) {
+            return [];
+        }
+        const lista = await respuesta.json();
+        return Array.isArray(lista) ? lista.filter((c) => c && (c.nombre || "").toString().trim()) : [];
+    } catch (error) {
+        return [];
+    }
+}
+
+function pintarElMundo(caja, fichas, categorias) {
     const buenas = fichas.filter((f) => f && (f.titulo || "").toString().trim());
     caja.textContent = "";
     if (!buenas.length) {
@@ -97,18 +119,35 @@ function pintarElMundo(caja, fichas) {
     const botones = document.createElement("ul");
     botones.className = "mundo-secciones";
     botones.setAttribute("data-mundo-secciones", "");
+    // En el orden del archivo de categorías, y detrás lo que haya llegado
+    // sin estar en él. Los mapas no llevan botón: ya están a la vista en la
+    // columna de la derecha, con su dibujo (ver pintarLosMapasDelMundo).
+    const iconos = new Map((categorias || []).map((c) => [c.nombre.toString().trim(),
+        (c.icono || "").toString().trim()]));
+    const secciones = [...iconos.keys()];
     orden.forEach((grupo) => {
-        // Los mapas no llevan botón: ya están a la vista en la columna de
-        // la derecha, con su dibujo (ver pintarLosMapasDelMundo).
+        if (!secciones.includes(grupo)) {
+            secciones.push(grupo);
+        }
+    });
+    secciones.forEach((grupo) => {
         if (grupo === "mapas") {
             return;
         }
-        const fichas = porGrupo.get(grupo);
+        const fichas = porGrupo.get(grupo) || [];
         const li = document.createElement("li");
         const boton = document.createElement("button");
         boton.type = "button";
-        boton.className = "mundo-seccion";
+        boton.className = fichas.length ? "mundo-seccion" : "mundo-seccion es-vacia";
         boton.setAttribute("aria-haspopup", "dialog");
+        // El icono es adorno: el nombre va escrito al lado.
+        if (iconos.get(grupo)) {
+            const icono = document.createElement("span");
+            icono.className = "mundo-seccion-icono";
+            icono.setAttribute("aria-hidden", "true");
+            icono.textContent = iconos.get(grupo);
+            boton.appendChild(icono);
+        }
         const nombre = document.createElement("span");
         nombre.className = "mundo-seccion-nombre";
         nombre.textContent = grupo;
@@ -116,8 +155,7 @@ function pintarElMundo(caja, fichas) {
         const cuenta = document.createElement("span");
         cuenta.className = "mundo-seccion-cuenta";
         const n = new Set(fichas.map((f) => f.url)).size;
-        cuenta.textContent = grupo === "mapas"
-            ? (n === 1 ? "1 mapa" : n + " mapas")
+        cuenta.textContent = !n ? "todavía vacía"
             : (n === 1 ? "1 página" : n + " páginas");
         boton.appendChild(cuenta);
         boton.addEventListener("click", () => abrirSeccionMundo(grupo, fichas, boton));
@@ -1209,6 +1247,14 @@ function abrirSeccionMundo(grupo, fichas, boton, irA) {
 function contenidoDeSeccionMundo(grupo, fichas, irA) {
     const caja = document.createElement("div");
     caja.className = "mundo-seccion-contenido";
+    if (!fichas.length) {
+        const vacia = document.createElement("p");
+        vacia.className = "mundo-seccion-vacia";
+        vacia.textContent = "Todavía no hay ninguna página aquí. Sale en cuanto una "
+            + "página lleve una de las etiquetas de «" + grupo + "».";
+        caja.appendChild(vacia);
+        return caja;
+    }
     const sueltas = fichas.filter((f) => !etiquetasDeReparto(f).length);
     if (sueltas.length) {
         caja.appendChild(listaDeFichasMundo(sueltas));
@@ -1235,13 +1281,12 @@ function contenidoDeSeccionMundo(grupo, fichas, irA) {
                 .sort((a, b) => a.titulo.localeCompare(b.titulo, "es"))
             : suyas;
 
-        // CADA PARTE SE PLIEGA: un <details>, cerrado de serie (con tres
-        // partes y ciento y pico países, abierto todo es una pared), y
-        // abierto si se llega a ella desde fuera (#mundo-archipielagos).
+        // CADA PARTE SE PLIEGA: un <details>, abierto de serie (se pliega
+        // lo que se quiera quitar de en medio, no hay que ir abriendo).
         const parte = document.createElement("details");
         parte.className = "mundo-seccion-parte";
         const id = "ventana-" + idDeSubMundo(nombre);
-        parte.open = irA === id;
+        parte.open = true;
         const cabecera = document.createElement("summary");
         cabecera.className = "mundo-seccion-parte-cabecera";
         cabecera.id = id;
@@ -1284,4 +1329,41 @@ function abrirDesdeLaDireccionMundo() {
             return;
         }
     }
+}
+
+
+// =========================================
+// EL CONTENIDO DE LA PÁGINA, PLEGADO O NO
+// =========================================
+// Es un <details> (se pliega solo, con ratón y teclado). Esto solo
+// recuerda cómo lo dejaste, para todas las páginas: si lo plegaste en una,
+// sale plegado en la siguiente. En el navegador, con try por si no se
+// puede (ventana privada): entonces sale abierto, y ya está.
+const CONTENIDO_GUARDADO = "richi-contenido-plegado";
+
+prepararContenidoMundo();
+
+function prepararContenidoMundo() {
+    const plegable = document.querySelector("[data-mundo-contenido]");
+    if (!plegable) {
+        return;
+    }
+    try {
+        if (localStorage.getItem(CONTENIDO_GUARDADO) === "si") {
+            plegable.open = false;
+        }
+    } catch (error) {
+        // Sin almacenamiento: abierto.
+    }
+    plegable.addEventListener("toggle", () => {
+        try {
+            if (plegable.open) {
+                localStorage.removeItem(CONTENIDO_GUARDADO);
+            } else {
+                localStorage.setItem(CONTENIDO_GUARDADO, "si");
+            }
+        } catch (error) {
+            // Se pierde al cambiar de página, y ya está.
+        }
+    });
 }

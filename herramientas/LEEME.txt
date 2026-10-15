@@ -1359,14 +1359,22 @@
       cambia es qué carpetas tiene dentro, y eso no se ve en la fecha de
       ningún archivo), y su tarjeta abre su parte en la ventana.
       Mientras se busca algo, esta rejilla se esconde.
-    - UN BOTÓN POR SECCIÓN (Mapamundi, historia, lo demás; los mapas no,
-      que ya están a la vista en la columna de la derecha), justo
+    - UN BOTÓN POR SECCIÓN, con su icono: las de
+      datos/wiki/mundo-categorias.json, en su orden y con el "icono" de
+      cada una (Mapamundi 🗺️, cosmología 🌌, historia 📜, lugares 🏰,
+      personajes 👤, razas 🧝, religiones 🕯️, organizaciones 🏛️, monstruos
+      🐉, lo demás 🔮). Salen AUNQUE ESTÉN VACÍAS (con «todavía vacía» y
+      el borde de rayas), para que se vea qué hay previsto; una página cae
+      en una al llevar una de sus etiquetas. Los objetos mágicos van en
+      «lo demás»: una página con la etiqueta «objetos mágicos» cae ahí,
+      en su propio apartado. Los mapas no llevan botón, que ya están a la
+      vista en la columna de la derecha. Los botones van justo
       debajo del buscador. Cada uno abre su VENTANA (la de siempre,
       ventana-modal.js) con lo que tiene dentro; ya no sale todo seguido
       en la portada. Mientras se busca algo, los botones se quitan y sale
       lo encontrado en la propia portada, por secciones.
     - EN LA VENTANA DEL MAPAMUNDI, una parte del mundo por apartado, que
-      se pliega y se despliega (cerrados de serie), y dentro SOLO LOS
+      se pliega y se despliega (abiertos de serie), y dentro SOLO LOS
       PAÍSES, sin las páginas de las regiones, en una rejilla: la bandera
       grande arriba y el nombre debajo (sin bandera, el hueco vacío). Los
       demás apartados (historia, lo demás) siguen con tarjeta. Al BUSCAR
@@ -1542,15 +1550,38 @@
   para que se vea cómo queda el contenido de la página. Se buscan por
   esa frase y se cambian por lo de verdad.
 
+  LA COSMOLOGÍA (wiki/Cosmología/, el 15-10-2026, sacada del PDF de
+  Notion): «La Cosmología de Cralëa» (el Jardín del Último Canto y los
+  Mundos Tributo), La Luna, El Sol, Nevadra, Lurmeri y Gomath. Cada una
+  lleva de imagen una FOTO DE LA NASA PARECIDA, con su referencia al
+  final de la página (apartado «La imagen»). Las fotos no están: desde
+  donde se escribió esto no se podían descargar. Para ponerlas, baja cada
+  una de su enlace y pásala con
+
+      python herramientas/2-imagenes/traer-imagen.py --para mundo --nombre nasa-luna
+
+  (nasa-luna, nasa-sol, nasa-nevadra, nasa-lurmeri, nasa-gomath): se
+  queda en wiki/_imagenes/ en WebP y con el nombre que esperan las
+  páginas. Hasta entonces, al pasar la wiki se avisa de que faltan.
+
+  EN LA FICHA, lo primero es la bandera (el carrusel) y luego sus datos:
+  el título de la ficha, que repetía el de la página, solo lo oye el
+  lector de pantalla.
+
+  UNA REGIÓN enseña sus países en la misma rejilla de banderas de la
+  portada, en su apartado «Países» (en lugar de la lista que haya escrita
+  en el .md; si no lo tiene, se añade al final). Sale de la «región» de
+  cada ficha, así que no se queda atrás si un país cambia de sitio.
+
   LA NAVEGACIÓN DE CADA ENTRADA, como en una wiki de las de siempre:
   arriba, DÓNDE ESTÁS (Wiki Cralëa › Mapamundi › Azarasia › Islas de
   Labros › Corte de Labros: sale de la «región» de cada ficha y de la
   carpeta), y el CONTENIDO de la página, con un enlace al mapa de
   situación, a cada apartado (## y ###) y a «se habla de esto en». Con
-  menos de dos cosas no sale. En pantalla ancha FLOTA abajo a la derecha,
-  casi transparente para no estorbar, y se ve entero al pasar el ratón o
-  llegar con el tabulador (axe se queja del contraste mientras está
-  difuminado: es a propósito). En móvil va en su sitio, bajo la ficha.
+  menos de dos cosas no sale. En escritorio va FIJO abajo a la derecha de
+  la pantalla (sigue ahí al bajar) y se pliega pulsando «Contenido»; se
+  recuerda plegado o no entre páginas (richi-contenido-plegado, en el
+  navegador). En móvil va quieto y arriba del todo, antes de la ficha.
   Los eventos de la línea de tiempo llevan sus migas también (Wiki
   Cralëa › Línea de tiempo › el evento).
 

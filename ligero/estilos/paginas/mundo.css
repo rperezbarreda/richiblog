@@ -368,8 +368,7 @@ html:not(.js) .mundo-spoiler {
     outline-offset: 2px;
 }
 .mundo-contenido {
-    padding: 14px 16px;
-    border: 2px solid var(--border);
+    border: 2px solid var(--yellow);
     background: var(--surface);
 }
 @media (min-width: 861px) {
@@ -381,18 +380,40 @@ html:not(.js) .mundo-spoiler {
         width: min(17rem, 30vw);
         max-height: 60vh;
         overflow-y: auto;
-        border-color: var(--yellow);
         box-shadow: 4px 4px 0 var(--yellow);
-        opacity: 0.18;
-        transition: opacity 0.15s linear;
-    }
-    .mundo-contenido:hover,
-    .mundo-contenido:focus-within {
-        opacity: 1;
     }
 }
+.mundo-contenido-plegable {
+    display: block;
+}
+.mundo-contenido-cabecera {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    padding: 10px 14px;
+    cursor: pointer;
+    list-style: none;
+}
+.mundo-contenido-cabecera::-webkit-details-marker {
+    display: none;
+}
+.mundo-contenido-cabecera:hover,
+.mundo-contenido-cabecera:focus-visible {
+    background: var(--purple-lighter);
+}
+.mundo-contenido-cabecera:focus-visible {
+    outline: 2px solid var(--yellow);
+    outline-offset: -4px;
+}
+.mundo-contenido-plegable:not([open]) .mundo-sub-flecha {
+    transform: rotate(-90deg);
+}
+.mundo-contenido-plegable > ol {
+    padding-bottom: 12px;
+}
 .mundo-contenido-titulo {
-    margin: 0 0 8px;
+    display: inline;
+    margin: 0;
     color: var(--yellow);
     font-family: var(--fuente-mono);
     font-size: 0.8125rem;
@@ -401,13 +422,14 @@ html:not(.js) .mundo-spoiler {
     text-transform: uppercase;
 }
 .mundo-contenido ol {
-    margin: 0;
-    padding-left: 1.4em;
+    margin: 0 14px 0 0;
+    padding-left: 2.4em;
     color: var(--muted);
     font-size: 0.875rem;
     line-height: 1.5;
 }
 .mundo-contenido ol ol {
+    margin: 0;
     padding-left: 1.2em;
     list-style: lower-alpha;
 }
@@ -462,13 +484,15 @@ html:not(.js) .mundo-spoiler {
     box-shadow: 6px 6px 0 var(--yellow);
 }
 .mundo-ficha-titulo {
-    margin: 0 0 12px;
-    color: var(--yellow);
-    font-family: var(--fuente-ventana);
-    font-size: 1.125rem;
-    font-weight: 400;
-    line-height: 1.25;
-    overflow-wrap: break-word;
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    padding: 0;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
 }
 .mundo-ficha-fotos ul {
     display: flex;
@@ -720,6 +744,18 @@ html:not(.js) .mundo-spoiler {
 .mundo-seccion:focus-visible {
     outline: 2px solid var(--yellow);
     outline-offset: 4px;
+}
+.mundo-seccion-icono {
+    font-size: 1.6rem;
+    line-height: 1;
+}
+.mundo-seccion.es-vacia {
+    border-style: dashed;
+    box-shadow: none;
+}
+.mundo-seccion-vacia {
+    margin: 0;
+    color: var(--white);
 }
 .mundo-seccion-nombre {
     font-family: var(--fuente-mono);

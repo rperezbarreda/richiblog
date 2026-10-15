@@ -2088,6 +2088,111 @@
         "miniatura": ""
     },
     {
+        "titulo": "La Cosmología de Cralëa",
+        "url": "/web/wiki/cosmologia/la_cosmologia_de_cralea.html",
+        "carpeta": "Cosmología",
+        "etiquetas": [
+            "Cosmología"
+        ],
+        "grupo": "cosmología",
+        "sub": [],
+        "que": "El Jardín del Último Canto",
+        "resumen": "Cuando la Sinfonía Estelar se quebró en el último choque entre Azaras y Parta, no solo nació el mundo: murió para siempre la armonía perfecta del cosmos. De la fusión de ambos Arcontes surgió Cralëa, un mundo formado…",
+        "region": "",
+        "bandera": "",
+        "miniatura": ""
+    },
+    {
+        "titulo": "El Sol",
+        "url": "/web/wiki/cosmologia/el_sol.html",
+        "carpeta": "Cosmología",
+        "etiquetas": [
+            "Cosmología",
+            "Astros"
+        ],
+        "grupo": "cosmología",
+        "sub": [
+            "Astros"
+        ],
+        "que": "Söh-hgol · la Herida Dolorosa",
+        "resumen": "El Sol fue llamado por los Nithir Söh-hgol, «la Herida Dolorosa», nombre que con los siglos se transformó en Sol. No es una estrella, sino una herida abierta en el firmamento, el desgarro que quedó cuando el Canto se…",
+        "region": "",
+        "bandera": "",
+        "miniatura": ""
+    },
+    {
+        "titulo": "La Luna",
+        "url": "/web/wiki/cosmologia/la_luna.html",
+        "carpeta": "Cosmología",
+        "etiquetas": [
+            "Cosmología",
+            "Astros"
+        ],
+        "grupo": "cosmología",
+        "sub": [
+            "Astros"
+        ],
+        "que": "Lunaah · la Lápida y el Corazón",
+        "resumen": "La Luna fue llamada por los Nithir Lunaah, palabra que en su lengua significaba a la vez Lápida y Corazón. No es un simple satélite, sino la piedra funeraria del Canto y el último latido compartido de Azaras y Parta.",
+        "region": "",
+        "bandera": "",
+        "miniatura": ""
+    },
+    {
+        "titulo": "Gomath",
+        "url": "/web/wiki/cosmologia/gomath.html",
+        "carpeta": "Cosmología",
+        "etiquetas": [
+            "Cosmología",
+            "Mundos tributo"
+        ],
+        "grupo": "cosmología",
+        "sub": [
+            "Mundos tributo"
+        ],
+        "que": "el Sufrimiento",
+        "resumen": "Envuelto en púrpuras oscuros y brumas densas, Gomath presenta una superficie inestable, como si el planeta entero se retorciera lentamente.",
+        "region": "",
+        "bandera": "",
+        "miniatura": ""
+    },
+    {
+        "titulo": "Lurmeri",
+        "url": "/web/wiki/cosmologia/lurmeri.html",
+        "carpeta": "Cosmología",
+        "etiquetas": [
+            "Cosmología",
+            "Mundos tributo"
+        ],
+        "grupo": "cosmología",
+        "sub": [
+            "Mundos tributo"
+        ],
+        "que": "el Pantano",
+        "resumen": "Lurmeri no es un mundo fértil, aunque así lo sugieran sus tonos verdosos y dorados. Es, en realidad, un gigante gaseoso, cubierto por capas densas de nubes pesadas que se arremolinan lentamente en espirales interminab…",
+        "region": "",
+        "bandera": "",
+        "miniatura": ""
+    },
+    {
+        "titulo": "Nevadra",
+        "url": "/web/wiki/cosmologia/nevadra.html",
+        "carpeta": "Cosmología",
+        "etiquetas": [
+            "Cosmología",
+            "Mundos tributo"
+        ],
+        "grupo": "cosmología",
+        "sub": [
+            "Mundos tributo"
+        ],
+        "que": "la Tormenta",
+        "resumen": "Nevadra es el mundo más cercano y está cubierto casi por completo por océanos profundos y cielos perpetuamente agitados. Desde Cralëa se observa como una esfera azulada y blanquecina, surcada por vetas de nubes que ja…",
+        "region": "",
+        "bandera": "",
+        "miniatura": ""
+    },
+    {
         "titulo": "Mapamundi de Cralëa",
         "url": "/web/wiki/mapa_mapamundi_de_cralea.html",
         "carpeta": "mapas",

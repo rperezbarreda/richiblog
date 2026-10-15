@@ -8,6 +8,7 @@ async function initializeMundo() {
         return;
     }
     pintarRegionesMundo();
+    const pedidas = leerCategoriasMundo(caja);
     const fuente = (caja.getAttribute("data-mundo-datos") || "").trim();
     if (!fuente) {
         return;
@@ -24,9 +25,25 @@ async function initializeMundo() {
             '<p class="entries-error">No se ha podido cargar el mundo ahora mismo.</p>';
         return;
     }
-    pintarElMundo(caja, Array.isArray(fichas) ? fichas : []);
+    pintarElMundo(caja, Array.isArray(fichas) ? fichas : [], await pedidas);
 }
-function pintarElMundo(caja, fichas) {
+async function leerCategoriasMundo(caja) {
+    const fuente = (caja.getAttribute("data-mundo-categorias") || "").trim();
+    if (!fuente) {
+        return [];
+    }
+    try {
+        const respuesta = await window.pedirDatos(fuente);
+        if (!respuesta.ok) {
+            return [];
+        }
+        const lista = await respuesta.json();
+        return Array.isArray(lista) ? lista.filter((c) => c && (c.nombre || "").toString().trim()) : [];
+    } catch (error) {
+        return [];
+    }
+}
+function pintarElMundo(caja, fichas, categorias) {
     const buenas = fichas.filter((f) => f && (f.titulo || "").toString().trim());
     caja.textContent = "";
     if (!buenas.length) {
@@ -49,16 +66,31 @@ function pintarElMundo(caja, fichas) {
     const botones = document.createElement("ul");
     botones.className = "mundo-secciones";
     botones.setAttribute("data-mundo-secciones", "");
+    const iconos = new Map((categorias || []).map((c) => [c.nombre.toString().trim(),
+        (c.icono || "").toString().trim()]));
+    const secciones = [...iconos.keys()];
     orden.forEach((grupo) => {
+        if (!secciones.includes(grupo)) {
+            secciones.push(grupo);
+        }
+    });
+    secciones.forEach((grupo) => {
         if (grupo === "mapas") {
             return;
         }
-        const fichas = porGrupo.get(grupo);
+        const fichas = porGrupo.get(grupo) || [];
         const li = document.createElement("li");
         const boton = document.createElement("button");
         boton.type = "button";
-        boton.className = "mundo-seccion";
+        boton.className = fichas.length ? "mundo-seccion" : "mundo-seccion es-vacia";
         boton.setAttribute("aria-haspopup", "dialog");
+        if (iconos.get(grupo)) {
+            const icono = document.createElement("span");
+            icono.className = "mundo-seccion-icono";
+            icono.setAttribute("aria-hidden", "true");
+            icono.textContent = iconos.get(grupo);
+            boton.appendChild(icono);
+        }
         const nombre = document.createElement("span");
         nombre.className = "mundo-seccion-nombre";
         nombre.textContent = grupo;
@@ -66,8 +98,7 @@ function pintarElMundo(caja, fichas) {
         const cuenta = document.createElement("span");
         cuenta.className = "mundo-seccion-cuenta";
         const n = new Set(fichas.map((f) => f.url)).size;
-        cuenta.textContent = grupo === "mapas"
-            ? (n === 1 ? "1 mapa" : n + " mapas")
+        cuenta.textContent = !n ? "todavía vacía"
             : (n === 1 ? "1 página" : n + " páginas");
         boton.appendChild(cuenta);
         boton.addEventListener("click", () => abrirSeccionMundo(grupo, fichas, boton));
@@ -836,6 +867,14 @@ function abrirSeccionMundo(grupo, fichas, boton, irA) {
 function contenidoDeSeccionMundo(grupo, fichas, irA) {
     const caja = document.createElement("div");
     caja.className = "mundo-seccion-contenido";
+    if (!fichas.length) {
+        const vacia = document.createElement("p");
+        vacia.className = "mundo-seccion-vacia";
+        vacia.textContent = "Todavía no hay ninguna página aquí. Sale en cuanto una "
+            + "página lleve una de las etiquetas de «" + grupo + "».";
+        caja.appendChild(vacia);
+        return caja;
+    }
     const sueltas = fichas.filter((f) => !etiquetasDeReparto(f).length);
     if (sueltas.length) {
         caja.appendChild(listaDeFichasMundo(sueltas));
@@ -861,7 +900,7 @@ function contenidoDeSeccionMundo(grupo, fichas, irA) {
         const parte = document.createElement("details");
         parte.className = "mundo-seccion-parte";
         const id = "ventana-" + idDeSubMundo(nombre);
-        parte.open = irA === id;
+        parte.open = true;
         const cabecera = document.createElement("summary");
         cabecera.className = "mundo-seccion-parte-cabecera";
         cabecera.id = id;
@@ -902,4 +941,28 @@ function abrirDesdeLaDireccionMundo() {
             return;
         }
     }
+}
+const CONTENIDO_GUARDADO = "richi-contenido-plegado";
+prepararContenidoMundo();
+function prepararContenidoMundo() {
+    const plegable = document.querySelector("[data-mundo-contenido]");
+    if (!plegable) {
+        return;
+    }
+    try {
+        if (localStorage.getItem(CONTENIDO_GUARDADO) === "si") {
+            plegable.open = false;
+        }
+    } catch (error) {
+    }
+    plegable.addEventListener("toggle", () => {
+        try {
+            if (plegable.open) {
+                localStorage.removeItem(CONTENIDO_GUARDADO);
+            } else {
+                localStorage.setItem(CONTENIDO_GUARDADO, "si");
+            }
+        } catch (error) {
+        }
+    });
 }
