@@ -998,6 +998,11 @@ function prepararContenidoMundo() {
     }
     ajustarContenidoMundo(plegable);
     plegable.addEventListener("toggle", () => {
+        if (plegable.dataset.automatico) {
+            delete plegable.dataset.automatico;
+            return;
+        }
+        plegable.dataset.tocado = "1";
         try {
             if (plegable.open) {
                 localStorage.removeItem(CONTENIDO_GUARDADO);
@@ -1166,6 +1171,19 @@ function ajustarContenidoMundo(plegable) {
         }
         const libre = window.innerHeight - abajo - tope;
         caja.style.maxHeight = Math.round(Math.min(Math.max(libre, 150), window.innerHeight * 0.6)) + "px";
+        const apretado = libre < 150;
+        if (apretado && plegable.open && !plegable.dataset.tocado && !plegable.dataset.plegadoSolo) {
+            plegable.dataset.plegadoSolo = "1";
+            plegable.dataset.automatico = "1";
+            plegable.open = false;
+        } else if (!apretado) {
+            if (plegable.dataset.plegadoSolo && !plegable.open && !plegable.dataset.tocado) {
+                plegable.dataset.automatico = "1";
+                plegable.open = true;
+            }
+            delete plegable.dataset.plegadoSolo;
+            delete plegable.dataset.tocado;
+        }
     };
     ajustar();
     document.addEventListener("scroll", ajustar, { capture: true, passive: true });

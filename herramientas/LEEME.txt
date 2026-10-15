@@ -1597,6 +1597,20 @@
   de relleno: cuando tengas la de verdad, pon su archivo en
   wiki/_imagenes/banderas/ y cambia el campo bandera: de esa página.
 
+  LA FICHA DE LOS PAÍSES. Los 107 llevan (desde el 15-10-2026) los datos
+  de la plantilla de país en su ficha, debajo de la bandera y la región:
+  nombre oficial, gentilicio, capital, forma de gobierno, gobernante,
+  heredero, casa reinante, población, pueblos, lenguas, religión,
+  moneda, fundación y lema, en tres tramos (Gobierno, Gentes, Historia).
+  Todos dicen «*por decidir*» hasta que se rellenen: se buscan por esa
+  frase. Si uno no tiene sentido para un país (una tribu sin casa
+  reinante), se borra la línea y deja de salir.
+
+  Con la ficha así de larga, el cuadro de contenido (abajo a la derecha)
+  no tiene sitio mientras se ve la ficha: se pliega solo en su barra de
+  título y se vuelve a abrir al bajar y dejar sitio. Eso no cuenta como
+  plegarlo tú (no se recuerda en la página siguiente).
+
   TEXTO DE RELLENO. Los 107 países llevan, también desde el 15-10-2026,
   unos apartados de relleno (Historia, con Orígenes dentro; Gobierno y
   sociedad; Cultura), cada párrafo empezando por «*Texto de relleno.*»,

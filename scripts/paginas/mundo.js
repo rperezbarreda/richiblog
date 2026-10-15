@@ -1404,6 +1404,13 @@ function prepararContenidoMundo() {
     }
     ajustarContenidoMundo(plegable);
     plegable.addEventListener("toggle", () => {
+        // Si lo ha plegado o abierto ajustarContenidoMundo para no tapar
+        // la ficha, no es una elección de quien lee: no se apunta.
+        if (plegable.dataset.automatico) {
+            delete plegable.dataset.automatico;
+            return;
+        }
+        plegable.dataset.tocado = "1";
         try {
             if (plegable.open) {
                 localStorage.removeItem(CONTENIDO_GUARDADO);
@@ -1588,6 +1595,12 @@ function prepararAzarMundo(fichas) {
 // encima. Así que mide lo que queda libre entre el final de la ficha y el
 // fondo de la pantalla, y como mucho ocupa eso (con su propio scroll si
 // no cabe). Al bajar y perderse la ficha de vista, tiene todo el sitio.
+//
+// Y SI NO QUEDA SITIO (la ficha de un país, con todos sus datos, llena la
+// pantalla entera), se pliega solo y se queda en su barra de título; al
+// bajar y dejar sitio, se vuelve a abrir. Eso no se apunta como elección
+// (ver prepararContenidoMundo), y si mientras tanto lo abres o lo pliegas
+// tú, no se le lleva la contraria hasta que vuelva a haber sitio.
 function ajustarContenidoMundo(plegable) {
     const caja = plegable.closest(".mundo-contenido");
     const ficha = document.querySelector(".mundo-ficha");
@@ -1611,6 +1624,19 @@ function ajustarContenidoMundo(plegable) {
         // Nunca menos de lo que mide con tres o cuatro apartados, ni más
         // del 60% de la pantalla.
         caja.style.maxHeight = Math.round(Math.min(Math.max(libre, 150), window.innerHeight * 0.6)) + "px";
+        const apretado = libre < 150;
+        if (apretado && plegable.open && !plegable.dataset.tocado && !plegable.dataset.plegadoSolo) {
+            plegable.dataset.plegadoSolo = "1";
+            plegable.dataset.automatico = "1";
+            plegable.open = false;
+        } else if (!apretado) {
+            if (plegable.dataset.plegadoSolo && !plegable.open && !plegable.dataset.tocado) {
+                plegable.dataset.automatico = "1";
+                plegable.open = true;
+            }
+            delete plegable.dataset.plegadoSolo;
+            delete plegable.dataset.tocado;
+        }
     };
     ajustar();
     // El scroll es el de la sección de la página, no el de la ventana: se

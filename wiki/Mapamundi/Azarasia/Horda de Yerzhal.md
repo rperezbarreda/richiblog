@@ -3,6 +3,31 @@ title: "Horda de Yerzhal"
 tags: [Mapamundi, Azarasia]
 región: "[[Azarasia]]"
 bandera: horda_yerzhal.webp
+infobox: "País"
+nombre oficial: "*por decidir*"
+gentilicio: "*por decidir*"
+capital: "*por decidir*"
+forma de gobierno: "*por decidir*"
+gobernante: "*por decidir*"
+heredero: "*por decidir*"
+casa reinante: "*por decidir*"
+población: "*por decidir*"
+pueblos: "*por decidir*"
+lenguas: "*por decidir*"
+religión: "*por decidir*"
+moneda: "*por decidir*"
+fundación: "*por decidir*"
+lema: "*por decidir*"
+layout:
+  - type: header
+    text: Gobierno
+    above: capital
+  - type: header
+    text: Gentes
+    above: población
+  - type: header
+    text: Historia
+    above: fundación
 ---
 
 **Horda de Yerzhal** está en [[Azarasia]].

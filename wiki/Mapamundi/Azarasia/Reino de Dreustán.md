@@ -3,6 +3,31 @@ title: "Reino de Dreustán"
 tags: [Mapamundi, Azarasia]
 región: "[[Azarasia]]"
 bandera: reino_dreustan.webp
+infobox: "País"
+nombre oficial: "*por decidir*"
+gentilicio: "*por decidir*"
+capital: "*por decidir*"
+forma de gobierno: "*por decidir*"
+gobernante: "*por decidir*"
+heredero: "*por decidir*"
+casa reinante: "*por decidir*"
+población: "*por decidir*"
+pueblos: "*por decidir*"
+lenguas: "*por decidir*"
+religión: "*por decidir*"
+moneda: "*por decidir*"
+fundación: "*por decidir*"
+lema: "*por decidir*"
+layout:
+  - type: header
+    text: Gobierno
+    above: capital
+  - type: header
+    text: Gentes
+    above: población
+  - type: header
+    text: Historia
+    above: fundación
 ---
 
 **Reino de Dreustán** está en [[Azarasia]].
