@@ -1,7 +1,8 @@
 // =========================================
 // COMPONENTE: LA LUPA DEL MENÚ
 // =========================================
-// El botón de "buscar" del final del menú abre una ventana con el campo
+// El botón de "buscar" (flotante en escritorio, al final del menú en
+// el móvil) abre una ventana con el campo
 // de búsqueda. Está en todas las páginas, así que desde cualquier sitio
 // se puede buscar sin volver a la portada.
 //
@@ -29,21 +30,22 @@
 
 const LUPA = {
     ventana: null,
-    boton: null,
 };
 
 document.addEventListener("sidebar:loaded", initializeBuscarLupa);
 
 function initializeBuscarLupa() {
-    const boton = document.querySelector("[data-buscar-lupa]");
+    // Hay DOS botones: el flotante de escritorio (debajo del de plegar la
+    // barra) y el del final del menú, que es el del móvil. Solo se ve uno
+    // cada vez (lo decide el CSS) y los dos abren la misma ventana.
+    const botones = document.querySelectorAll("[data-buscar-lupa]");
     const ventana = document.querySelector("[data-buscar-modal]");
-    if (!boton || !ventana || LUPA.ventana) {
+    if (!botones.length || !ventana || LUPA.ventana) {
         return;
     }
-    LUPA.boton = boton;
     LUPA.ventana = ventana;
 
-    boton.addEventListener("click", abrirLupa);
+    botones.forEach((boton) => boton.addEventListener("click", abrirLupa));
 
     const cerrar = ventana.querySelector("[data-buscar-modal-cerrar]");
     if (cerrar) {

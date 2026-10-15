@@ -30,7 +30,9 @@
 #     año       opcional, sobre todo para los eventos: como se lea
 #               («1340 DEM»).
 #     resumen   una o dos frases.
-#     enlace    opcional: una página de la wiki. Vale su nombre entre
+#     enlace    opcional: una página de la wiki, a la que lleva pulsar el
+#               día (sin enlace, lleva a su mes en la entrada del
+#               calendario). Vale su nombre entre
 #               corchetes ([[La Gran Sequía]]) o la dirección (/web/wiki/…).
 #
 # Cómo es el año (los meses, sus Heraldos, la semana, los días del Fin del

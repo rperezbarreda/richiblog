@@ -1,9 +1,9 @@
 // =========================================
-// COMPONENTE: BOTÓN "VOLVER ARRIBA" (solo móvil)
+// COMPONENTE: BOTÓN "VOLVER ARRIBA"
 // =========================================
 // Botón flotante abajo a la derecha que devuelve la página al principio.
-// Solo se ve en móvil (lo decide el CSS) y solo cuando ya se ha bajado
-// un poco: arriba del todo no pinta nada y taparía contenido.
+// Sale en todas las páginas y en todos los tamaños, pero solo cuando ya
+// se ha bajado un poco: arriba del todo no pinta nada y taparía contenido.
 //
 // Lo del contenedor tiene truco. En este sitio la página NO se desplaza
 // con la ventana: <body> está fijo a la altura de la pantalla y quien

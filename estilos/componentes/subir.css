@@ -1,71 +1,82 @@
 /* COMPONENTE: BOTÓN "VOLVER ARRIBA" */
 
-/* En escritorio no existe: ahí las páginas caben o tienen su propio
-   scroll corto, y un botón flotante solo estorbaría. */
+/* En TODAS LAS PÁGINAS y en todos los tamaños (antes solo en el móvil):
+   abajo a la derecha, y solo cuando ya se ha bajado un poco (lo decide
+   scripts/componentes/subir.js). */
 .subir {
-    display: none;
+    position: fixed;
+    right: 16px;
+    /* Los 16 de siempre, más el hueco de los botones del teléfono
+       (ver --hueco-abajo en estilos/base.css): si no, en algunos
+       móviles este botón caía justo encima de ellos. */
+    bottom: calc(16px + var(--hueco-abajo));
+    /* Por debajo del aviso emergente (500) y del visor (600), que en
+       móvil ocupan la parte de abajo entera, y por encima del resto.
+       Así no se monta encima de un aviso abierto. */
+    z-index: 450;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    /* 46px: por encima del mínimo de 44 que se recomienda para
+       pulsar con el dedo. */
+    width: 46px;
+    height: 46px;
+    padding: 0;
+    border: 2px solid var(--yellow);
+    background: var(--surface);
+    color: var(--yellow);
+    box-shadow: 3px 3px 0 var(--yellow);
+    cursor: pointer;
+    /* Oculto mientras no se haya bajado. Se anima la opacidad y no
+       display, que no se puede animar. */
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(8px);
+    transition: opacity 0.15s linear, transform 0.15s ease,
+                visibility 0s linear 0.15s,
+                background-color 0.15s linear, color 0.15s linear;
 }
 
-@media (max-width: 860px) {
+.subir.is-visible {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+    transition: opacity 0.15s linear, transform 0.15s ease,
+                visibility 0s,
+                background-color 0.15s linear, color 0.15s linear;
+}
+
+.subir:hover,
+.subir:active,
+.subir:focus-visible {
+    background: var(--yellow);
+    color: var(--yellow-contrast);
+}
+
+.subir:focus-visible {
+    outline: 2px solid var(--yellow);
+    outline-offset: 3px;
+}
+
+.subir-icono {
+    display: block;
+    width: 22px;
+    height: 22px;
+}
+
+/* EN ESCRITORIO, más pequeño y más pegado al borde: el marco de la
+   página llega a 44px del borde derecho, y con las medidas del móvil el
+   botón se montaba encima de él. */
+@media (min-width: 861px) {
     .subir {
-        position: fixed;
-        right: 16px;
-        /* Los 16 de siempre, más el hueco de los botones del teléfono
-           (ver --hueco-abajo en estilos/base.css): si no, en algunos
-           móviles este botón caía justo encima de ellos. */
-        bottom: calc(16px + var(--hueco-abajo));
-        /* Por debajo del aviso emergente (500) y del visor (600), que en
-           móvil ocupan la parte de abajo entera, y por encima del resto.
-           Así no se monta encima de un aviso abierto. */
-        z-index: 450;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        /* 46px: por encima del mínimo de 44 que se recomienda para
-           pulsar con el dedo. */
-        width: 46px;
-        height: 46px;
-        padding: 0;
-        border: 2px solid var(--yellow);
-        background: var(--surface);
-        color: var(--yellow);
-        box-shadow: 3px 3px 0 var(--yellow);
-        cursor: pointer;
-        /* Oculto mientras no se haya bajado. Se anima la opacidad y no
-           display, que no se puede animar. */
-        opacity: 0;
-        visibility: hidden;
-        transform: translateY(8px);
-        transition: opacity 0.15s linear, transform 0.15s ease,
-                    visibility 0s linear 0.15s,
-                    background-color 0.15s linear, color 0.15s linear;
-    }
-
-    .subir.is-visible {
-        opacity: 1;
-        visibility: visible;
-        transform: translateY(0);
-        transition: opacity 0.15s linear, transform 0.15s ease,
-                    visibility 0s,
-                    background-color 0.15s linear, color 0.15s linear;
-    }
-
-    .subir:hover,
-    .subir:active,
-    .subir:focus-visible {
-        background: var(--yellow);
-        color: var(--yellow-contrast);
-    }
-
-    .subir:focus-visible {
-        outline: 2px solid var(--yellow);
-        outline-offset: 3px;
+        right: 6px;
+        width: 34px;
+        height: 34px;
     }
 
     .subir-icono {
-        display: block;
-        width: 22px;
-        height: 22px;
+        width: 18px;
+        height: 18px;
     }
 }
 

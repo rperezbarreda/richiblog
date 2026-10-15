@@ -1015,18 +1015,16 @@ function reiniciarAjustes() {
 /* ======== /scripts/componentes/buscar-lupa.js ======== */
 const LUPA = {
     ventana: null,
-    boton: null,
 };
 document.addEventListener("sidebar:loaded", initializeBuscarLupa);
 function initializeBuscarLupa() {
-    const boton = document.querySelector("[data-buscar-lupa]");
+    const botones = document.querySelectorAll("[data-buscar-lupa]");
     const ventana = document.querySelector("[data-buscar-modal]");
-    if (!boton || !ventana || LUPA.ventana) {
+    if (!botones.length || !ventana || LUPA.ventana) {
         return;
     }
-    LUPA.boton = boton;
     LUPA.ventana = ventana;
-    boton.addEventListener("click", abrirLupa);
+    botones.forEach((boton) => boton.addEventListener("click", abrirLupa));
     const cerrar = ventana.querySelector("[data-buscar-modal-cerrar]");
     if (cerrar) {
         cerrar.addEventListener("click", () => ventana.close());

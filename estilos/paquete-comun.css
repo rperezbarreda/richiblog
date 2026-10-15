@@ -949,54 +949,60 @@ body.lightbox-open {
 
 /* ======== /estilos/componentes/subir.css ======== */
 .subir {
-    display: none;
+    position: fixed;
+    right: 16px;
+    bottom: calc(16px + var(--hueco-abajo));
+    z-index: 450;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 46px;
+    height: 46px;
+    padding: 0;
+    border: 2px solid var(--yellow);
+    background: var(--surface);
+    color: var(--yellow);
+    box-shadow: 3px 3px 0 var(--yellow);
+    cursor: pointer;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(8px);
+    transition: opacity 0.15s linear, transform 0.15s ease,
+                visibility 0s linear 0.15s,
+                background-color 0.15s linear, color 0.15s linear;
 }
-@media (max-width: 860px) {
+.subir.is-visible {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+    transition: opacity 0.15s linear, transform 0.15s ease,
+                visibility 0s,
+                background-color 0.15s linear, color 0.15s linear;
+}
+.subir:hover,
+.subir:active,
+.subir:focus-visible {
+    background: var(--yellow);
+    color: var(--yellow-contrast);
+}
+.subir:focus-visible {
+    outline: 2px solid var(--yellow);
+    outline-offset: 3px;
+}
+.subir-icono {
+    display: block;
+    width: 22px;
+    height: 22px;
+}
+@media (min-width: 861px) {
     .subir {
-        position: fixed;
-        right: 16px;
-        bottom: calc(16px + var(--hueco-abajo));
-        z-index: 450;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        width: 46px;
-        height: 46px;
-        padding: 0;
-        border: 2px solid var(--yellow);
-        background: var(--surface);
-        color: var(--yellow);
-        box-shadow: 3px 3px 0 var(--yellow);
-        cursor: pointer;
-        opacity: 0;
-        visibility: hidden;
-        transform: translateY(8px);
-        transition: opacity 0.15s linear, transform 0.15s ease,
-                    visibility 0s linear 0.15s,
-                    background-color 0.15s linear, color 0.15s linear;
-    }
-    .subir.is-visible {
-        opacity: 1;
-        visibility: visible;
-        transform: translateY(0);
-        transition: opacity 0.15s linear, transform 0.15s ease,
-                    visibility 0s,
-                    background-color 0.15s linear, color 0.15s linear;
-    }
-    .subir:hover,
-    .subir:active,
-    .subir:focus-visible {
-        background: var(--yellow);
-        color: var(--yellow-contrast);
-    }
-    .subir:focus-visible {
-        outline: 2px solid var(--yellow);
-        outline-offset: 3px;
+        right: 6px;
+        width: 34px;
+        height: 34px;
     }
     .subir-icono {
-        display: block;
-        width: 22px;
-        height: 22px;
+        width: 18px;
+        height: 18px;
     }
 }
 @media (prefers-reduced-motion: reduce) {

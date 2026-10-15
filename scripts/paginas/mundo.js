@@ -474,43 +474,42 @@ function pintarLosMapasDelMundo(fichas) {
     // en pequeño ("mini"): las dos cosas van en esta columna.
     const mapas = fichas.filter((f) => (f.vista || "").toString().trim() ||
         (f.mini && Array.isArray(f.mini.cosas)));
-    // Sin mapas (ni calendario) no hay columna: un título suelto encima de
-    // un hueco no dice nada.
+    // Sin mapas (ni calendario) no hay columna.
     caja.hidden = !mapas.length && !MUNDO_CALENDARIO.tarjeta;
-    caja.querySelectorAll(".mundo-vista").forEach((vieja) => vieja.remove());
-    mapas.forEach((ficha) => caja.appendChild(
-        ficha.mini ? tarjetaDeLineaMundo(ficha) : tarjetaDeMapaMundo(ficha)));
-    // El calendario va entre los mapas y la línea, y llega por su cuenta
-    // (ver pintarCalendarioMundo): si ya está, vuelve a su sitio.
+    caja.querySelectorAll("[data-vistas-bloque='mapa'], [data-vistas-bloque='linea']")
+        .forEach((viejo) => viejo.remove());
+    // Cada cosa en su bloque y con su título encima: el mapamundi (o los
+    // mapas, si algún día hay más de uno), el calendario y la línea de
+    // tiempo. Los bloques van en ese orden: mapas, calendario, línea.
+    const soloMapas = mapas.filter((f) => !f.mini);
+    const lineas = mapas.filter((f) => f.mini);
+    if (soloMapas.length) {
+        const bloque = bloqueDeVistasMundo("mapa", soloMapas.length === 1 ? "mapamundi" : "mapas");
+        soloMapas.forEach((ficha) => bloque.appendChild(tarjetaDeMapaMundo(ficha)));
+        caja.insertBefore(bloque, caja.firstChild);
+    }
+    if (lineas.length) {
+        const bloque = bloqueDeVistasMundo("linea", "línea de tiempo");
+        lineas.forEach((ficha) => bloque.appendChild(tarjetaDeLineaMundo(ficha)));
+        caja.appendChild(bloque);
+    }
+    // El calendario llega por su cuenta (ver pintarCalendarioMundo): si
+    // ya está, se asegura de que quede entre los dos.
     colocarCalendarioMundo();
     // Con la columna ya a la vista, los recuadros miden lo que miden: ahora
     // se puede apartar lo que se pise (ver colocarLineaEnPequenoMundo).
     caja.querySelectorAll(".mundo-mini-lista").forEach(colocarLineaEnPequenoMundo);
-    ponerTituloDeVistasMundo();
 }
 
-// El título de la columna dice lo que hay en ella: «mapas, calendario y
-// línea de tiempo», o solo lo que haya. La columna está escondida hasta que
-// llega algo, así que el cambio no se ve.
-function ponerTituloDeVistasMundo() {
-    const caja = document.querySelector("[data-mundo-vistas]");
-    const titulo = caja ? caja.querySelector(".mundo-vistas-titulo") : null;
-    if (!titulo) {
-        return;
-    }
-    const partes = [];
-    if (caja.querySelector(".mundo-vista-mapa")) {
-        partes.push("mapas");
-    }
-    if (caja.querySelector(".mundo-vista-calendario")) {
-        partes.push("calendario");
-    }
-    if (caja.querySelector(".mundo-vista-linea")) {
-        partes.push("línea de tiempo");
-    }
-    const solo = { "mapas": "los mapas", "calendario": "el calendario", "línea de tiempo": "la línea de tiempo" };
-    titulo.textContent = partes.length < 2 ? solo[partes[0] || "mapas"]
-        : partes.slice(0, -1).join(", ") + " y " + partes[partes.length - 1];
+function bloqueDeVistasMundo(cual, titulo) {
+    const bloque = document.createElement("div");
+    bloque.className = "mundo-vistas-bloque";
+    bloque.setAttribute("data-vistas-bloque", cual);
+    const cabeza = document.createElement("h2");
+    cabeza.className = "mundo-vistas-titulo";
+    cabeza.textContent = titulo;
+    bloque.appendChild(cabeza);
+    return bloque;
 }
 
 // =========================================
@@ -740,7 +739,7 @@ function colocarLineaEnPequenoMundo(lista) {
 
 function tarjetaDeMapaMundo(ficha) {
     const enlace = document.createElement("a");
-    enlace.className = "mundo-vista mundo-vista-mapa";
+    enlace.className = "mundo-vista";
     enlace.href = rutaSeguraMundo(ficha.url);
 
     const marco = document.createElement("span");
@@ -1628,11 +1627,13 @@ function ajustarContenidoMundo(plegable) {
 // tiempo: el Ciclo de los Heraldos mes a mes, con flechas para pasar de uno
 // a otro (los doce meses y, detrás, los cuatro días del Fin del Ciclo) y
 // los días que tienen algo resaltados. Lo de cada día no va escrito debajo:
-// sale en un globo al pasar por encima (como los países en el mapamundi),
-// o al llegar con el tabulador, o al pulsarlo (que es lo que hay en el
-// móvil). Pulsado, el globo se queda hasta que se pulsa fuera o Escape, y
-// si lo que hay tiene página, su enlace se puede pulsar. Abajo, el enlace
-// a la entrada del calendario.
+// sale en un globo al pasar por encima (como los países en el mapamundi) o
+// al llegar con el tabulador. Cada día resaltado es un ENLACE: lleva a la
+// página de lo que pasa ese día, si la tiene, o a su mes en la entrada del
+// calendario. Abajo, el enlace a la entrada entera.
+//
+// Los meses no dicen quién los rige: eso puede cambiar, y está en la
+// entrada.
 //
 // Lo que se pinta sale de datos/wiki/calendario.json, que se lleva con
 // herramientas/1-publicar/calendario.py (o a mano). Llega por su cuenta,
@@ -1643,7 +1644,7 @@ function ajustarContenidoMundo(plegable) {
 // Como todos los meses tienen 28 días, que son cuatro semanas justas, todos
 // empiezan en Día del Sol: la rejilla es siempre la misma, 7 × 4.
 
-const MUNDO_CALENDARIO = { datos: null, tarjeta: null, globo: null, mes: 1, fijado: null };
+const MUNDO_CALENDARIO = { datos: null, tarjeta: null, globo: null, mes: 1 };
 const CALENDARIO_DIAS_MES = 28;
 
 pintarCalendarioMundo();
@@ -1719,21 +1720,26 @@ function limpiarCalendarioMundo(datos) {
         meses, fin, total, semana: semana.length === 7 ? semana : null, estaciones, eventos, hoy };
 }
 
-// En la columna, detrás del último mapa y delante de la línea de tiempo.
+// En la columna, en su bloque con su título, detrás del mapamundi y
+// delante de la línea de tiempo.
 function colocarCalendarioMundo() {
     const columna = document.querySelector("[data-mundo-vistas]");
     const tarjeta = MUNDO_CALENDARIO.tarjeta;
     if (!columna || !tarjeta) {
         return;
     }
-    const linea = columna.querySelector(".mundo-vista-linea");
+    let bloque = tarjeta.parentElement;
+    if (!bloque || !bloque.matches("[data-vistas-bloque='calendario']")) {
+        bloque = bloqueDeVistasMundo("calendario", "calendario");
+        bloque.appendChild(tarjeta);
+    }
+    const linea = columna.querySelector("[data-vistas-bloque='linea']");
     if (linea) {
-        columna.insertBefore(tarjeta, linea);
+        columna.insertBefore(bloque, linea);
     } else {
-        columna.appendChild(tarjeta);
+        columna.appendChild(bloque);
     }
     columna.hidden = false;
-    ponerTituloDeVistasMundo();
 }
 
 function tarjetaDeCalendarioMundo(datos) {
@@ -1800,32 +1806,13 @@ function tarjetaDeCalendarioMundo(datos) {
     // EL GLOBO, uno para toda la tarjeta. Se mueve al lado del día que toca.
     const globo = document.createElement("div");
     globo.className = "mundo-cal-globo";
-    globo.id = "mundo-cal-globo";
+    globo.setAttribute("aria-hidden", "true");
     globo.hidden = true;
     caja.appendChild(globo);
     MUNDO_CALENDARIO.globo = globo;
-    // Al salir del globo con el tabulador (sin volver a su día), se va.
-    globo.addEventListener("focusout", (evento) => {
-        const dia = globo.previousElementSibling;
-        if (!globo.contains(evento.relatedTarget) && evento.relatedTarget !== dia) {
-            soltarGloboDelCalendarioMundo();
-        }
-    });
-
-    // Un globo fijado se va al pulsar fuera de él y de su día, o con Escape.
-    document.addEventListener("click", (evento) => {
-        const fijado = MUNDO_CALENDARIO.fijado;
-        if (fijado && !fijado.contains(evento.target) && !globo.contains(evento.target)) {
-            soltarGloboDelCalendarioMundo();
-        }
-    });
     caja.addEventListener("keydown", (evento) => {
         if (evento.key === "Escape" && !globo.hidden) {
-            const volver = MUNDO_CALENDARIO.fijado;
             soltarGloboDelCalendarioMundo();
-            if (volver) {
-                volver.focus();
-            }
         }
     });
     return caja;
@@ -1885,9 +1872,7 @@ function pintarMesDelCalendarioMundo() {
     cabeza.appendChild(nombre);
     const quien = document.createElement("p");
     quien.className = "mundo-cal-heraldo";
-    const estacion = esFin ? "" : estacionDelMesMundo(mes);
-    quien.textContent = (esFin ? datos.fin.dias.length + " días sagrados, de " + mes.heraldo
-        : "Regido por " + mes.heraldo) + (estacion ? " · " + estacion : "");
+    quien.textContent = esFin ? datos.fin.dias.length + " días sagrados" : estacionDelMesMundo(mes);
     cabeza.appendChild(quien);
     const cuenta = eventosDelCalendarioMundo(numero).length;
     const oculto = document.createElement("span");
@@ -1901,25 +1886,16 @@ function pintarMesDelCalendarioMundo() {
     const rejilla = tarjeta.querySelector("[data-cal-rejilla]");
     rejilla.textContent = "";
     rejilla.appendChild(esFin ? listaDelFinMundo(datos) : tablaDelMesMundo(datos, numero, mes));
-    // Qué quiere decir cada marca, solo si en este mes hay alguna. Para
-    // quien no ve la rejilla ya lo dice cada botón con palabras.
-    const hayHoy = Boolean(datos.hoy && datos.hoy.mes === numero);
-    if (!esFin && (hayHoy || cuenta)) {
+    // Qué quiere decir el recuadro de hoy, solo en su mes. Para quien no
+    // ve la rejilla ya lo dice el día con palabras.
+    if (!esFin && datos.hoy && datos.hoy.mes === numero) {
         const leyenda = document.createElement("p");
         leyenda.className = "mundo-cal-leyenda";
         leyenda.setAttribute("aria-hidden", "true");
-        if (cuenta) {
-            const marca = document.createElement("span");
-            marca.className = "mundo-cal-leyenda-punto";
-            leyenda.appendChild(marca);
-            leyenda.appendChild(document.createTextNode("pasa algo (pasa el ratón o púlsalo)"));
-        }
-        if (hayHoy) {
-            const marca = document.createElement("span");
-            marca.className = "mundo-cal-leyenda-hoy";
-            leyenda.appendChild(marca);
-            leyenda.appendChild(document.createTextNode("hoy"));
-        }
+        const marca = document.createElement("span");
+        marca.className = "mundo-cal-leyenda-hoy";
+        leyenda.appendChild(marca);
+        leyenda.appendChild(document.createTextNode("hoy"));
         rejilla.appendChild(leyenda);
     }
 
@@ -1989,95 +1965,73 @@ function listaDelFinMundo(datos) {
     return lista;
 }
 
-// UN DÍA. Si tiene algo, o es hoy, es un botón con su globo; si no, es
-// solo su número (veintiocho botones que no hacen nada serían veintiocho
-// paradas de tabulador para nada). Los del Fin del Ciclo son siempre
-// botones: cada uno tiene su Heraldo que contar.
+// UN DÍA. Si tiene algo es un enlace, con su globo; si no, es solo su
+// número (veintiocho enlaces que no llevan a nada serían veintiocho
+// paradas de tabulador para nada). Hoy, sin nada, es su número en un
+// recuadro. Los del Fin del Ciclo son siempre enlaces: cada uno tiene su
+// apartado en la entrada.
+//
+// A DÓNDE LLEVA: a la página de lo que pasa ese día, si tiene una; si no,
+// a su mes (o a su día del Fin del Ciclo) en la entrada del calendario,
+// que es donde se cuenta.
 function diaDelCalendarioMundo(mes, dia, rotulo, delFin) {
     const datos = MUNDO_CALENDARIO.datos;
     const suyos = eventosDelCalendarioMundo(mes, dia);
     const esHoy = Boolean(datos.hoy && datos.hoy.mes === mes && datos.hoy.dia === dia);
-    if (!suyos.length && !esHoy && !delFin) {
+    if (!suyos.length && !delFin) {
         const numero = document.createElement("span");
-        numero.className = "mundo-cal-dia";
+        numero.className = "mundo-cal-dia" + (esHoy ? " es-hoy" : "");
         numero.textContent = rotulo;
+        if (esHoy) {
+            const oculto = document.createElement("span");
+            oculto.className = "visually-hidden";
+            oculto.textContent = ", hoy";
+            numero.appendChild(oculto);
+        }
         return numero;
     }
-    const boton = document.createElement("button");
-    boton.type = "button";
-    boton.className = "mundo-cal-dia es-pulsable" + (suyos.length ? " es-marcado" : "") +
+    const enlace = document.createElement("a");
+    enlace.className = "mundo-cal-dia es-pulsable" + (suyos.length ? " es-marcado" : "") +
         (esHoy ? " es-hoy" : "");
-    boton.setAttribute("aria-expanded", "false");
-    boton.setAttribute("aria-controls", "mundo-cal-globo");
+    const conPagina = suyos.find((e) => e.enlace);
+    const ancla = (delFin && delFin.ancla) || (datos.meses[mes - 1] || datos.fin || {}).ancla || "";
+    enlace.href = conPagina ? rutaSeguraMundo(conPagina.enlace)
+        : rutaSeguraMundo(datos.url + (/^[a-z0-9_-]+$/i.test(ancla) ? "#" + ancla : ""));
     const numero = document.createElement("span");
     numero.className = "mundo-cal-numero";
     numero.textContent = rotulo;
-    boton.appendChild(numero);
+    enlace.appendChild(numero);
     if (suyos.length) {
         const marca = document.createElement("span");
         marca.className = "mundo-cal-marca";
         marca.setAttribute("aria-hidden", "true");
-        boton.appendChild(marca);
+        enlace.appendChild(marca);
     }
-    // Lo que se oye: el día y qué tiene, sin tener que abrir el globo.
+    // Lo que se oye: el día y qué tiene, sin tener que ver el globo.
     const oculto = document.createElement("span");
     oculto.className = "visually-hidden";
     oculto.textContent = (esHoy ? ", hoy" : "") +
         (suyos.length ? ": " + suyos.map((e) => e.nombre).join(", ") : "");
-    boton.appendChild(oculto);
+    enlace.appendChild(oculto);
 
-    const ensenar = () => {
-        if (!MUNDO_CALENDARIO.fijado) {
-            abrirGloboDelCalendarioMundo(boton, mes, dia, delFin, esHoy);
-        }
-    };
-    const esconder = () => {
-        if (!MUNDO_CALENDARIO.fijado) {
-            soltarGloboDelCalendarioMundo();
-        }
-    };
-    boton.addEventListener("mouseenter", ensenar);
-    boton.addEventListener("focus", ensenar);
-    boton.addEventListener("mouseleave", esconder);
-    boton.addEventListener("blur", (evento) => {
-        // Si el foco se va al enlace de dentro del globo, el globo se queda.
-        if (!MUNDO_CALENDARIO.globo.contains(evento.relatedTarget)) {
-            esconder();
-        }
-    });
-    // PULSARLO lo fija (o lo suelta, si ya lo estaba): en el móvil no hay
-    // ratón que pase por encima, y fijado se puede pulsar su enlace.
-    boton.addEventListener("click", () => {
-        if (MUNDO_CALENDARIO.fijado === boton) {
-            soltarGloboDelCalendarioMundo();
-            return;
-        }
-        soltarGloboDelCalendarioMundo();
-        abrirGloboDelCalendarioMundo(boton, mes, dia, delFin, esHoy);
-        MUNDO_CALENDARIO.fijado = boton;
-        boton.setAttribute("aria-expanded", "true");
-        MUNDO_CALENDARIO.globo.classList.add("es-fijado");
-    });
-    return boton;
+    const ensenar = () => abrirGloboDelCalendarioMundo(enlace, mes, dia, delFin, esHoy);
+    enlace.addEventListener("mouseenter", ensenar);
+    enlace.addEventListener("focus", ensenar);
+    enlace.addEventListener("mouseleave", soltarGloboDelCalendarioMundo);
+    enlace.addEventListener("blur", soltarGloboDelCalendarioMundo);
+    return enlace;
 }
 
 function abrirGloboDelCalendarioMundo(boton, mes, dia, delFin, esHoy) {
     const datos = MUNDO_CALENDARIO.datos;
     const globo = MUNDO_CALENDARIO.globo;
     globo.textContent = "";
-    globo.classList.remove("es-fijado");
 
     const cuando = document.createElement("p");
     cuando.className = "mundo-cal-globo-cuando";
     cuando.textContent = (delFin ? delFin.nombre : "Día " + dia + " · " + datos.meses[mes - 1].nombre) +
         (esHoy ? " · hoy" : "");
     globo.appendChild(cuando);
-    if (delFin && delFin.heraldo) {
-        const quien = document.createElement("p");
-        quien.className = "mundo-cal-globo-texto";
-        quien.textContent = "Dedicado a " + delFin.heraldo + ".";
-        globo.appendChild(quien);
-    }
     eventosDelCalendarioMundo(mes, dia).forEach((evento) => {
         const bloque = document.createElement("div");
         bloque.className = "mundo-cal-globo-evento";
@@ -2087,14 +2041,7 @@ function abrirGloboDelCalendarioMundo(boton, mes, dia, delFin, esHoy) {
         icono.setAttribute("aria-hidden", "true");
         icono.textContent = (evento.tipo === "evento" ? "📌" : "🎉") + " ";
         nombre.appendChild(icono);
-        if (evento.enlace) {
-            const enlace = document.createElement("a");
-            enlace.href = rutaSeguraMundo(evento.enlace);
-            enlace.textContent = evento.nombre;
-            nombre.appendChild(enlace);
-        } else {
-            nombre.appendChild(document.createTextNode(evento.nombre));
-        }
+        nombre.appendChild(document.createTextNode(evento.nombre));
         bloque.appendChild(nombre);
         const tipo = document.createElement("p");
         tipo.className = "mundo-cal-globo-tipo";
@@ -2109,9 +2056,8 @@ function abrirGloboDelCalendarioMundo(boton, mes, dia, delFin, esHoy) {
         globo.appendChild(bloque);
     });
 
-    // Justo detrás del botón en el orden de la página: así, fijado, el
-    // tabulador pasa del día a lo que haya dentro del globo.
-    boton.insertAdjacentElement("afterend", globo);
+    // Lo que dice ya lo lleva el propio día escrito para el lector de
+    // pantalla (y el globo va aria-hidden): esto es para la vista.
     globo.hidden = false;
     colocarGloboDelCalendarioMundo(boton);
 }
@@ -2134,14 +2080,7 @@ function colocarGloboDelCalendarioMundo(boton) {
 }
 
 function soltarGloboDelCalendarioMundo() {
-    const globo = MUNDO_CALENDARIO.globo;
-    if (!globo) {
-        return;
+    if (MUNDO_CALENDARIO.globo) {
+        MUNDO_CALENDARIO.globo.hidden = true;
     }
-    if (MUNDO_CALENDARIO.fijado) {
-        MUNDO_CALENDARIO.fijado.setAttribute("aria-expanded", "false");
-        MUNDO_CALENDARIO.fijado = null;
-    }
-    globo.hidden = true;
-    globo.classList.remove("es-fijado");
 }

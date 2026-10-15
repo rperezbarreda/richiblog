@@ -1025,8 +1025,13 @@ html:not(.js) .mundo-spoiler {
     grid-area: vistas;
     display: flex;
     flex-direction: column;
-    gap: 12px;
+    gap: 22px;
     align-self: start;
+}
+.mundo-vistas-bloque {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
 }
 .mundo-vistas-titulo,
 .mundo-regiones-titulo {
@@ -1566,15 +1571,14 @@ html:not(.js) .mundo-spoiler {
     background: var(--purple-lighter);
     color: var(--white);
     font-weight: 700;
-    cursor: pointer;
+    text-decoration: none;
 }
 .mundo-cal-dia.es-marcado {
     border-color: var(--yellow);
     color: var(--yellow);
 }
 .mundo-cal-dia.es-hoy {
-    border-width: 2px;
-    border-color: var(--yellow);
+    border: 2px solid var(--yellow);
 }
 .mundo-cal-marca {
     position: absolute;
@@ -1588,7 +1592,7 @@ html:not(.js) .mundo-spoiler {
 }
 .mundo-cal-dia.es-pulsable:hover,
 .mundo-cal-dia.es-pulsable:focus-visible,
-.mundo-cal-dia.es-pulsable[aria-expanded="true"] {
+.mundo-cal-dia.es-pulsable:active {
     background: var(--yellow);
     border-color: var(--yellow);
     color: var(--yellow-contrast);
@@ -1637,25 +1641,13 @@ html:not(.js) .mundo-spoiler {
     font-family: var(--fuente-mono);
     font-size: 0.75rem;
 }
-.mundo-cal-leyenda-punto,
 .mundo-cal-leyenda-hoy {
     display: inline-block;
     margin-right: 6px;
     vertical-align: middle;
-}
-.mundo-cal-leyenda-punto {
-    width: 6px;
-    height: 6px;
-    border-radius: 50%;
-    background: var(--yellow);
-}
-.mundo-cal-leyenda-hoy {
     width: 12px;
     height: 12px;
     border: 2px solid var(--yellow);
-}
-.mundo-cal-leyenda-punto + .mundo-cal-leyenda-hoy {
-    margin-left: 12px;
 }
 .mundo-cal-globo {
     position: absolute;
@@ -1667,9 +1659,6 @@ html:not(.js) .mundo-spoiler {
     color: var(--white);
     text-align: left;
     pointer-events: none;
-}
-.mundo-cal-globo.es-fijado {
-    pointer-events: auto;
 }
 .mundo-cal-globo[hidden] {
     display: none;
@@ -1690,10 +1679,6 @@ html:not(.js) .mundo-spoiler {
     color: var(--yellow);
     font-weight: 700;
     line-height: 1.3;
-}
-.mundo-cal-globo-nombre a {
-    color: inherit;
-    text-underline-offset: 3px;
 }
 .mundo-cal-globo-texto {
     margin-top: 2px;

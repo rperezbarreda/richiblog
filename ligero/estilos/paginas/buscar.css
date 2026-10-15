@@ -249,6 +249,43 @@
     outline: 2px solid var(--yellow);
     outline-offset: 2px;
 }
+.buscar-flotante {
+    position: absolute;
+    top: calc(14px + 1.6rem + 8px);
+    right: -24px;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.6rem;
+    height: 1.6rem;
+    margin: 0;
+    padding: 0;
+    border: 2px solid var(--yellow);
+    background: var(--purple);
+    color: var(--yellow);
+    font-size: 0.85rem;
+    line-height: 1;
+}
+.buscar-flotante:hover,
+.buscar-flotante:focus-visible {
+    background: var(--yellow);
+    color: var(--yellow-contrast);
+}
+.buscar-flotante:focus-visible {
+    outline: 2px solid var(--yellow);
+    outline-offset: 2px;
+}
+@media (min-width: 861px) {
+    .buscar-lupa-boton {
+        display: none;
+    }
+}
+@media (max-width: 860px) {
+    .buscar-flotante {
+        display: none;
+    }
+}
 .buscar-modal {
     width: min(30rem, calc(100vw - 32px));
     margin: auto;
