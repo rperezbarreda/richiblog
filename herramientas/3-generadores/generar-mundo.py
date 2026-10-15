@@ -742,6 +742,23 @@ def regiones_de(paginas):
     return salida
 
 
+def con_banderas_en_el_mapa(svg, paginas):
+    """A cada país del mapa que lleve a una página con bandera, la
+    dirección de esa bandera en data-mapa-bandera: mundo-mapa.js la enseña
+    en el globo al pasar el ratón por encima, junto al nombre."""
+    banderas = {f["url"]: f.get("bandera_url") for f in paginas.values() if f.get("bandera_url")}
+    if not banderas:
+        return svg
+
+    def poner(m):
+        bandera = banderas.get(html.unescape(m.group(2)))
+        if not bandera:
+            return m.group(0)
+        return m.group(0) + ' data-mapa-bandera="%s"' % html.escape(bandera, quote=True)
+
+    return re.sub(r'<a class="mapa-forma([^"]*)" href="([^"]+)"', poner, svg)
+
+
 def convertir_mapas(mapas, paginas, imagenes, avisos_por_pagina, detalle):
     """Lee los .cmap, los pinta y deja en cada uno lo que hace falta para
     escribir su página. Devuelve las imágenes de fondo que hay que
@@ -800,7 +817,7 @@ def convertir_mapas(mapas, paginas, imagenes, avisos_por_pagina, detalle):
                                    region_de=region_de)
         mapa["titulo"] = leido["titulo"] or mapa["nombre"]
         mapa["ancho"], mapa["alto"] = leido["ancho"], leido["alto"]
-        mapa["svg"] = hecho["svg"]
+        mapa["svg"] = con_banderas_en_el_mapa(hecho["svg"], paginas)
         mapa["sitios"] = hecho["sitios"]
         mapa["capas"] = hecho["capas"]
         mapa["lista"] = mundo_mapas.pintar_lista(hecho["sitios"])
@@ -1266,6 +1283,9 @@ def escribir_indice(paginas, mapas, probar, categorias=(), peques=None):
             "que": ficha["subtitulo"] or str(ficha["datos"].get("infobox") or ""),
             "resumen": ficha["resumen"],
             "region": suya["titulo"] if suya else "",
+            # Si aún es de relleno («*Texto de relleno.*»): la portada no la
+            # saca de destacada ni en el «¿sabías que…?».
+            "relleno": "Texto de relleno" in (ficha.get("texto") or ""),
             # Su bandera, si tiene: la portada la pone junto al nombre.
             "bandera": ficha.get("bandera_url") or "",
             # Y si es una región (no tiene bandera), su mapa de situación en
@@ -1360,6 +1380,57 @@ def escribir_regiones(paginas, partes, peques, de_partes, probar):
         })
     if not probar:
         escribir_json(REGIONES, salida)
+    return salida
+
+
+# =========================================
+# LO DE LA PORTADA QUE NO ES EL ÍNDICE
+# =========================================
+# Lo que tienen las portadas de las wikis de mundos (Kanka, World Anvil,
+# las de Fandom): la fecha de HOY en el mundo y los ÚLTIMOS CAMBIOS. Lo
+# pinta scripts/paginas/mundo.js con datos/wiki/mundo-portada.json. La
+# página destacada, el «¿sabías que…?» y la página al azar salen de
+# mundo.json, en el navegador.
+
+PORTADA = RAIZ / "datos" / "wiki" / "mundo-portada.json"
+
+
+def _fecha_de(archivo):
+    """(cuándo, "aaaa-mm-dd") del último cambio de un archivo de la bóveda.
+    Si tiene cambios sin commit, la del archivo (es lo último que se ha
+    tocado); si no, la de su último commit (la de verdad: al bajar el
+    repositorio, todos los archivos nacen con la fecha del día)."""
+    import datetime
+    import subprocess
+    del_archivo = Path(archivo).stat().st_mtime
+    try:
+        sucio = subprocess.run(["git", "status", "--porcelain", "--", str(archivo)],
+                               cwd=RAIZ, capture_output=True, text=True, timeout=10).stdout.strip()
+        if not sucio:
+            hecho = subprocess.run(["git", "log", "-1", "--format=%ct", "--", str(archivo)],
+                                   cwd=RAIZ, capture_output=True, text=True, timeout=10)
+            if hecho.stdout.strip():
+                cuando = int(hecho.stdout.strip())
+                return cuando, datetime.date.fromtimestamp(cuando).isoformat()
+    except (OSError, subprocess.SubprocessError, ValueError):
+        pass
+    return del_archivo, datetime.date.fromtimestamp(del_archivo).isoformat()
+
+
+def escribir_portada(paginas, probar, cuantos=6):
+    cabecera, _ = mundo_linea.leer(lambda *a: None)
+    hoy = None
+    if cabecera.get("hoy") is not None:
+        era = mundo_linea.era_de({"fecha": cabecera["hoy"]}, cabecera.get("eras") or [])
+        hoy = {"anyo": mundo_linea.anyo(cabecera["hoy"]),
+               "era": era["nombre"] if era else "",
+               "url": mundo_linea.URL + mundo_linea.PAGINA}
+    fechas = {clave: _fecha_de(f["archivo"]) for clave, f in paginas.items()}
+    cambios = [{"titulo": paginas[k]["titulo"], "url": paginas[k]["url"], "fecha": fechas[k][1]}
+               for k in sorted(fechas, key=lambda k: fechas[k][0], reverse=True)[:cuantos]]
+    salida = {"hoy": hoy, "cambios": cambios}
+    if not probar:
+        escribir_json(PORTADA, salida)
     return salida
 
 
@@ -1610,6 +1681,7 @@ def main():
     escritos += escribir_vistas(mapas, args.probar)
     fichas = escribir_indice(paginas, mapas, args.probar, categorias, peques)
     escribir_regiones(paginas, partes, peques, de_partes, args.probar)
+    escribir_portada(paginas, args.probar)
     copiadas, pesadas, repetidas = copiar_imagenes(imagenes, usadas, args.probar)
     hechas, saltadas, enteras, gordas = preparar_capas(capas, args.probar)
     sobran = limpiar_lo_que_sobra(paginas, mapas, args.probar)

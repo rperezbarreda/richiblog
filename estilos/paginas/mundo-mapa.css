@@ -362,6 +362,17 @@ html:not(.js) .mapa-ayuda {
     margin-right: 6px;
 }
 
+/* La bandera del país, arriba del globo. */
+.mapa-globo-bandera {
+    display: block;
+    width: 7.5rem;
+    height: auto;
+    aspect-ratio: 3 / 2;
+    margin-bottom: 6px;
+    object-fit: cover;
+    border: 1px solid var(--border);
+}
+
 .mapa-globo-nombre {
     color: var(--yellow);
     font-weight: 400;

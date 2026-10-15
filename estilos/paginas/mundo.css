@@ -965,7 +965,9 @@ html:not(.js) .mundo-spoiler {
     grid-template-areas:
         "cabecera"
         "indice"
+        "destacado"
         "regiones"
+        "cambios"
         "vistas";
     align-content: start;
     gap: 14px;
@@ -1006,6 +1008,134 @@ html:not(.js) .mundo-spoiler {
     margin-top: 6px;
 }
 
+
+/* HOY EN CRALËA: el año y la era, debajo del título. */
+.mundo-hoy[hidden],
+.mundo-destacado[hidden],
+.mundo-cambios[hidden],
+.mundo-azar[hidden] {
+    display: none;
+}
+
+.mundo-hoy {
+    margin: 0;
+    color: var(--yellow);
+    font-family: var(--fuente-mono);
+    font-size: 0.875rem;
+}
+
+.mundo-hoy a {
+    color: inherit;
+    text-underline-offset: 3px;
+}
+
+/* UNA PÁGINA AL AZAR, al final de «para empezar». */
+.mundo-azar {
+    margin-left: 6px;
+    padding: 2px 10px;
+    border: 2px solid var(--yellow);
+    background: transparent;
+    color: var(--yellow);
+    font: inherit;
+    cursor: pointer;
+}
+
+.mundo-azar:hover,
+.mundo-azar:focus-visible {
+    background: var(--yellow);
+    color: var(--yellow-contrast);
+}
+
+.mundo-azar:focus-visible {
+    outline: 2px solid var(--yellow);
+    outline-offset: 2px;
+}
+
+/* LA DESTACADA Y «¿SABÍAS QUE…?», una al lado de otra si caben. */
+.mundo-destacado {
+    grid-area: destacado;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 14rem), 1fr));
+    gap: 18px;
+    align-items: start;
+}
+
+.mundo-destacada,
+.mundo-sabias {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    min-width: 0;
+}
+
+.mundo-destacada-nombre {
+    color: var(--yellow);
+    font-size: 1.125rem;
+    text-underline-offset: 3px;
+}
+
+.mundo-destacada-que {
+    margin: 0;
+    color: var(--muted);
+    font-family: var(--fuente-mono);
+    font-size: 0.75rem;
+}
+
+.mundo-destacada-resumen {
+    margin: 0;
+    color: var(--white);
+    font-size: 0.9375rem;
+    line-height: 1.55;
+}
+
+.mundo-sabias-lista,
+.mundo-cambios-lista {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    color: var(--white);
+    font-size: 0.9375rem;
+    line-height: 1.5;
+}
+
+.mundo-sabias-lista li::before {
+    content: "…";
+    content: "…" / "";
+    margin-right: 4px;
+    color: var(--yellow);
+}
+
+.mundo-sabias-lista a,
+.mundo-cambios-lista a {
+    color: var(--yellow);
+    text-underline-offset: 3px;
+}
+
+/* LOS ÚLTIMOS CAMBIOS: el nombre y, a la derecha, cuándo. */
+.mundo-cambios {
+    grid-area: cambios;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.mundo-cambios-lista li {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 2px 12px;
+    padding-bottom: 6px;
+    border-bottom: 1px solid var(--border);
+}
+
+.mundo-cambios-fecha {
+    color: var(--muted);
+    font-family: var(--fuente-mono);
+    font-size: 0.75rem;
+}
 
 /* «Para empezar: el Mapamundi, la línea de tiempo o una región». */
 /* LAS SECCIONES: un botón por cada una (el mapamundi, la historia…), y

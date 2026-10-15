@@ -294,6 +294,16 @@ function prepararGloboDeMapa(mando) {
 }
 function llenarGloboDeMapa(globo, sitio) {
     globo.textContent = "";
+    const bandera = banderaSeguraDeMapa(sitio.getAttribute("data-mapa-bandera"));
+    if (bandera) {
+        const img = document.createElement("img");
+        img.className = "mapa-globo-bandera";
+        img.src = bandera;
+        img.alt = "";
+        img.width = 120;
+        img.height = 80;
+        globo.appendChild(img);
+    }
     const icono = sitio.getAttribute("data-mapa-icono");
     if (icono) {
         const trozo = document.createElement("span");
@@ -312,6 +322,10 @@ function llenarGloboDeMapa(globo, sitio) {
         linea.textContent = que;
         globo.appendChild(linea);
     }
+}
+function banderaSeguraDeMapa(url) {
+    const limpia = (url || "").toString().trim();
+    return /^\/(?!\/)/.test(limpia) ? limpia : "";
 }
 function moverGloboDeMapa(mando, x, y) {
     const globo = mando.globo;

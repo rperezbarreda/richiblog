@@ -193,6 +193,15 @@ html:not(.js) .mapa-ayuda {
 .mapa-globo-icono {
     margin-right: 6px;
 }
+.mapa-globo-bandera {
+    display: block;
+    width: 7.5rem;
+    height: auto;
+    aspect-ratio: 3 / 2;
+    margin-bottom: 6px;
+    object-fit: cover;
+    border: 1px solid var(--border);
+}
 .mapa-globo-nombre {
     color: var(--yellow);
     font-weight: 400;

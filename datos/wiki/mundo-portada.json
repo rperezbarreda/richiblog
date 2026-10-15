@@ -1,0 +1,39 @@
+{
+    "hoy": {
+        "anyo": "1340 DEM",
+        "era": "Era del Expolio",
+        "url": "/web/wiki/linea-de-tiempo/linea_de_tiempo.html"
+    },
+    "cambios": [
+        {
+            "titulo": "El Sol",
+            "url": "/web/wiki/cosmologia/el_sol.html",
+            "fecha": "2026-10-15"
+        },
+        {
+            "titulo": "Gomath",
+            "url": "/web/wiki/cosmologia/gomath.html",
+            "fecha": "2026-10-15"
+        },
+        {
+            "titulo": "La Cosmología de Cralëa",
+            "url": "/web/wiki/cosmologia/la_cosmologia_de_cralea.html",
+            "fecha": "2026-10-15"
+        },
+        {
+            "titulo": "La Luna",
+            "url": "/web/wiki/cosmologia/la_luna.html",
+            "fecha": "2026-10-15"
+        },
+        {
+            "titulo": "Lurmeri",
+            "url": "/web/wiki/cosmologia/lurmeri.html",
+            "fecha": "2026-10-15"
+        },
+        {
+            "titulo": "Nevadra",
+            "url": "/web/wiki/cosmologia/nevadra.html",
+            "fecha": "2026-10-15"
+        }
+    ]
+}

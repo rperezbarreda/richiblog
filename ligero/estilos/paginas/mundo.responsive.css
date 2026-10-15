@@ -59,10 +59,12 @@
     .mundo-indice-page {
         grid-template-columns: minmax(0, 1fr) minmax(0, 20rem);
         grid-template-areas:
-            "cabecera vistas"
-            "indice   vistas"
-            "regiones vistas";
-        grid-template-rows: auto auto 1fr;
+            "cabecera  vistas"
+            "indice    vistas"
+            "destacado vistas"
+            "regiones  vistas"
+            "cambios   vistas";
+        grid-template-rows: auto auto auto auto 1fr;
         column-gap: 26px;
     }
 }

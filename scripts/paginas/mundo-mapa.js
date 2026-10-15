@@ -499,6 +499,19 @@ function prepararGloboDeMapa(mando) {
 
 function llenarGloboDeMapa(globo, sitio) {
     globo.textContent = "";
+    // La bandera del país, si tiene, arriba del todo. Con su ancho y su
+    // alto puestos: si no, el globo se coloca antes de que llegue la imagen
+    // y al llegar crece y se sale por el borde.
+    const bandera = banderaSeguraDeMapa(sitio.getAttribute("data-mapa-bandera"));
+    if (bandera) {
+        const img = document.createElement("img");
+        img.className = "mapa-globo-bandera";
+        img.src = bandera;
+        img.alt = "";
+        img.width = 120;
+        img.height = 80;
+        globo.appendChild(img);
+    }
     const icono = sitio.getAttribute("data-mapa-icono");
     if (icono) {
         const trozo = document.createElement("span");
@@ -517,6 +530,13 @@ function llenarGloboDeMapa(globo, sitio) {
         linea.textContent = que;
         globo.appendChild(linea);
     }
+}
+
+// Solo una dirección de esta web ("/imagenes/…"): lo que acaba en un src
+// se comprueba siempre, aunque lo escriba el generador.
+function banderaSeguraDeMapa(url) {
+    const limpia = (url || "").toString().trim();
+    return /^\/(?!\/)/.test(limpia) ? limpia : "";
 }
 
 function moverGloboDeMapa(mando, x, y) {

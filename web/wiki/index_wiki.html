@@ -59,11 +59,11 @@
     <script>window.adelantoDeFragmentos={};try{window.adelantoDeFragmentos["/fragmentos/barra-lateral.html"]=fetch("/fragmentos/barra-lateral.html?v=e6721b10").then(function(r){return r.ok?r.text():null}).catch(function(){return null})}catch(e){}</script>
     <!-- ==== CSS ==== -->
     <link rel="stylesheet" href="/estilos/paquete-comun.css?v=e43f1eeb">
-    <link rel="stylesheet" href="/ligero/estilos/paginas/mundo.css?v=f811f62e">
+    <link rel="stylesheet" href="/ligero/estilos/paginas/mundo.css?v=a45c7b2c">
     <link rel="stylesheet" href="/ligero/estilos/componentes/buscador.css?v=8425040e">
     <link rel="stylesheet" href="/ligero/estilos/componentes/ventana-modal.css?v=95db68e9">
     <link rel="stylesheet" href="/ligero/estilos/componentes/ventana-modal.responsive.css?v=e927767d">
-    <link rel="stylesheet" href="/ligero/estilos/paginas/mundo.responsive.css?v=f74b2ed2">
+    <link rel="stylesheet" href="/ligero/estilos/paginas/mundo.responsive.css?v=5c393dbd">
     <link rel="stylesheet" href="/ligero/estilos/componentes/barra-lateral.css?v=ef2928ea">
     <link rel="stylesheet" href="/ligero/estilos/componentes/barra-lateral.responsive.css?v=fb0768a1">
     <link rel="stylesheet" href="/ligero/estilos/paginas/buscar.css?v=e32b461e">
@@ -74,7 +74,7 @@
     <script defer src="/scripts/paquete-comun.js?v=ffd56d5d"></script>
     <script defer src="/ligero/scripts/componentes/buscador.js?v=4107f902"></script>
     <script defer src="/ligero/scripts/componentes/ventana-modal.js?v=427a4c21"></script>
-    <script defer src="/ligero/scripts/paginas/mundo.js?v=860e5908"></script>
+    <script defer src="/ligero/scripts/paginas/mundo.js?v=b1e457a7"></script>
     <!-- ==== fin del JS ==== -->
     </head>
 <body>
@@ -87,6 +87,7 @@
             <h1 class="home-title">
                 <em>Wiki Cralëa</em>
             </h1>
+            <p class="mundo-hoy" data-mundo-hoy hidden></p>
 
             <p class="mundo-indice-intro">
                 La wiki del mundo donde pasan las partidas: sus países, sus
@@ -98,6 +99,9 @@
                 Para empezar: el <a href="/web/wiki/mapa_mapamundi_de_cralea.html">Mapamundi de Cralëa</a>,
                 la <a href="/web/wiki/linea-de-tiempo/linea_de_tiempo.html">línea de tiempo</a>
                 o <a href="#mundo-regiones-titulo">una región</a>.
+                <button class="mundo-azar" type="button" data-mundo-azar hidden>
+                    <span aria-hidden="true">🎲</span> una página al azar
+                </button>
             </p>
 
             <form class="buscar" role="search" data-buscar
@@ -118,10 +122,16 @@
 
             </div>
 
+            <div class="mundo-destacado" role="region" aria-label="Destacado" data-mundo-destacado hidden></div>
+
             <div class="mundo-regiones" role="region" data-mundo-regiones
                  data-mundo-regiones-datos="/datos/wiki/mundo-regiones.json"
                  aria-labelledby="mundo-regiones-titulo" hidden>
                 <h2 class="mundo-regiones-titulo" id="mundo-regiones-titulo" tabindex="-1">busca una región</h2>
+            </div>
+
+            <div class="mundo-cambios" role="region" aria-labelledby="mundo-cambios-titulo" data-mundo-cambios hidden>
+                <h2 class="mundo-regiones-titulo" id="mundo-cambios-titulo">últimos cambios</h2>
             </div>
 
             <aside class="mundo-vistas" role="region" data-mundo-vistas aria-labelledby="mundo-vistas-titulo" hidden>
@@ -129,7 +139,8 @@
             </aside>
 
             <div class="mundo-indice" data-mundo-indice data-mundo-datos="/datos/wiki/mundo.json"
-                 data-mundo-categorias="/datos/wiki/mundo-categorias.json">
+                 data-mundo-categorias="/datos/wiki/mundo-categorias.json"
+                 data-mundo-portada="/datos/wiki/mundo-portada.json">
                 <p class="entries-loading">Cargando la wiki…</p>
             </div>
 

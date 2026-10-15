@@ -122,13 +122,15 @@
     .mundo-indice-page {
         grid-template-columns: minmax(0, 1fr) minmax(0, 20rem);
         grid-template-areas:
-            "cabecera vistas"
-            "indice   vistas"
-            "regiones vistas";
+            "cabecera  vistas"
+            "indice    vistas"
+            "destacado vistas"
+            "regiones  vistas"
+            "cambios   vistas";
         /* Si la columna de la derecha es más alta que lo de la izquierda,
-           lo que sobra se lo queda la última fila (las regiones) y no
-           aparece un hueco entre los botones y las regiones. */
-        grid-template-rows: auto auto 1fr;
+           lo que sobra se lo queda la última fila (los últimos cambios) y
+           no aparecen huecos entre los bloques de la izquierda. */
+        grid-template-rows: auto auto auto auto 1fr;
         column-gap: 26px;
     }
 }

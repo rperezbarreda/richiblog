@@ -1343,8 +1343,21 @@
   guardados los archivos; eso no tiene por qué ser cómo se busca una
   cosa.
 
-  ORGANIZADA COMO UN PORTAL DE GEOGRAFÍA (la idea sale del de A Wiki of
-  Ice and Fire, awoiaf.westeros.org/index.php/Portal:Geography):
+  ORGANIZADA COMO LAS PORTADAS DE LAS WIKIS DE MUNDOS (el portal de
+  geografía de A Wiki of Ice and Fire y los paneles de Kanka y World
+  Anvil):
+
+    - HOY EN CRALËA, debajo del título: el año de «hoy» de la línea de
+      tiempo y su era. Y un botón de UNA PÁGINA AL AZAR.
+    - PÁGINA DESTACADA (cambia cada día, la misma para todos ese día) y
+      ¿SABÍAS QUE…? (tres al azar). Solo salen las páginas con texto de
+      verdad: ni las de relleno, ni las que solo dicen dónde están, ni la
+      de ejemplo.
+    - ÚLTIMOS CAMBIOS: las seis páginas tocadas hace menos (la fecha de
+      su último commit, o la del archivo si tiene cambios sin subir).
+    Hoy y los cambios salen de datos/wiki/mundo-portada.json, que escribe
+    generar-mundo.py; lo demás, de mundo.json, en el navegador.
+
 
     - «Para empezar»: una línea con el mapamundi, la línea de tiempo y
       un enlace a las regiones. Está escrita a mano en index_wiki.html.
@@ -1516,6 +1529,10 @@
   imagenes/wiki/situacion/ (1200x800, unos 75 KB cada uno; 116 son unos
   9 MB), y solo rehace los que hagan falta: si cambias el .cmap, la
   imagen del mapa o la forma de dibujarlos, se rehacen todos.
+
+  EN EL MAPAMUNDI, al pasar el ratón por un país sale su bandera en el
+  globo, encima del nombre (data-mapa-bandera, que pone el generador en
+  cada país con bandera).
 
   LA BANDERA, EL BLASÓN Y EL MAPA van arriba del todo de la ficha, en el
   mismo hueco, como un carrusel: dos flechas debajo para pasar de uno a

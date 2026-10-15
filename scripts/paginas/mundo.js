@@ -44,6 +44,7 @@ async function initializeMundo() {
     }
     // A la vez, sin esperarse: son dos archivos que no dependen uno de otro.
     pintarRegionesMundo();
+    pintarPortadaMundo(caja);
     const pedidas = leerCategoriasMundo(caja);
     const fuente = (caja.getAttribute("data-mundo-datos") || "").trim();
     if (!fuente) {
@@ -180,6 +181,8 @@ function pintarElMundo(caja, fichas, categorias) {
     caja.appendChild(resultados);
 
     pintarLosMapasDelMundo(buenas);
+    pintarDestacadoMundo(buenas);
+    prepararAzarMundo(buenas);
 
     // Llegar con #mundo-<parte> (las migas de una entrada, la tarjeta de
     // Archipiélagos en «busca una región») abre la ventana del mapamundi
@@ -865,8 +868,14 @@ document.addEventListener("buscar:cambiado", () => {
     if (regiones && regiones.hasAttribute("data-mundo-cargado")) {
         regiones.hidden = !!window.buscador.texto;
     }
-    // Y los botones de las secciones dejan sitio a lo encontrado.
+    // Y los botones de las secciones dejan sitio a lo encontrado, y con
+    // ellos lo destacado y los últimos cambios.
     const buscando = !!window.buscador.texto;
+    document.querySelectorAll("[data-mundo-destacado], [data-mundo-cambios]").forEach((bloque) => {
+        if (bloque.hasAttribute("data-mundo-cargado")) {
+            bloque.hidden = buscando;
+        }
+    });
     const resultados = document.querySelector("[data-mundo-resultados]");
     const secciones = document.querySelector("[data-mundo-secciones]");
     if (resultados) {
@@ -1365,5 +1374,170 @@ function prepararContenidoMundo() {
         } catch (error) {
             // Se pierde al cambiar de página, y ya está.
         }
+    });
+}
+
+
+// =========================================
+// LO DEMÁS DE LA PORTADA
+// =========================================
+// Lo que tienen las portadas de las wikis de mundos (Kanka, World Anvil,
+// las de Fandom) y la nuestra no tenía: la fecha de hoy en el mundo, una
+// página destacada, un «¿sabías que…?», una página al azar y los últimos
+// cambios. Las páginas de relleno («*Texto de relleno.*») y la de ejemplo
+// no salen de destacadas: no tienen nada que contar todavía.
+
+function paginasConTextoMundo(fichas) {
+    // Fuera también las que solo dicen dónde están («X está en Y», «es una
+    // región de…»): son las frases que puso el generador, no texto de
+    // verdad.
+    const deRelleno = /\b(está en|es una región)\b/i;
+    return fichas.filter((f) => !f.relleno && f.grupo !== "mapas"
+        && (f.resumen || "").toString().trim().length > 60
+        && !deRelleno.test((f.resumen || "").toString())
+        && !(Array.isArray(f.etiquetas) && f.etiquetas.some((e) => (e || "").toString().toLowerCase() === "ejemplo")));
+}
+
+// La fecha de hoy y los últimos cambios: datos/wiki/mundo-portada.json.
+async function pintarPortadaMundo(caja) {
+    const fuente = (caja.getAttribute("data-mundo-portada") || "").trim();
+    if (!fuente) {
+        return;
+    }
+    let datos = null;
+    try {
+        const respuesta = await window.pedirDatos(fuente);
+        if (!respuesta.ok) {
+            return;
+        }
+        datos = await respuesta.json();
+    } catch (error) {
+        return;
+    }
+    const hoy = document.querySelector("[data-mundo-hoy]");
+    if (hoy && datos && datos.hoy && datos.hoy.anyo) {
+        hoy.textContent = "";
+        hoy.appendChild(document.createTextNode("Hoy en Cralëa: año " + datos.hoy.anyo));
+        if (datos.hoy.era) {
+            hoy.appendChild(document.createTextNode(", en la "));
+            const era = document.createElement("a");
+            era.href = rutaSeguraMundo(datos.hoy.url);
+            era.textContent = datos.hoy.era;
+            hoy.appendChild(era);
+        }
+        hoy.appendChild(document.createTextNode("."));
+        hoy.hidden = false;
+    }
+    const cambios = document.querySelector("[data-mundo-cambios]");
+    const lista = datos && Array.isArray(datos.cambios) ? datos.cambios : [];
+    if (cambios && lista.length) {
+        const ul = document.createElement("ul");
+        ul.className = "mundo-cambios-lista";
+        lista.forEach((cambio) => {
+            const li = document.createElement("li");
+            const enlace = document.createElement("a");
+            enlace.href = rutaSeguraMundo(cambio.url);
+            enlace.textContent = (cambio.titulo || "").toString();
+            li.appendChild(enlace);
+            const fecha = (cambio.fecha || "").toString();
+            if (/^\d{4}-\d{2}-\d{2}$/.test(fecha)) {
+                const cuando = document.createElement("time");
+                cuando.className = "mundo-cambios-fecha";
+                cuando.dateTime = fecha;
+                // Al mediodía: a las 00:00 en UTC, al oeste de Greenwich
+                // saldría el día de antes.
+                cuando.textContent = new Date(fecha + "T12:00:00").toLocaleDateString("es-ES",
+                    { day: "numeric", month: "short", year: "numeric" });
+                li.appendChild(cuando);
+            }
+            ul.appendChild(li);
+        });
+        cambios.appendChild(ul);
+        cambios.setAttribute("data-mundo-cargado", "");
+        cambios.hidden = !!(window.buscador && window.buscador.texto);
+    }
+}
+
+// La DESTACADA cambia cada día (la misma para todos ese día: sale del
+// número del día, no del azar), y el «¿sabías que…?» son tres al azar de
+// las demás, distintas cada vez que se entra.
+function pintarDestacadoMundo(fichas) {
+    const caja = document.querySelector("[data-mundo-destacado]");
+    const buenas = paginasConTextoMundo(fichas);
+    if (!caja || !buenas.length) {
+        return;
+    }
+    caja.textContent = "";
+    const dia = Math.floor(Date.now() / 86400000);
+    const destacada = buenas[dia % buenas.length];
+
+    const tarjeta = document.createElement("div");
+    tarjeta.className = "mundo-destacada";
+    const titulo = document.createElement("h2");
+    titulo.className = "mundo-regiones-titulo";
+    titulo.textContent = "página destacada";
+    tarjeta.appendChild(titulo);
+    const nombre = document.createElement("a");
+    nombre.className = "mundo-destacada-nombre";
+    nombre.href = rutaSeguraMundo(destacada.url);
+    nombre.textContent = destacada.titulo;
+    tarjeta.appendChild(nombre);
+    if ((destacada.que || "").toString().trim()) {
+        const que = document.createElement("p");
+        que.className = "mundo-destacada-que";
+        que.textContent = destacada.que;
+        tarjeta.appendChild(que);
+    }
+    const resumen = document.createElement("p");
+    resumen.className = "mundo-destacada-resumen";
+    resumen.textContent = destacada.resumen;
+    tarjeta.appendChild(resumen);
+    caja.appendChild(tarjeta);
+
+    const otras = buenas.filter((f) => f !== destacada);
+    if (otras.length) {
+        const sabias = document.createElement("div");
+        sabias.className = "mundo-sabias";
+        const suyo = document.createElement("h2");
+        suyo.className = "mundo-regiones-titulo";
+        suyo.textContent = "¿sabías que…?";
+        sabias.appendChild(suyo);
+        const ul = document.createElement("ul");
+        ul.className = "mundo-sabias-lista";
+        // Barajadas y las tres primeras.
+        const mezcla = otras.slice();
+        for (let i = mezcla.length - 1; i > 0; i -= 1) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [mezcla[i], mezcla[j]] = [mezcla[j], mezcla[i]];
+        }
+        mezcla.slice(0, 3).forEach((f) => {
+            const li = document.createElement("li");
+            // La primera frase de su resumen, y su nombre de enlace.
+            const frase = (f.resumen || "").toString().split(/(?<=[.!?])\s/)[0];
+            li.appendChild(document.createTextNode(frase + " "));
+            const enlace = document.createElement("a");
+            enlace.href = rutaSeguraMundo(f.url);
+            enlace.textContent = "(" + f.titulo + ")";
+            li.appendChild(enlace);
+            ul.appendChild(li);
+        });
+        sabias.appendChild(ul);
+        caja.appendChild(sabias);
+    }
+    caja.setAttribute("data-mundo-cargado", "");
+    caja.hidden = !!(window.buscador && window.buscador.texto);
+}
+
+// UNA PÁGINA AL AZAR, de todas (menos los mapas, que están a la vista).
+function prepararAzarMundo(fichas) {
+    const boton = document.querySelector("[data-mundo-azar]");
+    const todas = fichas.filter((f) => f.grupo !== "mapas" && rutaSeguraMundo(f.url) !== "#");
+    if (!boton || !todas.length) {
+        return;
+    }
+    boton.hidden = false;
+    boton.addEventListener("click", () => {
+        const una = todas[Math.floor(Math.random() * todas.length)];
+        window.location.href = rutaSeguraMundo(una.url);
     });
 }
