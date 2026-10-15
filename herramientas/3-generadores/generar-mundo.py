@@ -774,6 +774,65 @@ def regiones_de(paginas):
     return salida
 
 
+def subrazas_de(paginas):
+    """QUÉ SUBRAZA ES DE QUÉ RAZA, como en D&D (elfos altos, drow, elfos
+    del bosque… son elfos): el campo «subraza de» ([[Elfos]]) de la ficha.
+    {subraza en minúsculas: raza en minúsculas}. Lo usan la página de la
+    raza (su lista de subrazas), las migas y la portada.
+
+    Va con su propio campo y no con «raza» porque «raza» lo lleva también
+    la ficha de un personaje, y un personaje no es una subraza."""
+    salida = {}
+    for ficha in paginas.values():
+        datos = ficha.get("datos") or {}
+        valor = datos.get("subraza de")
+        if not valor:
+            continue
+        nombre = re.sub(r"^\[\[|\]\]$", "", str(valor).strip()).split("|")[0].strip()
+        if nombre and nombre.lower() in paginas:
+            salida[ficha["nombre"].strip().lower()] = nombre.lower()
+    return salida
+
+
+def lista_de_subrazas(ficha, paginas, subraza_de):
+    """LAS SUBRAZAS DE UNA RAZA, sacadas de las fichas de las subrazas (no
+    de lo que haya escrito en la página de la raza): cada una con su
+    enlace y su primera frase. "" si no tiene ninguna."""
+    suya = ficha["nombre"].strip().lower()
+    hijas = sorted((f for f in paginas.values()
+                    if subraza_de.get(f["nombre"].strip().lower()) == suya),
+                   key=lambda f: f["titulo"].lower())
+    if not hijas:
+        return ""
+    trozos = []
+    for f in hijas:
+        que = (f.get("resumen") or "").strip()
+        trozos.append('<li><a class="mundo-subraza-nombre" href="%s">%s</a>%s</li>'
+                      % (html.escape(f["url"], quote=True), html.escape(f["titulo"]),
+                         ('<span class="mundo-subraza-que">%s</span>' % html.escape(que)) if que else ""))
+    return '<ul class="mundo-subrazas">%s</ul>' % "".join(trozos)
+
+
+def con_subrazas(cuerpo, lista):
+    """Pone la lista en el apartado «Subrazas» del artículo (detrás de lo
+    que haya escrito en él); si no lo hay, lo añade detrás de la
+    entradilla, antes del primer apartado: es lo primero que se busca en
+    la página de una raza."""
+    if not lista:
+        return cuerpo
+    titulo = '<h2 id="subrazas">Subrazas</h2>'
+    if titulo in cuerpo:
+        despues = cuerpo.index(titulo) + len(titulo)
+        siguiente = cuerpo.find("<h2", despues)
+        punto = siguiente if siguiente != -1 else len(cuerpo)
+        return cuerpo[:punto] + lista + "\n" + cuerpo[punto:]
+    primero = cuerpo.find("<h2")
+    bloque = titulo + "\n" + lista + "\n"
+    if primero == -1:
+        return cuerpo + "\n" + bloque
+    return cuerpo[:primero] + bloque + cuerpo[primero:]
+
+
 def con_banderas_en_el_mapa(svg, paginas):
     """A cada país del mapa que lleve a una página con bandera, la
     dirección de esa bandera en data-mapa-bandera: mundo-mapa.js la enseña
@@ -1062,6 +1121,11 @@ def pintar_migas(ficha, paginas, region_de):
     portada = URL + "index_wiki.html"
     cadena = []
     vista = {ficha["nombre"].strip().lower()}
+    # Una subraza cuelga de su raza igual que un país de su región.
+    raza = subrazas_de(paginas).get(ficha["nombre"].strip().lower())
+    if raza:
+        region_de = dict(region_de)
+        region_de[ficha["nombre"].strip().lower()] = raza
     clave = region_de.get(ficha["nombre"].strip().lower())
     while clave and clave not in vista and clave in paginas:
         vista.add(clave)
@@ -1176,10 +1240,12 @@ def escribir_paginas(paginas, probar):
     molde = limpiar_comentarios_html(molde)[0]
     escritas = 0
     region_de = regiones_de(paginas)
+    subraza_de = subrazas_de(paginas)
     for ficha in paginas.values():
         relleno = molde
         cuerpo = con_rejilla_de_paises(ficha["cuerpo_html"],
                                        rejilla_de_paises(ficha, paginas, region_de))
+        cuerpo = con_subrazas(cuerpo, lista_de_subrazas(ficha, paginas, subraza_de))
         # El contenido ANTES que la ficha: en escritorio da igual (flota abajo
         # a la derecha), y en móvil así sale arriba del todo, como en una
         # wiki de las de siempre.
@@ -1296,6 +1362,7 @@ def escribir_indice(paginas, mapas, probar, categorias=(), peques=None):
     resto de listados del sitio."""
     fichas = []
     region_de = regiones_de(paginas)
+    subraza_de = subrazas_de(paginas)
     for ficha in sorted(paginas.values(), key=lambda f: f["titulo"].lower()):
         grupo, sub = clasificar(ficha["etiquetas"], categorias)
         # Su región, con el título de su página (la portada pone cada país
@@ -1315,6 +1382,10 @@ def escribir_indice(paginas, mapas, probar, categorias=(), peques=None):
             "que": ficha["subtitulo"] or str(ficha["datos"].get("infobox") or ""),
             "resumen": ficha["resumen"],
             "region": suya["titulo"] if suya else "",
+            # De qué raza es, si es una subraza (ver subrazas_de): la
+            # portada la pone debajo de su raza.
+            "subraza_de": (paginas[subraza_de[ficha["nombre"].strip().lower()]]["titulo"]
+                           if ficha["nombre"].strip().lower() in subraza_de else ""),
             # Si aún es de relleno («*Texto de relleno.*»): la portada no la
             # saca de destacada ni en el «¿sabías que…?».
             "relleno": "Texto de relleno" in (ficha.get("texto") or ""),

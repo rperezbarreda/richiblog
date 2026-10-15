@@ -1321,10 +1321,17 @@ function contenidoDeSeccionMundo(grupo, fichas, irA) {
         // ¿Tiene regiones propias, aparte de ella misma (los archipiélagos
         // de Archipiélagos)? Entonces, un apartado por región.
         const conSubregiones = [...regiones].some((r) => r !== llano(nombre));
+        // EN LAS RAZAS, como en D&D, cada raza con sus subrazas (elfos
+        // altos, drow…): la página de la raza primero y sus subrazas
+        // detrás, que son las que dicen «subraza de» en su ficha.
+        const subrazas = suyas.filter((f) => llano(f.subraza_de));
         const lista = conRegion
             ? suyas.filter((f) => !regiones.has(llano(f.titulo)) && llano(f.titulo) !== llano(nombre))
                 .sort((a, b) => a.titulo.localeCompare(b.titulo, "es"))
-            : suyas;
+            : (subrazas.length
+                ? suyas.slice().sort((a, b) => (llano(b.titulo) === llano(nombre)) - (llano(a.titulo) === llano(nombre))
+                    || a.titulo.localeCompare(b.titulo, "es"))
+                : suyas);
 
         // CADA PARTE SE PLIEGA: un <details>, abierto de serie (se pliega
         // lo que se quiera quitar de en medio, no hay que ir abriendo).
@@ -1347,9 +1354,11 @@ function contenidoDeSeccionMundo(grupo, fichas, irA) {
         const cuenta = document.createElement("span");
         cuenta.className = "mundo-grupo-cuenta";
         const n = new Set(lista.map((f) => f.url)).size;
+        const nSub = new Set(subrazas.map((f) => f.url)).size;
         cuenta.textContent = conRegion
             ? (n === 1 ? "1 país" : n + " países")
-            : (n === 1 ? "1 página" : n + " páginas");
+            : (nSub ? (nSub === 1 ? "1 subraza" : nSub + " subrazas")
+                : (n === 1 ? "1 página" : n + " páginas"));
         cabecera.appendChild(cuenta);
         parte.appendChild(cabecera);
         parte.appendChild(conSubregiones

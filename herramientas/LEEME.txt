@@ -1220,7 +1220,7 @@
   página, sacadas de cómo organizan las suyas las wikis de mundos de
   fantasía (A Wiki of Ice and Fire, Tolkien Gateway, la de Pathfinder,
   la de Forgotten Realms): País, Región, Asentamiento, Lugar, Personaje,
-  Raza, Deidad, Religión, Organización, Monstruo, Objeto mágico,
+  Raza, Subraza, Deidad, Religión, Organización, Monstruo, Objeto mágico,
   Acontecimiento, Era, Astro, Festividad e Idioma. Cada una trae:
 
     - la ficha de la derecha con los campos que suele llevar ese tipo
@@ -1236,6 +1236,27 @@
       apartado dentro de ella: Deidades, Credos, Asentamientos,
       Acontecimientos…) y la carpeta donde se guarda (un país, junto a
       la página de su región).
+
+  LAS RAZAS, COMO EN D&D: cada raza (Elfos) puede tener subrazas (Elfos
+  altos, Drow, Elfos del bosque…), cada una en su página, con la
+  plantilla Subraza. Lo que las une es el campo «subraza de: [[Elfos]]»
+  de la ficha de la subraza (la plantilla lo pone al preguntar de qué
+  raza es). Con eso:
+
+    - la página de la raza lleva sola un apartado «Subrazas» con todas
+      las suyas (nombre y primera frase), detrás de la entradilla o en
+      el apartado «Subrazas» si lo has escrito;
+    - las migas de una subraza pasan por su raza (Wiki Cralëa › Elfos ›
+      Drow);
+    - en la ventana de «razas» de la portada, cada raza es un apartado
+      plegable con la página de la raza primero y sus subrazas detrás
+      («Elfos · 2 subrazas»).
+
+  La raza y sus subrazas se guardan juntas en wiki/Razas/<Raza>/ y
+  llevan la etiqueta de la raza (tags: [Razas, Elfos]). Si creas una
+  subraza antes que su raza, va igualmente a wiki/Razas/<Raza>/, y la
+  raza, cuando la crees, la encuentra sola. Se usa «subraza de» y no
+  «raza» porque «raza» es también un campo de la ficha de un personaje.
 
   SE PUEDE PUBLICAR A MEDIO RELLENAR: lo que no se ha escrito no sale.
   Los campos vacíos de la ficha no salen (y si no queda ninguno, no sale

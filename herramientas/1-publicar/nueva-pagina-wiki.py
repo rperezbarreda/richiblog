@@ -34,6 +34,7 @@
 #     # carpeta: junto a {{region}}  o en la carpeta de esa otra página
 #                                    (y entonces {{parte}} es la parte del
 #                                    mapamundi en la que está)
+#     # si no está: Razas/{{raza}}   dónde, si esa otra página no existe
 #
 # {{nombre}} es siempre el nombre de la página. Lo que no se conteste se
 # queda vacío (un [[{{algo}}]] sin contestar desaparece entero).
@@ -125,7 +126,7 @@ def esqueleto(nombre, etiqueta, subtitulo, que):
 # LAS PLANTILLAS
 # =========================================
 
-RE_META = re.compile(r"^#\s*(plantilla|para|orden|carpeta|pregunta\s+\w+)\s*:\s*(.*)$")
+RE_META = re.compile(r"^#\s*(plantilla|para|orden|carpeta|si no está|pregunta\s+\w+)\s*:\s*(.*)$")
 
 
 def leer_plantillas():
@@ -135,8 +136,8 @@ def leer_plantillas():
         return salida
     for archivo in sorted(PLANTILLAS.glob("*.md")):
         texto = archivo.read_text(encoding="utf-8")
-        una = {"nombre": re.sub(r"^\d+\s*", "", archivo.stem), "para": "", "orden": 999,
-               "carpeta": "", "preguntas": [], "texto": texto}
+        una = {"nombre": re.sub(r"^\d+\w?\s*", "", archivo.stem), "para": "", "orden": 999,
+               "carpeta": "", "si_no": "", "preguntas": [], "texto": texto}
         for linea in texto.split("\n"):
             m = RE_META.match(linea.strip())
             if not m:
@@ -150,6 +151,8 @@ def leer_plantillas():
                 una["orden"] = int(valor) if valor.isdigit() else 999
             elif clave == "carpeta":
                 una["carpeta"] = valor
+            elif clave == "si no está":
+                una["si_no"] = valor
             else:
                 una["preguntas"].append((clave.split()[1], valor))
         salida.append(una)
@@ -192,7 +195,12 @@ def desde_plantilla(plantilla, nombre):
     """(carpeta dentro de wiki/, texto de la página)."""
     valores = {"nombre": nombre}
     for clave, pregunta in plantilla["preguntas"]:
-        valores[clave] = preguntar(pregunta).strip().strip("[]").strip()
+        valor = preguntar(pregunta).strip().strip("[]").strip()
+        # Si es el nombre de una página que ya existe, tal y como se llama
+        # ella: «elfos» y «Elfos» serían dos apartados distintos en la
+        # portada (las etiquetas se escriben como se escriben).
+        otra = pagina_llamada(valor) if valor else None
+        valores[clave] = otra.stem if otra else valor
 
     carpeta = plantilla["carpeta"] or "otros"
     m = re.match(r"^junto a \{\{(\w+)\}\}$", carpeta)
@@ -205,6 +213,13 @@ def desde_plantilla(plantilla, nombre):
             carpeta = relativa.as_posix()
             if len(relativa.parts) > 1 and relativa.parts[0].lower() == "mapamundi":
                 valores.setdefault("parte", relativa.parts[1])
+        elif plantilla["si_no"]:
+            # Sin esa página (la raza de una subraza que aún no existe):
+            # donde diga la plantilla.
+            if valores.get(m.group(1)):
+                print(f"     No hay ninguna página que se llame «{valores[m.group(1)]}» todavía:"
+                      " la guardo en su carpeta igualmente.")
+            carpeta = plantilla["si_no"]
         else:
             if valores.get(m.group(1)):
                 print(f"     No encuentro ninguna página que se llame «{valores[m.group(1)]}».")

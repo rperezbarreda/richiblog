@@ -1,12 +1,12 @@
 ---
 # plantilla: Raza
-# para: un pueblo o una especie que se puede jugar o encontrar: elfos, enanos, una raza propia
+# para: un pueblo o una especie, como las razas de D&D (elfos, enanos…); sus subrazas van en páginas aparte
 # orden: 6
-# carpeta: Razas
+# carpeta: Razas/{{nombre}}
 title: "{{nombre}}"
 subtitle: ""
 infobox: "Raza"
-tags: [Razas]
+tags: [Razas, {{nombre}}]
 image:
 tipo:
 tierra natal:
@@ -15,7 +15,14 @@ altura:
 peso:
 lenguas:
 religión:
-subrazas:
+tamaño:
+velocidad:
+aumento de característica:
+rasgos:
+layout:
+  - type: header
+    text: En la mesa
+    above: tamaño
 ---
 
 <!-- LA ENTRADILLA: qué son y dónde viven. -->
@@ -40,8 +47,12 @@ Los **{{nombre}}** son
 ## Historia
 
 ## Subrazas
+<!-- La lista de subrazas sale sola, aquí: cada página de subraza que diga
+«subraza de: [[{{nombre}}]]» en su ficha (la plantilla Subraza ya lo pone).
+Si escribes algo en este apartado, sale encima de la lista. -->
 
 ## Miembros notables
 
 ## En la mesa
-<!-- Si se puede jugar: sus rasgos de juego o de dónde salen. -->
+<!-- Si se puede jugar: sus rasgos de juego (lo de todas sus subrazas; lo
+propio de cada una, en su página), de dónde salen y nombres típicos. -->

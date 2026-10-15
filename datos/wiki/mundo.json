@@ -14,6 +14,7 @@
         "que": "",
         "resumen": "Azarasia es uno de los continentes del mundo.",
         "region": "",
+        "subraza_de": "",
         "relleno": false,
         "bandera": "",
         "miniatura": "/imagenes/wiki/situacion/peque/azarasia.webp"
@@ -33,6 +34,7 @@
         "que": "País",
         "resumen": "Califato de Jhel'Zadir está en Azarasia.",
         "region": "Azarasia",
+        "subraza_de": "",
         "relleno": true,
         "bandera": "/imagenes/wiki/califato_jhelzadir.webp",
         "miniatura": ""
@@ -52,6 +54,7 @@
         "que": "País",
         "resumen": "Cantón de Piedraspuras está en Azarasia.",
         "region": "Azarasia",
+        "subraza_de": "",
         "relleno": true,
         "bandera": "/imagenes/wiki/canton_piedraspuras.webp",
         "miniatura": ""
@@ -71,6 +74,7 @@
         "que": "País",
         "resumen": "Condado de Burcrecia está en Azarasia.",
         "region": "Azarasia",
+        "subraza_de": "",
         "relleno": true,
         "bandera": "/imagenes/wiki/condado_burcrecia.webp",
         "miniatura": ""
@@ -90,6 +94,7 @@
         "que": "País",
         "resumen": "Dominios de Bor'Korr el Sanguinario está en Azarasia.",
         "region": "Azarasia",
+        "subraza_de": "",
         "relleno": true,
         "bandera": "/imagenes/wiki/dominios_borkorr.webp",
         "miniatura": ""
@@ -109,6 +114,7 @@
         "que": "País",
         "resumen": "Emirato de Adrash está en Azarasia.",
         "region": "Azarasia",
+        "subraza_de": "",
         "relleno": true,
         "bandera": "/imagenes/wiki/emirato_adrash.webp",
         "miniatura": ""
@@ -128,6 +134,7 @@
         "que": "País",
         "resumen": "Gran Condado de Marturia está en Azarasia.",
         "region": "Azarasia",
+        "subraza_de": "",
         "relleno": true,
         "bandera": "/imagenes/wiki/gran_condado_marturia.webp",
         "miniatura": ""
@@ -147,6 +154,7 @@
         "que": "País",
         "resumen": "Horda de Yerzhal está en Azarasia.",
         "region": "Azarasia",
+        "subraza_de": "",
         "relleno": true,
         "bandera": "/imagenes/wiki/horda_yerzhal.webp",
         "miniatura": ""
@@ -166,6 +174,7 @@
         "que": "País",
         "resumen": "Imperio de Nueva Valindra está en Azarasia.",
         "region": "Azarasia",
+        "subraza_de": "",
         "relleno": true,
         "bandera": "/imagenes/wiki/imperio_nueva_valindra.webp",
         "miniatura": ""
@@ -185,6 +194,7 @@
         "que": "País",
         "resumen": "Marca de Elyarath está en Azarasia.",
         "region": "Azarasia",
+        "subraza_de": "",
         "relleno": true,
         "bandera": "/imagenes/wiki/marca_elyarath.webp",
         "miniatura": ""
@@ -204,6 +214,7 @@
         "que": "País",
         "resumen": "Marquesado de Setra está en Azarasia.",
         "region": "Azarasia",
+        "subraza_de": "",
         "relleno": true,
         "bandera": "/imagenes/wiki/marquesado_setra.webp",
         "miniatura": ""
@@ -223,6 +234,7 @@
         "que": "País",
         "resumen": "Obispado de Habaza está en Azarasia.",
         "region": "Azarasia",
+        "subraza_de": "",
         "relleno": true,
         "bandera": "/imagenes/wiki/obispado_habaza.webp",
         "miniatura": ""
@@ -242,6 +254,7 @@
         "que": "País",
         "resumen": "Orden de Clodia está en Azarasia.",
         "region": "Azarasia",
+        "subraza_de": "",
         "relleno": true,
         "bandera": "/imagenes/wiki/orden_clodia.webp",
         "miniatura": ""
@@ -261,6 +274,7 @@
         "que": "País",
         "resumen": "Principado de Lúnica está en Azarasia.",
         "region": "Azarasia",
+        "subraza_de": "",
         "relleno": true,
         "bandera": "/imagenes/wiki/principado_lunica.webp",
         "miniatura": ""
@@ -280,6 +294,7 @@
         "que": "País",
         "resumen": "Reino de Dreustán está en Azarasia.",
         "region": "Azarasia",
+        "subraza_de": "",
         "relleno": true,
         "bandera": "/imagenes/wiki/reino_dreustan.webp",
         "miniatura": ""
@@ -299,6 +314,7 @@
         "que": "País",
         "resumen": "Reino de Nocravel está en Azarasia.",
         "region": "Azarasia",
+        "subraza_de": "",
         "relleno": true,
         "bandera": "/imagenes/wiki/reino_nocravel.webp",
         "miniatura": ""
@@ -318,6 +334,7 @@
         "que": "País",
         "resumen": "Reino de Oritania está en Azarasia.",
         "region": "Azarasia",
+        "subraza_de": "",
         "relleno": true,
         "bandera": "/imagenes/wiki/reino_oritania.webp",
         "miniatura": ""
@@ -337,6 +354,7 @@
         "que": "País",
         "resumen": "Reino de Prunia está en Azarasia.",
         "region": "Azarasia",
+        "subraza_de": "",
         "relleno": true,
         "bandera": "/imagenes/wiki/reino_prunia.webp",
         "miniatura": ""
@@ -356,6 +374,7 @@
         "que": "País",
         "resumen": "Reino de Solazada está en Azarasia.",
         "region": "Azarasia",
+        "subraza_de": "",
         "relleno": true,
         "bandera": "/imagenes/wiki/reino_solazada.webp",
         "miniatura": ""
@@ -375,6 +394,7 @@
         "que": "País",
         "resumen": "Reino de Terredia está en Azarasia.",
         "region": "Azarasia",
+        "subraza_de": "",
         "relleno": true,
         "bandera": "/imagenes/wiki/reino_terredia.webp",
         "miniatura": ""
@@ -394,6 +414,7 @@
         "que": "País",
         "resumen": "República Mercantil de Denatria está en Azarasia.",
         "region": "Azarasia",
+        "subraza_de": "",
         "relleno": true,
         "bandera": "/imagenes/wiki/republica_denatria.webp",
         "miniatura": ""
@@ -413,6 +434,7 @@
         "que": "País",
         "resumen": "Sultanato de Doresia está en Azarasia.",
         "region": "Azarasia",
+        "subraza_de": "",
         "relleno": true,
         "bandera": "/imagenes/wiki/sultanato_doresia.webp",
         "miniatura": ""
@@ -432,6 +454,7 @@
         "que": "País",
         "resumen": "Tierras de Traena está en Azarasia.",
         "region": "Azarasia",
+        "subraza_de": "",
         "relleno": true,
         "bandera": "/imagenes/wiki/tierras_traena.webp",
         "miniatura": ""
@@ -451,6 +474,7 @@
         "que": "País",
         "resumen": "Unión de Cuerza está en Azarasia.",
         "region": "Azarasia",
+        "subraza_de": "",
         "relleno": true,
         "bandera": "/imagenes/wiki/union_de_cuerza.webp",
         "miniatura": ""
@@ -470,6 +494,7 @@
         "que": "País",
         "resumen": "Unión de las Cumbres Calcinadas está en Azarasia.",
         "region": "Azarasia",
+        "subraza_de": "",
         "relleno": true,
         "bandera": "/imagenes/wiki/cumbres_calcinadas.webp",
         "miniatura": ""
@@ -489,6 +514,7 @@
         "que": "País",
         "resumen": "Academia de Rosamica está en Partaria.",
         "region": "Partaria",
+        "subraza_de": "",
         "relleno": true,
         "bandera": "/imagenes/wiki/academia_de_rosamica.webp",
         "miniatura": ""
@@ -508,6 +534,7 @@
         "que": "País",
         "resumen": "Alianza de Sepón está en Partaria.",
         "region": "Partaria",
+        "subraza_de": "",
         "relleno": true,
         "bandera": "/imagenes/wiki/alianza_de_sepon.webp",
         "miniatura": ""
@@ -527,6 +554,7 @@
         "que": "País",
         "resumen": "Bosque de Utalis está en Partaria.",
         "region": "Partaria",
+        "subraza_de": "",
         "relleno": true,
         "bandera": "/imagenes/wiki/bosque_de_utalis.webp",
         "miniatura": ""
@@ -546,6 +574,7 @@
         "que": "País",
         "resumen": "Ciudad Santa de Ablanamaz está en Partaria.",
         "region": "Partaria",
+        "subraza_de": "",
         "relleno": true,
         "bandera": "/imagenes/wiki/ciudad_santa_de_ablanamaz.webp",
         "miniatura": ""
@@ -565,6 +594,7 @@
         "que": "País",
         "resumen": "Coronas del Viento está en Partaria.",
         "region": "Partaria",
+        "subraza_de": "",
         "relleno": true,
         "bandera": "/imagenes/wiki/coronas_del_viento.webp",
         "miniatura": ""
@@ -584,6 +614,7 @@
         "que": "País",
         "resumen": "Cumbres de Ath está en Partaria.",
         "region": "Partaria",
+        "subraza_de": "",
         "relleno": true,
         "bandera": "/imagenes/wiki/cumbres_de_ath.webp",
         "miniatura": ""
@@ -603,6 +634,7 @@
         "que": "País",
         "resumen": "Custodios de Parta está en Partaria.",
         "region": "Partaria",
+        "subraza_de": "",
         "relleno": true,
         "bandera": "/imagenes/wiki/custodios_de_parta.webp",
         "miniatura": ""
@@ -622,6 +654,7 @@
         "que": "País",
         "resumen": "Imperio Friscadio está en Partaria.",
         "region": "Partaria",
+        "subraza_de": "",
         "relleno": true,
         "bandera": "/imagenes/wiki/imperio_friscadio.webp",
         "miniatura": ""
@@ -641,6 +674,7 @@
         "que": "País",
         "resumen": "Maharato de Sulkaladésh está en Partaria.",
         "region": "Partaria",
+        "subraza_de": "",
         "relleno": true,
         "bandera": "/imagenes/wiki/maharato_de_sulkaladesh.webp",
         "miniatura": ""
@@ -660,6 +694,7 @@
         "que": "País",
         "resumen": "Mandato de Acratang está en Partaria.",
         "region": "Partaria",
+        "subraza_de": "",
         "relleno": true,
         "bandera": "/imagenes/wiki/mandato_de_acratang.webp",
         "miniatura": ""
@@ -679,6 +714,7 @@
         "que": "País",
         "resumen": "Mandato de Nisi está en Partaria.",
         "region": "Partaria",
+        "subraza_de": "",
         "relleno": true,
         "bandera": "/imagenes/wiki/mandato_de_nisi.webp",
         "miniatura": ""
@@ -698,6 +734,7 @@
         "que": "País",
         "resumen": "Mandato de Panchan está en Partaria.",
         "region": "Partaria",
+        "subraza_de": "",
         "relleno": true,
         "bandera": "/imagenes/wiki/mandato_de_panchan.webp",
         "miniatura": ""
@@ -717,6 +754,7 @@
         "que": "País",
         "resumen": "Mandato de Taz-Ju está en Partaria.",
         "region": "Partaria",
+        "subraza_de": "",
         "relleno": true,
         "bandera": "/imagenes/wiki/mandato_de_taz_ju.webp",
         "miniatura": ""
@@ -736,6 +774,7 @@
         "que": "País",
         "resumen": "Mandato de Zó está en Partaria.",
         "region": "Partaria",
+        "subraza_de": "",
         "relleno": true,
         "bandera": "/imagenes/wiki/mandato_de_zo.webp",
         "miniatura": ""
@@ -755,6 +794,7 @@
         "que": "País",
         "resumen": "Mercado de Dao-Yeni está en Partaria.",
         "region": "Partaria",
+        "subraza_de": "",
         "relleno": true,
         "bandera": "/imagenes/wiki/mercado_de_dao_yeni.webp",
         "miniatura": ""
@@ -774,6 +814,7 @@
         "que": "",
         "resumen": "Partaria es uno de los continentes del mundo.",
         "region": "",
+        "subraza_de": "",
         "relleno": false,
         "bandera": "",
         "miniatura": "/imagenes/wiki/situacion/peque/partaria.webp"
@@ -793,6 +834,7 @@
         "que": "País",
         "resumen": "Páramo de Parta está en Partaria.",
         "region": "Partaria",
+        "subraza_de": "",
         "relleno": true,
         "bandera": "/imagenes/wiki/paramo_de_parta.webp",
         "miniatura": ""
@@ -812,6 +854,7 @@
         "que": "País",
         "resumen": "Reino de Kasa está en Partaria.",
         "region": "Partaria",
+        "subraza_de": "",
         "relleno": true,
         "bandera": "/imagenes/wiki/reino_de_kasa.webp",
         "miniatura": ""
@@ -831,6 +874,7 @@
         "que": "País",
         "resumen": "Ruinas de Goa está en Partaria.",
         "region": "Partaria",
+        "subraza_de": "",
         "relleno": true,
         "bandera": "/imagenes/wiki/ruinas_de_goa.webp",
         "miniatura": ""
@@ -850,6 +894,7 @@
         "que": "País",
         "resumen": "Tierras Reflejadas está en Partaria.",
         "region": "Partaria",
+        "subraza_de": "",
         "relleno": true,
         "bandera": "/imagenes/wiki/tierras_reflejadas.webp",
         "miniatura": ""
@@ -869,6 +914,7 @@
         "que": "País",
         "resumen": "Tribu Boscalise está en Partaria.",
         "region": "Partaria",
+        "subraza_de": "",
         "relleno": true,
         "bandera": "/imagenes/wiki/tribu_boscalise.webp",
         "miniatura": ""
@@ -888,6 +934,7 @@
         "que": "País",
         "resumen": "Tribu Gogango está en Partaria.",
         "region": "Partaria",
+        "subraza_de": "",
         "relleno": true,
         "bandera": "/imagenes/wiki/tribu_gogango.webp",
         "miniatura": ""
@@ -907,6 +954,7 @@
         "que": "País",
         "resumen": "Tribu Kránimos está en Partaria.",
         "region": "Partaria",
+        "subraza_de": "",
         "relleno": true,
         "bandera": "/imagenes/wiki/tribu_kranimos.webp",
         "miniatura": ""
@@ -926,6 +974,7 @@
         "que": "País",
         "resumen": "Tribu Molosgo está en Partaria.",
         "region": "Partaria",
+        "subraza_de": "",
         "relleno": true,
         "bandera": "/imagenes/wiki/tribu_molosgo.webp",
         "miniatura": ""
@@ -945,6 +994,7 @@
         "que": "País",
         "resumen": "Tribu Ordasco está en Partaria.",
         "region": "Partaria",
+        "subraza_de": "",
         "relleno": true,
         "bandera": "/imagenes/wiki/tribu_ordasco.webp",
         "miniatura": ""
@@ -964,6 +1014,7 @@
         "que": "País",
         "resumen": "Tribu Tuzno está en Partaria.",
         "region": "Partaria",
+        "subraza_de": "",
         "relleno": true,
         "bandera": "/imagenes/wiki/tribu_tuzno.webp",
         "miniatura": ""
@@ -983,6 +1034,7 @@
         "que": "País",
         "resumen": "Tribu Utná está en Partaria.",
         "region": "Partaria",
+        "subraza_de": "",
         "relleno": true,
         "bandera": "/imagenes/wiki/tribu_utna.webp",
         "miniatura": ""
@@ -1002,6 +1054,7 @@
         "que": "País",
         "resumen": "Tribu Vadalacra está en Partaria.",
         "region": "Partaria",
+        "subraza_de": "",
         "relleno": true,
         "bandera": "/imagenes/wiki/tribu_vadalacra.webp",
         "miniatura": ""
@@ -1021,6 +1074,7 @@
         "que": "País",
         "resumen": "Valle de Után está en Partaria.",
         "region": "Partaria",
+        "subraza_de": "",
         "relleno": true,
         "bandera": "/imagenes/wiki/valle_de_utan.webp",
         "miniatura": ""
@@ -1040,6 +1094,7 @@
         "que": "País",
         "resumen": "Ac'atapec está en el Archipielago de las Costras.",
         "region": "Archipielago de las Costras",
+        "subraza_de": "",
         "relleno": true,
         "bandera": "/imagenes/wiki/ac_atapec.webp",
         "miniatura": ""
@@ -1059,6 +1114,7 @@
         "que": "País",
         "resumen": "Ahíu está en los Faros del Mar Ciego.",
         "region": "Faros del Mar Ciego",
+        "subraza_de": "",
         "relleno": true,
         "bandera": "/imagenes/wiki/ahiu.webp",
         "miniatura": ""
@@ -1078,6 +1134,7 @@
         "que": "País",
         "resumen": "Amequeleke está en el Archipielago de las Costras.",
         "region": "Archipielago de las Costras",
+        "subraza_de": "",
         "relleno": true,
         "bandera": "/imagenes/wiki/amequeleke.webp",
         "miniatura": ""
@@ -1097,6 +1154,7 @@
         "que": "",
         "resumen": "Archipielago de las Costras es una región del mapamundi.",
         "region": "",
+        "subraza_de": "",
         "relleno": false,
         "bandera": "",
         "miniatura": "/imagenes/wiki/situacion/peque/archipielago_de_las_costras.webp"
@@ -1116,6 +1174,7 @@
         "que": "",
         "resumen": "Archipiélago de Lunas es una región del mapamundi.",
         "region": "",
+        "subraza_de": "",
         "relleno": false,
         "bandera": "",
         "miniatura": "/imagenes/wiki/situacion/peque/archipielago_de_lunas.webp"
@@ -1135,6 +1194,7 @@
         "que": "",
         "resumen": "El Archipiélago Fragmentado es una región de las Tierras Encantadas.",
         "region": "Tierras Encantadas",
+        "subraza_de": "",
         "relleno": false,
         "bandera": "",
         "miniatura": "/imagenes/wiki/situacion/peque/archipielago_fragmentado.webp"
@@ -1154,6 +1214,7 @@
         "que": "País",
         "resumen": "Aruta está en los Faros del Mar Ciego.",
         "region": "Faros del Mar Ciego",
+        "subraza_de": "",
         "relleno": true,
         "bandera": "/imagenes/wiki/aruta.webp",
         "miniatura": ""
@@ -1173,6 +1234,7 @@
         "que": "País",
         "resumen": "Baronía de Ronco está en el Archipiélago de Lunas.",
         "region": "Archipiélago de Lunas",
+        "subraza_de": "",
         "relleno": true,
         "bandera": "/imagenes/wiki/baronia_ronco.webp",
         "miniatura": ""
@@ -1192,6 +1254,7 @@
         "que": "País",
         "resumen": "Corona de Mogla está en el Archipiélago de Lunas.",
         "region": "Archipiélago de Lunas",
+        "subraza_de": "",
         "relleno": true,
         "bandera": "/imagenes/wiki/corona_mogla.webp",
         "miniatura": ""
@@ -1211,6 +1274,7 @@
         "que": "País",
         "resumen": "Corte de Labros está en las Islas de Labros.",
         "region": "Islas de Labros",
+        "subraza_de": "",
         "relleno": true,
         "bandera": "/imagenes/wiki/corte_labros.webp",
         "miniatura": ""
@@ -1230,6 +1294,7 @@
         "que": "País",
         "resumen": "Costa de Vlasquie está en el Archipiélago Fragmentado, en las Tierras Encantadas.",
         "region": "Archipiélago Fragmentado",
+        "subraza_de": "",
         "relleno": true,
         "bandera": "/imagenes/wiki/costa_de_vlasquie.webp",
         "miniatura": ""
@@ -1249,6 +1314,7 @@
         "que": "País",
         "resumen": "Cuna de Quimeras es una isla grande e independiente.",
         "region": "",
+        "subraza_de": "",
         "relleno": true,
         "bandera": "/imagenes/wiki/cuna_de_quimeras.webp",
         "miniatura": ""
@@ -1268,6 +1334,7 @@
         "que": "País",
         "resumen": "Dominio de Lyca está en el Archipiélago Fragmentado, en las Tierras Encantadas.",
         "region": "Archipiélago Fragmentado",
+        "subraza_de": "",
         "relleno": true,
         "bandera": "/imagenes/wiki/dominio_de_lyca.webp",
         "miniatura": ""
@@ -1287,6 +1354,7 @@
         "que": "",
         "resumen": "Faros del Mar Ciego es una región del mapamundi.",
         "region": "",
+        "subraza_de": "",
         "relleno": false,
         "bandera": "",
         "miniatura": "/imagenes/wiki/situacion/peque/faros_del_mar_ciego.webp"
@@ -1306,6 +1374,7 @@
         "que": "País",
         "resumen": "Forja de Aureb está en el Archipiélago Fragmentado, en las Tierras Encantadas.",
         "region": "Archipiélago Fragmentado",
+        "subraza_de": "",
         "relleno": true,
         "bandera": "/imagenes/wiki/forja_de_aureb.webp",
         "miniatura": ""
@@ -1325,6 +1394,7 @@
         "que": "País",
         "resumen": "Franja de Turia está en las Tierras Encantadas.",
         "region": "Tierras Encantadas",
+        "subraza_de": "",
         "relleno": true,
         "bandera": "/imagenes/wiki/franja_de_turia.webp",
         "miniatura": ""
@@ -1344,6 +1414,7 @@
         "que": "País",
         "resumen": "Haluka está en los Faros del Mar Ciego.",
         "region": "Faros del Mar Ciego",
+        "subraza_de": "",
         "relleno": true,
         "bandera": "/imagenes/wiki/haluka.webp",
         "miniatura": ""
@@ -1363,6 +1434,7 @@
         "que": "País",
         "resumen": "Hokupuko está en los Faros del Mar Ciego.",
         "region": "Faros del Mar Ciego",
+        "subraza_de": "",
         "relleno": true,
         "bandera": "/imagenes/wiki/hokupuko.webp",
         "miniatura": ""
@@ -1382,6 +1454,7 @@
         "que": "País",
         "resumen": "Horda de Uspán está en las Tierras Encantadas.",
         "region": "Tierras Encantadas",
+        "subraza_de": "",
         "relleno": true,
         "bandera": "/imagenes/wiki/horda_de_uspan.webp",
         "miniatura": ""
@@ -1401,6 +1474,7 @@
         "que": "País",
         "resumen": "Horda Quebrada está en el Archipiélago Fragmentado, en las Tierras Encantadas.",
         "region": "Archipiélago Fragmentado",
+        "subraza_de": "",
         "relleno": true,
         "bandera": "/imagenes/wiki/horda_quebrada.webp",
         "miniatura": ""
@@ -1420,6 +1494,7 @@
         "que": "País",
         "resumen": "Imperio de Lezeris está en las Tierras Encantadas.",
         "region": "Tierras Encantadas",
+        "subraza_de": "",
         "relleno": true,
         "bandera": "/imagenes/wiki/imperio_de_lezeris.webp",
         "miniatura": ""
@@ -1439,6 +1514,7 @@
         "que": "País",
         "resumen": "Infierno Frondoso está en las Tierras Encantadas.",
         "region": "Tierras Encantadas",
+        "subraza_de": "",
         "relleno": true,
         "bandera": "/imagenes/wiki/infierno_frondoso.webp",
         "miniatura": ""
@@ -1458,6 +1534,7 @@
         "que": "",
         "resumen": "Isla de Arbenia es una región del mapamundi.",
         "region": "",
+        "subraza_de": "",
         "relleno": false,
         "bandera": "",
         "miniatura": "/imagenes/wiki/situacion/peque/isla_de_arbenia.webp"
@@ -1477,6 +1554,7 @@
         "que": "País",
         "resumen": "Isla de Telvetia es una isla grande e independiente.",
         "region": "",
+        "subraza_de": "",
         "relleno": true,
         "bandera": "/imagenes/wiki/isla_de_telvetia.webp",
         "miniatura": ""
@@ -1496,6 +1574,7 @@
         "que": "",
         "resumen": "Islas de Labros es una región del mapamundi.",
         "region": "",
+        "subraza_de": "",
         "relleno": false,
         "bandera": "",
         "miniatura": "/imagenes/wiki/situacion/peque/islas_de_labros.webp"
@@ -1515,6 +1594,7 @@
         "que": "País",
         "resumen": "Itzalcál está en el Archipielago de las Costras.",
         "region": "Archipielago de las Costras",
+        "subraza_de": "",
         "relleno": true,
         "bandera": "/imagenes/wiki/itzalcal.webp",
         "miniatura": ""
@@ -1534,6 +1614,7 @@
         "que": "País",
         "resumen": "Kaelova está en los Faros del Mar Ciego.",
         "region": "Faros del Mar Ciego",
+        "subraza_de": "",
         "relleno": true,
         "bandera": "/imagenes/wiki/kaelova.webp",
         "miniatura": ""
@@ -1553,6 +1634,7 @@
         "que": "País",
         "resumen": "Kukulna está en el Archipielago de las Costras.",
         "region": "Archipielago de las Costras",
+        "subraza_de": "",
         "relleno": true,
         "bandera": "/imagenes/wiki/kukulna.webp",
         "miniatura": ""
@@ -1572,6 +1654,7 @@
         "que": "País",
         "resumen": "Liga de Golota está en las Tierras Encantadas.",
         "region": "Tierras Encantadas",
+        "subraza_de": "",
         "relleno": true,
         "bandera": "/imagenes/wiki/liga_de_golota.webp",
         "miniatura": ""
@@ -1591,6 +1674,7 @@
         "que": "País",
         "resumen": "Marquesado de Al-Darís está en el Archipiélago de Lunas.",
         "region": "Archipiélago de Lunas",
+        "subraza_de": "",
         "relleno": true,
         "bandera": "/imagenes/wiki/marquesado_aldaris.webp",
         "miniatura": ""
@@ -1610,6 +1694,7 @@
         "que": "País",
         "resumen": "Morada de Eeli está en el Archipiélago Fragmentado, en las Tierras Encantadas.",
         "region": "Archipiélago Fragmentado",
+        "subraza_de": "",
         "relleno": true,
         "bandera": "/imagenes/wiki/morada_de_eeli.webp",
         "miniatura": ""
@@ -1629,6 +1714,7 @@
         "que": "País",
         "resumen": "Mulz'aka está en el Archipielago de las Costras.",
         "region": "Archipielago de las Costras",
+        "subraza_de": "",
         "relleno": true,
         "bandera": "/imagenes/wiki/mulz_aka.webp",
         "miniatura": ""
@@ -1648,6 +1734,7 @@
         "que": "País",
         "resumen": "Nahuatzal está en el Archipielago de las Costras.",
         "region": "Archipielago de las Costras",
+        "subraza_de": "",
         "relleno": true,
         "bandera": "/imagenes/wiki/nahuatzal.webp",
         "miniatura": ""
@@ -1667,6 +1754,7 @@
         "que": "País",
         "resumen": "Nalchalcoatl está en el Archipielago de las Costras.",
         "region": "Archipielago de las Costras",
+        "subraza_de": "",
         "relleno": true,
         "bandera": "/imagenes/wiki/nalchalcoatl.webp",
         "miniatura": ""
@@ -1686,6 +1774,7 @@
         "que": "País",
         "resumen": "Nalu'elé está en los Faros del Mar Ciego.",
         "region": "Faros del Mar Ciego",
+        "subraza_de": "",
         "relleno": true,
         "bandera": "/imagenes/wiki/nalu_ele.webp",
         "miniatura": ""
@@ -1705,6 +1794,7 @@
         "que": "País",
         "resumen": "Nara-Mana está en los Faros del Mar Ciego.",
         "region": "Faros del Mar Ciego",
+        "subraza_de": "",
         "relleno": true,
         "bandera": "/imagenes/wiki/nara_mana.webp",
         "miniatura": ""
@@ -1724,6 +1814,7 @@
         "que": "País",
         "resumen": "Níctebrakka está en el Archipielago de las Costras.",
         "region": "Archipielago de las Costras",
+        "subraza_de": "",
         "relleno": true,
         "bandera": "/imagenes/wiki/nictebrakka.webp",
         "miniatura": ""
@@ -1743,6 +1834,7 @@
         "que": "País",
         "resumen": "Ojo de Aglas está en las Tierras Encantadas.",
         "region": "Tierras Encantadas",
+        "subraza_de": "",
         "relleno": true,
         "bandera": "/imagenes/wiki/ojo_de_aglas.webp",
         "miniatura": ""
@@ -1762,6 +1854,7 @@
         "que": "País",
         "resumen": "Palacio de Jan está en las Tierras Encantadas.",
         "region": "Tierras Encantadas",
+        "subraza_de": "",
         "relleno": true,
         "bandera": "/imagenes/wiki/palacio_de_jan.webp",
         "miniatura": ""
@@ -1781,6 +1874,7 @@
         "que": "País",
         "resumen": "Paraje de Cereno está en el Archipiélago Fragmentado, en las Tierras Encantadas.",
         "region": "Archipiélago Fragmentado",
+        "subraza_de": "",
         "relleno": true,
         "bandera": "/imagenes/wiki/paraje_de_cereno.webp",
         "miniatura": ""
@@ -1800,6 +1894,7 @@
         "que": "País",
         "resumen": "Paraje de Ágrimar está en las Islas de Labros.",
         "region": "Islas de Labros",
+        "subraza_de": "",
         "relleno": true,
         "bandera": "/imagenes/wiki/paraje_agrimar.webp",
         "miniatura": ""
@@ -1819,6 +1914,7 @@
         "que": "País",
         "resumen": "Popalola está en los Faros del Mar Ciego.",
         "region": "Faros del Mar Ciego",
+        "subraza_de": "",
         "relleno": true,
         "bandera": "/imagenes/wiki/popalola.webp",
         "miniatura": ""
@@ -1838,6 +1934,7 @@
         "que": "País",
         "resumen": "Páramo de Esnirma está en el Archipiélago Fragmentado, en las Tierras Encantadas.",
         "region": "Archipiélago Fragmentado",
+        "subraza_de": "",
         "relleno": true,
         "bandera": "/imagenes/wiki/paramo_de_esnirma.webp",
         "miniatura": ""
@@ -1857,6 +1954,7 @@
         "que": "País",
         "resumen": "Reino de Donotebra está en la Isla de Arbenia.",
         "region": "Isla de Arbenia",
+        "subraza_de": "",
         "relleno": true,
         "bandera": "/imagenes/wiki/reino_donotebra.webp",
         "miniatura": ""
@@ -1876,6 +1974,7 @@
         "que": "País",
         "resumen": "Reino de Yor está en el Archipiélago de Lunas.",
         "region": "Archipiélago de Lunas",
+        "subraza_de": "",
         "relleno": true,
         "bandera": "/imagenes/wiki/reino_yor.webp",
         "miniatura": ""
@@ -1895,6 +1994,7 @@
         "que": "País",
         "resumen": "Reino de Zaustilla es una isla grande e independiente.",
         "region": "",
+        "subraza_de": "",
         "relleno": true,
         "bandera": "/imagenes/wiki/reino_de_zaustilla.webp",
         "miniatura": ""
@@ -1914,6 +2014,7 @@
         "que": "País",
         "resumen": "Reino de Ópalis está en las Tierras Encantadas.",
         "region": "Tierras Encantadas",
+        "subraza_de": "",
         "relleno": true,
         "bandera": "/imagenes/wiki/reino_de_opalis.webp",
         "miniatura": ""
@@ -1933,6 +2034,7 @@
         "que": "País",
         "resumen": "Ruinas de Nereth está en las Tierras Encantadas.",
         "region": "Tierras Encantadas",
+        "subraza_de": "",
         "relleno": true,
         "bandera": "/imagenes/wiki/ruinas_de_nereth.webp",
         "miniatura": ""
@@ -1952,6 +2054,7 @@
         "que": "País",
         "resumen": "Ruinas de Thalvyr está en el Archipiélago Fragmentado, en las Tierras Encantadas.",
         "region": "Archipiélago Fragmentado",
+        "subraza_de": "",
         "relleno": true,
         "bandera": "/imagenes/wiki/ruinas_de_thalvyr.webp",
         "miniatura": ""
@@ -1971,6 +2074,7 @@
         "que": "País",
         "resumen": "Santo Camino de Kada está en las Tierras Encantadas.",
         "region": "Tierras Encantadas",
+        "subraza_de": "",
         "relleno": true,
         "bandera": "/imagenes/wiki/santo_camino_de_kada.webp",
         "miniatura": ""
@@ -1990,6 +2094,7 @@
         "que": "País",
         "resumen": "Señorío de Pizaria está en la Isla de Arbenia.",
         "region": "Isla de Arbenia",
+        "subraza_de": "",
         "relleno": true,
         "bandera": "/imagenes/wiki/senorio_pizaria.webp",
         "miniatura": ""
@@ -2009,6 +2114,7 @@
         "que": "País",
         "resumen": "Talaiva está en los Faros del Mar Ciego.",
         "region": "Faros del Mar Ciego",
+        "subraza_de": "",
         "relleno": true,
         "bandera": "/imagenes/wiki/talaiva.webp",
         "miniatura": ""
@@ -2028,6 +2134,7 @@
         "que": "País",
         "resumen": "Techo de Az'Nu está en el Archipiélago Fragmentado, en las Tierras Encantadas.",
         "region": "Archipiélago Fragmentado",
+        "subraza_de": "",
         "relleno": true,
         "bandera": "/imagenes/wiki/techo_de_az_nu.webp",
         "miniatura": ""
@@ -2047,6 +2154,7 @@
         "que": "País",
         "resumen": "Territorios Unidos de Arbenia está en la Isla de Arbenia.",
         "region": "Isla de Arbenia",
+        "subraza_de": "",
         "relleno": true,
         "bandera": "/imagenes/wiki/territorios_unidos_arbenia.webp",
         "miniatura": ""
@@ -2066,6 +2174,7 @@
         "que": "",
         "resumen": "Las Tierras Encantadas son la zona norte del mundo, al lado de Partaria.",
         "region": "",
+        "subraza_de": "",
         "relleno": false,
         "bandera": "",
         "miniatura": "/imagenes/wiki/situacion/peque/tierras_encantadas.webp"
@@ -2085,6 +2194,7 @@
         "que": "País",
         "resumen": "Tzeibalba está en el Archipielago de las Costras.",
         "region": "Archipielago de las Costras",
+        "subraza_de": "",
         "relleno": true,
         "bandera": "/imagenes/wiki/tzeibalba.webp",
         "miniatura": ""
@@ -2104,6 +2214,7 @@
         "que": "País",
         "resumen": "Tzintara está en el Archipielago de las Costras.",
         "region": "Archipielago de las Costras",
+        "subraza_de": "",
         "relleno": true,
         "bandera": "/imagenes/wiki/tzintara.webp",
         "miniatura": ""
@@ -2123,6 +2234,7 @@
         "que": "País",
         "resumen": "Tzompoc está en el Archipielago de las Costras.",
         "region": "Archipielago de las Costras",
+        "subraza_de": "",
         "relleno": true,
         "bandera": "/imagenes/wiki/tzompoc.webp",
         "miniatura": ""
@@ -2142,6 +2254,7 @@
         "que": "País",
         "resumen": "Uluka está en los Faros del Mar Ciego.",
         "region": "Faros del Mar Ciego",
+        "subraza_de": "",
         "relleno": true,
         "bandera": "/imagenes/wiki/uluka.webp",
         "miniatura": ""
@@ -2161,6 +2274,7 @@
         "que": "País",
         "resumen": "Vanu Reki está en los Faros del Mar Ciego.",
         "region": "Faros del Mar Ciego",
+        "subraza_de": "",
         "relleno": true,
         "bandera": "/imagenes/wiki/vanu_reki.webp",
         "miniatura": ""
@@ -2180,6 +2294,7 @@
         "que": "País",
         "resumen": "Varamo'a está en los Faros del Mar Ciego.",
         "region": "Faros del Mar Ciego",
+        "subraza_de": "",
         "relleno": true,
         "bandera": "/imagenes/wiki/varamo_a.webp",
         "miniatura": ""
@@ -2199,6 +2314,7 @@
         "que": "País",
         "resumen": "Yaxch'umekte está en el Archipielago de las Costras.",
         "region": "Archipielago de las Costras",
+        "subraza_de": "",
         "relleno": true,
         "bandera": "/imagenes/wiki/yaxch_umekte.webp",
         "miniatura": ""
@@ -2215,6 +2331,7 @@
         "que": "El Jardín del Último Canto",
         "resumen": "Cuando la Sinfonía Estelar se quebró en el último choque entre Azaras y Parta, no solo nació el mundo: murió para siempre la armonía perfecta del cosmos. De la fusión de ambos Arcontes surgió Cralëa, un mundo formado…",
         "region": "",
+        "subraza_de": "",
         "relleno": false,
         "bandera": "",
         "miniatura": ""
@@ -2234,6 +2351,7 @@
         "que": "Söh-hgol · la Herida Dolorosa",
         "resumen": "El Sol fue llamado por los Nithir Söh-hgol, «la Herida Dolorosa», nombre que con los siglos se transformó en Sol. No es una estrella, sino una herida abierta en el firmamento, el desgarro que quedó cuando el Canto se…",
         "region": "",
+        "subraza_de": "",
         "relleno": false,
         "bandera": "",
         "miniatura": ""
@@ -2253,6 +2371,7 @@
         "que": "Lunaah · la Lápida y el Corazón",
         "resumen": "La Luna fue llamada por los Nithir Lunaah, palabra que en su lengua significaba a la vez Lápida y Corazón. No es un simple satélite, sino la piedra funeraria del Canto y el último latido compartido de Azaras y Parta.",
         "region": "",
+        "subraza_de": "",
         "relleno": false,
         "bandera": "",
         "miniatura": ""
@@ -2272,6 +2391,7 @@
         "que": "el Sufrimiento",
         "resumen": "Envuelto en púrpuras oscuros y brumas densas, Gomath presenta una superficie inestable, como si el planeta entero se retorciera lentamente.",
         "region": "",
+        "subraza_de": "",
         "relleno": false,
         "bandera": "",
         "miniatura": ""
@@ -2291,6 +2411,7 @@
         "que": "el Pantano",
         "resumen": "Lurmeri no es un mundo fértil, aunque así lo sugieran sus tonos verdosos y dorados. Es, en realidad, un gigante gaseoso, cubierto por capas densas de nubes pesadas que se arremolinan lentamente en espirales interminab…",
         "region": "",
+        "subraza_de": "",
         "relleno": false,
         "bandera": "",
         "miniatura": ""
@@ -2310,6 +2431,7 @@
         "que": "la Tormenta",
         "resumen": "Nevadra es el mundo más cercano y está cubierto casi por completo por océanos profundos y cielos perpetuamente agitados. Desde Cralëa se observa como una esfera azulada y blanquecina, surcada por vetas de nubes que ja…",
         "region": "",
+        "subraza_de": "",
         "relleno": false,
         "bandera": "",
         "miniatura": ""
@@ -2329,6 +2451,7 @@
         "que": "El calendario de Cralëa",
         "resumen": "El mundo sigue un calendario de 12 meses de 28 días, cada uno asociado a una virtud o un concepto vinculado a los Heraldos de la Virtud y la Ruina. Al final del año hay cuatro días sagrados dedicados a la Mesa del Ord…",
         "region": "",
+        "subraza_de": "",
         "relleno": false,
         "bandera": "",
         "miniatura": ""
@@ -2706,6 +2829,7 @@
         "que": "La chuleta del formato",
         "resumen": "Esta página no cuenta nada del mundo: está para ver cómo queda cada cosa y qué se puede escribir. Bórrala cuando ya no haga falta.",
         "region": "",
+        "subraza_de": "",
         "relleno": false,
         "bandera": "",
         "miniatura": ""

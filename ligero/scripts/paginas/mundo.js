@@ -932,10 +932,14 @@ function contenidoDeSeccionMundo(grupo, fichas, irA) {
         const conRegion = suyas.some((f) => llano(f.region));
         const regiones = new Set(suyas.map((f) => llano(f.region)).filter(Boolean));
         const conSubregiones = [...regiones].some((r) => r !== llano(nombre));
+        const subrazas = suyas.filter((f) => llano(f.subraza_de));
         const lista = conRegion
             ? suyas.filter((f) => !regiones.has(llano(f.titulo)) && llano(f.titulo) !== llano(nombre))
                 .sort((a, b) => a.titulo.localeCompare(b.titulo, "es"))
-            : suyas;
+            : (subrazas.length
+                ? suyas.slice().sort((a, b) => (llano(b.titulo) === llano(nombre)) - (llano(a.titulo) === llano(nombre))
+                    || a.titulo.localeCompare(b.titulo, "es"))
+                : suyas);
         const parte = document.createElement("details");
         parte.className = "mundo-seccion-parte";
         const id = "ventana-" + idDeSubMundo(nombre);
@@ -955,9 +959,11 @@ function contenidoDeSeccionMundo(grupo, fichas, irA) {
         const cuenta = document.createElement("span");
         cuenta.className = "mundo-grupo-cuenta";
         const n = new Set(lista.map((f) => f.url)).size;
+        const nSub = new Set(subrazas.map((f) => f.url)).size;
         cuenta.textContent = conRegion
             ? (n === 1 ? "1 país" : n + " países")
-            : (n === 1 ? "1 página" : n + " páginas");
+            : (nSub ? (nSub === 1 ? "1 subraza" : nSub + " subrazas")
+                : (n === 1 ? "1 página" : n + " páginas"));
         cabecera.appendChild(cuenta);
         parte.appendChild(cabecera);
         parte.appendChild(conSubregiones

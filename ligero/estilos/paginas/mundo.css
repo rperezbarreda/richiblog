@@ -1685,3 +1685,28 @@ html:not(.js) .mundo-spoiler {
     font-size: 0.875rem;
     line-height: 1.45;
 }
+.mundo-subrazas {
+    display: grid;
+    gap: 10px;
+    margin: 0 0 1.5em;
+    padding: 0;
+    list-style: none;
+}
+.mundo-subrazas li {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    padding: 10px 14px;
+    border: 2px solid var(--border);
+    border-left: 4px solid var(--yellow);
+}
+.mundo-subraza-nombre {
+    color: var(--yellow);
+    font-weight: 700;
+    text-underline-offset: 3px;
+}
+.mundo-subraza-que {
+    color: var(--white);
+    font-size: 0.9375rem;
+    line-height: 1.5;
+}
