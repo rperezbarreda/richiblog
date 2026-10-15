@@ -22,9 +22,9 @@
 #     nombre    lo que se ve.
 #     mes       el número (1 a 12) o el nombre («Valentía», «Susurro»…);
 #               13, o «fin», para los cuatro días del Fin del Ciclo.
-#     día       opcional: 1 a 28 (en el Fin del Ciclo, 1 a 4). Sin día,
-#               sale como del mes entero («sin día fijo») y no marca ningún
-#               día de la rejilla.
+#     día       1 a 28 (en el Fin del Ciclo, 1 a 4). Es el número que se
+#               resalta en la rejilla; lo de cada día sale en un globo al
+#               pasar el ratón por encima.
 #     tipo      festividad (se repite cada año) o evento (algo que pasó o
 #               pasará: una batalla, una coronación…).
 #     año       opcional, sobre todo para los eventos: como se lea
@@ -110,7 +110,7 @@ def cuando(datos, ev):
     mes = int(ev.get("mes") or 0)
     dia = ev.get("dia")
     if dia is None:
-        return "sin día fijo"
+        return "sin día (no sale)"
     if mes > len(datos["meses"]):
         dias = (datos.get("fin") or {}).get("dias") or []
         return dias[dia - 1]["nombre"] if 1 <= dia <= len(dias) else f"día {dia}"
@@ -197,10 +197,7 @@ def pedir_dia(datos, mes, actual=None):
         dias = (datos.get("fin") or {}).get("dias") or []
         print("     " + ", ".join(f"{n} {d.get('nombre')}" for n, d in enumerate(dias, start=1)))
     while True:
-        dicho = preguntar(f"Día (1 a {tope}; Enter en blanco: sin día fijo)",
-                          "" if actual is None else str(actual))
-        if not dicho:
-            return None
+        dicho = preguntar(f"Día (1 a {tope})", "" if actual is None else str(actual))
         if dicho.isdigit() and 1 <= int(dicho) <= tope:
             return int(dicho)
         print(f"     Tiene que ser un número del 1 al {tope}.")
@@ -283,11 +280,7 @@ def poner_hoy(datos):
         return
     actual = datos.get("hoy") if isinstance(datos.get("hoy"), dict) else {}
     mes = pedir_mes(datos, actual.get("mes"))
-    while True:
-        dia = pedir_dia(datos, mes, actual.get("dia") if actual.get("mes") == mes else None)
-        if dia:
-            break
-        print("     Hoy tiene que ser un día concreto.")
+    dia = pedir_dia(datos, mes, actual.get("dia") if actual.get("mes") == mes else None)
     datos["hoy"] = {"mes": mes, "dia": dia}
 
 

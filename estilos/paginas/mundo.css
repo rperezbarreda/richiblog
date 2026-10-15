@@ -2050,7 +2050,12 @@ html:not(.js) .mundo-spoiler {
    scripts/paginas/mundo.js, con datos/wiki/calendario.json). Va en la
    columna de la derecha, entre los mapas y la línea de tiempo. Como la
    línea, no es un enlace entero: dentro hay botones y enlaces, así que la
-   tarjeta no se ilumina entera; se ilumina lo que se pulsa. */
+   tarjeta no se ilumina entera; se ilumina lo que se pulsa. Es la caja
+   contra la que se coloca el globo de cada día. */
+.mundo-vista-calendario {
+    position: relative;
+}
+
 .mundo-vista-calendario:hover {
     border-color: var(--border);
     background: none;
@@ -2147,8 +2152,7 @@ html:not(.js) .mundo-spoiler {
     cursor: pointer;
 }
 
-.mundo-cal-dia.es-fiesta,
-.mundo-cal-dia.es-evento {
+.mundo-cal-dia.es-marcado {
     border-color: var(--yellow);
     color: var(--yellow);
 }
@@ -2172,7 +2176,7 @@ html:not(.js) .mundo-spoiler {
 
 .mundo-cal-dia.es-pulsable:hover,
 .mundo-cal-dia.es-pulsable:focus-visible,
-.mundo-cal-dia.es-pulsable[aria-pressed="true"] {
+.mundo-cal-dia.es-pulsable[aria-expanded="true"] {
     background: var(--yellow);
     border-color: var(--yellow);
     color: var(--yellow-contrast);
@@ -2206,97 +2210,13 @@ html:not(.js) .mundo-spoiler {
     margin: 0 0 -2px;
 }
 
-.mundo-cal-panel {
-    margin-top: 8px;
-    padding-top: 8px;
-    border-top: 1px solid var(--border);
-}
-
-.mundo-cal-panel-titulo {
-    margin: 0 0 6px;
-    color: var(--yellow);
-    font-family: var(--fuente-mono);
-    font-size: 0.8125rem;
-    letter-spacing: 1px;
-    text-transform: uppercase;
-}
-
-.mundo-cal-eventos {
-    display: grid;
-    gap: 8px;
-    margin: 0;
-    padding: 0;
-    list-style: none;
-}
-
-.mundo-cal-evento {
-    display: flex;
-    gap: 8px;
-    align-items: flex-start;
-}
-
-.mundo-cal-evento-icono {
-    flex: 0 0 auto;
-    line-height: 1.4;
-}
-
-.mundo-cal-evento-cuerpo {
-    display: flex;
-    flex-direction: column;
-    min-width: 0;
-    gap: 1px;
-}
-
-.mundo-cal-cuando {
-    color: var(--muted);
-    font-family: var(--fuente-mono);
-    font-size: 0.75rem;
-}
-
-.mundo-cal-evento-nombre {
-    color: var(--white);
-    font-weight: 700;
-    line-height: 1.3;
-}
-
-a.mundo-cal-evento-nombre {
-    color: var(--yellow);
-    text-underline-offset: 3px;
-}
-
-.mundo-cal-resumen,
-.mundo-cal-costumbres {
-    color: var(--white);
-    font-size: 0.875rem;
-    line-height: 1.45;
-}
-
-.mundo-cal-costumbres {
-    margin: 8px 0 0;
-}
-
 .mundo-cal-pie {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 6px 12px;
-    align-items: center;
-    margin: 10px 0 0;
+    margin: 8px 0 0;
     font-size: 0.875rem;
 }
 
-.mundo-cal-todo {
-    padding: 2px 8px;
-    border: 2px solid var(--yellow);
-    background: transparent;
-    color: var(--yellow);
-    font: inherit;
-    cursor: pointer;
-}
-
-.mundo-cal-todo:hover,
-.mundo-cal-todo:focus-visible {
-    background: var(--yellow);
-    color: var(--yellow-contrast);
+.mundo-cal-pie:empty {
+    display: none;
 }
 
 .mundo-cal-mas {
@@ -2310,10 +2230,6 @@ a.mundo-cal-evento-nombre {
 }
 
 .mundo-cal-leyenda {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 4px 6px;
     margin: 6px 0 0;
     color: var(--muted);
     font-family: var(--fuente-mono);
@@ -2323,7 +2239,8 @@ a.mundo-cal-evento-nombre {
 .mundo-cal-leyenda-punto,
 .mundo-cal-leyenda-hoy {
     display: inline-block;
-    flex: 0 0 auto;
+    margin-right: 6px;
+    vertical-align: middle;
 }
 
 .mundo-cal-leyenda-punto {
@@ -2341,4 +2258,62 @@ a.mundo-cal-evento-nombre {
 
 .mundo-cal-leyenda-punto + .mundo-cal-leyenda-hoy {
     margin-left: 12px;
+}
+
+/* EL GLOBO DE UN DÍA: lo que pasa ese día, al pasar el ratón por encima
+   (como en el mapamundi), al llegar con el tabulador o al pulsarlo. Lo
+   coloca colocarGloboDelCalendarioMundo, debajo del día o encima si abajo
+   no cabe. Mientras no está fijado no recibe el ratón: si no, al pasar de
+   un día a otro se taparía a sí mismo y parpadearía. Fijado (pulsando el
+   día), sí, para poder pulsar su enlace. */
+.mundo-cal-globo {
+    position: absolute;
+    z-index: 3;
+    width: min(18rem, calc(100% - 12px));
+    padding: 8px 10px;
+    border: 2px solid var(--yellow);
+    background: var(--purple);
+    color: var(--white);
+    text-align: left;
+    pointer-events: none;
+}
+
+.mundo-cal-globo.es-fijado {
+    pointer-events: auto;
+}
+
+.mundo-cal-globo[hidden] {
+    display: none;
+}
+
+.mundo-cal-globo p {
+    margin: 0;
+}
+
+.mundo-cal-globo-cuando,
+.mundo-cal-globo-tipo {
+    color: var(--muted);
+    font-family: var(--fuente-mono);
+    font-size: 0.75rem;
+}
+
+.mundo-cal-globo-evento {
+    margin-top: 6px;
+}
+
+.mundo-cal-globo-nombre {
+    color: var(--yellow);
+    font-weight: 700;
+    line-height: 1.3;
+}
+
+.mundo-cal-globo-nombre a {
+    color: inherit;
+    text-underline-offset: 3px;
+}
+
+.mundo-cal-globo-texto {
+    margin-top: 2px;
+    font-size: 0.875rem;
+    line-height: 1.45;
 }

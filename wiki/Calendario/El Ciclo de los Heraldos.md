@@ -2,7 +2,7 @@
 title: "El Ciclo de los Heraldos"
 subtitle: "El calendario de Cralëa"
 infobox: "Calendario"
-tags: [Calendario]
+tags: [Cosmología, Calendario]
 meses: "12, de 28 días"
 semana: "7 días"
 fin del ciclo: "4 días sagrados"
@@ -15,18 +15,18 @@ El mundo sigue un **calendario de 12 meses de 28 días**, cada uno asociado a un
 
 | nº | Mes | Heraldo | Estación | Festividad principal |
 | --- | --- | --- | --- | --- |
-| 1 | ⚔️ Mes de Valentía | Clodia, la Madre del Valor | ❄️ empieza el invierno | La Prueba del Héroe |
+| 1 | ⚔️ Mes de Valentía | Clodia, la Madre del Valor | ❄️ principio del invierno | La Prueba del Héroe |
 | 2 | 🕶️ Mes del Susurro | Verdos, el Padre de Mentiras | invierno | La Noche de los Susurros |
-| 3 | 📜 Mes de Lealtad | Sedril, el Custodio | invierno | El Juramento Eterno |
-| 4 | 🎭 Mes de Astucia | Morlon, el Rufián | 🌿 empieza la primavera | El Día de la Máscara |
+| 3 | 📜 Mes de Lealtad | Sedril, el Custodio | fin del invierno | El Juramento Eterno |
+| 4 | 🎭 Mes de Astucia | Morlon, el Rufián | 🌿 principio de la primavera | El Día de la Máscara |
 | 5 | 🍞 Mes de Misericordia | Demadia, la Dama Caritativa | primavera | La Mano Abierta |
-| 6 | 🦂 Mes de Penitencia | Runis, la Dama Cruel | primavera | El Juicio de la Sangre |
-| 7 | 📖 Mes del Arcano | Aglas, el Sabio | ☀️ empieza el verano | La Iluminación |
+| 6 | 🦂 Mes de Penitencia | Runis, la Dama Cruel | fin de la primavera | El Juicio de la Sangre |
+| 7 | 📖 Mes del Arcano | Aglas, el Sabio | ☀️ principio del verano | La Iluminación |
 | 8 | ⚖️ Mes de Justicia | Labros, el Juez | verano | El Día del Ojo por Ojo |
-| 9 | 🔥 Mes del Sacrificio | Bagros, el Mártir | verano | El Camino de la Prueba |
-| 10 | ⛓️ Mes de Cadena | Cahir, el Esclavo | 🍂 empieza el otoño | El Alzamiento de las Cadenas |
+| 9 | 🔥 Mes del Sacrificio | Bagros, el Mártir | fin del verano | El Camino de la Prueba |
+| 10 | ⛓️ Mes de Cadena | Cahir, el Esclavo | 🍂 principio del otoño | El Alzamiento de las Cadenas |
 | 11 | ⚒️ Mes de Unidad | Metra, el Forjador | otoño | El Pacto de Sangre |
-| 12 | 🌙 Mes de Espectro | Naria, la Sombría | ❄️ vuelve el invierno | La Noche de los Lamentos |
+| 12 | 🌙 Mes de Espectro | Naria, la Sombría | fin del otoño | La Noche de los Lamentos |
 | — | 🌿 Fin del Ciclo | la Mesa del Orden Natural | | cuatro días sagrados |
 
 ## Un mes
@@ -73,7 +73,7 @@ Un tiempo de renovación de pactos, promesas y justicia.
 
 *Regido por Morlon, el Rufián.* 🎭🌊
 
-Un mes de engaño y supervivencia, donde los oportunistas prosperan. **Fin del invierno, inicio de la primavera** 🌿: la nieve comienza a derretirse y las primeras lluvias marcan el cambio de temporada.
+Un mes de engaño y supervivencia, donde los oportunistas prosperan. **Principio de la primavera** 🌿: la nieve comienza a derretirse y las primeras lluvias marcan el cambio de temporada.
 
 - **Festividad principal:** *El Día de la Máscara*. Una celebración en la que todos ocultan su identidad con disfraces y participan en juegos de engaño.
 - **Otros eventos:** es común la proliferación de ladrones y estafadores, lo que lleva a los mercaderes a tomar precauciones.
@@ -100,7 +100,7 @@ Un tiempo de castigos y sacrificios, donde la crueldad se impone como ley.
 
 *Regido por Aglas, el Sabio.* 📖🌞
 
-Un mes de estudio, descubrimientos y transmisión del conocimiento. **Fin de la primavera, inicio del verano** ☀️: los días se vuelven más largos y cálidos.
+Un mes de estudio, descubrimientos y transmisión del conocimiento. **Principio del verano** ☀️: los días se vuelven más largos y cálidos.
 
 - **Festividad principal:** *La Iluminación*. Se encienden lámparas en las bibliotecas y se organizan debates filosóficos.
 - **Otros eventos:** es la mejor época para iniciar estudios o construir academias.
@@ -127,7 +127,7 @@ Un mes de resistencia y entrega, donde se valora la dedicación extrema.
 
 *Regido por Cahir, el Esclavo.* ⛓️❄️
 
-Un tiempo de rebelión y colapso, donde los oprimidos se alzan contra sus opresores. **Fin del verano, inicio del otoño** 🍂: las temperaturas comienzan a descender y los vientos aumentan.
+Un tiempo de rebelión y colapso, donde los oprimidos se alzan contra sus opresores. **Principio del otoño** 🍂: las temperaturas comienzan a descender y los vientos aumentan.
 
 - **Festividad principal:** *El Alzamiento de las Cadenas*. Se inician revueltas y muchos esclavos intentan escapar.
 - **Otros eventos:** se desatan conflictos políticos y enfrentamientos sociales.
@@ -145,7 +145,7 @@ Un mes de construcción, hermandad y fortalecimiento de las comunidades.
 
 *Regido por Naria, la Sombría.* 🌙🖤
 
-Un mes de presagios oscuros, donde la tristeza y el miedo reinan. **Fin del otoño, inicio del invierno** ❄️: el frío regresa y las noches se alargan.
+Un mes de presagios oscuros, donde la tristeza y el miedo reinan. **Fin del otoño** 🍂: el frío regresa y las noches se alargan.
 
 - **Festividad principal:** *La Noche de los Lamentos*. Un día de duelo y desesperación en el que se recuerda a los caídos.
 - **Otros eventos:** se hacen ofrendas a la luna negra para intentar apaciguar su influencia.

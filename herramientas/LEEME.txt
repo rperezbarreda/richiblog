@@ -1576,27 +1576,37 @@
   y los días de la semana. Sale en la sección «historia» (la etiqueta
   «calendario» está en la de historia, en mundo-categorias.json).
 
+  La entrada lleva también la etiqueta Cosmología, así que sale en la
+  ventana de cosmología (apartado «Calendario»), y «La Cosmología de
+  Cralëa» la enlaza en su apartado «El tiempo». La estación de cada mes
+  va siempre en tres tiempos: principio, la estación a secas y fin (el
+  Mes de Espectro es el fin del otoño).
+
   Y EN LA PORTADA DE LA WIKI, en la columna de la derecha entre el
   mapamundi y la línea de tiempo, el calendario en una tarjeta: el mes
   con su Heraldo y su estación, flechas para pasar de mes (los doce y,
   detrás, los cuatro días del Fin del Ciclo; del último se vuelve al
-  primero), la rejilla de 7 × 4 con los días que tienen algo marcados con
-  un punto (se pulsan y enseñan lo suyo) y, debajo, lo que pasa en el
-  mes. Abajo, «leer sobre este mes» lleva a su apartado de la entrada y
-  el título, a la entrada entera.
+  primero) y la rejilla de 7 × 4 con los días que tienen algo
+  resaltados. Lo de cada día NO va escrito debajo: sale en un globo al
+  pasar el ratón por encima del número (como los países del mapamundi),
+  al llegar con el tabulador o al pulsarlo; pulsado se queda fijo (es lo
+  que hay en el móvil) y se va al pulsar fuera o con Escape. Debajo,
+  «leer sobre este mes» lleva a su apartado de la entrada y el título, a
+  la entrada entera.
 
   Lo que se marca está en datos/wiki/calendario.json, y se lleva con
   herramientas/1-publicar/calendario.py (en el menú, en Wiki Cralëa).
   Cada cosa tiene nombre, mes (1 a 12, o 13 para el Fin del Ciclo), día
-  si lo tiene, tipo (festividad, que se repite cada año, o evento, que
-  pasó un año concreto: se le puede poner el año), un resumen y, si
-  quieres, un enlace a una página de la wiki. Las doce festividades
-  principales están ya, pero SIN DÍA (la página de Notion no decía qué
-  día caen): salen como «sin día fijo» y no marcan la rejilla hasta que
-  les pongas uno. También se puede fijar «hoy» en Cralëa (un mes y un
-  día): se marca y el calendario abre en ese mes; sin él, abre en el
-  primero. Cómo es el año (meses, Heraldos, semana) también está en ese
-  JSON, copiado de la entrada; si algún día cambia uno, cambia los dos.
+  (hace falta: es el número que se resalta), tipo (festividad, que se
+  repite cada año, o evento, que pasó un año concreto: se le puede poner
+  el año), un resumen y, si quieres, un enlace a una página de la wiki
+  (sale en el globo). Las doce festividades principales están, DE
+  MOMENTO, todas el día 12 de su mes (la página de Notion no decía qué
+  día caen): cuando lo sepas, cámbialas. También se puede fijar «hoy» en
+  Cralëa (un mes y un día): se marca y el calendario abre en ese mes;
+  sin él, abre en el primero. Cómo es el año (meses, Heraldos, estación,
+  semana) también está en ese JSON, copiado de la entrada; si algún día
+  cambia uno, cambia los dos.
 
   EN LA VENTANA DEL MAPAMUNDI, una parte del mundo que tiene regiones
   dentro (Archipiélagos) va repartida en un apartado por región (cada

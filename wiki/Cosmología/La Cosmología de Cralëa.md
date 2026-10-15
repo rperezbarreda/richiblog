@@ -26,3 +26,7 @@ Más allá de Lunaah orbitan seis mundos tributo. Sus nombres fueron impuestos p
 - [[Nevadra]], la Tormenta: el mundo más cercano.
 - [[Lurmeri]], el Pantano.
 - [[Gomath]], el Sufrimiento.
+
+## El tiempo
+
+Los Nithir contaron las primeras horas con los latidos de [[El Sol]], y el año se cuenta con [[El Ciclo de los Heraldos]]: doce meses de veintiocho días, cada uno regido por un Heraldo, y cuatro días sagrados al final del ciclo.

@@ -1,5 +1,5 @@
 {
-    "_explicacion": "EL CALENDARIO DE LA PORTADA DE LA WIKI (la tarjeta de la columna de la derecha, entre el mapamundi y la línea de tiempo). \"meses\" y \"fin\" son cómo es el año: 12 meses de 28 días y 4 días al final; no hace falta tocarlos. \"eventos\" es lo que sale marcado: cada uno con \"nombre\", \"mes\" (1 a 12, o 13 para los días del Fin del Ciclo), y si quieres \"dia\" (1 a 28; sin día, sale como del mes entero), \"tipo\" (\"festividad\" o \"evento\"), \"anyo\" (si pasó un año concreto, como se lea: \"1340 DEM\"), \"resumen\" y \"enlace\" (una página de la wiki, empezando por /web/). \"hoy\" es opcional: {\"mes\": 3, \"dia\": 12} marca ese día y el calendario abre en ese mes. Lo más cómodo es herramientas/1-publicar/calendario.py.",
+    "_explicacion": "EL CALENDARIO DE LA PORTADA DE LA WIKI (la tarjeta de la columna de la derecha, entre el mapamundi y la línea de tiempo). \"meses\" y \"fin\" son cómo es el año (en cada mes, \"momento\" es principio, pleno o fin de su estación): 12 meses de 28 días y 4 días al final; no hace falta tocarlos. \"eventos\" es lo que sale marcado: cada uno con \"nombre\", \"mes\" (1 a 12, o 13 para los días del Fin del Ciclo), \"dia\" (1 a 28; en el 13, 1 a 4), \"tipo\" (\"festividad\" o \"evento\"), \"anyo\" (si pasó un año concreto, como se lea: \"1340 DEM\"), \"resumen\" y \"enlace\" (una página de la wiki, empezando por /web/). \"hoy\" es opcional: {\"mes\": 3, \"dia\": 12} marca ese día y el calendario abre en ese mes. Lo más cómodo es herramientas/1-publicar/calendario.py.",
     "nombre": "El Ciclo de los Heraldos",
     "url": "/web/wiki/calendario/el_ciclo_de_los_heraldos.html",
     "hoy": null,
@@ -59,108 +59,108 @@
             "icono": "⚔️",
             "heraldo": "Clodia, la Madre del Valor",
             "estacion": "invierno",
-            "empieza_estacion": true,
             "ancla": "mes_de_valentia",
-            "costumbres": "Se celebran torneos de combate y pruebas de valentía."
+            "costumbres": "Se celebran torneos de combate y pruebas de valentía.",
+            "momento": "principio"
         },
         {
             "nombre": "Mes del Susurro",
             "icono": "🕶️",
             "heraldo": "Verdos, el Padre de Mentiras",
             "estacion": "invierno",
-            "empieza_estacion": false,
             "ancla": "mes_del_susurro",
-            "costumbres": "Se teme la llegada de espías y traidores; muchos nobles refuerzan su seguridad."
+            "costumbres": "Se teme la llegada de espías y traidores; muchos nobles refuerzan su seguridad.",
+            "momento": "pleno"
         },
         {
             "nombre": "Mes de Lealtad",
             "icono": "📜",
             "heraldo": "Sedril, el Custodio",
             "estacion": "invierno",
-            "empieza_estacion": false,
             "ancla": "mes_de_lealtad",
-            "costumbres": "Las bodas reales y los acuerdos comerciales suelen formalizarse este mes."
+            "costumbres": "Las bodas reales y los acuerdos comerciales suelen formalizarse este mes.",
+            "momento": "fin"
         },
         {
             "nombre": "Mes de Astucia",
             "icono": "🎭",
             "heraldo": "Morlon, el Rufián",
             "estacion": "primavera",
-            "empieza_estacion": true,
             "ancla": "mes_de_astucia",
-            "costumbres": "Es común la proliferación de ladrones y estafadores, lo que lleva a los mercaderes a tomar precauciones."
+            "costumbres": "Es común la proliferación de ladrones y estafadores, lo que lleva a los mercaderes a tomar precauciones.",
+            "momento": "principio"
         },
         {
             "nombre": "Mes de Misericordia",
             "icono": "🍞",
             "heraldo": "Demadia, la Dama Caritativa",
             "estacion": "primavera",
-            "empieza_estacion": false,
             "ancla": "mes_de_misericordia",
-            "costumbres": "Se considera la mejor época para sembrar los primeros cultivos de la temporada."
+            "costumbres": "Se considera la mejor época para sembrar los primeros cultivos de la temporada.",
+            "momento": "pleno"
         },
         {
             "nombre": "Mes de Penitencia",
             "icono": "🦂",
             "heraldo": "Runis, la Dama Cruel",
             "estacion": "primavera",
-            "empieza_estacion": false,
             "ancla": "mes_de_penitencia",
-            "costumbres": "Se refuerzan las prisiones y se llevan a cabo ejecuciones públicas."
+            "costumbres": "Se refuerzan las prisiones y se llevan a cabo ejecuciones públicas.",
+            "momento": "fin"
         },
         {
             "nombre": "Mes del Arcano",
             "icono": "📖",
             "heraldo": "Aglas, el Sabio",
             "estacion": "verano",
-            "empieza_estacion": true,
             "ancla": "mes_del_arcano",
-            "costumbres": "Es la mejor época para iniciar estudios o construir academias."
+            "costumbres": "Es la mejor época para iniciar estudios o construir academias.",
+            "momento": "principio"
         },
         {
             "nombre": "Mes de Justicia",
             "icono": "⚖️",
             "heraldo": "Labros, el Juez",
             "estacion": "verano",
-            "empieza_estacion": false,
             "ancla": "mes_de_justicia",
-            "costumbres": "Se celebran juicios de combate, donde el más fuerte es considerado el justo."
+            "costumbres": "Se celebran juicios de combate, donde el más fuerte es considerado el justo.",
+            "momento": "pleno"
         },
         {
             "nombre": "Mes del Sacrificio",
             "icono": "🔥",
             "heraldo": "Bagros, el Mártir",
             "estacion": "verano",
-            "empieza_estacion": false,
             "ancla": "mes_del_sacrificio",
-            "costumbres": "Marca el fin de la época de cosechas, y se ofrecen tributos a los dioses."
+            "costumbres": "Marca el fin de la época de cosechas, y se ofrecen tributos a los dioses.",
+            "momento": "fin"
         },
         {
             "nombre": "Mes de Cadena",
             "icono": "⛓️",
             "heraldo": "Cahir, el Esclavo",
             "estacion": "otoño",
-            "empieza_estacion": true,
             "ancla": "mes_de_cadena",
-            "costumbres": "Se desatan conflictos políticos y enfrentamientos sociales."
+            "costumbres": "Se desatan conflictos políticos y enfrentamientos sociales.",
+            "momento": "principio"
         },
         {
             "nombre": "Mes de Unidad",
             "icono": "⚒️",
             "heraldo": "Metra, el Forjador",
             "estacion": "otoño",
-            "empieza_estacion": false,
             "ancla": "mes_de_unidad",
-            "costumbres": "Se realizan torneos de herrería y construcciones comunitarias."
+            "costumbres": "Se realizan torneos de herrería y construcciones comunitarias.",
+            "momento": "pleno"
         },
         {
             "nombre": "Mes de Espectro",
             "icono": "🌙",
             "heraldo": "Naria, la Sombría",
-            "estacion": "invierno",
-            "empieza_estacion": true,
+            "estacion": "otoño",
             "ancla": "mes_de_espectro",
-            "costumbres": "Se hacen ofrendas a la luna negra para intentar apaciguar su influencia."
+            "costumbres": "Se hacen ofrendas a la luna negra para intentar apaciguar su influencia.",
+            "momento": "fin"
         }
     ],
     "fin": {
@@ -199,84 +199,84 @@
         {
             "nombre": "La Prueba del Héroe",
             "mes": 1,
-            "dia": null,
+            "dia": 12,
             "tipo": "festividad",
             "resumen": "Duelos rituales y pruebas de resistencia deciden quién es digno del favor de Clodia."
         },
         {
             "nombre": "La Noche de los Susurros",
             "mes": 2,
-            "dia": null,
+            "dia": 12,
             "tipo": "festividad",
             "resumen": "Un día en el que los acuerdos secretos y las traiciones se concretan en reuniones clandestinas."
         },
         {
             "nombre": "El Juramento Eterno",
             "mes": 3,
-            "dia": null,
+            "dia": 12,
             "tipo": "festividad",
             "resumen": "Se firman contratos sagrados y se renuevan alianzas bajo la luz de las estrellas."
         },
         {
             "nombre": "El Día de la Máscara",
             "mes": 4,
-            "dia": null,
+            "dia": 12,
             "tipo": "festividad",
             "resumen": "Una celebración en la que todos ocultan su identidad con disfraces y participan en juegos de engaño."
         },
         {
             "nombre": "La Mano Abierta",
             "mes": 5,
-            "dia": null,
+            "dia": 12,
             "tipo": "festividad",
             "resumen": "Un día en el que los ricos distribuyen comida y recursos entre los pobres."
         },
         {
             "nombre": "El Juicio de la Sangre",
             "mes": 6,
-            "dia": null,
+            "dia": 12,
             "tipo": "festividad",
             "resumen": "Se celebran combates brutales donde solo los más fuertes sobreviven."
         },
         {
             "nombre": "La Iluminación",
             "mes": 7,
-            "dia": null,
+            "dia": 12,
             "tipo": "festividad",
             "resumen": "Se encienden lámparas en las bibliotecas y se organizan debates filosóficos."
         },
         {
             "nombre": "El Día del Ojo por Ojo",
             "mes": 8,
-            "dia": null,
+            "dia": 12,
             "tipo": "festividad",
             "resumen": "Se permite la venganza como un derecho sagrado durante una jornada."
         },
         {
             "nombre": "El Camino de la Prueba",
             "mes": 9,
-            "dia": null,
+            "dia": 12,
             "tipo": "festividad",
             "resumen": "Quienes buscan redimirse realizan grandes sacrificios personales."
         },
         {
             "nombre": "El Alzamiento de las Cadenas",
             "mes": 10,
-            "dia": null,
+            "dia": 12,
             "tipo": "festividad",
             "resumen": "Se inician revueltas y muchos esclavos intentan escapar."
         },
         {
             "nombre": "El Pacto de Sangre",
             "mes": 11,
-            "dia": null,
+            "dia": 12,
             "tipo": "festividad",
             "resumen": "Se refuerzan los lazos entre clanes y ejércitos con ceremonias de hermandad."
         },
         {
             "nombre": "La Noche de los Lamentos",
             "mes": 12,
-            "dia": null,
+            "dia": 12,
             "tipo": "festividad",
             "resumen": "Un día de duelo y desesperación en el que se recuerda a los caídos."
         },

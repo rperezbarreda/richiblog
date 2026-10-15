@@ -1626,9 +1626,13 @@ function ajustarContenidoMundo(plegable) {
 // =========================================
 // Una tarjeta en la columna de la derecha, entre los mapas y la línea de
 // tiempo: el Ciclo de los Heraldos mes a mes, con flechas para pasar de uno
-// a otro (los doce meses y, detrás, los cuatro días del Fin del Ciclo), los
-// días que tienen algo marcados y, debajo, lo que pasa en el mes o en el
-// día que se pulse. Abajo, el enlace a su página de la wiki.
+// a otro (los doce meses y, detrás, los cuatro días del Fin del Ciclo) y
+// los días que tienen algo resaltados. Lo de cada día no va escrito debajo:
+// sale en un globo al pasar por encima (como los países en el mapamundi),
+// o al llegar con el tabulador, o al pulsarlo (que es lo que hay en el
+// móvil). Pulsado, el globo se queda hasta que se pulsa fuera o Escape, y
+// si lo que hay tiene página, su enlace se puede pulsar. Abajo, el enlace
+// a la entrada del calendario.
 //
 // Lo que se pinta sale de datos/wiki/calendario.json, que se lleva con
 // herramientas/1-publicar/calendario.py (o a mano). Llega por su cuenta,
@@ -1639,7 +1643,7 @@ function ajustarContenidoMundo(plegable) {
 // Como todos los meses tienen 28 días, que son cuatro semanas justas, todos
 // empiezan en Día del Sol: la rejilla es siempre la misma, 7 × 4.
 
-const MUNDO_CALENDARIO = { datos: null, tarjeta: null, mes: 1, dia: null };
+const MUNDO_CALENDARIO = { datos: null, tarjeta: null, globo: null, mes: 1, fijado: null };
 const CALENDARIO_DIAS_MES = 28;
 
 pintarCalendarioMundo();
@@ -1673,7 +1677,8 @@ async function pintarCalendarioMundo() {
 }
 
 // Lo que no tenga forma de calendario se queda fuera: un evento en el mes
-// 14 o en el día 30 no se puede pintar en ningún sitio.
+// 14 o en el día 30 no se puede pintar en ningún sitio, y uno sin día
+// tampoco (no hay número que resaltar).
 function limpiarCalendarioMundo(datos) {
     if (!datos || !Array.isArray(datos.meses) || !datos.meses.length) {
         return null;
@@ -1681,8 +1686,7 @@ function limpiarCalendarioMundo(datos) {
     const texto = (v) => (v === null || v === undefined ? "" : v.toString().trim());
     const meses = datos.meses.map((m) => ({
         nombre: texto(m && m.nombre), icono: texto(m && m.icono), heraldo: texto(m && m.heraldo),
-        estacion: texto(m && m.estacion), empieza: Boolean(m && m.empieza_estacion),
-        ancla: texto(m && m.ancla), costumbres: texto(m && m.costumbres),
+        estacion: texto(m && m.estacion), momento: texto(m && m.momento), ancla: texto(m && m.ancla),
     })).filter((m) => m.nombre);
     const fin = datos.fin && Array.isArray(datos.fin.dias) && datos.fin.dias.length ? {
         nombre: texto(datos.fin.nombre) || "Fin del Ciclo", icono: texto(datos.fin.icono),
@@ -1692,14 +1696,12 @@ function limpiarCalendarioMundo(datos) {
     } : null;
     const total = meses.length + (fin ? 1 : 0);
     const diasDe = (mes) => (mes <= meses.length ? CALENDARIO_DIAS_MES : (fin ? fin.dias.length : 0));
-    const eventos = (Array.isArray(datos.eventos) ? datos.eventos : []).map((e) => {
-        const mes = Number(e && e.mes);
-        const dia = e && e.dia !== null && e.dia !== undefined && e.dia !== "" ? Number(e.dia) : null;
-        return { nombre: texto(e && e.nombre), mes, dia,
-            tipo: texto(e && e.tipo) === "evento" ? "evento" : "festividad",
-            anyo: texto(e && e.anyo), resumen: texto(e && e.resumen), enlace: texto(e && e.enlace) };
-    }).filter((e) => e.nombre && Number.isInteger(e.mes) && e.mes >= 1 && e.mes <= total &&
-        (e.dia === null || (Number.isInteger(e.dia) && e.dia >= 1 && e.dia <= diasDe(e.mes))));
+    const eventos = (Array.isArray(datos.eventos) ? datos.eventos : []).map((e) => ({
+        nombre: texto(e && e.nombre), mes: Number(e && e.mes), dia: Number(e && e.dia),
+        tipo: texto(e && e.tipo) === "evento" ? "evento" : "festividad",
+        anyo: texto(e && e.anyo), resumen: texto(e && e.resumen), enlace: texto(e && e.enlace),
+    })).filter((e) => e.nombre && Number.isInteger(e.mes) && e.mes >= 1 && e.mes <= total &&
+        Number.isInteger(e.dia) && e.dia >= 1 && e.dia <= diasDe(e.mes));
     let hoy = null;
     if (datos.hoy && Number.isInteger(Number(datos.hoy.mes)) && Number.isInteger(Number(datos.hoy.dia))) {
         const mes = Number(datos.hoy.mes);
@@ -1764,24 +1766,24 @@ function tarjetaDeCalendarioMundo(datos) {
     cabeza.appendChild(flecha("Mes siguiente", 1, "›"));
     caja.appendChild(cabeza);
 
-    const rejilla = document.createElement("div");
-    rejilla.className = "mundo-cal-rejilla";
-    rejilla.setAttribute("data-cal-rejilla", "");
-    caja.appendChild(rejilla);
-
-    const panel = document.createElement("div");
-    panel.className = "mundo-cal-panel";
-    panel.setAttribute("data-cal-panel", "");
-    caja.appendChild(panel);
-
     // Las flechas del teclado también pasan de mes, si se está dentro de la
-    // cabecera (no en la rejilla, donde el foco va de día en día).
+    // cabecera.
     cabeza.addEventListener("keydown", (evento) => {
         if (evento.key === "ArrowLeft" || evento.key === "ArrowRight") {
             evento.preventDefault();
             moverCalendarioMundo(evento.key === "ArrowLeft" ? -1 : 1);
         }
     });
+
+    const rejilla = document.createElement("div");
+    rejilla.className = "mundo-cal-rejilla";
+    rejilla.setAttribute("data-cal-rejilla", "");
+    caja.appendChild(rejilla);
+
+    const pie = document.createElement("p");
+    pie.className = "mundo-cal-pie";
+    pie.setAttribute("data-cal-pie", "");
+    caja.appendChild(pie);
 
     const enlace = document.createElement("a");
     enlace.className = "mundo-vista-titulo mundo-cal-titulo";
@@ -1794,6 +1796,38 @@ function tarjetaDeCalendarioMundo(datos) {
     que.textContent = "calendario · " + datos.meses.length + " meses de " + CALENDARIO_DIAS_MES +
         " días" + (datos.fin ? " y " + datos.fin.dias.length + " del " + datos.fin.nombre : "");
     caja.appendChild(que);
+
+    // EL GLOBO, uno para toda la tarjeta. Se mueve al lado del día que toca.
+    const globo = document.createElement("div");
+    globo.className = "mundo-cal-globo";
+    globo.id = "mundo-cal-globo";
+    globo.hidden = true;
+    caja.appendChild(globo);
+    MUNDO_CALENDARIO.globo = globo;
+    // Al salir del globo con el tabulador (sin volver a su día), se va.
+    globo.addEventListener("focusout", (evento) => {
+        const dia = globo.previousElementSibling;
+        if (!globo.contains(evento.relatedTarget) && evento.relatedTarget !== dia) {
+            soltarGloboDelCalendarioMundo();
+        }
+    });
+
+    // Un globo fijado se va al pulsar fuera de él y de su día, o con Escape.
+    document.addEventListener("click", (evento) => {
+        const fijado = MUNDO_CALENDARIO.fijado;
+        if (fijado && !fijado.contains(evento.target) && !globo.contains(evento.target)) {
+            soltarGloboDelCalendarioMundo();
+        }
+    });
+    caja.addEventListener("keydown", (evento) => {
+        if (evento.key === "Escape" && !globo.hidden) {
+            const volver = MUNDO_CALENDARIO.fijado;
+            soltarGloboDelCalendarioMundo();
+            if (volver) {
+                volver.focus();
+            }
+        }
+    });
     return caja;
 }
 
@@ -1804,14 +1838,26 @@ function moverCalendarioMundo(paso) {
     if (!datos) {
         return;
     }
+    soltarGloboDelCalendarioMundo();
     MUNDO_CALENDARIO.mes = ((MUNDO_CALENDARIO.mes - 1 + paso + datos.total) % datos.total) + 1;
-    MUNDO_CALENDARIO.dia = null;
     pintarMesDelCalendarioMundo();
 }
 
 function eventosDelCalendarioMundo(mes, dia) {
     return MUNDO_CALENDARIO.datos.eventos.filter((e) => e.mes === mes &&
         (dia === undefined || e.dia === dia));
+}
+
+// «principio de la primavera», «primavera», «fin de la primavera».
+function estacionDelMesMundo(mes) {
+    if (!mes.estacion) {
+        return "";
+    }
+    const de = mes.estacion === "primavera" ? "de la " : "del ";
+    const icono = (MUNDO_CALENDARIO.datos.estaciones[mes.estacion] || "").toString();
+    const texto = mes.momento === "principio" ? "principio " + de + mes.estacion
+        : (mes.momento === "fin" ? "fin " + de + mes.estacion : mes.estacion);
+    return (icono ? icono + " " : "") + texto;
 }
 
 function pintarMesDelCalendarioMundo() {
@@ -1839,16 +1885,9 @@ function pintarMesDelCalendarioMundo() {
     cabeza.appendChild(nombre);
     const quien = document.createElement("p");
     quien.className = "mundo-cal-heraldo";
-    let linea = esFin ? (datos.fin.dias.length + " días sagrados, de " + mes.heraldo)
-        : ("Regido por " + mes.heraldo);
-    if (!esFin && mes.estacion) {
-        const icono = (datos.estaciones[mes.estacion] || "").toString();
-        const articulo = mes.estacion === "primavera" ? "la " : "el ";
-        linea += " · " + (!mes.empieza ? mes.estacion
-            : (icono ? icono + " " : "") + (numero > 1 && mes.estacion === "invierno" ? "vuelve " : "empieza ") +
-              articulo + mes.estacion);
-    }
-    quien.textContent = linea;
+    const estacion = esFin ? "" : estacionDelMesMundo(mes);
+    quien.textContent = (esFin ? datos.fin.dias.length + " días sagrados, de " + mes.heraldo
+        : "Regido por " + mes.heraldo) + (estacion ? " · " + estacion : "");
     cabeza.appendChild(quien);
     const cuenta = eventosDelCalendarioMundo(numero).length;
     const oculto = document.createElement("span");
@@ -1865,16 +1904,15 @@ function pintarMesDelCalendarioMundo() {
     // Qué quiere decir cada marca, solo si en este mes hay alguna. Para
     // quien no ve la rejilla ya lo dice cada botón con palabras.
     const hayHoy = Boolean(datos.hoy && datos.hoy.mes === numero);
-    const hayDias = eventosDelCalendarioMundo(numero).some((e) => e.dia);
-    if (!esFin && (hayHoy || hayDias)) {
+    if (!esFin && (hayHoy || cuenta)) {
         const leyenda = document.createElement("p");
         leyenda.className = "mundo-cal-leyenda";
         leyenda.setAttribute("aria-hidden", "true");
-        if (hayDias) {
+        if (cuenta) {
             const marca = document.createElement("span");
             marca.className = "mundo-cal-leyenda-punto";
             leyenda.appendChild(marca);
-            leyenda.appendChild(document.createTextNode("tiene algo"));
+            leyenda.appendChild(document.createTextNode("pasa algo (pasa el ratón o púlsalo)"));
         }
         if (hayHoy) {
             const marca = document.createElement("span");
@@ -1885,7 +1923,16 @@ function pintarMesDelCalendarioMundo() {
         rejilla.appendChild(leyenda);
     }
 
-    pintarPanelDelCalendarioMundo();
+    // EL PIE: a su apartado de la entrada.
+    const pie = tarjeta.querySelector("[data-cal-pie]");
+    pie.textContent = "";
+    if (datos.url && mes.ancla && /^[a-z0-9_-]+$/i.test(mes.ancla)) {
+        const mas = document.createElement("a");
+        mas.className = "mundo-cal-mas";
+        mas.href = rutaSeguraMundo(datos.url + "#" + mes.ancla);
+        mas.textContent = esFin ? "leer sobre el Fin del Ciclo" : "leer sobre este mes";
+        pie.appendChild(mas);
+    }
 }
 
 function tablaDelMesMundo(datos, numero, mes) {
@@ -1942,10 +1989,10 @@ function listaDelFinMundo(datos) {
     return lista;
 }
 
-// UN DÍA. Si tiene algo, o es hoy, es un botón que enseña lo suyo debajo;
-// si no, es solo su número (veintiocho botones que no hacen nada serían
-// veintiocho paradas de tabulador para nada). Los del Fin del Ciclo son
-// siempre botones: cada uno tiene su Heraldo que contar.
+// UN DÍA. Si tiene algo, o es hoy, es un botón con su globo; si no, es
+// solo su número (veintiocho botones que no hacen nada serían veintiocho
+// paradas de tabulador para nada). Los del Fin del Ciclo son siempre
+// botones: cada uno tiene su Heraldo que contar.
 function diaDelCalendarioMundo(mes, dia, rotulo, delFin) {
     const datos = MUNDO_CALENDARIO.datos;
     const suyos = eventosDelCalendarioMundo(mes, dia);
@@ -1958,12 +2005,10 @@ function diaDelCalendarioMundo(mes, dia, rotulo, delFin) {
     }
     const boton = document.createElement("button");
     boton.type = "button";
-    boton.className = "mundo-cal-dia es-pulsable" +
-        (suyos.some((e) => e.tipo === "festividad") ? " es-fiesta" : "") +
-        (suyos.some((e) => e.tipo === "evento") ? " es-evento" : "") +
+    boton.className = "mundo-cal-dia es-pulsable" + (suyos.length ? " es-marcado" : "") +
         (esHoy ? " es-hoy" : "");
-    boton.setAttribute("aria-pressed", MUNDO_CALENDARIO.dia === dia ? "true" : "false");
-    boton.setAttribute("data-cal-dia", String(dia));
+    boton.setAttribute("aria-expanded", "false");
+    boton.setAttribute("aria-controls", "mundo-cal-globo");
     const numero = document.createElement("span");
     numero.className = "mundo-cal-numero";
     numero.textContent = rotulo;
@@ -1974,132 +2019,129 @@ function diaDelCalendarioMundo(mes, dia, rotulo, delFin) {
         marca.setAttribute("aria-hidden", "true");
         boton.appendChild(marca);
     }
-    // Lo que se oye: el día y qué tiene, sin tener que pulsarlo.
+    // Lo que se oye: el día y qué tiene, sin tener que abrir el globo.
     const oculto = document.createElement("span");
     oculto.className = "visually-hidden";
     oculto.textContent = (esHoy ? ", hoy" : "") +
         (suyos.length ? ": " + suyos.map((e) => e.nombre).join(", ") : "");
     boton.appendChild(oculto);
-    if (suyos.length) {
-        boton.title = suyos.map((e) => e.nombre).join(" · ");
-    }
+
+    const ensenar = () => {
+        if (!MUNDO_CALENDARIO.fijado) {
+            abrirGloboDelCalendarioMundo(boton, mes, dia, delFin, esHoy);
+        }
+    };
+    const esconder = () => {
+        if (!MUNDO_CALENDARIO.fijado) {
+            soltarGloboDelCalendarioMundo();
+        }
+    };
+    boton.addEventListener("mouseenter", ensenar);
+    boton.addEventListener("focus", ensenar);
+    boton.addEventListener("mouseleave", esconder);
+    boton.addEventListener("blur", (evento) => {
+        // Si el foco se va al enlace de dentro del globo, el globo se queda.
+        if (!MUNDO_CALENDARIO.globo.contains(evento.relatedTarget)) {
+            esconder();
+        }
+    });
+    // PULSARLO lo fija (o lo suelta, si ya lo estaba): en el móvil no hay
+    // ratón que pase por encima, y fijado se puede pulsar su enlace.
     boton.addEventListener("click", () => {
-        MUNDO_CALENDARIO.dia = MUNDO_CALENDARIO.dia === dia ? null : dia;
-        MUNDO_CALENDARIO.tarjeta.querySelectorAll("[data-cal-dia]").forEach((otro) => {
-            otro.setAttribute("aria-pressed",
-                Number(otro.getAttribute("data-cal-dia")) === MUNDO_CALENDARIO.dia ? "true" : "false");
-        });
-        pintarPanelDelCalendarioMundo();
+        if (MUNDO_CALENDARIO.fijado === boton) {
+            soltarGloboDelCalendarioMundo();
+            return;
+        }
+        soltarGloboDelCalendarioMundo();
+        abrirGloboDelCalendarioMundo(boton, mes, dia, delFin, esHoy);
+        MUNDO_CALENDARIO.fijado = boton;
+        boton.setAttribute("aria-expanded", "true");
+        MUNDO_CALENDARIO.globo.classList.add("es-fijado");
     });
     return boton;
 }
 
-// DEBAJO DE LA REJILLA, lo que hay: todo el mes, o solo el día pulsado.
-function pintarPanelDelCalendarioMundo() {
+function abrirGloboDelCalendarioMundo(boton, mes, dia, delFin, esHoy) {
     const datos = MUNDO_CALENDARIO.datos;
-    const panel = MUNDO_CALENDARIO.tarjeta.querySelector("[data-cal-panel]");
-    const numero = MUNDO_CALENDARIO.mes;
-    const dia = MUNDO_CALENDARIO.dia;
-    const esFin = numero > datos.meses.length;
-    const mes = esFin ? datos.fin : datos.meses[numero - 1];
-    const delFin = esFin && dia ? datos.fin.dias[dia - 1] : null;
-    panel.textContent = "";
+    const globo = MUNDO_CALENDARIO.globo;
+    globo.textContent = "";
+    globo.classList.remove("es-fijado");
 
-    const titulo = document.createElement("p");
-    titulo.className = "mundo-cal-panel-titulo";
-    titulo.textContent = delFin ? delFin.nombre
-        : (dia ? "Día " + dia + " · " + mes.nombre : (esFin ? "Los días sagrados" : "Este mes"));
-    panel.appendChild(titulo);
-
+    const cuando = document.createElement("p");
+    cuando.className = "mundo-cal-globo-cuando";
+    cuando.textContent = (delFin ? delFin.nombre : "Día " + dia + " · " + datos.meses[mes - 1].nombre) +
+        (esHoy ? " · hoy" : "");
+    globo.appendChild(cuando);
     if (delFin && delFin.heraldo) {
         const quien = document.createElement("p");
-        quien.className = "mundo-cal-costumbres";
+        quien.className = "mundo-cal-globo-texto";
         quien.textContent = "Dedicado a " + delFin.heraldo + ".";
-        panel.appendChild(quien);
+        globo.appendChild(quien);
     }
+    eventosDelCalendarioMundo(mes, dia).forEach((evento) => {
+        const bloque = document.createElement("div");
+        bloque.className = "mundo-cal-globo-evento";
+        const nombre = document.createElement("p");
+        nombre.className = "mundo-cal-globo-nombre";
+        const icono = document.createElement("span");
+        icono.setAttribute("aria-hidden", "true");
+        icono.textContent = (evento.tipo === "evento" ? "📌" : "🎉") + " ";
+        nombre.appendChild(icono);
+        if (evento.enlace) {
+            const enlace = document.createElement("a");
+            enlace.href = rutaSeguraMundo(evento.enlace);
+            enlace.textContent = evento.nombre;
+            nombre.appendChild(enlace);
+        } else {
+            nombre.appendChild(document.createTextNode(evento.nombre));
+        }
+        bloque.appendChild(nombre);
+        const tipo = document.createElement("p");
+        tipo.className = "mundo-cal-globo-tipo";
+        tipo.textContent = evento.tipo + (evento.anyo ? " · año " + evento.anyo : "");
+        bloque.appendChild(tipo);
+        if (evento.resumen) {
+            const resumen = document.createElement("p");
+            resumen.className = "mundo-cal-globo-texto";
+            resumen.textContent = evento.resumen;
+            bloque.appendChild(resumen);
+        }
+        globo.appendChild(bloque);
+    });
 
-    const suyos = dia ? eventosDelCalendarioMundo(numero, dia)
-        : eventosDelCalendarioMundo(numero).slice().sort((a, b) => (a.dia || 0) - (b.dia || 0));
-    if (suyos.length) {
-        const lista = document.createElement("ul");
-        lista.className = "mundo-cal-eventos";
-        suyos.forEach((evento) => lista.appendChild(eventoDelCalendarioMundo(evento, esFin, Boolean(dia))));
-        panel.appendChild(lista);
-    } else {
-        const nada = document.createElement("p");
-        nada.className = "mundo-cal-costumbres";
-        nada.textContent = dia ? "Nada marcado este día." : "Nada marcado todavía.";
-        panel.appendChild(nada);
-    }
-
-    if (!dia && !esFin && mes.costumbres) {
-        const costumbres = document.createElement("p");
-        costumbres.className = "mundo-cal-costumbres";
-        costumbres.textContent = mes.costumbres;
-        panel.appendChild(costumbres);
-    }
-
-    const pie = document.createElement("p");
-    pie.className = "mundo-cal-pie";
-    if (dia) {
-        const todo = document.createElement("button");
-        todo.type = "button";
-        todo.className = "mundo-cal-todo";
-        todo.textContent = esFin ? "ver los cuatro días" : "ver todo el mes";
-        todo.addEventListener("click", () => {
-            MUNDO_CALENDARIO.dia = null;
-            MUNDO_CALENDARIO.tarjeta.querySelectorAll("[data-cal-dia]")
-                .forEach((otro) => otro.setAttribute("aria-pressed", "false"));
-            pintarPanelDelCalendarioMundo();
-            const pulsado = MUNDO_CALENDARIO.tarjeta.querySelector("[data-cal-dia='" + dia + "']");
-            if (pulsado) {
-                pulsado.focus();
-            }
-        });
-        pie.appendChild(todo);
-    }
-    const ancla = (delFin && delFin.ancla) || mes.ancla;
-    if (datos.url && ancla && /^[a-z0-9_-]+$/i.test(ancla)) {
-        const mas = document.createElement("a");
-        mas.className = "mundo-cal-mas";
-        mas.href = rutaSeguraMundo(datos.url + "#" + ancla);
-        mas.textContent = delFin ? "leer sobre este día" : (esFin ? "leer sobre el Fin del Ciclo" : "leer sobre este mes");
-        pie.appendChild(mas);
-    }
-    panel.appendChild(pie);
+    // Justo detrás del botón en el orden de la página: así, fijado, el
+    // tabulador pasa del día a lo que haya dentro del globo.
+    boton.insertAdjacentElement("afterend", globo);
+    globo.hidden = false;
+    colocarGloboDelCalendarioMundo(boton);
 }
 
-function eventoDelCalendarioMundo(evento, esFin, soloElDia) {
-    const item = document.createElement("li");
-    item.className = "mundo-cal-evento es-" + evento.tipo;
-    const icono = document.createElement("span");
-    icono.className = "mundo-cal-evento-icono";
-    icono.setAttribute("aria-hidden", "true");
-    icono.textContent = evento.tipo === "evento" ? "📌" : "🎉";
-    item.appendChild(icono);
-    const cuerpo = document.createElement("span");
-    cuerpo.className = "mundo-cal-evento-cuerpo";
-    const cuando = document.createElement("span");
-    cuando.className = "mundo-cal-cuando";
-    const fecha = soloElDia ? "" : (evento.dia
-        ? (esFin ? MUNDO_CALENDARIO.datos.fin.dias[evento.dia - 1].nombre : "día " + evento.dia)
-        : "sin día fijo");
-    cuando.textContent = [evento.tipo, fecha, evento.anyo ? "año " + evento.anyo : ""]
-        .filter(Boolean).join(" · ");
-    cuerpo.appendChild(cuando);
-    const nombre = document.createElement(evento.enlace ? "a" : "strong");
-    nombre.className = "mundo-cal-evento-nombre";
-    if (evento.enlace) {
-        nombre.href = rutaSeguraMundo(evento.enlace);
+// Debajo del día, centrado con él pero sin salirse de la tarjeta; si
+// debajo no cabe en la pantalla, encima.
+function colocarGloboDelCalendarioMundo(boton) {
+    const globo = MUNDO_CALENDARIO.globo;
+    const tarjeta = MUNDO_CALENDARIO.tarjeta.getBoundingClientRect();
+    const dia = boton.getBoundingClientRect();
+    const suyo = globo.getBoundingClientRect();
+    let izquierda = dia.left - tarjeta.left + dia.width / 2 - suyo.width / 2;
+    izquierda = Math.max(6, Math.min(izquierda, tarjeta.width - suyo.width - 6));
+    let arriba = dia.bottom - tarjeta.top + 6;
+    if (dia.bottom + 6 + suyo.height > window.innerHeight && dia.top - suyo.height - 6 > 0) {
+        arriba = dia.top - tarjeta.top - suyo.height - 6;
     }
-    nombre.textContent = evento.nombre;
-    cuerpo.appendChild(nombre);
-    if (evento.resumen) {
-        const resumen = document.createElement("span");
-        resumen.className = "mundo-cal-resumen";
-        resumen.textContent = evento.resumen;
-        cuerpo.appendChild(resumen);
+    globo.style.left = Math.round(izquierda) + "px";
+    globo.style.top = Math.round(arriba) + "px";
+}
+
+function soltarGloboDelCalendarioMundo() {
+    const globo = MUNDO_CALENDARIO.globo;
+    if (!globo) {
+        return;
     }
-    item.appendChild(cuerpo);
-    return item;
+    if (MUNDO_CALENDARIO.fijado) {
+        MUNDO_CALENDARIO.fijado.setAttribute("aria-expanded", "false");
+        MUNDO_CALENDARIO.fijado = null;
+    }
+    globo.hidden = true;
+    globo.classList.remove("es-fijado");
 }

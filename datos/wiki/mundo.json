@@ -2319,10 +2319,13 @@
         "url": "/web/wiki/calendario/el_ciclo_de_los_heraldos.html",
         "carpeta": "Calendario",
         "etiquetas": [
+            "Cosmología",
             "Calendario"
         ],
-        "grupo": "historia",
-        "sub": [],
+        "grupo": "cosmología",
+        "sub": [
+            "Calendario"
+        ],
         "que": "El calendario de Cralëa",
         "resumen": "El mundo sigue un calendario de 12 meses de 28 días, cada uno asociado a una virtud o un concepto vinculado a los Heraldos de la Virtud y la Ruina. Al final del año hay cuatro días sagrados dedicados a la Mesa del Ord…",
         "region": "",
