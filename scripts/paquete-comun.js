@@ -108,8 +108,19 @@ function initializeMobileToggle() {
             el.inert = isInert;
         });
     };
+    const movil = window.matchMedia("(max-width: 860px)");
+    const ajustarCajon = () => {
+        sidebar.inert = movil.matches && !sidebar.classList.contains("open");
+    };
+    ajustarCajon();
+    if (typeof movil.addEventListener === "function") {
+        movil.addEventListener("change", ajustarCajon);
+    } else if (typeof movil.addListener === "function") {
+        movil.addListener(ajustarCajon);
+    }
     const openSidebar = () => {
         sidebar.classList.add("open");
+        ajustarCajon();
         backdrop.hidden = false;
         toggle.setAttribute("aria-expanded", "true");
         setBackgroundInert(true);
@@ -120,6 +131,7 @@ function initializeMobileToggle() {
     };
     const closeSidebar = () => {
         sidebar.classList.remove("open");
+        ajustarCajon();
         backdrop.hidden = true;
         toggle.setAttribute("aria-expanded", "false");
         setBackgroundInert(false);

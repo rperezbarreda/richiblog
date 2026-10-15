@@ -71,7 +71,7 @@
     <!-- ==== fin del CSS ==== -->
     <script src="/ligero/scripts/cargador-scripts.js?v=2f4f6d8d"></script>
     <!-- ==== JS ==== -->
-    <script defer src="/scripts/paquete-comun.js?v=6f05db8f"></script>
+    <script defer src="/scripts/paquete-comun.js?v=a305fb20"></script>
     <script defer src="/ligero/scripts/componentes/buscador.js?v=4107f902"></script>
     <script defer src="/ligero/scripts/componentes/ventana-modal.js?v=427a4c21"></script>
     <script defer src="/ligero/scripts/paginas/mundo.js?v=a2365420"></script>
@@ -122,6 +122,18 @@
 
             </div>
 
+            <!-- EN EL ORDEN EN QUE SE LEE, que es el del tabulador: la
+                 cabecera, los botones de las secciones, lo destacado, las
+                 regiones, los últimos cambios y, al final, la columna de
+                 la derecha. Dónde se pinta cada cosa lo dicen las áreas de
+                 la rejilla (estilos/paginas/mundo.css), no este orden. -->
+            <div class="mundo-indice" data-mundo-indice data-mundo-datos="/datos/wiki/mundo.json"
+                 data-mundo-categorias="/datos/wiki/mundo-categorias.json"
+                 data-mundo-portada="/datos/wiki/mundo-portada.json"
+                 data-mundo-calendario="/datos/wiki/calendario.json">
+                <p class="entries-loading">Cargando la wiki…</p>
+            </div>
+
             <div class="mundo-destacado" role="region" aria-label="Destacado" data-mundo-destacado hidden></div>
 
             <div class="mundo-regiones" role="region" data-mundo-regiones
@@ -135,13 +147,6 @@
             </div>
 
             <aside class="mundo-vistas" role="region" data-mundo-vistas aria-label="Mapamundi, calendario y línea de tiempo" hidden></aside>
-
-            <div class="mundo-indice" data-mundo-indice data-mundo-datos="/datos/wiki/mundo.json"
-                 data-mundo-categorias="/datos/wiki/mundo-categorias.json"
-                 data-mundo-portada="/datos/wiki/mundo-portada.json"
-                 data-mundo-calendario="/datos/wiki/calendario.json">
-                <p class="entries-loading">Cargando la wiki…</p>
-            </div>
 
             <a class="mundo-volver mundo-volver-abajo" href="/index.html">← volver al inicio</a>
         </section>
