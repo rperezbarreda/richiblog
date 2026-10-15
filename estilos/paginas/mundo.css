@@ -2045,3 +2045,300 @@ html:not(.js) .mundo-spoiler {
     font-size: 0.875rem;
     line-height: 1.45;
 }
+
+/* EL CALENDARIO DE LA PORTADA (lo pinta tarjetaDeCalendarioMundo, en
+   scripts/paginas/mundo.js, con datos/wiki/calendario.json). Va en la
+   columna de la derecha, entre los mapas y la línea de tiempo. Como la
+   línea, no es un enlace entero: dentro hay botones y enlaces, así que la
+   tarjeta no se ilumina entera; se ilumina lo que se pulsa. */
+.mundo-vista-calendario:hover {
+    border-color: var(--border);
+    background: none;
+}
+
+.mundo-cal-cabeza {
+    display: flex;
+    align-items: flex-start;
+    gap: 6px;
+}
+
+.mundo-cal-flecha {
+    flex: 0 0 auto;
+    width: 2rem;
+    height: 2rem;
+    padding: 0;
+    border: 2px solid var(--yellow);
+    background: transparent;
+    color: var(--yellow);
+    font: inherit;
+    font-size: 1.25rem;
+    line-height: 1;
+    cursor: pointer;
+}
+
+.mundo-cal-flecha:hover,
+.mundo-cal-flecha:focus-visible {
+    background: var(--yellow);
+    color: var(--yellow-contrast);
+}
+
+.mundo-cal-mes {
+    flex: 1 1 auto;
+    min-width: 0;
+    text-align: center;
+}
+
+.mundo-cal-nombre {
+    margin: 0;
+    color: var(--yellow);
+    font-weight: 700;
+    line-height: 1.3;
+}
+
+.mundo-cal-heraldo {
+    margin: 2px 0 0;
+    color: var(--muted);
+    font-family: var(--fuente-mono);
+    font-size: 0.75rem;
+    line-height: 1.35;
+}
+
+.mundo-cal-rejilla {
+    margin-top: 6px;
+}
+
+.mundo-cal-tabla {
+    width: 100%;
+    border-collapse: collapse;
+    table-layout: fixed;
+}
+
+.mundo-cal-tabla th {
+    padding: 2px 0 4px;
+    border-bottom: 1px solid var(--border);
+    font-size: 0.875rem;
+    font-weight: 400;
+    text-align: center;
+    cursor: help;
+}
+
+.mundo-cal-tabla td {
+    padding: 2px;
+    text-align: center;
+}
+
+.mundo-cal-dia {
+    display: block;
+    width: 100%;
+    min-height: 1.9rem;
+    padding: 4px 0;
+    color: var(--muted);
+    font-family: var(--fuente-mono);
+    font-size: 0.8125rem;
+    line-height: 1.4;
+}
+
+.mundo-cal-dia.es-pulsable {
+    position: relative;
+    border: 1px solid var(--border);
+    background: var(--purple-lighter);
+    color: var(--white);
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.mundo-cal-dia.es-fiesta,
+.mundo-cal-dia.es-evento {
+    border-color: var(--yellow);
+    color: var(--yellow);
+}
+
+/* Hoy, con el recuadro relleno; lo que tiene algo, con un punto debajo. */
+.mundo-cal-dia.es-hoy {
+    border-width: 2px;
+    border-color: var(--yellow);
+}
+
+.mundo-cal-marca {
+    position: absolute;
+    left: 50%;
+    bottom: 2px;
+    width: 5px;
+    height: 5px;
+    margin-left: -2px;
+    border-radius: 50%;
+    background: currentColor;
+}
+
+.mundo-cal-dia.es-pulsable:hover,
+.mundo-cal-dia.es-pulsable:focus-visible,
+.mundo-cal-dia.es-pulsable[aria-pressed="true"] {
+    background: var(--yellow);
+    border-color: var(--yellow);
+    color: var(--yellow-contrast);
+}
+
+.mundo-cal-dia.es-pulsable:focus-visible {
+    outline: 2px solid var(--yellow);
+    outline-offset: 2px;
+}
+
+/* Los cuatro días del Fin del Ciclo: tienen nombre, no número. */
+.mundo-cal-fin {
+    display: grid;
+    gap: 4px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.mundo-cal-fin .mundo-cal-dia {
+    padding: 6px 10px;
+    font-family: inherit;
+    font-size: 0.875rem;
+    text-align: left;
+}
+
+.mundo-cal-fin .mundo-cal-marca {
+    left: auto;
+    right: 10px;
+    bottom: 50%;
+    margin: 0 0 -2px;
+}
+
+.mundo-cal-panel {
+    margin-top: 8px;
+    padding-top: 8px;
+    border-top: 1px solid var(--border);
+}
+
+.mundo-cal-panel-titulo {
+    margin: 0 0 6px;
+    color: var(--yellow);
+    font-family: var(--fuente-mono);
+    font-size: 0.8125rem;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+}
+
+.mundo-cal-eventos {
+    display: grid;
+    gap: 8px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.mundo-cal-evento {
+    display: flex;
+    gap: 8px;
+    align-items: flex-start;
+}
+
+.mundo-cal-evento-icono {
+    flex: 0 0 auto;
+    line-height: 1.4;
+}
+
+.mundo-cal-evento-cuerpo {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    gap: 1px;
+}
+
+.mundo-cal-cuando {
+    color: var(--muted);
+    font-family: var(--fuente-mono);
+    font-size: 0.75rem;
+}
+
+.mundo-cal-evento-nombre {
+    color: var(--white);
+    font-weight: 700;
+    line-height: 1.3;
+}
+
+a.mundo-cal-evento-nombre {
+    color: var(--yellow);
+    text-underline-offset: 3px;
+}
+
+.mundo-cal-resumen,
+.mundo-cal-costumbres {
+    color: var(--white);
+    font-size: 0.875rem;
+    line-height: 1.45;
+}
+
+.mundo-cal-costumbres {
+    margin: 8px 0 0;
+}
+
+.mundo-cal-pie {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 12px;
+    align-items: center;
+    margin: 10px 0 0;
+    font-size: 0.875rem;
+}
+
+.mundo-cal-todo {
+    padding: 2px 8px;
+    border: 2px solid var(--yellow);
+    background: transparent;
+    color: var(--yellow);
+    font: inherit;
+    cursor: pointer;
+}
+
+.mundo-cal-todo:hover,
+.mundo-cal-todo:focus-visible {
+    background: var(--yellow);
+    color: var(--yellow-contrast);
+}
+
+.mundo-cal-mas {
+    color: var(--yellow);
+    text-underline-offset: 3px;
+}
+
+.mundo-cal-titulo {
+    margin-top: 6px;
+    text-underline-offset: 3px;
+}
+
+.mundo-cal-leyenda {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 4px 6px;
+    margin: 6px 0 0;
+    color: var(--muted);
+    font-family: var(--fuente-mono);
+    font-size: 0.75rem;
+}
+
+.mundo-cal-leyenda-punto,
+.mundo-cal-leyenda-hoy {
+    display: inline-block;
+    flex: 0 0 auto;
+}
+
+.mundo-cal-leyenda-punto {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--yellow);
+}
+
+.mundo-cal-leyenda-hoy {
+    width: 12px;
+    height: 12px;
+    border: 2px solid var(--yellow);
+}
+
+.mundo-cal-leyenda-punto + .mundo-cal-leyenda-hoy {
+    margin-left: 12px;
+}

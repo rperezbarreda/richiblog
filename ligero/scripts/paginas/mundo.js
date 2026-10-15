@@ -313,22 +313,33 @@ function pintarLosMapasDelMundo(fichas) {
     }
     const mapas = fichas.filter((f) => (f.vista || "").toString().trim() ||
         (f.mini && Array.isArray(f.mini.cosas)));
-    caja.hidden = !mapas.length;
-    if (!mapas.length) {
-        return;
-    }
+    caja.hidden = !mapas.length && !MUNDO_CALENDARIO.tarjeta;
     caja.querySelectorAll(".mundo-vista").forEach((vieja) => vieja.remove());
     mapas.forEach((ficha) => caja.appendChild(
         ficha.mini ? tarjetaDeLineaMundo(ficha) : tarjetaDeMapaMundo(ficha)));
+    colocarCalendarioMundo();
     caja.querySelectorAll(".mundo-mini-lista").forEach(colocarLineaEnPequenoMundo);
-    const titulo = caja.querySelector(".mundo-vistas-titulo");
-    if (titulo) {
-        const hayLinea = mapas.some((f) => f.linea === true);
-        const hayMapas = mapas.some((f) => f.linea !== true);
-        titulo.textContent = hayLinea
-            ? (hayMapas ? "mapas y línea de tiempo" : "la línea de tiempo")
-            : "los mapas";
+    ponerTituloDeVistasMundo();
+}
+function ponerTituloDeVistasMundo() {
+    const caja = document.querySelector("[data-mundo-vistas]");
+    const titulo = caja ? caja.querySelector(".mundo-vistas-titulo") : null;
+    if (!titulo) {
+        return;
     }
+    const partes = [];
+    if (caja.querySelector(".mundo-vista-mapa")) {
+        partes.push("mapas");
+    }
+    if (caja.querySelector(".mundo-vista-calendario")) {
+        partes.push("calendario");
+    }
+    if (caja.querySelector(".mundo-vista-linea")) {
+        partes.push("línea de tiempo");
+    }
+    const solo = { "mapas": "los mapas", "calendario": "el calendario", "línea de tiempo": "la línea de tiempo" };
+    titulo.textContent = partes.length < 2 ? solo[partes[0] || "mapas"]
+        : partes.slice(0, -1).join(", ") + " y " + partes[partes.length - 1];
 }
 const MINI_PX_POR_REM = 6;
 const MINI_ARRIBA = 14;
@@ -505,7 +516,7 @@ function colocarLineaEnPequenoMundo(lista) {
 }
 function tarjetaDeMapaMundo(ficha) {
     const enlace = document.createElement("a");
-    enlace.className = "mundo-vista";
+    enlace.className = "mundo-vista mundo-vista-mapa";
     enlace.href = rutaSeguraMundo(ficha.url);
     const marco = document.createElement("span");
     marco.className = "mundo-vista-marco";
@@ -1159,4 +1170,420 @@ function ajustarContenidoMundo(plegable) {
     ajustar();
     document.addEventListener("scroll", ajustar, { capture: true, passive: true });
     window.addEventListener("resize", ajustar);
+}
+const MUNDO_CALENDARIO = { datos: null, tarjeta: null, mes: 1, dia: null };
+const CALENDARIO_DIAS_MES = 28;
+pintarCalendarioMundo();
+async function pintarCalendarioMundo() {
+    const caja = document.querySelector("[data-mundo-indice]");
+    const fuente = caja ? (caja.getAttribute("data-mundo-calendario") || "").trim() : "";
+    if (!fuente || !document.querySelector("[data-mundo-vistas]") ||
+        typeof window.pedirDatos !== "function") {
+        return;
+    }
+    let datos = null;
+    try {
+        const respuesta = await window.pedirDatos(fuente);
+        if (!respuesta.ok) {
+            return;
+        }
+        datos = await respuesta.json();
+    } catch (error) {
+        return;
+    }
+    const limpios = limpiarCalendarioMundo(datos);
+    if (!limpios) {
+        return;
+    }
+    MUNDO_CALENDARIO.datos = limpios;
+    MUNDO_CALENDARIO.mes = limpios.hoy ? limpios.hoy.mes : 1;
+    MUNDO_CALENDARIO.tarjeta = tarjetaDeCalendarioMundo(limpios);
+    pintarMesDelCalendarioMundo();
+    colocarCalendarioMundo();
+}
+function limpiarCalendarioMundo(datos) {
+    if (!datos || !Array.isArray(datos.meses) || !datos.meses.length) {
+        return null;
+    }
+    const texto = (v) => (v === null || v === undefined ? "" : v.toString().trim());
+    const meses = datos.meses.map((m) => ({
+        nombre: texto(m && m.nombre), icono: texto(m && m.icono), heraldo: texto(m && m.heraldo),
+        estacion: texto(m && m.estacion), empieza: Boolean(m && m.empieza_estacion),
+        ancla: texto(m && m.ancla), costumbres: texto(m && m.costumbres),
+    })).filter((m) => m.nombre);
+    const fin = datos.fin && Array.isArray(datos.fin.dias) && datos.fin.dias.length ? {
+        nombre: texto(datos.fin.nombre) || "Fin del Ciclo", icono: texto(datos.fin.icono),
+        heraldo: texto(datos.fin.heraldo), ancla: texto(datos.fin.ancla),
+        dias: datos.fin.dias.map((d) => ({ nombre: texto(d && d.nombre), icono: texto(d && d.icono),
+            heraldo: texto(d && d.heraldo), ancla: texto(d && d.ancla) })).filter((d) => d.nombre),
+    } : null;
+    const total = meses.length + (fin ? 1 : 0);
+    const diasDe = (mes) => (mes <= meses.length ? CALENDARIO_DIAS_MES : (fin ? fin.dias.length : 0));
+    const eventos = (Array.isArray(datos.eventos) ? datos.eventos : []).map((e) => {
+        const mes = Number(e && e.mes);
+        const dia = e && e.dia !== null && e.dia !== undefined && e.dia !== "" ? Number(e.dia) : null;
+        return { nombre: texto(e && e.nombre), mes, dia,
+            tipo: texto(e && e.tipo) === "evento" ? "evento" : "festividad",
+            anyo: texto(e && e.anyo), resumen: texto(e && e.resumen), enlace: texto(e && e.enlace) };
+    }).filter((e) => e.nombre && Number.isInteger(e.mes) && e.mes >= 1 && e.mes <= total &&
+        (e.dia === null || (Number.isInteger(e.dia) && e.dia >= 1 && e.dia <= diasDe(e.mes))));
+    let hoy = null;
+    if (datos.hoy && Number.isInteger(Number(datos.hoy.mes)) && Number.isInteger(Number(datos.hoy.dia))) {
+        const mes = Number(datos.hoy.mes);
+        const dia = Number(datos.hoy.dia);
+        if (mes >= 1 && mes <= total && dia >= 1 && dia <= diasDe(mes)) {
+            hoy = { mes, dia };
+        }
+    }
+    const semana = (Array.isArray(datos.semana) ? datos.semana : [])
+        .map((d) => ({ nombre: texto(d && d.nombre), icono: texto(d && d.icono),
+            titulo: texto(d && d.titulo), representa: texto(d && d.representa) }))
+        .filter((d) => d.nombre);
+    const estaciones = datos.estaciones && typeof datos.estaciones === "object" ? datos.estaciones : {};
+    return { nombre: texto(datos.nombre) || "El calendario", url: texto(datos.url),
+        meses, fin, total, semana: semana.length === 7 ? semana : null, estaciones, eventos, hoy };
+}
+function colocarCalendarioMundo() {
+    const columna = document.querySelector("[data-mundo-vistas]");
+    const tarjeta = MUNDO_CALENDARIO.tarjeta;
+    if (!columna || !tarjeta) {
+        return;
+    }
+    const linea = columna.querySelector(".mundo-vista-linea");
+    if (linea) {
+        columna.insertBefore(tarjeta, linea);
+    } else {
+        columna.appendChild(tarjeta);
+    }
+    columna.hidden = false;
+    ponerTituloDeVistasMundo();
+}
+function tarjetaDeCalendarioMundo(datos) {
+    const caja = document.createElement("div");
+    caja.className = "mundo-vista mundo-vista-calendario";
+    caja.setAttribute("role", "group");
+    caja.setAttribute("aria-label", "Calendario: " + datos.nombre);
+    const cabeza = document.createElement("div");
+    cabeza.className = "mundo-cal-cabeza";
+    const flecha = (texto, paso, simbolo) => {
+        const boton = document.createElement("button");
+        boton.type = "button";
+        boton.className = "mundo-cal-flecha";
+        boton.setAttribute("aria-label", texto);
+        boton.title = texto;
+        boton.textContent = simbolo;
+        boton.addEventListener("click", () => moverCalendarioMundo(paso));
+        return boton;
+    };
+    cabeza.appendChild(flecha("Mes anterior", -1, "‹"));
+    const mes = document.createElement("div");
+    mes.className = "mundo-cal-mes";
+    mes.setAttribute("aria-live", "polite");
+    mes.setAttribute("data-cal-mes", "");
+    cabeza.appendChild(mes);
+    cabeza.appendChild(flecha("Mes siguiente", 1, "›"));
+    caja.appendChild(cabeza);
+    const rejilla = document.createElement("div");
+    rejilla.className = "mundo-cal-rejilla";
+    rejilla.setAttribute("data-cal-rejilla", "");
+    caja.appendChild(rejilla);
+    const panel = document.createElement("div");
+    panel.className = "mundo-cal-panel";
+    panel.setAttribute("data-cal-panel", "");
+    caja.appendChild(panel);
+    cabeza.addEventListener("keydown", (evento) => {
+        if (evento.key === "ArrowLeft" || evento.key === "ArrowRight") {
+            evento.preventDefault();
+            moverCalendarioMundo(evento.key === "ArrowLeft" ? -1 : 1);
+        }
+    });
+    const enlace = document.createElement("a");
+    enlace.className = "mundo-vista-titulo mundo-cal-titulo";
+    enlace.href = rutaSeguraMundo(datos.url);
+    enlace.textContent = datos.nombre;
+    caja.appendChild(enlace);
+    const que = document.createElement("span");
+    que.className = "mundo-vista-que";
+    que.textContent = "calendario · " + datos.meses.length + " meses de " + CALENDARIO_DIAS_MES +
+        " días" + (datos.fin ? " y " + datos.fin.dias.length + " del " + datos.fin.nombre : "");
+    caja.appendChild(que);
+    return caja;
+}
+function moverCalendarioMundo(paso) {
+    const datos = MUNDO_CALENDARIO.datos;
+    if (!datos) {
+        return;
+    }
+    MUNDO_CALENDARIO.mes = ((MUNDO_CALENDARIO.mes - 1 + paso + datos.total) % datos.total) + 1;
+    MUNDO_CALENDARIO.dia = null;
+    pintarMesDelCalendarioMundo();
+}
+function eventosDelCalendarioMundo(mes, dia) {
+    return MUNDO_CALENDARIO.datos.eventos.filter((e) => e.mes === mes &&
+        (dia === undefined || e.dia === dia));
+}
+function pintarMesDelCalendarioMundo() {
+    const datos = MUNDO_CALENDARIO.datos;
+    const tarjeta = MUNDO_CALENDARIO.tarjeta;
+    if (!datos || !tarjeta) {
+        return;
+    }
+    const numero = MUNDO_CALENDARIO.mes;
+    const esFin = numero > datos.meses.length;
+    const mes = esFin ? datos.fin : datos.meses[numero - 1];
+    const cabeza = tarjeta.querySelector("[data-cal-mes]");
+    cabeza.textContent = "";
+    const nombre = document.createElement("p");
+    nombre.className = "mundo-cal-nombre";
+    if (mes.icono) {
+        const icono = document.createElement("span");
+        icono.setAttribute("aria-hidden", "true");
+        icono.textContent = mes.icono + " ";
+        nombre.appendChild(icono);
+    }
+    nombre.appendChild(document.createTextNode(mes.nombre));
+    cabeza.appendChild(nombre);
+    const quien = document.createElement("p");
+    quien.className = "mundo-cal-heraldo";
+    let linea = esFin ? (datos.fin.dias.length + " días sagrados, de " + mes.heraldo)
+        : ("Regido por " + mes.heraldo);
+    if (!esFin && mes.estacion) {
+        const icono = (datos.estaciones[mes.estacion] || "").toString();
+        const articulo = mes.estacion === "primavera" ? "la " : "el ";
+        linea += " · " + (!mes.empieza ? mes.estacion
+            : (icono ? icono + " " : "") + (numero > 1 && mes.estacion === "invierno" ? "vuelve " : "empieza ") +
+              articulo + mes.estacion);
+    }
+    quien.textContent = linea;
+    cabeza.appendChild(quien);
+    const cuenta = eventosDelCalendarioMundo(numero).length;
+    const oculto = document.createElement("span");
+    oculto.className = "visually-hidden";
+    oculto.textContent = (esFin ? "" : "Mes " + numero + " de " + datos.meses.length + ". ") +
+        (cuenta === 0 ? "Nada marcado." : (cuenta === 1 ? "Una cosa marcada." : cuenta + " cosas marcadas."));
+    cabeza.appendChild(oculto);
+    const rejilla = tarjeta.querySelector("[data-cal-rejilla]");
+    rejilla.textContent = "";
+    rejilla.appendChild(esFin ? listaDelFinMundo(datos) : tablaDelMesMundo(datos, numero, mes));
+    const hayHoy = Boolean(datos.hoy && datos.hoy.mes === numero);
+    const hayDias = eventosDelCalendarioMundo(numero).some((e) => e.dia);
+    if (!esFin && (hayHoy || hayDias)) {
+        const leyenda = document.createElement("p");
+        leyenda.className = "mundo-cal-leyenda";
+        leyenda.setAttribute("aria-hidden", "true");
+        if (hayDias) {
+            const marca = document.createElement("span");
+            marca.className = "mundo-cal-leyenda-punto";
+            leyenda.appendChild(marca);
+            leyenda.appendChild(document.createTextNode("tiene algo"));
+        }
+        if (hayHoy) {
+            const marca = document.createElement("span");
+            marca.className = "mundo-cal-leyenda-hoy";
+            leyenda.appendChild(marca);
+            leyenda.appendChild(document.createTextNode("hoy"));
+        }
+        rejilla.appendChild(leyenda);
+    }
+    pintarPanelDelCalendarioMundo();
+}
+function tablaDelMesMundo(datos, numero, mes) {
+    const tabla = document.createElement("table");
+    tabla.className = "mundo-cal-tabla";
+    const titulo = document.createElement("caption");
+    titulo.className = "visually-hidden";
+    titulo.textContent = mes.nombre;
+    tabla.appendChild(titulo);
+    if (datos.semana) {
+        const cabeza = document.createElement("thead");
+        const fila = document.createElement("tr");
+        datos.semana.forEach((dia) => {
+            const celda = document.createElement("th");
+            celda.scope = "col";
+            celda.title = (dia.titulo || dia.nombre) + (dia.representa ? ": " + dia.representa : "");
+            const icono = document.createElement("span");
+            icono.setAttribute("aria-hidden", "true");
+            icono.textContent = dia.icono || dia.nombre.charAt(0);
+            celda.appendChild(icono);
+            const nombre = document.createElement("span");
+            nombre.className = "visually-hidden";
+            nombre.textContent = dia.titulo || dia.nombre;
+            celda.appendChild(nombre);
+            fila.appendChild(celda);
+        });
+        cabeza.appendChild(fila);
+        tabla.appendChild(cabeza);
+    }
+    const cuerpo = document.createElement("tbody");
+    for (let semana = 0; semana < CALENDARIO_DIAS_MES / 7; semana++) {
+        const fila = document.createElement("tr");
+        for (let d = 1; d <= 7; d++) {
+            const dia = semana * 7 + d;
+            const celda = document.createElement("td");
+            celda.appendChild(diaDelCalendarioMundo(numero, dia, String(dia), null));
+            fila.appendChild(celda);
+        }
+        cuerpo.appendChild(fila);
+    }
+    tabla.appendChild(cuerpo);
+    return tabla;
+}
+function listaDelFinMundo(datos) {
+    const lista = document.createElement("ol");
+    lista.className = "mundo-cal-fin";
+    datos.fin.dias.forEach((dia, i) => {
+        const item = document.createElement("li");
+        item.appendChild(diaDelCalendarioMundo(datos.total, i + 1,
+            (dia.icono ? dia.icono + " " : "") + dia.nombre, dia));
+        lista.appendChild(item);
+    });
+    return lista;
+}
+function diaDelCalendarioMundo(mes, dia, rotulo, delFin) {
+    const datos = MUNDO_CALENDARIO.datos;
+    const suyos = eventosDelCalendarioMundo(mes, dia);
+    const esHoy = Boolean(datos.hoy && datos.hoy.mes === mes && datos.hoy.dia === dia);
+    if (!suyos.length && !esHoy && !delFin) {
+        const numero = document.createElement("span");
+        numero.className = "mundo-cal-dia";
+        numero.textContent = rotulo;
+        return numero;
+    }
+    const boton = document.createElement("button");
+    boton.type = "button";
+    boton.className = "mundo-cal-dia es-pulsable" +
+        (suyos.some((e) => e.tipo === "festividad") ? " es-fiesta" : "") +
+        (suyos.some((e) => e.tipo === "evento") ? " es-evento" : "") +
+        (esHoy ? " es-hoy" : "");
+    boton.setAttribute("aria-pressed", MUNDO_CALENDARIO.dia === dia ? "true" : "false");
+    boton.setAttribute("data-cal-dia", String(dia));
+    const numero = document.createElement("span");
+    numero.className = "mundo-cal-numero";
+    numero.textContent = rotulo;
+    boton.appendChild(numero);
+    if (suyos.length) {
+        const marca = document.createElement("span");
+        marca.className = "mundo-cal-marca";
+        marca.setAttribute("aria-hidden", "true");
+        boton.appendChild(marca);
+    }
+    const oculto = document.createElement("span");
+    oculto.className = "visually-hidden";
+    oculto.textContent = (esHoy ? ", hoy" : "") +
+        (suyos.length ? ": " + suyos.map((e) => e.nombre).join(", ") : "");
+    boton.appendChild(oculto);
+    if (suyos.length) {
+        boton.title = suyos.map((e) => e.nombre).join(" · ");
+    }
+    boton.addEventListener("click", () => {
+        MUNDO_CALENDARIO.dia = MUNDO_CALENDARIO.dia === dia ? null : dia;
+        MUNDO_CALENDARIO.tarjeta.querySelectorAll("[data-cal-dia]").forEach((otro) => {
+            otro.setAttribute("aria-pressed",
+                Number(otro.getAttribute("data-cal-dia")) === MUNDO_CALENDARIO.dia ? "true" : "false");
+        });
+        pintarPanelDelCalendarioMundo();
+    });
+    return boton;
+}
+function pintarPanelDelCalendarioMundo() {
+    const datos = MUNDO_CALENDARIO.datos;
+    const panel = MUNDO_CALENDARIO.tarjeta.querySelector("[data-cal-panel]");
+    const numero = MUNDO_CALENDARIO.mes;
+    const dia = MUNDO_CALENDARIO.dia;
+    const esFin = numero > datos.meses.length;
+    const mes = esFin ? datos.fin : datos.meses[numero - 1];
+    const delFin = esFin && dia ? datos.fin.dias[dia - 1] : null;
+    panel.textContent = "";
+    const titulo = document.createElement("p");
+    titulo.className = "mundo-cal-panel-titulo";
+    titulo.textContent = delFin ? delFin.nombre
+        : (dia ? "Día " + dia + " · " + mes.nombre : (esFin ? "Los días sagrados" : "Este mes"));
+    panel.appendChild(titulo);
+    if (delFin && delFin.heraldo) {
+        const quien = document.createElement("p");
+        quien.className = "mundo-cal-costumbres";
+        quien.textContent = "Dedicado a " + delFin.heraldo + ".";
+        panel.appendChild(quien);
+    }
+    const suyos = dia ? eventosDelCalendarioMundo(numero, dia)
+        : eventosDelCalendarioMundo(numero).slice().sort((a, b) => (a.dia || 0) - (b.dia || 0));
+    if (suyos.length) {
+        const lista = document.createElement("ul");
+        lista.className = "mundo-cal-eventos";
+        suyos.forEach((evento) => lista.appendChild(eventoDelCalendarioMundo(evento, esFin, Boolean(dia))));
+        panel.appendChild(lista);
+    } else {
+        const nada = document.createElement("p");
+        nada.className = "mundo-cal-costumbres";
+        nada.textContent = dia ? "Nada marcado este día." : "Nada marcado todavía.";
+        panel.appendChild(nada);
+    }
+    if (!dia && !esFin && mes.costumbres) {
+        const costumbres = document.createElement("p");
+        costumbres.className = "mundo-cal-costumbres";
+        costumbres.textContent = mes.costumbres;
+        panel.appendChild(costumbres);
+    }
+    const pie = document.createElement("p");
+    pie.className = "mundo-cal-pie";
+    if (dia) {
+        const todo = document.createElement("button");
+        todo.type = "button";
+        todo.className = "mundo-cal-todo";
+        todo.textContent = esFin ? "ver los cuatro días" : "ver todo el mes";
+        todo.addEventListener("click", () => {
+            MUNDO_CALENDARIO.dia = null;
+            MUNDO_CALENDARIO.tarjeta.querySelectorAll("[data-cal-dia]")
+                .forEach((otro) => otro.setAttribute("aria-pressed", "false"));
+            pintarPanelDelCalendarioMundo();
+            const pulsado = MUNDO_CALENDARIO.tarjeta.querySelector("[data-cal-dia='" + dia + "']");
+            if (pulsado) {
+                pulsado.focus();
+            }
+        });
+        pie.appendChild(todo);
+    }
+    const ancla = (delFin && delFin.ancla) || mes.ancla;
+    if (datos.url && ancla && /^[a-z0-9_-]+$/i.test(ancla)) {
+        const mas = document.createElement("a");
+        mas.className = "mundo-cal-mas";
+        mas.href = rutaSeguraMundo(datos.url + "#" + ancla);
+        mas.textContent = delFin ? "leer sobre este día" : (esFin ? "leer sobre el Fin del Ciclo" : "leer sobre este mes");
+        pie.appendChild(mas);
+    }
+    panel.appendChild(pie);
+}
+function eventoDelCalendarioMundo(evento, esFin, soloElDia) {
+    const item = document.createElement("li");
+    item.className = "mundo-cal-evento es-" + evento.tipo;
+    const icono = document.createElement("span");
+    icono.className = "mundo-cal-evento-icono";
+    icono.setAttribute("aria-hidden", "true");
+    icono.textContent = evento.tipo === "evento" ? "📌" : "🎉";
+    item.appendChild(icono);
+    const cuerpo = document.createElement("span");
+    cuerpo.className = "mundo-cal-evento-cuerpo";
+    const cuando = document.createElement("span");
+    cuando.className = "mundo-cal-cuando";
+    const fecha = soloElDia ? "" : (evento.dia
+        ? (esFin ? MUNDO_CALENDARIO.datos.fin.dias[evento.dia - 1].nombre : "día " + evento.dia)
+        : "sin día fijo");
+    cuando.textContent = [evento.tipo, fecha, evento.anyo ? "año " + evento.anyo : ""]
+        .filter(Boolean).join(" · ");
+    cuerpo.appendChild(cuando);
+    const nombre = document.createElement(evento.enlace ? "a" : "strong");
+    nombre.className = "mundo-cal-evento-nombre";
+    if (evento.enlace) {
+        nombre.href = rutaSeguraMundo(evento.enlace);
+    }
+    nombre.textContent = evento.nombre;
+    cuerpo.appendChild(nombre);
+    if (evento.resumen) {
+        const resumen = document.createElement("span");
+        resumen.className = "mundo-cal-resumen";
+        resumen.textContent = evento.resumen;
+        cuerpo.appendChild(resumen);
+    }
+    item.appendChild(cuerpo);
+    return item;
 }
