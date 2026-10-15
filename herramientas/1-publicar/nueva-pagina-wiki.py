@@ -9,12 +9,36 @@
 #
 #     python herramientas/1-publicar/nueva-pagina-wiki.py
 #
-#     wiki/lugares/Valderín.md
+#     wiki/Lugares/Valderín.md
 #
-# Pregunta el nombre, el apartado de la portada (países, lugares,
-# personajes…, los de datos/wiki/mundo-categorias.json), una línea de
-# subtítulo y qué es (lo que sale encima de la ficha). Luego lo abres con
-# cualquier editor de texto y escribes. Cómo se escribe cada cosa (negrita,
+# Pregunta el nombre y QUÉ TIPO DE PÁGINA es (país, región, asentamiento,
+# lugar, personaje, raza, deidad, religión, organización, monstruo,
+# objeto mágico, acontecimiento, era, astro, festividad, idioma) y la
+# crea con su PLANTILLA: la ficha con todos los campos que suele llevar
+# esa clase de página en una wiki de un mundo de fantasía, y los apartados
+# de siempre, cada uno con una nota escondida que dice qué va ahí. Los
+# campos que dejes vacíos no salen, y las notas (<!-- así -->) tampoco: se
+# puede publicar a medio rellenar.
+#
+# LAS PLANTILLAS están en wiki/_system/templates/ (la carpeta donde
+# Chronicler guarda las suyas, que no se publica). Son .md normales: se
+# pueden cambiar, y una nueva que pongas ahí sale sola en la lista. Arriba
+# llevan unas líneas que lee esta herramienta y que no pasan a la página:
+#
+#     # plantilla: País              el nombre en la lista
+#     # para: un reino, un…          la explicación de al lado
+#     # orden: 1                     dónde sale en la lista
+#     # pregunta region: ¿De qué…?   algo que preguntar; lo que se conteste
+#                                    va donde ponga {{region}}
+#     # carpeta: Personajes          dónde se guarda, dentro de wiki/
+#     # carpeta: junto a {{region}}  o en la carpeta de esa otra página
+#                                    (y entonces {{parte}} es la parte del
+#                                    mapamundi en la que está)
+#
+# {{nombre}} es siempre el nombre de la página. Lo que no se conteste se
+# queda vacío (un [[{{algo}}]] sin contestar desaparece entero).
+#
+# Luego lo abres con cualquier editor de texto y escribes. Cómo se escribe cada cosa (negrita,
 # listas, [[enlaces]] a otras páginas, la ficha de la derecha, imágenes…)
 # está en wiki/Cómo se escribe esto.md, que se ve publicada en la wiki.
 #
@@ -26,6 +50,7 @@
 #
 #     python herramientas/3-generadores/generar-mundo.py
 
+import re
 import sys
 from pathlib import Path
 
@@ -35,6 +60,7 @@ from comun import (RAIZ, elegir, esta_fuera, guardar_wiki_fuera,  # noqa: E402
                    leer_json, pasar_generadores, preguntar, sin_tildes, wiki_fuera)
 
 VAULT = RAIZ / "wiki"
+PLANTILLAS = VAULT / "_system" / "templates"
 CATEGORIAS = RAIZ / "datos" / "wiki" / "mundo-categorias.json"
 SI = ("s", "si", "sí")
 # Lo que no puede ir en el nombre de un archivo en Windows.
@@ -95,6 +121,103 @@ def esqueleto(nombre, etiqueta, subtitulo, que):
     return "\n".join(cabecera)
 
 
+# =========================================
+# LAS PLANTILLAS
+# =========================================
+
+RE_META = re.compile(r"^#\s*(plantilla|para|orden|carpeta|pregunta\s+\w+)\s*:\s*(.*)$")
+
+
+def leer_plantillas():
+    """[{nombre, para, orden, carpeta, preguntas: [(clave, texto)], texto}]"""
+    salida = []
+    if not PLANTILLAS.is_dir():
+        return salida
+    for archivo in sorted(PLANTILLAS.glob("*.md")):
+        texto = archivo.read_text(encoding="utf-8")
+        una = {"nombre": re.sub(r"^\d+\s*", "", archivo.stem), "para": "", "orden": 999,
+               "carpeta": "", "preguntas": [], "texto": texto}
+        for linea in texto.split("\n"):
+            m = RE_META.match(linea.strip())
+            if not m:
+                continue
+            clave, valor = m.group(1), m.group(2).strip()
+            if clave == "plantilla":
+                una["nombre"] = valor
+            elif clave == "para":
+                una["para"] = valor
+            elif clave == "orden":
+                una["orden"] = int(valor) if valor.isdigit() else 999
+            elif clave == "carpeta":
+                una["carpeta"] = valor
+            else:
+                una["preguntas"].append((clave.split()[1], valor))
+        salida.append(una)
+    return sorted(salida, key=lambda u: (u["orden"], u["nombre"].lower()))
+
+
+def pagina_llamada(nombre):
+    """El .md de la wiki que se llama así (sin mirar mayúsculas), o None."""
+    bajo = nombre.strip().lower()
+    for archivo in VAULT.rglob("*.md"):
+        if archivo.stem.lower() == bajo and "_system" not in archivo.relative_to(VAULT).parts:
+            return archivo
+    return None
+
+
+def rellenar(plantilla, valores):
+    """El texto de la plantilla con los huecos rellenos y sin las líneas que
+    son solo para esta herramienta."""
+    lineas = [l for l in plantilla["texto"].split("\n") if not RE_META.match(l.strip())]
+    texto = "\n".join(lineas)
+    for clave, valor in valores.items():
+        if valor:
+            texto = texto.replace("{{%s}}" % clave, valor)
+        else:
+            # Un enlace a nada desaparece entero, comillas incluidas («región:
+            # "[[]]"» no dice nada); en una lista de etiquetas, con su coma.
+            texto = re.sub(r'"?\[\[\{\{%s\}\}\]\]"?' % re.escape(clave), "", texto)
+            texto = re.sub(r",\s*\{\{%s\}\}" % re.escape(clave), "", texto)
+            texto = texto.replace("{{%s}}" % clave, "")
+    return texto
+
+
+def con_subtitulo(texto, subtitulo):
+    if not subtitulo:
+        return texto
+    return re.sub(r'^subtitle:.*$', "subtitle: " + entre_comillas(subtitulo), texto, count=1, flags=re.M)
+
+
+def desde_plantilla(plantilla, nombre):
+    """(carpeta dentro de wiki/, texto de la página)."""
+    valores = {"nombre": nombre}
+    for clave, pregunta in plantilla["preguntas"]:
+        valores[clave] = preguntar(pregunta).strip().strip("[]").strip()
+
+    carpeta = plantilla["carpeta"] or "otros"
+    m = re.match(r"^junto a \{\{(\w+)\}\}$", carpeta)
+    if m:
+        # En la carpeta de otra página (un país, junto a su región), y la
+        # parte del mapamundi es la carpeta de debajo de Mapamundi/.
+        otra = pagina_llamada(valores.get(m.group(1), "")) if valores.get(m.group(1)) else None
+        if otra:
+            relativa = otra.parent.relative_to(VAULT)
+            carpeta = relativa.as_posix()
+            if len(relativa.parts) > 1 and relativa.parts[0].lower() == "mapamundi":
+                valores.setdefault("parte", relativa.parts[1])
+        else:
+            if valores.get(m.group(1)):
+                print(f"     No encuentro ninguna página que se llame «{valores[m.group(1)]}».")
+            parte = preguntar("¿En qué parte del mapamundi va? (Azarasia, Partaria, Archipiélagos)")
+            valores["parte"] = parte
+            carpeta = "Mapamundi/" + parte if parte else "Mapamundi"
+    # Lo que quede por rellenar en la carpeta ({{parte}} en la de una región).
+    for clave, valor in valores.items():
+        carpeta = carpeta.replace("{{%s}}" % clave, valor)
+    carpeta = re.sub(r"/?\{\{\w+\}\}", "", carpeta).strip("/") or "otros"
+    return carpeta, rellenar(plantilla, valores)
+
+
 def main():
     if not VAULT.is_dir():
         VAULT.mkdir(parents=True)
@@ -110,10 +233,28 @@ def main():
             print(f"     No puede llevar {' '.join(malos)}: es el nombre de un archivo.")
             nombre = ""
             continue
-        ya = [p for p in VAULT.rglob("*.md") if p.stem.lower() == nombre.lower()]
+        ya = [p for p in [pagina_llamada(nombre)] if p]
         if ya:
             print(f"     Ya hay una que se llama así: {ya[0].relative_to(RAIZ)}")
             nombre = ""
+
+    plantillas = leer_plantillas()
+    if plantillas:
+        print("\n  ¿Qué tipo de página es?")
+        for n, una in enumerate(plantillas, start=1):
+            print(f"     {n:>2}. {una['nombre']:<16} {una['para']}")
+        print(f"     {len(plantillas) + 1:>2}. {'En blanco':<16} sin plantilla: solo la cabecera y un apartado")
+        while True:
+            dicho = preguntar("Elige", "1")
+            if dicho.isdigit() and 1 <= int(dicho) <= len(plantillas) + 1:
+                break
+            print("     Tiene que ser uno de los números de la lista.")
+        if int(dicho) <= len(plantillas):
+            plantilla = plantillas[int(dicho) - 1]
+            carpeta, texto = desde_plantilla(plantilla, nombre)
+            texto = con_subtitulo(texto, preguntar(
+                "Subtítulo, una línea debajo del título (Enter: ninguno)"))
+            return crear(nombre, carpeta, texto)
 
     lista = apartados()
     nombres = [n for n, _ in lista]
@@ -132,9 +273,13 @@ def main():
     subtitulo = preguntar("Subtítulo, una línea debajo del título (Enter: ninguno)")
     que = preguntar("Qué es, para la ficha («Reino», «Ciudad portuaria»…; Enter: nada)")
 
+    return crear(nombre, carpeta, esqueleto(nombre, etiqueta, subtitulo, que))
+
+
+def crear(nombre, carpeta, texto):
     destino = VAULT / carpeta / (nombre + ".md")
     destino.parent.mkdir(parents=True, exist_ok=True)
-    destino.write_text(esqueleto(nombre, etiqueta, subtitulo, que), encoding="utf-8")
+    destino.write_text(texto, encoding="utf-8")
     print(f"\n  Creada: {destino.relative_to(RAIZ)}")
     # Si esa ruta estaba en la lista de lo que se deja fuera (de cuando la
     # wiki venía de Chronicler), se quita: la acabas de escribir para que
@@ -150,8 +295,9 @@ def main():
             guardar_wiki_fuera(quedan)
             print("  (estaba en herramientas/wiki-fuera.txt, la lista de lo que no se"
                   " publica: la he quitado de ahí)")
-    print("  Ábrela con cualquier editor de texto y escribe. Cómo se escribe cada")
-    print("  cosa: wiki/Cómo se escribe esto.md.")
+    print("  Ábrela con cualquier editor de texto y escribe. Los campos de la ficha")
+    print("  que dejes vacíos no salen, ni las notas <!-- así --> de cada apartado.")
+    print("  Cómo se escribe cada cosa: wiki/Cómo se escribe esto.md.")
 
     if preguntar("\n  ¿La paso ya a la web, tal cual está? (s/N)", "n").lower() in SI:
         pasar_generadores(("3-generadores/generar-mundo.py",))

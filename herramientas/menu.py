@@ -87,7 +87,7 @@ APARTADOS = [
     ("Wiki Cralëa", "escribir sus páginas, la línea de tiempo y pasarla a la web", [
         ("Escribir una página nueva de la wiki",
          "1-publicar/nueva-pagina-wiki.py", [],
-         "Crea el .md en wiki/ con su cabecera; luego lo escribes a mano."),
+         "Elige el tipo (país, personaje, monstruo…) y crea el .md con su plantilla."),
         ("Llevar la línea de tiempo",
          "1-publicar/linea-de-tiempo.py", [],
          "Añadir, cambiar o quitar eventos. Cada uno tiene su página."),

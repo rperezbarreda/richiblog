@@ -316,17 +316,36 @@ def filas_de_la_infobox(datos, convertir):
     enGrupo = {c: n for n, g in enumerate(grupos) for c in g}
     filas = []
     puestos = set()
+    # LOS CAMPOS VACÍOS NO SALEN. Las plantillas de página
+    # (wiki/_system/templates/) traen la ficha entera con los campos sin
+    # rellenar, y una ficha con doce filas en blanco no dice nada. El
+    # encabezado de un tramo cuyo primer campo está vacío no se pierde: se
+    # queda esperando al siguiente campo que tenga algo, salvo que ese
+    # traiga su propio encabezado (entonces el tramo de antes estaba
+    # vacío entero y su título sobra).
+    pendientes = []
     for clave, valor in datos.items():
         if clave in APARTE or clave in puestos:
             continue
-        for texto in encabezados["above"].get(clave, []):
+        if clave in enGrupo:
+            vacio = all(_esta_vacio(datos.get(c)) for c in grupos[enGrupo[clave]])
+        else:
+            vacio = _esta_vacio(valor)
+        propios = encabezados["above"].get(clave, [])
+        if vacio:
+            if propios:
+                pendientes = list(propios)
+            continue
+        for texto in (propios or pendientes):
             filas.append({"tipo": "header", "texto": texto})
+        pendientes = []
         if clave in rayas["above"]:
             filas.append({"tipo": "separator"})
 
         if clave in enGrupo:
             grupo = grupos[enGrupo[clave]]
-            columnas = [(alias.get(c, c), datos[c]) for c in grupo if c in datos]
+            columnas = [(alias.get(c, c), datos[c]) for c in grupo
+                        if c in datos and not _esta_vacio(datos[c])]
             puestos.update(grupo)
             filas.append({"tipo": "group",
                           "columnas": [(n, convertir(str(v))) for n, v in columnas]})
@@ -342,6 +361,16 @@ def filas_de_la_infobox(datos, convertir):
     return filas
 
 
+def _esta_vacio(valor):
+    if valor is None:
+        return True
+    if isinstance(valor, list):
+        return all(_esta_vacio(v) for v in valor)
+    texto = str(valor).strip()
+    # Un enlace sin nada dentro («[[]]») es un hueco de plantilla.
+    return not texto or texto in ("[[]]", "''", '""')
+
+
 def _como_texto(valor):
     if isinstance(valor, list):
         return ", ".join(_como_texto(v) for v in valor)
@@ -349,7 +378,10 @@ def _como_texto(valor):
 
 
 def pintar_infobox(datos, filas, imagenes_html, emblemas_html=""):
-    if not filas and not imagenes_html and not emblemas_html and not datos.get("infobox"):
+    # Sin nada que enseñar no hay ficha, aunque diga qué es («infobox»): un
+    # recuadro con «Personaje» y nada debajo es lo que deja una plantilla
+    # recién creada, y no dice nada.
+    if not filas and not imagenes_html and not emblemas_html:
         return ""
     # role="note": es información al margen del artículo. Un <aside> a
     # secas dentro de <main> es una región complementaria anidada, y las

@@ -1209,12 +1209,47 @@
       python herramientas/1-publicar/nueva-pagina-wiki.py
 
   (en el menú, Wiki Cralëa → Escribir una página nueva de la wiki).
-  Pregunta el nombre, el apartado de la portada, una línea de subtítulo
-  y qué es, y crea el .md con la cabecera puesta y un esqueleto. Luego
-  se abre con cualquier editor de texto y se escribe. Cómo se escribe
+  Pregunta el nombre y QUÉ TIPO DE PÁGINA es, y crea el .md con su
+  PLANTILLA (ver LAS PLANTILLAS DE PÁGINA, justo debajo). Luego se abre
+  con cualquier editor de texto y se escribe. Cómo se escribe
   cada cosa —negrita, listas, tablas, [[enlaces]], la ficha de la
   derecha, imágenes, spoilers— está en wiki/Cómo se escribe esto.md, que
   además sale publicada para verlo de un vistazo.
+
+  LAS PLANTILLAS DE PÁGINA (desde el 15-10-2026). Una por cada tipo de
+  página, sacadas de cómo organizan las suyas las wikis de mundos de
+  fantasía (A Wiki of Ice and Fire, Tolkien Gateway, la de Pathfinder,
+  la de Forgotten Realms): País, Región, Asentamiento, Lugar, Personaje,
+  Raza, Deidad, Religión, Organización, Monstruo, Objeto mágico,
+  Acontecimiento, Era, Astro, Festividad e Idioma. Cada una trae:
+
+    - la ficha de la derecha con los campos que suele llevar ese tipo
+      (un país: capital, forma de gobierno, gobernante, población,
+      lenguas, moneda, lema…; un personaje: raza, nacimiento, lealtad,
+      familia, y su jugador y su clase si es de la partida), repartidos
+      en tramos con su título (Gobierno, Gentes, Familia…);
+    - los apartados de siempre de ese tipo (un país: Historia,
+      Geografía, Gobierno y política, Sociedad, Economía, Cultura,
+      Relaciones exteriores, Lugares de interés, Rumores y leyendas, En
+      la mesa…), cada uno con una NOTA ESCONDIDA que dice qué va ahí;
+    - las etiquetas para que salga en su sección de la portada (y en su
+      apartado dentro de ella: Deidades, Credos, Asentamientos,
+      Acontecimientos…) y la carpeta donde se guarda (un país, junto a
+      la página de su región).
+
+  SE PUEDE PUBLICAR A MEDIO RELLENAR: lo que no se ha escrito no sale.
+  Los campos vacíos de la ficha no salen (y si no queda ninguno, no sale
+  la ficha); los apartados sin nada debajo no salen, ni en la página ni
+  en el cuadro de contenido; y las notas escondidas, <!-- así -->, no
+  salen nunca. Las notas valen en cualquier página, no solo en las de
+  plantilla: es para dejarte apuntes que no se publican.
+
+  Están en wiki/_system/templates/, la carpeta donde Chronicler guarda
+  las suyas, que no se publica. Son .md normales: se pueden cambiar, y
+  una que añadas sale sola en la lista. Arriba llevan unas líneas que
+  lee la herramienta y no pasan a la página (# plantilla:, # para:,
+  # orden:, # pregunta …:, # carpeta:), explicadas al principio de
+  herramientas/1-publicar/nueva-pagina-wiki.py.
 
   LAS IMÁGENES de la wiki van en wiki/_imagenes/ y se nombran por el
   nombre del archivo. generar-mundo.py solo publica las que use alguna
@@ -2788,8 +2823,10 @@
                         el día de hoy en Cralëa. Guarda al momento; no hay
                         que generar nada. Ver EL CALENDARIO.
   1-publicar/nueva-pagina-wiki.py  crea el .md de una página nueva de
-                        la wiki, con su cabecera, en la carpeta de su
-                        apartado. Luego se escribe a mano.
+                        la wiki con la plantilla de su tipo (país,
+                        personaje, monstruo…), en la carpeta que le toca.
+                        Luego se escribe a mano. Ver LAS PLANTILLAS DE
+                        PÁGINA.
   1-publicar/importar-mundo.py  (ya no está en el menú) se trae la
                         bóveda de Chronicler a
                         wiki/ —páginas, mapas e imágenes— y pasa el

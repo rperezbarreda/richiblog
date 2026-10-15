@@ -83,12 +83,67 @@ OPCIONES_DE_INSERCION = {
 }
 
 
+# LAS NOTAS ESCONDIDAS: <!-- lo que sea --> en el cuerpo de una página no
+# sale en la web. Es lo que usan las plantillas de página
+# (wiki/_system/templates/) para decir qué va en cada apartado sin que se
+# publique, igual que los comentarios ocultos de las wikis de verdad. Se
+# quitan aquí, antes de nada, para que tampoco cuenten como el primer
+# párrafo (el resumen de la portada y del buscador).
+RE_NOTA_EN_SU_LINEA = re.compile(r"^[ \t]*<!--.*?-->[ \t]*(?:\n|\Z)", re.S | re.M)
+RE_NOTA_ESCONDIDA = re.compile(r"<!--.*?-->", re.S)
+
+
+def sin_notas_escondidas(texto):
+    """Primero las que ocupan sus propias líneas (se van con su salto de
+    línea, para no dejar huecos) y luego las que van en medio de una frase."""
+    return RE_NOTA_ESCONDIDA.sub("", RE_NOTA_EN_SU_LINEA.sub("", texto))
+
+
+RE_ENCABEZADO = re.compile(r"^(#{1,6})\s+\S")
+
+
+def sin_apartados_vacios(texto):
+    """LOS APARTADOS SIN NADA NO SALEN. Una plantilla trae todos los
+    apartados que suele tener esa clase de página (Historia, Geografía,
+    Rumores y leyendas…), y hasta que se escriben están vacíos: un título
+    con nada debajo, y el mismo título en el cuadro de contenido. Un
+    apartado se queda si debajo tiene algo antes del siguiente título de
+    su nivel o de uno más alto; si solo tiene un subapartado con algo, se
+    queda también, porque ese algo es suyo."""
+    lineas = texto.split("\n")
+    titulos = []          # (índice, nivel)
+    en_codigo = False
+    for i, linea in enumerate(lineas):
+        if linea.strip().startswith("```"):
+            en_codigo = not en_codigo
+            continue
+        if not en_codigo:
+            m = RE_ENCABEZADO.match(linea)
+            if m:
+                titulos.append((i, len(m.group(1))))
+    if not titulos:
+        return texto
+    fuera = set()
+    for n, (i, nivel) in enumerate(titulos):
+        fin = len(lineas)
+        for j, otro in titulos[n + 1:]:
+            if otro <= nivel:
+                fin = j
+                break
+        dentro = [k for k in range(i + 1, fin)
+                  if lineas[k].strip() and not any(k == t for t, _ in titulos)]
+        if not dentro:
+            fuera.add(i)
+    return "\n".join(l for k, l in enumerate(lineas) if k not in fuera)
+
+
 def partir(texto):
-    """(frontmatter como texto, cuerpo). Sin frontmatter, el primero es ''."""
+    """(frontmatter como texto, cuerpo). Sin frontmatter, el primero es ''.
+    El cuerpo, ya sin las notas escondidas ni los apartados vacíos."""
     m = RE_FRONTMATTER.match(texto)
     if not m:
-        return "", texto
-    return m.group(1), texto[m.end():]
+        return "", sin_apartados_vacios(sin_notas_escondidas(texto))
+    return m.group(1), sin_apartados_vacios(sin_notas_escondidas(texto[m.end():]))
 
 
 def leer_frontmatter(crudo, avisos=None):
