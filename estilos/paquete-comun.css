@@ -956,13 +956,13 @@ body.lightbox-open {
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 46px;
-    height: 46px;
+    width: 52px;
+    height: 52px;
     padding: 0;
     border: 2px solid var(--yellow);
     background: var(--surface);
     color: var(--yellow);
-    box-shadow: 3px 3px 0 var(--yellow);
+    box-shadow: 0 0 0 3px var(--purple);
     cursor: pointer;
     opacity: 0;
     visibility: hidden;
@@ -987,22 +987,19 @@ body.lightbox-open {
 }
 .subir:focus-visible {
     outline: 2px solid var(--yellow);
-    outline-offset: 3px;
+    outline-offset: 5px;
 }
 .subir-icono {
     display: block;
-    width: 22px;
-    height: 22px;
+    width: 26px;
+    height: 26px;
 }
 @media (min-width: 861px) {
     .subir {
-        right: 6px;
-        width: 34px;
-        height: 34px;
-    }
-    .subir-icono {
-        width: 18px;
-        height: 18px;
+        right: 14px;
+        bottom: 14px;
+        width: 2.7rem;
+        height: 2.7rem;
     }
 }
 @media (prefers-reduced-motion: reduce) {

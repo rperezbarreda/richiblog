@@ -365,20 +365,24 @@
    En escritorio la del menú no sale: estarían las dos a la vez. */
 .buscar-flotante {
     position: absolute;
-    top: calc(14px + 1.6rem + 8px);
-    right: -24px;
+    /* Debajo del de plegar (48px desde los 14 de arriba), con sitio para
+       los dos anillos de 3px y un poco de aire. */
+    top: calc(14px + 48px + 14px);
+    right: -31px;
     z-index: 1;
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 1.6rem;
-    height: 1.6rem;
+    width: 48px;
+    height: 48px;
     margin: 0;
     padding: 0;
     border: 2px solid var(--yellow);
+    /* El doble reborde del botón «Aa». */
+    box-shadow: 0 0 0 3px var(--purple);
     background: var(--purple);
     color: var(--yellow);
-    font-size: 0.85rem;
+    font-size: 1.3rem;
     line-height: 1;
 }
 
@@ -390,7 +394,7 @@
 
 .buscar-flotante:focus-visible {
     outline: 2px solid var(--yellow);
-    outline-offset: 2px;
+    outline-offset: 5px;
 }
 
 @media (min-width: 861px) {

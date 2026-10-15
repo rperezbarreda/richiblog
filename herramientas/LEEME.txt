@@ -2382,9 +2382,16 @@
   EL BOTÓN DE VOLVER ARRIBA sale en todas las páginas y en todos los
   tamaños (hasta el 15-10-2026 solo en el móvil): abajo a la derecha, y
   solo cuando se ha bajado un poco (scripts/componentes/subir.js). En
-  escritorio es más pequeño (34px) y más pegado al borde, para no
-  montarse encima del marco de la página. El contenido de las entradas
+  escritorio mide y se coloca como el botón «Aa» (2,7rem, a 14px del
+  borde), pero abajo; en el móvil, 52px. El contenido de las entradas
   de la wiki, que también va abajo a la derecha, queda a su izquierda.
+
+  EL DOBLE REBORDE. Volver arriba, el ☰ de plegar la barra y la lupa
+  flotante llevan, como el «Aa», el borde amarillo y por fuera un anillo
+  del color del fondo (box-shadow: 0 0 0 3px var(--purple)): los
+  despega del marco de la página o del borde de la barra cuando pasan
+  por encima. El ☰ y la lupa miden 48px (en píxeles: el hueco hasta el
+  marco es fijo y en rem, con la letra grande, se le montaban encima).
 
   LA LUPA, EN ESCRITORIO, es un botón flotante cuadrado debajo del de
   plegar la barra (☰), montado igual que él en el borde de la barra:

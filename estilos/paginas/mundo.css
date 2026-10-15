@@ -563,8 +563,9 @@ html:not(.js) .mundo-spoiler {
     .mundo-contenido {
         position: fixed;
         /* Lo bastante a la izquierda para no tocar el botón de volver
-           arriba, que también va abajo a la derecha. */
-        right: 64px;
+           arriba (2,7rem a 14px del borde, con su anillo), que también va
+           abajo a la derecha. */
+        right: calc(14px + 2.7rem + 18px);
         bottom: 48px;
         z-index: 40;
         width: min(17rem, 30vw);

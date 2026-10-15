@@ -374,7 +374,7 @@ html:not(.js) .mundo-spoiler {
 @media (min-width: 861px) {
     .mundo-contenido {
         position: fixed;
-        right: 64px;
+        right: calc(14px + 2.7rem + 18px);
         bottom: 48px;
         z-index: 40;
         width: min(17rem, 30vw);

@@ -58,19 +58,20 @@
 .lateral-plegar {
     position: absolute;
     top: 14px;
-    right: -24px;
+    right: -31px;
     z-index: 1;
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 1.6rem;
-    height: 1.6rem;
+    width: 48px;
+    height: 48px;
     margin: 0;
     padding: 0;
     border: 2px solid var(--yellow);
+    box-shadow: 0 0 0 3px var(--purple);
     background: var(--purple);
     color: var(--yellow);
-    font-size: 0.9rem;
+    font-size: 1.35rem;
     line-height: 1;
     cursor: pointer;
 }
@@ -81,11 +82,11 @@
 }
 .lateral-plegar:focus-visible {
     outline: 2px solid var(--yellow);
-    outline-offset: 2px;
+    outline-offset: 5px;
 }
 @media (min-width: 861px) {
     :root.lateral-plegada {
-        --lateral-hueco: calc(1.6rem - 16px);
+        --lateral-hueco: 25px;
     }
     .lateral-plegada .sidebar {
         width: var(--lateral-hueco);

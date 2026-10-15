@@ -73,28 +73,35 @@
    cambiar de página no se vea la barra entera un instante y luego
    plegarse.
 
-   Medidas: 1.6rem de botón (lo que mide de alto el título), que sale
-   24px por fuera del borde. Así quedan unos 10px hasta el título por
-   dentro y 12 hasta el marco del contenido por fuera (medido a 1440 con
-   el texto de siempre). Centrado justo en el borde se pegaba al título. */
+   Medidas: 48px de botón (antes 1.6rem, y se pidió más grande para
+   pulsarlo bien), que sale 31px por fuera del borde: empieza justo
+   detrás del título y deja unos 6px hasta el marco del contenido. En
+   píxeles y no en rem a propósito: el hueco hasta el marco es fijo, y
+   con la letra grande un botón en rem se metía encima del marco.
+
+   Con el DOBLE REBORDE del botón «Aa» (estilos/componentes/ajustes.css):
+   el borde amarillo y, por fuera, un anillo del color del fondo, que lo
+   despega de lo que tenga detrás (el borde de la barra, la rejilla). La
+   lupa flotante de debajo (estilos/paginas/buscar.css) va igual. */
 .lateral-plegar {
     position: absolute;
     top: 14px;
-    right: -24px;
+    right: -31px;
     z-index: 1;
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 1.6rem;
-    height: 1.6rem;
+    width: 48px;
+    height: 48px;
     margin: 0;
     padding: 0;
     border: 2px solid var(--yellow);
+    box-shadow: 0 0 0 3px var(--purple);
     /* Opaco: el borde de la barra pasa por debajo y no tiene que verse a
        través del botón. */
     background: var(--purple);
     color: var(--yellow);
-    font-size: 0.9rem;
+    font-size: 1.35rem;
     line-height: 1;
     cursor: pointer;
 }
@@ -107,7 +114,7 @@
 
 .lateral-plegar:focus-visible {
     outline: 2px solid var(--yellow);
-    outline-offset: 2px;
+    outline-offset: 5px;
 }
 
 /* Con un corte de escritorio y no a pelo: la clase se queda puesta si se
@@ -116,9 +123,9 @@
 @media (min-width: 861px) {
     :root.lateral-plegada {
         /* La tira: lo justo para que el botón, montado en su borde, quede
-           a 8px del borde de la pantalla (lo que mide menos los 24px que
-           sale por fuera). */
-        --lateral-hueco: calc(1.6rem - 16px);
+           a 8px del borde de la pantalla: los 48px que mide, menos los 31
+           que sale por fuera, más esos 8 (48 − 31 + 8 = 25). */
+        --lateral-hueco: 25px;
     }
 
     .lateral-plegada .sidebar {

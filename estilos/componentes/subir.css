@@ -17,15 +17,18 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    /* 46px: por encima del mínimo de 44 que se recomienda para
-       pulsar con el dedo. */
-    width: 46px;
-    height: 46px;
+    /* 52px: de sobra por encima del mínimo de 44 que se recomienda para
+       pulsar con el dedo (se pidió más grande). */
+    width: 52px;
+    height: 52px;
     padding: 0;
     border: 2px solid var(--yellow);
     background: var(--surface);
     color: var(--yellow);
-    box-shadow: 3px 3px 0 var(--yellow);
+    /* El doble reborde del botón «Aa»: un anillo del color del fondo por
+       fuera del borde amarillo, que lo despega del marco de la página
+       cuando pasa por encima. */
+    box-shadow: 0 0 0 3px var(--purple);
     cursor: pointer;
     /* Oculto mientras no se haya bajado. Se anima la opacidad y no
        display, que no se puede animar. */
@@ -55,28 +58,24 @@
 
 .subir:focus-visible {
     outline: 2px solid var(--yellow);
-    outline-offset: 3px;
+    outline-offset: 5px;
 }
 
 .subir-icono {
     display: block;
-    width: 22px;
-    height: 22px;
+    width: 26px;
+    height: 26px;
 }
 
-/* EN ESCRITORIO, más pequeño y más pegado al borde: el marco de la
-   página llega a 44px del borde derecho, y con las medidas del móvil el
-   botón se montaba encima de él. */
+/* EN ESCRITORIO, del tamaño del botón «Aa» y a la misma distancia del
+   borde que él, pero abajo: los dos se montan un poco sobre el marco de
+   la página, y el anillo de fuera es lo que los despega de él. */
 @media (min-width: 861px) {
     .subir {
-        right: 6px;
-        width: 34px;
-        height: 34px;
-    }
-
-    .subir-icono {
-        width: 18px;
-        height: 18px;
+        right: 14px;
+        bottom: 14px;
+        width: 2.7rem;
+        height: 2.7rem;
     }
 }
 
