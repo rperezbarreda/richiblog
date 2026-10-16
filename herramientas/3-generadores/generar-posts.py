@@ -259,26 +259,26 @@ def poner_minutos(ruta, prefijo, minutos, probar):
     return True
 
 
-# EL HUECO DE texto_a_voz.mp3. La ventana de escuchar la entrada la monta
-# scripts/componentes/leer-en-voz.js arriba de la columna de la foto, y al
-# aparecer empujaba la foto 270 px hacia abajo (auditoría de velocidad del
-# 16-10-2026). Así que cada entrada lleva ya escrita la misma ventana,
-# invisible (visibility: hidden, ver lectura.css) y ocupando su sitio, y
-# el script la cambia por la de verdad, que mide lo mismo. Si el
-# navegador no sabe leer en voz alta, el script la quita.
-HUECO_DE_VOZ = (
-    '<div class="voz-ventana" data-voz-esqueleto aria-hidden="true">'
-    '<div class="recent-entries-header"><h2>texto_a_voz.mp3</h2>'
-    '<div class="window-controls window-controls-small"></div></div>'
-    '<button type="button" class="voz-boton" tabindex="-1">'
-    '<span class="voz-icono">▶</span><span class="voz-texto">escuchar</span></button>'
-    '<div class="voz-velocidad"><p class="voz-velocidad-nombre">velocidad</p>'
-    '<div class="voz-velocidad-mandos">'
-    '<button type="button" class="voz-velocidad-boton" tabindex="-1">lenta</button>'
-    '<button type="button" class="voz-velocidad-boton" tabindex="-1">normal</button>'
-    '<button type="button" class="voz-velocidad-boton" tabindex="-1">rápida</button>'
-    '</div></div></div>'
-)
+# LA VENTANA DE texto_a_voz.mp3. Vive en fragmentos/texto-a-voz.html, que
+# es el único sitio donde está escrita, y este generador la copia en cada
+# entrada y relato, arriba de la columna de la foto. Llega dormida
+# (data-voz-esqueleto: invisible y sin poder pulsarse, ver lectura.css) y
+# scripts/componentes/leer-en-voz.js la despierta si el navegador sabe
+# leer en voz alta; si no, la quita. Antes la montaba el script al
+# cargar y al aparecer empujaba la foto 270 px hacia abajo (auditoría de
+# velocidad del 16-10-2026). Va en una sola línea, para encontrarla y
+# cambiarla fácil la vez siguiente.
+FRAGMENTO_VOZ = RAIZ / "fragmentos" / "texto-a-voz.html"
+
+
+def hueco_de_voz():
+    try:
+        crudo = FRAGMENTO_VOZ.read_text(encoding="utf-8")
+    except OSError:
+        return ""
+    return re.sub(r">\s+<", "><", crudo.strip())
+
+
 RE_HUECO = re.compile(r'\s*<div class="voz-ventana" data-voz-esqueleto.*?</div></div></div>', re.S)
 
 
@@ -290,7 +290,10 @@ def poner_hueco_de_voz(ruta, prefijo, probar):
     sangria = m.group(2) + "    "
     resto = texto[m.end():]
     viejo = RE_HUECO.match(resto)
-    nuevo_hueco = "\n" + sangria + HUECO_DE_VOZ
+    hueco = hueco_de_voz()
+    if not hueco:
+        return False
+    nuevo_hueco = "\n" + sangria + hueco
     if viejo:
         if viejo.group(0) == nuevo_hueco:
             return False
@@ -301,14 +304,22 @@ def poner_hueco_de_voz(ruta, prefijo, probar):
     return True
 
 
-# LA FICHA DE CADA CAMPAÑA (campana.nfo), YA ESCRITA EN SU PÁGINA. La pinta
-# scripts/paginas/notas-rol.js con el JSON de la campaña, pero hasta que
-# llegaba estaba escondida y al aparecer empujaba la lista de sesiones
-# media pantalla hacia abajo (auditoría de velocidad del 16-10-2026). Aquí
-# se escribe igual que la pinta el script (mismas clases, mismo orden,
-# mismos textos: ver pintarFichaCampana y listaDePersonajes), y el script
-# luego la cambia por la suya, que mide lo mismo. Manda el JSON: si se
+# LA FICHA DE CADA CAMPAÑA (campana.nfo), ESCRITA EN SU PÁGINA. Es el
+# ÚNICO sitio donde se monta: scripts/paginas/notas-rol.js ya no la pinta,
+# solo le da vida (cada personaje abre su ficha al pulsarlo). Antes la
+# pintaba el script al cargar y al aparecer empujaba la lista de sesiones
+# media pantalla hacia abajo (auditoría de velocidad del 16-10-2026).
+# Manda el JSON de la campaña (datos/notas_rol/campana-*.json): si se
 # cambia, al pasar esto otra vez se reescribe.
+#
+# LOS PERSONAJES VAN CON SU CARA: un token por cada uno, que es un botón
+# (abre su ficha encima, no cambia de página: aria-haspopup). Lo que es
+# cada uno (clase, nivel, quién lo lleva) no va escrito debajo del token
+# —ocupaba tres líneas bajo un círculo de 140px—: va en el nombre del
+# botón (lo lee el lector de pantalla) y en su title, y entero en la
+# ventana que abre. data-pj lleva su nombre, que es como el script lo
+# encuentra en el JSON; data-grande, el retrato grande por si la
+# miniatura (token_mini, la hace tokens-pequenos.py) no carga.
 CAMPANAS = RAIZ / "datos" / "notas_rol"
 CAMPOS_FICHA = (("sistema", "sistema"), ("director", "dirige"), ("personajes", "personajes"),
                 ("sinopsis", "de qué va"))
@@ -355,18 +366,20 @@ def ficha_de_campana(campana):
                     atributos = (' aria-label="%s" title="%s"' % (_e(nombre_pj + ". " + extra), _e(extra))
                                  if extra else "")
                     ruta = _imagen_segura(p.get("token_mini")) or _imagen_segura(p.get("token"))
+                    grande = _imagen_segura(p.get("token"))
                     if ruta:
-                        retrato = ('<img class="campana-personaje-img" src="%s" alt="" loading="lazy"'
-                                   ' decoding="async">' % _e(ruta))
+                        retrato = ('<img class="campana-personaje-img" src="%s"%s alt="" loading="lazy"'
+                                   ' decoding="async">' % (_e(ruta), ' data-grande="%s"' % _e(grande)
+                                                           if grande and grande != ruta else ""))
                     else:
                         retrato = ('<span class="campana-personaje-mono" aria-hidden="true">%s</span>'
                                    % _e((nombre_pj or "?")[0].upper()))
                     clase_color = " pj-" + color if color else ""
                     items.append(
                         '<li class="campana-personaje"><button type="button" class="campana-personaje-token%s"'
-                        ' aria-haspopup="dialog"%s><span class="campana-personaje-marco">%s</span>'
+                        ' aria-haspopup="dialog" data-pj="%s"%s><span class="campana-personaje-marco">%s</span>'
                         '<strong class="campana-personaje-nombre%s">%s</strong></button></li>'
-                        % (clase_color, atributos, retrato, clase_color, _e(nombre_pj)))
+                        % (clase_color, _e(nombre_pj), atributos, retrato, clase_color, _e(nombre_pj)))
                 valor = '<ul class="campana-personajes">%s</ul>' % "".join(items)
         else:
             texto = str(campana.get(clave) or "").strip()

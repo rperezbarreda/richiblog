@@ -2,7 +2,7 @@
 <html lang="es">
   <head>
     <meta charset="UTF-8">
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-34Y/CiruHg/k5h/Pc/unkzxpDPhI07cdtdXbW9YTAfg=' 'sha256-aDtzI6QgHfitL7afCewTh/rpYprDOJvupEIYVZKPk8Y='; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self' https://script.google.com https://script.googleusercontent.com; object-src 'none'; base-uri 'self'; form-action 'self'">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-aDtzI6QgHfitL7afCewTh/rpYprDOJvupEIYVZKPk8Y='; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self' https://script.google.com https://script.googleusercontent.com; object-src 'none'; base-uri 'self'; form-action 'self'">
     <!-- ==== TEMA ==== -->
     <meta name="theme-color" content="#12091c">
     <script>
@@ -55,8 +55,6 @@
     <link rel="icon" type="image/x-icon" href="/imagenes/favicon.ico">
     <link rel="preload" href="/tipografias/space-grotesk-400.woff2" as="font" type="font/woff2" crossorigin>
     <link rel="alternate" type="application/rss+xml" title="El Blog de Richi — blog, relatos y rol" href="/blog/rss.xml">
-    <!-- ==== ADELANTO DEL MENÚ ==== -->
-    <script>window.adelantoDeFragmentos={};try{window.adelantoDeFragmentos["/fragmentos/barra-lateral.html"]=fetch("/fragmentos/barra-lateral.html?v=d9a306ce").then(function(r){return r.ok?r.text():null}).catch(function(){return null})}catch(e){}</script>
     <!-- ==== CSS ==== -->
     <link rel="stylesheet" href="/estilos/paquete-comun.css?v=db722f0c">
     <link rel="stylesheet" href="/ligero/estilos/paginas/portada.css?v=2449d1cf">
@@ -64,15 +62,284 @@
     <link rel="stylesheet" href="/ligero/estilos/paginas/sobre-mi.responsive.css?v=ada54f90">
     <link rel="stylesheet" href="/estilos/paquete-cierre.css?v=b764bc66">
     <!-- ==== fin del CSS ==== -->
-    <script src="/ligero/scripts/cargador-scripts.js?v=d7504ea0"></script>
+    <script src="/ligero/scripts/cargador-scripts.js?v=fcb52e96"></script>
     <!-- ==== JS ==== -->
-    <script defer src="/scripts/paquete-comun.js?v=a305fb20"></script>
+    <script defer src="/scripts/paquete-comun.js?v=f3a079da"></script>
     <script defer src="/ligero/scripts/paginas/sobre-mi.js?v=9492d391"></script>
     <!-- ==== fin del JS ==== -->
   </head>
 <body>
     <a class="skip-link" href="#main-content">Saltar al contenido</a>
-    <div id="sidebar-container"></div>
+    <div id="sidebar-container" data-fragmento="barra-lateral">
+<!-- ==== BARRA LATERAL ==== -->
+<header class="mobile-topbar">
+    <button id="sidebar-toggle" class="sidebar-toggle" type="button" aria-expanded="false" aria-controls="sidebar">
+        <span aria-hidden="true">☰</span>
+        <span class="visually-hidden">Abrir menú</span>
+    </button>
+    <p class="mobile-topbar-title"><span aria-hidden="true">·🜏·</span> EL BLOG DE RICHI</p>
+</header>
+
+<button class="ajustes-abrir" type="button" data-ajustes-abrir
+        aria-haspopup="dialog">
+    <span class="ajustes-abrir-aa" aria-hidden="true">Aa</span>
+    <span class="ajustes-abrir-texto">ACCESIBILIDAD</span>
+</button>
+
+<div id="sidebar-backdrop" class="sidebar-backdrop" hidden></div>
+
+<aside class="sidebar" id="sidebar">
+    <div class="sidebar-logo">
+        <p><span aria-hidden="true">·🜏·</span> EL BLOG DE RICHI</p>
+    </div>
+    <button id="lateral-plegar" class="lateral-plegar" type="button"
+            aria-expanded="true" aria-controls="sidebar-menu" title="Plegar el menú">
+        <span aria-hidden="true">☰</span>
+        <span class="visually-hidden">Menú</span>
+    </button>
+    <button class="buscar-flotante" type="button" data-buscar-lupa
+            aria-haspopup="dialog" title="Buscar en toda la web">
+        <span class="buscar-lupa" aria-hidden="true"></span>
+        <span class="visually-hidden">Buscar</span>
+    </button>
+    <div class="sidebar-top" id="sidebar-menu">
+        <nav>
+        <a href="/index.html">home</a>
+            <div class="nav-group">
+                <button class="nav-toggle" type="button" aria-expanded="false">
+                    <span>mis movidas</span>
+                    <span class="arrow" aria-hidden="true">+</span>
+                </button>
+
+                <div class="submenu">
+                    <a href="/web/mis_movidas/relatos/index_relatos.html">relatos</a>
+                    <a href="/web/mis_movidas/rol/index_rol.html">recursos de rol</a>
+                </div>
+            </div>
+
+            <div class="nav-group">
+                <button class="nav-toggle" type="button" aria-expanded="false">
+                    <span>blog</span>
+                    <span class="arrow" aria-hidden="true">+</span>
+                </button>
+
+                <div class="submenu">
+                    <a href="/web/blog/diario.html">diario</a>
+                    <a href="/web/blog/2026/index_2026.html">2026</a>
+                </div>
+            </div>
+
+            <div class="nav-group">
+                <button class="nav-toggle" type="button" aria-expanded="false">
+                    <span>roleito</span>
+                    <span class="arrow" aria-hidden="true">+</span>
+                </button>
+
+                <div class="submenu">
+                    <div class="nav-group">
+                        <button class="nav-toggle" type="button" aria-expanded="false">
+                            <span>notas de rol</span>
+                            <span class="arrow" aria-hidden="true">+</span>
+                        </button>
+
+                        <div class="submenu">
+                            <a href="/web/notas_rol/ragna/index_ragna.html">campaña de Ragna</a>
+                        </div>
+                    </div>
+
+                    <a href="/web/wiki/index_wiki.html">wiki cralëa</a>
+                </div>
+            </div>
+
+            <div class="nav-group open">
+                <button class="nav-toggle" type="button" aria-expanded="true">
+                    <span>mi rincón</span>
+                    <span class="arrow" aria-hidden="true">−</span>
+                </button>
+
+                <div class="submenu">
+                    <a class="active" href="/web/sobre_mi/sobre_mi.html" aria-current="page">quién soy</a>
+                    <a href="/web/en_lo_que_ando/en_lo_que_ando.html">en lo que ando</a>
+                    <a href="/web/santuarios/index_santuarios.html">santuarios</a>
+                    <a href="/web/recomendaciones/recomendaciones.html">recomendaciones</a>
+                </div>
+            </div>
+
+        <a href="/web/contacto/contacto.html">contacto y guestbook</a>
+        <a href="/web/accesibilidad/accesibilidad.html">accesibilidad</a>
+        </nav>
+
+        <button class="buscar-lupa-boton" type="button" data-buscar-lupa
+                aria-haspopup="dialog">
+            <span class="buscar-lupa" aria-hidden="true"></span>
+            <span class="buscar-lupa-texto">buscar</span>
+        </button>
+    </div>
+
+    <div class="gatin-random" data-gatin-random hidden>
+        <div class="gatin-random-header">
+            <h2>gatin_random.exe</h2>
+            <div class="window-controls window-controls-small" data-window-controls aria-hidden="true"></div>
+        </div>
+        <div class="gatin-random-body" data-gatin-body></div>
+    </div>
+
+</aside>
+
+<dialog class="buscar-modal" data-buscar-modal aria-labelledby="buscar-modal-titulo">
+    <div class="ajustes-barra">
+        <h2 id="buscar-modal-titulo">buscador.exe</h2>
+        <button class="ajustes-cerrar" type="button" data-buscar-modal-cerrar>
+            <svg class="window-btn-icono" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                <path d="M5.5 5.5L18.5 18.5M18.5 5.5L5.5 18.5" fill="none"
+                      stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
+            </svg>
+            <span class="visually-hidden">Cerrar la búsqueda</span>
+        </button>
+    </div>
+    <div class="buscar-modal-cuerpo">
+        <form class="buscar-form" role="search" method="get"
+              action="/web/buscar/buscar.html">
+            <label class="buscar-form-label" for="buscar-modal-campo">buscar en toda la web:</label>
+            <div class="buscar-form-caja">
+                <input class="buscar-form-campo" type="search"
+                       id="buscar-modal-campo" name="q"
+                       placeholder="una palabra, un título…"
+                       autocomplete="off" spellcheck="false">
+                <button class="buscar-form-enviar" type="submit">
+                    <span class="buscar-lupa" aria-hidden="true"></span>
+                    <span class="buscar-form-enviar-texto">buscar</span>
+                </button>
+            </div>
+            <p class="buscar-ayuda">
+                Mira el título, la sección, las categorías y
+                <strong>lo que pone dentro</strong> de las entradas y los
+                relatos. Da igual con tildes o sin ellas.
+            </p>
+        </form>
+    </div>
+</dialog>
+
+<dialog class="ajustes" data-ajustes aria-labelledby="ajustes-titulo">
+    <div class="ajustes-barra">
+        <h2 id="ajustes-titulo">accesibilidad.cfg</h2>
+        <button class="ajustes-cerrar" type="button" data-ajustes-cerrar>
+            <svg class="window-btn-icono" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                <path d="M5.5 5.5L18.5 18.5M18.5 5.5L5.5 18.5" fill="none"
+                      stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
+            </svg>
+            <span class="visually-hidden">Cerrar los ajustes</span>
+        </button>
+    </div>
+
+    <div class="ajustes-cuerpo">
+        <div class="ajustes-fila">
+            <label class="ajustes-nombre" for="ajustes-tamano">tamaño del texto</label>
+            <div class="ajustes-deslizador">
+                <span class="ajustes-aa ajustes-aa-pequena" aria-hidden="true">Aa</span>
+                <input class="ajustes-rango" type="range" id="ajustes-tamano"
+                       min="0" max="4" step="1" value="1"
+                       list="ajustes-tamano-marcas" data-tamano-rango>
+                <datalist id="ajustes-tamano-marcas">
+                    <option value="0"></option>
+                    <option value="1"></option>
+                    <option value="2"></option>
+                    <option value="3"></option>
+                    <option value="4"></option>
+                </datalist>
+                <span class="ajustes-aa ajustes-aa-grande" aria-hidden="true">Aa</span>
+            </div>
+            <p class="ajustes-valor" role="status">
+                <span class="visually-hidden">Texto al </span><span data-tamano-valor>100%</span>
+            </p>
+        </div>
+
+        <div class="ajustes-fila">
+            <p class="ajustes-nombre" id="ajustes-interlineado-nombre">separación entre líneas</p>
+            <div class="ajustes-mandos" role="group" aria-labelledby="ajustes-interlineado-nombre">
+                <button class="ajustes-opcion" type="button" data-interlineado="" aria-pressed="true">por defecto</button>
+                <button class="ajustes-opcion" type="button" data-interlineado="amplio" aria-pressed="false">amplia</button>
+                <button class="ajustes-opcion" type="button" data-interlineado="muy-amplio" aria-pressed="false">muy amplia</button>
+            </div>
+        </div>
+
+        <div class="ajustes-fila">
+            <p class="ajustes-nombre" id="ajustes-letra-nombre">la letra</p>
+            <div class="ajustes-mandos" role="group" aria-labelledby="ajustes-letra-nombre">
+                <button class="ajustes-opcion" type="button" data-letra="" aria-pressed="true">por defecto</button>
+                <button class="ajustes-opcion" type="button" data-letra="legible" aria-pressed="false">más legible</button>
+            </div>
+        </div>
+
+        <div class="ajustes-fila">
+            <p class="ajustes-nombre" id="ajustes-voz-nombre">velocidad de la voz</p>
+            <div class="ajustes-mandos" role="group" aria-labelledby="ajustes-voz-nombre">
+                <button class="ajustes-opcion" type="button" data-voz="lenta" aria-pressed="false">lenta</button>
+                <button class="ajustes-opcion" type="button" data-voz="" aria-pressed="true">normal</button>
+                <button class="ajustes-opcion" type="button" data-voz="rapida" aria-pressed="false">rápida</button>
+            </div>
+        </div>
+
+        <div class="ajustes-fila">
+            <p class="ajustes-nombre" id="ajustes-tema-nombre">color de tema</p>
+            <p class="ajustes-grupo-titulo" id="ajustes-tema-leer">para leer</p>
+            <div class="ajustes-mandos ajustes-temas" role="group" aria-labelledby="ajustes-tema-nombre ajustes-tema-leer">
+                <button class="ajustes-opcion" type="button" data-tema="oscuro" aria-pressed="true">
+                    <span class="ajustes-emoji" aria-hidden="true">🌙</span>oscuro</button>
+                <button class="ajustes-opcion" type="button" data-tema="claro" aria-pressed="false">
+                    <span class="ajustes-emoji" aria-hidden="true">☀️</span>claro</button>
+                <button class="ajustes-opcion" type="button" data-tema="oscuro-puro" aria-pressed="false">
+                    <span class="ajustes-emoji" aria-hidden="true">🌑</span>oscuro puro</button>
+                <button class="ajustes-opcion" type="button" data-tema="claro-puro" aria-pressed="false">
+                    <span class="ajustes-emoji" aria-hidden="true">🌕</span>claro puro</button>
+                <button class="ajustes-opcion" type="button" data-tema="tranquilo-oscuro" aria-pressed="false">
+                    <span class="ajustes-emoji" aria-hidden="true">🌿</span>tranquilo oscuro</button>
+                <button class="ajustes-opcion" type="button" data-tema="tranquilo" aria-pressed="false">
+                    <span class="ajustes-emoji" aria-hidden="true">🍃</span>tranquilo</button>
+            </div>
+
+            <p class="ajustes-grupo-titulo" id="ajustes-tema-adorno">de adorno</p>
+            <div class="ajustes-mandos ajustes-temas" role="group" aria-labelledby="ajustes-tema-nombre ajustes-tema-adorno">
+                <button class="ajustes-opcion" type="button" data-tema="terminal-verde" aria-pressed="false">
+                    <span class="ajustes-emoji" aria-hidden="true">🟢</span>terminal verde</button>
+                <button class="ajustes-opcion" type="button" data-tema="terminal-azul" aria-pressed="false">
+                    <span class="ajustes-emoji" aria-hidden="true">🔵</span>terminal azul</button>
+                <button class="ajustes-opcion" type="button" data-tema="terminal-rojo" aria-pressed="false">
+                    <span class="ajustes-emoji" aria-hidden="true">🔴</span>terminal rojo</button>
+                <button class="ajustes-opcion" type="button" data-tema="terminal-ambar" aria-pressed="false">
+                    <span class="ajustes-emoji" aria-hidden="true">🟡</span>terminal ámbar</button>
+            </div>
+            <p class="ajustes-grupo-nota">
+                Estas opciones de consola antigua no respetan el contraste mínimo de
+                accesibilidad, son meramente estéticas.
+            </p>
+        </div>
+
+        <div class="ajustes-fila">
+            <p class="ajustes-nombre">efectos visuales</p>
+            <div class="ajustes-mandos ajustes-mandos-anchos">
+                <button id="cursor-trail-toggle" class="theme-toggle" type="button" aria-pressed="true">
+                    <span class="theme-toggle-icon" aria-hidden="true">✦</span>
+                    <span class="cursor-trail-toggle-text">BRILLITO: ON</span>
+                </button>
+                <button class="theme-toggle" type="button" data-crt-boton aria-pressed="false">
+                    <span class="theme-toggle-icon" aria-hidden="true">▧</span>
+                    <span class="ajustes-crt-texto">FILTRO <abbr title="Cathode Ray Tube: los monitores de tubo de antes, con sus rayas y las esquinas apagadas">CRT</abbr>: <span data-crt-estado>OFF</span></span>
+                </button>
+            </div>
+        </div>
+
+        <div class="ajustes-fila">
+            <p class="ajustes-nombre" id="ajustes-movimiento-nombre">animaciones</p>
+            <div class="ajustes-mandos" role="group" aria-labelledby="ajustes-movimiento-nombre">
+                <button class="ajustes-opcion" type="button" data-movimiento="" aria-pressed="true">normal</button>
+                <button class="ajustes-opcion" type="button" data-movimiento="quieto" aria-pressed="false">sin animaciones</button>
+            </div>
+        </div>
+    </div>
+</dialog>
+<!-- ==== fin de la BARRA LATERAL ==== -->
+    </div>
 
     <main id="main-content">
         <section id="home" class="home character-sheet">

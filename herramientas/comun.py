@@ -212,7 +212,8 @@ CRUDO = re.compile(r"<(script|style)\b.*?</\1\s*>", re.S | re.I)
 # Las marcas que busca actualizar-cabeceras.py (ABRE, CIERRA, ABRE_JS,
 # CIERRA_JS, ABRE_TEMA y ABRE_ADELANTO). Si cambian allí, cambian aquí.
 MARCAS = ("==== CSS ====", "==== fin del CSS ====", "==== JS ====",
-          "==== fin del JS ====", "==== TEMA ====", "==== ADELANTO DEL MENÚ ====")
+          "==== fin del JS ====", "==== TEMA ====", "==== ADELANTO DEL MENÚ ====",
+          "==== BARRA LATERAL ====", "==== fin de la BARRA LATERAL ====")
 
 
 def se_queda(cuerpo):
@@ -438,14 +439,15 @@ def elegir_campana(pedida, pregunta="¿De qué campaña?"):
 # repartidas por carpetas, el nombre suelto ya no basta para encontrarlas.
 GENERADORES = (
     "3-generadores/generar-archivo.py",
+    # Los tokens de los NPC y de la mesa, en pequeño, para donde se ven
+    # pequeños. Antes del buscador, que lee esos JSON, y antes de
+    # generar-posts, que escribe con ellos la ficha de cada campaña.
+    "2-imagenes/tokens-pequenos.py",
     "3-generadores/generar-posts.py",
     # Los comentarios de explicación de las plantillas, fuera de lo
     # publicado (los borradores se quedan con su guía). Después de
     # generar-archivo, que escribe páginas nuevas desde una plantilla.
     "3-generadores/quitar-comentarios.py",
-    # Los tokens de los NPC y de la mesa, en pequeño, para donde se ven
-    # pequeños. Antes del buscador, que lee esos JSON.
-    "2-imagenes/tokens-pequenos.py",
     # El nombre y la intro de la página de npcs, los mismos que su JSON:
     # si no, la página salta al llegar el JSON.
     "3-generadores/textos-npcs.py",

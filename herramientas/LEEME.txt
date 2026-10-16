@@ -2936,8 +2936,14 @@
       paginas/             lo que usa una sola (el diario, el
                            guestbook, los listados...)
 
-  fragmentos/ .......... trozos de HTML que se inyectan en todas
-                         las páginas: la barra lateral y las frases
+  fragmentos/ .......... trozos de HTML escritos UNA vez y usados en
+                         muchas páginas (ver LOS FRAGMENTOS):
+      barra-lateral.html   el menú; actualizar-cabeceras.py lo copia
+                           dentro de cada página
+      texto-a-voz.html     la ventana de escuchar; generar-posts.py la
+                           copia en cada entrada y relato
+      frases.html          la cinta de frases de la portada (se pide
+                           al cargar: solo la usa una página)
 
   datos/ ............... los JSON que rellenan la web, en una
                          carpeta por apartado, como el menú:
@@ -3440,6 +3446,23 @@
 
   SÍ HAY QUE SUBIRLOS A NEOCITIES: son los que piden las páginas.
 
+  LOS FRAGMENTOS
+  --------------
+  Lo que sale igual en muchas páginas se escribe una sola vez en
+  fragmentos/ y lo copian las herramientas, no el navegador:
+
+    - barra-lateral.html: el menú. Lo copia actualizar-cabeceras.py en
+      cada página (ver más arriba).
+    - texto-a-voz.html: la ventana de escuchar una entrada. La copia
+      generar-posts.py arriba de la columna de la foto, dormida
+      (data-voz-esqueleto: ocupa su sitio sin verse), y leer-en-voz.js
+      la despierta; si la página no la trae, la pide.
+
+  Y la ficha de cada campaña (campana.nfo) la escribe generar-posts.py
+  desde su JSON, y es el único sitio donde se monta: notas-rol.js solo le
+  da vida a los botones de los personajes. Si tocas el JSON de una
+  campaña a mano, pasa los generadores para que la ficha se ponga al día.
+
   LA VELOCIDAD (auditoría del 16-10-2026)
   ---------------------------------------
   Medido con Lighthouse simulando un móvil con 4G lento. Lo que más
@@ -3447,8 +3470,9 @@
   al cargar y empujaban lo de debajo. Se arreglaron escribiendo en la
   página lo que ya se sabe al generarla, o guardándole el sitio:
 
-    - Los minutos de lectura y el hueco de texto_a_voz.mp3 en entradas
-      y relatos, y la ficha de cada campaña: generar-posts.py.
+    - Los minutos de lectura y la ventana de texto_a_voz.mp3 en
+      entradas y relatos, y la ficha de cada campaña: generar-posts.py
+      (ver LOS FRAGMENTOS).
     - Los botones de las secciones y el «Hoy en Cralëa» de la portada
       de la wiki: generar-mundo.py (escribir_esqueleto_portada).
     - Los botones del botín y de pendientes de una campaña, y el dado
@@ -3561,6 +3585,16 @@
   965 ms en vez de entre 1350 y 1660 (la mitad), y la página termina de
   cargar entre 150 y 430 ms antes. El primer pintado no se movió, y es
   normal: nunca dependió del JS, sino del CSS, que ya iba bien.
+
+  DESDE EL 16-10-2026 EL MENÚ YA NO SE PIDE: actualizar-cabeceras.py lo
+  copia dentro de cada página (entre <!-- ==== BARRA LATERAL ==== --> y
+  su fin), con el enlace de esa página ya marcado y su apartado abierto.
+  Sale en el primer pintado (medido: 550 ms, antes que lo demás de la
+  página) y funciona aunque falle el JavaScript; cada página pesa 2,6 KB
+  más comprimida. Se sigue tocando SOLO fragmentos/barra-lateral.html y
+  pasando la herramienta. Si una página llega sin él (una recién hecha
+  desde una plantilla, antes de pasar los generadores), barra-lateral.js
+  lo pide como antes.
 
   OJO CON UNA TRAMPA QUE SALIÓ DE ESTO. Al llegar el menú tan pronto,
   puede estar ya en memoria cuando arranca barra-lateral.js. El aviso de

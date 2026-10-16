@@ -38,6 +38,17 @@ async function loadComponent(elementId, file, onLoaded) {
     }
 
     try {
+        // ¿Viene ya escrito en la página? La barra lateral sí: la copia
+        // dentro de cada página herramientas/3-generadores/actualizar-cabeceras.py
+        // (data-fragmento="barra-lateral"). Entonces no hay nada que pedir:
+        // solo esperar a que estén todos los scripts y avisar.
+        if (container.hasAttribute("data-fragmento") && container.children.length) {
+            if (typeof onLoaded === "function") {
+                await cuandoEsteLeidaLaPagina();
+                onLoaded();
+            }
+            return;
+        }
         // ¿Lo pidió ya cargador-scripts.js nada más empezar? La barra
         // lateral sí: la pide él, antes de que el navegador termine de
         // leer la página, porque es lo primero que hace falta ver. Si

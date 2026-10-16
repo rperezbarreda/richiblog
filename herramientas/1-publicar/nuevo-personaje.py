@@ -501,8 +501,11 @@ def main():
     print(f"\n  {anadidos} ficha(s) nueva(s).")
     print("  Ya se ven en la página; paso el buscador para que también")
     print("  se encuentren buscando su nombre.")
+    # generar-posts.py también: es quien escribe la ficha de la campaña
+    # (con los personajes de la mesa) dentro de su página.
     pasar_generadores(("2-imagenes/tokens-pequenos.py",
                        "3-generadores/textos-npcs.py",
+                       "3-generadores/generar-posts.py",
                        "3-generadores/generar-buscador.py"))
     return 0
 

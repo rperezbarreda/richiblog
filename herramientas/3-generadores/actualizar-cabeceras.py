@@ -1058,28 +1058,117 @@ CABECERA_JS = f"""    {ABRE_JS} -->
 
 BARRA_LATERAL = "/fragmentos/barra-lateral.html"
 
-# EL ADELANTO DEL MENÚ
+# EL ADELANTO DEL MENÚ (ya no se usa)
 #
-# El menú no está escrito en el HTML de cada página: vive en
-# fragmentos/barra-lateral.html y lo pide scripts/componentes/barra-lateral.js,
-# que va con defer y por tanto no corre hasta que el navegador ha
-# terminado de leer la página. Medido con la red frenada, el menú no
-# aparecía hasta 1,5 s: el HTML tardaba 190 ms, los scripts se ejecutaban
-# sobre los 1000 y solo entonces empezaba el viaje a por el trozo.
-#
-# Esa línea lo pide ahí mismo, antes incluso que el CSS, y guarda la
-# promesa. Cuando barra-lateral.js arranca no empieza ningún viaje: se
-# sube al que ya iba. El menú pasó a estar a los 786 ms, la mitad.
-#
-# Va escrita a pelo y no en un archivo aparte a propósito: un archivo
-# aparte habría que pedirlo, y pedirlo es justo lo que se está intentando
-# no hacer. Si algo falla se queda sin adelanto y loadComponent() lo pide
-# como siempre.
+# Hasta el 16-10-2026, cada página pedía el menú en el <head> con un
+# <script> escrito a pelo (window.adelantoDeFragmentos) para no esperar a
+# barra-lateral.js. Ahora el menú va escrito dentro de la página (ver LA
+# BARRA LATERAL, aquí abajo) y no hay nada que pedir. La marca se sigue
+# reconociendo (YA_PUESTO) para quitárselo a las páginas que aún lo
+# lleven.
 ABRE_ADELANTO = "<!-- ==== ADELANTO DEL MENÚ ===="
 
-ADELANTO = f"""    {ABRE_ADELANTO} -->
-    <script>window.adelantoDeFragmentos={{}};try{{window.adelantoDeFragmentos["%s"]=fetch("%s").then(function(r){{return r.ok?r.text():null}}).catch(function(){{return null}})}}catch(e){{}}</script>
-"""
+
+# =========================================
+# LA BARRA LATERAL, ESCRITA EN CADA PÁGINA
+# =========================================
+# fragmentos/barra-lateral.html es el menú de todo el sitio, escrito UNA
+# vez. Antes lo pedía el navegador al cargar cada página (con el adelanto
+# de arriba) y el menú aparecía 200-250 ms después que lo demás; ahora
+# esta herramienta lo copia dentro de cada página, entre dos marcas:
+#
+#     <div id="sidebar-container" data-fragmento="barra-lateral">
+#     <!-- ==== BARRA LATERAL ==== -->
+#     …el menú…
+#     <!-- ==== fin de la BARRA LATERAL ==== -->
+#     </div>
+#
+# y ya está desde el primer momento, aunque falle el JavaScript. SE SIGUE
+# TOCANDO SOLO EL FRAGMENTO: al pasar esto se reescribe en todas.
+#
+# De paso se deja marcado dónde se está (el enlace de esta página con
+# class="active" y aria-current, y su apartado abierto), lo mismo que hace
+# scripts/componentes/barra-lateral.js al arrancar (initializeActivePage):
+# así el submenú no se abre de golpe un momento después.
+#
+# Las plantillas (herramientas/plantillas/) se quedan con el contenedor
+# vacío: no son ninguna página, y lo que salga de ellas se pasa por aquí
+# después. Si una página llega sin menú, el script lo pide como antes.
+ABRE_BARRA = "<!-- ==== BARRA LATERAL ==== -->"
+CIERRA_BARRA = "<!-- ==== fin de la BARRA LATERAL ==== -->"
+RE_CONTENEDOR = re.compile(
+    r'<div id="sidebar-container"[^>]*>(?:\s*' + re.escape(ABRE_BARRA) + r'.*?'
+    + re.escape(CIERRA_BARRA) + r')?\s*</div>', re.S)
+
+
+def _normalizar(camino):
+    if len(camino) > 1 and camino.endswith("/"):
+        camino = camino[:-1]
+    if camino.endswith("/index.html"):
+        camino = camino[: -len("index.html")]
+    return camino or "/"
+
+
+def barra_para(ruta, fragmento):
+    """El menú con el enlace de esta página marcado y su apartado abierto
+    (mismas reglas que initializeActivePage en barra-lateral.js)."""
+    actual = _normalizar(ruta)
+    enlaces = [(m, _normalizar(m.group(2))) for m in
+               re.finditer(r'<a ([^>]*?)href="(/[^"#]*)"([^>]*)>', fragmento)
+               if fragmento.rfind('<aside class="sidebar"', 0, m.start()) != -1]
+    elegido, tipo = None, "page"
+    for m, camino in enlaces:
+        if camino == actual:
+            elegido = m
+            break
+    if elegido is None:
+        tipo, mejor = "true", ""
+        for m, camino in enlaces:
+            carpeta = camino[: camino.rfind("/") + 1] if camino.rfind("/") > 0 else "/"
+            if carpeta != "/" and (actual + "/").startswith(carpeta) and len(carpeta) > len(mejor):
+                elegido, mejor = m, carpeta
+    if elegido is None:
+        return fragmento
+    antes, despues = elegido.group(1), elegido.group(3)
+    clase = re.search(r'class="([^"]*)"', antes + despues)
+    nueva = elegido.group(0)
+    if clase:
+        nueva = nueva.replace(clase.group(0), 'class="%s active"' % clase.group(1), 1)
+    else:
+        nueva = nueva.replace("<a ", '<a class="active" ', 1)
+    nueva = nueva[:-1] + ' aria-current="%s">' % tipo
+    # Los apartados que lo contienen: los <div class="nav-group"> que
+    # siguen abiertos (sin cerrar) al llegar al enlace.
+    pila = []
+    for t in re.finditer(r"<(/?)div\b[^>]*>", fragmento[: elegido.start()]):
+        if t.group(1):
+            if pila:
+                pila.pop()
+        else:
+            pila.append(t)
+    grupos = sorted((t for t in pila if 'class="nav-group"' in t.group(0)), key=lambda t: -t.start())
+    texto = fragmento[: elegido.start()] + nueva + fragmento[elegido.end():]
+    for g in grupos:
+        # Desde el final hacia el principio, para no mover lo que queda
+        # por cambiar.
+        trozo = texto[g.start():]
+        trozo = trozo.replace('<div class="nav-group">', '<div class="nav-group open">', 1)
+        trozo = re.sub(r'(<button class="nav-toggle"[^>]*?)aria-expanded="false"', r'\1aria-expanded="true"',
+                       trozo, count=1)
+        trozo = re.sub(r'(<span class="arrow" aria-hidden="true">)\+(</span>)', "\\1\u2212\\2", trozo, count=1)
+        texto = texto[: g.start()] + trozo
+    return texto
+
+
+def con_barra_lateral(texto, ruta):
+    archivo = RAIZ / BARRA_LATERAL.lstrip("/")
+    if not archivo.is_file() or not RE_CONTENEDOR.search(texto):
+        return texto
+    fragmento = archivo.read_text(encoding="utf-8").strip("\n")
+    menu = barra_para(ruta, fragmento)
+    lleno = ('<div id="sidebar-container" data-fragmento="barra-lateral">\n%s\n%s\n%s\n    </div>'
+             % (ABRE_BARRA, menu, CIERRA_BARRA))
+    return RE_CONTENEDOR.sub(lambda m: lleno, texto, count=1)
 
 
 def bloque(ruta):
@@ -1096,10 +1185,10 @@ def bloque(ruta):
         f'    <script defer src="{con_version(servida(s))}"></script>'
         for s in con_paquetes(scripts_de(ruta))
     )
-    # El 404 no lleva barra lateral: ahí no hay nada que adelantar.
+    # Ya no hay adelanto que valga: la barra lateral va escrita dentro de
+    # cada página (ver con_barra_lateral, abajo). Las páginas que aún lo
+    # llevan lo pierden al pasar esto (YA_PUESTO se lo traga).
     adelanto = ""
-    if "/scripts/componentes/barra-lateral.js" in scripts_de(ruta):
-        adelanto = ADELANTO % (BARRA_LATERAL, con_version(BARRA_LATERAL))
 
     return (
         f"{adelanto}{CABECERA}{links}\n    {CIERRA}\n{cargador}\n"
@@ -1397,6 +1486,12 @@ def main():
             # algo que no es una página completa: ni se toca.
             saltadas.append(archivo.relative_to(RAIZ).as_posix())
             continue
+
+        # El menú, escrito dentro (no en las plantillas: ver
+        # con_barra_lateral).
+        if (FUERA.isdisjoint(archivo.relative_to(RAIZ).parts)
+                and "/scripts/componentes/barra-lateral.js" in scripts_de(ruta)):
+            salida = con_barra_lateral(salida, ruta)
 
         # Lo último, cuando ya está todo escrito: la política de seguridad
         # lleva las huellas de los scripts que haya quedado en la página.

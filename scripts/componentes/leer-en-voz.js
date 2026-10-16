@@ -45,17 +45,9 @@ const VOZ_ESPERA_VOCES = 2500;
 // de lento cansa, así que son dos pasos cortos a cada lado.
 const VOZ_VELOCIDADES = { lenta: 0.75, rapida: 1.35 };
 
-// Los tres pasos, en el orden en que salen los botones. Van AQUÍ ARRIBA
-// y no al lado de la función que los usa porque este archivo se arranca
-// solo (initializeLeerEnVoz, unas líneas más abajo), y un const que
-// todavía no se ha ejecutado no se puede leer: montar el botón reventaba
-// con "Cannot access 'VOZ_PASOS' before initialization" y la velocidad
-// no aparecía. Las funciones sí dan igual dónde estén; los const no.
-const VOZ_PASOS = [
-    { valor: "lenta", nombre: "lenta" },
-    { valor: "", nombre: "normal" },
-    { valor: "rapida", nombre: "rápida" },
-];
+// Los tres pasos de velocidad («lenta», normal y «rápida») son botones
+// de fragmentos/texto-a-voz.html, cada uno con su data-voz-paso: los
+// mismos valores que el mando de la ventana de accesibilidad (data-voz).
 
 const VOZ = {
     cuerpo: null,
@@ -74,11 +66,10 @@ const VOZ = {
 
 initializeLeerEnVoz();
 
-function initializeLeerEnVoz() {
-    // La entrada trae la ventana ya escrita, invisible, para guardarle el
-    // sitio (la escribe herramientas/3-generadores/generar-posts.py: si
-    // apareciera ahora, empujaría la foto hacia abajo). Si al final no se
-    // puede escuchar, el hueco sobra.
+async function initializeLeerEnVoz() {
+    // La entrada trae la ventana ya escrita y dormida (la copia
+    // herramientas/3-generadores/generar-posts.py de
+    // fragmentos/texto-a-voz.html). Si al final no se puede escuchar, sobra.
     const hueco = document.querySelector("[data-voz-esqueleto]");
     // Sin la función del navegador no hay nada que ofrecer.
     if (!("speechSynthesis" in window) || !("SpeechSynthesisUtterance" in window)) {
@@ -96,7 +87,9 @@ function initializeLeerEnVoz() {
     }
     VOZ.cuerpo = cuerpo;
 
-    montarBotonDeVoz();
+    if (!(await montarBotonDeVoz())) {
+        return;
+    }
 
     buscarVozEnEspanyol();
 
@@ -145,48 +138,66 @@ function dondeVaElBotonDeVoz() {
 // la pliega de verdad (ventanas-plegables.js). A los dos hay que
 // avisarlos con "ventanas:actualizar": esta ventana se monta desde JS y
 // aparece después de que ellos hayan repasado la página.
-function montarBotonDeVoz() {
+async function montarBotonDeVoz() {
     if (VOZ.boton) {
         return true;
     }
-    const sitio = dondeVaElBotonDeVoz();
-    if (!sitio) {
-        return false;
-    }
-
-    const ventana = document.createElement("div");
-    ventana.className = "voz-ventana";
-
-    const barra = document.createElement("div");
-    barra.className = "recent-entries-header";
-    const titulo = document.createElement("h2");
-    titulo.textContent = "texto_a_voz.mp3";
-    const mandos = document.createElement("div");
-    mandos.className = "window-controls window-controls-small";
-    mandos.setAttribute("data-window-controls", "");
-    mandos.setAttribute("aria-hidden", "true");
-    barra.appendChild(titulo);
-    barra.appendChild(mandos);
-    ventana.appendChild(barra);
-
-    const boton = document.createElement("button");
-    boton.type = "button";
-    boton.className = "voz-boton";
-    boton.addEventListener("click", alPulsarVoz);
-    pintarVoz(boton, "escuchar");
-    ventana.appendChild(boton);
-
-    // En el sitio del hueco que trae la entrada, si lo trae: mide lo
-    // mismo, así que no se mueve nada.
-    const hueco = document.querySelector("[data-voz-esqueleto]");
-    if (hueco) {
-        hueco.replaceWith(ventana);
-    } else {
+    // La ventana está escrita UNA vez, en fragmentos/texto-a-voz.html. Lo
+    // normal es que la página ya la traiga (ver arriba); si no la trae
+    // (una entrada recién escrita a la que aún no se le han pasado los
+    // generadores), se pide el fragmento y se pone en su sitio.
+    let ventana = document.querySelector("[data-voz-esqueleto]");
+    if (!ventana) {
+        const sitio = dondeVaElBotonDeVoz();
+        if (!sitio) {
+            return false;
+        }
+        try {
+            const ruta = "/fragmentos/texto-a-voz.html";
+            const respuesta = await fetch(window.conVersion ? window.conVersion(ruta) : ruta);
+            if (!respuesta.ok) {
+                return false;
+            }
+            // Un archivo de esta misma web, nada que venga de fuera: se
+            // lee como documento y se adopta su primer elemento.
+            const leido = new DOMParser().parseFromString(await respuesta.text(), "text/html");
+            ventana = leido.body.firstElementChild
+                ? document.importNode(leido.body.firstElementChild, true) : null;
+        } catch (error) {
+            return false;
+        }
+        if (!ventana || !ventana.classList.contains("voz-ventana")) {
+            return false;
+        }
         sitio.insertBefore(ventana, sitio.firstChild);
     }
+
+    // Despertarla: que se vea, que se lea y que se pueda pulsar.
+    ventana.removeAttribute("data-voz-esqueleto");
+    ventana.removeAttribute("aria-hidden");
+    ventana.querySelectorAll("[tabindex='-1']").forEach((b) => b.removeAttribute("tabindex"));
+    const mandos = ventana.querySelector(".window-controls");
+    if (mandos) {
+        mandos.setAttribute("data-window-controls", "");
+        mandos.setAttribute("aria-hidden", "true");
+    }
+    const boton = ventana.querySelector(".voz-boton");
+    if (!boton) {
+        return false;
+    }
+    boton.addEventListener("click", alPulsarVoz);
+    pintarVoz(boton, "escuchar");
     VOZ.ventana = ventana;
     VOZ.boton = boton;
-    montarVelocidadDeVoz(ventana);
+
+    const velocidad = ventana.querySelector(".voz-velocidad");
+    if (velocidad) {
+        velocidad.querySelectorAll("[data-voz-paso]").forEach((b) => {
+            b.addEventListener("click", () => ponerVelocidadDeVoz(b.getAttribute("data-voz-paso")));
+        });
+        VOZ.velocidad = velocidad;
+        pintarVelocidadDeVoz();
+    }
     document.dispatchEvent(new CustomEvent("ventanas:actualizar"));
     return true;
 }
@@ -214,40 +225,6 @@ function montarBotonDeVoz() {
 // data-voz es el que lleva el <html>, y un querySelectorAll("[data-voz]")
 // se llevaría por delante la propia página. Es el mismo tropiezo que ya
 // hubo con data-crt.
-function montarVelocidadDeVoz(ventana) {
-    if (VOZ.velocidad) {
-        return;
-    }
-    const caja = document.createElement("div");
-    caja.className = "voz-velocidad";
-    caja.setAttribute("role", "group");
-
-    const nombre = document.createElement("p");
-    nombre.className = "voz-velocidad-nombre";
-    nombre.id = "voz-velocidad-nombre";
-    nombre.textContent = "velocidad";
-    caja.setAttribute("aria-labelledby", "voz-velocidad-nombre");
-
-    const mandos = document.createElement("div");
-    mandos.className = "voz-velocidad-mandos";
-
-    VOZ_PASOS.forEach((paso) => {
-        const b = document.createElement("button");
-        b.type = "button";
-        b.className = "voz-velocidad-boton";
-        b.setAttribute("data-voz-paso", paso.valor);
-        b.textContent = paso.nombre;
-        b.addEventListener("click", () => ponerVelocidadDeVoz(paso.valor));
-        mandos.appendChild(b);
-    });
-
-    caja.appendChild(nombre);
-    caja.appendChild(mandos);
-    ventana.appendChild(caja);
-    VOZ.velocidad = caja;
-    pintarVelocidadDeVoz();
-}
-
 function ponerVelocidadDeVoz(valor) {
     const raiz = document.documentElement;
     if (valor) {

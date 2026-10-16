@@ -3,12 +3,6 @@
 */
 const NOTAS_LISTADO_URL = "/datos/notas_rol/notas-rol.json";
 const NOTAS_COLORES = ["verde", "azul", "rojo", "morado"];
-const NOTAS_CAMPOS = [
-    { clave: "sistema", nombre: "sistema" },
-    { clave: "director", nombre: "dirige" },
-    { clave: "personajes", nombre: "personajes" },
-    { clave: "sinopsis", nombre: "de qué va" },
-];
 initializeNotasRol();
 async function initializeNotasRol() {
     const lista = document.querySelector("[data-campana-sesiones]");
@@ -67,48 +61,26 @@ function pintarCabeceraCampana(campana) {
 }
 function pintarFichaCampana(campana) {
     const ficha = document.querySelector("[data-campana-ficha]");
-    const cuerpo = document.querySelector("[data-campana-ficha-cuerpo]");
-    if (!ficha || !cuerpo) {
+    if (!ficha || ficha.hidden) {
         return;
     }
-    const filas = NOTAS_CAMPOS.filter((campo) =>
-        Object.prototype.hasOwnProperty.call(campana, campo.clave)
-    );
-    if (!filas.length) {
-        return;
-    }
-    cuerpo.textContent = "";
-    const lista = document.createElement("dl");
-    lista.className = "campana-ficha-lista";
-    filas.forEach((campo) => {
-        const bloque = document.createElement("div");
-        bloque.className = "campana-dato";
-        const nombre = document.createElement("dt");
-        nombre.className = "campana-dato-nombre";
-        nombre.textContent = campo.nombre;
-        bloque.appendChild(nombre);
-        const valor = document.createElement("dd");
-        valor.className = "campana-dato-valor";
-        if (campo.clave === "personajes") {
-            const gente = personajesDe(campana.personajes);
-            if (gente.length) {
-                valor.appendChild(listaDePersonajes(gente));
-            } else {
-                valor.appendChild(porRellenar());
-            }
-        } else {
-            const texto = (campana[campo.clave] || "").toString().trim();
-            if (texto) {
-                valor.textContent = texto;
-            } else {
-                valor.appendChild(porRellenar());
+    const gente = new Map(personajesDe(campana.personajes).map((p) => [p.nombre, p]));
+    ficha.querySelectorAll(".campana-personaje-token[data-pj]").forEach((boton) => {
+        const quien = gente.get(boton.getAttribute("data-pj"));
+        if (!quien) {
+            return;
+        }
+        boton.addEventListener("click", () => abrirLaFichaDeUnPj(quien, boton));
+        const img = boton.querySelector("img[data-grande]");
+        if (img) {
+            const grande = imagenSeguraDeMesa(img.getAttribute("data-grande"));
+            if (grande) {
+                img.addEventListener("error", () => {
+                    img.src = grande;
+                }, { once: true });
             }
         }
-        bloque.appendChild(valor);
-        lista.appendChild(bloque);
     });
-    cuerpo.appendChild(lista);
-    ficha.hidden = false;
     document.dispatchEvent(new CustomEvent("ventanas:actualizar"));
 }
 function personajesDe(crudos) {
@@ -150,40 +122,6 @@ function personajesDe(crudos) {
                 .filter(Boolean),
         }));
 }
-function listaDePersonajes(gente) {
-    const lista = document.createElement("ul");
-    lista.className = "campana-personajes";
-    gente.forEach((quien, i) => {
-        const fila = document.createElement("li");
-        fila.className = "campana-personaje";
-        const boton = document.createElement("button");
-        boton.type = "button";
-        boton.className = "campana-personaje-token" + (quien.color ? " pj-" + quien.color : "");
-        boton.setAttribute("aria-haspopup", "dialog");
-        boton.addEventListener("click", () => abrirLaFichaDeUnPj(quien, boton));
-        const extra = (quien.extra || "").toString().trim();
-        if (extra) {
-            boton.setAttribute("aria-label", quien.nombre + ". " + extra);
-            boton.title = extra;
-        }
-        const marco = document.createElement("span");
-        marco.className = "campana-personaje-marco";
-        marco.appendChild(
-            retratoDeMesa(quien.token_mini || quien.token, quien.nombre,
-                "campana-personaje-img", "campana-personaje-mono", quien.token)
-        );
-        boton.appendChild(marco);
-        const nombre = document.createElement("strong");
-        nombre.className =
-            "campana-personaje-nombre" +
-            (quien.color ? " pj-" + quien.color : "");
-        nombre.textContent = quien.nombre;
-        boton.appendChild(nombre);
-        fila.appendChild(boton);
-        lista.appendChild(fila);
-    });
-    return lista;
-}
 function abrirLaFichaDeUnPj(quien, devolverA) {
     window.ventanaModal.abrir({
         titulo: nombreDeArchivoMesa(quien.nombre) + ".nfo",
@@ -205,12 +143,6 @@ function nombreDeArchivoMesa(nombre) {
         .replace(/[̀-ͯ]/g, "")
         .replace(/[^a-z0-9]+/g, "_")
         .replace(/^_+|_+$/g, "") || "ficha";
-}
-function porRellenar() {
-    const aviso = document.createElement("span");
-    aviso.className = "campana-dato-vacio";
-    aviso.textContent = "por rellenar";
-    return aviso;
 }
 function prepararBotones(campana) {
     document.querySelectorAll(".campana-boton[data-por-ver]").forEach((b) => {

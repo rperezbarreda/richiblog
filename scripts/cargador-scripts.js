@@ -69,6 +69,7 @@
         // ==== generado ====
         "/fragmentos/barra-lateral.html": "d9a306ce",
         "/fragmentos/frases.html": "2720019e",
+        "/fragmentos/texto-a-voz.html": "5a69ce50",
         // ==== fin del generado ====
     };
 

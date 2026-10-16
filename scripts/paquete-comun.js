@@ -28,6 +28,13 @@ async function loadComponent(elementId, file, onLoaded) {
         return;
     }
     try {
+        if (container.hasAttribute("data-fragmento") && container.children.length) {
+            if (typeof onLoaded === "function") {
+                await cuandoEsteLeidaLaPagina();
+                onLoaded();
+            }
+            return;
+        }
         const adelanto = window.adelantoDeFragmentos || {};
         let html = adelanto[file] ? await adelanto[file] : null;
         if (html === null) {

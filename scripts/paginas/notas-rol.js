@@ -28,18 +28,9 @@ const NOTAS_LISTADO_URL = "/datos/notas_rol/notas-rol.json";
 
 // Los colores que puede llevar un personaje de los jugadores. Son los
 // cuatro que están escritos en estilos/paginas/notas-rol.css; si se añade
-// uno allí, se añade aquí.
+// uno allí, se añade aquí (y en COLORES_PJ de generar-posts.py, que es
+// quien escribe la ficha de la campaña).
 const NOTAS_COLORES = ["verde", "azul", "rojo", "morado"];
-
-// El orden en que salen los campos de la ficha y cómo se llaman. Los
-// personajes van aparte (son una lista, no una línea de texto) y se
-// cuelan en su sitio por la clave "personajes".
-const NOTAS_CAMPOS = [
-    { clave: "sistema", nombre: "sistema" },
-    { clave: "director", nombre: "dirige" },
-    { clave: "personajes", nombre: "personajes" },
-    { clave: "sinopsis", nombre: "de qué va" },
-];
 
 initializeNotasRol();
 
@@ -122,69 +113,41 @@ function pintarCabeceraCampana(campana) {
 // =========================================
 // LA FICHA
 // =========================================
-// Se monta con createElement y no con innerHTML, al revés que la lista de
-// sesiones. No es por capricho: aquí cada dato es UN texto suelto, y
-// textContent lo pone tal cual sin que haya que acordarse de escapar
-// nada. En la lista de abajo hay que pegar varios trozos con sus clases y
-// sus enlaces, y ahí sale más corto escribir el HTML y escapar.
+// La ficha de la campaña (campana.nfo: sistema, quién dirige, los
+// personajes y de qué va) YA VIENE ESCRITA en la página: la escribe
+// herramientas/3-generadores/generar-posts.py con el mismo JSON de la
+// campaña (poner_fichas_de_campana), y es el ÚNICO sitio donde se monta.
+// Antes se montaba aquí, al cargar, y al aparecer empujaba la lista de
+// sesiones media pantalla hacia abajo.
+//
+// Aquí solo se le da vida: cada personaje es un botón que abre su ficha,
+// y su retrato pequeño, si no carga, se cambia por el grande. Si tocas el
+// JSON a mano, pasa los generadores (menú → repasar todo) para que la
+// ficha se ponga al día.
 
 function pintarFichaCampana(campana) {
     const ficha = document.querySelector("[data-campana-ficha]");
-    const cuerpo = document.querySelector("[data-campana-ficha-cuerpo]");
-    if (!ficha || !cuerpo) {
+    if (!ficha || ficha.hidden) {
         return;
     }
-
-    const filas = NOTAS_CAMPOS.filter((campo) =>
-        Object.prototype.hasOwnProperty.call(campana, campo.clave)
-    );
-    if (!filas.length) {
-        // Ni un campo en el JSON: la ficha no existe para esta campaña y
-        // la ventana se queda escondida, que es mejor que un marco vacío.
-        return;
-    }
-
-    cuerpo.textContent = "";
-    // Una <dl> de verdad: así un lector de pantalla dice "sistema, D&D
-    // 5e" y no dos textos sueltos uno detrás de otro.
-    const lista = document.createElement("dl");
-    lista.className = "campana-ficha-lista";
-
-    filas.forEach((campo) => {
-        const bloque = document.createElement("div");
-        bloque.className = "campana-dato";
-
-        const nombre = document.createElement("dt");
-        nombre.className = "campana-dato-nombre";
-        nombre.textContent = campo.nombre;
-        bloque.appendChild(nombre);
-
-        const valor = document.createElement("dd");
-        valor.className = "campana-dato-valor";
-        if (campo.clave === "personajes") {
-            const gente = personajesDe(campana.personajes);
-            if (gente.length) {
-                valor.appendChild(listaDePersonajes(gente));
-            } else {
-                valor.appendChild(porRellenar());
-            }
-        } else {
-            const texto = (campana[campo.clave] || "").toString().trim();
-            if (texto) {
-                valor.textContent = texto;
-            } else {
-                valor.appendChild(porRellenar());
+    const gente = new Map(personajesDe(campana.personajes).map((p) => [p.nombre, p]));
+    ficha.querySelectorAll(".campana-personaje-token[data-pj]").forEach((boton) => {
+        const quien = gente.get(boton.getAttribute("data-pj"));
+        if (!quien) {
+            return;
+        }
+        boton.addEventListener("click", () => abrirLaFichaDeUnPj(quien, boton));
+        const img = boton.querySelector("img[data-grande]");
+        if (img) {
+            const grande = imagenSeguraDeMesa(img.getAttribute("data-grande"));
+            if (grande) {
+                img.addEventListener("error", () => {
+                    img.src = grande;
+                }, { once: true });
             }
         }
-        bloque.appendChild(valor);
-        lista.appendChild(bloque);
     });
-
-    cuerpo.appendChild(lista);
-    ficha.hidden = false;
-    // Por si la ventana estrena sus botones −■✕ ahora: la cabecera ya
-    // estaba en el HTML, pero los cuadraditos los pone
-    // scripts/componentes/botones-ventana.js al avisar.
+    // Por si la ventana estrena sus botones −■✕ ahora.
     document.dispatchEvent(new CustomEvent("ventanas:actualizar"));
 }
 
@@ -254,61 +217,6 @@ function personajesDe(crudos) {
         }));
 }
 
-// LOS PERSONAJES DE LA MESA, CON SU CARA. Antes era una lista de nombres
-// que llevaba a la página de npcs; ahora es una fila de tokens, y pulsar
-// uno abre la ventana de «la mesa» por su ficha. Dos motivos: a la gente
-// de la mesa se la reconoce por el dibujo mucho antes que por el nombre, y
-// la página de npcs es de los NPC —la mesa no está ahí, así que aquel
-// enlace llevaba a buscar a alguien que no estaba.
-//
-// Siguen siendo botones y no enlaces porque no se cambia de página: se
-// abre una ventana encima (aria-haspopup="dialog" lo dice).
-function listaDePersonajes(gente) {
-    const lista = document.createElement("ul");
-    lista.className = "campana-personajes";
-    gente.forEach((quien, i) => {
-        const fila = document.createElement("li");
-        fila.className = "campana-personaje";
-
-        const boton = document.createElement("button");
-        boton.type = "button";
-        boton.className = "campana-personaje-token" + (quien.color ? " pj-" + quien.color : "");
-        boton.setAttribute("aria-haspopup", "dialog");
-        boton.addEventListener("click", () => abrirLaFichaDeUnPj(quien, boton));
-        // LO QUE ES CADA UNO (la clase, el nivel, quién lo lleva) NO va
-        // escrito debajo del token: medido, «Elfo Druida nivel 3 · lo
-        // lleva Richi» ocupa tres líneas bajo un círculo de 140px y deja
-        // la ficha de la campaña en una columna de tarjetas larguísimas.
-        // Va en el nombre del botón, así que lo lee un lector de pantalla
-        // y sale al dejar el ratón encima, y escrito entero en la ventana
-        // que abre el propio token, que es donde se va a mirar.
-        const extra = (quien.extra || "").toString().trim();
-        if (extra) {
-            boton.setAttribute("aria-label", quien.nombre + ". " + extra);
-            boton.title = extra;
-        }
-
-        const marco = document.createElement("span");
-        marco.className = "campana-personaje-marco";
-        marco.appendChild(
-            retratoDeMesa(quien.token_mini || quien.token, quien.nombre,
-                "campana-personaje-img", "campana-personaje-mono", quien.token)
-        );
-        boton.appendChild(marco);
-
-        const nombre = document.createElement("strong");
-        nombre.className =
-            "campana-personaje-nombre" +
-            (quien.color ? " pj-" + quien.color : "");
-        nombre.textContent = quien.nombre;
-        boton.appendChild(nombre);
-
-        fila.appendChild(boton);
-        lista.appendChild(fila);
-    });
-    return lista;
-}
-
 // UNA VENTANA PARA UNO, no para la mesa entera: se pulsa a alguien y sale
 // SU ficha y nada más, igual que la de un NPC. Antes la ventana llevaba
 // arriba una fila con los cuatro y había que volver a elegir dentro, que
@@ -343,12 +251,6 @@ function nombreDeArchivoMesa(nombre) {
         .replace(/^_+|_+$/g, "") || "ficha";
 }
 
-function porRellenar() {
-    const aviso = document.createElement("span");
-    aviso.className = "campana-dato-vacio";
-    aviso.textContent = "por rellenar";
-    return aviso;
-}
 
 
 // =========================================
