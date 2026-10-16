@@ -1,0 +1,634 @@
+/* EL EDITOR DE LA WIKI (herramientas/1-publicar/editor-wiki.py).
+
+   Con los colores del sitio (morado y amarillo; en claro, crema y
+   granate) y letra grande: es para escribir un buen rato. Todo lo que se
+   pulsa mide como poco 44px y lleva el doble borde al tener el foco. Sin
+   position: sticky, :has(), <dialog> ni display: contents, que no van en
+   el navegador de Richi: la barra de abajo es position: fixed. */
+
+:root {
+    --fondo: #12091c;
+    --caja: #2b1a3d;
+    --texto: #f4f1f7;
+    --suave: #d6d2da;
+    --acento: #f5ce6c;
+    --sobre-acento: #12091c;
+    --borde: rgba(255, 255, 255, 0.18);
+    --error: #f58f8a;
+    --mono: "DM Mono", ui-monospace, Consolas, monospace;
+    color-scheme: dark;
+}
+
+@media (prefers-color-scheme: light) {
+    :root {
+        --fondo: #f3e1d6;
+        --caja: #faf6ee;
+        --texto: #241a12;
+        --suave: #4c4236;
+        --acento: #800c04;
+        --sobre-acento: #ede4d6;
+        --borde: rgba(36, 26, 18, 0.25);
+        --error: #7a1d15;
+        color-scheme: light;
+    }
+}
+
+* {
+    box-sizing: border-box;
+}
+
+html {
+    font-size: 112.5%;
+}
+
+body {
+    margin: 0;
+    padding-bottom: 110px;
+    background: var(--fondo);
+    color: var(--texto);
+    font-family: "Space Grotesk", system-ui, "Segoe UI", sans-serif;
+    line-height: 1.55;
+}
+
+[hidden] {
+    display: none !important;
+}
+
+.saltar {
+    position: absolute;
+    left: -9999px;
+}
+
+.saltar:focus {
+    left: 16px;
+    top: 16px;
+    z-index: 10;
+    padding: 10px 16px;
+    background: var(--acento);
+    color: var(--sobre-acento);
+}
+
+:focus-visible {
+    outline: 3px solid var(--acento);
+    outline-offset: 3px;
+}
+
+.cabecera {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px 24px;
+    padding: 14px max(16px, 4vw);
+    border-bottom: 2px solid var(--acento);
+}
+
+.marca {
+    margin: 0;
+    color: var(--acento);
+    font-family: var(--mono);
+    font-size: 1.1rem;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+}
+
+.menu {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+main {
+    max-width: 62rem;
+    margin: 0 auto;
+    padding: 24px max(16px, 4vw);
+}
+
+main:focus {
+    outline: none;
+}
+
+h1 {
+    margin: 0 0 18px;
+    color: var(--acento);
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: clamp(1.8rem, 5vw, 2.6rem);
+    font-style: italic;
+    line-height: 1.15;
+}
+
+h2 {
+    margin: 0 0 10px;
+    color: var(--acento);
+    font-family: var(--mono);
+    font-size: 1.15rem;
+    font-weight: 400;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+}
+
+.ayuda {
+    margin: 0 0 10px;
+    color: var(--suave);
+    font-size: 0.95rem;
+}
+
+.opcional {
+    color: var(--suave);
+    font-weight: 400;
+}
+
+/* LOS BOTONES Y LAS CASILLAS */
+button,
+.boton {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    min-height: 48px;
+    padding: 8px 18px;
+    border: 2px solid var(--acento);
+    background: var(--caja);
+    color: var(--acento);
+    font: inherit;
+    font-size: 1rem;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+button:hover,
+.boton:hover {
+    background: var(--acento);
+    color: var(--sobre-acento);
+}
+
+/* El doble borde al tener el foco, como el botón Aa del sitio. */
+button:focus-visible,
+.boton:focus-visible,
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible {
+    outline: 3px solid var(--acento);
+    outline-offset: 3px;
+    box-shadow: 0 0 0 3px var(--fondo) inset;
+}
+
+button.principal {
+    background: var(--acento);
+    color: var(--sobre-acento);
+    font-weight: 700;
+}
+
+button.principal:hover {
+    background: var(--caja);
+    color: var(--acento);
+}
+
+button[aria-pressed="true"] {
+    background: var(--acento);
+    color: var(--sobre-acento);
+}
+
+button:disabled {
+    opacity: 0.6;
+    cursor: wait;
+}
+
+label {
+    display: block;
+    margin-bottom: 4px;
+    font-weight: 700;
+}
+
+input,
+textarea,
+select {
+    width: 100%;
+    min-height: 48px;
+    padding: 10px 12px;
+    border: 2px solid var(--borde);
+    border-radius: 0;
+    background: var(--caja);
+    color: var(--texto);
+    font: inherit;
+}
+
+input:hover,
+textarea:hover {
+    border-color: var(--acento);
+}
+
+textarea {
+    min-height: 7.5em;
+    resize: vertical;
+    line-height: 1.6;
+}
+
+.campo {
+    margin-bottom: 22px;
+}
+
+.fila {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px;
+}
+
+.fila input {
+    flex: 1 1 16rem;
+    width: auto;
+}
+
+.fila label {
+    flex-basis: 100%;
+    margin: 0;
+}
+
+.tecla {
+    padding: 0 6px;
+    border: 1px solid currentColor;
+    font-family: var(--mono);
+    font-size: 0.75rem;
+    font-weight: 400;
+}
+
+/* LO QUE DICE QUÉ HA PASADO */
+.aviso {
+    margin: 0 0 18px;
+    font-weight: 700;
+}
+
+.aviso:empty {
+    display: none;
+}
+
+.aviso {
+    padding: 12px 16px;
+    border: 2px solid var(--acento);
+    background: var(--caja);
+}
+
+.aviso.es-error {
+    border-color: var(--error);
+    color: var(--error);
+}
+
+.salida {
+    overflow-x: auto;
+    margin: 10px 0 0;
+    padding: 10px;
+    border: 1px solid var(--borde);
+    color: var(--suave);
+    font-family: var(--mono);
+    font-size: 0.8rem;
+    font-weight: 400;
+    white-space: pre-wrap;
+}
+
+/* INICIO */
+.grandes {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 18rem), 1fr));
+    gap: 16px;
+    margin-bottom: 32px;
+}
+
+.grande {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+    padding: 20px;
+    text-align: left;
+    box-shadow: 4px 4px 0 var(--acento);
+}
+
+.grande-titulo {
+    font-size: 1.25rem;
+    font-weight: 700;
+}
+
+.grande-que {
+    color: var(--texto);
+    font-size: 0.95rem;
+}
+
+.grande:hover .grande-que {
+    color: var(--sobre-acento);
+}
+
+.abrir {
+    padding: 18px;
+    border: 2px solid var(--borde);
+}
+
+/* LA PÁGINA NUEVA: los tipos, una tarjeta por plantilla. */
+.tipos {
+    margin: 0 0 22px;
+    padding: 0;
+    border: 0;
+}
+
+.tipos legend {
+    margin-bottom: 8px;
+    padding: 0;
+    font-weight: 700;
+}
+
+.tipos-lista {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 15rem), 1fr));
+    gap: 10px;
+}
+
+.tipo {
+    position: relative;
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+    margin: 0;
+    padding: 12px;
+    border: 2px solid var(--borde);
+    background: var(--caja);
+    font-weight: 400;
+    cursor: pointer;
+}
+
+.tipo:hover {
+    border-color: var(--acento);
+}
+
+.tipo input {
+    flex: 0 0 auto;
+    width: 22px;
+    min-height: 22px;
+    height: 22px;
+    margin: 3px 0 0;
+    accent-color: var(--acento);
+}
+
+.tipo.es-elegido {
+    border-color: var(--acento);
+    box-shadow: 3px 3px 0 var(--acento);
+}
+
+.tipo-nombre {
+    display: block;
+    font-weight: 700;
+}
+
+.tipo-para {
+    display: block;
+    color: var(--suave);
+    font-size: 0.875rem;
+}
+
+.opciones {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin: 0;
+    padding: 0;
+    border: 0;
+}
+
+.opciones legend {
+    margin-bottom: 6px;
+    padding: 0;
+    font-weight: 700;
+}
+
+.opcion {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    min-height: 48px;
+    margin: 0;
+    padding: 6px 14px;
+    border: 2px solid var(--borde);
+    background: var(--caja);
+    font-weight: 400;
+    cursor: pointer;
+}
+
+.opcion input {
+    width: 20px;
+    min-height: 20px;
+    height: 20px;
+    margin: 0;
+    accent-color: var(--acento);
+}
+
+/* LAS QUE FALTAN */
+.faltan {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.faltan li {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px 16px;
+    padding: 8px 0;
+    border-bottom: 1px solid var(--borde);
+}
+
+.faltan-nombre {
+    font-size: 1.1rem;
+    font-weight: 700;
+}
+
+.faltan-veces {
+    color: var(--suave);
+    font-family: var(--mono);
+    font-size: 0.85rem;
+}
+
+/* ESCRIBIR */
+.bloque {
+    margin-bottom: 36px;
+}
+
+.dato {
+    margin-bottom: 18px;
+}
+
+.dato-nota {
+    margin: 22px 0 10px;
+    padding: 8px 12px;
+    border-left: 3px solid var(--acento);
+    color: var(--suave);
+    font-size: 0.9rem;
+}
+
+.dato-imagen {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px;
+    margin-top: 8px;
+}
+
+.dato-imagen img {
+    width: 96px;
+    height: 64px;
+    object-fit: contain;
+    border: 1px solid var(--borde);
+    background: var(--fondo);
+}
+
+.subir {
+    position: relative;
+}
+
+.subir input[type="file"] {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    min-height: 0;
+    opacity: 0;
+}
+
+.subir:focus-within label {
+    outline: 3px solid var(--acento);
+    outline-offset: 3px;
+}
+
+.subir label {
+    margin: 0;
+    font-weight: 400;
+}
+
+.apartado {
+    margin-bottom: 26px;
+}
+
+.apartado-titulo {
+    margin: 0 0 4px;
+    font-size: 1.15rem;
+    font-weight: 700;
+}
+
+.apartado-titulo.nivel-3,
+.apartado-titulo.nivel-4 {
+    padding-left: 18px;
+    font-size: 1.05rem;
+}
+
+.apartado-nota {
+    margin: 0 0 6px;
+    color: var(--suave);
+    font-size: 0.9rem;
+}
+
+.enlazar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+    margin-top: 6px;
+}
+
+.enlazar label {
+    margin: 0;
+    color: var(--suave);
+    font-size: 0.9rem;
+    font-weight: 400;
+}
+
+.enlazar input {
+    flex: 1 1 12rem;
+    width: auto;
+    min-height: 44px;
+    padding: 6px 10px;
+}
+
+.enlazar button {
+    min-height: 44px;
+}
+
+/* El de la ficha va arriba de todas sus casillas, con dónde irá. */
+.enlazar-donde {
+    flex-basis: 100%;
+    color: var(--suave);
+    font-size: 0.875rem;
+}
+
+[data-campos] > .enlazar {
+    margin: 0 0 18px;
+    padding: 10px 12px;
+    border: 2px dashed var(--borde);
+}
+
+.salida-mas summary {
+    min-height: 44px;
+    padding: 10px 0 0;
+    font-weight: 400;
+    cursor: pointer;
+}
+
+.nuevo-campo summary {
+    min-height: 44px;
+    padding: 10px 0;
+    color: var(--acento);
+    cursor: pointer;
+}
+
+/* LA BARRA DE ABAJO: guardar siempre a mano. */
+.barra {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 5;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 10px;
+    padding: 12px 16px;
+    border-top: 2px solid var(--acento);
+    background: var(--fondo);
+}
+
+/* En un móvil, los tres de la barra en una fila y más bajos: si no, se
+   comían media pantalla. */
+@media (max-width: 40rem) {
+    body {
+        padding-bottom: 90px;
+    }
+
+    .barra {
+        flex-wrap: nowrap;
+        gap: 6px;
+        padding: 8px;
+    }
+
+    .barra button,
+    .barra .boton {
+        flex: 1 1 0;
+        min-width: 0;
+        padding: 6px 8px;
+        font-size: 0.85rem;
+        line-height: 1.2;
+        text-align: center;
+    }
+
+    .barra .tecla {
+        display: none;
+    }
+}
+
+@media (forced-colors: active) {
+    button,
+    .boton,
+    .tipo,
+    .opcion {
+        border-color: ButtonText;
+    }
+}

@@ -836,3 +836,138 @@ def con_glosario(cuerpo, palabras):
     if not definiciones:
         return cuerpo
     return "".join(trozos) + '<div class="mundo-glosario-definiciones">%s</div>' % "".join(definiciones)
+
+
+# =========================================
+# EL AVISO DE ESBOZO
+# =========================================
+# Como el «Este artículo es un esbozo» de las wikis de Fandom: un recuadro
+# arriba del artículo en las páginas que aún están a medias, diciendo qué
+# les falta. Una página es un esbozo si le queda algo de esto:
+#
+#   · apartados con el texto de relleno de la plantilla («Texto de
+#     relleno») o en lorem ipsum;
+#   · la entradilla como la dejó la plantilla («**Elfos** es»);
+#   · casi nada escrito (menos de RELLENO_MINIMO letras de texto suyo);
+#   · un tercio o más de los datos de la ficha «por decidir».
+#
+# En cuanto no le quede nada, el aviso se va solo al pasar la wiki.
+
+RELLENO_MINIMO = 200
+MARCAS_DE_RELLENO = ("Texto de relleno", "Lorem ipsum")
+# Lo de la cabecera que no es un dato de la ficha.
+NO_SON_DATOS = {"title", "subtitle", "infobox", "tags", "aliases", "layout", "image", "bandera",
+                "blasón", "blason", "escudo", "cssclasses", "plantilla"}
+
+
+def faltas_de_esbozo(ficha):
+    """[lo que le falta, en texto], vacía si la página está hecha."""
+    faltas = []
+    cuerpo = ficha.get("cuerpo_html") or ""
+    parrafos = re.findall(r"<p\b[^>]*>(.*?)</p>", cuerpo, re.S)
+    de_relleno = sum(1 for p in parrafos if any(m in p for m in MARCAS_DE_RELLENO))
+    if de_relleno:
+        faltas.append("escribir %d apartado%s, que aún tiene%s el texto de relleno"
+                      % (de_relleno, "" if de_relleno == 1 else "s", "" if de_relleno == 1 else "n"))
+    primero = re.sub(r"<[^>]+>", "", parrafos[0]).strip() if parrafos else ""
+    if re.search(r"\b(es|son|fue|fueron)\s*$", primero):
+        faltas.append("terminar la primera frase")
+    propio = " ".join(re.sub(r"<[^>]+>", " ", p) for p in parrafos
+                      if not any(m in p for m in MARCAS_DE_RELLENO))
+    if not de_relleno and len(re.sub(r"\s+", "", propio)) < RELLENO_MINIMO:
+        faltas.append("contar algo más: casi no tiene texto")
+    datos = ficha.get("datos") or {}
+    campos = [(k, v) for k, v in datos.items()
+              if str(k).strip().lower() not in NO_SON_DATOS and v not in (None, "", [])]
+    sin_decidir = [k for k, v in campos if "por decidir" in str(v).lower()]
+    if campos and len(sin_decidir) * 3 >= len(campos):
+        faltas.append("decidir %d de los %d datos de la ficha" % (len(sin_decidir), len(campos)))
+    return faltas
+
+
+def aviso_de_esbozo(ficha):
+    faltas = faltas_de_esbozo(ficha)
+    if not faltas:
+        return ""
+    if len(faltas) == 1:
+        dicho = '<p><strong>Esta página es un esbozo.</strong> Le falta %s.</p>' % esc(faltas[0])
+    else:
+        dicho = ('<p><strong>Esta página es un esbozo.</strong> Le falta:</p><ul>%s</ul>'
+                 % "".join("<li>%s</li>" % esc(f) for f in faltas))
+    return ('<div class="mundo-esbozo" role="note"><span class="mundo-esbozo-icono" aria-hidden="true">✎</span>'
+            '<div class="mundo-esbozo-texto">%s</div></div>' % dicho)
+
+
+# =========================================
+# PÁGINAS PARECIDAS
+# =========================================
+# Al pie, debajo de la caja de navegación: las que más tienen que ver con
+# esta aunque no sean de su misma familia. Cada cosa en común suma:
+#
+#   · enlazarse la una a la otra (en el texto o en la ficha): 2 cada lado;
+#   · enlazar a las mismas páginas: más cuanto menos enlazada esté esa
+#     página (que dos países nombren Azarasia no dice mucho; que dos
+#     personajes nombren la misma taberna, sí);
+#   · las mismas etiquetas, también más cuanto más rara sea la etiqueta;
+#   · el mismo valor en un campo de los que se filtran (raza, ubicación,
+#     tipo, lealtad…): 1,5.
+#
+# Salen hasta PARECIDAS, las que pasen de PARECIDO_MINIMO, sin las que ya
+# están en la caja de navegación ni las utilidades.
+
+PARECIDAS = 6
+PARECIDO_MINIMO = 1.5
+
+
+def indice_de_parecidos(paginas, filtros_de):
+    """Lo que hace falta para comparar rápido: por página, sus enlaces y
+    sus etiquetas en llano, y cuántas páginas enlazan a cada una y llevan
+    cada etiqueta."""
+    sale, etiquetas, valores = {}, {}, {}
+    entra, cuantas = {}, {}
+    for k, f in paginas.items():
+        sale[k] = {n.strip().lower() for n in f.get("enlaces") or []} - {k}
+        etiquetas[k] = {llano(e) for e in f.get("etiquetas") or []}
+        valores[k] = {(c, llano(v)) for c, v in (filtros_de(f) or {}).items() if c != "qué es"}
+        for n in sale[k]:
+            entra[n] = entra.get(n, 0) + 1
+        for e in etiquetas[k]:
+            cuantas[e] = cuantas.get(e, 0) + 1
+    return {"sale": sale, "etiquetas": etiquetas, "valores": valores, "entra": entra, "cuantas": cuantas}
+
+
+def paginas_parecidas(ficha, paginas, indice, fuera=()):
+    yo = clave(ficha)
+    sale, etq, val = indice["sale"], indice["etiquetas"], indice["valores"]
+    puntos = []
+    for k, f in paginas.items():
+        if k == yo or k in fuera or llano(f.get("carpeta", "")).split("/")[0] == "utilidades":
+            continue
+        n = 0.0
+        if k in sale[yo]:
+            n += 2
+        if yo in sale[k]:
+            n += 2
+        for comun in sale[yo] & sale[k]:
+            n += 1 / math.log(2 + indice["entra"].get(comun, 0))
+        for e in etq[yo] & etq[k]:
+            n += 1 / math.log(2 + indice["cuantas"].get(e, 0))
+        n += 1.5 * len(val[yo] & val[k])
+        if n >= PARECIDO_MINIMO:
+            puntos.append((n, k))
+    puntos.sort(key=lambda p: (-p[0], llano(paginas[p[1]]["titulo"])))
+    return [paginas[k] for _, k in puntos[:PARECIDAS]]
+
+
+def caja_de_parecidas(ficha, paginas, indice, fuera=()):
+    parecidas = paginas_parecidas(ficha, paginas, indice, fuera)
+    if not parecidas:
+        return ""
+    trozos = []
+    for f in parecidas:
+        que = str(f.get("subtitulo") or que_es(f) or "").strip()
+        trozos.append('<li>%s%s</li>' % (enlace(f), ' <span class="mundo-parecidas-que">%s</span>' % esc(que)
+                                         if que else ""))
+    return ('<div class="mundo-navbox mundo-parecidas" role="navigation" aria-labelledby="mundo-parecidas-titulo">'
+            '<h2 class="mundo-navbox-titulo" id="mundo-parecidas-titulo">Páginas parecidas</h2>'
+            '<ul>%s</ul></div>' % "".join(trozos))

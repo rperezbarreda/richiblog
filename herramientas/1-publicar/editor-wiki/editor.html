@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="editor-token" content="{{TOKEN}}">
+    <title>Editor de la wiki</title>
+    <link rel="stylesheet" href="/editor/editor.css">
+    <script defer src="/editor/editor.js"></script>
+</head>
+<body>
+    <!-- EL EDITOR DE LA WIKI. Lo sirve herramientas/1-publicar/editor-wiki.py
+         en este ordenador; no se publica. Cuatro vistas, una a la vista
+         cada vez: inicio, página nueva, páginas que faltan y escribir. -->
+    <a class="saltar" href="#principal">Saltar al contenido</a>
+    <header class="cabecera">
+        <p class="marca">✎ editor de la wiki</p>
+        <nav class="menu" aria-label="Qué hacer">
+            <button type="button" data-ir="inicio">Inicio</button>
+            <button type="button" data-ir="nueva">Página nueva</button>
+            <button type="button" data-ir="faltan">Páginas que faltan</button>
+        </nav>
+    </header>
+
+    <main id="principal" tabindex="-1">
+        <p class="aviso" role="status" aria-live="polite" data-aviso></p>
+
+        <!-- INICIO -->
+        <section class="vista" data-vista="inicio" aria-labelledby="t-inicio">
+            <h1 id="t-inicio">¿Qué quieres hacer?</h1>
+            <div class="grandes">
+                <button type="button" class="grande" data-ir="nueva">
+                    <span class="grande-titulo">Crear una página nueva</span>
+                    <span class="grande-que">Un país, un personaje, un monstruo… con su plantilla.</span>
+                </button>
+                <button type="button" class="grande" data-ir="faltan">
+                    <span class="grande-titulo">Crear una de las que faltan</span>
+                    <span class="grande-que">Las que ya se nombran en otras páginas y aún no existen (en rojo en la web).</span>
+                </button>
+            </div>
+            <form class="abrir" data-abrir>
+                <h2>Seguir con una que ya hay</h2>
+                <label for="abrir-nombre">Nombre de la página</label>
+                <div class="fila">
+                    <input id="abrir-nombre" list="lista-paginas" autocomplete="off" spellcheck="false" required>
+                    <button type="submit">Abrir</button>
+                </div>
+            </form>
+        </section>
+
+        <!-- PÁGINA NUEVA -->
+        <section class="vista" data-vista="nueva" aria-labelledby="t-nueva" hidden>
+            <h1 id="t-nueva">Una página nueva</h1>
+            <form data-nueva novalidate>
+                <div class="campo">
+                    <label for="nueva-nombre">Nombre de la página</label>
+                    <p class="ayuda" id="ayuda-nombre">Es también cómo se la enlaza desde otras: [[así]].</p>
+                    <input id="nueva-nombre" aria-describedby="ayuda-nombre" autocomplete="off" required>
+                </div>
+                <fieldset class="tipos">
+                    <legend>¿Qué es?</legend>
+                    <div class="tipos-lista" data-tipos></div>
+                </fieldset>
+                <div data-preguntas></div>
+                <div class="campo">
+                    <label for="nueva-subtitulo">Subtítulo <span class="opcional">(opcional)</span></label>
+                    <p class="ayuda" id="ayuda-subtitulo">Una línea debajo del título: «La ciudad de los mil puentes».</p>
+                    <input id="nueva-subtitulo" aria-describedby="ayuda-subtitulo" autocomplete="off">
+                </div>
+                <button type="submit" class="principal">Crear la página</button>
+            </form>
+        </section>
+
+        <!-- LAS QUE FALTAN -->
+        <section class="vista" data-vista="faltan" aria-labelledby="t-faltan" hidden>
+            <h1 id="t-faltan">Páginas que faltan</h1>
+            <p class="ayuda">Se nombran en otras páginas ([[así]]) pero aún no existen. Primero las que más veces salen.</p>
+            <ul class="faltan" data-faltan></ul>
+        </section>
+
+        <!-- ESCRIBIR -->
+        <section class="vista" data-vista="editar" aria-labelledby="t-editar" hidden>
+            <h1 id="t-editar" data-editar-titulo></h1>
+            <p class="ayuda" data-editar-archivo></p>
+            <form data-editar>
+                <section class="bloque" aria-labelledby="t-ficha">
+                    <h2 id="t-ficha">La ficha</h2>
+                    <p class="ayuda">Lo que sale en el recuadro de la derecha. Lo que dejes vacío no sale. Para enlazar
+                        otra página, escribe su nombre entre corchetes: [[Valderín]].</p>
+                    <div data-campos></div>
+                    <details class="nuevo-campo">
+                        <summary>Añadir otro dato a la ficha</summary>
+                        <div class="fila">
+                            <label for="campo-nuevo-clave">Nombre del dato</label>
+                            <input id="campo-nuevo-clave" autocomplete="off" placeholder="población">
+                            <button type="button" data-campo-nuevo>Añadir</button>
+                        </div>
+                    </details>
+                </section>
+                <section class="bloque" aria-labelledby="t-texto">
+                    <h2 id="t-texto">El texto</h2>
+                    <p class="ayuda">Cada apartado en su recuadro. Los que dejes vacíos no salen. **negrita**,
+                        *cursiva*, una lista con «- » delante de cada línea.</p>
+                    <div data-apartados></div>
+                </section>
+            </form>
+        </section>
+    </main>
+
+    <!-- Abajo, siempre a mano mientras se escribe. -->
+    <footer class="barra" data-barra hidden>
+        <button type="button" class="principal" data-guardar>Guardar <span class="tecla">Ctrl+S</span></button>
+        <button type="button" data-pasar>Guardar y pasar a la web</button>
+        <a class="boton" data-ver target="_blank" rel="noopener" hidden>Ver cómo queda ↗</a>
+    </footer>
+
+    <datalist id="lista-paginas"></datalist>
+    <datalist id="lista-imagenes"></datalist>
+</body>
+</html>

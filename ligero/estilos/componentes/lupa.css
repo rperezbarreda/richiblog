@@ -53,6 +53,83 @@
     outline: 2px solid var(--yellow);
     outline-offset: 2px;
 }
+.lupa.es-mapa {
+    justify-content: flex-start;
+    overflow-y: auto;
+    background: var(--purple);
+}
+.lupa-mapa {
+    position: relative;
+    flex: 0 0 auto;
+    width: min(94vw, 1200px, calc(66vh * 1.5));
+    margin-top: 52px;
+}
+.lupa-mapa-svg {
+    display: block;
+    width: 100%;
+    height: auto;
+    aspect-ratio: 3 / 2;
+    border: 2px solid var(--yellow);
+    background: var(--purple-lighter);
+}
+.lupa-mapa-vecino path {
+    fill: transparent;
+    stroke: transparent;
+    stroke-width: 3px;
+    cursor: pointer;
+}
+.lupa-mapa-vecino:hover path,
+.lupa-mapa-vecino:focus path,
+.lupa-mapa-vecino.es-resaltado path {
+    fill: var(--yellow);
+    fill-opacity: 0.32;
+    stroke: var(--yellow);
+}
+.lupa-mapa-yo {
+    fill: none;
+    stroke: none;
+    pointer-events: none;
+}
+.lupa-mapa-nombre {
+    position: absolute;
+    left: 10px;
+    bottom: 10px;
+    margin: 0;
+    padding: 4px 10px;
+    background: var(--purple);
+    color: var(--yellow);
+    font-family: var(--fuente-mono);
+    font-size: 1rem;
+    pointer-events: none;
+}
+.lupa-mapa-nombre:empty {
+    display: none;
+}
+.lupa-mapa-vecinos {
+    flex: 0 0 auto;
+    width: min(94vw, 1200px, calc(66vh * 1.5));
+}
+.lupa-mapa-titulo {
+    margin: 0 0 8px;
+    color: var(--muted);
+    font-family: var(--fuente-mono);
+    font-size: 0.875rem;
+}
+.lupa-mapa-lista {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 18px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+.lupa-mapa-lista a {
+    display: inline-block;
+    padding: 6px 0;
+    color: var(--yellow);
+    font-size: 1rem;
+    text-underline-offset: 3px;
+}
 @media (forced-colors: active) {
     .lupa {
         background: Canvas;

@@ -305,6 +305,12 @@ def desde_plantilla(plantilla, nombre, fijos=None):
             otra = pagina_llamada(valor) if valor else None
             valores[clave] = otra.stem if otra else valor
 
+    return carpeta_de(plantilla, valores), rellenar(plantilla, valores, sin_enlace)
+
+
+def carpeta_de(plantilla, valores):
+    """Dónde se guarda, dentro de wiki/, con las respuestas ya dadas (la
+    usa también el editor: herramientas/1-publicar/editor-wiki.py)."""
     carpeta = plantilla["carpeta"] or "otros"
     m = re.match(r"^junto a \{\{(\w+)\}\}$", carpeta)
     if m:
@@ -316,8 +322,7 @@ def desde_plantilla(plantilla, nombre, fijos=None):
             carpeta = plantilla["si_no"] or "otros"
     for clave, valor in valores.items():
         carpeta = carpeta.replace("{{%s}}" % clave, valor)
-    carpeta = re.sub(r"/?\{\{\w+\}\}", "", carpeta).strip("/") or "otros"
-    return carpeta, rellenar(plantilla, valores, sin_enlace)
+    return re.sub(r"/?\{\{\w+\}\}", "", carpeta).strip("/") or "otros"
 
 
 # =========================================

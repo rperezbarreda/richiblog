@@ -62,6 +62,7 @@
               botin.py              el botín de una campaña
               nueva-recomendacion.py
               en-lo-que-ando.py     lo que pone «en lo que ando»
+              editor-wiki.py        el editor de la wiki, en el navegador
               nueva-pagina-wiki.py  una página nueva de la wiki
               importar-mundo.py     (fuera del menú) traer una bóveda de Chronicler
               linea-de-tiempo.py    los eventos de la línea de tiempo
@@ -1204,7 +1205,20 @@
   SE ESCRIBE A MANO. Cada página es un archivo de texto (.md) dentro de
   wiki/, en la carpeta de su apartado (wiki/lugares/Valderín.md), y el
   nombre del archivo es el de la página: es como se la enlaza desde
-  otra, [[Valderín]]. Para empezar una:
+  otra, [[Valderín]]. LO MÁS FÁCIL, EL EDITOR:
+
+      python herramientas/1-publicar/editor-wiki.py
+
+  (en el menú, Wiki Cralëa → Escribir en la wiki con el editor). Se abre
+  en el navegador: crea una página nueva (con su plantilla, eligiendo de
+  las páginas que ya hay), o una de las que faltan, o sigue con una que
+  ya existe. Cada dato de la ficha es una casilla y cada apartado un
+  recuadro con su nota encima; un botón pone [[enlaces]] donde está el
+  cursor, otro sube una imagen de tu ordenador (a WebP y a su tamaño), y
+  «Guardar y pasar a la web» lo deja publicado y con un enlace para verlo.
+  Solo cambia del .md lo que cambies; las notas <!-- --> se quedan.
+
+  O, con preguntas aquí mismo, sin navegador:
 
       python herramientas/1-publicar/nueva-pagina-wiki.py
 
@@ -1291,21 +1305,6 @@
   # orden:, # pregunta …:, # carpeta:), explicadas al principio de
   herramientas/1-publicar/nueva-pagina-wiki.py.
 
-  PÁGINAS DE EJEMPLO (wiki/Ejemplos/, el 16-10-2026): una de cada tipo,
-  hecha con su plantilla y en lorem ipsum, para ver cómo queda cada
-  sección de la portada: Villa Lorem (lugar), Dolores Ipsum, Amet
-  Consectetur y Adipisci Elit (personajes, una familia), los Lorémidos y
-  los Lorémidos del Bosque (raza y subraza), La Fe de Ipsum e Ipsa
-  (religión y deidad), La Orden de Sitamet (organización, con aliados y
-  enemigos), La Bestia Dolorosa (monstruo), La Espada de Lorem (objeto
-  mágico), La Batalla de Ipsum (acontecimiento), La Constelación de
-  Lorem (cosmología), La Fiesta de Ipsum (festividad) y el Lorémico
-  (idioma). Se enlazan entre ellas para que se vean las listas que salen
-  solas (los lugares, el árbol familiar, las relaciones…). Cuentan como
-  relleno (no salen de destacadas ni en el generador de nombres) y la
-  lista de pendientes las enseña. Cuando sobren, se borra la carpeta
-  wiki/Ejemplos/ entera y se pasa la wiki.
-
   LO QUE LAS PÁGINAS SE PONEN SOLAS (desde el 16-10-2026). Sale de las
   fichas de las demás páginas, así que no hay ninguna lista que mantener
   a mano (el código, en herramientas/3-generadores/mundo_piezas.py):
@@ -1356,6 +1355,20 @@
       o pulsarla, dice qué significa. No se marca dentro de enlaces,
       títulos, tablas ni código.
 
+    - AVISO DE ESBOZO, arriba del artículo, en las páginas a medias:
+      dice qué les falta (apartados con texto de relleno, la primera
+      frase sin terminar, casi nada escrito o un tercio o más de la ficha
+      «por decidir»). Se va solo cuando ya no les falta nada.
+    - PÁGINAS PARECIDAS, al pie, debajo de la caja de navegación: las
+      que más tienen que ver con esa (se enlazan, enlazan a lo mismo,
+      comparten etiquetas raras o el mismo valor en raza, ubicación,
+      tipo…), sin repetir las de la caja. Hasta seis.
+    - EL MAPA DE SITUACIÓN, PARA PULSAR: al ampliarlo (en la ficha de
+      un país o una región), los países que se ven son enlaces: se pasa
+      el ratón y se resaltan, se pulsa y se va a su página; debajo, los
+      mismos en una lista. Las formas van en datos/wiki/situacion/
+      <página>.json (mundo_situacion.para_pulsar, simplificadas).
+
   LO QUE PONE EL NAVEGADOR (scripts/paginas/mundo.js):
 
     - VISTA PREVIA DE LOS ENLACES: al pasar el ratón (o llegar con el
@@ -1370,7 +1383,7 @@
       FILTRABLES en generar-mundo.py). Lo «por decidir» no cuenta.
     - CUÁNTO FALTA, en la portada: cuántas páginas tienen ya texto de
       verdad y cuántos campos de las fichas están decididos, en dos
-      barras (sin contar Ejemplos ni Utilidades). Lo cuenta progreso_de,
+      barras (sin contar las Utilidades). Lo cuenta progreso_de,
       en generar-mundo.py, y va en mundo-portada.json; el detalle, en
       herramientas/5-consulta/pendientes-wiki.py.
 
@@ -3044,6 +3057,10 @@
   5-consulta/pendientes-wiki.py  cuenta lo que falta en la wiki (páginas
                         por escribir, «por decidir», relleno, imágenes).
                         No cambia nada.
+  1-publicar/editor-wiki.py  el editor de la wiki en el navegador (en
+                        127.0.0.1, solo este ordenador): crear páginas,
+                        seguir con una, subir imágenes y pasarla a la
+                        web. Su página: 1-publicar/editor-wiki/.
   1-publicar/nueva-pagina-wiki.py  crea el .md de una página nueva de
                         la wiki con la plantilla de su tipo (país,
                         personaje, monstruo…), en la carpeta que le toca.

@@ -462,16 +462,19 @@ def poner_emblemas(ficha, situacion):
     lo lleva a lo grande)."""
     cuales = list(ficha.get("emblemas") or [])
     if situacion:
-        url, titulo_pagina, mapa_titulo, _ = situacion
+        url, titulo_pagina, mapa_titulo, _, pulsar = situacion
         cuales.append(("Mapa", url, "Mapa de situación: %s resaltado en el %s"
-                       % (titulo_pagina, mapa_titulo)))
+                       % (titulo_pagina, mapa_titulo), pulsar))
     trozos = []
-    for nombre, ruta, alt in cuales:
+    for nombre, ruta, alt, *resto in cuales:
+        # El mapa lleva además dónde están sus países para pulsar: al
+        # ampliarlo, cada vecino lleva a su página (ver mundo.js).
+        extra = (' data-mundo-pulsar="%s"' % html.escape(resto[0], quote=True)) if resto else ""
         trozos.append(
-            '<li class="mundo-emblema" data-mundo-emblema="%s"><figure>'
+            '<li class="mundo-emblema" data-mundo-emblema="%s"%s><figure>'
             '<img class="mundo-emblema-img" src="%s" alt="%s" loading="lazy" decoding="async">'
             '<figcaption>%s</figcaption></figure></li>'
-            % (html.escape(nombre, quote=True), html.escape(ruta, quote=True),
+            % (html.escape(nombre, quote=True), extra, html.escape(ruta, quote=True),
                html.escape(alt, quote=True), html.escape(nombre)))
     html_ = ('<div class="mundo-emblemas" data-mundo-emblemas><ul class="mundo-emblemas-lista">%s</ul></div>'
              % "".join(trozos)) if trozos else ""
@@ -1299,6 +1302,7 @@ def escribir_paginas(paginas, probar, categorias=(), eventos=()):
     familia = mundo_piezas.familias(paginas)
     todas_rel = mundo_piezas.todas_las_relaciones(paginas)
     palabras = leer_diccionario()
+    parecidos = mundo_piezas.indice_de_parecidos(paginas, filtros_de)
     sub_de = {}
     for ficha in paginas.values():
         grupo, sub = clasificar(ficha["etiquetas"], categorias)
@@ -1338,8 +1342,16 @@ def escribir_paginas(paginas, probar, categorias=(), eventos=()):
         # La caja de navegación, al final del artículo (en su columna: a
         # todo lo ancho se metía debajo del cuadro de contenido, que va fijo
         # abajo a la derecha).
-        cuerpo += mundo_piezas.caja_de_navegacion(ficha, paginas, region_de, subraza_de,
-                                                  padre_de, sub_de)
+        navbox = mundo_piezas.caja_de_navegacion(ficha, paginas, region_de, subraza_de,
+                                                 padre_de, sub_de)
+        cuerpo += navbox
+        # Las páginas parecidas, debajo, sin repetir las de la caja.
+        en_la_caja = {k for k, f in paginas.items() if 'href="%s"' % html.escape(f["url"], quote=True) in navbox}
+        cuerpo += mundo_piezas.caja_de_parecidas(ficha, paginas, parecidos, en_la_caja)
+        # Y el aviso de esbozo, arriba del todo (no en las utilidades, que
+        # no son del mundo).
+        if not ficha["carpeta"].lower().startswith("utilidades"):
+            cuerpo = mundo_piezas.aviso_de_esbozo(ficha) + cuerpo
         # El contenido ANTES que la ficha: en escritorio da igual (flota abajo
         # a la derecha), y en móvil así sale arriba del todo, como en una
         # wiki de las de siempre.
@@ -1648,8 +1660,8 @@ def _fecha_de(archivo):
 # CUÁNTO FALTA: las páginas que ya tienen texto de verdad (no el de
 # relleno de la plantilla ni el lorem ipsum de los ejemplos) y los campos
 # de las fichas que ya están decididos (no dicen «por decidir»). No cuenta
-# las páginas de ejemplo (wiki/Ejemplos/) ni las de utilidades, que no son
-# del mundo. Lo mismo, con detalle, lo dice
+# las de utilidades, que no son del mundo (ni las de ejemplo, si vuelve a
+# haber una carpeta wiki/Ejemplos/). Lo mismo, con detalle, lo dice
 # herramientas/5-consulta/pendientes-wiki.py.
 SIN_CONTAR = {"tags", "aliases", "etiquetas", "cssclasses", "image", "imagen", "bandera",
               "blasón", "blason", "escudo", "plantilla"}
@@ -1732,6 +1744,8 @@ def copiar_imagenes(imagenes, usadas, probar):
 # =========================================
 
 SITUACION = IMAGENES / "situacion"
+# Lo que hace falta para pulsar los países del mapa de situación ampliado.
+PULSAR = RAIZ / "datos" / "wiki" / "situacion"
 
 
 def preparar_situaciones(paginas, mapas, imagenes, probar, partes=()):
@@ -1803,6 +1817,14 @@ def preparar_situaciones(paginas, mapas, imagenes, probar, partes=()):
         vecinos_todos = [(i, f["puntos"]) for i, f in enumerate(leido["formas"])
                          if nivel.get(i) in ("pais", "suelto")]
         titulo_mapa = leido.get("titulo") or mapa["nombre"]
+        # Las formas con página, para el mapa de situación que se pulsa
+        # (ver mundo_situacion.para_pulsar): las de los países, como las
+        # fronteras finas.
+        con_pagina = {}
+        for i, f in enumerate(leido["formas"]):
+            nombre = (f["etiqueta"] or f["pagina"] or "").strip().lower()
+            if nombre in paginas and nivel.get(i) in ("pais", "suelto"):
+                con_pagina.setdefault(nombre, []).append(f["puntos"])
         fuentes = [mapa["archivo"], fondo_archivo, este]
         fondo = [None]
         for clave, ficha in paginas.items():
@@ -1815,9 +1837,23 @@ def preparar_situaciones(paginas, mapas, imagenes, probar, partes=()):
                              clave in con_peque)
             if clave in con_peque:
                 peques[clave] = "/imagenes/wiki/situacion/peque/" + archivo
-            salida[clave] = ("/imagenes/wiki/situacion/" + archivo,
-                             str(ficha["datos"].get("title") if ficha.get("datos") else "")
-                             or ficha["nombre"], titulo_mapa, mapa["url"])
+            titulo_suyo = (str(ficha["datos"].get("title") if ficha.get("datos") else "")
+                           or ficha["nombre"])
+            otras = [(paginas[k]["titulo"], paginas[k]["url"], pols)
+                     for k, pols in con_pagina.items() if k != clave]
+            pulsar = mundo_situacion.para_pulsar(poligonos, otras, leido["ancho"], leido["alto"],
+                                                 "/imagenes/wiki/situacion/" + archivo, titulo_suyo)
+            datos_pulsar = PULSAR / (slug(ficha["nombre"]) + ".json")
+            buenas.add(datos_pulsar)
+            if not probar:
+                # Apretado, sin sangría: son cientos de números, y con
+                # sangría (escribir_json) cada uno iba en su línea.
+                datos_pulsar.parent.mkdir(parents=True, exist_ok=True)
+                texto = json.dumps(pulsar, ensure_ascii=False, separators=(",", ":")) + "\n"
+                if not datos_pulsar.is_file() or leer_texto(datos_pulsar)[0] != texto:
+                    escribir_texto(datos_pulsar, texto)
+            salida[clave] = ("/imagenes/wiki/situacion/" + archivo, titulo_suyo, titulo_mapa,
+                             mapa["url"], "/datos/wiki/situacion/" + datos_pulsar.name)
         # LAS PARTES DEL MUNDO SIN PÁGINA (Archipiélagos): todas las formas
         # de las páginas de su carpeta, resaltadas a la vez.
         for parte in partes:
@@ -1842,9 +1878,9 @@ def preparar_situaciones(paginas, mapas, imagenes, probar, partes=()):
             de_partes[llave] = "/imagenes/wiki/situacion/peque/" + archivo
     # Los de páginas o formas que ya no están.
     if not probar:
-        for carpeta in (SITUACION, PEQUE_DIR):
+        for carpeta, cuales in ((SITUACION, "*.webp"), (PEQUE_DIR, "*.webp"), (PULSAR, "*.json")):
             if carpeta.is_dir():
-                for viejo in carpeta.glob("*.webp"):
+                for viejo in carpeta.glob(cuales):
                     if viejo not in buenas:
                         viejo.unlink()
     return salida, hechas, peques, de_partes

@@ -9,6 +9,11 @@
 //         que: "Retrato de",         // "Retrato de Sigil" (alt y título)
 //         alt: "…",                  // opcional: otro texto alternativo
 //         devolverA: boton,          // dónde dejar el foco al cerrar
+//         dibujo: elemento,          // opcional: en vez de la imagen, esto
+//                                    // (el mapa de situación de la wiki,
+//                                    // con sus países para pulsar); la
+//                                    // capa lleva entonces «es-mapa»
+//         debajo: elemento,          // opcional: algo más debajo del nombre
 //     });
 //
 // Se cierra con la ✕, pulsando el fondo o con Escape, y el foco vuelve a
@@ -85,17 +90,25 @@ function abrirLaLupa(opciones) {
     cerrar.addEventListener("click", cerrarLaLupa);
     capa.appendChild(cerrar);
 
-    const img = document.createElement("img");
-    img.className = "lupa-img";
-    img.src = ruta;
-    img.alt = (ajustes.alt || "").toString().trim() || comoSeLlama;
-    capa.appendChild(img);
+    if (ajustes.dibujo instanceof Element) {
+        capa.classList.add("es-mapa");
+        capa.appendChild(ajustes.dibujo);
+    } else {
+        const img = document.createElement("img");
+        img.className = "lupa-img";
+        img.src = ruta;
+        img.alt = (ajustes.alt || "").toString().trim() || comoSeLlama;
+        capa.appendChild(img);
+    }
 
     if (texto) {
         const pie = document.createElement("p");
         pie.className = "lupa-pie";
         pie.textContent = texto;
         capa.appendChild(pie);
+    }
+    if (ajustes.debajo instanceof Element) {
+        capa.appendChild(ajustes.debajo);
     }
 
     // Pulsar el fondo cierra, como en la ventana modal.

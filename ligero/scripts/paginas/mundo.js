@@ -743,7 +743,133 @@ function prepararAmpliarMundo() {
         );
         img.parentNode.insertBefore(boton, img);
         boton.appendChild(img);
-        boton.addEventListener("click", () => abrirAmpliadaMundo(boton, img));
+        boton.addEventListener("click", () => {
+            const pulsar = img.closest("[data-mundo-pulsar]");
+            if (pulsar) {
+                abrirMapaParaPulsarMundo(boton, img, pulsar.getAttribute("data-mundo-pulsar"));
+            } else {
+                abrirAmpliadaMundo(boton, img);
+            }
+        });
+    });
+}
+async function abrirMapaParaPulsarMundo(boton, img, fuente) {
+    let datos = null;
+    try {
+        const respuesta = await window.pedirDatos(rutaSeguraMundo(fuente));
+        datos = respuesta.ok ? await respuesta.json() : null;
+    } catch (error) {
+        datos = null;
+    }
+    const vista = datos && Array.isArray(datos.vista) && datos.vista.length === 4
+        && datos.vista.every((n) => Number.isFinite(n)) ? datos.vista : null;
+    const vecinos = datos && Array.isArray(datos.vecinos) ? datos.vecinos : [];
+    if (!vista || !vecinos.length) {
+        abrirAmpliadaMundo(boton, img);
+        return;
+    }
+    const SVG = "http://www.w3.org/2000/svg";
+    const caminoMundo = (formas) => (Array.isArray(formas) ? formas : []).map((plano) => {
+        if (!Array.isArray(plano) || plano.length < 6) {
+            return "";
+        }
+        let d = "";
+        for (let i = 0; i + 1 < plano.length; i += 2) {
+            const x = Number(plano[i]);
+            const y = Number(plano[i + 1]);
+            if (!Number.isFinite(x) || !Number.isFinite(y)) {
+                return "";
+            }
+            d += (i ? "L" : "M") + x + " " + y;
+        }
+        return d + "Z";
+    }).join("");
+    const yo = (datos.yo && datos.yo.titulo || "").toString();
+    const marco = document.createElement("div");
+    marco.className = "lupa-mapa";
+    const svg = document.createElementNS(SVG, "svg");
+    svg.setAttribute("class", "lupa-mapa-svg");
+    svg.setAttribute("viewBox", vista.join(" "));
+    svg.setAttribute("preserveAspectRatio", "none");
+    svg.setAttribute("role", "group");
+    svg.setAttribute("aria-label", "Mapa de situación de " + yo + ": pulsa un país vecino para ir a su página");
+    const fondo = document.createElementNS(SVG, "image");
+    fondo.setAttribute("href", rutaSeguraMundo(img.getAttribute("src")));
+    fondo.setAttribute("x", vista[0]);
+    fondo.setAttribute("y", vista[1]);
+    fondo.setAttribute("width", vista[2]);
+    fondo.setAttribute("height", vista[3]);
+    fondo.setAttribute("preserveAspectRatio", "none");
+    svg.appendChild(fondo);
+    const nombre = document.createElement("p");
+    nombre.className = "lupa-mapa-nombre";
+    nombre.setAttribute("aria-hidden", "true");
+    const lista = document.createElement("ul");
+    lista.className = "lupa-mapa-lista";
+    const enMapa = new Map();
+    const resaltar = (url, si) => {
+        const forma = enMapa.get(url);
+        if (forma) {
+            forma.classList.toggle("es-resaltado", si);
+        }
+        const v = vecinos.find((x) => x.url === url);
+        nombre.textContent = si && v ? "→ " + v.titulo : "";
+    };
+    vecinos.forEach((v) => {
+        const url = rutaSeguraMundo(v.url);
+        const d = caminoMundo(v.formas);
+        if (url === "#" || !d) {
+            return;
+        }
+        const titulo = (v.titulo || "").toString();
+        const enlace = document.createElementNS(SVG, "a");
+        enlace.setAttribute("href", rutaSeguraMundo(url));
+        enlace.setAttribute("class", "lupa-mapa-vecino");
+        enlace.setAttribute("aria-label", titulo);
+        const camino = document.createElementNS(SVG, "path");
+        camino.setAttribute("d", d);
+        camino.setAttribute("vector-effect", "non-scaling-stroke");
+        enlace.appendChild(camino);
+        enlace.setAttribute("tabindex", "-1");
+        enlace.addEventListener("mouseenter", () => resaltar(url, true));
+        enlace.addEventListener("mouseleave", () => resaltar(url, false));
+        svg.appendChild(enlace);
+        enMapa.set(url, enlace);
+        const li = document.createElement("li");
+        const a = document.createElement("a");
+        a.href = rutaSeguraMundo(url);
+        a.textContent = titulo;
+        ["mouseenter", "focus"].forEach((t) => a.addEventListener(t, () => resaltar(url, true)));
+        ["mouseleave", "blur"].forEach((t) => a.addEventListener(t, () => resaltar(url, false)));
+        li.appendChild(a);
+        lista.appendChild(li);
+    });
+    const suyo = caminoMundo(datos.yo && datos.yo.formas);
+    if (suyo) {
+        const camino = document.createElementNS(SVG, "path");
+        camino.setAttribute("d", suyo);
+        camino.setAttribute("class", "lupa-mapa-yo");
+        camino.setAttribute("vector-effect", "non-scaling-stroke");
+        camino.setAttribute("aria-hidden", "true");
+        svg.appendChild(camino);
+    }
+    marco.appendChild(svg);
+    marco.appendChild(nombre);
+    const debajo = document.createElement("nav");
+    debajo.className = "lupa-mapa-vecinos";
+    debajo.setAttribute("aria-label", "Países que se ven en el mapa");
+    const titulo = document.createElement("p");
+    titulo.className = "lupa-mapa-titulo";
+    titulo.textContent = "Pulsa un país en el mapa, o elige uno:";
+    debajo.appendChild(titulo);
+    debajo.appendChild(lista);
+    window.lupa.abrir({
+        ruta: img.currentSrc || img.getAttribute("src"),
+        texto: (img.getAttribute("alt") || "").trim(),
+        que: "",
+        dibujo: marco,
+        debajo,
+        devolverA: boton,
     });
 }
 function abrirAmpliadaMundo(boton, img) {

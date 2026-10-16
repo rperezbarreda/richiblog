@@ -82,6 +82,113 @@
     outline-offset: 2px;
 }
 
+/* EL MAPA DE SITUACIÓN DE LA WIKI, PARA PULSAR (lo monta
+   scripts/paginas/mundo.js): el dibujo con las formas de los vecinos
+   encima, cada una un enlace, y debajo la misma lista en texto.
+
+       <div class="lupa-mapa"><svg class="lupa-mapa-svg">…</svg>
+           <p class="lupa-mapa-nombre">→ el país por el que pasas</p></div>
+       <nav class="lupa-mapa-vecinos"><p class="lupa-mapa-titulo">…</p>
+           <ul class="lupa-mapa-lista">…</ul></nav>
+
+   La lupa entera se desplaza si no cabe (en un móvil, el mapa y una lista
+   larga de vecinos). Con una clase y no con :has(), que no va en el
+   navegador de Richi. */
+.lupa.es-mapa {
+    justify-content: flex-start;
+    overflow-y: auto;
+    /* Opaco: con texto y enlaces encima, lo de debajo transparentándose
+       se leía mezclado con la lista. */
+    background: var(--purple);
+}
+
+.lupa-mapa {
+    position: relative;
+    flex: 0 0 auto;
+    /* El dibujo es 3:2; lo más grande que quepa a lo ancho y dejando
+       sitio a la lista de debajo. */
+    width: min(94vw, 1200px, calc(66vh * 1.5));
+    margin-top: 52px;
+}
+
+.lupa-mapa-svg {
+    display: block;
+    width: 100%;
+    height: auto;
+    aspect-ratio: 3 / 2;
+    border: 2px solid var(--yellow);
+    background: var(--purple-lighter);
+}
+
+.lupa-mapa-vecino path {
+    fill: transparent;
+    stroke: transparent;
+    stroke-width: 3px;
+    cursor: pointer;
+}
+
+.lupa-mapa-vecino:hover path,
+.lupa-mapa-vecino:focus path,
+.lupa-mapa-vecino.es-resaltado path {
+    fill: var(--yellow);
+    fill-opacity: 0.32;
+    stroke: var(--yellow);
+}
+
+.lupa-mapa-yo {
+    fill: none;
+    stroke: none;
+    pointer-events: none;
+}
+
+/* El nombre del país por el que se pasa, encima del dibujo, abajo a la
+   izquierda. */
+.lupa-mapa-nombre {
+    position: absolute;
+    left: 10px;
+    bottom: 10px;
+    margin: 0;
+    padding: 4px 10px;
+    background: var(--purple);
+    color: var(--yellow);
+    font-family: var(--fuente-mono);
+    font-size: 1rem;
+    pointer-events: none;
+}
+
+.lupa-mapa-nombre:empty {
+    display: none;
+}
+
+.lupa-mapa-vecinos {
+    flex: 0 0 auto;
+    width: min(94vw, 1200px, calc(66vh * 1.5));
+}
+
+.lupa-mapa-titulo {
+    margin: 0 0 8px;
+    color: var(--muted);
+    font-family: var(--fuente-mono);
+    font-size: 0.875rem;
+}
+
+.lupa-mapa-lista {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 18px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.lupa-mapa-lista a {
+    display: inline-block;
+    padding: 6px 0;
+    color: var(--yellow);
+    font-size: 1rem;
+    text-underline-offset: 3px;
+}
+
 /* En alto contraste, el fondo casi negro lo repinta el sistema; lo que
    hace falta es que el marco del dibujo siga viéndose. */
 @media (forced-colors: active) {

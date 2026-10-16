@@ -132,3 +132,85 @@ def al_dia(destino, fuentes):
         return False
     hecha = destino.stat().st_mtime
     return all(hecha >= f.stat().st_mtime for f in fuentes if f and Path(f).is_file())
+
+
+# =========================================
+# EL MAPA DE SITUACIÓN, PARA PULSAR
+# =========================================
+# Al ampliar el mapa de situación (la lupa), encima del dibujo van las
+# formas de los países que se ven en el recorte, y cada una lleva a su
+# página: así se salta de un país a su vecino. Esto devuelve lo que hace
+# falta para dibujarlas, que generar-mundo.py guarda en
+# datos/wiki/situacion/<página>.json y pinta scripts/paginas/mundo.js:
+#
+#     {"vista": [x, y, ancho, alto],       el recorte, en las medidas del
+#                                          mapa (las mismas del .cmap)
+#      "imagen": "/imagenes/wiki/situacion/<página>.webp",
+#      "yo": {"titulo": …, "formas": [[x, y, x, y…], …]},
+#      "vecinos": [{"titulo": …, "url": …, "formas": [[…]]}, …]}
+#
+# Las formas van simplificadas (sin los puntos que no cambian el dibujo a
+# ese tamaño) y redondeadas: el mapamundi tiene 29.000 puntos y aquí solo
+# hacen falta unos pocos cientos.
+
+def _simplificar(puntos, tolerancia):
+    """Douglas-Peucker: quita los puntos que se apartan menos de tolerancia
+    de la raya entre sus vecinos."""
+    if len(puntos) < 4:
+        return list(puntos)
+    def distancia(p, a, b):
+        (x, y), (x1, y1), (x2, y2) = p, a, b
+        dx, dy = x2 - x1, y2 - y1
+        if dx == dy == 0:
+            return ((x - x1) ** 2 + (y - y1) ** 2) ** 0.5
+        t = max(0, min(1, ((x - x1) * dx + (y - y1) * dy) / (dx * dx + dy * dy)))
+        return ((x - x1 - t * dx) ** 2 + (y - y1 - t * dy) ** 2) ** 0.5
+    quedan = [False] * len(puntos)
+    quedan[0] = quedan[-1] = True
+    pila = [(0, len(puntos) - 1)]
+    while pila:
+        i, j = pila.pop()
+        lejos, k = 0, None
+        for n in range(i + 1, j):
+            d = distancia(puntos[n], puntos[i], puntos[j])
+            if d > lejos:
+                lejos, k = d, n
+        if k is not None and lejos > tolerancia:
+            quedan[k] = True
+            pila += [(i, k), (k, j)]
+    return [p for p, q in zip(puntos, quedan) if q]
+
+
+def _plano(pol, tolerancia):
+    # Con decimales solo si el recorte es tan pequeño que medio punto se
+    # notaría; si no, en enteros (es un archivo de números: lo que pesa).
+    cifras = 1 if tolerancia < 0.5 else 0
+    salida = []
+    for x, y in _simplificar(pol, tolerancia):
+        salida += [int(v) if float(v).is_integer() else v for v in (round(x, cifras), round(y, cifras))]
+    return salida
+
+
+def para_pulsar(poligonos, otras, ancho_mapa, alto_mapa, imagen, titulo):
+    """otras: [(título, url, [polígonos])] de las formas con página. Entran
+    las que asoman en el recorte."""
+    x0, y0, x1, y1 = encuadre(poligonos, ancho_mapa, alto_mapa)
+    # Lo que mide un par de píxeles al verlo ampliado: para pulsar sobra.
+    tolerancia = (x1 - x0) / 500
+    vecinos = []
+    for nombre, url, suyos in otras:
+        dentro = []
+        for pol in suyos:
+            cx0, cy0, cx1, cy1 = _caja([pol])
+            if cx1 < x0 or cx0 > x1 or cy1 < y0 or cy0 > y1:
+                continue
+            plano = _plano(pol, tolerancia)
+            if len(plano) >= 6:
+                dentro.append(plano)
+        if dentro:
+            vecinos.append({"titulo": nombre, "url": url, "formas": dentro})
+    vecinos.sort(key=lambda v: v["titulo"].lower())
+    return {"vista": [round(v, 1) for v in (x0, y0, x1 - x0, y1 - y0)],
+            "imagen": imagen,
+            "yo": {"titulo": titulo, "formas": [_plano(p, tolerancia) for p in poligonos]},
+            "vecinos": vecinos}

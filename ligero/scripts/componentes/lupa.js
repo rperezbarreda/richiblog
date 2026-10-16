@@ -32,16 +32,24 @@ function abrirLaLupa(opciones) {
     cerrar.textContent = "✕";
     cerrar.addEventListener("click", cerrarLaLupa);
     capa.appendChild(cerrar);
-    const img = document.createElement("img");
-    img.className = "lupa-img";
-    img.src = ruta;
-    img.alt = (ajustes.alt || "").toString().trim() || comoSeLlama;
-    capa.appendChild(img);
+    if (ajustes.dibujo instanceof Element) {
+        capa.classList.add("es-mapa");
+        capa.appendChild(ajustes.dibujo);
+    } else {
+        const img = document.createElement("img");
+        img.className = "lupa-img";
+        img.src = ruta;
+        img.alt = (ajustes.alt || "").toString().trim() || comoSeLlama;
+        capa.appendChild(img);
+    }
     if (texto) {
         const pie = document.createElement("p");
         pie.className = "lupa-pie";
         pie.textContent = texto;
         capa.appendChild(pie);
+    }
+    if (ajustes.debajo instanceof Element) {
+        capa.appendChild(ajustes.debajo);
     }
     capa.addEventListener("click", (evento) => {
         if (evento.target === capa) {
