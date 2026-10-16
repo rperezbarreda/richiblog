@@ -147,7 +147,8 @@ def al_dia(destino, fuentes):
 #                                          mapa (las mismas del .cmap)
 #      "imagen": "/imagenes/wiki/situacion/<página>.webp",
 #      "yo": {"titulo": …, "formas": [[x, y, x, y…], …]},
-#      "vecinos": [{"titulo": …, "url": …, "formas": [[…]]}, …]}
+#      "vecinos": [{"titulo": …, "url": …, "formas": [[…]],
+#                   "bandera": "/imagenes/wiki/…webp", "que": "Reino"}, …]}
 #
 # Las formas van simplificadas (sin los puntos que no cambian el dibujo a
 # ese tamaño) y redondeadas: el mapamundi tiene 29.000 puntos y aquí solo
@@ -192,13 +193,14 @@ def _plano(pol, tolerancia):
 
 
 def para_pulsar(poligonos, otras, ancho_mapa, alto_mapa, imagen, titulo):
-    """otras: [(título, url, [polígonos])] de las formas con página. Entran
-    las que asoman en el recorte."""
+    """otras: [(título, url, [polígonos], bandera, qué es)] de las formas
+    con página. Entran las que asoman en el recorte. La bandera y el qué
+    es salen en el globo al pasar por encima, como en el mapamundi."""
     x0, y0, x1, y1 = encuadre(poligonos, ancho_mapa, alto_mapa)
     # Lo que mide un par de píxeles al verlo ampliado: para pulsar sobra.
     tolerancia = (x1 - x0) / 500
     vecinos = []
-    for nombre, url, suyos in otras:
+    for nombre, url, suyos, bandera, que in otras:
         dentro = []
         for pol in suyos:
             cx0, cy0, cx1, cy1 = _caja([pol])
@@ -208,7 +210,12 @@ def para_pulsar(poligonos, otras, ancho_mapa, alto_mapa, imagen, titulo):
             if len(plano) >= 6:
                 dentro.append(plano)
         if dentro:
-            vecinos.append({"titulo": nombre, "url": url, "formas": dentro})
+            uno = {"titulo": nombre, "url": url, "formas": dentro}
+            if bandera:
+                uno["bandera"] = bandera
+            if que:
+                uno["que"] = que
+            vecinos.append(uno)
     vecinos.sort(key=lambda v: v["titulo"].lower())
     return {"vista": [round(v, 1) for v in (x0, y0, x1 - x0, y1 - y0)],
             "imagen": imagen,

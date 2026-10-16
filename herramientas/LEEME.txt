@@ -1365,8 +1365,9 @@
       tipo…), sin repetir las de la caja. Hasta seis.
     - EL MAPA DE SITUACIÓN, PARA PULSAR: al ampliarlo (en la ficha de
       un país o una región), los países que se ven son enlaces: se pasa
-      el ratón y se resaltan, se pulsa y se va a su página; debajo, los
-      mismos en una lista. Las formas van en datos/wiki/situacion/
+      el ratón y se resaltan con su BANDERA y su nombre en un globo, como
+      en el mapamundi; se pulsa y se va a su página; debajo, los mismos en
+      una lista, cada uno con su bandera en pequeño. Las formas van en datos/wiki/situacion/
       <página>.json (mundo_situacion.para_pulsar, simplificadas).
 
   LO QUE PONE EL NAVEGADOR (scripts/paginas/mundo.js):

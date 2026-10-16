@@ -1839,7 +1839,10 @@ def preparar_situaciones(paginas, mapas, imagenes, probar, partes=()):
                 peques[clave] = "/imagenes/wiki/situacion/peque/" + archivo
             titulo_suyo = (str(ficha["datos"].get("title") if ficha.get("datos") else "")
                            or ficha["nombre"])
-            otras = [(paginas[k]["titulo"], paginas[k]["url"], pols)
+            # Con su bandera y su subtítulo, si tiene («qué es» no: en
+            # todos pondría «País»).
+            otras = [(paginas[k]["titulo"], paginas[k]["url"], pols, paginas[k].get("bandera_url") or "",
+                      paginas[k]["subtitulo"])
                      for k, pols in con_pagina.items() if k != clave]
             pulsar = mundo_situacion.para_pulsar(poligonos, otras, leido["ancho"], leido["alto"],
                                                  "/imagenes/wiki/situacion/" + archivo, titulo_suyo)
