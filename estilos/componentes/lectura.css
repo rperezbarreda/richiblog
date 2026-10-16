@@ -99,6 +99,14 @@
    foto ya está puesto. El margen de abajo es solo para el caso raro de
    una entrada sin columna, donde esto cae al principio del texto.
    La monta scripts/componentes/leer-en-voz.js. */
+/* El hueco que trae escrito cada entrada para la ventana de escuchar
+   (ver herramientas/3-generadores/generar-posts.py): ocupa lo mismo que
+   la de verdad pero no se ve hasta que leer-en-voz.js la cambia por
+   ella. Así la foto de debajo no da un salto al llegar el script. */
+.voz-ventana[data-voz-esqueleto] {
+    visibility: hidden;
+}
+
 .voz-ventana {
     position: relative;
     flex: none;

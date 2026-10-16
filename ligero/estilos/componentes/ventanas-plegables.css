@@ -1,0 +1,47 @@
+/* Copia sin comentarios. La escribe actualizar-cabeceras.py: no se edita.
+   fuente: /estilos/componentes/ventanas-plegables.css
+*/
+.ventana-barra {
+    cursor: pointer;
+    user-select: none;
+}
+.ventana-barra-mando {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    width: 100%;
+    margin: 0;
+    padding: 0;
+    background: none;
+    border: 0;
+    color: inherit;
+    font: inherit;
+    cursor: pointer;
+}
+.ventana-barra-mando:focus-visible {
+    outline: 2px solid currentColor;
+    outline-offset: -4px;
+}
+.ventana-plegable[data-plegada="si"] > :not(.ventana-barra) {
+    display: none;
+}
+.ventana-plegable[data-plegada="si"] {
+    height: auto;
+    min-height: 0;
+    max-height: none;
+    padding-bottom: 0;
+}
+.ventana-plegable[data-plegada="si"] > .ventana-barra {
+    margin-bottom: 0;
+    padding-right: 4.4rem;
+}
+.ventana-plegable:not([data-plegada="si"]) > .ventana-barra [data-ventana-accion="desplegar"],
+.ventana-plegable[data-plegada="si"] > .ventana-barra [data-ventana-accion="plegar"] {
+    background: transparent;
+    color: var(--window-btn-tinta);
+}
+.ventana-barra [data-ventana-accion="plegar"]:hover,
+.ventana-barra [data-ventana-accion="desplegar"]:hover {
+    background: var(--window-btn-tinta);
+    color: var(--window-btn-fondo);
+}

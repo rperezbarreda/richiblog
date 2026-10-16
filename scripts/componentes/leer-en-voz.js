@@ -75,12 +75,23 @@ const VOZ = {
 initializeLeerEnVoz();
 
 function initializeLeerEnVoz() {
+    // La entrada trae la ventana ya escrita, invisible, para guardarle el
+    // sitio (la escribe herramientas/3-generadores/generar-posts.py: si
+    // apareciera ahora, empujaría la foto hacia abajo). Si al final no se
+    // puede escuchar, el hueco sobra.
+    const hueco = document.querySelector("[data-voz-esqueleto]");
     // Sin la función del navegador no hay nada que ofrecer.
     if (!("speechSynthesis" in window) || !("SpeechSynthesisUtterance" in window)) {
+        if (hueco) {
+            hueco.remove();
+        }
         return;
     }
     const cuerpo = document.querySelector(".blog-post-body, .relato-post-body");
     if (!cuerpo) {
+        if (hueco) {
+            hueco.remove();
+        }
         return;
     }
     VOZ.cuerpo = cuerpo;
@@ -165,7 +176,14 @@ function montarBotonDeVoz() {
     pintarVoz(boton, "escuchar");
     ventana.appendChild(boton);
 
-    sitio.insertBefore(ventana, sitio.firstChild);
+    // En el sitio del hueco que trae la entrada, si lo trae: mide lo
+    // mismo, así que no se mueve nada.
+    const hueco = document.querySelector("[data-voz-esqueleto]");
+    if (hueco) {
+        hueco.replaceWith(ventana);
+    } else {
+        sitio.insertBefore(ventana, sitio.firstChild);
+    }
     VOZ.ventana = ventana;
     VOZ.boton = boton;
     montarVelocidadDeVoz(ventana);

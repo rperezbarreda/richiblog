@@ -72,6 +72,8 @@ import unicodedata
 from comun import (
     RAIZ,
     escribir_json,
+    escribir_texto,
+    leer_texto,
     limpiar_html,
     paginas,
     sin_tildes,
@@ -225,6 +227,178 @@ def leer_entrada(ruta, prefijo):
     return titulo, fecha, texto, fallos
 
 
+# LOS MINUTOS, ESCRITOS EN LA PROPIA ENTRADA. Al lado de la fecha
+# («04 oct 2026 · 4 min»). Antes los ponía scripts/componentes/lectura.js
+# cuando llegaba el listado, y al llegar partía la cabecera en dos líneas
+# y todo el texto daba un salto hacia abajo (auditoría de velocidad del
+# 16-10-2026: era lo que más le bajaba la nota a las entradas). Escritos
+# aquí ya están desde el primer pintado; lectura.js ve que están y no
+# hace nada. El mismo número que el del listado, porque es el mismo.
+RE_MINUTOS = re.compile(r'\s*<p class="lectura-minutos">.*?</p>', re.S)
+
+
+def poner_minutos(ruta, prefijo, minutos, probar):
+    """Escribe (o pone al día) el «N min» detrás de la fecha. Devuelve si
+    ha cambiado algo."""
+    texto, crlf = leer_texto(ruta)
+    m = re.search(rf'(\n?([ \t]*)<p class="{prefijo}-post-date">.*?</p>)', texto, re.S)
+    if not m or not minutos:
+        return False
+    sangria = m.group(2)
+    nuevo_p = ('\n%s<p class="lectura-minutos">%d min<span class="visually-hidden">'
+               ' de lectura</span></p>' % (sangria, minutos))
+    resto = texto[m.end():]
+    viejo = RE_MINUTOS.match(resto)
+    if viejo:
+        if viejo.group(0) == nuevo_p:
+            return False
+        resto = resto[viejo.end():]
+    nuevo = texto[:m.end()] + nuevo_p + resto
+    if not probar:
+        escribir_texto(ruta, nuevo, crlf)
+    return True
+
+
+# EL HUECO DE texto_a_voz.mp3. La ventana de escuchar la entrada la monta
+# scripts/componentes/leer-en-voz.js arriba de la columna de la foto, y al
+# aparecer empujaba la foto 270 px hacia abajo (auditoría de velocidad del
+# 16-10-2026). Así que cada entrada lleva ya escrita la misma ventana,
+# invisible (visibility: hidden, ver lectura.css) y ocupando su sitio, y
+# el script la cambia por la de verdad, que mide lo mismo. Si el
+# navegador no sabe leer en voz alta, el script la quita.
+HUECO_DE_VOZ = (
+    '<div class="voz-ventana" data-voz-esqueleto aria-hidden="true">'
+    '<div class="recent-entries-header"><h2>texto_a_voz.mp3</h2>'
+    '<div class="window-controls window-controls-small"></div></div>'
+    '<button type="button" class="voz-boton" tabindex="-1">'
+    '<span class="voz-icono">▶</span><span class="voz-texto">escuchar</span></button>'
+    '<div class="voz-velocidad"><p class="voz-velocidad-nombre">velocidad</p>'
+    '<div class="voz-velocidad-mandos">'
+    '<button type="button" class="voz-velocidad-boton" tabindex="-1">lenta</button>'
+    '<button type="button" class="voz-velocidad-boton" tabindex="-1">normal</button>'
+    '<button type="button" class="voz-velocidad-boton" tabindex="-1">rápida</button>'
+    '</div></div></div>'
+)
+RE_HUECO = re.compile(r'\s*<div class="voz-ventana" data-voz-esqueleto.*?</div></div></div>', re.S)
+
+
+def poner_hueco_de_voz(ruta, prefijo, probar):
+    texto, crlf = leer_texto(ruta)
+    m = re.search(rf'(\n([ \t]*)<div class="{prefijo}-post-side">)', texto)
+    if not m:
+        return False
+    sangria = m.group(2) + "    "
+    resto = texto[m.end():]
+    viejo = RE_HUECO.match(resto)
+    nuevo_hueco = "\n" + sangria + HUECO_DE_VOZ
+    if viejo:
+        if viejo.group(0) == nuevo_hueco:
+            return False
+        resto = resto[viejo.end():]
+    nuevo = texto[:m.end()] + nuevo_hueco + resto
+    if not probar:
+        escribir_texto(ruta, nuevo, crlf)
+    return True
+
+
+# LA FICHA DE CADA CAMPAÑA (campana.nfo), YA ESCRITA EN SU PÁGINA. La pinta
+# scripts/paginas/notas-rol.js con el JSON de la campaña, pero hasta que
+# llegaba estaba escondida y al aparecer empujaba la lista de sesiones
+# media pantalla hacia abajo (auditoría de velocidad del 16-10-2026). Aquí
+# se escribe igual que la pinta el script (mismas clases, mismo orden,
+# mismos textos: ver pintarFichaCampana y listaDePersonajes), y el script
+# luego la cambia por la suya, que mide lo mismo. Manda el JSON: si se
+# cambia, al pasar esto otra vez se reescribe.
+CAMPANAS = RAIZ / "datos" / "notas_rol"
+CAMPOS_FICHA = (("sistema", "sistema"), ("director", "dirige"), ("personajes", "personajes"),
+                ("sinopsis", "de qué va"))
+COLORES_PJ = ("verde", "azul", "rojo", "morado")
+
+
+def _e(texto):
+    import html
+    return html.escape(str(texto), quote=True)
+
+
+def _imagen_segura(url):
+    url = str(url or "").strip()
+    return url if re.match(r"^/(?!/)|^https?://", url, re.I) else ""
+
+
+def ficha_de_campana(campana):
+    filas = [(c, n) for c, n in CAMPOS_FICHA if c in campana]
+    if not filas:
+        return ""
+    por_rellenar = '<span class="campana-dato-vacio">por rellenar</span>'
+    trozos = []
+    for clave, nombre in filas:
+        if clave == "personajes":
+            gente = [p for p in (campana.get("personajes") or [])
+                     if isinstance(p, dict) and str(p.get("nombre") or "").strip()]
+            if not gente:
+                valor = por_rellenar
+            else:
+                items = []
+                for p in gente:
+                    nombre_pj = str(p["nombre"]).strip()
+                    color = str(p.get("color") or "").strip().lower()
+                    color = color if color in COLORES_PJ else ""
+                    nivel = p.get("nivel")
+                    try:
+                        nivel = int(nivel) if nivel else 0
+                    except (TypeError, ValueError):
+                        nivel = 0
+                    primera = " ".join(x for x in (str(p.get("clase") or "").strip(),
+                                                   "nivel %d" % nivel if nivel else "") if x)
+                    jugador = str(p.get("jugador") or "").strip()
+                    extra = " · ".join(x for x in (primera, "lo lleva " + jugador if jugador else "") if x)
+                    atributos = (' aria-label="%s" title="%s"' % (_e(nombre_pj + ". " + extra), _e(extra))
+                                 if extra else "")
+                    ruta = _imagen_segura(p.get("token_mini")) or _imagen_segura(p.get("token"))
+                    if ruta:
+                        retrato = ('<img class="campana-personaje-img" src="%s" alt="" loading="lazy"'
+                                   ' decoding="async">' % _e(ruta))
+                    else:
+                        retrato = ('<span class="campana-personaje-mono" aria-hidden="true">%s</span>'
+                                   % _e((nombre_pj or "?")[0].upper()))
+                    clase_color = " pj-" + color if color else ""
+                    items.append(
+                        '<li class="campana-personaje"><button type="button" class="campana-personaje-token%s"'
+                        ' aria-haspopup="dialog"%s><span class="campana-personaje-marco">%s</span>'
+                        '<strong class="campana-personaje-nombre%s">%s</strong></button></li>'
+                        % (clase_color, atributos, retrato, clase_color, _e(nombre_pj)))
+                valor = '<ul class="campana-personajes">%s</ul>' % "".join(items)
+        else:
+            texto = str(campana.get(clave) or "").strip()
+            valor = _e(texto) if texto else por_rellenar
+        trozos.append('<div class="campana-dato"><dt class="campana-dato-nombre">%s</dt>'
+                      '<dd class="campana-dato-valor">%s</dd></div>' % (_e(nombre), valor))
+    return '<dl class="campana-ficha-lista">%s</dl>' % "".join(trozos)
+
+
+def poner_fichas_de_campana(probar):
+    for archivo in sorted(CAMPANAS.glob("campana-*.json")):
+        try:
+            campana = json.loads(archivo.read_text(encoding="utf-8"))
+        except (OSError, ValueError):
+            continue
+        pagina = str(campana.get("pagina") or "").strip().lstrip("/")
+        ruta = RAIZ / pagina if pagina else None
+        if not ruta or not ruta.is_file():
+            continue
+        texto, crlf = leer_texto(ruta)
+        dentro = ficha_de_campana(campana)
+        nuevo = re.sub(r'(<div class="campana-ficha-cuerpo" data-campana-ficha-cuerpo>).*?(</div>\s*</div>)',
+                       lambda m: m.group(1) + dentro + m.group(2), texto, count=1, flags=re.S)
+        # Con algo dentro, se ve desde el principio; sin nada, escondida
+        # (como la deja el script cuando el JSON no trae ningún campo).
+        nuevo = re.sub(r'<div class="campana-ficha" data-campana-ficha( hidden)?>',
+                       '<div class="campana-ficha" data-campana-ficha%s>' % ("" if dentro else " hidden"),
+                       nuevo, count=1)
+        if nuevo != texto and not probar:
+            escribir_texto(ruta, nuevo, crlf)
+
+
 def recoger_blog():
     entradas, avisos = [], []
     for ruta in paginas(BLOG, "*.html"):
@@ -242,6 +416,8 @@ def recoger_blog():
                 "minutos": minutos_de(cuerpo_de(texto, "blog")),
             }
         )
+        poner_minutos(ruta, "blog", entradas[-1]["minutos"], PROBAR[0])
+        poner_hueco_de_voz(ruta, "blog", PROBAR[0])
     entradas.sort(key=clave_orden)
     return entradas, avisos
 
@@ -391,6 +567,8 @@ def recoger_movidas():
         if coleccion:
             entrada["collection"] = coleccion
         entradas.append(entrada)
+        poner_minutos(ruta, "relato", entrada["minutos"], PROBAR[0])
+        poner_hueco_de_voz(ruta, "relato", PROBAR[0])
 
     rol, avisos_rol = recoger_rol()
     todas = rol + entradas
@@ -445,11 +623,17 @@ def escribir(destino, datos, probar):
     return True
 
 
+# Si se está probando (--probar): poner_minutos no escribe nada.
+PROBAR = [False]
+
+
 def generar(probar=False):
+    PROBAR[0] = probar
     if probar:
         print("  MODO PRUEBA: no se cambia ningún archivo.\n")
 
     blog, avisos_blog = recoger_blog()
+    poner_fichas_de_campana(probar)
     movidas, avisos_movidas, cuantas_rol = recoger_movidas()
     notas, avisos_notas = recoger_notas_rol()
 

@@ -49,6 +49,9 @@
 .campana-boton[hidden] {
     display: none;
 }
+.campana-boton[data-por-ver] {
+    visibility: hidden;
+}
 .campana-boton {
     display: inline-flex;
     align-items: center;

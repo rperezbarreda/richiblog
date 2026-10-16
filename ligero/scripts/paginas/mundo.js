@@ -1450,7 +1450,12 @@ function pintarDestacadoMundo(fichas) {
 function prepararAzarMundo(fichas) {
     const boton = document.querySelector("[data-mundo-azar]");
     const todas = fichas.filter((f) => f.grupo !== "mapas" && rutaSeguraMundo(f.url) !== "#");
-    if (!boton || !todas.length) {
+    if (!boton) {
+        return;
+    }
+    boton.removeAttribute("data-por-ver");
+    if (!todas.length) {
+        boton.hidden = true;
         return;
     }
     boton.hidden = false;

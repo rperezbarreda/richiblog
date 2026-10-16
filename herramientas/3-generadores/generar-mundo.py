@@ -962,6 +962,23 @@ def preparar_capas(capas, probar):
     hechas, saltadas, enteras, pesadas = 0, 0, [], []
     for final, archivo in sorted(capas.items()):
         destino = IMAGENES / final
+        # Y su versión pequeña, la que se pide primero (ver mundo_mapas:
+        # el mapa la cambia por la grande al acercarse).
+        if final.lower().endswith(".webp") and not probar:
+            peque = IMAGENES / (final[:-5] + mundo_mapas.PEQUE_DE_CAPA)
+            try:
+                hace_falta = (not peque.is_file() or not destino.is_file()
+                              or peque.stat().st_mtime < destino.stat().st_mtime
+                              or peque.stat().st_mtime < archivo.stat().st_mtime)
+            except OSError:
+                hace_falta = True
+            if hace_falta and mundo_situacion.HAY_PILLOW:
+                from PIL import Image as _Img
+                with _Img.open(destino if destino.is_file() else archivo) as foto:
+                    foto = foto.convert("RGBA" if "A" in foto.getbands() else "RGB")
+                    foto.thumbnail((mundo_mapas.ANCHO_PEQUE_DE_CAPA,) * 2, _Img.LANCZOS)
+                    IMAGENES.mkdir(parents=True, exist_ok=True)
+                    foto.save(peque, "WEBP", quality=80, method=6)
         try:
             if destino.is_file() and destino.stat().st_mtime >= archivo.stat().st_mtime:
                 saltadas += 1
@@ -1709,6 +1726,64 @@ def escribir_portada(paginas, probar, cuantos=6):
     return salida
 
 
+# LA PORTADA, YA PINTADA DESDE EL PRINCIPIO. Los botones de las
+# secciones y el «Hoy en Cralëa» los pinta scripts/paginas/mundo.js con
+# mundo.json y mundo-portada.json, pero hasta que llegaban, en su sitio
+# había una línea («Cargando la wiki…») y al llegar la portada crecía de
+# golpe 350 px y empujaba todo lo de debajo: era lo que más le bajaba la
+# nota (auditoría de velocidad del 16-10-2026). Así que aquí se escriben
+# en web/wiki/index_wiki.html tal y como los va a pintar el navegador
+# (mismas clases, mismo orden, mismas cuentas): al llegar el script los
+# cambia por los suyos, iguales, y no se mueve nada.
+
+PORTADA_HTML = SALIDA / "index_wiki.html"
+
+
+def escribir_esqueleto_portada(fichas, hoy, probar):
+    if not PORTADA_HTML.is_file():
+        return False
+    texto, crlf = leer_texto(PORTADA_HTML)
+    categorias = [c for c in (leer_json(CATEGORIAS, []) or [])
+                  if isinstance(c, dict) and str(c.get("nombre") or "").strip()]
+    iconos = {str(c["nombre"]).strip(): str(c.get("icono") or "").strip() for c in categorias}
+    orden, por_grupo = [], {}
+    for f in fichas:
+        if not str(f.get("titulo") or "").strip():
+            continue
+        grupo = str(f.get("grupo") or "").strip() or LO_DEMAS
+        if grupo not in por_grupo:
+            por_grupo[grupo] = set()
+            orden.append(grupo)
+        por_grupo[grupo].add(f.get("url"))
+    secciones = list(iconos) + [g for g in orden if g not in iconos]
+    trozos = []
+    for grupo in secciones:
+        if grupo == "mapas":
+            continue
+        n = len(por_grupo.get(grupo, ()))
+        icono = ('<span class="mundo-seccion-icono" aria-hidden="true">%s</span>' % html.escape(iconos[grupo])
+                 if iconos.get(grupo) else "")
+        cuenta = "todavía vacía" if not n else ("1 página" if n == 1 else "%d páginas" % n)
+        trozos.append('<li><button type="button" class="mundo-seccion%s" aria-haspopup="dialog">%s'
+                      '<span class="mundo-seccion-nombre">%s</span><span class="mundo-seccion-cuenta">%s</span>'
+                      '</button></li>' % ("" if n else " es-vacia", icono, html.escape(grupo), cuenta))
+    botones = '<ul class="mundo-secciones" data-mundo-secciones>%s</ul>' % "".join(trozos)
+    nuevo = re.sub(r'(<div class="mundo-indice" data-mundo-indice[^>]*>)(.*?)(</div>)',
+                   lambda m: m.group(1) + "\n                " + botones + "\n            " + m.group(3),
+                   texto, count=1, flags=re.S)
+    if hoy and hoy.get("anyo") is not None:
+        era = (', en la <a href="%s">%s</a>' % (html.escape(hoy["url"], quote=True), html.escape(hoy["era"]))
+               if hoy.get("era") else "")
+        linea = '<p class="mundo-hoy" data-mundo-hoy>Hoy en Cralëa: año %s%s.</p>' % (html.escape(str(hoy["anyo"])), era)
+        nuevo = re.sub(r'<p class="mundo-hoy" data-mundo-hoy[^>]*>.*?</p>', lambda m: linea, nuevo, count=1,
+                       flags=re.S)
+    if nuevo == texto:
+        return False
+    if not probar:
+        escribir_texto(PORTADA_HTML, nuevo, crlf)
+    return True
+
+
 def copiar_imagenes(imagenes, usadas, probar):
     """Las imágenes que se usan, a imagenes/wiki/.
 
@@ -2021,7 +2096,8 @@ def main():
     escritos += escribir_vistas(mapas, args.probar)
     fichas = escribir_indice(paginas, mapas, args.probar, categorias, peques)
     escribir_regiones(paginas, partes, peques, de_partes, args.probar)
-    escribir_portada(paginas, args.probar)
+    portada = escribir_portada(paginas, args.probar)
+    escribir_esqueleto_portada(fichas, portada.get("hoy"), args.probar)
     escribir_datos_de_las_piezas(paginas, args.probar)
     copiadas, pesadas, repetidas = copiar_imagenes(imagenes, usadas, args.probar)
     hechas, saltadas, enteras, gordas = preparar_capas(capas, args.probar)

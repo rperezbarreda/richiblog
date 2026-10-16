@@ -1,0 +1,213 @@
+/* Copia sin comentarios. La escribe actualizar-cabeceras.py: no se edita.
+   fuente: /estilos/componentes/impresion.css
+*/
+@media print {
+    @page {
+        margin: 2cm;
+    }
+    :root,
+    :root[data-theme] {
+        --bg-texture: none;
+        --purple: #000000;
+        --purple-lighter: #000000;
+        --surface: #000000;
+        --white: #000000;
+        --yellow: #000000;
+        --yellow-contrast: #000000;
+        --border: #000000;
+        --error: #000000;
+        --yellow-glow-strong: transparent;
+        --muted: #3a3a3a;
+    }
+    body {
+        background: #ffffff;
+        color: #000000;
+    }
+    :root body *,
+    :root body *::before,
+    :root body *::after {
+        background-image: none;
+        background-color: transparent;
+        box-shadow: none;
+        text-shadow: none;
+    }
+    :root body [aria-pressed="true"],
+    :root body [aria-pressed="true"]::before,
+    :root body [aria-pressed="true"]::after,
+    :root body th:not([aria-sort="none"]) .mapa-ordenar,
+    :root body a.campana-sesion:hover,
+    :root body a.campana-sesion:focus-visible {
+        background-color: transparent;
+    }
+    :root body .cuaderno-tareas > li::before {
+        outline: none;
+    }
+    :root[data-crt="si"]::after {
+        display: none;
+    }
+    .skip-link,
+    .mobile-topbar,
+    .sidebar,
+    .sidebar-backdrop,
+    .ajustes-abrir,
+    .ajustes,
+    .notice,
+    #quotes-container,
+    .subir,
+    .window-controls,
+    .window-controls-small,
+    .voz-ventana,
+    .voz-aviso,
+    .buscador,
+    .filtros,
+    .gatin-random,
+    .lightbox,
+    .nav-toggle,
+    .blog-tags-toggle,
+    .rec-flecha,
+    .blog-post-back,
+    .relato-post-back,
+    .pet-back,
+    .reto-volver,
+    .cuaderno-post-back,
+    .campana-volver,
+    .npcs-volver,
+    .campana-botones,
+    .modal,
+    .cuaderno-plegar-todo,
+    .cuaderno-tareas-deshacer,
+    .cuaderno-paginacion,
+    .cuaderno-pie,
+    .volver-inicio,
+    [data-otras-caja],
+    [data-otras-entradas] {
+        display: none;
+    }
+    main,
+    #main-content {
+        max-width: none;
+        margin: 0;
+        padding: 0;
+    }
+    body {
+        font-size: 11pt;
+        line-height: 1.5;
+    }
+    .blog-post-layout,
+    .relato-post-layout {
+        display: block;
+    }
+    .npcs-page,
+    .ando-page,
+    .ando-rejilla {
+        display: block;
+        height: auto;
+        min-height: 0;
+        max-height: none;
+        overflow: visible;
+    }
+    .ando-bloque,
+    .ando-postit {
+        break-inside: avoid;
+        margin-bottom: 0.6cm;
+    }
+    .npc-grupo {
+        break-inside: avoid;
+        margin-bottom: 0.8cm;
+    }
+    .npc-token-marco {
+        box-shadow: none;
+    }
+    .cuaderno-page,
+    .cuaderno-post,
+    .cuaderno-post-body-wrap,
+    .cuaderno-reparto,
+    .cuaderno-columna,
+    .cuaderno-lateral,
+    .cuaderno,
+    .cuaderno-hoja,
+    .cuaderno-hoja-cuerpo,
+    .cuaderno-postit {
+        display: block;
+        height: auto;
+        min-height: 0;
+        max-height: none;
+        overflow: visible;
+    }
+    .cuaderno-postit {
+        transform: none;
+        box-shadow: none;
+    }
+    .cuaderno-postit::after {
+        display: none;
+    }
+    .cuaderno-hoja[hidden] {
+        display: block;
+    }
+    .cuaderno-hoja,
+    .cuaderno-postit {
+        margin-bottom: 1cm;
+    }
+    .blog-post-aside,
+    .relato-post-aside {
+        max-width: 11cm;
+        margin: 0 auto;
+    }
+    main p a[href]::after,
+    main li a[href]::after,
+    main blockquote a[href]::after {
+        content: " (" attr(href) ")";
+        background: none;
+        -webkit-mask: none;
+        mask: none;
+        width: auto;
+        height: auto;
+        margin: 0;
+        font-size: 0.85em;
+        word-break: break-all;
+    }
+    main a[href^="#"]::after,
+    main a[href^="mailto:"]::after,
+    main li a.campana-sesion::after {
+        content: "";
+    }
+    h1,
+    h2,
+    h3,
+    h4 {
+        break-after: avoid;
+        page-break-after: avoid;
+    }
+    figure,
+    img,
+    blockquote,
+    pre,
+    table,
+    .cuaderno-escena,
+    .cuaderno-postit {
+        break-inside: avoid;
+        page-break-inside: avoid;
+    }
+    p,
+    li {
+        orphans: 3;
+        widows: 3;
+    }
+    .home,
+    .blog-post,
+    .relato-post,
+    .blog-post-page,
+    .acc-bloque,
+    main > section {
+        border: 0;
+        padding-left: 0;
+        padding-right: 0;
+    }
+    .recent-entries-header,
+    .gatin-random-header,
+    .pet-window-header {
+        padding: 0;
+        border: 0;
+        background: none;
+    }
+}

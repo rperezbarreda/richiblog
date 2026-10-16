@@ -9,6 +9,7 @@ function initializeLectura() {
         return;
     }
     montarIndice(cuerpo);
+    prepararGifsLectura();
     document.addEventListener("lectura:entrada", (evento) => {
         pintarMinutos(evento.detail);
     });
@@ -80,4 +81,52 @@ function idLibre(texto, numero, usados) {
         vuelta += 1;
     }
     return id;
+}
+function prepararGifsLectura() {
+    const videos = [...document.querySelectorAll("video[data-gif]")];
+    if (!videos.length) {
+        return;
+    }
+    const sistema = window.matchMedia ? window.matchMedia("(prefers-reduced-motion: reduce)") : null;
+    const quieto = () => (sistema && sistema.matches)
+        || document.documentElement.getAttribute("data-movimiento") === "quieto";
+    const aplicar = () => {
+        videos.forEach((v) => {
+            if (quieto()) {
+                v.pause();
+            } else if (!v.dataset.parado) {
+                v.play().catch(() => {});
+            }
+        });
+    };
+    videos.forEach((v) => {
+        const boton = document.createElement("button");
+        boton.type = "button";
+        boton.className = "gif-boton";
+        v.parentNode.insertBefore(boton, v);
+        boton.appendChild(v);
+        const nombre = (v.getAttribute("aria-label") || "").trim();
+        v.removeAttribute("aria-label");
+        v.setAttribute("aria-hidden", "true");
+        const decir = () => boton.setAttribute("aria-label", nombre
+            + (v.paused ? ": parado, pulsa para que siga" : ": pulsa para pararlo"));
+        boton.addEventListener("click", () => {
+            if (v.paused) {
+                delete v.dataset.parado;
+                v.play().catch(() => {});
+            } else {
+                v.dataset.parado = "1";
+                v.pause();
+            }
+        });
+        v.addEventListener("play", decir);
+        v.addEventListener("pause", decir);
+        decir();
+    });
+    if (sistema && sistema.addEventListener) {
+        sistema.addEventListener("change", aplicar);
+    }
+    new MutationObserver(aplicar).observe(document.documentElement,
+        { attributes: true, attributeFilter: ["data-movimiento"] });
+    aplicar();
 }

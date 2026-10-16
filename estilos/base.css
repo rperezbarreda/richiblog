@@ -7,8 +7,14 @@
    sitio donde una declaración vale para todo el sitio.
    Declararlas aquí no cuesta ancho de banda: el navegador solo baja
    el archivo cuando algún elemento de esa página usa esa fuente de
-   verdad, así que Pangolin (74 KB) solo se descarga al abrir una
+   verdad, así que Pangolin (36 KB) solo se descarga al abrir una
    entrada del blog, aunque esté declarada aquí.
+   Pangolin va recortada (16-10-2026): solo las letras del español y
+   del latín de siempre y sin las instrucciones de «hinting», que eran
+   la mitad del archivo (74 KB → 36 KB). La original sigue en el
+   historial de git (la de antes del commit «Velocidad», en
+   tipografias/pangolin-400.woff2) por si en Windows se viera peor y
+   hubiera que volver a ella.
    font-display: swap replica el &display=swap que llevaba el enlace
    de Google: el texto se ve desde el primer momento con la fuente de
    respaldo y salta a la definitiva al cargar. */
@@ -67,6 +73,59 @@
     font-weight: 400;
     font-style: normal;
     font-display: swap;
+}
+
+/* ---- LAS DE RECAMBIO, A LA MEDIDA ----
+   Mientras llegan Space Grotesk y DM Mono (font-display: swap), el texto
+   sale con la letra del sistema, y al llegar las buenas cambiaba de
+   ancho y de alto: las líneas se partían en otro sitio y la página daba
+   un salto (auditoría de velocidad del 16-10-2026: en las páginas de la
+   wiki era todo lo que se movía). Estas dos son la del sistema (Arial y
+   Courier New, o sus gemelas de Linux, Liberation) estirada para que
+   ocupe lo mismo que la buena: el mismo ancho medio de letra en un texto
+   en español y la misma altura de línea. Los números salen de los
+   propios archivos de las fuentes (unitsPerEm, hhea y el ancho de cada
+   letra por lo que se usa en español). Si cambias de fuente, hay que
+   recalcularlos. */
+@font-face {
+    font-family: "Space Grotesk Recambio";
+    src: local("Arial"), local("ArialMT"), local("Liberation Sans"), local("LiberationSans");
+    size-adjust: 109.4%;
+    ascent-override: 89.9%;
+    descent-override: 26.7%;
+    line-gap-override: 0%;
+}
+
+@font-face {
+    font-family: "DM Mono Recambio";
+    src: local("Courier New"), local("CourierNewPSMT"), local("Liberation Mono"), local("LiberationMono");
+    size-adjust: 100%;
+    ascent-override: 99.2%;
+    descent-override: 31%;
+    line-gap-override: 0%;
+}
+
+/* La de las barras de título de las ventanas (y el título de cada
+   entrada): Jersey 10 es muy estrecha, y sin esto el título salía en dos
+   líneas hasta que llegaba y luego en una. */
+@font-face {
+    font-family: "Jersey 10 Recambio";
+    src: local("Arial"), local("ArialMT"), local("Liberation Sans"), local("LiberationSans");
+    size-adjust: 79.3%;
+    ascent-override: 101.3%;
+    descent-override: 33.8%;
+    line-gap-override: 0%;
+}
+
+/* La de las entradas y los relatos. Pangolin es más estrecha que Arial
+   y con más alto por abajo. */
+@font-face {
+    font-family: "Pangolin Recambio";
+    src: local("Arial"), local("ArialMT"), local("Liberation Sans"), local("LiberationSans");
+    size-adjust: 92.9%;
+    ascent-override: 100.9%;
+    descent-override: 33.6%;
+    line-gap-override: 0%;
 }
 
 /* ---- LA LETRA "MÁS LEGIBLE" ---- */
@@ -155,15 +214,15 @@
        Si añades CSS nuevo, usa estas variables y no el nombre de la
        fuente, que si no ese trozo no cambiará con el mando. */
     /* Lo que se lee de corrido: párrafos, entradas, menú. */
-    --fuente-texto: "Space Grotesk", sans-serif;
+    --fuente-texto: "Space Grotesk", "Space Grotesk Recambio", sans-serif;
     /* Datos y rótulos: fechas, etiquetas, botones, formularios. */
-    --fuente-mono: "DM Mono", monospace;
+    --fuente-mono: "DM Mono", "DM Mono Recambio", monospace;
     /* Las barras de título de las ventanas falsas. */
-    --fuente-ventana: "Jersey 10", "DM Mono", monospace;
+    --fuente-ventana: "Jersey 10", "Jersey 10 Recambio", "DM Mono", monospace;
     /* Los titulares grandes en cursiva ("bienvenidos a mi blog!"). */
     --fuente-titular: Georgia, "Times New Roman", serif;
     /* La de aire escrito a mano, para las notas sueltas. */
-    --fuente-mano: "Pangolin", "Space Grotesk", sans-serif;
+    --fuente-mano: "Pangolin", "Pangolin Recambio", sans-serif;
     /* Lo que mide la barra amarilla del móvil. Sale de aquí, y no de un
        60px suelto en cada sitio, porque la barra tiene que crecer con
        el texto y hay cuatro cosas que se colocan justo debajo de ella. */

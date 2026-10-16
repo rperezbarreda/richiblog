@@ -20,11 +20,18 @@ const VOZ = {
 };
 initializeLeerEnVoz();
 function initializeLeerEnVoz() {
+    const hueco = document.querySelector("[data-voz-esqueleto]");
     if (!("speechSynthesis" in window) || !("SpeechSynthesisUtterance" in window)) {
+        if (hueco) {
+            hueco.remove();
+        }
         return;
     }
     const cuerpo = document.querySelector(".blog-post-body, .relato-post-body");
     if (!cuerpo) {
+        if (hueco) {
+            hueco.remove();
+        }
         return;
     }
     VOZ.cuerpo = cuerpo;
@@ -66,7 +73,12 @@ function montarBotonDeVoz() {
     boton.addEventListener("click", alPulsarVoz);
     pintarVoz(boton, "escuchar");
     ventana.appendChild(boton);
-    sitio.insertBefore(ventana, sitio.firstChild);
+    const hueco = document.querySelector("[data-voz-esqueleto]");
+    if (hueco) {
+        hueco.replaceWith(ventana);
+    } else {
+        sitio.insertBefore(ventana, sitio.firstChild);
+    }
     VOZ.ventana = ventana;
     VOZ.boton = boton;
     montarVelocidadDeVoz(ventana);

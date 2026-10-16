@@ -54,6 +54,9 @@
 .relato-post-body h2 {
     scroll-margin-top: 16px;
 }
+.voz-ventana[data-voz-esqueleto] {
+    visibility: hidden;
+}
 .voz-ventana {
     position: relative;
     flex: none;

@@ -213,6 +213,10 @@ function porRellenar() {
     return aviso;
 }
 function prepararBotones(campana) {
+    document.querySelectorAll(".campana-boton[data-por-ver]").forEach((b) => {
+        b.removeAttribute("data-por-ver");
+        b.hidden = true;
+    });
     const cosas = cosasDelBotin(campana);
     const botonBotin = document.querySelector("[data-campana-botin-abrir]");
     if (botonBotin && cosas.length) {

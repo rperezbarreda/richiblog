@@ -107,6 +107,17 @@
     display: none;
 }
 
+/* Mientras llega el JSON de la campaña, los dos botones de las ventanas
+   ocupan su sitio pero no se ven (ni se leen ni se pulsan: visibility
+   los quita también del lector y del tabulador). Antes nacían con
+   hidden y, al aparecer, la fila pasaba a dos líneas en el móvil y toda
+   la página daba un salto (auditoría de velocidad del 16-10-2026). Si
+   al final la campaña no tiene botín o pendientes, el script le pone
+   hidden y entonces sí se van. */
+.campana-boton[data-por-ver] {
+    visibility: hidden;
+}
+
 .campana-boton {
     display: inline-flex;
     align-items: center;

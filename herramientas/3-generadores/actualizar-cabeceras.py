@@ -906,6 +906,14 @@ PAQUETES = (
     (
         "/estilos/paquete-cierre.css",
         [
+            # La barra lateral y su buscador van justo antes de ULTIMAS en
+            # todas las páginas que llevan menú (ver hojas_de), así que
+            # entran también: tres viajes menos por página (auditoría de
+            # velocidad del 16-10-2026: cada hoja suelta frenaba el primer
+            # pintado en el móvil).
+            "/estilos/componentes/barra-lateral.css",
+            "/estilos/componentes/barra-lateral.responsive.css",
+            "/estilos/paginas/buscar.css",
             "/estilos/componentes/ventanas-plegables.css",
             "/estilos/componentes/impresion.css",
             "/estilos/componentes/sin-movimiento.css",

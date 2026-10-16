@@ -1034,6 +1034,13 @@ html:not(.js) .mundo-spoiler {
 }
 
 /* UNA PÁGINA AL AZAR, al final de «para empezar». */
+/* Hasta que llega la lista de páginas, el dado ocupa su sitio sin verse
+   (ni leerse ni pulsarse): si naciera escondido, al aparecer partiría la
+   línea en dos y la portada daría un salto. */
+.mundo-azar[data-por-ver] {
+    visibility: hidden;
+}
+
 .mundo-azar {
     margin-left: 6px;
     padding: 2px 10px;

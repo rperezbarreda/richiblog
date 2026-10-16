@@ -61,24 +61,21 @@
     <!-- ==== ADELANTO DEL MENÚ ==== -->
     <script>window.adelantoDeFragmentos={};try{window.adelantoDeFragmentos["/fragmentos/barra-lateral.html"]=fetch("/fragmentos/barra-lateral.html?v=d9a306ce").then(function(r){return r.ok?r.text():null}).catch(function(){return null})}catch(e){}</script>
     <!-- ==== CSS ==== -->
-    <link rel="stylesheet" href="/estilos/paquete-comun.css?v=f64bf058">
-    <link rel="stylesheet" href="/ligero/estilos/paginas/notas-rol.css?v=0cbcfee9">
+    <link rel="stylesheet" href="/estilos/paquete-comun.css?v=db722f0c">
+    <link rel="stylesheet" href="/ligero/estilos/paginas/notas-rol.css?v=dd8c2e3b">
     <link rel="stylesheet" href="/ligero/estilos/componentes/postit.css?v=c6f04f61">
     <link rel="stylesheet" href="/ligero/estilos/paginas/notas-rol.responsive.css?v=9c1d26db">
     <link rel="stylesheet" href="/ligero/estilos/componentes/ventana-modal.css?v=95db68e9">
     <link rel="stylesheet" href="/ligero/estilos/componentes/ventana-modal.responsive.css?v=e927767d">
     <link rel="stylesheet" href="/ligero/estilos/componentes/lupa.css?v=bd5208ae">
-    <link rel="stylesheet" href="/ligero/estilos/componentes/barra-lateral.css?v=4b5b861b">
-    <link rel="stylesheet" href="/ligero/estilos/componentes/barra-lateral.responsive.css?v=fb0768a1">
-    <link rel="stylesheet" href="/ligero/estilos/paginas/buscar.css?v=b0074caa">
-    <link rel="stylesheet" href="/estilos/paquete-cierre.css?v=3c277d98">
+    <link rel="stylesheet" href="/estilos/paquete-cierre.css?v=b764bc66">
     <!-- ==== fin del CSS ==== -->
     <script src="/ligero/scripts/cargador-scripts.js?v=d7504ea0"></script>
     <!-- ==== JS ==== -->
     <script defer src="/scripts/paquete-comun.js?v=a305fb20"></script>
     <script defer src="/ligero/scripts/componentes/ventana-modal.js?v=427a4c21"></script>
     <script defer src="/ligero/scripts/componentes/lupa.js?v=cce10cd1"></script>
-    <script defer src="/ligero/scripts/paginas/notas-rol.js?v=280164a5"></script>
+    <script defer src="/ligero/scripts/paginas/notas-rol.js?v=2e6f6d4f"></script>
     <!-- ==== fin del JS ==== -->
   </head>
 <body>
@@ -136,9 +133,9 @@
                 <p class="campana-botones">
                     <a class="campana-boton" data-campana-npcs href="{{PERSONAJES_URL}}">npcs →</a>
                     <button class="campana-boton" type="button"
-                            data-campana-botin-abrir aria-haspopup="dialog" hidden>el botín →</button>
+                            data-campana-botin-abrir aria-haspopup="dialog" data-por-ver>el botín →</button>
                     <button class="campana-boton" type="button"
-                            data-campana-misiones-abrir aria-haspopup="dialog" hidden>pendientes →</button>
+                            data-campana-misiones-abrir aria-haspopup="dialog" data-por-ver>pendientes →</button>
                 </p>
             </div>
 

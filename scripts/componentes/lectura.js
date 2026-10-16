@@ -37,6 +37,7 @@ function initializeLectura() {
     }
 
     montarIndice(cuerpo);
+    prepararGifsLectura();
 
     document.addEventListener("lectura:entrada", (evento) => {
         pintarMinutos(evento.detail);
@@ -140,4 +141,77 @@ function idLibre(texto, numero, usados) {
         vuelta += 1;
     }
     return id;
+}
+
+
+// =========================================
+// LOS «GIF», QUE SON VÍDEOS
+// =========================================
+// Un GIF animado pesa muchísimo: el de los gatos con la fregona eran
+// 1,25 MB para 320x320. Pasado a vídeo (sin sonido y en bucle) se queda
+// en 150 KB y se ve igual. En la entrada va así, en MP4 y en WebM (cada
+// navegador coge el primero que sepa leer; el Chromium sin códecs de
+// pago, por ejemplo, no lee MP4):
+//
+//     <video poster="….webp" width="320" height="320" autoplay muted
+//            loop playsinline data-gif aria-label="…">
+//         <source src="….mp4" type="video/mp4">
+//         <source src="….webm" type="video/webm">
+//     </video>
+//
+// Aquí se mete dentro de un botón, que es el que lleva el nombre.
+//
+// Y como es un vídeo, a diferencia del GIF, SE PUEDE PARAR: quieto si el
+// aparato pide menos movimiento o si en accesibilidad está «movimiento:
+// quieto» (data-movimiento en el <html>), y pulsándolo se para o sigue.
+function prepararGifsLectura() {
+    const videos = [...document.querySelectorAll("video[data-gif]")];
+    if (!videos.length) {
+        return;
+    }
+    const sistema = window.matchMedia ? window.matchMedia("(prefers-reduced-motion: reduce)") : null;
+    const quieto = () => (sistema && sistema.matches)
+        || document.documentElement.getAttribute("data-movimiento") === "quieto";
+    const aplicar = () => {
+        videos.forEach((v) => {
+            if (quieto()) {
+                v.pause();
+            } else if (!v.dataset.parado) {
+                v.play().catch(() => {});
+            }
+        });
+    };
+    videos.forEach((v) => {
+        // Dentro de un botón (un <video> no puede hacer de botón él
+        // mismo): con el teclado se llega y se para con Intro o espacio.
+        const boton = document.createElement("button");
+        boton.type = "button";
+        boton.className = "gif-boton";
+        v.parentNode.insertBefore(boton, v);
+        boton.appendChild(v);
+        const nombre = (v.getAttribute("aria-label") || "").trim();
+        v.removeAttribute("aria-label");
+        v.setAttribute("aria-hidden", "true");
+        // Lo que dice el lector de pantalla: qué es y qué pasa si se pulsa.
+        const decir = () => boton.setAttribute("aria-label", nombre
+            + (v.paused ? ": parado, pulsa para que siga" : ": pulsa para pararlo"));
+        boton.addEventListener("click", () => {
+            if (v.paused) {
+                delete v.dataset.parado;
+                v.play().catch(() => {});
+            } else {
+                v.dataset.parado = "1";
+                v.pause();
+            }
+        });
+        v.addEventListener("play", decir);
+        v.addEventListener("pause", decir);
+        decir();
+    });
+    if (sistema && sistema.addEventListener) {
+        sistema.addEventListener("change", aplicar);
+    }
+    new MutationObserver(aplicar).observe(document.documentElement,
+        { attributes: true, attributeFilter: ["data-movimiento"] });
+    aplicar();
 }

@@ -369,6 +369,12 @@ function porRellenar() {
 // botón que abre una ventana vacía es peor que no tenerlo.
 
 function prepararBotones(campana) {
+    // Nacen ocupando su sitio sin verse (data-por-ver, ver notas-rol.css):
+    // aquí se ve si se quedan o se van.
+    document.querySelectorAll(".campana-boton[data-por-ver]").forEach((b) => {
+        b.removeAttribute("data-por-ver");
+        b.hidden = true;
+    });
     const cosas = cosasDelBotin(campana);
     const botonBotin = document.querySelector("[data-campana-botin-abrir]");
     if (botonBotin && cosas.length) {

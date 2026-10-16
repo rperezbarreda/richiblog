@@ -1,0 +1,21 @@
+/* Copia sin comentarios. La escribe actualizar-cabeceras.py: no se edita.
+   fuente: /estilos/componentes/sin-movimiento.css
+*/
+:root[data-movimiento="quieto"] *,
+:root[data-movimiento="quieto"] *::before,
+:root[data-movimiento="quieto"] *::after {
+    animation-duration: 1ms;
+    animation-iteration-count: 1;
+    transition-duration: 1ms;
+    scroll-behavior: auto;
+}
+:root[data-movimiento="quieto"][data-crt="si"]::after {
+    animation: none;
+}
+:root[data-movimiento="quieto"][data-theme^="terminal-"] .recent-entries-header h2::after,
+:root[data-movimiento="quieto"][data-theme^="terminal-"] .gatin-random-header h2::after {
+    animation: none;
+}
+:root[data-movimiento="quieto"] .quotes-track {
+    animation-play-state: paused;
+}

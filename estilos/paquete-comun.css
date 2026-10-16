@@ -65,6 +65,38 @@
     font-display: swap;
 }
 @font-face {
+    font-family: "Space Grotesk Recambio";
+    src: local("Arial"), local("ArialMT"), local("Liberation Sans"), local("LiberationSans");
+    size-adjust: 109.4%;
+    ascent-override: 89.9%;
+    descent-override: 26.7%;
+    line-gap-override: 0%;
+}
+@font-face {
+    font-family: "DM Mono Recambio";
+    src: local("Courier New"), local("CourierNewPSMT"), local("Liberation Mono"), local("LiberationMono");
+    size-adjust: 100%;
+    ascent-override: 99.2%;
+    descent-override: 31%;
+    line-gap-override: 0%;
+}
+@font-face {
+    font-family: "Jersey 10 Recambio";
+    src: local("Arial"), local("ArialMT"), local("Liberation Sans"), local("LiberationSans");
+    size-adjust: 79.3%;
+    ascent-override: 101.3%;
+    descent-override: 33.8%;
+    line-gap-override: 0%;
+}
+@font-face {
+    font-family: "Pangolin Recambio";
+    src: local("Arial"), local("ArialMT"), local("Liberation Sans"), local("LiberationSans");
+    size-adjust: 92.9%;
+    ascent-override: 100.9%;
+    descent-override: 33.6%;
+    line-gap-override: 0%;
+}
+@font-face {
     font-family: "Atkinson Hyperlegible";
     src: url("/tipografias/atkinson-400.woff2") format("woff2");
     font-weight: 400;
@@ -108,11 +140,11 @@
 }
 :root {
     --escala: 1;
-    --fuente-texto: "Space Grotesk", sans-serif;
-    --fuente-mono: "DM Mono", monospace;
-    --fuente-ventana: "Jersey 10", "DM Mono", monospace;
+    --fuente-texto: "Space Grotesk", "Space Grotesk Recambio", sans-serif;
+    --fuente-mono: "DM Mono", "DM Mono Recambio", monospace;
+    --fuente-ventana: "Jersey 10", "Jersey 10 Recambio", "DM Mono", monospace;
     --fuente-titular: Georgia, "Times New Roman", serif;
-    --fuente-mano: "Pangolin", "Space Grotesk", sans-serif;
+    --fuente-mano: "Pangolin", "Pangolin Recambio", sans-serif;
     --barra-alto: calc(60px * var(--escala));
     --lateral-ancho: calc(280px * var(--escala));
     --lateral-hueco: var(--lateral-ancho);

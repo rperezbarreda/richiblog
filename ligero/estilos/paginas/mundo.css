@@ -727,6 +727,9 @@ html:not(.js) .mundo-spoiler {
     color: inherit;
     text-underline-offset: 3px;
 }
+.mundo-azar[data-por-ver] {
+    visibility: hidden;
+}
 .mundo-azar {
     margin-left: 6px;
     padding: 2px 10px;

@@ -2745,8 +2745,11 @@
   No hay que hacer nada: generar-posts.py cuenta las palabras del
   cuerpo de cada entrada y apunta los minutos en el listado (200
   palabras por minuto). Sale al lado de la fecha, tanto en los
-  listados como en la propia entrada. Si reescribes una entrada, se
-  pone al día la próxima vez que pases el generador.
+  listados como en la propia entrada: ahí lo ESCRIBE el generador
+  dentro de la página (<p class="lectura-minutos">), para que esté
+  desde el primer pintado y no empuje el texto al aparecer. Si
+  reescribes una entrada, se pone al día la próxima vez que pases el
+  generador.
 
   Y si una entrada lleva apartados —los <h2> del ejemplo de
   formatos—, arriba del texto sale sola una lista para saltar de uno
@@ -3120,7 +3123,11 @@
                         menú lateral
   3-generadores/generar-posts.py  reescribe datos/blog/entradas-blog.json,
                         datos/mis_movidas/mis-movidas.json y datos/notas_rol/notas-rol.json
-                        leyendo las páginas
+                        leyendo las páginas. Y escribe en cada entrada y
+                        relato sus minutos de lectura y el hueco de
+                        texto_a_voz.mp3, y en la página de cada campaña
+                        su ficha (campana.nfo) sacada del JSON: así no se
+                        mueve nada al cargar (ver LA VELOCIDAD)
   3-generadores/generar-rss.py  escribe blog/rss.xml
   3-generadores/generar-mundo.py  convierte los .md y los .cmap
                         que hay en wiki/ en las páginas de web/wiki/,
@@ -3397,19 +3404,22 @@
 
   LOS PAQUETES
   ------------
-  Once hojas de estilo y quince scripts los lleva TODA página del sitio.
+  Catorce hojas de estilo y quince scripts los lleva TODA página del sitio.
   Eran veintiséis líneas iguales en los 38 archivos y veintiséis viajes
   del navegador, así que la herramienta los pega en tres archivos:
 
       estilos/paquete-comun.css    las ocho que van ANTES de la hoja
                                    de la página
-      estilos/paquete-cierre.css   las tres que van DESPUÉS
+      estilos/paquete-cierre.css   las seis que van DESPUÉS (la barra
+                                   lateral, su buscador y las tres
+                                   últimas; desde el 16-10-2026)
       scripts/paquete-comun.js     los quince scripts comunes
 
   Son TRES y no uno porque el orden del CSS decide quién gana, y los
   comunes no van todos seguidos: ocho van siempre antes de la hoja de la
-  página y tres siempre después. Juntándolos en uno, esos tres
-  adelantarían a la hoja de la página y cambiaría lo que se ve.
+  página y seis siempre después. Juntándolos en uno, esos seis
+  adelantarían a la hoja de la página y cambiaría lo que se ve. (El 404,
+  que no lleva menú, se queda con las tres últimas sueltas.)
 
   Y no hay un paquete por página porque sale peor: hay 19 combinaciones
   distintas de CSS para 31 páginas, serían 19 paquetes de ~200 KB y cada
@@ -3429,6 +3439,46 @@
       python herramientas/3-generadores/actualizar-cabeceras.py
 
   SÍ HAY QUE SUBIRLOS A NEOCITIES: son los que piden las páginas.
+
+  LA VELOCIDAD (auditoría del 16-10-2026)
+  ---------------------------------------
+  Medido con Lighthouse simulando un móvil con 4G lento. Lo que más
+  bajaba la nota no era el peso sino los SALTOS: cosas que aparecían
+  al cargar y empujaban lo de debajo. Se arreglaron escribiendo en la
+  página lo que ya se sabe al generarla, o guardándole el sitio:
+
+    - Los minutos de lectura y el hueco de texto_a_voz.mp3 en entradas
+      y relatos, y la ficha de cada campaña: generar-posts.py.
+    - Los botones de las secciones y el «Hoy en Cralëa» de la portada
+      de la wiki: generar-mundo.py (escribir_esqueleto_portada).
+    - Los botones del botín y de pendientes de una campaña, y el dado
+      de la wiki: nacen con data-por-ver (ocupan su sitio sin verse) y
+      el script decide si se quedan.
+    - Las fuentes: mientras llegan, unas de recambio (Arial o Courier
+      New estiradas a la medida, «… Recambio» en estilos/base.css) que
+      ocupan lo mismo que Space Grotesk, DM Mono, Jersey 10 y Pangolin.
+
+  Y lo que pesaba de más:
+
+    - Las portadas de recomendaciones, a 800 px (1,2 MB → 0,4 MB), y
+      las fotos de los santuarios, a 1400 px (lo mismo que ya hacían
+      traer-imagen.py y generar-galeria.py con las nuevas): 18,5 MB →
+      10 MB. Los originales siguen en el historial de git (el commit
+      de antes del de «Velocidad»), por si hiciera falta alguno.
+    - Pangolin, sin las instrucciones de hinting: 74 KB → 36 KB (la
+      original, también en el historial de git).
+    - El GIF de los gatos con la fregona, pasado a vídeo: 1,25 MB →
+      150 KB, en MP4 y WebM. Un «gif» así se escribe como
+      <video … autoplay muted loop playsinline data-gif aria-label="…">
+      con sus dos <source> (ver scripts/componentes/lectura.js), y se
+      para pulsándolo o con «movimiento: quieto».
+    - El dibujo del mapamundi: se pide primero la versión de 1280 px
+      (283 KB, …-peque.webp, la hace generar-mundo.py) y el mapa la
+      cambia por la de 2560 (1,1 MB) al acercarse.
+
+  Resultado en el móvil: la portada de la wiki 75 → 98, las entradas
+  83 → 93, las campañas 87 → 97, las páginas de país 88 → 94; ningún
+  salto por encima de 0,01. En escritorio, todas 100.
 
   SIN COMENTARIOS
   ---------------

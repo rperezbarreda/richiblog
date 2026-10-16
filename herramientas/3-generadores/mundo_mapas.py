@@ -64,6 +64,10 @@ import json
 import re
 import unicodedata
 
+# El sufijo de la versión pequeña de cada imagen de capa (ver arriba).
+PEQUE_DE_CAPA = "-peque.webp"
+ANCHO_PEQUE_DE_CAPA = 1280
+
 
 # =========================================
 # LEER
@@ -506,9 +510,16 @@ def pintar(mapa, pagina_a, mapa_a, imagen_a, detalle=None, avisar=None, region_d
             opacidad = ""
             if capa["opacidad"] < 0.999:
                 opacidad = ' opacity="%s"' % _cifra(max(0.0, min(1.0, capa["opacidad"])))
-            trozos.append('<image class="mapa-capa-img" href="%s" x="0" y="0"'
+            # De entrada, la versión pequeña (1280 de ancho, la escribe
+            # generar-mundo.py en preparar_capas: un cuarto de lo que pesa
+            # la grande); scripts/paginas/mundo-mapa.js la cambia por la
+            # grande en cuanto se acerca el mapa o la pantalla la pide.
+            peque = url[:-5] + PEQUE_DE_CAPA if url.lower().endswith(".webp") else ""
+            trozos.append('<image class="mapa-capa-img" href="%s"%s x="0" y="0"'
                           ' width="%d" height="%d" preserveAspectRatio="none"%s></image>'
-                          % (html.escape(url, quote=True), ancho, alto, opacidad))
+                          % (html.escape(peque or url, quote=True),
+                             ' data-mapa-grande="%s"' % html.escape(url, quote=True) if peque else "",
+                             ancho, alto, opacidad))
         trozos.append("</g>")
         capas.append({"id": capa["id"], "nombre": capa["nombre"],
                       "visible": capa["visible"], "imagen": capa["imagen"]})

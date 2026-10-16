@@ -119,10 +119,14 @@ function initializeMundoMapa() {
 
     // Al cambiar de tamaño la ventana cambia cuánto mide una unidad del
     // mapa en pantalla, así que los pines hay que volver a ajustarlos.
-    window.addEventListener("resize", () => escalarPinesDeMapa(mando));
+    window.addEventListener("resize", () => {
+        escalarPinesDeMapa(mando);
+        mejorarImagenDeMapa(mando);
+    });
 
     prepararArrastreDeMapa(mando);
     prepararCapasDeMapa(caja);
+    mejorarImagenDeMapa(mando);
     prepararRegionesDeMapa(caja);
     prepararGloboDeMapa(mando);
     prepararSitiosDeMapa();
@@ -199,6 +203,7 @@ function ponerZoomDeMapa(mando, quiere, anclaX, anclaY) {
     }
 
     escalarPinesDeMapa(mando);
+    mejorarImagenDeMapa(mando);
 
     if (mando.cifra) {
         mando.cifra.textContent = Math.round(ahora * 100) + "%";
@@ -590,4 +595,38 @@ function prepararSitiosDeMapa() {
     lista.addEventListener("mouseout", (evento) => mirar(evento, false));
     lista.addEventListener("focusin", (evento) => mirar(evento, true));
     lista.addEventListener("focusout", (evento) => mirar(evento, false));
+}
+
+
+// =========================================
+// LA IMAGEN GRANDE, SOLO CUANDO HACE FALTA
+// =========================================
+// El dibujo del mapa llega en pequeño (1280 de ancho: un cuarto de lo que
+// pesa el de 2560, ver preparar_capas en generar-mundo.py), que es lo que
+// se ve en un móvil y en la mayoría de pantallas con el mapa entero. En
+// cuanto lo que se pinta pide más puntos de los que tiene —al acercar el
+// mapa, o en una pantalla muy grande o de mucha densidad— se baja el
+// grande por detrás y se cambia cuando ya ha llegado, para que no se quede
+// en blanco mientras tanto.
+function mejorarImagenDeMapa(mando) {
+    const pide = mando.lienzo.clientWidth * (mando.zoom || 1) * (window.devicePixelRatio || 1);
+    mando.lienzo.querySelectorAll(".mapa-capa-img[data-mapa-grande]").forEach((imagen) => {
+        if (imagen.dataset.mapaCambiando || pide <= 1280 * 1.15) {
+            return;
+        }
+        const grande = banderaSeguraDeMapa(imagen.getAttribute("data-mapa-grande"));
+        if (!grande) {
+            return;
+        }
+        imagen.dataset.mapaCambiando = "1";
+        const antes = new Image();
+        antes.onload = () => {
+            imagen.setAttribute("href", grande);
+            imagen.removeAttribute("data-mapa-grande");
+        };
+        antes.onerror = () => {
+            delete imagen.dataset.mapaCambiando;
+        };
+        antes.src = grande;
+    });
 }

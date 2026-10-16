@@ -481,13 +481,31 @@ body:has(.blog-post-page) main {
     gap: 10px;
 }
 
-.blog-post-aside img {
+.blog-post-aside img,
+.blog-post-aside video {
     display: block;
     width: 100%;
     height: auto;
     flex: 0 0 auto;
     border: 3px solid var(--yellow);
     box-shadow: 4px 4px 0 var(--yellow);
+}
+
+/* El «gif» de una entrada es un vídeo, y se para pulsándolo (ver
+   scripts/componentes/lectura.js). */
+.blog-post-aside .gif-boton {
+    display: block;
+    width: 100%;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    background: none;
+    cursor: pointer;
+}
+
+.blog-post-aside .gif-boton:focus-visible {
+    outline: 3px solid var(--yellow);
+    outline-offset: 6px;
 }
 
 .blog-post-aside figcaption {

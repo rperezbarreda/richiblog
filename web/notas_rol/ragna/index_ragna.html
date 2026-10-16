@@ -58,24 +58,21 @@
     <!-- ==== ADELANTO DEL MENÚ ==== -->
     <script>window.adelantoDeFragmentos={};try{window.adelantoDeFragmentos["/fragmentos/barra-lateral.html"]=fetch("/fragmentos/barra-lateral.html?v=d9a306ce").then(function(r){return r.ok?r.text():null}).catch(function(){return null})}catch(e){}</script>
     <!-- ==== CSS ==== -->
-    <link rel="stylesheet" href="/estilos/paquete-comun.css?v=f64bf058">
-    <link rel="stylesheet" href="/ligero/estilos/paginas/notas-rol.css?v=0cbcfee9">
+    <link rel="stylesheet" href="/estilos/paquete-comun.css?v=db722f0c">
+    <link rel="stylesheet" href="/ligero/estilos/paginas/notas-rol.css?v=dd8c2e3b">
     <link rel="stylesheet" href="/ligero/estilos/componentes/postit.css?v=c6f04f61">
     <link rel="stylesheet" href="/ligero/estilos/paginas/notas-rol.responsive.css?v=9c1d26db">
     <link rel="stylesheet" href="/ligero/estilos/componentes/ventana-modal.css?v=95db68e9">
     <link rel="stylesheet" href="/ligero/estilos/componentes/ventana-modal.responsive.css?v=e927767d">
     <link rel="stylesheet" href="/ligero/estilos/componentes/lupa.css?v=bd5208ae">
-    <link rel="stylesheet" href="/ligero/estilos/componentes/barra-lateral.css?v=4b5b861b">
-    <link rel="stylesheet" href="/ligero/estilos/componentes/barra-lateral.responsive.css?v=fb0768a1">
-    <link rel="stylesheet" href="/ligero/estilos/paginas/buscar.css?v=b0074caa">
-    <link rel="stylesheet" href="/estilos/paquete-cierre.css?v=3c277d98">
+    <link rel="stylesheet" href="/estilos/paquete-cierre.css?v=b764bc66">
     <!-- ==== fin del CSS ==== -->
     <script src="/ligero/scripts/cargador-scripts.js?v=d7504ea0"></script>
     <!-- ==== JS ==== -->
     <script defer src="/scripts/paquete-comun.js?v=a305fb20"></script>
     <script defer src="/ligero/scripts/componentes/ventana-modal.js?v=427a4c21"></script>
     <script defer src="/ligero/scripts/componentes/lupa.js?v=cce10cd1"></script>
-    <script defer src="/ligero/scripts/paginas/notas-rol.js?v=280164a5"></script>
+    <script defer src="/ligero/scripts/paginas/notas-rol.js?v=2e6f6d4f"></script>
     <!-- ==== fin del JS ==== -->
   </head>
 <body>
@@ -93,23 +90,23 @@
             </div>
 
             <div class="campana-cabecera">
-                <p class="campana-intro" data-campana-intro>Las notas que tomo después de cada partida, tal cual las escribo.</p>
+                <p class="campana-intro" data-campana-intro>Las notas que tomo después de cada partida.</p>
 
                 <p class="campana-botones">
                     <a class="campana-boton" data-campana-npcs href="/web/notas_rol/ragna/npcs_ragna.html">npcs →</a>
                     <button class="campana-boton" type="button"
-                            data-campana-botin-abrir aria-haspopup="dialog" hidden>el botín →</button>
+                            data-campana-botin-abrir aria-haspopup="dialog" data-por-ver>el botín →</button>
                     <button class="campana-boton" type="button"
-                            data-campana-misiones-abrir aria-haspopup="dialog" hidden>pendientes →</button>
+                            data-campana-misiones-abrir aria-haspopup="dialog" data-por-ver>pendientes →</button>
                 </p>
             </div>
 
-            <div class="campana-ficha" data-campana-ficha hidden>
+            <div class="campana-ficha" data-campana-ficha>
                 <div class="recent-entries-header">
                     <h2>campana.nfo</h2>
                     <div class="window-controls window-controls-small" data-window-controls aria-hidden="true"></div>
                 </div>
-                <div class="campana-ficha-cuerpo" data-campana-ficha-cuerpo></div>
+                <div class="campana-ficha-cuerpo" data-campana-ficha-cuerpo><dl class="campana-ficha-lista"><div class="campana-dato"><dt class="campana-dato-nombre">sistema</dt><dd class="campana-dato-valor">DnD 5.5e</dd></div><div class="campana-dato"><dt class="campana-dato-nombre">dirige</dt><dd class="campana-dato-valor">Nacho</dd></div><div class="campana-dato"><dt class="campana-dato-nombre">personajes</dt><dd class="campana-dato-valor"><ul class="campana-personajes"><li class="campana-personaje"><button type="button" class="campana-personaje-token pj-verde" aria-haspopup="dialog" aria-label="Faëlar. Elfo Druida nivel 3 · lo lleva Richi" title="Elfo Druida nivel 3 · lo lleva Richi"><span class="campana-personaje-marco"><span class="campana-personaje-mono" aria-hidden="true">F</span></span><strong class="campana-personaje-nombre pj-verde">Faëlar</strong></button></li><li class="campana-personaje"><button type="button" class="campana-personaje-token pj-azul" aria-haspopup="dialog" aria-label="Melissa. Humana Pícara nivel 3 · lo lleva Andrea" title="Humana Pícara nivel 3 · lo lleva Andrea"><span class="campana-personaje-marco"><span class="campana-personaje-mono" aria-hidden="true">M</span></span><strong class="campana-personaje-nombre pj-azul">Melissa</strong></button></li><li class="campana-personaje"><button type="button" class="campana-personaje-token pj-morado" aria-haspopup="dialog" aria-label="Denelia. Elfa Maga nivel 3 · lo lleva Julia" title="Elfa Maga nivel 3 · lo lleva Julia"><span class="campana-personaje-marco"><span class="campana-personaje-mono" aria-hidden="true">D</span></span><strong class="campana-personaje-nombre pj-morado">Denelia</strong></button></li><li class="campana-personaje"><button type="button" class="campana-personaje-token pj-rojo" aria-haspopup="dialog" aria-label="Thenarys. Elfo Paladín nivel 3 · lo lleva María" title="Elfo Paladín nivel 3 · lo lleva María"><span class="campana-personaje-marco"><span class="campana-personaje-mono" aria-hidden="true">T</span></span><strong class="campana-personaje-nombre pj-rojo">Thenarys</strong></button></li></ul></dd></div><div class="campana-dato"><dt class="campana-dato-nombre">de qué va</dt><dd class="campana-dato-valor">Unidos a la Gran Caravana de manos del comerciante Sigil, exploramos el mundo tras la expulsión de los gigantes por parte de Ragnar.</dd></div></dl></div>
             </div>
 
             <div class="campana-card">
