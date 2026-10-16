@@ -1797,9 +1797,73 @@ html:not(.js) .mundo-spoiler {
     border-color: var(--yellow);
 }
 .mundo-familia-nota {
-    margin: 0 0 0 calc(9rem + 10px);
+    margin: 0 0 12px;
     color: var(--muted);
     font-size: 0.875rem;
+}
+.mundo-familia-dibujo {
+    overflow-x: auto;
+    margin: 0 0 10px;
+    padding: 4px 0;
+}
+.mundo-arbol-svg {
+    display: block;
+    max-width: none;
+    margin: 0 auto;
+}
+.mundo-arbol-svg line {
+    stroke: var(--muted);
+    stroke-width: 2;
+}
+.mundo-arbol-svg rect {
+    fill: var(--purple-lighter);
+    stroke: var(--border);
+    stroke-width: 2;
+}
+.mundo-arbol-svg text {
+    fill: var(--yellow);
+    font-family: var(--fuente-texto);
+    font-size: 16px;
+    font-weight: 700;
+}
+.mundo-arbol-svg .arbol-fechas {
+    fill: var(--muted);
+    font-family: var(--fuente-mono);
+    font-size: 12px;
+    font-weight: 400;
+}
+.mundo-arbol-svg a.arbol-persona text {
+    text-decoration: underline;
+}
+.mundo-arbol-svg a.arbol-persona:hover rect,
+.mundo-arbol-svg a.arbol-persona:focus-visible rect {
+    stroke: var(--yellow);
+    stroke-width: 3;
+}
+.mundo-arbol-svg a.arbol-persona:focus-visible {
+    outline: none;
+}
+.mundo-arbol-svg a.arbol-persona:focus-visible rect {
+    stroke-width: 4;
+}
+.mundo-arbol-svg .es-yo rect {
+    fill: var(--yellow);
+    stroke: var(--yellow);
+}
+.mundo-arbol-svg .es-yo text {
+    fill: var(--yellow-contrast);
+}
+.mundo-arbol-svg .es-yo .arbol-fechas {
+    fill: var(--yellow-contrast);
+}
+.mundo-familia-lista summary {
+    color: var(--yellow);
+    font-family: var(--fuente-mono);
+    font-size: 0.875rem;
+    cursor: pointer;
+}
+.mundo-familia-lista[open] summary {
+    margin-bottom: 10px;
 }
 .mundo-navbox {
     margin: 24px 0 8px;
@@ -2003,7 +2067,24 @@ input.mundo-pieza-control[type="search"] {
         grid-template-columns: minmax(0, 1fr);
         gap: 4px;
     }
-    .mundo-familia-nota {
-        margin-left: 0;
-    }
+}
+.mundo-tabla th.mundo-diccionario-palabra {
+    min-width: 9rem;
+    background: transparent;
+    color: var(--yellow);
+    font-family: var(--fuente-texto);
+    font-size: 1.25rem;
+    font-weight: 700;
+    letter-spacing: 0;
+    text-transform: none;
+}
+.mundo-migas.es-fija {
+    position: fixed;
+    z-index: 30;
+    box-sizing: border-box;
+    margin: 0;
+    padding-top: 10px;
+    padding-bottom: 10px;
+    border-bottom: 2px solid var(--yellow);
+    background: var(--purple);
 }

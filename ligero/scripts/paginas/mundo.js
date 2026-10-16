@@ -991,6 +991,56 @@ function abrirDesdeLaDireccionMundo() {
 }
 const CONTENIDO_GUARDADO = "richi-contenido-plegado";
 prepararContenidoMundo();
+prepararMigasFijasMundo();
+function prepararMigasFijasMundo() {
+    const migas = document.querySelector(".mundo-migas");
+    const seccion = migas ? migas.closest("main > section") : null;
+    if (!migas || !seccion) {
+        return;
+    }
+    const hueco = document.createElement("div");
+    hueco.className = "mundo-migas-hueco";
+    hueco.hidden = true;
+    hueco.setAttribute("aria-hidden", "true");
+    migas.parentNode.insertBefore(hueco, migas);
+    const soltar = () => {
+        migas.classList.remove("es-fija");
+        migas.style.top = migas.style.left = migas.style.width = migas.style.paddingLeft =
+            migas.style.paddingRight = migas.style.backgroundColor = "";
+        hueco.hidden = true;
+    };
+    const ajustar = () => {
+        const caja = seccion.getBoundingClientRect();
+        const estilo = getComputedStyle(seccion);
+        const arriba = caja.top + (parseFloat(estilo.borderTopWidth) || 0);
+        const fija = migas.classList.contains("es-fija");
+        const donde = (fija ? hueco : migas).getBoundingClientRect();
+        if (donde.top >= arriba) {
+            if (fija) {
+                soltar();
+            }
+            return;
+        }
+        if (!fija) {
+            hueco.style.height = migas.offsetHeight + "px";
+            hueco.hidden = false;
+            migas.classList.add("es-fija");
+        }
+        migas.style.top = Math.round(arriba) + "px";
+        migas.style.left = Math.round(caja.left + (parseFloat(estilo.borderLeftWidth) || 0)) + "px";
+        migas.style.width = seccion.clientWidth + "px";
+        migas.style.backgroundColor = estilo.backgroundColor && !/rgba\([^)]*,\s*0\)|transparent/.test(estilo.backgroundColor)
+            ? estilo.backgroundColor : "";
+        migas.style.paddingLeft = estilo.paddingLeft;
+        migas.style.paddingRight = estilo.paddingRight;
+    };
+    seccion.addEventListener("scroll", ajustar, { passive: true });
+    window.addEventListener("resize", () => {
+        soltar();
+        ajustar();
+    });
+    ajustar();
+}
 function prepararContenidoMundo() {
     const plegable = document.querySelector("[data-mundo-contenido]");
     if (!plegable) {
@@ -1276,6 +1326,20 @@ function limpiarCalendarioMundo(datos) {
                 enlace: texto(luna.enlace) });
         }
     });
+    const ciclo = luna.ciclo_de_eclipses && typeof luna.ciclo_de_eclipses === "object" ? luna.ciclo_de_eclipses : null;
+    const tiposEclipse = ciclo && Array.isArray(ciclo.tipos) ? ciclo.tipos.filter((t) => t && texto(t.nombre)) : [];
+    const diasAnyo = meses.length * CALENDARIO_DIAS_MES + (fin ? fin.dias.length : 0);
+    const cada = ciclo ? Number(ciclo.cada) : 0;
+    if (tiposEclipse.length && Number.isInteger(cada) && cada > 0) {
+        let n = 0;
+        for (let d = Number(ciclo.primero) || cada; d <= diasAnyo; d += cada, n++) {
+            const mes = d <= meses.length * CALENDARIO_DIAS_MES ? Math.floor((d - 1) / CALENDARIO_DIAS_MES) + 1 : total;
+            const dia = mes <= meses.length ? ((d - 1) % CALENDARIO_DIAS_MES) + 1 : d - meses.length * CALENDARIO_DIAS_MES;
+            const tipo = tiposEclipse[n % tiposEclipse.length];
+            eventos.push({ nombre: texto(tipo.nombre), mes, dia, tipo: "eclipse", anyo: "",
+                resumen: texto(tipo.efecto) || texto(luna.efecto_eclipse), enlace: texto(luna.enlace) });
+        }
+    }
     return { nombre: texto(datos.nombre) || "El calendario", url: texto(datos.url),
         meses, fin, total, semana: semana.length === 7 ? semana : null, estaciones, eventos, hoy,
         fases, nombreLuna: texto(luna.nombre) || "la Luna" };
@@ -1918,6 +1982,12 @@ function prepararDiccionarioMundo() {
     form.setAttribute("role", "search");
     form.addEventListener("submit", (evento) => evento.preventDefault());
     form.appendChild(campoDeFormularioMundo("Buscar en el diccionario", campo));
+    const idiomas = [...new Set(filas.map((f) => f.getAttribute("data-idioma") || "").filter(Boolean))]
+        .sort((a, b) => a.localeCompare(b, "es"));
+    const idioma = selectMundo([["", "Todos"]].concat(idiomas.map((i) => [i, i])), "");
+    if (idiomas.length) {
+        form.appendChild(campoDeFormularioMundo("Idioma", idioma));
+    }
     const antesDe = tabla.closest(".mundo-tabla") || tabla;
     antesDe.parentNode.insertBefore(cuenta, antesDe);
     antesDe.parentNode.insertBefore(form, cuenta);
@@ -1925,15 +1995,17 @@ function prepararDiccionarioMundo() {
     const filtrar = () => {
         const buscado = llanoDic(campo.value.trim());
         let vistas = 0;
+        const suyo = idioma.value;
         filas.forEach((fila) => {
-            const pasa = !buscado || llanoDic(fila.textContent).includes(buscado);
+            const pasa = (!buscado || llanoDic(fila.textContent).includes(buscado)) &&
+                (!suyo || fila.getAttribute("data-idioma") === suyo);
             fila.hidden = !pasa;
             vistas += pasa ? 1 : 0;
         });
-        cuenta.textContent = buscado
-            ? (vistas === 1 ? "1 palabra" : vistas + " palabras") + " con «" + campo.value.trim() + "»."
-            : (filas.length === 1 ? "1 palabra." : filas.length + " palabras.");
+        cuenta.textContent = (vistas === 1 ? "1 palabra" : vistas + " palabras") +
+            (suyo ? " en " + suyo : "") + (buscado ? " con «" + campo.value.trim() + "»" : "") + ".";
     };
     campo.addEventListener("input", filtrar);
+    idioma.addEventListener("change", filtrar);
     filtrar();
 }

@@ -2455,9 +2455,92 @@ html:not(.js) .mundo-spoiler {
 }
 
 .mundo-familia-nota {
-    margin: 0 0 0 calc(9rem + 10px);
+    margin: 0 0 12px;
     color: var(--muted);
     font-size: 0.875rem;
+}
+
+/* EL DIBUJO DEL ÁRBOL FAMILIAR (dibujo_familiar, en mundo_piezas.py): las
+   cajas de cada persona unidas por rayas, de los abuelos a los nietos. Va
+   a su tamaño y, si no cabe, se desplaza de lado dentro de su caja (en el
+   móvil, sobre todo): encogido, los nombres no se leerían. */
+.mundo-familia-dibujo {
+    overflow-x: auto;
+    margin: 0 0 10px;
+    padding: 4px 0;
+}
+
+.mundo-arbol-svg {
+    display: block;
+    max-width: none;
+    margin: 0 auto;
+}
+
+.mundo-arbol-svg line {
+    stroke: var(--muted);
+    stroke-width: 2;
+}
+
+.mundo-arbol-svg rect {
+    fill: var(--purple-lighter);
+    stroke: var(--border);
+    stroke-width: 2;
+}
+
+.mundo-arbol-svg text {
+    fill: var(--yellow);
+    font-family: var(--fuente-texto);
+    font-size: 16px;
+    font-weight: 700;
+}
+
+.mundo-arbol-svg .arbol-fechas {
+    fill: var(--muted);
+    font-family: var(--fuente-mono);
+    font-size: 12px;
+    font-weight: 400;
+}
+
+.mundo-arbol-svg a.arbol-persona text {
+    text-decoration: underline;
+}
+
+.mundo-arbol-svg a.arbol-persona:hover rect,
+.mundo-arbol-svg a.arbol-persona:focus-visible rect {
+    stroke: var(--yellow);
+    stroke-width: 3;
+}
+
+.mundo-arbol-svg a.arbol-persona:focus-visible {
+    outline: none;
+}
+
+.mundo-arbol-svg a.arbol-persona:focus-visible rect {
+    stroke-width: 4;
+}
+
+.mundo-arbol-svg .es-yo rect {
+    fill: var(--yellow);
+    stroke: var(--yellow);
+}
+
+.mundo-arbol-svg .es-yo text {
+    fill: var(--yellow-contrast);
+}
+
+.mundo-arbol-svg .es-yo .arbol-fechas {
+    fill: var(--yellow-contrast);
+}
+
+.mundo-familia-lista summary {
+    color: var(--yellow);
+    font-family: var(--fuente-mono);
+    font-size: 0.875rem;
+    cursor: pointer;
+}
+
+.mundo-familia-lista[open] summary {
+    margin-bottom: 10px;
 }
 
 /* LA CAJA DE NAVEGACIÓN, al pie: las páginas hermanas en una tira. */
@@ -2706,7 +2789,34 @@ input.mundo-pieza-control[type="search"] {
         gap: 4px;
     }
 
-    .mundo-familia-nota {
-        margin-left: 0;
-    }
+}
+
+/* EL DICCIONARIO: la palabra, más grande que lo demás de la fila, que es
+   lo que se busca con la vista. */
+.mundo-tabla th.mundo-diccionario-palabra {
+    min-width: 9rem;
+    background: transparent;
+    color: var(--yellow);
+    font-family: var(--fuente-texto);
+    font-size: 1.25rem;
+    font-weight: 700;
+    letter-spacing: 0;
+    text-transform: none;
+}
+
+/* LAS MIGAS PEGADAS ARRIBA al bajar por una entrada (las pega
+   prepararMigasFijasMundo, en scripts/paginas/mundo.js, que les pone la
+   posición y el ancho de la sección). Por debajo del cuadro de contenido
+   (40) y de la barra del menú (50). */
+.mundo-migas.es-fija {
+    position: fixed;
+    z-index: 30;
+    box-sizing: border-box;
+    margin: 0;
+    padding-top: 10px;
+    padding-bottom: 10px;
+    border-bottom: 2px solid var(--yellow);
+    /* Si la sección no tiene un fondo opaco, el morado del tema (el script
+       le pone el de la sección si lo tiene). */
+    background: var(--purple);
 }

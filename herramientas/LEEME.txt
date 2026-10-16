@@ -1330,8 +1330,12 @@
       para una orden y sus ramas, o una casa y sus vasallos. Las migas
       siguen el mismo camino.
     - ÁRBOL FAMILIAR: los campos «padres», «pareja» e «hijos» de los
-      personajes. Salen abuelos, padres, su generación (con pareja y
-      hermanos), hijos y nietos. También basta con que lo diga uno.
+      personajes. Sale DIBUJADO como un árbol genealógico de los de
+      siempre: arriba los abuelos (cada pareja sobre su hijo), los padres,
+      la persona con su pareja al lado, y debajo hijos y nietos, cada uno
+      en su caja (con «nacimiento – muerte» si la ficha los tiene) y
+      unidos por rayas; cada caja lleva a su página. Debajo, plegado, lo
+      mismo en lista, con los hermanos. También basta con que lo diga uno.
     - LA CAJA DE NAVEGACIÓN, al final del artículo: las páginas
       hermanas. Un país, los de su región (con su bandera en pequeño);
       una raza o subraza, toda la familia; lo que pertenece a algo, lo que
@@ -1370,6 +1374,23 @@
                        palabras en «Vocabulario».
     pieza-relaciones   el diagrama de relaciones (ver arriba).
     pieza-panteon      todos los árboles de «pertenece a» juntos.
+
+  LOS ECLIPSES: cada 85 días hay uno, de cada uno de los cuatro tipos
+  por turno (total, parcial, anular e híbrido), así que caen cuatro al
+  año y siempre los mismos días: el 1 del Mes de Astucia, el 2 del Mes
+  del Arcano, el 3 del Mes de Cadena y el Día del Cambio. Está en
+  «luna» → «ciclo_de_eclipses» del calendario (cada, primero y los
+  tipos con su efecto, que se puede cambiar: el orden de los tipos y lo
+  que hace cada uno con la magia son una propuesta a partir de la
+  cosmología). Salen en el calendario de la portada y en el conversor.
+
+  LAS MIGAS de una entrada (Wiki Cralëa › Mapamundi › Azarasia) se
+  quedan pegadas arriba del marco al bajar, para volver atrás sin subir
+  (prepararMigasFijasMundo, en scripts/paginas/mundo.js; con fixed, no
+  sticky).
+
+  EL DICCIONARIO se puede filtrar por idioma además de buscar, y la
+  palabra va más grande que lo demás de la fila.
 
   LA LUNA EN EL CALENDARIO. En datos/wiki/calendario.json, «luna»: sus
   fases, el día de cada mes en que caen (el ciclo es de 28 días, como el

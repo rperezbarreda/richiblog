@@ -83,6 +83,29 @@
             }
         ],
         "efecto_eclipse": "La Luna tapa la Herida: la resonancia del mundo se debilita y la magia se vuelve torpe, errática o se calla.",
+        "ciclo_de_eclipses": {
+            "_": "Un eclipse cada «cada» días contando desde el primer día del año (el primero, el día «primero» del año), y cada uno de un tipo, por turno. Como el año tiene 340 días, cada 85 son cuatro eclipses al año, uno de cada tipo, y caen todos los años el mismo día.",
+            "cada": 85,
+            "primero": 85,
+            "tipos": [
+                {
+                    "nombre": "Eclipse total",
+                    "efecto": "La Luna tapa la Herida entera: la magia se calla y los conjuros se disuelven."
+                },
+                {
+                    "nombre": "Eclipse parcial",
+                    "efecto": "La Luna muerde un trozo de la Herida: la magia se vuelve torpe y débil."
+                },
+                {
+                    "nombre": "Eclipse anular",
+                    "efecto": "Queda un anillo de la Herida a la vista: la magia se desata sin control."
+                },
+                {
+                    "nombre": "Eclipse híbrido",
+                    "efecto": "Total en unos sitios y anular en otros: la magia es completamente impredecible."
+                }
+            ]
+        },
         "eclipses": []
     },
     "meses": [

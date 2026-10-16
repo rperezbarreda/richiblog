@@ -336,9 +336,178 @@ def arbol_familiar(ficha, paginas, familia):
         detalles.append("hermanos: " + ", ".join(paginas[k]["titulo"] for k in sorted(hermanos)))
     junto = "; ".join(detalles)
     nota = ('<p class="mundo-familia-nota">%s</p>' % esc(junto[:1].upper() + junto[1:])) if detalles else ""
-    return ('<div class="mundo-familia">%s%s%s%s%s%s</div>'
-            % (fila("Abuelos", abuelos), fila("Padres", sus_padres), centro, nota,
-               fila("Hijos", sus_hijos), fila("Nietos", nietos)))
+    lista = ('<div class="mundo-familia">%s%s%s%s%s</div>'
+             % (fila("Abuelos", abuelos), fila("Padres", sus_padres), centro,
+                fila("Hijos", sus_hijos), fila("Nietos", nietos)))
+    dibujo = dibujo_familiar(ficha, paginas, familia)
+    # El dibujo, como un árbol de los de siempre; y debajo, plegado, lo
+    # mismo en lista (con los hermanos, que el dibujo no lleva).
+    return ('<div class="mundo-familia-dibujo">%s</div>%s'
+            '<details class="mundo-familia-lista"><summary>Ver el árbol como lista</summary>%s</details>'
+            % (dibujo, nota, lista))
+
+
+# EL DIBUJO DEL ÁRBOL, en SVG, como los árboles genealógicos de siempre:
+# arriba los abuelos (cada pareja de abuelos sobre su hijo o hija), luego
+# los padres, en medio la persona (con su pareja al lado, unidas por una
+# raya) y debajo sus hijos y sus nietos. Las rayas bajan de cada pareja a
+# lo que sale de ella. Cada caja es un enlace a su página.
+
+ANCHO_HUECO = 200
+CAJA_ANCHO, CAJA_ALTO = 176, 64
+FILA = CAJA_ALTO + 56
+
+
+def _lineas_de_nombre(nombre, largo=19):
+    palabras, lineas, actual = nombre.split(), [], ""
+    for p in palabras:
+        if actual and len(actual) + 1 + len(p) > largo:
+            lineas.append(actual)
+            actual = p
+        else:
+            actual = (actual + " " + p).strip()
+    if actual:
+        lineas.append(actual)
+    if len(lineas) > 2:
+        lineas = [lineas[0], (" ".join(lineas[1:]))[:largo - 1] + "…"]
+    return lineas
+
+
+def _fechas(f):
+    nace = str(campo(f, "nacimiento") or "").strip().strip("*")
+    muere = str(campo(f, "muerte") or "").strip().strip("*")
+    nace = "" if "por decidir" in nace else nace
+    muere = "" if "por decidir" in muere else muere
+    if not nace and not muere:
+        return ""
+    texto = (nace or "?") + (" – " + muere if muere else "")
+    return texto if len(texto) <= 24 else texto[:23] + "…"
+
+
+def dibujo_familiar(ficha, paginas, familia):
+    padres, hijos, parejas = familia
+    yo = clave(ficha)
+    orden = lambda ks: sorted(ks, key=lambda k: llano(paginas[k]["titulo"]))
+    sus_padres = orden(padres.get(yo, set()))[:2]
+    abuelos_de = [orden(padres.get(p, set()))[:2] for p in sus_padres]
+    hay_abuelos = any(abuelos_de)
+    sus_parejas = orden(parejas.get(yo, set()))
+    sus_hijos = orden(hijos.get(yo, set()))
+    nietos_de = {h: orden(hijos.get(h, set())) for h in sus_hijos}
+    hay_nietos = any(nietos_de.values())
+
+    fila_de = {}
+    n = 0
+    for nombre, hay in (("abuelos", hay_abuelos), ("padres", bool(sus_padres)), ("yo", True),
+                        ("hijos", bool(sus_hijos)), ("nietos", hay_nietos)):
+        if hay:
+            fila_de[nombre] = n
+            n += 1
+    y_de = lambda nombre: 20 + fila_de[nombre] * FILA
+
+    cajas, rayas = [], []   # cajas: (clave, x centro, y arriba); rayas: (x1, y1, x2, y2)
+    W = ANCHO_HUECO
+    # Arriba: abuelos y padres, como en un árbol de antepasados.
+    x_padres = []
+    for i, p in enumerate(sus_padres):
+        if hay_abuelos:
+            base = i * 2 * W
+            xs = [base + (j + 0.5) * W for j in range(2)]
+            suyos = abuelos_de[i]
+            puestos = []
+            for j, a in enumerate(suyos):
+                cajas.append((a, xs[j], y_de("abuelos")))
+                puestos.append(xs[j])
+            x = base + W
+            if puestos:
+                _pareja_a_hijo(rayas, puestos, x, y_de("abuelos"), y_de("padres"))
+        else:
+            x = (i + 0.5) * W
+        cajas.append((p, x, y_de("padres")))
+        x_padres.append(x)
+    x_yo = sum(x_padres) / len(x_padres) if x_padres else 0.5 * W
+    cajas.append((yo, x_yo, y_de("yo")))
+    if x_padres:
+        _pareja_a_hijo(rayas, x_padres, x_yo, y_de("padres"), y_de("yo"))
+    # Su pareja (o parejas), al lado, unidas por una raya a media altura.
+    x_pareja = []
+    for i, p in enumerate(sus_parejas):
+        x = x_yo + (i + 1) * W
+        cajas.append((p, x, y_de("yo")))
+        x_pareja.append(x)
+    if x_pareja:
+        medio = y_de("yo") + CAJA_ALTO / 2
+        rayas.append((x_yo + CAJA_ANCHO / 2, medio, x_pareja[0] - CAJA_ANCHO / 2, medio))
+    # Abajo: hijos y nietos, cada hijo en el centro de los suyos.
+    if sus_hijos:
+        desde = (x_yo + x_pareja[0]) / 2 if x_pareja else x_yo
+        anchos = [max(1, len(nietos_de[h])) for h in sus_hijos]
+        total = sum(anchos) * W
+        x = desde - total / 2
+        x_hijos = []
+        for h, a in zip(sus_hijos, anchos):
+            centro = x + a * W / 2
+            cajas.append((h, centro, y_de("hijos")))
+            x_hijos.append(centro)
+            if nietos_de[h]:
+                xs = [x + (j + 0.5) * W for j in range(len(nietos_de[h]))]
+                for nieto, xn in zip(nietos_de[h], xs):
+                    cajas.append((nieto, xn, y_de("nietos")))
+                _padre_a_hijos(rayas, centro, xs, y_de("hijos"), y_de("nietos"))
+            x += a * W
+        arranque = y_de("yo") + (CAJA_ALTO / 2 if x_pareja else CAJA_ALTO)
+        _padre_a_hijos(rayas, desde, x_hijos, y_de("yo"), y_de("hijos"), arranque)
+
+    # Todo dentro del dibujo, con un margen.
+    izquierda = min(x for _, x, _ in cajas) - CAJA_ANCHO / 2 - 10
+    derecha = max(x for _, x, _ in cajas) + CAJA_ANCHO / 2 + 10
+    ancho = derecha - izquierda
+    alto = 20 + n * FILA - 36
+    dx = -izquierda
+    trozos = []
+    for x1, y1, x2, y2 in rayas:
+        trozos.append('<line x1="%.1f" y1="%.1f" x2="%.1f" y2="%.1f"/>' % (x1 + dx, y1, x2 + dx, y2))
+    for k, x, y in cajas:
+        f = paginas[k]
+        es_yo = k == yo
+        lineas = _lineas_de_nombre(f["titulo"])
+        fechas = _fechas(f)
+        filas = len(lineas) + (1 if fechas else 0)
+        y_texto = y + CAJA_ALTO / 2 - (filas - 1) * 9 + 5
+        texto = "".join('<tspan x="%.1f" y="%.1f">%s</tspan>' % (x + dx, y_texto + i * 18, esc(l))
+                        for i, l in enumerate(lineas))
+        if fechas:
+            texto += '<tspan class="arbol-fechas" x="%.1f" y="%.1f">%s</tspan>' % (
+                x + dx, y_texto + len(lineas) * 18, esc(fechas))
+        caja = ('<rect x="%.1f" y="%.1f" width="%d" height="%d" rx="6"/>'
+                '<text text-anchor="middle">%s</text>' % (x + dx - CAJA_ANCHO / 2, y, CAJA_ANCHO, CAJA_ALTO, texto))
+        if es_yo:
+            trozos.append('<g class="arbol-persona es-yo" aria-current="page">%s</g>' % caja)
+        else:
+            trozos.append('<a class="arbol-persona" href="%s">%s</a>' % (esc(f["url"]), caja))
+    return ('<svg class="mundo-arbol-svg" width="%d" height="%d" viewBox="0 0 %d %d" role="group"'
+            ' aria-label="Árbol familiar de %s">%s</svg>'
+            % (ancho, alto, ancho, alto, esc(ficha["titulo"]), "".join(trozos)))
+
+
+def _pareja_a_hijo(rayas, xs_padres, x_hijo, y_padres, y_hijo):
+    """Las rayas de una pareja (o de uno solo) a su hijo: bajan de cada uno,
+    se juntan en una barra y de ahí al hijo."""
+    barra = y_padres + CAJA_ALTO + (FILA - CAJA_ALTO) / 2
+    for x in xs_padres:
+        rayas.append((x, y_padres + CAJA_ALTO, x, barra))
+    puntos = list(xs_padres) + [x_hijo]
+    rayas.append((min(puntos), barra, max(puntos), barra))
+    rayas.append((x_hijo, barra, x_hijo, y_hijo))
+
+
+def _padre_a_hijos(rayas, x_padre, xs_hijos, y_padre, y_hijos, arranque=None):
+    barra = y_padre + CAJA_ALTO + (FILA - CAJA_ALTO) / 2
+    rayas.append((x_padre, arranque if arranque is not None else y_padre + CAJA_ALTO, x_padre, barra))
+    puntos = list(xs_hijos) + [x_padre]
+    rayas.append((min(puntos), barra, max(puntos), barra))
+    for x in xs_hijos:
+        rayas.append((x, barra, x, y_hijos))
 
 
 # =========================================
@@ -428,9 +597,9 @@ def tabla_de_palabras(palabras, paginas, enlazar_idioma=True):
         notas = esc(p.get("notas") or "")
         if pag:
             notas = (notas + " " if notas else "") + "(ver %s)" % enlace(pag)
-        filas.append('<tr data-diccionario-fila><th scope="row" lang="%s">%s</th><td>%s</td><td>%s</td>'
-                     '<td>%s</td></tr>'
-                     % ("und", esc(p.get("palabra")), celda_idioma, esc(p.get("significado")), notas))
+        filas.append('<tr data-diccionario-fila data-idioma="%s"><th scope="row" class="mundo-diccionario-palabra"'
+                     ' lang="und">%s</th><td>%s</td><td>%s</td><td>%s</td></tr>'
+                     % (esc(idioma), esc(p.get("palabra")), celda_idioma, esc(p.get("significado")), notas))
     return ('<div class="mundo-diccionario" data-mundo-diccionario>'
             '<div class="mundo-tabla"><table class="mundo-diccionario-tabla"><caption>Palabras del mundo</caption>'
             '<thead><tr><th scope="col">Palabra</th><th scope="col">Idioma</th>'
