@@ -1288,6 +1288,21 @@
   # orden:, # pregunta …:, # carpeta:), explicadas al principio de
   herramientas/1-publicar/nueva-pagina-wiki.py.
 
+  PÁGINAS DE EJEMPLO (wiki/Ejemplos/, el 16-10-2026): una de cada tipo,
+  hecha con su plantilla y en lorem ipsum, para ver cómo queda cada
+  sección de la portada: Villa Lorem (lugar), Dolores Ipsum, Amet
+  Consectetur y Adipisci Elit (personajes, una familia), los Lorémidos y
+  los Lorémidos del Bosque (raza y subraza), La Fe de Ipsum e Ipsa
+  (religión y deidad), La Orden de Sitamet (organización, con aliados y
+  enemigos), La Bestia Dolorosa (monstruo), La Espada de Lorem (objeto
+  mágico), La Batalla de Ipsum (acontecimiento), La Constelación de
+  Lorem (cosmología), La Fiesta de Ipsum (festividad) y el Lorémico
+  (idioma). Se enlazan entre ellas para que se vean las listas que salen
+  solas (los lugares, el árbol familiar, las relaciones…). Cuentan como
+  relleno (no salen de destacadas ni en el generador de nombres) y la
+  lista de pendientes las enseña. Cuando sobren, se borra la carpeta
+  wiki/Ejemplos/ entera y se pasa la wiki.
+
   LO QUE LAS PÁGINAS SE PONEN SOLAS (desde el 16-10-2026). Sale de las
   fichas de las demás páginas, así que no hay ninguna lista que mantener
   a mano (el código, en herramientas/3-generadores/mundo_piezas.py):

@@ -2437,6 +2437,26 @@
         "miniatura": ""
     },
     {
+        "titulo": "La Constelación de Lorem",
+        "url": "/web/wiki/ejemplos/la_constelacion_de_lorem.html",
+        "carpeta": "Ejemplos",
+        "etiquetas": [
+            "Cosmología",
+            "Constelaciones"
+        ],
+        "grupo": "cosmología",
+        "sub": [
+            "Constelaciones"
+        ],
+        "que": "Página de ejemplo",
+        "resumen": "La Constelación de Lorem es lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer in mauris eu nibh euismod gravida.",
+        "region": "",
+        "subraza_de": "",
+        "relleno": true,
+        "bandera": "",
+        "miniatura": ""
+    },
+    {
         "titulo": "El Ciclo de los Heraldos",
         "url": "/web/wiki/calendario/el_ciclo_de_los_heraldos.html",
         "carpeta": "Calendario",
@@ -2453,6 +2473,197 @@
         "region": "",
         "subraza_de": "",
         "relleno": false,
+        "bandera": "",
+        "miniatura": ""
+    },
+    {
+        "titulo": "La Fiesta de Ipsum",
+        "url": "/web/wiki/ejemplos/la_fiesta_de_ipsum.html",
+        "carpeta": "Ejemplos",
+        "etiquetas": [
+            "Cosmología",
+            "Calendario"
+        ],
+        "grupo": "cosmología",
+        "sub": [
+            "Calendario"
+        ],
+        "que": "Página de ejemplo",
+        "resumen": "La Fiesta de Ipsum es una festividad de El Ciclo de los Heraldos, lorem ipsum dolor sit amet, consectetur adipiscing elit. Praesent placerat risus quis eros, fusce pellentesque suscipit nibh.",
+        "region": "",
+        "subraza_de": "",
+        "relleno": true,
+        "bandera": "",
+        "miniatura": ""
+    },
+    {
+        "titulo": "La Batalla de Ipsum",
+        "url": "/web/wiki/ejemplos/la_batalla_de_ipsum.html",
+        "carpeta": "Ejemplos",
+        "etiquetas": [
+            "Historia",
+            "Acontecimientos"
+        ],
+        "grupo": "historia",
+        "sub": [
+            "Acontecimientos"
+        ],
+        "que": "Página de ejemplo",
+        "resumen": "La Batalla de Ipsum fue lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
+        "region": "",
+        "subraza_de": "",
+        "relleno": true,
+        "bandera": "",
+        "miniatura": ""
+    },
+    {
+        "titulo": "Villa Lorem",
+        "url": "/web/wiki/ejemplos/villa_lorem.html",
+        "carpeta": "Ejemplos",
+        "etiquetas": [
+            "Lugares",
+            "Asentamientos"
+        ],
+        "grupo": "lugares",
+        "sub": [
+            "Asentamientos"
+        ],
+        "que": "Página de ejemplo",
+        "resumen": "Villa Lorem es lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
+        "region": "",
+        "subraza_de": "",
+        "relleno": true,
+        "bandera": "",
+        "miniatura": ""
+    },
+    {
+        "titulo": "Adipisci Elit",
+        "url": "/web/wiki/ejemplos/adipisci_elit.html",
+        "carpeta": "Ejemplos",
+        "etiquetas": [
+            "Personajes"
+        ],
+        "grupo": "personajes",
+        "sub": [],
+        "que": "Página de ejemplo",
+        "resumen": "Adipisci Elit es lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam varius, turpis et commodo pharetra, est eros bibendum elit, nec luctus magna felis sollicitudin mauris.",
+        "region": "",
+        "subraza_de": "",
+        "relleno": true,
+        "bandera": "",
+        "miniatura": ""
+    },
+    {
+        "titulo": "Amet Consectetur",
+        "url": "/web/wiki/ejemplos/amet_consectetur.html",
+        "carpeta": "Ejemplos",
+        "etiquetas": [
+            "Personajes"
+        ],
+        "grupo": "personajes",
+        "sub": [],
+        "que": "Página de ejemplo",
+        "resumen": "Amet Consectetur es lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
+        "region": "",
+        "subraza_de": "",
+        "relleno": true,
+        "bandera": "",
+        "miniatura": ""
+    },
+    {
+        "titulo": "Dolores Ipsum",
+        "url": "/web/wiki/ejemplos/dolores_ipsum.html",
+        "carpeta": "Ejemplos",
+        "etiquetas": [
+            "Personajes"
+        ],
+        "grupo": "personajes",
+        "sub": [],
+        "que": "Página de ejemplo",
+        "resumen": "Dolores Ipsum es lorem ipsum dolor sit amet, consectetur adipiscing elit. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.",
+        "region": "",
+        "subraza_de": "",
+        "relleno": true,
+        "bandera": "",
+        "miniatura": ""
+    },
+    {
+        "titulo": "Lorémidos",
+        "url": "/web/wiki/ejemplos/loremidos/loremidos.html",
+        "carpeta": "Ejemplos/Lorémidos",
+        "etiquetas": [
+            "Razas",
+            "Lorémidos"
+        ],
+        "grupo": "razas",
+        "sub": [
+            "Lorémidos"
+        ],
+        "que": "Página de ejemplo",
+        "resumen": "Los Lorémidos son lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
+        "region": "",
+        "subraza_de": "",
+        "relleno": true,
+        "bandera": "",
+        "miniatura": ""
+    },
+    {
+        "titulo": "Lorémidos del Bosque",
+        "url": "/web/wiki/ejemplos/loremidos/loremidos_del_bosque.html",
+        "carpeta": "Ejemplos/Lorémidos",
+        "etiquetas": [
+            "Razas",
+            "Lorémidos"
+        ],
+        "grupo": "razas",
+        "sub": [
+            "Lorémidos"
+        ],
+        "que": "Página de ejemplo",
+        "resumen": "Los Lorémidos del Bosque son una subraza de Lorémidos, lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
+        "region": "",
+        "subraza_de": "Lorémidos",
+        "relleno": true,
+        "bandera": "",
+        "miniatura": ""
+    },
+    {
+        "titulo": "La Fe de Ipsum",
+        "url": "/web/wiki/ejemplos/la_fe_de_ipsum.html",
+        "carpeta": "Ejemplos",
+        "etiquetas": [
+            "Religión",
+            "Credos"
+        ],
+        "grupo": "religiones",
+        "sub": [
+            "Credos"
+        ],
+        "que": "Página de ejemplo",
+        "resumen": "La Fe de Ipsum es lorem ipsum dolor sit amet, consectetur adipiscing elit. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.",
+        "region": "",
+        "subraza_de": "",
+        "relleno": true,
+        "bandera": "",
+        "miniatura": ""
+    },
+    {
+        "titulo": "Ipsa",
+        "url": "/web/wiki/ejemplos/ipsa.html",
+        "carpeta": "Ejemplos",
+        "etiquetas": [
+            "Religión",
+            "Deidades"
+        ],
+        "grupo": "religiones",
+        "sub": [
+            "Deidades"
+        ],
+        "que": "Página de ejemplo",
+        "resumen": "Ipsa es lorem ipsum dolor sit amet, consectetur adipiscing elit. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
+        "region": "",
+        "subraza_de": "",
+        "relleno": true,
         "bandera": "",
         "miniatura": ""
     },
@@ -2893,6 +3104,40 @@
         "region": "",
         "subraza_de": "",
         "relleno": false,
+        "bandera": "",
+        "miniatura": ""
+    },
+    {
+        "titulo": "La Orden de Sitamet",
+        "url": "/web/wiki/ejemplos/la_orden_de_sitamet.html",
+        "carpeta": "Ejemplos",
+        "etiquetas": [
+            "Organizaciones"
+        ],
+        "grupo": "organizaciones",
+        "sub": [],
+        "que": "Página de ejemplo",
+        "resumen": "La Orden de Sitamet es lorem ipsum dolor sit amet, consectetur adipiscing elit. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.",
+        "region": "",
+        "subraza_de": "",
+        "relleno": true,
+        "bandera": "",
+        "miniatura": ""
+    },
+    {
+        "titulo": "La Bestia Dolorosa",
+        "url": "/web/wiki/ejemplos/la_bestia_dolorosa.html",
+        "carpeta": "Ejemplos",
+        "etiquetas": [
+            "Monstruos"
+        ],
+        "grupo": "monstruos",
+        "sub": [],
+        "que": "Página de ejemplo",
+        "resumen": "La Bestia Dolorosa es lorem ipsum dolor sit amet, consectetur adipiscing elit. Curabitur pretium tincidunt lacus, nulla gravida orci a odio.",
+        "region": "",
+        "subraza_de": "",
+        "relleno": true,
         "bandera": "",
         "miniatura": ""
     },
@@ -3339,6 +3584,44 @@
         "region": "",
         "subraza_de": "",
         "relleno": false,
+        "bandera": "",
+        "miniatura": ""
+    },
+    {
+        "titulo": "Lorémico",
+        "url": "/web/wiki/ejemplos/loremico.html",
+        "carpeta": "Ejemplos",
+        "etiquetas": [
+            "Idiomas"
+        ],
+        "grupo": "lo demás",
+        "sub": [
+            "Idiomas"
+        ],
+        "que": "Página de ejemplo",
+        "resumen": "El Lorémico es lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam varius, turpis et commodo pharetra, est eros bibendum elit, nec luctus magna felis sollicitudin mauris.",
+        "region": "",
+        "subraza_de": "",
+        "relleno": true,
+        "bandera": "",
+        "miniatura": ""
+    },
+    {
+        "titulo": "La Espada de Lorem",
+        "url": "/web/wiki/ejemplos/la_espada_de_lorem.html",
+        "carpeta": "Ejemplos",
+        "etiquetas": [
+            "Objetos mágicos"
+        ],
+        "grupo": "lo demás",
+        "sub": [
+            "Objetos mágicos"
+        ],
+        "que": "Página de ejemplo",
+        "resumen": "La Espada de Lorem es lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
+        "region": "",
+        "subraza_de": "",
+        "relleno": true,
         "bandera": "",
         "miniatura": ""
     }

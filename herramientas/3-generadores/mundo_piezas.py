@@ -102,18 +102,22 @@ def ordenadas(fichas):
 # «Lugares» del Reino de X; un personaje «raza: [[Elfos]]», en «Personajes»
 # de los Elfos.
 
+# La última columna, si la hay: la etiqueta que tiene que llevar la otra
+# página (un objeto mágico también tiene «ubicación», y no es un lugar).
 INVERSOS = (
-    (("ubicación", "ubicacion", "país", "pais"), "lugares", "Lugares"),
-    (("raza",), "personajes", "Personajes"),
-    (("residencia",), "habitantes_conocidos", "Quién vive aquí"),
+    (("ubicación", "ubicacion", "país", "pais"), "lugares", "Lugares", "lugares"),
+    (("ubicación", "ubicacion"), "objetos", "Lo que se guarda aquí", "objetos magicos"),
+    (("raza",), "personajes", "Personajes", ""),
+    (("residencia",), "habitantes_conocidos", "Quién vive aquí", ""),
 )
 
 
 def apartados_inversos(ficha, paginas):
     salida = []
     suya = clave(ficha)
-    for campos, ancla, titulo in INVERSOS:
+    for campos, ancla, titulo, etiqueta in INVERSOS:
         hijas = [f for f in paginas.values() if f is not ficha
+                 and (not etiqueta or etiqueta in [llano(t) for t in f.get("etiquetas") or []])
                  and any(suya in enlaces_de(campo(f, c)) for c in campos)]
         if hijas:
             salida.append((ancla, titulo, lista_de_fichas(ordenadas(hijas))))
@@ -501,6 +505,9 @@ def estilos_de_nombres(paginas, region_de, extra, palabras=()):
         if pais in paginas and region in paginas:
             apunta(paginas[region]["titulo"], paginas[pais]["titulo"])
     for f in paginas.values():
+        # Las de ejemplo (lorem ipsum) no enseñan cómo suena nada.
+        if "Lorem ipsum" in (f.get("texto") or ""):
+            continue
         tags = [llano(t) for t in f.get("etiquetas") or []]
         que = llano(que_es(f))
         if "cosmologia" in tags and que in ("astro", "mundo tributo", "constelacion"):

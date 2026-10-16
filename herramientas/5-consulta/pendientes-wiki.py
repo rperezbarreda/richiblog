@@ -16,6 +16,7 @@
 #   - «POR DECIDIR»: los campos de las fichas que siguen diciendo eso, por
 #     campo (capital: 107 páginas…).
 #   - TEXTO DE RELLENO: las páginas que aún tienen párrafos de relleno.
+#   - PÁGINAS DE EJEMPLO: las de wiki/Ejemplos/, en lorem ipsum.
 #   - ENTRADILLAS A MEDIAS: las que se quedaron como las dejó la plantilla
 #     («**Elfos** es»).
 #   - IMÁGENES QUE FALTAN: las que pide una ficha y no están en
@@ -62,11 +63,14 @@ def main():
     faltan = defaultdict(set)
     por_decidir = Counter()
     por_decidir_en = defaultdict(list)
-    relleno, entradillas, sin_imagen = [], [], []
+    relleno, entradillas, sin_imagen, ejemplos = [], [], [], []
     for nombre, archivo in paginas.items():
         texto = archivo.read_text(encoding="utf-8")
         m = RE_FM.match(texto)
-        frontmatter = m.group(1) if m else ""
+        # Sin las líneas de comentario (las explicaciones de las plantillas
+        # ponen ejemplos como [[Una]], que no son enlaces de verdad).
+        frontmatter = "\n".join(l for l in (m.group(1) if m else "").split("\n")
+                                 if not l.lstrip().startswith("#"))
         cuerpo = texto[m.end():] if m else texto
         cuerpo_sin_notas = re.sub(r"<!--.*?-->", "", cuerpo, flags=re.S)
         for e in RE_ENLACE.finditer(frontmatter + "\n" + cuerpo_sin_notas):
@@ -87,6 +91,8 @@ def main():
                         sin_imagen.append((archivo.stem, pedida))
         if "Texto de relleno" in cuerpo_sin_notas:
             relleno.append(archivo.stem)
+        if "Lorem ipsum" in cuerpo_sin_notas:
+            ejemplos.append(archivo.stem)
         primero = next((p.strip() for p in re.split(r"\n\s*\n", cuerpo_sin_notas) if p.strip()), "")
         if re.search(r"\*\*[^*]+\*\*\s+(es|son|fue|fueron)\s*$", primero):
             entradillas.append(archivo.stem)
@@ -113,6 +119,10 @@ def main():
     if todo:
         for p in sorted(relleno):
             print(f"     · {p}")
+
+    print(f"\n  PÁGINAS DE EJEMPLO (en lorem ipsum, para borrar cuando sobren): {len(ejemplos)}")
+    for p in sorted(ejemplos):
+        print(f"     · {p}")
 
     print(f"\n  ENTRADILLAS A MEDIAS (como las dejó la plantilla): {len(entradillas)}")
     for p in sorted(entradillas):

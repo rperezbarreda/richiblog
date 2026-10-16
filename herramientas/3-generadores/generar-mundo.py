@@ -1464,7 +1464,8 @@ def escribir_indice(paginas, mapas, probar, categorias=(), peques=None):
                            if ficha["nombre"].strip().lower() in subraza_de else ""),
             # Si aún es de relleno («*Texto de relleno.*»): la portada no la
             # saca de destacada ni en el «¿sabías que…?».
-            "relleno": "Texto de relleno" in (ficha.get("texto") or ""),
+            # (o de ejemplo, en lorem ipsum: wiki/Ejemplos/).
+            "relleno": any(m in (ficha.get("texto") or "") for m in ("Texto de relleno", "Lorem ipsum")),
             # Su bandera, si tiene: la portada la pone junto al nombre.
             "bandera": ficha.get("bandera_url") or "",
             # Y si es una región (no tiene bandera), su mapa de situación en

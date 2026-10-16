@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-34Y/CiruHg/k5h/Pc/unkzxpDPhI07cdtdXbW9YTAfg=' 'sha256-aDtzI6QgHfitL7afCewTh/rpYprDOJvupEIYVZKPk8Y='; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self' https://script.google.com https://script.googleusercontent.com; object-src 'none'; base-uri 'self'; form-action 'self'">
+    <!-- ==== TEMA ==== -->
+    <meta name="theme-color" content="#12091c">
+    <script>
+      (function () {
+        document.documentElement.classList.add("js");
+        try {
+          var temas = {
+            "claro": ["light", "#f3e1d6"],
+            "oscuro-puro": ["puro-oscuro", "#000000"],
+            "claro-puro": ["puro-claro", "#ffffff"],
+            "tranquilo": ["tranquilo", "#f2efe9"],
+            "tranquilo-oscuro": ["tranquilo-oscuro", "#1b1e22"],
+            "terminal-verde": ["terminal-verde", "#000000"],
+            "terminal-azul": ["terminal-azul", "#000000"],
+            "terminal-rojo": ["terminal-rojo", "#000000"],
+            "terminal-ambar": ["terminal-ambar", "#000000"]
+          };
+          var guardado = localStorage.getItem("richi-theme");
+          var elegido = temas[guardado];
+          if (!elegido && !guardado &&
+              window.matchMedia("(prefers-color-scheme: light)").matches) {
+            elegido = temas.claro;
+          }
+          if (elegido) {
+            document.documentElement.setAttribute("data-theme", elegido[0]);
+            var barra = document.querySelector('meta[name="theme-color"]');
+            if (barra) { barra.setAttribute("content", elegido[1]); }
+          }
+          if (localStorage.getItem("richi-lateral") === "plegada") {
+            document.documentElement.classList.add("lateral-plegada");
+          }
+        } catch (e) {}
+      })();
+    </script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lorémico · Wiki Cralëa · El Blog de Richi</title>
+    <meta name="description" content="El Lorémico es lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam varius, turpis et commodo pharetra, est eros bibendum elit, nec luctus magna felis sollicitudin mauris.">
+    <link rel="canonical" href="https://richi.blog/web/wiki/ejemplos/loremico.html">
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="El Blog de Richi">
+    <meta property="og:locale" content="es_ES">
+    <meta property="og:title" content="Lorémico · Wiki Cralëa · El Blog de Richi">
+    <meta property="og:description" content="El Lorémico es lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam varius, turpis et commodo pharetra, est eros bibendum elit, nec luctus magna felis sollicitudin mauris.">
+    <meta property="og:url" content="https://richi.blog/web/wiki/ejemplos/loremico.html">
+    <meta property="og:image" content="https://richi.blog/imagenes/meta/og.webp">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta property="og:image:alt" content="El Blog de Richi — ilustración de Richi sobre fondo morado">
+    <meta name="twitter:card" content="summary_large_image">
+    <link rel="icon" type="image/x-icon" href="/imagenes/favicon.ico">
+    <link rel="preload" href="/tipografias/space-grotesk-400.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="alternate" type="application/rss+xml" title="El Blog de Richi — blog, relatos y rol" href="/blog/rss.xml">
+    <!-- ==== ADELANTO DEL MENÚ ==== -->
+    <script>window.adelantoDeFragmentos={};try{window.adelantoDeFragmentos["/fragmentos/barra-lateral.html"]=fetch("/fragmentos/barra-lateral.html?v=d9a306ce").then(function(r){return r.ok?r.text():null}).catch(function(){return null})}catch(e){}</script>
+    <!-- ==== CSS ==== -->
+    <link rel="stylesheet" href="/estilos/paquete-comun.css?v=f64bf058">
+    <link rel="stylesheet" href="/ligero/estilos/paginas/mundo.css?v=e6a25a48">
+    <link rel="stylesheet" href="/ligero/estilos/componentes/lupa.css?v=0eda6554">
+    <link rel="stylesheet" href="/ligero/estilos/paginas/mundo.responsive.css?v=b9adb687">
+    <link rel="stylesheet" href="/ligero/estilos/componentes/barra-lateral.css?v=4b5b861b">
+    <link rel="stylesheet" href="/ligero/estilos/componentes/barra-lateral.responsive.css?v=fb0768a1">
+    <link rel="stylesheet" href="/ligero/estilos/paginas/buscar.css?v=b0074caa">
+    <link rel="stylesheet" href="/estilos/paquete-cierre.css?v=3c277d98">
+    <!-- ==== fin del CSS ==== -->
+    <script src="/ligero/scripts/cargador-scripts.js?v=d7504ea0"></script>
+    <!-- ==== JS ==== -->
+    <script defer src="/scripts/paquete-comun.js?v=a305fb20"></script>
+    <script defer src="/ligero/scripts/componentes/lupa.js?v=1992d040"></script>
+    <script defer src="/ligero/scripts/paginas/mundo.js?v=e7506226"></script>
+    <!-- ==== fin del JS ==== -->
+    </head>
+<body>
+    <a class="skip-link" href="#main-content">Saltar al contenido</a>
+    <div id="sidebar-container"></div>
+
+    <main id="main-content">
+        <section id="home" class="home mundo-page">
+            <div class="mundo-cabecera">
+                <div class="mundo-migas" role="navigation" aria-label="Dónde estás"><ol><li><a href="/web/wiki/index_wiki.html">Wiki Cralëa</a></li><li aria-current="page">Lorémico</li></ol></div>
+                <h1 class="mundo-titulo">Lorémico</h1>
+                <p class="mundo-subtitulo">Página de ejemplo</p>
+                <p class="mundo-etiquetas"><span class="mundo-etiquetas-label">etiquetas:</span><a class="mundo-etiqueta" href="/web/wiki/index_wiki.html?buscar=Idiomas">Idiomas</a></p>
+            </div>
+
+            <div class="mundo-columnas">
+                <article class="mundo-articulo"><p>El <strong>Lorémico</strong> es lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam varius, turpis et commodo pharetra, est eros bibendum elit, nec luctus magna felis sollicitudin mauris.</p>
+<h2 id="historia">Historia</h2>
+<p>Praesent placerat risus quis eros, fusce pellentesque suscipit nibh. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+<h2 id="escritura">Escritura</h2>
+<p>Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer in mauris eu nibh euismod gravida.</p>
+<h2 id="como_suena">Cómo suena</h2>
+<p>Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Morbi in sem quis dui placerat ornare, pellentesque odio nisi euismod in. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
+<h2 id="vocabulario">Vocabulario</h2>
+<p>Integer in mauris eu nibh euismod gravida. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
+<h2 id="dialectos">Dialectos</h2>
+<p>Curabitur pretium tincidunt lacus, nulla gravida orci a odio. Morbi in sem quis dui placerat ornare, pellentesque odio nisi euismod in. Praesent placerat risus quis eros, fusce pellentesque suscipit nibh.</p>
+<h2 id="frases">Frases</h2>
+<p>Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p></article>
+
+                <div class="mundo-lateral"><div class="mundo-contenido" role="navigation" aria-labelledby="mundo-contenido-titulo"><details class="mundo-contenido-plegable" open data-mundo-contenido><summary class="mundo-contenido-cabecera"><span class="mundo-sub-flecha" aria-hidden="true">▾</span><h2 class="mundo-contenido-titulo" id="mundo-contenido-titulo">Contenido</h2></summary><ol><li><a href="#historia">Historia</a></li><li><a href="#escritura">Escritura</a></li><li><a href="#como_suena">Cómo suena</a></li><li><a href="#vocabulario">Vocabulario</a></li><li><a href="#dialectos">Dialectos</a></li><li><a href="#frases">Frases</a></li></ol></details></div><aside class="mundo-ficha" role="note" aria-labelledby="mundo-ficha-titulo"><h2 class="mundo-ficha-titulo" id="mundo-ficha-titulo">Lorémico</h2><p class="mundo-ficha-que">Idioma</p><dl class="mundo-ficha-datos"><div class="mundo-ficha-fila"><dt>familia</dt><dd>magna aliqua</dd></div><div class="mundo-ficha-fila"><dt>hablantes</dt><dd><a class="mundo-enlace" href="/web/wiki/ejemplos/loremidos/loremidos.html">Lorémidos</a></dd></div><div class="mundo-ficha-fila"><dt>dónde</dt><dd>consectetur</dd></div><div class="mundo-ficha-fila"><dt>escritura</dt><dd>lorem ipsum</dd></div><div class="mundo-ficha-fila"><dt>dialectos</dt><dd>dolor sit amet</dd></div></dl></aside></div>
+            </div>
+
+            
+
+            <a class="mundo-volver mundo-volver-abajo" href="/web/wiki/index_wiki.html">← volver a la wiki</a>
+        </section>
+    </main>
+</body>
+</html>
