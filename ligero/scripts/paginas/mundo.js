@@ -565,7 +565,7 @@ function itemDelMundo(ficha, corto) {
         if (bandera !== "#") {
             const img = document.createElement("img");
             img.className = "mundo-item-bandera";
-            img.src = bandera;
+            img.src = rutaSeguraMundo(bandera);
             img.alt = "";
             img.width = 150;
             img.height = 100;
@@ -832,7 +832,7 @@ async function abrirMapaParaPulsarMundo(boton, img, fuente) {
         if (bandera) {
             const img = document.createElement("img");
             img.className = "lupa-mapa-globo-bandera";
-            img.src = bandera;
+            img.src = rutaSeguraMundo(bandera);
             img.alt = "";
             img.width = 120;
             img.height = 80;
@@ -900,7 +900,7 @@ async function abrirMapaParaPulsarMundo(boton, img, fuente) {
         if (bandera) {
             const img = document.createElement("img");
             img.className = "lupa-mapa-lista-bandera";
-            img.src = bandera;
+            img.src = rutaSeguraMundo(bandera);
             img.alt = "";
             img.width = 30;
             img.height = 20;
