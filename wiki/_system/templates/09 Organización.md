@@ -17,6 +17,7 @@ líder:
 miembros:
 fundación:
 fundador:
+pertenece a:
 aliados:
 enemigos:
 layout:

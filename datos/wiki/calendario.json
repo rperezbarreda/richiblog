@@ -1,5 +1,5 @@
 {
-    "_explicacion": "EL CALENDARIO DE LA PORTADA DE LA WIKI (la tarjeta de la columna de la derecha, entre el mapamundi y la línea de tiempo). \"meses\" y \"fin\" son cómo es el año (en cada mes, \"momento\" es principio, pleno o fin de su estación): 12 meses de 28 días y 4 días al final; no hace falta tocarlos. \"eventos\" es lo que sale marcado: cada uno con \"nombre\", \"mes\" (1 a 12, o 13 para los días del Fin del Ciclo), \"dia\" (1 a 28; en el 13, 1 a 4), \"tipo\" (\"festividad\" o \"evento\"), \"anyo\" (si pasó un año concreto, como se lea: \"1340 DEM\"), \"resumen\" y \"enlace\" (una página de la wiki, empezando por /web/). \"hoy\" es opcional: {\"mes\": 3, \"dia\": 12} marca ese día y el calendario abre en ese mes. Lo más cómodo es herramientas/1-publicar/calendario.py.",
+    "_explicacion": "EL CALENDARIO DE LA PORTADA DE LA WIKI (la tarjeta de la columna de la derecha, entre el mapamundi y la línea de tiempo). \"meses\" y \"fin\" son cómo es el año (en cada mes, \"momento\" es principio, pleno o fin de su estación): 12 meses de 28 días y 4 días al final; no hace falta tocarlos. \"eventos\" es lo que sale marcado: cada uno con \"nombre\", \"mes\" (1 a 12, o 13 para los días del Fin del Ciclo), \"dia\" (1 a 28; en el 13, 1 a 4), \"tipo\" (\"festividad\" o \"evento\"), \"anyo\" (si pasó un año concreto, como se lea: \"1340 DEM\"), \"resumen\" y \"enlace\" (una página de la wiki, empezando por /web/). \"hoy\" es opcional: {\"mes\": 3, \"dia\": 12} marca ese día y el calendario abre en ese mes. Lo más cómodo es herramientas/1-publicar/calendario.py. \"luna\": sus fases (\"dia\" de cada mes en que caen, con su \"nombre\", su \"icono\" y, si quieres, su \"efecto\", que sale al pasar el ratón) y sus \"eclipses\" ({\"mes\": 3, \"dia\": 15, \"nombre\": \"…\", \"anyo\": \"1340 DEM\"}; los que no dicen año salen todos los años en el calendario de la portada; el conversor de fechas los mira todos).",
     "nombre": "El Ciclo de los Heraldos",
     "url": "/web/wiki/calendario/el_ciclo_de_los_heraldos.html",
     "hoy": null,
@@ -52,6 +52,38 @@
         "primavera": "🌿",
         "verano": "☀️",
         "otoño": "🍂"
+    },
+    "luna": {
+        "nombre": "Lunaah",
+        "enlace": "/web/wiki/cosmologia/la_luna.html",
+        "fases": [
+            {
+                "dia": 1,
+                "nombre": "Luna nueva",
+                "icono": "🌑",
+                "efecto": ""
+            },
+            {
+                "dia": 8,
+                "nombre": "Cuarto creciente",
+                "icono": "🌓",
+                "efecto": ""
+            },
+            {
+                "dia": 15,
+                "nombre": "Luna llena",
+                "icono": "🌕",
+                "efecto": ""
+            },
+            {
+                "dia": 22,
+                "nombre": "Cuarto menguante",
+                "icono": "🌗",
+                "efecto": ""
+            }
+        ],
+        "efecto_eclipse": "La Luna tapa la Herida: la resonancia del mundo se debilita y la magia se vuelve torpe, errática o se calla.",
+        "eclipses": []
     },
     "meses": [
         {

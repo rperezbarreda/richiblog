@@ -58,6 +58,7 @@ from pathlib import Path
 # esto dentro de una subcarpeta, "from comun import ..." no lo encuentra.
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 sys.path.insert(0, str(Path(__file__).resolve().parent))
+import mundo_piezas  # noqa: E402
 
 from comun import (RAIZ, es_del_mundo, esta_fuera, wiki_fuera, escribir_json,
                    limpiar_comentarios_html,  # noqa: E402
@@ -1122,10 +1123,15 @@ def pintar_migas(ficha, paginas, region_de):
     cadena = []
     vista = {ficha["nombre"].strip().lower()}
     # Una subraza cuelga de su raza igual que un país de su región.
-    raza = subrazas_de(paginas).get(ficha["nombre"].strip().lower())
+    # Y lo que «pertenece a» algo (un Heraldo, al panteón), igual.
+    raza = (subrazas_de(paginas).get(ficha["nombre"].strip().lower())
+            or mundo_piezas.padres_de_jerarquia(paginas).get(ficha["nombre"].strip().lower()))
     if raza:
         region_de = dict(region_de)
         region_de[ficha["nombre"].strip().lower()] = raza
+        # Y su camino hacia arriba, si lo de arriba también pertenece a algo.
+        for hija, madre in mundo_piezas.padres_de_jerarquia(paginas).items():
+            region_de.setdefault(hija, madre)
     clave = region_de.get(ficha["nombre"].strip().lower())
     while clave and clave not in vista and clave in paginas:
         vista.add(clave)
@@ -1234,18 +1240,88 @@ def con_rejilla_de_paises(cuerpo, rejilla):
     return cuerpo + "\n" + titulo + "\n" + rejilla
 
 
-def escribir_paginas(paginas, probar):
+DICCIONARIO = RAIZ / "datos" / "wiki" / "diccionario.json"
+
+
+def leer_diccionario():
+    datos = leer_json(DICCIONARIO, {}) or {}
+    palabras = datos.get("palabras") if isinstance(datos, dict) else datos
+    return [p for p in (palabras or []) if isinstance(p, dict) and str(p.get("palabra") or "").strip()]
+
+
+# LAS PIEZAS: lo que se escribe en una página como <div class="pieza-…"></div>
+# en una línea suelta y aquí se cambia por lo que es. Las del conversor y el
+# generador de nombres las pinta el navegador (scripts/paginas/mundo.js);
+# aquí solo se les dice de dónde sacar los datos.
+PIEZAS_DEL_NAVEGADOR = {
+    "pieza-conversor": '<div class="mundo-conversor" data-mundo-conversor'
+                       ' data-conversor-datos="/datos/wiki/conversor.json"'
+                       ' data-calendario-datos="/datos/wiki/calendario.json">'
+                       '<p class="mundo-auto-vacio">El conversor necesita JavaScript.</p></div>',
+    "pieza-nombres": '<div class="mundo-nombres" data-mundo-nombres'
+                     ' data-nombres-datos="/datos/wiki/nombres.json">'
+                     '<p class="mundo-auto-vacio">El generador necesita JavaScript.</p></div>',
+}
+
+
+def con_piezas(cuerpo, paginas, todas_rel, padre_de, palabras):
+    def pieza(m):
+        cual = m.group(1)
+        if cual == "pieza-relaciones":
+            return mundo_piezas.diagrama_de_relaciones(paginas, todas_rel)
+        if cual == "pieza-panteon":
+            return mundo_piezas.panteon_entero(paginas, padre_de)
+        if cual == "pieza-diccionario":
+            return mundo_piezas.tabla_de_palabras(palabras, paginas)
+        return PIEZAS_DEL_NAVEGADOR.get(cual, "")
+    return re.sub(r'<div class="(pieza-[a-z]+)">\s*</div>', pieza, cuerpo)
+
+
+def escribir_paginas(paginas, probar, categorias=()):
     molde, _ = leer_texto(PLANTILLA)
     # Sin los comentarios de la plantilla: estas páginas salen publicadas.
     molde = limpiar_comentarios_html(molde)[0]
     escritas = 0
     region_de = regiones_de(paginas)
     subraza_de = subrazas_de(paginas)
+    padre_de = mundo_piezas.padres_de_jerarquia(paginas)
+    familia = mundo_piezas.familias(paginas)
+    todas_rel = mundo_piezas.todas_las_relaciones(paginas)
+    palabras = leer_diccionario()
+    sub_de = {}
+    for ficha in paginas.values():
+        grupo, sub = clasificar(ficha["etiquetas"], categorias)
+        sub_de[ficha["nombre"].strip().lower()] = (grupo, sub[0] if sub else "")
     for ficha in paginas.values():
         relleno = molde
         cuerpo = con_rejilla_de_paises(ficha["cuerpo_html"],
                                        rejilla_de_paises(ficha, paginas, region_de))
         cuerpo = con_subrazas(cuerpo, lista_de_subrazas(ficha, paginas, subraza_de))
+        cuerpo = con_piezas(cuerpo, paginas, todas_rel, padre_de, palabras)
+        # LO QUE SALE SOLO, sacado de las fichas de las demás páginas (ver
+        # herramientas/3-generadores/mundo_piezas.py): sus lugares, sus
+        # personajes, sus aliados y enemigos, lo que cuelga de ella, su
+        # árbol familiar y, si es un idioma, sus palabras.
+        for ancla, titulo, lista in mundo_piezas.apartados_inversos(ficha, paginas):
+            cuerpo = mundo_piezas.en_su_apartado(cuerpo, ancla, titulo, lista)
+        cuerpo = mundo_piezas.en_su_apartado(
+            cuerpo, "relaciones", "Relaciones", mundo_piezas.relaciones(ficha, paginas, todas_rel))
+        cuerpo = mundo_piezas.en_su_apartado(
+            cuerpo, "lo_que_la_forma", "Lo que la forma", mundo_piezas.jerarquia(ficha, paginas, padre_de))
+        cuerpo = mundo_piezas.en_su_apartado(
+            cuerpo, "arbol_familiar", "Árbol familiar", mundo_piezas.arbol_familiar(ficha, paginas, familia))
+        if mundo_piezas.llano(mundo_piezas.que_es(ficha)) == "idioma":
+            suyas = [p for p in palabras
+                     if mundo_piezas.llano(p.get("idioma")) == mundo_piezas.llano(ficha["nombre"])]
+            if suyas:
+                cuerpo = mundo_piezas.en_su_apartado(
+                    cuerpo, "vocabulario", "Vocabulario",
+                    mundo_piezas.tabla_de_palabras(suyas, paginas, enlazar_idioma=False))
+        # La caja de navegación, al final del artículo (en su columna: a
+        # todo lo ancho se metía debajo del cuadro de contenido, que va fijo
+        # abajo a la derecha).
+        cuerpo += mundo_piezas.caja_de_navegacion(ficha, paginas, region_de, subraza_de,
+                                                  padre_de, sub_de)
         # El contenido ANTES que la ficha: en escritorio da igual (flota abajo
         # a la derecha), y en móvil así sale arriba del todo, como en una
         # wiki de las de siempre.
@@ -1722,6 +1798,44 @@ def limpiar_lo_que_sobra(paginas, mapas, probar):
 # CONTARLO
 # =========================================
 
+# LOS DATOS DEL CONVERSOR DE FECHAS Y DEL GENERADOR DE NOMBRES, que pinta el
+# navegador. El conversor necesita las eras con sus años ya en números (la
+# misma cuenta que la línea de tiempo: ver mundo_linea.leer_fecha) y el
+# generador, los nombres de cada sitio (ver mundo_piezas.estilos_de_nombres).
+CONVERSOR = RAIZ / "datos" / "wiki" / "conversor.json"
+NOMBRES = RAIZ / "datos" / "wiki" / "nombres.json"
+NOMBRES_PROPIOS = RAIZ / "datos" / "wiki" / "nombres-propios.json"
+
+
+def escribir_datos_de_las_piezas(paginas, probar):
+    cabecera, _ = mundo_linea.leer(avisar=lambda *_: None)
+    eras = mundo_linea.leer_eras(cabecera.get("eras") or [], avisar=lambda *_: None)
+    calendario = mundo_linea.CALENDARIO
+    conversor = {
+        "_": "Lo escribe generar-mundo.py a partir de la línea de tiempo: no se edita.",
+        "antes": calendario.get("antes", ""),
+        "despues": calendario.get("despues", ""),
+        "base_antes": mundo_linea.BASE_ANTES,
+        "hoy": mundo_linea.HOY[0],
+        "eras": [{"nombre": e["nombre"], "desde": e["desde"], "fin": e["fin"],
+                  "url": mundo_linea.URL + mundo_linea.PAGINA + "#" + e["slug"]} for e in eras],
+    }
+    extra = leer_json(NOMBRES_PROPIOS, {}) or {}
+    nombres = {
+        "_": ("Lo escribe generar-mundo.py con los nombres que ya hay en la wiki. Para"
+              " añadir los tuyos (o un estilo nuevo), datos/wiki/nombres-propios.json."),
+        "estilos": mundo_piezas.estilos_de_nombres(
+            paginas, regiones_de(paginas),
+            extra.get("estilos", []) if isinstance(extra, dict) else [], leer_diccionario()),
+    }
+    if probar:
+        return
+    for archivo, datos in ((CONVERSOR, conversor), (NOMBRES, nombres)):
+        texto = json.dumps(datos, ensure_ascii=False, indent=4) + "\n"
+        if not archivo.is_file() or leer_texto(archivo)[0] != texto:
+            escribir_texto(archivo, texto)
+
+
 def main():
     parser = argparse.ArgumentParser(
         description="Convierte la bóveda de wiki/ en las páginas de web/wiki/.")
@@ -1779,12 +1893,13 @@ def main():
             usadas.add(m.group(1).lower())
 
     SALIDA.mkdir(parents=True, exist_ok=True)
-    escritas = escribir_paginas(paginas, args.probar)
+    escritas = escribir_paginas(paginas, args.probar, categorias)
     escritos = escribir_mapas(mapas, args.probar)
     escritos += escribir_vistas(mapas, args.probar)
     fichas = escribir_indice(paginas, mapas, args.probar, categorias, peques)
     escribir_regiones(paginas, partes, peques, de_partes, args.probar)
     escribir_portada(paginas, args.probar)
+    escribir_datos_de_las_piezas(paginas, args.probar)
     copiadas, pesadas, repetidas = copiar_imagenes(imagenes, usadas, args.probar)
     hechas, saltadas, enteras, gordas = preparar_capas(capas, args.probar)
     sobran = limpiar_lo_que_sobra(paginas, mapas, args.probar)

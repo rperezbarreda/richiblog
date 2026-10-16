@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-34Y/CiruHg/k5h/Pc/unkzxpDPhI07cdtdXbW9YTAfg=' 'sha256-aDtzI6QgHfitL7afCewTh/rpYprDOJvupEIYVZKPk8Y='; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self' https://script.google.com https://script.googleusercontent.com; object-src 'none'; base-uri 'self'; form-action 'self'">
+    <!-- ==== TEMA ==== -->
+    <meta name="theme-color" content="#12091c">
+    <script>
+      (function () {
+        document.documentElement.classList.add("js");
+        try {
+          var temas = {
+            "claro": ["light", "#f3e1d6"],
+            "oscuro-puro": ["puro-oscuro", "#000000"],
+            "claro-puro": ["puro-claro", "#ffffff"],
+            "tranquilo": ["tranquilo", "#f2efe9"],
+            "tranquilo-oscuro": ["tranquilo-oscuro", "#1b1e22"],
+            "terminal-verde": ["terminal-verde", "#000000"],
+            "terminal-azul": ["terminal-azul", "#000000"],
+            "terminal-rojo": ["terminal-rojo", "#000000"],
+            "terminal-ambar": ["terminal-ambar", "#000000"]
+          };
+          var guardado = localStorage.getItem("richi-theme");
+          var elegido = temas[guardado];
+          if (!elegido && !guardado &&
+              window.matchMedia("(prefers-color-scheme: light)").matches) {
+            elegido = temas.claro;
+          }
+          if (elegido) {
+            document.documentElement.setAttribute("data-theme", elegido[0]);
+            var barra = document.querySelector('meta[name="theme-color"]');
+            if (barra) { barra.setAttribute("content", elegido[1]); }
+          }
+          if (localStorage.getItem("richi-lateral") === "plegada") {
+            document.documentElement.classList.add("lateral-plegada");
+          }
+        } catch (e) {}
+      })();
+    </script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Relaciones · Wiki Cralëa · El Blog de Richi</title>
+    <meta name="description" content="Todos los países, facciones, órdenes y dioses que tienen apuntados aliados o enemigos en su ficha, en un solo dibujo. Cada uno enseña además los suyos en su página, en el apartado «Relaciones».">
+    <link rel="canonical" href="https://richi.blog/web/wiki/utilidades/relaciones.html">
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="El Blog de Richi">
+    <meta property="og:locale" content="es_ES">
+    <meta property="og:title" content="Relaciones · Wiki Cralëa · El Blog de Richi">
+    <meta property="og:description" content="Todos los países, facciones, órdenes y dioses que tienen apuntados aliados o enemigos en su ficha, en un solo dibujo. Cada uno enseña además los suyos en su página, en el apartado «Relaciones».">
+    <meta property="og:url" content="https://richi.blog/web/wiki/utilidades/relaciones.html">
+    <meta property="og:image" content="https://richi.blog/imagenes/meta/og.webp">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta property="og:image:alt" content="El Blog de Richi — ilustración de Richi sobre fondo morado">
+    <meta name="twitter:card" content="summary_large_image">
+    <link rel="icon" type="image/x-icon" href="/imagenes/favicon.ico">
+    <link rel="preload" href="/tipografias/space-grotesk-400.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="alternate" type="application/rss+xml" title="El Blog de Richi — blog, relatos y rol" href="/blog/rss.xml">
+    <!-- ==== ADELANTO DEL MENÚ ==== -->
+    <script>window.adelantoDeFragmentos={};try{window.adelantoDeFragmentos["/fragmentos/barra-lateral.html"]=fetch("/fragmentos/barra-lateral.html?v=d9a306ce").then(function(r){return r.ok?r.text():null}).catch(function(){return null})}catch(e){}</script>
+    <!-- ==== CSS ==== -->
+    <link rel="stylesheet" href="/estilos/paquete-comun.css?v=f64bf058">
+    <link rel="stylesheet" href="/ligero/estilos/paginas/mundo.css?v=e6a25a48">
+    <link rel="stylesheet" href="/ligero/estilos/componentes/lupa.css?v=0eda6554">
+    <link rel="stylesheet" href="/ligero/estilos/paginas/mundo.responsive.css?v=b9adb687">
+    <link rel="stylesheet" href="/ligero/estilos/componentes/barra-lateral.css?v=4b5b861b">
+    <link rel="stylesheet" href="/ligero/estilos/componentes/barra-lateral.responsive.css?v=fb0768a1">
+    <link rel="stylesheet" href="/ligero/estilos/paginas/buscar.css?v=b0074caa">
+    <link rel="stylesheet" href="/estilos/paquete-cierre.css?v=3c277d98">
+    <!-- ==== fin del CSS ==== -->
+    <script src="/ligero/scripts/cargador-scripts.js?v=d7504ea0"></script>
+    <!-- ==== JS ==== -->
+    <script defer src="/scripts/paquete-comun.js?v=a305fb20"></script>
+    <script defer src="/ligero/scripts/componentes/lupa.js?v=1992d040"></script>
+    <script defer src="/ligero/scripts/paginas/mundo.js?v=e7506226"></script>
+    <!-- ==== fin del JS ==== -->
+    </head>
+<body>
+    <a class="skip-link" href="#main-content">Saltar al contenido</a>
+    <div id="sidebar-container"></div>
+
+    <main id="main-content">
+        <section id="home" class="home mundo-page">
+            <div class="mundo-cabecera">
+                <div class="mundo-migas" role="navigation" aria-label="Dónde estás"><ol><li><a href="/web/wiki/index_wiki.html">Wiki Cralëa</a></li><li aria-current="page">Relaciones</li></ol></div>
+                <h1 class="mundo-titulo">Relaciones</h1>
+                <p class="mundo-subtitulo">Quién es aliado y enemigo de quién</p>
+                <p class="mundo-etiquetas"><span class="mundo-etiquetas-label">etiquetas:</span><a class="mundo-etiqueta" href="/web/wiki/index_wiki.html?buscar=Herramientas">Herramientas</a></p>
+            </div>
+
+            <div class="mundo-columnas">
+                <article class="mundo-articulo"><p>Todos los países, facciones, órdenes y dioses que tienen apuntados aliados o enemigos en su ficha, en un solo dibujo. Cada uno enseña además los suyos en su página, en el apartado «Relaciones».</p>
+<div class="mundo-relaciones"><svg class="mundo-relaciones-svg" viewBox="0 0 960 640" role="group" aria-labelledby="rel-titulo rel-desc"><title id="rel-titulo">Diagrama de relaciones</title><desc id="rel-desc">Cada línea une dos páginas: seguida si son aliados, a rayas si son enemigos. La tabla de debajo dice lo mismo.</desc><line class="rel-enemigos" x1="480.0" y1="60.0" x2="480.0" y2="580.0"/><a href="/web/wiki/religiones/panteon/azaras.html"><circle cx="480.0" cy="60.0" r="9"/><text x="480.0" y="42.0" text-anchor="middle" dominant-baseline="middle">Azaras</text></a><a href="/web/wiki/religiones/panteon/parta.html"><circle cx="480.0" cy="580.0" r="9"/><text x="480.0" y="598.0" text-anchor="middle" dominant-baseline="middle">Parta</text></a></svg><p class="mundo-relaciones-leyenda" aria-hidden="true"><span class="rel-muestra rel-aliados"></span> aliados<span class="rel-muestra rel-enemigos"></span> enemigos</p><div class="mundo-tabla"><table class="mundo-relaciones-tabla"><caption>Todas las relaciones</caption><thead><tr><th scope="col">Uno</th><th scope="col">Son</th><th scope="col">Otro</th></tr></thead><tbody><tr><td><a class="mundo-enlace" href="/web/wiki/religiones/panteon/azaras.html">Azaras</a></td><td>enemigos</td><td><a class="mundo-enlace" href="/web/wiki/religiones/panteon/parta.html">Parta</a></td></tr></tbody></table></div></div></article>
+
+                
+            </div>
+
+            
+
+            <a class="mundo-volver mundo-volver-abajo" href="/web/wiki/index_wiki.html">← volver a la wiki</a>
+        </section>
+    </main>
+</body>
+</html>

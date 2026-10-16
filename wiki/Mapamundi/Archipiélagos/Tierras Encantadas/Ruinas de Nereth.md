@@ -18,6 +18,8 @@ religión: "*por decidir*"
 moneda: "*por decidir*"
 fundación: "*por decidir*"
 lema: "*por decidir*"
+aliados: "*por decidir*"
+enemigos: "*por decidir*"
 layout:
   - type: header
     text: Gobierno
@@ -28,6 +30,9 @@ layout:
   - type: header
     text: Historia
     above: fundación
+  - type: header
+    text: Relaciones
+    above: aliados
 ---
 
 **Ruinas de Nereth** está en las [[Tierras Encantadas]].

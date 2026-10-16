@@ -7,6 +7,9 @@ title: "{{nombre}}"
 subtitle: ""
 infobox: "Personaje"
 tags: [Personajes]
+# La familia (padres, pareja, hijos) y los aliados y enemigos, como
+# enlaces: "[[Una]], [[Otra]]". Con eso salen solos su árbol familiar y
+# sus relaciones, y basta con que lo diga uno de los dos.
 image:
 nombre completo:
 también conocido como:
@@ -21,6 +24,8 @@ residencia:
 padres:
 pareja:
 hijos:
+aliados:
+enemigos:
 jugador:
 clase:
 layout:

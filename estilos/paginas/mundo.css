@@ -2338,3 +2338,375 @@ html:not(.js) .mundo-spoiler {
     font-size: 0.9375rem;
     line-height: 1.5;
 }
+
+/* ====================================================================
+   LO QUE LAS PÁGINAS SE PONEN SOLAS
+   ====================================================================
+   Lo escribe herramientas/3-generadores/mundo_piezas.py sacándolo de las
+   fichas de las demás páginas: los lugares de un país, los personajes de
+   una raza, los aliados y enemigos, el árbol de lo que «pertenece a» algo
+   (el panteón), el árbol familiar y la caja de navegación del pie. */
+
+.mundo-auto-lista {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(14rem, 1fr));
+    gap: 6px 18px;
+    margin: 0 0 1.2em;
+    padding: 0;
+    list-style: none;
+}
+
+.mundo-auto-lista li {
+    margin: 0;
+}
+
+.mundo-auto-que {
+    color: var(--muted);
+    font-family: var(--fuente-mono);
+    font-size: 0.8125rem;
+}
+
+.mundo-auto-subtitulo {
+    margin: 0.8em 0 0.4em;
+}
+
+.mundo-auto-vacio {
+    color: var(--muted);
+    font-style: italic;
+}
+
+/* EL ÁRBOL de lo que pertenece a algo: una lista dentro de otra, con su
+   raya a la izquierda que une a cada uno con el de arriba. */
+.mundo-arbol,
+.mundo-arbol ul {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.mundo-arbol ul {
+    margin-left: 0.6em;
+    padding-left: 1.2em;
+    border-left: 2px solid var(--border);
+}
+
+.mundo-arbol li {
+    position: relative;
+    margin: 0;
+    padding: 4px 0;
+}
+
+.mundo-arbol ul > li::before {
+    content: "";
+    position: absolute;
+    left: -1.2em;
+    top: 1.05em;
+    width: 0.9em;
+    border-top: 2px solid var(--border);
+}
+
+.mundo-arbol-nodo {
+    display: inline-block;
+}
+
+/* EL ÁRBOL FAMILIAR: una fila por generación, de los abuelos a los
+   nietos, cada persona en su caja. La página de la que es el árbol va
+   resaltada (aria-current, en negrita y con el borde amarillo). */
+.mundo-familia {
+    display: grid;
+    gap: 10px;
+    margin: 0 0 1.2em;
+}
+
+.mundo-familia-fila {
+    display: grid;
+    grid-template-columns: 9rem minmax(0, 1fr);
+    align-items: center;
+    gap: 10px;
+}
+
+.mundo-familia-titulo {
+    margin: 0;
+    color: var(--muted);
+    font-family: var(--fuente-mono);
+    font-size: 0.8125rem;
+    font-weight: 400;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.mundo-familia-fila ul {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.mundo-familia-persona {
+    margin: 0;
+    padding: 6px 12px;
+    border: 2px solid var(--border);
+}
+
+.mundo-familia-persona.es-yo {
+    border-color: var(--yellow);
+}
+
+.mundo-familia-nota {
+    margin: 0 0 0 calc(9rem + 10px);
+    color: var(--muted);
+    font-size: 0.875rem;
+}
+
+/* LA CAJA DE NAVEGACIÓN, al pie: las páginas hermanas en una tira. */
+.mundo-navbox {
+    margin: 24px 0 8px;
+    border: 2px solid var(--border);
+}
+
+.mundo-navbox-titulo {
+    margin: 0;
+    padding: 8px 14px;
+    background: var(--purple-lighter);
+    color: var(--yellow);
+    font-family: var(--fuente-mono);
+    font-size: 0.875rem;
+    font-weight: 400;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+}
+
+.mundo-navbox-titulo a {
+    color: inherit;
+}
+
+.mundo-navbox ul {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 16px;
+    margin: 0;
+    padding: 12px 14px;
+    list-style: none;
+}
+
+.mundo-navbox li {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin: 0;
+}
+
+.mundo-navbox strong {
+    color: var(--white);
+}
+
+.mundo-navbox-bandera {
+    width: 24px;
+    height: 16px;
+    object-fit: cover;
+    border: 1px solid var(--border);
+}
+
+/* EL DIAGRAMA DE RELACIONES: aliados con raya seguida, enemigos a rayas
+   (no solo por el color). Los nombres llevan a su página. */
+.mundo-relaciones-svg {
+    display: block;
+    width: 100%;
+    height: auto;
+    margin: 0 auto;
+}
+
+.mundo-relaciones-svg line {
+    stroke-width: 3;
+}
+
+.mundo-relaciones-svg .rel-aliados,
+.rel-muestra.rel-aliados {
+    stroke: var(--yellow);
+    border-top: 3px solid var(--yellow);
+}
+
+.mundo-relaciones-svg .rel-enemigos,
+.rel-muestra.rel-enemigos {
+    stroke: var(--white);
+    stroke-dasharray: 8 6;
+    border-top: 3px dashed var(--white);
+}
+
+.mundo-relaciones-svg circle {
+    fill: var(--yellow);
+}
+
+/* En unidades del dibujo (960 de ancho): en la columna del artículo
+   sale a unos 15px. */
+.mundo-relaciones-svg text {
+    fill: var(--white);
+    font-family: var(--fuente-texto);
+    font-size: 24px;
+}
+
+.mundo-relaciones-svg a:hover text,
+.mundo-relaciones-svg a:focus-visible text {
+    fill: var(--yellow);
+    text-decoration: underline;
+}
+
+.mundo-relaciones-leyenda {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    color: var(--muted);
+    font-family: var(--fuente-mono);
+    font-size: 0.8125rem;
+}
+
+.rel-muestra {
+    display: inline-block;
+    width: 28px;
+    margin-left: 14px;
+}
+
+.mundo-relaciones-tabla caption,
+.mundo-diccionario-tabla caption {
+    padding: 0 0 8px;
+    color: var(--muted);
+    font-family: var(--fuente-mono);
+    font-size: 0.8125rem;
+    text-align: left;
+}
+
+/* LAS PIEZAS: el conversor de fechas, el generador de nombres y el
+   buscador del diccionario (las pinta scripts/paginas/mundo.js). */
+.mundo-conversor,
+.mundo-nombres {
+    margin: 0 0 1.5em;
+    padding: 16px;
+    border: 2px solid var(--border);
+}
+
+.mundo-pieza-form {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    gap: 12px 16px;
+    margin: 0 0 12px;
+}
+
+.mundo-pieza-campo {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.mundo-pieza-etiqueta {
+    color: var(--muted);
+    font-family: var(--fuente-mono);
+    font-size: 0.8125rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.mundo-pieza-control {
+    min-height: 2.6rem;
+    padding: 6px 10px;
+    border: 2px solid var(--yellow);
+    background: var(--purple);
+    color: var(--white);
+    font: inherit;
+}
+
+.mundo-pieza-control:focus-visible,
+.mundo-pieza-boton:focus-visible {
+    outline: 2px solid var(--yellow);
+    outline-offset: 3px;
+}
+
+input.mundo-pieza-control[type="number"] {
+    width: 9rem;
+}
+
+input.mundo-pieza-control[type="search"] {
+    width: min(26rem, 100%);
+}
+
+.mundo-pieza-boton {
+    min-height: 2.6rem;
+    padding: 6px 16px;
+    border: 2px solid var(--yellow);
+    background: var(--yellow);
+    color: var(--yellow-contrast);
+    font: inherit;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.mundo-pieza-boton:hover {
+    background: var(--purple);
+    color: var(--yellow);
+}
+
+.mundo-pieza-salida {
+    display: grid;
+    gap: 4px;
+}
+
+.mundo-pieza-titular {
+    margin: 0;
+    color: var(--yellow);
+    font-size: 1.125rem;
+    font-weight: 700;
+}
+
+.mundo-pieza-linea {
+    margin: 0;
+}
+
+.mundo-pieza-ejemplos {
+    color: var(--muted);
+    font-size: 0.875rem;
+}
+
+.mundo-nombres-lista {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(10rem, 1fr));
+    gap: 8px;
+    margin: 12px 0 0;
+    padding: 0;
+    list-style: none;
+}
+
+.mundo-nombres-lista li {
+    margin: 0;
+    padding: 8px 12px;
+    border-left: 4px solid var(--yellow);
+    background: var(--purple-lighter);
+    font-size: 1.0625rem;
+}
+
+/* LA LUNA EN EL CALENDARIO: su fase, en pequeño en la esquina del día. */
+.mundo-cal-dia.es-luna,
+.mundo-cal-dia.es-pulsable {
+    position: relative;
+}
+
+.mundo-cal-luna {
+    position: absolute;
+    top: 0;
+    right: 1px;
+    font-size: 0.625rem;
+    line-height: 1;
+}
+
+@media (max-width: 860px) {
+    .mundo-familia-fila {
+        grid-template-columns: minmax(0, 1fr);
+        gap: 4px;
+    }
+
+    .mundo-familia-nota {
+        margin-left: 0;
+    }
+}

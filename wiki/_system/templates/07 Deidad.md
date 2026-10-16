@@ -7,8 +7,10 @@ title: "{{nombre}}"
 subtitle: ""
 infobox: "Deidad"
 tags: [Religión, Deidades]
+# «pertenece a: [[El grupo o el panteón]]» la cuelga de su árbol.
 image:
 títulos:
+pertenece a:
 rango:
 ámbitos:
 símbolo:

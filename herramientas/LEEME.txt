@@ -1288,6 +1288,94 @@
   # orden:, # pregunta …:, # carpeta:), explicadas al principio de
   herramientas/1-publicar/nueva-pagina-wiki.py.
 
+  LO QUE LAS PÁGINAS SE PONEN SOLAS (desde el 16-10-2026). Sale de las
+  fichas de las demás páginas, así que no hay ninguna lista que mantener
+  a mano (el código, en herramientas/3-generadores/mundo_piezas.py):
+
+    - LUGARES de un país o zona: los lugares cuya ficha dice
+      «ubicación: [[ese país]]». PERSONAJES de una raza: los que dicen
+      «raza: [[esa raza]]». QUIÉN VIVE AQUÍ en un lugar: los que dicen
+      «residencia: [[ese lugar]]». Si la página ya tiene un apartado con
+      ese título, la lista va al final de lo que hayas escrito en él.
+    - RELACIONES: los campos «aliados» y «enemigos» de cualquier ficha
+      (países, organizaciones, deidades, personajes), como enlaces:
+      aliados: "[[Una]], [[Otra]]". Basta con que lo diga UNO de los dos:
+      la otra página lo enseña también. Los 107 países llevan los dos
+      campos en «*por decidir*», en el tramo Relaciones de su ficha. Y la
+      página Relaciones (en Utilidades) lo dibuja todo junto: aliados con
+      raya seguida, enemigos a rayas, y debajo la misma lista en una tabla.
+    - LO QUE LA FORMA: el campo «pertenece a: [[La de arriba]]» cuelga
+      una página de otra, y la de arriba enseña el árbol de todo lo que
+      cuelga de ella. Así está hecho EL PANTEÓN (wiki/Religiones/Panteón/):
+      El Panteón de Cralëa › los Arcontes Primordiales (Azaras y Parta),
+      los Heraldos de la Virtud y la Ruina (los doce) y la Mesa del Orden
+      Natural (Elvir, Lusdra, Imedia y Calad), cada uno con su título,
+      sacado del calendario y de la cosmología; sin decir quién es de la
+      Virtud y quién de la Ruina, que eso no estaba escrito. Vale igual
+      para una orden y sus ramas, o una casa y sus vasallos. Las migas
+      siguen el mismo camino.
+    - ÁRBOL FAMILIAR: los campos «padres», «pareja» e «hijos» de los
+      personajes. Salen abuelos, padres, su generación (con pareja y
+      hermanos), hijos y nietos. También basta con que lo diga uno.
+    - LA CAJA DE NAVEGACIÓN, al final del artículo: las páginas
+      hermanas. Un país, los de su región (con su bandera en pequeño);
+      una raza o subraza, toda la familia; lo que pertenece a algo, lo que
+      pertenece a lo mismo; un lugar, los de su país; y si no, las de su
+      mismo apartado de la portada (si son entre 2 y 40).
+
+  LAS UTILIDADES (wiki/Utilidades/, en la sección «herramientas» de la
+  portada). Son páginas normales de la wiki con una PIEZA dentro, una
+  línea suelta como <div class="pieza-conversor"></div>, que el
+  generador cambia por lo que es. Se pueden poner también en cualquier
+  otra página:
+
+    pieza-conversor    el CONVERSOR DE FECHAS: un año (AEM o DEM), un mes
+                       y un día del Ciclo, y dice qué día de la semana es,
+                       en qué era cae, la fase de la luna, qué se celebra
+                       y cuánto ha pasado o falta desde hoy en Cralëa (con
+                       el «hoy» del calendario, si lo has fijado, al día).
+                       Las eras salen de la línea de tiempo, en
+                       datos/wiki/conversor.json, que escribe el generador.
+    pieza-nombres      el GENERADOR DE NOMBRES: aprende cómo suenan los
+                       nombres de cada región (sus países), de los dioses,
+                       de cada idioma del diccionario y de cada raza (sus
+                       personajes), y se inventa otros que no existen. Los
+                       ejemplos, en datos/wiki/nombres.json (lo escribe el
+                       generador, quitando «Reino de», «Tribu»… y las
+                       palabras normales). Para añadir los tuyos o un
+                       estilo nuevo: datos/wiki/nombres-propios.json, con
+                       {"estilos": [{"nombre": "Elfos", "ejemplos": [...]}]}
+                       (cuatro ejemplos como poco).
+    pieza-diccionario  el DICCIONARIO: todas las palabras, con un buscador.
+                       Las palabras están en datos/wiki/diccionario.json y
+                       se llevan con herramientas/1-publicar/diccionario.py.
+                       Están las cinco palabras nithir que ya salían
+                       (Lunaah, Söh-hgol, Nevadra, Lurmeri, Gomath). Una
+                       página de idioma (infobox «Idioma») enseña sola sus
+                       palabras en «Vocabulario».
+    pieza-relaciones   el diagrama de relaciones (ver arriba).
+    pieza-panteon      todos los árboles de «pertenece a» juntos.
+
+  LA LUNA EN EL CALENDARIO. En datos/wiki/calendario.json, «luna»: sus
+  fases, el día de cada mes en que caen (el ciclo es de 28 días, como el
+  mes: luna nueva el 1, cuarto creciente el 8, llena el 15, menguante el
+  22, que es una suposición y se cambia ahí) con su icono y, si quieres,
+  su «efecto»; y sus «eclipses» ({"mes", "dia", "nombre", "anyo"}). En la
+  portada sale el icono en la esquina del día y la fase en el globo; un
+  eclipse sin año sale como una cosa más del calendario (todos los
+  años), con el efecto de la cosmología, y uno con año lo ve el
+  conversor de fechas.
+
+  LO QUE FALTA, de un vistazo:
+
+      python herramientas/5-consulta/pendientes-wiki.py          (--todo, con todo)
+
+  (en el menú, Wiki Cralëa → Ver lo que falta en la wiki). No cambia
+  nada: cuenta las páginas que se enlazan y no existen, los campos «por
+  decidir» (por campo), las páginas con texto de relleno, las
+  entradillas que se quedaron como las dejó la plantilla y las imágenes
+  que pide una ficha y no están.
+
   LAS IMÁGENES de la wiki van en wiki/_imagenes/ y se nombran por el
   nombre del archivo. generar-mundo.py solo publica las que use alguna
   página, y las copia a imagenes/wiki/.
@@ -2882,6 +2970,12 @@
                         añadir, cambiar y quitar festividades y eventos, y
                         el día de hoy en Cralëa. Guarda al momento; no hay
                         que generar nada. Ver EL CALENDARIO.
+  1-publicar/diccionario.py  lleva las palabras del diccionario de la
+                        wiki (datos/wiki/diccionario.json): añadir,
+                        cambiar y quitar. Ver LAS UTILIDADES.
+  5-consulta/pendientes-wiki.py  cuenta lo que falta en la wiki (páginas
+                        por escribir, «por decidir», relleno, imágenes).
+                        No cambia nada.
   1-publicar/nueva-pagina-wiki.py  crea el .md de una página nueva de
                         la wiki con la plantilla de su tipo (país,
                         personaje, monstruo…), en la carpeta que le toca.

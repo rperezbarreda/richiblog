@@ -12,6 +12,13 @@
     .mundo-columnas {
         grid-template-columns: minmax(0, 1fr) minmax(0, 17rem);
     }
+
+    /* «Se habla de esto en», en la columna del artículo y no a todo lo
+       ancho: debajo de la ficha va, fijo, el cuadro de contenido, y al
+       final de la página se le ponía encima. */
+    .mundo-backlinks {
+        margin-right: calc(17rem + 32px);
+    }
 }
 
 /* EN UNA COLUMNA, LA FICHA VA ARRIBA DEL TODO. En el HTML está DESPUÉS del

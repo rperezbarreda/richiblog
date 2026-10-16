@@ -111,6 +111,9 @@ LOS_LEEN_LAS_HERRAMIENTAS = {
     # Los eventos de la línea de tiempo: los leen
     # 3-generadores/generar-linea-tiempo.py y 1-publicar/linea-de-tiempo.py.
     "datos/wiki/linea-de-tiempo.json",
+    # Las palabras del diccionario: las lee 3-generadores/generar-mundo.py
+    # (las pone en la página Diccionario) y 1-publicar/diccionario.py.
+    "datos/wiki/diccionario.json",
     # Las hojas de la página de la línea de tiempo. Mientras no haya ningún
     # evento esa página no existe, y nadie las pide; con el primero, sí.
     "estilos/paginas/mundo-linea.css",
@@ -129,7 +132,7 @@ RE_ATRIBUTOS = re.compile(
     # página se queda vacía y nadie se entera. Van aquí para que cuenten
     # como una referencia más.
     r"""\b(?:href|src|poster|data-reto-datos|data-campana-datos"""
-    r"""|data-npcs-datos|data-ando-datos|data-mundo-datos|data-mundo-regiones-datos|data-mundo-categorias|data-mundo-portada|data-mundo-calendario)"""
+    r"""|data-npcs-datos|data-ando-datos|data-mundo-datos|data-mundo-regiones-datos|data-mundo-categorias|data-mundo-portada|data-mundo-calendario|data-conversor-datos|data-calendario-datos|data-nombres-datos)"""
     r"""\s*=\s*["']([^"']*)["']""",
     re.I,
 )

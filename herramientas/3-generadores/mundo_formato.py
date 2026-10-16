@@ -528,7 +528,11 @@ class Conversor:
                     "h2", "h3", "h4", "em", "strong", "small"}
     CLASES_OK = {"gallery", "carousel", "tabbed", "float-container",
                  "float-left", "float-right", "small", "large",
-                 "portrait", "landscape"}
+                 "portrait", "landscape",
+                 # Las piezas que pone el generador en su sitio (ver
+                 # con_piezas en generar-mundo.py).
+                 "pieza-relaciones", "pieza-panteon", "pieza-diccionario",
+                 "pieza-conversor", "pieza-nombres"}
 
     def _html_crudo(self, lineas, i):
         """Un trozo de HTML escrito a mano en la página: se recoge hasta la

@@ -5,6 +5,9 @@
     .mundo-columnas {
         grid-template-columns: minmax(0, 1fr) minmax(0, 17rem);
     }
+    .mundo-backlinks {
+        margin-right: calc(17rem + 32px);
+    }
 }
 @media (max-width: 1399px) {
     .mundo-lateral {

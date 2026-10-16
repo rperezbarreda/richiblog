@@ -1,0 +1,39 @@
+{
+    "_": "Lo escribe generar-mundo.py a partir de la línea de tiempo: no se edita.",
+    "antes": "AEM",
+    "despues": "DEM",
+    "base_antes": -10000000000,
+    "hoy": 1340,
+    "eras": [
+        {
+            "nombre": "Sinfonía Estelar en armonía",
+            "desde": -10800000000,
+            "fin": -10400000000,
+            "url": "/web/wiki/linea-de-tiempo/linea_de_tiempo.html#era_sinfonia_estelar_en_armonia"
+        },
+        {
+            "nombre": "Era de los Desgarros",
+            "desde": -10400000000,
+            "fin": -10140000000,
+            "url": "/web/wiki/linea-de-tiempo/linea_de_tiempo.html#era_era_de_los_desgarros"
+        },
+        {
+            "nombre": "Era Pútrida",
+            "desde": -10140000000,
+            "fin": -10000000000,
+            "url": "/web/wiki/linea-de-tiempo/linea_de_tiempo.html#era_era_putrida"
+        },
+        {
+            "nombre": "Era Muda",
+            "desde": -10000000000,
+            "fin": 0,
+            "url": "/web/wiki/linea-de-tiempo/linea_de_tiempo.html#era_era_muda"
+        },
+        {
+            "nombre": "Era del Expolio",
+            "desde": 0,
+            "fin": null,
+            "url": "/web/wiki/linea-de-tiempo/linea_de_tiempo.html#era_era_del_expolio"
+        }
+    ]
+}

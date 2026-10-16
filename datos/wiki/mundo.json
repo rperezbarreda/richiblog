@@ -2457,6 +2457,446 @@
         "miniatura": ""
     },
     {
+        "titulo": "Aglas",
+        "url": "/web/wiki/religiones/panteon/aglas.html",
+        "carpeta": "Religiones/Panteón",
+        "etiquetas": [
+            "Religión",
+            "Panteón"
+        ],
+        "grupo": "religiones",
+        "sub": [
+            "Panteón"
+        ],
+        "que": "Heraldo",
+        "resumen": "Aglas, el Sabio, es uno de los Heraldos de la Virtud y la Ruina.",
+        "region": "",
+        "subraza_de": "",
+        "relleno": false,
+        "bandera": "",
+        "miniatura": ""
+    },
+    {
+        "titulo": "Azaras",
+        "url": "/web/wiki/religiones/panteon/azaras.html",
+        "carpeta": "Religiones/Panteón",
+        "etiquetas": [
+            "Religión",
+            "Panteón"
+        ],
+        "grupo": "religiones",
+        "sub": [
+            "Panteón"
+        ],
+        "que": "Arconte Primordial",
+        "resumen": "Azaras es uno de los Arcontes Primordiales. Su último choque con Parta rompió la Sinfonía Estelar, y de la fusión de los dos surgió Cralëa.",
+        "region": "",
+        "subraza_de": "",
+        "relleno": false,
+        "bandera": "",
+        "miniatura": ""
+    },
+    {
+        "titulo": "Bagros",
+        "url": "/web/wiki/religiones/panteon/bagros.html",
+        "carpeta": "Religiones/Panteón",
+        "etiquetas": [
+            "Religión",
+            "Panteón"
+        ],
+        "grupo": "religiones",
+        "sub": [
+            "Panteón"
+        ],
+        "que": "Heraldo",
+        "resumen": "Bagros, el Mártir, es uno de los Heraldos de la Virtud y la Ruina.",
+        "region": "",
+        "subraza_de": "",
+        "relleno": false,
+        "bandera": "",
+        "miniatura": ""
+    },
+    {
+        "titulo": "Cahir",
+        "url": "/web/wiki/religiones/panteon/cahir.html",
+        "carpeta": "Religiones/Panteón",
+        "etiquetas": [
+            "Religión",
+            "Panteón"
+        ],
+        "grupo": "religiones",
+        "sub": [
+            "Panteón"
+        ],
+        "que": "Heraldo",
+        "resumen": "Cahir, el Esclavo, es uno de los Heraldos de la Virtud y la Ruina.",
+        "region": "",
+        "subraza_de": "",
+        "relleno": false,
+        "bandera": "",
+        "miniatura": ""
+    },
+    {
+        "titulo": "Calad",
+        "url": "/web/wiki/religiones/panteon/calad.html",
+        "carpeta": "Religiones/Panteón",
+        "etiquetas": [
+            "Religión",
+            "Panteón"
+        ],
+        "grupo": "religiones",
+        "sub": [
+            "Panteón"
+        ],
+        "que": "Heraldo",
+        "resumen": "Calad, la Destrucción y la Renovación, es uno de los cuatro Heraldos de la Mesa del Orden Natural. Su día es el Día del Cambio, en el Fin del Ciclo.",
+        "region": "",
+        "subraza_de": "",
+        "relleno": false,
+        "bandera": "",
+        "miniatura": ""
+    },
+    {
+        "titulo": "Clodia",
+        "url": "/web/wiki/religiones/panteon/clodia.html",
+        "carpeta": "Religiones/Panteón",
+        "etiquetas": [
+            "Religión",
+            "Panteón"
+        ],
+        "grupo": "religiones",
+        "sub": [
+            "Panteón"
+        ],
+        "que": "Heraldo",
+        "resumen": "Clodia, la Madre del Valor, es uno de los Heraldos de la Virtud y la Ruina.",
+        "region": "",
+        "subraza_de": "",
+        "relleno": false,
+        "bandera": "",
+        "miniatura": ""
+    },
+    {
+        "titulo": "Demadia",
+        "url": "/web/wiki/religiones/panteon/demadia.html",
+        "carpeta": "Religiones/Panteón",
+        "etiquetas": [
+            "Religión",
+            "Panteón"
+        ],
+        "grupo": "religiones",
+        "sub": [
+            "Panteón"
+        ],
+        "que": "Heraldo",
+        "resumen": "Demadia, la Dama Caritativa, es uno de los Heraldos de la Virtud y la Ruina.",
+        "region": "",
+        "subraza_de": "",
+        "relleno": false,
+        "bandera": "",
+        "miniatura": ""
+    },
+    {
+        "titulo": "El Panteón de Cralëa",
+        "url": "/web/wiki/religiones/panteon/el_panteon_de_cralea.html",
+        "carpeta": "Religiones/Panteón",
+        "etiquetas": [
+            "Religión",
+            "Panteón"
+        ],
+        "grupo": "religiones",
+        "sub": [
+            "Panteón"
+        ],
+        "que": "Panteón",
+        "resumen": "El Panteón de Cralëa son los poderes que están por encima del mundo: los Arcontes Primordiales, de cuyo choque nació Cralëa; los Heraldos de la Virtud y la Ruina, que dan nombre a los meses de El Ciclo de los Heraldos…",
+        "region": "",
+        "subraza_de": "",
+        "relleno": false,
+        "bandera": "",
+        "miniatura": ""
+    },
+    {
+        "titulo": "Elvir",
+        "url": "/web/wiki/religiones/panteon/elvir.html",
+        "carpeta": "Religiones/Panteón",
+        "etiquetas": [
+            "Religión",
+            "Panteón"
+        ],
+        "grupo": "religiones",
+        "sub": [
+            "Panteón"
+        ],
+        "que": "Heraldo",
+        "resumen": "Elvir, la Muerte y el Descanso, es uno de los cuatro Heraldos de la Mesa del Orden Natural. Su día es el Día del Sendero, en el Fin del Ciclo.",
+        "region": "",
+        "subraza_de": "",
+        "relleno": false,
+        "bandera": "",
+        "miniatura": ""
+    },
+    {
+        "titulo": "Imedia",
+        "url": "/web/wiki/religiones/panteon/imedia.html",
+        "carpeta": "Religiones/Panteón",
+        "etiquetas": [
+            "Religión",
+            "Panteón"
+        ],
+        "grupo": "religiones",
+        "sub": [
+            "Panteón"
+        ],
+        "que": "Heraldo",
+        "resumen": "Imedia, la Peste y la Decadencia, es uno de los cuatro Heraldos de la Mesa del Orden Natural. Su día es el Día de la Purga, en el Fin del Ciclo.",
+        "region": "",
+        "subraza_de": "",
+        "relleno": false,
+        "bandera": "",
+        "miniatura": ""
+    },
+    {
+        "titulo": "La Mesa del Orden Natural",
+        "url": "/web/wiki/religiones/panteon/la_mesa_del_orden_natural.html",
+        "carpeta": "Religiones/Panteón",
+        "etiquetas": [
+            "Religión",
+            "Panteón"
+        ],
+        "grupo": "religiones",
+        "sub": [
+            "Panteón"
+        ],
+        "que": "Grupo de deidades",
+        "resumen": "La Mesa del Orden Natural gobierna la existencia durante los cuatro días sagrados del Fin del Ciclo, cuando el conflicto entre la Virtud y la Ruina se suspende. Cada uno de sus cuatro Heraldos tiene su día (ver El Cic…",
+        "region": "",
+        "subraza_de": "",
+        "relleno": false,
+        "bandera": "",
+        "miniatura": ""
+    },
+    {
+        "titulo": "Labros",
+        "url": "/web/wiki/religiones/panteon/labros.html",
+        "carpeta": "Religiones/Panteón",
+        "etiquetas": [
+            "Religión",
+            "Panteón"
+        ],
+        "grupo": "religiones",
+        "sub": [
+            "Panteón"
+        ],
+        "que": "Heraldo",
+        "resumen": "Labros, el Juez, es uno de los Heraldos de la Virtud y la Ruina.",
+        "region": "",
+        "subraza_de": "",
+        "relleno": false,
+        "bandera": "",
+        "miniatura": ""
+    },
+    {
+        "titulo": "Los Arcontes Primordiales",
+        "url": "/web/wiki/religiones/panteon/los_arcontes_primordiales.html",
+        "carpeta": "Religiones/Panteón",
+        "etiquetas": [
+            "Religión",
+            "Panteón"
+        ],
+        "grupo": "religiones",
+        "sub": [
+            "Panteón"
+        ],
+        "que": "Grupo de deidades",
+        "resumen": "Los Arcontes Primordiales son los seres de la Sinfonía Estelar. Del último choque entre dos de ellos, Azaras y Parta, nació Cralëa; los demás no intervinieron, y alrededor de su tumba dispusieron los astros como ofren…",
+        "region": "",
+        "subraza_de": "",
+        "relleno": false,
+        "bandera": "",
+        "miniatura": ""
+    },
+    {
+        "titulo": "Los Heraldos de la Virtud y la Ruina",
+        "url": "/web/wiki/religiones/panteon/los_heraldos_de_la_virtud_y_la_ruina.html",
+        "carpeta": "Religiones/Panteón",
+        "etiquetas": [
+            "Religión",
+            "Panteón"
+        ],
+        "grupo": "religiones",
+        "sub": [
+            "Panteón"
+        ],
+        "que": "Grupo de deidades",
+        "resumen": "Los Heraldos de la Virtud y la Ruina son los doce que dan nombre a los meses de El Ciclo de los Heraldos. Su conflicto solo se suspende durante los cuatro días del Fin del Ciclo, cuando gobierna la Mesa del Orden Natu…",
+        "region": "",
+        "subraza_de": "",
+        "relleno": false,
+        "bandera": "",
+        "miniatura": ""
+    },
+    {
+        "titulo": "Lusdra",
+        "url": "/web/wiki/religiones/panteon/lusdra.html",
+        "carpeta": "Religiones/Panteón",
+        "etiquetas": [
+            "Religión",
+            "Panteón"
+        ],
+        "grupo": "religiones",
+        "sub": [
+            "Panteón"
+        ],
+        "que": "Heraldo",
+        "resumen": "Lusdra, la Vida y la Suerte, es uno de los cuatro Heraldos de la Mesa del Orden Natural. Su día es el Día del Renacer, en el Fin del Ciclo.",
+        "region": "",
+        "subraza_de": "",
+        "relleno": false,
+        "bandera": "",
+        "miniatura": ""
+    },
+    {
+        "titulo": "Metra",
+        "url": "/web/wiki/religiones/panteon/metra.html",
+        "carpeta": "Religiones/Panteón",
+        "etiquetas": [
+            "Religión",
+            "Panteón"
+        ],
+        "grupo": "religiones",
+        "sub": [
+            "Panteón"
+        ],
+        "que": "Heraldo",
+        "resumen": "Metra, el Forjador, es uno de los Heraldos de la Virtud y la Ruina.",
+        "region": "",
+        "subraza_de": "",
+        "relleno": false,
+        "bandera": "",
+        "miniatura": ""
+    },
+    {
+        "titulo": "Morlon",
+        "url": "/web/wiki/religiones/panteon/morlon.html",
+        "carpeta": "Religiones/Panteón",
+        "etiquetas": [
+            "Religión",
+            "Panteón"
+        ],
+        "grupo": "religiones",
+        "sub": [
+            "Panteón"
+        ],
+        "que": "Heraldo",
+        "resumen": "Morlon, el Rufián, es uno de los Heraldos de la Virtud y la Ruina.",
+        "region": "",
+        "subraza_de": "",
+        "relleno": false,
+        "bandera": "",
+        "miniatura": ""
+    },
+    {
+        "titulo": "Naria",
+        "url": "/web/wiki/religiones/panteon/naria.html",
+        "carpeta": "Religiones/Panteón",
+        "etiquetas": [
+            "Religión",
+            "Panteón"
+        ],
+        "grupo": "religiones",
+        "sub": [
+            "Panteón"
+        ],
+        "que": "Heraldo",
+        "resumen": "Naria, la Sombría, es uno de los Heraldos de la Virtud y la Ruina.",
+        "region": "",
+        "subraza_de": "",
+        "relleno": false,
+        "bandera": "",
+        "miniatura": ""
+    },
+    {
+        "titulo": "Parta",
+        "url": "/web/wiki/religiones/panteon/parta.html",
+        "carpeta": "Religiones/Panteón",
+        "etiquetas": [
+            "Religión",
+            "Panteón"
+        ],
+        "grupo": "religiones",
+        "sub": [
+            "Panteón"
+        ],
+        "que": "Arconte Primordial",
+        "resumen": "Parta es uno de los Arcontes Primordiales. Su último choque con Azaras rompió la Sinfonía Estelar, y de la fusión de los dos surgió Cralëa.",
+        "region": "",
+        "subraza_de": "",
+        "relleno": false,
+        "bandera": "",
+        "miniatura": ""
+    },
+    {
+        "titulo": "Runis",
+        "url": "/web/wiki/religiones/panteon/runis.html",
+        "carpeta": "Religiones/Panteón",
+        "etiquetas": [
+            "Religión",
+            "Panteón"
+        ],
+        "grupo": "religiones",
+        "sub": [
+            "Panteón"
+        ],
+        "que": "Heraldo",
+        "resumen": "Runis, la Dama Cruel, es uno de los Heraldos de la Virtud y la Ruina.",
+        "region": "",
+        "subraza_de": "",
+        "relleno": false,
+        "bandera": "",
+        "miniatura": ""
+    },
+    {
+        "titulo": "Sedril",
+        "url": "/web/wiki/religiones/panteon/sedril.html",
+        "carpeta": "Religiones/Panteón",
+        "etiquetas": [
+            "Religión",
+            "Panteón"
+        ],
+        "grupo": "religiones",
+        "sub": [
+            "Panteón"
+        ],
+        "que": "Heraldo",
+        "resumen": "Sedril, el Custodio, es uno de los Heraldos de la Virtud y la Ruina.",
+        "region": "",
+        "subraza_de": "",
+        "relleno": false,
+        "bandera": "",
+        "miniatura": ""
+    },
+    {
+        "titulo": "Verdos",
+        "url": "/web/wiki/religiones/panteon/verdos.html",
+        "carpeta": "Religiones/Panteón",
+        "etiquetas": [
+            "Religión",
+            "Panteón"
+        ],
+        "grupo": "religiones",
+        "sub": [
+            "Panteón"
+        ],
+        "que": "Heraldo",
+        "resumen": "Verdos, el Padre de Mentiras, es uno de los Heraldos de la Virtud y la Ruina.",
+        "region": "",
+        "subraza_de": "",
+        "relleno": false,
+        "bandera": "",
+        "miniatura": ""
+    },
+    {
         "titulo": "Mapamundi de Cralëa",
         "url": "/web/wiki/mapa_mapamundi_de_cralea.html",
         "carpeta": "mapas",
@@ -2468,6 +2908,74 @@
         "que": "mapa interactivo",
         "vista": "/imagenes/wiki/vista_mapa_mapamundi_de_cralea.svg",
         "resumen": ""
+    },
+    {
+        "titulo": "Conversor de fechas",
+        "url": "/web/wiki/utilidades/conversor_de_fechas.html",
+        "carpeta": "Utilidades",
+        "etiquetas": [
+            "Herramientas"
+        ],
+        "grupo": "herramientas",
+        "sub": [],
+        "que": "Qué día es, en qué era cae y cuánto falta",
+        "resumen": "Elige un año, un mes y un día de El Ciclo de los Heraldos y te dice qué día de la semana es, en qué era de la Línea de tiempo cae, cómo está la luna, qué se celebra y cuánto ha pasado (o falta) desde hoy en Cralëa.",
+        "region": "",
+        "subraza_de": "",
+        "relleno": false,
+        "bandera": "",
+        "miniatura": ""
+    },
+    {
+        "titulo": "Diccionario",
+        "url": "/web/wiki/utilidades/diccionario.html",
+        "carpeta": "Utilidades",
+        "etiquetas": [
+            "Herramientas"
+        ],
+        "grupo": "herramientas",
+        "sub": [],
+        "que": "Las palabras de las lenguas del mundo",
+        "resumen": "Las palabras de las lenguas de Cralëa que salen en la wiki, con lo que significan. Cada idioma que tenga su página enseña además las suyas en su apartado «Vocabulario».",
+        "region": "",
+        "subraza_de": "",
+        "relleno": false,
+        "bandera": "",
+        "miniatura": ""
+    },
+    {
+        "titulo": "Generador de nombres",
+        "url": "/web/wiki/utilidades/generador_de_nombres.html",
+        "carpeta": "Utilidades",
+        "etiquetas": [
+            "Herramientas"
+        ],
+        "grupo": "herramientas",
+        "sub": [],
+        "que": "Nombres que suenan a cada rincón del mundo",
+        "resumen": "Para sacar un tabernero, una aldea o un barco en mitad de una partida. Cada estilo aprende cómo suenan los nombres que ya hay en la wiki (los países de cada región, las palabras de cada idioma del Diccionario…) y se i…",
+        "region": "",
+        "subraza_de": "",
+        "relleno": false,
+        "bandera": "",
+        "miniatura": ""
+    },
+    {
+        "titulo": "Relaciones",
+        "url": "/web/wiki/utilidades/relaciones.html",
+        "carpeta": "Utilidades",
+        "etiquetas": [
+            "Herramientas"
+        ],
+        "grupo": "herramientas",
+        "sub": [],
+        "que": "Quién es aliado y enemigo de quién",
+        "resumen": "Todos los países, facciones, órdenes y dioses que tienen apuntados aliados o enemigos en su ficha, en un solo dibujo. Cada uno enseña además los suyos en su página, en el apartado «Relaciones».",
+        "region": "",
+        "subraza_de": "",
+        "relleno": false,
+        "bandera": "",
+        "miniatura": ""
     },
     {
         "titulo": "Línea de tiempo",

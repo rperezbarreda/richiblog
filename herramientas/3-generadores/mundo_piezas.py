@@ -1,0 +1,533 @@
+# =========================================
+# LO QUE LAS PÁGINAS DE LA WIKI SE PONEN SOLAS
+# =========================================
+# Lo usa generar-mundo.py al escribir cada página. Todo sale de las fichas
+# (el frontmatter de los .md), así que no hay que mantener ninguna lista a
+# mano: si un lugar dice «ubicación: [[Reino de X]]», el Reino de X lo
+# lista entre sus lugares; si dos facciones se dicen enemigas, las dos lo
+# enseñan; si un personaje dice quiénes son sus padres, sale su árbol.
+#
+#   apartados_inversos   «Lugares» en un país, «Personajes» en una raza…
+#   relaciones           aliados y enemigos (en las dos direcciones)
+#   jerarquia            «pertenece a»: el panteón, una orden y sus ramas
+#   arbol_familiar       padres, pareja, hijos (y abuelos, nietos, hermanos)
+#   caja_de_navegacion   al pie: las páginas hermanas
+#   piezas               lo que va en una página dentro de <div class="pieza-…">
+#                        (el diagrama de relaciones, el panteón entero, el
+#                        diccionario)
+#
+# Todo devuelve HTML ya escapado. Los nombres se comparan en minúsculas,
+# que es como están las claves de «paginas» en generar-mundo.py.
+
+import html
+import math
+import re
+import unicodedata
+
+RE_ENLACE = re.compile(r"\[\[([^\]|#]+)(?:#[^\]|]*)?(?:\|[^\]]*)?\]\]")
+
+
+def esc(texto):
+    return html.escape(str(texto or ""), quote=True)
+
+
+def llano(texto):
+    plano = unicodedata.normalize("NFD", str(texto or "").lower())
+    return "".join(c for c in plano if unicodedata.category(c) != "Mn").strip()
+
+
+def enlaces_de(valor):
+    """Las páginas a las que apunta un campo de la ficha: «[[A]], [[B|b]]»
+    → ["a", "b"] (en minúsculas). Un texto sin corchetes no apunta a nada."""
+    if isinstance(valor, list):
+        valor = ", ".join(str(v) for v in valor)
+    return [m.group(1).strip().lower() for m in RE_ENLACE.finditer(str(valor or ""))]
+
+
+def campo(ficha, *nombres):
+    datos = ficha.get("datos") or {}
+    for nombre in nombres:
+        if nombre in datos and datos[nombre] not in (None, ""):
+            return datos[nombre]
+    return ""
+
+
+def clave(ficha):
+    return ficha["nombre"].strip().lower()
+
+
+def enlace(ficha, actual=None):
+    if actual is not None and ficha is actual:
+        return '<strong aria-current="page">%s</strong>' % esc(ficha["titulo"])
+    return '<a class="mundo-enlace" href="%s">%s</a>' % (esc(ficha["url"]), esc(ficha["titulo"]))
+
+
+def que_es(ficha):
+    return str(campo(ficha, "infobox") or "").strip()
+
+
+def en_su_apartado(cuerpo, ancla, titulo, html_):
+    """Pone html_ al final del apartado <h2 id="ancla"> del artículo (si
+    lo has escrito, lo tuyo sale primero); si no lo hay, lo añade al final
+    con ese título."""
+    if not html_:
+        return cuerpo
+    cabeza = '<h2 id="%s">' % ancla
+    i = cuerpo.find(cabeza)
+    if i != -1:
+        siguiente = cuerpo.find("<h2", i + len(cabeza))
+        punto = siguiente if siguiente != -1 else len(cuerpo)
+        return cuerpo[:punto] + html_ + "\n" + cuerpo[punto:]
+    return cuerpo + '\n<h2 id="%s">%s</h2>\n%s\n' % (ancla, esc(titulo), html_)
+
+
+def lista_de_fichas(fichas, actual=None, con_que=True):
+    trozos = []
+    for f in fichas:
+        que = que_es(f) if con_que else ""
+        trozos.append("<li>%s%s</li>" % (
+            enlace(f, actual), ' <span class="mundo-auto-que">%s</span>' % esc(que) if que else ""))
+    return '<ul class="mundo-auto-lista">%s</ul>' % "".join(trozos)
+
+
+def ordenadas(fichas):
+    return sorted(fichas, key=lambda f: llano(f["titulo"]))
+
+
+# =========================================
+# LO QUE APUNTA AQUÍ POR UN CAMPO
+# =========================================
+# (campo de la ficha de las OTRAS páginas, ancla y título del apartado que
+# sale en la página apuntada). Un lugar «ubicación: [[Reino de X]]» sale en
+# «Lugares» del Reino de X; un personaje «raza: [[Elfos]]», en «Personajes»
+# de los Elfos.
+
+INVERSOS = (
+    (("ubicación", "ubicacion", "país", "pais"), "lugares", "Lugares"),
+    (("raza",), "personajes", "Personajes"),
+    (("residencia",), "habitantes_conocidos", "Quién vive aquí"),
+)
+
+
+def apartados_inversos(ficha, paginas):
+    salida = []
+    suya = clave(ficha)
+    for campos, ancla, titulo in INVERSOS:
+        hijas = [f for f in paginas.values() if f is not ficha
+                 and any(suya in enlaces_de(campo(f, c)) for c in campos)]
+        if hijas:
+            salida.append((ancla, titulo, lista_de_fichas(ordenadas(hijas))))
+    return salida
+
+
+# =========================================
+# ALIADOS Y ENEMIGOS
+# =========================================
+# Los campos «aliados» y «enemigos» de cualquier ficha (países,
+# organizaciones, deidades, personajes…). Basta con que lo diga UNO de los
+# dos: si el Reino de X tiene a la Orden de Y por aliada, la Orden de Y
+# también enseña al Reino de X entre sus aliados.
+
+TIPOS_DE_RELACION = (("aliados", "Aliados"), ("enemigos", "Enemigos"))
+
+
+def todas_las_relaciones(paginas):
+    """{(a, b, tipo)} con a < b: cada pareja una vez."""
+    salida = set()
+    for f in paginas.values():
+        for tipo, _ in TIPOS_DE_RELACION:
+            for otra in enlaces_de(campo(f, tipo)):
+                if otra in paginas and otra != clave(f):
+                    a, b = sorted((clave(f), otra))
+                    salida.add((a, b, tipo))
+    return salida
+
+
+def relaciones(ficha, paginas, todas):
+    suya = clave(ficha)
+    trozos = []
+    for tipo, titulo in TIPOS_DE_RELACION:
+        otras = [paginas[b if a == suya else a] for a, b, t in todas
+                 if t == tipo and suya in (a, b)]
+        if otras:
+            trozos.append('<h3 class="mundo-auto-subtitulo">%s</h3>%s'
+                          % (titulo, lista_de_fichas(ordenadas(otras))))
+    return "".join(trozos)
+
+
+def diagrama_de_relaciones(paginas, todas):
+    """El diagrama de todas: cada página en un círculo y una línea entre las
+    que tienen algo (seguida, aliados; a rayas, enemigos: no solo por el
+    color). Debajo, lo mismo en una tabla, que es lo que lee un lector de
+    pantalla y lo que se puede buscar."""
+    if not todas:
+        return ('<p class="mundo-auto-vacio">Todavía no hay ninguna relación apuntada. Se'
+                ' apuntan en la ficha de cada página, con los campos «aliados» y'
+                ' «enemigos» ([[Una página]], [[Otra]]).</p>')
+    nodos = ordenadas([paginas[k] for k in {a for a, b, t in todas} | {b for a, b, t in todas}])
+    n = len(nodos)
+    # Más ancho que alto: los nombres van a los lados del círculo y algunos
+    # son largos («Califato de Jhel'Zadir»).
+    ancho, alto = 960, 640
+    radio = alto / 2 - 60
+    cx, cy = ancho / 2, alto / 2
+    pos = {}
+    for i, f in enumerate(nodos):
+        angulo = -math.pi / 2 + 2 * math.pi * i / n
+        pos[clave(f)] = (cx + radio * math.cos(angulo), cy + radio * math.sin(angulo), angulo)
+    lineas = []
+    for a, b, tipo in sorted(todas):
+        x1, y1, _ = pos[a]
+        x2, y2, _ = pos[b]
+        lineas.append('<line class="rel-%s" x1="%.1f" y1="%.1f" x2="%.1f" y2="%.1f"/>'
+                      % (tipo, x1, y1, x2, y2))
+    puntos = []
+    for f in nodos:
+        x, y, angulo = pos[clave(f)]
+        fuera = 18
+        tx, ty = x + fuera * math.cos(angulo), y + fuera * math.sin(angulo)
+        ancla = "start" if math.cos(angulo) > 0.2 else ("end" if math.cos(angulo) < -0.2 else "middle")
+        puntos.append('<a href="%s"><circle cx="%.1f" cy="%.1f" r="9"/>'
+                      '<text x="%.1f" y="%.1f" text-anchor="%s" dominant-baseline="middle">%s</text></a>'
+                      % (esc(f["url"]), x, y, tx, ty, ancla, esc(f["titulo"])))
+    # role="group" y no "img": dentro van los enlaces a cada página, y una
+    # imagen no puede llevar cosas que se pulsan (axe: nested-interactive).
+    svg = ('<svg class="mundo-relaciones-svg" viewBox="0 0 %d %d" role="group"'
+           ' aria-labelledby="rel-titulo rel-desc">'
+           '<title id="rel-titulo">Diagrama de relaciones</title>'
+           '<desc id="rel-desc">Cada línea une dos páginas: seguida si son aliados, a rayas si'
+           ' son enemigos. La tabla de debajo dice lo mismo.</desc>%s%s</svg>'
+           % (ancho, alto, "".join(lineas), "".join(puntos)))
+    leyenda = ('<p class="mundo-relaciones-leyenda" aria-hidden="true">'
+               '<span class="rel-muestra rel-aliados"></span> aliados'
+               '<span class="rel-muestra rel-enemigos"></span> enemigos</p>')
+    filas = []
+    for a, b, tipo in sorted(todas, key=lambda r: (llano(paginas[r[0]]["titulo"]), r[2])):
+        filas.append("<tr><td>%s</td><td>%s</td><td>%s</td></tr>"
+                     % (enlace(paginas[a]), "aliados" if tipo == "aliados" else "enemigos",
+                        enlace(paginas[b])))
+    tabla = ('<div class="mundo-tabla"><table class="mundo-relaciones-tabla"><caption>Todas las relaciones</caption>'
+             '<thead><tr><th scope="col">Uno</th><th scope="col">Son</th><th scope="col">Otro</th>'
+             '</tr></thead><tbody>%s</tbody></table></div>' % "".join(filas))
+    return '<div class="mundo-relaciones">%s%s%s</div>' % (svg, leyenda, tabla)
+
+
+# =========================================
+# A QUIÉN PERTENECE: EL PANTEÓN, UNA ORDEN Y SUS RAMAS
+# =========================================
+# El campo «pertenece a: [[Los Heraldos]]». De ahí sale un árbol: en la
+# página de arriba, todo lo que cuelga de ella; en las de abajo, el camino
+# hasta arriba (en las migas).
+
+def padres_de_jerarquia(paginas):
+    """{hija: madre} por «pertenece a»."""
+    salida = {}
+    for f in paginas.values():
+        for otra in enlaces_de(campo(f, "pertenece a")):
+            if otra in paginas and otra != clave(f):
+                salida[clave(f)] = otra
+                break
+    return salida
+
+
+def _rama(nombre, paginas, hijas_de, actual, vistos):
+    vistos = vistos | {nombre}
+    f = paginas[nombre]
+    que = que_es(f)
+    dentro = "".join(_rama(h, paginas, hijas_de, actual, vistos)
+                     for h in sorted(hijas_de.get(nombre, []), key=lambda k: llano(paginas[k]["titulo"]))
+                     if h not in vistos)
+    return '<li><span class="mundo-arbol-nodo">%s%s</span>%s</li>' % (
+        enlace(f, actual), ' <span class="mundo-auto-que">%s</span>' % esc(que) if que else "",
+        "<ul>%s</ul>" % dentro if dentro else "")
+
+
+def hijas_de_jerarquia(padre_de):
+    hijas = {}
+    for h, p in padre_de.items():
+        hijas.setdefault(p, []).append(h)
+    return hijas
+
+
+def jerarquia(ficha, paginas, padre_de):
+    """El árbol de lo que cuelga de esta página, o ""."""
+    hijas = hijas_de_jerarquia(padre_de)
+    suya = clave(ficha)
+    if suya not in hijas:
+        return ""
+    # Desde lo que cuelga de ella: ella misma ya es la página.
+    return '<ul class="mundo-arbol">%s</ul>' % "".join(
+        _rama(h, paginas, hijas, ficha, {suya})
+        for h in sorted(hijas[suya], key=lambda k: llano(paginas[k]["titulo"])))
+
+
+def panteon_entero(paginas, padre_de, solo=None):
+    """Todos los árboles de «pertenece a» (o solo los que empiecen en una
+    página de las de «solo»)."""
+    hijas = hijas_de_jerarquia(padre_de)
+    raices = [k for k in hijas if k not in padre_de and (solo is None or k in solo)]
+    if not raices:
+        return ('<p class="mundo-auto-vacio">Todavía no hay nada que cuelgue de nada. Se'
+                ' apunta en la ficha de cada página con «pertenece a: [[La de arriba]]».</p>')
+    return '<ul class="mundo-arbol">%s</ul>' % "".join(
+        _rama(r, paginas, hijas, None, set()) for r in sorted(raices, key=lambda k: llano(paginas[k]["titulo"])))
+
+
+# =========================================
+# EL ÁRBOL FAMILIAR
+# =========================================
+# Los campos «padres», «pareja» e «hijos» de los personajes. Como con los
+# aliados, basta con que lo diga uno: si la madre lista a su hija entre sus
+# hijos, la hija tiene a su madre entre sus padres aunque no lo ponga.
+
+def familias(paginas):
+    padres, parejas = {}, {}
+    for f in paginas.values():
+        yo = clave(f)
+        for p in enlaces_de(campo(f, "padres", "padre", "madre")):
+            if p in paginas and p != yo:
+                padres.setdefault(yo, set()).add(p)
+        for h in enlaces_de(campo(f, "hijos", "hijas")):
+            if h in paginas and h != yo:
+                padres.setdefault(h, set()).add(yo)
+        for p in enlaces_de(campo(f, "pareja", "esposa", "esposo", "consorte")):
+            if p in paginas and p != yo:
+                parejas.setdefault(yo, set()).add(p)
+                parejas.setdefault(p, set()).add(yo)
+    hijos = {}
+    for h, ps in padres.items():
+        for p in ps:
+            hijos.setdefault(p, set()).add(h)
+    return padres, hijos, parejas
+
+
+def arbol_familiar(ficha, paginas, familia):
+    padres, hijos, parejas = familia
+    yo = clave(ficha)
+    sus_padres = padres.get(yo, set())
+    abuelos = set().union(*[padres.get(p, set()) for p in sus_padres]) if sus_padres else set()
+    hermanos = set().union(*[hijos.get(p, set()) for p in sus_padres]) - {yo} if sus_padres else set()
+    sus_hijos = hijos.get(yo, set())
+    nietos = set().union(*[hijos.get(h, set()) for h in sus_hijos]) if sus_hijos else set()
+    sus_parejas = parejas.get(yo, set())
+    if not (sus_padres or sus_hijos or sus_parejas or hermanos):
+        return ""
+
+    def fila(titulo, claves, clase=""):
+        if not claves:
+            return ""
+        caja = "".join('<li class="mundo-familia-persona%s">%s</li>'
+                       % (" es-yo" if k == yo else clase, enlace(paginas[k], ficha))
+                       for k in sorted(claves, key=lambda k: llano(paginas[k]["titulo"])))
+        return ('<div class="mundo-familia-fila"><h3 class="mundo-familia-titulo">%s</h3>'
+                '<ul>%s</ul></div>' % (esc(titulo), caja))
+
+    centro = fila("Generación de %s" % ficha["titulo"],
+                  {yo} | sus_parejas | hermanos, "")
+    # Qué es cada uno en su generación, para quien no ve la caja resaltada.
+    detalles = []
+    if sus_parejas:
+        detalles.append("pareja: " + ", ".join(paginas[k]["titulo"] for k in sorted(sus_parejas)))
+    if hermanos:
+        detalles.append("hermanos: " + ", ".join(paginas[k]["titulo"] for k in sorted(hermanos)))
+    junto = "; ".join(detalles)
+    nota = ('<p class="mundo-familia-nota">%s</p>' % esc(junto[:1].upper() + junto[1:])) if detalles else ""
+    return ('<div class="mundo-familia">%s%s%s%s%s%s</div>'
+            % (fila("Abuelos", abuelos), fila("Padres", sus_padres), centro, nota,
+               fila("Hijos", sus_hijos), fila("Nietos", nietos)))
+
+
+# =========================================
+# LA CAJA DE NAVEGACIÓN, AL PIE
+# =========================================
+# Como las de Wikipedia: las páginas hermanas, para pasar de una a otra sin
+# volver a la portada. Se busca, por este orden:
+#   - un país: los demás países de su región (con su bandera en pequeño);
+#   - una raza o una subraza: la raza y todas sus subrazas;
+#   - lo que «pertenece a» algo: lo que pertenece a lo mismo;
+#   - un lugar: los demás lugares de su país o zona;
+#   - y si no, las de su mismo apartado de la portada (Astros, Credos…),
+#     siempre que sean entre 2 y 40.
+
+MAXIMO = 40
+
+
+def caja_de_navegacion(ficha, paginas, region_de, subraza_de, padre_de, sub_de):
+    yo = clave(ficha)
+
+    def caja(titulo_html, miembros, con_bandera=False):
+        miembros = [m for m in miembros if m in paginas]
+        if len(miembros) < 2:
+            return ""
+        trozos = []
+        for k in sorted(set(miembros), key=lambda k: llano(paginas[k]["titulo"])):
+            f = paginas[k]
+            bandera = f.get("bandera_url") if con_bandera else ""
+            dibujo = ('<img class="mundo-navbox-bandera" src="%s" alt="" width="24" height="16"'
+                      ' loading="lazy" decoding="async">' % esc(bandera)) if bandera else ""
+            trozos.append("<li>%s%s</li>" % (dibujo, enlace(f, ficha)))
+        return ('<div class="mundo-navbox" role="navigation" aria-labelledby="mundo-navbox-titulo">'
+                '<h2 class="mundo-navbox-titulo" id="mundo-navbox-titulo">%s</h2><ul>%s</ul></div>'
+                % (titulo_html, "".join(trozos)))
+
+    def titulo(k, prefijo=""):
+        f = paginas.get(k)
+        return esc(prefijo) + (enlace(f) if f else "")
+
+    # Un país, o una región: los países de la región.
+    region = region_de.get(yo) or (yo if yo in region_de.values() else "")
+    if region and region in paginas:
+        paises = [k for k, r in region_de.items() if r == region]
+        hecha = caja(titulo(region, "Países de "), paises, con_bandera=True)
+        if hecha:
+            return hecha
+    raza = subraza_de.get(yo) or (yo if yo in subraza_de.values() else "")
+    if raza:
+        hecha = caja(titulo(raza, "La familia de los "), [raza] + [k for k, r in subraza_de.items() if r == raza])
+        if hecha:
+            return hecha
+    arriba = padre_de.get(yo) or (yo if yo in padre_de.values() else "")
+    if arriba:
+        hecha = caja(titulo(arriba), [arriba] + [k for k, p in padre_de.items() if p == arriba])
+        if hecha:
+            return hecha
+    donde = (enlaces_de(campo(ficha, "ubicación", "ubicacion")) or [""])[0]
+    if donde in paginas:
+        vecinos = [clave(f) for f in paginas.values()
+                   if donde in enlaces_de(campo(f, "ubicación", "ubicacion"))]
+        hecha = caja(titulo(donde, "Lugares de "), vecinos)
+        if hecha:
+            return hecha
+    grupo, sub = sub_de.get(yo, ("", ""))
+    if sub:
+        iguales = [k for k, gs in sub_de.items() if gs == (grupo, sub)]
+        if 2 <= len(iguales) <= MAXIMO:
+            return caja(esc(sub), iguales)
+    return ""
+
+
+# =========================================
+# EL DICCIONARIO
+# =========================================
+
+def tabla_de_palabras(palabras, paginas, enlazar_idioma=True):
+    if not palabras:
+        return ('<p class="mundo-auto-vacio">Todavía no hay ninguna palabra. Se añaden con'
+                ' herramientas/1-publicar/diccionario.py.</p>')
+    filas = []
+    for p in sorted(palabras, key=lambda p: llano(p.get("palabra"))):
+        idioma = str(p.get("idioma") or "").strip()
+        pag_idioma = paginas.get(idioma.lower()) if idioma else None
+        celda_idioma = enlace(pag_idioma) if (enlazar_idioma and pag_idioma) else esc(idioma)
+        donde = str(p.get("pagina") or "").strip()
+        pag = paginas.get(donde.lower()) if donde else None
+        notas = esc(p.get("notas") or "")
+        if pag:
+            notas = (notas + " " if notas else "") + "(ver %s)" % enlace(pag)
+        filas.append('<tr data-diccionario-fila><th scope="row" lang="%s">%s</th><td>%s</td><td>%s</td>'
+                     '<td>%s</td></tr>'
+                     % ("und", esc(p.get("palabra")), celda_idioma, esc(p.get("significado")), notas))
+    return ('<div class="mundo-diccionario" data-mundo-diccionario>'
+            '<div class="mundo-tabla"><table class="mundo-diccionario-tabla"><caption>Palabras del mundo</caption>'
+            '<thead><tr><th scope="col">Palabra</th><th scope="col">Idioma</th>'
+            '<th scope="col">Qué significa</th><th scope="col">Notas</th></tr></thead>'
+            '<tbody>%s</tbody></table></div></div>' % "".join(filas))
+
+
+# =========================================
+# LOS NOMBRES DE CADA SITIO, PARA EL GENERADOR DE NOMBRES
+# =========================================
+# El generador de nombres (scripts/paginas/mundo.js) aprende cómo suenan
+# los nombres de cada sitio con los que ya hay: los de los países de cada
+# región, los de los Heraldos, los de los astros… De «Tribu Gogango»,
+# «Tribu Molosgo» y «Tribu Ordasco» saca nombres que suenan a Partaria.
+# Aquí se quita lo que no es nombre propio («Reino de», «Tribu», «el
+# Sanguinario»…).
+
+PALABRAS_DE_TITULO = {
+    "reino", "reinos", "califato", "canton", "condado", "dominios", "emirato", "gran", "horda",
+    "imperio", "marca", "marquesado", "obispado", "orden", "principado", "tribu", "isla", "islas",
+    "ruinas", "valle", "coronas", "mandato", "territorios", "republica", "ducado", "baronia",
+    "archipielago", "tierras", "faros", "cuna", "corte", "ciudad", "ciudades", "libre", "libres",
+    "sacro", "santo", "nueva", "nuevo", "alto", "alta", "bajo", "baja", "puerto", "fortaleza",
+    "monte", "montes", "bosque", "mar", "rio", "lago", "costa", "liga", "confederacion",
+    "union", "pueblo", "pueblos", "clan", "clanes", "estado", "estados", "señorio", "senorio",
+    "jefatura", "khanato", "kanato", "sultanato", "teocracia", "dominio", "protectorado",
+    "unidos", "unidas", "independiente", "del", "de", "la", "las", "los", "el", "y",
+    "academia", "alianza", "santa", "viento", "vientos", "corona", "forja", "quebrada", "morada",
+    "paraje", "fragmentado", "franja", "infierno", "frondoso", "ciclo", "heraldos", "sol",
+    "luna", "cosmologia", "cielo", "mundo", "mundos", "torre", "puente", "camino",
+    "cumbres", "calcinadas", "mercantil", "mercado", "custodios", "reflejadas", "palacio",
+    "ojo", "techo", "paramo",
+}
+
+
+def palabras_comunes(paginas):
+    """Las palabras que salen EN MINÚSCULA en el texto de alguna página: son
+    palabras de las de siempre («viento», «academia»), no nombres propios,
+    aunque vayan con mayúscula en un título («Coronas del Viento»)."""
+    comunes = set()
+    for f in paginas.values():
+        for palabra in re.findall(r"\b[a-záéíóúüñ][a-záéíóúüñ']+\b", f.get("texto") or ""):
+            comunes.add(llano(palabra))
+    return comunes
+
+
+def nombres_propios(titulo, comunes=frozenset()):
+    """«Dominios de Bor'Korr el Sanguinario» → ["Bor'Korr"]."""
+    sin_el = re.split(r"\s+(?:el|la)\s+[A-ZÁÉÍÓÚÑ]", titulo)[0]
+    salida = []
+    for palabra in re.split(r"[\s\-–]+", sin_el):
+        limpia = palabra.strip(".,;:()«»\"")
+        if (len(limpia) >= 3 and llano(limpia) not in PALABRAS_DE_TITULO
+                and llano(limpia) not in comunes and limpia[:1].isupper()):
+            salida.append(limpia)
+    return salida
+
+
+def estilos_de_nombres(paginas, region_de, extra, palabras=()):
+    """[{nombre, ejemplos}] para datos/wiki/nombres.json. Las palabras del
+    diccionario cuentan también, en el estilo de su idioma."""
+    estilos = {}
+    comunes = palabras_comunes(paginas)
+
+    def apunta(estilo, titulo):
+        for n in nombres_propios(titulo, comunes):
+            estilos.setdefault(estilo, [])
+            if n not in estilos[estilo]:
+                estilos[estilo].append(n)
+
+    for pais, region in region_de.items():
+        if pais in paginas and region in paginas:
+            apunta(paginas[region]["titulo"], paginas[pais]["titulo"])
+    for f in paginas.values():
+        tags = [llano(t) for t in f.get("etiquetas") or []]
+        que = llano(que_es(f))
+        if "cosmologia" in tags and que in ("astro", "mundo tributo", "constelacion"):
+            apunta("Nithir", f["titulo"])
+        if que in ("deidad", "heraldo"):
+            apunta("Los dioses y los Heraldos", f["titulo"])
+        raza = (enlaces_de(campo(f, "raza")) or [""])[0]
+        if raza in paginas:
+            apunta(paginas[raza]["titulo"], f["titulo"])
+    for p in palabras:
+        idioma = str(p.get("idioma") or "").strip()
+        if idioma:
+            for n in re.split(r"[\s\-]+", str(p.get("palabra") or "")):
+                if len(n) >= 3:
+                    estilos.setdefault(idioma, [])
+                    if n not in estilos[idioma]:
+                        estilos[idioma].append(n)
+    for uno in extra:
+        nombre = str(uno.get("nombre") or "").strip()
+        if not nombre:
+            continue
+        for n in uno.get("ejemplos") or []:
+            n = str(n).strip()
+            if n:
+                estilos.setdefault(nombre, [])
+                if n not in estilos[nombre]:
+                    estilos[nombre].append(n)
+    # Con menos de cuatro ejemplos no hay de dónde aprender.
+    return [{"nombre": k, "ejemplos": v} for k, v in sorted(estilos.items(), key=lambda kv: llano(kv[0]))
+            if len(v) >= 4]

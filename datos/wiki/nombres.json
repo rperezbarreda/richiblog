@@ -1,0 +1,168 @@
+{
+    "_": "Lo escribe generar-mundo.py con los nombres que ya hay en la wiki. Para añadir los tuyos (o un estilo nuevo), datos/wiki/nombres-propios.json.",
+    "estilos": [
+        {
+            "nombre": "Archipielago de las Costras",
+            "ejemplos": [
+                "Ac'atapec",
+                "Amequeleke",
+                "Itzalcál",
+                "Kukulna",
+                "Mulz'aka",
+                "Nahuatzal",
+                "Nalchalcoatl",
+                "Níctebrakka",
+                "Tzeibalba",
+                "Tzintara",
+                "Tzompoc",
+                "Yaxch'umekte"
+            ]
+        },
+        {
+            "nombre": "Archipiélago de Lunas",
+            "ejemplos": [
+                "Ronco",
+                "Mogla",
+                "Darís",
+                "Yor"
+            ]
+        },
+        {
+            "nombre": "Archipiélago Fragmentado",
+            "ejemplos": [
+                "Vlasquie",
+                "Lyca",
+                "Aureb",
+                "Eeli",
+                "Cereno",
+                "Esnirma",
+                "Thalvyr",
+                "Az'Nu"
+            ]
+        },
+        {
+            "nombre": "Azarasia",
+            "ejemplos": [
+                "Jhel'Zadir",
+                "Piedraspuras",
+                "Burcrecia",
+                "Bor'Korr",
+                "Adrash",
+                "Marturia",
+                "Yerzhal",
+                "Valindra",
+                "Elyarath",
+                "Setra",
+                "Habaza",
+                "Clodia",
+                "Lúnica",
+                "Dreustán",
+                "Nocravel",
+                "Oritania",
+                "Prunia",
+                "Solazada",
+                "Terredia",
+                "Denatria",
+                "Doresia",
+                "Traena",
+                "Cuerza"
+            ]
+        },
+        {
+            "nombre": "Faros del Mar Ciego",
+            "ejemplos": [
+                "Ahíu",
+                "Aruta",
+                "Haluka",
+                "Hokupuko",
+                "Kaelova",
+                "Nalu'elé",
+                "Nara",
+                "Mana",
+                "Popalola",
+                "Talaiva",
+                "Uluka",
+                "Vanu",
+                "Reki",
+                "Varamo'a"
+            ]
+        },
+        {
+            "nombre": "Los dioses y los Heraldos",
+            "ejemplos": [
+                "Aglas",
+                "Bagros",
+                "Cahir",
+                "Calad",
+                "Clodia",
+                "Demadia",
+                "Elvir",
+                "Imedia",
+                "Labros",
+                "Lusdra",
+                "Metra",
+                "Morlon",
+                "Naria",
+                "Runis",
+                "Sedril",
+                "Verdos"
+            ]
+        },
+        {
+            "nombre": "Nithir",
+            "ejemplos": [
+                "Gomath",
+                "Lurmeri",
+                "Nevadra",
+                "Lunaah",
+                "Söh",
+                "hgol"
+            ]
+        },
+        {
+            "nombre": "Partaria",
+            "ejemplos": [
+                "Rosamica",
+                "Sepón",
+                "Utalis",
+                "Ablanamaz",
+                "Ath",
+                "Parta",
+                "Friscadio",
+                "Maharato",
+                "Sulkaladésh",
+                "Acratang",
+                "Nisi",
+                "Panchan",
+                "Taz",
+                "Dao",
+                "Yeni",
+                "Kasa",
+                "Goa",
+                "Boscalise",
+                "Gogango",
+                "Kránimos",
+                "Molosgo",
+                "Ordasco",
+                "Tuzno",
+                "Utná",
+                "Vadalacra",
+                "Után"
+            ]
+        },
+        {
+            "nombre": "Tierras Encantadas",
+            "ejemplos": [
+                "Turia",
+                "Uspán",
+                "Lezeris",
+                "Golota",
+                "Aglas",
+                "Jan",
+                "Ópalis",
+                "Nereth",
+                "Kada"
+            ]
+        }
+    ]
+}

@@ -1,0 +1,40 @@
+{
+    "_explicacion": "EL DICCIONARIO DE LA WIKI (la página Diccionario y el «Vocabulario» de cada idioma). Cada palabra: \"palabra\", \"idioma\" (el nombre de la página del idioma, si la tiene), \"significado\", y si quieres \"notas\" y \"pagina\" (una página de la wiki donde se explica). Las palabras de cada idioma sirven también al generador de nombres. Lo más cómodo es herramientas/1-publicar/diccionario.py.",
+    "palabras": [
+        {
+            "palabra": "Lunaah",
+            "idioma": "Nithir",
+            "significado": "lápida y corazón, a la vez; la Luna",
+            "notas": "",
+            "pagina": "La Luna"
+        },
+        {
+            "palabra": "Söh-hgol",
+            "idioma": "Nithir",
+            "significado": "la Herida Dolorosa; el Sol",
+            "notas": "con los siglos se transformó en «Sol»",
+            "pagina": "El Sol"
+        },
+        {
+            "palabra": "Nevadra",
+            "idioma": "Nithir",
+            "significado": "tormenta; el mundo tributo más cercano",
+            "notas": "",
+            "pagina": "Nevadra"
+        },
+        {
+            "palabra": "Lurmeri",
+            "idioma": "Nithir",
+            "significado": "pantano; un mundo tributo",
+            "notas": "",
+            "pagina": "Lurmeri"
+        },
+        {
+            "palabra": "Gomath",
+            "idioma": "Nithir",
+            "significado": "sufrimiento; un mundo tributo",
+            "notas": "",
+            "pagina": "Gomath"
+        }
+    ]
+}

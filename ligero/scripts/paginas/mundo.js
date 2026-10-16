@@ -1261,8 +1261,31 @@ function limpiarCalendarioMundo(datos) {
             titulo: texto(d && d.titulo), representa: texto(d && d.representa) }))
         .filter((d) => d.nombre);
     const estaciones = datos.estaciones && typeof datos.estaciones === "object" ? datos.estaciones : {};
+    const luna = datos.luna && typeof datos.luna === "object" ? datos.luna : {};
+    const fases = (Array.isArray(luna.fases) ? luna.fases : []).map((f) => ({
+        dia: Number(f && f.dia), nombre: texto(f && f.nombre), icono: texto(f && f.icono),
+        efecto: texto(f && f.efecto),
+    })).filter((f) => f.nombre && Number.isInteger(f.dia) && f.dia >= 1 && f.dia <= CALENDARIO_DIAS_MES);
+    (Array.isArray(luna.eclipses) ? luna.eclipses : []).forEach((e) => {
+        const mes = Number(e && e.mes);
+        const dia = Number(e && e.dia);
+        if (Number.isInteger(mes) && mes >= 1 && mes <= meses.length &&
+            Number.isInteger(dia) && dia >= 1 && dia <= CALENDARIO_DIAS_MES && !texto(e && e.anyo)) {
+            eventos.push({ nombre: texto(e && e.nombre) || "Eclipse", mes, dia, tipo: "eclipse",
+                anyo: "", resumen: texto(e && e.efecto) || texto(luna.efecto_eclipse),
+                enlace: texto(luna.enlace) });
+        }
+    });
     return { nombre: texto(datos.nombre) || "El calendario", url: texto(datos.url),
-        meses, fin, total, semana: semana.length === 7 ? semana : null, estaciones, eventos, hoy };
+        meses, fin, total, semana: semana.length === 7 ? semana : null, estaciones, eventos, hoy,
+        fases, nombreLuna: texto(luna.nombre) || "la Luna" };
+}
+function faseDeLunaMundo(mes, dia) {
+    const datos = MUNDO_CALENDARIO.datos;
+    if (!datos || mes > datos.meses.length) {
+        return null;
+    }
+    return datos.fases.find((f) => f.dia === dia) || null;
 }
 function colocarCalendarioMundo() {
     const columna = document.querySelector("[data-mundo-vistas]");
@@ -1478,14 +1501,28 @@ function diaDelCalendarioMundo(mes, dia, rotulo, delFin) {
     const datos = MUNDO_CALENDARIO.datos;
     const suyos = eventosDelCalendarioMundo(mes, dia);
     const esHoy = Boolean(datos.hoy && datos.hoy.mes === mes && datos.hoy.dia === dia);
+    const fase = faseDeLunaMundo(mes, dia);
+    const conLuna = (caja) => {
+        if (fase && fase.icono) {
+            const icono = document.createElement("span");
+            icono.className = "mundo-cal-luna";
+            icono.setAttribute("aria-hidden", "true");
+            icono.textContent = fase.icono;
+            caja.appendChild(icono);
+        }
+    };
     if (!suyos.length && !delFin) {
         const numero = document.createElement("span");
-        numero.className = "mundo-cal-dia" + (esHoy ? " es-hoy" : "");
+        numero.className = "mundo-cal-dia" + (esHoy ? " es-hoy" : "") + (fase ? " es-luna" : "");
         numero.textContent = rotulo;
-        if (esHoy) {
+        conLuna(numero);
+        if (fase) {
+            numero.title = fase.nombre + (fase.efecto ? ": " + fase.efecto : "");
+        }
+        if (esHoy || fase) {
             const oculto = document.createElement("span");
             oculto.className = "visually-hidden";
-            oculto.textContent = ", hoy";
+            oculto.textContent = (esHoy ? ", hoy" : "") + (fase ? ", " + fase.nombre.toLowerCase() : "");
             numero.appendChild(oculto);
         }
         return numero;
@@ -1501,6 +1538,7 @@ function diaDelCalendarioMundo(mes, dia, rotulo, delFin) {
     numero.className = "mundo-cal-numero";
     numero.textContent = rotulo;
     enlace.appendChild(numero);
+    conLuna(enlace);
     if (suyos.length) {
         const marca = document.createElement("span");
         marca.className = "mundo-cal-marca";
@@ -1509,7 +1547,7 @@ function diaDelCalendarioMundo(mes, dia, rotulo, delFin) {
     }
     const oculto = document.createElement("span");
     oculto.className = "visually-hidden";
-    oculto.textContent = (esHoy ? ", hoy" : "") +
+    oculto.textContent = (esHoy ? ", hoy" : "") + (fase ? ", " + fase.nombre.toLowerCase() : "") +
         (suyos.length ? ": " + suyos.map((e) => e.nombre).join(", ") : "");
     enlace.appendChild(oculto);
     const ensenar = () => abrirGloboDelCalendarioMundo(enlace, mes, dia, delFin, esHoy);
@@ -1528,6 +1566,14 @@ function abrirGloboDelCalendarioMundo(boton, mes, dia, delFin, esHoy) {
     cuando.textContent = (delFin ? delFin.nombre : "Día " + dia + " · " + datos.meses[mes - 1].nombre) +
         (esHoy ? " · hoy" : "");
     globo.appendChild(cuando);
+    const fase = faseDeLunaMundo(mes, dia);
+    if (fase) {
+        const luna = document.createElement("p");
+        luna.className = "mundo-cal-globo-tipo";
+        luna.textContent = (fase.icono ? fase.icono + " " : "") + fase.nombre +
+            (fase.efecto ? ": " + fase.efecto : "");
+        globo.appendChild(luna);
+    }
     eventosDelCalendarioMundo(mes, dia).forEach((evento) => {
         const bloque = document.createElement("div");
         bloque.className = "mundo-cal-globo-evento";
@@ -1535,7 +1581,7 @@ function abrirGloboDelCalendarioMundo(boton, mes, dia, delFin, esHoy) {
         nombre.className = "mundo-cal-globo-nombre";
         const icono = document.createElement("span");
         icono.setAttribute("aria-hidden", "true");
-        icono.textContent = (evento.tipo === "evento" ? "📌" : "🎉") + " ";
+        icono.textContent = (evento.tipo === "evento" ? "📌" : (evento.tipo === "eclipse" ? "🌘" : "🎉")) + " ";
         nombre.appendChild(icono);
         nombre.appendChild(document.createTextNode(evento.nombre));
         bloque.appendChild(nombre);
@@ -1572,4 +1618,322 @@ function soltarGloboDelCalendarioMundo() {
     if (MUNDO_CALENDARIO.globo) {
         MUNDO_CALENDARIO.globo.hidden = true;
     }
+}
+prepararConversorMundo();
+prepararNombresMundo();
+prepararDiccionarioMundo();
+async function pedirJsonMundo(ruta) {
+    const limpia = rutaSeguraMundo(ruta);
+    if (limpia === "#" || typeof window.pedirDatos !== "function") {
+        return null;
+    }
+    try {
+        const respuesta = await window.pedirDatos(limpia);
+        return respuesta.ok ? await respuesta.json() : null;
+    } catch (error) {
+        return null;
+    }
+}
+function campoDeFormularioMundo(texto, control) {
+    const caja = document.createElement("label");
+    caja.className = "mundo-pieza-campo";
+    const nombre = document.createElement("span");
+    nombre.className = "mundo-pieza-etiqueta";
+    nombre.textContent = texto;
+    caja.appendChild(nombre);
+    caja.appendChild(control);
+    return caja;
+}
+function selectMundo(opciones, elegida) {
+    const select = document.createElement("select");
+    select.className = "mundo-pieza-control";
+    opciones.forEach(([valor, texto]) => {
+        const opcion = document.createElement("option");
+        opcion.value = String(valor);
+        opcion.textContent = texto;
+        if (String(valor) === String(elegida)) {
+            opcion.selected = true;
+        }
+        select.appendChild(opcion);
+    });
+    return select;
+}
+function milesMundo(n) {
+    return Math.round(n).toLocaleString("es-ES");
+}
+async function prepararConversorMundo() {
+    const caja = document.querySelector("[data-mundo-conversor]");
+    if (!caja) {
+        return;
+    }
+    const [conversor, calendarioCrudo] = await Promise.all([
+        pedirJsonMundo(caja.getAttribute("data-conversor-datos")),
+        pedirJsonMundo(caja.getAttribute("data-calendario-datos")),
+    ]);
+    const calendario = limpiarCalendarioMundo(calendarioCrudo);
+    if (!conversor || !calendario) {
+        return;
+    }
+    MUNDO_CALENDARIO.datos = MUNDO_CALENDARIO.datos || calendario;
+    const antes = (conversor.antes || "").toString();
+    const despues = (conversor.despues || "").toString();
+    const base = Number(conversor.base_antes) || -1e10;
+    const hoyAnyo = Number.isFinite(Number(conversor.hoy)) ? Number(conversor.hoy) : null;
+    const diasAnyo = calendario.meses.length * CALENDARIO_DIAS_MES + (calendario.fin ? calendario.fin.dias.length : 0);
+    caja.textContent = "";
+    const form = document.createElement("form");
+    form.className = "mundo-pieza-form";
+    form.addEventListener("submit", (evento) => evento.preventDefault());
+    const anyo = document.createElement("input");
+    anyo.type = "number";
+    anyo.min = "0";
+    anyo.step = "1";
+    anyo.inputMode = "numeric";
+    anyo.className = "mundo-pieza-control";
+    anyo.value = hoyAnyo !== null && hoyAnyo >= 0 ? String(hoyAnyo) : "1";
+    const era = selectMundo([[despues, despues || "después"], [antes, antes || "antes"]], despues);
+    const meses = calendario.meses.map((m, i) => [i + 1, m.nombre]);
+    if (calendario.fin) {
+        meses.push([calendario.total, calendario.fin.nombre]);
+    }
+    const mesInicial = calendario.hoy ? calendario.hoy.mes : 1;
+    const mes = selectMundo(meses, mesInicial);
+    const dia = selectMundo([], 1);
+    const llenarDias = (elegido) => {
+        const n = Number(mes.value);
+        const opciones = n > calendario.meses.length
+            ? calendario.fin.dias.map((d, i) => [i + 1, d.nombre])
+            : Array.from({ length: CALENDARIO_DIAS_MES }, (_, i) => [i + 1, String(i + 1)]);
+        dia.textContent = "";
+        opciones.forEach(([v, t]) => {
+            const o = document.createElement("option");
+            o.value = String(v);
+            o.textContent = t;
+            dia.appendChild(o);
+        });
+        dia.value = String(Math.min(Number(elegido) || 1, opciones.length));
+    };
+    llenarDias(calendario.hoy ? calendario.hoy.dia : 1);
+    form.appendChild(campoDeFormularioMundo("Año", anyo));
+    form.appendChild(campoDeFormularioMundo("Antes o después", era));
+    form.appendChild(campoDeFormularioMundo("Mes", mes));
+    form.appendChild(campoDeFormularioMundo("Día", dia));
+    caja.appendChild(form);
+    const salida = document.createElement("div");
+    salida.className = "mundo-pieza-salida";
+    salida.setAttribute("aria-live", "polite");
+    caja.appendChild(salida);
+    const linea = (texto, clase) => {
+        const p = document.createElement("p");
+        p.className = clase || "mundo-pieza-linea";
+        p.textContent = texto;
+        salida.appendChild(p);
+        return p;
+    };
+    const calcular = () => {
+        salida.textContent = "";
+        const y = Math.max(0, Math.floor(Number(anyo.value) || 0));
+        const esAntes = era.value === antes && antes;
+        const numero = esAntes ? base - y : y;
+        const m = Number(mes.value);
+        const d = Number(dia.value);
+        const esFin = m > calendario.meses.length;
+        const nombreMes = esFin ? calendario.fin.nombre : calendario.meses[m - 1].nombre;
+        const etiquetaAnyo = milesMundo(y) + " " + (esAntes ? antes : despues);
+        let cuando;
+        if (esFin) {
+            cuando = calendario.fin.dias[d - 1].nombre + ", en el " + calendario.fin.nombre +
+                " (fuera de la semana)";
+        } else {
+            const semana = calendario.semana ? calendario.semana[(d - 1) % 7] : null;
+            cuando = (semana ? (semana.titulo || semana.nombre) + ", " : "") + d + " del " + nombreMes;
+        }
+        linea(cuando + ", año " + etiquetaAnyo + ".", "mundo-pieza-titular");
+        const suya = (Array.isArray(conversor.eras) ? conversor.eras : []).filter((e) =>
+            Number(e.desde) <= numero && (e.fin === null || e.fin === undefined || numero < Number(e.fin))).pop();
+        if (suya) {
+            const p = linea("En la ");
+            const a = document.createElement("a");
+            a.className = "mundo-enlace";
+            a.href = rutaSeguraMundo(suya.url);
+            a.textContent = suya.nombre;
+            p.appendChild(a);
+            p.appendChild(document.createTextNode("."));
+        }
+        const fase = esFin ? null : calendario.fases.find((f) => f.dia === d);
+        if (fase) {
+            linea((fase.icono ? fase.icono + " " : "") + fase.nombre + (fase.efecto ? ": " + fase.efecto : "") + ".");
+        }
+        const normal = (t) => (t || "").toString().replace(/[.\s]/g, "").toLowerCase();
+        const deEseDia = calendario.eventos.filter((e) => e.mes === m && e.dia === d &&
+            (!e.anyo || normal(e.anyo) === normal(etiquetaAnyo)));
+        (Array.isArray(calendarioCrudo.luna && calendarioCrudo.luna.eclipses) ? calendarioCrudo.luna.eclipses : [])
+            .filter((e) => Number(e.mes) === m && Number(e.dia) === d && e.anyo &&
+                normal(e.anyo) === normal(etiquetaAnyo))
+            .forEach((e) => deEseDia.push({ nombre: e.nombre || "Eclipse", tipo: "eclipse" }));
+        deEseDia.forEach((e) => {
+            linea((e.tipo === "evento" ? "📌 " : (e.tipo === "eclipse" ? "🌘 " : "🎉 ")) + e.nombre +
+                (e.tipo === "festividad" ? " (festividad)" : "") + ".");
+        });
+        const diaDelAnyo = (esFin ? calendario.meses.length * CALENDARIO_DIAS_MES : (m - 1) * CALENDARIO_DIAS_MES) + d;
+        linea("Es el día " + diaDelAnyo + " de los " + diasAnyo + " del año.");
+        if (hoyAnyo !== null) {
+            const hoyTexto = milesMundo(hoyAnyo) + " " + despues;
+            if (esAntes) {
+                linea("Hoy en Cralëa es el año " + hoyTexto + ": eso fue hace más de " +
+                    milesMundo(y + hoyAnyo) + " años (sin contar lo que duró la " +
+                    "época entre " + antes + " y " + despues + ", que nadie midió).");
+            } else if (calendario.hoy) {
+                const hoyDia = (calendario.hoy.mes > calendario.meses.length
+                    ? calendario.meses.length * CALENDARIO_DIAS_MES : (calendario.hoy.mes - 1) * CALENDARIO_DIAS_MES) + calendario.hoy.dia;
+                const dif = (y * diasAnyo + diaDelAnyo) - (hoyAnyo * diasAnyo + hoyDia);
+                const anyos = Math.floor(Math.abs(dif) / diasAnyo);
+                const dias = Math.abs(dif) % diasAnyo;
+                const cuanto = (anyos ? milesMundo(anyos) + (anyos === 1 ? " año" : " años") : "") +
+                    (anyos && dias ? " y " : "") + (dias ? dias + (dias === 1 ? " día" : " días") : "");
+                linea(dif === 0 ? "Es hoy en Cralëa." : (dif < 0 ? "Fue hace " + cuanto + "." : "Será dentro de " + cuanto + "."));
+            } else {
+                const dif = y - hoyAnyo;
+                linea(dif === 0 ? "Es este mismo año (hoy en Cralëa es " + hoyTexto + ")."
+                    : (dif < 0 ? "Fue hace " + milesMundo(-dif) + (dif === -1 ? " año" : " años")
+                        : "Será dentro de " + milesMundo(dif) + (dif === 1 ? " año" : " años")) +
+                      " (hoy en Cralëa es " + hoyTexto + ").");
+            }
+        }
+    };
+    mes.addEventListener("change", () => { llenarDias(dia.value); calcular(); });
+    [anyo, era, dia].forEach((c) => c.addEventListener("input", calcular));
+    calcular();
+}
+async function prepararNombresMundo() {
+    const caja = document.querySelector("[data-mundo-nombres]");
+    if (!caja) {
+        return;
+    }
+    const datos = await pedirJsonMundo(caja.getAttribute("data-nombres-datos"));
+    const estilos = (datos && Array.isArray(datos.estilos) ? datos.estilos : [])
+        .filter((e) => e && e.nombre && Array.isArray(e.ejemplos) && e.ejemplos.length >= 4);
+    if (!estilos.length) {
+        return;
+    }
+    caja.textContent = "";
+    const form = document.createElement("form");
+    form.className = "mundo-pieza-form";
+    const estilo = selectMundo(estilos.map((e, i) => [i, e.nombre + " (" + e.ejemplos.length + " de ejemplo)"]), 0);
+    form.appendChild(campoDeFormularioMundo("Que suenen a", estilo));
+    const boton = document.createElement("button");
+    boton.type = "submit";
+    boton.className = "mundo-pieza-boton";
+    boton.textContent = "Dame nombres";
+    form.appendChild(boton);
+    caja.appendChild(form);
+    const ejemplos = document.createElement("p");
+    ejemplos.className = "mundo-pieza-linea mundo-pieza-ejemplos";
+    caja.appendChild(ejemplos);
+    const lista = document.createElement("ul");
+    lista.className = "mundo-nombres-lista";
+    lista.setAttribute("aria-live", "polite");
+    lista.setAttribute("aria-label", "Nombres inventados");
+    caja.appendChild(lista);
+    const pintar = () => {
+        const elegido = estilos[Number(estilo.value)] || estilos[0];
+        ejemplos.textContent = "Aprendidos de: " + elegido.ejemplos.slice(0, 12).join(", ") +
+            (elegido.ejemplos.length > 12 ? "…" : "") + ".";
+        lista.textContent = "";
+        inventarNombresMundo(elegido.ejemplos, 10).forEach((nombre) => {
+            const li = document.createElement("li");
+            li.textContent = nombre;
+            lista.appendChild(li);
+        });
+    };
+    form.addEventListener("submit", (evento) => {
+        evento.preventDefault();
+        pintar();
+    });
+    estilo.addEventListener("change", pintar);
+    pintar();
+}
+function inventarNombresMundo(ejemplos, cuantos) {
+    const limpios = ejemplos.map((e) => e.toString().trim()).filter((e) => e.length >= 2);
+    const conocidos = new Set(limpios.map((e) => e.toLowerCase()));
+    const orden = 2;
+    const cadena = new Map();
+    let largoMin = Infinity;
+    let largoMax = 0;
+    limpios.forEach((nombre) => {
+        const palabra = "^".repeat(orden) + nombre.toLowerCase() + "$";
+        largoMin = Math.min(largoMin, nombre.length);
+        largoMax = Math.max(largoMax, nombre.length);
+        for (let i = orden; i < palabra.length; i++) {
+            const clave = palabra.slice(i - orden, i);
+            if (!cadena.has(clave)) {
+                cadena.set(clave, []);
+            }
+            cadena.get(clave).push(palabra[i]);
+        }
+    });
+    const salida = new Set();
+    let intentos = 0;
+    while (salida.size < cuantos && intentos < 4000) {
+        intentos++;
+        let actual = "^".repeat(orden);
+        let nombre = "";
+        while (nombre.length < largoMax + 3) {
+            const opciones = cadena.get(actual.slice(-orden));
+            if (!opciones) {
+                break;
+            }
+            const letra = opciones[Math.floor(Math.random() * opciones.length)];
+            if (letra === "$") {
+                break;
+            }
+            nombre += letra;
+            actual += letra;
+        }
+        if (nombre.length < Math.max(3, largoMin - 1) || nombre.length > largoMax + 2 ||
+            conocidos.has(nombre) || /['\-]$|^['\-]/.test(nombre)) {
+            continue;
+        }
+        const bonito = nombre.charAt(0).toUpperCase() + nombre.slice(1).replace(/'(.)/g, (_, c) => "'" + c.toUpperCase());
+        salida.add(bonito);
+    }
+    return [...salida];
+}
+function prepararDiccionarioMundo() {
+    const caja = document.querySelector("[data-mundo-diccionario]");
+    const tabla = caja ? caja.querySelector("table") : null;
+    if (!tabla) {
+        return;
+    }
+    const filas = Array.from(tabla.querySelectorAll("[data-diccionario-fila]"));
+    const campo = document.createElement("input");
+    campo.type = "search";
+    campo.className = "mundo-pieza-control";
+    campo.placeholder = "una palabra, un idioma, un significado…";
+    const cuenta = document.createElement("p");
+    cuenta.className = "mundo-pieza-linea";
+    cuenta.setAttribute("aria-live", "polite");
+    const form = document.createElement("form");
+    form.className = "mundo-pieza-form";
+    form.setAttribute("role", "search");
+    form.addEventListener("submit", (evento) => evento.preventDefault());
+    form.appendChild(campoDeFormularioMundo("Buscar en el diccionario", campo));
+    const antesDe = tabla.closest(".mundo-tabla") || tabla;
+    antesDe.parentNode.insertBefore(cuenta, antesDe);
+    antesDe.parentNode.insertBefore(form, cuenta);
+    const llanoDic = (t) => (t || "").toString().normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
+    const filtrar = () => {
+        const buscado = llanoDic(campo.value.trim());
+        let vistas = 0;
+        filas.forEach((fila) => {
+            const pasa = !buscado || llanoDic(fila.textContent).includes(buscado);
+            fila.hidden = !pasa;
+            vistas += pasa ? 1 : 0;
+        });
+        cuenta.textContent = buscado
+            ? (vistas === 1 ? "1 palabra" : vistas + " palabras") + " con «" + campo.value.trim() + "»."
+            : (filas.length === 1 ? "1 palabra." : filas.length + " palabras.");
+    };
+    campo.addEventListener("input", filtrar);
+    filtrar();
 }
