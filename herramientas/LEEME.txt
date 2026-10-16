@@ -2939,7 +2939,10 @@
   fragmentos/ .......... trozos de HTML escritos UNA vez y usados en
                          muchas páginas (ver LOS FRAGMENTOS):
       barra-lateral.html   el menú; actualizar-cabeceras.py lo copia
-                           dentro de cada página
+                           dentro de cada página, con estos dos dentro:
+      ajustes.html         el botón Aa y la ventana de accesibilidad
+                           (también suelto en el 404)
+      buscar.html          la ventana de buscar en toda la web
       texto-a-voz.html     la ventana de escuchar; generar-posts.py la
                            copia en cada entrada y relato
       frases.html          la cinta de frases de la portada (se pide
@@ -3452,7 +3455,19 @@
   fragmentos/ y lo copian las herramientas, no el navegador:
 
     - barra-lateral.html: el menú. Lo copia actualizar-cabeceras.py en
-      cada página (ver más arriba).
+      cada página (ver más arriba). Lleva dentro, cada uno en su
+      archivo, el botón Aa con su ventana (ajustes.html) y la ventana de
+      buscar (buscar.html): en el menú van con una línea
+
+          <!--! fragmento: ajustes -->
+
+      que la herramienta cambia por el archivo (el «!» es para que
+      quitar-comentarios.py no la borre). Vale para cualquier fragmento
+      dentro de otro.
+    - Una página que quiera un fragmento suelto pone un contenedor
+      vacío, <div id="lo-que-sea" data-fragmento="ajustes"></div>, y la
+      herramienta lo rellena. Así lleva el 404 el botón Aa sin tener
+      menú (y ajustes.js lo arranca solo, sin esperar al menú).
     - texto-a-voz.html: la ventana de escuchar una entrada. La copia
       generar-posts.py arriba de la columna de la foto, dormida
       (data-voz-esqueleto: ocupa su sitio sin verse), y leer-en-voz.js

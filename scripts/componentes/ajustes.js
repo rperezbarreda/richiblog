@@ -66,6 +66,23 @@ const AJUSTES = {
 
 document.addEventListener("sidebar:loaded", initializeAjustes);
 
+// EN UNA PÁGINA SIN MENÚ (el 404) nadie avisa con sidebar:loaded: la
+// ventana viene suelta (fragmentos/ajustes.html, en su propio
+// contenedor), así que se arranca en cuanto la página está leída, y con
+// ella los dos mandos de dentro que son de otros scripts (el color de
+// tema, de tema.js, y el brillito, de rastro-cursor.js).
+if (!document.getElementById("sidebar-container")) {
+    document.addEventListener("DOMContentLoaded", () => {
+        initializeAjustes();
+        if (typeof initializeThemeToggle === "function") {
+            initializeThemeToggle();
+        }
+        if (typeof initializeCursorTrailToggle === "function") {
+            initializeCursorTrailToggle();
+        }
+    });
+}
+
 // Los mandos de la velocidad de la voz están en dos sitios: aquí dentro
 // y debajo del botón de escuchar de cada entrada. Cuando cambian allí,
 // avisan con esto para que los de aquí se marquen igual (y al revés, que
@@ -203,7 +220,7 @@ function cerrarAjustes() {
 // =========================================
 // ARMAR EL PANEL
 // =========================================
-// En fragmentos/barra-lateral.html solo vienen las filas de mandos. La
+// En fragmentos/ajustes.html solo vienen las filas de mandos. La
 // caja que las agrupa (.ajustes-lista), la ventanita de la muestra
 // (ejemplo.txt) y la nota del final se montan aquí.
 //

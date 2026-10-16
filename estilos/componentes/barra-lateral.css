@@ -492,91 +492,10 @@ nav a.active::before {
     }
 }
 
-/* SIDEBAR — TEMA */
-
-/* Aquí abajo había una caja (.sidebar-ajustes) que juntaba el botón del
-   tema, el del tamaño y el del brillito. Ya no hay nada que juntar: los
-   tres mandos viven dentro de la ventana de accesibilidad y el botón que
-   la abre flota por su cuenta, fuera de la barra lateral —tiene que
-   estar fuera o en móvil se va con el cajón; está explicado en
-   fragmentos/barra-lateral.html—. La clase .theme-toggle se sigue
-   usando, pero ahora dentro de la ventana. */
-
-.theme-toggle {
-    display: inline-flex;
-    align-self: center;
-    align-items: center;
-    gap: 10px;
-    width: auto;
-    margin-top: 10px;
-    padding: 10px 22px 10px 10px;
-    border: 1px solid var(--border);
-    border-radius: 0;
-    background: var(--purple-lighter);
-    color: var(--muted);
-    font-family: var(--fuente-mono);
-    font-size: 0.625rem;
-    letter-spacing: 1px;
-    text-transform: uppercase;
-    cursor: pointer;
-    transition: color 0.1s linear, border-color 0.1s linear, background-color 0.1s linear, transform 0.1s linear;
-}
-
-.cursor-trail-toggle-text {
-    width: calc(11ch + 10px);
-    white-space: nowrap;
-    text-align: left;
-}
-
-.theme-toggle-icon {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-    width: 1.3rem;
-    height: 1.3rem;
-    border-radius: 50%;
-    background: var(--yellow);
-    color: var(--yellow-contrast);
-    font-size: 0.75rem;
-    line-height: 1;
-    transition: background-color 0.1s linear, color 0.1s linear;
-}
-
-.theme-toggle:hover,
-.theme-toggle:focus-visible {
-    color: var(--yellow);
-    border-color: var(--yellow);
-}
-
-.theme-toggle:focus-visible {
-    outline: 2px solid var(--yellow);
-    outline-offset: 2px;
-}
-
-/* Estado "encendido" de los botones de efectos visuales: mismos colores
-   que el logo (fondo amarillo, texto oscuro), para que se note a simple
-   vista sin tener que leer el ON/OFF.
-   Por clase y no por id: antes solo valía para el del rastro del cursor
-   y el del filtro CRT se quedaba igual encendido que apagado. Son los
-   dos únicos botones con esta pinta que quedan. */
-
-.theme-toggle[aria-pressed="true"] {
-    background: var(--yellow);
-    border-color: var(--yellow);
-    color: var(--yellow-contrast);
-}
-
-.theme-toggle[aria-pressed="true"] .theme-toggle-icon {
-    background: var(--yellow-contrast);
-    color: var(--yellow);
-}
-
-.theme-toggle[aria-pressed="true"]:hover,
-.theme-toggle[aria-pressed="true"]:focus-visible {
-    color: var(--yellow-contrast);
-    border-color: var(--yellow);
-}
+/* Los botones de la ventana de accesibilidad (.theme-toggle: el
+   brillito y el filtro CRT) estaban aquí de cuando vivían en la barra.
+   Ahora están con su ventana, en estilos/componentes/ajustes.css: así
+   valen también en las páginas sin barra lateral (el 404). */
 
 @media (prefers-reduced-motion: reduce) {
     nav a,

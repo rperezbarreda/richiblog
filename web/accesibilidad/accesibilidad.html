@@ -56,19 +56,19 @@
     <link rel="preload" href="/tipografias/space-grotesk-400.woff2" as="font" type="font/woff2" crossorigin>
     <link rel="alternate" type="application/rss+xml" title="El Blog de Richi — blog, relatos y rol" href="/blog/rss.xml">
     <!-- ==== CSS ==== -->
-    <link rel="stylesheet" href="/estilos/paquete-comun.css?v=db722f0c">
+    <link rel="stylesheet" href="/estilos/paquete-comun.css?v=42e63d33">
     <link rel="stylesheet" href="/ligero/estilos/paginas/accesibilidad.css?v=65e2f0c3">
-    <link rel="stylesheet" href="/estilos/paquete-cierre.css?v=b764bc66">
+    <link rel="stylesheet" href="/estilos/paquete-cierre.css?v=a49d87f4">
     <!-- ==== fin del CSS ==== -->
-    <script src="/ligero/scripts/cargador-scripts.js?v=fcb52e96"></script>
+    <script src="/ligero/scripts/cargador-scripts.js?v=cee4ebcb"></script>
     <!-- ==== JS ==== -->
-    <script defer src="/scripts/paquete-comun.js?v=f3a079da"></script>
+    <script defer src="/scripts/paquete-comun.js?v=5806fd68"></script>
     <!-- ==== fin del JS ==== -->
   </head>
 <body>
     <a class="skip-link" href="#main-content">Saltar al contenido</a>
     <div id="sidebar-container" data-fragmento="barra-lateral">
-<!-- ==== BARRA LATERAL ==== -->
+<!-- ==== FRAGMENTO barra-lateral ==== -->
 <header class="mobile-topbar">
     <button id="sidebar-toggle" class="sidebar-toggle" type="button" aria-expanded="false" aria-controls="sidebar">
         <span aria-hidden="true">☰</span>
@@ -82,6 +82,125 @@
     <span class="ajustes-abrir-aa" aria-hidden="true">Aa</span>
     <span class="ajustes-abrir-texto">ACCESIBILIDAD</span>
 </button>
+
+<dialog class="ajustes" data-ajustes aria-labelledby="ajustes-titulo">
+    <div class="ajustes-barra">
+        <h2 id="ajustes-titulo">accesibilidad.cfg</h2>
+        <button class="ajustes-cerrar" type="button" data-ajustes-cerrar>
+            <svg class="window-btn-icono" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                <path d="M5.5 5.5L18.5 18.5M18.5 5.5L5.5 18.5" fill="none"
+                      stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
+            </svg>
+            <span class="visually-hidden">Cerrar los ajustes</span>
+        </button>
+    </div>
+
+    <div class="ajustes-cuerpo">
+        <div class="ajustes-fila">
+            <label class="ajustes-nombre" for="ajustes-tamano">tamaño del texto</label>
+            <div class="ajustes-deslizador">
+                <span class="ajustes-aa ajustes-aa-pequena" aria-hidden="true">Aa</span>
+                <input class="ajustes-rango" type="range" id="ajustes-tamano"
+                       min="0" max="4" step="1" value="1"
+                       list="ajustes-tamano-marcas" data-tamano-rango>
+                <datalist id="ajustes-tamano-marcas">
+                    <option value="0"></option>
+                    <option value="1"></option>
+                    <option value="2"></option>
+                    <option value="3"></option>
+                    <option value="4"></option>
+                </datalist>
+                <span class="ajustes-aa ajustes-aa-grande" aria-hidden="true">Aa</span>
+            </div>
+            <p class="ajustes-valor" role="status">
+                <span class="visually-hidden">Texto al </span><span data-tamano-valor>100%</span>
+            </p>
+        </div>
+
+        <div class="ajustes-fila">
+            <p class="ajustes-nombre" id="ajustes-interlineado-nombre">separación entre líneas</p>
+            <div class="ajustes-mandos" role="group" aria-labelledby="ajustes-interlineado-nombre">
+                <button class="ajustes-opcion" type="button" data-interlineado="" aria-pressed="true">por defecto</button>
+                <button class="ajustes-opcion" type="button" data-interlineado="amplio" aria-pressed="false">amplia</button>
+                <button class="ajustes-opcion" type="button" data-interlineado="muy-amplio" aria-pressed="false">muy amplia</button>
+            </div>
+        </div>
+
+        <div class="ajustes-fila">
+            <p class="ajustes-nombre" id="ajustes-letra-nombre">la letra</p>
+            <div class="ajustes-mandos" role="group" aria-labelledby="ajustes-letra-nombre">
+                <button class="ajustes-opcion" type="button" data-letra="" aria-pressed="true">por defecto</button>
+                <button class="ajustes-opcion" type="button" data-letra="legible" aria-pressed="false">más legible</button>
+            </div>
+        </div>
+
+        <div class="ajustes-fila">
+            <p class="ajustes-nombre" id="ajustes-voz-nombre">velocidad de la voz</p>
+            <div class="ajustes-mandos" role="group" aria-labelledby="ajustes-voz-nombre">
+                <button class="ajustes-opcion" type="button" data-voz="lenta" aria-pressed="false">lenta</button>
+                <button class="ajustes-opcion" type="button" data-voz="" aria-pressed="true">normal</button>
+                <button class="ajustes-opcion" type="button" data-voz="rapida" aria-pressed="false">rápida</button>
+            </div>
+        </div>
+
+        <div class="ajustes-fila">
+            <p class="ajustes-nombre" id="ajustes-tema-nombre">color de tema</p>
+            <p class="ajustes-grupo-titulo" id="ajustes-tema-leer">para leer</p>
+            <div class="ajustes-mandos ajustes-temas" role="group" aria-labelledby="ajustes-tema-nombre ajustes-tema-leer">
+                <button class="ajustes-opcion" type="button" data-tema="oscuro" aria-pressed="true">
+                    <span class="ajustes-emoji" aria-hidden="true">🌙</span>oscuro</button>
+                <button class="ajustes-opcion" type="button" data-tema="claro" aria-pressed="false">
+                    <span class="ajustes-emoji" aria-hidden="true">☀️</span>claro</button>
+                <button class="ajustes-opcion" type="button" data-tema="oscuro-puro" aria-pressed="false">
+                    <span class="ajustes-emoji" aria-hidden="true">🌑</span>oscuro puro</button>
+                <button class="ajustes-opcion" type="button" data-tema="claro-puro" aria-pressed="false">
+                    <span class="ajustes-emoji" aria-hidden="true">🌕</span>claro puro</button>
+                <button class="ajustes-opcion" type="button" data-tema="tranquilo-oscuro" aria-pressed="false">
+                    <span class="ajustes-emoji" aria-hidden="true">🌿</span>tranquilo oscuro</button>
+                <button class="ajustes-opcion" type="button" data-tema="tranquilo" aria-pressed="false">
+                    <span class="ajustes-emoji" aria-hidden="true">🍃</span>tranquilo</button>
+            </div>
+
+            <p class="ajustes-grupo-titulo" id="ajustes-tema-adorno">de adorno</p>
+            <div class="ajustes-mandos ajustes-temas" role="group" aria-labelledby="ajustes-tema-nombre ajustes-tema-adorno">
+                <button class="ajustes-opcion" type="button" data-tema="terminal-verde" aria-pressed="false">
+                    <span class="ajustes-emoji" aria-hidden="true">🟢</span>terminal verde</button>
+                <button class="ajustes-opcion" type="button" data-tema="terminal-azul" aria-pressed="false">
+                    <span class="ajustes-emoji" aria-hidden="true">🔵</span>terminal azul</button>
+                <button class="ajustes-opcion" type="button" data-tema="terminal-rojo" aria-pressed="false">
+                    <span class="ajustes-emoji" aria-hidden="true">🔴</span>terminal rojo</button>
+                <button class="ajustes-opcion" type="button" data-tema="terminal-ambar" aria-pressed="false">
+                    <span class="ajustes-emoji" aria-hidden="true">🟡</span>terminal ámbar</button>
+            </div>
+            <p class="ajustes-grupo-nota">
+                Estas opciones de consola antigua no respetan el contraste mínimo de
+                accesibilidad, son meramente estéticas.
+            </p>
+        </div>
+
+        <div class="ajustes-fila">
+            <p class="ajustes-nombre">efectos visuales</p>
+            <div class="ajustes-mandos ajustes-mandos-anchos">
+                <button id="cursor-trail-toggle" class="theme-toggle" type="button" aria-pressed="true">
+                    <span class="theme-toggle-icon" aria-hidden="true">✦</span>
+                    <span class="cursor-trail-toggle-text">BRILLITO: ON</span>
+                </button>
+                <button class="theme-toggle" type="button" data-crt-boton aria-pressed="false">
+                    <span class="theme-toggle-icon" aria-hidden="true">▧</span>
+                    <span class="ajustes-crt-texto">FILTRO <abbr title="Cathode Ray Tube: los monitores de tubo de antes, con sus rayas y las esquinas apagadas">CRT</abbr>: <span data-crt-estado>OFF</span></span>
+                </button>
+            </div>
+        </div>
+
+        <div class="ajustes-fila">
+            <p class="ajustes-nombre" id="ajustes-movimiento-nombre">animaciones</p>
+            <div class="ajustes-mandos" role="group" aria-labelledby="ajustes-movimiento-nombre">
+                <button class="ajustes-opcion" type="button" data-movimiento="" aria-pressed="true">normal</button>
+                <button class="ajustes-opcion" type="button" data-movimiento="quieto" aria-pressed="false">sin animaciones</button>
+            </div>
+        </div>
+    </div>
+</dialog>
 
 <div id="sidebar-backdrop" class="sidebar-backdrop" hidden></div>
 
@@ -216,126 +335,7 @@
         </form>
     </div>
 </dialog>
-
-<dialog class="ajustes" data-ajustes aria-labelledby="ajustes-titulo">
-    <div class="ajustes-barra">
-        <h2 id="ajustes-titulo">accesibilidad.cfg</h2>
-        <button class="ajustes-cerrar" type="button" data-ajustes-cerrar>
-            <svg class="window-btn-icono" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-                <path d="M5.5 5.5L18.5 18.5M18.5 5.5L5.5 18.5" fill="none"
-                      stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
-            </svg>
-            <span class="visually-hidden">Cerrar los ajustes</span>
-        </button>
-    </div>
-
-    <div class="ajustes-cuerpo">
-        <div class="ajustes-fila">
-            <label class="ajustes-nombre" for="ajustes-tamano">tamaño del texto</label>
-            <div class="ajustes-deslizador">
-                <span class="ajustes-aa ajustes-aa-pequena" aria-hidden="true">Aa</span>
-                <input class="ajustes-rango" type="range" id="ajustes-tamano"
-                       min="0" max="4" step="1" value="1"
-                       list="ajustes-tamano-marcas" data-tamano-rango>
-                <datalist id="ajustes-tamano-marcas">
-                    <option value="0"></option>
-                    <option value="1"></option>
-                    <option value="2"></option>
-                    <option value="3"></option>
-                    <option value="4"></option>
-                </datalist>
-                <span class="ajustes-aa ajustes-aa-grande" aria-hidden="true">Aa</span>
-            </div>
-            <p class="ajustes-valor" role="status">
-                <span class="visually-hidden">Texto al </span><span data-tamano-valor>100%</span>
-            </p>
-        </div>
-
-        <div class="ajustes-fila">
-            <p class="ajustes-nombre" id="ajustes-interlineado-nombre">separación entre líneas</p>
-            <div class="ajustes-mandos" role="group" aria-labelledby="ajustes-interlineado-nombre">
-                <button class="ajustes-opcion" type="button" data-interlineado="" aria-pressed="true">por defecto</button>
-                <button class="ajustes-opcion" type="button" data-interlineado="amplio" aria-pressed="false">amplia</button>
-                <button class="ajustes-opcion" type="button" data-interlineado="muy-amplio" aria-pressed="false">muy amplia</button>
-            </div>
-        </div>
-
-        <div class="ajustes-fila">
-            <p class="ajustes-nombre" id="ajustes-letra-nombre">la letra</p>
-            <div class="ajustes-mandos" role="group" aria-labelledby="ajustes-letra-nombre">
-                <button class="ajustes-opcion" type="button" data-letra="" aria-pressed="true">por defecto</button>
-                <button class="ajustes-opcion" type="button" data-letra="legible" aria-pressed="false">más legible</button>
-            </div>
-        </div>
-
-        <div class="ajustes-fila">
-            <p class="ajustes-nombre" id="ajustes-voz-nombre">velocidad de la voz</p>
-            <div class="ajustes-mandos" role="group" aria-labelledby="ajustes-voz-nombre">
-                <button class="ajustes-opcion" type="button" data-voz="lenta" aria-pressed="false">lenta</button>
-                <button class="ajustes-opcion" type="button" data-voz="" aria-pressed="true">normal</button>
-                <button class="ajustes-opcion" type="button" data-voz="rapida" aria-pressed="false">rápida</button>
-            </div>
-        </div>
-
-        <div class="ajustes-fila">
-            <p class="ajustes-nombre" id="ajustes-tema-nombre">color de tema</p>
-            <p class="ajustes-grupo-titulo" id="ajustes-tema-leer">para leer</p>
-            <div class="ajustes-mandos ajustes-temas" role="group" aria-labelledby="ajustes-tema-nombre ajustes-tema-leer">
-                <button class="ajustes-opcion" type="button" data-tema="oscuro" aria-pressed="true">
-                    <span class="ajustes-emoji" aria-hidden="true">🌙</span>oscuro</button>
-                <button class="ajustes-opcion" type="button" data-tema="claro" aria-pressed="false">
-                    <span class="ajustes-emoji" aria-hidden="true">☀️</span>claro</button>
-                <button class="ajustes-opcion" type="button" data-tema="oscuro-puro" aria-pressed="false">
-                    <span class="ajustes-emoji" aria-hidden="true">🌑</span>oscuro puro</button>
-                <button class="ajustes-opcion" type="button" data-tema="claro-puro" aria-pressed="false">
-                    <span class="ajustes-emoji" aria-hidden="true">🌕</span>claro puro</button>
-                <button class="ajustes-opcion" type="button" data-tema="tranquilo-oscuro" aria-pressed="false">
-                    <span class="ajustes-emoji" aria-hidden="true">🌿</span>tranquilo oscuro</button>
-                <button class="ajustes-opcion" type="button" data-tema="tranquilo" aria-pressed="false">
-                    <span class="ajustes-emoji" aria-hidden="true">🍃</span>tranquilo</button>
-            </div>
-
-            <p class="ajustes-grupo-titulo" id="ajustes-tema-adorno">de adorno</p>
-            <div class="ajustes-mandos ajustes-temas" role="group" aria-labelledby="ajustes-tema-nombre ajustes-tema-adorno">
-                <button class="ajustes-opcion" type="button" data-tema="terminal-verde" aria-pressed="false">
-                    <span class="ajustes-emoji" aria-hidden="true">🟢</span>terminal verde</button>
-                <button class="ajustes-opcion" type="button" data-tema="terminal-azul" aria-pressed="false">
-                    <span class="ajustes-emoji" aria-hidden="true">🔵</span>terminal azul</button>
-                <button class="ajustes-opcion" type="button" data-tema="terminal-rojo" aria-pressed="false">
-                    <span class="ajustes-emoji" aria-hidden="true">🔴</span>terminal rojo</button>
-                <button class="ajustes-opcion" type="button" data-tema="terminal-ambar" aria-pressed="false">
-                    <span class="ajustes-emoji" aria-hidden="true">🟡</span>terminal ámbar</button>
-            </div>
-            <p class="ajustes-grupo-nota">
-                Estas opciones de consola antigua no respetan el contraste mínimo de
-                accesibilidad, son meramente estéticas.
-            </p>
-        </div>
-
-        <div class="ajustes-fila">
-            <p class="ajustes-nombre">efectos visuales</p>
-            <div class="ajustes-mandos ajustes-mandos-anchos">
-                <button id="cursor-trail-toggle" class="theme-toggle" type="button" aria-pressed="true">
-                    <span class="theme-toggle-icon" aria-hidden="true">✦</span>
-                    <span class="cursor-trail-toggle-text">BRILLITO: ON</span>
-                </button>
-                <button class="theme-toggle" type="button" data-crt-boton aria-pressed="false">
-                    <span class="theme-toggle-icon" aria-hidden="true">▧</span>
-                    <span class="ajustes-crt-texto">FILTRO <abbr title="Cathode Ray Tube: los monitores de tubo de antes, con sus rayas y las esquinas apagadas">CRT</abbr>: <span data-crt-estado>OFF</span></span>
-                </button>
-            </div>
-        </div>
-
-        <div class="ajustes-fila">
-            <p class="ajustes-nombre" id="ajustes-movimiento-nombre">animaciones</p>
-            <div class="ajustes-mandos" role="group" aria-labelledby="ajustes-movimiento-nombre">
-                <button class="ajustes-opcion" type="button" data-movimiento="" aria-pressed="true">normal</button>
-                <button class="ajustes-opcion" type="button" data-movimiento="quieto" aria-pressed="false">sin animaciones</button>
-            </div>
-        </div>
-    </div>
-</dialog>
-<!-- ==== fin de la BARRA LATERAL ==== -->
+<!-- ==== fin del FRAGMENTO barra-lateral ==== -->
     </div>
 
     <main id="main-content">

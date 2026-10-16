@@ -1,0 +1,33 @@
+<dialog class="buscar-modal" data-buscar-modal aria-labelledby="buscar-modal-titulo">
+    <div class="ajustes-barra">
+        <h2 id="buscar-modal-titulo">buscador.exe</h2>
+        <button class="ajustes-cerrar" type="button" data-buscar-modal-cerrar>
+            <svg class="window-btn-icono" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                <path d="M5.5 5.5L18.5 18.5M18.5 5.5L5.5 18.5" fill="none"
+                      stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
+            </svg>
+            <span class="visually-hidden">Cerrar la búsqueda</span>
+        </button>
+    </div>
+    <div class="buscar-modal-cuerpo">
+        <form class="buscar-form" role="search" method="get"
+              action="/web/buscar/buscar.html">
+            <label class="buscar-form-label" for="buscar-modal-campo">buscar en toda la web:</label>
+            <div class="buscar-form-caja">
+                <input class="buscar-form-campo" type="search"
+                       id="buscar-modal-campo" name="q"
+                       placeholder="una palabra, un título…"
+                       autocomplete="off" spellcheck="false">
+                <button class="buscar-form-enviar" type="submit">
+                    <span class="buscar-lupa" aria-hidden="true"></span>
+                    <span class="buscar-form-enviar-texto">buscar</span>
+                </button>
+            </div>
+            <p class="buscar-ayuda">
+                Mira el título, la sección, las categorías y
+                <strong>lo que pone dentro</strong> de las entradas y los
+                relatos. Da igual con tildes o sin ellas.
+            </p>
+        </form>
+    </div>
+</dialog>

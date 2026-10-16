@@ -12,7 +12,7 @@ Un tema de color no está en un sitio, está en seis:
   3. el <script> del <head> de CADA página, que pinta el tema guardado
      antes del primer dibujo (si no, la web parpadea al cargar)
   4. estilos/componentes/ajustes.css      la muestra de color del botón
-  5. fragmentos/barra-lateral.html        el botón
+  5. fragmentos/ajustes.html              el botón
   6. web/accesibilidad/accesibilidad.html los cuenta por su nombre
 
 Y si falta en uno solo, lo que pasa es raro y silencioso: el tema se
@@ -59,7 +59,7 @@ def main():
 
     base = (RAIZ / "estilos/base.css").read_text(encoding="utf-8")
     ajustes = (RAIZ / "estilos/componentes/ajustes.css").read_text(encoding="utf-8")
-    lateral = (RAIZ / "fragmentos/barra-lateral.html").read_text(encoding="utf-8")
+    lateral = (RAIZ / "fragmentos/ajustes.html").read_text(encoding="utf-8")
 
     paginas = [
         f for f in sorted(RAIZ.rglob("*.html"))
@@ -89,7 +89,7 @@ def main():
                           "estilos/componentes/ajustes.css." % tema)
         if ('data-tema="%s"' % tema) not in lateral:
             fallos.append("%s: no tiene botón en "
-                          "fragmentos/barra-lateral.html." % tema)
+                          "fragmentos/ajustes.html." % tema)
 
         # La clave puede ir entre comillas o sin ellas: en JavaScript solo
         # hacen falta cuando el nombre lleva un guion, así que "claro" va

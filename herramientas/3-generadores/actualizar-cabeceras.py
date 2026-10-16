@@ -498,6 +498,11 @@ def scripts_de(ruta):
             # Lo primero: si lo pedido es una dirección vieja de algo que
             # se ha movido (la wiki era mundo/), se va a la nueva.
             "/scripts/paginas/redirecciones.js",
+            # El botón Aa y su ventana (fragmentos/ajustes.html, que el
+            # 404 pide suelto: no tiene menú). tema.js antes, que los
+            # botones del color de tema son suyos.
+            "/scripts/tema.js",
+            "/scripts/componentes/ajustes.js",
             "/scripts/componentes/botones-ventana.js",
             # Después de botones-ventana.js: este monta el mando de
             # plegar sobre las barras de título, y los −■✕ de dentro los
@@ -522,11 +527,8 @@ def scripts_de(ruta):
         "/scripts/tema.js",
         # La ventana de accesibilidad, que es donde viven el tamaño del
         # texto, la separación entre líneas, la letra, el tema, la voz y
-        # los efectos. Su HTML va con el resto del armazón, en
-        # fragmentos/barra-lateral.html, así que lo lleva cualquier
-        # página que tenga barra lateral. En el 404, que no la tiene, no
-        # sale el mando, pero lo que se haya elegido se respeta igual
-        # (lo pone cargador-scripts.js).
+        # los efectos. Su HTML está en fragmentos/ajustes.html, que va
+        # dentro del menú (y suelto en el 404, ver arriba).
         "/scripts/componentes/ajustes.js",
         # La lupa del final del menú, que abre la ventana de buscar. Va
         # en la base porque la barra lateral está en todas las páginas de
@@ -1094,11 +1096,60 @@ ABRE_ADELANTO = "<!-- ==== ADELANTO DEL MENÚ ===="
 # Las plantillas (herramientas/plantillas/) se quedan con el contenedor
 # vacío: no son ninguna página, y lo que salga de ellas se pasa por aquí
 # después. Si una página llega sin menú, el script lo pide como antes.
+#
+# UN FRAGMENTO PUEDE LLEVAR OTROS DENTRO, con una línea así:
+#
+#     <!--! fragmento: ajustes -->
+#
+# que aquí se cambia por fragmentos/ajustes.html (el «!» es para que
+# quitar-comentarios.py no la borre del fragmento). Así el menú
+# (barra-lateral.html) lleva dentro la ventana de accesibilidad
+# (ajustes.html) y la de buscar (buscar.html), cada una en su archivo.
+#
+# Y UNA PÁGINA PUEDE PEDIR UN FRAGMENTO SUELTO con un contenedor
+#
+#     <div id="lo-que-sea" data-fragmento="ajustes"></div>
+#
+# que esta herramienta rellena entre sus marcas. Es lo que hace el 404,
+# que no tiene menú pero sí el botón Aa.
+FRAGMENTOS = RAIZ / "fragmentos"
+RE_INCLUIR = re.compile(r"[ \t]*<!--!\s*fragmento:\s*([\w-]+)\s*-->")
+
+
+def abre_fragmento(nombre):
+    return "<!-- ==== FRAGMENTO %s ==== -->" % nombre
+
+
+def cierra_fragmento(nombre):
+    return "<!-- ==== fin del FRAGMENTO %s ==== -->" % nombre
+
+
+def fragmento(nombre, vistos=()):
+    """El HTML de fragmentos/<nombre>.html con los que lleve dentro ya
+    puestos. Un fragmento que se incluyera a sí mismo (o en círculo) se
+    canta y se deja fuera."""
+    if nombre in vistos:
+        print("  AVISO: el fragmento %s se incluye a sí mismo (%s)." % (nombre, " → ".join(vistos)))
+        return ""
+    archivo = FRAGMENTOS / (nombre + ".html")
+    if not archivo.is_file():
+        print("  AVISO: no hay ningún fragmentos/%s.html." % nombre)
+        return ""
+    texto = archivo.read_text(encoding="utf-8").strip("\n")
+    return RE_INCLUIR.sub(lambda m: fragmento(m.group(1), tuple(vistos) + (nombre,)), texto)
+
+
+# Las marcas de antes de que hubiera más fragmentos que el menú: se
+# reconocen para cambiarlas por las nuevas.
 ABRE_BARRA = "<!-- ==== BARRA LATERAL ==== -->"
 CIERRA_BARRA = "<!-- ==== fin de la BARRA LATERAL ==== -->"
 RE_CONTENEDOR = re.compile(
-    r'<div id="sidebar-container"[^>]*>(?:\s*' + re.escape(ABRE_BARRA) + r'.*?'
-    + re.escape(CIERRA_BARRA) + r')?\s*</div>', re.S)
+    r'<div id="sidebar-container"[^>]*>(?:\s*(?:' + re.escape(ABRE_BARRA) + r'|'
+    + re.escape(abre_fragmento("barra-lateral")) + r').*?(?:' + re.escape(CIERRA_BARRA) + r'|'
+    + re.escape(cierra_fragmento("barra-lateral")) + r'))?\s*</div>', re.S)
+RE_SUELTO = re.compile(
+    r'<div id="([\w-]+)" data-fragmento="([\w-]+)">(?:\s*<!-- ==== FRAGMENTO [\w-]+ ==== -->.*?'
+    r'<!-- ==== fin del FRAGMENTO [\w-]+ ==== -->)?\s*</div>', re.S)
 
 
 def _normalizar(camino):
@@ -1113,9 +1164,13 @@ def barra_para(ruta, fragmento):
     """El menú con el enlace de esta página marcado y su apartado abierto
     (mismas reglas que initializeActivePage en barra-lateral.js)."""
     actual = _normalizar(ruta)
+    # Solo los del menú (dentro del <aside>): las ventanas de buscar y de
+    # accesibilidad, que van en el mismo fragmento, no cuentan.
+    desde = fragmento.find('<aside class="sidebar"')
+    hasta = fragmento.find("</aside>", desde)
     enlaces = [(m, _normalizar(m.group(2))) for m in
                re.finditer(r'<a ([^>]*?)href="(/[^"#]*)"([^>]*)>', fragmento)
-               if fragmento.rfind('<aside class="sidebar"', 0, m.start()) != -1]
+               if desde != -1 and desde < m.start() < hasta]
     elegido, tipo = None, "page"
     for m, camino in enlaces:
         if camino == actual:
@@ -1161,14 +1216,28 @@ def barra_para(ruta, fragmento):
 
 
 def con_barra_lateral(texto, ruta):
-    archivo = RAIZ / BARRA_LATERAL.lstrip("/")
-    if not archivo.is_file() or not RE_CONTENEDOR.search(texto):
+    if not RE_CONTENEDOR.search(texto):
         return texto
-    fragmento = archivo.read_text(encoding="utf-8").strip("\n")
-    menu = barra_para(ruta, fragmento)
+    menu = barra_para(ruta, fragmento("barra-lateral"))
+    if not menu:
+        return texto
     lleno = ('<div id="sidebar-container" data-fragmento="barra-lateral">\n%s\n%s\n%s\n    </div>'
-             % (ABRE_BARRA, menu, CIERRA_BARRA))
+             % (abre_fragmento("barra-lateral"), menu, cierra_fragmento("barra-lateral")))
     return RE_CONTENEDOR.sub(lambda m: lleno, texto, count=1)
+
+
+def con_fragmentos_sueltos(texto):
+    """Los <div id="…" data-fragmento="…"> que no son el menú, rellenos."""
+    def rellenar(m):
+        ident, nombre = m.group(1), m.group(2)
+        if ident == "sidebar-container":
+            return m.group(0)
+        dentro = fragmento(nombre)
+        if not dentro:
+            return m.group(0)
+        return ('<div id="%s" data-fragmento="%s">\n%s\n%s\n%s\n    </div>'
+                % (ident, nombre, abre_fragmento(nombre), dentro, cierra_fragmento(nombre)))
+    return RE_SUELTO.sub(rellenar, texto)
 
 
 def bloque(ruta):
@@ -1489,9 +1558,10 @@ def main():
 
         # El menú, escrito dentro (no en las plantillas: ver
         # con_barra_lateral).
-        if (FUERA.isdisjoint(archivo.relative_to(RAIZ).parts)
-                and "/scripts/componentes/barra-lateral.js" in scripts_de(ruta)):
-            salida = con_barra_lateral(salida, ruta)
+        if FUERA.isdisjoint(archivo.relative_to(RAIZ).parts):
+            if "/scripts/componentes/barra-lateral.js" in scripts_de(ruta):
+                salida = con_barra_lateral(salida, ruta)
+            salida = con_fragmentos_sueltos(salida)
 
         # Lo último, cuando ya está todo escrito: la política de seguridad
         # lleva las huellas de los scripts que haya quedado en la página.

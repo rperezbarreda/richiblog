@@ -1,9 +1,10 @@
 // =========================================
 // TEMA (CUATRO)
 // =========================================
-// Los botones viven dentro de la ventana de accesibilidad, que va en
-// fragmentos/barra-lateral.html y se carga por fetch, así que se espera
-// al evento "sidebar:loaded" en vez de dar por hecho que ya están.
+// Los botones viven dentro de la ventana de accesibilidad
+// (fragmentos/ajustes.html, que va dentro del menú), así que se espera al
+// evento "sidebar:loaded" en vez de dar por hecho que ya están. En el
+// 404, que no tiene menú, los arranca ajustes.js.
 //
 // LOS SEIS
 //     oscuro           el de siempre: morado y amarillo

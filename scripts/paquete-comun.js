@@ -45,6 +45,7 @@ async function loadComponent(elementId, file, onLoaded) {
             html = await response.text();
         }
         container.innerHTML = html;
+        await ponerFragmentosDentro(container);
         if (typeof onLoaded === "function") {
             await cuandoEsteLeidaLaPagina();
             onLoaded();
@@ -62,6 +63,36 @@ const FRAGMENTOS_PAGINA_LEIDA = new Promise((seguir) => {
 });
 function cuandoEsteLeidaLaPagina() {
     return FRAGMENTOS_PAGINA_LEIDA;
+}
+async function ponerFragmentosDentro(raiz, vueltas) {
+    if ((vueltas || 0) > 4) {
+        return;
+    }
+    const recorrido = document.createTreeWalker(raiz, NodeFilter.SHOW_COMMENT);
+    const marcas = [];
+    while (recorrido.nextNode()) {
+        const m = /^!\s*fragmento:\s*([\w-]+)\s*$/.exec(recorrido.currentNode.nodeValue.trim());
+        if (m) {
+            marcas.push([recorrido.currentNode, m[1]]);
+        }
+    }
+    for (const [marca, nombre] of marcas) {
+        try {
+            const ruta = "/fragmentos/" + nombre + ".html";
+            const respuesta = await fetch(window.conVersion ? window.conVersion(ruta) : ruta);
+            if (!respuesta.ok) {
+                continue;
+            }
+            const leido = new DOMParser().parseFromString(await respuesta.text(), "text/html");
+            const trozo = document.createDocumentFragment();
+            [...leido.body.childNodes].forEach((n) => trozo.appendChild(document.importNode(n, true)));
+            const caja = document.createElement("div");
+            caja.appendChild(trozo);
+            await ponerFragmentosDentro(caja, (vueltas || 0) + 1);
+            marca.replaceWith(...caja.childNodes);
+        } catch (error) {
+        }
+    }
 }
 
 /* ======== /scripts/componentes/barra-lateral.js ======== */
@@ -584,6 +615,17 @@ const AJUSTES = {
     avisoReloj: 0,
 };
 document.addEventListener("sidebar:loaded", initializeAjustes);
+if (!document.getElementById("sidebar-container")) {
+    document.addEventListener("DOMContentLoaded", () => {
+        initializeAjustes();
+        if (typeof initializeThemeToggle === "function") {
+            initializeThemeToggle();
+        }
+        if (typeof initializeCursorTrailToggle === "function") {
+            initializeCursorTrailToggle();
+        }
+    });
+}
 document.addEventListener("ajustes:actualizar", () => {
     if (AJUSTES.ventana) {
         pintarAjustesOpciones();

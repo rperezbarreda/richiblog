@@ -141,22 +141,8 @@
         background: rgba(0, 0, 0, 0.5);
     }
 
-    /* Los botones del tema y del brillito, que ahora viven dentro de la
-       ventana de accesibilidad, con algo más de aire para el dedo. */
-    .theme-toggle {
-        padding: 14px;
-    }
-
-    .theme-toggle-icon {
-        width: 1.6rem;
-        height: 1.6rem;
-        font-size: 0.9rem;
-    }
-
-    /* El rastro del cursor no tiene sentido en pantallas táctiles */
-    #cursor-trail-toggle {
-        display: none;
-    }
+    /* (Los botones de la ventana de accesibilidad, en móvil, están con
+       ella: estilos/componentes/ajustes.css.) */
 }
 
 @media (prefers-reduced-motion: reduce) {

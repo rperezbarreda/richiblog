@@ -213,7 +213,8 @@ CRUDO = re.compile(r"<(script|style)\b.*?</\1\s*>", re.S | re.I)
 # CIERRA_JS, ABRE_TEMA y ABRE_ADELANTO). Si cambian allí, cambian aquí.
 MARCAS = ("==== CSS ====", "==== fin del CSS ====", "==== JS ====",
           "==== fin del JS ====", "==== TEMA ====", "==== ADELANTO DEL MENÚ ====",
-          "==== BARRA LATERAL ====", "==== fin de la BARRA LATERAL ====")
+          "==== BARRA LATERAL ====", "==== fin de la BARRA LATERAL ====",
+          "==== FRAGMENTO ", "==== fin del FRAGMENTO ")
 
 
 def se_queda(cuerpo):

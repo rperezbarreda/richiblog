@@ -217,6 +217,106 @@
     align-items: stretch;
 }
 
+/* LOS BOTONES DE ENCENDER Y APAGAR (el brillito y el filtro CRT): una
+   pastilla con su icono redondo. Estaban en barra-lateral.css, de
+   cuando vivían en la barra; se vinieron aquí con su ventana para valer
+   también en las páginas sin barra (el 404). Encendido = los colores del
+   logo (fondo amarillo, texto oscuro), para que se note sin leer el
+   ON/OFF. */
+.theme-toggle {
+    display: inline-flex;
+    align-self: center;
+    align-items: center;
+    gap: 10px;
+    width: auto;
+    margin-top: 10px;
+    padding: 10px 22px 10px 10px;
+    border: 1px solid var(--border);
+    border-radius: 0;
+    background: var(--purple-lighter);
+    color: var(--muted);
+    font-family: var(--fuente-mono);
+    font-size: 0.625rem;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: color 0.1s linear, border-color 0.1s linear, background-color 0.1s linear, transform 0.1s linear;
+}
+
+.cursor-trail-toggle-text {
+    width: calc(11ch + 10px);
+    white-space: nowrap;
+    text-align: left;
+}
+
+.theme-toggle-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    width: 1.3rem;
+    height: 1.3rem;
+    border-radius: 50%;
+    background: var(--yellow);
+    color: var(--yellow-contrast);
+    font-size: 0.75rem;
+    line-height: 1;
+    transition: background-color 0.1s linear, color 0.1s linear;
+}
+
+.theme-toggle:hover,
+.theme-toggle:focus-visible {
+    color: var(--yellow);
+    border-color: var(--yellow);
+}
+
+.theme-toggle:focus-visible {
+    outline: 2px solid var(--yellow);
+    outline-offset: 2px;
+}
+
+/* Estado "encendido" de los botones de efectos visuales: mismos colores
+   que el logo (fondo amarillo, texto oscuro), para que se note a simple
+   vista sin tener que leer el ON/OFF.
+   Por clase y no por id: antes solo valía para el del rastro del cursor
+   y el del filtro CRT se quedaba igual encendido que apagado. Son los
+   dos únicos botones con esta pinta que quedan. */
+
+.theme-toggle[aria-pressed="true"] {
+    background: var(--yellow);
+    border-color: var(--yellow);
+    color: var(--yellow-contrast);
+}
+
+.theme-toggle[aria-pressed="true"] .theme-toggle-icon {
+    background: var(--yellow-contrast);
+    color: var(--yellow);
+}
+
+.theme-toggle[aria-pressed="true"]:hover,
+.theme-toggle[aria-pressed="true"]:focus-visible {
+    color: var(--yellow-contrast);
+    border-color: var(--yellow);
+}
+
+/* En móvil, con algo más de aire para el dedo; y el rastro del cursor
+   no tiene sentido en una pantalla táctil. */
+@media (max-width: 860px) {
+    .theme-toggle {
+        padding: 14px;
+    }
+
+    .theme-toggle-icon {
+        width: 1.6rem;
+        height: 1.6rem;
+        font-size: 0.9rem;
+    }
+
+    #cursor-trail-toggle {
+        display: none;
+    }
+}
+
 .ajustes-mandos-anchos .theme-toggle {
     align-self: stretch;
     justify-content: flex-start;
@@ -897,6 +997,21 @@
     .ajustes-abrir:focus-visible {
         outline: 2px solid var(--yellow-contrast);
         outline-offset: 2px;
+    }
+
+    /* En una página sin menú (el 404) no hay barra amarilla detrás: el
+       botón se queda como en escritorio, macizo y con su reborde. */
+    #ajustes-container .ajustes-abrir {
+        top: 14px;
+        box-shadow: 0 0 0 3px var(--purple);
+        border-color: var(--yellow);
+        background: var(--yellow);
+        color: var(--yellow-contrast);
+    }
+
+    #ajustes-container .ajustes-abrir:focus-visible {
+        outline: 2px solid var(--yellow);
+        outline-offset: 5px;
     }
 
     /* El nombre vuelve a esconderse: en la barra solo cabe el "Aa", y

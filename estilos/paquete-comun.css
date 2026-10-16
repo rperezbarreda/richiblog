@@ -1179,6 +1179,80 @@ body.lightbox-open {
     flex-direction: column;
     align-items: stretch;
 }
+.theme-toggle {
+    display: inline-flex;
+    align-self: center;
+    align-items: center;
+    gap: 10px;
+    width: auto;
+    margin-top: 10px;
+    padding: 10px 22px 10px 10px;
+    border: 1px solid var(--border);
+    border-radius: 0;
+    background: var(--purple-lighter);
+    color: var(--muted);
+    font-family: var(--fuente-mono);
+    font-size: 0.625rem;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: color 0.1s linear, border-color 0.1s linear, background-color 0.1s linear, transform 0.1s linear;
+}
+.cursor-trail-toggle-text {
+    width: calc(11ch + 10px);
+    white-space: nowrap;
+    text-align: left;
+}
+.theme-toggle-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    width: 1.3rem;
+    height: 1.3rem;
+    border-radius: 50%;
+    background: var(--yellow);
+    color: var(--yellow-contrast);
+    font-size: 0.75rem;
+    line-height: 1;
+    transition: background-color 0.1s linear, color 0.1s linear;
+}
+.theme-toggle:hover,
+.theme-toggle:focus-visible {
+    color: var(--yellow);
+    border-color: var(--yellow);
+}
+.theme-toggle:focus-visible {
+    outline: 2px solid var(--yellow);
+    outline-offset: 2px;
+}
+.theme-toggle[aria-pressed="true"] {
+    background: var(--yellow);
+    border-color: var(--yellow);
+    color: var(--yellow-contrast);
+}
+.theme-toggle[aria-pressed="true"] .theme-toggle-icon {
+    background: var(--yellow-contrast);
+    color: var(--yellow);
+}
+.theme-toggle[aria-pressed="true"]:hover,
+.theme-toggle[aria-pressed="true"]:focus-visible {
+    color: var(--yellow-contrast);
+    border-color: var(--yellow);
+}
+@media (max-width: 860px) {
+    .theme-toggle {
+        padding: 14px;
+    }
+    .theme-toggle-icon {
+        width: 1.6rem;
+        height: 1.6rem;
+        font-size: 0.9rem;
+    }
+    #cursor-trail-toggle {
+        display: none;
+    }
+}
 .ajustes-mandos-anchos .theme-toggle {
     align-self: stretch;
     justify-content: flex-start;
@@ -1575,6 +1649,17 @@ body.lightbox-open {
     .ajustes-abrir:focus-visible {
         outline: 2px solid var(--yellow-contrast);
         outline-offset: 2px;
+    }
+    #ajustes-container .ajustes-abrir {
+        top: 14px;
+        box-shadow: 0 0 0 3px var(--purple);
+        border-color: var(--yellow);
+        background: var(--yellow);
+        color: var(--yellow-contrast);
+    }
+    #ajustes-container .ajustes-abrir:focus-visible {
+        outline: 2px solid var(--yellow);
+        outline-offset: 5px;
     }
     .ajustes-abrir-aa {
         font-size: 1.05em;

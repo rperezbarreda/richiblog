@@ -72,6 +72,10 @@ async function loadComponent(elementId, file, onLoaded) {
         }
 
         container.innerHTML = html;
+        // Un fragmento puede llevar otros dentro (<!--! fragmento: buscar -->,
+        // ver actualizar-cabeceras.py). Escritos en la página ya vienen
+        // puestos; pedidos así, se ponen aquí.
+        await ponerFragmentosDentro(container);
 
         if (typeof onLoaded === "function") {
             await cuandoEsteLeidaLaPagina();
@@ -104,4 +108,39 @@ const FRAGMENTOS_PAGINA_LEIDA = new Promise((seguir) => {
 
 function cuandoEsteLeidaLaPagina() {
     return FRAGMENTOS_PAGINA_LEIDA;
+}
+
+
+// Los <!--! fragmento: nombre --> de dentro de un fragmento pedido: cada
+// uno se cambia por fragmentos/<nombre>.html (que puede llevar otros).
+async function ponerFragmentosDentro(raiz, vueltas) {
+    if ((vueltas || 0) > 4) {
+        return;
+    }
+    const recorrido = document.createTreeWalker(raiz, NodeFilter.SHOW_COMMENT);
+    const marcas = [];
+    while (recorrido.nextNode()) {
+        const m = /^!\s*fragmento:\s*([\w-]+)\s*$/.exec(recorrido.currentNode.nodeValue.trim());
+        if (m) {
+            marcas.push([recorrido.currentNode, m[1]]);
+        }
+    }
+    for (const [marca, nombre] of marcas) {
+        try {
+            const ruta = "/fragmentos/" + nombre + ".html";
+            const respuesta = await fetch(window.conVersion ? window.conVersion(ruta) : ruta);
+            if (!respuesta.ok) {
+                continue;
+            }
+            const leido = new DOMParser().parseFromString(await respuesta.text(), "text/html");
+            const trozo = document.createDocumentFragment();
+            [...leido.body.childNodes].forEach((n) => trozo.appendChild(document.importNode(n, true)));
+            const caja = document.createElement("div");
+            caja.appendChild(trozo);
+            await ponerFragmentosDentro(caja, (vueltas || 0) + 1);
+            marca.replaceWith(...caja.childNodes);
+        } catch (error) {
+            // Sin ese trozo, y ya está: el resto del fragmento sí está.
+        }
+    }
 }
