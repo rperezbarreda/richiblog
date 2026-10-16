@@ -1,5 +1,15 @@
 [
     {
+        "fecha": "16-10-2026",
+        "titulo": "Creación de la wiki de mi mundo homebrew y cambios en la navegación del sitio web",
+        "cosas": [
+                "Añadido nuevo apartado de wiki de cralëa, mi mundo homebrew.",
+                "Dentro de la wiki hay navegación propia, acceso a un mapamundi interactivo, entradas de la wiki, linea de tiempo y árboles genealógicos.",
+                "Ahora se puede plegar y desplegar el menú de navegación del sitio web, para poder ver mejor el contenido de la página.",
+                "Se ha cambiado el sitio del icono de búsqueda de la web al lado del icono de pliegue/despliege del menú de navegación, para que sea mas fácil de encontrar y usar.",
+                "Se ha añadido en la parte inferior izquierda un botón para volver al inicio de la página, para no tener que scrollear hasta el principio."
+        ]
+    },{
         "fecha": "10-10-2026",
         "titulo": "Reestructuración del menú, añadido la sección nueva de rol para añadir la wiki de mi mundo homebrew y las notas de partidas y recomendaciones personales.",
         "cosas": [
