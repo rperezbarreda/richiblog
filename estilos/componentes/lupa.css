@@ -87,7 +87,7 @@
    encima, cada una un enlace, y debajo la misma lista en texto.
 
        <div class="lupa-mapa"><svg class="lupa-mapa-svg">…</svg>
-           <p class="lupa-mapa-nombre">→ el país por el que pasas</p></div>
+           <div class="lupa-mapa-globo">la bandera y el nombre</div></div>
        <nav class="lupa-mapa-vecinos"><p class="lupa-mapa-titulo">…</p>
            <ul class="lupa-mapa-lista">…</ul></nav>
 
@@ -141,23 +141,46 @@
     pointer-events: none;
 }
 
-/* El nombre del país por el que se pasa, encima del dibujo, abajo a la
-   izquierda. */
-.lupa-mapa-nombre {
+/* EL GLOBO del país por el que se pasa, como el del mapamundi
+   (estilos/paginas/mundo-mapa.css, .mapa-globo): su bandera, su nombre
+   y su subtítulo. Opaco, porque va encima del dibujo, y sin comerse el
+   ratón, para que no se tape a sí mismo y parpadee. */
+.lupa-mapa-globo {
     position: absolute;
-    left: 10px;
-    bottom: 10px;
-    margin: 0;
-    padding: 4px 10px;
+    z-index: 2;
+    max-width: min(20rem, 70%);
+    padding: 6px 10px;
+    border: 2px solid var(--yellow);
     background: var(--purple);
-    color: var(--yellow);
     font-family: var(--fuente-mono);
-    font-size: 1rem;
+    font-size: 0.875rem;
+    line-height: 1.35;
     pointer-events: none;
 }
 
-.lupa-mapa-nombre:empty {
+.lupa-mapa-globo[hidden] {
     display: none;
+}
+
+.lupa-mapa-globo-bandera {
+    display: block;
+    width: 7.5rem;
+    height: auto;
+    aspect-ratio: 3 / 2;
+    margin-bottom: 6px;
+    object-fit: cover;
+    border: 1px solid var(--border);
+}
+
+.lupa-mapa-globo-nombre {
+    color: var(--yellow);
+    font-weight: 400;
+}
+
+.lupa-mapa-globo-que {
+    display: block;
+    color: var(--muted);
+    font-size: 0.75rem;
 }
 
 .lupa-mapa-vecinos {
@@ -182,11 +205,21 @@
 }
 
 .lupa-mapa-lista a {
-    display: inline-block;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
     padding: 6px 0;
     color: var(--yellow);
     font-size: 1rem;
     text-underline-offset: 3px;
+}
+
+.lupa-mapa-lista-bandera {
+    flex: 0 0 auto;
+    width: 30px;
+    height: 20px;
+    object-fit: cover;
+    border: 1px solid var(--border);
 }
 
 /* En alto contraste, el fondo casi negro lo repinta el sistema; lo que
