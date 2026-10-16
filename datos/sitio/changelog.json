@@ -3,21 +3,21 @@
         "fecha": "16-10-2026",
         "titulo": "Creación de la wiki de mi mundo homebrew y cambios en la navegación del sitio web",
         "cosas": [
-                "Añadido nuevo apartado de wiki de cralëa, mi mundo homebrew.",
-                "Dentro de la wiki hay navegación propia, acceso a un mapamundi interactivo, entradas de la wiki, linea de tiempo y árboles genealógicos.",
+                "Añadido nuevo apartado de wiki de Cralëa, mi mundo homebrew.",
+                "Dentro de la wiki hay navegación propia, acceso a un mapamundi interactivo, entradas de la wiki, línea de tiempo y árboles genealógicos.",
                 "Ahora se puede plegar y desplegar el menú de navegación del sitio web, para poder ver mejor el contenido de la página.",
-                "Se ha cambiado el sitio del icono de búsqueda de la web al lado del icono de pliegue/despliege del menú de navegación, para que sea mas fácil de encontrar y usar.",
-                "Se ha añadido en la parte inferior izquierda un botón para volver al inicio de la página, para no tener que scrollear hasta el principio."
+                "Se ha cambiado el sitio del icono de búsqueda de la web al lado del icono de pliegue/despliegue del menú de navegación, para que sea más fácil de encontrar y usar.",
+                "Se ha añadido en la parte inferior derecha un botón para volver al inicio de la página, para no tener que scrollear hasta el principio."
         ]
     },{
         "fecha": "10-10-2026",
         "titulo": "Reestructuración del menú, añadido la sección nueva de rol para añadir la wiki de mi mundo homebrew y las notas de partidas y recomendaciones personales.",
         "cosas": [
-                "Alañadido nuevo apartado para añadir notas de partidas de rol, con su sección para las notas, inventario, misiones y npcs.",
-                "Añadiuda nueva sección para añadir la wiki de mi mundo homebrew, con su sección para el mapamundi y entradas tipo wiki.",
+                "Añadido nuevo apartado para añadir notas de partidas de rol, con su sección para las notas, inventario, misiones y npcs.",
+                "Añadida nueva sección para añadir la wiki de mi mundo homebrew, con su sección para el mapamundi y entradas tipo wiki.",
                 "Reestructuración del navegador para organizar y separar mejor lo que tiene que ver de partidas de rol con los recursos que creo para ello.",
                 "Añadido apartado de mi rincón para ver recomendaciones personales de libros, películas, series y videojuegos, con su sección para cada tipo de recomendación.",
-                "Añadido el apartado de mi rincón para ver que contenitod estoy consumiendo y en que me estoy dedicando ahora, tanto de escritura como de mejoras en la web."
+                "Añadido el apartado de mi rincón para ver qué contenido estoy consumiendo y a qué me estoy dedicando ahora, tanto de escritura como de mejoras en la web."
         ]
     },
     {
@@ -25,10 +25,10 @@
         "titulo": "Nuevos cambios de accesibilidad y reestructuración de todo el sitio web",
         "cosas": [
             "Reestructuración de los apartados personales, movido todo a la categoría mi rincón, y añadida la página de recomendaciones personales.",
-            "Añadido en el index y en la parte de navegación un botón y barra de búsqueda de todos las páginas del blog y de su contenido.",
+            "Añadido en el index y en la parte de navegación un botón y barra de búsqueda de todas las páginas del blog y de su contenido.",
             "Añadido en todos los relatos y entradas del blog un botón para poder utilizar el texto a voz y otras opciones de accesibilidad.",
             "Reestructuración de los apartados y opciones de accesibilidad de toda la web, ahora usando el botón de accesibilidad se abre una ventana modal con todas las opciones de accesibilidad del sitio y un texto de ejemplo para ver los cambios.",
-            "Añadidos nuevos temas de color y efectos visuales para la web, así como mas opciones de accesibilidad como poder ampliar el tamaño de letra, la separación de párrafos o cambiar a un tipo de fuente mas legible.",
+            "Añadidos nuevos temas de color y efectos visuales para la web, así como más opciones de accesibilidad como poder ampliar el tamaño de letra, la separación de párrafos o cambiar a un tipo de fuente más legible.",
             "Ahora las ventanas que simulan un programa de ordenador pueden minimizarse y reabrirse como añadido visual."
         ]
     },
@@ -47,7 +47,7 @@
         "fecha": "27-09-2026",
         "titulo": "Creación del changelog y mapa del sitio",
         "cosas": [
-            "Cambio en la accesibilidad, ahora el texto del footer del indez tiene un botón para detener el movimiento.",
+            "Cambio en la accesibilidad, ahora el texto del footer del index tiene un botón para detener el movimiento.",
             "Creación en el index de los botones para las nuevas páginas de changelog y mapa del sitio, no las he incluido en el navbar porque al ser algo tan técnico poca gente va a querer navegar, por eso el único acceso es en la página de index.",
             "Creación de la página de changelog con todos los cambios de programación del sitio web que no incluye las subidas de contenido",
             "Creación del mapa del sitio, para acceder a todas las páginas del sitio web y ver un histórico de sus cambios, con filtros de búsqueda y ordenación en la tabla."
@@ -57,7 +57,7 @@
         "fecha": "26-09-2026",
         "titulo": "Buscador, filtros en etiquetas y tiempo de lectura",
         "cosas": [
-            "Buscador en el archivo del blog, en el listado de relatos y en el portfolio de rol. Busca por título, fecha y etiqueta —sin tildes ni mayúsculas, así que «crepusculo» encuentra «Crepùsculo»— y resalta lo que coincide. Se suma a los filtros en vez de pelearse con ellos.",
+            "Buscador en el archivo del blog, en el listado de relatos y en el portfolio de rol. Busca por título, fecha y etiqueta —sin tildes ni mayúsculas, así que «crepusculo» encuentra «Crepúsculo»— y resalta lo que coincide. Se suma a los filtros en vez de pelearse con ellos.",
             "Cada entrada dice lo que se tarda en leerla, contando las palabras al generar los listados.",
             "Las entradas con apartados llevan un índice arriba para saltar de uno a otro.",
             "El aviso del portfolio de rol es ahora su propia ventanita, y va al lado del título en vez de debajo: el portfolio empieza mucho más arriba."
@@ -65,7 +65,7 @@
     },
     {
         "fecha": "25-09-2026",
-        "titulo": "Reestructuración de los CSS, arreglo del Error 404 y nueva categorìa de retos",
+        "titulo": "Reestructuración de los CSS, arreglo del Error 404 y nueva categoría de retos",
         "cosas": [
             "Se han modificado tanto los css como los scripts que lo cargan para que tengan una url dinámica, haciendo que si subo algún cambio se vea siempre reflejado, ya que la caché impedía ver muchas veces los cambios y las nuevas entradas y era un poco molesto.",
             "Todas las barras de scroll del sitio van con los colores del tema.",
