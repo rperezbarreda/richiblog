@@ -707,3 +707,132 @@ def estilos_de_nombres(paginas, region_de, extra, palabras=()):
     # Con menos de cuatro ejemplos no hay de dónde aprender.
     return [{"nombre": k, "ejemplos": v} for k, v in sorted(estilos.items(), key=lambda kv: llano(kv[0]))
             if len(v) >= 4]
+
+
+# =========================================
+# LA CRONOLOGÍA DE CADA PÁGINA
+# =========================================
+# Los eventos de la línea de tiempo que tienen que ver con una página, por
+# orden: los que la enlazan en su texto ([[Reino de X]]) o la nombran en
+# su nombre o su resumen («Nacimiento Azaras y Parta» sale en Azaras y en
+# Parta), y las páginas de acontecimientos (plantilla Acontecimiento) que
+# la nombran en su ficha (lugar, bandos…).
+#
+# EN UN PAÍS (o en cualquier página que tenga lugares), además, lo que ha
+# pasado en sus lugares: es la línea de tiempo del país, con el sitio
+# donde pasó cada cosa.
+
+CAMPOS_DE_ACONTECIMIENTO = ("lugar", "ubicación", "ubicacion", "bandos", "participantes",
+                            "comandantes", "país", "pais")
+
+
+def _nombra(texto, titulo):
+    if len(titulo) < 4:
+        return False
+    return re.search(r"(?<![\wÀ-ÿ])%s(?![\wÀ-ÿ])" % re.escape(titulo), texto or "", re.I) is not None
+
+
+def cronologia(ficha, paginas, eventos, enlaces_de_evento, fecha_de, leer_fecha):
+    suya = clave(ficha)
+    # Ella y sus lugares (lo que dice «ubicación: [[ella]]» y es un lugar).
+    sitios = {suya: None}
+    for f in paginas.values():
+        if (f is not ficha and "lugares" in [llano(t) for t in f.get("etiquetas") or []]
+                and suya in enlaces_de(campo(f, "ubicación", "ubicacion"))):
+            sitios[clave(f)] = f
+    cosas = []
+    for ev in eventos:
+        enlazadas = {n.lower() for n in enlaces_de_evento(ev)}
+        texto = " ".join(str(ev.get(k) or "") for k in ("nombre", "resumen"))
+        for k, lugar in sitios.items():
+            if k in enlazadas or _nombra(texto, paginas[k]["titulo"]):
+                cosas.append((ev.get("fecha"), fecha_de(ev), ev["nombre"], ev["url"],
+                              str(ev.get("resumen") or ""), lugar))
+                break
+    for f in paginas.values():
+        if f is ficha or llano(que_es(f)) != "acontecimiento":
+            continue
+        nombradas = set()
+        for c in CAMPOS_DE_ACONTECIMIENTO:
+            nombradas.update(enlaces_de(campo(f, c)))
+        for k, lugar in sitios.items():
+            if k in nombradas:
+                cuando = str(campo(f, "fecha") or "").strip()
+                cosas.append((leer_fecha(cuando), cuando, f["titulo"], f["url"],
+                              f.get("resumen") or "", lugar))
+                break
+    if not cosas:
+        return ""
+    cosas.sort(key=lambda c: (c[0] is None, c[0] if c[0] is not None else 0, llano(c[2])))
+    trozos = []
+    for _, cuando, nombre, url, resumen, lugar in cosas:
+        donde = (' <span class="mundo-crono-donde">en %s</span>' % enlace(lugar)) if lugar else ""
+        corto = resumen if len(resumen) <= 180 else resumen[:179].rsplit(" ", 1)[0] + "…"
+        trozos.append('<li><span class="mundo-crono-fecha">%s</span>'
+                      '<span class="mundo-crono-cuerpo"><a class="mundo-enlace" href="%s">%s</a>%s%s</span></li>'
+                      % (esc(cuando or "¿?"), esc(url), esc(nombre), donde,
+                         ('<span class="mundo-crono-resumen">%s</span>' % esc(corto)) if corto else ""))
+    return '<ol class="mundo-cronologia">%s</ol>' % "".join(trozos)
+
+
+# =========================================
+# EL GLOSARIO, DENTRO DEL TEXTO
+# =========================================
+# Las palabras del diccionario que salen en el texto de una página (la
+# primera vez de cada una) se marcan: al pasar el ratón, al llegar con el
+# tabulador o al pulsarlas, sale lo que significan (lo pinta
+# scripts/paginas/mundo.js). Son botones, para que se lleguen con el
+# teclado, y su significado va en un texto escondido que el lector de
+# pantalla lee como descripción. No se toca lo que va dentro de un
+# enlace, de un título, de una tabla ni de un bloque de código.
+
+NO_DENTRO = {"a", "h1", "h2", "h3", "h4", "h5", "h6", "table", "pre", "code", "button", "svg",
+             "script", "style", "summary"}
+RE_TROZO = re.compile(r"(<[^>]+>)")
+
+
+def con_glosario(cuerpo, palabras):
+    buenas = sorted({str(p.get("palabra") or "").strip(): p for p in palabras
+                     if len(str(p.get("palabra") or "").strip()) >= 3}.items(),
+                    key=lambda kv: -len(kv[0]))
+    if not buenas:
+        return cuerpo
+    puestas = set()
+    definiciones = []
+    dentro = []
+    trozos = RE_TROZO.split(cuerpo)
+    for i, trozo in enumerate(trozos):
+        if trozo.startswith("<"):
+            m = re.match(r"<(/?)([a-zA-Z0-9]+)", trozo)
+            if m:
+                nombre = m.group(2).lower()
+                if nombre in NO_DENTRO:
+                    if m.group(1):
+                        if nombre in dentro:
+                            while dentro and dentro.pop() != nombre:
+                                pass
+                    elif not trozo.endswith("/>"):
+                        dentro.append(nombre)
+            continue
+        if dentro or not trozo.strip():
+            continue
+        for palabra, p in buenas:
+            if palabra in puestas:
+                continue
+            patron = re.compile(r"(?<![\wÀ-ÿ'-])%s(?![\wÀ-ÿ'-])" % re.escape(html.escape(palabra, quote=False)))
+            m = patron.search(trozo)
+            if not m:
+                continue
+            puestas.add(palabra)
+            n = len(definiciones) + 1
+            significado = str(p.get("significado") or "").strip()
+            idioma = str(p.get("idioma") or "").strip()
+            texto = (idioma + ": " if idioma else "") + significado
+            definiciones.append('<span id="glosario-%d" hidden>%s</span>' % (n, esc(texto)))
+            boton = ('<button type="button" class="mundo-glosario" aria-describedby="glosario-%d">%s</button>'
+                     % (n, m.group(0)))
+            trozo = trozo[:m.start()] + boton + trozo[m.end():]
+        trozos[i] = trozo
+    if not definiciones:
+        return cuerpo
+    return "".join(trozos) + '<div class="mundo-glosario-definiciones">%s</div>' % "".join(definiciones)

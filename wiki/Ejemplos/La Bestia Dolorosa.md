@@ -42,7 +42,3 @@ Nullam varius, turpis et commodo pharetra, est eros bibendum elit, nec luctus ma
 ## Ejemplares notables
 
 Curabitur pretium tincidunt lacus, nulla gravida orci a odio. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Morbi in sem quis dui placerat ornare, pellentesque odio nisi euismod in.
-
-## En la mesa
-
-Lorem ipsum dolor sit amet, consectetur adipiscing elit. Curabitur pretium tincidunt lacus, nulla gravida orci a odio. Integer in mauris eu nibh euismod gravida.

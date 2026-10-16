@@ -66,8 +66,9 @@
             "indice    vistas"
             "destacado vistas"
             "regiones  vistas"
-            "cambios   vistas";
-        grid-template-rows: auto auto auto auto 1fr;
+            "cambios   vistas"
+            "progreso  vistas";
+        grid-template-rows: auto auto auto auto auto 1fr;
         column-gap: 26px;
     }
 }

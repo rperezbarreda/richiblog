@@ -68,7 +68,3 @@ Morbi in sem quis dui placerat ornare, pellentesque odio nisi euismod in. Except
 ## Rumores y leyendas
 
 Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Curabitur pretium tincidunt lacus, nulla gravida orci a odio.
-
-## En la mesa
-
-Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Praesent placerat risus quis eros, fusce pellentesque suscipit nibh. Morbi in sem quis dui placerat ornare, pellentesque odio nisi euismod in.

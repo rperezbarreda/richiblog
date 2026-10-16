@@ -1366,7 +1366,73 @@ function contenidoDeSeccionMundo(grupo, fichas, irA) {
             : listaDeFichasMundo(lista, conRegion));
         caja.appendChild(parte);
     });
+    filtrosDeSeccionMundo(caja, fichas, grupo);
     return caja;
+}
+
+// LOS FILTROS DE UNA VENTANA: un desplegable por cada campo de las fichas
+// que tenga al menos dos valores distintos entre las páginas de la
+// sección (los monstruos por hábitat y tamaño, los personajes por raza,
+// los lugares por tipo o por dónde están…). Lo que no pasa se esconde, y
+// las partes que se quedan sin nada, también. El Mapamundi no lleva: ahí
+// ya se reparte por regiones.
+function filtrosDeSeccionMundo(caja, fichas, grupo) {
+    if ((grupo || "").toString().toLowerCase() === "mapamundi") {
+        return;
+    }
+    const porUrl = new Map();
+    fichas.forEach((f) => porUrl.set((f.url || "").toString(), f.filtros || {}));
+    const valores = new Map();
+    porUrl.forEach((filtros) => {
+        Object.entries(filtros).forEach(([campo, valor]) => {
+            if (!valores.has(campo)) {
+                valores.set(campo, new Set());
+            }
+            valores.get(campo).add(valor.toString());
+        });
+    });
+    const campos = [...valores.keys()].filter((c) => valores.get(c).size >= 2);
+    if (!campos.length) {
+        return;
+    }
+    const barra = document.createElement("div");
+    barra.className = "mundo-filtros";
+    barra.setAttribute("role", "group");
+    barra.setAttribute("aria-label", "Filtrar esta sección");
+    const cuenta = document.createElement("p");
+    cuenta.className = "mundo-filtros-cuenta";
+    cuenta.setAttribute("aria-live", "polite");
+    const selects = new Map();
+    campos.forEach((campo) => {
+        const opciones = [["", "todo"]].concat([...valores.get(campo)].sort((a, b) => a.localeCompare(b, "es"))
+            .map((v) => [v, v]));
+        const select = selectMundo(opciones, "");
+        selects.set(campo, select);
+        barra.appendChild(campoDeFormularioMundo(campo, select));
+        select.addEventListener("change", aplicar);
+    });
+    barra.appendChild(cuenta);
+    caja.insertBefore(barra, caja.firstChild);
+
+    function aplicar() {
+        const pedidos = [...selects].filter(([, s]) => s.value).map(([c, s]) => [c, s.value]);
+        const vistas = new Set();
+        caja.querySelectorAll(".mundo-ficha-item").forEach((item) => {
+            const suyos = porUrl.get(item.getAttribute("data-mundo-url") || "") || {};
+            const pasa = pedidos.every(([c, v]) => (suyos[c] || "") === v);
+            item.hidden = !pasa;
+            if (pasa) {
+                vistas.add(item.getAttribute("data-mundo-url"));
+            }
+        });
+        // Las partes (y las listas sueltas) que se quedan vacías, fuera.
+        caja.querySelectorAll(".mundo-seccion-parte").forEach((parte) => {
+            parte.hidden = !parte.querySelector(".mundo-ficha-item:not([hidden])");
+        });
+        cuenta.textContent = pedidos.length
+            ? (vistas.size === 1 ? "1 página" : vistas.size + " páginas") + " con eso."
+            : "";
+    }
 }
 
 function abrirDesdeLaDireccionMundo() {
@@ -1546,6 +1612,7 @@ async function pintarPortadaMundo(caja) {
         hoy.appendChild(document.createTextNode("."));
         hoy.hidden = false;
     }
+    pintarProgresoMundo(datos && datos.progreso);
     const cambios = document.querySelector("[data-mundo-cambios]");
     const lista = datos && Array.isArray(datos.cambios) ? datos.cambios : [];
     if (cambios && lista.length) {
@@ -2623,4 +2690,284 @@ function prepararDiccionarioMundo() {
     campo.addEventListener("input", filtrar);
     idioma.addEventListener("change", filtrar);
     filtrar();
+}
+
+
+// =========================================
+// CUÁNTO FALTA
+// =========================================
+// Dos barras en la portada: cuántas páginas tienen ya texto de verdad y
+// cuántos campos de las fichas están decididos. Lo cuenta el generador
+// (progreso_de, en generar-mundo.py). Son <progress>, que el lector de
+// pantalla ya lee como tales, con su texto al lado por si no.
+function pintarProgresoMundo(progreso) {
+    const caja = document.querySelector("[data-mundo-progreso]");
+    if (!caja || !progreso || !(progreso.paginas > 0)) {
+        return;
+    }
+    const filas = [
+        ["páginas con texto", progreso.escritas, progreso.paginas],
+        ["campos de las fichas decididos", progreso.decididos, progreso.campos],
+    ];
+    const lista = document.createElement("ul");
+    lista.className = "mundo-progreso-lista";
+    filas.forEach(([que, hecho, total], i) => {
+        if (!(total > 0)) {
+            return;
+        }
+        const li = document.createElement("li");
+        const id = "mundo-progreso-" + i;
+        const etiqueta = document.createElement("label");
+        etiqueta.className = "mundo-progreso-que";
+        etiqueta.htmlFor = id;
+        const tanto = Math.round(100 * hecho / total);
+        etiqueta.textContent = que + ": " + hecho + " de " + total + " (" + tanto + " %)";
+        const barra = document.createElement("progress");
+        barra.className = "mundo-progreso-barra";
+        barra.id = id;
+        barra.max = total;
+        barra.value = hecho;
+        barra.textContent = tanto + " %";
+        li.appendChild(etiqueta);
+        li.appendChild(barra);
+        lista.appendChild(li);
+    });
+    const falta = document.createElement("p");
+    falta.className = "mundo-progreso-falta";
+    falta.textContent = "Faltan " + Math.max(0, progreso.paginas - progreso.escritas) + " páginas por escribir y "
+        + Math.max(0, progreso.campos - progreso.decididos) + " campos por decidir.";
+    caja.appendChild(lista);
+    caja.appendChild(falta);
+    caja.hidden = false;
+}
+
+
+// =========================================
+// EL GLOBO: LA VISTA PREVIA DE LOS ENLACES Y EL GLOSARIO
+// =========================================
+// Un solo globo flotante para las dos cosas:
+//
+//   · al pasar el ratón por un enlace a otra página de la wiki (o al
+//     llegar a él con el tabulador), una tarjeta con su bandera o su mapa,
+//     su nombre, qué es y su entradilla (de datos/wiki/mundo.json, que se
+//     pide la primera vez que hace falta);
+//   · en las palabras del glosario (las del diccionario que salen en el
+//     texto; las marca el generador), lo que significan.
+//
+// El globo es solo para la vista: aria-hidden. Quien usa lector de
+// pantalla ya tiene el nombre en el enlace y el significado de cada
+// palabra como su descripción (aria-describedby). Se cierra con Escape,
+// al salir el ratón o al irse el foco. Con position: fixed (sticky y
+// <dialog> no van en el navegador de Richi), y se recoloca para no salirse
+// de la pantalla.
+prepararGloboMundo();
+
+function prepararGloboMundo() {
+    const articulo = document.querySelector(".mundo-migas, .mundo-articulo");
+    if (!articulo) {
+        return;
+    }
+    const globo = document.createElement("div");
+    globo.className = "mundo-globo";
+    globo.setAttribute("aria-hidden", "true");
+    globo.hidden = true;
+    document.body.appendChild(globo);
+    let fichasGlobo = null;
+    let dueno = null;
+    let espera = 0;
+
+    const fichas = async () => {
+        if (fichasGlobo) {
+            return fichasGlobo;
+        }
+        fichasGlobo = new Map();
+        if (typeof window.pedirDatos !== "function") {
+            return fichasGlobo;
+        }
+        try {
+            const respuesta = await window.pedirDatos("/datos/wiki/mundo.json");
+            const lista = respuesta.ok ? await respuesta.json() : [];
+            (Array.isArray(lista) ? lista : []).forEach((f) => {
+                if (f && f.url) {
+                    fichasGlobo.set(f.url.toString(), f);
+                }
+            });
+        } catch (error) {
+            // Sin vista previa, y ya está.
+        }
+        return fichasGlobo;
+    };
+
+    const colocar = (junto) => {
+        const caja = junto.getBoundingClientRect();
+        globo.style.left = "0px";
+        globo.style.top = "0px";
+        const ancho = globo.offsetWidth;
+        const alto = globo.offsetHeight;
+        const margen = 8;
+        let x = Math.min(Math.max(margen, caja.left), window.innerWidth - ancho - margen);
+        let y = caja.bottom + margen;
+        if (y + alto > window.innerHeight - margen && caja.top - alto - margen > margen) {
+            y = caja.top - alto - margen;
+        }
+        globo.style.left = Math.round(Math.max(margen, x)) + "px";
+        globo.style.top = Math.round(y) + "px";
+    };
+
+    const cerrar = () => {
+        clearTimeout(espera);
+        dueno = null;
+        globo.hidden = true;
+        globo.textContent = "";
+        globo.className = "mundo-globo";
+    };
+
+    const abrirGlosario = (boton) => {
+        const definicion = document.getElementById(boton.getAttribute("aria-describedby") || "");
+        const texto = definicion ? definicion.textContent : "";
+        if (!texto.trim()) {
+            return;
+        }
+        dueno = boton;
+        globo.textContent = "";
+        globo.className = "mundo-globo es-glosario";
+        const palabra = document.createElement("strong");
+        palabra.className = "mundo-globo-titulo";
+        palabra.textContent = boton.textContent;
+        const que = document.createElement("span");
+        que.className = "mundo-globo-resumen";
+        que.textContent = texto;
+        globo.appendChild(palabra);
+        globo.appendChild(que);
+        globo.hidden = false;
+        colocar(boton);
+    };
+
+    const abrirEnlace = async (enlace) => {
+        dueno = enlace;
+        const url = new URL(enlace.href, location.href);
+        const mapa = await fichas();
+        if (dueno !== enlace) {
+            return;
+        }
+        const f = mapa.get(url.pathname);
+        if (!f) {
+            return;
+        }
+        globo.textContent = "";
+        globo.className = "mundo-globo es-enlace";
+        const imagen = (f.bandera || f.miniatura || "").toString();
+        if (imagen && rutaSeguraMundo(imagen) !== "#") {
+            const img = document.createElement("img");
+            img.className = "mundo-globo-imagen";
+            img.src = rutaSeguraMundo(imagen);
+            img.alt = "";
+            img.loading = "lazy";
+            globo.appendChild(img);
+        }
+        const texto = document.createElement("div");
+        texto.className = "mundo-globo-texto";
+        const titulo = document.createElement("strong");
+        titulo.className = "mundo-globo-titulo";
+        titulo.textContent = (f.titulo || "").toString();
+        texto.appendChild(titulo);
+        if ((f.que || "").toString().trim()) {
+            const que = document.createElement("span");
+            que.className = "mundo-globo-que";
+            que.textContent = f.que.toString();
+            texto.appendChild(que);
+        }
+        let resumen = (f.resumen || "").toString().trim();
+        if (resumen.length > 220) {
+            resumen = resumen.slice(0, 220).replace(/\s+\S*$/, "") + "…";
+        }
+        if (resumen) {
+            const r = document.createElement("span");
+            r.className = "mundo-globo-resumen";
+            r.textContent = resumen;
+            texto.appendChild(r);
+        }
+        globo.appendChild(texto);
+        globo.hidden = false;
+        colocar(enlace);
+        const img = globo.querySelector("img");
+        if (img && !img.complete) {
+            img.addEventListener("load", () => {
+                if (dueno === enlace) {
+                    colocar(enlace);
+                }
+            }, { once: true });
+        }
+    };
+
+    const deLaWiki = (enlace) => {
+        if (!enlace || enlace.closest(".mundo-migas, .mundo-globo")) {
+            return false;
+        }
+        let url = null;
+        try {
+            url = new URL(enlace.href, location.href);
+        } catch (error) {
+            return false;
+        }
+        return url.origin === location.origin && url.pathname.startsWith("/web/wiki/")
+            && url.pathname !== location.pathname && !/index_wiki\.html$/.test(url.pathname);
+    };
+
+    const entrar = (evento) => {
+        const objetivo = evento.target instanceof Element ? evento.target : null;
+        const glosario = objetivo ? objetivo.closest(".mundo-glosario") : null;
+        const enlace = objetivo ? objetivo.closest("main a[href]") : null;
+        if (glosario) {
+            clearTimeout(espera);
+            abrirGlosario(glosario);
+        } else if (enlace && deLaWiki(enlace) && enlace !== dueno) {
+            clearTimeout(espera);
+            // Un poco de espera con el ratón, para que no salte al cruzar
+            // la página; con el teclado, al momento.
+            espera = setTimeout(() => abrirEnlace(enlace), evento.type === "focusin" ? 0 : 350);
+        }
+    };
+    const salir = (evento) => {
+        const hacia = evento.relatedTarget instanceof Element ? evento.relatedTarget : null;
+        if (dueno && hacia && dueno.contains(hacia)) {
+            return;
+        }
+        // Al salir el ratón de lo que tiene el foco (lo pulsado con el
+        // dedo, o a lo que se llegó con el tabulador), sigue abierto: se
+        // cierra al irse el foco.
+        if (evento.type === "mouseout" && dueno && document.activeElement === dueno) {
+            return;
+        }
+        const objetivo = evento.target instanceof Element ? evento.target : null;
+        if (objetivo && objetivo.closest(".mundo-glosario, main a[href]")) {
+            cerrar();
+        }
+    };
+    document.addEventListener("mouseover", entrar);
+    document.addEventListener("focusin", entrar);
+    document.addEventListener("mouseout", salir);
+    document.addEventListener("focusout", salir);
+    // En una pantalla táctil no hay «pasar por encima»: pulsar la palabra
+    // abre o cierra su significado.
+    document.addEventListener("click", (evento) => {
+        const glosario = evento.target instanceof Element ? evento.target.closest(".mundo-glosario") : null;
+        if (glosario) {
+            // Abre, no alterna: al pulsar ya ha llegado el foco y lo ha
+            // abierto. Se cierra pulsando fuera o con Escape.
+            abrirGlosario(glosario);
+        } else if (!globo.hidden) {
+            cerrar();
+        }
+    });
+    document.addEventListener("keydown", (evento) => {
+        if (evento.key === "Escape" && !globo.hidden) {
+            cerrar();
+        }
+    });
+    const seccion = document.querySelector("main > section");
+    if (seccion) {
+        seccion.addEventListener("scroll", cerrar, { passive: true });
+    }
+    window.addEventListener("resize", cerrar);
 }

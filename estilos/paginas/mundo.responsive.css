@@ -133,11 +133,12 @@
             "indice    vistas"
             "destacado vistas"
             "regiones  vistas"
-            "cambios   vistas";
+            "cambios   vistas"
+            "progreso  vistas";
         /* Si la columna de la derecha es más alta que lo de la izquierda,
-           lo que sobra se lo queda la última fila (los últimos cambios) y
+           lo que sobra se lo queda la última fila (cuánto falta) y
            no aparecen huecos entre los bloques de la izquierda. */
-        grid-template-rows: auto auto auto auto 1fr;
+        grid-template-rows: auto auto auto auto auto 1fr;
         column-gap: 26px;
     }
 }

@@ -30,5 +30,3 @@ calendario (herramientas/1-publicar/calendario.py): [[{{nombre}}]]. -->
 
 ## Variantes regionales
 <!-- Cómo se celebra en cada sitio. -->
-
-## En la mesa

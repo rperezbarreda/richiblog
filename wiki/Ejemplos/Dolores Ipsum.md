@@ -18,8 +18,6 @@ pareja: "[[Amet Consectetur]]"
 hijos: "[[Adipisci Elit]]"
 aliados: "[[La Orden de Sitamet]]"
 enemigos: "[[La Bestia Dolorosa]]"
-jugador: "tempor incididunt"
-clase: "sed do eiusmod"
 layout:
   - type: header
     text: Biografía
@@ -27,9 +25,6 @@ layout:
   - type: header
     text: Familia
     above: padres
-  - type: header
-    text: En la mesa
-    above: jugador
 ---
 
 **Dolores Ipsum** es lorem ipsum dolor sit amet, consectetur adipiscing elit. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.
@@ -61,10 +56,6 @@ Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliqu
 ## Posesiones
 
 Integer in mauris eu nibh euismod gravida. Nullam varius, turpis et commodo pharetra, est eros bibendum elit, nec luctus magna felis sollicitudin mauris. Lorem ipsum dolor sit amet, consectetur adipiscing elit.
-
-## En la mesa
-
-Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Praesent placerat risus quis eros, fusce pellentesque suscipit nibh. Curabitur pretium tincidunt lacus, nulla gravida orci a odio.
 
 ## Citas
 

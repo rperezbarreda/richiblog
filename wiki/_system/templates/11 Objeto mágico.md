@@ -33,6 +33,3 @@ valor:
 ## Portadores
 
 ## Leyendas
-
-## En la mesa
-<!-- Sus reglas de juego, y quién lo tiene en la partida. -->

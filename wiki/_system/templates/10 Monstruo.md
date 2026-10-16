@@ -39,6 +39,3 @@ El **{{nombre}}** es
 <!-- Lo que cuenta la gente de él, sea verdad o no. -->
 
 ## Ejemplares notables
-
-## En la mesa
-<!-- Sus estadísticas, o de dónde salen, y cuándo ha aparecido. -->

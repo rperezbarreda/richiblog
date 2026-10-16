@@ -18,8 +18,6 @@ pareja: ""
 hijos: ""
 aliados: ""
 enemigos: ""
-jugador: "magna aliqua"
-clase: "tempor incididunt"
 layout:
   - type: header
     text: Biografía
@@ -27,9 +25,6 @@ layout:
   - type: header
     text: Familia
     above: padres
-  - type: header
-    text: En la mesa
-    above: jugador
 ---
 
 **Amet Consectetur** es lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit.
@@ -61,10 +56,6 @@ Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad mi
 ## Posesiones
 
 Nullam varius, turpis et commodo pharetra, est eros bibendum elit, nec luctus magna felis sollicitudin mauris. Praesent placerat risus quis eros, fusce pellentesque suscipit nibh. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
-
-## En la mesa
-
-Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Nullam varius, turpis et commodo pharetra, est eros bibendum elit, nec luctus magna felis sollicitudin mauris. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
 
 ## Citas
 

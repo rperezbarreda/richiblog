@@ -23,7 +23,7 @@ aumento de característica:
 rasgos:
 layout:
   - type: header
-    text: En la mesa
+    text: Rasgos
     above: aumento de característica
 ---
 
@@ -43,6 +43,3 @@ Los **{{nombre}}** son una subraza de [[{{raza}}]].
 <!-- Con las otras subrazas de su raza y con los demás pueblos. -->
 
 ## Miembros notables
-
-## En la mesa
-<!-- Sus rasgos de juego propios, los que se suman a los de la raza. -->

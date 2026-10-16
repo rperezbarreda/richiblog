@@ -6,13 +6,13 @@
     },
     "cambios": [
         {
-            "titulo": "Adipisci Elit",
-            "url": "/web/wiki/ejemplos/adipisci_elit.html",
+            "titulo": "Lorémidos del Bosque",
+            "url": "/web/wiki/ejemplos/loremidos/loremidos_del_bosque.html",
             "fecha": "2026-10-16"
         },
         {
-            "titulo": "Amet Consectetur",
-            "url": "/web/wiki/ejemplos/amet_consectetur.html",
+            "titulo": "Lorémidos",
+            "url": "/web/wiki/ejemplos/loremidos/loremidos.html",
             "fecha": "2026-10-16"
         },
         {
@@ -21,19 +21,25 @@
             "fecha": "2026-10-16"
         },
         {
-            "titulo": "Ipsa",
-            "url": "/web/wiki/ejemplos/ipsa.html",
+            "titulo": "Adipisci Elit",
+            "url": "/web/wiki/ejemplos/adipisci_elit.html",
             "fecha": "2026-10-16"
         },
         {
-            "titulo": "La Batalla de Ipsum",
-            "url": "/web/wiki/ejemplos/la_batalla_de_ipsum.html",
+            "titulo": "La Orden de Sitamet",
+            "url": "/web/wiki/ejemplos/la_orden_de_sitamet.html",
             "fecha": "2026-10-16"
         },
         {
-            "titulo": "La Bestia Dolorosa",
-            "url": "/web/wiki/ejemplos/la_bestia_dolorosa.html",
+            "titulo": "Amet Consectetur",
+            "url": "/web/wiki/ejemplos/amet_consectetur.html",
             "fecha": "2026-10-16"
         }
-    ]
+    ],
+    "progreso": {
+        "paginas": 146,
+        "escritas": 39,
+        "campos": 2174,
+        "decididos": 462
+    }
 }

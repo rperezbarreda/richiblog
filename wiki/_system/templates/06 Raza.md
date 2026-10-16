@@ -22,7 +22,7 @@ aumento de característica:
 rasgos:
 layout:
   - type: header
-    text: En la mesa
+    text: Rasgos
     above: tamaño
 ---
 
@@ -53,7 +53,3 @@ Los **{{nombre}}** son
 Si escribes algo en este apartado, sale encima de la lista. -->
 
 ## Miembros notables
-
-## En la mesa
-<!-- Si se puede jugar: sus rasgos de juego (lo de todas sus subrazas; lo
-propio de cada una, en su página), de dónde salen y nombres típicos. -->

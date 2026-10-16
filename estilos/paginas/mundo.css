@@ -971,6 +971,7 @@ html:not(.js) .mundo-spoiler {
         "destacado"
         "regiones"
         "cambios"
+        "progreso"
         "vistas";
     align-content: start;
     gap: 14px;
@@ -2819,4 +2820,236 @@ input.mundo-pieza-control[type="search"] {
     /* Si la sección no tiene un fondo opaco, el morado del tema (el script
        le pone el de la sección si lo tiene). */
     background: var(--purple);
+}
+
+
+/* ====================================================================
+   LA CRONOLOGÍA DE CADA PÁGINA
+   ==================================================================== */
+/* Lo que ha pasado allí o le ha pasado a quien sea (de la línea de tiempo
+   y de las páginas de acontecimiento), en una raya vertical: la fecha a
+   la izquierda, lo que pasó a la derecha. */
+.mundo-cronologia {
+    margin: 0;
+    padding: 0 0 0 18px;
+    border-left: 2px solid var(--yellow);
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.mundo-cronologia li {
+    position: relative;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 2px 14px;
+}
+
+/* El punto sobre la raya. */
+.mundo-cronologia li::before {
+    content: "";
+    position: absolute;
+    top: 0.45em;
+    left: -25px;
+    width: 10px;
+    height: 10px;
+    border: 2px solid var(--yellow);
+    border-radius: 50%;
+    background: var(--purple);
+}
+
+.mundo-crono-fecha {
+    flex: 0 0 9rem;
+    color: var(--yellow);
+    font-family: var(--fuente-mono);
+    font-size: 0.875rem;
+    line-height: 1.6;
+}
+
+.mundo-crono-cuerpo {
+    flex: 1 1 16rem;
+    min-width: 0;
+}
+
+.mundo-crono-donde {
+    color: var(--muted);
+}
+
+.mundo-crono-resumen {
+    display: block;
+    margin-top: 2px;
+    color: var(--muted);
+    font-size: 0.9375rem;
+}
+
+
+/* ====================================================================
+   LOS FILTROS DE CADA SECCIÓN
+   ==================================================================== */
+/* Un desplegable por cada cosa que se puede filtrar (la raza, el tipo…),
+   encima de las tarjetas de la ventana de la sección. */
+.mundo-filtros {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: end;
+    gap: 10px 16px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--border);
+}
+
+.mundo-filtros-cuenta {
+    flex-basis: 100%;
+    margin: 0;
+    color: var(--muted);
+    font-family: var(--fuente-mono);
+    font-size: 0.875rem;
+}
+
+
+/* ====================================================================
+   CUÁNTO FALTA, EN LA PORTADA
+   ==================================================================== */
+.mundo-progreso[hidden] {
+    display: none;
+}
+
+.mundo-progreso {
+    grid-area: progreso;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.mundo-progreso-lista {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.mundo-progreso-lista li {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.mundo-progreso-que {
+    color: var(--white);
+    font-size: 0.9375rem;
+}
+
+/* La barra, dibujada a mano (la de cada navegador es distinta y, en
+   oscuro, apenas se ve): el borde y el relleno en el color de los
+   enlaces. */
+.mundo-progreso-barra {
+    appearance: none;
+    width: 100%;
+    height: 14px;
+    border: 2px solid var(--yellow);
+    border-radius: 0;
+    background: transparent;
+    color: var(--yellow);
+}
+
+.mundo-progreso-barra::-webkit-progress-bar {
+    background: transparent;
+}
+
+.mundo-progreso-barra::-webkit-progress-value {
+    background: var(--yellow);
+}
+
+.mundo-progreso-barra::-moz-progress-bar {
+    background: var(--yellow);
+}
+
+.mundo-progreso-falta {
+    margin: 0;
+    color: var(--muted);
+    font-size: 0.875rem;
+}
+
+
+/* ====================================================================
+   EL GLOSARIO DENTRO DEL TEXTO Y EL GLOBO
+   ==================================================================== */
+/* La palabra: un botón que se lee como texto, subrayado de puntos (como
+   los <abbr>), para que se note que tiene algo detrás. */
+.mundo-glosario {
+    display: inline;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    background: none;
+    color: inherit;
+    font: inherit;
+    text-decoration: underline dotted;
+    text-decoration-thickness: 2px;
+    text-underline-offset: 4px;
+    cursor: help;
+}
+
+.mundo-glosario:hover {
+    color: var(--yellow);
+}
+
+.mundo-glosario:focus-visible {
+    outline: 3px solid var(--yellow);
+    outline-offset: 2px;
+}
+
+.mundo-glosario-definiciones {
+    display: none;
+}
+
+/* El globo: el mismo para la vista previa de un enlace y para el
+   significado de una palabra. */
+.mundo-globo[hidden] {
+    display: none;
+}
+
+.mundo-globo {
+    position: fixed;
+    z-index: 60;
+    display: flex;
+    gap: 12px;
+    width: max-content;
+    max-width: min(22rem, calc(100vw - 16px));
+    padding: 12px 14px;
+    border: 2px solid var(--yellow);
+    background: var(--purple);
+    box-shadow: 4px 4px 0 var(--yellow);
+    color: var(--white);
+    font-size: 0.9375rem;
+    line-height: 1.5;
+    pointer-events: none;
+}
+
+.mundo-globo-imagen {
+    flex: 0 0 auto;
+    width: 64px;
+    height: 64px;
+    object-fit: contain;
+}
+
+.mundo-globo-texto,
+.mundo-globo.es-glosario {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    min-width: 0;
+}
+
+.mundo-globo-titulo {
+    color: var(--yellow);
+    font-size: 1rem;
+}
+
+.mundo-globo-que {
+    color: var(--muted);
+    font-family: var(--fuente-mono);
+    font-size: 0.8125rem;
 }

@@ -1277,7 +1277,18 @@ def con_piezas(cuerpo, paginas, todas_rel, padre_de, palabras):
     return re.sub(r'<div class="(pieza-[a-z]+)">\s*</div>', pieza, cuerpo)
 
 
-def escribir_paginas(paginas, probar, categorias=()):
+def _fecha_de_evento(ev):
+    if str(ev.get("fecha_texto") or "").strip():
+        return str(ev["fecha_texto"]).strip()
+    if ev.get("fecha") is None:
+        return ""
+    texto = mundo_linea.anyo(ev["fecha"])
+    if ev.get("hasta") is not None and ev["hasta"] > ev["fecha"]:
+        texto += " a " + mundo_linea.anyo(ev["hasta"])
+    return texto
+
+
+def escribir_paginas(paginas, probar, categorias=(), eventos=()):
     molde, _ = leer_texto(PLANTILLA)
     # Sin los comentarios de la plantilla: estas páginas salen publicadas.
     molde = limpiar_comentarios_html(molde)[0]
@@ -1298,6 +1309,9 @@ def escribir_paginas(paginas, probar, categorias=()):
                                        rejilla_de_paises(ficha, paginas, region_de))
         cuerpo = con_subrazas(cuerpo, lista_de_subrazas(ficha, paginas, subraza_de))
         cuerpo = con_piezas(cuerpo, paginas, todas_rel, padre_de, palabras)
+        # El glosario, antes de lo que se añade solo (que son listas de
+        # enlaces y nombres, y ahí no hace falta).
+        cuerpo = mundo_piezas.con_glosario(cuerpo, palabras)
         # LO QUE SALE SOLO, sacado de las fichas de las demás páginas (ver
         # herramientas/3-generadores/mundo_piezas.py): sus lugares, sus
         # personajes, sus aliados y enemigos, lo que cuelga de ella, su
@@ -1310,6 +1324,10 @@ def escribir_paginas(paginas, probar, categorias=()):
             cuerpo, "lo_que_la_forma", "Lo que la forma", mundo_piezas.jerarquia(ficha, paginas, padre_de))
         cuerpo = mundo_piezas.en_su_apartado(
             cuerpo, "arbol_familiar", "Árbol familiar", mundo_piezas.arbol_familiar(ficha, paginas, familia))
+        cuerpo = mundo_piezas.en_su_apartado(
+            cuerpo, "cronologia", "Cronología",
+            mundo_piezas.cronologia(ficha, paginas, eventos, mundo_linea.enlaces_de, _fecha_de_evento,
+                                    mundo_linea.leer_fecha))
         if mundo_piezas.llano(mundo_piezas.que_es(ficha)) == "idioma":
             suyas = [p for p in palabras
                      if mundo_piezas.llano(p.get("idioma")) == mundo_piezas.llano(ficha["nombre"])]
@@ -1432,6 +1450,33 @@ def clasificar(etiquetas, categorias):
     return LO_DEMAS, [e for e, _ in suyas]
 
 
+# LOS FILTROS DE LAS VENTANAS DE LA PORTADA: los campos de las fichas por
+# los que tiene sentido filtrar (los monstruos por hábitat, los personajes
+# por raza…). En la ventana sale un desplegable por cada uno que tenga al
+# menos dos valores distintos entre las páginas de esa sección. El tipo es
+# el «infobox» (Asentamiento, Fortaleza, Criatura…).
+FILTRABLES = ("raza", "ubicación", "tipo", "hábitat", "tamaño", "peligrosidad", "rareza",
+              "lealtad", "familia", "ámbitos", "sede", "organización")
+
+
+def filtros_de(ficha):
+    datos = ficha.get("datos") or {}
+    salida = {}
+    que = str(datos.get("infobox") or "").strip()
+    if que:
+        salida["qué es"] = que
+    for campo in FILTRABLES:
+        valor = datos.get(campo)
+        if isinstance(valor, list):
+            valor = ", ".join(str(v) for v in valor)
+        texto = str(valor or "").strip()
+        # Los enlaces, por su nombre: [[Elfos|los elfos]] → Elfos.
+        texto = re.sub(r"\[\[([^\]|#]+)(?:#[^\]|]*)?(?:\|[^\]]*)?\]\]", r"\1", texto).strip(" *")
+        if texto and "por decidir" not in texto.lower() and len(texto) <= 60:
+            salida[campo] = texto
+    return salida
+
+
 def escribir_indice(paginas, mapas, probar, categorias=(), peques=None):
     """La portada: el índice por apartados. Las fichas y los botones de
     etiqueta los pinta el navegador con datos/wiki/mundo.json, igual que el
@@ -1458,6 +1503,9 @@ def escribir_indice(paginas, mapas, probar, categorias=(), peques=None):
             "que": ficha["subtitulo"] or str(ficha["datos"].get("infobox") or ""),
             "resumen": ficha["resumen"],
             "region": suya["titulo"] if suya else "",
+            # Lo que se puede filtrar en la ventana de su sección (el tipo,
+            # la raza, el hábitat…; ver FILTRABLES).
+            "filtros": filtros_de(ficha),
             # De qué raza es, si es una subraza (ver subrazas_de): la
             # portada la pone debajo de su raza.
             "subraza_de": (paginas[subraza_de[ficha["nombre"].strip().lower()]]["titulo"]
@@ -1597,6 +1645,41 @@ def _fecha_de(archivo):
     return del_archivo, datetime.date.fromtimestamp(del_archivo).isoformat()
 
 
+# CUÁNTO FALTA: las páginas que ya tienen texto de verdad (no el de
+# relleno de la plantilla ni el lorem ipsum de los ejemplos) y los campos
+# de las fichas que ya están decididos (no dicen «por decidir»). No cuenta
+# las páginas de ejemplo (wiki/Ejemplos/) ni las de utilidades, que no son
+# del mundo. Lo mismo, con detalle, lo dice
+# herramientas/5-consulta/pendientes-wiki.py.
+SIN_CONTAR = {"tags", "aliases", "etiquetas", "cssclasses", "image", "imagen", "bandera",
+              "blasón", "blason", "escudo", "plantilla"}
+
+
+def progreso_de(paginas):
+    escritas = total = decididos = campos = 0
+    for f in paginas.values():
+        partes = Path(f["carpeta"]).parts
+        if partes and partes[0].lower() in ("ejemplos", "utilidades"):
+            continue
+        texto = leer_texto(f["archivo"])[0]
+        m = re.match(r"^---\n(.*?)\n---\n?", texto, re.S)
+        cuerpo = re.sub(r"<!--.*?-->", "", texto[m.end():] if m else texto, flags=re.S)
+        total += 1
+        if cuerpo.strip() and not any(r in cuerpo for r in ("Texto de relleno", "Lorem ipsum")):
+            escritas += 1
+        for linea in (m.group(1) if m else "").split("\n"):
+            if linea.lstrip().startswith("#") or linea.startswith((" ", "\t", "-")) or ":" not in linea:
+                continue
+            clave, valor = linea.split(":", 1)
+            valor = valor.strip().strip("'\"")
+            if clave.strip().lower() in SIN_CONTAR or not valor:
+                continue
+            campos += 1
+            if "por decidir" not in valor.lower():
+                decididos += 1
+    return {"paginas": total, "escritas": escritas, "campos": campos, "decididos": decididos}
+
+
 def escribir_portada(paginas, probar, cuantos=6):
     cabecera, _ = mundo_linea.leer(lambda *a: None)
     hoy = None
@@ -1608,7 +1691,7 @@ def escribir_portada(paginas, probar, cuantos=6):
     fechas = {clave: _fecha_de(f["archivo"]) for clave, f in paginas.items()}
     cambios = [{"titulo": paginas[k]["titulo"], "url": paginas[k]["url"], "fecha": fechas[k][1]}
                for k in sorted(fechas, key=lambda k: fechas[k][0], reverse=True)[:cuantos]]
-    salida = {"hoy": hoy, "cambios": cambios}
+    salida = {"hoy": hoy, "cambios": cambios, "progreso": progreso_de(paginas)}
     if not probar:
         escribir_json(PORTADA, salida)
     return salida
@@ -1894,7 +1977,7 @@ def main():
             usadas.add(m.group(1).lower())
 
     SALIDA.mkdir(parents=True, exist_ok=True)
-    escritas = escribir_paginas(paginas, args.probar, categorias)
+    escritas = escribir_paginas(paginas, args.probar, categorias, eventos)
     escritos = escribir_mapas(mapas, args.probar)
     escritos += escribir_vistas(mapas, args.probar)
     fichas = escribir_indice(paginas, mapas, args.probar, categorias, peques)

@@ -14,7 +14,7 @@ aumento de característica: "ut labore"
 rasgos: "tempor incididunt"
 layout:
   - type: header
-    text: En la mesa
+    text: Rasgos
     above: aumento de característica
 ---
 
@@ -39,7 +39,3 @@ Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Duis aute iru
 ## Miembros notables
 
 Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Integer in mauris eu nibh euismod gravida. Morbi in sem quis dui placerat ornare, pellentesque odio nisi euismod in.
-
-## En la mesa
-
-Curabitur pretium tincidunt lacus, nulla gravida orci a odio. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Integer in mauris eu nibh euismod gravida.

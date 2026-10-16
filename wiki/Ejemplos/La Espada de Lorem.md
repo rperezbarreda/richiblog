@@ -34,7 +34,3 @@ Nullam varius, turpis et commodo pharetra, est eros bibendum elit, nec luctus ma
 ## Leyendas
 
 Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Praesent placerat risus quis eros, fusce pellentesque suscipit nibh. Integer in mauris eu nibh euismod gravida.
-
-## En la mesa
-
-Curabitur pretium tincidunt lacus, nulla gravida orci a odio. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.

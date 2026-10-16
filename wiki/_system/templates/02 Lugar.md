@@ -64,6 +64,3 @@ templos, mercados…) o las salas de una mazmorra. Con ### si son muchas. -->
 ## Personajes notables
 
 ## Rumores y leyendas
-
-## En la mesa
-<!-- Cuándo ha salido en las partidas y qué pasó. -->

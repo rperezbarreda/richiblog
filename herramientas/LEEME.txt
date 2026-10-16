@@ -1242,12 +1242,15 @@
     - la ficha de la derecha con los campos que suele llevar ese tipo
       (un país: capital, forma de gobierno, gobernante, población,
       lenguas, moneda, lema…; un personaje: raza, nacimiento, lealtad,
-      familia, y su jugador y su clase si es de la partida), repartidos
-      en tramos con su título (Gobierno, Gentes, Familia…);
+      familia), repartidos en tramos con su título (Gobierno, Gentes,
+      Familia…);
     - los apartados de siempre de ese tipo (un país: Historia,
       Geografía, Gobierno y política, Sociedad, Economía, Cultura,
-      Relaciones exteriores, Lugares de interés, Rumores y leyendas, En
-      la mesa…), cada uno con una NOTA ESCONDIDA que dice qué va ahí;
+      Relaciones exteriores, Lugares de interés, Rumores y leyendas…),
+      cada uno con una NOTA ESCONDIDA que dice qué va ahí. La wiki y las
+      notas de rol son cosas distintas: las plantillas no hablan de
+      partidas (desde el 16-10-2026 ya no llevan «En la mesa» ni el
+      jugador y la clase de los personajes);
     - las etiquetas para que salga en su sección de la portada (y en su
       apartado dentro de ella: Deidades, Credos, Asentamientos,
       Acontecimientos…) y la carpeta donde se guarda (un país, junto a
@@ -1341,6 +1344,35 @@
       una raza o subraza, toda la familia; lo que pertenece a algo, lo que
       pertenece a lo mismo; un lugar, los de su país; y si no, las de su
       mismo apartado de la portada (si son entre 2 y 40).
+    - CRONOLOGÍA: lo que ha pasado en esa página o le ha pasado a quien
+      sea, en una raya vertical por fechas. Sale de los eventos de la
+      línea de tiempo que enlazan o nombran la página y de las páginas de
+      acontecimiento cuyo lugar, bandos… la nombran. Un PAÍS se lleva
+      además lo que ha pasado en sus lugares (los que dicen
+      «ubicación: [[ese país]]»): es su línea de tiempo.
+    - EL GLOSARIO, dentro del texto: la primera vez que sale en una
+      página una palabra del diccionario (datos/wiki/diccionario.json),
+      va subrayada de puntos y al pasar el ratón, llegar con el tabulador
+      o pulsarla, dice qué significa. No se marca dentro de enlaces,
+      títulos, tablas ni código.
+
+  LO QUE PONE EL NAVEGADOR (scripts/paginas/mundo.js):
+
+    - VISTA PREVIA DE LOS ENLACES: al pasar el ratón (o llegar con el
+      tabulador) por un enlace a otra página de la wiki, una tarjeta con
+      su bandera o su mapa, qué es y su entradilla, de mundo.json. Se
+      cierra con Escape.
+    - FILTROS EN LAS SECCIONES: la ventana de cada sección de la portada
+      (menos el Mapamundi) lleva un desplegable por cada campo que se
+      pueda filtrar y tenga al menos dos valores distintos: raza,
+      ubicación, tipo, hábitat, tamaño, peligrosidad, rareza, lealtad,
+      familia, ámbitos, sede, organización y «qué es» (la lista,
+      FILTRABLES en generar-mundo.py). Lo «por decidir» no cuenta.
+    - CUÁNTO FALTA, en la portada: cuántas páginas tienen ya texto de
+      verdad y cuántos campos de las fichas están decididos, en dos
+      barras (sin contar Ejemplos ni Utilidades). Lo cuenta progreso_de,
+      en generar-mundo.py, y va en mundo-portada.json; el detalle, en
+      herramientas/5-consulta/pendientes-wiki.py.
 
   LAS UTILIDADES (wiki/Utilidades/, en la sección «herramientas» de la
   portada). Son páginas normales de la wiki con una PIEZA dentro, una

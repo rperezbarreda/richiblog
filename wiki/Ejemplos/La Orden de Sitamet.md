@@ -54,7 +54,3 @@ Praesent placerat risus quis eros, fusce pellentesque suscipit nibh. Duis aute i
 ## Rumores y leyendas
 
 Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Nullam varius, turpis et commodo pharetra, est eros bibendum elit, nec luctus magna felis sollicitudin mauris. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
-
-## En la mesa
-
-Nullam varius, turpis et commodo pharetra, est eros bibendum elit, nec luctus magna felis sollicitudin mauris. Integer in mauris eu nibh euismod gravida. Curabitur pretium tincidunt lacus, nulla gravida orci a odio.

@@ -16,7 +16,7 @@ aumento de característica: "ut labore"
 rasgos: "dolor sit amet"
 layout:
   - type: header
-    text: En la mesa
+    text: Rasgos
     above: tamaño
 ---
 
@@ -57,7 +57,3 @@ Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Excepteur sin
 ## Miembros notables
 
 Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Curabitur pretium tincidunt lacus, nulla gravida orci a odio. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.
-
-## En la mesa
-
-Praesent placerat risus quis eros, fusce pellentesque suscipit nibh. Morbi in sem quis dui placerat ornare, pellentesque odio nisi euismod in. Curabitur pretium tincidunt lacus, nulla gravida orci a odio.

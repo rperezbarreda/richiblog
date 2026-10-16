@@ -18,8 +18,6 @@ pareja: ""
 hijos: ""
 aliados: ""
 enemigos: ""
-jugador: "lorem ipsum"
-clase: "consectetur"
 layout:
   - type: header
     text: Biografía
@@ -27,9 +25,6 @@ layout:
   - type: header
     text: Familia
     above: padres
-  - type: header
-    text: En la mesa
-    above: jugador
 ---
 
 **Adipisci Elit** es lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam varius, turpis et commodo pharetra, est eros bibendum elit, nec luctus magna felis sollicitudin mauris.
@@ -61,10 +56,6 @@ Nullam varius, turpis et commodo pharetra, est eros bibendum elit, nec luctus ma
 ## Posesiones
 
 Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Integer in mauris eu nibh euismod gravida.
-
-## En la mesa
-
-Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Curabitur pretium tincidunt lacus, nulla gravida orci a odio.
 
 ## Citas
 

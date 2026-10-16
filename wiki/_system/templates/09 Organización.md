@@ -47,5 +47,3 @@ layout:
 <!-- Qué piden a quien quiere unirse y qué le dan. -->
 
 ## Rumores y leyendas
-
-## En la mesa
