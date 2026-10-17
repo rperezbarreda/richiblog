@@ -854,6 +854,11 @@ def con_banderas_en_el_mapa(svg, paginas):
     return re.sub(r'<a class="mapa-forma([^"]*)" href="([^"]+)"', poner, svg)
 
 
+# Las imágenes de los emblemas de los mapas: se copian con las de las
+# fichas (ver copiar_imagenes).
+EMBLEMAS_USADOS = set()
+
+
 def convertir_mapas(mapas, paginas, imagenes, avisos_por_pagina, detalle):
     """Lee los .cmap, los pinta y deja en cada uno lo que hace falta para
     escribir su página. Devuelve las imágenes de fondo que hay que
@@ -892,6 +897,17 @@ def convertir_mapas(mapas, paginas, imagenes, avisos_por_pagina, detalle):
         capas_por_preparar[final] = archivo
         return "/imagenes/wiki/" + final
 
+    def de_emblema(nombre):
+        """La imagen de un emblema (una bandera, un blasón): se copia tal
+        cual a imagenes/wiki/, como las de las fichas."""
+        archivo, apano = pedir_imagen(indices, nombre)
+        if archivo is None:
+            return ""
+        if apano and cuaderno[0] is not None:
+            cuaderno[0].di("no tengo %s" % _como_lo_pide(nombre), apano)
+        EMBLEMAS_USADOS.add(archivo.name.lower())
+        return "/imagenes/wiki/" + archivo.name
+
     def de_pagina(nombre):
         ficha = paginas.get(nombre.strip().lower())
         return (ficha["url"], True) if ficha else ("", False)
@@ -909,7 +925,7 @@ def convertir_mapas(mapas, paginas, imagenes, avisos_por_pagina, detalle):
         cuaderno[0] = avisos
         hecho = mundo_mapas.pintar(leido, de_pagina, de_mapa, de_imagen,
                                    detalle=detalle, avisar=avisos.di,
-                                   region_de=region_de)
+                                   region_de=region_de, emblema_a=de_emblema)
         mapa["titulo"] = leido["titulo"] or mapa["nombre"]
         mapa["ancho"], mapa["alto"] = leido["ancho"], leido["alto"]
         mapa["svg"] = con_banderas_en_el_mapa(hecho["svg"], paginas)
@@ -927,7 +943,8 @@ def convertir_mapas(mapas, paginas, imagenes, avisos_por_pagina, detalle):
                                                    hecho.get("niveles", False),
                                                    hecho.get("hay_lineas", False),
                                                    hecho.get("hay_nombres", False),
-                                                   hecho.get("todas_de_salida", False))
+                                                   hecho.get("todas_de_salida", False),
+                                                   hecho.get("hay_escala", False))
         mapa["puntos"] = hecho["puntos"]
         mapa["dibujo"] = hecho["dibujo"]
         mapa["escondidos"] = hecho["escondidos"]
@@ -2119,6 +2136,7 @@ def main():
     portada = escribir_portada(paginas, args.probar)
     escribir_esqueleto_portada(fichas, portada.get("hoy"), args.probar)
     escribir_datos_de_las_piezas(paginas, args.probar)
+    usadas |= EMBLEMAS_USADOS
     copiadas, pesadas, repetidas = copiar_imagenes(imagenes, usadas, args.probar)
     hechas, saltadas, enteras, gordas = preparar_capas(capas, args.probar)
     sobran = limpiar_lo_que_sobra(paginas, mapas, args.probar)

@@ -925,6 +925,17 @@ body.en-mapa main {
     accent-color: var(--acento);
 }
 
+.mapa-emblema-botones {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 8px;
+}
+
+.mapa-ed-emblema {
+    filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.6));
+}
+
 .mapa-medir-escala {
     margin-top: 12px;
 }

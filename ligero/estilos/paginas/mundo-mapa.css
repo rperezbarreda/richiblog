@@ -21,6 +21,119 @@ html:not(.js) .mapa-mandos,
 html:not(.js) .mapa-ayuda {
     display: none;
 }
+.mapa-medir {
+    display: inline-flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px 10px;
+}
+.mapa-medir [aria-pressed="true"] {
+    background: var(--yellow);
+    color: var(--surface);
+}
+.mapa-medida {
+    margin: 0;
+    color: var(--white);
+    font-weight: 700;
+}
+.mapa-medida:empty {
+    display: none;
+}
+.mapa-medida.es-encima {
+    position: absolute;
+    left: 10px;
+    right: 10px;
+    bottom: 76px;
+    z-index: 2;
+    width: fit-content;
+    max-width: calc(100% - 20px);
+    padding: 6px 10px;
+    border-radius: 4px;
+    background: rgba(27, 16, 32, 0.82);
+    color: #f4ecd8;
+    pointer-events: none;
+}
+.mapa-lienzo.esta-midiendo,
+.mapa-lienzo.esta-midiendo .es-enlace {
+    cursor: crosshair;
+}
+.mapa-medida-dibujo {
+    pointer-events: none;
+}
+.mapa-medida-borde,
+.mapa-medida-raya {
+    fill: none;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    vector-effect: non-scaling-stroke;
+}
+.mapa-medida-borde {
+    stroke: #1b1020;
+    stroke-width: 6px;
+}
+.mapa-medida-raya {
+    stroke: #f5ce6c;
+    stroke-width: 3px;
+    stroke-dasharray: 10px 6px;
+}
+.mapa-medida-punto {
+    fill: #f5ce6c;
+    stroke: #1b1020;
+    stroke-width: 2px;
+    vector-effect: non-scaling-stroke;
+}
+.mapa-escala-viva {
+    position: absolute;
+    left: 10px;
+    bottom: 14px;
+    z-index: 2;
+    padding: 2px 4px;
+    border-radius: 4px;
+    background: rgba(27, 16, 32, 0.72);
+    pointer-events: none;
+}
+.mapa-escala-viva svg {
+    display: block;
+}
+.tiene-escala-viva .mapa-escala {
+    display: none;
+}
+.mapa-escala-tramo {
+    fill: #f4ecd8;
+}
+.mapa-escala-tramo.es-oscuro {
+    fill: #1b1020;
+}
+.mapa-escala-borde {
+    fill: none;
+    stroke: #f4ecd8;
+    stroke-width: 1.5px;
+}
+.mapa-escala-raya {
+    stroke: #f4ecd8;
+    stroke-width: 1.5px;
+}
+.mapa-escala-letra {
+    fill: #f4ecd8;
+    font-family: "Space Grotesk", "Space Grotesk Recambio", system-ui, sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+}
+.mapa-emblema {
+    filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.6));
+}
+.mapa-emblema-fondo {
+    fill: #8e1b3b;
+}
+.mapa-emblema-marco {
+    fill: none;
+    stroke: #d8b25a;
+    stroke-linejoin: round;
+}
+.mapa-emblema.es-enlace:hover .mapa-emblema-marco,
+.mapa-emblema.esta-mirado .mapa-emblema-marco {
+    stroke: #fff3c4;
+}
 .mapa-zoom {
     display: inline-flex;
     align-items: center;

@@ -577,8 +577,13 @@ def leer_mapa(archivo):
     if datos is None:
         return {"error": "Ese mapa no se puede leer: no es un JSON que entienda."}
     capas = [c for c in datos.get("layers") or [] if isinstance(c, dict)]
+    imagenes = {str(c.get("image")): url_de_imagen(c.get("image")) for c in capas if c.get("image")}
+    # Y las de los emblemas (banderas, blasones).
+    for em in datos.get("emblems") or []:
+        if isinstance(em, dict) and em.get("image"):
+            imagenes[str(em["image"])] = url_de_imagen(em["image"])
     return {"archivo": archivo.relative_to(VAULT).as_posix(), "datos": datos,
-            "imagenes": {str(c.get("image")): url_de_imagen(c.get("image")) for c in capas if c.get("image")},
+            "imagenes": imagenes,
             "url": url_de_la_pagina(str(datos.get("title") or archivo.stem))}
 
 
@@ -613,6 +618,40 @@ def guardar_mapa(archivo, datos):
     final = "\n" if archivo.read_bytes().endswith(b"\n") else ""
     escribir_como_estaba(archivo, json.dumps(datos, ensure_ascii=False, indent=2) + final)
     return {"ok": True, "mapa": leer_mapa(archivo)}
+
+
+def traer_emblema(peticion):
+    """La imagen de un emblema (una bandera, un blasón) a
+    wiki/_imagenes/banderas/, a 512 px como mucho. {nombre, url}."""
+    try:
+        import imagenes as img
+    except ImportError:
+        return {"error": "No encuentro herramientas/imagenes.py."}
+    nombre = str(peticion.get("nombre") or "").strip() or "emblema"
+    ruta = str(peticion.get("ruta") or "").strip()
+    temporal = None
+    try:
+        if not ruta:
+            datos = str(peticion.get("datos") or "")
+            if not datos:
+                return {"error": "Falta la imagen."}
+            original = str(peticion.get("archivo") or "emblema.png")
+            if "," in datos:
+                datos = datos.split(",", 1)[1]
+            try:
+                crudo = base64.b64decode(datos, validate=True)
+            except ValueError:
+                return {"error": "La imagen no ha llegado bien."}
+            if len(crudo) > 20 * 1024 * 1024:
+                return {"error": "Es demasiado grande (más de 20 MB)."}
+            temporal = archivo_temporal(crudo, Path(original).suffix.lower() or ".png")
+            ruta = str(temporal)
+        hecha, aviso = img.traer(ruta, "wiki/_imagenes/banderas", img.nombre_para(nombre, "_emblema"), lado=512)
+    finally:
+        borrar_temporal(temporal)
+    if not hecha:
+        return {"error": "No he podido traerla: " + aviso}
+    return {"ok": True, "nombre": Path(hecha).name, "url": url_de_imagen(Path(hecha).name), "aviso": aviso}
 
 
 def traer_imagen_de_mapa(peticion, nombre):
@@ -902,6 +941,9 @@ class Editor(SimpleHTTPRequestHandler):
                 return self._json(dict(leer_pagina(archivo), mapas=mapas_de(archivo.stem)))
             if url.path == "/api/pasar/estado":
                 return self._json({k: PASADA[k] for k in ("activa", "fase", "porcentaje", "terminado", "resultado")})
+            if url.path == "/api/imagen-url":
+                nombre = (pregunta.get("nombre") or [""])[0]
+                return self._json({"url": url_de_imagen(nombre)})
             if url.path == "/api/mapas":
                 return self._json({"mapas": mapas_que_hay()})
             if url.path == "/api/mapa":
@@ -943,6 +985,8 @@ class Editor(SimpleHTTPRequestHandler):
                 return self._json({"ok": True, "pagina": leer_pagina(archivo)})
             if url.path == "/api/imagen":
                 return self._json(subir_imagen(peticion))
+            if url.path == "/api/mapa/emblema":
+                return self._json(traer_emblema(peticion))
             if url.path == "/api/mapa/nuevo":
                 return self._json(nuevo_mapa(peticion))
             if url.path in ("/api/mapa/guardar", "/api/mapa/imagen"):

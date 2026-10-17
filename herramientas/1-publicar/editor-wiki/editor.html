@@ -168,6 +168,8 @@
                         <span class="herramienta-icono" aria-hidden="true">⬠</span> Pintar una región</label>
                     <label class="herramienta"><input type="radio" name="herramienta" value="raya">
                         <span class="herramienta-icono" aria-hidden="true">〰</span> Pintar una raya</label>
+                    <label class="herramienta"><input type="radio" name="herramienta" value="emblema">
+                        <span class="herramienta-icono" aria-hidden="true">🛡</span> Poner un emblema</label>
                     <label class="herramienta"><input type="radio" name="herramienta" value="texto">
                         <span class="herramienta-icono" aria-hidden="true">𝐀</span> Escribir</label>
                     <label class="herramienta"><input type="radio" name="herramienta" value="medir">
@@ -183,6 +185,14 @@
                     <div class="mapa-opcion" data-mapa-solo="raya">
                         <label for="mapa-tipo-raya">Qué raya</label>
                         <select id="mapa-tipo-raya" data-mapa-tipos-raya></select>
+                    </div>
+                    <div class="mapa-opcion" data-mapa-solo="emblema">
+                        <label for="mapa-forma-nueva">Forma</label>
+                        <select id="mapa-forma-nueva" data-mapa-formas-emblema></select>
+                    </div>
+                    <div class="mapa-opcion" data-mapa-solo="emblema">
+                        <label for="mapa-tamano-emblema-nuevo">Tamaño</label>
+                        <select id="mapa-tamano-emblema-nuevo" data-mapa-tamanos-emblema></select>
                     </div>
                     <div class="mapa-opcion" data-mapa-solo="texto">
                         <label for="mapa-letra-nueva">Letra</label>
@@ -292,6 +302,26 @@
                             <div class="campo" data-mapa-p-caja="kind">
                                 <label for="mapa-p-tipo" data-mapa-p-tipo-que>Qué es</label>
                                 <select id="mapa-p-tipo" data-mapa-p="kind"></select>
+                            </div>
+                            <div class="campo" data-mapa-p-caja="emblema">
+                                <label for="mapa-p-imagen">Imagen (la bandera o el blasón)</label>
+                                <input id="mapa-p-imagen" list="lista-imagenes" autocomplete="off" spellcheck="false"
+                                       data-mapa-p="image">
+                                <div class="mapa-emblema-botones">
+                                    <div class="subir">
+                                        <input type="file" id="mapa-p-imagen-subir" accept="image/*">
+                                        <label class="boton" for="mapa-p-imagen-subir">Subir una imagen</label>
+                                    </div>
+                                    <button type="button" data-mapa-emblema-pagina>Usar la de su página</button>
+                                </div>
+                            </div>
+                            <div class="campo" data-mapa-p-caja="emblema">
+                                <label for="mapa-p-forma">Forma</label>
+                                <select id="mapa-p-forma" data-mapa-p="shape" data-mapa-formas-emblema></select>
+                            </div>
+                            <div class="campo" data-mapa-p-caja="emblema">
+                                <label for="mapa-p-tamano-emblema">Tamaño</label>
+                                <select id="mapa-p-tamano-emblema" data-mapa-p="size" data-mapa-tamanos-emblema></select>
                             </div>
                             <div class="campo" data-mapa-p-caja="letra">
                                 <label for="mapa-p-letra">Letra</label>

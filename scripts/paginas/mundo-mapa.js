@@ -55,6 +55,7 @@ function initializeMundoMapa() {
     const mando = {
         caja: caja,
         lienzo: lienzo,
+        dibujo: dibujo,
         zoom: 1,
         cifra: caja.querySelector("[data-mapa-cifra]"),
         mas: caja.querySelector("[data-mapa-mas]"),
@@ -122,6 +123,7 @@ function initializeMundoMapa() {
     window.addEventListener("resize", () => {
         escalarPinesDeMapa(mando);
         mejorarImagenDeMapa(mando);
+        pintarEscalaDeMapa(mando);
     });
 
     prepararArrastreDeMapa(mando);
@@ -130,6 +132,8 @@ function initializeMundoMapa() {
     prepararRegionesDeMapa(caja);
     prepararGloboDeMapa(mando);
     prepararSitiosDeMapa();
+    prepararEscalaDeMapa(mando);
+    prepararMedirDeMapa(mando);
     ponerZoomDeMapa(mando, 1);
 }
 
@@ -207,6 +211,7 @@ function ponerZoomDeMapa(mando, quiere, anclaX, anclaY) {
 
     escalarPinesDeMapa(mando);
     mejorarImagenDeMapa(mando);
+    pintarEscalaDeMapa(mando);
 
     if (mando.cifra) {
         mando.cifra.textContent = Math.round(ahora * 100) + "%";
@@ -639,5 +644,252 @@ function mejorarImagenDeMapa(mando) {
             delete imagen.dataset.mapaCambiando;
         };
         antes.src = grande;
+    });
+}
+
+
+// =========================================
+// LA ESCALA Y MEDIR
+// =========================================
+// Si el mapa tiene escala (la pone el editor de mapas: el SVG la trae en
+// data-mapa-escala-px, -distancia y -unidad), una BARRA DE ESCALA COMO LA
+// DE UN MAPA DE VERDAD: a tramos blancos y negros, con sus rayitas y sus
+// números (0, la mitad y el total). Va abajo a la izquierda de la ventana
+// del mapa, quieta aunque el mapa se mueva, y se rehace con el zoom: mide
+// siempre un número redondo (1, 2 o 5 por diez a la lo que sea) de unos
+// 180 píxeles de pantalla. La de dentro del SVG (la que se ve sin
+// JavaScript, que crece con el zoom y se sale) se esconde.
+//
+// Y MEDIR: con el botón «medir» pulsado, cada clic en el mapa pone un
+// punto (también encima de un sitio, que entonces no lleva a su página) y
+// abajo dice cuánto hay y los días de viaje. Los puntos llevan
+// data-mapa-xy, así que miden lo mismo a cualquier zoom, como los pines.
+
+function escalaDelMapa(mando) {
+    const d = mando.dibujo;
+    const px = parseFloat(d.getAttribute("data-mapa-escala-px"));
+    const distancia = parseFloat(d.getAttribute("data-mapa-escala-distancia"));
+    if (!px || !distancia) {
+        return null;
+    }
+    let viaje = {};
+    try {
+        viaje = JSON.parse(d.getAttribute("data-mapa-viaje") || "{}") || {};
+    } catch (error) {
+        viaje = {};
+    }
+    return { porPixel: distancia / px, unidad: d.getAttribute("data-mapa-escala-unidad") || "", viaje };
+}
+
+function cifraDeMapa(n) {
+    return Number(n).toLocaleString("es-ES", { maximumFractionDigits: 1 });
+}
+
+// Cuántos píxeles de pantalla mide una unidad del mapa ahora mismo.
+function pantallaPorUnidadDeMapa(mando) {
+    const d = mando.dibujo;
+    const caja = d.getBoundingClientRect();
+    const lados = (d.getAttribute("viewBox") || "").split(/[\s,]+/);
+    const ancho = parseFloat(lados[2]);
+    const alto = parseFloat(lados[3]);
+    if (!ancho || !alto || !caja.width) {
+        return 0;
+    }
+    return Math.min(caja.width, caja.height * (ancho / alto)) / ancho;
+}
+
+function svgDeMapa(etiqueta, atributos) {
+    // (El espacio de nombres escrito aquí y no en una constante de arriba:
+    // el mapa se prepara nada más cargar este archivo, antes de llegar a
+    // las constantes del final.)
+    const el = document.createElementNS("http://www.w3.org/2000/svg", etiqueta);
+    Object.keys(atributos || {}).forEach((k) => el.setAttribute(k, String(atributos[k])));
+    return el;
+}
+
+function prepararEscalaDeMapa(mando) {
+    mando.escala = escalaDelMapa(mando);
+    if (!mando.escala) {
+        return;
+    }
+    mando.caja.classList.add("tiene-escala-viva");
+    const barra = document.createElement("div");
+    barra.className = "mapa-escala-viva";
+    barra.setAttribute("aria-hidden", "true");
+    mando.caja.appendChild(barra);
+    mando.barraDeEscala = barra;
+}
+
+function pintarEscalaDeMapa(mando) {
+    const barra = mando.barraDeEscala;
+    const escala = mando.escala;
+    if (!barra || !escala) {
+        return;
+    }
+    const porUnidad = pantallaPorUnidadDeMapa(mando);
+    if (!porUnidad) {
+        return;
+    }
+    // Lo que mide un píxel de pantalla, y el número redondo que cabe en
+    // unos 180.
+    const porPantalla = escala.porPixel / porUnidad;
+    const deseado = 180 * porPantalla;
+    const potencia = Math.pow(10, Math.floor(Math.log10(deseado)));
+    const valor = [5, 2, 1].map((m) => m * potencia).find((v) => v <= deseado);
+    const largo = valor / porPantalla;
+    const margen = 12;
+    const unidad = escala.unidad ? " " + escala.unidad : "";
+    const ancho = largo + margen * 2 + 10 + unidad.length * 8;
+    const svg = svgDeMapa("svg", { width: Math.ceil(ancho), height: 52, viewBox: "0 0 " + Math.ceil(ancho) + " 52" });
+    const y = 30;
+    const alto = 8;
+    // Cuatro tramos, blanco y negro a turnos, con un borde: la barra de
+    // los mapas de papel.
+    for (let i = 0; i < 4; i++) {
+        svg.appendChild(svgDeMapa("rect", {
+            x: margen + largo * i / 4, y, width: largo / 4, height: alto,
+            class: i % 2 ? "mapa-escala-tramo es-oscuro" : "mapa-escala-tramo",
+        }));
+    }
+    svg.appendChild(svgDeMapa("rect", { x: margen, y, width: largo, height: alto, class: "mapa-escala-borde" }));
+    // Las rayitas: largas en el principio, la mitad y el final; cortas en
+    // los cuartos.
+    [0, 1, 2, 3, 4].forEach((i) => {
+        const x = margen + largo * i / 4;
+        const larga = i % 2 === 0;
+        svg.appendChild(svgDeMapa("line", {
+            x1: x, x2: x, y1: y - (larga ? 8 : 4), y2: y + alto, class: "mapa-escala-raya",
+        }));
+    });
+    // Los números encima de las rayas largas, y la unidad detrás de la
+    // barra.
+    [[0, "0"], [2, cifraDeMapa(valor / 2)], [4, cifraDeMapa(valor)]].forEach(([i, texto]) => {
+        const letrero = svgDeMapa("text", {
+            x: margen + largo * i / 4, y: y - 11, class: "mapa-escala-letra", "text-anchor": "middle",
+        });
+        letrero.textContent = texto;
+        svg.appendChild(letrero);
+    });
+    if (unidad) {
+        const letrero = svgDeMapa("text", { x: margen + largo + 8, y: y + alto, class: "mapa-escala-letra" });
+        letrero.textContent = unidad.trim();
+        svg.appendChild(letrero);
+    }
+    barra.replaceChildren(svg);
+}
+
+function diasDeViajeDeMapa(distancia, porDia) {
+    const dias = distancia / porDia;
+    if (dias < 1) {
+        const horas = Math.max(1, Math.round(dias * 8));
+        return horas === 1 ? "una hora" : "unas " + horas + " horas";
+    }
+    const medios = Math.round(dias * 2) / 2;
+    const enteros = Math.floor(medios);
+    const conMedio = medios !== enteros;
+    if (enteros === 1) {
+        return conMedio ? "un día y medio" : "un día";
+    }
+    return enteros + (conMedio ? " días y medio" : " días");
+}
+
+function prepararMedirDeMapa(mando) {
+    const boton = mando.caja.querySelector("[data-mapa-medir]");
+    const borrar = mando.caja.querySelector("[data-mapa-medir-borrar]");
+    const salida = mando.caja.querySelector("[data-mapa-medida]");
+    if (!boton || !mando.escala) {
+        return;
+    }
+    boton.hidden = false;
+    // «Borrar» siempre a la vista (apagado sin medida) y lo medido ENCIMA
+    // del mapa, abajo: si aparecieran en la fila de los mandos, la fila
+    // crecería y el mapa bajaría justo mientras se está pulsando en él.
+    borrar.hidden = false;
+    mando.caja.appendChild(salida);
+    salida.classList.add("es-encima");
+    const medida = { activa: false, puntos: [], grupo: null };
+    const radio = parseFloat(mando.dibujo.getAttribute("data-mapa-radio")) || 10;
+
+    const pintar = () => {
+        if (medida.grupo) {
+            medida.grupo.remove();
+            medida.grupo = null;
+        }
+        borrar.disabled = !medida.puntos.length;
+        if (!medida.puntos.length) {
+            salida.textContent = medida.activa ? "Pulsa en el mapa de un sitio a otro." : "";
+            return;
+        }
+        const grupo = svgDeMapa("g", { class: "mapa-medida-dibujo" });
+        const d = medida.puntos.map((p, i) => (i ? "L" : "M") + p.x.toFixed(1) + " " + p.y.toFixed(1)).join("");
+        grupo.appendChild(svgDeMapa("path", { d, class: "mapa-medida-borde" }));
+        grupo.appendChild(svgDeMapa("path", { d, class: "mapa-medida-raya" }));
+        medida.puntos.forEach((p) => {
+            const xy = p.x.toFixed(1) + "," + p.y.toFixed(1);
+            const punto = svgDeMapa("circle", { r: (radio * 0.4).toFixed(1), class: "mapa-medida-punto",
+                "data-mapa-xy": xy, transform: "translate(" + xy + ")" });
+            grupo.appendChild(punto);
+        });
+        mando.dibujo.appendChild(grupo);
+        medida.grupo = grupo;
+        escalarPinesDeMapa(mando);
+        let pixeles = 0;
+        for (let i = 1; i < medida.puntos.length; i++) {
+            pixeles += Math.hypot(medida.puntos[i].x - medida.puntos[i - 1].x, medida.puntos[i].y - medida.puntos[i - 1].y);
+        }
+        if (medida.puntos.length < 2) {
+            salida.textContent = "Ahora pulsa en el siguiente punto.";
+            return;
+        }
+        const e = mando.escala;
+        const distancia = pixeles * e.porPixel;
+        let texto = "Distancia: " + cifraDeMapa(distancia) + (e.unidad ? " " + e.unidad : "");
+        const viaje = Object.keys(e.viaje).filter((como) => e.viaje[como] > 0);
+        if (viaje.length) {
+            texto += ". " + viaje.map((como) => como.charAt(0).toUpperCase() + como.slice(1) + ": "
+                + diasDeViajeDeMapa(distancia, e.viaje[como])).join(" · ");
+        }
+        salida.textContent = texto + ".";
+    };
+
+    const activar = (si) => {
+        medida.activa = si;
+        boton.setAttribute("aria-pressed", si ? "true" : "false");
+        mando.lienzo.classList.toggle("esta-midiendo", si);
+        if (mando.globo) {
+            mando.globo.hidden = true;
+        }
+        pintar();
+    };
+
+    boton.addEventListener("click", () => activar(!medida.activa));
+    borrar.addEventListener("click", () => {
+        medida.puntos = [];
+        pintar();
+    });
+    // En captura y en el lienzo: llega antes que el enlace del sitio, que
+    // midiendo no tiene que llevar a ninguna parte. (Si se ha arrastrado,
+    // el arrastre ya se ha comido el clic.)
+    mando.lienzo.addEventListener("click", (evento) => {
+        if (!medida.activa) {
+            return;
+        }
+        evento.preventDefault();
+        evento.stopPropagation();
+        const matriz = mando.dibujo.getScreenCTM();
+        if (!matriz) {
+            return;
+        }
+        const punto = mando.dibujo.createSVGPoint();
+        punto.x = evento.clientX;
+        punto.y = evento.clientY;
+        const p = punto.matrixTransform(matriz.inverse());
+        medida.puntos.push({ x: p.x, y: p.y });
+        pintar();
+    }, true);
+    mando.lienzo.addEventListener("keydown", (evento) => {
+        if (evento.key === "Escape" && medida.activa) {
+            activar(false);
+        }
     });
 }

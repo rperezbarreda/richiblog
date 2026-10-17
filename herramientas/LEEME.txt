@@ -1624,10 +1624,30 @@
   mapa, no señaladores: crecen con el zoom. No se pulsan ni salen en la
   lista (son el dibujo).
 
-  LA ESCALA: con "scale" en el .cmap (la pone el editor al medir), el
-  mapa lleva abajo a la izquierda una barra de escala de un número
-  redondo (1, 2 o 5 por diez a la lo que sea, alrededor de un sexto del
-  mapa) y la leyenda lo dice en letra, con cuánto se anda en un día.
+  LA ESCALA: con "scale" en el .cmap (la pone el editor), el mapa lleva
+  abajo a la izquierda de su ventana UNA BARRA DE ESCALA COMO LA DE UN
+  MAPA DE PAPEL: a tramos blancos y negros, con sus rayitas (largas en el
+  0, la mitad y el final; cortas en los cuartos), sus números y la
+  unidad. La pinta mundo-mapa.js y se queda quieta aunque el mapa se
+  mueva; con el zoom se rehace para medir siempre un número redondo (1, 2
+  o 5 por diez a la lo que sea) de unos 180 píxeles. El SVG trae la
+  escala en data-mapa-escala-px, -distancia y -unidad, y los días de
+  viaje en data-mapa-viaje. Sin JavaScript se ve la del propio SVG (un
+  sexto del mapa, que crece con el zoom). La leyenda lo dice en letra.
+
+  MEDIR EN LA WEB: los mapas con escala llevan el botón «medir». Con él
+  pulsado, cada clic pone un punto (encima de un sitio también, que
+  entonces no lleva a su página) y encima del mapa, abajo, sale cuánto
+  hay y los días de viaje a pie y a caballo; «borrar la medida» empieza
+  otra y Esc deja de medir. Lo medido va encima del mapa y no en la fila
+  de los mandos: ahí la fila crecía y el mapa bajaba mientras se pulsaba.
+
+  LOS EMBLEMAS: un escudo, una bandera o un medallón con una imagen dentro
+  (una bandera, un blasón), con marco dorado y su nombre debajo, como un
+  pin grande: miden lo mismo en pantalla a cualquier zoom, se apagan con
+  los pines, llevan a su página y salen en la lista. Las imágenes se
+  copian a imagenes/wiki/ como las de las fichas (generar-mundo:
+  EMBLEMAS_USADOS). En el .cmap van en "emblems".
 
   ZONAS DENTRO DE ZONAS: las regiones se pintan DE LA MÁS GRANDE A LA MÁS
   PEQUEÑA (en la web, en el editor y en la imagen descargada), así que
@@ -1672,6 +1692,12 @@
       generador). Las rayas van del primer punto al último: el río desde
       donde nace, la ruta desde donde sale. El primer punto de una raya
       elegida sale en amarillo.
+    - PONER UN EMBLEMA: se eligen la forma (escudo, bandera o medallón) y
+      el tamaño y se pulsa en el mapa. A la derecha, su nombre, la página
+      a la que lleva y su imagen: SUBIR UNA de tu ordenador (va a
+      wiki/_imagenes/banderas/, a 512 px como mucho), escribir o elegir
+      una de las que ya hay, o «USAR LA DE SU PÁGINA», que pone la
+      bandera, el blasón o el escudo de la ficha de esa página.
     - ESCRIBIR EN EL MAPA: arriba se eligen la letra, el tamaño y si va en
       cursiva; se pulsa donde va el texto y, a la derecha, se escribe (y
       se le puede cambiar todo eso, el giro y el color).
