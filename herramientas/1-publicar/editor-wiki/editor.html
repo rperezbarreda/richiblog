@@ -160,18 +160,28 @@
                     <span aria-hidden="true">📍</span> Poner un sitio</label>
                 <label class="herramienta"><input type="radio" name="herramienta" value="region">
                     <span aria-hidden="true">⬠</span> Pintar una región</label>
-                <label class="herramienta"><input type="radio" name="herramienta" value="camino">
-                    <span aria-hidden="true">┅</span> Pintar un camino</label>
-                <label class="herramienta"><input type="radio" name="herramienta" value="rio">
-                    <span aria-hidden="true">〰</span> Pintar un río</label>
+                <label class="herramienta"><input type="radio" name="herramienta" value="raya">
+                    <span aria-hidden="true">〰</span> Pintar un camino, un río…</label>
+                <label class="herramienta"><input type="radio" name="herramienta" value="texto">
+                    <span aria-hidden="true">𝐀</span> Escribir en el mapa</label>
+                <label class="herramienta"><input type="radio" name="herramienta" value="medir">
+                    <span aria-hidden="true">📏</span> Medir</label>
             </fieldset>
             <div class="fila mapa-opciones">
                 <div class="mapa-opcion" data-mapa-solo="pin">
                     <label for="mapa-tipo-nuevo">Qué sitio</label>
                     <select id="mapa-tipo-nuevo" data-mapa-tipos-pin></select>
                 </div>
+                <div class="mapa-opcion" data-mapa-solo="raya">
+                    <label for="mapa-tipo-raya">Qué raya</label>
+                    <select id="mapa-tipo-raya" data-mapa-tipos-raya></select>
+                </div>
                 <label class="opcion mapa-opcion" data-mapa-solo="dibujo">
                     <input type="checkbox" id="mapa-mano"> A mano alzada (arrastrando)</label>
+                <label class="opcion mapa-opcion">
+                    <input type="checkbox" id="mapa-iman" checked aria-describedby="ayuda-iman"> Imán</label>
+                <p class="ayuda mapa-opcion-ayuda" id="ayuda-iman">Lo que pones se engancha a los puntos y bordes
+                    que tenga cerca (con Alt pulsado, no).</p>
             </div>
             <p class="ayuda mapa-instrucciones" data-mapa-instrucciones aria-live="polite"></p>
             <div class="fila mapa-mandos">
@@ -179,6 +189,8 @@
                 <span class="mapa-cuanto" data-mapa-cuanto>100%</span>
                 <button type="button" data-mapa-zoom="1" aria-label="Acercar">+</button>
                 <button type="button" data-mapa-ajustar>Verlo entero</button>
+                <button type="button" data-mapa-deshacer disabled>↶ Deshacer <span class="tecla">Ctrl+Z</span></button>
+                <button type="button" data-mapa-rehacer disabled>↷ Rehacer <span class="tecla">Ctrl+Y</span></button>
                 <button type="button" data-mapa-quitar-punto>Quitar el último punto</button>
                 <button type="button" class="principal" data-mapa-terminar>Terminar el dibujo</button>
                 <button type="button" data-mapa-cancelar>Cancelar</button>
@@ -190,29 +202,72 @@
                         <svg data-mapa-svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true"></svg>
                     </div>
                     <p class="ayuda" id="mapa-teclas">Con el mapa elegido: las flechas lo mueven (o mueven el
-                        sitio elegido), + y − acercan y alejan, Intro pone un sitio o un punto en el centro, Fin
-                        termina el dibujo, Esc lo cancela y Supr borra lo elegido. La rueda del ratón acerca y
-                        aleja; para moverte por el mapa, arrastra con «Elegir y mover» o con el botón de en
-                        medio.</p>
+                        sitio o el texto elegido), + y − acercan y alejan, Intro pone un sitio, un texto o un
+                        punto en el centro, Fin termina el dibujo, Esc lo cancela, Supr borra lo elegido y
+                        Ctrl+Z lo deshace. La rueda del ratón acerca y aleja; para moverte por el mapa, arrastra
+                        con «Elegir y mover» o con el botón de en medio.</p>
                 </div>
                 <div class="mapa-derecha">
+                    <section class="bloque mapa-medir" data-mapa-medir hidden aria-labelledby="t-mapa-medir">
+                        <h2 id="t-mapa-medir">Medir</h2>
+                        <p class="mapa-medida" data-mapa-medida aria-live="polite"></p>
+                        <p class="ayuda" data-mapa-medida-raton></p>
+                        <button type="button" data-mapa-medir-otra>Empezar otra medida</button>
+                        <h3 class="mapa-cosas-titulo">La escala</h3>
+                        <p class="ayuda" data-mapa-escala-ahora></p>
+                        <div class="fila mapa-escala-fila">
+                            <div>
+                                <label for="mapa-escala-cuanto">Lo medido son</label>
+                                <input id="mapa-escala-cuanto" type="number" min="0" step="any" inputmode="decimal">
+                            </div>
+                            <div>
+                                <label for="mapa-escala-unidad">Unidad</label>
+                                <input id="mapa-escala-unidad" autocomplete="off" list="lista-unidades" value="leguas">
+                            </div>
+                        </div>
+                        <button type="button" data-mapa-escala-poner>Usar como escala</button>
+                        <div class="fila mapa-escala-fila" data-mapa-viaje>
+                            <div>
+                                <label for="mapa-dia-pie">En un día a pie</label>
+                                <input id="mapa-dia-pie" type="number" min="0" step="any" inputmode="decimal"
+                                       data-mapa-viaje-como="a pie">
+                            </div>
+                            <div>
+                                <label for="mapa-dia-caballo">En un día a caballo</label>
+                                <input id="mapa-dia-caballo" type="number" min="0" step="any" inputmode="decimal"
+                                       data-mapa-viaje-como="a caballo">
+                            </div>
+                        </div>
+                        <button type="button" data-mapa-escala-quitar>Quitar la escala</button>
+                    </section>
                     <section class="bloque mapa-elegido" aria-labelledby="t-mapa-elegido">
                         <h2 id="t-mapa-elegido">Lo elegido</h2>
                         <p class="ayuda" data-mapa-nada>Nada. Pulsa algo del mapa o de la lista de abajo.</p>
                         <div data-mapa-propiedades hidden>
                             <p class="mapa-que" data-mapa-que></p>
                             <div class="campo">
-                                <label for="mapa-p-nombre">Nombre</label>
+                                <label for="mapa-p-nombre" data-mapa-p-nombre-que>Nombre</label>
                                 <input id="mapa-p-nombre" autocomplete="off" data-mapa-p="label">
                             </div>
-                            <div class="campo">
+                            <div class="campo" data-mapa-p-caja="pagina">
                                 <label for="mapa-p-pagina">Lleva a la página</label>
                                 <input id="mapa-p-pagina" list="lista-paginas" autocomplete="off" spellcheck="false"
                                        data-mapa-p="targetPage">
                             </div>
                             <div class="campo" data-mapa-p-caja="kind">
-                                <label for="mapa-p-tipo">Qué es</label>
+                                <label for="mapa-p-tipo" data-mapa-p-tipo-que>Qué es</label>
                                 <select id="mapa-p-tipo" data-mapa-p="kind"></select>
+                            </div>
+                            <div class="campo" data-mapa-p-caja="giro">
+                                <label for="mapa-p-giro">Giro (grados)</label>
+                                <div class="fila">
+                                    <input id="mapa-p-giro" type="range" min="-90" max="90" step="5" data-mapa-p="angle">
+                                    <span class="mapa-cuanto" data-mapa-p-giro-cifra aria-hidden="true">0°</span>
+                                </div>
+                            </div>
+                            <div class="campo" data-mapa-p-caja="taper">
+                                <label class="opcion"><input type="checkbox" data-mapa-p="taper"> Se ensancha hacia el
+                                    final (la desembocadura)</label>
                             </div>
                             <div class="campo" data-mapa-p-caja="xy">
                                 <div class="fila mapa-xy">
@@ -282,6 +337,11 @@
     </footer>
 
     <datalist id="lista-paginas"></datalist>
+    <datalist id="lista-unidades">
+        <option value="leguas"></option>
+        <option value="km"></option>
+        <option value="millas"></option>
+    </datalist>
     <datalist id="lista-imagenes"></datalist>
 </body>
 </html>

@@ -698,6 +698,42 @@ body.en-mapa main {
     accent-color: var(--acento);
 }
 
+.mapa-opcion-ayuda {
+    flex: 1 1 100%;
+    margin: 0;
+}
+
+.mapa-mandos .tecla {
+    margin-left: 4px;
+}
+
+.mapa-medida {
+    margin: 0 0 8px;
+    font-size: 1.1rem;
+    font-weight: 700;
+}
+
+.mapa-escala-fila {
+    margin: 12px 0;
+}
+
+.mapa-escala-fila > div {
+    flex: 1 1 9rem;
+}
+
+.mapa-escala-fila label {
+    flex-basis: auto;
+}
+
+.mapa-derecha input[type="range"] {
+    flex: 1 1 10rem;
+    min-height: 48px;
+    padding: 0;
+    border: 0;
+    background: none;
+    accent-color: var(--acento);
+}
+
 .mapa-instrucciones {
     min-height: 3em;
 }
@@ -762,6 +798,7 @@ body.en-mapa main {
 
 .mapa-ed-letra {
     fill: #1b1020;
+    font-family: "Segoe UI Symbol", "Noto Sans Symbols 2", "Noto Sans Symbols", "DejaVu Sans", sans-serif;
     font-size: 13px;
     font-weight: 700;
     pointer-events: none;
@@ -777,6 +814,30 @@ body.en-mapa main {
     paint-order: stroke;
     font-size: 15px;
     font-weight: 700;
+    pointer-events: none;
+}
+
+/* Los textos sueltos, como en la web: de mapa antiguo. */
+.mapa-ed-texto {
+    stroke-linejoin: round;
+    paint-order: stroke;
+    font-family: Georgia, "Times New Roman", serif;
+    font-style: italic;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    cursor: move;
+}
+
+.mapa-ed-texto.es-vacio {
+    opacity: 0.7;
+}
+
+/* El primer punto de una raya (de donde sale: el nacimiento del río). */
+.mapa-ed-asa.es-principio circle {
+    fill: #f5ce6c;
+}
+
+.mapa-ed-flecha {
     pointer-events: none;
 }
 
@@ -874,6 +935,7 @@ body.en-mapa main {
 }
 
 .mapa-cosa-marca {
+    font-family: "Segoe UI Symbol", "Noto Sans Symbols 2", "Noto Sans Symbols", "DejaVu Sans", sans-serif;
     display: inline-flex;
     align-items: center;
     justify-content: center;

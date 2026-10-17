@@ -5,34 +5,70 @@
 // el editor de un mapa. El mapa es un SVG con el viewBox del lienzo del
 // .cmap (sus coordenadas son píxeles de la imagen), así que acercar y
 // moverse es cambiar el viewBox. Lo que mide lo mismo en pantalla a
-// cualquier zoom (los sitios, los puntos para arrastrar, el grosor de las
-// rayas) se escala al revés: los sitios con scale() y las rayas con
-// vector-effect: non-scaling-stroke.
+// cualquier zoom (los sitios, los puntos para arrastrar, las flechas, el
+// grosor de las rayas) se escala al revés: con scale() y con
+// vector-effect: non-scaling-stroke. Los textos sueltos («Mar de las
+// Brumas») son del mapa: crecen con el zoom, como en la web.
 //
 // El .cmap se guarda ENTERO: llega del servidor, se cambian aquí solo las
-// cosas que se tocan (label, targetPage, kind, color, x/y, points) y vuelve
-// tal cual con lo que traiga de Chronicler. Usa $, crearEditor,
-// pedirEditor, avisarEditor e irAEditor de editor.js.
+// cosas que se tocan (label, targetPage, kind, color, x/y, points, size,
+// angle, taper, scale) y vuelve tal cual con lo que traiga de Chronicler.
+// El formato está explicado en herramientas/3-generadores/mundo_mapas.py.
+// Usa $, crearEditor, pedirEditor, avisarEditor e irAEditor de editor.js.
 
 const SVG_MAPA = "http://www.w3.org/2000/svg";
+// [valor, nombre, símbolo, color de la bola]. Los mismos que
+// TIPOS_DE_PIN en mundo_mapas.py.
 const TIPOS_DE_SITIO = [
     ["capital", "Capital", "★", "#f5ce6c"],
     ["ciudad", "Ciudad", "◉", "#f4f1f7"],
     ["pueblo", "Pueblo", "●", "#e0c9a6"],
     ["fortaleza", "Fortaleza", "♜", "#b9b3c2"],
     ["ruina", "Ruina", "✕", "#8d8478"],
+    ["puerto", "Puerto", "⚓", "#ece6f2"],
+    ["templo", "Templo", "⛩", "#ece6f2"],
+    ["torre", "Torre", "♖", "#ece6f2"],
+    ["cueva", "Cueva", "⌓", "#ece6f2"],
+    ["mina", "Mina", "⛏", "#ece6f2"],
+    ["puente", "Puente", "⌒", "#ece6f2"],
+    ["batalla", "Campo de batalla", "⚔", "#ece6f2"],
+    ["mazmorra", "Mazmorra", "☠", "#ece6f2"],
+    ["campamento", "Campamento", "⛺", "#ece6f2"],
 ];
-const TIPOS_DE_RAYA = [["camino", "Camino"], ["rio", "Río"]];
+const LETRA_DE_SIMBOLOS = '"Segoe UI Symbol", "Noto Sans Symbols 2", "Noto Sans Symbols", "DejaVu Sans", sans-serif';
+// Las rayas y cómo se pintan: los mismos colores y trazos que la web
+// (estilos/paginas/mundo-mapa.css). ancho y borde en píxeles de pantalla.
+const TIPOS_DE_RAYA = [
+    ["camino", "Camino"], ["rio", "Río"], ["frontera", "Frontera"],
+    ["maritima", "Ruta marítima"], ["muralla", "Muralla"], ["ruta", "Ruta de viaje"],
+];
+const ESTILO_DE_RAYA = {
+    camino: { color: "#f0dfb4", ancho: 3.5, borde: 6.5, trazos: [10, 7] },
+    rio: { color: "#4aa3df", ancho: 4.5, borde: 7, trazos: null },
+    frontera: { color: "#8e1b3b", ancho: 3, borde: 6, colorBorde: "#f4f1f7", trazos: [12, 5, 2, 5], corte: "butt",
+        bordeConTrazos: true },
+    maritima: { color: "#e6f4ff", ancho: 4, borde: 6.5, trazos: [0.5, 8], bordeConTrazos: true },
+    muralla: { color: "#a39a90", ancho: 6, borde: 9, trazos: null, corte: "butt" },
+    ruta: { color: "#e8446f", ancho: 3.5, borde: 6, trazos: [9, 6], flechas: true },
+};
+// El tamaño de un texto suelto: el lado largo del mapa entre esto.
+const TAMANOS_DE_TEXTO = [["grande", "Grande", 45], ["mediano", "Mediano", 70], ["pequeno", "Pequeño", 110]];
 // Los colores que van tomando las regiones nuevas, uno detrás de otro.
 const COLORES_DE_REGION = ["#e74c3c", "#3498db", "#2ecc71", "#f1c40f", "#9b59b6", "#e67e22", "#1abc9c"];
-const LISTAS_DEL_MAPA = { pins: "sitio", shapes: "región", lines: "raya" };
+// Cuánto se anda en un día, según la unidad de la escala (se puede
+// cambiar en el panel de medir).
+const VIAJE_POR_UNIDAD = { leguas: { "a pie": 8, "a caballo": 12 }, km: { "a pie": 30, "a caballo": 50 },
+    millas: { "a pie": 20, "a caballo": 30 } };
+const PASOS_QUE_SE_RECUERDAN = 80;
 
 const estadoMapa = {
     archivo: "", datos: null, imagenes: {}, url: "", cambiado: false, guardando: false,
     herramienta: "elegir", elegido: null, dibujo: null, vista: null, capasOcultas: {},
-    arrastre: null, cuantasRegiones: 0,
+    arrastre: null, cuantasRegiones: 0, iman: null, sinIman: false, medida: [], ratonMedida: null,
+    ultimoCampo: null,
 };
 window.estadoMapa = estadoMapa;
+const historiaMapa = { atras: [], adelante: [] };
 
 function svgMapa(etiqueta, atributos) {
     const el = document.createElementNS(SVG_MAPA, etiqueta);
@@ -50,8 +86,22 @@ function redondoMapa(n) {
     return Math.round(n * 10) / 10;
 }
 
+function cifraMapa(n, decimales) {
+    return Number(n).toLocaleString("es-ES", { maximumFractionDigits: decimales === undefined ? 1 : decimales });
+}
+
 function tipoDeSitioMapa(kind) {
     return TIPOS_DE_SITIO.find((t) => t[0] === kind) || null;
+}
+
+function estiloDeRaya(kind) {
+    return ESTILO_DE_RAYA[kind] || ESTILO_DE_RAYA.camino;
+}
+
+function tamanoDeTexto(cosa) {
+    const t = TAMANOS_DE_TEXTO.find((x) => x[0] === cosa.size) || TAMANOS_DE_TEXTO[1];
+    const d = estadoMapa.datos;
+    return Math.max(d.width, d.height) / t[2];
 }
 
 // ---- LA LISTA DE MAPAS ----
@@ -74,7 +124,7 @@ async function pintarListaDeMapas() {
         texto.appendChild(document.createTextNode(" "));
         const cuenta = [m.pines + (m.pines === 1 ? " sitio" : " sitios"),
             m.regiones + (m.regiones === 1 ? " región" : " regiones"),
-            m.rayas + (m.rayas === 1 ? " camino o río" : " caminos y ríos")].join(" · ");
+            m.rayas + (m.rayas === 1 ? " camino, río…" : " caminos, ríos…")].join(" · ");
         texto.appendChild(crearEditor("span", "faltan-veces",
             (m.pagina ? "de " + m.pagina + " · " : "") + cuenta));
         const boton = crearEditor("button", "", "Editar");
@@ -170,17 +220,30 @@ async function abrirMapa(archivo) {
     irAEditor("mapa");
 }
 
-function ponerMapa(mapa) {
-    const d = mapa.datos;
+function completarDatosMapa(d) {
     ["pins", "shapes", "lines", "layers"].forEach((k) => {
         if (!Array.isArray(d[k])) {
             d[k] = [];
         }
     });
+    // Los textos sueltos son de esta web: si el mapa no tiene, la lista no
+    // se escribe en el archivo hasta que haya alguno (ver guardarMapa).
+    if (!Array.isArray(d.labels)) {
+        d.labels = [];
+    }
+    return d;
+}
+
+function ponerMapa(mapa) {
+    const d = completarDatosMapa(mapa.datos);
     Object.assign(estadoMapa, {
         archivo: mapa.archivo, datos: d, imagenes: mapa.imagenes || {}, url: mapa.url || "",
         cambiado: false, elegido: null, dibujo: null, capasOcultas: {}, cuantasRegiones: d.shapes.length,
+        medida: [], ratonMedida: null, iman: null, ultimoCampo: null,
     });
+    historiaMapa.atras = [];
+    historiaMapa.adelante = [];
+    pintarBotonesDeHistoria();
     // Las capas que estaban apagadas al guardar en Chronicler, apagadas aquí
     // también (se pueden encender en «El mapa en sí»).
     d.layers.forEach((c) => {
@@ -188,17 +251,23 @@ function ponerMapa(mapa) {
             estadoMapa.capasOcultas[c.id] = true;
         }
     });
-    $("[data-mapa-archivo]").textContent = "En wiki/" + mapa.archivo + " · " + d.width + " × " + d.height + " px";
-    $("#mapa-titulo").value = d.title || "";
-    $("#mapa-pagina").value = d.page || "";
-    pintarTituloMapa();
+    pintarDatosGenerales();
     pintarVerMapa();
     pintarCapasMapa();
-    $("[data-mapa-cambiar-imagen]").hidden = d.layers.length !== 1;
     // La vista, entera; y luego el dibujo.
     estadoMapa.vista = null;
     pintarTodoElMapa();
+    pintarMedida();
     requestAnimationFrame(ajustarMapa);
+}
+
+function pintarDatosGenerales() {
+    const d = estadoMapa.datos;
+    $("[data-mapa-archivo]").textContent = "En wiki/" + estadoMapa.archivo + " · " + d.width + " × " + d.height + " px";
+    $("#mapa-titulo").value = d.title || "";
+    $("#mapa-pagina").value = d.page || "";
+    $("[data-mapa-cambiar-imagen]").hidden = d.layers.length !== 1;
+    pintarTituloMapa();
 }
 
 function pintarTituloMapa() {
@@ -231,6 +300,76 @@ function pintarCapasMapa() {
     });
 }
 
+// ---- DESHACER Y REHACER ----
+// Antes de cada cambio se apunta cómo estaba el mapa entero (en texto: así
+// no hay que andar copiando cosas por dentro). Lo que se cambia a golpes
+// seguidos —escribir un nombre letra a letra, mover un sitio con las
+// flechas— es UN paso: lleva una «clave» y mientras sea la misma no se
+// apunta otro.
+function apuntarPaso(clave) {
+    if (!estadoMapa.datos) {
+        return;
+    }
+    if (clave && estadoMapa.ultimoCampo === clave) {
+        return;
+    }
+    estadoMapa.ultimoCampo = clave || null;
+    historiaMapa.atras.push(JSON.stringify(estadoMapa.datos));
+    // Sin pasarse: en el mapamundi cada paso es casi un par de megas.
+    let total = historiaMapa.atras.reduce((s, x) => s + x.length, 0);
+    while (historiaMapa.atras.length > PASOS_QUE_SE_RECUERDAN || (total > 60e6 && historiaMapa.atras.length > 3)) {
+        total -= historiaMapa.atras.shift().length;
+    }
+    historiaMapa.adelante = [];
+    estadoMapa.cambiado = true;
+    pintarBotonesDeHistoria();
+}
+
+function pintarBotonesDeHistoria() {
+    $("[data-mapa-deshacer]").disabled = !historiaMapa.atras.length;
+    $("[data-mapa-rehacer]").disabled = !historiaMapa.adelante.length;
+}
+
+function volverAlPaso(desde, hacia, que) {
+    if (!desde.length || !estadoMapa.datos) {
+        return;
+    }
+    if (estadoMapa.dibujo) {
+        cancelarDibujo();
+    }
+    hacia.push(JSON.stringify(estadoMapa.datos));
+    const anterior = estadoMapa.datos;
+    estadoMapa.datos = completarDatosMapa(JSON.parse(desde.pop()));
+    estadoMapa.cambiado = true;
+    estadoMapa.ultimoCampo = null;
+    const el = estadoMapa.elegido;
+    if (el && !estadoMapa.datos[el.lista][el.i]) {
+        estadoMapa.elegido = null;
+    }
+    pintarDatosGenerales();
+    if (anterior.width !== estadoMapa.datos.width || anterior.height !== estadoMapa.datos.height
+        || JSON.stringify(anterior.layers) !== JSON.stringify(estadoMapa.datos.layers)) {
+        pintarTodoElMapa();
+        ajustarMapa();
+    } else {
+        pintarCosasMapa();
+    }
+    pintarPropiedadesMapa();
+    pintarMedida();
+    pintarBotonesDeHistoria();
+    avisarEditor(que);
+}
+
+function deshacerMapa() {
+    volverAlPaso(historiaMapa.atras, historiaMapa.adelante,
+        historiaMapa.atras.length ? "Deshecho." : "");
+}
+
+function rehacerMapa() {
+    volverAlPaso(historiaMapa.adelante, historiaMapa.atras,
+        historiaMapa.adelante.length ? "Rehecho." : "");
+}
+
 // ---- LA VISTA: ACERCAR Y MOVERSE ----
 function lienzoMapa() {
     return $("[data-mapa-lienzo]");
@@ -256,12 +395,11 @@ function ponerVistaMapa(v) {
     // un píxel de la imagen en ocho de la pantalla.
     const lienzo = lienzoMapa();
     const proporcion = lienzo.clientHeight ? lienzo.clientWidth / lienzo.clientHeight : 1.6;
-    let w = Math.min(Math.max(v.w, 40), Math.max(d.width, d.height * proporcion) * 1.5);
+    const w = Math.min(Math.max(v.w, 40), Math.max(d.width, d.height * proporcion) * 1.5);
     const h = w / proporcion;
     const cx = Math.min(Math.max(v.x + v.w / 2, 0), d.width);
     const cy = Math.min(Math.max(v.y + v.h / 2, 0), d.height);
     estadoMapa.vista = { x: cx - w / 2, y: cy - h / 2, w, h };
-    w = estadoMapa.vista.w;
     svgDelMapa().setAttribute("viewBox", [estadoMapa.vista.x, estadoMapa.vista.y, w, h].map(redondoMapa).join(" "));
     const entero = Math.max(d.width / lienzo.clientWidth, d.height / lienzo.clientHeight) || 1;
     $("[data-mapa-cuanto]").textContent = Math.round((entero / escalaMapa()) * 100) + "%";
@@ -323,13 +461,89 @@ function centroDeLaVista() {
     return { x: v.x + v.w / 2, y: v.y + v.h / 2 };
 }
 
+// ---- EL IMÁN ----
+// Lo que se pone cerca (a menos de 12 píxeles de pantalla) de un sitio o de
+// un punto de una región o una raya se pone JUSTO ahí; y si no hay punto
+// cerca pero sí un borde, encima del borde. Así un camino llega de verdad
+// a la ciudad, un río acaba en la costa de la región y dos regiones
+// vecinas comparten los puntos de la frontera. evitar: lo que se está
+// moviendo, para que no se enganche a sí mismo.
+function imantar(p, evitar) {
+    if (!$("#mapa-iman").checked || estadoMapa.sinIman || !estadoMapa.datos) {
+        return { p, pegado: false };
+    }
+    const d = estadoMapa.datos;
+    const r = 12 * escalaMapa();
+    let mejor = null;
+    let lejos = r;
+    const mirar = (q) => {
+        const dist = Math.hypot(q.x - p.x, q.y - p.y);
+        if (dist < lejos) {
+            lejos = dist;
+            mejor = q;
+        }
+    };
+    const esEvitado = (lista, i, n) => evitar && evitar.lista === lista && evitar.i === i
+        && (evitar.n === undefined || evitar.n === n);
+    d.pins.forEach((s, i) => {
+        if (!esEvitado("pins", i)) {
+            mirar(s);
+        }
+    });
+    ["shapes", "lines"].forEach((lista) => {
+        d[lista].forEach((c, i) => (c.points || []).forEach((q, n) => {
+            if (!esEvitado(lista, i, n)) {
+                mirar(q);
+            }
+        }));
+    });
+    (estadoMapa.dibujo ? estadoMapa.dibujo.puntos.slice(0, -1) : []).forEach(mirar);
+    if (mejor) {
+        return { p: { x: mejor.x, y: mejor.y }, pegado: "punto" };
+    }
+    // Un borde: el punto más cercano de cada tramo.
+    let sobre = null;
+    lejos = r;
+    ["shapes", "lines"].forEach((lista) => {
+        d[lista].forEach((c, i) => {
+            if (evitar && evitar.lista === lista && evitar.i === i) {
+                return;
+            }
+            const puntos = c.points || [];
+            const cuantos = lista === "shapes" ? puntos.length : puntos.length - 1;
+            for (let n = 0; n < cuantos; n++) {
+                const a = puntos[n];
+                const b = puntos[(n + 1) % puntos.length];
+                const dx = b.x - a.x;
+                const dy = b.y - a.y;
+                const largo = dx * dx + dy * dy;
+                if (!largo) {
+                    continue;
+                }
+                const f = Math.max(0, Math.min(1, ((p.x - a.x) * dx + (p.y - a.y) * dy) / largo));
+                const q = { x: a.x + dx * f, y: a.y + dy * f };
+                const dist = Math.hypot(q.x - p.x, q.y - p.y);
+                if (dist < lejos) {
+                    lejos = dist;
+                    sobre = q;
+                }
+            }
+        });
+    });
+    if (sobre) {
+        return { p: { x: redondoMapa(sobre.x), y: redondoMapa(sobre.y) }, pegado: "borde" };
+    }
+    return { p, pegado: false };
+}
+
 // ---- PINTAR ----
 // Capas del SVG, de abajo arriba: las imágenes, las regiones, las rayas,
-// los sitios, lo que se está dibujando y los puntos para arrastrar.
+// los textos, los sitios, lo que se está dibujando (o midiendo) y los
+// puntos para arrastrar.
 function pintarTodoElMapa() {
     const svg = svgDelMapa();
     svg.textContent = "";
-    ["fondo", "regiones", "rayas", "sitios", "dibujo", "asas"].forEach((g) => {
+    ["fondo", "regiones", "rayas", "textos", "sitios", "dibujo", "asas"].forEach((g) => {
         svg.appendChild(svgMapa("g", { "data-capa-mapa": g }));
     });
     pintarFondoMapa();
@@ -339,6 +553,8 @@ function pintarTodoElMapa() {
 function capaMapa(nombre) {
     return svgDelMapa().querySelector('[data-capa-mapa="' + nombre + '"]');
 }
+
+const CAPA_DE_LISTA = { shapes: "regiones", lines: "rayas", labels: "textos", pins: "sitios" };
 
 function pintarFondoMapa() {
     const g = capaMapa("fondo");
@@ -368,13 +584,13 @@ function trazoMapa(puntos, cerrado) {
 }
 
 function pintarCosasMapa() {
-    ["regiones", "rayas", "sitios"].forEach((g) => {
+    Object.values(CAPA_DE_LISTA).forEach((g) => {
         capaMapa(g).textContent = "";
     });
     const d = estadoMapa.datos;
-    d.shapes.forEach((s, i) => capaMapa("regiones").appendChild(dibujoDeCosa("shapes", s, i)));
-    d.lines.forEach((l, i) => capaMapa("rayas").appendChild(dibujoDeCosa("lines", l, i)));
-    d.pins.forEach((p, i) => capaMapa("sitios").appendChild(dibujoDeCosa("pins", p, i)));
+    Object.keys(CAPA_DE_LISTA).forEach((lista) => {
+        d[lista].forEach((c, i) => capaMapa(CAPA_DE_LISTA[lista]).appendChild(dibujoDeCosa(lista, c, i)));
+    });
     pintarAsasMapa();
     escalarMarcasMapa();
     pintarListaDeCosas();
@@ -392,6 +608,69 @@ function repintarCosa(lista, i) {
     escalarMarcasMapa();
 }
 
+// LO QUE SE ANDA HASTA CADA PUNTO de una raya, y el punto que está a tanto
+// del principio (con hacia dónde va la raya ahí, en grados).
+function largosMapa(puntos) {
+    const acumulado = [0];
+    for (let i = 1; i < puntos.length; i++) {
+        acumulado.push(acumulado[i - 1] + Math.hypot(puntos[i].x - puntos[i - 1].x, puntos[i].y - puntos[i - 1].y));
+    }
+    return acumulado;
+}
+
+function puntoALoLargo(puntos, acumulado, s) {
+    for (let i = 1; i < puntos.length; i++) {
+        if (acumulado[i] >= s || i === puntos.length - 1) {
+            const a = puntos[i - 1];
+            const b = puntos[i];
+            const tramo = (acumulado[i] - acumulado[i - 1]) || 1;
+            const f = Math.max(0, Math.min(1, (s - acumulado[i - 1]) / tramo));
+            return { x: a.x + (b.x - a.x) * f, y: a.y + (b.y - a.y) * f,
+                giro: Math.atan2(b.y - a.y, b.x - a.x) * 180 / Math.PI };
+        }
+    }
+    return { x: puntos[0].x, y: puntos[0].y, giro: 0 };
+}
+
+// Un río que se ensancha: en ocho trozos, del más fino (donde nace, el
+// primer punto) al más gordo (la desembocadura). Como _rio_que_se_ensancha
+// en mundo_mapas.py.
+function tramosDeRio(puntos, cuantos) {
+    const n = cuantos || 8;
+    const acumulado = largosMapa(puntos);
+    const total = acumulado[acumulado.length - 1];
+    if (!total) {
+        return [];
+    }
+    const tramos = [];
+    for (let k = 0; k < n; k++) {
+        const a = total * k / n;
+        const b = total * (k + 1) / n;
+        const medio = puntos.filter((p, i) => acumulado[i] > a && acumulado[i] < b);
+        tramos.push({ puntos: [puntoALoLargo(puntos, acumulado, a)].concat(medio, [puntoALoLargo(puntos, acumulado, b)]),
+            grueso: 2 + 5.5 * (k + 0.5) / n });
+    }
+    return tramos;
+}
+
+// Las flechas de una ruta de viaje: tantas como quepan (una cada nueve
+// radios de pin de la web), a lo largo y mirando hacia el final.
+function flechasDeRaya(puntos) {
+    const d = estadoMapa.datos;
+    const acumulado = largosMapa(puntos);
+    const total = acumulado[acumulado.length - 1];
+    if (!total) {
+        return [];
+    }
+    const radio = Math.max(8, Math.round(d.width / 60));
+    const cuantas = Math.max(1, Math.min(12, Math.round(total / (radio * 9))));
+    const salida = [];
+    for (let j = 0; j < cuantas; j++) {
+        salida.push(puntoALoLargo(puntos, acumulado, total * (j + 0.5) / cuantas));
+    }
+    return salida;
+}
+
 function dibujoDeCosa(lista, cosa, i) {
     const elegido = estadoMapa.elegido && estadoMapa.elegido.lista === lista && estadoMapa.elegido.i === i;
     const g = svgMapa("g", { "data-lista": lista, "data-i": i, class: "mapa-ed-cosa" + (elegido ? " es-elegida" : "") });
@@ -403,23 +682,19 @@ function dibujoDeCosa(lista, cosa, i) {
             class: "mapa-ed-region",
         }));
     } else if (lista === "lines") {
-        const rio = cosa.kind === "rio";
-        const d = trazoMapa(cosa.points || [], false);
-        // Una raya gorda y transparente debajo, para acertarle con el ratón.
-        g.appendChild(svgMapa("path", {
-            d, fill: "none", stroke: "transparent", "stroke-width": 18, "vector-effect": "non-scaling-stroke",
-            "pointer-events": "stroke",
-        }));
-        g.appendChild(svgMapa("path", {
-            d, fill: "none", stroke: elegido ? "#ffffff" : "#1b1020", "stroke-width": rio ? 8 : 7,
-            "stroke-linecap": "round", "stroke-linejoin": "round", "vector-effect": "non-scaling-stroke",
-            "pointer-events": "none",
-        }));
-        g.appendChild(svgMapa("path", {
-            d, fill: "none", stroke: cosa.color || (rio ? "#4aa3df" : "#f0dfb4"), "stroke-width": rio ? 5 : 4,
-            "stroke-dasharray": rio ? "none" : "12 8", "stroke-linecap": "round", "stroke-linejoin": "round",
-            "vector-effect": "non-scaling-stroke", "pointer-events": "none",
-        }));
+        dibujarRayaSvg(g, cosa, elegido);
+    } else if (lista === "labels") {
+        const tam = tamanoDeTexto(cosa);
+        const texto = svgMapa("text", {
+            class: "mapa-ed-texto" + (cosa.label ? "" : " es-vacio"), x: cosa.x, y: cosa.y, "font-size": redondoMapa(tam),
+            "stroke-width": redondoMapa(tam * 0.16), "text-anchor": "middle", "dominant-baseline": "central",
+            fill: cosa.color || "#f4ecd8", stroke: elegido ? "#f5ce6c" : "#1b1020",
+        });
+        if (cosa.angle) {
+            texto.setAttribute("transform", "rotate(" + cosa.angle + " " + cosa.x + " " + cosa.y + ")");
+        }
+        texto.textContent = cosa.label || "(escribe el texto)";
+        g.appendChild(texto);
     } else {
         const tipo = tipoDeSitioMapa(cosa.kind);
         const marca = svgMapa("g", { class: "mapa-ed-marca", "data-x": cosa.x, "data-y": cosa.y });
@@ -436,7 +711,7 @@ function dibujoDeCosa(lista, cosa, i) {
             }));
         }
         const letra = svgMapa("text", { class: "mapa-ed-letra", "text-anchor": "middle", "dominant-baseline": "central" });
-        letra.textContent = tipo ? tipo[2] : (cosa.icon || "");
+        letra.textContent = tipo ? tipo[2] + "︎" : (cosa.icon || "");
         marca.appendChild(letra);
         if (cosa.label) {
             const nombre = svgMapa("text", { class: "mapa-ed-nombre", x: 17, y: 0, "dominant-baseline": "central" });
@@ -453,6 +728,48 @@ function dibujoDeCosa(lista, cosa, i) {
     return g;
 }
 
+function dibujarRayaSvg(g, cosa, elegido) {
+    const estilo = estiloDeRaya(cosa.kind);
+    const puntos = cosa.points || [];
+    const d = trazoMapa(puntos, false);
+    const comun = { fill: "none", "stroke-linejoin": "round", "vector-effect": "non-scaling-stroke", "pointer-events": "none" };
+    // Una raya gorda y transparente debajo, para acertarle con el ratón.
+    g.appendChild(svgMapa("path", {
+        d, fill: "none", stroke: "transparent", "stroke-width": 18, "vector-effect": "non-scaling-stroke",
+        "pointer-events": "stroke",
+    }));
+    const color = cosa.color || estilo.color;
+    const borde = elegido ? "#ffffff" : (estilo.colorBorde || "#1b1020");
+    if (cosa.kind === "rio" && cosa.taper !== false && puntos.length >= 2) {
+        const tramos = tramosDeRio(puntos);
+        tramos.forEach((t) => g.appendChild(svgMapa("path", Object.assign({
+            d: trazoMapa(t.puntos, false), stroke: borde, "stroke-width": t.grueso + 3, "stroke-linecap": "round",
+        }, comun))));
+        tramos.forEach((t) => g.appendChild(svgMapa("path", Object.assign({
+            d: trazoMapa(t.puntos, false), stroke: color, "stroke-width": t.grueso, "stroke-linecap": "round",
+        }, comun))));
+    } else {
+        const corte = estilo.corte || "round";
+        g.appendChild(svgMapa("path", Object.assign({
+            d, stroke: borde, "stroke-width": estilo.borde, "stroke-linecap": corte,
+            "stroke-dasharray": estilo.bordeConTrazos && estilo.trazos ? estilo.trazos.join(" ") : "none",
+        }, comun)));
+        g.appendChild(svgMapa("path", Object.assign({
+            d, stroke: color, "stroke-width": estilo.ancho, "stroke-linecap": corte,
+            "stroke-dasharray": estilo.trazos ? estilo.trazos.join(" ") : "none",
+        }, comun)));
+    }
+    if (estilo.flechas && puntos.length >= 2) {
+        flechasDeRaya(puntos).forEach((f) => {
+            const flecha = svgMapa("g", { class: "mapa-ed-marca mapa-ed-flecha", "data-x": f.x, "data-y": f.y,
+                "data-giro": redondoMapa(f.giro) });
+            flecha.appendChild(svgMapa("path", { d: "M-8 -6 L8 0 L-8 6 Z", fill: color, stroke: "#1b1020",
+                "stroke-width": 1.5 }));
+            g.appendChild(flecha);
+        });
+    }
+}
+
 // Los puntos de la región o la raya elegida: uno por esquina, para
 // arrastrarlo, y uno pequeño entre cada dos, para meter uno nuevo.
 function pintarAsasMapa() {
@@ -462,7 +779,7 @@ function pintarAsasMapa() {
     }
     g.textContent = "";
     const el = estadoMapa.elegido;
-    if (!el || el.lista === "pins" || estadoMapa.herramienta !== "elegir") {
+    if (!el || el.lista === "pins" || el.lista === "labels" || estadoMapa.herramienta !== "elegir") {
         return;
     }
     const cosa = estadoMapa.datos[el.lista][el.i];
@@ -481,17 +798,20 @@ function pintarAsasMapa() {
         }
     });
     puntos.forEach((p, n) => {
-        g.appendChild(svgMapa("g", { class: "mapa-ed-marca mapa-ed-asa", "data-asa": n, "data-x": p.x, "data-y": p.y }))
+        g.appendChild(svgMapa("g", { class: "mapa-ed-marca mapa-ed-asa" + (n === 0 && !cerrado ? " es-principio" : ""),
+            "data-asa": n, "data-x": p.x, "data-y": p.y }))
             .appendChild(svgMapa("circle", { r: 8 }));
     });
 }
 
-// Lo que mide lo mismo a cualquier zoom: los sitios y los puntos.
+// Lo que mide lo mismo a cualquier zoom: los sitios, las flechas y los
+// puntos.
 function escalarMarcasMapa() {
     const s = escalaMapa();
     svgDelMapa().querySelectorAll(".mapa-ed-marca").forEach((m) => {
+        const giro = m.getAttribute("data-giro");
         m.setAttribute("transform", "translate(" + m.getAttribute("data-x") + " " + m.getAttribute("data-y")
-            + ") scale(" + s + ")");
+            + ")" + (giro ? " rotate(" + giro + ")" : "") + " scale(" + s + ")");
     });
     pintarDibujoMapa();
 }
@@ -504,7 +824,10 @@ function nombreDeCosa(lista, cosa) {
         const tipo = tipoDeSitioMapa(cosa.kind);
         que = tipo ? tipo[1].toLowerCase() : "sitio";
     } else if (lista === "lines") {
-        que = cosa.kind === "rio" ? "río" : "camino";
+        const tipo = TIPOS_DE_RAYA.find((t) => t[0] === cosa.kind) || TIPOS_DE_RAYA[0];
+        que = tipo[1].toLowerCase();
+    } else if (lista === "labels") {
+        que = "texto";
     } else {
         que = "región";
     }
@@ -515,7 +838,7 @@ function pintarListaDeCosas() {
     const caja = $("[data-mapa-cosas]");
     caja.textContent = "";
     const d = estadoMapa.datos;
-    const grupos = [["pins", "Sitios"], ["lines", "Caminos y ríos"], ["shapes", "Regiones"]];
+    const grupos = [["pins", "Sitios"], ["lines", "Caminos, ríos y rayas"], ["labels", "Textos"], ["shapes", "Regiones"]];
     let alguna = false;
     grupos.forEach(([lista, titulo]) => {
         if (!d[lista].length) {
@@ -539,7 +862,8 @@ function pintarListaDeCosas() {
             boton.setAttribute("aria-pressed", elegido ? "true" : "false");
             const tipo = lista === "pins" ? tipoDeSitioMapa(cosa.kind) : null;
             if (tipo) {
-                boton.appendChild(crearEditor("span", "mapa-cosa-marca es-" + tipo[0], tipo[2])).setAttribute("aria-hidden", "true");
+                boton.appendChild(crearEditor("span", "mapa-cosa-marca es-" + tipo[0], tipo[2] + "︎"))
+                    .setAttribute("aria-hidden", "true");
             }
             boton.appendChild(crearEditor("span", "mapa-cosa-nombre", nombre || "(sin nombre)"));
             boton.appendChild(crearEditor("span", "mapa-cosa-que", que));
@@ -563,7 +887,7 @@ function pintarListaDeCosas() {
 
 function irACosa(lista, i) {
     const cosa = estadoMapa.datos[lista][i];
-    const puntos = lista === "pins" ? [cosa] : cosa.points || [];
+    const puntos = lista === "pins" || lista === "labels" ? [cosa] : cosa.points || [];
     if (!puntos.length) {
         return;
     }
@@ -582,6 +906,7 @@ function irACosa(lista, i) {
 // ---- ELEGIR, Y LO ELEGIDO ----
 function elegirCosa(lista, i) {
     estadoMapa.elegido = lista ? { lista, i } : null;
+    estadoMapa.ultimoCampo = null;
     pintarCosasMapa();
     pintarPropiedadesMapa();
 }
@@ -601,35 +926,57 @@ function pintarPropiedadesMapa() {
     const lista = estadoMapa.elegido.lista;
     const { que } = nombreDeCosa(lista, cosa);
     $("[data-mapa-que]").textContent = que[0].toUpperCase() + que.slice(1);
+    $("[data-mapa-p-nombre-que]").textContent = lista === "labels" ? "Texto" : "Nombre";
     $("#mapa-p-nombre").value = cosa.label || "";
     $("#mapa-p-pagina").value = cosa.targetPage || "";
     const tipo = $("#mapa-p-tipo");
     tipo.textContent = "";
-    const opciones = lista === "pins" ? [["", "Sin tipo (chincheta redonda)"]].concat(TIPOS_DE_SITIO)
-        : lista === "lines" ? TIPOS_DE_RAYA : [];
+    let opciones = [];
+    if (lista === "pins") {
+        opciones = [["", "Sin tipo (chincheta redonda)"]].concat(TIPOS_DE_SITIO.map((t) => [t[0], t[2] + " " + t[1]]));
+    } else if (lista === "lines") {
+        opciones = TIPOS_DE_RAYA;
+    } else if (lista === "labels") {
+        opciones = TAMANOS_DE_TEXTO;
+    }
     opciones.forEach((o) => {
         const opcion = document.createElement("option");
         opcion.value = o[0];
         opcion.textContent = o[1];
         tipo.appendChild(opcion);
     });
-    tipo.value = cosa.kind || (lista === "lines" ? "camino" : "");
+    tipo.value = lista === "labels" ? (cosa.size || "mediano") : (cosa.kind || (lista === "lines" ? "camino" : ""));
+    $("[data-mapa-p-tipo-que]").textContent = lista === "labels" ? "Tamaño" : "Qué es";
     $('[data-mapa-p-caja="kind"]').hidden = lista === "shapes";
-    $('[data-mapa-p-caja="xy"]').hidden = lista !== "pins";
-    if (lista === "pins") {
+    $('[data-mapa-p-caja="pagina"]').hidden = lista === "labels";
+    $('[data-mapa-p-caja="xy"]').hidden = lista !== "pins" && lista !== "labels";
+    $('[data-mapa-p-caja="giro"]').hidden = lista !== "labels";
+    $('[data-mapa-p-caja="taper"]').hidden = !(lista === "lines" && cosa.kind === "rio");
+    if (lista === "pins" || lista === "labels") {
         $("#mapa-p-x").value = Math.round(cosa.x);
         $("#mapa-p-y").value = Math.round(cosa.y);
     }
+    if (lista === "labels") {
+        $("#mapa-p-giro").value = cosa.angle || 0;
+        $("[data-mapa-p-giro-cifra]").textContent = (cosa.angle || 0) + "°";
+    }
+    $('[data-mapa-p="taper"]').checked = cosa.taper !== false;
     const conColor = $('[data-mapa-p="con-color"]');
     conColor.checked = !!cosa.color;
     $("#mapa-p-color").value = /^#[0-9a-f]{6}$/i.test(cosa.color || "") ? cosa.color : "#e74c3c";
     $("#mapa-p-color").hidden = !cosa.color;
     const puntos = (cosa.points || []).length;
-    $("[data-mapa-p-puntos]").textContent = lista === "pins" ? ""
-        : puntos + " puntos. " + (puntos > 400
+    let ayuda = "";
+    if (lista === "shapes" || lista === "lines") {
+        ayuda = puntos + " puntos. " + (puntos > 400
             ? "Son demasiados para arrastrarlos uno a uno: se puede cambiar el nombre, la página y el color."
             : "Con «Elegir y mover»: arrastra un punto para moverlo, arrastra uno de los pequeños para añadir"
               + " otro y pulsa dos veces en uno para quitarlo.");
+        if (lista === "lines") {
+            ayuda += " Va del punto con borde amarillo (el principio) al último.";
+        }
+    }
+    $("[data-mapa-p-puntos]").textContent = ayuda;
 }
 
 function cambiarPropiedadMapa(campo, valor) {
@@ -638,12 +985,27 @@ function cambiarPropiedadMapa(campo, valor) {
         return;
     }
     const el = estadoMapa.elegido;
+    apuntarPaso("campo-" + campo + "-" + el.lista + "-" + el.i);
     if (campo === "x" || campo === "y") {
         const n = Number(valor);
-        if (!Number.isFinite(n)) {
+        if (!Number.isFinite(n) || valor === "") {
             return;
         }
         cosa[campo] = redondoMapa(n);
+    } else if (campo === "angle") {
+        const n = Number(valor) || 0;
+        if (n) {
+            cosa.angle = n;
+        } else {
+            delete cosa.angle;
+        }
+        $("[data-mapa-p-giro-cifra]").textContent = n + "°";
+    } else if (campo === "taper") {
+        if (valor) {
+            delete cosa.taper;
+        } else {
+            cosa.taper = false;
+        }
     } else if (campo === "con-color") {
         if (valor) {
             cosa.color = $("#mapa-p-color").value;
@@ -651,6 +1013,8 @@ function cambiarPropiedadMapa(campo, valor) {
             delete cosa.color;
         }
         $("#mapa-p-color").hidden = !valor;
+    } else if (campo === "kind" && el.lista === "labels") {
+        cosa.size = valor || "mediano";
     } else if (valor) {
         cosa[campo] = valor;
     } else {
@@ -662,6 +1026,7 @@ function cambiarPropiedadMapa(campo, valor) {
         pintarListaDeCosas();
         if (campo === "kind") {
             $("[data-mapa-que]").textContent = nombreDeCosa(el.lista, cosa).que.replace(/^./, (c) => c.toUpperCase());
+            $('[data-mapa-p-caja="taper"]').hidden = !(el.lista === "lines" && cosa.kind === "rio");
         }
     }
 }
@@ -673,31 +1038,35 @@ function borrarElegido() {
     }
     const cosa = cosaElegida();
     const { nombre, que } = nombreDeCosa(el.lista, cosa);
+    apuntarPaso();
     estadoMapa.datos[el.lista].splice(el.i, 1);
     estadoMapa.elegido = null;
-    estadoMapa.cambiado = true;
     pintarCosasMapa();
     pintarPropiedadesMapa();
-    avisarEditor("Borrado: " + que + (nombre ? " «" + nombre + "»" : "") + ".");
+    avisarEditor("Borrado: " + que + (nombre ? " «" + nombre + "»" : "") + ". (Ctrl+Z lo trae de vuelta.)");
     lienzoMapa().focus({ preventScroll: true });
 }
 
 // ---- LAS HERRAMIENTAS ----
 const INSTRUCCIONES_MAPA = {
-    elegir: "Pulsa un sitio, una región o una raya para elegirlo. Los sitios se arrastran; en las regiones y"
-        + " las rayas se arrastran sus puntos. Arrastrando en un hueco te mueves por el mapa.",
+    elegir: "Pulsa un sitio, un texto, una región o una raya para elegirlo. Los sitios y los textos se arrastran;"
+        + " en las regiones y las rayas se arrastran sus puntos. Arrastrando en un hueco te mueves por el mapa.",
     pin: "Pulsa en el mapa donde va el sitio. Luego escribe su nombre a la derecha.",
     region: "Pulsa punto a punto el borde de la región. Para cerrarla, pulsa en el primero, pulsa dos veces"
         + " o «Terminar el dibujo».",
-    camino: "Pulsa punto a punto por donde va el camino. Para acabar, pulsa dos veces o «Terminar el dibujo».",
-    rio: "Pulsa punto a punto por donde va el río, desde donde nace. Para acabar, pulsa dos veces o"
-        + " «Terminar el dibujo».",
+    raya: "Pulsa punto a punto por donde va, desde el principio (un río, desde donde nace; una ruta, desde"
+        + " donde sale). Para acabar, pulsa dos veces o «Terminar el dibujo».",
+    texto: "Pulsa en el mapa donde va el texto («Mar de las Brumas»). Luego escríbelo a la derecha, y elige su"
+        + " tamaño y su giro.",
+    medir: "Pulsa de un sitio a otro, punto a punto, por donde se iría. A la derecha sale cuánto hay.",
 };
 const INSTRUCCIONES_A_MANO = "Aprieta y arrastra por donde va; al soltar, se acaba.";
+const HERRAMIENTAS_DE_DIBUJO = ["region", "raya"];
 
 function ponerHerramienta(herramienta) {
     cancelarDibujo();
     estadoMapa.herramienta = herramienta;
+    estadoMapa.iman = null;
     const radio = document.querySelector('input[name="herramienta"][value="' + herramienta + '"]');
     if (radio) {
         radio.checked = true;
@@ -705,9 +1074,11 @@ function ponerHerramienta(herramienta) {
     document.querySelectorAll(".herramienta").forEach((h) => {
         h.classList.toggle("es-elegida", !!h.querySelector("input:checked"));
     });
-    const dibuja = ["region", "camino", "rio"].includes(herramienta);
+    const dibuja = HERRAMIENTAS_DE_DIBUJO.includes(herramienta);
     $('[data-mapa-solo="pin"]').hidden = herramienta !== "pin";
+    $('[data-mapa-solo="raya"]').hidden = herramienta !== "raya";
     $('[data-mapa-solo="dibujo"]').hidden = !dibuja;
+    $("[data-mapa-medir]").hidden = herramienta !== "medir";
     $("[data-mapa-instrucciones]").textContent = dibuja && $("#mapa-mano").checked
         ? INSTRUCCIONES_A_MANO : INSTRUCCIONES_MAPA[herramienta];
     lienzoMapa().classList.toggle("es-dibujo", herramienta !== "elegir");
@@ -717,7 +1088,8 @@ function ponerHerramienta(herramienta) {
 
 function empezarDibujo() {
     const h = estadoMapa.herramienta;
-    estadoMapa.dibujo = { lista: h === "region" ? "shapes" : "lines", kind: h, puntos: [], raton: null };
+    estadoMapa.dibujo = { lista: h === "region" ? "shapes" : "lines",
+        kind: h === "region" ? "" : $("#mapa-tipo-raya").value, puntos: [], raton: null };
     mandosDeDibujo();
 }
 
@@ -731,47 +1103,72 @@ function mandosDeDibujo() {
     });
 }
 
+// Lo que se está dibujando o midiendo, y el aro del imán.
 function pintarDibujoMapa() {
     const g = capaMapa("dibujo");
     if (!g) {
         return;
     }
     g.textContent = "";
-    const dibujo = estadoMapa.dibujo;
-    if (!dibujo || !dibujo.puntos.length) {
-        return;
-    }
-    const puntos = dibujo.raton ? dibujo.puntos.concat([dibujo.raton]) : dibujo.puntos;
     const s = escalaMapa();
-    g.appendChild(svgMapa("path", {
-        d: trazoMapa(puntos, false), fill: dibujo.lista === "shapes" ? "rgba(245,206,108,0.25)" : "none",
-        stroke: "#ffffff", "stroke-width": 3, "stroke-dasharray": "8 5", "vector-effect": "non-scaling-stroke",
-        class: "mapa-ed-dibujo",
-    }));
-    dibujo.puntos.forEach((p, n) => {
-        g.appendChild(svgMapa("circle", {
-            cx: p.x, cy: p.y, r: (n === 0 && dibujo.lista === "shapes" ? 9 : 5) * s,
-            fill: n === 0 ? "#f5ce6c" : "#ffffff", stroke: "#1b1020", "stroke-width": 2,
-            "vector-effect": "non-scaling-stroke",
+    const dibujo = estadoMapa.dibujo;
+    if (dibujo && dibujo.puntos.length) {
+        const puntos = dibujo.raton ? dibujo.puntos.concat([dibujo.raton]) : dibujo.puntos;
+        g.appendChild(svgMapa("path", {
+            d: trazoMapa(puntos, false), fill: dibujo.lista === "shapes" ? "rgba(245,206,108,0.25)" : "none",
+            stroke: "#ffffff", "stroke-width": 3, "stroke-dasharray": "8 5", "vector-effect": "non-scaling-stroke",
+            class: "mapa-ed-dibujo",
         }));
-    });
+        dibujo.puntos.forEach((p, n) => {
+            g.appendChild(svgMapa("circle", {
+                cx: p.x, cy: p.y, r: (n === 0 && dibujo.lista === "shapes" ? 9 : 5) * s,
+                fill: n === 0 ? "#f5ce6c" : "#ffffff", stroke: "#1b1020", "stroke-width": 2,
+                "vector-effect": "non-scaling-stroke", class: "mapa-ed-dibujo",
+            }));
+        });
+    }
+    const medida = estadoMapa.herramienta === "medir" ? estadoMapa.medida : [];
+    if (medida.length) {
+        const puntos = estadoMapa.ratonMedida ? medida.concat([estadoMapa.ratonMedida]) : medida;
+        g.appendChild(svgMapa("path", {
+            d: trazoMapa(puntos, false), fill: "none", stroke: "#1b1020", "stroke-width": 6,
+            "vector-effect": "non-scaling-stroke", "stroke-linecap": "round", class: "mapa-ed-dibujo",
+        }));
+        g.appendChild(svgMapa("path", {
+            d: trazoMapa(puntos, false), fill: "none", stroke: "#f5ce6c", "stroke-width": 3, "stroke-dasharray": "10 6",
+            "vector-effect": "non-scaling-stroke", "stroke-linecap": "round", class: "mapa-ed-dibujo",
+        }));
+        medida.forEach((p) => g.appendChild(svgMapa("circle", {
+            cx: p.x, cy: p.y, r: 5 * s, fill: "#f5ce6c", stroke: "#1b1020", "stroke-width": 2,
+            "vector-effect": "non-scaling-stroke", class: "mapa-ed-dibujo",
+        })));
+    }
+    if (estadoMapa.iman) {
+        g.appendChild(svgMapa("circle", {
+            cx: estadoMapa.iman.x, cy: estadoMapa.iman.y, r: 11 * s, fill: "none", stroke: "#f5ce6c",
+            "stroke-width": 3, "vector-effect": "non-scaling-stroke", class: "mapa-ed-dibujo",
+        }));
+    }
 }
 
-function anadirPuntoDibujo(p) {
+function anadirPuntoDibujo(crudo) {
     if (!estadoMapa.dibujo) {
         empezarDibujo();
     }
     const dibujo = estadoMapa.dibujo;
-    const ultimo = dibujo.puntos[dibujo.puntos.length - 1];
     const s = escalaMapa();
-    // El segundo clic de un doble clic cae en el mismo sitio: no es otro punto.
-    if (ultimo && Math.hypot(ultimo.x - p.x, ultimo.y - p.y) < 4 * s) {
+    // Pulsar en el primero cierra la región (antes que el imán, que lo
+    // pegaría al primero igual).
+    const primero = dibujo.puntos[0];
+    if (dibujo.lista === "shapes" && dibujo.puntos.length >= 3
+        && Math.hypot(primero.x - crudo.x, primero.y - crudo.y) < 12 * s) {
+        terminarDibujo();
         return;
     }
-    // Pulsar en el primero cierra la región.
-    const primero = dibujo.puntos[0];
-    if (dibujo.lista === "shapes" && dibujo.puntos.length >= 3 && Math.hypot(primero.x - p.x, primero.y - p.y) < 12 * s) {
-        terminarDibujo();
+    const p = imantar(crudo).p;
+    const ultimo = dibujo.puntos[dibujo.puntos.length - 1];
+    // El segundo clic de un doble clic cae en el mismo sitio: no es otro punto.
+    if (ultimo && Math.hypot(ultimo.x - p.x, ultimo.y - p.y) < 4 * s) {
         return;
     }
     dibujo.puntos.push(dentroDelMapa(p));
@@ -827,6 +1224,11 @@ function terminarDibujo(aMano) {
     let puntos = dibujo.puntos;
     if (aMano) {
         puntos = simplificarMapa(puntos, 1.5 * escalaMapa());
+        // A mano, el imán solo para los dos extremos: el camino que acaba
+        // en la ciudad.
+        if (puntos.length >= 2) {
+            puntos[puntos.length - 1] = dentroDelMapa(imantar(puntos[puntos.length - 1]).p);
+        }
     }
     const falta = dibujo.lista === "shapes" ? 3 : 2;
     if (puntos.length < falta) {
@@ -834,6 +1236,7 @@ function terminarDibujo(aMano) {
             : "Una raya necesita por lo menos dos puntos.", true);
         return;
     }
+    apuntarPaso();
     const cosa = { id: idNuevoMapa() };
     if (dibujo.lista === "shapes") {
         cosa.type = "polygon";
@@ -845,31 +1248,180 @@ function terminarDibujo(aMano) {
             cosa.layerId = capa.id;
         }
     } else {
-        cosa.kind = dibujo.kind;
+        cosa.kind = dibujo.kind || "camino";
         cosa.points = puntos;
     }
     estadoMapa.datos[dibujo.lista].push(cosa);
-    estadoMapa.cambiado = true;
     const lista = dibujo.lista;
     cancelarDibujo();
+    estadoMapa.iman = null;
     elegirCosa(lista, estadoMapa.datos[lista].length - 1);
-    avisarEditor((lista === "shapes" ? "Región" : dibujo.kind === "rio" ? "Río" : "Camino")
-        + " hecho (" + puntos.length + " puntos). Ponle nombre a la derecha.");
+    avisarEditor((lista === "shapes" ? "Región" : nombreDeCosa("lines", cosa).que.replace(/^./, (c) => c.toUpperCase()))
+        + " hecha (" + puntos.length + " puntos). Ponle nombre a la derecha.");
     $("#mapa-p-nombre").focus({ preventScroll: true });
 }
 
-function ponerSitio(p) {
+function ponerSitio(crudo) {
     const tipo = $("#mapa-tipo-nuevo").value;
-    const sitio = dentroDelMapa(p);
+    const sitio = dentroDelMapa(imantar(crudo).p);
+    apuntarPaso();
     const cosa = { id: idNuevoMapa(), x: sitio.x, y: sitio.y, label: "" };
     if (tipo) {
         cosa.kind = tipo;
     }
     estadoMapa.datos.pins.push(cosa);
-    estadoMapa.cambiado = true;
+    estadoMapa.iman = null;
     elegirCosa("pins", estadoMapa.datos.pins.length - 1);
     avisarEditor("Sitio puesto. Escribe su nombre (y, si tiene, la página a la que lleva).");
     $("#mapa-p-nombre").focus({ preventScroll: true });
+}
+
+function ponerTexto(p) {
+    const sitio = dentroDelMapa(p);
+    apuntarPaso();
+    estadoMapa.datos.labels.push({ id: idNuevoMapa(), x: sitio.x, y: sitio.y, label: "", size: "mediano" });
+    elegirCosa("labels", estadoMapa.datos.labels.length - 1);
+    avisarEditor("Texto puesto. Escríbelo a la derecha.");
+    $("#mapa-p-nombre").focus({ preventScroll: true });
+}
+
+// ---- MEDIR ----
+// Una raya de varios tramos, que no se guarda: solo dice cuánto mide. Con
+// escala, en leguas (o en lo que sea) y en días de viaje; sin ella, en
+// píxeles del mapa. La escala sí se guarda en el .cmap ("scale") y la web
+// pinta con ella una barra de escala.
+function largoDeMedida(puntos) {
+    const a = largosMapa(puntos);
+    return a[a.length - 1] || 0;
+}
+
+function enUnidades(pixeles) {
+    const e = estadoMapa.datos.scale;
+    if (!e || !e.pixels || !e.distance) {
+        return null;
+    }
+    return pixeles * e.distance / e.pixels;
+}
+
+function diasDeViaje(distancia, porDia) {
+    const dias = distancia / porDia;
+    if (dias < 1) {
+        const horas = Math.max(1, Math.round(dias * 8));
+        return horas === 1 ? "una hora" : "unas " + horas + " horas";
+    }
+    const medios = Math.round(dias * 2) / 2;
+    const enteros = Math.floor(medios);
+    const conMedio = medios !== enteros;
+    if (enteros === 1) {
+        return conMedio ? "un día y medio" : "un día";
+    }
+    return enteros + (conMedio ? " días y medio" : " días");
+}
+
+function textoDeDistancia(pixeles) {
+    const e = estadoMapa.datos.scale;
+    const unidades = enUnidades(pixeles);
+    if (unidades === null) {
+        return cifraMapa(pixeles, 0) + " píxeles del mapa";
+    }
+    let texto = cifraMapa(unidades) + " " + (e.unit || "");
+    const viaje = Object.entries(e.travel || {}).filter(([, v]) => typeof v === "number" && v > 0);
+    if (viaje.length && unidades > 0) {
+        texto += ". " + viaje.map(([como, v]) => como[0].toUpperCase() + como.slice(1) + ": " + diasDeViaje(unidades, v))
+            .join(" · ");
+    }
+    return texto;
+}
+
+function pintarMedida() {
+    if (!estadoMapa.datos) {
+        return;
+    }
+    const medida = estadoMapa.medida;
+    const total = largoDeMedida(medida);
+    $("[data-mapa-medida]").textContent = medida.length < 2
+        ? "Pulsa en el mapa de un sitio a otro."
+        : "Distancia: " + textoDeDistancia(total) + ".";
+    $("[data-mapa-medida-raton]").textContent = "";
+    const e = estadoMapa.datos.scale;
+    $("[data-mapa-escala-ahora]").textContent = e && e.pixels && e.distance
+        ? "Ahora: " + cifraMapa(e.pixels, 0) + " píxeles del mapa son " + cifraMapa(e.distance) + " " + (e.unit || "")
+            + ". Para cambiarla, mide un tramo que conozcas, escribe cuánto es y «Usar como escala»."
+        : "Sin escala: las distancias salen en píxeles del mapa. Mide un tramo que conozcas (de una ciudad a otra),"
+            + " escribe cuánto es y pulsa «Usar como escala».";
+    if (e && e.unit) {
+        $("#mapa-escala-unidad").value = e.unit;
+    }
+    const viaje = (e && e.travel) || {};
+    document.querySelectorAll("[data-mapa-viaje-como]").forEach((campo) => {
+        const v = viaje[campo.getAttribute("data-mapa-viaje-como")];
+        campo.value = typeof v === "number" ? v : "";
+        campo.disabled = !e;
+    });
+    $("[data-mapa-escala-quitar]").disabled = !e;
+    pintarDibujoMapa();
+}
+
+function anadirPuntoMedida(crudo) {
+    const p = dentroDelMapa(imantar(crudo).p);
+    const ultimo = estadoMapa.medida[estadoMapa.medida.length - 1];
+    if (ultimo && Math.hypot(ultimo.x - p.x, ultimo.y - p.y) < 2 * escalaMapa()) {
+        return;
+    }
+    estadoMapa.medida.push(p);
+    pintarMedida();
+}
+
+function ponerEscala() {
+    const pixeles = largoDeMedida(estadoMapa.medida);
+    const cuanto = Number(String($("#mapa-escala-cuanto").value).replace(",", "."));
+    const unidad = $("#mapa-escala-unidad").value.trim() || "leguas";
+    if (pixeles <= 0) {
+        avisarEditor("Primero mide en el mapa un tramo del que sepas cuánto es.", true);
+        return;
+    }
+    if (!Number.isFinite(cuanto) || cuanto <= 0) {
+        avisarEditor("Escribe cuánto es lo medido (un número).", true);
+        $("#mapa-escala-cuanto").focus();
+        return;
+    }
+    apuntarPaso();
+    const antes = estadoMapa.datos.scale || {};
+    const viaje = antes.unit === unidad && antes.travel ? antes.travel
+        : Object.assign({}, VIAJE_POR_UNIDAD[unidad.toLowerCase()] || {});
+    estadoMapa.datos.scale = { pixels: redondoMapa(pixeles), distance: cuanto, unit: unidad, travel: viaje };
+    pintarMedida();
+    avisarEditor("Escala puesta: " + cifraMapa(pixeles, 0) + " píxeles del mapa son " + cifraMapa(cuanto) + " " + unidad
+        + ". En la web sale una barra de escala.");
+}
+
+function cambiarViaje(campo) {
+    const e = estadoMapa.datos.scale;
+    if (!e) {
+        return;
+    }
+    const como = campo.getAttribute("data-mapa-viaje-como");
+    apuntarPaso("viaje-" + como);
+    const n = Number(String(campo.value).replace(",", "."));
+    e.travel = Object.assign({}, e.travel);
+    if (Number.isFinite(n) && n > 0) {
+        e.travel[como] = n;
+    } else {
+        delete e.travel[como];
+    }
+    const total = largoDeMedida(estadoMapa.medida);
+    $("[data-mapa-medida]").textContent = estadoMapa.medida.length < 2 ? "Pulsa en el mapa de un sitio a otro."
+        : "Distancia: " + textoDeDistancia(total) + ".";
+}
+
+function quitarEscala() {
+    if (!estadoMapa.datos.scale) {
+        return;
+    }
+    apuntarPaso();
+    delete estadoMapa.datos.scale;
+    pintarMedida();
+    avisarEditor("Escala quitada.");
 }
 
 // ---- EL RATÓN ----
@@ -877,6 +1429,7 @@ function alApretarEnElMapa(e) {
     if (!estadoMapa.datos || (e.button !== 0 && e.button !== 1)) {
         return;
     }
+    estadoMapa.sinIman = e.altKey;
     const svg = svgDelMapa();
     const p = puntoDelMapa(e);
     const inicio = { x: e.clientX, y: e.clientY, p, vista: Object.assign({}, estadoMapa.vista) };
@@ -894,25 +1447,29 @@ function alApretarEnElMapa(e) {
         const el = estadoMapa.elegido;
         const puntos = estadoMapa.datos[el.lista][el.i].points;
         let n;
+        let apuntado = false;
         if (medio) {
+            apuntarPaso();
+            apuntado = true;
             n = Number(medio.getAttribute("data-medio")) + 1;
             puntos.splice(n, 0, dentroDelMapa(p));
-            estadoMapa.cambiado = true;
             repintarCosa(el.lista, el.i);
         } else {
             n = Number(asa.getAttribute("data-asa"));
         }
-        estadoMapa.arrastre = { que: "punto", n, inicio, movido: false };
+        estadoMapa.arrastre = { que: "punto", n, inicio, movido: false, apuntado };
     } else if (h === "elegir" && cosa) {
         const lista = cosa.getAttribute("data-lista");
         const i = Number(cosa.getAttribute("data-i"));
         elegirCosa(lista, i);
-        estadoMapa.arrastre = lista === "pins"
-            ? { que: "sitio", inicio, desde: { x: estadoMapa.datos.pins[i].x, y: estadoMapa.datos.pins[i].y }, movido: false }
+        const movible = lista === "pins" || lista === "labels";
+        estadoMapa.arrastre = movible
+            ? { que: "sitio", lista, inicio, desde: { x: estadoMapa.datos[lista][i].x, y: estadoMapa.datos[lista][i].y },
+                movido: false }
             : { que: "vista", inicio, movido: false, cosa: true };
-    } else if (h !== "elegir" && h !== "pin" && $("#mapa-mano").checked) {
+    } else if (HERRAMIENTAS_DE_DIBUJO.includes(h) && $("#mapa-mano").checked) {
         empezarDibujo();
-        estadoMapa.dibujo.puntos.push(dentroDelMapa(p));
+        estadoMapa.dibujo.puntos.push(dentroDelMapa(imantar(p).p));
         estadoMapa.arrastre = { que: "mano", inicio, movido: false };
     } else {
         estadoMapa.arrastre = { que: "clic", inicio, movido: false };
@@ -924,11 +1481,24 @@ function alApretarEnElMapa(e) {
 function alMoverEnElMapa(e) {
     const a = estadoMapa.arrastre;
     const dibujo = estadoMapa.dibujo;
+    estadoMapa.sinIman = e.altKey;
+    const h = estadoMapa.herramienta;
     if (!a) {
-        if (dibujo && dibujo.puntos.length) {
-            dibujo.raton = puntoDelMapa(e);
-            pintarDibujoMapa();
+        // Sin arrastrar: dónde caería lo siguiente (con el imán).
+        if (h === "elegir") {
+            return;
         }
+        const pegado = imantar(puntoDelMapa(e));
+        estadoMapa.iman = pegado.pegado ? pegado.p : null;
+        if (dibujo && dibujo.puntos.length) {
+            dibujo.raton = pegado.p;
+        }
+        if (h === "medir" && estadoMapa.medida.length) {
+            estadoMapa.ratonMedida = pegado.p;
+            const tramo = largoDeMedida([estadoMapa.medida[estadoMapa.medida.length - 1], pegado.p]);
+            $("[data-mapa-medida-raton]").textContent = "Hasta el ratón, " + textoDeDistancia(tramo) + " más.";
+        }
+        pintarDibujoMapa();
         return;
     }
     const lienzo = lienzoMapa();
@@ -945,14 +1515,21 @@ function alMoverEnElMapa(e) {
     }
     const p = puntoDelMapa(e);
     const el = estadoMapa.elegido;
+    if ((a.que === "sitio" || a.que === "punto") && !a.apuntado) {
+        apuntarPaso();
+        a.apuntado = true;
+    }
     if (a.que === "sitio") {
-        const sitio = estadoMapa.datos.pins[el.i];
-        Object.assign(sitio, dentroDelMapa({ x: a.desde.x + p.x - a.inicio.p.x, y: a.desde.y + p.y - a.inicio.p.y }));
-        estadoMapa.cambiado = true;
-        repintarCosa("pins", el.i);
+        const sitio = estadoMapa.datos[a.lista][el.i];
+        const quiere = { x: a.desde.x + p.x - a.inicio.p.x, y: a.desde.y + p.y - a.inicio.p.y };
+        const pegado = a.lista === "pins" ? imantar(quiere, { lista: "pins", i: el.i }) : { p: quiere, pegado: false };
+        estadoMapa.iman = pegado.pegado ? pegado.p : null;
+        Object.assign(sitio, dentroDelMapa(pegado.p));
+        repintarCosa(a.lista, el.i);
     } else if (a.que === "punto") {
-        estadoMapa.datos[el.lista][el.i].points[a.n] = dentroDelMapa(p);
-        estadoMapa.cambiado = true;
+        const pegado = imantar(p, { lista: el.lista, i: el.i, n: a.n });
+        estadoMapa.iman = pegado.pegado ? pegado.p : null;
+        estadoMapa.datos[el.lista][el.i].points[a.n] = dentroDelMapa(pegado.p);
         repintarCosa(el.lista, el.i);
     } else if (a.que === "mano" && dibujo) {
         const ultimo = dibujo.puntos[dibujo.puntos.length - 1];
@@ -971,6 +1548,8 @@ function alSoltarEnElMapa(e) {
     }
     const h = estadoMapa.herramienta;
     if (a.que === "sitio" || a.que === "punto") {
+        estadoMapa.iman = null;
+        pintarDibujoMapa();
         if (a.movido) {
             pintarPropiedadesMapa();
         }
@@ -984,6 +1563,10 @@ function alSoltarEnElMapa(e) {
     } else if (a.que === "clic" && !a.movido) {
         if (h === "pin") {
             ponerSitio(a.inicio.p);
+        } else if (h === "texto") {
+            ponerTexto(a.inicio.p);
+        } else if (h === "medir") {
+            anadirPuntoMedida(a.inicio.p);
         } else {
             anadirPuntoDibujo(a.inicio.p);
         }
@@ -1005,7 +1588,7 @@ function esDobleEnAsa(asa) {
 
 function quitarPuntoMapa(n) {
     const el = estadoMapa.elegido;
-    if (!el || el.lista === "pins") {
+    if (!el || el.lista === "pins" || el.lista === "labels") {
         return;
     }
     const puntos = estadoMapa.datos[el.lista][el.i].points;
@@ -1013,14 +1596,14 @@ function quitarPuntoMapa(n) {
         avisarEditor("No le quedan puntos que quitar: si sobra entera, bórrala.", true);
         return;
     }
+    apuntarPaso();
     puntos.splice(n, 1);
-    estadoMapa.cambiado = true;
     repintarCosa(el.lista, el.i);
     pintarPropiedadesMapa();
 }
 
 function alDobleClicEnElMapa() {
-    if (["region", "camino", "rio"].includes(estadoMapa.herramienta) && estadoMapa.dibujo) {
+    if (HERRAMIENTAS_DE_DIBUJO.includes(estadoMapa.herramienta) && estadoMapa.dibujo) {
         terminarDibujo();
     }
 }
@@ -1042,15 +1625,16 @@ function alPulsarEnElMapa(e) {
     const paso = (e.shiftKey ? 0.25 : 0.08);
     const flechas = { ArrowLeft: [-1, 0], ArrowRight: [1, 0], ArrowUp: [0, -1], ArrowDown: [0, 1] };
     const el = estadoMapa.elegido;
+    const h = estadoMapa.herramienta;
     if (flechas[e.key]) {
         e.preventDefault();
         const [fx, fy] = flechas[e.key];
-        if (el && el.lista === "pins" && estadoMapa.herramienta === "elegir") {
-            const sitio = estadoMapa.datos.pins[el.i];
+        if (el && (el.lista === "pins" || el.lista === "labels") && h === "elegir") {
+            const sitio = estadoMapa.datos[el.lista][el.i];
             const s = escalaMapa() * (e.shiftKey ? 20 : 4);
+            apuntarPaso("mover-" + el.lista + "-" + el.i);
             Object.assign(sitio, dentroDelMapa({ x: sitio.x + fx * s, y: sitio.y + fy * s }));
-            estadoMapa.cambiado = true;
-            repintarCosa("pins", el.i);
+            repintarCosa(el.lista, el.i);
             pintarPropiedadesMapa();
         } else {
             moverVistaMapa(fx * v.w * paso, fy * v.h * paso);
@@ -1063,9 +1647,13 @@ function alPulsarEnElMapa(e) {
         acercarMapa(0.8);
     } else if (e.key === "Enter" || e.key === " ") {
         e.preventDefault();
-        if (estadoMapa.herramienta === "pin") {
+        if (h === "pin") {
             ponerSitio(centroDeLaVista());
-        } else if (estadoMapa.herramienta !== "elegir") {
+        } else if (h === "texto") {
+            ponerTexto(centroDeLaVista());
+        } else if (h === "medir") {
+            anadirPuntoMedida(centroDeLaVista());
+        } else if (h !== "elegir") {
             anadirPuntoDibujo(centroDeLaVista());
         }
     } else if (e.key === "End") {
@@ -1074,6 +1662,8 @@ function alPulsarEnElMapa(e) {
     } else if (e.key === "Escape") {
         if (estadoMapa.dibujo) {
             cancelarDibujo();
+        } else if (h === "medir" && estadoMapa.medida.length) {
+            empezarOtraMedida();
         } else if (el) {
             elegirCosa(null);
         }
@@ -1081,6 +1671,12 @@ function alPulsarEnElMapa(e) {
         e.preventDefault();
         borrarElegido();
     }
+}
+
+function empezarOtraMedida() {
+    estadoMapa.medida = [];
+    estadoMapa.ratonMedida = null;
+    pintarMedida();
 }
 
 // ---- CAMBIAR LA IMAGEN (con el mismo encuadre) ----
@@ -1097,9 +1693,10 @@ async function cambiarImagenMapa(input) {
         avisarEditor(hecha.error, true);
         return;
     }
+    apuntarPaso();
     const d = estadoMapa.datos;
     // Lo puesto, a la medida nueva: si la imagen es el doble de grande,
-    // cada coordenada, el doble.
+    // cada coordenada, el doble (y la escala, igual).
     const fx = hecha.ancho / d.width;
     const fy = hecha.alto / d.height;
     const escalar = (p) => {
@@ -1107,16 +1704,21 @@ async function cambiarImagenMapa(input) {
         p.y = redondoMapa(p.y * fy);
     };
     d.pins.forEach(escalar);
+    d.labels.forEach(escalar);
     d.shapes.concat(d.lines).forEach((c) => (c.points || []).forEach(escalar));
+    if (d.scale && d.scale.pixels) {
+        d.scale.pixels = redondoMapa(d.scale.pixels * (fx + fy) / 2);
+    }
     d.width = hecha.ancho;
     d.height = hecha.alto;
     d.layers[0].image = hecha.nombre;
     estadoMapa.imagenes[hecha.nombre] = hecha.url;
-    estadoMapa.cambiado = true;
-    $("[data-mapa-archivo]").textContent = "En wiki/" + estadoMapa.archivo + " · " + d.width + " × " + d.height + " px";
+    estadoMapa.medida = [];
+    pintarDatosGenerales();
     pintarTodoElMapa();
     ajustarMapa();
     pintarPropiedadesMapa();
+    pintarMedida();
     const raro = Math.abs(fx - fy) > 0.02 ? " OJO: no tiene la misma forma que la otra, así que lo puesto se ha estirado." : "";
     avisarEditor("Imagen cambiada: " + hecha.nombre + " (" + hecha.ancho + " × " + hecha.alto + ")." + raro
         + " Recuerda guardar.", !!raro);
@@ -1124,11 +1726,11 @@ async function cambiarImagenMapa(input) {
 
 // ---- DESCARGAR LA IMAGEN, CON TODO LO PUESTO ----
 // Un PNG del tamaño del mapa: las capas que se ven aquí y, encima, las
-// regiones (con su nombre en medio), los caminos y ríos y los sitios con
-// su símbolo y su nombre. Se pinta en un <canvas> a partir de los datos,
-// no del SVG de la pantalla: así los tamaños van en proporción al mapa y
-// no al zoom de ahora. Sale lo que hay en el editor, aunque no esté
-// guardado.
+// regiones (con su nombre en medio), las rayas, los textos, los sitios con
+// su símbolo y su nombre y la barra de escala. Se pinta en un <canvas> a
+// partir de los datos, no del SVG de la pantalla: así los tamaños van en
+// proporción al mapa y no al zoom de ahora. Sale lo que hay en el editor,
+// aunque no esté guardado.
 function cargarImagenMapa(url) {
     return new Promise((resolver) => {
         const img = new Image();
@@ -1173,6 +1775,104 @@ function letreroMapa(ctx, texto, x, y, k, tamano, alinear, estilo) {
     ctx.fillText(texto, x, y);
 }
 
+function rayaEnLienzo(ctx, puntos, k) {
+    ctx.beginPath();
+    puntos.forEach((p, i) => (i ? ctx.lineTo(p.x, p.y) : ctx.moveTo(p.x, p.y)));
+}
+
+function pintarRayaEnLienzo(ctx, l, k) {
+    const puntos = l.points || [];
+    if (puntos.length < 2) {
+        return;
+    }
+    const estilo = estiloDeRaya(l.kind);
+    const color = l.color || estilo.color;
+    ctx.lineJoin = "round";
+    if (l.kind === "rio" && l.taper !== false) {
+        const tramos = tramosDeRio(puntos);
+        ctx.lineCap = "round";
+        ctx.setLineDash([]);
+        [[estilo.colorBorde || "#1b1020", 3], [color, 0]].forEach(([pintura, mas]) => {
+            tramos.forEach((t) => {
+                rayaEnLienzo(ctx, t.puntos, k);
+                ctx.strokeStyle = pintura;
+                ctx.lineWidth = (t.grueso + mas) * k;
+                ctx.stroke();
+            });
+        });
+    } else {
+        ctx.lineCap = estilo.corte || "round";
+        const trazos = estilo.trazos ? estilo.trazos.map((x) => x * k) : [];
+        rayaEnLienzo(ctx, puntos, k);
+        ctx.setLineDash(estilo.bordeConTrazos ? trazos : []);
+        ctx.strokeStyle = estilo.colorBorde || "#1b1020";
+        ctx.lineWidth = estilo.borde * k;
+        ctx.stroke();
+        ctx.setLineDash(trazos);
+        ctx.strokeStyle = color;
+        ctx.lineWidth = estilo.ancho * k;
+        ctx.stroke();
+        ctx.setLineDash([]);
+    }
+    if (estilo.flechas) {
+        // Del tamaño de las de la pantalla con el mapa entero.
+        const r = 8 * k;
+        flechasDeRaya(puntos).forEach((f) => {
+            ctx.save();
+            ctx.translate(f.x, f.y);
+            ctx.rotate(f.giro * Math.PI / 180);
+            ctx.beginPath();
+            ctx.moveTo(-r, -r * 0.75);
+            ctx.lineTo(r, 0);
+            ctx.lineTo(-r, r * 0.75);
+            ctx.closePath();
+            ctx.fillStyle = color;
+            ctx.fill();
+            ctx.lineWidth = 1.5 * k;
+            ctx.strokeStyle = "#1b1020";
+            ctx.stroke();
+            ctx.restore();
+        });
+    }
+}
+
+function barraDeEscalaEnLienzo(ctx, d, k) {
+    const e = d.scale;
+    if (!e || !e.pixels || !e.distance) {
+        return;
+    }
+    // Como _barra_de_escala en mundo_mapas.py: un número redondo de
+    // alrededor de un sexto del mapa, abajo a la izquierda.
+    const porPixel = e.distance / e.pixels;
+    const deseado = d.width / 6 * porPixel;
+    const potencia = Math.pow(10, Math.floor(Math.log10(deseado)));
+    const valor = [5, 2, 1].map((m) => m * potencia).find((v) => v <= deseado);
+    const largo = valor / porPixel;
+    const base = Math.max(d.width, d.height);
+    const x0 = d.width / 40;
+    const y0 = d.height - d.height / 22;
+    const alto = base / 200;
+    ctx.fillStyle = "rgba(27,16,32,0.55)";
+    ctx.fillRect(x0 - alto * 0.6, y0 - alto * 0.6, largo + alto * 1.2, alto * 2.2);
+    ctx.fillStyle = "#f4ecd8";
+    ctx.fillRect(x0, y0, largo / 2, alto);
+    ctx.fillStyle = "#1b1020";
+    ctx.fillRect(x0 + largo / 2, y0, largo / 2, alto);
+    ctx.strokeStyle = "#f4ecd8";
+    ctx.lineWidth = k;
+    ctx.strokeRect(x0 + largo / 2, y0, largo / 2, alto);
+    ctx.font = "700 " + Math.round(base / 60) + 'px "Space Grotesk", system-ui, sans-serif';
+    ctx.textAlign = "left";
+    ctx.textBaseline = "alphabetic";
+    ctx.lineJoin = "round";
+    ctx.lineWidth = base / 60 * 0.2;
+    ctx.strokeStyle = "#1b1020";
+    const texto = cifraMapa(valor, 2) + (e.unit ? " " + e.unit : "");
+    ctx.strokeText(texto, x0, y0 - alto * 1.6);
+    ctx.fillStyle = "#f4ecd8";
+    ctx.fillText(texto, x0, y0 - alto * 1.6);
+}
+
 async function descargarImagenMapa() {
     const d = estadoMapa.datos;
     if (!d) {
@@ -1207,13 +1907,6 @@ async function descargarImagenMapa() {
             ctx.globalAlpha = 1;
         }
     }
-    const camino = (puntos, cerrado) => {
-        ctx.beginPath();
-        puntos.forEach((p, i) => (i ? ctx.lineTo(p.x, p.y) : ctx.moveTo(p.x, p.y)));
-        if (cerrado) {
-            ctx.closePath();
-        }
-    };
     ctx.lineJoin = "round";
     ctx.lineCap = "round";
 
@@ -1224,7 +1917,8 @@ async function descargarImagenMapa() {
             return;
         }
         const color = s.color || "#f5ce6c";
-        camino(puntos, true);
+        rayaEnLienzo(ctx, puntos, k);
+        ctx.closePath();
         ctx.globalAlpha = s.label || s.targetPage ? 0.35 : 0.18;
         ctx.fillStyle = color;
         ctx.fill();
@@ -1235,23 +1929,31 @@ async function descargarImagenMapa() {
         ctx.globalAlpha = 1;
     });
 
-    // Los caminos y los ríos: un borde oscuro debajo y la raya encima.
-    d.lines.forEach((l) => {
-        const puntos = l.points || [];
-        if (puntos.length < 2) {
+    // Las rayas.
+    d.lines.forEach((l) => pintarRayaEnLienzo(ctx, l, k));
+
+    // Los textos sueltos, del tamaño del mapa y girados.
+    d.labels.forEach((t) => {
+        if (!t.label) {
             return;
         }
-        const rio = l.kind === "rio";
-        camino(puntos, false);
-        ctx.setLineDash([]);
+        const tam = tamanoDeTexto(t);
+        ctx.save();
+        ctx.translate(t.x, t.y);
+        ctx.rotate((t.angle || 0) * Math.PI / 180);
+        ctx.font = "italic 700 " + Math.round(tam) + "px Georgia, \"Times New Roman\", serif";
+        if ("letterSpacing" in ctx) {
+            ctx.letterSpacing = Math.round(tam * 0.12) + "px";
+        }
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.lineJoin = "round";
+        ctx.lineWidth = tam * 0.16;
         ctx.strokeStyle = "#1b1020";
-        ctx.lineWidth = (rio ? 7 : 6.5) * k;
-        ctx.stroke();
-        ctx.strokeStyle = l.color || (rio ? "#4aa3df" : "#f0dfb4");
-        ctx.lineWidth = (rio ? 4.5 : 3.5) * k;
-        ctx.setLineDash(rio ? [] : [10 * k, 7 * k]);
-        ctx.stroke();
-        ctx.setLineDash([]);
+        ctx.strokeText(t.label, 0, 0);
+        ctx.fillStyle = t.color || "#f4ecd8";
+        ctx.fillText(t.label, 0, 0);
+        ctx.restore();
     });
 
     // Los nombres de las regiones, en medio, en cursiva para no
@@ -1296,10 +1998,10 @@ async function descargarImagenMapa() {
         ctx.fill();
         ctx.stroke();
         ctx.setLineDash([]);
-        const simbolo = tipo ? tipo[2] : (p.icon || "");
+        const simbolo = tipo ? tipo[2] + "︎" : (p.icon || "");
         if (simbolo) {
             ctx.fillStyle = "#1b1020";
-            ctx.font = "700 " + Math.round(13 * k) + "px system-ui, sans-serif";
+            ctx.font = "700 " + Math.round(13 * k) + "px " + LETRA_DE_SIMBOLOS;
             ctx.textAlign = "center";
             ctx.textBaseline = "middle";
             ctx.fillText(simbolo, p.x, p.y + k);
@@ -1308,6 +2010,8 @@ async function descargarImagenMapa() {
             letreroMapa(ctx, p.label, p.x + r + 5 * k, p.y, k, 15);
         }
     });
+
+    barraDeEscalaEnLienzo(ctx, d, k);
 
     lienzo.toBlob((blob) => {
         if (!blob) {
@@ -1344,7 +2048,14 @@ async function guardarMapa(yPasar) {
         b.disabled = true;
     });
     avisarEditor("Guardando…");
-    const hecho = await pedirEditor("/api/mapa/guardar", { archivo: estadoMapa.archivo, datos: estadoMapa.datos });
+    // Los textos sin escribir no se guardan; y si no hay ninguno, la
+    // lista tampoco (un mapa de Chronicler se queda como estaba).
+    const datos = Object.assign({}, estadoMapa.datos);
+    datos.labels = datos.labels.filter((t) => (t.label || "").trim());
+    if (!datos.labels.length) {
+        delete datos.labels;
+    }
+    const hecho = await pedirEditor("/api/mapa/guardar", { archivo: estadoMapa.archivo, datos });
     if (hecho.error) {
         avisarEditor(hecho.error, true);
     } else {
@@ -1371,15 +2082,30 @@ async function guardarMapa(yPasar) {
 }
 
 // ---- AL EMPEZAR ----
-function empezarMapas() {
-    const tipos = $("[data-mapa-tipos-pin]");
-    TIPOS_DE_SITIO.forEach(([valor, nombre, simbolo]) => {
+function opcionesMapa(select, lista, conSimbolo) {
+    lista.forEach((t) => {
         const o = document.createElement("option");
-        o.value = valor;
-        o.textContent = simbolo + " " + nombre;
-        tipos.appendChild(o);
+        o.value = t[0];
+        o.textContent = conSimbolo ? t[2] + " " + t[1] : t[1];
+        select.appendChild(o);
     });
-    tipos.value = "ciudad";
+}
+
+function escribiendoEnUnaCasilla() {
+    const activo = document.activeElement;
+    if (!activo) {
+        return false;
+    }
+    if (activo.tagName === "TEXTAREA") {
+        return true;
+    }
+    return activo.tagName === "INPUT" && !["checkbox", "radio", "range", "button", "file", "color"].includes(activo.type);
+}
+
+function empezarMapas() {
+    opcionesMapa($("[data-mapa-tipos-pin]"), TIPOS_DE_SITIO, true);
+    $("[data-mapa-tipos-pin]").value = "ciudad";
+    opcionesMapa($("[data-mapa-tipos-raya]"), TIPOS_DE_RAYA, false);
 
     document.querySelectorAll('[data-ir="mapas"]').forEach((b) => b.addEventListener("click", pintarListaDeMapas));
     $("[data-mapa-nuevo]").addEventListener("submit", (e) => {
@@ -1398,10 +2124,21 @@ function empezarMapas() {
         b.addEventListener("click", () => acercarMapa(b.getAttribute("data-mapa-zoom") === "1" ? 1.5 : 1 / 1.5));
     });
     $("[data-mapa-ajustar]").addEventListener("click", ajustarMapa);
+    $("[data-mapa-deshacer]").addEventListener("click", deshacerMapa);
+    $("[data-mapa-rehacer]").addEventListener("click", rehacerMapa);
     $("[data-mapa-terminar]").addEventListener("click", () => terminarDibujo());
     $("[data-mapa-cancelar]").addEventListener("click", cancelarDibujo);
     $("[data-mapa-quitar-punto]").addEventListener("click", quitarUltimoPunto);
     $("[data-mapa-borrar]").addEventListener("click", borrarElegido);
+    $("[data-mapa-medir-otra]").addEventListener("click", empezarOtraMedida);
+    $("[data-mapa-escala-poner]").addEventListener("click", ponerEscala);
+    $("[data-mapa-escala-quitar]").addEventListener("click", quitarEscala);
+    document.querySelectorAll("[data-mapa-viaje-como]").forEach((campo) => {
+        campo.addEventListener("input", () => cambiarViaje(campo));
+        campo.addEventListener("blur", () => {
+            estadoMapa.ultimoCampo = null;
+        });
+    });
 
     const svg = svgDelMapa();
     svg.addEventListener("pointerdown", alApretarEnElMapa);
@@ -1413,8 +2150,10 @@ function empezarMapas() {
     svg.addEventListener("pointerleave", () => {
         if (estadoMapa.dibujo) {
             estadoMapa.dibujo.raton = null;
-            pintarDibujoMapa();
         }
+        estadoMapa.ratonMedida = null;
+        estadoMapa.iman = null;
+        pintarDibujoMapa();
     });
     svg.addEventListener("dblclick", alDobleClicEnElMapa);
     svg.addEventListener("auxclick", (e) => e.preventDefault());
@@ -1426,16 +2165,20 @@ function empezarMapas() {
         }
     });
 
-    // Lo elegido: cada casilla cambia lo suyo al escribir.
+    // Lo elegido: cada casilla cambia lo suyo al escribir. Al salir de una
+    // casilla se cierra su paso de «deshacer».
     document.querySelectorAll("[data-mapa-p]").forEach((campo) => {
         const que = campo.getAttribute("data-mapa-p");
-        const tipo = campo.type === "checkbox" ? "change" : "input";
+        const tipo = campo.type === "checkbox" || campo.tagName === "SELECT" ? "change" : "input";
         campo.addEventListener(tipo, () => {
-            if (que === "con-color") {
+            if (que === "con-color" || que === "taper") {
                 cambiarPropiedadMapa(que, campo.checked);
             } else {
-                cambiarPropiedadMapa(que, que === "x" || que === "y" ? campo.value : campo.value.trim());
+                cambiarPropiedadMapa(que, ["x", "y", "angle"].includes(que) ? campo.value : campo.value.trim());
             }
+        });
+        campo.addEventListener("blur", () => {
+            estadoMapa.ultimoCampo = null;
         });
     });
     $("#mapa-p-nombre").addEventListener("keydown", (e) => {
@@ -1448,15 +2191,18 @@ function empezarMapas() {
         campo.addEventListener("input", () => {
             const que = campo.getAttribute("data-mapa-general");
             const valor = campo.value.trim();
+            apuntarPaso("general-" + que);
             if (valor) {
                 estadoMapa.datos[que] = valor;
             } else {
                 delete estadoMapa.datos[que];
             }
-            estadoMapa.cambiado = true;
             if (que === "title") {
                 pintarTituloMapa();
             }
+        });
+        campo.addEventListener("blur", () => {
+            estadoMapa.ultimoCampo = null;
         });
     });
     $("#mapa-otra-imagen").addEventListener("change", (e) => cambiarImagenMapa(e.target));
@@ -1465,9 +2211,22 @@ function empezarMapas() {
     $("[data-mapa-descargar]").addEventListener("click", descargarImagenMapa);
     $("[data-mapa-pasar]").addEventListener("click", () => guardarMapa(true));
     document.addEventListener("keydown", (e) => {
-        if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "s" && !$('[data-vista="mapa"]').hidden) {
+        if ($('[data-vista="mapa"]').hidden || !(e.ctrlKey || e.metaKey)) {
+            return;
+        }
+        const tecla = e.key.toLowerCase();
+        if (tecla === "s") {
             e.preventDefault();
             guardarMapa(false);
+        } else if ((tecla === "z" || tecla === "y") && !escribiendoEnUnaCasilla()) {
+            // En una casilla de texto, Ctrl+Z deshace lo escrito en ella
+            // (lo del navegador); fuera, deshace en el mapa.
+            e.preventDefault();
+            if (tecla === "y" || e.shiftKey) {
+                rehacerMapa();
+            } else {
+                deshacerMapa();
+            }
         }
     });
     ponerHerramienta("elegir");

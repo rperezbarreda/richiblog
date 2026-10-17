@@ -105,6 +105,7 @@ function ponerZoomDeMapa(mando, quiere, anclaX, anclaY) {
     mando.zoom = ahora;
     lienzo.style.setProperty("--mapa-zoom", ahora);
     lienzo.classList.toggle("se-puede-arrastrar", ahora > 1.0005);
+    lienzo.classList.toggle("esta-cerca", ahora >= 1.995);
     if (Math.abs(ahora - antes) > 0.0005) {
         const cuanto = ahora / antes;
         lienzo.scrollLeft = puntoX * cuanto - haciaX;
@@ -202,6 +203,7 @@ function prepararRegionesDeMapa(caja) {
     apagarConCasilla(caja, "[data-mapa-regiones]", ".mapa-dibujos, .mapa-formas");
     apagarConCasilla(caja, "[data-mapa-pines]", ".mapa-pines");
     apagarConCasilla(caja, "[data-mapa-lineas]", ".mapa-lineas");
+    apagarConCasilla(caja, "[data-mapa-nombres]", ".mapa-pin-nombre, .mapa-textos");
     prepararNivelesDeMapa(caja);
 }
 function prepararNivelesDeMapa(caja) {
@@ -236,12 +238,13 @@ function apagarConCasilla(caja, cual, selector) {
     });
 }
 function escalarPinesDeMapa(mando) {
-    const grupo = mando.caja.querySelector(".mapa-pines");
     const dibujo = mando.caja.querySelector(".mapa-svg");
-    if (!grupo || !dibujo) {
+    if (!dibujo) {
         return;
     }
-    const radio = parseFloat(grupo.getAttribute("data-mapa-radio")) || 0;
+    const grupo = mando.caja.querySelector(".mapa-pines");
+    const radio = parseFloat(dibujo.getAttribute("data-mapa-radio")
+        || (grupo && grupo.getAttribute("data-mapa-radio"))) || 0;
     const caja = dibujo.getBoundingClientRect();
     const lados = (dibujo.getAttribute("viewBox") || "").split(/[\s,]+/);
     const ancho = parseFloat(lados[2]);
@@ -252,9 +255,11 @@ function escalarPinesDeMapa(mando) {
     const anchoReal = Math.min(caja.width, caja.height * (ancho / alto));
     const porUnidad = anchoReal / ancho;
     const cuanto = Math.max(0.15, Math.min(8, PIN_EN_PANTALLA / (radio * porUnidad)));
-    grupo.querySelectorAll("[data-mapa-xy]").forEach((pin) => {
+    dibujo.querySelectorAll("[data-mapa-xy]").forEach((pin) => {
         const sitio = pin.getAttribute("data-mapa-xy");
-        pin.setAttribute("transform", "translate(" + sitio + ") scale(" + cuanto.toFixed(3) + ")");
+        const giro = pin.getAttribute("data-mapa-giro");
+        pin.setAttribute("transform", "translate(" + sitio + ")" + (giro ? " rotate(" + giro + ")" : "")
+            + " scale(" + cuanto.toFixed(3) + ")");
     });
 }
 function prepararGloboDeMapa(mando) {

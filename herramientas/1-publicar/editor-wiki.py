@@ -28,8 +28,10 @@
 #     tamaño y sin los datos del móvil, a wiki/_imagenes/ (lo mismo que
 #     traer-imagen.py), y pone su nombre en la casilla.
 #   · LOS MAPAS (los .cmap): poner sitios (capital, ciudad, pueblo,
-#     fortaleza o ruina), pintar regiones, caminos y ríos, ponerles nombre
-#     y la página a la que llevan, y moverlos o borrarlos. También hacer un
+#     fortaleza, ruina, puerto, templo…), pintar regiones y rayas (caminos,
+#     ríos, fronteras, rutas…), escribir textos en el mapa, ponerles nombre
+#     y la página a la que llevan, moverlos o borrarlos (con imán, y con
+#     deshacer), y medir distancias con su escala y sus días de viaje. También hacer un
 #     mapa nuevo para una página a partir de una imagen: se guarda junto a
 #     la página y esa página sale en la web con un botón para explorarlo.
 #   · GUARDAR (Ctrl+S) escribe el .md. GUARDAR Y PASAR A LA WEB además

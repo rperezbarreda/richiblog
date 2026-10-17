@@ -264,7 +264,9 @@ html:not(.js) .mapa-ayuda {
 .mapa-dibujos.es-apagada,
 .mapa-formas.es-apagada,
 .mapa-pines.es-apagada,
-.mapa-lineas.es-apagada {
+.mapa-lineas.es-apagada,
+.mapa-textos.es-apagada,
+.mapa-pin-nombre.es-apagada {
     display: none;
 }
 
@@ -305,6 +307,67 @@ html:not(.js) .mapa-ayuda {
     stroke: #f0dfb4;
 }
 
+/* Un río que se ensancha va en trozos, cada uno con su grosor escrito
+   (style=""); opaco, para que no se noten las juntas. */
+.mapa-linea.es-rio.es-tramo {
+    stroke-opacity: 1;
+}
+
+/* LAS OTRAS RAYAS, cada una con su forma: la frontera a raya y punto, la
+   ruta marítima a puntos, la muralla gorda y con borde, y la ruta de
+   viaje a trazos y con flechas. */
+.mapa-linea.es-frontera {
+    stroke-width: 3px;
+    stroke-dasharray: 12px 5px 2px 5px;
+    stroke-linecap: butt;
+    filter: drop-shadow(0 0 1.5px #f4f1f7);
+}
+
+.mapa-linea.es-frontera:not([stroke]) {
+    stroke: #8e1b3b;
+}
+
+.mapa-linea.es-maritima {
+    stroke-width: 4px;
+    stroke-dasharray: 0.5px 8px;
+    filter: drop-shadow(0 0 1px #1b1020);
+}
+
+.mapa-linea.es-maritima:not([stroke]) {
+    stroke: #e6f4ff;
+}
+
+.mapa-linea.es-muralla {
+    stroke-width: 6px;
+    stroke-linecap: butt;
+    filter: drop-shadow(0 0 1.5px #1b1020);
+}
+
+.mapa-linea.es-muralla:not([stroke]) {
+    stroke: #a39a90;
+}
+
+.mapa-linea.es-ruta {
+    stroke-width: 3.5px;
+    stroke-dasharray: 9px 6px;
+    filter: drop-shadow(0 0 1.5px #1b1020);
+}
+
+.mapa-linea.es-ruta:not([stroke]) {
+    stroke: #e8446f;
+}
+
+.mapa-flecha {
+    stroke: #1b1020;
+    stroke-width: 1.5px;
+    vector-effect: non-scaling-stroke;
+    pointer-events: none;
+}
+
+.mapa-flecha:not([fill]) {
+    fill: #e8446f;
+}
+
 .mapa-linea-toque {
     stroke: transparent;
     stroke-width: 18px;
@@ -328,6 +391,13 @@ html:not(.js) .mapa-ayuda {
 .mapa-pin[class*="es-"] .mapa-pin-bola {
     stroke: #1b1020;
     fill-opacity: 1;
+}
+
+/* La bola de los tipos escritos (puerto, templo…); las de capital,
+   ciudad… la cambian justo debajo. Un color propio del sitio va en un
+   style="" y gana a todas. */
+.mapa-pin.con-tipo .mapa-pin-bola {
+    fill: #ece6f2;
 }
 
 .mapa-pin.es-capital .mapa-pin-bola {
@@ -385,6 +455,7 @@ html:not(.js) .mapa-ayuda {
 }
 
 .mapa-leyenda-marca {
+    font-family: "Segoe UI Symbol", "Noto Sans Symbols 2", "Noto Sans Symbols", "DejaVu Sans", sans-serif;
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -426,6 +497,32 @@ html:not(.js) .mapa-ayuda {
 
 .mapa-leyenda-marca.linea.es-rio {
     border-top: 5px solid #4aa3df;
+}
+
+.mapa-leyenda-marca.linea.es-frontera {
+    border-top: 3px dashed #8e1b3b;
+    filter: drop-shadow(0 0 1px #f4f1f7);
+}
+
+.mapa-leyenda-marca.linea.es-maritima {
+    border-top: 4px dotted #e6f4ff;
+    filter: drop-shadow(0 0 1px #1b1020);
+}
+
+.mapa-leyenda-marca.linea.es-muralla {
+    border-top: 6px solid #a39a90;
+    filter: drop-shadow(0 0 1px #1b1020);
+}
+
+.mapa-leyenda-marca.linea.es-ruta {
+    border-top: 4px dashed #e8446f;
+    filter: drop-shadow(0 0 1px #1b1020);
+}
+
+.mapa-escala-texto {
+    margin: 0 0 18px;
+    color: var(--white);
+    font-size: 0.9375rem;
 }
 
 .mapa-leyenda-marca.linea.es-camino {
@@ -481,6 +578,89 @@ html:not(.js) .mapa-ayuda {
 .mapa-pin.esta-mirado .mapa-pin-bola {
     fill-opacity: 1;
     stroke: var(--yellow);
+}
+
+/* LOS TIPOS ESCRITOS (puerto, templo…): una bola clara (la de la regla
+   de arriba, la primera de los tipos) con su símbolo. */
+.mapa-pin-letra {
+    fill: #1b1020;
+    font-family: "Segoe UI Symbol", "Noto Sans Symbols 2", "Noto Sans Symbols", "DejaVu Sans", sans-serif;
+    pointer-events: none;
+}
+
+/* EL NOMBRE DE CADA SITIO, escrito al lado, con un borde oscuro
+   alrededor de cada letra para leerse encima de cualquier dibujo. Los de
+   los sitios pequeños, solo de cerca (mundo-mapa.js pone esta-cerca). */
+.mapa-pin-nombre {
+    fill: #ffffff;
+    stroke: #1b1020;
+    stroke-linejoin: round;
+    paint-order: stroke;
+    font-family: "Space Grotesk", "Space Grotesk Recambio", system-ui, sans-serif;
+    font-weight: 700;
+    pointer-events: none;
+}
+
+.mapa-pin-nombre.es-de-cerca {
+    display: none;
+}
+
+.esta-cerca .mapa-pin-nombre.es-de-cerca {
+    display: inline;
+}
+
+.esta-cerca .mapa-pin-nombre.es-de-cerca.es-apagada {
+    display: none;
+}
+
+/* LOS TEXTOS SUELTOS («Mar de las Brumas»): de mapa antiguo, en cursiva y
+   espaciados. */
+.mapa-textos {
+    pointer-events: none;
+}
+
+.mapa-texto {
+    stroke: #1b1020;
+    stroke-linejoin: round;
+    paint-order: stroke;
+    font-family: Georgia, "Times New Roman", serif;
+    font-style: italic;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+}
+
+.mapa-texto:not([fill]) {
+    fill: #f4ecd8;
+}
+
+/* LA BARRA DE ESCALA. */
+.mapa-escala {
+    pointer-events: none;
+}
+
+.mapa-escala-fondo {
+    fill: #1b1020;
+    fill-opacity: 0.55;
+}
+
+.mapa-escala-clara {
+    fill: #f4ecd8;
+}
+
+.mapa-escala-oscura {
+    fill: #1b1020;
+    stroke: #f4ecd8;
+    stroke-width: 1px;
+    vector-effect: non-scaling-stroke;
+}
+
+.mapa-escala-cifra {
+    fill: #f4ecd8;
+    stroke: #1b1020;
+    stroke-linejoin: round;
+    paint-order: stroke;
+    font-family: "Space Grotesk", "Space Grotesk Recambio", system-ui, sans-serif;
+    font-weight: 700;
 }
 
 .mapa-pin-icono {

@@ -1574,7 +1574,21 @@
   dorado), CIUDAD (◉), PUEBLO (●), FORTALEZA (♜, cuadrada) o RUINA (✕,
   con el borde a trazos). Cada uno con su símbolo y su forma, no solo su
   color, y encima de la lista sale la leyenda con los que hay en ese
-  mapa. Lo dibuja mundo_mapas._simbolo_de_pin.
+  mapa. Lo dibuja mundo_mapas._simbolo_de_pin. Y además (desde el mismo
+  día, más tarde) PUERTO ⚓, TEMPLO ⛩, TORRE ♖, CUEVA ⌓, MINA ⛏, PUENTE ⌒,
+  CAMPO DE BATALLA ⚔, MAZMORRA ☠ y CAMPAMENTO ⛺: una bola clara con el
+  símbolo escrito dentro, con las fuentes de símbolos que trae cualquier
+  sistema (Segoe UI Symbol en Windows) y un U+FE0E detrás para que no
+  salga como emoji de colores. Un sitio con tipo y con color propio lleva
+  el color en un style="" para ganarle al del tipo.
+
+  LOS NOMBRES DE LOS SITIOS SE LEEN EN EL MAPA, escritos al lado de cada
+  uno con un borde oscuro alrededor de las letras. Van dentro del pin, así
+  que miden siempre lo mismo en pantalla. Los de las capitales, las
+  ciudades y los pines sin tipo, siempre; los demás (pueblos, ruinas…)
+  solo de cerca, al 200% o más (mundo-mapa.js pone esta-cerca en el
+  lienzo): con todos escritos, el mapa entero era una sopa. Se apagan con
+  el interruptor de «nombres» (que apaga también los textos sueltos).
 
   LOS CAMINOS Y LOS RÍOS: rayas abiertas, debajo de los pines. El río
   azul y seguido, el camino claro y a trazos con un borde oscuro; se
@@ -1584,10 +1598,35 @@
   salen en la lista y, si llevan a una página, se pulsan. Se apagan con
   el interruptor de «caminos y ríos».
 
+  MÁS RAYAS: FRONTERA (granate a raya y punto, con un borde claro), RUTA
+  MARÍTIMA (a puntos claros), MURALLA (gris, gorda y con borde) y RUTA DE
+  VIAJE (rosa a trazos, con FLECHAS hacia donde va: del primer punto al
+  último). Las flechas son como los pines: llevan data-mapa-xy y su giro
+  en data-mapa-giro, y mundo-mapa.js les pone el scale para que midan lo
+  mismo a cualquier zoom (por eso el radio de pin va también en el <svg>).
+
+  LOS RÍOS SE ENSANCHAN hacia el final (la desembocadura): se pintan en
+  ocho trozos seguidos, de 2 a 7,5 píxeles de pantalla, cada uno con su
+  grosor en un style="" (mundo_mapas._rio_que_se_ensancha). Por eso un río
+  se dibuja desde donde nace. Uno que no deba ensancharse lleva "taper":
+  false (en el editor, la casilla «Se ensancha hacia el final»).
+
+  LOS TEXTOS SUELTOS («Mar de las Brumas», «Montes Grises»): escritos en
+  el mapa en cursiva y espaciados, de mapa antiguo, con su tamaño
+  (grande, mediano o pequeño, en proporción al mapa) y su giro. Son del
+  mapa, no señaladores: crecen con el zoom. No se pulsan ni salen en la
+  lista (son el dibujo).
+
+  LA ESCALA: con "scale" en el .cmap (la pone el editor al medir), el
+  mapa lleva abajo a la izquierda una barra de escala de un número
+  redondo (1, 2 o 5 por diez a la lo que sea, alrededor de un sexto del
+  mapa) y la leyenda lo dice en letra, con cuánto se anda en un día.
+
   LO QUE LE AÑADE ESTA WEB AL .cmap (Chronicler no lo conoce; si abres
   el mapa allí y lo guardas, puede perderlo): "page" (de qué página es
-  el mapa), pins[].kind (el tipo de sitio) y "lines" (los caminos y los
-  ríos). Está explicado, con un ejemplo, arriba del todo de
+  el mapa), pins[].kind (el tipo de sitio), "lines" (las rayas, con su
+  "taper"), "labels" (los textos sueltos) y "scale" (la escala y los días
+  de viaje). Está explicado, con un ejemplo, arriba del todo de
   mundo_mapas.py.
 
   EL MAPA DE UNA PÁGINA. Un .cmap con "page" es de esa página: se guarda
@@ -1606,19 +1645,45 @@
 
     - PONER UN SITIO: se elige qué es (capital, ciudad…) y se pulsa en
       el mapa. Luego, a la derecha, su nombre y la página a la que lleva.
-    - PINTAR UNA REGIÓN, UN CAMINO O UN RÍO: punto a punto (pulsando; la
-      región se cierra pulsando en el primero, y todo se acaba con doble
-      clic o «Terminar el dibujo») o A MANO ALZADA, arrastrando (se le
-      quitan los puntos de más al soltar, como hace el generador).
-    - ELEGIR Y MOVER: los sitios se arrastran; en las regiones y las
-      rayas se arrastran sus puntos, los pequeños de en medio añaden uno
-      y dos pulsaciones en uno lo quitan. En un hueco, arrastrar mueve
-      el mapa. Lo elegido se borra con Supr o con «Borrar».
+    - PINTAR UNA REGIÓN, O UNA RAYA (camino, río, frontera, ruta
+      marítima, muralla o ruta de viaje, en «Qué raya»): punto a punto
+      (pulsando; la región se cierra pulsando en el primero, y todo se
+      acaba con doble clic o «Terminar el dibujo») o A MANO ALZADA,
+      arrastrando (se le quitan los puntos de más al soltar, como hace el
+      generador). Las rayas van del primer punto al último: el río desde
+      donde nace, la ruta desde donde sale. El primer punto de una raya
+      elegida sale en amarillo.
+    - ESCRIBIR EN EL MAPA: se pulsa donde va el texto y, a la derecha, se
+      escribe y se le pone tamaño y giro.
+    - EL IMÁN (casilla «Imán», encendida): lo que se pone a menos de 12
+      píxeles de un sitio o de un punto se pone JUSTO ahí, y si no hay
+      punto pero sí un borde, encima del borde. Así el camino llega a la
+      ciudad, el río acaba en la costa y dos regiones vecinas comparten
+      los puntos de la frontera. Un aro amarillo dice dónde se va a
+      enganchar; con Alt pulsado no engancha. A mano alzada, solo los dos
+      extremos.
+    - ELEGIR Y MOVER: los sitios y los textos se arrastran; en las
+      regiones y las rayas se arrastran sus puntos, los pequeños de en
+      medio añaden uno y dos pulsaciones en uno lo quitan. En un hueco,
+      arrastrar mueve el mapa. Lo elegido se borra con Supr o con
+      «Borrar».
+    - DESHACER Y REHACER (Ctrl+Z y Ctrl+Y, o sus botones): antes de cada
+      cambio se apunta el mapa entero, hasta 80 pasos (menos si son muy
+      grandes, como el mapamundi). Escribir un nombre letra a letra o
+      mover un sitio con las flechas es UN paso. Dentro de una casilla de
+      texto, Ctrl+Z deshace lo escrito en ella, como siempre.
+    - MEDIR: se pulsa de un sitio a otro, punto a punto, y a la derecha
+      sale cuánto hay (con el imán, de pin a pin exacto). Sin escala, en
+      píxeles del mapa. PARA PONER LA ESCALA: se mide un tramo que se
+      conozca, se escribe cuánto es («50», «leguas») y «Usar como
+      escala». Entonces sale en leguas y en DÍAS DE VIAJE a pie y a
+      caballo (8 y 12 leguas al día de entrada; 30 y 50 en km; se pueden
+      cambiar). La medida no se guarda; la escala sí, y la web la pinta.
     - TODO SE PUEDE HACER CON EL TECLADO: con el mapa elegido, las
-      flechas lo mueven (o mueven el sitio elegido), + y − acercan,
-      Intro pone un sitio o un punto en el centro, Fin termina el dibujo
-      y Esc lo cancela. Y a la derecha está la lista de todo lo que hay,
-      con botones para elegirlo, y las casillas X e Y de cada sitio.
+      flechas lo mueven (o mueven el sitio o el texto elegido), + y −
+      acercan, Intro pone un sitio, un texto o un punto en el centro, Fin
+      termina el dibujo y Esc lo cancela. Y a la derecha está la lista de
+      todo lo que hay, con botones para elegirlo, y las casillas X e Y.
     - UN MAPA NUEVO: de qué página es, el título (si no, «Mapa del…» o
       «Mapa de…» con el artículo que toque) y la imagen, que va a
       wiki/_imagenes/mapas/ en WebP (hasta 4096 px de lado: un mapa
@@ -1626,7 +1691,8 @@
 
     - DESCARGAR LA IMAGEN (en la barra de abajo): un PNG del tamaño del
       mapa con todo lo puesto encima —regiones con su nombre en cursiva,
-      caminos, ríos y sitios con su símbolo y su nombre—, tal y como esté
+      todas las rayas, los textos, los sitios con su símbolo y su nombre
+      y la barra de escala—, tal y como esté
       en el editor aunque no esté guardado. Se pinta en un <canvas> desde
       los datos, así que no depende del zoom con que lo estés mirando.
 

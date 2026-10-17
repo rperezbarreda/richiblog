@@ -139,7 +139,9 @@ html:not(.js) .mapa-ayuda {
 .mapa-dibujos.es-apagada,
 .mapa-formas.es-apagada,
 .mapa-pines.es-apagada,
-.mapa-lineas.es-apagada {
+.mapa-lineas.es-apagada,
+.mapa-textos.es-apagada,
+.mapa-pin-nombre.es-apagada {
     display: none;
 }
 .mapa-linea {
@@ -164,6 +166,51 @@ html:not(.js) .mapa-ayuda {
 .mapa-linea.es-camino:not([stroke]) {
     stroke: #f0dfb4;
 }
+.mapa-linea.es-rio.es-tramo {
+    stroke-opacity: 1;
+}
+.mapa-linea.es-frontera {
+    stroke-width: 3px;
+    stroke-dasharray: 12px 5px 2px 5px;
+    stroke-linecap: butt;
+    filter: drop-shadow(0 0 1.5px #f4f1f7);
+}
+.mapa-linea.es-frontera:not([stroke]) {
+    stroke: #8e1b3b;
+}
+.mapa-linea.es-maritima {
+    stroke-width: 4px;
+    stroke-dasharray: 0.5px 8px;
+    filter: drop-shadow(0 0 1px #1b1020);
+}
+.mapa-linea.es-maritima:not([stroke]) {
+    stroke: #e6f4ff;
+}
+.mapa-linea.es-muralla {
+    stroke-width: 6px;
+    stroke-linecap: butt;
+    filter: drop-shadow(0 0 1.5px #1b1020);
+}
+.mapa-linea.es-muralla:not([stroke]) {
+    stroke: #a39a90;
+}
+.mapa-linea.es-ruta {
+    stroke-width: 3.5px;
+    stroke-dasharray: 9px 6px;
+    filter: drop-shadow(0 0 1.5px #1b1020);
+}
+.mapa-linea.es-ruta:not([stroke]) {
+    stroke: #e8446f;
+}
+.mapa-flecha {
+    stroke: #1b1020;
+    stroke-width: 1.5px;
+    vector-effect: non-scaling-stroke;
+    pointer-events: none;
+}
+.mapa-flecha:not([fill]) {
+    fill: #e8446f;
+}
 .mapa-linea-toque {
     stroke: transparent;
     stroke-width: 18px;
@@ -181,6 +228,9 @@ html:not(.js) .mapa-ayuda {
 .mapa-pin[class*="es-"] .mapa-pin-bola {
     stroke: #1b1020;
     fill-opacity: 1;
+}
+.mapa-pin.con-tipo .mapa-pin-bola {
+    fill: #ece6f2;
 }
 .mapa-pin.es-capital .mapa-pin-bola {
     fill: #f5ce6c;
@@ -226,6 +276,7 @@ html:not(.js) .mapa-ayuda {
     gap: 8px;
 }
 .mapa-leyenda-marca {
+    font-family: "Segoe UI Symbol", "Noto Sans Symbols 2", "Noto Sans Symbols", "DejaVu Sans", sans-serif;
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -262,6 +313,27 @@ html:not(.js) .mapa-ayuda {
 .mapa-leyenda-marca.linea.es-rio {
     border-top: 5px solid #4aa3df;
 }
+.mapa-leyenda-marca.linea.es-frontera {
+    border-top: 3px dashed #8e1b3b;
+    filter: drop-shadow(0 0 1px #f4f1f7);
+}
+.mapa-leyenda-marca.linea.es-maritima {
+    border-top: 4px dotted #e6f4ff;
+    filter: drop-shadow(0 0 1px #1b1020);
+}
+.mapa-leyenda-marca.linea.es-muralla {
+    border-top: 6px solid #a39a90;
+    filter: drop-shadow(0 0 1px #1b1020);
+}
+.mapa-leyenda-marca.linea.es-ruta {
+    border-top: 4px dashed #e8446f;
+    filter: drop-shadow(0 0 1px #1b1020);
+}
+.mapa-escala-texto {
+    margin: 0 0 18px;
+    color: var(--white);
+    font-size: 0.9375rem;
+}
 .mapa-leyenda-marca.linea.es-camino {
     border-top: 4px dashed #f0dfb4;
     filter: drop-shadow(0 0 1px #1b1020);
@@ -295,6 +367,68 @@ html:not(.js) .mapa-ayuda {
 .mapa-pin.esta-mirado .mapa-pin-bola {
     fill-opacity: 1;
     stroke: var(--yellow);
+}
+.mapa-pin-letra {
+    fill: #1b1020;
+    font-family: "Segoe UI Symbol", "Noto Sans Symbols 2", "Noto Sans Symbols", "DejaVu Sans", sans-serif;
+    pointer-events: none;
+}
+.mapa-pin-nombre {
+    fill: #ffffff;
+    stroke: #1b1020;
+    stroke-linejoin: round;
+    paint-order: stroke;
+    font-family: "Space Grotesk", "Space Grotesk Recambio", system-ui, sans-serif;
+    font-weight: 700;
+    pointer-events: none;
+}
+.mapa-pin-nombre.es-de-cerca {
+    display: none;
+}
+.esta-cerca .mapa-pin-nombre.es-de-cerca {
+    display: inline;
+}
+.esta-cerca .mapa-pin-nombre.es-de-cerca.es-apagada {
+    display: none;
+}
+.mapa-textos {
+    pointer-events: none;
+}
+.mapa-texto {
+    stroke: #1b1020;
+    stroke-linejoin: round;
+    paint-order: stroke;
+    font-family: Georgia, "Times New Roman", serif;
+    font-style: italic;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+}
+.mapa-texto:not([fill]) {
+    fill: #f4ecd8;
+}
+.mapa-escala {
+    pointer-events: none;
+}
+.mapa-escala-fondo {
+    fill: #1b1020;
+    fill-opacity: 0.55;
+}
+.mapa-escala-clara {
+    fill: #f4ecd8;
+}
+.mapa-escala-oscura {
+    fill: #1b1020;
+    stroke: #f4ecd8;
+    stroke-width: 1px;
+    vector-effect: non-scaling-stroke;
+}
+.mapa-escala-cifra {
+    fill: #f4ecd8;
+    stroke: #1b1020;
+    stroke-linejoin: round;
+    paint-order: stroke;
+    font-family: "Space Grotesk", "Space Grotesk Recambio", system-ui, sans-serif;
+    font-weight: 700;
 }
 .mapa-pin-icono {
     fill: var(--yellow-contrast);

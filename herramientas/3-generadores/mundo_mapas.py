@@ -38,10 +38,29 @@ abres el mapa allí y lo guardas, puede perderlo):
     pins[].kind: "capital" | "ciudad" | "pueblo" | "fortaleza" | "ruina"
                                         el tipo de sitio: cada uno se
                                         dibuja con su símbolo
-    "lines": [ { "id": "…", "kind": "camino" | "rio",
+    pins[].kind también: "puerto" | "templo" | "torre" | "cueva" |
+                 "mina" | "puente" | "batalla" | "mazmorra" | "campamento"
+    "lines": [ { "id": "…", "kind": "camino" | "rio" | "frontera" |
+                         "maritima" | "muralla" | "ruta",
                  "points": [ {"x": 10, "y": 20}, … ],
-                 "label": "Río Lorem", "targetPage": "Río Lorem" } ]
-                                        caminos y ríos: rayas abiertas
+                 "label": "Río Lorem", "targetPage": "Río Lorem",
+                 "taper": false } ]
+                                        rayas abiertas. Los ríos se
+                                        ensanchan hacia el final (la
+                                        desembocadura) salvo con
+                                        "taper": false; las rutas llevan
+                                        flechas hacia donde van
+    "labels": [ { "id": "…", "x": 900, "y": 300, "label": "Mar de las
+                  Brumas", "size": "grande" | "mediano" | "pequeno",
+                  "angle": -15, "color": "#…" } ]
+                                        texto suelto en el mapa, del
+                                        tamaño del mapa (crece con el zoom)
+    "scale": { "pixels": 412.5, "distance": 50, "unit": "leguas",
+               "travel": { "a pie": 8, "a caballo": 12 } }
+                                        la escala: tantos píxeles del
+                                        lienzo son tanta distancia, y
+                                        cuánto se anda en un día. Sale
+                                        una barra de escala en el mapa
 
 Las coordenadas son PÍXELES del lienzo (width x height), no tantos por
 ciento. Eso es cómodo: el SVG se monta con viewBox="0 0 width height" y
@@ -155,6 +174,8 @@ def leer_cmap(texto, avisar=None):
                 avisar("color de una región que no entiendo", _quien(uno, n))
         formas.append(hecho)
 
+    textos = [hecho for hecho in (_texto(uno) for uno in crudo.get("labels") or []) if hecho]
+
     lineas = []
     for n, uno in enumerate(crudo.get("lines") or []):
         hecho = _linea(uno)
@@ -173,6 +194,8 @@ def leer_cmap(texto, avisar=None):
         "pines": pines,
         "formas": formas,
         "lineas": lineas,
+        "textos": textos,
+        "escala": _escala(crudo.get("scale")),
         "pagina": str(crudo.get("page") or "").strip(),
     }
 
@@ -242,8 +265,24 @@ TIPOS_DE_PIN = {
     "pueblo": ("●", "pueblo"),
     "fortaleza": ("♜", "fortaleza"),
     "ruina": ("✕", "ruina"),
+    # Éstos van con su símbolo escrito (una letra de las fuentes de
+    # símbolos que trae cualquier sistema) dentro de una bola.
+    "puerto": ("⚓", "puerto"),
+    "templo": ("⛩", "templo"),
+    "torre": ("♖", "torre"),
+    "cueva": ("⌓", "cueva"),
+    "mina": ("⛏", "mina"),
+    "puente": ("⌒", "puente"),
+    "batalla": ("⚔", "batalla"),
+    "mazmorra": ("☠", "mazmorra"),
+    "campamento": ("⛺", "campamento"),
 }
-TIPOS_DE_LINEA = {"camino": "camino", "rio": "río"}
+# Los de nombre siempre a la vista; los demás, solo al acercarse (al 200%
+# o más): con todos los pueblos escritos, el mapa entero era una sopa.
+SIEMPRE_CON_NOMBRE = {"", "capital", "ciudad"}
+TIPOS_DE_LINEA = {"camino": "camino", "rio": "río", "frontera": "frontera",
+                  "maritima": "ruta marítima", "muralla": "muralla", "ruta": "ruta de viaje"}
+TAMANOS_DE_TEXTO = {"grande": 45, "mediano": 70, "pequeno": 110}
 
 
 def _tipo_de_pin(valor):
@@ -275,7 +314,37 @@ def _linea(crudo):
         "pagina": str(crudo.get("targetPage") or "").strip(),
         "mapa": str(crudo.get("targetMap") or "").strip(),
         "color": _color(crudo.get("color")),
+        "ensancha": crudo.get("taper") is not False,
     }
+
+
+def _texto(crudo):
+    """Un texto suelto del mapa («Mar de las Brumas»)."""
+    if not isinstance(crudo, dict):
+        return None
+    x, y = _numero(crudo.get("x"), None), _numero(crudo.get("y"), None)
+    texto = str(crudo.get("label") or crudo.get("text") or "").strip()
+    if x is None or y is None or not texto:
+        return None
+    tamano = str(crudo.get("size") or "mediano").strip().lower()
+    return {"x": x, "y": y, "texto": texto,
+            "tamano": tamano if tamano in TAMANOS_DE_TEXTO else "mediano",
+            "giro": max(-180.0, min(180.0, _numero(crudo.get("angle"), 0.0) or 0.0)),
+            "color": _color(crudo.get("color"))}
+
+
+def _escala(crudo):
+    """{pixeles, distancia, unidad, viaje} o None."""
+    if not isinstance(crudo, dict):
+        return None
+    pixeles, distancia = _numero(crudo.get("pixels"), 0), _numero(crudo.get("distance"), 0)
+    if not pixeles or not distancia or pixeles <= 0 or distancia <= 0:
+        return None
+    viaje = crudo.get("travel") if isinstance(crudo.get("travel"), dict) else {}
+    return {"pixeles": pixeles, "distancia": distancia,
+            "unidad": str(crudo.get("unit") or "").strip()[:20],
+            "viaje": {str(k)[:20]: v for k, v in viaje.items()
+                      if isinstance(v, (int, float)) and not isinstance(v, bool) and v > 0}}
 
 
 def _simbolo_de_pin(tipo, radio, grosor, pintura):
@@ -318,12 +387,120 @@ def _simbolo_de_pin(tipo, radio, grosor, pintura):
         return ('<path class="mapa-pin-bola" d="%s"%s stroke-width="%d"></path>'
                 '<path class="mapa-pin-marca es-raya" d="%s" stroke-width="%d"></path>'
                 % (d, pintura, grosor, cruz, max(2, grosor)))
+    if tipo in TIPOS_DE_PIN:
+        # Una bola con su símbolo escrito dentro (el U+FE0E de detrás pide
+        # «como letra, no como emoji de colores»).
+        return ('<circle class="mapa-pin-bola" cx="0" cy="0" r="%s"%s stroke-width="%d"></circle>'
+                '<text class="mapa-pin-letra" x="0" y="0" font-size="%s" text-anchor="middle"'
+                ' dominant-baseline="central">%s\ufe0e</text>'
+                % (num(r * 0.95), pintura, grosor, num(r * 1.05), TIPOS_DE_PIN[tipo][0]))
     return ""
 
 
 def _trazo_abierto(puntos):
     """Como _trazo, pero sin cerrar: un camino o un río."""
     return _trazo(puntos)[:-1]
+
+
+def _largos(puntos):
+    """Lo andado hasta cada punto, desde el primero."""
+    acumulado = [0.0]
+    for (x1, y1), (x2, y2) in zip(puntos, puntos[1:]):
+        acumulado.append(acumulado[-1] + math.hypot(x2 - x1, y2 - y1))
+    return acumulado
+
+
+def _punto_a(puntos, acumulado, s):
+    """El punto que está a s de distancia del primero, por la raya, y hacia
+    dónde va la raya ahí (en grados)."""
+    for i in range(1, len(puntos)):
+        if acumulado[i] >= s or i == len(puntos) - 1:
+            (x1, y1), (x2, y2) = puntos[i - 1], puntos[i]
+            tramo = (acumulado[i] - acumulado[i - 1]) or 1
+            f = max(0.0, min(1.0, (s - acumulado[i - 1]) / tramo))
+            return (x1 + (x2 - x1) * f, y1 + (y2 - y1) * f), math.degrees(math.atan2(y2 - y1, x2 - x1))
+    return puntos[0], 0.0
+
+
+def _rio_que_se_ensancha(puntos, clase, color, trozos=8):
+    """El río en ocho trozos seguidos, cada uno algo más gordo que el
+    anterior: fino donde nace (el primer punto) y ancho en la
+    desembocadura. El grosor va en píxeles de pantalla (como el resto de
+    las rayas, ver la hoja de estilos), en un style="" porque la hoja le
+    pone uno fijo a .mapa-linea.es-rio."""
+    acumulado = _largos(puntos)
+    total = acumulado[-1]
+    if total <= 0:
+        return ""
+    salida = []
+    for k in range(trozos):
+        a, b = total * k / trozos, total * (k + 1) / trozos
+        (inicio, _), (fin, _) = _punto_a(puntos, acumulado, a), _punto_a(puntos, acumulado, b)
+        tramo = [inicio] + [p for p, s in zip(puntos, acumulado) if a < s < b] + [fin]
+        grueso = 2 + 5.5 * (k + 0.5) / trozos
+        salida.append('<path class="%s es-tramo" d="%s"%s style="stroke-width: %.1fpx" fill="none"></path>'
+                      % (clase, _trazo_abierto(tramo), color, grueso))
+    return "".join(salida)
+
+
+def _flechas(puntos, radio, color):
+    """Las flechas de una ruta de viaje, hacia donde va (del primer punto
+    al último). Como los pines, miden lo mismo en pantalla: llevan
+    data-mapa-xy y su giro, y mundo-mapa.js les pone el scale."""
+    acumulado = _largos(puntos)
+    total = acumulado[-1]
+    if total <= 0:
+        return ""
+    cuantas = max(1, min(12, round(total / (radio * 9))))
+    r = radio * 0.6
+    forma = "M%s %s L%s 0 L%s %s Z" % (_cifra(-r), _cifra(-r * 0.75), _cifra(r), _cifra(-r), _cifra(r * 0.75))
+    pintura = (' fill="%s"' % color) if color else ""
+    salida = []
+    for j in range(cuantas):
+        (x, y), giro = _punto_a(puntos, acumulado, total * (j + 0.5) / cuantas)
+        sitio = "%s,%s" % (_cifra(x), _cifra(y))
+        salida.append('<path class="mapa-flecha" d="%s"%s transform="translate(%s) rotate(%s)"'
+                      ' data-mapa-xy="%s" data-mapa-giro="%s"></path>'
+                      % (forma, pintura, sitio, _cifra(giro), sitio, _cifra(giro)))
+    return "".join(salida)
+
+
+def _bonito(n):
+    return ("%.2f" % n).rstrip("0").rstrip(".").replace(".", ",")
+
+
+def _barra_de_escala(escala, ancho, alto):
+    """La barra de escala, abajo a la izquierda, en unidades del mapa (así
+    crece con el zoom, que es lo que tiene que hacer una escala). Mide un
+    número redondo (1, 2 o 5 por diez a la lo que sea) de alrededor de un
+    sexto del mapa. Devuelve (svg, texto para la leyenda)."""
+    por_pixel = escala["distancia"] / escala["pixeles"]
+    deseado = ancho / 6 * por_pixel
+    potencia = 10 ** math.floor(math.log10(deseado))
+    valor = next(m * potencia for m in (5, 2, 1) if m * potencia <= deseado)
+    largo = valor / por_pixel
+    base = max(ancho, alto)
+    x0, y0, alto_barra = ancho / 40, alto - alto / 22, base / 200
+    letra = base / 60
+    unidad = escala["unidad"]
+    texto = "%s %s" % (_bonito(valor), unidad) if unidad else _bonito(valor)
+    mitad = largo / 2
+    svg = ('<g class="mapa-escala">'
+           '<rect class="mapa-escala-fondo" x="%s" y="%s" width="%s" height="%s"></rect>'
+           '<rect class="mapa-escala-clara" x="%s" y="%s" width="%s" height="%s"></rect>'
+           '<rect class="mapa-escala-oscura" x="%s" y="%s" width="%s" height="%s"></rect>'
+           '<text class="mapa-escala-cifra" x="%s" y="%s" font-size="%s" stroke-width="%s">%s</text></g>'
+           % (_cifra(x0 - alto_barra * 0.6), _cifra(y0 - alto_barra * 0.6), _cifra(largo + alto_barra * 1.2),
+              _cifra(alto_barra * 2.2),
+              _cifra(x0), _cifra(y0), _cifra(mitad), _cifra(alto_barra),
+              _cifra(x0 + mitad), _cifra(y0), _cifra(mitad), _cifra(alto_barra),
+              _cifra(x0), _cifra(y0 - alto_barra * 1.6), _cifra(letra), _cifra(letra * 0.2),
+              html.escape(texto)))
+    leyenda = "Escala: la barra de abajo a la izquierda del mapa mide %s." % texto
+    if escala["viaje"]:
+        dias = ", ".join("%s %s %s al día" % (como, _bonito(cuanto), unidad) for como, cuanto in escala["viaje"].items())
+        leyenda += " De viaje se hacen " + dias + "."
+    return svg, leyenda
 
 
 def _forma(crudo):
@@ -724,12 +901,19 @@ def pintar(mapa, pagina_a, mapa_a, imagen_a, detalle=None, avisar=None, region_d
     # sitio, y si llevan a una página, se pueden pulsar.
     rayas = []
     for linea in mapa.get("lineas") or []:
-        coordenadas = _trazo_abierto(simplificar(linea["puntos"], detalle / 2))
+        simple = simplificar(linea["puntos"], detalle / 2)
+        coordenadas = _trazo_abierto(simple)
         clase = "mapa-linea es-" + linea["tipo"]
         color = (' stroke="%s"' % linea["color"]) if linea["color"] else ""
-        ancho = grosor * (3 if linea["tipo"] == "rio" else 2)
-        raya = ('<path class="%s" d="%s"%s stroke-width="%d" fill="none"></path>'
-                % (clase, coordenadas, color, ancho))
+        # (grueso y no «ancho», que es lo que mide el mapa y se usa abajo)
+        grueso = grosor * (3 if linea["tipo"] == "rio" else 2)
+        if linea["tipo"] == "rio" and linea["ensancha"]:
+            raya = _rio_que_se_ensancha(simple, clase, color)
+        else:
+            raya = ('<path class="%s" d="%s"%s stroke-width="%d" fill="none"></path>'
+                    % (clase, coordenadas, color, grueso))
+        if linea["tipo"] == "ruta":
+            raya += _flechas(simple, radio, linea["color"])
         nombre = linea["etiqueta"] or linea["pagina"]
         if not nombre:
             rayas.append(raya)
@@ -757,6 +941,23 @@ def pintar(mapa, pagina_a, mapa_a, imagen_a, detalle=None, avisar=None, region_d
                          % (cual, datos, html.escape(nombre), tocar, raya))
     if rayas:
         trozos.append('<g class="mapa-lineas">%s</g>' % "".join(rayas))
+
+    # ---- LOS TEXTOS SUELTOS ----
+    # «Mar de las Brumas», «Montes Grises»: escritos en el mapa, del tamaño
+    # del mapa (crecen con el zoom, como lo dibujado), debajo de los pines.
+    base = max(ancho, alto)
+    letreros = []
+    for tx in mapa.get("textos") or []:
+        tam = base / TAMANOS_DE_TEXTO[tx["tamano"]]
+        giro = (' transform="rotate(%s %s %s)"' % (_cifra(tx["giro"]), _cifra(tx["x"]), _cifra(tx["y"]))
+                if tx["giro"] else "")
+        color = (' fill="%s"' % tx["color"]) if tx["color"] else ""
+        letreros.append('<text class="mapa-texto es-%s" x="%s" y="%s" font-size="%s" stroke-width="%s"'
+                        ' text-anchor="middle" dominant-baseline="central"%s%s>%s</text>'
+                        % (tx["tamano"], _cifra(tx["x"]), _cifra(tx["y"]), _cifra(tam), _cifra(tam * 0.16),
+                           giro, color, html.escape(tx["texto"])))
+    if letreros:
+        trozos.append('<g class="mapa-textos">%s</g>' % "".join(letreros))
 
     # ---- LOS PINES ----
     pines = []
@@ -787,7 +988,9 @@ def pintar(mapa, pagina_a, mapa_a, imagen_a, detalle=None, avisar=None, region_d
         sitio = ' transform="translate(%s,%s)" data-mapa-xy="%s,%s"' % (
             _cifra(pin["x"]), _cifra(pin["y"]), _cifra(pin["x"]), _cifra(pin["y"]))
         dentro = ['<title>%s</title>' % html.escape(nombre)]
-        pintura = (' fill="%s"' % pin["color"]) if pin["color"] else ""
+        # Con tipo, el color propio va en un style="" para ganarle al del
+        # tipo, que lo pone la hoja de estilos.
+        pintura = ((' style="fill: %s"' if pin["tipo"] else ' fill="%s"') % pin["color"]) if pin["color"] else ""
         simbolo = _simbolo_de_pin(pin["tipo"], radio, grosor, pintura) if pin["tipo"] else ""
         if simbolo:
             dentro.append(simbolo)
@@ -800,7 +1003,16 @@ def pintar(mapa, pagina_a, mapa_a, imagen_a, detalle=None, avisar=None, region_d
                           ' font-size="%d" text-anchor="middle"'
                           ' dominant-baseline="central">%s</text>'
                           % (round(radio * 1.3), html.escape(pin["icono"])))
-        de_tipo = (" es-" + pin["tipo"]) if pin["tipo"] else ""
+        # SU NOMBRE, ESCRITO AL LADO. Va dentro del pin, así que crece y
+        # encoge con él (mide siempre lo mismo en pantalla). Los de las
+        # capitales y las ciudades siempre; los demás, al acercarse.
+        if pin["etiqueta"]:
+            de_cerca = "" if pin["tipo"] in SIEMPRE_CON_NOMBRE else " es-de-cerca"
+            dentro.append('<text class="mapa-pin-nombre%s" x="%s" y="0" font-size="%s"'
+                          ' stroke-width="%s" dominant-baseline="central">%s</text>'
+                          % (de_cerca, _cifra(radio * 1.4), _cifra(radio * 1.05), _cifra(radio * 0.28),
+                             html.escape(pin["etiqueta"])))
+        de_tipo = (" con-tipo es-" + pin["tipo"]) if pin["tipo"] else ""
         if url:
             pines.append('<a class="mapa-pin es-enlace%s" href="%s" data-mapa-sitio="%s"%s%s'
                          ' tabindex="-1">%s</a>'
@@ -813,7 +1025,17 @@ def pintar(mapa, pagina_a, mapa_a, imagen_a, detalle=None, avisar=None, region_d
         trozos.append('<g class="mapa-pines" data-mapa-radio="%d">%s</g>'
                       % (radio, "".join(pines)))
 
+    # ---- LA BARRA DE ESCALA ----
+    escala = mapa.get("escala")
+    texto_escala = ""
+    if escala:
+        barra, texto_escala = _barra_de_escala(escala, ancho, alto)
+        trozos.append(barra)
+
     trozos.append("</svg>")
+    # El radio también en el SVG: las flechas de las rutas se escalan como
+    # los pines aunque el mapa no tenga ninguno.
+    trozos[0] = trozos[0].replace('<svg class="mapa-svg"', '<svg class="mapa-svg" data-mapa-radio="%d"' % radio, 1)
 
     sitios.sort(key=lambda s: (_sin_tildes(s["nombre"]), s["id"]))
     # LA LEYENDA: los tipos de sitio y de raya que salen en ESTE mapa.
@@ -825,16 +1047,19 @@ def pintar(mapa, pagina_a, mapa_a, imagen_a, detalle=None, avisar=None, region_d
         if any(l["tipo"] == tipo for l in mapa.get("lineas") or []):
             usados.append(("linea es-" + tipo, "", nombre))
     leyenda = ""
-    if usados:
-        leyenda = ('<div class="mapa-leyenda"><h2 class="mapa-sitios-titulo">Leyenda</h2><ul>%s</ul></div>'
-                   % "".join('<li><span class="mapa-leyenda-marca %s" aria-hidden="true">%s</span>%s</li>'
-                             % (clase, html.escape(simbolo), html.escape(nombre))
-                             for clase, simbolo, nombre in usados))
+    if usados or texto_escala:
+        lista = ('<ul>%s</ul>' % "".join('<li><span class="mapa-leyenda-marca %s" aria-hidden="true">%s</span>%s</li>'
+                                         % (clase, html.escape(simbolo), html.escape(nombre))
+                                         for clase, simbolo, nombre in usados)) if usados else ""
+        escrita = ('<p class="mapa-escala-texto">%s</p>' % html.escape(texto_escala)) if texto_escala else ""
+        leyenda = ('<div class="mapa-leyenda"><h2 class="mapa-sitios-titulo">Leyenda</h2>%s%s</div>'
+                   % (lista, escrita))
 
     return {
         "svg": "".join(trozos),
         "leyenda": leyenda,
         "hay_lineas": bool(rayas),
+        "hay_nombres": bool(letreros) or any(p["etiqueta"] and not p["escondido"] for p in mapa["pines"]),
         "sitios": sitios,
         "capas": capas,
         "imagenes": imagenes,
@@ -1042,7 +1267,8 @@ def pintar_lista(sitios, titulo_id="mapa-sitios-titulo"):
 # sitio. El mapa se sigue viendo entero y las capas salen como estuvieran
 # guardadas en Chronicler.
 
-def pintar_mandos(capas, hay_formas=True, hay_pines=False, hay_niveles=False, hay_lineas=False):
+def pintar_mandos(capas, hay_formas=True, hay_pines=False, hay_niveles=False, hay_lineas=False,
+                  hay_nombres=False):
     trozos = ['<div class="mapa-mandos" data-mapa-mandos>']
     trozos.append(
         '<div class="mapa-zoom" role="group" aria-label="Zoom del mapa">'
@@ -1087,6 +1313,10 @@ def pintar_mandos(capas, hay_formas=True, hay_pines=False, hay_niveles=False, ha
         casillas.append(
             '<label class="mapa-capa-casilla"><input type="checkbox"'
             ' data-mapa-lineas checked> caminos y ríos</label>')
+    if hay_nombres:
+        casillas.append(
+            '<label class="mapa-capa-casilla"><input type="checkbox"'
+            ' data-mapa-nombres checked> nombres</label>')
     if len(capas) > 1:
         for capa in capas:
             casillas.append(
