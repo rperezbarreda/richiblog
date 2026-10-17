@@ -1,0 +1,646 @@
+// =========================================
+// EL EDITOR DE LA WEB — las fichas
+// =========================================
+// Lo que vive en un JSON de datos/ y llevaban las herramientas de
+// 1-publicar con preguntas: los recursos de rol, los NPC y el botín, las
+// recomendaciones, «en lo que ando», el calendario, la línea de tiempo,
+// el diccionario, las palabras del reto y las fotos de los gatos. Cada una
+// es una COLECCIÓN (las describe editor_web.colecciones: sus partes, sus
+// casillas y de qué tipo es cada una), y aquí se pinta igual para todas:
+// la lista de fichas, y al elegir una, sus casillas debajo.
+//
+// Lo que se cambia se queda aquí hasta «Guardar», que manda la colección
+// entera; el servidor la mezcla con lo que había (lo que no tiene casilla
+// se respeta), la escribe y pasa lo que toque (el buscador, la línea de
+// tiempo…), con su barra de progreso.
+//
+// También la vista de LAS IMÁGENES Y REPASAR: traer una imagen, repasar el
+// sitio y volver a generarlo.
+
+const estadoFichas = { colecciones: [], campanas: [], sitios: [], col: null, id: "", campana: "", elegidas: {},
+    cambiado: false, guardando: false, filtros: {} };
+
+async function cargarColeccionesWeb() {
+    const datos = await pedirEditor("/api/web/colecciones");
+    if (datos.error) {
+        avisarEditor(datos.error, true);
+        return;
+    }
+    estadoFichas.colecciones = datos.colecciones;
+    estadoFichas.campanas = datos.campanas;
+    estadoFichas.sitios = datos.sitios;
+    // Un botón grande por colección, en su apartado (Rol, Mi rincón, la
+    // wiki, escribir).
+    document.querySelectorAll("[data-fichas-de]").forEach((caja) => {
+        const apartado = caja.getAttribute("data-fichas-de");
+        caja.textContent = "";
+        datos.colecciones.filter((c) => c.apartado === apartado).forEach((c) => {
+            const b = crearEditor("button", "grande");
+            b.type = "button";
+            b.appendChild(crearEditor("span", "grande-titulo", c.titulo));
+            b.appendChild(crearEditor("span", "grande-que", c.ayuda));
+            b.addEventListener("click", () => abrirFichasWeb(c.id));
+            caja.appendChild(b);
+        });
+    });
+    pintarTraerImagenWeb();
+}
+
+async function abrirFichasWeb(id, campana) {
+    if (estadoFichas.cambiado && estadoFichas.id !== id
+        && !window.confirm("Hay cambios sin guardar en " + estadoFichas.col.titulo + ". ¿Salir igualmente?")) {
+        return;
+    }
+    const meta = estadoFichas.colecciones.find((c) => c.id === id);
+    let clave = campana || "";
+    if (meta && meta.por_campana && !clave) {
+        clave = estadoFichas.campana || (estadoFichas.campanas[0] || {}).clave || "";
+    }
+    const col = await pedirEditor("/api/web/coleccion?id=" + encodeURIComponent(id) + "&campana=" + encodeURIComponent(clave));
+    if (col.error) {
+        avisarEditor(col.error, true);
+        return;
+    }
+    estadoFichas.cambiado = false;
+    ponerFichasWeb(col, true);
+    irAEditor("fichas");
+}
+
+function ponerFichasWeb(col, deCero) {
+    const antes = estadoFichas.id;
+    estadoFichas.col = col;
+    estadoFichas.id = col.id;
+    estadoFichas.campana = col.campana || "";
+    if (deCero || antes !== col.id) {
+        estadoFichas.elegidas = {};
+        estadoFichas.filtros = {};
+    }
+    $("[data-fichas-titulo]").textContent = col.titulo;
+    $("[data-fichas-ayuda]").textContent = col.ayuda + " (En " + col.archivo + ".)";
+    const campana = $("#fichas-campana");
+    $("[data-fichas-campana-caja]").hidden = !col.por_campana;
+    if (col.por_campana) {
+        campana.textContent = "";
+        estadoFichas.campanas.forEach((c) => {
+            const o = document.createElement("option");
+            o.value = c.clave;
+            o.textContent = c.nombre;
+            campana.appendChild(o);
+        });
+        campana.value = col.campana;
+    }
+    const gatos = $("[data-fichas-gatos]");
+    gatos.hidden = !col.santuarios;
+    if (col.santuarios) {
+        const elegir = $("#gatos-santuario");
+        elegir.textContent = "";
+        col.santuarios.forEach((s) => {
+            const o = document.createElement("option");
+            o.value = s;
+            o.textContent = s;
+            elegir.appendChild(o);
+        });
+    }
+    pintarPartesWeb();
+}
+
+function pintarPartesWeb(enfocar) {
+    const col = estadoFichas.col;
+    const caja = $("[data-fichas-partes]");
+    caja.textContent = "";
+    col.partes_def.forEach((parte) => {
+        const sec = crearEditor("section", "bloque");
+        const idT = "t-parte-" + parte.id;
+        sec.setAttribute("aria-labelledby", idT);
+        const h2 = crearEditor("h2", "", parte.titulo);
+        h2.id = idT;
+        sec.appendChild(h2);
+        if (parte.ayuda) {
+            sec.appendChild(crearEditor("p", "ayuda", parte.ayuda));
+        }
+        if (parte.tipo === "objeto") {
+            const objeto = col.partes[parte.id];
+            parte.campos.forEach((c) => casillaDeFichaWeb(sec, objeto, c, "o-" + parte.id, parte, null));
+        } else {
+            pintarListaDeFichasWeb(sec, parte);
+        }
+        caja.appendChild(sec);
+    });
+    if (enfocar && document.getElementById(enfocar)) {
+        document.getElementById(enfocar).focus();
+    }
+}
+
+function nombreDeFichaWeb(parte, f) {
+    const nombre = String(f[parte.nombre_de] === undefined || f[parte.nombre_de] === null ? "" : f[parte.nombre_de]).trim();
+    const opciones = estadoFichas.col.opciones || {};
+    const detalle = (parte.detalle || []).map((k) => {
+        const v = f[k];
+        if (v === undefined || v === null || v === "") {
+            return "";
+        }
+        // Lo que se elige de una lista (el mes, la sesión), con su nombre.
+        const op = (opciones[k] || []).find((x) => String(x[0]) === String(v));
+        return op ? op[1] : String(v);
+    }).filter(Boolean);
+    if (f._grupo !== undefined && parte.agrupada) {
+        const op = (opciones._grupo || []).find((x) => x[0] === f._grupo);
+        detalle.unshift(op ? op[1] : f._grupo);
+    }
+    return { nombre: nombre || "(sin nombre)", detalle: detalle.join(" · ") };
+}
+
+function pintarListaDeFichasWeb(sec, parte) {
+    const col = estadoFichas.col;
+    const fichas = col.partes[parte.id];
+    const elegida = estadoFichas.elegidas[parte.id];
+    const cuenta = crearEditor("p", "ayuda", fichas.length === 1 ? "1 ficha." : fichas.length + " fichas.");
+    sec.appendChild(cuenta);
+    let filtro = estadoFichas.filtros[parte.id] || "";
+    if (fichas.length > 10) {
+        const caja = crearEditor("div", "campo");
+        const l = crearEditor("label", "", "Buscar");
+        l.htmlFor = "filtro-" + parte.id;
+        const i = document.createElement("input");
+        i.id = "filtro-" + parte.id;
+        i.value = filtro;
+        i.autocomplete = "off";
+        caja.appendChild(l);
+        caja.appendChild(i);
+        sec.appendChild(caja);
+        i.addEventListener("input", () => {
+            estadoFichas.filtros[parte.id] = i.value;
+            pintarPartesWeb("filtro-" + parte.id);
+            const nuevo = document.getElementById("filtro-" + parte.id);
+            if (nuevo) {
+                nuevo.setSelectionRange(nuevo.value.length, nuevo.value.length);
+            }
+        });
+        filtro = sinTildesWeb(filtro);
+    }
+    const ul = crearEditor("ul", "fichas-lista");
+    fichas.forEach((f, i) => {
+        const { nombre, detalle } = nombreDeFichaWeb(parte, f);
+        if (filtro && !sinTildesWeb(nombre + " " + detalle).includes(filtro)) {
+            return;
+        }
+        const li = document.createElement("li");
+        const b = crearEditor("button", "ficha-boton");
+        b.type = "button";
+        b.id = "ficha-" + parte.id + "-" + i;
+        b.setAttribute("aria-pressed", elegida === i ? "true" : "false");
+        if (f._foto) {
+            const img = document.createElement("img");
+            img.src = f._foto;
+            img.alt = "";
+            img.loading = "lazy";
+            b.appendChild(img);
+        }
+        b.appendChild(crearEditor("span", "ficha-nombre", nombre));
+        if (detalle) {
+            b.appendChild(crearEditor("span", "ficha-detalle", detalle));
+        }
+        b.addEventListener("click", () => {
+            estadoFichas.elegidas[parte.id] = elegida === i ? undefined : i;
+            pintarPartesWeb(elegida === i ? b.id : "ficha-editor-" + parte.id);
+        });
+        li.appendChild(b);
+        ul.appendChild(li);
+    });
+    sec.appendChild(ul);
+    if (!parte.fijas) {
+        const anadir = crearEditor("button", "", "Añadir");
+        anadir.type = "button";
+        anadir.setAttribute("aria-label", "Añadir a «" + parte.titulo + "»");
+        anadir.addEventListener("click", () => {
+            const nueva = {};
+            parte.campos.forEach((c) => {
+                nueva[c.clave] = c.tipo === "si-no" ? false : (c.hoy ? estadoFichas.hoy || "" : "");
+                if (c.tipo === "elegir" && !c.libre && c.obligatorio) {
+                    const op = (estadoFichas.col.opciones[c.clave] || c.opciones || [])[0];
+                    nueva[c.clave] = op ? op[0] : "";
+                }
+            });
+            if (parte.agrupada) {
+                nueva._grupo = ((estadoFichas.col.opciones._grupo || [])[0] || [""])[0];
+            }
+            if (parte.nuevas_arriba) {
+                fichas.unshift(nueva);
+                estadoFichas.elegidas[parte.id] = 0;
+            } else {
+                fichas.push(nueva);
+                estadoFichas.elegidas[parte.id] = fichas.length - 1;
+            }
+            estadoFichas.cambiado = true;
+            estadoFichas.filtros[parte.id] = "";
+            pintarPartesWeb("ficha-editor-" + parte.id);
+        });
+        sec.appendChild(anadir);
+    }
+    if (elegida !== undefined && fichas[elegida]) {
+        pintarFichaWeb(sec, parte, fichas, elegida);
+    }
+}
+
+function pintarFichaWeb(sec, parte, fichas, i) {
+    const f = fichas[i];
+    const caja = crearEditor("fieldset", "ficha-editor");
+    const leyenda = crearEditor("legend", "", nombreDeFichaWeb(parte, f).nombre);
+    leyenda.id = "ficha-editor-" + parte.id;
+    leyenda.tabIndex = -1;
+    caja.appendChild(leyenda);
+    if (f._foto) {
+        const img = document.createElement("img");
+        img.src = f._foto;
+        img.alt = "";
+        img.className = "ficha-foto";
+        caja.appendChild(img);
+    }
+    parte.campos.forEach((c) => casillaDeFichaWeb(caja, f, c, "f-" + parte.id + "-" + i, parte, () => {
+        leyenda.textContent = nombreDeFichaWeb(parte, f).nombre;
+        const boton = document.getElementById("ficha-" + parte.id + "-" + i);
+        if (boton) {
+            const { nombre, detalle } = nombreDeFichaWeb(parte, f);
+            boton.querySelector(".ficha-nombre").textContent = nombre;
+            const d = boton.querySelector(".ficha-detalle");
+            if (d) {
+                d.textContent = detalle;
+            }
+        }
+    }));
+    const fila = crearEditor("div", "fila");
+    const boton = (texto, ayuda, alPulsar) => {
+        const b = crearEditor("button", "", texto);
+        b.type = "button";
+        b.setAttribute("aria-label", ayuda);
+        b.addEventListener("click", alPulsar);
+        fila.appendChild(b);
+    };
+    const nombre = nombreDeFichaWeb(parte, f).nombre;
+    boton("↑ Subir", "Subir «" + nombre + "» en la lista", () => {
+        if (i > 0) {
+            [fichas[i - 1], fichas[i]] = [fichas[i], fichas[i - 1]];
+            estadoFichas.elegidas[parte.id] = i - 1;
+            estadoFichas.cambiado = true;
+            pintarPartesWeb("ficha-editor-" + parte.id);
+        }
+    });
+    boton("↓ Bajar", "Bajar «" + nombre + "» en la lista", () => {
+        if (i < fichas.length - 1) {
+            [fichas[i + 1], fichas[i]] = [fichas[i], fichas[i + 1]];
+            estadoFichas.elegidas[parte.id] = i + 1;
+            estadoFichas.cambiado = true;
+            pintarPartesWeb("ficha-editor-" + parte.id);
+        }
+    });
+    if (!parte.fijas) {
+        boton("Quitar", "Quitar «" + nombre + "»", () => {
+            if (!window.confirm("¿Quitar «" + nombre + "»? (No se borra de verdad hasta que guardes.)")) {
+                return;
+            }
+            fichas.splice(i, 1);
+            estadoFichas.elegidas[parte.id] = undefined;
+            estadoFichas.cambiado = true;
+            pintarPartesWeb("t-parte-" + parte.id);
+        });
+    }
+    boton("Cerrar", "Cerrar la ficha de «" + nombre + "»", () => {
+        estadoFichas.elegidas[parte.id] = undefined;
+        pintarPartesWeb("ficha-" + parte.id + "-" + i);
+    });
+    caja.appendChild(fila);
+    sec.appendChild(caja);
+}
+
+// UNA CASILLA, según su tipo. Lo que se escribe va derecho a la ficha.
+function casillaDeFichaWeb(dentro, f, c, base, parte, alCambiar) {
+    const id = base + "-" + c.clave.replace(/\W/g, "");
+    const opciones = (estadoFichas.col.opciones || {})[c.clave] || c.opciones || [];
+    const cambiar = (valor) => {
+        f[c.clave] = valor;
+        estadoFichas.cambiado = true;
+        if (alCambiar) {
+            alCambiar();
+        }
+    };
+    const valor = f[c.clave] === undefined || f[c.clave] === null ? "" : f[c.clave];
+    const ayuda = c.ayuda || "";
+    if (c.tipo === "ver") {
+        if (c.foto) {
+            return;
+        }
+        const p = crearEditor("p", "ficha-ver");
+        p.appendChild(crearEditor("strong", "", c.nombre + ": "));
+        p.appendChild(document.createTextNode(String(valor || "—")));
+        dentro.appendChild(p);
+        return;
+    }
+    if (c.tipo === "si-no") {
+        const l = crearEditor("label", "opcion campo-si-no");
+        const casilla = document.createElement("input");
+        casilla.type = "checkbox";
+        casilla.id = id;
+        casilla.checked = !!valor;
+        casilla.addEventListener("change", () => cambiar(casilla.checked));
+        l.appendChild(casilla);
+        l.appendChild(document.createTextNode(" " + c.nombre));
+        dentro.appendChild(l);
+        return;
+    }
+    const nombre = c.nombre;
+    if (c.tipo === "elegir" && !c.libre) {
+        const lista = (c.obligatorio ? [] : [["", "— ninguno —"]]).concat(opciones);
+        const el = campoWeb(dentro, id, nombre, { tipo: "elegir", opciones: lista, ayuda, opcional: !c.obligatorio });
+        el.value = String(valor);
+        if (el.value !== String(valor) && valor !== "") {
+            // Un valor que no está en la lista (escrito a mano): se enseña igual.
+            const o = document.createElement("option");
+            o.value = String(valor);
+            o.textContent = String(valor);
+            el.appendChild(o);
+            el.value = String(valor);
+        }
+        el.addEventListener("change", () => cambiar(el.value));
+        return;
+    }
+    if (c.tipo === "elegir") {
+        const idLista = "lista-" + id;
+        datalistWeb(idLista, opciones.map((x) => String(x[0])));
+        const el = campoWeb(dentro, id, nombre, { lista: idLista, valor, ayuda, opcional: !c.obligatorio });
+        el.addEventListener("input", () => cambiar(el.value));
+        return;
+    }
+    if (c.tipo === "imagen") {
+        const caja = crearEditor("div", "campo");
+        const l = crearEditor("label", "", c.nombre);
+        l.htmlFor = id;
+        caja.appendChild(l);
+        if (ayuda) {
+            caja.appendChild(crearEditor("p", "ayuda", ayuda));
+        }
+        const vista = crearEditor("div", "dato-imagen");
+        const img = document.createElement("img");
+        img.alt = "";
+        const pintarVista = () => {
+            img.hidden = !f[c.clave];
+            if (f[c.clave]) {
+                img.src = f[c.clave];
+            }
+        };
+        pintarVista();
+        vista.appendChild(img);
+        const texto = document.createElement("input");
+        texto.id = id;
+        texto.value = valor;
+        texto.autocomplete = "off";
+        texto.spellcheck = false;
+        texto.placeholder = "/imagenes/…";
+        texto.addEventListener("input", () => {
+            cambiar(texto.value.trim());
+            pintarVista();
+        });
+        vista.appendChild(texto);
+        const subir = crearEditor("div", "subir");
+        const archivo = document.createElement("input");
+        archivo.type = "file";
+        archivo.accept = "image/*";
+        archivo.id = id + "-subir";
+        const ls = crearEditor("label", "boton", "Subir una");
+        ls.htmlFor = archivo.id;
+        subir.appendChild(archivo);
+        subir.appendChild(ls);
+        vista.appendChild(subir);
+        archivo.addEventListener("change", async () => {
+            avisarEditor("Trayendo la imagen…");
+            const hecha = await subirImagenWeb(archivo, c.sitio, { campana: estadoFichas.campana },
+                String(f[parte.nombre_de] || c.nombre));
+            archivo.value = "";
+            if (!hecha) {
+                return;
+            }
+            if (hecha.error) {
+                avisarEditor(hecha.error, true);
+                return;
+            }
+            texto.value = hecha.ruta;
+            cambiar(hecha.ruta);
+            pintarVista();
+            avisarEditor("Imagen lista: " + hecha.ruta + " (" + hecha.aviso + "). Se apunta al guardar.");
+        });
+        caja.appendChild(vista);
+        dentro.appendChild(caja);
+        return;
+    }
+    const tipos = { largo: "largo", lineas: "largo", numero: "number", color: "color", texto: "text", enlace: "url",
+        fecha: "text" };
+    const el = campoWeb(dentro, id, nombre, { tipo: tipos[c.tipo] || "text", valor, ayuda: c.tipo === "fecha"
+        ? (ayuda ? ayuda + " " : "") + "dd-mm-aaaa." : ayuda, opcional: !c.obligatorio,
+    filas: c.grande ? 12 : (c.tipo === "lineas" ? 5 : 3) });
+    if (c.tipo === "enlace") {
+        el.type = "text";
+        el.inputMode = "url";
+        el.spellcheck = false;
+    }
+    if (c.tipo === "color" && !valor) {
+        el.value = "#808080";
+    }
+    if (c.tipo === "numero") {
+        el.inputMode = "decimal";
+        if (c.minimo !== undefined) {
+            el.min = c.minimo;
+        }
+        if (c.maximo !== undefined) {
+            el.max = c.maximo;
+        }
+    }
+    el.addEventListener("input", () => cambiar(el.value));
+}
+
+async function guardarFichasWeb() {
+    const col = estadoFichas.col;
+    if (!col || estadoFichas.guardando) {
+        return;
+    }
+    estadoFichas.guardando = true;
+    const botones = document.querySelectorAll("[data-barra-fichas] button");
+    ocuparWeb(botones, true);
+    avisarEditor("Guardando…");
+    const hecho = await seguirTareaWeb(await pedirEditor("/api/web/coleccion/guardar",
+        { id: col.id, campana: col.campana, partes: col.partes }), "Guardado. Pasándolo a la web…");
+    ocuparWeb(botones, false);
+    estadoFichas.guardando = false;
+    if (hecho.error) {
+        avisarEditor(hecho.error, true, hecho.salida);
+        return;
+    }
+    estadoFichas.cambiado = false;
+    if (hecho.coleccion && !hecho.coleccion.error) {
+        ponerFichasWeb(hecho.coleccion, false);
+    }
+    avisarEditor("Guardado en " + col.archivo + (col.despues ? " y pasado a la web." : ". La página lo lee tal cual: ya"
+        + " está."), false, hecho.salida);
+}
+
+async function subirFotosDeGatoWeb() {
+    const archivos = [...($("#gatos-fotos").files || [])];
+    if (!archivos.length) {
+        avisarEditor("Elige primero las fotos.", true);
+        return;
+    }
+    if (estadoFichas.cambiado && !window.confirm("Hay descripciones sin guardar; se perderán al subir. ¿Seguir?")) {
+        return;
+    }
+    const boton = $("[data-gatos-subir]");
+    ocuparWeb([boton], true);
+    avisarEditor("Leyendo " + archivos.length + (archivos.length === 1 ? " foto…" : " fotos…"));
+    const fotos = await Promise.all(archivos.map((a) => new Promise((r) => {
+        const lector = new FileReader();
+        lector.onload = () => r({ archivo: a.name, datos: lector.result });
+        lector.onerror = () => r({ archivo: a.name, datos: "" });
+        lector.readAsDataURL(a);
+    })));
+    const hecho = await seguirTareaWeb(await pedirEditor("/api/web/gatos/subir", { santuario: $("#gatos-santuario").value,
+        fotos }), "Trayendo las fotos y haciendo las miniaturas…");
+    ocuparWeb([boton], false);
+    $("#gatos-fotos").value = "";
+    $("[data-gatos-elegidas]").textContent = "";
+    if (hecho.error) {
+        avisarEditor(hecho.error, true, hecho.salida);
+        return;
+    }
+    estadoFichas.cambiado = false;
+    if (hecho.coleccion) {
+        ponerFichasWeb(hecho.coleccion, true);
+    }
+    avisarEditor("Subidas " + hecho.traidas + "." + (hecho.fallos && hecho.fallos.length ? " No he podido con: "
+        + hecho.fallos.join("; ") : "") + " Ahora escríbeles su descripción y guarda.", false, hecho.salida);
+}
+
+// ---- LAS IMÁGENES Y REPASAR ----
+function pintarTraerImagenWeb() {
+    const sitio = $("#traer-sitio");
+    if (!sitio || sitio.options.length) {
+        return;
+    }
+    estadoFichas.sitios.forEach((s) => {
+        const o = document.createElement("option");
+        o.value = s.clave;
+        o.textContent = s.que + " (" + s.lado + " px)";
+        sitio.appendChild(o);
+    });
+    const campana = $("#traer-campana");
+    estadoFichas.campanas.forEach((c) => {
+        const o = document.createElement("option");
+        o.value = c.clave;
+        o.textContent = c.nombre;
+        campana.appendChild(o);
+    });
+    $("#traer-anyo").value = String(new Date().getFullYear());
+    const ajustar = () => {
+        const s = estadoFichas.sitios.find((x) => x.clave === sitio.value) || {};
+        const carpeta = s.carpeta || "";
+        $("[data-traer-campana]").hidden = !carpeta.includes("{campana}");
+        $("[data-traer-anyo]").hidden = !carpeta.includes("{anyo}");
+        $("[data-traer-santuario]").hidden = !carpeta.includes("{santuario}");
+        $("[data-traer-carpeta]").hidden = sitio.value !== "otra";
+    };
+    sitio.addEventListener("change", ajustar);
+    ajustar();
+}
+
+async function traerImagenWeb() {
+    const archivo = $("#traer-archivo");
+    if (!archivo.files || !archivo.files[0]) {
+        avisarEditor("Elige primero la imagen.", true);
+        return;
+    }
+    const boton = $("[data-traer] button[type=\"submit\"]");
+    ocuparWeb([boton], true);
+    avisarEditor("Trayendo la imagen…");
+    const hecha = await subirImagenWeb(archivo, $("#traer-sitio").value, { campana: $("#traer-campana").value,
+        anyo: $("#traer-anyo").value.trim(), santuario: $("#traer-santuario").value.trim() },
+    $("#traer-nombre").value.trim() || archivo.files[0].name.replace(/\.[^.]+$/, ""),
+    { carpeta: $("#traer-carpeta").value.trim() });
+    ocuparWeb([boton], false);
+    const salida = $("[data-traer-salida]");
+    salida.textContent = "";
+    if (!hecha || hecha.error) {
+        avisarEditor((hecha && hecha.error) || "No ha llegado ninguna imagen.", true);
+        return;
+    }
+    archivo.value = "";
+    $("[data-traer-elegida]").textContent = "";
+    avisarEditor("Traída: " + hecha.ruta + " (" + hecha.aviso + ").");
+    salida.appendChild(crearEditor("p", "", "Ruta, tal y como va en un JSON o en una página:"));
+    const ruta = document.createElement("input");
+    ruta.readOnly = true;
+    ruta.value = hecha.ruta;
+    ruta.setAttribute("aria-label", "Ruta de la imagen traída");
+    salida.appendChild(ruta);
+    const copiar = crearEditor("button", "", "Copiarla");
+    copiar.type = "button";
+    copiar.addEventListener("click", async () => {
+        try {
+            await navigator.clipboard.writeText(hecha.ruta);
+            avisarEditor("Copiada: " + hecha.ruta);
+        } catch (error) {
+            ruta.select();
+        }
+    });
+    salida.appendChild(copiar);
+    ruta.focus();
+    ruta.select();
+}
+
+async function correrHerramientaWeb(ruta, texto) {
+    const botones = document.querySelectorAll("[data-repasar], [data-regenerar]");
+    ocuparWeb(botones, true);
+    const hecho = await seguirTareaWeb(await pedirEditor(ruta, {}), texto);
+    ocuparWeb(botones, false);
+    if (hecho.error) {
+        avisarEditor(hecho.error, true, hecho.salida);
+        return;
+    }
+    avisarEditor("Hecho, todo bien.", false, hecho.salida);
+}
+
+function empezarFichasWeb() {
+    cargarColeccionesWeb();
+    $("[data-fichas-guardar]").addEventListener("click", guardarFichasWeb);
+    $("#fichas-campana").addEventListener("change", (e) => {
+        const nueva = e.target.value;
+        if (estadoFichas.cambiado && !window.confirm("Hay cambios sin guardar. ¿Cambiar de campaña igualmente?")) {
+            e.target.value = estadoFichas.campana;
+            return;
+        }
+        estadoFichas.cambiado = false;
+        abrirFichasWeb(estadoFichas.id, nueva);
+    });
+    $("[data-gatos-subir]").addEventListener("click", subirFotosDeGatoWeb);
+    $("#gatos-fotos").addEventListener("change", (e) => {
+        const n = (e.target.files || []).length;
+        $("[data-gatos-elegidas]").textContent = n ? (n === 1 ? "1 foto elegida." : n + " fotos elegidas.") : "";
+    });
+    $("[data-traer]").addEventListener("submit", (e) => {
+        e.preventDefault();
+        traerImagenWeb();
+    });
+    $("#traer-archivo").addEventListener("change", (e) => {
+        const f = e.target.files && e.target.files[0];
+        $("[data-traer-elegida]").textContent = f ? "Elegida: " + f.name : "";
+    });
+    $("[data-repasar]").addEventListener("click", () => correrHerramientaWeb("/api/web/repasar", "Repasando el sitio…"));
+    $("[data-regenerar]").addEventListener("click", () => correrHerramientaWeb("/api/web/regenerar", "Generando…"));
+    document.addEventListener("keydown", (e) => {
+        if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "s" && !$('[data-vista="fichas"]').hidden) {
+            e.preventDefault();
+            guardarFichasWeb();
+        }
+    });
+    estadoFichas.hoy = (() => {
+        const d = new Date();
+        return String(d.getDate()).padStart(2, "0") + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + d.getFullYear();
+    })();
+}
+
+empezarFichasWeb();

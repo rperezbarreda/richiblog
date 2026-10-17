@@ -1,7 +1,36 @@
 #!/usr/bin/env python3
 # =========================================
-# EL EDITOR DE LA WIKI (en el navegador)
+# EL EDITOR DE LA WEB (en el navegador)
 # =========================================
+# Empezó siendo el de la wiki (y sigue siéndolo: lo de abajo), y desde el
+# 18-10-2026 lleva también EL RESTO DE LA WEB, cada cosa en su apartado
+# del menú de arriba:
+#
+#   · ESCRIBIR: las entradas del blog, los relatos, los días del reto y
+#     las notas de las partidas. Hacer una nueva (nace como borrador) o
+#     seguir con una que ya hay, y escribirla COMO EN UN WORD: negrita,
+#     títulos, listas, enlaces, imágenes, tablas… sin ver el HTML (aunque
+#     se puede). Las notas de partida, hoja a hoja y escena a escena, con
+#     un botón para los personajes de la mesa (de su color). Guardar,
+#     Publicar o Volver a borrador, y Ver cómo queda.
+#   · ROL, WIKI CRALËA Y MI RINCÓN: las fichas de lo que va en un JSON
+#     (las campañas y los recursos de rol, los NPC, el botín, el
+#     calendario, la línea de tiempo, el diccionario, las
+#     recomendaciones, «en lo que ando», el reto y las fotos de los
+#     gatos): una lista para elegir, añadir, cambiar, ordenar o quitar.
+#   · IMÁGENES Y REPASAR: traer una imagen suelta, repasar el sitio
+#     entero y volver a generar.
+#
+# Lo de escribir y las fichas lo hace editor_web.py (aquí al lado), con
+# las mismas herramientas de siempre por debajo (nuevo.py, publicar.py,
+# calendario.py…), así que el resultado es igual que con ellas.
+#
+#     python herramientas/1-publicar/editor-wiki.py [--en escribir]
+#
+# (--en escribir|rol|wiki|rincon|repasar lo abre ya en ese apartado; es
+# lo que usa el menú.)
+#
+# LA WIKI:
 # Lo mismo que nueva-pagina-wiki.py, pero con ventanas en vez de
 # preguntas, y además para SEGUIR escribiendo una página que ya existe sin
 # tener que abrir el .md: cada dato de la ficha es una casilla y cada
@@ -50,8 +79,10 @@
 # (y Pillow para subir imágenes, que ya lo usa el resto de herramientas).
 #
 # Los archivos de la página del editor están en
-# herramientas/1-publicar/editor-wiki/ (editor.html, editor.css,
-# editor.js y mapas.js, que es el editor de mapas).
+# herramientas/1-publicar/editor-wiki/: editor.html, editor.css,
+# editor.js (lo común y la wiki), mapas.js (el editor de mapas),
+# redactor.js (el «Word»), escribir.js (las entradas) y fichas.js (las
+# fichas y lo de imágenes y repasar).
 
 import base64
 import difflib
@@ -76,6 +107,12 @@ sys.path.insert(0, str(HERRAMIENTAS))
 
 from comun import (RAIZ, esta_fuera, escribir_como_estaba, escribir_texto,  # noqa: E402
                    guardar_wiki_fuera, leer_json, leer_texto, sin_tildes, wiki_fuera)
+
+# Lo del resto de la web (el blog, los relatos, el rol, las fichas de
+# datos/…): está en editor_web.py, junto a esto; aquí solo se le pasan las
+# peticiones de /api/web/….
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+import editor_web  # noqa: E402
 
 # La herramienta de siempre, para no repetir cómo se leen y rellenan las
 # plantillas: se carga por su ruta porque lleva guiones en el nombre.
@@ -915,7 +952,8 @@ class Editor(SimpleHTTPRequestHandler):
         if url.path.startswith("/editor/"):
             nombre = url.path[len("/editor/"):]
             tipos = {"editor.css": "text/css; charset=utf-8", "editor.js": "text/javascript; charset=utf-8",
-                     "mapas.js": "text/javascript; charset=utf-8"}
+                     "mapas.js": "text/javascript; charset=utf-8", "escribir.js": "text/javascript; charset=utf-8",
+                     "redactor.js": "text/javascript; charset=utf-8", "fichas.js": "text/javascript; charset=utf-8"}
             if nombre in tipos:
                 return self._archivo(CARPETA_EDITOR / nombre, tipos[nombre])
             return self._json({"error": "no existe"}, 404)
@@ -924,6 +962,13 @@ class Editor(SimpleHTTPRequestHandler):
                 return self._json({"error": "Falta la contraseña del editor: recarga la página (o vuelve a"
                                    " abrir la dirección que sale al arrancarlo)."}, 403)
             pregunta = urllib.parse.parse_qs(url.query)
+            if url.path.startswith("/api/web/"):
+                try:
+                    contestado = editor_web.atender_get(url.path, pregunta)
+                except Exception as error:  # que el editor diga qué ha pasado
+                    return self._json({"error": "Algo ha fallado: %s" % error}, 500)
+                return self._json(contestado if contestado is not None else {"error": "no existe"},
+                                  200 if contestado is not None else 404)
             if url.path == "/api/inicio":
                 return self._json({
                     "plantillas": plantillas(),
@@ -973,6 +1018,10 @@ class Editor(SimpleHTTPRequestHandler):
         except ValueError:
             return self._json({"error": "No entiendo lo que ha llegado."}, 400)
         try:
+            if url.path.startswith("/api/web/"):
+                contestado = editor_web.atender_post(url.path, peticion)
+                if contestado is not None:
+                    return self._json(contestado)
             if url.path == "/api/crear":
                 return self._json(crear(peticion))
             if url.path == "/api/guardar":
@@ -1031,8 +1080,11 @@ def main():
     puerto = puerto_libre()
     servidor = ThreadingHTTPServer(("127.0.0.1", puerto), Editor)
     direccion = "http://127.0.0.1:%d/editor/" % servidor.server_address[1]
+    # --en escribir|rol|wiki|rincon|repasar: abre ya en ese apartado.
+    if "--en" in sys.argv[:-1]:
+        direccion += "#" + sys.argv[sys.argv.index("--en") + 1]
     print("\n  ==================================")
-    print("  EL EDITOR DE LA WIKI")
+    print("  EL EDITOR DE LA WEB")
     print("  ==================================")
     print("\n  Abierto en el navegador. Si no se ha abierto solo, copia esto en él:")
     print("\n     " + direccion)

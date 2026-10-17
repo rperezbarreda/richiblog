@@ -22,7 +22,77 @@
   se escribe algo que nace como borrador; es la misma herramienta.
 
   No hace nada por su cuenta: es un índice. Todo lo de abajo se
-  puede seguir usando suelto si ya sabes cuál quieres.
+  puede seguir usando suelto si ya sabes cuál quieres. La ÚLTIMA cosa
+  de cada apartado (la primera, en la wiki) es el editor de la web,
+  abierto ya en ese apartado: lo mismo, con ventanas (lo de justo
+  aquí debajo).
+
+
+---------------------------------------------------------------
+  EL EDITOR DE LA WEB (en el navegador)
+---------------------------------------------------------------
+
+  Casi todo lo de esta chuleta, con ventanas en vez de preguntas:
+
+      python herramientas/1-publicar/editor-wiki.py
+
+  (o la última cosa de cada apartado del menú, que lo abre ya en el
+  suyo con --en escribir, --en rol, --en wiki, --en rincon o
+  --en repasar). Se abre solo en el navegador, en 127.0.0.1 (este
+  ordenador y nadie más); para cerrarlo, Ctrl+C donde se abrió.
+
+  Arriba, un menú con los apartados:
+
+    · ESCRIBIR: las entradas del blog, los relatos, los días del reto
+      y las notas de las partidas, en una lista con filtros (qué, si
+      son borrador o no, y buscar por el título). «Abrir» una para
+      seguir con ella, o hacer una nueva (con lo mismo que pregunta
+      nuevo.py: título, fecha, etiquetas, imagen…; nace como borrador).
+      El texto se escribe COMO EN UN WORD: negrita (Ctrl+B), cursiva
+      (Ctrl+I), enlaces (Ctrl+K), títulos, listas, citas, código,
+      imágenes (se suben de tu ordenador a su carpeta, en WebP),
+      tablas y rayas. «Ver el HTML» enseña lo que hay debajo y deja
+      tocarlo. Lo que se pega de otro sitio llega limpio (sin colores
+      ni letras raras). Abajo, una barra fija: Guardar (Ctrl+S),
+      Guardar y pasar a la web (rehace listados, RSS y buscador),
+      Publicar / Volver a borrador (como publicar.py) y Ver cómo queda.
+      Las NOTAS DE UNA PARTIDA van hoja a hoja y escena a escena
+      (añadir, subir, bajar, quitar, desplegada o no), y con cuatro
+      botones de más: «Personaje de la mesa» (lo elegido, o su nombre
+      si no hay nada elegido, en su color), «Alguien» (negrita),
+      «Lugar» (cursiva) y «Lista de objetos». El nombre corto de la
+      sesión y el PDF del cuaderno van a la campaña.
+    · ROL, WIKI CRALËA Y MI RINCÓN: las FICHAS de lo que va en un JSON
+      — las campañas y los recursos de rol, los NPC, el botín, el
+      calendario, la línea de tiempo, el diccionario, las
+      recomendaciones, «en lo que ando», el reto y las fotos de los
+      gatos —. Una lista (con buscador si es larga) donde elegir una
+      ficha para cambiarla, «Añadir», subir, bajar o quitar. Cada dato
+      es su casilla (texto, número, fecha, sí/no, elegir de una lista,
+      imagen con su botón de subir, color…). Guardar lo escribe con la
+      misma herramienta de siempre (el diccionario sale ordenado, «en
+      lo que ando» con su fecha) y pasa lo que toque a la web (el
+      buscador, los tokens de los NPC, la línea de tiempo, la wiki…).
+      Lo que el editor no conoce de una ficha se queda como estaba.
+      En la wiki siguen estando sus páginas y sus mapas (ver
+      LOS MAPAS DEL MUNDO y la parte de la wiki).
+    · IMÁGENES Y REPASAR: traer una imagen suelta (como
+      traer-imagen.py, eligiéndola en una ventana), repasar el sitio
+      entero (las cinco comprobaciones) y volver a generar.
+
+  Mientras trabaja algo largo (pasar a la web, generar), una barra de
+  progreso dice qué va haciendo y cuánto le queda (aprende lo que
+  tarda cada herramienta), y al final sale lo que han dicho las
+  herramientas, plegado. Si algo falla, lo dice ahí mismo. Si te vas
+  a otro apartado con cambios sin guardar, pregunta antes.
+
+  Lo hace editor_web.py (junto a editor-wiki.py), que no escribe nada
+  a su manera: llama a nuevo.py, publicar.py, calendario.py,
+  diccionario.py, linea-de-tiempo.py… y a los generadores, así que
+  lo que sale es igual que con ellos. Al guardar una entrada cambia
+  solo lo que se toca (el título en sus cuatro sitios, el resumen, las
+  etiquetas, el texto y la imagen del lado); una figura hecha a mano
+  (un vídeo, por ejemplo) se deja como está.
 
   Todo se ejecuta DESDE LA CARPETA RAÍZ del sitio (donde está
   index.html), no desde dentro de herramientas/. Es decir:
@@ -62,7 +132,8 @@
               botin.py              el botín de una campaña
               nueva-recomendacion.py
               en-lo-que-ando.py     lo que pone «en lo que ando»
-              editor-wiki.py        el editor de la wiki (y de sus mapas), en el navegador
+              editor-wiki.py        el editor de la web (y de la wiki y sus mapas), en el navegador
+              editor_web.py         (no se ejecuta) lo suyo de las entradas y las fichas
               nueva-pagina-wiki.py  una página nueva de la wiki
               importar-mundo.py     (fuera del menú) traer una bóveda de Chronicler
               linea-de-tiempo.py    los eventos de la línea de tiempo
@@ -3446,10 +3517,18 @@
   5-consulta/pendientes-wiki.py  cuenta lo que falta en la wiki (páginas
                         por escribir, «por decidir», relleno, imágenes).
                         No cambia nada.
-  1-publicar/editor-wiki.py  el editor de la wiki en el navegador (en
-                        127.0.0.1, solo este ordenador): crear páginas,
-                        seguir con una, subir imágenes y pasarla a la
-                        web. Su página: 1-publicar/editor-wiki/.
+  1-publicar/editor-wiki.py  el editor de la web en el navegador (en
+                        127.0.0.1, solo este ordenador): la wiki y sus
+                        mapas, y desde el 18-10-2026 las entradas, los
+                        relatos, el reto, las notas de partida y las
+                        fichas de los JSON. Ver EL EDITOR DE LA WEB. Su
+                        página: 1-publicar/editor-wiki/ (redactor.js es
+                        el «Word», escribir.js las entradas, fichas.js
+                        las fichas).
+  1-publicar/editor_web.py  (no se ejecuta) lo que hace editor-wiki.py
+                        con las entradas y las fichas: las lee, las
+                        guarda con cada herramienta y pasa lo que toque
+                        a la web en segundo plano, con su progreso.
   1-publicar/nueva-pagina-wiki.py  crea el .md de una página nueva de
                         la wiki con la plantilla de su tipo (país,
                         personaje, monstruo…), en la carpeta que le toca.

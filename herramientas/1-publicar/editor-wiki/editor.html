@@ -4,33 +4,152 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="editor-token" content="{{TOKEN}}">
-    <title>Editor de la wiki</title>
+    <title>Editor de la web</title>
     <link rel="stylesheet" href="/editor/editor.css">
     <script defer src="/editor/editor.js"></script>
     <script defer src="/editor/mapas.js"></script>
+    <script defer src="/editor/redactor.js"></script>
+    <script defer src="/editor/escribir.js"></script>
+    <script defer src="/editor/fichas.js"></script>
 </head>
 <body>
-    <!-- EL EDITOR DE LA WIKI. Lo sirve herramientas/1-publicar/editor-wiki.py
-         en este ordenador; no se publica. Seis vistas, una a la vista
-         cada vez: inicio, página nueva, páginas que faltan, escribir, los
-         mapas y el editor de un mapa. -->
+    <!-- EL EDITOR DE LA WEB. Lo sirve herramientas/1-publicar/editor-wiki.py
+         en este ordenador; no se publica. Una vista a la vista cada vez:
+         el inicio y un apartado por cada uno de la web (escribir, rol, la
+         wiki, mi rincón, imágenes y repasar), y dentro de ellos, escribir
+         una entrada, una página de la wiki, un mapa o una lista de fichas.
+         editor.js lleva la wiki; mapas.js, los mapas; escribir.js y
+         redactor.js, las entradas; fichas.js, las fichas. -->
     <a class="saltar" href="#principal">Saltar al contenido</a>
     <header class="cabecera">
-        <p class="marca">✎ editor de la wiki</p>
-        <nav class="menu" aria-label="Qué hacer">
+        <p class="marca">✎ editor de la web</p>
+        <nav class="menu" aria-label="Apartados">
             <button type="button" data-ir="inicio">Inicio</button>
-            <button type="button" data-ir="nueva">Página nueva</button>
-            <button type="button" data-ir="faltan">Páginas que faltan</button>
-            <button type="button" data-ir="mapas">Mapas</button>
+            <button type="button" data-ir="escribir">Escribir</button>
+            <button type="button" data-ir="rol">Rol</button>
+            <button type="button" data-ir="wiki">Wiki Cralëa</button>
+            <button type="button" data-ir="rincon">Mi rincón</button>
+            <button type="button" data-ir="repasar">Imágenes y repasar</button>
         </nav>
     </header>
 
     <main id="principal" tabindex="-1">
         <p class="aviso" role="status" aria-live="polite" data-aviso></p>
 
-        <!-- INICIO -->
+        <!-- INICIO: un botón por apartado, los mismos que el menú de la web. -->
         <section class="vista" data-vista="inicio" aria-labelledby="t-inicio">
             <h1 id="t-inicio">¿Qué quieres hacer?</h1>
+            <div class="grandes">
+                <button type="button" class="grande" data-ir="escribir">
+                    <span class="grande-titulo">Escribir</span>
+                    <span class="grande-que">Una entrada del blog, un relato o un día del reto; seguir con uno, publicarlo.</span>
+                </button>
+                <button type="button" class="grande" data-ir="rol">
+                    <span class="grande-titulo">Rol</span>
+                    <span class="grande-que">Las notas de una partida, los NPC, el botín y los recursos del portfolio.</span>
+                </button>
+                <button type="button" class="grande" data-ir="wiki">
+                    <span class="grande-titulo">Wiki Cralëa</span>
+                    <span class="grande-que">Sus páginas, los mapas, la línea de tiempo, el calendario y el diccionario.</span>
+                </button>
+                <button type="button" class="grande" data-ir="rincon">
+                    <span class="grande-titulo">Mi rincón</span>
+                    <span class="grande-que">En lo que ando, las recomendaciones y las fotos de los gatos.</span>
+                </button>
+                <button type="button" class="grande" data-ir="repasar">
+                    <span class="grande-titulo">Imágenes y repasar</span>
+                    <span class="grande-que">Traer una imagen de tu ordenador, repasar el sitio antes de subirlo o volver a generarlo.</span>
+                </button>
+            </div>
+        </section>
+
+        <!-- ESCRIBIR: hacer una nueva y la lista de lo que hay. -->
+        <section class="vista" data-vista="escribir" aria-labelledby="t-escribir" hidden>
+            <h1 id="t-escribir">Escribir</h1>
+            <div class="grandes">
+                <button type="button" class="grande" data-nueva-tipo="entrada">
+                    <span class="grande-titulo">Una entrada del blog</span>
+                    <span class="grande-que">Con su fecha, sus etiquetas y su imagen. Nace como borrador.</span>
+                </button>
+                <button type="button" class="grande" data-nueva-tipo="relato">
+                    <span class="grande-titulo">Un relato</span>
+                    <span class="grande-que">Como una entrada, pero va a mis movidas.</span>
+                </button>
+                <button type="button" class="grande" data-nueva-tipo="reto">
+                    <span class="grande-titulo">Un día del reto</span>
+                    <span class="grande-que">El siguiente que falte, con su palabra.</span>
+                </button>
+            </div>
+            <section class="bloque" aria-labelledby="t-entradas">
+                <h2 id="t-entradas">Lo que hay</h2>
+                <p class="ayuda">Las entradas, los relatos, los días del reto y las notas de las partidas, de lo último a lo
+                    primero. Los borradores no salen en la web hasta que se publican.</p>
+                <div class="fila filtros">
+                    <div>
+                        <label for="entradas-tipo">Qué</label>
+                        <select id="entradas-tipo">
+                            <option value="">Todo</option>
+                            <option value="entrada">Entradas del blog</option>
+                            <option value="relato">Relatos</option>
+                            <option value="reto">Días del reto</option>
+                            <option value="sesion">Notas de las partidas</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="entradas-estado">Cómo están</label>
+                        <select id="entradas-estado">
+                            <option value="">Todas</option>
+                            <option value="borrador">Borradores</option>
+                            <option value="publicada">Publicadas</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="entradas-buscar">Buscar por el título</label>
+                        <input id="entradas-buscar" autocomplete="off">
+                    </div>
+                </div>
+                <p class="ayuda" data-entradas-cuantas aria-live="polite"></p>
+                <ul class="faltan" data-entradas></ul>
+            </section>
+            <section class="bloque" aria-labelledby="t-escribir-fichas">
+                <h2 id="t-escribir-fichas">Y además</h2>
+                <div class="grandes" data-fichas-de="escribir"></div>
+            </section>
+        </section>
+
+        <!-- UNA NUEVA (entrada, relato, día del reto o notas de una partida) -->
+        <section class="vista" data-vista="nueva-entrada" aria-labelledby="t-nueva-entrada" hidden>
+            <h1 id="t-nueva-entrada" data-nueva-entrada-titulo></h1>
+            <form data-nueva-entrada novalidate></form>
+        </section>
+
+        <!-- ESCRIBIR UNA -->
+        <section class="vista" data-vista="entrada" aria-labelledby="t-entrada" hidden>
+            <h1 id="t-entrada" data-entrada-titulo></h1>
+            <p class="ayuda" data-entrada-que></p>
+            <div class="fila entrada-estado">
+                <p class="estado-entrada" data-entrada-estado></p>
+                <a class="boton" data-entrada-ver target="_blank" rel="noopener">Ver cómo queda ↗</a>
+            </div>
+            <form data-entrada></form>
+        </section>
+
+        <!-- ROL -->
+        <section class="vista" data-vista="rol" aria-labelledby="t-rol" hidden>
+            <h1 id="t-rol">Rol</h1>
+            <div class="grandes">
+                <button type="button" class="grande" data-nueva-tipo="sesion">
+                    <span class="grande-titulo">Apuntar las notas de una partida</span>
+                    <span class="grande-que">Elige la campaña y deja el cuaderno listo para escribir. Nace como borrador. Las de
+                        antes se abren desde «Escribir».</span>
+                </button>
+            </div>
+            <div class="grandes" data-fichas-de="rol"></div>
+        </section>
+
+        <!-- LA WIKI -->
+        <section class="vista" data-vista="wiki" aria-labelledby="t-wiki" hidden>
+            <h1 id="t-wiki">Wiki Cralëa</h1>
             <div class="grandes">
                 <button type="button" class="grande" data-ir="nueva">
                     <span class="grande-titulo">Crear una página nueva</span>
@@ -53,6 +172,95 @@
                     <button type="submit">Abrir</button>
                 </div>
             </form>
+            <div class="grandes grandes-abajo" data-fichas-de="wiki"></div>
+        </section>
+
+        <!-- MI RINCÓN -->
+        <section class="vista" data-vista="rincon" aria-labelledby="t-rincon" hidden>
+            <h1 id="t-rincon">Mi rincón</h1>
+            <div class="grandes" data-fichas-de="rincon"></div>
+        </section>
+
+        <!-- UNA LISTA DE FICHAS (la pinta fichas.js) -->
+        <section class="vista" data-vista="fichas" aria-labelledby="t-fichas" hidden>
+            <h1 id="t-fichas" data-fichas-titulo></h1>
+            <p class="ayuda" data-fichas-ayuda></p>
+            <div class="campo" data-fichas-campana-caja hidden>
+                <label for="fichas-campana">Campaña</label>
+                <select id="fichas-campana"></select>
+            </div>
+            <section class="bloque gatos-subir" data-fichas-gatos aria-labelledby="t-gatos-subir" hidden>
+                <h2 id="t-gatos-subir">Subir fotos nuevas</h2>
+                <p class="ayuda">Van a su carpeta en WebP y a su tamaño, se les hace la miniatura y salen en la galería
+                    (como generar-galeria.py). Luego, a cada una, su descripción.</p>
+                <div class="campo">
+                    <label for="gatos-santuario">De quién</label>
+                    <select id="gatos-santuario"></select>
+                </div>
+                <div class="fila">
+                    <div class="subir">
+                        <input type="file" id="gatos-fotos" accept="image/*" multiple>
+                        <label class="boton" for="gatos-fotos">Elegir las fotos de tu ordenador</label>
+                    </div>
+                    <button type="button" class="principal" data-gatos-subir>Subirlas</button>
+                </div>
+                <p class="ayuda" data-gatos-elegidas aria-live="polite"></p>
+            </section>
+            <div data-fichas-partes></div>
+        </section>
+
+        <!-- LAS IMÁGENES Y REPASAR -->
+        <section class="vista" data-vista="repasar" aria-labelledby="t-repasar" hidden>
+            <h1 id="t-repasar">Imágenes y repasar</h1>
+            <form class="bloque" data-traer novalidate aria-labelledby="t-traer">
+                <h2 id="t-traer">Traer una imagen de tu ordenador</h2>
+                <p class="ayuda">La deja en su carpeta, en WebP, al tamaño que toca y sin los datos del móvil (como
+                    traer-imagen.py). Las de las entradas, las fichas y los NPC se suben ya desde su sitio; esto es para
+                    una suelta.</p>
+                <div class="campo">
+                    <label for="traer-sitio">Para qué es</label>
+                    <select id="traer-sitio"></select>
+                </div>
+                <div class="campo" data-traer-campana hidden>
+                    <label for="traer-campana">Campaña</label>
+                    <select id="traer-campana"></select>
+                </div>
+                <div class="campo" data-traer-anyo hidden>
+                    <label for="traer-anyo">Año</label>
+                    <input id="traer-anyo" inputmode="numeric" autocomplete="off">
+                </div>
+                <div class="campo" data-traer-santuario hidden>
+                    <label for="traer-santuario">Santuario (tali, regis…)</label>
+                    <input id="traer-santuario" autocomplete="off">
+                </div>
+                <div class="campo" data-traer-carpeta hidden>
+                    <label for="traer-carpeta">Carpeta, dentro de imagenes/</label>
+                    <input id="traer-carpeta" autocomplete="off" spellcheck="false" placeholder="imagenes/loquesea">
+                </div>
+                <div class="campo">
+                    <label for="traer-nombre">Cómo se llamará <span class="opcional">(opcional)</span></label>
+                    <input id="traer-nombre" autocomplete="off" placeholder="como el archivo">
+                </div>
+                <div class="fila">
+                    <div class="subir">
+                        <input type="file" id="traer-archivo" accept="image/*">
+                        <label class="boton" for="traer-archivo">Elegir la imagen</label>
+                    </div>
+                    <button type="submit" class="principal">Traerla</button>
+                </div>
+                <p class="ayuda" data-traer-elegida aria-live="polite"></p>
+                <div class="fila" data-traer-salida></div>
+            </form>
+            <section class="bloque" aria-labelledby="t-repasar-sitio">
+                <h2 id="t-repasar-sitio">Antes de subir</h2>
+                <p class="ayuda">Repasar pasa las cinco comprobaciones (enlaces rotos, hojas de estilo, temas, nombres
+                    repetidos y lo que se pega sin escapar): no cambia nada, solo mira. Volver a generar rehace los
+                    listados, el RSS, el mapa del sitio, el buscador y las cabeceras (solo hace falta si has tocado algo a mano).</p>
+                <div class="fila">
+                    <button type="button" class="principal" data-repasar>Repasar el sitio entero</button>
+                    <button type="button" data-regenerar>Volver a generar</button>
+                </div>
+            </section>
         </section>
 
         <!-- PÁGINA NUEVA -->
@@ -488,9 +696,24 @@
         <a class="boton" data-ver target="_blank" rel="noopener" hidden>Ver cómo queda ↗</a>
     </footer>
 
+    <!-- Abajo, mientras se escribe una entrada. -->
+    <footer class="barra" data-barra-entrada hidden>
+        <p class="aviso barra-aviso" role="status" aria-live="polite" data-aviso-barra></p>
+        <button type="button" class="principal" data-entrada-guardar>Guardar <span class="tecla">Ctrl+S</span></button>
+        <button type="button" data-entrada-pasar>Guardar y pasar a la web</button>
+        <button type="button" data-entrada-publicar>Publicar</button>
+        <a class="boton" data-entrada-ver-barra target="_blank" rel="noopener">Ver cómo queda ↗</a>
+    </footer>
+
+    <!-- Abajo, mientras se tocan unas fichas. -->
+    <footer class="barra" data-barra-fichas hidden>
+        <p class="aviso barra-aviso" role="status" aria-live="polite" data-aviso-barra></p>
+        <button type="button" class="principal" data-fichas-guardar>Guardar <span class="tecla">Ctrl+S</span></button>
+    </footer>
+
     <!-- Abajo, mientras se edita un mapa. -->
     <footer class="barra" data-barra-mapa hidden>
-        <p class="aviso barra-aviso" role="status" aria-live="polite" data-aviso-mapa></p>
+        <p class="aviso barra-aviso" role="status" aria-live="polite" data-aviso-mapa data-aviso-barra></p>
         <button type="button" class="principal" data-mapa-guardar>Guardar <span class="tecla">Ctrl+S</span></button>
         <button type="button" data-mapa-pasar>Guardar y pasar a la web</button>
         <button type="button" data-mapa-descargar>Descargar la imagen</button>

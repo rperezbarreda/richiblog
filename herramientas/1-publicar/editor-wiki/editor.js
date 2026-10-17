@@ -39,11 +39,17 @@ async function pedirEditor(ruta, cuerpo) {
 }
 
 function avisarEditor(texto, error, salida) {
-    // Editando un mapa, los avisos van en la barra de abajo: arriba
-    // empujarían el mapa mientras se pulsa en él (y no se verían).
-    const enMapa = !$('[data-vista="mapa"]').hidden;
-    $(enMapa ? "[data-aviso]" : "[data-aviso-mapa]").textContent = "";
-    const aviso = $(enMapa ? "[data-aviso-mapa]" : "[data-aviso]");
+    // Editando un mapa, una entrada o unas fichas, los avisos van en la
+    // barra de abajo (la que esté a la vista), junto a «Guardar»: arriba
+    // empujarían lo de debajo (y, al final de una página larga, no se
+    // verían).
+    const enBarra = document.querySelector(".barra:not([hidden]) [data-aviso-barra]");
+    const aviso = enBarra || $("[data-aviso]");
+    document.querySelectorAll("[data-aviso], [data-aviso-barra]").forEach((otro) => {
+        if (otro !== aviso) {
+            otro.textContent = "";
+        }
+    });
     aviso.textContent = texto || "";
     aviso.classList.toggle("es-error", !!error);
     if (salida) {
@@ -61,6 +67,23 @@ function irAEditor(vista) {
     if (vista !== "editar" && estadoEditor.cambiado
         && !window.confirm("Hay cambios sin guardar en esta página. ¿Salir igualmente?")) {
         return;
+    }
+    // Lo de escribir.js y fichas.js (se cargan después; están si existen).
+    const escribiendo = typeof estadoEscribir !== "undefined" ? estadoEscribir : null;
+    if (vista !== "entrada" && escribiendo && escribiendo.cambiado
+        && !window.confirm("Hay cambios sin guardar en lo que estabas escribiendo. ¿Salir igualmente?")) {
+        return;
+    }
+    const fichas = typeof estadoFichas !== "undefined" ? estadoFichas : null;
+    if (vista !== "fichas" && fichas && fichas.cambiado
+        && !window.confirm("Hay cambios sin guardar en las fichas. ¿Salir igualmente?")) {
+        return;
+    }
+    if (vista !== "entrada" && escribiendo) {
+        escribiendo.cambiado = false;
+    }
+    if (vista !== "fichas" && fichas) {
+        fichas.cambiado = false;
     }
     // El mapa que se está editando (lo lleva mapas.js).
     const mapa = window.estadoMapa;
@@ -83,6 +106,8 @@ function irAEditor(vista) {
         v.hidden = v.getAttribute("data-vista") !== vista;
     });
     $("[data-barra]").hidden = vista !== "editar";
+    $("[data-barra-entrada]").hidden = vista !== "entrada";
+    $("[data-barra-fichas]").hidden = vista !== "fichas";
     document.querySelectorAll(".menu [data-ir]").forEach((b) => {
         if (b.getAttribute("data-ir") === vista) {
             b.setAttribute("aria-current", "page");
@@ -184,11 +209,20 @@ async function empezarEditor() {
         }
     });
     window.addEventListener("beforeunload", (e) => {
-        if (estadoEditor.cambiado || (window.estadoMapa && window.estadoMapa.cambiado)) {
+        if (estadoEditor.cambiado || (window.estadoMapa && window.estadoMapa.cambiado)
+            || (typeof estadoEscribir !== "undefined" && estadoEscribir.cambiado)
+            || (typeof estadoFichas !== "undefined" && estadoFichas.cambiado)) {
             e.preventDefault();
             e.returnValue = "";
         }
     });
+    // «editor-wiki.py --en escribir» (lo que usa el menú) lo abre ya en ese
+    // apartado: va detrás de la dirección, con #.
+    const vista = decodeURIComponent(location.hash.slice(1)).replace(/[^a-z-]/g, "");
+    const ir = vista ? document.querySelector('.menu [data-ir="' + vista + '"]') : null;
+    if (ir) {
+        ir.click();
+    }
 }
 
 function llenarListasEditor() {

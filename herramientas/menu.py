@@ -43,6 +43,14 @@ PUBLICAR = ("Publicar un borrador",
             "1-publicar/publicar.py", [],
             "Lo que ya esté escrito deja de ser borrador y sale en la web.")
 
+# El editor de la web (en el navegador) sale el último en cada apartado
+# (para no mover los números de siempre), abierto ya en el suyo: lo mismo
+# que lo de encima, pero con ventanas.
+def editor(en, que):
+    return ("Todo esto en el editor (en el navegador)",
+            "1-publicar/editor-wiki.py", ["--en", en], que)
+
+
 # (nombre del apartado, de qué va, [opciones])
 # Cada opción: (qué hace, qué script, qué argumentos, una línea explicándolo)
 #
@@ -56,6 +64,7 @@ APARTADOS = [
          "1-publicar/nuevo.py", ["--entrada"],
          "Crea la página con la fecha puesta. Nace como borrador."),
         PUBLICAR,
+        editor("escribir", "Escribir como en un Word, seguir con una ya hecha y publicarla."),
     ]),
 
     ("Mis movidas", "relatos y el reto de escritura", [
@@ -66,6 +75,7 @@ APARTADOS = [
          "1-publicar/nuevo.py", ["--reto"],
          "Coge el siguiente día que falte, con su palabra."),
         PUBLICAR,
+        editor("escribir", "Relatos y días del reto, escritos como en un Word."),
     ]),
 
     ("Rol", "las campañas, los NPC, el botín y los recursos", [
@@ -82,12 +92,13 @@ APARTADOS = [
          "1-publicar/nuevo.py", ["--rol"],
          "Una ficha, un mapa, una aventura… para el portfolio."),
         PUBLICAR,
+        editor("rol", "Las notas de partida, los NPC, el botín y los recursos, con fichas."),
     ]),
 
     ("Wiki Cralëa", "escribir sus páginas, la línea de tiempo y pasarla a la web", [
         ("Escribir en la wiki con el editor (en el navegador)",
-         "1-publicar/editor-wiki.py", [],
-         "Crear páginas o seguir con una, con casillas; guarda y la pasa a la web."),
+         "1-publicar/editor-wiki.py", ["--en", "wiki"],
+         "Páginas, mapas, línea de tiempo, calendario y diccionario; y pasarla a la web."),
         ("Escribir una página nueva de la wiki (aquí, con preguntas)",
          "1-publicar/nueva-pagina-wiki.py", [],
          "Elige el tipo (país, personaje, monstruo…) y crea el .md con su plantilla."),
@@ -118,6 +129,7 @@ APARTADOS = [
         ("Añadir fotos a la galería de un gato",
          "2-imagenes/generar-galeria.py", [],
          "Hace las miniaturas y pregunta la descripción de cada una."),
+        editor("rincon", "En lo que ando, las recomendaciones y las fotos de los gatos."),
     ]),
 
     ("Imágenes", "traerlas de tu ordenador y dejarlas a punto", [
@@ -130,6 +142,7 @@ APARTADOS = [
         ("Sacar los tamaños del dibujo de la portada",
          "2-imagenes/tamanos-portada.py", [],
          "Solo si has cambiado el dibujo de la portada."),
+        editor("repasar", "Elegir la imagen en una ventana en vez de pegar la ruta."),
     ]),
 
     ("Antes de subir", "repasar el sitio y rehacer lo generado", [
@@ -142,6 +155,7 @@ APARTADOS = [
         ("Volver a generar los listados, el mapa y las cabeceras",
          REGENERAR, None,
          "Solo hace falta si has tocado una página, un CSS o un JS a mano."),
+        editor("repasar", "Repasar y volver a generar con un botón."),
     ]),
 ]
 

@@ -1278,3 +1278,347 @@ body.en-mapa main {
     border: 2px solid var(--texto, currentColor);
     vertical-align: middle;
 }
+
+
+/* ====================================================================
+   EL EDITOR DE LA WEB: escribir, las fichas, las imágenes y repasar
+   (escribir.js, redactor.js y fichas.js)
+   ==================================================================== */
+
+/* El hueco de abajo lo pone escribir.js con lo que mida la barra que esté
+   a la vista (crece con los avisos). */
+
+.grandes-abajo {
+    margin-top: 32px;
+}
+
+.filtros > div {
+    flex: 1 1 12rem;
+}
+
+.filtros label {
+    flex-basis: auto;
+}
+
+.marca-borrador {
+    display: inline-block;
+    padding: 0 8px;
+    border: 2px solid var(--acento);
+    color: var(--acento);
+    font-family: var(--mono);
+    font-size: 0.8rem;
+    text-transform: uppercase;
+}
+
+.entrada-estado {
+    margin-bottom: 22px;
+}
+
+.estado-entrada {
+    margin: 0;
+    font-weight: 700;
+}
+
+.estado-entrada.marca-borrador {
+    padding: 4px 10px;
+    font-size: 0.9rem;
+}
+
+.nueva-imagen {
+    display: block;
+    padding: 14px;
+    border: 2px dashed var(--borde);
+}
+
+.nueva-imagen-datos {
+    margin-top: 12px;
+}
+
+.imagen-del-lado img {
+    width: 120px;
+    height: 120px;
+}
+
+.etiqueta-suelta {
+    margin: 0 0 4px;
+    font-weight: 700;
+}
+
+/* ---- EL EDITOR DE TEXTO ---- */
+.redactor {
+    margin-bottom: 18px;
+    border: 2px solid var(--borde);
+    background: var(--caja);
+}
+
+.redactor:focus-within {
+    border-color: var(--acento);
+}
+
+.redactor-botones {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px;
+    padding: 8px;
+    border-bottom: 2px solid var(--borde);
+    background: var(--fondo);
+}
+
+.redactor-boton {
+    min-height: 40px;
+    padding: 4px 10px;
+    font-size: 0.9rem;
+}
+
+.redactor-elegir {
+    width: auto;
+    min-height: 40px;
+    padding: 4px 8px;
+    font-size: 0.9rem;
+}
+
+.redactor-hueco {
+    width: 2px;
+    height: 28px;
+    margin: 0 4px;
+    background: var(--borde);
+}
+
+.redactor-panel {
+    padding: 12px;
+    border-bottom: 2px solid var(--acento);
+}
+
+.redactor-area,
+.redactor-fuente {
+    min-height: 12rem;
+    padding: 14px 18px;
+    border: 0;
+    font-size: 1.1rem;
+    line-height: 1.7;
+}
+
+.redactor-area.es-grande {
+    min-height: 26rem;
+}
+
+.redactor-area:focus,
+.redactor-fuente:focus {
+    outline: 3px solid var(--acento);
+    outline-offset: -3px;
+    box-shadow: none;
+}
+
+.redactor-fuente {
+    display: block;
+    width: 100%;
+    font-family: var(--mono);
+    font-size: 0.95rem;
+}
+
+.redactor.es-en-linea .redactor-area {
+    min-height: 0;
+    padding: 10px 14px;
+    font-size: 1rem;
+}
+
+.redactor-area p {
+    margin: 0 0 1em;
+}
+
+.redactor-area h2,
+.redactor-area h3,
+.redactor-area h4 {
+    margin: 1.2em 0 0.5em;
+    color: var(--acento);
+    font-family: Georgia, "Times New Roman", serif;
+    text-transform: none;
+    letter-spacing: 0;
+}
+
+.redactor-area h2 {
+    font-size: 1.5rem;
+}
+
+.redactor-area h3 {
+    font-size: 1.25rem;
+}
+
+.redactor-area a {
+    color: var(--acento);
+}
+
+.redactor-area blockquote {
+    margin: 0 0 1em;
+    padding: 4px 0 4px 16px;
+    border-left: 4px solid var(--acento);
+    font-style: italic;
+}
+
+.redactor-area code,
+.redactor-area pre {
+    font-family: var(--mono);
+    font-size: 0.95em;
+}
+
+.redactor-area code {
+    padding: 0 4px;
+    background: var(--fondo);
+}
+
+.redactor-area pre {
+    overflow-x: auto;
+    padding: 10px;
+    background: var(--fondo);
+    white-space: pre-wrap;
+}
+
+.redactor-area figure {
+    margin: 0 0 1em;
+}
+
+.redactor-area img {
+    max-width: 100%;
+    height: auto;
+}
+
+.redactor-area figcaption {
+    color: var(--suave);
+    font-size: 0.9rem;
+}
+
+.redactor-area table {
+    border-collapse: collapse;
+    margin: 0 0 1em;
+}
+
+.redactor-area th,
+.redactor-area td {
+    padding: 4px 10px;
+    border: 1px solid var(--borde);
+}
+
+.redactor-area hr {
+    margin: 1.5em 0;
+    border: 0;
+    border-top: 2px dashed var(--acento);
+}
+
+/* Las notas de una partida: los personajes de la mesa de su color (los
+   mismos que notas-rol.css), y la lista de lo conseguido. */
+.redactor-area .pj-verde { color: #7fe496; }
+.redactor-area .pj-azul { color: #a8d3ff; }
+.redactor-area .pj-rojo { color: #ffc0b7; }
+.redactor-area .pj-morado { color: #dec4ff; }
+
+@media (prefers-color-scheme: light) {
+    .redactor-area .pj-verde { color: #006b19; }
+    .redactor-area .pj-azul { color: #005da2; }
+    .redactor-area .pj-rojo { color: #b10011; }
+    .redactor-area .pj-morado { color: #8500d1; }
+}
+
+.redactor-area .cuaderno-objetos {
+    padding: 8px 8px 8px 32px;
+    border: 2px dashed var(--borde);
+}
+
+/* ---- EL CUADERNO ---- */
+.cuaderno-hoja-editor {
+    margin-bottom: 28px;
+    padding: 14px;
+    border: 2px solid var(--acento);
+}
+
+.cuaderno-hoja-cab {
+    margin-bottom: 12px;
+}
+
+.cuaderno-hoja-cab h3 {
+    flex: 1 1 auto;
+    margin: 0;
+    font-size: 1.3rem;
+}
+
+.cuaderno-bloque {
+    margin: 0 0 18px;
+    padding: 12px;
+    border: 2px dashed var(--borde);
+}
+
+.cuaderno-bloque legend {
+    padding: 0 6px;
+    font-weight: 700;
+}
+
+/* ---- LAS FICHAS ---- */
+.fichas-lista {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin: 0 0 12px;
+    padding: 0;
+    list-style: none;
+}
+
+.ficha-boton {
+    width: 100%;
+    flex-wrap: wrap;
+    justify-content: flex-start;
+    gap: 4px 14px;
+    text-align: left;
+}
+
+.ficha-boton img {
+    width: 56px;
+    height: 40px;
+    object-fit: cover;
+}
+
+.ficha-nombre {
+    font-weight: 700;
+}
+
+.ficha-detalle {
+    font-family: var(--mono);
+    font-size: 0.85rem;
+}
+
+.ficha-editor {
+    margin: 16px 0 0;
+    padding: 16px;
+    border: 2px solid var(--acento);
+    box-shadow: 4px 4px 0 var(--acento);
+}
+
+.ficha-editor legend {
+    padding: 0 8px;
+    color: var(--acento);
+    font-size: 1.15rem;
+    font-weight: 700;
+}
+
+.ficha-foto {
+    display: block;
+    max-width: 100%;
+    max-height: 320px;
+    margin-bottom: 16px;
+}
+
+.ficha-ver {
+    margin: 0 0 14px;
+}
+
+.campo-si-no {
+    margin-bottom: 22px;
+}
+
+.gatos-subir {
+    padding: 16px;
+    border: 2px dashed var(--borde);
+}
+
+[data-traer-salida] input {
+    flex: 1 1 18rem;
+}
