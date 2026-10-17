@@ -428,6 +428,7 @@ def pintar_infobox(datos, filas, imagenes_html, emblemas_html=""):
 # que se dibuja después de convertir las páginas (preparar_situaciones
 # necesita la «región» de cada ficha). La cambia poner_emblemas.
 MARCA_EMBLEMAS = "\ue010emblemas\ue011"
+MARCA_SU_MAPA = "\ue010su-mapa\ue011"
 
 
 def emblemas_de_la_ficha(datos, ruta_de_imagen, avisos, titulo):
@@ -478,6 +479,9 @@ def poner_emblemas(ficha, situacion):
                html.escape(alt, quote=True), html.escape(nombre)))
     html_ = ('<div class="mundo-emblemas" data-mundo-emblemas><ul class="mundo-emblemas-lista">%s</ul></div>'
              % "".join(trozos)) if trozos else ""
+    # Y debajo, el hueco del botón «Explorar Mapa» (si la página tiene mapa
+    # propio: lo pone poner_su_mapa, cuando ya se sabe).
+    html_ += MARCA_SU_MAPA
     if not html_ and ficha.get("ficha_vacia"):
         ficha["ficha_html"] = ""
         return
@@ -933,7 +937,8 @@ def convertir_mapas(mapas, paginas, imagenes, avisos_por_pagina, detalle):
         mapa["capas"] = hecho["capas"]
         # La leyenda (los tipos de sitio y de raya que hay), encima de la
         # lista: se ve también sin JavaScript.
-        mapa["lista"] = hecho.get("leyenda", "") + mundo_mapas.pintar_lista(hecho["sitios"])
+        mapa["leyenda"] = hecho.get("leyenda", "")
+        mapa["lista"] = mundo_mapas.pintar_lista(hecho["sitios"])
         mapa["de_pagina"] = leido.get("pagina", "")
         # El interruptor de las regiones solo tiene sentido si hay
         # regiones que apagar.
@@ -944,7 +949,8 @@ def convertir_mapas(mapas, paginas, imagenes, avisos_por_pagina, detalle):
                                                    hecho.get("hay_lineas", False),
                                                    hecho.get("hay_nombres", False),
                                                    hecho.get("todas_de_salida", False),
-                                                   hecho.get("hay_escala", False))
+                                                   hecho.get("hay_escala", False),
+                                                   bool(hecho.get("leyenda")))
         mapa["puntos"] = hecho["puntos"]
         mapa["dibujo"] = hecho["dibujo"]
         mapa["escondidos"] = hecho["escondidos"]
@@ -1060,7 +1066,26 @@ def escribir_vistas(mapas, probar):
     return escritas
 
 
-def escribir_mapas(mapas, probar):
+def pintar_migas_de_mapa(mapa, paginas, region_de):
+    """Las migas de la página de un mapa: las de su página (Wiki Cralëa ›
+    Mapamundi › Azarasia › Reino de Prunia), con la página como enlace, y
+    «Mapa» al final. Un mapa que no es de ninguna página (el mapamundi):
+    Wiki Cralëa › su título. Devuelve (migas, a dónde lleva «volver»)."""
+    suya = paginas.get((mapa.get("de_pagina") or "").strip().lower())
+    if suya:
+        migas = pintar_migas(suya, paginas, region_de)
+        actual = '<li aria-current="page">%s</li>' % html.escape(suya["titulo"])
+        migas = migas.replace(actual, '<li><a href="%s">%s</a></li><li aria-current="page">Mapa</li>'
+                              % (html.escape(suya["url"], quote=True), html.escape(suya["titulo"])))
+        return migas, ("← volver a %s" % suya["titulo"], suya["url"])
+    portada = URL + "index_wiki.html"
+    return ('<div class="mundo-migas" role="navigation" aria-label="Dónde estás"><ol>'
+            '<li><a href="%s">Wiki Cralëa</a></li><li aria-current="page">%s</li></ol></div>'
+            % (html.escape(portada, quote=True), html.escape(mapa["titulo"])),
+            ("← volver a la wiki", portada))
+
+
+def escribir_mapas(mapas, probar, paginas=None, region_de=None):
     if not mapas:
         return 0
     molde, _ = leer_texto(PLANTILLA_MAPA)
@@ -1070,6 +1095,7 @@ def escribir_mapas(mapas, probar):
     for mapa in mapas.values():
         cuantos = cuantos_sitios(mapa)
         resumen = resumen_de_mapa(mapa)
+        migas, (volver, volver_url) = pintar_migas_de_mapa(mapa, paginas or {}, region_de or {})
         relleno = molde
         for marca, valor in (
             ("{{TITULO}}", html.escape(mapa["titulo"])),
@@ -1078,6 +1104,10 @@ def escribir_mapas(mapas, probar):
             ("{{MANDOS}}", mapa["mandos"]),
             ("{{MAPA}}", mapa["svg"]),
             ("{{SITIOS}}", mapa["lista"]),
+            ("{{LEYENDA}}", mapa.get("leyenda", "")),
+            ("{{MIGAS}}", migas),
+            ("{{VOLVER}}", html.escape(volver)),
+            ("{{VOLVER_URL}}", html.escape(volver_url, quote=True)),
             ("{{CUANTOS}}", "1 sitio" if cuantos == 1 else "%d sitios" % cuantos),
         ):
             relleno = relleno.replace(marca, valor)
@@ -1389,7 +1419,7 @@ def escribir_paginas(paginas, probar, categorias=(), eventos=()):
         en_la_caja = {k for k, f in paginas.items() if 'href="%s"' % html.escape(f["url"], quote=True) in navbox}
         cuerpo += mundo_piezas.caja_de_parecidas(ficha, paginas, parecidos, en_la_caja)
         # El botón de su mapa, si tiene uno propio (ver main).
-        for titulo_mapa, url_mapa in ficha.get("mapas_propios", []):
+        for titulo_mapa, url_mapa in ([] if ficha.get("mapa_en_la_ficha") else ficha.get("mapas_propios", [])):
             cuerpo = ('<p class="mundo-su-mapa"><a class="mundo-su-mapa-enlace" href="%s">'
                       '<span aria-hidden="true">🗺</span> Explorar el %s</a></p>'
                       % (html.escape(url_mapa, quote=True), html.escape(titulo_mapa[:1].lower() + titulo_mapa[1:]
@@ -1583,6 +1613,11 @@ def escribir_indice(paginas, mapas, probar, categorias=(), peques=None):
     # estén guardados: en la portada se buscan como "los mapas", no como
     # "lo que hay en lugares/".
     for mapa in sorted(mapas.values(), key=lambda m: m["titulo"].lower()):
+        # Los mapas de una página (el de un reino, con "page") no salen en
+        # la portada: se llega a ellos desde su página («Explorar Mapa»).
+        # En la portada, solo los del mundo (el mapamundi).
+        if mapa.get("de_pagina"):
+            continue
         grupo, sub = clasificar(["mapa"], categorias)
         fichas.append({
             "titulo": mapa["titulo"],
@@ -2109,6 +2144,18 @@ def main():
         suya = paginas.get((mapa.get("de_pagina") or "").strip().lower())
         if suya:
             suya.setdefault("mapas_propios", []).append((mapa["titulo"], mapa["url"]))
+    # EL BOTÓN «EXPLORAR MAPA», en la ficha de la derecha, debajo de la
+    # bandera. Si la página no tiene ficha, arriba del artículo (lo pone
+    # escribir_paginas).
+    for ficha in paginas.values():
+        propios = ficha.get("mapas_propios") or []
+        boton = ""
+        if propios and MARCA_SU_MAPA in ficha.get("ficha_html", ""):
+            boton = "".join('<p class="mundo-su-mapa"><a class="mundo-su-mapa-enlace" href="%s">'
+                            '<span aria-hidden="true">🗺</span> Explorar Mapa</a></p>'
+                            % html.escape(url, quote=True) for _, url in propios[:1])
+            ficha["mapa_en_la_ficha"] = True
+        ficha["ficha_html"] = ficha.get("ficha_html", "").replace(MARCA_SU_MAPA, boton)
     # Un evento que nombra una página ([[Valderín]] en su texto) sale en el
     # «se habla de esto en» de esa página, igual que un artículo o un mapa.
     for evento in eventos:
@@ -2129,7 +2176,7 @@ def main():
 
     SALIDA.mkdir(parents=True, exist_ok=True)
     escritas = escribir_paginas(paginas, args.probar, categorias, eventos)
-    escritos = escribir_mapas(mapas, args.probar)
+    escritos = escribir_mapas(mapas, args.probar, paginas, regiones_de(paginas))
     escritos += escribir_vistas(mapas, args.probar)
     fichas = escribir_indice(paginas, mapas, args.probar, categorias, peques)
     escribir_regiones(paginas, partes, peques, de_partes, args.probar)

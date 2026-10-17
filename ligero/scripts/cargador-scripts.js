@@ -3,11 +3,11 @@
 */
 (function versionesDeArchivos() {
     const VERSIONES = {
-        "/fragmentos/ajustes.html": "d19f96dc",
-        "/fragmentos/barra-lateral.html": "a4c5ed3f",
-        "/fragmentos/buscar.html": "c442925c",
-        "/fragmentos/frases.html": "a09dd925",
-        "/fragmentos/texto-a-voz.html": "70c81ea4",
+        "/fragmentos/ajustes.html": "abbc4adc",
+        "/fragmentos/barra-lateral.html": "d2be7284",
+        "/fragmentos/buscar.html": "0172e5dd",
+        "/fragmentos/frases.html": "2720019e",
+        "/fragmentos/texto-a-voz.html": "5a69ce50",
     };
     window.conVersion = function (ruta) {
         const version = VERSIONES[ruta];

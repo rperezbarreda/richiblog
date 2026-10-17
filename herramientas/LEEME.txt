@@ -1642,12 +1642,32 @@
   otra y Esc deja de medir. Lo medido va encima del mapa y no en la fila
   de los mandos: ahí la fila crecía y el mapa bajaba mientras se pulsaba.
 
-  LOS EMBLEMAS: un escudo, una bandera o un medallón con una imagen dentro
-  (una bandera, un blasón), con marco dorado y su nombre debajo, como un
-  pin grande: miden lo mismo en pantalla a cualquier zoom, se apagan con
-  los pines, llevan a su página y salen en la lista. Las imágenes se
-  copian a imagenes/wiki/ como las de las fichas (generar-mundo:
-  EMBLEMAS_USADOS). En el .cmap van en "emblems".
+  LOS SITIOS COMO EMBLEMA: un sitio (con su tipo: capital, pueblo…) puede
+  verse como un escudo, una bandera o un medallón, de tres tamaños, con
+  una imagen dentro (una bandera, un blasón) o, sin ella, con el símbolo
+  de su tipo en el color de su tipo; marco dorado y el nombre debajo. Va
+  en el propio pin: "shape", "size" e "image". Miden lo mismo en pantalla
+  a cualquier zoom, se apagan con los pines, llevan a su página, salen en
+  la lista y en la leyenda (por su tipo). Las imágenes se copian a
+  imagenes/wiki/ como las de las fichas (generar-mundo: EMBLEMAS_USADOS).
+  Los «emblems» sueltos de antes (17-10-2026) se leen igual, como sitios
+  sin tipo; el editor los pasa a sitios al abrir el mapa (con el tipo por
+  el tamaño: grande, capital; mediano, ciudad; pequeño, pueblo).
+
+  LA LEYENDA FLOTANTE: el botón «leyenda» de los mandos abre un panel
+  encima del mapa, arriba a la derecha (Esc lo cierra). Sin JavaScript va
+  debajo del mapa, dentro de su marco.
+
+  LAS MIGAS DEL MAPA: la página de un mapa de una página lleva las migas
+  de esa página y «Mapa» al final (Wiki Cralëa › Mapamundi › Azarasia ›
+  Reino de Prunia › Mapa), y abajo «volver a» esa página. El mapamundi,
+  Wiki Cralëa › su título.
+
+  EN LA PORTADA DE LA WIKI solo salen los mapas que no son de ninguna
+  página (el mapamundi). A los de una página se llega desde ella: el botón
+  «Explorar Mapa» va en su ficha de la derecha, debajo de la bandera (el
+  hueco lo deja poner_emblemas con MARCA_SU_MAPA); si la página no tiene
+  ficha, arriba del artículo.
 
   ZONAS DENTRO DE ZONAS: las regiones se pintan DE LA MÁS GRANDE A LA MÁS
   PEQUEÑA (en la web, en el editor y en la imagen descargada), así que
@@ -1692,12 +1712,13 @@
       generador). Las rayas van del primer punto al último: el río desde
       donde nace, la ruta desde donde sale. El primer punto de una raya
       elegida sale en amarillo.
-    - PONER UN EMBLEMA: se eligen la forma (escudo, bandera o medallón) y
-      el tamaño y se pulsa en el mapa. A la derecha, su nombre, la página
-      a la que lleva y su imagen: SUBIR UNA de tu ordenador (va a
-      wiki/_imagenes/banderas/, a 512 px como mucho), escribir o elegir
-      una de las que ya hay, o «USAR LA DE SU PÁGINA», que pone la
-      bandera, el blasón o el escudo de la ficha de esa página.
+    - PONER UN SITIO: qué sitio es (capital, pueblo…) y CÓMO SE VE: con
+      su símbolo, o como escudo, bandera o medallón (con su tamaño). Como
+      emblema, a la derecha se le pone imagen: SUBIR UNA de tu ordenador
+      (va a wiki/_imagenes/banderas/, a 512 px como mucho), escribir o
+      elegir una de las que ya hay, o «USAR LA DE SU PÁGINA», que pone la
+      bandera, el blasón o el escudo de la ficha de esa página. Sin
+      imagen lleva el símbolo de su tipo.
     - ESCRIBIR EN EL MAPA: arriba se eligen la letra, el tamaño y si va en
       cursiva; se pulsa donde va el texto y, a la derecha, se escribe (y
       se le puede cambiar todo eso, el giro y el color).

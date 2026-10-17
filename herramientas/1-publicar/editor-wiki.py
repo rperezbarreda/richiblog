@@ -578,8 +578,9 @@ def leer_mapa(archivo):
         return {"error": "Ese mapa no se puede leer: no es un JSON que entienda."}
     capas = [c for c in datos.get("layers") or [] if isinstance(c, dict)]
     imagenes = {str(c.get("image")): url_de_imagen(c.get("image")) for c in capas if c.get("image")}
-    # Y las de los emblemas (banderas, blasones).
-    for em in datos.get("emblems") or []:
+    # Y las de los emblemas (banderas, blasones): las de los sitios que se
+    # ven como emblema y las de los emblemas sueltos de antes.
+    for em in (datos.get("emblems") or []) + (datos.get("pins") or []):
         if isinstance(em, dict) and em.get("image"):
             imagenes[str(em["image"])] = url_de_imagen(em["image"])
     return {"archivo": archivo.relative_to(VAULT).as_posix(), "datos": datos,

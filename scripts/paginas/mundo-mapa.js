@@ -134,6 +134,7 @@ function initializeMundoMapa() {
     prepararSitiosDeMapa();
     prepararEscalaDeMapa(mando);
     prepararMedirDeMapa(mando);
+    prepararLeyendaDeMapa(mando);
     ponerZoomDeMapa(mando, 1);
 }
 
@@ -890,6 +891,49 @@ function prepararMedirDeMapa(mando) {
     mando.lienzo.addEventListener("keydown", (evento) => {
         if (evento.key === "Escape" && medida.activa) {
             activar(false);
+        }
+    });
+}
+
+
+// =========================================
+// LA LEYENDA, FLOTANTE
+// =========================================
+// Sin JavaScript la leyenda va debajo del mapa, a la vista. Con él, es un
+// panel encima del mapa, arriba a la derecha (justo debajo de los
+// mandos), que abre y cierra el botón «leyenda»; Esc también lo cierra.
+
+function prepararLeyendaDeMapa(mando) {
+    const boton = mando.caja.querySelector("[data-mapa-leyenda-boton]");
+    const panel = mando.caja.querySelector("[data-mapa-leyenda]");
+    if (!boton || !panel) {
+        return;
+    }
+    boton.hidden = false;
+    panel.classList.add("es-flotante");
+    panel.hidden = true;
+    const colocar = () => {
+        const mandos = mando.caja.querySelector("[data-mapa-mandos]");
+        panel.style.top = ((mandos ? mandos.offsetHeight : 0) + 10) + "px";
+        panel.style.maxHeight = Math.max(160, mando.lienzo.clientHeight - 20) + "px";
+    };
+    const poner = (abierta) => {
+        panel.hidden = !abierta;
+        boton.setAttribute("aria-expanded", abierta ? "true" : "false");
+        if (abierta) {
+            colocar();
+        }
+    };
+    boton.addEventListener("click", () => poner(panel.hidden));
+    window.addEventListener("resize", () => {
+        if (!panel.hidden) {
+            colocar();
+        }
+    });
+    mando.caja.addEventListener("keydown", (evento) => {
+        if (evento.key === "Escape" && !panel.hidden) {
+            poner(false);
+            boton.focus();
         }
     });
 }

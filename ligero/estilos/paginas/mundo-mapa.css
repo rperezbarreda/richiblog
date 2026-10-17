@@ -381,6 +381,46 @@ html:not(.js) .mapa-ayuda {
 .mapa-pin[class*="es-"].esta-mirado .mapa-pin-bola {
     stroke: var(--yellow);
 }
+.mapa-caja > .mapa-leyenda {
+    padding: 12px 14px 0;
+    border-top: 2px solid var(--yellow);
+}
+.mapa-caja > .mapa-leyenda.es-flotante {
+    position: absolute;
+    right: 10px;
+    z-index: 3;
+    width: min(22rem, calc(100% - 20px));
+    padding: 12px 16px 4px;
+    overflow-y: auto;
+    border: 2px solid var(--yellow);
+    background: var(--surface);
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.45);
+}
+.mapa-leyenda.es-flotante ul {
+    flex-direction: column;
+    gap: 8px;
+}
+.mapa-caja > .mapa-leyenda.es-flotante[hidden] {
+    display: none;
+}
+.mapa-emblema.con-tipo .mapa-emblema-fondo {
+    fill: #ece6f2;
+}
+.mapa-emblema.es-capital .mapa-emblema-fondo {
+    fill: #f5ce6c;
+}
+.mapa-emblema.es-ciudad .mapa-emblema-fondo {
+    fill: #f4f1f7;
+}
+.mapa-emblema.es-pueblo .mapa-emblema-fondo {
+    fill: #e0c9a6;
+}
+.mapa-emblema.es-fortaleza .mapa-emblema-fondo {
+    fill: #b9b3c2;
+}
+.mapa-emblema.es-ruina .mapa-emblema-fondo {
+    fill: #8d8478;
+}
 .mapa-leyenda ul {
     display: flex;
     flex-wrap: wrap;

@@ -38,7 +38,8 @@ const TIPOS_DE_SITIO = [
 // Los emblemas: [valor, nombre] de la forma y [valor, nombre, cuánto más
 // grande que un sitio] del tamaño. Los mismos que FORMAS_DE_EMBLEMA y
 // TAMANOS_DE_EMBLEMA en mundo_mapas.py.
-const FORMAS_DE_EMBLEMA = [["escudo", "Escudo"], ["bandera", "Bandera"], ["redondo", "Medallón"]];
+const FORMAS_DE_EMBLEMA = [["", "Con su símbolo"], ["escudo", "Como escudo"], ["bandera", "Como bandera"],
+    ["redondo", "Como medallón"]];
 const TAMANOS_DE_EMBLEMA = [["pequeno", "Pequeño", 0.8], ["mediano", "Mediano", 1.2], ["grande", "Grande", 1.7]];
 const LETRA_DE_SIMBOLOS = '"Segoe UI Symbol", "Noto Sans Symbols 2", "Noto Sans Symbols", "DejaVu Sans", sans-serif';
 // Las rayas y cómo se pintan: los mismos colores y trazos que la web
@@ -305,8 +306,29 @@ function completarDatosMapa(d) {
     return d;
 }
 
+// LOS EMBLEMAS SUELTOS DE ANTES ("emblems") pasan a ser sitios que se ven
+// como emblema: un sitio con su tipo (para la leyenda y la lista) y su
+// aspecto. El tipo se adivina por el tamaño (grande, capital; mediano,
+// ciudad; pequeño, pueblo) y se puede cambiar. Devuelve cuántos.
+function pasarEmblemasASitios(d) {
+    const viejos = Array.isArray(d.emblems) ? d.emblems : [];
+    const tipoPorTamano = { grande: "capital", mediano: "ciudad", pequeno: "pueblo" };
+    viejos.forEach((em) => {
+        const sitio = Object.assign({}, em);
+        sitio.shape = em.shape || "escudo";
+        sitio.size = em.size || "mediano";
+        if (!sitio.kind) {
+            sitio.kind = tipoPorTamano[sitio.size] || "ciudad";
+        }
+        d.pins.push(sitio);
+    });
+    d.emblems = [];
+    return viejos.length;
+}
+
 function ponerMapa(mapa) {
     const d = completarDatosMapa(mapa.datos);
+    const pasados = pasarEmblemasASitios(d);
     Object.assign(estadoMapa, {
         archivo: mapa.archivo, datos: d, imagenes: mapa.imagenes || {}, url: mapa.url || "",
         cambiado: false, elegido: null, dibujo: null, capasOcultas: {}, cuantasRegiones: d.shapes.length,
@@ -332,6 +354,12 @@ function ponerMapa(mapa) {
     pintarTodoElMapa();
     pintarMedida();
     requestAnimationFrame(ajustarMapa);
+    if (pasados) {
+        estadoMapa.cambiado = true;
+        setTimeout(() => avisarEditor(pasados + " emblemas sueltos son ahora sitios que se ven como emblema (en la"
+            + " lista, «Sitios»). Su tipo se ha puesto por el tamaño: grande, capital; mediano, ciudad; pequeño,"
+            + " pueblo. Cámbialo si no es. Se guarda al guardar."), 0);
+    }
 }
 
 function pintarDatosGenerales() {
@@ -760,7 +788,7 @@ function dibujoDeCosa(lista, cosa, i) {
         }));
     } else if (lista === "lines") {
         dibujarRayaSvg(g, cosa, elegido);
-    } else if (lista === "emblems") {
+    } else if (lista === "emblems" || (lista === "pins" && cosa.shape)) {
         const r = radioDeEmblema(cosa);
         const forma = formaDeEmblema(cosa.shape, r);
         const marca = svgMapa("g", { class: "mapa-ed-marca mapa-ed-emblema", "data-x": cosa.x, "data-y": cosa.y });
@@ -768,13 +796,21 @@ function dibujoDeCosa(lista, cosa, i) {
         const clip = svgMapa("clipPath", { id: recorte });
         clip.appendChild(svgMapa("path", { d: forma.d }));
         marca.appendChild(clip);
-        marca.appendChild(svgMapa("path", { d: forma.d, fill: cosa.color || "#8e1b3b" }));
+        const tipoFondo = tipoDeSitioMapa(cosa.kind);
+        marca.appendChild(svgMapa("path", { d: forma.d, fill: cosa.color || (tipoFondo ? tipoFondo[3] : "#8e1b3b") }));
         const url = cosa.image ? estadoMapa.imagenes[cosa.image] : "";
+        const tipo = tipoDeSitioMapa(cosa.kind);
         if (url) {
             const img = svgMapa("image", { x: -1.4 * r, y: -1.4 * r, width: 2.8 * r, height: 2.8 * r,
                 preserveAspectRatio: "xMidYMid slice", "clip-path": "url(#" + recorte + ")" });
             img.setAttribute("href", url);
             marca.appendChild(img);
+        } else if (tipo) {
+            // Sin imagen, el símbolo de su tipo dentro.
+            const letra = svgMapa("text", { class: "mapa-ed-letra", "text-anchor": "middle", "dominant-baseline": "central",
+                "font-size": redondoMapa(r * 1.05) });
+            letra.textContent = tipo[2] + "\uFE0E";
+            marca.appendChild(letra);
         }
         marca.appendChild(svgMapa("path", { d: forma.d, fill: "none", stroke: elegido ? "#ffffff" : "#d8b25a",
             "stroke-width": elegido ? 4 : 2.5, "stroke-linejoin": "round" }));
@@ -1056,12 +1092,15 @@ function pintarPropiedadesMapa() {
     });
     tipo.value = cosa.kind || (lista === "lines" ? "camino" : "");
     $('[data-mapa-p-caja="kind"]').hidden = lista === "shapes" || lista === "labels" || lista === "emblems";
+    // Un sitio puede verse como emblema: la forma, y si la tiene, la
+    // imagen y el tamaño.
+    $('[data-mapa-p-caja="forma"]').hidden = lista !== "pins";
     document.querySelectorAll('[data-mapa-p-caja="emblema"]').forEach((c) => {
-        c.hidden = lista !== "emblems";
+        c.hidden = !(lista === "pins" && cosa.shape);
     });
-    if (lista === "emblems") {
+    if (lista === "pins") {
         $("#mapa-p-imagen").value = cosa.image || "";
-        $("#mapa-p-forma").value = cosa.shape || "escudo";
+        $("#mapa-p-forma").value = cosa.shape || "";
         $("#mapa-p-tamano-emblema").value = cosa.size || "mediano";
     }
     document.querySelectorAll('[data-mapa-p-caja="letra"]').forEach((c) => {
@@ -1157,6 +1196,11 @@ function cambiarPropiedadMapa(campo, valor) {
     }
     estadoMapa.cambiado = true;
     repintarCosa(el.lista, el.i);
+    if (campo === "shape") {
+        document.querySelectorAll('[data-mapa-p-caja="emblema"]').forEach((c) => {
+            c.hidden = !cosa.shape;
+        });
+    }
     if (campo === "image" && valor && !estadoMapa.imagenes[valor]) {
         urlDeImagenMapa(valor).then(() => repintarCosa(el.lista, el.i));
     }
@@ -1206,6 +1250,11 @@ const INSTRUCCIONES_MAPA = {
 const INSTRUCCIONES_A_MANO = "Aprieta y arrastra por donde va; al soltar, se acaba.";
 const HERRAMIENTAS_DE_DIBUJO = ["region", "raya"];
 
+// «Tamaño» solo si el sitio nuevo va como emblema.
+function pintarOpcionesDeSitio() {
+    $('[data-mapa-solo="pin-emblema"]').hidden = estadoMapa.herramienta !== "pin" || !$("#mapa-forma-nueva").value;
+}
+
 function ponerHerramienta(herramienta) {
     // Un dibujo a medias con puntos de sobra se termina en vez de perderlo
     // (al pasar, por ejemplo, a «Elegir y mover» para retocarlo).
@@ -1230,9 +1279,7 @@ function ponerHerramienta(herramienta) {
     document.querySelectorAll('[data-mapa-solo="texto"]').forEach((c) => {
         c.hidden = herramienta !== "texto";
     });
-    document.querySelectorAll('[data-mapa-solo="emblema"]').forEach((c) => {
-        c.hidden = herramienta !== "emblema";
-    });
+    pintarOpcionesDeSitio();
     $("[data-mapa-escala]").hidden = herramienta !== "escala";
     estadoMapa.ratonMedida = null;
     $('[data-mapa-solo="dibujo"]').hidden = !dibuja;
@@ -1429,6 +1476,11 @@ function ponerSitio(crudo) {
     if (tipo) {
         cosa.kind = tipo;
     }
+    const forma = $("#mapa-forma-nueva").value;
+    if (forma) {
+        cosa.shape = forma;
+        cosa.size = $("#mapa-tamano-emblema-nuevo").value || "mediano";
+    }
     estadoMapa.datos.pins.push(cosa);
     estadoMapa.iman = null;
     elegirCosa("pins", estadoMapa.datos.pins.length - 1);
@@ -1480,7 +1532,7 @@ async function urlDeImagenMapa(nombre) {
 
 function ponerImagenDeEmblema(nombre) {
     const el = estadoMapa.elegido;
-    if (!el || el.lista !== "emblems") {
+    if (!el || (el.lista !== "emblems" && el.lista !== "pins")) {
         return;
     }
     $("#mapa-p-imagen").value = nombre;
@@ -1535,7 +1587,7 @@ async function usarImagenDeLaPagina() {
     const nombre = campo.valor.replace(/^!?\[\[|\]\]$/g, "").split("|")[0].trim();
     ponerImagenDeEmblema(nombre);
     await urlDeImagenMapa(nombre);
-    repintarCosa("emblems", estadoMapa.elegido.i);
+    repintarCosa(estadoMapa.elegido.lista, estadoMapa.elegido.i);
     avisarEditor("Puesta la " + campo.clave + " de " + pagina.nombre + ": " + nombre + ".");
 }
 
@@ -2298,9 +2350,10 @@ async function descargarImagenMapa() {
         letreroMapa(ctx, s.label, c.x, y, k, 18, "center", "italic ");
     });
 
-    // Los emblemas: la imagen recortada con su forma, el marco dorado y el
-    // nombre debajo.
-    for (const em of d.emblems) {
+    // Los sitios que se ven como emblema (y los emblemas sueltos de antes):
+    // la imagen recortada con su forma (o el símbolo de su tipo), el marco
+    // dorado y el nombre debajo.
+    for (const em of d.emblems.concat(d.pins.filter((p) => p.shape))) {
         const r = radioDeEmblema(em) * k;
         const forma = new Path2D(formaDeEmblema(em.shape, r).d);
         const bajo = formaDeEmblema(em.shape, r).bajo;
@@ -2308,7 +2361,8 @@ async function descargarImagenMapa() {
         ctx.translate(em.x, em.y);
         ctx.shadowColor = "rgba(0,0,0,0.6)";
         ctx.shadowBlur = 4 * k;
-        ctx.fillStyle = em.color || "#8e1b3b";
+        const tipoEm = tipoDeSitioMapa(em.kind);
+        ctx.fillStyle = em.color || (tipoEm ? tipoEm[3] : "#8e1b3b");
         ctx.fill(forma);
         ctx.shadowColor = "transparent";
         const url = em.image ? estadoMapa.imagenes[em.image] : "";
@@ -2321,6 +2375,12 @@ async function descargarImagenMapa() {
             const f2 = Math.max(lado / img.width, lado / img.height);
             ctx.drawImage(img, -img.width * f2 / 2, -img.height * f2 / 2, img.width * f2, img.height * f2);
             ctx.restore();
+        } else if (tipoEm) {
+            ctx.fillStyle = "#1b1020";
+            ctx.font = "700 " + Math.round(r * 1.05) + "px " + LETRA_DE_SIMBOLOS;
+            ctx.textAlign = "center";
+            ctx.textBaseline = "middle";
+            ctx.fillText(tipoEm[2] + "\uFE0E", 0, r * 0.05);
         }
         ctx.lineJoin = "round";
         ctx.lineWidth = 2.5 * k;
@@ -2333,7 +2393,7 @@ async function descargarImagenMapa() {
     }
 
     // Los sitios: su símbolo y su nombre a la derecha.
-    d.pins.forEach((p) => {
+    d.pins.filter((p) => !p.shape).forEach((p) => {
         const tipo = tipoDeSitioMapa(p.kind);
         const r = 12 * k;
         ctx.fillStyle = p.color || (tipo ? tipo[3] : "#e74c3c");
@@ -2466,6 +2526,7 @@ function empezarMapas() {
         s.value = "mediano";
     });
     $("#mapa-p-imagen-subir").addEventListener("change", (e) => subirImagenDeEmblema(e.target));
+    $("#mapa-forma-nueva").addEventListener("change", pintarOpcionesDeSitio);
     $("[data-mapa-emblema-pagina]").addEventListener("click", usarImagenDeLaPagina);
     $("[data-mapa-escala-otro]").addEventListener("click", empezarOtraMedida);
     // LA PALETA de herramientas va fija a la derecha, de arriba hasta la

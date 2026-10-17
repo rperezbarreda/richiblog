@@ -183,7 +183,15 @@ def leer_cmap(texto, avisar=None):
         formas.append(hecho)
 
     textos = [hecho for hecho in (_texto(uno) for uno in crudo.get("labels") or []) if hecho]
-    emblemas = [hecho for hecho in (_emblema(uno) for uno in crudo.get("emblems") or []) if hecho]
+    # Los emblemas sueltos de antes ("emblems") son sitios con forma de
+    # emblema: se leen como pines (el editor ya los guarda así).
+    emblemas = []
+    for em in (_emblema(uno) for uno in crudo.get("emblems") or []):
+        if em:
+            pines.append({"x": em["x"], "y": em["y"], "etiqueta": em["etiqueta"], "color": em["color"],
+                          "icono": "", "pagina": em["pagina"], "mapa": em["mapa"], "capa": "",
+                          "escondido": False, "tipo": "", "forma": em["forma"], "tamano": em["tamano"],
+                          "imagen": em["imagen"]})
 
     lineas = []
     for n, uno in enumerate(crudo.get("lines") or []):
@@ -264,6 +272,12 @@ def _pin(crudo):
         # El tipo de sitio (capital, ciudad…), si lo tiene: se dibuja con
         # su símbolo en vez de la chincheta redonda.
         "tipo": _tipo_de_pin(crudo.get("kind") or crudo.get("tipo")),
+        # CÓMO SE VE (de esta web): sin "shape", con su símbolo; con él,
+        # como un emblema (escudo, bandera o medallón) de su tamaño, con
+        # su imagen dentro o, sin ella, con el símbolo del tipo.
+        "forma": _forma_valida(crudo.get("shape")),
+        "tamano": _tamano_valido(crudo.get("size")),
+        "imagen": str(crudo.get("image") or "").strip(),
     }
 
 
@@ -299,6 +313,16 @@ TAMANOS_DE_TEXTO = {"grande": 45, "mediano": 70, "pequeno": 110}
 # mundo-mapa.css (es-letra-…), con las fuentes que ya carga la web.
 FORMAS_DE_EMBLEMA = ("escudo", "bandera", "redondo")
 TAMANOS_DE_EMBLEMA = {"pequeno": 0.8, "mediano": 1.2, "grande": 1.7}
+
+
+def _forma_valida(valor):
+    valor = str(valor or "").strip().lower()
+    return valor if valor in FORMAS_DE_EMBLEMA else ""
+
+
+def _tamano_valido(valor):
+    valor = str(valor or "").strip().lower()
+    return valor if valor in TAMANOS_DE_EMBLEMA else "mediano"
 LETRAS_DE_TEXTO = ("antigua", "elegante", "legible", "moderna", "a-mano", "pixel", "maquina")
 
 
@@ -1037,7 +1061,9 @@ def pintar(mapa, pagina_a, mapa_a, imagen_a, detalle=None, avisar=None, region_d
     # ---- LOS PINES ----
     pines = []
     escondidos = 0
-    for pin in mapa["pines"]:
+    recortes = 0
+    # Los que se ven como emblema, primero (debajo): son más grandes.
+    for pin in sorted(mapa["pines"], key=lambda p: 0 if p.get("forma") else 1):
         if pin["escondido"]:
             # Marcado como invisible en Chronicler: ni se dibuja ni se
             # lista. Se cuenta para decirlo al final.
@@ -1063,6 +1089,46 @@ def pintar(mapa, pagina_a, mapa_a, imagen_a, detalle=None, avisar=None, region_d
         sitio = ' transform="translate(%s,%s)" data-mapa-xy="%s,%s"' % (
             _cifra(pin["x"]), _cifra(pin["y"]), _cifra(pin["x"]), _cifra(pin["y"]))
         dentro = ['<title>%s</title>' % html.escape(nombre)]
+        if pin.get("forma"):
+            # COMO EMBLEMA: el escudo (o la bandera, o el medallón) con la
+            # imagen recortada dentro, o con el símbolo de su tipo si no
+            # tiene imagen; el marco dorado, y el nombre debajo.
+            recortes += 1
+            r = radio * TAMANOS_DE_EMBLEMA[pin["tamano"]]
+            contorno, bajo = _forma_de_emblema(pin["forma"], r)
+            url_imagen = emblema_a(pin["imagen"]) if (emblema_a and pin["imagen"]) else ""
+            if pin["imagen"] and not url_imagen:
+                di("no encuentro la imagen de un emblema", pin["imagen"])
+            recorte = "mapa-emblema-%d" % recortes
+            dentro.append('<clipPath id="%s"><path d="%s"></path></clipPath>' % (recorte, contorno))
+            dentro.append('<path class="mapa-emblema-fondo" d="%s"%s></path>'
+                          % (contorno, (' style="fill: %s"' % pin["color"]) if pin["color"] else ""))
+            if url_imagen:
+                dentro.append('<image href="%s" x="%s" y="%s" width="%s" height="%s"'
+                              ' preserveAspectRatio="xMidYMid slice" clip-path="url(#%s)"></image>'
+                              % (html.escape(url_imagen, quote=True), _cifra(-1.4 * r), _cifra(-1.4 * r),
+                                 _cifra(2.8 * r), _cifra(2.8 * r), recorte))
+            elif pin["tipo"]:
+                dentro.append('<text class="mapa-pin-letra" x="0" y="0" font-size="%s" text-anchor="middle"'
+                              ' dominant-baseline="central">%s\ufe0e</text>'
+                              % (_cifra(r * 1.05), TIPOS_DE_PIN[pin["tipo"]][0]))
+            dentro.append('<path class="mapa-emblema-marco" d="%s" stroke-width="%s"></path>'
+                          % (contorno, _cifra(r * 0.16)))
+            if pin["etiqueta"]:
+                de_cerca = "" if pin["tipo"] in SIEMPRE_CON_NOMBRE else " es-de-cerca"
+                dentro.append('<text class="mapa-pin-nombre%s" x="0" y="%s" font-size="%s" stroke-width="%s"'
+                              ' text-anchor="middle" dominant-baseline="hanging">%s</text>'
+                              % (de_cerca, _cifra(bajo + radio * 0.35), _cifra(radio * 1.05),
+                                 _cifra(radio * 0.28), html.escape(pin["etiqueta"])))
+            de_tipo = " mapa-emblema" + ((" con-tipo es-" + pin["tipo"]) if pin["tipo"] else "")
+            if url:
+                pines.append('<a class="mapa-pin es-enlace%s" href="%s" data-mapa-sitio="%s"%s%s'
+                             ' tabindex="-1">%s</a>'
+                             % (de_tipo, html.escape(url, quote=True), cual, datos, sitio, "".join(dentro)))
+            else:
+                pines.append('<g class="mapa-pin%s" data-mapa-sitio="%s"%s%s>%s</g>'
+                             % (de_tipo, cual, datos, sitio, "".join(dentro)))
+            continue
         # Con tipo, el color propio va en un style="" para ganarle al del
         # tipo, que lo pone la hoja de estilos.
         pintura = ((' style="fill: %s"' if pin["tipo"] else ' fill="%s"') % pin["color"]) if pin["color"] else ""
@@ -1095,58 +1161,6 @@ def pintar(mapa, pagina_a, mapa_a, imagen_a, detalle=None, avisar=None, region_d
         else:
             pines.append('<g class="mapa-pin%s" data-mapa-sitio="%s"%s%s>%s</g>'
                          % (de_tipo, cual, datos, sitio, "".join(dentro)))
-    # ---- LOS EMBLEMAS ----
-    # Un escudo (o una bandera, o un medallón) con la imagen dentro,
-    # recortada con un clipPath, y un marco dorado. Van con los pines (se
-    # apagan con ellos y miden lo mismo en pantalla a cualquier zoom) pero
-    # debajo, que son más grandes. emblema_a(nombre) da la dirección de la
-    # imagen (y la apunta para copiarla a la web).
-    emblemas = []
-    for n, em in enumerate(mapa.get("emblemas") or []):
-        r = radio * TAMANOS_DE_EMBLEMA[em["tamano"]]
-        contorno, bajo = _forma_de_emblema(em["forma"], r)
-        url_imagen = emblema_a(em["imagen"]) if (emblema_a and em["imagen"]) else ""
-        if em["imagen"] and not url_imagen:
-            di("no encuentro la imagen de un emblema", em["imagen"])
-        recorte = "mapa-emblema-%d" % (n + 1)
-        dentro = ['<clipPath id="%s"><path d="%s"></path></clipPath>' % (recorte, contorno),
-                  '<path class="mapa-emblema-fondo" d="%s"%s></path>'
-                  % (contorno, (' style="fill: %s"' % em["color"]) if em["color"] else "")]
-        if url_imagen:
-            dentro.append('<image href="%s" x="%s" y="%s" width="%s" height="%s"'
-                          ' preserveAspectRatio="xMidYMid slice" clip-path="url(#%s)"></image>'
-                          % (html.escape(url_imagen, quote=True), _cifra(-1.4 * r), _cifra(-1.4 * r),
-                             _cifra(2.8 * r), _cifra(2.8 * r), recorte))
-        dentro.append('<path class="mapa-emblema-marco" d="%s" stroke-width="%s"></path>'
-                      % (contorno, _cifra(r * 0.16)))
-        nombre = em["etiqueta"] or em["pagina"] or em["mapa"]
-        if em["etiqueta"]:
-            dentro.append('<text class="mapa-pin-nombre" x="0" y="%s" font-size="%s" stroke-width="%s"'
-                          ' text-anchor="middle" dominant-baseline="hanging">%s</text>'
-                          % (_cifra(bajo + radio * 0.35), _cifra(radio * 1.05), _cifra(radio * 0.28),
-                             html.escape(em["etiqueta"])))
-        sitio = ' transform="translate(%s,%s)" data-mapa-xy="%s,%s"' % (
-            _cifra(em["x"]), _cifra(em["y"]), _cifra(em["x"]), _cifra(em["y"]))
-        if not nombre:
-            emblemas.append('<g class="mapa-pin mapa-emblema"%s>%s</g>' % (sitio, "".join(dentro)))
-            continue
-        cuantas += 1
-        cual = "s%d" % cuantas
-        destinos = _destinos(em, pagina_a, mapa_a)
-        for uno in destinos:
-            sitios.append(dict(uno, id=cual, nombre=nombre, color=em["color"], tipo="pin",
-                               icono="🛡", que="emblema"))
-        elegido = next((d for d in destinos if d["url"]), destinos[0])
-        datos = _datos_del_globo(nombre, " · ".join(x for x in ("emblema", _nota(elegido["destino"], elegido["url"])) if x), "")
-        titulo = "<title>%s</title>" % html.escape(nombre)
-        if elegido["url"]:
-            emblemas.append('<a class="mapa-pin mapa-emblema es-enlace" href="%s" data-mapa-sitio="%s"%s%s'
-                            ' tabindex="-1">%s%s</a>'
-                            % (html.escape(elegido["url"], quote=True), cual, datos, sitio, titulo, "".join(dentro)))
-        else:
-            emblemas.append('<g class="mapa-pin mapa-emblema" data-mapa-sitio="%s"%s%s>%s%s</g>'
-                            % (cual, datos, sitio, titulo, "".join(dentro)))
-    pines = emblemas + pines
 
     if pines:
         # El radio va aquí para que el JavaScript sepa de qué tamaño parte.
@@ -1189,7 +1203,11 @@ def pintar(mapa, pagina_a, mapa_a, imagen_a, detalle=None, avisar=None, region_d
                                          % (clase, html.escape(simbolo), html.escape(nombre))
                                          for clase, simbolo, nombre in usados)) if usados else ""
         escrita = ('<p class="mapa-escala-texto">%s</p>' % html.escape(texto_escala)) if texto_escala else ""
-        leyenda = ('<div class="mapa-leyenda"><h2 class="mapa-sitios-titulo">Leyenda</h2>%s%s</div>'
+        # Con JavaScript es un panel flotante encima del mapa, que se abre
+        # con el botón «leyenda» de los mandos (mundo-mapa.js); sin él, va
+        # debajo del mapa, a la vista.
+        leyenda = ('<div class="mapa-leyenda" id="mapa-leyenda" data-mapa-leyenda>'
+                   '<h2 class="mapa-sitios-titulo" id="mapa-leyenda-titulo">Leyenda</h2>%s%s</div>'
                    % (lista, escrita))
 
     return {
@@ -1407,7 +1425,7 @@ def pintar_lista(sitios, titulo_id="mapa-sitios-titulo"):
 # guardadas en Chronicler.
 
 def pintar_mandos(capas, hay_formas=True, hay_pines=False, hay_niveles=False, hay_lineas=False,
-                  hay_nombres=False, todas_de_salida=False, hay_escala=False):
+                  hay_nombres=False, todas_de_salida=False, hay_escala=False, hay_leyenda=False):
     trozos = ['<div class="mapa-mandos" data-mapa-mandos>']
     trozos.append(
         '<div class="mapa-zoom" role="group" aria-label="Zoom del mapa">'
@@ -1419,6 +1437,14 @@ def pintar_mandos(capas, hay_formas=True, hay_pines=False, hay_niveles=False, ha
         '<button class="mapa-boton mapa-boton-ancho" type="button" data-mapa-ajustar>'
         'ajustar</button>'
         "</div>")
+
+    # LA LEYENDA, en un panel encima del mapa que abre y cierra este botón
+    # (sin JavaScript no se pinta: la leyenda está debajo, a la vista).
+    if hay_leyenda:
+        trozos.append(
+            '<button class="mapa-boton mapa-boton-ancho" type="button" data-mapa-leyenda-boton'
+            ' aria-expanded="false" aria-controls="mapa-leyenda" hidden>'
+            '<span aria-hidden="true">📜</span> leyenda</button>')
 
     # MEDIR, si el mapa tiene escala: se pulsa de un sitio a otro y dice
     # cuánto hay y cuántos días de viaje (lo hace mundo-mapa.js; sin

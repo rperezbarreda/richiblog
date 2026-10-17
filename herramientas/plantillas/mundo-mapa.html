@@ -108,7 +108,10 @@
                  Esta misma página es la plantilla: lo que está entre llaves
                  dobles lo rellena el generador. -->
             <div class="mundo-cabecera">
-                <a class="mundo-volver" href="/web/wiki/index_wiki.html">← volver a la wiki</a>
+                <!-- DÓNDE ESTÁS: las migas de su página (Wiki Cralëa ›
+                     Mapamundi › Azarasia › Reino de Prunia) y «Mapa»; el
+                     mapamundi, Wiki Cralëa y su título. -->
+                {{MIGAS}}
                 <h1 class="mundo-titulo">{{TITULO}}</h1>
                 <p class="mundo-subtitulo">mapa · {{CUANTOS}}</p>
             </div>
@@ -133,6 +136,10 @@
                      aria-label="El mapa dibujado. Debajo está en lista todo lo que hay en él.">
                     {{MAPA}}
                 </div>
+
+                <!-- LA LEYENDA: con JavaScript, un panel encima del mapa que
+                     abre el botón «leyenda»; sin él, aquí debajo. -->
+                {{LEYENDA}}
             </div>
 
             <p class="mapa-ayuda">
@@ -145,7 +152,7 @@
                  enlaces y en orden alfabético. -->
             {{SITIOS}}
 
-            <a class="mundo-volver mundo-volver-abajo" href="/web/wiki/index_wiki.html">← volver a la wiki</a>
+            <a class="mundo-volver mundo-volver-abajo" href="{{VOLVER_URL}}">{{VOLVER}}</a>
         </section>
     </main>
 </body>

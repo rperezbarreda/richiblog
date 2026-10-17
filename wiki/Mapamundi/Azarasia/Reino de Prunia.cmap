@@ -14,7 +14,261 @@
       "visible": true
     }
   ],
-  "pins": [],
+  "pins": [
+    {
+      "id": "7821f0e477db27c7",
+      "x": 1113.7,
+      "y": 613.4,
+      "label": "Torrelodosa",
+      "shape": "escudo",
+      "size": "grande",
+      "image": "reino_prunia.webp",
+      "kind": "capital"
+    },
+    {
+      "id": "3887fcb456cdeecd",
+      "x": 528.1,
+      "y": 810.7,
+      "label": "Brujamar",
+      "shape": "redondo",
+      "size": "pequeno",
+      "kind": "pueblo"
+    },
+    {
+      "id": "0ea0a97cb53cfe06",
+      "x": 242,
+      "y": 1005.9,
+      "label": "Olaspuras",
+      "shape": "redondo",
+      "size": "pequeno",
+      "kind": "pueblo"
+    },
+    {
+      "id": "4e9decd152f8f2a1",
+      "x": 266,
+      "y": 1156,
+      "shape": "redondo",
+      "size": "pequeno",
+      "label": "Llanonegro",
+      "kind": "pueblo"
+    },
+    {
+      "id": "467dc9aaf970247e",
+      "x": 97.2,
+      "y": 1231.1,
+      "label": "Sangrorrisco",
+      "shape": "redondo",
+      "size": "pequeno",
+      "kind": "pueblo"
+    },
+    {
+      "id": "25f2f797cb08036d",
+      "x": 331.8,
+      "y": 1475.8,
+      "label": "Altoceniza",
+      "shape": "redondo",
+      "size": "pequeno",
+      "kind": "pueblo"
+    },
+    {
+      "id": "53f5803e5a7f99c1",
+      "x": 484.4,
+      "y": 1211.1,
+      "label": "Aguabrea",
+      "shape": "redondo",
+      "size": "pequeno",
+      "kind": "pueblo"
+    },
+    {
+      "id": "2b5a594ace3451cc",
+      "x": 713.3,
+      "y": 1065.4,
+      "label": "Pasobrea",
+      "shape": "redondo",
+      "size": "pequeno",
+      "kind": "pueblo"
+    },
+    {
+      "id": "e14935e24b7c239e",
+      "x": 637.2,
+      "y": 882.5,
+      "shape": "redondo",
+      "size": "pequeno",
+      "label": "Pasoaciago",
+      "kind": "pueblo"
+    },
+    {
+      "id": "01061f467882158f",
+      "x": 685,
+      "y": 670.1,
+      "label": "Petrapura",
+      "shape": "redondo",
+      "size": "pequeno",
+      "kind": "pueblo"
+    },
+    {
+      "id": "663807a0c25f7816",
+      "x": 860.7,
+      "y": 710.9,
+      "label": "Pozovalor",
+      "shape": "redondo",
+      "size": "pequeno",
+      "kind": "pueblo"
+    },
+    {
+      "id": "3e9aca7636063390",
+      "x": 985.9,
+      "y": 848.6,
+      "label": "Simavoraz",
+      "shape": "redondo",
+      "size": "pequeno",
+      "kind": "pueblo"
+    },
+    {
+      "id": "d5e750b77084a101",
+      "x": 1402.2,
+      "y": 847.7,
+      "label": "Cumbrehueso",
+      "shape": "redondo",
+      "size": "pequeno",
+      "kind": "pueblo"
+    },
+    {
+      "id": "e7f9977b3b76bce7",
+      "x": 1257.6,
+      "y": 588.7,
+      "label": "Bajoceleste",
+      "shape": "redondo",
+      "size": "pequeno",
+      "kind": "pueblo"
+    },
+    {
+      "id": "6f1db0019fc4fa3c",
+      "x": 1436.1,
+      "y": 407.3,
+      "label": "Forjaceleste",
+      "shape": "redondo",
+      "size": "pequeno",
+      "kind": "pueblo"
+    },
+    {
+      "id": "43f9faa79bb839ca",
+      "x": 1615.5,
+      "y": 514.4,
+      "label": "Monteleña",
+      "shape": "redondo",
+      "size": "pequeno",
+      "kind": "pueblo"
+    },
+    {
+      "id": "2fa977c666116ea6",
+      "x": 1676.9,
+      "y": 731.2,
+      "label": "Ambraversa",
+      "shape": "redondo",
+      "size": "pequeno",
+      "kind": "pueblo"
+    },
+    {
+      "id": "6896c9c501da922a",
+      "x": 1665.9,
+      "y": 925.8,
+      "label": "Gallovalle",
+      "shape": "redondo",
+      "size": "pequeno",
+      "kind": "pueblo"
+    },
+    {
+      "id": "69f629da5077de15",
+      "x": 2091.9,
+      "y": 943,
+      "shape": "redondo",
+      "size": "pequeno",
+      "label": "Flacobeso",
+      "kind": "pueblo"
+    },
+    {
+      "id": "a2ac4763ab011bf7",
+      "x": 2277.1,
+      "y": 1165.7,
+      "label": "Vistaespejo",
+      "shape": "redondo",
+      "size": "pequeno",
+      "kind": "pueblo"
+    },
+    {
+      "id": "3fd4bb7b67cc13e3",
+      "x": 2600,
+      "y": 998,
+      "label": "Brisaeterna",
+      "shape": "redondo",
+      "size": "pequeno",
+      "kind": "pueblo"
+    },
+    {
+      "id": "c0bb8e81c5c26fea",
+      "x": 2368.8,
+      "y": 829.4,
+      "label": "Puertosoñado",
+      "shape": "redondo",
+      "size": "pequeno",
+      "kind": "pueblo"
+    },
+    {
+      "id": "a7bd9d6925358716",
+      "x": 2154.3,
+      "y": 644.4,
+      "label": "Fosalumbre",
+      "shape": "redondo",
+      "size": "pequeno",
+      "kind": "pueblo"
+    },
+    {
+      "id": "71c6ff0f32e26e1f",
+      "x": 1990,
+      "y": 419.7,
+      "label": "Villaespumosa",
+      "shape": "redondo",
+      "size": "pequeno",
+      "kind": "pueblo"
+    },
+    {
+      "id": "ea850461f8375f52",
+      "x": 1399,
+      "y": 157,
+      "label": "Cuelgacuervos",
+      "shape": "redondo",
+      "size": "pequeno",
+      "kind": "pueblo"
+    },
+    {
+      "id": "805a18758943a483",
+      "x": 934.6,
+      "y": 239.7,
+      "shape": "redondo",
+      "size": "pequeno",
+      "label": "Pinzacharcos",
+      "kind": "pueblo"
+    },
+    {
+      "id": "45f27bcd237dca33",
+      "x": 887.1,
+      "y": 482.7,
+      "label": "Vegasombría",
+      "shape": "redondo",
+      "size": "pequeno",
+      "kind": "pueblo"
+    },
+    {
+      "id": "7619bc0120f17b8c",
+      "x": 2600,
+      "y": 647.8,
+      "shape": "redondo",
+      "size": "pequeno",
+      "label": "Valdescalofrío",
+      "kind": "pueblo"
+    }
+  ],
   "shapes": [
     {
       "id": "474c0071fcd5af5c",
@@ -9632,233 +9886,6 @@
       "font": "a-mano",
       "fontSize": 62,
       "angle": -20
-    }
-  ],
-  "emblems": [
-    {
-      "id": "7821f0e477db27c7",
-      "x": 1113.7,
-      "y": 613.4,
-      "label": "Torrelodosa",
-      "shape": "escudo",
-      "size": "grande",
-      "image": "reino_prunia.webp"
-    },
-    {
-      "id": "3887fcb456cdeecd",
-      "x": 528.1,
-      "y": 810.7,
-      "label": "Brujamar",
-      "shape": "redondo",
-      "size": "pequeno"
-    },
-    {
-      "id": "0ea0a97cb53cfe06",
-      "x": 242,
-      "y": 1005.9,
-      "label": "Olaspuras",
-      "shape": "redondo",
-      "size": "pequeno"
-    },
-    {
-      "id": "4e9decd152f8f2a1",
-      "x": 266,
-      "y": 1156,
-      "shape": "redondo",
-      "size": "pequeno",
-      "label": "Llanonegro"
-    },
-    {
-      "id": "467dc9aaf970247e",
-      "x": 97.2,
-      "y": 1231.1,
-      "label": "Sangrorrisco",
-      "shape": "redondo",
-      "size": "pequeno"
-    },
-    {
-      "id": "25f2f797cb08036d",
-      "x": 331.8,
-      "y": 1475.8,
-      "label": "Altoceniza",
-      "shape": "redondo",
-      "size": "pequeno"
-    },
-    {
-      "id": "53f5803e5a7f99c1",
-      "x": 484.4,
-      "y": 1211.1,
-      "label": "Aguabrea",
-      "shape": "redondo",
-      "size": "pequeno"
-    },
-    {
-      "id": "2b5a594ace3451cc",
-      "x": 713.3,
-      "y": 1065.4,
-      "label": "Pasobrea",
-      "shape": "redondo",
-      "size": "pequeno"
-    },
-    {
-      "id": "e14935e24b7c239e",
-      "x": 637.2,
-      "y": 882.5,
-      "shape": "redondo",
-      "size": "pequeno",
-      "label": "Pasoaciago"
-    },
-    {
-      "id": "01061f467882158f",
-      "x": 685,
-      "y": 670.1,
-      "label": "Petrapura",
-      "shape": "redondo",
-      "size": "pequeno"
-    },
-    {
-      "id": "663807a0c25f7816",
-      "x": 860.7,
-      "y": 710.9,
-      "label": "Pozovalor",
-      "shape": "redondo",
-      "size": "pequeno"
-    },
-    {
-      "id": "3e9aca7636063390",
-      "x": 985.9,
-      "y": 848.6,
-      "label": "Simavoraz",
-      "shape": "redondo",
-      "size": "pequeno"
-    },
-    {
-      "id": "d5e750b77084a101",
-      "x": 1402.2,
-      "y": 847.7,
-      "label": "Cumbrehueso",
-      "shape": "redondo",
-      "size": "pequeno"
-    },
-    {
-      "id": "e7f9977b3b76bce7",
-      "x": 1257.6,
-      "y": 588.7,
-      "label": "Bajoceleste",
-      "shape": "redondo",
-      "size": "pequeno"
-    },
-    {
-      "id": "6f1db0019fc4fa3c",
-      "x": 1436.1,
-      "y": 407.3,
-      "label": "Forjaceleste",
-      "shape": "redondo",
-      "size": "pequeno"
-    },
-    {
-      "id": "43f9faa79bb839ca",
-      "x": 1615.5,
-      "y": 514.4,
-      "label": "Monteleña",
-      "shape": "redondo",
-      "size": "pequeno"
-    },
-    {
-      "id": "2fa977c666116ea6",
-      "x": 1676.9,
-      "y": 731.2,
-      "label": "Ambraversa",
-      "shape": "redondo",
-      "size": "pequeno"
-    },
-    {
-      "id": "6896c9c501da922a",
-      "x": 1665.9,
-      "y": 925.8,
-      "label": "Gallovalle",
-      "shape": "redondo",
-      "size": "pequeno"
-    },
-    {
-      "id": "69f629da5077de15",
-      "x": 2091.9,
-      "y": 943,
-      "shape": "redondo",
-      "size": "pequeno",
-      "label": "Flacobeso"
-    },
-    {
-      "id": "a2ac4763ab011bf7",
-      "x": 2277.1,
-      "y": 1165.7,
-      "label": "Vistaespejo",
-      "shape": "redondo",
-      "size": "pequeno"
-    },
-    {
-      "id": "3fd4bb7b67cc13e3",
-      "x": 2600,
-      "y": 998,
-      "label": "Brisaeterna",
-      "shape": "redondo",
-      "size": "pequeno"
-    },
-    {
-      "id": "c0bb8e81c5c26fea",
-      "x": 2368.8,
-      "y": 829.4,
-      "label": "Puertosoñado",
-      "shape": "redondo",
-      "size": "pequeno"
-    },
-    {
-      "id": "a7bd9d6925358716",
-      "x": 2154.3,
-      "y": 644.4,
-      "label": "Fosalumbre",
-      "shape": "redondo",
-      "size": "pequeno"
-    },
-    {
-      "id": "71c6ff0f32e26e1f",
-      "x": 1990,
-      "y": 419.7,
-      "label": "Villaespumosa",
-      "shape": "redondo",
-      "size": "pequeno"
-    },
-    {
-      "id": "ea850461f8375f52",
-      "x": 1399,
-      "y": 157,
-      "label": "Cuelgacuervos",
-      "shape": "redondo",
-      "size": "pequeno"
-    },
-    {
-      "id": "805a18758943a483",
-      "x": 934.6,
-      "y": 239.7,
-      "shape": "redondo",
-      "size": "pequeno",
-      "label": "Pinzacharcos"
-    },
-    {
-      "id": "45f27bcd237dca33",
-      "x": 887.1,
-      "y": 482.7,
-      "label": "Vegasombría",
-      "shape": "redondo",
-      "size": "pequeno"
-    },
-    {
-      "id": "7619bc0120f17b8c",
-      "x": 2600,
-      "y": 647.8,
-      "shape": "redondo",
-      "size": "pequeno",
-      "label": "Valdescalofrío"
     }
   ],
   "scale": {

@@ -3314,19 +3314,6 @@
         "miniatura": ""
     },
     {
-        "titulo": "Mapa del Reino de Prunia",
-        "url": "/web/wiki/mapamundi/azarasia/mapa_reino_de_prunia.html",
-        "carpeta": "mapas",
-        "etiquetas": [
-            "mapa"
-        ],
-        "grupo": "mapas",
-        "sub": [],
-        "que": "mapa interactivo",
-        "vista": "/imagenes/wiki/vista_mapamundi_azarasia_mapa_reino_de_prunia.svg",
-        "resumen": ""
-    },
-    {
         "titulo": "Mapamundi de Cralëa",
         "url": "/web/wiki/mapa_mapamundi_de_cralea.html",
         "carpeta": "mapas",
