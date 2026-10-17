@@ -1727,10 +1727,14 @@
 
   LA ROSA DE LOS VIENTOS SE APAGA con su casilla en «ver».
 
-  EL MAPA SE PUEDE LLEVAR MÁS ALLÁ DE SUS BORDES: con zoom, el dibujo
-  lleva un margen de un tercio de la ventana por cada lado (margenDeMapa;
+  EL MAPA SE PUEDE LLEVAR MÁS ALLÁ DE SUS BORDES: el dibujo lleva un
+  margen de un tercio de la ventana por cada lado (margenDeMapa;
   ponerZoomDeMapa lo descuenta para que el zoom siga yendo hacia el
-  ratón), así un sitio de la orilla se puede poner en medio.
+  ratón), así un sitio de la orilla se puede poner en medio. TAMBIÉN AL
+  100% con ratón (pointer: fine): sale entero y centrado (centrarMapa) y
+  se arrastra; «ajustar» lo vuelve a centrar. La ventana mide lo que el
+  dibujo al 100% (más las barras) y no cambia de alto con el zoom. En
+  pantallas táctiles, al 100% no hay margen: el dedo mueve la página.
 
   UN SITIO SIN NOMBRE se llama como su tipo y ya no repite el tipo al
   lado («Puente», no «Puente · puente»).

@@ -76,7 +76,10 @@ function initializeMundoMapa() {
         mando.menos.addEventListener("click", () => moverZoomDeMapa(mando, -1));
     }
     if (mando.ajustar) {
-        mando.ajustar.addEventListener("click", () => ponerZoomDeMapa(mando, 1));
+        mando.ajustar.addEventListener("click", () => {
+            ponerZoomDeMapa(mando, 1);
+            centrarMapa(mando);
+        });
     }
 
     // LA RUEDA DEL RATÓN. Hacia arriba acerca, hacia abajo aleja, y lo
@@ -121,6 +124,7 @@ function initializeMundoMapa() {
         } else if (evento.key === "0") {
             evento.preventDefault();
             ponerZoomDeMapa(mando, 1);
+            centrarMapa(mando);
         }
     });
 
@@ -146,6 +150,7 @@ function initializeMundoMapa() {
     prepararRutaDeMapa(mando);
     fijarMigasDeMapa();
     ponerZoomDeMapa(mando, 1);
+    centrarMapa(mando);
 }
 
 
@@ -213,7 +218,7 @@ function ponerZoomDeMapa(mando, quiere, anclaX, anclaY) {
     mando.zoom = ahora;
     lienzo.style.setProperty("--mapa-zoom", ahora);
     const margen = margenDeMapa(mando);
-    lienzo.classList.toggle("se-puede-arrastrar", ahora > 1.0005);
+    lienzo.classList.toggle("se-puede-arrastrar", ahora > 1.0005 || conMargenDeMapa());
     // De cerca (al 200% o más) se escriben también los nombres de los
     // pueblos, las fortalezas…: con el mapa entero serían una sopa.
     lienzo.classList.toggle("esta-cerca", ahora >= 1.995);
@@ -242,7 +247,8 @@ function ponerZoomDeMapa(mando, quiere, anclaX, anclaY) {
         mando.mas.disabled = ahora >= ZOOM_MAXIMO_DE_MAPA - 0.0005;
     }
     if (mando.ajustar) {
-        mando.ajustar.disabled = abajo;
+        // Al 100% con margen también vale: vuelve a centrar el mapa.
+        mando.ajustar.disabled = abajo && !conMargenDeMapa();
     }
 }
 
@@ -261,19 +267,53 @@ function alturaDelMenuDeMapa(mando) {
 }
 
 
-// UN MARGEN ALREDEDOR DEL DIBUJO, con el zoom puesto: así el mapa se
-// puede llevar más allá de sus bordes (lo de fuera se queda del color del
-// fondo) y un sitio de la orilla se puede poner en medio de la ventana, en
-// vez de quedarse pegado al borde. Un tercio de la ventana por cada lado.
-// Con el mapa entero no hay margen, que entonces no hay nada que mover.
+// UN MARGEN ALREDEDOR DEL DIBUJO: así el mapa se puede llevar más allá
+// de sus bordes (lo de fuera se queda del color del fondo) y un sitio de la
+// orilla se puede poner en medio de la ventana. Un tercio de la ventana
+// por cada lado. TAMBIÉN AL 100% con ratón: el mapa sale entero y
+// centrado (centrarMapa), y se arrastra igual. En pantallas táctiles, al
+// 100% no: ahí el dedo tiene que mover la página, no el mapa.
+//
+// Para que al 100% se siga viendo el mapa entero, la ventana mide lo que
+// el dibujo a ese tamaño (si no, el margen de arriba y abajo la estiraría
+// hasta su tope y saldrían dos franjas vacías); y con zoom no cambia de
+// alto, así que el mapa no salta al acercarse.
+function conMargenDeMapa() {
+    return !!(window.matchMedia && window.matchMedia("(pointer: fine)").matches);
+}
+
 function margenDeMapa(mando) {
     const lienzo = mando.lienzo;
-    const margen = mando.zoom > 1.0005
-        ? { x: Math.round(lienzo.clientWidth / 3), y: Math.round(lienzo.clientHeight / 3) }
-        : { x: 0, y: 0 };
+    const lados = (mando.dibujo.getAttribute("viewBox") || "").split(/[\s,]+/);
+    const ancho = parseFloat(lados[2]);
+    const alto = parseFloat(lados[3]);
+    const hay = mando.zoom > 1.0005 || conMargenDeMapa();
+    if (hay && ancho && alto) {
+        const tope = parseFloat(getComputedStyle(lienzo).maxHeight) || Infinity;
+        const quiere = Math.min(lienzo.clientWidth * alto / ancho, tope);
+        lienzo.style.height = Math.round(quiere) + "px";
+        // Y lo que se coman las barras de desplazamiento, que si no el
+        // dibujo entero no cabe por un pelo.
+        const barras = lienzo.offsetHeight - lienzo.clientHeight;
+        if (barras > 0) {
+            lienzo.style.height = Math.round(Math.min(quiere + barras, tope)) + "px";
+        }
+    } else {
+        lienzo.style.height = "";
+    }
+    const margen = hay ? { x: Math.round(lienzo.clientWidth / 3), y: Math.round(lienzo.clientHeight / 3) } : { x: 0, y: 0 };
     mando.margen = margen;
     mando.dibujo.style.margin = margen.y + "px " + margen.x + "px";
     return margen;
+}
+
+// El mapa entero en medio de la ventana (al empezar y al «ajustar»).
+function centrarMapa(mando) {
+    const m = mando.margen || { x: 0, y: 0 };
+    const caja = mando.dibujo.getBoundingClientRect();
+    const lienzo = mando.lienzo;
+    lienzo.scrollLeft = m.x + (caja.width - lienzo.clientWidth) / 2;
+    lienzo.scrollTop = m.y + (caja.height - lienzo.clientHeight) / 2;
 }
 
 

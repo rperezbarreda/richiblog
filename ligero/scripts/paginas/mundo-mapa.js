@@ -32,7 +32,10 @@ function initializeMundoMapa() {
         mando.menos.addEventListener("click", () => moverZoomDeMapa(mando, -1));
     }
     if (mando.ajustar) {
-        mando.ajustar.addEventListener("click", () => ponerZoomDeMapa(mando, 1));
+        mando.ajustar.addEventListener("click", () => {
+            ponerZoomDeMapa(mando, 1);
+            centrarMapa(mando);
+        });
     }
     lienzo.addEventListener("wheel", (evento) => {
         if (evento.shiftKey) {
@@ -59,6 +62,7 @@ function initializeMundoMapa() {
         } else if (evento.key === "0") {
             evento.preventDefault();
             ponerZoomDeMapa(mando, 1);
+            centrarMapa(mando);
         }
     });
     window.addEventListener("resize", () => {
@@ -80,6 +84,7 @@ function initializeMundoMapa() {
     prepararRutaDeMapa(mando);
     fijarMigasDeMapa();
     ponerZoomDeMapa(mando, 1);
+    centrarMapa(mando);
 }
 function ruedaDeMapa(evento) {
     const cuanto = evento.deltaY || 0;
@@ -118,7 +123,7 @@ function ponerZoomDeMapa(mando, quiere, anclaX, anclaY) {
     mando.zoom = ahora;
     lienzo.style.setProperty("--mapa-zoom", ahora);
     const margen = margenDeMapa(mando);
-    lienzo.classList.toggle("se-puede-arrastrar", ahora > 1.0005);
+    lienzo.classList.toggle("se-puede-arrastrar", ahora > 1.0005 || conMargenDeMapa());
     lienzo.classList.toggle("esta-cerca", ahora >= 1.995);
     if (Math.abs(ahora - antes) > 0.0005) {
         const cuanto = ahora / antes;
@@ -140,7 +145,7 @@ function ponerZoomDeMapa(mando, quiere, anclaX, anclaY) {
         mando.mas.disabled = ahora >= ZOOM_MAXIMO_DE_MAPA - 0.0005;
     }
     if (mando.ajustar) {
-        mando.ajustar.disabled = abajo;
+        mando.ajustar.disabled = abajo && !conMargenDeMapa();
     }
 }
 function alturaDelMenuDeMapa(mando) {
@@ -151,14 +156,37 @@ function alturaDelMenuDeMapa(mando) {
     const alLado = menu.offsetTop === mando.lienzo.offsetTop && menu.offsetLeft < mando.lienzo.offsetLeft;
     menu.style.maxHeight = alLado ? Math.max(260, mando.lienzo.offsetHeight) + "px" : "";
 }
+function conMargenDeMapa() {
+    return !!(window.matchMedia && window.matchMedia("(pointer: fine)").matches);
+}
 function margenDeMapa(mando) {
     const lienzo = mando.lienzo;
-    const margen = mando.zoom > 1.0005
-        ? { x: Math.round(lienzo.clientWidth / 3), y: Math.round(lienzo.clientHeight / 3) }
-        : { x: 0, y: 0 };
+    const lados = (mando.dibujo.getAttribute("viewBox") || "").split(/[\s,]+/);
+    const ancho = parseFloat(lados[2]);
+    const alto = parseFloat(lados[3]);
+    const hay = mando.zoom > 1.0005 || conMargenDeMapa();
+    if (hay && ancho && alto) {
+        const tope = parseFloat(getComputedStyle(lienzo).maxHeight) || Infinity;
+        const quiere = Math.min(lienzo.clientWidth * alto / ancho, tope);
+        lienzo.style.height = Math.round(quiere) + "px";
+        const barras = lienzo.offsetHeight - lienzo.clientHeight;
+        if (barras > 0) {
+            lienzo.style.height = Math.round(Math.min(quiere + barras, tope)) + "px";
+        }
+    } else {
+        lienzo.style.height = "";
+    }
+    const margen = hay ? { x: Math.round(lienzo.clientWidth / 3), y: Math.round(lienzo.clientHeight / 3) } : { x: 0, y: 0 };
     mando.margen = margen;
     mando.dibujo.style.margin = margen.y + "px " + margen.x + "px";
     return margen;
+}
+function centrarMapa(mando) {
+    const m = mando.margen || { x: 0, y: 0 };
+    const caja = mando.dibujo.getBoundingClientRect();
+    const lienzo = mando.lienzo;
+    lienzo.scrollLeft = m.x + (caja.width - lienzo.clientWidth) / 2;
+    lienzo.scrollTop = m.y + (caja.height - lienzo.clientHeight) / 2;
 }
 function prepararArrastreDeMapa(mando) {
     const lienzo = mando.lienzo;
