@@ -62,7 +62,7 @@
               botin.py              el botín de una campaña
               nueva-recomendacion.py
               en-lo-que-ando.py     lo que pone «en lo que ando»
-              editor-wiki.py        el editor de la wiki, en el navegador
+              editor-wiki.py        el editor de la wiki (y de sus mapas), en el navegador
               nueva-pagina-wiki.py  una página nueva de la wiki
               importar-mundo.py     (fuera del menú) traer una bóveda de Chronicler
               linea-de-tiempo.py    los eventos de la línea de tiempo
@@ -1217,6 +1217,9 @@
   cursor, otro sube una imagen de tu ordenador (a WebP y a su tamaño), y
   «Guardar y pasar a la web» lo deja publicado y con un enlace para verlo.
   Solo cambia del .md lo que cambies; las notas <!-- --> se quedan.
+  Y LOS MAPAS (desde el 17-10-2026): poner sitios, pintar regiones,
+  caminos y ríos, o hacerle un mapa nuevo a una página (ver EL EDITOR DE
+  MAPAS, en LOS MAPAS DEL MUNDO).
 
   O, con preguntas aquí mismo, sin navegador:
 
@@ -1566,6 +1569,66 @@
   unidades del mapa, así que el zoom lo engordaba con todo lo demás y al
   600% tapaba medio continente; mundo-mapa.js le pone un "scale" que
   contrarresta el zoom. Un pin no es geografía, es un señalador.
+
+  LOS TIPOS DE SITIO (desde el 17-10-2026): un pin puede ser CAPITAL (★,
+  dorado), CIUDAD (◉), PUEBLO (●), FORTALEZA (♜, cuadrada) o RUINA (✕,
+  con el borde a trazos). Cada uno con su símbolo y su forma, no solo su
+  color, y encima de la lista sale la leyenda con los que hay en ese
+  mapa. Lo dibuja mundo_mapas._simbolo_de_pin.
+
+  LOS CAMINOS Y LOS RÍOS: rayas abiertas, debajo de los pines. El río
+  azul y seguido, el camino claro y a trazos con un borde oscuro; se
+  distinguen por la forma de la raya. Miden lo mismo en pantalla a
+  cualquier zoom (vector-effect: non-scaling-stroke: en un mapa visto
+  entero, las rayas del grosor del mapa salían de un píxel). Con nombre
+  salen en la lista y, si llevan a una página, se pulsan. Se apagan con
+  el interruptor de «caminos y ríos».
+
+  LO QUE LE AÑADE ESTA WEB AL .cmap (Chronicler no lo conoce; si abres
+  el mapa allí y lo guardas, puede perderlo): "page" (de qué página es
+  el mapa), pins[].kind (el tipo de sitio) y "lines" (los caminos y los
+  ríos). Está explicado, con un ejemplo, arriba del todo de
+  mundo_mapas.py.
+
+  EL MAPA DE UNA PÁGINA. Un .cmap con "page" es de esa página: se guarda
+  en su carpeta con el mismo nombre (wiki/Mapamundi/Azarasia/Reino de
+  Prunia.cmap junto a Reino de Prunia.md; no se pisan, uno es .md y otro
+  .cmap), sale en la web como mapa_reino_de_prunia.html y la página
+  lleva arriba un botón, «Explorar el mapa del Reino de Prunia». El
+  primero, el de Prunia, es el recorte ampliado del mapamundi
+  (wiki/_imagenes/mapas/reino_de_prunia_mapa.webp, de 1920 px). Si hay
+  una imagen mejor con EL MISMO ENCUADRE, se cambia desde el editor y
+  todo lo puesto se queda en su sitio.
+
+  EL EDITOR DE MAPAS está en el editor de la wiki (editor-wiki.py →
+  «Mapas», o el botón «Editar su mapa» / «Hacerle un mapa» de cada
+  página). Lo que se puede hacer:
+
+    - PONER UN SITIO: se elige qué es (capital, ciudad…) y se pulsa en
+      el mapa. Luego, a la derecha, su nombre y la página a la que lleva.
+    - PINTAR UNA REGIÓN, UN CAMINO O UN RÍO: punto a punto (pulsando; la
+      región se cierra pulsando en el primero, y todo se acaba con doble
+      clic o «Terminar el dibujo») o A MANO ALZADA, arrastrando (se le
+      quitan los puntos de más al soltar, como hace el generador).
+    - ELEGIR Y MOVER: los sitios se arrastran; en las regiones y las
+      rayas se arrastran sus puntos, los pequeños de en medio añaden uno
+      y dos pulsaciones en uno lo quitan. En un hueco, arrastrar mueve
+      el mapa. Lo elegido se borra con Supr o con «Borrar».
+    - TODO SE PUEDE HACER CON EL TECLADO: con el mapa elegido, las
+      flechas lo mueven (o mueven el sitio elegido), + y − acercan,
+      Intro pone un sitio o un punto en el centro, Fin termina el dibujo
+      y Esc lo cancela. Y a la derecha está la lista de todo lo que hay,
+      con botones para elegirlo, y las casillas X e Y de cada sitio.
+    - UN MAPA NUEVO: de qué página es, el título (si no, «Mapa del…» o
+      «Mapa de…» con el artículo que toque) y la imagen, que va a
+      wiki/_imagenes/mapas/ en WebP (hasta 4096 px de lado: un mapa
+      encogido no aguanta el zoom).
+
+  EL .cmap SE GUARDA ENTERO: va y vuelve con todo lo que traiga (lo de
+  Chronicler que el editor no conoce también), con el mismo sangrado y
+  los mismos saltos de línea. Los avisos del editor de mapas salen en la
+  barra de abajo y no arriba: arriba empujaban el mapa mientras se
+  pulsaba en él.
 
 
   LA PORTADA DE LA WIKI, POR APARTADOS

@@ -7,11 +7,13 @@
     <title>Editor de la wiki</title>
     <link rel="stylesheet" href="/editor/editor.css">
     <script defer src="/editor/editor.js"></script>
+    <script defer src="/editor/mapas.js"></script>
 </head>
 <body>
     <!-- EL EDITOR DE LA WIKI. Lo sirve herramientas/1-publicar/editor-wiki.py
-         en este ordenador; no se publica. Cuatro vistas, una a la vista
-         cada vez: inicio, página nueva, páginas que faltan y escribir. -->
+         en este ordenador; no se publica. Seis vistas, una a la vista
+         cada vez: inicio, página nueva, páginas que faltan, escribir, los
+         mapas y el editor de un mapa. -->
     <a class="saltar" href="#principal">Saltar al contenido</a>
     <header class="cabecera">
         <p class="marca">✎ editor de la wiki</p>
@@ -19,6 +21,7 @@
             <button type="button" data-ir="inicio">Inicio</button>
             <button type="button" data-ir="nueva">Página nueva</button>
             <button type="button" data-ir="faltan">Páginas que faltan</button>
+            <button type="button" data-ir="mapas">Mapas</button>
         </nav>
     </header>
 
@@ -36,6 +39,10 @@
                 <button type="button" class="grande" data-ir="faltan">
                     <span class="grande-titulo">Crear una de las que faltan</span>
                     <span class="grande-que">Las que ya se nombran en otras páginas y aún no existen (en rojo en la web).</span>
+                </button>
+                <button type="button" class="grande" data-ir="mapas">
+                    <span class="grande-titulo">Los mapas</span>
+                    <span class="grande-que">Poner ciudades, pueblos y fortalezas, pintar regiones, caminos y ríos, o hacer un mapa nuevo.</span>
                 </button>
             </div>
             <form class="abrir" data-abrir>
@@ -82,6 +89,7 @@
         <section class="vista" data-vista="editar" aria-labelledby="t-editar" hidden>
             <h1 id="t-editar" data-editar-titulo></h1>
             <p class="ayuda" data-editar-archivo></p>
+            <div class="pagina-mapas" data-pagina-mapas></div>
             <form data-editar>
                 <section class="bloque" aria-labelledby="t-ficha">
                     <h2 id="t-ficha">La ficha</h2>
@@ -105,6 +113,156 @@
                 </section>
             </form>
         </section>
+
+        <!-- LOS MAPAS -->
+        <section class="vista" data-vista="mapas" aria-labelledby="t-mapas" hidden>
+            <h1 id="t-mapas">Mapas</h1>
+            <section class="bloque" aria-labelledby="t-mapas-hay">
+                <h2 id="t-mapas-hay">Los que hay</h2>
+                <ul class="faltan" data-mapas-lista></ul>
+            </section>
+            <form class="bloque" data-mapa-nuevo novalidate aria-labelledby="t-mapa-nuevo">
+                <h2 id="t-mapa-nuevo">Un mapa nuevo</h2>
+                <p class="ayuda">Una imagen (un mapa dibujado, un trozo ampliado del mapamundi…) sobre la que
+                    poner sitios y pintar. Si es de una página, se guarda junto a ella y esa página sale en la
+                    web con un botón para explorarlo.</p>
+                <div class="campo">
+                    <label for="mapa-nuevo-pagina">De qué página es <span class="opcional">(opcional)</span></label>
+                    <input id="mapa-nuevo-pagina" list="lista-paginas" autocomplete="off" spellcheck="false">
+                </div>
+                <div class="campo">
+                    <label for="mapa-nuevo-titulo">Título</label>
+                    <p class="ayuda" id="ayuda-mapa-titulo">Si lo dejas vacío: «Mapa del» o «Mapa de» y el nombre de la página («Mapa del Reino de Prunia»).</p>
+                    <input id="mapa-nuevo-titulo" aria-describedby="ayuda-mapa-titulo" autocomplete="off">
+                </div>
+                <div class="campo subir">
+                    <input type="file" id="mapa-nuevo-archivo" accept="image/*">
+                    <label class="boton" for="mapa-nuevo-archivo">Elegir la imagen de tu ordenador</label>
+                    <p class="ayuda" data-mapa-nuevo-elegida aria-live="polite"></p>
+                </div>
+                <div class="campo">
+                    <label for="mapa-nuevo-ruta">…o pega su ruta <span class="opcional">(e:\Descargas\mapa.png)</span></label>
+                    <input id="mapa-nuevo-ruta" autocomplete="off" spellcheck="false">
+                </div>
+                <button type="submit" class="principal">Hacer el mapa</button>
+            </form>
+        </section>
+
+        <!-- UN MAPA -->
+        <section class="vista" data-vista="mapa" aria-labelledby="t-mapa" hidden>
+            <h1 id="t-mapa" data-mapa-titulo></h1>
+            <p class="ayuda" data-mapa-archivo></p>
+            <fieldset class="herramientas">
+                <legend>Qué hacer en el mapa</legend>
+                <label class="herramienta"><input type="radio" name="herramienta" value="elegir" checked>
+                    <span aria-hidden="true">✋</span> Elegir y mover</label>
+                <label class="herramienta"><input type="radio" name="herramienta" value="pin">
+                    <span aria-hidden="true">📍</span> Poner un sitio</label>
+                <label class="herramienta"><input type="radio" name="herramienta" value="region">
+                    <span aria-hidden="true">⬠</span> Pintar una región</label>
+                <label class="herramienta"><input type="radio" name="herramienta" value="camino">
+                    <span aria-hidden="true">┅</span> Pintar un camino</label>
+                <label class="herramienta"><input type="radio" name="herramienta" value="rio">
+                    <span aria-hidden="true">〰</span> Pintar un río</label>
+            </fieldset>
+            <div class="fila mapa-opciones">
+                <div class="mapa-opcion" data-mapa-solo="pin">
+                    <label for="mapa-tipo-nuevo">Qué sitio</label>
+                    <select id="mapa-tipo-nuevo" data-mapa-tipos-pin></select>
+                </div>
+                <label class="opcion mapa-opcion" data-mapa-solo="dibujo">
+                    <input type="checkbox" id="mapa-mano"> A mano alzada (arrastrando)</label>
+            </div>
+            <p class="ayuda mapa-instrucciones" data-mapa-instrucciones aria-live="polite"></p>
+            <div class="fila mapa-mandos">
+                <button type="button" data-mapa-zoom="-1" aria-label="Alejar">−</button>
+                <span class="mapa-cuanto" data-mapa-cuanto>100%</span>
+                <button type="button" data-mapa-zoom="1" aria-label="Acercar">+</button>
+                <button type="button" data-mapa-ajustar>Verlo entero</button>
+                <button type="button" data-mapa-quitar-punto>Quitar el último punto</button>
+                <button type="button" class="principal" data-mapa-terminar>Terminar el dibujo</button>
+                <button type="button" data-mapa-cancelar>Cancelar</button>
+            </div>
+            <div class="mapa-editor">
+                <div class="mapa-izquierda">
+                    <div class="mapa-lienzo" data-mapa-lienzo tabindex="0" role="application"
+                         aria-roledescription="lienzo del mapa" aria-describedby="mapa-teclas">
+                        <svg data-mapa-svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true"></svg>
+                    </div>
+                    <p class="ayuda" id="mapa-teclas">Con el mapa elegido: las flechas lo mueven (o mueven el
+                        sitio elegido), + y − acercan y alejan, Intro pone un sitio o un punto en el centro, Fin
+                        termina el dibujo, Esc lo cancela y Supr borra lo elegido. La rueda del ratón acerca y
+                        aleja; para moverte por el mapa, arrastra con «Elegir y mover» o con el botón de en
+                        medio.</p>
+                </div>
+                <div class="mapa-derecha">
+                    <section class="bloque mapa-elegido" aria-labelledby="t-mapa-elegido">
+                        <h2 id="t-mapa-elegido">Lo elegido</h2>
+                        <p class="ayuda" data-mapa-nada>Nada. Pulsa algo del mapa o de la lista de abajo.</p>
+                        <div data-mapa-propiedades hidden>
+                            <p class="mapa-que" data-mapa-que></p>
+                            <div class="campo">
+                                <label for="mapa-p-nombre">Nombre</label>
+                                <input id="mapa-p-nombre" autocomplete="off" data-mapa-p="label">
+                            </div>
+                            <div class="campo">
+                                <label for="mapa-p-pagina">Lleva a la página</label>
+                                <input id="mapa-p-pagina" list="lista-paginas" autocomplete="off" spellcheck="false"
+                                       data-mapa-p="targetPage">
+                            </div>
+                            <div class="campo" data-mapa-p-caja="kind">
+                                <label for="mapa-p-tipo">Qué es</label>
+                                <select id="mapa-p-tipo" data-mapa-p="kind"></select>
+                            </div>
+                            <div class="campo" data-mapa-p-caja="xy">
+                                <div class="fila mapa-xy">
+                                    <div><label for="mapa-p-x">X</label>
+                                        <input id="mapa-p-x" type="number" step="1" data-mapa-p="x"></div>
+                                    <div><label for="mapa-p-y">Y</label>
+                                        <input id="mapa-p-y" type="number" step="1" data-mapa-p="y"></div>
+                                </div>
+                            </div>
+                            <div class="campo">
+                                <label class="opcion"><input type="checkbox" data-mapa-p="con-color"> Con su propio color</label>
+                                <label for="mapa-p-color" class="solo-lector">Color</label>
+                                <input id="mapa-p-color" type="color" data-mapa-p="color">
+                            </div>
+                            <p class="ayuda" data-mapa-p-puntos></p>
+                            <button type="button" data-mapa-borrar>Borrar</button>
+                        </div>
+                    </section>
+                    <section class="bloque" aria-labelledby="t-mapa-cosas">
+                        <h2 id="t-mapa-cosas">Lo que hay en el mapa</h2>
+                        <div data-mapa-cosas></div>
+                    </section>
+                    <details class="bloque mapa-ajustes">
+                        <summary>El mapa en sí: título, página e imagen</summary>
+                        <div class="campo">
+                            <label for="mapa-titulo">Título</label>
+                            <input id="mapa-titulo" autocomplete="off" data-mapa-general="title">
+                        </div>
+                        <div class="campo">
+                            <label for="mapa-pagina">De qué página es</label>
+                            <p class="ayuda" id="ayuda-mapa-pagina">Esa página lleva en la web un botón para explorarlo.</p>
+                            <input id="mapa-pagina" list="lista-paginas" autocomplete="off" spellcheck="false"
+                                   aria-describedby="ayuda-mapa-pagina" data-mapa-general="page">
+                        </div>
+                        <fieldset class="opciones campo" data-mapa-capas-caja>
+                            <legend>Capas que se ven aquí</legend>
+                            <div data-mapa-capas></div>
+                        </fieldset>
+                        <div class="campo" data-mapa-cambiar-imagen>
+                            <p class="ayuda">Cambiar la imagen por otra con el mismo encuadre (más grande, retocada…):
+                                todo lo puesto se queda en su sitio.</p>
+                            <div class="subir">
+                                <input type="file" id="mapa-otra-imagen" accept="image/*">
+                                <label class="boton" for="mapa-otra-imagen">Cambiar la imagen</label>
+                            </div>
+                        </div>
+                    </details>
+                </div>
+            </div>
+        </section>
     </main>
 
     <!-- Abajo, siempre a mano mientras se escribe. -->
@@ -112,6 +270,14 @@
         <button type="button" class="principal" data-guardar>Guardar <span class="tecla">Ctrl+S</span></button>
         <button type="button" data-pasar>Guardar y pasar a la web</button>
         <a class="boton" data-ver target="_blank" rel="noopener" hidden>Ver cómo queda ↗</a>
+    </footer>
+
+    <!-- Abajo, mientras se edita un mapa. -->
+    <footer class="barra" data-barra-mapa hidden>
+        <p class="aviso barra-aviso" role="status" aria-live="polite" data-aviso-mapa></p>
+        <button type="button" class="principal" data-mapa-guardar>Guardar <span class="tecla">Ctrl+S</span></button>
+        <button type="button" data-mapa-pasar>Guardar y pasar a la web</button>
+        <a class="boton" data-mapa-ver target="_blank" rel="noopener" hidden>Ver el mapa ↗</a>
     </footer>
 
     <datalist id="lista-paginas"></datalist>

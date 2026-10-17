@@ -274,6 +274,15 @@ textarea {
     color: var(--error);
 }
 
+/* El de la barra de abajo (editando un mapa): una fila entera encima de
+   los botones, y si hay mucho que leer, con su propia barra. */
+.barra-aviso {
+    flex: 1 1 100%;
+    max-height: 40vh;
+    margin: 0;
+    overflow-y: auto;
+}
+
 .salida {
     overflow-x: auto;
     margin: 10px 0 0;
@@ -581,6 +590,339 @@ textarea {
 }
 
 /* LA BARRA DE ABAJO: guardar siempre a mano. */
+/* LOS MAPAS. El lienzo a la izquierda y lo elegido a la derecha; en una
+   pantalla estrecha, uno debajo del otro. El lienzo no es sticky: mide
+   un alto fijo y lo de la derecha baja con la página. */
+body.en-mapa main {
+    max-width: 110rem;
+}
+
+.pagina-mapas {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 24px;
+}
+
+.mapa-editor {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    gap: 24px;
+}
+
+.mapa-izquierda {
+    flex: 3 1 36rem;
+    min-width: 0;
+}
+
+.mapa-derecha {
+    flex: 1 1 20rem;
+    min-width: 0;
+}
+
+.herramientas {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin: 0 0 12px;
+    padding: 0;
+    border: 0;
+}
+
+.herramientas legend {
+    margin-bottom: 8px;
+    padding: 0;
+    color: var(--acento);
+    font-family: var(--mono);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+}
+
+.herramienta {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    min-height: 48px;
+    margin: 0;
+    padding: 6px 14px;
+    border: 2px solid var(--borde);
+    background: var(--caja);
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.herramienta:hover {
+    border-color: var(--acento);
+}
+
+.herramienta input {
+    width: 1.1em;
+    min-height: 0;
+    height: 1.1em;
+    margin: 0;
+    accent-color: var(--acento);
+}
+
+.herramienta.es-elegida {
+    border-color: var(--acento);
+    background: var(--acento);
+    color: var(--sobre-acento);
+}
+
+.herramienta:focus-within {
+    outline: 3px solid var(--acento);
+    outline-offset: 3px;
+}
+
+.mapa-opciones {
+    margin-bottom: 8px;
+}
+
+.mapa-opciones .mapa-opcion {
+    flex: 0 1 18rem;
+}
+
+.mapa-opciones label.opcion {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.mapa-opciones input[type="checkbox"],
+.mapa-derecha input[type="checkbox"] {
+    width: 1.3em;
+    min-height: 0;
+    height: 1.3em;
+    margin: 0;
+    accent-color: var(--acento);
+}
+
+.mapa-instrucciones {
+    min-height: 3em;
+}
+
+.mapa-mandos {
+    margin-bottom: 10px;
+}
+
+.mapa-mandos button {
+    min-width: 48px;
+}
+
+.mapa-mandos .es-guardado {
+    visibility: hidden;
+}
+
+.mapa-cuanto {
+    min-width: 4em;
+    font-family: var(--mono);
+    text-align: center;
+}
+
+.mapa-lienzo {
+    position: relative;
+    /* Que quepa entero encima de la barra de abajo. */
+    height: min(calc(100vh - 230px), 900px);
+    min-height: 320px;
+    overflow: hidden;
+    border: 2px solid var(--borde);
+    background: #0b0612;
+    touch-action: none;
+    cursor: grab;
+}
+
+.mapa-lienzo:focus-visible {
+    outline: 3px solid var(--acento);
+    outline-offset: 3px;
+}
+
+.mapa-lienzo.es-dibujo {
+    cursor: crosshair;
+}
+
+.mapa-lienzo svg {
+    display: block;
+    width: 100%;
+    height: 100%;
+    user-select: none;
+}
+
+.mapa-ed-papel {
+    fill: #241a2e;
+}
+
+.mapa-ed-cosa {
+    cursor: pointer;
+}
+
+.mapa-lienzo.es-dibujo .mapa-ed-cosa {
+    cursor: crosshair;
+}
+
+.mapa-ed-letra {
+    fill: #1b1020;
+    font-size: 13px;
+    font-weight: 700;
+    pointer-events: none;
+}
+
+/* El nombre de cada sitio, con un borde oscuro alrededor de las letras
+   para leerse encima de cualquier dibujo. */
+.mapa-ed-nombre {
+    fill: #ffffff;
+    stroke: #1b1020;
+    stroke-width: 4px;
+    stroke-linejoin: round;
+    paint-order: stroke;
+    font-size: 15px;
+    font-weight: 700;
+    pointer-events: none;
+}
+
+.mapa-ed-asa circle {
+    fill: #ffffff;
+    stroke: #1b1020;
+    stroke-width: 3px;
+    cursor: move;
+}
+
+.mapa-ed-medio circle {
+    fill: #f5ce6c;
+    fill-opacity: 0.85;
+    stroke: #1b1020;
+    stroke-width: 2px;
+    cursor: copy;
+}
+
+.mapa-ed-dibujo {
+    pointer-events: none;
+}
+
+.mapa-que {
+    margin: 0 0 12px;
+    font-family: var(--mono);
+    font-size: 1.1rem;
+}
+
+.mapa-xy > div {
+    flex: 1 1 6rem;
+}
+
+.mapa-xy label {
+    flex-basis: auto;
+}
+
+.mapa-derecha label.opcion {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-height: 48px;
+}
+
+.mapa-derecha input[type="color"] {
+    width: 6rem;
+    padding: 4px;
+}
+
+.mapa-cosas-titulo {
+    margin: 16px 0 6px;
+    font-size: 1rem;
+}
+
+.mapa-cosas {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    max-height: 26rem;
+    margin: 0;
+    padding: 0;
+    overflow-y: auto;
+    list-style: none;
+}
+
+.mapa-cosa {
+    justify-content: flex-start;
+    width: 100%;
+    min-height: 44px;
+    padding: 6px 10px;
+    border-width: 1px;
+    border-color: var(--borde);
+    color: var(--texto);
+    text-align: left;
+}
+
+.mapa-cosa[aria-pressed="true"] {
+    border-width: 2px;
+    border-color: var(--acento);
+}
+
+.mapa-cosa-nombre {
+    flex: 1 1 auto;
+    font-weight: 700;
+}
+
+.mapa-cosa-que {
+    color: var(--suave);
+    font-family: var(--mono);
+    font-size: 0.85rem;
+}
+
+.mapa-cosa[aria-pressed="true"] .mapa-cosa-que,
+.mapa-cosa:hover .mapa-cosa-que {
+    color: inherit;
+}
+
+.mapa-cosa-marca {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.7em;
+    height: 1.7em;
+    border: 2px solid #1b1020;
+    border-radius: 50%;
+    color: #1b1020;
+    font-size: 0.85rem;
+}
+
+.mapa-cosa-marca.es-capital {
+    background: #f5ce6c;
+}
+
+.mapa-cosa-marca.es-ciudad {
+    background: #f4f1f7;
+}
+
+.mapa-cosa-marca.es-pueblo {
+    background: #e0c9a6;
+}
+
+.mapa-cosa-marca.es-fortaleza {
+    border-radius: 0;
+    background: #b9b3c2;
+}
+
+.mapa-cosa-marca.es-ruina {
+    border-style: dashed;
+    background: #8d8478;
+}
+
+.mapa-ajustes summary {
+    min-height: 48px;
+    color: var(--acento);
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.solo-lector {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+}
+
 .barra {
     position: fixed;
     left: 0;
@@ -621,6 +963,10 @@ textarea {
 
     .barra .tecla {
         display: none;
+    }
+
+    .barra[data-barra-mapa] {
+        flex-wrap: wrap;
     }
 }
 

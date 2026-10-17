@@ -3127,3 +3127,36 @@ input.mundo-pieza-control[type="search"] {
     font-family: var(--fuente-mono);
     font-size: 0.8125rem;
 }
+
+
+/* EL BOTÓN DE SU MAPA, arriba del artículo, en las páginas que tienen un
+   mapa propio (un .cmap que dice "page": esa página). */
+.mundo-su-mapa {
+    margin: 0 0 20px;
+}
+
+.mundo-su-mapa-enlace {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    min-height: 48px;
+    padding: 10px 18px;
+    border: 2px solid var(--yellow);
+    background: var(--yellow);
+    box-shadow: 4px 4px 0 var(--purple-lighter);
+    color: var(--yellow-contrast);
+    font-family: var(--fuente-mono);
+    font-size: 0.9375rem;
+    text-decoration: none;
+}
+
+.mundo-su-mapa-enlace:hover,
+.mundo-su-mapa-enlace:focus-visible {
+    background: var(--purple);
+    color: var(--yellow);
+}
+
+.mundo-su-mapa-enlace:focus-visible {
+    outline: 3px solid var(--yellow);
+    outline-offset: 3px;
+}

@@ -915,13 +915,17 @@ def convertir_mapas(mapas, paginas, imagenes, avisos_por_pagina, detalle):
         mapa["svg"] = con_banderas_en_el_mapa(hecho["svg"], paginas)
         mapa["sitios"] = hecho["sitios"]
         mapa["capas"] = hecho["capas"]
-        mapa["lista"] = mundo_mapas.pintar_lista(hecho["sitios"])
+        # La leyenda (los tipos de sitio y de raya que hay), encima de la
+        # lista: se ve también sin JavaScript.
+        mapa["lista"] = hecho.get("leyenda", "") + mundo_mapas.pintar_lista(hecho["sitios"])
+        mapa["de_pagina"] = leido.get("pagina", "")
         # El interruptor de las regiones solo tiene sentido si hay
         # regiones que apagar.
         hay_formas = bool(hecho["dibujo"]) or any(s["tipo"] == "forma" for s in hecho["sitios"])
         hay_pines = any(s["tipo"] == "pin" for s in hecho["sitios"])
         mapa["mandos"] = mundo_mapas.pintar_mandos(hecho["capas"], hay_formas, hay_pines,
-                                                   hecho.get("niveles", False))
+                                                   hecho.get("niveles", False),
+                                                   hecho.get("hay_lineas", False))
         mapa["puntos"] = hecho["puntos"]
         mapa["dibujo"] = hecho["dibujo"]
         mapa["escondidos"] = hecho["escondidos"]
@@ -1365,6 +1369,13 @@ def escribir_paginas(paginas, probar, categorias=(), eventos=()):
         # Las páginas parecidas, debajo, sin repetir las de la caja.
         en_la_caja = {k for k, f in paginas.items() if 'href="%s"' % html.escape(f["url"], quote=True) in navbox}
         cuerpo += mundo_piezas.caja_de_parecidas(ficha, paginas, parecidos, en_la_caja)
+        # El botón de su mapa, si tiene uno propio (ver main).
+        for titulo_mapa, url_mapa in ficha.get("mapas_propios", []):
+            cuerpo = ('<p class="mundo-su-mapa"><a class="mundo-su-mapa-enlace" href="%s">'
+                      '<span aria-hidden="true">🗺</span> Explorar el %s</a></p>'
+                      % (html.escape(url_mapa, quote=True), html.escape(titulo_mapa[:1].lower() + titulo_mapa[1:]
+                                                                         if titulo_mapa.lower().startswith("mapa")
+                                                                         else "mapa: " + titulo_mapa))) + cuerpo
         # Y el aviso de esbozo, arriba del todo (no en las utilidades, que
         # no son del mundo).
         if not ficha["carpeta"].lower().startswith("utilidades"):
@@ -2072,6 +2083,13 @@ def main():
     for clave, ficha in paginas.items():
         poner_emblemas(ficha, situaciones.get(clave))
     capas = convertir_mapas(mapas, paginas, imagenes, avisos_por_pagina, args.detalle)
+    # EL MAPA DE UNA PÁGINA. Un mapa que dice de qué página es ("page" en el
+    # .cmap, lo pone el editor de mapas) deja en esa página un botón para
+    # abrirlo, arriba del artículo.
+    for mapa in mapas.values():
+        suya = paginas.get((mapa.get("de_pagina") or "").strip().lower())
+        if suya:
+            suya.setdefault("mapas_propios", []).append((mapa["titulo"], mapa["url"]))
     # Un evento que nombra una página ([[Valderín]] en su texto) sale en el
     # «se habla de esto en» de esa página, igual que un artículo o un mapa.
     for evento in eventos:

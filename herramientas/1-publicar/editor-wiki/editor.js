@@ -3,8 +3,9 @@
 // =========================================
 // Habla con herramientas/1-publicar/editor-wiki.py, que es quien lee y
 // escribe los .md. Cuatro vistas (inicio, página nueva, las que faltan y
-// escribir) y solo una a la vista. Todo lo que llega del servidor se pone
-// con textContent: un nombre con < dentro no es HTML.
+// escribir) y solo una a la vista; las dos de los mapas están en mapas.js.
+// Todo lo que llega del servidor se pone con textContent: un nombre con <
+// dentro no es HTML.
 
 const TOKEN_EDITOR = (document.querySelector('meta[name="editor-token"]') || {}).content || "";
 const estadoEditor = { datos: null, pagina: null, cambiado: false, guardando: false };
@@ -38,7 +39,11 @@ async function pedirEditor(ruta, cuerpo) {
 }
 
 function avisarEditor(texto, error, salida) {
-    const aviso = $("[data-aviso]");
+    // Editando un mapa, los avisos van en la barra de abajo: arriba
+    // empujarían el mapa mientras se pulsa en él (y no se verían).
+    const enMapa = !$('[data-vista="mapa"]').hidden;
+    $(enMapa ? "[data-aviso]" : "[data-aviso-mapa]").textContent = "";
+    const aviso = $(enMapa ? "[data-aviso-mapa]" : "[data-aviso]");
     aviso.textContent = texto || "";
     aviso.classList.toggle("es-error", !!error);
     if (salida) {
@@ -57,8 +62,22 @@ function irAEditor(vista) {
         && !window.confirm("Hay cambios sin guardar en esta página. ¿Salir igualmente?")) {
         return;
     }
+    // El mapa que se está editando (lo lleva mapas.js).
+    const mapa = window.estadoMapa;
+    if (vista !== "mapa" && mapa && mapa.cambiado
+        && !window.confirm("Hay cambios sin guardar en este mapa. ¿Salir igualmente?")) {
+        return;
+    }
     if (vista !== "editar") {
         estadoEditor.cambiado = false;
+    }
+    if (vista !== "mapa" && mapa) {
+        mapa.cambiado = false;
+    }
+    document.body.classList.toggle("en-mapa", vista === "mapa");
+    const barraMapa = $("[data-barra-mapa]");
+    if (barraMapa) {
+        barraMapa.hidden = vista !== "mapa";
     }
     document.querySelectorAll("[data-vista]").forEach((v) => {
         v.hidden = v.getAttribute("data-vista") !== vista;
@@ -117,7 +136,7 @@ async function empezarEditor() {
         }
     });
     window.addEventListener("beforeunload", (e) => {
-        if (estadoEditor.cambiado) {
+        if (estadoEditor.cambiado || (window.estadoMapa && window.estadoMapa.cambiado)) {
             e.preventDefault();
             e.returnValue = "";
         }
@@ -397,6 +416,9 @@ function pintarPaginaEditor(pagina) {
     const ver = $("[data-ver]");
     ver.hidden = !pagina.url;
     ver.href = pagina.url || "#";
+    if (window.pintarMapasDePagina) {
+        window.pintarMapasDePagina(pagina);
+    }
 
     const campos = $("[data-campos]");
     campos.textContent = "";

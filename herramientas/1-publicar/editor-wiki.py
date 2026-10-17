@@ -27,6 +27,11 @@
 #     bandera, blasón), SUBIR UNA de tu ordenador: la pasa a WebP, a su
 #     tamaño y sin los datos del móvil, a wiki/_imagenes/ (lo mismo que
 #     traer-imagen.py), y pone su nombre en la casilla.
+#   · LOS MAPAS (los .cmap): poner sitios (capital, ciudad, pueblo,
+#     fortaleza o ruina), pintar regiones, caminos y ríos, ponerles nombre
+#     y la página a la que llevan, y moverlos o borrarlos. También hacer un
+#     mapa nuevo para una página a partir de una imagen: se guarda junto a
+#     la página y esa página sale en la web con un botón para explorarlo.
 #   · GUARDAR (Ctrl+S) escribe el .md. GUARDAR Y PASAR A LA WEB además
 #     pasa la wiki (generar-mundo.py y actualizar-cabeceras.py) y deja un
 #     enlace para VER CÓMO QUEDA, aquí mismo, en el navegador.
@@ -41,8 +46,8 @@
 # (y Pillow para subir imágenes, que ya lo usa el resto de herramientas).
 #
 # Los archivos de la página del editor están en
-# herramientas/1-publicar/editor-wiki/ (editor.html, editor.css y
-# editor.js).
+# herramientas/1-publicar/editor-wiki/ (editor.html, editor.css,
+# editor.js y mapas.js, que es el editor de mapas).
 
 import base64
 import difflib
@@ -63,8 +68,8 @@ from pathlib import Path
 HERRAMIENTAS = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(HERRAMIENTAS))
 
-from comun import (RAIZ, esta_fuera, escribir_texto, guardar_wiki_fuera,  # noqa: E402
-                   leer_json, leer_texto, sin_tildes, wiki_fuera)
+from comun import (RAIZ, esta_fuera, escribir_como_estaba, escribir_texto,  # noqa: E402
+                   guardar_wiki_fuera, leer_json, leer_texto, sin_tildes, wiki_fuera)
 
 # La herramienta de siempre, para no repetir cómo se leen y rellenan las
 # plantillas: se carga por su ruta porque lleva guiones en el nombre.
@@ -473,6 +478,221 @@ def subir_imagen(peticion):
 
 
 # =========================================
+# LOS MAPAS
+# =========================================
+# Los .cmap de la bóveda (el formato está explicado en
+# herramientas/3-generadores/mundo_mapas.py). El editor los lee enteros y
+# los devuelve enteros: lo que no conoce (lo que escribió Chronicler) va y
+# vuelve sin tocar. Aquí solo se comprueba que lo que llega es un mapa y
+# que se escribe dentro de la bóveda.
+
+CARPETA_MAPAS = "wiki/_imagenes/mapas"
+# Las imágenes de mapa, a su tamaño (o hasta este lado): un mapa encogido
+# a 1600 se queda sin detalle al acercarse.
+LADO_MAPA = 4096
+
+
+def _leer_cmap(archivo):
+    try:
+        datos = json.loads(archivo.read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        return None
+    return datos if isinstance(datos, dict) else None
+
+
+def mapas_que_hay():
+    salida = []
+    for archivo in sorted(VAULT.rglob("*.cmap"), key=lambda a: a.stem.lower()):
+        datos = _leer_cmap(archivo)
+        if datos is None:
+            continue
+        salida.append({"archivo": archivo.relative_to(VAULT).as_posix(),
+                       "titulo": str(datos.get("title") or archivo.stem),
+                       "pagina": str(datos.get("page") or ""),
+                       "pines": len(datos.get("pins") or []),
+                       "regiones": len(datos.get("shapes") or []),
+                       "rayas": len(datos.get("lines") or [])})
+    return salida
+
+
+def mapas_de(nombre):
+    """Los mapas que dicen ser de esta página ("page")."""
+    clave = sin_tildes(nombre).lower()
+    return [m for m in mapas_que_hay() if sin_tildes(m["pagina"]).lower() == clave]
+
+
+def ruta_de_mapa(relativo):
+    """El .cmap que se pide, si es un .cmap de dentro de la bóveda."""
+    relativo = str(relativo or "").replace("\\", "/").strip("/")
+    if not relativo.lower().endswith(".cmap"):
+        return None
+    archivo = (VAULT / relativo).resolve()
+    try:
+        archivo.relative_to(VAULT.resolve())
+    except ValueError:
+        return None
+    return archivo if archivo.is_file() else None
+
+
+def url_de_imagen(nombre):
+    """Dónde la sirve el editor: se busca por el nombre en wiki/_imagenes/
+    (igual que hace generar-mundo con las capas)."""
+    nombre = str(nombre or "").replace("\\", "/").split("/")[-1].lower()
+    if not nombre or not IMAGENES.is_dir():
+        return ""
+    for archivo in sorted(IMAGENES.rglob("*")):
+        if archivo.name.lower() == nombre:
+            return "/" + urllib.parse.quote(archivo.relative_to(RAIZ).as_posix())
+    return ""
+
+
+def leer_mapa(archivo):
+    datos = _leer_cmap(archivo)
+    if datos is None:
+        return {"error": "Ese mapa no se puede leer: no es un JSON que entienda."}
+    capas = [c for c in datos.get("layers") or [] if isinstance(c, dict)]
+    return {"archivo": archivo.relative_to(VAULT).as_posix(), "datos": datos,
+            "imagenes": {str(c.get("image")): url_de_imagen(c.get("image")) for c in capas if c.get("image")},
+            "url": url_de_la_pagina(str(datos.get("title") or archivo.stem))}
+
+
+def _lista_de_puntos(puntos):
+    return isinstance(puntos, list) and all(
+        isinstance(p, dict) and isinstance(p.get("x"), (int, float)) and isinstance(p.get("y"), (int, float))
+        for p in puntos)
+
+
+def guardar_mapa(archivo, datos):
+    """Comprueba que es un mapa (medidas, y listas de cosas con
+    coordenadas) y lo escribe."""
+    if not isinstance(datos, dict):
+        return {"error": "Lo que ha llegado no es un mapa."}
+    for medida in ("width", "height"):
+        if not isinstance(datos.get(medida), (int, float)) or datos[medida] <= 0:
+            return {"error": "El mapa no dice cuánto mide."}
+    for lista in ("pins", "shapes", "lines", "layers"):
+        if not isinstance(datos.get(lista, []), list):
+            return {"error": "El mapa ha llegado roto (%s)." % lista}
+    for pin in datos.get("pins") or []:
+        if not (isinstance(pin, dict) and isinstance(pin.get("x"), (int, float))
+                and isinstance(pin.get("y"), (int, float))):
+            return {"error": "Hay un sitio sin coordenadas."}
+    for cosa in (datos.get("shapes") or []) + (datos.get("lines") or []):
+        if not (isinstance(cosa, dict) and _lista_de_puntos(cosa.get("points"))):
+            return {"error": "Hay una región o una raya con puntos raros."}
+    # Escrito como lo escribe Chronicler (sangrado de dos, sin \u00 en las
+    # tildes), con sus saltos de línea de Windows si los tenía y el salto
+    # del final solo si lo tenía: que el archivo cambie por lo cambiado y
+    # nada más.
+    final = "\n" if archivo.read_bytes().endswith(b"\n") else ""
+    escribir_como_estaba(archivo, json.dumps(datos, ensure_ascii=False, indent=2) + final)
+    return {"ok": True, "mapa": leer_mapa(archivo)}
+
+
+def traer_imagen_de_mapa(peticion, nombre):
+    """La imagen que llega (subida o por su ruta) a wiki/_imagenes/mapas/.
+    Devuelve {nombre, ancho, alto, url} o {error}."""
+    try:
+        import imagenes as img
+    except ImportError:
+        return {"error": "No encuentro herramientas/imagenes.py."}
+    ruta = str(peticion.get("ruta") or "").strip()
+    temporal = None
+    try:
+        if not ruta:
+            datos = str(peticion.get("datos") or "")
+            if not datos:
+                return {"error": "Falta la imagen del mapa."}
+            original = str(peticion.get("archivo") or "mapa.png")
+            if "," in datos:
+                datos = datos.split(",", 1)[1]
+            try:
+                crudo = base64.b64decode(datos, validate=True)
+            except ValueError:
+                return {"error": "La imagen no ha llegado bien."}
+            if len(crudo) > 40 * 1024 * 1024:
+                return {"error": "Es demasiado grande (más de 40 MB)."}
+            temporal = Path(tempfile.mkstemp(suffix=Path(original).suffix.lower() or ".png")[1])
+            temporal.write_bytes(crudo)
+            ruta = str(temporal)
+        hecha, aviso = img.traer(ruta, CARPETA_MAPAS, img.nombre_para(nombre, "_mapa"), lado=LADO_MAPA)
+    finally:
+        if temporal and temporal.exists():
+            temporal.unlink()
+    if not hecha:
+        return {"error": "No he podido traerla: " + aviso}
+    archivo = RAIZ / CARPETA_MAPAS / Path(hecha).name
+    try:
+        from PIL import Image
+        with Image.open(archivo) as abierta:
+            ancho, alto = abierta.size
+    except Exception as error:  # Pillow ya la ha abierto para convertirla: no debería pasar
+        return {"error": "No sé cuánto mide la imagen: %s" % error}
+    return {"ok": True, "nombre": archivo.name, "ancho": ancho, "alto": alto,
+            "url": url_de_imagen(archivo.name), "aviso": aviso}
+
+
+# Con artículo si empieza por un nombre común: «Mapa del Reino de
+# Prunia», «Mapa de la Unión de Cuerza», «Mapa de la Tribu Utná», pero
+# «Mapa de Azarasia». Es nombre común si es uno de éstos o si va seguido
+# de «de» («Paraje de Cereno»). Femeninas las acabadas en -a, -ión, -dad
+# y -tad, y las de FEMENINAS.
+COMUNES = {"reino", "república", "imperio", "principado", "sultanato", "unión", "cantón", "tribu",
+           "archipiélago", "alianza", "liga", "horda", "mandato", "maharato", "páramo", "valle", "isla",
+           "ciudad", "bosque", "montaña", "desierto", "mar", "costa", "ducado", "condado", "baronía",
+           "marquesado", "señorío", "corona", "territorio", "dominio", "confederación", "federación"}
+FEMENINAS = {"tribu", "costa", "torre", "fuente", "corte", "cuna"}
+
+
+def titulo_por_defecto(nombre):
+    palabras = nombre.split()
+    primera = palabras[0].lower() if palabras else ""
+    sin_plural = primera[:-1] if primera.endswith("s") and len(primera) > 3 else primera
+    comun = sin_plural in COMUNES or (len(palabras) >= 3 and palabras[1].lower() in ("de", "del"))
+    if not comun:
+        return "Mapa de " + nombre
+    singular = sin_plural
+    femenina = (singular in FEMENINAS or singular.endswith(("a", "ión", "dad", "tad")))
+    articulo = ("de las " if femenina else "de los ") if singular != primera else ("de la " if femenina else "del ")
+    return "Mapa " + articulo + nombre
+
+
+def nuevo_mapa(peticion):
+    """Un .cmap nuevo con una imagen de fondo y nada encima, en la carpeta
+    de su página (o en la raíz de la bóveda si no es de ninguna)."""
+    pagina = str(peticion.get("pagina") or "").strip()
+    titulo = str(peticion.get("titulo") or "").strip()
+    archivo_pagina = npw.pagina_llamada(pagina) if pagina else None
+    if pagina and not archivo_pagina:
+        return {"error": "No hay ninguna página que se llame «%s»." % pagina}
+    if archivo_pagina:
+        pagina = archivo_pagina.stem
+    nombre = pagina or titulo
+    if not nombre:
+        return {"error": "Hace falta la página del mapa o, si no es de ninguna, su título."}
+    malos = [c for c in nombre if c in npw.PROHIBIDO]
+    if malos:
+        return {"error": "El título no puede llevar %s: es también el nombre del archivo." % " ".join(malos)}
+    carpeta = archivo_pagina.parent if archivo_pagina else VAULT
+    destino = carpeta / (nombre + ".cmap")
+    if destino.exists():
+        return {"error": "Ya hay un mapa así: %s. Ábrelo desde la lista de mapas."
+                % destino.relative_to(VAULT).as_posix()}
+    imagen = traer_imagen_de_mapa(peticion, nombre)
+    if imagen.get("error"):
+        return imagen
+    datos = {"version": "1.0", "title": titulo or titulo_por_defecto(nombre)}
+    if pagina:
+        datos["page"] = pagina
+    datos.update({"width": imagen["ancho"], "height": imagen["alto"],
+                  "layers": [{"id": "base", "name": "Mapa", "image": imagen["nombre"], "opacity": 1,
+                              "zIndex": 0, "visible": True}],
+                  "pins": [], "shapes": [], "lines": []})
+    escribir_texto(destino, json.dumps(datos, ensure_ascii=False, indent=2) + "\n")
+    return {"ok": True, "mapa": leer_mapa(destino)}
+
+
+# =========================================
 # PASAR A LA WEB
 # =========================================
 
@@ -536,7 +756,8 @@ class Editor(SimpleHTTPRequestHandler):
             return self._archivo(CARPETA_EDITOR / "editor.html", "text/html; charset=utf-8")
         if url.path.startswith("/editor/"):
             nombre = url.path[len("/editor/"):]
-            tipos = {"editor.css": "text/css; charset=utf-8", "editor.js": "text/javascript; charset=utf-8"}
+            tipos = {"editor.css": "text/css; charset=utf-8", "editor.js": "text/javascript; charset=utf-8",
+                     "mapas.js": "text/javascript; charset=utf-8"}
             if nombre in tipos:
                 return self._archivo(CARPETA_EDITOR / nombre, tipos[nombre])
             return self._json({"error": "no existe"}, 404)
@@ -560,7 +781,14 @@ class Editor(SimpleHTTPRequestHandler):
                     parecidas = difflib.get_close_matches(nombre, [a.stem for a in todas()], 5, 0.5)
                     return self._json({"error": "No hay ninguna página que se llame «%s»." % nombre,
                                        "parecidas": parecidas}, 404)
-                return self._json(leer_pagina(archivo))
+                return self._json(dict(leer_pagina(archivo), mapas=mapas_de(archivo.stem)))
+            if url.path == "/api/mapas":
+                return self._json({"mapas": mapas_que_hay()})
+            if url.path == "/api/mapa":
+                archivo = ruta_de_mapa((pregunta.get("archivo") or [""])[0])
+                if not archivo:
+                    return self._json({"error": "Ese mapa no está."}, 404)
+                return self._json(leer_mapa(archivo))
             return self._json({"error": "no existe"}, 404)
         # El sitio: sin las herramientas ni lo escondido.
         # (Las imágenes de la wiki sí: el editor enseña la que pone cada
@@ -595,11 +823,26 @@ class Editor(SimpleHTTPRequestHandler):
                 return self._json({"ok": True, "pagina": leer_pagina(archivo)})
             if url.path == "/api/imagen":
                 return self._json(subir_imagen(peticion))
+            if url.path == "/api/mapa/nuevo":
+                return self._json(nuevo_mapa(peticion))
+            if url.path in ("/api/mapa/guardar", "/api/mapa/imagen"):
+                # (En la de la imagen, «archivo» es cómo se llamaba la
+                # imagen subida; el mapa va en «mapa».)
+                archivo = ruta_de_mapa(peticion.get("mapa" if url.path == "/api/mapa/imagen" else "archivo"))
+                if not archivo:
+                    return self._json({"error": "Ese mapa ya no está."})
+                if url.path == "/api/mapa/imagen":
+                    return self._json(traer_imagen_de_mapa(peticion, archivo.stem))
+                return self._json(guardar_mapa(archivo, peticion.get("datos")))
             if url.path == "/api/pasar":
                 hecho = pasar_a_la_web()
                 nombre = str(peticion.get("nombre") or "")
                 if nombre:
                     hecho["url"] = url_de_la_pagina(nombre)
+                mapa = ruta_de_mapa(peticion.get("mapa"))
+                if mapa:
+                    datos = _leer_cmap(mapa) or {}
+                    hecho["url"] = url_de_la_pagina(str(datos.get("title") or mapa.stem))
                 return self._json(hecho)
         except Exception as error:  # que el editor diga qué ha pasado, y no se quede colgado
             return self._json({"error": "Algo ha fallado: %s" % error}, 500)

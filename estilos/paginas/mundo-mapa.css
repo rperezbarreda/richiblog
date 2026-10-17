@@ -263,8 +263,174 @@ html:not(.js) .mapa-ayuda {
 
 .mapa-dibujos.es-apagada,
 .mapa-formas.es-apagada,
-.mapa-pines.es-apagada {
+.mapa-pines.es-apagada,
+.mapa-lineas.es-apagada {
     display: none;
+}
+
+/* LOS CAMINOS Y LOS RÍOS. Se distinguen por la forma de la raya, no solo
+   por el color: el río, gordo y seguido; el camino, a trazos. El color
+   lo pone el .cmap si lo trae (stroke="…"); si no, éstos. Los colores
+   son fijos y no del tema: van encima del dibujo del mapa, que es el
+   mismo en cualquier tema. */
+.mapa-linea {
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    pointer-events: none;
+    /* El grosor, en píxeles de la PANTALLA y no del mapa: en un mapa
+       grande visto entero, las rayas del grosor del mapa salían de un
+       píxel y no se veían. Así miden lo mismo a cualquier zoom. */
+    vector-effect: non-scaling-stroke;
+}
+
+.mapa-linea.es-rio {
+    stroke-width: 4px;
+    stroke-opacity: 0.95;
+}
+
+.mapa-linea.es-rio:not([stroke]) {
+    stroke: #4aa3df;
+}
+
+/* El camino, a trazos y con un borde oscuro (la sombra) para que se
+   despegue de cualquier dibujo de debajo. */
+.mapa-linea.es-camino {
+    stroke-width: 3.5px;
+    stroke-opacity: 0.95;
+    stroke-dasharray: 10px 7px;
+    filter: drop-shadow(0 0 1.5px #1b1020);
+}
+
+.mapa-linea.es-camino:not([stroke]) {
+    stroke: #f0dfb4;
+}
+
+.mapa-linea-toque {
+    stroke: transparent;
+    stroke-width: 18px;
+    vector-effect: non-scaling-stroke;
+    pointer-events: stroke;
+}
+
+.mapa-linea-sitio.es-enlace {
+    cursor: pointer;
+}
+
+.mapa-linea-sitio.es-enlace:hover .mapa-linea,
+.mapa-linea-sitio.esta-mirado .mapa-linea {
+    stroke-opacity: 1;
+    filter: drop-shadow(0 0 3px #ffffff);
+}
+
+/* LOS TIPOS DE SITIO. Cada uno con su símbolo (lo dibuja
+   mundo_mapas._simbolo_de_pin); aquí sus colores, con un borde oscuro
+   para que se despeguen de cualquier dibujo de debajo. */
+.mapa-pin[class*="es-"] .mapa-pin-bola {
+    stroke: #1b1020;
+    fill-opacity: 1;
+}
+
+.mapa-pin.es-capital .mapa-pin-bola {
+    fill: #f5ce6c;
+}
+
+.mapa-pin.es-ciudad .mapa-pin-bola {
+    fill: #f4f1f7;
+}
+
+.mapa-pin.es-pueblo .mapa-pin-bola {
+    fill: #e0c9a6;
+}
+
+.mapa-pin.es-fortaleza .mapa-pin-bola {
+    fill: #b9b3c2;
+}
+
+.mapa-pin.es-ruina .mapa-pin-bola {
+    fill: #8d8478;
+    stroke-dasharray: 4 3;
+}
+
+.mapa-pin-marca {
+    fill: #1b1020;
+    pointer-events: none;
+}
+
+.mapa-pin-marca.es-raya {
+    fill: none;
+    stroke: #1b1020;
+}
+
+.mapa-pin[class*="es-"].es-enlace:hover .mapa-pin-bola,
+.mapa-pin[class*="es-"].esta-mirado .mapa-pin-bola {
+    stroke: var(--yellow);
+}
+
+/* LA LEYENDA, encima de la lista: qué es cada símbolo de ESTE mapa. */
+.mapa-leyenda ul {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 20px;
+    margin: 0 0 18px;
+    padding: 0;
+    list-style: none;
+    color: var(--white);
+    font-size: 0.9375rem;
+}
+
+.mapa-leyenda li {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.mapa-leyenda-marca {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.6em;
+    height: 1.6em;
+    border: 2px solid #1b1020;
+    border-radius: 50%;
+    background: #f4f1f7;
+    color: #1b1020;
+    font-size: 0.875rem;
+    line-height: 1;
+}
+
+.mapa-leyenda-marca.es-capital {
+    background: #f5ce6c;
+}
+
+.mapa-leyenda-marca.es-pueblo {
+    background: #e0c9a6;
+}
+
+.mapa-leyenda-marca.es-fortaleza {
+    border-radius: 0;
+    background: #b9b3c2;
+}
+
+.mapa-leyenda-marca.es-ruina {
+    border-style: dashed;
+    background: #8d8478;
+}
+
+.mapa-leyenda-marca.linea {
+    width: 2.4em;
+    height: 0;
+    border: 0;
+    border-radius: 0;
+    background: none;
+}
+
+.mapa-leyenda-marca.linea.es-rio {
+    border-top: 5px solid #4aa3df;
+}
+
+.mapa-leyenda-marca.linea.es-camino {
+    border-top: 4px dashed #f0dfb4;
+    filter: drop-shadow(0 0 1px #1b1020);
 }
 
 /* EL DIBUJO: las formas que no tienen nombre ni enlace (fronteras, costas,

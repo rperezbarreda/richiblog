@@ -1,0 +1,20 @@
+{
+  "version": "1.0",
+  "title": "Mapa del Reino de Prunia",
+  "page": "Reino de Prunia",
+  "width": 1920,
+  "height": 1164,
+  "layers": [
+    {
+      "id": "base",
+      "name": "Mapa",
+      "image": "reino_de_prunia_mapa.webp",
+      "opacity": 1,
+      "zIndex": 0,
+      "visible": true
+    }
+  ],
+  "pins": [],
+  "shapes": [],
+  "lines": []
+}

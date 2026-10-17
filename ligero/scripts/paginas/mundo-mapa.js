@@ -201,6 +201,7 @@ function prepararCapasDeMapa(caja) {
 function prepararRegionesDeMapa(caja) {
     apagarConCasilla(caja, "[data-mapa-regiones]", ".mapa-dibujos, .mapa-formas");
     apagarConCasilla(caja, "[data-mapa-pines]", ".mapa-pines");
+    apagarConCasilla(caja, "[data-mapa-lineas]", ".mapa-lineas");
     prepararNivelesDeMapa(caja);
 }
 function prepararNivelesDeMapa(caja) {
