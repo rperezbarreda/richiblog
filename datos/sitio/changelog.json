@@ -1,5 +1,11 @@
 [
     {
+        "fecha": "18-10-2026",
+        "titulo": "Creación de vista de mapas regionales",
+        "cosas": [
+                "Dentro de la wiki de Cralëa ahora se puede acceder a mapas regionales de cada paós, para poder ver asentamientos, ríos, caminos y demás.",
+        ]
+    },{
         "fecha": "16-10-2026",
         "titulo": "Creación de la wiki de mi mundo homebrew y cambios en la navegación del sitio web",
         "cosas": [
