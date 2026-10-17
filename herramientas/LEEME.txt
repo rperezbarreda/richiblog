@@ -1675,10 +1675,17 @@
     - ESCRIBIR EN EL MAPA: arriba se eligen la letra, el tamaño y si va en
       cursiva; se pulsa donde va el texto y, a la derecha, se escribe (y
       se le puede cambiar todo eso, el giro y el color).
-    - EL BOTÓN FLOTANTE «ELEGIR Y MOVER», abajo a la derecha y siempre a
-      la vista (encima de la barra, que crece con los avisos): es lo que
-      más se usa. Si había un dibujo a medias con puntos de sobra, lo
-      termina en vez de perderlo.
+    - LA PALETA DE HERRAMIENTAS, como la de Photoshop: fija a la derecha
+      de la pantalla (position: fixed, nada de sticky) y siempre a la
+      vista aunque se baje por la página, desde arriba hasta la barra de
+      abajo (que crece con los avisos; mapas.js apunta lo que mide en
+      --alto-barra). Lleva las herramientas, lo que se elige de cada una
+      (qué sitio, qué raya, la letra…), a mano alzada, el imán, terminar
+      o cancelar el dibujo, deshacer y rehacer y el zoom. La página le
+      deja su hueco con un margen a la derecha. En pantallas de menos de
+      64rem va en su sitio, encima del mapa, con las herramientas en
+      filas. Al cambiar de herramienta, un dibujo a medias con puntos de
+      sobra se termina en vez de perderse.
     - EL IMÁN (casilla «Imán», encendida): lo que se pone a menos de 12
       píxeles de un sitio o de un punto se pone JUSTO ahí, y si no hay
       punto pero sí un borde, encima del borde. Así el camino llega a la

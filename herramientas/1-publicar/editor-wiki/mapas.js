@@ -1131,6 +1131,13 @@ const INSTRUCCIONES_A_MANO = "Aprieta y arrastra por donde va; al soltar, se aca
 const HERRAMIENTAS_DE_DIBUJO = ["region", "raya"];
 
 function ponerHerramienta(herramienta) {
+    // Un dibujo a medias con puntos de sobra se termina en vez de perderlo
+    // (al pasar, por ejemplo, a «Elegir y mover» para retocarlo).
+    const dibujo = estadoMapa.dibujo;
+    if (dibujo && herramienta !== estadoMapa.herramienta
+        && dibujo.puntos.length >= (dibujo.lista === "shapes" ? 3 : 2)) {
+        terminarDibujo();
+    }
     cancelarDibujo();
     estadoMapa.herramienta = herramienta;
     estadoMapa.iman = null;
@@ -1149,7 +1156,6 @@ function ponerHerramienta(herramienta) {
     });
     $("[data-mapa-escala]").hidden = herramienta !== "escala";
     estadoMapa.ratonMedida = null;
-    $("[data-mapa-flotante]").setAttribute("aria-pressed", herramienta === "elegir" ? "true" : "false");
     $('[data-mapa-solo="dibujo"]').hidden = !dibuja;
     $("[data-mapa-medir]").hidden = herramienta !== "medir";
     $("[data-mapa-instrucciones]").textContent = dibuja && $("#mapa-mano").checked
@@ -1169,8 +1175,8 @@ function empezarDibujo() {
 function mandosDeDibujo() {
     const dibujo = estadoMapa.dibujo;
     const hay = !!dibujo && dibujo.puntos.length > 0;
-    // Escondidos sin dejar de ocupar su sitio: si aparecieran de golpe, el
-    // mapa bajaría justo mientras se está pulsando en él.
+    // (Están en la paleta, que va fija: aparecer y desaparecer no mueve el
+    // mapa.)
     ["[data-mapa-terminar]", "[data-mapa-cancelar]", "[data-mapa-quitar-punto]"].forEach((s) => {
         $(s).classList.toggle("es-guardado", !hay);
     });
@@ -2246,17 +2252,9 @@ function empezarMapas() {
     opcionesMapa($("[data-mapa-tipos-raya]"), TIPOS_DE_RAYA, false);
     document.querySelectorAll("[data-mapa-letras]").forEach((s) => opcionesMapa(s, LETRAS_DE_TEXTO, false));
     $("[data-mapa-escala-otro]").addEventListener("click", empezarOtraMedida);
-    // EL BOTÓN FLOTANTE de «Elegir y mover», siempre encima de la barra de
-    // abajo (que crece con los avisos): su alto se apunta en --alto-barra.
-    $("[data-mapa-flotante]").addEventListener("click", () => {
-        const dibujo = estadoMapa.dibujo;
-        // Si había un dibujo con puntos de sobra, se termina en vez de
-        // perderlo.
-        if (dibujo && dibujo.puntos.length >= (dibujo.lista === "shapes" ? 3 : 2)) {
-            terminarDibujo();
-        }
-        ponerHerramienta("elegir");
-    });
+    // LA PALETA de herramientas va fija a la derecha, de arriba hasta la
+    // barra de abajo (que crece con los avisos): su alto se apunta en
+    // --alto-barra.
     const barra = $("[data-barra-mapa]");
     const apuntarAlto = () => document.documentElement.style.setProperty("--alto-barra", barra.offsetHeight + "px");
     if (window.ResizeObserver) {

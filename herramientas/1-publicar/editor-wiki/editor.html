@@ -152,65 +152,73 @@
         <section class="vista" data-vista="mapa" aria-labelledby="t-mapa" hidden>
             <h1 id="t-mapa" data-mapa-titulo></h1>
             <p class="ayuda" data-mapa-archivo></p>
-            <fieldset class="herramientas">
-                <legend>Qué hacer en el mapa</legend>
-                <label class="herramienta"><input type="radio" name="herramienta" value="elegir" checked>
-                    <span aria-hidden="true">✋</span> Elegir y mover</label>
-                <label class="herramienta"><input type="radio" name="herramienta" value="pin">
-                    <span aria-hidden="true">📍</span> Poner un sitio</label>
-                <label class="herramienta"><input type="radio" name="herramienta" value="region">
-                    <span aria-hidden="true">⬠</span> Pintar una región</label>
-                <label class="herramienta"><input type="radio" name="herramienta" value="raya">
-                    <span aria-hidden="true">〰</span> Pintar un camino, un río…</label>
-                <label class="herramienta"><input type="radio" name="herramienta" value="texto">
-                    <span aria-hidden="true">𝐀</span> Escribir en el mapa</label>
-                <label class="herramienta"><input type="radio" name="herramienta" value="medir">
-                    <span aria-hidden="true">📏</span> Medir</label>
-                <label class="herramienta"><input type="radio" name="herramienta" value="escala">
-                    <span aria-hidden="true">⟷</span> Poner la escala</label>
-            </fieldset>
-            <div class="fila mapa-opciones">
-                <div class="mapa-opcion" data-mapa-solo="pin">
-                    <label for="mapa-tipo-nuevo">Qué sitio</label>
-                    <select id="mapa-tipo-nuevo" data-mapa-tipos-pin></select>
-                </div>
-                <div class="mapa-opcion" data-mapa-solo="raya">
-                    <label for="mapa-tipo-raya">Qué raya</label>
-                    <select id="mapa-tipo-raya" data-mapa-tipos-raya></select>
-                </div>
-                <div class="mapa-opcion" data-mapa-solo="texto">
-                    <label for="mapa-letra-nueva">Letra</label>
-                    <select id="mapa-letra-nueva" data-mapa-letras></select>
-                </div>
-                <div class="mapa-opcion mapa-opcion-corta" data-mapa-solo="texto">
-                    <label for="mapa-tamano-nuevo">Tamaño</label>
-                    <input id="mapa-tamano-nuevo" type="number" min="6" step="1" inputmode="numeric">
-                </div>
-                <label class="opcion mapa-opcion" data-mapa-solo="texto">
-                    <input type="checkbox" id="mapa-cursiva-nueva" checked> Cursiva</label>
-                <label class="opcion mapa-opcion" data-mapa-solo="dibujo">
-                    <input type="checkbox" id="mapa-mano"> A mano alzada (arrastrando)</label>
-                <label class="opcion mapa-opcion">
-                    <input type="checkbox" id="mapa-iman" checked aria-describedby="ayuda-iman"> Imán</label>
-                <p class="ayuda mapa-opcion-ayuda" id="ayuda-iman">Lo que pones se engancha a los puntos y bordes
-                    que tenga cerca (con Alt pulsado, no).</p>
-            </div>
             <p class="ayuda mapa-instrucciones" data-mapa-instrucciones aria-live="polite"></p>
-            <div class="fila mapa-mandos">
-                <button type="button" data-mapa-zoom="-1" aria-label="Alejar">−</button>
-                <span class="mapa-cuanto" data-mapa-cuanto>100%</span>
-                <button type="button" data-mapa-zoom="1" aria-label="Acercar">+</button>
-                <button type="button" data-mapa-ajustar>Verlo entero</button>
-                <button type="button" data-mapa-deshacer disabled>↶ Deshacer <span class="tecla">Ctrl+Z</span></button>
-                <button type="button" data-mapa-rehacer disabled>↷ Rehacer <span class="tecla">Ctrl+Y</span></button>
-                <button type="button" data-mapa-quitar-punto>Quitar el último punto</button>
-                <button type="button" class="principal" data-mapa-terminar>Terminar el dibujo</button>
-                <button type="button" data-mapa-cancelar>Cancelar</button>
-            </div>
-            <!-- Siempre a mano (lo que más se usa), fijo abajo a la derecha,
-                 encima de la barra. -->
-            <button type="button" class="mapa-flotante" data-mapa-flotante aria-pressed="true">
-                <span aria-hidden="true">✋</span> Elegir y mover</button>
+            <!-- LA PALETA DE HERRAMIENTAS, como la de Photoshop: fija a la
+                 derecha (position: fixed, no sticky) y siempre a la vista
+                 aunque se baje por la página. En pantallas estrechas va en
+                 su sitio, encima del mapa. -->
+            <aside class="mapa-paleta" aria-label="Herramientas del mapa">
+                <fieldset class="herramientas">
+                    <legend>Herramientas</legend>
+                    <label class="herramienta"><input type="radio" name="herramienta" value="elegir" checked>
+                        <span class="herramienta-icono" aria-hidden="true">✋</span> Elegir y mover</label>
+                    <label class="herramienta"><input type="radio" name="herramienta" value="pin">
+                        <span class="herramienta-icono" aria-hidden="true">📍</span> Poner un sitio</label>
+                    <label class="herramienta"><input type="radio" name="herramienta" value="region">
+                        <span class="herramienta-icono" aria-hidden="true">⬠</span> Pintar una región</label>
+                    <label class="herramienta"><input type="radio" name="herramienta" value="raya">
+                        <span class="herramienta-icono" aria-hidden="true">〰</span> Pintar una raya</label>
+                    <label class="herramienta"><input type="radio" name="herramienta" value="texto">
+                        <span class="herramienta-icono" aria-hidden="true">𝐀</span> Escribir</label>
+                    <label class="herramienta"><input type="radio" name="herramienta" value="medir">
+                        <span class="herramienta-icono" aria-hidden="true">📏</span> Medir</label>
+                    <label class="herramienta"><input type="radio" name="herramienta" value="escala">
+                        <span class="herramienta-icono" aria-hidden="true">⟷</span> Poner la escala</label>
+                </fieldset>
+                <div class="mapa-opciones">
+                    <div class="mapa-opcion" data-mapa-solo="pin">
+                        <label for="mapa-tipo-nuevo">Qué sitio</label>
+                        <select id="mapa-tipo-nuevo" data-mapa-tipos-pin></select>
+                    </div>
+                    <div class="mapa-opcion" data-mapa-solo="raya">
+                        <label for="mapa-tipo-raya">Qué raya</label>
+                        <select id="mapa-tipo-raya" data-mapa-tipos-raya></select>
+                    </div>
+                    <div class="mapa-opcion" data-mapa-solo="texto">
+                        <label for="mapa-letra-nueva">Letra</label>
+                        <select id="mapa-letra-nueva" data-mapa-letras></select>
+                    </div>
+                    <div class="mapa-opcion" data-mapa-solo="texto">
+                        <label for="mapa-tamano-nuevo">Tamaño</label>
+                        <input id="mapa-tamano-nuevo" type="number" min="6" step="1" inputmode="numeric">
+                    </div>
+                    <label class="opcion mapa-opcion" data-mapa-solo="texto">
+                        <input type="checkbox" id="mapa-cursiva-nueva" checked> Cursiva</label>
+                    <label class="opcion mapa-opcion" data-mapa-solo="dibujo">
+                        <input type="checkbox" id="mapa-mano"> A mano alzada</label>
+                    <label class="opcion mapa-opcion" title="Lo que pones se engancha a los puntos y bordes que tenga cerca (con Alt pulsado, no).">
+                        <input type="checkbox" id="mapa-iman" checked aria-describedby="ayuda-iman"> Imán</label>
+                    <p class="solo-lector" id="ayuda-iman">Lo que pones se engancha a los puntos y bordes que tenga
+                        cerca (con Alt pulsado, no).</p>
+                </div>
+                <div class="mapa-paleta-dibujo">
+                    <button type="button" class="principal" data-mapa-terminar>Terminar el dibujo</button>
+                    <button type="button" data-mapa-quitar-punto>Quitar el último punto</button>
+                    <button type="button" data-mapa-cancelar>Cancelar</button>
+                </div>
+                <div class="mapa-paleta-fila">
+                    <button type="button" data-mapa-deshacer disabled aria-label="Deshacer (Ctrl+Z)"
+                            title="Deshacer (Ctrl+Z)">↶</button>
+                    <button type="button" data-mapa-rehacer disabled aria-label="Rehacer (Ctrl+Y)"
+                            title="Rehacer (Ctrl+Y)">↷</button>
+                </div>
+                <div class="mapa-paleta-fila">
+                    <button type="button" data-mapa-zoom="-1" aria-label="Alejar" title="Alejar">−</button>
+                    <span class="mapa-cuanto" data-mapa-cuanto>100%</span>
+                    <button type="button" data-mapa-zoom="1" aria-label="Acercar" title="Acercar">+</button>
+                </div>
+                <button type="button" class="mapa-paleta-ancho" data-mapa-ajustar>Verlo entero</button>
+            </aside>
             <div class="mapa-editor">
                 <div class="mapa-izquierda">
                     <div class="mapa-lienzo" data-mapa-lienzo tabindex="0" role="application"

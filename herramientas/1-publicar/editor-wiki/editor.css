@@ -691,6 +691,120 @@ body.en-mapa main {
     min-width: 0;
 }
 
+/* LA PALETA DE HERRAMIENTAS. En pantalla ancha, fija a la derecha (como
+   la de Photoshop) y de arriba abajo hasta la barra, que mide lo que
+   apunte mapas.js en --alto-barra; si no cabe, con su propia barra para
+   bajar. La página le deja su hueco con un margen a la derecha. En
+   pantalla estrecha va en su sitio, encima del mapa. */
+.mapa-paleta {
+    margin-bottom: 16px;
+    padding: 12px;
+    border: 2px solid var(--acento);
+    background: var(--caja);
+}
+
+/* En pantalla estrecha, las herramientas en filas y no en columna. */
+@media (max-width: 63.99rem) {
+    .mapa-paleta fieldset.herramientas {
+        flex-direction: row;
+        flex-wrap: wrap;
+    }
+
+    .mapa-paleta label.herramienta {
+        width: auto;
+    }
+}
+
+@media (min-width: 64rem) {
+    /* El hueco de la paleta, para todo menos la barra de abajo (la
+       paleta acaba encima de ella). */
+    body.en-mapa {
+        padding-right: calc(15rem + 24px);
+    }
+
+    .mapa-paleta {
+        position: fixed;
+        top: 12px;
+        right: 12px;
+        bottom: calc(var(--alto-barra, 80px) + 12px);
+        z-index: 6;
+        width: 15rem;
+        margin: 0;
+        overflow-y: auto;
+        box-shadow: 0 6px 18px rgba(0, 0, 0, 0.35);
+    }
+}
+
+.mapa-paleta .herramientas {
+    flex-direction: column;
+    gap: 6px;
+}
+
+.mapa-paleta .herramienta {
+    width: 100%;
+    min-height: 46px;
+    padding: 6px 10px;
+}
+
+.herramienta-icono {
+    display: inline-block;
+    width: 1.4em;
+    text-align: center;
+    font-size: 1.15em;
+}
+
+.mapa-paleta .mapa-opciones {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin: 12px 0;
+}
+
+.mapa-paleta .mapa-opciones .mapa-opcion {
+    flex: none;
+    width: 100%;
+}
+
+.mapa-paleta select,
+.mapa-paleta input:not([type]),
+.mapa-paleta input[type="number"] {
+    min-height: 44px;
+    padding: 6px 8px;
+}
+
+.mapa-paleta-dibujo {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-bottom: 12px;
+}
+
+.mapa-paleta-dibujo .es-guardado {
+    display: none;
+}
+
+.mapa-paleta-fila {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 8px;
+}
+
+.mapa-paleta-fila button {
+    flex: 1 1 0;
+    min-width: 0;
+    padding: 6px;
+    font-size: 1.3rem;
+}
+
+.mapa-paleta-fila .mapa-cuanto {
+    flex: 0 0 4em;
+}
+
+.mapa-paleta-ancho {
+    width: 100%;
+}
+
 .herramientas {
     display: flex;
     flex-wrap: wrap;
@@ -768,41 +882,8 @@ body.en-mapa main {
     accent-color: var(--acento);
 }
 
-.mapa-opciones .mapa-opcion-corta {
-    flex: 0 1 8rem;
-}
-
-/* EL BOTÓN FLOTANTE de «Elegir y mover»: fijo abajo a la derecha, justo
-   encima de la barra (mapas.js apunta lo que mide en --alto-barra). */
-.mapa-flotante {
-    position: fixed;
-    right: 20px;
-    bottom: calc(var(--alto-barra, 80px) + 14px);
-    z-index: 6;
-    min-height: 60px;
-    padding: 10px 20px;
-    border-width: 3px;
-    box-shadow: 0 0 0 3px var(--fondo), 0 6px 18px rgba(0, 0, 0, 0.45);
-    font-size: 1.1rem;
-    font-weight: 700;
-}
-
-.mapa-flotante[aria-pressed="true"] {
-    background: var(--acento);
-    color: var(--sobre-acento);
-}
-
 .mapa-medir-escala {
     margin-top: 12px;
-}
-
-.mapa-opcion-ayuda {
-    flex: 1 1 100%;
-    margin: 0;
-}
-
-.mapa-mandos .tecla {
-    margin-left: 4px;
 }
 
 .mapa-medida {
@@ -834,18 +915,6 @@ body.en-mapa main {
 
 .mapa-instrucciones {
     min-height: 3em;
-}
-
-.mapa-mandos {
-    margin-bottom: 10px;
-}
-
-.mapa-mandos button {
-    min-width: 48px;
-}
-
-.mapa-mandos .es-guardado {
-    visibility: hidden;
 }
 
 .mapa-cuanto {
