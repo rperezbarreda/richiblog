@@ -30,7 +30,7 @@
       "x": 528.1,
       "y": 810.7,
       "label": "Brujamar",
-      "shape": "redondo",
+      "shape": "tipo",
       "size": "pequeno",
       "kind": "puerto"
     },
@@ -39,7 +39,7 @@
       "x": 242,
       "y": 1005.9,
       "label": "Olaspuras",
-      "shape": "redondo",
+      "shape": "tipo",
       "size": "pequeno",
       "kind": "puerto"
     },
@@ -47,7 +47,7 @@
       "id": "4e9decd152f8f2a1",
       "x": 266,
       "y": 1156,
-      "shape": "redondo",
+      "shape": "tipo",
       "size": "pequeno",
       "label": "Llanonegro",
       "kind": "pueblo"
@@ -57,7 +57,7 @@
       "x": 97.2,
       "y": 1231.1,
       "label": "Sangrorrisco",
-      "shape": "redondo",
+      "shape": "tipo",
       "size": "pequeno",
       "kind": "fortaleza"
     },
@@ -66,7 +66,7 @@
       "x": 331.8,
       "y": 1475.8,
       "label": "Altoceniza",
-      "shape": "redondo",
+      "shape": "tipo",
       "size": "pequeno",
       "kind": "pueblo"
     },
@@ -75,7 +75,7 @@
       "x": 484.4,
       "y": 1211.1,
       "label": "Aguabrea",
-      "shape": "redondo",
+      "shape": "tipo",
       "size": "pequeno",
       "kind": "pueblo"
     },
@@ -84,7 +84,7 @@
       "x": 713.3,
       "y": 1065.4,
       "label": "Pasobrea",
-      "shape": "redondo",
+      "shape": "tipo",
       "size": "pequeno",
       "kind": "ruina"
     },
@@ -92,7 +92,7 @@
       "id": "e14935e24b7c239e",
       "x": 637.2,
       "y": 882.5,
-      "shape": "redondo",
+      "shape": "tipo",
       "size": "pequeno",
       "label": "Pasoaciago",
       "kind": "pueblo"
@@ -102,7 +102,7 @@
       "x": 685,
       "y": 670.1,
       "label": "Petrapura",
-      "shape": "redondo",
+      "shape": "tipo",
       "size": "pequeno",
       "kind": "puerto"
     },
@@ -111,7 +111,7 @@
       "x": 860.7,
       "y": 710.9,
       "label": "Pozovalor",
-      "shape": "redondo",
+      "shape": "tipo",
       "size": "pequeno",
       "kind": "pueblo"
     },
@@ -120,7 +120,7 @@
       "x": 985.9,
       "y": 848.6,
       "label": "Simavoraz",
-      "shape": "redondo",
+      "shape": "tipo",
       "size": "pequeno",
       "kind": "ruina"
     },
@@ -129,7 +129,7 @@
       "x": 1402.2,
       "y": 847.7,
       "label": "Cumbrehueso",
-      "shape": "redondo",
+      "shape": "tipo",
       "size": "pequeno",
       "kind": "fortaleza"
     },
@@ -138,7 +138,7 @@
       "x": 1257.6,
       "y": 588.7,
       "label": "Bajoceleste",
-      "shape": "redondo",
+      "shape": "tipo",
       "size": "pequeno",
       "kind": "pueblo"
     },
@@ -147,7 +147,7 @@
       "x": 1436.1,
       "y": 407.3,
       "label": "Forjaceleste",
-      "shape": "redondo",
+      "shape": "tipo",
       "size": "pequeno",
       "kind": "templo"
     },
@@ -156,7 +156,7 @@
       "x": 1615.5,
       "y": 514.4,
       "label": "Monteleña",
-      "shape": "redondo",
+      "shape": "tipo",
       "size": "pequeno",
       "kind": "pueblo"
     },
@@ -165,7 +165,7 @@
       "x": 1676.9,
       "y": 731.2,
       "label": "Ambraversa",
-      "shape": "redondo",
+      "shape": "tipo",
       "size": "pequeno",
       "kind": "puerto"
     },
@@ -174,7 +174,7 @@
       "x": 1665.9,
       "y": 925.8,
       "label": "Gallovalle",
-      "shape": "redondo",
+      "shape": "tipo",
       "size": "pequeno",
       "kind": "pueblo"
     },
@@ -182,7 +182,7 @@
       "id": "69f629da5077de15",
       "x": 2091.9,
       "y": 943,
-      "shape": "redondo",
+      "shape": "tipo",
       "size": "pequeno",
       "label": "Flacobeso",
       "kind": "pueblo"
@@ -192,7 +192,7 @@
       "x": 2277.1,
       "y": 1165.7,
       "label": "Vistaespejo",
-      "shape": "redondo",
+      "shape": "tipo",
       "size": "pequeno",
       "kind": "puerto"
     },
@@ -201,7 +201,7 @@
       "x": 2600,
       "y": 998,
       "label": "Brisaeterna",
-      "shape": "redondo",
+      "shape": "tipo",
       "size": "pequeno",
       "kind": "templo"
     },
@@ -210,7 +210,7 @@
       "x": 2368.8,
       "y": 829.4,
       "label": "Puertosoñado",
-      "shape": "redondo",
+      "shape": "tipo",
       "size": "pequeno",
       "kind": "puerto"
     },
@@ -219,7 +219,7 @@
       "x": 2154.3,
       "y": 644.4,
       "label": "Fosalumbre",
-      "shape": "redondo",
+      "shape": "tipo",
       "size": "pequeno",
       "kind": "templo"
     },
@@ -228,7 +228,7 @@
       "x": 1990,
       "y": 419.7,
       "label": "Villaespumosa",
-      "shape": "redondo",
+      "shape": "tipo",
       "size": "pequeno",
       "kind": "ciudad"
     },
@@ -237,7 +237,7 @@
       "x": 1399,
       "y": 157,
       "label": "Cuelgacuervos",
-      "shape": "redondo",
+      "shape": "tipo",
       "size": "pequeno",
       "kind": "puerto"
     },
@@ -245,7 +245,7 @@
       "id": "805a18758943a483",
       "x": 934.6,
       "y": 239.7,
-      "shape": "redondo",
+      "shape": "tipo",
       "size": "pequeno",
       "label": "Pinzacharcos",
       "kind": "ciudad"
@@ -255,7 +255,7 @@
       "x": 887.1,
       "y": 482.7,
       "label": "Vegasombría",
-      "shape": "redondo",
+      "shape": "tipo",
       "size": "pequeno",
       "kind": "ciudad"
     },
@@ -263,7 +263,7 @@
       "id": "7619bc0120f17b8c",
       "x": 2600,
       "y": 647.8,
-      "shape": "redondo",
+      "shape": "tipo",
       "size": "pequeno",
       "label": "Valdescalofrío",
       "kind": "torre"

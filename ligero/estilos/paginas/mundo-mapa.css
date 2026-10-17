@@ -460,19 +460,16 @@ html:not(.js) .mapa-ayuda {
     font-size: 0.875rem;
     line-height: 1;
 }
-.mapa-leyenda-marca.es-capital {
-    background: #f5ce6c;
-}
-.mapa-leyenda-marca.es-pueblo {
-    background: #e0c9a6;
-}
-.mapa-leyenda-marca.es-fortaleza {
+.mapa-leyenda-marca.es-dibujo {
+    width: 34px;
+    height: 34px;
+    border: 0;
     border-radius: 0;
-    background: #b9b3c2;
+    background: none;
 }
-.mapa-leyenda-marca.es-ruina {
-    border-style: dashed;
-    background: #8d8478;
+.mapa-leyenda-marca.es-dibujo svg {
+    display: block;
+    overflow: visible;
 }
 .mapa-leyenda-marca.linea {
     width: 2.4em;

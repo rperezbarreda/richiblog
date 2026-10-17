@@ -323,7 +323,8 @@ ANCHO_DE_RAYA = {"camino": 4.5, "sendero": 2.5, "rio": 4, "frontera": 3, "mariti
 TRAZOS_DE_RAYA = ("solid", "dashed", "dotted", "dashdot")
 # Las letras de los textos sueltos: cada una es una clase en
 # mundo-mapa.css (es-letra-…), con las fuentes que ya carga la web.
-FORMAS_DE_EMBLEMA = ("escudo", "bandera", "redondo")
+FORMAS_DE_EMBLEMA = ("tipo", "escudo", "bandera", "redondo", "cuadrado", "rombo", "hexagono", "octogono",
+                     "triangulo", "triangulo-abajo", "casa", "torre", "cupula", "pildora", "estrella", "cruz")
 TAMANOS_DE_EMBLEMA = {"pequeno": 0.8, "mediano": 1.2, "grande": 1.7}
 
 
@@ -448,20 +449,102 @@ def _emblema(crudo):
             "color": _color(crudo.get("color"))}
 
 
-def _forma_de_emblema(forma, r):
-    """El contorno de un emblema de «radio» r, centrado en (0, 0), y lo
-    que mide de alto (para poner el nombre debajo)."""
+# LA FORMA DE CADA TIPO DE SITIO: la de su bola (con su símbolo dentro) y
+# la que toma como emblema con «según su tipo» ("shape": "tipo"). Así un
+# pueblo, una ciudad y una ruina se distinguen por la forma y no solo por
+# el color: círculo, hexágono, rombo…
+FORMA_POR_TIPO = {"capital": "escudo", "ciudad": "hexagono", "pueblo": "redondo", "fortaleza": "cuadrado",
+                  "ruina": "rombo", "puerto": "octogono", "templo": "casa", "torre": "torre",
+                  "cueva": "cupula", "mina": "triangulo-abajo", "puente": "pildora", "batalla": "estrella",
+                  "mazmorra": "cruz", "campamento": "triangulo"}
+
+
+def _poligono(puntos):
+    return "M" + " L".join("%s %s" % (_cifra(x), _cifra(y)) for x, y in puntos) + " Z"
+
+
+def _forma_de_emblema(forma, r, tipo=""):
+    """El contorno de un emblema (o de la bola de un sitio) de «radio» r,
+    centrado en (0, 0), y lo que baja por debajo (para poner el nombre).
+    forma "tipo": la de su tipo (FORMA_POR_TIPO)."""
     c = _cifra
+    if forma == "tipo":
+        forma = FORMA_POR_TIPO.get(tipo, "redondo")
     if forma == "bandera":
-        return ("M%s %s H%s V%s H%s Z" % (c(-1.3 * r), c(-0.9 * r), c(1.3 * r), c(0.9 * r), c(-1.3 * r))), 0.9 * r
+        return _poligono([(-1.3 * r, -0.9 * r), (1.3 * r, -0.9 * r), (1.3 * r, 0.9 * r), (-1.3 * r, 0.9 * r)]), 0.9 * r
     if forma == "redondo":
         return ("M%s 0 A%s %s 0 1 0 %s 0 A%s %s 0 1 0 %s 0 Z"
                 % (c(-1.2 * r), c(1.2 * r), c(1.2 * r), c(1.2 * r), c(1.2 * r), c(1.2 * r), c(-1.2 * r))), 1.2 * r
+    if forma == "cuadrado":
+        return _poligono([(-1.05 * r, -1.05 * r), (1.05 * r, -1.05 * r), (1.05 * r, 1.05 * r), (-1.05 * r, 1.05 * r)]), 1.05 * r
+    if forma == "rombo":
+        return _poligono([(0, -1.4 * r), (1.2 * r, 0), (0, 1.4 * r), (-1.2 * r, 0)]), 1.4 * r
+    if forma in ("hexagono", "octogono"):
+        lados = 6 if forma == "hexagono" else 8
+        giro = -90 if lados == 6 else -90 + 22.5
+        radio = 1.25 * r if lados == 6 else 1.2 * r
+        puntos = [(radio * math.cos(math.radians(giro + k * 360 / lados)),
+                   radio * math.sin(math.radians(giro + k * 360 / lados))) for k in range(lados)]
+        return _poligono(puntos), max(y for _, y in puntos)
+    if forma == "triangulo":
+        return _poligono([(0, -1.45 * r), (1.35 * r, 0.95 * r), (-1.35 * r, 0.95 * r)]), 0.95 * r
+    if forma == "triangulo-abajo":
+        return _poligono([(-1.35 * r, -0.95 * r), (1.35 * r, -0.95 * r), (0, 1.45 * r)]), 1.45 * r
+    if forma == "casa":
+        return _poligono([(-1.05 * r, 1.05 * r), (-1.05 * r, -0.2 * r), (0, -1.35 * r), (1.05 * r, -0.2 * r),
+                          (1.05 * r, 1.05 * r)]), 1.05 * r
+    if forma == "torre":
+        return _poligono([(-0.8 * r, 1.2 * r), (-0.8 * r, -1.35 * r), (0.8 * r, -1.35 * r), (0.8 * r, 1.2 * r)]), 1.2 * r
+    if forma == "cupula":
+        return ("M%s %s V0 A%s %s 0 0 1 %s 0 V%s Z" % (c(-1.2 * r), c(0.9 * r), c(1.2 * r), c(1.2 * r), c(1.2 * r),
+                                                     c(0.9 * r))), 0.9 * r
+    if forma == "pildora":
+        return ("M%s %s H%s A%s %s 0 0 1 %s %s H%s A%s %s 0 0 1 %s %s Z"
+                % (c(-0.6 * r), c(-0.8 * r), c(0.6 * r), c(0.8 * r), c(0.8 * r), c(0.6 * r), c(0.8 * r),
+                   c(-0.6 * r), c(0.8 * r), c(0.8 * r), c(-0.6 * r), c(-0.8 * r))), 0.8 * r
+    if forma == "estrella":
+        puntos = []
+        for k in range(8):
+            largo = 1.45 * r if k % 2 == 0 else 0.6 * r
+            angulo = math.radians(-90 + k * 45)
+            puntos.append((largo * math.cos(angulo), largo * math.sin(angulo)))
+        return _poligono(puntos), 1.45 * r
+    if forma == "cruz":
+        a, b = 0.45 * r, 1.3 * r
+        return _poligono([(-a, -b), (a, -b), (a, -a), (b, -a), (b, a), (a, a), (a, b), (-a, b), (-a, a), (-b, a),
+                          (-b, -a), (-a, -a)]), b
     # El escudo de siempre: arriba recto y abajo en punta redondeada.
     return ("M%s %s H%s V0 C%s %s %s %s 0 %s C%s %s %s %s %s 0 Z"
             % (c(-1.1 * r), c(-1.3 * r), c(1.1 * r),
                c(1.1 * r), c(0.9 * r), c(0.4 * r), c(1.15 * r), c(1.35 * r),
                c(-0.4 * r), c(1.15 * r), c(-1.1 * r), c(0.9 * r), c(-1.1 * r))), 1.35 * r
+
+
+def _marca_de_leyenda(tipo, suyos, emblema_a, n):
+    """Un SVG pequeño con un sitio de ese tipo tal y como se ve en el mapa
+    (para la leyenda). Con las mismas clases que en el mapa, así que lo
+    pinta la misma hoja de estilos."""
+    r = 10
+    emblemas = [p for p in suyos if p.get("forma")]
+    if emblemas:
+        ejemplo = next((p for p in emblemas if p.get("imagen")), emblemas[0])
+        contorno, _ = _forma_de_emblema(ejemplo["forma"], r, tipo)
+        url = emblema_a(ejemplo["imagen"]) if (emblema_a and ejemplo.get("imagen")) else ""
+        recorte = "mapa-leyenda-recorte-%d" % n
+        dentro = ['<clipPath id="%s"><path d="%s"></path></clipPath>' % (recorte, contorno),
+                  '<path class="mapa-emblema-fondo" d="%s"%s></path>'
+                  % (contorno, (' style="fill: %s"' % ejemplo["color"]) if ejemplo.get("color") else "")]
+        if url:
+            dentro.append('<image href="%s" x="-14" y="-14" width="28" height="28" preserveAspectRatio="xMidYMid slice"'
+                          ' clip-path="url(#%s)"></image>' % (html.escape(url, quote=True), recorte))
+        else:
+            dentro.append('<text class="mapa-pin-letra" x="0" y="0" font-size="11" text-anchor="middle"'
+                          ' dominant-baseline="central">%s\ufe0e</text>' % TIPOS_DE_PIN[tipo][0])
+        dentro.append('<path class="mapa-emblema-marco" d="%s" stroke-width="1.6"></path>' % contorno)
+        cuerpo = '<g class="mapa-pin mapa-emblema con-tipo es-%s">%s</g>' % (tipo, "".join(dentro))
+    else:
+        cuerpo = '<g class="mapa-pin con-tipo es-%s">%s</g>' % (tipo, _simbolo_de_pin(tipo, r * 1.15, 2, ""))
+    return ('<svg viewBox="-15 -15 30 30" width="34" height="34" focusable="false">%s</svg>' % cuerpo)
 
 
 def _escala(crudo):
@@ -496,9 +579,11 @@ def _simbolo_de_pin(tipo, radio, grosor, pintura):
                 '<path class="mapa-pin-marca" d="M%sZ"></path>'
                 % (num(r * 1.05), pintura, grosor, " L".join(puntas)))
     if tipo == "ciudad":
-        return ('<circle class="mapa-pin-bola" cx="0" cy="0" r="%s"%s stroke-width="%d"></circle>'
+        # Un hexágono con un punto: se distingue del pueblo (un círculo)
+        # por la forma, no solo por el tamaño.
+        return ('<path class="mapa-pin-bola" d="%s"%s stroke-width="%d"></path>'
                 '<circle class="mapa-pin-marca" cx="0" cy="0" r="%s"></circle>'
-                % (num(r * 0.85), pintura, grosor, num(r * 0.38)))
+                % (_forma_de_emblema("hexagono", r * 0.78)[0], pintura, grosor, num(r * 0.36)))
     if tipo == "pueblo":
         return ('<circle class="mapa-pin-bola" cx="0" cy="0" r="%s"%s stroke-width="%d"></circle>'
                 % (num(r * 0.55), pintura, grosor))
@@ -519,12 +604,14 @@ def _simbolo_de_pin(tipo, radio, grosor, pintura):
                 '<path class="mapa-pin-marca es-raya" d="%s" stroke-width="%d"></path>'
                 % (d, pintura, grosor, cruz, max(2, grosor)))
     if tipo in TIPOS_DE_PIN:
-        # Una bola con su símbolo escrito dentro (el U+FE0E de detrás pide
-        # «como letra, no como emoji de colores»).
-        return ('<circle class="mapa-pin-bola" cx="0" cy="0" r="%s"%s stroke-width="%d"></circle>'
+        # La forma de su tipo (FORMA_POR_TIPO: octógono el puerto, casa el
+        # templo, píldora el puente…) con su símbolo escrito dentro (el
+        # U+FE0E de detrás pide «como letra, no como emoji de colores»).
+        return ('<path class="mapa-pin-bola" d="%s"%s stroke-width="%d"></path>'
                 '<text class="mapa-pin-letra" x="0" y="0" font-size="%s" text-anchor="middle"'
                 ' dominant-baseline="central">%s\ufe0e</text>'
-                % (num(r * 0.95), pintura, grosor, num(r * 1.05), TIPOS_DE_PIN[tipo][0]))
+                % (_forma_de_emblema("tipo", r * 0.8, tipo)[0], pintura, grosor, num(r * 0.95),
+                   TIPOS_DE_PIN[tipo][0]))
     return ""
 
 
@@ -1124,7 +1211,9 @@ def pintar(mapa, pagina_a, mapa_a, imagen_a, detalle=None, avisar=None, region_d
             # lista. Se cuenta para decirlo al final.
             escondidos += 1
             continue
-        nombre = pin["etiqueta"] or pin["pagina"] or pin["mapa"] or "sin nombre"
+        # Sin nombre, su tipo («Puente»), y no «sin nombre».
+        nombre = (pin["etiqueta"] or pin["pagina"] or pin["mapa"]
+                  or (TIPOS_DE_PIN[pin["tipo"]][1].capitalize() if pin["tipo"] in TIPOS_DE_PIN else "sin nombre"))
         destinos = _destinos(pin, pagina_a, mapa_a)
         cuantas += 1
         cual = "s%d" % cuantas
@@ -1150,7 +1239,7 @@ def pintar(mapa, pagina_a, mapa_a, imagen_a, detalle=None, avisar=None, region_d
             # tiene imagen; el marco dorado, y el nombre debajo.
             recortes += 1
             r = radio * TAMANOS_DE_EMBLEMA[pin["tamano"]]
-            contorno, bajo = _forma_de_emblema(pin["forma"], r)
+            contorno, bajo = _forma_de_emblema(pin["forma"], r, pin["tipo"])
             url_imagen = emblema_a(pin["imagen"]) if (emblema_a and pin["imagen"]) else ""
             if pin["imagen"] and not url_imagen:
                 di("no encuentro la imagen de un emblema", pin["imagen"])
@@ -1245,17 +1334,27 @@ def pintar(mapa, pagina_a, mapa_a, imagen_a, detalle=None, avisar=None, region_d
 
     sitios.sort(key=lambda s: (_sin_tildes(s["nombre"]), s["id"]))
     # LA LEYENDA: los tipos de sitio y de raya que salen en ESTE mapa.
+    # La marca de cada tipo, COMO SE VE EN ESTE MAPA: si sus sitios van como
+    # emblema, el emblema (con la imagen del primero que la tenga: la
+    # capital, con su bandera); si no, su símbolo.
     usados = []
+    marcas = {}
     for tipo in TIPOS_DE_PIN:
-        if any(p["tipo"] == tipo and not p["escondido"] for p in mapa["pines"]):
+        suyos = [p for p in mapa["pines"] if p["tipo"] == tipo and not p["escondido"]]
+        if suyos:
             usados.append(("pin es-" + tipo, TIPOS_DE_PIN[tipo][0], TIPOS_DE_PIN[tipo][1]))
+            marcas[tipo] = _marca_de_leyenda(tipo, suyos, emblema_a, len(marcas) + 1)
     for tipo, nombre in TIPOS_DE_LINEA.items():
         if any(l["tipo"] == tipo for l in mapa.get("lineas") or []):
             usados.append(("linea es-" + tipo, "", nombre))
     leyenda = ""
     if usados or texto_escala:
-        lista = ('<ul>%s</ul>' % "".join('<li><span class="mapa-leyenda-marca %s" aria-hidden="true">%s</span>%s</li>'
-                                         % (clase, html.escape(simbolo), html.escape(nombre))
+        def marca(clase, simbolo):
+            tipo = clase[len("pin es-"):] if clase.startswith("pin es-") else ""
+            if tipo in marcas:
+                return '<span class="mapa-leyenda-marca es-dibujo" aria-hidden="true">%s</span>' % marcas[tipo]
+            return '<span class="mapa-leyenda-marca %s" aria-hidden="true">%s</span>' % (clase, html.escape(simbolo))
+        lista = ('<ul>%s</ul>' % "".join('<li>%s%s</li>' % (marca(clase, simbolo), html.escape(nombre))
                                          for clase, simbolo, nombre in usados)) if usados else ""
         escrita = ('<p class="mapa-escala-texto">%s</p>' % html.escape(texto_escala)) if texto_escala else ""
         # Con JavaScript es un panel flotante encima del mapa, que se abre

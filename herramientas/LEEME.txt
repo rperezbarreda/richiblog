@@ -1654,6 +1654,34 @@
   sin tipo; el editor los pasa a sitios al abrir el mapa (con el tipo por
   el tamaño: grande, capital; mediano, ciudad; pequeño, pueblo).
 
+  CADA TIPO DE SITIO CON SU FORMA, no solo con su color (FORMA_POR_TIPO
+  en mundo_mapas.py y en mapas.js): pueblo, círculo; ciudad, hexágono;
+  fortaleza, cuadrado; ruina, rombo; puerto, octógono; templo, casa;
+  torre, torre; cueva, cúpula; mina, triángulo hacia abajo; puente,
+  píldora; batalla, estrella; mazmorra, cruz; campamento, triángulo; la
+  capital, escudo. Los sitios con su símbolo usan esa forma para su bola
+  (la capital sigue con su estrella, la fortaleza con su torre y la ruina
+  con su aspa). Como emblema, "shape": "tipo" («con la forma de su tipo»)
+  toma la de su tipo; y hay más formas para elegir a mano: cuadrado,
+  rombo, hexágono, octógono, triángulo (y hacia abajo), casa, torre,
+  cúpula, píldora, estrella y cruz, además de escudo, bandera y medallón.
+  En el Reino de Prunia los sitios que iban de medallón pasaron a «la
+  forma de su tipo» (17-10-2026).
+
+  LA LEYENDA DIBUJA CADA TIPO COMO SE VE EN ESE MAPA (_marca_de_leyenda):
+  un SVG pequeño con las mismas clases que en el mapa; si los sitios de
+  ese tipo van como emblema, el emblema con la imagen del primero que la
+  tenga, así que la capital sale con su bandera.
+
+  UN SITIO SIN NOMBRE SE LLAMA COMO SU TIPO: «Puente», y no «sin nombre»,
+  en la lista, en el globo y en la lista del editor.
+
+  LA CAPITAL, SIEMPRE CON SU BANDERA: en el editor, al poner una capital
+  (o cambiar un sitio a capital) sin imagen, se vuelve emblema (escudo,
+  grande, si no tenía forma) con la bandera, el blasón o el escudo de la
+  ficha de la página del mapa (o, si no la tiene, de la página a la que
+  lleva). Lo dice en la barra de abajo; se puede cambiar después.
+
   CAMINOS, RÍOS Y OTRAS RAYAS SE APAGAN POR SEPARADO: cada grupo va en su
   <g class="mapa-lineas es-caminos|es-rios|es-otras"> con su casilla en los
   mandos (GRUPO_DE_RAYA en mundo_mapas.py). En el editor, la lista de lo
@@ -1734,7 +1762,8 @@
       donde nace, la ruta desde donde sale. El primer punto de una raya
       elegida sale en amarillo.
     - PONER UN SITIO: qué sitio es (capital, pueblo…) y CÓMO SE VE: con
-      su símbolo, o como escudo, bandera o medallón (con su tamaño). Como
+      su símbolo, con la forma de su tipo, o como escudo, bandera,
+      medallón, hexágono, rombo, estrella… (con su tamaño). Como
       emblema, a la derecha se le pone imagen: SUBIR UNA de tu ordenador
       (va a wiki/_imagenes/banderas/, a 512 px como mucho), escribir o
       elegir una de las que ya hay, o «USAR LA DE SU PÁGINA», que pone la

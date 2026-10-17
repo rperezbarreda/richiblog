@@ -38,8 +38,16 @@ const TIPOS_DE_SITIO = [
 // Los emblemas: [valor, nombre] de la forma y [valor, nombre, cuánto más
 // grande que un sitio] del tamaño. Los mismos que FORMAS_DE_EMBLEMA y
 // TAMANOS_DE_EMBLEMA en mundo_mapas.py.
-const FORMAS_DE_EMBLEMA = [["", "Con su símbolo"], ["escudo", "Como escudo"], ["bandera", "Como bandera"],
-    ["redondo", "Como medallón"]];
+const FORMAS_DE_EMBLEMA = [["", "Con su símbolo"], ["tipo", "Emblema con la forma de su tipo"],
+    ["escudo", "Escudo"], ["bandera", "Bandera"], ["redondo", "Medallón (círculo)"], ["cuadrado", "Cuadrado"],
+    ["rombo", "Rombo"], ["hexagono", "Hexágono"], ["octogono", "Octógono"], ["triangulo", "Triángulo"],
+    ["triangulo-abajo", "Triángulo hacia abajo"], ["casa", "Casa"], ["torre", "Torre"], ["cupula", "Cúpula"],
+    ["pildora", "Píldora"], ["estrella", "Estrella"], ["cruz", "Cruz"]];
+// La forma de cada tipo de sitio (FORMA_POR_TIPO en mundo_mapas.py): la de
+// su símbolo y la de su emblema con «la forma de su tipo».
+const FORMA_POR_TIPO = { capital: "escudo", ciudad: "hexagono", pueblo: "redondo", fortaleza: "cuadrado",
+    ruina: "rombo", puerto: "octogono", templo: "casa", torre: "torre", cueva: "cupula", mina: "triangulo-abajo",
+    puente: "pildora", batalla: "estrella", mazmorra: "cruz", campamento: "triangulo" };
 const TAMANOS_DE_EMBLEMA = [["pequeno", "Pequeño", 0.8], ["mediano", "Mediano", 1.2], ["grande", "Grande", 1.7]];
 const LETRA_DE_SIMBOLOS = '"Segoe UI Symbol", "Noto Sans Symbols 2", "Noto Sans Symbols", "DejaVu Sans", sans-serif';
 // Las rayas y cómo se pintan: los mismos colores y trazos que la web
@@ -156,19 +164,93 @@ function tamanoDeTexto(cosa) {
 
 // El contorno de un emblema de «radio» r centrado en (0, 0) (como
 // _forma_de_emblema en mundo_mapas.py) y lo que baja por debajo.
-function formaDeEmblema(forma, r) {
+function formaDeEmblema(forma, r, tipo) {
     const c = (n) => redondoMapa(n);
+    const poligono = (puntos) => "M" + puntos.map((p) => c(p[0]) + " " + c(p[1])).join(" L") + " Z";
+    if (forma === "tipo") {
+        forma = FORMA_POR_TIPO[tipo] || "redondo";
+    }
     if (forma === "bandera") {
-        return { d: "M" + c(-1.3 * r) + " " + c(-0.9 * r) + " H" + c(1.3 * r) + " V" + c(0.9 * r) + " H" + c(-1.3 * r) + " Z",
+        return { d: poligono([[-1.3 * r, -0.9 * r], [1.3 * r, -0.9 * r], [1.3 * r, 0.9 * r], [-1.3 * r, 0.9 * r]]),
             bajo: 0.9 * r };
     }
     if (forma === "redondo") {
         return { d: "M" + c(-1.2 * r) + " 0 A" + c(1.2 * r) + " " + c(1.2 * r) + " 0 1 0 " + c(1.2 * r) + " 0 A"
             + c(1.2 * r) + " " + c(1.2 * r) + " 0 1 0 " + c(-1.2 * r) + " 0 Z", bajo: 1.2 * r };
     }
+    if (forma === "cuadrado") {
+        const a = 1.05 * r;
+        return { d: poligono([[-a, -a], [a, -a], [a, a], [-a, a]]), bajo: a };
+    }
+    if (forma === "rombo") {
+        return { d: poligono([[0, -1.4 * r], [1.2 * r, 0], [0, 1.4 * r], [-1.2 * r, 0]]), bajo: 1.4 * r };
+    }
+    if (forma === "hexagono" || forma === "octogono") {
+        const lados = forma === "hexagono" ? 6 : 8;
+        const giro = lados === 6 ? -90 : -67.5;
+        const radio = (lados === 6 ? 1.25 : 1.2) * r;
+        const puntos = [];
+        for (let k = 0; k < lados; k++) {
+            const angulo = (giro + k * 360 / lados) * Math.PI / 180;
+            puntos.push([radio * Math.cos(angulo), radio * Math.sin(angulo)]);
+        }
+        return { d: poligono(puntos), bajo: Math.max(...puntos.map((p) => p[1])) };
+    }
+    if (forma === "triangulo") {
+        return { d: poligono([[0, -1.45 * r], [1.35 * r, 0.95 * r], [-1.35 * r, 0.95 * r]]), bajo: 0.95 * r };
+    }
+    if (forma === "triangulo-abajo") {
+        return { d: poligono([[-1.35 * r, -0.95 * r], [1.35 * r, -0.95 * r], [0, 1.45 * r]]), bajo: 1.45 * r };
+    }
+    if (forma === "casa") {
+        return { d: poligono([[-1.05 * r, 1.05 * r], [-1.05 * r, -0.2 * r], [0, -1.35 * r], [1.05 * r, -0.2 * r],
+            [1.05 * r, 1.05 * r]]), bajo: 1.05 * r };
+    }
+    if (forma === "torre") {
+        return { d: poligono([[-0.8 * r, 1.2 * r], [-0.8 * r, -1.35 * r], [0.8 * r, -1.35 * r], [0.8 * r, 1.2 * r]]),
+            bajo: 1.2 * r };
+    }
+    if (forma === "cupula") {
+        return { d: "M" + c(-1.2 * r) + " " + c(0.9 * r) + " V0 A" + c(1.2 * r) + " " + c(1.2 * r) + " 0 0 1 "
+            + c(1.2 * r) + " 0 V" + c(0.9 * r) + " Z", bajo: 0.9 * r };
+    }
+    if (forma === "pildora") {
+        return { d: "M" + c(-0.6 * r) + " " + c(-0.8 * r) + " H" + c(0.6 * r) + " A" + c(0.8 * r) + " " + c(0.8 * r)
+            + " 0 0 1 " + c(0.6 * r) + " " + c(0.8 * r) + " H" + c(-0.6 * r) + " A" + c(0.8 * r) + " " + c(0.8 * r)
+            + " 0 0 1 " + c(-0.6 * r) + " " + c(-0.8 * r) + " Z", bajo: 0.8 * r };
+    }
+    if (forma === "estrella") {
+        const puntos = [];
+        for (let k = 0; k < 8; k++) {
+            const largo = (k % 2 ? 0.6 : 1.45) * r;
+            const angulo = (-90 + k * 45) * Math.PI / 180;
+            puntos.push([largo * Math.cos(angulo), largo * Math.sin(angulo)]);
+        }
+        return { d: poligono(puntos), bajo: 1.45 * r };
+    }
+    if (forma === "cruz") {
+        const a = 0.45 * r;
+        const b = 1.3 * r;
+        return { d: poligono([[-a, -b], [a, -b], [a, -a], [b, -a], [b, a], [a, a], [a, b], [-a, b], [-a, a], [-b, a],
+            [-b, -a], [-a, -a]]), bajo: b };
+    }
     return { d: "M" + c(-1.1 * r) + " " + c(-1.3 * r) + " H" + c(1.1 * r) + " V0 C" + c(1.1 * r) + " " + c(0.9 * r) + " "
         + c(0.4 * r) + " " + c(1.15 * r) + " 0 " + c(1.35 * r) + " C" + c(-0.4 * r) + " " + c(1.15 * r) + " "
         + c(-1.1 * r) + " " + c(0.9 * r) + " " + c(-1.1 * r) + " 0 Z", bajo: 1.35 * r };
+}
+
+// El contorno de la bola de un sitio con su símbolo (sin emblema): la
+// capital y el pueblo, un círculo; la fortaleza, un cuadrado; los demás,
+// la forma de su tipo (hexágono la ciudad, rombo la ruina…). Como
+// _simbolo_de_pin en mundo_mapas.py.
+function bolaDeSitio(tipo, r) {
+    if (!tipo || tipo === "capital" || tipo === "pueblo") {
+        return null;
+    }
+    if (tipo === "fortaleza") {
+        return formaDeEmblema("cuadrado", r * 0.88).d;
+    }
+    return formaDeEmblema("tipo", r * 0.82, tipo).d;
 }
 
 function radioDeEmblema(cosa) {
@@ -818,7 +900,7 @@ function dibujoDeCosa(lista, cosa, i) {
         dibujarRayaSvg(g, cosa, elegido);
     } else if (lista === "emblems" || (lista === "pins" && cosa.shape)) {
         const r = radioDeEmblema(cosa);
-        const forma = formaDeEmblema(cosa.shape, r);
+        const forma = formaDeEmblema(cosa.shape, r, cosa.kind);
         const marca = svgMapa("g", { class: "mapa-ed-marca mapa-ed-emblema", "data-x": cosa.x, "data-y": cosa.y });
         const recorte = "ed-emblema-" + i;
         const clip = svgMapa("clipPath", { id: recorte });
@@ -871,10 +953,11 @@ function dibujoDeCosa(lista, cosa, i) {
         const tipo = tipoDeSitioMapa(cosa.kind);
         const marca = svgMapa("g", { class: "mapa-ed-marca", "data-x": cosa.x, "data-y": cosa.y });
         const fondo = cosa.color || (tipo ? tipo[3] : "#e74c3c");
-        if (cosa.kind === "fortaleza") {
-            marca.appendChild(svgMapa("rect", {
-                x: -11, y: -11, width: 22, height: 22, fill: fondo, stroke: elegido ? "#ffffff" : "#1b1020",
-                "stroke-width": elegido ? 4 : 2.5,
+        const bola = bolaDeSitio(cosa.kind, 12);
+        if (bola) {
+            marca.appendChild(svgMapa("path", {
+                d: bola, fill: fondo, stroke: elegido ? "#ffffff" : "#1b1020", "stroke-width": elegido ? 4 : 2.5,
+                "stroke-linejoin": "round", "stroke-dasharray": cosa.kind === "ruina" ? "4 3" : "none",
             }));
         } else {
             marca.appendChild(svgMapa("circle", {
@@ -1047,7 +1130,9 @@ function pintarListaDeCosas() {
                 boton.appendChild(crearEditor("span", "mapa-cosa-marca es-" + tipo[0], tipo[2] + "︎"))
                     .setAttribute("aria-hidden", "true");
             }
-            boton.appendChild(crearEditor("span", "mapa-cosa-nombre", nombre || "(sin nombre)"));
+            // Un sitio sin nombre se llama como su tipo («Puente»).
+            const sinEl = tipo ? tipo[1] : "(sin nombre)";
+            boton.appendChild(crearEditor("span", "mapa-cosa-nombre", nombre || sinEl));
             boton.appendChild(crearEditor("span", "mapa-cosa-que", que));
             boton.addEventListener("click", () => {
                 elegirCosa(lista, i);
@@ -1262,6 +1347,7 @@ function cambiarPropiedadMapa(campo, valor) {
     if (campo === "label" || campo === "kind" || campo === "targetPage") {
         pintarListaDeCosas();
         if (campo === "kind") {
+            vestirCapital(cosa);
             $("[data-mapa-que]").textContent = nombreDeCosa(el.lista, cosa).que.replace(/^./, (c) => c.toUpperCase());
             $('[data-mapa-p-caja="taper"]').hidden = !(el.lista === "lines" && cosa.kind === "rio");
         }
@@ -1539,6 +1625,7 @@ function ponerSitio(crudo) {
     estadoMapa.datos.pins.push(cosa);
     estadoMapa.iman = null;
     elegirCosa("pins", estadoMapa.datos.pins.length - 1);
+    vestirCapital(cosa);
     avisarEditor("Sitio puesto. Escribe su nombre (y, si tiene, la página a la que lleva).");
     $("#mapa-p-nombre").focus({ preventScroll: true });
 }
@@ -1644,6 +1731,54 @@ async function usarImagenDeLaPagina() {
     await urlDeImagenMapa(nombre);
     repintarCosa(estadoMapa.elegido.lista, estadoMapa.elegido.i);
     avisarEditor("Puesta la " + campo.clave + " de " + pagina.nombre + ": " + nombre + ".");
+}
+
+// LA CAPITAL, SIEMPRE CON SU BANDERA: al poner una (o cambiar un sitio a
+// capital), si no tiene imagen, se le pone de emblema (escudo, grande, si
+// no tenía forma) la bandera, el blasón o el escudo de la ficha de la
+// página del mapa (el reino), y si no, de la página a la que lleva.
+async function vestirCapital(cosa) {
+    if (!cosa || cosa.kind !== "capital" || cosa.image) {
+        return;
+    }
+    if (!cosa.shape) {
+        cosa.shape = "escudo";
+        cosa.size = cosa.size || "grande";
+    }
+    const deDonde = [estadoMapa.datos.page, cosa.targetPage].filter(Boolean);
+    let puesta = "";
+    for (const nombrePagina of deDonde) {
+        const pagina = await pedirEditor("/api/pagina?nombre=" + encodeURIComponent(nombrePagina));
+        const campo = pagina && !pagina.error
+            && (pagina.campos || []).find((c) => /^(bandera|blas[oó]n|escudo)$/i.test(c.clave) && c.valor);
+        if (campo) {
+            puesta = campo.valor.replace(/^!?\[\[|\]\]$/g, "").split("|")[0].trim();
+            await urlDeImagenMapa(puesta);
+            avisarEditor("A la capital le he puesto la " + campo.clave + " de " + pagina.nombre + ".");
+            break;
+        }
+    }
+    if (puesta && !cosa.image) {
+        cosa.image = puesta;
+        estadoMapa.cambiado = true;
+    }
+    // Se repinta y, si sigue elegida, se ponen en el panel su forma, su
+    // tamaño y su imagen (solo esos campos: rehacer el panel entero le
+    // quitaría el foco a lo que se esté tocando).
+    const i = estadoMapa.datos.pins.indexOf(cosa);
+    if (i < 0) {
+        return;
+    }
+    repintarCosa("pins", i);
+    const el = estadoMapa.elegido;
+    if (el && el.lista === "pins" && el.i === i) {
+        document.querySelectorAll('[data-mapa-p-caja="emblema"]').forEach((c) => {
+            c.hidden = false;
+        });
+        $("#mapa-p-forma").value = cosa.shape;
+        $("#mapa-p-tamano-emblema").value = cosa.size || "mediano";
+        $("#mapa-p-imagen").value = cosa.image || "";
+    }
 }
 
 // ---- MEDIR, Y PONER LA ESCALA ----
@@ -2410,8 +2545,8 @@ async function descargarImagenMapa() {
     // dorado y el nombre debajo.
     for (const em of d.emblems.concat(d.pins.filter((p) => p.shape))) {
         const r = radioDeEmblema(em) * k;
-        const forma = new Path2D(formaDeEmblema(em.shape, r).d);
-        const bajo = formaDeEmblema(em.shape, r).bajo;
+        const forma = new Path2D(formaDeEmblema(em.shape, r, em.kind).d);
+        const bajo = formaDeEmblema(em.shape, r, em.kind).bajo;
         ctx.save();
         ctx.translate(em.x, em.y);
         ctx.shadowColor = "rgba(0,0,0,0.6)";
@@ -2455,14 +2590,21 @@ async function descargarImagenMapa() {
         ctx.strokeStyle = "#1b1020";
         ctx.lineWidth = 2.5 * k;
         ctx.setLineDash(p.kind === "ruina" ? [4 * k, 3 * k] : []);
-        ctx.beginPath();
-        if (p.kind === "fortaleza") {
-            ctx.rect(p.x - r * 0.92, p.y - r * 0.92, r * 1.84, r * 1.84);
+        const bola = bolaDeSitio(p.kind, r);
+        if (bola) {
+            ctx.save();
+            ctx.translate(p.x, p.y);
+            ctx.lineJoin = "round";
+            const camino = new Path2D(bola);
+            ctx.fill(camino);
+            ctx.stroke(camino);
+            ctx.restore();
         } else {
+            ctx.beginPath();
             ctx.arc(p.x, p.y, r, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.stroke();
         }
-        ctx.fill();
-        ctx.stroke();
         ctx.setLineDash([]);
         const simbolo = tipo ? tipo[2] + "︎" : (p.icon || "");
         if (simbolo) {
