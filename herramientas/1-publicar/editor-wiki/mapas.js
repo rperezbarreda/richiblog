@@ -101,8 +101,61 @@ const estadoMapa = {
     archivo: "", datos: null, imagenes: {}, url: "", cambiado: false, guardando: false,
     herramienta: "elegir", elegido: null, dibujo: null, vista: null, capasOcultas: {},
     arrastre: null, cuantasRegiones: 0, iman: null, sinIman: false, medida: [], tramoEscala: [], ratonMedida: null,
-    ultimoCampo: null, varios: [], curvaPara: null, cajaEleccion: null, portapapeles: [],
+    ultimoCampo: null, varios: [], curvaPara: null, cajaEleccion: null, portapapeles: [], colorNuevo: {},
 };
+
+// EL COLOR DE LO NUEVO: al cambiarle el color a algo (un sitio, una raya,
+// una región, un texto), lo siguiente que se ponga de esa clase sale de
+// ese color, hasta que se le quite (en la paleta, «Como su tipo»). Se
+// recuerda en el navegador (si deja).
+const LISTA_DE_HERRAMIENTA = { pin: "pins", raya: "lines", region: "shapes", texto: "labels" };
+try {
+    const guardado = JSON.parse(window.localStorage.getItem("mapa-color-nuevo") || "{}");
+    if (guardado && typeof guardado === "object") {
+        Object.keys(guardado).forEach((k) => {
+            if (/^#[0-9a-f]{6}$/i.test(guardado[k])) {
+                estadoMapa.colorNuevo[k] = guardado[k];
+            }
+        });
+    }
+} catch (error) {
+    // Sin almacenamiento, se recuerda mientras esté abierta la página.
+}
+
+function apuntarColorNuevo(lista, color) {
+    if (color) {
+        estadoMapa.colorNuevo[lista] = color;
+    } else {
+        delete estadoMapa.colorNuevo[lista];
+    }
+    try {
+        window.localStorage.setItem("mapa-color-nuevo", JSON.stringify(estadoMapa.colorNuevo));
+    } catch (error) {
+        // Igual que arriba.
+    }
+    pintarColorNuevo();
+}
+
+function conColorNuevo(lista, cosa) {
+    if (estadoMapa.colorNuevo[lista]) {
+        cosa.color = estadoMapa.colorNuevo[lista];
+    }
+    return cosa;
+}
+
+// En la paleta: de qué color sale lo que se ponga con esta herramienta.
+function pintarColorNuevo() {
+    const caja = $("[data-mapa-color-nuevo]");
+    if (!caja) {
+        return;
+    }
+    const color = estadoMapa.colorNuevo[LISTA_DE_HERRAMIENTA[estadoMapa.herramienta]];
+    caja.hidden = !color;
+    if (color) {
+        $("[data-mapa-color-muestra]").style.background = color;
+        $("[data-mapa-color-nombre]").textContent = color;
+    }
+}
 window.estadoMapa = estadoMapa;
 const historiaMapa = { atras: [], adelante: [] };
 
@@ -1749,6 +1802,7 @@ function colorDeVariosMapa(poner) {
             delete cosa.color;
         }
     });
+    [...new Set(todos.map((v) => v.lista))].forEach((lista) => apuntarColorNuevo(lista, poner ? $("#mapa-v-color").value : ""));
     pintarCosasMapa();
     avisarEditor(poner ? "Color puesto a las " + todos.length + "." : "Quitado su color a las " + todos.length
         + " (vuelven al de su tipo).");
@@ -1813,12 +1867,16 @@ function cambiarPropiedadMapa(campo, valor) {
             delete cosa.color;
         }
         $("#mapa-p-color").hidden = !valor;
+        apuntarColorNuevo(el.lista, cosa.color || "");
     } else if (valor) {
         cosa[campo] = valor;
     } else {
         delete cosa[campo];
     }
     estadoMapa.cambiado = true;
+    if (campo === "color" && valor) {
+        apuntarColorNuevo(el.lista, valor);
+    }
     repintarCosa(el.lista, el.i);
     if (campo === "dash") {
         $("[data-mapa-p-hueco]").hidden = cosa.dash === "solid";
@@ -1951,6 +2009,7 @@ function ponerHerramienta(herramienta) {
         c.hidden = herramienta !== "texto";
     });
     pintarOpcionesDeSitio();
+    pintarColorNuevo();
     $("[data-mapa-escala]").hidden = herramienta !== "escala";
     estadoMapa.ratonMedida = null;
     $('[data-mapa-solo="dibujo"]').hidden = !dibuja;
@@ -2153,6 +2212,7 @@ function terminarDibujo(aMano) {
         cosa.kind = dibujo.kind || "camino";
         cosa.points = puntos;
     }
+    conColorNuevo(dibujo.lista, cosa);
     estadoMapa.datos[dibujo.lista].push(cosa);
     const lista = dibujo.lista;
     cancelarDibujo();
@@ -2186,7 +2246,7 @@ function terminarCurvaDeTexto(puntos) {
     if (!$("#mapa-cursiva-nueva").checked) {
         texto.italic = false;
     }
-    labels.push(texto);
+    labels.push(conColorNuevo("labels", texto));
     elegirCosa("labels", labels.length - 1);
     avisarEditor("Curva hecha (" + puntos.length + " puntos). Escribe el texto a la derecha.");
     $("#mapa-p-nombre").focus({ preventScroll: true });
@@ -2205,7 +2265,7 @@ function ponerSitio(crudo) {
         cosa.shape = forma;
         cosa.size = $("#mapa-tamano-emblema-nuevo").value || "mediano";
     }
-    estadoMapa.datos.pins.push(cosa);
+    estadoMapa.datos.pins.push(conColorNuevo("pins", cosa));
     estadoMapa.iman = null;
     elegirCosa("pins", estadoMapa.datos.pins.length - 1);
     vestirCapital(cosa);
@@ -2222,7 +2282,7 @@ function ponerTexto(p) {
     if (!$("#mapa-cursiva-nueva").checked) {
         texto.italic = false;
     }
-    estadoMapa.datos.labels.push(texto);
+    estadoMapa.datos.labels.push(conColorNuevo("labels", texto));
     elegirCosa("labels", estadoMapa.datos.labels.length - 1);
     avisarEditor("Texto puesto. Escríbelo a la derecha.");
     $("#mapa-p-nombre").focus({ preventScroll: true });
@@ -3500,6 +3560,10 @@ function empezarMapas() {
     $("[data-mapa-v-duplicar]").addEventListener("click", duplicarElegidos);
     $("[data-mapa-v-borrar]").addEventListener("click", borrarElegidos);
     $("[data-mapa-curva-dibujar]").addEventListener("click", dibujarCurvaDelTexto);
+    $("[data-mapa-color-olvidar]").addEventListener("click", () => {
+        apuntarColorNuevo(LISTA_DE_HERRAMIENTA[estadoMapa.herramienta], "");
+        avisarEditor("Lo nuevo vuelve a salir del color de su tipo.");
+    });
     $("[data-mapa-curva-quitar]").addEventListener("click", quitarCurvaDelTexto);
     $("#mapa-curva-nueva").addEventListener("change", () => ponerHerramienta(estadoMapa.herramienta));
     document.querySelectorAll("[data-mapa-letras]").forEach((s) => opcionesMapa(s, LETRAS_DE_TEXTO, false));

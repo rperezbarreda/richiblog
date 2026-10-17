@@ -42,6 +42,12 @@ const ZOOM_MAXIMO_DE_MAPA = 6;
 // pero el mapa se veía, así que no parecía roto.
 const PIN_EN_PANTALLA = 15;
 
+// Las clases de zona del desplegable «zonas» (prepararZonasDeMapa), con su
+// nombre en plural. Aquí arriba por lo mismo que PIN_EN_PANTALLA.
+const CLASES_DE_ZONA_DE_MAPA = [["vecino", "países vecinos"], ["provincia", "provincias y comarcas"], ["lago", "lagos"],
+    ["mar", "mares"], ["bosque", "bosques"], ["montana", "montañas"], ["desierto", "desiertos"],
+    ["pantano", "pantanos y ciénagas"], ["valle", "valles y llanuras"], ["otra", "otras regiones"]];
+
 initializeMundoMapa();
 
 function initializeMundoMapa() {
@@ -121,6 +127,8 @@ function initializeMundoMapa() {
     // Al cambiar de tamaño la ventana cambia cuánto mide una unidad del
     // mapa en pantalla, así que los pines hay que volver a ajustarlos.
     window.addEventListener("resize", () => {
+        margenDeMapa(mando);
+        alturaDelMenuDeMapa(mando);
         escalarPinesDeMapa(mando);
         mejorarImagenDeMapa(mando);
         pintarEscalaDeMapa(mando);
@@ -198,9 +206,13 @@ function ponerZoomDeMapa(mando, quiere, anclaX, anclaY) {
     const haciaY = anclaY === undefined ? lienzo.clientHeight / 2 : anclaY - caja.top;
     const puntoX = lienzo.scrollLeft + haciaX;
     const puntoY = lienzo.scrollTop + haciaY;
+    // EL MARGEN DE ALREDEDOR (ver margenDeMapa): el punto se cuenta desde
+    // el dibujo, sin él, y después se le suma el nuevo.
+    const antesMargen = mando.margen || { x: 0, y: 0 };
 
     mando.zoom = ahora;
     lienzo.style.setProperty("--mapa-zoom", ahora);
+    const margen = margenDeMapa(mando);
     lienzo.classList.toggle("se-puede-arrastrar", ahora > 1.0005);
     // De cerca (al 200% o más) se escriben también los nombres de los
     // pueblos, las fortalezas…: con el mapa entero serían una sopa.
@@ -208,13 +220,14 @@ function ponerZoomDeMapa(mando, quiere, anclaX, anclaY) {
 
     if (Math.abs(ahora - antes) > 0.0005) {
         const cuanto = ahora / antes;
-        lienzo.scrollLeft = puntoX * cuanto - haciaX;
-        lienzo.scrollTop = puntoY * cuanto - haciaY;
+        lienzo.scrollLeft = (puntoX - antesMargen.x) * cuanto + margen.x - haciaX;
+        lienzo.scrollTop = (puntoY - antesMargen.y) * cuanto + margen.y - haciaY;
     }
 
     escalarPinesDeMapa(mando);
     mejorarImagenDeMapa(mando);
     pintarEscalaDeMapa(mando);
+    alturaDelMenuDeMapa(mando);
 
     if (mando.cifra) {
         mando.cifra.textContent = Math.round(ahora * 100) + "%";
@@ -231,6 +244,36 @@ function ponerZoomDeMapa(mando, quiere, anclaX, anclaY) {
     if (mando.ajustar) {
         mando.ajustar.disabled = abajo;
     }
+}
+
+
+// EL MENÚ DE LA IZQUIERDA (pantallas anchas) mide lo que el mapa, y si no
+// le cabe lo de dentro, se desplaza: así la caja acaba donde acaba el mapa
+// y la barra de escala (abajo, encima del mapa) no se queda colgando debajo.
+// Con el menú encima del mapa (pantallas estrechas) no se toca.
+function alturaDelMenuDeMapa(mando) {
+    const menu = mando.caja.querySelector("[data-mapa-mandos]");
+    if (!menu) {
+        return;
+    }
+    const alLado = menu.offsetTop === mando.lienzo.offsetTop && menu.offsetLeft < mando.lienzo.offsetLeft;
+    menu.style.maxHeight = alLado ? Math.max(260, mando.lienzo.offsetHeight) + "px" : "";
+}
+
+
+// UN MARGEN ALREDEDOR DEL DIBUJO, con el zoom puesto: así el mapa se
+// puede llevar más allá de sus bordes (lo de fuera se queda del color del
+// fondo) y un sitio de la orilla se puede poner en medio de la ventana, en
+// vez de quedarse pegado al borde. Un tercio de la ventana por cada lado.
+// Con el mapa entero no hay margen, que entonces no hay nada que mover.
+function margenDeMapa(mando) {
+    const lienzo = mando.lienzo;
+    const margen = mando.zoom > 1.0005
+        ? { x: Math.round(lienzo.clientWidth / 3), y: Math.round(lienzo.clientHeight / 3) }
+        : { x: 0, y: 0 };
+    mando.margen = margen;
+    mando.dibujo.style.margin = margen.y + "px " + margen.x + "px";
+    return margen;
 }
 
 
@@ -366,7 +409,100 @@ function prepararRegionesDeMapa(caja) {
         }
     });
     apagarConCasilla(caja, "[data-mapa-nombres]", ".mapa-pin-nombre, .mapa-textos");
+    apagarConCasilla(caja, "[data-mapa-rosa]", ".mapa-rosa");
     prepararNivelesDeMapa(caja);
+    prepararZonasDeMapa(caja);
+}
+
+// LAS ZONAS, UNA A UNA O POR CLASES. Un desplegable («zonas») con una
+// casilla por clase de zona (lagos, bosques, países vecinos…) y, debajo de
+// cada una, otra por cada zona con nombre: se apagan sueltas o la clase
+// entera (también las de sin nombre, que son dibujo). Si una clase tiene
+// unas sí y otras no, su casilla sale a medias.
+// (Las clases y sus nombres, en CLASES_DE_ZONA_DE_MAPA, arriba del todo.)
+
+function prepararZonasDeMapa(caja) {
+    const desplegable = caja.querySelector("[data-mapa-zonas]");
+    const dentro = caja.querySelector("[data-mapa-zonas-dentro]");
+    if (!desplegable || !dentro) {
+        return;
+    }
+    const formas = [...caja.querySelectorAll(".mapa-forma[data-mapa-zona]")];
+    let cuantas = 0;
+    CLASES_DE_ZONA_DE_MAPA.forEach(([clase, nombre]) => {
+        const suyas = formas.filter((f) => f.getAttribute("data-mapa-zona") === clase);
+        // Las de sin nombre de esa clase (el dibujo y su trama).
+        const dibujo = clase === "otra"
+            ? [...caja.querySelectorAll(".mapa-dibujos > .mapa-dibujo:not([class*='es-zona-'])")]
+            : [...caja.querySelectorAll(".mapa-dibujos > .es-zona-" + clase)];
+        if (!suyas.length && !dibujo.length) {
+            return;
+        }
+        cuantas += 1;
+        const grupo = document.createElement("div");
+        grupo.className = "mapa-zonas-grupo";
+        const todas = document.createElement("label");
+        todas.className = "mapa-capa-casilla es-clase";
+        const casillaClase = document.createElement("input");
+        casillaClase.type = "checkbox";
+        casillaClase.checked = true;
+        todas.appendChild(casillaClase);
+        todas.appendChild(document.createTextNode(" " + nombre + " (" + (suyas.length + dibujo.length) + ")"));
+        grupo.appendChild(todas);
+        const sueltas = [];
+        // Una forma puede salir dos veces (si lleva a una página y a otro
+        // mapa), así que se agrupan por su nombre.
+        const porNombre = new Map();
+        suyas.forEach((f) => {
+            const n = f.getAttribute("data-mapa-nombre") || "";
+            if (!porNombre.has(n)) {
+                porNombre.set(n, []);
+            }
+            porNombre.get(n).push(f);
+        });
+        const lista = document.createElement("ul");
+        lista.className = "mapa-zonas-lista";
+        [...porNombre.keys()].sort((a, b) => a.localeCompare(b, "es")).forEach((n) => {
+            const li = document.createElement("li");
+            const etiqueta = document.createElement("label");
+            etiqueta.className = "mapa-capa-casilla";
+            const casilla = document.createElement("input");
+            casilla.type = "checkbox";
+            casilla.checked = true;
+            etiqueta.appendChild(casilla);
+            etiqueta.appendChild(document.createTextNode(" " + n));
+            li.appendChild(etiqueta);
+            lista.appendChild(li);
+            sueltas.push({ casilla, formas: porNombre.get(n) });
+        });
+        if (sueltas.length) {
+            grupo.appendChild(lista);
+        }
+        dentro.appendChild(grupo);
+        const ponerClase = () => {
+            const encendidas = sueltas.filter((s) => s.casilla.checked).length;
+            casillaClase.indeterminate = sueltas.length > 0 && encendidas > 0 && encendidas < sueltas.length;
+            if (sueltas.length) {
+                casillaClase.checked = encendidas === sueltas.length;
+            }
+        };
+        sueltas.forEach((s) => {
+            s.casilla.addEventListener("change", () => {
+                s.formas.forEach((f) => f.classList.toggle("es-oculta", !s.casilla.checked));
+                ponerClase();
+            });
+        });
+        casillaClase.addEventListener("change", () => {
+            const si = casillaClase.checked;
+            casillaClase.indeterminate = false;
+            sueltas.forEach((s) => {
+                s.casilla.checked = si;
+                s.formas.forEach((f) => f.classList.toggle("es-oculta", !si));
+            });
+            dibujo.forEach((d) => d.classList.toggle("es-oculta", !si));
+        });
+    });
+    desplegable.hidden = cuantas === 0;
 }
 
 // PAÍSES O REGIONES. En un mapa con las dos cosas (ver niveles() en
@@ -923,9 +1059,10 @@ function prepararLeyendaDeMapa(mando) {
     // Puede ser más alta que el mapa y desplazarse: así se llega con el
     // teclado (y se desplaza con las flechas).
     panel.tabIndex = 0;
+    // Arriba a la derecha DEL MAPA: con los mandos encima (pantallas
+    // estrechas) o al lado (anchas), lo que mida el lienzo desde arriba.
     const colocar = () => {
-        const mandos = mando.caja.querySelector("[data-mapa-mandos]");
-        panel.style.top = ((mandos ? mandos.offsetHeight : 0) + 10) + "px";
+        panel.style.top = (mando.lienzo.offsetTop + 10) + "px";
         panel.style.maxHeight = Math.max(160, mando.lienzo.clientHeight - 20) + "px";
     };
     const poner = (abierta) => {
@@ -1067,7 +1204,8 @@ function prepararRutaDeMapa(mando) {
     boton.hidden = false;
     const radio = parseFloat(mando.dibujo.getAttribute("data-mapa-radio")) || 10;
 
-    // EL PANEL. Lo hace esto (sin JavaScript no hay rutas que calcular).
+    // EL PANEL, en el menú, justo debajo del botón (no tapa el mapa). Lo
+    // hace esto: sin JavaScript no hay rutas que calcular.
     const panel = document.createElement("section");
     panel.className = "mapa-ruta";
     panel.id = "mapa-ruta";
@@ -1122,7 +1260,7 @@ function prepararRutaDeMapa(mando) {
     salida.className = "mapa-ruta-salida";
     salida.setAttribute("role", "status");
     panel.appendChild(salida);
-    mando.caja.appendChild(panel);
+    boton.after(panel);
 
     let dibujoDeRuta = null;
     const borrarDibujo = () => {
@@ -1190,27 +1328,19 @@ function prepararRutaDeMapa(mando) {
         salida.textContent = texto;
     };
 
-    const colocar = () => {
-        const mandos = mando.caja.querySelector("[data-mapa-mandos]");
-        panel.style.top = ((mandos ? mandos.offsetHeight : 0) + 10) + "px";
-        panel.style.maxHeight = Math.max(160, mando.lienzo.clientHeight - 20) + "px";
-    };
     const medir = mando.caja.querySelector("[data-mapa-medir]");
-    const leyenda = mando.caja.querySelector("[data-mapa-leyenda-boton]");
+    // ENCENDIDA O APAGADA: apagada, se cierra el panel y la ruta pintada
+    // se esconde (no se pierde: al encenderla vuelve).
     const abrir = (si) => {
         panel.hidden = !si;
-        boton.setAttribute("aria-expanded", si ? "true" : "false");
+        boton.setAttribute("aria-pressed", si ? "true" : "false");
         mando.lienzo.classList.toggle("esta-trazando-ruta", si);
-        if (si) {
-            colocar();
-            // Midiendo y trazando a la vez, cada clic serían las dos cosas.
-            if (medir && medir.getAttribute("aria-pressed") === "true") {
-                medir.click();
-            }
-            // Y la leyenda, cerrada: los dos paneles a la vez se pisan.
-            if (leyenda && leyenda.getAttribute("aria-expanded") === "true") {
-                leyenda.click();
-            }
+        if (dibujoDeRuta) {
+            dibujoDeRuta.classList.toggle("es-apagada", !si);
+        }
+        // Midiendo y trazando a la vez, cada clic serían las dos cosas.
+        if (si && medir && medir.getAttribute("aria-pressed") === "true") {
+            medir.click();
         }
     };
     boton.addEventListener("click", () => {
@@ -1222,13 +1352,6 @@ function prepararRutaDeMapa(mando) {
     if (medir) {
         medir.addEventListener("click", () => {
             if (medir.getAttribute("aria-pressed") === "true" && !panel.hidden) {
-                abrir(false);
-            }
-        });
-    }
-    if (leyenda) {
-        leyenda.addEventListener("click", () => {
-            if (leyenda.getAttribute("aria-expanded") === "true" && !panel.hidden) {
                 abrir(false);
             }
         });
@@ -1245,13 +1368,8 @@ function prepararRutaDeMapa(mando) {
         pintar();
         desde.focus();
     });
-    window.addEventListener("resize", () => {
-        if (!panel.hidden) {
-            colocar();
-        }
-    });
     mando.caja.addEventListener("keydown", (evento) => {
-        if (evento.key === "Escape" && !panel.hidden) {
+        if (evento.key === "Escape" && !panel.hidden && panel.contains(document.activeElement)) {
             abrir(false);
             boton.focus();
         }

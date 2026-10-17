@@ -1404,8 +1404,8 @@ def pintar(mapa, pagina_a, mapa_a, imagen_a, detalle=None, avisar=None, region_d
         color = forma["color"] or (TIPOS_DE_ZONA[tipo_zona][1] if tipo_zona else "")
         # La trama de su clase de zona, encima del color (sin ratón: no
         # se pulsa, se pulsa lo de debajo).
-        trama = ('<path class="mapa-trama" d="%s" fill="url(#mapa-trama-%s)"></path>' % (coordenadas, tipo_zona)
-                 if tipo_zona and tipo_zona != "provincia" else "")
+        trama = ('<path class="mapa-trama es-zona-%s" d="%s" fill="url(#mapa-trama-%s)"></path>'
+                 % (tipo_zona, coordenadas, tipo_zona) if tipo_zona and tipo_zona != "provincia" else "")
         de_zona = (" es-zona-" + tipo_zona) if tipo_zona else ""
 
         if not nombre:
@@ -1436,6 +1436,9 @@ def pintar(mapa, pagina_a, mapa_a, imagen_a, detalle=None, avisar=None, region_d
         # nombre va también en un atributo.
         titulo = "<title>%s</title>" % html.escape(nombre)
         datos = _datos_del_globo(nombre, " · ".join(x for x in (que_zona, _nota(elegido["destino"], url)) if x), "")
+        # Su clase de zona, para el desplegable de «zonas» de los mandos
+        # (mundo-mapa.js: apagar zonas sueltas o una clase entera).
+        datos += ' data-mapa-zona="%s"' % (tipo_zona or "otra")
         suelto = (" es-suelto" if (hay_niveles and nivel == "suelto") else "") + de_zona
         destino_lista = vivas_regiones if nivel == "region" else vivas
         if url:
@@ -1557,12 +1560,16 @@ def pintar(mapa, pagina_a, mapa_a, imagen_a, detalle=None, avisar=None, region_d
             escondidos += 1
             continue
         # Sin nombre, su tipo («Puente»), y no «sin nombre».
+        sin_nombre = not (pin["etiqueta"] or pin["pagina"] or pin["mapa"])
         nombre = (pin["etiqueta"] or pin["pagina"] or pin["mapa"]
                   or (TIPOS_DE_PIN[pin["tipo"]][1].capitalize() if pin["tipo"] in TIPOS_DE_PIN else "sin nombre"))
         destinos = _destinos(pin, pagina_a, mapa_a)
         cuantas += 1
         cual = "s%d" % cuantas
         simbolo_lista, que_es = TIPOS_DE_PIN.get(pin["tipo"], ("", ""))
+        if sin_nombre:
+            # Ya se llama como su tipo: «Puente», y no «Puente · puente».
+            que_es = ""
         if pin["etiqueta"] or pin["pagina"] or pin["mapa"]:
             para_la_red.append({"x": pin["x"], "y": pin["y"], "nombre": nombre, "cual": cual})
         for uno in destinos:
@@ -1736,6 +1743,7 @@ def pintar(mapa, pagina_a, mapa_a, imagen_a, detalle=None, avisar=None, region_d
         "hay_lineas": [clave for clave, _ in NOMBRE_DE_GRUPO_DE_RAYA if rayas.get(clave)],
         "hay_escala": bool(escala),
         "hay_ruta": bool(red),
+        "hay_rosa": bool(mapa.get("rosa")),
         "hay_nombres": bool(letreros) or any(p["etiqueta"] and not p["escondido"] for p in mapa["pines"]),
         "sitios": sitios,
         "capas": capas,
@@ -1946,7 +1954,8 @@ def pintar_lista(sitios, titulo_id="mapa-sitios-titulo"):
 # guardadas en Chronicler.
 
 def pintar_mandos(capas, hay_formas=True, hay_pines=False, hay_niveles=False, hay_lineas=False,
-                  hay_nombres=False, todas_de_salida=False, hay_escala=False, hay_leyenda=False, hay_ruta=False):
+                  hay_nombres=False, todas_de_salida=False, hay_escala=False, hay_leyenda=False, hay_ruta=False,
+                  hay_rosa=False):
     trozos = ['<div class="mapa-mandos" data-mapa-mandos>']
     trozos.append(
         '<div class="mapa-zoom" role="group" aria-label="Zoom del mapa">'
@@ -1981,12 +1990,13 @@ def pintar_mandos(capas, hay_formas=True, hay_pines=False, hay_niveles=False, ha
             '<p class="mapa-medida" data-mapa-medida role="status"></p>'
             '</div>')
 
-    # LA RUTA por los caminos (de un sitio a otro): el botón abre un panel
-    # que pinta mundo-mapa.js con la red que lleva el SVG (data-mapa-red).
+    # LA RUTA por los caminos (de un sitio a otro): el botón la enciende y
+    # la apaga, y encendida abre debajo, en el mismo menú, un panel que
+    # pinta mundo-mapa.js con la red que lleva el SVG (data-mapa-red).
     if hay_ruta:
         trozos.append(
             '<button class="mapa-boton mapa-boton-ancho" type="button" data-mapa-ruta-boton'
-            ' aria-expanded="false" aria-controls="mapa-ruta" hidden>'
+            ' aria-pressed="false" hidden>'
             '<span aria-hidden="true">🧭</span> ruta</button>')
 
     # QUÉ SE VE ENCIMA DEL DIBUJO. Lo primero, las regiones: un mapa
@@ -2034,6 +2044,10 @@ def pintar_mandos(capas, hay_formas=True, hay_pines=False, hay_niveles=False, ha
         casillas.append(
             '<label class="mapa-capa-casilla"><input type="checkbox"'
             ' data-mapa-nombres checked> nombres</label>')
+    if hay_rosa:
+        casillas.append(
+            '<label class="mapa-capa-casilla"><input type="checkbox"'
+            ' data-mapa-rosa checked> rosa de los vientos</label>')
     if len(capas) > 1:
         for capa in capas:
             casillas.append(
@@ -2046,5 +2060,11 @@ def pintar_mandos(capas, hay_formas=True, hay_pines=False, hay_niveles=False, ha
         trozos.append('<fieldset class="mapa-capas">'
                       '<legend class="mapa-capas-titulo">ver</legend>%s</fieldset>'
                       % "".join(casillas))
+    # LAS ZONAS, UNA A UNA O POR CLASES (lagos, bosques, países vecinos…):
+    # un desplegable que llena mundo-mapa.js con las que haya en el dibujo.
+    if hay_formas:
+        trozos.append('<details class="mapa-zonas" data-mapa-zonas hidden>'
+                      '<summary class="mapa-capas-titulo">zonas</summary>'
+                      '<div class="mapa-zonas-dentro" data-mapa-zonas-dentro></div></details>')
     trozos.append("</div>")
     return "".join(trozos)

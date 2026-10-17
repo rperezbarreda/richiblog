@@ -1711,17 +1711,43 @@
   piezas). Va dentro del dibujo, del tamaño del mapa, y sale también en
   la imagen descargada. En Prunia, arriba a la derecha.
 
+  EL MENÚ A LA IZQUIERDA DEL MAPA: en pantallas de más de 860px los
+  mandos (zoom, leyenda, medir, ruta, «ver» y «zonas») van en una
+  columna de 15rem al lado del lienzo (--mapa-menu), del alto del mapa y
+  con su barra si no caben (alturaDelMenuDeMapa). La barra de escala y lo
+  medido se corren a su derecha. En pantallas estrechas, encima del mapa
+  como antes. Solo flex.
+
+  LAS ZONAS, UNA A UNA O POR CLASES: el desplegable «zonas» del menú
+  (un <details>, lo llena prepararZonasDeMapa) tiene una casilla por
+  clase (países vecinos, lagos, bosques… y «otras regiones») y debajo
+  una por cada zona con nombre. Apagar la clase apaga todas, también las
+  de sin nombre; si unas sí y otras no, la de la clase sale a medias.
+  Cada zona lleva data-mapa-zona con su clase.
+
+  LA ROSA DE LOS VIENTOS SE APAGA con su casilla en «ver».
+
+  EL MAPA SE PUEDE LLEVAR MÁS ALLÁ DE SUS BORDES: con zoom, el dibujo
+  lleva un margen de un tercio de la ventana por cada lado (margenDeMapa;
+  ponerZoomDeMapa lo descuenta para que el zoom siga yendo hacia el
+  ratón), así un sitio de la orilla se puede poner en medio.
+
+  UN SITIO SIN NOMBRE se llama como su tipo y ya no repite el tipo al
+  lado («Puente», no «Puente · puente»).
+
   LA RUTA POR LOS CAMINOS (botón «ruta» de la vista del mapa): el
   generador hace un grafo con los caminos, senderos y rutas
   (_red_de_caminos: los puntos casi juntos son el mismo cruce, un camino
   que acaba a menos de medio pin de otro se engancha a él, y cada sitio
   con nombre se engancha al camino que le pase cerca) y lo deja en
-  data-mapa-red. mundo-mapa.js (prepararRutaDeMapa) abre un panel arriba
-  a la izquierda con DESDE y HASTA (o se pulsan dos sitios en el mapa),
+  data-mapa-red. mundo-mapa.js (prepararRutaDeMapa): el botón la
+  enciende y la apaga (apagada, el panel se cierra y la ruta pintada se
+  esconde, sin perderse); encendida, abre en el menú, debajo del botón,
+  un panel con DESDE y HASTA (o se pulsan dos sitios en el mapa),
   busca el camino más corto (Dijkstra) y lo pinta en rojo con borde
   oscuro; dice cuánto hay, los días a pie y a caballo y por qué sitios
-  se pasa. «Al revés», «quitar la ruta», Esc lo cierra. Abrir la ruta
-  apaga «medir» y cierra la leyenda (y al revés). Si un sitio no sale en
+  se pasa. «Al revés», «quitar la ruta», Esc lo cierra. Encender la ruta
+  apaga «medir» (y al revés). Si un sitio no sale en
   las listas es que no tiene un camino cerca: hay que llevárselo con el
   imán.
 
@@ -1818,6 +1844,11 @@
       curva», se marca la curva punto a punto (ver TEXTOS SOBRE UNA CURVA).
     - PINTAR UNA REGIÓN: «Qué zona» (vecino, lago, bosque…; ver CLASES DE
       ZONA) le da su trama y su color.
+    - EL COLOR DE LO NUEVO: al cambiarle el color a algo, lo siguiente
+      que se ponga de esa clase (sitio, raya, región o texto) sale de ese
+      color. La paleta lo dice («Sale de este color») con un botón «Como
+      su tipo» para olvidarlo. Se guarda en el navegador
+      (localStorage «mapa-color-nuevo»).
     - ELEGIR VARIAS COSAS: Mayús+clic (en el mapa o en la lista) añade o
       quita; Mayús y arrastrar en un hueco elige lo que quede dentro del
       recuadro (los sitios y los textos por su punto; las rayas y las

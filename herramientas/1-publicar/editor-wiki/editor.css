@@ -1261,3 +1261,20 @@ body.en-mapa main {
         border-color: ButtonText;
     }
 }
+
+/* EL COLOR DE LO NUEVO, en la paleta: la muestra y el botón para volver al
+   color de su tipo. */
+.mapa-color-nuevo {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px;
+}
+
+.mapa-color-muestra {
+    display: inline-block;
+    width: 1.1em;
+    height: 1.1em;
+    border: 2px solid var(--texto, currentColor);
+    vertical-align: middle;
+}

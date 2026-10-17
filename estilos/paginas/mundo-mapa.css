@@ -62,6 +62,64 @@
     border-bottom: 2px solid var(--yellow);
 }
 
+/* EL MENÚ A LA IZQUIERDA DEL MAPA, en pantallas anchas: los mandos (zoom,
+   leyenda, medir, ruta, qué se ve y las zonas) en una columna al lado del
+   lienzo, con su propia barra si no caben, y lo de encima del mapa (la
+   barra de escala, lo medido) corrido a la derecha de la columna
+   (--mapa-menu). Sin JavaScript los mandos no salen y el mapa ocupa todo.
+   En pantallas estrechas siguen encima del mapa, en filas. Con flex y
+   nada más (ni grid ni sticky). */
+@media (min-width: 861px) {
+    html.js .mapa-caja {
+        --mapa-menu: 15rem;
+        flex-direction: row;
+        flex-wrap: wrap;
+        align-items: flex-start;
+    }
+
+    /* Que no se encoja nada del menú: si no cabe, se desplaza. */
+    html.js .mapa-mandos > * {
+        flex-shrink: 0;
+    }
+
+    html.js .mapa-mandos {
+        flex: 0 0 var(--mapa-menu);
+        flex-direction: column;
+        flex-wrap: nowrap;
+        align-items: stretch;
+        gap: 12px;
+        box-sizing: border-box;
+        width: var(--mapa-menu);
+        /* Lo alto del mapa (lo pone mundo-mapa.js: alturaDelMenuDeMapa);
+           esto es por si no llega. */
+        max-height: 70vh;
+        overflow-y: auto;
+        border-right: 2px solid var(--yellow);
+        border-bottom: 0;
+    }
+
+    html.js .mapa-mandos .mapa-capas {
+        flex-direction: column;
+        align-items: flex-start;
+        flex-wrap: nowrap;
+    }
+
+    html.js .mapa-mandos .mapa-capa-casilla {
+        min-height: 36px;
+    }
+
+    html.js .mapa-caja > .mapa-lienzo {
+        flex: 1 1 0;
+        min-width: 0;
+    }
+
+    /* La leyenda, cuando va debajo (sin JavaScript no hay menú, pero por
+       si acaso), de lado a lado. */
+    html.js .mapa-caja > .mapa-leyenda:not(.es-flotante) {
+        flex: 0 0 100%;
+    }
+}
+
 /* Sin JavaScript no hay zoom ni capas que encender: unos botones que no
    hacen nada son peor que ninguno. Lo pone .js en el <html>, que es lo que
    hace el sitio en cuanto arranca un script. */
@@ -98,7 +156,7 @@ html:not(.js) .mapa-ayuda {
    mundo-mapa.js). */
 .mapa-medida.es-encima {
     position: absolute;
-    left: 10px;
+    left: calc(var(--mapa-menu, 0px) + 10px);
     right: 10px;
     bottom: 76px;
     z-index: 2;
@@ -152,7 +210,7 @@ html:not(.js) .mapa-ayuda {
    (la que se ve sin JavaScript) se esconde. */
 .mapa-escala-viva {
     position: absolute;
-    left: 10px;
+    left: calc(var(--mapa-menu, 0px) + 10px);
     bottom: 14px;
     z-index: 2;
     padding: 2px 4px;
@@ -427,6 +485,10 @@ html:not(.js) .mapa-ayuda {
 
 .mapa-dibujos.es-apagada,
 .mapa-formas.es-apagada,
+.mapa-rosa.es-apagada,
+.mapa-ruta-dibujo.es-apagada,
+.mapa-forma.es-oculta,
+.mapa-dibujos > .es-oculta,
 .mapa-pines.es-apagada,
 .mapa-lineas.es-apagada,
 .mapa-textos.es-apagada,
@@ -652,25 +714,62 @@ html:not(.js) .mapa-ayuda {
     stroke-width: 1.5px;
 }
 
-/* LA RUTA POR LOS CAMINOS: un panel encima del mapa, arriba a la
-   izquierda (la leyenda va a la derecha), que pinta y abre mundo-mapa.js
-   con el botón «ruta». Dos listas (desde, hasta) y lo que sale: cuánto
-   hay, los días de viaje y por dónde se pasa. */
-.mapa-caja > .mapa-ruta {
-    position: absolute;
-    left: 10px;
-    z-index: 3;
-    width: min(19rem, calc(100% - 20px));
-    padding: 10px 14px;
-    overflow-y: auto;
+/* LA RUTA POR LOS CAMINOS: un panel en el menú, debajo del botón «ruta»
+   (lo pinta mundo-mapa.js; no tapa el mapa). Dos listas (desde, hasta) y
+   lo que sale: cuánto hay, los días de viaje y por dónde se pasa. */
+.mapa-ruta {
+    box-sizing: border-box;
+    width: 100%;
+    padding: 8px 10px;
     border: 2px solid var(--yellow);
-    background: var(--surface);
-    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.45);
     color: var(--white);
 }
 
-.mapa-caja > .mapa-ruta[hidden] {
+.mapa-ruta[hidden] {
     display: none;
+}
+
+.mapa-ruta .mapa-sitios-titulo {
+    margin-top: 0;
+    font-size: 0.875rem;
+}
+
+.mapa-mandos [data-mapa-ruta-boton][aria-pressed="true"] {
+    background: var(--yellow);
+    color: var(--yellow-contrast);
+}
+
+/* LAS ZONAS (el desplegable): por clases, y debajo de cada una las suyas. */
+.mapa-zonas[hidden] {
+    display: none;
+}
+
+.mapa-zonas summary {
+    min-height: 36px;
+    cursor: pointer;
+}
+
+.mapa-zonas summary:focus-visible {
+    outline: 2px solid var(--yellow);
+    outline-offset: 2px;
+}
+
+.mapa-zonas-grupo {
+    margin: 4px 0 8px;
+}
+
+.mapa-capa-casilla.es-clase {
+    font-weight: 700;
+}
+
+.mapa-zonas-lista {
+    margin: 0;
+    padding: 0 0 0 22px;
+    list-style: none;
+}
+
+.mapa-zonas-lista .mapa-capa-casilla {
+    min-height: 32px;
 }
 
 .mapa-ruta-campo {
