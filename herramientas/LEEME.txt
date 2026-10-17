@@ -1675,14 +1675,19 @@
     - ESCRIBIR EN EL MAPA: arriba se eligen la letra, el tamaño y si va en
       cursiva; se pulsa donde va el texto y, a la derecha, se escribe (y
       se le puede cambiar todo eso, el giro y el color).
-    - LA PALETA DE HERRAMIENTAS, como la de Photoshop: fija a la derecha
+    - COMO PHOTOSHOP: la paleta de herramientas fija a la IZQUIERDA, el
+      mapa en medio y LO ELEGIDO (con la lista de lo que hay y los paneles
+      de medir y de la escala) fijo a la DERECHA, con su propia barra para
+      bajar si no cabe. Lo elegido va fijo desde 80rem de ancho; con menos,
+      debajo del mapa.
+    - LA PALETA DE HERRAMIENTAS: fija a la izquierda
       de la pantalla (position: fixed, nada de sticky) y siempre a la
       vista aunque se baje por la página, desde arriba hasta la barra de
       abajo (que crece con los avisos; mapas.js apunta lo que mide en
       --alto-barra). Lleva las herramientas, lo que se elige de cada una
       (qué sitio, qué raya, la letra…), a mano alzada, el imán, terminar
       o cancelar el dibujo, deshacer y rehacer y el zoom. La página le
-      deja su hueco con un margen a la derecha. En pantallas de menos de
+      deja su hueco con un margen a la izquierda. En pantallas de menos de
       64rem va en su sitio, encima del mapa, con las herramientas en
       filas. Al cambiar de herramienta, un dibujo a medias con puntos de
       sobra se termina en vez de perderse.

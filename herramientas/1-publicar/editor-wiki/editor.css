@@ -691,8 +691,17 @@ body.en-mapa main {
     min-width: 0;
 }
 
-/* LA PALETA DE HERRAMIENTAS. En pantalla ancha, fija a la derecha (como
-   la de Photoshop) y de arriba abajo hasta la barra, que mide lo que
+/* COMO PHOTOSHOP: la paleta de herramientas fija a la IZQUIERDA, el mapa
+   en medio y lo elegido (con la lista de lo que hay y los paneles de
+   medir y de la escala) fijo a la DERECHA. Los dos fijos van de arriba
+   abajo hasta la barra, que mide lo que apunta mapas.js en --alto-barra,
+   y si no les cabe lo suyo, con su propia barra para bajar. La página
+   les deja su hueco con márgenes. Fijos y no sticky: position: fixed.
+   Con menos ancho, lo elegido va debajo del mapa (menos de 80rem) y la
+   paleta encima (menos de 64rem).
+
+   LA PALETA DE HERRAMIENTAS. En pantalla ancha, fija y de arriba abajo
+   hasta la barra, que mide lo que
    apunte mapas.js en --alto-barra; si no cabe, con su propia barra para
    bajar. La página le deja su hueco con un margen a la derecha. En
    pantalla estrecha va en su sitio, encima del mapa. */
@@ -719,19 +728,53 @@ body.en-mapa main {
     /* El hueco de la paleta, para todo menos la barra de abajo (la
        paleta acaba encima de ella). */
     body.en-mapa {
-        padding-right: calc(15rem + 24px);
+        padding-left: calc(14rem + 24px);
+    }
+
+    body.en-mapa main {
+        padding-right: 16px;
+        padding-left: 16px;
     }
 
     .mapa-paleta {
         position: fixed;
         top: 12px;
-        right: 12px;
+        left: 12px;
         bottom: calc(var(--alto-barra, 80px) + 12px);
         z-index: 6;
-        width: 15rem;
+        width: 14rem;
         margin: 0;
         overflow-y: auto;
         box-shadow: 0 6px 18px rgba(0, 0, 0, 0.35);
+    }
+}
+
+/* LO ELEGIDO, fijo a la derecha cuando cabe. */
+@media (min-width: 80rem) {
+    body.en-mapa {
+        padding-right: calc(21rem + 24px);
+    }
+
+    .mapa-derecha {
+        position: fixed;
+        top: 12px;
+        right: 12px;
+        bottom: calc(var(--alto-barra, 80px) + 12px);
+        z-index: 6;
+        width: 21rem;
+        padding: 14px;
+        overflow-y: auto;
+        border: 2px solid var(--acento);
+        background: var(--caja);
+        box-shadow: 0 6px 18px rgba(0, 0, 0, 0.35);
+    }
+
+    .mapa-derecha .bloque {
+        margin-bottom: 24px;
+    }
+
+    .mapa-izquierda {
+        flex-basis: 100%;
     }
 }
 
