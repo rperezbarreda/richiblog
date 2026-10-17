@@ -39,7 +39,10 @@
 #   montan con ${...}, porque hasta que no corre el navegador no se sabe
 #   cómo quedan.
 # - Las anclas (#algo) se comprueban también, mirando si existe ese id
-#   en la página de destino o en los fragmentos que se inyectan.
+#   en la página de destino o en los fragmentos que se inyectan. En la
+#   portada de la wiki, además, los apartados de la lista («#mundo-
+#   archipielagos», al que llevan las migas) los pone mundo.js al cargar:
+#   valen los de las carpetas de web/wiki/ (ver ids_de_la_portada_wiki).
 # - El ?v= de las direcciones se ignora: es la marca anti-caché que pone
 #   actualizar-cabeceras.py, no parte del nombre del archivo.
 # - Al final lista los archivos a los que no apunta nadie. Ojo con esa
@@ -48,6 +51,7 @@
 #   de una prueba.
 
 import sys
+import unicodedata
 from pathlib import Path
 
 # comun.py vive un piso más arriba, en herramientas/, y Python solo busca
@@ -433,6 +437,26 @@ def ids_de_fragmentos():
     return ids
 
 
+PORTADA_WIKI = "web/wiki/index_wiki.html"
+
+
+def ids_de_la_portada_wiki():
+    """Los id que mundo.js pone a cada apartado de la lista de la
+    portada de la wiki (idDeSubMundo: «mundo-» y el nombre sin tildes,
+    con guiones). Las migas de una página sin página de su parte
+    (Archipiélagos) llevan ahí, y esa parte sale de su carpeta, así que
+    valen los nombres de las carpetas de web/wiki/."""
+    ids = set()
+    base = RAIZ / "web" / "wiki"
+    if base.is_dir():
+        for carpeta in base.rglob("*"):
+            if carpeta.is_dir():
+                nombre = unicodedata.normalize("NFD", carpeta.name)
+                nombre = "".join(c for c in nombre if not unicodedata.combining(c)).lower()
+                ids.add("mundo-" + re.sub(r"[^a-z0-9]+", "-", nombre).strip("-"))
+    return ids
+
+
 # =========================================
 # RECORRER EL SITIO
 # =========================================
@@ -523,6 +547,7 @@ def revisar(mirar_externos=False):
     medias_rutas = set()
 
     ids_inyectados = ids_de_fragmentos()
+    ids_portada_wiki = ids_de_la_portada_wiki()
 
     for ruta, linea, ref, queja in referencias(medias_rutas):
         if queja:
@@ -550,7 +575,8 @@ def revisar(mirar_externos=False):
             usados.add(real)
 
         if ancla and real.suffix.lower() == ".html":
-            if ancla not in ids_de(real) and ancla not in ids_inyectados:
+            de_mundo = (real.relative_to(RAIZ).as_posix() == PORTADA_WIKI and ancla in ids_portada_wiki)
+            if ancla not in ids_de(real) and ancla not in ids_inyectados and not de_mundo:
                 anclas.append((ruta, linea, ref))
 
     # --- lo que no usa nadie ---
