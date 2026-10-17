@@ -31,11 +31,13 @@
 #     fortaleza, ruina, puerto, templo…), pintar regiones y rayas (caminos,
 #     ríos, fronteras, rutas…), escribir textos en el mapa, ponerles nombre
 #     y la página a la que llevan, moverlos o borrarlos (con imán, y con
-#     deshacer), y medir distancias con su escala y sus días de viaje. También hacer un
-#     mapa nuevo para una página a partir de una imagen: se guarda junto a
-#     la página y esa página sale en la web con un botón para explorarlo.
+#     deshacer), y medir distancias con su escala y sus días de viaje.
+#     También hacer un mapa nuevo para una página a partir de una imagen:
+#     se guarda junto a la página y esa página sale en la web con un botón
+#     para explorarlo.
 #   · GUARDAR (Ctrl+S) escribe el .md. GUARDAR Y PASAR A LA WEB además
-#     pasa la wiki (generar-mundo.py y actualizar-cabeceras.py) y deja un
+#     pasa la wiki (generar-mundo.py y actualizar-cabeceras.py), con una
+#     barra de progreso mientras tanto, y deja un
 #     enlace para VER CÓMO QUEDA, aquí mismo, en el navegador.
 #
 # LO QUE NO TOCA: las notas escondidas (<!-- así -->) de cada apartado se
@@ -63,6 +65,7 @@ import subprocess
 import sys
 import tempfile
 import threading
+import time
 import urllib.parse
 import webbrowser
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
@@ -718,24 +721,118 @@ def nuevo_mapa(peticion):
 # =========================================
 
 PASAR_LOCK = threading.Lock()
+SCRIPTS_DE_PASAR = ("3-generadores/generar-mundo.py", "3-generadores/actualizar-cabeceras.py")
+# Lo que se apuntó la última vez (cuántas líneas escribió cada script y
+# cuánto tardó), para que la barra de progreso sepa cuánto le queda.
+ULTIMA_PASADA = Path(tempfile.gettempdir()) / "editor-wiki-ultima-pasada.json"
+# Cómo va lo que se está pasando ahora; lo lee /api/pasar/estado.
+PASADA = {"activa": False, "fase": "", "porcentaje": 0, "terminado": True, "resultado": None}
 
 
-def pasar_a_la_web():
+def _ultima_pasada():
+    try:
+        datos = json.loads(ULTIMA_PASADA.read_text(encoding="utf-8"))
+        return datos if isinstance(datos, dict) else {}
+    except (OSError, ValueError):
+        return {}
+
+
+def pasar_a_la_web(al_avanzar=None):
+    """Pasa la wiki a la web (generar-mundo.py y actualizar-cabeceras.py)
+    leyendo lo que escriben según lo escriben. al_avanzar(fase,
+    porcentaje): cuánto va. Se cuenta por el TIEMPO que lleva cada script
+    comparado con lo que tardó la última vez (y por las líneas que lleva
+    escritas, si van más deprisa): solo con las líneas la barra iba a
+    saltos, porque los scripts escriben casi todo al final. La primera
+    vez, a ojo. Nunca pasa de 99 hasta que termina de verdad."""
     if not PASAR_LOCK.acquire(blocking=False):
         return {"error": "Ya se está pasando la wiki; espera a que termine."}
     try:
-        salida = []
-        for script in ("3-generadores/generar-mundo.py", "3-generadores/actualizar-cabeceras.py"):
-            hecho = subprocess.run([sys.executable, str(HERRAMIENTAS / script)], cwd=RAIZ,
-                                   capture_output=True, text=True, encoding="utf-8", errors="replace",
-                                   timeout=900)
-            lineas = [l for l in (hecho.stdout + hecho.stderr).split("\n") if l.strip()]
-            salida.append(script.split("/")[-1] + ":\n" + "\n".join(lineas[-12:]))
-            if hecho.returncode:
+        antes = _ultima_pasada()
+        lineas_antes = {s: int(antes.get(s, {}).get("lineas") or 0) for s in SCRIPTS_DE_PASAR}
+        tiempos = {s: float(antes.get(s, {}).get("segundos") or 0) for s in SCRIPTS_DE_PASAR}
+        total_tiempo = sum(tiempos.values())
+        # Cuánto de la barra le toca a cada script: lo que tardó la última
+        # vez (la primera, más o menos lo de siempre: el primero tarda más).
+        pesos = ([tiempos[s] / total_tiempo for s in SCRIPTS_DE_PASAR] if total_tiempo > 0 and all(tiempos.values())
+                 else [0.65, 0.35])
+        nombres = {"generar-mundo.py": "Montando las páginas de la wiki",
+                   "actualizar-cabeceras.py": "Poniendo las cabeceras y los menús"}
+        salida, apuntado, hecho_antes = [], {}, 0.0
+        entorno = dict(os.environ, PYTHONUNBUFFERED="1", PYTHONIOENCODING="utf-8")
+        for n, script in enumerate(SCRIPTS_DE_PASAR):
+            nombre = script.split("/")[-1]
+            fase = nombres.get(nombre, nombre)
+            esperadas = lineas_antes[script] or (400 if n == 0 else 250)
+            segundos = tiempos[script] or (30.0 if n == 0 else 10.0)
+            if al_avanzar:
+                al_avanzar(fase, round(hecho_antes * 100))
+            empieza = time.monotonic()
+            proceso = subprocess.Popen([sys.executable, str(HERRAMIENTAS / script)], cwd=RAIZ,
+                                       stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True,
+                                       encoding="utf-8", errors="replace", env=entorno)
+            reloj = threading.Timer(900, proceso.kill)
+            reloj.start()
+            lineas = []
+
+            def contar(n=n, fase=fase, empieza=empieza, base=hecho_antes):
+                # Cada cuarto de segundo, mientras el script siga.
+                while proceso.poll() is None:
+                    parte = min(0.97, max((time.monotonic() - empieza) / segundos, len(lineas) / esperadas))
+                    if al_avanzar:
+                        al_avanzar(fase, min(99, round((base + pesos[n] * parte) * 100)))
+                    time.sleep(0.25)
+
+            contador = threading.Thread(target=contar, daemon=True)
+            contador.start()
+            try:
+                for linea in proceso.stdout:
+                    lineas.append(linea.rstrip("\n"))
+                proceso.wait()
+            finally:
+                reloj.cancel()
+                contador.join(timeout=1)
+            apuntado[script] = {"lineas": len(lineas), "segundos": round(time.monotonic() - empieza, 1)}
+            hecho_antes += pesos[n]
+            utiles = [l for l in lineas if l.strip()]
+            salida.append(nombre + ":\n" + "\n".join(utiles[-12:]))
+            if proceso.returncode:
                 return {"error": "Algo ha fallado al pasar la wiki.", "salida": "\n\n".join(salida)}
+        try:
+            ULTIMA_PASADA.write_text(json.dumps(apuntado), encoding="utf-8")
+        except OSError:
+            pass
         return {"ok": True, "salida": "\n\n".join(salida)}
     finally:
         PASAR_LOCK.release()
+
+
+def empezar_a_pasar(peticion):
+    """Pasa la wiki en otro hilo y vuelve enseguida: el editor va
+    preguntando a /api/pasar/estado cómo va (para la barra de progreso)."""
+    if PASADA["activa"]:
+        return {"empezado": True, "ya": True}
+    nombre = str(peticion.get("nombre") or "")
+    mapa = ruta_de_mapa(peticion.get("mapa"))
+    PASADA.update({"activa": True, "fase": "Empezando", "porcentaje": 0, "terminado": False, "resultado": None})
+
+    def avanzar(fase, porcentaje):
+        PASADA["fase"], PASADA["porcentaje"] = fase, porcentaje
+
+    def trabajar():
+        try:
+            hecho = pasar_a_la_web(avanzar)
+            if nombre:
+                hecho["url"] = url_de_la_pagina(nombre)
+            if mapa:
+                datos = _leer_cmap(mapa) or {}
+                hecho["url"] = url_de_la_pagina(str(datos.get("title") or mapa.stem))
+        except Exception as error:  # que el editor lo cuente y no se quede esperando
+            hecho = {"error": "Algo ha fallado: %s" % error}
+        PASADA.update({"activa": False, "terminado": True, "porcentaje": 100, "resultado": hecho})
+
+    threading.Thread(target=trabajar, daemon=True).start()
+    return {"empezado": True}
 
 
 # =========================================
@@ -803,6 +900,8 @@ class Editor(SimpleHTTPRequestHandler):
                     return self._json({"error": "No hay ninguna página que se llame «%s»." % nombre,
                                        "parecidas": parecidas}, 404)
                 return self._json(dict(leer_pagina(archivo), mapas=mapas_de(archivo.stem)))
+            if url.path == "/api/pasar/estado":
+                return self._json({k: PASADA[k] for k in ("activa", "fase", "porcentaje", "terminado", "resultado")})
             if url.path == "/api/mapas":
                 return self._json({"mapas": mapas_que_hay()})
             if url.path == "/api/mapa":
@@ -856,15 +955,7 @@ class Editor(SimpleHTTPRequestHandler):
                     return self._json(traer_imagen_de_mapa(peticion, archivo.stem))
                 return self._json(guardar_mapa(archivo, peticion.get("datos")))
             if url.path == "/api/pasar":
-                hecho = pasar_a_la_web()
-                nombre = str(peticion.get("nombre") or "")
-                if nombre:
-                    hecho["url"] = url_de_la_pagina(nombre)
-                mapa = ruta_de_mapa(peticion.get("mapa"))
-                if mapa:
-                    datos = _leer_cmap(mapa) or {}
-                    hecho["url"] = url_de_la_pagina(str(datos.get("title") or mapa.stem))
-                return self._json(hecho)
+                return self._json(empezar_a_pasar(peticion))
         except Exception as error:  # que el editor diga qué ha pasado, y no se quede colgado
             return self._json({"error": "Algo ha fallado: %s" % error}, 500)
         return self._json({"error": "no existe"}, 404)

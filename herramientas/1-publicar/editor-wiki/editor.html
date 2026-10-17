@@ -166,6 +166,8 @@
                     <span aria-hidden="true">𝐀</span> Escribir en el mapa</label>
                 <label class="herramienta"><input type="radio" name="herramienta" value="medir">
                     <span aria-hidden="true">📏</span> Medir</label>
+                <label class="herramienta"><input type="radio" name="herramienta" value="escala">
+                    <span aria-hidden="true">⟷</span> Poner la escala</label>
             </fieldset>
             <div class="fila mapa-opciones">
                 <div class="mapa-opcion" data-mapa-solo="pin">
@@ -176,6 +178,16 @@
                     <label for="mapa-tipo-raya">Qué raya</label>
                     <select id="mapa-tipo-raya" data-mapa-tipos-raya></select>
                 </div>
+                <div class="mapa-opcion" data-mapa-solo="texto">
+                    <label for="mapa-letra-nueva">Letra</label>
+                    <select id="mapa-letra-nueva" data-mapa-letras></select>
+                </div>
+                <div class="mapa-opcion mapa-opcion-corta" data-mapa-solo="texto">
+                    <label for="mapa-tamano-nuevo">Tamaño</label>
+                    <input id="mapa-tamano-nuevo" type="number" min="6" step="1" inputmode="numeric">
+                </div>
+                <label class="opcion mapa-opcion" data-mapa-solo="texto">
+                    <input type="checkbox" id="mapa-cursiva-nueva" checked> Cursiva</label>
                 <label class="opcion mapa-opcion" data-mapa-solo="dibujo">
                     <input type="checkbox" id="mapa-mano"> A mano alzada (arrastrando)</label>
                 <label class="opcion mapa-opcion">
@@ -195,6 +207,10 @@
                 <button type="button" class="principal" data-mapa-terminar>Terminar el dibujo</button>
                 <button type="button" data-mapa-cancelar>Cancelar</button>
             </div>
+            <!-- Siempre a mano (lo que más se usa), fijo abajo a la derecha,
+                 encima de la barra. -->
+            <button type="button" class="mapa-flotante" data-mapa-flotante aria-pressed="true">
+                <span aria-hidden="true">✋</span> Elegir y mover</button>
             <div class="mapa-editor">
                 <div class="mapa-izquierda">
                     <div class="mapa-lienzo" data-mapa-lienzo tabindex="0" role="application"
@@ -213,27 +229,38 @@
                         <p class="mapa-medida" data-mapa-medida aria-live="polite"></p>
                         <p class="ayuda" data-mapa-medida-raton></p>
                         <button type="button" data-mapa-medir-otra>Empezar otra medida</button>
-                        <h3 class="mapa-cosas-titulo">La escala</h3>
+                        <p class="ayuda mapa-medir-escala" data-mapa-medir-escala></p>
+                    </section>
+                    <section class="bloque mapa-medir" data-mapa-escala hidden aria-labelledby="t-mapa-escala">
+                        <h2 id="t-mapa-escala">La escala</h2>
                         <p class="ayuda" data-mapa-escala-ahora></p>
+                        <p class="mapa-medida" data-mapa-tramo aria-live="polite"></p>
+                        <p class="ayuda" data-mapa-escala-raton></p>
+                        <button type="button" data-mapa-escala-otro>Marcar otro tramo</button>
                         <div class="fila mapa-escala-fila">
                             <div>
-                                <label for="mapa-escala-cuanto">Lo medido son</label>
+                                <label for="mapa-escala-cuanto">Ese tramo son</label>
                                 <input id="mapa-escala-cuanto" type="number" min="0" step="any" inputmode="decimal">
                             </div>
                             <div>
                                 <label for="mapa-escala-unidad">Unidad</label>
-                                <input id="mapa-escala-unidad" autocomplete="off" list="lista-unidades" value="leguas">
+                                <select id="mapa-escala-unidad">
+                                    <option value="leguas">leguas</option>
+                                    <option value="km">kilómetros</option>
+                                    <option value="millas">millas</option>
+                                </select>
                             </div>
                         </div>
-                        <button type="button" data-mapa-escala-poner>Usar como escala</button>
+                        <button type="button" class="principal" data-mapa-escala-poner>Usar como escala</button>
+                        <h3 class="mapa-cosas-titulo">Un día de viaje</h3>
                         <div class="fila mapa-escala-fila" data-mapa-viaje>
                             <div>
-                                <label for="mapa-dia-pie">En un día a pie</label>
+                                <label for="mapa-dia-pie">A pie</label>
                                 <input id="mapa-dia-pie" type="number" min="0" step="any" inputmode="decimal"
                                        data-mapa-viaje-como="a pie">
                             </div>
                             <div>
-                                <label for="mapa-dia-caballo">En un día a caballo</label>
+                                <label for="mapa-dia-caballo">A caballo</label>
                                 <input id="mapa-dia-caballo" type="number" min="0" step="any" inputmode="decimal"
                                        data-mapa-viaje-como="a caballo">
                             </div>
@@ -257,6 +284,18 @@
                             <div class="campo" data-mapa-p-caja="kind">
                                 <label for="mapa-p-tipo" data-mapa-p-tipo-que>Qué es</label>
                                 <select id="mapa-p-tipo" data-mapa-p="kind"></select>
+                            </div>
+                            <div class="campo" data-mapa-p-caja="letra">
+                                <label for="mapa-p-letra">Letra</label>
+                                <select id="mapa-p-letra" data-mapa-p="font" data-mapa-letras></select>
+                            </div>
+                            <div class="campo" data-mapa-p-caja="letra">
+                                <label for="mapa-p-tamano">Tamaño (en píxeles del mapa)</label>
+                                <input id="mapa-p-tamano" type="number" min="6" step="1" inputmode="numeric"
+                                       data-mapa-p="fontSize">
+                            </div>
+                            <div class="campo" data-mapa-p-caja="letra">
+                                <label class="opcion"><input type="checkbox" data-mapa-p="italic"> Cursiva</label>
                             </div>
                             <div class="campo" data-mapa-p-caja="giro">
                                 <label for="mapa-p-giro">Giro (grados)</label>
@@ -337,11 +376,6 @@
     </footer>
 
     <datalist id="lista-paginas"></datalist>
-    <datalist id="lista-unidades">
-        <option value="leguas"></option>
-        <option value="km"></option>
-        <option value="millas"></option>
-    </datalist>
     <datalist id="lista-imagenes"></datalist>
 </body>
 </html>

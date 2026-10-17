@@ -99,6 +99,54 @@ function irAEditor(vista) {
     window.scrollTo(0, 0);
 }
 
+// ---- PASAR A LA WEB, CON SU BARRA ----
+// El servidor pasa la wiki en otro hilo; aquí se le pregunta cómo va cada
+// poco y se enseña en una barra (un <progress> de verdad, que lo lee el
+// lector de pantalla). Mientras tanto el aviso lleva aria-busy, para que
+// el lector no cante cada porcentaje: dice el resultado al final.
+// Devuelve lo que devolvía /api/pasar: {ok, salida, url} o {error, salida}.
+async function pasarALaWebEditor(cuerpo) {
+    const empezado = await pedirEditor("/api/pasar", cuerpo);
+    if (empezado.error) {
+        return empezado;
+    }
+    avisarEditor("Guardado. Pasando la wiki a la web…");
+    const aviso = !$('[data-vista="mapa"]').hidden && $("[data-aviso-mapa]") ? $("[data-aviso-mapa]") : $("[data-aviso]");
+    aviso.setAttribute("aria-busy", "true");
+    const caja = crearEditor("div", "progreso");
+    const etiqueta = crearEditor("span", "progreso-fase", "Empezando…");
+    etiqueta.id = "progreso-fase";
+    const barra = document.createElement("progress");
+    barra.max = 100;
+    barra.value = 0;
+    barra.setAttribute("aria-labelledby", "progreso-fase");
+    const cifra = crearEditor("span", "progreso-cifra", "0%");
+    cifra.setAttribute("aria-hidden", "true");
+    caja.appendChild(etiqueta);
+    caja.appendChild(barra);
+    caja.appendChild(cifra);
+    aviso.appendChild(caja);
+    const empieza = Date.now();
+    let estado = {};
+    for (;;) {
+        await new Promise((r) => setTimeout(r, 400));
+        estado = await pedirEditor("/api/pasar/estado");
+        if (estado.error && !("terminado" in estado)) {
+            break;
+        }
+        const porcentaje = Math.max(0, Math.min(100, Number(estado.porcentaje) || 0));
+        barra.value = porcentaje;
+        cifra.textContent = porcentaje + "%";
+        const segundos = Math.round((Date.now() - empieza) / 1000);
+        etiqueta.textContent = (estado.fase || "Pasando") + "… (" + segundos + " s)";
+        if (estado.terminado && estado.resultado) {
+            break;
+        }
+    }
+    aviso.removeAttribute("aria-busy");
+    return estado.resultado || estado;
+}
+
 // ---- AL EMPEZAR ----
 async function empezarEditor() {
     const datos = await pedirEditor("/api/inicio");
@@ -709,8 +757,7 @@ async function guardarEditor(yPasar) {
         if (!yPasar) {
             avisarEditor("Guardado en " + hecho.pagina.archivo + ".");
         } else {
-            avisarEditor("Guardado. Pasando la wiki a la web (tarda un poco)…");
-            const pasado = await pedirEditor("/api/pasar", { nombre: estadoEditor.pagina.nombre });
+            const pasado = await pasarALaWebEditor({ nombre: estadoEditor.pagina.nombre });
             if (pasado.error) {
                 avisarEditor(pasado.error, true, pasado.salida);
             } else {

@@ -39,11 +39,12 @@ const LETRA_DE_SIMBOLOS = '"Segoe UI Symbol", "Noto Sans Symbols 2", "Noto Sans 
 // Las rayas y cómo se pintan: los mismos colores y trazos que la web
 // (estilos/paginas/mundo-mapa.css). ancho y borde en píxeles de pantalla.
 const TIPOS_DE_RAYA = [
-    ["camino", "Camino"], ["rio", "Río"], ["frontera", "Frontera"],
+    ["camino", "Camino principal"], ["sendero", "Sendero"], ["rio", "Río"], ["frontera", "Frontera"],
     ["maritima", "Ruta marítima"], ["muralla", "Muralla"], ["ruta", "Ruta de viaje"],
 ];
 const ESTILO_DE_RAYA = {
-    camino: { color: "#f0dfb4", ancho: 3.5, borde: 6.5, trazos: [10, 7] },
+    camino: { color: "#f0dfb4", ancho: 4.5, borde: 7.5, trazos: null },
+    sendero: { color: "#e2cf9f", ancho: 2.5, borde: 4.5, trazos: [5, 5] },
     rio: { color: "#4aa3df", ancho: 4.5, borde: 7, trazos: null },
     frontera: { color: "#8e1b3b", ancho: 3, borde: 6, colorBorde: "#f4f1f7", trazos: [12, 5, 2, 5], corte: "butt",
         bordeConTrazos: true },
@@ -51,8 +52,20 @@ const ESTILO_DE_RAYA = {
     muralla: { color: "#a39a90", ancho: 6, borde: 9, trazos: null, corte: "butt" },
     ruta: { color: "#e8446f", ancho: 3.5, borde: 6, trazos: [9, 6], flechas: true },
 };
-// El tamaño de un texto suelto: el lado largo del mapa entre esto.
+// El tamaño de los textos de antes (el lado largo del mapa entre esto); los
+// de ahora lo llevan en píxeles del mapa ("fontSize").
 const TAMANOS_DE_TEXTO = [["grande", "Grande", 45], ["mediano", "Mediano", 70], ["pequeno", "Pequeño", 110]];
+// Las letras de los textos: [clave, nombre, familia, grosor]. Las mismas
+// que .mapa-texto.es-letra-… en estilos/paginas/mundo-mapa.css.
+const LETRAS_DE_TEXTO = [
+    ["antigua", "Antigua (Georgia)", 'Georgia, "Times New Roman", serif', 700],
+    ["elegante", "Elegante (Palatino)", '"Palatino Linotype", "Book Antiqua", Palatino, Georgia, serif', 700],
+    ["legible", "Muy legible (Atkinson)", '"Atkinson Hyperlegible", system-ui, sans-serif', 700],
+    ["moderna", "Moderna (Space Grotesk)", '"Space Grotesk", system-ui, sans-serif', 600],
+    ["a-mano", "A mano (Pangolin)", '"Pangolin", cursive', 400],
+    ["pixel", "De videojuego (Jersey 10)", '"Jersey 10", monospace', 400],
+    ["maquina", "De máquina (DM Mono)", '"DM Mono", monospace', 500],
+];
 // Los colores que van tomando las regiones nuevas, uno detrás de otro.
 const COLORES_DE_REGION = ["#e74c3c", "#3498db", "#2ecc71", "#f1c40f", "#9b59b6", "#e67e22", "#1abc9c"];
 // Cuánto se anda en un día, según la unidad de la escala (se puede
@@ -64,7 +77,7 @@ const PASOS_QUE_SE_RECUERDAN = 80;
 const estadoMapa = {
     archivo: "", datos: null, imagenes: {}, url: "", cambiado: false, guardando: false,
     herramienta: "elegir", elegido: null, dibujo: null, vista: null, capasOcultas: {},
-    arrastre: null, cuantasRegiones: 0, iman: null, sinIman: false, medida: [], ratonMedida: null,
+    arrastre: null, cuantasRegiones: 0, iman: null, sinIman: false, medida: [], tramoEscala: [], ratonMedida: null,
     ultimoCampo: null,
 };
 window.estadoMapa = estadoMapa;
@@ -99,9 +112,32 @@ function estiloDeRaya(kind) {
 }
 
 function tamanoDeTexto(cosa) {
+    if (Number(cosa.fontSize) > 0) {
+        return Number(cosa.fontSize);
+    }
     const t = TAMANOS_DE_TEXTO.find((x) => x[0] === cosa.size) || TAMANOS_DE_TEXTO[1];
     const d = estadoMapa.datos;
     return Math.max(d.width, d.height) / t[2];
+}
+
+function letraDeTexto(cosa) {
+    return LETRAS_DE_TEXTO.find((l) => l[0] === cosa.font) || LETRAS_DE_TEXTO[0];
+}
+
+// El área de una región (para pintar primero las grandes: ver
+// pintarCosasMapa).
+function areaMapa(puntos) {
+    let doble = 0;
+    puntos.forEach((a, i) => {
+        const b = puntos[(i + 1) % puntos.length];
+        doble += a.x * b.y - b.x * a.y;
+    });
+    return Math.abs(doble) / 2;
+}
+
+function regionesDeGrandeAPequena() {
+    const formas = estadoMapa.datos.shapes;
+    return formas.map((s, i) => [i, areaMapa(s.points || [])]).sort((a, b) => b[1] - a[1]).map((x) => x[0]);
 }
 
 // ---- LA LISTA DE MAPAS ----
@@ -239,8 +275,10 @@ function ponerMapa(mapa) {
     Object.assign(estadoMapa, {
         archivo: mapa.archivo, datos: d, imagenes: mapa.imagenes || {}, url: mapa.url || "",
         cambiado: false, elegido: null, dibujo: null, capasOcultas: {}, cuantasRegiones: d.shapes.length,
-        medida: [], ratonMedida: null, iman: null, ultimoCampo: null,
+        medida: [], tramoEscala: [], ratonMedida: null, iman: null, ultimoCampo: null,
     });
+    // El tamaño de los textos nuevos, de salida: el de un texto mediano.
+    $("#mapa-tamano-nuevo").value = Math.round(Math.max(d.width, d.height) / 70);
     historiaMapa.atras = [];
     historiaMapa.adelante = [];
     pintarBotonesDeHistoria();
@@ -588,7 +626,11 @@ function pintarCosasMapa() {
         capaMapa(g).textContent = "";
     });
     const d = estadoMapa.datos;
-    Object.keys(CAPA_DE_LISTA).forEach((lista) => {
+    // Las regiones, DE LA MÁS GRANDE A LA MÁS PEQUEÑA: en SVG lo último
+    // queda encima, así que una zona dentro de otra se ve y se puede
+    // pulsar (en el orden del archivo, la grande se la tragaba).
+    regionesDeGrandeAPequena().forEach((i) => capaMapa("regiones").appendChild(dibujoDeCosa("shapes", d.shapes[i], i)));
+    Object.keys(CAPA_DE_LISTA).filter((l) => l !== "shapes").forEach((lista) => {
         d[lista].forEach((c, i) => capaMapa(CAPA_DE_LISTA[lista]).appendChild(dibujoDeCosa(lista, c, i)));
     });
     pintarAsasMapa();
@@ -693,6 +735,12 @@ function dibujoDeCosa(lista, cosa, i) {
         if (cosa.angle) {
             texto.setAttribute("transform", "rotate(" + cosa.angle + " " + cosa.x + " " + cosa.y + ")");
         }
+        // En style y no en atributos: la hoja de estilos (.mapa-ed-texto)
+        // ganaría a los atributos.
+        const letra = letraDeTexto(cosa);
+        texto.style.fontFamily = letra[2];
+        texto.style.fontWeight = String(letra[3]);
+        texto.style.fontStyle = cosa.italic === false ? "normal" : "italic";
         texto.textContent = cosa.label || "(escribe el texto)";
         g.appendChild(texto);
     } else {
@@ -936,8 +984,6 @@ function pintarPropiedadesMapa() {
         opciones = [["", "Sin tipo (chincheta redonda)"]].concat(TIPOS_DE_SITIO.map((t) => [t[0], t[2] + " " + t[1]]));
     } else if (lista === "lines") {
         opciones = TIPOS_DE_RAYA;
-    } else if (lista === "labels") {
-        opciones = TAMANOS_DE_TEXTO;
     }
     opciones.forEach((o) => {
         const opcion = document.createElement("option");
@@ -945,9 +991,16 @@ function pintarPropiedadesMapa() {
         opcion.textContent = o[1];
         tipo.appendChild(opcion);
     });
-    tipo.value = lista === "labels" ? (cosa.size || "mediano") : (cosa.kind || (lista === "lines" ? "camino" : ""));
-    $("[data-mapa-p-tipo-que]").textContent = lista === "labels" ? "Tamaño" : "Qué es";
-    $('[data-mapa-p-caja="kind"]').hidden = lista === "shapes";
+    tipo.value = cosa.kind || (lista === "lines" ? "camino" : "");
+    $('[data-mapa-p-caja="kind"]').hidden = lista === "shapes" || lista === "labels";
+    document.querySelectorAll('[data-mapa-p-caja="letra"]').forEach((c) => {
+        c.hidden = lista !== "labels";
+    });
+    if (lista === "labels") {
+        $("#mapa-p-letra").value = letraDeTexto(cosa)[0];
+        $("#mapa-p-tamano").value = Math.round(tamanoDeTexto(cosa));
+        $('[data-mapa-p="italic"]').checked = cosa.italic !== false;
+    }
     $('[data-mapa-p-caja="pagina"]').hidden = lista === "labels";
     $('[data-mapa-p-caja="xy"]').hidden = lista !== "pins" && lista !== "labels";
     $('[data-mapa-p-caja="giro"]').hidden = lista !== "labels";
@@ -1000,6 +1053,19 @@ function cambiarPropiedadMapa(campo, valor) {
             delete cosa.angle;
         }
         $("[data-mapa-p-giro-cifra]").textContent = n + "°";
+    } else if (campo === "fontSize") {
+        const n = Number(valor);
+        if (!Number.isFinite(n) || n < 1) {
+            return;
+        }
+        cosa.fontSize = Math.round(n);
+        delete cosa.size;
+    } else if (campo === "italic") {
+        if (valor) {
+            delete cosa.italic;
+        } else {
+            cosa.italic = false;
+        }
     } else if (campo === "taper") {
         if (valor) {
             delete cosa.taper;
@@ -1013,8 +1079,6 @@ function cambiarPropiedadMapa(campo, valor) {
             delete cosa.color;
         }
         $("#mapa-p-color").hidden = !valor;
-    } else if (campo === "kind" && el.lista === "labels") {
-        cosa.size = valor || "mediano";
     } else if (valor) {
         cosa[campo] = valor;
     } else {
@@ -1058,7 +1122,10 @@ const INSTRUCCIONES_MAPA = {
         + " donde sale). Para acabar, pulsa dos veces o «Terminar el dibujo».",
     texto: "Pulsa en el mapa donde va el texto («Mar de las Brumas»). Luego escríbelo a la derecha, y elige su"
         + " tamaño y su giro.",
-    medir: "Pulsa de un sitio a otro, punto a punto, por donde se iría. A la derecha sale cuánto hay.",
+    medir: "Pulsa de un sitio a otro, punto a punto, por donde se iría. A la derecha sale cuánto hay (con la"
+        + " escala, en leguas o kilómetros y en días de viaje).",
+    escala: "Marca un tramo del que sepas lo que mide (de una ciudad a otra, por ejemplo): pulsa en un extremo y"
+        + " en el otro. Luego escribe a la derecha cuánto es y «Usar como escala».",
 };
 const INSTRUCCIONES_A_MANO = "Aprieta y arrastra por donde va; al soltar, se acaba.";
 const HERRAMIENTAS_DE_DIBUJO = ["region", "raya"];
@@ -1077,6 +1144,12 @@ function ponerHerramienta(herramienta) {
     const dibuja = HERRAMIENTAS_DE_DIBUJO.includes(herramienta);
     $('[data-mapa-solo="pin"]').hidden = herramienta !== "pin";
     $('[data-mapa-solo="raya"]').hidden = herramienta !== "raya";
+    document.querySelectorAll('[data-mapa-solo="texto"]').forEach((c) => {
+        c.hidden = herramienta !== "texto";
+    });
+    $("[data-mapa-escala]").hidden = herramienta !== "escala";
+    estadoMapa.ratonMedida = null;
+    $("[data-mapa-flotante]").setAttribute("aria-pressed", herramienta === "elegir" ? "true" : "false");
     $('[data-mapa-solo="dibujo"]').hidden = !dibuja;
     $("[data-mapa-medir]").hidden = herramienta !== "medir";
     $("[data-mapa-instrucciones]").textContent = dibuja && $("#mapa-mano").checked
@@ -1127,7 +1200,8 @@ function pintarDibujoMapa() {
             }));
         });
     }
-    const medida = estadoMapa.herramienta === "medir" ? estadoMapa.medida : [];
+    const medida = medidaActual() || [];
+    const deEscala = estadoMapa.herramienta === "escala";
     if (medida.length) {
         const puntos = estadoMapa.ratonMedida ? medida.concat([estadoMapa.ratonMedida]) : medida;
         g.appendChild(svgMapa("path", {
@@ -1135,11 +1209,12 @@ function pintarDibujoMapa() {
             "vector-effect": "non-scaling-stroke", "stroke-linecap": "round", class: "mapa-ed-dibujo",
         }));
         g.appendChild(svgMapa("path", {
-            d: trazoMapa(puntos, false), fill: "none", stroke: "#f5ce6c", "stroke-width": 3, "stroke-dasharray": "10 6",
+            d: trazoMapa(puntos, false), fill: "none", stroke: deEscala ? "#5fd4e8" : "#f5ce6c", "stroke-width": 3,
+            "stroke-dasharray": "10 6",
             "vector-effect": "non-scaling-stroke", "stroke-linecap": "round", class: "mapa-ed-dibujo",
         }));
         medida.forEach((p) => g.appendChild(svgMapa("circle", {
-            cx: p.x, cy: p.y, r: 5 * s, fill: "#f5ce6c", stroke: "#1b1020", "stroke-width": 2,
+            cx: p.x, cy: p.y, r: 5 * s, fill: deEscala ? "#5fd4e8" : "#f5ce6c", stroke: "#1b1020", "stroke-width": 2,
             "vector-effect": "non-scaling-stroke", class: "mapa-ed-dibujo",
         })));
     }
@@ -1279,17 +1354,32 @@ function ponerSitio(crudo) {
 function ponerTexto(p) {
     const sitio = dentroDelMapa(p);
     apuntarPaso();
-    estadoMapa.datos.labels.push({ id: idNuevoMapa(), x: sitio.x, y: sitio.y, label: "", size: "mediano" });
+    const texto = { id: idNuevoMapa(), x: sitio.x, y: sitio.y, label: "", font: $("#mapa-letra-nueva").value };
+    const tamano = Number($("#mapa-tamano-nuevo").value);
+    texto.fontSize = tamano > 0 ? Math.round(tamano) : Math.round(tamanoDeTexto({}));
+    if (!$("#mapa-cursiva-nueva").checked) {
+        texto.italic = false;
+    }
+    estadoMapa.datos.labels.push(texto);
     elegirCosa("labels", estadoMapa.datos.labels.length - 1);
     avisarEditor("Texto puesto. Escríbelo a la derecha.");
     $("#mapa-p-nombre").focus({ preventScroll: true });
 }
 
-// ---- MEDIR ----
-// Una raya de varios tramos, que no se guarda: solo dice cuánto mide. Con
-// escala, en leguas (o en lo que sea) y en días de viaje; sin ella, en
-// píxeles del mapa. La escala sí se guarda en el .cmap ("scale") y la web
-// pinta con ella una barra de escala.
+// ---- MEDIR, Y PONER LA ESCALA ----
+// Dos herramientas aparte. «Poner la escala»: se marca un tramo que se
+// conoce y se dice cuánto es (en leguas, kilómetros o millas); eso se
+// guarda en el .cmap ("scale") y la web pinta con ello una barra de
+// escala. «Medir»: una raya de varios tramos, que no se guarda, que dice
+// cuánto hay (con escala, en esa unidad y en días de viaje; sin ella, en
+// píxeles del mapa).
+const NOMBRE_DE_UNIDAD = { leguas: "leguas", km: "kilómetros", millas: "millas" };
+
+function medidaActual() {
+    const h = estadoMapa.herramienta;
+    return h === "medir" ? estadoMapa.medida : h === "escala" ? estadoMapa.tramoEscala : null;
+}
+
 function largoDeMedida(puntos) {
     const a = largosMapa(puntos);
     return a[a.length - 1] || 0;
@@ -1301,6 +1391,10 @@ function enUnidades(pixeles) {
         return null;
     }
     return pixeles * e.distance / e.pixels;
+}
+
+function nombreDeUnidad(unidad) {
+    return NOMBRE_DE_UNIDAD[unidad] || unidad || "";
 }
 
 function diasDeViaje(distancia, porDia) {
@@ -1318,15 +1412,15 @@ function diasDeViaje(distancia, porDia) {
     return enteros + (conMedio ? " días y medio" : " días");
 }
 
-function textoDeDistancia(pixeles) {
+function textoDeDistancia(pixeles, sinViaje) {
     const e = estadoMapa.datos.scale;
     const unidades = enUnidades(pixeles);
     if (unidades === null) {
         return cifraMapa(pixeles, 0) + " píxeles del mapa";
     }
-    let texto = cifraMapa(unidades) + " " + (e.unit || "");
+    let texto = cifraMapa(unidades) + " " + nombreDeUnidad(e.unit);
     const viaje = Object.entries(e.travel || {}).filter(([, v]) => typeof v === "number" && v > 0);
-    if (viaje.length && unidades > 0) {
+    if (!sinViaje && viaje.length && unidades > 0) {
         texto += ". " + viaje.map(([como, v]) => como[0].toUpperCase() + como.slice(1) + ": " + diasDeViaje(unidades, v))
             .join(" · ");
     }
@@ -1337,20 +1431,40 @@ function pintarMedida() {
     if (!estadoMapa.datos) {
         return;
     }
+    const e = estadoMapa.datos.scale;
+    const hayEscala = !!(e && e.pixels && e.distance);
+    const textoEscala = hayEscala
+        ? cifraMapa(e.pixels, 0) + " píxeles del mapa son " + cifraMapa(e.distance) + " " + nombreDeUnidad(e.unit)
+        : "";
+    // MEDIR
     const medida = estadoMapa.medida;
-    const total = largoDeMedida(medida);
     $("[data-mapa-medida]").textContent = medida.length < 2
         ? "Pulsa en el mapa de un sitio a otro."
-        : "Distancia: " + textoDeDistancia(total) + ".";
+        : "Distancia: " + textoDeDistancia(largoDeMedida(medida)) + ".";
     $("[data-mapa-medida-raton]").textContent = "";
-    const e = estadoMapa.datos.scale;
-    $("[data-mapa-escala-ahora]").textContent = e && e.pixels && e.distance
-        ? "Ahora: " + cifraMapa(e.pixels, 0) + " píxeles del mapa son " + cifraMapa(e.distance) + " " + (e.unit || "")
-            + ". Para cambiarla, mide un tramo que conozcas, escribe cuánto es y «Usar como escala»."
-        : "Sin escala: las distancias salen en píxeles del mapa. Mide un tramo que conozcas (de una ciudad a otra),"
-            + " escribe cuánto es y pulsa «Usar como escala».";
+    $("[data-mapa-medir-escala]").textContent = hayEscala
+        ? "Escala del mapa: " + textoEscala + "."
+        : "Este mapa aún no tiene escala, así que se mide en píxeles. Para medir en leguas o kilómetros, ponla"
+            + " antes con «Poner la escala».";
+    // LA ESCALA
+    $("[data-mapa-escala-ahora]").textContent = hayEscala
+        ? "Ahora: " + textoEscala + ". Para cambiarla, marca otro tramo."
+        : "Este mapa aún no tiene escala.";
+    const tramo = estadoMapa.tramoEscala;
+    $("[data-mapa-tramo]").textContent = tramo.length < 2
+        ? "Pulsa en el mapa en un extremo del tramo y luego en el otro."
+        : "El tramo marcado mide " + cifraMapa(largoDeMedida(tramo), 0) + " píxeles del mapa"
+            + (hayEscala ? " (ahora, " + textoDeDistancia(largoDeMedida(tramo), true) + ")" : "") + ".";
+    $("[data-mapa-escala-raton]").textContent = "";
     if (e && e.unit) {
-        $("#mapa-escala-unidad").value = e.unit;
+        const unidad = $("#mapa-escala-unidad");
+        if (![...unidad.options].some((o) => o.value === e.unit)) {
+            const otra = document.createElement("option");
+            otra.value = e.unit;
+            otra.textContent = e.unit;
+            unidad.appendChild(otra);
+        }
+        unidad.value = e.unit;
     }
     const viaje = (e && e.travel) || {};
     document.querySelectorAll("[data-mapa-viaje-como]").forEach((campo) => {
@@ -1363,36 +1477,44 @@ function pintarMedida() {
 }
 
 function anadirPuntoMedida(crudo) {
+    const lista = medidaActual();
+    if (!lista) {
+        return;
+    }
     const p = dentroDelMapa(imantar(crudo).p);
-    const ultimo = estadoMapa.medida[estadoMapa.medida.length - 1];
+    const ultimo = lista[lista.length - 1];
     if (ultimo && Math.hypot(ultimo.x - p.x, ultimo.y - p.y) < 2 * escalaMapa()) {
         return;
     }
-    estadoMapa.medida.push(p);
+    // El tramo de la escala es de dos puntos: el tercero empieza otro.
+    if (estadoMapa.herramienta === "escala" && lista.length >= 2) {
+        lista.length = 0;
+    }
+    lista.push(p);
     pintarMedida();
 }
 
 function ponerEscala() {
-    const pixeles = largoDeMedida(estadoMapa.medida);
+    const pixeles = largoDeMedida(estadoMapa.tramoEscala);
     const cuanto = Number(String($("#mapa-escala-cuanto").value).replace(",", "."));
-    const unidad = $("#mapa-escala-unidad").value.trim() || "leguas";
+    const unidad = $("#mapa-escala-unidad").value || "leguas";
     if (pixeles <= 0) {
-        avisarEditor("Primero mide en el mapa un tramo del que sepas cuánto es.", true);
+        avisarEditor("Primero marca en el mapa un tramo del que sepas cuánto es.", true);
         return;
     }
     if (!Number.isFinite(cuanto) || cuanto <= 0) {
-        avisarEditor("Escribe cuánto es lo medido (un número).", true);
+        avisarEditor("Escribe cuánto es el tramo (un número).", true);
         $("#mapa-escala-cuanto").focus();
         return;
     }
     apuntarPaso();
     const antes = estadoMapa.datos.scale || {};
     const viaje = antes.unit === unidad && antes.travel ? antes.travel
-        : Object.assign({}, VIAJE_POR_UNIDAD[unidad.toLowerCase()] || {});
+        : Object.assign({}, VIAJE_POR_UNIDAD[unidad] || {});
     estadoMapa.datos.scale = { pixels: redondoMapa(pixeles), distance: cuanto, unit: unidad, travel: viaje };
     pintarMedida();
-    avisarEditor("Escala puesta: " + cifraMapa(pixeles, 0) + " píxeles del mapa son " + cifraMapa(cuanto) + " " + unidad
-        + ". En la web sale una barra de escala.");
+    avisarEditor("Escala puesta: " + cifraMapa(pixeles, 0) + " píxeles del mapa son " + cifraMapa(cuanto) + " "
+        + nombreDeUnidad(unidad) + ". Ya puedes medir con «Medir»; en la web sale una barra de escala.");
 }
 
 function cambiarViaje(campo) {
@@ -1409,9 +1531,6 @@ function cambiarViaje(campo) {
     } else {
         delete e.travel[como];
     }
-    const total = largoDeMedida(estadoMapa.medida);
-    $("[data-mapa-medida]").textContent = estadoMapa.medida.length < 2 ? "Pulsa en el mapa de un sitio a otro."
-        : "Distancia: " + textoDeDistancia(total) + ".";
 }
 
 function quitarEscala() {
@@ -1493,10 +1612,17 @@ function alMoverEnElMapa(e) {
         if (dibujo && dibujo.puntos.length) {
             dibujo.raton = pegado.p;
         }
-        if (h === "medir" && estadoMapa.medida.length) {
+        const medida = medidaActual();
+        if (medida && medida.length && !(h === "escala" && medida.length >= 2)) {
             estadoMapa.ratonMedida = pegado.p;
-            const tramo = largoDeMedida([estadoMapa.medida[estadoMapa.medida.length - 1], pegado.p]);
-            $("[data-mapa-medida-raton]").textContent = "Hasta el ratón, " + textoDeDistancia(tramo) + " más.";
+            const tramo = largoDeMedida([medida[medida.length - 1], pegado.p]);
+            if (h === "medir") {
+                $("[data-mapa-medida-raton]").textContent = "Hasta el ratón, " + textoDeDistancia(tramo, true) + " más.";
+            } else {
+                $("[data-mapa-escala-raton]").textContent = "Hasta el ratón: " + cifraMapa(tramo, 0) + " píxeles.";
+            }
+        } else {
+            estadoMapa.ratonMedida = null;
         }
         pintarDibujoMapa();
         return;
@@ -1565,7 +1691,7 @@ function alSoltarEnElMapa(e) {
             ponerSitio(a.inicio.p);
         } else if (h === "texto") {
             ponerTexto(a.inicio.p);
-        } else if (h === "medir") {
+        } else if (h === "medir" || h === "escala") {
             anadirPuntoMedida(a.inicio.p);
         } else {
             anadirPuntoDibujo(a.inicio.p);
@@ -1651,7 +1777,7 @@ function alPulsarEnElMapa(e) {
             ponerSitio(centroDeLaVista());
         } else if (h === "texto") {
             ponerTexto(centroDeLaVista());
-        } else if (h === "medir") {
+        } else if (h === "medir" || h === "escala") {
             anadirPuntoMedida(centroDeLaVista());
         } else if (h !== "elegir") {
             anadirPuntoDibujo(centroDeLaVista());
@@ -1662,7 +1788,7 @@ function alPulsarEnElMapa(e) {
     } else if (e.key === "Escape") {
         if (estadoMapa.dibujo) {
             cancelarDibujo();
-        } else if (h === "medir" && estadoMapa.medida.length) {
+        } else if (medidaActual() && medidaActual().length) {
             empezarOtraMedida();
         } else if (el) {
             elegirCosa(null);
@@ -1674,7 +1800,10 @@ function alPulsarEnElMapa(e) {
 }
 
 function empezarOtraMedida() {
-    estadoMapa.medida = [];
+    const lista = medidaActual();
+    if (lista) {
+        lista.length = 0;
+    }
     estadoMapa.ratonMedida = null;
     pintarMedida();
 }
@@ -1714,6 +1843,7 @@ async function cambiarImagenMapa(input) {
     d.layers[0].image = hecha.nombre;
     estadoMapa.imagenes[hecha.nombre] = hecha.url;
     estadoMapa.medida = [];
+    estadoMapa.tramoEscala = [];
     pintarDatosGenerales();
     pintarTodoElMapa();
     ajustarMapa();
@@ -1910,8 +2040,8 @@ async function descargarImagenMapa() {
     ctx.lineJoin = "round";
     ctx.lineCap = "round";
 
-    // Las regiones.
-    d.shapes.forEach((s) => {
+    // Las regiones, de la más grande a la más pequeña (las de dentro, encima).
+    regionesDeGrandeAPequena().map((i) => d.shapes[i]).forEach((s) => {
         const puntos = s.points || [];
         if (puntos.length < 3) {
             return;
@@ -1932,6 +2062,15 @@ async function descargarImagenMapa() {
     // Las rayas.
     d.lines.forEach((l) => pintarRayaEnLienzo(ctx, l, k));
 
+    // Las letras de los textos, cargadas antes de pintar (si no, el lienzo
+    // las pinta con la de recambio).
+    const fuenteDe = (t) => (t.italic === false ? "" : "italic ") + letraDeTexto(t)[3] + " "
+        + Math.round(tamanoDeTexto(t)) + "px " + letraDeTexto(t)[2];
+    try {
+        await Promise.all(d.labels.filter((t) => t.label).map((t) => document.fonts.load(fuenteDe(t), t.label)));
+    } catch (error) {
+        // Sin las letras se pinta con las del sistema: no es motivo para no descargar.
+    }
     // Los textos sueltos, del tamaño del mapa y girados.
     d.labels.forEach((t) => {
         if (!t.label) {
@@ -1941,7 +2080,7 @@ async function descargarImagenMapa() {
         ctx.save();
         ctx.translate(t.x, t.y);
         ctx.rotate((t.angle || 0) * Math.PI / 180);
-        ctx.font = "italic 700 " + Math.round(tam) + "px Georgia, \"Times New Roman\", serif";
+        ctx.font = fuenteDe(t);
         if ("letterSpacing" in ctx) {
             ctx.letterSpacing = Math.round(tam * 0.12) + "px";
         }
@@ -2063,8 +2202,7 @@ async function guardarMapa(yPasar) {
         if (!yPasar) {
             avisarEditor("Guardado en wiki/" + estadoMapa.archivo + ".");
         } else {
-            avisarEditor("Guardado. Pasando la wiki a la web (tarda un poco)…");
-            const pasado = await pedirEditor("/api/pasar", { mapa: estadoMapa.archivo });
+            const pasado = await pasarALaWebEditor({ mapa: estadoMapa.archivo });
             if (pasado.error) {
                 avisarEditor(pasado.error, true, pasado.salida);
             } else {
@@ -2106,6 +2244,25 @@ function empezarMapas() {
     opcionesMapa($("[data-mapa-tipos-pin]"), TIPOS_DE_SITIO, true);
     $("[data-mapa-tipos-pin]").value = "ciudad";
     opcionesMapa($("[data-mapa-tipos-raya]"), TIPOS_DE_RAYA, false);
+    document.querySelectorAll("[data-mapa-letras]").forEach((s) => opcionesMapa(s, LETRAS_DE_TEXTO, false));
+    $("[data-mapa-escala-otro]").addEventListener("click", empezarOtraMedida);
+    // EL BOTÓN FLOTANTE de «Elegir y mover», siempre encima de la barra de
+    // abajo (que crece con los avisos): su alto se apunta en --alto-barra.
+    $("[data-mapa-flotante]").addEventListener("click", () => {
+        const dibujo = estadoMapa.dibujo;
+        // Si había un dibujo con puntos de sobra, se termina en vez de
+        // perderlo.
+        if (dibujo && dibujo.puntos.length >= (dibujo.lista === "shapes" ? 3 : 2)) {
+            terminarDibujo();
+        }
+        ponerHerramienta("elegir");
+    });
+    const barra = $("[data-barra-mapa]");
+    const apuntarAlto = () => document.documentElement.style.setProperty("--alto-barra", barra.offsetHeight + "px");
+    if (window.ResizeObserver) {
+        new ResizeObserver(apuntarAlto).observe(barra);
+    }
+    window.addEventListener("resize", apuntarAlto);
 
     document.querySelectorAll('[data-ir="mapas"]').forEach((b) => b.addEventListener("click", pintarListaDeMapas));
     $("[data-mapa-nuevo]").addEventListener("submit", (e) => {
@@ -2171,10 +2328,10 @@ function empezarMapas() {
         const que = campo.getAttribute("data-mapa-p");
         const tipo = campo.type === "checkbox" || campo.tagName === "SELECT" ? "change" : "input";
         campo.addEventListener(tipo, () => {
-            if (que === "con-color" || que === "taper") {
+            if (que === "con-color" || que === "taper" || que === "italic") {
                 cambiarPropiedadMapa(que, campo.checked);
             } else {
-                cambiarPropiedadMapa(que, ["x", "y", "angle"].includes(que) ? campo.value : campo.value.trim());
+                cambiarPropiedadMapa(que, ["x", "y", "angle", "fontSize"].includes(que) ? campo.value : campo.value.trim());
             }
         });
         campo.addEventListener("blur", () => {

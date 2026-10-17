@@ -217,7 +217,7 @@ function prepararNivelesDeMapa(caja) {
     const aplicar = () => {
         const marcada = casillas.find((c) => c.checked);
         const cual = marcada ? marcada.value : "paises";
-        regiones.classList.toggle("es-apagada", cual !== "regiones");
+        regiones.classList.toggle("es-apagada", cual !== "regiones" && cual !== "todo");
         paises.classList.toggle("es-apagada", cual === "nada");
         paises.classList.toggle("es-solo-sueltos", cual === "regiones");
         if (dibujos) {

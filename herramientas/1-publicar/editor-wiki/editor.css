@@ -6,6 +6,50 @@
    position: sticky, :has(), <dialog> ni display: contents, que no van en
    el navegador de Richi: la barra de abajo es position: fixed. */
 
+/* Las letras de la web, para los textos del mapa (las sirve el propio
+   editor desde tipografias/, como la web). */
+@font-face {
+    font-family: "Atkinson Hyperlegible";
+    font-weight: 700;
+    font-display: swap;
+    src: url("/tipografias/atkinson-700.woff2") format("woff2");
+}
+
+@font-face {
+    font-family: "Space Grotesk";
+    font-weight: 400;
+    font-display: swap;
+    src: url("/tipografias/space-grotesk-400.woff2") format("woff2");
+}
+
+@font-face {
+    font-family: "Space Grotesk";
+    font-weight: 600 700;
+    font-display: swap;
+    src: url("/tipografias/space-grotesk-600.woff2") format("woff2");
+}
+
+@font-face {
+    font-family: "Pangolin";
+    font-weight: 400;
+    font-display: swap;
+    src: url("/tipografias/pangolin-400.woff2") format("woff2");
+}
+
+@font-face {
+    font-family: "Jersey 10";
+    font-weight: 400;
+    font-display: swap;
+    src: url("/tipografias/jersey-10-400.woff2") format("woff2");
+}
+
+@font-face {
+    font-family: "DM Mono";
+    font-weight: 500;
+    font-display: swap;
+    src: url("/tipografias/dm-mono-500.woff2") format("woff2");
+}
+
 :root {
     --fondo: #12091c;
     --caja: #2b1a3d;
@@ -281,6 +325,32 @@ textarea {
     max-height: 40vh;
     margin: 0;
     overflow-y: auto;
+}
+
+/* LA BARRA DE PROGRESO de «Guardar y pasar a la web». */
+.progreso {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px 14px;
+    margin-top: 10px;
+    font-weight: 400;
+}
+
+.progreso-fase {
+    flex: 1 1 100%;
+}
+
+.progreso progress {
+    flex: 1 1 14rem;
+    height: 22px;
+    accent-color: var(--acento);
+}
+
+.progreso-cifra {
+    min-width: 3.5em;
+    font-family: var(--mono);
+    font-weight: 700;
 }
 
 .salida {
@@ -696,6 +766,34 @@ body.en-mapa main {
     height: 1.3em;
     margin: 0;
     accent-color: var(--acento);
+}
+
+.mapa-opciones .mapa-opcion-corta {
+    flex: 0 1 8rem;
+}
+
+/* EL BOTÓN FLOTANTE de «Elegir y mover»: fijo abajo a la derecha, justo
+   encima de la barra (mapas.js apunta lo que mide en --alto-barra). */
+.mapa-flotante {
+    position: fixed;
+    right: 20px;
+    bottom: calc(var(--alto-barra, 80px) + 14px);
+    z-index: 6;
+    min-height: 60px;
+    padding: 10px 20px;
+    border-width: 3px;
+    box-shadow: 0 0 0 3px var(--fondo), 0 6px 18px rgba(0, 0, 0, 0.45);
+    font-size: 1.1rem;
+    font-weight: 700;
+}
+
+.mapa-flotante[aria-pressed="true"] {
+    background: var(--acento);
+    color: var(--sobre-acento);
+}
+
+.mapa-medir-escala {
+    margin-top: 12px;
 }
 
 .mapa-opcion-ayuda {

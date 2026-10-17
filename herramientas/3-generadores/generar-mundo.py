@@ -926,7 +926,8 @@ def convertir_mapas(mapas, paginas, imagenes, avisos_por_pagina, detalle):
         mapa["mandos"] = mundo_mapas.pintar_mandos(hecho["capas"], hay_formas, hay_pines,
                                                    hecho.get("niveles", False),
                                                    hecho.get("hay_lineas", False),
-                                                   hecho.get("hay_nombres", False))
+                                                   hecho.get("hay_nombres", False),
+                                                   hecho.get("todas_de_salida", False))
         mapa["puntos"] = hecho["puntos"]
         mapa["dibujo"] = hecho["dibujo"]
         mapa["escondidos"] = hecho["escondidos"]

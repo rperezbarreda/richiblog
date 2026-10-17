@@ -1598,6 +1598,9 @@
   salen en la lista y, si llevan a una página, se pulsan. Se apagan con
   el interruptor de «caminos y ríos».
 
+  CAMINO PRINCIPAL Y SENDERO: el camino principal, seguido y gordo con
+  borde oscuro; el sendero, fino y a trazos cortos.
+
   MÁS RAYAS: FRONTERA (granate a raya y punto, con un borde claro), RUTA
   MARÍTIMA (a puntos claros), MURALLA (gris, gorda y con borde) y RUTA DE
   VIAJE (rosa a trazos, con FLECHAS hacia donde va: del primer punto al
@@ -1612,8 +1615,12 @@
   false (en el editor, la casilla «Se ensancha hacia el final»).
 
   LOS TEXTOS SUELTOS («Mar de las Brumas», «Montes Grises»): escritos en
-  el mapa en cursiva y espaciados, de mapa antiguo, con su tamaño
-  (grande, mediano o pequeño, en proporción al mapa) y su giro. Son del
+  el mapa, con su LETRA (antigua, elegante, muy legible, moderna, a mano,
+  de videojuego o de máquina: las fuentes que ya carga la web, más
+  Georgia y Palatino, que son del sistema; clases es-letra-… en
+  mundo-mapa.css), en cursiva o no, con su TAMAÑO en píxeles del mapa
+  ("fontSize"; los de antes llevaban "size": grande, mediano o pequeño)
+  y su giro. Son del
   mapa, no señaladores: crecen con el zoom. No se pulsan ni salen en la
   lista (son el dibujo).
 
@@ -1621,6 +1628,18 @@
   mapa lleva abajo a la izquierda una barra de escala de un número
   redondo (1, 2 o 5 por diez a la lo que sea, alrededor de un sexto del
   mapa) y la leyenda lo dice en letra, con cuánto se anda en un día.
+
+  ZONAS DENTRO DE ZONAS: las regiones se pintan DE LA MÁS GRANDE A LA MÁS
+  PEQUEÑA (en la web, en el editor y en la imagen descargada), así que
+  una zona dentro de otra queda encima: se ve y se puede pulsar. Antes
+  iban en el orden del archivo y una grande dibujada después se tragaba
+  a las de dentro. En el mapa de una página ("page"), cuando hay zonas
+  dentro de otras, los mandos dicen «todas las zonas» (de salida), «solo
+  las grandes», «solo las de dentro» o «solo la imagen». En el
+  mapamundi siguen siendo «países» (de salida), «regiones», «las dos» y
+  «solo la imagen». Qué zona está dentro de cuál lo dicen las páginas
+  de la wiki («región: [[…]]»), pero solo si hablan de alguna zona de
+  ese mapa; si no, se mira el dibujo.
 
   LO QUE LE AÑADE ESTA WEB AL .cmap (Chronicler no lo conoce; si abres
   el mapa allí y lo guardas, puede perderlo): "page" (de qué página es
@@ -1653,8 +1672,13 @@
       generador). Las rayas van del primer punto al último: el río desde
       donde nace, la ruta desde donde sale. El primer punto de una raya
       elegida sale en amarillo.
-    - ESCRIBIR EN EL MAPA: se pulsa donde va el texto y, a la derecha, se
-      escribe y se le pone tamaño y giro.
+    - ESCRIBIR EN EL MAPA: arriba se eligen la letra, el tamaño y si va en
+      cursiva; se pulsa donde va el texto y, a la derecha, se escribe (y
+      se le puede cambiar todo eso, el giro y el color).
+    - EL BOTÓN FLOTANTE «ELEGIR Y MOVER», abajo a la derecha y siempre a
+      la vista (encima de la barra, que crece con los avisos): es lo que
+      más se usa. Si había un dibujo a medias con puntos de sobra, lo
+      termina en vez de perderlo.
     - EL IMÁN (casilla «Imán», encendida): lo que se pone a menos de 12
       píxeles de un sitio o de un punto se pone JUSTO ahí, y si no hay
       punto pero sí un borde, encima del borde. Así el camino llega a la
@@ -1672,13 +1696,15 @@
       grandes, como el mapamundi). Escribir un nombre letra a letra o
       mover un sitio con las flechas es UN paso. Dentro de una casilla de
       texto, Ctrl+Z deshace lo escrito en ella, como siempre.
+    - PONER LA ESCALA (herramienta aparte): se marca un tramo que se
+      conozca (un extremo y el otro), se escribe cuánto es y en qué
+      (leguas, kilómetros o millas) y «Usar como escala». Ahí mismo, lo
+      que se anda en un día a pie y a caballo (8 y 12 leguas de entrada;
+      30 y 50 km; 20 y 30 millas). La escala se guarda y la web la pinta.
     - MEDIR: se pulsa de un sitio a otro, punto a punto, y a la derecha
-      sale cuánto hay (con el imán, de pin a pin exacto). Sin escala, en
-      píxeles del mapa. PARA PONER LA ESCALA: se mide un tramo que se
-      conozca, se escribe cuánto es («50», «leguas») y «Usar como
-      escala». Entonces sale en leguas y en DÍAS DE VIAJE a pie y a
-      caballo (8 y 12 leguas al día de entrada; 30 y 50 en km; se pueden
-      cambiar). La medida no se guarda; la escala sí, y la web la pinta.
+      sale cuánto hay (con el imán, de pin a pin exacto): con escala, en
+      su unidad y en DÍAS DE VIAJE; sin ella, en píxeles del mapa. La
+      medida no se guarda.
     - TODO SE PUEDE HACER CON EL TECLADO: con el mapa elegido, las
       flechas lo mueven (o mueven el sitio o el texto elegido), + y −
       acercan, Intro pone un sitio, un texto o un punto en el centro, Fin
@@ -1695,6 +1721,15 @@
       y la barra de escala—, tal y como esté
       en el editor aunque no esté guardado. Se pinta en un <canvas> desde
       los datos, así que no depende del zoom con que lo estés mirando.
+
+  «GUARDAR Y PASAR A LA WEB» LLEVA BARRA DE PROGRESO (en las páginas y en
+  los mapas): el servidor pasa la wiki en otro hilo y el editor le
+  pregunta cómo va cada poco (/api/pasar/estado). Se cuenta por el tiempo
+  que tardó cada script la última vez (apuntado en la carpeta temporal,
+  editor-wiki-ultima-pasada.json) y por las líneas que lleva escritas: solo
+  con las líneas iba a saltos, porque los scripts escriben casi todo al
+  final. Es un <progress> de verdad, y mientras dura el aviso lleva
+  aria-busy para que el lector de pantalla no cante cada porcentaje.
 
   EL .cmap SE GUARDA ENTERO: va y vuelve con todo lo que traiga (lo de
   Chronicler que el editor no conoce también), con el mismo sangrado y

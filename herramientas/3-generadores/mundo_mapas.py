@@ -280,9 +280,14 @@ TIPOS_DE_PIN = {
 # Los de nombre siempre a la vista; los demás, solo al acercarse (al 200%
 # o más): con todos los pueblos escritos, el mapa entero era una sopa.
 SIEMPRE_CON_NOMBRE = {"", "capital", "ciudad"}
-TIPOS_DE_LINEA = {"camino": "camino", "rio": "río", "frontera": "frontera",
+TIPOS_DE_LINEA = {"camino": "camino principal", "sendero": "sendero", "rio": "río", "frontera": "frontera",
                   "maritima": "ruta marítima", "muralla": "muralla", "ruta": "ruta de viaje"}
+# Tamaños de antes (el lado largo del mapa entre esto); ahora el editor
+# guarda el tamaño en píxeles del mapa ("fontSize").
 TAMANOS_DE_TEXTO = {"grande": 45, "mediano": 70, "pequeno": 110}
+# Las letras de los textos sueltos: cada una es una clase en
+# mundo-mapa.css (es-letra-…), con las fuentes que ya carga la web.
+LETRAS_DE_TEXTO = ("antigua", "elegante", "legible", "moderna", "a-mano", "pixel", "maquina")
 
 
 def _tipo_de_pin(valor):
@@ -327,8 +332,13 @@ def _texto(crudo):
     if x is None or y is None or not texto:
         return None
     tamano = str(crudo.get("size") or "mediano").strip().lower()
+    letra = str(crudo.get("font") or "antigua").strip().lower()
+    pixeles = _numero(crudo.get("fontSize"), 0) or 0
     return {"x": x, "y": y, "texto": texto,
             "tamano": tamano if tamano in TAMANOS_DE_TEXTO else "mediano",
+            "pixeles": pixeles if 0 < pixeles <= 5000 else 0,
+            "letra": letra if letra in LETRAS_DE_TEXTO else "antigua",
+            "cursiva": crudo.get("italic") is not False,
             "giro": max(-180.0, min(180.0, _numero(crudo.get("angle"), 0.0) or 0.0)),
             "color": _color(crudo.get("color"))}
 
@@ -709,6 +719,15 @@ def niveles(formas, region_de=None):
     con todos tardaba minutos."""
     con_nombre = [(i, f) for i, f in enumerate(formas)
                   if f["etiqueta"] or f["pagina"] or f["mapa"]]
+    # Las páginas mandan solo si hablan de ALGUNA de estas formas: en el
+    # mapa de un reino, con sus comarcas y sus valles, las páginas del
+    # mapamundi no dicen nada, y entonces se mira el dibujo.
+    if region_de:
+        regiones = set(region_de.values())
+        if not any((f["etiqueta"] or f["pagina"] or f["mapa"]).strip().lower() in regiones
+                   or (f["etiqueta"] or f["pagina"] or f["mapa"]).strip().lower() in region_de
+                   for _, f in con_nombre):
+            region_de = None
     if region_de:
         regiones = set(region_de.values())
         salida = {}
@@ -830,8 +849,17 @@ def pintar(mapa, pagina_a, mapa_a, imagen_a, detalle=None, avisar=None, region_d
     dibujo, vivas, vivas_regiones = [], [], []
     nivel_de = niveles(mapa["formas"], region_de)
     hay_niveles = "region" in nivel_de.values()
+    # El mapa de una página (con "page") enseña de salida TODAS las zonas,
+    # las grandes y las de dentro a la vez; el mapamundi, los países.
+    todas_de_salida = bool(mapa.get("pagina"))
     cuantas = 0
-    for indice, forma in enumerate(mapa["formas"]):
+    # DE LA MÁS GRANDE A LA MÁS PEQUEÑA: en SVG lo último tapa a lo de
+    # antes, así que una zona dentro de otra se pinta después y queda
+    # encima (se ve y se puede pulsar). En el orden del archivo, una zona
+    # grande dibujada después se tragaba a las de dentro.
+    orden = sorted(range(len(mapa["formas"])), key=lambda i: -_area(mapa["formas"][i]["puntos"]))
+    for indice in orden:
+        forma = mapa["formas"][indice]
         nombre = forma["etiqueta"] or forma["pagina"] or forma["mapa"]
         destinos = _destinos(forma, pagina_a, mapa_a)
 
@@ -887,8 +915,8 @@ def pintar(mapa, pagina_a, mapa_a, imagen_a, detalle=None, avisar=None, region_d
         # Las regiones, apagadas de salida: se empieza viendo los países.
         # Sin JavaScript se quedan así, que es lo más útil (los países son
         # lo que más se busca, y las regiones están en la lista de abajo).
-        trozos.append('<g class="mapa-formas mapa-regiones es-apagada" data-mapa-nivel="regiones">'
-                      '%s</g>' % "".join(vivas_regiones))
+        trozos.append('<g class="mapa-formas mapa-regiones%s" data-mapa-nivel="regiones">'
+                      '%s</g>' % ("" if todas_de_salida else " es-apagada", "".join(vivas_regiones)))
         trozos.append('<g class="mapa-formas mapa-paises" data-mapa-nivel="paises">%s</g>'
                       % "".join(vivas))
     else:
@@ -948,13 +976,13 @@ def pintar(mapa, pagina_a, mapa_a, imagen_a, detalle=None, avisar=None, region_d
     base = max(ancho, alto)
     letreros = []
     for tx in mapa.get("textos") or []:
-        tam = base / TAMANOS_DE_TEXTO[tx["tamano"]]
+        tam = tx["pixeles"] or base / TAMANOS_DE_TEXTO[tx["tamano"]]
         giro = (' transform="rotate(%s %s %s)"' % (_cifra(tx["giro"]), _cifra(tx["x"]), _cifra(tx["y"]))
                 if tx["giro"] else "")
         color = (' fill="%s"' % tx["color"]) if tx["color"] else ""
-        letreros.append('<text class="mapa-texto es-%s" x="%s" y="%s" font-size="%s" stroke-width="%s"'
+        letreros.append('<text class="mapa-texto es-letra-%s%s" x="%s" y="%s" font-size="%s" stroke-width="%s"'
                         ' text-anchor="middle" dominant-baseline="central"%s%s>%s</text>'
-                        % (tx["tamano"], _cifra(tx["x"]), _cifra(tx["y"]), _cifra(tam), _cifra(tam * 0.16),
+                        % (tx["letra"], "" if tx["cursiva"] else " es-recta", _cifra(tx["x"]), _cifra(tx["y"]), _cifra(tam), _cifra(tam * 0.16),
                            giro, color, html.escape(tx["texto"])))
     if letreros:
         trozos.append('<g class="mapa-textos">%s</g>' % "".join(letreros))
@@ -1066,6 +1094,7 @@ def pintar(mapa, pagina_a, mapa_a, imagen_a, detalle=None, avisar=None, region_d
         "puntos": (puntos_antes, puntos_despues),
         "dibujo": len(dibujo),
         "niveles": hay_niveles,
+        "todas_de_salida": todas_de_salida,
         "escondidos": escondidos,
     }
 
@@ -1268,7 +1297,7 @@ def pintar_lista(sitios, titulo_id="mapa-sitios-titulo"):
 # guardadas en Chronicler.
 
 def pintar_mandos(capas, hay_formas=True, hay_pines=False, hay_niveles=False, hay_lineas=False,
-                  hay_nombres=False):
+                  hay_nombres=False, todas_de_salida=False):
     trozos = ['<div class="mapa-mandos" data-mapa-mandos>']
     trozos.append(
         '<div class="mapa-zoom" role="group" aria-label="Zoom del mapa">'
@@ -1291,12 +1320,16 @@ def pintar_mandos(capas, hay_formas=True, hay_pines=False, hay_niveles=False, ha
     # interruptor para quedarse sin mapa no es un interruptor.
     casillas = []
     if hay_formas and hay_niveles:
-        # Países o regiones (ver niveles()), o nada encima de la imagen.
-        # Son radios: una cosa u otra, nunca las dos, porque una región
-        # tapa a sus países.
-        for valor, texto, marcado in (("paises", "países", True),
-                                      ("regiones", "regiones", False),
-                                      ("nada", "solo la imagen", False)):
+        # Países o regiones (ver niveles()), las dos cosas a la vez (las de
+        # dentro encima), o nada encima de la imagen. En el mapa de una
+        # página se habla de zonas y se empieza viéndolas todas.
+        if todas_de_salida:
+            opciones = (("todo", "todas las zonas", True), ("regiones", "solo las grandes", False),
+                        ("paises", "solo las de dentro", False), ("nada", "solo la imagen", False))
+        else:
+            opciones = (("paises", "países", True), ("regiones", "regiones", False),
+                        ("todo", "las dos", False), ("nada", "solo la imagen", False))
+        for valor, texto, marcado in opciones:
             casillas.append(
                 '<label class="mapa-capa-casilla"><input type="radio" name="mapa-nivel"'
                 ' value="%s" data-mapa-nivel-casilla%s> %s</label>'
