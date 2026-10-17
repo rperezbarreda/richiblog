@@ -32,7 +32,7 @@
       "label": "Brujamar",
       "shape": "redondo",
       "size": "pequeno",
-      "kind": "pueblo"
+      "kind": "puerto"
     },
     {
       "id": "0ea0a97cb53cfe06",
@@ -41,7 +41,7 @@
       "label": "Olaspuras",
       "shape": "redondo",
       "size": "pequeno",
-      "kind": "pueblo"
+      "kind": "puerto"
     },
     {
       "id": "4e9decd152f8f2a1",
@@ -59,7 +59,7 @@
       "label": "Sangrorrisco",
       "shape": "redondo",
       "size": "pequeno",
-      "kind": "pueblo"
+      "kind": "fortaleza"
     },
     {
       "id": "25f2f797cb08036d",
@@ -86,7 +86,7 @@
       "label": "Pasobrea",
       "shape": "redondo",
       "size": "pequeno",
-      "kind": "pueblo"
+      "kind": "ruina"
     },
     {
       "id": "e14935e24b7c239e",
@@ -104,7 +104,7 @@
       "label": "Petrapura",
       "shape": "redondo",
       "size": "pequeno",
-      "kind": "pueblo"
+      "kind": "puerto"
     },
     {
       "id": "663807a0c25f7816",
@@ -122,7 +122,7 @@
       "label": "Simavoraz",
       "shape": "redondo",
       "size": "pequeno",
-      "kind": "pueblo"
+      "kind": "ruina"
     },
     {
       "id": "d5e750b77084a101",
@@ -131,7 +131,7 @@
       "label": "Cumbrehueso",
       "shape": "redondo",
       "size": "pequeno",
-      "kind": "pueblo"
+      "kind": "fortaleza"
     },
     {
       "id": "e7f9977b3b76bce7",
@@ -149,7 +149,7 @@
       "label": "Forjaceleste",
       "shape": "redondo",
       "size": "pequeno",
-      "kind": "pueblo"
+      "kind": "templo"
     },
     {
       "id": "43f9faa79bb839ca",
@@ -167,7 +167,7 @@
       "label": "Ambraversa",
       "shape": "redondo",
       "size": "pequeno",
-      "kind": "pueblo"
+      "kind": "puerto"
     },
     {
       "id": "6896c9c501da922a",
@@ -194,7 +194,7 @@
       "label": "Vistaespejo",
       "shape": "redondo",
       "size": "pequeno",
-      "kind": "pueblo"
+      "kind": "puerto"
     },
     {
       "id": "3fd4bb7b67cc13e3",
@@ -203,7 +203,7 @@
       "label": "Brisaeterna",
       "shape": "redondo",
       "size": "pequeno",
-      "kind": "pueblo"
+      "kind": "templo"
     },
     {
       "id": "c0bb8e81c5c26fea",
@@ -212,7 +212,7 @@
       "label": "Puertosoñado",
       "shape": "redondo",
       "size": "pequeno",
-      "kind": "pueblo"
+      "kind": "puerto"
     },
     {
       "id": "a7bd9d6925358716",
@@ -221,7 +221,7 @@
       "label": "Fosalumbre",
       "shape": "redondo",
       "size": "pequeno",
-      "kind": "pueblo"
+      "kind": "templo"
     },
     {
       "id": "71c6ff0f32e26e1f",
@@ -230,7 +230,7 @@
       "label": "Villaespumosa",
       "shape": "redondo",
       "size": "pequeno",
-      "kind": "pueblo"
+      "kind": "ciudad"
     },
     {
       "id": "ea850461f8375f52",
@@ -239,7 +239,7 @@
       "label": "Cuelgacuervos",
       "shape": "redondo",
       "size": "pequeno",
-      "kind": "pueblo"
+      "kind": "puerto"
     },
     {
       "id": "805a18758943a483",
@@ -248,7 +248,7 @@
       "shape": "redondo",
       "size": "pequeno",
       "label": "Pinzacharcos",
-      "kind": "pueblo"
+      "kind": "ciudad"
     },
     {
       "id": "45f27bcd237dca33",
@@ -257,7 +257,7 @@
       "label": "Vegasombría",
       "shape": "redondo",
       "size": "pequeno",
-      "kind": "pueblo"
+      "kind": "ciudad"
     },
     {
       "id": "7619bc0120f17b8c",
@@ -266,7 +266,161 @@
       "shape": "redondo",
       "size": "pequeno",
       "label": "Valdescalofrío",
-      "kind": "pueblo"
+      "kind": "torre"
+    },
+    {
+      "id": "413dc583d2a119c8",
+      "x": 206.4,
+      "y": 1214.4,
+      "label": "",
+      "kind": "puente"
+    },
+    {
+      "id": "9a2834066fa62378",
+      "x": 267.8,
+      "y": 1328.2,
+      "label": "",
+      "kind": "puente"
+    },
+    {
+      "id": "750cd9c08fe83051",
+      "x": 555.5,
+      "y": 1205.2,
+      "label": "",
+      "kind": "puente"
+    },
+    {
+      "id": "c5ec8143208dbd8b",
+      "x": 773,
+      "y": 1001.7,
+      "label": "",
+      "kind": "puente"
+    },
+    {
+      "id": "361b726ef2fdccf5",
+      "x": 713.8,
+      "y": 983.2,
+      "label": "",
+      "kind": "puente"
+    },
+    {
+      "id": "726047a34cfb3c11",
+      "x": 582.5,
+      "y": 949.9,
+      "label": "",
+      "kind": "puente"
+    },
+    {
+      "id": "b7f8d49ea2708be6",
+      "x": 531.6,
+      "y": 906.4,
+      "label": "",
+      "kind": "puente"
+    },
+    {
+      "id": "3fa65c85ebc836fa",
+      "x": 779.2,
+      "y": 704,
+      "label": "",
+      "kind": "puente"
+    },
+    {
+      "id": "195fc73f7a83402c",
+      "x": 839.5,
+      "y": 687.2,
+      "label": "",
+      "kind": "puente"
+    },
+    {
+      "id": "ce940be268fa42a2",
+      "x": 852.5,
+      "y": 688.1,
+      "label": "",
+      "kind": "puente"
+    },
+    {
+      "id": "dbd851c1ed61ae3f",
+      "x": 1062.4,
+      "y": 635.4,
+      "label": "",
+      "kind": "puente"
+    },
+    {
+      "id": "58a8ee2e3e140026",
+      "x": 1093.7,
+      "y": 382.6,
+      "label": "",
+      "kind": "puente"
+    },
+    {
+      "id": "18c68122f54b587d",
+      "x": 930.3,
+      "y": 260.9,
+      "label": "",
+      "kind": "puente"
+    },
+    {
+      "id": "49ca7e078de56239",
+      "x": 1204.6,
+      "y": 450.2,
+      "label": "",
+      "kind": "puente"
+    },
+    {
+      "id": "c3d7688d376990bf",
+      "x": 1290.5,
+      "y": 708,
+      "label": "",
+      "kind": "puente"
+    },
+    {
+      "id": "88e02636974680ed",
+      "x": 1899.9,
+      "y": 925.6,
+      "label": "",
+      "kind": "puente"
+    },
+    {
+      "id": "b5a6a18e97c92109",
+      "x": 1556.5,
+      "y": 819.9,
+      "label": "",
+      "kind": "puente"
+    },
+    {
+      "id": "a7eba7c36733bd6d",
+      "x": 1669.3,
+      "y": 662.3,
+      "label": "",
+      "kind": "puente"
+    },
+    {
+      "id": "c110aed4d2af1910",
+      "x": 1734,
+      "y": 593.5,
+      "label": "",
+      "kind": "puente"
+    },
+    {
+      "id": "1e9dfe0e376ebd13",
+      "x": 1691.2,
+      "y": 457.1,
+      "label": "",
+      "kind": "puente"
+    },
+    {
+      "id": "07658fb33626d89d",
+      "x": 2169.3,
+      "y": 618.7,
+      "label": "",
+      "kind": "puente"
+    },
+    {
+      "id": "906e942a6cfac60f",
+      "x": 1273.3,
+      "y": 154.6,
+      "label": "",
+      "kind": "puente"
     }
   ],
   "shapes": [
@@ -6903,7 +7057,11 @@
           "y": 731.2
         }
       ],
-      "label": "Senda Real"
+      "label": "Senda Real",
+      "width": 6,
+      "gap": 8,
+      "color": "#ff301a",
+      "dash": "dotted"
     },
     {
       "id": "29e377aa6f9d9698",
@@ -9853,8 +10011,8 @@
     },
     {
       "id": "66b1dd5100ae1fb8",
-      "x": 1753.1,
-      "y": 1440.6,
+      "x": 1765,
+      "y": 1377.1,
       "label": "Mar Espumoso",
       "font": "a-mano",
       "fontSize": 88,
