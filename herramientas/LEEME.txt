@@ -1624,11 +1624,24 @@
       wiki/_imagenes/mapas/ en WebP (hasta 4096 px de lado: un mapa
       encogido no aguanta el zoom).
 
+    - DESCARGAR LA IMAGEN (en la barra de abajo): un PNG del tamaño del
+      mapa con todo lo puesto encima —regiones con su nombre en cursiva,
+      caminos, ríos y sitios con su símbolo y su nombre—, tal y como esté
+      en el editor aunque no esté guardado. Se pinta en un <canvas> desde
+      los datos, así que no depende del zoom con que lo estés mirando.
+
   EL .cmap SE GUARDA ENTERO: va y vuelve con todo lo que traiga (lo de
   Chronicler que el editor no conoce también), con el mismo sangrado y
   los mismos saltos de línea. Los avisos del editor de mapas salen en la
   barra de abajo y no arriba: arriba empujaban el mapa mientras se
   pulsaba en él.
+
+  LAS IMÁGENES SUBIDAS pasan por un archivo temporal, porque traer() de
+  imagenes.py trabaja con rutas. Ese archivo se cierra nada más
+  escribirlo: tempfile.mkstemp lo deja abierto y en Windows un archivo
+  abierto no se puede borrar («[WinError 32] … está siendo utilizado por
+  otro proceso», que hacía fallar la subida). Y si aun así no se deja
+  borrar, se queda en la carpeta temporal en vez de tumbar la subida.
 
 
   LA PORTADA DE LA WIKI, POR APARTADOS
