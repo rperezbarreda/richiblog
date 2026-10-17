@@ -887,7 +887,8 @@
       ],
       "color": "#421f93",
       "layerId": "base",
-      "label": "Lago Ponzoña"
+      "label": "Lago Ponzoña",
+      "kind": "lago"
     },
     {
       "id": "eeda43accb8eb936",
@@ -1045,7 +1046,8 @@
       "color": "#ffffff",
       "layerId": "base",
       "label": "Reino de Nocravel",
-      "targetPage": "Reino de Nocravel"
+      "targetPage": "Reino de Nocravel",
+      "kind": "vecino"
     },
     {
       "id": "c0324bb0dadde716",
@@ -1695,7 +1697,8 @@
       "color": "#242225",
       "layerId": "base",
       "targetPage": "Unión de las Cumbres Calcinadas",
-      "label": "Unión de las Cumbres Calcinadas"
+      "label": "Unión de las Cumbres Calcinadas",
+      "kind": "vecino"
     },
     {
       "id": "7e71cdcf58582a11",
@@ -2289,7 +2292,8 @@
       "color": "#1c8236",
       "layerId": "base",
       "targetPage": "Reino de Terredia",
-      "label": "Reino de Terredia"
+      "label": "Reino de Terredia",
+      "kind": "vecino"
     },
     {
       "id": "1e7ba6cc6dac1389",
@@ -2371,7 +2375,8 @@
       "color": "#cb611a",
       "layerId": "base",
       "targetPage": "Condado de Burcrecia",
-      "label": "Condado de Burcrecia"
+      "label": "Condado de Burcrecia",
+      "kind": "vecino"
     },
     {
       "id": "6a75480a5924a3bc",
@@ -2573,7 +2578,8 @@
       "color": "#d5df49",
       "layerId": "base",
       "targetPage": "Mulz'aka",
-      "label": "Mulz'aka"
+      "label": "Mulz'aka",
+      "kind": "vecino"
     },
     {
       "id": "6d95af4158e337c5",
@@ -2854,7 +2860,8 @@
       ],
       "color": "#f7d940",
       "layerId": "base",
-      "label": "Cordillera de Los Filos"
+      "label": "Cordillera de Los Filos",
+      "kind": "montana"
     },
     {
       "id": "4890180520c95040",
@@ -3319,7 +3326,8 @@
       ],
       "color": "#2ecc71",
       "layerId": "base",
-      "label": "Lago Valor"
+      "label": "Lago Valor",
+      "kind": "lago"
     },
     {
       "id": "7d8ca19ed26ed1d2",
@@ -3536,7 +3544,8 @@
       ],
       "color": "#157f2f",
       "layerId": "base",
-      "label": "Bosque Augurio"
+      "label": "Bosque Augurio",
+      "kind": "bosque"
     },
     {
       "id": "fecea7698ecd63ad",
@@ -4309,7 +4318,8 @@
       ],
       "color": "#631212",
       "layerId": "base",
-      "label": "Ciénaga de Almas"
+      "label": "Ciénaga de Almas",
+      "kind": "pantano"
     },
     {
       "id": "3f374b5b893dbdec",
@@ -4506,7 +4516,8 @@
       ],
       "color": "#9a9998",
       "layerId": "base",
-      "label": "Bosque Nubloso"
+      "label": "Bosque Nubloso",
+      "kind": "bosque"
     },
     {
       "id": "8d74985f498b5c74",
@@ -4603,7 +4614,8 @@
       ],
       "color": "#5c0f30",
       "layerId": "base",
-      "label": "Bosque Lumbre"
+      "label": "Bosque Lumbre",
+      "kind": "bosque"
     },
     {
       "id": "a27ba8e324b4f82d",
@@ -4708,7 +4720,8 @@
       ],
       "color": "#166a24",
       "layerId": "base",
-      "label": "Valle Musgoso"
+      "label": "Valle Musgoso",
+      "kind": "valle"
     }
   ],
   "lines": [
@@ -10054,5 +10067,6 @@
       "a pie": 30,
       "a caballo": 50
     }
-  }
+  },
+  "compass": "arriba-derecha"
 }

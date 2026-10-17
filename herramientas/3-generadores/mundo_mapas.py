@@ -67,6 +67,19 @@ abres el mapa allí y lo guardas, puede perderlo):
                                         o un medallón) con una imagen dentro
                                         (la bandera o el blasón), como un
                                         pin grande
+    shapes[].kind: "vecino" | "provincia" | "lago" | "mar" | "bosque" |
+                   "montana" | "desierto" | "pantano" | "valle"
+                                        qué clase de zona es: cada una
+                                        lleva su trama (olas, árboles,
+                                        montes, rayado…) encima de su color
+    labels[].points: [ {"x": 10, "y": 20}, … ]
+                                        un texto que va SOBRE UNA CURVA (el
+                                        nombre de un río, de una
+                                        cordillera): se escribe a lo largo
+                                        de esos puntos, suavizados
+    "compass": "arriba-derecha"         la rosa de los vientos, en esa
+                                        esquina ("arriba-izquierda",
+                                        "abajo-derecha"…)
     "scale": { "pixels": 412.5, "distance": 50, "unit": "leguas",
                "travel": { "a pie": 8, "a caballo": 12 } }
                                         la escala: tantos píxeles del
@@ -219,6 +232,7 @@ def leer_cmap(texto, avisar=None):
         "emblemas": emblemas,
         "escala": _escala(crudo.get("scale")),
         "pagina": str(crudo.get("page") or "").strip(),
+        "rosa": _rosa_valida(crudo.get("compass")),
     }
 
 
@@ -326,6 +340,25 @@ TRAZOS_DE_RAYA = ("solid", "dashed", "dotted", "dashdot")
 FORMAS_DE_EMBLEMA = ("tipo", "escudo", "bandera", "redondo", "cuadrado", "rombo", "hexagono", "octogono",
                      "triangulo", "triangulo-abajo", "casa", "torre", "cupula", "pildora", "estrella", "cruz")
 TAMANOS_DE_EMBLEMA = {"pequeno": 0.8, "mediano": 1.2, "grande": 1.7}
+# LAS CLASES DE ZONA: cada una con su nombre, su color si la zona no trae
+# uno, y su trama (_trama). Se distinguen por la trama, no solo por el
+# color: olas el agua, arbolitos el bosque, montes la montaña…
+TIPOS_DE_ZONA = {"vecino": ("país vecino", "#9a8fb0"), "provincia": ("provincia o comarca", "#f5ce6c"),
+                 "lago": ("lago", "#3f8fd2"), "mar": ("mar", "#2f6fb0"), "bosque": ("bosque", "#2e7d32"),
+                 "montana": ("montaña", "#8d6e63"), "desierto": ("desierto", "#e0c27a"),
+                 "pantano": ("pantano o ciénaga", "#6b7d3a"), "valle": ("valle o llanura", "#9ccc65")}
+# Dónde va la rosa de los vientos.
+RINCONES_DE_ROSA = ("arriba-izquierda", "arriba-derecha", "abajo-izquierda", "abajo-derecha")
+# Las rayas por las que se viaja (las que forman la red de caminos para
+# calcular rutas): caminos, senderos y rutas, de tierra y de mar.
+RAYAS_DE_VIAJE = ("camino", "sendero", "ruta", "maritima")
+
+
+def _rosa_valida(valor):
+    if isinstance(valor, dict):
+        valor = valor.get("corner")
+    valor = str(valor or "").strip().lower()
+    return valor if valor in RINCONES_DE_ROSA else ""
 
 
 def _forma_valida(valor):
@@ -421,7 +454,9 @@ def _texto(crudo):
     tamano = str(crudo.get("size") or "mediano").strip().lower()
     letra = str(crudo.get("font") or "antigua").strip().lower()
     pixeles = _numero(crudo.get("fontSize"), 0) or 0
+    curva = _puntos(crudo.get("points") if isinstance(crudo.get("points"), list) else [])
     return {"x": x, "y": y, "texto": texto,
+            "curva": curva if len(curva) >= 2 else [],
             "tamano": tamano if tamano in TAMANOS_DE_TEXTO else "mediano",
             "pixeles": pixeles if 0 < pixeles <= 5000 else 0,
             "letra": letra if letra in LETRAS_DE_TEXTO else "antigua",
@@ -684,6 +719,266 @@ def _flechas(puntos, radio, color):
     return "".join(salida)
 
 
+# =========================================
+# LAS TRAMAS DE LAS ZONAS
+# =========================================
+# Un <pattern> por clase de zona, de lado s (en unidades del mapa: crece
+# con el zoom, como lo dibujado), que se pinta ENCIMA del color de la zona.
+# La tinta es oscura y medio transparente (sirve encima de cualquier
+# color), y en el agua, clara.
+
+def _trama(tipo, s, ident):
+    c = _cifra
+    g = s * 0.07
+    oscura = ' stroke="#1b1020" stroke-opacity="0.5" fill="none" stroke-width="%s" stroke-linecap="round"' % c(g)
+    if tipo == "vecino":
+        # Rayado en diagonal: «esto es de fuera».
+        d = "M0 %s L%s 0 M%s %s L%s %s M%s %s L%s %s" % (c(s), c(s), c(-s / 4), c(s / 4), c(s / 4), c(-s / 4),
+                                                       c(s * 3 / 4), c(s * 5 / 4), c(s * 5 / 4), c(s * 3 / 4))
+        dentro = '<path d="%s"%s></path>' % (d, oscura)
+    elif tipo in ("lago", "mar"):
+        # Olas: dos filas de ondas, en claro.
+        def ola(x, y):
+            return "M%s %s q%s %s %s 0 t%s 0" % (c(x), c(y), c(s * 0.12), c(-s * 0.12), c(s * 0.24), c(s * 0.24))
+        dentro = ('<path d="%s %s" stroke="#ffffff" stroke-opacity="0.6" fill="none" stroke-width="%s"'
+                  ' stroke-linecap="round"></path>' % (ola(s * 0.05, s * 0.3), ola(s * 0.5, s * 0.78), c(g)))
+    elif tipo == "bosque":
+        # Arbolitos: un triángulo con su tronco, a tresbolillo.
+        def arbol(x, y):
+            return ("M%s %s l%s %s l%s 0 Z M%s %s l0 %s"
+                    % (c(x), c(y - s * 0.16), c(s * 0.11), c(s * 0.22), c(-s * 0.22), c(x), c(y + s * 0.06), c(s * 0.08)))
+        dentro = ('<path d="%s %s" stroke="#1b1020" stroke-opacity="0.55" fill="#1b1020" fill-opacity="0.3"'
+                  ' stroke-width="%s" stroke-linejoin="round"></path>' % (arbol(s * 0.25, s * 0.3), arbol(s * 0.75, s * 0.8), c(g)))
+    elif tipo == "montana":
+        # Montes: dos picos.
+        def monte(x, y):
+            return "M%s %s l%s %s l%s %s" % (c(x - s * 0.18), c(y + s * 0.1), c(s * 0.18), c(-s * 0.22), c(s * 0.18), c(s * 0.22))
+        dentro = '<path d="%s %s"%s stroke-linejoin="round"></path>' % (monte(s * 0.25, s * 0.3), monte(s * 0.75, s * 0.8), oscura)
+    elif tipo == "desierto":
+        # Puntitos de arena.
+        puntos = [(0.15, 0.2), (0.55, 0.12), (0.35, 0.5), (0.8, 0.45), (0.12, 0.78), (0.6, 0.85)]
+        dentro = "".join('<circle cx="%s" cy="%s" r="%s" fill="#1b1020" fill-opacity="0.45"></circle>'
+                         % (c(x * s), c(y * s), c(g * 0.9)) for x, y in puntos)
+    elif tipo == "pantano":
+        # Agua quieta y matas de junco.
+        def mata(x, y):
+            return ("M%s %s l%s 0 M%s %s l0 %s M%s %s l%s %s M%s %s l%s %s"
+                    % (c(x - s * 0.14), c(y), c(s * 0.28), c(x), c(y), c(-s * 0.16), c(x - s * 0.07), c(y),
+                       c(-s * 0.05), c(-s * 0.11), c(x + s * 0.07), c(y), c(s * 0.05), c(-s * 0.11)))
+        dentro = '<path d="%s %s"%s></path>' % (mata(s * 0.25, s * 0.35), mata(s * 0.75, s * 0.85), oscura)
+    elif tipo == "valle":
+        # Hierba: matitas sueltas.
+        def hierba(x, y):
+            return "M%s %s l%s %s l%s %s" % (c(x - s * 0.07), c(y - s * 0.1), c(s * 0.07), c(s * 0.1), c(s * 0.07), c(-s * 0.1))
+        dentro = '<path d="%s %s"%s></path>' % (hierba(s * 0.3, s * 0.3), hierba(s * 0.8, s * 0.75), oscura)
+    else:
+        return ""
+    return ('<pattern id="%s" patternUnits="userSpaceOnUse" width="%s" height="%s">%s</pattern>'
+            % (ident, c(s), c(s), dentro))
+
+
+def _muestra_de_zona(tipo, color, n):
+    """Un cuadradito para la leyenda: el color de la zona con su trama."""
+    trama = _trama(tipo, 12, "mapa-leyenda-trama-%d" % n)
+    encima = ('<rect x="1" y="1" width="32" height="20" fill="url(#mapa-leyenda-trama-%d)"></rect>' % n) if trama else ""
+    return ('<svg viewBox="0 0 34 22" width="34" height="22" focusable="false"><defs>%s</defs>'
+            '<rect class="mapa-leyenda-zona es-%s" x="1" y="1" width="32" height="20" fill="%s"></rect>%s</svg>'
+            % (trama, tipo, color, encima))
+
+
+# =========================================
+# LOS TEXTOS SOBRE UNA CURVA
+# =========================================
+# Los puntos que se marcan en el editor se suavizan (Catmull-Rom: una curva
+# que pasa por todos ellos sin picos). Si van de derecha a izquierda se
+# les da la vuelta, que si no el texto sale cabeza abajo.
+
+def _curva_suave(puntos):
+    if puntos[-1][0] < puntos[0][0]:
+        puntos = list(reversed(puntos))
+    c = _cifra
+    if len(puntos) == 2:
+        return "M%s %s L%s %s" % (c(puntos[0][0]), c(puntos[0][1]), c(puntos[1][0]), c(puntos[1][1]))
+    trozos = ["M%s %s" % (c(puntos[0][0]), c(puntos[0][1]))]
+    for i in range(len(puntos) - 1):
+        p0 = puntos[max(0, i - 1)]
+        p1, p2 = puntos[i], puntos[i + 1]
+        p3 = puntos[min(len(puntos) - 1, i + 2)]
+        c1 = (p1[0] + (p2[0] - p0[0]) / 6, p1[1] + (p2[1] - p0[1]) / 6)
+        c2 = (p2[0] - (p3[0] - p1[0]) / 6, p2[1] - (p3[1] - p1[1]) / 6)
+        trozos.append("C%s %s %s %s %s %s" % (c(c1[0]), c(c1[1]), c(c2[0]), c(c2[1]), c(p2[0]), c(p2[1])))
+    return " ".join(trozos)
+
+
+# =========================================
+# LA ROSA DE LOS VIENTOS
+# =========================================
+# Ocho puntas (las cuatro grandes, partidas en claro y oscuro como las de
+# los mapas antiguos), un aro dorado y las letras N, E, S y O. Del tamaño
+# del mapa (crece con el zoom, como la barra de escala de dentro del
+# dibujo). La misma en el editor (rosaDeLosVientos en mapas.js).
+
+def _rosa(rincon, ancho, alto):
+    base = max(ancho, alto)
+    r = base / 18
+    margen = r * 1.45
+    x = margen if rincon.endswith("izquierda") else ancho - margen
+    y = margen if rincon.startswith("arriba") else alto - margen
+    c = _cifra
+    trozos = ['<g class="mapa-rosa" transform="translate(%s %s)">' % (c(x), c(y)),
+              '<circle class="mapa-rosa-fondo" r="%s"></circle>' % c(r * 0.8),
+              '<circle class="mapa-rosa-aro" r="%s" stroke-width="%s"></circle>' % (c(r * 0.78), c(r * 0.035)),
+              '<circle class="mapa-rosa-aro es-fino" r="%s" stroke-width="%s"></circle>' % (c(r * 0.68), c(r * 0.015))]
+    for largo, ancho_punta, giros in ((0.58, 0.11, (45, 135, 225, 315)), (1.0, 0.15, (0, 90, 180, 270))):
+        for giro in giros:
+            a = math.radians(giro - 90)
+            punta = (largo * r * math.cos(a), largo * r * math.sin(a))
+            lado = (ancho_punta * r * math.cos(a + math.pi / 2), ancho_punta * r * math.sin(a + math.pi / 2))
+            for clase, signo in (("es-clara", 1), ("es-oscura", -1)):
+                trozos.append('<path class="mapa-rosa-punta %s" d="M0 0 L%s %s L%s %s Z" stroke-width="%s"></path>'
+                              % (clase, c(punta[0]), c(punta[1]), c(signo * lado[0]), c(signo * lado[1]), c(r * 0.012)))
+    trozos.append('<circle class="mapa-rosa-centro" r="%s"></circle>' % c(r * 0.07))
+    for letra, giro, tam in (("N", 0, 0.34), ("E", 90, 0.24), ("S", 180, 0.24), ("O", 270, 0.24)):
+        a = math.radians(giro - 90)
+        lejos = r * 1.0 + r * tam * 0.75
+        trozos.append('<text class="mapa-rosa-letra" x="%s" y="%s" font-size="%s" stroke-width="%s"'
+                      ' text-anchor="middle" dominant-baseline="central">%s</text>'
+                      % (c(lejos * math.cos(a)), c(lejos * math.sin(a)), c(r * tam), c(r * tam * 0.18), letra))
+    trozos.append("</g>")
+    return "".join(trozos)
+
+
+# =========================================
+# LA RED DE CAMINOS
+# =========================================
+# Para calcular rutas en la web («de Torrelodosa a Brujamar por los
+# caminos»): los caminos, senderos y rutas hechos un grafo. Los puntos que
+# caen casi en el mismo sitio son el mismo cruce; un camino que acaba
+# encima de otro (sin un punto ahí) se engancha partiendo ese tramo; y cada
+# sitio con nombre se engancha al camino que le pase más cerca, si le pasa
+# cerca. El camino más corto lo busca mundo-mapa.js (Dijkstra).
+
+def _red_de_caminos(lineas, sitios, ancho, alto, radio, detalle=0):
+    junto = max(ancho, alto) / 400
+    cerca = radio * 1.3
+    # Un camino que se queda a nada de otro (a menos de medio pin) es que
+    # quería llegar a él: se engancha.
+    sin_salida = max(junto, radio * 0.45)
+    nodos = []
+    celdas = {}
+
+    def nodo(x, y, tol=junto):
+        cx, cy = int(x // tol), int(y // tol)
+        for i in range(cx - 1, cx + 2):
+            for j in range(cy - 1, cy + 2):
+                for n in celdas.get((i, j), ()):
+                    if math.hypot(nodos[n][0] - x, nodos[n][1] - y) <= tol:
+                        return n
+        nodos.append((x, y))
+        celdas.setdefault((cx, cy), []).append(len(nodos) - 1)
+        return len(nodos) - 1
+
+    tramos = set()
+    extremos = []
+    for linea in lineas:
+        if linea["tipo"] not in RAYAS_DE_VIAJE:
+            continue
+        cuales = [nodo(x, y) for x, y in simplificar(linea["puntos"], detalle / 2)]
+        for a, b in zip(cuales, cuales[1:]):
+            if a != b:
+                tramos.add((min(a, b), max(a, b)))
+        extremos += [cuales[0], cuales[-1]]
+    if not tramos:
+        return None
+
+    def partir(x, y, tol, salvo=()):
+        """El tramo más cercano a (x, y), a menos de tol: lo parte en el
+        punto de encima y devuelve ese nodo (o None)."""
+        mejor, lejos = None, tol
+        for a, b in tramos:
+            if a in salvo or b in salvo:
+                continue
+            (ax, ay), (bx, by) = nodos[a], nodos[b]
+            dx, dy = bx - ax, by - ay
+            largo = dx * dx + dy * dy
+            if not largo:
+                continue
+            f = max(0.0, min(1.0, ((x - ax) * dx + (y - ay) * dy) / largo))
+            px, py = ax + dx * f, ay + dy * f
+            d = math.hypot(px - x, py - y)
+            if d < lejos:
+                lejos, mejor = d, (a, b, px, py, f)
+        if not mejor:
+            return None
+        a, b, px, py, f = mejor
+        if f <= 0.0001:
+            return a
+        if f >= 0.9999:
+            return b
+        nodos.append((px, py))
+        n = len(nodos) - 1
+        tramos.discard((a, b))
+        tramos.add((min(a, n), max(a, n)))
+        tramos.add((min(b, n), max(b, n)))
+        return n
+
+    # Los caminos que acaban encima de otro (o casi), enganchados a él. Sin
+    # contar los puntos de su propio camino que tiene al lado, que si no se
+    # enganchaba a sí mismo.
+    vecinos = {}
+    for a, b in tramos:
+        vecinos.setdefault(a, set()).add(b)
+        vecinos.setdefault(b, set()).add(a)
+
+    def suyos(e, hasta):
+        vistos, cola = {e: 0.0}, [e]
+        while cola:
+            n = cola.pop()
+            for m in vecinos.get(n, ()):
+                d = vistos[n] + math.hypot(nodos[n][0] - nodos[m][0], nodos[n][1] - nodos[m][1])
+                if d <= hasta and d < vistos.get(m, 1e18):
+                    vistos[m] = d
+                    cola.append(m)
+        return set(vistos)
+
+    for e in set(extremos):
+        sola = len(vecinos.get(e, ())) <= 1
+        tol = sin_salida if sola else junto
+        n = partir(nodos[e][0], nodos[e][1], tol, salvo=suyos(e, tol * 3))
+        if n is not None and n != e:
+            tramos.add((min(e, n), max(e, n)))
+    # Y los sitios, cada uno al camino más cercano.
+    en_la_red = []
+    for sitio in sitios:
+        x, y = sitio["x"], sitio["y"]
+        n = None
+        mejor = cerca
+        for i, (nx, ny) in enumerate(nodos):
+            d = math.hypot(nx - x, ny - y)
+            if d < mejor:
+                mejor, n = d, i
+        if n is None or mejor > junto * 2:
+            otro = partir(x, y, cerca)
+            if otro is not None and (n is None or math.hypot(nodos[otro][0] - x, nodos[otro][1] - y) < mejor):
+                n = otro
+        if n is not None:
+            en_la_red.append([n, sitio["nombre"], sitio["cual"]])
+    if len(en_la_red) < 2:
+        return None
+    # Solo los nodos que se usan, renumerados (los de un tramo partido
+    # pueden haberse quedado sueltos).
+    usados = sorted({n for t in tramos for n in t} | {s[0] for s in en_la_red})
+    nuevo = {n: i for i, n in enumerate(usados)}
+    plano = []
+    for n in usados:
+        plano += [round(nodos[n][0], 1), round(nodos[n][1], 1)]
+    aristas = []
+    for a, b in sorted(tramos):
+        aristas += [nuevo[a], nuevo[b]]
+    en_la_red.sort(key=lambda s: _sin_tildes(s[1]))
+    return {"p": plano, "a": aristas, "s": [[nuevo[n], nombre, cual] for n, nombre, cual in en_la_red]}
+
+
 def _bonito(n):
     return ("%.2f" % n).rstrip("0").rstrip(".").replace(".", ",")
 
@@ -744,7 +1039,29 @@ def _forma(crudo):
         "pagina": str(crudo.get("targetPage") or "").strip(),
         "mapa": str(crudo.get("targetMap") or "").strip(),
         "capa": str(crudo.get("layerId") or "").strip(),
+        "tipo": _tipo_de_zona(crudo.get("kind")),
     }
+
+
+def _tipo_de_zona(valor):
+    valor = str(valor or "").strip().lower()
+    return valor if valor in TIPOS_DE_ZONA else ""
+
+
+def _puntos(crudo):
+    """Una lista de puntos ({x, y} o [x, y]) a tuplas, sin los que no se
+    entienden."""
+    puntos = []
+    for punto in crudo or []:
+        if isinstance(punto, dict):
+            x, y = _numero(punto.get("x"), None), _numero(punto.get("y"), None)
+        elif isinstance(punto, (list, tuple)) and len(punto) >= 2:
+            x, y = _numero(punto[0], None), _numero(punto[1], None)
+        else:
+            continue
+        if x is not None and y is not None:
+            puntos.append((x, y))
+    return puntos
 
 
 def _entero(valor, por_defecto):
@@ -1067,6 +1384,12 @@ def pintar(mapa, pagina_a, mapa_a, imagen_a, detalle=None, avisar=None, region_d
     # encima (se ve y se puede pulsar). En el orden del archivo, una zona
     # grande dibujada después se tragaba a las de dentro.
     orden = sorted(range(len(mapa["formas"])), key=lambda i: -_area(mapa["formas"][i]["puntos"]))
+    # Las tramas de las clases de zona que hay (olas, árboles…), en <defs>.
+    base_mapa = max(ancho, alto)
+    tramas = "".join(_trama(tipo, base_mapa / 90, "mapa-trama-" + tipo)
+                     for tipo in TIPOS_DE_ZONA if any(f["tipo"] == tipo for f in mapa["formas"]))
+    if tramas:
+        trozos.append("<defs>%s</defs>" % tramas)
     for indice in orden:
         forma = mapa["formas"][indice]
         nombre = forma["etiqueta"] or forma["pagina"] or forma["mapa"]
@@ -1077,36 +1400,43 @@ def pintar(mapa, pagina_a, mapa_a, imagen_a, detalle=None, avisar=None, region_d
         puntos_antes += len(antes)
         puntos_despues += len(despues)
         coordenadas = _trazo(despues)
-        color = forma["color"]
+        tipo_zona = forma["tipo"]
+        color = forma["color"] or (TIPOS_DE_ZONA[tipo_zona][1] if tipo_zona else "")
+        # La trama de su clase de zona, encima del color (sin ratón: no
+        # se pulsa, se pulsa lo de debajo).
+        trama = ('<path class="mapa-trama" d="%s" fill="url(#mapa-trama-%s)"></path>' % (coordenadas, tipo_zona)
+                 if tipo_zona and tipo_zona != "provincia" else "")
+        de_zona = (" es-zona-" + tipo_zona) if tipo_zona else ""
 
         if not nombre:
             # Sin nombre y sin enlace: es el dibujo (fronteras, costas,
             # regiones que todavía no son nada). Se pinta y no se toca.
-            dibujo.append('<path class="mapa-dibujo" d="%s"%s stroke-width="%d"></path>'
-                          % (coordenadas, _pintura(color), grosor))
+            dibujo.append('<path class="mapa-dibujo%s" d="%s"%s stroke-width="%d"></path>%s'
+                          % (de_zona, coordenadas, _pintura(color), grosor, trama))
             continue
 
         cuantas += 1
         cual = "s%d" % cuantas
         nivel = nivel_de.get(indice, "pais")
+        que_zona = TIPOS_DE_ZONA[tipo_zona][0] if tipo_zona else ""
         for uno in destinos:
             sitios.append(dict(uno, id=cual, nombre=nombre, color=color,
-                               tipo="forma", icono="", region=(nivel == "region")))
+                               tipo="forma", icono="", region=(nivel == "region"), que=que_zona))
         # El polígono lleva al primero que exista. Si la región apunta a una
         # página Y a otro mapa —que es raro pero pasa—, el dibujo lleva a la
         # página y el mapa sale como una fila más de la lista, que es la
         # única manera de no esconder uno de los dos.
         elegido = next((d for d in destinos if d["url"]), destinos[0])
         url = elegido["url"]
-        poligono = ('<path d="%s"%s stroke-width="%d"></path>'
-                    % (coordenadas, _pintura(color), grosor))
+        poligono = ('<path d="%s"%s stroke-width="%d"></path>%s'
+                    % (coordenadas, _pintura(color), grosor, trama))
         # El <title> es el globo que enseña el navegador por su cuenta:
         # sirve sin JavaScript. Cuando hay JavaScript, mundo-mapa.js se los
         # lleva y enseña el suyo, que dice además a dónde va; por eso el
         # nombre va también en un atributo.
         titulo = "<title>%s</title>" % html.escape(nombre)
-        datos = _datos_del_globo(nombre, _nota(elegido["destino"], url), "")
-        suelto = " es-suelto" if (hay_niveles and nivel == "suelto") else ""
+        datos = _datos_del_globo(nombre, " · ".join(x for x in (que_zona, _nota(elegido["destino"], url)) if x), "")
+        suelto = (" es-suelto" if (hay_niveles and nivel == "suelto") else "") + de_zona
         destino_lista = vivas_regiones if nivel == "region" else vivas
         if url:
             # tabindex="-1": se puede pulsar con el ratón, pero no sale en
@@ -1188,11 +1518,24 @@ def pintar(mapa, pagina_a, mapa_a, imagen_a, detalle=None, avisar=None, region_d
     # del mapa (crecen con el zoom, como lo dibujado), debajo de los pines.
     base = max(ancho, alto)
     letreros = []
+    curvas = 0
     for tx in mapa.get("textos") or []:
         tam = tx["pixeles"] or base / TAMANOS_DE_TEXTO[tx["tamano"]]
         giro = (' transform="rotate(%s %s %s)"' % (_cifra(tx["giro"]), _cifra(tx["x"]), _cifra(tx["y"]))
                 if tx["giro"] else "")
         color = (' fill="%s"' % tx["color"]) if tx["color"] else ""
+        if tx["curva"]:
+            # SOBRE UNA CURVA: la curva (invisible) y el texto a lo largo
+            # de ella, centrado.
+            curvas += 1
+            ident = "mapa-curva-%d" % curvas
+            letreros.append('<path id="%s" class="mapa-texto-curva" d="%s" fill="none"></path>'
+                            '<text class="mapa-texto es-letra-%s%s" font-size="%s" stroke-width="%s"'
+                            ' dominant-baseline="central"%s><textPath href="#%s" startOffset="50%%"'
+                            ' text-anchor="middle">%s</textPath></text>'
+                            % (ident, _curva_suave(tx["curva"]), tx["letra"], "" if tx["cursiva"] else " es-recta",
+                               _cifra(tam), _cifra(tam * 0.16), color, ident, html.escape(tx["texto"])))
+            continue
         letreros.append('<text class="mapa-texto es-letra-%s%s" x="%s" y="%s" font-size="%s" stroke-width="%s"'
                         ' text-anchor="middle" dominant-baseline="central"%s%s>%s</text>'
                         % (tx["letra"], "" if tx["cursiva"] else " es-recta", _cifra(tx["x"]), _cifra(tx["y"]), _cifra(tam), _cifra(tam * 0.16),
@@ -1204,6 +1547,8 @@ def pintar(mapa, pagina_a, mapa_a, imagen_a, detalle=None, avisar=None, region_d
     pines = []
     escondidos = 0
     recortes = 0
+    # Los sitios con nombre, para la red de caminos (las rutas).
+    para_la_red = []
     # Los que se ven como emblema, primero (debajo): son más grandes.
     for pin in sorted(mapa["pines"], key=lambda p: 0 if p.get("forma") else 1):
         if pin["escondido"]:
@@ -1218,6 +1563,8 @@ def pintar(mapa, pagina_a, mapa_a, imagen_a, detalle=None, avisar=None, region_d
         cuantas += 1
         cual = "s%d" % cuantas
         simbolo_lista, que_es = TIPOS_DE_PIN.get(pin["tipo"], ("", ""))
+        if pin["etiqueta"] or pin["pagina"] or pin["mapa"]:
+            para_la_red.append({"x": pin["x"], "y": pin["y"], "nombre": nombre, "cual": cual})
         for uno in destinos:
             sitios.append(dict(uno, id=cual, nombre=nombre, color=pin["color"],
                                tipo="pin", icono=pin["icono"] or simbolo_lista, que=que_es))
@@ -1318,7 +1665,17 @@ def pintar(mapa, pagina_a, mapa_a, imagen_a, detalle=None, avisar=None, region_d
         barra, texto_escala = _barra_de_escala(escala, ancho, alto)
         trozos.append(barra)
 
+    # ---- LA ROSA DE LOS VIENTOS ----
+    if mapa.get("rosa"):
+        trozos.append(_rosa(mapa["rosa"], ancho, alto))
+
     trozos.append("</svg>")
+    # ---- LA RED DE CAMINOS (para las rutas, en mundo-mapa.js) ----
+    red = _red_de_caminos(mapa.get("lineas") or [], para_la_red, ancho, alto, radio, detalle)
+    if red:
+        trozos[0] = trozos[0].replace('<svg class="mapa-svg"', '<svg class="mapa-svg" data-mapa-red="%s"'
+                                      % html.escape(json.dumps(red, ensure_ascii=False, separators=(",", ":")),
+                                                    quote=True), 1)
     # El radio también en el SVG: las flechas de las rutas se escalan como
     # los pines aunque el mapa no tenga ninguno.
     # Y la escala, para la barra de escala de verdad (la que pinta
@@ -1347,10 +1704,19 @@ def pintar(mapa, pagina_a, mapa_a, imagen_a, detalle=None, avisar=None, region_d
     for tipo, nombre in TIPOS_DE_LINEA.items():
         if any(l["tipo"] == tipo for l in mapa.get("lineas") or []):
             usados.append(("linea es-" + tipo, "", nombre))
+    # Las clases de zona, con su color y su trama.
+    for tipo, (nombre, color) in TIPOS_DE_ZONA.items():
+        suyas = [f for f in mapa["formas"] if f["tipo"] == tipo]
+        if suyas:
+            usados.append(("zona es-" + tipo, "", nombre))
+            marcas["zona-" + tipo] = _muestra_de_zona(tipo, next((f["color"] for f in suyas if f["color"]), color),
+                                                      len(marcas) + 1)
     leyenda = ""
     if usados or texto_escala:
         def marca(clase, simbolo):
             tipo = clase[len("pin es-"):] if clase.startswith("pin es-") else ""
+            if clase.startswith("zona es-"):
+                tipo = "zona-" + clase[len("zona es-"):]
             if tipo in marcas:
                 return '<span class="mapa-leyenda-marca es-dibujo" aria-hidden="true">%s</span>' % marcas[tipo]
             return '<span class="mapa-leyenda-marca %s" aria-hidden="true">%s</span>' % (clase, html.escape(simbolo))
@@ -1369,6 +1735,7 @@ def pintar(mapa, pagina_a, mapa_a, imagen_a, detalle=None, avisar=None, region_d
         "leyenda": leyenda,
         "hay_lineas": [clave for clave, _ in NOMBRE_DE_GRUPO_DE_RAYA if rayas.get(clave)],
         "hay_escala": bool(escala),
+        "hay_ruta": bool(red),
         "hay_nombres": bool(letreros) or any(p["etiqueta"] and not p["escondido"] for p in mapa["pines"]),
         "sitios": sitios,
         "capas": capas,
@@ -1579,7 +1946,7 @@ def pintar_lista(sitios, titulo_id="mapa-sitios-titulo"):
 # guardadas en Chronicler.
 
 def pintar_mandos(capas, hay_formas=True, hay_pines=False, hay_niveles=False, hay_lineas=False,
-                  hay_nombres=False, todas_de_salida=False, hay_escala=False, hay_leyenda=False):
+                  hay_nombres=False, todas_de_salida=False, hay_escala=False, hay_leyenda=False, hay_ruta=False):
     trozos = ['<div class="mapa-mandos" data-mapa-mandos>']
     trozos.append(
         '<div class="mapa-zoom" role="group" aria-label="Zoom del mapa">'
@@ -1613,6 +1980,14 @@ def pintar_mandos(capas, hay_formas=True, hay_pines=False, hay_niveles=False, ha
             'borrar la medida</button>'
             '<p class="mapa-medida" data-mapa-medida role="status"></p>'
             '</div>')
+
+    # LA RUTA por los caminos (de un sitio a otro): el botón abre un panel
+    # que pinta mundo-mapa.js con la red que lleva el SVG (data-mapa-red).
+    if hay_ruta:
+        trozos.append(
+            '<button class="mapa-boton mapa-boton-ancho" type="button" data-mapa-ruta-boton'
+            ' aria-expanded="false" aria-controls="mapa-ruta" hidden>'
+            '<span aria-hidden="true">🧭</span> ruta</button>')
 
     # QUÉ SE VE ENCIMA DEL DIBUJO. Lo primero, las regiones: un mapa
     # dibujado a mano ya trae sus fronteras pintadas, así que las manchas

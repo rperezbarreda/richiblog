@@ -413,6 +413,95 @@ html:not(.js) .mapa-ayuda {
 .mapa-caja > .mapa-leyenda.es-flotante[hidden] {
     display: none;
 }
+.mapa-caja > .mapa-leyenda.es-flotante:focus-visible {
+    outline: 3px solid var(--yellow);
+    outline-offset: 2px;
+}
+.mapa-leyenda-zona {
+    fill-opacity: 0.75;
+    stroke: #1b1020;
+    stroke-width: 1.5px;
+}
+.mapa-caja > .mapa-ruta {
+    position: absolute;
+    left: 10px;
+    z-index: 3;
+    width: min(19rem, calc(100% - 20px));
+    padding: 10px 14px;
+    overflow-y: auto;
+    border: 2px solid var(--yellow);
+    background: var(--surface);
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.45);
+    color: var(--white);
+}
+.mapa-caja > .mapa-ruta[hidden] {
+    display: none;
+}
+.mapa-ruta-campo {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    margin: 0 0 10px;
+    font-weight: 700;
+}
+.mapa-ruta-campo select {
+    min-height: 44px;
+    padding: 0 8px;
+    border: 2px solid var(--yellow);
+    background: var(--purple);
+    color: var(--white);
+    font: inherit;
+    font-weight: 400;
+}
+.mapa-ruta-campo select:focus-visible {
+    outline: 2px solid var(--yellow);
+    outline-offset: 2px;
+}
+.mapa-ruta-botones {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin: 0 0 10px;
+}
+.mapa-ruta-salida {
+    margin: 0 0 8px;
+    font-size: 0.9375rem;
+    line-height: 1.45;
+}
+.mapa-ruta-salida:empty {
+    display: none;
+}
+.mapa-lienzo.esta-trazando-ruta,
+.mapa-lienzo.esta-trazando-ruta .es-enlace {
+    cursor: crosshair;
+}
+.mapa-ruta-dibujo {
+    pointer-events: none;
+}
+.mapa-ruta-borde,
+.mapa-ruta-raya {
+    fill: none;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    vector-effect: non-scaling-stroke;
+}
+.mapa-ruta-borde {
+    stroke: #1b1020;
+    stroke-width: 11px;
+}
+.mapa-ruta-raya {
+    stroke: #ff5d73;
+    stroke-width: 6px;
+}
+.mapa-ruta-punto {
+    fill: #ffffff;
+    stroke: #1b1020;
+    stroke-width: 3px;
+    vector-effect: non-scaling-stroke;
+}
+.mapa-ruta-punto.es-final {
+    fill: #e8446f;
+}
 .mapa-emblema.con-tipo .mapa-emblema-fondo {
     fill: #ece6f2;
 }
@@ -519,11 +608,45 @@ html:not(.js) .mapa-ayuda {
     fill-opacity: 0.16;
     stroke-opacity: 0.8;
 }
+.mapa-svg path.mapa-trama {
+    fill-opacity: 1;
+    stroke: none;
+    pointer-events: none;
+}
+.mapa-forma.es-zona-lago path:not(.mapa-trama),
+.mapa-forma.es-zona-mar path:not(.mapa-trama),
+.mapa-dibujo.es-zona-lago,
+.mapa-dibujo.es-zona-mar {
+    fill-opacity: 0.42;
+}
+.mapa-forma.es-zona-bosque path:not(.mapa-trama),
+.mapa-forma.es-zona-montana path:not(.mapa-trama),
+.mapa-forma.es-zona-desierto path:not(.mapa-trama),
+.mapa-forma.es-zona-pantano path:not(.mapa-trama),
+.mapa-forma.es-zona-valle path:not(.mapa-trama),
+.mapa-dibujo.es-zona-bosque,
+.mapa-dibujo.es-zona-montana,
+.mapa-dibujo.es-zona-desierto,
+.mapa-dibujo.es-zona-pantano,
+.mapa-dibujo.es-zona-valle {
+    fill-opacity: 0.3;
+}
+.mapa-forma.es-zona-vecino path:not(.mapa-trama),
+.mapa-dibujo.es-zona-vecino {
+    fill-opacity: 0.3;
+    stroke-dasharray: calc(var(--mapa-grosor, 6) * 4) calc(var(--mapa-grosor, 6) * 2);
+}
+.mapa-forma.es-zona-provincia path:not(.mapa-trama),
+.mapa-dibujo.es-zona-provincia {
+    fill-opacity: 0.07;
+    stroke-width: calc(var(--mapa-grosor, 6) * 1.6);
+    stroke-dasharray: calc(var(--mapa-grosor, 6) * 5) calc(var(--mapa-grosor, 6) * 3);
+}
 .mapa-forma.es-enlace {
     cursor: pointer;
 }
-.mapa-forma.es-enlace:hover path,
-.mapa-forma.esta-mirado path {
+.mapa-forma.es-enlace:hover path:not(.mapa-trama),
+.mapa-forma.esta-mirado path:not(.mapa-trama) {
     fill-opacity: 0.45;
     stroke-opacity: 1;
     stroke-width: calc(var(--mapa-grosor, 6) * 3);
@@ -609,6 +732,43 @@ html:not(.js) .mapa-ayuda {
 }
 .mapa-escala {
     pointer-events: none;
+}
+.mapa-rosa {
+    pointer-events: none;
+}
+.mapa-rosa-fondo {
+    fill: #1b1020;
+    fill-opacity: 0.35;
+}
+.mapa-rosa-aro {
+    fill: none;
+    stroke: #d8b25a;
+}
+.mapa-rosa-aro.es-fino {
+    stroke: #f4ecd8;
+    stroke-opacity: 0.8;
+}
+.mapa-rosa-punta {
+    stroke: #1b1020;
+    stroke-linejoin: round;
+}
+.mapa-rosa-punta.es-clara {
+    fill: #f4ecd8;
+}
+.mapa-rosa-punta.es-oscura {
+    fill: #b8892f;
+}
+.mapa-rosa-centro {
+    fill: #d8b25a;
+    stroke: #1b1020;
+}
+.mapa-rosa-letra {
+    fill: #f4ecd8;
+    stroke: #1b1020;
+    stroke-linejoin: round;
+    paint-order: stroke;
+    font-family: Georgia, "Times New Roman", serif;
+    font-weight: 700;
 }
 .mapa-escala-fondo {
     fill: #1b1020;
@@ -794,6 +954,12 @@ html:not(.js) .mapa-ayuda {
     .mapa-pin-bola {
         fill: LinkText !important;
         stroke: CanvasText !important;
+    }
+    .mapa-trama {
+        display: none;
+    }
+    .mapa-ruta-raya {
+        stroke: Highlight;
     }
     .mapa-sitio-color {
         background: CanvasText;

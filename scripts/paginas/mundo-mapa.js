@@ -135,6 +135,7 @@ function initializeMundoMapa() {
     prepararEscalaDeMapa(mando);
     prepararMedirDeMapa(mando);
     prepararLeyendaDeMapa(mando);
+    prepararRutaDeMapa(mando);
     fijarMigasDeMapa();
     ponerZoomDeMapa(mando, 1);
 }
@@ -919,6 +920,9 @@ function prepararLeyendaDeMapa(mando) {
     boton.hidden = false;
     panel.classList.add("es-flotante");
     panel.hidden = true;
+    // Puede ser más alta que el mapa y desplazarse: así se llega con el
+    // teclado (y se desplaza con las flechas).
+    panel.tabIndex = 0;
     const colocar = () => {
         const mandos = mando.caja.querySelector("[data-mapa-mandos]");
         panel.style.top = ((mandos ? mandos.offsetHeight : 0) + 10) + "px";
@@ -943,6 +947,339 @@ function prepararLeyendaDeMapa(mando) {
             boton.focus();
         }
     });
+}
+
+
+// =========================================
+// LA RUTA POR LOS CAMINOS
+// =========================================
+// El SVG trae la red de caminos (data-mapa-red, la hace
+// _red_de_caminos en mundo_mapas.py): los puntos ("p": x, y, x, y…), los
+// tramos ("a": de qué punto a qué punto) y los sitios con nombre que están
+// en ella ("s": [punto, nombre, id del sitio]). Con el botón «ruta» se abre
+// un panel arriba a la izquierda con dos listas, desde y hasta (o se
+// pulsan dos sitios en el mapa), y se pinta el camino más corto (Dijkstra)
+// con lo que mide, los días de viaje si el mapa tiene escala y los sitios
+// por los que se pasa, que es lo que lo hace útil también sin verlo.
+
+function leerRedDeMapa(dibujo) {
+    try {
+        const red = JSON.parse(dibujo.getAttribute("data-mapa-red") || "null");
+        if (!red || !Array.isArray(red.p) || !Array.isArray(red.a) || !Array.isArray(red.s)) {
+            return null;
+        }
+        const cuantos = Math.floor(red.p.length / 2);
+        const vecinos = Array.from({ length: cuantos }, () => []);
+        for (let i = 0; i + 1 < red.a.length; i += 2) {
+            const a = red.a[i];
+            const b = red.a[i + 1];
+            if (a < cuantos && b < cuantos) {
+                const largo = Math.hypot(red.p[2 * a] - red.p[2 * b], red.p[2 * a + 1] - red.p[2 * b + 1]);
+                vecinos[a].push([b, largo]);
+                vecinos[b].push([a, largo]);
+            }
+        }
+        return { p: red.p, vecinos, sitios: red.s.filter((s) => Array.isArray(s) && s[0] < cuantos) };
+    } catch (error) {
+        return null;
+    }
+}
+
+// El camino más corto de un punto a otro: la lista de puntos y lo que mide
+// (en píxeles del mapa), o null si no hay.
+function caminoMasCortoDeMapa(red, desde, hasta) {
+    const lejos = new Array(red.vecinos.length).fill(Infinity);
+    const antes = new Array(red.vecinos.length).fill(-1);
+    const hecho = new Array(red.vecinos.length).fill(false);
+    lejos[desde] = 0;
+    // Un montón (de lo más cercano a lo más lejano) hecho a mano.
+    const monton = [[0, desde]];
+    const subir = () => {
+        let i = monton.length - 1;
+        while (i > 0) {
+            const padre = (i - 1) >> 1;
+            if (monton[padre][0] <= monton[i][0]) {
+                break;
+            }
+            [monton[padre], monton[i]] = [monton[i], monton[padre]];
+            i = padre;
+        }
+    };
+    const sacar = () => {
+        const primero = monton[0];
+        const ultimo = monton.pop();
+        if (monton.length) {
+            monton[0] = ultimo;
+            let i = 0;
+            for (;;) {
+                const a = 2 * i + 1;
+                const b = a + 1;
+                let menor = i;
+                if (a < monton.length && monton[a][0] < monton[menor][0]) {
+                    menor = a;
+                }
+                if (b < monton.length && monton[b][0] < monton[menor][0]) {
+                    menor = b;
+                }
+                if (menor === i) {
+                    break;
+                }
+                [monton[menor], monton[i]] = [monton[i], monton[menor]];
+                i = menor;
+            }
+        }
+        return primero;
+    };
+    while (monton.length) {
+        const [d, n] = sacar();
+        if (hecho[n]) {
+            continue;
+        }
+        hecho[n] = true;
+        if (n === hasta) {
+            break;
+        }
+        red.vecinos[n].forEach(([m, largo]) => {
+            if (d + largo < lejos[m]) {
+                lejos[m] = d + largo;
+                antes[m] = n;
+                monton.push([lejos[m], m]);
+                subir();
+            }
+        });
+    }
+    if (!Number.isFinite(lejos[hasta])) {
+        return null;
+    }
+    const puntos = [];
+    for (let n = hasta; n !== -1; n = antes[n]) {
+        puntos.unshift(n);
+    }
+    return { puntos, largo: lejos[hasta] };
+}
+
+function prepararRutaDeMapa(mando) {
+    const boton = mando.caja.querySelector("[data-mapa-ruta-boton]");
+    const red = leerRedDeMapa(mando.dibujo);
+    if (!boton || !red || red.sitios.length < 2) {
+        return;
+    }
+    boton.hidden = false;
+    const radio = parseFloat(mando.dibujo.getAttribute("data-mapa-radio")) || 10;
+
+    // EL PANEL. Lo hace esto (sin JavaScript no hay rutas que calcular).
+    const panel = document.createElement("section");
+    panel.className = "mapa-ruta";
+    panel.id = "mapa-ruta";
+    panel.hidden = true;
+    panel.setAttribute("aria-labelledby", "mapa-ruta-titulo");
+    const titulo = document.createElement("h2");
+    titulo.className = "mapa-sitios-titulo";
+    titulo.id = "mapa-ruta-titulo";
+    titulo.textContent = "Ruta por los caminos";
+    panel.appendChild(titulo);
+    const ayuda = document.createElement("p");
+    ayuda.className = "mapa-ruta-salida";
+    ayuda.textContent = "Elige de dónde a dónde, o pulsa dos sitios en el mapa.";
+    panel.appendChild(ayuda);
+    const lista = (texto, id) => {
+        const etiqueta = document.createElement("label");
+        etiqueta.className = "mapa-ruta-campo";
+        etiqueta.htmlFor = id;
+        etiqueta.textContent = texto;
+        const elegir = document.createElement("select");
+        elegir.id = id;
+        const nada = document.createElement("option");
+        nada.value = "";
+        nada.textContent = "— elige un sitio —";
+        elegir.appendChild(nada);
+        red.sitios.forEach((s, i) => {
+            const opcion = document.createElement("option");
+            opcion.value = String(i);
+            opcion.textContent = s[1];
+            elegir.appendChild(opcion);
+        });
+        etiqueta.appendChild(elegir);
+        panel.appendChild(etiqueta);
+        return elegir;
+    };
+    const desde = lista("Desde", "mapa-ruta-desde");
+    const hasta = lista("Hasta", "mapa-ruta-hasta");
+    const botones = document.createElement("div");
+    botones.className = "mapa-ruta-botones";
+    const alReves = document.createElement("button");
+    alReves.type = "button";
+    alReves.className = "mapa-boton mapa-boton-ancho";
+    alReves.textContent = "⇅ al revés";
+    const quitar = document.createElement("button");
+    quitar.type = "button";
+    quitar.className = "mapa-boton mapa-boton-ancho";
+    quitar.textContent = "quitar la ruta";
+    botones.appendChild(alReves);
+    botones.appendChild(quitar);
+    panel.appendChild(botones);
+    const salida = document.createElement("p");
+    salida.className = "mapa-ruta-salida";
+    salida.setAttribute("role", "status");
+    panel.appendChild(salida);
+    mando.caja.appendChild(panel);
+
+    let dibujoDeRuta = null;
+    const borrarDibujo = () => {
+        if (dibujoDeRuta) {
+            dibujoDeRuta.remove();
+            dibujoDeRuta = null;
+        }
+    };
+
+    const pintar = () => {
+        borrarDibujo();
+        const a = red.sitios[Number(desde.value)];
+        const b = red.sitios[Number(hasta.value)];
+        quitar.disabled = !desde.value && !hasta.value;
+        alReves.disabled = !desde.value || !hasta.value;
+        if (!desde.value || !hasta.value) {
+            salida.textContent = desde.value || hasta.value ? "Ahora elige el otro sitio." : "";
+            return;
+        }
+        if (a[0] === b[0]) {
+            salida.textContent = "Elige dos sitios distintos.";
+            return;
+        }
+        const camino = caminoMasCortoDeMapa(red, a[0], b[0]);
+        if (!camino) {
+            salida.textContent = "No hay camino de " + a[1] + " a " + b[1] + " por los caminos del mapa.";
+            return;
+        }
+        // El dibujo, debajo de los sitios (que se sigan viendo y pulsando).
+        const g = svgDeMapa("g", { class: "mapa-ruta-dibujo" });
+        const d = camino.puntos.map((n, i) => (i ? "L" : "M") + red.p[2 * n] + " " + red.p[2 * n + 1]).join("");
+        g.appendChild(svgDeMapa("path", { d, class: "mapa-ruta-borde" }));
+        g.appendChild(svgDeMapa("path", { d, class: "mapa-ruta-raya" }));
+        [[a[0], ""], [b[0], " es-final"]].forEach(([n, clase]) => {
+            const xy = red.p[2 * n] + "," + red.p[2 * n + 1];
+            g.appendChild(svgDeMapa("circle", { r: (radio * 0.5).toFixed(1), class: "mapa-ruta-punto" + clase,
+                "data-mapa-xy": xy, transform: "translate(" + xy + ")" }));
+        });
+        const pines = mando.dibujo.querySelector(".mapa-pines");
+        mando.dibujo.insertBefore(g, pines || null);
+        dibujoDeRuta = g;
+        escalarPinesDeMapa(mando);
+        // Lo que se dice: cuánto, cuántos días y por dónde se pasa.
+        let texto = "De " + a[1] + " a " + b[1] + " por los caminos";
+        const e = mando.escala;
+        if (e) {
+            const distancia = camino.largo * e.porPixel;
+            texto += ": " + cifraDeMapa(distancia) + (e.unidad ? " " + e.unidad : "") + ".";
+            const viaje = Object.keys(e.viaje).filter((como) => e.viaje[como] > 0);
+            if (viaje.length) {
+                texto += " " + viaje.map((como) => como.charAt(0).toUpperCase() + como.slice(1) + ": "
+                    + diasDeViajeDeMapa(distancia, e.viaje[como])).join(" · ") + ".";
+            }
+        } else {
+            texto += ".";
+        }
+        const enMedio = new Map();
+        red.sitios.forEach((s) => {
+            if (s[0] !== a[0] && s[0] !== b[0] && !enMedio.has(s[0])) {
+                enMedio.set(s[0], s[1]);
+            }
+        });
+        const paso = camino.puntos.filter((n) => enMedio.has(n)).map((n) => enMedio.get(n));
+        texto += paso.length ? " Se pasa por " + paso.join(", ") + "." : " Sin pasar por ningún otro sitio.";
+        salida.textContent = texto;
+    };
+
+    const colocar = () => {
+        const mandos = mando.caja.querySelector("[data-mapa-mandos]");
+        panel.style.top = ((mandos ? mandos.offsetHeight : 0) + 10) + "px";
+        panel.style.maxHeight = Math.max(160, mando.lienzo.clientHeight - 20) + "px";
+    };
+    const medir = mando.caja.querySelector("[data-mapa-medir]");
+    const leyenda = mando.caja.querySelector("[data-mapa-leyenda-boton]");
+    const abrir = (si) => {
+        panel.hidden = !si;
+        boton.setAttribute("aria-expanded", si ? "true" : "false");
+        mando.lienzo.classList.toggle("esta-trazando-ruta", si);
+        if (si) {
+            colocar();
+            // Midiendo y trazando a la vez, cada clic serían las dos cosas.
+            if (medir && medir.getAttribute("aria-pressed") === "true") {
+                medir.click();
+            }
+            // Y la leyenda, cerrada: los dos paneles a la vez se pisan.
+            if (leyenda && leyenda.getAttribute("aria-expanded") === "true") {
+                leyenda.click();
+            }
+        }
+    };
+    boton.addEventListener("click", () => {
+        abrir(panel.hidden);
+        if (!panel.hidden) {
+            desde.focus();
+        }
+    });
+    if (medir) {
+        medir.addEventListener("click", () => {
+            if (medir.getAttribute("aria-pressed") === "true" && !panel.hidden) {
+                abrir(false);
+            }
+        });
+    }
+    if (leyenda) {
+        leyenda.addEventListener("click", () => {
+            if (leyenda.getAttribute("aria-expanded") === "true" && !panel.hidden) {
+                abrir(false);
+            }
+        });
+    }
+    desde.addEventListener("change", pintar);
+    hasta.addEventListener("change", pintar);
+    alReves.addEventListener("click", () => {
+        [desde.value, hasta.value] = [hasta.value, desde.value];
+        pintar();
+    });
+    quitar.addEventListener("click", () => {
+        desde.value = "";
+        hasta.value = "";
+        pintar();
+        desde.focus();
+    });
+    window.addEventListener("resize", () => {
+        if (!panel.hidden) {
+            colocar();
+        }
+    });
+    mando.caja.addEventListener("keydown", (evento) => {
+        if (evento.key === "Escape" && !panel.hidden) {
+            abrir(false);
+            boton.focus();
+        }
+    });
+    // Con el panel abierto, pulsar un sitio del mapa lo elige (el primero,
+    // «desde»; el segundo, «hasta»; el tercero empieza otra) en vez de
+    // llevar a su página. En captura, antes que el enlace.
+    mando.lienzo.addEventListener("click", (evento) => {
+        if (panel.hidden) {
+            return;
+        }
+        const sitio = evento.target.closest ? evento.target.closest("[data-mapa-sitio]") : null;
+        const cual = sitio ? sitio.getAttribute("data-mapa-sitio") : "";
+        const i = red.sitios.findIndex((s) => s[2] === cual);
+        if (i < 0) {
+            return;
+        }
+        evento.preventDefault();
+        evento.stopPropagation();
+        if (!desde.value || (desde.value && hasta.value)) {
+            desde.value = String(i);
+            hasta.value = "";
+        } else {
+            hasta.value = String(i);
+        }
+        pintar();
+    }, true);
+    pintar();
 }
 
 

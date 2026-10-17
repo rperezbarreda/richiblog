@@ -1682,6 +1682,49 @@
   ficha de la página del mapa (o, si no la tiene, de la página a la que
   lleva). Lo dice en la barra de abajo; se puede cambiar después.
 
+  CLASES DE ZONA (shapes[].kind): país vecino, provincia o comarca, lago,
+  mar, bosque, montaña, desierto, pantano o ciénaga y valle o llanura
+  (TIPOS_DE_ZONA en mundo_mapas.py y en mapas.js). Cada una con su color
+  si la zona no trae uno, lo tapada que va (el agua más; las provincias
+  casi nada) y SU TRAMA encima del color (mundo_mapas._trama, un
+  <pattern> en <defs>): rayado los vecinos, olas el agua, arbolitos el
+  bosque, montes la montaña, puntitos el desierto, juncos el pantano,
+  hierba el valle. Vecinos y provincias, con la raya a trazos. Salen en
+  la leyenda (su color con su trama) y en la lista y el globo («lago»,
+  «país vecino»…). En el editor: «Qué zona» al pintar una región, y «Qué
+  es» en lo elegido. En el Reino de Prunia se pusieron por el nombre
+  (17-10-2026): Lago…, lago; Bosque…, bosque; Cordillera, montaña;
+  Ciénaga, pantano; Valle, valle; los países de al lado, vecinos.
+
+  TEXTOS SOBRE UNA CURVA (labels[].points): el nombre de un río o de una
+  cordillera escrito a lo largo de unos puntos, suavizados (Catmull-Rom:
+  _curva_suave y curvaSuaveMapa) y del derecho aunque se marquen de
+  derecha a izquierda. En la web, un <textPath> centrado. En el editor:
+  «Escribir» con «Sobre una curva» (se marca punto a punto, como una
+  raya, y luego se escribe), o «Ponerlo sobre una curva» / «Quitar la
+  curva» en un texto elegido; la curva se retoca por sus puntos y el
+  texto se arrastra entero. Su x, y es el punto de en medio de la curva.
+
+  LA ROSA DE LOS VIENTOS ("compass": "arriba-derecha"…, en «El mapa en
+  sí» del editor): ocho puntas en pergamino y oro, aro dorado y N, E, S
+  y O (mundo_mapas._rosa y rosaDeLosVientos en mapas.js, las mismas
+  piezas). Va dentro del dibujo, del tamaño del mapa, y sale también en
+  la imagen descargada. En Prunia, arriba a la derecha.
+
+  LA RUTA POR LOS CAMINOS (botón «ruta» de la vista del mapa): el
+  generador hace un grafo con los caminos, senderos y rutas
+  (_red_de_caminos: los puntos casi juntos son el mismo cruce, un camino
+  que acaba a menos de medio pin de otro se engancha a él, y cada sitio
+  con nombre se engancha al camino que le pase cerca) y lo deja en
+  data-mapa-red. mundo-mapa.js (prepararRutaDeMapa) abre un panel arriba
+  a la izquierda con DESDE y HASTA (o se pulsan dos sitios en el mapa),
+  busca el camino más corto (Dijkstra) y lo pinta en rojo con borde
+  oscuro; dice cuánto hay, los días a pie y a caballo y por qué sitios
+  se pasa. «Al revés», «quitar la ruta», Esc lo cierra. Abrir la ruta
+  apaga «medir» y cierra la leyenda (y al revés). Si un sitio no sale en
+  las listas es que no tiene un camino cerca: hay que llevárselo con el
+  imán.
+
   CAMINOS, RÍOS Y OTRAS RAYAS SE APAGAN POR SEPARADO: cada grupo va en su
   <g class="mapa-lineas es-caminos|es-rios|es-otras"> con su casilla en los
   mandos (GRUPO_DE_RAYA en mundo_mapas.py). En el editor, la lista de lo
@@ -1771,7 +1814,19 @@
       imagen lleva el símbolo de su tipo.
     - ESCRIBIR EN EL MAPA: arriba se eligen la letra, el tamaño y si va en
       cursiva; se pulsa donde va el texto y, a la derecha, se escribe (y
-      se le puede cambiar todo eso, el giro y el color).
+      se le puede cambiar todo eso, el giro y el color). Con «Sobre una
+      curva», se marca la curva punto a punto (ver TEXTOS SOBRE UNA CURVA).
+    - PINTAR UNA REGIÓN: «Qué zona» (vecino, lago, bosque…; ver CLASES DE
+      ZONA) le da su trama y su color.
+    - ELEGIR VARIAS COSAS: Mayús+clic (en el mapa o en la lista) añade o
+      quita; Mayús y arrastrar en un hueco elige lo que quede dentro del
+      recuadro (los sitios y los textos por su punto; las rayas y las
+      regiones, si caben enteras). Varias se arrastran juntas, se mueven
+      con las flechas, se borran con Supr y, a la derecha, se les cambia
+      a la vez el tipo de sitio, la forma, el tamaño, la raya, la zona o
+      el color. Ctrl+C, Ctrl+V y Ctrl+D copian, pegan y duplican lo
+      elegido (sea una o varias), un poco más abajo a la derecha y ya
+      elegido para moverlo.
     - COMO PHOTOSHOP: la paleta de herramientas fija a la IZQUIERDA, el
       mapa en medio y LO ELEGIDO (con la lista de lo que hay y los paneles
       de medir y de la escala) fijo a la DERECHA, con su propia barra para

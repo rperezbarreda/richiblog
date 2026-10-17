@@ -640,6 +640,119 @@ html:not(.js) .mapa-ayuda {
     display: none;
 }
 
+.mapa-caja > .mapa-leyenda.es-flotante:focus-visible {
+    outline: 3px solid var(--yellow);
+    outline-offset: 2px;
+}
+
+/* La muestra de una clase de zona en la leyenda: su color y su trama. */
+.mapa-leyenda-zona {
+    fill-opacity: 0.75;
+    stroke: #1b1020;
+    stroke-width: 1.5px;
+}
+
+/* LA RUTA POR LOS CAMINOS: un panel encima del mapa, arriba a la
+   izquierda (la leyenda va a la derecha), que pinta y abre mundo-mapa.js
+   con el botón «ruta». Dos listas (desde, hasta) y lo que sale: cuánto
+   hay, los días de viaje y por dónde se pasa. */
+.mapa-caja > .mapa-ruta {
+    position: absolute;
+    left: 10px;
+    z-index: 3;
+    width: min(19rem, calc(100% - 20px));
+    padding: 10px 14px;
+    overflow-y: auto;
+    border: 2px solid var(--yellow);
+    background: var(--surface);
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.45);
+    color: var(--white);
+}
+
+.mapa-caja > .mapa-ruta[hidden] {
+    display: none;
+}
+
+.mapa-ruta-campo {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    margin: 0 0 10px;
+    font-weight: 700;
+}
+
+.mapa-ruta-campo select {
+    min-height: 44px;
+    padding: 0 8px;
+    border: 2px solid var(--yellow);
+    background: var(--purple);
+    color: var(--white);
+    font: inherit;
+    font-weight: 400;
+}
+
+.mapa-ruta-campo select:focus-visible {
+    outline: 2px solid var(--yellow);
+    outline-offset: 2px;
+}
+
+.mapa-ruta-botones {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin: 0 0 10px;
+}
+
+.mapa-ruta-salida {
+    margin: 0 0 8px;
+    font-size: 0.9375rem;
+    line-height: 1.45;
+}
+
+.mapa-ruta-salida:empty {
+    display: none;
+}
+
+.mapa-lienzo.esta-trazando-ruta,
+.mapa-lienzo.esta-trazando-ruta .es-enlace {
+    cursor: crosshair;
+}
+
+.mapa-ruta-dibujo {
+    pointer-events: none;
+}
+
+.mapa-ruta-borde,
+.mapa-ruta-raya {
+    fill: none;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    vector-effect: non-scaling-stroke;
+}
+
+/* Roja con borde oscuro: se ve encima de cualquier dibujo, y no se
+   confunde con los caminos (claros) ni con lo que se mide (amarillo). */
+.mapa-ruta-borde {
+    stroke: #1b1020;
+    stroke-width: 11px;
+}
+
+.mapa-ruta-raya {
+    stroke: #ff5d73;
+    stroke-width: 6px;
+}
+
+.mapa-ruta-punto {
+    fill: #ffffff;
+    stroke: #1b1020;
+    stroke-width: 3px;
+    vector-effect: non-scaling-stroke;
+}
+
+.mapa-ruta-punto.es-final {
+    fill: #e8446f;
+}
+
 /* LOS SITIOS QUE SE VEN COMO EMBLEMA y no tienen imagen: la bola del
    color de su tipo, con su símbolo. */
 .mapa-emblema.con-tipo .mapa-emblema-fondo {
@@ -779,6 +892,52 @@ html:not(.js) .mapa-ayuda {
     stroke-opacity: 0.8;
 }
 
+/* LAS CLASES DE ZONA (shapes[].kind en el .cmap): cada una con su trama
+   encima del color (olas, arbolitos, montes, rayado…; la dibuja
+   mundo_mapas._trama), para distinguirlas por algo más que el color. La
+   trama no se pulsa: se pulsa la zona de debajo. */
+.mapa-svg path.mapa-trama {
+    fill-opacity: 1;
+    stroke: none;
+    pointer-events: none;
+}
+
+.mapa-forma.es-zona-lago path:not(.mapa-trama),
+.mapa-forma.es-zona-mar path:not(.mapa-trama),
+.mapa-dibujo.es-zona-lago,
+.mapa-dibujo.es-zona-mar {
+    fill-opacity: 0.42;
+}
+
+.mapa-forma.es-zona-bosque path:not(.mapa-trama),
+.mapa-forma.es-zona-montana path:not(.mapa-trama),
+.mapa-forma.es-zona-desierto path:not(.mapa-trama),
+.mapa-forma.es-zona-pantano path:not(.mapa-trama),
+.mapa-forma.es-zona-valle path:not(.mapa-trama),
+.mapa-dibujo.es-zona-bosque,
+.mapa-dibujo.es-zona-montana,
+.mapa-dibujo.es-zona-desierto,
+.mapa-dibujo.es-zona-pantano,
+.mapa-dibujo.es-zona-valle {
+    fill-opacity: 0.3;
+}
+
+/* Los países vecinos, más tapados (el mapa es del de dentro) y con la
+   raya a trazos; las provincias, casi sin relleno y con la raya a trazos
+   más gorda: son divisiones, no manchas. */
+.mapa-forma.es-zona-vecino path:not(.mapa-trama),
+.mapa-dibujo.es-zona-vecino {
+    fill-opacity: 0.3;
+    stroke-dasharray: calc(var(--mapa-grosor, 6) * 4) calc(var(--mapa-grosor, 6) * 2);
+}
+
+.mapa-forma.es-zona-provincia path:not(.mapa-trama),
+.mapa-dibujo.es-zona-provincia {
+    fill-opacity: 0.07;
+    stroke-width: calc(var(--mapa-grosor, 6) * 1.6);
+    stroke-dasharray: calc(var(--mapa-grosor, 6) * 5) calc(var(--mapa-grosor, 6) * 3);
+}
+
 .mapa-forma.es-enlace {
     cursor: pointer;
 }
@@ -791,8 +950,8 @@ html:not(.js) .mapa-ayuda {
    línea fina, en uno de mil es un churro. De ahí --mapa-grosor, que la
    escribe el generador en el propio SVG con la medida de ESE mapa; aquí
    solo se dice "el triple". */
-.mapa-forma.es-enlace:hover path,
-.mapa-forma.esta-mirado path {
+.mapa-forma.es-enlace:hover path:not(.mapa-trama),
+.mapa-forma.esta-mirado path:not(.mapa-trama) {
     fill-opacity: 0.45;
     stroke-opacity: 1;
     stroke-width: calc(var(--mapa-grosor, 6) * 3);
@@ -907,6 +1066,55 @@ html:not(.js) .mapa-ayuda {
 /* LA BARRA DE ESCALA. */
 .mapa-escala {
     pointer-events: none;
+}
+
+/* LA ROSA DE LOS VIENTOS (mundo_mapas._rosa): puntas en pergamino y oro,
+   aro dorado y las letras N, E, S y O. Colores fijos, como los de las
+   rayas: va encima del dibujo del mapa, que no cambia con el tema. */
+.mapa-rosa {
+    pointer-events: none;
+}
+
+.mapa-rosa-fondo {
+    fill: #1b1020;
+    fill-opacity: 0.35;
+}
+
+.mapa-rosa-aro {
+    fill: none;
+    stroke: #d8b25a;
+}
+
+.mapa-rosa-aro.es-fino {
+    stroke: #f4ecd8;
+    stroke-opacity: 0.8;
+}
+
+.mapa-rosa-punta {
+    stroke: #1b1020;
+    stroke-linejoin: round;
+}
+
+.mapa-rosa-punta.es-clara {
+    fill: #f4ecd8;
+}
+
+.mapa-rosa-punta.es-oscura {
+    fill: #b8892f;
+}
+
+.mapa-rosa-centro {
+    fill: #d8b25a;
+    stroke: #1b1020;
+}
+
+.mapa-rosa-letra {
+    fill: #f4ecd8;
+    stroke: #1b1020;
+    stroke-linejoin: round;
+    paint-order: stroke;
+    font-family: Georgia, "Times New Roman", serif;
+    font-weight: 700;
 }
 
 .mapa-escala-fondo {
@@ -1177,6 +1385,14 @@ html:not(.js) .mapa-ayuda {
     .mapa-pin-bola {
         fill: LinkText !important;
         stroke: CanvasText !important;
+    }
+
+    .mapa-trama {
+        display: none;
+    }
+
+    .mapa-ruta-raya {
+        stroke: Highlight;
     }
 
     .mapa-sitio-color {
