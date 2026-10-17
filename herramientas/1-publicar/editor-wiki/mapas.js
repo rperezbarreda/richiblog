@@ -1122,6 +1122,213 @@ async function cambiarImagenMapa(input) {
         + " Recuerda guardar.", !!raro);
 }
 
+// ---- DESCARGAR LA IMAGEN, CON TODO LO PUESTO ----
+// Un PNG del tamaño del mapa: las capas que se ven aquí y, encima, las
+// regiones (con su nombre en medio), los caminos y ríos y los sitios con
+// su símbolo y su nombre. Se pinta en un <canvas> a partir de los datos,
+// no del SVG de la pantalla: así los tamaños van en proporción al mapa y
+// no al zoom de ahora. Sale lo que hay en el editor, aunque no esté
+// guardado.
+function cargarImagenMapa(url) {
+    return new Promise((resolver) => {
+        const img = new Image();
+        img.onload = () => resolver(img);
+        img.onerror = () => resolver(null);
+        img.src = url;
+    });
+}
+
+function centroDeRegion(puntos) {
+    // El centro de la caja; si cae fuera (una región en forma de C), el
+    // punto medio de la fila horizontal más larga que la cruce por en medio.
+    const xs = puntos.map((p) => p.x);
+    const ys = puntos.map((p) => p.y);
+    const cy = (Math.min(...ys) + Math.max(...ys)) / 2;
+    const cortes = [];
+    puntos.forEach((a, i) => {
+        const b = puntos[(i + 1) % puntos.length];
+        if ((a.y > cy) !== (b.y > cy)) {
+            cortes.push(a.x + (cy - a.y) * (b.x - a.x) / (b.y - a.y));
+        }
+    });
+    cortes.sort((a, b) => a - b);
+    let mejor = null;
+    for (let i = 0; i + 1 < cortes.length; i += 2) {
+        if (!mejor || cortes[i + 1] - cortes[i] > mejor[1] - mejor[0]) {
+            mejor = [cortes[i], cortes[i + 1]];
+        }
+    }
+    return { x: mejor ? (mejor[0] + mejor[1]) / 2 : (Math.min(...xs) + Math.max(...xs)) / 2, y: cy };
+}
+
+function letreroMapa(ctx, texto, x, y, k, tamano, alinear, estilo) {
+    ctx.font = (estilo || "") + "700 " + Math.round(tamano * k) + 'px "Space Grotesk", system-ui, "Segoe UI", sans-serif';
+    ctx.textAlign = alinear || "left";
+    ctx.textBaseline = "middle";
+    ctx.lineJoin = "round";
+    ctx.lineWidth = 4 * k;
+    ctx.strokeStyle = "#1b1020";
+    ctx.strokeText(texto, x, y);
+    ctx.fillStyle = "#ffffff";
+    ctx.fillText(texto, x, y);
+}
+
+async function descargarImagenMapa() {
+    const d = estadoMapa.datos;
+    if (!d) {
+        return;
+    }
+    avisarEditor("Preparando la imagen…");
+    // El lienzo, del tamaño del mapa (con un tope: un PNG de 8000 px no
+    // lo abre casi nada).
+    const tope = 8192;
+    const f = Math.min(1, tope / Math.max(d.width, d.height));
+    const lienzo = document.createElement("canvas");
+    lienzo.width = Math.round(d.width * f);
+    lienzo.height = Math.round(d.height * f);
+    const ctx = lienzo.getContext("2d");
+    ctx.scale(f, f);
+    // Lo que en pantalla mide «un píxel», aquí mide k: un mapa de 1400 px
+    // lleva las rayas y los sitios como se ven en el editor al verlo entero.
+    const k = Math.max(d.width, d.height) / 1400;
+
+    ctx.fillStyle = "#241a2e";
+    ctx.fillRect(0, 0, d.width, d.height);
+    const capas = d.layers.slice().sort((a, b) => (Number(a.zIndex) || 0) - (Number(b.zIndex) || 0));
+    for (const c of capas) {
+        const url = estadoMapa.imagenes[c.image];
+        if (!url || estadoMapa.capasOcultas[c.id]) {
+            continue;
+        }
+        const img = await cargarImagenMapa(url);
+        if (img) {
+            ctx.globalAlpha = typeof c.opacity === "number" ? c.opacity : 1;
+            ctx.drawImage(img, 0, 0, d.width, d.height);
+            ctx.globalAlpha = 1;
+        }
+    }
+    const camino = (puntos, cerrado) => {
+        ctx.beginPath();
+        puntos.forEach((p, i) => (i ? ctx.lineTo(p.x, p.y) : ctx.moveTo(p.x, p.y)));
+        if (cerrado) {
+            ctx.closePath();
+        }
+    };
+    ctx.lineJoin = "round";
+    ctx.lineCap = "round";
+
+    // Las regiones.
+    d.shapes.forEach((s) => {
+        const puntos = s.points || [];
+        if (puntos.length < 3) {
+            return;
+        }
+        const color = s.color || "#f5ce6c";
+        camino(puntos, true);
+        ctx.globalAlpha = s.label || s.targetPage ? 0.35 : 0.18;
+        ctx.fillStyle = color;
+        ctx.fill();
+        ctx.globalAlpha = 0.9;
+        ctx.strokeStyle = color;
+        ctx.lineWidth = 2 * k;
+        ctx.stroke();
+        ctx.globalAlpha = 1;
+    });
+
+    // Los caminos y los ríos: un borde oscuro debajo y la raya encima.
+    d.lines.forEach((l) => {
+        const puntos = l.points || [];
+        if (puntos.length < 2) {
+            return;
+        }
+        const rio = l.kind === "rio";
+        camino(puntos, false);
+        ctx.setLineDash([]);
+        ctx.strokeStyle = "#1b1020";
+        ctx.lineWidth = (rio ? 7 : 6.5) * k;
+        ctx.stroke();
+        ctx.strokeStyle = l.color || (rio ? "#4aa3df" : "#f0dfb4");
+        ctx.lineWidth = (rio ? 4.5 : 3.5) * k;
+        ctx.setLineDash(rio ? [] : [10 * k, 7 * k]);
+        ctx.stroke();
+        ctx.setLineDash([]);
+    });
+
+    // Los nombres de las regiones, en medio, en cursiva para no
+    // confundirlos con los de los sitios. Si en medio hay un sitio (con su
+    // nombre al lado), el de la región se baja o se sube hasta un hueco.
+    const ocupado = d.pins.map((p) => {
+        ctx.font = "700 " + Math.round(15 * k) + 'px "Space Grotesk", system-ui, sans-serif';
+        const ancho = p.label ? ctx.measureText(p.label).width + 22 * k : 0;
+        return { x1: p.x - 14 * k, x2: p.x + 14 * k + ancho, y1: p.y - 14 * k, y2: p.y + 14 * k };
+    });
+    d.shapes.forEach((s) => {
+        if (!s.label || (s.points || []).length < 3) {
+            return;
+        }
+        const c = centroDeRegion(s.points);
+        ctx.font = "italic 700 " + Math.round(18 * k) + 'px "Space Grotesk", system-ui, sans-serif';
+        const medio = ctx.measureText(s.label).width / 2;
+        const choca = (y) => ocupado.some((o) => o.x1 < c.x + medio && o.x2 > c.x - medio
+            && o.y1 < y + 12 * k && o.y2 > y - 12 * k);
+        let y = c.y;
+        for (let n = 1; n <= 8 && choca(y); n++) {
+            y = c.y + (n % 2 ? 1 : -1) * Math.ceil(n / 2) * 26 * k;
+        }
+        ocupado.push({ x1: c.x - medio, x2: c.x + medio, y1: y - 12 * k, y2: y + 12 * k });
+        letreroMapa(ctx, s.label, c.x, y, k, 18, "center", "italic ");
+    });
+
+    // Los sitios: su símbolo y su nombre a la derecha.
+    d.pins.forEach((p) => {
+        const tipo = tipoDeSitioMapa(p.kind);
+        const r = 12 * k;
+        ctx.fillStyle = p.color || (tipo ? tipo[3] : "#e74c3c");
+        ctx.strokeStyle = "#1b1020";
+        ctx.lineWidth = 2.5 * k;
+        ctx.setLineDash(p.kind === "ruina" ? [4 * k, 3 * k] : []);
+        ctx.beginPath();
+        if (p.kind === "fortaleza") {
+            ctx.rect(p.x - r * 0.92, p.y - r * 0.92, r * 1.84, r * 1.84);
+        } else {
+            ctx.arc(p.x, p.y, r, 0, Math.PI * 2);
+        }
+        ctx.fill();
+        ctx.stroke();
+        ctx.setLineDash([]);
+        const simbolo = tipo ? tipo[2] : (p.icon || "");
+        if (simbolo) {
+            ctx.fillStyle = "#1b1020";
+            ctx.font = "700 " + Math.round(13 * k) + "px system-ui, sans-serif";
+            ctx.textAlign = "center";
+            ctx.textBaseline = "middle";
+            ctx.fillText(simbolo, p.x, p.y + k);
+        }
+        if (p.label) {
+            letreroMapa(ctx, p.label, p.x + r + 5 * k, p.y, k, 15);
+        }
+    });
+
+    lienzo.toBlob((blob) => {
+        if (!blob) {
+            avisarEditor("No se ha podido hacer la imagen (¿el mapa es demasiado grande?).", true);
+            return;
+        }
+        const nombre = (d.title || estadoMapa.archivo.split("/").pop().replace(/\.cmap$/i, "") || "mapa")
+            .normalize("NFD").replace(/[̀-ͯ]/g, "").replace(/[^\w\- ]+/g, "").trim()
+            .replace(/\s+/g, "_").toLowerCase() || "mapa";
+        const enlace = document.createElement("a");
+        enlace.href = URL.createObjectURL(blob);
+        enlace.download = nombre + ".png";
+        document.body.appendChild(enlace);
+        enlace.click();
+        enlace.remove();
+        setTimeout(() => URL.revokeObjectURL(enlace.href), 10000);
+        avisarEditor("Imagen descargada: " + nombre + ".png (" + lienzo.width + " × " + lienzo.height
+            + " px). Va con lo que hay ahora en el editor, esté guardado o no.");
+    }, "image/png");
+}
+
 // ---- GUARDAR ----
 async function guardarMapa(yPasar) {
     if (!estadoMapa.datos || estadoMapa.guardando) {
@@ -1255,6 +1462,7 @@ function empezarMapas() {
     $("#mapa-otra-imagen").addEventListener("change", (e) => cambiarImagenMapa(e.target));
 
     $("[data-mapa-guardar]").addEventListener("click", () => guardarMapa(false));
+    $("[data-mapa-descargar]").addEventListener("click", descargarImagenMapa);
     $("[data-mapa-pasar]").addEventListener("click", () => guardarMapa(true));
     document.addEventListener("keydown", (e) => {
         if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "s" && !$('[data-vista="mapa"]').hidden) {

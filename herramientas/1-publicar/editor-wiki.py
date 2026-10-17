@@ -53,6 +53,7 @@ import base64
 import difflib
 import importlib.util
 import json
+import os
 import re
 import secrets
 import socket
@@ -441,6 +442,28 @@ def crear(peticion):
 # LAS IMÁGENES
 # =========================================
 
+def archivo_temporal(crudo, sufijo):
+    """La imagen subida, en un archivo temporal para traer() (que trabaja
+    con rutas). mkstemp lo deja ABIERTO: hay que cerrarlo, que en Windows
+    un archivo abierto no se puede ni leer desde otro sitio ni borrar
+    («[WinError 32] … está siendo utilizado por otro proceso»)."""
+    descriptor, ruta = tempfile.mkstemp(suffix=sufijo)
+    with os.fdopen(descriptor, "wb") as archivo:
+        archivo.write(crudo)
+    return Path(ruta)
+
+
+def borrar_temporal(temporal):
+    """Lo borra si puede. Si Windows aún lo tiene agarrado (un antivirus
+    mirándolo, por ejemplo), se queda en la carpeta temporal, que ya se
+    vacía sola: no es motivo para que falle la subida."""
+    if temporal:
+        try:
+            temporal.unlink()
+        except OSError:
+            pass
+
+
 def subir_imagen(peticion):
     try:
         import imagenes as img
@@ -465,13 +488,11 @@ def subir_imagen(peticion):
                 return {"error": "La imagen no ha llegado bien."}
             if len(crudo) > 40 * 1024 * 1024:
                 return {"error": "Es demasiado grande (más de 40 MB)."}
-            temporal = Path(tempfile.mkstemp(suffix=Path(original).suffix.lower() or ".png")[1])
-            temporal.write_bytes(crudo)
+            temporal = archivo_temporal(crudo, Path(original).suffix.lower() or ".png")
             ruta = str(temporal)
         hecha, aviso = img.traer(ruta, carpeta, nombre, lado=1600)
     finally:
-        if temporal and temporal.exists():
-            temporal.unlink()
+        borrar_temporal(temporal)
     if not hecha:
         return {"error": "No he podido traerla: " + aviso}
     return {"ok": True, "nombre": Path(hecha).name, "aviso": aviso}
@@ -612,13 +633,11 @@ def traer_imagen_de_mapa(peticion, nombre):
                 return {"error": "La imagen no ha llegado bien."}
             if len(crudo) > 40 * 1024 * 1024:
                 return {"error": "Es demasiado grande (más de 40 MB)."}
-            temporal = Path(tempfile.mkstemp(suffix=Path(original).suffix.lower() or ".png")[1])
-            temporal.write_bytes(crudo)
+            temporal = archivo_temporal(crudo, Path(original).suffix.lower() or ".png")
             ruta = str(temporal)
         hecha, aviso = img.traer(ruta, CARPETA_MAPAS, img.nombre_para(nombre, "_mapa"), lado=LADO_MAPA)
     finally:
-        if temporal and temporal.exists():
-            temporal.unlink()
+        borrar_temporal(temporal)
     if not hecha:
         return {"error": "No he podido traerla: " + aviso}
     archivo = RAIZ / CARPETA_MAPAS / Path(hecha).name
