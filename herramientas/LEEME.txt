@@ -1654,6 +1654,27 @@
   sin tipo; el editor los pasa a sitios al abrir el mapa (con el tipo por
   el tamaño: grande, capital; mediano, ciudad; pequeño, pueblo).
 
+  CAMINOS, RÍOS Y OTRAS RAYAS SE APAGAN POR SEPARADO: cada grupo va en su
+  <g class="mapa-lineas es-caminos|es-rios|es-otras"> con su casilla en los
+  mandos (GRUPO_DE_RAYA en mundo_mapas.py). En el editor, la lista de lo
+  que hay también los separa.
+
+  EL ESTILO DE CADA RAYA: además del color, cada raya puede llevar su
+  grosor ("width", en píxeles de pantalla), su tipo de trazo ("dash":
+  continua, a trazos, a puntos o raya y punto) y su separación ("gap").
+  Van en un style="" (mundo_mapas._estilo_de_raya) para ganarle a la hoja
+  de estilos; un río con grosor propio se ensancha de su 45% a su 160%, y
+  uno a trazos o a puntos no se ensancha. En el editor: «Estilo de la
+  raya», en lo elegido.
+
+  EN LA VISTA DEL MAPA NO SE SELECCIONA EL TEXTO (user-select: none en la
+  caja del mapa): al pulsar y arrastrar se quedaba todo marcado.
+
+  LAS MIGAS SE QUEDAN ARRIBA al bajar por la página del mapa: cuando su
+  sitio se sale, mundo-mapa.js (fijarMigasDeMapa) las pasa a position:
+  fixed en lo alto de la caja que se desplaza, de lado a lado, y deja un
+  hueco de su alto para que nada salte.
+
   LA LEYENDA FLOTANTE: el botón «leyenda» de los mandos abre un panel
   encima del mapa, arriba a la derecha (Esc lo cierra). Sin JavaScript va
   debajo del mapa, dentro de su marco.
@@ -1665,7 +1686,7 @@
 
   EN LA PORTADA DE LA WIKI solo salen los mapas que no son de ninguna
   página (el mapamundi). A los de una página se llega desde ella: el botón
-  «Explorar Mapa» va en su ficha de la derecha, debajo de la bandera (el
+  «Explorar Mapa» va en su ficha de la derecha, centrado debajo de la bandera (el
   hueco lo deja poner_emblemas con MARCA_SU_MAPA); si la página no tiene
   ficha, arriba del artículo.
 

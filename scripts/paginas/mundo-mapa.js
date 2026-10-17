@@ -135,6 +135,7 @@ function initializeMundoMapa() {
     prepararEscalaDeMapa(mando);
     prepararMedirDeMapa(mando);
     prepararLeyendaDeMapa(mando);
+    fijarMigasDeMapa();
     ponerZoomDeMapa(mando, 1);
 }
 
@@ -356,7 +357,13 @@ function prepararCapasDeMapa(caja) {
 function prepararRegionesDeMapa(caja) {
     apagarConCasilla(caja, "[data-mapa-regiones]", ".mapa-dibujos, .mapa-formas");
     apagarConCasilla(caja, "[data-mapa-pines]", ".mapa-pines");
-    apagarConCasilla(caja, "[data-mapa-lineas]", ".mapa-lineas");
+    // Las rayas, por grupos: caminos, ríos y otras, cada uno con su casilla.
+    caja.querySelectorAll("[data-mapa-lineas]").forEach((casilla) => {
+        const grupo = casilla.getAttribute("data-mapa-lineas");
+        if (/^[a-z]+$/.test(grupo)) {
+            apagarConCasilla(caja, '[data-mapa-lineas="' + grupo + '"]', ".mapa-lineas.es-" + grupo);
+        }
+    });
     apagarConCasilla(caja, "[data-mapa-nombres]", ".mapa-pin-nombre, .mapa-textos");
     prepararNivelesDeMapa(caja);
 }
@@ -936,4 +943,60 @@ function prepararLeyendaDeMapa(mando) {
             boton.focus();
         }
     });
+}
+
+
+// =========================================
+// LAS MIGAS, FIJAS ARRIBA
+// =========================================
+// Al bajar por la página, las migas (Wiki Cralëa › … › Reino de Prunia ›
+// Mapa) se quedan arriba, para poder volver al país en cualquier momento.
+// Sin sticky (no va en el navegador de Richi): cuando su sitio se sale
+// por arriba, pasan a position: fixed en lo alto de la caja que se
+// desplaza (.home), con su ancho; y dejan en su sitio un hueco de su alto
+// para que lo de debajo no salte.
+
+function fijarMigasDeMapa() {
+    const migas = document.querySelector(".mundo-migas");
+    if (!migas) {
+        return;
+    }
+    const home = migas.closest(".home");
+    const hueco = document.createElement("div");
+    hueco.className = "mundo-migas-hueco";
+    migas.before(hueco);
+    hueco.appendChild(migas);
+    const colocar = () => {
+        // Arriba del todo de lo que se ve: el borde de .home si es ella la
+        // que se desplaza; si no (en un móvil se desplaza la página), la
+        // ventana.
+        const seDesplaza = home && home.scrollHeight > home.clientHeight + 1
+            && /(auto|scroll)/.test(getComputedStyle(home).overflowY);
+        const arriba = seDesplaza ? Math.max(0, home.getBoundingClientRect().top) : 0;
+        const sitio = hueco.getBoundingClientRect();
+        const fija = sitio.top < arriba;
+        if (fija) {
+            hueco.style.minHeight = migas.offsetHeight + "px";
+            migas.classList.add("es-fija");
+            migas.style.top = arriba + "px";
+            migas.style.left = sitio.left + "px";
+            // De lado a lado de la página (con el mismo margen a los dos
+            // lados), no lo que mida su hueco, que es más estrecho.
+            const caja = home ? home.getBoundingClientRect() : { left: 0, right: window.innerWidth };
+            const margen = Math.max(0, sitio.left - caja.left);
+            migas.style.width = Math.max(sitio.width, caja.right - caja.left - 2 * margen) + "px";
+        } else {
+            migas.classList.remove("es-fija");
+            hueco.style.minHeight = "";
+            migas.style.top = "";
+            migas.style.left = "";
+            migas.style.width = "";
+        }
+    };
+    if (home) {
+        home.addEventListener("scroll", colocar, { passive: true });
+    }
+    window.addEventListener("scroll", colocar, { passive: true });
+    window.addEventListener("resize", colocar);
+    colocar();
 }

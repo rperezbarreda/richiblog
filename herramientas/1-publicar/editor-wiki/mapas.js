@@ -117,6 +117,34 @@ function estiloDeRaya(kind) {
     return ESTILO_DE_RAYA[kind] || ESTILO_DE_RAYA.camino;
 }
 
+// El estilo de UNA raya: el de su tipo con lo que tenga propio encima
+// (grosor "width", tipo de trazo "dash" y separación "gap", como
+// _estilo_de_raya en mundo_mapas.py).
+function estiloDeLaRaya(cosa) {
+    const base = estiloDeRaya(cosa.kind);
+    const w = Number(cosa.width) > 0 ? Number(cosa.width) : base.ancho;
+    const estilo = Object.assign({}, base, { ancho: w, borde: w + (base.borde - base.ancho) });
+    const hueco = Number(cosa.gap) > 0 ? Number(cosa.gap) : 2 * w;
+    if (cosa.dash === "solid") {
+        estilo.trazos = null;
+    } else if (cosa.dash === "dashed") {
+        estilo.trazos = [3 * w, hueco];
+    } else if (cosa.dash === "dotted") {
+        estilo.trazos = [0.1, hueco];
+        estilo.corte = "round";
+    } else if (cosa.dash === "dashdot") {
+        estilo.trazos = [3 * w, hueco, 0.1, hueco];
+        estilo.corte = "round";
+    } else if (Number(cosa.gap) > 0) {
+        estilo.trazos = [3 * w, hueco];
+    }
+    if (cosa.dash) {
+        // El borde oscuro, seguido: con trazos propios, punteado no se ve.
+        estilo.bordeConTrazos = false;
+    }
+    return estilo;
+}
+
 function tamanoDeTexto(cosa) {
     if (Number(cosa.fontSize) > 0) {
         return Number(cosa.fontSize);
@@ -740,7 +768,7 @@ function puntoALoLargo(puntos, acumulado, s) {
 // Un río que se ensancha: en ocho trozos, del más fino (donde nace, el
 // primer punto) al más gordo (la desembocadura). Como _rio_que_se_ensancha
 // en mundo_mapas.py.
-function tramosDeRio(puntos, cuantos) {
+function tramosDeRio(puntos, cuantos, ancho) {
     const n = cuantos || 8;
     const acumulado = largosMapa(puntos);
     const total = acumulado[acumulado.length - 1];
@@ -753,7 +781,7 @@ function tramosDeRio(puntos, cuantos) {
         const b = total * (k + 1) / n;
         const medio = puntos.filter((p, i) => acumulado[i] > a && acumulado[i] < b);
         tramos.push({ puntos: [puntoALoLargo(puntos, acumulado, a)].concat(medio, [puntoALoLargo(puntos, acumulado, b)]),
-            grueso: 2 + 5.5 * (k + 0.5) / n });
+            grueso: ancho ? ancho * (0.45 + 1.15 * (k + 0.5) / n) : 2 + 5.5 * (k + 0.5) / n });
     }
     return tramos;
 }
@@ -873,7 +901,7 @@ function dibujoDeCosa(lista, cosa, i) {
 }
 
 function dibujarRayaSvg(g, cosa, elegido) {
-    const estilo = estiloDeRaya(cosa.kind);
+    const estilo = estiloDeLaRaya(cosa);
     const puntos = cosa.points || [];
     const d = trazoMapa(puntos, false);
     const comun = { fill: "none", "stroke-linejoin": "round", "vector-effect": "non-scaling-stroke", "pointer-events": "none" };
@@ -884,8 +912,8 @@ function dibujarRayaSvg(g, cosa, elegido) {
     }));
     const color = cosa.color || estilo.color;
     const borde = elegido ? "#ffffff" : (estilo.colorBorde || "#1b1020");
-    if (cosa.kind === "rio" && cosa.taper !== false && puntos.length >= 2) {
-        const tramos = tramosDeRio(puntos);
+    if (cosa.kind === "rio" && cosa.taper !== false && puntos.length >= 2 && !(cosa.dash && cosa.dash !== "solid")) {
+        const tramos = tramosDeRio(puntos, 8, Number(cosa.width) > 0 ? Number(cosa.width) : 0);
         tramos.forEach((t) => g.appendChild(svgMapa("path", Object.assign({
             d: trazoMapa(t.puntos, false), stroke: borde, "stroke-width": t.grueso + 3, "stroke-linecap": "round",
         }, comun))));
@@ -984,18 +1012,25 @@ function pintarListaDeCosas() {
     const caja = $("[data-mapa-cosas]");
     caja.textContent = "";
     const d = estadoMapa.datos;
-    const grupos = [["pins", "Sitios"], ["emblems", "Emblemas"], ["lines", "Caminos, ríos y rayas"], ["labels", "Textos"],
-        ["shapes", "Regiones"]];
+    // Las rayas, en tres grupos: caminos, ríos y las demás.
+    const esCamino = (c) => c.kind === "camino" || c.kind === "sendero" || !c.kind;
+    const esRio = (c) => c.kind === "rio";
+    const grupos = [["pins", "Sitios"], ["emblems", "Emblemas"], ["lines", "Caminos", esCamino], ["lines", "Ríos", esRio],
+        ["lines", "Otras rayas", (c) => !esCamino(c) && !esRio(c)], ["labels", "Textos"], ["shapes", "Regiones"]];
     let alguna = false;
-    grupos.forEach(([lista, titulo]) => {
-        if (!d[lista].length) {
+    grupos.forEach(([lista, titulo, filtro]) => {
+        const deEste = d[lista].filter((c) => !filtro || filtro(c));
+        if (!deEste.length) {
             return;
         }
         alguna = true;
-        const sinNombre = d[lista].filter((c) => !c.label && !c.targetPage).length;
-        caja.appendChild(crearEditor("h3", "mapa-cosas-titulo", titulo + " (" + d[lista].length + ")"));
+        const sinNombre = deEste.filter((c) => !c.label && !c.targetPage).length;
+        caja.appendChild(crearEditor("h3", "mapa-cosas-titulo", titulo + " (" + deEste.length + ")"));
         const ul = crearEditor("ul", "mapa-cosas");
         d[lista].forEach((cosa, i) => {
+            if (filtro && !filtro(cosa)) {
+                return;
+            }
             const { nombre, que } = nombreDeCosa(lista, cosa);
             // Las regiones sin nombre del mapamundi son el dibujo (costas,
             // fronteras): se cuentan, pero no se listan una a una.
@@ -1115,6 +1150,16 @@ function pintarPropiedadesMapa() {
     $('[data-mapa-p-caja="xy"]').hidden = !esMovible(lista);
     $('[data-mapa-p-caja="giro"]').hidden = lista !== "labels";
     $('[data-mapa-p-caja="taper"]').hidden = !(lista === "lines" && cosa.kind === "rio");
+    $('[data-mapa-p-caja="estilo-raya"]').hidden = lista !== "lines";
+    if (lista === "lines") {
+        const base = estiloDeRaya(cosa.kind);
+        $("#mapa-p-grosor").value = cosa.width || "";
+        $("#mapa-p-grosor").placeholder = String(base.ancho);
+        $("#mapa-p-trazo").value = cosa.dash || "";
+        $("#mapa-p-hueco").value = cosa.gap || "";
+        $("#mapa-p-hueco").placeholder = String(2 * (Number(cosa.width) || base.ancho));
+        $("[data-mapa-p-hueco]").hidden = cosa.dash === "solid";
+    }
     if (esMovible(lista)) {
         $("#mapa-p-x").value = Math.round(cosa.x);
         $("#mapa-p-y").value = Math.round(cosa.y);
@@ -1163,6 +1208,13 @@ function cambiarPropiedadMapa(campo, valor) {
             delete cosa.angle;
         }
         $("[data-mapa-p-giro-cifra]").textContent = n + "°";
+    } else if (campo === "width" || campo === "gap") {
+        const n = Number(String(valor).replace(",", "."));
+        if (valor === "" || !Number.isFinite(n) || n <= 0) {
+            delete cosa[campo];
+        } else {
+            cosa[campo] = Math.round(n * 10) / 10;
+        }
     } else if (campo === "fontSize") {
         const n = Number(valor);
         if (!Number.isFinite(n) || n < 1) {
@@ -1196,6 +1248,9 @@ function cambiarPropiedadMapa(campo, valor) {
     }
     estadoMapa.cambiado = true;
     repintarCosa(el.lista, el.i);
+    if (campo === "dash") {
+        $("[data-mapa-p-hueco]").hidden = cosa.dash === "solid";
+    }
     if (campo === "shape") {
         document.querySelectorAll('[data-mapa-p-caja="emblema"]').forEach((c) => {
             c.hidden = !cosa.shape;
@@ -2145,11 +2200,11 @@ function pintarRayaEnLienzo(ctx, l, k) {
     if (puntos.length < 2) {
         return;
     }
-    const estilo = estiloDeRaya(l.kind);
+    const estilo = estiloDeLaRaya(l);
     const color = l.color || estilo.color;
     ctx.lineJoin = "round";
-    if (l.kind === "rio" && l.taper !== false) {
-        const tramos = tramosDeRio(puntos);
+    if (l.kind === "rio" && l.taper !== false && !(l.dash && l.dash !== "solid")) {
+        const tramos = tramosDeRio(puntos, 8, Number(l.width) > 0 ? Number(l.width) : 0);
         ctx.lineCap = "round";
         ctx.setLineDash([]);
         [[estilo.colorBorde || "#1b1020", 3], [color, 0]].forEach(([pintura, mas]) => {
@@ -2606,7 +2661,8 @@ function empezarMapas() {
             if (que === "con-color" || que === "taper" || que === "italic") {
                 cambiarPropiedadMapa(que, campo.checked);
             } else {
-                cambiarPropiedadMapa(que, ["x", "y", "angle", "fontSize"].includes(que) ? campo.value : campo.value.trim());
+                cambiarPropiedadMapa(que, ["x", "y", "angle", "fontSize", "width", "gap"].includes(que)
+                    ? campo.value : campo.value.trim());
             }
         });
         campo.addEventListener("blur", () => {

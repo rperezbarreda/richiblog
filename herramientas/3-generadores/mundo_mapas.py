@@ -44,12 +44,16 @@ abres el mapa allí y lo guardas, puede perderlo):
                          "maritima" | "muralla" | "ruta",
                  "points": [ {"x": 10, "y": 20}, … ],
                  "label": "Río Lorem", "targetPage": "Río Lorem",
-                 "taper": false } ]
+                 "taper": false, "width": 3, "dash": "dotted", "gap": 8 } ]
                                         rayas abiertas. Los ríos se
                                         ensanchan hacia el final (la
                                         desembocadura) salvo con
                                         "taper": false; las rutas llevan
-                                        flechas hacia donde van
+                                        flechas hacia donde van. width
+                                        (grosor en px de pantalla), dash
+                                        ("solid", "dashed", "dotted",
+                                        "dashdot") y gap (la separación)
+                                        cambian el estilo de su tipo
     "labels": [ { "id": "…", "x": 900, "y": 300, "label": "Mar de las
                   Brumas", "size": "grande" | "mediano" | "pequeno",
                   "angle": -15, "color": "#…" } ]
@@ -309,6 +313,14 @@ TIPOS_DE_LINEA = {"camino": "camino principal", "sendero": "sendero", "rio": "r�
 # Tamaños de antes (el lado largo del mapa entre esto); ahora el editor
 # guarda el tamaño en píxeles del mapa ("fontSize").
 TAMANOS_DE_TEXTO = {"grande": 45, "mediano": 70, "pequeno": 110}
+# Cómo se agrupan las rayas para encender y apagar: cada grupo, su casilla.
+GRUPO_DE_RAYA = {"camino": "caminos", "sendero": "caminos", "rio": "rios", "frontera": "otras",
+                 "maritima": "otras", "muralla": "otras", "ruta": "otras"}
+NOMBRE_DE_GRUPO_DE_RAYA = (("caminos", "caminos"), ("rios", "ríos"), ("otras", "otras rayas"))
+# El grosor de cada raya, en píxeles de pantalla (el de mundo-mapa.css),
+# para calcular sus trazos cuando lleva un estilo propio.
+ANCHO_DE_RAYA = {"camino": 4.5, "sendero": 2.5, "rio": 4, "frontera": 3, "maritima": 4, "muralla": 6, "ruta": 3.5}
+TRAZOS_DE_RAYA = ("solid", "dashed", "dotted", "dashdot")
 # Las letras de los textos sueltos: cada una es una clase en
 # mundo-mapa.css (es-letra-…), con las fuentes que ya carga la web.
 FORMAS_DE_EMBLEMA = ("escudo", "bandera", "redondo")
@@ -356,7 +368,45 @@ def _linea(crudo):
         "mapa": str(crudo.get("targetMap") or "").strip(),
         "color": _color(crudo.get("color")),
         "ensancha": crudo.get("taper") is not False,
+        # Su estilo propio, si lo tiene (si no, el de su tipo).
+        "ancho": _entre(_numero(crudo.get("width"), None), 0.5, 20),
+        "trazo": str(crudo.get("dash") or "").strip().lower() if str(crudo.get("dash") or "").strip().lower()
+        in TRAZOS_DE_RAYA else "",
+        "hueco": _entre(_numero(crudo.get("gap"), None), 1, 80),
     }
+
+
+def _entre(valor, menos, mas):
+    """El número, si está entre menos y más; si no, None."""
+    if valor is None or not (menos <= valor <= mas):
+        return None
+    return valor
+
+
+def _estilo_de_raya(linea):
+    """El style="" de una raya con estilo propio (grosor y trazos), o "".
+    En style y no en atributos: la hoja de estilos ganaría a un atributo."""
+    if not (linea["ancho"] or linea["trazo"] or linea["hueco"]):
+        return ""
+    w = linea["ancho"] or ANCHO_DE_RAYA.get(linea["tipo"], 3.5)
+    partes = []
+    if linea["ancho"]:
+        partes.append("stroke-width: %.1fpx" % w)
+    trazo = linea["trazo"]
+    hueco = linea["hueco"] or 2 * w
+    if trazo == "solid":
+        partes.append("stroke-dasharray: none")
+    elif trazo == "dashed":
+        partes.append("stroke-dasharray: %.1fpx %.1fpx" % (3 * w, hueco))
+    elif trazo == "dotted":
+        partes.append("stroke-dasharray: 0.1px %.1fpx; stroke-linecap: round" % hueco)
+    elif trazo == "dashdot":
+        partes.append("stroke-dasharray: %.1fpx %.1fpx 0.1px %.1fpx; stroke-linecap: round" % (3 * w, hueco, hueco))
+    elif linea["hueco"]:
+        # Solo la separación, con los trazos de su tipo: tres anchos de
+        # trazo y el hueco que diga.
+        partes.append("stroke-dasharray: %.1fpx %.1fpx" % (3 * w, hueco))
+    return ' style="%s"' % "; ".join(partes) if partes else ""
 
 
 def _texto(crudo):
@@ -503,7 +553,7 @@ def _punto_a(puntos, acumulado, s):
     return puntos[0], 0.0
 
 
-def _rio_que_se_ensancha(puntos, clase, color, trozos=8):
+def _rio_que_se_ensancha(puntos, clase, color, trozos=8, ancho=None):
     """El río en ocho trozos seguidos, cada uno algo más gordo que el
     anterior: fino donde nace (el primer punto) y ancho en la
     desembocadura. El grosor va en píxeles de pantalla (como el resto de
@@ -518,7 +568,8 @@ def _rio_que_se_ensancha(puntos, clase, color, trozos=8):
         a, b = total * k / trozos, total * (k + 1) / trozos
         (inicio, _), (fin, _) = _punto_a(puntos, acumulado, a), _punto_a(puntos, acumulado, b)
         tramo = [inicio] + [p for p, s in zip(puntos, acumulado) if a < s < b] + [fin]
-        grueso = 2 + 5.5 * (k + 0.5) / trozos
+        # De 2 a 7,5 px; con un grosor propio, de su 45% a su 160%.
+        grueso = (ancho * (0.45 + 1.15 * (k + 0.5) / trozos)) if ancho else 2 + 5.5 * (k + 0.5) / trozos
         salida.append('<path class="%s es-tramo" d="%s"%s style="stroke-width: %.1fpx" fill="none"></path>'
                       % (clase, _trazo_abierto(tramo), color, grueso))
     return "".join(salida)
@@ -998,7 +1049,7 @@ def pintar(mapa, pagina_a, mapa_a, imagen_a, detalle=None, avisar=None, region_d
     # los caminos a trazos: se distinguen por la forma de la raya y no
     # solo por el color. Con nombre, salen en la lista como cualquier
     # sitio, y si llevan a una página, se pueden pulsar.
-    rayas = []
+    rayas = {}
     for linea in mapa.get("lineas") or []:
         simple = simplificar(linea["puntos"], detalle / 2)
         coordenadas = _trazo_abierto(simple)
@@ -1006,16 +1057,17 @@ def pintar(mapa, pagina_a, mapa_a, imagen_a, detalle=None, avisar=None, region_d
         color = (' stroke="%s"' % linea["color"]) if linea["color"] else ""
         # (grueso y no «ancho», que es lo que mide el mapa y se usa abajo)
         grueso = grosor * (3 if linea["tipo"] == "rio" else 2)
-        if linea["tipo"] == "rio" and linea["ensancha"]:
-            raya = _rio_que_se_ensancha(simple, clase, color)
+        grupo = rayas.setdefault(GRUPO_DE_RAYA.get(linea["tipo"], "otras"), [])
+        if linea["tipo"] == "rio" and linea["ensancha"] and not (linea["trazo"] and linea["trazo"] != "solid"):
+            raya = _rio_que_se_ensancha(simple, clase, color, ancho=linea["ancho"])
         else:
-            raya = ('<path class="%s" d="%s"%s stroke-width="%d" fill="none"></path>'
-                    % (clase, coordenadas, color, grueso))
+            raya = ('<path class="%s" d="%s"%s stroke-width="%d" fill="none"%s></path>'
+                    % (clase, coordenadas, color, grueso, _estilo_de_raya(linea)))
         if linea["tipo"] == "ruta":
             raya += _flechas(simple, radio, linea["color"])
         nombre = linea["etiqueta"] or linea["pagina"]
         if not nombre:
-            rayas.append(raya)
+            grupo.append(raya)
             continue
         cuantas += 1
         cual = "s%d" % cuantas
@@ -1031,15 +1083,18 @@ def pintar(mapa, pagina_a, mapa_a, imagen_a, detalle=None, avisar=None, region_d
         tocar = ('<path class="mapa-linea-toque" d="%s" stroke-width="%d" fill="none"></path>'
                  % (coordenadas, grosor * 8))
         if elegido["url"]:
-            rayas.append('<a class="mapa-linea-sitio es-enlace" href="%s" data-mapa-sitio="%s"%s'
+            grupo.append('<a class="mapa-linea-sitio es-enlace" href="%s" data-mapa-sitio="%s"%s'
                          ' tabindex="-1"><title>%s</title>%s%s</a>'
                          % (html.escape(elegido["url"], quote=True), cual, datos,
                             html.escape(nombre), tocar, raya))
         else:
-            rayas.append('<g class="mapa-linea-sitio" data-mapa-sitio="%s"%s><title>%s</title>%s%s</g>'
+            grupo.append('<g class="mapa-linea-sitio" data-mapa-sitio="%s"%s><title>%s</title>%s%s</g>'
                          % (cual, datos, html.escape(nombre), tocar, raya))
-    if rayas:
-        trozos.append('<g class="mapa-lineas">%s</g>' % "".join(rayas))
+    # Un grupo por clase de raya (caminos, ríos, otras), cada uno con su
+    # casilla en los mandos para encenderlo y apagarlo por separado.
+    for clave, _ in NOMBRE_DE_GRUPO_DE_RAYA:
+        if rayas.get(clave):
+            trozos.append('<g class="mapa-lineas es-%s">%s</g>' % (clave, "".join(rayas[clave])))
 
     # ---- LOS TEXTOS SUELTOS ----
     # «Mar de las Brumas», «Montes Grises»: escritos en el mapa, del tamaño
@@ -1213,7 +1268,7 @@ def pintar(mapa, pagina_a, mapa_a, imagen_a, detalle=None, avisar=None, region_d
     return {
         "svg": "".join(trozos),
         "leyenda": leyenda,
-        "hay_lineas": bool(rayas),
+        "hay_lineas": [clave for clave, _ in NOMBRE_DE_GRUPO_DE_RAYA if rayas.get(clave)],
         "hay_escala": bool(escala),
         "hay_nombres": bool(letreros) or any(p["etiqueta"] and not p["escondido"] for p in mapa["pines"]),
         "sitios": sitios,
@@ -1492,10 +1547,15 @@ def pintar_mandos(capas, hay_formas=True, hay_pines=False, hay_niveles=False, ha
         casillas.append(
             '<label class="mapa-capa-casilla"><input type="checkbox"'
             ' data-mapa-pines checked> pines</label>')
+    # Las rayas, por grupos (hay_lineas: los que hay, de
+    # NOMBRE_DE_GRUPO_DE_RAYA): caminos, ríos y otras, cada uno con la suya.
     if hay_lineas:
-        casillas.append(
-            '<label class="mapa-capa-casilla"><input type="checkbox"'
-            ' data-mapa-lineas checked> caminos y ríos</label>')
+        grupos = hay_lineas if isinstance(hay_lineas, (list, tuple)) else [g for g, _ in NOMBRE_DE_GRUPO_DE_RAYA]
+        for clave, texto in NOMBRE_DE_GRUPO_DE_RAYA:
+            if clave in grupos:
+                casillas.append(
+                    '<label class="mapa-capa-casilla"><input type="checkbox"'
+                    ' data-mapa-lineas="%s" checked> %s</label>' % (clave, texto))
     if hay_nombres:
         casillas.append(
             '<label class="mapa-capa-casilla"><input type="checkbox"'

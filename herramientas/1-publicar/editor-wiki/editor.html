@@ -340,6 +340,28 @@
                                     <span class="mapa-cuanto" data-mapa-p-giro-cifra aria-hidden="true">0°</span>
                                 </div>
                             </div>
+                            <fieldset class="opciones campo mapa-estilo-raya" data-mapa-p-caja="estilo-raya">
+                                <legend>Estilo de la raya</legend>
+                                <p class="ayuda" id="ayuda-estilo-raya">Vacío o «como su tipo»: el de los caminos, los
+                                    ríos… En píxeles de pantalla (mide lo mismo a cualquier zoom).</p>
+                                <div class="fila mapa-xy">
+                                    <div><label for="mapa-p-grosor">Grosor</label>
+                                        <input id="mapa-p-grosor" type="number" min="0.5" max="20" step="0.5"
+                                               inputmode="decimal" data-mapa-p="width"
+                                               aria-describedby="ayuda-estilo-raya"></div>
+                                    <div data-mapa-p-hueco><label for="mapa-p-hueco">Separación</label>
+                                        <input id="mapa-p-hueco" type="number" min="1" max="80" step="1"
+                                               inputmode="numeric" data-mapa-p="gap"></div>
+                                </div>
+                                <label for="mapa-p-trazo">Tipo de raya</label>
+                                <select id="mapa-p-trazo" data-mapa-p="dash">
+                                    <option value="">Como su tipo</option>
+                                    <option value="solid">Continua ───</option>
+                                    <option value="dashed">A trazos ─ ─ ─</option>
+                                    <option value="dotted">A puntos · · · ·</option>
+                                    <option value="dashdot">Raya y punto ─ · ─ ·</option>
+                                </select>
+                            </fieldset>
                             <div class="campo" data-mapa-p-caja="taper">
                                 <label class="opcion"><input type="checkbox" data-mapa-p="taper"> Se ensancha hacia el
                                     final (la desembocadura)</label>

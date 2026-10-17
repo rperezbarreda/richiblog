@@ -2316,6 +2316,11 @@ input.mundo-pieza-control[type="search"] {
 .mundo-su-mapa {
     margin: 0 0 20px;
 }
+.mundo-ficha .mundo-su-mapa {
+    display: flex;
+    justify-content: center;
+    margin: 14px 0 18px;
+}
 .mundo-su-mapa-enlace {
     display: inline-flex;
     align-items: center;

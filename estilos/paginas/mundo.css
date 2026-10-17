@@ -3135,6 +3135,13 @@ input.mundo-pieza-control[type="search"] {
     margin: 0 0 20px;
 }
 
+/* En la ficha, debajo de la bandera: centrado. */
+.mundo-ficha .mundo-su-mapa {
+    display: flex;
+    justify-content: center;
+    margin: 14px 0 18px;
+}
+
 .mundo-su-mapa-enlace {
     display: inline-flex;
     align-items: center;

@@ -32,6 +32,11 @@
    ==================================================================== */
 
 .mapa-caja {
+    /* Que no se seleccione el texto al pulsar o arrastrar por el mapa
+       (los nombres, la escala, la leyenda): se queda todo marcado en azul
+       y estorba. */
+    -webkit-user-select: none;
+    user-select: none;
     display: flex;
     flex-direction: column;
     /* QUE NO SE ENCOJA. La página es una columna flexible que se desplaza
@@ -406,6 +411,18 @@ html:not(.js) .mapa-ayuda {
    ninguna región (es-suelto; ver mundo-mapa.js). */
 .mapa-paises.es-solo-sueltos > .mapa-forma:not(.es-suelto) {
     display: none;
+}
+
+/* LAS MIGAS, FIJAS: al bajar por la página se quedan arriba (las fija
+   mundo-mapa.js con position: fixed, nada de sticky), para poder volver a
+   la página del país en cualquier momento. */
+.mundo-migas.es-fija {
+    position: fixed;
+    z-index: 30;
+    padding: 8px 12px;
+    border-bottom: 2px solid var(--yellow);
+    background: var(--surface);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.25);
 }
 
 .mapa-dibujos.es-apagada,
