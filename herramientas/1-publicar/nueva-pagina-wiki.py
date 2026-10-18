@@ -39,7 +39,9 @@
 #                                    escribir solo un trozo) y deja elegir;
 #                                    si no está, va escrito sin enlace
 #     # carpeta: Personajes          dónde se guarda, dentro de wiki/
-#     # carpeta: junto a {{raza}}    o en la carpeta de esa otra página
+#     # carpeta: junto a {{raza}}    o en la carpeta de esa otra página (y
+#                                    con /{{nombre}} detrás, en una suya
+#                                    dentro de ella: el País)
 #     # si no está: Razas/{{raza}}   dónde, si esa otra página no existe
 #     # oculta: sí                   no sale en la lista (la Subraza: se
 #                                    llega a ella desde «Raza»)
@@ -312,12 +314,14 @@ def carpeta_de(plantilla, valores):
     """Dónde se guarda, dentro de wiki/, con las respuestas ya dadas (la
     usa también el editor: herramientas/1-publicar/editor-wiki.py)."""
     carpeta = plantilla["carpeta"] or "otros"
-    m = re.match(r"^junto a \{\{(\w+)\}\}$", carpeta)
+    m = re.match(r"^junto a \{\{(\w+)\}\}(/.*)?$", carpeta)
     if m:
-        # En la carpeta de otra página (una subraza, junto a su raza).
+        # En la carpeta de otra página (una subraza, junto a su raza), y
+        # dentro de ella lo que venga detrás (un país: junto a su región,
+        # en su propia carpeta: «junto a {{region}}/{{nombre}}»).
         otra = pagina_llamada(valores.get(m.group(1), "")) if valores.get(m.group(1)) else None
         if otra:
-            carpeta = otra.parent.relative_to(VAULT).as_posix()
+            carpeta = otra.parent.relative_to(VAULT).as_posix() + (m.group(2) or "")
         else:
             carpeta = plantilla["si_no"] or "otros"
     for clave, valor in valores.items():

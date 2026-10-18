@@ -32,6 +32,13 @@
             <button type="button" data-ir="repasar">Imágenes y repasar</button>
             <button type="button" data-ir="comandos">Comandos</button>
         </nav>
+        <!-- Cómo se ve el propio editor: el tamaño de la letra y el contraste
+             (editor.js, ajustesDeVistaEditor; se recuerdan). -->
+        <div class="vista-ajustes" role="group" aria-label="Cómo se ve el editor">
+            <button type="button" data-letra="-1">Letra −</button>
+            <button type="button" data-letra="1">Letra +</button>
+            <button type="button" data-boton-contraste aria-pressed="false">Contraste alto</button>
+        </div>
     </header>
 
     <main id="principal" tabindex="-1">
@@ -136,6 +143,7 @@
                 <p class="estado-entrada" data-entrada-estado></p>
                 <a class="boton" data-entrada-ver target="_blank" rel="noopener">Ver cómo queda ↗</a>
             </div>
+            <div class="borrador-caja" data-borrador-entrada></div>
             <form data-entrada></form>
         </section>
 
@@ -239,6 +247,25 @@
             <p class="ayuda">Lo del menú de siempre (herramientas/menu.py). Cada «Abrir» abre esa herramienta en su
                 propia ventana de comandos, que pregunta lo que necesite; al acabar, espera a que pulses Enter para
                 cerrarse. El número es el atajo del menú («3.3» es lo tercero del apartado 3).</p>
+            <section class="bloque" aria-labelledby="t-git">
+                <h2 id="t-git">Guardar en GitHub</h2>
+                <p class="ayuda">Guarda todo lo cambiado (un commit, con tu mensaje) y lo sube a la rama en la que
+                    estás. Lo mismo que git add, git commit y git push en la consola.</p>
+                <p data-git-estado aria-live="polite"></p>
+                <details class="git-cambios" data-git-cambios-caja hidden>
+                    <summary>Ver lo cambiado</summary>
+                    <ul data-git-cambios></ul>
+                </details>
+                <div class="campo">
+                    <label for="git-mensaje">Qué has cambiado (el mensaje)</label>
+                    <input id="git-mensaje" autocomplete="off">
+                </div>
+                <div class="fila">
+                    <button type="button" class="principal" data-git-subir>Guardar y subir a GitHub</button>
+                    <button type="button" data-git-traer>Traer lo último de GitHub</button>
+                    <button type="button" data-git-mirar>Mirar otra vez</button>
+                </div>
+            </section>
             <div class="fila">
                 <button type="button" class="principal" data-comando-menu>Abrir el menú entero en una ventana</button>
             </div>
@@ -333,7 +360,39 @@
         <section class="vista" data-vista="editar" aria-labelledby="t-editar" hidden>
             <h1 id="t-editar" data-editar-titulo></h1>
             <p class="ayuda" data-editar-archivo></p>
+            <div class="fila herramientas-pagina">
+                <button type="button" data-vista-previa-boton aria-pressed="false">Vista previa al lado</button>
+                <button type="button" data-mover-boton aria-expanded="false" aria-controls="mover-pagina">Mover o renombrar</button>
+            </div>
+            <!-- Mover o renombrar la página (editor.js, moverPaginaEditor). -->
+            <section class="bloque mover-pagina" id="mover-pagina" aria-labelledby="t-mover" hidden>
+                <h2 id="t-mover">Mover o renombrar</h2>
+                <p class="ayuda">Se cambian también los [[enlaces]] de las otras páginas que la nombran (y los de la
+                    línea de tiempo, el calendario, el diccionario y los mapas), y la dirección vieja de la web lleva a
+                    la nueva. Después hay que pasar la wiki a la web.</p>
+                <div class="campo">
+                    <label for="mover-nombre">Nombre</label>
+                    <input id="mover-nombre" autocomplete="off" spellcheck="false">
+                </div>
+                <div class="campo">
+                    <label for="mover-carpeta">Carpeta, dentro de wiki/</label>
+                    <input id="mover-carpeta" list="lista-carpetas-wiki" autocomplete="off" spellcheck="false">
+                    <datalist id="lista-carpetas-wiki"></datalist>
+                </div>
+                <div class="fila">
+                    <button type="button" class="principal" data-mover-hacer>Moverla</button>
+                    <button type="button" data-mover-cancelar>Dejarla como está</button>
+                </div>
+            </section>
+            <aside class="vista-previa" data-vista-previa aria-labelledby="t-vista-previa" hidden>
+                <h2 id="t-vista-previa">Vista previa</h2>
+                <p class="ayuda">El texto como saldrá en la web (sin la ficha). Los enlaces se abren en otra pestaña; en
+                    rojo, los de páginas que aún no existen.</p>
+                <ul class="vista-previa-avisos" data-vista-previa-avisos></ul>
+                <div class="vista-previa-cuerpo" data-vista-previa-cuerpo></div>
+            </aside>
             <div class="pagina-mapas" data-pagina-mapas></div>
+            <div class="borrador-caja" data-borrador-wiki></div>
             <form data-editar>
                 <section class="bloque" aria-labelledby="t-ficha">
                     <h2 id="t-ficha">La ficha</h2>

@@ -77,6 +77,20 @@
     }
 }
 
+/* CONTRASTE ALTO (el botón de arriba): negro, blanco y amarillo, los
+   bordes enteros en blanco. Va por encima del tema claro u oscuro. */
+html[data-contraste="alto"] {
+    --fondo: #000;
+    --caja: #000;
+    --texto: #fff;
+    --suave: #fff;
+    --acento: #ffe14d;
+    --sobre-acento: #000;
+    --borde: #fff;
+    --error: #ff9b94;
+    color-scheme: dark;
+}
+
 * {
     box-sizing: border-box;
 }
@@ -140,6 +154,18 @@ body {
     display: flex;
     flex-wrap: wrap;
     gap: 8px;
+}
+
+.vista-ajustes {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.vista-ajustes button {
+    min-height: 40px;
+    padding: 4px 12px;
+    font-size: 0.9rem;
 }
 
 main {
@@ -1615,6 +1641,12 @@ body.en-mapa main {
     .redactor-area .pj-morado { color: #8500d1; }
 }
 
+/* Con contraste alto el fondo es negro siempre: los colores claros. */
+html[data-contraste="alto"] .redactor-area .pj-verde { color: #7fe496; }
+html[data-contraste="alto"] .redactor-area .pj-azul { color: #a8d3ff; }
+html[data-contraste="alto"] .redactor-area .pj-rojo { color: #ffc0b7; }
+html[data-contraste="alto"] .redactor-area .pj-morado { color: #dec4ff; }
+
 .redactor-area .cuaderno-objetos {
     padding: 8px 8px 8px 32px;
     border: 2px dashed var(--borde);
@@ -1718,6 +1750,177 @@ body.en-mapa main {
     display: block;
     margin-top: 2px;
     color: var(--suave);
+}
+
+/* LA VISTA PREVIA DE LA WIKI. En pantalla ancha, fija a la derecha (la
+   coloca editor.js entre la cabecera y la barra de abajo) y la página se
+   estrecha; en estrecha, en su sitio, debajo de los botones. */
+.vista-previa {
+    margin: 0 0 24px;
+    padding: 14px 18px;
+    border: 2px solid var(--acento);
+    background: var(--caja);
+}
+
+.vista-previa-cuerpo h2,
+.vista-previa-cuerpo h3,
+.vista-previa-cuerpo h4 {
+    margin: 18px 0 8px;
+    color: var(--acento);
+}
+
+.vista-previa-cuerpo h2 {
+    padding-bottom: 4px;
+    border-bottom: 2px solid var(--acento);
+}
+
+.vista-previa-cuerpo a {
+    color: var(--texto);
+    text-decoration: underline;
+}
+
+.vista-previa-cuerpo .mundo-enlace-vacio {
+    color: var(--error);
+    text-decoration: underline dotted;
+}
+
+.vista-previa-cuerpo img {
+    max-width: 100%;
+    height: auto;
+}
+
+.vista-previa-cuerpo blockquote {
+    margin: 0 0 12px;
+    padding: 4px 14px;
+    border-left: 4px solid var(--acento);
+}
+
+.vista-previa-cuerpo table {
+    border-collapse: collapse;
+}
+
+.vista-previa-cuerpo th,
+.vista-previa-cuerpo td {
+    padding: 4px 8px;
+    border: 1px solid var(--borde);
+}
+
+.vista-previa-avisos {
+    margin: 0 0 10px;
+    padding-left: 20px;
+    color: var(--error);
+}
+
+@media (min-width: 1100px) {
+    body.con-vista-previa main {
+        max-width: none;
+        margin-right: 44vw;
+    }
+
+    body.con-vista-previa .vista-previa {
+        position: fixed;
+        right: 0;
+        z-index: 20;
+        width: 42vw;
+        margin: 0;
+        overflow-y: auto;
+    }
+}
+
+.herramientas-pagina {
+    margin-bottom: 16px;
+}
+
+.mover-pagina {
+    padding: 14px 18px;
+    border: 2px solid var(--acento);
+}
+
+.git-cambios {
+    margin: 0 0 14px;
+}
+
+.git-cambios ul {
+    max-height: 16rem;
+    overflow-y: auto;
+    font-family: var(--mono);
+    font-size: 0.85rem;
+}
+
+/* EL BUSCADOR DE [[ (lo que se puede enlazar), debajo de los botones. */
+.buscar-enlace-lista {
+    max-height: 18rem;
+    margin: 6px 0 0;
+    padding: 0;
+    overflow-y: auto;
+    border: 2px solid var(--borde);
+    list-style: none;
+}
+
+.buscar-enlace-cosa {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 2px 10px;
+    padding: 6px 10px;
+    cursor: pointer;
+}
+
+.buscar-enlace-cosa[aria-selected="true"] {
+    background: var(--acento);
+    color: var(--sobre-acento);
+}
+
+.buscar-enlace-cosa[aria-selected="true"] .faltan-veces {
+    color: var(--sobre-acento);
+}
+
+/* EL CONTADOR, debajo de cada texto: las palabras y lo que repasar. */
+.redactor-cuenta {
+    padding: 6px 12px 8px;
+    border-top: 1px solid var(--borde);
+    color: var(--suave);
+    font-size: 0.9rem;
+}
+
+textarea + .redactor-cuenta {
+    margin-bottom: 10px;
+    border: 2px solid var(--borde);
+    border-top: 0;
+}
+
+.redactor-cuenta-linea {
+    margin: 0;
+    font-family: var(--mono);
+}
+
+.redactor-cuenta-avisos {
+    margin: 4px 0 0;
+    padding-left: 20px;
+    color: var(--texto);
+}
+
+.redactor-cuenta-avisos li {
+    margin: 4px 0;
+}
+
+.redactor-cuenta-avisos button {
+    min-height: 36px;
+    padding: 2px 10px;
+    font-size: 0.85rem;
+}
+
+/* EL AVISO DE UN BORRADOR SIN GUARDAR (al abrir algo que lo tiene). */
+.aviso-borrador {
+    margin: 0 0 24px;
+    padding: 14px 16px;
+    border: 3px solid var(--acento);
+    background: var(--caja);
+}
+
+.aviso-borrador p {
+    margin: 0 0 10px;
+    font-weight: 700;
 }
 
 /* El título de cada grupo, en la lista partida por grupos (los NPC). */

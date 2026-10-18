@@ -1169,6 +1169,41 @@ def colecciones():
                          C("notas", "Lo que sabemos", "lineas", ayuda="Una cosa por línea.", siempre=True),
                          C("primera", "Sesión en la que salió por primera vez", "elegir", numerico=True, vacio="quitar"),
                      ]}]},
+        {"id": "campana", "apartado": "rol", "titulo": "La ficha de una campaña", "por_campana": True,
+         "ayuda": "Lo que sale arriba en la página de la campaña: de qué va, el sistema, quién dirige; los"
+                  " personajes de la mesa (con su color en las notas) y las misiones pendientes (el post-it).",
+         "archivo": "datos/notas_rol/campana-{campana}.json", "despues": "generadores",
+         "partes": [
+             {"id": "datos", "tipo": "objeto", "camino": [], "titulo": "La campaña", "campos": [
+                 C("nombre", "Nombre", obligatorio=True, ayuda="«campaña de Ragna»: sale en los títulos."),
+                 C("intro", "La entradilla", "largo"),
+                 C("sistema", "Sistema", ayuda="«DnD 5.5e»…"),
+                 C("director", "Quién dirige"),
+                 C("sinopsis", "De qué va", "largo", grande=True)]},
+             {"id": "personajes", "camino": ["personajes"], "titulo": "Los personajes de la mesa", "nombre_de": "nombre",
+              "detalle": ["clase", "jugador"], "campos": [
+                  C("nombre", "Nombre", obligatorio=True),
+                  C("jugador", "Quién lo lleva", siempre=True),
+                  C("clase", "Raza y clase", siempre=True, ayuda="«Elfo Druida»…"),
+                  C("nivel", "Nivel", "numero", minimo=1, maximo=30, siempre=True),
+                  C("color", "Su color en las notas", "elegir", obligatorio=True,
+                    opciones=[["verde", "verde"], ["azul", "azul"], ["rojo", "rojo"], ["morado", "morado"]],
+                    ayuda="Con el que sale su nombre en las notas de las partidas."),
+                  C("token", "Token (el redondel)", "imagen", sitio="pj-token", siempre=True),
+                  C("ilustracion", "Ilustración (la grande)", "imagen", sitio="pj-ficha", siempre=True),
+                  C("equipo", "Lo que lleva encima", "lineas", ayuda="Una cosa por línea.", siempre=True),
+                  C("notas", "Notas", "lineas", ayuda="Una cosa por línea.", siempre=True)]},
+             {"id": "misiones", "camino": ["misiones"], "titulo": "Las misiones (el post-it)",
+              "agrupada": {"clave": "nombre", "nombre": "nombre", "dentro": "cosas", "libre": True},
+              "ayuda": "Cada cosa, en su misión (una que ya hay o una nueva, escribiéndola). Hecha: se queda tachada."
+                       " Una misión sin nada dentro se quita.",
+              "nombre_de": "que", "detalle": ["de"], "campos": [
+                  C("_grupo", "Misión", "elegir", libre=True, obligatorio=True,
+                    ayuda="«la Gran Caravana»… Una nueva: escríbela."),
+                  C("que", "Qué hay que hacer", obligatorio=True),
+                  C("de", "De qué sesión", "elegir", numerico=True, vacio="quitar"),
+                  C("hecha", "Hecha", "si-no", vacio="quitar")]},
+         ]},
         {"id": "botin", "apartado": "rol", "titulo": "El botín de una campaña", "por_campana": True,
          "ayuda": "Lo que el grupo va juntando. Lo gastado se queda en la lista, tachado: «qué tuvimos» es media"
                   " discusión de cada partida. Quitarlo es para lo que no debió apuntarse.",
@@ -1391,6 +1426,10 @@ def opciones_de(col, clave_campana, datos):
                 if cat not in orden:
                     orden.append(cat)
         salida["_grupos"] = _opciones(orden)
+    if col["id"] == "campana":
+        salida["de"] = _sesiones_de(campana)
+        salida["_grupo"] = _opciones([m.get("nombre", "") for m in (datos or {}).get("misiones") or []
+                                      if isinstance(m, dict) and m.get("nombre")])
     if col["id"] == "botin":
         salida["de"] = _sesiones_de(campana)
         salida["quien"] = _opciones([p.get("nombre", "") for p in (campana or {}).get("personajes") or []
@@ -1598,12 +1637,21 @@ def guardar_coleccion(peticion):
                 datos.update(nuevo_dict)
                 continue
             if agrupada:
-                grupos = [g for g in datos if isinstance(g, dict)]
+                contenedor = _ir(datos, parte["camino"], crear=True) if parte["camino"] else datos
+                grupos = [g for g in contenedor or [] if isinstance(g, dict)]
                 por_clave = {g.get(agrupada["clave"]): g for g in grupos}
                 viejas = {k: list(g.get(agrupada["dentro"]) or []) for k, g in por_clave.items()}
                 nuevas = {k: [] for k in por_clave}
                 for ficha in crudo:
                     destino = ficha.get("_grupo")
+                    if isinstance(destino, str):
+                        destino = destino.strip()
+                    if destino not in por_clave and agrupada.get("libre") and destino:
+                        # Uno nuevo (una misión nueva): se añade al final.
+                        nuevo_grupo = {agrupada["clave"]: destino, agrupada["dentro"]: []}
+                        contenedor.append(nuevo_grupo)
+                        por_clave[destino] = nuevo_grupo
+                        nuevas[destino] = []
                     if destino not in por_clave:
                         raise ValueError("«%s» no tiene una categoría que exista" % (ficha.get(parte["nombre_de"]) or "?"))
                     origen = viejas.get(ficha.get("_g")) or []
@@ -1612,6 +1660,10 @@ def guardar_coleccion(peticion):
                     nuevas[destino].append(_montar_ficha(parte["campos"], original, ficha, parte.get("nombre_de")))
                 for k, g in por_clave.items():
                     g[agrupada["dentro"]] = nuevas[k]
+                if agrupada.get("libre"):
+                    # Las que se han quedado sin nada (una misión acabada y
+                    # vaciada), fuera.
+                    contenedor[:] = [g for g in contenedor if not isinstance(g, dict) or g.get(agrupada["dentro"])]
                 continue
             lista = _ir(datos, parte["camino"], crear=True) if parte["camino"] else datos
             if not isinstance(lista, list):
@@ -1733,6 +1785,169 @@ def regenerar():
 # comprobada). Devuelve el diccionario que hay que contestar en JSON.
 
 # =========================================
+# LO QUE SE PUEDE ENLAZAR ESCRIBIENDO [[
+# =========================================
+# Las páginas de la wiki (de mundo.json, que lo escribe generar-mundo) y los
+# NPC de cada campaña, para el buscador que sale al escribir [[.
+
+def enlazables():
+    paginas = []
+    for f in leer_json(RAIZ / "datos" / "wiki" / "mundo.json", []) or []:
+        if isinstance(f, dict) and f.get("titulo") and f.get("url"):
+            paginas.append({"nombre": str(f["titulo"]), "url": str(f["url"]), "que": str(f.get("que") or "")})
+    npcs, grupos = {}, {}
+    for archivo in sorted((RAIZ / "datos" / "notas_rol").glob("npcs-*.json")):
+        datos = leer_json(archivo, {}) or {}
+        clave = archivo.stem[len("npcs-"):]
+        npcs[clave] = [{"nombre": str(p.get("nombre")), "que": str(p.get("que") or "")}
+                       for p in datos.get("personajes") or [] if isinstance(p, dict) and p.get("nombre")]
+        grupos[clave] = [g[0] for g in opciones_de(coleccion("npcs"), "", datos).get("_grupos", [])]
+    return {"paginas": paginas, "npcs": npcs, "grupos": grupos}
+
+
+def crear_npc(peticion):
+    """Un NPC nuevo desde las notas de una partida: con su nombre, su
+    grupo, qué es y la sesión en la que salió. Se guarda como si se hubiera
+    añadido en sus fichas (y se pasa a la web igual)."""
+    clave = str(peticion.get("campana") or "").strip()
+    nombre = " ".join(str(peticion.get("nombre") or "").split())
+    if not nombre:
+        return {"error": "Hace falta su nombre."}
+    col = leer_coleccion("npcs", clave)
+    if col.get("error"):
+        return col
+    if any(sin_tildes(str(f.get("nombre") or "")).lower() == sin_tildes(nombre).lower()
+           for f in col["partes"]["personajes"]):
+        return {"error": "Ya hay un NPC que se llama «%s» en esta campaña." % nombre}
+    nuevo = {"nombre": nombre, "_grupos": str(peticion.get("grupo") or "").strip(),
+             "que": str(peticion.get("que") or "").strip(), "donde": "", "relacion": "", "estado": "",
+             "token": "", "ilustracion": "", "notas": ""}
+    if str(peticion.get("sesion") or "").strip().isdigit():
+        nuevo["primera"] = str(int(peticion["sesion"]))
+    partes = {"personajes": col["partes"]["personajes"] + [nuevo]}
+    return guardar_coleccion({"id": "npcs", "campana": clave, "partes": partes})
+
+
+# =========================================
+# GITHUB: GUARDAR Y SUBIR LO CAMBIADO
+# =========================================
+# Lo mismo que harías en la consola: git add, git commit con tu mensaje y
+# git push a la rama en la que estés (y traer lo último con git pull
+# --ff-only, que no mezcla nada: si no se puede, lo dice). Si git no está
+# o el proyecto no es un repositorio, se dice y ya.
+
+def _git(*args, tiempo=120):
+    try:
+        hecho = subprocess.run(["git"] + list(args), cwd=RAIZ, capture_output=True, text=True, timeout=tiempo,
+                               stdin=subprocess.DEVNULL, encoding="utf-8", errors="replace")
+    except FileNotFoundError:
+        return 127, "", "No encuentro git en este ordenador."
+    except subprocess.TimeoutExpired:
+        return 124, "", "git ha tardado demasiado (¿la conexión?)."
+    return hecho.returncode, hecho.stdout, hecho.stderr
+
+
+def git_estado():
+    codigo, rama, error = _git("rev-parse", "--abbrev-ref", "HEAD")
+    if codigo:
+        return {"error": (error or "Esto no parece un repositorio de git.").strip()}
+    _, cambios, _ = _git("status", "--porcelain", "-uall")
+    lineas = [l for l in cambios.splitlines() if l.strip()]
+    _, arriba, _ = _git("rev-parse", "--abbrev-ref", "--symbolic-full-name", "@{u}")
+    por_subir = 0
+    if arriba.strip():
+        _, cuenta, _ = _git("rev-list", "--count", "@{u}..HEAD")
+        por_subir = int(cuenta.strip() or 0) if cuenta.strip().isdigit() else 0
+    que = {"M": "cambiado", "A": "nuevo", "D": "borrado", "R": "movido", "?": "nuevo"}
+    return {"rama": rama.strip(), "arriba": arriba.strip(), "por_subir": por_subir, "cuantos": len(lineas),
+            "cambios": [{"que": que.get((l[:2].strip() or "M")[0], "cambiado"), "archivo": l[3:]} for l in lineas[:300]]}
+
+
+def git_subir(peticion):
+    mensaje = " ".join(str(peticion.get("mensaje") or "").split())
+    if not mensaje:
+        return {"error": "Hace falta un mensaje: qué has cambiado, en una línea."}
+    estado = git_estado()
+    if estado.get("error"):
+        return estado
+    salida = []
+    if estado["cuantos"]:
+        codigo, out, err = _git("add", "-A")
+        salida.append(out + err)
+        if codigo:
+            return {"error": "No he podido preparar los cambios.", "salida": "\n".join(salida)}
+        codigo, out, err = _git("commit", "-q", "-m", mensaje)
+        salida.append(out + err)
+        if codigo:
+            return {"error": "No he podido guardar los cambios (el commit).", "salida": "\n".join(salida)}
+    elif not estado["por_subir"] and estado["arriba"]:
+        return {"error": "No hay nada cambiado ni nada por subir."}
+    rama = estado["rama"]
+    args = ["push", "origin", rama] if estado["arriba"] else ["push", "-u", "origin", rama]
+    codigo, out, err = _git(*args, tiempo=600)
+    salida.append(out + err)
+    if codigo:
+        return {"error": "Guardado aquí, pero no he podido subirlo a GitHub. Si dice que hay cambios arriba que no"
+                         " tienes, pulsa «Traer lo último» y vuelve a probar.", "salida": "\n".join(salida).strip()}
+    return {"ok": True, "rama": rama, "salida": "\n".join(salida).strip()}
+
+
+def git_traer():
+    estado = git_estado()
+    if estado.get("error"):
+        return estado
+    codigo, out, err = _git("pull", "--ff-only", tiempo=600)
+    if codigo:
+        return {"error": "No he podido traer lo último sin mezclar (puede que tengas cambios aquí que chocan, o que"
+                         " las ramas se hayan separado).", "salida": (out + err).strip()}
+    return {"ok": True, "salida": (out + err).strip()}
+
+
+# =========================================
+# LOS BORRADORES AUTOMÁTICOS
+# =========================================
+# Mientras escribes, el editor manda cada poco lo que tienes sin guardar, y
+# aquí se apunta en un archivo aparte (en la carpeta temporal del
+# ordenador, nunca en la web ni en el proyecto). Si se cierra la ventana o
+# se va la luz, al volver a abrir esa entrada o esa página el editor
+# ofrece recuperarlo. Al guardar de verdad, se borra.
+#   clave: «entrada:web/blog/…html» o «wiki:Nombre de la página»
+
+BORRADORES = Path(tempfile.gettempdir()) / "editor-web-borradores"
+
+
+def _archivo_de_borrador(clave):
+    import hashlib
+    return BORRADORES / (hashlib.sha1(str(clave).encode("utf-8")).hexdigest() + ".json")
+
+
+def leer_borrador(clave):
+    archivo = _archivo_de_borrador(clave)
+    try:
+        dato = json.loads(archivo.read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        return {"borrador": None}
+    return {"borrador": dato if dato.get("clave") == clave else None}
+
+
+def apuntar_borrador(peticion):
+    clave = str(peticion.get("clave") or "").strip()
+    if not clave:
+        return {"error": "Falta de qué es el borrador."}
+    archivo = _archivo_de_borrador(clave)
+    if peticion.get("datos") is None:
+        try:
+            archivo.unlink()
+        except OSError:
+            pass
+        return {"ok": True}
+    BORRADORES.mkdir(parents=True, exist_ok=True)
+    archivo.write_text(json.dumps({"clave": clave, "cuando": dt.datetime.now().strftime("%d-%m-%Y %H:%M"),
+                                   "datos": peticion["datos"]}, ensure_ascii=False), encoding="utf-8")
+    return {"ok": True}
+
+
+# =========================================
 # LOS COMANDOS (el menú de siempre)
 # =========================================
 # El apartado «Comandos» del editor: lo de herramientas/menu.py, cada cosa
@@ -1791,6 +2006,12 @@ def atender_get(ruta, pregunta):
         return medidas(uno("ruta"))
     if ruta == "/api/web/comandos":
         return comandos()
+    if ruta == "/api/web/borrador":
+        return leer_borrador(uno("clave"))
+    if ruta == "/api/web/enlazables":
+        return enlazables()
+    if ruta == "/api/web/git":
+        return git_estado()
     return None
 
 
@@ -1799,6 +2020,14 @@ def atender_post(ruta, peticion):
         return crear_entrada(peticion)
     if ruta == "/api/web/comando":
         return abrir_comando(peticion)
+    if ruta == "/api/web/borrador":
+        return apuntar_borrador(peticion)
+    if ruta == "/api/web/npc/nuevo":
+        return crear_npc(peticion)
+    if ruta == "/api/web/git/subir":
+        return git_subir(peticion)
+    if ruta == "/api/web/git/traer":
+        return git_traer()
     if ruta == "/api/web/entrada/guardar":
         return guardar_entrada(peticion)
     if ruta == "/api/web/entrada/publicar":

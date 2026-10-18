@@ -115,6 +115,41 @@
       espera a que pulses Enter para cerrarse. Arriba, otro botón abre
       el menú entero (menu.py --texto) en una ventana.
 
+  MÁS AYUDAS AL ESCRIBIR (desde el 18-10-2026):
+
+    · [[ PARA ENLAZAR: escribiendo [[ en cualquier texto sale, debajo de
+      los botones, un buscador (escribe un trozo; flechas, Enter, Escape).
+      En una entrada pone el enlace a la página de la wiki; en las notas
+      de partida, además, los personajes de la mesa (de su color) y los
+      NPC de la campaña (en negrita); en la wiki, [[Nombre]].
+    · EL CONTADOR, debajo de cada texto: palabras y minutos de lectura,
+      y lo que conviene repasar (dobles espacios, con botón para
+      quitarlos; trozos de etiquetas como «/p>»; imágenes sin
+      descripción; enlaces sin dirección; en la wiki, [[ o ** sin
+      cerrar). La ortografía la subraya el navegador.
+    · EL BORRADOR AUTOMÁTICO: lo que llevas sin guardar se apunta cada
+      cinco segundos (en la carpeta temporal del ordenador, no en el
+      proyecto). Si se cierra la ventana, al abrir otra vez esa entrada o
+      esa página sale «Hay cambios sin guardar… ¿Los recuperas?».
+    · LA VISTA PREVIA de la wiki: «Vista previa al lado» pinta el texto
+      con el mismo conversor que la web (a la derecha en pantalla ancha;
+      debajo en estrecha), con los enlaces rojos y lo que no entiende.
+    · MOVER O RENOMBRAR una página de la wiki: cambia su nombre o su
+      carpeta (un país, con su carpeta entera), los [[enlaces]] que la
+      nombran (páginas, mapas, línea de tiempo, calendario, diccionario),
+      apunta la dirección vieja en redirecciones.js y la pasa a la web.
+    · HACER NPC, en las notas: lo elegido pasa a ser un NPC de la campaña
+      (con su grupo, qué es y la sesión en la que salió).
+    · LA FICHA DE LA CAMPAÑA (en Rol): de qué va, el sistema, quién
+      dirige, los personajes de la mesa (con su color) y las misiones
+      del post-it (una nueva se escribe; hecha, se queda tachada).
+    · GUARDAR EN GITHUB (en Comandos): ver lo cambiado, escribir qué es
+      y «Guardar y subir» (commit y push a la rama en la que estés; si es
+      la principal, pregunta antes). «Traer lo último» hace git pull
+      --ff-only.
+    · CÓMO SE VE EL EDITOR: «Letra −» y «Letra +» (del 90 % al 200 %) y
+      «Contraste alto» (negro, blanco y amarillo), arriba; se recuerdan.
+
   Mientras trabaja algo largo (pasar a la web, generar), una barra de
   progreso dice qué va haciendo y cuánto le queda (aprende lo que
   tarda cada herramienta), y al final sale lo que han dicho las
@@ -1344,8 +1379,10 @@
   fantasía (A Wiki of Ice and Fire, Tolkien Gateway, la de Pathfinder,
   la de Forgotten Realms): Lugar, Personaje, Raza (y Subraza), Deidad,
   Religión, Organización, Monstruo, Objeto mágico, Acontecimiento, Era,
-  Astro, Festividad e Idioma. No hay de país ni de región: el mapamundi
-  ya está completo. CADA PAÍS TIENE SU CARPETA (desde el 18-10-2026):
+  Astro, Festividad e Idioma, y PAÍS (desde el 18-10-2026): pregunta en
+  qué región está y lo crea en su propia carpeta dentro de la de esa
+  región (# carpeta: junto a {{region}}/{{nombre}}), con la misma ficha
+  que los que ya hay. CADA PAÍS TIENE SU CARPETA (desde el 18-10-2026):
   wiki/Mapamundi/Azarasia/Reino de Prunia/Reino de Prunia.md (y su
   .cmap al lado), para ir metiendo dentro sus lugares, su gente o lo que
   sea. Las regiones (Azarasia, Partaria, los archipiélagos) ya la

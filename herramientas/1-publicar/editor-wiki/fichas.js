@@ -727,6 +727,67 @@ async function pintarComandosWeb() {
     });
 }
 
+// ---- GUARDAR EN GITHUB ----
+async function pintarGitWeb() {
+    const estado = $("[data-git-estado]");
+    const hecho = await pedirEditor("/api/web/git");
+    const caja = $("[data-git-cambios-caja]");
+    const lista = $("[data-git-cambios]");
+    lista.textContent = "";
+    if (hecho.error) {
+        estado.textContent = hecho.error;
+        caja.hidden = true;
+        return;
+    }
+    const principal = /^(main|master)$/.test(hecho.rama);
+    estado.textContent = "Estás en la rama «" + hecho.rama + "»" + (principal ? " (la principal)" : "") + ". "
+        + (hecho.cuantos ? (hecho.cuantos === 1 ? "1 archivo cambiado" : hecho.cuantos + " archivos cambiados")
+            : "Nada cambiado") + (hecho.por_subir ? "; " + hecho.por_subir + " guardado(s) sin subir" : "") + ".";
+    hecho.cambios.forEach((c) => lista.appendChild(crearEditor("li", "", c.que + ": " + c.archivo)));
+    caja.hidden = !hecho.cambios.length;
+    const mensaje = $("#git-mensaje");
+    if (!mensaje.value) {
+        mensaje.value = "Cambios del " + estadoFichas.hoy;
+    }
+    estadoFichas.rama = hecho.rama;
+}
+
+async function subirAGitWeb() {
+    const mensaje = $("#git-mensaje").value.trim();
+    if (!mensaje) {
+        avisarEditor("Escribe qué has cambiado, en una línea.", true);
+        $("#git-mensaje").focus();
+        return;
+    }
+    if (/^(main|master)$/.test(estadoFichas.rama || "")
+        && !window.confirm("Estás en la rama principal («" + estadoFichas.rama + "»): lo que subas sale en la web"
+            + " si Neocities lee de ahí. ¿Subirlo igualmente?")) {
+        return;
+    }
+    const boton = $("[data-git-subir]");
+    ocuparWeb([boton], true);
+    avisarEditor("Guardando y subiendo a GitHub…");
+    const hecho = await pedirEditor("/api/web/git/subir", { mensaje });
+    ocuparWeb([boton], false);
+    if (hecho.error) {
+        avisarEditor(hecho.error, true, hecho.salida);
+    } else {
+        avisarEditor("Subido a GitHub, a la rama «" + hecho.rama + "».", false, hecho.salida);
+        $("#git-mensaje").value = "";
+    }
+    pintarGitWeb();
+}
+
+async function traerDeGitWeb() {
+    const boton = $("[data-git-traer]");
+    ocuparWeb([boton], true);
+    avisarEditor("Trayendo lo último de GitHub…");
+    const hecho = await pedirEditor("/api/web/git/traer", {});
+    ocuparWeb([boton], false);
+    avisarEditor(hecho.error || "Al día con GitHub.", !!hecho.error, hecho.salida);
+    pintarGitWeb();
+}
+
 async function abrirComandoWeb(cual) {
     const hecho = await pedirEditor("/api/web/comando", { cual });
     if (hecho.error) {
@@ -737,7 +798,13 @@ async function abrirComandoWeb(cual) {
 }
 
 function empezarFichasWeb() {
-    document.querySelectorAll('[data-ir="comandos"]').forEach((b) => b.addEventListener("click", pintarComandosWeb));
+    document.querySelectorAll('[data-ir="comandos"]').forEach((b) => {
+        b.addEventListener("click", pintarComandosWeb);
+        b.addEventListener("click", pintarGitWeb);
+    });
+    $("[data-git-subir]").addEventListener("click", subirAGitWeb);
+    $("[data-git-traer]").addEventListener("click", traerDeGitWeb);
+    $("[data-git-mirar]").addEventListener("click", pintarGitWeb);
     $("[data-comando-menu]").addEventListener("click", () => abrirComandoWeb(""));
     cargarColeccionesWeb();
     $("[data-fichas-guardar]").addEventListener("click", guardarFichasWeb);

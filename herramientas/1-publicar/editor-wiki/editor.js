@@ -12,6 +12,56 @@ const estadoEditor = { datos: null, pagina: null, cambiado: false, guardando: fa
 
 const $ = (sel, dentro) => (dentro || document).querySelector(sel);
 
+// CÓMO SE VE EL EDITOR: la letra, en pasos (el 1 es lo normal), y el
+// contraste alto (negro, blanco y amarillo). Se guarda en este navegador
+// y se pone nada más cargar, antes que lo demás.
+const PASOS_DE_LETRA_EDITOR = [0.9, 1, 1.12, 1.25, 1.4, 1.6, 1.8, 2];
+const AJUSTES_DE_VISTA_EDITOR = "editor-web-vista";
+
+function leerVistaEditor() {
+    try {
+        return Object.assign({ letra: 1, contraste: false },
+            JSON.parse(localStorage.getItem(AJUSTES_DE_VISTA_EDITOR) || "{}"));
+    } catch (e) {
+        return { letra: 1, contraste: false };
+    }
+}
+
+function ponerVistaEditor(vista) {
+    const paso = Math.max(0, Math.min(PASOS_DE_LETRA_EDITOR.length - 1, Number(vista.letra) || 0));
+    document.documentElement.style.fontSize = (112.5 * PASOS_DE_LETRA_EDITOR[paso]) + "%";
+    if (vista.contraste) {
+        document.documentElement.setAttribute("data-contraste", "alto");
+    } else {
+        document.documentElement.removeAttribute("data-contraste");
+    }
+    try {
+        localStorage.setItem(AJUSTES_DE_VISTA_EDITOR, JSON.stringify({ letra: paso, contraste: !!vista.contraste }));
+    } catch (e) {
+        // Sin almacenamiento: vale para esta vez.
+    }
+    return paso;
+}
+
+ponerVistaEditor(leerVistaEditor());
+
+function ajustesDeVistaEditor() {
+    const contraste = $("[data-boton-contraste]");
+    contraste.setAttribute("aria-pressed", leerVistaEditor().contraste ? "true" : "false");
+    document.querySelectorAll("[data-letra]").forEach((b) => b.addEventListener("click", () => {
+        const vista = leerVistaEditor();
+        vista.letra = Number(vista.letra) + Number(b.getAttribute("data-letra"));
+        const paso = ponerVistaEditor(vista);
+        avisarEditor("Letra al " + Math.round(PASOS_DE_LETRA_EDITOR[paso] * 100) + " %.");
+    }));
+    contraste.addEventListener("click", () => {
+        const vista = leerVistaEditor();
+        vista.contraste = !vista.contraste;
+        ponerVistaEditor(vista);
+        contraste.setAttribute("aria-pressed", vista.contraste ? "true" : "false");
+    });
+}
+
 function crearEditor(etiqueta, clase, texto) {
     const el = document.createElement(etiqueta);
     if (clase) {
@@ -174,6 +224,7 @@ async function pasarALaWebEditor(cuerpo) {
 
 // ---- AL EMPEZAR ----
 async function empezarEditor() {
+    ajustesDeVistaEditor();
     const datos = await pedirEditor("/api/inicio");
     if (datos.error) {
         avisarEditor(datos.error, true);
@@ -187,6 +238,15 @@ async function empezarEditor() {
         b.addEventListener("click", () => irAEditor(b.getAttribute("data-ir")));
     });
     document.querySelectorAll('[data-ir="wiki"]').forEach((b) => b.addEventListener("click", refrescarArbolWikiEditor));
+    $("[data-vista-previa-boton]").addEventListener("click", () => ponerVistaPreviaEditor($("[data-vista-previa]").hidden));
+    $("[data-editar]").addEventListener("input", pedirVistaPreviaEditor);
+    window.addEventListener("scroll", colocarVistaPreviaEditor, { passive: true });
+    window.addEventListener("resize", colocarVistaPreviaEditor);
+    // Al salir de la página, la vista previa no estrecha lo demás.
+    document.querySelectorAll("[data-ir]").forEach((b) => b.addEventListener("click", () => {
+        document.body.classList.remove("con-vista-previa");
+    }));
+    empezarMoverEditor();
     $("#wiki-arbol-buscar").addEventListener("input", pintarArbolWikiEditor);
     pintarArbolWikiEditor();
     $("[data-abrir]").addEventListener("submit", (e) => {
@@ -477,6 +537,185 @@ function pintarFaltanEditor() {
     });
 }
 
+// ---- LA VISTA PREVIA ----
+// El texto de la página entera (la entradilla y cada apartado con su
+// título), pasado a HTML por el servidor con el conversor de la web. En
+// pantalla ancha va a la derecha, fija, y la página se estrecha; en
+// estrecha, debajo de los botones. Se acuerda de si la tenías puesta.
+const VISTA_PREVIA_EDITOR = { pedida: null, ultima: "" };
+
+function cuerpoDeLaPaginaEditor() {
+    const trozos = [];
+    estadoEditor.pagina.apartados.forEach((a, i) => {
+        const caja = document.querySelector('[data-apartado-caja="' + i + '"]');
+        if (!caja) {
+            return;
+        }
+        const texto = caja.querySelector("textarea").value;
+        trozos.push((a.nivel ? a.linea + "\n\n" : "") + texto);
+    });
+    return trozos.join("\n\n");
+}
+
+function vistaPreviaPuesta() {
+    try {
+        return localStorage.getItem("editor-wiki-vista-previa") === "si";
+    } catch (e) {
+        return false;
+    }
+}
+
+function ponerVistaPreviaEditor(si) {
+    try {
+        localStorage.setItem("editor-wiki-vista-previa", si ? "si" : "no");
+    } catch (e) {
+        // Sin almacenamiento: vale para esta vez.
+    }
+    $("[data-vista-previa-boton]").setAttribute("aria-pressed", si ? "true" : "false");
+    $("[data-vista-previa]").hidden = !si;
+    document.body.classList.toggle("con-vista-previa", si && !$('[data-vista="editar"]').hidden);
+    if (si) {
+        VISTA_PREVIA_EDITOR.ultima = "";
+        pintarVistaPreviaEditor();
+        colocarVistaPreviaEditor();
+    }
+}
+
+function pedirVistaPreviaEditor() {
+    if ($("[data-vista-previa]").hidden) {
+        return;
+    }
+    clearTimeout(VISTA_PREVIA_EDITOR.pedida);
+    VISTA_PREVIA_EDITOR.pedida = setTimeout(pintarVistaPreviaEditor, 700);
+}
+
+async function pintarVistaPreviaEditor() {
+    if (!estadoEditor.pagina || $("[data-vista-previa]").hidden) {
+        return;
+    }
+    const cuerpo = cuerpoDeLaPaginaEditor();
+    if (cuerpo === VISTA_PREVIA_EDITOR.ultima) {
+        return;
+    }
+    VISTA_PREVIA_EDITOR.ultima = cuerpo;
+    const hecho = await pedirEditor("/api/vista-previa", { cuerpo });
+    const caja = $("[data-vista-previa-cuerpo]");
+    const avisos = $("[data-vista-previa-avisos]");
+    avisos.textContent = "";
+    if (hecho.error) {
+        caja.textContent = hecho.error;
+        return;
+    }
+    // Lo pinta el servidor con el mismo conversor que la web, que lo escapa
+    // todo; aun así se lee en un documento aparte y se pasa por aquí lo
+    // que hay, sin nada que se ejecute.
+    const raiz = leerHtmlRedactor(hecho.html);
+    raiz.querySelectorAll("script, iframe, object, embed, style").forEach((x) => x.remove());
+    raiz.querySelectorAll("*").forEach((el) => {
+        [...el.attributes].forEach((a) => {
+            if (/^on/i.test(a.name)) {
+                el.removeAttribute(a.name);
+            }
+        });
+    });
+    raiz.querySelectorAll("a[href]").forEach((a) => {
+        a.target = "_blank";
+        a.rel = "noopener";
+    });
+    caja.replaceChildren(...raiz.childNodes);
+    (hecho.avisos || []).forEach((t) => avisos.appendChild(crearEditor("li", "", "Ojo: " + t)));
+}
+
+// Fija a la derecha: arriba, donde acabe la cabecera (que no se tape el
+// menú); abajo, donde empiece la barra de guardar.
+function colocarVistaPreviaEditor() {
+    const panel = $("[data-vista-previa]");
+    if (!panel || panel.hidden) {
+        return;
+    }
+    const cabecera = document.querySelector(".cabecera").getBoundingClientRect();
+    const barra = document.querySelector(".barra:not([hidden])");
+    panel.style.top = Math.max(0, cabecera.bottom) + "px";
+    panel.style.bottom = (barra ? barra.offsetHeight : 0) + "px";
+}
+
+// ---- MOVER O RENOMBRAR ----
+function empezarMoverEditor() {
+    const boton = $("[data-mover-boton]");
+    boton.addEventListener("click", () => {
+        if (!$("#mover-pagina").hidden) {
+            cerrarMoverEditor();
+            return;
+        }
+        const pagina = estadoEditor.pagina;
+        if (!pagina) {
+            return;
+        }
+        $("#mover-nombre").value = pagina.nombre;
+        const carpeta = pagina.archivo.replace(/^wiki\//, "").split("/").slice(0, -1).join("/");
+        $("#mover-carpeta").value = carpeta;
+        const lista = $("#lista-carpetas-wiki");
+        lista.textContent = "";
+        (((estadoEditor.datos || {}).arbol || {}).carpetas || []).forEach((c) => {
+            const o = document.createElement("option");
+            o.value = c;
+            lista.appendChild(o);
+        });
+        $("#mover-pagina").hidden = false;
+        boton.setAttribute("aria-expanded", "true");
+        $("#mover-nombre").focus();
+    });
+    $("[data-mover-cancelar]").addEventListener("click", () => {
+        cerrarMoverEditor();
+        $("[data-mover-boton]").focus();
+    });
+    $("[data-mover-hacer]").addEventListener("click", moverPaginaEditor);
+}
+
+function cerrarMoverEditor() {
+    $("#mover-pagina").hidden = true;
+    $("[data-mover-boton]").setAttribute("aria-expanded", "false");
+}
+
+async function moverPaginaEditor() {
+    const pagina = estadoEditor.pagina;
+    if (estadoEditor.cambiado) {
+        avisarEditor("Primero guarda lo que has cambiado (o ciérrala sin guardar): luego se mueve.", true);
+        return;
+    }
+    const nuevo = $("#mover-nombre").value.trim();
+    const carpeta = $("#mover-carpeta").value.trim();
+    if (!nuevo) {
+        avisarEditor("Hace falta un nombre.", true);
+        $("#mover-nombre").focus();
+        return;
+    }
+    const boton = $("[data-mover-hacer]");
+    ocuparWeb([boton], true);
+    avisarEditor("Moviendo…");
+    const hecho = await pedirEditor("/api/mover", { nombre: pagina.nombre, nuevo, carpeta });
+    ocuparWeb([boton], false);
+    if (hecho.error) {
+        avisarEditor(hecho.error, true);
+        return;
+    }
+    cerrarMoverEditor();
+    const datos = await pedirEditor("/api/inicio");
+    if (!datos.error) {
+        estadoEditor.datos = datos;
+        llenarListasEditor();
+    }
+    await abrirPaginaEditor(hecho.nombre);
+    avisarEditor("Movida a " + hecho.archivo + (hecho.tocadas ? "; cambiados los enlaces en " + hecho.tocadas
+        + (hecho.tocadas === 1 ? " archivo" : " archivos") : "") + ". Pasando la wiki a la web…");
+    const pasado = await pasarALaWebEditor({ nombre: hecho.nombre });
+    if (pasado.error) {
+        avisarEditor(pasado.error, true, pasado.salida);
+    } else {
+        avisarEditor("Movida y pasada a la web. La dirección vieja lleva a la nueva.", false, pasado.salida);
+    }
+}
+
 // ---- LAS PÁGINAS, POR CARPETAS ----
 // El árbol lo pinta pintarArbolWeb (escribir.js), el mismo de «Escribir».
 function pintarArbolWikiEditor() {
@@ -529,6 +768,66 @@ async function abrirPaginaEditor(nombre) {
     estadoEditor.cambiado = false;
     pintarPaginaEditor(pagina);
     irAEditor("editar");
+    ponerVistaPreviaEditor(vistaPreviaPuesta());
+    cerrarMoverEditor();
+    // El borrador automático (escribir.js): lo de sin guardar, cada poco.
+    vigilarBorradorWeb("wiki", "wiki:" + pagina.nombre, () => (estadoEditor.cambiado && estadoEditor.pagina
+        && estadoEditor.pagina.nombre === pagina.nombre && !$('[data-vista="editar"]').hidden
+        ? datosDeLaPaginaEditor() : null));
+    await ofrecerBorradorWeb("wiki", $("[data-borrador-wiki]"), datosDeLaPaginaEditor(), ponerBorradorEditor);
+}
+
+// Lo que hay escrito ahora en la página abierta (lo que se guarda).
+function datosDeLaPaginaEditor() {
+    const campos = {};
+    document.querySelectorAll("[data-campos] [data-clave]").forEach((el) => {
+        campos[el.getAttribute("data-clave")] = el.value;
+    });
+    // Uno por apartado de los que había; null, el que se ha quitado.
+    const apartados = estadoEditor.pagina.apartados.map(() => null);
+    document.querySelectorAll("[data-apartado]").forEach((el) => {
+        apartados[Number(el.getAttribute("data-apartado"))] = el.value;
+    });
+    return { campos, apartados, quitar: estadoEditor.quitar.slice() };
+}
+
+// Un borrador recuperado, encima de lo que se acaba de abrir.
+function ponerBorradorEditor(d) {
+    Object.entries(d.campos || {}).forEach(([clave, valor]) => {
+        const el = document.querySelector('[data-campos] [data-clave="' + CSS.escape(clave) + '"]');
+        if (el) {
+            el.value = valor;
+        } else if (valor) {
+            const caja = datoEditor({ clave, valor, nombre: clave[0].toUpperCase() + clave.slice(1), imagen: false },
+                "nuevo-" + clave.replace(/\W/g, ""));
+            $("[data-campos]").appendChild(caja);
+        }
+    });
+    (d.quitar || []).forEach((clave) => {
+        const el = document.querySelector('[data-campos] [data-clave="' + CSS.escape(clave) + '"]');
+        if (el) {
+            const caja = el.closest(".dato");
+            if (caja.notaDelDato) {
+                caja.notaDelDato.remove();
+            }
+            caja.remove();
+        }
+        if (!estadoEditor.quitar.includes(clave)) {
+            estadoEditor.quitar.push(clave);
+        }
+    });
+    (d.apartados || []).forEach((texto, i) => {
+        const caja = document.querySelector('[data-apartado-caja="' + i + '"]');
+        if (!caja) {
+            return;
+        }
+        if (texto === null) {
+            caja.remove();
+        } else {
+            caja.querySelector("textarea").value = texto;
+        }
+    });
+    estadoEditor.cambiado = true;
 }
 
 function pintarPaginaEditor(pagina) {
@@ -860,6 +1159,7 @@ function quitarApartadoEditor(i) {
         }
     });
     estadoEditor.cambiado = true;
+    pedirVistaPreviaEditor();
     avisarEditor("Quitado «" + aps[i].titulo + "». Se va del .md al guardar.");
     const foco = (despues && despues.isConnected ? despues : document.querySelector("[data-apartados] .apartado:last-child"));
     const area = foco && foco.querySelector("textarea");
@@ -897,15 +1197,7 @@ async function guardarEditor(yPasar) {
     botones.forEach((b) => {
         b.disabled = true;
     });
-    const campos = {};
-    document.querySelectorAll("[data-clave]").forEach((el) => {
-        campos[el.getAttribute("data-clave")] = el.value;
-    });
-    // Uno por apartado de los que había; null, el que se ha quitado.
-    const apartados = estadoEditor.pagina.apartados.map(() => null);
-    document.querySelectorAll("[data-apartado]").forEach((el) => {
-        apartados[Number(el.getAttribute("data-apartado"))] = el.value;
-    });
+    const { campos, apartados } = datosDeLaPaginaEditor();
     const quitado = estadoEditor.quitar.length > 0 || apartados.some((a) => a === null);
     avisarEditor("Guardando…");
     const hecho = await pedirEditor("/api/guardar", { nombre: estadoEditor.pagina.nombre, campos, apartados,
@@ -914,6 +1206,7 @@ async function guardarEditor(yPasar) {
         avisarEditor(hecho.error, true);
     } else {
         estadoEditor.cambiado = false;
+        borrarBorradorWeb("wiki");
         estadoEditor.pagina = hecho.pagina;
         if (quitado) {
             // Lo quitado cambia los números de los apartados: se pinta otra

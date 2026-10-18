@@ -66,6 +66,7 @@ const ICONOS_DEL_REDACTOR = {
     deshacer: '<path d="M9 14L4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H11"/>',
     rehacer: '<path d="M15 14l5-5-5-5"/><path d="M20 9H9.5a5.5 5.5 0 0 0 0 11H13"/>',
     html: '<rect x="2" y="4" width="20" height="16" rx="2"/><path d="M8.5 9l-3 3 3 3M15.5 9l3 3-3 3M13.2 8l-2.4 8"/>',
+    npcNuevo: '<circle cx="10" cy="8" r="4"/><path d="M2 21a8 8 0 0 1 14.5-4.6"/><path d="M19 14v7M15.5 17.5h7"/>',
     personaje: '<circle cx="12" cy="8" r="4" fill="currentColor"/><path d="M4 21a8 8 0 0 1 16 0z" fill="currentColor"/>',
     alguien: '<circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/>',
     lugar: '<path d="M12 21s-7-6.5-7-12a7 7 0 0 1 14 0c0 5.5-7 12-7 12z"/><circle cx="12" cy="9" r="2.5"/>',
@@ -170,7 +171,8 @@ function limpiarRedactor(raiz, clases) {
                     nombre = "em";
                 }
             }
-            if (!ETIQUETAS_DEL_REDACTOR[nombre] && !(nombre === "span" && clasesBuenas.test(hijo.className || ""))) {
+            if (!ETIQUETAS_DEL_REDACTOR[nombre] && !(nombre === "span" && hijo.className
+                && clasesBuenas.test(hijo.className))) {
                 limpiarUno(hijo);
                 if (nombre === "div" || nombre === "section" || nombre === "article") {
                     // Un bloque dentro de otro: lo de dentro, en párrafos.
@@ -194,9 +196,15 @@ function limpiarRedactor(raiz, clases) {
             }
             const buenos = ETIQUETAS_DEL_REDACTOR[nombre] || [];
             const clase = (hijo.getAttribute("class") || "").split(/\s+/).filter((c) => clasesBuenas.test(c)).join(" ");
+            // Los valores, antes de vaciar: si no cambia de etiqueta, «nuevo»
+            // es el mismo elemento y se quedaría sin ellos.
+            const antes = {};
+            buenos.forEach((a) => {
+                antes[a] = hijo.getAttribute(a);
+            });
             [...nuevo.attributes].forEach((a) => nuevo.removeAttribute(a.name));
             buenos.forEach((a) => {
-                const valor = hijo.getAttribute(a);
+                const valor = antes[a];
                 if (valor === null) {
                     return;
                 }
@@ -258,6 +266,8 @@ function htmlDelRedactor(raiz) {
 //   clases     las clases que se quedan (una expresión regular)
 //   extras     botones de más: [{texto, ayuda, hacer(redactor)}]
 //   imagenes   {sitio, campos} para subir imágenes; sin esto, no hay botón
+//   enlaces    (enlazables) => grupos para el buscador de [[ (ver
+//              buscadorDeEnlaceRedactor); sin esto, las páginas de la wiki
 // Devuelve {caja, ponerHTML, darHTML, foco, alCambiar}.
 function crearRedactor(opciones) {
     cuentaDeRedactores += 1;
@@ -330,11 +340,34 @@ function crearRedactor(opciones) {
     };
     yo.hacer = hacer;
     yo.meterHtml = meterHtml;
+    // Un elemento donde está el cursor, y el cursor detrás (fuera de él).
+    // Con el DOM y no con insertHTML, que se come el espacio de antes.
+    yo.meterNodo = (nodo) => {
+        volverASeleccion();
+        const sel = window.getSelection();
+        if (!sel.rangeCount || !area.contains(sel.anchorNode)) {
+            area.appendChild(nodo);
+        } else {
+            const rango = sel.getRangeAt(0);
+            rango.deleteContents();
+            rango.insertNode(nodo);
+        }
+        const tope = document.createTextNode("\u200B");
+        nodo.after(tope);
+        const nuevo = document.createRange();
+        nuevo.setStart(tope, 1);
+        nuevo.collapse(true);
+        sel.removeAllRanges();
+        sel.addRange(nuevo);
+        recordarSeleccion();
+        avisar();
+    };
     yo.recordar = recordarSeleccion;
     // Lo elegido, envuelto en una etiqueta (con su clase).
     // siNada: si no hay nada elegido, se mete ese texto ya envuelto
     // (el nombre de un personaje, por ejemplo).
-    yo.envolver = (etiqueta, clase, siNada) => {
+    // detras: después, el cursor detrás (y no lo envuelto elegido).
+    yo.envolver = (etiqueta, clase, siNada, detras) => {
         volverASeleccion();
         const sel = window.getSelection();
         if (!sel.rangeCount || (sel.isCollapsed && !siNada) || !area.contains(sel.anchorNode)) {
@@ -346,8 +379,9 @@ function crearRedactor(opciones) {
         if (clase) {
             el.className = clase;
         }
-        const vacia = sel.isCollapsed;
-        el.appendChild(vacia ? document.createTextNode(siNada) : rango.extractContents());
+        const vacia = sel.isCollapsed || !!detras;
+        const sinElegir = sel.isCollapsed;
+        el.appendChild(sinElegir ? document.createTextNode(siNada) : rango.extractContents());
         // Lo de dentro sin las mismas marcas (no <strong> dentro de <strong>).
         el.querySelectorAll(etiqueta).forEach((x) => x.replaceWith(...x.childNodes));
         rango.insertNode(el);
@@ -531,6 +565,15 @@ function crearRedactor(opciones) {
         });
         return si;
     };
+    // Un panel hecho por quien lo pide (los botones de más): rellenar(panel,
+    // cerrar). Lo elegido en el texto se guarda antes.
+    yo.panel = (rellenar) => {
+        recordarSeleccion();
+        panel.textContent = "";
+        panel.hidden = false;
+        rellenar(panel, (volver) => cerrarPanel(volver));
+    };
+    yo.elegido = () => (guardada ? guardada.toString() : "");
     const abrirPanel = (que) => {
         recordarSeleccion();
         panel.textContent = "";
@@ -666,6 +709,40 @@ function crearRedactor(opciones) {
             abrirPanel("enlace");
         }
     });
+    // [[ : el buscador de lo enlazable, debajo de los botones.
+    area.addEventListener("input", async (e) => {
+        if (o.enLinea || e.inputType !== "insertText" || e.data !== "[") {
+            return;
+        }
+        const sel = window.getSelection();
+        if (!sel.rangeCount) {
+            return;
+        }
+        const r = sel.getRangeAt(0);
+        const nodo = r.startContainer;
+        const donde = r.startOffset;
+        if (nodo.nodeType !== 3 || nodo.nodeValue.slice(Math.max(0, donde - 2), donde) !== "[[") {
+            return;
+        }
+        const quitar = document.createRange();
+        quitar.setStart(nodo, donde - 2);
+        quitar.setEnd(nodo, donde);
+        quitar.deleteContents();
+        recordarSeleccion();
+        const datos = await enlazablesWeb();
+        const grupos = (o.enlaces || gruposDeEnlaceRedactor)(datos);
+        buscadorDeEnlaceRedactor(panel, grupos, (c) => {
+            volverASeleccion();
+            c.poner(yo);
+            recordarSeleccion();
+            avisar();
+        }, (porSalir) => {
+            if (!porSalir) {
+                volverASeleccion();
+                document.execCommand("insertText", false, "[[");
+            }
+        });
+    });
     area.addEventListener("paste", (e) => {
         const datos = e.clipboardData;
         if (!datos) {
@@ -721,6 +798,14 @@ function crearRedactor(opciones) {
             yo.ponerHTML(fuente.value);
         }
         const copia = leerHtmlRedactor(area.innerHTML.replace(/\u200B/g, ""));
+        // Los espacios duros que mete el navegador al escribir dos seguidos
+        // o al final de una línea: espacios normales (menos en el código).
+        const paseo = document.createTreeWalker(copia, NodeFilter.SHOW_TEXT);
+        for (let t = paseo.nextNode(); t; t = paseo.nextNode()) {
+            if (!(t.parentNode.closest && t.parentNode.closest("pre"))) {
+                t.nodeValue = t.nodeValue.replace(/\u00a0/g, " ");
+            }
+        }
         if (o.enLinea) {
             const raiz = limpiarRedactor(copia, o.clases);
             const p = raiz.querySelector("p");
@@ -729,7 +814,91 @@ function crearRedactor(opciones) {
         return htmlDelRedactor(limpiarRedactor(copia, o.clases));
     };
     yo.foco = () => area.focus();
+    if (!o.enLinea) {
+        // Debajo: cuántas palabras, cuánto se tarda en leer y lo que
+        // conviene repasar.
+        const cuenta = contadorDeTextoRedactor(() => area.innerText || "", () => {
+            const avisos = [];
+            const texto = area.innerText || "";
+            const dobles = (texto.match(/\S[ \u00a0]{2,}(?=\S)/g) || []).length;
+            if (dobles) {
+                avisos.push({ texto: dobles === 1 ? "1 doble espacio" : dobles + " dobles espacios", arreglar: () => {
+                    const paseo = document.createTreeWalker(area, NodeFilter.SHOW_TEXT);
+                    for (let t = paseo.nextNode(); t; t = paseo.nextNode()) {
+                        if (!t.parentNode.closest("pre")) {
+                            t.nodeValue = t.nodeValue.replace(/(\S)[ \u00a0]{2,}(?=\S)/g, "$1 ");
+                        }
+                    }
+                    avisar();
+                }, comoArreglar: "Quitar los dobles espacios" });
+            }
+            const sueltas = (texto.match(/<\/?[a-zA-Z][^>]{0,30}>|(^|[^<\w])\/[a-z]{1,10}>/g) || []).length;
+            if (sueltas) {
+                avisos.push({ texto: sueltas === 1 ? "1 trozo de etiqueta HTML en el texto (como «/p>»)"
+                    : sueltas + " trozos de etiquetas HTML en el texto (como «/p>»)" });
+            }
+            const sinAlt = [...area.querySelectorAll("img")].filter((i) => !(i.getAttribute("alt") || "").trim()).length;
+            if (sinAlt) {
+                avisos.push({ texto: sinAlt === 1 ? "1 imagen sin descripción (si no es de adorno, ponle una)"
+                    : sinAlt + " imágenes sin descripción (si no son de adorno, pónselas)" });
+            }
+            const sinDireccion = [...area.querySelectorAll("a")].filter((a) => {
+                const h = (a.getAttribute("href") || "").trim();
+                return !h || h === "#" || h === "https://" || h === "http://";
+            }).length;
+            if (sinDireccion) {
+                avisos.push({ texto: sinDireccion === 1 ? "1 enlace sin dirección" : sinDireccion + " enlaces sin dirección" });
+            }
+            return avisos;
+        });
+        caja.appendChild(cuenta.caja);
+        area.addEventListener("input", cuenta.pedir);
+        yo.contar = cuenta.pedir;
+        setTimeout(cuenta.pedir, 0);
+    }
     return yo;
+}
+
+// EL CONTADOR Y LO QUE CONVIENE REPASAR, debajo de un texto. Se pone al
+// día un poco después de dejar de escribir (no a cada letra). Lo de
+// repasar es una lista; lo que se puede arreglar solo lleva su botón.
+// La ortografía la marca el propio navegador (subrayado en rojo; clic
+// derecho para ver cómo se escribe).
+//   leer      () => el texto
+//   revisar   () => [{texto, arreglar?, comoArreglar?}]
+function contadorDeTextoRedactor(leer, revisar) {
+    const caja = crearEditor("div", "redactor-cuenta");
+    const linea = crearEditor("p", "redactor-cuenta-linea");
+    const lista = crearEditor("ul", "redactor-cuenta-avisos");
+    caja.appendChild(linea);
+    caja.appendChild(lista);
+    let espera = null;
+    const pintar = () => {
+        const palabras = (leer().match(/[\p{L}\p{N}]+(?:['’-][\p{L}\p{N}]+)*/gu) || []).length;
+        const minutos = Math.max(1, Math.round(palabras / 200));
+        linea.textContent = palabras === 1 ? "1 palabra" : palabras + " palabras · " + minutos + " min de lectura";
+        lista.textContent = "";
+        revisar().forEach((a) => {
+            const li = crearEditor("li", "", "Ojo: " + a.texto + ".");
+            if (a.arreglar) {
+                const b = crearEditor("button", "", a.comoArreglar || "Arreglarlo");
+                b.type = "button";
+                b.addEventListener("click", () => {
+                    a.arreglar();
+                    pintar();
+                    avisarEditor("Arreglado.");
+                });
+                li.appendChild(document.createTextNode(" "));
+                li.appendChild(b);
+            }
+            lista.appendChild(li);
+        });
+    };
+    const pedir = () => {
+        clearTimeout(espera);
+        espera = setTimeout(pintar, 600);
+    };
+    return { caja, pedir, pintar };
 }
 
 // =========================================
@@ -880,9 +1049,57 @@ function crearBarraMarkdown(area, nombre, alCambiar) {
         document.execCommand("redo");
         avisar();
     });
+    // Debajo del recuadro, el contador y lo que conviene repasar.
+    const cuenta = contadorDeTextoRedactor(() => area.value, () => {
+        const avisos = [];
+        const v = area.value;
+        const dobles = (v.match(/\S {2,}(?=\S)/g) || []).length;
+        if (dobles) {
+            avisos.push({ texto: dobles === 1 ? "1 doble espacio" : dobles + " dobles espacios", arreglar: () => {
+                poner(0, area.value.length, area.value.replace(/(\S) {2,}(?=\S)/g, "$1 "), 0, 0);
+            }, comoArreglar: "Quitar los dobles espacios" });
+        }
+        const abren = (v.match(/\[\[/g) || []).length;
+        const cierran = (v.match(/\]\]/g) || []).length;
+        if (abren !== cierran) {
+            avisos.push({ texto: "un [[enlace]] sin cerrar (" + abren + " «[[» y " + cierran + " «]]»)" });
+        }
+        if ((v.match(/\*\*/g) || []).length % 2) {
+            avisos.push({ texto: "una **negrita** sin cerrar" });
+        }
+        return avisos;
+    });
+    area.addEventListener("input", cuenta.pedir);
     // Al bajar por un texto largo, la barra va contigo (cuando ya esté en
     // la página: se espera a que se ponga encima del recuadro).
-    requestAnimationFrame(() => seguirConLaBarra(barra, area, [area, barra]));
+    requestAnimationFrame(() => {
+        seguirConLaBarra(barra, area, [area, barra]);
+        if (area.parentNode) {
+            area.after(cuenta.caja);
+            cuenta.pintar();
+        }
+    });
+    // [[ : el buscador de páginas de la wiki, debajo de los botones; pone
+    // [[Nombre]].
+    const buscar = crearEditor("div", "redactor-panel");
+    buscar.hidden = true;
+    requestAnimationFrame(() => barra.after(buscar));
+    area.addEventListener("input", async (e) => {
+        if (e.inputType !== "insertText" || e.data !== "[") {
+            return;
+        }
+        const fin = area.selectionStart;
+        if (area.value.slice(Math.max(0, fin - 2), fin) !== "[[") {
+            return;
+        }
+        const datos = await enlazablesWeb();
+        buscadorDeEnlaceRedactor(buscar, [paginasParaEnlazarRedactor(datos)], (c) => {
+            poner(fin - 2, fin, "[[" + c.texto + "]]");
+        }, () => {
+            area.focus();
+            area.setSelectionRange(fin, fin);
+        });
+    });
     // Los atajos de siempre, también aquí.
     area.addEventListener("keydown", (e) => {
         if (!(e.ctrlKey || e.metaKey) || e.altKey || e.shiftKey) {
@@ -976,3 +1193,145 @@ function colocarBarrasRedactor() {
     // Lo que se escribe hace crecer el texto: también cuenta.
     document.addEventListener("input", pedir);
 })();
+
+// =========================================
+// [[ PARA ENLAZAR, MIENTRAS SE ESCRIBE
+// =========================================
+// Escribir [[ en un texto abre, debajo de sus botones, un buscador: las
+// páginas de la wiki (y, en las notas de una partida, los personajes de la
+// mesa y los NPC de la campaña). Se escribe un trozo del nombre, flechas
+// arriba y abajo para elegir, Enter para ponerlo y Escape para dejarlo como
+// estaba. Lo que se pone depende de dónde se escribe: un enlace en una
+// entrada, el nombre de su color o en negrita en las notas, [[Nombre]] en la
+// wiki. Lo enlazable lo da editor_web.enlazables (se pide una vez y se
+// guarda un minuto).
+const ENLAZABLES_WEB = { datos: null, cuando: 0 };
+
+async function enlazablesWeb() {
+    if (!ENLAZABLES_WEB.datos || Date.now() - ENLAZABLES_WEB.cuando > 60000) {
+        const datos = await pedirEditor("/api/web/enlazables");
+        if (!datos.error) {
+            ENLAZABLES_WEB.datos = datos;
+            ENLAZABLES_WEB.cuando = Date.now();
+        }
+    }
+    return ENLAZABLES_WEB.datos || { paginas: [], npcs: {} };
+}
+
+// dentro: dónde se pinta; grupos: [{nombre, cosas: [{texto, detalle}]}];
+// alElegir(cosa) y alCancelar().
+let cuentaDeBuscadoresDeEnlace = 0;
+function buscadorDeEnlaceRedactor(dentro, grupos, alElegir, alCancelar) {
+    cuentaDeBuscadoresDeEnlace += 1;
+    const id = "buscar-enlace-" + cuentaDeBuscadoresDeEnlace;
+    dentro.textContent = "";
+    dentro.hidden = false;
+    const l = crearEditor("label", "", "Enlazar a… (escribe un trozo del nombre; Enter para ponerlo, Escape para dejarlo)");
+    l.htmlFor = id;
+    const busca = document.createElement("input");
+    busca.id = id;
+    busca.autocomplete = "off";
+    busca.spellcheck = false;
+    busca.setAttribute("role", "combobox");
+    busca.setAttribute("aria-expanded", "true");
+    busca.setAttribute("aria-autocomplete", "list");
+    busca.setAttribute("aria-controls", id + "-lista");
+    const lista = crearEditor("ul", "buscar-enlace-lista");
+    lista.id = id + "-lista";
+    lista.setAttribute("role", "listbox");
+    lista.setAttribute("aria-label", "Lo que cuadra");
+    const cuantas = crearEditor("p", "ayuda");
+    cuantas.setAttribute("aria-live", "polite");
+    dentro.appendChild(l);
+    dentro.appendChild(busca);
+    dentro.appendChild(cuantas);
+    dentro.appendChild(lista);
+    const todas = [];
+    grupos.forEach((g) => g.cosas.forEach((c) => todas.push(Object.assign({ grupo: g.nombre }, c))));
+    let vistas = [];
+    let activa = 0;
+    const llano = (t) => (t || "").normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
+    const pintar = () => {
+        const q = llano(busca.value.trim());
+        vistas = todas.filter((c) => !q || llano(c.texto).includes(q))
+            .sort((a, b) => (llano(a.texto).startsWith(q) ? 0 : 1) - (llano(b.texto).startsWith(q) ? 0 : 1)).slice(0, 12);
+        activa = Math.min(activa, Math.max(0, vistas.length - 1));
+        lista.textContent = "";
+        vistas.forEach((c, i) => {
+            const li = crearEditor("li", "buscar-enlace-cosa");
+            li.id = id + "-" + i;
+            li.setAttribute("role", "option");
+            li.setAttribute("aria-selected", i === activa ? "true" : "false");
+            li.appendChild(crearEditor("span", "faltan-nombre", c.texto));
+            li.appendChild(crearEditor("span", "faltan-veces", " " + c.grupo + (c.detalle ? " · " + c.detalle : "")));
+            li.addEventListener("mousedown", (e) => e.preventDefault());
+            li.addEventListener("click", () => elegir(i));
+            lista.appendChild(li);
+        });
+        if (vistas.length) {
+            busca.setAttribute("aria-activedescendant", id + "-" + activa);
+        } else {
+            busca.removeAttribute("aria-activedescendant");
+        }
+        cuantas.textContent = vistas.length ? vistas.length + (vistas.length === 1 ? " cosa" : " cosas")
+            + ". La primera: " + vistas[activa].texto + "." : "Nada con eso. Escape para dejarlo.";
+    };
+    let hecho = false;
+    const cerrar = () => {
+        hecho = true;
+        dentro.textContent = "";
+        dentro.hidden = true;
+    };
+    const elegir = (i) => {
+        const c = vistas[i];
+        if (!c) {
+            return;
+        }
+        cerrar();
+        alElegir(c);
+    };
+    busca.addEventListener("input", () => {
+        activa = 0;
+        pintar();
+    });
+    busca.addEventListener("keydown", (e) => {
+        if (e.key === "ArrowDown" || e.key === "ArrowUp") {
+            e.preventDefault();
+            if (vistas.length) {
+                activa = (activa + (e.key === "ArrowDown" ? 1 : vistas.length - 1)) % vistas.length;
+                pintar();
+                cuantas.textContent = vistas[activa].texto + " (" + vistas[activa].grupo + ").";
+            }
+        } else if (e.key === "Enter") {
+            e.preventDefault();
+            elegir(activa);
+        } else if (e.key === "Escape") {
+            e.preventDefault();
+            cerrar();
+            alCancelar();
+        }
+    });
+    busca.addEventListener("blur", () => setTimeout(() => {
+        if (!hecho && !dentro.contains(document.activeElement)) {
+            cerrar();
+            alCancelar(true);
+        }
+    }, 150));
+    pintar();
+    busca.focus();
+}
+
+// Lo de siempre: las páginas de la wiki, como enlace.
+function gruposDeEnlaceRedactor(datos) {
+    return [paginasParaEnlazarRedactor(datos)];
+}
+
+function paginasParaEnlazarRedactor(datos) {
+    return { nombre: "Página de la wiki", cosas: (datos.paginas || []).map((p) => ({ texto: p.nombre, detalle: p.que,
+        poner: (r) => {
+            const a = document.createElement("a");
+            a.setAttribute("href", p.url);
+            a.textContent = p.nombre;
+            r.meterNodo(a);
+        } })) };
+}

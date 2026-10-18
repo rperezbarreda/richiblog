@@ -306,6 +306,93 @@ function sinTildesWeb(texto) {
     return (texto || "").normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
 }
 
+// ---- LOS BORRADORES AUTOMÁTICOS ----
+// Lo que llevas sin guardar se manda al servidor cada pocos segundos
+// (editor_web.apuntar_borrador lo deja en la carpeta temporal del
+// ordenador). Al abrir otra vez esa entrada o esa página, si hay uno
+// distinto de lo guardado, se ofrece recuperarlo. Al guardar, se borra.
+// Hay un hueco por cosa abierta: «entrada» y «wiki».
+const BORRADORES_WEB = {};
+
+// recoger: () => los datos sin guardar (o null si no hay nada que apuntar).
+function vigilarBorradorWeb(hueco, clave, recoger) {
+    BORRADORES_WEB[hueco] = { clave, recoger, ultimo: "" };
+}
+
+async function borrarBorradorWeb(hueco) {
+    const b = BORRADORES_WEB[hueco];
+    if (!b) {
+        return;
+    }
+    b.ultimo = "";
+    await pedirEditor("/api/web/borrador", { clave: b.clave, datos: null });
+}
+
+setInterval(() => {
+    Object.values(BORRADORES_WEB).forEach((b) => {
+        let datos = null;
+        try {
+            datos = b.recoger();
+        } catch (e) {
+            datos = null;
+        }
+        if (!datos) {
+            return;
+        }
+        const texto = JSON.stringify(datos);
+        if (texto === b.ultimo) {
+            return;
+        }
+        b.ultimo = texto;
+        pedirEditor("/api/web/borrador", { clave: b.clave, datos });
+    });
+}, 5000);
+
+// Si hay un borrador de esto y no es lo que ya está guardado, un aviso
+// con «Recuperarlo» (aplicar(datos)) y «Descartarlo».
+async function ofrecerBorradorWeb(hueco, caja, actual, aplicar) {
+    caja.textContent = "";
+    const b = BORRADORES_WEB[hueco];
+    if (!b) {
+        return;
+    }
+    const r = await pedirEditor("/api/web/borrador?clave=" + encodeURIComponent(b.clave));
+    if (!r.borrador || r.error) {
+        return;
+    }
+    if (JSON.stringify(r.borrador.datos) === JSON.stringify(actual)) {
+        borrarBorradorWeb(hueco);
+        return;
+    }
+    const aviso = crearEditor("div", "aviso-borrador");
+    aviso.setAttribute("role", "region");
+    aviso.setAttribute("aria-label", "Cambios sin guardar");
+    aviso.tabIndex = -1;
+    aviso.appendChild(crearEditor("p", "", "Hay cambios sin guardar de aquí, del " + r.borrador.cuando
+        + " (se cerró la ventana o el editor antes de guardar). ¿Los recuperas?"));
+    const fila = crearEditor("div", "fila");
+    const si = crearEditor("button", "principal", "Recuperarlos");
+    si.type = "button";
+    si.addEventListener("click", () => {
+        caja.textContent = "";
+        aplicar(r.borrador.datos);
+        b.ultimo = JSON.stringify(r.borrador.datos);
+        avisarEditor("Recuperados. Están sin guardar: guarda cuando quieras.");
+    });
+    const no = crearEditor("button", "", "Descartarlos");
+    no.type = "button";
+    no.addEventListener("click", () => {
+        caja.textContent = "";
+        borrarBorradorWeb(hueco);
+        avisarEditor("Descartados: se queda lo guardado.");
+    });
+    fila.appendChild(si);
+    fila.appendChild(no);
+    aviso.appendChild(fila);
+    caja.appendChild(aviso);
+    aviso.focus();
+}
+
 // Mientras trabaja, sus botones no se pueden pulsar. Un botón desactivado
 // pierde el foco (se iría al principio de la página), así que luego vuelve
 // adonde estaba.
@@ -477,6 +564,26 @@ async function abrirEntradaWeb(archivo) {
     estadoEscribir.cambiado = false;
     ponerEntradaWeb(entrada);
     irAEditor("entrada");
+    vigilarBorradorWeb("entrada", "entrada:" + entrada.archivo,
+        () => (estadoEscribir.cambiado && estadoEscribir.entrada && estadoEscribir.entrada.archivo === entrada.archivo
+            && !$('[data-vista="entrada"]').hidden ? datosDeLaEntradaWeb() : null));
+    await ofrecerBorradorWeb("entrada", $("[data-borrador-entrada]"), datosDeLaEntradaWeb(), (d) => {
+        const e = Object.assign({}, entrada);
+        ["titulo", "titulo_corto", "pdf", "descripcion", "etiquetas", "subcategoria", "cuerpo", "hojas"].forEach((k) => {
+            if (d[k] !== undefined) {
+                e[k] = d[k];
+            }
+        });
+        if (d.imagen !== undefined) {
+            e.imagen = d.imagen && d.imagen.src ? Object.assign({}, entrada.imagen || {}, d.imagen) : null;
+        }
+        ponerEntradaWeb(e);
+        // La imagen: lo del borrador, para que al guardar se cambie.
+        if (d.imagen !== undefined) {
+            estadoEscribir.imagen = d.imagen ? Object.assign({}, entrada.imagen || {}, d.imagen) : null;
+        }
+        estadoEscribir.cambiado = true;
+    });
 }
 
 function ponerEntradaWeb(e) {
@@ -751,7 +858,7 @@ function pintarCuadernoWeb(enfocar) {
             }
             const r = crearRedactor({ etiqueta: b.tipo === "escena" ? "Lo que pasó en " + (b.nombre || "la escena")
                 : "Texto suelto de la hoja " + (i + 1), clases: /^(pj-[a-z]+|cuaderno-objetos)$/,
-            extras: extrasDelCuadernoWeb(e) });
+            extras: extrasDelCuadernoWeb(e), enlaces: (datos) => enlacesDelCuadernoWeb(e, datos) });
             r.ponerHTML(b.html || "");
             r.alCambiar = () => {
                 estadoEscribir.cambiado = true;
@@ -806,6 +913,80 @@ function pintarCuadernoWeb(enfocar) {
 // Los botones de más del cuaderno: un personaje de la mesa (de su color),
 // alguien que no es de la mesa (negrita), un lugar (cursiva) y la lista de
 // lo conseguido.
+// Al escribir [[ en las notas: los de la mesa (de su color), los NPC de la
+// campaña (en negrita) y las páginas de la wiki (enlace).
+function enlacesDelCuadernoWeb(e, datos) {
+    const pjs = (e.personajes || []).filter((p) => p.nombre);
+    return [
+        { nombre: "Personaje de la mesa", cosas: pjs.map((p) => ({ texto: p.nombre,
+            poner: (r) => r.envolver("strong", p.color ? "pj-" + p.color : "", p.nombre) })) },
+        { nombre: "NPC de la campaña", cosas: ((datos.npcs || {})[e.campana] || []).map((p) => ({ texto: p.nombre,
+            detalle: p.que, poner: (r) => r.envolver("strong", "", p.nombre) })) },
+        paginasParaEnlazarRedactor(datos),
+    ];
+}
+
+// «Hacer NPC»: lo elegido en las notas pasa a ser un NPC de la campaña
+// (editor_web.crear_npc), sale en negrita y ya está en sus fichas.
+async function hacerNpcDesdeLasNotasWeb(r, e) {
+    const datos = await enlazablesWeb();
+    r.panel((panel, cerrar) => {
+        panel.appendChild(crearEditor("h3", "", "Un NPC nuevo, de la campaña"));
+        const campo = (id, texto, valor, lista) => {
+            const c = crearEditor("div", "campo");
+            const l = crearEditor("label", "", texto);
+            l.htmlFor = id;
+            const i = document.createElement("input");
+            i.id = id;
+            i.value = valor || "";
+            i.autocomplete = "off";
+            if (lista) {
+                i.setAttribute("list", lista);
+            }
+            c.appendChild(l);
+            c.appendChild(i);
+            panel.appendChild(c);
+            return i;
+        };
+        datalistWeb("lista-grupos-npc-web", (datos.grupos || {})[e.campana] || []);
+        const nombre = campo("npc-nuevo-nombre", "Nombre", r.elegido().trim());
+        const grupo = campo("npc-nuevo-grupo", "Grupo (la caravana, Sirevia…)", "", "lista-grupos-npc-web");
+        const que = campo("npc-nuevo-que", "Qué es (raza, oficio…)", "");
+        const fila = crearEditor("div", "fila");
+        const si = crearEditor("button", "principal", "Crear el NPC");
+        si.type = "button";
+        const no = crearEditor("button", "", "Cancelar");
+        no.type = "button";
+        fila.appendChild(si);
+        fila.appendChild(no);
+        panel.appendChild(fila);
+        no.addEventListener("click", () => cerrar(true));
+        si.addEventListener("click", async () => {
+            if (!nombre.value.trim()) {
+                avisarEditor("Hace falta su nombre.", true);
+                nombre.focus();
+                return;
+            }
+            ocuparWeb([si], true);
+            const hecho = await seguirTareaWeb(await pedirEditor("/api/web/npc/nuevo", { campana: e.campana,
+                nombre: nombre.value.trim(), grupo: grupo.value.trim(), que: que.value.trim(), sesion: e.numero }),
+            "NPC apuntado. Pasándolo a la web…");
+            ocuparWeb([si], false);
+            if (hecho.error) {
+                avisarEditor(hecho.error, true, hecho.salida);
+                return;
+            }
+            ENLAZABLES_WEB.cuando = 0;
+            const lo = nombre.value.trim();
+            cerrar(true);
+            r.envolver("strong", "", r.elegido().trim() === lo ? undefined : lo, true);
+            avisarEditor("«" + lo + "» ya es NPC de la campaña (en sus fichas, para ponerle foto y lo que sepáis).",
+                false, hecho.salida);
+        });
+        nombre.focus();
+    });
+}
+
 function extrasDelCuadernoWeb(e) {
     const pjs = (e.personajes || []).filter((p) => p.nombre);
     const extras = [];
@@ -828,6 +1009,9 @@ function extrasDelCuadernoWeb(e) {
     extras.push({ texto: "Alguien", icono: "alguien", ayuda: "Lo elegido, como alguien que no es de la mesa (en negrita)",
         hacer: (r) => r.envolver("strong"), separar: !pjs.length });
     extras.push({ texto: "Lugar", icono: "lugar", ayuda: "Lo elegido, como un lugar (en cursiva)", hacer: (r) => r.envolver("em") });
+    extras.push({ texto: "Hacer NPC", icono: "npcNuevo",
+        ayuda: "Lo elegido (un nombre), como NPC nuevo de la campaña: con su grupo y qué es",
+        hacer: (r) => hacerNpcDesdeLasNotasWeb(r, e) });
     extras.push({ texto: "Lista de objetos", icono: "objetos", ayuda: "Una lista de lo que se consiguió (con su formato)",
         hacer: (r) => {
             r.hacer("insertUnorderedList");
@@ -880,6 +1064,7 @@ async function guardarEntradaWeb(yPasar) {
         return false;
     }
     estadoEscribir.cambiado = false;
+    borrarBorradorWeb("entrada");
     if (hecho.entrada && !hecho.entrada.error) {
         actualizarCabeceraDeEntradaWeb(hecho.entrada);
     }

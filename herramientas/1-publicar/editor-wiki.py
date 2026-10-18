@@ -32,7 +32,12 @@
 # escribir|rol|wiki|rincon|repasar|comandos lo abre ya en ese apartado.
 #
 #   · COMANDOS: lo de menu.py, cada cosa con un botón que la abre en su
-#     propia ventana de comandos (menu.abrir_en_ventana).
+#     propia ventana de comandos (menu.abrir_en_ventana), y guardar en
+#     GitHub (editor_web.git_subir).
+#   · Y además (ver el LEEME, EL EDITOR DE LA WEB): [[ para enlazar, el
+#     contador, el borrador automático, la vista previa de la wiki
+#     (vista_previa), mover o renombrar páginas (mover_pagina), hacer NPC
+#     desde las notas, la ficha de la campaña, y la letra y el contraste.
 #
 # LA WIKI:
 # Lo mismo que nueva-pagina-wiki.py, pero con ventanas en vez de
@@ -696,6 +701,212 @@ def url_de_imagen(nombre):
     return ""
 
 
+# =========================================
+# MOVER O RENOMBRAR UNA PÁGINA
+# =========================================
+# La página (y lo que se llame como ella al lado: su .cmap) va a su nueva
+# carpeta o con su nuevo nombre. Si vive en su propia carpeta (un país:
+# Reino de Prunia/Reino de Prunia.md) y se renombra sin cambiarla de
+# sitio, la carpeta se renombra con ella y se lleva lo de dentro. Al
+# renombrar se cambian los [[enlaces]] que la nombran: en las páginas, en
+# los mapas (page, targetPage, y las regiones que la enlazaban por llamarse
+# igual), y en la línea de tiempo, el calendario y el diccionario. Las
+# direcciones viejas de la web se apuntan en redirecciones.js.
+
+REDIRECCIONES_JS = RAIZ / "scripts" / "paginas" / "redirecciones.js"
+DATOS_QUE_NOMBRAN = [RAIZ / "datos" / "wiki" / n for n in ("linea-de-tiempo.json", "calendario.json",
+                                                            "diccionario.json")]
+
+
+def _slug_web(texto):
+    plano = "".join(c for c in __import__("unicodedata").normalize("NFD", (texto or "").lower())
+                    if __import__("unicodedata").category(c) != "Mn")
+    return re.sub(r"^_+|_+$", "", re.sub(r"[^a-z0-9]+", "_", plano)) or "pagina"
+
+
+def _url_de(md):
+    """La dirección que le dará generar-mundo (mismo cálculo: cada trozo
+    de la carpeta y el nombre por slug)."""
+    trozos = [_slug_web(t) for t in md.parent.relative_to(VAULT).parts]
+    return "/web/wiki/" + "".join(t + "/" for t in trozos) + _slug_web(md.stem) + ".html"
+
+
+def _cambiar_enlaces(texto, viejo, nuevo):
+    """[[viejo]], [[viejo|lo que se lee]] y [[viejo#apartado]] → nuevo
+    (sin mirar mayúsculas ni tildes). Las imágenes ![[…]] no."""
+    llano = sin_tildes(viejo).lower()
+
+    def cambiar(m):
+        if m.group(1):
+            return m.group(0)
+        dentro = m.group(2)
+        nombre = re.split(r"[|#]", dentro, 1)[0]
+        if sin_tildes(nombre.strip()).lower() != llano:
+            return m.group(0)
+        return "[[" + nuevo + dentro[len(nombre):] + "]]"
+    return re.sub(r"(!?)\[\[([^\]\n]+)\]\]", lambda m: cambiar(m) if not m.group(1) else m.group(0), texto)
+
+
+def _cambiar_en_json(dato, viejo, nuevo, claves=("page", "targetPage", "pagina", "idioma", "enlace")):
+    llano = sin_tildes(viejo).lower()
+    if isinstance(dato, dict):
+        salida = {}
+        for k, v in dato.items():
+            if isinstance(v, str) and k in claves and sin_tildes(v.strip()).lower() == llano:
+                salida[k] = nuevo
+            else:
+                salida[k] = _cambiar_en_json(v, viejo, nuevo, claves)
+        # Una región que llevaba a la página por llamarse igual, sin
+        # targetPage: ahora lo lleva puesto.
+        if (isinstance(salida.get("label"), str) and sin_tildes(salida["label"].strip()).lower() == llano
+                and "points" in salida and not salida.get("targetPage")):
+            salida["targetPage"] = nuevo
+        return salida
+    if isinstance(dato, list):
+        return [_cambiar_en_json(v, viejo, nuevo, claves) for v in dato]
+    if isinstance(dato, str) and "[[" in dato:
+        return _cambiar_enlaces(dato, viejo, nuevo)
+    return dato
+
+
+def _apuntar_redirecciones(pares):
+    """Las mudanzas, al principio de la lista de redirecciones.js. Las que
+    ya llevaban a una dirección que ahora se muda, a la nueva."""
+    if not pares or not REDIRECCIONES_JS.is_file():
+        return
+    texto, crlf = leer_texto(REDIRECCIONES_JS)
+    for viejo, nuevo in pares:
+        texto = texto.replace('", "%s"]' % viejo, '", "%s"]' % nuevo)
+    lineas = "".join('        ["%s", "%s"],\n' % (v, n) for v, n in pares if v != n)
+    marca = "    const REDIRECCIONES = [\n"
+    if marca in texto:
+        texto = texto.replace(marca, marca + "        // Movida o renombrada desde el editor.\n" + lineas, 1)
+        escribir_texto(REDIRECCIONES_JS, texto, crlf)
+
+
+def mover_pagina(peticion):
+    archivo = npw.pagina_llamada(str(peticion.get("nombre") or ""))
+    if not archivo:
+        return {"error": "Esa página ya no está."}
+    viejo = archivo.stem
+    nuevo = str(peticion.get("nuevo") or "").strip() or viejo
+    carpeta = str(peticion.get("carpeta") or "").strip().replace("\\", "/").strip("/")
+    if any(t in ("", ".", "..") or t.startswith(("_", ".")) for t in carpeta.split("/") if carpeta) \
+            or re.search(r'[<>:"|?*]', carpeta):
+        return {"error": "Esa carpeta no vale: escríbela como en wiki/ (Mapamundi/Azarasia), sin «..» ni _ delante."}
+    if nuevo != viejo:
+        malo = nombre_valido(nuevo) if sin_tildes(nuevo).lower() != sin_tildes(viejo).lower() else ""
+        if malo:
+            return {"error": malo}
+    actual = archivo.parent.relative_to(VAULT).as_posix() if archivo.parent != VAULT else ""
+    if nuevo == viejo and carpeta == actual:
+        return {"error": "Es el mismo nombre y la misma carpeta: no hay nada que mover."}
+    # Lo que se muda: la página y lo suyo; o, si vive en su propia carpeta y
+    # solo cambia de nombre, la carpeta entera.
+    mudanzas = []   # (de, a) de archivos .md y .cmap, para las direcciones
+    propia = archivo.parent.name == viejo and archivo.parent != VAULT
+    if propia and carpeta == actual:
+        vieja_carpeta = archivo.parent
+        nueva_carpeta = vieja_carpeta.parent / nuevo
+        if nueva_carpeta.exists() and nueva_carpeta != vieja_carpeta:
+            return {"error": "Ya hay una carpeta que se llama «%s» ahí." % nuevo}
+        antes = sorted(vieja_carpeta.rglob("*"))
+        vieja_carpeta.rename(nueva_carpeta) if nueva_carpeta != vieja_carpeta else None
+        for f in antes:
+            if f.suffix.lower() in (".md", ".cmap"):
+                mudanzas.append((f, nueva_carpeta / f.relative_to(vieja_carpeta)))
+        # La página y su mapa, con el nombre nuevo.
+        for f in list(nueva_carpeta.glob(viejo + ".*")):
+            destino = nueva_carpeta / (nuevo + f.suffix)
+            if f != destino:
+                f.rename(destino)
+                mudanzas = [(a, destino if b == f else b) for a, b in mudanzas]
+    else:
+        destino_dir = VAULT / carpeta if carpeta else VAULT
+        if (destino_dir / (nuevo + ".md")).exists() and (destino_dir / (nuevo + ".md")) != archivo:
+            return {"error": "Ya hay una página «%s» en esa carpeta." % nuevo}
+        destino_dir.mkdir(parents=True, exist_ok=True)
+        for f in sorted(archivo.parent.glob(viejo + ".*")):
+            if f.suffix.lower() not in (".md", ".cmap"):
+                continue
+            destino = destino_dir / (nuevo + f.suffix)
+            f.rename(destino)
+            mudanzas.append((f, destino))
+    # Los enlaces, si cambia el nombre.
+    tocadas = 0
+    if nuevo != viejo:
+        for md in sorted(VAULT.rglob("*.md")):
+            if "_system" in md.parts:
+                continue
+            texto, crlf = leer_texto(md)
+            cambiado = _cambiar_enlaces(texto, viejo, nuevo)
+            if md.stem == nuevo:
+                # Su propio título, si era el nombre viejo.
+                cambiado = re.sub(r'^(title:\s*)(["\']?)%s\2\s*$' % re.escape(viejo),
+                                  lambda m: m.group(1) + '"' + nuevo + '"', cambiado, count=1, flags=re.M)
+            if cambiado != texto:
+                escribir_texto(md, cambiado, crlf)
+                tocadas += 1
+        for archivo_json in sorted(VAULT.rglob("*.cmap")) + DATOS_QUE_NOMBRAN:
+            if not archivo_json.is_file():
+                continue
+            texto, crlf = leer_texto(archivo_json)
+            try:
+                dato = json.loads(texto)
+            except ValueError:
+                continue
+            otro = _cambiar_en_json(dato, viejo, nuevo)
+            if otro != dato:
+                final = "\n" if texto.endswith("\n") else ""
+                escribir_texto(archivo_json, json.dumps(otro, ensure_ascii=False, indent=4 if archivo_json.suffix
+                                                         == ".json" else 2) + final, crlf)
+                tocadas += 1
+    # Las direcciones viejas de la web, a las nuevas.
+    pares = []
+    for de, a in mudanzas:
+        if de.suffix.lower() == ".md":
+            pares.append((_url_de(de), _url_de(a)))
+        else:
+            pares.append((_url_de(de).rsplit("/", 1)[0] + "/mapa_" + _slug_web(de.stem) + ".html",
+                          _url_de(a).rsplit("/", 1)[0] + "/mapa_" + _slug_web(a.stem) + ".html"))
+    _apuntar_redirecciones([p for p in pares if p[0] != p[1]])
+    nuevo_archivo = npw.pagina_llamada(nuevo)
+    return {"ok": True, "nombre": nuevo, "archivo": nuevo_archivo.relative_to(RAIZ).as_posix() if nuevo_archivo else "",
+            "tocadas": tocadas, "mudanzas": len(pares)}
+
+
+# =========================================
+# LA VISTA PREVIA (lo escrito, pasado a HTML como en la web)
+# =========================================
+# Con el mismo conversor que generar-mundo (mundo_formato.Conversor): los
+# [[enlaces]] van a la página si existe (en mundo.json) y, si no, salen
+# como en la web, en rojo. Las imágenes, desde wiki/_imagenes/. Devuelve
+# también lo que el conversor no ha entendido (sus avisos).
+
+def vista_previa(cuerpo):
+    sys.path.insert(0, str(HERRAMIENTAS / "3-generadores"))
+    from mundo_formato import Avisos, Conversor
+    direcciones = {}
+    for f in leer_json(MUNDO_JSON, []) or []:
+        if isinstance(f, dict) and f.get("titulo"):
+            direcciones[sin_tildes(str(f["titulo"])).lower()] = str(f.get("url") or "")
+    existen = {sin_tildes(a.stem).lower() for a in todas()}
+
+    def enlace_a(nombre):
+        clave = sin_tildes(str(nombre or "").strip()).lower()
+        if clave in direcciones:
+            return direcciones[clave], True
+        # Escrita pero aún sin pasar a la web: se marca como enlace igual.
+        return ("#", clave in existen)
+
+    avisos = Avisos()
+    try:
+        html_ = Conversor(enlace_a, url_de_imagen, avisos, None).a_html(str(cuerpo or ""))
+    except Exception as error:  # noqa: BLE001 (que la vista previa no tumbe el editor)
+        return {"error": "No he podido pintarla: %s" % error}
+    return {"html": html_, "avisos": ["%s%s" % (que, (": " + donde) if donde else "") for que, donde in avisos.lista]}
+
+
 def leer_mapa(archivo):
     datos = _leer_cmap(archivo)
     if datos is None:
@@ -1112,6 +1323,10 @@ class Editor(SimpleHTTPRequestHandler):
                     return self._json(contestado)
             if url.path == "/api/crear":
                 return self._json(crear(peticion))
+            if url.path == "/api/mover":
+                return self._json(mover_pagina(peticion))
+            if url.path == "/api/vista-previa":
+                return self._json(vista_previa(peticion.get("cuerpo")))
             if url.path == "/api/guardar":
                 archivo = npw.pagina_llamada(str(peticion.get("nombre") or ""))
                 if not archivo:
@@ -1156,6 +1371,14 @@ class Editor(SimpleHTTPRequestHandler):
 def puerto_libre(desde=8765):
     for puerto in range(desde, desde + 50):
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+            # Fuera de Windows, el puerto de un editor recién cerrado se
+            # puede volver a usar enseguida (si no, se queda unos segundos
+            # «ocupado» y abría en otro, y lo que recuerda el navegador
+            # —el tamaño de la letra, las carpetas abiertas— es de cada
+            # dirección, así que se perdía). En Windows esa opción
+            # deja pisar un puerto que otro tiene abierto: allí, no.
+            if not sys.platform.startswith("win"):
+                s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
             try:
                 s.bind(("127.0.0.1", puerto))
                 return puerto
