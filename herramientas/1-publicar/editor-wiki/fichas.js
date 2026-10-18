@@ -18,7 +18,7 @@
 // sitio y volver a generarlo.
 
 const estadoFichas = { colecciones: [], campanas: [], sitios: [], col: null, id: "", campana: "", elegidas: {},
-    cambiado: false, guardando: false, filtros: {} };
+    cambiado: false, guardando: false, filtros: {}, grupos: {} };
 
 async function cargarColeccionesWeb() {
     const datos = await pedirEditor("/api/web/colecciones");
@@ -74,6 +74,7 @@ function ponerFichasWeb(col, deCero) {
     if (deCero || antes !== col.id) {
         estadoFichas.elegidas = {};
         estadoFichas.filtros = {};
+        estadoFichas.grupos = {};
     }
     $("[data-fichas-titulo]").textContent = col.titulo;
     $("[data-fichas-ayuda]").textContent = col.ayuda + " (En " + col.archivo + ".)";
@@ -178,8 +179,51 @@ function pintarListaDeFichasWeb(sec, parte) {
         });
         filtro = sinTildesWeb(filtro);
     }
+    // Por grupos (los NPC: la caravana, Sirevia…): un desplegable para ver
+    // solo los de uno y, con «todos», la lista partida por grupos, como en
+    // la página (quien está en dos sale en los dos).
+    const porGrupos = parte.por_grupos;
+    const gruposDe = (f) => String(f[porGrupos] || "").split(",").map((g) => g.trim()).filter(Boolean);
+    let grupo = "";
+    let grupos = [];
+    if (porGrupos) {
+        grupos = ((col.opciones || {})[porGrupos] || []).map((x) => String(x[0]));
+        fichas.forEach((f) => gruposDe(f).forEach((g) => {
+            if (!grupos.includes(g)) {
+                grupos.push(g);
+            }
+        }));
+        grupo = estadoFichas.grupos[parte.id] || "";
+        if (grupo && !grupos.includes(grupo)) {
+            grupo = "";
+        }
+        const caja = crearEditor("div", "campo");
+        const l = crearEditor("label", "", "Qué grupo");
+        l.htmlFor = "grupo-" + parte.id;
+        const elegir = document.createElement("select");
+        elegir.id = "grupo-" + parte.id;
+        [["", "Todos, por grupos"]].concat(grupos.map((g) => {
+            const cuantos = fichas.filter((f) => gruposDe(f).includes(g)).length;
+            return [g, g + " (" + cuantos + ")"];
+        })).concat(fichas.some((f) => !gruposDe(f).length) ? [["-", "Sin grupo"]] : []).forEach(([v, t]) => {
+            const o = document.createElement("option");
+            o.value = v;
+            o.textContent = t;
+            elegir.appendChild(o);
+        });
+        elegir.value = estadoFichas.grupos[parte.id] === "-" ? "-" : grupo;
+        grupo = elegir.value;
+        caja.appendChild(l);
+        caja.appendChild(elegir);
+        sec.appendChild(caja);
+        elegir.addEventListener("change", () => {
+            estadoFichas.grupos[parte.id] = elegir.value;
+            pintarPartesWeb("grupo-" + parte.id);
+        });
+    }
+    const vistos = new Set();
     const ul = crearEditor("ul", "fichas-lista");
-    fichas.forEach((f, i) => {
+    const pintarUna = (f, i, lista) => {
         const { nombre, detalle } = nombreDeFichaWeb(parte, f);
         if (filtro && !sinTildesWeb(nombre + " " + detalle).includes(filtro)) {
             return;
@@ -187,7 +231,11 @@ function pintarListaDeFichasWeb(sec, parte) {
         const li = document.createElement("li");
         const b = crearEditor("button", "ficha-boton");
         b.type = "button";
-        b.id = "ficha-" + parte.id + "-" + i;
+        // La misma ficha en dos grupos: el id, solo la primera vez.
+        if (!vistos.has(i)) {
+            b.id = "ficha-" + parte.id + "-" + i;
+            vistos.add(i);
+        }
         b.setAttribute("aria-pressed", elegida === i ? "true" : "false");
         if (f._foto) {
             const img = document.createElement("img");
@@ -202,12 +250,35 @@ function pintarListaDeFichasWeb(sec, parte) {
         }
         b.addEventListener("click", () => {
             estadoFichas.elegidas[parte.id] = elegida === i ? undefined : i;
-            pintarPartesWeb(elegida === i ? b.id : "ficha-editor-" + parte.id);
+            pintarPartesWeb(elegida === i ? "ficha-" + parte.id + "-" + i : "ficha-editor-" + parte.id);
         });
         li.appendChild(b);
-        ul.appendChild(li);
-    });
-    sec.appendChild(ul);
+        lista.appendChild(li);
+    };
+    if (porGrupos && !grupo) {
+        // Todos, partidos por grupo: un título y su lista cada uno.
+        grupos.concat([""]).forEach((g) => {
+            const suyas = fichas.map((f, i) => [f, i]).filter(([f]) => (g ? gruposDe(f).includes(g) : !gruposDe(f).length));
+            if (!suyas.length) {
+                return;
+            }
+            const h = crearEditor("h3", "fichas-grupo", (g || "Sin grupo") + " (" + suyas.length + ")");
+            const lista = crearEditor("ul", "fichas-lista");
+            suyas.forEach(([f, i]) => pintarUna(f, i, lista));
+            if (lista.children.length) {
+                sec.appendChild(h);
+                sec.appendChild(lista);
+            }
+        });
+    } else {
+        fichas.forEach((f, i) => {
+            if (porGrupos && (grupo === "-" ? gruposDe(f).length : !gruposDe(f).includes(grupo))) {
+                return;
+            }
+            pintarUna(f, i, ul);
+        });
+        sec.appendChild(ul);
+    }
     if (!parte.fijas) {
         const anadir = crearEditor("button", "", "Añadir");
         anadir.type = "button";
@@ -239,6 +310,13 @@ function pintarListaDeFichasWeb(sec, parte) {
     }
     if (elegida !== undefined && fichas[elegida]) {
         pintarFichaWeb(sec, parte, fichas, elegida);
+        // Partida por grupos, la ficha se abre debajo de su grupo (el
+        // primero en el que sale), no al final de todo.
+        const suyo = porGrupos && !grupo ? sec.querySelector("#ficha-" + parte.id + "-" + elegida) : null;
+        const editor = sec.querySelector(".ficha-editor");
+        if (suyo && editor) {
+            suyo.closest("ul").after(editor);
+        }
     }
 }
 
@@ -454,6 +532,10 @@ function casillaDeFichaWeb(dentro, f, c, base, parte, alCambiar) {
         }
     }
     el.addEventListener("input", () => cambiar(el.value));
+    if (c.markdown) {
+        // Texto con formato (el Markdown de la wiki): los botones encima.
+        el.before(crearBarraMarkdown(el, nombre));
+    }
 }
 
 async function guardarFichasWeb() {
@@ -604,7 +686,59 @@ async function correrHerramientaWeb(ruta, texto) {
     avisarEditor("Hecho, todo bien.", false, hecho.salida);
 }
 
+// ---- LOS COMANDOS ----
+async function pintarComandosWeb() {
+    const caja = $("[data-comandos]");
+    if (caja.childElementCount) {
+        return;
+    }
+    const datos = await pedirEditor("/api/web/comandos");
+    if (datos.error) {
+        avisarEditor(datos.error, true);
+        return;
+    }
+    datos.apartados.forEach((a, n) => {
+        if (!a.opciones.length) {
+            return;
+        }
+        const sec = crearEditor("section", "bloque");
+        sec.setAttribute("aria-labelledby", "t-comandos-" + n);
+        const h = crearEditor("h2", "", (n + 1) + ". " + a.nombre);
+        h.id = "t-comandos-" + n;
+        sec.appendChild(h);
+        sec.appendChild(crearEditor("p", "ayuda", a.de_que));
+        const ul = crearEditor("ul", "faltan");
+        a.opciones.forEach((o) => {
+            const li = document.createElement("li");
+            const texto = crearEditor("span");
+            texto.appendChild(crearEditor("span", "faltan-veces", o.cual + " "));
+            texto.appendChild(crearEditor("span", "faltan-nombre", o.titulo));
+            texto.appendChild(crearEditor("span", "comando-pista", o.pista));
+            const b = crearEditor("button", "", "Abrir");
+            b.type = "button";
+            b.setAttribute("aria-label", "Abrir " + o.titulo);
+            b.addEventListener("click", () => abrirComandoWeb(o.cual));
+            li.appendChild(texto);
+            li.appendChild(b);
+            ul.appendChild(li);
+        });
+        sec.appendChild(ul);
+        caja.appendChild(sec);
+    });
+}
+
+async function abrirComandoWeb(cual) {
+    const hecho = await pedirEditor("/api/web/comando", { cual });
+    if (hecho.error) {
+        avisarEditor(hecho.error, true);
+        return;
+    }
+    avisarEditor("Abierto en su ventana de comandos: " + hecho.titulo + ". Contesta allí lo que pregunte.");
+}
+
 function empezarFichasWeb() {
+    document.querySelectorAll('[data-ir="comandos"]').forEach((b) => b.addEventListener("click", pintarComandosWeb));
+    $("[data-comando-menu]").addEventListener("click", () => abrirComandoWeb(""));
     cargarColeccionesWeb();
     $("[data-fichas-guardar]").addEventListener("click", guardarFichasWeb);
     $("#fichas-campana").addEventListener("change", (e) => {

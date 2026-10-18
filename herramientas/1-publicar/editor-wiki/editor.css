@@ -1366,9 +1366,73 @@ body.en-mapa main {
 }
 
 .redactor-boton {
+    position: relative;
     min-height: 40px;
     padding: 4px 10px;
     font-size: 0.9rem;
+}
+
+/* Los de icono: cuadrados, con el dibujo grande. */
+.redactor-boton.es-icono {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    min-height: 44px;
+    padding: 0;
+}
+
+.redactor-icono {
+    width: 26px;
+    height: 26px;
+    pointer-events: none;
+}
+
+/* El globo con lo que hace: al pasar el ratón o al llegar con el tabulador.
+   Grande y con el contraste de siempre (el title del navegador sale
+   pequeño y tarde). */
+.redactor-boton.es-icono:hover::after,
+.redactor-boton.es-icono:focus-visible::after {
+    content: attr(data-ayuda);
+    position: absolute;
+    z-index: 30;
+    top: calc(100% + 6px);
+    left: 50%;
+    transform: translateX(-50%);
+    width: max-content;
+    max-width: 260px;
+    padding: 6px 10px;
+    border: 2px solid var(--acento);
+    background: var(--fondo);
+    color: var(--texto);
+    font-size: 1rem;
+    font-weight: 400;
+    line-height: 1.35;
+    white-space: normal;
+    text-align: left;
+    pointer-events: none;
+}
+
+.redactor-boton.es-icono.globo-a-la-izquierda::after {
+    left: auto;
+    right: 0;
+    transform: none;
+}
+
+.redactor-boton.es-icono.globo-a-la-derecha::after {
+    left: 0;
+    transform: none;
+}
+
+/* Encima de un recuadro de Markdown (la wiki, el texto de un evento):
+   pegada a él, como la de las entradas a su texto. */
+.barra-markdown {
+    border: 2px solid var(--borde);
+    border-bottom: 0;
+}
+
+.barra-markdown + textarea {
+    margin-top: 0;
 }
 
 .redactor-elegir {
@@ -1560,6 +1624,76 @@ body.en-mapa main {
     margin: 0 0 12px;
     padding: 0;
     list-style: none;
+}
+
+/* LO QUE HAY, POR CARPETAS: cada carpeta se despliega (un <details>), y lo
+   de dentro va sangrado con una raya a la izquierda, como un explorador
+   de archivos. */
+.arbol,
+.arbol-dentro {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.faltan li.arbol-carpeta {
+    display: block;
+    padding: 0;
+    border-bottom: 0;
+}
+
+.arbol-dentro {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    margin: 4px 0 10px 14px;
+    padding-left: 14px;
+    border-left: 2px solid var(--borde);
+}
+
+.arbol-cabeza {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 4px 10px;
+    min-height: 44px;
+    padding: 4px 8px;
+    cursor: pointer;
+    font-weight: 700;
+}
+
+.arbol-cabeza:hover {
+    background: var(--caja);
+}
+
+.arbol-cabeza:focus-visible {
+    outline: 3px solid var(--acento);
+    outline-offset: 2px;
+}
+
+.arbol-cabeza .redactor-icono {
+    width: 24px;
+    height: 24px;
+    color: var(--acento);
+}
+
+.arbol-cabeza .faltan-veces {
+    font-weight: 400;
+}
+
+/* LOS COMANDOS: debajo del nombre, lo que hace. */
+.comando-pista {
+    display: block;
+    margin-top: 2px;
+    color: var(--suave);
+}
+
+/* El título de cada grupo, en la lista partida por grupos (los NPC). */
+.fichas-grupo {
+    margin: 18px 0 8px;
+    padding-bottom: 4px;
+    border-bottom: 2px solid var(--borde);
+    font-size: 1.05rem;
 }
 
 .ficha-boton {

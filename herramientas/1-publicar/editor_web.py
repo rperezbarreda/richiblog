@@ -365,10 +365,21 @@ def _sin_sangria(texto):
     return "\n".join(l[quitar:] for l in lineas).strip()
 
 
+def tapar_comentarios(texto):
+    """El texto con lo de dentro de cada <!-- --> en blanco (los saltos de
+    línea se quedan): mide lo mismo, así que lo que se encuentra en él está
+    en el mismo sitio del de verdad. Los borradores llevan en comentarios
+    EJEMPLOS de lo que va en la página (una figura, una hoja del
+    cuaderno…), y buscando en el texto tal cual se encontraba el ejemplo
+    en vez de lo de verdad."""
+    return re.sub(r"<!--.*?-->", lambda m: re.sub(r"[^\n]", " ", m.group(0)), texto, flags=re.S)
+
+
 def caja(texto, apertura):
     """Dónde empieza y acaba lo de DENTRO de la caja que abre «apertura»
     (una expresión regular de su etiqueta), contando las de dentro del
-    mismo tipo. (inicio, fin) o None."""
+    mismo tipo. (inicio, fin) o None. Lo de los comentarios no cuenta."""
+    texto = tapar_comentarios(texto)
     m = re.search(apertura, texto)
     if not m:
         return None
@@ -466,9 +477,10 @@ def _campana_de(texto):
 
 
 def _imagen_al_lado(texto, pre):
-    m = re.search(r'<figure class="%s-post-aside">(.*?)</figure>' % pre, texto, re.S)
+    m = re.search(r'<figure class="%s-post-aside">(.*?)</figure>' % pre, tapar_comentarios(texto), re.S)
     if not m:
         return None
+    m = re.match(r'<figure class="%s-post-aside">(.*?)</figure>' % pre, texto[m.start():m.end()], re.S)
     imagen = re.search(r"<img\b[^>]*>", m.group(1))
     pie = re.search(r"<figcaption>(.*?)</figcaption>", m.group(1), re.S)
     # Una que no es una imagen sin más (un vídeo que hace de gif, una
@@ -660,7 +672,8 @@ def _cambiar_imagen(texto, tipo, imagen):
     if antes == quiere or (antes and quiere and antes["src"] == quiere["src"] and antes["alt"] == quiere["alt"]
                            and " ".join(antes["pie"].split()) == quiere["pie"]):
         return texto
-    vieja = re.search(r'([ \t]*)<figure class="%s-post-aside">.*?</figure>' % pre, texto, re.S)
+    tapado = tapar_comentarios(texto)
+    vieja = re.search(r'([ \t]*)<figure class="%s-post-aside">.*?</figure>' % pre, tapado, re.S)
     if vieja:
         if not quiere:
             fin = vieja.end() + (1 if texto[vieja.end():vieja.end() + 1] == "\n" else 0)
@@ -669,7 +682,7 @@ def _cambiar_imagen(texto, tipo, imagen):
             + texto[vieja.end():]
     if not quiere:
         return texto
-    donde = texto.find('<div class="%s-post-otras"' % pre)
+    donde = tapado.find('<div class="%s-post-otras"' % pre)
     if donde == -1:
         lado = caja(texto, r'<div class="%s-post-side">' % pre)
         if not lado:
@@ -1141,7 +1154,7 @@ def colecciones():
          "ayuda": "La gente que os vais encontrando: la rejilla de tokens de la página de NPC.",
          "archivo": "datos/notas_rol/npcs-{campana}.json", "despues": "npcs",
          "partes": [{"id": "personajes", "camino": ["personajes"], "titulo": "La gente", "nombre_de": "nombre",
-                     "detalle": ["que", "relacion"], "campos": [
+                     "detalle": ["que", "relacion"], "por_grupos": "_grupos", "campos": [
                          C("nombre", "Nombre", obligatorio=True),
                          C("_grupos", "Grupos", "texto",
                            ayuda="De qué grupo es (la caravana, Sirevia…). Si es de varios, separados por comas:"
@@ -1265,8 +1278,9 @@ def colecciones():
                     ayuda="Si se dice de otra manera: «hace mucho»."),
                   C("resumen", "Resumen", "largo", maximo_letras=180,
                     ayuda="Para la tarjeta de la línea: mejor por debajo de 180 letras."),
-                  C("texto", "Su página", "largo", grande=True, vacio="quitar",
-                    ayuda="En el mismo formato que la wiki: **negrita**, listas, [[enlaces]]."),
+                  C("texto", "Su página", "largo", grande=True, vacio="quitar", markdown=True,
+                    ayuda="En el mismo formato que la wiki: **negrita**, listas, [[enlaces]]. Los botones de"
+                          " encima lo ponen. Con dos títulos o más sale el «Contenido» a un lado."),
                   C("imagen", "Imagen", "imagen", sitio="evento", vacio="quitar"),
               ]},
              {"id": "eras", "camino": ["eras"], "titulo": "Las eras", "nombre_de": "nombre", "detalle": ["desde"],
@@ -1365,6 +1379,18 @@ def opciones_de(col, clave_campana, datos):
         salida["subcategory"] = _opciones(nuevo.categorias_de_rol(texto, datos if isinstance(datos, list) else []))
     if col["id"] == "npcs":
         salida["primera"] = _sesiones_de(campana)
+        # Los grupos, en el orden de los apartados de la página de NPC (y
+        # detrás, los que no estén en ninguno): para el filtro de la lista.
+        orden = []
+        for apartado in (datos or {}).get("apartados") or []:
+            for cat in (apartado or {}).get("categorias") or []:
+                if cat not in orden:
+                    orden.append(cat)
+        for ficha in (datos or {}).get("personajes") or []:
+            for cat in [g.strip() for g in _grupos_npc(ficha).split(",") if g.strip()]:
+                if cat not in orden:
+                    orden.append(cat)
+        salida["_grupos"] = _opciones(orden)
     if col["id"] == "botin":
         salida["de"] = _sesiones_de(campana)
         salida["quien"] = _opciones([p.get("nombre", "") for p in (campana or {}).get("personajes") or []
@@ -1706,6 +1732,45 @@ def regenerar():
 # editor-wiki.py le pasa aquí todo lo de /api/web/… (con la contraseña ya
 # comprobada). Devuelve el diccionario que hay que contestar en JSON.
 
+# =========================================
+# LOS COMANDOS (el menú de siempre)
+# =========================================
+# El apartado «Comandos» del editor: lo de herramientas/menu.py, cada cosa
+# con un botón que la abre en su propia ventana de comandos (ver
+# menu.abrir_en_ventana). Lo que lleva al editor no sale: ya estás en él.
+
+def _menu():
+    if "menu" not in _CARGADAS:
+        spec = importlib.util.spec_from_file_location("editor_web_menu", HERRAMIENTAS / "menu.py")
+        modulo = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(modulo)
+        _CARGADAS["menu"] = modulo
+    return _CARGADAS["menu"]
+
+
+def comandos():
+    menu = _menu()
+    apartados = []
+    for n, (nombre, de_que, opciones) in enumerate(menu.APARTADOS, start=1):
+        lista = [{"cual": "%d.%d" % (n, i), "titulo": titulo, "pista": pista}
+                 for i, (titulo, script, _, pista) in enumerate(opciones, start=1) if script != menu.EDITOR]
+        apartados.append({"nombre": nombre, "de_que": de_que, "opciones": lista})
+    return {"apartados": apartados}
+
+
+def abrir_comando(peticion):
+    cual = str(peticion.get("cual") or "").strip()
+    menu = _menu()
+    if cual:
+        opcion = menu.opcion_de(cual)
+        if opcion is None or menu.es_el_editor(opcion):
+            return {"error": "No sé qué es eso."}
+    error = menu.abrir_en_ventana(cual or None)
+    if error:
+        return {"error": error}
+    return {"ok": True, "titulo": menu.opcion_de(cual)[0] if cual else "El menú de siempre"}
+
+
 def atender_get(ruta, pregunta):
     uno = lambda k: (pregunta.get(k) or [""])[0]  # noqa: E731
     if ruta == "/api/web/entradas":
@@ -1724,12 +1789,16 @@ def atender_get(ruta, pregunta):
         return leer_coleccion(uno("id"), uno("campana"))
     if ruta == "/api/web/medidas":
         return medidas(uno("ruta"))
+    if ruta == "/api/web/comandos":
+        return comandos()
     return None
 
 
 def atender_post(ruta, peticion):
     if ruta == "/api/web/entrada/nueva":
         return crear_entrada(peticion)
+    if ruta == "/api/web/comando":
+        return abrir_comando(peticion)
     if ruta == "/api/web/entrada/guardar":
         return guardar_entrada(peticion)
     if ruta == "/api/web/entrada/publicar":

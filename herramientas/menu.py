@@ -7,6 +7,13 @@
 #
 #     python herramientas/menu.py
 #
+# y SE ABRE EL EDITOR DE LA WEB, en el navegador (1-publicar/editor-wiki.py):
+# ahí está casi todo con ventanas, y en su apartado «Comandos», cada cosa
+# de este menú con un botón que la abre en su propia ventana de comandos.
+# El menú de siempre, aquí mismo, con:
+#
+#     python herramientas/menu.py --texto
+#
 # y sale una lista de APARTADOS, los mismos que el menú de la web: blog,
 # mis movidas, rol, la wiki, mi rincón… Eliges uno y dentro están sus
 # herramientas. Lo de rol con lo de rol, lo del blog con lo del blog.
@@ -46,9 +53,11 @@ PUBLICAR = ("Publicar un borrador",
 # El editor de la web (en el navegador) sale el último en cada apartado
 # (para no mover los números de siempre), abierto ya en el suyo: lo mismo
 # que lo de encima, pero con ventanas.
+EDITOR = "1-publicar/editor-wiki.py"
+
+
 def editor(en, que):
-    return ("Todo esto en el editor (en el navegador)",
-            "1-publicar/editor-wiki.py", ["--en", en], que)
+    return ("Todo esto en el editor (en el navegador)", EDITOR, ["--en", en], que)
 
 
 # (nombre del apartado, de qué va, [opciones])
@@ -97,7 +106,7 @@ APARTADOS = [
 
     ("Wiki Cralëa", "escribir sus páginas, la línea de tiempo y pasarla a la web", [
         ("Escribir en la wiki con el editor (en el navegador)",
-         "1-publicar/editor-wiki.py", ["--en", "wiki"],
+         EDITOR, ["--en", "wiki"],
          "Páginas, mapas, línea de tiempo, calendario y diccionario; y pasarla a la web."),
         ("Escribir una página nueva de la wiki (aquí, con preguntas)",
          "1-publicar/nueva-pagina-wiki.py", [],
@@ -189,7 +198,7 @@ def faltan():
     return [n for n in dict.fromkeys(nombres) if not (HERRAMIENTAS / n).is_file()]
 
 
-def hacer(opcion):
+def hacer(opcion, al_acabar="Hecho. Pulsa Enter para volver al menú. "):
     titulo, script, argumentos, _ = opcion
     print(f"\n  >> {titulo}")
     if script == REPASAR_TODO:
@@ -205,7 +214,7 @@ def hacer(opcion):
             pasar(uno)
     else:
         pasar(script, argumentos)
-    input("\n  Hecho. Pulsa Enter para volver al menú. ")
+    input("\n  " + al_acabar)
 
 
 def titulo_grande(texto):
@@ -256,7 +265,82 @@ def dentro_de(n):
         hacer(opciones[i])
 
 
+def opcion_de(texto):
+    """«3.2» -> la opción (o None si no hay tal)."""
+    a, _, o = str(texto).partition(".")
+    n = numero(a, len(APARTADOS))
+    i = numero(o, len(APARTADOS[n][2])) if n is not None else None
+    return APARTADOS[n][2][i] if i is not None else None
+
+
+def es_el_editor(opcion):
+    return opcion[1] == EDITOR
+
+
+# =========================================
+# ABRIR UNA OPCIÓN EN SU PROPIA VENTANA
+# =========================================
+# Lo que usa el apartado «Comandos» del editor: cada opción del menú en una
+# ventana de comandos nueva (las herramientas preguntan cosas, y eso se
+# contesta en una ventana, no en el navegador). Va como «menu.py --solo
+# 3.2»: hace esa opción y espera a que pulses Enter para cerrarse, para
+# que dé tiempo a leer lo que ha dicho. Sin opción, el menú entero.
+
+def abrir_en_ventana(cual=None):
+    """Abre una ventana de comandos con esa opción («3.2») o con el menú
+    de siempre (None). Devuelve None si va, o qué ha fallado."""
+    orden = [sys.executable, str(HERRAMIENTAS / "menu.py")] + (["--solo", cual] if cual else ["--texto"])
+    try:
+        if sys.platform.startswith("win"):
+            subprocess.Popen(orden, cwd=RAIZ, creationflags=subprocess.CREATE_NEW_CONSOLE)
+            return None
+        if sys.platform == "darwin":
+            linea = "cd " + _entre_comillas(str(RAIZ)) + " && " + " ".join(_entre_comillas(x) for x in orden)
+            subprocess.Popen(["osascript", "-e", 'tell application "Terminal" to do script "%s"'
+                              % linea.replace("\\", "\\\\").replace('"', '\\"'),
+                              "-e", 'tell application "Terminal" to activate'])
+            return None
+        import shutil
+        for terminal, antes in (("x-terminal-emulator", ["-e"]), ("gnome-terminal", ["--"]),
+                                ("konsole", ["-e"]), ("xfce4-terminal", ["-x"]), ("xterm", ["-e"])):
+            if shutil.which(terminal):
+                subprocess.Popen([terminal] + antes + orden, cwd=RAIZ)
+                return None
+    except OSError as error:
+        return "No he podido abrir la ventana de comandos (%s)." % error
+    return ("No sé abrir una ventana de comandos en este ordenador. Abre una tú y escribe: "
+            + " ".join(_entre_comillas(x) for x in ["python", "herramientas/menu.py"]
+                       + (["--solo", cual] if cual else ["--texto"])))
+
+
+def _entre_comillas(texto):
+    return "'" + texto.replace("'", "'\\''") + "'" if any(c in texto for c in " '\"$") else texto
+
+
+def solo(cual):
+    """--solo 3.2: esa opción y nada más (en su ventana)."""
+    opcion = opcion_de(cual)
+    if opcion is None:
+        print(f"\n  {cual!r} no es ninguna de las opciones.")
+        input("\n  Pulsa Enter para cerrar esta ventana. ")
+        return 1
+    hacer(opcion, "Hecho. Pulsa Enter para cerrar esta ventana. ")
+    return 0
+
+
 def main():
+    argumentos = sys.argv[1:]
+    if "--solo" in argumentos[:-1]:
+        return solo(argumentos[argumentos.index("--solo") + 1])
+    if "--texto" not in argumentos:
+        # Lo normal: el editor de la web, en el navegador.
+        print("\n  Abriendo el editor de la web en el navegador.")
+        print("  (El menú de aquí, con: python herramientas/menu.py --texto)")
+        return pasar(EDITOR)
+    return menu_de_texto()
+
+
+def menu_de_texto():
     perdidas = faltan()
     if perdidas:
         print("\n  OJO: el menú nombra herramientas que no encuentro:")

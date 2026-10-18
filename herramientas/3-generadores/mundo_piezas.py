@@ -971,3 +971,43 @@ def caja_de_parecidas(ficha, paginas, indice, fuera=()):
     return ('<div class="mundo-navbox mundo-parecidas" role="navigation" aria-labelledby="mundo-parecidas-titulo">'
             '<h2 class="mundo-navbox-titulo" id="mundo-parecidas-titulo">Páginas parecidas</h2>'
             '<ul>%s</ul></div>' % "".join(trozos))
+
+
+def pintar_contenido(cuerpo, con_backlinks):
+    """El índice de la página (el «Contenido» que flota en la columna; lo
+    usan las entradas de la wiki y las páginas de los eventos de la línea): cada encabezado del artículo (los h3,
+    dentro del h2 de encima) y «se habla de esto en».
+    Con menos de dos cosas no sale: un índice de una línea no ayuda."""
+    entradas = []
+    for m in re.finditer(r'<h([23]) id="([^"]+)">(.*?)</h\1>', cuerpo, re.S):
+        texto = html.unescape(re.sub(r"<[^>]+>", "", m.group(3))).strip()
+        if texto:
+            entradas.append((int(m.group(1)), m.group(2), texto))
+    if con_backlinks:
+        entradas.append((2, "mundo-backlinks-titulo", "Se habla de esto en"))
+    if len(entradas) < 2:
+        return ""
+    trozos, abierta = [], False
+    for nivel, ancla, texto in entradas:
+        enlace = '<a href="#%s">%s</a>' % (html.escape(ancla, quote=True), html.escape(texto))
+        if nivel == 3 and trozos:
+            if not abierta:
+                # Dentro del último h2: se reabre su <li>.
+                trozos[-1] = trozos[-1][:-len("</li>")] + "<ol>"
+                abierta = True
+            trozos.append("<li>%s</li>" % enlace)
+            continue
+        if abierta:
+            trozos.append("</ol></li>")
+            abierta = False
+        trozos.append("<li>%s</li>" % enlace)
+    if abierta:
+        trozos.append("</ol></li>")
+    # <div> con role, no <nav>: lo mismo que las migas (pintar_migas). Y
+    # dentro un <details>, para poder plegarlo (lo recuerda mundo.js).
+    return ('<div class="mundo-contenido" role="navigation" aria-labelledby="mundo-contenido-titulo">'
+            '<details class="mundo-contenido-plegable" open data-mundo-contenido>'
+            '<summary class="mundo-contenido-cabecera">'
+            '<span class="mundo-sub-flecha" aria-hidden="true">▾</span>'
+            '<h2 class="mundo-contenido-titulo" id="mundo-contenido-titulo">Contenido</h2></summary>'
+            '<ol>%s</ol></details></div>' % "".join(trozos))

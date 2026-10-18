@@ -6,6 +6,13 @@
 
       python herramientas/menu.py
 
+  Y SE ABRE EL EDITOR DE LA WEB, en el navegador (desde el 18-10-2026;
+  ver EL EDITOR DE LA WEB, aquí debajo). Ahí, en «Comandos», está todo
+  lo de este menú, cada cosa con un botón que la abre en su propia
+  ventana de comandos. El menú de siempre, aquí mismo, sin navegador:
+
+      python herramientas/menu.py --texto
+
   Sale una lista de APARTADOS, los mismos que el menú de la web:
 
       1. Blog            entradas y borradores
@@ -36,32 +43,39 @@
 
       python herramientas/1-publicar/editor-wiki.py
 
-  (o la última cosa de cada apartado del menú, que lo abre ya en el
-  suyo con --en escribir, --en rol, --en wiki, --en rincon o
-  --en repasar). Se abre solo en el navegador, en 127.0.0.1 (este
+  o, lo mismo, python herramientas/menu.py (o la última cosa de cada
+  apartado del menú de texto, que lo abre ya en el suyo con
+  --en escribir, --en rol, --en wiki, --en rincon, --en repasar o
+  --en comandos). Se abre solo en el navegador, en 127.0.0.1 (este
   ordenador y nadie más); para cerrarlo, Ctrl+C donde se abrió.
 
   Arriba, un menú con los apartados:
 
     · ESCRIBIR: las entradas del blog, los relatos, los días del reto
-      y las notas de las partidas, en una lista con filtros (qué, si
-      son borrador o no, y buscar por el título). «Abrir» una para
+      y las notas de las partidas, por CARPETAS como en el proyecto
+      (blog/2026/octubre…, cada una se despliega y se cierra, y se
+      acuerda de cómo la dejaste), con filtros (qué, si son borrador o
+      no, y buscar por el título: buscando, se abren solas). «Abrir» una para
       seguir con ella, o hacer una nueva (con lo mismo que pregunta
       nuevo.py: título, fecha, etiquetas, imagen…; nace como borrador).
-      El texto se escribe COMO EN UN WORD: negrita (Ctrl+B), cursiva
-      (Ctrl+I), enlaces (Ctrl+K), títulos, listas, citas, código,
-      imágenes (se suben de tu ordenador a su carpeta, en WebP),
-      tablas y rayas. «Ver el HTML» enseña lo que hay debajo y deja
-      tocarlo. Lo que se pega de otro sitio llega limpio (sin colores
+      El texto se escribe COMO EN UN WORD, con una barra de ICONOS:
+      negrita (Ctrl+B), cursiva (Ctrl+I), enlaces (Ctrl+K), títulos,
+      listas, citas, código, imágenes (se suben de tu ordenador a su
+      carpeta, en WebP), tablas y rayas. Al pasar por encima de un
+      icono (o llegar con el tabulador) sale un globo grande con lo que
+      hace; el lector de pantalla dice su nombre. El último (HTML)
+      enseña lo que hay debajo y deja tocarlo. Lo que se pega de otro sitio llega limpio (sin colores
       ni letras raras). Abajo, una barra fija: Guardar (Ctrl+S),
       Guardar y pasar a la web (rehace listados, RSS y buscador),
       Publicar / Volver a borrador (como publicar.py) y Ver cómo queda.
       Las NOTAS DE UNA PARTIDA van hoja a hoja y escena a escena
       (añadir, subir, bajar, quitar, desplegada o no), y con cuatro
-      botones de más: «Personaje de la mesa» (lo elegido, o su nombre
-      si no hay nada elegido, en su color), «Alguien» (negrita),
-      «Lugar» (cursiva) y «Lista de objetos». El nombre corto de la
-      sesión y el PDF del cuaderno van a la campaña.
+      botones de más: «Personaje de la mesa» (el muñequito relleno: lo
+      elegido, o su nombre si no hay nada elegido, en su color),
+      «Alguien» (el hueco: negrita), «Lugar» (la chincheta: cursiva) y
+      «Lista de objetos» (la bolsa). El nombre corto de la sesión y el
+      PDF del cuaderno van a la campaña. Las notas que ya hay también
+      salen en ROL, para abrirlas desde ahí.
     · ROL, WIKI CRALËA Y MI RINCÓN: las FICHAS de lo que va en un JSON
       — las campañas y los recursos de rol, los NPC, el botín, el
       calendario, la línea de tiempo, el diccionario, las
@@ -74,11 +88,22 @@
       lo que ando» con su fecha) y pasa lo que toque a la web (el
       buscador, los tokens de los NPC, la línea de tiempo, la wiki…).
       Lo que el editor no conoce de una ficha se queda como estaba.
+      Los NPC salen partidos por sus grupos (la caravana, Sirevia…),
+      con un desplegable para ver solo los de uno.
       En la wiki siguen estando sus páginas y sus mapas (ver
-      LOS MAPAS DEL MUNDO y la parte de la wiki).
+      LOS MAPAS DEL MUNDO y la parte de la wiki). Lo que se escribe en
+      Markdown (cada apartado de una página de la wiki, el texto de un
+      evento de la línea de tiempo) lleva encima LOS MISMOS ICONOS, que
+      ponen las marcas: **negrita**, ## Título, - lista, > cita…
+      (Ctrl+B y Ctrl+I también; Ctrl+Z lo deshace).
     · IMÁGENES Y REPASAR: traer una imagen suelta (como
       traer-imagen.py, eligiéndola en una ventana), repasar el sitio
       entero (las cinco comprobaciones) y volver a generar.
+    · COMANDOS: todo lo de menu.py, por apartados y con su número
+      («3.3»). Cada «Abrir» abre esa herramienta en su propia ventana
+      de comandos (menu.py --solo 3.3), que pregunta lo que necesite y
+      espera a que pulses Enter para cerrarse. Arriba, otro botón abre
+      el menú entero (menu.py --texto) en una ventana.
 
   Mientras trabaja algo largo (pasar a la web, generar), una barra de
   progreso dice qué va haciendo y cuánto le queda (aprende lo que
@@ -2355,7 +2380,10 @@
   recuerda plegado o no entre páginas (richi-contenido-plegado, en el
   navegador). En móvil va quieto y arriba del todo, antes de la ficha.
   Los eventos de la línea de tiempo llevan sus migas también (Wiki
-  Cralëa › Línea de tiempo › el evento).
+  Cralëa › Línea de tiempo › el evento) y, desde el 18-10-2026, su
+  Contenido, igual que las demás (sale cuando su texto tiene dos
+  apartados o más; lo pinta pintar_contenido, en mundo_piezas.py, que
+  usan generar-mundo.py y mundo_linea.py).
 
   LAS IMÁGENES SE AMPLÍAN. Cualquier imagen de una página de la wiki (el
   mapa de situación, las fotos de la ficha, las del artículo) se ve en

@@ -1237,45 +1237,6 @@ def pintar_migas(ficha, paginas, region_de):
             '<ol>%s</ol></div>' % "".join(trozos))
 
 
-def pintar_contenido(cuerpo, con_backlinks):
-    """El índice de la página: cada encabezado del artículo (los h3,
-    dentro del h2 de encima) y «se habla de esto en».
-    Con menos de dos cosas no sale: un índice de una línea no ayuda."""
-    entradas = []
-    for m in re.finditer(r'<h([23]) id="([^"]+)">(.*?)</h\1>', cuerpo, re.S):
-        texto = html.unescape(re.sub(r"<[^>]+>", "", m.group(3))).strip()
-        if texto:
-            entradas.append((int(m.group(1)), m.group(2), texto))
-    if con_backlinks:
-        entradas.append((2, "mundo-backlinks-titulo", "Se habla de esto en"))
-    if len(entradas) < 2:
-        return ""
-    trozos, abierta = [], False
-    for nivel, ancla, texto in entradas:
-        enlace = '<a href="#%s">%s</a>' % (html.escape(ancla, quote=True), html.escape(texto))
-        if nivel == 3 and trozos:
-            if not abierta:
-                # Dentro del último h2: se reabre su <li>.
-                trozos[-1] = trozos[-1][:-len("</li>")] + "<ol>"
-                abierta = True
-            trozos.append("<li>%s</li>" % enlace)
-            continue
-        if abierta:
-            trozos.append("</ol></li>")
-            abierta = False
-        trozos.append("<li>%s</li>" % enlace)
-    if abierta:
-        trozos.append("</ol></li>")
-    # <div> con role, no <nav>: lo mismo que las migas (pintar_migas). Y
-    # dentro un <details>, para poder plegarlo (lo recuerda mundo.js).
-    return ('<div class="mundo-contenido" role="navigation" aria-labelledby="mundo-contenido-titulo">'
-            '<details class="mundo-contenido-plegable" open data-mundo-contenido>'
-            '<summary class="mundo-contenido-cabecera">'
-            '<span class="mundo-sub-flecha" aria-hidden="true">▾</span>'
-            '<h2 class="mundo-contenido-titulo" id="mundo-contenido-titulo">Contenido</h2></summary>'
-            '<ol>%s</ol></details></div>' % "".join(trozos))
-
-
 def rejilla_de_paises(ficha, paginas, region_de):
     """LOS PAÍSES DE UNA REGIÓN, en la rejilla de banderas de la portada (la
     bandera grande y el nombre debajo; las mismas clases, así que se ven
@@ -1434,7 +1395,7 @@ def escribir_paginas(paginas, probar, categorias=(), eventos=()):
         # El contenido ANTES que la ficha: en escritorio da igual (flota abajo
         # a la derecha), y en móvil así sale arriba del todo, como en una
         # wiki de las de siempre.
-        lateral = pintar_contenido(cuerpo, bool(ficha["backlinks"])) + ficha["ficha_html"]
+        lateral = mundo_piezas.pintar_contenido(cuerpo, bool(ficha["backlinks"])) + ficha["ficha_html"]
         for marca, valor in (
             ("{{TITULO}}", html.escape(ficha["titulo"])),
             ("{{SUBTITULO}}", html.escape(ficha["subtitulo"])),

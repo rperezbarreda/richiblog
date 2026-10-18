@@ -27,8 +27,12 @@
 #
 #     python herramientas/1-publicar/editor-wiki.py [--en escribir]
 #
-# (--en escribir|rol|wiki|rincon|repasar lo abre ya en ese apartado; es
-# lo que usa el menú.)
+# o, igual, python herramientas/menu.py, que desde el 18-10-2026 abre esto
+# (el menú de texto de antes, con menu.py --texto). --en
+# escribir|rol|wiki|rincon|repasar|comandos lo abre ya en ese apartado.
+#
+#   · COMANDOS: lo de menu.py, cada cosa con un botón que la abre en su
+#     propia ventana de comandos (menu.abrir_en_ventana).
 #
 # LA WIKI:
 # Lo mismo que nueva-pagina-wiki.py, pero con ventanas en vez de

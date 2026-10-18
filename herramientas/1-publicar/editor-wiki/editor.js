@@ -546,6 +546,11 @@ function pintarPaginaEditor(pagina) {
         if (ayuda) {
             area.setAttribute("aria-describedby", id + "-nota");
         }
+        // Encima, los botones de formato (los mismos que en las entradas,
+        // pero poniendo el Markdown de la wiki).
+        caja.appendChild(crearBarraMarkdown(area, a.nivel ? a.titulo : "la entradilla", () => {
+            estadoEditor.cambiado = true;
+        }));
         caja.appendChild(area);
         caja.appendChild(enlazarEditor(area, id));
         apartados.appendChild(caja);

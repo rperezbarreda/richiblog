@@ -29,6 +29,95 @@ const CAMBIOS_DEL_REDACTOR = { b: "strong", i: "em", strike: "s", del: "s", h1: 
 const BLOQUES_DEL_REDACTOR = ["p", "h2", "h3", "h4", "ul", "ol", "pre", "blockquote", "figure", "table", "hr"];
 let cuentaDeRedactores = 0;
 
+// LOS ICONOS DE LOS BOTONES, como los de un procesador de textos. Cada uno,
+// lo de dentro de un <svg viewBox="0 0 24 24">: rayas del color del texto
+// (stroke) y, las letras, un <text>. El nombre del botón lo lleva su
+// aria-label, y lo que hace sale en un globo al pasar por encima o al
+// llegar con el tabulador (data-ayuda; ver .redactor-boton en editor.css).
+const LETRA_DEL_REDACTOR = (letra, mas) => '<text x="12" y="19" text-anchor="middle" font-size="21" '
+    + 'font-family="Georgia, serif" fill="currentColor" stroke="none" ' + (mas || "") + ">" + letra + "</text>";
+const ICONOS_DEL_REDACTOR = {
+    negrita: LETRA_DEL_REDACTOR("B", 'font-weight="700"'),
+    cursiva: LETRA_DEL_REDACTOR("I", 'font-style="italic" font-weight="700"'),
+    tachado: LETRA_DEL_REDACTOR("S", 'font-weight="700"') + '<path d="M3 12.5h18"/>',
+    codigo: '<path d="M8 7l-5 5 5 5M16 7l5 5-5 5"/>',
+    parrafo: LETRA_DEL_REDACTOR("¶", 'font-weight="700"'),
+    titulo: LETRA_DEL_REDACTOR("T", 'font-weight="700" font-size="21"'),
+    subtitulo: LETRA_DEL_REDACTOR("T", 'font-weight="700" font-size="14"') + '<path d="M6 21h12" opacity="0.6"/>',
+    lista: '<path d="M9 6h12M9 12h12M9 18h12"/><circle cx="4" cy="6" r="1.4" fill="currentColor"/>'
+        + '<circle cx="4" cy="12" r="1.4" fill="currentColor"/><circle cx="4" cy="18" r="1.4" fill="currentColor"/>',
+    numerada: '<path d="M10 6h11M10 12h11M10 18h11"/><g stroke-width="1.5"><path d="M2.8 4.6l1.5-.8v4.4"/>'
+        + '<path d="M2.6 11a1.3 1.3 0 0 1 2.5.5c0 .8-2.5 2.4-2.5 2.4h2.6"/>'
+        + '<path d="M2.6 16.2h2.4l-1.3 1.5a1.3 1.3 0 1 1-1.2 1.9"/></g>',
+    cita: '<text x="12" y="25" text-anchor="middle" font-size="32" font-weight="700" font-family="Georgia, serif" '
+        + 'fill="currentColor" stroke="none">\u201C</text>',
+    bloque: '<rect x="3" y="4" width="18" height="16" rx="2"/><path d="M10 9l-3 3 3 3M14 9l3 3-3 3"/>',
+    enlace: '<path d="M10 13a5 5 0 0 0 7.07 0l3-3a5 5 0 0 0-7.07-7.07l-1.5 1.5"/>'
+        + '<path d="M14 11a5 5 0 0 0-7.07 0l-3 3a5 5 0 0 0 7.07 7.07l1.5-1.5"/>',
+    sinEnlace: '<path d="M10 13a5 5 0 0 0 7.07 0l3-3a5 5 0 0 0-7.07-7.07l-1.5 1.5"/>'
+        + '<path d="M14 11a5 5 0 0 0-7.07 0l-3 3a5 5 0 0 0 7.07 7.07l1.5-1.5"/><path d="M3 3l18 18"/>',
+    imagen: '<rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="8.5" cy="9.5" r="1.6"/>'
+        + '<path d="M21 16l-6-6L5 20"/>',
+    tabla: '<rect x="3" y="4" width="18" height="16" rx="1"/><path d="M3 10h18M3 15h18M9 4v16M15 4v16"/>',
+    raya: '<path d="M3 12h18" stroke-width="2.6"/><path d="M6 6h12M6 18h12" opacity="0.45"/>',
+    deshacer: '<path d="M9 14L4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H11"/>',
+    rehacer: '<path d="M15 14l5-5-5-5"/><path d="M20 9H9.5a5.5 5.5 0 0 0 0 11H13"/>',
+    html: '<rect x="2" y="4" width="20" height="16" rx="2"/><path d="M8.5 9l-3 3 3 3M15.5 9l3 3-3 3M13.2 8l-2.4 8"/>',
+    personaje: '<circle cx="12" cy="8" r="4" fill="currentColor"/><path d="M4 21a8 8 0 0 1 16 0z" fill="currentColor"/>',
+    alguien: '<circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/>',
+    lugar: '<path d="M12 21s-7-6.5-7-12a7 7 0 0 1 14 0c0 5.5-7 12-7 12z"/><circle cx="12" cy="9" r="2.5"/>',
+    objetos: '<path d="M5 8h14l-1.2 12H6.2z"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/>',
+    carpeta: '<path d="M3 6.5A1.5 1.5 0 0 1 4.5 5H9l2 2.5h8.5A1.5 1.5 0 0 1 21 9v9.5a1.5 1.5 0 0 1-1.5 1.5h-15A1.5 1.5 0 0 1 3 18.5z"/>',
+    wikiEnlace: '<path d="M7 4H4v16h3M17 4h3v16h-3"/><path d="M10 12h4"/>',
+};
+
+// Un icono, para meterlo en un botón (lo lee el aria-label, no él).
+function iconoRedactor(nombre) {
+    const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+    svg.setAttribute("viewBox", "0 0 24 24");
+    svg.setAttribute("aria-hidden", "true");
+    svg.setAttribute("focusable", "false");
+    svg.setAttribute("class", "redactor-icono");
+    svg.setAttribute("fill", "none");
+    svg.setAttribute("stroke", "currentColor");
+    svg.setAttribute("stroke-width", "2");
+    svg.setAttribute("stroke-linecap", "round");
+    svg.setAttribute("stroke-linejoin", "round");
+    svg.innerHTML = ICONOS_DEL_REDACTOR[nombre] || "";
+    return svg;
+}
+
+// Un botón de icono: se lee «texto» (y el atajo, si lo hay en la ayuda);
+// en pantalla, el icono y, encima, el globo con la ayuda entera.
+function botonDeIconoRedactor(texto, ayuda, icono) {
+    const b = crearEditor("button", "redactor-boton");
+    b.type = "button";
+    const atajo = (ayuda || "").match(/\((Ctrl\+[^)]+)\)/);
+    b.setAttribute("aria-label", texto + (atajo ? " (" + atajo[1] + ")" : ""));
+    if (atajo) {
+        b.setAttribute("aria-keyshortcuts", atajo[1].replace("Ctrl", "Control"));
+    }
+    b.dataset.ayuda = ayuda || texto;
+    // El globo, que no se salga de la pantalla: cerca de un borde, pegado
+    // a ese lado del botón en vez de centrado.
+    const colocarGlobo = () => {
+        const r = b.getBoundingClientRect();
+        b.classList.toggle("globo-a-la-izquierda", r.left + r.width / 2 > window.innerWidth - 150);
+        b.classList.toggle("globo-a-la-derecha", r.left + r.width / 2 < 150);
+    };
+    b.addEventListener("mouseenter", colocarGlobo);
+    b.addEventListener("focus", colocarGlobo);
+    if (icono && ICONOS_DEL_REDACTOR[icono]) {
+        b.classList.add("es-icono");
+        b.appendChild(iconoRedactor(icono));
+    } else {
+        // Sin icono, su nombre escrito (y entonces el nombre es lo que se ve).
+        b.removeAttribute("aria-label");
+        b.textContent = texto;
+    }
+    return b;
+}
+
 // Una dirección que vale en un enlace o en una imagen: de la web (/…), de
 // fuera (https://…), un #ancla o un correo.
 function direccionBuenaRedactor(url) {
@@ -278,14 +367,8 @@ function crearRedactor(opciones) {
 
     // ---- LOS BOTONES ----
     const botones = [];
-    const boton = (texto, ayuda, alPulsar, estado) => {
-        const b = crearEditor("button", "redactor-boton", texto);
-        b.type = "button";
-        // El nombre es lo que se lee en el botón; lo de más (y el atajo),
-        // en el title, que el lector de pantalla da como descripción.
-        if (ayuda !== texto) {
-            b.title = ayuda;
-        }
+    const boton = (texto, ayuda, alPulsar, estado, icono) => {
+        const b = botonDeIconoRedactor(texto, ayuda, icono);
         if (estado) {
             b.setAttribute("aria-pressed", "false");
             b.dataset.estado = estado;
@@ -299,31 +382,31 @@ function crearRedactor(opciones) {
     };
     const grupo = () => barra.appendChild(crearEditor("span", "redactor-hueco")).setAttribute("aria-hidden", "true");
 
-    boton("Negrita", "Negrita (Ctrl+B)", () => hacer("bold"), "bold");
-    boton("Cursiva", "Cursiva (Ctrl+I)", () => hacer("italic"), "italic");
-    boton("Tachado", "Tachado", () => hacer("strikeThrough"), "strikeThrough");
-    boton("Código", "Código, en una frase", () => yo.envolver("code"));
+    boton("Negrita", "Negrita (Ctrl+B)", () => hacer("bold"), "bold", "negrita");
+    boton("Cursiva", "Cursiva (Ctrl+I)", () => hacer("italic"), "italic", "cursiva");
+    boton("Tachado", "Tachado", () => hacer("strikeThrough"), "strikeThrough", "tachado");
+    boton("Código", "Código, en una frase", () => yo.envolver("code"), null, "codigo");
     if (!o.enLinea) {
         grupo();
-        boton("Párrafo", "Texto normal", () => hacer("formatBlock", "<p>"), "p");
-        boton("Título", "Título de apartado", () => hacer("formatBlock", "<h2>"), "h2");
-        boton("Subtítulo", "Título de algo dentro de un apartado", () => hacer("formatBlock", "<h3>"), "h3");
+        boton("Párrafo", "Párrafo: texto normal", () => hacer("formatBlock", "<p>"), "p", "parrafo");
+        boton("Título", "Título de apartado", () => hacer("formatBlock", "<h2>"), "h2", "titulo");
+        boton("Subtítulo", "Subtítulo: algo dentro de un apartado", () => hacer("formatBlock", "<h3>"), "h3", "subtitulo");
         grupo();
-        boton("• Lista", "Lista de puntos", () => hacer("insertUnorderedList"), "insertUnorderedList");
-        boton("1. Lista", "Lista numerada", () => hacer("insertOrderedList"), "insertOrderedList");
-        boton("Cita", "Cita", () => hacer("formatBlock", "<blockquote>"), "blockquote");
+        boton("Lista", "Lista de puntos", () => hacer("insertUnorderedList"), "insertUnorderedList", "lista");
+        boton("Lista numerada", "Lista numerada", () => hacer("insertOrderedList"), "insertOrderedList", "numerada");
+        boton("Cita", "Cita", () => hacer("formatBlock", "<blockquote>"), "blockquote", "cita");
         boton("Código en bloque", "Código en bloque (sale tal cual, con sus espacios)",
-            () => hacer("formatBlock", "<pre>"), "pre");
+            () => hacer("formatBlock", "<pre>"), "pre", "bloque");
     }
     grupo();
-    boton("Enlace", "Poner un enlace (Ctrl+K)", () => abrirPanel("enlace"));
-    boton("Quitar enlace", "Quitar el enlace", () => hacer("unlink"));
+    boton("Enlace", "Poner un enlace (Ctrl+K)", () => abrirPanel("enlace"), null, "enlace");
+    boton("Quitar enlace", "Quitar el enlace", () => hacer("unlink"), null, "sinEnlace");
     if (!o.enLinea) {
         if (o.imagenes) {
-            boton("Imagen", "Meter una imagen en el texto", () => abrirPanel("imagen"));
+            boton("Imagen", "Meter una imagen en el texto", () => abrirPanel("imagen"), null, "imagen");
         }
-        boton("Tabla", "Meter una tabla", () => abrirPanel("tabla"));
-        boton("Raya", "Una raya para separar (un corte fuerte)", () => hacer("insertHorizontalRule"));
+        boton("Tabla", "Meter una tabla", () => abrirPanel("tabla"), null, "tabla");
+        boton("Raya", "Una raya para separar (un corte fuerte)", () => hacer("insertHorizontalRule"), null, "raya");
     }
     (o.extras || []).forEach((x) => {
         if (x.separar) {
@@ -333,11 +416,11 @@ function crearRedactor(opciones) {
             barra.appendChild(x.elemento);
             return;
         }
-        boton(x.texto, x.ayuda || x.texto, () => x.hacer(yo));
+        boton(x.texto, x.ayuda || x.texto, () => x.hacer(yo), null, x.icono);
     });
     grupo();
-    boton("Deshacer", "Deshacer (Ctrl+Z)", () => hacer("undo"));
-    boton("Rehacer", "Rehacer (Ctrl+Y)", () => hacer("redo"));
+    boton("Deshacer", "Deshacer (Ctrl+Z)", () => hacer("undo"), null, "deshacer");
+    boton("Rehacer", "Rehacer (Ctrl+Y)", () => hacer("redo"), null, "rehacer");
     if (!o.enLinea) {
         const verHtml = boton("Ver el HTML", "Ver (y cambiar) el HTML de este texto", () => {
             const enHtml = fuente.hidden;
@@ -357,7 +440,7 @@ function crearRedactor(opciones) {
                 }
             });
             (enHtml ? fuente : area).focus();
-        });
+        }, null, "html");
         verHtml.setAttribute("aria-pressed", "false");
         fuente.addEventListener("input", avisar);
     }
@@ -643,4 +726,166 @@ function crearRedactor(opciones) {
     };
     yo.foco = () => area.focus();
     return yo;
+}
+
+// =========================================
+// LOS MISMOS BOTONES, PARA UN TEXTO EN MARKDOWN
+// =========================================
+// Las páginas de la wiki (y el texto de un evento de la línea de tiempo)
+// se escriben en el Markdown de Chronicler: **negrita**, ## Título, - lista…
+// Ahí no se ve cómo queda, pero los botones son los mismos: ponen las
+// marcas alrededor de lo elegido, o al principio de las líneas. Van con
+// insertText, que es lo que deja deshacerlo con Ctrl+Z.
+//   area     el <textarea>
+//   nombre   de qué es (para el nombre de la barra)
+//   alCambiar
+function crearBarraMarkdown(area, nombre, alCambiar) {
+    const barra = crearEditor("div", "redactor-botones barra-markdown");
+    barra.setAttribute("role", "toolbar");
+    barra.setAttribute("aria-label", "Formato: " + (nombre || "texto"));
+    barra.setAttribute("aria-controls", area.id);
+    const avisar = () => {
+        if (alCambiar) {
+            alCambiar();
+        }
+    };
+    // Cambia del carácter a al b por texto, y deja elegido de selA a selB
+    // (contados desde a).
+    const poner = (a, b, texto, selA, selB) => {
+        area.focus();
+        area.setSelectionRange(a, b);
+        if (!document.execCommand("insertText", false, texto)) {
+            area.setRangeText(texto, a, b, "end");
+            area.dispatchEvent(new Event("input", { bubbles: true }));
+        }
+        area.setSelectionRange(a + (selA === undefined ? texto.length : selA),
+            a + (selB === undefined ? texto.length : selB));
+        avisar();
+    };
+    // **así**: alrededor de lo elegido; sin nada elegido, las marcas con el
+    // cursor en medio. Si ya las tenía, se las quita.
+    const envolver = (marca) => {
+        const a = area.selectionStart;
+        const b = area.selectionEnd;
+        const v = area.value;
+        const dentro = v.slice(a, b);
+        if (v.slice(a - marca.length, a) === marca && v.slice(b, b + marca.length) === marca) {
+            poner(a - marca.length, b + marca.length, dentro, 0, dentro.length);
+            return;
+        }
+        if (dentro.startsWith(marca) && dentro.endsWith(marca) && dentro.length >= marca.length * 2) {
+            const sin = dentro.slice(marca.length, dentro.length - marca.length);
+            poner(a, b, sin, 0, sin.length);
+            return;
+        }
+        poner(a, b, marca + dentro + marca, marca.length, marca.length + dentro.length);
+    };
+    // Las líneas tocadas por lo elegido, enteras.
+    const lineas = () => {
+        const v = area.value;
+        const a = v.lastIndexOf("\n", area.selectionStart - 1) + 1;
+        let b = v.indexOf("\n", area.selectionEnd - (area.selectionEnd > area.selectionStart ? 1 : 0));
+        b = b === -1 ? v.length : b;
+        return { a, b, filas: v.slice(a, b).split("\n") };
+    };
+    const SIN_MARCA = /^(\s*)(#{1,6}\s+|>\s?|[-*+]\s+|\d+[.)]\s+)/;
+    // Cada línea, con su marca delante (y sin la que tuviera). Si todas
+    // tenían ya esa misma, se les quita: el botón va y viene.
+    const alPrincipio = (marca) => {
+        const { a, b, filas } = lineas();
+        if (!filas.some((f) => f.trim())) {
+            // Una línea en blanco: la marca, y a escribir detrás.
+            const sola = typeof marca === "function" ? marca(1) : marca;
+            poner(a, b, filas.join("\n") + sola);
+            return;
+        }
+        const tienen = filas.filter((f) => f.trim()).every((f) => {
+            const m = f.match(SIN_MARCA);
+            return m && (typeof marca === "function" ? /^\d+[.)]\s+$/.test(m[2]) : m[2].trim() === marca.trim());
+        });
+        let n = 0;
+        const nuevas = filas.map((f) => {
+            if (!f.trim()) {
+                return f;
+            }
+            const limpia = f.replace(SIN_MARCA, "$1");
+            if (tienen || !marca) {
+                return limpia;
+            }
+            n += 1;
+            return (typeof marca === "function" ? marca(n) : marca) + limpia.trimStart();
+        });
+        const texto = nuevas.join("\n");
+        poner(a, b, texto, 0, texto.length);
+    };
+    // Un trozo que va solo en su línea (una tabla, una raya).
+    const bloque = (texto) => {
+        const a = area.selectionStart;
+        const v = area.value;
+        const antes = a === 0 || v[a - 1] === "\n" ? (a > 1 && v[a - 2] !== "\n" ? "\n" : "") : "\n\n";
+        const despues = v[area.selectionEnd] === "\n" ? "\n" : "\n\n";
+        poner(a, area.selectionEnd, antes + texto + despues);
+    };
+    const enlaceWeb = () => {
+        const a = area.selectionStart;
+        const b = area.selectionEnd;
+        const dentro = area.value.slice(a, b);
+        if (/^https?:\/\/\S+$/.test(dentro)) {
+            // Lo elegido es la dirección: falta lo que se lee.
+            poner(a, b, "[texto](" + dentro + ")", 1, 6);
+            return;
+        }
+        const leer = dentro || "texto";
+        poner(a, b, "[" + leer + "](https://)", leer.length + 3, leer.length + 11);
+    };
+    const boton = (texto, ayuda, icono, alPulsar) => {
+        const b = botonDeIconoRedactor(texto, ayuda, icono);
+        b.addEventListener("mousedown", (e) => e.preventDefault());
+        b.addEventListener("click", alPulsar);
+        barra.appendChild(b);
+        return b;
+    };
+    const grupo = () => barra.appendChild(crearEditor("span", "redactor-hueco")).setAttribute("aria-hidden", "true");
+
+    boton("Negrita", "Negrita (Ctrl+B): **así**", "negrita", () => envolver("**"));
+    boton("Cursiva", "Cursiva (Ctrl+I): *así*", "cursiva", () => envolver("*"));
+    boton("Tachado", "Tachado: ~~así~~", "tachado", () => envolver("~~"));
+    boton("Código", "Código, en una frase: `así`", "codigo", () => envolver("`"));
+    grupo();
+    boton("Párrafo", "Párrafo: quita el título, la lista o la cita de la línea", "parrafo", () => alPrincipio(""));
+    boton("Título", "Título de apartado: ## al principio", "titulo", () => alPrincipio("## "));
+    boton("Subtítulo", "Subtítulo: ### al principio", "subtitulo", () => alPrincipio("### "));
+    grupo();
+    boton("Lista", "Lista de puntos: - al principio de cada línea", "lista", () => alPrincipio("- "));
+    boton("Lista numerada", "Lista numerada: 1. 2. 3.", "numerada", () => alPrincipio((n) => n + ". "));
+    boton("Cita", "Cita: > al principio", "cita", () => alPrincipio("> "));
+    grupo();
+    boton("Enlace a una web", "Enlace a una web: [lo que se lee](dirección). Para otra página de la wiki, "
+        + "el buscador de «Enlazar una página»", "enlace", enlaceWeb);
+    boton("Tabla", "Meter una tabla", "tabla",
+        () => bloque("| Columna | Columna |\n| --- | --- |\n|  |  |"));
+    boton("Raya", "Una raya para separar: ---", "raya", () => bloque("---"));
+    grupo();
+    boton("Deshacer", "Deshacer (Ctrl+Z)", "deshacer", () => {
+        area.focus();
+        document.execCommand("undo");
+        avisar();
+    });
+    boton("Rehacer", "Rehacer (Ctrl+Y)", "rehacer", () => {
+        area.focus();
+        document.execCommand("redo");
+        avisar();
+    });
+    // Los atajos de siempre, también aquí.
+    area.addEventListener("keydown", (e) => {
+        if (!(e.ctrlKey || e.metaKey) || e.altKey || e.shiftKey) {
+            return;
+        }
+        const tecla = e.key.toLowerCase();
+        if (tecla === "b" || tecla === "i") {
+            e.preventDefault();
+            envolver(tecla === "b" ? "**" : "*");
+        }
+    });
+    return barra;
 }

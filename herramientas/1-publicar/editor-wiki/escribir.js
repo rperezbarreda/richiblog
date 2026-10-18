@@ -160,36 +160,123 @@ async function pintarEscribir() {
 }
 
 function pintarListaDeEntradas() {
-    const lista = $("[data-entradas]");
     const tipo = $("#entradas-tipo").value;
     const estado = $("#entradas-estado").value;
     const busca = sinTildesWeb($("#entradas-buscar").value.trim());
-    lista.textContent = "";
     const vistas = estadoEscribir.entradas.filter((e) => (!tipo || e.tipo === tipo)
         && (!estado || (estado === "borrador") === e.borrador)
         && (!busca || sinTildesWeb(e.titulo).includes(busca)));
     $("[data-entradas-cuantas]").textContent = vistas.length === 1 ? "1 cosa" : vistas.length + " cosas";
-    vistas.forEach((e) => {
-        const li = document.createElement("li");
-        const texto = crearEditor("span");
-        texto.appendChild(crearEditor("span", "faltan-nombre", e.titulo));
-        texto.appendChild(document.createTextNode(" "));
-        texto.appendChild(crearEditor("span", "faltan-veces", e.que + " · " + (e.fecha_texto || e.fecha)));
-        if (e.borrador) {
-            texto.appendChild(document.createTextNode(" "));
-            texto.appendChild(crearEditor("span", "marca-borrador", "borrador"));
-        }
-        const boton = crearEditor("button", "", "Abrir");
-        boton.type = "button";
-        boton.setAttribute("aria-label", "Abrir " + e.titulo);
-        boton.addEventListener("click", () => abrirEntradaWeb(e.archivo));
-        li.appendChild(texto);
-        li.appendChild(boton);
-        lista.appendChild(li);
-    });
-    if (!vistas.length) {
-        lista.appendChild(crearEditor("li", "ayuda", "Nada con eso."));
+    // Buscando o filtrando, las carpetas se abren solas: lo encontrado se ve.
+    pintarArbolDeEntradasWeb($("[data-entradas]"), vistas, !!(tipo || estado || busca));
+}
+
+// LO QUE HAY, POR CARPETAS, como en el proyecto (web/blog/2026/octubre…):
+// cada carpeta se despliega y se cierra, y se acuerda de cómo la dejaste.
+// Las carpetas salen en el orden de lo que llevan dentro (lo último
+// arriba), así que octubre va antes que septiembre.
+const CARPETAS_CERRADAS_WEB = "editor-web-carpetas-cerradas";
+
+function carpetasCerradasWeb() {
+    try {
+        return new Set(JSON.parse(localStorage.getItem(CARPETAS_CERRADAS_WEB) || "[]"));
+    } catch (e) {
+        return new Set();
     }
+}
+
+function recordarCarpetaWeb(ruta, abierta) {
+    const cerradas = carpetasCerradasWeb();
+    if (abierta) {
+        cerradas.delete(ruta);
+    } else {
+        cerradas.add(ruta);
+    }
+    try {
+        localStorage.setItem(CARPETAS_CERRADAS_WEB, JSON.stringify([...cerradas]));
+    } catch (e) {
+        // Sin almacenamiento: se abre todo la próxima vez, y ya.
+    }
+}
+
+function filaDeEntradaWeb(e) {
+    const li = crearEditor("li", "arbol-entrada");
+    const texto = crearEditor("span");
+    texto.appendChild(crearEditor("span", "faltan-nombre", e.titulo));
+    texto.appendChild(document.createTextNode(" "));
+    texto.appendChild(crearEditor("span", "faltan-veces", e.que + " · " + (e.fecha_texto || e.fecha)));
+    if (e.borrador) {
+        texto.appendChild(document.createTextNode(" "));
+        texto.appendChild(crearEditor("span", "marca-borrador", "borrador"));
+    }
+    const boton = crearEditor("button", "", "Abrir");
+    boton.type = "button";
+    boton.setAttribute("aria-label", "Abrir " + e.titulo);
+    boton.addEventListener("click", () => abrirEntradaWeb(e.archivo));
+    li.appendChild(texto);
+    li.appendChild(boton);
+    return li;
+}
+
+// lista: el <ul> donde va; entradas: las que se enseñan (en su orden);
+// abrirTodo: con todo desplegado (al buscar).
+function pintarArbolDeEntradasWeb(lista, entradas, abrirTodo) {
+    lista.textContent = "";
+    lista.classList.add("arbol");
+    if (!entradas.length) {
+        lista.appendChild(crearEditor("li", "ayuda", "Nada con eso."));
+        return;
+    }
+    // El árbol: cada carpeta, con sus carpetas y sus archivos.
+    const raiz = { hijas: new Map(), cosas: [] };
+    entradas.forEach((e) => {
+        const trozos = e.archivo.replace(/^web\//, "").split("/");
+        trozos.pop();
+        let aqui = raiz;
+        trozos.forEach((t) => {
+            if (!aqui.hijas.has(t)) {
+                aqui.hijas.set(t, { hijas: new Map(), cosas: [] });
+            }
+            aqui = aqui.hijas.get(t);
+        });
+        aqui.cosas.push(e);
+    });
+    const cuantas = (nodo) => nodo.cosas.length + [...nodo.hijas.values()].reduce((n, h) => n + cuantas(h), 0);
+    const cerradas = carpetasCerradasWeb();
+    const pintar = (nodo, dentro, ruta) => {
+        nodo.hijas.forEach((hija, nombre) => {
+            const suya = ruta + nombre + "/";
+            const li = crearEditor("li", "arbol-carpeta");
+            const pliegue = document.createElement("details");
+            pliegue.open = abrirTodo || !cerradas.has(suya);
+            const cabeza = document.createElement("summary");
+            cabeza.className = "arbol-cabeza";
+            const icono = iconoRedactor("carpeta");
+            cabeza.appendChild(icono);
+            cabeza.appendChild(crearEditor("span", "arbol-nombre", nombre));
+            const n = cuantas(hija);
+            cabeza.appendChild(crearEditor("span", "faltan-veces", n === 1 ? "1 cosa" : n + " cosas"));
+            pliegue.appendChild(cabeza);
+            const ul = crearEditor("ul", "arbol-dentro");
+            pintar(hija, ul, suya);
+            pliegue.appendChild(ul);
+            pliegue.addEventListener("toggle", () => {
+                if (!abrirTodo) {
+                    recordarCarpetaWeb(suya, pliegue.open);
+                }
+            });
+            li.appendChild(pliegue);
+            dentro.appendChild(li);
+        });
+        nodo.cosas.forEach((e) => dentro.appendChild(filaDeEntradaWeb(e)));
+    };
+    pintar(raiz, lista, "");
+}
+
+// Las notas de las partidas, en Rol: las mismas de «Escribir», por campaña.
+async function pintarNotasDeRolWeb() {
+    await pintarEscribir();
+    pintarArbolDeEntradasWeb($("[data-notas-rol]"), estadoEscribir.entradas.filter((e) => e.tipo === "sesion"), false);
 }
 
 function sinTildesWeb(texto) {
@@ -420,8 +507,9 @@ function ponerEntradaWeb(e) {
         h.id = "t-cuaderno";
         cuaderno.appendChild(h);
         cuaderno.appendChild(crearEditor("p", "ayuda", "Cada hoja, con sus escenas (lo que se pliega, con su nombre) y"
-            + " el texto suelto que quieras. En el texto: los personajes de la mesa salen de su color, la demás gente"
-            + " en negrita y los lugares en cursiva; «Lista de objetos» es para lo que se consigue."));
+            + " el texto suelto que quieras. En el texto: los personajes de la mesa salen de su color (el muñequito"
+            + " relleno, con el desplegable de al lado), la demás gente en negrita (el muñequito hueco) y los lugares en"
+            + " cursiva (la chincheta); la bolsa es la lista de lo que se consigue."));
         const dentro = crearEditor("div", "cuaderno-hojas");
         dentro.setAttribute("data-cuaderno-hojas", "");
         cuaderno.appendChild(dentro);
@@ -709,15 +797,15 @@ function extrasDelCuadernoWeb(e) {
             elegir.appendChild(o);
         });
         extras.push({ elemento: elegir, separar: true });
-        extras.push({ texto: "Personaje de la mesa",
+        extras.push({ texto: "Personaje de la mesa", icono: "personaje",
             ayuda: "Lo elegido, como personaje de la mesa (de su color). Sin nada elegido, mete su nombre",
             hacer: (r) => r.envolver("strong", elegir.value ? "pj-" + elegir.value : "",
                 elegir.options[elegir.selectedIndex].textContent) });
     }
-    extras.push({ texto: "Alguien", ayuda: "Lo elegido, como alguien que no es de la mesa (en negrita)",
+    extras.push({ texto: "Alguien", icono: "alguien", ayuda: "Lo elegido, como alguien que no es de la mesa (en negrita)",
         hacer: (r) => r.envolver("strong"), separar: !pjs.length });
-    extras.push({ texto: "Lugar", ayuda: "Lo elegido, como un lugar (en cursiva)", hacer: (r) => r.envolver("em") });
-    extras.push({ texto: "Lista de objetos", ayuda: "Una lista de lo que se consiguió (con su formato)",
+    extras.push({ texto: "Lugar", icono: "lugar", ayuda: "Lo elegido, como un lugar (en cursiva)", hacer: (r) => r.envolver("em") });
+    extras.push({ texto: "Lista de objetos", icono: "objetos", ayuda: "Una lista de lo que se consiguió (con su formato)",
         hacer: (r) => {
             r.hacer("insertUnorderedList");
             const sel = window.getSelection();
@@ -829,6 +917,7 @@ async function publicarEntradaWeb() {
 // ---- AL EMPEZAR ----
 function empezarEscribirWeb() {
     document.querySelectorAll('[data-ir="escribir"]').forEach((b) => b.addEventListener("click", pintarEscribir));
+    document.querySelectorAll('[data-ir="rol"]').forEach((b) => b.addEventListener("click", pintarNotasDeRolWeb));
     ["#entradas-tipo", "#entradas-estado"].forEach((s) => $(s).addEventListener("change", pintarListaDeEntradas));
     $("#entradas-buscar").addEventListener("input", pintarListaDeEntradas);
     document.querySelectorAll("[data-nueva-tipo]").forEach((b) => {

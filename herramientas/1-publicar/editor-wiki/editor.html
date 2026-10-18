@@ -30,6 +30,7 @@
             <button type="button" data-ir="wiki">Wiki Cralëa</button>
             <button type="button" data-ir="rincon">Mi rincón</button>
             <button type="button" data-ir="repasar">Imágenes y repasar</button>
+            <button type="button" data-ir="comandos">Comandos</button>
         </nav>
     </header>
 
@@ -59,6 +60,10 @@
                 <button type="button" class="grande" data-ir="repasar">
                     <span class="grande-titulo">Imágenes y repasar</span>
                     <span class="grande-que">Traer una imagen de tu ordenador, repasar el sitio antes de subirlo o volver a generarlo.</span>
+                </button>
+                <button type="button" class="grande" data-ir="comandos">
+                    <span class="grande-titulo">Comandos</span>
+                    <span class="grande-que">El menú de siempre (menu.py): cada herramienta, en su ventana de comandos.</span>
                 </button>
             </div>
         </section>
@@ -140,11 +145,19 @@
             <div class="grandes">
                 <button type="button" class="grande" data-nueva-tipo="sesion">
                     <span class="grande-titulo">Apuntar las notas de una partida</span>
-                    <span class="grande-que">Elige la campaña y deja el cuaderno listo para escribir. Nace como borrador. Las de
-                        antes se abren desde «Escribir».</span>
+                    <span class="grande-que">Elige la campaña y deja el cuaderno listo para escribir. Nace como borrador.</span>
                 </button>
             </div>
-            <div class="grandes" data-fichas-de="rol"></div>
+            <section class="bloque" aria-labelledby="t-notas-rol">
+                <h2 id="t-notas-rol">Las notas que ya hay</h2>
+                <p class="ayuda">Las de cada partida, por campaña. «Abrir» para seguir escribiéndolas o cambiar lo que
+                    sea: el nombre, el PDF del cuaderno, las escenas…</p>
+                <ul class="faltan" data-notas-rol></ul>
+            </section>
+            <section class="bloque" aria-labelledby="t-rol-fichas">
+                <h2 id="t-rol-fichas">Y además</h2>
+                <div class="grandes" data-fichas-de="rol"></div>
+            </section>
         </section>
 
         <!-- LA WIKI -->
@@ -207,6 +220,18 @@
                 <p class="ayuda" data-gatos-elegidas aria-live="polite"></p>
             </section>
             <div data-fichas-partes></div>
+        </section>
+
+        <!-- LOS COMANDOS: lo de menu.py, cada cosa en su ventana (fichas.js) -->
+        <section class="vista" data-vista="comandos" aria-labelledby="t-comandos" hidden>
+            <h1 id="t-comandos">Comandos</h1>
+            <p class="ayuda">Lo del menú de siempre (herramientas/menu.py). Cada «Abrir» abre esa herramienta en su
+                propia ventana de comandos, que pregunta lo que necesite; al acabar, espera a que pulses Enter para
+                cerrarse. El número es el atajo del menú («3.3» es lo tercero del apartado 3).</p>
+            <div class="fila">
+                <button type="button" class="principal" data-comando-menu>Abrir el menú entero en una ventana</button>
+            </div>
+            <div data-comandos></div>
         </section>
 
         <!-- LAS IMÁGENES Y REPASAR -->

@@ -55,6 +55,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 from comun import (RAIZ, escribir_json, escribir_texto, leer_json,  # noqa: E402
                    leer_texto, limpiar_comentarios_html)
 from mundo_formato import Avisos, Conversor  # noqa: E402
+from mundo_piezas import pintar_contenido  # noqa: E402
 
 DATOS = RAIZ / "datos" / "wiki" / "linea-de-tiempo.json"
 # La wiki entera (para ver qué páginas hay y quién enlaza a quién) y la
@@ -971,8 +972,11 @@ def pagina_de_evento(molde, evento, antes, despues, enlazan, ruta, era, avisos):
         ("{{SLUG}}", CARPETA + "/" + evento["slug"]),
         # En su columna, como la ficha de cualquier entrada (la columna es
         # lo que se sube arriba en pantalla estrecha: mundo.responsive.css).
-        ("{{FICHA}}", '<div class="mundo-lateral">%s</div>'
-                      % pintar_ficha(evento, antes, despues, era, avisos)),
+        # Encima, el «Contenido» de su texto (si tiene apartados), como en
+        # las demás entradas.
+        ("{{FICHA}}", '<div class="mundo-lateral">%s%s</div>'
+                      % (pintar_contenido(cuerpo, bool(enlazan)),
+                         pintar_ficha(evento, antes, despues, era, avisos))),
         ("{{CUERPO}}", cuerpo),
         ("{{ETIQUETAS}}", etiqueta),
         ("{{BACKLINKS}}", pintar_backlinks(enlazan)),
