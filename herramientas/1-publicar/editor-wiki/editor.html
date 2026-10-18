@@ -248,22 +248,26 @@
                 propia ventana de comandos, que pregunta lo que necesite; al acabar, espera a que pulses Enter para
                 cerrarse. El número es el atajo del menú («3.3» es lo tercero del apartado 3).</p>
             <section class="bloque" aria-labelledby="t-git">
-                <h2 id="t-git">Guardar en GitHub</h2>
-                <p class="ayuda">Guarda todo lo cambiado (un commit, con tu mensaje) y lo sube a la rama en la que
-                    estás. Lo mismo que git add, git commit y git push en la consola.</p>
+                <h2 id="t-git">Guardar en GitHub (con la consola)</h2>
+                <p class="ayuda">Los pasos para guardar lo cambiado y subirlo tú. Cada comando tiene su botón
+                    «Copiar»: lo pegas en la ventana de comandos (clic derecho, o Ctrl+V) y pulsas Enter. El mensaje
+                    de abajo ya va puesto en el suyo.</p>
                 <p data-git-estado aria-live="polite"></p>
                 <details class="git-cambios" data-git-cambios-caja hidden>
                     <summary>Ver lo cambiado</summary>
                     <ul data-git-cambios></ul>
                 </details>
                 <div class="campo">
-                    <label for="git-mensaje">Qué has cambiado (el mensaje)</label>
+                    <label for="git-mensaje">Qué has cambiado (el mensaje del commit)</label>
                     <input id="git-mensaje" autocomplete="off">
                 </div>
+                <ol class="git-pasos" data-git-pasos></ol>
+                <details class="git-mas">
+                    <summary>Otras cosas que a veces hacen falta</summary>
+                    <ol class="git-pasos" data-git-otros></ol>
+                </details>
                 <div class="fila">
-                    <button type="button" class="principal" data-git-subir>Guardar y subir a GitHub</button>
-                    <button type="button" data-git-traer>Traer lo último de GitHub</button>
-                    <button type="button" data-git-mirar>Mirar otra vez</button>
+                    <button type="button" data-git-mirar>Mirar otra vez lo cambiado</button>
                 </div>
             </section>
             <div class="fila">

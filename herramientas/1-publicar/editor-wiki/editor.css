@@ -1848,6 +1848,45 @@ html[data-contraste="alto"] .redactor-area .pj-morado { color: #dec4ff; }
     border: 2px solid var(--acento);
 }
 
+.git-pasos {
+    margin: 0 0 14px;
+    padding-left: 24px;
+}
+
+.git-pasos li {
+    margin-bottom: 14px;
+}
+
+.git-pasos p {
+    margin: 0 0 6px;
+}
+
+.git-comando {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px 12px;
+}
+
+.git-comando code {
+    flex: 1 1 18rem;
+    padding: 8px 10px;
+    border: 2px solid var(--borde);
+    background: var(--fondo);
+    font-family: var(--mono);
+    word-break: break-all;
+}
+
+.git-mas {
+    margin: 0 0 14px;
+}
+
+.git-mas summary {
+    margin-bottom: 10px;
+    cursor: pointer;
+    font-weight: 700;
+}
+
 .git-cambios {
     margin: 0 0 14px;
 }

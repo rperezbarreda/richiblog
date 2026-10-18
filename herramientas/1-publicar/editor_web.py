@@ -1829,78 +1829,43 @@ def crear_npc(peticion):
 
 
 # =========================================
-# GITHUB: GUARDAR Y SUBIR LO CAMBIADO
+# GITHUB: LA GUÍA DE COMANDOS
 # =========================================
-# Lo mismo que harías en la consola: git add, git commit con tu mensaje y
-# git push a la rama en la que estés (y traer lo último con git pull
-# --ff-only, que no mezcla nada: si no se puede, lo dice). Si git no está
-# o el proyecto no es un repositorio, se dice y ya.
+# El editor no sube nada por su cuenta (en el ordenador de Richi git pide
+# sus credenciales en la consola): enseña lo que hay cambiado, si se
+# puede saber, y los comandos para hacerlo uno mismo, ya con la carpeta,
+# la rama y el mensaje puestos.
 
-def _git(*args, tiempo=120):
+REPOSITORIO = "https://github.com/rperezbarreda/richiblog"
+
+
+def _git(*args, tiempo=60):
     try:
         hecho = subprocess.run(["git"] + list(args), cwd=RAIZ, capture_output=True, text=True, timeout=tiempo,
                                stdin=subprocess.DEVNULL, encoding="utf-8", errors="replace")
     except FileNotFoundError:
         return 127, "", "No encuentro git en este ordenador."
     except subprocess.TimeoutExpired:
-        return 124, "", "git ha tardado demasiado (¿la conexión?)."
+        return 124, "", "git ha tardado demasiado."
     return hecho.returncode, hecho.stdout, hecho.stderr
 
 
 def git_estado():
+    salida = {"carpeta": str(RAIZ), "windows": sys.platform.startswith("win"), "repositorio": REPOSITORIO,
+              "rama": "", "cuantos": None, "cambios": []}
     codigo, rama, error = _git("rev-parse", "--abbrev-ref", "HEAD")
     if codigo:
-        return {"error": (error or "Esto no parece un repositorio de git.").strip()}
+        salida["aviso"] = ("No encuentro git en este ordenador: instálalo (abajo dice cómo)." if codigo == 127
+                           else "Esta carpeta no es todavía un repositorio de git (abajo, cómo bajarlo).")
+        return salida
+    salida["rama"] = rama.strip()
     _, cambios, _ = _git("status", "--porcelain", "-uall")
     lineas = [l for l in cambios.splitlines() if l.strip()]
-    _, arriba, _ = _git("rev-parse", "--abbrev-ref", "--symbolic-full-name", "@{u}")
-    por_subir = 0
-    if arriba.strip():
-        _, cuenta, _ = _git("rev-list", "--count", "@{u}..HEAD")
-        por_subir = int(cuenta.strip() or 0) if cuenta.strip().isdigit() else 0
     que = {"M": "cambiado", "A": "nuevo", "D": "borrado", "R": "movido", "?": "nuevo"}
-    return {"rama": rama.strip(), "arriba": arriba.strip(), "por_subir": por_subir, "cuantos": len(lineas),
-            "cambios": [{"que": que.get((l[:2].strip() or "M")[0], "cambiado"), "archivo": l[3:]} for l in lineas[:300]]}
-
-
-def git_subir(peticion):
-    mensaje = " ".join(str(peticion.get("mensaje") or "").split())
-    if not mensaje:
-        return {"error": "Hace falta un mensaje: qué has cambiado, en una línea."}
-    estado = git_estado()
-    if estado.get("error"):
-        return estado
-    salida = []
-    if estado["cuantos"]:
-        codigo, out, err = _git("add", "-A")
-        salida.append(out + err)
-        if codigo:
-            return {"error": "No he podido preparar los cambios.", "salida": "\n".join(salida)}
-        codigo, out, err = _git("commit", "-q", "-m", mensaje)
-        salida.append(out + err)
-        if codigo:
-            return {"error": "No he podido guardar los cambios (el commit).", "salida": "\n".join(salida)}
-    elif not estado["por_subir"] and estado["arriba"]:
-        return {"error": "No hay nada cambiado ni nada por subir."}
-    rama = estado["rama"]
-    args = ["push", "origin", rama] if estado["arriba"] else ["push", "-u", "origin", rama]
-    codigo, out, err = _git(*args, tiempo=600)
-    salida.append(out + err)
-    if codigo:
-        return {"error": "Guardado aquí, pero no he podido subirlo a GitHub. Si dice que hay cambios arriba que no"
-                         " tienes, pulsa «Traer lo último» y vuelve a probar.", "salida": "\n".join(salida).strip()}
-    return {"ok": True, "rama": rama, "salida": "\n".join(salida).strip()}
-
-
-def git_traer():
-    estado = git_estado()
-    if estado.get("error"):
-        return estado
-    codigo, out, err = _git("pull", "--ff-only", tiempo=600)
-    if codigo:
-        return {"error": "No he podido traer lo último sin mezclar (puede que tengas cambios aquí que chocan, o que"
-                         " las ramas se hayan separado).", "salida": (out + err).strip()}
-    return {"ok": True, "salida": (out + err).strip()}
+    salida["cuantos"] = len(lineas)
+    salida["cambios"] = [{"que": que.get((l[:2].strip() or "M")[0], "cambiado"), "archivo": l[3:]}
+                         for l in lineas[:300]]
+    return salida
 
 
 # =========================================
@@ -2024,10 +1989,6 @@ def atender_post(ruta, peticion):
         return apuntar_borrador(peticion)
     if ruta == "/api/web/npc/nuevo":
         return crear_npc(peticion)
-    if ruta == "/api/web/git/subir":
-        return git_subir(peticion)
-    if ruta == "/api/web/git/traer":
-        return git_traer()
     if ruta == "/api/web/entrada/guardar":
         return guardar_entrada(peticion)
     if ruta == "/api/web/entrada/publicar":

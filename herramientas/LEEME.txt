@@ -146,10 +146,13 @@
     · LA FICHA DE LA CAMPAÑA (en Rol): de qué va, el sistema, quién
       dirige, los personajes de la mesa (con su color) y las misiones
       del post-it (una nueva se escribe; hecha, se queda tachada).
-    · GUARDAR EN GITHUB (en Comandos): ver lo cambiado, escribir qué es
-      y «Guardar y subir» (commit y push a la rama en la que estés; si es
-      la principal, pregunta antes). «Traer lo último» hace git pull
-      --ff-only.
+    · GUARDAR EN GITHUB (en Comandos): una guía de comandos para hacerlo
+      tú en la consola (ir a la carpeta, git status, git pull, git add
+      -A, git commit con tu mensaje, git push a tu rama), cada uno con
+      «Copiar», ya con la carpeta, la rama y el mensaje puestos; y otras
+      cosas que a veces hacen falta (pasar desarrollo a main, cambiar de
+      rama, bajar el repositorio, instalar git). Si se puede, dice en qué
+      rama estás y qué hay cambiado. El editor no sube nada solo.
     · CÓMO SE VE EL EDITOR: «Letra −» y «Letra +» (del 90 % al 200 %) y
       «Contraste alto» (negro, blanco y amarillo), arriba; se recuerdan.
 

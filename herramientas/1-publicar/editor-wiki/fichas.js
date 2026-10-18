@@ -727,65 +727,92 @@ async function pintarComandosWeb() {
     });
 }
 
-// ---- GUARDAR EN GITHUB ----
+// ---- GUARDAR EN GITHUB: LA GUÍA ----
+// Lo cambiado (si git está y esto es un repositorio) y los comandos, ya
+// con la carpeta, la rama y el mensaje, cada uno con «Copiar».
+const ESTADO_GIT_WEB = { datos: null };
+
 async function pintarGitWeb() {
-    const estado = $("[data-git-estado]");
     const hecho = await pedirEditor("/api/web/git");
-    const caja = $("[data-git-cambios-caja]");
-    const lista = $("[data-git-cambios]");
-    lista.textContent = "";
     if (hecho.error) {
-        estado.textContent = hecho.error;
-        caja.hidden = true;
+        $("[data-git-estado]").textContent = hecho.error;
         return;
     }
-    const principal = /^(main|master)$/.test(hecho.rama);
-    estado.textContent = "Estás en la rama «" + hecho.rama + "»" + (principal ? " (la principal)" : "") + ". "
-        + (hecho.cuantos ? (hecho.cuantos === 1 ? "1 archivo cambiado" : hecho.cuantos + " archivos cambiados")
-            : "Nada cambiado") + (hecho.por_subir ? "; " + hecho.por_subir + " guardado(s) sin subir" : "") + ".";
+    ESTADO_GIT_WEB.datos = hecho;
+    const lista = $("[data-git-cambios]");
+    lista.textContent = "";
+    $("[data-git-estado]").textContent = hecho.aviso || ("Estás en la rama «" + hecho.rama + "»"
+        + (/^(main|master)$/.test(hecho.rama) ? " (la principal: lo que subas ahí sale en la web)" : "") + ". "
+        + (hecho.cuantos ? (hecho.cuantos === 1 ? "1 archivo cambiado." : hecho.cuantos + " archivos cambiados.")
+            : "No hay nada cambiado."));
     hecho.cambios.forEach((c) => lista.appendChild(crearEditor("li", "", c.que + ": " + c.archivo)));
-    caja.hidden = !hecho.cambios.length;
+    $("[data-git-cambios-caja]").hidden = !hecho.cambios.length;
     const mensaje = $("#git-mensaje");
     if (!mensaje.value) {
         mensaje.value = "Cambios del " + estadoFichas.hoy;
     }
-    estadoFichas.rama = hecho.rama;
+    pintarPasosDeGitWeb();
 }
 
-async function subirAGitWeb() {
-    const mensaje = $("#git-mensaje").value.trim();
-    if (!mensaje) {
-        avisarEditor("Escribe qué has cambiado, en una línea.", true);
-        $("#git-mensaje").focus();
-        return;
+function pasoDeGitWeb(lista, texto, comando) {
+    const li = document.createElement("li");
+    li.appendChild(crearEditor("p", "", texto));
+    if (comando) {
+        const fila = crearEditor("div", "git-comando");
+        fila.appendChild(crearEditor("code", "", comando));
+        const b = crearEditor("button", "", "Copiar");
+        b.type = "button";
+        b.setAttribute("aria-label", "Copiar: " + comando);
+        b.addEventListener("click", async () => {
+            try {
+                await navigator.clipboard.writeText(comando);
+                avisarEditor("Copiado: " + comando);
+            } catch (e) {
+                // Sin portapapeles: se deja elegido para copiarlo a mano.
+                const r = document.createRange();
+                r.selectNodeContents(fila.querySelector("code"));
+                window.getSelection().removeAllRanges();
+                window.getSelection().addRange(r);
+                avisarEditor("No he podido copiarlo yo: está elegido, pulsa Ctrl+C.", true);
+            }
+        });
+        fila.appendChild(b);
+        li.appendChild(fila);
     }
-    if (/^(main|master)$/.test(estadoFichas.rama || "")
-        && !window.confirm("Estás en la rama principal («" + estadoFichas.rama + "»): lo que subas sale en la web"
-            + " si Neocities lee de ahí. ¿Subirlo igualmente?")) {
-        return;
-    }
-    const boton = $("[data-git-subir]");
-    ocuparWeb([boton], true);
-    avisarEditor("Guardando y subiendo a GitHub…");
-    const hecho = await pedirEditor("/api/web/git/subir", { mensaje });
-    ocuparWeb([boton], false);
-    if (hecho.error) {
-        avisarEditor(hecho.error, true, hecho.salida);
-    } else {
-        avisarEditor("Subido a GitHub, a la rama «" + hecho.rama + "».", false, hecho.salida);
-        $("#git-mensaje").value = "";
-    }
-    pintarGitWeb();
+    lista.appendChild(li);
 }
 
-async function traerDeGitWeb() {
-    const boton = $("[data-git-traer]");
-    ocuparWeb([boton], true);
-    avisarEditor("Trayendo lo último de GitHub…");
-    const hecho = await pedirEditor("/api/web/git/traer", {});
-    ocuparWeb([boton], false);
-    avisarEditor(hecho.error || "Al día con GitHub.", !!hecho.error, hecho.salida);
-    pintarGitWeb();
+function pintarPasosDeGitWeb() {
+    const d = ESTADO_GIT_WEB.datos;
+    if (!d) {
+        return;
+    }
+    const rama = d.rama || "desarrollo";
+    const mensaje = ($("#git-mensaje").value.trim() || "Cambios").replace(/"/g, "'");
+    const pasos = $("[data-git-pasos]");
+    pasos.textContent = "";
+    pasoDeGitWeb(pasos, d.windows
+        ? "Abre una ventana de comandos (tecla Windows, escribe cmd y Enter) y ve a la carpeta del proyecto:"
+        : "Abre una terminal y ve a la carpeta del proyecto:",
+    (d.windows ? "cd /d \"" : "cd \"") + d.carpeta + "\"");
+    pasoDeGitWeb(pasos, "Mira qué ha cambiado (en rojo, lo que aún no está preparado):", "git status");
+    pasoDeGitWeb(pasos, "Trae lo último de GitHub, por si hay algo subido desde otro sitio:", "git pull");
+    pasoDeGitWeb(pasos, "Prepara todo lo cambiado:", "git add -A");
+    pasoDeGitWeb(pasos, "Guárdalo con su mensaje (un commit):", "git commit -m \"" + mensaje + "\"");
+    pasoDeGitWeb(pasos, "Súbelo a GitHub, a tu rama (la primera vez puede pedirte entrar en GitHub):",
+        "git push origin " + rama);
+    const otros = $("[data-git-otros]");
+    otros.textContent = "";
+    pasoDeGitWeb(otros, "Pasar lo de la rama desarrollo a main (lo que sale en la web), y volver a desarrollo:",
+        "git switch main && git pull && git merge desarrollo && git push origin main && git switch desarrollo");
+    pasoDeGitWeb(otros, "Cambiar a la rama desarrollo (o a main, cambiando el nombre):", "git switch desarrollo");
+    pasoDeGitWeb(otros, "Deshacer lo cambiado en un archivo que aún no has guardado con commit:",
+        "git restore \"ruta/del/archivo\"");
+    pasoDeGitWeb(otros, "Si la carpeta no es un repositorio (git dice «not a git repository»), bájalo de GitHub"
+        + " en una carpeta nueva:", "git clone " + d.repositorio);
+    pasoDeGitWeb(otros, "Si no tienes git, se instala desde git-scm.com/downloads (en Windows, con lo que trae por"
+        + " defecto). Después, una vez, dile quién eres:", "git config --global user.name \"Richi\"");
+    pasoDeGitWeb(otros, "Y tu correo (el de GitHub):", "git config --global user.email \"tu@correo\"");
 }
 
 async function abrirComandoWeb(cual) {
@@ -802,9 +829,8 @@ function empezarFichasWeb() {
         b.addEventListener("click", pintarComandosWeb);
         b.addEventListener("click", pintarGitWeb);
     });
-    $("[data-git-subir]").addEventListener("click", subirAGitWeb);
-    $("[data-git-traer]").addEventListener("click", traerDeGitWeb);
     $("[data-git-mirar]").addEventListener("click", pintarGitWeb);
+    $("#git-mensaje").addEventListener("input", pintarPasosDeGitWeb);
     $("[data-comando-menu]").addEventListener("click", () => abrirComandoWeb(""));
     cargarColeccionesWeb();
     $("[data-fichas-guardar]").addEventListener("click", guardarFichasWeb);

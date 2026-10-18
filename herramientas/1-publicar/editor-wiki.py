@@ -32,8 +32,8 @@
 # escribir|rol|wiki|rincon|repasar|comandos lo abre ya en ese apartado.
 #
 #   · COMANDOS: lo de menu.py, cada cosa con un botón que la abre en su
-#     propia ventana de comandos (menu.abrir_en_ventana), y guardar en
-#     GitHub (editor_web.git_subir).
+#     propia ventana de comandos (menu.abrir_en_ventana), y la guía de
+#     comandos para guardar en GitHub (editor_web.git_estado).
 #   · Y además (ver el LEEME, EL EDITOR DE LA WEB): [[ para enlazar, el
 #     contador, el borrador automático, la vista previa de la wiki
 #     (vista_previa), mover o renombrar páginas (mover_pagina), hacer NPC
