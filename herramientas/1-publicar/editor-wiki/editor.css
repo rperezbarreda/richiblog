@@ -538,6 +538,28 @@ textarea {
     margin-bottom: 18px;
 }
 
+/* El nombre del dato (o el título del apartado) y, al lado, «Quitar». */
+.dato-cabeza,
+.apartado-cabeza {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 6px 12px;
+    margin-bottom: 4px;
+}
+
+.dato-cabeza label,
+.apartado-cabeza .apartado-titulo {
+    margin: 0;
+}
+
+.quitar-pequeno {
+    min-height: 36px;
+    padding: 2px 12px;
+    font-size: 0.9rem;
+}
+
 .dato-nota {
     margin: 22px 0 10px;
     padding: 8px 12px;
@@ -1422,6 +1444,16 @@ body.en-mapa main {
 .redactor-boton.es-icono.globo-a-la-derecha::after {
     left: 0;
     transform: none;
+}
+
+/* La barra que va contigo al bajar por un texto largo (redactor.js,
+   seguirConLaBarra): pegada arriba de la pantalla, del ancho del texto. */
+.redactor-botones.va-contigo {
+    position: fixed;
+    top: 0;
+    z-index: 25;
+    border: 2px solid var(--acento);
+    box-shadow: 0 4px 0 var(--fondo);
 }
 
 /* Encima de un recuadro de Markdown (la wiki, el texto de un evento):

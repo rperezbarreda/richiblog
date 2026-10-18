@@ -152,6 +152,17 @@ def todas():
     return sorted(npw.paginas_de_la_wiki(), key=lambda a: a.stem.lower())
 
 
+def arbol_de_la_wiki():
+    """Las carpetas de wiki/ (también las vacías: las de cada tipo de cosa,
+    donde irán sus páginas) y cada página en la suya. Sin lo de la
+    aplicación (_system, _imagenes, lo que empieza por punto)."""
+    carpetas = sorted(c.relative_to(VAULT).as_posix() for c in VAULT.rglob("*")
+                      if c.is_dir() and not any(p.startswith(("_", ".")) for p in c.relative_to(VAULT).parts))
+    paginas = [{"carpeta": a.parent.relative_to(VAULT).as_posix() if a.parent != VAULT else "",
+                "nombre": a.stem} for a in todas()]
+    return {"carpetas": carpetas, "paginas": paginas}
+
+
 def imagenes_que_hay():
     if not IMAGENES.is_dir():
         return []
@@ -315,13 +326,82 @@ def escribir_valor(clave, valor):
     return "%s: %s" % (clave, entre_comillas(valor))
 
 
-def juntar(archivo, campos_nuevos, apartados_nuevos):
+def _quitar_de_la_cabecera(lineas, quitar):
+    """Las líneas de la cabecera sin los datos de «quitar» (con las notas
+    # de encima, que eran suyas). Un título del layout que iba encima de
+    uno quitado («above: capital») pasa al siguiente dato que quede; si no
+    queda ninguno detrás, se va también."""
+    if not quitar:
+        return lineas
+    datos = leer_cabecera("\n".join(lineas))
+    # Solo los datos de verdad (no el layout ni las listas sangradas).
+    orden = [c["clave"] for c in datos if not c["fija"]]
+    quedan = [k for k in orden if k not in quitar]
+    salida, notas = [], []
+    for linea in lineas:
+        if linea.lstrip().startswith("#") and not linea.startswith((" ", "\t")):
+            notas.append(linea)
+            continue
+        m = re.match(r"^([^\s#:][^:]*):", linea)
+        if m and m.group(1).strip() in quitar:
+            notas = []
+            continue
+        salida += notas + [linea]
+        notas = []
+    salida += notas
+    # El layout: cada regla empieza por «  - »; las que apuntan a uno quitado.
+    hecho, regla = [], []
+
+    def cerrar():
+        if not regla:
+            return
+        cuerpo = "\n".join(regla)
+        for donde in ("above", "below"):
+            m = re.search(r"^(\s*%s:\s*)(.+?)\s*$" % donde, cuerpo, re.M)
+            if m and sin_comillas(m.group(2)) in quitar:
+                vieja = sin_comillas(m.group(2))
+                i = orden.index(vieja) if vieja in orden else -1
+                otra = next((k for k in orden[i + 1:] if k in quedan), None) if donde == "above" else \
+                    next((k for k in reversed(orden[:max(i, 0)]) if k in quedan), None)
+                if not otra:
+                    return
+                cuerpo = cuerpo[:m.start(2)] + otra + cuerpo[m.end(2):]
+        hecho.extend(cuerpo.split("\n"))
+
+    en_layout = False
+    for linea in salida:
+        if re.match(r"^layout\s*:\s*$", linea):
+            en_layout = True
+            hecho.append(linea)
+            continue
+        if en_layout and linea[:1] in (" ", "\t", "-"):
+            if linea.lstrip().startswith("- "):
+                cerrar()
+                regla = [linea]
+            else:
+                regla.append(linea)
+            continue
+        if en_layout:
+            cerrar()
+            regla = []
+            en_layout = False
+        hecho.append(linea)
+    if en_layout:
+        cerrar()
+    # Un «layout:» que se ha quedado sin reglas, fuera.
+    return [l for n, l in enumerate(hecho)
+            if not (re.match(r"^layout\s*:\s*$", l) and not (n + 1 < len(hecho) and hecho[n + 1][:1] in (" ", "\t", "-")))]
+
+
+def juntar(archivo, campos_nuevos, apartados_nuevos, quitar=()):
     """El .md con lo nuevo: campos_nuevos {clave: valor}; apartados_nuevos
-    [texto] en el mismo orden en que se leyeron."""
+    [texto] en el mismo orden en que se leyeron (None: ese apartado, con
+    su título, se quita); quitar: los datos de la ficha que se van."""
     texto, crlf = leer_texto(archivo)
     cabecera, cuerpo, tiene = partir(texto)
+    quitar = {str(q).strip() for q in quitar or () if str(q).strip() and str(q).strip() != "title"}
     if tiene:
-        lineas = cabecera.split("\n")
+        lineas = _quitar_de_la_cabecera(cabecera.split("\n"), quitar)
         viejos = {c["crudo"]: c for c in leer_cabecera(cabecera)}
         salida = []
         for linea in lineas:
@@ -338,7 +418,7 @@ def juntar(archivo, campos_nuevos, apartados_nuevos):
         # sangrado y no una fila.
         ya = {c["clave"] for c in viejos.values()}
         nuevos = [escribir_valor(clave.strip(), valor) for clave, valor in campos_nuevos.items()
-                  if clave not in ya and clave.strip() and valor.strip()]
+                  if clave not in ya and clave not in quitar and clave.strip() and valor.strip()]
         donde = next((n for n, l in enumerate(salida) if re.match(r"^layout\s*:\s*$", l)), len(salida))
         salida[donde:donde] = nuevos
         nueva_cabecera = "---\n" + "\n".join(salida) + "\n---\n"
@@ -352,6 +432,9 @@ def juntar(archivo, campos_nuevos, apartados_nuevos):
     for n, ap in enumerate(leer_cuerpo(cuerpo)):
         propias = ([ap["linea"]] if ap["nivel"] else []) + ap["lineas"]
         nuevo = apartados_nuevos[n] if n < len(apartados_nuevos) else ap["texto"]
+        if nuevo is None and ap["nivel"]:
+            # Quitado: ni su título ni su texto (ni sus notas).
+            continue
         nuevo = (nuevo or "").replace("\r", "").strip("\n")
         if nuevo.strip() == ap["texto"].strip():
             lineas += propias
@@ -980,6 +1063,7 @@ class Editor(SimpleHTTPRequestHandler):
                     "razas": npw.razas_que_hay(),
                     "faltan": [{"nombre": n, "veces": v} for n, v in paginas_que_faltan()[:200]],
                     "imagenes": imagenes_que_hay(),
+                    "arbol": arbol_de_la_wiki(),
                 })
             if url.path == "/api/pagina":
                 nombre = (pregunta.get("nombre") or [""])[0]
@@ -1033,8 +1117,8 @@ class Editor(SimpleHTTPRequestHandler):
                 if not archivo:
                     return self._json({"error": "Esa página ya no está."})
                 campos = {str(k): str(v) for k, v in (peticion.get("campos") or {}).items()}
-                apartados = [str(t) for t in peticion.get("apartados") or []]
-                texto, crlf = juntar(archivo, campos, apartados)
+                apartados = [None if t is None else str(t) for t in peticion.get("apartados") or []]
+                texto, crlf = juntar(archivo, campos, apartados, peticion.get("quitar") or [])
                 escribir_texto(archivo, texto, crlf)
                 return self._json({"ok": True, "pagina": leer_pagina(archivo)})
             if url.path == "/api/imagen":

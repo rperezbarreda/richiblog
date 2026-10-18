@@ -8,7 +8,7 @@
 // dentro no es HTML.
 
 const TOKEN_EDITOR = (document.querySelector('meta[name="editor-token"]') || {}).content || "";
-const estadoEditor = { datos: null, pagina: null, cambiado: false, guardando: false };
+const estadoEditor = { datos: null, pagina: null, cambiado: false, guardando: false, quitar: [] };
 
 const $ = (sel, dentro) => (dentro || document).querySelector(sel);
 
@@ -186,6 +186,9 @@ async function empezarEditor() {
     document.querySelectorAll("[data-ir]").forEach((b) => {
         b.addEventListener("click", () => irAEditor(b.getAttribute("data-ir")));
     });
+    document.querySelectorAll('[data-ir="wiki"]').forEach((b) => b.addEventListener("click", refrescarArbolWikiEditor));
+    $("#wiki-arbol-buscar").addEventListener("input", pintarArbolWikiEditor);
+    pintarArbolWikiEditor();
     $("[data-abrir]").addEventListener("submit", (e) => {
         e.preventDefault();
         abrirPaginaEditor($("#abrir-nombre").value);
@@ -474,6 +477,43 @@ function pintarFaltanEditor() {
     });
 }
 
+// ---- LAS PÁGINAS, POR CARPETAS ----
+// El árbol lo pinta pintarArbolWeb (escribir.js), el mismo de «Escribir».
+function pintarArbolWikiEditor() {
+    const arbol = (estadoEditor.datos || {}).arbol;
+    const lista = $("[data-wiki-arbol]");
+    if (!arbol || !lista) {
+        return;
+    }
+    const busca = sinTildesWeb($("#wiki-arbol-buscar").value.trim());
+    const vistas = arbol.paginas.filter((p) => !busca || sinTildesWeb(p.nombre).includes(busca));
+    $("[data-wiki-arbol-cuantas]").textContent = vistas.length === 1 ? "1 página" : vistas.length + " páginas";
+    pintarArbolWeb(lista, vistas.map((p) => ({
+        carpeta: p.carpeta ? p.carpeta.split("/") : [],
+        fila: () => {
+            const li = document.createElement("li");
+            li.appendChild(crearEditor("span", "faltan-nombre", p.nombre));
+            const b = crearEditor("button", "", "Abrir");
+            b.type = "button";
+            b.setAttribute("aria-label", "Abrir " + p.nombre);
+            b.addEventListener("click", () => abrirPaginaEditor(p.nombre));
+            li.appendChild(b);
+            return li;
+        },
+    })), { abrirTodo: !!busca, memoria: "wiki:", unidad: ["página", "páginas"], carpetasPrimero: true, cerradasDeSalida: true,
+        vacias: busca ? [] : arbol.carpetas.map((c) => c.split("/")),
+        vaciaDice: "Aún no hay ninguna: las nuevas de este tipo vendrán aquí." });
+}
+
+// Al volver a la wiki, el árbol al día (puede haber páginas nuevas).
+async function refrescarArbolWikiEditor() {
+    const datos = await pedirEditor("/api/inicio");
+    if (!datos.error) {
+        estadoEditor.datos.arbol = datos.arbol;
+    }
+    pintarArbolWikiEditor();
+}
+
 // ---- ESCRIBIR ----
 async function abrirPaginaEditor(nombre) {
     nombre = (nombre || "").trim();
@@ -510,14 +550,17 @@ function pintarPaginaEditor(pagina) {
     donde.setAttribute("data-enlazar-donde", "");
     enlazarFicha.appendChild(donde);
     campos.appendChild(enlazarFicha);
+    estadoEditor.quitar = [];
     pagina.campos.forEach((c, i) => {
         if (c.fija || c.clave === "title") {
             return;
         }
+        let nota = null;
         if (c.nota) {
-            campos.appendChild(crearEditor("p", "dato-nota", c.nota));
+            nota = campos.appendChild(crearEditor("p", "dato-nota", c.nota));
         }
-        campos.appendChild(datoEditor(c, i));
+        const dato = campos.appendChild(datoEditor(c, i));
+        dato.notaDelDato = nota;
     });
 
     const apartados = $("[data-apartados]");
@@ -525,10 +568,22 @@ function pintarPaginaEditor(pagina) {
     pagina.apartados.forEach((a, i) => {
         const caja = crearEditor("div", "apartado");
         const id = "apartado-" + i;
+        caja.setAttribute("data-apartado-caja", String(i));
+        const cab = crearEditor("div", "apartado-cabeza");
         const titulo = crearEditor("label", "apartado-titulo nivel-" + a.nivel,
             a.nivel ? a.titulo : "La entradilla (el primer párrafo)");
         titulo.htmlFor = id;
-        caja.appendChild(titulo);
+        cab.appendChild(titulo);
+        if (a.nivel) {
+            // Quitar el apartado entero (con su título y lo que tenga
+            // dentro: los ### de debajo de un ##).
+            const quitar = crearEditor("button", "quitar-pequeno", "Quitar");
+            quitar.type = "button";
+            quitar.setAttribute("aria-label", "Quitar el apartado «" + a.titulo + "»");
+            quitar.addEventListener("click", () => quitarApartadoEditor(i));
+            cab.appendChild(quitar);
+        }
+        caja.appendChild(cab);
         let ayuda = a.nota;
         if (!a.nivel && !ayuda) {
             ayuda = "Qué es, en una o dos frases. Es lo que sale en la portada y en el buscador.";
@@ -560,9 +615,17 @@ function pintarPaginaEditor(pagina) {
 function datoEditor(c, i) {
     const caja = crearEditor("div", "dato");
     const id = "dato-" + i;
+    const cab = crearEditor("div", "dato-cabeza");
     const etiqueta = crearEditor("label", "", c.nombre);
     etiqueta.htmlFor = id;
-    caja.appendChild(etiqueta);
+    cab.appendChild(etiqueta);
+    // Quitar el dato de la ficha (la línea del .md entera, no dejarlo vacío).
+    const quitar = crearEditor("button", "quitar-pequeno", "Quitar");
+    quitar.type = "button";
+    quitar.setAttribute("aria-label", "Quitar el dato «" + c.nombre + "» de la ficha");
+    quitar.addEventListener("click", () => quitarDatoEditor(caja, c));
+    cab.appendChild(quitar);
+    caja.appendChild(cab);
     const input = document.createElement("input");
     input.id = id;
     input.value = c.valor;
@@ -751,6 +814,60 @@ function subirImagenEditor(input, clave, id) {
     return caja;
 }
 
+// ---- QUITAR UN DATO O UN APARTADO ----
+// Se ven quitados al momento y se quitan del .md al guardar. El foco pasa
+// a lo siguiente (o a lo de antes), no al principio de la página.
+function quitarDatoEditor(caja, c) {
+    const siguiente = caja.nextElementSibling && caja.nextElementSibling.querySelector("input")
+        ? caja.nextElementSibling.querySelector("input")
+        : (caja.previousElementSibling && caja.previousElementSibling.querySelector
+            && caja.previousElementSibling.querySelector("input"));
+    if (!estadoEditor.quitar.includes(c.clave)) {
+        estadoEditor.quitar.push(c.clave);
+    }
+    if (caja.notaDelDato) {
+        caja.notaDelDato.remove();
+    }
+    caja.remove();
+    estadoEditor.cambiado = true;
+    avisarEditor("Quitado «" + c.nombre + "». Se va del todo al guardar (para volver atrás, cierra sin guardar"
+        + " o añádelo otra vez abajo).");
+    if (siguiente) {
+        siguiente.focus();
+    }
+}
+
+function quitarApartadoEditor(i) {
+    const aps = estadoEditor.pagina.apartados;
+    const nivel = aps[i].nivel;
+    // Los de dentro: los que vienen detrás con más nivel.
+    const dentro = [];
+    for (let j = i + 1; j < aps.length && aps[j].nivel > nivel; j += 1) {
+        dentro.push(j);
+    }
+    const nombres = dentro.map((j) => aps[j].titulo).filter((t, k) => document.querySelector('[data-apartado-caja="'
+        + dentro[k] + '"]'));
+    if (!window.confirm("¿Quitar el apartado «" + aps[i].titulo + "» con todo su texto"
+        + (nombres.length ? " (y lo que tiene dentro: " + nombres.join(", ") + ")" : "") + "?")) {
+        return;
+    }
+    let despues = null;
+    [i].concat(dentro).forEach((j) => {
+        const caja = document.querySelector('[data-apartado-caja="' + j + '"]');
+        if (caja) {
+            despues = caja.nextElementSibling || despues;
+            caja.remove();
+        }
+    });
+    estadoEditor.cambiado = true;
+    avisarEditor("Quitado «" + aps[i].titulo + "». Se va del .md al guardar.");
+    const foco = (despues && despues.isConnected ? despues : document.querySelector("[data-apartados] .apartado:last-child"));
+    const area = foco && foco.querySelector("textarea");
+    if (area) {
+        area.focus();
+    }
+}
+
 function anadirCampoEditor() {
     const clave = $("#campo-nuevo-clave");
     const nombre = clave.value.trim().replace(/:/g, "");
@@ -762,6 +879,8 @@ function anadirCampoEditor() {
         avisarEditor("Ese dato ya está en la ficha.", true);
         return;
     }
+    // Si se había quitado, ya no se quita: vuelve.
+    estadoEditor.quitar = estadoEditor.quitar.filter((q) => q !== nombre);
     const c = { clave: nombre, valor: "", nombre: nombre[0].toUpperCase() + nombre.slice(1), imagen: false };
     const caja = datoEditor(c, "nuevo-" + Date.now());
     $("[data-campos]").appendChild(caja);
@@ -782,17 +901,27 @@ async function guardarEditor(yPasar) {
     document.querySelectorAll("[data-clave]").forEach((el) => {
         campos[el.getAttribute("data-clave")] = el.value;
     });
-    const apartados = [];
+    // Uno por apartado de los que había; null, el que se ha quitado.
+    const apartados = estadoEditor.pagina.apartados.map(() => null);
     document.querySelectorAll("[data-apartado]").forEach((el) => {
         apartados[Number(el.getAttribute("data-apartado"))] = el.value;
     });
+    const quitado = estadoEditor.quitar.length > 0 || apartados.some((a) => a === null);
     avisarEditor("Guardando…");
-    const hecho = await pedirEditor("/api/guardar", { nombre: estadoEditor.pagina.nombre, campos, apartados });
+    const hecho = await pedirEditor("/api/guardar", { nombre: estadoEditor.pagina.nombre, campos, apartados,
+        quitar: estadoEditor.quitar });
     if (hecho.error) {
         avisarEditor(hecho.error, true);
     } else {
         estadoEditor.cambiado = false;
         estadoEditor.pagina = hecho.pagina;
+        if (quitado) {
+            // Lo quitado cambia los números de los apartados: se pinta otra
+            // vez desde lo guardado.
+            const y = window.scrollY;
+            pintarPaginaEditor(hecho.pagina);
+            window.scrollTo(0, y);
+        }
         if (!yPasar) {
             avisarEditor("Guardado en " + hecho.pagina.archivo + ".");
         } else {

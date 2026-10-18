@@ -28,6 +28,9 @@ const ETIQUETAS_DEL_REDACTOR = {
 const CAMBIOS_DEL_REDACTOR = { b: "strong", i: "em", strike: "s", del: "s", h1: "h2", h5: "h4", h6: "h4" };
 const BLOQUES_DEL_REDACTOR = ["p", "h2", "h3", "h4", "ul", "ol", "pre", "blockquote", "figure", "table", "hr"];
 let cuentaDeRedactores = 0;
+// Las barras de botones que se van con el texto al bajar (ver
+// seguirConLaBarra, al final).
+const BARRAS_QUE_SIGUEN = [];
 
 // LOS ICONOS DE LOS BOTONES, como los de un procesador de textos. Cada uno,
 // lo de dentro de un <svg viewBox="0 0 24 24">: rayas del color del texto
@@ -279,6 +282,7 @@ function crearRedactor(opciones) {
     fuente.spellcheck = false;
     fuente.setAttribute("aria-label", (o.etiqueta || "Texto") + ", en HTML");
     caja.appendChild(barra);
+    seguirConLaBarra(barra, caja, caja);
     caja.appendChild(panel);
     caja.appendChild(area);
     caja.appendChild(fuente);
@@ -876,6 +880,9 @@ function crearBarraMarkdown(area, nombre, alCambiar) {
         document.execCommand("redo");
         avisar();
     });
+    // Al bajar por un texto largo, la barra va contigo (cuando ya esté en
+    // la página: se espera a que se ponga encima del recuadro).
+    requestAnimationFrame(() => seguirConLaBarra(barra, area, [area, barra]));
     // Los atajos de siempre, también aquí.
     area.addEventListener("keydown", (e) => {
         if (!(e.ctrlKey || e.metaKey) || e.altKey || e.shiftKey) {
@@ -889,3 +896,83 @@ function crearBarraMarkdown(area, nombre, alCambiar) {
     });
     return barra;
 }
+
+// =========================================
+// LA BARRA VA CONTIGO
+// =========================================
+// Escribiendo en un texto largo, al bajar, los botones se quedarían arriba,
+// fuera de la pantalla. Mientras el foco está en ese texto (o en sus
+// botones) y su barra se ha ido por arriba, la barra se queda pegada
+// arriba de la pantalla, del ancho del texto, hasta que el texto se acaba.
+// Con position: fixed y JavaScript, no con sticky (que en el navegador de
+// Richi no va fino). En su sitio queda un hueco de su alto, para que el
+// texto no salte.
+//   barra   la barra de botones
+//   campo   hasta dónde llega (el redactor entero, o el <textarea>)
+//   foco    dónde tiene que estar el foco (un elemento o una lista)
+function seguirConLaBarra(barra, campo, foco) {
+    if (barra.hueco) {
+        return;
+    }
+    const hueco = crearEditor("div", "barra-hueco");
+    hueco.setAttribute("aria-hidden", "true");
+    barra.before(hueco);
+    barra.hueco = hueco;
+    BARRAS_QUE_SIGUEN.push({ barra, campo, foco: [].concat(foco) });
+}
+
+function colocarBarrasRedactor() {
+    const activo = document.activeElement;
+    // Las de lo que ya no está (otra página abierta), fuera de la lista.
+    for (let i = BARRAS_QUE_SIGUEN.length - 1; i >= 0; i -= 1) {
+        if (!BARRAS_QUE_SIGUEN[i].barra.isConnected && BARRAS_QUE_SIGUEN[i].campo.dataset.visto) {
+            BARRAS_QUE_SIGUEN.splice(i, 1);
+        }
+    }
+    BARRAS_QUE_SIGUEN.forEach((b) => {
+        const { barra, campo } = b;
+        const hueco = barra.hueco;
+        if (!barra.isConnected || !hueco || !hueco.isConnected) {
+            return;
+        }
+        campo.dataset.visto = "1";
+        const conFoco = b.foco.some((f) => f && f.contains(activo));
+        const arriba = hueco.getBoundingClientRect();
+        const abajo = campo.getBoundingClientRect().bottom;
+        const alto = barra.offsetHeight;
+        const pegar = conFoco && arriba.top < 0 && abajo > alto + 48;
+        if (pegar) {
+            if (!barra.classList.contains("va-contigo")) {
+                hueco.style.height = alto + "px";
+                barra.classList.add("va-contigo");
+            }
+            barra.style.left = arriba.left + "px";
+            barra.style.width = arriba.width + "px";
+        } else if (barra.classList.contains("va-contigo")) {
+            barra.classList.remove("va-contigo");
+            barra.style.left = "";
+            barra.style.width = "";
+            hueco.style.height = "";
+        }
+    });
+}
+
+(() => {
+    let pedido = false;
+    const pedir = () => {
+        if (pedido) {
+            return;
+        }
+        pedido = true;
+        requestAnimationFrame(() => {
+            pedido = false;
+            colocarBarrasRedactor();
+        });
+    };
+    window.addEventListener("scroll", pedir, { passive: true });
+    window.addEventListener("resize", pedir);
+    document.addEventListener("focusin", pedir);
+    document.addEventListener("focusout", () => setTimeout(pedir, 0));
+    // Lo que se escribe hace crecer el texto: también cuenta.
+    document.addEventListener("input", pedir);
+})();

@@ -185,6 +185,17 @@
                     <button type="submit">Abrir</button>
                 </div>
             </form>
+            <section class="bloque" aria-labelledby="t-wiki-arbol">
+                <h2 id="t-wiki-arbol">Todas las páginas, por carpetas</h2>
+                <p class="ayuda">Como están en la carpeta wiki/ del proyecto. Las de cada tipo de cosa (Personajes, Lugares,
+                    Monstruos…) es donde va a parar cada página nueva según su plantilla; las vacías están esperando.</p>
+                <div class="campo">
+                    <label for="wiki-arbol-buscar">Buscar por el nombre</label>
+                    <input id="wiki-arbol-buscar" autocomplete="off" spellcheck="false">
+                </div>
+                <p class="ayuda" data-wiki-arbol-cuantas aria-live="polite"></p>
+                <ul class="faltan" data-wiki-arbol></ul>
+            </section>
             <div class="grandes grandes-abajo" data-fichas-de="wiki"></div>
         </section>
 

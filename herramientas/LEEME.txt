@@ -64,7 +64,10 @@
       carpeta, en WebP), tablas y rayas. Al pasar por encima de un
       icono (o llegar con el tabulador) sale un globo grande con lo que
       hace; el lector de pantalla dice su nombre. El último (HTML)
-      enseña lo que hay debajo y deja tocarlo. Lo que se pega de otro sitio llega limpio (sin colores
+      enseña lo que hay debajo y deja tocarlo. LA BARRA VA CONTIGO: con
+      el cursor en un texto largo, al bajar, los botones se quedan
+      arriba de la pantalla hasta que el texto se acaba (en todos los
+      textos con botones, también los de la wiki). Lo que se pega de otro sitio llega limpio (sin colores
       ni letras raras). Abajo, una barra fija: Guardar (Ctrl+S),
       Guardar y pasar a la web (rehace listados, RSS y buscador),
       Publicar / Volver a borrador (como publicar.py) y Ver cómo queda.
@@ -96,6 +99,13 @@
       evento de la línea de tiempo) lleva encima LOS MISMOS ICONOS, que
       ponen las marcas: **negrita**, ## Título, - lista, > cita…
       (Ctrl+B y Ctrl+I también; Ctrl+Z lo deshace).
+      En la wiki, además: TODAS LAS PÁGINAS POR CARPETAS, como en
+      wiki/ (cerradas de salida; se acuerda de las que abres), con
+      buscador. Y en cada página, «Quitar» al lado de cada dato de la
+      ficha (se va su línea del .md, con su nota; si un título del
+      layout iba encima de él, pasa al siguiente dato) y de cada
+      apartado (con su título y los ### que tenga dentro). Se quita al
+      guardar; para arrepentirse, cerrar sin guardar.
     · IMÁGENES Y REPASAR: traer una imagen suelta (como
       traer-imagen.py, eligiéndola en una ventana), repasar el sitio
       entero (las cinco comprobaciones) y volver a generar.
@@ -1335,7 +1345,12 @@
   la de Forgotten Realms): Lugar, Personaje, Raza (y Subraza), Deidad,
   Religión, Organización, Monstruo, Objeto mágico, Acontecimiento, Era,
   Astro, Festividad e Idioma. No hay de país ni de región: el mapamundi
-  ya está completo. Algunas preguntan algo más al crearlas:
+  ya está completo. CADA TIPO TIENE SU CARPETA en wiki/ (la que dice su
+  «# carpeta:»): Lugares, Personajes, Razas, Religiones, Organizaciones,
+  Monstruos, Objetos mágicos, Historia, Cosmología, Calendario e
+  Idiomas. Desde el 18-10-2026 están todas hechas aunque estén vacías
+  (con un .gitkeep dentro, que el generador no mira, para que git las
+  guarde), y salen así en el editor. Algunas preguntan algo más al crearlas:
 
     - LUGAR (ciudad, aldea, fortaleza, mazmorra, ruina, templo,
       paraje…): qué tipo de sitio es, de una lista (o uno nuevo: «Otro»),
