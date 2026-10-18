@@ -801,12 +801,28 @@ function pintarPasosDeGitWeb() {
     pasoDeGitWeb(pasos, "Guárdalo con su mensaje (un commit):", "git commit -m \"" + mensaje + "\"");
     pasoDeGitWeb(pasos, "Súbelo a GitHub, a tu rama (la primera vez puede pedirte entrar en GitHub):",
         "git push origin " + rama);
+    const deshacer = $("[data-git-deshacer]");
+    deshacer.textContent = "";
+    pasoDeGitWeb(deshacer, "Ver los últimos commits (los cambios guardados), del más nuevo al más viejo:",
+        "git log --oneline -5");
+    pasoDeGitWeb(deshacer, "Quitar el último commit que AÚN NO has subido, pero quedándote con los cambios (como"
+        + " si no lo hubieras guardado; luego puedes volver a hacerlo con otro mensaje):", "git reset --soft HEAD~1");
+    pasoDeGitWeb(deshacer, "Quitar el último commit que AÚN NO has subido y tirar sus cambios (se pierde):",
+        "git reset --hard HEAD~1");
+    pasoDeGitWeb(deshacer, "Deshacer un commit que YA está subido: crea otro commit que lo deshace (no se pierde"
+        + " nada, queda en la historia). Después, súbelo con git push origin " + rama + ":", "git revert HEAD");
+    pasoDeGitWeb(deshacer, "Tirar todo lo cambiado que aún no has guardado con commit, en archivos que ya existían"
+        + " (se pierde):", "git restore .");
+    pasoDeGitWeb(deshacer, "Y borrar los archivos nuevos que aún no has guardado (se pierden; para ver antes cuáles"
+        + " serían: git clean -n):", "git clean -fd");
+    pasoDeGitWeb(deshacer, "Dejarlo todo exactamente como está en GitHub, en tu rama, tirando lo tuyo que no esté"
+        + " subido (se pierde):", "git fetch origin && git reset --hard origin/" + rama);
     const otros = $("[data-git-otros]");
     otros.textContent = "";
     pasoDeGitWeb(otros, "Pasar lo de la rama desarrollo a main (lo que sale en la web), y volver a desarrollo:",
         "git switch main && git pull && git merge desarrollo && git push origin main && git switch desarrollo");
     pasoDeGitWeb(otros, "Cambiar a la rama desarrollo (o a main, cambiando el nombre):", "git switch desarrollo");
-    pasoDeGitWeb(otros, "Deshacer lo cambiado en un archivo que aún no has guardado con commit:",
+    pasoDeGitWeb(otros, "Tirar lo cambiado en un solo archivo que aún no has guardado con commit (se pierde):",
         "git restore \"ruta/del/archivo\"");
     pasoDeGitWeb(otros, "Si la carpeta no es un repositorio (git dice «not a git repository»), bájalo de GitHub"
         + " en una carpeta nueva:", "git clone " + d.repositorio);

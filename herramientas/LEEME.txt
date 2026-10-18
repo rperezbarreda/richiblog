@@ -149,7 +149,11 @@
     · GUARDAR EN GITHUB (en Comandos): una guía de comandos para hacerlo
       tú en la consola (ir a la carpeta, git status, git pull, git add
       -A, git commit con tu mensaje, git push a tu rama), cada uno con
-      «Copiar», ya con la carpeta, la rama y el mensaje puestos; y otras
+      «Copiar», ya con la carpeta, la rama y el mensaje puestos; cómo
+      DESHACER (quitar el último commit sin subir, quedándote o no con
+      sus cambios; deshacer uno ya subido con git revert; tirar lo sin
+      guardar; dejarlo todo como en GitHub), con lo que se pierde dicho;
+      y otras
       cosas que a veces hacen falta (pasar desarrollo a main, cambiar de
       rama, bajar el repositorio, instalar git). Si se puede, dice en qué
       rama estás y qué hay cambiado. El editor no sube nada solo.
