@@ -4,7 +4,8 @@
 # orden: 2
 # elige clase: ¿Qué tipo de sitio es? | Asentamientos=Asentamiento | Fortalezas=Fortaleza | Mazmorras y ruinas=Mazmorra o ruina | Templos y santuarios=Templo | Parajes=Paraje | Otro
 # busca donde: ¿En qué país o zona está? (vale un trozo del nombre)
-# carpeta: Lugares
+# carpeta: junto a {{donde}}
+# si no está: Lugares
 title: "{{nombre}}"
 subtitle: ""
 infobox: "{{clase_uno}}"

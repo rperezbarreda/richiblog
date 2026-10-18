@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-aDtzI6QgHfitL7afCewTh/rpYprDOJvupEIYVZKPk8Y='; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self' https://script.google.com https://script.googleusercontent.com; object-src 'none'; base-uri 'self'; form-action 'self'">
+    <!-- ==== TEMA ==== -->
+    <meta name="theme-color" content="#12091c">
+    <script>
+      (function () {
+        document.documentElement.classList.add("js");
+        try {
+          var temas = {
+            "claro": ["light", "#f3e1d6"],
+            "oscuro-puro": ["puro-oscuro", "#000000"],
+            "claro-puro": ["puro-claro", "#ffffff"],
+            "tranquilo": ["tranquilo", "#f2efe9"],
+            "tranquilo-oscuro": ["tranquilo-oscuro", "#1b1e22"],
+            "terminal-verde": ["terminal-verde", "#000000"],
+            "terminal-azul": ["terminal-azul", "#000000"],
+            "terminal-rojo": ["terminal-rojo", "#000000"],
+            "terminal-ambar": ["terminal-ambar", "#000000"]
+          };
+          var guardado = localStorage.getItem("richi-theme");
+          var elegido = temas[guardado];
+          if (!elegido && !guardado &&
+              window.matchMedia("(prefers-color-scheme: light)").matches) {
+            elegido = temas.claro;
+          }
+          if (elegido) {
+            document.documentElement.setAttribute("data-theme", elegido[0]);
+            var barra = document.querySelector('meta[name="theme-color"]');
+            if (barra) { barra.setAttribute("content", elegido[1]); }
+          }
+          if (localStorage.getItem("richi-lateral") === "plegada") {
+            document.documentElement.classList.add("lateral-plegada");
+          }
+        } catch (e) {}
+      })();
+    </script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tierras Reflejadas · Wiki Cralëa · El Blog de Richi</title>
+    <meta name="description" content="Tierras Reflejadas está en Partaria.">
+    <link rel="canonical" href="https://richi.blog/web/wiki/mapamundi/partaria/tierras_reflejadas/tierras_reflejadas.html">
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="El Blog de Richi">
+    <meta property="og:locale" content="es_ES">
+    <meta property="og:title" content="Tierras Reflejadas · Wiki Cralëa · El Blog de Richi">
+    <meta property="og:description" content="Tierras Reflejadas está en Partaria.">
+    <meta property="og:url" content="https://richi.blog/web/wiki/mapamundi/partaria/tierras_reflejadas/tierras_reflejadas.html">
+    <meta property="og:image" content="https://richi.blog/imagenes/meta/og.webp">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta property="og:image:alt" content="El Blog de Richi — ilustración de Richi sobre fondo morado">
+    <meta name="twitter:card" content="summary_large_image">
+    <link rel="icon" type="image/x-icon" href="/imagenes/favicon.ico">
+    <link rel="preload" href="/tipografias/space-grotesk-400.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="alternate" type="application/rss+xml" title="El Blog de Richi — blog, relatos y rol" href="/blog/rss.xml">
+    <!-- ==== CSS ==== -->
+    <link rel="stylesheet" href="/estilos/paquete-comun.css?v=42e63d33">
+    <link rel="stylesheet" href="/ligero/estilos/paginas/mundo.css?v=d124f7d8">
+    <link rel="stylesheet" href="/ligero/estilos/componentes/lupa.css?v=bd5208ae">
+    <link rel="stylesheet" href="/ligero/estilos/paginas/mundo.responsive.css?v=ea708468">
+    <link rel="stylesheet" href="/estilos/paquete-cierre.css?v=a49d87f4">
+    <!-- ==== fin del CSS ==== -->
+    <script src="/ligero/scripts/cargador-scripts.js?v=cee4ebcb"></script>
+    <!-- ==== JS ==== -->
+    <script defer src="/scripts/paquete-comun.js?v=5806fd68"></script>
+    <script defer src="/ligero/scripts/componentes/lupa.js?v=cce10cd1"></script>
+    <script defer src="/ligero/scripts/paginas/mundo.js?v=449db41a"></script>
+    <!-- ==== fin del JS ==== -->
+    </head>
+<body>
+    <a class="skip-link" href="#main-content">Saltar al contenido</a>
+    <div id="sidebar-container" data-fragmento="barra-lateral">
+<!-- ==== FRAGMENTO barra-lateral ==== -->
+<header class="mobile-topbar">
+    <button id="sidebar-toggle" class="sidebar-toggle" type="button" aria-expanded="false" aria-controls="sidebar">
+        <span aria-hidden="true">☰</span>
+        <span class="visually-hidden">Abrir menú</span>
+    </button>
+    <p class="mobile-topbar-title"><span aria-hidden="true">·🜏·</span> EL BLOG DE RICHI</p>
+</header>
+
+<button class="ajustes-abrir" type="button" data-ajustes-abrir
+        aria-haspopup="dialog">
+    <span class="ajustes-abrir-aa" aria-hidden="true">Aa</span>
+    <span class="ajustes-abrir-texto">ACCESIBILIDAD</span>
+</button>
+
+<dialog class="ajustes" data-ajustes aria-labelledby="ajustes-titulo">
+    <div class="ajustes-barra">
+        <h2 id="ajustes-titulo">accesibilidad.cfg</h2>
+        <button class="ajustes-cerrar" type="button" data-ajustes-cerrar>
+            <svg class="window-btn-icono" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                <path d="M5.5 5.5L18.5 18.5M18.5 5.5L5.5 18.5" fill="none"
+                      stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
+            </svg>
+            <span class="visually-hidden">Cerrar los ajustes</span>
+        </button>
+    </div>
+
+    <div class="ajustes-cuerpo">
+        <div class="ajustes-fila">
+            <label class="ajustes-nombre" for="ajustes-tamano">tamaño del texto</label>
+            <div class="ajustes-deslizador">
+                <span class="ajustes-aa ajustes-aa-pequena" aria-hidden="true">Aa</span>
+                <input class="ajustes-rango" type="range" id="ajustes-tamano"
+                       min="0" max="4" step="1" value="1"
+                       list="ajustes-tamano-marcas" data-tamano-rango>
+                <datalist id="ajustes-tamano-marcas">
+                    <option value="0"></option>
+                    <option value="1"></option>
+                    <option value="2"></option>
+                    <option value="3"></option>
+                    <option value="4"></option>
+                </datalist>
+                <span class="ajustes-aa ajustes-aa-grande" aria-hidden="true">Aa</span>
+            </div>
+            <p class="ajustes-valor" role="status">
+                <span class="visually-hidden">Texto al </span><span data-tamano-valor>100%</span>
+            </p>
+        </div>
+
+        <div class="ajustes-fila">
+            <p class="ajustes-nombre" id="ajustes-interlineado-nombre">separación entre líneas</p>
+            <div class="ajustes-mandos" role="group" aria-labelledby="ajustes-interlineado-nombre">
+                <button class="ajustes-opcion" type="button" data-interlineado="" aria-pressed="true">por defecto</button>
+                <button class="ajustes-opcion" type="button" data-interlineado="amplio" aria-pressed="false">amplia</button>
+                <button class="ajustes-opcion" type="button" data-interlineado="muy-amplio" aria-pressed="false">muy amplia</button>
+            </div>
+        </div>
+
+        <div class="ajustes-fila">
+            <p class="ajustes-nombre" id="ajustes-letra-nombre">la letra</p>
+            <div class="ajustes-mandos" role="group" aria-labelledby="ajustes-letra-nombre">
+                <button class="ajustes-opcion" type="button" data-letra="" aria-pressed="true">por defecto</button>
+                <button class="ajustes-opcion" type="button" data-letra="legible" aria-pressed="false">más legible</button>
+            </div>
+        </div>
+
+        <div class="ajustes-fila">
+            <p class="ajustes-nombre" id="ajustes-voz-nombre">velocidad de la voz</p>
+            <div class="ajustes-mandos" role="group" aria-labelledby="ajustes-voz-nombre">
+                <button class="ajustes-opcion" type="button" data-voz="lenta" aria-pressed="false">lenta</button>
+                <button class="ajustes-opcion" type="button" data-voz="" aria-pressed="true">normal</button>
+                <button class="ajustes-opcion" type="button" data-voz="rapida" aria-pressed="false">rápida</button>
+            </div>
+        </div>
+
+        <div class="ajustes-fila">
+            <p class="ajustes-nombre" id="ajustes-tema-nombre">color de tema</p>
+            <p class="ajustes-grupo-titulo" id="ajustes-tema-leer">para leer</p>
+            <div class="ajustes-mandos ajustes-temas" role="group" aria-labelledby="ajustes-tema-nombre ajustes-tema-leer">
+                <button class="ajustes-opcion" type="button" data-tema="oscuro" aria-pressed="true">
+                    <span class="ajustes-emoji" aria-hidden="true">🌙</span>oscuro</button>
+                <button class="ajustes-opcion" type="button" data-tema="claro" aria-pressed="false">
+                    <span class="ajustes-emoji" aria-hidden="true">☀️</span>claro</button>
+                <button class="ajustes-opcion" type="button" data-tema="oscuro-puro" aria-pressed="false">
+                    <span class="ajustes-emoji" aria-hidden="true">🌑</span>oscuro puro</button>
+                <button class="ajustes-opcion" type="button" data-tema="claro-puro" aria-pressed="false">
+                    <span class="ajustes-emoji" aria-hidden="true">🌕</span>claro puro</button>
+                <button class="ajustes-opcion" type="button" data-tema="tranquilo-oscuro" aria-pressed="false">
+                    <span class="ajustes-emoji" aria-hidden="true">🌿</span>tranquilo oscuro</button>
+                <button class="ajustes-opcion" type="button" data-tema="tranquilo" aria-pressed="false">
+                    <span class="ajustes-emoji" aria-hidden="true">🍃</span>tranquilo</button>
+            </div>
+
+            <p class="ajustes-grupo-titulo" id="ajustes-tema-adorno">de adorno</p>
+            <div class="ajustes-mandos ajustes-temas" role="group" aria-labelledby="ajustes-tema-nombre ajustes-tema-adorno">
+                <button class="ajustes-opcion" type="button" data-tema="terminal-verde" aria-pressed="false">
+                    <span class="ajustes-emoji" aria-hidden="true">🟢</span>terminal verde</button>
+                <button class="ajustes-opcion" type="button" data-tema="terminal-azul" aria-pressed="false">
+                    <span class="ajustes-emoji" aria-hidden="true">🔵</span>terminal azul</button>
+                <button class="ajustes-opcion" type="button" data-tema="terminal-rojo" aria-pressed="false">
+                    <span class="ajustes-emoji" aria-hidden="true">🔴</span>terminal rojo</button>
+                <button class="ajustes-opcion" type="button" data-tema="terminal-ambar" aria-pressed="false">
+                    <span class="ajustes-emoji" aria-hidden="true">🟡</span>terminal ámbar</button>
+            </div>
+            <p class="ajustes-grupo-nota">
+                Estas opciones de consola antigua no respetan el contraste mínimo de
+                accesibilidad, son meramente estéticas.
+            </p>
+        </div>
+
+        <div class="ajustes-fila">
+            <p class="ajustes-nombre">efectos visuales</p>
+            <div class="ajustes-mandos ajustes-mandos-anchos">
+                <button id="cursor-trail-toggle" class="theme-toggle" type="button" aria-pressed="true">
+                    <span class="theme-toggle-icon" aria-hidden="true">✦</span>
+                    <span class="cursor-trail-toggle-text">BRILLITO: ON</span>
+                </button>
+                <button class="theme-toggle" type="button" data-crt-boton aria-pressed="false">
+                    <span class="theme-toggle-icon" aria-hidden="true">▧</span>
+                    <span class="ajustes-crt-texto">FILTRO <abbr title="Cathode Ray Tube: los monitores de tubo de antes, con sus rayas y las esquinas apagadas">CRT</abbr>: <span data-crt-estado>OFF</span></span>
+                </button>
+            </div>
+        </div>
+
+        <div class="ajustes-fila">
+            <p class="ajustes-nombre" id="ajustes-movimiento-nombre">animaciones</p>
+            <div class="ajustes-mandos" role="group" aria-labelledby="ajustes-movimiento-nombre">
+                <button class="ajustes-opcion" type="button" data-movimiento="" aria-pressed="true">normal</button>
+                <button class="ajustes-opcion" type="button" data-movimiento="quieto" aria-pressed="false">sin animaciones</button>
+            </div>
+        </div>
+    </div>
+</dialog>
+
+<div id="sidebar-backdrop" class="sidebar-backdrop" hidden></div>
+
+<aside class="sidebar" id="sidebar">
+    <div class="sidebar-logo">
+        <p><span aria-hidden="true">·🜏·</span> EL BLOG DE RICHI</p>
+    </div>
+    <button id="lateral-plegar" class="lateral-plegar" type="button"
+            aria-expanded="true" aria-controls="sidebar-menu" title="Plegar el menú">
+        <span aria-hidden="true">☰</span>
+        <span class="visually-hidden">Menú</span>
+    </button>
+    <button class="buscar-flotante" type="button" data-buscar-lupa
+            aria-haspopup="dialog" title="Buscar en toda la web">
+        <span class="buscar-lupa" aria-hidden="true"></span>
+        <span class="visually-hidden">Buscar</span>
+    </button>
+    <div class="sidebar-top" id="sidebar-menu">
+        <nav>
+        <a href="/index.html">home</a>
+            <div class="nav-group">
+                <button class="nav-toggle" type="button" aria-expanded="false">
+                    <span>mis movidas</span>
+                    <span class="arrow" aria-hidden="true">+</span>
+                </button>
+
+                <div class="submenu">
+                    <a href="/web/mis_movidas/relatos/index_relatos.html">relatos</a>
+                    <a href="/web/mis_movidas/rol/index_rol.html">recursos de rol</a>
+                </div>
+            </div>
+
+            <div class="nav-group">
+                <button class="nav-toggle" type="button" aria-expanded="false">
+                    <span>blog</span>
+                    <span class="arrow" aria-hidden="true">+</span>
+                </button>
+
+                <div class="submenu">
+                    <a href="/web/blog/diario.html">diario</a>
+                    <a href="/web/blog/2026/index_2026.html">2026</a>
+                </div>
+            </div>
+
+            <div class="nav-group open">
+                <button class="nav-toggle" type="button" aria-expanded="true">
+                    <span>roleito</span>
+                    <span class="arrow" aria-hidden="true">−</span>
+                </button>
+
+                <div class="submenu">
+                    <div class="nav-group">
+                        <button class="nav-toggle" type="button" aria-expanded="false">
+                            <span>notas de rol</span>
+                            <span class="arrow" aria-hidden="true">+</span>
+                        </button>
+
+                        <div class="submenu">
+                            <a href="/web/notas_rol/ragna/index_ragna.html">campaña de Ragna</a>
+                        </div>
+                    </div>
+
+                    <a class="active" href="/web/wiki/index_wiki.html" aria-current="true">wiki cralëa</a>
+                </div>
+            </div>
+
+            <div class="nav-group">
+                <button class="nav-toggle" type="button" aria-expanded="false">
+                    <span>mi rincón</span>
+                    <span class="arrow" aria-hidden="true">+</span>
+                </button>
+
+                <div class="submenu">
+                    <a href="/web/sobre_mi/sobre_mi.html">quién soy</a>
+                    <a href="/web/en_lo_que_ando/en_lo_que_ando.html">en lo que ando</a>
+                    <a href="/web/santuarios/index_santuarios.html">santuarios</a>
+                    <a href="/web/recomendaciones/recomendaciones.html">recomendaciones</a>
+                </div>
+            </div>
+
+        <a href="/web/contacto/contacto.html">contacto y guestbook</a>
+        <a href="/web/accesibilidad/accesibilidad.html">accesibilidad</a>
+        </nav>
+
+        <button class="buscar-lupa-boton" type="button" data-buscar-lupa
+                aria-haspopup="dialog">
+            <span class="buscar-lupa" aria-hidden="true"></span>
+            <span class="buscar-lupa-texto">buscar</span>
+        </button>
+    </div>
+
+    <div class="gatin-random" data-gatin-random hidden>
+        <div class="gatin-random-header">
+            <h2>gatin_random.exe</h2>
+            <div class="window-controls window-controls-small" data-window-controls aria-hidden="true"></div>
+        </div>
+        <div class="gatin-random-body" data-gatin-body></div>
+    </div>
+
+</aside>
+
+<dialog class="buscar-modal" data-buscar-modal aria-labelledby="buscar-modal-titulo">
+    <div class="ajustes-barra">
+        <h2 id="buscar-modal-titulo">buscador.exe</h2>
+        <button class="ajustes-cerrar" type="button" data-buscar-modal-cerrar>
+            <svg class="window-btn-icono" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                <path d="M5.5 5.5L18.5 18.5M18.5 5.5L5.5 18.5" fill="none"
+                      stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
+            </svg>
+            <span class="visually-hidden">Cerrar la búsqueda</span>
+        </button>
+    </div>
+    <div class="buscar-modal-cuerpo">
+        <form class="buscar-form" role="search" method="get"
+              action="/web/buscar/buscar.html">
+            <label class="buscar-form-label" for="buscar-modal-campo">buscar en toda la web:</label>
+            <div class="buscar-form-caja">
+                <input class="buscar-form-campo" type="search"
+                       id="buscar-modal-campo" name="q"
+                       placeholder="una palabra, un título…"
+                       autocomplete="off" spellcheck="false">
+                <button class="buscar-form-enviar" type="submit">
+                    <span class="buscar-lupa" aria-hidden="true"></span>
+                    <span class="buscar-form-enviar-texto">buscar</span>
+                </button>
+            </div>
+            <p class="buscar-ayuda">
+                Mira el título, la sección, las categorías y
+                <strong>lo que pone dentro</strong> de las entradas y los
+                relatos. Da igual con tildes o sin ellas.
+            </p>
+        </form>
+    </div>
+</dialog>
+<!-- ==== fin del FRAGMENTO barra-lateral ==== -->
+    </div>
+
+    <main id="main-content">
+        <section id="home" class="home mundo-page">
+            <div class="mundo-cabecera">
+                <div class="mundo-migas" role="navigation" aria-label="Dónde estás"><ol><li><a href="/web/wiki/index_wiki.html">Wiki Cralëa</a></li><li><a href="/web/wiki/index_wiki.html#mundo-regiones-titulo">Mapamundi</a></li><li><a href="/web/wiki/mapamundi/partaria/partaria.html">Partaria</a></li><li aria-current="page">Tierras Reflejadas</li></ol></div>
+                <h1 class="mundo-titulo">Tierras Reflejadas</h1>
+                
+                <p class="mundo-etiquetas"><span class="mundo-etiquetas-label">etiquetas:</span><a class="mundo-etiqueta" href="/web/wiki/index_wiki.html?buscar=Mapamundi">Mapamundi</a><a class="mundo-etiqueta" href="/web/wiki/index_wiki.html?buscar=Partaria">Partaria</a></p>
+            </div>
+
+            <div class="mundo-columnas">
+                <article class="mundo-articulo"><div class="mundo-esbozo" role="note"><span class="mundo-esbozo-icono" aria-hidden="true">✎</span><div class="mundo-esbozo-texto"><p><strong>Esta página es un esbozo.</strong> Le falta:</p><ul><li>escribir 4 apartados, que aún tienen el texto de relleno</li><li>decidir 16 de los 17 datos de la ficha</li></ul></div></div><p><strong>Tierras Reflejadas</strong> está en <a class="mundo-enlace" href="/web/wiki/mapamundi/partaria/partaria.html">Partaria</a>.</p>
+<h2 id="historia">Historia</h2>
+<p><em>Texto de relleno.</em> Aquí irá la historia de Tierras Reflejadas: cómo empezó, quién la ha gobernado y qué la ha cambiado con los siglos.</p>
+<h3 id="origenes">Orígenes</h3>
+<p><em>Texto de relleno.</em> De dónde viene su gente, cuándo se asentó aquí y qué queda de aquellos primeros tiempos.</p>
+<h2 id="gobierno_y_sociedad">Gobierno y sociedad</h2>
+<p><em>Texto de relleno.</em> Quién manda en Tierras Reflejadas, cómo se eligen sus líderes y cómo vive la gente corriente.</p>
+<h2 id="cultura">Cultura</h2>
+<p><em>Texto de relleno.</em> Sus costumbres, sus fiestas, lo que comen y lo que cuentan de sí mismos.</p><div class="mundo-navbox" role="navigation" aria-labelledby="mundo-navbox-titulo"><h2 class="mundo-navbox-titulo" id="mundo-navbox-titulo">Países de <a class="mundo-enlace" href="/web/wiki/mapamundi/partaria/partaria.html">Partaria</a></h2><ul><li><img class="mundo-navbox-bandera" src="/imagenes/wiki/academia_de_rosamica.webp" alt="" width="24" height="16" loading="lazy" decoding="async"><a class="mundo-enlace" href="/web/wiki/mapamundi/partaria/academia_de_rosamica/academia_de_rosamica.html">Academia de Rosamica</a></li><li><img class="mundo-navbox-bandera" src="/imagenes/wiki/alianza_de_sepon.webp" alt="" width="24" height="16" loading="lazy" decoding="async"><a class="mundo-enlace" href="/web/wiki/mapamundi/partaria/alianza_de_sepon/alianza_de_sepon.html">Alianza de Sepón</a></li><li><img class="mundo-navbox-bandera" src="/imagenes/wiki/bosque_de_utalis.webp" alt="" width="24" height="16" loading="lazy" decoding="async"><a class="mundo-enlace" href="/web/wiki/mapamundi/partaria/bosque_de_utalis/bosque_de_utalis.html">Bosque de Utalis</a></li><li><img class="mundo-navbox-bandera" src="/imagenes/wiki/ciudad_santa_de_ablanamaz.webp" alt="" width="24" height="16" loading="lazy" decoding="async"><a class="mundo-enlace" href="/web/wiki/mapamundi/partaria/ciudad_santa_de_ablanamaz/ciudad_santa_de_ablanamaz.html">Ciudad Santa de Ablanamaz</a></li><li><img class="mundo-navbox-bandera" src="/imagenes/wiki/coronas_del_viento.webp" alt="" width="24" height="16" loading="lazy" decoding="async"><a class="mundo-enlace" href="/web/wiki/mapamundi/partaria/coronas_del_viento/coronas_del_viento.html">Coronas del Viento</a></li><li><img class="mundo-navbox-bandera" src="/imagenes/wiki/cumbres_de_ath.webp" alt="" width="24" height="16" loading="lazy" decoding="async"><a class="mundo-enlace" href="/web/wiki/mapamundi/partaria/cumbres_de_ath/cumbres_de_ath.html">Cumbres de Ath</a></li><li><img class="mundo-navbox-bandera" src="/imagenes/wiki/custodios_de_parta.webp" alt="" width="24" height="16" loading="lazy" decoding="async"><a class="mundo-enlace" href="/web/wiki/mapamundi/partaria/custodios_de_parta/custodios_de_parta.html">Custodios de Parta</a></li><li><img class="mundo-navbox-bandera" src="/imagenes/wiki/imperio_friscadio.webp" alt="" width="24" height="16" loading="lazy" decoding="async"><a class="mundo-enlace" href="/web/wiki/mapamundi/partaria/imperio_friscadio/imperio_friscadio.html">Imperio Friscadio</a></li><li><img class="mundo-navbox-bandera" src="/imagenes/wiki/maharato_de_sulkaladesh.webp" alt="" width="24" height="16" loading="lazy" decoding="async"><a class="mundo-enlace" href="/web/wiki/mapamundi/partaria/maharato_de_sulkaladesh/maharato_de_sulkaladesh.html">Maharato de Sulkaladésh</a></li><li><img class="mundo-navbox-bandera" src="/imagenes/wiki/mandato_de_acratang.webp" alt="" width="24" height="16" loading="lazy" decoding="async"><a class="mundo-enlace" href="/web/wiki/mapamundi/partaria/mandato_de_acratang/mandato_de_acratang.html">Mandato de Acratang</a></li><li><img class="mundo-navbox-bandera" src="/imagenes/wiki/mandato_de_nisi.webp" alt="" width="24" height="16" loading="lazy" decoding="async"><a class="mundo-enlace" href="/web/wiki/mapamundi/partaria/mandato_de_nisi/mandato_de_nisi.html">Mandato de Nisi</a></li><li><img class="mundo-navbox-bandera" src="/imagenes/wiki/mandato_de_panchan.webp" alt="" width="24" height="16" loading="lazy" decoding="async"><a class="mundo-enlace" href="/web/wiki/mapamundi/partaria/mandato_de_panchan/mandato_de_panchan.html">Mandato de Panchan</a></li><li><img class="mundo-navbox-bandera" src="/imagenes/wiki/mandato_de_taz_ju.webp" alt="" width="24" height="16" loading="lazy" decoding="async"><a class="mundo-enlace" href="/web/wiki/mapamundi/partaria/mandato_de_taz_ju/mandato_de_taz_ju.html">Mandato de Taz-Ju</a></li><li><img class="mundo-navbox-bandera" src="/imagenes/wiki/mandato_de_zo.webp" alt="" width="24" height="16" loading="lazy" decoding="async"><a class="mundo-enlace" href="/web/wiki/mapamundi/partaria/mandato_de_zo/mandato_de_zo.html">Mandato de Zó</a></li><li><img class="mundo-navbox-bandera" src="/imagenes/wiki/mercado_de_dao_yeni.webp" alt="" width="24" height="16" loading="lazy" decoding="async"><a class="mundo-enlace" href="/web/wiki/mapamundi/partaria/mercado_de_dao_yeni/mercado_de_dao_yeni.html">Mercado de Dao-Yeni</a></li><li><img class="mundo-navbox-bandera" src="/imagenes/wiki/paramo_de_parta.webp" alt="" width="24" height="16" loading="lazy" decoding="async"><a class="mundo-enlace" href="/web/wiki/mapamundi/partaria/paramo_de_parta/paramo_de_parta.html">Páramo de Parta</a></li><li><img class="mundo-navbox-bandera" src="/imagenes/wiki/reino_de_kasa.webp" alt="" width="24" height="16" loading="lazy" decoding="async"><a class="mundo-enlace" href="/web/wiki/mapamundi/partaria/reino_de_kasa/reino_de_kasa.html">Reino de Kasa</a></li><li><img class="mundo-navbox-bandera" src="/imagenes/wiki/ruinas_de_goa.webp" alt="" width="24" height="16" loading="lazy" decoding="async"><a class="mundo-enlace" href="/web/wiki/mapamundi/partaria/ruinas_de_goa/ruinas_de_goa.html">Ruinas de Goa</a></li><li><img class="mundo-navbox-bandera" src="/imagenes/wiki/tierras_reflejadas.webp" alt="" width="24" height="16" loading="lazy" decoding="async"><strong aria-current="page">Tierras Reflejadas</strong></li><li><img class="mundo-navbox-bandera" src="/imagenes/wiki/tribu_boscalise.webp" alt="" width="24" height="16" loading="lazy" decoding="async"><a class="mundo-enlace" href="/web/wiki/mapamundi/partaria/tribu_boscalise/tribu_boscalise.html">Tribu Boscalise</a></li><li><img class="mundo-navbox-bandera" src="/imagenes/wiki/tribu_gogango.webp" alt="" width="24" height="16" loading="lazy" decoding="async"><a class="mundo-enlace" href="/web/wiki/mapamundi/partaria/tribu_gogango/tribu_gogango.html">Tribu Gogango</a></li><li><img class="mundo-navbox-bandera" src="/imagenes/wiki/tribu_kranimos.webp" alt="" width="24" height="16" loading="lazy" decoding="async"><a class="mundo-enlace" href="/web/wiki/mapamundi/partaria/tribu_kranimos/tribu_kranimos.html">Tribu Kránimos</a></li><li><img class="mundo-navbox-bandera" src="/imagenes/wiki/tribu_molosgo.webp" alt="" width="24" height="16" loading="lazy" decoding="async"><a class="mundo-enlace" href="/web/wiki/mapamundi/partaria/tribu_molosgo/tribu_molosgo.html">Tribu Molosgo</a></li><li><img class="mundo-navbox-bandera" src="/imagenes/wiki/tribu_ordasco.webp" alt="" width="24" height="16" loading="lazy" decoding="async"><a class="mundo-enlace" href="/web/wiki/mapamundi/partaria/tribu_ordasco/tribu_ordasco.html">Tribu Ordasco</a></li><li><img class="mundo-navbox-bandera" src="/imagenes/wiki/tribu_tuzno.webp" alt="" width="24" height="16" loading="lazy" decoding="async"><a class="mundo-enlace" href="/web/wiki/mapamundi/partaria/tribu_tuzno/tribu_tuzno.html">Tribu Tuzno</a></li><li><img class="mundo-navbox-bandera" src="/imagenes/wiki/tribu_utna.webp" alt="" width="24" height="16" loading="lazy" decoding="async"><a class="mundo-enlace" href="/web/wiki/mapamundi/partaria/tribu_utna/tribu_utna.html">Tribu Utná</a></li><li><img class="mundo-navbox-bandera" src="/imagenes/wiki/tribu_vadalacra.webp" alt="" width="24" height="16" loading="lazy" decoding="async"><a class="mundo-enlace" href="/web/wiki/mapamundi/partaria/tribu_vadalacra/tribu_vadalacra.html">Tribu Vadalacra</a></li><li><img class="mundo-navbox-bandera" src="/imagenes/wiki/valle_de_utan.webp" alt="" width="24" height="16" loading="lazy" decoding="async"><a class="mundo-enlace" href="/web/wiki/mapamundi/partaria/valle_de_utan/valle_de_utan.html">Valle de Után</a></li></ul></div></article>
+
+                <div class="mundo-lateral"><div class="mundo-contenido" role="navigation" aria-labelledby="mundo-contenido-titulo"><details class="mundo-contenido-plegable" open data-mundo-contenido><summary class="mundo-contenido-cabecera"><span class="mundo-sub-flecha" aria-hidden="true">▾</span><h2 class="mundo-contenido-titulo" id="mundo-contenido-titulo">Contenido</h2></summary><ol><li><a href="#historia">Historia</a><ol><li><a href="#origenes">Orígenes</a></li></ol></li><li><a href="#gobierno_y_sociedad">Gobierno y sociedad</a></li><li><a href="#cultura">Cultura</a></li><li><a href="#mundo-backlinks-titulo">Se habla de esto en</a></li></ol></details></div><aside class="mundo-ficha" role="note" aria-labelledby="mundo-ficha-titulo"><div class="mundo-emblemas" data-mundo-emblemas><ul class="mundo-emblemas-lista"><li class="mundo-emblema" data-mundo-emblema="Bandera"><figure><img class="mundo-emblema-img" src="/imagenes/wiki/tierras_reflejadas.webp" alt="Bandera de Tierras Reflejadas" loading="lazy" decoding="async"><figcaption>Bandera</figcaption></figure></li><li class="mundo-emblema" data-mundo-emblema="Mapa" data-mundo-pulsar="/datos/wiki/situacion/tierras_reflejadas.json"><figure><img class="mundo-emblema-img" src="/imagenes/wiki/situacion/tierras_reflejadas.webp" alt="Mapa de situación: Tierras Reflejadas resaltado en el Mapamundi de Cralëa" loading="lazy" decoding="async"><figcaption>Mapa</figcaption></figure></li></ul></div><h2 class="mundo-ficha-titulo" id="mundo-ficha-titulo">Tierras Reflejadas</h2><p class="mundo-ficha-que">País</p><dl class="mundo-ficha-datos"><div class="mundo-ficha-fila"><dt>región</dt><dd><a class="mundo-enlace" href="/web/wiki/mapamundi/partaria/partaria.html">Partaria</a></dd></div><div class="mundo-ficha-fila"><dt>nombre oficial</dt><dd><em>por decidir</em></dd></div><div class="mundo-ficha-fila"><dt>gentilicio</dt><dd><em>por decidir</em></dd></div><div class="mundo-ficha-apartado"><dt>Gobierno</dt><dd></dd></div><div class="mundo-ficha-fila"><dt>capital</dt><dd><em>por decidir</em></dd></div><div class="mundo-ficha-fila"><dt>forma de gobierno</dt><dd><em>por decidir</em></dd></div><div class="mundo-ficha-fila"><dt>gobernante</dt><dd><em>por decidir</em></dd></div><div class="mundo-ficha-fila"><dt>heredero</dt><dd><em>por decidir</em></dd></div><div class="mundo-ficha-fila"><dt>casa reinante</dt><dd><em>por decidir</em></dd></div><div class="mundo-ficha-apartado"><dt>Gentes</dt><dd></dd></div><div class="mundo-ficha-fila"><dt>población</dt><dd><em>por decidir</em></dd></div><div class="mundo-ficha-fila"><dt>pueblos</dt><dd><em>por decidir</em></dd></div><div class="mundo-ficha-fila"><dt>lenguas</dt><dd><em>por decidir</em></dd></div><div class="mundo-ficha-fila"><dt>religión</dt><dd><em>por decidir</em></dd></div><div class="mundo-ficha-fila"><dt>moneda</dt><dd><em>por decidir</em></dd></div><div class="mundo-ficha-apartado"><dt>Historia</dt><dd></dd></div><div class="mundo-ficha-fila"><dt>fundación</dt><dd><em>por decidir</em></dd></div><div class="mundo-ficha-fila"><dt>lema</dt><dd><em>por decidir</em></dd></div><div class="mundo-ficha-apartado"><dt>Relaciones</dt><dd></dd></div><div class="mundo-ficha-fila"><dt>aliados</dt><dd><em>por decidir</em></dd></div><div class="mundo-ficha-fila"><dt>enemigos</dt><dd><em>por decidir</em></dd></div></dl></aside></div>
+            </div>
+
+            <nav class="mundo-backlinks" aria-labelledby="mundo-backlinks-titulo"><h2 id="mundo-backlinks-titulo">Se habla de esto en</h2><ul><li><a class="mundo-enlace" href="/web/wiki/mapa_mapamundi_de_cralea.html">Mapamundi de Cralëa</a><span class="mundo-backlink-nota">mapa</span></li><li><a class="mundo-enlace" href="/web/wiki/mapamundi/partaria/partaria.html">Partaria</a></li></ul></nav>
+
+            <a class="mundo-volver mundo-volver-abajo" href="/web/wiki/index_wiki.html">← volver a la wiki</a>
+        </section>
+    </main>
+</body>
+</html>

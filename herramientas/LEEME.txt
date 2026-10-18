@@ -1345,7 +1345,14 @@
   la de Forgotten Realms): Lugar, Personaje, Raza (y Subraza), Deidad,
   Religión, Organización, Monstruo, Objeto mágico, Acontecimiento, Era,
   Astro, Festividad e Idioma. No hay de país ni de región: el mapamundi
-  ya está completo. CADA TIPO TIENE SU CARPETA en wiki/ (la que dice su
+  ya está completo. CADA PAÍS TIENE SU CARPETA (desde el 18-10-2026):
+  wiki/Mapamundi/Azarasia/Reino de Prunia/Reino de Prunia.md (y su
+  .cmap al lado), para ir metiendo dentro sus lugares, su gente o lo que
+  sea. Las regiones (Azarasia, Partaria, los archipiélagos) ya la
+  tenían. En la web, las direcciones cambiaron igual
+  (…/azarasia/reino_de_prunia/reino_de_prunia.html); las viejas llevan
+  a las nuevas (scripts/paginas/redirecciones.js). Un país nuevo, igual:
+  su carpeta con su nombre y el .md dentro. CADA TIPO TIENE SU CARPETA en wiki/ (la que dice su
   «# carpeta:»): Lugares, Personajes, Razas, Religiones, Organizaciones,
   Monstruos, Objetos mágicos, Historia, Cosmología, Calendario e
   Idiomas. Desde el 18-10-2026 están todas hechas aunque estén vacías
@@ -1357,7 +1364,10 @@
       que es su apartado dentro de «lugares»; y en qué país o zona está.
       Vale escribir un trozo del nombre («zadir»): busca entre las
       páginas que hay y deja elegir. Si no está, se queda escrito sin
-      enlace.
+      enlace. EL LUGAR SE GUARDA EN LA CARPETA DE ESE PAÍS (# carpeta:
+      junto a {{donde}}): una aldea de Prunia, en wiki/Mapamundi/
+      Azarasia/Reino de Prunia/. Si el país o la zona no tiene página,
+      a wiki/Lugares/.
     - RAZA: si es una raza (que podrá tener subrazas) o una subraza de
       una de las que ya hay, de una lista; o de una que aún no existe, y
       entonces crea también la página de la raza (ver LAS RAZAS, COMO EN
@@ -1923,8 +1933,9 @@
 
   EL MAPA DE UNA PÁGINA. Un .cmap con "page" es de esa página: se guarda
   en su carpeta con el mismo nombre (wiki/Mapamundi/Azarasia/Reino de
-  Prunia.cmap junto a Reino de Prunia.md; no se pisan, uno es .md y otro
-  .cmap), sale en la web como mapa_reino_de_prunia.html y la página
+  Prunia/Reino de Prunia.cmap junto a Reino de Prunia.md; no se pisan,
+  uno es .md y otro .cmap), sale en la web como
+  …/reino_de_prunia/mapa_reino_de_prunia.html y la página
   lleva arriba un botón, «Explorar el mapa del Reino de Prunia». El
   primero, el de Prunia, es el recorte ampliado del mapamundi
   (wiki/_imagenes/mapas/reino_de_prunia_mapa.webp, de 1920 px). Si hay
@@ -2200,7 +2211,7 @@
 
   UNA REGIÓN LLEVA A LA PÁGINA QUE SE LLAMA COMO ELLA. Si en el mapa no
   tiene puesto a dónde lleva, pero hay una página de la wiki con su mismo
-  nombre («Reino de Prunia» → wiki/Azarasia/Reino de Prunia.md), lleva a
+  nombre («Reino de Prunia» → su .md, esté en la carpeta que esté), lleva a
   esa. Así están enlazadas las 120 regiones del mapamundi sin tocar el
   .cmap, y una página nueva queda enlazada desde el mapa en cuanto existe
   (está en _destinos, en herramientas/3-generadores/mundo_mapas.py).
