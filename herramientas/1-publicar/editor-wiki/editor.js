@@ -8,6 +8,7 @@
 // dentro no es HTML.
 
 const TOKEN_EDITOR = (document.querySelector('meta[name="editor-token"]') || {}).content || "";
+let cuentaDeApartadosNuevos = 0;
 const estadoEditor = { datos: null, pagina: null, cambiado: false, guardando: false, quitar: [] };
 
 const $ = (sel, dentro) => (dentro || document).querySelector(sel);
@@ -248,6 +249,13 @@ async function empezarEditor() {
     }));
     empezarMoverEditor();
     $("#wiki-arbol-buscar").addEventListener("input", pintarArbolWikiEditor);
+    $("[data-apartado-nuevo-boton]").addEventListener("click", anadirApartadoEditor);
+    $("#apartado-nuevo-titulo").addEventListener("keydown", (e) => {
+        if (e.key === "Enter") {
+            e.preventDefault();
+            anadirApartadoEditor();
+        }
+    });
     pintarArbolWikiEditor();
     $("[data-abrir]").addEventListener("submit", (e) => {
         e.preventDefault();
@@ -788,7 +796,7 @@ function datosDeLaPaginaEditor() {
     document.querySelectorAll("[data-apartado]").forEach((el) => {
         apartados[Number(el.getAttribute("data-apartado"))] = el.value;
     });
-    return { campos, apartados, quitar: estadoEditor.quitar.slice() };
+    return { campos, apartados, quitar: estadoEditor.quitar.slice(), nuevos: apartadosNuevosEditor() };
 }
 
 // Un borrador recuperado, encima de lo que se acaba de abrir.
@@ -816,6 +824,19 @@ function ponerBorradorEditor(d) {
             estadoEditor.quitar.push(clave);
         }
     });
+    // Los añadidos, cada uno detrás del suyo.
+    (d.nuevos || []).slice().reverse().forEach((x) => {
+        cuentaDeApartadosNuevos += 1;
+        const caja = cajaDeApartadoEditor({ id: "apartado-nuevo-" + cuentaDeApartadosNuevos, nivel: x.nivel,
+            titulo: x.titulo, texto: x.texto });
+        const tras = document.querySelector('[data-apartado-caja="' + x.despues + '"]');
+        if (tras) {
+            tras.after(caja);
+        } else {
+            $("[data-apartados]").appendChild(caja);
+        }
+    });
+    pintarDondeVaElNuevoEditor();
     (d.apartados || []).forEach((texto, i) => {
         const caja = document.querySelector('[data-apartado-caja="' + i + '"]');
         if (!caja) {
@@ -865,50 +886,169 @@ function pintarPaginaEditor(pagina) {
     const apartados = $("[data-apartados]");
     apartados.textContent = "";
     pagina.apartados.forEach((a, i) => {
-        const caja = crearEditor("div", "apartado");
-        const id = "apartado-" + i;
-        caja.setAttribute("data-apartado-caja", String(i));
-        const cab = crearEditor("div", "apartado-cabeza");
-        const titulo = crearEditor("label", "apartado-titulo nivel-" + a.nivel,
-            a.nivel ? a.titulo : "La entradilla (el primer párrafo)");
-        titulo.htmlFor = id;
-        cab.appendChild(titulo);
-        if (a.nivel) {
-            // Quitar el apartado entero (con su título y lo que tenga
-            // dentro: los ### de debajo de un ##).
-            const quitar = crearEditor("button", "quitar-pequeno", "Quitar");
-            quitar.type = "button";
-            quitar.setAttribute("aria-label", "Quitar el apartado «" + a.titulo + "»");
-            quitar.addEventListener("click", () => quitarApartadoEditor(i));
-            cab.appendChild(quitar);
-        }
-        caja.appendChild(cab);
-        let ayuda = a.nota;
-        if (!a.nivel && !ayuda) {
-            ayuda = "Qué es, en una o dos frases. Es lo que sale en la portada y en el buscador.";
-        }
-        if (ayuda) {
-            const nota = crearEditor("p", "apartado-nota", ayuda);
-            nota.id = id + "-nota";
-            caja.appendChild(nota);
-        }
-        const area = document.createElement("textarea");
-        area.id = id;
-        area.value = a.texto;
-        area.setAttribute("data-apartado", String(i));
-        area.rows = Math.min(18, Math.max(4, a.texto.split("\n").length + 2));
-        if (ayuda) {
-            area.setAttribute("aria-describedby", id + "-nota");
-        }
-        // Encima, los botones de formato (los mismos que en las entradas,
-        // pero poniendo el Markdown de la wiki).
-        caja.appendChild(crearBarraMarkdown(area, a.nivel ? a.titulo : "la entradilla", () => {
-            estadoEditor.cambiado = true;
-        }));
-        caja.appendChild(area);
-        caja.appendChild(enlazarEditor(area, id));
-        apartados.appendChild(caja);
+        apartados.appendChild(cajaDeApartadoEditor({ id: "apartado-" + i, nivel: a.nivel, titulo: a.titulo,
+            nota: a.nota, texto: a.texto, numero: i }));
     });
+    // Debajo de todo: añadir uno nuevo.
+    pintarDondeVaElNuevoEditor();
+}
+
+// UN APARTADO: su título (con «Quitar»), su nota, los botones y el texto.
+// a: {id, nivel, titulo, nota, texto, numero} (numero: el de la página; los
+// nuevos, sin él, llevan data-apartado-nuevo).
+function cajaDeApartadoEditor(a) {
+    const caja = crearEditor("div", "apartado");
+    const id = a.id;
+    if (a.numero !== undefined) {
+        caja.setAttribute("data-apartado-caja", String(a.numero));
+    }
+    const cab = crearEditor("div", "apartado-cabeza");
+    const titulo = crearEditor("label", "apartado-titulo nivel-" + a.nivel,
+        a.nivel ? a.titulo : "La entradilla (el primer párrafo)");
+    titulo.htmlFor = id;
+    cab.appendChild(titulo);
+    if (a.nivel) {
+        // Quitar el apartado entero (con su título y lo que tenga dentro:
+        // los ### de debajo de un ##). Uno nuevo, sin preguntar.
+        const quitar = crearEditor("button", "quitar-pequeno", "Quitar");
+        quitar.type = "button";
+        quitar.setAttribute("aria-label", "Quitar el apartado «" + a.titulo + "»");
+        quitar.addEventListener("click", () => {
+            if (a.numero !== undefined) {
+                quitarApartadoEditor(a.numero);
+                return;
+            }
+            const siguiente = caja.nextElementSibling && caja.nextElementSibling.querySelector("textarea");
+            caja.remove();
+            estadoEditor.cambiado = true;
+            pedirVistaPreviaEditor();
+            pintarDondeVaElNuevoEditor();
+            avisarEditor("Quitado «" + a.titulo + "» (aún no estaba guardado).");
+            (siguiente || $("#apartado-nuevo-titulo")).focus();
+        });
+        cab.appendChild(quitar);
+    }
+    caja.appendChild(cab);
+    let ayuda = a.nota;
+    if (!a.nivel && !ayuda) {
+        ayuda = "Qué es, en una o dos frases. Es lo que sale en la portada y en el buscador.";
+    }
+    if (ayuda) {
+        const nota = crearEditor("p", "apartado-nota", ayuda);
+        nota.id = id + "-nota";
+        caja.appendChild(nota);
+    }
+    const area = document.createElement("textarea");
+    area.id = id;
+    area.value = a.texto || "";
+    if (a.numero !== undefined) {
+        area.setAttribute("data-apartado", String(a.numero));
+    } else {
+        caja.setAttribute("data-apartado-nuevo", "");
+        caja.dataset.titulo = a.titulo;
+        caja.dataset.nivel = String(a.nivel);
+    }
+    area.rows = Math.min(18, Math.max(4, (a.texto || "").split("\n").length + 2));
+    if (ayuda) {
+        area.setAttribute("aria-describedby", id + "-nota");
+    }
+    // Encima, los botones de formato (los mismos que en las entradas, pero
+    // poniendo el Markdown de la wiki).
+    caja.appendChild(crearBarraMarkdown(area, a.nivel ? a.titulo : "la entradilla", () => {
+        estadoEditor.cambiado = true;
+    }));
+    caja.appendChild(area);
+    caja.appendChild(enlazarEditor(area, id));
+    return caja;
+}
+
+// ---- AÑADIR UN APARTADO ----
+// El nivel: el de los apartados que ya tiene la página (normalmente ##), o
+// uno más para un subapartado. Va donde se diga: detrás de un apartado (y
+// de lo que tenga dentro) o al final. Se guarda con lo demás.
+function nivelBaseEditor() {
+    const niveles = (estadoEditor.pagina.apartados || []).map((a) => a.nivel).filter((n) => n > 0);
+    return niveles.length ? Math.min(...niveles) : 2;
+}
+
+// Las cajas que hay ahora, en orden: [{caja, titulo, nivel}].
+function apartadosEnPantallaEditor() {
+    return [...document.querySelectorAll("[data-apartados] > .apartado")].map((caja) => {
+        if (caja.hasAttribute("data-apartado-nuevo")) {
+            return { caja, titulo: caja.dataset.titulo, nivel: Number(caja.dataset.nivel) };
+        }
+        const a = estadoEditor.pagina.apartados[Number(caja.getAttribute("data-apartado-caja"))];
+        return { caja, titulo: a.nivel ? a.titulo : "la entradilla", nivel: a.nivel };
+    });
+}
+
+function pintarDondeVaElNuevoEditor() {
+    const elegir = $("#apartado-nuevo-sitio");
+    if (!elegir || !estadoEditor.pagina) {
+        return;
+    }
+    const antes = elegir.value;
+    elegir.textContent = "";
+    const fin = document.createElement("option");
+    fin.value = "fin";
+    fin.textContent = "Al final";
+    elegir.appendChild(fin);
+    apartadosEnPantallaEditor().forEach((x, i) => {
+        const o = document.createElement("option");
+        o.value = String(i);
+        o.textContent = "Después de «" + x.titulo + "»" + (x.nivel > nivelBaseEditor() ? " (dentro)" : "");
+        elegir.appendChild(o);
+    });
+    if ([...elegir.options].some((o) => o.value === antes)) {
+        elegir.value = antes;
+    }
+}
+
+function anadirApartadoEditor() {
+    const titulo = $("#apartado-nuevo-titulo").value.trim().replace(/^#+\s*/, "");
+    if (!titulo || !estadoEditor.pagina) {
+        avisarEditor("Escribe el título del apartado nuevo.", true);
+        $("#apartado-nuevo-titulo").focus();
+        return;
+    }
+    const nivel = nivelBaseEditor() + ($("#apartado-nuevo-sub").checked ? 1 : 0);
+    const cajas = apartadosEnPantallaEditor();
+    const sitio = $("#apartado-nuevo-sitio").value;
+    cuentaDeApartadosNuevos += 1;
+    const caja = cajaDeApartadoEditor({ id: "apartado-nuevo-" + cuentaDeApartadosNuevos, nivel, titulo, texto: "" });
+    if (sitio === "fin" || !cajas[Number(sitio)]) {
+        $("[data-apartados]").appendChild(caja);
+    } else {
+        // Detrás de ese y de lo que tenga dentro (los de más nivel).
+        const i = Number(sitio);
+        let ultimo = i;
+        while (cajas[ultimo + 1] && cajas[i].nivel > 0 && cajas[ultimo + 1].nivel > cajas[i].nivel) {
+            ultimo += 1;
+        }
+        cajas[ultimo].caja.after(caja);
+    }
+    estadoEditor.cambiado = true;
+    $("#apartado-nuevo-titulo").value = "";
+    pintarDondeVaElNuevoEditor();
+    pedirVistaPreviaEditor();
+    avisarEditor("Añadido «" + titulo + "». Escribe su texto; se guarda con lo demás.");
+    caja.querySelector("textarea").focus();
+}
+
+// Los nuevos, para guardar: cada uno detrás del apartado de la página que
+// tenga justo antes (despues: su número; -1, si no hay ninguno antes).
+function apartadosNuevosEditor() {
+    const salida = [];
+    let anterior = -1;
+    document.querySelectorAll("[data-apartados] > .apartado").forEach((caja) => {
+        if (caja.hasAttribute("data-apartado-caja")) {
+            anterior = Number(caja.getAttribute("data-apartado-caja"));
+            return;
+        }
+        salida.push({ titulo: caja.dataset.titulo, nivel: Number(caja.dataset.nivel),
+            texto: caja.querySelector("textarea").value, despues: anterior });
+    });
+    return salida;
 }
 
 function datoEditor(c, i) {
@@ -1160,6 +1300,7 @@ function quitarApartadoEditor(i) {
     });
     estadoEditor.cambiado = true;
     pedirVistaPreviaEditor();
+    pintarDondeVaElNuevoEditor();
     avisarEditor("Quitado «" + aps[i].titulo + "». Se va del .md al guardar.");
     const foco = (despues && despues.isConnected ? despues : document.querySelector("[data-apartados] .apartado:last-child"));
     const area = foco && foco.querySelector("textarea");
@@ -1197,11 +1338,11 @@ async function guardarEditor(yPasar) {
     botones.forEach((b) => {
         b.disabled = true;
     });
-    const { campos, apartados } = datosDeLaPaginaEditor();
-    const quitado = estadoEditor.quitar.length > 0 || apartados.some((a) => a === null);
+    const { campos, apartados, nuevos } = datosDeLaPaginaEditor();
+    const quitado = estadoEditor.quitar.length > 0 || apartados.some((a) => a === null) || nuevos.length > 0;
     avisarEditor("Guardando…");
     const hecho = await pedirEditor("/api/guardar", { nombre: estadoEditor.pagina.nombre, campos, apartados,
-        quitar: estadoEditor.quitar });
+        quitar: estadoEditor.quitar, nuevos });
     if (hecho.error) {
         avisarEditor(hecho.error, true);
     } else {

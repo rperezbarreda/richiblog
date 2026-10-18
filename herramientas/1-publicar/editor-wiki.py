@@ -398,10 +398,12 @@ def _quitar_de_la_cabecera(lineas, quitar):
             if not (re.match(r"^layout\s*:\s*$", l) and not (n + 1 < len(hecho) and hecho[n + 1][:1] in (" ", "\t", "-")))]
 
 
-def juntar(archivo, campos_nuevos, apartados_nuevos, quitar=()):
+def juntar(archivo, campos_nuevos, apartados_nuevos, quitar=(), anadidos=()):
     """El .md con lo nuevo: campos_nuevos {clave: valor}; apartados_nuevos
     [texto] en el mismo orden en que se leyeron (None: ese apartado, con
-    su título, se quita); quitar: los datos de la ficha que se van."""
+    su título, se quita); quitar: los datos de la ficha que se van;
+    anadidos: apartados añadidos [{titulo, nivel, texto, despues}], donde
+    despues es el número del apartado tras el que va (-1: al final)."""
     texto, crlf = leer_texto(archivo)
     cabecera, cuerpo, tiene = partir(texto)
     quitar = {str(q).strip() for q in quitar or () if str(q).strip() and str(q).strip() != "title"}
@@ -434,15 +436,46 @@ def juntar(archivo, campos_nuevos, apartados_nuevos, quitar=()):
     # nuevo, respetando si llevaba una línea en blanco debajo del título y
     # otra antes del siguiente.
     lineas = []
-    for n, ap in enumerate(leer_cuerpo(cuerpo)):
+
+    def meter_nuevos(n):
+        # Los apartados añadidos en el editor que van detrás del n.
+        for extra in [x for x in nuevos_apartados if x["despues"] == n]:
+            while lineas and not lineas[-1].strip():
+                lineas.pop()
+            if lineas:
+                lineas.append("")
+            lineas.append("#" * extra["nivel"] + " " + extra["titulo"])
+            lineas.append("")
+            if extra["texto"].strip():
+                lineas.extend(extra["texto"].strip("\n").split("\n"))
+                lineas.append("")
+
+    nuevos_apartados = []
+    for x in anadidos or []:
+        if not isinstance(x, dict):
+            continue
+        titulo = " ".join(str(x.get("titulo") or "").split())
+        if not titulo:
+            continue
+        try:
+            nivel = min(6, max(1, int(x.get("nivel") or 2)))
+            despues = int(x.get("despues", -1))
+        except (TypeError, ValueError):
+            continue
+        nuevos_apartados.append({"titulo": titulo, "nivel": nivel, "despues": despues,
+                                 "texto": str(x.get("texto") or "").replace("\r", "")})
+    trozos = leer_cuerpo(cuerpo)
+    for n, ap in enumerate(trozos):
         propias = ([ap["linea"]] if ap["nivel"] else []) + ap["lineas"]
         nuevo = apartados_nuevos[n] if n < len(apartados_nuevos) else ap["texto"]
         if nuevo is None and ap["nivel"]:
             # Quitado: ni su título ni su texto (ni sus notas).
+            meter_nuevos(n)
             continue
         nuevo = (nuevo or "").replace("\r", "").strip("\n")
         if nuevo.strip() == ap["texto"].strip():
             lineas += propias
+            meter_nuevos(n)
             continue
         hecho = [ap["linea"]] if ap["nivel"] else []
         if ap["lineas"] and not ap["lineas"][0].strip():
@@ -454,6 +487,12 @@ def juntar(archivo, campos_nuevos, apartados_nuevos, quitar=()):
         # Una en blanco antes del siguiente título (o al final).
         hecho.append("")
         lineas += hecho
+        meter_nuevos(n)
+    # Los que digan «al final» (o un sitio que ya no está).
+    sueltos = [x for x in nuevos_apartados if not 0 <= x["despues"] < len(trozos)]
+    for x in sueltos:
+        x["despues"] = -99
+    meter_nuevos(-99)
     nuevo_cuerpo = "\n".join(lineas)
     if not nuevo_cuerpo.endswith("\n"):
         nuevo_cuerpo += "\n"
@@ -1333,7 +1372,8 @@ class Editor(SimpleHTTPRequestHandler):
                     return self._json({"error": "Esa página ya no está."})
                 campos = {str(k): str(v) for k, v in (peticion.get("campos") or {}).items()}
                 apartados = [None if t is None else str(t) for t in peticion.get("apartados") or []]
-                texto, crlf = juntar(archivo, campos, apartados, peticion.get("quitar") or [])
+                texto, crlf = juntar(archivo, campos, apartados, peticion.get("quitar") or [],
+                                     peticion.get("nuevos") or [])
                 escribir_texto(archivo, texto, crlf)
                 return self._json({"ok": True, "pagina": leer_pagina(archivo)})
             if url.path == "/api/imagen":

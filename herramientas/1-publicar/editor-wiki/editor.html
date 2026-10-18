@@ -410,9 +410,26 @@
                 </section>
                 <section class="bloque" aria-labelledby="t-texto">
                     <h2 id="t-texto">El texto</h2>
-                    <p class="ayuda">Cada apartado en su recuadro. Los que dejes vacíos no salen. **negrita**,
-                        *cursiva*, una lista con «- » delante de cada línea.</p>
+                    <p class="ayuda">Cada apartado en su recuadro, con su título (un ## en el archivo). Los que dejes vacíos
+                        no salen; «Quitar» lo quita con su título. **negrita**, *cursiva*, una lista con «- » delante
+                        de cada línea.</p>
                     <div data-apartados></div>
+                    <fieldset class="apartado-nuevo">
+                        <legend>Añadir un apartado</legend>
+                        <div class="campo">
+                            <label for="apartado-nuevo-titulo">Su título</label>
+                            <input id="apartado-nuevo-titulo" autocomplete="off" placeholder="Geografía">
+                        </div>
+                        <div class="campo">
+                            <label for="apartado-nuevo-sitio">Dónde</label>
+                            <select id="apartado-nuevo-sitio"></select>
+                        </div>
+                        <label class="opcion">
+                            <input type="checkbox" id="apartado-nuevo-sub">
+                            Es un subapartado (###, dentro del de encima)
+                        </label>
+                        <button type="button" data-apartado-nuevo-boton>Añadirlo</button>
+                    </fieldset>
                 </section>
             </form>
         </section>

@@ -580,6 +580,18 @@ textarea {
     margin: 0;
 }
 
+/* AÑADIR UN APARTADO, debajo de los de la página. */
+.apartado-nuevo {
+    margin: 10px 0 0;
+    padding: 12px 16px 16px;
+    border: 2px dashed var(--acento);
+}
+
+.apartado-nuevo legend {
+    padding: 0 6px;
+    font-weight: 700;
+}
+
 .quitar-pequeno {
     min-height: 36px;
     padding: 2px 12px;

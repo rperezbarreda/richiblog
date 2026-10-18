@@ -105,7 +105,10 @@
       ficha (se va su línea del .md, con su nota; si un título del
       layout iba encima de él, pasa al siguiente dato) y de cada
       apartado (con su título y los ### que tenga dentro). Se quita al
-      guardar; para arrepentirse, cerrar sin guardar.
+      guardar; para arrepentirse, cerrar sin guardar. Y debajo de los
+      apartados, AÑADIR UNO: su título, dónde va (al final o detrás de
+      uno, y de lo que tenga dentro) y si es un subapartado (###). Vale
+      para cualquier página, sea país o no.
     · IMÁGENES Y REPASAR: traer una imagen suelta (como
       traer-imagen.py, eligiéndola en una ventana), repasar el sitio
       entero (las cinco comprobaciones) y volver a generar.
