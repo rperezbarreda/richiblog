@@ -819,8 +819,13 @@ function pintarPasosDeGitWeb() {
         + " subido (se pierde):", "git fetch origin && git reset --hard origin/" + rama);
     const otros = $("[data-git-otros]");
     otros.textContent = "";
-    pasoDeGitWeb(otros, "Pasar lo de la rama desarrollo a main (lo que sale en la web), y volver a desarrollo:",
-        "git switch main && git pull && git merge desarrollo && git push origin main && git switch desarrollo");
+    pasoDeGitWeb(otros, "Pasar lo de la rama desarrollo a main (lo que sale en la web), y volver a desarrollo."
+        + " Coge el desarrollo de GitHub (no el que tengas aquí, que puede estar viejo) y solo avanza: si main y"
+        + " desarrollo se han separado, se para y no mezcla nada:",
+    "git fetch origin && git switch main && git merge --ff-only origin/main && git merge --ff-only origin/desarrollo"
+        + " && git push origin main && git switch desarrollo && git merge --ff-only origin/desarrollo");
+    pasoDeGitWeb(otros, "Si al juntar ramas salen conflictos (archivos con <<<<<<< dentro), echarse atrás y dejarlo"
+        + " como estaba antes de juntar:", "git merge --abort");
     pasoDeGitWeb(otros, "Cambiar a la rama desarrollo (o a main, cambiando el nombre):", "git switch desarrollo");
     pasoDeGitWeb(otros, "Tirar lo cambiado en un solo archivo que aún no has guardado con commit (se pierde):",
         "git restore \"ruta/del/archivo\"");
