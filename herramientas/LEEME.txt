@@ -1991,7 +1991,12 @@
 
   EL EDITOR DE MAPAS está en el editor de la wiki (editor-wiki.py →
   «Mapas», o el botón «Editar su mapa» / «Hacerle un mapa» de cada
-  página). Lo que se puede hacer:
+  página). Los mapas salen POR CARPETAS, como están en wiki/, y lo que
+  hay dentro de cada uno también (desde el 22-10-2026): Sitios (y dentro,
+  cada tipo: Capital, Ciudad, Pueblo…), Emblemas, Caminos, Ríos, Otras
+  rayas, Textos y Regiones (cada tipo de zona). Cerradas de salida; se
+  acuerda de las que abres, y la de lo que eliges en el mapa se abre
+  sola. Lo que se puede hacer:
 
     - PONER UN SITIO: se elige qué es (capital, ciudad…) y se pulsa en
       el mapa. Luego, a la derecha, su nombre y la página a la que lleva.

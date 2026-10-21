@@ -1167,11 +1167,6 @@ body.en-mapa main {
     padding: 4px;
 }
 
-.mapa-cosas-titulo {
-    margin: 16px 0 6px;
-    font-size: 1rem;
-}
-
 .mapa-cosas {
     display: flex;
     flex-direction: column;
@@ -1181,6 +1176,18 @@ body.en-mapa main {
     padding: 0;
     overflow-y: auto;
     list-style: none;
+}
+
+/* Dentro de las carpetas de «lo que hay en el mapa», un poco menos de
+   sangría: la columna es estrecha. */
+.mapa-cosas .arbol-dentro {
+    margin-left: 8px;
+    padding-left: 8px;
+}
+
+.mapa-cosas .arbol-cabeza {
+    min-height: 40px;
+    padding: 2px 4px;
 }
 
 .mapa-cosa {

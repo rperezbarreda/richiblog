@@ -230,7 +230,8 @@ function pintarArbolDeEntradasWeb(lista, entradas, abrirTodo) {
 // orden; las carpetas salen en el orden de lo primero que llevan.
 // opciones: abrirTodo (al buscar), memoria (el prefijo con que se
 // recuerda lo plegado), vacias (carpetas sin nada que también salen, como
-// listas de nombres), unidad ([«cosa», «cosas»]).
+// listas de nombres), unidad ([«cosa», «cosas»]), abrir (carpetas que salen
+// abiertas sí o sí, como «Sitios/Capital/»: la de lo elegido).
 function pintarArbolWeb(lista, cosas, opciones) {
     const o = opciones || {};
     const unidad = o.unidad || ["cosa", "cosas"];
@@ -268,7 +269,8 @@ function pintarArbolWeb(lista, cosas, opciones) {
             // Lo apuntado es lo que se ha cambiado de cómo sale: cerrada
             // (o, con cerradasDeSalida, abierta).
             const cambiada = cerradas.has((o.memoria || "") + suya);
-            pliegue.open = o.abrirTodo || (o.cerradasDeSalida ? cambiada : !cambiada);
+            pliegue.open = o.abrirTodo || (o.abrir || []).includes(suya)
+                || (o.cerradasDeSalida ? cambiada : !cambiada);
             const cabeza = document.createElement("summary");
             cabeza.className = "arbol-cabeza";
             cabeza.appendChild(iconoRedactor("carpeta"));

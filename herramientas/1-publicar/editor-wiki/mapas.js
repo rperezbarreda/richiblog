@@ -535,7 +535,8 @@ async function pintarListaDeMapas() {
         lista.appendChild(crearEditor("li", "", "Aún no hay ninguno."));
         return;
     }
-    hay.mapas.forEach((m) => {
+    // Por carpetas, como están en wiki/ (el mapamundi, suelto arriba).
+    pintarArbolWeb(lista, hay.mapas.map((m) => ({ carpeta: m.archivo.split("/").slice(0, -1), fila: () => {
         const li = document.createElement("li");
         const texto = crearEditor("span");
         texto.appendChild(crearEditor("span", "faltan-nombre", m.titulo));
@@ -551,8 +552,8 @@ async function pintarListaDeMapas() {
         boton.addEventListener("click", () => abrirMapa(m.archivo));
         li.appendChild(texto);
         li.appendChild(boton);
-        lista.appendChild(li);
-    });
+        return li;
+    } })), { memoria: "mapas:", unidad: ["mapa", "mapas"] });
 }
 
 // En la página que se está escribiendo: su mapa, o cómo hacerle uno.
@@ -1376,69 +1377,104 @@ function nombreDeCosa(lista, cosa) {
     return { nombre, que };
 }
 
+// LO QUE HAY EN EL MAPA, POR CARPETAS como lo demás del editor
+// (pintarArbolWeb, en escribir.js): Sitios (y dentro, cada tipo: Capital,
+// Ciudad…), Emblemas, Caminos, Ríos, Otras rayas, Textos y Regiones (cada
+// tipo de zona). Se despliegan y se cierran, y se acuerda; la carpeta de lo
+// elegido sale abierta.
 function pintarListaDeCosas() {
     const caja = $("[data-mapa-cosas]");
     caja.textContent = "";
     const d = estadoMapa.datos;
-    // Las rayas, en tres grupos: caminos, ríos y las demás.
     const esCamino = (c) => c.kind === "camino" || c.kind === "sendero" || !c.kind;
     const esRio = (c) => c.kind === "rio";
-    const grupos = [["pins", "Sitios"], ["emblems", "Emblemas"], ["lines", "Caminos", esCamino], ["lines", "Ríos", esRio],
-        ["lines", "Otras rayas", (c) => !esCamino(c) && !esRio(c)], ["labels", "Textos"], ["shapes", "Regiones"]];
-    let alguna = false;
-    grupos.forEach(([lista, titulo, filtro]) => {
-        const deEste = d[lista].filter((c) => !filtro || filtro(c));
-        if (!deEste.length) {
-            return;
+    const carpetaDe = (lista, cosa) => {
+        if (lista === "pins") {
+            const tipo = tipoDeSitioMapa(cosa.kind);
+            return ["Sitios", tipo ? tipo[1] : "Otros"];
         }
-        alguna = true;
-        const sinNombre = deEste.filter((c) => !c.label && !c.targetPage).length;
-        caja.appendChild(crearEditor("h3", "mapa-cosas-titulo", titulo + " (" + deEste.length + ")"));
-        const ul = crearEditor("ul", "mapa-cosas");
-        d[lista].forEach((cosa, i) => {
-            if (filtro && !filtro(cosa)) {
-                return;
-            }
+        if (lista === "shapes") {
+            const zona = tipoDeZonaMapa(cosa.kind);
+            return ["Regiones", zona ? zona[1] : "Sin tipo"];
+        }
+        if (lista === "lines") {
+            return [esCamino(cosa) ? "Caminos" : esRio(cosa) ? "Ríos" : "Otras rayas"];
+        }
+        return [lista === "emblems" ? "Emblemas" : "Textos"];
+    };
+    const orden = ["pins", "emblems", "lines", "labels", "shapes"];
+    const sinNombre = d.shapes.filter((c) => !c.label && !c.targetPage).length;
+    const cosas = [];
+    let abrir = [];
+    const elegido = estadoMapa.elegido;
+    orden.forEach((lista) => {
+        // Las rayas, primero los caminos, luego los ríos y las demás.
+        const indices = d[lista].map((c, i) => i);
+        if (lista === "lines") {
+            const puesto = (c) => (esCamino(c) ? 0 : esRio(c) ? 1 : 2);
+            indices.sort((a, b) => puesto(d.lines[a]) - puesto(d.lines[b]) || a - b);
+        }
+        // Los sitios y las regiones, por su tipo, en el orden de la lista
+        // de tipos (capital, ciudad, pueblo…), y los sin tipo al final.
+        const tipos = lista === "pins" ? TIPOS_DE_SITIO : lista === "shapes" ? TIPOS_DE_ZONA : null;
+        if (tipos) {
+            const puesto = (c) => {
+                const k = tipos.findIndex((t) => t[0] === c.kind);
+                return k === -1 ? tipos.length : k;
+            };
+            indices.sort((a, b) => puesto(d[lista][a]) - puesto(d[lista][b]) || a - b);
+        }
+        indices.forEach((i) => {
+            const cosa = d[lista][i];
             const { nombre, que } = nombreDeCosa(lista, cosa);
             // Las regiones sin nombre del mapamundi son el dibujo (costas,
-            // fronteras): se cuentan, pero no se listan una a una.
+            // fronteras): se cuentan aparte, no una a una.
             if (!nombre && lista === "shapes" && sinNombre > 12) {
                 return;
             }
-            const li = document.createElement("li");
-            const boton = crearEditor("button", "mapa-cosa");
-            boton.type = "button";
-            boton.setAttribute("aria-pressed", estaElegida(lista, i) ? "true" : "false");
-            const tipo = lista === "pins" ? tipoDeSitioMapa(cosa.kind) : null;
-            if (tipo) {
-                boton.appendChild(crearEditor("span", "mapa-cosa-marca es-" + tipo[0], tipo[2] + "︎"))
-                    .setAttribute("aria-hidden", "true");
+            const carpeta = carpetaDe(lista, cosa);
+            if (elegido && elegido.lista === lista && elegido.i === i) {
+                abrir = carpeta.map((c, k) => carpeta.slice(0, k + 1).join("/") + "/");
             }
-            // Un sitio sin nombre se llama como su tipo («Puente»).
-            const sinEl = tipo ? tipo[1] : "(sin nombre)";
-            boton.appendChild(crearEditor("span", "mapa-cosa-nombre", nombre || sinEl));
-            boton.appendChild(crearEditor("span", "mapa-cosa-que", que));
-            // Con Mayús (o Ctrl), se añade a lo elegido o se quita.
-            boton.addEventListener("click", (e) => {
-                if (e.shiftKey || e.ctrlKey || e.metaKey) {
-                    alternarEleccion(lista, i);
-                    return;
+            cosas.push({ carpeta, fila: () => {
+                const li = document.createElement("li");
+                const boton = crearEditor("button", "mapa-cosa");
+                boton.type = "button";
+                boton.setAttribute("aria-pressed", estaElegida(lista, i) ? "true" : "false");
+                const tipo = lista === "pins" ? tipoDeSitioMapa(cosa.kind) : null;
+                if (tipo) {
+                    boton.appendChild(crearEditor("span", "mapa-cosa-marca es-" + tipo[0], tipo[2] + "︎"))
+                        .setAttribute("aria-hidden", "true");
                 }
-                elegirCosa(lista, i);
-                irACosa(lista, i);
-            });
-            li.appendChild(boton);
-            ul.appendChild(li);
+                // Un sitio sin nombre se llama como su tipo («Puente»).
+                const sinEl = tipo ? tipo[1] : "(sin nombre)";
+                boton.appendChild(crearEditor("span", "mapa-cosa-nombre", nombre || sinEl));
+                boton.appendChild(crearEditor("span", "mapa-cosa-que", que));
+                // Con Mayús (o Ctrl), se añade a lo elegido o se quita.
+                boton.addEventListener("click", (e) => {
+                    if (e.shiftKey || e.ctrlKey || e.metaKey) {
+                        alternarEleccion(lista, i);
+                        return;
+                    }
+                    elegirCosa(lista, i);
+                    irACosa(lista, i);
+                });
+                li.appendChild(boton);
+                return li;
+            } });
         });
-        if (lista === "shapes" && sinNombre > 12) {
-            ul.appendChild(crearEditor("li", "ayuda", "Y " + sinNombre
-                + " sin nombre (el dibujo: costas y fronteras). Se eligen pulsándolas en el mapa."));
-        }
-        caja.appendChild(ul);
     });
-    if (!alguna) {
-        caja.appendChild(crearEditor("p", "ayuda", "Aún nada. Elige «Poner un sitio» y pulsa en el mapa."));
+    if (sinNombre > 12) {
+        cosas.push({ carpeta: ["Regiones"], fila: () => crearEditor("li", "ayuda", "Y " + sinNombre
+            + " sin nombre (el dibujo: costas y fronteras). Se eligen pulsándolas en el mapa.") });
     }
+    if (!cosas.length) {
+        caja.appendChild(crearEditor("p", "ayuda", "Aún nada. Elige «Poner un sitio» y pulsa en el mapa."));
+        return;
+    }
+    const ul = crearEditor("ul", "mapa-cosas");
+    caja.appendChild(ul);
+    pintarArbolWeb(ul, cosas, { memoria: "mapa-cosas:", cerradasDeSalida: true, abrir });
 }
 
 function irACosa(lista, i) {
