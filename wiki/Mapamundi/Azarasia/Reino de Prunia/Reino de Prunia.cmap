@@ -1045,8 +1045,8 @@
       ],
       "color": "#ffffff",
       "layerId": "base",
-      "label": "Reino de Nocravel",
-      "targetPage": "Reino de Nocravel",
+      "label": "Reino de Neclaverna",
+      "targetPage": "Reino de Neclaverna",
       "kind": "vecino"
     },
     {
@@ -2291,8 +2291,8 @@
       ],
       "color": "#1c8236",
       "layerId": "base",
-      "targetPage": "Reino de Terredia",
-      "label": "Reino de Terredia",
+      "targetPage": "Reino de Telzaria",
+      "label": "Reino de Telzaria",
       "kind": "vecino"
     },
     {
@@ -2374,8 +2374,8 @@
       ],
       "color": "#cb611a",
       "layerId": "base",
-      "targetPage": "Condado de Burcrecia",
-      "label": "Condado de Burcrecia",
+      "targetPage": "Condado de Burcrelle",
+      "label": "Condado de Burcrelle",
       "kind": "vecino"
     },
     {

@@ -6,6 +6,26 @@
     },
     "cambios": [
         {
+            "titulo": "Reino de Telzaria",
+            "url": "/web/wiki/mapamundi/azarasia/reino_de_telzaria/reino_de_telzaria.html",
+            "fecha": "2026-10-22"
+        },
+        {
+            "titulo": "Condado de Burcrelle",
+            "url": "/web/wiki/mapamundi/azarasia/condado_de_burcrelle/condado_de_burcrelle.html",
+            "fecha": "2026-10-22"
+        },
+        {
+            "titulo": "Reino de Neclaverna",
+            "url": "/web/wiki/mapamundi/azarasia/reino_de_neclaverna/reino_de_neclaverna.html",
+            "fecha": "2026-10-22"
+        },
+        {
+            "titulo": "Azarasia",
+            "url": "/web/wiki/mapamundi/azarasia/azarasia.html",
+            "fecha": "2026-10-22"
+        },
+        {
             "titulo": "Ac'atapec",
             "url": "/web/wiki/mapamundi/archipielagos/archipielago_de_las_costras/ac_atapec/ac_atapec.html",
             "fecha": "2026-10-18"
@@ -13,26 +33,6 @@
         {
             "titulo": "Amequeleke",
             "url": "/web/wiki/mapamundi/archipielagos/archipielago_de_las_costras/amequeleke/amequeleke.html",
-            "fecha": "2026-10-18"
-        },
-        {
-            "titulo": "Itzalcál",
-            "url": "/web/wiki/mapamundi/archipielagos/archipielago_de_las_costras/itzalcal/itzalcal.html",
-            "fecha": "2026-10-18"
-        },
-        {
-            "titulo": "Kukulna",
-            "url": "/web/wiki/mapamundi/archipielagos/archipielago_de_las_costras/kukulna/kukulna.html",
-            "fecha": "2026-10-18"
-        },
-        {
-            "titulo": "Mulz'aka",
-            "url": "/web/wiki/mapamundi/archipielagos/archipielago_de_las_costras/mulz_aka/mulz_aka.html",
-            "fecha": "2026-10-18"
-        },
-        {
-            "titulo": "Nahuatzal",
-            "url": "/web/wiki/mapamundi/archipielagos/archipielago_de_las_costras/nahuatzal/nahuatzal.html",
             "fecha": "2026-10-18"
         }
     ],

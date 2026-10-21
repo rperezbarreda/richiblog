@@ -1,8 +1,8 @@
 ---
-title: "Reino de Nocravel"
+title: "Reino de Neclaverna"
 tags: [Mapamundi, Azarasia]
 región: "[[Azarasia]]"
-bandera: reino_nocravel.webp
+bandera: reino_neclaverna.webp
 infobox: "País"
 nombre oficial: "*por decidir*"
 gentilicio: "*por decidir*"
@@ -35,11 +35,11 @@ layout:
     above: aliados
 ---
 
-**Reino de Nocravel** está en [[Azarasia]].
+**Reino de Neclaverna** está en [[Azarasia]].
 
 ## Historia
 
-*Texto de relleno.* Aquí irá la historia de Reino de Nocravel: cómo empezó, quién la ha gobernado y qué la ha cambiado con los siglos.
+*Texto de relleno.* Aquí irá la historia de Reino de Neclaverna: cómo empezó, quién la ha gobernado y qué la ha cambiado con los siglos.
 
 ### Orígenes
 
@@ -47,7 +47,7 @@ layout:
 
 ## Gobierno y sociedad
 
-*Texto de relleno.* Quién manda en Reino de Nocravel, cómo se eligen sus líderes y cómo vive la gente corriente.
+*Texto de relleno.* Quién manda en Reino de Neclaverna, cómo se eligen sus líderes y cómo vive la gente corriente.
 
 ## Cultura
 

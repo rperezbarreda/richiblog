@@ -42028,9 +42028,10 @@
           "y": 340
         }
       ],
-      "label": "Reino de Terredia",
+      "label": "Reino de Telzaria",
       "color": "#40b017",
-      "layerId": "de8d455c-d6ef-4a1f-916d-96a71df407fd"
+      "layerId": "de8d455c-d6ef-4a1f-916d-96a71df407fd",
+      "targetPage": "Reino de Telzaria"
     },
     {
       "id": "e3e1d84c-004e-4a46-af0f-d57af7500112",
@@ -45902,9 +45903,10 @@
           "y": 360
         }
       ],
-      "label": "Reino de Nocravel",
+      "label": "Reino de Neclaverna",
       "color": "#cc870f",
-      "layerId": "de8d455c-d6ef-4a1f-916d-96a71df407fd"
+      "layerId": "de8d455c-d6ef-4a1f-916d-96a71df407fd",
+      "targetPage": "Reino de Neclaverna"
     },
     {
       "id": "8cda69f1-9bbe-4f99-8393-5c396a617b46",
@@ -54186,7 +54188,8 @@
       ],
       "color": "#f7e082",
       "layerId": "de8d455c-d6ef-4a1f-916d-96a71df407fd",
-      "label": "Condado de Burcrecia"
+      "label": "Condado de Burcrelle",
+      "targetPage": "Condado de Burcrelle"
     },
     {
       "id": "81c0751c-b92e-4c95-8ac2-04715967875c",

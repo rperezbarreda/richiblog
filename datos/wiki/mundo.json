@@ -67,9 +67,9 @@
         "miniatura": ""
     },
     {
-        "titulo": "Condado de Burcrecia",
-        "url": "/web/wiki/mapamundi/azarasia/condado_de_burcrecia/condado_de_burcrecia.html",
-        "carpeta": "Mapamundi/Azarasia/Condado de Burcrecia",
+        "titulo": "Condado de Burcrelle",
+        "url": "/web/wiki/mapamundi/azarasia/condado_de_burcrelle/condado_de_burcrelle.html",
+        "carpeta": "Mapamundi/Azarasia/Condado de Burcrelle",
         "etiquetas": [
             "Mapamundi",
             "Azarasia"
@@ -79,14 +79,14 @@
             "Azarasia"
         ],
         "que": "País",
-        "resumen": "Condado de Burcrecia está en Azarasia.",
+        "resumen": "Condado de Burcrelle está en Azarasia.",
         "region": "Azarasia",
         "filtros": {
             "qué es": "País"
         },
         "subraza_de": "",
         "relleno": true,
-        "bandera": "/imagenes/wiki/condado_burcrecia.webp",
+        "bandera": "/imagenes/wiki/condado_burcrelle.webp",
         "miniatura": ""
     },
     {
@@ -343,9 +343,9 @@
         "miniatura": ""
     },
     {
-        "titulo": "Reino de Nocravel",
-        "url": "/web/wiki/mapamundi/azarasia/reino_de_nocravel/reino_de_nocravel.html",
-        "carpeta": "Mapamundi/Azarasia/Reino de Nocravel",
+        "titulo": "Reino de Neclaverna",
+        "url": "/web/wiki/mapamundi/azarasia/reino_de_neclaverna/reino_de_neclaverna.html",
+        "carpeta": "Mapamundi/Azarasia/Reino de Neclaverna",
         "etiquetas": [
             "Mapamundi",
             "Azarasia"
@@ -355,14 +355,14 @@
             "Azarasia"
         ],
         "que": "País",
-        "resumen": "Reino de Nocravel está en Azarasia.",
+        "resumen": "Reino de Neclaverna está en Azarasia.",
         "region": "Azarasia",
         "filtros": {
             "qué es": "País"
         },
         "subraza_de": "",
         "relleno": true,
-        "bandera": "/imagenes/wiki/reino_nocravel.webp",
+        "bandera": "/imagenes/wiki/reino_neclaverna.webp",
         "miniatura": ""
     },
     {
@@ -435,9 +435,9 @@
         "miniatura": ""
     },
     {
-        "titulo": "Reino de Terredia",
-        "url": "/web/wiki/mapamundi/azarasia/reino_de_terredia/reino_de_terredia.html",
-        "carpeta": "Mapamundi/Azarasia/Reino de Terredia",
+        "titulo": "Reino de Telzaria",
+        "url": "/web/wiki/mapamundi/azarasia/reino_de_telzaria/reino_de_telzaria.html",
+        "carpeta": "Mapamundi/Azarasia/Reino de Telzaria",
         "etiquetas": [
             "Mapamundi",
             "Azarasia"
@@ -447,14 +447,14 @@
             "Azarasia"
         ],
         "que": "País",
-        "resumen": "Reino de Terredia está en Azarasia.",
+        "resumen": "Reino de Telzaria está en Azarasia.",
         "region": "Azarasia",
         "filtros": {
             "qué es": "País"
         },
         "subraza_de": "",
         "relleno": true,
-        "bandera": "/imagenes/wiki/reino_terredia.webp",
+        "bandera": "/imagenes/wiki/reino_telzaria.webp",
         "miniatura": ""
     },
     {

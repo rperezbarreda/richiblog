@@ -1,8 +1,8 @@
 ---
-title: "Condado de Burcrecia"
+title: "Condado de Burcrelle"
 tags: [Mapamundi, Azarasia]
 región: "[[Azarasia]]"
-bandera: condado_burcrecia.webp
+bandera: condado_burcrelle.webp
 infobox: "País"
 nombre oficial: "*por decidir*"
 gentilicio: "*por decidir*"
@@ -35,11 +35,11 @@ layout:
     above: aliados
 ---
 
-**Condado de Burcrecia** está en [[Azarasia]].
+**Condado de Burcrelle** está en [[Azarasia]].
 
 ## Historia
 
-*Texto de relleno.* Aquí irá la historia de Condado de Burcrecia: cómo empezó, quién la ha gobernado y qué la ha cambiado con los siglos.
+*Texto de relleno.* Aquí irá la historia de Condado de Burcrelle: cómo empezó, quién la ha gobernado y qué la ha cambiado con los siglos.
 
 ### Orígenes
 
@@ -47,7 +47,7 @@ layout:
 
 ## Gobierno y sociedad
 
-*Texto de relleno.* Quién manda en Condado de Burcrecia, cómo se eligen sus líderes y cómo vive la gente corriente.
+*Texto de relleno.* Quién manda en Condado de Burcrelle, cómo se eligen sus líderes y cómo vive la gente corriente.
 
 ## Cultura
 

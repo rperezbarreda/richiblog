@@ -27,6 +27,12 @@
 
 (function () {
     const REDIRECCIONES = [
+        // Movida o renombrada desde el editor.
+        ["/web/wiki/mapamundi/azarasia/condado_de_burcrecia/condado_de_burcrecia.html", "/web/wiki/mapamundi/azarasia/condado_de_burcrelle/condado_de_burcrelle.html"],
+        // Movida o renombrada desde el editor.
+        ["/web/wiki/mapamundi/azarasia/reino_de_nocravel/reino_de_nocravel.html", "/web/wiki/mapamundi/azarasia/reino_de_neclaverna/reino_de_neclaverna.html"],
+        // Movida o renombrada desde el editor.
+        ["/web/wiki/mapamundi/azarasia/reino_de_terredia/reino_de_terredia.html", "/web/wiki/mapamundi/azarasia/reino_de_telzaria/reino_de_telzaria.html"],
         // Los países, cada uno a su carpeta (18-10-2026).
         ["/web/wiki/mapamundi/archipielagos/archipielago_de_las_costras/ac_atapec.html", "/web/wiki/mapamundi/archipielagos/archipielago_de_las_costras/ac_atapec/ac_atapec.html"],
         ["/web/wiki/mapamundi/archipielagos/archipielago_de_las_costras/amequeleke.html", "/web/wiki/mapamundi/archipielagos/archipielago_de_las_costras/amequeleke/amequeleke.html"],
@@ -85,7 +91,7 @@
         ["/web/wiki/mapamundi/archipielagos/tierras_encantadas/santo_camino_de_kada.html", "/web/wiki/mapamundi/archipielagos/tierras_encantadas/santo_camino_de_kada/santo_camino_de_kada.html"],
         ["/web/wiki/mapamundi/azarasia/califato_de_jhel_zadir.html", "/web/wiki/mapamundi/azarasia/califato_de_jhel_zadir/califato_de_jhel_zadir.html"],
         ["/web/wiki/mapamundi/azarasia/canton_de_piedraspuras.html", "/web/wiki/mapamundi/azarasia/canton_de_piedraspuras/canton_de_piedraspuras.html"],
-        ["/web/wiki/mapamundi/azarasia/condado_de_burcrecia.html", "/web/wiki/mapamundi/azarasia/condado_de_burcrecia/condado_de_burcrecia.html"],
+        ["/web/wiki/mapamundi/azarasia/condado_de_burcrecia.html", "/web/wiki/mapamundi/azarasia/condado_de_burcrelle/condado_de_burcrelle.html"],
         ["/web/wiki/mapamundi/azarasia/dominios_de_bor_korr_el_sanguinario.html", "/web/wiki/mapamundi/azarasia/dominios_de_bor_korr_el_sanguinario/dominios_de_bor_korr_el_sanguinario.html"],
         ["/web/wiki/mapamundi/azarasia/emirato_de_adrash.html", "/web/wiki/mapamundi/azarasia/emirato_de_adrash/emirato_de_adrash.html"],
         ["/web/wiki/mapamundi/azarasia/gran_condado_de_marturia.html", "/web/wiki/mapamundi/azarasia/gran_condado_de_marturia/gran_condado_de_marturia.html"],
@@ -98,11 +104,11 @@
         ["/web/wiki/mapamundi/azarasia/orden_de_clodia.html", "/web/wiki/mapamundi/azarasia/orden_de_clodia/orden_de_clodia.html"],
         ["/web/wiki/mapamundi/azarasia/principado_de_lunica.html", "/web/wiki/mapamundi/azarasia/principado_de_lunica/principado_de_lunica.html"],
         ["/web/wiki/mapamundi/azarasia/reino_de_dreustan.html", "/web/wiki/mapamundi/azarasia/reino_de_dreustan/reino_de_dreustan.html"],
-        ["/web/wiki/mapamundi/azarasia/reino_de_nocravel.html", "/web/wiki/mapamundi/azarasia/reino_de_nocravel/reino_de_nocravel.html"],
+        ["/web/wiki/mapamundi/azarasia/reino_de_nocravel.html", "/web/wiki/mapamundi/azarasia/reino_de_neclaverna/reino_de_neclaverna.html"],
         ["/web/wiki/mapamundi/azarasia/reino_de_oritania.html", "/web/wiki/mapamundi/azarasia/reino_de_oritania/reino_de_oritania.html"],
         ["/web/wiki/mapamundi/azarasia/reino_de_prunia.html", "/web/wiki/mapamundi/azarasia/reino_de_prunia/reino_de_prunia.html"],
         ["/web/wiki/mapamundi/azarasia/reino_de_solazada.html", "/web/wiki/mapamundi/azarasia/reino_de_solazada/reino_de_solazada.html"],
-        ["/web/wiki/mapamundi/azarasia/reino_de_terredia.html", "/web/wiki/mapamundi/azarasia/reino_de_terredia/reino_de_terredia.html"],
+        ["/web/wiki/mapamundi/azarasia/reino_de_terredia.html", "/web/wiki/mapamundi/azarasia/reino_de_telzaria/reino_de_telzaria.html"],
         ["/web/wiki/mapamundi/azarasia/republica_mercantil_de_denatria.html", "/web/wiki/mapamundi/azarasia/republica_mercantil_de_denatria/republica_mercantil_de_denatria.html"],
         ["/web/wiki/mapamundi/azarasia/sultanato_de_doresia.html", "/web/wiki/mapamundi/azarasia/sultanato_de_doresia/sultanato_de_doresia.html"],
         ["/web/wiki/mapamundi/azarasia/tierras_de_traena.html", "/web/wiki/mapamundi/azarasia/tierras_de_traena/tierras_de_traena.html"],

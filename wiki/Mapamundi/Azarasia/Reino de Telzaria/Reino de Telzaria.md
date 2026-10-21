@@ -1,8 +1,8 @@
 ---
-title: "Reino de Terredia"
+title: "Reino de Telzaria"
 tags: [Mapamundi, Azarasia]
 región: "[[Azarasia]]"
-bandera: reino_terredia.webp
+bandera: reino_telzaria.webp
 infobox: "País"
 nombre oficial: "*por decidir*"
 gentilicio: "*por decidir*"
@@ -35,11 +35,11 @@ layout:
     above: aliados
 ---
 
-**Reino de Terredia** está en [[Azarasia]].
+**Reino de Telzaria** está en [[Azarasia]].
 
 ## Historia
 
-*Texto de relleno.* Aquí irá la historia de Reino de Terredia: cómo empezó, quién la ha gobernado y qué la ha cambiado con los siglos.
+*Texto de relleno.* Aquí irá la historia de Reino de Telzaria: cómo empezó, quién la ha gobernado y qué la ha cambiado con los siglos.
 
 ### Orígenes
 
@@ -47,7 +47,7 @@ layout:
 
 ## Gobierno y sociedad
 
-*Texto de relleno.* Quién manda en Reino de Terredia, cómo se eligen sus líderes y cómo vive la gente corriente.
+*Texto de relleno.* Quién manda en Reino de Telzaria, cómo se eligen sus líderes y cómo vive la gente corriente.
 
 ## Cultura
 
