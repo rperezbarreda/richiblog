@@ -735,16 +735,21 @@ VERSIONADAS = {
 
 
 def version_de(ruta_publica):
-    """Resumen corto del contenido, o "" si el archivo no está."""
+    """Resumen corto del contenido, o "" si el archivo no está.
+
+    Los saltos de línea de Windows (\\r\\n) cuentan como los de siempre
+    (\\n): si no, el mismo archivo daba otro ?v= según el ordenador (git
+    en Windows los cambia al bajarlos), y pasar esto allí cambiaba la
+    cabecera de las doscientas páginas sin haber tocado nada."""
     # Una copia de ligero/ puede no estar escrita todavía (con --probar no
     # se escribe nada): su versión sale de lo que se va a escribir.
     for servida, texto in LIGERAS.values():
         if servida == ruta_publica:
-            return hashlib.sha1(texto.encode("utf-8")).hexdigest()[:8]
+            return hashlib.sha1(texto.replace("\r\n", "\n").encode("utf-8")).hexdigest()[:8]
     archivo = RAIZ / ruta_publica.lstrip("/")
     if not archivo.is_file():
         return ""
-    return hashlib.sha1(archivo.read_bytes()).hexdigest()[:8]
+    return hashlib.sha1(archivo.read_bytes().replace(b"\r\n", b"\n")).hexdigest()[:8]
 
 
 def con_version(ruta_publica):
