@@ -102,6 +102,7 @@ const estadoMapa = {
     herramienta: "elegir", elegido: null, dibujo: null, vista: null, capasOcultas: {},
     arrastre: null, cuantasRegiones: 0, iman: null, sinIman: false, medida: [], tramoEscala: [], ratonMedida: null,
     ultimoCampo: null, varios: [], curvaPara: null, cajaEleccion: null, portapapeles: [], colorNuevo: {},
+    paneo: null, habiaElegido: false,
 };
 
 // EL COLOR DE LO NUEVO: al cambiarle el color a algo (un sitio, una raya,
@@ -848,14 +849,18 @@ function escalaMapa() {
 
 function ponerVistaMapa(v) {
     const d = estadoMapa.datos;
-    // No más lejos que el mapa entero (con un margen) ni más cerca que
-    // un píxel de la imagen en ocho de la pantalla.
+    // No más lejos que tres veces el mapa entero ni más cerca que un píxel
+    // de la imagen en ocho de la pantalla.
     const lienzo = lienzoMapa();
     const proporcion = lienzo.clientHeight ? lienzo.clientWidth / lienzo.clientHeight : 1.6;
-    const w = Math.min(Math.max(v.w, 40), Math.max(d.width, d.height * proporcion) * 1.5);
+    const w = Math.min(Math.max(v.w, 40), Math.max(d.width, d.height * proporcion) * 3);
     const h = w / proporcion;
-    const cx = Math.min(Math.max(v.x + v.w / 2, 0), d.width);
-    const cy = Math.min(Math.max(v.y + v.h / 2, 0), d.height);
+    // El mapa se puede llevar más allá de sus bordes (queda un reborde
+    // oscuro alrededor), pero no tanto que se pierda: siempre se ve por lo
+    // menos un trocito (el centro de la vista, como mucho a casi media
+    // pantalla de fuera).
+    const cx = Math.min(Math.max(v.x + v.w / 2, -w * 0.45), d.width + w * 0.45);
+    const cy = Math.min(Math.max(v.y + v.h / 2, -h * 0.45), d.height + h * 0.45);
     estadoMapa.vista = { x: cx - w / 2, y: cy - h / 2, w, h };
     svgDelMapa().setAttribute("viewBox", [estadoMapa.vista.x, estadoMapa.vista.y, w, h].map(redondoMapa).join(" "));
     const entero = Math.max(d.width / lienzo.clientWidth, d.height / lienzo.clientHeight) || 1;
@@ -863,15 +868,44 @@ function ponerVistaMapa(v) {
     escalarMarcasMapa();
 }
 
+// «Verlo entero»: el mapa entero en el hueco que dejan los paneles
+// abiertos (si al quitarlos queda muy poco, como en un móvil, en toda la
+// pantalla).
+function huecoLibreMapa() {
+    const r = lienzoMapa().getBoundingClientRect();
+    let izquierda = 0;
+    let derecha = 0;
+    document.querySelectorAll(".mapa-columna").forEach((c) => {
+        if (!c.querySelector(".mapa-panel:not([hidden])")) {
+            return;
+        }
+        const rc = c.getBoundingClientRect();
+        if (c.classList.contains("es-izquierda")) {
+            izquierda = Math.max(0, rc.right - r.left);
+        } else {
+            derecha = Math.max(0, r.right - rc.left);
+        }
+    });
+    if (r.width - izquierda - derecha < r.width * 0.4) {
+        izquierda = 0;
+        derecha = 0;
+    }
+    return { izquierda, derecha, ancho: r.width, alto: r.height };
+}
+
 function ajustarMapa() {
     const d = estadoMapa.datos;
-    if (!d) {
+    const hueco = huecoLibreMapa();
+    if (!d || !hueco.ancho || !hueco.alto) {
         return;
     }
-    const lienzo = lienzoMapa();
-    const proporcion = lienzo.clientHeight ? lienzo.clientWidth / lienzo.clientHeight : 1.6;
-    const w = Math.max(d.width, d.height * proporcion);
-    ponerVistaMapa({ x: (d.width - w) / 2, y: (d.height - w / proporcion) / 2, w, h: w / proporcion });
+    const libre = Math.max(hueco.ancho - hueco.izquierda - hueco.derecha - 24, 40);
+    // Píxeles de pantalla por píxel del mapa.
+    const k = Math.min(libre / d.width, Math.max(hueco.alto - 24, 40) / d.height);
+    const w = hueco.ancho / k;
+    const h = hueco.alto / k;
+    const centro = hueco.izquierda + (hueco.ancho - hueco.izquierda - hueco.derecha) / 2;
+    ponerVistaMapa({ x: d.width / 2 - centro / k, y: d.height / 2 - h / 2, w, h });
 }
 
 function acercarMapa(factor, hacia) {
@@ -1668,6 +1702,12 @@ function pintarPropiedadesMapa() {
     $("[data-mapa-nada]").hidden = !!cosa || varios;
     $("[data-mapa-propiedades]").hidden = !cosa;
     $("[data-mapa-varios]").hidden = !varios;
+    // Al elegir algo (sin nada elegido antes), su panel se abre solo.
+    const hay = !!cosa || varios;
+    if (hay && !estadoMapa.habiaElegido) {
+        abrirPanelMapa("elegido", true, true);
+    }
+    estadoMapa.habiaElegido = hay;
     if (varios) {
         pintarVariosMapa();
     }
@@ -1985,23 +2025,23 @@ function borrarElegido() {
 // ---- LAS HERRAMIENTAS ----
 const INSTRUCCIONES_MAPA = {
     elegir: "Pulsa un sitio, un texto, una región o una raya para elegirlo. Los sitios y los textos se arrastran;"
-        + " en las regiones y las rayas se arrastran sus puntos. Arrastrando en un hueco te mueves por el mapa."
+        + " en las regiones y las rayas se arrastran sus puntos. Arrastrando en un hueco (o con el botón de en medio) te mueves por el mapa."
         + " Con Mayús: pulsando, eliges varias cosas; arrastrando en un hueco, todo lo que quede en el recuadro.",
-    pin: "Pulsa en el mapa donde va el sitio. Luego escribe su nombre a la derecha.",
+    pin: "Pulsa en el mapa donde va el sitio. Luego escribe su nombre en «Lo elegido».",
     region: "Pulsa punto a punto el borde de la región. Para cerrarla, pulsa en el primero, pulsa dos veces"
         + " o «Terminar el dibujo».",
     raya: "Pulsa punto a punto por donde va, desde el principio (un río, desde donde nace; una ruta, desde"
         + " donde sale). Para acabar, pulsa dos veces o «Terminar el dibujo».",
-    texto: "Pulsa en el mapa donde va el texto («Mar de las Brumas»). Luego escríbelo a la derecha, y elige su"
+    texto: "Pulsa en el mapa donde va el texto («Mar de las Brumas»). Luego escríbelo en «Lo elegido», y elige su"
         + " tamaño y su giro.",
     curva: "Pulsa punto a punto por donde va el texto (el nombre de un río, de una cordillera): sale del derecho"
         + " vaya hacia donde vaya. Para acabar, pulsa dos veces o «Terminar el dibujo».",
-    emblema: "Pulsa en el mapa donde va el emblema. Luego, a la derecha, su nombre, la página a la que lleva y su"
+    emblema: "Pulsa en el mapa donde va el emblema. Luego, en «Lo elegido», su nombre, la página a la que lleva y su"
         + " imagen: súbela, elige una de las que hay o usa la bandera o el blasón de su página.",
-    medir: "Pulsa de un sitio a otro, punto a punto, por donde se iría. A la derecha sale cuánto hay (con la"
+    medir: "Pulsa de un sitio a otro, punto a punto, por donde se iría. Aquí debajo sale cuánto hay (con la"
         + " escala, en leguas o kilómetros y en días de viaje).",
     escala: "Marca un tramo del que sepas lo que mide (de una ciudad a otra, por ejemplo): pulsa en un extremo y"
-        + " en el otro. Luego escribe a la derecha cuánto es y «Usar como escala».",
+        + " en el otro. Luego escribe aquí debajo cuánto es y «Usar como escala».",
 };
 const INSTRUCCIONES_A_MANO = "Aprieta y arrastra por donde va; al soltar, se acaba.";
 const HERRAMIENTAS_DE_DIBUJO = ["region", "raya"];
@@ -2050,6 +2090,10 @@ function ponerHerramienta(herramienta) {
     estadoMapa.ratonMedida = null;
     $('[data-mapa-solo="dibujo"]').hidden = !dibuja;
     $("[data-mapa-medir]").hidden = herramienta !== "medir";
+    // Lo que se mide sale en el panel de las herramientas: a la vista.
+    if (herramienta === "medir" || herramienta === "escala") {
+        abrirPanelMapa("herramientas", true, true);
+    }
     $("[data-mapa-instrucciones]").textContent = dibuja && $("#mapa-mano").checked
         ? INSTRUCCIONES_A_MANO : INSTRUCCIONES_MAPA[herramienta === "texto" && dibuja ? "curva" : herramienta];
     lienzoMapa().classList.toggle("es-dibujo", herramienta !== "elegir");
@@ -2255,7 +2299,7 @@ function terminarDibujo(aMano) {
     estadoMapa.iman = null;
     elegirCosa(lista, estadoMapa.datos[lista].length - 1);
     avisarEditor((lista === "shapes" ? "Región" : nombreDeCosa("lines", cosa).que.replace(/^./, (c) => c.toUpperCase()))
-        + " hecha (" + puntos.length + " puntos). Ponle nombre a la derecha.");
+        + " hecha (" + puntos.length + " puntos). Ponle nombre en «Lo elegido».");
     $("#mapa-p-nombre").focus({ preventScroll: true });
 }
 
@@ -2284,7 +2328,7 @@ function terminarCurvaDeTexto(puntos) {
     }
     labels.push(conColorNuevo("labels", texto));
     elegirCosa("labels", labels.length - 1);
-    avisarEditor("Curva hecha (" + puntos.length + " puntos). Escribe el texto a la derecha.");
+    avisarEditor("Curva hecha (" + puntos.length + " puntos). Escribe el texto en «Lo elegido».");
     $("#mapa-p-nombre").focus({ preventScroll: true });
 }
 
@@ -2320,7 +2364,7 @@ function ponerTexto(p) {
     }
     estadoMapa.datos.labels.push(conColorNuevo("labels", texto));
     elegirCosa("labels", estadoMapa.datos.labels.length - 1);
-    avisarEditor("Texto puesto. Escríbelo a la derecha.");
+    avisarEditor("Texto puesto. Escríbelo en «Lo elegido».");
     $("#mapa-p-nombre").focus({ preventScroll: true });
 }
 
@@ -2638,12 +2682,55 @@ function quitarEscala() {
 }
 
 // ---- EL RATÓN ----
+// MOVERSE CON EL BOTÓN DE EN MEDIO, con cualquier herramienta y a mitad de
+// lo que sea (un dibujo, arrastrando un punto o un sitio, midiendo): va
+// aparte de lo que se esté haciendo (estadoMapa.paneo, no arrastre), así
+// que no lo corta ni suelta lo elegido. Si se aprieta con el izquierdo ya
+// apretado, el navegador no avisa con un pointerdown sino con un
+// pointermove con otros botones (e.buttons: 1 el izquierdo, 4 el de en
+// medio); por eso se mira en cada movimiento.
+function empezarPaneo(e) {
+    estadoMapa.paneo = { x: e.clientX, y: e.clientY, vista: Object.assign({}, estadoMapa.vista) };
+    lienzoMapa().classList.add("es-paneo");
+}
+
+function seguirPaneo(e) {
+    const pa = estadoMapa.paneo;
+    const lienzo = lienzoMapa();
+    const s = Math.max(pa.vista.w / lienzo.clientWidth, pa.vista.h / lienzo.clientHeight);
+    ponerVistaMapa({ x: pa.vista.x - (e.clientX - pa.x) * s, y: pa.vista.y - (e.clientY - pa.y) * s,
+        w: pa.vista.w, h: pa.vista.h });
+}
+
+function acabarPaneo(e) {
+    estadoMapa.paneo = null;
+    lienzoMapa().classList.remove("es-paneo");
+    // Si se estaba moviendo el mapa con el izquierdo, sigue desde aquí.
+    const a = estadoMapa.arrastre;
+    if (a && a.que === "vista" && e) {
+        a.inicio = Object.assign({}, a.inicio, { x: e.clientX, y: e.clientY, vista: Object.assign({}, estadoMapa.vista) });
+    }
+}
+
 function alApretarEnElMapa(e) {
     if (!estadoMapa.datos || (e.button !== 0 && e.button !== 1)) {
         return;
     }
-    estadoMapa.sinIman = e.altKey;
     const svg = svgDelMapa();
+    if (e.button === 1) {
+        // Sin quitarle el foco a nada: lo que se estaba escribiendo o
+        // haciendo sigue igual.
+        e.preventDefault();
+        empezarPaneo(e);
+        svg.setPointerCapture(e.pointerId);
+        return;
+    }
+    // Con el izquierdo, el teclado pasa al mapa (Esc cancela el dibujo,
+    // Supr borra lo elegido…), aunque se viniera de un panel.
+    if (document.activeElement !== lienzoMapa()) {
+        lienzoMapa().focus({ preventScroll: true });
+    }
+    estadoMapa.sinIman = e.altKey;
     const p = puntoDelMapa(e);
     const inicio = { x: e.clientX, y: e.clientY, p, vista: Object.assign({}, estadoMapa.vista) };
     // Con el botón de en medio, o en un hueco con «Elegir y mover»: moverse.
@@ -2654,7 +2741,7 @@ function alApretarEnElMapa(e) {
     if (e.button === 0 && h === "elegir" && e.shiftKey && !asa && !medio && !cosa) {
         // Mayús y arrastrar en un hueco: un recuadro para elegir lo de dentro.
         estadoMapa.arrastre = { que: "caja", inicio, movido: false };
-    } else if (e.button === 1 || (h === "elegir" && !asa && !medio && !cosa)) {
+    } else if (h === "elegir" && !asa && !medio && !cosa) {
         estadoMapa.arrastre = { que: "vista", inicio, movido: false };
     } else if (h === "elegir" && asa && esDobleEnAsa(asa)) {
         quitarPuntoMapa(Number(asa.getAttribute("data-asa")));
@@ -2706,6 +2793,21 @@ function alApretarEnElMapa(e) {
 }
 
 function alMoverEnElMapa(e) {
+    if (e.pointerType === "mouse") {
+        if (estadoMapa.paneo && !(e.buttons & 4)) {
+            acabarPaneo(e);
+        } else if (!estadoMapa.paneo && (e.buttons & 4)) {
+            empezarPaneo(e);
+        }
+        // Soltado el izquierdo con el de en medio apretado: no llega un
+        // pointerup (hasta soltarlos todos), así que se suelta aquí.
+        if (estadoMapa.arrastre && !(e.buttons & 1)) {
+            alSoltarEnElMapa(e);
+        }
+    }
+    if (estadoMapa.paneo) {
+        seguirPaneo(e);
+    }
     const a = estadoMapa.arrastre;
     const dibujo = estadoMapa.dibujo;
     estadoMapa.sinIman = e.altKey;
@@ -2743,6 +2845,10 @@ function alMoverEnElMapa(e) {
     }
     a.movido = true;
     if (a.que === "vista") {
+        if (estadoMapa.paneo) {
+            return;
+        }
+        lienzo.classList.add("es-paneo");
         const s = Math.max(a.inicio.vista.w / lienzo.clientWidth, a.inicio.vista.h / lienzo.clientHeight);
         ponerVistaMapa({ x: a.inicio.vista.x - dx * s, y: a.inicio.vista.y - dy * s, w: a.inicio.vista.w, h: a.inicio.vista.h });
         return;
@@ -2787,7 +2893,7 @@ function alMoverEnElMapa(e) {
             Object.assign(deEste, centroDeCurva(deEste.points));
         }
         repintarCosa(el.lista, el.i);
-    } else if (a.que === "mano" && dibujo) {
+    } else if (a.que === "mano" && dibujo && !estadoMapa.paneo) {
         const ultimo = dibujo.puntos[dibujo.puntos.length - 1];
         if (Math.hypot(ultimo.x - p.x, ultimo.y - p.y) > 3 * escalaMapa()) {
             dibujo.puntos.push(dentroDelMapa(p));
@@ -2797,6 +2903,10 @@ function alMoverEnElMapa(e) {
 }
 
 function alSoltarEnElMapa(e) {
+    if (estadoMapa.paneo && e.type === "pointerup") {
+        acabarPaneo();
+    }
+    lienzoMapa().classList.remove("es-paneo");
     const a = estadoMapa.arrastre;
     estadoMapa.arrastre = null;
     if (!a) {
@@ -2829,7 +2939,7 @@ function alSoltarEnElMapa(e) {
             });
             elegirVarios(todos);
             avisarEditor(salen.length ? "En el recuadro: " + salen.length + (salen.length === 1 ? " cosa." : " cosas.")
-                + " Arrástralas juntas, muévelas con las flechas o cámbialas a la derecha."
+                + " Arrástralas juntas, muévelas con las flechas o cámbialas en «Lo elegido»."
                 : "En el recuadro no hay nada entero (las rayas y las regiones tienen que caber enteras).");
         } else if (estadoMapa.elegido || estadoMapa.varios.length) {
             elegirCosa(null);
@@ -3575,7 +3685,99 @@ function escribiendoEnUnaCasilla() {
     return activo.tagName === "INPUT" && !["checkbox", "radio", "range", "button", "file", "color"].includes(activo.type);
 }
 
+// ---- LOS PANELES ----
+// Flotan encima del mapa; cada pestaña de arriba abre y cierra el suyo (un
+// botón que se queda apretado, aria-expanded), y la × o Esc dentro de él lo
+// cierran. Se recuerda en el navegador cuáles estaban abiertos; los que se
+// abren solos (lo elegido al elegir algo, las herramientas al medir) no
+// cuentan para eso.
+const PANELES_DE_SALIDA = { herramientas: true };
+let panelesAbiertos = Object.assign({}, PANELES_DE_SALIDA);
+try {
+    const guardados = JSON.parse(window.localStorage.getItem("mapa-paneles") || "null");
+    if (guardados && typeof guardados === "object") {
+        panelesAbiertos = guardados;
+    }
+} catch (error) {
+    // Sin almacenamiento: los de salida.
+}
+
+function abrirPanelMapa(clave, abrir, solo) {
+    const panel = document.querySelector('[data-mapa-panel="' + clave + '"]');
+    const pestana = document.querySelector('[data-mapa-pestana="' + clave + '"]');
+    if (!panel || !pestana) {
+        return;
+    }
+    panel.hidden = !abrir;
+    pestana.setAttribute("aria-expanded", abrir ? "true" : "false");
+    // En una pantalla estrecha no caben dos: se abre uno y se cierran los
+    // demás (sin olvidar cuáles se tenían abiertos en la grande).
+    if (abrir && window.innerWidth < 768) {
+        document.querySelectorAll("[data-mapa-panel]").forEach((otro) => {
+            const suya = otro.getAttribute("data-mapa-panel");
+            if (suya !== clave && !otro.hidden) {
+                abrirPanelMapa(suya, false, true);
+            }
+        });
+    }
+    if (solo) {
+        return;
+    }
+    panelesAbiertos[clave] = abrir;
+    try {
+        window.localStorage.setItem("mapa-paneles", JSON.stringify(panelesAbiertos));
+    } catch (error) {
+        // Se recuerda mientras esté abierta la página.
+    }
+}
+
+function empezarPanelesMapa() {
+    document.querySelectorAll("[data-mapa-pestana]").forEach((b) => {
+        const clave = b.getAttribute("data-mapa-pestana");
+        abrirPanelMapa(clave, !!panelesAbiertos[clave] && (window.innerWidth >= 768 || clave === "herramientas"), true);
+        b.addEventListener("click", () => abrirPanelMapa(clave, b.getAttribute("aria-expanded") !== "true"));
+    });
+    document.querySelectorAll("[data-mapa-cerrar]").forEach((b) => {
+        b.addEventListener("click", () => {
+            const clave = b.getAttribute("data-mapa-cerrar");
+            abrirPanelMapa(clave, false);
+            document.querySelector('[data-mapa-pestana="' + clave + '"]').focus();
+        });
+    });
+    document.querySelectorAll("[data-mapa-panel]").forEach((panel) => {
+        panel.addEventListener("keydown", (e) => {
+            if (e.key !== "Escape" || e.defaultPrevented) {
+                return;
+            }
+            e.preventDefault();
+            const clave = panel.getAttribute("data-mapa-panel");
+            abrirPanelMapa(clave, false);
+            document.querySelector('[data-mapa-pestana="' + clave + '"]').focus();
+        });
+    });
+    // Lo que mide la barra de arriba (crece si no cabe en una fila), para el
+    // mapa y los paneles.
+    const arriba = $("[data-mapa-arriba]");
+    const apuntarArriba = () => {
+        if (arriba.offsetHeight) {
+            document.documentElement.style.setProperty("--alto-arriba", arriba.offsetHeight + "px");
+        }
+    };
+    if (window.ResizeObserver) {
+        new ResizeObserver(apuntarArriba).observe(arriba);
+        // Si el mapa cambia de tamaño (la barra de arriba o la de abajo
+        // crecen), la vista se rehace con el mismo zoom.
+        new ResizeObserver(() => {
+            if (estadoMapa.vista && lienzoMapa().clientWidth) {
+                ponerVistaMapa(estadoMapa.vista);
+            }
+        }).observe(lienzoMapa());
+    }
+    window.addEventListener("resize", apuntarArriba);
+}
+
 function empezarMapas() {
+    empezarPanelesMapa();
     opcionesMapa($("[data-mapa-tipos-pin]"), TIPOS_DE_SITIO, true);
     $("[data-mapa-tipos-pin]").value = "ciudad";
     opcionesMapa($("[data-mapa-tipos-raya]"), TIPOS_DE_RAYA, false);
@@ -3612,9 +3814,8 @@ function empezarMapas() {
     $("#mapa-forma-nueva").addEventListener("change", pintarOpcionesDeSitio);
     $("[data-mapa-emblema-pagina]").addEventListener("click", usarImagenDeLaPagina);
     $("[data-mapa-escala-otro]").addEventListener("click", empezarOtraMedida);
-    // LA PALETA de herramientas va fija a la derecha, de arriba hasta la
-    // barra de abajo (que crece con los avisos): su alto se apunta en
-    // --alto-barra.
+    // La barra de abajo crece con los avisos: lo que mide se apunta en
+    // --alto-barra (hasta ahí llegan el mapa y los paneles).
     const barra = $("[data-barra-mapa]");
     const apuntarAlto = () => document.documentElement.style.setProperty("--alto-barra", barra.offsetHeight + "px");
     if (window.ResizeObserver) {
@@ -3661,6 +3862,19 @@ function empezarMapas() {
     svg.addEventListener("pointerup", alSoltarEnElMapa);
     svg.addEventListener("pointercancel", () => {
         estadoMapa.arrastre = null;
+        acabarPaneo();
+    });
+    // El botón de en medio no hace lo suyo del navegador (en Windows, la
+    // flecha de desplazarse sola; en Linux, pegar) ni se lleva el foco.
+    window.addEventListener("pointerup", (e) => {
+        if (estadoMapa.paneo && !(e.buttons & 4)) {
+            acabarPaneo(e);
+        }
+    });
+    lienzoMapa().addEventListener("mousedown", (e) => {
+        if (e.button === 1) {
+            e.preventDefault();
+        }
     });
     svg.addEventListener("pointerleave", () => {
         if (estadoMapa.dibujo) {

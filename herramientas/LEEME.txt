@@ -1999,7 +1999,7 @@
   sola. Lo que se puede hacer:
 
     - PONER UN SITIO: se elige qué es (capital, ciudad…) y se pulsa en
-      el mapa. Luego, a la derecha, su nombre y la página a la que lleva.
+      el mapa. Luego, en «Lo elegido», su nombre y la página a la que lleva.
     - PINTAR UNA REGIÓN, O UNA RAYA (camino, río, frontera, ruta
       marítima, muralla o ruta de viaje, en «Qué raya»): punto a punto
       (pulsando; la región se cierra pulsando en el primero, y todo se
@@ -2011,13 +2011,13 @@
     - PONER UN SITIO: qué sitio es (capital, pueblo…) y CÓMO SE VE: con
       su símbolo, con la forma de su tipo, o como escudo, bandera,
       medallón, hexágono, rombo, estrella… (con su tamaño). Como
-      emblema, a la derecha se le pone imagen: SUBIR UNA de tu ordenador
+      emblema, en «Lo elegido» se le pone imagen: SUBIR UNA de tu ordenador
       (va a wiki/_imagenes/banderas/, a 512 px como mucho), escribir o
       elegir una de las que ya hay, o «USAR LA DE SU PÁGINA», que pone la
       bandera, el blasón o el escudo de la ficha de esa página. Sin
       imagen lleva el símbolo de su tipo.
     - ESCRIBIR EN EL MAPA: arriba se eligen la letra, el tamaño y si va en
-      cursiva; se pulsa donde va el texto y, a la derecha, se escribe (y
+      cursiva; se pulsa donde va el texto y, en «Lo elegido», se escribe (y
       se le puede cambiar todo eso, el giro y el color). Con «Sobre una
       curva», se marca la curva punto a punto (ver TEXTOS SOBRE UNA CURVA).
     - PINTAR UNA REGIÓN: «Qué zona» (vecino, lago, bosque…; ver CLASES DE
@@ -2031,27 +2031,38 @@
       quita; Mayús y arrastrar en un hueco elige lo que quede dentro del
       recuadro (los sitios y los textos por su punto; las rayas y las
       regiones, si caben enteras). Varias se arrastran juntas, se mueven
-      con las flechas, se borran con Supr y, a la derecha, se les cambia
+      con las flechas, se borran con Supr y, en «Lo elegido», se les cambia
       a la vez el tipo de sitio, la forma, el tamaño, la raya, la zona o
       el color. Ctrl+C, Ctrl+V y Ctrl+D copian, pegan y duplican lo
       elegido (sea una o varias), un poco más abajo a la derecha y ya
       elegido para moverlo.
-    - COMO PHOTOSHOP: la paleta de herramientas fija a la IZQUIERDA, el
-      mapa en medio y LO ELEGIDO (con la lista de lo que hay y los paneles
-      de medir y de la escala) fijo a la DERECHA, con su propia barra para
-      bajar si no cabe. Lo elegido va fijo desde 80rem de ancho; con menos,
-      debajo del mapa.
-    - LA PALETA DE HERRAMIENTAS: fija a la izquierda
-      de la pantalla (position: fixed, nada de sticky) y siempre a la
-      vista aunque se baje por la página, desde arriba hasta la barra de
-      abajo (que crece con los avisos; mapas.js apunta lo que mide en
-      --alto-barra). Lleva las herramientas, lo que se elige de cada una
-      (qué sitio, qué raya, la letra…), a mano alzada, el imán, terminar
-      o cancelar el dibujo, deshacer y rehacer y el zoom. La página le
-      deja su hueco con un margen a la izquierda. En pantallas de menos de
-      64rem va en su sitio, encima del mapa, con las herramientas en
-      filas. Al cambiar de herramienta, un dibujo a medias con puntos de
-      sobra se termina en vez de perderse.
+    - A PANTALLA COMPLETA, CON PANELES EN PESTAÑAS (desde el 22-10-2026):
+      el mapa ocupa toda la pantalla entre dos barras fijas. Arriba,
+      «← Los mapas», el título, las PESTAÑAS (Herramientas, Lo elegido,
+      Lo que hay, El mapa en sí, Teclas y ratón), deshacer y rehacer, el
+      zoom y «Verlo entero»; abajo, guardar. Cada pestaña abre y cierra
+      su panel, que flota encima del mapa: las herramientas a la
+      izquierda (con lo de medir y la escala) y lo demás a la derecha, uno
+      debajo de otro, cada uno con su barra para bajar si no cabe. La ×
+      o Esc dentro de un panel lo cierran. Se recuerda cuáles tenías
+      abiertos (localStorage «mapa-paneles»; de salida, solo las
+      herramientas). «Lo elegido» se abre solo al elegir algo, y las
+      herramientas al medir o poner la escala. «Verlo entero» encaja el
+      mapa en el hueco que dejan los paneles abiertos. En pantallas
+      estrechas (menos de 768 px) se abre un panel cada vez. Todo fijo
+      (position: fixed, nada de sticky); mapas.js apunta lo que miden las
+      barras en --alto-arriba y --alto-barra. Al cambiar de herramienta,
+      un dibujo a medias con puntos de sobra se termina en vez de perderse.
+    - MOVERSE POR EL MAPA: la rueda acerca y aleja; se arrastra con «Elegir
+      y mover» en un hueco o, CON CUALQUIER HERRAMIENTA, con el BOTÓN DE EN
+      MEDIO. Eso va aparte de lo que estés haciendo: a mitad de un dibujo
+      (también a mano alzada, que se para mientras), arrastrando un sitio
+      o un punto (se lo lleva contigo), midiendo o escribiendo en un panel
+      no corta nada, no suelta lo elegido ni quita el foco. El mapa se
+      puede llevar MÁS ALLÁ DE SUS BORDES, con un reborde oscuro (siempre
+      queda un trozo a la vista), y alejar hasta tres veces el mapa
+      entero. Pulsar con el izquierdo en el mapa le pasa el teclado (Esc,
+      Supr, las flechas…).
     - EL IMÁN (casilla «Imán», encendida): lo que se pone a menos de 12
       píxeles de un sitio o de un punto se pone JUSTO ahí, y si no hay
       punto pero sí un borde, encima del borde. Así el camino llega a la
@@ -2062,7 +2073,7 @@
     - ELEGIR Y MOVER: los sitios y los textos se arrastran; en las
       regiones y las rayas se arrastran sus puntos, los pequeños de en
       medio añaden uno y dos pulsaciones en uno lo quitan. En un hueco,
-      arrastrar mueve el mapa. Lo elegido se borra con Supr o con
+      arrastrar mueve el mapa (o con el botón de en medio). Lo elegido se borra con Supr o con
       «Borrar».
     - DESHACER Y REHACER (Ctrl+Z y Ctrl+Y, o sus botones): antes de cada
       cambio se apunta el mapa entero, hasta 80 pasos (menos si son muy
@@ -2074,14 +2085,14 @@
       (leguas, kilómetros o millas) y «Usar como escala». Ahí mismo, lo
       que se anda en un día a pie y a caballo (8 y 12 leguas de entrada;
       30 y 50 km; 20 y 30 millas). La escala se guarda y la web la pinta.
-    - MEDIR: se pulsa de un sitio a otro, punto a punto, y a la derecha
-      sale cuánto hay (con el imán, de pin a pin exacto): con escala, en
+    - MEDIR: se pulsa de un sitio a otro, punto a punto, y en el panel
+      de las herramientas sale cuánto hay (con el imán, de pin a pin exacto): con escala, en
       su unidad y en DÍAS DE VIAJE; sin ella, en píxeles del mapa. La
       medida no se guarda.
     - TODO SE PUEDE HACER CON EL TECLADO: con el mapa elegido, las
       flechas lo mueven (o mueven el sitio o el texto elegido), + y −
       acercan, Intro pone un sitio, un texto o un punto en el centro, Fin
-      termina el dibujo y Esc lo cancela. Y a la derecha está la lista de
+      termina el dibujo y Esc lo cancela. Y en «Lo que hay» está la lista de
       todo lo que hay, con botones para elegirlo, y las casillas X e Y.
     - UN MAPA NUEVO: de qué página es, el título (si no, «Mapa del…» o
       «Mapa de…» con el artículo que toque) y la imagen, que va a

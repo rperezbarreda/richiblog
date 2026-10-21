@@ -478,119 +478,123 @@
             </form>
         </section>
 
-        <!-- UN MAPA -->
+        <!-- UN MAPA. A pantalla completa: arriba una barra con el título, las
+             pestañas de los paneles y el zoom; el mapa ocupa todo lo demás
+             hasta la barra de abajo, y los paneles flotan encima, a la
+             izquierda (las herramientas) y a la derecha (lo elegido, lo que
+             hay, el mapa en sí y las teclas). Cada pestaña abre y cierra el
+             suyo, y se recuerda cuáles estaban abiertos. Todo fijo
+             (position: fixed); mapas.js apunta lo que miden las dos barras en
+             --alto-arriba y --alto-barra. -->
         <section class="vista" data-vista="mapa" aria-labelledby="t-mapa" hidden>
-            <h1 id="t-mapa" data-mapa-titulo></h1>
-            <p class="ayuda" data-mapa-archivo></p>
-            <p class="ayuda mapa-instrucciones" data-mapa-instrucciones aria-live="polite"></p>
-            <!-- LA PALETA DE HERRAMIENTAS, como la de Photoshop: fija a la
-                 derecha (position: fixed, no sticky) y siempre a la vista
-                 aunque se baje por la página. En pantallas estrechas va en
-                 su sitio, encima del mapa. -->
-            <aside class="mapa-paleta" aria-label="Herramientas del mapa">
-                <fieldset class="herramientas">
-                    <legend>Herramientas</legend>
-                    <label class="herramienta"><input type="radio" name="herramienta" value="elegir" checked>
-                        <span class="herramienta-icono" aria-hidden="true">✋</span> Elegir y mover</label>
-                    <label class="herramienta"><input type="radio" name="herramienta" value="pin">
-                        <span class="herramienta-icono" aria-hidden="true">📍</span> Poner un sitio</label>
-                    <label class="herramienta"><input type="radio" name="herramienta" value="region">
-                        <span class="herramienta-icono" aria-hidden="true">⬠</span> Pintar una región</label>
-                    <label class="herramienta"><input type="radio" name="herramienta" value="raya">
-                        <span class="herramienta-icono" aria-hidden="true">〰</span> Pintar una raya</label>
-                    <label class="herramienta"><input type="radio" name="herramienta" value="texto">
-                        <span class="herramienta-icono" aria-hidden="true">𝐀</span> Escribir</label>
-                    <label class="herramienta"><input type="radio" name="herramienta" value="medir">
-                        <span class="herramienta-icono" aria-hidden="true">📏</span> Medir</label>
-                    <label class="herramienta"><input type="radio" name="herramienta" value="escala">
-                        <span class="herramienta-icono" aria-hidden="true">⟷</span> Poner la escala</label>
-                </fieldset>
-                <div class="mapa-opciones">
-                    <div class="mapa-opcion" data-mapa-solo="pin">
-                        <label for="mapa-tipo-nuevo">Qué sitio</label>
-                        <select id="mapa-tipo-nuevo" data-mapa-tipos-pin></select>
-                    </div>
-                    <div class="mapa-opcion" data-mapa-solo="raya">
-                        <label for="mapa-tipo-raya">Qué raya</label>
-                        <select id="mapa-tipo-raya" data-mapa-tipos-raya></select>
-                    </div>
-                    <div class="mapa-opcion" data-mapa-solo="region">
-                        <label for="mapa-tipo-zona">Qué zona</label>
-                        <select id="mapa-tipo-zona" data-mapa-tipos-zona></select>
-                    </div>
-                    <div class="mapa-opcion" data-mapa-solo="pin">
-                        <label for="mapa-forma-nueva">Cómo se ve</label>
-                        <select id="mapa-forma-nueva" data-mapa-formas-emblema></select>
-                    </div>
-                    <div class="mapa-opcion" data-mapa-solo="pin-emblema">
-                        <label for="mapa-tamano-emblema-nuevo">Tamaño</label>
-                        <select id="mapa-tamano-emblema-nuevo" data-mapa-tamanos-emblema></select>
-                    </div>
-                    <div class="mapa-opcion" data-mapa-solo="texto">
-                        <label for="mapa-letra-nueva">Letra</label>
-                        <select id="mapa-letra-nueva" data-mapa-letras></select>
-                    </div>
-                    <div class="mapa-opcion" data-mapa-solo="texto">
-                        <label for="mapa-tamano-nuevo">Tamaño</label>
-                        <input id="mapa-tamano-nuevo" type="number" min="6" step="1" inputmode="numeric">
-                    </div>
-                    <label class="opcion mapa-opcion" data-mapa-solo="texto">
-                        <input type="checkbox" id="mapa-cursiva-nueva" checked> Cursiva</label>
-                    <label class="opcion mapa-opcion" data-mapa-solo="texto">
-                        <input type="checkbox" id="mapa-curva-nueva"> Sobre una curva</label>
-                    <div class="mapa-opcion mapa-color-nuevo" data-mapa-color-nuevo hidden>
-                        <span>Sale de este color: <span class="mapa-color-muestra" data-mapa-color-muestra
-                            aria-hidden="true"></span> <span data-mapa-color-nombre></span></span>
-                        <button type="button" data-mapa-color-olvidar>Como su tipo</button>
-                    </div>
-                    <label class="opcion mapa-opcion" data-mapa-solo="dibujo">
-                        <input type="checkbox" id="mapa-mano"> A mano alzada</label>
-                    <label class="opcion mapa-opcion" title="Lo que pones se engancha a los puntos y bordes que tenga cerca (con Alt pulsado, no).">
-                        <input type="checkbox" id="mapa-iman" checked aria-describedby="ayuda-iman"> Imán</label>
-                    <p class="solo-lector" id="ayuda-iman">Lo que pones se engancha a los puntos y bordes que tenga
-                        cerca (con Alt pulsado, no).</p>
+            <div class="mapa-arriba" data-mapa-arriba>
+                <button type="button" data-ir="mapas">← Los mapas</button>
+                <h1 id="t-mapa" data-mapa-titulo></h1>
+                <div class="mapa-pestanas" role="group" aria-label="Paneles">
+                    <button type="button" data-mapa-pestana="herramientas" aria-controls="mapa-panel-herramientas" aria-expanded="false">Herramientas</button>
+                    <button type="button" data-mapa-pestana="elegido" aria-controls="mapa-panel-elegido" aria-expanded="false">Lo elegido</button>
+                    <button type="button" data-mapa-pestana="cosas" aria-controls="mapa-panel-cosas" aria-expanded="false">Lo que hay</button>
+                    <button type="button" data-mapa-pestana="ajustes" aria-controls="mapa-panel-ajustes" aria-expanded="false">El mapa en sí</button>
+                    <button type="button" data-mapa-pestana="teclas" aria-controls="mapa-panel-teclas" aria-expanded="false">Teclas y ratón</button>
                 </div>
-                <div class="mapa-paleta-dibujo">
-                    <button type="button" class="principal" data-mapa-terminar>Terminar el dibujo</button>
-                    <button type="button" data-mapa-quitar-punto>Quitar el último punto</button>
-                    <button type="button" data-mapa-cancelar>Cancelar</button>
-                </div>
-                <div class="mapa-paleta-fila">
+                <div class="mapa-arriba-mandos" role="group" aria-label="Deshacer y zoom">
                     <button type="button" data-mapa-deshacer disabled aria-label="Deshacer (Ctrl+Z)"
                             title="Deshacer (Ctrl+Z)">↶</button>
                     <button type="button" data-mapa-rehacer disabled aria-label="Rehacer (Ctrl+Y)"
                             title="Rehacer (Ctrl+Y)">↷</button>
-                </div>
-                <div class="mapa-paleta-fila">
                     <button type="button" data-mapa-zoom="-1" aria-label="Alejar" title="Alejar">−</button>
                     <span class="mapa-cuanto" data-mapa-cuanto>100%</span>
                     <button type="button" data-mapa-zoom="1" aria-label="Acercar" title="Acercar">+</button>
+                    <button type="button" data-mapa-ajustar>Verlo entero</button>
                 </div>
-                <button type="button" class="mapa-paleta-ancho" data-mapa-ajustar>Verlo entero</button>
-            </aside>
-            <div class="mapa-editor">
-                <div class="mapa-izquierda">
-                    <div class="mapa-lienzo" data-mapa-lienzo tabindex="0" role="application"
-                         aria-roledescription="lienzo del mapa" aria-describedby="mapa-teclas">
-                        <svg data-mapa-svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true"></svg>
+            </div>
+            <div class="mapa-lienzo" data-mapa-lienzo tabindex="0" role="application"
+                 aria-roledescription="lienzo del mapa" aria-describedby="mapa-instrucciones mapa-teclas">
+                <svg data-mapa-svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true"></svg>
+            </div>
+            <div class="mapa-columna es-izquierda">
+                <section class="mapa-panel mapa-paleta" id="mapa-panel-herramientas" data-mapa-panel="herramientas" aria-labelledby="t-mapa-herramientas" hidden>
+                    <div class="mapa-panel-cabeza">
+                        <h2 id="t-mapa-herramientas">Herramientas</h2>
+                        <button type="button" class="mapa-panel-cerrar" data-mapa-cerrar="herramientas" aria-label="Cerrar «Herramientas»" title="Cerrar (Esc)">×</button>
                     </div>
-                    <p class="ayuda" id="mapa-teclas">Con el mapa elegido: las flechas lo mueven (o mueven el
-                        sitio o el texto elegido), + y − acercan y alejan, Intro pone un sitio, un texto o un
-                        punto en el centro, Fin termina el dibujo, Esc lo cancela, Supr borra lo elegido y
-                        Ctrl+Z lo deshace. Con Mayús se eligen varias cosas (pulsando, o arrastrando un recuadro en
-                        un hueco); Ctrl+C, Ctrl+V y Ctrl+D copian, pegan y duplican lo elegido. La rueda del ratón acerca y aleja; para moverte por el mapa, arrastra
-                        con «Elegir y mover» o con el botón de en medio.</p>
-                </div>
-                <div class="mapa-derecha">
-                    <section class="bloque mapa-medir" data-mapa-medir hidden aria-labelledby="t-mapa-medir">
-                        <h2 id="t-mapa-medir">Medir</h2>
+                    <fieldset class="herramientas">
+                        <legend class="solo-lector">La herramienta</legend>
+                        <label class="herramienta"><input type="radio" name="herramienta" value="elegir" checked>
+                            <span class="herramienta-icono" aria-hidden="true">✋</span> Elegir y mover</label>
+                        <label class="herramienta"><input type="radio" name="herramienta" value="pin">
+                            <span class="herramienta-icono" aria-hidden="true">📍</span> Poner un sitio</label>
+                        <label class="herramienta"><input type="radio" name="herramienta" value="region">
+                            <span class="herramienta-icono" aria-hidden="true">⬠</span> Pintar una región</label>
+                        <label class="herramienta"><input type="radio" name="herramienta" value="raya">
+                            <span class="herramienta-icono" aria-hidden="true">〰</span> Pintar una raya</label>
+                        <label class="herramienta"><input type="radio" name="herramienta" value="texto">
+                            <span class="herramienta-icono" aria-hidden="true">𝐀</span> Escribir</label>
+                        <label class="herramienta"><input type="radio" name="herramienta" value="medir">
+                            <span class="herramienta-icono" aria-hidden="true">📏</span> Medir</label>
+                        <label class="herramienta"><input type="radio" name="herramienta" value="escala">
+                            <span class="herramienta-icono" aria-hidden="true">⟷</span> Poner la escala</label>
+                    </fieldset>
+                    <div class="mapa-opciones">
+                        <div class="mapa-opcion" data-mapa-solo="pin">
+                            <label for="mapa-tipo-nuevo">Qué sitio</label>
+                            <select id="mapa-tipo-nuevo" data-mapa-tipos-pin></select>
+                        </div>
+                        <div class="mapa-opcion" data-mapa-solo="raya">
+                            <label for="mapa-tipo-raya">Qué raya</label>
+                            <select id="mapa-tipo-raya" data-mapa-tipos-raya></select>
+                        </div>
+                        <div class="mapa-opcion" data-mapa-solo="region">
+                            <label for="mapa-tipo-zona">Qué zona</label>
+                            <select id="mapa-tipo-zona" data-mapa-tipos-zona></select>
+                        </div>
+                        <div class="mapa-opcion" data-mapa-solo="pin">
+                            <label for="mapa-forma-nueva">Cómo se ve</label>
+                            <select id="mapa-forma-nueva" data-mapa-formas-emblema></select>
+                        </div>
+                        <div class="mapa-opcion" data-mapa-solo="pin-emblema">
+                            <label for="mapa-tamano-emblema-nuevo">Tamaño</label>
+                            <select id="mapa-tamano-emblema-nuevo" data-mapa-tamanos-emblema></select>
+                        </div>
+                        <div class="mapa-opcion" data-mapa-solo="texto">
+                            <label for="mapa-letra-nueva">Letra</label>
+                            <select id="mapa-letra-nueva" data-mapa-letras></select>
+                        </div>
+                        <div class="mapa-opcion" data-mapa-solo="texto">
+                            <label for="mapa-tamano-nuevo">Tamaño</label>
+                            <input id="mapa-tamano-nuevo" type="number" min="6" step="1" inputmode="numeric">
+                        </div>
+                        <label class="opcion mapa-opcion" data-mapa-solo="texto">
+                            <input type="checkbox" id="mapa-cursiva-nueva" checked> Cursiva</label>
+                        <label class="opcion mapa-opcion" data-mapa-solo="texto">
+                            <input type="checkbox" id="mapa-curva-nueva"> Sobre una curva</label>
+                        <div class="mapa-opcion mapa-color-nuevo" data-mapa-color-nuevo hidden>
+                            <span>Sale de este color: <span class="mapa-color-muestra" data-mapa-color-muestra
+                                aria-hidden="true"></span> <span data-mapa-color-nombre></span></span>
+                            <button type="button" data-mapa-color-olvidar>Como su tipo</button>
+                        </div>
+                        <label class="opcion mapa-opcion" data-mapa-solo="dibujo">
+                            <input type="checkbox" id="mapa-mano"> A mano alzada</label>
+                        <label class="opcion mapa-opcion" title="Lo que pones se engancha a los puntos y bordes que tenga cerca (con Alt pulsado, no).">
+                            <input type="checkbox" id="mapa-iman" checked aria-describedby="ayuda-iman"> Imán</label>
+                        <p class="solo-lector" id="ayuda-iman">Lo que pones se engancha a los puntos y bordes que tenga
+                            cerca (con Alt pulsado, no).</p>
+                    </div>
+                    <div class="mapa-paleta-dibujo">
+                        <button type="button" class="principal" data-mapa-terminar>Terminar el dibujo</button>
+                        <button type="button" data-mapa-quitar-punto>Quitar el último punto</button>
+                        <button type="button" data-mapa-cancelar>Cancelar</button>
+                    </div>
+                    <p class="ayuda mapa-instrucciones" id="mapa-instrucciones" data-mapa-instrucciones aria-live="polite"></p>
+                    <section data-mapa-medir hidden aria-labelledby="t-mapa-medir">
+                        <h3 id="t-mapa-medir">Medir</h3>
                         <p class="mapa-medida" data-mapa-medida aria-live="polite"></p>
                         <p class="ayuda" data-mapa-medida-raton></p>
                         <button type="button" data-mapa-medir-otra>Empezar otra medida</button>
                         <p class="ayuda mapa-medir-escala" data-mapa-medir-escala></p>
                     </section>
-                    <section class="bloque mapa-medir" data-mapa-escala hidden aria-labelledby="t-mapa-escala">
-                        <h2 id="t-mapa-escala">La escala</h2>
+                    <section data-mapa-escala hidden aria-labelledby="t-mapa-escala">
+                        <h3 id="t-mapa-escala">La escala</h3>
                         <p class="ayuda" data-mapa-escala-ahora></p>
                         <p class="mapa-medida" data-mapa-tramo aria-live="polite"></p>
                         <p class="ayuda" data-mapa-escala-raton></p>
@@ -625,188 +629,218 @@
                         </div>
                         <button type="button" data-mapa-escala-quitar>Quitar la escala</button>
                     </section>
-                    <section class="bloque mapa-elegido" aria-labelledby="t-mapa-elegido">
+                </section>
+            </div>
+            <div class="mapa-columna es-derecha">
+                <section class="mapa-panel" id="mapa-panel-elegido" data-mapa-panel="elegido" aria-labelledby="t-mapa-elegido" hidden>
+                    <div class="mapa-panel-cabeza">
                         <h2 id="t-mapa-elegido">Lo elegido</h2>
-                        <p class="ayuda" data-mapa-nada>Nada. Pulsa algo del mapa o de la lista de abajo.</p>
-                        <div data-mapa-propiedades hidden>
-                            <p class="mapa-que" data-mapa-que></p>
-                            <div class="campo">
-                                <label for="mapa-p-nombre" data-mapa-p-nombre-que>Nombre</label>
-                                <input id="mapa-p-nombre" autocomplete="off" data-mapa-p="label">
-                            </div>
-                            <div class="campo" data-mapa-p-caja="pagina">
-                                <label for="mapa-p-pagina">Lleva a la página</label>
-                                <input id="mapa-p-pagina" list="lista-paginas" autocomplete="off" spellcheck="false"
-                                       data-mapa-p="targetPage">
-                            </div>
-                            <div class="campo" data-mapa-p-caja="kind">
-                                <label for="mapa-p-tipo" data-mapa-p-tipo-que>Qué es</label>
-                                <select id="mapa-p-tipo" data-mapa-p="kind"></select>
-                            </div>
-                            <div class="campo" data-mapa-p-caja="emblema">
-                                <label for="mapa-p-imagen">Imagen (la bandera o el blasón)</label>
-                                <input id="mapa-p-imagen" list="lista-imagenes" autocomplete="off" spellcheck="false"
-                                       data-mapa-p="image">
-                                <div class="mapa-emblema-botones">
-                                    <div class="subir">
-                                        <input type="file" id="mapa-p-imagen-subir" accept="image/*">
-                                        <label class="boton" for="mapa-p-imagen-subir">Subir una imagen</label>
-                                    </div>
-                                    <button type="button" data-mapa-emblema-pagina>Usar la de su página</button>
-                                </div>
-                            </div>
-                            <div class="campo" data-mapa-p-caja="forma">
-                                <label for="mapa-p-forma">Cómo se ve</label>
-                                <select id="mapa-p-forma" data-mapa-p="shape" data-mapa-formas-emblema></select>
-                            </div>
-                            <div class="campo" data-mapa-p-caja="emblema">
-                                <label for="mapa-p-tamano-emblema">Tamaño</label>
-                                <select id="mapa-p-tamano-emblema" data-mapa-p="size" data-mapa-tamanos-emblema></select>
-                            </div>
-                            <div class="campo" data-mapa-p-caja="letra">
-                                <label for="mapa-p-letra">Letra</label>
-                                <select id="mapa-p-letra" data-mapa-p="font" data-mapa-letras></select>
-                            </div>
-                            <div class="campo" data-mapa-p-caja="letra">
-                                <label for="mapa-p-tamano">Tamaño (en píxeles del mapa)</label>
-                                <input id="mapa-p-tamano" type="number" min="6" step="1" inputmode="numeric"
-                                       data-mapa-p="fontSize">
-                            </div>
-                            <div class="campo" data-mapa-p-caja="letra">
-                                <label class="opcion"><input type="checkbox" data-mapa-p="italic"> Cursiva</label>
-                            </div>
-                            <div class="campo mapa-emblema-botones" data-mapa-p-caja="curva">
-                                <button type="button" data-mapa-curva-dibujar>Ponerlo sobre una curva</button>
-                                <button type="button" data-mapa-curva-quitar>Quitar la curva</button>
-                            </div>
-                            <div class="campo" data-mapa-p-caja="giro">
-                                <label for="mapa-p-giro">Giro (grados)</label>
-                                <div class="fila">
-                                    <input id="mapa-p-giro" type="range" min="-90" max="90" step="5" data-mapa-p="angle">
-                                    <span class="mapa-cuanto" data-mapa-p-giro-cifra aria-hidden="true">0°</span>
-                                </div>
-                            </div>
-                            <fieldset class="opciones campo mapa-estilo-raya" data-mapa-p-caja="estilo-raya">
-                                <legend>Estilo de la raya</legend>
-                                <p class="ayuda" id="ayuda-estilo-raya">Vacío o «como su tipo»: el de los caminos, los
-                                    ríos… En píxeles de pantalla (mide lo mismo a cualquier zoom).</p>
-                                <div class="fila mapa-xy">
-                                    <div><label for="mapa-p-grosor">Grosor</label>
-                                        <input id="mapa-p-grosor" type="number" min="0.5" max="20" step="0.5"
-                                               inputmode="decimal" data-mapa-p="width"
-                                               aria-describedby="ayuda-estilo-raya"></div>
-                                    <div data-mapa-p-hueco><label for="mapa-p-hueco">Separación</label>
-                                        <input id="mapa-p-hueco" type="number" min="1" max="80" step="1"
-                                               inputmode="numeric" data-mapa-p="gap"></div>
-                                </div>
-                                <label for="mapa-p-trazo">Tipo de raya</label>
-                                <select id="mapa-p-trazo" data-mapa-p="dash">
-                                    <option value="">Como su tipo</option>
-                                    <option value="solid">Continua ───</option>
-                                    <option value="dashed">A trazos ─ ─ ─</option>
-                                    <option value="dotted">A puntos · · · ·</option>
-                                    <option value="dashdot">Raya y punto ─ · ─ ·</option>
-                                </select>
-                            </fieldset>
-                            <div class="campo" data-mapa-p-caja="taper">
-                                <label class="opcion"><input type="checkbox" data-mapa-p="taper"> Se ensancha hacia el
-                                    final (la desembocadura)</label>
-                            </div>
-                            <div class="campo" data-mapa-p-caja="xy">
-                                <div class="fila mapa-xy">
-                                    <div><label for="mapa-p-x">X</label>
-                                        <input id="mapa-p-x" type="number" step="1" data-mapa-p="x"></div>
-                                    <div><label for="mapa-p-y">Y</label>
-                                        <input id="mapa-p-y" type="number" step="1" data-mapa-p="y"></div>
-                                </div>
-                            </div>
-                            <div class="campo">
-                                <label class="opcion"><input type="checkbox" data-mapa-p="con-color"> Con su propio color</label>
-                                <label for="mapa-p-color" class="solo-lector">Color</label>
-                                <input id="mapa-p-color" type="color" data-mapa-p="color">
-                            </div>
-                            <p class="ayuda" data-mapa-p-puntos></p>
-                            <button type="button" data-mapa-borrar>Borrar</button>
+                        <button type="button" class="mapa-panel-cerrar" data-mapa-cerrar="elegido" aria-label="Cerrar «Lo elegido»" title="Cerrar (Esc)">×</button>
+                    </div>
+                    <p class="ayuda" data-mapa-nada>Nada. Pulsa algo del mapa o de «Lo que hay».</p>
+                    <div data-mapa-propiedades hidden>
+                        <p class="mapa-que" data-mapa-que></p>
+                        <div class="campo">
+                            <label for="mapa-p-nombre" data-mapa-p-nombre-que>Nombre</label>
+                            <input id="mapa-p-nombre" autocomplete="off" data-mapa-p="label">
                         </div>
-                        <!-- VARIAS A LA VEZ (Mayús+clic, o Mayús y un recuadro). -->
-                        <div data-mapa-varios hidden>
-                            <p class="mapa-que" data-mapa-varios-que></p>
-                            <p class="ayuda">Arrástralas juntas o muévelas con las flechas. Mayús+clic añade o quita
-                                una; Ctrl+C y Ctrl+V las copian y las pegan, y Ctrl+D las duplica.</p>
-                            <div class="campo" data-mapa-v-caja="pins">
-                                <label for="mapa-v-tipo">Qué sitio son</label>
-                                <select id="mapa-v-tipo" data-mapa-v="kind"></select>
-                            </div>
-                            <div class="campo" data-mapa-v-caja="pins">
-                                <label for="mapa-v-forma">Cómo se ven</label>
-                                <select id="mapa-v-forma" data-mapa-v="shape"></select>
-                            </div>
-                            <div class="campo" data-mapa-v-caja="pins">
-                                <label for="mapa-v-tamano">Tamaño (de los que van como emblema)</label>
-                                <select id="mapa-v-tamano" data-mapa-v="size"></select>
-                            </div>
-                            <div class="campo" data-mapa-v-caja="lines">
-                                <label for="mapa-v-raya">Qué raya son</label>
-                                <select id="mapa-v-raya" data-mapa-v="kind-raya"></select>
-                            </div>
-                            <div class="campo" data-mapa-v-caja="shapes">
-                                <label for="mapa-v-zona">Qué zona son</label>
-                                <select id="mapa-v-zona" data-mapa-v="kind-zona"></select>
-                            </div>
-                            <div class="campo">
-                                <label for="mapa-v-color">Color</label>
-                                <div class="mapa-emblema-botones">
-                                    <input id="mapa-v-color" type="color" value="#e74c3c">
-                                    <button type="button" data-mapa-v-color>Ponérselo a todas</button>
-                                    <button type="button" data-mapa-v-sin-color>Quitarles el suyo</button>
-                                </div>
-                            </div>
+                        <div class="campo" data-mapa-p-caja="pagina">
+                            <label for="mapa-p-pagina">Lleva a la página</label>
+                            <input id="mapa-p-pagina" list="lista-paginas" autocomplete="off" spellcheck="false"
+                                   data-mapa-p="targetPage">
+                        </div>
+                        <div class="campo" data-mapa-p-caja="kind">
+                            <label for="mapa-p-tipo" data-mapa-p-tipo-que>Qué es</label>
+                            <select id="mapa-p-tipo" data-mapa-p="kind"></select>
+                        </div>
+                        <div class="campo" data-mapa-p-caja="emblema">
+                            <label for="mapa-p-imagen">Imagen (la bandera o el blasón)</label>
+                            <input id="mapa-p-imagen" list="lista-imagenes" autocomplete="off" spellcheck="false"
+                                   data-mapa-p="image">
                             <div class="mapa-emblema-botones">
-                                <button type="button" data-mapa-v-duplicar>Duplicar</button>
-                                <button type="button" data-mapa-v-borrar>Borrarlas</button>
+                                <div class="subir">
+                                    <input type="file" id="mapa-p-imagen-subir" accept="image/*">
+                                    <label class="boton" for="mapa-p-imagen-subir">Subir una imagen</label>
+                                </div>
+                                <button type="button" data-mapa-emblema-pagina>Usar la de su página</button>
                             </div>
                         </div>
-                    </section>
-                    <section class="bloque" aria-labelledby="t-mapa-cosas">
-                        <h2 id="t-mapa-cosas">Lo que hay en el mapa</h2>
-                        <div data-mapa-cosas></div>
-                    </section>
-                    <details class="bloque mapa-ajustes">
-                        <summary>El mapa en sí: título, página, imagen y rosa de los vientos</summary>
-                        <div class="campo">
-                            <label for="mapa-titulo">Título</label>
-                            <input id="mapa-titulo" autocomplete="off" data-mapa-general="title">
+                        <div class="campo" data-mapa-p-caja="forma">
+                            <label for="mapa-p-forma">Cómo se ve</label>
+                            <select id="mapa-p-forma" data-mapa-p="shape" data-mapa-formas-emblema></select>
                         </div>
-                        <div class="campo">
-                            <label for="mapa-pagina">De qué página es</label>
-                            <p class="ayuda" id="ayuda-mapa-pagina">Esa página lleva en la web un botón para explorarlo.</p>
-                            <input id="mapa-pagina" list="lista-paginas" autocomplete="off" spellcheck="false"
-                                   aria-describedby="ayuda-mapa-pagina" data-mapa-general="page">
+                        <div class="campo" data-mapa-p-caja="emblema">
+                            <label for="mapa-p-tamano-emblema">Tamaño</label>
+                            <select id="mapa-p-tamano-emblema" data-mapa-p="size" data-mapa-tamanos-emblema></select>
                         </div>
-                        <div class="campo">
-                            <label for="mapa-rosa">Rosa de los vientos</label>
-                            <select id="mapa-rosa" data-mapa-general="compass">
-                                <option value="">Sin rosa de los vientos</option>
-                                <option value="arriba-izquierda">Arriba a la izquierda</option>
-                                <option value="arriba-derecha">Arriba a la derecha</option>
-                                <option value="abajo-izquierda">Abajo a la izquierda</option>
-                                <option value="abajo-derecha">Abajo a la derecha</option>
+                        <div class="campo" data-mapa-p-caja="letra">
+                            <label for="mapa-p-letra">Letra</label>
+                            <select id="mapa-p-letra" data-mapa-p="font" data-mapa-letras></select>
+                        </div>
+                        <div class="campo" data-mapa-p-caja="letra">
+                            <label for="mapa-p-tamano">Tamaño (en píxeles del mapa)</label>
+                            <input id="mapa-p-tamano" type="number" min="6" step="1" inputmode="numeric"
+                                   data-mapa-p="fontSize">
+                        </div>
+                        <div class="campo" data-mapa-p-caja="letra">
+                            <label class="opcion"><input type="checkbox" data-mapa-p="italic"> Cursiva</label>
+                        </div>
+                        <div class="campo mapa-emblema-botones" data-mapa-p-caja="curva">
+                            <button type="button" data-mapa-curva-dibujar>Ponerlo sobre una curva</button>
+                            <button type="button" data-mapa-curva-quitar>Quitar la curva</button>
+                        </div>
+                        <div class="campo" data-mapa-p-caja="giro">
+                            <label for="mapa-p-giro">Giro (grados)</label>
+                            <div class="fila">
+                                <input id="mapa-p-giro" type="range" min="-90" max="90" step="5" data-mapa-p="angle">
+                                <span class="mapa-cuanto" data-mapa-p-giro-cifra aria-hidden="true">0°</span>
+                            </div>
+                        </div>
+                        <fieldset class="opciones campo mapa-estilo-raya" data-mapa-p-caja="estilo-raya">
+                            <legend>Estilo de la raya</legend>
+                            <p class="ayuda" id="ayuda-estilo-raya">Vacío o «como su tipo»: el de los caminos, los
+                                ríos… En píxeles de pantalla (mide lo mismo a cualquier zoom).</p>
+                            <div class="fila mapa-xy">
+                                <div><label for="mapa-p-grosor">Grosor</label>
+                                    <input id="mapa-p-grosor" type="number" min="0.5" max="20" step="0.5"
+                                           inputmode="decimal" data-mapa-p="width"
+                                           aria-describedby="ayuda-estilo-raya"></div>
+                                <div data-mapa-p-hueco><label for="mapa-p-hueco">Separación</label>
+                                    <input id="mapa-p-hueco" type="number" min="1" max="80" step="1"
+                                           inputmode="numeric" data-mapa-p="gap"></div>
+                            </div>
+                            <label for="mapa-p-trazo">Tipo de raya</label>
+                            <select id="mapa-p-trazo" data-mapa-p="dash">
+                                <option value="">Como su tipo</option>
+                                <option value="solid">Continua ───</option>
+                                <option value="dashed">A trazos ─ ─ ─</option>
+                                <option value="dotted">A puntos · · · ·</option>
+                                <option value="dashdot">Raya y punto ─ · ─ ·</option>
                             </select>
-                        </div>
-                        <fieldset class="opciones campo" data-mapa-capas-caja>
-                            <legend>Capas que se ven aquí</legend>
-                            <div data-mapa-capas></div>
                         </fieldset>
-                        <div class="campo" data-mapa-cambiar-imagen>
-                            <p class="ayuda">Cambiar la imagen por otra con el mismo encuadre (más grande, retocada…):
-                                todo lo puesto se queda en su sitio.</p>
-                            <div class="subir">
-                                <input type="file" id="mapa-otra-imagen" accept="image/*">
-                                <label class="boton" for="mapa-otra-imagen">Cambiar la imagen</label>
+                        <div class="campo" data-mapa-p-caja="taper">
+                            <label class="opcion"><input type="checkbox" data-mapa-p="taper"> Se ensancha hacia el
+                                final (la desembocadura)</label>
+                        </div>
+                        <div class="campo" data-mapa-p-caja="xy">
+                            <div class="fila mapa-xy">
+                                <div><label for="mapa-p-x">X</label>
+                                    <input id="mapa-p-x" type="number" step="1" data-mapa-p="x"></div>
+                                <div><label for="mapa-p-y">Y</label>
+                                    <input id="mapa-p-y" type="number" step="1" data-mapa-p="y"></div>
                             </div>
                         </div>
-                    </details>
-                </div>
+                        <div class="campo">
+                            <label class="opcion"><input type="checkbox" data-mapa-p="con-color"> Con su propio color</label>
+                            <label for="mapa-p-color" class="solo-lector">Color</label>
+                            <input id="mapa-p-color" type="color" data-mapa-p="color">
+                        </div>
+                        <p class="ayuda" data-mapa-p-puntos></p>
+                        <button type="button" data-mapa-borrar>Borrar</button>
+                    </div>
+                    <!-- VARIAS A LA VEZ (Mayús+clic, o Mayús y un recuadro). -->
+                    <div data-mapa-varios hidden>
+                        <p class="mapa-que" data-mapa-varios-que></p>
+                        <p class="ayuda">Arrástralas juntas o muévelas con las flechas. Mayús+clic añade o quita
+                            una; Ctrl+C y Ctrl+V las copian y las pegan, y Ctrl+D las duplica.</p>
+                        <div class="campo" data-mapa-v-caja="pins">
+                            <label for="mapa-v-tipo">Qué sitio son</label>
+                            <select id="mapa-v-tipo" data-mapa-v="kind"></select>
+                        </div>
+                        <div class="campo" data-mapa-v-caja="pins">
+                            <label for="mapa-v-forma">Cómo se ven</label>
+                            <select id="mapa-v-forma" data-mapa-v="shape"></select>
+                        </div>
+                        <div class="campo" data-mapa-v-caja="pins">
+                            <label for="mapa-v-tamano">Tamaño (de los que van como emblema)</label>
+                            <select id="mapa-v-tamano" data-mapa-v="size"></select>
+                        </div>
+                        <div class="campo" data-mapa-v-caja="lines">
+                            <label for="mapa-v-raya">Qué raya son</label>
+                            <select id="mapa-v-raya" data-mapa-v="kind-raya"></select>
+                        </div>
+                        <div class="campo" data-mapa-v-caja="shapes">
+                            <label for="mapa-v-zona">Qué zona son</label>
+                            <select id="mapa-v-zona" data-mapa-v="kind-zona"></select>
+                        </div>
+                        <div class="campo">
+                            <label for="mapa-v-color">Color</label>
+                            <div class="mapa-emblema-botones">
+                                <input id="mapa-v-color" type="color" value="#e74c3c">
+                                <button type="button" data-mapa-v-color>Ponérselo a todas</button>
+                                <button type="button" data-mapa-v-sin-color>Quitarles el suyo</button>
+                            </div>
+                        </div>
+                        <div class="mapa-emblema-botones">
+                            <button type="button" data-mapa-v-duplicar>Duplicar</button>
+                            <button type="button" data-mapa-v-borrar>Borrarlas</button>
+                        </div>
+                    </div>
+                </section>
+                <section class="mapa-panel" id="mapa-panel-cosas" data-mapa-panel="cosas" aria-labelledby="t-mapa-cosas" hidden>
+                    <div class="mapa-panel-cabeza">
+                        <h2 id="t-mapa-cosas">Lo que hay en el mapa</h2>
+                        <button type="button" class="mapa-panel-cerrar" data-mapa-cerrar="cosas" aria-label="Cerrar «Lo que hay en el mapa»" title="Cerrar (Esc)">×</button>
+                    </div>
+                    <div data-mapa-cosas></div>
+                </section>
+                <section class="mapa-panel" id="mapa-panel-ajustes" data-mapa-panel="ajustes" aria-labelledby="t-mapa-ajustes" hidden>
+                    <div class="mapa-panel-cabeza">
+                        <h2 id="t-mapa-ajustes">El mapa en sí</h2>
+                        <button type="button" class="mapa-panel-cerrar" data-mapa-cerrar="ajustes" aria-label="Cerrar «El mapa en sí»" title="Cerrar (Esc)">×</button>
+                    </div>
+                    <p class="ayuda" data-mapa-archivo></p>
+                    <div class="campo">
+                        <label for="mapa-titulo">Título</label>
+                        <input id="mapa-titulo" autocomplete="off" data-mapa-general="title">
+                    </div>
+                    <div class="campo">
+                        <label for="mapa-pagina">De qué página es</label>
+                        <p class="ayuda" id="ayuda-mapa-pagina">Esa página lleva en la web un botón para explorarlo.</p>
+                        <input id="mapa-pagina" list="lista-paginas" autocomplete="off" spellcheck="false"
+                               aria-describedby="ayuda-mapa-pagina" data-mapa-general="page">
+                    </div>
+                    <div class="campo">
+                        <label for="mapa-rosa">Rosa de los vientos</label>
+                        <select id="mapa-rosa" data-mapa-general="compass">
+                            <option value="">Sin rosa de los vientos</option>
+                            <option value="arriba-izquierda">Arriba a la izquierda</option>
+                            <option value="arriba-derecha">Arriba a la derecha</option>
+                            <option value="abajo-izquierda">Abajo a la izquierda</option>
+                            <option value="abajo-derecha">Abajo a la derecha</option>
+                        </select>
+                    </div>
+                    <fieldset class="opciones campo" data-mapa-capas-caja>
+                        <legend>Capas que se ven aquí</legend>
+                        <div data-mapa-capas></div>
+                    </fieldset>
+                    <div class="campo" data-mapa-cambiar-imagen>
+                        <p class="ayuda">Cambiar la imagen por otra con el mismo encuadre (más grande, retocada…):
+                            todo lo puesto se queda en su sitio.</p>
+                        <div class="subir">
+                            <input type="file" id="mapa-otra-imagen" accept="image/*">
+                            <label class="boton" for="mapa-otra-imagen">Cambiar la imagen</label>
+                        </div>
+                    </div>
+                </section>
+                <section class="mapa-panel" id="mapa-panel-teclas" data-mapa-panel="teclas" aria-labelledby="t-mapa-teclas" hidden>
+                    <div class="mapa-panel-cabeza">
+                        <h2 id="t-mapa-teclas">Teclas y ratón</h2>
+                        <button type="button" class="mapa-panel-cerrar" data-mapa-cerrar="teclas" aria-label="Cerrar «Teclas y ratón»" title="Cerrar (Esc)">×</button>
+                    </div>
+                    <div id="mapa-teclas">
+                        <p>Con el ratón: la rueda acerca y aleja. Para moverte por el mapa, arrastra con el
+                            <strong>botón de en medio</strong> (vale con cualquier herramienta, incluso a mitad de un
+                            dibujo o arrastrando algo) o, con «Elegir y mover», en un hueco. Puedes llevar el mapa
+                            más allá de sus bordes.</p>
+                        <p>Con el mapa elegido: las flechas lo mueven (o mueven el sitio o el texto elegido), + y −
+                            acercan y alejan, Intro pone un sitio, un texto o un punto en el centro, Fin termina el
+                            dibujo, Esc lo cancela, Supr borra lo elegido y Ctrl+Z lo deshace.</p>
+                        <p>Con Mayús se eligen varias cosas (pulsando, o arrastrando un recuadro en un hueco); Ctrl+C,
+                            Ctrl+V y Ctrl+D copian, pegan y duplican lo elegido.</p>
+                        <p>Los paneles se abren y se cierran con las pestañas de arriba; Esc dentro de uno lo cierra.</p>
+                    </div>
+                </section>
             </div>
         </section>
     </main>

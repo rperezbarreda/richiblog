@@ -719,14 +719,7 @@ textarea {
     cursor: pointer;
 }
 
-/* LA BARRA DE ABAJO: guardar siempre a mano. */
-/* LOS MAPAS. El lienzo a la izquierda y lo elegido a la derecha; en una
-   pantalla estrecha, uno debajo del otro. El lienzo no es sticky: mide
-   un alto fijo y lo de la derecha baja con la página. */
-body.en-mapa main {
-    max-width: 110rem;
-}
-
+/* LOS MAPAS. La lista de mapas de una página. */
 .pagina-mapas {
     display: flex;
     flex-wrap: wrap;
@@ -734,108 +727,169 @@ body.en-mapa main {
     margin-bottom: 24px;
 }
 
-.mapa-editor {
+/* UN MAPA, A PANTALLA COMPLETA. Arriba, la barra con el título, las
+   pestañas y el zoom (mide --alto-arriba); abajo, la de guardar (mide
+   --alto-barra; las dos las apunta mapas.js). El mapa ocupa todo lo de en
+   medio y los paneles flotan encima en dos columnas, la de la izquierda
+   (las herramientas) y la de la derecha (lo demás, uno debajo de otro).
+   Las columnas no se quedan con el ratón donde no hay panel. Todo fijo
+   (position: fixed, no sticky); la cabecera del editor no se ve. */
+body.en-mapa {
+    overflow: hidden;
+}
+
+body.en-mapa .cabecera,
+body.en-mapa .saltar {
+    display: none;
+}
+
+.mapa-arriba {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 7;
     display: flex;
     flex-wrap: wrap;
-    align-items: flex-start;
-    gap: 24px;
+    align-items: center;
+    gap: 6px 12px;
+    padding: 6px 10px;
+    border-bottom: 2px solid var(--acento);
+    background: var(--fondo);
 }
 
-.mapa-izquierda {
-    flex: 3 1 36rem;
+.mapa-arriba h1 {
+    flex: 1 1 8rem;
     min-width: 0;
+    margin: 0;
+    overflow: hidden;
+    font-size: 1.25rem;
+    white-space: nowrap;
+    text-overflow: ellipsis;
 }
 
-.mapa-derecha {
-    flex: 1 1 20rem;
-    min-width: 0;
+.mapa-arriba button {
+    min-height: 42px;
+    padding: 4px 10px;
+    font-size: 0.95rem;
 }
 
-/* COMO PHOTOSHOP: la paleta de herramientas fija a la IZQUIERDA, el mapa
-   en medio y lo elegido (con la lista de lo que hay y los paneles de
-   medir y de la escala) fijo a la DERECHA. Los dos fijos van de arriba
-   abajo hasta la barra, que mide lo que apunta mapas.js en --alto-barra,
-   y si no les cabe lo suyo, con su propia barra para bajar. La página
-   les deja su hueco con márgenes. Fijos y no sticky: position: fixed.
-   Con menos ancho, lo elegido va debajo del mapa (menos de 80rem) y la
-   paleta encima (menos de 64rem).
+.mapa-pestanas,
+.mapa-arriba-mandos {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px;
+}
 
-   LA PALETA DE HERRAMIENTAS. En pantalla ancha, fija y de arriba abajo
-   hasta la barra, que mide lo que
-   apunte mapas.js en --alto-barra; si no cabe, con su propia barra para
-   bajar. La página le deja su hueco con un margen a la derecha. En
-   pantalla estrecha va en su sitio, encima del mapa. */
-.mapa-paleta {
-    margin-bottom: 16px;
-    padding: 12px;
+.mapa-pestanas button[aria-expanded="true"] {
+    border-color: var(--acento);
+    background: var(--acento);
+    color: var(--sobre-acento);
+}
+
+.mapa-arriba-mandos button {
+    min-width: 42px;
+    font-size: 1.15rem;
+}
+
+.mapa-arriba-mandos [data-mapa-ajustar] {
+    font-size: 0.95rem;
+}
+
+.mapa-lienzo {
+    position: fixed;
+    top: var(--alto-arriba, 64px);
+    left: 0;
+    right: 0;
+    bottom: var(--alto-barra, 80px);
+    z-index: 1;
+    overflow: hidden;
+    background: #0b0612;
+    touch-action: none;
+    cursor: grab;
+}
+
+.mapa-lienzo:focus-visible {
+    outline: 4px solid var(--acento);
+    outline-offset: -4px;
+}
+
+.mapa-lienzo.es-dibujo {
+    cursor: crosshair;
+}
+
+/* Moviéndose con el botón de en medio (o arrastrando en un hueco). */
+.mapa-lienzo.es-paneo {
+    cursor: grabbing;
+}
+
+.mapa-columna {
+    position: fixed;
+    top: calc(var(--alto-arriba, 64px) + 10px);
+    bottom: calc(var(--alto-barra, 80px) + 10px);
+    z-index: 6;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    width: min(21rem, calc(100vw - 20px));
+    overflow-y: auto;
+    pointer-events: none;
+}
+
+.mapa-columna.es-izquierda {
+    left: 10px;
+    width: min(16rem, calc(100vw - 20px));
+}
+
+.mapa-columna.es-derecha {
+    right: 10px;
+}
+
+.mapa-panel {
+    flex: none;
+    padding: 4px 14px 14px;
     border: 2px solid var(--acento);
     background: var(--caja);
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.45);
+    pointer-events: auto;
 }
 
-/* En pantalla estrecha, las herramientas en filas y no en columna. */
-@media (max-width: 63.99rem) {
-    .mapa-paleta fieldset.herramientas {
-        flex-direction: row;
-        flex-wrap: wrap;
-    }
-
-    .mapa-paleta label.herramienta {
-        width: auto;
-    }
+/* Con la columna llena, cada panel con su propia barra para bajar. */
+.mapa-columna.es-derecha .mapa-panel {
+    flex: 0 1 auto;
+    min-height: 8rem;
+    overflow-y: auto;
 }
 
-@media (min-width: 64rem) {
-    /* El hueco de la paleta, para todo menos la barra de abajo (la
-       paleta acaba encima de ella). */
-    body.en-mapa {
-        padding-left: calc(14rem + 24px);
-    }
-
-    body.en-mapa main {
-        padding-right: 16px;
-        padding-left: 16px;
-    }
-
-    .mapa-paleta {
-        position: fixed;
-        top: 12px;
-        left: 12px;
-        bottom: calc(var(--alto-barra, 80px) + 12px);
-        z-index: 6;
-        width: 14rem;
-        margin: 0;
-        overflow-y: auto;
-        box-shadow: 0 6px 18px rgba(0, 0, 0, 0.35);
-    }
+.mapa-panel-cabeza {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    margin-bottom: 6px;
 }
 
-/* LO ELEGIDO, fijo a la derecha cuando cabe. */
-@media (min-width: 80rem) {
-    body.en-mapa {
-        padding-right: calc(21rem + 24px);
-    }
+.mapa-panel-cabeza h2 {
+    margin: 0;
+    font-size: 1.05rem;
+}
 
-    .mapa-derecha {
-        position: fixed;
-        top: 12px;
-        right: 12px;
-        bottom: calc(var(--alto-barra, 80px) + 12px);
-        z-index: 6;
-        width: 21rem;
-        padding: 14px;
-        overflow-y: auto;
-        border: 2px solid var(--acento);
-        background: var(--caja);
-        box-shadow: 0 6px 18px rgba(0, 0, 0, 0.35);
-    }
+.mapa-panel-cerrar {
+    flex: none;
+    min-width: 44px;
+    min-height: 44px;
+    padding: 0;
+    font-size: 1.5rem;
+    line-height: 1;
+}
 
-    .mapa-derecha .bloque {
-        margin-bottom: 24px;
-    }
+.mapa-panel h3 {
+    margin: 18px 0 8px;
+}
 
-    .mapa-izquierda {
-        flex-basis: 100%;
-    }
+.mapa-panel .campo {
+    margin-bottom: 14px;
 }
 
 .mapa-paleta .herramientas {
@@ -884,28 +938,6 @@ body.en-mapa main {
 
 .mapa-paleta-dibujo .es-guardado {
     display: none;
-}
-
-.mapa-paleta-fila {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    margin-bottom: 8px;
-}
-
-.mapa-paleta-fila button {
-    flex: 1 1 0;
-    min-width: 0;
-    padding: 6px;
-    font-size: 1.3rem;
-}
-
-.mapa-paleta-fila .mapa-cuanto {
-    flex: 0 0 4em;
-}
-
-.mapa-paleta-ancho {
-    width: 100%;
 }
 
 .herramientas {
@@ -977,7 +1009,7 @@ body.en-mapa main {
 }
 
 .mapa-opciones input[type="checkbox"],
-.mapa-derecha input[type="checkbox"] {
+.mapa-panel input[type="checkbox"] {
     width: 1.3em;
     min-height: 0;
     height: 1.3em;
@@ -1018,7 +1050,7 @@ body.en-mapa main {
     flex-basis: auto;
 }
 
-.mapa-derecha input[type="range"] {
+.mapa-panel input[type="range"] {
     flex: 1 1 10rem;
     min-height: 48px;
     padding: 0;
@@ -1035,27 +1067,6 @@ body.en-mapa main {
     min-width: 4em;
     font-family: var(--mono);
     text-align: center;
-}
-
-.mapa-lienzo {
-    position: relative;
-    /* Que quepa entero encima de la barra de abajo. */
-    height: min(calc(100vh - 230px), 900px);
-    min-height: 320px;
-    overflow: hidden;
-    border: 2px solid var(--borde);
-    background: #0b0612;
-    touch-action: none;
-    cursor: grab;
-}
-
-.mapa-lienzo:focus-visible {
-    outline: 3px solid var(--acento);
-    outline-offset: 3px;
-}
-
-.mapa-lienzo.es-dibujo {
-    cursor: crosshair;
 }
 
 .mapa-lienzo svg {
@@ -1155,14 +1166,14 @@ body.en-mapa main {
     flex-basis: auto;
 }
 
-.mapa-derecha label.opcion {
+.mapa-panel label.opcion {
     display: flex;
     align-items: center;
     gap: 10px;
     min-height: 48px;
 }
 
-.mapa-derecha input[type="color"] {
+.mapa-panel input[type="color"] {
     width: 6rem;
     padding: 4px;
 }
@@ -1255,13 +1266,6 @@ body.en-mapa main {
 .mapa-cosa-marca.es-ruina {
     border-style: dashed;
     background: #8d8478;
-}
-
-.mapa-ajustes summary {
-    min-height: 48px;
-    color: var(--acento);
-    font-weight: 700;
-    cursor: pointer;
 }
 
 .solo-lector {
