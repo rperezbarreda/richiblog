@@ -526,7 +526,9 @@ html:not(.js) .mapa-ayuda {
     margin: 0 0 10px;
     font-weight: 700;
 }
-.mapa-ruta-campo select {
+.mapa-ruta-campo input {
+    box-sizing: border-box;
+    width: 100%;
     min-height: 44px;
     padding: 0 8px;
     border: 2px solid var(--yellow);
@@ -535,7 +537,7 @@ html:not(.js) .mapa-ayuda {
     font: inherit;
     font-weight: 400;
 }
-.mapa-ruta-campo select:focus-visible {
+.mapa-ruta-campo input:focus-visible {
     outline: 2px solid var(--yellow);
     outline-offset: 2px;
 }
@@ -574,6 +576,14 @@ html:not(.js) .mapa-ayuda {
 .mapa-ruta-raya {
     stroke: #ff5d73;
     stroke-width: 6px;
+}
+path.mapa-ruta-campo {
+    fill: none;
+    stroke: #ff5d73;
+    stroke-width: 4px;
+    stroke-dasharray: 1px 8px;
+    stroke-linecap: round;
+    vector-effect: non-scaling-stroke;
 }
 .mapa-ruta-punto {
     fill: #ffffff;
@@ -1077,4 +1087,122 @@ html:not(.js) .mapa-ayuda {
         fill-opacity: 0.08;
         stroke-opacity: 0.6;
     }
+}
+html.js .mapa-caja.con-mandos-flotantes {
+    --mapa-menu: 0px;
+    flex-direction: column;
+}
+html.js .mapa-caja.con-mandos-flotantes > .mapa-lienzo {
+    flex: 0 0 auto;
+    width: 100%;
+}
+html.js .mapa-caja.con-mandos-flotantes > .mapa-mandos {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    z-index: 4;
+    flex-direction: column;
+    flex-wrap: nowrap;
+    align-items: stretch;
+    gap: 10px;
+    box-sizing: border-box;
+    width: min(17rem, calc(100% - 20px));
+    max-height: 70vh;
+    padding: 8px 10px 10px;
+    overflow-y: auto;
+    border: 2px solid var(--yellow);
+    background: var(--surface);
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.45);
+}
+html.js .mapa-caja.con-mandos-flotantes > .mapa-mandos[hidden] {
+    display: none;
+}
+.mapa-mandos-cabeza {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+.mapa-mandos-titulo {
+    flex: 1 1 auto;
+    margin: 0;
+}
+.mapa-mandos-cuerpo {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+.mapa-mandos-cuerpo[hidden] {
+    display: none;
+}
+.mapa-mandos .mapa-zoom {
+    flex-wrap: wrap;
+    max-width: 100%;
+}
+html.js .con-mandos-flotantes .mapa-capas {
+    flex-direction: column;
+    flex-wrap: nowrap;
+    align-items: flex-start;
+}
+.con-mandos-flotantes > .mapa-mandos-abrir {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    z-index: 4;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.45);
+}
+.mapa-mandos > .mapa-mandos-cabeza,
+.mapa-mandos > .mapa-mandos-cuerpo {
+    flex: 1 1 100%;
+}
+.mapa-mandos-abrir {
+    align-self: flex-start;
+    margin: 8px 10px;
+}
+.mapa-mandos-abrir[hidden] {
+    display: none;
+}
+.mapa-filtro-sitios [aria-pressed="true"] {
+    background: var(--yellow);
+    color: var(--yellow-contrast);
+}
+.mapa-filtro-sitios .mapa-boton {
+    margin-top: 6px;
+}
+.mapa-caja.es-pantalla-completa {
+    position: fixed;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 1000;
+    border: 0;
+}
+.mapa-caja.es-pantalla-completa > .mapa-lienzo {
+    --mapa-alto: 100vh;
+    max-height: none;
+}
+html.con-mapa-a-pantalla,
+html.con-mapa-a-pantalla body {
+    overflow: hidden;
+}
+.mapa-svg .mapa-pin.es-regional,
+.mapa-svg path.es-regional,
+.mapa-svg .mapa-lineas.es-puentes.es-regional {
+    display: none;
+}
+.esta-medio .mapa-svg path.es-regional,
+.esta-medio .mapa-svg .mapa-pin.es-regional.es-capital,
+.esta-medio .mapa-svg .mapa-pin.es-regional.es-ciudad,
+.esta-cerca .mapa-svg .mapa-pin.es-regional,
+.esta-cerca .mapa-svg .mapa-lineas.es-puentes.es-regional {
+    display: inline;
+}
+.mapa-caja .mapa-lienzo .mapa-svg .mapa-pin.es-filtrada {
+    display: none;
+}
+.mapa-lienzo.pines-solo-simbolo .mapa-pin .mapa-pin-nombre {
+    display: none;
+}
+.pines-solo-nombre .mapa-pin > :not(.mapa-pin-nombre) {
+    display: none;
 }

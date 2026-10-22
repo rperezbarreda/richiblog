@@ -1890,12 +1890,35 @@
   piezas). Va dentro del dibujo, del tamaño del mapa, y sale también en
   la imagen descargada. En Prunia, arriba a la derecha.
 
-  EL MENÚ A LA IZQUIERDA DEL MAPA: en pantallas de más de 860px los
-  mandos (zoom, leyenda, medir, ruta, «ver» y «zonas») van en una
-  columna de 15rem al lado del lienzo (--mapa-menu), del alto del mapa y
-  con su barra si no caben (alturaDelMenuDeMapa). La barra de escala y lo
-  medido se corren a su derecha. En pantallas estrechas, encima del mapa
-  como antes. Solo flex.
+  LOS MANDOS, EN UNA VENTANA FLOTANTE (desde el 22-10-2026; antes iban
+  en una columna a la izquierda): en pantallas de más de 860px, y en
+  cualquiera a pantalla completa, flotan encima del mapa, arriba a la
+  izquierda, y el mapa ocupa todo el ancho. Llevan una cabecera con
+  PLEGAR (se queda la cabecera y el zoom) y CERRAR (desaparecen; el
+  botón «☰ mandos» de la esquina los trae). De salida, plegados; luego,
+  como se dejaron (localStorage «mapa-mandos»). Del alto del mapa menos
+  un hueco para la escala, con su barra si no caben
+  (prepararMandosFlotantesDeMapa, alturaDelMenuDeMapa: pone en la caja
+  con-mandos-flotantes). En pantallas estrechas el mapa mide poco de
+  alto: ahí van encima de él, como antes, también plegables. Sin sticky:
+  absolute.
+
+  A PANTALLA COMPLETA: el botón «⛶ pantalla completa», junto al zoom. La
+  caja del mapa pasa a position: fixed sobre toda la ventana y el mapa
+  ocupa todo lo alto; la página de detrás no se mueve. Esc o el mismo
+  botón vuelven (si hay un panel abierto con el foco dentro, Esc cierra
+  ese primero). No usa la pantalla completa del navegador
+  (prepararPantallaCompletaDeMapa).
+
+  LOS SITIOS, CÓMO Y CUÁLES: en los mandos, el grupo «sitios»: con su
+  símbolo y su nombre, solo el símbolo o solo el nombre; el desplegable
+  «tipos de sitio», una casilla por tipo con cuántos hay; y el atajo
+  «SOLO PAÍSES Y CAPITALES» (deja «ver: países» y solo las capitales; al
+  pulsarlo otra vez, todo). Lo hacen clases (pines-solo-simbolo y
+  pines-solo-nombre en el lienzo, es-filtrada en cada pin;
+  prepararFiltrosDeSitiosDeMapa). La casilla «textos» de «ver» es solo
+  para los textos sueltos (mares, cordilleras): los nombres de los
+  sitios van en «sitios».
 
   LAS ZONAS, UNA A UNA O POR CLASES: el desplegable «zonas» del menú
   (un <details>, lo llena prepararZonasDeMapa) tiene una casilla por
@@ -1926,7 +1949,12 @@
   data-mapa-red. mundo-mapa.js (prepararRutaDeMapa): el botón la
   enciende y la apaga (apagada, el panel se cierra y la ruta pintada se
   esconde, sin perderse); encendida, abre en el menú, debajo del botón,
-  un panel con DESDE y HASTA (o se pulsan dos sitios en el mapa),
+  un panel con DESDE y HASTA, que son BUSCADORES (se escribe un trozo y
+  sale la lista de sitios que coinciden: un <datalist>). O se pulsan dos
+  puntos en el mapa: un sitio, o CUALQUIER PUNTO, que se engancha al
+  punto de camino más cercano («un punto del mapa (cerca de Pozovalor)»;
+  lo de campo a través va a puntos y se suma a la distancia, que lo
+  dice aparte). Un arrastre del mapa no cuenta como pulsar. Luego
   busca el camino más corto (Dijkstra) y lo pinta en rojo con borde
   oscuro; dice cuánto hay, los días a pie y a caballo y por qué sitios
   se pasa. «Al revés», «quitar la ruta», Esc lo cierra. Encender la ruta
@@ -2166,7 +2194,16 @@
       camino también de un país a otro, con la escala y los días de viaje
       del primer regional que la tenga. Con regionales dentro, el
       mapamundi deja acercar hasta el 1600% y los nombres de los pueblos
-      salen desde el 400%. Cada camino conserva el detalle y las
+      salen desde el 400%. EN EL MAPAMUNDI, lo regional sale al acercarse
+      (es-regional): sus caminos, ríos, capitales y ciudades desde el
+      200%; los demás sitios y los puentes desde el 400%; y sus pines van
+      más pequeños (9 px de radio en pantalla, data-mapa-pin; los nombres
+      no encogen). Pasan también sus ZONAS NATURALES (lagos, mares,
+      bosques, montañas, desiertos, pantanos y valles, con su trama a la
+      escala de su mapa; no los países vecinos, las provincias ni las
+      regiones sin clase), en su propio grupo con la casilla «zonas
+      naturales» de «ver»: se ven también con «solo la imagen», y salen en
+      «zonas» y en la leyenda. Cada camino conserva el detalle y las
       tolerancias de la red de su mapa: la ruta mide lo mismo que en el
       mapa regional. Lo junta juntar_regionales (mundo_mapas.py), lo llama
       generar-mundo.py. Un mapa sin situar no sale: sitúalo en «El mapa en

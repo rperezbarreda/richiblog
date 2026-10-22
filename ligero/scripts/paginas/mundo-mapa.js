@@ -4,6 +4,11 @@
 const ZOOMS_DE_MAPA = [1, 1.5, 2, 3, 4, 6, 8, 12, 16];
 const ZOOM_MAXIMO_DE_MAPA = 6;
 const PIN_EN_PANTALLA = 15;
+const TIPOS_DE_SITIO_DE_MAPA = [["capital", "capitales"], ["ciudad", "ciudades"], ["pueblo", "pueblos"],
+    ["fortaleza", "fortalezas"], ["ruina", "ruinas"], ["puerto", "puertos"], ["templo", "templos"],
+    ["torre", "torres"], ["cueva", "cuevas"], ["mina", "minas"], ["puente", "puentes"], ["batalla", "batallas"],
+    ["mazmorra", "mazmorras"], ["campamento", "campamentos"], ["", "sin tipo"]];
+const MEMORIA_DE_MANDOS_DE_MAPA = "mapa-mandos";
 const CLASES_DE_ZONA_DE_MAPA = [["vecino", "países vecinos"], ["provincia", "provincias y comarcas"], ["lago", "lagos"],
     ["mar", "mares"], ["bosque", "bosques"], ["montana", "montañas"], ["desierto", "desiertos"],
     ["pantano", "pantanos y ciénagas"], ["valle", "valles y llanuras"], ["otra", "otras regiones"]];
@@ -22,6 +27,7 @@ function initializeMundoMapa() {
         zoom: 1,
         maximo: parseFloat(dibujo.getAttribute("data-mapa-zoom-maximo")) || ZOOM_MAXIMO_DE_MAPA,
         cerca: parseFloat(dibujo.getAttribute("data-mapa-cerca")) || 2,
+        pin: parseFloat(dibujo.getAttribute("data-mapa-pin")) || PIN_EN_PANTALLA,
         cifra: caja.querySelector("[data-mapa-cifra]"),
         mas: caja.querySelector("[data-mapa-mas]"),
         menos: caja.querySelector("[data-mapa-menos]"),
@@ -67,17 +73,14 @@ function initializeMundoMapa() {
             centrarMapa(mando);
         }
     });
-    window.addEventListener("resize", () => {
-        margenDeMapa(mando);
-        alturaDelMenuDeMapa(mando);
-        escalarPinesDeMapa(mando);
-        mejorarImagenDeMapa(mando);
-        pintarEscalaDeMapa(mando);
-    });
+    window.addEventListener("resize", () => rehacerMapa(mando));
+    prepararMandosFlotantesDeMapa(mando);
+    prepararPantallaCompletaDeMapa(mando);
     prepararArrastreDeMapa(mando);
     prepararCapasDeMapa(caja);
     mejorarImagenDeMapa(mando);
     prepararRegionesDeMapa(caja);
+    prepararFiltrosDeSitiosDeMapa(mando);
     prepararGloboDeMapa(mando);
     prepararSitiosDeMapa();
     prepararEscalaDeMapa(mando);
@@ -127,6 +130,7 @@ function ponerZoomDeMapa(mando, quiere, anclaX, anclaY) {
     const margen = margenDeMapa(mando);
     lienzo.classList.toggle("se-puede-arrastrar", ahora > 1.0005 || conMargenDeMapa());
     lienzo.classList.toggle("esta-cerca", ahora >= (mando.cerca || 2) - 0.005);
+    lienzo.classList.toggle("esta-medio", ahora >= 1.995);
     if (Math.abs(ahora - antes) > 0.0005) {
         const cuanto = ahora / antes;
         lienzo.scrollLeft = (puntoX - antesMargen.x) * cuanto + margen.x - haciaX;
@@ -155,8 +159,145 @@ function alturaDelMenuDeMapa(mando) {
     if (!menu) {
         return;
     }
+    if (mando.flotantes) {
+        const flota = window.innerWidth >= 861 || !!mando.aPantalla;
+        mando.caja.classList.toggle("con-mandos-flotantes", flota);
+        menu.style.top = flota ? (mando.lienzo.offsetTop + 10) + "px" : "";
+        menu.style.maxHeight = flota ? Math.max(120, mando.lienzo.clientHeight - 70) + "px" : "";
+        return;
+    }
     const alLado = menu.offsetTop === mando.lienzo.offsetTop && menu.offsetLeft < mando.lienzo.offsetLeft;
     menu.style.maxHeight = alLado ? Math.max(260, mando.lienzo.offsetHeight) + "px" : "";
+}
+function rehacerMapa(mando) {
+    margenDeMapa(mando);
+    alturaDelMenuDeMapa(mando);
+    escalarPinesDeMapa(mando);
+    mejorarImagenDeMapa(mando);
+    pintarEscalaDeMapa(mando);
+}
+function memoriaDeMandosDeMapa() {
+    try {
+        const m = JSON.parse(window.localStorage.getItem(MEMORIA_DE_MANDOS_DE_MAPA) || "null");
+        return m && typeof m === "object" ? m : null;
+    } catch (error) {
+        return null;
+    }
+}
+function prepararMandosFlotantesDeMapa(mando) {
+    const menu = mando.caja.querySelector("[data-mapa-mandos]");
+    if (!menu) {
+        return;
+    }
+    mando.flotantes = true;
+    menu.id = menu.id || "mapa-mandos";
+    const zoom = menu.querySelector(".mapa-zoom");
+    const cuerpo = document.createElement("div");
+    cuerpo.className = "mapa-mandos-cuerpo";
+    cuerpo.id = "mapa-mandos-cuerpo";
+    [...menu.children].forEach((hijo) => {
+        if (hijo !== zoom) {
+            cuerpo.appendChild(hijo);
+        }
+    });
+    const cabeza = document.createElement("div");
+    cabeza.className = "mapa-mandos-cabeza";
+    const titulo = document.createElement("span");
+    titulo.className = "mapa-capas-titulo mapa-mandos-titulo";
+    titulo.textContent = "mandos";
+    const plegar = document.createElement("button");
+    plegar.type = "button";
+    plegar.className = "mapa-boton";
+    plegar.setAttribute("aria-controls", cuerpo.id);
+    const cerrar = document.createElement("button");
+    cerrar.type = "button";
+    cerrar.className = "mapa-boton";
+    cerrar.setAttribute("aria-label", "Cerrar los mandos");
+    cerrar.textContent = "×";
+    cabeza.appendChild(titulo);
+    cabeza.appendChild(plegar);
+    cabeza.appendChild(cerrar);
+    menu.prepend(cabeza);
+    menu.appendChild(cuerpo);
+    menu.setAttribute("role", "region");
+    menu.setAttribute("aria-label", "Mandos del mapa");
+    const abrir = document.createElement("button");
+    abrir.type = "button";
+    abrir.className = "mapa-boton mapa-mandos-abrir";
+    abrir.setAttribute("aria-controls", menu.id);
+    abrir.innerHTML = '<span aria-hidden="true">☰</span> mandos';
+    abrir.hidden = true;
+    menu.after(abrir);
+    const memoria = memoriaDeMandosDeMapa();
+    const estado = {
+        plegado: memoria ? !!memoria.plegado : true,
+        cerrado: memoria ? !!memoria.cerrado : false,
+    };
+    const apuntar = () => {
+        try {
+            window.localStorage.setItem(MEMORIA_DE_MANDOS_DE_MAPA, JSON.stringify(estado));
+        } catch (error) {
+        }
+    };
+    const poner = () => {
+        cuerpo.hidden = estado.plegado;
+        plegar.setAttribute("aria-expanded", estado.plegado ? "false" : "true");
+        plegar.setAttribute("aria-label", estado.plegado ? "Desplegar los mandos" : "Plegar los mandos");
+        plegar.textContent = estado.plegado ? "▸" : "▾";
+        menu.hidden = estado.cerrado;
+        abrir.hidden = !estado.cerrado;
+        abrir.setAttribute("aria-expanded", estado.cerrado ? "false" : "true");
+        alturaDelMenuDeMapa(mando);
+    };
+    plegar.addEventListener("click", () => {
+        estado.plegado = !estado.plegado;
+        apuntar();
+        poner();
+    });
+    cerrar.addEventListener("click", () => {
+        estado.cerrado = true;
+        apuntar();
+        poner();
+        abrir.focus();
+    });
+    abrir.addEventListener("click", () => {
+        estado.cerrado = false;
+        apuntar();
+        poner();
+        plegar.focus();
+    });
+    poner();
+}
+function prepararPantallaCompletaDeMapa(mando) {
+    const zoom = mando.caja.querySelector(".mapa-zoom");
+    if (!zoom) {
+        return;
+    }
+    const boton = document.createElement("button");
+    boton.type = "button";
+    boton.className = "mapa-boton mapa-boton-ancho";
+    boton.setAttribute("aria-pressed", "false");
+    boton.innerHTML = '<span aria-hidden="true">⛶</span> pantalla completa';
+    zoom.appendChild(boton);
+    const poner = (si) => {
+        mando.caja.classList.toggle("es-pantalla-completa", si);
+        document.documentElement.classList.toggle("con-mapa-a-pantalla", si);
+        boton.setAttribute("aria-pressed", si ? "true" : "false");
+        boton.innerHTML = si ? '<span aria-hidden="true">⛶</span> salir de pantalla completa'
+            : '<span aria-hidden="true">⛶</span> pantalla completa';
+        mando.aPantalla = si;
+        const antes = mando.zoom;
+        rehacerMapa(mando);
+        ponerZoomDeMapa(mando, antes);
+    };
+    boton.addEventListener("click", () => poner(!mando.aPantalla));
+    document.addEventListener("keydown", (evento) => {
+        if (evento.key !== "Escape" || !mando.aPantalla || evento.defaultPrevented) {
+            return;
+        }
+        poner(false);
+        boton.focus();
+    });
 }
 function conMargenDeMapa() {
     return !!(window.matchMedia && window.matchMedia("(pointer: fine)").matches);
@@ -167,7 +308,9 @@ function margenDeMapa(mando) {
     const ancho = parseFloat(lados[2]);
     const alto = parseFloat(lados[3]);
     const hay = mando.zoom > 1.0005 || conMargenDeMapa();
-    if (hay && ancho && alto) {
+    if (mando.aPantalla) {
+        lienzo.style.height = window.innerHeight + "px";
+    } else if (hay && ancho && alto) {
         const tope = parseFloat(getComputedStyle(lienzo).maxHeight) || Infinity;
         const quiere = Math.min(lienzo.clientWidth * alto / ancho, tope);
         lienzo.style.height = Math.round(quiere) + "px";
@@ -271,7 +414,8 @@ function prepararRegionesDeMapa(caja) {
             apagarConCasilla(caja, '[data-mapa-lineas="' + grupo + '"]', ".mapa-lineas.es-" + grupo);
         }
     });
-    apagarConCasilla(caja, "[data-mapa-nombres]", ".mapa-pin-nombre, .mapa-textos");
+    apagarConCasilla(caja, "[data-mapa-nombres]", ".mapa-textos");
+    apagarConCasilla(caja, "[data-mapa-zonas-regionales]", ".mapa-zonas-regionales");
     apagarConCasilla(caja, "[data-mapa-rosa]", ".mapa-rosa");
     prepararNivelesDeMapa(caja);
     prepararZonasDeMapa(caja);
@@ -288,7 +432,7 @@ function prepararZonasDeMapa(caja) {
         const suyas = formas.filter((f) => f.getAttribute("data-mapa-zona") === clase);
         const dibujo = clase === "otra"
             ? [...caja.querySelectorAll(".mapa-dibujos > .mapa-dibujo:not([class*='es-zona-'])")]
-            : [...caja.querySelectorAll(".mapa-dibujos > .es-zona-" + clase)];
+            : [...caja.querySelectorAll(".mapa-dibujos > .es-zona-" + clase + ", .mapa-zonas-regionales > .es-zona-" + clase)];
         if (!suyas.length && !dibujo.length) {
             return;
         }
@@ -387,6 +531,103 @@ function apagarConCasilla(caja, cual, selector) {
         capas.forEach((capa) => capa.classList.toggle("es-apagada", !casilla.checked));
     });
 }
+function tipoDePinDeMapa(pin) {
+    const tipo = TIPOS_DE_SITIO_DE_MAPA.find(([clave]) => clave && pin.classList.contains("es-" + clave));
+    return tipo ? tipo[0] : "";
+}
+function prepararFiltrosDeSitiosDeMapa(mando) {
+    const menu = mando.caja.querySelector(".mapa-mandos-cuerpo") || mando.caja.querySelector("[data-mapa-mandos]");
+    const pines = [...mando.dibujo.querySelectorAll(".mapa-pin")];
+    if (!menu || !pines.length) {
+        return;
+    }
+    const lienzo = mando.lienzo;
+    const grupo = document.createElement("fieldset");
+    grupo.className = "mapa-capas mapa-filtro-sitios";
+    const leyenda = document.createElement("legend");
+    leyenda.className = "mapa-capas-titulo";
+    leyenda.textContent = "sitios";
+    grupo.appendChild(leyenda);
+    const casilla = (tipo, nombre, valor, marcada, texto) => {
+        const etiqueta = document.createElement("label");
+        etiqueta.className = "mapa-capa-casilla";
+        const entrada = document.createElement("input");
+        entrada.type = tipo;
+        if (nombre) {
+            entrada.name = nombre;
+        }
+        entrada.value = valor;
+        entrada.checked = marcada;
+        etiqueta.appendChild(entrada);
+        etiqueta.appendChild(document.createTextNode(" " + texto));
+        return { etiqueta, entrada };
+    };
+    const como = [["ambos", "símbolo y nombre"], ["simbolo", "solo el símbolo"], ["nombre", "solo el nombre"]]
+        .map(([valor, texto], i) => casilla("radio", "mapa-pines-como", valor, i === 0, texto));
+    como.forEach(({ etiqueta, entrada }) => {
+        grupo.appendChild(etiqueta);
+        entrada.addEventListener("change", () => {
+            lienzo.classList.toggle("pines-solo-simbolo", entrada.value === "simbolo" && entrada.checked);
+            lienzo.classList.toggle("pines-solo-nombre", entrada.value === "nombre" && entrada.checked);
+        });
+    });
+    const porTipo = new Map();
+    pines.forEach((pin) => {
+        const tipo = tipoDePinDeMapa(pin);
+        porTipo.set(tipo, (porTipo.get(tipo) || 0) + 1);
+    });
+    const tipos = TIPOS_DE_SITIO_DE_MAPA.filter(([clave]) => porTipo.has(clave));
+    const casillasDeTipo = [];
+    const aplicar = () => {
+        const fuera = new Set(casillasDeTipo.filter((c) => !c.checked).map((c) => c.value));
+        pines.forEach((pin) => pin.classList.toggle("es-filtrada", fuera.has(tipoDePinDeMapa(pin))));
+    };
+    if (tipos.length > 1) {
+        const desplegable = document.createElement("details");
+        desplegable.className = "mapa-zonas mapa-tipos-de-sitio";
+        const resumen = document.createElement("summary");
+        resumen.className = "mapa-capas-titulo";
+        resumen.textContent = "tipos de sitio";
+        desplegable.appendChild(resumen);
+        const dentro = document.createElement("div");
+        dentro.className = "mapa-zonas-dentro";
+        tipos.forEach(([clave, plural]) => {
+            const { etiqueta, entrada } = casilla("checkbox", "", clave, true, plural + " (" + porTipo.get(clave) + ")");
+            entrada.addEventListener("change", aplicar);
+            casillasDeTipo.push(entrada);
+            dentro.appendChild(etiqueta);
+        });
+        desplegable.appendChild(dentro);
+        grupo.appendChild(desplegable);
+    }
+    if (porTipo.has("capital") && casillasDeTipo.length) {
+        const atajo = document.createElement("button");
+        atajo.type = "button";
+        atajo.className = "mapa-boton mapa-boton-ancho";
+        atajo.setAttribute("aria-pressed", "false");
+        atajo.textContent = "solo países y capitales";
+        atajo.addEventListener("click", () => {
+            const si = atajo.getAttribute("aria-pressed") !== "true";
+            atajo.setAttribute("aria-pressed", si ? "true" : "false");
+            casillasDeTipo.forEach((c) => {
+                c.checked = !si || c.value === "capital";
+            });
+            aplicar();
+            const paises = mando.caja.querySelector('[data-mapa-nivel-casilla][value="paises"]');
+            if (si && paises && !paises.checked) {
+                paises.checked = true;
+                paises.dispatchEvent(new Event("change"));
+            }
+        });
+        grupo.appendChild(atajo);
+    }
+    const ver = menu.querySelector(".mapa-capas");
+    if (ver) {
+        ver.after(grupo);
+    } else {
+        menu.appendChild(grupo);
+    }
+}
 function escalarPinesDeMapa(mando) {
     const dibujo = mando.caja.querySelector(".mapa-svg");
     if (!dibujo) {
@@ -404,7 +645,7 @@ function escalarPinesDeMapa(mando) {
     }
     const anchoReal = Math.min(caja.width, caja.height * (ancho / alto));
     const porUnidad = anchoReal / ancho;
-    const cuanto = Math.max(0.15, Math.min(8, PIN_EN_PANTALLA / (radio * porUnidad)));
+    const cuanto = Math.max(0.05, Math.min(8, (mando.pin || PIN_EN_PANTALLA) / (radio * porUnidad)));
     dibujo.querySelectorAll("[data-mapa-xy]").forEach((pin) => {
         const sitio = pin.getAttribute("data-mapa-xy");
         const giro = pin.getAttribute("data-mapa-giro");
@@ -786,6 +1027,7 @@ function prepararLeyendaDeMapa(mando) {
     });
     mando.caja.addEventListener("keydown", (evento) => {
         if (evento.key === "Escape" && !panel.hidden) {
+            evento.preventDefault();
             poner(false);
             boton.focus();
         }
@@ -882,6 +1124,33 @@ function caminoMasCortoDeMapa(red, desde, hasta) {
     }
     return { puntos, largo: lejos[hasta] };
 }
+function puntoDelMapaDeMapa(mando, evento) {
+    const svg = mando.dibujo;
+    const matriz = svg.getScreenCTM && svg.getScreenCTM();
+    if (!matriz) {
+        return null;
+    }
+    const punto = svg.createSVGPoint();
+    punto.x = evento.clientX;
+    punto.y = evento.clientY;
+    const p = punto.matrixTransform(matriz.inverse());
+    return { x: p.x, y: p.y };
+}
+function nodoMasCercanoDeMapa(red, x, y) {
+    let mejor = -1;
+    let lejos = Infinity;
+    for (let n = 0; n < red.vecinos.length; n++) {
+        if (!red.vecinos[n].length) {
+            continue;
+        }
+        const d = Math.hypot(red.p[2 * n] - x, red.p[2 * n + 1] - y);
+        if (d < lejos) {
+            lejos = d;
+            mejor = n;
+        }
+    }
+    return mejor < 0 ? null : { nodo: mejor, lejos };
+}
 function prepararRutaDeMapa(mando) {
     const boton = mando.caja.querySelector("[data-mapa-ruta-boton]");
     const red = leerRedDeMapa(mando.dibujo);
@@ -902,31 +1171,41 @@ function prepararRutaDeMapa(mando) {
     panel.appendChild(titulo);
     const ayuda = document.createElement("p");
     ayuda.className = "mapa-ruta-salida";
-    ayuda.textContent = "Elige de dónde a dónde, o pulsa dos sitios en el mapa.";
+    ayuda.textContent = "Escribe de dónde a dónde (sale la lista de sitios), o pulsa dos puntos en el mapa:"
+        + " un sitio o cualquier sitio, que se va al camino más cercano.";
     panel.appendChild(ayuda);
-    const lista = (texto, id) => {
+    const nombres = new Map();
+    red.sitios.forEach((s) => {
+        if (!nombres.has(s[1].toLowerCase())) {
+            nombres.set(s[1].toLowerCase(), s);
+        }
+    });
+    const opciones = document.createElement("datalist");
+    opciones.id = "mapa-ruta-sitios";
+    [...nombres.values()].sort((a, b) => a[1].localeCompare(b[1], "es")).forEach((s) => {
+        const opcion = document.createElement("option");
+        opcion.value = s[1];
+        opciones.appendChild(opcion);
+    });
+    panel.appendChild(opciones);
+    const buscador = (texto, id) => {
         const etiqueta = document.createElement("label");
         etiqueta.className = "mapa-ruta-campo";
         etiqueta.htmlFor = id;
         etiqueta.textContent = texto;
-        const elegir = document.createElement("select");
-        elegir.id = id;
-        const nada = document.createElement("option");
-        nada.value = "";
-        nada.textContent = "— elige un sitio —";
-        elegir.appendChild(nada);
-        red.sitios.forEach((s, i) => {
-            const opcion = document.createElement("option");
-            opcion.value = String(i);
-            opcion.textContent = s[1];
-            elegir.appendChild(opcion);
-        });
-        etiqueta.appendChild(elegir);
+        const entrada = document.createElement("input");
+        entrada.id = id;
+        entrada.type = "search";
+        entrada.setAttribute("list", opciones.id);
+        entrada.autocomplete = "off";
+        entrada.spellcheck = false;
+        entrada.placeholder = "escribe un sitio…";
+        etiqueta.appendChild(entrada);
         panel.appendChild(etiqueta);
-        return elegir;
+        return entrada;
     };
-    const desde = lista("Desde", "mapa-ruta-desde");
-    const hasta = lista("Hasta", "mapa-ruta-hasta");
+    const desde = buscador("Desde", "mapa-ruta-desde");
+    const hasta = buscador("Hasta", "mapa-ruta-hasta");
     const botones = document.createElement("div");
     botones.className = "mapa-ruta-botones";
     const alReves = document.createElement("button");
@@ -945,6 +1224,40 @@ function prepararRutaDeMapa(mando) {
     salida.setAttribute("role", "status");
     panel.appendChild(salida);
     boton.after(panel);
+    const extremos = { desde: null, hasta: null };
+    const deSitio = (s) => ({ nodo: s[0], nombre: s[1], x: red.p[2 * s[0]], y: red.p[2 * s[0] + 1], campo: 0 });
+    const cercaDe = (x, y) => {
+        let mejor = null;
+        red.sitios.forEach((s) => {
+            const d = Math.hypot(red.p[2 * s[0]] - x, red.p[2 * s[0] + 1] - y);
+            if (!mejor || d < mejor.d) {
+                mejor = { d, nombre: s[1] };
+            }
+        });
+        return mejor ? mejor.nombre : "";
+    };
+    const deUnPunto = (x, y) => {
+        const cerca = nodoMasCercanoDeMapa(red, x, y);
+        if (!cerca) {
+            return null;
+        }
+        const junto = cercaDe(x, y);
+        return { nodo: cerca.nodo, nombre: "un punto del mapa" + (junto ? " (cerca de " + junto + ")" : ""), x, y,
+            campo: cerca.lejos };
+    };
+    const leerBuscador = (entrada, cual) => {
+        const valor = entrada.value.trim().toLowerCase();
+        if (!valor) {
+            extremos[cual] = null;
+            return;
+        }
+        const s = nombres.get(valor);
+        if (s) {
+            extremos[cual] = deSitio(s);
+        } else if (!(extremos[cual] && extremos[cual].nombre.toLowerCase() === valor)) {
+            extremos[cual] = null;
+        }
+    };
     let dibujoDeRuta = null;
     const borrarDibujo = () => {
         if (dibujoDeRuta) {
@@ -952,31 +1265,43 @@ function prepararRutaDeMapa(mando) {
             dibujoDeRuta = null;
         }
     };
+    const distanciaEscrita = (pixeles) => {
+        const e = mando.escala;
+        return e ? cifraDeMapa(pixeles * e.porPixel) + (e.unidad ? " " + e.unidad : "") : "";
+    };
     const pintar = () => {
         borrarDibujo();
-        const a = red.sitios[Number(desde.value)];
-        const b = red.sitios[Number(hasta.value)];
-        quitar.disabled = !desde.value && !hasta.value;
-        alReves.disabled = !desde.value || !hasta.value;
-        if (!desde.value || !hasta.value) {
-            salida.textContent = desde.value || hasta.value ? "Ahora elige el otro sitio." : "";
+        const a = extremos.desde;
+        const b = extremos.hasta;
+        quitar.disabled = !a && !b && !desde.value && !hasta.value;
+        alReves.disabled = !a || !b;
+        if (!a || !b) {
+            const escrito = (desde.value.trim() && !a) || (hasta.value.trim() && !b);
+            salida.textContent = escrito ? "No encuentro ese sitio: elige uno de la lista que sale al escribir."
+                : (a || b ? "Ahora el otro extremo." : "");
             return;
         }
-        if (a[0] === b[0]) {
+        if (a.nodo === b.nodo && !a.campo && !b.campo) {
             salida.textContent = "Elige dos sitios distintos.";
             return;
         }
-        const camino = caminoMasCortoDeMapa(red, a[0], b[0]);
+        const camino = a.nodo === b.nodo ? { puntos: [a.nodo], largo: 0 } : caminoMasCortoDeMapa(red, a.nodo, b.nodo);
         if (!camino) {
-            salida.textContent = "No hay camino de " + a[1] + " a " + b[1] + " por los caminos del mapa.";
+            salida.textContent = "No hay camino de " + a.nombre + " a " + b.nombre + " por los caminos del mapa.";
             return;
         }
         const g = svgDeMapa("g", { class: "mapa-ruta-dibujo" });
         const d = camino.puntos.map((n, i) => (i ? "L" : "M") + red.p[2 * n] + " " + red.p[2 * n + 1]).join("");
         g.appendChild(svgDeMapa("path", { d, class: "mapa-ruta-borde" }));
         g.appendChild(svgDeMapa("path", { d, class: "mapa-ruta-raya" }));
-        [[a[0], ""], [b[0], " es-final"]].forEach(([n, clase]) => {
-            const xy = red.p[2 * n] + "," + red.p[2 * n + 1];
+        [a, b].forEach((x) => {
+            if (x.campo > 0) {
+                g.appendChild(svgDeMapa("path", { class: "mapa-ruta-campo",
+                    d: "M" + x.x + " " + x.y + "L" + red.p[2 * x.nodo] + " " + red.p[2 * x.nodo + 1] }));
+            }
+        });
+        [[a, ""], [b, " es-final"]].forEach(([x, clase]) => {
+            const xy = x.x + "," + x.y;
             g.appendChild(svgDeMapa("circle", { r: (radio * 0.5).toFixed(1), class: "mapa-ruta-punto" + clase,
                 "data-mapa-xy": xy, transform: "translate(" + xy + ")" }));
         });
@@ -984,11 +1309,13 @@ function prepararRutaDeMapa(mando) {
         mando.dibujo.insertBefore(g, pines || null);
         dibujoDeRuta = g;
         escalarPinesDeMapa(mando);
-        let texto = "De " + a[1] + " a " + b[1] + " por los caminos";
+        const campo = a.campo + b.campo;
+        let texto = "De " + a.nombre + " a " + b.nombre + " por los caminos";
         const e = mando.escala;
         if (e) {
-            const distancia = camino.largo * e.porPixel;
-            texto += ": " + cifraDeMapa(distancia) + (e.unidad ? " " + e.unidad : "") + ".";
+            const distancia = (camino.largo + campo) * e.porPixel;
+            texto += ": " + cifraDeMapa(distancia) + (e.unidad ? " " + e.unidad : "")
+                + (campo > 0 ? " (" + distanciaEscrita(campo) + " campo a través hasta el camino)" : "") + ".";
             const viaje = Object.keys(e.viaje).filter((como) => e.viaje[como] > 0);
             if (viaje.length) {
                 texto += " " + viaje.map((como) => como.charAt(0).toUpperCase() + como.slice(1) + ": "
@@ -999,7 +1326,7 @@ function prepararRutaDeMapa(mando) {
         }
         const enMedio = new Map();
         red.sitios.forEach((s) => {
-            if (s[0] !== a[0] && s[0] !== b[0] && !enMedio.has(s[0])) {
+            if (s[0] !== a.nodo && s[0] !== b.nodo && !enMedio.has(s[0])) {
                 enMedio.set(s[0], s[1]);
             }
         });
@@ -1018,6 +1345,7 @@ function prepararRutaDeMapa(mando) {
         if (si && medir && medir.getAttribute("aria-pressed") === "true") {
             medir.click();
         }
+        alturaDelMenuDeMapa(mando);
     };
     boton.addEventListener("click", () => {
         abrir(panel.hidden);
@@ -1032,13 +1360,26 @@ function prepararRutaDeMapa(mando) {
             }
         });
     }
-    desde.addEventListener("change", pintar);
-    hasta.addEventListener("change", pintar);
+    [[desde, "desde"], [hasta, "hasta"]].forEach(([entrada, cual]) => {
+        entrada.addEventListener("input", () => {
+            leerBuscador(entrada, cual);
+            if (extremos[cual] || !entrada.value) {
+                pintar();
+            }
+        });
+        entrada.addEventListener("change", () => {
+            leerBuscador(entrada, cual);
+            pintar();
+        });
+    });
     alReves.addEventListener("click", () => {
+        [extremos.desde, extremos.hasta] = [extremos.hasta, extremos.desde];
         [desde.value, hasta.value] = [hasta.value, desde.value];
         pintar();
     });
     quitar.addEventListener("click", () => {
+        extremos.desde = null;
+        extremos.hasta = null;
         desde.value = "";
         hasta.value = "";
         pintar();
@@ -1046,27 +1387,36 @@ function prepararRutaDeMapa(mando) {
     });
     mando.caja.addEventListener("keydown", (evento) => {
         if (evento.key === "Escape" && !panel.hidden && panel.contains(document.activeElement)) {
+            evento.preventDefault();
             abrir(false);
             boton.focus();
         }
     });
     mando.lienzo.addEventListener("click", (evento) => {
-        if (panel.hidden) {
+        if (panel.hidden || evento.defaultPrevented) {
             return;
         }
         const sitio = evento.target.closest ? evento.target.closest("[data-mapa-sitio]") : null;
         const cual = sitio ? sitio.getAttribute("data-mapa-sitio") : "";
-        const i = red.sitios.findIndex((s) => s[2] === cual);
-        if (i < 0) {
+        const enLaRed = cual ? red.sitios.find((s) => s[2] === cual) : null;
+        let extremo = enLaRed ? deSitio(enLaRed) : null;
+        if (!extremo) {
+            const p = puntoDelMapaDeMapa(mando, evento);
+            extremo = p ? deUnPunto(p.x, p.y) : null;
+        }
+        if (!extremo) {
             return;
         }
         evento.preventDefault();
         evento.stopPropagation();
-        if (!desde.value || (desde.value && hasta.value)) {
-            desde.value = String(i);
+        if (!extremos.desde || extremos.hasta) {
+            extremos.desde = extremo;
+            extremos.hasta = null;
+            desde.value = extremo.nombre;
             hasta.value = "";
         } else {
-            hasta.value = String(i);
+            extremos.hasta = extremo;
+            hasta.value = extremo.nombre;
         }
         pintar();
     }, true);

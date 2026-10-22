@@ -44,6 +44,17 @@ const ZOOM_MAXIMO_DE_MAPA = 6;
 // pero el mapa se veía, así que no parecía roto.
 const PIN_EN_PANTALLA = 15;
 
+// Los tipos de sitio, con su nombre en plural, para el filtro «tipos de
+// sitio» (prepararFiltrosDeSitiosDeMapa). Los mismos que TIPOS_DE_PIN de
+// mundo_mapas.py, en su orden; "" son los que no tienen tipo.
+const TIPOS_DE_SITIO_DE_MAPA = [["capital", "capitales"], ["ciudad", "ciudades"], ["pueblo", "pueblos"],
+    ["fortaleza", "fortalezas"], ["ruina", "ruinas"], ["puerto", "puertos"], ["templo", "templos"],
+    ["torre", "torres"], ["cueva", "cuevas"], ["mina", "minas"], ["puente", "puentes"], ["batalla", "batallas"],
+    ["mazmorra", "mazmorras"], ["campamento", "campamentos"], ["", "sin tipo"]];
+
+// Lo que se recuerda de los mandos (plegados, cerrados), en el navegador.
+const MEMORIA_DE_MANDOS_DE_MAPA = "mapa-mandos";
+
 // Las clases de zona del desplegable «zonas» (prepararZonasDeMapa), con su
 // nombre en plural. Aquí arriba por lo mismo que PIN_EN_PANTALLA.
 const CLASES_DE_ZONA_DE_MAPA = [["vecino", "países vecinos"], ["provincia", "provincias y comarcas"], ["lago", "lagos"],
@@ -68,6 +79,9 @@ function initializeMundoMapa() {
         maximo: parseFloat(dibujo.getAttribute("data-mapa-zoom-maximo")) || ZOOM_MAXIMO_DE_MAPA,
         // Desde qué zoom se escriben los nombres de los pueblos y demás.
         cerca: parseFloat(dibujo.getAttribute("data-mapa-cerca")) || 2,
+        // Lo que mide un pin en pantalla (el mapamundi con lo regional
+        // dentro los lleva más pequeños: data-mapa-pin).
+        pin: parseFloat(dibujo.getAttribute("data-mapa-pin")) || PIN_EN_PANTALLA,
         cifra: caja.querySelector("[data-mapa-cifra]"),
         mas: caja.querySelector("[data-mapa-mas]"),
         menos: caja.querySelector("[data-mapa-menos]"),
@@ -135,18 +149,15 @@ function initializeMundoMapa() {
 
     // Al cambiar de tamaño la ventana cambia cuánto mide una unidad del
     // mapa en pantalla, así que los pines hay que volver a ajustarlos.
-    window.addEventListener("resize", () => {
-        margenDeMapa(mando);
-        alturaDelMenuDeMapa(mando);
-        escalarPinesDeMapa(mando);
-        mejorarImagenDeMapa(mando);
-        pintarEscalaDeMapa(mando);
-    });
+    window.addEventListener("resize", () => rehacerMapa(mando));
 
+    prepararMandosFlotantesDeMapa(mando);
+    prepararPantallaCompletaDeMapa(mando);
     prepararArrastreDeMapa(mando);
     prepararCapasDeMapa(caja);
     mejorarImagenDeMapa(mando);
     prepararRegionesDeMapa(caja);
+    prepararFiltrosDeSitiosDeMapa(mando);
     prepararGloboDeMapa(mando);
     prepararSitiosDeMapa();
     prepararEscalaDeMapa(mando);
@@ -227,6 +238,9 @@ function ponerZoomDeMapa(mando, quiere, anclaX, anclaY) {
     // De cerca (al 200% o más) se escriben también los nombres de los
     // pueblos, las fortalezas…: con el mapa entero serían una sopa.
     lienzo.classList.toggle("esta-cerca", ahora >= (mando.cerca || 2) - 0.005);
+    // A medio camino (desde el 200%): en el mapamundi, las capitales y las
+    // ciudades de los mapas regionales; los demás sitios, ya de cerca.
+    lienzo.classList.toggle("esta-medio", ahora >= 1.995);
 
     if (Math.abs(ahora - antes) > 0.0005) {
         const cuanto = ahora / antes;
@@ -262,13 +276,193 @@ function ponerZoomDeMapa(mando, quiere, anclaX, anclaY) {
 // le cabe lo de dentro, se desplaza: así la caja acaba donde acaba el mapa
 // y la barra de escala (abajo, encima del mapa) no se queda colgando debajo.
 // Con el menú encima del mapa (pantallas estrechas) no se toca.
+// (Con los mandos flotando encima del mapa, lo alto que pueden ponerse:
+// lo del mapa, menos un hueco abajo para la barra de escala.)
 function alturaDelMenuDeMapa(mando) {
     const menu = mando.caja.querySelector("[data-mapa-mandos]");
     if (!menu) {
         return;
     }
+    if (mando.flotantes) {
+        // Flotan donde hay sitio: en pantallas anchas y a pantalla
+        // completa. En una estrecha el mapa mide poco de alto y lo
+        // taparían: ahí van encima del mapa, como siempre.
+        const flota = window.innerWidth >= 861 || !!mando.aPantalla;
+        mando.caja.classList.toggle("con-mandos-flotantes", flota);
+        menu.style.top = flota ? (mando.lienzo.offsetTop + 10) + "px" : "";
+        menu.style.maxHeight = flota ? Math.max(120, mando.lienzo.clientHeight - 70) + "px" : "";
+        return;
+    }
     const alLado = menu.offsetTop === mando.lienzo.offsetTop && menu.offsetLeft < mando.lienzo.offsetLeft;
     menu.style.maxHeight = alLado ? Math.max(260, mando.lienzo.offsetHeight) + "px" : "";
+}
+
+// Todo lo que depende de lo que mide la ventana del mapa, otra vez (al
+// cambiar el tamaño de la ventana y al entrar o salir de pantalla
+// completa).
+function rehacerMapa(mando) {
+    margenDeMapa(mando);
+    alturaDelMenuDeMapa(mando);
+    escalarPinesDeMapa(mando);
+    mejorarImagenDeMapa(mando);
+    pintarEscalaDeMapa(mando);
+}
+
+
+// =========================================
+// LOS MANDOS, EN UNA VENTANA FLOTANTE
+// =========================================
+// Con JavaScript, los mandos (zoom, leyenda, medir, ruta, qué se ve, los
+// filtros) flotan encima del mapa, arriba a la izquierda, y el mapa ocupa
+// todo el ancho (en pantallas estrechas no: ahí el mapa mide poco de alto
+// y van encima de él, salvo a pantalla completa; ver alturaDelMenuDeMapa). Llevan una cabecera con dos botones: PLEGAR (se queda la
+// cabecera y el zoom; vuelve a desplegarse con el mismo botón) y CERRAR
+// (desaparecen; un botón «mandos» en la esquina los trae de vuelta). Se
+// recuerda cómo se dejaron (en el navegador); la primera vez, plegados,
+// que desplegados tapan un buen trozo del mapa. Sin sticky: absolute
+// dentro de la caja del mapa.
+
+function memoriaDeMandosDeMapa() {
+    try {
+        const m = JSON.parse(window.localStorage.getItem(MEMORIA_DE_MANDOS_DE_MAPA) || "null");
+        return m && typeof m === "object" ? m : null;
+    } catch (error) {
+        return null;
+    }
+}
+
+function prepararMandosFlotantesDeMapa(mando) {
+    const menu = mando.caja.querySelector("[data-mapa-mandos]");
+    if (!menu) {
+        return;
+    }
+    mando.flotantes = true;
+    menu.id = menu.id || "mapa-mandos";
+    const zoom = menu.querySelector(".mapa-zoom");
+    const cuerpo = document.createElement("div");
+    cuerpo.className = "mapa-mandos-cuerpo";
+    cuerpo.id = "mapa-mandos-cuerpo";
+    [...menu.children].forEach((hijo) => {
+        if (hijo !== zoom) {
+            cuerpo.appendChild(hijo);
+        }
+    });
+    const cabeza = document.createElement("div");
+    cabeza.className = "mapa-mandos-cabeza";
+    const titulo = document.createElement("span");
+    titulo.className = "mapa-capas-titulo mapa-mandos-titulo";
+    titulo.textContent = "mandos";
+    const plegar = document.createElement("button");
+    plegar.type = "button";
+    plegar.className = "mapa-boton";
+    plegar.setAttribute("aria-controls", cuerpo.id);
+    const cerrar = document.createElement("button");
+    cerrar.type = "button";
+    cerrar.className = "mapa-boton";
+    cerrar.setAttribute("aria-label", "Cerrar los mandos");
+    cerrar.textContent = "×";
+    cabeza.appendChild(titulo);
+    cabeza.appendChild(plegar);
+    cabeza.appendChild(cerrar);
+    menu.prepend(cabeza);
+    menu.appendChild(cuerpo);
+    menu.setAttribute("role", "region");
+    menu.setAttribute("aria-label", "Mandos del mapa");
+    // El botón para traerlos de vuelta, en la esquina del mapa.
+    const abrir = document.createElement("button");
+    abrir.type = "button";
+    abrir.className = "mapa-boton mapa-mandos-abrir";
+    abrir.setAttribute("aria-controls", menu.id);
+    abrir.innerHTML = '<span aria-hidden="true">☰</span> mandos';
+    abrir.hidden = true;
+    menu.after(abrir);
+
+    const memoria = memoriaDeMandosDeMapa();
+    const estado = {
+        // De salida, plegados (con la cabecera y el zoom): desplegados
+        // tapan un buen trozo del mapa. Luego, como se dejaron.
+        plegado: memoria ? !!memoria.plegado : true,
+        cerrado: memoria ? !!memoria.cerrado : false,
+    };
+    const apuntar = () => {
+        try {
+            window.localStorage.setItem(MEMORIA_DE_MANDOS_DE_MAPA, JSON.stringify(estado));
+        } catch (error) {
+            // Se recuerda mientras esté abierta la página.
+        }
+    };
+    const poner = () => {
+        cuerpo.hidden = estado.plegado;
+        plegar.setAttribute("aria-expanded", estado.plegado ? "false" : "true");
+        plegar.setAttribute("aria-label", estado.plegado ? "Desplegar los mandos" : "Plegar los mandos");
+        plegar.textContent = estado.plegado ? "▸" : "▾";
+        menu.hidden = estado.cerrado;
+        abrir.hidden = !estado.cerrado;
+        abrir.setAttribute("aria-expanded", estado.cerrado ? "false" : "true");
+        alturaDelMenuDeMapa(mando);
+    };
+    plegar.addEventListener("click", () => {
+        estado.plegado = !estado.plegado;
+        apuntar();
+        poner();
+    });
+    cerrar.addEventListener("click", () => {
+        estado.cerrado = true;
+        apuntar();
+        poner();
+        abrir.focus();
+    });
+    abrir.addEventListener("click", () => {
+        estado.cerrado = false;
+        apuntar();
+        poner();
+        plegar.focus();
+    });
+    poner();
+}
+
+
+// =========================================
+// A PANTALLA COMPLETA
+// =========================================
+// Un botón junto al zoom: la caja del mapa pasa a ocupar toda la ventana
+// (position: fixed, por encima de todo; la página de detrás no se mueve)
+// y el mapa, todo lo alto. Esc (o el mismo botón) vuelve. No usa la
+// pantalla completa del navegador: así funciona igual en todos y no
+// esconde la barra de tareas sin avisar.
+
+function prepararPantallaCompletaDeMapa(mando) {
+    const zoom = mando.caja.querySelector(".mapa-zoom");
+    if (!zoom) {
+        return;
+    }
+    const boton = document.createElement("button");
+    boton.type = "button";
+    boton.className = "mapa-boton mapa-boton-ancho";
+    boton.setAttribute("aria-pressed", "false");
+    boton.innerHTML = '<span aria-hidden="true">⛶</span> pantalla completa';
+    zoom.appendChild(boton);
+    const poner = (si) => {
+        mando.caja.classList.toggle("es-pantalla-completa", si);
+        document.documentElement.classList.toggle("con-mapa-a-pantalla", si);
+        boton.setAttribute("aria-pressed", si ? "true" : "false");
+        boton.innerHTML = si ? '<span aria-hidden="true">⛶</span> salir de pantalla completa'
+            : '<span aria-hidden="true">⛶</span> pantalla completa';
+        mando.aPantalla = si;
+        const antes = mando.zoom;
+        rehacerMapa(mando);
+        ponerZoomDeMapa(mando, antes);
+    };
+    boton.addEventListener("click", () => poner(!mando.aPantalla));
+    document.addEventListener("keydown", (evento) => {
+        if (evento.key !== "Escape" || !mando.aPantalla || evento.defaultPrevented) {
+            return;
+        }
+        // Primero se cierra lo que esté abierto encima (la leyenda, la
+        // ruta): eso lo hacen ellos, y marcan el Esc como usado.
+        poner(false);
+        boton.focus();
+    });
 }
 
 
@@ -293,7 +487,10 @@ function margenDeMapa(mando) {
     const ancho = parseFloat(lados[2]);
     const alto = parseFloat(lados[3]);
     const hay = mando.zoom > 1.0005 || conMargenDeMapa();
-    if (hay && ancho && alto) {
+    if (mando.aPantalla) {
+        // A pantalla completa, la ventana del mapa es la pantalla entera.
+        lienzo.style.height = window.innerHeight + "px";
+    } else if (hay && ancho && alto) {
         const tope = parseFloat(getComputedStyle(lienzo).maxHeight) || Infinity;
         const quiere = Math.min(lienzo.clientWidth * alto / ancho, tope);
         lienzo.style.height = Math.round(quiere) + "px";
@@ -453,7 +650,8 @@ function prepararRegionesDeMapa(caja) {
             apagarConCasilla(caja, '[data-mapa-lineas="' + grupo + '"]', ".mapa-lineas.es-" + grupo);
         }
     });
-    apagarConCasilla(caja, "[data-mapa-nombres]", ".mapa-pin-nombre, .mapa-textos");
+    apagarConCasilla(caja, "[data-mapa-nombres]", ".mapa-textos");
+    apagarConCasilla(caja, "[data-mapa-zonas-regionales]", ".mapa-zonas-regionales");
     apagarConCasilla(caja, "[data-mapa-rosa]", ".mapa-rosa");
     prepararNivelesDeMapa(caja);
     prepararZonasDeMapa(caja);
@@ -479,7 +677,7 @@ function prepararZonasDeMapa(caja) {
         // Las de sin nombre de esa clase (el dibujo y su trama).
         const dibujo = clase === "otra"
             ? [...caja.querySelectorAll(".mapa-dibujos > .mapa-dibujo:not([class*='es-zona-'])")]
-            : [...caja.querySelectorAll(".mapa-dibujos > .es-zona-" + clase)];
+            : [...caja.querySelectorAll(".mapa-dibujos > .es-zona-" + clase + ", .mapa-zonas-regionales > .es-zona-" + clase)];
         if (!suyas.length && !dibujo.length) {
             return;
         }
@@ -592,6 +790,120 @@ function apagarConCasilla(caja, cual, selector) {
 
 
 // =========================================
+// LOS SITIOS: CÓMO SE VEN Y CUÁLES
+// =========================================
+// En los mandos, un grupo «sitios»: si se ven con su símbolo y su nombre,
+// solo el símbolo o solo el nombre; un desplegable «tipos de sitio» con
+// una casilla por cada tipo que haya en el mapa (con cuántos); y un atajo,
+// «solo países y capitales», que deja los países y solo las capitales (y
+// vuelve a dejarlo todo al pulsarlo otra vez). Lo hacen clases: en el
+// lienzo, pines-solo-simbolo y pines-solo-nombre; en cada pin que no
+// toca, es-filtrada.
+
+function tipoDePinDeMapa(pin) {
+    const tipo = TIPOS_DE_SITIO_DE_MAPA.find(([clave]) => clave && pin.classList.contains("es-" + clave));
+    return tipo ? tipo[0] : "";
+}
+
+function prepararFiltrosDeSitiosDeMapa(mando) {
+    const menu = mando.caja.querySelector(".mapa-mandos-cuerpo") || mando.caja.querySelector("[data-mapa-mandos]");
+    const pines = [...mando.dibujo.querySelectorAll(".mapa-pin")];
+    if (!menu || !pines.length) {
+        return;
+    }
+    const lienzo = mando.lienzo;
+    const grupo = document.createElement("fieldset");
+    grupo.className = "mapa-capas mapa-filtro-sitios";
+    const leyenda = document.createElement("legend");
+    leyenda.className = "mapa-capas-titulo";
+    leyenda.textContent = "sitios";
+    grupo.appendChild(leyenda);
+    const casilla = (tipo, nombre, valor, marcada, texto) => {
+        const etiqueta = document.createElement("label");
+        etiqueta.className = "mapa-capa-casilla";
+        const entrada = document.createElement("input");
+        entrada.type = tipo;
+        if (nombre) {
+            entrada.name = nombre;
+        }
+        entrada.value = valor;
+        entrada.checked = marcada;
+        etiqueta.appendChild(entrada);
+        etiqueta.appendChild(document.createTextNode(" " + texto));
+        return { etiqueta, entrada };
+    };
+    // Cómo se ven.
+    const como = [["ambos", "símbolo y nombre"], ["simbolo", "solo el símbolo"], ["nombre", "solo el nombre"]]
+        .map(([valor, texto], i) => casilla("radio", "mapa-pines-como", valor, i === 0, texto));
+    como.forEach(({ etiqueta, entrada }) => {
+        grupo.appendChild(etiqueta);
+        entrada.addEventListener("change", () => {
+            lienzo.classList.toggle("pines-solo-simbolo", entrada.value === "simbolo" && entrada.checked);
+            lienzo.classList.toggle("pines-solo-nombre", entrada.value === "nombre" && entrada.checked);
+        });
+    });
+    // Cuáles: por tipos.
+    const porTipo = new Map();
+    pines.forEach((pin) => {
+        const tipo = tipoDePinDeMapa(pin);
+        porTipo.set(tipo, (porTipo.get(tipo) || 0) + 1);
+    });
+    const tipos = TIPOS_DE_SITIO_DE_MAPA.filter(([clave]) => porTipo.has(clave));
+    const casillasDeTipo = [];
+    const aplicar = () => {
+        const fuera = new Set(casillasDeTipo.filter((c) => !c.checked).map((c) => c.value));
+        pines.forEach((pin) => pin.classList.toggle("es-filtrada", fuera.has(tipoDePinDeMapa(pin))));
+    };
+    if (tipos.length > 1) {
+        const desplegable = document.createElement("details");
+        desplegable.className = "mapa-zonas mapa-tipos-de-sitio";
+        const resumen = document.createElement("summary");
+        resumen.className = "mapa-capas-titulo";
+        resumen.textContent = "tipos de sitio";
+        desplegable.appendChild(resumen);
+        const dentro = document.createElement("div");
+        dentro.className = "mapa-zonas-dentro";
+        tipos.forEach(([clave, plural]) => {
+            const { etiqueta, entrada } = casilla("checkbox", "", clave, true, plural + " (" + porTipo.get(clave) + ")");
+            entrada.addEventListener("change", aplicar);
+            casillasDeTipo.push(entrada);
+            dentro.appendChild(etiqueta);
+        });
+        desplegable.appendChild(dentro);
+        grupo.appendChild(desplegable);
+    }
+    // El atajo: solo los países y las capitales.
+    if (porTipo.has("capital") && casillasDeTipo.length) {
+        const atajo = document.createElement("button");
+        atajo.type = "button";
+        atajo.className = "mapa-boton mapa-boton-ancho";
+        atajo.setAttribute("aria-pressed", "false");
+        atajo.textContent = "solo países y capitales";
+        atajo.addEventListener("click", () => {
+            const si = atajo.getAttribute("aria-pressed") !== "true";
+            atajo.setAttribute("aria-pressed", si ? "true" : "false");
+            casillasDeTipo.forEach((c) => {
+                c.checked = !si || c.value === "capital";
+            });
+            aplicar();
+            const paises = mando.caja.querySelector('[data-mapa-nivel-casilla][value="paises"]');
+            if (si && paises && !paises.checked) {
+                paises.checked = true;
+                paises.dispatchEvent(new Event("change"));
+            }
+        });
+        grupo.appendChild(atajo);
+    }
+    const ver = menu.querySelector(".mapa-capas");
+    if (ver) {
+        ver.after(grupo);
+    } else {
+        menu.appendChild(grupo);
+    }
+}
+
+
+// =========================================
 // EL TAMAÑO DE LOS PINES
 // =========================================
 // Una chincheta no es geografía: es un señalador, y tiene que medir lo
@@ -628,7 +940,7 @@ function escalarPinesDeMapa(mando) {
     // quepa: a lo ancho o a lo alto, lo que primero toque.
     const anchoReal = Math.min(caja.width, caja.height * (ancho / alto));
     const porUnidad = anchoReal / ancho;
-    const cuanto = Math.max(0.15, Math.min(8, PIN_EN_PANTALLA / (radio * porUnidad)));
+    const cuanto = Math.max(0.05, Math.min(8, (mando.pin || PIN_EN_PANTALLA) / (radio * porUnidad)));
     dibujo.querySelectorAll("[data-mapa-xy]").forEach((pin) => {
         const sitio = pin.getAttribute("data-mapa-xy");
         const giro = pin.getAttribute("data-mapa-giro");
@@ -1140,6 +1452,7 @@ function prepararLeyendaDeMapa(mando) {
     });
     mando.caja.addEventListener("keydown", (evento) => {
         if (evento.key === "Escape" && !panel.hidden) {
+            evento.preventDefault();
             poner(false);
             boton.focus();
         }
@@ -1255,6 +1568,42 @@ function caminoMasCortoDeMapa(red, desde, hasta) {
     return { puntos, largo: lejos[hasta] };
 }
 
+// LOS DOS EXTREMOS DE LA RUTA. Cada uno es { nodo, nombre, x, y, campo }:
+// el punto de la red donde se engancha, cómo se llama, dónde está, y lo
+// que hay campo a través hasta el camino (0 si es un sitio de la red).
+// Se eligen escribiendo (un buscador con la lista de los sitios: se
+// escribe un trozo y sale lo que coincide) o pulsando en el mapa: un sitio,
+// o CUALQUIER punto, que se engancha al punto de camino más cercano.
+
+function puntoDelMapaDeMapa(mando, evento) {
+    const svg = mando.dibujo;
+    const matriz = svg.getScreenCTM && svg.getScreenCTM();
+    if (!matriz) {
+        return null;
+    }
+    const punto = svg.createSVGPoint();
+    punto.x = evento.clientX;
+    punto.y = evento.clientY;
+    const p = punto.matrixTransform(matriz.inverse());
+    return { x: p.x, y: p.y };
+}
+
+function nodoMasCercanoDeMapa(red, x, y) {
+    let mejor = -1;
+    let lejos = Infinity;
+    for (let n = 0; n < red.vecinos.length; n++) {
+        if (!red.vecinos[n].length) {
+            continue;
+        }
+        const d = Math.hypot(red.p[2 * n] - x, red.p[2 * n + 1] - y);
+        if (d < lejos) {
+            lejos = d;
+            mejor = n;
+        }
+    }
+    return mejor < 0 ? null : { nodo: mejor, lejos };
+}
+
 function prepararRutaDeMapa(mando) {
     const boton = mando.caja.querySelector("[data-mapa-ruta-boton]");
     const red = leerRedDeMapa(mando.dibujo);
@@ -1264,8 +1613,8 @@ function prepararRutaDeMapa(mando) {
     boton.hidden = false;
     const radio = parseFloat(mando.dibujo.getAttribute("data-mapa-radio")) || 10;
 
-    // EL PANEL, en el menú, justo debajo del botón (no tapa el mapa). Lo
-    // hace esto: sin JavaScript no hay rutas que calcular.
+    // EL PANEL, en los mandos, justo debajo del botón. Lo hace esto: sin
+    // JavaScript no hay rutas que calcular.
     const panel = document.createElement("section");
     panel.className = "mapa-ruta";
     panel.id = "mapa-ruta";
@@ -1278,31 +1627,43 @@ function prepararRutaDeMapa(mando) {
     panel.appendChild(titulo);
     const ayuda = document.createElement("p");
     ayuda.className = "mapa-ruta-salida";
-    ayuda.textContent = "Elige de dónde a dónde, o pulsa dos sitios en el mapa.";
+    ayuda.textContent = "Escribe de dónde a dónde (sale la lista de sitios), o pulsa dos puntos en el mapa:"
+        + " un sitio o cualquier sitio, que se va al camino más cercano.";
     panel.appendChild(ayuda);
-    const lista = (texto, id) => {
+    // La lista de los sitios con nombre, para los dos buscadores (sin
+    // repetidos: un sitio puede estar en la red dos veces).
+    const nombres = new Map();
+    red.sitios.forEach((s) => {
+        if (!nombres.has(s[1].toLowerCase())) {
+            nombres.set(s[1].toLowerCase(), s);
+        }
+    });
+    const opciones = document.createElement("datalist");
+    opciones.id = "mapa-ruta-sitios";
+    [...nombres.values()].sort((a, b) => a[1].localeCompare(b[1], "es")).forEach((s) => {
+        const opcion = document.createElement("option");
+        opcion.value = s[1];
+        opciones.appendChild(opcion);
+    });
+    panel.appendChild(opciones);
+    const buscador = (texto, id) => {
         const etiqueta = document.createElement("label");
         etiqueta.className = "mapa-ruta-campo";
         etiqueta.htmlFor = id;
         etiqueta.textContent = texto;
-        const elegir = document.createElement("select");
-        elegir.id = id;
-        const nada = document.createElement("option");
-        nada.value = "";
-        nada.textContent = "— elige un sitio —";
-        elegir.appendChild(nada);
-        red.sitios.forEach((s, i) => {
-            const opcion = document.createElement("option");
-            opcion.value = String(i);
-            opcion.textContent = s[1];
-            elegir.appendChild(opcion);
-        });
-        etiqueta.appendChild(elegir);
+        const entrada = document.createElement("input");
+        entrada.id = id;
+        entrada.type = "search";
+        entrada.setAttribute("list", opciones.id);
+        entrada.autocomplete = "off";
+        entrada.spellcheck = false;
+        entrada.placeholder = "escribe un sitio…";
+        etiqueta.appendChild(entrada);
         panel.appendChild(etiqueta);
-        return elegir;
+        return entrada;
     };
-    const desde = lista("Desde", "mapa-ruta-desde");
-    const hasta = lista("Hasta", "mapa-ruta-hasta");
+    const desde = buscador("Desde", "mapa-ruta-desde");
+    const hasta = buscador("Hasta", "mapa-ruta-hasta");
     const botones = document.createElement("div");
     botones.className = "mapa-ruta-botones";
     const alReves = document.createElement("button");
@@ -1322,6 +1683,42 @@ function prepararRutaDeMapa(mando) {
     panel.appendChild(salida);
     boton.after(panel);
 
+    // Los extremos elegidos.
+    const extremos = { desde: null, hasta: null };
+    const deSitio = (s) => ({ nodo: s[0], nombre: s[1], x: red.p[2 * s[0]], y: red.p[2 * s[0] + 1], campo: 0 });
+    const cercaDe = (x, y) => {
+        let mejor = null;
+        red.sitios.forEach((s) => {
+            const d = Math.hypot(red.p[2 * s[0]] - x, red.p[2 * s[0] + 1] - y);
+            if (!mejor || d < mejor.d) {
+                mejor = { d, nombre: s[1] };
+            }
+        });
+        return mejor ? mejor.nombre : "";
+    };
+    const deUnPunto = (x, y) => {
+        const cerca = nodoMasCercanoDeMapa(red, x, y);
+        if (!cerca) {
+            return null;
+        }
+        const junto = cercaDe(x, y);
+        return { nodo: cerca.nodo, nombre: "un punto del mapa" + (junto ? " (cerca de " + junto + ")" : ""), x, y,
+            campo: cerca.lejos };
+    };
+    const leerBuscador = (entrada, cual) => {
+        const valor = entrada.value.trim().toLowerCase();
+        if (!valor) {
+            extremos[cual] = null;
+            return;
+        }
+        const s = nombres.get(valor);
+        if (s) {
+            extremos[cual] = deSitio(s);
+        } else if (!(extremos[cual] && extremos[cual].nombre.toLowerCase() === valor)) {
+            extremos[cual] = null;
+        }
+    };
+
     let dibujoDeRuta = null;
     const borrarDibujo = () => {
         if (dibujoDeRuta) {
@@ -1329,33 +1726,46 @@ function prepararRutaDeMapa(mando) {
             dibujoDeRuta = null;
         }
     };
+    const distanciaEscrita = (pixeles) => {
+        const e = mando.escala;
+        return e ? cifraDeMapa(pixeles * e.porPixel) + (e.unidad ? " " + e.unidad : "") : "";
+    };
 
     const pintar = () => {
         borrarDibujo();
-        const a = red.sitios[Number(desde.value)];
-        const b = red.sitios[Number(hasta.value)];
-        quitar.disabled = !desde.value && !hasta.value;
-        alReves.disabled = !desde.value || !hasta.value;
-        if (!desde.value || !hasta.value) {
-            salida.textContent = desde.value || hasta.value ? "Ahora elige el otro sitio." : "";
+        const a = extremos.desde;
+        const b = extremos.hasta;
+        quitar.disabled = !a && !b && !desde.value && !hasta.value;
+        alReves.disabled = !a || !b;
+        if (!a || !b) {
+            const escrito = (desde.value.trim() && !a) || (hasta.value.trim() && !b);
+            salida.textContent = escrito ? "No encuentro ese sitio: elige uno de la lista que sale al escribir."
+                : (a || b ? "Ahora el otro extremo." : "");
             return;
         }
-        if (a[0] === b[0]) {
+        if (a.nodo === b.nodo && !a.campo && !b.campo) {
             salida.textContent = "Elige dos sitios distintos.";
             return;
         }
-        const camino = caminoMasCortoDeMapa(red, a[0], b[0]);
+        const camino = a.nodo === b.nodo ? { puntos: [a.nodo], largo: 0 } : caminoMasCortoDeMapa(red, a.nodo, b.nodo);
         if (!camino) {
-            salida.textContent = "No hay camino de " + a[1] + " a " + b[1] + " por los caminos del mapa.";
+            salida.textContent = "No hay camino de " + a.nombre + " a " + b.nombre + " por los caminos del mapa.";
             return;
         }
-        // El dibujo, debajo de los sitios (que se sigan viendo y pulsando).
+        // El dibujo, debajo de los sitios (que se sigan viendo y pulsando):
+        // la ruta y, a trazos, lo de campo a través hasta el camino.
         const g = svgDeMapa("g", { class: "mapa-ruta-dibujo" });
         const d = camino.puntos.map((n, i) => (i ? "L" : "M") + red.p[2 * n] + " " + red.p[2 * n + 1]).join("");
         g.appendChild(svgDeMapa("path", { d, class: "mapa-ruta-borde" }));
         g.appendChild(svgDeMapa("path", { d, class: "mapa-ruta-raya" }));
-        [[a[0], ""], [b[0], " es-final"]].forEach(([n, clase]) => {
-            const xy = red.p[2 * n] + "," + red.p[2 * n + 1];
+        [a, b].forEach((x) => {
+            if (x.campo > 0) {
+                g.appendChild(svgDeMapa("path", { class: "mapa-ruta-campo",
+                    d: "M" + x.x + " " + x.y + "L" + red.p[2 * x.nodo] + " " + red.p[2 * x.nodo + 1] }));
+            }
+        });
+        [[a, ""], [b, " es-final"]].forEach(([x, clase]) => {
+            const xy = x.x + "," + x.y;
             g.appendChild(svgDeMapa("circle", { r: (radio * 0.5).toFixed(1), class: "mapa-ruta-punto" + clase,
                 "data-mapa-xy": xy, transform: "translate(" + xy + ")" }));
         });
@@ -1364,11 +1774,13 @@ function prepararRutaDeMapa(mando) {
         dibujoDeRuta = g;
         escalarPinesDeMapa(mando);
         // Lo que se dice: cuánto, cuántos días y por dónde se pasa.
-        let texto = "De " + a[1] + " a " + b[1] + " por los caminos";
+        const campo = a.campo + b.campo;
+        let texto = "De " + a.nombre + " a " + b.nombre + " por los caminos";
         const e = mando.escala;
         if (e) {
-            const distancia = camino.largo * e.porPixel;
-            texto += ": " + cifraDeMapa(distancia) + (e.unidad ? " " + e.unidad : "") + ".";
+            const distancia = (camino.largo + campo) * e.porPixel;
+            texto += ": " + cifraDeMapa(distancia) + (e.unidad ? " " + e.unidad : "")
+                + (campo > 0 ? " (" + distanciaEscrita(campo) + " campo a través hasta el camino)" : "") + ".";
             const viaje = Object.keys(e.viaje).filter((como) => e.viaje[como] > 0);
             if (viaje.length) {
                 texto += " " + viaje.map((como) => como.charAt(0).toUpperCase() + como.slice(1) + ": "
@@ -1379,7 +1791,7 @@ function prepararRutaDeMapa(mando) {
         }
         const enMedio = new Map();
         red.sitios.forEach((s) => {
-            if (s[0] !== a[0] && s[0] !== b[0] && !enMedio.has(s[0])) {
+            if (s[0] !== a.nodo && s[0] !== b.nodo && !enMedio.has(s[0])) {
                 enMedio.set(s[0], s[1]);
             }
         });
@@ -1402,6 +1814,7 @@ function prepararRutaDeMapa(mando) {
         if (si && medir && medir.getAttribute("aria-pressed") === "true") {
             medir.click();
         }
+        alturaDelMenuDeMapa(mando);
     };
     boton.addEventListener("click", () => {
         abrir(panel.hidden);
@@ -1416,13 +1829,26 @@ function prepararRutaDeMapa(mando) {
             }
         });
     }
-    desde.addEventListener("change", pintar);
-    hasta.addEventListener("change", pintar);
+    [[desde, "desde"], [hasta, "hasta"]].forEach(([entrada, cual]) => {
+        entrada.addEventListener("input", () => {
+            leerBuscador(entrada, cual);
+            if (extremos[cual] || !entrada.value) {
+                pintar();
+            }
+        });
+        entrada.addEventListener("change", () => {
+            leerBuscador(entrada, cual);
+            pintar();
+        });
+    });
     alReves.addEventListener("click", () => {
+        [extremos.desde, extremos.hasta] = [extremos.hasta, extremos.desde];
         [desde.value, hasta.value] = [hasta.value, desde.value];
         pintar();
     });
     quitar.addEventListener("click", () => {
+        extremos.desde = null;
+        extremos.hasta = null;
         desde.value = "";
         hasta.value = "";
         pintar();
@@ -1430,30 +1856,42 @@ function prepararRutaDeMapa(mando) {
     });
     mando.caja.addEventListener("keydown", (evento) => {
         if (evento.key === "Escape" && !panel.hidden && panel.contains(document.activeElement)) {
+            evento.preventDefault();
             abrir(false);
             boton.focus();
         }
     });
-    // Con el panel abierto, pulsar un sitio del mapa lo elige (el primero,
+    // Con el panel abierto, pulsar en el mapa elige un extremo (el primero,
     // «desde»; el segundo, «hasta»; el tercero empieza otra) en vez de
-    // llevar a su página. En captura, antes que el enlace.
+    // llevar a la página del sitio. Un sitio de la red, ese; cualquier otro
+    // punto, el camino más cercano. En captura, antes que el enlace.
     mando.lienzo.addEventListener("click", (evento) => {
-        if (panel.hidden) {
+        // (Un clic que es el final de un arrastre ya lo ha marcado como
+        // usado prepararArrastreDeMapa: eso no elige nada.)
+        if (panel.hidden || evento.defaultPrevented) {
             return;
         }
         const sitio = evento.target.closest ? evento.target.closest("[data-mapa-sitio]") : null;
         const cual = sitio ? sitio.getAttribute("data-mapa-sitio") : "";
-        const i = red.sitios.findIndex((s) => s[2] === cual);
-        if (i < 0) {
+        const enLaRed = cual ? red.sitios.find((s) => s[2] === cual) : null;
+        let extremo = enLaRed ? deSitio(enLaRed) : null;
+        if (!extremo) {
+            const p = puntoDelMapaDeMapa(mando, evento);
+            extremo = p ? deUnPunto(p.x, p.y) : null;
+        }
+        if (!extremo) {
             return;
         }
         evento.preventDefault();
         evento.stopPropagation();
-        if (!desde.value || (desde.value && hasta.value)) {
-            desde.value = String(i);
+        if (!extremos.desde || extremos.hasta) {
+            extremos.desde = extremo;
+            extremos.hasta = null;
+            desde.value = extremo.nombre;
             hasta.value = "";
         } else {
-            hasta.value = String(i);
+            extremos.hasta = extremo;
+            hasta.value = extremo.nombre;
         }
         pintar();
     }, true);

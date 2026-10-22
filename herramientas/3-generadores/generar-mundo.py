@@ -990,7 +990,8 @@ def convertir_mapas(mapas, paginas, imagenes, avisos_por_pagina, detalle):
                                                    hecho.get("hay_escala", False),
                                                    bool(hecho.get("leyenda")),
                                                    hecho.get("hay_ruta", False),
-                                                   hecho.get("hay_rosa", False))
+                                                   hecho.get("hay_rosa", False),
+                                                   hecho.get("hay_zonas_regionales", False))
         mapa["puntos"] = hecho["puntos"]
         mapa["dibujo"] = hecho["dibujo"]
         mapa["escondidos"] = hecho["escondidos"]
