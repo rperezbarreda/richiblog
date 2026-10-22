@@ -2076,6 +2076,17 @@
       cuántos hay, y si quedan sitios «Puente» SIN NOMBRE puestos a mano
       encima de uno automático, un botón los quita todos de una vez
       (Ctrl+Z los devuelve). Los que tienen nombre o página se quedan.
+    - EL REPASO (pestaña «Repaso», desde el 22-10-2026): lo que se ha
+      quedado suelto, por grupos plegables. SITIOS SIN NOMBRE (menos los
+      «Puente»), TEXTOS VACÍOS, CAMINOS QUE CASI LLEGAN (una punta de
+      camino o sendero a poco de un sitio, o de otro camino, sin tocarlo;
+      lo que la web ya junta sola, a menos de 1/400 del lado largo del
+      mapa, no cuenta), REGIONES SIN PÁGINA (ni «Lleva a la página» ni se
+      llaman como una página de la wiki) y ENLACES A PÁGINAS QUE NO
+      EXISTEN. Cada aviso es un botón que te lleva a eso y lo elige; los
+      caminos que casi llegan tienen además «Llevarlo hasta…» o
+      «Juntarlo con…», que ponen la punta justo encima (Ctrl+Z lo
+      deshace). Se rehace solo mientras el panel está abierto.
     - EL IMÁN (casilla «Imán», encendida): lo que se pone a menos de 12
       píxeles de un sitio o de un punto se pone JUSTO ahí, y si no hay
       punto pero sí un borde, encima del borde. Así el camino llega a la

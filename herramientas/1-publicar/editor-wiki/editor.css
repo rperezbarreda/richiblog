@@ -862,6 +862,40 @@ body.en-mapa .saltar {
     overflow-y: auto;
 }
 
+/* EL REPASO: un grupo plegable por clase de aviso; cada aviso, un botón
+   que lleva a lo suyo (y a veces otro que lo arregla). */
+.mapa-repaso-grupo {
+    margin-top: 12px;
+}
+
+.mapa-repaso-grupo summary {
+    min-height: 44px;
+    padding-top: 10px;
+    color: var(--acento);
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.mapa-repaso-lista {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.mapa-repaso-lista li {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.mapa-repaso-ir {
+    flex: 1 1 100%;
+    text-align: left;
+}
+
 .mapa-panel-cabeza {
     display: flex;
     align-items: center;

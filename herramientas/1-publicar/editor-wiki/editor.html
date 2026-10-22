@@ -494,6 +494,7 @@
                     <button type="button" data-mapa-pestana="herramientas" aria-controls="mapa-panel-herramientas" aria-expanded="false">Herramientas</button>
                     <button type="button" data-mapa-pestana="elegido" aria-controls="mapa-panel-elegido" aria-expanded="false">Lo elegido</button>
                     <button type="button" data-mapa-pestana="cosas" aria-controls="mapa-panel-cosas" aria-expanded="false">Lo que hay</button>
+                    <button type="button" data-mapa-pestana="repaso" aria-controls="mapa-panel-repaso" aria-expanded="false">Repaso</button>
                     <button type="button" data-mapa-pestana="ajustes" aria-controls="mapa-panel-ajustes" aria-expanded="false">El mapa en sí</button>
                     <button type="button" data-mapa-pestana="teclas" aria-controls="mapa-panel-teclas" aria-expanded="false">Teclas y ratón</button>
                 </div>
@@ -783,6 +784,17 @@
                         <button type="button" class="mapa-panel-cerrar" data-mapa-cerrar="cosas" aria-label="Cerrar «Lo que hay en el mapa»" title="Cerrar (Esc)">×</button>
                     </div>
                     <div data-mapa-cosas></div>
+                </section>
+                <!-- EL REPASO: lo que se ha quedado suelto (mapas.js,
+                     repasoDelMapa). Cada aviso lleva a lo suyo, y algunos se
+                     arreglan con un botón. -->
+                <section class="mapa-panel" id="mapa-panel-repaso" data-mapa-panel="repaso" aria-labelledby="t-mapa-repaso" hidden>
+                    <div class="mapa-panel-cabeza">
+                        <h2 id="t-mapa-repaso">Repaso</h2>
+                        <button type="button" class="mapa-panel-cerrar" data-mapa-cerrar="repaso" aria-label="Cerrar «Repaso»" title="Cerrar (Esc)">×</button>
+                    </div>
+                    <p class="ayuda" data-mapa-repaso-resumen aria-live="polite"></p>
+                    <div data-mapa-repaso></div>
                 </section>
                 <section class="mapa-panel" id="mapa-panel-ajustes" data-mapa-panel="ajustes" aria-labelledby="t-mapa-ajustes" hidden>
                     <div class="mapa-panel-cabeza">

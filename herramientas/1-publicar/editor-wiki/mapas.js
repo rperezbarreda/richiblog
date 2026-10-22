@@ -1094,6 +1094,7 @@ function pintarCosasMapa() {
         d[lista].forEach((c, i) => capaMapa(CAPA_DE_LISTA[lista]).appendChild(dibujoDeCosa(lista, c, i)));
     });
     pintarPuentesMapa();
+    pedirRepasoMapa();
     pintarAsasMapa();
     escalarMarcasMapa();
     pintarListaDeCosas();
@@ -1110,6 +1111,7 @@ function repintarCosa(lista, i) {
     if (lista === "lines") {
         pedirPuentesMapa();
     }
+    pedirRepasoMapa();
     pintarAsasMapa();
     escalarMarcasMapa();
 }
@@ -1295,6 +1297,265 @@ function quitarPinesDePuente() {
     pintarPropiedadesMapa();
     avisarEditor("Quitados " + salen.length + (salen.length === 1 ? " sitio «Puente»." : " sitios «Puente».")
         + " Se guarda al guardar; Ctrl+Z los trae de vuelta.");
+}
+
+// ---- EL REPASO ----
+// Lo que se ha quedado suelto, en el panel «Repaso»: sitios y textos sin
+// nombre, caminos que acaban casi en un sitio o casi en otro camino (y no
+// se tocan: la ruta de la web no pasaría por ahí), regiones sin página y
+// enlaces a páginas que no existen. Cada aviso lleva a lo suyo (lo elige
+// y lo centra) y los caminos que casi llegan se arreglan con un botón.
+// Se rehace al abrir el panel y cada vez que cambia algo, si está abierto.
+const RAYAS_QUE_LLEGAN = ["camino", "sendero"];
+
+function paginasDeLaWiki() {
+    // (estadoEditor es de editor.js: un const, no cuelga de window)
+    const datos = typeof estadoEditor !== "undefined" && estadoEditor.datos;
+    const lista = (datos && datos.paginas) || [];
+    return new Set(lista.map((n) => String(n).trim().toLowerCase()));
+}
+
+// El punto más cercano a p de una raya: { x, y, distancia }.
+function puntoMasCercanoDeRaya(puntos, p) {
+    let mejor = null;
+    for (let i = 1; i < puntos.length; i++) {
+        const a = puntos[i - 1];
+        const b = puntos[i];
+        const dx = b.x - a.x;
+        const dy = b.y - a.y;
+        const largo = dx * dx + dy * dy;
+        const s = largo ? Math.max(0, Math.min(1, ((p.x - a.x) * dx + (p.y - a.y) * dy) / largo)) : 0;
+        const q = { x: a.x + dx * s, y: a.y + dy * s };
+        const distancia = Math.hypot(q.x - p.x, q.y - p.y);
+        if (!mejor || distancia < mejor.distancia) {
+            mejor = Object.assign(q, { distancia });
+        }
+    }
+    return mejor;
+}
+
+// «cerca de Pozovalor»: el sitio con nombre más cercano, para saber de
+// cuál se habla sin mirar el mapa.
+function cercaDeMapa(p) {
+    let mejor = null;
+    estadoMapa.datos.pins.forEach((s) => {
+        if (!(s.label || "").trim()) {
+            return;
+        }
+        const distancia = Math.hypot(s.x - p.x, s.y - p.y);
+        if (!mejor || distancia < mejor.distancia) {
+            mejor = { nombre: s.label.trim(), distancia };
+        }
+    });
+    return mejor ? "cerca de " + mejor.nombre : "";
+}
+
+function sitioDeAviso(lista, cosa) {
+    if (esMovible(lista)) {
+        return { x: cosa.x, y: cosa.y };
+    }
+    const puntos = cosa.points || [];
+    if (lista === "shapes" && puntos.length >= 3) {
+        return centroDeRegion(puntos);
+    }
+    return puntos[Math.floor(puntos.length / 2)] || { x: 0, y: 0 };
+}
+
+function repasoDelMapa() {
+    const d = estadoMapa.datos;
+    const paginas = paginasDeLaWiki();
+    const hayPaginas = paginas.size > 0;
+    const cerca = Math.max(d.width, d.height) / 60;
+    // Lo que la web ya cuenta como el mismo punto (junto en
+    // _red_de_caminos, mundo_mapas.py): tan cerca no se nota.
+    const tocan = Math.max(d.width, d.height) / 400;
+    const grupos = [];
+    const grupo = (titulo, ayuda) => {
+        const g = { titulo, ayuda, avisos: [] };
+        grupos.push(g);
+        return g;
+    };
+    const conNombre = (lista, cosa, i) => {
+        const { nombre, que } = nombreDeCosa(lista, cosa);
+        const donde = cercaDeMapa(sitioDeAviso(lista, cosa));
+        return { lista, i, texto: (nombre ? "«" + nombre + "», " + que : que[0].toUpperCase() + que.slice(1))
+            + (donde ? ", " + donde : "") };
+    };
+
+    const sinNombre = grupo("Sitios sin nombre", "No salen en la lista de la web ni en el globo al pasar por encima.");
+    d.pins.forEach((p, i) => {
+        if (!(p.label || "").trim() && !p.targetPage && p.kind !== "puente") {
+            sinNombre.avisos.push(conNombre("pins", p, i));
+        }
+    });
+    const textos = grupo("Textos vacíos", "Un texto sin letras no se ve: escríbelo o bórralo.");
+    d.labels.forEach((x, i) => {
+        if (!(x.label || "").trim()) {
+            textos.avisos.push(conNombre("labels", x, i));
+        }
+    });
+
+    const casi = grupo("Caminos que casi llegan", "Acaban muy cerca de un sitio o de otro camino pero sin tocarlo: la"
+        + " ruta de la web no pasaría por ahí. «Llevarlo» pone la punta justo encima.");
+    d.lines.forEach((l, i) => {
+        const puntos = l.points || [];
+        if (!RAYAS_QUE_LLEGAN.includes(l.kind || "camino") || puntos.length < 2) {
+            return;
+        }
+        [0, puntos.length - 1].forEach((n) => {
+            const punta = puntos[n];
+            // El camino más cercano a esa punta: si ya lo toca, está unido
+            // (un cruce) y no hay nada que avisar.
+            let otro = null;
+            d.lines.forEach((m, j) => {
+                if (j === i || !RAYAS_QUE_LLEGAN.includes(m.kind || "camino") || (m.points || []).length < 2) {
+                    return;
+                }
+                const q = puntoMasCercanoDeRaya(m.points, punta);
+                if (q && (!otro || q.distancia < otro.q.distancia)) {
+                    otro = { m, q };
+                }
+            });
+            if (otro && otro.q.distancia <= tocan) {
+                return;
+            }
+            // El sitio más cercano a esa punta.
+            let sitio = null;
+            // (Los sitios «Puente» no: ahora los puentes salen solos, y
+            // donde se juntan dos caminos se mira abajo, camino con camino.)
+            d.pins.forEach((s) => {
+                if (s.kind === "puente") {
+                    return;
+                }
+                const distancia = Math.hypot(s.x - punta.x, s.y - punta.y);
+                if (!sitio || distancia < sitio.distancia) {
+                    sitio = { s, distancia };
+                }
+            });
+            if (sitio && sitio.distancia <= tocan) {
+                return;
+            }
+            const { nombre, que } = nombreDeCosa("lines", l);
+            const cual = (nombre ? "«" + nombre + "», " + que : que[0].toUpperCase() + que.slice(1));
+            const extremo = n === 0 ? "empieza" : "acaba";
+            if (sitio && sitio.distancia <= cerca) {
+                const destino = (sitio.s.label || "").trim() || nombreDeCosa("pins", sitio.s).que;
+                casi.avisos.push({ lista: "lines", i, texto: cual + ": " + extremo + " a " + Math.round(sitio.distancia)
+                    + " px de " + destino + ", sin tocarlo.",
+                arreglo: { texto: "Llevarlo hasta " + destino, n, a: { x: sitio.s.x, y: sitio.s.y } } });
+                return;
+            }
+            if (otro && otro.q.distancia > tocan && otro.q.distancia <= cerca / 2) {
+                const deOtro = nombreDeCosa("lines", otro.m);
+                const aQuien = deOtro.nombre ? "«" + deOtro.nombre + "»" : "otro " + deOtro.que;
+                casi.avisos.push({ lista: "lines", i, texto: cual + (cercaDeMapa(punta) ? " (" + cercaDeMapa(punta) + ")" : "")
+                    + ": " + extremo + " a " + Math.round(otro.q.distancia) + " px de " + aQuien + ", sin juntarse.",
+                arreglo: { texto: "Juntarlo con " + aQuien, n, a: { x: redondoMapa(otro.q.x), y: redondoMapa(otro.q.y) } } });
+            }
+        });
+    });
+
+    const regiones = grupo("Regiones sin página", hayPaginas
+        ? "Ni llevan a una página («Lleva a la página») ni se llaman como ninguna de la wiki. Los bosques, lagos y"
+            + " demás zonas no siempre la necesitan." : "");
+    d.shapes.forEach((r, i) => {
+        if (r.targetPage) {
+            return;
+        }
+        const nombre = (r.label || "").trim();
+        if (!nombre || (hayPaginas && !paginas.has(nombre.toLowerCase()))) {
+            const aviso = conNombre("shapes", r, i);
+            if (nombre) {
+                aviso.texto += " (no hay ninguna página «" + nombre + "»)";
+            }
+            regiones.avisos.push(aviso);
+        }
+    });
+    const rotos = grupo("Enlaces a páginas que no existen", "Llevan a una página que todavía no está en la wiki: en la web"
+        + " salen como enlace pendiente. Escríbela o cambia «Lleva a la página».");
+    if (hayPaginas) {
+        ["pins", "lines", "shapes"].forEach((lista) => {
+            d[lista].forEach((c, i) => {
+                if (c.targetPage && !paginas.has(String(c.targetPage).trim().toLowerCase())) {
+                    const aviso = conNombre(lista, c, i);
+                    aviso.texto += " → «" + c.targetPage + "»";
+                    rotos.avisos.push(aviso);
+                }
+            });
+        });
+    }
+    return grupos.filter((g) => g.avisos.length);
+}
+
+function pintarRepasoMapa() {
+    estadoMapa.repasoPedido = false;
+    const caja = $("[data-mapa-repaso]");
+    if (!estadoMapa.datos || $("[data-mapa-panel=\"repaso\"]").hidden) {
+        return;
+    }
+    const grupos = repasoDelMapa();
+    const total = grupos.reduce((s, g) => s + g.avisos.length, 0);
+    $("[data-mapa-repaso-resumen]").textContent = total
+        ? (total === 1 ? "Hay 1 cosa suelta." : "Hay " + total + " cosas sueltas.") + " Pulsa una para ir a ella."
+        : "Nada suelto: todo tiene nombre, los caminos llegan y las regiones tienen página.";
+    // Lo que estaba plegado se queda plegado al rehacerlo.
+    const plegados = new Set([...caja.querySelectorAll("details:not([open])")].map((x) => x.getAttribute("data-grupo")));
+    caja.textContent = "";
+    grupos.forEach((g) => {
+        const det = document.createElement("details");
+        det.className = "mapa-repaso-grupo";
+        det.setAttribute("data-grupo", g.titulo);
+        det.open = !plegados.has(g.titulo);
+        const sum = document.createElement("summary");
+        sum.textContent = g.titulo + " (" + g.avisos.length + ")";
+        det.appendChild(sum);
+        if (g.ayuda) {
+            const ayuda = document.createElement("p");
+            ayuda.className = "ayuda";
+            ayuda.textContent = g.ayuda;
+            det.appendChild(ayuda);
+        }
+        const ul = document.createElement("ul");
+        ul.className = "mapa-repaso-lista";
+        g.avisos.forEach((a) => {
+            const li = document.createElement("li");
+            const ir = document.createElement("button");
+            ir.type = "button";
+            ir.className = "mapa-repaso-ir";
+            ir.textContent = a.texto;
+            ir.addEventListener("click", () => {
+                irACosa(a.lista, a.i);
+                elegirCosa(a.lista, a.i);
+            });
+            li.appendChild(ir);
+            if (a.arreglo) {
+                const arreglar = document.createElement("button");
+                arreglar.type = "button";
+                arreglar.textContent = a.arreglo.texto;
+                arreglar.addEventListener("click", () => {
+                    apuntarPaso();
+                    estadoMapa.datos.lines[a.i].points[a.arreglo.n] = { x: a.arreglo.a.x, y: a.arreglo.a.y };
+                    repintarCosa("lines", a.i);
+                    avisarEditor("Hecho: " + a.arreglo.texto.toLowerCase() + ". (Ctrl+Z lo deshace.)");
+                    pintarRepasoMapa();
+                    const primero = $("[data-mapa-repaso] button");
+                    (primero || $("[data-mapa-pestana=\"repaso\"]")).focus();
+                });
+                li.appendChild(arreglar);
+            }
+            ul.appendChild(li);
+        });
+        det.appendChild(ul);
+        caja.appendChild(det);
+    });
+}
+
+function pedirRepasoMapa() {
+    if (estadoMapa.repasoPedido || $("[data-mapa-panel=\"repaso\"]").hidden) {
+        return;
+    }
+    estadoMapa.repasoPedido = true;
+    setTimeout(pintarRepasoMapa, 300);
 }
 
 // Mientras se arrastra un punto, los puentes se rehacen una vez por
@@ -3930,6 +4191,9 @@ function abrirPanelMapa(clave, abrir, solo) {
     }
     panel.hidden = !abrir;
     pestana.setAttribute("aria-expanded", abrir ? "true" : "false");
+    if (abrir && clave === "repaso" && estadoMapa.datos) {
+        pintarRepasoMapa();
+    }
     // En una pantalla estrecha no caben dos: se abre uno y se cierran los
     // demás (sin olvidar cuáles se tenían abiertos en la grande).
     if (abrir && window.innerWidth < 768) {
