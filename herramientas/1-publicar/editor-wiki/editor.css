@@ -1741,6 +1741,23 @@ body.en-mapa .saltar {
     box-shadow: 0 4px 0 var(--fondo);
 }
 
+/* Lo que abren sus botones (enlace, imagen, tabla, el buscador de [[),
+   con la barra pegada: justo debajo de ella, también pegado, para no
+   tener que subir al principio del texto. Si no cabe, baja por dentro. */
+.redactor-botones.va-contigo + .redactor-panel {
+    position: fixed;
+    top: var(--contigo-alto, 50px);
+    left: var(--contigo-izq, 0);
+    z-index: 25;
+    width: var(--contigo-ancho, 100%);
+    max-height: calc(100vh - var(--contigo-alto, 50px) - 16px);
+    overflow-y: auto;
+    border: 2px solid var(--acento);
+    border-top: 0;
+    background: var(--caja);
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.45);
+}
+
 /* Encima de un recuadro de Markdown (la wiki, el texto de un evento):
    pegada a él, como la de las entradas a su texto. */
 .barra-markdown {

@@ -292,7 +292,7 @@ function crearRedactor(opciones) {
     fuente.spellcheck = false;
     fuente.setAttribute("aria-label", (o.etiqueta || "Texto") + ", en HTML");
     caja.appendChild(barra);
-    seguirConLaBarra(barra, caja, caja);
+    seguirConLaBarra(barra, caja);
     caja.appendChild(panel);
     caja.appendChild(area);
     caja.appendChild(fuente);
@@ -1073,7 +1073,7 @@ function crearBarraMarkdown(area, nombre, alCambiar) {
     // Al bajar por un texto largo, la barra va contigo (cuando ya esté en
     // la página: se espera a que se ponga encima del recuadro).
     requestAnimationFrame(() => {
-        seguirConLaBarra(barra, area, [area, barra]);
+        seguirConLaBarra(barra, area);
         if (area.parentNode) {
             area.after(cuenta.caja);
             cuenta.pintar();
@@ -1117,17 +1117,18 @@ function crearBarraMarkdown(area, nombre, alCambiar) {
 // =========================================
 // LA BARRA VA CONTIGO
 // =========================================
-// Escribiendo en un texto largo, al bajar, los botones se quedarían arriba,
-// fuera de la pantalla. Mientras el foco está en ese texto (o en sus
-// botones) y su barra se ha ido por arriba, la barra se queda pegada
-// arriba de la pantalla, del ancho del texto, hasta que el texto se acaba.
+// En un texto largo, al bajar, los botones se quedarían arriba, fuera de la
+// pantalla. En cuanto su barra se va por arriba y el texto sigue a la vista
+// (escribiendo en él o no: basta con bajar por la página), la barra se queda
+// pegada arriba de la pantalla, del ancho del texto, hasta que el texto se
+// acaba. Como los textos no se pisan, solo va contigo la del que tienes a
+// la altura de arriba de la pantalla.
 // Con position: fixed y JavaScript, no con sticky (que en el navegador de
 // Richi no va fino). En su sitio queda un hueco de su alto, para que el
 // texto no salte.
 //   barra   la barra de botones
 //   campo   hasta dónde llega (el redactor entero, o el <textarea>)
-//   foco    dónde tiene que estar el foco (un elemento o una lista)
-function seguirConLaBarra(barra, campo, foco) {
+function seguirConLaBarra(barra, campo) {
     if (barra.hueco) {
         return;
     }
@@ -1135,11 +1136,10 @@ function seguirConLaBarra(barra, campo, foco) {
     hueco.setAttribute("aria-hidden", "true");
     barra.before(hueco);
     barra.hueco = hueco;
-    BARRAS_QUE_SIGUEN.push({ barra, campo, foco: [].concat(foco) });
+    BARRAS_QUE_SIGUEN.push({ barra, campo });
 }
 
 function colocarBarrasRedactor() {
-    const activo = document.activeElement;
     // Las de lo que ya no está (otra página abierta), fuera de la lista.
     for (let i = BARRAS_QUE_SIGUEN.length - 1; i >= 0; i -= 1) {
         if (!BARRAS_QUE_SIGUEN[i].barra.isConnected && BARRAS_QUE_SIGUEN[i].campo.dataset.visto) {
@@ -1153,11 +1153,10 @@ function colocarBarrasRedactor() {
             return;
         }
         campo.dataset.visto = "1";
-        const conFoco = b.foco.some((f) => f && f.contains(activo));
         const arriba = hueco.getBoundingClientRect();
         const abajo = campo.getBoundingClientRect().bottom;
         const alto = barra.offsetHeight;
-        const pegar = conFoco && arriba.top < 0 && abajo > alto + 48;
+        const pegar = arriba.top < 0 && abajo > alto + 48;
         if (pegar) {
             if (!barra.classList.contains("va-contigo")) {
                 hueco.style.height = alto + "px";
@@ -1165,6 +1164,14 @@ function colocarBarrasRedactor() {
             }
             barra.style.left = arriba.left + "px";
             barra.style.width = arriba.width + "px";
+            // Lo que abren sus botones (enlace, imagen, tabla, el buscador
+            // de [[) sale justo debajo de ella, también pegado (en el CSS,
+            // .va-contigo + .redactor-panel): así abrirlo no te sube al
+            // principio del texto.
+            const caja = barra.parentNode;
+            caja.style.setProperty("--contigo-izq", arriba.left + "px");
+            caja.style.setProperty("--contigo-ancho", arriba.width + "px");
+            caja.style.setProperty("--contigo-alto", barra.offsetHeight + "px");
         } else if (barra.classList.contains("va-contigo")) {
             barra.classList.remove("va-contigo");
             barra.style.left = "";
@@ -1188,8 +1195,6 @@ function colocarBarrasRedactor() {
     };
     window.addEventListener("scroll", pedir, { passive: true });
     window.addEventListener("resize", pedir);
-    document.addEventListener("focusin", pedir);
-    document.addEventListener("focusout", () => setTimeout(pedir, 0));
     // Lo que se escribe hace crecer el texto: también cuenta.
     document.addEventListener("input", pedir);
 })();

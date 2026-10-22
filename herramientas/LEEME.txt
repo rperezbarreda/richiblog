@@ -64,10 +64,13 @@
       carpeta, en WebP), tablas y rayas. Al pasar por encima de un
       icono (o llegar con el tabulador) sale un globo grande con lo que
       hace; el lector de pantalla dice su nombre. El último (HTML)
-      enseña lo que hay debajo y deja tocarlo. LA BARRA VA CONTIGO: con
-      el cursor en un texto largo, al bajar, los botones se quedan
-      arriba de la pantalla hasta que el texto se acaba (en todos los
-      textos con botones, también los de la wiki). Lo que se pega de otro sitio llega limpio (sin colores
+      enseña lo que hay debajo y deja tocarlo. LA BARRA VA CONTIGO: al
+      bajar por un texto largo, los botones se quedan arriba de la
+      pantalla hasta que el texto se acaba, tengas el cursor en él o
+      no (desde el 22-10-2026; antes solo con el cursor dentro). Lo que
+      abren (enlace, imagen, tabla, el buscador de [[) sale pegado
+      debajo de ella, sin subirte al principio del texto. En todos los
+      textos con botones, también los de la wiki. Lo que se pega de otro sitio llega limpio (sin colores
       ni letras raras). Abajo, una barra fija: Guardar (Ctrl+S),
       Guardar y pasar a la web (rehace listados, RSS y buscador),
       Publicar / Volver a borrador (como publicar.py) y Ver cómo queda.
