@@ -727,14 +727,19 @@ textarea {
     margin-bottom: 24px;
 }
 
-/* UN MAPA, A PANTALLA COMPLETA. Arriba, la barra con el título, las
-   pestañas y el zoom (mide --alto-arriba); abajo, la de guardar (mide
-   --alto-barra; las dos las apunta mapas.js). El mapa ocupa todo lo de en
-   medio y los paneles flotan encima en dos columnas, la de la izquierda
-   (las herramientas) y la de la derecha (lo demás, uno debajo de otro).
-   Las columnas no se quedan con el ratón donde no hay panel. Todo fijo
-   (position: fixed, no sticky); la cabecera del editor no se ve. */
+/* UN MAPA, A PANTALLA COMPLETA, COMO UN MAPA DE LOS DE SIEMPRE (el de la
+   web, mundo-mapa.css). El mapa ocupa todo hasta la barra de guardar
+   (mide --alto-barra) y encima flotan: arriba, pastillas redondeadas con
+   sombra (volver y el título, una por panel, deshacer; lo que miden, en
+   --alto-arriba; las dos las apunta mapas.js); abajo a la derecha, el zoom
+   en botones redondos; y los paneles, tarjetas en dos columnas (la de la
+   izquierda, las herramientas; la de la derecha, lo demás, dejando sitio
+   al zoom) que se pueden sacar y dejar donde se quiera (es-suelto). Las
+   columnas y los huecos entre pastillas no se quedan con el ratón. Todo
+   fijo (position: fixed, no sticky); la cabecera del editor no se ve. */
 body.en-mapa {
+    --mapa-ui-borde: rgba(127, 127, 127, 0.38);
+    --mapa-ui-sombra: 0 2px 6px rgba(0, 0, 0, 0.32), 0 1px 2px rgba(0, 0, 0, 0.24);
     overflow: hidden;
 }
 
@@ -748,30 +753,42 @@ body.en-mapa .saltar {
     top: 0;
     left: 0;
     right: 0;
-    z-index: 7;
+    z-index: 8;
     display: flex;
     flex-wrap: wrap;
     align-items: center;
-    gap: 6px 12px;
-    padding: 6px 10px;
-    border-bottom: 2px solid var(--acento);
-    background: var(--fondo);
+    gap: 8px;
+    padding: 10px 10px 4px;
+    pointer-events: none;
+}
+
+.mapa-arriba-titulo,
+.mapa-arriba button {
+    pointer-events: auto;
+}
+
+/* Volver y el título, en una sola pastilla (como el buscador). */
+.mapa-arriba-titulo {
+    display: flex;
+    flex: 0 1 auto;
+    align-items: center;
+    gap: 6px;
+    min-width: 0;
+    max-width: min(30rem, 100%);
+    padding: 3px 18px 3px 3px;
+    border: 1px solid var(--mapa-ui-borde);
+    border-radius: 26px;
+    background: var(--caja);
+    box-shadow: var(--mapa-ui-sombra);
 }
 
 .mapa-arriba h1 {
-    flex: 1 1 8rem;
     min-width: 0;
     margin: 0;
     overflow: hidden;
-    font-size: 1.25rem;
+    font-size: 1.15rem;
     white-space: nowrap;
     text-overflow: ellipsis;
-}
-
-.mapa-arriba button {
-    min-height: 42px;
-    padding: 4px 10px;
-    font-size: 0.95rem;
 }
 
 .mapa-pestanas,
@@ -779,27 +796,101 @@ body.en-mapa .saltar {
     display: flex;
     flex-wrap: wrap;
     align-items: center;
-    gap: 6px;
+    gap: 8px;
 }
 
+.mapa-arriba-mandos {
+    margin-left: auto;
+}
+
+/* LAS PASTILLAS Y LOS BOTONES REDONDOS: 44px, lo que mide un dedo. */
+.mapa-arriba button,
+.mapa-zoom-pila button,
+.mapa-cuanto {
+    box-sizing: border-box;
+    min-height: 44px;
+    border: 1px solid var(--mapa-ui-borde);
+    background: var(--caja);
+    color: var(--texto);
+    font-size: 0.95rem;
+    font-weight: 600;
+    line-height: 1;
+    box-shadow: var(--mapa-ui-sombra);
+}
+
+.mapa-arriba button {
+    gap: 6px;
+    padding: 0 16px 0 12px;
+    border-radius: 22px;
+}
+
+.mapa-arriba-titulo button {
+    flex: none;
+    border-color: transparent;
+    box-shadow: none;
+}
+
+.mapa-arriba-mandos button,
+.mapa-zoom-pila button {
+    width: 44px;
+    padding: 0;
+    border-radius: 50%;
+    font-size: 1.25rem;
+}
+
+.mapa-arriba button:hover,
+.mapa-zoom-pila button:hover,
 .mapa-pestanas button[aria-expanded="true"] {
     border-color: var(--acento);
     background: var(--acento);
     color: var(--sobre-acento);
 }
 
-.mapa-arriba-mandos button {
-    min-width: 42px;
-    font-size: 1.15rem;
+.mapa-arriba button:disabled {
+    opacity: 0.5;
+    cursor: default;
 }
 
-.mapa-arriba-mandos [data-mapa-ajustar] {
-    font-size: 0.95rem;
+.mapa-arriba button:disabled:hover {
+    border-color: var(--mapa-ui-borde);
+    background: var(--caja);
+    color: var(--texto);
+}
+
+.mapa-icono {
+    display: inline-block;
+    min-width: 1.1em;
+    font-size: 1.15em;
+    line-height: 1;
+    text-align: center;
+}
+
+/* ABAJO A LA DERECHA: el zoom, en columna. */
+.mapa-zoom-pila {
+    position: fixed;
+    right: 12px;
+    bottom: calc(var(--alto-barra, 80px) + 14px);
+    z-index: 5;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+}
+
+.mapa-cuanto {
+    display: flex;
+    justify-content: center;
+    justify-content: center;
+    align-items: center;
+    min-height: 0;
+    padding: 4px 8px;
+    border-radius: 10px;
+    font-size: 0.8rem;
 }
 
 .mapa-lienzo {
     position: fixed;
-    top: var(--alto-arriba, 64px);
+    top: 0;
     left: 0;
     right: 0;
     bottom: var(--alto-barra, 80px);
@@ -826,39 +917,70 @@ body.en-mapa .saltar {
 
 .mapa-columna {
     position: fixed;
-    top: calc(var(--alto-arriba, 64px) + 10px);
+    top: var(--alto-arriba, 64px);
     bottom: calc(var(--alto-barra, 80px) + 10px);
     z-index: 6;
     display: flex;
     flex-direction: column;
     gap: 10px;
-    width: min(21rem, calc(100vw - 20px));
+    width: min(21rem, calc(100vw - 88px));
     overflow-y: auto;
     pointer-events: none;
 }
 
+/* La del último panel que se ha tocado, por encima de la otra. */
+.mapa-columna.es-delante {
+    z-index: 7;
+}
+
 .mapa-columna.es-izquierda {
     left: 10px;
-    width: min(16rem, calc(100vw - 20px));
+    width: min(16rem, calc(100vw - 88px));
 }
 
 .mapa-columna.es-derecha {
-    right: 10px;
+    right: 68px;
 }
 
+/* LOS PANELES: tarjetas redondeadas; con la columna llena, cada uno con su
+   propia barra para bajar (la de su cuerpo: la cabecera se queda). */
 .mapa-panel {
-    flex: none;
-    padding: 4px 14px 14px;
-    border: 2px solid var(--acento);
+    display: flex;
+    flex: 0 1 auto;
+    flex-direction: column;
+    box-sizing: border-box;
+    min-height: 8rem;
+    overflow: hidden;
+    border: 1px solid var(--mapa-ui-borde);
+    border-radius: 14px;
     background: var(--caja);
-    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.45);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.42);
     pointer-events: auto;
 }
 
-/* Con la columna llena, cada panel con su propia barra para bajar. */
-.mapa-columna.es-derecha .mapa-panel {
-    flex: 0 1 auto;
-    min-height: 8rem;
+.mapa-panel[hidden] {
+    display: none;
+}
+
+/* Uno sacado de su columna: donde se haya dejado (left y top los pone
+   mapas.js, y el alto hasta la barra de abajo). */
+.mapa-panel.es-suelto {
+    position: fixed;
+    width: min(21rem, calc(100vw - 20px));
+}
+
+.mapa-paleta.es-suelto {
+    width: min(16rem, calc(100vw - 20px));
+}
+
+.mapa-panel.se-esta-moviendo {
+    opacity: 0.94;
+}
+
+.mapa-panel-cuerpo {
+    flex: 1 1 auto;
+    min-height: 0;
+    padding: 8px 14px 14px;
     overflow-y: auto;
 }
 
@@ -898,24 +1020,74 @@ body.en-mapa .saltar {
 
 .mapa-panel-cabeza {
     display: flex;
+    flex: none;
     align-items: center;
-    justify-content: space-between;
-    gap: 8px;
-    margin-bottom: 6px;
+    gap: 4px;
+    padding: 4px 4px 4px 2px;
+    border-bottom: 1px solid var(--mapa-ui-borde);
+    cursor: grab;
+    touch-action: none;
+}
+
+.mapa-panel.se-esta-moviendo .mapa-panel-cabeza {
+    cursor: grabbing;
 }
 
 .mapa-panel-cabeza h2 {
+    flex: 1 1 auto;
+    min-width: 0;
     margin: 0;
     font-size: 1.05rem;
 }
 
+.mapa-panel-asa,
 .mapa-panel-cerrar {
     flex: none;
     min-width: 44px;
     min-height: 44px;
     padding: 0;
-    font-size: 1.5rem;
+    border-color: transparent;
+    border-radius: 50%;
+    background: transparent;
+    color: var(--texto);
     line-height: 1;
+}
+
+.mapa-panel-asa {
+    min-width: 36px;
+    font-size: 1.3rem;
+    cursor: grab;
+}
+
+.mapa-panel-cerrar {
+    font-size: 1.5rem;
+}
+
+/* En una pantalla estrecha los paneles no se mueven (van en su columna), y
+   las pestañas van en una sola fila que se desplaza de lado (junto a
+   deshacer y rehacer), para que no se coman medio mapa. */
+@media (max-width: 47.99rem) {
+    .mapa-pestanas {
+        flex: 1 1 0;
+        flex-wrap: nowrap;
+        min-width: 0;
+        padding: 2px 2px 8px;
+        overflow-x: auto;
+        pointer-events: auto;
+    }
+
+    .mapa-pestanas button {
+        flex: none;
+    }
+
+    .mapa-panel-asa {
+        display: none;
+    }
+
+    .mapa-panel-cabeza {
+        padding-left: 10px;
+        cursor: default;
+    }
 }
 
 .mapa-panel h3 {

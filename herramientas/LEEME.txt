@@ -2103,6 +2103,24 @@
       (position: fixed, nada de sticky); mapas.js apunta lo que miden las
       barras en --alto-arriba y --alto-barra. Al cambiar de herramienta,
       un dibujo a medias con puntos de sobra se termina en vez de perderse.
+    - COMO UN MAPA DE LOS DE SIEMPRE, IGUAL QUE EL DE LA WEB (desde el
+      22-10-2026): el mapa llega hasta arriba y la barra de arriba son
+      PASTILLAS que flotan encima (volver y el título en una; una por
+      panel, con su icono; deshacer y rehacer redondos). El ZOOM va abajo
+      a la derecha en botones redondos (⤢ es «Verlo entero», +, la cifra
+      y −); la columna de la derecha deja ese carril libre. Los PANELES
+      son tarjetas redondeadas con sombra; la cabecera (asa ⠿, título, ×)
+      se queda quieta y lo de dentro baja con su propia barra. SE MUEVEN
+      a donde quieras: arrastrando la cabecera, o desde el asa con las
+      flechas (Mayús: más deprisa). Uno movido sale de su columna
+      (es-suelto, position: fixed) y se recuerda dónde
+      (localStorage «mapa-paneles-sitios»); el último que tocas queda
+      delante. Inicio en el asa, o dos clics en la cabecera, lo devuelven
+      a su columna, y la pastilla «⇱ Paneles a su sitio» (sale solo si
+      hay alguno movido) los devuelve todos. «Verlo entero» no cuenta los
+      sueltos ni lo que tapan las pastillas de arriba. En pantallas
+      estrechas no se mueven y las pestañas van en una fila que se
+      desplaza de lado.
     - MOVERSE POR EL MAPA: la rueda acerca y aleja; se arrastra con «Elegir
       y mover» en un hueco o, CON CUALQUIER HERRAMIENTA, con el BOTÓN DE EN
       MEDIO. Eso va aparte de lo que estés haciendo: a mitad de un dibujo

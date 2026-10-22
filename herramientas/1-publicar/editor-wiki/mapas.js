@@ -887,7 +887,7 @@ function huecoLibreMapa() {
     let izquierda = 0;
     let derecha = 0;
     document.querySelectorAll(".mapa-columna").forEach((c) => {
-        if (!c.querySelector(".mapa-panel:not([hidden])")) {
+        if (!c.querySelector(".mapa-panel:not([hidden]):not(.es-suelto)")) {
             return;
         }
         const rc = c.getBoundingClientRect();
@@ -901,7 +901,13 @@ function huecoLibreMapa() {
         izquierda = 0;
         derecha = 0;
     }
-    return { izquierda, derecha, ancho: r.width, alto: r.height };
+    // Las pastillas de arriba flotan encima del mapa: lo de debajo no cuenta.
+    const pastillas = $("[data-mapa-arriba]").getBoundingClientRect();
+    let arriba = Math.max(0, pastillas.bottom - r.top);
+    if (r.height - arriba < r.height * 0.5) {
+        arriba = 0;
+    }
+    return { izquierda, derecha, arriba, ancho: r.width, alto: r.height };
 }
 
 function ajustarMapa() {
@@ -912,11 +918,12 @@ function ajustarMapa() {
     }
     const libre = Math.max(hueco.ancho - hueco.izquierda - hueco.derecha - 24, 40);
     // Píxeles de pantalla por píxel del mapa.
-    const k = Math.min(libre / d.width, Math.max(hueco.alto - 24, 40) / d.height);
+    const k = Math.min(libre / d.width, Math.max(hueco.alto - hueco.arriba - 24, 40) / d.height);
     const w = hueco.ancho / k;
     const h = hueco.alto / k;
     const centro = hueco.izquierda + (hueco.ancho - hueco.izquierda - hueco.derecha) / 2;
-    ponerVistaMapa({ x: d.width / 2 - centro / k, y: d.height / 2 - h / 2, w, h });
+    const centroY = hueco.arriba + (hueco.alto - hueco.arriba) / 2;
+    ponerVistaMapa({ x: d.width / 2 - centro / k, y: d.height / 2 - centroY / k, w, h });
 }
 
 function acercarMapa(factor, hacia) {
@@ -4654,6 +4661,9 @@ function abrirPanelMapa(clave, abrir, solo) {
     }
     panel.hidden = !abrir;
     pestana.setAttribute("aria-expanded", abrir ? "true" : "false");
+    if (abrir) {
+        colocarPanelMapa(panel);
+    }
     if (abrir && clave === "repaso" && estadoMapa.datos) {
         pintarRepasoMapa();
     }
@@ -4681,7 +4691,193 @@ function abrirPanelMapa(clave, abrir, solo) {
     }
 }
 
+// MOVER LOS PANELES, como en el mapa de la web: se arrastran por la
+// cabecera (con el ratón o el dedo) o, desde su asa (⠿), con las flechas
+// (Mayús: más deprisa). Uno movido se queda «suelto» (es-suelto: fixed, en
+// su sitio, fuera de la columna) y se recuerda dónde; Inicio en el asa o dos
+// clics en la cabecera lo devuelven a su columna, y «Paneles a su sitio»
+// todos. En una pantalla estrecha no se mueven: van en su columna.
+const MEMORIA_DE_SITIOS_DE_PANELES = "mapa-paneles-sitios";
+let sitiosDePaneles = {};
+try {
+    const guardados = JSON.parse(window.localStorage.getItem(MEMORIA_DE_SITIOS_DE_PANELES) || "null");
+    if (guardados && typeof guardados === "object") {
+        sitiosDePaneles = guardados;
+    }
+} catch (error) {
+    // Sin almacenamiento: todos en su columna.
+}
+let panelesDelante = 1;
+
+function pantallaEstrechaMapa() {
+    return window.innerWidth < 768;
+}
+
+function apuntarSitiosDePaneles() {
+    try {
+        window.localStorage.setItem(MEMORIA_DE_SITIOS_DE_PANELES, JSON.stringify(sitiosDePaneles));
+    } catch (error) {
+        // Se recuerda mientras esté abierta la página.
+    }
+    const boton = $("[data-mapa-recolocar]");
+    if (boton) {
+        boton.hidden = !Object.keys(sitiosDePaneles).length;
+    }
+}
+
+// Lo de arriba y abajo que no se debe tapar: la cabecera de un panel no
+// sube de las pastillas ni baja tanto que no se pueda volver a coger.
+function limitesDePanelesMapa() {
+    const arriba = $("[data-mapa-arriba]").getBoundingClientRect().bottom;
+    const barra = $("[data-barra-mapa]");
+    const abajo = barra && !barra.hidden ? barra.getBoundingClientRect().top : window.innerHeight;
+    return { arriba, abajo };
+}
+
+function ponerPanelSueltoMapa(panel, x, y) {
+    const limites = limitesDePanelesMapa();
+    const nx = Math.min(Math.max(6, x), Math.max(6, window.innerWidth - panel.offsetWidth - 6));
+    const ny = Math.min(Math.max(limites.arriba + 6, y), Math.max(limites.arriba + 6, limites.abajo - 70));
+    panel.style.left = Math.round(nx) + "px";
+    panel.style.top = Math.round(ny) + "px";
+    panel.style.maxHeight = Math.max(120, limites.abajo - ny - 10) + "px";
+    return { x: Math.round(nx), y: Math.round(ny) };
+}
+
+function traerDelanteMapa(panel) {
+    document.querySelectorAll(".mapa-columna").forEach((c) => c.classList.toggle("es-delante", c.contains(panel)));
+    panelesDelante += 1;
+    panel.style.zIndex = String(panelesDelante);
+}
+
+function colocarPanelMapa(panel) {
+    const sitio = sitiosDePaneles[panel.getAttribute("data-mapa-panel")];
+    if (!sitio || pantallaEstrechaMapa() || !Number.isFinite(sitio.x) || !Number.isFinite(sitio.y)) {
+        panel.classList.remove("es-suelto");
+        panel.style.left = "";
+        panel.style.top = "";
+        panel.style.maxHeight = "";
+        return;
+    }
+    panel.classList.add("es-suelto");
+    if (!panel.hidden) {
+        ponerPanelSueltoMapa(panel, sitio.x, sitio.y);
+    }
+}
+
+function devolverPanelMapa(panel) {
+    delete sitiosDePaneles[panel.getAttribute("data-mapa-panel")];
+    apuntarSitiosDePaneles();
+    colocarPanelMapa(panel);
+}
+
+function hacerPanelMovibleMapa(panel) {
+    const clave = panel.getAttribute("data-mapa-panel");
+    const cabeza = panel.querySelector(".mapa-panel-cabeza");
+    const titulo = cabeza.querySelector("h2").textContent.trim();
+    const asa = document.createElement("button");
+    asa.type = "button";
+    asa.className = "mapa-panel-asa";
+    asa.setAttribute("aria-label", "Mover el panel «" + titulo + "» (arrástralo, o con las flechas; Inicio lo devuelve a su sitio)");
+    asa.title = "Arrastra para moverlo (dos clics: a su sitio)";
+    asa.textContent = "⠿";
+    cabeza.insertBefore(asa, cabeza.firstChild);
+    // Lo de dentro, en su propia caja que se desplaza: la cabecera (para
+    // moverlo y cerrarlo) se queda siempre a la vista.
+    const cuerpo = document.createElement("div");
+    cuerpo.className = "mapa-panel-cuerpo";
+    [...panel.childNodes].filter((hijo) => hijo !== cabeza).forEach((hijo) => cuerpo.appendChild(hijo));
+    panel.appendChild(cuerpo);
+
+    const mover = (x, y) => {
+        if (!panel.classList.contains("es-suelto")) {
+            // Sale de la columna justo donde estaba (x, y: su esquina).
+            panel.classList.add("es-suelto");
+        }
+        sitiosDePaneles[clave] = ponerPanelSueltoMapa(panel, x, y);
+    };
+    let arrastre = null;
+    cabeza.addEventListener("pointerdown", (evento) => {
+        traerDelanteMapa(panel);
+        if (evento.button !== 0 || evento.target.closest(".mapa-panel-cerrar") || pantallaEstrechaMapa()) {
+            return;
+        }
+        const r = panel.getBoundingClientRect();
+        arrastre = { id: evento.pointerId, x: evento.clientX, y: evento.clientY, desdeX: r.left, desdeY: r.top, movido: false };
+        try {
+            cabeza.setPointerCapture(evento.pointerId);
+        } catch (error) {
+            // Sin captura se arrastra igual mientras el puntero esté encima.
+        }
+        evento.preventDefault();
+    });
+    cabeza.addEventListener("pointermove", (evento) => {
+        if (!arrastre || evento.pointerId !== arrastre.id) {
+            return;
+        }
+        const dx = evento.clientX - arrastre.x;
+        const dy = evento.clientY - arrastre.y;
+        // Un clic que tiembla un poco no lo saca de su columna.
+        if (!arrastre.movido && Math.abs(dx) + Math.abs(dy) < 4) {
+            return;
+        }
+        arrastre.movido = true;
+        panel.classList.add("se-esta-moviendo");
+        mover(arrastre.desdeX + dx, arrastre.desdeY + dy);
+    });
+    const soltar = () => {
+        if (!arrastre) {
+            return;
+        }
+        if (arrastre.movido) {
+            apuntarSitiosDePaneles();
+        }
+        arrastre = null;
+        panel.classList.remove("se-esta-moviendo");
+    };
+    cabeza.addEventListener("pointerup", soltar);
+    cabeza.addEventListener("pointercancel", soltar);
+    cabeza.addEventListener("dblclick", (evento) => {
+        if (!evento.target.closest(".mapa-panel-cerrar")) {
+            devolverPanelMapa(panel);
+        }
+    });
+    asa.addEventListener("keydown", (evento) => {
+        if (pantallaEstrechaMapa()) {
+            return;
+        }
+        if (evento.key === "Home") {
+            evento.preventDefault();
+            devolverPanelMapa(panel);
+            asa.focus();
+            return;
+        }
+        const flechas = { ArrowLeft: [-1, 0], ArrowRight: [1, 0], ArrowUp: [0, -1], ArrowDown: [0, 1] };
+        if (!flechas[evento.key]) {
+            return;
+        }
+        evento.preventDefault();
+        evento.stopPropagation();
+        traerDelanteMapa(panel);
+        const paso = evento.shiftKey ? 60 : 20;
+        const r = panel.getBoundingClientRect();
+        mover(r.left + flechas[evento.key][0] * paso, r.top + flechas[evento.key][1] * paso);
+        apuntarSitiosDePaneles();
+    });
+}
+
 function empezarPanelesMapa() {
+    document.querySelectorAll("[data-mapa-panel]").forEach(hacerPanelMovibleMapa);
+    apuntarSitiosDePaneles();
+    $("[data-mapa-recolocar]").addEventListener("click", () => {
+        sitiosDePaneles = {};
+        apuntarSitiosDePaneles();
+        document.querySelectorAll("[data-mapa-panel]").forEach(colocarPanelMapa);
+        $("[data-mapa-pestana=\"herramientas\"]").focus();
+    });
+    // Al cambiar el tamaño de la ventana, los sueltos se quedan dentro (o
+    // vuelven a su columna si la pantalla se ha quedado estrecha).
+    window.addEventListener("resize", () => document.querySelectorAll("[data-mapa-panel]").forEach(colocarPanelMapa));
     document.querySelectorAll("[data-mapa-pestana]").forEach((b) => {
         const clave = b.getAttribute("data-mapa-pestana");
         abrirPanelMapa(clave, !!panelesAbiertos[clave] && (window.innerWidth >= 768 || clave === "herramientas"), true);

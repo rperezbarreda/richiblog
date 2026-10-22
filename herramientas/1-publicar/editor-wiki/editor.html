@@ -490,36 +490,44 @@
             </form>
         </section>
 
-        <!-- UN MAPA. A pantalla completa: arriba una barra con el título, las
-             pestañas de los paneles y el zoom; el mapa ocupa todo lo demás
-             hasta la barra de abajo, y los paneles flotan encima, a la
-             izquierda (las herramientas) y a la derecha (lo elegido, lo que
-             hay, el mapa en sí y las teclas). Cada pestaña abre y cierra el
-             suyo, y se recuerda cuáles estaban abiertos. Todo fijo
-             (position: fixed); mapas.js apunta lo que miden las dos barras en
-             --alto-arriba y --alto-barra. -->
+        <!-- UN MAPA. A pantalla completa, como un mapa de los de siempre: el
+             mapa ocupa todo hasta la barra de abajo y encima flotan, arriba,
+             unas pastillas (volver, el título, una por panel y deshacer) y,
+             abajo a la derecha, el zoom en botones redondos. Los paneles
+             salen en dos columnas, a la izquierda (las herramientas) y a la
+             derecha (lo demás), y se pueden llevar a donde se quiera
+             arrastrando su cabecera (o con las flechas desde su asa, ⠿); se
+             recuerda dónde, y «Paneles a su sitio» los devuelve. Cada pestaña
+             abre y cierra el suyo y se recuerda cuáles estaban abiertos. Todo
+             fijo (position: fixed); mapas.js apunta lo que miden las dos
+             barras en --alto-arriba y --alto-barra. -->
         <section class="vista" data-vista="mapa" aria-labelledby="t-mapa" hidden>
             <div class="mapa-arriba" data-mapa-arriba>
-                <button type="button" data-ir="mapas">← Los mapas</button>
-                <h1 id="t-mapa" data-mapa-titulo></h1>
-                <div class="mapa-pestanas" role="group" aria-label="Paneles">
-                    <button type="button" data-mapa-pestana="herramientas" aria-controls="mapa-panel-herramientas" aria-expanded="false">Herramientas</button>
-                    <button type="button" data-mapa-pestana="elegido" aria-controls="mapa-panel-elegido" aria-expanded="false">Lo elegido</button>
-                    <button type="button" data-mapa-pestana="cosas" aria-controls="mapa-panel-cosas" aria-expanded="false">Lo que hay</button>
-                    <button type="button" data-mapa-pestana="repaso" aria-controls="mapa-panel-repaso" aria-expanded="false">Repaso</button>
-                    <button type="button" data-mapa-pestana="ajustes" aria-controls="mapa-panel-ajustes" aria-expanded="false">El mapa en sí</button>
-                    <button type="button" data-mapa-pestana="teclas" aria-controls="mapa-panel-teclas" aria-expanded="false">Teclas y ratón</button>
+                <div class="mapa-arriba-titulo">
+                    <button type="button" data-ir="mapas">← Los mapas</button>
+                    <h1 id="t-mapa" data-mapa-titulo></h1>
                 </div>
-                <div class="mapa-arriba-mandos" role="group" aria-label="Deshacer y zoom">
+                <div class="mapa-pestanas" role="group" aria-label="Paneles">
+                    <button type="button" data-mapa-pestana="herramientas" aria-controls="mapa-panel-herramientas" aria-expanded="false"><span class="mapa-icono" aria-hidden="true">✎</span>Herramientas</button>
+                    <button type="button" data-mapa-pestana="elegido" aria-controls="mapa-panel-elegido" aria-expanded="false"><span class="mapa-icono" aria-hidden="true">◎</span>Lo elegido</button>
+                    <button type="button" data-mapa-pestana="cosas" aria-controls="mapa-panel-cosas" aria-expanded="false"><span class="mapa-icono" aria-hidden="true">☰</span>Lo que hay</button>
+                    <button type="button" data-mapa-pestana="repaso" aria-controls="mapa-panel-repaso" aria-expanded="false"><span class="mapa-icono" aria-hidden="true">✓</span>Repaso</button>
+                    <button type="button" data-mapa-pestana="ajustes" aria-controls="mapa-panel-ajustes" aria-expanded="false"><span class="mapa-icono" aria-hidden="true">⚙</span>El mapa en sí</button>
+                    <button type="button" data-mapa-pestana="teclas" aria-controls="mapa-panel-teclas" aria-expanded="false"><span class="mapa-icono" aria-hidden="true">⌨</span>Teclas y ratón</button>
+                    <button type="button" data-mapa-recolocar hidden><span class="mapa-icono" aria-hidden="true">⇱</span>Paneles a su sitio</button>
+                </div>
+                <div class="mapa-arriba-mandos" role="group" aria-label="Deshacer y rehacer">
                     <button type="button" data-mapa-deshacer disabled aria-label="Deshacer (Ctrl+Z)"
                             title="Deshacer (Ctrl+Z)">↶</button>
                     <button type="button" data-mapa-rehacer disabled aria-label="Rehacer (Ctrl+Y)"
                             title="Rehacer (Ctrl+Y)">↷</button>
-                    <button type="button" data-mapa-zoom="-1" aria-label="Alejar" title="Alejar">−</button>
-                    <span class="mapa-cuanto" data-mapa-cuanto>100%</span>
-                    <button type="button" data-mapa-zoom="1" aria-label="Acercar" title="Acercar">+</button>
-                    <button type="button" data-mapa-ajustar>Verlo entero</button>
                 </div>
+            </div>
+            <div class="mapa-zoom-pila" role="group" aria-label="Zoom">
+                <button type="button" data-mapa-ajustar aria-label="Verlo entero" title="Verlo entero">⤢</button>
+                <button type="button" data-mapa-zoom="1" aria-label="Acercar" title="Acercar">+</button>
+                <span class="mapa-cuanto" data-mapa-cuanto>100%</span>
+                <button type="button" data-mapa-zoom="-1" aria-label="Alejar" title="Alejar">−</button>
             </div>
             <div class="mapa-lienzo" data-mapa-lienzo tabindex="0" role="application"
                  aria-roledescription="lienzo del mapa" aria-describedby="mapa-instrucciones mapa-teclas">
@@ -952,7 +960,10 @@
                             dibujo, Esc lo cancela, Supr borra lo elegido y Ctrl+Z lo deshace.</p>
                         <p>Con Mayús se eligen varias cosas (pulsando, o arrastrando un recuadro en un hueco); Ctrl+C,
                             Ctrl+V y Ctrl+D copian, pegan y duplican lo elegido.</p>
-                        <p>Los paneles se abren y se cierran con las pestañas de arriba; Esc dentro de uno lo cierra.</p>
+                        <p>Los paneles se abren y se cierran con las pestañas de arriba; Esc dentro de uno lo cierra.
+                            Para llevarlos a otro sitio, arrastra su cabecera, o ponte en su asa (⠿) y usa las
+                            flechas (con Mayús, más deprisa); Inicio en el asa, o dos clics en la cabecera, lo
+                            devuelven a su columna, y «Paneles a su sitio», arriba, los devuelve todos.</p>
                     </div>
                 </section>
             </div>
