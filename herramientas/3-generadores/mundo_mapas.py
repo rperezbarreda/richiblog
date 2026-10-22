@@ -720,6 +720,132 @@ def _flechas(puntos, radio, color):
 
 
 # =========================================
+# LOS PUENTES
+# =========================================
+# Donde un camino o un sendero cruza un río va un puente, solo: no está en
+# el .cmap, se calcula al pintar (la misma cuenta que el editor de mapas,
+# puentesDelMapa en mapas.js). Cuenta como cruce el que pasa de un lado al
+# otro del río; un camino que acaba en la orilla, o que la toca y vuelve,
+# no lleva puente, y dos cruces muy juntos del mismo camino son uno.
+RAYAS_CON_PUENTE = ("camino", "sendero")
+COLOR_DE_CAMINO = {"camino": "#f0dfb4", "sendero": "#e2cf9f"}
+
+
+def _caja(puntos):
+    xs = [p[0] for p in puntos]
+    ys = [p[1] for p in puntos]
+    return min(xs), min(ys), max(xs), max(ys)
+
+
+def _se_tocan(a, b):
+    return a[0] <= b[2] and b[0] <= a[2] and a[1] <= b[3] and b[1] <= a[3]
+
+
+def _lado(c, d, p):
+    """De qué lado de la raya c→d cae p (lo que cae encima, del de +)."""
+    return 1 if (d[0] - c[0]) * (p[1] - c[1]) - (d[1] - c[1]) * (p[0] - c[0]) >= 0 else -1
+
+
+def _ancho_del_rio(rio, en_el_rio):
+    """Lo que mide el río en pantalla en ese punto (0 el nacimiento, 1 la
+    desembocadura), como lo pinta _rio_que_se_ensancha."""
+    if rio["ensancha"] and not (rio["trazo"] and rio["trazo"] != "solid"):
+        k = min(7, int(en_el_rio * 8))
+        return rio["ancho"] * (0.45 + 1.15 * (k + 0.5) / 8) if rio["ancho"] else 2 + 5.5 * (k + 0.5) / 8
+    return rio["ancho"] or ANCHO_DE_RAYA["rio"]
+
+
+def puentes(lineas):
+    """Los puentes de un mapa: [{"x", "y", "giro", "sendero", "color",
+    "rio"}], con el giro del camino y lo que mide el río ahí."""
+    rios = []
+    for linea in lineas:
+        if linea["tipo"] == "rio" and len(linea["puntos"]) >= 2:
+            rios.append((linea, _caja(linea["puntos"]), _largos(linea["puntos"])))
+    salida = []
+    if not rios:
+        return salida
+    for camino in lineas:
+        pc = camino["puntos"]
+        if camino["tipo"] not in RAYAS_CON_PUENTE or len(pc) < 2:
+            continue
+        caja_camino = _caja(pc)
+        largos_camino = _largos(pc)
+        cruces = []
+        for rio, caja_rio, largos in rios:
+            if not _se_tocan(caja_camino, caja_rio):
+                continue
+            pr = rio["puntos"]
+            total = largos[-1] or 1
+            for i in range(1, len(pc)):
+                a, b = pc[i - 1], pc[i]
+                tramo = (min(a[0], b[0]), min(a[1], b[1]), max(a[0], b[0]), max(a[1], b[1]))
+                for j in range(1, len(pr)):
+                    c, d = pr[j - 1], pr[j]
+                    if not _se_tocan(tramo, (min(c[0], d[0]), min(c[1], d[1]), max(c[0], d[0]), max(c[1], d[1]))):
+                        continue
+                    if _lado(c, d, a) == _lado(c, d, b) or _lado(a, b, c) == _lado(a, b, d):
+                        continue
+                    den = (b[0] - a[0]) * (d[1] - c[1]) - (b[1] - a[1]) * (d[0] - c[0])
+                    s = ((c[0] - a[0]) * (d[1] - c[1]) - (c[1] - a[1]) * (d[0] - c[0])) / den if den else 0
+                    p = (a[0] + (b[0] - a[0]) * s, a[1] + (b[1] - a[1]) * s)
+                    cruces.append({
+                        "p": p, "giro": math.degrees(math.atan2(b[1] - a[1], b[0] - a[0])), "rio": rio,
+                        "en_el_rio": (largos[j - 1] + math.hypot(p[0] - c[0], p[1] - c[1])) / total,
+                        "lejos": largos_camino[i - 1] + math.hypot(p[0] - a[0], p[1] - a[1]),
+                    })
+        # Los que caen en el mismo punto: pares, toca y vuelve; nones, cruza.
+        sueltos = []
+        for x in cruces:
+            igual = next((y for y in sueltos if math.hypot(y["p"][0] - x["p"][0], y["p"][1] - x["p"][1]) < 0.01), None)
+            if igual:
+                igual["veces"] += 1
+            else:
+                x["veces"] = 1
+                sueltos.append(x)
+        ultimos = []
+        for x in sorted((x for x in sueltos if x["veces"] % 2 == 1), key=lambda x: x["lejos"]):
+            pr = x["rio"]["puntos"]
+            if any(math.hypot(q[0] - x["p"][0], q[1] - x["p"][1]) < 0.5 for q in (pc[0], pc[-1], pr[0], pr[-1])):
+                continue
+            if ultimos and x["lejos"] - ultimos[-1]["lejos"] < 1:
+                continue
+            ultimos.append(x)
+        for x in ultimos:
+            salida.append({"x": x["p"][0], "y": x["p"][1], "giro": x["giro"], "sendero": camino["tipo"] == "sendero",
+                           "color": camino["color"] or COLOR_DE_CAMINO[camino["tipo"]],
+                           "rio": _ancho_del_rio(x["rio"], x["en_el_rio"])})
+    return salida
+
+
+def _puentes_svg(lineas, radio):
+    """Los puentes, como los pines: dibujados en unidades del mapa para que
+    con el mapa entero midan lo que en pantalla, y con data-mapa-xy para
+    que mundo-mapa.js los deje de ese tamaño a cualquier zoom. El tablero,
+    del color del camino, tapa el río; los pretiles, oscuros a los lados y
+    abiertos en las puntas. Se pintan encima de las rayas."""
+    u = radio / 15  # PIN_EN_PANTALLA de mundo-mapa.js: 15 px por radio
+    salida = []
+    for puente in puentes(lineas):
+        largo = max(10, puente["rio"] / 2 + 6) * u
+        ancho = (4 if puente["sendero"] else 5) * u
+        abre = 3.5 * u
+        pretiles = "".join((
+            "M%s %sL%s %sL%s %sL%s %s" % (_cifra(-largo - abre), _cifra(-ancho - abre), _cifra(-largo), _cifra(-ancho),
+                                         _cifra(largo), _cifra(-ancho), _cifra(largo + abre), _cifra(-ancho - abre)),
+            "M%s %sL%s %sL%s %sL%s %s" % (_cifra(-largo - abre), _cifra(ancho + abre), _cifra(-largo), _cifra(ancho),
+                                         _cifra(largo), _cifra(ancho), _cifra(largo + abre), _cifra(ancho + abre)),
+        ))
+        sitio = "%s,%s" % (_cifra(puente["x"]), _cifra(puente["y"]))
+        salida.append('<g class="mapa-puente" transform="translate(%s) rotate(%s)" data-mapa-xy="%s"'
+                      ' data-mapa-giro="%s"><rect x="%s" y="%s" width="%s" height="%s" fill="%s"></rect>'
+                      '<path class="mapa-puente-pretil" d="%s"></path></g>'
+                      % (sitio, _cifra(puente["giro"]), sitio, _cifra(puente["giro"]), _cifra(-largo),
+                         _cifra(-ancho), _cifra(2 * largo), _cifra(2 * ancho), puente["color"], pretiles))
+    return "".join(salida)
+
+
+# =========================================
 # LAS TRAMAS DE LAS ZONAS
 # =========================================
 # Un <pattern> por clase de zona, de lado s (en unidades del mapa: crece
@@ -1515,6 +1641,10 @@ def pintar(mapa, pagina_a, mapa_a, imagen_a, detalle=None, avisar=None, region_d
     for clave, _ in NOMBRE_DE_GRUPO_DE_RAYA:
         if rayas.get(clave):
             trozos.append('<g class="mapa-lineas es-%s">%s</g>' % (clave, "".join(rayas[clave])))
+    # Los puentes, encima de todas las rayas; se apagan con los caminos.
+    con_puente = _puentes_svg(mapa.get("lineas") or [], radio)
+    if con_puente:
+        trozos.append('<g class="mapa-lineas es-caminos es-puentes">%s</g>' % con_puente)
 
     # ---- LOS TEXTOS SUELTOS ----
     # «Mar de las Brumas», «Montes Grises»: escritos en el mapa, del tamaño

@@ -2063,6 +2063,19 @@
       queda un trozo a la vista), y alejar hasta tres veces el mapa
       entero. Pulsar con el izquierdo en el mapa le pasa el teclado (Esc,
       Supr, las flechas…).
+    - LOS PUENTES SALEN SOLOS (desde el 22-10-2026): donde un camino o
+      un sendero cruza un río se pinta un puente (el tablero del color
+      del camino tapando el río y los pretiles oscuros), sin poner ningún
+      sitio. No se guarda en el .cmap: se calcula al pintar, con la misma
+      cuenta en el editor (puentesDelMapa, mapas.js), en la imagen
+      descargada y en la web (puentes, mundo_mapas.py; miden lo mismo a
+      cualquier zoom, como los pines, y se apagan con los caminos). Solo
+      cuenta si el camino pasa de un lado al otro: uno que acaba en la
+      orilla, o que la toca y vuelve, no lleva puente. Al mover un camino
+      o un río, los puentes se mueven con él. En «El mapa en sí» dice
+      cuántos hay, y si quedan sitios «Puente» SIN NOMBRE puestos a mano
+      encima de uno automático, un botón los quita todos de una vez
+      (Ctrl+Z los devuelve). Los que tienen nombre o página se quedan.
     - EL IMÁN (casilla «Imán», encendida): lo que se pone a menos de 12
       píxeles de un sitio o de un punto se pone JUSTO ahí, y si no hay
       punto pero sí un borde, encima del borde. Así el camino llega a la

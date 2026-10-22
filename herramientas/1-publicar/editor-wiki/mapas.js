@@ -1040,7 +1040,7 @@ function pintarTodoElMapa() {
     defs.innerHTML = TIPOS_DE_ZONA.map((z) => '<pattern id="ed-trama-' + z[0] + '" patternUnits="userSpaceOnUse" width="'
         + redondoMapa(s) + '" height="' + redondoMapa(s) + '">' + tramaDeZona(z[0], s) + "</pattern>").join("");
     svg.appendChild(defs);
-    ["fondo", "regiones", "rayas", "textos", "rosa", "emblemas", "sitios", "dibujo", "asas"].forEach((g) => {
+    ["fondo", "regiones", "rayas", "puentes", "textos", "rosa", "emblemas", "sitios", "dibujo", "asas"].forEach((g) => {
         svg.appendChild(svgMapa("g", { "data-capa-mapa": g }));
     });
     pintarFondoMapa();
@@ -1093,6 +1093,7 @@ function pintarCosasMapa() {
     Object.keys(CAPA_DE_LISTA).filter((l) => l !== "shapes").forEach((lista) => {
         d[lista].forEach((c, i) => capaMapa(CAPA_DE_LISTA[lista]).appendChild(dibujoDeCosa(lista, c, i)));
     });
+    pintarPuentesMapa();
     pintarAsasMapa();
     escalarMarcasMapa();
     pintarListaDeCosas();
@@ -1106,8 +1107,226 @@ function repintarCosa(lista, i) {
     if (viejo) {
         viejo.replaceWith(nuevo);
     }
+    if (lista === "lines") {
+        pedirPuentesMapa();
+    }
     pintarAsasMapa();
     escalarMarcasMapa();
+}
+
+// ---- LOS PUENTES ----
+// Donde un camino o un sendero cruza un río se pinta un puente, solo, sin
+// poner nada: no se guarda en el .cmap, se calcula cada vez (aquí, en la
+// imagen descargada y en la web, mundo_mapas.py, con la misma cuenta).
+// Cuenta como cruce el que pasa de un lado al otro del río: un camino que
+// acaba en la orilla, o que la toca y vuelve, no lleva puente. Dos
+// cruces muy juntos del mismo camino son un solo puente.
+const RAYAS_CON_PUENTE = ["camino", "sendero"];
+
+function puentesDelMapa(lineas) {
+    const caja = (puntos) => {
+        const xs = puntos.map((p) => p.x);
+        const ys = puntos.map((p) => p.y);
+        return { x1: Math.min(...xs), y1: Math.min(...ys), x2: Math.max(...xs), y2: Math.max(...ys) };
+    };
+    const seCruzan = (a, b) => a.x1 <= b.x2 && b.x1 <= a.x2 && a.y1 <= b.y2 && b.y1 <= a.y2;
+    // De qué lado de la raya c→d cae p (lo que cae encima, del lado de +).
+    const lado = (c, d, p) => ((d.x - c.x) * (p.y - c.y) - (d.y - c.y) * (p.x - c.x) >= 0 ? 1 : -1);
+    const rios = lineas.filter((l) => l.kind === "rio" && (l.points || []).length >= 2)
+        .map((l) => ({ l, caja: caja(l.points), largos: largosMapa(l.points) }));
+    const puentes = [];
+    lineas.forEach((camino) => {
+        const pc = camino.points || [];
+        if (!RAYAS_CON_PUENTE.includes(camino.kind) || pc.length < 2 || !rios.length) {
+            return;
+        }
+        const cajaCamino = caja(pc);
+        const cruces = [];
+        rios.forEach(({ l: rio, caja: cajaRio, largos }) => {
+            if (!seCruzan(cajaCamino, cajaRio)) {
+                return;
+            }
+            const pr = rio.points;
+            const total = largos[largos.length - 1] || 1;
+            for (let i = 1; i < pc.length; i++) {
+                const a = pc[i - 1];
+                const b = pc[i];
+                const tramo = { x1: Math.min(a.x, b.x), y1: Math.min(a.y, b.y), x2: Math.max(a.x, b.x), y2: Math.max(a.y, b.y) };
+                for (let j = 1; j < pr.length; j++) {
+                    const c = pr[j - 1];
+                    const d = pr[j];
+                    if (!seCruzan(tramo, { x1: Math.min(c.x, d.x), y1: Math.min(c.y, d.y), x2: Math.max(c.x, d.x),
+                        y2: Math.max(c.y, d.y) })) {
+                        continue;
+                    }
+                    if (lado(c, d, a) === lado(c, d, b) || lado(a, b, c) === lado(a, b, d)) {
+                        continue;
+                    }
+                    const den = (b.x - a.x) * (d.y - c.y) - (b.y - a.y) * (d.x - c.x);
+                    const s = den ? ((c.x - a.x) * (d.y - c.y) - (c.y - a.y) * (d.x - c.x)) / den : 0;
+                    const p = { x: a.x + (b.x - a.x) * s, y: a.y + (b.y - a.y) * s };
+                    const enElRio = (largos[j - 1] + Math.hypot(p.x - c.x, p.y - c.y)) / total;
+                    cruces.push({ p, giro: Math.atan2(b.y - a.y, b.x - a.x) * 180 / Math.PI, rio, enElRio,
+                        lejos: largosHastaMapa(pc, i - 1) + Math.hypot(p.x - a.x, p.y - a.y) });
+                }
+            }
+        });
+        // Los que caen en el mismo punto (un vértice encima del río): si
+        // son pares, el camino toca y vuelve; si nones, cruza.
+        const sueltos = [];
+        cruces.forEach((x) => {
+            const igual = sueltos.find((y) => Math.hypot(y.p.x - x.p.x, y.p.y - x.p.y) < 0.01);
+            if (igual) {
+                igual.veces += 1;
+            } else {
+                sueltos.push(Object.assign(x, { veces: 1 }));
+            }
+        });
+        const fin = pc[pc.length - 1];
+        const ultimos = [];
+        sueltos.filter((x) => x.veces % 2 === 1).sort((x, y) => x.lejos - y.lejos).forEach((x) => {
+            const pr = x.rio.points;
+            const enUnExtremo = [pc[0], fin, pr[0], pr[pr.length - 1]].some((q) => Math.hypot(q.x - x.p.x, q.y - x.p.y) < 0.5);
+            const anterior = ultimos[ultimos.length - 1];
+            if (enUnExtremo || (anterior && x.lejos - anterior.lejos < 1)) {
+                return;
+            }
+            ultimos.push(x);
+        });
+        ultimos.forEach((x) => {
+            const estiloRio = estiloDeLaRaya(x.rio);
+            let ancho = estiloRio.ancho;
+            if (x.rio.taper !== false && !(x.rio.dash && x.rio.dash !== "solid")) {
+                const k = Math.min(7, Math.floor(x.enElRio * 8));
+                const propio = Number(x.rio.width) > 0 ? Number(x.rio.width) : 0;
+                ancho = propio ? propio * (0.45 + 1.15 * (k + 0.5) / 8) : 2 + 5.5 * (k + 0.5) / 8;
+            }
+            puentes.push({ x: x.p.x, y: x.p.y, giro: x.giro, sendero: camino.kind === "sendero",
+                color: camino.color || estiloDeLaRaya(camino).color, rio: ancho });
+        });
+    });
+    return puentes;
+}
+
+function largosHastaMapa(puntos, n) {
+    let s = 0;
+    for (let i = 1; i <= n; i++) {
+        s += Math.hypot(puntos[i].x - puntos[i - 1].x, puntos[i].y - puntos[i - 1].y);
+    }
+    return s;
+}
+
+// La forma del puente, en píxeles de pantalla y a lo largo del camino (x):
+// el tablero del color del camino, tapando el río, y los pretiles oscuros
+// a los lados, abiertos en las puntas.
+function formaDePuente(puente) {
+    const largo = Math.max(10, puente.rio / 2 + 6);
+    const ancho = puente.sendero ? 4 : 5;
+    const abre = 3.5;
+    return {
+        largo, ancho,
+        pretiles: "M" + (-largo - abre) + " " + (-ancho - abre) + "L" + (-largo) + " " + (-ancho) + "L" + largo + " "
+            + (-ancho) + "L" + (largo + abre) + " " + (-ancho - abre) + "M" + (-largo - abre) + " " + (ancho + abre) + "L"
+            + (-largo) + " " + ancho + "L" + largo + " " + ancho + "L" + (largo + abre) + " " + (ancho + abre),
+    };
+}
+
+function pintarPuentesMapa() {
+    estadoMapa.puentesPedidos = false;
+    const g = capaMapa("puentes");
+    if (!g) {
+        return;
+    }
+    g.textContent = "";
+    const todos = puentesDelMapa(estadoMapa.datos.lines);
+    estadoMapa.puentes = todos;
+    pintarCuentaDePuentes();
+    todos.forEach((puente) => {
+        const forma = formaDePuente(puente);
+        const marca = svgMapa("g", { class: "mapa-ed-marca mapa-ed-puente", "data-x": redondoMapa(puente.x),
+            "data-y": redondoMapa(puente.y), "data-giro": redondoMapa(puente.giro) });
+        marca.appendChild(svgMapa("rect", { x: -forma.largo, y: -forma.ancho, width: 2 * forma.largo,
+            height: 2 * forma.ancho, fill: puente.color }));
+        marca.appendChild(svgMapa("path", { d: forma.pretiles, fill: "none", stroke: "#1b1020", "stroke-width": 2.5,
+            "stroke-linecap": "round", "stroke-linejoin": "round" }));
+        g.appendChild(marca);
+    });
+}
+
+// LOS SITIOS «PUENTE» QUE SOBRAN: los puestos a mano antes de que los
+// puentes salieran solos. Sin nombre y encima de un puente automático (a
+// menos de un 1,25% del lado largo del mapa) no dicen nada más; con
+// nombre se quedan (un puente con historia sale en la lista y en la web).
+function pinesDePuenteQueSobran() {
+    const d = estadoMapa.datos;
+    const cerca = Math.max(d.width, d.height) / 80;
+    const puentes = estadoMapa.puentes || [];
+    const salen = [];
+    d.pins.forEach((p, i) => {
+        if (p.kind === "puente" && !(p.label || "").trim() && !p.targetPage
+            && puentes.some((q) => Math.hypot(q.x - p.x, q.y - p.y) <= cerca)) {
+            salen.push(i);
+        }
+    });
+    return salen;
+}
+
+function pintarCuentaDePuentes() {
+    const n = (estadoMapa.puentes || []).length;
+    $("[data-mapa-puentes-cuantos]").textContent = "Los puentes salen solos donde un camino o un sendero cruza un río: "
+        + (n ? (n === 1 ? "hay 1" : "hay " + n) + " en este mapa." : "en este mapa, ninguno todavía.");
+    const sobran = pinesDePuenteQueSobran().length;
+    const boton = $("[data-mapa-quitar-pines-puente]");
+    boton.hidden = !sobran;
+    boton.textContent = "Quitar " + (sobran === 1 ? "el sitio «Puente» sin nombre que ya pinta uno solo"
+        : "los " + sobran + " sitios «Puente» sin nombre que ya pintan solos");
+}
+
+function quitarPinesDePuente() {
+    const salen = pinesDePuenteQueSobran();
+    if (!salen.length) {
+        return;
+    }
+    apuntarPaso();
+    salen.reverse().forEach((i) => estadoMapa.datos.pins.splice(i, 1));
+    estadoMapa.elegido = null;
+    estadoMapa.varios = [];
+    pintarCosasMapa();
+    pintarPropiedadesMapa();
+    avisarEditor("Quitados " + salen.length + (salen.length === 1 ? " sitio «Puente»." : " sitios «Puente».")
+        + " Se guarda al guardar; Ctrl+Z los trae de vuelta.");
+}
+
+// Mientras se arrastra un punto, los puentes se rehacen una vez por
+// fotograma como mucho.
+function pedirPuentesMapa() {
+    if (estadoMapa.puentesPedidos) {
+        return;
+    }
+    estadoMapa.puentesPedidos = true;
+    requestAnimationFrame(() => {
+        pintarPuentesMapa();
+        escalarMarcasMapa();
+    });
+}
+
+function puentesEnLienzo(ctx, d, k) {
+    puentesDelMapa(d.lines).forEach((puente) => {
+        const forma = formaDePuente(puente);
+        ctx.save();
+        ctx.translate(puente.x, puente.y);
+        ctx.rotate(puente.giro * Math.PI / 180);
+        ctx.scale(k, k);
+        ctx.fillStyle = puente.color;
+        ctx.fillRect(-forma.largo, -forma.ancho, 2 * forma.largo, 2 * forma.ancho);
+        ctx.strokeStyle = "#1b1020";
+        ctx.lineWidth = 2.5;
+        ctx.lineCap = "round";
+        ctx.lineJoin = "round";
+        ctx.setLineDash([]);
+        ctx.stroke(new Path2D(forma.pretiles));
+        ctx.restore();
+    });
 }
 
 // LO QUE SE ANDA HASTA CADA PUNTO de una raya, y el punto que está a tanto
@@ -3449,6 +3668,7 @@ async function descargarImagenMapa() {
 
     // Las rayas.
     d.lines.forEach((l) => pintarRayaEnLienzo(ctx, l, k));
+    puentesEnLienzo(ctx, d, k);
 
     // Las letras de los textos, cargadas antes de pintar (si no, el lienzo
     // las pinta con la de recambio).
@@ -3814,6 +4034,7 @@ function empezarMapas() {
     $("#mapa-forma-nueva").addEventListener("change", pintarOpcionesDeSitio);
     $("[data-mapa-emblema-pagina]").addEventListener("click", usarImagenDeLaPagina);
     $("[data-mapa-escala-otro]").addEventListener("click", empezarOtraMedida);
+    $("[data-mapa-quitar-pines-puente]").addEventListener("click", quitarPinesDePuente);
     // La barra de abajo crece con los avisos: lo que mide se apunta en
     // --alto-barra (hasta ahí llegan el mapa y los paneles).
     const barra = $("[data-barra-mapa]");

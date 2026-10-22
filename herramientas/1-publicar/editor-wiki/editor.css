@@ -1129,7 +1129,8 @@ body.en-mapa .saltar {
     fill: #f5ce6c;
 }
 
-.mapa-ed-flecha {
+.mapa-ed-flecha,
+.mapa-ed-puente {
     pointer-events: none;
 }
 

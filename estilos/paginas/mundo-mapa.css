@@ -605,6 +605,22 @@ html:not(.js) .mapa-ayuda {
     fill: #e8446f;
 }
 
+/* LOS PUENTES, donde un camino cruza un río (los pone mundo_mapas.py):
+   el tablero del color del camino y los pretiles oscuros. Miden lo mismo
+   a cualquier zoom, como los pines (data-mapa-xy). */
+.mapa-puente {
+    pointer-events: none;
+}
+
+.mapa-puente-pretil {
+    fill: none;
+    stroke: #1b1020;
+    stroke-width: 2.5px;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    vector-effect: non-scaling-stroke;
+}
+
 .mapa-linea-toque {
     stroke: transparent;
     stroke-width: 18px;
