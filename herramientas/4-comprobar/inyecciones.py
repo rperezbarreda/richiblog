@@ -49,7 +49,7 @@ CÓMO USARLO
 -----------
     python herramientas/4-comprobar/inyecciones.py
 
-Lo pasa también «Repasar el sitio entero», en el menú (Antes de subir).
+Lo pasa también «Repasar el sitio entero», en el menú (Repasar y subir).
 """
 
 import re

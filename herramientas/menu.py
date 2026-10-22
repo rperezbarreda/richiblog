@@ -154,7 +154,7 @@ APARTADOS = [
         editor("repasar", "Elegir la imagen en una ventana en vez de pegar la ruta."),
     ]),
 
-    ("Antes de subir", "repasar el sitio y rehacer lo generado", [
+    ("Repasar y subir", "repasar el sitio, rehacer lo generado y subirlo a Neocities", [
         ("Repasar el sitio entero",
          REPASAR_TODO, None,
          "Pasa de golpe las cinco comprobaciones de 4-comprobar/."),
@@ -164,6 +164,12 @@ APARTADOS = [
         ("Volver a generar los listados, el mapa y las cabeceras",
          REGENERAR, None,
          "Solo hace falta si has tocado una página, un CSS o un JS a mano."),
+        ("Subir el sitio a Neocities",
+         "1-publicar/subir-neocities.py", [],
+         "Sube solo lo que ha cambiado (pregunta antes). La primera vez pide la clave de la API."),
+        ("Ver qué se subiría a Neocities (sin subir nada)",
+         "1-publicar/subir-neocities.py", ["--ensayo"],
+         "Un ensayo: compara y te lo cuenta."),
         editor("repasar", "Repasar y volver a generar con un botón."),
     ]),
 ]

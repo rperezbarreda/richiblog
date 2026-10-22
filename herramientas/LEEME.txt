@@ -21,7 +21,7 @@
       4. Wiki Cralëa     escribir sus páginas, la línea de tiempo y publicarla
       5. Mi rincón       en lo que ando, recomendaciones, los gatos
       6. Imágenes        traerlas de tu ordenador y dejarlas a punto
-      7. Antes de subir  repasar el sitio y rehacer lo generado
+      7. Repasar y subir repasar el sitio, rehacer lo generado y subirlo a Neocities
 
   Eliges uno, dentro salen sus herramientas, y él llama a la que toca.
   Si ya sabes cuál, «3.3» va directo a la tercera cosa del apartado 3
@@ -208,6 +208,7 @@
           1-publicar/ ......... LO QUE USAS CASI SIEMPRE
               nuevo.py              escribir algo nuevo
               publicar.py           sacar un borrador a la web
+              subir-neocities.py    subir a Neocities lo que ha cambiado (con su API)
               nuevo-personaje.py    los NPC de una campaña
               botin.py              el botín de una campaña
               nueva-recomendacion.py
@@ -260,7 +261,7 @@
 
   LAS DE 1 Y 2 LAS PASAS TÚ. Las de 3 van solas detrás de las de 1.
   Las de 4 no cambian nada: están para pasarlas antes de subir y
-  quedarte tranquilo, y «Antes de subir → Repasar el sitio entero»
+  quedarte tranquilo, y «Repasar y subir → Repasar el sitio entero»
   del menú las pasa las cinco de golpe.
 
 
@@ -1657,7 +1658,7 @@
   web/wiki/, copia las imágenes a imagenes/wiki/ y deja el índice en
   datos/wiki/mundo.json (que es de donde sale la portada). Detrás hay que
   pasar los de siempre, porque hay páginas nuevas: el sitemap, el mapa,
-  el buscador y las cabeceras. En el menú, «Antes de subir → Volver a
+  el buscador y las cabeceras. En el menú, «Repasar y subir → Volver a
   generar…» los pasa todos.
 
   CON --probar NO ESCRIBE NADA y cuenta lo que haría. Conviene pasarlo
@@ -3393,6 +3394,36 @@
   falta subirla: es solo para ti. La carpeta ligero/ SÍ: es lo que piden
   las páginas (ver LA CABECERA DE LAS PÁGINAS, más abajo).
 
+  SUBIRLO SIN ARRASTRAR CARPETAS (desde el 22-10-2026):
+
+      python herramientas/1-publicar/subir-neocities.py
+
+  (en el menú, «Repasar y subir → Subir el sitio a Neocities»; también
+  en el editor, en «Comandos»). Usa la API de Neocities: le pide la
+  lista de lo que hay allí con la huella (SHA-1) de cada archivo, la
+  compara con la de los de aquí y sube SOLO lo nuevo o cambiado, en
+  tandas y sin prisas (como pide Neocities). Enseña la lista y pregunta
+  antes de subir. Sube todo menos herramientas/, wiki/, lo que empieza
+  por punto (.git) y la basurilla.
+
+    - LA CLAVE: la primera vez la pide. Se saca en Neocities: Settings,
+      tu sitio, pestaña «API». Se guarda FUERA de la carpeta del sitio
+      (que va a GitHub), en tu carpeta de usuario:
+      C:\Users\tu-usuario\.richiblog-neocities. Para cambiarla,
+      --clave. (O en la variable de entorno NEOCITIES_API_KEY.)
+    - --ensayo: dice qué subiría, sin subir nada.
+    - --borrar: además, borra de Neocities lo que ya no está aquí (una
+      página despublicada, una imagen renombrada). Enseña la lista y
+      pregunta aparte: allí no se puede deshacer. Sin --borrar nunca
+      borra nada. El index.html de la raíz no se toca nunca.
+    - CUENTA GRATIS: Neocities no deja subir vídeos, audio ni .zip. Si
+      la cuenta es gratis (se lo pregunta a Neocities), esos se apartan y
+      se dice cuáles. Si aun así no quiere algún archivo, parte la tanda
+      por la mitad hasta dar con él, sube el resto y al final dice cuál
+      y por qué.
+    - Si se corta (la conexión, Ctrl+C), lo subido, subido está: al
+      volver a lanzarlo sigue con lo que falte.
+
 
 ---------------------------------------------------------------
   LOS COMENTARIOS DE LAS PÁGINAS
@@ -3622,6 +3653,10 @@
                         lleva página propia nace como borrador.
   1-publicar/publicar.py  publica un borrador, o despublica algo
                         con --despublicar
+  1-publicar/subir-neocities.py  sube a Neocities solo lo que ha
+                        cambiado, con su API (ver SUBIRLO SIN
+                        ARRASTRAR CARPETAS). --ensayo, --borrar,
+                        --clave.
   1-publicar/nueva-recomendacion.py  añade cosas a
                         datos/mi_rincon/recomendaciones.json preguntándote los
                         datos. Con --listar enseña lo que ya hay y con
@@ -3721,7 +3756,7 @@
   ------------------------------
   (nuevo.py y publicar.py ya los ejecutan en orden; solo los
   necesitas sueltos si has tocado alguna página a mano, y para eso
-  está «Antes de subir → Volver a generar…» en el menú)
+  está «Repasar y subir → Volver a generar…» en el menú)
 
   3-generadores/generar-archivo.py  crea web/blog/<año>/index_<año>.html
                         con un bloque por mes, y mete el año en el
@@ -3782,7 +3817,7 @@
 
   4-COMPROBAR: MIRAN Y NO TOCAN NADA
   ----------------------------------
-  («Antes de subir → Repasar el sitio entero» las pasa las cinco)
+  («Repasar y subir → Repasar el sitio entero» las pasa las cinco)
 
   4-comprobar/enlaces-rotos.py  comprueba que todo lo que se enlaza
                         existe, y lista lo que no usa nadie. Con
