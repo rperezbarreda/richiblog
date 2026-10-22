@@ -861,6 +861,30 @@ def con_banderas_en_el_mapa(svg, paginas):
 # Las imágenes de los emblemas de los mapas: se copian con las de las
 # fichas (ver copiar_imagenes).
 EMBLEMAS_USADOS = set()
+# Las capas de fondo que tienen además versión MÁXIMA (la original es
+# bastante más grande que ANCHO_DE_CAPA): por su nombre final.
+CAPAS_CON_MAXIMA = set()
+
+
+def lado_de_imagen(archivo):
+    """El lado largo de una imagen (solo lee la cabecera), o 0."""
+    try:
+        with Image.open(archivo) as foto:
+            return max(foto.size)
+    except Exception:  # sin Pillow, o un archivo que no es imagen
+        return 0
+
+
+def con_imagen_maxima(svg):
+    """A las capas con versión máxima, data-mapa-maxima: el mapa la pide al
+    acercarse mucho (mejorarImagenDeMapa, en mundo-mapa.js)."""
+    def poner(m):
+        url = m.group(1)
+        if url.lower().endswith(".webp") and url.rsplit("/", 1)[-1] in CAPAS_CON_MAXIMA:
+            maxima = url[:-5] + mundo_mapas.MAXIMA_DE_CAPA
+            return m.group(0) + ' data-mapa-maxima="%s"' % html.escape(maxima, quote=True)
+        return m.group(0)
+    return re.sub(r'data-mapa-grande="([^"]+)"', poner, svg)
 
 
 def convertir_mapas(mapas, paginas, imagenes, avisos_por_pagina, detalle):
@@ -911,6 +935,8 @@ def convertir_mapas(mapas, paginas, imagenes, avisos_por_pagina, detalle):
             cuaderno[0].di("no tengo %s" % _como_lo_pide(nombre), apano)
         final = nombre_de_capa(archivo)
         capas_por_preparar[final] = archivo
+        if final.lower().endswith(".webp") and lado_de_imagen(archivo) > ANCHO_DE_CAPA * 1.2:
+            CAPAS_CON_MAXIMA.add(final)
         return "/imagenes/wiki/" + final
 
     def de_emblema(nombre):
@@ -944,7 +970,7 @@ def convertir_mapas(mapas, paginas, imagenes, avisos_por_pagina, detalle):
                                    region_de=region_de, emblema_a=de_emblema)
         mapa["titulo"] = leido["titulo"] or mapa["nombre"]
         mapa["ancho"], mapa["alto"] = leido["ancho"], leido["alto"]
-        mapa["svg"] = con_banderas_en_el_mapa(hecho["svg"], paginas)
+        mapa["svg"] = con_imagen_maxima(con_banderas_en_el_mapa(hecho["svg"], paginas))
         mapa["sitios"] = hecho["sitios"]
         mapa["capas"] = hecho["capas"]
         # La leyenda (los tipos de sitio y de raya que hay), encima de la
@@ -1022,6 +1048,22 @@ def preparar_capas(capas, probar):
                     foto.thumbnail((mundo_mapas.ANCHO_PEQUE_DE_CAPA,) * 2, _Img.LANCZOS)
                     IMAGENES.mkdir(parents=True, exist_ok=True)
                     foto.save(peque, "WEBP", quality=80, method=6)
+        # Y la MÁXIMA, si la original da para ella (ver CAPAS_CON_MAXIMA).
+        if final in CAPAS_CON_MAXIMA and not probar and Image is not None:
+            maxima = IMAGENES / (final[:-5] + mundo_mapas.MAXIMA_DE_CAPA)
+            try:
+                hace_falta = not maxima.is_file() or maxima.stat().st_mtime < archivo.stat().st_mtime
+            except OSError:
+                hace_falta = True
+            if hace_falta:
+                try:
+                    with Image.open(archivo) as foto:
+                        foto = foto.convert("RGBA" if "A" in foto.getbands() else "RGB")
+                        foto.thumbnail((mundo_mapas.LADO_MAXIMO_DE_CAPA,) * 2, Image.LANCZOS)
+                        IMAGENES.mkdir(parents=True, exist_ok=True)
+                        foto.save(maxima, "WEBP", quality=78, method=6)
+                except (OSError, ValueError) as error:
+                    print(f"  OJO: no he podido hacer la versión máxima de {archivo.name}: {error}")
         try:
             if destino.is_file() and destino.stat().st_mtime >= archivo.stat().st_mtime:
                 saltadas += 1

@@ -1185,11 +1185,19 @@ def ampliar_mapa(archivo, peticion):
     if not imagen:
         return {"error": "Este mapa no tiene imagen de fondo."}
     try:
-        ancho, alto = int(peticion.get("ancho")), int(peticion.get("alto"))
+        if peticion.get("factor"):
+            # Por cuánto multiplicar la imagen de verdad (el mapamundi: sus
+            # coordenadas no son píxeles de su imagen y no cambian).
+            factor = float(peticion["factor"])
+            ancho_ahora, alto_ahora = _medidas(imagen)
+            ancho, alto = round(ancho_ahora * factor), round(alto_ahora * factor)
+        else:
+            ancho, alto = int(peticion.get("ancho")), int(peticion.get("alto"))
     except (TypeError, ValueError):
         return {"error": "No sé a qué medida ponerla."}
     if not (1 <= ancho <= mm.LADO_MAXIMO and 1 <= alto <= mm.LADO_MAXIMO):
-        return {"error": "Como mucho %d píxeles de lado." % mm.LADO_MAXIMO}
+        return {"error": "Saldría de %d × %d, y como mucho son %d píxeles de lado. Prueba con menos."
+                         % (ancho, alto, mm.LADO_MAXIMO)}
     destino = img.sin_pisar(RAIZ / CARPETA_MAPAS, img.nombre_para(archivo.stem, "_mapa"))
     con_ia, aviso = mm.a_medida(imagen, destino, ancho, alto, ia=peticion.get("ia") is not False,
                                 modelo=str(peticion.get("modelo") or "pintado"))

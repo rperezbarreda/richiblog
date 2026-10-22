@@ -3682,8 +3682,17 @@ function medidaComunMapa() {
     return { ancho, alto: Math.round(ancho * d.height / d.width) };
 }
 
+// El mapamundi mismo: la referencia de los demás. Sus coordenadas no
+// cambian nunca (los mapas regionales guardan su sitio en ellas): al
+// ampliarlo solo cambia la imagen, y no se sitúa en sí mismo.
+function esElMapamundi() {
+    const mundo = ayudasDeMapas && ayudasDeMapas.mapamundi;
+    return !!mundo && (estadoMapa.archivo || "").toLowerCase() === String(mundo.archivo).toLowerCase();
+}
+
 function pintarMundoDelMapa(sinCasillas) {
     const d = estadoMapa.datos;
+    $("[data-mapa-mundo-caja]").hidden = esElMapamundi();
     const w = d.world;
     const estado = $("[data-mapa-mundo-estado]");
     const boton = $("[data-mapa-mundo-escala]");
@@ -3730,6 +3739,13 @@ function pintarMundoDelMapa(sinCasillas) {
 function pintarMedidaDeAmpliar() {
     const d = estadoMapa.datos;
     const f = Number($("#mapa-ampliar-cuanto").value) || 2;
+    if (esElMapamundi()) {
+        $("[data-mapa-ampliar-medida]").textContent = "En el mapamundi solo cambia la imagen (por " + cifraMapa(f)
+            + "); sus coordenadas no, así que los mapas regionales siguen en su sitio. Como mucho "
+            + ladoMaximoMapa() + " píxeles de lado.";
+        $("[data-mapa-ampliar]").disabled = false;
+        return;
+    }
     const ancho = Math.round(d.width * f);
     const alto = Math.round(d.height * f);
     const cabe = Math.max(ancho, alto) <= ladoMaximoMapa();
@@ -3799,9 +3815,33 @@ function llevarAEscalaComun() {
     }
 }
 
+async function ampliarElMapamundi(f, ia, modelo) {
+    const boton = $("[data-mapa-ampliar]");
+    boton.disabled = true;
+    avisarEditor("Ampliando la imagen del mapamundi" + (ia ? " con IA" : "") + "… (puede tardar un poco)");
+    const hecha = await pedirEditor("/api/mapa/ampliar", { mapa: estadoMapa.archivo, factor: f, ia, modelo,
+        imagen: estadoMapa.datos.layers[0] && estadoMapa.datos.layers[0].image });
+    boton.disabled = false;
+    if (hecha.error) {
+        avisarEditor(hecha.error, true);
+        return;
+    }
+    apuntarPaso();
+    estadoMapa.datos.layers[0].image = hecha.nombre;
+    estadoMapa.imagenes[hecha.nombre] = hecha.url;
+    pintarFondoMapa();
+    avisarEditor("Imagen del mapamundi ampliada" + (hecha.con_ia ? " con IA" : "") + ": " + hecha.nombre + " ("
+        + hecha.ancho + " × " + hecha.alto + "). Sus coordenadas no cambian." + (hecha.aviso ? " " + hecha.aviso + "." : "")
+        + " Recuerda guardar.", ia && !hecha.con_ia);
+}
+
 function ampliarPorFactor() {
     const d = estadoMapa.datos;
     const f = Number($("#mapa-ampliar-cuanto").value) || 2;
+    if (esElMapamundi()) {
+        ampliarElMapamundi(f, $("#mapa-ampliar-ia").checked, $("#mapa-ampliar-modelo").value);
+        return;
+    }
     ampliarImagenDelMapa(Math.round(d.width * f), Math.round(d.height * f), $("#mapa-ampliar-ia").checked,
         $("#mapa-ampliar-modelo").value);
 }

@@ -814,26 +814,41 @@ function prepararSitiosDeMapa() {
 // mapa, o en una pantalla muy grande o de mucha densidad— se baja el
 // grande por detrás y se cambia cuando ya ha llegado, para que no se quede
 // en blanco mientras tanto.
+//
+// Y si la capa tiene además una versión MÁXIMA (data-mapa-maxima: hasta
+// 8192 de lado, solo cuando la original es mucho más grande, como un
+// mapamundi ampliado con IA), al acercarse más allá de lo que da la de
+// 2560 se cambia por esa, del mismo modo.
 function mejorarImagenDeMapa(mando) {
     const pide = mando.lienzo.clientWidth * (mando.zoom || 1) * (window.devicePixelRatio || 1);
-    mando.lienzo.querySelectorAll(".mapa-capa-img[data-mapa-grande]").forEach((imagen) => {
-        if (imagen.dataset.mapaCambiando || pide <= 1280 * 1.15) {
+    mando.lienzo.querySelectorAll(".mapa-capa-img").forEach((imagen) => {
+        if (imagen.dataset.mapaCambiando) {
             return;
         }
-        const grande = banderaSeguraDeMapa(imagen.getAttribute("data-mapa-grande"));
-        if (!grande) {
+        let cual = "";
+        if (imagen.hasAttribute("data-mapa-grande") && pide > 1280 * 1.15) {
+            cual = "data-mapa-grande";
+        } else if (!imagen.hasAttribute("data-mapa-grande") && imagen.hasAttribute("data-mapa-maxima")
+            && pide > 2560 * 1.15) {
+            cual = "data-mapa-maxima";
+        }
+        const otra = cual ? banderaSeguraDeMapa(imagen.getAttribute(cual)) : "";
+        if (!otra) {
             return;
         }
         imagen.dataset.mapaCambiando = "1";
         const antes = new Image();
         antes.onload = () => {
-            imagen.setAttribute("href", grande);
-            imagen.removeAttribute("data-mapa-grande");
+            imagen.setAttribute("href", otra);
+            imagen.removeAttribute(cual);
+            delete imagen.dataset.mapaCambiando;
+            // Si ya se está más cerca de lo que da esta, la siguiente.
+            mejorarImagenDeMapa(mando);
         };
         antes.onerror = () => {
             delete imagen.dataset.mapaCambiando;
         };
-        antes.src = grande;
+        antes.src = otra;
     });
 }
 

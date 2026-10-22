@@ -126,6 +126,11 @@ import unicodedata
 # El sufijo de la versión pequeña de cada imagen de capa (ver arriba).
 PEQUE_DE_CAPA = "-peque.webp"
 ANCHO_PEQUE_DE_CAPA = 1280
+# Y la MÁXIMA, para acercarse mucho: solo si la original es bastante más
+# grande que la normal (un mapamundi ampliado con IA), hasta este lado. La
+# escribe preparar_capas y la pide mundo-mapa.js al acercar mucho.
+MAXIMA_DE_CAPA = "-max.webp"
+LADO_MAXIMO_DE_CAPA = 8192
 
 
 # =========================================

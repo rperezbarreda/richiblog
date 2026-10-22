@@ -1645,6 +1645,11 @@
   Para cambiarlo: se sustituye el .cmap (o la imagen) y se pasa la wiki
   a la web. La imagen de fondo, a 2560 px de ancho como mucho: el mapa
   nunca se pinta más grande, y el original de 7680 pesaba 55 MB.
+  (Desde el 22-10-2026, si la original es bastante más grande —un
+  mapamundi ampliado con IA en el editor—, se hace además una versión
+  MÁXIMA, hasta 8192 de lado, «-max.webp», que el mapa pide solo al
+  acercarse mucho: la de 1280 al entrar, la de 2560 al acercar y la
+  máxima desde el 400% más o menos.)
 
   ANTES VENÍA DE CHRONICLER, entera, con herramientas/1-publicar/
   importar-mundo.py, que se traía la bóveda y dejaba elegir qué entraba.
@@ -2166,6 +2171,9 @@
       mapa regional. Lo junta juntar_regionales (mundo_mapas.py), lo llama
       generar-mundo.py. Un mapa sin situar no sale: sitúalo en «El mapa en
       sí» → «En el mapamundi».
+    - AMPLIAR EL MAPAMUNDI: solo cambia su imagen, NO sus coordenadas
+      (siguen siendo 1920 × 1080): los mapas regionales guardan su sitio
+      en ellas. Por eso en el mapamundi no sale «En el mapamundi».
     - LAS AYUDAS SE INSTALAN UNA VEZ en cada ordenador: menú → Imágenes →
       «Instalar las ayudas de los mapas» (2-imagenes/instalar-ayudas-de-
       mapas.py). Pone OpenCV con pip y baja el ampliador con IA
