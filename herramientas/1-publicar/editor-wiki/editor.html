@@ -796,6 +796,47 @@
                     <p class="ayuda" data-mapa-repaso-resumen aria-live="polite"></p>
                     <div data-mapa-repaso></div>
                 </section>
+                <!-- DESCARGAR LA IMAGEN: qué sale en ella (mapas.js,
+                     pintarOpcionesDeDescarga y descargarImagenMapa). Las
+                     casillas salen según lo que tenga el mapa y se
+                     recuerda lo que quitaste. Lo abre el botón de abajo. -->
+                <section class="mapa-panel" id="mapa-panel-descargar" data-mapa-panel="descargar" aria-labelledby="t-mapa-descargar" hidden>
+                    <div class="mapa-panel-cabeza">
+                        <h2 id="t-mapa-descargar">Descargar la imagen</h2>
+                        <button type="button" class="mapa-panel-cerrar" data-mapa-cerrar="descargar" aria-label="Cerrar «Descargar la imagen»" title="Cerrar (Esc)">×</button>
+                    </div>
+                    <p class="ayuda">Marca lo que quieres que salga. Va con lo que hay ahora en el editor, esté guardado o no.</p>
+                    <div class="mapa-emblema-botones">
+                        <button type="button" data-mapa-descarga-todo="1">Marcar todo</button>
+                        <button type="button" data-mapa-descarga-todo="0">Quitar todo</button>
+                    </div>
+                    <div data-mapa-descarga-opciones></div>
+                    <fieldset class="opciones campo mapa-descarga-grupo">
+                        <legend>La imagen</legend>
+                        <label class="opcion"><input type="radio" name="mapa-recorte" value="todo" checked> El mapa entero</label>
+                        <label class="opcion"><input type="radio" name="mapa-recorte" value="vista"> Solo lo que se ve ahora en pantalla</label>
+                        <div class="campo">
+                            <label for="mapa-descarga-tamano">Tamaño</label>
+                            <select id="mapa-descarga-tamano">
+                                <option value="0.5">La mitad</option>
+                                <option value="1" selected>Como la imagen del mapa</option>
+                                <option value="2">El doble</option>
+                                <option value="3">El triple</option>
+                                <option value="4">Cuatro veces</option>
+                            </select>
+                        </div>
+                        <div class="campo">
+                            <label for="mapa-descarga-formato">Formato</label>
+                            <select id="mapa-descarga-formato">
+                                <option value="png" selected>PNG (sin pérdida, pesa más)</option>
+                                <option value="jpeg">JPG (pesa poco)</option>
+                                <option value="webp">WebP (pesa poco, para la web)</option>
+                            </select>
+                        </div>
+                        <p class="ayuda" data-mapa-descarga-medida aria-live="polite"></p>
+                    </fieldset>
+                    <button type="button" class="principal" data-mapa-descargar>Descargar</button>
+                </section>
                 <section class="mapa-panel" id="mapa-panel-ajustes" data-mapa-panel="ajustes" aria-labelledby="t-mapa-ajustes" hidden>
                     <div class="mapa-panel-cabeza">
                         <h2 id="t-mapa-ajustes">El mapa en sí</h2>
@@ -888,7 +929,7 @@
         <p class="aviso barra-aviso" role="status" aria-live="polite" data-aviso-mapa data-aviso-barra></p>
         <button type="button" class="principal" data-mapa-guardar>Guardar <span class="tecla">Ctrl+S</span></button>
         <button type="button" data-mapa-pasar>Guardar y pasar a la web</button>
-        <button type="button" data-mapa-descargar>Descargar la imagen</button>
+        <button type="button" data-mapa-pestana="descargar" aria-controls="mapa-panel-descargar" aria-expanded="false">Descargar la imagen</button>
         <a class="boton" data-mapa-ver target="_blank" rel="noopener" hidden>Ver el mapa ↗</a>
     </footer>
 

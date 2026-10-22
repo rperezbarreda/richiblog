@@ -1043,7 +1043,8 @@ body.en-mapa .saltar {
 }
 
 .mapa-opciones input[type="checkbox"],
-.mapa-panel input[type="checkbox"] {
+.mapa-panel input[type="checkbox"],
+.mapa-panel input[type="radio"] {
     width: 1.3em;
     min-height: 0;
     height: 1.3em;
@@ -1199,6 +1200,11 @@ body.en-mapa .saltar {
 
 .mapa-xy label {
     flex-basis: auto;
+}
+
+/* Los grupos de casillas del panel de descargar. */
+.mapa-descarga-grupo {
+    margin: 14px 0 0;
 }
 
 .mapa-panel label.opcion {

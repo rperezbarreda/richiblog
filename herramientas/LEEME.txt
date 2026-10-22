@@ -2124,12 +2124,23 @@
       wiki/_imagenes/mapas/ en WebP (hasta 4096 px de lado: un mapa
       encogido no aguanta el zoom).
 
-    - DESCARGAR LA IMAGEN (en la barra de abajo): un PNG del tamaño del
-      mapa con todo lo puesto encima —regiones con su nombre en cursiva,
-      todas las rayas, los textos, los sitios con su símbolo y su nombre
-      y la barra de escala—, tal y como esté
-      en el editor aunque no esté guardado. Se pinta en un <canvas> desde
-      los datos, así que no depende del zoom con que lo estés mirando.
+    - DESCARGAR LA IMAGEN (en la barra de abajo): abre su panel, para
+      ELEGIR QUÉ SALE (desde el 22-10-2026). Una casilla por cada cosa
+      que tenga el mapa, con cuántas hay: cada capa del fondo, cada clase
+      de región (lago, bosque, país vecino…) y sus nombres, cada clase de
+      raya (caminos y senderos, ríos, fronteras…) y los puentes (sin los
+      ríos no salen), cada tipo de sitio (capital, ciudad, pueblo…) y sus
+      nombres, los textos sueltos y la barra de escala; y la rosa de los
+      vientos en la esquina que quieras (o sin ella). «Marcar todo» y
+      «Quitar todo». Además: EL RECORTE (el mapa entero o solo lo que se
+      ve en pantalla; la escala y la rosa van en las esquinas del
+      recorte), EL TAMAÑO (de la mitad a cuatro veces, con 8192 px de
+      lado como mucho; dice cuánto saldrá) y EL FORMATO (PNG, JPG o
+      WebP). Se recuerda en el navegador (localStorage «mapa-descarga»)
+      lo que quitaste, así lo nuevo de un mapa sale marcado. Va tal y
+      como esté en el editor aunque no esté guardado. Se pinta en un
+      <canvas> desde los datos, así que no depende del zoom con que lo
+      estés mirando.
 
   «GUARDAR Y PASAR A LA WEB» LLEVA BARRA DE PROGRESO (en las páginas y en
   los mapas): el servidor pasa la wiki en otro hilo y el editor le

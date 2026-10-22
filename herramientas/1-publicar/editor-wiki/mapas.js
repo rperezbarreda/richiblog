@@ -865,6 +865,9 @@ function ponerVistaMapa(v) {
     svgDelMapa().setAttribute("viewBox", [estadoMapa.vista.x, estadoMapa.vista.y, w, h].map(redondoMapa).join(" "));
     const entero = Math.max(d.width / lienzo.clientWidth, d.height / lienzo.clientHeight) || 1;
     $("[data-mapa-cuanto]").textContent = Math.round((entero / escalaMapa()) * 100) + "%";
+    if (!$("[data-mapa-panel=\"descargar\"]").hidden) {
+        pintarMedidaDeDescarga();
+    }
     escalarMarcasMapa();
 }
 
@@ -3848,21 +3851,232 @@ function barraDeEscalaEnLienzo(ctx, d, k) {
     ctx.fillText(texto, x0, y0 - alto * 1.6);
 }
 
+// ---- QUÉ SALE EN LA IMAGEN DESCARGADA ----
+// El panel «Descargar la imagen»: una casilla por cada cosa que tenga el
+// mapa (cada capa del fondo, cada clase de región y de sitio, cada clase
+// de raya, los puentes, los nombres, los textos, la escala) y la rosa en
+// la esquina que se quiera. Cada casilla tiene su clave («sitio:pueblo»);
+// en el navegador se recuerdan las que se QUITARON, así lo nuevo sale
+// marcado. Y el recorte (entero o lo que se ve), el tamaño y el formato.
+const GRUPOS_DE_RAYA_EN_DESCARGA = [
+    ["caminos", "Caminos y senderos", ["camino", "sendero"]], ["rios", "Ríos", ["rio"]],
+    ["fronteras", "Fronteras", ["frontera"]], ["maritimas", "Rutas marítimas", ["maritima"]],
+    ["murallas", "Murallas", ["muralla"]], ["rutas", "Rutas de viaje", ["ruta"]],
+];
+const RINCONES_DE_ROSA = [["", "Sin rosa de los vientos"], ["arriba-izquierda", "Arriba a la izquierda"],
+    ["arriba-derecha", "Arriba a la derecha"], ["abajo-izquierda", "Abajo a la izquierda"],
+    ["abajo-derecha", "Abajo a la derecha"]];
+const TOPE_DE_DESCARGA = 8192;
+// La clase de cada cosa para las casillas (lo de un tipo que no se conoce,
+// con lo «sin tipo»; una raya rara, con los caminos, como en la web).
+const claveDeSitioEnDescarga = (p) => (tipoDeSitioMapa(p.kind) ? p.kind : "");
+const claveDeRegionEnDescarga = (s) => (tipoDeZonaMapa(s.kind) ? s.kind : "");
+const claveDeRayaEnDescarga = (l) => {
+    const g = GRUPOS_DE_RAYA_EN_DESCARGA.find((x) => x[2].includes(l.kind)) || GRUPOS_DE_RAYA_EN_DESCARGA[0];
+    return g[0];
+};
+
+function memoriaDeDescarga() {
+    try {
+        const m = JSON.parse(window.localStorage.getItem("mapa-descarga") || "{}");
+        return m && typeof m === "object" ? m : {};
+    } catch (error) {
+        return {};
+    }
+}
+
+function apuntarDescarga() {
+    const quitadas = [...document.querySelectorAll("[data-descarga]")].filter((c) => !c.checked)
+        .map((c) => c.getAttribute("data-descarga"));
+    const viejas = memoriaDeDescarga().quitadas || [];
+    // Las de otros mapas (que aquí no salen) se conservan.
+    const aqui = new Set([...document.querySelectorAll("[data-descarga]")].map((c) => c.getAttribute("data-descarga")));
+    const m = {
+        quitadas: viejas.filter((k) => !aqui.has(k)).concat(quitadas),
+        tamano: $("#mapa-descarga-tamano").value, formato: $("#mapa-descarga-formato").value,
+        recorte: (document.querySelector('input[name="mapa-recorte"]:checked') || {}).value || "todo",
+    };
+    try {
+        window.localStorage.setItem("mapa-descarga", JSON.stringify(m));
+    } catch (error) {
+        // Se recuerda mientras esté abierta la página.
+    }
+    pintarMedidaDeDescarga();
+}
+
+function pintarOpcionesDeDescarga() {
+    const d = estadoMapa.datos;
+    const caja = $("[data-mapa-descarga-opciones]");
+    if (!d || !caja) {
+        return;
+    }
+    const memoria = memoriaDeDescarga();
+    const quitadas = new Set(memoria.quitadas || []);
+    caja.textContent = "";
+    let n = 0;
+    const grupo = (titulo) => {
+        const fs = document.createElement("fieldset");
+        fs.className = "opciones campo mapa-descarga-grupo";
+        const lg = document.createElement("legend");
+        lg.textContent = titulo;
+        fs.appendChild(lg);
+        caja.appendChild(fs);
+        return fs;
+    };
+    const casilla = (dentro, clave, texto, cuantas, deSalida) => {
+        const label = document.createElement("label");
+        label.className = "opcion";
+        const input = document.createElement("input");
+        input.type = "checkbox";
+        input.id = "mapa-descarga-" + (n += 1);
+        input.setAttribute("data-descarga", clave);
+        input.checked = deSalida === false ? false : !quitadas.has(clave);
+        label.appendChild(input);
+        label.appendChild(document.createTextNode(" " + texto + (cuantas ? " (" + cuantas + ")" : "")));
+        dentro.appendChild(label);
+    };
+    const contar = (lista, clave) => {
+        const cuenta = new Map();
+        lista.forEach((c) => cuenta.set(clave(c), (cuenta.get(clave(c)) || 0) + 1));
+        return cuenta;
+    };
+
+    if (d.layers.length) {
+        const g = grupo("El fondo");
+        d.layers.forEach((c, i) => {
+            const nombre = c.name || c.title || (d.layers.length === 1 ? "La imagen del mapa" : "Capa " + (i + 1));
+            casilla(g, "fondo:" + (c.id || i), nombre, 0, estadoMapa.capasOcultas[c.id] ? false : undefined);
+        });
+    }
+    if (d.shapes.length) {
+        const g = grupo("Regiones");
+        contar(d.shapes, claveDeRegionEnDescarga).forEach((cuantas, kind) => {
+            const zona = tipoDeZonaMapa(kind);
+            casilla(g, "region:" + kind, zona ? zona[1] : "Regiones sin tipo (países, comarcas…)", cuantas);
+        });
+        if (d.shapes.some((s) => s.label)) {
+            casilla(g, "nombres-regiones", "Sus nombres");
+        }
+    }
+    if (d.lines.length) {
+        const g = grupo("Rayas");
+        GRUPOS_DE_RAYA_EN_DESCARGA.forEach(([clave, texto, kinds]) => {
+            const cuantas = d.lines.filter((l) => claveDeRayaEnDescarga(l) === clave).length;
+            if (cuantas) {
+                casilla(g, "raya:" + clave, texto, cuantas);
+            }
+        });
+        const puentes = puentesDelMapa(d.lines).length;
+        if (puentes) {
+            casilla(g, "puentes", "Puentes", puentes);
+        }
+    }
+    const sitios = d.pins.concat(d.emblems);
+    if (sitios.length) {
+        const g = grupo("Sitios");
+        const cuenta = contar(sitios, claveDeSitioEnDescarga);
+        // En el orden de la lista de tipos (capital, ciudad, pueblo…).
+        TIPOS_DE_SITIO.map((x) => x[0]).concat([""]).filter((k) => cuenta.has(k)).forEach((kind) => {
+            const tipo = tipoDeSitioMapa(kind);
+            casilla(g, "sitio:" + kind, tipo ? tipo[2] + " " + tipo[1] : "Sin tipo", cuenta.get(kind));
+        });
+        if (sitios.some((p) => p.label)) {
+            casilla(g, "nombres-sitios", "Sus nombres");
+        }
+    }
+    const g = grupo("Lo demás");
+    if (d.labels.some((x) => x.label)) {
+        casilla(g, "textos", "Los textos sueltos (mares, cordilleras…)", d.labels.filter((x) => x.label).length);
+    }
+    if (d.scale && d.scale.pixels && d.scale.distance) {
+        casilla(g, "escala", "La barra de escala");
+    }
+    const campo = document.createElement("div");
+    campo.className = "campo";
+    const etiqueta = document.createElement("label");
+    etiqueta.setAttribute("for", "mapa-descarga-rosa");
+    etiqueta.textContent = "Rosa de los vientos";
+    const rosa = document.createElement("select");
+    rosa.id = "mapa-descarga-rosa";
+    opcionesMapa(rosa, RINCONES_DE_ROSA, false);
+    rosa.value = typeof d.compass === "string" ? d.compass : "";
+    campo.appendChild(etiqueta);
+    campo.appendChild(rosa);
+    g.appendChild(campo);
+
+    $("#mapa-descarga-tamano").value = memoria.tamano || "1";
+    $("#mapa-descarga-formato").value = memoria.formato || "png";
+    const recorte = document.querySelector('input[name="mapa-recorte"][value="' + (memoria.recorte || "todo") + '"]');
+    if (recorte) {
+        recorte.checked = true;
+    }
+    caja.querySelectorAll("[data-descarga]").forEach((c) => c.addEventListener("change", apuntarDescarga));
+    pintarMedidaDeDescarga();
+}
+
+// El trozo del mapa que sale (en unidades del mapa): entero, o lo que se
+// ve en pantalla sin salirse del mapa.
+function marcoDeDescarga() {
+    const d = estadoMapa.datos;
+    const vista = (document.querySelector('input[name="mapa-recorte"]:checked') || {}).value === "vista";
+    const v = estadoMapa.vista;
+    if (!vista || !v) {
+        return { x: 0, y: 0, w: d.width, h: d.height };
+    }
+    const x1 = Math.max(0, v.x);
+    const y1 = Math.max(0, v.y);
+    const x2 = Math.min(d.width, v.x + v.w);
+    const y2 = Math.min(d.height, v.y + v.h);
+    if (x2 - x1 < 1 || y2 - y1 < 1) {
+        return { x: 0, y: 0, w: d.width, h: d.height };
+    }
+    return { x: x1, y: y1, w: x2 - x1, h: y2 - y1 };
+}
+
+function escalaDeDescarga(marco) {
+    const pedido = Number($("#mapa-descarga-tamano").value) || 1;
+    return Math.min(pedido, TOPE_DE_DESCARGA / Math.max(marco.w, marco.h));
+}
+
+function pintarMedidaDeDescarga() {
+    const caja = $("[data-mapa-descarga-medida]");
+    if (!caja || !estadoMapa.datos) {
+        return;
+    }
+    const marco = marcoDeDescarga();
+    const f = escalaDeDescarga(marco);
+    const pedido = Number($("#mapa-descarga-tamano").value) || 1;
+    caja.textContent = "Saldrá de " + Math.round(marco.w * f) + " × " + Math.round(marco.h * f) + " píxeles"
+        + (f < pedido ? " (lo más grande que se puede: " + TOPE_DE_DESCARGA + " de lado)." : ".");
+}
+
 async function descargarImagenMapa() {
     const d = estadoMapa.datos;
     if (!d) {
         return;
     }
+    if (!document.querySelector("[data-descarga]")) {
+        pintarOpcionesDeDescarga();
+    }
+    const marcadas = new Set([...document.querySelectorAll("[data-descarga]")].filter((c) => c.checked)
+        .map((c) => c.getAttribute("data-descarga")));
+    const ve = (clave) => marcadas.has(clave);
+    const rayaSeVe = (l) => ve("raya:" + claveDeRayaEnDescarga(l));
+    const sitioSeVe = (p) => ve("sitio:" + claveDeSitioEnDescarga(p));
+    const regionSeVe = (s) => ve("region:" + claveDeRegionEnDescarga(s));
+    const rincon = ($("#mapa-descarga-rosa") || {}).value || "";
+    const formato = $("#mapa-descarga-formato").value || "png";
     avisarEditor("Preparando la imagen…");
-    // El lienzo, del tamaño del mapa (con un tope: un PNG de 8000 px no
-    // lo abre casi nada).
-    const tope = 8192;
-    const f = Math.min(1, tope / Math.max(d.width, d.height));
+    // El lienzo, del tamaño del trozo que sale por el tamaño pedido (con un
+    // tope: un PNG de más de 8000 px no lo abre casi nada).
+    const marco = marcoDeDescarga();
+    const f = escalaDeDescarga(marco);
     const lienzo = document.createElement("canvas");
-    lienzo.width = Math.round(d.width * f);
-    lienzo.height = Math.round(d.height * f);
+    lienzo.width = Math.max(1, Math.round(marco.w * f));
+    lienzo.height = Math.max(1, Math.round(marco.h * f));
     const ctx = lienzo.getContext("2d");
     ctx.scale(f, f);
+    ctx.translate(-marco.x, -marco.y);
     // Lo que en pantalla mide «un píxel», aquí mide k: un mapa de 1400 px
     // lleva las rayas y los sitios como se ven en el editor al verlo entero.
     const k = Math.max(d.width, d.height) / 1400;
@@ -3872,7 +4086,7 @@ async function descargarImagenMapa() {
     const capas = d.layers.slice().sort((a, b) => (Number(a.zIndex) || 0) - (Number(b.zIndex) || 0));
     for (const c of capas) {
         const url = estadoMapa.imagenes[c.image];
-        if (!url || estadoMapa.capasOcultas[c.id]) {
+        if (!url || !ve("fondo:" + (c.id || d.layers.indexOf(c)))) {
             continue;
         }
         const img = await cargarImagenMapa(url);
@@ -3889,7 +4103,7 @@ async function descargarImagenMapa() {
     const tramas = {};
     const lado = ladoDeTrama();
     for (const z of TIPOS_DE_ZONA) {
-        if (z[0] === "provincia" || !d.shapes.some((s) => s.kind === z[0])) {
+        if (z[0] === "provincia" || !d.shapes.some((s) => s.kind === z[0] && regionSeVe(s))) {
             continue;
         }
         const dibujoTrama = '<svg xmlns="http://www.w3.org/2000/svg" width="' + Math.ceil(lado) + '" height="'
@@ -3903,7 +4117,7 @@ async function descargarImagenMapa() {
     // Las regiones, de la más grande a la más pequeña (las de dentro, encima).
     regionesDeGrandeAPequena().map((i) => d.shapes[i]).forEach((s) => {
         const puntos = s.points || [];
-        if (puntos.length < 3) {
+        if (puntos.length < 3 || !regionSeVe(s)) {
             return;
         }
         const zona = tipoDeZonaMapa(s.kind);
@@ -3928,20 +4142,25 @@ async function descargarImagenMapa() {
     });
 
     // Las rayas.
-    d.lines.forEach((l) => pintarRayaEnLienzo(ctx, l, k));
-    puentesEnLienzo(ctx, d, k);
+    const rayas = d.lines.filter(rayaSeVe);
+    rayas.forEach((l) => pintarRayaEnLienzo(ctx, l, k));
+    if (ve("puentes")) {
+        // Con los caminos y los ríos que salen: sin el río, no hay puente.
+        puentesEnLienzo(ctx, { lines: rayas }, k);
+    }
+    const textos = ve("textos") ? d.labels : [];
 
     // Las letras de los textos, cargadas antes de pintar (si no, el lienzo
     // las pinta con la de recambio).
     const fuenteDe = (t) => (t.italic === false ? "" : "italic ") + letraDeTexto(t)[3] + " "
         + Math.round(tamanoDeTexto(t)) + "px " + letraDeTexto(t)[2];
     try {
-        await Promise.all(d.labels.filter((t) => t.label).map((t) => document.fonts.load(fuenteDe(t), t.label)));
+        await Promise.all(textos.filter((t) => t.label).map((t) => document.fonts.load(fuenteDe(t), t.label)));
     } catch (error) {
         // Sin las letras se pinta con las del sistema: no es motivo para no descargar.
     }
     // Los textos sueltos, del tamaño del mapa y girados.
-    d.labels.forEach((t) => {
+    textos.forEach((t) => {
         if (!t.label) {
             return;
         }
@@ -3971,13 +4190,15 @@ async function descargarImagenMapa() {
     // Los nombres de las regiones, en medio, en cursiva para no
     // confundirlos con los de los sitios. Si en medio hay un sitio (con su
     // nombre al lado), el de la región se baja o se sube hasta un hueco.
-    const ocupado = d.pins.map((p) => {
+    const conNombre = ve("nombres-sitios");
+    const sitiosQueSalen = d.pins.filter(sitioSeVe);
+    const ocupado = sitiosQueSalen.map((p) => {
         ctx.font = "700 " + Math.round(15 * k) + 'px "Space Grotesk", system-ui, sans-serif';
-        const ancho = p.label ? ctx.measureText(p.label).width + 22 * k : 0;
+        const ancho = p.label && conNombre ? ctx.measureText(p.label).width + 22 * k : 0;
         return { x1: p.x - 14 * k, x2: p.x + 14 * k + ancho, y1: p.y - 14 * k, y2: p.y + 14 * k };
     });
     d.shapes.forEach((s) => {
-        if (!s.label || (s.points || []).length < 3) {
+        if (!ve("nombres-regiones") || !regionSeVe(s) || !s.label || (s.points || []).length < 3) {
             return;
         }
         const c = centroDeRegion(s.points);
@@ -3996,7 +4217,7 @@ async function descargarImagenMapa() {
     // Los sitios que se ven como emblema (y los emblemas sueltos de antes):
     // la imagen recortada con su forma (o el símbolo de su tipo), el marco
     // dorado y el nombre debajo.
-    for (const em of d.emblems.concat(d.pins.filter((p) => p.shape))) {
+    for (const em of d.emblems.filter(sitioSeVe).concat(sitiosQueSalen.filter((p) => p.shape))) {
         const r = radioDeEmblema(em) * k;
         const forma = new Path2D(formaDeEmblema(em.shape, r, em.kind).d);
         const bajo = formaDeEmblema(em.shape, r, em.kind).bajo;
@@ -4030,13 +4251,13 @@ async function descargarImagenMapa() {
         ctx.strokeStyle = "#d8b25a";
         ctx.stroke(forma);
         ctx.restore();
-        if (em.label) {
+        if (em.label && conNombre) {
             letreroMapa(ctx, em.label, em.x, em.y + bajo + 12 * k, k, 15, "center");
         }
     }
 
     // Los sitios: su símbolo y su nombre a la derecha.
-    d.pins.filter((p) => !p.shape).forEach((p) => {
+    sitiosQueSalen.filter((p) => !p.shape).forEach((p) => {
         const tipo = tipoDeSitioMapa(p.kind);
         const r = 12 * k;
         ctx.fillStyle = p.color || (tipo ? tipo[3] : "#e74c3c");
@@ -4067,14 +4288,24 @@ async function descargarImagenMapa() {
             ctx.textBaseline = "middle";
             ctx.fillText(simbolo, p.x, p.y + k);
         }
-        if (p.label) {
+        if (p.label && conNombre) {
             letreroMapa(ctx, p.label, p.x + r + 5 * k, p.y, k, 15);
         }
     });
 
-    barraDeEscalaEnLienzo(ctx, d, k);
-    rosaEnLienzo(ctx, d);
+    // La escala y la rosa, en las esquinas de lo que sale (si es un
+    // recorte, en las suyas, no en las del mapa entero).
+    const enElMarco = Object.assign({}, d, { width: marco.w, height: marco.h, compass: rincon });
+    ctx.save();
+    ctx.translate(marco.x, marco.y);
+    if (ve("escala")) {
+        barraDeEscalaEnLienzo(ctx, enElMarco, k);
+    }
+    rosaEnLienzo(ctx, enElMarco);
+    ctx.restore();
 
+    const tipos = { png: ["image/png", "png"], jpeg: ["image/jpeg", "jpg"], webp: ["image/webp", "webp"] };
+    const [mime, extension] = tipos[formato] || tipos.png;
     lienzo.toBlob((blob) => {
         if (!blob) {
             avisarEditor("No se ha podido hacer la imagen (¿el mapa es demasiado grande?).", true);
@@ -4085,14 +4316,14 @@ async function descargarImagenMapa() {
             .replace(/\s+/g, "_").toLowerCase() || "mapa";
         const enlace = document.createElement("a");
         enlace.href = URL.createObjectURL(blob);
-        enlace.download = nombre + ".png";
+        enlace.download = nombre + "." + extension;
         document.body.appendChild(enlace);
         enlace.click();
         enlace.remove();
         setTimeout(() => URL.revokeObjectURL(enlace.href), 10000);
-        avisarEditor("Imagen descargada: " + nombre + ".png (" + lienzo.width + " × " + lienzo.height
+        avisarEditor("Imagen descargada: " + nombre + "." + extension + " (" + lienzo.width + " × " + lienzo.height
             + " px). Va con lo que hay ahora en el editor, esté guardado o no.");
-    }, "image/png");
+    }, mime, 0.92);
 }
 
 // ---- GUARDAR ----
@@ -4193,6 +4424,9 @@ function abrirPanelMapa(clave, abrir, solo) {
     pestana.setAttribute("aria-expanded", abrir ? "true" : "false");
     if (abrir && clave === "repaso" && estadoMapa.datos) {
         pintarRepasoMapa();
+    }
+    if (abrir && clave === "descargar" && estadoMapa.datos) {
+        pintarOpcionesDeDescarga();
     }
     // En una pantalla estrecha no caben dos: se abre uno y se cierran los
     // demás (sin olvidar cuáles se tenían abiertos en la grande).
@@ -4427,6 +4661,15 @@ function empezarMapas() {
 
     $("[data-mapa-guardar]").addEventListener("click", () => guardarMapa(false));
     $("[data-mapa-descargar]").addEventListener("click", descargarImagenMapa);
+    document.querySelectorAll("[data-mapa-descarga-todo]").forEach((b) => b.addEventListener("click", () => {
+        const si = b.getAttribute("data-mapa-descarga-todo") === "1";
+        document.querySelectorAll("[data-descarga]").forEach((c) => {
+            c.checked = si;
+        });
+        apuntarDescarga();
+    }));
+    ["#mapa-descarga-tamano", "#mapa-descarga-formato"].forEach((s) => $(s).addEventListener("change", apuntarDescarga));
+    document.querySelectorAll('input[name="mapa-recorte"]').forEach((r) => r.addEventListener("change", apuntarDescarga));
     $("[data-mapa-pasar]").addEventListener("click", () => guardarMapa(true));
     document.addEventListener("keydown", (e) => {
         if ($('[data-vista="mapa"]').hidden || !(e.ctrlKey || e.metaKey)) {
