@@ -1576,101 +1576,369 @@ path.mapa-ruta-campo {
 
 
 /* ====================================================================
-   LOS MANDOS, FLOTANDO ENCIMA DEL MAPA
+   LA INTERFAZ, COMO UN MAPA DE LOS DE SIEMPRE
    ====================================================================
-   Con JavaScript (mundo-mapa.js: prepararMandosFlotantesDeMapa, que pone
-   con-mandos-flotantes en la caja) los mandos son una ventana encima del
-   mapa, arriba a la izquierda, con su cabecera (plegar y cerrar), y el
-   mapa ocupa todo el ancho. Gana a la columna de la izquierda de antes
-   (las reglas de min-width: 861px de arriba). Sin sticky: absolute. */
-html.js .mapa-caja.con-mandos-flotantes {
+   Con JavaScript (mundo-mapa.js: prepararInterfazDeMapa pone
+   con-interfaz en la caja): arriba a la izquierda el buscador y las
+   pastillas; abajo a la derecha el zoom, en botones redondos; y los
+   paneles (capas, ruta, leyenda), tarjetas que flotan donde se dejen.
+   Tarjetas claras sobre el mapa, con las esquinas redondeadas y sombra,
+   con los colores del tema (sirve en los diez). En una pantalla estrecha
+   (es-estrecha) el mapa mide poco de alto: el buscador, las pastillas y
+   los paneles van encima de él, y el zoom debajo. Sin sticky, sin grid y
+   sin color-mix: absolute y flex. */
+.mapa-caja.con-interfaz {
+    --mapa-ui-borde: rgba(127, 127, 127, 0.38);
+    --mapa-ui-sombra: 0 2px 6px rgba(0, 0, 0, 0.32), 0 1px 2px rgba(0, 0, 0, 0.24);
+}
+
+html.js .mapa-caja.con-interfaz {
     --mapa-menu: 0px;
     flex-direction: column;
 }
 
-html.js .mapa-caja.con-mandos-flotantes > .mapa-lienzo {
+html.js .mapa-caja.con-interfaz > .mapa-lienzo {
     flex: 0 0 auto;
     width: 100%;
 }
 
-html.js .mapa-caja.con-mandos-flotantes > .mapa-mandos {
+.mapa-icono {
+    display: inline-block;
+    min-width: 1.1em;
+    font-size: 1.15em;
+    line-height: 1;
+    text-align: center;
+}
+
+/* ARRIBA A LA IZQUIERDA: el buscador y las pastillas. Lo de en medio no
+   se queda con el ratón (el mapa se sigue arrastrando por ahí). */
+.mapa-ui-arriba {
     position: absolute;
     top: 10px;
     left: 10px;
-    z-index: 4;
+    z-index: 5;
+    display: flex;
     flex-direction: column;
-    flex-wrap: nowrap;
-    align-items: stretch;
-    gap: 10px;
-    box-sizing: border-box;
-    width: min(17rem, calc(100% - 20px));
-    max-height: 70vh;
-    padding: 8px 10px 10px;
-    overflow-y: auto;
-    border: 2px solid var(--yellow);
-    background: var(--surface);
-    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.45);
+    align-items: flex-start;
+    gap: 8px;
+    max-width: calc(100% - 80px);
+    pointer-events: none;
 }
 
-html.js .mapa-caja.con-mandos-flotantes > .mapa-mandos[hidden] {
-    display: none;
+.mapa-ui-arriba > * {
+    pointer-events: auto;
 }
 
-.mapa-mandos-cabeza {
+.mapa-buscador {
     display: flex;
     align-items: center;
-    gap: 6px;
+    gap: 4px;
+    box-sizing: border-box;
+    width: min(24rem, 100%);
+    min-height: 50px;
+    padding: 0 4px 0 14px;
+    border: 1px solid var(--mapa-ui-borde);
+    border-radius: 25px;
+    background: var(--surface);
+    box-shadow: var(--mapa-ui-sombra);
 }
 
-.mapa-mandos-titulo {
-    flex: 1 1 auto;
-    margin: 0;
-}
-
-.mapa-mandos-cuerpo {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-}
-
-.mapa-mandos-cuerpo[hidden] {
+.mapa-buscador[hidden] {
     display: none;
 }
 
-/* El zoom y «pantalla completa», en dos filas si no caben en una. */
-.mapa-mandos .mapa-zoom {
-    flex-wrap: wrap;
-    max-width: 100%;
+.mapa-buscador:focus-within {
+    outline: 2px solid var(--yellow);
+    outline-offset: 2px;
 }
 
-html.js .con-mandos-flotantes .mapa-capas {
+.mapa-buscador-lupa {
+    color: var(--white);
+    font-size: 1.4rem;
+    opacity: 0.75;
+}
+
+.mapa-buscador input {
+    flex: 1 1 auto;
+    min-width: 0;
+    min-height: 44px;
+    padding: 0 6px;
+    border: 0;
+    background: transparent;
+    color: var(--white);
+    font-family: var(--fuente-texto);
+    font-size: 1rem;
+}
+
+.mapa-buscador input:focus {
+    outline: none;
+}
+
+.mapa-buscador input::placeholder {
+    color: var(--white);
+    opacity: 0.6;
+}
+
+.mapa-pastillas {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.mapa-pastillas .mapa-medir {
+    gap: 8px;
+}
+
+/* LAS PASTILLAS (capas, leyenda, medir) y LOS BOTONES REDONDOS (el zoom,
+   la ruta). 44px, lo que mide un dedo. */
+.mapa-pastilla,
+.mapa-redondo {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    box-sizing: border-box;
+    min-height: 44px;
+    border: 1px solid var(--mapa-ui-borde);
+    background: var(--surface);
+    color: var(--white);
+    font-family: var(--fuente-texto);
+    font-size: 0.9375rem;
+    font-weight: 600;
+    line-height: 1;
+    box-shadow: var(--mapa-ui-sombra);
+    cursor: pointer;
+}
+
+.mapa-pastilla {
+    padding: 0 16px 0 12px;
+    border-radius: 22px;
+}
+
+.mapa-pastilla[hidden],
+.mapa-redondo[hidden] {
+    display: none;
+}
+
+.mapa-redondo {
+    width: 44px;
+    padding: 0;
+    border-radius: 50%;
+    font-size: 1.25rem;
+}
+
+.mapa-pastilla:hover,
+.mapa-redondo:hover {
+    background: var(--purple-lighter);
+}
+
+.mapa-pastilla:focus-visible,
+.mapa-redondo:focus-visible {
+    outline: 2px solid var(--yellow);
+    outline-offset: 2px;
+}
+
+.mapa-pastilla[aria-expanded="true"],
+.mapa-pastilla[aria-pressed="true"],
+.mapa-redondo[aria-expanded="true"],
+.mapa-redondo[aria-pressed="true"] {
+    border-color: var(--yellow);
+    background: var(--yellow);
+    color: var(--yellow-contrast);
+}
+
+.mapa-pastilla:disabled,
+.mapa-redondo:disabled {
+    opacity: 0.5;
+    cursor: default;
+}
+
+/* El de la ruta, dentro del buscador (como el «cómo llegar»): de color. */
+.mapa-buscador .mapa-boton-ruta {
+    border-color: var(--yellow);
+    background: var(--yellow);
+    color: var(--yellow-contrast);
+    box-shadow: none;
+}
+
+/* ABAJO A LA DERECHA: el zoom, en columna. */
+.mapa-ui-zoom {
+    position: absolute;
+    right: 10px;
+    bottom: 14px;
+    z-index: 5;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+}
+
+.mapa-ui-zoom .mapa-zoom-cifra {
+    min-width: 0;
+    padding: 3px 8px;
+    border: 1px solid var(--mapa-ui-borde);
+    border-radius: 10px;
+    background: var(--surface);
+    font-size: 0.75rem;
+    box-shadow: var(--mapa-ui-sombra);
+}
+
+/* LOS PANELES: tarjetas que flotan donde se dejen. */
+html.js .mapa-caja.con-interfaz > .mapa-panel {
+    position: absolute;
+    top: 70px;
+    left: 10px;
+    z-index: 6;
+    display: flex;
+    flex-direction: column;
+    box-sizing: border-box;
+    width: min(20rem, calc(100% - 20px));
+    max-height: 70vh;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    border: 1px solid var(--mapa-ui-borde);
+    border-radius: 14px;
+    background: var(--surface);
+    color: var(--white);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.42);
+}
+
+html.js .mapa-caja.con-interfaz > .mapa-panel[hidden] {
+    display: none;
+}
+
+html.js .mapa-caja.con-interfaz > .mapa-panel.se-esta-moviendo {
+    opacity: 0.94;
+}
+
+.mapa-panel-cabeza {
+    display: flex;
+    flex: 0 0 auto;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 4px 4px 2px;
+    border-bottom: 1px solid var(--mapa-ui-borde);
+    cursor: grab;
+    touch-action: none;
+}
+
+/* Lo de dentro del panel: se desplaza él (la cabecera se queda). */
+.mapa-panel-cuerpo {
+    display: flex;
+    flex: 1 1 auto;
+    flex-direction: column;
+    gap: 12px;
+    min-height: 0;
+    padding: 12px 14px 14px;
+    overflow-y: auto;
+}
+
+.se-esta-moviendo .mapa-panel-cabeza {
+    cursor: grabbing;
+}
+
+.mapa-panel-asa,
+.mapa-panel-cerrar {
+    flex: 0 0 auto;
+    width: 44px;
+    height: 44px;
+    padding: 0;
+    border: 0;
+    border-radius: 50%;
+    background: transparent;
+    color: var(--white);
+    font-size: 1.35rem;
+    line-height: 1;
+    cursor: pointer;
+}
+
+.mapa-panel-asa {
+    cursor: grab;
+    opacity: 0.75;
+}
+
+.mapa-panel-asa:hover,
+.mapa-panel-cerrar:hover {
+    background: var(--purple-lighter);
+}
+
+.mapa-panel-asa:focus-visible,
+.mapa-panel-cerrar:focus-visible {
+    outline: 2px solid var(--yellow);
+    outline-offset: -2px;
+}
+
+.mapa-panel-titulo {
+    flex: 1 1 auto;
+    margin: 0;
+    color: var(--white);
+    font-family: var(--fuente-texto);
+    font-size: 1rem;
+    font-weight: 700;
+    letter-spacing: 0;
+    text-transform: none;
+}
+
+/* Dentro de los paneles, la letra del texto (no la de máquina de
+   escribir de los mandos de antes): se lee mejor en una lista larga. */
+.con-interfaz .mapa-panel .mapa-capa-casilla,
+.con-interfaz .mapa-panel .mapa-ruta-salida,
+.con-interfaz .mapa-panel .mapa-ruta-campo {
+    font-family: var(--fuente-texto);
+    font-size: 0.9375rem;
+}
+
+html.js .con-interfaz .mapa-panel .mapa-capas {
     flex-direction: column;
     flex-wrap: nowrap;
     align-items: flex-start;
 }
 
-.con-mandos-flotantes > .mapa-mandos-abrir {
-    position: absolute;
-    top: 10px;
-    left: 10px;
-    z-index: 4;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.45);
+.con-interfaz .mapa-panel .mapa-boton {
+    border-width: 1px;
+    border-radius: 22px;
+    font-family: var(--fuente-texto);
+    font-size: 0.9375rem;
 }
 
-/* Sin flotar (pantallas estrechas), encima del mapa: la cabeza y lo de
-   dentro, cada uno en su fila. */
-.mapa-mandos > .mapa-mandos-cabeza,
-.mapa-mandos > .mapa-mandos-cuerpo {
-    flex: 1 1 100%;
+/* Lo medido, encima del mapa, sin taparse con el zoom de la derecha. */
+.con-interfaz .mapa-medida.es-encima {
+    right: 70px;
 }
 
-.mapa-mandos-abrir {
-    align-self: flex-start;
-    margin: 8px 10px;
+/* EN UNA PANTALLA ESTRECHA: encima del mapa, en su sitio. */
+.mapa-caja.es-estrecha .mapa-ui-arriba {
+    position: static;
+    align-items: stretch;
+    max-width: none;
+    padding: 10px;
 }
 
-.mapa-mandos-abrir[hidden] {
+.mapa-caja.es-estrecha .mapa-buscador {
+    width: 100%;
+}
+
+html.js .mapa-caja.con-interfaz.es-estrecha > .mapa-panel {
+    position: static;
+    width: auto;
+    max-height: none;
+    margin: 0 10px 10px;
+}
+
+.mapa-caja.es-estrecha .mapa-panel-cabeza {
+    cursor: default;
+}
+
+.mapa-caja.es-estrecha .mapa-panel-asa {
     display: none;
+}
+
+.mapa-caja.es-estrecha .mapa-ui-zoom {
+    position: static;
+    flex-direction: row;
+    justify-content: flex-end;
+    padding: 8px 10px;
 }
 
 /* Los filtros de los sitios: el atajo «solo países y capitales», pulsado. */

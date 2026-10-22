@@ -8,7 +8,8 @@ const TIPOS_DE_SITIO_DE_MAPA = [["capital", "capitales"], ["ciudad", "ciudades"]
     ["fortaleza", "fortalezas"], ["ruina", "ruinas"], ["puerto", "puertos"], ["templo", "templos"],
     ["torre", "torres"], ["cueva", "cuevas"], ["mina", "minas"], ["puente", "puentes"], ["batalla", "batallas"],
     ["mazmorra", "mazmorras"], ["campamento", "campamentos"], ["", "sin tipo"]];
-const MEMORIA_DE_MANDOS_DE_MAPA = "mapa-mandos";
+const MEMORIA_DE_PANELES_DE_MAPA = "mapa-paneles";
+const ANCHO_ESTRECHO_DE_MAPA = 700;
 const CLASES_DE_ZONA_DE_MAPA = [["vecino", "países vecinos"], ["provincia", "provincias y comarcas"], ["lago", "lagos"],
     ["mar", "mares"], ["bosque", "bosques"], ["montana", "montañas"], ["desierto", "desiertos"],
     ["pantano", "pantanos y ciénagas"], ["valle", "valles y llanuras"], ["otra", "otras regiones"]];
@@ -74,7 +75,7 @@ function initializeMundoMapa() {
         }
     });
     window.addEventListener("resize", () => rehacerMapa(mando));
-    prepararMandosFlotantesDeMapa(mando);
+    prepararInterfazDeMapa(mando);
     prepararPantallaCompletaDeMapa(mando);
     prepararArrastreDeMapa(mando);
     prepararCapasDeMapa(caja);
@@ -87,6 +88,7 @@ function initializeMundoMapa() {
     prepararMedirDeMapa(mando);
     prepararLeyendaDeMapa(mando);
     prepararRutaDeMapa(mando);
+    prepararBuscadorDeMapa(mando);
     fijarMigasDeMapa();
     ponerZoomDeMapa(mando, 1);
     centrarMapa(mando);
@@ -159,11 +161,18 @@ function alturaDelMenuDeMapa(mando) {
     if (!menu) {
         return;
     }
-    if (mando.flotantes) {
-        const flota = window.innerWidth >= 861 || !!mando.aPantalla;
-        mando.caja.classList.toggle("con-mandos-flotantes", flota);
-        menu.style.top = flota ? (mando.lienzo.offsetTop + 10) + "px" : "";
-        menu.style.maxHeight = flota ? Math.max(120, mando.lienzo.clientHeight - 70) + "px" : "";
+    if (mando.interfaz) {
+        const estrecha = window.innerWidth < ANCHO_ESTRECHO_DE_MAPA && !mando.aPantalla;
+        mando.caja.classList.toggle("es-estrecha", estrecha);
+        if (mando.pilaDeZoom) {
+            mando.caja.insertBefore(mando.pilaDeZoom, estrecha ? mando.lienzo : mando.lienzo.nextSibling);
+        }
+        mando.caja.querySelectorAll(".mapa-panel").forEach((panel) => {
+            panel.style.maxHeight = "";
+            if (!estrecha && panel.colocarEnElMapa) {
+                panel.colocarEnElMapa();
+            }
+        });
         return;
     }
     const alLado = menu.offsetTop === mando.lienzo.offsetTop && menu.offsetLeft < mando.lienzo.offsetLeft;
@@ -176,115 +185,291 @@ function rehacerMapa(mando) {
     mejorarImagenDeMapa(mando);
     pintarEscalaDeMapa(mando);
 }
-function memoriaDeMandosDeMapa() {
+function memoriaDePanelesDeMapa() {
     try {
-        const m = JSON.parse(window.localStorage.getItem(MEMORIA_DE_MANDOS_DE_MAPA) || "null");
-        return m && typeof m === "object" ? m : null;
+        const m = JSON.parse(window.localStorage.getItem(MEMORIA_DE_PANELES_DE_MAPA) || "null");
+        return m && typeof m === "object" ? m : {};
     } catch (error) {
-        return null;
+        return {};
     }
 }
-function prepararMandosFlotantesDeMapa(mando) {
+function apuntarPanelDeMapa(clave, sitio) {
+    const m = memoriaDePanelesDeMapa();
+    m[clave] = sitio;
+    try {
+        window.localStorage.setItem(MEMORIA_DE_PANELES_DE_MAPA, JSON.stringify(m));
+    } catch (error) {
+    }
+}
+function botonDeMapa(clase, icono, texto, soloIcono) {
+    const boton = document.createElement("button");
+    boton.type = "button";
+    boton.className = clase;
+    const dibujo = document.createElement("span");
+    dibujo.className = "mapa-icono";
+    dibujo.setAttribute("aria-hidden", "true");
+    dibujo.textContent = icono;
+    boton.appendChild(dibujo);
+    if (soloIcono) {
+        boton.setAttribute("aria-label", texto);
+        boton.title = texto;
+    } else {
+        boton.appendChild(document.createTextNode(texto));
+    }
+    return boton;
+}
+function hacerPanelDeMapa(mando, panel, clave, titulo, pastilla, alCambiar) {
+    panel.classList.add("mapa-panel");
+    panel.hidden = true;
+    panel.setAttribute("role", "region");
+    const cabeza = document.createElement("div");
+    cabeza.className = "mapa-panel-cabeza";
+    const asa = document.createElement("button");
+    asa.type = "button";
+    asa.className = "mapa-panel-asa";
+    asa.setAttribute("aria-label", "Mover el panel «" + titulo + "» (arrástralo, o con las flechas)");
+    asa.title = "Arrastra para moverlo";
+    asa.textContent = "⠿";
+    const nombre = document.createElement("h2");
+    nombre.className = "mapa-panel-titulo";
+    nombre.id = "mapa-panel-" + clave;
+    nombre.textContent = titulo;
+    const cerrar = document.createElement("button");
+    cerrar.type = "button";
+    cerrar.className = "mapa-panel-cerrar";
+    cerrar.setAttribute("aria-label", "Cerrar «" + titulo + "»");
+    cerrar.textContent = "×";
+    cabeza.appendChild(asa);
+    cabeza.appendChild(nombre);
+    cabeza.appendChild(cerrar);
+    const cuerpo = document.createElement("div");
+    cuerpo.className = "mapa-panel-cuerpo";
+    [...panel.childNodes].forEach((hijo) => cuerpo.appendChild(hijo));
+    panel.appendChild(cabeza);
+    panel.appendChild(cuerpo);
+    panel.setAttribute("aria-labelledby", nombre.id);
+    cuerpo.querySelectorAll(":scope > .mapa-sitios-titulo").forEach((h) => h.remove());
+    const recordado = memoriaDePanelesDeMapa()[clave];
+    const sitio = recordado && Number.isFinite(recordado.x) && Number.isFinite(recordado.y) ? recordado : null;
+    const colocar = (x, y) => {
+        const lienzo = mando.lienzo;
+        const maxX = Math.max(0, lienzo.offsetLeft + lienzo.clientWidth - panel.offsetWidth - 6);
+        const maxY = Math.max(0, lienzo.offsetTop + lienzo.clientHeight - Math.min(panel.offsetHeight, 120));
+        const nx = Math.min(Math.max(lienzo.offsetLeft + 6, x), maxX);
+        const ny = Math.min(Math.max(lienzo.offsetTop + 6, y), maxY);
+        panel.style.left = nx + "px";
+        panel.style.top = ny + "px";
+        panel.style.right = "auto";
+        panel.style.maxHeight = Math.max(140, lienzo.offsetTop + lienzo.clientHeight - ny - 8) + "px";
+        return { x: nx, y: ny };
+    };
+    panel.colocarEnElMapa = () => {
+        if (mando.caja.classList.contains("es-estrecha")) {
+            panel.style.left = "";
+            panel.style.top = "";
+            panel.style.maxHeight = "";
+            return;
+        }
+        if (panel.hidden) {
+            return;
+        }
+        const arriba = mando.caja.querySelector(".mapa-ui-arriba");
+        const salidaY = (arriba ? arriba.offsetTop + arriba.offsetHeight : mando.lienzo.offsetTop) + 8;
+        const salidaX = clave === "leyenda" ? mando.lienzo.offsetLeft + mando.lienzo.clientWidth - panel.offsetWidth - 70
+            : mando.lienzo.offsetLeft + 10;
+        const actual = panel.dataset.x ? { x: Number(panel.dataset.x), y: Number(panel.dataset.y) } : sitio;
+        const puesto = colocar(actual ? actual.x : salidaX, actual ? actual.y : (clave === "leyenda" ? 10 : salidaY));
+        panel.dataset.x = puesto.x;
+        panel.dataset.y = puesto.y;
+    };
+    let arrastre = null;
+    cabeza.addEventListener("pointerdown", (evento) => {
+        if (evento.button !== 0 || evento.target.closest(".mapa-panel-cerrar") || mando.caja.classList.contains("es-estrecha")) {
+            return;
+        }
+        arrastre = { id: evento.pointerId, x: evento.clientX, y: evento.clientY,
+            desdeX: panel.offsetLeft, desdeY: panel.offsetTop };
+        try {
+            cabeza.setPointerCapture(evento.pointerId);
+        } catch (error) {
+        }
+        panel.classList.add("se-esta-moviendo");
+        evento.preventDefault();
+    });
+    cabeza.addEventListener("pointermove", (evento) => {
+        if (!arrastre || evento.pointerId !== arrastre.id) {
+            return;
+        }
+        const puesto = colocar(arrastre.desdeX + evento.clientX - arrastre.x, arrastre.desdeY + evento.clientY - arrastre.y);
+        panel.dataset.x = puesto.x;
+        panel.dataset.y = puesto.y;
+    });
+    const soltar = () => {
+        if (arrastre) {
+            arrastre = null;
+            panel.classList.remove("se-esta-moviendo");
+            apuntarPanelDeMapa(clave, { x: Number(panel.dataset.x), y: Number(panel.dataset.y) });
+        }
+    };
+    cabeza.addEventListener("pointerup", soltar);
+    cabeza.addEventListener("pointercancel", soltar);
+    asa.addEventListener("keydown", (evento) => {
+        const flechas = { ArrowLeft: [-1, 0], ArrowRight: [1, 0], ArrowUp: [0, -1], ArrowDown: [0, 1] };
+        if (!flechas[evento.key] || mando.caja.classList.contains("es-estrecha")) {
+            return;
+        }
+        evento.preventDefault();
+        const paso = evento.shiftKey ? 60 : 20;
+        const puesto = colocar(panel.offsetLeft + flechas[evento.key][0] * paso, panel.offsetTop + flechas[evento.key][1] * paso);
+        panel.dataset.x = puesto.x;
+        panel.dataset.y = puesto.y;
+        apuntarPanelDeMapa(clave, puesto);
+    });
+    const poner = (abierto) => {
+        panel.hidden = !abierto;
+        if (pastilla) {
+            pastilla.setAttribute("aria-expanded", abierto ? "true" : "false");
+        }
+        if (abierto) {
+            alturaDelMenuDeMapa(mando);
+            panel.colocarEnElMapa();
+        }
+        if (alCambiar) {
+            alCambiar(abierto);
+        }
+    };
+    if (pastilla) {
+        pastilla.setAttribute("aria-controls", panel.id || (panel.id = "mapa-panel-de-" + clave));
+        pastilla.setAttribute("aria-expanded", "false");
+        pastilla.addEventListener("click", () => {
+            poner(panel.hidden);
+            if (!panel.hidden) {
+                const primero = panel.querySelector("input, select, button:not(.mapa-panel-asa):not(.mapa-panel-cerrar), summary");
+                (primero || cerrar).focus();
+            }
+        });
+    }
+    cerrar.addEventListener("click", () => {
+        poner(false);
+        if (pastilla) {
+            pastilla.focus();
+        }
+    });
+    panel.addEventListener("keydown", (evento) => {
+        if (evento.key === "Escape") {
+            evento.preventDefault();
+            poner(false);
+            if (pastilla) {
+                pastilla.focus();
+            }
+        }
+    });
+    return poner;
+}
+function prepararInterfazDeMapa(mando) {
     const menu = mando.caja.querySelector("[data-mapa-mandos]");
     if (!menu) {
         return;
     }
-    mando.flotantes = true;
-    menu.id = menu.id || "mapa-mandos";
-    const zoom = menu.querySelector(".mapa-zoom");
-    const cuerpo = document.createElement("div");
-    cuerpo.className = "mapa-mandos-cuerpo";
-    cuerpo.id = "mapa-mandos-cuerpo";
-    [...menu.children].forEach((hijo) => {
-        if (hijo !== zoom) {
-            cuerpo.appendChild(hijo);
+    mando.interfaz = true;
+    mando.caja.classList.add("con-interfaz");
+    const arriba = document.createElement("div");
+    arriba.className = "mapa-ui-arriba";
+    const buscador = document.createElement("div");
+    buscador.className = "mapa-buscador";
+    buscador.setAttribute("role", "search");
+    arriba.appendChild(buscador);
+    const pastillas = document.createElement("div");
+    pastillas.className = "mapa-pastillas";
+    pastillas.setAttribute("role", "group");
+    pastillas.setAttribute("aria-label", "Herramientas del mapa");
+    arriba.appendChild(pastillas);
+    mando.caja.insertBefore(arriba, mando.lienzo);
+    mando.buscador = buscador;
+    mando.pastillas = pastillas;
+    const pila = document.createElement("div");
+    pila.className = "mapa-ui-zoom";
+    pila.setAttribute("role", "group");
+    pila.setAttribute("aria-label", "Zoom del mapa");
+    const ajustar = mando.ajustar;
+    if (ajustar) {
+        ajustar.className = "mapa-redondo";
+        ajustar.innerHTML = '<span class="mapa-icono" aria-hidden="true">⤢</span>';
+        ajustar.setAttribute("aria-label", "Ver el mapa entero");
+        ajustar.title = "Ver el mapa entero (0)";
+        pila.appendChild(ajustar);
+    }
+    if (mando.mas) {
+        mando.mas.className = "mapa-redondo es-arriba";
+        mando.mas.title = "Acercar (+)";
+        pila.appendChild(mando.mas);
+    }
+    if (mando.cifra) {
+        mando.cifra.className = "mapa-zoom-cifra";
+        pila.appendChild(mando.cifra);
+    }
+    if (mando.menos) {
+        mando.menos.className = "mapa-redondo es-abajo";
+        mando.menos.title = "Alejar (−)";
+        pila.appendChild(mando.menos);
+    }
+    mando.caja.insertBefore(pila, mando.lienzo.nextSibling);
+    mando.pilaDeZoom = pila;
+    const zoomViejo = menu.querySelector(".mapa-zoom");
+    if (zoomViejo) {
+        zoomViejo.remove();
+    }
+    const capas = botonDeMapa("mapa-pastilla", "◧", "capas");
+    pastillas.appendChild(capas);
+    const deLeyenda = menu.querySelector("[data-mapa-leyenda-boton]");
+    if (deLeyenda) {
+        deLeyenda.className = "mapa-pastilla";
+        deLeyenda.innerHTML = '<span class="mapa-icono" aria-hidden="true">≡</span>leyenda';
+        pastillas.appendChild(deLeyenda);
+    }
+    const medir = menu.querySelector(".mapa-medir");
+    if (medir) {
+        medir.querySelectorAll(".mapa-boton").forEach((b) => {
+            b.className = "mapa-pastilla";
+        });
+        const deMedir = medir.querySelector("[data-mapa-medir]");
+        if (deMedir) {
+            deMedir.innerHTML = '<span class="mapa-icono" aria-hidden="true">📏</span>medir';
         }
-    });
-    const cabeza = document.createElement("div");
-    cabeza.className = "mapa-mandos-cabeza";
-    const titulo = document.createElement("span");
-    titulo.className = "mapa-capas-titulo mapa-mandos-titulo";
-    titulo.textContent = "mandos";
-    const plegar = document.createElement("button");
-    plegar.type = "button";
-    plegar.className = "mapa-boton";
-    plegar.setAttribute("aria-controls", cuerpo.id);
-    const cerrar = document.createElement("button");
-    cerrar.type = "button";
-    cerrar.className = "mapa-boton";
-    cerrar.setAttribute("aria-label", "Cerrar los mandos");
-    cerrar.textContent = "×";
-    cabeza.appendChild(titulo);
-    cabeza.appendChild(plegar);
-    cabeza.appendChild(cerrar);
-    menu.prepend(cabeza);
-    menu.appendChild(cuerpo);
-    menu.setAttribute("role", "region");
-    menu.setAttribute("aria-label", "Mandos del mapa");
-    const abrir = document.createElement("button");
-    abrir.type = "button";
-    abrir.className = "mapa-boton mapa-mandos-abrir";
-    abrir.setAttribute("aria-controls", menu.id);
-    abrir.innerHTML = '<span aria-hidden="true">☰</span> mandos';
-    abrir.hidden = true;
-    menu.after(abrir);
-    const memoria = memoriaDeMandosDeMapa();
-    const estado = {
-        plegado: memoria ? !!memoria.plegado : true,
-        cerrado: memoria ? !!memoria.cerrado : false,
-    };
-    const apuntar = () => {
-        try {
-            window.localStorage.setItem(MEMORIA_DE_MANDOS_DE_MAPA, JSON.stringify(estado));
-        } catch (error) {
+        const borrar = medir.querySelector("[data-mapa-medir-borrar]");
+        if (borrar) {
+            borrar.innerHTML = '<span class="mapa-icono" aria-hidden="true">⌫</span>borrar la medida';
         }
-    };
-    const poner = () => {
-        cuerpo.hidden = estado.plegado;
-        plegar.setAttribute("aria-expanded", estado.plegado ? "false" : "true");
-        plegar.setAttribute("aria-label", estado.plegado ? "Desplegar los mandos" : "Plegar los mandos");
-        plegar.textContent = estado.plegado ? "▸" : "▾";
-        menu.hidden = estado.cerrado;
-        abrir.hidden = !estado.cerrado;
-        abrir.setAttribute("aria-expanded", estado.cerrado ? "false" : "true");
-        alturaDelMenuDeMapa(mando);
-    };
-    plegar.addEventListener("click", () => {
-        estado.plegado = !estado.plegado;
-        apuntar();
-        poner();
-    });
-    cerrar.addEventListener("click", () => {
-        estado.cerrado = true;
-        apuntar();
-        poner();
-        abrir.focus();
-    });
-    abrir.addEventListener("click", () => {
-        estado.cerrado = false;
-        apuntar();
-        poner();
-        plegar.focus();
-    });
-    poner();
+        pastillas.appendChild(medir);
+    }
+    const deRuta = menu.querySelector("[data-mapa-ruta-boton]");
+    if (deRuta) {
+        deRuta.className = "mapa-redondo mapa-boton-ruta";
+        deRuta.innerHTML = '<span class="mapa-icono" aria-hidden="true">⇄</span>';
+        deRuta.setAttribute("aria-label", "Ruta por los caminos");
+        deRuta.title = "Ruta por los caminos";
+        buscador.appendChild(deRuta);
+    }
+    menu.classList.add("mapa-panel-capas");
+    menu.id = "mapa-panel-de-capas";
+    mando.caja.insertBefore(menu, arriba.nextSibling);
+    mando.abrirCapas = hacerPanelDeMapa(mando, menu, "capas", "Capas", capas);
+    alturaDelMenuDeMapa(mando);
 }
 function prepararPantallaCompletaDeMapa(mando) {
-    const zoom = mando.caja.querySelector(".mapa-zoom");
+    const zoom = mando.pilaDeZoom || mando.caja.querySelector(".mapa-zoom");
     if (!zoom) {
         return;
     }
-    const boton = document.createElement("button");
-    boton.type = "button";
-    boton.className = "mapa-boton mapa-boton-ancho";
+    const boton = botonDeMapa("mapa-redondo", "⛶", "Pantalla completa", true);
     boton.setAttribute("aria-pressed", "false");
-    boton.innerHTML = '<span aria-hidden="true">⛶</span> pantalla completa';
-    zoom.appendChild(boton);
+    zoom.prepend(boton);
     const poner = (si) => {
         mando.caja.classList.toggle("es-pantalla-completa", si);
         document.documentElement.classList.toggle("con-mapa-a-pantalla", si);
         boton.setAttribute("aria-pressed", si ? "true" : "false");
-        boton.innerHTML = si ? '<span aria-hidden="true">⛶</span> salir de pantalla completa'
-            : '<span aria-hidden="true">⛶</span> pantalla completa';
+        boton.setAttribute("aria-label", si ? "Salir de pantalla completa (Esc)" : "Pantalla completa");
+        boton.title = boton.getAttribute("aria-label");
         mando.aPantalla = si;
         const antes = mando.zoom;
         rehacerMapa(mando);
@@ -536,7 +721,7 @@ function tipoDePinDeMapa(pin) {
     return tipo ? tipo[0] : "";
 }
 function prepararFiltrosDeSitiosDeMapa(mando) {
-    const menu = mando.caja.querySelector(".mapa-mandos-cuerpo") || mando.caja.querySelector("[data-mapa-mandos]");
+    const menu = mando.caja.querySelector("[data-mapa-mandos]");
     const pines = [...mando.dibujo.querySelectorAll(".mapa-pin")];
     if (!menu || !pines.length) {
         return;
@@ -915,7 +1100,7 @@ function prepararMedirDeMapa(mando) {
         return;
     }
     boton.hidden = false;
-    borrar.hidden = false;
+    borrar.hidden = !!mando.interfaz;
     mando.caja.appendChild(salida);
     salida.classList.add("es-encima");
     const medida = { activa: false, puntos: [], grupo: null };
@@ -965,6 +1150,9 @@ function prepararMedirDeMapa(mando) {
         medida.activa = si;
         boton.setAttribute("aria-pressed", si ? "true" : "false");
         mando.lienzo.classList.toggle("esta-midiendo", si);
+        if (mando.interfaz) {
+            borrar.hidden = !si && !medida.puntos.length;
+        }
         if (mando.globo) {
             mando.globo.hidden = true;
         }
@@ -1006,32 +1194,18 @@ function prepararLeyendaDeMapa(mando) {
     }
     boton.hidden = false;
     panel.classList.add("es-flotante");
-    panel.hidden = true;
     panel.tabIndex = 0;
-    const colocar = () => {
-        panel.style.top = (mando.lienzo.offsetTop + 10) + "px";
-        panel.style.maxHeight = Math.max(160, mando.lienzo.clientHeight - 20) + "px";
-    };
+    if (mando.interfaz) {
+        mando.caja.insertBefore(panel, mando.lienzo);
+        hacerPanelDeMapa(mando, panel, "leyenda", "Leyenda", boton);
+        return;
+    }
+    panel.hidden = true;
     const poner = (abierta) => {
         panel.hidden = !abierta;
         boton.setAttribute("aria-expanded", abierta ? "true" : "false");
-        if (abierta) {
-            colocar();
-        }
     };
     boton.addEventListener("click", () => poner(panel.hidden));
-    window.addEventListener("resize", () => {
-        if (!panel.hidden) {
-            colocar();
-        }
-    });
-    mando.caja.addEventListener("keydown", (evento) => {
-        if (evento.key === "Escape" && !panel.hidden) {
-            evento.preventDefault();
-            poner(false);
-            boton.focus();
-        }
-    });
 }
 function leerRedDeMapa(dibujo) {
     try {
@@ -1123,6 +1297,110 @@ function caminoMasCortoDeMapa(red, desde, hasta) {
         puntos.unshift(n);
     }
     return { puntos, largo: lejos[hasta] };
+}
+function prepararBuscadorDeMapa(mando) {
+    const caja = mando.buscador;
+    if (!caja) {
+        return;
+    }
+    const porNombre = new Map();
+    mando.dibujo.querySelectorAll("[data-mapa-sitio][data-mapa-nombre]").forEach((el) => {
+        const nombre = (el.getAttribute("data-mapa-nombre") || "").trim();
+        if (nombre && !porNombre.has(nombre.toLowerCase())) {
+            porNombre.set(nombre.toLowerCase(), { nombre, el });
+        }
+    });
+    const lupa = document.createElement("span");
+    lupa.className = "mapa-icono mapa-buscador-lupa";
+    lupa.setAttribute("aria-hidden", "true");
+    lupa.textContent = "⌕";
+    const etiqueta = document.createElement("label");
+    etiqueta.className = "visually-hidden";
+    etiqueta.htmlFor = "mapa-buscar";
+    etiqueta.textContent = "Buscar en el mapa";
+    const entrada = document.createElement("input");
+    entrada.id = "mapa-buscar";
+    entrada.type = "search";
+    entrada.placeholder = "Buscar en el mapa";
+    entrada.autocomplete = "off";
+    entrada.spellcheck = false;
+    const lista = document.createElement("datalist");
+    lista.id = "mapa-buscar-lista";
+    [...porNombre.values()].sort((a, b) => a.nombre.localeCompare(b.nombre, "es")).forEach(({ nombre }) => {
+        const opcion = document.createElement("option");
+        opcion.value = nombre;
+        lista.appendChild(opcion);
+    });
+    entrada.setAttribute("list", lista.id);
+    const aviso = document.createElement("p");
+    aviso.className = "visually-hidden";
+    aviso.setAttribute("role", "status");
+    caja.prepend(lista);
+    caja.prepend(entrada);
+    caja.prepend(etiqueta);
+    caja.prepend(lupa);
+    caja.appendChild(aviso);
+    if (!porNombre.size) {
+        caja.hidden = true;
+        return;
+    }
+    const ir = () => {
+        const hallado = porNombre.get(entrada.value.trim().toLowerCase());
+        if (!hallado) {
+            return false;
+        }
+        irASitioDeMapa(mando, hallado.el);
+        aviso.textContent = hallado.nombre + ", en el centro del mapa.";
+        return true;
+    };
+    entrada.addEventListener("change", ir);
+    entrada.addEventListener("keydown", (evento) => {
+        if (evento.key === "Enter") {
+            evento.preventDefault();
+            if (!ir()) {
+                aviso.textContent = "No hay nada que se llame así: elige uno de la lista.";
+            }
+        }
+    });
+}
+function irASitioDeMapa(mando, el) {
+    const lados = (mando.dibujo.getAttribute("viewBox") || "").split(/[\s,]+/).map(parseFloat);
+    let x;
+    let y;
+    let zoom;
+    const xy = el.getAttribute("data-mapa-xy");
+    if (xy) {
+        [x, y] = xy.split(",").map(parseFloat);
+        const regional = el.classList.contains("es-regional");
+        const importante = el.classList.contains("es-capital") || el.classList.contains("es-ciudad");
+        zoom = regional ? (importante ? 3 : Math.max(mando.cerca || 2, 4)) : Math.max(mando.zoom, 2);
+    } else {
+        let caja;
+        try {
+            caja = el.getBBox();
+        } catch (error) {
+            return;
+        }
+        x = caja.x + caja.width / 2;
+        y = caja.y + caja.height / 2;
+        const cabe = Math.min(lados[2] / Math.max(caja.width, 1), lados[3] / Math.max(caja.height, 1));
+        zoom = Math.max(1, cabe * 0.6);
+    }
+    ponerZoomDeMapa(mando, Math.min(zoom, mando.maximo || ZOOM_MAXIMO_DE_MAPA));
+    escalarPinesDeMapa(mando);
+    const matriz = mando.dibujo.getScreenCTM && mando.dibujo.getScreenCTM();
+    if (matriz) {
+        const punto = mando.dibujo.createSVGPoint();
+        punto.x = x;
+        punto.y = y;
+        const enPantalla = punto.matrixTransform(matriz);
+        const ventana = mando.lienzo.getBoundingClientRect();
+        mando.lienzo.scrollLeft += enPantalla.x - (ventana.left + ventana.width / 2);
+        mando.lienzo.scrollTop += enPantalla.y - (ventana.top + ventana.height / 2);
+    }
+    const todos = mando.dibujo.querySelectorAll('[data-mapa-sitio="' + el.getAttribute("data-mapa-sitio") + '"]');
+    todos.forEach((uno) => uno.classList.add("esta-mirado"));
+    setTimeout(() => todos.forEach((uno) => uno.classList.remove("esta-mirado")), 2500);
 }
 function puntoDelMapaDeMapa(mando, evento) {
     const svg = mando.dibujo;
@@ -1223,7 +1501,11 @@ function prepararRutaDeMapa(mando) {
     salida.className = "mapa-ruta-salida";
     salida.setAttribute("role", "status");
     panel.appendChild(salida);
-    boton.after(panel);
+    if (mando.interfaz) {
+        mando.caja.insertBefore(panel, mando.lienzo);
+    } else {
+        boton.after(panel);
+    }
     const extremos = { desde: null, hasta: null };
     const deSitio = (s) => ({ nodo: s[0], nombre: s[1], x: red.p[2 * s[0]], y: red.p[2 * s[0] + 1], campo: 0 });
     const cercaDe = (x, y) => {
@@ -1269,6 +1551,37 @@ function prepararRutaDeMapa(mando) {
         const e = mando.escala;
         return e ? cifraDeMapa(pixeles * e.porPixel) + (e.unidad ? " " + e.unidad : "") : "";
     };
+    const pintarCampoATraves = (a, b, recta, porCaminos) => {
+        const g = svgDeMapa("g", { class: "mapa-ruta-dibujo" });
+        g.appendChild(svgDeMapa("path", { class: "mapa-ruta-campo es-recta", d: "M" + a.x + " " + a.y + "L" + b.x + " " + b.y }));
+        [[a, ""], [b, " es-final"]].forEach(([x, clase]) => {
+            const xy = x.x + "," + x.y;
+            g.appendChild(svgDeMapa("circle", { r: (radio * 0.5).toFixed(1), class: "mapa-ruta-punto" + clase,
+                "data-mapa-xy": xy, transform: "translate(" + xy + ")" }));
+        });
+        const pines = mando.dibujo.querySelector(".mapa-pines");
+        mando.dibujo.insertBefore(g, pines || null);
+        dibujoDeRuta = g;
+        escalarPinesDeMapa(mando);
+        let texto = "De " + a.nombre + " a " + b.nombre + ", campo a través (en línea recta: es más corto que por los"
+            + " caminos)";
+        const e = mando.escala;
+        if (e) {
+            const distancia = recta * e.porPixel;
+            texto += ": " + cifraDeMapa(distancia) + (e.unidad ? " " + e.unidad : "") + ".";
+            const viaje = Object.keys(e.viaje).filter((como) => e.viaje[como] > 0);
+            if (viaje.length) {
+                texto += " " + viaje.map((como) => como.charAt(0).toUpperCase() + como.slice(1) + ": "
+                    + diasDeViajeDeMapa(distancia, e.viaje[como])).join(" · ") + ".";
+            }
+            if (Number.isFinite(porCaminos)) {
+                texto += " Por los caminos serían " + distanciaEscrita(porCaminos) + ".";
+            }
+        } else {
+            texto += ".";
+        }
+        salida.textContent = texto;
+    };
     const pintar = () => {
         borrarDibujo();
         const a = extremos.desde;
@@ -1286,6 +1599,12 @@ function prepararRutaDeMapa(mando) {
             return;
         }
         const camino = a.nodo === b.nodo ? { puntos: [a.nodo], largo: 0 } : caminoMasCortoDeMapa(red, a.nodo, b.nodo);
+        const recta = Math.hypot(a.x - b.x, a.y - b.y);
+        const porCaminos = camino ? camino.largo + a.campo + b.campo : Infinity;
+        if ((a.campo > 0 || b.campo > 0) && recta <= porCaminos) {
+            pintarCampoATraves(a, b, recta, porCaminos);
+            return;
+        }
         if (!camino) {
             salida.textContent = "No hay camino de " + a.nombre + " a " + b.nombre + " por los caminos del mapa.";
             return;
@@ -1335,8 +1654,7 @@ function prepararRutaDeMapa(mando) {
         salida.textContent = texto;
     };
     const medir = mando.caja.querySelector("[data-mapa-medir]");
-    const abrir = (si) => {
-        panel.hidden = !si;
+    const alCambiar = (si) => {
         boton.setAttribute("aria-pressed", si ? "true" : "false");
         mando.lienzo.classList.toggle("esta-trazando-ruta", si);
         if (dibujoDeRuta) {
@@ -1345,14 +1663,22 @@ function prepararRutaDeMapa(mando) {
         if (si && medir && medir.getAttribute("aria-pressed") === "true") {
             medir.click();
         }
-        alturaDelMenuDeMapa(mando);
     };
-    boton.addEventListener("click", () => {
-        abrir(panel.hidden);
-        if (!panel.hidden) {
-            desde.focus();
-        }
-    });
+    let abrir;
+    if (mando.interfaz) {
+        abrir = hacerPanelDeMapa(mando, panel, "ruta", "Ruta por los caminos", boton, alCambiar);
+    } else {
+        abrir = (si) => {
+            panel.hidden = !si;
+            alCambiar(si);
+        };
+        boton.addEventListener("click", () => {
+            abrir(panel.hidden);
+            if (!panel.hidden) {
+                desde.focus();
+            }
+        });
+    }
     if (medir) {
         medir.addEventListener("click", () => {
             if (medir.getAttribute("aria-pressed") === "true" && !panel.hidden) {
@@ -1384,13 +1710,6 @@ function prepararRutaDeMapa(mando) {
         hasta.value = "";
         pintar();
         desde.focus();
-    });
-    mando.caja.addEventListener("keydown", (evento) => {
-        if (evento.key === "Escape" && !panel.hidden && panel.contains(document.activeElement)) {
-            evento.preventDefault();
-            abrir(false);
-            boton.focus();
-        }
     });
     mando.lienzo.addEventListener("click", (evento) => {
         if (panel.hidden || evento.defaultPrevented) {

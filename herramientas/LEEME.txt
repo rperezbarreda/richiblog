@@ -1890,25 +1890,31 @@
   piezas). Va dentro del dibujo, del tamaño del mapa, y sale también en
   la imagen descargada. En Prunia, arriba a la derecha.
 
-  LOS MANDOS, EN UNA VENTANA FLOTANTE (desde el 22-10-2026; antes iban
-  en una columna a la izquierda): en pantallas de más de 860px, y en
-  cualquiera a pantalla completa, flotan encima del mapa, arriba a la
-  izquierda, y el mapa ocupa todo el ancho. Llevan una cabecera con
-  PLEGAR (se queda la cabecera y el zoom) y CERRAR (desaparecen; el
-  botón «☰ mandos» de la esquina los trae). De salida, plegados; luego,
-  como se dejaron (localStorage «mapa-mandos»). Del alto del mapa menos
-  un hueco para la escala, con su barra si no caben
-  (prepararMandosFlotantesDeMapa, alturaDelMenuDeMapa: pone en la caja
-  con-mandos-flotantes). En pantallas estrechas el mapa mide poco de
-  alto: ahí van encima de él, como antes, también plegables. Sin sticky:
-  absolute.
-
-  A PANTALLA COMPLETA: el botón «⛶ pantalla completa», junto al zoom. La
-  caja del mapa pasa a position: fixed sobre toda la ventana y el mapa
-  ocupa todo lo alto; la página de detrás no se mueve. Esc o el mismo
-  botón vuelven (si hay un panel abierto con el foco dentro, Esc cierra
-  ese primero). No usa la pantalla completa del navegador
-  (prepararPantallaCompletaDeMapa).
+  LA INTERFAZ DEL MAPA, COMO UN MAPA DE LOS DE SIEMPRE (desde el
+  22-10-2026; antes los mandos iban en una columna a la izquierda):
+  con JavaScript (prepararInterfazDeMapa, pone con-interfaz en la caja):
+    - ARRIBA A LA IZQUIERDA, el BUSCADOR «Buscar en el mapa»: se escribe
+      un trozo y sale la lista de sitios, regiones y rayas con nombre (un
+      <datalist>); al elegir uno el mapa se acerca, lo pone en medio y lo
+      resalta un momento (lo regional del mapamundi, con el zoom al que
+      sale). A su lado, el botón redondo de la RUTA. Debajo, las
+      PASTILLAS: capas, leyenda, medir (y «borrar la medida» mientras se
+      mide).
+    - ABAJO A LA DERECHA, el ZOOM en columna, en botones redondos:
+      pantalla completa, ver entero, +, el tanto por ciento y −.
+    - LOS PANELES (capas: qué se ve, los sitios y las zonas; ruta;
+      leyenda) son tarjetas que abre su pastilla, se cierran con su × o
+      Esc (el foco vuelve a la pastilla) y SE MUEVEN arrastrando su
+      cabecera, o con las flechas desde su asa ⠿ (Mayús: más deprisa). Se
+      recuerda dónde se dejó cada uno (localStorage «mapa-paneles») y
+      nunca se salen del mapa. La cabecera se queda; lo de dentro se
+      desplaza.
+    - EN UNA PANTALLA ESTRECHA (menos de 700px, sin pantalla completa:
+      es-estrecha) el mapa mide poco de alto: el buscador, las pastillas,
+      los paneles y el zoom van encima del mapa, en su sitio, y no se
+      arrastran.
+  Tarjetas redondeadas y con sombra, con los colores del tema (sirve en
+  los diez). Sin sticky, sin grid, sin color-mix: absolute y flex.
 
   LOS SITIOS, CÓMO Y CUÁLES: en los mandos, el grupo «sitios»: con su
   símbolo y su nombre, solo el símbolo o solo el nombre; el desplegable
@@ -1954,7 +1960,10 @@
   puntos en el mapa: un sitio, o CUALQUIER PUNTO, que se engancha al
   punto de camino más cercano («un punto del mapa (cerca de Pozovalor)»;
   lo de campo a través va a puntos y se suma a la distancia, que lo
-  dice aparte). Un arrastre del mapa no cuenta como pulsar. Luego
+  dice aparte). Y si con un punto suelto es más corto ir EN LÍNEA RECTA,
+  CAMPO A TRAVÉS, que ir hasta el camino, seguirlo y volver a salir, va
+  en línea recta (a puntos) y dice cuánto sería por los caminos. Un
+  arrastre del mapa no cuenta como pulsar. Luego
   busca el camino más corto (Dijkstra) y lo pinta en rojo con borde
   oscuro; dice cuánto hay, los días a pie y a caballo y por qué sitios
   se pasa. «Al revés», «quitar la ruta», Esc lo cierra. Encender la ruta
