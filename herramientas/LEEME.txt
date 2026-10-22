@@ -1958,12 +1958,14 @@
   un panel con DESDE y HASTA, que son BUSCADORES (se escribe un trozo y
   sale la lista de sitios que coinciden: un <datalist>). O se pulsan dos
   puntos en el mapa: un sitio, o CUALQUIER PUNTO, que se engancha al
-  punto de camino más cercano («un punto del mapa (cerca de Pozovalor)»;
-  lo de campo a través va a puntos y se suma a la distancia, que lo
-  dice aparte). Y si con un punto suelto es más corto ir EN LÍNEA RECTA,
-  CAMPO A TRAVÉS, que ir hasta el camino, seguirlo y volver a salir, va
-  en línea recta (a puntos) y dice cuánto sería por los caminos. Un
-  arrastre del mapa no cuenta como pulsar. Luego
+  TRAMO de camino más cercano (al punto del tramo, no a su esquina; se
+  sigue por la punta que dé la ruta más corta) («un punto del mapa (cerca
+  de Pozovalor)»; lo de campo a través va a puntos y se suma a la
+  distancia, que lo dice aparte). LA REGLA DEL CAMPO A TRAVÉS: si de un
+  punto suelto al camino más cercano hay MÁS que de un punto al otro, no
+  se pilla ningún camino: EN LÍNEA RECTA, a puntos. Si no, siempre por
+  los caminos, aunque salga algo más largo. Un arrastre del mapa no
+  cuenta como pulsar. Luego
   busca el camino más corto (Dijkstra) y lo pinta en rojo con borde
   oscuro; dice cuánto hay, los días a pie y a caballo y por qué sitios
   se pasa. «Al revés», «quitar la ruta», Esc lo cierra. Encender la ruta

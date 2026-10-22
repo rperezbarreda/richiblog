@@ -1287,6 +1287,10 @@ html.js .mapa-caja.con-interfaz > .mapa-panel.se-esta-moviendo {
     cursor: grab;
     touch-action: none;
 }
+html.js .mapa-caja.con-interfaz > .mapa-panel > .mapa-panel-cuerpo {
+    flex: 1 1 auto;
+    min-height: 0;
+}
 .mapa-panel-cuerpo {
     display: flex;
     flex: 1 1 auto;

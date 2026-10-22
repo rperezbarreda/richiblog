@@ -1414,20 +1414,31 @@ function puntoDelMapaDeMapa(mando, evento) {
     const p = punto.matrixTransform(matriz.inverse());
     return { x: p.x, y: p.y };
 }
-function nodoMasCercanoDeMapa(red, x, y) {
-    let mejor = -1;
-    let lejos = Infinity;
+function tramoMasCercanoDeMapa(red, x, y) {
+    let mejor = null;
     for (let n = 0; n < red.vecinos.length; n++) {
-        if (!red.vecinos[n].length) {
-            continue;
-        }
-        const d = Math.hypot(red.p[2 * n] - x, red.p[2 * n + 1] - y);
-        if (d < lejos) {
-            lejos = d;
-            mejor = n;
-        }
+        const ax = red.p[2 * n];
+        const ay = red.p[2 * n + 1];
+        red.vecinos[n].forEach(([m]) => {
+            if (m < n) {
+                return;
+            }
+            const bx = red.p[2 * m];
+            const by = red.p[2 * m + 1];
+            const dx = bx - ax;
+            const dy = by - ay;
+            const largo = dx * dx + dy * dy;
+            const s = largo ? Math.max(0, Math.min(1, ((x - ax) * dx + (y - ay) * dy) / largo)) : 0;
+            const px = ax + dx * s;
+            const py = ay + dy * s;
+            const lejos = Math.hypot(px - x, py - y);
+            if (!mejor || lejos < mejor.lejos) {
+                mejor = { px, py, lejos, opciones: [{ nodo: n, extra: Math.hypot(px - ax, py - ay) },
+                    { nodo: m, extra: Math.hypot(px - bx, py - by) }] };
+            }
+        });
     }
-    return mejor < 0 ? null : { nodo: mejor, lejos };
+    return mejor;
 }
 function prepararRutaDeMapa(mando) {
     const boton = mando.caja.querySelector("[data-mapa-ruta-boton]");
@@ -1507,7 +1518,8 @@ function prepararRutaDeMapa(mando) {
         boton.after(panel);
     }
     const extremos = { desde: null, hasta: null };
-    const deSitio = (s) => ({ nodo: s[0], nombre: s[1], x: red.p[2 * s[0]], y: red.p[2 * s[0] + 1], campo: 0 });
+    const deSitio = (s) => ({ nombre: s[1], x: red.p[2 * s[0]], y: red.p[2 * s[0] + 1], px: red.p[2 * s[0]],
+        py: red.p[2 * s[0] + 1], campo: 0, opciones: [{ nodo: s[0], extra: 0 }] });
     const cercaDe = (x, y) => {
         let mejor = null;
         red.sitios.forEach((s) => {
@@ -1519,13 +1531,13 @@ function prepararRutaDeMapa(mando) {
         return mejor ? mejor.nombre : "";
     };
     const deUnPunto = (x, y) => {
-        const cerca = nodoMasCercanoDeMapa(red, x, y);
+        const cerca = tramoMasCercanoDeMapa(red, x, y);
         if (!cerca) {
             return null;
         }
         const junto = cercaDe(x, y);
-        return { nodo: cerca.nodo, nombre: "un punto del mapa" + (junto ? " (cerca de " + junto + ")" : ""), x, y,
-            campo: cerca.lejos };
+        return { nombre: "un punto del mapa" + (junto ? " (cerca de " + junto + ")" : ""), x, y, px: cerca.px,
+            py: cerca.py, campo: cerca.lejos, opciones: cerca.opciones };
     };
     const leerBuscador = (entrada, cual) => {
         const valor = entrada.value.trim().toLowerCase();
@@ -1551,7 +1563,7 @@ function prepararRutaDeMapa(mando) {
         const e = mando.escala;
         return e ? cifraDeMapa(pixeles * e.porPixel) + (e.unidad ? " " + e.unidad : "") : "";
     };
-    const pintarCampoATraves = (a, b, recta, porCaminos) => {
+    const pintarCampoATraves = (a, b, recta) => {
         const g = svgDeMapa("g", { class: "mapa-ruta-dibujo" });
         g.appendChild(svgDeMapa("path", { class: "mapa-ruta-campo es-recta", d: "M" + a.x + " " + a.y + "L" + b.x + " " + b.y }));
         [[a, ""], [b, " es-final"]].forEach(([x, clase]) => {
@@ -1563,8 +1575,8 @@ function prepararRutaDeMapa(mando) {
         mando.dibujo.insertBefore(g, pines || null);
         dibujoDeRuta = g;
         escalarPinesDeMapa(mando);
-        let texto = "De " + a.nombre + " a " + b.nombre + ", campo a través (en línea recta: es más corto que por los"
-            + " caminos)";
+        let texto = "De " + a.nombre + " a " + b.nombre + ", campo a través, en línea recta (no hay ningún camino más"
+            + " cerca que el otro punto)";
         const e = mando.escala;
         if (e) {
             const distancia = recta * e.porPixel;
@@ -1573,9 +1585,6 @@ function prepararRutaDeMapa(mando) {
             if (viaje.length) {
                 texto += " " + viaje.map((como) => como.charAt(0).toUpperCase() + como.slice(1) + ": "
                     + diasDeViajeDeMapa(distancia, e.viaje[como])).join(" · ") + ".";
-            }
-            if (Number.isFinite(porCaminos)) {
-                texto += " Por los caminos serían " + distanciaEscrita(porCaminos) + ".";
             }
         } else {
             texto += ".";
@@ -1594,29 +1603,44 @@ function prepararRutaDeMapa(mando) {
                 : (a || b ? "Ahora el otro extremo." : "");
             return;
         }
-        if (a.nodo === b.nodo && !a.campo && !b.campo) {
+        const mismoSitio = !a.campo && !b.campo && a.opciones[0].nodo === b.opciones[0].nodo;
+        if (mismoSitio) {
             salida.textContent = "Elige dos sitios distintos.";
             return;
         }
-        const camino = a.nodo === b.nodo ? { puntos: [a.nodo], largo: 0 } : caminoMasCortoDeMapa(red, a.nodo, b.nodo);
         const recta = Math.hypot(a.x - b.x, a.y - b.y);
-        const porCaminos = camino ? camino.largo + a.campo + b.campo : Infinity;
-        if ((a.campo > 0 || b.campo > 0) && recta <= porCaminos) {
-            pintarCampoATraves(a, b, recta, porCaminos);
+        const suelto = a.campo > 0 || b.campo > 0;
+        if (suelto && (a.campo >= recta || b.campo >= recta)) {
+            pintarCampoATraves(a, b, recta);
             return;
         }
-        if (!camino) {
-            salida.textContent = "No hay camino de " + a.nombre + " a " + b.nombre + " por los caminos del mapa.";
+        let mejor = null;
+        a.opciones.forEach((oa) => {
+            b.opciones.forEach((ob) => {
+                const c = oa.nodo === ob.nodo ? { puntos: [oa.nodo], largo: 0 } : caminoMasCortoDeMapa(red, oa.nodo, ob.nodo);
+                if (c && (!mejor || oa.extra + c.largo + ob.extra < mejor.total)) {
+                    mejor = { puntos: c.puntos, total: oa.extra + c.largo + ob.extra };
+                }
+            });
+        });
+        if (!mejor) {
+            if (suelto) {
+                pintarCampoATraves(a, b, recta);
+            } else {
+                salida.textContent = "No hay camino de " + a.nombre + " a " + b.nombre + " por los caminos del mapa.";
+            }
             return;
         }
+        const camino = mejor;
         const g = svgDeMapa("g", { class: "mapa-ruta-dibujo" });
-        const d = camino.puntos.map((n, i) => (i ? "L" : "M") + red.p[2 * n] + " " + red.p[2 * n + 1]).join("");
+        const d = "M" + a.px + " " + a.py + camino.puntos.map((n) => "L" + red.p[2 * n] + " " + red.p[2 * n + 1]).join("")
+            + "L" + b.px + " " + b.py;
         g.appendChild(svgDeMapa("path", { d, class: "mapa-ruta-borde" }));
         g.appendChild(svgDeMapa("path", { d, class: "mapa-ruta-raya" }));
         [a, b].forEach((x) => {
             if (x.campo > 0) {
                 g.appendChild(svgDeMapa("path", { class: "mapa-ruta-campo",
-                    d: "M" + x.x + " " + x.y + "L" + red.p[2 * x.nodo] + " " + red.p[2 * x.nodo + 1] }));
+                    d: "M" + x.x + " " + x.y + "L" + x.px + " " + x.py }));
             }
         });
         [[a, ""], [b, " es-final"]].forEach(([x, clase]) => {
@@ -1632,7 +1656,7 @@ function prepararRutaDeMapa(mando) {
         let texto = "De " + a.nombre + " a " + b.nombre + " por los caminos";
         const e = mando.escala;
         if (e) {
-            const distancia = (camino.largo + campo) * e.porPixel;
+            const distancia = (camino.total + campo) * e.porPixel;
             texto += ": " + cifraDeMapa(distancia) + (e.unidad ? " " + e.unidad : "")
                 + (campo > 0 ? " (" + distanciaEscrita(campo) + " campo a través hasta el camino)" : "") + ".";
             const viaje = Object.keys(e.viaje).filter((como) => e.viaje[como] > 0);
@@ -1643,9 +1667,11 @@ function prepararRutaDeMapa(mando) {
         } else {
             texto += ".";
         }
+        const extremosDeLaRed = [camino.puntos[0], camino.puntos[camino.puntos.length - 1]];
         const enMedio = new Map();
         red.sitios.forEach((s) => {
-            if (s[0] !== a.nodo && s[0] !== b.nodo && !enMedio.has(s[0])) {
+            const esUnExtremo = (s[0] === extremosDeLaRed[0] && !a.campo) || (s[0] === extremosDeLaRed[1] && !b.campo);
+            if (!esUnExtremo && !enMedio.has(s[0])) {
                 enMedio.set(s[0], s[1]);
             }
         });
