@@ -8,7 +8,7 @@
     {
       "id": "base",
       "name": "Mapa",
-      "image": "reino-de-prunia_mapa.webp",
+      "image": "reino-de-prunia_mapa-3.webp",
       "opacity": 1,
       "zIndex": 0,
       "visible": true
@@ -269,156 +269,9 @@
       "kind": "torre"
     },
     {
-      "id": "413dc583d2a119c8",
-      "x": 206.4,
-      "y": 1214.4,
-      "label": "",
-      "kind": "puente"
-    },
-    {
-      "id": "9a2834066fa62378",
-      "x": 267.8,
-      "y": 1328.2,
-      "label": "",
-      "kind": "puente"
-    },
-    {
-      "id": "750cd9c08fe83051",
-      "x": 555.5,
-      "y": 1205.2,
-      "label": "",
-      "kind": "puente"
-    },
-    {
-      "id": "c5ec8143208dbd8b",
-      "x": 773,
-      "y": 1001.7,
-      "label": "",
-      "kind": "puente"
-    },
-    {
-      "id": "361b726ef2fdccf5",
-      "x": 713.8,
-      "y": 983.2,
-      "label": "",
-      "kind": "puente"
-    },
-    {
-      "id": "726047a34cfb3c11",
-      "x": 582.5,
-      "y": 949.9,
-      "label": "",
-      "kind": "puente"
-    },
-    {
-      "id": "b7f8d49ea2708be6",
-      "x": 531.6,
-      "y": 906.4,
-      "label": "",
-      "kind": "puente"
-    },
-    {
-      "id": "3fa65c85ebc836fa",
-      "x": 779.2,
-      "y": 704,
-      "label": "",
-      "kind": "puente"
-    },
-    {
-      "id": "195fc73f7a83402c",
-      "x": 839.5,
-      "y": 687.2,
-      "label": "",
-      "kind": "puente"
-    },
-    {
-      "id": "ce940be268fa42a2",
-      "x": 852.5,
-      "y": 688.1,
-      "label": "",
-      "kind": "puente"
-    },
-    {
-      "id": "dbd851c1ed61ae3f",
-      "x": 1062.4,
-      "y": 635.4,
-      "label": "",
-      "kind": "puente"
-    },
-    {
-      "id": "58a8ee2e3e140026",
-      "x": 1093.7,
-      "y": 382.6,
-      "label": "",
-      "kind": "puente"
-    },
-    {
-      "id": "18c68122f54b587d",
-      "x": 949.3,
-      "y": 281.6,
-      "label": "",
-      "kind": "puente"
-    },
-    {
-      "id": "49ca7e078de56239",
-      "x": 1204.6,
-      "y": 450.2,
-      "label": "",
-      "kind": "puente"
-    },
-    {
-      "id": "c3d7688d376990bf",
-      "x": 1290.5,
-      "y": 708,
-      "label": "",
-      "kind": "puente"
-    },
-    {
-      "id": "88e02636974680ed",
-      "x": 1899.9,
-      "y": 925.6,
-      "label": "",
-      "kind": "puente"
-    },
-    {
-      "id": "b5a6a18e97c92109",
-      "x": 1556.5,
-      "y": 819.9,
-      "label": "",
-      "kind": "puente"
-    },
-    {
-      "id": "a7eba7c36733bd6d",
-      "x": 1669.3,
-      "y": 662.3,
-      "label": "",
-      "kind": "puente"
-    },
-    {
-      "id": "c110aed4d2af1910",
-      "x": 1734,
-      "y": 593.5,
-      "label": "",
-      "kind": "puente"
-    },
-    {
-      "id": "1e9dfe0e376ebd13",
-      "x": 1691.2,
-      "y": 457.1,
-      "label": "",
-      "kind": "puente"
-    },
-    {
       "id": "07658fb33626d89d",
       "x": 2169.3,
       "y": 618.7,
-      "label": "",
-      "kind": "puente"
-    },
-    {
-      "id": "906e942a6cfac60f",
-      "x": 1273.3,
-      "y": 154.6,
       "label": "",
       "kind": "puente"
     }
@@ -8293,8 +8146,8 @@
           "y": 711.4
         },
         {
-          "x": 853.5,
-          "y": 706.9
+          "x": 860.7,
+          "y": 710.9
         }
       ]
     },
@@ -8863,8 +8716,8 @@
       "kind": "sendero",
       "points": [
         {
-          "x": 995.7,
-          "y": 847.6
+          "x": 985.9,
+          "y": 848.6
         },
         {
           "x": 1037.4,
@@ -8901,8 +8754,8 @@
       "kind": "sendero",
       "points": [
         {
-          "x": 717,
-          "y": 1072.8
+          "x": 713.3,
+          "y": 1065.4
         },
         {
           "x": 742.4,
@@ -9025,8 +8878,8 @@
       "kind": "sendero",
       "points": [
         {
-          "x": 1674.2,
-          "y": 937.7
+          "x": 1665.9,
+          "y": 925.8
         },
         {
           "x": 1729.7,
@@ -9281,8 +9134,8 @@
       "kind": "sendero",
       "points": [
         {
-          "x": 2143.3,
-          "y": 664
+          "x": 2154.3,
+          "y": 644.4
         },
         {
           "x": 2158.1,
@@ -9931,8 +9784,8 @@
       "kind": "sendero",
       "points": [
         {
-          "x": 1436.8,
-          "y": 415.7
+          "x": 1436.1,
+          "y": 407.3
         },
         {
           "x": 1426,
@@ -10076,5 +9929,12 @@
       "a caballo": 50
     }
   },
-  "compass": "arriba-derecha"
+  "compass": "arriba-izquierda",
+  "world": {
+    "map": "Mapamundi de Cralëa.cmap",
+    "x": 331.1,
+    "y": 235.1,
+    "w": 348,
+    "h": 202.2
+  }
 }

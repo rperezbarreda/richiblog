@@ -7,7 +7,7 @@
     {
       "id": "de8d455c-d6ef-4a1f-916d-96a71df407fd",
       "name": "Mapa Político",
-      "image": "mapamundi_fronteras.webp",
+      "image": "mapamundi-de-cralea_mapa-2.webp",
       "opacity": 1,
       "zIndex": 0,
       "visible": true
@@ -113243,5 +113243,6 @@
       "label": "Ruinas de Thalvyr",
       "color": "#ff8af5"
     }
-  ]
+  ],
+  "lines": []
 }
