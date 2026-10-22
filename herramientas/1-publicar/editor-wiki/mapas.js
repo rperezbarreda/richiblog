@@ -609,8 +609,14 @@ async function hacerMapaNuevo() {
     const boton = $('[data-mapa-nuevo] button[type="submit"]');
     boton.disabled = true;
     avisarEditor("Preparando la imagen y el mapa…");
+    const aEscala = $("#mapa-nuevo-escala").checked;
+    if (aEscala) {
+        avisarEditor("Buscándolo en el mapamundi y ampliándolo" + ($("#mapa-nuevo-ia").checked ? " con IA" : "")
+            + "… (puede tardar un poco)");
+    }
     const hecho = await pedirEditor("/api/mapa/nuevo", Object.assign({
         pagina: $("#mapa-nuevo-pagina").value.trim(), titulo: $("#mapa-nuevo-titulo").value.trim(),
+        escala_comun: aEscala, ia: $("#mapa-nuevo-ia").checked, modelo: $("#mapa-nuevo-modelo").value,
     }, imagen || { ruta }));
     boton.disabled = false;
     if (hecho.error) {
@@ -621,7 +627,8 @@ async function hacerMapaNuevo() {
     $("[data-mapa-nuevo-elegida]").textContent = "";
     ponerMapa(hecho.mapa);
     irAEditor("mapa");
-    avisarEditor("Hecho: " + hecho.mapa.archivo + ". Ya puedes poner sitios y pintar.");
+    avisarEditor("Hecho: " + hecho.mapa.archivo + ". " + (hecho.aviso ? hecho.aviso + " " : "")
+        + "Ya puedes poner sitios y pintar.", /OJO|No lo he puesto/.test(hecho.aviso || ""));
 }
 
 // ---- ABRIR UN MAPA ----
@@ -722,6 +729,7 @@ function pintarDatosGenerales() {
     $("#mapa-rosa").value = typeof d.compass === "string" ? d.compass : "";
     $("[data-mapa-cambiar-imagen]").hidden = d.layers.length !== 1;
     pintarTituloMapa();
+    pintarMundoDelMapa();
 }
 
 function pintarTituloMapa() {
@@ -3580,10 +3588,18 @@ async function cambiarImagenMapa(input) {
         avisarEditor(hecha.error, true);
         return;
     }
+    const raro = pasarAImagenNueva(hecha);
+    avisarEditor("Imagen cambiada: " + hecha.nombre + " (" + hecha.ancho + " × " + hecha.alto + ")." + raro
+        + " Recuerda guardar.", !!raro);
+}
+
+// El mapa, con otra imagen de fondo (otra medida, el mismo encuadre): lo
+// puesto, a la medida nueva. Si la imagen es el doble de grande, cada
+// coordenada, el doble (y la escala, igual). Su sitio en el mapamundi no
+// cambia: es el mismo trozo. Devuelve un aviso si no tiene la misma forma.
+function pasarAImagenNueva(hecha) {
     apuntarPaso();
     const d = estadoMapa.datos;
-    // Lo puesto, a la medida nueva: si la imagen es el doble de grande,
-    // cada coordenada, el doble (y la escala, igual).
     const fx = hecha.ancho / d.width;
     const fy = hecha.alto / d.height;
     const escalar = (p) => {
@@ -3609,9 +3625,185 @@ async function cambiarImagenMapa(input) {
     ajustarMapa();
     pintarPropiedadesMapa();
     pintarMedida();
-    const raro = Math.abs(fx - fy) > 0.02 ? " OJO: no tiene la misma forma que la otra, así que lo puesto se ha estirado." : "";
-    avisarEditor("Imagen cambiada: " + hecha.nombre + " (" + hecha.ancho + " × " + hecha.alto + ")." + raro
-        + " Recuerda guardar.", !!raro);
+    return Math.abs(fx - fy) > 0.02 ? " OJO: no tiene la misma forma que la otra, así que lo puesto se ha estirado." : "";
+}
+
+// ---- EN EL MAPAMUNDI, Y AMPLIAR ----
+// Dónde cae este mapa en el mapamundi ("world", en unidades del
+// mapamundi) y a qué escala va, para poder juntarlo luego con otros: todos
+// los regionales a la ESCALA COMÚN (8 píxeles por unidad del mapamundi,
+// la de Prunia). Buscarlo solo (OpenCV, en el servidor), retocarlo a
+// mano, llevarlo a la escala común y ampliar la imagen (con IA si está
+// instalada: herramientas/mapas_mundo.py).
+const MODELOS_DE_IMAGEN = [["pintado", "Pintada o con texturas (la mayoría)"], ["dibujo", "Dibujo de líneas limpias"]];
+let ayudasDeMapas = null;
+
+async function cargarAyudasDeMapas() {
+    const r = await pedirEditor("/api/mapa/ayudas");
+    if (r.error) {
+        return;
+    }
+    ayudasDeMapas = r;
+    const faltan = [];
+    if (!r.opencv) {
+        faltan.push("buscarlo en el mapamundi");
+    }
+    if (!r.ampliador) {
+        faltan.push("ampliar con IA");
+    }
+    $("[data-mapa-ayudas-estado]").textContent = faltan.length
+        ? "Para " + faltan.join(" y ") + " hay que instalar una vez las ayudas de los mapas (menú → Imágenes →"
+            + " «Instalar las ayudas de los mapas»). Sin ellas el mapa se hace igual" + (r.ampliador ? "." : ", ampliado sin IA.")
+        : "Todo a punto: lo busca en el mapamundi y lo amplía con IA hasta " + r.escala + " píxeles por unidad del mapamundi.";
+    if (estadoMapa.datos) {
+        pintarMundoDelMapa();
+    }
+}
+
+function escalaComunMapa() {
+    return (ayudasDeMapas && ayudasDeMapas.escala) || 8;
+}
+
+function ladoMaximoMapa() {
+    return (ayudasDeMapas && ayudasDeMapas.lado_maximo) || 8192;
+}
+
+// Lo que mediría la imagen a la escala común (sin pasar del máximo).
+function medidaComunMapa() {
+    const d = estadoMapa.datos;
+    const w = d.world;
+    if (!w || !(w.w > 0)) {
+        return null;
+    }
+    let ancho = Math.round(w.w * escalaComunMapa());
+    if (Math.max(ancho, ancho * d.height / d.width) > ladoMaximoMapa()) {
+        ancho = Math.floor(ladoMaximoMapa() * Math.min(1, d.width / d.height));
+    }
+    return { ancho, alto: Math.round(ancho * d.height / d.width) };
+}
+
+function pintarMundoDelMapa(sinCasillas) {
+    const d = estadoMapa.datos;
+    const w = d.world;
+    const estado = $("[data-mapa-mundo-estado]");
+    const boton = $("[data-mapa-mundo-escala]");
+    if (!w || !(w.w > 0)) {
+        estado.textContent = "No está situado en el mapamundi. «Buscarlo» lo encuentra solo si sale de un trozo del"
+            + " mapamundi (aunque esté retocado); si está dibujado de cero, pon X, Y y el ancho a mano.";
+        boton.hidden = true;
+    } else {
+        const escala = d.width / w.w;
+        const comun = medidaComunMapa();
+        const yaEsta = comun && Math.abs(comun.ancho - d.width) <= 2;
+        estado.textContent = "Está en el mapamundi en " + cifraMapa(w.x, 1) + ", " + cifraMapa(w.y, 1) + " ("
+            + cifraMapa(w.w, 1) + " × " + cifraMapa(w.h, 1) + " unidades). Va a " + cifraMapa(escala, 1)
+            + " píxeles por unidad" + (yaEsta ? ": la escala común. Se podrá juntar con los demás."
+                : "; la escala común es " + escalaComunMapa() + ".");
+        boton.hidden = !comun || yaEsta;
+        if (comun) {
+            boton.textContent = "Llevarlo a la escala común (" + comun.ancho + " × " + comun.alto + " px)";
+        }
+    }
+    if (!sinCasillas) {
+        ["x", "y", "w"].forEach((k) => {
+            $("#mapa-mundo-" + k).value = w && Number.isFinite(Number(w[k])) ? String(Math.round(w[k] * 10) / 10) : "";
+        });
+    }
+    // La vista: el mapamundi en pequeño con el recuadro de este mapa.
+    const vista = $("[data-mapa-mundo-vista]");
+    const mundo = ayudasDeMapas && ayudasDeMapas.mapamundi;
+    vista.hidden = !mundo || !mundo.url || !w || !(w.w > 0);
+    if (!vista.hidden) {
+        const img = $("[data-mapa-mundo-imagen]");
+        if (img.getAttribute("src") !== mundo.url) {
+            img.setAttribute("src", mundo.url);
+        }
+        const marco = $("[data-mapa-mundo-marco]");
+        marco.style.left = (w.x / mundo.ancho * 100) + "%";
+        marco.style.top = (w.y / mundo.alto * 100) + "%";
+        marco.style.width = (w.w / mundo.ancho * 100) + "%";
+        marco.style.height = (w.h / mundo.alto * 100) + "%";
+    }
+    pintarMedidaDeAmpliar();
+}
+
+function pintarMedidaDeAmpliar() {
+    const d = estadoMapa.datos;
+    const f = Number($("#mapa-ampliar-cuanto").value) || 2;
+    const ancho = Math.round(d.width * f);
+    const alto = Math.round(d.height * f);
+    const cabe = Math.max(ancho, alto) <= ladoMaximoMapa();
+    $("[data-mapa-ampliar-medida]").textContent = "Ahora mide " + d.width + " × " + d.height + " px; saldría de "
+        + ancho + " × " + alto + "." + (cabe ? "" : " Es demasiado: como mucho " + ladoMaximoMapa() + " de lado.");
+    $("[data-mapa-ampliar]").disabled = !cabe;
+}
+
+function cambiarMundoAMano() {
+    const d = estadoMapa.datos;
+    const x = parseFloat($("#mapa-mundo-x").value);
+    const y = parseFloat($("#mapa-mundo-y").value);
+    const w = parseFloat($("#mapa-mundo-w").value);
+    if (![x, y, w].every(Number.isFinite) || w <= 0) {
+        return;
+    }
+    apuntarPaso("mundo");
+    d.world = { map: (ayudasDeMapas && ayudasDeMapas.mapamundi && ayudasDeMapas.mapamundi.archivo)
+        || (d.world && d.world.map) || "Mapamundi de Cralëa.cmap",
+    x, y, w, h: Math.round(w * d.height / d.width * 10) / 10 };
+    pintarMundoDelMapa(true);
+}
+
+async function buscarEnElMapamundi() {
+    const boton = $("[data-mapa-mundo-buscar]");
+    boton.disabled = true;
+    avisarEditor("Buscándolo en el mapamundi…");
+    const r = await pedirEditor("/api/mapa/situar", { mapa: estadoMapa.archivo, imagen: estadoMapa.datos.layers[0]
+        && estadoMapa.datos.layers[0].image });
+    boton.disabled = false;
+    if (r.error) {
+        avisarEditor(r.error, true);
+        return;
+    }
+    apuntarPaso();
+    estadoMapa.datos.world = r.world;
+    pintarMundoDelMapa();
+    avisarEditor("Encontrado en el mapamundi (" + r.seguridad + " puntos que coinciden). Recuerda guardar.");
+}
+
+async function ampliarImagenDelMapa(ancho, alto, ia, modelo) {
+    const botones = [$("[data-mapa-ampliar]"), $("[data-mapa-mundo-escala]")];
+    botones.forEach((b) => {
+        b.disabled = true;
+    });
+    avisarEditor("Ampliando la imagen" + (ia ? " con IA" : "") + " a " + ancho + " × " + alto + "… (puede tardar un poco)");
+    const hecha = await pedirEditor("/api/mapa/ampliar", { mapa: estadoMapa.archivo, ancho, alto, ia, modelo,
+        imagen: estadoMapa.datos.layers[0] && estadoMapa.datos.layers[0].image });
+    botones.forEach((b) => {
+        b.disabled = false;
+    });
+    if (hecha.error) {
+        avisarEditor(hecha.error, true);
+        return;
+    }
+    const raro = pasarAImagenNueva(hecha);
+    pintarMundoDelMapa();
+    avisarEditor("Imagen ampliada" + (hecha.con_ia ? " con IA" : "") + ": " + hecha.nombre + " (" + hecha.ancho + " × "
+        + hecha.alto + ")." + (hecha.aviso ? " " + hecha.aviso + "." : "") + raro + " Recuerda guardar.",
+    !!raro || (ia && !hecha.con_ia));
+}
+
+function llevarAEscalaComun() {
+    const comun = medidaComunMapa();
+    if (comun) {
+        ampliarImagenDelMapa(comun.ancho, comun.alto, $("#mapa-ampliar-ia").checked, $("#mapa-ampliar-modelo").value);
+    }
+}
+
+function ampliarPorFactor() {
+    const d = estadoMapa.datos;
+    const f = Number($("#mapa-ampliar-cuanto").value) || 2;
+    ampliarImagenDelMapa(Math.round(d.width * f), Math.round(d.height * f), $("#mapa-ampliar-ia").checked,
+        $("#mapa-ampliar-modelo").value);
 }
 
 // ---- DESCARGAR LA IMAGEN, CON TODO LO PUESTO ----
@@ -4533,6 +4725,18 @@ function empezarMapas() {
     $("[data-mapa-emblema-pagina]").addEventListener("click", usarImagenDeLaPagina);
     $("[data-mapa-escala-otro]").addEventListener("click", empezarOtraMedida);
     $("[data-mapa-quitar-pines-puente]").addEventListener("click", quitarPinesDePuente);
+    document.querySelectorAll("[data-mapa-modelos]").forEach((s) => opcionesMapa(s, MODELOS_DE_IMAGEN, false));
+    $("[data-mapa-mundo-buscar]").addEventListener("click", buscarEnElMapamundi);
+    $("[data-mapa-mundo-escala]").addEventListener("click", llevarAEscalaComun);
+    $("[data-mapa-ampliar]").addEventListener("click", ampliarPorFactor);
+    $("#mapa-ampliar-cuanto").addEventListener("change", pintarMedidaDeAmpliar);
+    document.querySelectorAll("[data-mapa-mundo]").forEach((c) => {
+        c.addEventListener("input", cambiarMundoAMano);
+        c.addEventListener("blur", () => {
+            estadoMapa.ultimoCampo = null;
+        });
+    });
+    cargarAyudasDeMapas();
     // La barra de abajo crece con los avisos: lo que mide se apunta en
     // --alto-barra (hasta ahí llegan el mapa y los paneles).
     const barra = $("[data-barra-mapa]");

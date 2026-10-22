@@ -474,6 +474,18 @@
                     <label for="mapa-nuevo-ruta">…o pega su ruta <span class="opcional">(e:\Descargas\mapa.png)</span></label>
                     <input id="mapa-nuevo-ruta" autocomplete="off" spellcheck="false">
                 </div>
+                <fieldset class="opciones campo">
+                    <legend>Para juntarlo luego con otros</legend>
+                    <label class="opcion"><input type="checkbox" id="mapa-nuevo-escala" checked> Buscarlo en el mapamundi y
+                        ponerlo a la escala común</label>
+                    <label class="opcion"><input type="checkbox" id="mapa-nuevo-ia" checked> Ampliarlo con IA (sale
+                        nítido, no borroso)</label>
+                    <div class="campo">
+                        <label for="mapa-nuevo-modelo">Qué clase de imagen es</label>
+                        <select id="mapa-nuevo-modelo" data-mapa-modelos></select>
+                    </div>
+                    <p class="ayuda" data-mapa-ayudas-estado aria-live="polite"></p>
+                </fieldset>
                 <button type="submit" class="principal">Hacer el mapa</button>
             </form>
         </section>
@@ -871,6 +883,51 @@
                         <p class="ayuda" data-mapa-puentes-cuantos aria-live="polite"></p>
                         <button type="button" data-mapa-quitar-pines-puente hidden></button>
                     </div>
+                    <!-- EN EL MAPAMUNDI: dónde cae este mapa ("world") y su
+                         escala, para juntarlo con otros (mapas.js,
+                         pintarMundoDelMapa; herramientas/mapas_mundo.py). -->
+                    <fieldset class="opciones campo" data-mapa-mundo-caja>
+                        <legend>En el mapamundi</legend>
+                        <p class="ayuda" data-mapa-mundo-estado aria-live="polite"></p>
+                        <div class="mapa-mundo-vista" data-mapa-mundo-vista hidden>
+                            <img alt="" data-mapa-mundo-imagen>
+                            <span class="mapa-mundo-marco" data-mapa-mundo-marco></span>
+                        </div>
+                        <div class="mapa-emblema-botones">
+                            <button type="button" data-mapa-mundo-buscar>Buscarlo en el mapamundi</button>
+                            <button type="button" data-mapa-mundo-escala hidden></button>
+                        </div>
+                        <div class="fila mapa-xy" data-mapa-mundo-a-mano>
+                            <div><label for="mapa-mundo-x">X</label>
+                                <input id="mapa-mundo-x" type="number" step="0.1" data-mapa-mundo="x"></div>
+                            <div><label for="mapa-mundo-y">Y</label>
+                                <input id="mapa-mundo-y" type="number" step="0.1" data-mapa-mundo="y"></div>
+                            <div><label for="mapa-mundo-w">Ancho</label>
+                                <input id="mapa-mundo-w" type="number" min="1" step="0.1" data-mapa-mundo="w"></div>
+                        </div>
+                        <p class="ayuda">X, Y y el ancho, en unidades del mapamundi, por si hay que situarlo o
+                            retocarlo a mano (el alto va en proporción).</p>
+                    </fieldset>
+                    <fieldset class="opciones campo">
+                        <legend>Ampliar la imagen</legend>
+                        <p class="ayuda">Más grande y con más resolución: lo puesto encima se queda en su sitio.</p>
+                        <div class="campo">
+                            <label for="mapa-ampliar-cuanto">Cuánto</label>
+                            <select id="mapa-ampliar-cuanto">
+                                <option value="1.5">Vez y media</option>
+                                <option value="2" selected>El doble</option>
+                                <option value="3">El triple</option>
+                                <option value="4">Cuatro veces</option>
+                            </select>
+                        </div>
+                        <label class="opcion"><input type="checkbox" id="mapa-ampliar-ia" checked> Con IA (sale nítido)</label>
+                        <div class="campo">
+                            <label for="mapa-ampliar-modelo">Qué clase de imagen es</label>
+                            <select id="mapa-ampliar-modelo" data-mapa-modelos></select>
+                        </div>
+                        <p class="ayuda" data-mapa-ampliar-medida aria-live="polite"></p>
+                        <button type="button" data-mapa-ampliar>Ampliar</button>
+                    </fieldset>
                     <div class="campo" data-mapa-cambiar-imagen>
                         <p class="ayuda">Cambiar la imagen por otra con el mismo encuadre (más grande, retocada…):
                             todo lo puesto se queda en su sitio.</p>

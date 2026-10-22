@@ -1202,6 +1202,29 @@ body.en-mapa .saltar {
     flex-basis: auto;
 }
 
+/* EN EL MAPAMUNDI: el mapamundi en pequeño con el recuadro de este mapa. */
+.mapa-mundo-vista {
+    position: relative;
+    margin: 8px 0 12px;
+    border: 2px solid var(--borde);
+    line-height: 0;
+}
+
+.mapa-mundo-vista img {
+    display: block;
+    width: 100%;
+    height: auto;
+}
+
+.mapa-mundo-marco {
+    position: absolute;
+    min-width: 6px;
+    min-height: 6px;
+    border: 2px solid #ffd54a;
+    box-shadow: 0 0 0 2px #1b1020;
+    pointer-events: none;
+}
+
 /* Los grupos de casillas del panel de descargar. */
 .mapa-descarga-grupo {
     margin: 14px 0 0;

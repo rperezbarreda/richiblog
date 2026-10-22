@@ -198,6 +198,10 @@
       herramientas/
           menu.py ............. el "¿qué quieres hacer?"
           comun.py ............ el cajón compartido. No se ejecuta.
+          mapas_mundo.py ...... situar un mapa en el mapamundi y ampliarlo a la
+                                escala común (lo usa el editor de mapas)
+          programas/ .......... lo que bajan las herramientas (el ampliador con
+                                IA). Solo en tu ordenador: no va a GitHub.
           LEEME.txt ........... esto
           mundo-origen.txt .... dónde está la bóveda de Chronicler
                                 (lo escribe importar-mundo.py)
@@ -222,6 +226,7 @@
 
           2-imagenes/ ......... ANTES DE SUBIR FOTOS
               traer-imagen.py       traer una de tu ordenador
+              instalar-ayudas-de-mapas.py  OpenCV y el ampliador con IA (una vez)
               optimizar-imagenes.py
               generar-galeria.py
               tamanos-portada.py
@@ -2123,6 +2128,37 @@
       «Mapa de…» con el artículo que toque) y la imagen, que va a
       wiki/_imagenes/mapas/ en WebP (hasta 4096 px de lado: un mapa
       encogido no aguanta el zoom).
+    - LA ESCALA COMÚN, PARA JUNTAR LOS MAPAS (desde el 22-10-2026): todos
+      los mapas regionales van a 8 PÍXELES POR UNIDAD DEL MAPAMUNDI (el
+      .cmap del mapamundi mide 1920 × 1080; es la escala de Prunia). Al
+      hacer un mapa nuevo, con «Buscarlo en el mapamundi y ponerlo a la
+      escala común» (marcado), el editor encuentra solo dónde cae la
+      imagen en el mapamundi (OpenCV: vale para los que salen de un trozo
+      del mapamundi, aunque estén retocados o ampliados) y la deja a la
+      medida que le toca, AMPLIADA CON IA si está marcado (Real-ESRGAN:
+      sale nítida, no borrosa; «Qué clase de imagen es»: pintada, la
+      mayoría, o dibujo de líneas limpias). Su sitio queda en el .cmap,
+      en "world" (x, y, ancho y alto en unidades del mapamundi; Chronicler
+      no lo usa). Si no lo encuentra, el mapa se hace igual, tal cual, y
+      lo dice. Como mucho 8192 px de lado: uno más grande va a la escala
+      que quepa, y avisa. Todo en herramientas/mapas_mundo.py.
+    - EN «EL MAPA EN SÍ» → EN EL MAPAMUNDI: dónde está (con el mapamundi
+      en pequeño y su recuadro) y a qué escala va; «Buscarlo en el
+      mapamundi» (para los de antes, como Prunia); X, Y y el ancho a mano,
+      para los dibujados de cero; y «Llevarlo a la escala común», que
+      amplía (o encoge) la imagen a su medida. Y «AMPLIAR LA IMAGEN»: vez
+      y media, el doble, el triple o cuatro veces, con IA o sin ella. En
+      los dos, lo puesto encima se queda en su sitio (cada coordenada y la
+      escala, a la medida nueva) y la imagen de antes no se borra.
+    - LAS AYUDAS SE INSTALAN UNA VEZ en cada ordenador: menú → Imágenes →
+      «Instalar las ayudas de los mapas» (2-imagenes/instalar-ayudas-de-
+      mapas.py). Pone OpenCV con pip y baja el ampliador con IA
+      (realesrgan-ncnn-vulkan, unos 45 MB, de github.com/xinntao/Real-ESRGAN)
+      a herramientas/programas/realesrgan/, que no va a GitHub. Usa la
+      tarjeta gráfica (Vulkan; vale la integrada): son segundos. Con
+      --comprobar dice qué hay y prueba el ampliador. Sin las ayudas, el
+      editor lo dice debajo de «Un mapa nuevo» y amplía sin IA (Lanczos
+      y un poco de nitidez).
 
     - DESCARGAR LA IMAGEN (en la barra de abajo): abre su panel, para
       ELEGIR QUÉ SALE (desde el 22-10-2026). Una casilla por cada cosa

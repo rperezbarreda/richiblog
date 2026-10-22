@@ -11,3 +11,7 @@ __pycache__/
 .DS_Store
 Thumbs.db
 desktop.ini
+
+# Los programas que bajan las herramientas (el ampliador con IA de los
+# mapas): son de este ordenador, no del sitio.
+herramientas/programas/

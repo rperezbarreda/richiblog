@@ -1029,6 +1029,44 @@ def traer_emblema(peticion):
     return {"ok": True, "nombre": Path(hecha).name, "url": url_de_imagen(Path(hecha).name), "aviso": aviso}
 
 
+def _imagen_que_llega(peticion):
+    """La imagen que manda el editor: subida (datos en base64) o por su
+    ruta. Devuelve (ruta, temporal, error); el temporal hay que borrarlo
+    (borrar_temporal) al acabar."""
+    ruta = str(peticion.get("ruta") or "").strip()
+    if ruta:
+        return ruta, None, ""
+    datos = str(peticion.get("datos") or "")
+    if not datos:
+        return "", None, "Falta la imagen del mapa."
+    original = str(peticion.get("archivo") or "mapa.png")
+    if "," in datos:
+        datos = datos.split(",", 1)[1]
+    try:
+        crudo = base64.b64decode(datos, validate=True)
+    except ValueError:
+        return "", None, "La imagen no ha llegado bien."
+    if len(crudo) > 40 * 1024 * 1024:
+        return "", None, "Es demasiado grande (más de 40 MB)."
+    temporal = archivo_temporal(crudo, Path(original).suffix.lower() or ".png")
+    return str(temporal), temporal, ""
+
+
+def _medidas(archivo):
+    from PIL import Image
+    with Image.open(archivo) as abierta:
+        return abierta.size
+
+
+def _hecha(archivo, aviso="", **mas):
+    try:
+        ancho, alto = _medidas(archivo)
+    except Exception as error:  # Pillow ya la ha abierto para convertirla: no debería pasar
+        return {"error": "No sé cuánto mide la imagen: %s" % error}
+    return dict({"ok": True, "nombre": archivo.name, "ancho": ancho, "alto": alto,
+                 "url": url_de_imagen(archivo.name), "aviso": aviso}, **mas)
+
+
 def traer_imagen_de_mapa(peticion, nombre):
     """La imagen que llega (subida o por su ruta) a wiki/_imagenes/mapas/.
     Devuelve {nombre, ancho, alto, url} o {error}."""
@@ -1036,38 +1074,126 @@ def traer_imagen_de_mapa(peticion, nombre):
         import imagenes as img
     except ImportError:
         return {"error": "No encuentro herramientas/imagenes.py."}
-    ruta = str(peticion.get("ruta") or "").strip()
-    temporal = None
+    ruta, temporal, error = _imagen_que_llega(peticion)
+    if error:
+        return {"error": error}
     try:
-        if not ruta:
-            datos = str(peticion.get("datos") or "")
-            if not datos:
-                return {"error": "Falta la imagen del mapa."}
-            original = str(peticion.get("archivo") or "mapa.png")
-            if "," in datos:
-                datos = datos.split(",", 1)[1]
-            try:
-                crudo = base64.b64decode(datos, validate=True)
-            except ValueError:
-                return {"error": "La imagen no ha llegado bien."}
-            if len(crudo) > 40 * 1024 * 1024:
-                return {"error": "Es demasiado grande (más de 40 MB)."}
-            temporal = archivo_temporal(crudo, Path(original).suffix.lower() or ".png")
-            ruta = str(temporal)
         hecha, aviso = img.traer(ruta, CARPETA_MAPAS, img.nombre_para(nombre, "_mapa"), lado=LADO_MAPA)
     finally:
         borrar_temporal(temporal)
     if not hecha:
         return {"error": "No he podido traerla: " + aviso}
-    archivo = RAIZ / CARPETA_MAPAS / Path(hecha).name
+    return _hecha(RAIZ / CARPETA_MAPAS / Path(hecha).name, aviso)
+
+
+# ---- A LA ESCALA COMÚN (herramientas/mapas_mundo.py) ----
+# Un mapa regional nuevo se busca en el mapamundi y su imagen se agranda
+# (con IA si está) hasta la escala común: así todos los regionales se
+# pueden juntar luego sin estirar nada. Su sitio queda en "world".
+
+def _mapas_mundo():
+    import mapas_mundo
+    return mapas_mundo
+
+
+def imagen_de_mapa_a_escala(peticion, nombre):
+    """Como traer_imagen_de_mapa, pero buscándola en el mapamundi y
+    llevándola a la escala común. Si no la encuentra, la trae tal cual y
+    lo dice. Devuelve lo de _hecha más "world" (o sin él) y "con_ia"."""
     try:
-        from PIL import Image
-        with Image.open(archivo) as abierta:
-            ancho, alto = abierta.size
-    except Exception as error:  # Pillow ya la ha abierto para convertirla: no debería pasar
-        return {"error": "No sé cuánto mide la imagen: %s" % error}
-    return {"ok": True, "nombre": archivo.name, "ancho": ancho, "alto": alto,
-            "url": url_de_imagen(archivo.name), "aviso": aviso}
+        import imagenes as img
+        mm = _mapas_mundo()
+    except ImportError as error:
+        return {"error": "Falta una herramienta: %s" % error}
+    ruta, temporal, error = _imagen_que_llega(peticion)
+    if error:
+        return {"error": error}
+    try:
+        fuente = img.resolver(ruta)
+        if fuente is None:
+            return {"error": "No encuentro el archivo %s." % ruta}
+        sitio = mm.situar(fuente)
+        if sitio.get("error"):
+            hecha = traer_imagen_de_mapa(dict(peticion, ruta=str(fuente), datos=""), nombre)
+            if hecha.get("ok"):
+                hecha["aviso"] = ("No lo he puesto a la escala común: " + sitio["error"]
+                                  + " Cuando lo sitúes (en «El mapa en sí»), podrás llevarlo a ella.")
+            return hecha
+        ancho, alto = _medidas(fuente)
+        nuevo_ancho, nuevo_alto, escala = mm.medida_comun(sitio, ancho, alto)
+        destino = img.sin_pisar(RAIZ / CARPETA_MAPAS, img.nombre_para(nombre, "_mapa"))
+        con_ia, aviso = mm.a_medida(fuente, destino, nuevo_ancho, nuevo_alto,
+                                    ia=peticion.get("ia") is not False, modelo=str(peticion.get("modelo") or "pintado"))
+    finally:
+        borrar_temporal(temporal)
+    mundo = {k: sitio[k] for k in ("map", "x", "y", "w", "h")}
+    texto = "Situado en el mapamundi y puesto a la escala común (%s × %s px%s)." % (
+        nuevo_ancho, nuevo_alto, ", ampliado con IA" if con_ia else "")
+    if escala != mm.ESCALA_COMUN:
+        texto += " OJO: es tan grande que no cabe a la escala común; va a %.1f px por unidad." % escala
+    return _hecha(destino, texto + (" " + aviso if aviso else ""), world=mundo, con_ia=con_ia)
+
+
+def _imagen_del_mapa(archivo, nombre=""):
+    """La imagen de fondo (la primera capa) de un .cmap: (Path, datos).
+    Con nombre, esa (la que tiene ahora el editor, aunque no esté
+    guardado)."""
+    datos = _leer_cmap(archivo)
+    if not datos:
+        return None, None
+    capas = sorted([c for c in datos.get("layers") or [] if isinstance(c, dict) and c.get("image")],
+                   key=lambda c: float(c.get("zIndex") or 0))
+    if not capas and not nombre:
+        return None, datos
+    nombre = str(nombre or capas[0]["image"]).replace("\\", "/").split("/")[-1].lower()
+    for imagen in sorted(IMAGENES.rglob("*")):
+        if imagen.name.lower() == nombre:
+            return imagen, datos
+    return None, datos
+
+
+def ayudas_de_mapas():
+    mm = _mapas_mundo()
+    mundo = mm.mapamundi()
+    salida = {"opencv": mm.hay_opencv(), "ampliador": bool(mm.ampliador()), "escala": mm.ESCALA_COMUN,
+              "lado_maximo": mm.LADO_MAXIMO}
+    if mundo:
+        salida["mapamundi"] = {"archivo": mundo["nombre"], "ancho": mundo["ancho"], "alto": mundo["alto"],
+                               "url": url_de_imagen(mundo["imagen"].name)}
+    return salida
+
+
+def situar_mapa(archivo, peticion):
+    imagen, _ = _imagen_del_mapa(archivo, peticion.get("imagen"))
+    if not imagen:
+        return {"error": "Este mapa no tiene imagen de fondo que buscar."}
+    sitio = _mapas_mundo().situar(imagen)
+    if sitio.get("error"):
+        return sitio
+    return {"ok": True, "world": {k: sitio[k] for k in ("map", "x", "y", "w", "h")}, "seguridad": sitio["seguridad"]}
+
+
+def ampliar_mapa(archivo, peticion):
+    """La imagen de fondo del mapa, a ancho × alto, en una imagen nueva
+    (la de antes se queda: puede estar en uso hasta que se guarde)."""
+    try:
+        import imagenes as img
+    except ImportError:
+        return {"error": "No encuentro herramientas/imagenes.py."}
+    mm = _mapas_mundo()
+    imagen, _ = _imagen_del_mapa(archivo, peticion.get("imagen"))
+    if not imagen:
+        return {"error": "Este mapa no tiene imagen de fondo."}
+    try:
+        ancho, alto = int(peticion.get("ancho")), int(peticion.get("alto"))
+    except (TypeError, ValueError):
+        return {"error": "No sé a qué medida ponerla."}
+    if not (1 <= ancho <= mm.LADO_MAXIMO and 1 <= alto <= mm.LADO_MAXIMO):
+        return {"error": "Como mucho %d píxeles de lado." % mm.LADO_MAXIMO}
+    destino = img.sin_pisar(RAIZ / CARPETA_MAPAS, img.nombre_para(archivo.stem, "_mapa"))
+    con_ia, aviso = mm.a_medida(imagen, destino, ancho, alto, ia=peticion.get("ia") is not False,
+                                modelo=str(peticion.get("modelo") or "pintado"))
+    return _hecha(destino, aviso, con_ia=con_ia)
 
 
 # Con artículo si empieza por un nombre común: «Mapa del Reino de
@@ -1116,7 +1242,10 @@ def nuevo_mapa(peticion):
     if destino.exists():
         return {"error": "Ya hay un mapa así: %s. Ábrelo desde la lista de mapas."
                 % destino.relative_to(VAULT).as_posix()}
-    imagen = traer_imagen_de_mapa(peticion, nombre)
+    if peticion.get("escala_comun") is not False:
+        imagen = imagen_de_mapa_a_escala(peticion, nombre)
+    else:
+        imagen = traer_imagen_de_mapa(peticion, nombre)
     if imagen.get("error"):
         return imagen
     datos = {"version": "1.0", "title": titulo or titulo_por_defecto(nombre)}
@@ -1126,8 +1255,10 @@ def nuevo_mapa(peticion):
                   "layers": [{"id": "base", "name": "Mapa", "image": imagen["nombre"], "opacity": 1,
                               "zIndex": 0, "visible": True}],
                   "pins": [], "shapes": [], "lines": []})
+    if imagen.get("world"):
+        datos["world"] = imagen["world"]
     escribir_texto(destino, json.dumps(datos, ensure_ascii=False, indent=2) + "\n")
-    return {"ok": True, "mapa": leer_mapa(destino)}
+    return {"ok": True, "mapa": leer_mapa(destino), "aviso": imagen.get("aviso", "")}
 
 
 # =========================================
@@ -1330,6 +1461,8 @@ class Editor(SimpleHTTPRequestHandler):
                 return self._json({"url": url_de_imagen(nombre)})
             if url.path == "/api/mapas":
                 return self._json({"mapas": mapas_que_hay()})
+            if url.path == "/api/mapa/ayudas":
+                return self._json(ayudas_de_mapas())
             if url.path == "/api/mapa":
                 archivo = ruta_de_mapa((pregunta.get("archivo") or [""])[0])
                 if not archivo:
@@ -1382,6 +1515,13 @@ class Editor(SimpleHTTPRequestHandler):
                 return self._json(traer_emblema(peticion))
             if url.path == "/api/mapa/nuevo":
                 return self._json(nuevo_mapa(peticion))
+            if url.path in ("/api/mapa/situar", "/api/mapa/ampliar"):
+                archivo = ruta_de_mapa(peticion.get("mapa"))
+                if not archivo:
+                    return self._json({"error": "Ese mapa ya no está."})
+                if url.path == "/api/mapa/situar":
+                    return self._json(situar_mapa(archivo, peticion))
+                return self._json(ampliar_mapa(archivo, peticion))
             if url.path in ("/api/mapa/guardar", "/api/mapa/imagen"):
                 # (En la de la imagen, «archivo» es cómo se llamaba la
                 # imagen subida; el mapa va en «mapa».)

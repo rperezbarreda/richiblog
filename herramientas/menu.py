@@ -151,6 +151,9 @@ APARTADOS = [
         ("Sacar los tamaños del dibujo de la portada",
          "2-imagenes/tamanos-portada.py", [],
          "Solo si has cambiado el dibujo de la portada."),
+        ("Instalar las ayudas de los mapas (una vez)",
+         "2-imagenes/instalar-ayudas-de-mapas.py", [],
+         "Para que el editor busque los mapas en el mapamundi y los amplíe con IA sin que salgan borrosos."),
         editor("repasar", "Elegir la imagen en una ventana en vez de pegar la ruta."),
     ]),
 
