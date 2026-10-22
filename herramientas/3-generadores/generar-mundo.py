@@ -884,6 +884,18 @@ def convertir_mapas(mapas, paginas, imagenes, avisos_por_pagina, detalle):
         mapa["leido"] = leido
         mapa["avisos"] = avisos
 
+    # LOS MAPAS REGIONALES SITUADOS ("world"), DENTRO DEL MAPAMUNDI: sus
+    # sitios, caminos, rutas y ríos salen también en él, en su sitio (ver
+    # juntar_regionales en mundo_mapas.py).
+    for mundo in mapas.values():
+        nombre_mundo = Path(mundo["archivo"]).name
+        regionales = [m["leido"] for m in mapas.values()
+                      if m is not mundo and m["leido"].get("mundo")
+                      and (m["leido"]["mundo"]["mapa"] or "").lower() == nombre_mundo.lower()]
+        if regionales:
+            cuantos = mundo_mapas.juntar_regionales(mundo["leido"], regionales)
+            print("  En %s: lo de %d mapa(s) regional(es)." % (Path(nombre_mundo).stem, cuantos))
+
     indices = indice_de_imagenes(imagenes)
     cuaderno = [None]
 

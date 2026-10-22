@@ -29,7 +29,9 @@
 // entero y nada de barras": por debajo no se baja porque no tendría
 // sentido dejar huecos a los lados. La rueda del ratón no va a saltos,
 // va suave, pero se mueve entre los mismos topes.
-const ZOOMS_DE_MAPA = [1, 1.5, 2, 3, 4, 6];
+const ZOOMS_DE_MAPA = [1, 1.5, 2, 3, 4, 6, 8, 12, 16];
+// El tope de siempre; un mapa puede pedir más (el mapamundi con lo de los
+// mapas regionales dentro: data-mapa-zoom-maximo en su SVG).
 const ZOOM_MAXIMO_DE_MAPA = 6;
 
 // El radio que se quiere ver de un pin, en píxeles de pantalla (ver
@@ -63,6 +65,9 @@ function initializeMundoMapa() {
         lienzo: lienzo,
         dibujo: dibujo,
         zoom: 1,
+        maximo: parseFloat(dibujo.getAttribute("data-mapa-zoom-maximo")) || ZOOM_MAXIMO_DE_MAPA,
+        // Desde qué zoom se escriben los nombres de los pueblos y demás.
+        cerca: parseFloat(dibujo.getAttribute("data-mapa-cerca")) || 2,
         cifra: caja.querySelector("[data-mapa-cifra]"),
         mas: caja.querySelector("[data-mapa-mas]"),
         menos: caja.querySelector("[data-mapa-menos]"),
@@ -180,9 +185,9 @@ function moverZoomDeMapa(mando, hacia) {
     const ahora = mando.zoom || 1;
     let destino;
     if (hacia > 0) {
-        destino = ZOOMS_DE_MAPA.find((z) => z > ahora + 0.001);
+        destino = ZOOMS_DE_MAPA.find((z) => z > ahora + 0.001 && z <= mando.maximo);
         if (destino === undefined) {
-            destino = ZOOM_MAXIMO_DE_MAPA;
+            destino = mando.maximo;
         }
     } else {
         const menores = ZOOMS_DE_MAPA.filter((z) => z < ahora - 0.001);
@@ -196,7 +201,7 @@ function moverZoomDeMapa(mando, hacia) {
 function ponerZoomDeMapa(mando, quiere, anclaX, anclaY) {
     const lienzo = mando.lienzo;
     const antes = mando.zoom || 1;
-    const ahora = Math.max(1, Math.min(ZOOM_MAXIMO_DE_MAPA, quiere || 1));
+    const ahora = Math.max(1, Math.min(mando.maximo || ZOOM_MAXIMO_DE_MAPA, quiere || 1));
 
     // DÓNDE SE ESTABA MIRANDO, para seguir mirando ahí después. Sin esto,
     // al acercar el mapa salta a la esquina de arriba a la izquierda y hay
@@ -221,7 +226,7 @@ function ponerZoomDeMapa(mando, quiere, anclaX, anclaY) {
     lienzo.classList.toggle("se-puede-arrastrar", ahora > 1.0005 || conMargenDeMapa());
     // De cerca (al 200% o más) se escriben también los nombres de los
     // pueblos, las fortalezas…: con el mapa entero serían una sopa.
-    lienzo.classList.toggle("esta-cerca", ahora >= 1.995);
+    lienzo.classList.toggle("esta-cerca", ahora >= (mando.cerca || 2) - 0.005);
 
     if (Math.abs(ahora - antes) > 0.0005) {
         const cuanto = ahora / antes;
@@ -244,7 +249,7 @@ function ponerZoomDeMapa(mando, quiere, anclaX, anclaY) {
         mando.menos.disabled = abajo;
     }
     if (mando.mas) {
-        mando.mas.disabled = ahora >= ZOOM_MAXIMO_DE_MAPA - 0.0005;
+        mando.mas.disabled = ahora >= (mando.maximo || ZOOM_MAXIMO_DE_MAPA) - 0.0005;
     }
     if (mando.ajustar) {
         // Al 100% con margen también vale: vuelve a centrar el mapa.

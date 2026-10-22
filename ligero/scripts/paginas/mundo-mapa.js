@@ -1,7 +1,7 @@
 /* Copia sin comentarios. La escribe actualizar-cabeceras.py: no se edita.
    fuente: /scripts/paginas/mundo-mapa.js
 */
-const ZOOMS_DE_MAPA = [1, 1.5, 2, 3, 4, 6];
+const ZOOMS_DE_MAPA = [1, 1.5, 2, 3, 4, 6, 8, 12, 16];
 const ZOOM_MAXIMO_DE_MAPA = 6;
 const PIN_EN_PANTALLA = 15;
 const CLASES_DE_ZONA_DE_MAPA = [["vecino", "países vecinos"], ["provincia", "provincias y comarcas"], ["lago", "lagos"],
@@ -20,6 +20,8 @@ function initializeMundoMapa() {
         lienzo: lienzo,
         dibujo: dibujo,
         zoom: 1,
+        maximo: parseFloat(dibujo.getAttribute("data-mapa-zoom-maximo")) || ZOOM_MAXIMO_DE_MAPA,
+        cerca: parseFloat(dibujo.getAttribute("data-mapa-cerca")) || 2,
         cifra: caja.querySelector("[data-mapa-cifra]"),
         mas: caja.querySelector("[data-mapa-mas]"),
         menos: caja.querySelector("[data-mapa-menos]"),
@@ -100,9 +102,9 @@ function moverZoomDeMapa(mando, hacia) {
     const ahora = mando.zoom || 1;
     let destino;
     if (hacia > 0) {
-        destino = ZOOMS_DE_MAPA.find((z) => z > ahora + 0.001);
+        destino = ZOOMS_DE_MAPA.find((z) => z > ahora + 0.001 && z <= mando.maximo);
         if (destino === undefined) {
-            destino = ZOOM_MAXIMO_DE_MAPA;
+            destino = mando.maximo;
         }
     } else {
         const menores = ZOOMS_DE_MAPA.filter((z) => z < ahora - 0.001);
@@ -113,7 +115,7 @@ function moverZoomDeMapa(mando, hacia) {
 function ponerZoomDeMapa(mando, quiere, anclaX, anclaY) {
     const lienzo = mando.lienzo;
     const antes = mando.zoom || 1;
-    const ahora = Math.max(1, Math.min(ZOOM_MAXIMO_DE_MAPA, quiere || 1));
+    const ahora = Math.max(1, Math.min(mando.maximo || ZOOM_MAXIMO_DE_MAPA, quiere || 1));
     const caja = lienzo.getBoundingClientRect();
     const haciaX = anclaX === undefined ? lienzo.clientWidth / 2 : anclaX - caja.left;
     const haciaY = anclaY === undefined ? lienzo.clientHeight / 2 : anclaY - caja.top;
@@ -124,7 +126,7 @@ function ponerZoomDeMapa(mando, quiere, anclaX, anclaY) {
     lienzo.style.setProperty("--mapa-zoom", ahora);
     const margen = margenDeMapa(mando);
     lienzo.classList.toggle("se-puede-arrastrar", ahora > 1.0005 || conMargenDeMapa());
-    lienzo.classList.toggle("esta-cerca", ahora >= 1.995);
+    lienzo.classList.toggle("esta-cerca", ahora >= (mando.cerca || 2) - 0.005);
     if (Math.abs(ahora - antes) > 0.0005) {
         const cuanto = ahora / antes;
         lienzo.scrollLeft = (puntoX - antesMargen.x) * cuanto + margen.x - haciaX;
@@ -142,7 +144,7 @@ function ponerZoomDeMapa(mando, quiere, anclaX, anclaY) {
         mando.menos.disabled = abajo;
     }
     if (mando.mas) {
-        mando.mas.disabled = ahora >= ZOOM_MAXIMO_DE_MAPA - 0.0005;
+        mando.mas.disabled = ahora >= (mando.maximo || ZOOM_MAXIMO_DE_MAPA) - 0.0005;
     }
     if (mando.ajustar) {
         mando.ajustar.disabled = abajo && !conMargenDeMapa();

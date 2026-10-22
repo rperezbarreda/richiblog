@@ -233,7 +233,87 @@ def leer_cmap(texto, avisar=None):
         "escala": _escala(crudo.get("scale")),
         "pagina": str(crudo.get("page") or "").strip(),
         "rosa": _rosa_valida(crudo.get("compass")),
+        # Dónde cae en el mapamundi (si es un mapa regional situado; lo
+        # pone el editor de mapas, ver herramientas/mapas_mundo.py).
+        "mundo": _mundo(crudo.get("world")),
     }
+
+
+def _mundo(crudo):
+    """{"mapa", "x", "y", "w", "h"} (en unidades del mapamundi) o None."""
+    if not isinstance(crudo, dict):
+        return None
+    numeros = [_numero(crudo.get(k), None) for k in ("x", "y", "w", "h")]
+    if any(n is None for n in numeros) or numeros[2] <= 0 or numeros[3] <= 0:
+        return None
+    x, y, w, h = numeros
+    return {"mapa": str(crudo.get("map") or "").strip(), "x": x, "y": y, "w": w, "h": h}
+
+
+# =========================================
+# LOS MAPAS REGIONALES, EN EL MAPAMUNDI
+# =========================================
+# Lo que se pinta en cada mapa regional situado (con "world") sale también
+# en el mapamundi, en su sitio: los asentamientos y demás sitios, los
+# caminos, los senderos, las rutas y los ríos. No sus regiones (lagos,
+# bosques, países vecinos: el mapamundi ya tiene las suyas), ni sus
+# fronteras, ni sus textos sueltos. Los sitios «Puente» sin nombre
+# tampoco: los puentes salen solos donde un camino cruza un río. Así, con
+# las regiones apagadas (la casilla «regiones»), el mapamundi es el mapa
+# de rutas de todo el mundo, y la ruta se puede buscar de un país a otro.
+RAYAS_QUE_NO_PASAN = ("frontera",)
+# Con lo regional dentro, se puede acercar más (hay pueblos que a 6x aún
+# se ven pequeños), y los nombres de los pueblos salen de más cerca.
+ZOOM_MAXIMO_CON_REGIONALES = 16
+CERCA_CON_REGIONALES = 4
+
+
+def juntar_regionales(mundo, regionales, avisar=None):
+    """Añade a «mundo» (lo leído del mapamundi) lo de cada mapa regional
+    de «regionales» (lo leído de cada uno, con su "mundo"), pasado a las
+    medidas del mapamundi. Devuelve cuántos ha juntado."""
+    juntados = 0
+    for reg in regionales:
+        sitio = reg.get("mundo")
+        if not sitio or not reg.get("ancho") or not reg.get("alto"):
+            continue
+        fx, fy = sitio["w"] / reg["ancho"], sitio["h"] / reg["alto"]
+
+        def a_mundo(x, y):
+            return sitio["x"] + x * fx, sitio["y"] + y * fy
+
+        for pin in reg.get("pines") or []:
+            if pin.get("tipo") == "puente" and not pin.get("etiqueta"):
+                continue
+            nuevo = dict(pin)
+            nuevo["x"], nuevo["y"] = a_mundo(pin["x"], pin["y"])
+            # Las capas son las del mapa regional: aquí no existen.
+            nuevo["capa"] = ""
+            mundo["pines"].append(nuevo)
+        for linea in reg.get("lineas") or []:
+            if linea.get("tipo") in RAYAS_QUE_NO_PASAN:
+                continue
+            nueva = dict(linea)
+            nueva["puntos"] = [a_mundo(x, y) for x, y in linea["puntos"]]
+            # Con el detalle de su mapa (el del mapamundi es mucho más
+            # grueso: un camino de pueblo saldría recto y más corto).
+            nueva["detalle"] = detalle_de(reg) * fx
+            # Cuánto más fino es su mapa que el mapamundi (para la red de
+            # caminos: _red_de_caminos).
+            nueva["escala_de"] = max(reg["ancho"], reg["alto"]) * fx / max(mundo["ancho"], mundo["alto"])
+            mundo["lineas"].append(nueva)
+        # La escala: la del primer regional que la tenga, si el mapamundi
+        # no tiene la suya (en píxeles del regional; aquí, en unidades).
+        if not mundo.get("escala") and reg.get("escala"):
+            escala = dict(reg["escala"])
+            escala["pixeles"] = escala["pixeles"] * fx
+            mundo["escala"] = escala
+        juntados += 1
+        mundo.setdefault("regionales", []).append(reg.get("titulo") or "")
+    if juntados:
+        mundo["zoom_maximo"] = ZOOM_MAXIMO_CON_REGIONALES
+        mundo["cerca"] = CERCA_CON_REGIONALES
+    return juntados
 
 
 def _quien(crudo, n):
@@ -990,6 +1070,13 @@ def _red_de_caminos(lineas, sitios, ancho, alto, radio, detalle=0):
     # Un camino que se queda a nada de otro (a menos de medio pin) es que
     # quería llegar a él: se engancha.
     sin_salida = max(junto, radio * 0.45)
+    # Con caminos de mapas regionales (juntar_regionales), las tolerancias
+    # de su escala, que es más fina: con las del mapamundi se juntarían
+    # cruces que no lo son y saldrían atajos.
+    finos = [linea["escala_de"] for linea in lineas if linea.get("escala_de")]
+    if finos:
+        fino = min(1.0, min(finos))
+        junto, cerca, sin_salida = junto * fino, cerca * fino, sin_salida * fino
     nodos = []
     celdas = {}
 
@@ -1009,7 +1096,7 @@ def _red_de_caminos(lineas, sitios, ancho, alto, radio, detalle=0):
     for linea in lineas:
         if linea["tipo"] not in RAYAS_DE_VIAJE:
             continue
-        cuales = [nodo(x, y) for x, y in simplificar(linea["puntos"], detalle / 2)]
+        cuales = [nodo(x, y) for x, y in simplificar(linea["puntos"], min(detalle, linea.get("detalle") or detalle) / 2)]
         for a, b in zip(cuales, cuales[1:]):
             if a != b:
                 tramos.add((min(a, b), max(a, b)))
@@ -1597,7 +1684,7 @@ def pintar(mapa, pagina_a, mapa_a, imagen_a, detalle=None, avisar=None, region_d
     # sitio, y si llevan a una página, se pueden pulsar.
     rayas = {}
     for linea in mapa.get("lineas") or []:
-        simple = simplificar(linea["puntos"], detalle / 2)
+        simple = simplificar(linea["puntos"], min(detalle, linea.get("detalle") or detalle) / 2)
         coordenadas = _trazo_abierto(simple)
         clase = "mapa-linea es-" + linea["tipo"]
         color = (' stroke="%s"' % linea["color"]) if linea["color"] else ""
@@ -1825,6 +1912,11 @@ def pintar(mapa, pagina_a, mapa_a, imagen_a, detalle=None, avisar=None, region_d
                         html.escape(json.dumps(escala["viaje"], ensure_ascii=False), quote=True)))
     trozos[0] = trozos[0].replace('<svg class="mapa-svg"', '<svg class="mapa-svg" data-mapa-radio="%d"%s'
                                   % (radio, de_escala), 1)
+    # Con los mapas regionales dentro (juntar_regionales): más zoom, y los
+    # nombres de los pueblos desde más cerca (lo lee mundo-mapa.js).
+    if mapa.get("zoom_maximo"):
+        trozos[0] = trozos[0].replace('<svg class="mapa-svg"', '<svg class="mapa-svg" data-mapa-zoom-maximo="%s"'
+                                      ' data-mapa-cerca="%s"' % (mapa["zoom_maximo"], mapa.get("cerca") or 2), 1)
 
     sitios.sort(key=lambda s: (_sin_tildes(s["nombre"]), s["id"]))
     # LA LEYENDA: los tipos de sitio y de raya que salen en ESTE mapa.

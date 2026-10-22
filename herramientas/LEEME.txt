@@ -2150,6 +2150,22 @@
       y media, el doble, el triple o cuatro veces, con IA o sin ella. En
       los dos, lo puesto encima se queda en su sitio (cada coordenada y la
       escala, a la medida nueva) y la imagen de antes no se borra.
+    - EL MAPAMUNDI CON TODO LO DE LOS MAPAS REGIONALES (desde el
+      22-10-2026): al pasar la wiki a la web, lo que se pinta en cada mapa
+      regional SITUADO (con "world") sale también en el mapamundi, en su
+      sitio: los asentamientos y demás sitios, los caminos, los senderos,
+      las rutas y los ríos (y los puentes, que salen solos). Sus regiones
+      (lagos, bosques, países vecinos), sus fronteras y sus textos no: el
+      mapamundi tiene los suyos. Con «ver: solo la imagen» (sin los
+      países) queda el mapa de rutas del mundo entero, y «ruta» busca el
+      camino también de un país a otro, con la escala y los días de viaje
+      del primer regional que la tenga. Con regionales dentro, el
+      mapamundi deja acercar hasta el 1600% y los nombres de los pueblos
+      salen desde el 400%. Cada camino conserva el detalle y las
+      tolerancias de la red de su mapa: la ruta mide lo mismo que en el
+      mapa regional. Lo junta juntar_regionales (mundo_mapas.py), lo llama
+      generar-mundo.py. Un mapa sin situar no sale: sitúalo en «El mapa en
+      sí» → «En el mapamundi».
     - LAS AYUDAS SE INSTALAN UNA VEZ en cada ordenador: menú → Imágenes →
       «Instalar las ayudas de los mapas» (2-imagenes/instalar-ayudas-de-
       mapas.py). Pone OpenCV con pip y baja el ampliador con IA
