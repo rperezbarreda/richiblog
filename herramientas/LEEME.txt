@@ -866,7 +866,16 @@
   la campaña para la mesa. Las tildes y las mayúsculas dan igual, y vale
   el nombre de pila suelto si nadie más empieza igual. Si un nombre no
   hace nada, es que está escrito distinto en los dos sitios (pasó con
-  «Rukkus» y «Apacca»). Un <strong> que no sea nadie —un caballo, algo
+  «Rukkus» y «Apacca»).
+
+  LA ETIQUETA DE UN NPC (desde el 24-10-2026): <strong data-npc="Brandr
+  Vindahl">Brandr</strong>. Con ella, lo escrito puede ser solo el
+  nombre de pila, un mote o «su padre»: el globo y la ficha salen por la
+  etiqueta. La pone el editor: el botón «NPC de la campaña» (la persona
+  con la etiqueta colgada, con la lista de NPC al lado) envuelve lo
+  elegido, o mete el nombre entero si no hay nada elegido; también el
+  buscador de [[ y «Hacer NPC». En el editor, al pasar el ratón por un
+  nombre etiquetado, dice de quién es. Un <strong> que no sea nadie —un caballo, algo
   que se quiso resaltar— se queda como estaba.
 
   Los nombres que lo tienen llevan un subrayado de puntos. El propio

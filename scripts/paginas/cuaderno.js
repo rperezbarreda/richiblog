@@ -824,7 +824,10 @@ async function montarTokensDeNpcs(cuaderno) {
 
     cuaderno.querySelectorAll("strong").forEach((nombre) => {
         const deLaMesa = [...nombre.classList].some((clase) => clase.indexOf("pj-") === 0);
-        const quien = deLaMesa ? pjQueSea(nombre.textContent) : npcQueSea(nombre.textContent);
+        // Un NPC puede llevar su etiqueta (data-npc, la pone el editor):
+        // entonces es él aunque en el texto ponga solo el nombre de pila.
+        const quien = deLaMesa ? pjQueSea(nombre.textContent)
+            : npcQueSea(nombre.getAttribute("data-npc") || nombre.textContent);
         if (!quien) {
             return;
         }

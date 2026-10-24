@@ -19,7 +19,7 @@
 
 const ETIQUETAS_DEL_REDACTOR = {
     // etiqueta: atributos que se quedan
-    p: [], h2: [], h3: [], h4: [], strong: [], em: [], s: [], code: [], pre: [], br: [], hr: [],
+    p: [], h2: [], h3: [], h4: [], strong: ["data-npc"], em: [], s: [], code: [], pre: [], br: [], hr: [],
     a: ["href", "target", "rel"], ul: [], ol: [], li: [], blockquote: [], figure: [], figcaption: [],
     img: ["src", "alt", "width", "height", "loading", "decoding"], table: [], thead: [], tbody: [], tr: [],
     th: [], td: [], sub: [], sup: [],
@@ -69,6 +69,9 @@ const ICONOS_DEL_REDACTOR = {
     npcNuevo: '<circle cx="10" cy="8" r="4"/><path d="M2 21a8 8 0 0 1 14.5-4.6"/><path d="M19 14v7M15.5 17.5h7"/>',
     personaje: '<circle cx="12" cy="8" r="4" fill="currentColor"/><path d="M4 21a8 8 0 0 1 16 0z" fill="currentColor"/>',
     alguien: '<circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/>',
+    // Alguien con una etiqueta colgada: un NPC de la campaña (con su ficha).
+    npc: '<circle cx="9" cy="8" r="4"/><path d="M2 21a7 7 0 0 1 13-3.6"/><path d="M15 12h6v5l-3 3-3-3z"/>',
+
     lugar: '<path d="M12 21s-7-6.5-7-12a7 7 0 0 1 14 0c0 5.5-7 12-7 12z"/><circle cx="12" cy="9" r="2.5"/>',
     objetos: '<path d="M5 8h14l-1.2 12H6.2z"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/>',
     carpeta: '<path d="M3 6.5A1.5 1.5 0 0 1 4.5 5H9l2 2.5h8.5A1.5 1.5 0 0 1 21 9v9.5a1.5 1.5 0 0 1-1.5 1.5h-15A1.5 1.5 0 0 1 3 18.5z"/>',
@@ -401,7 +404,8 @@ function crearRedactor(opciones) {
     // siNada: si no hay nada elegido, se mete ese texto ya envuelto
     // (el nombre de un personaje, por ejemplo).
     // detras: después, el cursor detrás (y no lo envuelto elegido).
-    yo.envolver = (etiqueta, clase, siNada, detras) => {
+    // atributos: {nombre: valor} de más (el data-npc de un NPC).
+    yo.envolver = (etiqueta, clase, siNada, detras, atributos) => {
         volverASeleccion();
         const sel = window.getSelection();
         if (!sel.rangeCount || (sel.isCollapsed && !siNada) || !area.contains(sel.anchorNode)) {
@@ -413,6 +417,7 @@ function crearRedactor(opciones) {
         if (clase) {
             el.className = clase;
         }
+        Object.entries(atributos || {}).forEach(([k, v]) => el.setAttribute(k, v));
         const vacia = sel.isCollapsed || !!detras;
         const sinElegir = sel.isCollapsed;
         el.appendChild(sinElegir ? document.createTextNode(siNada) : rango.extractContents());
@@ -499,12 +504,19 @@ function crearRedactor(opciones) {
             if (enHtml) {
                 fuente.value = yo.darHTML();
                 fuente.style.height = Math.max(area.offsetHeight, 240) + "px";
+                fuente.hidden = false;
+                area.hidden = true;
             } else {
-                yo.ponerHTML(fuente.value);
+                // Primero se vuelve al texto y LUEGO se avisa: el aviso
+                // pide el HTML (darHTML), y con la caja del HTML todavía a
+                // la vista lo sacaba de ella, que ponerHTML acababa de
+                // vaciar: se borraba todo lo escrito.
+                const escrito = fuente.value;
+                fuente.hidden = true;
+                area.hidden = false;
+                yo.ponerHTML(escrito);
                 avisar();
             }
-            fuente.hidden = !enHtml;
-            area.hidden = enHtml;
             verHtml.setAttribute("aria-pressed", enHtml ? "true" : "false");
             botones.forEach((b) => {
                 if (b !== verHtml) {
@@ -807,6 +819,14 @@ function crearRedactor(opciones) {
         avisar();
     });
     area.addEventListener("input", avisar);
+    // Un NPC con su etiqueta (data-npc): al pasar el ratón, quién es. El
+    // title no se guarda (no está entre lo que se queda al limpiar).
+    area.addEventListener("mouseover", (e) => {
+        const npc = e.target.closest && e.target.closest("strong[data-npc]");
+        if (npc && area.contains(npc)) {
+            npc.title = "NPC: " + npc.getAttribute("data-npc");
+        }
+    });
     area.addEventListener("focus", () => {
         document.execCommand("defaultParagraphSeparator", false, "p");
     });
@@ -825,13 +845,16 @@ function crearRedactor(opciones) {
                 area.appendChild(document.createElement("p")).appendChild(document.createElement("br"));
             }
         }
-        fuente.value = "";
+        // Con la caja del HTML a la vista (un borrador que se recupera
+        // estando en ella), lo nuevo también ahí; si no, vacía.
+        fuente.value = fuente.hidden ? "" : html;
     };
+    // Sin tocar nada: con la caja del HTML a la vista, lo que hay escrito
+    // en ella (antes lo pasaba al texto y la vaciaba, y lo que se escribía
+    // en el HTML se borraba al primer cambio).
     yo.darHTML = () => {
-        if (!fuente.hidden) {
-            yo.ponerHTML(fuente.value);
-        }
-        const copia = leerHtmlRedactor(area.innerHTML.replace(/\u200B/g, ""));
+        const crudo = fuente.hidden ? area.innerHTML : fuente.value;
+        const copia = leerHtmlRedactor(crudo.replace(/\u200B/g, ""));
         // Los espacios duros que mete el navegador al escribir dos seguidos
         // o al final de una línea: espacios normales (menos en el código).
         const paseo = document.createTreeWalker(copia, NodeFilter.SHOW_TEXT);

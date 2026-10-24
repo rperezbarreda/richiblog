@@ -961,7 +961,7 @@ function enlacesDelCuadernoWeb(e, datos) {
         { nombre: "Personaje de la mesa", cosas: pjs.map((p) => ({ texto: p.nombre,
             poner: (r) => r.envolver("strong", p.color ? "pj-" + p.color : "", p.nombre) })) },
         { nombre: "NPC de la campaña", cosas: ((datos.npcs || {})[e.campana] || []).map((p) => ({ texto: p.nombre,
-            detalle: p.que, poner: (r) => r.envolver("strong", "", p.nombre) })) },
+            detalle: p.que, poner: (r) => r.envolver("strong", "", p.nombre, undefined, { "data-npc": p.nombre }) })) },
         paginasParaEnlazarRedactor(datos),
     ];
 }
@@ -1019,7 +1019,7 @@ async function hacerNpcDesdeLasNotasWeb(r, e) {
             ENLAZABLES_WEB.cuando = 0;
             const lo = nombre.value.trim();
             cerrar(true);
-            r.envolver("strong", "", r.elegido().trim() === lo ? undefined : lo, true);
+            r.envolver("strong", "", r.elegido().trim() === lo ? undefined : lo, true, { "data-npc": lo });
             avisarEditor("«" + lo + "» ya es NPC de la campaña (en sus fichas, para ponerle foto y lo que sepáis).",
                 false, hecho.salida);
         });
@@ -1046,8 +1046,36 @@ function extrasDelCuadernoWeb(e) {
             hacer: (r) => r.envolver("strong", elegir.value ? "pj-" + elegir.value : "",
                 elegir.options[elegir.selectedIndex].textContent) });
     }
+    // UN NPC DE LA CAMPAÑA, con su etiqueta: <strong data-npc="Brandr
+    // Vindahl">Brandr</strong>. En las notas se puede escribir solo el
+    // nombre de pila (o un mote) y sigue siendo él: el globo y su ficha
+    // salen por la etiqueta, no por lo escrito. Sin nada elegido, mete su
+    // nombre entero.
+    const npcs = document.createElement("select");
+    npcs.className = "redactor-elegir";
+    npcs.setAttribute("aria-label", "Qué NPC de la campaña");
+    npcs.appendChild(new Option("(cargando…)", ""));
+    enlazablesWeb().then((datos) => {
+        npcs.textContent = "";
+        ((datos.npcs || {})[e.campana] || []).forEach((p) => npcs.appendChild(new Option(p.nombre, p.nombre)));
+        if (!npcs.options.length) {
+            npcs.appendChild(new Option("(no hay NPC todavía)", ""));
+        }
+    });
+    extras.push({ elemento: npcs, separar: true });
+    extras.push({ texto: "NPC de la campaña", icono: "npc",
+        ayuda: "Lo elegido (su nombre, o solo el de pila), como el NPC de al lado: con su etiqueta, sale su ficha."
+            + " Sin nada elegido, mete su nombre entero",
+        hacer: (r) => {
+            if (!npcs.value) {
+                avisarEditor("Primero elige el NPC en la lista de al lado.", true);
+                npcs.focus();
+                return;
+            }
+            r.envolver("strong", "", npcs.value, false, { "data-npc": npcs.value });
+        } });
     extras.push({ texto: "Alguien", icono: "alguien", ayuda: "Lo elegido, como alguien que no es de la mesa (en negrita)",
-        hacer: (r) => r.envolver("strong"), separar: !pjs.length });
+        hacer: (r) => r.envolver("strong") });
     extras.push({ texto: "Lugar", icono: "lugar", ayuda: "Lo elegido, como un lugar (en cursiva)", hacer: (r) => r.envolver("em") });
     extras.push({ texto: "Hacer NPC", icono: "npcNuevo",
         ayuda: "Lo elegido (un nombre), como NPC nuevo de la campaña: con su grupo y qué es",
