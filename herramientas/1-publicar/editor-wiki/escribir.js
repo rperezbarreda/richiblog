@@ -662,7 +662,7 @@ function ponerEntradaWeb(e) {
             h2.id = "t-postit";
             nota.appendChild(h2);
             nota.appendChild(crearEditor("p", "ayuda", "Sale solo de las misiones de la campaña: lo que estaba abierto"
-                + " en esta sesión (lo que se cerró en ella, tachado). Las misiones se llevan en la ficha de la campaña,"
+                + " en esta sesión (lo que se cerró en ella, tachado). Las misiones se llevan en Rol → «Las misiones (el post-it)»,"
                 + " con quién las pidió, la recompensa y en qué sesión empezaron y se cerraron; al guardarlas se"
                 + " rehacen los post-its de todas las sesiones."));
             if (e.postit.length) {
@@ -684,7 +684,7 @@ function ponerEntradaWeb(e) {
                     return;
                 }
                 estadoEscribir.cambiado = false;
-                abrirFichasWeb("campana", e.campana);
+                abrirFichasWeb("misiones", e.campana);
             });
             nota.appendChild(ir);
             form.appendChild(nota);

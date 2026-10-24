@@ -414,7 +414,7 @@ def poner_fichas_de_campana(probar):
 
 # EL POST-IT DE CADA SESIÓN, SACADO DE LAS MISIONES DE LA CAMPAÑA. La
 # lista de verdad es una sola, "misiones" en el JSON de la campaña (se
-# lleva en el editor, en la ficha de la campaña); el post-it de «Cosas
+# lleva en el editor, Rol → «Las misiones (el post-it)»); el post-it de «Cosas
 # pendientes» de la sesión N enseña lo que estaba abierto en ella: lo que
 # empezó en la N o antes (o no se sabe cuándo) y no se había cerrado
 # antes. Lo que se cerró EN esa sesión sale tachado (completado) o

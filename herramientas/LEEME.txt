@@ -162,11 +162,14 @@
       (con su grupo, qué es y la sesión en la que salió).
     · LAS MISIONES, UNA SOLA LISTA PARA TODA LA CAMPAÑA (desde el
       24-10-2026). Van en "misiones" de datos/notas_rol/campana-<clave>
-      .json y se llevan en la ficha de la campaña (en Rol). Cada cosa:
+      .json y se llevan en su propio apartado del editor, en Rol →
+      «Las misiones (el post-it)» (arriba lo pendiente, debajo el
+      histórico de completadas y fallidas). Cada cosa:
       qué hay que hacer, cómo va (pendiente, completada o fallada),
       quién nos lo pidió (un NPC, opcional), la recompensa prometida,
       la sesión en que empezó y en la que se cerró, y lo que nos
-      llevamos de verdad. Lo acabado NO se borra: se cierra.
+      llevamos de verdad. Lo acabado NO se borra: se cierra. Si se
+      cierra sin decir en qué sesión, al guardar se pone la última.
         - EL POST-IT DE LA CAMPAÑA (el botón de su página): de primeras
           solo lo pendiente, con quién lo pidió y la recompensa; al
           final, plegado, EL HISTÓRICO de completadas (✓) y fallidas
@@ -180,8 +183,8 @@
           botón para ir a llevar las misiones. Una campaña sin
           "misiones" no toca sus post-its.
     · LA FICHA DE LA CAMPAÑA (en Rol): de qué va, el sistema, quién
-      dirige, los personajes de la mesa (con su color) y las misiones
-      del post-it (una nueva se escribe; hecha, se queda tachada).
+      dirige y los personajes de la mesa (con su color). Las misiones
+      van en su propio apartado (ver arriba).
     · GUARDAR EN GITHUB (en Comandos): una guía de comandos para hacerlo
       tú en la consola (ir a la carpeta, git status, git pull, git add
       -A, git commit con tu mensaje, git push a tu rama), cada uno con

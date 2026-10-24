@@ -270,6 +270,23 @@ function pintarListaDeFichasWeb(sec, parte) {
                 sec.appendChild(lista);
             }
         });
+    } else if (parte.por_estado) {
+        // Por cómo van (las misiones): arriba lo pendiente (sin estado) y
+        // debajo el histórico (completadas y fallidas), cada uno con su
+        // título y su lista.
+        const clave = parte.por_estado;
+        const todas = fichas.map((f, i) => [f, i]);
+        [["Pendientes", todas.filter(([f]) => !f[clave])],
+            ["El histórico: completadas y fallidas", todas.filter(([f]) => f[clave])]].forEach(([titulo, suyas]) => {
+            sec.appendChild(crearEditor("h3", "fichas-grupo", titulo + " (" + suyas.length + ")"));
+            if (!suyas.length) {
+                sec.appendChild(crearEditor("p", "ayuda", "Nada todavía."));
+                return;
+            }
+            const lista = crearEditor("ul", "fichas-lista");
+            suyas.forEach(([f, i]) => pintarUna(f, i, lista));
+            sec.appendChild(lista);
+        });
     } else {
         fichas.forEach((f, i) => {
             if (porGrupos && (grupo === "-" ? gruposDe(f).length : !gruposDe(f).includes(grupo))) {
@@ -310,9 +327,10 @@ function pintarListaDeFichasWeb(sec, parte) {
     }
     if (elegida !== undefined && fichas[elegida]) {
         pintarFichaWeb(sec, parte, fichas, elegida);
-        // Partida por grupos, la ficha se abre debajo de su grupo (el
-        // primero en el que sale), no al final de todo.
-        const suyo = porGrupos && !grupo ? sec.querySelector("#ficha-" + parte.id + "-" + elegida) : null;
+        // Partida por grupos (o por cómo van), la ficha se abre debajo de
+        // su grupo (el primero en el que sale), no al final de todo.
+        const suyo = (porGrupos && !grupo) || parte.por_estado
+            ? sec.querySelector("#ficha-" + parte.id + "-" + elegida) : null;
         const editor = sec.querySelector(".ficha-editor");
         if (suyo && editor) {
             suyo.closest("ul").after(editor);

@@ -1201,8 +1201,9 @@ def colecciones():
                          C("primera", "Sesión en la que salió por primera vez", "elegir", numerico=True, vacio="quitar"),
                      ]}]},
         {"id": "campana", "apartado": "rol", "titulo": "La ficha de una campaña", "por_campana": True,
-         "ayuda": "Lo que sale arriba en la página de la campaña: de qué va, el sistema, quién dirige; los"
-                  " personajes de la mesa (con su color en las notas) y las misiones pendientes (el post-it).",
+         "ayuda": "Lo que sale arriba en la página de la campaña: de qué va, el sistema, quién dirige y los"
+                  " personajes de la mesa (con su color en las notas). Las misiones van aparte, en «Las"
+                  " misiones (el post-it)».",
          "archivo": "datos/notas_rol/campana-{campana}.json", "despues": "generadores",
          "partes": [
              {"id": "datos", "tipo": "objeto", "camino": [], "titulo": "La campaña", "campos": [
@@ -1224,13 +1225,18 @@ def colecciones():
                   C("ilustracion", "Ilustración (la grande)", "imagen", sitio="pj-ficha", siempre=True),
                   C("equipo", "Lo que lleva encima", "lineas", ayuda="Una cosa por línea.", siempre=True),
                   C("notas", "Notas", "lineas", ayuda="Una cosa por línea.", siempre=True)]},
-             {"id": "misiones", "camino": ["misiones"], "titulo": "Las misiones (el post-it)",
+         ]},
+        {"id": "misiones", "apartado": "rol", "titulo": "Las misiones (el post-it)", "por_campana": True,
+         "ayuda": "Lo que el grupo tiene a medias y lo que ya se cerró: sale en el post-it de la campaña (lo"
+                  " pendiente y, plegado, el histórico) y en el de cada sesión. Arriba lo pendiente; debajo, el"
+                  " histórico de completadas y fallidas.",
+         "archivo": "datos/notas_rol/campana-{campana}.json", "despues": "generadores",
+         "partes": [
+             {"id": "misiones", "camino": ["misiones"], "titulo": "Las misiones", "por_estado": "estado",
               "agrupada": {"clave": "nombre", "nombre": "nombre", "dentro": "cosas", "libre": True},
-              "ayuda": "Cada cosa, en su misión (una que ya hay o una nueva, escribiéndola). Es LA lista de la"
-                       " campaña: sale en el post-it de la campaña (las pendientes delante y, detrás, el histórico"
-                       " de completadas y fallidas) y en el de cada sesión (lo que estaba abierto en esa sesión)."
-                       " No se borra lo acabado: se marca completada o fallada, con la sesión en que se cerró."
-                       " Una misión sin nada dentro se quita.",
+              "ayuda": "Cada cosa, en su misión (una que ya hay o una nueva, escribiéndola). Lo acabado no se"
+                       " borra: en «Cómo va» se marca completada o fallada, con la sesión en que se cerró, y pasa"
+                       " al histórico. Una misión sin nada dentro se quita.",
               "nombre_de": "que", "detalle": ["estado", "de"], "campos": [
                   C("_grupo", "Misión", "elegir", libre=True, obligatorio=True,
                     ayuda="«la Gran Caravana»… Una nueva: escríbela."),
@@ -1469,7 +1475,7 @@ def opciones_de(col, clave_campana, datos):
                 if cat not in orden:
                     orden.append(cat)
         salida["_grupos"] = _opciones(orden)
-    if col["id"] == "campana":
+    if col["id"] == "misiones":
         salida["de"] = _sesiones_de(campana)
         salida["hasta"] = _sesiones_de(campana)
         clave = (campana or {}).get("clave") or clave_campana
@@ -1741,6 +1747,16 @@ def guardar_coleccion(peticion):
                 for f in nuevas:
                     _arreglar_evento_del_calendario(datos, f)
             lista[:] = nuevas
+        if col["id"] == "misiones":
+            # Una misión cerrada (completada o fallada) sin decir en qué
+            # sesión: en la última que haya, que es casi siempre la de
+            # ahora. Si no, no saldría en el post-it de ninguna sesión.
+            ultima = max([int(s.get("numero")) for s in datos.get("sesiones") or []
+                          if isinstance(s, dict) and str(s.get("numero") or "").isdigit()] or [0])
+            for apartado in datos.get("misiones") or []:
+                for cosa in (apartado or {}).get("cosas") or [] if isinstance(apartado, dict) else []:
+                    if isinstance(cosa, dict) and cosa.get("estado") and not cosa.get("hasta") and ultima:
+                        cosa["hasta"] = ultima
         if col["id"] == "calendario":
             hoy = datos.get("hoy")
             if isinstance(hoy, dict) and not (hoy.get("mes") and hoy.get("dia")):
