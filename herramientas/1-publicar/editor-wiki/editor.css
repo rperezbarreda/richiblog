@@ -1956,6 +1956,33 @@ html[data-contraste="alto"] .redactor-area .pj-morado { color: #dec4ff; }
     font-weight: 700;
 }
 
+/* ---- EL POST-IT DE UNA PARTIDA: una fila por cosa (Hecha, lo que es,
+   subir, bajar, quitar); en estrecho, lo que es ocupa la fila entera. */
+.postit-lista {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin: 0 0 14px;
+    padding: 0;
+    list-style: none;
+}
+
+.postit-cosa {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+}
+
+.postit-cosa input[type="text"] {
+    flex: 1 1 16rem;
+    min-width: 0;
+}
+
+.postit-cosa .fila {
+    margin: 0;
+}
+
 /* ---- LAS FICHAS ---- */
 .fichas-lista {
     display: flex;

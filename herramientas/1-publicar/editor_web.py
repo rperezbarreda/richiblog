@@ -542,6 +542,53 @@ def leer_cuaderno(texto):
     return hojas
 
 
+# EL POST-IT DE UNA PARTIDA: las «Cosas pendientes» de al lado del
+# cuaderno, un <ul class="cuaderno-tareas"> dentro de <aside
+# class="cuaderno-postit">. Cada cosa es un <li> (con class="hecho" si ya
+# está hecha: sale tachada y con la casilla marcada). Los comentarios de la
+# plantilla llevan un post-it de ejemplo: no cuentan (tapar_comentarios).
+RE_POSTIT = re.compile(r'<aside class="cuaderno-postit"[^>]*>.*?(<ul class="cuaderno-tareas">)(.*?)(</ul>)', re.S)
+
+
+def _sitio_del_postit(texto):
+    """Dónde está lo de DENTRO de la lista del post-it (inicio, fin), o
+    None si la página no tiene post-it."""
+    m = RE_POSTIT.search(tapar_comentarios(texto))
+    return (m.start(2), m.end(2)) if m else None
+
+
+def leer_postit(texto):
+    sitio = _sitio_del_postit(texto)
+    if not sitio:
+        return None
+    cosas = []
+    for nodo in arbol(texto[sitio[0]:sitio[1]]):
+        if isinstance(nodo, str) or nodo["tag"] != "li":
+            continue
+        dentro = _en_linea(nodo["hijos"]).strip()
+        if _texto_plano(dentro):
+            cosas.append({"html": dentro, "hecho": "hecho" in dict(nodo["attrs"]).get("class", "").split()})
+    return cosas
+
+
+def _cambiar_postit(texto, cosas):
+    sitio = _sitio_del_postit(texto)
+    if not sitio:
+        return texto
+    sangria = _sangria_de(texto, texto.rfind("<ul", 0, sitio[0]))
+    lineas = []
+    for cosa in cosas:
+        if not isinstance(cosa, dict):
+            continue
+        # Lo que llega pasa por el mismo colador que el resto de las notas
+        # (solo etiquetas de texto, sin scripts ni direcciones raras).
+        dentro = _en_linea(arbol(str(cosa.get("html") or ""))).strip()
+        if not _texto_plano(dentro):
+            continue
+        lineas.append(sangria + "    <li%s>%s</li>" % (' class="hecho"' if cosa.get("hecho") else "", dentro))
+    return texto[:sitio[0]] + "\n" + "\n".join(lineas) + ("\n" if lineas else "") + sangria + texto[sitio[1]:]
+
+
 def limpiar_nodos(nodos):
     lineas = []
     _bonito(nodos, "", lineas)
@@ -574,6 +621,7 @@ def leer_entrada(relativo):
         salida["anyo"] = (fecha.group(1)[:4] if fecha else str(dt.date.today().year))
     if tipo == "sesion":
         salida["hojas"] = leer_cuaderno(texto)
+        salida["postit"] = leer_postit(texto)
         archivo_c, campana = _campana_de(texto)
         salida["campana"] = (campana or {}).get("clave", "")
         salida["campana_nombre"] = (campana or {}).get("nombre", "")
@@ -779,6 +827,8 @@ def guardar_entrada(peticion):
                 cabecera = hojas_viejas[0]["titulo"]
             texto = (texto[:sitio[0]] + "\n" + _cuaderno_html(hojas, sangria, cabecera) + "\n" + sangria
                      + texto[sitio[1]:])
+            if isinstance(peticion.get("postit"), list):
+                texto = _cambiar_postit(texto, peticion["postit"])
     except ValueError as error:
         return {"error": "No he podido guardarla: %s." % error}
     escribir_como_estaba(archivo, texto)

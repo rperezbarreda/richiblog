@@ -160,6 +160,15 @@
       apunta la dirección vieja en redirecciones.js y la pasa a la web.
     · HACER NPC, en las notas: lo elegido pasa a ser un NPC de la campaña
       (con su grupo, qué es y la sesión en la que salió).
+    · EL POST-IT DE UNA PARTIDA (desde el 24-10-2026), debajo del
+      cuaderno al editar unas notas: las «Cosas pendientes» de la nota
+      amarilla, una fila por cosa (Hecha, lo que es, subir, bajar,
+      quitar) y «Añadir una cosa». Hecha = <li class="hecho"> (tachada y
+      con la casilla marcada). Lo que no se reescribe conserva su HTML
+      (un nombre de color); lo nuevo se guarda como texto. Se lee y se
+      escribe en el <ul class="cuaderno-tareas"> del <aside
+      class="cuaderno-postit"> (editor_web.py: leer_postit y
+      _cambiar_postit; el ejemplo de los comentarios no cuenta).
     · LA FICHA DE LA CAMPAÑA (en Rol): de qué va, el sistema, quién
       dirige, los personajes de la mesa (con su color) y las misiones
       del post-it (una nueva se escribe; hecha, se queda tachada).
