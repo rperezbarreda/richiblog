@@ -60,7 +60,7 @@
     <link rel="alternate" type="application/rss+xml" title="El Blog de Richi — blog, relatos y rol" href="/blog/rss.xml">
     <!-- ==== CSS ==== -->
     <link rel="stylesheet" href="/estilos/paquete-comun.css?v=42e63d33">
-    <link rel="stylesheet" href="/ligero/estilos/paginas/notas-rol.css?v=60d0af56">
+    <link rel="stylesheet" href="/ligero/estilos/paginas/notas-rol.css?v=35e52280">
     <link rel="stylesheet" href="/ligero/estilos/componentes/postit.css?v=c6f04f61">
     <link rel="stylesheet" href="/ligero/estilos/paginas/notas-rol.responsive.css?v=9c1d26db">
     <link rel="stylesheet" href="/ligero/estilos/componentes/ventana-modal.css?v=95db68e9">
@@ -76,7 +76,7 @@
     <script defer src="/ligero/scripts/componentes/tareas.js?v=38f87599"></script>
     <script defer src="/ligero/scripts/componentes/ventana-modal.js?v=427a4c21"></script>
     <script defer src="/ligero/scripts/componentes/lupa.js?v=cce10cd1"></script>
-    <script defer src="/ligero/scripts/paginas/notas-rol.js?v=00e930ae"></script>
+    <script defer src="/ligero/scripts/paginas/notas-rol.js?v=1a6a45fe"></script>
     <script defer src="/ligero/scripts/paginas/npcs-rol.js?v=e01941fa"></script>
     <script defer src="/ligero/scripts/paginas/cuaderno.js?v=230c0fb8"></script>
     <!-- ==== fin del JS ==== -->
@@ -189,22 +189,23 @@
                  ----------------------------------
                  Va fuera del cuaderno, a la derecha, y NO se desplaza:
                  por largas que sean las notas, lo que queda por hacer
-                 sigue estando delante. Dentro, una lista de tareas es un
-                 <ul> con su clase y ya está:
+                 sigue estando delante. NO SE ESCRIBE A MANO: lo rellena
+                 generar-posts.py con las MISIONES DE LA CAMPAÑA ("misiones"
+                 en datos/notas_rol/campana-<clave>.json, que se llevan en
+                 el editor, en la ficha de la campaña): lo que estaba
+                 abierto en esta sesión, y lo que se cerró en ella
+                 tachado. Queda así:
 
                    <ul class="cuaderno-tareas">
-                       <li>Lo que queda por hacer.</li>
-                       <li class="hecho">Lo que ya está hecho.</li>
+                       <li>Lo que queda por hacer. <span class="cuaderno-tarea-extra">lo pide Sigil · recompensa: 50 po</span></li>
+                       <li class="hecho">Lo que se completó en esta sesión.</li>
                    </ul>
 
                  Sale con su casilla, y se puede marcar y desmarcar
                  pulsándola. Lo que se marque así se queda guardado en
-                 ESE navegador y nada más; para que quede escrito —y para
-                 que lo vea quien entre— se le pone la clase "hecho" al
-                 <li> aquí, en el archivo.
-
-                 Si una partida no deja nada pendiente, se borra el
-                 <aside> entero y el cuaderno ocupa todo el ancho.
+                 ESE navegador y nada más; lo que vale es lo de la
+                 campaña. (Una campaña SIN "misiones" no toca su post-it:
+                 ahí se sigue escribiendo a mano.)
 
                  EL PDF Y LA SESIÓN DE AL LADO
                  -----------------------------
@@ -358,16 +359,12 @@
                                  Lo que quedó por hacer. Vive fuera del
                                  cuaderno, así que no se desplaza con él:
                                  por largas que sean las notas, sigue
-                                 delante.
-                                 Si la partida no deja nada pendiente, se
-                                 borra el <aside> entero y el cuaderno
-                                 ocupa todo el ancho. -->
+                                 delante. Lo de dentro lo pone
+                                 generar-posts.py con las misiones de la
+                                 campaña. -->
                             <aside class="cuaderno-postit" role="note" aria-labelledby="cuaderno-postit-titulo">
                                 <h2 class="cuaderno-postit-titulo" id="cuaderno-postit-titulo">Cosas pendientes</h2>
                                 <ul class="cuaderno-tareas">
-                                    <li>Lo que quedó a medias para la próxima.</li>
-                                    <li>Preguntarle a alguien por algo.</li>
-                                    <li class="hecho">Y esto ya está hecho.</li>
                                 </ul>
                             </aside>
 

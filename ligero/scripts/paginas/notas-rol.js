@@ -551,13 +551,42 @@ function trozoDeBotin(texto) {
     trozo.textContent = texto;
     return trozo;
 }
+function estadoDeMision(cosa) {
+    const estado = (cosa.estado || "").toString().trim().toLowerCase();
+    if (estado === "completada" || estado === "fallada") {
+        return estado;
+    }
+    return cosa.hecha ? "completada" : "pendiente";
+}
+function extrasDeMision(trozos) {
+    const hay = trozos.filter(Boolean);
+    if (!hay.length) {
+        return null;
+    }
+    const extra = document.createElement("span");
+    extra.className = "misiones-extra";
+    extra.textContent = hay.join(" · ");
+    return extra;
+}
+function sesionesDeMision(cosa) {
+    const de = Number(cosa.de);
+    const hasta = Number(cosa.hasta);
+    if (de && hasta && de !== hasta) {
+        return "sesiones " + de + " a " + hasta;
+    }
+    if (hasta) {
+        return "sesión " + hasta;
+    }
+    return de ? "desde la sesión " + de : "";
+}
 function misionesDe(campana) {
     return (Array.isArray(campana.misiones) ? campana.misiones : [])
         .map((apartado) => ({
             nombre: (apartado && apartado.nombre ? apartado.nombre : "")
                 .toString().trim(),
             cosas: (Array.isArray(apartado && apartado.cosas) ? apartado.cosas : [])
-                .filter((c) => c && (c.que || "").toString().trim()),
+                .filter((c) => c && (c.que || "").toString().trim())
+                .map((c) => Object.assign({}, c, { estado: estadoDeMision(c) })),
         }))
         .filter((apartado) => apartado.cosas.length);
 }
@@ -565,7 +594,14 @@ function llenarLasMisiones(cuerpo, misiones) {
     const nota = document.createElement("div");
     nota.className = "cuaderno-postit misiones-nota";
     let pendientes = 0;
+    const cerradas = [];
     misiones.forEach((apartado) => {
+        apartado.cosas.filter((c) => c.estado !== "pendiente")
+            .forEach((c) => cerradas.push(Object.assign({ apartado: apartado.nombre }, c)));
+        const abiertas = apartado.cosas.filter((c) => c.estado === "pendiente");
+        if (!abiertas.length) {
+            return;
+        }
         const caja = document.createElement("details");
         caja.className = "misiones-apartado";
         caja.open = true;
@@ -581,23 +617,18 @@ function llenarLasMisiones(cuerpo, misiones) {
         const nombre = document.createElement("span");
         nombre.textContent = apartado.nombre || "sin apartado";
         titulo.appendChild(nombre);
-        const quedan = apartado.cosas.filter((c) => !c.hecha).length;
+        const quedan = abiertas.length;
         pendientes += quedan;
         const cuenta = document.createElement("span");
         cuenta.className = "misiones-cuenta";
-        cuenta.textContent = quedan === 0
-            ? "todo hecho"
-            : (quedan === 1 ? "queda 1" : "quedan " + quedan);
+        cuenta.textContent = quedan === 1 ? "queda 1" : "quedan " + quedan;
         titulo.appendChild(cuenta);
         tirador.appendChild(titulo);
         caja.appendChild(tirador);
         const lista = document.createElement("ul");
         lista.className = "cuaderno-tareas";
-        apartado.cosas.forEach((cosa) => {
+        abiertas.forEach((cosa) => {
             const fila = document.createElement("li");
-            if (cosa.hecha) {
-                fila.className = "hecho";
-            }
             fila.appendChild(document.createTextNode(cosa.que.toString().trim()));
             const numero = Number(cosa.de);
             if (numero) {
@@ -606,6 +637,13 @@ function llenarLasMisiones(cuerpo, misiones) {
                 de.className = "misiones-de";
                 de.textContent = "sesión " + numero;
                 fila.appendChild(de);
+            }
+            const extra = extrasDeMision([
+                cosa.quien ? "lo pide " + cosa.quien.toString().trim() : "",
+                cosa.recompensa ? "recompensa: " + cosa.recompensa.toString().trim() : "",
+            ]);
+            if (extra) {
+                fila.appendChild(extra);
             }
             lista.appendChild(fila);
         });
@@ -619,7 +657,77 @@ function llenarLasMisiones(cuerpo, misiones) {
         : (pendientes === 1 ? "Queda 1 cosa por hacer."
             : "Quedan " + pendientes + " cosas por hacer.");
     nota.appendChild(pie);
+    if (cerradas.length) {
+        nota.appendChild(historicoDeMisiones(cerradas));
+    }
     cuerpo.appendChild(nota);
+}
+function historicoDeMisiones(cerradas) {
+    const hechas = cerradas.filter((c) => c.estado === "completada").length;
+    const falladas = cerradas.length - hechas;
+    const caja = document.createElement("details");
+    caja.className = "misiones-historico";
+    const tirador = document.createElement("summary");
+    tirador.className = "misiones-tirador";
+    const titulo = document.createElement("h3");
+    titulo.className = "misiones-titulo";
+    const flecha = document.createElement("span");
+    flecha.className = "misiones-flecha";
+    flecha.setAttribute("aria-hidden", "true");
+    flecha.textContent = "▾";
+    titulo.appendChild(flecha);
+    const nombre = document.createElement("span");
+    nombre.textContent = "el histórico";
+    titulo.appendChild(nombre);
+    const cuenta = document.createElement("span");
+    cuenta.className = "misiones-cuenta";
+    cuenta.textContent = [
+        hechas ? hechas + (hechas === 1 ? " completada" : " completadas") : "",
+        falladas ? falladas + (falladas === 1 ? " fallida" : " fallidas") : "",
+    ].filter(Boolean).join(" · ");
+    titulo.appendChild(cuenta);
+    tirador.appendChild(titulo);
+    caja.appendChild(tirador);
+    const lista = document.createElement("ul");
+    lista.className = "misiones-hechas";
+    cerradas
+        .map((c, i) => ({ c, i }))
+        .sort((a, b) => (Number(b.c.hasta) || 0) - (Number(a.c.hasta) || 0) || a.i - b.i)
+        .forEach(({ c }) => {
+            const fallada = c.estado === "fallada";
+            const fila = document.createElement("li");
+            fila.className = "misiones-hecha" + (fallada ? " es-fallada" : "");
+            const marca = document.createElement("span");
+            marca.className = "misiones-marca";
+            marca.setAttribute("aria-hidden", "true");
+            marca.textContent = fallada ? "✗" : "✓";
+            fila.appendChild(marca);
+            const que = document.createElement("span");
+            que.className = "misiones-que";
+            que.textContent = c.que.toString().trim();
+            fila.appendChild(que);
+            const obtenida = (c.obtenida || "").toString().trim();
+            const prometida = (c.recompensa || "").toString().trim();
+            let premio = "";
+            if (obtenida) {
+                premio = "recompensa: " + obtenida;
+            } else if (fallada && prometida) {
+                premio = "se perdió: " + prometida;
+            } else if (!fallada) {
+                premio = "sin recompensa";
+            }
+            const extra = extrasDeMision([
+                fallada ? "fallida" : "completada",
+                sesionesDeMision(c),
+                c.apartado,
+                c.quien ? "la pidió " + c.quien.toString().trim() : "",
+                premio,
+            ]);
+            fila.appendChild(extra);
+            lista.appendChild(fila);
+        });
+    caja.appendChild(lista);
+    return caja;
 }
 function pintarSesiones(lista, campana, publicadas) {
     const sesiones = (Array.isArray(campana.sesiones) ? campana.sesiones : [])

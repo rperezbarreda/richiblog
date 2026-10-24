@@ -923,11 +923,21 @@ function trozoDeBotin(texto) {
 //       }
 //   ]
 //
-//   nombre   el apartado. Sale como título, y se puede plegar.
-//   que      la misión. Lo único que hace falta.
-//   de       en qué sesión salió, si se sabe.
-//   hecha    true para lo que ya está: se queda con la casilla marcada y
-//            tachada, en vez de borrarla. Lo hecho es media campaña.
+//   nombre      el apartado. Sale como título, y se puede plegar.
+//   que         la misión. Lo único que hace falta.
+//   de          en qué sesión empezó, si se sabe.
+//   hasta       en qué sesión se cerró (completada o fallada).
+//   estado      "completada" o "fallada"; sin él, pendiente ("hecha":
+//               true, lo de antes, vale como completada).
+//   quien       el NPC que nos la pidió (opcional).
+//   recompensa  la prometida (sale mientras está pendiente).
+//   obtenida    la que hubo de verdad al cerrarla (vacío: ninguna).
+//
+// DE PRIMERAS SOLO SE VE LO PENDIENTE. Lo cerrado no se borra: va al
+// HISTÓRICO, un <details> plegado al final de la nota («completadas y
+// fallidas»), de la última cerrada a la primera, con sus sesiones, quién
+// la pidió y qué recompensa hubo. El post-it de cada sesión sale de esta
+// misma lista (generar-posts.py: lo que estaba abierto en ella).
 //
 // SE VE COMO UN POST-IT, el mismo papel amarillo que la nota de cosas
 // pendientes de una partida (estilos/componentes/postit.css). No es un
@@ -940,13 +950,47 @@ function trozoDeBotin(texto) {
 // haría pensar que está apuntado cuando no lo está. Las casillas se ven
 // porque dicen de un vistazo qué está hecho y qué no.
 
+function estadoDeMision(cosa) {
+    const estado = (cosa.estado || "").toString().trim().toLowerCase();
+    if (estado === "completada" || estado === "fallada") {
+        return estado;
+    }
+    return cosa.hecha ? "completada" : "pendiente";
+}
+
+// Lo de debajo de una misión, pequeño: «lo pide Sigil · recompensa: 50
+// po». Vacío si no hay nada.
+function extrasDeMision(trozos) {
+    const hay = trozos.filter(Boolean);
+    if (!hay.length) {
+        return null;
+    }
+    const extra = document.createElement("span");
+    extra.className = "misiones-extra";
+    extra.textContent = hay.join(" · ");
+    return extra;
+}
+
+function sesionesDeMision(cosa) {
+    const de = Number(cosa.de);
+    const hasta = Number(cosa.hasta);
+    if (de && hasta && de !== hasta) {
+        return "sesiones " + de + " a " + hasta;
+    }
+    if (hasta) {
+        return "sesión " + hasta;
+    }
+    return de ? "desde la sesión " + de : "";
+}
+
 function misionesDe(campana) {
     return (Array.isArray(campana.misiones) ? campana.misiones : [])
         .map((apartado) => ({
             nombre: (apartado && apartado.nombre ? apartado.nombre : "")
                 .toString().trim(),
             cosas: (Array.isArray(apartado && apartado.cosas) ? apartado.cosas : [])
-                .filter((c) => c && (c.que || "").toString().trim()),
+                .filter((c) => c && (c.que || "").toString().trim())
+                .map((c) => Object.assign({}, c, { estado: estadoDeMision(c) })),
         }))
         .filter((apartado) => apartado.cosas.length);
 }
@@ -956,7 +1000,14 @@ function llenarLasMisiones(cuerpo, misiones) {
     nota.className = "cuaderno-postit misiones-nota";
 
     let pendientes = 0;
+    const cerradas = [];
     misiones.forEach((apartado) => {
+        apartado.cosas.filter((c) => c.estado !== "pendiente")
+            .forEach((c) => cerradas.push(Object.assign({ apartado: apartado.nombre }, c)));
+        const abiertas = apartado.cosas.filter((c) => c.estado === "pendiente");
+        if (!abiertas.length) {
+            return;
+        }
         // Cada apartado es un <details>, que se pliega y se despliega
         // solo, con el teclado y diciéndolo un lector de pantalla. Lo
         // mismo que las regiones de los npcs y los apartados de la wiki.
@@ -982,13 +1033,11 @@ function llenarLasMisiones(cuerpo, misiones) {
         nombre.textContent = apartado.nombre || "sin apartado";
         titulo.appendChild(nombre);
 
-        const quedan = apartado.cosas.filter((c) => !c.hecha).length;
+        const quedan = abiertas.length;
         pendientes += quedan;
         const cuenta = document.createElement("span");
         cuenta.className = "misiones-cuenta";
-        cuenta.textContent = quedan === 0
-            ? "todo hecho"
-            : (quedan === 1 ? "queda 1" : "quedan " + quedan);
+        cuenta.textContent = quedan === 1 ? "queda 1" : "quedan " + quedan;
         titulo.appendChild(cuenta);
 
         tirador.appendChild(titulo);
@@ -999,11 +1048,8 @@ function llenarLasMisiones(cuerpo, misiones) {
         // sitio: dibuja la casilla y el tachado sin JavaScript ninguno
         // (estilos/componentes/postit.css).
         lista.className = "cuaderno-tareas";
-        apartado.cosas.forEach((cosa) => {
+        abiertas.forEach((cosa) => {
             const fila = document.createElement("li");
-            if (cosa.hecha) {
-                fila.className = "hecho";
-            }
             fila.appendChild(document.createTextNode(cosa.que.toString().trim()));
             const numero = Number(cosa.de);
             if (numero) {
@@ -1019,6 +1065,13 @@ function llenarLasMisiones(cuerpo, misiones) {
                 de.textContent = "sesión " + numero;
                 fila.appendChild(de);
             }
+            const extra = extrasDeMision([
+                cosa.quien ? "lo pide " + cosa.quien.toString().trim() : "",
+                cosa.recompensa ? "recompensa: " + cosa.recompensa.toString().trim() : "",
+            ]);
+            if (extra) {
+                fila.appendChild(extra);
+            }
             lista.appendChild(fila);
         });
         caja.appendChild(lista);
@@ -1033,7 +1086,85 @@ function llenarLasMisiones(cuerpo, misiones) {
             : "Quedan " + pendientes + " cosas por hacer.");
     nota.appendChild(pie);
 
+    if (cerradas.length) {
+        nota.appendChild(historicoDeMisiones(cerradas));
+    }
+
     cuerpo.appendChild(nota);
+}
+
+
+// EL HISTÓRICO: lo completado y lo fallado, plegado al final de la nota.
+// Cada una con su marca (✓ o ✗, y dicho en palabras para quien no la ve),
+// sus sesiones, de qué apartado era, quién la pidió y qué recompensa
+// hubo. De la última cerrada a la primera.
+function historicoDeMisiones(cerradas) {
+    const hechas = cerradas.filter((c) => c.estado === "completada").length;
+    const falladas = cerradas.length - hechas;
+    const caja = document.createElement("details");
+    caja.className = "misiones-historico";
+    const tirador = document.createElement("summary");
+    tirador.className = "misiones-tirador";
+    const titulo = document.createElement("h3");
+    titulo.className = "misiones-titulo";
+    const flecha = document.createElement("span");
+    flecha.className = "misiones-flecha";
+    flecha.setAttribute("aria-hidden", "true");
+    flecha.textContent = "▾";
+    titulo.appendChild(flecha);
+    const nombre = document.createElement("span");
+    nombre.textContent = "el histórico";
+    titulo.appendChild(nombre);
+    const cuenta = document.createElement("span");
+    cuenta.className = "misiones-cuenta";
+    cuenta.textContent = [
+        hechas ? hechas + (hechas === 1 ? " completada" : " completadas") : "",
+        falladas ? falladas + (falladas === 1 ? " fallida" : " fallidas") : "",
+    ].filter(Boolean).join(" · ");
+    titulo.appendChild(cuenta);
+    tirador.appendChild(titulo);
+    caja.appendChild(tirador);
+
+    const lista = document.createElement("ul");
+    lista.className = "misiones-hechas";
+    cerradas
+        .map((c, i) => ({ c, i }))
+        .sort((a, b) => (Number(b.c.hasta) || 0) - (Number(a.c.hasta) || 0) || a.i - b.i)
+        .forEach(({ c }) => {
+            const fallada = c.estado === "fallada";
+            const fila = document.createElement("li");
+            fila.className = "misiones-hecha" + (fallada ? " es-fallada" : "");
+            const marca = document.createElement("span");
+            marca.className = "misiones-marca";
+            marca.setAttribute("aria-hidden", "true");
+            marca.textContent = fallada ? "✗" : "✓";
+            fila.appendChild(marca);
+            const que = document.createElement("span");
+            que.className = "misiones-que";
+            que.textContent = c.que.toString().trim();
+            fila.appendChild(que);
+            const obtenida = (c.obtenida || "").toString().trim();
+            const prometida = (c.recompensa || "").toString().trim();
+            let premio = "";
+            if (obtenida) {
+                premio = "recompensa: " + obtenida;
+            } else if (fallada && prometida) {
+                premio = "se perdió: " + prometida;
+            } else if (!fallada) {
+                premio = "sin recompensa";
+            }
+            const extra = extrasDeMision([
+                fallada ? "fallida" : "completada",
+                sesionesDeMision(c),
+                c.apartado,
+                c.quien ? "la pidió " + c.quien.toString().trim() : "",
+                premio,
+            ]);
+            fila.appendChild(extra);
+            lista.appendChild(fila);
+        });
+    caja.appendChild(lista);
+    return caja;
 }
 
 

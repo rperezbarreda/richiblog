@@ -160,15 +160,25 @@
       apunta la dirección vieja en redirecciones.js y la pasa a la web.
     · HACER NPC, en las notas: lo elegido pasa a ser un NPC de la campaña
       (con su grupo, qué es y la sesión en la que salió).
-    · EL POST-IT DE UNA PARTIDA (desde el 24-10-2026), debajo del
-      cuaderno al editar unas notas: las «Cosas pendientes» de la nota
-      amarilla, una fila por cosa (Hecha, lo que es, subir, bajar,
-      quitar) y «Añadir una cosa». Hecha = <li class="hecho"> (tachada y
-      con la casilla marcada). Lo que no se reescribe conserva su HTML
-      (un nombre de color); lo nuevo se guarda como texto. Se lee y se
-      escribe en el <ul class="cuaderno-tareas"> del <aside
-      class="cuaderno-postit"> (editor_web.py: leer_postit y
-      _cambiar_postit; el ejemplo de los comentarios no cuenta).
+    · LAS MISIONES, UNA SOLA LISTA PARA TODA LA CAMPAÑA (desde el
+      24-10-2026). Van en "misiones" de datos/notas_rol/campana-<clave>
+      .json y se llevan en la ficha de la campaña (en Rol). Cada cosa:
+      qué hay que hacer, cómo va (pendiente, completada o fallada),
+      quién nos lo pidió (un NPC, opcional), la recompensa prometida,
+      la sesión en que empezó y en la que se cerró, y lo que nos
+      llevamos de verdad. Lo acabado NO se borra: se cierra.
+        - EL POST-IT DE LA CAMPAÑA (el botón de su página): de primeras
+          solo lo pendiente, con quién lo pidió y la recompensa; al
+          final, plegado, EL HISTÓRICO de completadas (✓) y fallidas
+          (✗, tachadas), de la última a la primera, con sus sesiones,
+          su misión, quién la pidió y qué recompensa hubo (o «sin
+          recompensa», o «se perdió: …» si se falló).
+        - EL POST-IT DE CADA SESIÓN lo escribe generar-posts.py
+          (poner_postits_de_sesiones) con lo que estaba abierto en esa
+          sesión; lo que se cerró en ella sale tachado. Ya no se escribe
+          a mano: en el editor de las notas se ve cómo está y hay un
+          botón para ir a llevar las misiones. Una campaña sin
+          "misiones" no toca sus post-its.
     · LA FICHA DE LA CAMPAÑA (en Rol): de qué va, el sistema, quién
       dirige, los personajes de la mesa (con su color) y las misiones
       del post-it (una nueva se escribe; hecha, se queda tachada).
@@ -1059,18 +1069,24 @@
               "nombre": "la mercancía robada",
               "cosas": [
                   { "que": "Encontrar la base de los bandidos.", "de": 1 },
-                  { "que": "Hablar con Sigil.", "hecha": true }
+                  { "que": "Hablar con Sigil.", "estado": "completada",
+                    "de": 1, "hasta": 2, "quien": "Sigil",
+                    "recompensa": "50 po", "obtenida": "40 po" }
               ]
           }
       ]
 
-      nombre   el apartado. Normalmente quién te lo encargó o dónde
-               pasa. Sale como título y se puede plegar.
-      que      la misión. Lo único que hace falta.
-      de       en qué sesión salió, si se sabe.
-      hecha    true para lo que ya está: se queda con la casilla
-               marcada y tachado, en vez de borrarlo. Lo hecho es
-               media campaña.
+      nombre      el apartado. Normalmente quién te lo encargó o dónde
+                  pasa. Sale como título y se puede plegar.
+      que         la misión. Lo único que hace falta.
+      de          en qué sesión empezó, si se sabe.
+      hasta       en qué sesión se cerró.
+      estado      "completada" o "fallada"; sin él, pendiente. Lo
+                  cerrado no se borra: va al histórico. ("hecha": true,
+                  lo de antes, vale como completada.)
+      quien       el NPC que nos lo pidió (opcional).
+      recompensa  la prometida (sale mientras está pendiente).
+      obtenida    la que hubo al cerrarla (vacío: ninguna).
 
   SE VE COMO UN POST-IT, el mismo papel amarillo que la nota de cosas
   pendientes de una partida. No es un adorno: las dos listas son la

@@ -412,6 +412,106 @@ def poner_fichas_de_campana(probar):
             escribir_texto(ruta, nuevo, crlf)
 
 
+# EL POST-IT DE CADA SESIÓN, SACADO DE LAS MISIONES DE LA CAMPAÑA. La
+# lista de verdad es una sola, "misiones" en el JSON de la campaña (se
+# lleva en el editor, en la ficha de la campaña); el post-it de «Cosas
+# pendientes» de la sesión N enseña lo que estaba abierto en ella: lo que
+# empezó en la N o antes (o no se sabe cuándo) y no se había cerrado
+# antes. Lo que se cerró EN esa sesión sale tachado (completado) o
+# tachado y con «fallida». Cada cosa lleva debajo, pequeño, quién la
+# pidió y la recompensa prometida, si se saben.
+#
+#   { "que": "…", "de": 1, "hasta": 3, "estado": "completada" | "fallada",
+#     "quien": "Sigil", "recompensa": "50 po", "obtenida": "40 po" }
+#
+# Sin estado es pendiente; "hecha": true (lo de antes) vale como
+# completada. Una campaña SIN "misiones" no toca sus post-its (los de
+# antes se escribían a mano). Los comentarios de la plantilla llevan un
+# post-it de ejemplo: no cuentan.
+RE_POSTIT_DE_SESION = re.compile(r'(<aside class="cuaderno-postit"[^>]*>.*?<ul class="cuaderno-tareas">)(.*?)(</ul>)',
+                                 re.S)
+
+
+def estado_de_mision(cosa):
+    estado = str(cosa.get("estado") or "").strip().lower()
+    if estado in ("completada", "fallada"):
+        return estado
+    return "completada" if cosa.get("hecha") else "pendiente"
+
+
+def _numero_de_sesion(valor):
+    try:
+        return int(valor)
+    except (TypeError, ValueError):
+        return None
+
+
+def postit_de_sesion(campana, numero, sangria):
+    lineas = []
+    for apartado in campana.get("misiones") or []:
+        if not isinstance(apartado, dict):
+            continue
+        for cosa in apartado.get("cosas") or []:
+            if not isinstance(cosa, dict) or not str(cosa.get("que") or "").strip():
+                continue
+            de = _numero_de_sesion(cosa.get("de"))
+            hasta = _numero_de_sesion(cosa.get("hasta"))
+            estado = estado_de_mision(cosa)
+            if de is not None and de > numero:
+                continue
+            # Cerrada sin saber cuándo: ya no se ve en ninguna sesión.
+            if estado != "pendiente" and (hasta is None or hasta < numero):
+                continue
+            clases = []
+            extra = []
+            if estado != "pendiente" and hasta == numero:
+                clases.append("hecho")
+                if estado == "fallada":
+                    clases.append("es-fallada")
+                    extra.append("fallida")
+            quien = str(cosa.get("quien") or "").strip()
+            recompensa = str(cosa.get("recompensa") or "").strip()
+            if quien:
+                extra.append("lo pide " + quien)
+            if recompensa and estado == "pendiente":
+                extra.append("recompensa: " + recompensa)
+            texto = _e(str(cosa["que"]).strip())
+            if extra:
+                texto += ' <span class="cuaderno-tarea-extra">%s</span>' % _e(" · ".join(extra))
+            lineas.append(sangria + "    <li%s>%s</li>" % (' class="%s"' % " ".join(clases) if clases else "", texto))
+    return lineas
+
+
+def poner_postits_de_sesiones(probar):
+    for archivo in sorted(CAMPANAS.glob("campana-*.json")):
+        try:
+            campana = json.loads(archivo.read_text(encoding="utf-8"))
+        except (OSError, ValueError):
+            continue
+        if not isinstance(campana.get("misiones"), list):
+            continue
+        for sesion in campana.get("sesiones") or []:
+            if not isinstance(sesion, dict):
+                continue
+            numero = _numero_de_sesion(sesion.get("numero"))
+            ruta = RAIZ / str(sesion.get("url") or "").lstrip("/")
+            if numero is None or not sesion.get("url") or not ruta.is_file():
+                continue
+            texto, crlf = leer_texto(ruta)
+            tapado = re.sub(r"<!--.*?-->", lambda m: re.sub(r"[^\n]", " ", m.group(0)), texto, flags=re.S)
+            m = RE_POSTIT_DE_SESION.search(tapado)
+            if not m:
+                continue
+            inicio = texto.rfind("\n", 0, m.start(1) + m.group(1).rfind("<ul")) + 1
+            sangria = texto[inicio:m.start(1) + m.group(1).rfind("<ul")]
+            sangria = sangria[:len(sangria) - len(sangria.lstrip())]
+            lineas = postit_de_sesion(campana, numero, sangria)
+            dentro = "\n" + "\n".join(lineas) + ("\n" if lineas else "") + sangria
+            nuevo = texto[:m.start(2)] + dentro + texto[m.end(2):]
+            if nuevo != texto and not probar:
+                escribir_texto(ruta, nuevo, crlf)
+
+
 def recoger_blog():
     entradas, avisos = [], []
     for ruta in paginas(BLOG, "*.html"):
@@ -647,6 +747,7 @@ def generar(probar=False):
 
     blog, avisos_blog = recoger_blog()
     poner_fichas_de_campana(probar)
+    poner_postits_de_sesiones(probar)
     movidas, avisos_movidas, cuantas_rol = recoger_movidas()
     notas, avisos_notas = recoger_notas_rol()
 

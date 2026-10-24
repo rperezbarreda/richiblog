@@ -479,6 +479,43 @@
 .misiones-de::before {
     content: "· ";
 }
+.misiones-extra,
+.cuaderno-tarea-extra {
+    display: block;
+    font-family: var(--fuente-mono);
+    font-size: 0.75rem;
+    line-height: 1.5;
+}
+.misiones-historico {
+    margin-top: 0.9em;
+    padding-top: 0.9em;
+    border-top: 1px solid currentColor;
+}
+.misiones-historico:not([open]) .misiones-flecha {
+    transform: rotate(-90deg);
+}
+.misiones-hechas {
+    display: flex;
+    flex-direction: column;
+    gap: 0.6em;
+    margin: calc(var(--renglon) / 3) 0 0;
+    padding: 0 0 0 0.6em;
+    list-style: none;
+}
+.misiones-hecha {
+    position: relative;
+    padding-left: 1.4em;
+}
+.misiones-marca {
+    position: absolute;
+    top: 0;
+    left: 0;
+    font-weight: 700;
+}
+.misiones-hecha.es-fallada .misiones-que,
+.cuaderno-tareas > li.es-fallada {
+    text-decoration: line-through;
+}
 .misiones-pie {
     margin: 0.9em 0 0;
     padding-top: calc(var(--renglon) / 2);

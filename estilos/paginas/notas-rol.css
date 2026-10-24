@@ -829,6 +829,57 @@
     content: "· ";
 }
 
+/* Lo de debajo de una misión: quién la pidió y la recompensa (y, en el
+   histórico, cómo acabó y en qué sesiones). En su propia línea, pequeño y
+   de máquina, en la misma tinta: en gris no se leería sobre el amarillo. */
+.misiones-extra,
+.cuaderno-tarea-extra {
+    display: block;
+    font-family: var(--fuente-mono);
+    font-size: 0.75rem;
+    line-height: 1.5;
+}
+
+/* EL HISTÓRICO: plegado al final, debajo de la cuenta. */
+.misiones-historico {
+    margin-top: 0.9em;
+    padding-top: 0.9em;
+    border-top: 1px solid currentColor;
+}
+
+.misiones-historico:not([open]) .misiones-flecha {
+    transform: rotate(-90deg);
+}
+
+.misiones-hechas {
+    display: flex;
+    flex-direction: column;
+    gap: 0.6em;
+    margin: calc(var(--renglon) / 3) 0 0;
+    padding: 0 0 0 0.6em;
+    list-style: none;
+}
+
+/* La marca (✓ o ✗) colgada a la izquierda; el texto y lo de debajo,
+   alineados detrás de ella. */
+.misiones-hecha {
+    position: relative;
+    padding-left: 1.4em;
+}
+
+.misiones-marca {
+    position: absolute;
+    top: 0;
+    left: 0;
+    font-weight: 700;
+}
+
+/* Una fallida, tachada (como se tacha en el papel lo que ya no va). */
+.misiones-hecha.es-fallada .misiones-que,
+.cuaderno-tareas > li.es-fallada {
+    text-decoration: line-through;
+}
+
 /* La cuenta de todo, al pie de la nota, con su raya encima. */
 .misiones-pie {
     margin: 0.9em 0 0;

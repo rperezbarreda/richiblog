@@ -544,9 +544,10 @@ def leer_cuaderno(texto):
 
 # EL POST-IT DE UNA PARTIDA: las «Cosas pendientes» de al lado del
 # cuaderno, un <ul class="cuaderno-tareas"> dentro de <aside
-# class="cuaderno-postit">. Cada cosa es un <li> (con class="hecho" si ya
-# está hecha: sale tachada y con la casilla marcada). Los comentarios de la
-# plantilla llevan un post-it de ejemplo: no cuentan (tapar_comentarios).
+# class="cuaderno-postit">. Aquí solo se LEE, para enseñarlo en el editor:
+# lo escribe generar-posts.py a partir de las misiones de la campaña. Los
+# comentarios de la plantilla llevan un post-it de ejemplo: no cuentan
+# (tapar_comentarios).
 RE_POSTIT = re.compile(r'<aside class="cuaderno-postit"[^>]*>.*?(<ul class="cuaderno-tareas">)(.*?)(</ul>)', re.S)
 
 
@@ -569,24 +570,6 @@ def leer_postit(texto):
         if _texto_plano(dentro):
             cosas.append({"html": dentro, "hecho": "hecho" in dict(nodo["attrs"]).get("class", "").split()})
     return cosas
-
-
-def _cambiar_postit(texto, cosas):
-    sitio = _sitio_del_postit(texto)
-    if not sitio:
-        return texto
-    sangria = _sangria_de(texto, texto.rfind("<ul", 0, sitio[0]))
-    lineas = []
-    for cosa in cosas:
-        if not isinstance(cosa, dict):
-            continue
-        # Lo que llega pasa por el mismo colador que el resto de las notas
-        # (solo etiquetas de texto, sin scripts ni direcciones raras).
-        dentro = _en_linea(arbol(str(cosa.get("html") or ""))).strip()
-        if not _texto_plano(dentro):
-            continue
-        lineas.append(sangria + "    <li%s>%s</li>" % (' class="hecho"' if cosa.get("hecho") else "", dentro))
-    return texto[:sitio[0]] + "\n" + "\n".join(lineas) + ("\n" if lineas else "") + sangria + texto[sitio[1]:]
 
 
 def limpiar_nodos(nodos):
@@ -827,8 +810,6 @@ def guardar_entrada(peticion):
                 cabecera = hojas_viejas[0]["titulo"]
             texto = (texto[:sitio[0]] + "\n" + _cuaderno_html(hojas, sangria, cabecera) + "\n" + sangria
                      + texto[sitio[1]:])
-            if isinstance(peticion.get("postit"), list):
-                texto = _cambiar_postit(texto, peticion["postit"])
     except ValueError as error:
         return {"error": "No he podido guardarla: %s." % error}
     escribir_como_estaba(archivo, texto)
@@ -1245,14 +1226,26 @@ def colecciones():
                   C("notas", "Notas", "lineas", ayuda="Una cosa por línea.", siempre=True)]},
              {"id": "misiones", "camino": ["misiones"], "titulo": "Las misiones (el post-it)",
               "agrupada": {"clave": "nombre", "nombre": "nombre", "dentro": "cosas", "libre": True},
-              "ayuda": "Cada cosa, en su misión (una que ya hay o una nueva, escribiéndola). Hecha: se queda tachada."
+              "ayuda": "Cada cosa, en su misión (una que ya hay o una nueva, escribiéndola). Es LA lista de la"
+                       " campaña: sale en el post-it de la campaña (las pendientes delante y, detrás, el histórico"
+                       " de completadas y fallidas) y en el de cada sesión (lo que estaba abierto en esa sesión)."
+                       " No se borra lo acabado: se marca completada o fallada, con la sesión en que se cerró."
                        " Una misión sin nada dentro se quita.",
-              "nombre_de": "que", "detalle": ["de"], "campos": [
+              "nombre_de": "que", "detalle": ["estado", "de"], "campos": [
                   C("_grupo", "Misión", "elegir", libre=True, obligatorio=True,
                     ayuda="«la Gran Caravana»… Una nueva: escríbela."),
                   C("que", "Qué hay que hacer", obligatorio=True),
-                  C("de", "De qué sesión", "elegir", numerico=True, vacio="quitar"),
-                  C("hecha", "Hecha", "si-no", vacio="quitar")]},
+                  C("estado", "Cómo va", "elegir", vacio="quitar",
+                    opciones=[["", "pendiente"], ["completada", "completada"], ["fallada", "fallada"]]),
+                  C("quien", "Quién nos lo pidió", "elegir", libre=True, vacio="quitar",
+                    ayuda="Un NPC de la campaña (o escribe otro). Opcional."),
+                  C("recompensa", "Recompensa prometida", vacio="quitar",
+                    ayuda="Lo que nos darían. Opcional; sale en el post-it mientras está pendiente."),
+                  C("de", "Sesión en la que empezó", "elegir", numerico=True, vacio="quitar"),
+                  C("hasta", "Sesión en la que se cerró", "elegir", numerico=True, vacio="quitar",
+                    ayuda="Al completarla o fallarla."),
+                  C("obtenida", "Lo que nos llevamos", vacio="quitar",
+                    ayuda="Al cerrarla: la recompensa que hubo de verdad. Vacío: ninguna.")]},
          ]},
         {"id": "botin", "apartado": "rol", "titulo": "El botín de una campaña", "por_campana": True,
          "ayuda": "Lo que el grupo va juntando. Lo gastado se queda en la lista, tachado: «qué tuvimos» es media"
@@ -1478,6 +1471,15 @@ def opciones_de(col, clave_campana, datos):
         salida["_grupos"] = _opciones(orden)
     if col["id"] == "campana":
         salida["de"] = _sesiones_de(campana)
+        salida["hasta"] = _sesiones_de(campana)
+        clave = (campana or {}).get("clave") or clave_campana
+        npcs = []
+        try:
+            npcs = json.loads((RAIZ / "datos" / "notas_rol" / ("npcs-%s.json" % clave)).read_text(encoding="utf-8"))
+        except (OSError, ValueError):
+            pass
+        salida["quien"] = _opciones([p.get("nombre", "") for p in (npcs or {}).get("personajes") or []
+                                     if isinstance(p, dict) and p.get("nombre")])
         salida["_grupo"] = _opciones([m.get("nombre", "") for m in (datos or {}).get("misiones") or []
                                       if isinstance(m, dict) and m.get("nombre")])
     if col["id"] == "botin":
