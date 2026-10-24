@@ -61,7 +61,21 @@
       El texto se escribe COMO EN UN WORD, con una barra de ICONOS:
       negrita (Ctrl+B), cursiva (Ctrl+I), enlaces (Ctrl+K), títulos,
       listas, citas, código, imágenes (se suben de tu ordenador a su
-      carpeta, en WebP), tablas y rayas. Al pasar por encima de un
+      carpeta, en WebP), tablas y rayas. IMÁGENES EN TODOS LOS TEXTOS
+      CON BOTONES (desde el 24-10-2026): el botón «Imagen» pide el
+      archivo, qué se ve (el texto alternativo) y un pie opcional, y la
+      trae como traer-imagen.py (WebP, a su tamaño, sin los datos del
+      móvil, sin pisar otra que se llame igual) a la carpeta que toca:
+      una entrada del blog a imagenes/blog/<año>/, un relato a
+      imagenes/mis_movidas/relatos/, las notas de una partida a
+      imagenes/notas_rol/<campaña>/notas/, una página de la wiki a la
+      bóveda (wiki/_imagenes/) y el texto de un evento de la línea de
+      tiempo a imagenes/wiki/eventos/ (los sitios, en SITIOS de
+      herramientas/imagenes.py). En los textos como un Word va como
+      <figure> DETRÁS del párrafo o la lista donde está el cursor (no a
+      mitad de una frase, que la partía); en los de la wiki y los
+      eventos, en su línea, ![[nombre.webp|qué se ve]] y el pie en
+      cursiva debajo. Las tablas van igual que las imágenes. Al pasar por encima de un
       icono (o llegar con el tabulador) sale un globo grande con lo que
       hace; el lector de pantalla dice su nombre. El último (HTML)
       enseña lo que hay debajo y deja tocarlo. LA BARRA VA CONTIGO: al
@@ -956,7 +970,7 @@
 
       "botin": [
           { "que": "4 kits curativos", "de": 1, "tipo": "pociones" },
-          { "que": "Hierbas misteriosas", "de": 1, "quien": "Melissa",
+          { "que": "Hierbas misteriosas", "de": 1, "quien": "Mellissa",
             "tipo": "pociones" },
           { "que": "6 provisiones", "de": 1, "tipo": "equipo",
             "gastado": true }

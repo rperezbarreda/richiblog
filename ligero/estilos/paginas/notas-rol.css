@@ -837,6 +837,24 @@ body:has(.cuaderno-page) main {
 .cuaderno-escena-cuerpo > li {
     margin: 0 0 0 1.3em;
 }
+.cuaderno-hoja-cuerpo figure {
+    margin-right: 0;
+    margin-left: 0;
+}
+.cuaderno-hoja-cuerpo img {
+    display: block;
+    max-width: 100%;
+    height: auto;
+    border: 3px solid var(--yellow);
+    box-shadow: 4px 4px 0 var(--yellow);
+}
+.cuaderno-hoja-cuerpo figcaption {
+    margin-top: 6px;
+    color: var(--muted);
+    font-family: var(--fuente-mono);
+    font-size: 0.75rem;
+    line-height: 1.5;
+}
 .cuaderno-hoja-cuerpo h2,
 .cuaderno-hoja-cuerpo h3,
 .cuaderno-hoja-cuerpo h4 {

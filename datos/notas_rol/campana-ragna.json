@@ -19,7 +19,7 @@
             "notas": []
         },
         {
-            "nombre": "Melissa",
+            "nombre": "Mellissa",
             "jugador": "Andrea",
             "clase": "Humana Pícara",
             "nivel": 3,
@@ -60,7 +60,7 @@
         {
             "que": "Hierbas misteriosas (velocidad)",
             "tipo": "pociones",
-            "quien": "Melissa",
+            "quien": "Mellissa",
             "imagen": "/imagenes/notas_rol/ragna/botin/hierbas-misteriosas-velocidad.webp"
         },
         {
@@ -78,7 +78,7 @@
         {
             "que": "Piedra mensajera",
             "tipo": "objetos mágicos",
-            "quien": "Melissa",
+            "quien": "Mellissa",
             "imagen": "/imagenes/notas_rol/ragna/botin/piedra-mensajera.webp"
         }
     ],

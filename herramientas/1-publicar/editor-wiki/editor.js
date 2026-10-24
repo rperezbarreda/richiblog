@@ -954,9 +954,11 @@ function cajaDeApartadoEditor(a) {
     }
     // Encima, los botones de formato (los mismos que en las entradas, pero
     // poniendo el Markdown de la wiki).
+    // Las imágenes del texto van a la bóveda (wiki/_imagenes), como las
+    // que pone Chronicler, y se nombran ![[así.webp|lo que se ve]].
     caja.appendChild(crearBarraMarkdown(area, a.nivel ? a.titulo : "la entradilla", () => {
         estadoEditor.cambiado = true;
-    }));
+    }, { imagenes: () => ({ sitio: "mundo" }) }));
     caja.appendChild(area);
     caja.appendChild(enlazarEditor(area, id));
     return caja;

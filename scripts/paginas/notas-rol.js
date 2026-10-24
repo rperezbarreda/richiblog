@@ -546,7 +546,7 @@ function imagenSeguraDeMesa(url) {
 //   "botin": [
 //       { "que": "4 kits curativos", "de": 1, "tipo": "pociones" },
 //       { "que": "Hierbas misteriosas (velocidad)", "de": 1,
-//         "quien": "Melissa", "tipo": "pociones" },
+//         "quien": "Mellissa", "tipo": "pociones" },
 //       { "que": "6 provisiones para el viaje", "de": 1,
 //         "tipo": "equipo", "gastado": true }
 //   ]

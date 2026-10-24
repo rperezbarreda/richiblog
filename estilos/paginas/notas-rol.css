@@ -629,7 +629,7 @@
     line-height: 1.55;
 }
 
-/* La línea de debajo: "sesión 1 · lo lleva Melissa". Los trozos se separan
+/* La línea de debajo: "sesión 1 · lo lleva Mellissa". Los trozos se separan
    con un punto que pone el CSS, así el JavaScript solo pega los trozos y
    nunca sobra ni falta un separador. */
 .campana-botin-donde {
@@ -1471,6 +1471,31 @@ body:has(.cuaderno-page) main {
     margin: 0 0 0 1.3em;
 }
 
+/* UNA IMAGEN EN LAS NOTAS (el botón «Imagen» del editor; van a
+   imagenes/notas_rol/<campaña>/notas/). Ocupa el ancho de la hoja como
+   mucho, sin deformarse, con el marco de las de las entradas; el pie,
+   pequeño debajo. */
+.cuaderno-hoja-cuerpo figure {
+    margin-right: 0;
+    margin-left: 0;
+}
+
+.cuaderno-hoja-cuerpo img {
+    display: block;
+    max-width: 100%;
+    height: auto;
+    border: 3px solid var(--yellow);
+    box-shadow: 4px 4px 0 var(--yellow);
+}
+
+.cuaderno-hoja-cuerpo figcaption {
+    margin-top: 6px;
+    color: var(--muted);
+    font-family: var(--fuente-mono);
+    font-size: 0.75rem;
+    line-height: 1.5;
+}
+
 /* Un apartado dentro de la hoja. Mismo tamaño que el texto (ver arriba:
    cambiarlo rompería los renglones) y se distingue por la letra de
    máquina, las mayúsculas y el subrayado, que es como se marca un
@@ -1508,7 +1533,7 @@ body:has(.cuaderno-page) main {
    Se escribe poniéndole la clase al <strong> de siempre:
 
        <strong class="pj-verde">Faëlar</strong>
-       <strong class="pj-azul">Melissa</strong>
+       <strong class="pj-azul">Mellissa</strong>
        <strong class="pj-rojo">Thenarys</strong>
        <strong class="pj-morado">Denelia</strong>
 

@@ -21,7 +21,7 @@
         {
             "nombre": "NPCs Personales",
             "categorias": [
-                "Familia de Melissa",
+                "Familia de Mellissa",
                 "Familia de Faëlar"
             ]
         }
@@ -209,7 +209,7 @@
         {
             "nombre": "Brandr Vindahl",
             "categorias": [
-                "Familia de Melissa"
+                "Familia de Mellissa"
             ],
             "que": "Humano",
             "donde": "Sirevia",
@@ -218,13 +218,13 @@
             "token": "/imagenes/notas_rol/ragna/brandr-vindahl_tkn.webp",
             "ilustracion": "/imagenes/notas_rol/ragna/brandr-vindahl.webp",
             "notas": [
-                "Padre de Melissa"
+                "Padre de Mellissa"
             ],
             "token_mini": "/imagenes/notas_rol/ragna/brandr-vindahl_tkn-mini.webp"
         },
         {
             "nombre": "Isa Vindahl",
-            "categoria": "Familia de Melissa",
+            "categoria": "Familia de Mellissa",
             "que": "Humana",
             "donde": "Sirevia",
             "relacion": "aliado",
@@ -232,13 +232,13 @@
             "token": "/imagenes/notas_rol/ragna/isa-vindahl_tkn.webp",
             "ilustracion": "/imagenes/notas_rol/ragna/isa-vindahl.webp",
             "notas": [
-                "Madre de Melissa"
+                "Madre de Mellissa"
             ],
             "token_mini": "/imagenes/notas_rol/ragna/isa-vindahl_tkn-mini.webp"
         },
         {
             "nombre": "Obrandr Vindahl",
-            "categoria": "Familia de Melissa",
+            "categoria": "Familia de Mellissa",
             "que": "Humano",
             "donde": "Sirevia",
             "relacion": "aliado",
@@ -246,7 +246,7 @@
             "token": "/imagenes/notas_rol/ragna/obrandr-vindahl_tkn.webp",
             "ilustracion": "/imagenes/notas_rol/ragna/obrandr-vindahl.webp",
             "notas": [
-                "Hermano de Melissa"
+                "Hermano de Mellissa"
             ],
             "token_mini": "/imagenes/notas_rol/ragna/obrandr-vindahl_tkn-mini.webp"
         },

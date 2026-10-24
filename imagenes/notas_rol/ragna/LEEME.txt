@@ -31,3 +31,7 @@ ANTES DE SUBIRLAS, pásalas por:
 
 que es lo que las convierte a .webp y las deja del peso que toca, igual
 que con las fotos del blog.
+
+LAS IMÁGENES DE DENTRO DE LAS NOTAS (las que se meten con el botón
+«Imagen» al escribir una partida en el editor) van en notas/, ya
+optimizadas.

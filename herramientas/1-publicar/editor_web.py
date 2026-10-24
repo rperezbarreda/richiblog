@@ -1313,7 +1313,7 @@ def colecciones():
                     ayuda="Si se dice de otra manera: «hace mucho»."),
                   C("resumen", "Resumen", "largo", maximo_letras=180,
                     ayuda="Para la tarjeta de la línea: mejor por debajo de 180 letras."),
-                  C("texto", "Su página", "largo", grande=True, vacio="quitar", markdown=True,
+                  C("texto", "Su página", "largo", grande=True, vacio="quitar", markdown=True, imagenes="evento",
                     ayuda="En el mismo formato que la wiki: **negrita**, listas, [[enlaces]]. Los botones de"
                           " encima lo ponen. Con dos títulos o más sale el «Contenido» a un lado."),
                   C("imagen", "Imagen", "imagen", sitio="evento", vacio="quitar"),

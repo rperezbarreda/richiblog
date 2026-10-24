@@ -338,6 +338,40 @@ function crearRedactor(opciones) {
         recordarSeleccion();
         avisar();
     };
+    // Una cosa que va sola, entre párrafos (una imagen, una tabla): no en
+    // el sitio del cursor, que puede estar a mitad de una frase o de un
+    // punto de una lista (el navegador la partiría en dos y la imagen se
+    // saldría de su <figure>), sino DETRÁS del párrafo, la lista o lo que
+    // sea donde está el cursor. Si está en una línea vacía, en su lugar.
+    const meterBloque = (html) => {
+        volverASeleccion();
+        const sel = window.getSelection();
+        let nodo = sel.rangeCount && area.contains(sel.anchorNode) ? sel.anchorNode : null;
+        while (nodo && nodo.parentNode !== area) {
+            nodo = nodo.parentNode;
+        }
+        // Con el cursor justo detrás, el navegador lo vuelve a meter en lo
+        // de antes (en el último punto de la lista): por eso se pone ahí una
+        // línea vacía de usar y tirar y se cambia por lo que va.
+        const rango = document.createRange();
+        if (nodo && nodo.nodeType === 1 && !nodo.textContent.trim() && !nodo.querySelector("img, table, hr")) {
+            rango.selectNode(nodo);
+        } else {
+            const hueco = document.createElement("p");
+            hueco.appendChild(document.createElement("br"));
+            if (nodo) {
+                nodo.after(hueco);
+            } else {
+                area.appendChild(hueco);
+            }
+            rango.selectNode(hueco);
+        }
+        sel.removeAllRanges();
+        sel.addRange(rango);
+        document.execCommand("insertHTML", false, html);
+        recordarSeleccion();
+        avisar();
+    };
     yo.hacer = hacer;
     yo.meterHtml = meterHtml;
     // Un elemento donde está el cursor, y el cursor detrás (fuera de él).
@@ -626,7 +660,7 @@ function crearRedactor(opciones) {
                 const titulos = "<tr>" + Array.from({ length: c }, (_, i) => "<th>Título " + (i + 1) + "</th>").join("") + "</tr>";
                 const cuerpo = Array.from({ length: f }, () => "<tr>" + "<td>…</td>".repeat(c) + "</tr>").join("");
                 cerrarPanel(true);
-                meterHtml("<table><tbody>" + titulos + cuerpo + "</tbody></table><p><br></p>");
+                meterBloque("<table><tbody>" + titulos + cuerpo + "</tbody></table><p><br></p>");
             });
             filas.focus();
         } else if (que === "imagen") {
@@ -682,7 +716,7 @@ function crearRedactor(opciones) {
                     figura.appendChild(crearEditor("figcaption", "", pie.value.trim()));
                 }
                 cerrarPanel(true);
-                meterHtml(figura.outerHTML + "<p><br></p>");
+                meterBloque(figura.outerHTML + "<p><br></p>");
                 avisarEditor("Imagen puesta: " + hecha.ruta + " (" + hecha.aviso + ").");
             });
             archivo.focus();
@@ -912,7 +946,11 @@ function contadorDeTextoRedactor(leer, revisar) {
 //   area     el <textarea>
 //   nombre   de qué es (para el nombre de la barra)
 //   alCambiar
-function crearBarraMarkdown(area, nombre, alCambiar) {
+//   opciones  {imagenes: () => {sitio, campos}} para el botón de meter una
+//             imagen (a qué carpeta va: ver SITIOS en herramientas/
+//             imagenes.py); sin esto, no hay botón
+function crearBarraMarkdown(area, nombre, alCambiar, opciones) {
+    const o = opciones || {};
     const barra = crearEditor("div", "redactor-botones barra-markdown");
     barra.setAttribute("role", "toolbar");
     barra.setAttribute("aria-label", "Formato: " + (nombre || "texto"));
@@ -1035,6 +1073,10 @@ function crearBarraMarkdown(area, nombre, alCambiar) {
     grupo();
     boton("Enlace a una web", "Enlace a una web: [lo que se lee](dirección). Para otra página de la wiki, "
         + "el buscador de «Enlazar una página»", "enlace", enlaceWeb);
+    if (o.imagenes) {
+        boton("Imagen", "Meter una imagen (se guarda en su carpeta, en WebP y a su tamaño)", "imagen",
+            () => imagenMarkdown());
+    }
     boton("Tabla", "Meter una tabla", "tabla",
         () => bloque("| Columna | Columna |\n| --- | --- |\n|  |  |"));
     boton("Raya", "Una raya para separar: ---", "raya", () => bloque("---"));
@@ -1100,6 +1142,96 @@ function crearBarraMarkdown(area, nombre, alCambiar) {
             area.setSelectionRange(fin, fin);
         });
     });
+    // METER UNA IMAGEN: se elige del ordenador, se trae a su carpeta (en
+    // WebP, a su tamaño y sin los datos del móvil, como traer-imagen.py) y
+    // se pone ![[nombre.webp|lo que se ve]] en su propia línea, con el pie
+    // en cursiva debajo si lo tiene. Sale en el mismo hueco que el buscador
+    // de [[ (debajo de los botones, y pegado a ellos si van contigo).
+    const imagenMarkdown = () => {
+        const a = area.selectionStart;
+        const b = area.selectionEnd;
+        buscar.textContent = "";
+        buscar.hidden = false;
+        const dentro = crearEditor("div", "");
+        buscar.appendChild(dentro);
+        const cerrar = (volver) => {
+            buscar.hidden = true;
+            buscar.textContent = "";
+            if (volver) {
+                area.focus();
+                area.setSelectionRange(a, b);
+            }
+        };
+        dentro.appendChild(crearEditor("p", "ayuda", "Se guarda en su carpeta, en WebP y a su tamaño, sin los"
+            + " datos del móvil."));
+        const campo = (texto, tipo, sufijo) => {
+            const c = crearEditor("div", "campo");
+            const l = crearEditor("label", "", texto);
+            const i = document.createElement("input");
+            i.type = tipo;
+            i.id = (area.id || "texto") + "-imagen-" + sufijo;
+            i.autocomplete = "off";
+            l.htmlFor = i.id;
+            c.appendChild(l);
+            c.appendChild(i);
+            dentro.appendChild(c);
+            return i;
+        };
+        const archivo = campo("La imagen", "file", "archivo");
+        archivo.accept = "image/*";
+        const alt = campo("Qué se ve (para quien no la ve; vacío si es de adorno)", "text", "alt");
+        const pie = campo("Pie de foto (opcional)", "text", "pie");
+        const fila = crearEditor("div", "fila");
+        const si = crearEditor("button", "principal", "Meter la imagen");
+        si.type = "button";
+        const no = crearEditor("button", "", "Cancelar");
+        no.type = "button";
+        fila.appendChild(si);
+        fila.appendChild(no);
+        dentro.appendChild(fila);
+        no.addEventListener("click", () => cerrar(true));
+        dentro.addEventListener("keydown", (e) => {
+            if (e.key === "Escape") {
+                e.preventDefault();
+                e.stopPropagation();
+                cerrar(true);
+            }
+        });
+        si.addEventListener("click", async () => {
+            const elegido = archivo.files && archivo.files[0];
+            if (!elegido) {
+                avisarEditor("Elige primero la imagen.", true);
+                archivo.focus();
+                return;
+            }
+            si.disabled = true;
+            avisarEditor("Trayendo la imagen…");
+            const datos = await new Promise((r) => {
+                const lector = new FileReader();
+                lector.onload = () => r(lector.result);
+                lector.onerror = () => r("");
+                lector.readAsDataURL(elegido);
+            });
+            const hecha = await pedirEditor("/api/web/imagen", Object.assign({ archivo: elegido.name, datos,
+                nombre: elegido.name.replace(/\.[^.]+$/, "") }, o.imagenes()));
+            si.disabled = false;
+            if (!hecha || hecha.error) {
+                avisarEditor((hecha && hecha.error) || "No se ha podido traer la imagen.", true);
+                return;
+            }
+            // Ni corchetes ni barras ni saltos: romperían el ![[…]].
+            const limpio = (s, fuera) => s.replace(fuera, " ").replace(/\s+/g, " ").trim();
+            const queSeVe = limpio(alt.value, /[[\]|\n]/g);
+            const elPie = limpio(pie.value, /[*\n]/g);
+            const nombreDeArchivo = String(hecha.ruta).split("/").pop();
+            cerrar(false);
+            area.focus();
+            area.setSelectionRange(a, b);
+            bloque("![[" + nombreDeArchivo + (queSeVe ? "|" + queSeVe : "") + "]]" + (elPie ? "\n*" + elPie + "*" : ""));
+            avisarEditor("Imagen puesta: " + hecha.ruta + " (" + hecha.aviso + ").");
+        });
+        archivo.focus();
+    };
     // Los atajos de siempre, también aquí.
     area.addEventListener("keydown", (e) => {
         if (!(e.ctrlKey || e.metaKey) || e.altKey || e.shiftKey) {

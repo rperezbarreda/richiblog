@@ -860,7 +860,8 @@ function pintarCuadernoWeb(enfocar) {
             }
             const r = crearRedactor({ etiqueta: b.tipo === "escena" ? "Lo que pasó en " + (b.nombre || "la escena")
                 : "Texto suelto de la hoja " + (i + 1), clases: /^(pj-[a-z]+|cuaderno-objetos)$/,
-            extras: extrasDelCuadernoWeb(e), enlaces: (datos) => enlacesDelCuadernoWeb(e, datos) });
+            extras: extrasDelCuadernoWeb(e), enlaces: (datos) => enlacesDelCuadernoWeb(e, datos),
+            imagenes: () => ({ sitio: "notas", campos: { campana: e.campana } }) });
             r.ponerHTML(b.html || "");
             r.alCambiar = () => {
                 estadoEscribir.cambiado = true;

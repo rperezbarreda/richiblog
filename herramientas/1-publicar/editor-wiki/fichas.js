@@ -534,7 +534,10 @@ function casillaDeFichaWeb(dentro, f, c, base, parte, alCambiar) {
     el.addEventListener("input", () => cambiar(el.value));
     if (c.markdown) {
         // Texto con formato (el Markdown de la wiki): los botones encima.
-        el.before(crearBarraMarkdown(el, nombre));
+        // Con c.imagenes (a dónde van: «evento»…), también el botón de
+        // meter una imagen.
+        el.before(crearBarraMarkdown(el, nombre, null,
+            c.imagenes ? { imagenes: () => ({ sitio: c.imagenes, campos: { campana: estadoFichas.campana } }) } : null));
     }
 }
 

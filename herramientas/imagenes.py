@@ -131,6 +131,13 @@ SITIOS = {
         "lado": 1400,
         "cuadrada": False,
     },
+    "notas": {
+        "que": "una imagen dentro de las notas de una partida",
+        "carpeta": "imagenes/notas_rol/{campana}/notas",
+        "sufijo": "",
+        "lado": 1400,
+        "cuadrada": False,
+    },
     "rol": {
         "que": "la portada de una aventura de rol",
         "carpeta": "imagenes/mis_movidas/rol",
