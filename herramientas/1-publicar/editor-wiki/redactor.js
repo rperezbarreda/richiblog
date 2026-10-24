@@ -245,6 +245,45 @@ function limpiarRedactor(raiz, clases) {
         }
         suelto.appendChild(hijo);
     });
+    // NEGRITAS Y CURSIVAS DE MÁS. Pulsando «Alguien» o «Negrita» sobre un
+    // nombre que ya lo estaba salían <strong><strong class="pj-rojo">…
+    // </strong></strong> (hasta tres), y quedaban <strong></strong>
+    // vacíos. Una dentro de otra igual: si la de fuera no tiene nada más ni
+    // nada suyo (ni clase ni etiqueta de NPC), se queda la de dentro; si
+    // no, la de dentro se deshace. Y un espacio al final de una negrita,
+    // fuera de ella (si no, se subraya hasta el espacio).
+    ["strong", "em"].forEach((etiqueta) => {
+        raiz.querySelectorAll(etiqueta).forEach((el) => {
+            if (!el.isConnected) {
+                return;
+            }
+            if (!el.textContent.trim() && !el.querySelector("img")) {
+                el.replaceWith(...el.childNodes);
+                return;
+            }
+            const padre = el.parentElement;
+            if (!padre || padre.tagName !== el.tagName) {
+                return;
+            }
+            const solo = [...padre.childNodes].every((n) => n === el || (n.nodeType === Node.TEXT_NODE && !n.textContent.trim()));
+            if (solo && !padre.attributes.length) {
+                padre.replaceWith(el);
+            } else {
+                el.replaceWith(...el.childNodes);
+            }
+        });
+        raiz.querySelectorAll(etiqueta).forEach((el) => {
+            const ultimo = el.lastChild;
+            if (ultimo && ultimo.nodeType === Node.TEXT_NODE && /\s$/.test(ultimo.nodeValue) && ultimo.nodeValue.trim()) {
+                const espacio = ultimo.nodeValue.match(/\s+$/)[0];
+                ultimo.nodeValue = ultimo.nodeValue.slice(0, -espacio.length);
+                const siguiente = el.nextSibling;
+                if (!(siguiente && siguiente.nodeType === Node.TEXT_NODE && /^\s/.test(siguiente.nodeValue))) {
+                    el.after(document.createTextNode(" "));
+                }
+            }
+        });
+    });
     // Los párrafos vacíos (los <p><br></p> que deja el navegador), fuera.
     raiz.querySelectorAll("p, h2, h3, h4, li, blockquote").forEach((b) => {
         if (!b.textContent.trim() && !b.querySelector("img")) {

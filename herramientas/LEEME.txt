@@ -875,7 +875,13 @@
   con la etiqueta colgada, con la lista de NPC al lado) envuelve lo
   elegido, o mete el nombre entero si no hay nada elegido; también el
   buscador de [[ y «Hacer NPC». En el editor, al pasar el ratón por un
-  nombre etiquetado, dice de quién es. Un <strong> que no sea nadie —un caballo, algo
+  nombre etiquetado, dice de quién es.
+
+  NEGRITAS DOBLES: pulsar «Alguien» o «Negrita» sobre un nombre que ya
+  lo estaba dejaba <strong><strong class="pj-rojo">…</strong></strong>
+  (y negritas vacías). El editor ya lo arregla solo al guardar: una
+  negrita dentro de otra se queda en una, las vacías se van y el
+  espacio del final sale fuera (redactor.js, limpiarRedactor). Un <strong> que no sea nadie —un caballo, algo
   que se quiso resaltar— se queda como estaba.
 
   Los nombres que lo tienen llevan un subrayado de puntos. El propio

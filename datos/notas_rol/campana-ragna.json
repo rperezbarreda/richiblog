@@ -88,11 +88,13 @@
             "cosas": [
                 {
                     "que": "Encontrar la base de los bandidos, oculta en una cueva en las montañas.",
-                    "de": 1
+                    "de": 1,
+                    "quien": "Sigil"
                 },
                 {
                     "que": "Recuperar la mercancía robada.",
-                    "de": 1
+                    "de": 1,
+                    "quien": "Sigil"
                 }
             ]
         },
@@ -101,7 +103,9 @@
             "cosas": [
                 {
                     "que": "Hacernos con un carromato para transportar la mercancía.",
-                    "de": 1
+                    "de": 1,
+                    "estado": "completada",
+                    "hasta": 1
                 }
             ]
         },
