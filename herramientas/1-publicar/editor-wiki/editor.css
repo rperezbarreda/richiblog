@@ -2317,6 +2317,17 @@ html[data-contraste="alto"] .redactor-area .pj-morado { color: #dec4ff; }
     cursor: pointer;
 }
 
+/* La cara de un NPC en el buscador de la gente (@ en las notas). */
+.buscar-enlace-foto {
+    flex: none;
+    align-self: center;
+    width: 36px;
+    height: 36px;
+    border: 2px solid var(--borde);
+    border-radius: 50%;
+    object-fit: cover;
+}
+
 .buscar-enlace-cosa[aria-selected="true"] {
     background: var(--acento);
     color: var(--sobre-acento);

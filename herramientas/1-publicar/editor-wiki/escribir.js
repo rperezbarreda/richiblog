@@ -11,7 +11,7 @@
 
 const estadoEscribir = {
     entradas: [], nuevas: null, entrada: null, cambiado: false, guardando: false,
-    redactor: null, pie: null, imagen: null, hojas: [], postit: null, tipoNuevo: "",
+    redactor: null, pie: null, imagen: null, hojas: [], postit: null, ultimaPlantilla: "", tipoNuevo: "",
 };
 const NOMBRES_DE_LO_NUEVO = {
     entrada: "Una entrada del blog", relato: "Un relato", reto: "Un día del reto", sesion: "Las notas de una partida",
@@ -884,6 +884,8 @@ function pintarCuadernoWeb(enfocar) {
             const r = crearRedactor({ etiqueta: b.tipo === "escena" ? "Lo que pasó en " + (b.nombre || "la escena")
                 : "Texto suelto de la hoja " + (i + 1), clases: /^(pj-[a-z]+|cuaderno-(objetos|flavor|mecanica|descubrimiento))$/,
             extras: extrasDelCuadernoWeb(e), enlaces: (datos) => enlacesDelCuadernoWeb(e, datos),
+            gente: (datos) => enlacesDelCuadernoWeb(e, datos).slice(0, 2),
+            avisos: (area, avisar) => avisosDeNombresWeb(area, e, avisar),
             imagenes: () => ({ sitio: "notas", campos: { campana: e.campana } }) });
             r.ponerHTML(b.html || "");
             r.alCambiar = () => {
@@ -891,6 +893,9 @@ function pintarCuadernoWeb(enfocar) {
             };
             b.redactor = r;
             caja2.appendChild(r.caja);
+            // Los avisos de nombres necesitan la lista de NPC: en cuanto
+            // llega, se vuelven a mirar.
+            enlazablesWeb().then(() => r.contar && r.contar());
             const fila = crearEditor("div", "fila");
             const que = b.tipo === "escena" ? "la escena «" + (b.nombre || "sin nombre") + "»" : "el texto suelto";
             botonCuaderno(fila, "↑", "Subir " + que, () => {
@@ -913,9 +918,21 @@ function pintarCuadernoWeb(enfocar) {
             caja2.appendChild(fila);
             sec.appendChild(caja2);
         });
-        const anadir = crearEditor("div", "fila");
-        botonCuaderno(anadir, "Añadir una escena", "Añadir una escena a la hoja " + (i + 1), () => {
-            hoja.bloques.push({ tipo: "escena", nombre: "", abierta: true, html: "" });
+        const anadir = crearEditor("div", "fila cuaderno-anadir");
+        const plantilla = document.createElement("select");
+        plantilla.id = "plantilla-hoja-" + i;
+        plantilla.className = "redactor-elegir";
+        plantilla.setAttribute("aria-label", "De qué es la escena nueva (plantilla) de la hoja " + (i + 1));
+        PLANTILLAS_DE_ESCENA.forEach(([clave, texto]) => plantilla.appendChild(new Option(texto, clave)));
+        plantilla.value = estadoEscribir.ultimaPlantilla || "";
+        plantilla.addEventListener("change", () => {
+            estadoEscribir.ultimaPlantilla = plantilla.value;
+        });
+        anadir.appendChild(plantilla);
+        botonCuaderno(anadir, "Añadir una escena", "Añadir una escena a la hoja " + (i + 1)
+            + " (con la plantilla elegida al lado)", () => {
+            const p = PLANTILLAS_DE_ESCENA.find(([clave]) => clave === plantilla.value) || PLANTILLAS_DE_ESCENA[0];
+            hoja.bloques.push({ tipo: "escena", nombre: p[2], abierta: true, html: p[3] });
             pintarCuadernoWeb("bloque-web-" + i + "-" + (hoja.bloques.length - 1) + "-nombre");
         });
         botonCuaderno(anadir, "Añadir texto suelto", "Añadir texto suelto a la hoja " + (i + 1), () => {
@@ -947,7 +964,9 @@ function enlacesDelCuadernoWeb(e, datos) {
         { nombre: "Personaje de la mesa", cosas: pjs.map((p) => ({ texto: p.nombre,
             poner: (r) => r.envolver("strong", p.color ? "pj-" + p.color : "", p.nombre) })) },
         { nombre: "NPC de la campaña", cosas: ((datos.npcs || {})[e.campana] || []).map((p) => ({ texto: p.nombre,
-            detalle: p.que, poner: (r) => r.envolver("strong", "", p.nombre, undefined, { "data-npc": p.nombre }) })) },
+            detalle: [p.que, p.grupo, p.estado && p.estado !== "vivo" ? p.estado : ""].filter(Boolean).join(" · "),
+            busca: [p.donde, p.estado, p.notas].filter(Boolean).join(" "), foto: p.foto,
+            poner: (r) => r.envolver("strong", "", p.nombre, undefined, { "data-npc": p.nombre }) })) },
         paginasParaEnlazarRedactor(datos),
     ];
 }
@@ -1013,6 +1032,128 @@ async function hacerNpcDesdeLasNotasWeb(r, e) {
     });
 }
 
+// NOMBRES CASI IGUALES. Una negrita que no es nadie pero se parece mucho
+// a un NPC o a alguien de la mesa («Rukkus», «Apacca», «Thenaris») es
+// casi seguro una errata: en la web no abriría su ficha. Sale en los
+// avisos de debajo del texto, con un botón que la cambia por el nombre
+// bueno (y le pone su etiqueta o su color). Lo que no se parece a nadie
+// (un caballo, «25 monedas de oro») no avisa. Una etiqueta de NPC que ya
+// no existe (se le cambió el nombre), también.
+function avisosDeNombresWeb(area, e, avisar) {
+    const datos = ENLAZABLES_WEB.datos;
+    if (!datos) {
+        return [];
+    }
+    const llano = (s) => (s || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim();
+    const distancia = (a, b) => {
+        let antes = Array.from({ length: b.length + 1 }, (_, i) => i);
+        for (let i = 1; i <= a.length; i += 1) {
+            const fila = [i];
+            for (let j = 1; j <= b.length; j += 1) {
+                fila[j] = Math.min(antes[j] + 1, fila[j - 1] + 1, antes[j - 1] + (a[i - 1] === b[j - 1] ? 0 : 1));
+            }
+            antes = fila;
+        }
+        return antes[b.length];
+    };
+    const npcs = ((datos.npcs || {})[e.campana] || []).map((p) => ({ nombre: p.nombre, npc: true }));
+    const pjs = (e.personajes || []).filter((p) => p.nombre).map((p) => ({ nombre: p.nombre, color: p.color }));
+    const gente = npcs.concat(pjs);
+    const avisos = new Map();
+    area.querySelectorAll("strong").forEach((s) => {
+        const texto = s.textContent.replace(/\s+/g, " ").trim();
+        if (!texto || /\d/.test(texto)) {
+            return;
+        }
+        const etiqueta = s.getAttribute("data-npc");
+        if (etiqueta) {
+            if (!npcs.some((p) => llano(p.nombre) === llano(etiqueta)) && !avisos.has("etiqueta" + etiqueta)) {
+                avisos.set("etiqueta" + etiqueta, { texto: "«" + texto + "» lleva la etiqueta de «" + etiqueta
+                    + "», que no es ningún NPC de la campaña" });
+            }
+            return;
+        }
+        const t = llano(texto);
+        // Ya es alguien: su nombre, o su nombre de pila (como lo busca la web).
+        if (gente.some((g) => llano(g.nombre) === t || llano(g.nombre).split(/\s+/)[0] === t)) {
+            return;
+        }
+        let mejor = null;
+        let menor = 99;
+        gente.forEach((g) => {
+            const n = llano(g.nombre);
+            [n].concat(n.split(/\s+/)).forEach((c) => {
+                const d = distancia(c, t);
+                if (d < menor) {
+                    menor = d;
+                    mejor = g;
+                }
+            });
+        });
+        const tope = t.length >= 5 ? 2 : (t.length >= 3 ? 1 : 0);
+        if (!mejor || menor === 0 || menor > tope) {
+            return;
+        }
+        const clave = texto + "\u0000" + mejor.nombre;
+        const ya = avisos.get(clave);
+        if (ya) {
+            ya.veces += 1;
+            ya.texto = "«" + texto + "» (" + ya.veces + " veces) se parece a " + mejor.nombre
+                + (mejor.npc ? " (NPC)" : " (de la mesa)");
+            return;
+        }
+        const quien = mejor;
+        avisos.set(clave, { veces: 1, texto: "«" + texto + "» se parece a " + quien.nombre
+            + (quien.npc ? " (NPC)" : " (de la mesa)"), comoArreglar: "Cambiarlo por " + quien.nombre,
+        arreglar: () => {
+            area.querySelectorAll("strong").forEach((x) => {
+                if (x.getAttribute("data-npc") || x.textContent.replace(/\s+/g, " ").trim() !== texto) {
+                    return;
+                }
+                x.textContent = quien.nombre;
+                if (quien.npc) {
+                    x.setAttribute("data-npc", quien.nombre);
+                } else if (quien.color) {
+                    x.className = "pj-" + quien.color;
+                }
+            });
+            avisar();
+        } });
+    });
+    return [...avisos.values()];
+}
+
+// LAS PLANTILLAS DE ESCENA: al añadir una escena se puede elegir de qué
+// es, y sale con su nombre y su esqueleto para rellenar (los «…»). Con lo
+// de los botones de las notas: la caja de «Lo que descubrimos», la lista
+// de objetos, la ambientación.
+const PLANTILLAS_DE_ESCENA = [
+    ["", "Vacía", "", ""],
+    ["combate", "Combate", "Combate contra …",
+        "<ul><li>Contra quién: …</li><li>Cómo empieza: …</li><li>Lo más destacado: …</li><li>Cómo acaba: …</li></ul>"
+        + "<p>Lo que conseguimos:</p><ul class=\"cuaderno-objetos\"><li>…</li></ul>"],
+    ["viaje", "Viaje", "De … a …",
+        "<ul><li>Salimos de <em>…</em> rumbo a <em>…</em>.</li><li>Por el camino: …</li>"
+        + "<li>Llegamos a <em>…</em> (o acampamos en …).</li></ul>"],
+    ["descanso", "Descanso o acampada", "Noche en …",
+        "<ul><li>Acampamos en <em>…</em>.</li><li>Primera guardia: …</li><li>Segunda guardia: …</li>"
+        + "<li>Lo que se habló: …</li></ul>"],
+    ["interrogatorio", "Interrogatorio", "Interrogatorio a …",
+        "<ul><li>Interrogamos a <strong>…</strong> en …</li></ul>"
+        + "<blockquote class=\"cuaderno-descubrimiento\"><ul><li>…</li></ul></blockquote>"
+        + "<ul><li>Qué hacemos con él: …</li></ul>"],
+    ["llegada", "Llegada a un sitio", "Llegada a …",
+        "<ul><li>Llegamos a <em>…</em>. <span class=\"cuaderno-flavor\">Cómo es: lo que se ve, se oye y se huele"
+        + " al llegar.</span></li><li>Quién nos recibe: …</li><li>Lo que nos cuentan: …</li></ul>"],
+    ["comercio", "Compras y ventas", "Compras en …",
+        "<ul><li>Vamos a <em>…</em> (la tienda o el puesto de <strong>…</strong>).</li></ul>"
+        + "<p>Compramos:</p><ul class=\"cuaderno-objetos\"><li>…</li></ul>"
+        + "<p>Vendimos:</p><ul class=\"cuaderno-objetos\"><li>…</li></ul>"],
+    ["investigacion", "Investigación o pista", "Investigando …",
+        "<ul><li>Qué investigamos y dónde: …</li><li>Quién: …</li></ul>"
+        + "<blockquote class=\"cuaderno-descubrimiento\"><ul><li>…</li></ul></blockquote>"],
+];
+
 function extrasDelCuadernoWeb(e) {
     const pjs = (e.personajes || []).filter((p) => p.nombre);
     const extras = [];
@@ -1035,31 +1176,13 @@ function extrasDelCuadernoWeb(e) {
     // UN NPC DE LA CAMPAÑA, con su etiqueta: <strong data-npc="Brandr
     // Vindahl">Brandr</strong>. En las notas se puede escribir solo el
     // nombre de pila (o un mote) y sigue siendo él: el globo y su ficha
-    // salen por la etiqueta, no por lo escrito. Sin nada elegido, mete su
-    // nombre entero.
-    const npcs = document.createElement("select");
-    npcs.className = "redactor-elegir";
-    npcs.setAttribute("aria-label", "Qué NPC de la campaña");
-    npcs.appendChild(new Option("(cargando…)", ""));
-    enlazablesWeb().then((datos) => {
-        npcs.textContent = "";
-        ((datos.npcs || {})[e.campana] || []).forEach((p) => npcs.appendChild(new Option(p.nombre, p.nombre)));
-        if (!npcs.options.length) {
-            npcs.appendChild(new Option("(no hay NPC todavía)", ""));
-        }
-    });
-    extras.push({ elemento: npcs, separar: true });
-    extras.push({ texto: "NPC de la campaña", icono: "npc",
-        ayuda: "Lo elegido (su nombre, o solo el de pila), como el NPC de al lado: con su etiqueta, sale su ficha."
-            + " Sin nada elegido, mete su nombre entero",
-        hacer: (r) => {
-            if (!npcs.value) {
-                avisarEditor("Primero elige el NPC en la lista de al lado.", true);
-                npcs.focus();
-                return;
-            }
-            r.envolver("strong", "", npcs.value, false, { "data-npc": npcs.value });
-        } });
+    // salen por la etiqueta, no por lo escrito. El botón abre el buscador
+    // de la gente (como escribir @): lo elegido se envuelve con quien se
+    // elija; sin nada elegido, mete su nombre entero.
+    extras.push({ texto: "Buscar a alguien (NPC o de la mesa)", icono: "npc", separar: true,
+        ayuda: "Buscar un NPC o a alguien de la mesa (también escribiendo @): lo elegido pasa a ser él, con su"
+            + " etiqueta. Sin nada elegido, mete su nombre",
+        hacer: (r) => r.buscarGente() });
     extras.push({ texto: "Alguien", icono: "alguien", ayuda: "Lo elegido, como alguien que no es de la mesa (en negrita)",
         hacer: (r) => r.envolver("strong") });
     extras.push({ texto: "Lugar", icono: "lugar", ayuda: "Lo elegido, como un lugar (en cursiva)", hacer: (r) => r.envolver("em") });

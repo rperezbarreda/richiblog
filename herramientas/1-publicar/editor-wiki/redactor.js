@@ -1133,6 +1133,55 @@ function crearRedactor(opciones) {
             }
         });
     });
+    // @ : el buscador de la gente (las notas de una partida: los de la mesa
+    // y los NPC), con o.gente. Solo al principio de una palabra (un correo
+    // no lo abre). Escape lo deja como estaba, con su @.
+    const ETIQUETA_DE_GENTE = "Buscar a alguien: por su nombre, lo que es o de dónde es (Enter para ponerlo, Escape"
+        + " para dejarlo)";
+    area.addEventListener("input", async (e) => {
+        if (!o.gente || e.inputType !== "insertText" || e.data !== "@") {
+            return;
+        }
+        const sel = window.getSelection();
+        if (!sel.rangeCount) {
+            return;
+        }
+        const r = sel.getRangeAt(0);
+        const nodo = r.startContainer;
+        const donde = r.startOffset;
+        if (nodo.nodeType !== 3 || nodo.nodeValue[donde - 1] !== "@" || /\S/.test(nodo.nodeValue[donde - 2] || " ")) {
+            return;
+        }
+        const quitar = document.createRange();
+        quitar.setStart(nodo, donde - 1);
+        quitar.setEnd(nodo, donde);
+        quitar.deleteContents();
+        recordarSeleccion();
+        const datos = await enlazablesWeb();
+        buscadorDeEnlaceRedactor(panel, o.gente(datos), (c) => {
+            volverASeleccion();
+            c.poner(yo);
+            recordarSeleccion();
+            avisar();
+        }, (porSalir) => {
+            if (!porSalir) {
+                volverASeleccion();
+                document.execCommand("insertText", false, "@");
+            }
+        }, ETIQUETA_DE_GENTE);
+    });
+    // El mismo buscador, desde un botón (el de «NPC de la campaña»): lo
+    // elegido se envuelve con lo que se elija; sin nada elegido, se mete.
+    yo.buscarGente = async () => {
+        recordarSeleccion();
+        const datos = await enlazablesWeb();
+        buscadorDeEnlaceRedactor(panel, (o.gente || (() => []))(datos), (c) => {
+            volverASeleccion();
+            c.poner(yo);
+            recordarSeleccion();
+            avisar();
+        }, () => volverASeleccion(), ETIQUETA_DE_GENTE);
+    };
     area.addEventListener("paste", (e) => {
         const datos = e.clipboardData;
         if (!datos) {
@@ -1249,6 +1298,11 @@ function crearRedactor(opciones) {
             }).length;
             if (sinDireccion) {
                 avisos.push({ texto: sinDireccion === 1 ? "1 enlace sin dirección" : sinDireccion + " enlaces sin dirección" });
+            }
+            // Los de cada clase de texto (las notas: nombres casi iguales a
+            // los de un NPC).
+            if (o.avisos) {
+                avisos.push(...o.avisos(area, avisar));
             }
             return avisos;
         });
@@ -1725,12 +1779,69 @@ async function enlazablesWeb() {
 // dentro: dónde se pinta; grupos: [{nombre, cosas: [{texto, detalle}]}];
 // alElegir(cosa) y alCancelar().
 let cuentaDeBuscadoresDeEnlace = 0;
-function buscadorDeEnlaceRedactor(dentro, grupos, alElegir, alCancelar) {
+// Cada cosa: {texto, detalle?, busca? (más palabras por las que
+// encontrarla: su grupo, dónde vive…), foto? (su cara), poner(redactor)}.
+// BUSCA COMO SE BUSCA UNA PERSONA: por cualquier palabra del nombre
+// («vind» da los tres Vindahl), por lo que es o de dónde es («tiefling»,
+// «caravana»), sin tildes ni mayúsculas, con varias palabras a la vez
+// («vind padre») y perdonando una errata («rukus» da Ruukus). Lo que
+// mejor cuadra, arriba.
+function puntosDeBusquedaRedactor(c, q, llano) {
+    if (!q) {
+        return 1;
+    }
+    const nombre = llano(c.texto);
+    const palabras = nombre.split(/[\s'’-]+/).filter(Boolean);
+    const extra = llano([c.detalle, c.busca, c.grupo].filter(Boolean).join(" ")).split(/[\s,·()/-]+/).filter(Boolean);
+    const errata = (a, b) => {
+        // Distancia de edición, cortada: solo interesa si es 0, 1 o 2.
+        if (Math.abs(a.length - b.length) > 2) {
+            return 3;
+        }
+        let antes = Array.from({ length: b.length + 1 }, (_, i) => i);
+        for (let i = 1; i <= a.length; i += 1) {
+            const fila = [i];
+            for (let j = 1; j <= b.length; j += 1) {
+                fila[j] = Math.min(antes[j] + 1, fila[j - 1] + 1, antes[j - 1] + (a[i - 1] === b[j - 1] ? 0 : 1));
+            }
+            antes = fila;
+        }
+        return antes[b.length];
+    };
+    let total = 0;
+    for (const trozo of q.split(/\s+/).filter(Boolean)) {
+        let p = 0;
+        if (nombre === trozo) {
+            p = 100;
+        } else if (nombre.startsWith(trozo)) {
+            p = 80;
+        } else if (palabras.some((w) => w.startsWith(trozo))) {
+            p = 60;
+        } else if (nombre.includes(trozo)) {
+            p = 40;
+        } else if (extra.some((w) => w.startsWith(trozo))) {
+            p = 20;
+        } else if (trozo.length >= 3) {
+            const tope = trozo.length >= 5 ? 2 : 1;
+            if (palabras.some((w) => errata(w, trozo) <= tope || errata(w.slice(0, trozo.length), trozo) <= tope - 1)) {
+                p = 10;
+            }
+        }
+        if (!p) {
+            return 0;
+        }
+        total += p;
+    }
+    return total;
+}
+
+function buscadorDeEnlaceRedactor(dentro, grupos, alElegir, alCancelar, etiqueta) {
     cuentaDeBuscadoresDeEnlace += 1;
     const id = "buscar-enlace-" + cuentaDeBuscadoresDeEnlace;
     dentro.textContent = "";
     dentro.hidden = false;
-    const l = crearEditor("label", "", "Enlazar a… (escribe un trozo del nombre; Enter para ponerlo, Escape para dejarlo)");
+    const l = crearEditor("label", "", etiqueta
+        || "Enlazar a… (escribe un trozo del nombre; Enter para ponerlo, Escape para dejarlo)");
     l.htmlFor = id;
     const busca = document.createElement("input");
     busca.id = id;
@@ -1757,8 +1868,11 @@ function buscadorDeEnlaceRedactor(dentro, grupos, alElegir, alCancelar) {
     const llano = (t) => (t || "").normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
     const pintar = () => {
         const q = llano(busca.value.trim());
-        vistas = todas.filter((c) => !q || llano(c.texto).includes(q))
-            .sort((a, b) => (llano(a.texto).startsWith(q) ? 0 : 1) - (llano(b.texto).startsWith(q) ? 0 : 1)).slice(0, 12);
+        vistas = todas.map((c, i) => ({ c, i, p: puntosDeBusquedaRedactor(c, q, llano) }))
+            .filter((x) => x.p > 0)
+            .sort((a, b) => b.p - a.p || a.i - b.i)
+            .slice(0, 30)
+            .map((x) => x.c);
         activa = Math.min(activa, Math.max(0, vistas.length - 1));
         lista.textContent = "";
         vistas.forEach((c, i) => {
@@ -1766,6 +1880,14 @@ function buscadorDeEnlaceRedactor(dentro, grupos, alElegir, alCancelar) {
             li.id = id + "-" + i;
             li.setAttribute("role", "option");
             li.setAttribute("aria-selected", i === activa ? "true" : "false");
+            if (c.foto) {
+                const cara = document.createElement("img");
+                cara.className = "buscar-enlace-foto";
+                cara.src = c.foto;
+                cara.alt = "";
+                cara.loading = "lazy";
+                li.appendChild(cara);
+            }
             li.appendChild(crearEditor("span", "faltan-nombre", c.texto));
             li.appendChild(crearEditor("span", "faltan-veces", " " + c.grupo + (c.detalle ? " · " + c.detalle : "")));
             li.addEventListener("mousedown", (e) => e.preventDefault());

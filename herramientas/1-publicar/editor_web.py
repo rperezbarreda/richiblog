@@ -1888,7 +1888,14 @@ def enlazables():
     for archivo in sorted((RAIZ / "datos" / "notas_rol").glob("npcs-*.json")):
         datos = leer_json(archivo, {}) or {}
         clave = archivo.stem[len("npcs-"):]
-        npcs[clave] = [{"nombre": str(p.get("nombre")), "que": str(p.get("que") or "")}
+        # Con lo que ayuda a encontrarlos en el buscador de las notas: su
+        # cara, su grupo, dónde viven y cómo están.
+        npcs[clave] = [{"nombre": str(p.get("nombre")), "que": str(p.get("que") or ""),
+                        "foto": str(p.get("token_mini") or p.get("token") or ""),
+                        "grupo": _grupos_npc(p), "donde": str(p.get("donde") or ""),
+                        "estado": str(p.get("estado") or ""),
+                        "notas": " ".join(str(x) for x in (p.get("notas") or [])[:3]
+                                          if isinstance(p.get("notas"), list))[:300]}
                        for p in datos.get("personajes") or [] if isinstance(p, dict) and p.get("nombre")]
         grupos[clave] = [g[0] for g in opciones_de(coleccion("npcs"), "", datos).get("_grupos", [])]
     return {"paginas": paginas, "npcs": npcs, "grupos": grupos}

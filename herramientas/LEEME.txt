@@ -873,11 +873,32 @@
   LA ETIQUETA DE UN NPC (desde el 24-10-2026): <strong data-npc="Brandr
   Vindahl">Brandr</strong>. Con ella, lo escrito puede ser solo el
   nombre de pila, un mote o «su padre»: el globo y la ficha salen por la
-  etiqueta. La pone el editor: el botón «NPC de la campaña» (la persona
-  con la etiqueta colgada, con la lista de NPC al lado) envuelve lo
-  elegido, o mete el nombre entero si no hay nada elegido; también el
-  buscador de [[ y «Hacer NPC». En el editor, al pasar el ratón por un
-  nombre etiquetado, dice de quién es.
+  etiqueta. La pone el editor: escribiendo @ (o con el botón «Buscar a
+  alguien», la persona con la etiqueta colgada) sale EL BUSCADOR DE LA
+  GENTE: los de la mesa y los NPC, con su cara, qué son y su grupo. Busca
+  por cualquier palabra del nombre («vind» da los tres Vindahl), por lo
+  que es, de dónde es o lo que sabéis de él («tiefling», «caravana»,
+  «isa madre»), sin tildes y perdonando una errata («rukus» da Ruukus).
+  Flechas para elegir, Enter para ponerlo, Escape para dejar la @. Lo
+  elegido en el texto se envuelve con quien se elija; sin nada elegido,
+  se mete su nombre entero. También el buscador de [[ y «Hacer NPC»
+  ponen la etiqueta. En el editor, al pasar el ratón por un nombre
+  etiquetado, dice de quién es.
+
+  NOMBRES CASI IGUALES: debajo de cada texto de las notas, en los avisos,
+  sale toda negrita que no es nadie pero se parece mucho a un NPC o a
+  alguien de la mesa («Rukkus», «Apacca», «Thenaris»), con un botón que
+  la cambia por el nombre bueno y le pone su etiqueta o su color. Lo que
+  no se parece a nadie (un caballo, «25 monedas de oro») no avisa. Y
+  también avisa de una etiqueta de NPC que ya no existe.
+
+  PLANTILLAS DE ESCENA: junto a «Añadir una escena» hay un desplegable
+  para elegir de qué es: combate, viaje, descanso o acampada,
+  interrogatorio, llegada a un sitio, compras y ventas, investigación o
+  pista (o vacía). Sale con su nombre y su esqueleto con «…» para
+  rellenar, con la caja de «Lo que descubrimos», la lista de objetos o la
+  ambientación donde tocan (escribir.js, PLANTILLAS_DE_ESCENA). Se
+  recuerda la última elegida.
 
   LO QUE SE CUENTA APARTE EN LAS NOTAS (desde el 25-10-2026), con tres
   botones de la barra de las notas:
