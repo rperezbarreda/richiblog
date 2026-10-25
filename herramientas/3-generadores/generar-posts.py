@@ -473,7 +473,9 @@ def postit_de_sesion(campana, numero, sangria):
             recompensa = str(cosa.get("recompensa") or "").strip()
             if quien:
                 extra.append("lo pide " + quien)
-            if recompensa and estado == "pendiente":
+            # La recompensa, mientras seguía abierta en esa sesión (en la
+            # sesión en que se cerró ya no se promete nada).
+            if recompensa and not (estado != "pendiente" and hasta == numero):
                 extra.append("recompensa: " + recompensa)
             texto = _e(str(cosa["que"]).strip())
             if extra:
