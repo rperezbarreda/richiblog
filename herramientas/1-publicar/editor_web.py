@@ -544,10 +544,11 @@ def leer_cuaderno(texto):
 
 # EL POST-IT DE UNA PARTIDA: las «Cosas pendientes» de al lado del
 # cuaderno, un <ul class="cuaderno-tareas"> dentro de <aside
-# class="cuaderno-postit">. Aquí solo se LEE, para enseñarlo en el editor:
-# lo escribe generar-posts.py a partir de las misiones de la campaña. Los
-# comentarios de la plantilla llevan un post-it de ejemplo: no cuentan
-# (tapar_comentarios).
+# class="cuaderno-postit">. Es de cada sesión, escrito a mano en el editor
+# de las notas (no sale de las misiones de la campaña). Cada cosa es un
+# <li> (con class="hecho" si ya está hecha: sale tachada y con la casilla
+# marcada). Los comentarios de la plantilla llevan un post-it de ejemplo:
+# no cuentan (tapar_comentarios).
 RE_POSTIT = re.compile(r'<aside class="cuaderno-postit"[^>]*>.*?(<ul class="cuaderno-tareas">)(.*?)(</ul>)', re.S)
 
 
@@ -570,6 +571,24 @@ def leer_postit(texto):
         if _texto_plano(dentro):
             cosas.append({"html": dentro, "hecho": "hecho" in dict(nodo["attrs"]).get("class", "").split()})
     return cosas
+
+
+def _cambiar_postit(texto, cosas):
+    sitio = _sitio_del_postit(texto)
+    if not sitio:
+        return texto
+    sangria = _sangria_de(texto, texto.rfind("<ul", 0, sitio[0]))
+    lineas = []
+    for cosa in cosas:
+        if not isinstance(cosa, dict):
+            continue
+        # Lo que llega pasa por el mismo colador que el resto de las notas
+        # (solo etiquetas de texto, sin scripts ni direcciones raras).
+        dentro = _en_linea(arbol(str(cosa.get("html") or ""))).strip()
+        if not _texto_plano(dentro):
+            continue
+        lineas.append(sangria + "    <li%s>%s</li>" % (' class="hecho"' if cosa.get("hecho") else "", dentro))
+    return texto[:sitio[0]] + "\n" + "\n".join(lineas) + ("\n" if lineas else "") + sangria + texto[sitio[1]:]
 
 
 def limpiar_nodos(nodos):
@@ -810,6 +829,8 @@ def guardar_entrada(peticion):
                 cabecera = hojas_viejas[0]["titulo"]
             texto = (texto[:sitio[0]] + "\n" + _cuaderno_html(hojas, sangria, cabecera) + "\n" + sangria
                      + texto[sitio[1]:])
+            if isinstance(peticion.get("postit"), list):
+                texto = _cambiar_postit(texto, peticion["postit"])
     except ValueError as error:
         return {"error": "No he podido guardarla: %s." % error}
     escribir_como_estaba(archivo, texto)
@@ -1227,9 +1248,9 @@ def colecciones():
                   C("notas", "Notas", "lineas", ayuda="Una cosa por línea.", siempre=True)]},
          ]},
         {"id": "misiones", "apartado": "rol", "titulo": "Las misiones (el post-it)", "por_campana": True,
-         "ayuda": "Lo que el grupo tiene a medias y lo que ya se cerró: sale en el post-it de la campaña (lo"
-                  " pendiente y, plegado, el histórico) y en el de cada sesión. Arriba lo pendiente; debajo, el"
-                  " histórico de completadas y fallidas.",
+         "ayuda": "Lo que el grupo tiene a medias y lo que ya se cerró, en toda la campaña: sale en el post-it"
+                  " de la página de la campaña (lo pendiente y, plegado, el histórico). El post-it de cada sesión"
+                  " es aparte: se escribe en sus notas. Arriba lo pendiente; debajo, el histórico.",
          "archivo": "datos/notas_rol/campana-{campana}.json", "despues": "generadores",
          "partes": [
              {"id": "misiones", "camino": ["misiones"], "titulo": "Las misiones", "por_estado": "estado",
@@ -1750,7 +1771,7 @@ def guardar_coleccion(peticion):
         if col["id"] == "misiones":
             # Una misión cerrada (completada o fallada) sin decir en qué
             # sesión: en la última que haya, que es casi siempre la de
-            # ahora. Si no, no saldría en el post-it de ninguna sesión.
+            # ahora (así el histórico dice cuándo se cerró).
             ultima = max([int(s.get("numero")) for s in datos.get("sesiones") or []
                           if isinstance(s, dict) and str(s.get("numero") or "").isdigit()] or [0])
             for apartado in datos.get("misiones") or []:

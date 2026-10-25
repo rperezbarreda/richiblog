@@ -60,7 +60,7 @@
     <link rel="alternate" type="application/rss+xml" title="El Blog de Richi — blog, relatos y rol" href="/blog/rss.xml">
     <!-- ==== CSS ==== -->
     <link rel="stylesheet" href="/estilos/paquete-comun.css?v=42e63d33">
-    <link rel="stylesheet" href="/ligero/estilos/paginas/notas-rol.css?v=2d11b593">
+    <link rel="stylesheet" href="/ligero/estilos/paginas/notas-rol.css?v=ca485ba0">
     <link rel="stylesheet" href="/ligero/estilos/componentes/postit.css?v=c6f04f61">
     <link rel="stylesheet" href="/ligero/estilos/paginas/notas-rol.responsive.css?v=9c1d26db">
     <link rel="stylesheet" href="/ligero/estilos/componentes/ventana-modal.css?v=95db68e9">
@@ -189,23 +189,20 @@
                  ----------------------------------
                  Va fuera del cuaderno, a la derecha, y NO se desplaza:
                  por largas que sean las notas, lo que queda por hacer
-                 sigue estando delante. NO SE ESCRIBE A MANO: lo rellena
-                 generar-posts.py con las MISIONES DE LA CAMPAÑA ("misiones"
-                 en datos/notas_rol/campana-<clave>.json, que se llevan en
-                 el editor, Rol → «Las misiones (el post-it)»): lo que estaba
-                 abierto en esta sesión, y lo que se cerró en ella
-                 tachado. Queda así:
+                 sigue estando delante. Es de ESTA sesión y de nadie más
+                 (las misiones de toda la campaña son otra cosa: el
+                 post-it de la página de la campaña). Se escribe en el
+                 editor, debajo del cuaderno, o aquí a mano:
 
                    <ul class="cuaderno-tareas">
-                       <li>Lo que queda por hacer. <span class="cuaderno-tarea-extra">lo pide Sigil · recompensa: 50 po</span></li>
-                       <li class="hecho">Lo que se completó en esta sesión.</li>
+                       <li>Lo que queda por hacer.</li>
+                       <li class="hecho">Lo que ya está hecho.</li>
                    </ul>
 
                  Sale con su casilla, y se puede marcar y desmarcar
                  pulsándola. Lo que se marque así se queda guardado en
-                 ESE navegador y nada más; lo que vale es lo de la
-                 campaña. (Una campaña SIN "misiones" no toca su post-it:
-                 ahí se sigue escribiendo a mano.)
+                 ESE navegador y nada más; para que quede escrito se le
+                 pone la clase "hecho" al <li> (o «Hecha» en el editor).
 
                  EL PDF Y LA SESIÓN DE AL LADO
                  -----------------------------
@@ -359,9 +356,8 @@
                                  Lo que quedó por hacer. Vive fuera del
                                  cuaderno, así que no se desplaza con él:
                                  por largas que sean las notas, sigue
-                                 delante. Lo de dentro lo pone
-                                 generar-posts.py con las misiones de la
-                                 campaña. -->
+                                 delante. Es de esta sesión: se escribe
+                                 en el editor o aquí. -->
                             <aside class="cuaderno-postit" role="note" aria-labelledby="cuaderno-postit-titulo">
                                 <h2 class="cuaderno-postit-titulo" id="cuaderno-postit-titulo">Cosas pendientes</h2>
                                 <ul class="cuaderno-tareas">

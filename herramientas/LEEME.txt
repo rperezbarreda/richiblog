@@ -176,12 +176,14 @@
           (✗, tachadas), de la última a la primera, con sus sesiones,
           su misión, quién la pidió y qué recompensa hubo (o «sin
           recompensa», o «se perdió: …» si se falló).
-        - EL POST-IT DE CADA SESIÓN lo escribe generar-posts.py
-          (poner_postits_de_sesiones) con lo que estaba abierto en esa
-          sesión; lo que se cerró en ella sale tachado. Ya no se escribe
-          a mano: en el editor de las notas se ve cómo está y hay un
-          botón para ir a llevar las misiones. Una campaña sin
-          "misiones" no toca sus post-its.
+        - EL POST-IT DE CADA SESIÓN NO TIENE QUE VER CON ESTA LISTA
+          (desde el 25-10-2026; un día lo generaba): es de esa sesión y
+          se escribe en el editor de sus notas, debajo del cuaderno. Una
+          fila por cosa (Hecha, lo que es, subir, bajar, quitar) y
+          «Añadir una cosa». Hecha = <li class="hecho"> (tachada y con la
+          casilla marcada). Lo que no se reescribe conserva su HTML; lo
+          nuevo se guarda como texto (editor_web.py: leer_postit y
+          _cambiar_postit; el ejemplo de los comentarios no cuenta).
     · LA FICHA DE LA CAMPAÑA (en Rol): de qué va, el sistema, quién
       dirige y los personajes de la mesa (con su color). Las misiones
       van en su propio apartado (ver arriba).

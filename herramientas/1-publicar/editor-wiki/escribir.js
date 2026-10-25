@@ -11,7 +11,7 @@
 
 const estadoEscribir = {
     entradas: [], nuevas: null, entrada: null, cambiado: false, guardando: false,
-    redactor: null, pie: null, imagen: null, hojas: [], tipoNuevo: "",
+    redactor: null, pie: null, imagen: null, hojas: [], postit: null, tipoNuevo: "",
 };
 const NOMBRES_DE_LO_NUEVO = {
     entrada: "Una entrada del blog", relato: "Un relato", reto: "Un día del reto", sesion: "Las notas de una partida",
@@ -571,7 +571,7 @@ async function abrirEntradaWeb(archivo) {
             && !$('[data-vista="entrada"]').hidden ? datosDeLaEntradaWeb() : null));
     await ofrecerBorradorWeb("entrada", $("[data-borrador-entrada]"), datosDeLaEntradaWeb(), (d) => {
         const e = Object.assign({}, entrada);
-        ["titulo", "titulo_corto", "pdf", "descripcion", "etiquetas", "subcategoria", "cuerpo", "hojas"].forEach((k) => {
+        ["titulo", "titulo_corto", "pdf", "descripcion", "etiquetas", "subcategoria", "cuerpo", "hojas", "postit"].forEach((k) => {
             if (d[k] !== undefined) {
                 e[k] = d[k];
             }
@@ -652,42 +652,28 @@ function ponerEntradaWeb(e) {
             estadoEscribir.hojas.push({ titulo: "", bloques: [{ tipo: "escena", nombre: "", abierta: true, html: "" }] });
         }
         pintarCuadernoWeb();
-        // EL POST-IT: no se escribe aquí. Sale solo de las misiones de la
-        // campaña (generar-posts.py): lo que estaba abierto en esta sesión.
-        // Aquí se ve cómo está y se va a llevarlas.
+        // EL POST-IT, si la página lo tiene (las de la plantilla, todas). Es de
+        // esta sesión y de nadie más: no tiene que ver con las misiones de la
+        // campaña (que son el post-it de la página de la campaña).
+        estadoEscribir.postit = null;
         if (Array.isArray(e.postit)) {
             const nota = crearEditor("section", "bloque");
             nota.setAttribute("aria-labelledby", "t-postit");
             const h2 = crearEditor("h2", "", "El post-it: cosas pendientes");
             h2.id = "t-postit";
             nota.appendChild(h2);
-            nota.appendChild(crearEditor("p", "ayuda", "Sale solo de las misiones de la campaña: lo que estaba abierto"
-                + " en esta sesión (lo que se cerró en ella, tachado). Las misiones se llevan en Rol → «Las misiones (el post-it)»,"
-                + " con quién las pidió, la recompensa y en qué sesión empezaron y se cerraron; al guardarlas se"
-                + " rehacen los post-its de todas las sesiones."));
-            if (e.postit.length) {
-                const lista = crearEditor("ul", "postit-ahora");
-                e.postit.forEach((c) => {
-                    const li = crearEditor("li", c.hecho ? "es-hecha" : "");
-                    li.innerHTML = c.html;
-                    lista.appendChild(li);
-                });
-                nota.appendChild(lista);
-            } else {
-                nota.appendChild(crearEditor("p", "", "Ahora mismo no tiene nada."));
-            }
-            const ir = crearEditor("button", "", "Llevar las misiones de la campaña");
-            ir.type = "button";
-            ir.addEventListener("click", () => {
-                if (estadoEscribir.cambiado
-                    && !window.confirm("Hay cambios sin guardar en las notas. ¿Ir a las misiones igualmente?")) {
-                    return;
-                }
-                estadoEscribir.cambiado = false;
-                abrirFichasWeb("misiones", e.campana);
-            });
-            nota.appendChild(ir);
+            nota.appendChild(crearEditor("p", "ayuda", "La nota amarilla de al lado del cuaderno: lo que quedó a medias"
+                + " para la próxima. Una cosa por casilla; «Hecha» la deja tachada y con la casilla marcada en vez de"
+                + " borrarla."));
+            const lista = crearEditor("div", "postit-cosas");
+            lista.setAttribute("data-postit-cosas", "");
+            nota.appendChild(lista);
             form.appendChild(nota);
+            estadoEscribir.postit = e.postit.map((c) => {
+                const texto = textoDeHtmlWeb(c.html);
+                return { html: c.html || "", texto, original: texto, hecho: !!c.hecho };
+            });
+            pintarPostitWeb();
         }
     } else {
         const texto = crearEditor("section", "bloque");
@@ -1107,6 +1093,108 @@ function extrasDelCuadernoWeb(e) {
     return extras;
 }
 
+// ---- EL POST-IT DE UNA PARTIDA ----
+// Cada cosa, una fila: «Hecha», lo que es, subir, bajar y quitar. Lo que
+// no se toca conserva su HTML (un nombre en negrita, de color…); lo que se
+// reescribe se guarda tal cual se escribe.
+function textoDeHtmlWeb(trozo) {
+    const d = document.createElement("div");
+    d.innerHTML = trozo || "";
+    return (d.textContent || "").replace(/\s+/g, " ").trim();
+}
+
+function htmlDeTextoWeb(texto) {
+    const d = document.createElement("div");
+    d.textContent = texto;
+    return d.innerHTML;
+}
+
+function pintarPostitWeb(enfocar) {
+    const caja = $("[data-postit-cosas]");
+    const cosas = estadoEscribir.postit;
+    if (!caja || !cosas) {
+        return;
+    }
+    caja.textContent = "";
+    const cambiado = () => {
+        estadoEscribir.cambiado = true;
+    };
+    const lista = crearEditor("ol", "postit-lista");
+    cosas.forEach((c, i) => {
+        const li = crearEditor("li", "postit-cosa");
+        const hecha = crearEditor("label", "opcion");
+        const casilla = document.createElement("input");
+        casilla.type = "checkbox";
+        casilla.checked = c.hecho;
+        casilla.addEventListener("change", () => {
+            c.hecho = casilla.checked;
+            cambiado();
+        });
+        hecha.appendChild(casilla);
+        hecha.appendChild(document.createTextNode(" Hecha"));
+        const campo = document.createElement("input");
+        campo.type = "text";
+        campo.id = "postit-web-" + i;
+        campo.value = c.texto;
+        campo.autocomplete = "off";
+        campo.setAttribute("aria-label", "Cosa pendiente " + (i + 1));
+        campo.addEventListener("input", () => {
+            c.texto = campo.value;
+            cambiado();
+        });
+        const botones = crearEditor("div", "fila");
+        const boton = (texto, ayuda, alPulsar, apagado) => {
+            const b = crearEditor("button", "", texto);
+            b.type = "button";
+            b.setAttribute("aria-label", ayuda);
+            b.disabled = !!apagado;
+            b.addEventListener("click", () => {
+                cambiado();
+                alPulsar();
+            });
+            botones.appendChild(b);
+        };
+        boton("↑", "Subir la cosa " + (i + 1), () => {
+            [cosas[i - 1], cosas[i]] = [cosas[i], cosas[i - 1]];
+            pintarPostitWeb("postit-web-" + (i - 1));
+        }, i === 0);
+        boton("↓", "Bajar la cosa " + (i + 1), () => {
+            [cosas[i + 1], cosas[i]] = [cosas[i], cosas[i + 1]];
+            pintarPostitWeb("postit-web-" + (i + 1));
+        }, i === cosas.length - 1);
+        boton("Quitar", "Quitar la cosa " + (i + 1), () => {
+            cosas.splice(i, 1);
+            pintarPostitWeb(cosas.length ? "postit-web-" + Math.min(i, cosas.length - 1) : "postit-web-anadir");
+        });
+        li.appendChild(hecha);
+        li.appendChild(campo);
+        li.appendChild(botones);
+        lista.appendChild(li);
+    });
+    if (cosas.length) {
+        caja.appendChild(lista);
+    } else {
+        caja.appendChild(crearEditor("p", "ayuda", "No hay nada pendiente (el post-it sale vacío)."));
+    }
+    const anadir = crearEditor("button", "", "Añadir una cosa");
+    anadir.type = "button";
+    anadir.id = "postit-web-anadir";
+    anadir.addEventListener("click", () => {
+        cosas.push({ html: "", texto: "", original: "", hecho: false });
+        estadoEscribir.cambiado = true;
+        pintarPostitWeb("postit-web-" + (cosas.length - 1));
+    });
+    caja.appendChild(anadir);
+    if (enfocar && document.getElementById(enfocar)) {
+        document.getElementById(enfocar).focus();
+    }
+}
+
+function datosDelPostitWeb() {
+    return estadoEscribir.postit.filter((c) => c.texto.trim()).map((c) => ({ hecho: c.hecho,
+        html: c.texto === c.original && c.html ? c.html : htmlDeTextoWeb(c.texto.trim()) }));
+}
+
 // ---- GUARDAR Y PUBLICAR ----
 function datosDeLaEntradaWeb() {
     const e = estadoEscribir.entrada;
@@ -1118,6 +1206,9 @@ function datosDeLaEntradaWeb() {
         cuerpo.pdf = valor("entrada-pdf");
         cuerpo.hojas = estadoEscribir.hojas.map((h) => ({ titulo: h.titulo,
             bloques: h.bloques.map((b) => ({ tipo: b.tipo, nombre: b.nombre || "", abierta: b.abierta !== false, html: b.html || "" })) }));
+        if (estadoEscribir.postit) {
+            cuerpo.postit = datosDelPostitWeb();
+        }
     } else {
         cuerpo.titulo = valor("entrada-titulo");
         cuerpo.cuerpo = estadoEscribir.redactor ? estadoEscribir.redactor.darHTML() : "";

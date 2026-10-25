@@ -512,8 +512,7 @@
     left: 0;
     font-weight: 700;
 }
-.misiones-hecha.es-fallada .misiones-que,
-.cuaderno-tareas > li.es-fallada {
+.misiones-hecha.es-fallada .misiones-que {
     text-decoration: line-through;
 }
 .misiones-pie {

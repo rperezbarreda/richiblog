@@ -936,8 +936,8 @@ function trozoDeBotin(texto) {
 // DE PRIMERAS SOLO SE VE LO PENDIENTE. Lo cerrado no se borra: va al
 // HISTÓRICO, un <details> plegado al final de la nota («completadas y
 // fallidas»), de la última cerrada a la primera, con sus sesiones, quién
-// la pidió y qué recompensa hubo. El post-it de cada sesión sale de esta
-// misma lista (generar-posts.py: lo que estaba abierto en ella).
+// la pidió y qué recompensa hubo. (El post-it de cada sesión es otra cosa:
+// se escribe en esa sesión y no sale de aquí.)
 //
 // SE VE COMO UN POST-IT, el mismo papel amarillo que la nota de cosas
 // pendientes de una partida (estilos/componentes/postit.css). No es un

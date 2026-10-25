@@ -875,8 +875,7 @@
 }
 
 /* Una fallida, tachada (como se tacha en el papel lo que ya no va). */
-.misiones-hecha.es-fallada .misiones-que,
-.cuaderno-tareas > li.es-fallada {
+.misiones-hecha.es-fallada .misiones-que {
     text-decoration: line-through;
 }
 

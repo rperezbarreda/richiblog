@@ -2065,20 +2065,31 @@ html[data-contraste="alto"] .redactor-area .pj-morado { color: #dec4ff; }
     font-weight: 700;
 }
 
-/* ---- EL POST-IT DE UNA PARTIDA, para ver (sale de las misiones de la
-   campaña): lo cerrado en esa sesión, tachado. */
-.postit-ahora {
+/* ---- EL POST-IT DE UNA PARTIDA: una fila por cosa (Hecha, lo que es,
+   subir, bajar, quitar); en estrecho, lo que es ocupa la fila entera. */
+.postit-lista {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
     margin: 0 0 14px;
+    padding: 0;
+    list-style: none;
 }
 
-.postit-ahora .es-hecha {
-    text-decoration: line-through;
+.postit-cosa {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
 }
 
-.postit-ahora .cuaderno-tarea-extra {
-    display: block;
-    color: var(--suave);
-    font-size: 0.9rem;
+.postit-cosa input[type="text"] {
+    flex: 1 1 16rem;
+    min-width: 0;
+}
+
+.postit-cosa .fila {
+    margin: 0;
 }
 
 /* ---- LAS FICHAS ---- */
