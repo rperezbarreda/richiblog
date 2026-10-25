@@ -5,16 +5,17 @@
     "intro": "La gente que nos vamos encontrando por el camino. Pulsa en cualquiera para ver su ficha.",
     "apartados": [
         {
-            "nombre": "la Gran Caravana",
+            "nombre": "La Gran Caravana",
             "categorias": [
-                "Gran Caravana"
+                "Gran Caravana",
+                "Mercader de la Gran Caravana"
             ]
         },
         {
-            "nombre": "Sirevia",
+            "nombre": "Región de Sirevia",
             "categorias": [
                 "Sirevia",
-                "Bandidos de Sirevia",
+                "Bandidos Colmillo de Lobo",
                 "Chitxia"
             ]
         },
@@ -39,11 +40,12 @@
             "notas": [
                 "Nuestro jefe, un carismático y joven tiefling que dirige nuestra caravana."
             ],
-            "token_mini": "/imagenes/notas_rol/ragna/sigil_tkn-mini.webp"
+            "token_mini": "/imagenes/notas_rol/ragna/sigil_tkn-mini.webp",
+            "primera": 1
         },
         {
             "nombre": "Tovin",
-            "categoria": "Gran Caravana",
+            "categoria": "Mercader de la Gran Caravana",
             "que": "Kobold",
             "donde": "Gran Caravana",
             "relacion": "aliado",
@@ -53,11 +55,12 @@
             "notas": [
                 "Comerciante de mercancias generales, tiene perretes."
             ],
-            "token_mini": "/imagenes/notas_rol/ragna/tovin_tkn-mini.webp"
+            "token_mini": "/imagenes/notas_rol/ragna/tovin_tkn-mini.webp",
+            "primera": 1
         },
         {
             "nombre": "Borin",
-            "categoria": "Gran Caravana",
+            "categoria": "Mercader de la Gran Caravana",
             "que": "Enano",
             "donde": "Gran Caravana",
             "relacion": "aliado",
@@ -67,7 +70,8 @@
             "notas": [
                 "Herrero en la caravana de Sigil."
             ],
-            "token_mini": "/imagenes/notas_rol/ragna/borin_tkn-mini.webp"
+            "token_mini": "/imagenes/notas_rol/ragna/borin_tkn-mini.webp",
+            "primera": 1
         },
         {
             "nombre": "Ayala",
@@ -82,7 +86,8 @@
                 "Posadera de El Sueño del Elemental.",
                 "Antipática."
             ],
-            "token_mini": "/imagenes/notas_rol/ragna/ayala_tkn-mini.webp"
+            "token_mini": "/imagenes/notas_rol/ragna/ayala_tkn-mini.webp",
+            "primera": 1
         },
         {
             "nombre": "Reeni",
@@ -97,7 +102,8 @@
                 "Cazador de Sirevia.",
                 "Padre de Areeni."
             ],
-            "token_mini": "/imagenes/notas_rol/ragna/reeni_tkn-mini.webp"
+            "token_mini": "/imagenes/notas_rol/ragna/reeni_tkn-mini.webp",
+            "primera": 1
         },
         {
             "nombre": "Ruukus",
@@ -111,7 +117,8 @@
             "notas": [
                 "Cazador de Sirevia"
             ],
-            "token_mini": "/imagenes/notas_rol/ragna/ruukus_tkn-mini.webp"
+            "token_mini": "/imagenes/notas_rol/ragna/ruukus_tkn-mini.webp",
+            "primera": 1
         },
         {
             "nombre": "Areeni",
@@ -120,16 +127,18 @@
             "donde": "Sirevia",
             "relacion": "neutral",
             "estado": "vivo",
-            "token": "",
-            "ilustracion": "",
+            "token": "/imagenes/notas_rol/ragna/areeni_tkn.webp",
+            "ilustracion": "/imagenes/notas_rol/ragna/areeni.webp",
             "notas": [
                 "Entusiasmada por el puesto de pergaminos de Denelia.",
                 "Hija de Reeni."
-            ]
+            ],
+            "primera": 1,
+            "token_mini": "/imagenes/notas_rol/ragna/areeni_tkn-mini.webp"
         },
         {
             "nombre": "Elvira",
-            "categoria": "Gran Caravana",
+            "categoria": "Mercader de la Gran Caravana",
             "que": "Humana",
             "donde": "Gran Caravana",
             "relacion": "aliado",
@@ -139,7 +148,8 @@
             "notas": [
                 "Herborista y comerciante de pociones."
             ],
-            "token_mini": "/imagenes/notas_rol/ragna/elvira_tkn-mini.webp"
+            "token_mini": "/imagenes/notas_rol/ragna/elvira_tkn-mini.webp",
+            "primera": 1
         },
         {
             "nombre": "Apaaka",
@@ -158,53 +168,54 @@
         },
         {
             "nombre": "Terkus",
-            "categorias": [
-                "Sirevia",
-                "Bandidos de Sirevia"
-            ],
+            "categoria": "Bandidos Colmillo de Lobo",
             "que": "Humano",
             "donde": "Sirevia",
             "relacion": "enemigo",
             "estado": "muerto",
-            "token": "",
-            "ilustracion": "",
+            "token": "/imagenes/notas_rol/ragna/terkus_tkn.webp",
+            "ilustracion": "/imagenes/notas_rol/ragna/terkus.webp",
             "notas": [
                 "Líder del ataque a nuestra caravana en Sirevia.",
                 "Tras interrogarlo nos dijo dónde encontrar al resto de su banda."
-            ]
+            ],
+            "primera": 1,
+            "token_mini": "/imagenes/notas_rol/ragna/terkus_tkn-mini.webp"
         },
         {
             "nombre": "Ermitaño desconocido",
             "categoria": "Sirevia",
-            "que": "Humano?",
+            "que": "Humano",
             "donde": "Bosques de Sirevia",
             "relacion": "desconocida",
             "estado": "vivo",
-            "token": "",
-            "ilustracion": "",
+            "token": "/imagenes/notas_rol/ragna/ermitano-desconocido_tkn-2.webp",
+            "ilustracion": "/imagenes/notas_rol/ragna/ermitano-desconocido.webp",
             "notas": [
                 "Personaje muy misterioso.",
                 "Nos advirtió de los espíritus del bosque.",
                 "Sabe usar muy bien el arco."
-            ]
+            ],
+            "primera": 1,
+            "token_mini": "/imagenes/notas_rol/ragna/ermitano-desconocido_tkn-2-mini.webp"
         },
         {
             "nombre": "Rise",
-            "categorias": [
-                "Sirevia",
-                "Chitxia"
-            ],
+            "categoria": "Chitxia",
             "que": "Humano",
             "donde": "Chitxia",
             "relacion": "aliado",
             "estado": "vivo",
-            "token": "",
-            "ilustracion": "",
+            "token": "/imagenes/notas_rol/ragna/rise_tkn.webp",
+            "ilustracion": "/imagenes/notas_rol/ragna/rise.webp",
             "notas": [
                 "Anciano líder del pueblo de Chitxia.",
+                "Deprimido tras quedar viudo.",
                 "Nos pidió ayuda con sus planctaciones a cambio de dejarnos un carro.",
                 "Seguidor de Mielikki."
-            ]
+            ],
+            "primera": 1,
+            "token_mini": "/imagenes/notas_rol/ragna/rise_tkn-mini.webp"
         },
         {
             "nombre": "Brandr Vindahl",
@@ -220,7 +231,8 @@
             "notas": [
                 "Padre de Mellissa"
             ],
-            "token_mini": "/imagenes/notas_rol/ragna/brandr-vindahl_tkn-mini.webp"
+            "token_mini": "/imagenes/notas_rol/ragna/brandr-vindahl_tkn-mini.webp",
+            "primera": 1
         },
         {
             "nombre": "Isa Vindahl",
@@ -234,7 +246,8 @@
             "notas": [
                 "Madre de Mellissa"
             ],
-            "token_mini": "/imagenes/notas_rol/ragna/isa-vindahl_tkn-mini.webp"
+            "token_mini": "/imagenes/notas_rol/ragna/isa-vindahl_tkn-mini.webp",
+            "primera": 1
         },
         {
             "nombre": "Obrandr Vindahl",
@@ -248,7 +261,8 @@
             "notas": [
                 "Hermano de Mellissa"
             ],
-            "token_mini": "/imagenes/notas_rol/ragna/obrandr-vindahl_tkn-mini.webp"
+            "token_mini": "/imagenes/notas_rol/ragna/obrandr-vindahl_tkn-mini.webp",
+            "primera": 1
         },
         {
             "nombre": "Mita",
@@ -263,7 +277,25 @@
                 "Familiar de Faëlar",
                 "Nombre original: Palomita"
             ],
-            "token_mini": "/imagenes/notas_rol/ragna/mita_tkn-mini.webp"
+            "token_mini": "/imagenes/notas_rol/ragna/mita_tkn-mini.webp",
+            "primera": 1
+        },
+        {
+            "nombre": "Björn",
+            "categoria": "Bandidos Colmillo de Lobo",
+            "que": "Humano",
+            "donde": "Chitxia",
+            "relacion": "enemigo",
+            "estado": "muerto",
+            "token": "/imagenes/notas_rol/ragna/bjorn_tkn.webp",
+            "ilustracion": "/imagenes/notas_rol/ragna/bjorn.webp",
+            "notas": [
+                "Extorsionaba al pueblo de Chitxia.",
+                "Lo capturamos e interrogamos para guiarnos a la entrada secretra de las montañas para acabar con su banda.",
+                "Lo ejecutamos para que no diera problemas."
+            ],
+            "primera": 2,
+            "token_mini": "/imagenes/notas_rol/ragna/bjorn_tkn-mini.webp"
         },
         {
             "nombre": "Sozil",

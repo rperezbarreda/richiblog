@@ -2,7 +2,7 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
     <url>
         <loc>https://richi.blog/index.html</loc>
-        <lastmod>2026-10-22</lastmod>
+        <lastmod>2026-10-24</lastmod>
     </url>
     <url>
         <loc>https://richi.blog/web/accesibilidad/accesibilidad.html</loc>
@@ -10,7 +10,7 @@
     </url>
     <url>
         <loc>https://richi.blog/web/blog/2026/index_2026.html</loc>
-        <lastmod>2026-10-22</lastmod>
+        <lastmod>2026-10-25</lastmod>
     </url>
     <url>
         <loc>https://richi.blog/web/blog/2026/octubre/novedades-de-hace-un-cristo-de-tiempo.html</loc>
@@ -98,15 +98,19 @@
     </url>
     <url>
         <loc>https://richi.blog/web/notas_rol/ragna/index_ragna.html</loc>
-        <lastmod>2026-10-22</lastmod>
+        <lastmod>2026-10-24</lastmod>
     </url>
     <url>
         <loc>https://richi.blog/web/notas_rol/ragna/npcs_ragna.html</loc>
-        <lastmod>2026-10-22</lastmod>
+        <lastmod>2026-10-24</lastmod>
     </url>
     <url>
         <loc>https://richi.blog/web/notas_rol/ragna/sesion-01.html</loc>
-        <lastmod>2026-10-22</lastmod>
+        <lastmod>2026-10-25</lastmod>
+    </url>
+    <url>
+        <loc>https://richi.blog/web/notas_rol/ragna/sesion-02.html</loc>
+        <lastmod>2026-10-25</lastmod>
     </url>
     <url>
         <loc>https://richi.blog/web/recomendaciones/recomendaciones.html</loc>

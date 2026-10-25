@@ -105,7 +105,8 @@
                     "que": "Hacernos con un carromato para transportar la mercancía.",
                     "de": 1,
                     "estado": "completada",
-                    "hasta": 1
+                    "hasta": 2,
+                    "obtenida": "Un carromato"
                 }
             ]
         },
@@ -114,7 +115,12 @@
             "cosas": [
                 {
                     "que": "Terminar de ayudar a replantar el huerto en Chitxia.",
-                    "de": 1
+                    "de": 1,
+                    "estado": "completada",
+                    "quien": "Rise",
+                    "recompensa": "Descuento en el carromato",
+                    "hasta": 2,
+                    "obtenida": "Un descuento para el carromato."
                 }
             ]
         },
@@ -139,7 +145,14 @@
             "fecha": "03-10-2026",
             "titulo": "El robo de la mercancía",
             "url": "/web/notas_rol/ragna/sesion-01.html",
-            "pdf": "https://drive.google.com/file/d/19Ld6RR8xYK_UHMI-HYlTkk2tdvLghFqQ/view?usp=sharing"
+            "pdf": "https://drive.google.com/file/d/16_wFkaKOxEd0Vv8o1ryuvdAEbBqWJWNb/view?usp=sharing"
+        },
+        {
+            "numero": 2,
+            "fecha": "24-10-2026",
+            "titulo": "Rumbo hacia las montañas",
+            "url": "/web/notas_rol/ragna/sesion-02.html",
+            "pdf": ""
         }
     ]
 }
