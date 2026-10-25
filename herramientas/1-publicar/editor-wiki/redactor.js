@@ -26,6 +26,9 @@ const ETIQUETAS_DEL_REDACTOR = {
 };
 // Lo que se cambia por otra cosa al limpiar.
 const CAMBIOS_DEL_REDACTOR = { b: "strong", i: "em", strike: "s", del: "s", h1: "h2", h5: "h4", h6: "h4" };
+// Cómo va una imagen (el panel «Colocar la imagen»): a un lado con el texto
+// alrededor o en el centro, y de qué tamaño. Valen en todos los textos.
+const CLASES_DE_IMAGEN = /^img-(izquierda|derecha|centro|pequena|mediana|grande)$/;
 const BLOQUES_DEL_REDACTOR = ["p", "h2", "h3", "h4", "ul", "ol", "pre", "blockquote", "figure", "table", "hr"];
 let cuentaDeRedactores = 0;
 // Las barras de botones que se van con el texto al bajar (ver
@@ -68,6 +71,14 @@ const ICONOS_DEL_REDACTOR = {
     html: '<rect x="2" y="4" width="20" height="16" rx="2"/><path d="M8.5 9l-3 3 3 3M15.5 9l3 3-3 3M13.2 8l-2.4 8"/>',
     npcNuevo: '<circle cx="10" cy="8" r="4"/><path d="M2 21a8 8 0 0 1 14.5-4.6"/><path d="M19 14v7M15.5 17.5h7"/>',
     personaje: '<circle cx="12" cy="8" r="4" fill="currentColor"/><path d="M4 21a8 8 0 0 1 16 0z" fill="currentColor"/>',
+    // Una foto con flechas a los lados: colocar una imagen.
+    colocar: '<rect x="6" y="6" width="12" height="12" rx="1.5"/><path d="M6 15l3.5-3.5L13 15M3 12H1M23 12h-2M2.5 10.5L1 12l1.5 1.5M21.5 10.5L23 12l-1.5 1.5"/>',
+    // Una pluma: texto de ambientación.
+    ambientacion: '<path d="M20 4c-6 0-11 5-12 12l-3 4"/><path d="M8 16c5-1 9-4 11-9"/><path d="M11 13h4"/>',
+    // Un dado: la regla de juego.
+    regla: '<path d="M12 2l9 5v10l-9 5-9-5V7z"/><path d="M12 22V12M21 7l-9 5-9-5"/>',
+    // Una lupa sobre un papel: lo que descubrimos.
+    descubrimiento: '<path d="M5 3h10l4 4v6"/><path d="M5 3v18h7"/><circle cx="16.5" cy="16.5" r="3"/><path d="M18.7 18.7L22 22"/>',
     alguien: '<circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/>',
     // Alguien con una etiqueta colgada: un NPC de la campaña (con su ficha).
     npc: '<circle cx="9" cy="8" r="4"/><path d="M2 21a7 7 0 0 1 13-3.6"/><path d="M15 12h6v5l-3 3-3-3z"/>',
@@ -142,7 +153,8 @@ function leerHtmlRedactor(html) {
 // «clases», para las notas: pj-verde, cuaderno-objetos…), con sus
 // atributos buenos. Lo demás se desenvuelve (se queda lo de dentro).
 function limpiarRedactor(raiz, clases) {
-    const clasesBuenas = clases || /^$/;
+    const base = clases || /^$/;
+    const clasesBuenas = { test: (c) => base.test(c) || CLASES_DE_IMAGEN.test(c) };
     const limpiarUno = (nodo) => {
         [...nodo.childNodes].forEach((hijo) => {
             if (hijo.nodeType === Node.COMMENT_NODE) {
@@ -481,6 +493,67 @@ function crearRedactor(opciones) {
         avisar();
     };
 
+    // Lo de donde está el cursor (el párrafo, la lista…) dentro de una caja
+    // con su clase (<blockquote class="cuaderno-descubrimiento">); si ya
+    // estaba dentro de una así, se saca (el botón va y viene).
+    yo.envolverBloque = (etiqueta, clase) => {
+        volverASeleccion();
+        const sel = window.getSelection();
+        if (!sel.rangeCount || !area.contains(sel.anchorNode)) {
+            avisarEditor("Primero pon el cursor en lo que quieres meter en la caja.", true);
+            return;
+        }
+        const rango = sel.getRangeAt(0);
+        const dentro = (nodo) => (nodo.nodeType === 1 ? nodo : nodo.parentNode).closest(etiqueta + "." + clase);
+        const ya = dentro(rango.startContainer);
+        if (ya && area.contains(ya)) {
+            ya.replaceWith(...ya.childNodes);
+            avisar();
+            return;
+        }
+        const arriba = (nodo) => {
+            let x = nodo;
+            while (x && x.parentNode !== area) {
+                x = x.parentNode;
+            }
+            return x;
+        };
+        // El cursor justo en el borde (entre dos bloques): el bloque de ahí.
+        const enBorde = (contenedor, desfase) => (contenedor === area ? area.childNodes[desfase] || area.lastChild
+            : contenedor);
+        const primero = arriba(enBorde(rango.startContainer, rango.startOffset));
+        const ultimo = arriba(enBorde(rango.endContainer, rango.endOffset)) || primero;
+        if (!primero) {
+            return;
+        }
+        if (primero.nodeType === 1 && primero.matches(etiqueta + "." + clase)) {
+            primero.replaceWith(...primero.childNodes);
+            avisar();
+            return;
+        }
+        const caja = document.createElement(etiqueta);
+        caja.className = clase;
+        primero.before(caja);
+        let x = primero;
+        while (x) {
+            const siguiente = x.nextSibling;
+            caja.appendChild(x);
+            if (x === ultimo) {
+                break;
+            }
+            x = siguiente;
+        }
+        // Al mover los bloques el navegador pierde el cursor: se deja al
+        // principio de la caja (así, pulsar otra vez la deshace).
+        const dentroDeLaCaja = document.createRange();
+        dentroDeLaCaja.selectNodeContents(caja);
+        dentroDeLaCaja.collapse(true);
+        sel.removeAllRanges();
+        sel.addRange(dentroDeLaCaja);
+        recordarSeleccion();
+        avisar();
+    };
+
     // ---- LOS BOTONES ----
     const botones = [];
     const boton = (texto, ayuda, alPulsar, estado, icono) => {
@@ -521,6 +594,9 @@ function crearRedactor(opciones) {
         if (o.imagenes) {
             boton("Imagen", "Meter una imagen en el texto", () => abrirPanel("imagen"), null, "imagen");
         }
+        boton("Colocar la imagen", "Colocar una imagen del texto: a un lado o en el centro, su tamaño, subirla o"
+            + " bajarla (también se abre pulsando la imagen, y se puede arrastrar)", () => abrirPanel("colocar"),
+        null, "colocar");
         boton("Tabla", "Meter una tabla", () => abrirPanel("tabla"), null, "tabla");
         boton("Raya", "Una raya para separar (un corte fuerte)", () => hacer("insertHorizontalRule"), null, "raya");
     }
@@ -609,6 +685,7 @@ function crearRedactor(opciones) {
     const cerrarPanel = (volver) => {
         panel.hidden = true;
         panel.textContent = "";
+        area.querySelectorAll("img.es-elegida").forEach((i) => i.classList.remove("es-elegida"));
         if (volver) {
             volverASeleccion();
         }
@@ -659,8 +736,13 @@ function crearRedactor(opciones) {
         rellenar(panel, (volver) => cerrarPanel(volver));
     };
     yo.elegido = () => (guardada ? guardada.toString() : "");
-    const abrirPanel = (que) => {
+    const abrirPanel = (que, cual) => {
         recordarSeleccion();
+        area.querySelectorAll("img.es-elegida").forEach((i) => i.classList.remove("es-elegida"));
+        if (que === "colocar") {
+            colocarImagen(cual);
+            return;
+        }
         panel.textContent = "";
         panel.hidden = false;
         if (que === "enlace") {
@@ -773,6 +855,229 @@ function crearRedactor(opciones) {
             archivo.focus();
         }
     };
+
+    // ---- COLOCAR UNA IMAGEN, COMO EN UN WORD ----
+    // Pulsando una imagen del texto (o con el botón «Colocar la imagen»,
+    // que pregunta cuál si hay varias) sale debajo de los botones: a la
+    // izquierda o a la derecha con el texto al lado, en el centro o como
+    // estaba; pequeña, mediana, grande o a su tamaño; subirla o bajarla
+    // entre los párrafos y las listas; y lo que se ve (el texto
+    // alternativo). Con el ratón también se puede arrastrar a donde sea.
+    // Las clases van en la <figure> si la tiene (para que el pie se vaya
+    // con ella) y si no en la <img> (CLASES_DE_IMAGEN).
+    const portadorDeImagen = (img) => {
+        const fig = img.closest("figure");
+        return fig && area.contains(fig) ? fig : img;
+    };
+    // Lo que se mueve: la figura, el párrafo que solo tiene la imagen o la
+    // imagen sola.
+    const pedazoDeImagen = (img) => {
+        const fig = img.closest("figure");
+        if (fig && area.contains(fig)) {
+            return fig;
+        }
+        const p = img.parentElement;
+        if (p && p !== area && p.tagName === "P" && [...p.childNodes].every((x) => x === img || x.nodeName === "BR"
+            || (x.nodeType === Node.TEXT_NODE && !x.textContent.trim()))) {
+            return p;
+        }
+        return img;
+    };
+    // Una imagen sola en su párrafo pasa a ir en su <figure> (con las
+    // clases que tuviera): así lo que va detrás de ella (una lista) se puede
+    // poner a su lado sin que las viñetas se le metan encima (ver el CSS).
+    const enFigura = (img) => {
+        const pedazo = pedazoDeImagen(img);
+        if (pedazo.tagName === "FIGURE" || pedazo === img) {
+            return;
+        }
+        const fig = document.createElement("figure");
+        [...img.classList].filter((c) => CLASES_DE_IMAGEN.test(c)).forEach((c) => {
+            img.classList.remove(c);
+            fig.classList.add(c);
+        });
+        pedazo.replaceWith(fig);
+        fig.appendChild(img);
+    };
+    const deArriba = (nodo) => {
+        let n = nodo;
+        while (n && n.parentNode !== area) {
+            n = n.parentNode;
+        }
+        return n;
+    };
+    const POSICIONES = [["img-izquierda", "A la izquierda, con el texto al lado"], ["img-centro", "En el centro, sola"],
+        ["img-derecha", "A la derecha, con el texto al lado"], ["", "Como estaba"]];
+    const TAMANOS = [["img-pequena", "Pequeña"], ["img-mediana", "Mediana"], ["img-grande", "Grande (todo el ancho)"],
+        ["", "Su tamaño"]];
+    const colocarImagen = (cual) => {
+        const imagenes = [...area.querySelectorAll("img")];
+        if (!imagenes.length) {
+            avisarEditor("En este texto no hay ninguna imagen.", true);
+            return;
+        }
+        let img = cual && area.contains(cual) ? cual : null;
+        if (!img) {
+            // La de donde está el cursor, si la hay; si no, la primera.
+            const cerca = guardada ? deArriba(guardada.startContainer) : null;
+            img = (cerca && cerca.nodeType === 1 && (cerca.tagName === "IMG" ? cerca : cerca.querySelector("img")))
+                || imagenes[0];
+        }
+        panel.textContent = "";
+        panel.hidden = false;
+        const pintar = (enfocar) => {
+            area.querySelectorAll("img.es-elegida").forEach((i) => i.classList.remove("es-elegida"));
+            img.classList.add("es-elegida");
+            panel.textContent = "";
+            const h = crearEditor("h3", "", "Colocar la imagen");
+            panel.appendChild(h);
+            if (imagenes.length > 1) {
+                const c = crearEditor("div", "campo");
+                const l = crearEditor("label", "", "Qué imagen");
+                const elegir = document.createElement("select");
+                elegir.id = "redactor-" + n + "-cual-imagen";
+                l.htmlFor = elegir.id;
+                imagenes.forEach((x, i) => {
+                    const nombre = x.getAttribute("alt") || (x.getAttribute("src") || "").split("/").pop();
+                    elegir.appendChild(new Option((i + 1) + ". " + nombre, String(i)));
+                });
+                elegir.value = String(imagenes.indexOf(img));
+                elegir.addEventListener("change", () => {
+                    img = imagenes[Number(elegir.value)];
+                    pintar(elegir.id);
+                });
+                c.appendChild(l);
+                c.appendChild(elegir);
+                panel.appendChild(c);
+            }
+            panel.appendChild(crearEditor("p", "ayuda", "Con el ratón también se puede arrastrar la imagen a"
+                + " cualquier sitio del texto."));
+            const portador = portadorDeImagen(img);
+            const grupo = (titulo, lista, prefijo) => {
+                const caja = crearEditor("div", "redactor-colocar");
+                caja.setAttribute("role", "group");
+                const id = "redactor-" + n + "-" + prefijo;
+                const t = crearEditor("p", "redactor-colocar-titulo", titulo);
+                t.id = id;
+                caja.setAttribute("aria-labelledby", id);
+                caja.appendChild(t);
+                const fila = crearEditor("div", "fila");
+                lista.forEach(([clase, texto]) => {
+                    const b = crearEditor("button", "", texto);
+                    b.type = "button";
+                    b.id = id + "-" + (clase || "nada");
+                    const puesta = clase ? portador.classList.contains(clase)
+                        : !lista.some(([c]) => c && portador.classList.contains(c));
+                    b.setAttribute("aria-pressed", puesta ? "true" : "false");
+                    b.addEventListener("click", () => {
+                        enFigura(img);
+                        const suyo = portadorDeImagen(img);
+                        lista.forEach(([c]) => c && suyo.classList.remove(c));
+                        if (clase) {
+                            suyo.classList.add(clase);
+                        }
+                        avisar();
+                        pintar(b.id);
+                    });
+                    fila.appendChild(b);
+                });
+                caja.appendChild(fila);
+                panel.appendChild(caja);
+            };
+            grupo("Dónde", POSICIONES, "donde");
+            grupo("Tamaño", TAMANOS, "tamano");
+            const mover = crearEditor("div", "redactor-colocar");
+            mover.setAttribute("role", "group");
+            const tm = crearEditor("p", "redactor-colocar-titulo", "Moverla entre los párrafos y las listas");
+            tm.id = "redactor-" + n + "-mover";
+            mover.setAttribute("aria-labelledby", tm.id);
+            mover.appendChild(tm);
+            const filaM = crearEditor("div", "fila");
+            const moverla = (hacia, idBoton) => {
+                let pedazo = pedazoDeImagen(img);
+                const arriba = deArriba(pedazo);
+                if (pedazo !== arriba) {
+                    // Dentro de un párrafo o de una lista: sale y se pone
+                    // antes o después de ese párrafo o lista.
+                    if (pedazo.tagName === "IMG" && !pedazo.closest("figure")) {
+                        const fig = document.createElement("figure");
+                        [...pedazo.classList].filter((c) => CLASES_DE_IMAGEN.test(c)).forEach((c) => {
+                            pedazo.classList.remove(c);
+                            fig.classList.add(c);
+                        });
+                        fig.appendChild(pedazo);
+                        pedazo = fig;
+                    }
+                    if (hacia < 0) {
+                        arriba.before(pedazo);
+                    } else {
+                        arriba.after(pedazo);
+                    }
+                } else if (hacia < 0 && pedazo.previousElementSibling) {
+                    pedazo.previousElementSibling.before(pedazo);
+                } else if (hacia > 0 && pedazo.nextElementSibling) {
+                    pedazo.nextElementSibling.after(pedazo);
+                } else {
+                    avisarEditor(hacia < 0 ? "Ya está arriba del todo." : "Ya está abajo del todo.");
+                }
+                avisar();
+                img.scrollIntoView({ block: "nearest" });
+                pintar(idBoton);
+            };
+            [["Subir", -1], ["Bajar", 1]].forEach(([texto, hacia]) => {
+                const b = crearEditor("button", "", (hacia < 0 ? "↑ " : "↓ ") + texto);
+                b.type = "button";
+                b.id = "redactor-" + n + "-mover-" + hacia;
+                b.addEventListener("click", () => moverla(hacia, b.id));
+                filaM.appendChild(b);
+            });
+            mover.appendChild(filaM);
+            panel.appendChild(mover);
+            const c = crearEditor("div", "campo");
+            const l = crearEditor("label", "", "Qué se ve (para quien no la ve; vacío si es de adorno)");
+            const alt = document.createElement("input");
+            alt.id = "redactor-" + n + "-alt-imagen";
+            alt.value = img.getAttribute("alt") || "";
+            alt.autocomplete = "off";
+            l.htmlFor = alt.id;
+            alt.addEventListener("input", () => {
+                img.setAttribute("alt", alt.value.trim());
+                avisar();
+            });
+            c.appendChild(l);
+            c.appendChild(alt);
+            panel.appendChild(c);
+            const fin = crearEditor("div", "fila");
+            const quitar = crearEditor("button", "", "Quitar la imagen");
+            quitar.type = "button";
+            quitar.addEventListener("click", () => {
+                pedazoDeImagen(img).remove();
+                avisar();
+                cerrarPanel(true);
+                avisarEditor("Imagen quitada del texto (el archivo sigue en su carpeta).");
+            });
+            const listo = crearEditor("button", "principal", "Listo");
+            listo.type = "button";
+            listo.addEventListener("click", () => cerrarPanel(true));
+            fin.appendChild(listo);
+            fin.appendChild(quitar);
+            panel.appendChild(fin);
+            panel.onkeydown = (e) => {
+                if (e.key === "Escape") {
+                    e.preventDefault();
+                    cerrarPanel(true);
+                }
+            };
+            const foco = enfocar && document.getElementById(enfocar);
+            (foco || h.nextElementSibling.querySelector("select, button") || listo).focus();
+        };
+        pintar();
+    };
+    area.addEventListener("click", (e) => {
+        if (e.target.tagName === "IMG" && area.contains(e.target)) {
+            abrirPanel("colocar", e.target);
+        }
+    });
 
     // ---- EL TECLADO Y LO PEGADO ----
     area.addEventListener("keydown", (e) => {

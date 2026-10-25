@@ -877,6 +877,31 @@
   buscador de [[ y «Hacer NPC». En el editor, al pasar el ratón por un
   nombre etiquetado, dice de quién es.
 
+  LO QUE SE CUENTA APARTE EN LAS NOTAS (desde el 25-10-2026), con tres
+  botones de la barra de las notas:
+    · AMBIENTACIÓN (la pluma): lo elegido, en su línea, en cursiva y con
+      una raya a la izquierda (<span class="cuaderno-flavor">). Para
+      describir cómo es algo, como lo leería el máster.
+    · REGLA (el dado): lo elegido, de máquina y en un recuadro de puntos
+      (<span class="cuaderno-mecanica">): lo que hace en el juego.
+    · LO QUE DESCUBRIMOS (la lupa): el párrafo o la lista del cursor (o lo
+      elegido), en una caja con el título «Lo que descubrimos»
+      (<blockquote class="cuaderno-descubrimiento">). Otra pulsación lo
+      saca de la caja.
+  Los estilos, en estilos/paginas/notas-rol.css.
+
+  COLOCAR UNA IMAGEN COMO EN UN WORD (desde el 25-10-2026), en todos los
+  textos con botones: pulsando la imagen (o con el botón «Colocar la
+  imagen», que pregunta cuál si hay varias) sale un panel con dónde va
+  (a la izquierda o a la derecha con el texto alrededor, en el centro o
+  como estaba), su tamaño (pequeña 30%, mediana 50%, grande todo el
+  ancho o el suyo), subirla o bajarla entre párrafos y listas, lo que se
+  ve (el texto alternativo) y quitarla. Con el ratón también se arrastra.
+  Son clases (img-izquierda, img-derecha, img-centro, img-pequena,
+  img-mediana, img-grande) en la <figure> (una imagen sola en su párrafo
+  pasa a ir en una). Las pintan texto-entrada.css (entradas y relatos),
+  notas-rol.css (notas) y editor.css; en el móvil van solas, centradas.
+
   NEGRITAS DOBLES: pulsar «Alguien» o «Negrita» sobre un nombre que ya
   lo estaba dejaba <strong><strong class="pj-rojo">…</strong></strong>
   (y negritas vacías). El editor ya lo arregla solo al guardar: una

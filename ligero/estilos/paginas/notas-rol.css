@@ -892,6 +892,98 @@ body:has(.cuaderno-page) main {
     font-size: 0.75rem;
     line-height: 1.5;
 }
+.cuaderno-hoja-cuerpo .img-izquierda {
+    float: left;
+    max-width: 50%;
+    margin: 0.3em 1.2em 0.6em 0;
+}
+.cuaderno-hoja-cuerpo .img-derecha {
+    float: right;
+    max-width: 50%;
+    margin: 0.3em 0 0.6em 1.2em;
+}
+.cuaderno-hoja-cuerpo .img-centro {
+    display: block;
+    margin-right: auto;
+    margin-left: auto;
+}
+.cuaderno-hoja-cuerpo .img-pequena {
+    width: 30%;
+}
+.cuaderno-hoja-cuerpo .img-mediana {
+    width: 50%;
+}
+.cuaderno-hoja-cuerpo .img-grande {
+    width: 100%;
+    max-width: 100%;
+}
+.cuaderno-hoja-cuerpo figure[class*="img-"] img {
+    width: 100%;
+}
+.cuaderno-hoja-cuerpo .img-izquierda + ul,
+.cuaderno-hoja-cuerpo .img-izquierda + ol,
+.cuaderno-hoja-cuerpo .img-izquierda + blockquote,
+.cuaderno-hoja-cuerpo .img-derecha + blockquote {
+    display: flow-root;
+}
+.cuaderno-escena-cuerpo::after,
+.cuaderno-hoja-cuerpo::after {
+    content: "";
+    display: block;
+    clear: both;
+}
+@media (max-width: 37.5rem) {
+    .cuaderno-hoja-cuerpo .img-izquierda,
+    .cuaderno-hoja-cuerpo .img-derecha {
+        float: none;
+        display: block;
+        max-width: 100%;
+        margin: 0.5em auto;
+    }
+}
+.cuaderno-flavor {
+    display: block;
+    margin: 0.15em 0 0.15em 0.1em;
+    padding-left: 0.7em;
+    border-left: 2px solid var(--yellow);
+    font-family: var(--fuente-mano);
+    font-style: italic;
+    font-weight: 400;
+    letter-spacing: normal;
+}
+.cuaderno-mecanica {
+    display: block;
+    width: fit-content;
+    max-width: 100%;
+    margin: 0.3em 0;
+    padding: 0.1em 0.6em;
+    border: 1px dashed var(--yellow);
+    font-family: var(--fuente-mono);
+    font-size: 0.8em;
+    font-style: normal;
+    letter-spacing: normal;
+}
+.cuaderno-hoja-cuerpo .cuaderno-descubrimiento {
+    margin-right: 0;
+    margin-left: 0;
+    padding: 0.4em 0.9em 0.5em;
+    border: 2px solid var(--yellow);
+    box-shadow: 4px 4px 0 var(--yellow);
+}
+.cuaderno-descubrimiento::before {
+    content: "Lo que descubrimos";
+    display: block;
+    margin-bottom: 0.2em;
+    color: var(--yellow);
+    font-family: var(--fuente-mono);
+    font-size: 0.75em;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+}
+.cuaderno-descubrimiento > ul {
+    margin: 0;
+}
 .cuaderno-hoja-cuerpo h2,
 .cuaderno-hoja-cuerpo h3,
 .cuaderno-hoja-cuerpo h4 {

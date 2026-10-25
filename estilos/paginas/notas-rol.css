@@ -1547,6 +1547,136 @@ body:has(.cuaderno-page) main {
     line-height: 1.5;
 }
 
+/* ---- IMÁGENES COLOCADAS (el panel «Colocar la imagen» del editor) ----
+   A un lado con el texto alrededor, en el centro, y de qué tamaño. Las
+   clases van en la <figure> o, si no la hay, en la <img>. Lo que viene
+   justo detrás de una imagen a la izquierda (una lista, una caja) se
+   queda entero a su lado (display: flow-root), sin meter las viñetas
+   encima de la foto; a la derecha, el texto la rodea como en un Word.
+   En una pantalla estrecha van solas, en el centro. */
+.cuaderno-hoja-cuerpo .img-izquierda {
+    float: left;
+    max-width: 50%;
+    margin: 0.3em 1.2em 0.6em 0;
+}
+
+.cuaderno-hoja-cuerpo .img-derecha {
+    float: right;
+    max-width: 50%;
+    margin: 0.3em 0 0.6em 1.2em;
+}
+
+.cuaderno-hoja-cuerpo .img-centro {
+    display: block;
+    margin-right: auto;
+    margin-left: auto;
+}
+
+.cuaderno-hoja-cuerpo .img-pequena {
+    width: 30%;
+}
+
+.cuaderno-hoja-cuerpo .img-mediana {
+    width: 50%;
+}
+
+.cuaderno-hoja-cuerpo .img-grande {
+    width: 100%;
+    max-width: 100%;
+}
+
+.cuaderno-hoja-cuerpo figure[class*="img-"] img {
+    width: 100%;
+}
+
+.cuaderno-hoja-cuerpo .img-izquierda + ul,
+.cuaderno-hoja-cuerpo .img-izquierda + ol,
+.cuaderno-hoja-cuerpo .img-izquierda + blockquote,
+.cuaderno-hoja-cuerpo .img-derecha + blockquote {
+    display: flow-root;
+}
+
+/* Que nada de la escena siguiente se meta al lado de una imagen que va al
+   final de esta. */
+.cuaderno-escena-cuerpo::after,
+.cuaderno-hoja-cuerpo::after {
+    content: "";
+    display: block;
+    clear: both;
+}
+
+@media (max-width: 37.5rem) {
+    .cuaderno-hoja-cuerpo .img-izquierda,
+    .cuaderno-hoja-cuerpo .img-derecha {
+        float: none;
+        display: block;
+        max-width: 100%;
+        margin: 0.5em auto;
+    }
+}
+
+/* ---- LO QUE SE CUENTA APARTE (los botones del editor de notas) ----
+   LA AMBIENTACIÓN (.cuaderno-flavor): cómo es algo, como lo leería el
+   máster. En su propia línea, en cursiva y con una raya a la izquierda.
+   LA REGLA (.cuaderno-mecanica): lo que hace en el juego. De máquina,
+   en su recuadro de puntos, como una ficha. Las dos dentro de un punto
+   de la lista (o de la de objetos), debajo del nombre de la cosa.
+   LO QUE DESCUBRIMOS (.cuaderno-descubrimiento): una caja con su
+   título, para lo que sale de un interrogatorio o una pista. No es una
+   cita: es lo que sabemos ahora. Ninguna se distingue solo por el
+   color: la letra, la raya y el recuadro bastan. */
+.cuaderno-flavor {
+    display: block;
+    margin: 0.15em 0 0.15em 0.1em;
+    padding-left: 0.7em;
+    border-left: 2px solid var(--yellow);
+    /* La letra de la hoja, aunque vaya dentro de la lista de objetos (que
+       es de máquina): es lo que se cuenta, no la cuenta. */
+    font-family: var(--fuente-mano);
+    font-style: italic;
+    font-weight: 400;
+    letter-spacing: normal;
+}
+
+.cuaderno-mecanica {
+    display: block;
+    width: fit-content;
+    max-width: 100%;
+    margin: 0.3em 0;
+    padding: 0.1em 0.6em;
+    border: 1px dashed var(--yellow);
+    font-family: var(--fuente-mono);
+    font-size: 0.8em;
+    font-style: normal;
+    letter-spacing: normal;
+}
+
+.cuaderno-hoja-cuerpo .cuaderno-descubrimiento {
+    margin-right: 0;
+    margin-left: 0;
+    padding: 0.4em 0.9em 0.5em;
+    border: 2px solid var(--yellow);
+    box-shadow: 4px 4px 0 var(--yellow);
+}
+
+/* El título de la caja. Escrito por el CSS para no tener que ponerlo a
+   mano en cada una: el lector de pantalla lo lee igual. */
+.cuaderno-descubrimiento::before {
+    content: "Lo que descubrimos";
+    display: block;
+    margin-bottom: 0.2em;
+    color: var(--yellow);
+    font-family: var(--fuente-mono);
+    font-size: 0.75em;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+}
+
+.cuaderno-descubrimiento > ul {
+    margin: 0;
+}
+
 /* Un apartado dentro de la hoja. Mismo tamaño que el texto (ver arriba:
    cambiarlo rompería los renglones) y se distingue por la letra de
    máquina, las mayúsculas y el subrayado, que es como se marca un

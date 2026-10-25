@@ -242,6 +242,81 @@
     line-height: 1.5;
 }
 
+/* ---- IMÁGENES COLOCADAS (el panel «Colocar la imagen» del editor) ----
+   A un lado con el texto alrededor, en el centro, y de qué tamaño. Las
+   clases van en la <figure> o, si no la hay, en la <img>. Lo que viene
+   justo detrás de una imagen a la izquierda (una lista, una caja) se
+   queda entero a su lado (display: flow-root), sin meter las viñetas
+   encima de la foto; a la derecha, el texto la rodea como en un Word.
+   En una pantalla estrecha no hay sitio para dos columnas: van solas, en
+   el centro. */
+.blog-post-body .img-izquierda, .relato-post-body .img-izquierda {
+    float: left;
+    max-width: 50%;
+    margin: 0.3em 1.2em 0.8em 0;
+}
+
+.blog-post-body .img-derecha, .relato-post-body .img-derecha {
+    float: right;
+    max-width: 50%;
+    margin: 0.3em 0 0.8em 1.2em;
+}
+
+.blog-post-body .img-centro, .relato-post-body .img-centro {
+    display: block;
+    margin-right: auto;
+    margin-left: auto;
+}
+
+.blog-post-body .img-pequena, .relato-post-body .img-pequena {
+    width: 30%;
+}
+
+.blog-post-body .img-mediana, .relato-post-body .img-mediana {
+    width: 50%;
+}
+
+.blog-post-body .img-grande, .relato-post-body .img-grande {
+    width: 100%;
+    max-width: 100%;
+}
+
+.blog-post-body figure[class*='img-'] img, .relato-post-body figure[class*='img-'] img {
+    width: 100%;
+}
+
+.blog-post-body img[class*='img-'], .relato-post-body img[class*='img-'] {
+    height: auto;
+}
+
+.blog-post-body .img-izquierda + ul,
+.blog-post-body .img-izquierda + ol,
+.blog-post-body .img-izquierda + blockquote,
+.relato-post-body .img-izquierda + ul,
+.relato-post-body .img-izquierda + ol,
+.relato-post-body .img-izquierda + blockquote,
+.blog-post-body .img-derecha + blockquote,
+.relato-post-body .img-derecha + blockquote {
+    display: flow-root;
+}
+
+@media (max-width: 37.5rem) {
+    .blog-post-body .img-izquierda, .blog-post-body .img-derecha, .relato-post-body .img-izquierda, .relato-post-body .img-derecha {
+        float: none;
+        display: block;
+        max-width: 100%;
+        margin: 0.5em auto;
+    }
+}
+
+/* Que nada de debajo se meta al lado de una imagen que va al final. */
+.blog-post-body::after,
+.relato-post-body::after {
+    content: "";
+    display: block;
+    clear: both;
+}
+
 /* ---- tablas ---- */
 /* display: block para que una tabla ancha se desplace dentro de su caja
    en un móvil, en vez de ensanchar la columna del texto. */

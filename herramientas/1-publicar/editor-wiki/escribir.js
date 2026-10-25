@@ -896,7 +896,7 @@ function pintarCuadernoWeb(enfocar) {
                 caja2.appendChild(abierta);
             }
             const r = crearRedactor({ etiqueta: b.tipo === "escena" ? "Lo que pasó en " + (b.nombre || "la escena")
-                : "Texto suelto de la hoja " + (i + 1), clases: /^(pj-[a-z]+|cuaderno-objetos)$/,
+                : "Texto suelto de la hoja " + (i + 1), clases: /^(pj-[a-z]+|cuaderno-(objetos|flavor|mecanica|descubrimiento))$/,
             extras: extrasDelCuadernoWeb(e), enlaces: (datos) => enlacesDelCuadernoWeb(e, datos),
             imagenes: () => ({ sitio: "notas", campos: { campana: e.campana } }) });
             r.ponerHTML(b.html || "");
@@ -1080,6 +1080,20 @@ function extrasDelCuadernoWeb(e) {
     extras.push({ texto: "Hacer NPC", icono: "npcNuevo",
         ayuda: "Lo elegido (un nombre), como NPC nuevo de la campaña: con su grupo y qué es",
         hacer: (r) => hacerNpcDesdeLasNotasWeb(r, e) });
+    // Lo que se cuenta aparte: la AMBIENTACIÓN (cómo es algo, en cursiva y
+    // con su raya), la REGLA (lo que hace en el juego, de máquina y en su
+    // recuadro) y LO QUE DESCUBRIMOS (un interrogatorio, una pista: una
+    // caja con su título). Ver estilos/paginas/notas-rol.css.
+    extras.push({ texto: "Ambientación", icono: "ambientacion", separar: true,
+        ayuda: "Lo elegido, como texto de ambientación: cómo es, cómo suena, a qué huele (en cursiva, aparte)",
+        hacer: (r) => r.envolver("span", "cuaderno-flavor") });
+    extras.push({ texto: "Regla", icono: "regla",
+        ayuda: "Lo elegido, como la regla de juego: lo que hace (daño, tiradas, CD…), en su recuadro",
+        hacer: (r) => r.envolver("span", "cuaderno-mecanica") });
+    extras.push({ texto: "Lo que descubrimos", icono: "descubrimiento",
+        ayuda: "Lo de donde está el cursor (o lo elegido), en una caja aparte: lo que sacamos de un interrogatorio,"
+            + " una pista… Otra vez, lo saca de la caja",
+        hacer: (r) => r.envolverBloque("blockquote", "cuaderno-descubrimiento") });
     extras.push({ texto: "Lista de objetos", icono: "objetos", ayuda: "Una lista de lo que se consiguió (con su formato)",
         hacer: (r) => {
             r.hacer("insertUnorderedList");
