@@ -176,7 +176,13 @@ APARTADOS = [
         ("Ver qué se subiría a Neocities (sin subir nada)",
          "1-publicar/subir-neocities.py", ["--ensayo"],
          "Un ensayo: compara y te lo cuenta."),
-        editor("repasar", "Repasar y volver a generar con un botón."),
+        ("Subir y borrar de Neocities lo que ya no está aquí",
+         "1-publicar/subir-neocities.py", ["--borrar"],
+         "Como subir, y además borra allí lo que aquí ya no existe (enseña la lista y pregunta aparte)."),
+        ("Cambiar la clave de la API de Neocities",
+         "1-publicar/subir-neocities.py", ["--clave"],
+         "Por si la has cambiado en Neocities."),
+        editor("neocities", "Repasar, ver qué se subiría y subirlo, con botones."),
     ]),
 ]
 

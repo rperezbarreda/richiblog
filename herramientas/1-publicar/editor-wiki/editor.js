@@ -149,6 +149,7 @@ function irAEditor(vista) {
         mapa.cambiado = false;
     }
     document.body.classList.toggle("en-mapa", vista === "mapa");
+    medirCabeceraEditor();
     const barraMapa = $("[data-barra-mapa]");
     if (barraMapa) {
         barraMapa.hidden = vista !== "mapa";
@@ -159,13 +160,19 @@ function irAEditor(vista) {
     $("[data-barra]").hidden = vista !== "editar";
     $("[data-barra-entrada]").hidden = vista !== "entrada";
     $("[data-barra-fichas]").hidden = vista !== "fichas";
+    // En el menú, el apartado en el que estás, también dentro de él (unas
+    // fichas de Rol siguen siendo Rol): aria-current, y se ve marcado.
+    const apartado = apartadoDeVistaEditor(vista);
     document.querySelectorAll(".menu [data-ir]").forEach((b) => {
-        if (b.getAttribute("data-ir") === vista) {
-            b.setAttribute("aria-current", "page");
+        if (b.getAttribute("data-ir") === apartado) {
+            b.setAttribute("aria-current", b.getAttribute("data-ir") === vista ? "page" : "true");
         } else {
             b.removeAttribute("aria-current");
         }
     });
+    abrirMenuEditor(false);
+    ESTADO_DONDE_EDITOR.vista = vista;
+    pintarDondeEditor();
     avisarEditor("");
     const titulo = $('[data-vista="' + vista + '"] h1');
     if (titulo) {
@@ -173,6 +180,166 @@ function irAEditor(vista) {
         titulo.focus();
     }
     window.scrollTo(0, 0);
+}
+
+// ---- EL MENÚ Y «ESTÁS EN» ----
+// Las vistas de dentro de un apartado (escribir una entrada, unas fichas,
+// una página de la wiki, un mapa…), con su apartado y, si lo hay, el paso
+// de en medio (un mapa cuelga de «Mapas»).
+const VISTAS_DE_DENTRO_EDITOR = {
+    "nueva-entrada": ["escribir"],
+    entrada: ["escribir"],
+    nueva: ["wiki"],
+    faltan: ["wiki"],
+    editar: ["wiki"],
+    mapas: ["wiki"],
+    mapa: ["wiki", "mapas"],
+};
+// Las fichas son de un apartado u otro según la colección (fichas.js).
+const APARTADO_DE_FICHAS_EDITOR = { escribir: "escribir", rol: "rol", personajes: "rol", wiki: "wiki",
+    rincon: "rincon" };
+const ESTADO_DONDE_EDITOR = { vista: "inicio" };
+
+function caminoDeVistaEditor(vista) {
+    if (vista === "fichas" && typeof estadoFichas !== "undefined") {
+        const col = (estadoFichas.colecciones || []).find((c) => c.id === estadoFichas.id);
+        return [APARTADO_DE_FICHAS_EDITOR[col && col.apartado] || "inicio"];
+    }
+    return VISTAS_DE_DENTRO_EDITOR[vista] || [];
+}
+
+function apartadoDeVistaEditor(vista) {
+    return caminoDeVistaEditor(vista)[0] || vista;
+}
+
+// El nombre de una vista, el de su título (sin el emoji, que es de adorno).
+function nombreDeVistaEditor(vista) {
+    const boton = document.querySelector('.menu [data-ir="' + vista + '"] .menu-texto');
+    if (boton) {
+        return boton.textContent.trim();
+    }
+    const titulo = $('[data-vista="' + vista + '"] h1');
+    if (!titulo) {
+        return vista;
+    }
+    const copia = titulo.cloneNode(true);
+    copia.querySelectorAll('[aria-hidden="true"]').forEach((x) => x.remove());
+    return copia.textContent.trim() || vista;
+}
+
+// «Estás en: Inicio › Rol › Mis personajes»: cada paso de antes es un
+// botón para volver; el último, donde estás (aria-current), no se pulsa.
+function pintarDondeEditor() {
+    const vista = ESTADO_DONDE_EDITOR.vista;
+    const caja = $("[data-donde]");
+    const lista = $("[data-donde-lista]");
+    if (!caja || !lista) {
+        return;
+    }
+    lista.textContent = "";
+    caja.hidden = vista === "inicio";
+    const pasos = ["inicio"].concat(caminoDeVistaEditor(vista).filter((v) => v !== "inicio"), [vista]);
+    pasos.forEach((paso, i) => {
+        const li = document.createElement("li");
+        if (i === pasos.length - 1) {
+            const aqui = crearEditor("span", "donde-aqui", nombreDeVistaEditor(paso));
+            aqui.setAttribute("aria-current", "page");
+            li.appendChild(aqui);
+        } else {
+            const b = crearEditor("button", "donde-paso", nombreDeVistaEditor(paso));
+            b.type = "button";
+            b.addEventListener("click", () => irAEditor(paso));
+            li.appendChild(b);
+        }
+        lista.appendChild(li);
+    });
+    medirCabeceraEditor();
+}
+
+// La cabecera es fija: el cuerpo deja su alto arriba (y lo que se pega
+// arriba al bajar, como la barra de botones del redactor, se pone debajo).
+// Se vuelve a medir cuando cambia (la letra, el menú abierto, «Estás en»).
+function medirCabeceraEditor() {
+    const cabecera = $("[data-cabecera]");
+    if (!cabecera) {
+        return;
+    }
+    const alto = document.body.classList.contains("en-mapa") ? 0 : cabecera.offsetHeight;
+    document.documentElement.style.setProperty("--alto-cabecera", alto + "px");
+}
+
+// En una pantalla estrecha el menú se pliega tras «Menú».
+function abrirMenuEditor(abrir) {
+    const boton = $("[data-menu-abrir]");
+    if (!boton) {
+        return;
+    }
+    boton.setAttribute("aria-expanded", abrir ? "true" : "false");
+    $("[data-cabecera]").classList.toggle("menu-abierto", !!abrir);
+    medirCabeceraEditor();
+}
+
+function empezarMenuEditor() {
+    const boton = $("[data-menu-abrir]");
+    boton.addEventListener("click", () => {
+        const abrir = boton.getAttribute("aria-expanded") !== "true";
+        abrirMenuEditor(abrir);
+        if (abrir) {
+            const primero = document.querySelector('.menu [aria-current]') || document.querySelector(".menu button");
+            if (primero) {
+                primero.focus();
+            }
+        }
+    });
+    // Escape dentro del menú abierto: se cierra y vuelves a «Menú».
+    $("[data-menu]").addEventListener("keydown", (e) => {
+        if (e.key === "Escape" && boton.getAttribute("aria-expanded") === "true") {
+            abrirMenuEditor(false);
+            boton.focus();
+        }
+    });
+    // «Saltar al menú»: al primer botón (abriéndolo si está plegado).
+    $("[data-saltar-menu]").addEventListener("click", (e) => {
+        e.preventDefault();
+        if (window.getComputedStyle(boton).display !== "none") {
+            abrirMenuEditor(true);
+        }
+        const primero = document.querySelector('.menu [aria-current]') || document.querySelector(".menu button");
+        if (primero) {
+            primero.focus();
+        }
+    });
+    // Alt+1 … Alt+9: cada apartado, en el orden del menú (con e.code, que
+    // es la tecla y no lo que escribe: con Alt, en algunos teclados, la
+    // tecla 1 escribe «|» o «¡»).
+    const apartados = [...document.querySelectorAll(".menu [data-ir]")];
+    document.addEventListener("keydown", (e) => {
+        const n = /^Digit([1-9])$/.exec(e.code || "");
+        if (!n || !e.altKey || e.ctrlKey || e.metaKey || e.shiftKey) {
+            return;
+        }
+        const b = apartados[Number(n[1]) - 1];
+        if (b) {
+            e.preventDefault();
+            b.click();
+        }
+    });
+    // Los títulos que se ponen después (unas fichas, una página): «Estás
+    // en» se repinta cuando cambian.
+    const vigia = new MutationObserver(pintarDondeEditor);
+    document.querySelectorAll("[data-vista] h1").forEach((h) => vigia.observe(h, { childList: true,
+        characterData: true, subtree: true }));
+    if (window.ResizeObserver) {
+        new ResizeObserver(medirCabeceraEditor).observe($("[data-cabecera]"));
+    }
+    // Al abrir, «Inicio» ya marcado (si se abre en otro apartado, ir a él
+    // lo cambia).
+    const inicio = document.querySelector('.menu [data-ir="inicio"]');
+    if (inicio && !document.querySelector(".menu [aria-current]")) {
+        inicio.setAttribute("aria-current", "page");
+    }
+    window.addEventListener("resize", medirCabeceraEditor);
+    medirCabeceraEditor();
 }
 
 // ---- PASAR A LA WEB, CON SU BARRA ----
@@ -226,6 +393,7 @@ async function pasarALaWebEditor(cuerpo) {
 // ---- AL EMPEZAR ----
 async function empezarEditor() {
     ajustesDeVistaEditor();
+    empezarMenuEditor();
     const datos = await pedirEditor("/api/inicio");
     if (datos.error) {
         avisarEditor(datos.error, true);

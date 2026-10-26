@@ -2521,6 +2521,29 @@ def abrir_comando(peticion):
     return {"ok": True, "titulo": menu.opcion_de(cual)[0] if cual else "El menú de siempre"}
 
 
+# PUBLICAR EN NEOCITIES (el apartado del editor): las opciones de
+# subir-neocities.py del menú, cada una en su ventana de comandos, como en
+# «Comandos» (la herramienta pregunta antes de subir y pide la clave).
+NEOCITIES_MODOS = {"ensayo": ["--ensayo"], "subir": [], "borrar": ["--borrar"], "clave": ["--clave"]}
+
+
+def neocities_estado():
+    clave = bool(os.environ.get("NEOCITIES_API_KEY")) or (Path.home() / ".richiblog-neocities").is_file()
+    return {"clave": clave}
+
+
+def abrir_neocities(peticion):
+    argumentos = NEOCITIES_MODOS.get(str(peticion.get("modo") or ""))
+    if argumentos is None:
+        return {"error": "No sé qué es eso."}
+    menu = _menu()
+    for n, (_, _, opciones) in enumerate(menu.APARTADOS, start=1):
+        for i, (titulo, script, args, _) in enumerate(opciones, start=1):
+            if script == "1-publicar/subir-neocities.py" and list(args or []) == argumentos:
+                return abrir_comando({"cual": "%d.%d" % (n, i)})
+    return {"error": "No encuentro esa opción en el menú (herramientas/menu.py)."}
+
+
 def atender_get(ruta, pregunta):
     uno = lambda k: (pregunta.get(k) or [""])[0]  # noqa: E731
     if ruta == "/api/web/entradas":
@@ -2537,6 +2560,8 @@ def atender_get(ruta, pregunta):
                 "sitios": sitios_de_imagen()}
     if ruta == "/api/web/coleccion":
         return leer_coleccion(uno("id"), uno("campana"))
+    if ruta == "/api/web/neocities/estado":
+        return neocities_estado()
     if ruta == "/api/web/medidas":
         return medidas(uno("ruta"))
     if ruta == "/api/web/comandos":
@@ -2553,6 +2578,8 @@ def atender_get(ruta, pregunta):
 def atender_post(ruta, peticion):
     if ruta == "/api/web/entrada/nueva":
         return crear_entrada(peticion)
+    if ruta == "/api/web/neocities":
+        return abrir_neocities(peticion)
     if ruta == "/api/web/comando":
         return abrir_comando(peticion)
     if ruta == "/api/web/borrador":

@@ -1713,7 +1713,10 @@ function colocarBarrasRedactor() {
         const arriba = hueco.getBoundingClientRect();
         const abajo = campo.getBoundingClientRect().bottom;
         const alto = barra.offsetHeight;
-        const pegar = arriba.top < 0 && abajo > alto + 48;
+        // Se pega debajo de la cabecera del editor, que está fija arriba
+        // (su alto lo apunta editor.js en --alto-cabecera).
+        const techo = parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--alto-cabecera")) || 0;
+        const pegar = arriba.top < techo && abajo > techo + alto + 48;
         if (pegar) {
             if (!barra.classList.contains("va-contigo")) {
                 hueco.style.height = alto + "px";

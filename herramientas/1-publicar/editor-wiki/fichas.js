@@ -1063,6 +1063,25 @@ function pintarPasosDeGitWeb() {
     pasoDeGitWeb(otros, "Y tu correo (el de GitHub):", "git config --global user.email \"tu@correo\"");
 }
 
+// ---- PUBLICAR EN NEOCITIES ----
+// Si la clave de la API ya está guardada (si no, subir la pedirá), y los
+// botones, que abren subir-neocities.py en su ventana de comandos.
+async function pintarNeocitiesWeb() {
+    const hecho = await pedirEditor("/api/web/neocities/estado");
+    $("[data-neocities-estado]").textContent = hecho.error ? hecho.error : (hecho.clave
+        ? "✓ La clave de la API de Neocities ya está guardada en este ordenador."
+        : "Todavía no hay clave de la API guardada: al subir por primera vez te la pedirá.");
+}
+
+async function abrirNeocitiesWeb(modo) {
+    const hecho = await pedirEditor("/api/web/neocities", { modo });
+    if (hecho.error) {
+        avisarEditor(hecho.error, true);
+        return;
+    }
+    avisarEditor("Abierto en su ventana de comandos: " + hecho.titulo + ". Contesta allí lo que pregunte.");
+}
+
 async function abrirComandoWeb(cual) {
     const hecho = await pedirEditor("/api/web/comando", { cual });
     if (hecho.error) {
@@ -1073,10 +1092,11 @@ async function abrirComandoWeb(cual) {
 }
 
 function empezarFichasWeb() {
-    document.querySelectorAll('[data-ir="comandos"]').forEach((b) => {
-        b.addEventListener("click", pintarComandosWeb);
-        b.addEventListener("click", pintarGitWeb);
-    });
+    document.querySelectorAll('[data-ir="comandos"]').forEach((b) => b.addEventListener("click", pintarComandosWeb));
+    document.querySelectorAll('[data-ir="github"]').forEach((b) => b.addEventListener("click", pintarGitWeb));
+    document.querySelectorAll('[data-ir="neocities"]').forEach((b) => b.addEventListener("click", pintarNeocitiesWeb));
+    document.querySelectorAll("[data-neocities]").forEach((b) => b.addEventListener("click",
+        () => abrirNeocitiesWeb(b.getAttribute("data-neocities"))));
     $("[data-git-mirar]").addEventListener("click", pintarGitWeb);
     $("#git-mensaje").addEventListener("input", pintarPasosDeGitWeb);
     $("[data-comando-menu]").addEventListener("click", () => abrirComandoWeb(""));

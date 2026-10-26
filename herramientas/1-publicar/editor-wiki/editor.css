@@ -99,8 +99,16 @@ html {
     font-size: 112.5%;
 }
 
+html {
+    /* Lo que se enfoca o se salta con un enlace no queda debajo de la
+       cabecera fija. */
+    scroll-padding-top: calc(var(--alto-cabecera, 0px) + 12px);
+}
+
 body {
     margin: 0;
+    /* El hueco de la cabecera, que es fija (lo mide editor.js). */
+    padding-top: var(--alto-cabecera, 0px);
     padding-bottom: 110px;
     background: var(--fondo);
     color: var(--texto);
@@ -131,41 +139,185 @@ body {
     outline-offset: 3px;
 }
 
+/* LA CABECERA, SIEMPRE A LA VISTA: fija arriba, a todo lo ancho, con su
+   fondo (que no se vea lo de debajo al bajar). Arriba la marca, «Menú»
+   (solo en pantallas estrechas) y los ajustes de la vista; debajo, el
+   menú de apartados; y debajo, «Estás en». */
 .cabecera {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 20;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    max-height: 100vh;
+    overflow-y: auto;
+    padding: 8px max(16px, 3vw) 10px;
+    border-bottom: 3px solid var(--acento);
+    background: var(--fondo);
+    box-shadow: 0 4px 0 rgba(0, 0, 0, 0.25);
+}
+
+.cabecera-fila {
     display: flex;
     flex-wrap: wrap;
     align-items: center;
-    justify-content: space-between;
-    gap: 12px 24px;
-    padding: 14px max(16px, 4vw);
-    border-bottom: 2px solid var(--acento);
+    gap: 8px 16px;
 }
 
 .marca {
     margin: 0;
     color: var(--acento);
     font-family: var(--mono);
-    font-size: 1.1rem;
+    font-size: 1.05rem;
     letter-spacing: 1px;
     text-transform: uppercase;
-}
-
-.menu {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
 }
 
 .vista-ajustes {
     display: flex;
     flex-wrap: wrap;
-    gap: 8px;
+    gap: 6px;
+    margin-left: auto;
 }
 
 .vista-ajustes button {
     min-height: 40px;
     padding: 4px 12px;
     font-size: 0.9rem;
+}
+
+/* EL MENÚ: una fila de botones grandes, cada uno con su emoji, su nombre y
+   su atajo. El del apartado en el que estás, relleno (aria-current: lo
+   dice también el lector). */
+.menu-abrir {
+    display: none;
+}
+
+.menu-lista {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.menu-lista button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 7px;
+    min-height: 44px;
+    padding: 4px 11px;
+    border: 2px solid var(--acento);
+    background: transparent;
+    color: var(--texto);
+    font-size: 0.95rem;
+    font-weight: 600;
+}
+
+.menu-lista button:hover {
+    background: var(--caja);
+    text-decoration: underline;
+}
+
+.menu-lista button[aria-current] {
+    background: var(--acento);
+    color: var(--sobre-acento);
+    text-decoration: none;
+}
+
+.menu-emoji {
+    font-size: 1.15em;
+    line-height: 1;
+}
+
+/* «ESTÁS EN», al lado de la marca: el camino, con › entre paso y paso (de
+   adorno: el lector ya dice que es una lista). */
+.donde-lista {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 4px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    font-size: 0.9rem;
+}
+
+.donde-lista li + li::before {
+    content: "›" / "";
+    margin-right: 4px;
+    color: var(--suave);
+}
+
+.donde-paso {
+    min-height: 36px;
+    padding: 2px 10px;
+    font-size: 0.9rem;
+}
+
+.donde-aqui {
+    color: var(--acento);
+    font-weight: 700;
+}
+
+/* En una pantalla estrecha: «Menú» y, al abrirlo, los apartados uno debajo
+   de otro, a todo lo ancho (sin los atajos, que ahí no hay teclado). */
+@media (max-width: 47.99rem) {
+    .menu-abrir {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        min-height: 44px;
+    }
+
+    .menu {
+        display: none;
+    }
+
+    .cabecera.menu-abierto .menu {
+        display: block;
+    }
+
+    .menu-lista {
+        flex-direction: column;
+    }
+
+    .menu-lista button {
+        width: 100%;
+    }
+
+    .vista-ajustes {
+        margin-left: 0;
+    }
+}
+
+/* LOS EMOJIS de los títulos y de los botones grandes del inicio. */
+.grande-emoji {
+    margin-right: 10px;
+}
+
+/* El número de cada paso (publicar en Neocities: 1, 2, 3). */
+.paso-numero {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 1.6em;
+    height: 1.6em;
+    margin-right: 8px;
+    border-radius: 50%;
+    background: var(--acento);
+    color: var(--sobre-acento);
+    font-family: var(--mono);
+    font-size: 0.85em;
+}
+
+.neocities-estado:empty {
+    display: none;
 }
 
 main {
@@ -1735,7 +1887,8 @@ body.en-mapa .saltar {
    seguirConLaBarra): pegada arriba de la pantalla, del ancho del texto. */
 .redactor-botones.va-contigo {
     position: fixed;
-    top: 0;
+    /* Debajo de la cabecera del editor, que también es fija. */
+    top: var(--alto-cabecera, 0px);
     z-index: 25;
     border: 2px solid var(--acento);
     box-shadow: 0 4px 0 var(--fondo);
@@ -1746,11 +1899,11 @@ body.en-mapa .saltar {
    tener que subir al principio del texto. Si no cabe, baja por dentro. */
 .redactor-botones.va-contigo + .redactor-panel {
     position: fixed;
-    top: var(--contigo-alto, 50px);
+    top: calc(var(--alto-cabecera, 0px) + var(--contigo-alto, 50px));
     left: var(--contigo-izq, 0);
     z-index: 25;
     width: var(--contigo-ancho, 100%);
-    max-height: calc(100vh - var(--contigo-alto, 50px) - 16px);
+    max-height: calc(100vh - var(--alto-cabecera, 0px) - var(--contigo-alto, 50px) - 16px);
     overflow-y: auto;
     border: 2px solid var(--acento);
     border-top: 0;

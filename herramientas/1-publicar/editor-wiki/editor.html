@@ -21,24 +21,57 @@
          editor.js lleva la wiki; mapas.js, los mapas; escribir.js y
          redactor.js, las entradas; fichas.js, las fichas. -->
     <a class="saltar" href="#principal">Saltar al contenido</a>
-    <header class="cabecera">
-        <p class="marca">✎ editor de la web</p>
-        <nav class="menu" aria-label="Apartados">
-            <button type="button" data-ir="inicio">Inicio</button>
-            <button type="button" data-ir="escribir">Escribir</button>
-            <button type="button" data-ir="rol">Rol</button>
-            <button type="button" data-ir="wiki">Wiki Cralëa</button>
-            <button type="button" data-ir="rincon">Mi rincón</button>
-            <button type="button" data-ir="repasar">Imágenes y repasar</button>
-            <button type="button" data-ir="comandos">Comandos</button>
-        </nav>
-        <!-- Cómo se ve el propio editor: el tamaño de la letra y el contraste
-             (editor.js, ajustesDeVistaEditor; se recuerdan). -->
-        <div class="vista-ajustes" role="group" aria-label="Cómo se ve el editor">
-            <button type="button" data-letra="-1">Letra −</button>
-            <button type="button" data-letra="1">Letra +</button>
-            <button type="button" data-boton-contraste aria-pressed="false">Contraste alto</button>
+    <a class="saltar" href="#menu-apartados" data-saltar-menu>Saltar al menú</a>
+    <!-- LA CABECERA, SIEMPRE A LA VISTA: fija arriba (position: fixed, no
+         sticky, que no va en el navegador de Richi). Lo que mide lo apunta
+         editor.js en --alto-cabecera, y el cuerpo deja ese hueco.
+         EL MENÚ es una lista de botones, cada uno con su emoji (solo para
+         la vista: el lector lee el nombre) y su atajo, Alt+1 a Alt+9
+         (aria-keyshortcuts). El del apartado en el que estás lleva
+         aria-current. En una pantalla estrecha se pliega tras «Menú».
+         Al lado de la marca, «Estás en»: el camino hasta lo que tienes
+         abierto, con botones para volver a cada paso. -->
+    <header class="cabecera" data-cabecera>
+        <div class="cabecera-fila">
+            <p class="marca"><span aria-hidden="true">✎</span> editor de la web</p>
+            <nav class="donde" aria-label="Estás en" data-donde hidden>
+                <ol class="donde-lista" data-donde-lista></ol>
+            </nav>
+            <button type="button" class="menu-abrir" data-menu-abrir aria-expanded="false"
+                    aria-controls="menu-apartados">
+                <span class="menu-emoji" aria-hidden="true">☰</span> Menú
+            </button>
+            <!-- Cómo se ve el propio editor: el tamaño de la letra y el
+                 contraste (editor.js, ajustesDeVistaEditor; se recuerdan). -->
+            <div class="vista-ajustes" role="group" aria-label="Cómo se ve el editor">
+                <button type="button" data-letra="-1" aria-label="Letra más pequeña">A−</button>
+                <button type="button" data-letra="1" aria-label="Letra más grande">A+</button>
+                <button type="button" data-boton-contraste aria-pressed="false">
+                    <span aria-hidden="true">◐</span> Contraste alto</button>
+            </div>
         </div>
+        <nav class="menu" id="menu-apartados" aria-label="Apartados del editor" data-menu>
+            <ul class="menu-lista">
+                <li><button type="button" data-ir="inicio" aria-keyshortcuts="Alt+1" title="Atajo: Alt+1">
+                    <span class="menu-emoji" aria-hidden="true">🏠</span><span class="menu-texto">Inicio</span></button></li>
+                <li><button type="button" data-ir="escribir" aria-keyshortcuts="Alt+2" title="Atajo: Alt+2">
+                    <span class="menu-emoji" aria-hidden="true">✍️</span><span class="menu-texto">Escribir</span></button></li>
+                <li><button type="button" data-ir="rol" aria-keyshortcuts="Alt+3" title="Atajo: Alt+3">
+                    <span class="menu-emoji" aria-hidden="true">🎲</span><span class="menu-texto">Rol</span></button></li>
+                <li><button type="button" data-ir="wiki" aria-keyshortcuts="Alt+4" title="Atajo: Alt+4">
+                    <span class="menu-emoji" aria-hidden="true">🗺️</span><span class="menu-texto">Wiki Cralëa</span></button></li>
+                <li><button type="button" data-ir="rincon" aria-keyshortcuts="Alt+5" title="Atajo: Alt+5">
+                    <span class="menu-emoji" aria-hidden="true">🛋️</span><span class="menu-texto">Mi rincón</span></button></li>
+                <li><button type="button" data-ir="repasar" aria-keyshortcuts="Alt+6" title="Atajo: Alt+6">
+                    <span class="menu-emoji" aria-hidden="true">🖼️</span><span class="menu-texto">Imágenes</span></button></li>
+                <li><button type="button" data-ir="neocities" aria-keyshortcuts="Alt+7" title="Atajo: Alt+7">
+                    <span class="menu-emoji" aria-hidden="true">🚀</span><span class="menu-texto">Publicar en Neocities</span></button></li>
+                <li><button type="button" data-ir="github" aria-keyshortcuts="Alt+8" title="Atajo: Alt+8">
+                    <span class="menu-emoji" aria-hidden="true">🐙</span><span class="menu-texto">GitHub</span></button></li>
+                <li><button type="button" data-ir="comandos" aria-keyshortcuts="Alt+9" title="Atajo: Alt+9">
+                    <span class="menu-emoji" aria-hidden="true">⌨️</span><span class="menu-texto">Comandos</span></button></li>
+            </ul>
+        </nav>
     </header>
 
     <main id="principal" tabindex="-1">
@@ -47,29 +80,39 @@
         <!-- INICIO: un botón por apartado, los mismos que el menú de la web. -->
         <section class="vista" data-vista="inicio" aria-labelledby="t-inicio">
             <h1 id="t-inicio">¿Qué quieres hacer?</h1>
+            <p class="ayuda">El menú de arriba está siempre a la vista. Atajos: Alt+1 a Alt+9 van a cada apartado,
+                en el orden del menú; y «Estás en», al lado de «Editor de la web», lleva de vuelta a donde venías.</p>
             <div class="grandes">
                 <button type="button" class="grande" data-ir="escribir">
-                    <span class="grande-titulo">Escribir</span>
+                    <span class="grande-titulo"><span class="grande-emoji" aria-hidden="true">✍️</span>Escribir</span>
                     <span class="grande-que">Una entrada del blog, un relato o un día del reto; seguir con uno, publicarlo.</span>
                 </button>
                 <button type="button" class="grande" data-ir="rol">
-                    <span class="grande-titulo">Rol</span>
+                    <span class="grande-titulo"><span class="grande-emoji" aria-hidden="true">🎲</span>Rol</span>
                     <span class="grande-que">Las notas de una partida, los NPC, el botín y los recursos del portfolio.</span>
                 </button>
                 <button type="button" class="grande" data-ir="wiki">
-                    <span class="grande-titulo">Wiki Cralëa</span>
+                    <span class="grande-titulo"><span class="grande-emoji" aria-hidden="true">🗺️</span>Wiki Cralëa</span>
                     <span class="grande-que">Sus páginas, los mapas, la línea de tiempo, el calendario y el diccionario.</span>
                 </button>
                 <button type="button" class="grande" data-ir="rincon">
-                    <span class="grande-titulo">Mi rincón</span>
+                    <span class="grande-titulo"><span class="grande-emoji" aria-hidden="true">🛋️</span>Mi rincón</span>
                     <span class="grande-que">En lo que ando, las recomendaciones y las fotos de los gatos.</span>
                 </button>
                 <button type="button" class="grande" data-ir="repasar">
-                    <span class="grande-titulo">Imágenes y repasar</span>
-                    <span class="grande-que">Traer una imagen de tu ordenador, repasar el sitio antes de subirlo o volver a generarlo.</span>
+                    <span class="grande-titulo"><span class="grande-emoji" aria-hidden="true">🖼️</span>Imágenes</span>
+                    <span class="grande-que">Traer una imagen de tu ordenador y dejarla en su carpeta, a punto.</span>
+                </button>
+                <button type="button" class="grande" data-ir="neocities">
+                    <span class="grande-titulo"><span class="grande-emoji" aria-hidden="true">🚀</span>Publicar en Neocities</span>
+                    <span class="grande-que">Repasar el sitio, ver qué ha cambiado y subirlo a richi.blog.</span>
+                </button>
+                <button type="button" class="grande" data-ir="github">
+                    <span class="grande-titulo"><span class="grande-emoji" aria-hidden="true">🐙</span>GitHub</span>
+                    <span class="grande-que">Guardar lo cambiado en GitHub, paso a paso, y deshacer si hace falta.</span>
                 </button>
                 <button type="button" class="grande" data-ir="comandos">
-                    <span class="grande-titulo">Comandos</span>
+                    <span class="grande-titulo"><span class="grande-emoji" aria-hidden="true">⌨️</span>Comandos</span>
                     <span class="grande-que">El menú de siempre (menu.py): cada herramienta, en su ventana de comandos.</span>
                 </button>
             </div>
@@ -77,7 +120,7 @@
 
         <!-- ESCRIBIR: hacer una nueva y la lista de lo que hay. -->
         <section class="vista" data-vista="escribir" aria-labelledby="t-escribir" hidden>
-            <h1 id="t-escribir">Escribir</h1>
+            <h1 id="t-escribir"><span aria-hidden="true">✍️</span> Escribir</h1>
             <div class="grandes">
                 <button type="button" class="grande" data-nueva-tipo="entrada">
                     <span class="grande-titulo">Una entrada del blog</span>
@@ -149,7 +192,7 @@
 
         <!-- ROL -->
         <section class="vista" data-vista="rol" aria-labelledby="t-rol" hidden>
-            <h1 id="t-rol">Rol</h1>
+            <h1 id="t-rol"><span aria-hidden="true">🎲</span> Rol</h1>
             <div class="grandes">
                 <button type="button" class="grande" data-nueva-tipo="sesion">
                     <span class="grande-titulo">Apuntar las notas de una partida</span>
@@ -177,7 +220,7 @@
 
         <!-- LA WIKI -->
         <section class="vista" data-vista="wiki" aria-labelledby="t-wiki" hidden>
-            <h1 id="t-wiki">Wiki Cralëa</h1>
+            <h1 id="t-wiki"><span aria-hidden="true">🗺️</span> Wiki Cralëa</h1>
             <div class="grandes">
                 <button type="button" class="grande" data-ir="nueva">
                     <span class="grande-titulo">Crear una página nueva</span>
@@ -216,7 +259,7 @@
 
         <!-- MI RINCÓN -->
         <section class="vista" data-vista="rincon" aria-labelledby="t-rincon" hidden>
-            <h1 id="t-rincon">Mi rincón</h1>
+            <h1 id="t-rincon"><span aria-hidden="true">🛋️</span> Mi rincón</h1>
             <div class="grandes" data-fichas-de="rincon"></div>
         </section>
 
@@ -250,39 +293,10 @@
 
         <!-- LOS COMANDOS: lo de menu.py, cada cosa en su ventana (fichas.js) -->
         <section class="vista" data-vista="comandos" aria-labelledby="t-comandos" hidden>
-            <h1 id="t-comandos">Comandos</h1>
+            <h1 id="t-comandos"><span aria-hidden="true">⌨️</span> Comandos</h1>
             <p class="ayuda">Lo del menú de siempre (herramientas/menu.py). Cada «Abrir» abre esa herramienta en su
                 propia ventana de comandos, que pregunta lo que necesite; al acabar, espera a que pulses Enter para
                 cerrarse. El número es el atajo del menú («3.3» es lo tercero del apartado 3).</p>
-            <section class="bloque" aria-labelledby="t-git">
-                <h2 id="t-git">Guardar en GitHub (con la consola)</h2>
-                <p class="ayuda">Los pasos para guardar lo cambiado y subirlo tú. Cada comando tiene su botón
-                    «Copiar»: lo pegas en la ventana de comandos (clic derecho, o Ctrl+V) y pulsas Enter. El mensaje
-                    de abajo ya va puesto en el suyo.</p>
-                <p data-git-estado aria-live="polite"></p>
-                <details class="git-cambios" data-git-cambios-caja hidden>
-                    <summary>Ver lo cambiado</summary>
-                    <ul data-git-cambios></ul>
-                </details>
-                <div class="campo">
-                    <label for="git-mensaje">Qué has cambiado (el mensaje del commit)</label>
-                    <input id="git-mensaje" autocomplete="off">
-                </div>
-                <ol class="git-pasos" data-git-pasos></ol>
-                <details class="git-mas">
-                    <summary>Deshacer cambios (lo guardado o sin guardar)</summary>
-                    <p class="ayuda">Ojo: los que dicen «se pierde» no tienen vuelta atrás. Si dudas, mira antes con
-                        git status (lo sin guardar) o git log --oneline -5 (los últimos commits).</p>
-                    <ol class="git-pasos" data-git-deshacer></ol>
-                </details>
-                <details class="git-mas">
-                    <summary>Otras cosas que a veces hacen falta</summary>
-                    <ol class="git-pasos" data-git-otros></ol>
-                </details>
-                <div class="fila">
-                    <button type="button" data-git-mirar>Mirar otra vez lo cambiado</button>
-                </div>
-            </section>
             <div class="fila">
                 <button type="button" class="principal" data-comando-menu>Abrir el menú entero en una ventana</button>
             </div>
@@ -291,7 +305,7 @@
 
         <!-- LAS IMÁGENES Y REPASAR -->
         <section class="vista" data-vista="repasar" aria-labelledby="t-repasar" hidden>
-            <h1 id="t-repasar">Imágenes y repasar</h1>
+            <h1 id="t-repasar"><span aria-hidden="true">🖼️</span> Imágenes</h1>
             <form class="bloque" data-traer novalidate aria-labelledby="t-traer">
                 <h2 id="t-traer">Traer una imagen de tu ordenador</h2>
                 <p class="ayuda">La deja en su carpeta, en WebP, al tamaño que toca y sin los datos del móvil (como
@@ -331,14 +345,90 @@
                 <p class="ayuda" data-traer-elegida aria-live="polite"></p>
                 <div class="fila" data-traer-salida></div>
             </form>
+        </section>
+
+        <!-- PUBLICAR EN NEOCITIES: repasar, ver qué se subiría y subirlo
+             (subir-neocities.py, en su ventana de comandos: pregunta antes
+             de subir, y la primera vez pide la clave). fichas.js. -->
+        <section class="vista" data-vista="neocities" aria-labelledby="t-neocities" hidden>
+            <h1 id="t-neocities"><span aria-hidden="true">🚀</span> Publicar en Neocities</h1>
+            <p class="ayuda">Lo que hay en tu ordenador, a <a href="https://richi.blog" target="_blank"
+                rel="noopener">richi.blog</a> (se abre en otra pestaña). Solo se sube lo que ha cambiado. Subir y ver
+                qué se subiría se abren en su propia ventana de comandos, que pregunta antes de tocar nada.</p>
+            <p class="neocities-estado" data-neocities-estado aria-live="polite"></p>
             <section class="bloque" aria-labelledby="t-repasar-sitio">
-                <h2 id="t-repasar-sitio">Antes de subir</h2>
+                <h2 id="t-repasar-sitio"><span class="paso-numero">1</span> Repasar antes de subir</h2>
                 <p class="ayuda">Repasar pasa las cinco comprobaciones (enlaces rotos, hojas de estilo, temas, nombres
                     repetidos y lo que se pega sin escapar): no cambia nada, solo mira. Volver a generar rehace los
                     listados, el RSS, el mapa del sitio, el buscador y las cabeceras (solo hace falta si has tocado algo a mano).</p>
                 <div class="fila">
                     <button type="button" class="principal" data-repasar>Repasar el sitio entero</button>
                     <button type="button" data-regenerar>Volver a generar</button>
+                </div>
+            </section>
+            <section class="bloque" aria-labelledby="t-neocities-ensayo">
+                <h2 id="t-neocities-ensayo"><span class="paso-numero">2</span> Ver qué se subiría</h2>
+                <p class="ayuda">Un ensayo: compara tu carpeta con lo que hay en Neocities y te dice qué archivos
+                    subiría, sin subir nada.</p>
+                <div class="fila">
+                    <button type="button" data-neocities="ensayo">
+                        <span aria-hidden="true">🔍</span> Ver qué se subiría</button>
+                </div>
+            </section>
+            <section class="bloque" aria-labelledby="t-neocities-subir">
+                <h2 id="t-neocities-subir"><span class="paso-numero">3</span> Subirlo</h2>
+                <p class="ayuda">Sube solo lo cambiado. Antes de subir te enseña la lista y pregunta; contesta en la
+                    ventana de comandos. La primera vez te pide la clave de la API de Neocities (Settings, tu sitio,
+                    pestaña «API»), que se guarda en tu carpeta de usuario y no en el proyecto.</p>
+                <div class="fila">
+                    <button type="button" class="principal" data-neocities="subir">
+                        <span aria-hidden="true">🚀</span> Subir a Neocities</button>
+                </div>
+            </section>
+            <section class="bloque" aria-labelledby="t-neocities-mas">
+                <h2 id="t-neocities-mas">Otras cosas</h2>
+                <div class="fila">
+                    <button type="button" data-neocities="borrar">
+                        <span aria-hidden="true">🧹</span> Subir y borrar lo que ya no está aquí</button>
+                    <button type="button" data-neocities="clave">
+                        <span aria-hidden="true">🔑</span> Cambiar la clave de la API</button>
+                </div>
+                <p class="ayuda">Borrar enseña antes la lista y pregunta aparte; lo borrado en Neocities no se puede
+                    recuperar allí (aquí sigue estando, y se puede volver a subir).</p>
+            </section>
+        </section>
+
+        <!-- GITHUB: la guía de comandos para guardar lo cambiado (fichas.js,
+             pintarGitWeb). El editor no sube nada a GitHub él solo. -->
+        <section class="vista" data-vista="github" aria-labelledby="t-github" hidden>
+            <h1 id="t-github"><span aria-hidden="true">🐙</span> GitHub</h1>
+            <section class="bloque" aria-labelledby="t-git">
+                <h2 id="t-git">Guardar lo cambiado (con la consola)</h2>
+                <p class="ayuda">Los pasos para guardar lo cambiado y subirlo tú. Cada comando tiene su botón
+                    «Copiar»: lo pegas en la ventana de comandos (clic derecho, o Ctrl+V) y pulsas Enter. El mensaje
+                    de abajo ya va puesto en el suyo.</p>
+                <p data-git-estado aria-live="polite"></p>
+                <details class="git-cambios" data-git-cambios-caja hidden>
+                    <summary>Ver lo cambiado</summary>
+                    <ul data-git-cambios></ul>
+                </details>
+                <div class="campo">
+                    <label for="git-mensaje">Qué has cambiado (el mensaje del commit)</label>
+                    <input id="git-mensaje" autocomplete="off">
+                </div>
+                <ol class="git-pasos" data-git-pasos></ol>
+                <details class="git-mas">
+                    <summary>Deshacer cambios (lo guardado o sin guardar)</summary>
+                    <p class="ayuda">Ojo: los que dicen «se pierde» no tienen vuelta atrás. Si dudas, mira antes con
+                        git status (lo sin guardar) o git log --oneline -5 (los últimos commits).</p>
+                    <ol class="git-pasos" data-git-deshacer></ol>
+                </details>
+                <details class="git-mas">
+                    <summary>Otras cosas que a veces hacen falta</summary>
+                    <ol class="git-pasos" data-git-otros></ol>
+                </details>
+                <div class="fila">
+                    <button type="button" data-git-mirar>Mirar otra vez lo cambiado</button>
                 </div>
             </section>
         </section>

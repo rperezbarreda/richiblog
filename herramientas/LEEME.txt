@@ -195,7 +195,26 @@
     · LA FICHA DE LA CAMPAÑA (en Rol): de qué va, el sistema, quién
       dirige y los personajes de la mesa (con su color). Las misiones
       van en su propio apartado (ver arriba).
-    · GUARDAR EN GITHUB (en Comandos): una guía de comandos para hacerlo
+    · EL MENÚ DEL EDITOR (desde el 26-10-2026): la cabecera está
+      SIEMPRE A LA VISTA (fija arriba; lo que mide lo apunta editor.js
+      en --alto-cabecera y el cuerpo, y la barra de botones del redactor
+      cuando te sigue, se ponen debajo). Nueve apartados, cada uno con su
+      emoji: 🏠 Inicio, ✍️ Escribir, 🎲 Rol, 🗺️ Wiki Cralëa, 🛋️ Mi
+      rincón, 🖼️ Imágenes, 🚀 Publicar en Neocities, 🐙 GitHub y ⌨️
+      Comandos. ATAJOS: Alt+1 a Alt+9, en ese orden (aria-keyshortcuts;
+      al pasar por encima lo dice). El apartado en el que estás va
+      relleno y con aria-current, también dentro de él (unas fichas de
+      Rol siguen marcando Rol). Al lado de la marca, «ESTÁS EN»: el
+      camino (Inicio › Rol › Mis personajes), con un botón para volver a
+      cada paso. «Saltar al menú» es el segundo enlace al tabular desde
+      arriba. En una pantalla estrecha el menú se pliega tras «☰ Menú»
+      (aria-expanded; Escape lo cierra y te devuelve al botón).
+    · PUBLICAR EN NEOCITIES (su propio apartado): 1, repasar el sitio y
+      volver a generar; 2, ver qué se subiría (el ensayo); 3, subirlo; y
+      aparte, subir borrando lo que ya no está aquí y cambiar la clave.
+      Subir abre subir-neocities.py en su ventana de comandos (pregunta
+      antes de tocar nada). Dice si la clave de la API ya está guardada.
+    · GUARDAR EN GITHUB (su propio apartado, 🐙 GitHub): una guía de comandos para hacerlo
       tú en la consola (ir a la carpeta, git status, git pull, git add
       -A, git commit con tu mensaje, git push a tu rama), cada uno con
       «Copiar», ya con la carpeta, la rama y el mensaje puestos; cómo
@@ -206,7 +225,7 @@
       cosas que a veces hacen falta (pasar desarrollo a main, cambiar de
       rama, bajar el repositorio, instalar git). Si se puede, dice en qué
       rama estás y qué hay cambiado. El editor no sube nada solo.
-    · CÓMO SE VE EL EDITOR: «Letra −» y «Letra +» (del 90 % al 200 %) y
+    · CÓMO SE VE EL EDITOR: «A−» y «A+» (la letra, del 90 % al 200 %) y
       «Contraste alto» (negro, blanco y amarillo), arriba; se recuerdan.
 
   Mientras trabaja algo largo (pasar a la web, generar), una barra de
@@ -3797,7 +3816,7 @@
       python herramientas/1-publicar/subir-neocities.py
 
   (en el menú, «Repasar y subir → Subir el sitio a Neocities»; también
-  en el editor, en «Comandos»). Usa la API de Neocities: le pide la
+  en el editor, en «🚀 Publicar en Neocities», con botones). Usa la API de Neocities: le pide la
   lista de lo que hay allí con la huella (SHA-1) de cada archivo, la
   compara con la de los de aquí y sube SOLO lo nuevo o cambiado, en
   tandas y sin prisas (como pide Neocities). Enseña la lista y pregunta
