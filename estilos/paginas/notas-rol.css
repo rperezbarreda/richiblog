@@ -644,6 +644,93 @@
     line-height: 1.6;
 }
 
+/* LO QUE HACE EN EL JUEGO («+1d4 de daño de ácido»): de máquina, en su
+   recuadro de puntos, como la regla de las notas. */
+.campana-botin-efecto {
+    grid-column: 2;
+    justify-self: start;
+    max-width: 100%;
+    margin: 0.2em 0;
+    padding: 0.1em 0.5em;
+    border: 1px dashed var(--yellow);
+    color: var(--white);
+    font-family: var(--fuente-mono);
+    font-size: 0.75rem;
+    line-height: 1.6;
+}
+
+/* EL HECHIZO DE UN PERGAMINO: un desplegable «Qué hace» con el nivel, los
+   datos (lanzamiento, alcance, duración, tirada) y lo que hace. */
+.campana-botin-hechizo {
+    grid-column: 2;
+    margin: 0.2em 0 0.4em;
+    color: var(--white);
+    font-size: 0.8125rem;
+    line-height: 1.55;
+}
+
+.campana-botin-hechizo-tirador {
+    width: fit-content;
+    min-height: 1.75rem;
+    color: var(--yellow);
+    font-family: var(--fuente-mono);
+    font-size: 0.75rem;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.campana-botin-hechizo-tirador:hover {
+    text-decoration: underline;
+    text-underline-offset: 3px;
+}
+
+.campana-botin-hechizo-tirador:focus-visible {
+    outline: 2px solid var(--yellow);
+    outline-offset: 2px;
+}
+
+.campana-botin-hechizo[open] {
+    padding: 0.2em 0 0.4em 0.7em;
+    border-left: 2px solid var(--yellow);
+}
+
+.campana-botin-hechizo-nivel {
+    margin: 0.2em 0;
+    color: var(--muted);
+    font-family: var(--fuente-mono);
+    font-size: 0.75rem;
+    font-style: italic;
+}
+
+.campana-botin-hechizo-datos {
+    margin: 0.2em 0 0.4em;
+    font-family: var(--fuente-mono);
+    font-size: 0.75rem;
+}
+
+.campana-botin-hechizo-datos > div {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0 0.5em;
+}
+
+.campana-botin-hechizo-datos dt {
+    color: var(--yellow);
+    font-weight: 700;
+}
+
+.campana-botin-hechizo-datos dt::after {
+    content: ":";
+}
+
+.campana-botin-hechizo-datos dd {
+    margin: 0;
+}
+
+.campana-botin-hechizo-texto {
+    margin: 0.3em 0 0;
+}
+
 .campana-botin-trozo + .campana-botin-trozo::before,
 .campana-botin-gastado + .campana-botin-trozo::before {
     content: "· ";

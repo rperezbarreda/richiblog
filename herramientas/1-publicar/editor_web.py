@@ -1183,7 +1183,11 @@ def colecciones():
     de la campaña…) se ponen al leer cada una (opciones_de)."""
     nuevo_personaje_tipos = ["aliado", "aliada", "neutral", "enemigo", "enemiga", "desconocida"]
     estados = ["vivo", "viva", "muerto", "muerta", "desaparecido", "desaparecida", "desconocido"]
-    tipos_botin = ["armas", "armaduras", "pociones", "equipo", "objetos mágicos", "dinero", "otras cosas"]
+    tipos_botin = ["armas", "armaduras", "pociones", "pergaminos", "equipo", "objetos mágicos", "dinero", "otras cosas"]
+    escuelas = ["abjuración", "adivinación", "conjuración", "encantamiento", "evocación", "ilusión", "nigromancia",
+                "transmutación"]
+    # Lo de un pergamino solo sale con el apartado «pergaminos» elegido.
+    es_pergamino = {"tipo": ["pergaminos"]}
     return [
         {"id": "rol", "apartado": "rol", "titulo": "Recursos de rol (el portfolio)",
          "ayuda": "Las tarjetas de la página de rol: aventuras, fichas, mapas… Lo último, arriba.",
@@ -1286,6 +1290,24 @@ def colecciones():
                          C("de", "De qué sesión", "elegir", numerico=True, vacio="quitar"),
                          C("gastado", "Gastado", "si-no", vacio="quitar"),
                          C("imagen", "Foto", "imagen", sitio="botin", vacio="quitar"),
+                         C("efecto", "Qué hace (en el juego)", vacio="quitar",
+                           ayuda="Lo que cuenta en una tirada: «+1d4 de daño de ácido», «cura 2d4+2», «+1 a la CA»."
+                                 " Opcional; sale debajo del nombre, en su recuadro."),
+                         C("hechizo", "El hechizo", vacio="quitar", si=es_pergamino,
+                           ayuda="Su nombre, y si quieres el original: «Escudo (Shield)»."),
+                         C("nivel", "Nivel del hechizo", "numero", minimo=0, maximo=9, vacio="quitar", si=es_pergamino,
+                           ayuda="0 para un truco."),
+                         C("escuela", "Escuela", "elegir", libre=True, vacio="quitar", si=es_pergamino,
+                           opciones=_opciones(escuelas)),
+                         C("lanzamiento", "Tiempo de lanzamiento", vacio="quitar", si=es_pergamino,
+                           ayuda="«1 acción», «1 reacción, al recibir un ataque»…"),
+                         C("alcance", "Alcance", vacio="quitar", si=es_pergamino, ayuda="«Personal», «18 m»…"),
+                         C("duracion", "Duración", vacio="quitar", si=es_pergamino,
+                           ayuda="«Instantánea», «1 asalto», «Concentración, hasta 1 minuto»…"),
+                         C("tirada", "Tirada o CD", vacio="quitar", si=es_pergamino,
+                           ayuda="Si pide salvación o ataque: «CD 13 de DES», «+5 al ataque»."),
+                         C("descripcion", "Qué hace el hechizo", "largo", vacio="quitar", si=es_pergamino,
+                           ayuda="Lo que sale al desplegarlo en la web. Un párrafo por línea."),
                      ]}]},
         {"id": "recomendaciones", "apartado": "rincon", "titulo": "Recomendaciones",
          "ayuda": "Libros, series, pelis, juegos… las ventanitas de la página de recomendaciones.",

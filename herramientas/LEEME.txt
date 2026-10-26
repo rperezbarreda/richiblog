@@ -1116,6 +1116,16 @@
   es donde se añade uno nuevo; y copiada en TIPOS de botin.py, que avisa
   si escribes uno que la web no conoce. Si añades uno, añádelo en las dos.
 
+  LO QUE HACE Y LOS PERGAMINOS (desde el 26-10-2026). Cualquier cosa
+  puede llevar "efecto" (lo que cuenta en una tirada: «+1d4 de daño de
+  ácido»), que sale debajo del nombre en un recuadro de puntos. Y hay un
+  apartado nuevo, PERGAMINOS (después de las pociones), cuyas cosas
+  llevan su hechizo en un desplegable «Qué hace»: "hechizo" (su nombre),
+  "nivel" (0 = truco), "escuela", "lanzamiento", "alcance", "duracion",
+  "tirada" (la CD o el ataque) y "descripcion" (un párrafo por línea).
+  En el editor (Rol → El botín) lo del hechizo solo sale al elegir el
+  apartado «pergaminos» (las casillas con «si» en editor_web.py).
+
   Sin "botin" en el JSON el botón no sale. Lo que se apunte se busca
   desde la lupa, así que si lo tocas a mano conviene pasar el buscador
   (la herramienta ya lo hace):

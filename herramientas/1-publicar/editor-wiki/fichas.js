@@ -352,7 +352,22 @@ function pintarFichaWeb(sec, parte, fichas, i) {
         img.className = "ficha-foto";
         caja.appendChild(img);
     }
-    parte.campos.forEach((c) => casillaDeFichaWeb(caja, f, c, "f-" + parte.id + "-" + i, parte, () => {
+    // Las casillas que solo valen para unas fichas (c.si: {"tipo":
+    // ["pergaminos"]}, lo de un pergamino en el botín) salen y se esconden
+    // según lo elegido; lo escrito en ellas se queda.
+    const condicionadas = [];
+    const mirarCondiciones = () => condicionadas.forEach(([sitio, c]) => {
+        sitio.hidden = !Object.entries(c.si).every(([k, valores]) => valores.includes(String(f[k] || "")));
+    });
+    parte.campos.forEach((c) => {
+        let dentro = caja;
+        if (c.si) {
+            dentro = crearEditor("div", "");
+            condicionadas.push([dentro, c]);
+            caja.appendChild(dentro);
+        }
+        casillaDeFichaWeb(dentro, f, c, "f-" + parte.id + "-" + i, parte, () => {
+        mirarCondiciones();
         leyenda.textContent = nombreDeFichaWeb(parte, f).nombre;
         const boton = document.getElementById("ficha-" + parte.id + "-" + i);
         if (boton) {
@@ -363,7 +378,9 @@ function pintarFichaWeb(sec, parte, fichas, i) {
                 d.textContent = detalle;
             }
         }
-    }));
+    });
+    });
+    mirarCondiciones();
     const fila = crearEditor("div", "fila");
     const boton = (texto, ayuda, alPulsar) => {
         const b = crearEditor("button", "", texto);

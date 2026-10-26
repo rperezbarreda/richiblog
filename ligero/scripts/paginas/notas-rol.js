@@ -324,6 +324,7 @@ const TIPOS_DE_BOTIN = [
     { nombre: "armas", alias: ["arma"] },
     { nombre: "armaduras", alias: ["armadura", "escudos", "escudo"] },
     { nombre: "pociones", alias: ["pocion", "pociones y hierbas", "curacion"] },
+    { nombre: "pergaminos", alias: ["pergamino", "conjuros", "hechizos", "pergaminos de conjuro"] },
     { nombre: "equipo", alias: ["utiles", "util", "herramientas", "provisiones"] },
     {
         nombre: "objetos mágicos",
@@ -516,6 +517,17 @@ function listaDeBotin(cosas, donde) {
         if (pie.childNodes.length) {
             fila.appendChild(pie);
         }
+        const efecto = (cosa.efecto || "").toString().trim();
+        if (efecto) {
+            const caja = document.createElement("span");
+            caja.className = "campana-botin-efecto";
+            caja.textContent = efecto;
+            fila.appendChild(caja);
+        }
+        const hechizo = hechizoDeCosa(cosa);
+        if (hechizo) {
+            fila.appendChild(hechizo);
+        }
         const retrato = imagenSeguraDeMesa(cosa.imagen);
         if (retrato) {
             fila.classList.add("tiene-foto");
@@ -544,6 +556,60 @@ function listaDeBotin(cosas, donde) {
     });
     donde.appendChild(lista);
     return gastadas;
+}
+const DATOS_DE_HECHIZO = [
+    ["lanzamiento", "Lanzamiento"],
+    ["alcance", "Alcance"],
+    ["duracion", "Duración"],
+    ["tirada", "Tirada"],
+];
+function hechizoDeCosa(cosa) {
+    const texto = (clave) => (cosa[clave] === undefined || cosa[clave] === null ? "" : cosa[clave]).toString().trim();
+    const descripcion = texto("descripcion");
+    const datos = DATOS_DE_HECHIZO.filter(([clave]) => texto(clave));
+    const nombre = texto("hechizo");
+    if (!descripcion && !datos.length && !nombre) {
+        return null;
+    }
+    const caja = document.createElement("details");
+    caja.className = "campana-botin-hechizo";
+    const tirador = document.createElement("summary");
+    tirador.className = "campana-botin-hechizo-tirador";
+    tirador.textContent = "Qué hace" + (nombre ? " «" + nombre + "»" : "");
+    caja.appendChild(tirador);
+    const nivel = texto("nivel");
+    const linea = [
+        nivel === "" ? "" : (Number(nivel) === 0 ? "Truco" : "Nivel " + nivel),
+        texto("escuela"),
+    ].filter(Boolean).join(" · ");
+    if (linea) {
+        const p = document.createElement("p");
+        p.className = "campana-botin-hechizo-nivel";
+        p.textContent = linea;
+        caja.appendChild(p);
+    }
+    if (datos.length) {
+        const lista = document.createElement("dl");
+        lista.className = "campana-botin-hechizo-datos";
+        datos.forEach(([clave, rotulo]) => {
+            const fila = document.createElement("div");
+            const dt = document.createElement("dt");
+            dt.textContent = rotulo;
+            const dd = document.createElement("dd");
+            dd.textContent = texto(clave);
+            fila.appendChild(dt);
+            fila.appendChild(dd);
+            lista.appendChild(fila);
+        });
+        caja.appendChild(lista);
+    }
+    descripcion.split(/\n+/).map((s) => s.trim()).filter(Boolean).forEach((parrafo) => {
+        const p = document.createElement("p");
+        p.className = "campana-botin-hechizo-texto";
+        p.textContent = parrafo;
+        caja.appendChild(p);
+    });
+    return caja;
 }
 function trozoDeBotin(texto) {
     const trozo = document.createElement("span");

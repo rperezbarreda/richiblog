@@ -63,6 +63,7 @@ TIPOS = [
     ("armas", ["arma"]),
     ("armaduras", ["armadura", "escudos", "escudo"]),
     ("pociones", ["pocion", "pociones y hierbas", "curacion"]),
+    ("pergaminos", ["pergamino", "conjuros", "hechizos", "pergaminos de conjuro"]),
     ("equipo", ["utiles", "util", "herramientas", "provisiones"]),
     ("objetos mágicos", ["objeto magico", "objetos magicos", "magia", "magicos"]),
     ("dinero", ["monedas", "oro", "tesoro"]),

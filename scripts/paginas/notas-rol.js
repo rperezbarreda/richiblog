@@ -560,6 +560,13 @@ function imagenSeguraDeMesa(url) {
 //   gastado  true para lo que ya se ha usado: se queda tachado y puesto
 //            en gris, en vez de borrarlo. Así se ve lo que hubo y lo que
 //            queda, que es media discusión de cada partida.
+//   efecto   lo que hace en el juego («+1d4 de daño de ácido»): sale
+//            debajo del nombre, de máquina y en su recuadro.
+//
+// LOS PERGAMINOS (tipo "pergaminos") llevan además su hechizo, que sale
+// en un desplegable «Qué hace» debajo del nombre:
+//   hechizo, nivel (0 = truco), escuela, lanzamiento, alcance, duracion,
+//   tirada (la CD o el ataque) y descripcion (un párrafo por línea).
 //
 // SIN "botin" EN EL JSON el botón no sale: una campaña que no lleva la
 // cuenta no tiene por qué enseñar una ventana vacía.
@@ -576,6 +583,7 @@ const TIPOS_DE_BOTIN = [
     { nombre: "armas", alias: ["arma"] },
     { nombre: "armaduras", alias: ["armadura", "escudos", "escudo"] },
     { nombre: "pociones", alias: ["pocion", "pociones y hierbas", "curacion"] },
+    { nombre: "pergaminos", alias: ["pergamino", "conjuros", "hechizos", "pergaminos de conjuro"] },
     { nombre: "equipo", alias: ["utiles", "util", "herramientas", "provisiones"] },
     {
         nombre: "objetos mágicos",
@@ -850,6 +858,23 @@ function listaDeBotin(cosas, donde) {
             fila.appendChild(pie);
         }
 
+        // Lo que hace en el juego, de máquina y en su recuadro (como la
+        // regla de las notas).
+        const efecto = (cosa.efecto || "").toString().trim();
+        if (efecto) {
+            const caja = document.createElement("span");
+            caja.className = "campana-botin-efecto";
+            caja.textContent = efecto;
+            fila.appendChild(caja);
+        }
+
+        // EL HECHIZO DE UN PERGAMINO, plegado: un <details> que se abre
+        // solo, con el teclado y diciéndolo un lector de pantalla.
+        const hechizo = hechizoDeCosa(cosa);
+        if (hechizo) {
+            fila.appendChild(hechizo);
+        }
+
         // LA FOTO DEL OBJETO, un cuadradito con reborde DELANTE del
         // nombre, en el sitio del rombo: lo que tiene foto la usa de
         // viñeta. Se mete la primera de la fila (insertBefore), para que
@@ -895,6 +920,66 @@ function listaDeBotin(cosas, donde) {
 
     donde.appendChild(lista);
     return gastadas;
+}
+
+// Lo de un pergamino: el desplegable «Qué hace» con sus datos (los que
+// haya) y la descripción. Nada si no lleva ninguno.
+const DATOS_DE_HECHIZO = [
+    ["lanzamiento", "Lanzamiento"],
+    ["alcance", "Alcance"],
+    ["duracion", "Duración"],
+    ["tirada", "Tirada"],
+];
+
+function hechizoDeCosa(cosa) {
+    const texto = (clave) => (cosa[clave] === undefined || cosa[clave] === null ? "" : cosa[clave]).toString().trim();
+    const descripcion = texto("descripcion");
+    const datos = DATOS_DE_HECHIZO.filter(([clave]) => texto(clave));
+    const nombre = texto("hechizo");
+    if (!descripcion && !datos.length && !nombre) {
+        return null;
+    }
+    const caja = document.createElement("details");
+    caja.className = "campana-botin-hechizo";
+    const tirador = document.createElement("summary");
+    tirador.className = "campana-botin-hechizo-tirador";
+    tirador.textContent = "Qué hace" + (nombre ? " «" + nombre + "»" : "");
+    caja.appendChild(tirador);
+
+    // Nivel y escuela, en una línea: «Nivel 1 · abjuración» o «Truco».
+    const nivel = texto("nivel");
+    const linea = [
+        nivel === "" ? "" : (Number(nivel) === 0 ? "Truco" : "Nivel " + nivel),
+        texto("escuela"),
+    ].filter(Boolean).join(" · ");
+    if (linea) {
+        const p = document.createElement("p");
+        p.className = "campana-botin-hechizo-nivel";
+        p.textContent = linea;
+        caja.appendChild(p);
+    }
+    if (datos.length) {
+        const lista = document.createElement("dl");
+        lista.className = "campana-botin-hechizo-datos";
+        datos.forEach(([clave, rotulo]) => {
+            const fila = document.createElement("div");
+            const dt = document.createElement("dt");
+            dt.textContent = rotulo;
+            const dd = document.createElement("dd");
+            dd.textContent = texto(clave);
+            fila.appendChild(dt);
+            fila.appendChild(dd);
+            lista.appendChild(fila);
+        });
+        caja.appendChild(lista);
+    }
+    descripcion.split(/\n+/).map((s) => s.trim()).filter(Boolean).forEach((parrafo) => {
+        const p = document.createElement("p");
+        p.className = "campana-botin-hechizo-texto";
+        p.textContent = parrafo;
+        caja.appendChild(p);
+    });
+    return caja;
 }
 
 function trozoDeBotin(texto) {

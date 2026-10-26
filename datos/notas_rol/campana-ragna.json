@@ -86,14 +86,22 @@
             "tipo": "armas",
             "quien": "Mellissa",
             "de": 2,
-            "imagen": "/imagenes/notas_rol/ragna/botin/5-flechas-de-acido.webp"
+            "imagen": "/imagenes/notas_rol/ragna/botin/5-flechas-de-acido.webp",
+            "efecto": "+1d4 de daño de ácido · salvación de DES CD 12: si la falla, −2 a su CA"
         },
         {
             "que": "Pergamino: Escudo",
-            "tipo": "objetos mágicos",
+            "tipo": "pergaminos",
             "quien": "Mellissa",
             "de": 2,
-            "imagen": "/imagenes/notas_rol/ragna/botin/pergamino-escudo.webp"
+            "imagen": "/imagenes/notas_rol/ragna/botin/pergamino-escudo.webp",
+            "hechizo": "Escudo (Shield)",
+            "nivel": 1,
+            "escuela": "abjuración",
+            "lanzamiento": "1 reacción, al recibir un ataque o ser el objetivo de proyectil mágico",
+            "alcance": "Personal",
+            "duracion": "1 asalto",
+            "descripcion": "Una barrera invisible de fuerza mágica aparece y te protege.\nHasta el principio de tu siguiente turno tienes +5 a la CA, también contra el ataque que la ha provocado, y no recibes daño de proyectil mágico.\nAl leer el pergamino, se deshace en polvo."
         }
     ],
     "misiones": [
