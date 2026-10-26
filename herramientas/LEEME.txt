@@ -1149,10 +1149,12 @@
       de la campaña y en las notas), «Lo que lleva del botín».
     · EL DINERO: "dinero": {"movimientos": [{que, sentido: "entra" |
       "sale", cantidad, moneda: pc | pp | pe | po | ppt, de, quien}]}. Se
-      lleva en Rol → «El dinero de una campaña». En la pestaña «dinero»
-      del botín: la bolsa (en po, pp y pc, y en oro), «Entradas y gastos»
-      con lo que quedaba después de cada uno, y un CONVERSOR de monedas
-      (1 po = 10 pp = 100 pc; 1 pe = 5 pp; 1 ppt = 10 po).
+      lleva en Rol → «El dinero de una campaña». Tiene SU PROPIO BOTÓN en
+      el índice de la campaña («el dinero →», sale si hay algo apuntado):
+      arriba, en un post-it, lo que tenéis (en po, pp y pc, y en oro);
+      debajo, la TABLA de entradas y gastos (sesión, concepto, entra,
+      sale y lo que quedaba); y al final el CONVERSOR de monedas (1 po =
+      10 pp = 100 pc; 1 pe = 5 pp; 1 ppt = 10 po).
     · DESDE LAS NOTAS: el botón «Pasar al botín» (la bolsa con la flecha)
       lleva la lista de objetos del texto (o lo elegido, una cosa por
       línea) al botín, con su apartado adivinado, quién lo lleva y la
@@ -1161,6 +1163,20 @@
     · DESDE UNA MISIÓN COMPLETADA: el botón «Pasar "Lo que nos llevamos"
       al botín» hace lo mismo con la recompensa (varias cosas, con comas
       o «y»).
+
+  LAS SESIONES DEL ÍNDICE van de la más reciente a la más vieja, y cada
+  una publicada lleva al lado un botón «resumen» que abre una ventana con
+  el resumen: una línea por escena («Escena: lo que pasó», la escena en
+  negrita) y por caja de «Lo que descubrimos». Va en el "resumen" de esa
+  sesión en el JSON de la campaña:
+    · SE HACE SOLO al publicar (y cada vez que se pasan los generadores,
+      mientras sea el automático: "resumen_auto": true), leyendo las
+      notas: de cada escena, su nombre y la primera frase de lo que pasó
+      (herramientas/resumenes.py, desde generar-posts.py).
+    · SE CAMBIA A MANO en el editor de las notas, en «Resumen de la
+      sesión»: lo que escribas se queda y ya no se rehace solo. Vacío,
+      vuelve el automático. El botón «Rehacer el resumen automático» lo
+      saca otra vez de las notas de ahora.
 
   Sin "botin" en el JSON el botón no sale. Lo que se apunte se busca
   desde la lupa, así que si lo tocas a mano conviene pasar el buscador

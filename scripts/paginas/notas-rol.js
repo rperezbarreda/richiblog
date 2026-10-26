@@ -286,14 +286,29 @@ function prepararBotones(campana) {
     const dinero = movimientosDeDinero(campana);
     ponerBotinDeLaMesa(campana);
     const botonBotin = document.querySelector("[data-campana-botin-abrir]");
-    if (botonBotin && (cosas.length || dinero.length)) {
+    if (botonBotin && cosas.length) {
         botonBotin.hidden = false;
         botonBotin.addEventListener("click", () =>
             window.ventanaModal.abrir({
                 titulo: "botin.lst",
                 clase: "modal-botin",
                 devolverA: botonBotin,
-                llenar: (cuerpo) => llenarElBotin(cuerpo, cosas, dinero),
+                llenar: (cuerpo) => llenarElBotin(cuerpo, cosas),
+            })
+        );
+    }
+
+    // EL DINERO, con su botón: la bolsa en un post-it, la tabla de
+    // entradas y gastos y el conversor de monedas.
+    const botonDinero = document.querySelector("[data-campana-dinero-abrir]");
+    if (botonDinero && dinero.length) {
+        botonDinero.hidden = false;
+        botonDinero.addEventListener("click", () =>
+            window.ventanaModal.abrir({
+                titulo: "bolsa.txt",
+                clase: "modal-dinero",
+                devolverA: botonDinero,
+                llenar: (cuerpo) => llenarElDinero(cuerpo, dinero),
             })
         );
     }
@@ -578,9 +593,9 @@ function imagenSeguraDeMesa(url) {
 //
 // EL DINERO va aparte, en "dinero": {"movimientos": [...]}, cada uno
 // {que, sentido: "entra" | "sale", cantidad, moneda: pc|pp|pe|po|ppt, de,
-// quien}. En la pestaña «dinero»: la bolsa (en po, pp y pc), la lista de
-// entradas y gastos con lo que quedaba después de cada uno, y un
-// conversor de monedas.
+// quien}. Tiene su propio botón en el índice («el dinero»): la bolsa en
+// un post-it (en po, pp y pc), la tabla de entradas y gastos con lo que
+// quedaba después de cada uno, y un conversor de monedas.
 //
 // LOS PERGAMINOS (tipo "pergaminos") llevan además su hechizo, que sale
 // en un desplegable «Qué hace» debajo del nombre:
@@ -652,7 +667,7 @@ function apartadoDeCosa(cosa) {
 // Las cosas repartidas por apartados, en el orden de TIPOS_DE_BOTIN y sin
 // los apartados que se queden vacíos. Dentro de cada uno, el orden es el
 // del JSON: lo escribe a mano quien lleva la campaña y ese orden es suyo.
-function repartirElBotin(cosas, dinero) {
+function repartirElBotin(cosas) {
     const porApartado = new Map();
     cosas.forEach((cosa) => {
         const donde = apartadoDeCosa(cosa);
@@ -662,12 +677,10 @@ function repartirElBotin(cosas, dinero) {
         porApartado.get(donde).push(cosa);
     });
 
-    const hayDinero = Array.isArray(dinero) && dinero.length;
     const apartados = TIPOS_DE_BOTIN.map((apartado) => ({
         nombre: apartado.nombre,
         cosas: porApartado.get(apartado.nombre) || [],
-        dinero: apartado.nombre === "dinero" && hayDinero ? dinero : null,
-    })).filter((apartado) => apartado.cosas.length || apartado.dinero);
+    })).filter((apartado) => apartado.cosas.length);
 
     // Por si alguien escribe un apartado que no está en TIPOS_DE_BOTIN:
     // no puede pasar (apartadoDeCosa solo devuelve nombres de la lista),
@@ -699,7 +712,7 @@ function repartirPorQuien(cosas) {
     if (porQuien.has(BOTIN_DE_NADIE)) {
         nombres.push(BOTIN_DE_NADIE);
     }
-    return nombres.map((nombre) => ({ nombre: nombre, cosas: porQuien.get(nombre), dinero: null }));
+    return nombres.map((nombre) => ({ nombre: nombre, cosas: porQuien.get(nombre) }));
 }
 
 // LOS APARTADOS SON PESTAÑAS, una por cosa que haya en la bolsa y una
@@ -713,7 +726,7 @@ function repartirPorQuien(cosas) {
 // nada. Ahí sale la lista a secas, como antes de que esto existiera.
 const BOTIN_TODAS = "todas";
 
-function llenarElBotin(cuerpo, cosas, dinero) {
+function llenarElBotin(cuerpo, cosas) {
     const gastadas = cosas.filter((cosa) => cosa && cosa.gastado).length;
 
     // CÓMO SE REPARTE: por apartado (armas, pociones…) o por quién lo
@@ -721,17 +734,13 @@ function llenarElBotin(cuerpo, cosas, dinero) {
     const vista = document.createElement("div");
     const pintar = (modo) => {
         vista.textContent = "";
-        const apartados = modo === "quien" ? repartirPorQuien(cosas) : repartirElBotin(cosas, dinero);
+        const apartados = modo === "quien" ? repartirPorQuien(cosas) : repartirElBotin(cosas);
         if (apartados.length > 1) {
             pestanasDelBotin(apartados, vista);
         } else {
             const panel = document.createElement("div");
             panel.className = "campana-botin-panel";
-            const unico = apartados[0] || { cosas: cosas, dinero: null };
-            if (unico.dinero) {
-                panel.appendChild(panelDeDinero(unico.dinero));
-            }
-            listaDeBotin(unico.cosas, panel);
+            listaDeBotin((apartados[0] || { cosas: cosas }).cosas, panel);
             vista.appendChild(panel);
         }
     };
@@ -783,7 +792,7 @@ function pestanasDelBotin(apartados, donde) {
     apartados.forEach((apartado) => {
         juntas = juntas.concat(apartado.cosas);
     });
-    const todas = [{ nombre: BOTIN_TODAS, cosas: juntas, dinero: null }].concat(apartados);
+    const todas = [{ nombre: BOTIN_TODAS, cosas: juntas }].concat(apartados);
 
     const tira = document.createElement("div");
     tira.className = "campana-botin-pestanas";
@@ -812,7 +821,7 @@ function pestanasDelBotin(apartados, donde) {
         // hay algo sin ir abriéndolas una por una.
         const cuantas = document.createElement("span");
         cuantas.className = "campana-botin-pestana-cuenta";
-        cuantas.textContent = apartado.cosas.length + (apartado.dinero ? apartado.dinero.length : 0);
+        cuantas.textContent = apartado.cosas.length;
         boton.appendChild(cuantas);
         return boton;
     });
@@ -840,15 +849,11 @@ function pestanasDelBotin(apartados, donde) {
                 titulo.textContent = apartado.nombre;
                 const cuantas = document.createElement("span");
                 cuantas.className = "campana-botin-grupo-cuenta";
-                cuantas.textContent = apartado.dinero
-                    ? (apartado.dinero.length === 1 ? "1 movimiento" : apartado.dinero.length + " movimientos")
-                    : (apartado.cosas.length === 1 ? "1 cosa" : apartado.cosas.length + " cosas");
+                cuantas.textContent =
+                    apartado.cosas.length === 1 ? "1 cosa" : apartado.cosas.length + " cosas";
                 titulo.appendChild(cuantas);
 
                 grupo.appendChild(titulo);
-                if (apartado.dinero) {
-                    grupo.appendChild(panelDeDinero(apartado.dinero, true));
-                }
                 listaDeBotin(apartado.cosas, grupo);
                 panel.appendChild(grupo);
             });
@@ -857,9 +862,6 @@ function pestanasDelBotin(apartados, donde) {
             // propia pestaña, que además es quien nombra el panel
             // (aria-labelledby), así que tampoco se pierde para quien lo
             // escucha.
-            if (todas[i].dinero) {
-                panel.appendChild(panelDeDinero(todas[i].dinero));
-            }
             listaDeBotin(todas[i].cosas, panel);
         }
         panel.scrollTop = 0;
@@ -1133,12 +1135,10 @@ function movimientosDeDinero(campana) {
     return crudos.filter((m) => m && Number(m.cantidad) > 0 && (m.que || "").toString().trim());
 }
 
-// La pestaña del dinero: la bolsa, la lista de entradas y gastos (con lo
-// que quedaba después de cada uno) y el conversor. Con «corto» (en la
-// pestaña de todo), solo la bolsa.
-function panelDeDinero(movimientos, corto) {
-    const caja = document.createElement("div");
-    caja.className = "campana-dinero";
+// LA VENTANA DEL DINERO: arriba, en un post-it, lo que hay en la bolsa
+// (en po, pp y pc, y todo en oro); debajo, la tabla de entradas y gastos
+// con lo que quedaba después de cada uno; y al final, el conversor.
+function llenarElDinero(cuerpo, movimientos) {
     let saldo = 0;
     const filas = movimientos.map((m) => {
         const cobre = enCobre(m.cantidad, m.moneda) * (m.sentido === "sale" ? -1 : 1);
@@ -1146,53 +1146,75 @@ function panelDeDinero(movimientos, corto) {
         return { m, cobre, despues: saldo };
     });
 
-    const bolsa = document.createElement("p");
-    bolsa.className = "campana-dinero-bolsa";
-    const rotulo = document.createElement("strong");
-    rotulo.textContent = "En la bolsa: ";
-    bolsa.appendChild(rotulo);
-    bolsa.appendChild(document.createTextNode(bolsaEnMonedas(saldo)
-        + (saldo % 100 ? " (" + numeroDeDinero(saldo / 100) + " po)" : "")));
-    caja.appendChild(bolsa);
-    if (corto) {
-        return caja;
-    }
-
+    const nota = document.createElement("div");
+    nota.className = "cuaderno-postit misiones-nota dinero-nota";
     const titulo = document.createElement("h3");
-    titulo.className = "campana-dinero-titulo";
-    titulo.textContent = "Entradas y gastos";
-    caja.appendChild(titulo);
-    const lista = document.createElement("ul");
-    lista.className = "campana-dinero-lista";
-    filas.forEach(({ m, cobre, despues }) => {
-        const li = document.createElement("li");
-        li.className = "campana-dinero-movimiento" + (cobre < 0 ? " es-gasto" : "");
-        const cuanto = document.createElement("span");
-        cuanto.className = "campana-dinero-cuanto";
-        // El signo y la palabra: el color no es lo único que lo dice.
-        cuanto.textContent = (cobre < 0 ? "− " : "+ ") + numeroDeDinero(Number(m.cantidad)) + " "
-            + (m.moneda || "po").toString().toLowerCase();
-        li.appendChild(cuanto);
-        const que = document.createElement("span");
-        que.className = "campana-dinero-que";
-        que.textContent = m.que.toString().trim();
-        li.appendChild(que);
-        const pie = document.createElement("span");
-        pie.className = "campana-botin-donde";
-        pie.appendChild(trozoDeBotin(cobre < 0 ? "gasto" : "entrada"));
-        if (Number(m.de)) {
-            pie.appendChild(trozoDeBotin("sesión " + Number(m.de)));
-        }
-        if ((m.quien || "").toString().trim()) {
-            pie.appendChild(trozoDeBotin(m.quien.toString().trim()));
-        }
-        pie.appendChild(trozoDeBotin("quedan " + bolsaEnMonedas(despues)));
-        li.appendChild(pie);
-        lista.appendChild(li);
+    titulo.className = "dinero-nota-titulo";
+    titulo.textContent = "Lo que tenemos";
+    nota.appendChild(titulo);
+    const cuanto = document.createElement("p");
+    cuanto.className = "dinero-nota-cuanto";
+    cuanto.textContent = bolsaEnMonedas(saldo);
+    nota.appendChild(cuanto);
+    if (saldo % 100) {
+        const enOro = document.createElement("p");
+        enOro.className = "dinero-nota-oro";
+        enOro.textContent = "(" + numeroDeDinero(saldo / 100) + " po en oro)";
+        nota.appendChild(enOro);
+    }
+    cuerpo.appendChild(nota);
+
+    const tabla = document.createElement("table");
+    tabla.className = "campana-dinero-tabla";
+    const leyenda = document.createElement("caption");
+    leyenda.textContent = "Entradas y gastos";
+    tabla.appendChild(leyenda);
+    const cabeza = document.createElement("thead");
+    const filaCabeza = document.createElement("tr");
+    ["Sesión", "Concepto", "Entra", "Sale", "Queda"].forEach((texto) => {
+        const th = document.createElement("th");
+        th.scope = "col";
+        th.textContent = texto;
+        filaCabeza.appendChild(th);
     });
-    caja.appendChild(lista);
-    caja.appendChild(conversorDeMonedas());
-    return caja;
+    cabeza.appendChild(filaCabeza);
+    tabla.appendChild(cabeza);
+    const cuerpoTabla = document.createElement("tbody");
+    filas.forEach(({ m, cobre, despues }) => {
+        const tr = document.createElement("tr");
+        const celda = (texto, clase) => {
+            const td = document.createElement("td");
+            if (clase) {
+                td.className = clase;
+            }
+            td.textContent = texto;
+            tr.appendChild(td);
+            return td;
+        };
+        celda(Number(m.de) ? String(Number(m.de)) : "—");
+        const concepto = celda(m.que.toString().trim());
+        if ((m.quien || "").toString().trim()) {
+            const quien = document.createElement("span");
+            quien.className = "campana-dinero-quien";
+            quien.textContent = m.quien.toString().trim();
+            concepto.appendChild(quien);
+        }
+        const moneda = (m.moneda || "po").toString().toLowerCase();
+        celda(cobre > 0 ? "+" + numeroDeDinero(Number(m.cantidad)) + " " + moneda : "", "es-numero");
+        celda(cobre < 0 ? "−" + numeroDeDinero(Number(m.cantidad)) + " " + moneda : "", "es-numero");
+        celda(numeroDeDinero(despues / 100) + " po", "es-numero");
+        cuerpoTabla.appendChild(tr);
+    });
+    tabla.appendChild(cuerpoTabla);
+    // La tabla se desplaza de lado ella sola en una pantalla estrecha.
+    const caja = document.createElement("div");
+    caja.className = "campana-dinero-caja";
+    caja.setAttribute("tabindex", "0");
+    caja.setAttribute("role", "region");
+    caja.setAttribute("aria-label", "Entradas y gastos, con scroll");
+    caja.appendChild(tabla);
+    cuerpo.appendChild(caja);
+    cuerpo.appendChild(conversorDeMonedas());
 }
 
 // EL CONVERSOR: una cantidad y una moneda, y lo que es en las demás.
@@ -1617,9 +1639,9 @@ function pintarSesiones(lista, campana, publicadas) {
                 hecha: true,
             });
         })
-        // Por número de sesión y de la primera a la última: una campaña
-        // se lee en el orden en que se jugó, no al revés que un blog.
-        .sort((a, b) => (Number(a.numero) || 0) - (Number(b.numero) || 0));
+        // De la más reciente a la más vieja: lo que se viene a buscar es
+        // la última partida.
+        .sort((a, b) => (Number(b.numero) || 0) - (Number(a.numero) || 0));
 
     if (!sesiones.length) {
         lista.innerHTML =
@@ -1627,6 +1649,53 @@ function pintarSesiones(lista, campana, publicadas) {
         return;
     }
     lista.innerHTML = sesiones.map(filaDeSesion).join("");
+
+    // EL RESUMEN de cada una, en una ventana (el botón de al lado).
+    lista.querySelectorAll("[data-sesion-resumen]").forEach((boton) => {
+        const sesion = sesiones.find((s) => String(Number(s.numero)) === boton.getAttribute("data-sesion-resumen"));
+        if (!sesion) {
+            return;
+        }
+        boton.addEventListener("click", () =>
+            window.ventanaModal.abrir({
+                titulo: "resumen_sesion_" + String(Number(sesion.numero)).padStart(2, "0") + ".txt",
+                clase: "modal-resumen",
+                devolverA: boton,
+                llenar: (cuerpo) => llenarElResumen(cuerpo, sesion),
+            })
+        );
+    });
+}
+
+// Una línea por cosa; «Escena: lo que pasó» con la escena en negrita. Y
+// debajo, el enlace para leer las notas enteras.
+function llenarElResumen(cuerpo, sesion) {
+    const corto = (sesion.titulo || "").toString().replace(/^\s*sesi[oó]n\s*\d+\s*(?:[·.:\-–—]\s*)?/i, "").trim();
+    const titulo = document.createElement("h3");
+    titulo.className = "campana-resumen-titulo";
+    titulo.textContent = "Sesión " + Number(sesion.numero) + (corto ? " — " + corto : "");
+    cuerpo.appendChild(titulo);
+    const lista = document.createElement("ul");
+    lista.className = "campana-resumen-lista";
+    (sesion.resumen || "").toString().split(/\n+/).map((l) => l.trim()).filter(Boolean).forEach((linea) => {
+        const li = document.createElement("li");
+        const dos = linea.indexOf(": ");
+        if (dos > 0 && dos < 70) {
+            const quien = document.createElement("strong");
+            quien.textContent = linea.slice(0, dos) + ":";
+            li.appendChild(quien);
+            li.appendChild(document.createTextNode(" " + linea.slice(dos + 2)));
+        } else {
+            li.textContent = linea;
+        }
+        lista.appendChild(li);
+    });
+    cuerpo.appendChild(lista);
+    const leer = document.createElement("a");
+    leer.className = "campana-resumen-leer";
+    leer.href = rutaSeguraNotas(sesion.url);
+    leer.textContent = "leer las notas enteras →";
+    cuerpo.appendChild(leer);
 }
 
 function filaDeSesion(sesion) {
@@ -1676,12 +1745,19 @@ function filaDeSesion(sesion) {
             "</span></li>"
         );
     }
+    // Con resumen, su botón al lado (no dentro: un botón dentro de un
+    // enlace no se puede pulsar bien ni se lee bien).
+    const resumen = (sesion.resumen || "").toString().trim()
+        ? `<button class="campana-sesion-resumen" type="button" aria-haspopup="dialog"` +
+          ` data-sesion-resumen="${escaparHtmlNotas(numero)}"` +
+          ` aria-label="Resumen de la sesión ${escaparHtmlNotas(numero)}">resumen</button>`
+        : "";
     return (
-        "<li>" +
+        `<li class="campana-sesion-fila">` +
         `<a class="campana-sesion" href="${escaparHtmlNotas(rutaSeguraNotas(sesion.url))}"` +
         ` aria-label="${escaparHtmlNotas(nombre)}">` +
         dentro +
-        "</a></li>"
+        "</a>" + resumen + "</li>"
     );
 }
 

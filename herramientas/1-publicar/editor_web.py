@@ -637,6 +637,8 @@ def leer_entrada(relativo):
         salida["titulo_corto"] = sesion.get("titulo", "")
         salida["numero"] = sesion.get("numero", "")
         salida["pdf"] = sesion.get("pdf", "")
+        salida["resumen"] = sesion.get("resumen", "")
+        salida["resumen_auto"] = bool(sesion.get("resumen_auto")) or not sesion.get("resumen")
     return salida
 
 
@@ -841,6 +843,24 @@ def guardar_entrada(peticion):
         if pdf and not re.match(r"^https?://", pdf):
             return {"error": "El enlace del PDF tiene que empezar por http:// o https:// (lo demás está guardado)."}
         sesion["pdf"] = pdf
+        # EL RESUMEN: lo escrito a mano se queda (y ya no se rehace solo);
+        # vacío, vuelve a ser el automático (lo rehace generar-posts.py).
+        if isinstance(peticion.get("resumen"), str):
+            resumen = "\n".join(l.strip() for l in peticion["resumen"].strip().splitlines() if l.strip())
+            if not resumen:
+                # Vacío: vuelve el automático, rehecho ya con estas notas.
+                from resumenes import resumen_de_notas
+                sesion["resumen"] = resumen_de_notas(texto)
+                sesion["resumen_auto"] = True
+                if not sesion["resumen"]:
+                    sesion.pop("resumen")
+            elif peticion.get("resumen_auto"):
+                # El automático (el de antes o uno rehecho con su botón).
+                sesion["resumen"] = resumen
+                sesion["resumen_auto"] = True
+            elif resumen != sesion.get("resumen") or sesion.get("resumen_auto"):
+                sesion["resumen"] = resumen
+                sesion["resumen_auto"] = False
         escribir_json(archivo_c, campana)
     rel = archivo.relative_to(RAIZ).as_posix()
     if peticion.get("pasar"):
@@ -2014,6 +2034,18 @@ def _campana_para_tocar(clave):
     return archivo, campana
 
 
+def resumen_automatico(peticion):
+    """El resumen que saldría solo de estas hojas (las del editor, aunque
+    no estén guardadas)."""
+    from resumenes import resumen_de_notas
+    hojas = [h for h in peticion.get("hojas") or [] if isinstance(h, dict)]
+    try:
+        cuaderno = _cuaderno_html(hojas, "", "")
+    except ValueError as error:
+        return {"error": str(error)}
+    return {"ok": True, "resumen": resumen_de_notas(cuaderno)}
+
+
 def anadir_al_botin(peticion):
     """{campana, cosas: [{que, de?, tipo?, quien?}]}. Las monedas («25 po»,
     «10 monedas de oro») van al dinero, como una entrada; lo demás, al
@@ -2301,6 +2333,8 @@ def atender_post(ruta, peticion):
         return apuntar_borrador(peticion)
     if ruta == "/api/web/npc/nuevo":
         return crear_npc(peticion)
+    if ruta == "/api/web/sesion/resumen":
+        return resumen_automatico(peticion)
     if ruta == "/api/web/botin/anadir":
         return anadir_al_botin(peticion)
     if ruta == "/api/web/mision/nueva":

@@ -493,24 +493,34 @@
     white-space: nowrap;
 }
 
-/* EL DINERO: la bolsa, la lista de entradas y gastos y el conversor. */
-.campana-dinero {
-    margin-bottom: 14px;
-    color: var(--white);
+/* LA VENTANA DEL DINERO: la bolsa en un post-it (el mismo papel que el
+   de las misiones), la tabla de entradas y gastos y el conversor. */
+.dinero-nota {
+    margin-bottom: 16px;
+    text-align: center;
+}
+
+.dinero-nota-titulo {
+    margin: 0 0 4px;
+    color: var(--yellow-contrast);
     font-family: var(--fuente-mono);
     font-size: 0.8125rem;
-    line-height: 1.6;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
 }
 
-.campana-dinero-bolsa {
-    margin: 0 0 8px;
-    padding: 6px 10px;
-    border: 2px solid var(--yellow);
-    font-size: 0.875rem;
+.dinero-nota-cuanto {
+    margin: 0;
+    font-size: 1.6rem;
+    font-weight: 700;
+    line-height: 1.3;
 }
 
-.campana-dinero-bolsa strong {
-    color: var(--yellow);
+.dinero-nota-oro {
+    margin: 2px 0 0;
+    font-family: var(--fuente-mono);
+    font-size: 0.8125rem;
 }
 
 .campana-dinero-titulo {
@@ -522,38 +532,58 @@
     letter-spacing: 1px;
 }
 
-.campana-dinero-lista {
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-    margin: 0;
-    padding: 0;
-    list-style: none;
+/* La tabla se desplaza de lado ella sola si no cabe (con el teclado
+   también: tiene tabindex). */
+.campana-dinero-caja {
+    max-width: 100%;
+    overflow-x: auto;
 }
 
-.campana-dinero-movimiento {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: baseline;
-    gap: 0 0.6em;
-    padding-left: 0.6em;
-    border-left: 3px solid var(--yellow);
+.campana-dinero-caja:focus-visible {
+    outline: 2px solid var(--yellow);
+    outline-offset: 2px;
 }
 
-/* Un gasto: la raya de puntos (y el «−» y la palabra «gasto», que son
-   los que lo dicen). */
-.campana-dinero-movimiento.es-gasto {
-    border-left-style: dashed;
+.campana-dinero-tabla {
+    width: 100%;
+    border-collapse: collapse;
+    color: var(--white);
+    font-family: var(--fuente-mono);
+    font-size: 0.8125rem;
+    line-height: 1.5;
 }
 
-.campana-dinero-cuanto {
-    min-width: 6.5em;
+.campana-dinero-tabla caption {
+    padding-bottom: 6px;
     color: var(--yellow);
     font-weight: 700;
+    letter-spacing: 1px;
+    text-align: left;
+    text-transform: uppercase;
 }
 
-.campana-dinero-movimiento .campana-botin-donde {
-    flex-basis: 100%;
+.campana-dinero-tabla th,
+.campana-dinero-tabla td {
+    padding: 6px 8px;
+    border-bottom: 1px solid var(--muted);
+    text-align: left;
+    vertical-align: top;
+}
+
+.campana-dinero-tabla th {
+    border-bottom: 2px solid var(--yellow);
+    color: var(--yellow);
+}
+
+.campana-dinero-tabla .es-numero {
+    text-align: right;
+    white-space: nowrap;
+}
+
+.campana-dinero-quien {
+    display: block;
+    color: var(--muted);
+    font-size: 0.75rem;
 }
 
 .campana-conversor-fila {
@@ -961,6 +991,13 @@
     width: min(34rem, 100%);
 }
 
+/* La del dinero (post-it, tabla y conversor) y la del resumen de una
+   sesión: algo más anchas, para la tabla y para leer de corrido. */
+.modal-dinero .modal-ventana,
+.modal-resumen .modal-ventana {
+    width: min(44rem, 100%);
+}
+
 /* Las dos clases juntas y no solo .misiones-nota: postit.css se carga
    DESPUÉS que esta hoja, así que con una sola clase ganaría él y la nota
    se quedaba torcida dentro de la ventana. */
@@ -1210,6 +1247,75 @@
     /* Es un <ol>: el número de sesión ya va escrito dentro de cada
        fila, así que el contador del navegador sobra. */
     list-style: none;
+}
+
+/* Con resumen, la fila lleva al lado su botón «resumen» (fuera del
+   enlace: un botón dentro de un enlace no se pulsa ni se lee bien). */
+.campana-sesion-fila {
+    display: flex;
+    align-items: stretch;
+    gap: 6px;
+}
+
+.campana-sesion-fila > .campana-sesion {
+    flex: 1 1 auto;
+    min-width: 0;
+}
+
+.campana-sesion-resumen {
+    flex: 0 0 auto;
+    padding: 0 12px;
+    border: 2px solid var(--border);
+    background: transparent;
+    color: var(--yellow);
+    font-family: var(--fuente-mono);
+    font-size: 0.75rem;
+    cursor: pointer;
+}
+
+.campana-sesion-resumen:hover,
+.campana-sesion-resumen:focus-visible {
+    border-color: var(--yellow);
+    background: var(--yellow);
+    color: var(--yellow-contrast);
+}
+
+.campana-sesion-resumen:focus-visible {
+    outline: 2px solid var(--yellow);
+    outline-offset: 2px;
+}
+
+/* EL RESUMEN, en su ventana: una línea por escena, la escena en negrita. */
+.campana-resumen-titulo {
+    margin: 0 0 10px;
+    color: var(--yellow);
+    font-family: var(--fuente-mono);
+    font-size: 0.9375rem;
+}
+
+.campana-resumen-lista {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin: 0 0 14px;
+    padding-left: 1.2em;
+    color: var(--white);
+    line-height: 1.6;
+}
+
+.campana-resumen-lista strong {
+    color: var(--yellow);
+}
+
+.campana-resumen-leer {
+    color: var(--yellow);
+    font-family: var(--fuente-mono);
+    font-size: 0.8125rem;
+}
+
+.campana-resumen-leer:focus-visible {
+    outline: 2px solid var(--yellow);
+    outline-offset: 2px;
 }
 
 /* Una sesión. Es una fila entera pulsable, no un enlace en medio del

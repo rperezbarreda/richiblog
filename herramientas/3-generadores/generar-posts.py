@@ -71,6 +71,7 @@ import unicodedata
 
 from comun import (
     RAIZ,
+    es_borrador,
     escribir_json,
     escribir_texto,
     leer_texto,
@@ -412,6 +413,37 @@ def poner_fichas_de_campana(probar):
             escribir_texto(ruta, nuevo, crlf)
 
 
+# EL RESUMEN DE CADA SESIÓN, para su botón en el índice de la campaña. Se
+# saca de las notas (herramientas/resumenes.py) cuando la sesión está
+# publicada, y se guarda en su "resumen" del JSON de la campaña con
+# "resumen_auto": true. Mientras siga así, se rehace cada vez que se pasa
+# esto (si cambian las notas, cambia el resumen). Si se escribe a mano en
+# el editor, "resumen_auto" pasa a false y ya no se toca.
+def poner_resumenes_de_sesiones(probar):
+    from resumenes import resumen_de_notas  # herramientas/, que ya está en sys.path
+    for archivo in sorted(CAMPANAS.glob("campana-*.json")):
+        try:
+            campana = json.loads(archivo.read_text(encoding="utf-8"))
+        except (OSError, ValueError):
+            continue
+        cambiado = False
+        for sesion in campana.get("sesiones") or []:
+            if not isinstance(sesion, dict) or not sesion.get("url"):
+                continue
+            if sesion.get("resumen") and not sesion.get("resumen_auto"):
+                continue
+            ruta = RAIZ / str(sesion["url"]).lstrip("/")
+            if not ruta.is_file() or es_borrador(ruta):
+                continue
+            nuevo = resumen_de_notas(leer_texto(ruta)[0])
+            if nuevo and (nuevo != sesion.get("resumen") or not sesion.get("resumen_auto")):
+                sesion["resumen"] = nuevo
+                sesion["resumen_auto"] = True
+                cambiado = True
+        if cambiado and not probar:
+            escribir_json(archivo, campana)
+
+
 def recoger_blog():
     entradas, avisos = [], []
     for ruta in paginas(BLOG, "*.html"):
@@ -647,6 +679,7 @@ def generar(probar=False):
 
     blog, avisos_blog = recoger_blog()
     poner_fichas_de_campana(probar)
+    poner_resumenes_de_sesiones(probar)
     movidas, avisos_movidas, cuantas_rol = recoger_movidas()
     notas, avisos_notas = recoger_notas_rol()
 

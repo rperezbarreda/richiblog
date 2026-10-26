@@ -182,14 +182,18 @@
             "fecha": "03-10-2026",
             "titulo": "El robo de la mercancía",
             "url": "/web/notas_rol/ragna/sesion-01.html",
-            "pdf": "https://drive.google.com/file/d/16_wFkaKOxEd0Vv8o1ryuvdAEbBqWJWNb/view?usp=sharing"
+            "pdf": "https://drive.google.com/file/d/16_wFkaKOxEd0Vv8o1ryuvdAEbBqWJWNb/view?usp=sharing",
+            "resumen": "Las ventas de Denelia: Viajando en la Gran Caravana hemos llegado finalmente a Sirevia, el hogar natal de Mellissa.\nEl Sueño del Elemental: Thenarys se encuentra bebiendo en el Sueño del Elemental, regentado Ayala, una mediana algo arisca.\nExploración en el bosque: Faëlar se encuentra a las afueras, en el bosque.\nReunión familiar: Mellissa está en casa de sus padres, Brandr e Isa, poniéndose al día de las novedades.\nAsalto de los bandidos: Aparecen bandidos que se llevan parte de las mercancías de diversos mercaderes, nada mar robar las cajas usan pergaminos para teletransportarse.\nPreparativos del viaje: Mellissa se reúne en privado con Sigil (quien estaba oculto en su tienda).\nRumbo a las montañas: Mellissa nos reúne a todos para comunicarnos la misión y que nos preparemos para partir esa misma noche.\nEmboscada de los lobos: Faëlar se adelanta al resto del grupo para marcar el camino; al poco de adentrarse en el bosque se da cuenta de que una manada de lobos liderado por uno gigante y ártico nos está acechando.\nDescanso en el bosque: Por la noche la primera guardia la hacen Denelia y Thenarys.\nEncuentro con el ermitaño: Por la mañana, antes de levantar campamento, Faëlar descubre escondido al cazador ermitaño que se encontró el día anterior, y tras ser descubierto, se acerca al grupo.\nLlegada a Chitxia: Proseguimos la marcha hasta llegar a Chitxia, un pequeño pueblo mas cercano a las montañas.",
+            "resumen_auto": true
         },
         {
             "numero": 2,
             "fecha": "24-10-2026",
             "titulo": "Rumbo hacia las montañas",
             "url": "/web/notas_rol/ragna/sesion-02.html",
-            "pdf": ""
+            "pdf": "",
+            "resumen": "Salida nocturna: Pasamos la noche en Chitxia en la casa de Rise…\nDesayuno en Chitxia: En casa de Rise, mientras todos descansan, Thenarys y Denelia investigan el ático.\nLlegan bandidos a Chitxia: Durante la conversación alguien del pueblo llama a la puerta desesperado, al parecer han venido bandidos.\nCombate en Chitxia: Mellissa se abalanza sobre los bandidos, algunos de ellos se echan para atrás para tener un mejor tiro con sus ballestas.\nInterrogatorio a Björn y salida de Chitxia: Decidimos deshacernos del resto de los cuerpos, Faëlar propone enterrarlos en los cultivos para que se usen de abono natural.\nLo que descubrimos: Su líder es algún tipo de hechicero, pero nunca ha tratado con él, pero tiene un lobo gigante ártico de mascota y guardián.\nCementerio de gigantes: Salimos de Chitxia y nos dirigimos a las montañas del suroeste con el nuevo carromato y con Björn encadenado para que no se nos escape.\nFantasmas en la noche: Por la noche Faëlar hace la primera guardia, algo le escama mucho al oir un sonido extraño mientras el resto descansa.\nLlegamos a la montaña: Cuando se levanta Mellissa nos ponemos rumbo hacia las montañas cuando aún es de noche.",
+            "resumen_auto": true
         }
     ],
     "dinero": {

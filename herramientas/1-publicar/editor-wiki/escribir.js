@@ -11,7 +11,8 @@
 
 const estadoEscribir = {
     entradas: [], nuevas: null, entrada: null, cambiado: false, guardando: false,
-    redactor: null, pie: null, imagen: null, hojas: [], postit: null, ultimaPlantilla: "", tipoNuevo: "",
+    redactor: null, pie: null, imagen: null, hojas: [], postit: null, ultimaPlantilla: "", resumenAuto: null,
+    tipoNuevo: "",
 };
 const NOMBRES_DE_LO_NUEVO = {
     entrada: "Una entrada del blog", relato: "Un relato", reto: "Un día del reto", sesion: "Las notas de una partida",
@@ -571,7 +572,7 @@ async function abrirEntradaWeb(archivo) {
             && !$('[data-vista="entrada"]').hidden ? datosDeLaEntradaWeb() : null));
     await ofrecerBorradorWeb("entrada", $("[data-borrador-entrada]"), datosDeLaEntradaWeb(), (d) => {
         const e = Object.assign({}, entrada);
-        ["titulo", "titulo_corto", "pdf", "descripcion", "etiquetas", "subcategoria", "cuerpo", "hojas", "postit"].forEach((k) => {
+        ["titulo", "titulo_corto", "pdf", "descripcion", "etiquetas", "subcategoria", "cuerpo", "hojas", "postit", "resumen"].forEach((k) => {
             if (d[k] !== undefined) {
                 e[k] = d[k];
             }
@@ -612,6 +613,39 @@ function ponerEntradaWeb(e) {
             ayuda: "Sale detrás de «Sesión " + e.numero + "»: «Sesión " + e.numero + " — El mercado»." });
         campoWeb(datos, "entrada-pdf", "Enlace al cuaderno escaneado (PDF)", { opcional: true, valor: e.pdf,
             ayuda: "Con él, debajo del post-it sale el botón de descargarlo." });
+        // EL RESUMEN del botón «resumen» del índice de la campaña. Sale
+        // solo de las notas al publicar (una línea por escena); escrito a
+        // mano aquí, se queda como lo dejes. Vacío, vuelve el automático.
+        const resumen = campoWeb(datos, "entrada-resumen", "Resumen de la sesión (el del índice de la campaña)", {
+            tipo: "largo", filas: 8, opcional: true, valor: e.resumen,
+            ayuda: (e.resumen_auto ? "Ahora es el AUTOMÁTICO: se rehace solo al publicar y al pasar a la web, sacado"
+                + " de las notas (una línea por escena). " : "Escrito A MANO: ya no se rehace solo. ")
+                + "Si lo cambias, se queda como lo dejes; si lo vacías, vuelve el automático. Una línea por cosa;"
+                + " «Escena: lo que pasó» sale con la escena en negrita." });
+        const rehacer = crearEditor("button", "", "Rehacer el resumen automático");
+        rehacer.type = "button";
+        rehacer.addEventListener("click", async () => {
+            recogerCuadernoWeb();
+            const hecho = await pedirEditor("/api/web/sesion/resumen", { hojas: estadoEscribir.hojas.map((h) => ({
+                titulo: h.titulo, bloques: h.bloques.map((b) => ({ tipo: b.tipo, nombre: b.nombre || "",
+                    abierta: b.abierta !== false, html: b.html || "" })) })) });
+            if (hecho.error) {
+                avisarEditor(hecho.error, true);
+                return;
+            }
+            resumen.value = hecho.resumen;
+            estadoEscribir.resumenAuto = hecho.resumen;
+            estadoEscribir.cambiado = true;
+            avisarEditor("Resumen rehecho con las notas de ahora. Se apunta al guardar, y sigue siendo el automático"
+                + " mientras no lo toques.");
+            resumen.focus();
+        });
+        resumen.parentNode.appendChild(rehacer);
+        // El último automático: si al guardar sigue igual, sigue siéndolo.
+        estadoEscribir.resumenAuto = e.resumen_auto ? (e.resumen || "") : null;
+        resumen.addEventListener("input", () => {
+            estadoEscribir.cambiado = true;
+        });
     } else {
         campoWeb(datos, "entrada-titulo", "Título", { valor: e.titulo,
             ayuda: "Cambiarlo no cambia el nombre del archivo (ni su dirección)." });
@@ -1537,6 +1571,9 @@ function datosDeLaEntradaWeb() {
         recogerCuadernoWeb();
         cuerpo.titulo_corto = valor("entrada-titulo-corto");
         cuerpo.pdf = valor("entrada-pdf");
+        cuerpo.resumen = valor("entrada-resumen");
+        cuerpo.resumen_auto = estadoEscribir.resumenAuto !== null
+            && cuerpo.resumen.trim() === String(estadoEscribir.resumenAuto).trim();
         cuerpo.hojas = estadoEscribir.hojas.map((h) => ({ titulo: h.titulo,
             bloques: h.bloques.map((b) => ({ tipo: b.tipo, nombre: b.nombre || "", abierta: b.abierta !== false, html: b.html || "" })) }));
         if (estadoEscribir.postit) {
