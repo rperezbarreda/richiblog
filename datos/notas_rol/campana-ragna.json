@@ -80,6 +80,20 @@
             "tipo": "objetos mágicos",
             "quien": "Mellissa",
             "imagen": "/imagenes/notas_rol/ragna/botin/piedra-mensajera.webp"
+        },
+        {
+            "que": "5 Flechas de ácido",
+            "tipo": "armas",
+            "quien": "Mellissa",
+            "de": 2,
+            "imagen": "/imagenes/notas_rol/ragna/botin/5-flechas-de-acido.webp"
+        },
+        {
+            "que": "Pergamino: Escudo",
+            "tipo": "objetos mágicos",
+            "quien": "Mellissa",
+            "de": 2,
+            "imagen": "/imagenes/notas_rol/ragna/botin/pergamino-escudo.webp"
         }
     ],
     "misiones": [
