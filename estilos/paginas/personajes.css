@@ -1,0 +1,759 @@
+/* ====================================================================
+   MIS PERSONAJES — mis OC
+   ====================================================================
+
+   Dos páginas, las dos escritas por generar-personajes.py a partir de
+   datos/personajes/personajes.json:
+
+     · el ÍNDICE (web/personajes/index_personajes.html): una rejilla de
+       redondeles, cada uno con el aro del color del personaje y su
+       nombre en grande encima de la foto, y debajo una etiqueta con su
+       icono y el nombre completo;
+     · la FICHA de cada uno (web/personajes/<clave>/<clave>.html): a la
+       izquierda las pestañas (historia, npcs, imágenes, extra) sobre un
+       recuadro; a la derecha la foto en un post-it con las seis
+       características de D&D, y debajo el botón de la ficha en PDF.
+
+   Va aparte de las notas de rol y de la wiki: no comparte hoja con
+   ninguna de las dos.
+
+   EL COLOR DE CADA UNO: la clase oc-color-<nombre> (en la tarjeta del
+   índice y en la página de la ficha) pone --oc-color, que es el del aro,
+   el borde de la etiqueta y la raya de las pestañas. Nunca es el color de
+   un texto: el texto va con los de siempre del tema, que son los que
+   están medidos. Así un color nuevo solo tiene que verse como borde
+   (Lc 45), no como letra (Lc 75). */
+
+.oc-page {
+    /* Los nueve colores del aro, claros para los temas oscuros… */
+    --oc-azul: #8fb8ff;
+    --oc-celeste: #7fdcff;
+    --oc-naranja: #ffad6b;
+    --oc-verde: #7fe496;
+    --oc-gris: #c9c9d1;
+    --oc-morado: #c9a2ff;
+    --oc-rojo: #ff8f8f;
+    --oc-rosa: #ffa6d5;
+    --oc-amarillo: #f5e17a;
+    /* El nombre grande va ENCIMA DE LA FOTO, así que no puede ir con los
+       colores del tema (en el claro saldría oscuro sobre una cara oscura):
+       blanco con un contorno casi negro, que se lee sobre cualquier foto,
+       como un rótulo de cómic. */
+    --oc-rotulo: #ffffff;
+    --oc-rotulo-borde: #14101a;
+    --oc-color: var(--oc-gris);
+
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    justify-content: flex-start;
+    gap: 22px;
+    /* auto: la página crece con el texto agrandado (ver npcs-rol.css). */
+    overflow-y: auto;
+    padding: 24px 4%;
+}
+
+/* …y oscuros para los claros. */
+:root[data-theme="light"] .oc-page,
+:root[data-theme="tranquilo"] .oc-page {
+    --oc-azul: #1f4fbf;
+    --oc-celeste: #00708f;
+    --oc-naranja: #b34700;
+    --oc-verde: #1d7a32;
+    --oc-gris: #5a5a66;
+    --oc-morado: #7a2bc4;
+    --oc-rojo: #b3121f;
+    --oc-rosa: #b0306f;
+    --oc-amarillo: #8a6d00;
+}
+
+/* En los puros y en los de terminal todo es del color del tema. */
+:root[data-theme="puro-claro"] .oc-page,
+:root[data-theme="puro-oscuro"] .oc-page,
+:root[data-theme^="terminal"] .oc-page {
+    --oc-azul: var(--yellow);
+    --oc-celeste: var(--yellow);
+    --oc-naranja: var(--yellow);
+    --oc-verde: var(--yellow);
+    --oc-gris: var(--yellow);
+    --oc-morado: var(--yellow);
+    --oc-rojo: var(--yellow);
+    --oc-rosa: var(--yellow);
+    --oc-amarillo: var(--yellow);
+}
+
+.oc-color-azul { --oc-color: var(--oc-azul); }
+.oc-color-celeste { --oc-color: var(--oc-celeste); }
+.oc-color-naranja { --oc-color: var(--oc-naranja); }
+.oc-color-verde { --oc-color: var(--oc-verde); }
+.oc-color-gris { --oc-color: var(--oc-gris); }
+.oc-color-morado { --oc-color: var(--oc-morado); }
+.oc-color-rojo { --oc-color: var(--oc-rojo); }
+.oc-color-rosa { --oc-color: var(--oc-rosa); }
+.oc-color-amarillo { --oc-color: var(--oc-amarillo); }
+
+/* Que no se encoja nada dentro de la columna que se desplaza. */
+.oc-page > * {
+    flex: none;
+}
+
+.oc-cabecera {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+    max-width: 60rem;
+}
+
+.oc-page .home-title {
+    margin: 0;
+    font-size: clamp(2.75rem, 5vw, 4.5rem);
+    line-height: 1.05;
+    overflow-wrap: break-word;
+}
+
+.oc-intro {
+    margin: 0;
+    max-width: 48rem;
+    color: var(--white);
+    font-size: 1rem;
+    line-height: 1.6;
+}
+
+.oc-nombre-completo {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    margin: 0;
+    color: var(--yellow);
+    font-family: var(--fuente-mono);
+    font-size: 1rem;
+    letter-spacing: 1px;
+}
+
+.oc-icono {
+    font-family: initial;
+    letter-spacing: 0;
+}
+
+.oc-volver {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    align-self: flex-start;
+    padding: 8px 14px;
+    border: 2px solid var(--yellow);
+    color: var(--yellow);
+    font-family: var(--fuente-mono);
+    font-size: 0.8125rem;
+    letter-spacing: 1px;
+    text-decoration: none;
+    transition: color 0.15s linear, background-color 0.15s linear;
+}
+
+.oc-volver:hover,
+.oc-volver:focus-visible {
+    background: var(--yellow);
+    color: var(--yellow-contrast);
+}
+
+.oc-volver:focus-visible {
+    outline: 2px solid var(--yellow);
+    outline-offset: 3px;
+}
+
+.oc-vacio {
+    margin: 0;
+    color: var(--muted);
+    font-style: italic;
+}
+
+
+/* ====================================================================
+   EL ÍNDICE: LA REJILLA DE REDONDELES
+   ==================================================================== */
+
+.oc-rejilla {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 10.5rem), 1fr));
+    gap: 28px 24px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.oc-celda {
+    display: flex;
+    min-width: 0;
+}
+
+/* Toda la tarjeta es el enlace: el redondel, el nombre y la etiqueta. */
+.oc-tarjeta {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+    color: var(--white);
+    text-decoration: none;
+}
+
+.oc-tarjeta:focus-visible {
+    outline: 2px solid var(--yellow);
+    outline-offset: 4px;
+}
+
+.oc-tarjeta-aro {
+    position: relative;
+    width: 100%;
+    max-width: 13rem;
+}
+
+/* El aro: un borde gordo del color del personaje y, por dentro, una raya
+   fina oscura, que es lo que lo despega de una foto del mismo color. */
+.oc-tarjeta-foto {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    overflow: hidden;
+    border: 7px solid var(--oc-color);
+    border-radius: 50%;
+    background: var(--purple-lighter);
+    box-shadow: inset 0 0 0 2px var(--oc-rotulo-borde);
+    transition: transform 0.15s linear;
+}
+
+.oc-tarjeta-foto img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.oc-tarjeta:hover .oc-tarjeta-foto,
+.oc-tarjeta:focus-visible .oc-tarjeta-foto {
+    transform: translate(-2px, -3px);
+}
+
+/* Sin foto: la inicial, como los tokens de los NPC. */
+.oc-inicial {
+    color: var(--oc-color);
+    font-family: var(--fuente-titular);
+    font-size: 4rem;
+    line-height: 1;
+    user-select: none;
+}
+
+/* EL NOMBRE GRANDE, encima de la parte de abajo de la foto, como un
+   rótulo. aria-hidden en el HTML: el nombre de verdad es la etiqueta de
+   debajo (y si no, se leería dos veces). */
+.oc-tarjeta-nombre {
+    position: absolute;
+    left: 50%;
+    bottom: 10%;
+    max-width: 100%;
+    transform: translateX(-50%);
+    color: var(--oc-rotulo);
+    font-family: var(--fuente-mano);
+    font-size: clamp(1.5rem, 2.6vw, 2.1rem);
+    font-weight: 700;
+    line-height: 1;
+    text-align: center;
+    white-space: nowrap;
+    /* El contorno: ocho sombras alrededor (sin -webkit-text-stroke, que
+       se come las letras finas por dentro). */
+    text-shadow:
+        2px 0 0 var(--oc-rotulo-borde), -2px 0 0 var(--oc-rotulo-borde),
+        0 2px 0 var(--oc-rotulo-borde), 0 -2px 0 var(--oc-rotulo-borde),
+        2px 2px 0 var(--oc-rotulo-borde), -2px 2px 0 var(--oc-rotulo-borde),
+        2px -2px 0 var(--oc-rotulo-borde), -2px -2px 0 var(--oc-rotulo-borde),
+        0 4px 6px var(--oc-rotulo-borde);
+    pointer-events: none;
+}
+
+/* LA ETIQUETA: el icono y el nombre completo, con una raya del color. */
+.oc-tarjeta-etiqueta {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    width: 100%;
+    padding: 6px 10px;
+    border: 2px solid var(--border);
+    border-left: 8px solid var(--oc-color);
+    background: var(--purple-lighter);
+    font-family: var(--fuente-mono);
+    font-size: 0.875rem;
+    font-weight: 700;
+    line-height: 1.4;
+    overflow-wrap: anywhere;
+}
+
+.oc-tarjeta:hover .oc-tarjeta-completo,
+.oc-tarjeta:focus-visible .oc-tarjeta-completo {
+    color: var(--yellow);
+    text-decoration: underline;
+}
+
+.oc-tarjeta-que {
+    align-self: flex-start;
+    margin-top: -6px;
+    padding: 0 10px;
+    color: var(--muted);
+    font-size: 0.8125rem;
+}
+
+
+/* ====================================================================
+   LA FICHA DE UNO
+   ====================================================================
+   El lateral (la foto y lo demás) va antes en el HTML y se pinta a la
+   derecha con row-reverse; en el móvil, una debajo de otra y la foto
+   arriba (ver el responsive). */
+
+.oc-columnas {
+    display: flex;
+    flex-direction: row-reverse;
+    align-items: flex-start;
+    gap: 28px;
+}
+
+.oc-principal {
+    flex: 1 1 30rem;
+    min-width: 0;
+}
+
+.oc-lateral {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+    flex: 0 1 16rem;
+    min-width: 0;
+    /* Hueco para el post-it, que va un poco torcido y se saldría. */
+    padding: 6px 6px 0;
+}
+
+/* ---- LAS PESTAÑAS ----
+   Sin JavaScript son enlaces (un <nav> que salta a cada apartado); con
+   él, botones con role="tab". Se ven igual de las dos maneras. */
+.oc-pestanas,
+.oc-pestanas-lista {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 12px;
+}
+
+.oc-pestana {
+    display: inline-block;
+    padding: 8px 14px;
+    border: 3px solid var(--yellow);
+    background: var(--purple-lighter);
+    color: var(--yellow);
+    font-family: var(--fuente-mono);
+    font-size: 0.9375rem;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-align: left;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.oc-pestana:hover {
+    background: var(--purple);
+    text-decoration: underline;
+}
+
+/* La elegida: rellena, y con una raya del color del personaje debajo
+   (el garabato del dibujo). */
+.oc-pestana[aria-selected="true"] {
+    background: var(--yellow);
+    color: var(--yellow-contrast);
+    box-shadow: 0 5px 0 var(--oc-color);
+    text-decoration: none;
+}
+
+.oc-pestana:focus-visible {
+    outline: 2px solid var(--yellow);
+    outline-offset: 3px;
+}
+
+/* ---- EL RECUADRO ---- */
+.oc-panel {
+    min-height: 22rem;
+    padding: 20px 22px;
+    border: 3px solid var(--yellow);
+    background: var(--purple-lighter);
+    box-shadow: 6px 6px 0 var(--yellow);
+    color: var(--white);
+}
+
+.oc-apartado:focus-visible {
+    outline: 2px solid var(--yellow);
+    outline-offset: 6px;
+}
+
+.oc-apartado[hidden] {
+    display: none;
+}
+
+/* Sin pestañas (sin JavaScript), los cuatro uno debajo de otro. */
+.oc-apartado + .oc-apartado {
+    margin-top: 26px;
+    padding-top: 20px;
+    border-top: 2px dashed var(--border);
+}
+
+.oc-apartado-titulo {
+    margin: 0 0 12px;
+    color: var(--yellow);
+    font-family: var(--fuente-mono);
+    font-size: 0.9375rem;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+}
+
+/* Con pestañas, el título ya es la pestaña: solo para el lector. */
+.oc-panel.con-pestanas .oc-apartado-titulo {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+}
+
+.oc-panel.con-pestanas .oc-apartado + .oc-apartado {
+    margin-top: 0;
+    padding-top: 0;
+    border-top: 0;
+}
+
+/* ---- EL TEXTO (la historia y lo de «extra», en Markdown) ---- */
+.oc-texto {
+    font-size: 1rem;
+    line-height: 1.7;
+    overflow-wrap: break-word;
+}
+
+.oc-texto > :first-child {
+    margin-top: 0;
+}
+
+.oc-texto > :last-child {
+    margin-bottom: 0;
+}
+
+.oc-texto p,
+.oc-texto ul,
+.oc-texto ol {
+    margin: 0 0 0.9em;
+}
+
+.oc-texto ul,
+.oc-texto ol {
+    padding-left: 1.4em;
+}
+
+.oc-texto h2,
+.oc-texto h3,
+.oc-texto h4 {
+    margin: 1.2em 0 0.4em;
+    color: var(--yellow);
+    font-family: var(--fuente-mono);
+    font-size: 1.0625rem;
+    letter-spacing: 1px;
+}
+
+.oc-texto blockquote {
+    margin: 0 0 0.9em;
+    padding: 4px 0 4px 14px;
+    border-left: 4px solid var(--oc-color);
+    font-style: italic;
+}
+
+.oc-texto a {
+    color: var(--yellow);
+}
+
+.oc-texto img {
+    display: block;
+    max-width: 100%;
+    height: auto;
+    margin: 0.6em 0;
+    border: 3px solid var(--yellow);
+}
+
+/* [[Alguien]] que no es ninguno de mis personajes: texto, no enlace. */
+.oc-texto .mundo-enlace-vacio {
+    border-bottom: 1px dashed var(--muted);
+}
+
+/* ---- LA GENTE (pestaña npcs) ---- */
+.oc-npcs {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.oc-npc {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--border);
+}
+
+.oc-npc:last-child {
+    padding-bottom: 0;
+    border-bottom: 0;
+}
+
+.oc-npc-foto {
+    display: flex;
+    flex: 0 0 auto;
+    align-items: center;
+    justify-content: center;
+    width: 5.5rem;
+    aspect-ratio: 1 / 1;
+    overflow: hidden;
+    border: 3px solid var(--yellow);
+    border-radius: 50%;
+    background: var(--purple);
+}
+
+.oc-npc-foto img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.oc-npc-foto .oc-inicial {
+    color: var(--yellow);
+    font-size: 2rem;
+}
+
+.oc-npc-texto {
+    flex: 1 1 auto;
+    min-width: 0;
+}
+
+.oc-npc-nombre {
+    margin: 0;
+    color: var(--yellow);
+    font-size: 1.125rem;
+}
+
+.oc-npc-que,
+.oc-npc-relacion {
+    margin: 2px 0 0;
+    font-family: var(--fuente-mono);
+    font-size: 0.8125rem;
+}
+
+.oc-npc-relacion {
+    color: var(--muted);
+}
+
+.oc-npc-notas {
+    margin-top: 8px;
+    font-size: 0.9375rem;
+}
+
+/* ---- LAS IMÁGENES ---- */
+.oc-galeria {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 9rem), 1fr));
+    gap: 16px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.oc-foto figure {
+    margin: 0;
+}
+
+.oc-foto .lightbox-trigger,
+.oc-retrato.lightbox-trigger {
+    display: block;
+    width: 100%;
+    padding: 0;
+    border: 0;
+    background: none;
+    cursor: zoom-in;
+}
+
+.oc-foto img {
+    display: block;
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    object-fit: cover;
+    border: 3px solid var(--yellow);
+}
+
+.oc-foto .lightbox-trigger:focus-visible,
+.oc-retrato.lightbox-trigger:focus-visible {
+    outline: 3px solid var(--yellow);
+    outline-offset: 3px;
+}
+
+.oc-foto figcaption {
+    margin-top: 6px;
+    color: var(--muted);
+    font-size: 0.8125rem;
+    line-height: 1.4;
+}
+
+/* ---- EL POST-IT: la foto y las características ----
+   El amarillo de las barras de título con su contraste encima, como el
+   post-it de las notas de rol (ese par ya está medido en los diez temas),
+   y torcido un grado para que se lea como algo pegado. */
+.oc-postit {
+    padding: 16px 16px 18px;
+    background: var(--yellow);
+    color: var(--yellow-contrast);
+    transform: rotate(1deg);
+    box-shadow: 3px 5px 0 var(--oc-color);
+}
+
+.oc-retrato {
+    position: relative;
+}
+
+.oc-retrato img {
+    display: block;
+    width: 100%;
+    aspect-ratio: 4 / 5;
+    object-fit: cover;
+    border: 3px solid var(--yellow-contrast);
+}
+
+.oc-retrato.es-sin-foto {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    aspect-ratio: 4 / 5;
+    border: 3px dashed var(--yellow-contrast);
+}
+
+.oc-retrato .oc-inicial {
+    color: var(--yellow-contrast);
+    font-size: 5rem;
+}
+
+.oc-postit-que {
+    margin: 12px 0 0;
+    font-family: var(--fuente-mono);
+    font-size: 0.875rem;
+    font-weight: 700;
+    text-align: center;
+}
+
+.oc-postit-lema {
+    margin: 6px 0 0;
+    font-family: var(--fuente-mano);
+    font-size: 1.0625rem;
+    text-align: center;
+}
+
+.oc-stats-titulo {
+    margin: 14px 0 8px;
+    padding-top: 10px;
+    border-top: 1px dashed currentColor;
+    font-family: var(--fuente-mono);
+    font-size: 0.75rem;
+    letter-spacing: 1px;
+    text-align: center;
+    text-transform: uppercase;
+}
+
+/* Las seis, de tres en tres: un cuadradito cada una con el valor grande y
+   el modificador debajo, como en la hoja de personaje. */
+.oc-stats {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 8px;
+    margin: 0;
+}
+
+.oc-stat {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 6px 2px 8px;
+    border: 2px solid var(--yellow-contrast);
+    text-align: center;
+}
+
+.oc-stat dt {
+    font-family: var(--fuente-mono);
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 1px;
+}
+
+.oc-stat abbr {
+    text-decoration: none;
+}
+
+.oc-stat dd {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin: 0;
+}
+
+.oc-stat-valor {
+    font-size: 1.5rem;
+    font-weight: 700;
+    line-height: 1.2;
+}
+
+.oc-stat-mod {
+    font-family: var(--fuente-mono);
+    font-size: 0.8125rem;
+}
+
+/* ---- VER LA FICHA EN PDF ---- */
+.oc-pdf {
+    display: block;
+    padding: 12px 14px;
+    border: 3px solid var(--yellow);
+    background: var(--purple-lighter);
+    box-shadow: 5px 5px 0 var(--yellow);
+    color: var(--yellow);
+    font-family: var(--fuente-mono);
+    font-size: 0.9375rem;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-align: center;
+    text-decoration: none;
+}
+
+.oc-pdf:hover,
+.oc-pdf:focus-visible {
+    background: var(--yellow);
+    color: var(--yellow-contrast);
+}
+
+.oc-pdf:focus-visible {
+    outline: 2px solid var(--yellow);
+    outline-offset: 4px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .oc-tarjeta-foto {
+        transition: none;
+    }
+
+    .oc-tarjeta:hover .oc-tarjeta-foto,
+    .oc-tarjeta:focus-visible .oc-tarjeta-foto {
+        transform: none;
+    }
+}

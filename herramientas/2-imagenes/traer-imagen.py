@@ -56,7 +56,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 import datetime as dt
 
-from comun import RAIZ, campanas_que_hay, elegir, elegir_campana, preguntar
+from comun import RAIZ, campanas_que_hay, elegir, elegir_campana, nombre_archivo, preguntar
 from imagenes import SITIOS, limpiar_ruta, nombre_para, resolver, traer
 
 
@@ -125,6 +125,13 @@ def rellenar_carpeta(plantilla, args):
                 else preguntar("¿De qué santuario? (carpeta)")
         carpeta = carpeta.replace("{santuario}", cual)
 
+    if "{personaje}" in carpeta:
+        # Uno de mis personajes: su clave (la de su carpeta y su página).
+        cual = nombre_archivo((args.personaje or "").strip(), "")
+        while not cual:
+            cual = nombre_archivo(preguntar("¿De qué personaje? (su clave: yorel, diana…)"), "")
+        carpeta = carpeta.replace("{personaje}", cual)
+
     return carpeta
 
 
@@ -184,6 +191,7 @@ def pedir_argumentos():
     parser.add_argument("--campana", help="clave de la campaña, si va en una")
     parser.add_argument("--anyo", help="año, si va en el blog")
     parser.add_argument("--santuario", help="carpeta del santuario, si va en uno")
+    parser.add_argument("--personaje", help="clave de uno de mis personajes, si es suya")
     parser.add_argument("--carpeta", help="carpeta del sitio, con --para otra")
     parser.add_argument("--probar", action="store_true",
                         help="dice qué haría y no toca nada")

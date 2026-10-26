@@ -93,7 +93,7 @@ CARPETAS_EXCLUIDAS = {"herramientas", "fragmentos"}
 # El orden en que salen las secciones en la tabla. Lo que no esté aquí
 # va al final, por orden alfabético.
 ORDEN_SECCIONES = [
-    "portada", "blog", "relatos", "rol", "notas de rol", "wiki cralëa",
+    "portada", "blog", "relatos", "rol", "notas de rol", "mis personajes", "wiki cralëa",
     "santuarios", "recomendaciones", "otras",
 ]
 
@@ -138,6 +138,9 @@ def seccion_de(url):
     # distintas, aunque las dos sean de rol.
     if url.startswith("/web/notas_rol/"):
         return "notas de rol"
+    # Mis personajes: aparte de las campañas y de la wiki.
+    if url.startswith("/web/personajes/"):
+        return "mis personajes"
     if url.startswith("/web/santuarios/"):
         return "santuarios"
     if url.startswith("/web/recomendaciones/"):

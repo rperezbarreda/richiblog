@@ -445,6 +445,8 @@ GENERADORES = (
     # generar-posts, que escribe con ellos la ficha de cada campaña.
     "2-imagenes/tokens-pequenos.py",
     "3-generadores/generar-posts.py",
+    # Mis personajes: el índice y la ficha de cada uno, de su JSON.
+    "3-generadores/generar-personajes.py",
     # Los comentarios de explicación de las plantillas, fuera de lo
     # publicado (los borradores se quedan con su guía). Después de
     # generar-archivo, que escribe páginas nuevas desde una plantilla.

@@ -145,6 +145,35 @@ SITIOS = {
         "lado": 1200,
         "cuadrada": False,
     },
+    # Mis personajes (mis OC): todo lo de cada uno en su carpeta.
+    "oc-token": {
+        "que": "el redondel de uno de mis personajes (el índice)",
+        "carpeta": "imagenes/personajes/{personaje}",
+        "sufijo": "_tkn",
+        "lado": 600,
+        "cuadrada": True,
+    },
+    "oc-retrato": {
+        "que": "el retrato de uno de mis personajes (el post-it de su ficha)",
+        "carpeta": "imagenes/personajes/{personaje}",
+        "sufijo": "",
+        "lado": 900,
+        "cuadrada": False,
+    },
+    "oc-imagen": {
+        "que": "una imagen de uno de mis personajes (su galería o su historia)",
+        "carpeta": "imagenes/personajes/{personaje}",
+        "sufijo": "",
+        "lado": 1600,
+        "cuadrada": False,
+    },
+    "oc-npc": {
+        "que": "alguien de la gente de uno de mis personajes",
+        "carpeta": "imagenes/personajes/{personaje}/gente",
+        "sufijo": "_tkn",
+        "lado": 300,
+        "cuadrada": True,
+    },
     "otra": {
         "que": "otra cosa (se pregunta la carpeta)",
         "carpeta": "imagenes",

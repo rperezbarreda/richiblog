@@ -3663,6 +3663,65 @@
 
 
 ---------------------------------------------------------------
+  MIS PERSONAJES (mis OC) — desde el 26-10-2026
+---------------------------------------------------------------
+
+  Un apartado APARTE: no tiene nada que ver con las campañas (notas
+  de rol) ni con la wiki de Cralëa. En el menú de la web, en
+  «roleito» → «mis personajes».
+
+  DÓNDE ESTÁ CADA COSA
+      datos/personajes/personajes.json   todo: los personajes, su
+                                         gente y sus imágenes
+      web/personajes/index_personajes.html   el índice (los redondeles)
+      web/personajes/<clave>/<clave>.html     la ficha de cada uno
+      imagenes/personajes/<clave>/        sus imágenes y su ficha en
+                                          PDF (ficha-<clave>.pdf); la
+                                          gente, en .../gente/
+  Las páginas las ESCRIBE generar-personajes.py: no se tocan a mano
+  (se pisaría lo tocado). Lo de dentro se cambia en el JSON o en el
+  editor.
+
+  CÓMO SE LLEVA: en el editor, Rol → «Mis personajes». Tres listas:
+    · LOS PERSONAJES: nombre (el grande del redondel), nombre
+      completo (el de la etiqueta), su dirección (la clave; si se deja
+      en blanco sale del nombre, y mejor no cambiarla luego), icono
+      (un emoji), color del aro (azul, celeste, naranja, verde, gris,
+      morado, rojo, rosa, amarillo), token (el redondel del índice),
+      retrato (la foto del post-it; sin él sale el token), raza,
+      clase, nivel, una frase suya, las seis características de D&D
+      (el modificador se calcula solo), la ficha en PDF (botón «Subir
+      el PDF»: va a su carpeta y sale «ver ficha pdf»), la historia y
+      «extra». Historia y extra van con formato (el Markdown de la
+      wiki, con su barra de botones e imágenes), y [[Otro personaje]]
+      enlaza con su ficha.
+    · SU GENTE (la pestaña npcs): de quién es, nombre, quién es, cómo
+      se llevan, foto y lo que hay que saber.
+    · SUS IMÁGENES (la pestaña imágenes): de quién es, la imagen, qué
+      se ve (obligatorio) y un pie.
+  Las imágenes se suben desde su casilla y van solas a la carpeta del
+  personaje, en WebP y a su tamaño (sitios oc-token, oc-retrato,
+  oc-imagen y oc-npc de herramientas/imagenes.py; traer-imagen.py los
+  acepta con --personaje <clave>). Al guardar se pasan
+  generar-personajes, quitar-comentarios, el sitemap, el buscador y
+  las cabeceras. Para la gente y las imágenes, el personaje tiene que
+  estar guardado antes.
+
+  Sin el editor:  python3 herramientas/3-generadores/generar-personajes.py
+  (también va con los demás generadores). Un personaje quitado del
+  JSON no se borra de la web: se avisa y su carpeta se borra a mano.
+
+  LA FICHA: a la izquierda cuatro PESTAÑAS (historia, npcs, imágenes,
+  extra; con las flechas se pasa de una a otra, y la dirección lleva
+  la elegida: .../yorel.html#oc-imagenes); a la derecha el post-it con
+  la foto (se amplía al pulsarla) y las características, y debajo «ver
+  ficha pdf». En el móvil, la foto arriba y las pestañas debajo. Sin
+  JavaScript se ven los cuatro apartados uno debajo de otro. Estilos:
+  estilos/paginas/personajes.css (y .responsive); el script,
+  scripts/paginas/personajes.js (solo las pestañas).
+
+
+---------------------------------------------------------------
   Y CUANDO TERMINES, SIEMPRE
 ---------------------------------------------------------------
 

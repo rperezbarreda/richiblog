@@ -100,8 +100,11 @@ APARTADOS = [
         ("Añadir algo a los recursos de rol",
          "1-publicar/nuevo.py", ["--rol"],
          "Una ficha, un mapa, una aventura… para el portfolio."),
+        ("Pasar mis personajes a la web",
+         "3-generadores/generar-personajes.py", [],
+         "Rehace el índice y la ficha de cada uno desde datos/personajes/personajes.json."),
         PUBLICAR,
-        editor("rol", "Las notas de partida, los NPC, el botín y los recursos, con fichas."),
+        editor("rol", "Las notas de partida, los NPC, el botín, los recursos y mis personajes, con fichas."),
     ]),
 
     ("Wiki Cralëa", "escribir sus páginas, la línea de tiempo y pasarla a la web", [

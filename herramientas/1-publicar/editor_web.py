@@ -1068,6 +1068,14 @@ def _campos_de_carpeta(sitio, campos):
         if clave not in {d.get("clave") for _, d in campanas_que_hay()}:
             raise ValueError("no encuentro esa campaña")
         salida["campana"] = clave
+    if "{personaje}" in img.SITIOS[sitio]["carpeta"]:
+        # Uno de mis personajes: su clave (la de su carpeta). Puede ser uno
+        # recién añadido que aún no se ha guardado, así que basta con que
+        # sea una clave que valga.
+        clave = nombre_archivo(str(campos.get("personaje") or ""), "")
+        if not clave:
+            raise ValueError("primero ponle nombre al personaje")
+        salida["personaje"] = clave
     if "{santuario}" in img.SITIOS[sitio]["carpeta"]:
         gato = str(campos.get("santuario") or "")
         if gato not in santuarios():
@@ -1213,6 +1221,7 @@ def colecciones():
     es_magico = {"tipo": ["objetos mágicos"]}
     con_descripcion = {"tipo": ["pergaminos", "objetos mágicos"]}
     rarezas = ["común", "poco común", "rara", "muy rara", "legendaria", "artefacto"]
+    colores_oc = ["azul", "celeste", "naranja", "verde", "gris", "morado", "rojo", "rosa", "amarillo"]
     monedas = [["po", "po (oro)"], ["pp", "pp (plata)"], ["pc", "pc (cobre)"], ["pe", "pe (electro)"],
                ["ppt", "ppt (platino)"]]
     return [
@@ -1376,6 +1385,62 @@ def colecciones():
                            ayuda="Un personaje por línea con su parte, en la misma moneda: «Mellissa: 20»."
                                  " «Cada uno: 5» es lo mismo para todos. Lo que no se reparte es del grupo."),
                      ]}]},
+        {"id": "personajes", "apartado": "personajes", "titulo": "Mis personajes",
+         "ayuda": "Mis OC: el índice de redondeles y la ficha de cada uno (historia, npcs, imágenes, extra, la foto con"
+                  " sus características y su PDF). Va aparte de las campañas y de la wiki.",
+         "archivo": "datos/personajes/personajes.json", "despues": "personajes",
+         "partes": [
+             {"id": "datos", "tipo": "objeto", "camino": [], "titulo": "La página de mis personajes", "campos": [
+                 C("titulo", "Título", ayuda="«mis personajes»: el grande de arriba del índice."),
+                 C("intro", "La entradilla", "largo")]},
+             {"id": "personajes", "camino": ["personajes"], "titulo": "Los personajes", "nombre_de": "nombre",
+              "detalle": ["nombre_completo", "color"], "campos": [
+                  C("nombre", "Nombre", obligatorio=True, ayuda="El corto, el que va en grande en el redondel."),
+                  C("nombre_completo", "Nombre completo", siempre=True, ayuda="«Yorel Telvet»: el de la etiqueta."),
+                  C("clave", "Su dirección", vacio="quitar",
+                    ayuda="El nombre de su carpeta y de su página (yorel). Si lo dejas en blanco, sale del nombre."
+                          " Mejor no cambiarlo después: cambiaría su dirección."),
+                  C("icono", "Icono", vacio="quitar", ayuda="Un emoji que va delante del nombre completo: ✨, 🐺…"),
+                  C("color", "Color del aro", "elegir", obligatorio=True, opciones=_opciones(colores_oc)),
+                  C("token", "Token (el redondel del índice)", "imagen", sitio="oc-token", siempre=True),
+                  C("retrato", "Retrato (la foto del post-it)", "imagen", sitio="oc-retrato", vacio="quitar",
+                    ayuda="De pie, mejor. Si no hay, sale el token."),
+                  C("retrato_alt", "Cómo es (para quien no ve el retrato)", vacio="quitar"),
+                  C("raza", "Raza", vacio="quitar"),
+                  C("clase", "Clase", vacio="quitar"),
+                  C("nivel", "Nivel", "numero", minimo=1, maximo=30, vacio="quitar"),
+                  C("lema", "Una frase suya", vacio="quitar", ayuda="Sale en el post-it, debajo de la clase."),
+              ] + [C(k, n, "numero", minimo=1, maximo=30, vacio="quitar",
+                     ayuda="La puntuación (el modificador se calcula solo)." if k == "fue" else "")
+                   for k, n in (("fue", "Fuerza"), ("des", "Destreza"), ("con", "Constitución"),
+                                ("int", "Inteligencia"), ("sab", "Sabiduría"), ("car", "Carisma"))] + [
+                  C("ficha", "La ficha en PDF", "pdf", vacio="quitar",
+                    ayuda="Se guarda en su carpeta y sale el botón «ver ficha pdf»."),
+                  C("historia", "Historia", "largo", grande=True, vacio="quitar", markdown=True, imagenes="oc-imagen",
+                    ayuda="Con formato: **negrita**, ## apartados, > citas, [[Otro personaje]] enlaza con su ficha."),
+                  C("extra", "Extra", "largo", grande=True, vacio="quitar", markdown=True, imagenes="oc-imagen",
+                    ayuda="Lo que no es historia: manías, curiosidades, canciones…"),
+              ]},
+             {"id": "gente", "camino": ["gente"], "titulo": "Su gente (la pestaña npcs)",
+              "agrupada": {"clave": "personaje", "nombre": "personaje", "dentro": "cosas", "libre": True},
+              "nombre_de": "nombre", "detalle": ["que", "relacion"], "campos": [
+                  C("_grupo", "De quién", "elegir", obligatorio=True,
+                    ayuda="El personaje en cuya ficha sale (tiene que estar guardado ya)."),
+                  C("nombre", "Nombre", obligatorio=True),
+                  C("que", "Quién es", vacio="quitar", ayuda="«Su hermana», «su maestro»…"),
+                  C("relacion", "Cómo se llevan", vacio="quitar"),
+                  C("token", "Foto (el redondel)", "imagen", sitio="oc-npc", vacio="quitar"),
+                  C("notas", "Lo que hay que saber", "largo", vacio="quitar", markdown=True),
+              ]},
+             {"id": "imagenes", "camino": ["imagenes"], "titulo": "Sus imágenes (la pestaña imágenes)",
+              "agrupada": {"clave": "personaje", "nombre": "personaje", "dentro": "cosas", "libre": True},
+              "nombre_de": "alt", "detalle": ["pie"], "campos": [
+                  C("_grupo", "De quién", "elegir", obligatorio=True),
+                  C("imagen", "Imagen", "imagen", sitio="oc-imagen", obligatorio=True),
+                  C("alt", "Qué se ve", obligatorio=True, ayuda="Para quien no la ve."),
+                  C("pie", "Pie de foto", vacio="quitar"),
+              ]},
+         ]},
         {"id": "recomendaciones", "apartado": "rincon", "titulo": "Recomendaciones",
          "ayuda": "Libros, series, pelis, juegos… las ventanitas de la página de recomendaciones.",
          "archivo": "datos/mi_rincon/recomendaciones.json", "despues": None,
@@ -1608,6 +1673,9 @@ def opciones_de(col, clave_campana, datos):
         salida["de"] = _sesiones_de(campana)
         salida["quien"] = _opciones([p.get("nombre", "") for p in (campana or {}).get("personajes") or []
                                      if isinstance(p, dict)] + ["el carro"])
+    if col["id"] == "personajes":
+        salida["_grupo"] = [[_clave_oc(p), str(p.get("nombre") or _clave_oc(p))]
+                            for p in (datos or {}).get("personajes") or [] if isinstance(p, dict) and _clave_oc(p)]
     if col["id"] == "recomendaciones":
         salida["_grupo"] = [[g.get("clave"), g.get("nombre")] for g in datos or [] if isinstance(g, dict)]
     if col["id"] == "calendario":
@@ -1705,6 +1773,8 @@ def _valor(campo, crudo, ficha_nombre):
         raise ValueError("%s tiene que empezar por http://, https:// o / (una página del sitio)" % donde)
     if tipo == "color" and not re.fullmatch(r"#[0-9a-fA-F]{6}", texto):
         raise ValueError("%s no es un color (#rrggbb)" % donde)
+    if tipo == "pdf" and not re.fullmatch(r"/imagenes/[\w/\-]+\.pdf", texto):
+        raise ValueError("%s tiene que ser un PDF del sitio: súbelo con su botón" % donde)
     if tipo == "imagen" and not (texto.startswith("/") and not texto.startswith("//")):
         raise ValueError("%s tiene que ser una imagen del sitio (/imagenes/…): súbela con su botón" % donde)
     if campo.get("anyo"):
@@ -1863,6 +1933,8 @@ def guardar_coleccion(peticion):
                 for f in nuevas:
                     _arreglar_evento_del_calendario(datos, f)
             lista[:] = nuevas
+        if col["id"] == "personajes":
+            _arreglar_personajes(datos)
         if col["id"] == "misiones":
             # Una misión cerrada (completada o fallada) sin decir en qué
             # sesión: en la última que haya, que es casi siempre la de
@@ -1913,6 +1985,57 @@ def _arreglar_evento_del_calendario(datos, evento):
         raise ValueError("el enlace de «%s» lleva a una página que no existe" % evento.get("nombre"))
 
 
+def _clave_oc(p):
+    return nombre_archivo(str(p.get("clave") or p.get("nombre") or ""), "")
+
+
+def _arreglar_personajes(datos):
+    """Cada personaje con su clave (si no la tiene, la de su nombre) y sin
+    repetir; y lo de las pestañas npcs e imágenes, de uno que exista."""
+    vistas = set()
+    for p in datos.get("personajes") or []:
+        if not isinstance(p, dict):
+            continue
+        clave = _clave_oc(p)
+        if not clave:
+            raise ValueError("«%s» necesita un nombre con alguna letra" % (p.get("nombre") or "?"))
+        if clave in vistas:
+            raise ValueError("hay dos personajes con la dirección «%s»: cámbiasela a uno" % clave)
+        vistas.add(clave)
+        p["clave"] = clave
+        if not re.fullmatch(r"[a-z0-9-]+", clave):
+            raise ValueError("la dirección «%s» solo puede llevar letras sin tilde, números y guiones" % clave)
+    for lista in ("gente", "imagenes"):
+        for grupo in datos.get(lista) or []:
+            if isinstance(grupo, dict) and grupo.get("personaje") not in vistas:
+                raise ValueError("hay %s de «%s», que no es ninguno de los personajes"
+                                 % ("gente" if lista == "gente" else "imágenes", grupo.get("personaje")))
+
+
+def subir_pdf_de_personaje(peticion):
+    """La ficha en PDF de uno de mis personajes, a su carpeta:
+    imagenes/personajes/<clave>/ficha-<clave>.pdf (pisa la que hubiera)."""
+    clave = nombre_archivo(str(peticion.get("personaje") or ""), "")
+    if not clave:
+        return {"error": "Primero ponle nombre al personaje."}
+    datos = str(peticion.get("datos") or "")
+    if "," in datos:
+        datos = datos.split(",", 1)[1]
+    try:
+        crudo = base64.b64decode(datos, validate=True)
+    except ValueError:
+        return {"error": "El PDF no ha llegado bien."}
+    if not crudo.startswith(b"%PDF"):
+        return {"error": "Eso no es un PDF."}
+    if len(crudo) > 20 * 1024 * 1024:
+        return {"error": "Es demasiado grande (más de 20 MB)."}
+    destino = RAIZ / "imagenes" / "personajes" / clave / ("ficha-%s.pdf" % clave)
+    destino.parent.mkdir(parents=True, exist_ok=True)
+    destino.write_bytes(crudo)
+    return {"ok": True, "ruta": "/" + destino.relative_to(RAIZ).as_posix(),
+            "aviso": "%d KB" % max(1, len(crudo) // 1024)}
+
+
 def pasos_despues(que):
     if que == "generadores":
         return pasos_generadores()
@@ -1923,6 +2046,10 @@ def pasos_despues(que):
                                   "3-generadores/generar-posts.py", "3-generadores/generar-buscador.py")]
     if que == "linea":
         return [paso("3-generadores/generar-linea-tiempo.py")]
+    if que == "personajes":
+        return [paso(s) for s in ("3-generadores/generar-personajes.py", "3-generadores/quitar-comentarios.py",
+                                  "3-generadores/generar-sitemap.py", "3-generadores/generar-buscador.py",
+                                  "3-generadores/actualizar-cabeceras.py")]
     if que == "mundo":
         return [paso("3-generadores/generar-mundo.py"), paso("3-generadores/actualizar-cabeceras.py")]
     return []
@@ -2349,6 +2476,8 @@ def atender_post(ruta, peticion):
         return guardar_entrada(peticion)
     if ruta == "/api/web/entrada/publicar":
         return publicar_entrada(peticion)
+    if ruta == "/api/web/personaje/pdf":
+        return subir_pdf_de_personaje(peticion)
     if ruta == "/api/web/imagen":
         return subir_imagen(peticion)
     if ruta == "/api/web/coleccion/guardar":

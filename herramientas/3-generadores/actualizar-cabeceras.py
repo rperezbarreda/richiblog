@@ -94,6 +94,8 @@ PLANTILLAS = {
     "herramientas/plantillas/sesion-rol.html": "/web/notas_rol/ragna/sesion-99.html",
     "herramientas/plantillas/npcs-rol.html": "/web/notas_rol/ragna/npcs_ragna.html",
     "herramientas/plantillas/campana-rol.html": "/web/notas_rol/ragna/index_ragna.html",
+    "herramientas/plantillas/personajes-index.html": "/web/personajes/index_personajes.html",
+    "herramientas/plantillas/personaje.html": "/web/personajes/un-personaje/un-personaje.html",
 }
 
 # Carpetas que no son el sitio.
@@ -182,6 +184,9 @@ def hojas_de(ruta):
         and not es_npcs_rol
         and not re.search(r"/notas_rol/[^/]+/index_[^/]+\.html$", ruta)
     )
+    # Mis personajes (mis OC): el índice y la ficha de cada uno. Van
+    # aparte de las notas de rol y de la wiki, con su propia hoja.
+    es_personajes = "/web/personajes/" in ruta
     es_accesibilidad = "/accesibilidad/" in ruta
     es_changelog = "/changelog/" in ruta
     es_mapa = "/mapa/" in ruta
@@ -333,6 +338,13 @@ def hojas_de(ruta):
                 "/estilos/paginas/reto.css",
                 "/estilos/paginas/reto.responsive.css",
             ]
+    elif es_personajes:
+        # Marcos propios. La lupa de las fotos (la del retrato y la de la
+        # galería) es el visor de la base: no hace falta nada más.
+        hojas += [
+            "/estilos/paginas/personajes.css",
+            "/estilos/paginas/personajes.responsive.css",
+        ]
     elif es_accesibilidad:
         # Sin portada.css: esta página no usa nada de la portada, se
         # dibuja sus propios marcos (ver el comentario de .acc-bloque).
@@ -473,6 +485,8 @@ def scripts_de(ruta):
     # galería.
     es_ficha_santuario = bool(re.search(r"/santuarios/[^/]+/[^/]+$", camino))
     es_404 = camino.endswith("/not_found")
+    # La ficha de uno de mis personajes (no el índice): las pestañas.
+    es_ficha_personaje = bool(re.search(r"/web/personajes/[^/]+/[^/]+$", camino))
     es_changelog = "/changelog/" in camino
     es_mapa = "/mapa/" in camino
     es_buscar = "/buscar/" in camino
@@ -658,6 +672,8 @@ def scripts_de(ruta):
         js.append("/scripts/paginas/otras-entradas.js")
     elif es_ficha_santuario:
         js.append("/scripts/paginas/santuarios.js")
+    elif es_ficha_personaje:
+        js.append("/scripts/paginas/personajes.js")
     elif es_changelog:
         js.append("/scripts/paginas/changelog.js")
     elif es_recomendaciones:

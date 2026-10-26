@@ -495,6 +495,72 @@ function casillaDeFichaWeb(dentro, f, c, base, parte, alCambiar) {
         el.addEventListener("input", () => cambiar(el.value));
         return;
     }
+    if (c.tipo === "pdf") {
+        // Un PDF (la ficha de uno de mis personajes): se sube tal cual a
+        // su carpeta y aquí se apunta su ruta, con un enlace para verlo.
+        const caja = crearEditor("div", "campo");
+        const l = crearEditor("label", "", c.nombre);
+        l.htmlFor = id;
+        caja.appendChild(l);
+        if (ayuda) {
+            caja.appendChild(crearEditor("p", "ayuda", ayuda));
+        }
+        const texto = document.createElement("input");
+        texto.id = id;
+        texto.value = valor;
+        texto.autocomplete = "off";
+        texto.spellcheck = false;
+        texto.placeholder = "/imagenes/personajes/…/ficha-….pdf";
+        caja.appendChild(texto);
+        const ver = crearEditor("a", "", "Ver el PDF");
+        ver.target = "_blank";
+        ver.rel = "noopener";
+        const pintarVer = () => {
+            ver.hidden = !texto.value.trim();
+            ver.href = texto.value.trim() || "#";
+        };
+        pintarVer();
+        texto.addEventListener("input", () => {
+            cambiar(texto.value.trim());
+            pintarVer();
+        });
+        const subir = crearEditor("div", "subir");
+        const archivo = document.createElement("input");
+        archivo.type = "file";
+        archivo.accept = "application/pdf,.pdf";
+        archivo.id = id + "-subir";
+        const ls = crearEditor("label", "boton", "Subir el PDF");
+        ls.htmlFor = archivo.id;
+        subir.appendChild(archivo);
+        subir.appendChild(ls);
+        subir.appendChild(ver);
+        caja.appendChild(subir);
+        archivo.addEventListener("change", async () => {
+            const elegido = archivo.files && archivo.files[0];
+            if (!elegido) {
+                return;
+            }
+            avisarEditor("Subiendo el PDF…");
+            const datos = await new Promise((r) => {
+                const lector = new FileReader();
+                lector.onload = () => r(lector.result);
+                lector.onerror = () => r("");
+                lector.readAsDataURL(elegido);
+            });
+            archivo.value = "";
+            const hecho = await pedirEditor("/api/web/personaje/pdf", { personaje: personajeDeFichaWeb(f), datos });
+            if (!hecho || hecho.error) {
+                avisarEditor((hecho && hecho.error) || "No he podido subirlo.", true);
+                return;
+            }
+            texto.value = hecho.ruta;
+            cambiar(hecho.ruta);
+            pintarVer();
+            avisarEditor("PDF listo: " + hecho.ruta + " (" + hecho.aviso + "). Se apunta al guardar.");
+        });
+        dentro.appendChild(caja);
+        return;
+    }
     if (c.tipo === "imagen") {
         const caja = crearEditor("div", "campo");
         const l = crearEditor("label", "", c.nombre);
@@ -537,7 +603,8 @@ function casillaDeFichaWeb(dentro, f, c, base, parte, alCambiar) {
         vista.appendChild(subir);
         archivo.addEventListener("change", async () => {
             avisarEditor("Trayendo la imagen…");
-            const hecha = await subirImagenWeb(archivo, c.sitio, { campana: estadoFichas.campana },
+            const hecha = await subirImagenWeb(archivo, c.sitio, { campana: estadoFichas.campana,
+                personaje: personajeDeFichaWeb(f) },
                 String(f[parte.nombre_de] || c.nombre));
             archivo.value = "";
             if (!hecha) {
@@ -616,8 +683,18 @@ function casillaDeFichaWeb(dentro, f, c, base, parte, alCambiar) {
         // Con c.imagenes (a dónde van: «evento»…), también el botón de
         // meter una imagen.
         el.before(crearBarraMarkdown(el, nombre, null,
-            c.imagenes ? { imagenes: () => ({ sitio: c.imagenes, campos: { campana: estadoFichas.campana } }) } : null));
+            c.imagenes ? { imagenes: () => ({ sitio: c.imagenes, campos: { campana: estadoFichas.campana,
+                personaje: personajeDeFichaWeb(f) } }) } : null));
     }
+}
+
+// De qué personaje mío es una ficha (para la carpeta de sus imágenes):
+// la gente y las imágenes, el de su grupo; un personaje, su dirección o,
+// si aún no la tiene, la que saldrá de su nombre (como hace el servidor).
+function personajeDeFichaWeb(f) {
+    const de = String(f._grupo || f.clave || f.nombre || "");
+    return de.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/ñ/g, "n")
+        .replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
 }
 
 // LO QUE HACEN LOS BOTONES DE LAS FICHAS (casillas de tipo «accion»).
@@ -720,7 +797,9 @@ function pintarTraerImagenWeb() {
     if (!sitio || sitio.options.length) {
         return;
     }
-    estadoFichas.sitios.forEach((s) => {
+    // Lo de mis personajes no: va a la carpeta de cada uno, y eso se sube
+    // desde su ficha (Rol → Mis personajes), que ya sabe de quién es.
+    estadoFichas.sitios.filter((s) => !String(s.carpeta || "").includes("{personaje}")).forEach((s) => {
         const o = document.createElement("option");
         o.value = s.clave;
         o.textContent = s.que + " (" + s.lado + " px)";
