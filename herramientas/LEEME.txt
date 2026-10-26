@@ -4410,9 +4410,11 @@
   Lo que se coloque al lado de la barra tiene que medirse con
   --lateral-hueco (estilos/base.css) y no con --lateral-ancho, o al
   plegarla se queda un hueco vacío donde estaba.
-  Y lo que va PEGADO a la barra (una entrada, un relato, las notas de
-  una partida) deja además --lateral-botones (40px): lo que sobresalen
-  el ☰ y la lupa. Sin él tapaban el principio del título (26-10-2026).
+  Lo que va PEGADO a la barra (una entrada, un relato, las notas de
+  una partida) sigue pegado, con el ☰ y la lupa flotando encima de su
+  cabecera amarilla; lo que se aparta es lo de DENTRO de esa cabecera,
+  --lateral-botones (40px) más: lo que sobresalen los dos botones. Sin
+  él tapaban el principio del título (26-10-2026).
 
   POR QUÉ ESTÁ TODO AHÍ Y NO LO PIDE UN SCRIPT
   --------------------------------------------

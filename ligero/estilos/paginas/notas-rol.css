@@ -1029,8 +1029,8 @@ body:has(.cuaderno-page) main {
 }
 @media (min-width: 861px) {
     body:has(.cuaderno-page) main {
-        margin: 0 0 0 calc(var(--lateral-hueco) + var(--lateral-botones));
-        width: calc(100% - var(--lateral-hueco) - var(--lateral-botones));
+        margin: 0 0 0 var(--lateral-hueco);
+        width: calc(100% - var(--lateral-hueco));
     }
 }
 .cuaderno-post {
@@ -1066,7 +1066,7 @@ body:has(.cuaderno-page) main {
     flex-wrap: wrap;
     justify-content: space-between;
     gap: 16px;
-    padding: 14px calc(2.4rem + 30px) 14px 20px;
+    padding: 14px calc(2.4rem + 30px) 14px calc(20px + var(--lateral-botones));
     background: var(--yellow);
     user-select: none;
 }

@@ -1552,10 +1552,8 @@ body:has(.cuaderno-page) main {
    regla y la de notas-rol.responsive.css se lleven la contraria. */
 @media (min-width: 861px) {
     body:has(.cuaderno-page) main {
-        /* Y apartado de los botones ☰ y de la lupa, que sobresalen de
-           la barra y tapaban el principio del título. */
-        margin: 0 0 0 calc(var(--lateral-hueco) + var(--lateral-botones));
-        width: calc(100% - var(--lateral-hueco) - var(--lateral-botones));
+        margin: 0 0 0 var(--lateral-hueco);
+        width: calc(100% - var(--lateral-hueco));
     }
 }
 
@@ -1609,7 +1607,11 @@ body:has(.cuaderno-page) main {
        debajo del mando y le comería el final al botón de volver. Lo
        deshace notas-rol.responsive.css en móvil, donde el mando se va a
        la barra del título. */
-    padding: 14px calc(2.4rem + 30px) 14px 20px;
+    /* Y por la izquierda, apartado de los botones ☰ y de la lupa, que
+       flotan encima de esta barra (sobresalen de la lateral) y tapaban
+       el principio del título. En móvil no están ahí y el responsive
+       lo deja en 16px. */
+    padding: 14px calc(2.4rem + 30px) 14px calc(20px + var(--lateral-botones));
     background: var(--yellow);
     user-select: none;
 }
