@@ -198,7 +198,7 @@
     · EL MENÚ DEL EDITOR (desde el 26-10-2026): la cabecera está
       SIEMPRE A LA VISTA (fija arriba; lo que mide lo apunta editor.js
       en --alto-cabecera y el cuerpo, y la barra de botones del redactor
-      cuando te sigue, se ponen debajo) y va TODA EN UNA LÍNEA: la marca,
+      cuando te sigue, se ponen debajo). En su PRIMERA LÍNEA, la marca,
       el menú y los ajustes (A−, A+ y 🌓 contraste alto). El editor es
       para el ordenador: no tiene vista de móvil; si con la letra grande
       el menú no cabe, se desplaza de lado. Nueve apartados, cada uno con
