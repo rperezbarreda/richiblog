@@ -1395,12 +1395,16 @@ def colecciones():
                  C("intro", "La entradilla", "largo")]},
              {"id": "personajes", "camino": ["personajes"], "titulo": "Los personajes", "nombre_de": "nombre",
               "detalle": ["nombre_completo", "color"], "campos": [
+                  C("_previa", "Ver cómo queda (sin guardar)", "accion", accion="personaje-previa",
+                    ayuda="Abre su ficha en otra pestaña con lo que hay escrito ahora, aunque no esté guardado."),
                   C("nombre", "Nombre", obligatorio=True, ayuda="El corto, el que va en grande en el redondel."),
                   C("nombre_completo", "Nombre completo", siempre=True, ayuda="«Yorel Telvet»: el de la etiqueta."),
                   C("clave", "Su dirección", vacio="quitar",
                     ayuda="El nombre de su carpeta y de su página (yorel). Si lo dejas en blanco, sale del nombre."
                           " Mejor no cambiarlo después: cambiaría su dirección."),
                   C("icono", "Icono", vacio="quitar", ayuda="Un emoji que va delante del nombre completo: ✨, 🐺…"),
+                  C("etiquetas", "Etiquetas (para el filtro del índice)", vacio="quitar",
+                    ayuda="Separadas por comas: «D&D 5e, jugando, Ragna». Cada una sale como un botón del filtro."),
                   C("color", "Color del aro", "elegir", obligatorio=True, opciones=_opciones(colores_oc)),
                   C("token", "Token de la galería", "imagen", sitio="oc-token", siempre=True,
                     ayuda="El redondel del índice de mis personajes (cuadrado; se recorta solo). Solo sale ahí."),
@@ -1415,6 +1419,38 @@ def colecciones():
                      ayuda="La puntuación (el modificador se calcula solo)." if k == "fue" else "")
                    for k, n in (("fue", "Fuerza"), ("des", "Destreza"), ("con", "Constitución"),
                                 ("int", "Inteligencia"), ("sab", "Sabiduría"), ("car", "Carisma"))] + [
+                  # LA PESTAÑA «FICHA» (D&D): lo que se calcula (iniciativa,
+                  # competencia, salvaciones, habilidades, CD…) sale solo de
+                  # las características y el nivel.
+                  C("ca", "Clase de armadura (CA)", vacio="quitar"),
+                  C("pg", "Puntos de golpe", vacio="quitar", ayuda="«38» o «38 (máx.)»."),
+                  C("velocidad", "Velocidad", vacio="quitar", ayuda="«9 m»."),
+                  C("dados_golpe", "Dados de golpe", vacio="quitar", ayuda="«5d8»."),
+                  C("competencia", "Bonificador de competencia", "numero", minimo=1, maximo=10, vacio="quitar",
+                    ayuda="Si lo dejas en blanco, sale del nivel."),
+                  C("salvaciones", "Salvaciones en las que es competente", vacio="quitar",
+                    ayuda="Separadas por comas: «Destreza, Inteligencia»."),
+                  C("habilidades", "Habilidades en las que es competente", "lineas", vacio="quitar",
+                    ayuda="Una por línea; «(pericia)» detrás si la tiene doble: «Sigilo (pericia)». Valen: "
+                          "Acrobacias, Arcanos, Atletismo, Engaño, Historia, Interpretación, Intimidación, "
+                          "Investigación, Juego de manos, Medicina, Naturaleza, Percepción, Perspicacia, "
+                          "Persuasión, Religión, Sigilo, Supervivencia y Trato con animales."),
+                  C("ataques", "Ataques", "lineas", vacio="quitar",
+                    ayuda="Uno por línea: «Espada corta: +6, 1d6+4 perforante»."),
+                  C("aptitud_magica", "Aptitud mágica", "elegir", vacio="quitar",
+                    opciones=[["fue", "Fuerza"], ["des", "Destreza"], ["con", "Constitución"],
+                              ["int", "Inteligencia"], ["sab", "Sabiduría"], ["car", "Carisma"]],
+                    ayuda="Con qué lanza conjuros (la CD y el ataque de conjuro se calculan solos)."),
+                  C("espacios", "Espacios de conjuro", "lineas", vacio="quitar",
+                    ayuda="Uno por línea: «1.º: 4», «2.º: 2»."),
+                  C("conjuros", "Conjuros", "lineas", vacio="quitar",
+                    ayuda="Uno por línea, con su nivel delante: «Truco: Luz», «1: Escudo». Salen por niveles."),
+                  C("objetos", "Objetos", "lineas", vacio="quitar", ayuda="Uno por línea."),
+                  C("dinero", "Dinero", vacio="quitar", ayuda="«15 po, 4 pp»."),
+                  C("competencias", "Competencias e idiomas", "lineas", vacio="quitar",
+                    ayuda="Uno por línea: armas, armaduras, herramientas, idiomas…"),
+                  C("rasgos", "Rasgos y dotes", "largo", vacio="quitar", markdown=True,
+                    ayuda="Los de su raza, su clase y sus dotes. Con formato: **Nombre.** Lo que hace."),
                   C("ficha", "La ficha en PDF", "pdf", vacio="quitar",
                     ayuda="Se guarda en su carpeta y sale el botón «ver ficha pdf»."),
                   C("historia", "Historia", "largo", grande=True, vacio="quitar", markdown=True, imagenes="oc-imagen",
@@ -1835,6 +1871,120 @@ def _montar_ficha(campos, original, crudo, nombre_de):
     return ficha
 
 
+def _mezclar_partes(col, archivo, datos, llegan):
+    """Lo que llega del editor (las fichas de cada parte), metido en los
+    datos de la colección, con sus comprobaciones. No escribe nada: lo usa
+    guardar_coleccion (que luego guarda) y la vista previa de un personaje
+    (que no). Devuelve las categorías nuevas del portfolio de rol."""
+    nuevas_categorias = []
+    for parte in col["partes"]:
+        if parte["id"] not in llegan:
+            continue
+        crudo = llegan[parte["id"]]
+        if parte.get("tipo") == "objeto":
+            destino = _ir(datos, parte["camino"]) if parte["camino"] else datos
+            nueva = _montar_ficha(parte["campos"], destino if isinstance(destino, dict) else {},
+                                  crudo if isinstance(crudo, dict) else {}, None)
+            if parte["camino"]:
+                padre = _ir(datos, parte["camino"][:-1])
+                clave_obj = parte["camino"][-1]
+                if nueva:
+                    padre[clave_obj] = nueva
+                elif clave_obj in padre:
+                    # Vacío: como estaba (null si lo tenía así).
+                    padre[clave_obj] = None
+            else:
+                datos.update(nueva)
+            continue
+        if not isinstance(crudo, list):
+            continue
+        agrupada = parte.get("agrupada")
+        if agrupada and agrupada.get("tipo") == "diccionario":
+            viejo = datos if isinstance(datos, dict) else {}
+            nuevo_dict = {g: [] for g in viejo}
+            for ficha in crudo:
+                g = str(ficha.get("_g") or "")
+                lista = viejo.get(g) or []
+                i = ficha.get("_i")
+                if g in viejo and isinstance(i, int) and 0 <= i < len(lista):
+                    nuevo_dict[g].append(_montar_ficha(parte["campos"], lista[i], ficha, None))
+            datos.clear()
+            datos.update(nuevo_dict)
+            continue
+        if agrupada:
+            contenedor = _ir(datos, parte["camino"], crear=True) if parte["camino"] else datos
+            grupos = [g for g in contenedor or [] if isinstance(g, dict)]
+            por_clave = {g.get(agrupada["clave"]): g for g in grupos}
+            viejas = {k: list(g.get(agrupada["dentro"]) or []) for k, g in por_clave.items()}
+            nuevas = {k: [] for k in por_clave}
+            for ficha in crudo:
+                destino = ficha.get("_grupo")
+                if isinstance(destino, str):
+                    destino = destino.strip()
+                if destino not in por_clave and agrupada.get("libre") and destino:
+                    # Uno nuevo (una misión nueva): se añade al final.
+                    nuevo_grupo = {agrupada["clave"]: destino, agrupada["dentro"]: []}
+                    contenedor.append(nuevo_grupo)
+                    por_clave[destino] = nuevo_grupo
+                    nuevas[destino] = []
+                if destino not in por_clave:
+                    raise ValueError("«%s» no tiene una categoría que exista" % (ficha.get(parte["nombre_de"]) or "?"))
+                origen = viejas.get(ficha.get("_g")) or []
+                i = ficha.get("_i")
+                original = origen[i] if isinstance(i, int) and 0 <= i < len(origen) else {}
+                nuevas[destino].append(_montar_ficha(parte["campos"], original, ficha, parte.get("nombre_de")))
+            for k, g in por_clave.items():
+                g[agrupada["dentro"]] = nuevas[k]
+            if agrupada.get("libre"):
+                # Las que se han quedado sin nada (una misión acabada y
+                # vaciada), fuera.
+                contenedor[:] = [g for g in contenedor if not isinstance(g, dict) or g.get(agrupada["dentro"])]
+            continue
+        lista = _ir(datos, parte["camino"], crear=True) if parte["camino"] else datos
+        if not isinstance(lista, list):
+            raise ValueError("%s no tiene la forma que espero" % archivo.relative_to(RAIZ).as_posix())
+        viejas = list(lista)
+        nuevas = []
+        for ficha in crudo:
+            i = ficha.get("_i")
+            original = viejas[i] if isinstance(i, int) and 0 <= i < len(viejas) else {}
+            if parte.get("fijas") and not original:
+                continue
+            nuevas.append(_montar_ficha(parte["campos"], original, ficha, parte.get("nombre_de")))
+        if parte.get("fijas"):
+            # Las fijas no se añaden ni se quitan: se quedan todas, en su orden.
+            vistas = {id(viejas[f.get("_i")]) for f in crudo if isinstance(f.get("_i"), int)
+                      and 0 <= f.get("_i") < len(viejas)}
+            if len(vistas) != len(viejas):
+                raise ValueError("faltan fichas de «%s», que no se pueden quitar" % parte["titulo"])
+        if col["id"] == "rol":
+            conocidas = {c for c, _ in opciones_de(col, "", viejas).get("subcategory", [])}
+            nuevas_categorias = sorted({str(f.get("subcategory") or "") for f in nuevas} - conocidas - {""})
+        if col["id"] == "calendario" and parte["id"] == "eventos":
+            for f in nuevas:
+                _arreglar_evento_del_calendario(datos, f)
+        lista[:] = nuevas
+    if col["id"] == "personajes":
+        _arreglar_personajes(datos)
+    if col["id"] == "misiones":
+        # Una misión cerrada (completada o fallada) sin decir en qué
+        # sesión: en la última que haya, que es casi siempre la de
+        # ahora (así el histórico dice cuándo se cerró).
+        ultima = max([int(s.get("numero")) for s in datos.get("sesiones") or []
+                      if isinstance(s, dict) and str(s.get("numero") or "").isdigit()] or [0])
+        for apartado in datos.get("misiones") or []:
+            for cosa in (apartado or {}).get("cosas") or [] if isinstance(apartado, dict) else []:
+                if isinstance(cosa, dict) and cosa.get("estado") and not cosa.get("hasta") and ultima:
+                    cosa["hasta"] = ultima
+    if col["id"] == "calendario":
+        hoy = datos.get("hoy")
+        if isinstance(hoy, dict) and not (hoy.get("mes") and hoy.get("dia")):
+            if hoy.get("mes") or hoy.get("dia"):
+                raise ValueError("el día de hoy necesita el mes y el día (o ninguno de los dos)")
+            datos["hoy"] = None
+    return nuevas_categorias
+
+
 def guardar_coleccion(peticion):
     col = coleccion(str(peticion.get("id") or ""))
     if not col:
@@ -1845,113 +1995,7 @@ def guardar_coleccion(peticion):
         datos = _cargar_datos(col, archivo)
         if datos is None:
             return {"error": "No encuentro %s." % archivo.relative_to(RAIZ).as_posix()}
-        nuevas_categorias = []
-        llegan = peticion.get("partes") or {}
-        for parte in col["partes"]:
-            if parte["id"] not in llegan:
-                continue
-            crudo = llegan[parte["id"]]
-            if parte.get("tipo") == "objeto":
-                destino = _ir(datos, parte["camino"]) if parte["camino"] else datos
-                nueva = _montar_ficha(parte["campos"], destino if isinstance(destino, dict) else {},
-                                      crudo if isinstance(crudo, dict) else {}, None)
-                if parte["camino"]:
-                    padre = _ir(datos, parte["camino"][:-1])
-                    clave_obj = parte["camino"][-1]
-                    if nueva:
-                        padre[clave_obj] = nueva
-                    elif clave_obj in padre:
-                        # Vacío: como estaba (null si lo tenía así).
-                        padre[clave_obj] = None
-                else:
-                    datos.update(nueva)
-                continue
-            if not isinstance(crudo, list):
-                continue
-            agrupada = parte.get("agrupada")
-            if agrupada and agrupada.get("tipo") == "diccionario":
-                viejo = datos if isinstance(datos, dict) else {}
-                nuevo_dict = {g: [] for g in viejo}
-                for ficha in crudo:
-                    g = str(ficha.get("_g") or "")
-                    lista = viejo.get(g) or []
-                    i = ficha.get("_i")
-                    if g in viejo and isinstance(i, int) and 0 <= i < len(lista):
-                        nuevo_dict[g].append(_montar_ficha(parte["campos"], lista[i], ficha, None))
-                datos.clear()
-                datos.update(nuevo_dict)
-                continue
-            if agrupada:
-                contenedor = _ir(datos, parte["camino"], crear=True) if parte["camino"] else datos
-                grupos = [g for g in contenedor or [] if isinstance(g, dict)]
-                por_clave = {g.get(agrupada["clave"]): g for g in grupos}
-                viejas = {k: list(g.get(agrupada["dentro"]) or []) for k, g in por_clave.items()}
-                nuevas = {k: [] for k in por_clave}
-                for ficha in crudo:
-                    destino = ficha.get("_grupo")
-                    if isinstance(destino, str):
-                        destino = destino.strip()
-                    if destino not in por_clave and agrupada.get("libre") and destino:
-                        # Uno nuevo (una misión nueva): se añade al final.
-                        nuevo_grupo = {agrupada["clave"]: destino, agrupada["dentro"]: []}
-                        contenedor.append(nuevo_grupo)
-                        por_clave[destino] = nuevo_grupo
-                        nuevas[destino] = []
-                    if destino not in por_clave:
-                        raise ValueError("«%s» no tiene una categoría que exista" % (ficha.get(parte["nombre_de"]) or "?"))
-                    origen = viejas.get(ficha.get("_g")) or []
-                    i = ficha.get("_i")
-                    original = origen[i] if isinstance(i, int) and 0 <= i < len(origen) else {}
-                    nuevas[destino].append(_montar_ficha(parte["campos"], original, ficha, parte.get("nombre_de")))
-                for k, g in por_clave.items():
-                    g[agrupada["dentro"]] = nuevas[k]
-                if agrupada.get("libre"):
-                    # Las que se han quedado sin nada (una misión acabada y
-                    # vaciada), fuera.
-                    contenedor[:] = [g for g in contenedor if not isinstance(g, dict) or g.get(agrupada["dentro"])]
-                continue
-            lista = _ir(datos, parte["camino"], crear=True) if parte["camino"] else datos
-            if not isinstance(lista, list):
-                raise ValueError("%s no tiene la forma que espero" % archivo.relative_to(RAIZ).as_posix())
-            viejas = list(lista)
-            nuevas = []
-            for ficha in crudo:
-                i = ficha.get("_i")
-                original = viejas[i] if isinstance(i, int) and 0 <= i < len(viejas) else {}
-                if parte.get("fijas") and not original:
-                    continue
-                nuevas.append(_montar_ficha(parte["campos"], original, ficha, parte.get("nombre_de")))
-            if parte.get("fijas"):
-                # Las fijas no se añaden ni se quitan: se quedan todas, en su orden.
-                vistas = {id(viejas[f.get("_i")]) for f in crudo if isinstance(f.get("_i"), int)
-                          and 0 <= f.get("_i") < len(viejas)}
-                if len(vistas) != len(viejas):
-                    raise ValueError("faltan fichas de «%s», que no se pueden quitar" % parte["titulo"])
-            if col["id"] == "rol":
-                conocidas = {c for c, _ in opciones_de(col, "", viejas).get("subcategory", [])}
-                nuevas_categorias = sorted({str(f.get("subcategory") or "") for f in nuevas} - conocidas - {""})
-            if col["id"] == "calendario" and parte["id"] == "eventos":
-                for f in nuevas:
-                    _arreglar_evento_del_calendario(datos, f)
-            lista[:] = nuevas
-        if col["id"] == "personajes":
-            _arreglar_personajes(datos)
-        if col["id"] == "misiones":
-            # Una misión cerrada (completada o fallada) sin decir en qué
-            # sesión: en la última que haya, que es casi siempre la de
-            # ahora (así el histórico dice cuándo se cerró).
-            ultima = max([int(s.get("numero")) for s in datos.get("sesiones") or []
-                          if isinstance(s, dict) and str(s.get("numero") or "").isdigit()] or [0])
-            for apartado in datos.get("misiones") or []:
-                for cosa in (apartado or {}).get("cosas") or [] if isinstance(apartado, dict) else []:
-                    if isinstance(cosa, dict) and cosa.get("estado") and not cosa.get("hasta") and ultima:
-                        cosa["hasta"] = ultima
-        if col["id"] == "calendario":
-            hoy = datos.get("hoy")
-            if isinstance(hoy, dict) and not (hoy.get("mes") and hoy.get("dia")):
-                if hoy.get("mes") or hoy.get("dia"):
-                    raise ValueError("el día de hoy necesita el mes y el día (o ninguno de los dos)")
-                datos["hoy"] = None
+        nuevas_categorias = _mezclar_partes(col, archivo, datos, peticion.get("partes") or {})
         _guardar_datos(col, archivo, datos)
         if nuevas_categorias:
             nuevo = herramienta("nuevo")
@@ -2011,6 +2055,56 @@ def _arreglar_personajes(datos):
             if isinstance(grupo, dict) and grupo.get("personaje") not in vistas:
                 raise ValueError("hay %s de «%s», que no es ninguno de los personajes"
                                  % ("gente" if lista == "gente" else "imágenes", grupo.get("personaje")))
+
+
+def _generador(nombre):
+    """Un script de 3-generadores, cargado como módulo (no se ejecuta su
+    main). Sin caché: así la vista previa usa siempre el que hay."""
+    carpeta = RAIZ / "herramientas" / "3-generadores"
+    if str(carpeta) not in sys.path:
+        sys.path.insert(0, str(carpeta))
+    spec = importlib.util.spec_from_file_location("editor_gen_" + nombre.replace("-", "_"),
+                                                  carpeta / (nombre + ".py"))
+    modulo = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(modulo)
+    return modulo
+
+
+# LA VISTA PREVIA DE UN PERSONAJE: la última que se ha pedido, por su
+# clave. No se escribe en ningún archivo: editor-wiki.py la sirve en
+# /previa/personajes/<clave>.html mientras el editor esté abierto.
+PREVIAS = {}
+
+
+def vista_previa_personaje(peticion):
+    """La ficha de uno de mis personajes con lo que hay escrito en el editor
+    (sin guardar): se mezcla como al guardar, pero sobre una copia, y se
+    monta la página entera con su cabecera, como la generaría
+    generar-personajes.py y la dejaría actualizar-cabeceras.py."""
+    import copy
+    col = coleccion("personajes")
+    archivo = _archivo_de(col, "")
+    datos = copy.deepcopy(_cargar_datos(col, archivo) or {})
+    try:
+        _mezclar_partes(col, archivo, datos, peticion.get("partes") or {})
+        _arreglar_personajes(datos)
+    except ValueError as error:
+        return {"error": "No puedo enseñarlo así: %s." % error}
+    pedida = nombre_archivo(str(peticion.get("clave") or ""), "")
+    gen = _generador("generar-personajes")
+    personajes = [p for p in datos.get("personajes") or [] if isinstance(p, dict) and gen.clave_de(p)]
+    uno = next((p for p in personajes if gen.clave_de(p) == pedida), None)
+    if not uno:
+        return {"error": "Ponle nombre al personaje para poder verlo."}
+    avisos = gen.Avisos()
+    texto = gen.pagina_ficha(uno, datos, personajes, avisos)
+    url = "/web/personajes/%s/%s.html" % (pedida, pedida)
+    pagina = _generador("actualizar-cabeceras").montar_pagina(texto, url)
+    if pagina is None:
+        return {"error": "No he podido montar la página."}
+    PREVIAS[pedida] = pagina
+    return {"ok": True, "url": "/previa/personajes/%s.html" % pedida,
+            "avisos": ["%s «%s»" % (q, d) for q, d in avisos.lista]}
 
 
 def subir_pdf_de_personaje(peticion):
@@ -2477,6 +2571,8 @@ def atender_post(ruta, peticion):
         return guardar_entrada(peticion)
     if ruta == "/api/web/entrada/publicar":
         return publicar_entrada(peticion)
+    if ruta == "/api/web/personaje/previa":
+        return vista_previa_personaje(peticion)
     if ruta == "/api/web/personaje/pdf":
         return subir_pdf_de_personaje(peticion)
     if ruta == "/api/web/imagen":

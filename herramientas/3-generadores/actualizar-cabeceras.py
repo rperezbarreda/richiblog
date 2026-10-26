@@ -345,6 +345,12 @@ def hojas_de(ruta):
             "/estilos/paginas/personajes.css",
             "/estilos/paginas/personajes.responsive.css",
         ]
+        # El índice lleva el filtro de etiquetas (el de los relatos).
+        if ruta.endswith("/index_personajes.html"):
+            hojas += [
+                "/estilos/componentes/filtros.css",
+                "/estilos/componentes/filtros.responsive.css",
+            ]
     elif es_accesibilidad:
         # Sin portada.css: esta página no usa nada de la portada, se
         # dibuja sus propios marcos (ver el comentario de .acc-bloque).
@@ -674,6 +680,9 @@ def scripts_de(ruta):
         js.append("/scripts/paginas/santuarios.js")
     elif es_ficha_personaje:
         js.append("/scripts/paginas/personajes.js")
+    elif camino.endswith("/web/personajes/index_personajes"):
+        # El filtro de etiquetas del índice de mis personajes.
+        js.append("/scripts/componentes/filtros.js")
     elif es_changelog:
         js.append("/scripts/paginas/changelog.js")
     elif es_recomendaciones:
@@ -1519,6 +1528,42 @@ def paginas():
         yield archivo, "/" + clave
 
 
+def montar_pagina(texto, ruta, tema=None, con_menu=True):
+    """Una página con su cabecera al día: el pre-pintado del tema, el
+    bloque de CSS y JS, el menú (si con_menu) y la política de seguridad.
+    None si no es una página completa. Lo usa main() con cada archivo, y
+    el editor para la vista previa de un personaje (que no se escribe en
+    ningún sitio: se sirve tal cual)."""
+    if tema is None:
+        tema = bloque_del_tema()
+    nuevo = bloque(ruta)
+
+    # El pre-pintado del tema, que vive en las primeras líneas y es
+    # igual en todas las páginas.
+    if tema and TEMA_PUESTO.search(texto):
+        texto = TEMA_PUESTO.sub(lambda m: tema, texto, count=1)
+
+    # Las dos expresiones se tragan la sangría de la primera línea,
+    # así que el bloque nuevo se pone entero, con la suya.
+    if YA_PUESTO.search(texto):
+        salida = YA_PUESTO.sub(lambda m: nuevo, texto, count=1)
+    elif VIEJO.search(texto):
+        salida = VIEJO.sub(lambda m: nuevo, texto, count=1)
+    else:
+        return None
+
+    # El menú, escrito dentro (no en las plantillas: ver
+    # con_barra_lateral).
+    if con_menu:
+        if "/scripts/componentes/barra-lateral.js" in scripts_de(ruta):
+            salida = con_barra_lateral(salida, ruta)
+        salida = con_fragmentos_sueltos(salida)
+
+    # Lo último, cuando ya está todo escrito: la política de seguridad
+    # lleva las huellas de los scripts que haya quedado en la página.
+    return poner_csp(salida)
+
+
 def main():
     probar = "--probar" in sys.argv
 
@@ -1558,35 +1603,12 @@ def main():
         # guardarlo, una página a la que solo le cambiara el pre-pintado
         # se daba por "ya estaba al día" y no se escribía.
         original = texto
-        nuevo = bloque(ruta)
-
-        # El pre-pintado del tema, que vive en las primeras líneas y es
-        # igual en todas las páginas.
-        if tema and TEMA_PUESTO.search(texto):
-            texto = TEMA_PUESTO.sub(lambda m: tema, texto, count=1)
-
-        # Las dos expresiones se tragan la sangría de la primera línea,
-        # así que el bloque nuevo se pone entero, con la suya.
-        if YA_PUESTO.search(texto):
-            salida = YA_PUESTO.sub(lambda m: nuevo, texto, count=1)
-        elif VIEJO.search(texto):
-            salida = VIEJO.sub(lambda m: nuevo, texto, count=1)
-        else:
+        salida = montar_pagina(texto, ruta, tema, FUERA.isdisjoint(archivo.relative_to(RAIZ).parts))
+        if salida is None:
             # Un fragmento suelto (barra-lateral.html, frases.html) o
             # algo que no es una página completa: ni se toca.
             saltadas.append(archivo.relative_to(RAIZ).as_posix())
             continue
-
-        # El menú, escrito dentro (no en las plantillas: ver
-        # con_barra_lateral).
-        if FUERA.isdisjoint(archivo.relative_to(RAIZ).parts):
-            if "/scripts/componentes/barra-lateral.js" in scripts_de(ruta):
-                salida = con_barra_lateral(salida, ruta)
-            salida = con_fragmentos_sueltos(salida)
-
-        # Lo último, cuando ya está todo escrito: la política de seguridad
-        # lleva las huellas de los scripts que haya quedado en la página.
-        salida = poner_csp(salida)
 
         if salida == original:
             iguales.append(archivo.relative_to(RAIZ).as_posix())

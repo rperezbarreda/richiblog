@@ -1477,6 +1477,24 @@ class Editor(SimpleHTTPRequestHandler):
                     return self._json({"error": "Ese mapa no está."}, 404)
                 return self._json(leer_mapa(archivo))
             return self._json({"error": "no existe"}, 404)
+        # La vista previa de uno de mis personajes (editor_web.PREVIAS): la
+        # página entera, que pide sus estilos y sus fotos al sitio de aquí.
+        # Sin contraseña (se abre en otra pestaña, sin la cabecera), pero
+        # solo hablándole como 127.0.0.1 o localhost.
+        previa = re.fullmatch(r"/previa/personajes/([a-z0-9-]+)\.html", url.path)
+        if previa:
+            anfitrion = (self.headers.get("Host") or "").rsplit(":", 1)[0].strip("[]").lower()
+            pagina = editor_web.PREVIAS.get(previa.group(1)) if anfitrion in ("127.0.0.1", "localhost") else None
+            if not pagina:
+                return self._json({"error": "No hay vista previa de ese personaje: vuelve a pulsar «Ver cómo queda»."},
+                                  404)
+            cuerpo = pagina.encode("utf-8")
+            self.send_response(200)
+            self.send_header("Content-Type", "text/html; charset=utf-8")
+            self.send_header("Content-Length", str(len(cuerpo)))
+            self.end_headers()
+            self.wfile.write(cuerpo)
+            return None
         # El sitio: sin las herramientas ni lo escondido.
         # (Las imágenes de la wiki sí: el editor enseña la que pone cada
         # casilla.)

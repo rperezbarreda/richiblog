@@ -33,7 +33,20 @@
 #         "raza": "…", "clase": "…", "nivel": 5, "lema": "Una frase suya",
 #         "fue": 10, "des": 14, "con": 12, "int": 10, "sab": 13, "car": 16,
 #         "ficha": "/imagenes/personajes/yorel/ficha-yorel.pdf",
-#         "historia": "En Markdown", "extra": "En Markdown"
+#         "historia": "En Markdown", "extra": "En Markdown",
+#
+#         Y lo de la pestaña «ficha» (D&D), todo opcional:
+#         "ca": 15, "pg": 38, "velocidad": "9 m", "dados_golpe": "5d8",
+#         "competencia": 3                  (si no, sale del nivel)
+#         "salvaciones": "Destreza, Inteligencia",
+#         "habilidades": ["Sigilo (pericia)", "Percepción"],
+#         "ataques": ["Espada corta: +6, 1d6+4 perforante"],
+#         "aptitud_magica": "int"           (fue, des, con, int, sab, car)
+#         "espacios": ["1.º: 4", "2.º: 2"],
+#         "conjuros": ["Truco: Luz", "1: Escudo", "1: Proyectil mágico"],
+#         "objetos": ["Armadura de cuero"], "dinero": "15 po",
+#         "competencias": ["Común", "Élfico", "Herramientas de ladrón"],
+#         "rasgos": "En Markdown (rasgos de raza, de clase, dotes)"
 #     }],
 #     "gente":    [{"personaje": "yorel", "cosas": [{"nombre", "que",
 #                   "relacion", "token", "notas"}]}],
@@ -92,7 +105,19 @@ STATS = (("fue", "FUE", "Fuerza"), ("des", "DES", "Destreza"), ("con", "CON", "C
          ("int", "INT", "Inteligencia"), ("sab", "SAB", "Sabiduría"), ("car", "CAR", "Carisma"))
 
 # Las pestañas, en el orden en que salen.
-PESTANAS = (("historia", "historia"), ("gente", "npcs"), ("imagenes", "imágenes"), ("extra", "extra"))
+PESTANAS = (("historia", "historia"), ("ficha", "ficha"), ("gente", "npcs"), ("imagenes", "imágenes"),
+            ("extra", "extra"))
+
+# Las dieciocho habilidades de D&D 5e, con la característica de la que
+# tiran. Se escriben en «habilidades» una por línea («Sigilo»,
+# «Percepción (pericia)»); el nombre se compara sin tildes ni mayúsculas.
+HABILIDADES = (
+    ("Acrobacias", "des"), ("Arcanos", "int"), ("Atletismo", "fue"), ("Engaño", "car"),
+    ("Historia", "int"), ("Interpretación", "car"), ("Intimidación", "car"), ("Investigación", "int"),
+    ("Juego de manos", "des"), ("Medicina", "sab"), ("Naturaleza", "int"), ("Percepción", "sab"),
+    ("Perspicacia", "sab"), ("Persuasión", "car"), ("Religión", "int"), ("Sigilo", "des"),
+    ("Supervivencia", "sab"), ("Trato con animales", "sab"),
+)
 
 
 def e(texto):
@@ -194,8 +219,9 @@ def tarjeta(p):
     foto = ruta_que_existe(p.get("token"))
     icono = str(p.get("icono") or "").strip()
     que = lo_que_es(p)
+    etiquetas = ", ".join(etiquetas_de(p))
     return (
-        '                <li class="oc-celda">\n'
+        '                <li class="oc-celda"%s>\n'
         '                    <a class="oc-tarjeta %s" href="%s%s/%s.html">\n'
         '                        <span class="oc-tarjeta-aro">\n'
         '                            %s\n'
@@ -205,9 +231,47 @@ def tarjeta(p):
         '%s'
         '                    </a>\n'
         '                </li>\n'
-    ) % (color_de(p), URL, c, c, redondel(foto, nombre, "oc-tarjeta-foto"), e(nombre),
+    ) % ((' data-categoria="%s"' % e(etiquetas)) if etiquetas else "",
+         color_de(p), URL, c, c, redondel(foto, nombre, "oc-tarjeta-foto"), e(nombre),
          ('<span class="oc-icono" aria-hidden="true">%s</span>' % e(icono)) if icono else "", e(completo),
          ('                        <span class="oc-tarjeta-que">%s</span>\n' % e(que)) if que else "")
+
+
+def etiquetas_de(p):
+    """Las etiquetas de un personaje («D&D 5e, jugando»), que son los
+    botones del filtro del índice. Sin comas dentro de una: la coma es la
+    que las separa (así lo lee scripts/componentes/filtros.js)."""
+    crudo = p.get("etiquetas")
+    trozos = crudo if isinstance(crudo, list) else str(crudo or "").replace("\n", ",").split(",")
+    vistas, salida = set(), []
+    for trozo in trozos:
+        limpio = " ".join(str(trozo).split()).strip()
+        if limpio and limpio.lower() not in vistas:
+            vistas.add(limpio.lower())
+            salida.append(limpio)
+    return salida
+
+
+# El filtro de arriba del índice (el mismo que el de los relatos y los
+# NPC): los botones los pone filtros.js con las etiquetas de cada tarjeta.
+FILTROS = """            <div class="filtros" data-filtros
+                 data-filtros-items=".oc-celda"
+                 data-filtros-orden="aparicion">
+                <span class="filtros-label" id="filtros-label">filtrar:</span>
+
+                <button class="filtros-toggle" type="button" data-filtros-toggle
+                        aria-expanded="false" aria-controls="filtros-lista">
+                    <span class="visually-hidden">Filtrando por: </span>
+                    <span class="filtros-toggle-label" data-filtros-label>todas</span>
+                    <span class="filtros-toggle-arrow" aria-hidden="true">▾</span>
+                </button>
+
+                <div class="filtros-list" id="filtros-lista" role="group" aria-labelledby="filtros-label"></div>
+            </div>
+
+            <p class="filtros-vacio" data-filtros-vacio role="status" hidden></p>
+
+"""
 
 
 def pagina_indice(datos, personajes):
@@ -216,6 +280,9 @@ def pagina_indice(datos, personajes):
     if personajes:
         lista = ('            <ul class="oc-rejilla">\n%s            </ul>'
                  % "".join(tarjeta(p) for p in personajes))
+        # Solo con etiquetas: sin ninguna, el filtro no tendría botones.
+        if any(etiquetas_de(p) for p in personajes):
+            lista = FILTROS + lista
     else:
         lista = '            <p class="oc-vacio">Todavía no hay ningún personaje.</p>'
     cambios = {
@@ -329,21 +396,183 @@ def apartado_imagenes(fotos, nombre):
     return '<ul class="oc-galeria">%s</ul>' % "".join(celdas) if celdas else ""
 
 
+# =========================================
+# LA PESTAÑA «FICHA»: todo lo de D&D
+# =========================================
+# Lo que sale en la hoja de personaje, en recuadros: el combate (CA, PG,
+# velocidad, iniciativa, competencia, percepción pasiva), las tiradas de
+# salvación y las habilidades (calculadas con las características y el
+# nivel), los ataques, la magia, los objetos, los rasgos y las
+# competencias. Cada recuadro sale solo si tiene algo.
+
+def llano(texto):
+    import unicodedata
+    texto = unicodedata.normalize("NFD", str(texto or "")).lower()
+    return " ".join("".join(ch for ch in texto if unicodedata.category(ch) != "Mn").split())
+
+
+def con_signo(n):
+    return ("+%d" % n) if n >= 0 else ("−%d" % -n)
+
+
+def lineas_de(valor):
+    if isinstance(valor, list):
+        return [str(x).strip() for x in valor if str(x).strip()]
+    return [l.strip() for l in str(valor or "").split("\n") if l.strip()]
+
+
+def bonificador_de_competencia(p):
+    propio = numero(p.get("competencia"))
+    if propio is not None:
+        return propio
+    nivel = numero(p.get("nivel"))
+    return 2 + (max(1, min(nivel, 20)) - 1) // 4 if nivel else None
+
+
+def recuadro(titulo, dentro, clase=""):
+    return ('<div class="oc-hoja-caja%s"><h3 class="oc-hoja-titulo">%s</h3>%s</div>'
+            % ((" " + clase) if clase else "", e(titulo), dentro))
+
+
+def lista_simple(cosas, clase="oc-hoja-lista"):
+    return '<ul class="%s">%s</ul>' % (clase, "".join("<li>%s</li>" % e(x) for x in cosas))
+
+
+def apartado_ficha(p, c, personajes, avisos):
+    mods = {k: (modificador_num(numero(p.get(k))) if numero(p.get(k)) is not None else None) for k, _, _ in STATS}
+    comp = bonificador_de_competencia(p)
+    cajas = []
+
+    # EL COMBATE: los numeritos grandes.
+    datos = []
+    for clave, texto in (("ca", "Clase de armadura"), ("pg", "Puntos de golpe"), ("velocidad", "Velocidad")):
+        valor = str(p.get(clave) or "").strip()
+        if valor:
+            datos.append((texto, valor))
+    if mods["des"] is not None:
+        datos.append(("Iniciativa", con_signo(mods["des"])))
+    if comp is not None:
+        datos.append(("Competencia", con_signo(comp)))
+    competentes = {}
+    for linea in lineas_de(p.get("habilidades")):
+        nombre = llano(linea.split("(")[0])
+        competentes[nombre] = 2 if "pericia" in llano(linea) else 1
+    conocidas = {llano(n) for n, _ in HABILIDADES}
+    for nombre in competentes:
+        if nombre not in conocidas:
+            avisos.di("habilidad que no conozco", nombre)
+    if mods["sab"] is not None:
+        pasiva = 10 + mods["sab"] + (comp or 0) * competentes.get(llano("Percepción"), 0)
+        datos.append(("Percepción pasiva", str(pasiva)))
+    dados = str(p.get("dados_golpe") or "").strip()
+    if dados:
+        datos.append(("Dados de golpe", dados))
+    if datos:
+        cajas.append(recuadro("combate", '<dl class="oc-hoja-numeros">%s</dl>' % "".join(
+            '<div class="oc-hoja-numero"><dt>%s</dt><dd>%s</dd></div>' % (e(a), e(b)) for a, b in datos),
+            "es-ancha"))
+
+    # LAS SALVACIONES Y LAS HABILIDADES: solo con las características.
+    if any(v is not None for v in mods.values()):
+        salva = {llano(x)[:3] for x in str(p.get("salvaciones") or "").replace("\n", ",").split(",") if x.strip()}
+        filas = []
+        for k, corto, largo in STATS:
+            if mods[k] is None:
+                continue
+            es = k in salva
+            filas.append(fila_de_tirada(largo, mods[k] + ((comp or 0) if es else 0), 1 if es else 0))
+        cajas.append(recuadro("tiradas de salvación", '<ul class="oc-hoja-tiradas">%s</ul>' % "".join(filas)))
+        filas = []
+        for nombre, k in HABILIDADES:
+            if mods[k] is None:
+                continue
+            nivel = competentes.get(llano(nombre), 0)
+            filas.append(fila_de_tirada(nombre, mods[k] + (comp or 0) * nivel, nivel,
+                                        dict((a, b) for a, b, _ in STATS)[k]))
+        cajas.append(recuadro("habilidades", '<ul class="oc-hoja-tiradas">%s</ul>' % "".join(filas)))
+
+    ataques = lineas_de(p.get("ataques"))
+    if ataques:
+        cajas.append(recuadro("ataques", lista_simple(ataques), "es-ancha"))
+
+    # LA MAGIA: la característica con la que lanza, la CD y el ataque
+    # (calculados), los espacios y los conjuros por nivel.
+    magia = []
+    aptitud = llano(p.get("aptitud_magica"))[:3]
+    if aptitud in mods and mods[aptitud] is not None and comp is not None:
+        nombre_apt = dict((a, c3) for a, _, c3 in STATS)[aptitud]
+        magia.append('<dl class="oc-hoja-numeros">'
+                     '<div class="oc-hoja-numero"><dt>Aptitud mágica</dt><dd>%s</dd></div>'
+                     '<div class="oc-hoja-numero"><dt>CD de salvación</dt><dd>%d</dd></div>'
+                     '<div class="oc-hoja-numero"><dt>Ataque de conjuro</dt><dd>%s</dd></div></dl>'
+                     % (e(nombre_apt), 8 + comp + mods[aptitud], con_signo(comp + mods[aptitud])))
+    espacios = lineas_de(p.get("espacios"))
+    if espacios:
+        magia.append('<p class="oc-hoja-espacios"><strong>Espacios:</strong> %s</p>'
+                     % " · ".join(e(x) for x in espacios))
+    por_nivel = {}
+    for linea in lineas_de(p.get("conjuros")):
+        if ":" in linea:
+            nivel, nombre = linea.split(":", 1)
+        else:
+            nivel, nombre = "", linea
+        nivel = llano(nivel)
+        clave_n = "0" if nivel.startswith("truco") else (nivel if nivel.isdigit() else "?")
+        por_nivel.setdefault(clave_n, []).append(nombre.strip())
+    for clave_n in sorted(por_nivel, key=lambda x: (x == "?", int(x) if x.isdigit() else 99)):
+        titulo = "Trucos" if clave_n == "0" else ("Nivel %s" % clave_n if clave_n != "?" else "Conjuros")
+        magia.append('<h4 class="oc-hoja-subtitulo">%s</h4>%s' % (titulo, lista_simple(por_nivel[clave_n])))
+    if magia:
+        cajas.append(recuadro("magia", "".join(magia), "es-ancha"))
+
+    objetos = lineas_de(p.get("objetos"))
+    dinero = str(p.get("dinero") or "").strip()
+    if objetos or dinero:
+        cajas.append(recuadro("objetos", (('<p class="oc-hoja-dinero"><strong>Dinero:</strong> %s</p>' % e(dinero))
+                                          if dinero else "") + (lista_simple(objetos) if objetos else "")))
+    competencias = lineas_de(p.get("competencias"))
+    if competencias:
+        cajas.append(recuadro("competencias e idiomas", lista_simple(competencias)))
+    rasgos = markdown(p.get("rasgos"), c, personajes, avisos)
+    if rasgos:
+        cajas.append(recuadro("rasgos y dotes", '<div class="oc-texto">%s</div>' % rasgos, "es-ancha"))
+    return '<div class="oc-hoja">%s</div>' % "".join(cajas) if cajas else ""
+
+
+def modificador_num(valor):
+    return (valor - 10) // 2
+
+
+def fila_de_tirada(nombre, total, nivel, corto=""):
+    """Una tirada: la marca (vacía, competente o pericia), el nombre, de qué
+    característica tira y el bono. La marca es solo para la vista; para el
+    lector va dicho con palabras."""
+    marca = ("○", "●", "◆")[nivel]
+    dicho = ("", ", competente", ", con pericia")[nivel]
+    return ('<li class="oc-tirada%s"><span class="oc-tirada-marca" aria-hidden="true">%s</span>'
+            '<span class="oc-tirada-nombre">%s%s<span class="visually-hidden">%s</span></span>'
+            '<span class="oc-tirada-bono">%s</span></li>'
+            % (" es-competente" if nivel else "", marca, e(nombre),
+               (' <span class="oc-tirada-de">(%s)</span>' % corto) if corto else "", dicho, con_signo(total)))
+
+
 def pestanas(p, c, datos, personajes, avisos):
     nombre = str(p.get("nombre") or c)
     contenido = {
         "historia": markdown(p.get("historia"), c, personajes, avisos),
+        "ficha": apartado_ficha(p, c, personajes, avisos),
         "gente": apartado_gente(grupos_de(datos, "gente", c), c, personajes, avisos),
         "imagenes": apartado_imagenes(grupos_de(datos, "imagenes", c), nombre),
         "extra": markdown(p.get("extra"), c, personajes, avisos),
     }
     vacio = {
         "historia": "Todavía no he escrito su historia.",
+        "ficha": "Todavía no tiene la ficha apuntada.",
         "gente": "Todavía no hay nadie apuntado.",
         "imagenes": "Todavía no hay imágenes.",
         "extra": "Nada más, de momento.",
     }
-    # Sin JavaScript, los cuatro apartados uno debajo de otro y estos
+    # Sin JavaScript, los cinco apartados uno debajo de otro y estos
     # enlaces para saltar a cada uno; con él, personajes.js convierte los
     # enlaces en pestañas y enseña solo el elegido.
     menu = ['                    <nav class="oc-pestanas" aria-label="Apartados de %s" data-oc-pestanas>' % e(nombre)]

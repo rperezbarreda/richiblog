@@ -1156,6 +1156,8 @@
       si queda algo sin repartir) y la tabla lo pone bajo el concepto. Se
       lleva en Rol → «El dinero de una campaña». Tiene SU PROPIO BOTÓN en
       el índice de la campaña («el dinero →», sale si hay algo apuntado),
+      y en la ficha de cada uno de la mesa sale «Su dinero»: lo que le
+      ha tocado en los repartos, sumado, y de dónde sale cada parte,
       en dos columnas: a la izquierda, en su recuadro, los botones
       «ganancia» y «pérdida» (filtran la tabla; otra pulsación, todo) y
       la TABLA de entradas y gastos (sesión, concepto, entra, sale y lo
@@ -3713,8 +3715,26 @@
   (también va con los demás generadores). Un personaje quitado del
   JSON no se borra de la web: se avisa y su carpeta se borra a mano.
 
-  LA FICHA: a la izquierda cuatro PESTAÑAS (historia, npcs, imágenes,
-  extra; con las flechas se pasa de una a otra, y la dirección lleva
+  LA PESTAÑA «FICHA» (D&D, desde el 26-10-2026): CA, puntos de golpe,
+  velocidad, dados de golpe, salvaciones y habilidades en las que es
+  competente («Sigilo (pericia)»), ataques, aptitud mágica, espacios,
+  conjuros («Truco: Luz», «1: Escudo»), objetos, dinero, competencias e
+  idiomas, y rasgos y dotes (con formato). Lo demás SE CALCULA de las
+  características y el nivel: iniciativa, bonificador de competencia (o
+  el que se escriba), percepción pasiva, todas las tiradas de salvación
+  y las 18 habilidades, la CD y el ataque de conjuro. Una habilidad mal
+  escrita se avisa al generar.
+  LAS ETIQUETAS («D&D 5e, jugando»): cada una es un botón del filtro del
+  índice (el de los relatos, scripts/componentes/filtros.js); sin
+  ninguna etiqueta en ningún personaje, el filtro no sale.
+  VER CÓMO QUEDA: el botón de arriba de cada personaje en el editor abre
+  su ficha en otra pestaña con lo escrito, SIN GUARDAR (no se escribe en
+  ningún archivo: el editor la sirve en /previa/personajes/<clave>.html,
+  montada con generar-personajes.py y montar_pagina() de
+  actualizar-cabeceras.py).
+
+  LA FICHA: a la izquierda cinco PESTAÑAS (historia, ficha, npcs,
+  imágenes, extra; con las flechas se pasa de una a otra, y la dirección lleva
   la elegida: .../yorel.html#oc-imagenes); a la derecha el post-it con
   la foto (se amplía al pulsarla) y las características, y debajo «ver
   ficha pdf». En el móvil, la foto arriba y las pestañas debajo. Sin

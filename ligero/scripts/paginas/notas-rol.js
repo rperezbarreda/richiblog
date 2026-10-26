@@ -131,6 +131,10 @@ function abrirLaFichaDeUnPj(quien, devolverA) {
             const caja = document.createElement("div");
             caja.className = "mesa-ficha";
             const ficha = fichaDeLaMesa(quien);
+            const dinero = dineroDeUnPj(quien.nombre);
+            if (dinero) {
+                ficha.appendChild(dinero);
+            }
             const suyo = botinDeUnPj(quien.nombre);
             if (suyo) {
                 ficha.appendChild(suyo);
@@ -980,8 +984,47 @@ function conversorDeMonedas() {
     return caja;
 }
 let botinDeLaMesa = [];
+let dineroDeLaMesa = { movimientos: [], mesa: [] };
 function ponerBotinDeLaMesa(campana) {
     botinDeLaMesa = cosasDelBotin(campana || {});
+    dineroDeLaMesa = { movimientos: movimientosDeDinero(campana || {}), mesa: nombresDeLaMesa(campana || {}) };
+}
+function dineroDeUnPj(nombre) {
+    const llano = (s) => comoSeEscribeElTipo(s);
+    let total = 0;
+    const de = [];
+    dineroDeLaMesa.movimientos.forEach((m) => {
+        repartoDeMovimiento(m, dineroDeLaMesa.mesa).forEach(([quien, cobre]) => {
+            if (llano(quien) === llano(nombre)) {
+                total += cobre;
+                de.push([m, cobre]);
+            }
+        });
+    });
+    if (!de.length) {
+        return null;
+    }
+    const caja = document.createElement("div");
+    caja.className = "mesa-botin mesa-dinero";
+    const titulo = document.createElement("h3");
+    titulo.className = "mesa-botin-titulo";
+    titulo.textContent = "Su dinero";
+    caja.appendChild(titulo);
+    const cuanto = document.createElement("p");
+    cuanto.className = "mesa-dinero-cuanto";
+    cuanto.textContent = bolsaEnMonedas(total);
+    caja.appendChild(cuanto);
+    const lista = document.createElement("ul");
+    lista.className = "mesa-botin-lista mesa-dinero-lista";
+    de.forEach(([m, cobre]) => {
+        const li = document.createElement("li");
+        const moneda = (m.moneda || "po").toString().toLowerCase();
+        li.textContent = (cobre < 0 ? "−" : "+") + numeroDeDinero(Math.abs(cobre) / enCobre(1, moneda)) + " "
+            + moneda + " · " + m.que.toString().trim() + (Number(m.de) ? " (sesión " + Number(m.de) + ")" : "");
+        lista.appendChild(li);
+    });
+    caja.appendChild(lista);
+    return caja;
 }
 function botinDeUnPj(nombre) {
     const llano = (s) => comoSeEscribeElTipo(s);
@@ -999,8 +1042,10 @@ function botinDeUnPj(nombre) {
     lista.className = "mesa-botin-lista";
     suyas.forEach((c) => {
         const li = document.createElement("li");
+        const hay = c.cantidad !== undefined && c.cantidad !== "";
+        const habia = c.inicial !== undefined && c.inicial !== "" && Number(c.inicial) !== Number(c.cantidad);
         li.textContent = c.que.toString().trim()
-            + (c.cantidad !== undefined && c.cantidad !== "" ? " ×" + c.cantidad : "");
+            + (hay ? (habia ? " (quedan " + c.cantidad + " de " + c.inicial + ")" : " ×" + c.cantidad) : "");
         lista.appendChild(li);
     });
     caja.appendChild(lista);

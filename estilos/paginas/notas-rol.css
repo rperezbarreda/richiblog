@@ -739,6 +739,19 @@
     padding-left: 1.2em;
 }
 
+/* SU DINERO: lo que lleva, en grande, y de dónde sale, en pequeño. */
+.mesa-dinero-cuanto {
+    margin: 0 0 4px;
+    font-size: 1.25rem;
+    font-weight: 700;
+}
+
+.mesa-dinero-lista {
+    color: var(--muted);
+    font-family: var(--fuente-mono);
+    font-size: 0.8125rem;
+}
+
 /* El panel que llenan. No lleva barra propia: quien se desplaza es la
    ventana, como en la ficha de un personaje. */
 .campana-botin-panel {

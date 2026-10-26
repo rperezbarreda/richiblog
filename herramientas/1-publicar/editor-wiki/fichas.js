@@ -470,6 +470,12 @@ function casillaDeFichaWeb(dentro, f, c, base, parte, alCambiar) {
         b.id = id;
         b.addEventListener("click", () => (ACCIONES_DE_FICHA[c.accion] || (() => {}))(f, b));
         caja.appendChild(b);
+        if (c.ayuda) {
+            const p = crearEditor("p", "ayuda", c.ayuda);
+            p.id = id + "-ayuda";
+            b.setAttribute("aria-describedby", p.id);
+            caja.appendChild(p);
+        }
         dentro.appendChild(caja);
         return;
     }
@@ -699,6 +705,32 @@ function personajeDeFichaWeb(f) {
 
 // LO QUE HACEN LOS BOTONES DE LAS FICHAS (casillas de tipo «accion»).
 const ACCIONES_DE_FICHA = {
+    // Uno de mis personajes, tal y como está escrito ahora (sin guardar),
+    // en otra pestaña. La pestaña se abre ya, al pulsar (si se abriera al
+    // contestar el servidor, el navegador la tomaría por una ventana
+    // emergente y la bloquearía), y se le pone la página al llegar.
+    "personaje-previa": async (f, boton) => {
+        const pestana = window.open("about:blank", "_blank");
+        boton.disabled = true;
+        avisarEditor("Montando la vista previa…");
+        const hecho = await pedirEditor("/api/web/personaje/previa",
+            { partes: estadoFichas.col.partes, clave: personajeDeFichaWeb(f) });
+        boton.disabled = false;
+        if (!hecho || hecho.error) {
+            if (pestana) {
+                pestana.close();
+            }
+            avisarEditor((hecho && hecho.error) || "No he podido montarla.", true);
+            return;
+        }
+        if (pestana) {
+            pestana.location.href = hecho.url;
+        } else {
+            window.open(hecho.url, "_blank");
+        }
+        avisarEditor("Vista previa abierta en otra pestaña (todavía no está guardado)."
+            + (hecho.avisos && hecho.avisos.length ? " Ojo: " + hecho.avisos.join("; ") + "." : ""));
+    },
     // Una misión completada: «Lo que nos llevamos» al botín (o al dinero,
     // si son monedas: «50 po»). Varias cosas se separan con comas o «y».
     "mision-al-botin": async (f, boton) => {
