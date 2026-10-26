@@ -42,6 +42,7 @@ import re
 import subprocess
 import sys
 import tempfile
+import unicodedata
 import threading
 import time
 from html.parser import HTMLParser
@@ -1186,8 +1187,14 @@ def colecciones():
     tipos_botin = ["armas", "armaduras", "pociones", "pergaminos", "equipo", "objetos mágicos", "dinero", "otras cosas"]
     escuelas = ["abjuración", "adivinación", "conjuración", "encantamiento", "evocación", "ilusión", "nigromancia",
                 "transmutación"]
-    # Lo de un pergamino solo sale con el apartado «pergaminos» elegido.
+    # Lo de un pergamino solo sale con el apartado «pergaminos» elegido, y
+    # lo de un objeto mágico con «objetos mágicos».
     es_pergamino = {"tipo": ["pergaminos"]}
+    es_magico = {"tipo": ["objetos mágicos"]}
+    con_descripcion = {"tipo": ["pergaminos", "objetos mágicos"]}
+    rarezas = ["común", "poco común", "rara", "muy rara", "legendaria", "artefacto"]
+    monedas = [["po", "po (oro)"], ["pp", "pp (plata)"], ["pc", "pc (cobre)"], ["pe", "pe (electro)"],
+               ["ppt", "ppt (platino)"]]
     return [
         {"id": "rol", "apartado": "rol", "titulo": "Recursos de rol (el portfolio)",
          "ayuda": "Las tarjetas de la página de rol: aventuras, fichas, mapas… Lo último, arriba.",
@@ -1276,7 +1283,14 @@ def colecciones():
                   C("hasta", "Sesión en la que se cerró", "elegir", numerico=True, vacio="quitar",
                     ayuda="Al completarla o fallarla."),
                   C("obtenida", "Lo que nos llevamos", vacio="quitar",
-                    ayuda="Al cerrarla: la recompensa que hubo de verdad. Vacío: ninguna.")]},
+                    ayuda="Al cerrarla: la recompensa que hubo de verdad. Vacío: ninguna."),
+                  C("_al_botin", "Pasar «Lo que nos llevamos» al botín (o al dinero, si son monedas)", "accion",
+                    accion="mision-al-botin", si={"estado": ["completada"]}),
+                  C("urgente", "Urgente", "si-no", vacio="quitar",
+                    ayuda="Sale arriba de su misión, con su marca."),
+                  C("plazo", "Plazo", vacio="quitar", ayuda="«Antes de que la caravana se vaya», «3 días»…"),
+                  C("pistas", "Pistas", "lineas", vacio="quitar",
+                    ayuda="Lo que sabemos de ella, una cosa por línea. En la web, plegadas debajo.")]},
          ]},
         {"id": "botin", "apartado": "rol", "titulo": "El botín de una campaña", "por_campana": True,
          "ayuda": "Lo que el grupo va juntando. Lo gastado se queda en la lista, tachado: «qué tuvimos» es media"
@@ -1284,11 +1298,20 @@ def colecciones():
          "archivo": "datos/notas_rol/campana-{campana}.json", "despues": "buscador",
          "partes": [{"id": "botin", "camino": ["botin"], "titulo": "El botín", "nombre_de": "que",
                      "detalle": ["tipo", "quien"], "campos": [
-                         C("que", "Qué es", obligatorio=True, ayuda="«4 kits curativos», «Piedra mensajera»…"),
+                         C("que", "Qué es", obligatorio=True,
+                           ayuda="«Kits curativos», «Piedra mensajera»… (cuántas, más abajo)."),
                          C("tipo", "Apartado", "elegir", opciones=_opciones(tipos_botin)),
                          C("quien", "Quién lo lleva", "elegir", libre=True, vacio="quitar"),
                          C("de", "De qué sesión", "elegir", numerico=True, vacio="quitar"),
+                         C("cantidad", "Cuántas quedan", "numero", minimo=0, vacio="quitar", pasos=True,
+                           inicial="inicial",
+                           agota="gastado", ayuda="Con − y + se va contando en la partida; al llegar a 0 queda"
+                                                  " gastado. Vacío si es una sola cosa."),
+                         C("inicial", "Cuántas había", "numero", minimo=0, vacio="quitar",
+                           ayuda="Para que en la web salga «4 de 5». Se apunta solo al gastar la primera."),
                          C("gastado", "Gastado", "si-no", vacio="quitar"),
+                         C("valor", "Valor (en po, cada una)", "numero", minimo=0, vacio="quitar",
+                           ayuda="Lo que sacaríais vendiéndolo: «25», «0,5». Opcional; la web suma el total."),
                          C("imagen", "Foto", "imagen", sitio="botin", vacio="quitar"),
                          C("efecto", "Qué hace (en el juego)", vacio="quitar",
                            ayuda="Lo que cuenta en una tirada: «+1d4 de daño de ácido», «cura 2d4+2», «+1 a la CA»."
@@ -1306,8 +1329,28 @@ def colecciones():
                            ayuda="«Instantánea», «1 asalto», «Concentración, hasta 1 minuto»…"),
                          C("tirada", "Tirada o CD", vacio="quitar", si=es_pergamino,
                            ayuda="Si pide salvación o ataque: «CD 13 de DES», «+5 al ataque»."),
-                         C("descripcion", "Qué hace el hechizo", "largo", vacio="quitar", si=es_pergamino,
-                           ayuda="Lo que sale al desplegarlo en la web. Un párrafo por línea."),
+                         C("rareza", "Rareza", "elegir", libre=True, vacio="quitar", si=es_magico,
+                           opciones=_opciones(rarezas)),
+                         C("sintonizacion", "Requiere sintonización", "si-no", vacio="quitar", si=es_magico),
+                         C("cargas", "Cargas", vacio="quitar", si=es_magico,
+                           ayuda="«3», «3; recupera 1d3 al amanecer»…"),
+                         C("descripcion", "Qué hace (al desplegarlo en la web)", "largo", vacio="quitar",
+                           si=con_descripcion, ayuda="El hechizo o el objeto, entero. Un párrafo por línea."),
+                     ]}]},
+        {"id": "dinero", "apartado": "rol", "titulo": "El dinero de una campaña", "por_campana": True,
+         "ayuda": "Lo que entra y lo que sale de la bolsa del grupo, con su concepto y su sesión. La web lo suma por"
+                  " monedas, lo pasa a oro y lo enseña en la pestaña «dinero» del botín, con un conversor.",
+         "archivo": "datos/notas_rol/campana-{campana}.json", "despues": None,
+         "partes": [{"id": "movimientos", "camino": ["dinero", "movimientos"], "titulo": "Entradas y gastos",
+                     "nombre_de": "que", "detalle": ["sentido", "cantidad", "moneda", "de"], "campos": [
+                         C("que", "Concepto", obligatorio=True, ayuda="«Botín de los bandidos», «el carromato»…"),
+                         C("sentido", "Entra o sale", "elegir", obligatorio=True,
+                           opciones=[["entra", "entra (lo ganamos)"], ["sale", "sale (lo gastamos)"]]),
+                         C("cantidad", "Cuánto", "numero", minimo=0, obligatorio=True),
+                         C("moneda", "Moneda", "elegir", obligatorio=True, opciones=monedas),
+                         C("de", "De qué sesión", "elegir", numerico=True, vacio="quitar"),
+                         C("quien", "Quién", "elegir", libre=True, vacio="quitar",
+                           ayuda="Quién lo cobró o lo pagó, si importa."),
                      ]}]},
         {"id": "recomendaciones", "apartado": "rincon", "titulo": "Recomendaciones",
          "ayuda": "Libros, series, pelis, juegos… las ventanitas de la página de recomendaciones.",
@@ -1465,11 +1508,13 @@ def _guardar_datos(col, archivo, datos):
 
 
 def _ir(datos, camino, crear=False):
-    for paso_ in camino:
+    for n, paso_ in enumerate(camino):
         if not isinstance(datos, dict):
             return None
         if paso_ not in datos and crear:
-            datos[paso_] = {} if paso_ == "hoy" else []
+            # Lo de en medio de un camino (["dinero", "movimientos"]) es un
+            # diccionario; lo del final, una lista.
+            datos[paso_] = {} if paso_ == "hoy" or n < len(camino) - 1 else []
         datos = datos.get(paso_)
     return datos
 
@@ -1531,6 +1576,10 @@ def opciones_de(col, clave_campana, datos):
                                      if isinstance(p, dict) and p.get("nombre")])
         salida["_grupo"] = _opciones([m.get("nombre", "") for m in (datos or {}).get("misiones") or []
                                       if isinstance(m, dict) and m.get("nombre")])
+    if col["id"] == "dinero":
+        salida["de"] = _sesiones_de(campana)
+        salida["quien"] = _opciones([p.get("nombre", "") for p in (campana or {}).get("personajes") or []
+                                     if isinstance(p, dict)] + ["el grupo"])
     if col["id"] == "botin":
         salida["de"] = _sesiones_de(campana)
         salida["quien"] = _opciones([p.get("nombre", "") for p in (campana or {}).get("personajes") or []
@@ -1682,7 +1731,7 @@ def _montar_ficha(campos, original, crudo, nombre_de):
     ficha = dict(original)
     nombre = str(crudo.get(nombre_de) or "") if nombre_de else ""
     for campo in campos:
-        if campo["tipo"] == "ver" or campo["clave"] == "_grupo":
+        if campo["tipo"] in ("ver", "accion") or campo["clave"] == "_grupo":
             continue
         if campo["clave"] == "_grupos":
             _poner(ficha, campo, crudo.get("_grupos"))
@@ -1920,7 +1969,152 @@ def enlazables():
                                           if isinstance(p.get("notas"), list))[:300]}
                        for p in datos.get("personajes") or [] if isinstance(p, dict) and p.get("nombre")]
         grupos[clave] = [g[0] for g in opciones_de(coleccion("npcs"), "", datos).get("_grupos", [])]
-    return {"paginas": paginas, "npcs": npcs, "grupos": grupos}
+    # Las misiones de cada campaña (para «Nueva misión» y «Pista» en las
+    # notas): las abiertas, con su apartado.
+    misiones = {}
+    for _, campana in campanas_que_hay():
+        clave = campana.get("clave")
+        lista = []
+        for apartado in campana.get("misiones") or []:
+            if not isinstance(apartado, dict):
+                continue
+            for cosa in apartado.get("cosas") or []:
+                if isinstance(cosa, dict) and cosa.get("que") and not cosa.get("estado") and not cosa.get("hecha"):
+                    lista.append({"mision": str(apartado.get("nombre") or ""), "que": str(cosa["que"])})
+        misiones[clave] = lista
+    return {"paginas": paginas, "npcs": npcs, "grupos": grupos, "misiones": misiones}
+
+
+# =========================================
+# DE LAS NOTAS AL BOTÍN, A LAS MISIONES Y AL DINERO
+# =========================================
+# Lo que el editor hace sin pasar por las fichas: pasar al botín la lista
+# de objetos de unas notas (o lo que se llevó el grupo de una misión), y
+# crear una misión o apuntarle una pista desde lo elegido en las notas.
+# Escriben solo su trozo del JSON de la campaña: lo demás, como estaba.
+MONEDAS = {"pc": "pc", "pp": "pp", "pe": "pe", "po": "po", "ppt": "ppt", "cobre": "pc", "plata": "pp",
+           "electro": "pe", "electrum": "pe", "oro": "po", "platino": "ppt"}
+RE_MONEDAS = re.compile(r"^\s*(\d+(?:[.,]\d+)?)\s*(?:(ppt|pp|pc|pe|po)\b|monedas?\s+de\s+"
+                        r"(oro|plata|cobre|electro|electrum|platino))", re.I)
+RE_CUANTAS = re.compile(r"^\s*[x×]?\s*(\d+)\s*[x×]?\s+(.+)$", re.I)
+
+
+def _texto_llano(texto):
+    return " ".join(unicodedata.normalize("NFD", str(texto or "")).encode("ascii", "ignore").decode().lower().split())
+
+
+def _de_sesion(valor):
+    return int(valor) if str(valor or "").strip().isdigit() else None
+
+
+def _campana_para_tocar(clave):
+    archivo, campana = _campana(str(clave or ""))
+    if not archivo:
+        raise ValueError("no encuentro esa campaña")
+    return archivo, campana
+
+
+def anadir_al_botin(peticion):
+    """{campana, cosas: [{que, de?, tipo?, quien?}]}. Las monedas («25 po»,
+    «10 monedas de oro») van al dinero, como una entrada; lo demás, al
+    botín, con su cantidad aparte si empieza por un número («4 kits» →
+    «Kits», 4). Lo que ya estaba (mismo nombre) no se repite."""
+    try:
+        archivo, campana = _campana_para_tocar(peticion.get("campana"))
+    except ValueError as error:
+        return {"error": str(error).capitalize() + "."}
+    botin = campana.setdefault("botin", [])
+    movimientos = campana.setdefault("dinero", {}).setdefault("movimientos", [])
+    hechas, al_dinero, ya = [], [], []
+    for cosa in peticion.get("cosas") or []:
+        if not isinstance(cosa, dict):
+            continue
+        texto = " ".join(str(cosa.get("que") or "").split())
+        if not texto:
+            continue
+        de = _de_sesion(cosa.get("de"))
+        monedas = RE_MONEDAS.match(texto)
+        if monedas:
+            numero = float(monedas.group(1).replace(",", "."))
+            movimiento = {"que": str(cosa.get("concepto") or texto), "sentido": "entra",
+                          "cantidad": int(numero) if numero == int(numero) else numero,
+                          "moneda": MONEDAS[(monedas.group(2) or monedas.group(3)).lower()]}
+            if de:
+                movimiento["de"] = de
+            movimientos.append(movimiento)
+            al_dinero.append(texto)
+            continue
+        cantidad = None
+        nombre = texto
+        cuantas = RE_CUANTAS.match(texto)
+        if cuantas:
+            cantidad = int(cuantas.group(1))
+            nombre = cuantas.group(2).strip()
+        # Con mayúscula, como lo demás del botín («un carromato» → «Un carromato»).
+        nombre = nombre[:1].upper() + nombre[1:]
+        if any(_texto_llano(c.get("que")) in (_texto_llano(nombre), _texto_llano(texto))
+               for c in botin if isinstance(c, dict)):
+            ya.append(texto)
+            continue
+        nueva = {"que": nombre}
+        if cantidad and cantidad > 1:
+            nueva["cantidad"] = cantidad
+        for clave in ("tipo", "quien"):
+            if str(cosa.get(clave) or "").strip():
+                nueva[clave] = str(cosa[clave]).strip()
+        if de:
+            nueva["de"] = de
+        botin.append(nueva)
+        hechas.append(texto)
+    escribir_json(archivo, campana)
+    return {"ok": True, "botin": hechas, "dinero": al_dinero, "ya": ya}
+
+
+def nueva_mision(peticion):
+    """{campana, mision (el apartado), que, quien?, de?}"""
+    try:
+        archivo, campana = _campana_para_tocar(peticion.get("campana"))
+    except ValueError as error:
+        return {"error": str(error).capitalize() + "."}
+    que = " ".join(str(peticion.get("que") or "").split())
+    grupo = " ".join(str(peticion.get("mision") or "").split())
+    if not que or not grupo:
+        return {"error": "Hace falta qué hay que hacer y de qué misión es."}
+    misiones = campana.setdefault("misiones", [])
+    apartado = next((m for m in misiones if isinstance(m, dict) and m.get("nombre") == grupo), None)
+    if apartado is None:
+        apartado = {"nombre": grupo, "cosas": []}
+        misiones.append(apartado)
+    cosa = {"que": que}
+    if _de_sesion(peticion.get("de")):
+        cosa["de"] = _de_sesion(peticion.get("de"))
+    if str(peticion.get("quien") or "").strip():
+        cosa["quien"] = str(peticion["quien"]).strip()
+    apartado.setdefault("cosas", []).append(cosa)
+    escribir_json(archivo, campana)
+    return {"ok": True}
+
+
+def pista_de_mision(peticion):
+    """{campana, mision, que (la cosa de la misión), pista}"""
+    try:
+        archivo, campana = _campana_para_tocar(peticion.get("campana"))
+    except ValueError as error:
+        return {"error": str(error).capitalize() + "."}
+    pista = " ".join(str(peticion.get("pista") or "").split())
+    if not pista:
+        return {"error": "La pista está vacía."}
+    for apartado in campana.get("misiones") or []:
+        if not isinstance(apartado, dict) or apartado.get("nombre") != peticion.get("mision"):
+            continue
+        for cosa in apartado.get("cosas") or []:
+            if isinstance(cosa, dict) and cosa.get("que") == peticion.get("que"):
+                pistas = cosa.setdefault("pistas", [])
+                if pista not in pistas:
+                    pistas.append(pista)
+                escribir_json(archivo, campana)
+                return {"ok": True}
+    return {"error": "Esa misión ya no está."}
 
 
 def crear_npc(peticion):
@@ -2107,6 +2301,12 @@ def atender_post(ruta, peticion):
         return apuntar_borrador(peticion)
     if ruta == "/api/web/npc/nuevo":
         return crear_npc(peticion)
+    if ruta == "/api/web/botin/anadir":
+        return anadir_al_botin(peticion)
+    if ruta == "/api/web/mision/nueva":
+        return nueva_mision(peticion)
+    if ruta == "/api/web/mision/pista":
+        return pista_de_mision(peticion)
     if ruta == "/api/web/entrada/guardar":
         return guardar_entrada(peticion)
     if ruta == "/api/web/entrada/publicar":

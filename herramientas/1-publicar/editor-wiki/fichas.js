@@ -461,6 +461,18 @@ function casillaDeFichaWeb(dentro, f, c, base, parte, alCambiar) {
         return;
     }
     const nombre = c.nombre;
+    if (c.tipo === "accion") {
+        // Un botón que hace algo con la ficha (ACCIONES_DE_FICHA), no una
+        // casilla: no guarda nada en ella.
+        const caja = crearEditor("div", "campo");
+        const b = crearEditor("button", "", c.nombre);
+        b.type = "button";
+        b.id = id;
+        b.addEventListener("click", () => (ACCIONES_DE_FICHA[c.accion] || (() => {}))(f, b));
+        caja.appendChild(b);
+        dentro.appendChild(caja);
+        return;
+    }
     if (c.tipo === "elegir" && !c.libre) {
         const lista = (c.obligatorio ? [] : [["", "— ninguno —"]]).concat(opciones);
         const el = campoWeb(dentro, id, nombre, { tipo: "elegir", opciones: lista, ayuda, opcional: !c.obligatorio });
@@ -567,6 +579,38 @@ function casillaDeFichaWeb(dentro, f, c, base, parte, alCambiar) {
         }
     }
     el.addEventListener("input", () => cambiar(el.value));
+    if (c.tipo === "numero" && c.pasos) {
+        // − y + al lado (contar flechas en plena partida). Con c.agota
+        // («gastado»), al llegar a 0 se marca solo; con c.inicial
+        // («inicial»), la primera vez que baja se apunta cuántas había.
+        const fila = crearEditor("div", "fila ficha-pasos");
+        const paso = (hacia) => {
+            const b = crearEditor("button", "", hacia < 0 ? "−" : "+");
+            b.type = "button";
+            b.id = id + (hacia < 0 ? "-menos" : "-mas");
+            b.setAttribute("aria-label", (hacia < 0 ? "Una menos" : "Una más") + " (" + nombre + ")");
+            b.addEventListener("click", () => {
+                const ahora = Number(String(f[c.clave] === undefined ? "" : f[c.clave]).replace(",", ".")) || 0;
+                const nuevo = Math.max(0, ahora + hacia);
+                if (nuevo === ahora) {
+                    return;
+                }
+                if (hacia < 0 && c.inicial && !f[c.inicial]) {
+                    f[c.inicial] = String(ahora);
+                }
+                if (c.agota) {
+                    f[c.agota] = nuevo === 0;
+                }
+                cambiar(String(nuevo));
+                avisarEditor(nombre + ": " + nuevo + (nuevo === 0 && c.agota ? " (ya no queda: gastado)" : "") + ".");
+                pintarPartesWeb(b.id);
+            });
+            fila.appendChild(b);
+        };
+        paso(-1);
+        paso(1);
+        el.after(fila);
+    }
     if (c.markdown) {
         // Texto con formato (el Markdown de la wiki): los botones encima.
         // Con c.imagenes (a dónde van: «evento»…), también el botón de
@@ -575,6 +619,40 @@ function casillaDeFichaWeb(dentro, f, c, base, parte, alCambiar) {
             c.imagenes ? { imagenes: () => ({ sitio: c.imagenes, campos: { campana: estadoFichas.campana } }) } : null));
     }
 }
+
+// LO QUE HACEN LOS BOTONES DE LAS FICHAS (casillas de tipo «accion»).
+const ACCIONES_DE_FICHA = {
+    // Una misión completada: «Lo que nos llevamos» al botín (o al dinero,
+    // si son monedas: «50 po»). Varias cosas se separan con comas o «y».
+    "mision-al-botin": async (f, boton) => {
+        const lo = String(f.obtenida || "").trim();
+        if (!lo) {
+            avisarEditor("Primero escribe en «Lo que nos llevamos» qué fue.", true);
+            return;
+        }
+        const cosas = lo.split(/\s*[,;]\s*|\s+y\s+/).map((x) => x.replace(/[.]$/, "").trim()).filter(Boolean)
+            .map((que) => ({ que, de: f.hasta || "", concepto: "Recompensa: " + String(f.que || "").trim() }));
+        boton.disabled = true;
+        const hecho = await pedirEditor("/api/web/botin/anadir", { campana: estadoFichas.campana, cosas });
+        boton.disabled = false;
+        if (hecho.error) {
+            avisarEditor(hecho.error, true);
+            return;
+        }
+        const partes = [];
+        if (hecho.botin.length) {
+            partes.push("al botín: " + hecho.botin.join(", "));
+        }
+        if (hecho.dinero.length) {
+            partes.push("al dinero: " + hecho.dinero.join(", "));
+        }
+        if (hecho.ya.length) {
+            partes.push("ya estaba: " + hecho.ya.join(", "));
+        }
+        avisarEditor((partes.join("; ") || "Nada que pasar") + ". (Ya está guardado; ponle su apartado y quién"
+            + " lo lleva en «El botín de una campaña».)");
+    },
+};
 
 async function guardarFichasWeb() {
     const col = estadoFichas.col;

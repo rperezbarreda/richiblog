@@ -132,6 +132,7 @@ async function initializeNpcsRol() {
             if (respuesta.ok) {
                 const campana = await respuesta.json();
                 datos.sesiones = campana.sesiones;
+                datos.misiones = campana.misiones;
                 if (!(datos.campana_pagina || "").trim()) {
                     datos.campana_pagina = campana.pagina;
                 }
@@ -801,7 +802,50 @@ function fichaDeNpc(quien, nombre, datos) {
         ficha.appendChild(vacio);
     }
 
+    const misiones = misionesDeNpc(nombre, datos);
+    if (misiones) {
+        ficha.appendChild(misiones);
+    }
+
     return ficha;
+}
+
+// LAS MISIONES QUE NOS HA PEDIDO: las de la campaña con su nombre en
+// «quien», con cómo van (escrito, no solo con un color).
+function misionesDeNpc(nombre, datos) {
+    const llano = (s) => (s || "").toString().normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim();
+    const suyas = [];
+    (Array.isArray(datos && datos.misiones) ? datos.misiones : []).forEach((apartado) => {
+        (Array.isArray(apartado && apartado.cosas) ? apartado.cosas : []).forEach((cosa) => {
+            if (cosa && cosa.que && llano(cosa.quien) === llano(nombre)) {
+                suyas.push(cosa);
+            }
+        });
+    });
+    if (!suyas.length) {
+        return null;
+    }
+    const caja = document.createElement("section");
+    caja.className = "npc-misiones";
+    const titulo = document.createElement("h4");
+    titulo.className = "npc-misiones-titulo";
+    titulo.textContent = "Lo que nos ha pedido";
+    caja.appendChild(titulo);
+    const lista = document.createElement("ul");
+    lista.className = "npc-misiones-lista";
+    suyas.forEach((cosa) => {
+        const estado = (cosa.estado || (cosa.hecha ? "completada" : "pendiente")).toString().toLowerCase();
+        const li = document.createElement("li");
+        li.textContent = cosa.que.toString().trim();
+        const marca = document.createElement("span");
+        marca.className = "npc-misiones-estado";
+        marca.textContent = estado === "fallada" ? "fallida" : estado;
+        li.appendChild(document.createTextNode(" "));
+        li.appendChild(marca);
+        lista.appendChild(li);
+    });
+    caja.appendChild(lista);
+    return caja;
 }
 
 // ["a", "b", "c"] -> "a, b y c". Con la "y" y no con una coma final,

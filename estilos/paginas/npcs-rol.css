@@ -639,6 +639,35 @@
     line-height: 1.6;
 }
 
+/* LO QUE NOS HA PEDIDO: sus misiones, con cómo van escrito al lado. */
+.npc-misiones {
+    margin-top: 16px;
+}
+
+.npc-misiones-titulo {
+    margin: 0 0 6px;
+    color: var(--yellow);
+    font-family: var(--fuente-mono);
+    font-size: 0.8125rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.npc-misiones-lista {
+    margin: 0;
+    padding-left: 1.2em;
+    color: var(--white);
+    line-height: 1.6;
+}
+
+.npc-misiones-estado {
+    padding: 0 0.4em;
+    border: 1px solid var(--yellow);
+    color: var(--yellow);
+    font-family: var(--fuente-mono);
+    font-size: 0.75em;
+}
+
 .npc-visor-notas > li {
     margin: 0;
 }

@@ -775,6 +775,14 @@ async function montarTokensDeNpcs(cuaderno) {
     if (campana && Array.isArray(campana.sesiones)) {
         datosNpc.sesiones = campana.sesiones;
     }
+    // Las misiones, para que la ficha de un NPC diga las que nos pidió; y
+    // el botín, para que la de uno de la mesa diga lo que lleva.
+    if (campana && Array.isArray(campana.misiones)) {
+        datosNpc.misiones = campana.misiones;
+    }
+    if (campana && typeof ponerBotinDeLaMesa === "function") {
+        ponerBotinDeLaMesa(campana);
+    }
     const npcs = Array.isArray(datosNpc.personajes) ? datosNpc.personajes : [];
     // La mesa, ya repasada por personajesDe() de notas-rol.js: la misma
     // lectura que usa el índice de la campaña para sus fichas.

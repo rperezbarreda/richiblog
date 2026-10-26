@@ -455,6 +455,165 @@
     letter-spacing: 0;
 }
 
+/* CÓMO SE REPARTE (por apartado o por quién lo lleva): dos botones como
+   los de filtrar, encima de las pestañas, marcados con aria-pressed. */
+.campana-botin-modos {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 10px;
+}
+
+.campana-botin-modo {
+    padding: 4px 12px;
+    border: 1px dashed var(--yellow);
+    background: transparent;
+    color: var(--yellow);
+    font-family: var(--fuente-mono);
+    font-size: 0.75rem;
+    cursor: pointer;
+}
+
+.campana-botin-modo:hover,
+.campana-botin-modo[aria-pressed="true"] {
+    border-style: solid;
+    background: var(--yellow);
+    color: var(--yellow-contrast);
+}
+
+.campana-botin-modo:focus-visible {
+    outline: 2px solid var(--yellow);
+    outline-offset: 3px;
+}
+
+/* Cuántas quedan, detrás del nombre: «×4», «quedan 4 de 5». */
+.campana-botin-cantidad {
+    color: var(--yellow);
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+/* EL DINERO: la bolsa, la lista de entradas y gastos y el conversor. */
+.campana-dinero {
+    margin-bottom: 14px;
+    color: var(--white);
+    font-family: var(--fuente-mono);
+    font-size: 0.8125rem;
+    line-height: 1.6;
+}
+
+.campana-dinero-bolsa {
+    margin: 0 0 8px;
+    padding: 6px 10px;
+    border: 2px solid var(--yellow);
+    font-size: 0.875rem;
+}
+
+.campana-dinero-bolsa strong {
+    color: var(--yellow);
+}
+
+.campana-dinero-titulo {
+    margin: 14px 0 6px;
+    color: var(--yellow);
+    font-family: var(--fuente-mono);
+    font-size: 0.8125rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.campana-dinero-lista {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.campana-dinero-movimiento {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 0 0.6em;
+    padding-left: 0.6em;
+    border-left: 3px solid var(--yellow);
+}
+
+/* Un gasto: la raya de puntos (y el «−» y la palabra «gasto», que son
+   los que lo dicen). */
+.campana-dinero-movimiento.es-gasto {
+    border-left-style: dashed;
+}
+
+.campana-dinero-cuanto {
+    min-width: 6.5em;
+    color: var(--yellow);
+    font-weight: 700;
+}
+
+.campana-dinero-movimiento .campana-botin-donde {
+    flex-basis: 100%;
+}
+
+.campana-conversor-fila {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px 10px;
+}
+
+.campana-conversor-fila input,
+.campana-conversor-fila select {
+    min-height: 36px;
+    padding: 4px 8px;
+    border: 2px solid var(--yellow);
+    background: var(--purple-lighter);
+    color: var(--white);
+    font: inherit;
+}
+
+.campana-conversor-fila input {
+    width: 7em;
+}
+
+.campana-conversor-fila input:focus-visible,
+.campana-conversor-fila select:focus-visible {
+    outline: 2px solid var(--yellow);
+    outline-offset: 2px;
+}
+
+.campana-conversor-salida {
+    margin: 8px 0 4px;
+    padding: 0;
+    list-style: none;
+}
+
+.campana-conversor-nota {
+    margin: 0;
+    color: var(--muted);
+    font-size: 0.75rem;
+}
+
+/* LO QUE LLEVA CADA UNO DE LA MESA, en su ficha. */
+.mesa-botin {
+    margin-top: 16px;
+}
+
+.mesa-botin-titulo {
+    margin: 0 0 6px;
+    color: var(--yellow);
+    font-family: var(--fuente-mono);
+    font-size: 0.8125rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.mesa-botin-lista {
+    margin: 0;
+    padding-left: 1.2em;
+}
+
 /* El panel que llenan. No lleva barra propia: quien se desplaza es la
    ventana, como en la ficha de un personaje. */
 .campana-botin-panel {
@@ -964,6 +1123,39 @@
 /* Una fallida, tachada (como se tacha en el papel lo que ya no va). */
 .misiones-hecha.es-fallada .misiones-que {
     text-decoration: line-through;
+}
+
+/* LO URGENTE: la palabra delante, en recuadro, y lo primero de su misión. */
+.misiones-urgente {
+    padding: 0 0.4em;
+    border: 2px solid currentColor;
+    font-family: var(--fuente-mono);
+    font-size: 0.75em;
+    font-weight: 700;
+    text-transform: uppercase;
+}
+
+/* LAS PISTAS de una misión, plegadas debajo de ella. */
+.misiones-pistas {
+    font-size: 0.85em;
+}
+
+.misiones-pistas > summary {
+    width: fit-content;
+    font-family: var(--fuente-mono);
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.misiones-pistas > summary:focus-visible {
+    outline: 2px solid currentColor;
+    outline-offset: 2px;
+}
+
+.misiones-pistas > ul {
+    margin: 0.2em 0 0.4em;
+    padding-left: 1.2em;
+    list-style: disc;
 }
 
 /* La cuenta de todo, al pie de la nota, con su raya encima. */

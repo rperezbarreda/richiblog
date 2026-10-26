@@ -1154,6 +1154,209 @@ const PLANTILLAS_DE_ESCENA = [
         + "<blockquote class=\"cuaderno-descubrimiento\"><ul><li>…</li></ul></blockquote>"],
 ];
 
+// PASAR AL BOTÍN: lo de la lista de objetos del texto (la bolsa) o lo
+// elegido, una cosa por línea. Cada una con su casilla (todas marcadas),
+// su apartado (adivinado por el nombre) y quién lo lleva; la sesión, la de
+// estas notas. Las monedas («25 po», «10 monedas de oro») van al dinero.
+const ADIVINAR_APARTADO = [
+    [/pergamino|conjuro/, "pergaminos"], [/flecha|virote|espada|daga|arco|ballesta|hacha|maza|lanza/, "armas"],
+    [/armadura|escudo|cota|yelmo/, "armaduras"], [/poci[oó]n|hierba|elixir|ung[uü]ento|ant[ií]doto/, "pociones"],
+    [/kit|provisi|cuerda|antorcha|raci[oó]n|herramienta|mochila/, "equipo"],
+    [/m[aá]gic|anillo|amuleto|varita|piedra|orbe|bast[oó]n/, "objetos mágicos"],
+];
+
+function pasarAlBotinWeb(r, e) {
+    const listas = [...r.area.querySelectorAll("ul.cuaderno-objetos > li")].map((li) => li.textContent);
+    const elegido = r.elegido().trim();
+    const cosas = (elegido ? elegido.split(/\n+/) : listas).map((x) => x.replace(/\s+/g, " ").trim()).filter(Boolean);
+    if (!cosas.length) {
+        avisarEditor("No hay lista de objetos en este texto: elige lo que quieres pasar (una cosa por línea).", true);
+        return;
+    }
+    const llano = (s) => s.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+    const quienes = [["", "— nadie en concreto —"]].concat((e.personajes || []).filter((p) => p.nombre)
+        .map((p) => [p.nombre, p.nombre]), [["el carro", "el carro"]]);
+    const apartados = [["otras cosas", "otras cosas"], ["armas", "armas"], ["armaduras", "armaduras"],
+        ["pociones", "pociones"], ["pergaminos", "pergaminos"], ["equipo", "equipo"],
+        ["objetos mágicos", "objetos mágicos"]];
+    r.panel((panel, cerrar) => {
+        panel.appendChild(crearEditor("h3", "", "Pasar al botín (sesión " + (e.numero || "?") + ")"));
+        panel.appendChild(crearEditor("p", "ayuda", "Lo que ya esté en el botín no se repite. Las monedas van al"
+            + " dinero. Una cantidad delante («4 kits») se apunta aparte, para ir restando."));
+        const filas = cosas.map((que, i) => {
+            const caja = crearEditor("fieldset", "botin-pasar");
+            caja.appendChild(crearEditor("legend", "", que));
+            const marca = crearEditor("label", "opcion");
+            const casilla = document.createElement("input");
+            casilla.type = "checkbox";
+            casilla.checked = true;
+            marca.appendChild(casilla);
+            marca.appendChild(document.createTextNode(" Pasarlo"));
+            caja.appendChild(marca);
+            const elegir = (texto, opciones, valor, sufijo) => {
+                const c = crearEditor("div", "campo");
+                const l = crearEditor("label", "", texto);
+                const s = document.createElement("select");
+                s.id = "botin-pasar-" + i + "-" + sufijo;
+                l.htmlFor = s.id;
+                opciones.forEach(([v, n]) => s.appendChild(new Option(n, v)));
+                s.value = valor;
+                c.appendChild(l);
+                c.appendChild(s);
+                caja.appendChild(c);
+                return s;
+            };
+            const adivinado = (ADIVINAR_APARTADO.find(([patron]) => patron.test(llano(que))) || [null, "otras cosas"])[1];
+            const tipo = elegir("Apartado", apartados, adivinado, "tipo");
+            const quien = elegir("Quién lo lleva", quienes, "", "quien");
+            panel.appendChild(caja);
+            return { que, casilla, tipo, quien };
+        });
+        const fila = crearEditor("div", "fila");
+        const si = crearEditor("button", "principal", "Pasar al botín");
+        si.type = "button";
+        const no = crearEditor("button", "", "Cancelar");
+        no.type = "button";
+        fila.appendChild(si);
+        fila.appendChild(no);
+        panel.appendChild(fila);
+        no.addEventListener("click", () => cerrar(true));
+        si.addEventListener("click", async () => {
+            const elegidas = filas.filter((x) => x.casilla.checked).map((x) => ({ que: x.que, tipo: x.tipo.value,
+                quien: x.quien.value, de: e.numero, concepto: x.que + " (sesión " + (e.numero || "?") + ")" }));
+            if (!elegidas.length) {
+                avisarEditor("No hay nada marcado.", true);
+                return;
+            }
+            si.disabled = true;
+            const hecho = await pedirEditor("/api/web/botin/anadir", { campana: e.campana, cosas: elegidas });
+            si.disabled = false;
+            if (hecho.error) {
+                avisarEditor(hecho.error, true);
+                return;
+            }
+            cerrar(true);
+            const partes = [];
+            if (hecho.botin.length) {
+                partes.push(hecho.botin.length + " al botín");
+            }
+            if (hecho.dinero.length) {
+                partes.push(hecho.dinero.join(", ") + " al dinero");
+            }
+            if (hecho.ya.length) {
+                partes.push("ya estaban: " + hecho.ya.join(", "));
+            }
+            avisarEditor((partes.join("; ") || "Nada nuevo") + ". Ya está guardado en la campaña.");
+        });
+        filas[0].casilla.focus();
+    });
+}
+
+// UNA MISIÓN DESDE LAS NOTAS: lo elegido como misión nueva (con su
+// apartado, quién la pidió —de salida, el último NPC nombrado antes en el
+// texto— y la sesión de estas notas), o como pista de una que ya está
+// abierta. Se guarda en la campaña al momento.
+async function misionDesdeLasNotasWeb(r, e) {
+    const elegido = r.elegido().replace(/\s+/g, " ").trim();
+    if (!elegido) {
+        avisarEditor("Primero elige (marca) en el texto lo que hay que hacer, o la pista.", true);
+        return;
+    }
+    const datos = await enlazablesWeb();
+    const abiertas = (datos.misiones || {})[e.campana] || [];
+    const apartados = [...new Set(abiertas.map((m) => m.mision))];
+    const npcs = ((datos.npcs || {})[e.campana] || []).map((p) => p.nombre);
+    // El último NPC con etiqueta antes de lo elegido, en este texto.
+    let ultimo = "";
+    const sel = window.getSelection();
+    if (sel.rangeCount) {
+        const inicio = sel.getRangeAt(0);
+        r.area.querySelectorAll("strong[data-npc]").forEach((s) => {
+            if (s.compareDocumentPosition(inicio.startContainer) & Node.DOCUMENT_POSITION_FOLLOWING) {
+                ultimo = s.getAttribute("data-npc");
+            }
+        });
+    }
+    r.panel((panel, cerrar) => {
+        panel.appendChild(crearEditor("h3", "", "Misión: «" + elegido + "»"));
+        const campo = (texto, id, valor, lista) => {
+            const c = crearEditor("div", "campo");
+            const l = crearEditor("label", "", texto);
+            const i = document.createElement("input");
+            i.id = id;
+            i.value = valor || "";
+            i.autocomplete = "off";
+            if (lista) {
+                i.setAttribute("list", lista);
+            }
+            l.htmlFor = id;
+            c.appendChild(l);
+            c.appendChild(i);
+            panel.appendChild(c);
+            return i;
+        };
+        // Nueva
+        const nueva = crearEditor("fieldset", "botin-pasar");
+        nueva.appendChild(crearEditor("legend", "", "Como misión nueva"));
+        panel.appendChild(nueva);
+        datalistWeb("lista-apartados-mision-web", apartados);
+        datalistWeb("lista-npcs-mision-web", npcs);
+        const que = campo("Qué hay que hacer", "mision-nueva-que", elegido);
+        const de = campo("De qué misión (una que ya hay, o una nueva)", "mision-nueva-de", apartados[0] || "",
+            "lista-apartados-mision-web");
+        const quien = campo("Quién nos lo pidió (opcional)", "mision-nueva-quien", ultimo, "lista-npcs-mision-web");
+        [que, de, quien].forEach((i) => nueva.appendChild(i.parentNode));
+        const crear = crearEditor("button", "principal", "Crear la misión");
+        crear.type = "button";
+        nueva.appendChild(crear);
+        crear.addEventListener("click", async () => {
+            const hecho = await pedirEditor("/api/web/mision/nueva", { campana: e.campana, que: que.value,
+                mision: de.value, quien: quien.value, de: e.numero });
+            if (hecho.error) {
+                avisarEditor(hecho.error, true);
+                return;
+            }
+            ENLAZABLES_WEB.cuando = 0;
+            cerrar(true);
+            avisarEditor("Misión apuntada en «" + de.value.trim() + "». Sale en el post-it de la campaña.");
+        });
+        // Pista
+        if (abiertas.length) {
+            const pista = crearEditor("fieldset", "botin-pasar");
+            pista.appendChild(crearEditor("legend", "", "Como pista de una misión abierta"));
+            const c = crearEditor("div", "campo");
+            const l = crearEditor("label", "", "De cuál");
+            const s = document.createElement("select");
+            s.id = "mision-pista-cual";
+            l.htmlFor = s.id;
+            abiertas.forEach((m, i) => s.appendChild(new Option(m.mision + ": " + m.que, String(i))));
+            c.appendChild(l);
+            c.appendChild(s);
+            pista.appendChild(c);
+            const poner = crearEditor("button", "", "Apuntar la pista");
+            poner.type = "button";
+            pista.appendChild(poner);
+            panel.appendChild(pista);
+            poner.addEventListener("click", async () => {
+                const m = abiertas[Number(s.value)];
+                const hecho = await pedirEditor("/api/web/mision/pista", { campana: e.campana, mision: m.mision,
+                    que: m.que, pista: elegido });
+                if (hecho.error) {
+                    avisarEditor(hecho.error, true);
+                    return;
+                }
+                cerrar(true);
+                avisarEditor("Pista apuntada en «" + m.que + "».");
+            });
+        }
+        const no = crearEditor("button", "", "Cancelar");
+        no.type = "button";
+        no.addEventListener("click", () => cerrar(true));
+        panel.appendChild(no);
+        que.focus();
+    });
+}
+
 function extrasDelCuadernoWeb(e) {
     const pjs = (e.personajes || []).filter((p) => p.nombre);
     const extras = [];
@@ -1203,6 +1406,13 @@ function extrasDelCuadernoWeb(e) {
         ayuda: "Lo de donde está el cursor (o lo elegido), en una caja aparte: lo que sacamos de un interrogatorio,"
             + " una pista… Otra vez, lo saca de la caja",
         hacer: (r) => r.envolverBloque("blockquote", "cuaderno-descubrimiento") });
+    extras.push({ texto: "Pasar al botín", icono: "alBotin",
+        ayuda: "Lo de la lista de objetos de este texto (o lo elegido, una cosa por línea), al botín de la campaña;"
+            + " las monedas, al dinero",
+        hacer: (r) => pasarAlBotinWeb(r, e) });
+    extras.push({ texto: "Misión", icono: "mision",
+        ayuda: "Lo elegido como misión nueva de la campaña, o como pista de una que ya hay",
+        hacer: (r) => misionDesdeLasNotasWeb(r, e) });
     extras.push({ texto: "Lista de objetos", icono: "objetos", ayuda: "Una lista de lo que se consiguió (con su formato)",
         hacer: (r) => {
             r.hacer("insertUnorderedList");

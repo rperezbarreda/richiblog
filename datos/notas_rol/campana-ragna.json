@@ -64,13 +64,15 @@
             "imagen": "/imagenes/notas_rol/ragna/botin/hierbas-misteriosas-velocidad.webp"
         },
         {
-            "que": "x4 Kits curativos",
+            "que": "Kits curativos",
+            "cantidad": 4,
             "tipo": "equipo",
             "quien": "el carro",
             "imagen": "/imagenes/notas_rol/ragna/botin/x4-kits-curativos.webp"
         },
         {
-            "que": "x6 Provisiones",
+            "que": "Provisiones",
+            "cantidad": 6,
             "tipo": "otras cosas",
             "quien": "el carro",
             "imagen": "/imagenes/notas_rol/ragna/botin/x6-provisiones.webp"
@@ -82,7 +84,8 @@
             "imagen": "/imagenes/notas_rol/ragna/botin/piedra-mensajera.webp"
         },
         {
-            "que": "5 Flechas de ácido",
+            "que": "Flechas de ácido",
+            "cantidad": 5,
             "tipo": "armas",
             "quien": "Mellissa",
             "de": 2,

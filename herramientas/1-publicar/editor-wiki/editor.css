@@ -2093,6 +2093,29 @@ html[data-contraste="alto"] .redactor-area .pj-morado { color: #dec4ff; }
 }
 
 /* ---- LAS FICHAS ---- */
+/* Cada cosa al pasarla al botín (o la misión nueva, o la pista) desde
+   las notas: su recuadro con su nombre. */
+.botin-pasar {
+    margin: 0 0 12px;
+    padding: 8px 12px;
+    border: 2px dashed var(--borde);
+}
+
+.botin-pasar legend {
+    padding: 0 6px;
+    font-weight: 700;
+}
+
+/* − y + de una cantidad (el botín), pegados a su casilla. */
+.ficha-pasos {
+    margin-top: 6px;
+}
+
+.ficha-pasos button {
+    min-width: 48px;
+    font-size: 1.3rem;
+}
+
 .fichas-lista {
     display: flex;
     flex-direction: column;

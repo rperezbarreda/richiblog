@@ -79,6 +79,10 @@ const ICONOS_DEL_REDACTOR = {
     regla: '<path d="M12 2l9 5v10l-9 5-9-5V7z"/><path d="M12 22V12M21 7l-9 5-9-5"/>',
     // Una lupa sobre un papel: lo que descubrimos.
     descubrimiento: '<path d="M5 3h10l4 4v6"/><path d="M5 3v18h7"/><circle cx="16.5" cy="16.5" r="3"/><path d="M18.7 18.7L22 22"/>',
+    // Una bolsa con una flecha hacia dentro: pasar los objetos al botín.
+    alBotin: '<path d="M5 9h14l-1.2 11H6.2z"/><path d="M9 9V7a3 3 0 0 1 6 0v2"/><path d="M12 12v5M9.5 14.5L12 17l2.5-2.5"/>',
+    // Una bandera: una misión (nueva, o una pista para una).
+    mision: '<path d="M5 21V4"/><path d="M5 4h11l-2 4 2 4H5"/>',
     alguien: '<circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/>',
     // Alguien con una etiqueta colgada: un NPC de la campaña (con su ficha).
     npc: '<circle cx="9" cy="8" r="4"/><path d="M2 21a7 7 0 0 1 13-3.6"/><path d="M15 12h6v5l-3 3-3-3z"/>',

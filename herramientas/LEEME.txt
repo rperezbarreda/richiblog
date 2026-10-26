@@ -176,6 +176,14 @@
           (✗, tachadas), de la última a la primera, con sus sesiones,
           su misión, quién la pidió y qué recompensa hubo (o «sin
           recompensa», o «se perdió: …» si se falló).
+        - MÁS DE LAS MISIONES (desde el 26-10-2026): «Urgente» (sale la
+          primera de su misión, con la palabra en recuadro) y «Plazo»;
+          «Pistas» (una por línea; en la web, plegadas debajo); en la
+          ficha de cada NPC, «Lo que nos ha pedido» con cómo va cada
+          una; y desde las notas, el botón «Misión» (la bandera): lo
+          elegido como misión nueva (con su misión, quién la pidió —de
+          salida, el último NPC nombrado antes— y la sesión) o como
+          pista de una abierta.
         - EL POST-IT DE CADA SESIÓN NO TIENE QUE VER CON ESTA LISTA
           (desde el 25-10-2026; un día lo generaba): es de esa sesión y
           se escribe en el editor de sus notas, debajo del cuaderno. Una
@@ -1125,6 +1133,34 @@
   "tirada" (la CD o el ataque) y "descripcion" (un párrafo por línea).
   En el editor (Rol → El botín) lo del hechizo solo sale al elegir el
   apartado «pergaminos» (las casillas con «si» en editor_web.py).
+
+  MÁS DEL BOTÍN (desde el 26-10-2026):
+    · CUÁNTAS QUEDAN: "cantidad" (y "inicial", cuántas había). En el
+      editor, con − y + al lado; la primera vez que baja se apunta
+      «Cuántas había», y al llegar a 0 queda gastado solo. En la web,
+      «×4» o «quedan 4 de 5» detrás del nombre.
+    · VALOR: "valor" (en po, cada una). La web pone «vale 2 po cada una»
+      y al pie lo que vale todo lo que queda.
+    · OBJETOS MÁGICOS: "rareza", "sintonizacion", "cargas" y
+      "descripcion", en el mismo desplegable «Qué hace» que los
+      pergaminos (en el editor, solo con «objetos mágicos»).
+    · POR QUIÉN LO LLEVA: arriba de las pestañas, «por apartado» o «por
+      quién lo lleva». Y en la ficha de cada uno de la mesa (en la página
+      de la campaña y en las notas), «Lo que lleva del botín».
+    · EL DINERO: "dinero": {"movimientos": [{que, sentido: "entra" |
+      "sale", cantidad, moneda: pc | pp | pe | po | ppt, de, quien}]}. Se
+      lleva en Rol → «El dinero de una campaña». En la pestaña «dinero»
+      del botín: la bolsa (en po, pp y pc, y en oro), «Entradas y gastos»
+      con lo que quedaba después de cada uno, y un CONVERSOR de monedas
+      (1 po = 10 pp = 100 pc; 1 pe = 5 pp; 1 ppt = 10 po).
+    · DESDE LAS NOTAS: el botón «Pasar al botín» (la bolsa con la flecha)
+      lleva la lista de objetos del texto (o lo elegido, una cosa por
+      línea) al botín, con su apartado adivinado, quién lo lleva y la
+      sesión; una cantidad delante va aparte; lo que ya estaba no se
+      repite; las monedas («25 po», «10 monedas de oro») van al dinero.
+    · DESDE UNA MISIÓN COMPLETADA: el botón «Pasar "Lo que nos llevamos"
+      al botín» hace lo mismo con la recompensa (varias cosas, con comas
+      o «y»).
 
   Sin "botin" en el JSON el botón no sale. Lo que se apunte se busca
   desde la lupa, así que si lo tocas a mano conviene pasar el buscador

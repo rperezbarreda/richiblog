@@ -437,6 +437,12 @@ async function montarTokensDeNpcs(cuaderno) {
     if (campana && Array.isArray(campana.sesiones)) {
         datosNpc.sesiones = campana.sesiones;
     }
+    if (campana && Array.isArray(campana.misiones)) {
+        datosNpc.misiones = campana.misiones;
+    }
+    if (campana && typeof ponerBotinDeLaMesa === "function") {
+        ponerBotinDeLaMesa(campana);
+    }
     const npcs = Array.isArray(datosNpc.personajes) ? datosNpc.personajes : [];
     const mesa = campana && typeof personajesDe === "function"
         ? personajesDe(campana.personajes) : [];
