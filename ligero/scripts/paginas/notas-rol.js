@@ -735,6 +735,15 @@ function llenarElDinero(cuerpo, movimientos) {
         saldo += cobre;
         return { m, cobre, despues: saldo };
     });
+    const columnas = document.createElement("div");
+    columnas.className = "dinero-columnas";
+    const izquierda = document.createElement("div");
+    izquierda.className = "dinero-izquierda";
+    const derecha = document.createElement("div");
+    derecha.className = "dinero-derecha";
+    columnas.appendChild(izquierda);
+    columnas.appendChild(derecha);
+    cuerpo.appendChild(columnas);
     const nota = document.createElement("div");
     nota.className = "cuaderno-postit misiones-nota dinero-nota";
     const titulo = document.createElement("h3");
@@ -751,7 +760,7 @@ function llenarElDinero(cuerpo, movimientos) {
         enOro.textContent = "(" + numeroDeDinero(saldo / 100) + " po en oro)";
         nota.appendChild(enOro);
     }
-    cuerpo.appendChild(nota);
+    derecha.appendChild(nota);
     const tabla = document.createElement("table");
     tabla.className = "campana-dinero-tabla";
     const leyenda = document.createElement("caption");
@@ -791,17 +800,54 @@ function llenarElDinero(cuerpo, movimientos) {
         celda(cobre > 0 ? "+" + numeroDeDinero(Number(m.cantidad)) + " " + moneda : "", "es-numero");
         celda(cobre < 0 ? "−" + numeroDeDinero(Number(m.cantidad)) + " " + moneda : "", "es-numero");
         celda(numeroDeDinero(despues / 100) + " po", "es-numero");
+        tr.setAttribute("data-sentido", cobre < 0 ? "sale" : "entra");
         cuerpoTabla.appendChild(tr);
     });
     tabla.appendChild(cuerpoTabla);
+    const filtros = document.createElement("div");
+    filtros.className = "dinero-filtros";
+    filtros.setAttribute("role", "group");
+    filtros.setAttribute("aria-label", "Qué movimientos se ven");
+    const cuantasSeVen = document.createElement("p");
+    cuantasSeVen.className = "visually-hidden";
+    cuantasSeVen.setAttribute("aria-live", "polite");
+    const botonesFiltro = [["entra", "ganancia"], ["sale", "pérdida"]].map(([sentido, texto]) => {
+        const b = document.createElement("button");
+        b.type = "button";
+        b.className = "dinero-filtro";
+        b.textContent = texto;
+        b.setAttribute("aria-pressed", "false");
+        b.addEventListener("click", () => {
+            const poner = b.getAttribute("aria-pressed") !== "true";
+            botonesFiltro.forEach((x) => x.setAttribute("aria-pressed", x === b && poner ? "true" : "false"));
+            let vistas = 0;
+            cuerpoTabla.querySelectorAll("tr").forEach((tr) => {
+                tr.hidden = poner && tr.getAttribute("data-sentido") !== sentido;
+                vistas += tr.hidden ? 0 : 1;
+            });
+            cuantasSeVen.textContent = poner
+                ? (vistas === 1 ? "1 movimiento" : vistas + " movimientos") + " de " + texto + "."
+                : "Todos los movimientos.";
+            vacio.hidden = vistas > 0;
+            vacio.textContent = "Todavía no hay ninguna " + texto + " apuntada.";
+        });
+        filtros.appendChild(b);
+        return b;
+    });
+    izquierda.appendChild(filtros);
+    izquierda.appendChild(cuantasSeVen);
     const caja = document.createElement("div");
     caja.className = "campana-dinero-caja";
     caja.setAttribute("tabindex", "0");
     caja.setAttribute("role", "region");
     caja.setAttribute("aria-label", "Entradas y gastos, con scroll");
     caja.appendChild(tabla);
-    cuerpo.appendChild(caja);
-    cuerpo.appendChild(conversorDeMonedas());
+    izquierda.appendChild(caja);
+    const vacio = document.createElement("p");
+    vacio.className = "campana-conversor-nota";
+    vacio.hidden = true;
+    izquierda.appendChild(vacio);
+    derecha.appendChild(conversorDeMonedas());
 }
 let cuentaDeConversores = 0;
 function conversorDeMonedas() {

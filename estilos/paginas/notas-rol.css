@@ -493,10 +493,69 @@
     white-space: nowrap;
 }
 
-/* LA VENTANA DEL DINERO: la bolsa en un post-it (el mismo papel que el
-   de las misiones), la tabla de entradas y gastos y el conversor. */
+/* LA VENTANA DEL DINERO, en dos columnas que se ponen una debajo de otra
+   si no caben (flex-wrap; sin grid ni order: se ven en el orden en que
+   se leen). A la izquierda, en su recuadro, los botones de ganancia y
+   pérdida y la tabla; a la derecha, la bolsa en un post-it (el mismo
+   papel que el de las misiones) y el conversor en su recuadro. */
+.dinero-columnas {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    gap: 18px;
+}
+
+.dinero-izquierda {
+    flex: 1 1 24rem;
+    min-width: 0;
+    padding: 12px;
+    border: 2px solid var(--yellow);
+}
+
+.dinero-derecha {
+    display: flex;
+    flex: 0 1 17rem;
+    flex-direction: column;
+    gap: 18px;
+    min-width: 0;
+}
+
+.dinero-derecha .campana-conversor {
+    padding: 4px 12px 12px;
+    border: 2px solid var(--yellow);
+}
+
+.dinero-filtros {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 12px;
+}
+
+.dinero-filtro {
+    min-height: 36px;
+    padding: 4px 14px;
+    border: 2px solid var(--yellow);
+    background: transparent;
+    color: var(--yellow);
+    font-family: var(--fuente-mono);
+    font-size: 0.8125rem;
+    cursor: pointer;
+}
+
+.dinero-filtro:hover,
+.dinero-filtro[aria-pressed="true"] {
+    background: var(--yellow);
+    color: var(--yellow-contrast);
+}
+
+.dinero-filtro:focus-visible {
+    outline: 2px solid var(--yellow);
+    outline-offset: 3px;
+}
+
 .dinero-nota {
-    margin-bottom: 16px;
+    margin: 0;
     text-align: center;
 }
 
@@ -993,9 +1052,14 @@
 
 /* La del dinero (post-it, tabla y conversor) y la del resumen de una
    sesión: algo más anchas, para la tabla y para leer de corrido. */
-.modal-dinero .modal-ventana,
 .modal-resumen .modal-ventana {
     width: min(44rem, 100%);
+}
+
+/* La del dinero, ancha: dos columnas (la tabla y, al lado, el post-it y
+   el conversor). */
+.modal-dinero .modal-ventana {
+    width: min(60rem, 100%);
 }
 
 /* Las dos clases juntas y no solo .misiones-nota: postit.css se carga
@@ -1262,22 +1326,25 @@
     min-width: 0;
 }
 
+/* Con los colores al revés que la fila (relleno amarillo), para que se
+   vea que es otra cosa que se puede pulsar; al pasar por encima, al
+   revés otra vez. */
 .campana-sesion-resumen {
     flex: 0 0 auto;
     padding: 0 12px;
-    border: 2px solid var(--border);
-    background: transparent;
-    color: var(--yellow);
+    border: 2px solid var(--yellow);
+    background: var(--yellow);
+    color: var(--yellow-contrast);
     font-family: var(--fuente-mono);
     font-size: 0.75rem;
+    font-weight: 700;
     cursor: pointer;
 }
 
 .campana-sesion-resumen:hover,
 .campana-sesion-resumen:focus-visible {
-    border-color: var(--yellow);
-    background: var(--yellow);
-    color: var(--yellow-contrast);
+    background: transparent;
+    color: var(--yellow);
 }
 
 .campana-sesion-resumen:focus-visible {
