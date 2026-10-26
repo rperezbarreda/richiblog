@@ -199,11 +199,28 @@
     "dinero": {
         "movimientos": [
             {
+                "que": "Lo que llevábamos al empezar",
+                "sentido": "entra",
+                "cantidad": 20,
+                "moneda": "po",
+                "de": 1,
+                "reparto": [
+                    "Faëlar: 5",
+                    "Mellissa: 5",
+                    "Denelia: 5",
+                    "Thenarys: 5"
+                ]
+            },
+            {
                 "que": "Encontrado en los cuerpos de los bandidos",
                 "sentido": "entra",
                 "cantidad": 25,
                 "moneda": "po",
-                "de": 2
+                "de": 2,
+                "reparto": [
+                    "Mellissa: 20",
+                    "Thenarys: 5"
+                ]
             }
         ]
     }

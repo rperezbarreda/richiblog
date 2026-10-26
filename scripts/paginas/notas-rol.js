@@ -308,7 +308,7 @@ function prepararBotones(campana) {
                 titulo: "bolsa.txt",
                 clase: "modal-dinero",
                 devolverA: botonDinero,
-                llenar: (cuerpo) => llenarElDinero(cuerpo, dinero),
+                llenar: (cuerpo) => llenarElDinero(cuerpo, dinero, nombresDeLaMesa(campana)),
             })
         );
     }
@@ -593,9 +593,12 @@ function imagenSeguraDeMesa(url) {
 //
 // EL DINERO va aparte, en "dinero": {"movimientos": [...]}, cada uno
 // {que, sentido: "entra" | "sale", cantidad, moneda: pc|pp|pe|po|ppt, de,
-// quien}. Tiene su propio botón en el índice («el dinero»): la bolsa en
-// un post-it (en po, pp y pc), la tabla de entradas y gastos con lo que
-// quedaba después de cada uno, y un conversor de monedas.
+// quien, reparto}. Tiene su propio botón en el índice («el dinero»): la
+// bolsa en un post-it (en po, pp y pc), la tabla de entradas y gastos con
+// lo que quedaba después de cada uno, y un conversor de monedas.
+// EL REPARTO es una lista de líneas «Mellissa: 20» (en la moneda del
+// movimiento; «Cada uno: 5» vale para toda la mesa): lo que le toca o lo
+// que pone cada personaje. Lo que no se reparte es del grupo.
 //
 // LOS PERGAMINOS (tipo "pergaminos") llevan además su hechizo, que sale
 // en un desplegable «Qué hace» debajo del nombre:
@@ -1129,6 +1132,38 @@ function bolsaEnMonedas(cobre) {
     return signo + (trozos.length === 1 ? trozos[0] : trozos.slice(0, -1).join(", ") + " y " + trozos[trozos.length - 1]);
 }
 
+// Los nombres de la mesa, en el orden de la campaña.
+function nombresDeLaMesa(campana) {
+    return (campana && Array.isArray(campana.personajes) ? campana.personajes : [])
+        .map((p) => (p && p.nombre ? p.nombre.toString().trim() : ""))
+        .filter(Boolean);
+}
+
+// El reparto de un movimiento: [[nombre, cobre], ...], con el signo del
+// movimiento (lo que paga alguien, en negativo). Los nombres se igualan
+// sin mayúsculas ni tildes con los de la mesa, para que «melissa» o
+// «faelar» caigan en su sitio.
+function repartoDeMovimiento(m, mesa) {
+    const llano = (s) => s.toString().normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim();
+    const signo = m.sentido === "sale" ? -1 : 1;
+    const salida = [];
+    (Array.isArray(m.reparto) ? m.reparto : []).forEach((linea) => {
+        const trozos = /^(.+?)\s*[:=]\s*(\d+(?:[.,]\d+)?)\s*$/.exec((linea || "").toString());
+        if (!trozos) {
+            return;
+        }
+        const cobre = enCobre(Number(trozos[2].replace(",", ".")), m.moneda) * signo;
+        const quien = llano(trozos[1]);
+        if (quien === "cada uno" || quien === "todos") {
+            mesa.forEach((nombre) => salida.push([nombre, cobre]));
+            return;
+        }
+        const suyo = mesa.find((nombre) => llano(nombre) === quien);
+        salida.push([suyo || trozos[1].trim(), cobre]);
+    });
+    return salida;
+}
+
 function movimientosDeDinero(campana) {
     const crudos = campana && campana.dinero && Array.isArray(campana.dinero.movimientos)
         ? campana.dinero.movimientos : [];
@@ -1141,13 +1176,25 @@ function movimientosDeDinero(campana) {
 // en un post-it, lo que hay en la bolsa (en po, pp y pc, y todo en oro),
 // y debajo el conversor. En una pantalla estrecha, una debajo de otra, en
 // el mismo orden en que se leen.
-function llenarElDinero(cuerpo, movimientos) {
+function llenarElDinero(cuerpo, movimientos, mesa) {
     let saldo = 0;
+    // Lo de cada uno, con la mesa primero y en su orden (aunque no tenga
+    // nada) y detrás quien salga en un reparto sin ser de la mesa.
+    const deCadaUno = new Map((mesa || []).map((nombre) => [nombre, 0]));
+    let delGrupo = 0;
     const filas = movimientos.map((m) => {
         const cobre = enCobre(m.cantidad, m.moneda) * (m.sentido === "sale" ? -1 : 1);
         saldo += cobre;
-        return { m, cobre, despues: saldo };
+        const reparto = repartoDeMovimiento(m, mesa || []);
+        let repartido = 0;
+        reparto.forEach(([nombre, suyo]) => {
+            deCadaUno.set(nombre, (deCadaUno.get(nombre) || 0) + suyo);
+            repartido += suyo;
+        });
+        delGrupo += cobre - repartido;
+        return { m, cobre, despues: saldo, reparto };
     });
+    const hayReparto = filas.some((f) => f.reparto.length);
 
     const columnas = document.createElement("div");
     columnas.className = "dinero-columnas";
@@ -1175,6 +1222,32 @@ function llenarElDinero(cuerpo, movimientos) {
         enOro.textContent = "(" + numeroDeDinero(saldo / 100) + " po en oro)";
         nota.appendChild(enOro);
     }
+    // CADA UNO: lo que lleva cada personaje, y lo que es de todos.
+    if (hayReparto) {
+        const subtitulo = document.createElement("h4");
+        subtitulo.className = "dinero-nota-sub";
+        subtitulo.textContent = "Lo que lleva cada uno";
+        nota.appendChild(subtitulo);
+        const lista = document.createElement("ul");
+        lista.className = "dinero-nota-cada-uno";
+        const linea = (nombre, cobre, clase) => {
+            const li = document.createElement("li");
+            if (clase) {
+                li.className = clase;
+            }
+            const quien = document.createElement("span");
+            quien.className = "dinero-nota-quien";
+            quien.textContent = nombre;
+            li.appendChild(quien);
+            li.appendChild(document.createTextNode(" " + bolsaEnMonedas(cobre)));
+            lista.appendChild(li);
+        };
+        deCadaUno.forEach((cobre, nombre) => linea(nombre, cobre));
+        if (Math.round(delGrupo)) {
+            linea("Del grupo", delGrupo, "es-del-grupo");
+        }
+        nota.appendChild(lista);
+    }
     derecha.appendChild(nota);
 
     const tabla = document.createElement("table");
@@ -1193,7 +1266,7 @@ function llenarElDinero(cuerpo, movimientos) {
     cabeza.appendChild(filaCabeza);
     tabla.appendChild(cabeza);
     const cuerpoTabla = document.createElement("tbody");
-    filas.forEach(({ m, cobre, despues }) => {
+    filas.forEach(({ m, cobre, despues, reparto }) => {
         const tr = document.createElement("tr");
         const celda = (texto, clase) => {
             const td = document.createElement("td");
@@ -1204,6 +1277,7 @@ function llenarElDinero(cuerpo, movimientos) {
             tr.appendChild(td);
             return td;
         };
+        const moneda = (m.moneda || "po").toString().toLowerCase();
         celda(Number(m.de) ? String(Number(m.de)) : "—");
         const concepto = celda(m.que.toString().trim());
         if ((m.quien || "").toString().trim()) {
@@ -1212,7 +1286,22 @@ function llenarElDinero(cuerpo, movimientos) {
             quien.textContent = m.quien.toString().trim();
             concepto.appendChild(quien);
         }
-        const moneda = (m.moneda || "po").toString().toLowerCase();
+        if (reparto.length) {
+            const partes = document.createElement("span");
+            partes.className = "campana-dinero-reparto";
+            // Cada parte entera en su línea si no cabe (que no se parta
+            // «Mellissa 20» de «po»).
+            reparto.forEach(([nombre, suyo], i) => {
+                const parte = document.createElement("span");
+                parte.className = "campana-dinero-parte";
+                parte.textContent = nombre + " " + numeroDeDinero(Math.abs(suyo) / enCobre(1, moneda)) + " " + moneda;
+                partes.appendChild(parte);
+                if (i < reparto.length - 1) {
+                    partes.appendChild(document.createTextNode(" · "));
+                }
+            });
+            concepto.appendChild(partes);
+        }
         celda(cobre > 0 ? "+" + numeroDeDinero(Number(m.cantidad)) + " " + moneda : "", "es-numero");
         celda(cobre < 0 ? "−" + numeroDeDinero(Number(m.cantidad)) + " " + moneda : "", "es-numero");
         celda(numeroDeDinero(despues / 100) + " po", "es-numero");

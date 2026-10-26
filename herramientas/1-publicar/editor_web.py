@@ -1359,7 +1359,8 @@ def colecciones():
                      ]}]},
         {"id": "dinero", "apartado": "rol", "titulo": "El dinero de una campaña", "por_campana": True,
          "ayuda": "Lo que entra y lo que sale de la bolsa del grupo, con su concepto y su sesión. La web lo suma por"
-                  " monedas, lo pasa a oro y lo enseña en la pestaña «dinero» del botín, con un conversor.",
+                  " monedas, lo pasa a oro y lo enseña en la ventana «el dinero» del índice, con lo que lleva cada"
+                  " personaje y un conversor.",
          "archivo": "datos/notas_rol/campana-{campana}.json", "despues": None,
          "partes": [{"id": "movimientos", "camino": ["dinero", "movimientos"], "titulo": "Entradas y gastos",
                      "nombre_de": "que", "detalle": ["sentido", "cantidad", "moneda", "de"], "campos": [
@@ -1371,6 +1372,9 @@ def colecciones():
                          C("de", "De qué sesión", "elegir", numerico=True, vacio="quitar"),
                          C("quien", "Quién", "elegir", libre=True, vacio="quitar",
                            ayuda="Quién lo cobró o lo pagó, si importa."),
+                         C("reparto", "Cuánto le toca a cada uno", "lineas", vacio="quitar",
+                           ayuda="Un personaje por línea con su parte, en la misma moneda: «Mellissa: 20»."
+                                 " «Cada uno: 5» es lo mismo para todos. Lo que no se reparte es del grupo."),
                      ]}]},
         {"id": "recomendaciones", "apartado": "rincon", "titulo": "Recomendaciones",
          "ayuda": "Libros, series, pelis, juegos… las ventanitas de la página de recomendaciones.",
