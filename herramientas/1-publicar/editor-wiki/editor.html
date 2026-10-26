@@ -187,17 +187,30 @@
         <!-- ROL -->
         <section class="vista" data-vista="rol" aria-labelledby="t-rol" hidden>
             <h1 id="t-rol"><span aria-hidden="true">🎲</span> Rol</h1>
-            <!-- Arriba todo lo que se hace: las notas de una partida, lo de las
-                 campañas y, al final, mis personajes (que no tiene que ver con
-                 ninguna campaña). Debajo, las notas que hay, con su buscador. -->
-            <div class="grandes" data-fichas-de="rol personajes">
-                <button type="button" class="grande" data-nueva-tipo="sesion">
-                    <span class="grande-titulo"><span class="grande-emoji" aria-hidden="true">📓</span>Apuntar las notas de una partida</span>
-                    <span class="grande-que">Elige la campaña y deja el cuaderno listo para escribir. Nace como borrador.</span>
-                </button>
-            </div>
+            <!-- ARRIBA, DOS GRUPOS: lo de las CAMPAÑAS (apuntar las notas de
+                 una partida y las colecciones de apartado «rol»: NPC, ficha,
+                 misiones, botín, dinero) y LO DEMÁS DE ROL, que no es de
+                 ninguna campaña (los recursos del portfolio, apartado
+                 «recursos», y mis personajes). DEBAJO, las notas que ya hay,
+                 con su buscador. -->
+            <section class="bloque grupo-rol" aria-labelledby="t-rol-campanas">
+                <h2 id="t-rol-campanas"><span aria-hidden="true">⚔️</span> Las campañas</h2>
+                <div class="grandes" data-fichas-de="rol">
+                    <button type="button" class="grande" data-nueva-tipo="sesion">
+                        <span class="grande-titulo"><span class="grande-emoji" aria-hidden="true">📓</span>Apuntar las notas de una partida</span>
+                        <span class="grande-que">Elige la campaña y deja el cuaderno listo para escribir. Nace como borrador.</span>
+                    </button>
+                </div>
+            </section>
+
+            <section class="bloque grupo-rol" aria-labelledby="t-rol-otros">
+                <h2 id="t-rol-otros"><span aria-hidden="true">🎒</span> Lo demás de rol</h2>
+                <p class="ayuda">Lo que no es de ninguna campaña: los recursos que publico y mis personajes.</p>
+                <div class="grandes" data-fichas-de="recursos personajes"></div>
+            </section>
+
             <section class="bloque" aria-labelledby="t-notas-rol">
-                <h2 id="t-notas-rol">Las notas que ya hay</h2>
+                <h2 id="t-notas-rol"><span aria-hidden="true">📓</span> Las notas de las partidas</h2>
                 <p class="ayuda">Las de cada partida, por campaña. «Abrir» para seguir escribiéndolas o cambiar lo que
                     sea: el nombre, el PDF del cuaderno, las escenas…</p>
                 <div class="campo">

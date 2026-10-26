@@ -195,7 +195,7 @@ const VISTAS_DE_DENTRO_EDITOR = {
     mapa: ["wiki", "mapas"],
 };
 // Las fichas son de un apartado u otro según la colección (fichas.js).
-const APARTADO_DE_FICHAS_EDITOR = { escribir: "escribir", rol: "rol", personajes: "rol", wiki: "wiki",
+const APARTADO_DE_FICHAS_EDITOR = { escribir: "escribir", rol: "rol", recursos: "rol", personajes: "rol", wiki: "wiki",
     rincon: "rincon" };
 const ESTADO_DONDE_EDITOR = { vista: "inicio" };
 

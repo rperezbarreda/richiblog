@@ -1225,7 +1225,7 @@ def colecciones():
     monedas = [["po", "po (oro)"], ["pp", "pp (plata)"], ["pc", "pc (cobre)"], ["pe", "pe (electro)"],
                ["ppt", "ppt (platino)"]]
     return [
-        {"id": "rol", "apartado": "rol", "corto": "Las tarjetas de aventuras, fichas y mapas.", "titulo": "Recursos de rol (el portfolio)",
+        {"id": "rol", "apartado": "recursos", "corto": "Las tarjetas de aventuras, fichas y mapas.", "titulo": "Recursos de rol (el portfolio)",
          "ayuda": "Las tarjetas de la página de rol: aventuras, fichas, mapas… Lo último, arriba.",
          "archivo": "datos/mis_movidas/rol.json", "despues": "generadores",
          "partes": [{"id": "fichas", "camino": [], "titulo": "Las fichas", "nombre_de": "title",

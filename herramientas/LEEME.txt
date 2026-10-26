@@ -216,7 +216,11 @@
       fila, y con ellos lo que antes iba en «Y además» (las colecciones:
       fichas.js las añade al final de la misma rejilla, con el texto
       corto de «corto» en editor_web.colecciones y su emoji en
-      EMOJIS_DE_COLECCIONES; en Rol, mis personajes va el último).
+      EMOJIS_DE_COLECCIONES). ROL va en DOS GRUPOS, cada uno en su
+      recuadro: ⚔️ LAS CAMPAÑAS (apuntar las notas de una partida y las
+      colecciones de apartado «rol»: NPC, ficha, misiones, botín,
+      dinero) y 🎒 LO DEMÁS DE ROL, lo que no es de ninguna campaña (los
+      recursos del portfolio, apartado «recursos», y mis personajes).
       DEBAJO, los árboles y las listas, cada uno con su buscador: lo que
       hay en Escribir, las notas de las partidas en Rol y las páginas de
       la wiki. Buscando, las carpetas se abren solas.

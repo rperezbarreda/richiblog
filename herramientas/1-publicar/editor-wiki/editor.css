@@ -274,6 +274,19 @@ body {
     font-weight: 700;
 }
 
+/* LOS DOS GRUPOS DE ROL: las campañas y lo demás de rol, cada uno en su
+   recuadro y con su título, para que no se mezclen. */
+.grupo-rol {
+    margin-bottom: 18px;
+    padding: 16px 18px 2px;
+    border: 2px solid var(--borde);
+}
+
+.grupo-rol > h2 {
+    margin-bottom: 14px;
+    font-size: 1.3rem;
+}
+
 /* LOS EMOJIS de los títulos y de los botones grandes. */
 .grande-emoji {
     margin-right: 8px;
