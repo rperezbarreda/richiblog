@@ -61,27 +61,36 @@
             "que": "Hierbas misteriosas (velocidad)",
             "tipo": "pociones",
             "quien": "Mellissa",
-            "imagen": "/imagenes/notas_rol/ragna/botin/hierbas-misteriosas-velocidad.webp"
+            "imagen": "/imagenes/notas_rol/ragna/botin/hierbas-misteriosas-velocidad.webp",
+            "de": 1,
+            "cantidad": 1,
+            "inicial": 1
         },
         {
             "que": "Kits curativos",
             "cantidad": 4,
             "tipo": "equipo",
             "quien": "el carro",
-            "imagen": "/imagenes/notas_rol/ragna/botin/x4-kits-curativos.webp"
+            "imagen": "/imagenes/notas_rol/ragna/botin/x4-kits-curativos.webp",
+            "de": 1,
+            "inicial": 4
         },
         {
             "que": "Provisiones",
             "cantidad": 6,
             "tipo": "otras cosas",
             "quien": "el carro",
-            "imagen": "/imagenes/notas_rol/ragna/botin/x6-provisiones.webp"
+            "imagen": "/imagenes/notas_rol/ragna/botin/x6-provisiones.webp",
+            "de": 1,
+            "inicial": 6
         },
         {
             "que": "Piedra mensajera",
             "tipo": "objetos mágicos",
             "quien": "Mellissa",
-            "imagen": "/imagenes/notas_rol/ragna/botin/piedra-mensajera.webp"
+            "imagen": "/imagenes/notas_rol/ragna/botin/piedra-mensajera.webp",
+            "rareza": "poco común",
+            "descripcion": "Las piedras mensajeras vienen de dos en dos y cada una de ellas está tallada de forma que su pareja sea fácilmente identificable. Mientras tocas una piedra, puedes lanzar recado desde ella. El objetivo es el portador de la otra piedra. Si no hay nadie portándola, lo sabrás en cuanto emplees la tuya y no llegarás a lanzar el conjuro.\nEn cuanto se lance recado desde una de las dos piedras, no podrán volver a usarse hasta el siguiente amanecer. Si se destruye una de las piedras de la pareja, la otra deja de ser mágica."
         },
         {
             "que": "Flechas de ácido",
@@ -90,7 +99,8 @@
             "quien": "Mellissa",
             "de": 2,
             "imagen": "/imagenes/notas_rol/ragna/botin/5-flechas-de-acido.webp",
-            "efecto": "+1d4 de daño de ácido · salvación de DES CD 12: si la falla, −2 a su CA"
+            "efecto": "+1d4 de daño de ácido · salvación de DES CD 12: si la falla, −2 a su CA",
+            "inicial": 5
         },
         {
             "que": "Pergamino: Escudo",
@@ -104,7 +114,9 @@
             "lanzamiento": "1 reacción, al recibir un ataque o ser el objetivo de proyectil mágico",
             "alcance": "Personal",
             "duracion": "1 asalto",
-            "descripcion": "Una barrera invisible de fuerza mágica aparece y te protege.\nHasta el principio de tu siguiente turno tienes +5 a la CA, también contra el ataque que la ha provocado, y no recibes daño de proyectil mágico.\nAl leer el pergamino, se deshace en polvo."
+            "descripcion": "Una barrera invisible de fuerza mágica aparece y te protege.\nHasta el principio de tu siguiente turno tienes +5 a la CA, también contra el ataque que la ha provocado, y no recibes daño de proyectil mágico.\nAl leer el pergamino, se deshace en polvo.",
+            "cantidad": 1,
+            "inicial": 1
         }
     ],
     "misiones": [
@@ -179,5 +191,16 @@
             "url": "/web/notas_rol/ragna/sesion-02.html",
             "pdf": ""
         }
-    ]
+    ],
+    "dinero": {
+        "movimientos": [
+            {
+                "que": "Encontrado en los cuerpos de los bandidos",
+                "sentido": "entra",
+                "cantidad": 25,
+                "moneda": "po",
+                "de": 2
+            }
+        ]
+    }
 }
