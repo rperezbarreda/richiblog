@@ -28,9 +28,10 @@
          EL MENÚ es una lista de botones, cada uno con su emoji (solo para
          la vista: el lector lee el nombre) y su atajo, Alt+1 a Alt+9
          (aria-keyshortcuts). El del apartado en el que estás lleva
-         aria-current. Todo en UNA línea (el editor es para el ordenador:
-         no tiene vista de móvil). «Estás en», el camino hasta lo que
-         tienes abierto, va arriba del todo de la página. -->
+         aria-current. DOS líneas (el editor es para el ordenador: no
+         tiene vista de móvil): arriba la marca, el menú y los ajustes;
+         debajo, «Estás en», el camino hasta lo que tienes abierto, con
+         un botón para volver a cada paso. -->
     <header class="cabecera" data-cabecera>
         <p class="marca"><span aria-hidden="true">✎</span> editor</p>
         <nav class="menu" id="menu-apartados" aria-label="Apartados del editor" data-menu>
@@ -63,19 +64,19 @@
             <button type="button" data-boton-contraste aria-pressed="false" aria-label="Contraste alto"
                     title="Contraste alto"><span aria-hidden="true">🌓</span></button>
         </div>
+        <nav class="donde" aria-label="Estás en" data-donde>
+            <ol class="donde-lista" data-donde-lista></ol>
+        </nav>
     </header>
 
     <main id="principal" tabindex="-1">
-        <nav class="donde" aria-label="Estás en" data-donde hidden>
-            <ol class="donde-lista" data-donde-lista></ol>
-        </nav>
         <p class="aviso" role="status" aria-live="polite" data-aviso></p>
 
         <!-- INICIO: un botón por apartado, los mismos que el menú de la web. -->
         <section class="vista" data-vista="inicio" aria-labelledby="t-inicio">
             <h1 id="t-inicio">¿Qué quieres hacer?</h1>
             <p class="ayuda">El menú de arriba está siempre a la vista. Atajos: Alt+1 a Alt+9 van a cada apartado,
-                en el orden del menú; y «Estás en», arriba de cada página, lleva de vuelta a donde venías.</p>
+                en el orden del menú; y «Estás en», debajo del menú, lleva de vuelta a donde venías.</p>
             <div class="grandes">
                 <button type="button" class="grande" data-ir="escribir">
                     <span class="grande-titulo"><span class="grande-emoji" aria-hidden="true">✍️</span>Escribir</span>
@@ -115,17 +116,20 @@
         <!-- ESCRIBIR: hacer una nueva y la lista de lo que hay. -->
         <section class="vista" data-vista="escribir" aria-labelledby="t-escribir" hidden>
             <h1 id="t-escribir"><span aria-hidden="true">✍️</span> Escribir</h1>
-            <div class="grandes">
+            <!-- ARRIBA, todo lo que se puede hacer (con «Y además», las
+                 colecciones, que fichas.js añade al final de esta misma
+                 rejilla); DEBAJO, lo que hay y su buscador. -->
+            <div class="grandes" data-fichas-de="escribir">
                 <button type="button" class="grande" data-nueva-tipo="entrada">
-                    <span class="grande-titulo">Una entrada del blog</span>
+                    <span class="grande-titulo"><span class="grande-emoji" aria-hidden="true">📝</span>Una entrada del blog</span>
                     <span class="grande-que">Con su fecha, sus etiquetas y su imagen. Nace como borrador.</span>
                 </button>
                 <button type="button" class="grande" data-nueva-tipo="relato">
-                    <span class="grande-titulo">Un relato</span>
+                    <span class="grande-titulo"><span class="grande-emoji" aria-hidden="true">📖</span>Un relato</span>
                     <span class="grande-que">Como una entrada, pero va a mis movidas.</span>
                 </button>
                 <button type="button" class="grande" data-nueva-tipo="reto">
-                    <span class="grande-titulo">Un día del reto</span>
+                    <span class="grande-titulo"><span class="grande-emoji" aria-hidden="true">📅</span>Un día del reto</span>
                     <span class="grande-que">El siguiente que falte, con su palabra.</span>
                 </button>
             </div>
@@ -154,15 +158,11 @@
                     </div>
                     <div>
                         <label for="entradas-buscar">Buscar por el título</label>
-                        <input id="entradas-buscar" autocomplete="off">
+                        <input id="entradas-buscar" type="search" autocomplete="off">
                     </div>
                 </div>
                 <p class="ayuda" data-entradas-cuantas aria-live="polite"></p>
                 <ul class="faltan" data-entradas></ul>
-            </section>
-            <section class="bloque" aria-labelledby="t-escribir-fichas">
-                <h2 id="t-escribir-fichas">Y además</h2>
-                <div class="grandes" data-fichas-de="escribir"></div>
             </section>
         </section>
 
@@ -187,9 +187,12 @@
         <!-- ROL -->
         <section class="vista" data-vista="rol" aria-labelledby="t-rol" hidden>
             <h1 id="t-rol"><span aria-hidden="true">🎲</span> Rol</h1>
-            <div class="grandes">
+            <!-- Arriba todo lo que se hace: las notas de una partida, lo de las
+                 campañas y, al final, mis personajes (que no tiene que ver con
+                 ninguna campaña). Debajo, las notas que hay, con su buscador. -->
+            <div class="grandes" data-fichas-de="rol personajes">
                 <button type="button" class="grande" data-nueva-tipo="sesion">
-                    <span class="grande-titulo">Apuntar las notas de una partida</span>
+                    <span class="grande-titulo"><span class="grande-emoji" aria-hidden="true">📓</span>Apuntar las notas de una partida</span>
                     <span class="grande-que">Elige la campaña y deja el cuaderno listo para escribir. Nace como borrador.</span>
                 </button>
             </div>
@@ -197,35 +200,32 @@
                 <h2 id="t-notas-rol">Las notas que ya hay</h2>
                 <p class="ayuda">Las de cada partida, por campaña. «Abrir» para seguir escribiéndolas o cambiar lo que
                     sea: el nombre, el PDF del cuaderno, las escenas…</p>
+                <div class="campo">
+                    <label for="notas-rol-buscar">Buscar por el título</label>
+                    <input id="notas-rol-buscar" type="search" autocomplete="off" spellcheck="false">
+                </div>
+                <p class="ayuda" data-notas-rol-cuantas aria-live="polite"></p>
                 <ul class="faltan" data-notas-rol></ul>
-            </section>
-            <section class="bloque" aria-labelledby="t-rol-fichas">
-                <h2 id="t-rol-fichas">Y además</h2>
-                <div class="grandes" data-fichas-de="rol"></div>
-            </section>
-            <!-- MIS PERSONAJES: aparte de las campañas (y de la wiki). -->
-            <section class="bloque" aria-labelledby="t-rol-personajes">
-                <h2 id="t-rol-personajes">Mis personajes</h2>
-                <p class="ayuda">Mis OC, que no tienen nada que ver con ninguna campaña: añadir uno nuevo, cambiar
-                    sus datos, su historia, su gente, sus imágenes y su ficha en PDF.</p>
-                <div class="grandes" data-fichas-de="personajes"></div>
             </section>
         </section>
 
         <!-- LA WIKI -->
         <section class="vista" data-vista="wiki" aria-labelledby="t-wiki" hidden>
             <h1 id="t-wiki"><span aria-hidden="true">🗺️</span> Wiki Cralëa</h1>
-            <div class="grandes">
+            <!-- Arriba, todo lo que se hace (con el calendario, la línea de
+                 tiempo y el diccionario, que añade fichas.js); debajo, abrir
+                 una que ya hay y el árbol de páginas, con su buscador. -->
+            <div class="grandes" data-fichas-de="wiki">
                 <button type="button" class="grande" data-ir="nueva">
-                    <span class="grande-titulo">Crear una página nueva</span>
+                    <span class="grande-titulo"><span class="grande-emoji" aria-hidden="true">📄</span>Crear una página nueva</span>
                     <span class="grande-que">Un país, un personaje, un monstruo… con su plantilla.</span>
                 </button>
                 <button type="button" class="grande" data-ir="faltan">
-                    <span class="grande-titulo">Crear una de las que faltan</span>
+                    <span class="grande-titulo"><span class="grande-emoji" aria-hidden="true">🧩</span>Crear una de las que faltan</span>
                     <span class="grande-que">Las que ya se nombran en otras páginas y aún no existen (en rojo en la web).</span>
                 </button>
                 <button type="button" class="grande" data-ir="mapas">
-                    <span class="grande-titulo">Los mapas</span>
+                    <span class="grande-titulo"><span class="grande-emoji" aria-hidden="true">🗺️</span>Los mapas</span>
                     <span class="grande-que">Poner ciudades, pueblos y fortalezas, pintar regiones, caminos y ríos, o hacer un mapa nuevo.</span>
                 </button>
             </div>
@@ -243,12 +243,11 @@
                     Monstruos…) es donde va a parar cada página nueva según su plantilla; las vacías están esperando.</p>
                 <div class="campo">
                     <label for="wiki-arbol-buscar">Buscar por el nombre</label>
-                    <input id="wiki-arbol-buscar" autocomplete="off" spellcheck="false">
+                    <input id="wiki-arbol-buscar" type="search" autocomplete="off" spellcheck="false">
                 </div>
                 <p class="ayuda" data-wiki-arbol-cuantas aria-live="polite"></p>
                 <ul class="faltan" data-wiki-arbol></ul>
             </section>
-            <div class="grandes grandes-abajo" data-fichas-de="wiki"></div>
         </section>
 
         <!-- MI RINCÓN -->

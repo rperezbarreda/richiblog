@@ -207,9 +207,19 @@
       Alt+9, en ese orden (aria-keyshortcuts; al pasar por encima lo
       dice). El apartado en el que estás va relleno y con aria-current,
       también dentro de él (unas fichas de Rol siguen marcando Rol).
-      Arriba de cada página, «ESTÁS EN»: el camino (Inicio › Rol › Mis
-      personajes), con un botón para volver a cada paso. «Saltar al
-      menú» es el segundo enlace al tabular desde arriba.
+      La cabecera tiene DOS LÍNEAS: en la de abajo, «ESTÁS EN», el
+      camino (Inicio › Rol › Mis personajes), con un botón para volver
+      a cada paso. «Saltar al menú» es el segundo enlace al tabular desde
+      arriba.
+    · CADA APARTADO (Escribir, Rol, Wiki, Mi rincón): ARRIBA, todo lo
+      que se puede hacer, en botones grandes con su emoji, cuatro por
+      fila, y con ellos lo que antes iba en «Y además» (las colecciones:
+      fichas.js las añade al final de la misma rejilla, con el texto
+      corto de «corto» en editor_web.colecciones y su emoji en
+      EMOJIS_DE_COLECCIONES; en Rol, mis personajes va el último).
+      DEBAJO, los árboles y las listas, cada uno con su buscador: lo que
+      hay en Escribir, las notas de las partidas en Rol y las páginas de
+      la wiki. Buscando, las carpetas se abren solas.
     · PUBLICAR EN NEOCITIES (su propio apartado): 1, repasar el sitio y
       volver a generar; 2, ver qué se subiría (el ensayo); 3, subirlo; y
       aparte, subir borrando lo que ya no está aquí y cambiar la clave.

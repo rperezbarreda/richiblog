@@ -300,9 +300,18 @@ function pintarArbolWeb(lista, cosas, opciones) {
 }
 
 // Las notas de las partidas, en Rol: las mismas de «Escribir», por campaña.
+// Con su buscador: buscando, las carpetas se abren solas.
 async function pintarNotasDeRolWeb() {
     await pintarEscribir();
-    pintarArbolDeEntradasWeb($("[data-notas-rol]"), estadoEscribir.entradas.filter((e) => e.tipo === "sesion"), false);
+    pintarListaDeNotasDeRolWeb();
+}
+
+function pintarListaDeNotasDeRolWeb() {
+    const busca = sinTildesWeb(($("#notas-rol-buscar").value || "").trim());
+    const notas = estadoEscribir.entradas.filter((e) => e.tipo === "sesion"
+        && (!busca || sinTildesWeb(e.titulo + " " + e.archivo).includes(busca)));
+    $("[data-notas-rol-cuantas]").textContent = notas.length === 1 ? "1 sesión" : notas.length + " sesiones";
+    pintarArbolDeEntradasWeb($("[data-notas-rol]"), notas, !!busca);
 }
 
 function sinTildesWeb(texto) {
@@ -1671,6 +1680,7 @@ function empezarEscribirWeb() {
     document.querySelectorAll('[data-ir="rol"]').forEach((b) => b.addEventListener("click", pintarNotasDeRolWeb));
     ["#entradas-tipo", "#entradas-estado"].forEach((s) => $(s).addEventListener("change", pintarListaDeEntradas));
     $("#entradas-buscar").addEventListener("input", pintarListaDeEntradas);
+    $("#notas-rol-buscar").addEventListener("input", pintarListaDeNotasDeRolWeb);
     document.querySelectorAll("[data-nueva-tipo]").forEach((b) => {
         b.addEventListener("click", async () => {
             if (!estadoEscribir.nuevas) {

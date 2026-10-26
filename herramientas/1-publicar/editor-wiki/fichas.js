@@ -20,6 +20,14 @@
 const estadoFichas = { colecciones: [], campanas: [], sitios: [], col: null, id: "", campana: "", elegidas: {},
     cambiado: false, guardando: false, filtros: {}, grupos: {} };
 
+// El emoji de cada colección en su botón grande (solo de adorno: el lector
+// lee el título). Una nueva sin emoji aquí sale con 📋.
+const EMOJIS_DE_COLECCIONES = {
+    rol: "🎒", npcs: "👥", campana: "📜", misiones: "📌", botin: "🗡️", dinero: "💰", personajes: "🧙",
+    recomendaciones: "⭐", "en-lo-que-ando": "📝", gatos: "🐱", reto: "🗓️", calendario: "📆", linea: "⏳",
+    diccionario: "🔤",
+};
+
 async function cargarColeccionesWeb() {
     const datos = await pedirEditor("/api/web/colecciones");
     if (datos.error) {
@@ -31,14 +39,23 @@ async function cargarColeccionesWeb() {
     estadoFichas.sitios = datos.sitios;
     // Un botón grande por colección, en su apartado (Rol, Mi rincón, la
     // wiki, escribir).
+    // Detrás de los botones que ya trae la rejilla (los de escribir una
+    // entrada, crear una página…): esos no se tocan.
     document.querySelectorAll("[data-fichas-de]").forEach((caja) => {
-        const apartado = caja.getAttribute("data-fichas-de");
-        caja.textContent = "";
-        datos.colecciones.filter((c) => c.apartado === apartado).forEach((c) => {
-            const b = crearEditor("button", "grande");
+        // Uno o varios apartados («rol personajes»), en ese orden.
+        const apartados = caja.getAttribute("data-fichas-de").split(/\s+/);
+        caja.querySelectorAll(".es-coleccion").forEach((b) => b.remove());
+        apartados.flatMap((a) => datos.colecciones.filter((c) => c.apartado === a)).forEach((c) => {
+            const b = crearEditor("button", "grande es-coleccion");
             b.type = "button";
-            b.appendChild(crearEditor("span", "grande-titulo", c.titulo));
-            b.appendChild(crearEditor("span", "grande-que", c.ayuda));
+            const titulo = crearEditor("span", "grande-titulo");
+            const emoji = crearEditor("span", "grande-emoji", EMOJIS_DE_COLECCIONES[c.id] || "📋");
+            emoji.setAttribute("aria-hidden", "true");
+            titulo.appendChild(emoji);
+            titulo.appendChild(document.createTextNode(c.titulo));
+            b.appendChild(titulo);
+            // En el botón, lo corto; lo largo sale dentro, debajo del título.
+            b.appendChild(crearEditor("span", "grande-que", c.corto || c.ayuda));
             b.addEventListener("click", () => abrirFichasWeb(c.id));
             caja.appendChild(b);
         });

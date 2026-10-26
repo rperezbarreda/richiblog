@@ -236,10 +236,11 @@ function pintarDondeEditor() {
         return;
     }
     lista.textContent = "";
-    // En el inicio no hace falta, y en un mapa (a pantalla completa) ya
-    // está su «← Los mapas».
-    caja.hidden = vista === "inicio" || vista === "mapa";
-    const pasos = ["inicio"].concat(caminoDeVistaEditor(vista).filter((v) => v !== "inicio"), [vista]);
+    // En un mapa (a pantalla completa, sin la cabecera) ya está su «← Los
+    // mapas». En el inicio dice solo «Inicio».
+    caja.hidden = vista === "mapa";
+    const pasos = vista === "inicio" ? ["inicio"]
+        : ["inicio"].concat(caminoDeVistaEditor(vista).filter((v) => v !== "inicio"), [vista]);
     pasos.forEach((paso, i) => {
         const li = document.createElement("li");
         if (i === pasos.length - 1) {

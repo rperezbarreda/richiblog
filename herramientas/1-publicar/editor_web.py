@@ -1225,7 +1225,7 @@ def colecciones():
     monedas = [["po", "po (oro)"], ["pp", "pp (plata)"], ["pc", "pc (cobre)"], ["pe", "pe (electro)"],
                ["ppt", "ppt (platino)"]]
     return [
-        {"id": "rol", "apartado": "rol", "titulo": "Recursos de rol (el portfolio)",
+        {"id": "rol", "apartado": "rol", "corto": "Las tarjetas de aventuras, fichas y mapas.", "titulo": "Recursos de rol (el portfolio)",
          "ayuda": "Las tarjetas de la página de rol: aventuras, fichas, mapas… Lo último, arriba.",
          "archivo": "datos/mis_movidas/rol.json", "despues": "generadores",
          "partes": [{"id": "fichas", "camino": [], "titulo": "Las fichas", "nombre_de": "title",
@@ -1242,7 +1242,7 @@ def colecciones():
                          C("drive", "Enlace de Google Drive", "enlace", siempre=True,
                            ayuda="Opcional: sin él, la tarjeta sale con un solo botón."),
                      ]}]},
-        {"id": "npcs", "apartado": "rol", "titulo": "Los NPC de una campaña", "por_campana": True,
+        {"id": "npcs", "apartado": "rol", "corto": "La gente de cada campaña, con su token.", "titulo": "Los NPC de una campaña", "por_campana": True,
          "ayuda": "La gente que os vais encontrando: la rejilla de tokens de la página de NPC.",
          "archivo": "datos/notas_rol/npcs-{campana}.json", "despues": "npcs",
          "partes": [{"id": "personajes", "camino": ["personajes"], "titulo": "La gente", "nombre_de": "nombre",
@@ -1261,7 +1261,7 @@ def colecciones():
                          C("notas", "Lo que sabemos", "lineas", ayuda="Una cosa por línea.", siempre=True),
                          C("primera", "Sesión en la que salió por primera vez", "elegir", numerico=True, vacio="quitar"),
                      ]}]},
-        {"id": "campana", "apartado": "rol", "titulo": "La ficha de una campaña", "por_campana": True,
+        {"id": "campana", "apartado": "rol", "corto": "De qué va, el sistema y los de la mesa.", "titulo": "La ficha de una campaña", "por_campana": True,
          "ayuda": "Lo que sale arriba en la página de la campaña: de qué va, el sistema, quién dirige y los"
                   " personajes de la mesa (con su color en las notas). Las misiones van aparte, en «Las"
                   " misiones (el post-it)».",
@@ -1287,7 +1287,7 @@ def colecciones():
                   C("equipo", "Lo que lleva encima", "lineas", ayuda="Una cosa por línea.", siempre=True),
                   C("notas", "Notas", "lineas", ayuda="Una cosa por línea.", siempre=True)]},
          ]},
-        {"id": "misiones", "apartado": "rol", "titulo": "Las misiones (el post-it)", "por_campana": True,
+        {"id": "misiones", "apartado": "rol", "corto": "Lo pendiente y lo ya cerrado.", "titulo": "Las misiones (el post-it)", "por_campana": True,
          "ayuda": "Lo que el grupo tiene a medias y lo que ya se cerró, en toda la campaña: sale en el post-it"
                   " de la página de la campaña (lo pendiente y, plegado, el histórico). El post-it de cada sesión"
                   " es aparte: se escribe en sus notas. Arriba lo pendiente; debajo, el histórico.",
@@ -1321,7 +1321,7 @@ def colecciones():
                   C("pistas", "Pistas", "lineas", vacio="quitar",
                     ayuda="Lo que sabemos de ella, una cosa por línea. En la web, plegadas debajo.")]},
          ]},
-        {"id": "botin", "apartado": "rol", "titulo": "El botín de una campaña", "por_campana": True,
+        {"id": "botin", "apartado": "rol", "corto": "Lo que el grupo va juntando.", "titulo": "El botín de una campaña", "por_campana": True,
          "ayuda": "Lo que el grupo va juntando. Lo gastado se queda en la lista, tachado: «qué tuvimos» es media"
                   " discusión de cada partida. Quitarlo es para lo que no debió apuntarse.",
          "archivo": "datos/notas_rol/campana-{campana}.json", "despues": "buscador",
@@ -1366,7 +1366,7 @@ def colecciones():
                          C("descripcion", "Qué hace (al desplegarlo en la web)", "largo", vacio="quitar",
                            si=con_descripcion, ayuda="El hechizo o el objeto, entero. Un párrafo por línea."),
                      ]}]},
-        {"id": "dinero", "apartado": "rol", "titulo": "El dinero de una campaña", "por_campana": True,
+        {"id": "dinero", "apartado": "rol", "corto": "Lo que entra y sale, y lo de cada uno.", "titulo": "El dinero de una campaña", "por_campana": True,
          "ayuda": "Lo que entra y lo que sale de la bolsa del grupo, con su concepto y su sesión. La web lo suma por"
                   " monedas, lo pasa a oro y lo enseña en la ventana «el dinero» del índice, con lo que lleva cada"
                   " personaje y un conversor.",
@@ -1385,7 +1385,7 @@ def colecciones():
                            ayuda="Un personaje por línea con su parte, en la misma moneda: «Mellissa: 20»."
                                  " «Cada uno: 5» es lo mismo para todos. Lo que no se reparte es del grupo."),
                      ]}]},
-        {"id": "personajes", "apartado": "personajes", "titulo": "Mis personajes",
+        {"id": "personajes", "apartado": "personajes", "corto": "Mis OC, aparte de las campañas: ficha, historia, gente e imágenes.", "titulo": "Mis personajes",
          "ayuda": "Mis OC: el índice de redondeles y la ficha de cada uno (historia, npcs, imágenes, extra, la foto con"
                   " sus características y su PDF). Va aparte de las campañas y de la wiki.",
          "archivo": "datos/personajes/personajes.json", "despues": "personajes",
@@ -1478,7 +1478,7 @@ def colecciones():
                   C("pie", "Pie de foto", vacio="quitar"),
               ]},
          ]},
-        {"id": "recomendaciones", "apartado": "rincon", "titulo": "Recomendaciones",
+        {"id": "recomendaciones", "apartado": "rincon", "corto": "Libros, series, pelis y juegos.", "titulo": "Recomendaciones",
          "ayuda": "Libros, series, pelis, juegos… las ventanitas de la página de recomendaciones.",
          "archivo": "datos/mi_rincon/recomendaciones.json", "despues": None,
          "partes": [{"id": "cosas", "camino": [], "agrupada": {"clave": "clave", "nombre": "nombre", "dentro": "cosas"},
@@ -1494,7 +1494,7 @@ def colecciones():
                          C("enlace", "Enlace", "enlace"),
                          C("enlaceTexto", "Texto del enlace", ayuda="«Enlace a Goodreads»…"),
                      ]}]},
-        {"id": "en-lo-que-ando", "apartado": "rincon", "titulo": "En lo que ando",
+        {"id": "en-lo-que-ando", "apartado": "rincon", "corto": "Lo de ahora, lo que escribo y los pendientes.", "titulo": "En lo que ando",
          "ayuda": "Lo que pone la página «en lo que ando». La fecha de «actualizado» se pone sola al guardar.",
          "archivo": "datos/mi_rincon/en-lo-que-ando.json", "herramienta": "en-lo-que-ando", "despues": "buscador",
          "partes": [
@@ -1515,7 +1515,7 @@ def colecciones():
              {"id": "pendientes", "camino": ["pendientes"], "titulo": "Pendientes (el post-it)", "nombre_de": "cosa",
               "detalle": [], "campos": [C("cosa", "Qué", obligatorio=True), C("hecho", "Hecho", "si-no")]},
          ]},
-        {"id": "gatos", "apartado": "rincon", "titulo": "Las fotos de los gatos",
+        {"id": "gatos", "apartado": "rincon", "corto": "Subir fotos y describirlas.", "titulo": "Las fotos de los gatos",
          "ayuda": "La galería de cada santuario. Las fotos nuevas se suben aquí abajo; a cada una, su descripción"
                   " (lo que se lee en voz alta quien no la ve).",
          "archivo": "datos/mi_rincon/fotos-santuarios.json", "despues": None, "gatos": True,
@@ -1523,7 +1523,7 @@ def colecciones():
                      "titulo": "Las fotos", "nombre_de": "alt", "detalle": ["archivo"], "campos": [
                          C("_grupo", "De quién", "ver"), C("archivo", "La foto", "ver", foto=True),
                          C("alt", "Descripción", "largo")]}]},
-        {"id": "reto", "apartado": "escribir", "titulo": "Las palabras del reto",
+        {"id": "reto", "apartado": "escribir", "corto": "Una palabra para cada día.", "titulo": "Las palabras del reto",
          "ayuda": "Una palabra para cada día. Lo escrito de cada día se abre desde «Escribir».",
          "archivo": "datos/mis_movidas/reto-writeober26.json", "despues": "generadores",
          "partes": [
@@ -1534,7 +1534,7 @@ def colecciones():
                   C("dia", "Día", "ver"), C("fecha", "Fecha", "fecha"), C("palabra", "Palabra"),
                   C("titulo", "Título de lo escrito", "ver"), C("url", "Dónde está", "ver")]},
          ]},
-        {"id": "calendario", "apartado": "wiki", "titulo": "El calendario de la wiki",
+        {"id": "calendario", "apartado": "wiki", "corto": "Festividades y eventos de Cralëa.", "titulo": "El calendario de la wiki",
          "ayuda": "Las festividades y los eventos que salen marcados en el calendario de la portada de la wiki.",
          "archivo": "datos/wiki/calendario.json", "herramienta": "calendario", "despues": None,
          "partes": [
@@ -1556,7 +1556,7 @@ def colecciones():
                     ayuda="Una página de la wiki: su nombre entre corchetes ([[La Gran Sequía]]) o /web/wiki/…"),
               ]},
          ]},
-        {"id": "linea", "apartado": "wiki", "titulo": "La línea de tiempo",
+        {"id": "linea", "apartado": "wiki", "corto": "Los eventos y las eras.", "titulo": "La línea de tiempo",
          "ayuda": "Los eventos (cada uno con su página) y las eras. Se ordenan solos por el año.",
          "archivo": "datos/wiki/linea-de-tiempo.json", "herramienta": "linea-de-tiempo", "despues": "linea",
          "partes": [
@@ -1589,7 +1589,7 @@ def colecciones():
                   C("color", "Color", "color", vacio="quitar"),
               ]},
          ]},
-        {"id": "diccionario", "apartado": "wiki", "titulo": "El diccionario",
+        {"id": "diccionario", "apartado": "wiki", "corto": "Las palabras de las lenguas del mundo.", "titulo": "El diccionario",
          "ayuda": "Las palabras de las lenguas del mundo (y del generador de nombres).",
          "archivo": "datos/wiki/diccionario.json", "herramienta": "diccionario", "despues": "mundo",
          "partes": [{"id": "palabras", "camino": ["palabras"], "titulo": "Las palabras", "nombre_de": "palabra",
@@ -2554,7 +2554,8 @@ def atender_get(ruta, pregunta):
         return estado_de_la_tarea()
     if ruta == "/api/web/colecciones":
         return {"colecciones": [{"id": c["id"], "titulo": c["titulo"], "apartado": c["apartado"],
-                                 "ayuda": c.get("ayuda", ""), "por_campana": bool(c.get("por_campana"))}
+                                 "ayuda": c.get("ayuda", ""), "corto": c.get("corto", ""),
+                                 "por_campana": bool(c.get("por_campana"))}
                                 for c in colecciones()],
                 "campanas": [{"clave": d.get("clave", ""), "nombre": d.get("nombre", "")} for _, d in campanas_que_hay()],
                 "sitios": sitios_de_imagen()}
