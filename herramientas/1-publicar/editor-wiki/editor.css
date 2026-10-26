@@ -200,7 +200,7 @@ body {
 .menu-lista {
     display: flex;
     flex-wrap: nowrap;
-    gap: 4px;
+    gap: 3px;
     margin: 0;
     /* Hueco para el recuadro del foco, que si no se corta arriba y abajo
        (el menú recorta lo que sobresale, por el desplazamiento de lado). */
@@ -213,7 +213,7 @@ body {
     align-items: center;
     gap: 5px;
     min-height: 44px;
-    padding: 4px 8px;
+    padding: 4px 7px;
     border: 2px solid var(--acento);
     background: transparent;
     color: var(--texto);
@@ -272,19 +272,6 @@ body {
 .donde-aqui {
     color: var(--acento);
     font-weight: 700;
-}
-
-/* LOS DOS GRUPOS DE ROL: las campañas y lo demás de rol, cada uno en su
-   recuadro y con su título, para que no se mezclen. */
-.grupo-rol {
-    margin-bottom: 18px;
-    padding: 16px 18px 2px;
-    border: 2px solid var(--borde);
-}
-
-.grupo-rol > h2 {
-    margin-bottom: 14px;
-    font-size: 1.3rem;
 }
 
 /* LOS EMOJIS de los títulos y de los botones grandes. */

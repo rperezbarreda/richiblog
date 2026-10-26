@@ -201,11 +201,12 @@
       cuando te sigue, se ponen debajo). En su PRIMERA LÍNEA, la marca,
       el menú y los ajustes (A−, A+ y 🌓 contraste alto). El editor es
       para el ordenador: no tiene vista de móvil; si con la letra grande
-      el menú no cabe, se desplaza de lado. Nueve apartados, cada uno con
-      su emoji: 🏠 Inicio, ✍️ Escribir, 🎲 Rol, 🗺️ Wiki, 🛋️ Mi rincón,
-      🖼️ Imágenes, 🚀 Neocities, 🐙 GitHub y ⌨️ Comandos. ATAJOS: Alt+1 a
-      Alt+9, en ese orden (aria-keyshortcuts; al pasar por encima lo
-      dice). El apartado en el que estás va relleno y con aria-current,
+      el menú no cabe, se desplaza de lado. Diez apartados, cada uno con
+      su emoji: 🏠 Inicio, ✍️ Escribir, ⚔️ Campañas, 🎲 Rol, 🗺️ Wiki,
+      🛋️ Mi rincón, 🖼️ Imágenes, 🚀 Neocities, 🐙 GitHub y ⌨️ Comandos
+      (la marca es solo ✎, para que quepa todo). ATAJOS: Alt+1 a Alt+9
+      y Alt+0 el décimo, en ese orden (aria-keyshortcuts; al pasar por
+      encima lo dice). El apartado en el que estás va relleno y con aria-current,
       también dentro de él (unas fichas de Rol siguen marcando Rol).
       La cabecera tiene DOS LÍNEAS: en la de abajo, «ESTÁS EN», el
       camino (Inicio › Rol › Mis personajes), con un botón para volver
@@ -216,11 +217,12 @@
       fila, y con ellos lo que antes iba en «Y además» (las colecciones:
       fichas.js las añade al final de la misma rejilla, con el texto
       corto de «corto» en editor_web.colecciones y su emoji en
-      EMOJIS_DE_COLECCIONES). ROL va en DOS GRUPOS, cada uno en su
-      recuadro: ⚔️ LAS CAMPAÑAS (apuntar las notas de una partida y las
-      colecciones de apartado «rol»: NPC, ficha, misiones, botín,
-      dinero) y 🎒 LO DEMÁS DE ROL, lo que no es de ninguna campaña (los
-      recursos del portfolio, apartado «recursos», y mis personajes).
+      EMOJIS_DE_COLECCIONES). LAS CAMPAÑAS Y EL ROL SON DOS APARTADOS
+      DISTINTOS: ⚔️ CAMPAÑAS (apuntar las notas de una partida, las
+      colecciones de apartado «campanas»: NPC, ficha, misiones, botín,
+      dinero; y debajo las notas de las partidas) y 🎲 ROL, lo que no es
+      de ninguna campaña (los recursos del portfolio, apartado
+      «recursos», y mis personajes, apartado «personajes»).
       DEBAJO, los árboles y las listas, cada uno con su buscador: lo que
       hay en Escribir, las notas de las partidas en Rol y las páginas de
       la wiki. Buscando, las carpetas se abren solas.

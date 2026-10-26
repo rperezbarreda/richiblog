@@ -195,7 +195,8 @@ const VISTAS_DE_DENTRO_EDITOR = {
     mapa: ["wiki", "mapas"],
 };
 // Las fichas son de un apartado u otro según la colección (fichas.js).
-const APARTADO_DE_FICHAS_EDITOR = { escribir: "escribir", rol: "rol", recursos: "rol", personajes: "rol", wiki: "wiki",
+const APARTADO_DE_FICHAS_EDITOR = { escribir: "escribir", campanas: "campanas", recursos: "rol", personajes: "rol",
+    wiki: "wiki",
     rincon: "rincon" };
 const ESTADO_DONDE_EDITOR = { vista: "inicio" };
 
@@ -279,16 +280,17 @@ function empezarMenuEditor() {
             primero.focus();
         }
     });
-    // Alt+1 … Alt+9: cada apartado, en el orden del menú (con e.code, que
+    // Alt+1 … Alt+9 y Alt+0: cada apartado, en el orden del menú (con e.code, que
     // es la tecla y no lo que escribe: con Alt, en algunos teclados, la
     // tecla 1 escribe «|» o «¡»).
     const apartados = [...document.querySelectorAll(".menu [data-ir]")];
     document.addEventListener("keydown", (e) => {
-        const n = /^Digit([1-9])$/.exec(e.code || "");
+        const n = /^Digit([0-9])$/.exec(e.code || "");
         if (!n || !e.altKey || e.ctrlKey || e.metaKey || e.shiftKey) {
             return;
         }
-        const b = apartados[Number(n[1]) - 1];
+        // Alt+0 es el décimo.
+        const b = apartados[(Number(n[1]) || 10) - 1];
         if (b) {
             e.preventDefault();
             b.click();

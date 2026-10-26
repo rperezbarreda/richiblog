@@ -104,7 +104,7 @@ APARTADOS = [
          "3-generadores/generar-personajes.py", [],
          "Rehace el índice y la ficha de cada uno desde datos/personajes/personajes.json."),
         PUBLICAR,
-        editor("rol", "Las notas de partida, los NPC, el botín, los recursos y mis personajes, con fichas."),
+        editor("campanas", "Las notas de partida, los NPC, el botín y lo demás de las campañas, con fichas."),
     ]),
 
     ("Wiki Cralëa", "escribir sus páginas, la línea de tiempo y pasarla a la web", [

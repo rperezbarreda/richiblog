@@ -1242,7 +1242,7 @@ def colecciones():
                          C("drive", "Enlace de Google Drive", "enlace", siempre=True,
                            ayuda="Opcional: sin él, la tarjeta sale con un solo botón."),
                      ]}]},
-        {"id": "npcs", "apartado": "rol", "corto": "La gente de cada campaña, con su token.", "titulo": "Los NPC de una campaña", "por_campana": True,
+        {"id": "npcs", "apartado": "campanas", "corto": "La gente de cada campaña, con su token.", "titulo": "Los NPC de una campaña", "por_campana": True,
          "ayuda": "La gente que os vais encontrando: la rejilla de tokens de la página de NPC.",
          "archivo": "datos/notas_rol/npcs-{campana}.json", "despues": "npcs",
          "partes": [{"id": "personajes", "camino": ["personajes"], "titulo": "La gente", "nombre_de": "nombre",
@@ -1261,7 +1261,7 @@ def colecciones():
                          C("notas", "Lo que sabemos", "lineas", ayuda="Una cosa por línea.", siempre=True),
                          C("primera", "Sesión en la que salió por primera vez", "elegir", numerico=True, vacio="quitar"),
                      ]}]},
-        {"id": "campana", "apartado": "rol", "corto": "De qué va, el sistema y los de la mesa.", "titulo": "La ficha de una campaña", "por_campana": True,
+        {"id": "campana", "apartado": "campanas", "corto": "De qué va, el sistema y los de la mesa.", "titulo": "La ficha de una campaña", "por_campana": True,
          "ayuda": "Lo que sale arriba en la página de la campaña: de qué va, el sistema, quién dirige y los"
                   " personajes de la mesa (con su color en las notas). Las misiones van aparte, en «Las"
                   " misiones (el post-it)».",
@@ -1287,7 +1287,7 @@ def colecciones():
                   C("equipo", "Lo que lleva encima", "lineas", ayuda="Una cosa por línea.", siempre=True),
                   C("notas", "Notas", "lineas", ayuda="Una cosa por línea.", siempre=True)]},
          ]},
-        {"id": "misiones", "apartado": "rol", "corto": "Lo pendiente y lo ya cerrado.", "titulo": "Las misiones (el post-it)", "por_campana": True,
+        {"id": "misiones", "apartado": "campanas", "corto": "Lo pendiente y lo ya cerrado.", "titulo": "Las misiones (el post-it)", "por_campana": True,
          "ayuda": "Lo que el grupo tiene a medias y lo que ya se cerró, en toda la campaña: sale en el post-it"
                   " de la página de la campaña (lo pendiente y, plegado, el histórico). El post-it de cada sesión"
                   " es aparte: se escribe en sus notas. Arriba lo pendiente; debajo, el histórico.",
@@ -1321,7 +1321,7 @@ def colecciones():
                   C("pistas", "Pistas", "lineas", vacio="quitar",
                     ayuda="Lo que sabemos de ella, una cosa por línea. En la web, plegadas debajo.")]},
          ]},
-        {"id": "botin", "apartado": "rol", "corto": "Lo que el grupo va juntando.", "titulo": "El botín de una campaña", "por_campana": True,
+        {"id": "botin", "apartado": "campanas", "corto": "Lo que el grupo va juntando.", "titulo": "El botín de una campaña", "por_campana": True,
          "ayuda": "Lo que el grupo va juntando. Lo gastado se queda en la lista, tachado: «qué tuvimos» es media"
                   " discusión de cada partida. Quitarlo es para lo que no debió apuntarse.",
          "archivo": "datos/notas_rol/campana-{campana}.json", "despues": "buscador",
@@ -1366,7 +1366,7 @@ def colecciones():
                          C("descripcion", "Qué hace (al desplegarlo en la web)", "largo", vacio="quitar",
                            si=con_descripcion, ayuda="El hechizo o el objeto, entero. Un párrafo por línea."),
                      ]}]},
-        {"id": "dinero", "apartado": "rol", "corto": "Lo que entra y sale, y lo de cada uno.", "titulo": "El dinero de una campaña", "por_campana": True,
+        {"id": "dinero", "apartado": "campanas", "corto": "Lo que entra y sale, y lo de cada uno.", "titulo": "El dinero de una campaña", "por_campana": True,
          "ayuda": "Lo que entra y lo que sale de la bolsa del grupo, con su concepto y su sesión. La web lo suma por"
                   " monedas, lo pasa a oro y lo enseña en la ventana «el dinero» del índice, con lo que lleva cada"
                   " personaje y un conversor.",

@@ -26,33 +26,35 @@
          sticky, que no va en el navegador de Richi). Lo que mide lo apunta
          editor.js en --alto-cabecera, y el cuerpo deja ese hueco.
          EL MENÚ es una lista de botones, cada uno con su emoji (solo para
-         la vista: el lector lee el nombre) y su atajo, Alt+1 a Alt+9
-         (aria-keyshortcuts). El del apartado en el que estás lleva
+         la vista: el lector lee el nombre) y su atajo, Alt+1 a Alt+9 y
+         Alt+0 el décimo (aria-keyshortcuts). El del apartado en el que estás lleva
          aria-current. DOS líneas (el editor es para el ordenador: no
          tiene vista de móvil): arriba la marca, el menú y los ajustes;
          debajo, «Estás en», el camino hasta lo que tienes abierto, con
          un botón para volver a cada paso. -->
     <header class="cabecera" data-cabecera>
-        <p class="marca"><span aria-hidden="true">✎</span> editor</p>
+        <p class="marca" title="Editor de la web"><span aria-hidden="true">✎</span><span class="solo-lector">Editor de la web</span></p>
         <nav class="menu" id="menu-apartados" aria-label="Apartados del editor" data-menu>
             <ul class="menu-lista">
                 <li><button type="button" data-ir="inicio" aria-keyshortcuts="Alt+1" title="Atajo: Alt+1">
                     <span class="menu-emoji" aria-hidden="true">🏠</span><span class="menu-texto">Inicio</span></button></li>
                 <li><button type="button" data-ir="escribir" aria-keyshortcuts="Alt+2" title="Atajo: Alt+2">
                     <span class="menu-emoji" aria-hidden="true">✍️</span><span class="menu-texto">Escribir</span></button></li>
-                <li><button type="button" data-ir="rol" aria-keyshortcuts="Alt+3" title="Atajo: Alt+3">
+                <li><button type="button" data-ir="campanas" aria-keyshortcuts="Alt+3" title="Atajo: Alt+3">
+                    <span class="menu-emoji" aria-hidden="true">⚔️</span><span class="menu-texto">Campañas</span></button></li>
+                <li><button type="button" data-ir="rol" aria-keyshortcuts="Alt+4" title="Atajo: Alt+4">
                     <span class="menu-emoji" aria-hidden="true">🎲</span><span class="menu-texto">Rol</span></button></li>
-                <li><button type="button" data-ir="wiki" aria-keyshortcuts="Alt+4" title="Atajo: Alt+4">
+                <li><button type="button" data-ir="wiki" aria-keyshortcuts="Alt+5" title="Atajo: Alt+5">
                     <span class="menu-emoji" aria-hidden="true">🗺️</span><span class="menu-texto">Wiki</span></button></li>
-                <li><button type="button" data-ir="rincon" aria-keyshortcuts="Alt+5" title="Atajo: Alt+5">
+                <li><button type="button" data-ir="rincon" aria-keyshortcuts="Alt+6" title="Atajo: Alt+6">
                     <span class="menu-emoji" aria-hidden="true">🛋️</span><span class="menu-texto">Mi rincón</span></button></li>
-                <li><button type="button" data-ir="repasar" aria-keyshortcuts="Alt+6" title="Atajo: Alt+6">
+                <li><button type="button" data-ir="repasar" aria-keyshortcuts="Alt+7" title="Atajo: Alt+7">
                     <span class="menu-emoji" aria-hidden="true">🖼️</span><span class="menu-texto">Imágenes</span></button></li>
-                <li><button type="button" data-ir="neocities" aria-keyshortcuts="Alt+7" title="Atajo: Alt+7">
+                <li><button type="button" data-ir="neocities" aria-keyshortcuts="Alt+8" title="Atajo: Alt+8">
                     <span class="menu-emoji" aria-hidden="true">🚀</span><span class="menu-texto">Neocities</span></button></li>
-                <li><button type="button" data-ir="github" aria-keyshortcuts="Alt+8" title="Atajo: Alt+8">
+                <li><button type="button" data-ir="github" aria-keyshortcuts="Alt+9" title="Atajo: Alt+9">
                     <span class="menu-emoji" aria-hidden="true">🐙</span><span class="menu-texto">GitHub</span></button></li>
-                <li><button type="button" data-ir="comandos" aria-keyshortcuts="Alt+9" title="Atajo: Alt+9">
+                <li><button type="button" data-ir="comandos" aria-keyshortcuts="Alt+0" title="Atajo: Alt+0">
                     <span class="menu-emoji" aria-hidden="true">⌨️</span><span class="menu-texto">Comandos</span></button></li>
             </ul>
         </nav>
@@ -75,16 +77,20 @@
         <!-- INICIO: un botón por apartado, los mismos que el menú de la web. -->
         <section class="vista" data-vista="inicio" aria-labelledby="t-inicio">
             <h1 id="t-inicio">¿Qué quieres hacer?</h1>
-            <p class="ayuda">El menú de arriba está siempre a la vista. Atajos: Alt+1 a Alt+9 van a cada apartado,
+            <p class="ayuda">El menú de arriba está siempre a la vista. Atajos: Alt+1 a Alt+9 (y Alt+0, el décimo) van a cada apartado,
                 en el orden del menú; y «Estás en», debajo del menú, lleva de vuelta a donde venías.</p>
             <div class="grandes">
                 <button type="button" class="grande" data-ir="escribir">
                     <span class="grande-titulo"><span class="grande-emoji" aria-hidden="true">✍️</span>Escribir</span>
                     <span class="grande-que">Una entrada del blog, un relato o un día del reto; seguir con uno, publicarlo.</span>
                 </button>
+                <button type="button" class="grande" data-ir="campanas">
+                    <span class="grande-titulo"><span class="grande-emoji" aria-hidden="true">⚔️</span>Campañas</span>
+                    <span class="grande-que">Las notas de una partida, los NPC, la ficha, las misiones, el botín y el dinero.</span>
+                </button>
                 <button type="button" class="grande" data-ir="rol">
                     <span class="grande-titulo"><span class="grande-emoji" aria-hidden="true">🎲</span>Rol</span>
-                    <span class="grande-que">Las notas de una partida, los NPC, el botín y los recursos del portfolio.</span>
+                    <span class="grande-que">Lo que no es de ninguna campaña: los recursos que publico y mis personajes.</span>
                 </button>
                 <button type="button" class="grande" data-ir="wiki">
                     <span class="grande-titulo"><span class="grande-emoji" aria-hidden="true">🗺️</span>Wiki Cralëa</span>
@@ -185,30 +191,18 @@
         </section>
 
         <!-- ROL -->
-        <section class="vista" data-vista="rol" aria-labelledby="t-rol" hidden>
-            <h1 id="t-rol"><span aria-hidden="true">🎲</span> Rol</h1>
-            <!-- ARRIBA, DOS GRUPOS: lo de las CAMPAÑAS (apuntar las notas de
-                 una partida y las colecciones de apartado «rol»: NPC, ficha,
-                 misiones, botín, dinero) y LO DEMÁS DE ROL, que no es de
-                 ninguna campaña (los recursos del portfolio, apartado
-                 «recursos», y mis personajes). DEBAJO, las notas que ya hay,
-                 con su buscador. -->
-            <section class="bloque grupo-rol" aria-labelledby="t-rol-campanas">
-                <h2 id="t-rol-campanas"><span aria-hidden="true">⚔️</span> Las campañas</h2>
-                <div class="grandes" data-fichas-de="rol">
-                    <button type="button" class="grande" data-nueva-tipo="sesion">
-                        <span class="grande-titulo"><span class="grande-emoji" aria-hidden="true">📓</span>Apuntar las notas de una partida</span>
-                        <span class="grande-que">Elige la campaña y deja el cuaderno listo para escribir. Nace como borrador.</span>
-                    </button>
-                </div>
-            </section>
-
-            <section class="bloque grupo-rol" aria-labelledby="t-rol-otros">
-                <h2 id="t-rol-otros"><span aria-hidden="true">🎒</span> Lo demás de rol</h2>
-                <p class="ayuda">Lo que no es de ninguna campaña: los recursos que publico y mis personajes.</p>
-                <div class="grandes" data-fichas-de="recursos personajes"></div>
-            </section>
-
+        <!-- LAS CAMPAÑAS: arriba lo que se hace (apuntar las notas de una
+             partida y las colecciones de apartado «campanas»: NPC, ficha,
+             misiones, botín, dinero); debajo, las notas que ya hay, con su
+             buscador. -->
+        <section class="vista" data-vista="campanas" aria-labelledby="t-campanas" hidden>
+            <h1 id="t-campanas"><span aria-hidden="true">⚔️</span> Campañas</h1>
+            <div class="grandes" data-fichas-de="campanas">
+                <button type="button" class="grande" data-nueva-tipo="sesion">
+                    <span class="grande-titulo"><span class="grande-emoji" aria-hidden="true">📓</span>Apuntar las notas de una partida</span>
+                    <span class="grande-que">Elige la campaña y deja el cuaderno listo para escribir. Nace como borrador.</span>
+                </button>
+            </div>
             <section class="bloque" aria-labelledby="t-notas-rol">
                 <h2 id="t-notas-rol"><span aria-hidden="true">📓</span> Las notas de las partidas</h2>
                 <p class="ayuda">Las de cada partida, por campaña. «Abrir» para seguir escribiéndolas o cambiar lo que
@@ -220,6 +214,15 @@
                 <p class="ayuda" data-notas-rol-cuantas aria-live="polite"></p>
                 <ul class="faltan" data-notas-rol></ul>
             </section>
+        </section>
+
+        <!-- ROL: lo que no es de ninguna campaña (los recursos del portfolio,
+             apartado «recursos», y mis personajes). -->
+        <section class="vista" data-vista="rol" aria-labelledby="t-rol" hidden>
+            <h1 id="t-rol"><span aria-hidden="true">🎲</span> Rol</h1>
+            <p class="ayuda">Lo que no es de ninguna campaña: los recursos que publico y mis personajes. Lo de las
+                campañas está en «⚔️ Campañas».</p>
+            <div class="grandes" data-fichas-de="recursos personajes"></div>
         </section>
 
         <!-- LA WIKI -->

@@ -1677,7 +1677,7 @@ async function publicarEntradaWeb() {
 // ---- AL EMPEZAR ----
 function empezarEscribirWeb() {
     document.querySelectorAll('[data-ir="escribir"]').forEach((b) => b.addEventListener("click", pintarEscribir));
-    document.querySelectorAll('[data-ir="rol"]').forEach((b) => b.addEventListener("click", pintarNotasDeRolWeb));
+    document.querySelectorAll('[data-ir="campanas"]').forEach((b) => b.addEventListener("click", pintarNotasDeRolWeb));
     ["#entradas-tipo", "#entradas-estado"].forEach((s) => $(s).addEventListener("change", pintarListaDeEntradas));
     $("#entradas-buscar").addEventListener("input", pintarListaDeEntradas);
     $("#notas-rol-buscar").addEventListener("input", pintarListaDeNotasDeRolWeb);

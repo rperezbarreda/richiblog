@@ -1597,7 +1597,7 @@ def main():
     puerto = puerto_libre()
     servidor = ThreadingHTTPServer(("127.0.0.1", puerto), Editor)
     direccion = "http://127.0.0.1:%d/editor/" % servidor.server_address[1]
-    # --en escribir|rol|wiki|rincon|repasar|neocities|github|comandos: abre ya en ese apartado.
+    # --en escribir|campanas|rol|wiki|rincon|repasar|neocities|github|comandos: abre ya en ese apartado.
     if "--en" in sys.argv[:-1]:
         direccion += "#" + sys.argv[sys.argv.index("--en") + 1]
     print("\n  ==================================")
