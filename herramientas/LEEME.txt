@@ -198,17 +198,18 @@
     · EL MENÚ DEL EDITOR (desde el 26-10-2026): la cabecera está
       SIEMPRE A LA VISTA (fija arriba; lo que mide lo apunta editor.js
       en --alto-cabecera y el cuerpo, y la barra de botones del redactor
-      cuando te sigue, se ponen debajo). Nueve apartados, cada uno con su
-      emoji: 🏠 Inicio, ✍️ Escribir, 🎲 Rol, 🗺️ Wiki Cralëa, 🛋️ Mi
-      rincón, 🖼️ Imágenes, 🚀 Publicar en Neocities, 🐙 GitHub y ⌨️
-      Comandos. ATAJOS: Alt+1 a Alt+9, en ese orden (aria-keyshortcuts;
-      al pasar por encima lo dice). El apartado en el que estás va
-      relleno y con aria-current, también dentro de él (unas fichas de
-      Rol siguen marcando Rol). Al lado de la marca, «ESTÁS EN»: el
-      camino (Inicio › Rol › Mis personajes), con un botón para volver a
-      cada paso. «Saltar al menú» es el segundo enlace al tabular desde
-      arriba. En una pantalla estrecha el menú se pliega tras «☰ Menú»
-      (aria-expanded; Escape lo cierra y te devuelve al botón).
+      cuando te sigue, se ponen debajo) y va TODA EN UNA LÍNEA: la marca,
+      el menú y los ajustes (A−, A+ y 🌓 contraste alto). El editor es
+      para el ordenador: no tiene vista de móvil; si con la letra grande
+      el menú no cabe, se desplaza de lado. Nueve apartados, cada uno con
+      su emoji: 🏠 Inicio, ✍️ Escribir, 🎲 Rol, 🗺️ Wiki, 🛋️ Mi rincón,
+      🖼️ Imágenes, 🚀 Neocities, 🐙 GitHub y ⌨️ Comandos. ATAJOS: Alt+1 a
+      Alt+9, en ese orden (aria-keyshortcuts; al pasar por encima lo
+      dice). El apartado en el que estás va relleno y con aria-current,
+      también dentro de él (unas fichas de Rol siguen marcando Rol).
+      Arriba de cada página, «ESTÁS EN»: el camino (Inicio › Rol › Mis
+      personajes), con un botón para volver a cada paso. «Saltar al
+      menú» es el segundo enlace al tabular desde arriba.
     · PUBLICAR EN NEOCITIES (su propio apartado): 1, repasar el sitio y
       volver a generar; 2, ver qué se subiría (el ensayo); 3, subirlo; y
       aparte, subir borrando lo que ya no está aquí y cambiar la clave.

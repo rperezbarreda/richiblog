@@ -170,7 +170,6 @@ function irAEditor(vista) {
             b.removeAttribute("aria-current");
         }
     });
-    abrirMenuEditor(false);
     ESTADO_DONDE_EDITOR.vista = vista;
     pintarDondeEditor();
     avisarEditor("");
@@ -237,7 +236,9 @@ function pintarDondeEditor() {
         return;
     }
     lista.textContent = "";
-    caja.hidden = vista === "inicio";
+    // En el inicio no hace falta, y en un mapa (a pantalla completa) ya
+    // está su «← Los mapas».
+    caja.hidden = vista === "inicio" || vista === "mapa";
     const pasos = ["inicio"].concat(caminoDeVistaEditor(vista).filter((v) => v !== "inicio"), [vista]);
     pasos.forEach((paso, i) => {
         const li = document.createElement("li");
@@ -258,7 +259,7 @@ function pintarDondeEditor() {
 
 // La cabecera es fija: el cuerpo deja su alto arriba (y lo que se pega
 // arriba al bajar, como la barra de botones del redactor, se pone debajo).
-// Se vuelve a medir cuando cambia (la letra, el menú abierto, «Estás en»).
+// Se vuelve a medir cuando cambia (la letra).
 function medirCabeceraEditor() {
     const cabecera = $("[data-cabecera]");
     if (!cabecera) {
@@ -268,42 +269,10 @@ function medirCabeceraEditor() {
     document.documentElement.style.setProperty("--alto-cabecera", alto + "px");
 }
 
-// En una pantalla estrecha el menú se pliega tras «Menú».
-function abrirMenuEditor(abrir) {
-    const boton = $("[data-menu-abrir]");
-    if (!boton) {
-        return;
-    }
-    boton.setAttribute("aria-expanded", abrir ? "true" : "false");
-    $("[data-cabecera]").classList.toggle("menu-abierto", !!abrir);
-    medirCabeceraEditor();
-}
-
 function empezarMenuEditor() {
-    const boton = $("[data-menu-abrir]");
-    boton.addEventListener("click", () => {
-        const abrir = boton.getAttribute("aria-expanded") !== "true";
-        abrirMenuEditor(abrir);
-        if (abrir) {
-            const primero = document.querySelector('.menu [aria-current]') || document.querySelector(".menu button");
-            if (primero) {
-                primero.focus();
-            }
-        }
-    });
-    // Escape dentro del menú abierto: se cierra y vuelves a «Menú».
-    $("[data-menu]").addEventListener("keydown", (e) => {
-        if (e.key === "Escape" && boton.getAttribute("aria-expanded") === "true") {
-            abrirMenuEditor(false);
-            boton.focus();
-        }
-    });
-    // «Saltar al menú»: al primer botón (abriéndolo si está plegado).
+    // «Saltar al menú»: al botón del apartado en el que estás.
     $("[data-saltar-menu]").addEventListener("click", (e) => {
         e.preventDefault();
-        if (window.getComputedStyle(boton).display !== "none") {
-            abrirMenuEditor(true);
-        }
         const primero = document.querySelector('.menu [aria-current]') || document.querySelector(".menu button");
         if (primero) {
             primero.focus();

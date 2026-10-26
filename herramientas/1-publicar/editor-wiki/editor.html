@@ -28,28 +28,11 @@
          EL MENÚ es una lista de botones, cada uno con su emoji (solo para
          la vista: el lector lee el nombre) y su atajo, Alt+1 a Alt+9
          (aria-keyshortcuts). El del apartado en el que estás lleva
-         aria-current. En una pantalla estrecha se pliega tras «Menú».
-         Al lado de la marca, «Estás en»: el camino hasta lo que tienes
-         abierto, con botones para volver a cada paso. -->
+         aria-current. Todo en UNA línea (el editor es para el ordenador:
+         no tiene vista de móvil). «Estás en», el camino hasta lo que
+         tienes abierto, va arriba del todo de la página. -->
     <header class="cabecera" data-cabecera>
-        <div class="cabecera-fila">
-            <p class="marca"><span aria-hidden="true">✎</span> editor de la web</p>
-            <nav class="donde" aria-label="Estás en" data-donde hidden>
-                <ol class="donde-lista" data-donde-lista></ol>
-            </nav>
-            <button type="button" class="menu-abrir" data-menu-abrir aria-expanded="false"
-                    aria-controls="menu-apartados">
-                <span class="menu-emoji" aria-hidden="true">☰</span> Menú
-            </button>
-            <!-- Cómo se ve el propio editor: el tamaño de la letra y el
-                 contraste (editor.js, ajustesDeVistaEditor; se recuerdan). -->
-            <div class="vista-ajustes" role="group" aria-label="Cómo se ve el editor">
-                <button type="button" data-letra="-1" aria-label="Letra más pequeña">A−</button>
-                <button type="button" data-letra="1" aria-label="Letra más grande">A+</button>
-                <button type="button" data-boton-contraste aria-pressed="false">
-                    <span aria-hidden="true">◐</span> Contraste alto</button>
-            </div>
-        </div>
+        <p class="marca"><span aria-hidden="true">✎</span> editor</p>
         <nav class="menu" id="menu-apartados" aria-label="Apartados del editor" data-menu>
             <ul class="menu-lista">
                 <li><button type="button" data-ir="inicio" aria-keyshortcuts="Alt+1" title="Atajo: Alt+1">
@@ -59,29 +42,40 @@
                 <li><button type="button" data-ir="rol" aria-keyshortcuts="Alt+3" title="Atajo: Alt+3">
                     <span class="menu-emoji" aria-hidden="true">🎲</span><span class="menu-texto">Rol</span></button></li>
                 <li><button type="button" data-ir="wiki" aria-keyshortcuts="Alt+4" title="Atajo: Alt+4">
-                    <span class="menu-emoji" aria-hidden="true">🗺️</span><span class="menu-texto">Wiki Cralëa</span></button></li>
+                    <span class="menu-emoji" aria-hidden="true">🗺️</span><span class="menu-texto">Wiki</span></button></li>
                 <li><button type="button" data-ir="rincon" aria-keyshortcuts="Alt+5" title="Atajo: Alt+5">
                     <span class="menu-emoji" aria-hidden="true">🛋️</span><span class="menu-texto">Mi rincón</span></button></li>
                 <li><button type="button" data-ir="repasar" aria-keyshortcuts="Alt+6" title="Atajo: Alt+6">
                     <span class="menu-emoji" aria-hidden="true">🖼️</span><span class="menu-texto">Imágenes</span></button></li>
                 <li><button type="button" data-ir="neocities" aria-keyshortcuts="Alt+7" title="Atajo: Alt+7">
-                    <span class="menu-emoji" aria-hidden="true">🚀</span><span class="menu-texto">Publicar en Neocities</span></button></li>
+                    <span class="menu-emoji" aria-hidden="true">🚀</span><span class="menu-texto">Neocities</span></button></li>
                 <li><button type="button" data-ir="github" aria-keyshortcuts="Alt+8" title="Atajo: Alt+8">
                     <span class="menu-emoji" aria-hidden="true">🐙</span><span class="menu-texto">GitHub</span></button></li>
                 <li><button type="button" data-ir="comandos" aria-keyshortcuts="Alt+9" title="Atajo: Alt+9">
                     <span class="menu-emoji" aria-hidden="true">⌨️</span><span class="menu-texto">Comandos</span></button></li>
             </ul>
         </nav>
+        <!-- Cómo se ve el propio editor: el tamaño de la letra y el contraste
+             (editor.js, ajustesDeVistaEditor; se recuerdan). -->
+        <div class="vista-ajustes" role="group" aria-label="Cómo se ve el editor">
+            <button type="button" data-letra="-1" aria-label="Letra más pequeña" title="Letra más pequeña">A−</button>
+            <button type="button" data-letra="1" aria-label="Letra más grande" title="Letra más grande">A+</button>
+            <button type="button" data-boton-contraste aria-pressed="false" aria-label="Contraste alto"
+                    title="Contraste alto"><span aria-hidden="true">🌓</span></button>
+        </div>
     </header>
 
     <main id="principal" tabindex="-1">
+        <nav class="donde" aria-label="Estás en" data-donde hidden>
+            <ol class="donde-lista" data-donde-lista></ol>
+        </nav>
         <p class="aviso" role="status" aria-live="polite" data-aviso></p>
 
         <!-- INICIO: un botón por apartado, los mismos que el menú de la web. -->
         <section class="vista" data-vista="inicio" aria-labelledby="t-inicio">
             <h1 id="t-inicio">¿Qué quieres hacer?</h1>
             <p class="ayuda">El menú de arriba está siempre a la vista. Atajos: Alt+1 a Alt+9 van a cada apartado,
-                en el orden del menú; y «Estás en», al lado de «Editor de la web», lleva de vuelta a donde venías.</p>
+                en el orden del menú; y «Estás en», arriba de cada página, lleva de vuelta a donde venías.</p>
             <div class="grandes">
                 <button type="button" class="grande" data-ir="escribir">
                     <span class="grande-titulo"><span class="grande-emoji" aria-hidden="true">✍️</span>Escribir</span>
