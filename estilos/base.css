@@ -240,6 +240,12 @@
        de la barra tiene que contar con ESTO y no con --lateral-ancho, o
        al plegarla se queda un hueco vacío donde estaba. */
     --lateral-hueco: var(--lateral-ancho);
+    /* Lo que sobresalen de la barra, por la derecha, los botones ☰ y de
+       la lupa (31px más su anillo de 3, ver barra-lateral.css) y un
+       respiro. Lo usan las páginas que van pegadas a la barra (una
+       entrada, un relato, las notas de una partida): sin esto los botones
+       tapaban el principio del título. */
+    --lateral-botones: 40px;
     /* Hueco que se deja libre abajo del todo. En escritorio, ninguno;
        en móvil lo pone estilos/base.responsive.css, porque ahí los
        botones del propio teléfono (atrás, inicio...) se comen la tira

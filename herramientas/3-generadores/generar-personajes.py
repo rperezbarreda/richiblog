@@ -24,7 +24,11 @@
 #         "icono": "✨",                    va delante del nombre completo
 #         "color": "azul",                  el del aro (ver COLORES)
 #         "token": "/imagenes/personajes/yorel/yorel_tkn.webp",
+#                                           el de la GALERÍA: el redondel
+#                                           del índice, y nada más
 #         "retrato": "/imagenes/personajes/yorel/yorel.webp",
+#                                           la de PERFIL: la del post-it
+#                                           de su ficha, y nada más
 #         "retrato_alt": "Cómo es, para quien no lo ve",
 #         "raza": "…", "clase": "…", "nivel": 5, "lema": "Una frase suya",
 #         "fue": 10, "des": 14, "con": 12, "int": 10, "sab": 13, "car": 16,
@@ -38,7 +42,10 @@
 #   }
 #
 # Solo hace falta la clave y el nombre: lo que falte no sale (sin foto,
-# su inicial dentro del aro; sin estadísticas, sin cuadritos).
+# su inicial dentro del aro; sin estadísticas, sin cuadritos). El token y
+# la imagen de perfil son dos cosas distintas y NO se sustituyen una a la
+# otra: sin token, el índice lleva la inicial aunque haya perfil, y al
+# revés.
 #
 # EN LA HISTORIA Y EN «EXTRA» vale el Markdown de la wiki: **negrita**,
 # *cursiva*, listas, > citas, ## apartados, ![[imagen.webp|descripción]]
@@ -184,7 +191,7 @@ def tarjeta(p):
     c = clave_de(p)
     nombre = str(p.get("nombre") or c)
     completo = str(p.get("nombre_completo") or nombre)
-    foto = ruta_que_existe(p.get("token")) or ruta_que_existe(p.get("retrato"))
+    foto = ruta_que_existe(p.get("token"))
     icono = str(p.get("icono") or "").strip()
     que = lo_que_es(p)
     return (
@@ -242,7 +249,7 @@ def numero(valor):
 
 def postit(p, c):
     nombre = str(p.get("nombre") or c)
-    retrato = ruta_que_existe(p.get("retrato")) or ruta_que_existe(p.get("token"))
+    retrato = ruta_que_existe(p.get("retrato"))
     alt = str(p.get("retrato_alt") or "").strip() or "Retrato de %s" % nombre
     partes = ['                    <div class="oc-postit">']
     if retrato:
@@ -369,7 +376,7 @@ def pagina_ficha(p, datos, personajes, avisos):
     if completo and completo != nombre:
         sub.append('<p class="oc-nombre-completo">%s%s</p>'
                    % (('<span class="oc-icono" aria-hidden="true">%s</span>' % e(icono)) if icono else "", e(completo)))
-    retrato = ruta_que_existe(p.get("retrato")) or ruta_que_existe(p.get("token"))
+    retrato = ruta_que_existe(p.get("retrato"))
     historia_plana = re.sub(r"[#*_>\[\]!|`]+", "", str(p.get("historia") or "")).split("\n")
     primera = next((l.strip() for l in historia_plana if l.strip()), "")
     descripcion = (completo or nombre) + (", " + que if que else "") + ". " + (primera[:180] if primera else

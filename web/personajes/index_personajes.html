@@ -54,7 +54,7 @@
     <link rel="preload" href="/tipografias/space-grotesk-400.woff2" as="font" type="font/woff2" crossorigin>
     <link rel="alternate" type="application/rss+xml" title="El Blog de Richi — blog, relatos y rol" href="/blog/rss.xml">
     <!-- ==== CSS ==== -->
-    <link rel="stylesheet" href="/estilos/paquete-comun.css?v=42e63d33">
+    <link rel="stylesheet" href="/estilos/paquete-comun.css?v=e94b0ddd">
     <link rel="stylesheet" href="/ligero/estilos/paginas/personajes.css?v=36a30402">
     <link rel="stylesheet" href="/ligero/estilos/paginas/personajes.responsive.css?v=284458b6">
     <link rel="stylesheet" href="/estilos/paquete-cierre.css?v=a49d87f4">
@@ -339,6 +339,10 @@
     </div>
 
     <main id="main-content">
+        <!-- MIS PERSONAJES (el índice). Lo escribe entero
+             herramientas/3-generadores/generar-personajes.py a partir de
+             datos/personajes/personajes.json: lo que se toque aquí a mano
+             se pierde la próxima vez. Esta plantilla solo es el molde. -->
         <section id="home" class="home oc-page">
             <div class="oc-cabecera">
                 <a class="oc-volver" href="/index.html">← volver al inicio</a>
@@ -346,62 +350,7 @@
                 <p class="oc-intro">Mis personajes de rol: los que he llevado en partidas y los que tengo esperando la suya. Pulsa en cualquiera para ver su ficha.</p>
             </div>
 
-            <ul class="oc-rejilla">
-                <li class="oc-celda">
-                    <a class="oc-tarjeta oc-color-azul" href="/web/personajes/yorel/yorel.html">
-                        <span class="oc-tarjeta-aro">
-                            <span class="oc-tarjeta-foto es-sin-foto"><span class="oc-inicial" aria-hidden="true">Y</span></span>
-                            <span class="oc-tarjeta-nombre" aria-hidden="true">Yorel</span>
-                        </span>
-                        <span class="oc-tarjeta-etiqueta"><span class="oc-icono" aria-hidden="true">✨</span><span class="oc-tarjeta-completo">Yorel Telvet</span></span>
-                    </a>
-                </li>
-                <li class="oc-celda">
-                    <a class="oc-tarjeta oc-color-celeste" href="/web/personajes/diana/diana.html">
-                        <span class="oc-tarjeta-aro">
-                            <span class="oc-tarjeta-foto es-sin-foto"><span class="oc-inicial" aria-hidden="true">D</span></span>
-                            <span class="oc-tarjeta-nombre" aria-hidden="true">Diana</span>
-                        </span>
-                        <span class="oc-tarjeta-etiqueta"><span class="oc-icono" aria-hidden="true">🐬</span><span class="oc-tarjeta-completo">Diana Bellet</span></span>
-                    </a>
-                </li>
-                <li class="oc-celda">
-                    <a class="oc-tarjeta oc-color-naranja" href="/web/personajes/cassady/cassady.html">
-                        <span class="oc-tarjeta-aro">
-                            <span class="oc-tarjeta-foto es-sin-foto"><span class="oc-inicial" aria-hidden="true">C</span></span>
-                            <span class="oc-tarjeta-nombre" aria-hidden="true">Cassady</span>
-                        </span>
-                        <span class="oc-tarjeta-etiqueta"><span class="oc-icono" aria-hidden="true">🧨</span><span class="oc-tarjeta-completo">Cassady Range</span></span>
-                    </a>
-                </li>
-                <li class="oc-celda">
-                    <a class="oc-tarjeta oc-color-verde" href="/web/personajes/sevro/sevro.html">
-                        <span class="oc-tarjeta-aro">
-                            <span class="oc-tarjeta-foto es-sin-foto"><span class="oc-inicial" aria-hidden="true">S</span></span>
-                            <span class="oc-tarjeta-nombre" aria-hidden="true">Sevro</span>
-                        </span>
-                        <span class="oc-tarjeta-etiqueta"><span class="oc-icono" aria-hidden="true">🪈</span><span class="oc-tarjeta-completo">Sevro Zarev</span></span>
-                    </a>
-                </li>
-                <li class="oc-celda">
-                    <a class="oc-tarjeta oc-color-gris" href="/web/personajes/boris/boris.html">
-                        <span class="oc-tarjeta-aro">
-                            <span class="oc-tarjeta-foto es-sin-foto"><span class="oc-inicial" aria-hidden="true">B</span></span>
-                            <span class="oc-tarjeta-nombre" aria-hidden="true">Boris y Brisa</span>
-                        </span>
-                        <span class="oc-tarjeta-etiqueta"><span class="oc-icono" aria-hidden="true">🐺</span><span class="oc-tarjeta-completo">Boris Kareviz</span></span>
-                    </a>
-                </li>
-                <li class="oc-celda">
-                    <a class="oc-tarjeta oc-color-morado" href="/web/personajes/dahlia/dahlia.html">
-                        <span class="oc-tarjeta-aro">
-                            <span class="oc-tarjeta-foto es-sin-foto"><span class="oc-inicial" aria-hidden="true">D</span></span>
-                            <span class="oc-tarjeta-nombre" aria-hidden="true">Dahlia</span>
-                        </span>
-                        <span class="oc-tarjeta-etiqueta"><span class="oc-icono" aria-hidden="true">🦋</span><span class="oc-tarjeta-completo">Dahlia Morrigan</span></span>
-                    </a>
-                </li>
-            </ul>
+            <p class="oc-vacio">Todavía no hay ningún personaje.</p>
 
             <a class="oc-volver oc-volver-abajo" href="/index.html">← volver al inicio</a>
         </section>

@@ -1,50 +1,7 @@
 {
     "titulo": "mis personajes",
     "intro": "Mis personajes de rol: los que he llevado en partidas y los que tengo esperando la suya. Pulsa en cualquiera para ver su ficha.",
-    "personajes": [
-        {
-            "clave": "yorel",
-            "nombre": "Yorel",
-            "nombre_completo": "Yorel Telvet",
-            "icono": "✨",
-            "color": "azul"
-        },
-        {
-            "clave": "diana",
-            "nombre": "Diana",
-            "nombre_completo": "Diana Bellet",
-            "icono": "🐬",
-            "color": "celeste"
-        },
-        {
-            "clave": "cassady",
-            "nombre": "Cassady",
-            "nombre_completo": "Cassady Range",
-            "icono": "🧨",
-            "color": "naranja"
-        },
-        {
-            "clave": "sevro",
-            "nombre": "Sevro",
-            "nombre_completo": "Sevro Zarev",
-            "icono": "🪈",
-            "color": "verde"
-        },
-        {
-            "clave": "boris",
-            "nombre": "Boris y Brisa",
-            "nombre_completo": "Boris Kareviz",
-            "icono": "🐺",
-            "color": "gris"
-        },
-        {
-            "clave": "dahlia",
-            "nombre": "Dahlia",
-            "nombre_completo": "Dahlia Morrigan",
-            "icono": "🦋",
-            "color": "morado"
-        }
-    ],
+    "personajes": [],
     "gente": [],
     "imagenes": []
 }

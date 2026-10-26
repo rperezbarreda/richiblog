@@ -148,6 +148,7 @@
     --barra-alto: calc(60px * var(--escala));
     --lateral-ancho: calc(280px * var(--escala));
     --lateral-hueco: var(--lateral-ancho);
+    --lateral-botones: 40px;
     --hueco-abajo: 0px;
     color-scheme: dark;
     --bg-texture: url("/imagenes/dark_bg.webp");

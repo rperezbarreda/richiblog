@@ -3687,8 +3687,10 @@
       completo (el de la etiqueta), su dirección (la clave; si se deja
       en blanco sale del nombre, y mejor no cambiarla luego), icono
       (un emoji), color del aro (azul, celeste, naranja, verde, gris,
-      morado, rojo, rosa, amarillo), token (el redondel del índice),
-      retrato (la foto del post-it; sin él sale el token), raza,
+      morado, rojo, rosa, amarillo), TOKEN DE LA GALERÍA (el redondel
+      del índice, y solo ahí) e IMAGEN DE PERFIL (la del post-it de su
+      ficha, y solo ahí): son dos cosas distintas y una no sustituye a
+      la otra (sin la que toque, sale su inicial), raza,
       clase, nivel, una frase suya, las seis características de D&D
       (el modificador se calcula solo), la ficha en PDF (botón «Subir
       el PDF»: va a su carpeta y sale «ver ficha pdf»), la historia y
@@ -4408,6 +4410,9 @@
   Lo que se coloque al lado de la barra tiene que medirse con
   --lateral-hueco (estilos/base.css) y no con --lateral-ancho, o al
   plegarla se queda un hueco vacío donde estaba.
+  Y lo que va PEGADO a la barra (una entrada, un relato, las notas de
+  una partida) deja además --lateral-botones (40px): lo que sobresalen
+  el ☰ y la lupa. Sin él tapaban el principio del título (26-10-2026).
 
   POR QUÉ ESTÁ TODO AHÍ Y NO LO PIDE UN SCRIPT
   --------------------------------------------

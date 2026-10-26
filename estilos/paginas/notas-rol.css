@@ -1552,8 +1552,10 @@ body:has(.cuaderno-page) main {
    regla y la de notas-rol.responsive.css se lleven la contraria. */
 @media (min-width: 861px) {
     body:has(.cuaderno-page) main {
-        margin: 0 0 0 var(--lateral-hueco);
-        width: calc(100% - var(--lateral-hueco));
+        /* Y apartado de los botones ☰ y de la lupa, que sobresalen de
+           la barra y tapaban el principio del título. */
+        margin: 0 0 0 calc(var(--lateral-hueco) + var(--lateral-botones));
+        width: calc(100% - var(--lateral-hueco) - var(--lateral-botones));
     }
 }
 

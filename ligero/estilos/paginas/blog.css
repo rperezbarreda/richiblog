@@ -109,8 +109,8 @@ body:has(.blog-post-page) main {
 }
 @media (min-width: 861px) {
     body:has(.blog-post-page) main {
-        margin: 0 0 0 var(--lateral-hueco);
-        width: calc(100% - var(--lateral-hueco));
+        margin: 0 0 0 calc(var(--lateral-hueco) + var(--lateral-botones));
+        width: calc(100% - var(--lateral-hueco) - var(--lateral-botones));
     }
 }
 .blog-post-back {
