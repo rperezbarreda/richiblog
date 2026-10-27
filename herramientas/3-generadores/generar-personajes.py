@@ -1024,7 +1024,10 @@ def hoja_con_subpestanas(grupos):
             % "".join('<a class="oc-subpestana" href="#oc-ficha-%s" data-oc-pestana="%s">'
                       '<span class="oc-subpestana-emoji" aria-hidden="true">%s</span>%s</a>'
                       % (g, g, emoji, texto) for g, emoji, texto in llenos))
-    return menu + '<div class="oc-hoja-grupos" data-oc-subpanel>%s</div>' % "".join(cajas)
+    # Juntos en un bloque: en escritorio, la lista de subpestañas a la
+    # izquierda y lo elegido a la derecha.
+    return ('<div class="oc-ficha-partes">%s<div class="oc-hoja-grupos" data-oc-subpanel>%s</div></div>'
+            % (menu, "".join(cajas)))
 
 
 def modificador_num(valor):

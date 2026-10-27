@@ -3860,13 +3860,15 @@
   solo añade las nuevas (dndbeyond.py: descripciones_de, html_a_markdown,
   _plantillas; fichas.js: mezclarDescripcionesOc).
   CÓMO SE REPARTE LA PÁGINA DE CADA UNO: a la IZQUIERDA, el post-it
-  amarillo con el nombre en su recuadro y, al lado, los PG y la CA; la
+  amarillo con el nombre en su recuadro (bajito) y, al lado, los PG y la CA; la
   foto; la raza y la clase; y las características. Debajo, los botones:
   «ficha dndbeyond» (si tiene el campo «Su ficha en D&D Beyond», que el
   importador rellena solo), «pdf» (si tiene la ficha en PDF) y 🎲 (los
   dados). A la DERECHA, las pestañas con el «volver» al lado, y debajo su
-  recuadro; las subpestañas de «ficha», en una sola línea (si no caben,
-  se desplazan de lado). En escritorio (desde 1180px de ancho y 600 de
+  recuadro. En escritorio, las subpestañas de «ficha» van en una
+  COLUMNA a la izquierda del recuadro, como las carpetas de un explorador
+  (con las flechas de arriba y abajo se pasa de una a otra), y lo elegido
+  a la derecha; en pantallas más pequeñas, encima, en pastillas. En escritorio (desde 1180px de ancho y 600 de
   alto) la página NO SE DESPLAZA entera: la ficha de la izquierda se
   queda quieta (la foto, como mucho un 23% del alto de la pantalla) y el
   recuadro se desplaza por dentro. Más pequeño, se desplaza la página; en
@@ -3880,11 +3882,19 @@
   dado de golpe (1 dado + la Constitución) y los dados que salgan
   escritos en las descripciones («1d10», «8d6»). Y con el botón 🎲, la
   BANDEJA: cada pulsación en d4, d6, d8, d10, d12, d20 o d100 añade un
-  dado, más un modificador, y «tirar». Con «ventaja» o «desventaja»
-  elegido, lo que se tire con un solo d20 se tira dos veces y se queda el
-  mayor o el menor. Las tiradas salen en la ventanita «dados.exe» (abajo
-  a la derecha; la última, arriba; marca el 20 y el 1 naturales) y el
-  lector de pantalla dice el resultado. Esc la cierra.
+  dado (cada uno con su silueta: triángulo el d4, cuadrado el d6, rombo
+  el d8…), el modificador (con − y +), y «tirar»; «vaciar» deja la
+  bandeja vacía. Con «ventaja» o «desventaja» elegido, lo que se tire con
+  un solo d20 se tira dos veces y se queda el mayor o el menor. Al tirar
+  suena un traqueteo de dados (hecho con el navegador, sin archivos; el
+  🔊 de la barra lo apaga y se acuerda). Las tiradas salen en la
+  ventanita «dados.exe»: la última arriba, en colores invertidos; marca
+  el 20 y el 1 naturales; cada una con «↻ repetir» y su ✕ para borrarla,
+  y «borrar todo» arriba. La ventanita se mueve ARRASTRÁNDOLA por su
+  barra y se queda donde la dejes (en este navegador); su ✕ o Esc la
+  cierran. El lector de pantalla dice cada resultado. (La barra lleva su
+  clase propia, oc-dados-barra, y no la de las ventanas del sitio: esa la
+  coge ventanas-plegables.js y la vuelve un botón de plegar.)
   generar-personajes.py deja marcado lo que se tira (dado, prueba,
   con_dados: <span class="oc-dado" data-dados="1d20+4" data-que="sigilo">)
   y personajes.js lo convierte en botones.
