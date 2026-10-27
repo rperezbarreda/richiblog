@@ -3838,6 +3838,34 @@
   ideales, vínculos y defectos; el importador de D&D Beyond los rellena
   (la altura y el peso, pasados a metros y kilos; la historia de allí,
   solo si aquí no hay).
+  DESPLEGABLES CON SU DESCRIPCIÓN: cada conjuro, acción, rasgo, ataque u
+  objeto que tenga descripción sale con una flechita ▸ y, al pulsarlo, se
+  despliega con sus datos en pastillitas (nivel, escuela, tiempo,
+  alcance, componentes, duración…) y su texto entero. Al lado del nombre,
+  en una chapita, DE DÓNDE LE VIENE («Hechicero, nivel 3», «Raza:
+  Semielfo», «Dote», «Por Fuente de magia (Hechicero, nivel 2)», «Lista de
+  Hechicero»). Las descripciones van en el campo «Descripciones», un
+  bloque por cosa que empieza por «## Nombre» (el mismo nombre que en su
+  lista; no mira mayúsculas ni tildes, y «Puntos de hechicería (10 usos)»
+  encuentra «Puntos de hechicería»), con «Origen:» y «Datos:» opcionales
+  debajo y luego el texto con formato. Los RASGOS, si se escriben en lista
+  («- **Nombre** (de dónde le viene)» o «- **Nombre.** Lo que hace.»),
+  salen también desplegables; escritos de otra manera, salen tal cual
+  (generar-personajes.py: leer_descripciones, buscar_descripcion,
+  desplegable, rasgos_desplegables). El importador de D&D Beyond las
+  rellena: el texto de cada cosa (pasado de HTML a Markdown, con las
+  cuentas de D&D Beyond hechas: usos, competencia, nivel…; EN INGLÉS, que
+  es como lo da D&D Beyond: tradúcelo a mano si quieres) y de dónde le
+  viene; y al volver a importar NO pisa las descripciones que ya tengas,
+  solo añade las nuevas (dndbeyond.py: descripciones_de, html_a_markdown,
+  _plantillas; fichas.js: mezclarDescripcionesOc).
+  LA PÁGINA, SIN DESPLAZARSE ENTERA (escritorio, desde 1180px de ancho y
+  600 de alto): el nombre arriba a la izquierda, la ficha (foto y
+  características) a la derecha desde arriba del todo y quieta, y el
+  recuadro de las pestañas ocupando el alto que queda, desplazándose por
+  dentro; en «ficha», las subpestañas se quedan quietas y se desplaza lo
+  de debajo. La foto, como mucho un 36% del alto de la pantalla. Más
+  pequeño que eso (o en el móvil), se desplaza la página como siempre.
   LAS ETIQUETAS («D&D 5e, jugando»): cada una es un botón del filtro del
   índice (el de los relatos, scripts/componentes/filtros.js); sin
   ninguna etiqueta en ningún personaje, el filtro no sale.

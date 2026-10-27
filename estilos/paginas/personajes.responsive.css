@@ -1,20 +1,10 @@
 /* MIS PERSONAJES en pantallas estrechas. */
 
-/* Una columna: la ficha (foto, características y PDF) arriba, que es
-   como va en el HTML, y las pestañas debajo. */
+/* Una columna, en el orden del HTML: el nombre, la ficha (foto,
+   características y PDF) y las pestañas; y se desplaza la página. */
 @media (max-width: 860px) {
-    .oc-columnas {
-        flex-direction: column;
-        align-items: stretch;
-    }
-
-    .oc-principal,
     .oc-lateral {
-        flex: none;
         width: 100%;
-    }
-
-    .oc-lateral {
         max-width: 24rem;
         align-self: center;
     }

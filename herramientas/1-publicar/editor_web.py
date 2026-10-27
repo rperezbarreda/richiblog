@@ -1491,12 +1491,21 @@ def colecciones():
                   C("competencias", "Competencias e idiomas", "lineas", vacio="quitar",
                     ayuda="Uno por línea: armas, armaduras, herramientas, idiomas…"),
                   C("rasgos", "Rasgos y dotes", "largo", vacio="quitar", markdown=True,
-                    ayuda="Los de su raza, su clase y sus dotes. Con formato: **Nombre.** Lo que hace."),
+                    ayuda="Los de su raza, su clase y sus dotes, en lista: «- **Nombre** (Hechicero, nivel 3)»"
+                          " (lo de entre paréntesis, de dónde le viene) o «- **Nombre.** Lo que hace.». Así cada"
+                          " uno sale desplegable (con su texto de «Descripciones», si lo tiene)."),
                   C("sentidos", "Sentidos", vacio="quitar", ayuda="«Visión en la oscuridad 18 m». Las pasivas se calculan."),
                   C("defensas", "Defensas", "lineas", vacio="quitar",
                     ayuda="Una por línea: «Resistencia: fuego», «Inmunidad: veneno», «Ventaja contra ser hechizado»."),
                   C("acciones", "Acciones", "lineas", vacio="quitar",
                     ayuda="Una por línea, con su tipo delante: «Acción adicional: Acción astuta», «Reacción: …»."),
+                  C("descripciones", "Descripciones (lo que sale al desplegar)", "largo", grande=True,
+                    vacio="quitar", markdown=True,
+                    ayuda="De cada conjuro, acción, rasgo, ataque u objeto que quieras desplegable, un bloque"
+                          " que empieza con ## y su nombre, igual que en su lista. Debajo, si quieres, «Origen:»"
+                          " (de dónde le viene: «Hechicero, nivel 3», «Dote») y «Datos:» (separados por ·), y"
+                          " luego el texto, con formato. El importador de D&D Beyond las rellena (el texto, en"
+                          " inglés) sin pisar las que ya tengas."),
                   C("trasfondo", "Trasfondo", vacio="quitar", ayuda="«Criminal», «Sabio»…"),
                   C("alineamiento", "Alineamiento", "elegir", libre=True, vacio="quitar",
                     opciones=_opciones(["Legal bueno", "Neutral bueno", "Caótico bueno", "Legal neutral", "Neutral",

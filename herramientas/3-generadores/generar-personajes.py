@@ -584,6 +584,119 @@ def marcas(n, clase=""):
         '<span class="oc-marca%s"></span>' % ((" " + clase) if clase else "")) * n
 
 
+# LAS DESCRIPCIONES: lo que sale al desplegar un conjuro, una acción, un
+# rasgo, un ataque o un objeto. Van todas en el campo «descripciones», un
+# bloque por cosa, y se buscan por el nombre (sin mirar mayúsculas ni
+# tildes; y si no está, sin lo de entre paréntesis del final: «Puntos de
+# hechicería (10 usos)» encuentra «Puntos de hechicería»):
+#     ## Bola de fuego
+#     Origen: Lista de Hechicero
+#     Datos: Nivel 3 · Evocación · 1 acción · 45 m · V, S, M · Instantáneo
+#     El texto, con formato…
+# «Origen» (de dónde le viene: «Hechicero, nivel 3», «Dote»…) y «Datos»
+# (en pastillitas) son opcionales.
+
+def leer_descripciones(texto):
+    salida, actual = {}, None
+    for linea in str(texto or "").split("\n"):
+        if linea.startswith("## "):
+            nombre = linea[3:].strip()
+            actual = {"nombre": nombre, "origen": "", "datos": "", "cuerpo": []}
+            if nombre and llano(nombre) not in salida:
+                salida[llano(nombre)] = actual
+            continue
+        if actual is None:
+            continue
+        m = re.match(r"^\s*(origen|datos)\s*:\s*(.*)$", linea, re.I)
+        if m and not any(x.strip() for x in actual["cuerpo"]):
+            actual[llano(m.group(1))] = m.group(2).strip()
+            continue
+        actual["cuerpo"].append(linea)
+    for d in salida.values():
+        d["cuerpo"] = "\n".join(d["cuerpo"]).strip()
+    return salida
+
+
+def buscar_descripcion(descripciones, nombre):
+    nombre = re.sub(r"\s*[×x]\s*\d+$", "", str(nombre or "").strip())
+    while nombre:
+        d = descripciones.get(llano(nombre))
+        if d:
+            return d
+        sin = re.sub(r"\s*\([^()]*\)\s*$", "", nombre)
+        if sin == nombre:
+            return None
+        nombre = sin
+    return None
+
+
+def chapa_de_origen(origen):
+    """De dónde le viene, en su chapita (y para el lector, tras una coma)."""
+    if not origen:
+        return ""
+    return ('<span class="oc-origen"><span class="visually-hidden">, </span>%s</span>' % e(origen))
+
+
+def desplegable(cabeza, entrada, origen, c, personajes, avisos, cuerpo_extra=""):
+    """Una cosa de la ficha: si tiene descripción (o texto propio), un
+    <details> que se despliega con sus datos y su texto; si no, solo su
+    nombre, con de dónde le viene detrás si se sabe. «cabeza» ya va en
+    HTML (el nombre, su emoji, sus usos…)."""
+    origen = (entrada or {}).get("origen") or origen
+    cuerpo = (entrada or {}).get("cuerpo") or cuerpo_extra
+    datos = (entrada or {}).get("datos") or ""
+    if not (cuerpo or datos):
+        return cabeza + chapa_de_origen(origen)
+    dentro = ""
+    if datos:
+        dentro += '<ul class="oc-desplegable-datos">%s</ul>' % "".join(
+            "<li>%s</li>" % e(x.strip()) for x in datos.split("·") if x.strip())
+    if cuerpo:
+        dentro += '<div class="oc-texto">%s</div>' % markdown(cuerpo, c, personajes, avisos)
+    return ('<details class="oc-desplegable"><summary><span class="oc-desplegable-flecha" aria-hidden="true">▸</span>'
+            '<span class="oc-desplegable-cabeza">%s</span>%s</summary>'
+            '<div class="oc-desplegable-dentro">%s</div></details>' % (cabeza, chapa_de_origen(origen), dentro))
+
+
+def lista_desplegable(cosas, clase, descripciones, c, personajes, avisos, cabeza=None):
+    """Una lista (conjuros, acciones, objetos…) con cada cosa desplegable
+    si tiene descripción."""
+    filas = []
+    for x in cosas:
+        filas.append("<li>%s</li>" % desplegable(cabeza(x) if cabeza else e(x), buscar_descripcion(descripciones, x),
+                                                 "", c, personajes, avisos))
+    return '<ul class="%s">%s</ul>' % (clase, "".join(filas))
+
+
+def rasgos_desplegables(texto, descripciones, c, personajes, avisos):
+    """Los rasgos, si están escritos como lista («- **Nombre** (de dónde
+    viene)» o «- **Nombre.** Lo que hace.»): cada uno desplegable, con su
+    descripción (o con lo que hay escrito detrás del nombre). Si están
+    escritos de otra manera, None (y salen tal cual, con formato)."""
+    lineas = [l for l in str(texto or "").split("\n") if l.strip()]
+    if not lineas or not all(re.match(r"^\s*[-*+]\s+", l) for l in lineas):
+        return None
+    filas = []
+    for linea in lineas:
+        x = re.sub(r"^\s*[-*+]\s+", "", linea).strip()
+        m = re.match(r"^\*\*(.+?)\*\*\s*(.*)$", x)
+        nombre, resto = (m.group(1), m.group(2)) if m else (x, "")
+        nombre = nombre.strip().rstrip(".:").strip()
+        origen = ""
+        mo = re.match(r"^\(([^()]*)\)\s*(.*)$", resto.strip())
+        if mo:
+            origen, resto = mo.group(1).strip(), mo.group(2)
+        elif not m:
+            mo = re.match(r"^(.*?)\s*\(([^()]*)\)$", nombre)
+            if mo:
+                nombre, origen = mo.group(1).strip(), mo.group(2).strip()
+        resto = resto.strip().lstrip(".:—-").strip()
+        filas.append("<li>%s</li>" % desplegable('<span class="oc-desplegable-nombre">%s</span>' % e(nombre),
+                                                 buscar_descripcion(descripciones, nombre), origen,
+                                                 c, personajes, avisos, resto))
+    return '<ul class="oc-lista-maquina oc-hoja-rasgos">%s</ul>' % "".join(filas)
+
+
 def apartado_ficha(p, c, personajes, avisos):
     mods = {k: (modificador_num(numero(p.get(k))) if numero(p.get(k)) is not None else None) for k, _, _ in STATS}
     comp = bonificador_de_competencia(p)
@@ -591,6 +704,10 @@ def apartado_ficha(p, c, personajes, avisos):
     largo_de = dict((a, c3) for a, _, c3 in STATS)
     # Las ventanitas, repartidas en las SUBPESTAÑAS de la ficha.
     grupos = {g: [] for g, _, _ in SUBPESTANAS_DE_FICHA}
+    descripciones = leer_descripciones(p.get("descripciones"))
+
+    def lista_con(cosas, clase="oc-lista-maquina", cabeza=None):
+        return lista_desplegable(cosas, clase, descripciones, c, personajes, avisos, cabeza)
 
     competentes = {}
     for linea in lineas_de(p.get("habilidades")):
@@ -661,9 +778,11 @@ def apartado_ficha(p, c, personajes, avisos):
         filas = []
         for a in ataques:
             nombre, _, resto = a.partition(":")
-            filas.append('<li><span class="oc-hoja-nombre">%s</span>%s</li>'
-                         % (e(nombre.strip()), ('<span class="oc-hoja-detalle">%s</span>' % e(resto.strip()))
-                            if resto.strip() else ""))
+            cabeza = ('<span class="oc-hoja-nombre">%s</span>%s'
+                      % (e(nombre.strip()), (' <span class="oc-hoja-detalle">%s</span>' % e(resto.strip()))
+                         if resto.strip() else ""))
+            filas.append('<li>%s</li>' % desplegable(cabeza, buscar_descripcion(descripciones, nombre), "",
+                                                     c, personajes, avisos))
         grupos["acciones"].append(recuadro("ataques.lst", '<ul class="oc-hoja-filas">%s</ul>' % "".join(filas),
                                            "es-ancha", "🗡️"))
     acciones = lineas_de(p.get("acciones"))
@@ -674,7 +793,7 @@ def apartado_ficha(p, c, personajes, avisos):
             if not que.strip():
                 tipo, que = "Otras", a
             por_tipo.setdefault(tipo.strip(), []).append(que.strip())
-        dentro = "".join('<h5 class="oc-hoja-subtitulo">%s</h5>%s' % (e(tipo), lista_simple(cosas, "oc-lista-maquina"))
+        dentro = "".join('<h5 class="oc-hoja-subtitulo">%s</h5>%s' % (e(tipo), lista_con(cosas))
                          for tipo, cosas in por_tipo.items())
         grupos["acciones"].append(recuadro("acciones.txt", dentro, "es-ancha", "⏱️"))
 
@@ -707,7 +826,10 @@ def apartado_ficha(p, c, personajes, avisos):
             dentro += ('<p class="oc-hoja-espacios">%s%d %s</p>'
                        % (marcas(n), n, "espacio" if n == 1 else "espacios"))
         if por_nivel.get(clave_n):
-            dentro += lista_simple(por_nivel[clave_n], "oc-lista-maquina oc-hoja-conjuros")
+            # A dos columnas solo si no se despliega ninguno (desplegado, un
+            # conjuro a media columna no se lee).
+            con_algo = any(buscar_descripcion(descripciones, x) for x in por_nivel[clave_n])
+            dentro += lista_con(por_nivel[clave_n], "oc-lista-maquina" + ("" if con_algo else " oc-hoja-conjuros"))
         grupos["conjuros"].append(recuadro(titulo, dentro, "", "✨" if clave_n == "0" else "📖"))
 
     # 🎒 INVENTARIO: el dinero en monedas y los objetos con su cantidad.
@@ -727,14 +849,18 @@ def apartado_ficha(p, c, personajes, avisos):
                                              "es-ancha", "💰"))
     objetos = lineas_de(p.get("objetos"))
     if objetos:
-        grupos["inventario"].append(recuadro("inventario.lst", '<ul class="oc-lista-maquina oc-hoja-objetos">%s</ul>'
-                                             % "".join("<li>%s</li>" % objeto_con_cuantos(o) for o in objetos),
-                                             "es-ancha", "🎒"))
+        con_algo = any(buscar_descripcion(descripciones, o) for o in objetos)
+        grupos["inventario"].append(recuadro("inventario.lst", lista_con(
+            objetos, "oc-lista-maquina" + ("" if con_algo else " oc-hoja-objetos"), objeto_con_cuantos),
+            "es-ancha", "🎒"))
 
     # 🧬 RASGOS: los de raza, de clase y las dotes.
-    rasgos = markdown(p.get("rasgos"), c, personajes, avisos)
+    rasgos = rasgos_desplegables(p.get("rasgos"), descripciones, c, personajes, avisos)
+    if rasgos is None:
+        rasgos = markdown(p.get("rasgos"), c, personajes, avisos)
+        rasgos = '<div class="oc-texto">%s</div>' % rasgos if rasgos else ""
     if rasgos:
-        grupos["rasgos"].append(recuadro("rasgos.txt", '<div class="oc-texto">%s</div>' % rasgos, "es-ancha", "🧬"))
+        grupos["rasgos"].append(recuadro("rasgos.txt", rasgos, "es-ancha", "🧬"))
 
     # 🗣️ COMPETENCIAS: los idiomas aparte, y lo demás en pastillas.
     idiomas, otras = [], []
@@ -841,11 +967,11 @@ def pestanas(p, c, datos, personajes, avisos):
         dentro = contenido[ident]
         clase = "oc-texto" if ident in ("historia", "extra") else "oc-lista"
         cajas.append(
-            '                        <div class="oc-apartado" id="oc-%s" data-oc-apartado="%s">\n'
+            '                        <div class="oc-apartado%s" id="oc-%s" data-oc-apartado="%s">\n'
             '                            <h2 class="oc-apartado-titulo">%s</h2>\n'
             '                            <div class="%s">%s</div>\n'
             '                        </div>'
-            % (ident, ident, texto, clase,
+            % (" es-ficha" if ident == "ficha" else "", ident, ident, texto, clase,
                dentro or '<p class="oc-vacio">%s</p>' % vacio[ident]))
     cajas.append('                    </div>')
     return "\n".join(menu + cajas)

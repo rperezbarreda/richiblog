@@ -180,6 +180,379 @@ def con_signo(n):
     return ("+%d" % n) if n >= 0 else ("−%d" % -n)
 
 
+# =========================================
+# LAS DESCRIPCIONES (lo que sale al desplegar)
+# =========================================
+# De cada conjuro, acción, rasgo, dote y objeto mágico o puesto: su texto
+# entero (D&D Beyond lo da en HTML y en inglés: se pasa a Markdown y se
+# deja en inglés, para traducirlo a mano en el editor si se quiere), de
+# dónde le viene («Hechicero, nivel 3», «Raza: Semielfo», «Dote»…) y, en
+# los conjuros, sus datos (nivel, escuela, tiempo, alcance, componentes y
+# duración). Todo va en el campo «descripciones», un bloque por cosa:
+#     ## Escudo
+#     Origen: Lista de Hechicero
+#     Datos: Nivel 1 · Abjuración · 1 reacción · Personal · V, S · 1 asalto
+#     El texto…
+# generar-personajes.py los busca por el nombre y los pone desplegables.
+
+from html.parser import HTMLParser  # noqa: E402
+
+ESCUELAS = {"abjuration": "Abjuración", "conjuration": "Conjuración", "divination": "Adivinación",
+            "enchantment": "Encantamiento", "evocation": "Evocación", "illusion": "Ilusión",
+            "necromancy": "Nigromancia", "transmutation": "Transmutación"}
+TIEMPOS = {1: ("acción", "acciones"), 3: ("acción adicional", "acciones adicionales"),
+           4: ("reacción", "reacciones"), 6: ("minuto", "minutos"), 7: ("hora", "horas"),
+           8: ("especial", "especial")}
+UNIDADES = {"round": ("asalto", "asaltos"), "minute": ("minuto", "minutos"), "hour": ("hora", "horas"),
+            "day": ("día", "días")}
+AREAS = {"cone": "cono", "cube": "cubo", "cylinder": "cilindro", "line": "línea", "sphere": "esfera",
+         "square": "cuadrado", "emanation": "emanación"}
+RAREZAS = {"common": "común", "uncommon": "poco común", "rare": "raro", "very rare": "muy raro",
+           "legendary": "legendario", "artifact": "artefacto"}
+COMPONENTES = {1: "V", 2: "S", 3: "M"}
+TIPOS_DE_OBJETO = {"armor": "Armadura", "weapon": "Arma", "ring": "Anillo", "wondrous item": "Objeto maravilloso",
+                   "wand": "Varita", "potion": "Poción", "scroll": "Pergamino", "rod": "Vara", "staff": "Bastón",
+                   "ammunition": "Munición", "gear": "Equipo", "shield": "Escudo"}
+
+
+def _metros(pies):
+    return ("%g m" % round((pies or 0) * 0.3, 1)).replace(".", ",")
+
+
+def _plural(n, formas):
+    return "%s %s" % (n, formas[0] if n == 1 else formas[1])
+
+
+class _AMarkdown(HTMLParser):
+    """El HTML de las descripciones de D&D Beyond, en Markdown sencillo:
+    párrafos, **negrita**, *cursiva*, listas, y las tablas como listas
+    («- celda · celda»)."""
+
+    def __init__(self):
+        super().__init__(convert_charrefs=True)
+        self.trozos = []
+        self.lista = 0
+        self.primera_celda = False
+        self.celda = 0
+
+    def _salto(self, n=2):
+        texto = "".join(self.trozos).rstrip(" ")
+        # Justo detrás de un «- » (un <p> dentro de un <li>): sin salto.
+        if texto.endswith("-") and texto.rstrip("-").endswith(("\n", "")) and texto[-2:-1] in ("\n", ""):
+            self.trozos = [texto + " "]
+            return
+        self.trozos = [texto + "\n" * max(0, n - (len(texto) - len(texto.rstrip("\n"))))] if texto else []
+
+    def handle_starttag(self, tag, attrs):
+        # Dentro de una celda de tabla, los párrafos no parten la línea.
+        if self.celda and tag in ("p", "div", "br", "ul", "ol", "li"):
+            return
+        if tag in ("p", "div", "h1", "h2", "h3", "h4", "h5", "h6", "table"):
+            self._salto()
+            if tag.startswith("h") and len(tag) == 2:
+                self.trozos.append("**")
+        elif tag in ("ul", "ol"):
+            self.lista += 1
+            self._salto()
+        elif tag in ("li", "tr"):
+            self._salto(1)
+            self.trozos.append("- ")
+            self.primera_celda = tag == "tr"
+        elif tag in ("td", "th"):
+            self.celda += 1
+            if self.primera_celda:
+                self.primera_celda = False
+            else:
+                self.trozos.append(" · ")
+        elif tag == "br":
+            self._salto(1)
+        elif tag in ("strong", "b"):
+            self.trozos.append("**")
+        elif tag in ("em", "i"):
+            self.trozos.append("*")
+
+    def handle_endtag(self, tag):
+        if tag in ("td", "th"):
+            self.celda = max(0, self.celda - 1)
+            return
+        if self.celda and tag in ("p", "div", "ul", "ol", "li"):
+            return
+        if tag in ("p", "div", "table"):
+            self._salto()
+        elif tag.startswith("h") and len(tag) == 2 and tag[1].isdigit():
+            self.trozos.append("**")
+            self._salto()
+        elif tag in ("ul", "ol"):
+            self.lista = max(0, self.lista - 1)
+            self._salto()
+        elif tag in ("strong", "b"):
+            self.trozos.append("**")
+        elif tag in ("em", "i"):
+            self.trozos.append("*")
+
+    def handle_data(self, data):
+        data = re.sub(r"\s+", " ", data.replace("\xa0", " "))
+        # El espacio suelto entre etiquetas, justo detrás de un «- » o de
+        # un salto, sobra.
+        if not data.strip() and "".join(self.trozos[-1:]).endswith((" ", "\n")):
+            return
+        self.trozos.append(data)
+
+    def texto(self):
+        texto = "".join(self.trozos)
+        # La negrita o cursiva vacía, y con espacios por dentro, fuera.
+        texto = texto.replace("****", "")
+        texto = re.sub(r"\*\*(\s*)(.*?)(\s*)\*\*", lambda m: m.group(1) + ("**%s**" % m.group(2) if m.group(2) else "")
+                       + m.group(3), texto)
+        lineas = [re.sub(r" {2,}", " ", l.strip()) for l in texto.split("\n")]
+        # Nada que empiece por «## » (es como se separan los bloques).
+        lineas = [("\\" + l) if l.startswith("#") else l for l in lineas]
+        return re.sub(r"\n{3,}", "\n\n", "\n".join(lineas)).strip()
+
+
+def html_a_markdown(html):
+    p = _AMarkdown()
+    try:
+        p.feed(str(html or ""))
+        p.close()
+    except Exception:  # noqa: BLE001 (un HTML raro: mejor sin formato que nada)
+        return re.sub(r"<[^>]+>", " ", str(html or "")).strip()
+    return p.texto()
+
+
+def _plantillas(texto, valores):
+    """Las cuentas que D&D Beyond deja escritas en las descripciones
+    ({{limiteduse}}, {{proficiency#signed}}, {{(classlevel/2)@rounddown}},
+    {{modifier:cha}}…), hechas con los números del personaje. Lo que no
+    sepa hacer se queda como «?»."""
+    def una(m):
+        expr = m.group(1).strip()
+        formato = ""
+        if "#" in expr:
+            expr, formato = expr.rsplit("#", 1)
+        operaciones = expr.split("@")
+        expr = operaciones[0]
+
+        def valor(mm):
+            nombre = mm.group(0)
+            if nombre in valores:
+                return str(valores[nombre])
+            raise KeyError(nombre)
+        try:
+            expr = re.sub(r"[a-z]+(?::[a-z]+)?", valor, expr)
+            if not re.fullmatch(r"[\d+\-*/(). ]+", expr):
+                return "?"
+            n = eval(expr, {"__builtins__": {}}, {})  # solo números y + - * / ( )
+            for op in operaciones[1:]:
+                if op == "rounddown":
+                    n = int(n // 1)
+                elif op == "roundup":
+                    n = -int(-n // 1)
+                elif op.startswith("min:"):
+                    n = max(n, float(op[4:]))
+                elif op.startswith("max:"):
+                    n = min(n, float(op[4:]))
+            n = int(n) if float(n).is_integer() else round(n, 1)
+        except (KeyError, ValueError, SyntaxError, ZeroDivisionError, TypeError):
+            return "?"
+        return con_signo(n) if formato == "signed" else str(n)
+    return re.sub(r"\{\{(.*?)\}\}", una, str(texto or ""))
+
+
+def _datos_de_conjuro(defin, t):
+    datos = []
+    nivel = int(defin.get("level") or 0)
+    escuela = ESCUELAS.get(str(defin.get("school") or "").lower(), t(defin.get("school")))
+    datos.append(("Truco" if nivel == 0 else "Nivel %d" % nivel) + (" · " + escuela if escuela else ""))
+    act = defin.get("activation") or {}
+    if act.get("activationType") in TIEMPOS:
+        datos.append(_plural(act.get("activationTime") or 1, TIEMPOS[act["activationType"]]))
+    alcance = defin.get("range") or {}
+    origen = str(alcance.get("origin") or "").lower()
+    texto = {"self": "Personal", "touch": "Toque", "sight": "A la vista", "unlimited": "Ilimitado"}.get(origen, "")
+    if origen == "ranged" and alcance.get("rangeValue"):
+        texto = _metros(alcance["rangeValue"])
+    if alcance.get("aoeType") and alcance.get("aoeValue"):
+        area = "%s de %s" % (AREAS.get(str(alcance["aoeType"]).lower(), t(alcance["aoeType"]).lower()),
+                             _metros(alcance["aoeValue"]))
+        texto = ("%s (%s)" % (texto, area)) if texto else area
+    if texto:
+        datos.append(texto)
+    comps = [COMPONENTES[c] for c in defin.get("components") or [] if c in COMPONENTES]
+    if comps:
+        datos.append(", ".join(comps) + (" (%s)" % defin["componentsDescription"].strip().rstrip(".")
+                                         if "M" in comps and str(defin.get("componentsDescription") or "").strip()
+                                         else ""))
+    dur = defin.get("duration") or {}
+    tipo = str(dur.get("durationType") or "").lower()
+    unidad = UNIDADES.get(str(dur.get("durationUnit") or "").lower())
+    cuanto = _plural(dur.get("durationInterval") or 1, unidad) if unidad else ""
+    if tipo == "instantaneous":
+        datos.append("Instantáneo")
+    elif tipo == "concentration":
+        datos.append("Concentración, hasta %s" % cuanto if cuanto else "Concentración")
+    elif tipo == "time" and cuanto:
+        datos.append(cuanto)
+    elif "dispel" in tipo:
+        datos.append("Hasta que se disipe")
+    elif tipo == "special":
+        datos.append("Especial")
+    if defin.get("ritual"):
+        datos.append("ritual")
+    return " · ".join(datos)
+
+
+def _escala(defin, nivel_clase):
+    """El valor de la tabla de su clase a su nivel (el dado de Ataque
+    furtivo, de Artes marciales…), para {{scalevalue}}."""
+    mejor = None
+    for e in defin.get("levelScales") or []:
+        if int(e.get("level") or 0) <= nivel_clase and (not mejor or e["level"] > mejor["level"]):
+            mejor = e
+    if not mejor:
+        return None
+    dado = mejor.get("dice") or {}
+    return dado.get("diceString") or mejor.get("fixedValue") or mejor.get("description")
+
+
+def descripciones_de(d, t, mods, comp, nivel):
+    """Las descripciones (para el campo «descripciones») y, aparte, de
+    dónde le viene cada rasgo (para ponerlo detrás en «rasgos»)."""
+    clases = [c for c in d.get("classes") or [] if isinstance(c, dict)]
+    base = {"characterlevel": nivel, "proficiency": comp}
+    for i, (clave, _) in CARACTERISTICAS.items():
+        base["modifier:%s" % clave] = mods[i]
+        base["savedc:%s" % clave] = 8 + comp + mods[i]
+        base["spellattack:%s" % clave] = comp + mods[i]
+
+    # De dónde viene cada cosa, por su id en D&D Beyond.
+    rasgo_de = {}     # id de rasgo de clase/raza/dote -> (nombre, origen, nivel de clase)
+    raza = t((d.get("race") or {}).get("fullName") or (d.get("race") or {}).get("baseName") or "")
+    for r in (d.get("race") or {}).get("racialTraits") or []:
+        defin = (r or {}).get("definition") or {}
+        if defin.get("id"):
+            rasgo_de[defin["id"]] = (t(defin.get("name")), "Raza: %s" % raza if raza else "De su raza", nivel)
+    for c in clases:
+        clase = t((c.get("definition") or {}).get("name"))
+        sub_id = (c.get("subclassDefinition") or {}).get("id")
+        sub = t((c.get("subclassDefinition") or {}).get("name")) if sub_id else ""
+        for f in c.get("classFeatures") or []:
+            defin = (f or {}).get("definition") or {}
+            de = sub if sub_id and defin.get("classId") == sub_id else clase
+            rasgo_de[defin.get("id")] = (t(defin.get("name")), "%s, nivel %s" % (de, defin.get("requiredLevel") or 1),
+                                          int(c.get("level") or 0))
+    for f in d.get("feats") or []:
+        defin = (f or {}).get("definition") or {}
+        if defin.get("id"):
+            rasgo_de[defin["id"]] = (t(defin.get("name")), "Dote", nivel)
+    opcion_de = {}    # id de una opción (Metamagia: …) -> id del rasgo que la da
+    for lista in (d.get("options") or {}).values():
+        for o in lista or []:
+            defin = (o or {}).get("definition") or {}
+            if defin.get("id") and o.get("componentId"):
+                opcion_de[defin["id"]] = o["componentId"]
+    objeto_de = {((i or {}).get("definition") or {}).get("id"): t(((i or {}).get("definition") or {}).get("name"))
+                 for i in d.get("inventory") or []}
+
+    def por(clave_lista, componente):
+        """«Por Fuente de magia (Hechicero, nivel 2)», «Objeto: …»…"""
+        if clave_lista == "item":
+            return "Objeto: %s" % objeto_de[componente] if objeto_de.get(componente) else "De un objeto"
+        if componente in opcion_de and opcion_de[componente] in rasgo_de:
+            componente = opcion_de[componente]
+        if componente in rasgo_de:
+            nombre, origen, _ = rasgo_de[componente]
+            return "Por %s (%s)" % (nombre, origen)
+        return {"race": "De su raza", "feat": "De una dote", "class": "De su clase",
+                "background": "De su trasfondo"}.get(clave_lista, "")
+
+    bloques, vistos = [], set()
+
+    def anadir(nombre, origen, datos, html, valores=None):
+        nombre = str(nombre or "").strip()
+        texto = html_a_markdown(_plantillas(html, dict(base, **(valores or {}))))
+        if not nombre or nombre in vistos or not (texto or origen or datos):
+            return
+        vistos.add(nombre)
+        partes = ["## " + nombre]
+        if origen:
+            partes.append("Origen: " + origen)
+        if datos:
+            partes.append("Datos: " + datos)
+        if texto:
+            partes.append(texto)
+        bloques.append("\n".join(partes))
+
+    # LOS CONJUROS: los de la lista de su clase y los que le dan sus
+    # rasgos, su raza, sus dotes o sus objetos.
+    nombre_de_clase = {c.get("id"): t((c.get("definition") or {}).get("name")) for c in clases}
+    for cs in d.get("classSpells") or []:
+        for s in cs.get("spells") or []:
+            defin = (s or {}).get("definition") or {}
+            origen = "Lista de %s" % nombre_de_clase.get(cs.get("characterClassId"), "su clase")
+            if s.get("alwaysPrepared"):
+                origen += " (siempre preparado)"
+            anadir(t(defin.get("name")), origen, _datos_de_conjuro(defin, t), defin.get("description"))
+    for clave_lista, lista in (d.get("spells") or {}).items():
+        for s in lista or []:
+            defin = (s or {}).get("definition") or {}
+            anadir(t(defin.get("name")), por(clave_lista, s.get("componentId")), _datos_de_conjuro(defin, t),
+                   defin.get("description"))
+
+    # LAS ACCIONES (con sus usos en las cuentas).
+    for clave_lista, lista in (d.get("actions") or {}).items():
+        for a in lista or []:
+            usos = (a.get("limitedUse") or {}).get("maxUses")
+            componente = a.get("componentId")
+            nivel_c = rasgo_de.get(opcion_de.get(componente, componente), (None, None, nivel))[2]
+            anadir(t(a.get("name")), por(clave_lista, componente), "",
+                   a.get("description") or a.get("snippet"),
+                   {"limiteduse": usos if usos else "?", "classlevel": nivel_c})
+
+    # LOS RASGOS de raza y de clase, y las dotes.
+    for r in (d.get("race") or {}).get("racialTraits") or []:
+        defin = (r or {}).get("definition") or {}
+        if str(defin.get("name") or "").lower() not in RASGOS_QUE_SOBRAN:
+            anadir(t(defin.get("name")), rasgo_de.get(defin.get("id"), ("", ""))[1], "", defin.get("description"))
+    for c in clases:
+        for f in c.get("classFeatures") or []:
+            defin = (f or {}).get("definition") or {}
+            if int(defin.get("requiredLevel") or 1) > int(c.get("level") or 0) \
+                    or str(defin.get("name") or "").lower() in RASGOS_QUE_SOBRAN or defin.get("name") == "TBD":
+                continue
+            valores = {"classlevel": int(c.get("level") or 0),
+                       "limiteduse": (defin.get("limitedUse") or [{}])[0].get("uses", "?")
+                       if isinstance(defin.get("limitedUse"), list) and defin.get("limitedUse") else "?"}
+            escala = _escala(defin, int(c.get("level") or 0))
+            if escala is not None:
+                valores["scalevalue"] = escala
+            anadir(t(defin.get("name")), rasgo_de[defin.get("id")][1], "", defin.get("description"), valores)
+    for f in d.get("feats") or []:
+        defin = (f or {}).get("definition") or {}
+        anadir(t(defin.get("name")), "Dote", "", defin.get("description"))
+
+    # LOS OBJETOS: los mágicos y lo que lleva puesto (armas, armadura).
+    for i in d.get("inventory") or []:
+        defin = (i or {}).get("definition") or {}
+        if not (defin.get("magic") or (i.get("equipped") and (defin.get("armorClass") or defin.get("damage")))):
+            continue
+        datos = []
+        tipo = str(defin.get("filterType") or defin.get("type") or "")
+        if tipo:
+            datos.append(TIPOS_DE_OBJETO.get(tipo.lower()) or t(tipo))
+        rareza = RAREZAS.get(str(defin.get("rarity") or "").lower())
+        if rareza and defin.get("magic"):
+            datos.append(rareza)
+        if defin.get("canAttune"):
+            datos.append("sintonizado" if i.get("isAttuned") else "requiere sintonización")
+        if i.get("equipped"):
+            datos.append("lo lleva puesto")
+        anadir(t(defin.get("name")), "", " · ".join(datos), defin.get("description"))
+
+    origen_de_rasgo = {nombre: origen for nombre, origen, _ in rasgo_de.values()}
+    return "\n\n".join(bloques), origen_de_rasgo
+
+
 def a_ficha(d, traducir=None):
     """El personaje de D&D Beyond como las casillas de «Mis personajes».
     Devuelve (campos, avisos)."""
@@ -337,28 +710,31 @@ def a_ficha(d, traducir=None):
     dinero = ["%d %s" % (monedas[k], t(k)) for k in ("pp", "gp", "ep", "sp", "cp") if monedas.get(k)]
     campos["dinero"] = ", ".join(dinero)
 
-    # LOS RASGOS Y LAS DOTES, por su nombre (las descripciones de D&D
-    # Beyond vienen en inglés y con HTML: se escriben a mano si se quieren).
+    # LOS RASGOS Y LAS DOTES, por su nombre.
+    # Cada uno con de dónde le viene detrás: «(Hechicero, nivel 3)»,
+    # «(Raza: Semielfo)», «(Dote)». Su texto, en «descripciones».
+    campos["descripciones"], origen_de_rasgo = descripciones_de(d, t, mods, comp, nivel)
     rasgos = []
     for r in ((d.get("race") or {}).get("racialTraits") or []):
         nombre = ((r or {}).get("definition") or {}).get("name")
         if nombre and nombre.lower() not in RASGOS_QUE_SOBRAN:
-            rasgos.append(("de raza", t(nombre)))
+            rasgos.append(t(nombre))
     for c in clases:
         for f in c.get("classFeatures") or []:
             defin = (f or {}).get("definition") or {}
             if defin.get("name") and int(defin.get("requiredLevel") or 1) <= int(c.get("level") or 0) \
-                    and defin["name"].lower() not in RASGOS_QUE_SOBRAN:
-                rasgos.append(("de clase", t(defin["name"])))
+                    and defin["name"].lower() not in RASGOS_QUE_SOBRAN and defin["name"] != "TBD":
+                rasgos.append(t(defin["name"]))
     for f in d.get("feats") or []:
         nombre = ((f or {}).get("definition") or {}).get("name")
         if nombre:
-            rasgos.append(("dote", t(nombre)))
+            rasgos.append(t(nombre))
     vistos_r, lineas = set(), []
-    for de, nombre in rasgos:
+    for nombre in rasgos:
         if nombre not in vistos_r:
             vistos_r.add(nombre)
-            lineas.append("- **%s** (%s)" % (nombre, de))
+            origen = origen_de_rasgo.get(nombre)
+            lineas.append("- **%s**%s" % (nombre, (" (%s)" % origen) if origen else ""))
     campos["rasgos"] = "\n".join(lineas)
 
     # EL TRASFONDO, la apariencia y la personalidad (lo de la pestaña

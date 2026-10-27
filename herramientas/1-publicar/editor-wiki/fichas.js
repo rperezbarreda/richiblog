@@ -789,6 +789,12 @@ const ACCIONES_DE_FICHA = {
                     .includes(clave) && String(f[clave] || "").trim()) {
                     return;
                 }
+                // Las descripciones se juntan: las que ya tenga (quizá
+                // traducidas a mano) se quedan, y se añaden las nuevas.
+                if (clave === "descripciones") {
+                    f[clave] = mezclarDescripcionesOc(f[clave], valor);
+                    return;
+                }
                 f[clave] = Array.isArray(valor) ? valor.join("\n") : valor;
             });
             Object.entries(hecho.imagenes || {}).forEach(([clave, ruta]) => {
@@ -1234,3 +1240,15 @@ function empezarFichasWeb() {
 }
 
 empezarFichasWeb();
+
+// Las descripciones de un personaje (bloques que empiezan por «## Nombre»)
+// juntando las que ya tiene con las que trae el importador: si ya tiene
+// una con ese nombre se queda la suya; las que no tiene, se añaden al
+// final.
+function mezclarDescripcionesOc(viejo, nuevo) {
+    const bloques = (texto) => String(texto || "").split(/\n(?=## )/).map((b) => b.trim()).filter(Boolean);
+    const nombreDe = (b) => b.startsWith("## ") ? b.split("\n")[0].slice(3).trim().toLowerCase() : "";
+    const tiene = new Set(bloques(viejo).map(nombreDe));
+    const nuevos = bloques(nuevo).filter((b) => !tiene.has(nombreDe(b)));
+    return [String(viejo || "").trim(), ...nuevos].filter(Boolean).join("\n\n");
+}
