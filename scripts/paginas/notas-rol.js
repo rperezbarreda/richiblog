@@ -1843,6 +1843,9 @@ function pintarSesiones(lista, campana, publicadas) {
     }
     lista.innerHTML = sesiones.map(filaDeSesion).join("");
 
+    // LA HISTORIA HASTA AHORA: su botón, si hay alguna publicada.
+    prepararLaCronica(campana, sesiones.filter((s) => s.hecha));
+
     // EL RESUMEN de cada una, en una ventana (el botón de al lado).
     lista.querySelectorAll("[data-sesion-resumen]").forEach((boton) => {
         const sesion = sesiones.find((s) => String(Number(s.numero)) === boton.getAttribute("data-sesion-resumen"));
@@ -1868,6 +1871,16 @@ function llenarElResumen(cuerpo, sesion) {
     titulo.className = "campana-resumen-titulo";
     titulo.textContent = "Sesión " + Number(sesion.numero) + (corto ? " — " + corto : "");
     cuerpo.appendChild(titulo);
+    cuerpo.appendChild(listaDelResumen(sesion));
+    const leer = document.createElement("a");
+    leer.className = "campana-resumen-leer";
+    leer.href = rutaSeguraNotas(sesion.url);
+    leer.textContent = "leer las notas enteras →";
+    cuerpo.appendChild(leer);
+}
+
+// Las líneas de un resumen: «Escena: lo que pasó», con la escena en negrita.
+function listaDelResumen(sesion) {
     const lista = document.createElement("ul");
     lista.className = "campana-resumen-lista";
     (sesion.resumen || "").toString().split(/\n+/).map((l) => l.trim()).filter(Boolean).forEach((linea) => {
@@ -1883,12 +1896,118 @@ function llenarElResumen(cuerpo, sesion) {
         }
         lista.appendChild(li);
     });
-    cuerpo.appendChild(lista);
-    const leer = document.createElement("a");
-    leer.className = "campana-resumen-leer";
-    leer.href = rutaSeguraNotas(sesion.url);
-    leer.textContent = "leer las notas enteras →";
-    cuerpo.appendChild(leer);
+    return lista;
+}
+
+// =========================================
+// LA HISTORIA HASTA AHORA (la crónica de la campaña)
+// =========================================
+// Toda la campaña de un tirón, de la primera sesión a la última: de cada
+// una, su resumen y lo que pasó en ella según el resto del JSON (las
+// misiones que se abrieron y las que se cerraron, lo que se consiguió del
+// botín y el dinero que entró o salió), con su enlace a las notas. Sale
+// de lo mismo que ya está apuntado: no hay que escribir nada aparte.
+// Solo las sesiones publicadas. Con su botón en el índice («la historia
+// hasta ahora →»), que no sale si no hay ninguna.
+
+function prepararLaCronica(campana, publicadas) {
+    const boton = document.querySelector("[data-campana-cronica-abrir]");
+    if (!boton) {
+        return;
+    }
+    boton.removeAttribute("data-por-ver");
+    boton.hidden = !publicadas.length;
+    if (!publicadas.length || boton.dataset.listo) {
+        return;
+    }
+    boton.dataset.listo = "1";
+    const enOrden = publicadas.slice().sort((a, b) => (Number(a.numero) || 0) - (Number(b.numero) || 0));
+    boton.addEventListener("click", () =>
+        window.ventanaModal.abrir({
+            titulo: "cronica.txt",
+            clase: "modal-cronica",
+            devolverA: boton,
+            llenar: (cuerpo) => llenarLaCronica(cuerpo, campana, enOrden),
+        })
+    );
+}
+
+function llenarLaCronica(cuerpo, campana, sesiones) {
+    const misiones = misionesDe(campana);
+    const botin = cosasDelBotin(campana);
+    const dinero = movimientosDeDinero(campana);
+    const de = (x, n) => Number(x) === n;
+    const intro = document.createElement("p");
+    intro.className = "cronica-intro";
+    intro.textContent = (sesiones.length === 1 ? "1 sesión" : sesiones.length + " sesiones")
+        + ", de la primera a la última.";
+    cuerpo.appendChild(intro);
+    sesiones.forEach((sesion) => {
+        const n = Number(sesion.numero) || 0;
+        const corto = (sesion.titulo || "").toString().replace(/^\s*sesi[oó]n\s*\d+\s*(?:[·.:\-–—]\s*)?/i, "").trim();
+        const caja = document.createElement("article");
+        caja.className = "cronica-sesion";
+        const titulo = document.createElement("h3");
+        titulo.className = "campana-resumen-titulo";
+        titulo.textContent = "Sesión " + n + (corto ? " — " + corto : "");
+        caja.appendChild(titulo);
+        if (sesion.fecha) {
+            const fecha = document.createElement("p");
+            fecha.className = "cronica-fecha";
+            fecha.textContent = sesion.fecha;
+            caja.appendChild(fecha);
+        }
+        if ((sesion.resumen || "").toString().trim()) {
+            caja.appendChild(listaDelResumen(sesion));
+        }
+        // LO QUE PASÓ EN ELLA, de las demás listas de la campaña.
+        const hechos = [];
+        misiones.forEach((apartado) => apartado.cosas.forEach((c) => {
+            if (de(c.de, n)) {
+                hechos.push(["📜", "Nueva misión: " + c.que.toString().trim()
+                    + (apartado.nombre ? " (" + apartado.nombre + ")" : "")]);
+            }
+            if (c.estado !== "pendiente" && de(c.hasta, n)) {
+                hechos.push([c.estado === "completada" ? "✅" : "❌",
+                    (c.estado === "completada" ? "Misión cumplida: " : "Misión fallida: ") + c.que.toString().trim()]);
+            }
+        }));
+        botin.filter((c) => de(c.de, n)).forEach((c) => {
+            const cuantas = c.inicial !== undefined && c.inicial !== "" ? c.inicial : c.cantidad;
+            hechos.push(["🎒", "Conseguimos: " + c.que.toString().trim()
+                + (cuantas !== undefined && cuantas !== "" && Number(cuantas) !== 1 ? " ×" + cuantas : "")]);
+        });
+        dinero.filter((m) => de(m.de, n)).forEach((m) => {
+            const moneda = (m.moneda || "po").toString().toLowerCase();
+            hechos.push(["💰", (m.sentido === "sale" ? "−" : "+") + numeroDeDinero(Number(m.cantidad)) + " " + moneda
+                + ": " + m.que.toString().trim()]);
+        });
+        if (hechos.length) {
+            const sub = document.createElement("h4");
+            sub.className = "cronica-subtitulo";
+            sub.textContent = "Lo que pasó";
+            caja.appendChild(sub);
+            const lista = document.createElement("ul");
+            lista.className = "cronica-hechos";
+            hechos.forEach(([icono, texto]) => {
+                const li = document.createElement("li");
+                const marca = document.createElement("span");
+                marca.className = "cronica-icono";
+                marca.setAttribute("aria-hidden", "true");
+                marca.textContent = icono;
+                li.appendChild(marca);
+                li.appendChild(document.createTextNode(texto));
+                lista.appendChild(li);
+            });
+            caja.appendChild(lista);
+        }
+        const leer = document.createElement("a");
+        leer.className = "campana-resumen-leer";
+        leer.href = rutaSeguraNotas(sesion.url);
+        leer.textContent = "leer las notas de la sesión " + n + " →";
+        caja.appendChild(leer);
+        cuerpo.appendChild(caja);
+    });
 }
 
 function filaDeSesion(sesion) {

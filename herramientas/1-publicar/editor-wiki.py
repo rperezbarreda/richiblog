@@ -1279,7 +1279,7 @@ SCRIPTS_DE_PASAR = ("3-generadores/generar-mundo.py", "3-generadores/actualizar-
 # cuánto tardó), para que la barra de progreso sepa cuánto le queda.
 ULTIMA_PASADA = Path(tempfile.gettempdir()) / "editor-wiki-ultima-pasada.json"
 # Cómo va lo que se está pasando ahora; lo lee /api/pasar/estado.
-PASADA = {"activa": False, "fase": "", "porcentaje": 0, "terminado": True, "resultado": None}
+PASADA = {"activa": False, "fase": "", "porcentaje": 0, "terminado": True, "resultado": None, "registro": []}
 
 
 def _ultima_pasada():
@@ -1320,6 +1320,7 @@ def pasar_a_la_web(al_avanzar=None):
             segundos = tiempos[script] or (30.0 if n == 0 else 10.0)
             if al_avanzar:
                 al_avanzar(fase, round(hecho_antes * 100))
+            editor_web.apuntar(PASADA["registro"], "▶ %s  (%s)" % (fase, nombre))
             empieza = time.monotonic()
             proceso = subprocess.Popen([sys.executable, str(HERRAMIENTAS / script)], cwd=RAIZ,
                                        stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True,
@@ -1341,11 +1342,14 @@ def pasar_a_la_web(al_avanzar=None):
             try:
                 for linea in proceso.stdout:
                     lineas.append(linea.rstrip("\n"))
+                    editor_web.apuntar(PASADA["registro"], "  " + linea.rstrip("\n"))
                 proceso.wait()
             finally:
                 reloj.cancel()
                 contador.join(timeout=1)
             apuntado[script] = {"lineas": len(lineas), "segundos": round(time.monotonic() - empieza, 1)}
+            editor_web.apuntar(PASADA["registro"], ("✗ %s ha fallado" if proceso.returncode else "✓ %s, hecho") % fase
+                               + " (%s s)" % apuntado[script]["segundos"])
             hecho_antes += pesos[n]
             utiles = [l for l in lineas if l.strip()]
             salida.append(nombre + ":\n" + "\n".join(utiles[-12:]))
@@ -1367,7 +1371,8 @@ def empezar_a_pasar(peticion):
         return {"empezado": True, "ya": True}
     nombre = str(peticion.get("nombre") or "")
     mapa = ruta_de_mapa(peticion.get("mapa"))
-    PASADA.update({"activa": True, "fase": "Empezando", "porcentaje": 0, "terminado": False, "resultado": None})
+    PASADA.update({"activa": True, "fase": "Empezando", "porcentaje": 0, "terminado": False, "resultado": None,
+                   "registro": []})
 
     def avanzar(fase, porcentaje):
         PASADA["fase"], PASADA["porcentaje"] = fase, porcentaje
@@ -1463,7 +1468,7 @@ class Editor(SimpleHTTPRequestHandler):
                                        "parecidas": parecidas}, 404)
                 return self._json(dict(leer_pagina(archivo), mapas=mapas_de(archivo.stem)))
             if url.path == "/api/pasar/estado":
-                return self._json({k: PASADA[k] for k in ("activa", "fase", "porcentaje", "terminado", "resultado")})
+                return self._json(editor_web.estado_con_registro(PASADA, (pregunta.get("desde") or [""])[0]))
             if url.path == "/api/imagen-url":
                 nombre = (pregunta.get("nombre") or [""])[0]
                 return self._json({"url": url_de_imagen(nombre)})

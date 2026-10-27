@@ -226,6 +226,40 @@
       DEBAJO, los árboles y las listas, cada uno con su buscador: lo que
       hay en Escribir, las notas de las partidas en Rol y las páginas de
       la wiki. Buscando, las carpetas se abren solas.
+    · LA VENTANA DEL PROCESO (desde el 27-10-2026): cuando guardar o un
+      botón pone a trabajar a las herramientas (pasar a la web, generar,
+      repasar), sale una ventana flotante, «proceso.log», abajo a la
+      derecha, con la fase, la barra y TODO lo que van diciendo, línea a
+      línea según lo dicen (▶ al empezar cada herramienta, ✓ o ✗ al
+      acabar, con lo que ha tardado). Se queda al terminar, con cómo ha
+      ido, hasta que la cierras; se puede plegar, copiar lo dicho y
+      arrastrar por su barra (se acuerda de dónde la dejaste). El lector
+      anuncia solo los cambios de fase; las líneas están en su recuadro,
+      que se recorre con el teclado. (El servidor apunta las líneas en
+      «registro» de la tarea y el editor las pide por trozos con
+      ?desde=; editor_web.apuntar y estado_con_registro.)
+    · EL AVISO SONORO: el botón 🔕/🔔 de arriba a la derecha. Encendido,
+      al acabar algo largo suenan dos notas que suben si ha ido bien y
+      dos que bajan si algo ha fallado (sin archivos de sonido: el
+      oscilador del navegador). Apagado de serie; se recuerda.
+    · IMPORTAR DE D&D BEYOND (en Rol → Mis personajes, el botón de cada
+      personaje): pegas el enlace de su ficha (o el número, o el JSON
+      entero si no se puede bajar) y rellena su ficha EN ESPAÑOL: raza,
+      clase, nivel, características (con lo que suman raza, trasfondo,
+      dotes y objetos puestos), PG, CA (armadura, escudo y objetos;
+      «Defensa sin armadura» no la cuenta), velocidad en metros, dados de
+      golpe, salvaciones y habilidades (con pericia), idiomas y
+      competencias, aptitud mágica, espacios de conjuro, conjuros por
+      nivel, ataques de las armas puestas, objetos, dinero, trasfondo,
+      alineamiento, rasgos y dotes. Y si lo marcas, su retrato de allí
+      como imagen de perfil y token. No guarda: repásalo y guarda. La
+      ficha tiene que ser pública en D&D Beyond. Lo hace
+      1-publicar/dndbeyond.py (se puede probar suelto: python
+      herramientas/1-publicar/dndbeyond.py ficha.json); los nombres en
+      español salen de herramientas/dnd_es.py, y lo que no esté ahí se
+      queda en inglés y se dice cuál es: apúntalo en
+      herramientas/dnd-es-propias.json ({"Spellweaver": "Tejedor de
+      conjuros"}) y la próxima vez saldrá traducido.
     · PUBLICAR EN NEOCITIES (su propio apartado): 1, repasar el sitio y
       volver a generar; 2, ver qué se subiría (el ensayo); 3, subirlo; y
       aparte, subir borrando lo que ya no está aquí y cambiar la clave.
@@ -1192,6 +1226,14 @@
       si queda algo sin repartir) y la tabla lo pone bajo el concepto. Se
       lleva en Rol → «El dinero de una campaña». Tiene SU PROPIO BOTÓN en
       el índice de la campaña («el dinero →», sale si hay algo apuntado),
+      LA HISTORIA HASTA AHORA (desde el 27-10-2026): el botón «la
+      historia hasta ahora →» del índice de la campaña abre la crónica
+      entera, de la primera sesión publicada a la última: de cada una, su
+      resumen y «lo que pasó» según el resto del JSON (misiones nuevas,
+      cumplidas y fallidas; lo conseguido del botín; el dinero que entró
+      o salió), con su enlace a las notas. No hay que escribir nada
+      aparte: sale de lo que ya está apuntado (notas-rol.js,
+      llenarLaCronica).
       y en la ficha de cada uno de la mesa sale «Su dinero»: lo que le
       ha tocado en los repartos, sumado, y de dónde sale cada parte,
       en dos columnas: a la izquierda, en su recuadro, los botones

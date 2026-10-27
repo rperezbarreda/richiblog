@@ -722,6 +722,82 @@ function personajeDeFichaWeb(f) {
 
 // LO QUE HACEN LOS BOTONES DE LAS FICHAS (casillas de tipo «accion»).
 const ACCIONES_DE_FICHA = {
+    // IMPORTAR DE D&D BEYOND: la primera vez que se pulsa, sale debajo un
+    // recuadro para pegar el enlace (o el número, o el JSON) y elegir si
+    // traer también su retrato; «Importar» rellena las casillas (sin
+    // guardar) y repinta la ficha. Lo que no se ha podido traducir se dice.
+    "personaje-dndbeyond": (f, boton) => {
+        const id = boton.id + "-panel";
+        const ya = document.getElementById(id);
+        if (ya) {
+            ya.hidden = !ya.hidden;
+            boton.setAttribute("aria-expanded", ya.hidden ? "false" : "true");
+            if (!ya.hidden) {
+                ya.querySelector("textarea").focus();
+            }
+            return;
+        }
+        const panel = crearEditor("div", "importar-ddb");
+        panel.id = id;
+        boton.setAttribute("aria-controls", id);
+        boton.setAttribute("aria-expanded", "true");
+        const campo = crearEditor("div", "campo");
+        const l = crearEditor("label", "", "Enlace de su ficha en D&D Beyond (o su número, o el JSON entero)");
+        l.htmlFor = id + "-texto";
+        const texto = document.createElement("textarea");
+        texto.id = id + "-texto";
+        texto.rows = 2;
+        texto.spellcheck = false;
+        texto.placeholder = "https://www.dndbeyond.com/characters/12345678";
+        campo.appendChild(l);
+        campo.appendChild(texto);
+        campo.appendChild(crearEditor("p", "ayuda", "La ficha tiene que ser pública en D&D Beyond (Manage → Character"
+            + " Settings → Character Privacy: Public). Se rellena todo lo de la pestaña «ficha», la raza, la clase,"
+            + " el nivel y las características, en español. No se guarda hasta que guardes."));
+        panel.appendChild(campo);
+        const casillas = [["retrato", "Traer también su retrato como imagen de perfil"],
+            ["token", "Y como token de la galería"]].map(([clave, texto2]) => {
+            const lab = crearEditor("label", "campo-si-no");
+            const c = document.createElement("input");
+            c.type = "checkbox";
+            c.value = clave;
+            c.checked = !f[clave];
+            lab.appendChild(c);
+            lab.appendChild(document.createTextNode(" " + texto2 + (f[clave] ? " (ya tiene una)" : "")));
+            panel.appendChild(lab);
+            return c;
+        });
+        const ir = crearEditor("button", "principal", "Importar");
+        ir.type = "button";
+        panel.appendChild(ir);
+        boton.after(panel);
+        texto.focus();
+        ir.addEventListener("click", async () => {
+            ir.disabled = true;
+            avisarEditor("Trayendo el personaje de D&D Beyond…");
+            const hecho = await pedirEditor("/api/web/personaje/dndbeyond", { texto: texto.value,
+                personaje: personajeDeFichaWeb(f), imagenes: casillas.filter((c) => c.checked).map((c) => c.value) });
+            ir.disabled = false;
+            if (!hecho || hecho.error) {
+                avisarEditor((hecho && hecho.error) || "No he podido traerlo.", true);
+                return;
+            }
+            Object.entries(hecho.campos || {}).forEach(([clave, valor]) => {
+                // El nombre que ya tenga se queda (el de aquí manda).
+                if ((clave === "nombre" || clave === "nombre_completo") && String(f[clave] || "").trim()) {
+                    return;
+                }
+                f[clave] = Array.isArray(valor) ? valor.join("\n") : valor;
+            });
+            Object.entries(hecho.imagenes || {}).forEach(([clave, ruta]) => {
+                f[clave] = ruta;
+            });
+            estadoFichas.cambiado = true;
+            pintarPartesWeb(boton.id);
+            avisarEditor("Importado de D&D Beyond: repasa la ficha y guarda."
+                + (hecho.avisos && hecho.avisos.length ? " " + hecho.avisos.join(" ") : ""), false);
+        });
+    },
     // Uno de mis personajes, tal y como está escrito ahora (sin guardar),
     // en otra pestaña. La pestaña se abre ya, al pulsar (si se abriera al
     // contestar el servidor, el navegador la tomaría por una ventana

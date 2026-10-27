@@ -48,9 +48,11 @@ async function seguirTareaWeb(respuesta, texto) {
     aviso.appendChild(caja);
     const empieza = Date.now();
     let estado = {};
+    empezarProcesoEditor(texto || "Pasando a la web…");
     for (;;) {
         await new Promise((r) => setTimeout(r, 400));
-        estado = await pedirEditor("/api/web/tarea");
+        estado = await pedirEditor("/api/web/tarea?desde=" + PROCESO_EDITOR.desde);
+        ponerProcesoEditor(estado, Math.round((Date.now() - empieza) / 1000));
         if (estado.error && !("terminado" in estado)) {
             break;
         }
@@ -63,6 +65,7 @@ async function seguirTareaWeb(respuesta, texto) {
         }
     }
     aviso.removeAttribute("aria-busy");
+    acabarProcesoEditor(estado.resultado || estado);
     return estado.resultado || estado;
 }
 

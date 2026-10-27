@@ -21,10 +21,10 @@ const AJUSTES_DE_VISTA_EDITOR = "editor-web-vista";
 
 function leerVistaEditor() {
     try {
-        return Object.assign({ letra: 1, contraste: false },
+        return Object.assign({ letra: 1, contraste: false, sonido: false },
             JSON.parse(localStorage.getItem(AJUSTES_DE_VISTA_EDITOR) || "{}"));
     } catch (e) {
-        return { letra: 1, contraste: false };
+        return { letra: 1, contraste: false, sonido: false };
     }
 }
 
@@ -37,7 +37,8 @@ function ponerVistaEditor(vista) {
         document.documentElement.removeAttribute("data-contraste");
     }
     try {
-        localStorage.setItem(AJUSTES_DE_VISTA_EDITOR, JSON.stringify({ letra: paso, contraste: !!vista.contraste }));
+        localStorage.setItem(AJUSTES_DE_VISTA_EDITOR, JSON.stringify({ letra: paso, contraste: !!vista.contraste,
+            sonido: !!vista.sonido }));
     } catch (e) {
         // Sin almacenamiento: vale para esta vez.
     }
@@ -61,6 +62,228 @@ function ajustesDeVistaEditor() {
         ponerVistaEditor(vista);
         contraste.setAttribute("aria-pressed", vista.contraste ? "true" : "false");
     });
+    // EL AVISO SONORO: al acabar algo largo (guardar y pasar a la web,
+    // generar, repasar), dos notas que suben si ha ido bien y dos que bajan
+    // si algo ha fallado. Apagado de serie; al encenderlo suena una vez,
+    // para saber cómo es.
+    const sonido = $("[data-boton-sonido]");
+    const pintarSonido = (si) => {
+        sonido.setAttribute("aria-pressed", si ? "true" : "false");
+        sonido.querySelector("[data-sonido-icono]").textContent = si ? "🔔" : "🔕";
+    };
+    pintarSonido(leerVistaEditor().sonido);
+    sonido.addEventListener("click", () => {
+        const vista = leerVistaEditor();
+        vista.sonido = !vista.sonido;
+        ponerVistaEditor(vista);
+        pintarSonido(vista.sonido);
+        avisarEditor(vista.sonido ? "Aviso sonoro encendido: sonará al acabar lo que tarda." : "Aviso sonoro apagado.");
+        if (vista.sonido) {
+            sonarEditor(true, true);
+        }
+    });
+}
+
+// Dos notas con el oscilador del navegador (sin archivos de sonido).
+let audioEditor = null;
+
+function sonarEditor(bien, aunqueEsteApagado) {
+    if (!aunqueEsteApagado && !leerVistaEditor().sonido) {
+        return;
+    }
+    try {
+        audioEditor = audioEditor || new (window.AudioContext || window.webkitAudioContext)();
+        const notas = bien ? [660, 880] : [440, 294];
+        notas.forEach((frecuencia, i) => {
+            const osc = audioEditor.createOscillator();
+            const volumen = audioEditor.createGain();
+            const empieza = audioEditor.currentTime + i * 0.18;
+            osc.type = "sine";
+            osc.frequency.value = frecuencia;
+            volumen.gain.setValueAtTime(0.0001, empieza);
+            volumen.gain.exponentialRampToValueAtTime(0.25, empieza + 0.02);
+            volumen.gain.exponentialRampToValueAtTime(0.0001, empieza + 0.16);
+            osc.connect(volumen).connect(audioEditor.destination);
+            osc.start(empieza);
+            osc.stop(empieza + 0.17);
+        });
+    } catch (e) {
+        // Sin sonido en este navegador: no pasa nada.
+    }
+}
+
+// =========================================
+// LA VENTANA DEL PROCESO (flotante)
+// =========================================
+// Mientras las herramientas trabajan (guardar y pasar a la web, generar,
+// repasar…), una ventana flotante abajo a la derecha enseña todo lo que
+// van diciendo, línea a línea (lo apunta el servidor en «registro»: se
+// pide por trozos, desde la línea que ya se tiene), con la fase y la
+// barra. Se queda al acabar, con cómo ha ido, hasta que se cierra. Se
+// puede plegar, copiar lo dicho y moverla arrastrando su barra (se
+// recuerda dónde). Para el lector: la fase se anuncia (aria-live); las
+// líneas no, que serían cientos: están en el recuadro, que se puede
+// recorrer con el teclado.
+const PROCESO_EDITOR = { caja: null, desde: 0, siguiendo: true };
+const SITIO_DEL_PROCESO_EDITOR = "editor-web-proceso";
+
+function montarProcesoEditor() {
+    if (PROCESO_EDITOR.caja) {
+        return PROCESO_EDITOR.caja;
+    }
+    const caja = crearEditor("div", "proceso");
+    caja.setAttribute("role", "region");
+    caja.setAttribute("aria-labelledby", "proceso-titulo");
+    const barra = crearEditor("div", "proceso-barra");
+    const titulo = crearEditor("h2", "proceso-titulo", "proceso.log");
+    titulo.id = "proceso-titulo";
+    barra.appendChild(titulo);
+    const botones = crearEditor("div", "proceso-botones");
+    const plegar = crearEditor("button", "", "Plegar");
+    plegar.type = "button";
+    plegar.setAttribute("aria-expanded", "true");
+    const copiar = crearEditor("button", "", "Copiar");
+    copiar.type = "button";
+    const cerrar = crearEditor("button", "", "✕");
+    cerrar.type = "button";
+    cerrar.setAttribute("aria-label", "Cerrar la ventana del proceso");
+    [plegar, copiar, cerrar].forEach((b) => botones.appendChild(b));
+    barra.appendChild(botones);
+    caja.appendChild(barra);
+    const cuerpo = crearEditor("div", "proceso-cuerpo");
+    const fase = crearEditor("p", "proceso-fase");
+    fase.setAttribute("aria-live", "polite");
+    const progreso = document.createElement("progress");
+    progreso.max = 100;
+    progreso.value = 0;
+    progreso.setAttribute("aria-label", "Cuánto va");
+    const log = crearEditor("pre", "proceso-log");
+    log.tabIndex = 0;
+    log.setAttribute("aria-label", "Lo que van diciendo las herramientas");
+    [fase, progreso, log].forEach((x) => cuerpo.appendChild(x));
+    caja.appendChild(cuerpo);
+    document.body.appendChild(caja);
+    PROCESO_EDITOR.caja = caja;
+    Object.assign(PROCESO_EDITOR, { fase, progreso, log, cuerpo, plegar });
+
+    plegar.addEventListener("click", () => {
+        const abierta = plegar.getAttribute("aria-expanded") === "true";
+        plegar.setAttribute("aria-expanded", abierta ? "false" : "true");
+        plegar.textContent = abierta ? "Desplegar" : "Plegar";
+        cuerpo.hidden = abierta;
+    });
+    copiar.addEventListener("click", async () => {
+        try {
+            await navigator.clipboard.writeText(log.textContent);
+            avisarEditor("Copiado lo que han dicho las herramientas.");
+        } catch (e) {
+            avisarEditor("No he podido copiarlo.", true);
+        }
+    });
+    cerrar.addEventListener("click", () => {
+        caja.hidden = true;
+        const vuelta = $("[data-aviso]");
+        if (vuelta) {
+            vuelta.setAttribute("tabindex", "-1");
+            vuelta.focus();
+        }
+    });
+    // Si subes por lo dicho, deja de bajar solo hasta que vuelvas abajo.
+    log.addEventListener("scroll", () => {
+        PROCESO_EDITOR.siguiendo = log.scrollTop + log.clientHeight >= log.scrollHeight - 8;
+    });
+    // Arrastrando la barra (no sus botones), a donde se quiera.
+    let agarre = null;
+    barra.addEventListener("pointerdown", (e) => {
+        if (e.target.closest("button")) {
+            return;
+        }
+        const r = caja.getBoundingClientRect();
+        agarre = { x: e.clientX - r.left, y: e.clientY - r.top };
+        barra.setPointerCapture(e.pointerId);
+    });
+    barra.addEventListener("pointermove", (e) => {
+        if (!agarre) {
+            return;
+        }
+        colocarProcesoEditor(e.clientX - agarre.x, e.clientY - agarre.y);
+    });
+    barra.addEventListener("pointerup", () => {
+        if (!agarre) {
+            return;
+        }
+        agarre = null;
+        try {
+            localStorage.setItem(SITIO_DEL_PROCESO_EDITOR, JSON.stringify({ x: caja.offsetLeft, y: caja.offsetTop }));
+        } catch (e) {
+            // Sin almacenamiento: vale para esta vez.
+        }
+    });
+    try {
+        const sitio = JSON.parse(localStorage.getItem(SITIO_DEL_PROCESO_EDITOR) || "null");
+        if (sitio) {
+            colocarProcesoEditor(sitio.x, sitio.y);
+        }
+    } catch (e) {
+        // Donde sale de serie.
+    }
+    return caja;
+}
+
+function colocarProcesoEditor(x, y) {
+    const caja = PROCESO_EDITOR.caja;
+    const maxX = Math.max(0, window.innerWidth - caja.offsetWidth);
+    const maxY = Math.max(0, window.innerHeight - 60);
+    caja.style.left = Math.max(0, Math.min(maxX, x)) + "px";
+    caja.style.top = Math.max(0, Math.min(maxY, y)) + "px";
+    caja.style.right = "auto";
+    caja.style.bottom = "auto";
+}
+
+function empezarProcesoEditor(titulo) {
+    const caja = montarProcesoEditor();
+    caja.hidden = false;
+    caja.classList.remove("es-bien", "es-mal");
+    PROCESO_EDITOR.desde = 0;
+    PROCESO_EDITOR.siguiendo = true;
+    PROCESO_EDITOR.log.textContent = "";
+    PROCESO_EDITOR.progreso.value = 0;
+    PROCESO_EDITOR.fase.textContent = titulo || "Empezando…";
+}
+
+// Lo que ha llegado en una pregunta de cómo va: la fase, cuánto y las
+// líneas nuevas (desde PROCESO_EDITOR.desde).
+function ponerProcesoEditor(estado, segundos) {
+    if (!PROCESO_EDITOR.caja) {
+        return;
+    }
+    const porcentaje = Math.max(0, Math.min(100, Number(estado.porcentaje) || 0));
+    PROCESO_EDITOR.progreso.value = porcentaje;
+    const fase = (estado.fase || "Pasando") + "…";
+    // Solo cuando cambia de fase: si no, el lector la repetiría sin parar.
+    if (!PROCESO_EDITOR.fase.textContent.startsWith(fase)) {
+        PROCESO_EDITOR.fase.textContent = fase;
+    }
+    PROCESO_EDITOR.fase.dataset.segundos = segundos;
+    if (Array.isArray(estado.lineas) && estado.lineas.length) {
+        PROCESO_EDITOR.log.appendChild(document.createTextNode(estado.lineas.join("\n") + "\n"));
+        if (PROCESO_EDITOR.siguiendo) {
+            PROCESO_EDITOR.log.scrollTop = PROCESO_EDITOR.log.scrollHeight;
+        }
+    }
+    if (typeof estado.total === "number") {
+        PROCESO_EDITOR.desde = estado.total;
+    }
+}
+
+function acabarProcesoEditor(resultado) {
+    const bien = !(resultado && resultado.error);
+    if (PROCESO_EDITOR.caja) {
+        PROCESO_EDITOR.progreso.value = 100;
+        PROCESO_EDITOR.caja.classList.add(bien ? "es-bien" : "es-mal");
+        PROCESO_EDITOR.fase.textContent = bien ? "✓ Terminado, todo bien." : "✗ " + (resultado.error || "Algo ha fallado.");
+    }
+    sonarEditor(bien);
 }
 
 function crearEditor(etiqueta, clase, texto) {
@@ -343,9 +566,11 @@ async function pasarALaWebEditor(cuerpo) {
     aviso.appendChild(caja);
     const empieza = Date.now();
     let estado = {};
+    empezarProcesoEditor("Pasando la wiki a la web…");
     for (;;) {
         await new Promise((r) => setTimeout(r, 400));
-        estado = await pedirEditor("/api/pasar/estado");
+        estado = await pedirEditor("/api/pasar/estado?desde=" + PROCESO_EDITOR.desde);
+        ponerProcesoEditor(estado, Math.round((Date.now() - empieza) / 1000));
         if (estado.error && !("terminado" in estado)) {
             break;
         }
@@ -359,6 +584,7 @@ async function pasarALaWebEditor(cuerpo) {
         }
     }
     aviso.removeAttribute("aria-busy");
+    acabarProcesoEditor(estado.resultado || estado);
     return estado.resultado || estado;
 }
 

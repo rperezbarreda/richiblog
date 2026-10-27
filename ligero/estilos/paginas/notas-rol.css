@@ -723,8 +723,49 @@
 .modal-misiones .modal-ventana {
     width: min(34rem, 100%);
 }
-.modal-resumen .modal-ventana {
+.modal-resumen .modal-ventana,
+.modal-cronica .modal-ventana {
     width: min(44rem, 100%);
+}
+.cronica-intro {
+    margin: 0 0 14px;
+    color: var(--muted);
+    font-family: var(--fuente-mono);
+    font-size: 0.8125rem;
+}
+.cronica-sesion + .cronica-sesion {
+    margin-top: 22px;
+    padding-top: 18px;
+    border-top: 2px dashed var(--border);
+}
+.cronica-fecha {
+    margin: -6px 0 8px;
+    color: var(--muted);
+    font-family: var(--fuente-mono);
+    font-size: 0.8125rem;
+}
+.cronica-subtitulo {
+    margin: 12px 0 4px;
+    color: var(--yellow);
+    font-family: var(--fuente-mono);
+    font-size: 0.8125rem;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+}
+.cronica-hechos {
+    margin: 0 0 8px;
+    padding: 0;
+    list-style: none;
+    line-height: 1.6;
+}
+.cronica-hechos li {
+    padding-left: 1.6em;
+    text-indent: -1.6em;
+}
+.cronica-icono {
+    display: inline-block;
+    width: 1.6em;
+    text-indent: 0;
 }
 .modal-dinero .modal-ventana {
     width: min(60rem, 100%);

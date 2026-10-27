@@ -42,6 +42,8 @@ import re
 import subprocess
 import sys
 import tempfile
+import urllib.error
+import urllib.request
 import unicodedata
 import threading
 import time
@@ -99,7 +101,36 @@ def _sin_salir(funcion, *args):
 # que lleva comparado con lo que tardó la última vez (como al pasar la
 # wiki en editor-wiki.py), y nunca pasa de 99 hasta que termina.
 
-TAREA = {"activa": False, "fase": "", "porcentaje": 0, "terminado": True, "resultado": None}
+TAREA = {"activa": False, "fase": "", "porcentaje": 0, "terminado": True, "resultado": None, "registro": []}
+
+# EL REGISTRO: todo lo que van diciendo las herramientas, línea a línea y
+# según lo dicen, con una marca al empezar y al acabar cada paso («▶», «✓»,
+# «✗»). Es lo que enseña la ventana flotante del proceso en el editor (la
+# pide por trozos: desde la línea que ya tiene). Con tope, por si acaso.
+LINEAS_DE_REGISTRO = 5000
+
+
+def apuntar(registro, linea):
+    # Las líneas en blanco, fuera: en la ventana solo estiraban la lista.
+    if not str(linea).strip():
+        return
+    if len(registro) < LINEAS_DE_REGISTRO:
+        registro.append(linea)
+    elif len(registro) == LINEAS_DE_REGISTRO:
+        registro.append("… (hay más, pero no caben aquí)")
+
+
+def estado_con_registro(estado, desde):
+    """El estado de una tarea, con las líneas del registro desde «desde»."""
+    salida = {k: estado[k] for k in ("activa", "fase", "porcentaje", "terminado", "resultado")}
+    registro = estado.get("registro") or []
+    try:
+        desde = max(0, int(desde or 0))
+    except ValueError:
+        desde = 0
+    salida["lineas"] = registro[desde:]
+    salida["total"] = len(registro)
+    return salida
 TIEMPOS = Path(tempfile.gettempdir()) / "editor-web-tiempos.json"
 _CERROJO = threading.Lock()
 
@@ -142,7 +173,8 @@ def _tiempos():
         return {}
 
 
-def _correr(pasos, al_avanzar, seguir_aunque_falle=False):
+def _correr(pasos, al_avanzar, seguir_aunque_falle=False, registro=None):
+    registro = registro if registro is not None else []
     antes = _tiempos()
     esperados = [float(antes.get(clave) or 8.0) for _, _, clave in pasos]
     total = sum(esperados) or 1.0
@@ -151,6 +183,7 @@ def _correr(pasos, al_avanzar, seguir_aunque_falle=False):
     entorno = dict(os.environ, PYTHONUNBUFFERED="1", PYTHONIOENCODING="utf-8")
     for (fase, orden, clave), espera in zip(pasos, esperados):
         al_avanzar(fase, round(hecho / total * 100))
+        apuntar(registro, "▶ %s  (%s)" % (fase, clave))
         empieza = time.monotonic()
         proceso = subprocess.Popen(orden, cwd=RAIZ, stdin=subprocess.DEVNULL, stdout=subprocess.PIPE,
                                    stderr=subprocess.STDOUT, text=True, encoding="utf-8", errors="replace",
@@ -170,11 +203,14 @@ def _correr(pasos, al_avanzar, seguir_aunque_falle=False):
         try:
             for linea in proceso.stdout:
                 lineas.append(linea.rstrip("\n"))
+                apuntar(registro, "  " + linea.rstrip("\n"))
             proceso.wait()
         finally:
             reloj.cancel()
             contador.join(timeout=1)
         antes[clave] = round(time.monotonic() - empieza, 1)
+        apuntar(registro, ("✗ %s ha fallado" if proceso.returncode else "✓ %s, hecho") % fase
+                + " (%s s)" % antes[clave])
         hecho += espera
         utiles = [l for l in lineas if l.strip()]
         salida.append(clave + ":\n" + "\n".join(utiles[-12:]))
@@ -196,14 +232,16 @@ def empezar_tarea(pasos, fin=None, seguir_aunque_falle=False, primero="Empezando
     se da, añade lo que haga falta al resultado (a dónde ir después)."""
     if not _CERROJO.acquire(blocking=False):
         return {"error": "Ya hay algo pasándose; espera a que termine."}
-    TAREA.update({"activa": True, "fase": primero, "porcentaje": 0, "terminado": False, "resultado": None})
+    TAREA.update({"activa": True, "fase": primero, "porcentaje": 0, "terminado": False, "resultado": None,
+                  "registro": []})
 
     def avanzar(fase, porcentaje):
         TAREA["fase"], TAREA["porcentaje"] = fase, porcentaje
 
     def trabajar():
         try:
-            hecho = _correr(pasos, avanzar, seguir_aunque_falle) if pasos else {"ok": True, "salida": ""}
+            hecho = (_correr(pasos, avanzar, seguir_aunque_falle, TAREA["registro"]) if pasos
+                     else {"ok": True, "salida": ""})
             if fin:
                 hecho.update(fin(hecho) or {})
         except Exception as error:  # que el editor lo cuente y no se quede esperando
@@ -215,8 +253,8 @@ def empezar_tarea(pasos, fin=None, seguir_aunque_falle=False, primero="Empezando
     return {"tarea": True}
 
 
-def estado_de_la_tarea():
-    return {k: TAREA[k] for k in ("activa", "fase", "porcentaje", "terminado", "resultado")}
+def estado_de_la_tarea(desde=0):
+    return estado_con_registro(TAREA, desde)
 
 
 # =========================================
@@ -1395,6 +1433,9 @@ def colecciones():
                  C("intro", "La entradilla", "largo")]},
              {"id": "personajes", "camino": ["personajes"], "titulo": "Los personajes", "nombre_de": "nombre",
               "detalle": ["nombre_completo", "color"], "campos": [
+                  C("_dndbeyond", "Importar de D&D Beyond", "accion", accion="personaje-dndbeyond",
+                    ayuda="Rellena su ficha con la de D&D Beyond (el enlace, el número o el JSON), en español. No"
+                          " guarda: repásalo y guarda tú."),
                   C("_previa", "Ver cómo queda (sin guardar)", "accion", accion="personaje-previa",
                     ayuda="Abre su ficha en otra pestaña con lo que hay escrito ahora, aunque no esté guardado."),
                   C("nombre", "Nombre", obligatorio=True, ayuda="El corto, el que va en grande en el redondel."),
@@ -2107,6 +2148,48 @@ def vista_previa_personaje(peticion):
             "avisos": ["%s «%s»" % (q, d) for q, d in avisos.lista]}
 
 
+def importar_de_dndbeyond(peticion):
+    """La ficha de D&D Beyond como las casillas de uno de mis personajes
+    (1-publicar/dndbeyond.py), y si se pide, su retrato de allí como
+    imagen de perfil y token de la galería (los que no tenga)."""
+    ddb = herramienta("dndbeyond")
+    try:
+        datos = ddb.obtener(peticion.get("texto"))
+        campos, avisos, retrato = ddb.a_ficha(datos)
+    except ddb.ErrorDeImportacion as error:
+        return {"error": str(error)}
+    clave = nombre_archivo(str(peticion.get("personaje") or campos.get("nombre") or ""), "")
+    imagenes = {}
+    quiere = peticion.get("imagenes") or []
+    if retrato and quiere and clave:
+        # La de D&D Beyond sin el recorte de la URL (?width=150…): la grande.
+        grande = retrato.split("?", 1)[0]
+        temporal = None
+        try:
+            peticion_img = urllib.request.Request(grande, headers={"User-Agent": "Mozilla/5.0 (editor de richi.blog)"})
+            with urllib.request.urlopen(peticion_img, timeout=20) as respuesta:
+                crudo = respuesta.read(15 * 1024 * 1024)
+            temporal = _temporal(crudo, Path(grande).suffix.lower() or ".jpg")
+            for campo, sitio in (("retrato", "oc-retrato"), ("token", "oc-token")):
+                if campo in quiere:
+                    hecho = subir_imagen({"sitio": sitio, "campos": {"personaje": clave}, "nombre": clave,
+                                          "ruta": str(temporal)})
+                    if hecho.get("ok"):
+                        imagenes[campo] = hecho["ruta"]
+                    else:
+                        avisos.append("La imagen de D&D Beyond no ha podido ser %s: %s"
+                                      % ("la de perfil" if campo == "retrato" else "el token", hecho.get("error")))
+        except (urllib.error.URLError, OSError, ValueError) as error:
+            avisos.append("No he podido bajar su retrato de D&D Beyond (%s)." % getattr(error, "reason", error))
+        finally:
+            if temporal:
+                try:
+                    temporal.unlink()
+                except OSError:
+                    pass
+    return {"ok": True, "campos": campos, "imagenes": imagenes, "avisos": avisos}
+
+
 def subir_pdf_de_personaje(peticion):
     """La ficha en PDF de uno de mis personajes, a su carpeta:
     imagenes/personajes/<clave>/ficha-<clave>.pdf (pisa la que hubiera)."""
@@ -2551,7 +2634,7 @@ def atender_get(ruta, pregunta):
     if ruta == "/api/web/entrada":
         return leer_entrada(uno("archivo"))
     if ruta == "/api/web/tarea":
-        return estado_de_la_tarea()
+        return estado_de_la_tarea(uno("desde"))
     if ruta == "/api/web/colecciones":
         return {"colecciones": [{"id": c["id"], "titulo": c["titulo"], "apartado": c["apartado"],
                                  "ayuda": c.get("ayuda", ""), "corto": c.get("corto", ""),
@@ -2599,6 +2682,8 @@ def atender_post(ruta, peticion):
         return guardar_entrada(peticion)
     if ruta == "/api/web/entrada/publicar":
         return publicar_entrada(peticion)
+    if ruta == "/api/web/personaje/dndbeyond":
+        return importar_de_dndbeyond(peticion)
     if ruta == "/api/web/personaje/previa":
         return vista_previa_personaje(peticion)
     if ruta == "/api/web/personaje/pdf":

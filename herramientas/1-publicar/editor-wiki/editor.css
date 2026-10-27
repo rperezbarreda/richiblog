@@ -2610,3 +2610,117 @@ textarea + .redactor-cuenta {
 [data-traer-salida] input {
     flex: 1 1 18rem;
 }
+
+/* LA VENTANA DEL PROCESO (editor.js, montarProcesoEditor): flotante, abajo
+   a la derecha de serie y por encima de todo (también de la cabecera, por
+   si se arrastra arriba). Lo dicho por las herramientas, en letra de
+   máquina y con su propio desplazamiento. */
+.proceso {
+    position: fixed;
+    right: 16px;
+    bottom: 16px;
+    z-index: 40;
+    display: flex;
+    flex-direction: column;
+    width: min(38rem, calc(100vw - 32px));
+    max-height: 60vh;
+    border: 3px solid var(--acento);
+    background: var(--caja);
+    box-shadow: 6px 6px 0 var(--acento), 0 10px 30px rgba(0, 0, 0, 0.45);
+}
+
+.proceso.es-bien {
+    border-color: var(--acento);
+}
+
+.proceso.es-mal {
+    border-color: var(--error);
+    box-shadow: 6px 6px 0 var(--error), 0 10px 30px rgba(0, 0, 0, 0.45);
+}
+
+.proceso-barra {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 6px 8px 6px 12px;
+    background: var(--acento);
+    color: var(--sobre-acento);
+    cursor: move;
+    touch-action: none;
+    user-select: none;
+}
+
+.proceso-titulo {
+    flex: 1 1 auto;
+    margin: 0;
+    color: var(--sobre-acento);
+    font-size: 1rem;
+}
+
+.proceso-botones {
+    display: flex;
+    gap: 6px;
+}
+
+.proceso-botones button {
+    min-height: 36px;
+    padding: 2px 10px;
+    border-color: var(--sobre-acento);
+    font-size: 0.85rem;
+}
+
+.proceso-cuerpo {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    min-height: 0;
+    padding: 10px 12px 12px;
+}
+
+.proceso-fase {
+    margin: 0;
+    font-weight: 700;
+}
+
+.proceso.es-mal .proceso-fase {
+    color: var(--error);
+}
+
+.proceso-cuerpo progress {
+    width: 100%;
+    height: 12px;
+}
+
+.proceso-log {
+    flex: 1 1 auto;
+    min-height: 8rem;
+    max-height: 40vh;
+    margin: 0;
+    padding: 8px 10px;
+    overflow: auto;
+    border: 2px solid var(--borde);
+    background: var(--fondo);
+    font-family: var(--mono);
+    font-size: 0.8rem;
+    line-height: 1.5;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+}
+
+/* IMPORTAR DE D&D BEYOND: el recuadro que sale debajo de su botón. */
+.importar-ddb {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin: 8px 0 16px;
+    padding: 12px 14px;
+    border: 2px solid var(--acento);
+}
+
+.importar-ddb .principal {
+    align-self: flex-start;
+}
+
+.importar-ddb .campo-si-no {
+    margin-bottom: 0;
+}

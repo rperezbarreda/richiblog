@@ -1101,8 +1101,61 @@
 
 /* La del dinero (post-it, tabla y conversor) y la del resumen de una
    sesión: algo más anchas, para la tabla y para leer de corrido. */
-.modal-resumen .modal-ventana {
+.modal-resumen .modal-ventana,
+.modal-cronica .modal-ventana {
     width: min(44rem, 100%);
+}
+
+/* LA HISTORIA HASTA AHORA: una sesión detrás de otra, separadas por una
+   raya, cada una con su resumen y «lo que pasó» (con un icono de adorno
+   delante de cada cosa: el texto ya dice qué es). */
+.cronica-intro {
+    margin: 0 0 14px;
+    color: var(--muted);
+    font-family: var(--fuente-mono);
+    font-size: 0.8125rem;
+}
+
+.cronica-sesion + .cronica-sesion {
+    margin-top: 22px;
+    padding-top: 18px;
+    border-top: 2px dashed var(--border);
+}
+
+.cronica-fecha {
+    margin: -6px 0 8px;
+    color: var(--muted);
+    font-family: var(--fuente-mono);
+    font-size: 0.8125rem;
+}
+
+.cronica-subtitulo {
+    margin: 12px 0 4px;
+    color: var(--yellow);
+    font-family: var(--fuente-mono);
+    font-size: 0.8125rem;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+}
+
+.cronica-hechos {
+    margin: 0 0 8px;
+    padding: 0;
+    list-style: none;
+    line-height: 1.6;
+}
+
+/* Sangría francesa: si una cosa ocupa dos líneas, la segunda empieza
+   debajo del texto y no debajo del icono. */
+.cronica-hechos li {
+    padding-left: 1.6em;
+    text-indent: -1.6em;
+}
+
+.cronica-icono {
+    display: inline-block;
+    width: 1.6em;
+    text-indent: 0;
 }
 
 /* La del dinero, ancha: dos columnas (la tabla y, al lado, el post-it y

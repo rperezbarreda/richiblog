@@ -58,13 +58,16 @@
                     <span class="menu-emoji" aria-hidden="true">⌨️</span><span class="menu-texto">Comandos</span></button></li>
             </ul>
         </nav>
-        <!-- Cómo se ve el propio editor: el tamaño de la letra y el contraste
-             (editor.js, ajustesDeVistaEditor; se recuerdan). -->
+        <!-- Cómo se ve el propio editor: el tamaño de la letra, el contraste
+             y el aviso sonoro al acabar algo largo (editor.js,
+             ajustesDeVistaEditor; se recuerdan). -->
         <div class="vista-ajustes" role="group" aria-label="Cómo se ve el editor">
             <button type="button" data-letra="-1" aria-label="Letra más pequeña" title="Letra más pequeña">A−</button>
             <button type="button" data-letra="1" aria-label="Letra más grande" title="Letra más grande">A+</button>
             <button type="button" data-boton-contraste aria-pressed="false" aria-label="Contraste alto"
                     title="Contraste alto"><span aria-hidden="true">🌓</span></button>
+            <button type="button" data-boton-sonido aria-pressed="false" aria-label="Aviso sonoro al terminar"
+                    title="Aviso sonoro al terminar"><span aria-hidden="true" data-sonido-icono>🔕</span></button>
         </div>
         <nav class="donde" aria-label="Estás en" data-donde>
             <ol class="donde-lista" data-donde-lista></ol>
