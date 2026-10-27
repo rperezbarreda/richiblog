@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-aDtzI6QgHfitL7afCewTh/rpYprDOJvupEIYVZKPk8Y='; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self' https://script.google.com https://script.googleusercontent.com; object-src 'none'; base-uri 'self'; form-action 'self'">
+    <!-- ==== TEMA ==== -->
+    <meta name="theme-color" content="#12091c">
+    <script>
+      (function () {
+        document.documentElement.classList.add("js");
+        try {
+          var temas = {
+            "claro": ["light", "#f3e1d6"],
+            "oscuro-puro": ["puro-oscuro", "#000000"],
+            "claro-puro": ["puro-claro", "#ffffff"],
+            "tranquilo": ["tranquilo", "#f2efe9"],
+            "tranquilo-oscuro": ["tranquilo-oscuro", "#1b1e22"],
+            "terminal-verde": ["terminal-verde", "#000000"],
+            "terminal-azul": ["terminal-azul", "#000000"],
+            "terminal-rojo": ["terminal-rojo", "#000000"],
+            "terminal-ambar": ["terminal-ambar", "#000000"]
+          };
+          var guardado = localStorage.getItem("richi-theme");
+          var elegido = temas[guardado];
+          if (!elegido && !guardado &&
+              window.matchMedia("(prefers-color-scheme: light)").matches) {
+            elegido = temas.claro;
+          }
+          if (elegido) {
+            document.documentElement.setAttribute("data-theme", elegido[0]);
+            var barra = document.querySelector('meta[name="theme-color"]');
+            if (barra) { barra.setAttribute("content", elegido[1]); }
+          }
+          if (localStorage.getItem("richi-lateral") === "plegada") {
+            document.documentElement.classList.add("lateral-plegada");
+          }
+        } catch (e) {}
+      })();
+    </script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Faëlar Corbec · Mis personajes · El Blog de Richi</title>
+    <meta name="description" content="Faëlar Corbec, Elfo · Druida (Circle of the Stars) · nivel 3. Uno de mis personajes de rol.">
+    <link rel="canonical" href="https://richi.blog/web/personajes/faelar/faelar.html">
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="El Blog de Richi">
+    <meta property="og:locale" content="es_ES">
+    <meta property="og:title" content="Faëlar Corbec · Mis personajes · El Blog de Richi">
+    <meta property="og:description" content="Faëlar Corbec, Elfo · Druida (Circle of the Stars) · nivel 3. Uno de mis personajes de rol.">
+    <meta property="og:url" content="https://richi.blog/web/personajes/faelar/faelar.html">
+    <meta property="og:image" content="https://richi.blog/imagenes/personajes/faelar/faelar.webp">
+    <meta property="og:image:alt" content="Retrato de Faëlar">
+    <meta name="twitter:card" content="summary_large_image">
+    <link rel="icon" type="image/x-icon" href="/imagenes/favicon.ico">
+    <link rel="preload" href="/tipografias/space-grotesk-400.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="alternate" type="application/rss+xml" title="El Blog de Richi — blog, relatos y rol" href="/blog/rss.xml">
+    <!-- ==== CSS ==== -->
+    <link rel="stylesheet" href="/estilos/paquete-comun.css?v=e94b0ddd">
+    <link rel="stylesheet" href="/ligero/estilos/paginas/personajes.css?v=4b332f08">
+    <link rel="stylesheet" href="/ligero/estilos/paginas/personajes.responsive.css?v=5867d4ab">
+    <link rel="stylesheet" href="/estilos/paquete-cierre.css?v=a49d87f4">
+    <!-- ==== fin del CSS ==== -->
+    <script src="/ligero/scripts/cargador-scripts.js?v=e5f01c9b"></script>
+    <!-- ==== JS ==== -->
+    <script defer src="/scripts/paquete-comun.js?v=5806fd68"></script>
+    <script defer src="/ligero/scripts/paginas/personajes.js?v=3219b464"></script>
+    <!-- ==== fin del JS ==== -->
+  </head>
+<body>
+    <a class="skip-link" href="#main-content">Saltar al contenido</a>
+    <div id="sidebar-container" data-fragmento="barra-lateral">
+<!-- ==== FRAGMENTO barra-lateral ==== -->
+<header class="mobile-topbar">
+    <button id="sidebar-toggle" class="sidebar-toggle" type="button" aria-expanded="false" aria-controls="sidebar">
+        <span aria-hidden="true">☰</span>
+        <span class="visually-hidden">Abrir menú</span>
+    </button>
+    <p class="mobile-topbar-title"><span aria-hidden="true">·🜏·</span> EL BLOG DE RICHI</p>
+</header>
+
+<button class="ajustes-abrir" type="button" data-ajustes-abrir
+        aria-haspopup="dialog">
+    <span class="ajustes-abrir-aa" aria-hidden="true">Aa</span>
+    <span class="ajustes-abrir-texto">ACCESIBILIDAD</span>
+</button>
+
+<dialog class="ajustes" data-ajustes aria-labelledby="ajustes-titulo">
+    <div class="ajustes-barra">
+        <h2 id="ajustes-titulo">accesibilidad.cfg</h2>
+        <button class="ajustes-cerrar" type="button" data-ajustes-cerrar>
+            <svg class="window-btn-icono" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                <path d="M5.5 5.5L18.5 18.5M18.5 5.5L5.5 18.5" fill="none"
+                      stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
+            </svg>
+            <span class="visually-hidden">Cerrar los ajustes</span>
+        </button>
+    </div>
+
+    <div class="ajustes-cuerpo">
+        <div class="ajustes-fila">
+            <label class="ajustes-nombre" for="ajustes-tamano">tamaño del texto</label>
+            <div class="ajustes-deslizador">
+                <span class="ajustes-aa ajustes-aa-pequena" aria-hidden="true">Aa</span>
+                <input class="ajustes-rango" type="range" id="ajustes-tamano"
+                       min="0" max="4" step="1" value="1"
+                       list="ajustes-tamano-marcas" data-tamano-rango>
+                <datalist id="ajustes-tamano-marcas">
+                    <option value="0"></option>
+                    <option value="1"></option>
+                    <option value="2"></option>
+                    <option value="3"></option>
+                    <option value="4"></option>
+                </datalist>
+                <span class="ajustes-aa ajustes-aa-grande" aria-hidden="true">Aa</span>
+            </div>
+            <p class="ajustes-valor" role="status">
+                <span class="visually-hidden">Texto al </span><span data-tamano-valor>100%</span>
+            </p>
+        </div>
+
+        <div class="ajustes-fila">
+            <p class="ajustes-nombre" id="ajustes-interlineado-nombre">separación entre líneas</p>
+            <div class="ajustes-mandos" role="group" aria-labelledby="ajustes-interlineado-nombre">
+                <button class="ajustes-opcion" type="button" data-interlineado="" aria-pressed="true">por defecto</button>
+                <button class="ajustes-opcion" type="button" data-interlineado="amplio" aria-pressed="false">amplia</button>
+                <button class="ajustes-opcion" type="button" data-interlineado="muy-amplio" aria-pressed="false">muy amplia</button>
+            </div>
+        </div>
+
+        <div class="ajustes-fila">
+            <p class="ajustes-nombre" id="ajustes-letra-nombre">la letra</p>
+            <div class="ajustes-mandos" role="group" aria-labelledby="ajustes-letra-nombre">
+                <button class="ajustes-opcion" type="button" data-letra="" aria-pressed="true">por defecto</button>
+                <button class="ajustes-opcion" type="button" data-letra="legible" aria-pressed="false">más legible</button>
+            </div>
+        </div>
+
+        <div class="ajustes-fila">
+            <p class="ajustes-nombre" id="ajustes-voz-nombre">velocidad de la voz</p>
+            <div class="ajustes-mandos" role="group" aria-labelledby="ajustes-voz-nombre">
+                <button class="ajustes-opcion" type="button" data-voz="lenta" aria-pressed="false">lenta</button>
+                <button class="ajustes-opcion" type="button" data-voz="" aria-pressed="true">normal</button>
+                <button class="ajustes-opcion" type="button" data-voz="rapida" aria-pressed="false">rápida</button>
+            </div>
+        </div>
+
+        <div class="ajustes-fila">
+            <p class="ajustes-nombre" id="ajustes-tema-nombre">color de tema</p>
+            <p class="ajustes-grupo-titulo" id="ajustes-tema-leer">para leer</p>
+            <div class="ajustes-mandos ajustes-temas" role="group" aria-labelledby="ajustes-tema-nombre ajustes-tema-leer">
+                <button class="ajustes-opcion" type="button" data-tema="oscuro" aria-pressed="true">
+                    <span class="ajustes-emoji" aria-hidden="true">🌙</span>oscuro</button>
+                <button class="ajustes-opcion" type="button" data-tema="claro" aria-pressed="false">
+                    <span class="ajustes-emoji" aria-hidden="true">☀️</span>claro</button>
+                <button class="ajustes-opcion" type="button" data-tema="oscuro-puro" aria-pressed="false">
+                    <span class="ajustes-emoji" aria-hidden="true">🌑</span>oscuro puro</button>
+                <button class="ajustes-opcion" type="button" data-tema="claro-puro" aria-pressed="false">
+                    <span class="ajustes-emoji" aria-hidden="true">🌕</span>claro puro</button>
+                <button class="ajustes-opcion" type="button" data-tema="tranquilo-oscuro" aria-pressed="false">
+                    <span class="ajustes-emoji" aria-hidden="true">🌿</span>tranquilo oscuro</button>
+                <button class="ajustes-opcion" type="button" data-tema="tranquilo" aria-pressed="false">
+                    <span class="ajustes-emoji" aria-hidden="true">🍃</span>tranquilo</button>
+            </div>
+
+            <p class="ajustes-grupo-titulo" id="ajustes-tema-adorno">de adorno</p>
+            <div class="ajustes-mandos ajustes-temas" role="group" aria-labelledby="ajustes-tema-nombre ajustes-tema-adorno">
+                <button class="ajustes-opcion" type="button" data-tema="terminal-verde" aria-pressed="false">
+                    <span class="ajustes-emoji" aria-hidden="true">🟢</span>terminal verde</button>
+                <button class="ajustes-opcion" type="button" data-tema="terminal-azul" aria-pressed="false">
+                    <span class="ajustes-emoji" aria-hidden="true">🔵</span>terminal azul</button>
+                <button class="ajustes-opcion" type="button" data-tema="terminal-rojo" aria-pressed="false">
+                    <span class="ajustes-emoji" aria-hidden="true">🔴</span>terminal rojo</button>
+                <button class="ajustes-opcion" type="button" data-tema="terminal-ambar" aria-pressed="false">
+                    <span class="ajustes-emoji" aria-hidden="true">🟡</span>terminal ámbar</button>
+            </div>
+            <p class="ajustes-grupo-nota">
+                Estas opciones de consola antigua no respetan el contraste mínimo de
+                accesibilidad, son meramente estéticas.
+            </p>
+        </div>
+
+        <div class="ajustes-fila">
+            <p class="ajustes-nombre">efectos visuales</p>
+            <div class="ajustes-mandos ajustes-mandos-anchos">
+                <button id="cursor-trail-toggle" class="theme-toggle" type="button" aria-pressed="true">
+                    <span class="theme-toggle-icon" aria-hidden="true">✦</span>
+                    <span class="cursor-trail-toggle-text">BRILLITO: ON</span>
+                </button>
+                <button class="theme-toggle" type="button" data-crt-boton aria-pressed="false">
+                    <span class="theme-toggle-icon" aria-hidden="true">▧</span>
+                    <span class="ajustes-crt-texto">FILTRO <abbr title="Cathode Ray Tube: los monitores de tubo de antes, con sus rayas y las esquinas apagadas">CRT</abbr>: <span data-crt-estado>OFF</span></span>
+                </button>
+            </div>
+        </div>
+
+        <div class="ajustes-fila">
+            <p class="ajustes-nombre" id="ajustes-movimiento-nombre">animaciones</p>
+            <div class="ajustes-mandos" role="group" aria-labelledby="ajustes-movimiento-nombre">
+                <button class="ajustes-opcion" type="button" data-movimiento="" aria-pressed="true">normal</button>
+                <button class="ajustes-opcion" type="button" data-movimiento="quieto" aria-pressed="false">sin animaciones</button>
+            </div>
+        </div>
+    </div>
+</dialog>
+
+<div id="sidebar-backdrop" class="sidebar-backdrop" hidden></div>
+
+<aside class="sidebar" id="sidebar">
+    <div class="sidebar-logo">
+        <p><span aria-hidden="true">·🜏·</span> EL BLOG DE RICHI</p>
+    </div>
+    <button id="lateral-plegar" class="lateral-plegar" type="button"
+            aria-expanded="true" aria-controls="sidebar-menu" title="Plegar el menú">
+        <span aria-hidden="true">☰</span>
+        <span class="visually-hidden">Menú</span>
+    </button>
+    <button class="buscar-flotante" type="button" data-buscar-lupa
+            aria-haspopup="dialog" title="Buscar en toda la web">
+        <span class="buscar-lupa" aria-hidden="true"></span>
+        <span class="visually-hidden">Buscar</span>
+    </button>
+    <div class="sidebar-top" id="sidebar-menu">
+        <nav>
+        <a href="/index.html">home</a>
+            <div class="nav-group">
+                <button class="nav-toggle" type="button" aria-expanded="false">
+                    <span>mis movidas</span>
+                    <span class="arrow" aria-hidden="true">+</span>
+                </button>
+
+                <div class="submenu">
+                    <a href="/web/mis_movidas/relatos/index_relatos.html">relatos</a>
+                    <a href="/web/mis_movidas/rol/index_rol.html">recursos de rol</a>
+                </div>
+            </div>
+
+            <div class="nav-group">
+                <button class="nav-toggle" type="button" aria-expanded="false">
+                    <span>blog</span>
+                    <span class="arrow" aria-hidden="true">+</span>
+                </button>
+
+                <div class="submenu">
+                    <a href="/web/blog/diario.html">diario</a>
+                    <a href="/web/blog/2026/index_2026.html">2026</a>
+                </div>
+            </div>
+
+            <div class="nav-group open">
+                <button class="nav-toggle" type="button" aria-expanded="true">
+                    <span>roleito</span>
+                    <span class="arrow" aria-hidden="true">−</span>
+                </button>
+
+                <div class="submenu">
+                    <div class="nav-group">
+                        <button class="nav-toggle" type="button" aria-expanded="false">
+                            <span>notas de rol</span>
+                            <span class="arrow" aria-hidden="true">+</span>
+                        </button>
+
+                        <div class="submenu">
+                            <a href="/web/notas_rol/ragna/index_ragna.html">campaña de Ragna</a>
+                        </div>
+                    </div>
+
+                    <a class="active" href="/web/personajes/index_personajes.html" aria-current="true">mis personajes</a>
+                    <a href="/web/wiki/index_wiki.html">wiki cralëa</a>
+                </div>
+            </div>
+
+            <div class="nav-group">
+                <button class="nav-toggle" type="button" aria-expanded="false">
+                    <span>mi rincón</span>
+                    <span class="arrow" aria-hidden="true">+</span>
+                </button>
+
+                <div class="submenu">
+                    <a href="/web/sobre_mi/sobre_mi.html">quién soy</a>
+                    <a href="/web/en_lo_que_ando/en_lo_que_ando.html">en lo que ando</a>
+                    <a href="/web/santuarios/index_santuarios.html">santuarios</a>
+                    <a href="/web/recomendaciones/recomendaciones.html">recomendaciones</a>
+                </div>
+            </div>
+
+        <a href="/web/contacto/contacto.html">contacto y guestbook</a>
+        <a href="/web/accesibilidad/accesibilidad.html">accesibilidad</a>
+        </nav>
+
+        <button class="buscar-lupa-boton" type="button" data-buscar-lupa
+                aria-haspopup="dialog">
+            <span class="buscar-lupa" aria-hidden="true"></span>
+            <span class="buscar-lupa-texto">buscar</span>
+        </button>
+    </div>
+
+    <div class="gatin-random" data-gatin-random hidden>
+        <div class="gatin-random-header">
+            <h2>gatin_random.exe</h2>
+            <div class="window-controls window-controls-small" data-window-controls aria-hidden="true"></div>
+        </div>
+        <div class="gatin-random-body" data-gatin-body></div>
+    </div>
+
+</aside>
+
+<dialog class="buscar-modal" data-buscar-modal aria-labelledby="buscar-modal-titulo">
+    <div class="ajustes-barra">
+        <h2 id="buscar-modal-titulo">buscador.exe</h2>
+        <button class="ajustes-cerrar" type="button" data-buscar-modal-cerrar>
+            <svg class="window-btn-icono" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                <path d="M5.5 5.5L18.5 18.5M18.5 5.5L5.5 18.5" fill="none"
+                      stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
+            </svg>
+            <span class="visually-hidden">Cerrar la búsqueda</span>
+        </button>
+    </div>
+    <div class="buscar-modal-cuerpo">
+        <form class="buscar-form" role="search" method="get"
+              action="/web/buscar/buscar.html">
+            <label class="buscar-form-label" for="buscar-modal-campo">buscar en toda la web:</label>
+            <div class="buscar-form-caja">
+                <input class="buscar-form-campo" type="search"
+                       id="buscar-modal-campo" name="q"
+                       placeholder="una palabra, un título…"
+                       autocomplete="off" spellcheck="false">
+                <button class="buscar-form-enviar" type="submit">
+                    <span class="buscar-lupa" aria-hidden="true"></span>
+                    <span class="buscar-form-enviar-texto">buscar</span>
+                </button>
+            </div>
+            <p class="buscar-ayuda">
+                Mira el título, la sección, las categorías y
+                <strong>lo que pone dentro</strong> de las entradas y los
+                relatos. Da igual con tildes o sin ellas.
+            </p>
+        </form>
+    </div>
+</dialog>
+<!-- ==== fin del FRAGMENTO barra-lateral ==== -->
+    </div>
+
+    <main id="main-content">
+        <section id="home" class="home oc-page oc-ficha-page oc-color-azul">
+            <div class="oc-cabecera">
+                <a class="oc-volver" href="/web/personajes/index_personajes.html">← volver a mis personajes</a>
+                <h1 class="home-title">Faëlar</h1>
+                <p class="oc-nombre-completo">Faëlar Corbec</p>
+            </div>
+
+            <div class="oc-lateral" role="group" aria-label="Ficha de Faëlar">
+                    <div class="oc-postit">
+                        <button class="lightbox-trigger oc-retrato" type="button" aria-label="Ver en grande: Retrato de Faëlar">
+                            <img src="/imagenes/personajes/faelar/faelar.webp" alt="Retrato de Faëlar" decoding="async">
+                        </button>
+                        <p class="oc-postit-que">Elfo · Druida (Circle of the Stars) · nivel 3</p>
+                        <h2 class="oc-stats-titulo">características</h2>
+                        <dl class="oc-stats">
+                            <div class="oc-stat"><dt><abbr title="Fuerza">FUE</abbr></dt><dd><span class="oc-stat-valor">9</span><span class="oc-stat-mod"><span class="visually-hidden">, modificador </span>−1</span></dd></div>
+                            <div class="oc-stat"><dt><abbr title="Destreza">DES</abbr></dt><dd><span class="oc-stat-valor">14</span><span class="oc-stat-mod"><span class="visually-hidden">, modificador </span>+2</span></dd></div>
+                            <div class="oc-stat"><dt><abbr title="Constitución">CON</abbr></dt><dd><span class="oc-stat-valor">16</span><span class="oc-stat-mod"><span class="visually-hidden">, modificador </span>+3</span></dd></div>
+                            <div class="oc-stat"><dt><abbr title="Inteligencia">INT</abbr></dt><dd><span class="oc-stat-valor">14</span><span class="oc-stat-mod"><span class="visually-hidden">, modificador </span>+2</span></dd></div>
+                            <div class="oc-stat"><dt><abbr title="Sabiduría">SAB</abbr></dt><dd><span class="oc-stat-valor">18</span><span class="oc-stat-mod"><span class="visually-hidden">, modificador </span>+4</span></dd></div>
+                            <div class="oc-stat"><dt><abbr title="Carisma">CAR</abbr></dt><dd><span class="oc-stat-valor">12</span><span class="oc-stat-mod"><span class="visually-hidden">, modificador </span>+1</span></dd></div>
+                        </dl>
+                    </div>
+
+            </div>
+
+            <div class="oc-principal">
+                    <nav class="oc-pestanas" aria-label="Apartados de Faëlar" data-oc-pestanas>
+                        <a class="oc-pestana" href="#oc-historia" data-oc-pestana="historia">historia</a>
+                        <a class="oc-pestana" href="#oc-ficha" data-oc-pestana="ficha">ficha</a>
+                        <a class="oc-pestana" href="#oc-gente" data-oc-pestana="gente">npcs</a>
+                        <a class="oc-pestana" href="#oc-imagenes" data-oc-pestana="imagenes">imágenes</a>
+                        <a class="oc-pestana" href="#oc-extra" data-oc-pestana="extra">extra</a>
+                    </nav>
+                    <div class="oc-panel" data-oc-panel>
+                        <div class="oc-apartado" id="oc-historia" data-oc-apartado="historia">
+                            <h2 class="oc-apartado-titulo">historia</h2>
+                            <div class="oc-texto"><p class="oc-vacio">Todavía no he escrito su historia.</p></div>
+                        </div>
+                        <div class="oc-apartado es-ficha" id="oc-ficha" data-oc-apartado="ficha">
+                            <h2 class="oc-apartado-titulo">ficha</h2>
+                            <div class="oc-lista"><nav class="oc-subpestanas" aria-label="Partes de la ficha" data-oc-subpestanas><a class="oc-subpestana" href="#oc-ficha-combate" data-oc-pestana="combate"><span class="oc-subpestana-emoji" aria-hidden="true">📊</span>combate</a><a class="oc-subpestana" href="#oc-ficha-habilidades" data-oc-pestana="habilidades"><span class="oc-subpestana-emoji" aria-hidden="true">🎯</span>habilidades</a><a class="oc-subpestana" href="#oc-ficha-acciones" data-oc-pestana="acciones"><span class="oc-subpestana-emoji" aria-hidden="true">⚔️</span>acciones</a><a class="oc-subpestana" href="#oc-ficha-conjuros" data-oc-pestana="conjuros"><span class="oc-subpestana-emoji" aria-hidden="true">✨</span>conjuros</a><a class="oc-subpestana" href="#oc-ficha-inventario" data-oc-pestana="inventario"><span class="oc-subpestana-emoji" aria-hidden="true">🎒</span>inventario</a><a class="oc-subpestana" href="#oc-ficha-rasgos" data-oc-pestana="rasgos"><span class="oc-subpestana-emoji" aria-hidden="true">🧬</span>rasgos</a><a class="oc-subpestana" href="#oc-ficha-competencias" data-oc-pestana="competencias"><span class="oc-subpestana-emoji" aria-hidden="true">🗣️</span>competencias</a><a class="oc-subpestana" href="#oc-ficha-trasfondo" data-oc-pestana="trasfondo"><span class="oc-subpestana-emoji" aria-hidden="true">📜</span>trasfondo</a></nav><div class="oc-hoja-grupos" data-oc-subpanel><div class="oc-hoja-grupo" id="oc-ficha-combate" data-oc-subapartado="combate"><h3 class="oc-hoja-grupo-titulo"><span aria-hidden="true">📊</span> combate</h3><div class="oc-hoja"><div class="oc-hoja-caja es-ancha"><div class="recent-entries-header"><h4 class="oc-hoja-titulo"><span class="oc-hoja-emoji" aria-hidden="true">📊</span>estadisticas.dat</h4><div class="window-controls window-controls-small" data-window-controls aria-hidden="true"></div></div><div class="oc-hoja-dentro"><ul class="oc-cajitas"><li class="oc-cajita"><span class="oc-cajita-nombre">fuerza</span><span class="oc-cajita-valor">9</span><span class="oc-cajita-barra"><span class="visually-hidden">modificador </span>−1</span></li><li class="oc-cajita"><span class="oc-cajita-nombre">destreza</span><span class="oc-cajita-valor">14</span><span class="oc-cajita-barra"><span class="visually-hidden">modificador </span>+2</span></li><li class="oc-cajita"><span class="oc-cajita-nombre">constitución</span><span class="oc-cajita-valor">16</span><span class="oc-cajita-barra"><span class="visually-hidden">modificador </span>+3</span></li><li class="oc-cajita"><span class="oc-cajita-nombre">inteligencia</span><span class="oc-cajita-valor">14</span><span class="oc-cajita-barra"><span class="visually-hidden">modificador </span>+2</span></li><li class="oc-cajita"><span class="oc-cajita-nombre">sabiduría</span><span class="oc-cajita-valor">18</span><span class="oc-cajita-barra"><span class="visually-hidden">modificador </span>+4</span></li><li class="oc-cajita"><span class="oc-cajita-nombre">carisma</span><span class="oc-cajita-valor">12</span><span class="oc-cajita-barra"><span class="visually-hidden">modificador </span>+1</span></li></ul></div></div><div class="oc-hoja-caja es-ancha"><div class="recent-entries-header"><h4 class="oc-hoja-titulo"><span class="oc-hoja-emoji" aria-hidden="true">🛡️</span>combate.dat</h4><div class="window-controls window-controls-small" data-window-controls aria-hidden="true"></div></div><div class="oc-hoja-dentro"><ul class="oc-cajitas"><li class="oc-cajita"><span class="oc-cajita-nombre">clase de armadura</span><span class="oc-cajita-valor">15</span><span class="oc-cajita-barra" aria-hidden="true">CA</span></li><li class="oc-cajita"><span class="oc-cajita-nombre">puntos de golpe</span><span class="oc-cajita-valor">27</span><span class="oc-cajita-barra" aria-hidden="true">PG</span></li><li class="oc-cajita"><span class="oc-cajita-nombre">velocidad</span><span class="oc-cajita-valor">9 m</span><span class="oc-cajita-barra" aria-hidden="true">a pie</span></li><li class="oc-cajita"><span class="oc-cajita-nombre">iniciativa</span><span class="oc-cajita-valor">+2</span><span class="oc-cajita-barra" aria-hidden="true">DES</span></li><li class="oc-cajita"><span class="oc-cajita-nombre">competencia</span><span class="oc-cajita-valor">+2</span><span class="oc-cajita-barra" aria-hidden="true">bono</span></li><li class="oc-cajita"><span class="oc-cajita-nombre">dados de golpe</span><span class="oc-cajita-valor">3d8</span><span class="oc-cajita-barra" aria-hidden="true">DG</span></li></ul></div></div><div class="oc-hoja-caja"><div class="recent-entries-header"><h4 class="oc-hoja-titulo"><span class="oc-hoja-emoji" aria-hidden="true">👁️</span>sentidos.txt</h4><div class="window-controls window-controls-small" data-window-controls aria-hidden="true"></div></div><div class="oc-hoja-dentro"><ul class="oc-cajitas"><li class="oc-cajita"><span class="oc-cajita-nombre">percepción</span><span class="oc-cajita-valor">16</span><span class="oc-cajita-barra"><span class="visually-hidden"> </span>pasiva</span></li><li class="oc-cajita"><span class="oc-cajita-nombre">investigación</span><span class="oc-cajita-valor">12</span><span class="oc-cajita-barra"><span class="visually-hidden"> </span>pasiva</span></li><li class="oc-cajita"><span class="oc-cajita-nombre">perspicacia</span><span class="oc-cajita-valor">14</span><span class="oc-cajita-barra"><span class="visually-hidden"> </span>pasiva</span></li></ul><p class="oc-hoja-nota">Visión en la oscuridad 18 m</p></div></div><div class="oc-hoja-caja"><div class="recent-entries-header"><h4 class="oc-hoja-titulo"><span class="oc-hoja-emoji" aria-hidden="true">🧱</span>defensas.txt</h4><div class="window-controls window-controls-small" data-window-controls aria-hidden="true"></div></div><div class="oc-hoja-dentro"><ul class="oc-lista-maquina"><li>Inmunidad: magical sleep</li></ul></div></div></div></div><div class="oc-hoja-grupo" id="oc-ficha-habilidades" data-oc-subapartado="habilidades"><h3 class="oc-hoja-grupo-titulo"><span aria-hidden="true">🎯</span> habilidades</h3><div class="oc-hoja"><div class="oc-hoja-caja"><div class="recent-entries-header"><h4 class="oc-hoja-titulo"><span class="oc-hoja-emoji" aria-hidden="true">🎲</span>salvaciones.lst</h4><div class="window-controls window-controls-small" data-window-controls aria-hidden="true"></div></div><div class="oc-hoja-dentro"><ul class="oc-hoja-tiradas"><li class="oc-tirada"><span class="oc-marca" aria-hidden="true"></span><span><span class="oc-tirada-bono">−1</span> fuerza<span class="visually-hidden"></span></span></li><li class="oc-tirada"><span class="oc-marca" aria-hidden="true"></span><span><span class="oc-tirada-bono">+2</span> destreza<span class="visually-hidden"></span></span></li><li class="oc-tirada"><span class="oc-marca" aria-hidden="true"></span><span><span class="oc-tirada-bono">+3</span> constitución<span class="visually-hidden"></span></span></li><li class="oc-tirada"><span class="oc-marca es-llena" aria-hidden="true"></span><span><span class="oc-tirada-bono">+4</span> inteligencia<span class="visually-hidden"> (competente)</span></span></li><li class="oc-tirada"><span class="oc-marca es-llena" aria-hidden="true"></span><span><span class="oc-tirada-bono">+6</span> sabiduría<span class="visually-hidden"> (competente)</span></span></li><li class="oc-tirada"><span class="oc-marca" aria-hidden="true"></span><span><span class="oc-tirada-bono">+1</span> carisma<span class="visually-hidden"></span></span></li></ul></div></div><div class="oc-hoja-caja es-ancha"><div class="recent-entries-header"><h4 class="oc-hoja-titulo"><span class="oc-hoja-emoji" aria-hidden="true">🎯</span>habilidades.lst</h4><div class="window-controls window-controls-small" data-window-controls aria-hidden="true"></div></div><div class="oc-hoja-dentro"><ul class="oc-hoja-tiradas es-dos-columnas"><li class="oc-tirada"><span class="oc-marca" aria-hidden="true"></span><span><span class="oc-tirada-bono">+2</span> acrobacias <span class="oc-tirada-de">(des)</span><span class="visually-hidden"></span></span></li><li class="oc-tirada"><span class="oc-marca" aria-hidden="true"></span><span><span class="oc-tirada-bono">+2</span> arcanos <span class="oc-tirada-de">(int)</span><span class="visually-hidden"></span></span></li><li class="oc-tirada"><span class="oc-marca" aria-hidden="true"></span><span><span class="oc-tirada-bono">−1</span> atletismo <span class="oc-tirada-de">(fue)</span><span class="visually-hidden"></span></span></li><li class="oc-tirada"><span class="oc-marca" aria-hidden="true"></span><span><span class="oc-tirada-bono">+1</span> engaño <span class="oc-tirada-de">(car)</span><span class="visually-hidden"></span></span></li><li class="oc-tirada"><span class="oc-marca" aria-hidden="true"></span><span><span class="oc-tirada-bono">+2</span> historia <span class="oc-tirada-de">(int)</span><span class="visually-hidden"></span></span></li><li class="oc-tirada"><span class="oc-marca" aria-hidden="true"></span><span><span class="oc-tirada-bono">+1</span> interpretación <span class="oc-tirada-de">(car)</span><span class="visually-hidden"></span></span></li><li class="oc-tirada"><span class="oc-marca" aria-hidden="true"></span><span><span class="oc-tirada-bono">+1</span> intimidación <span class="oc-tirada-de">(car)</span><span class="visually-hidden"></span></span></li><li class="oc-tirada"><span class="oc-marca" aria-hidden="true"></span><span><span class="oc-tirada-bono">+2</span> investigación <span class="oc-tirada-de">(int)</span><span class="visually-hidden"></span></span></li><li class="oc-tirada"><span class="oc-marca" aria-hidden="true"></span><span><span class="oc-tirada-bono">+2</span> juego de manos <span class="oc-tirada-de">(des)</span><span class="visually-hidden"></span></span></li><li class="oc-tirada"><span class="oc-marca" aria-hidden="true"></span><span><span class="oc-tirada-bono">+4</span> medicina <span class="oc-tirada-de">(sab)</span><span class="visually-hidden"></span></span></li><li class="oc-tirada"><span class="oc-marca es-llena" aria-hidden="true"></span><span><span class="oc-tirada-bono">+4</span> naturaleza <span class="oc-tirada-de">(int)</span><span class="visually-hidden"> (competente)</span></span></li><li class="oc-tirada"><span class="oc-marca es-llena" aria-hidden="true"></span><span><span class="oc-tirada-bono">+6</span> percepción <span class="oc-tirada-de">(sab)</span><span class="visually-hidden"> (competente)</span></span></li><li class="oc-tirada"><span class="oc-marca" aria-hidden="true"></span><span><span class="oc-tirada-bono">+4</span> perspicacia <span class="oc-tirada-de">(sab)</span><span class="visually-hidden"></span></span></li><li class="oc-tirada"><span class="oc-marca" aria-hidden="true"></span><span><span class="oc-tirada-bono">+1</span> persuasión <span class="oc-tirada-de">(car)</span><span class="visually-hidden"></span></span></li><li class="oc-tirada"><span class="oc-marca" aria-hidden="true"></span><span><span class="oc-tirada-bono">+2</span> religión <span class="oc-tirada-de">(int)</span><span class="visually-hidden"></span></span></li><li class="oc-tirada"><span class="oc-marca es-llena" aria-hidden="true"></span><span><span class="oc-tirada-bono">+4</span> sigilo <span class="oc-tirada-de">(des)</span><span class="visually-hidden"> (competente)</span></span></li><li class="oc-tirada"><span class="oc-marca es-llena" aria-hidden="true"></span><span><span class="oc-tirada-bono">+6</span> supervivencia <span class="oc-tirada-de">(sab)</span><span class="visually-hidden"> (competente)</span></span></li><li class="oc-tirada"><span class="oc-marca es-llena" aria-hidden="true"></span><span><span class="oc-tirada-bono">+6</span> trato con animales <span class="oc-tirada-de">(sab)</span><span class="visually-hidden"> (competente)</span></span></li></ul></div></div></div></div><div class="oc-hoja-grupo" id="oc-ficha-acciones" data-oc-subapartado="acciones"><h3 class="oc-hoja-grupo-titulo"><span aria-hidden="true">⚔️</span> acciones</h3><div class="oc-hoja"><div class="oc-hoja-caja es-ancha"><div class="recent-entries-header"><h4 class="oc-hoja-titulo"><span class="oc-hoja-emoji" aria-hidden="true">🗡️</span>ataques.lst</h4><div class="window-controls window-controls-small" data-window-controls aria-hidden="true"></div></div><div class="oc-hoja-dentro"><ul class="oc-hoja-filas"><li><details class="oc-desplegable"><summary><span class="oc-desplegable-flecha" aria-hidden="true">▸</span><span class="oc-desplegable-cabeza"><span class="oc-hoja-nombre">Arco corto</span> <span class="oc-hoja-detalle">+4, 1d6+2 perforante</span></span></summary><div class="oc-desplegable-dentro"><ul class="oc-desplegable-datos"><li>Arma</li><li>lo lleva puesto</li></ul><div class="oc-texto"><p>Proficiency with a Shortbow allows you to add your proficiency bonus to the attack roll for any attack you make with it.</p>
+<p>This weapon has the following mastery property. To use this property, you must have a feature that lets you use it.</p>
+<p><strong><em>Vex.</strong></em> If you hit a creature with this weapon and deal damage to the creature, you have Advantage on your next attack roll against that creature before the end of your next turn.</p></div></div></details></li></ul></div></div><div class="oc-hoja-caja es-ancha"><div class="recent-entries-header"><h4 class="oc-hoja-titulo"><span class="oc-hoja-emoji" aria-hidden="true">⏱️</span>acciones.txt</h4><div class="window-controls window-controls-small" data-window-controls aria-hidden="true"></div></div><div class="oc-hoja-dentro"><h5 class="oc-hoja-subtitulo">Acción</h5><ul class="oc-lista-maquina"><li><details class="oc-desplegable"><summary><span class="oc-desplegable-flecha" aria-hidden="true">▸</span><span class="oc-desplegable-cabeza">Initiate a Circle Spell</span><span class="oc-origen"><span class="visually-hidden">, </span>De su clase</span></summary><div class="oc-desplegable-dentro"><div class="oc-texto"><p>You take a Magic action to initiate casting a Circle spell. When you do so, choose which Circle casting option you’re using for this casting; you must also meet any of the other requirements described in that option’s text. Until the Circle spell’s casting is complete, you must maintain Concentration on the spell.</p></div></div></details></li></ul><h5 class="oc-hoja-subtitulo">Acción adicional</h5><ul class="oc-lista-maquina"><li><details class="oc-desplegable"><summary><span class="oc-desplegable-flecha" aria-hidden="true">▸</span><span class="oc-desplegable-cabeza">Forma salvaje (2 usos)</span><span class="oc-origen"><span class="visually-hidden">, </span>Por Forma salvaje (Druida, nivel 2)</span></summary><div class="oc-desplegable-dentro"><div class="oc-texto"><p>The power of nature allows you to assume the form of an animal. As a Bonus Action, you [rules]shape-shifting;shape-shift[/rules] into a Beast form that you have learned for this feature (see “Known Forms” below). You stay in that form for a number of hours equal to half your Druid level or until you use Wild Shape again, have the [condition]Incapacitated[/condition] condition, or die. You can also leave the form early as a Bonus Action.</p>
+<p><strong><em>Number of Uses.</strong></em> You can use Wild Shape twice. You regain one expended use when you finish a Short Rest, and you regain all expended uses when you finish a Long Rest.</p>
+<p>You gain additional uses when you reach certain Druid levels, as shown in the Wild Shape column of the Druid Features table.</p>
+<p><strong><em>Known Forms.</strong></em> You know four Beast forms for this feature, chosen from among Beast stat blocks that have a maximum Challenge Rating of 1/4 and that lack a Fly Speed. Whenever you finish a Long Rest, you can replace one of your known forms with another eligible form.</p>
+<p>When you reach certain Druid levels, your number of known forms and the maximum Challenge Rating for those forms increases, as shown in the Beast Shapes table. In addition, starting at level 8, you can adopt a form that has a Fly Speed.</p>
+<p>When choosing known forms, you may look in the <em>Monster Manual</em> or elsewhere for eligible Beasts if the Dungeon Master permits you to do so.</p>
+<p>Beast Shapes</p>
+<ul><li>Druid Level · Known Forms · Max CR · Fly Speed</li><li>2 · 4 · 1/4 · No</li><li>4 · 6 · 1/2 · No</li><li>8 · 8 · 1 · Yes</li></ul>
+<p><strong><em>Rules While Shape-Shifted.</strong></em> While in a form, you retain your personality, memories, and ability to speak, and the following rules apply:</p>
+<p><strong><em>Temporary Hit Points.</strong></em> When you assume a Wild Shape form, you gain a number of [rules]Temporary Hit Points[/rules] equal to your Druid level.</p>
+<p><strong><em>Game Statistics.</strong></em> Your game statistics are replaced by the Beast’s stat block, but you retain your creature type; Hit Points; Hit Point Dice; Intelligence, Wisdom, and Charisma scores; class features; languages; and feats. You also retain your skill and saving throw proficiencies and use your Proficiency Bonus for them, in addition to gaining the proficiencies of the creature. If a skill or saving throw modifier in the Beast’s stat block is higher than yours, use the one in the stat block.</p>
+<p><strong><em>No Spellcasting.</strong></em> You can’t cast spells, but shape-shifting doesn’t break your [rules]Concentration[/rules] or otherwise interfere with a spell you’ve already cast.</p>
+<p><strong><em>Objects.</strong></em> Your ability to handle objects is determined by the form’s limbs rather than your own. In addition, you choose whether your equipment falls in your space, merges into your new form, or is worn by it. Worn equipment functions as normal, but the DM decides whether it’s practical for the new form to wear a piece of equipment based on the creature’s size and shape. Your equipment doesn’t change size or shape to match the new form, and any equipment that the new form can’t wear must either fall to the ground or merge with the form. Equipment that merges with the form has no effect while you’re in that form.</p></div></div></details></li><li><details class="oc-desplegable"><summary><span class="oc-desplegable-flecha" aria-hidden="true">▸</span><span class="oc-desplegable-cabeza">Assume Starry Form</span><span class="oc-origen"><span class="visually-hidden">, </span>Por Starry Form (Circle of the Stars, nivel 3)</span></summary><div class="oc-desplegable-dentro"><div class="oc-texto"><p>As a Bonus Action, you can expend a use of your Wild Shape feature to take on a starry form rather than shape-shifting.</p>
+<p>While in your starry form, you retain your game statistics, but your body becomes luminous, your joints glimmer like stars, and glowing lines connect them as on a star chart. This form sheds [rules]Bright Light[/rules] in a 10-foot radius and [rules]Dim Light[/rules] for an additional 10 feet. The form lasts for 10 minutes. It ends early if you dismiss it (no action required), have the [condition]Incapacitated[/condition] condition, or use this feature again.</p>
+<p>Whenever you assume your starry form, choose which of the following constellations glimmers on your body; your choice gives you certain benefits while in the form.</p></div></div></details></li><li><details class="oc-desplegable"><summary><span class="oc-desplegable-flecha" aria-hidden="true">▸</span><span class="oc-desplegable-cabeza">Archer: Luminous Arrow</span><span class="oc-origen"><span class="visually-hidden">, </span>Por Starry Form (Circle of the Stars, nivel 3)</span></summary><div class="oc-desplegable-dentro"><div class="oc-texto"><p>A constellation of an archer appears on you. When you activate this form and as a Bonus Action on your subsequent turns while it lasts, you can make a ranged spell attack, hurling a luminous arrow that targets one creature within 60 feet of yourself. On a hit, the attack deals Radiant damage equal to 1d8 plus your Wisdom modifier.</p></div></div></details></li></ul><h5 class="oc-hoja-subtitulo">Especial</h5><ul class="oc-lista-maquina"><li><details class="oc-desplegable"><summary><span class="oc-desplegable-flecha" aria-hidden="true">▸</span><span class="oc-desplegable-cabeza">Leave Druidic Message</span><span class="oc-origen"><span class="visually-hidden">, </span>Por Druídico (Druida, nivel 1)</span></summary><div class="oc-desplegable-dentro"><div class="oc-texto"><p>You know Druidic, the secret language of Druids. While learning this ancient tongue, you also unlocked the magic of communicating with animals; you always have the [spells]Speak with Animals[/spells] spell prepared.</p>
+<p>You can use Druidic to leave hidden messages. You and others who know Druidic automatically spot such a message. Others spot the message’s presence with a successful DC 15 Intelligence ([skill]Investigation[/skill]) check but can’t decipher it without magic.</p></div></div></details></li><li><details class="oc-desplegable"><summary><span class="oc-desplegable-flecha" aria-hidden="true">▸</span><span class="oc-desplegable-cabeza">Star Map: Ceremony</span><span class="oc-origen"><span class="visually-hidden">, </span>Por Star Map (Circle of the Stars, nivel 3)</span></summary><div class="oc-desplegable-dentro"><div class="oc-texto"><p>You’ve created a star chart as part of your heavenly studies. It is a Tiny object, and you can use it as a Spellcasting Focus for your Druid spells. You determine its form by rolling on the Star Map table or by choosing one.</p>
+<p>While holding the map, you have the [spells]Guidance[/spells] and [spells]Guiding Bolt[/spells] spells prepared, and you can cast <em>Guiding Bolt</em> without expending a spell slot. You can cast it in that way a number of times equal to your Wisdom modifier (minimum of once), and you regain all expended uses when you finish a [rules]Long Rest[/rules].</p>
+<p>If you lose the map, you can perform a 1-hour ceremony to magically create a replacement. This ceremony can be performed during a Short or Long Rest, and it destroys the previous map.</p>
+<p>Star Map</p>
+<ul><li>1d6 · Map Form</li><li>1 · A scroll bearing depictions of constellations</li><li>2 · A stone tablet with fine holes drilled through it</li><li>3 · An owlbear hide tooled with stellar symbols</li><li>4 · A collection of maps bound in an ebony cover</li><li>5 · A crystal engraved with starry patterns</li><li>6 · A glass disk etched with constellations</li></ul></div></div></details></li><li><details class="oc-desplegable"><summary><span class="oc-desplegable-flecha" aria-hidden="true">▸</span><span class="oc-desplegable-cabeza">Circle Spell: Augment</span><span class="oc-origen"><span class="visually-hidden">, </span>De su clase</span></summary><div class="oc-desplegable-dentro"><div class="oc-texto"><p>When you cast a spell with a range of at least 5 feet, you can increase the range of the spell by 1,000 feet per secondary caster contributing to the spell, up to a maximum of a 1-mile increase.</p></div></div></details></li><li><details class="oc-desplegable"><summary><span class="oc-desplegable-flecha" aria-hidden="true">▸</span><span class="oc-desplegable-cabeza">Circle Spell: Distribute</span><span class="oc-origen"><span class="visually-hidden">, </span>De su clase</span></summary><div class="oc-desplegable-dentro"><div class="oc-texto"><p>When you cast a spell that requires Concentration, you can distribute the mental load of the spell among you and the secondary casters. Once the casting is complete, you and all secondary casters can maintain Concentration on this spell. As long as at least one caster who contributed to the spell maintains this Concentration, the spell’s effects remain active.</p></div></div></details></li><li><details class="oc-desplegable"><summary><span class="oc-desplegable-flecha" aria-hidden="true">▸</span><span class="oc-desplegable-cabeza">Circle Spell: Expand</span><span class="oc-origen"><span class="visually-hidden">, </span>De su clase</span></summary><div class="oc-desplegable-dentro"><div class="oc-texto"><p>When you cast a spell that creates an area of effect, you can increase one dimension of the spell’s area of effect for this casting by 10 feet per secondary caster contributing to the spell. For example, if a spell creates a 20-foot-radius Sphere, casting it as a Circle spell with two secondary casters would increase the radius to 40 feet. A spell that creates a Line that is 5 feet wide and 300 feet long, cast as a Circle spell with two secondary casters, could make a Line that is either 25 feet wide or 320 feet long.</p>
+<p>Each secondary caster contributing to the spell must expend a spell slot (no action required). If the spell fails, these spell slots aren’t expended.</p></div></div></details></li><li><details class="oc-desplegable"><summary><span class="oc-desplegable-flecha" aria-hidden="true">▸</span><span class="oc-desplegable-cabeza">Circle Spell: Prolong</span><span class="oc-origen"><span class="visually-hidden">, </span>De su clase</span></summary><div class="oc-desplegable-dentro"><div class="oc-texto"><p>When you cast a spell that has a duration of 1 minute or longer, you can increase the duration of the spell depending on the number of secondary casters contributing to the spell, as detailed in the table below.</p>
+<p>Each secondary caster contributing to the spell must expend a spell slot (no action required). If the spell fails, these spell slots aren’t expended.</p>
+<p><strong>Spell Duration</strong></p>
+<ul><li>Secondary Casters · The Spell Increases Duration by</li><li>1–3 · 1 hour</li><li>4–6 · 8 hours</li><li>7+ · 24 hours</li></ul></div></div></details></li><li><details class="oc-desplegable"><summary><span class="oc-desplegable-flecha" aria-hidden="true">▸</span><span class="oc-desplegable-cabeza">Circle Spell: Safeguard</span><span class="oc-origen"><span class="visually-hidden">, </span>De su clase</span></summary><div class="oc-desplegable-dentro"><div class="oc-texto"><p>When you cast a spell that creates an area of effect, you can carve out a safe zone within that area of effect that is unaffected by the spell for its duration. This safe zone consists of a number of 5-foot Cubes equal to your spellcasting ability modifier plus the number of secondary casters contributing to the spell (minimum of one Cube). You can arrange the Cubes as you like, but each Cube must be contiguous with at least one other Cube.</p>
+<p>If the spell’s area of effect can be moved, the safe zone moves with it.</p></div></div></details></li><li><details class="oc-desplegable"><summary><span class="oc-desplegable-flecha" aria-hidden="true">▸</span><span class="oc-desplegable-cabeza">Circle Spell: Supplant</span><span class="oc-origen"><span class="visually-hidden">, </span>De su clase</span></summary><div class="oc-desplegable-dentro"><div class="oc-texto"><p>When you cast a spell that requires at least one Material component with a specified cost that is consumed by the spell, you can reduce the minimum cost of one such Material component by 50 GP per each secondary caster contributing to the spell. For example, casting [spells]Revivify[/spells] as a Circle spell with two secondary casters would reduce the Material component’s minimum cost to 200 GP.</p>
+<p>Each secondary caster contributing to the spell must expend a spell slot of a level greater than or equal to the spell’s level (no action required). If the spell fails, these spell slots aren’t expended.</p></div></div></details></li></ul></div></div></div></div><div class="oc-hoja-grupo" id="oc-ficha-conjuros" data-oc-subapartado="conjuros"><h3 class="oc-hoja-grupo-titulo"><span aria-hidden="true">✨</span> conjuros</h3><div class="oc-hoja"><div class="oc-hoja-caja es-ancha"><div class="recent-entries-header"><h4 class="oc-hoja-titulo"><span class="oc-hoja-emoji" aria-hidden="true">🔮</span>magia.dat</h4><div class="window-controls window-controls-small" data-window-controls aria-hidden="true"></div></div><div class="oc-hoja-dentro"><ul class="oc-cajitas"><li class="oc-cajita"><span class="oc-cajita-nombre">aptitud mágica</span><span class="oc-cajita-valor">SAB</span><span class="oc-cajita-barra"><span class="visually-hidden"> </span>sabiduría</span></li><li class="oc-cajita"><span class="oc-cajita-nombre">CD de salvación</span><span class="oc-cajita-valor">14</span><span class="oc-cajita-barra" aria-hidden="true">CD</span></li><li class="oc-cajita"><span class="oc-cajita-nombre">ataque de conjuro</span><span class="oc-cajita-valor">+6</span><span class="oc-cajita-barra" aria-hidden="true">ataque</span></li></ul></div></div><div class="oc-hoja-caja"><div class="recent-entries-header"><h4 class="oc-hoja-titulo"><span class="oc-hoja-emoji" aria-hidden="true">✨</span>trucos.lst</h4><div class="window-controls window-controls-small" data-window-controls aria-hidden="true"></div></div><div class="oc-hoja-dentro"><ul class="oc-lista-maquina"><li><details class="oc-desplegable"><summary><span class="oc-desplegable-flecha" aria-hidden="true">▸</span><span class="oc-desplegable-cabeza">Garrote</span><span class="oc-origen"><span class="visually-hidden">, </span>Lista de Druida</span></summary><div class="oc-desplegable-dentro"><ul class="oc-desplegable-datos"><li>Truco</li><li>Transmutación</li><li>1 acción adicional</li><li>Personal</li><li>V, S, M (mistletoe)</li><li>1 minuto</li></ul><div class="oc-texto"><p>A Club or Quarterstaff you are holding is imbued with nature’s power. For the duration, you can use your spellcasting ability instead of Strength for the attack and damage rolls of melee attacks using that weapon, and the weapon’s damage die becomes a d8. If the attack deals damage, it can be Force damage or the weapon’s normal damage type (your choice).</p>
+<p>The spell ends early if you cast it again or if you let go of the weapon.</p>
+<p><strong><em>Cantrip Upgrade.</strong></em> The damage die changes when you reach levels 5 (d10), 11 (d12), and 17 (2d6).</p></div></div></details></li><li><details class="oc-desplegable"><summary><span class="oc-desplegable-flecha" aria-hidden="true">▸</span><span class="oc-desplegable-cabeza">Orientación divina</span><span class="oc-origen"><span class="visually-hidden">, </span>Por Star Map (Circle of the Stars, nivel 3)</span></summary><div class="oc-desplegable-dentro"><ul class="oc-desplegable-datos"><li>Truco</li><li>Adivinación</li><li>1 acción</li><li>Toque</li><li>V, S</li><li>Concentración, hasta 1 minuto</li></ul><div class="oc-texto"><p>You touch a willing creature and choose a skill. Until the spell ends, the creature adds 1d4 to any ability check using the chosen skill.</p></div></div></details></li><li><details class="oc-desplegable"><summary><span class="oc-desplegable-flecha" aria-hidden="true">▸</span><span class="oc-desplegable-cabeza">Piedad con los moribundos</span><span class="oc-origen"><span class="visually-hidden">, </span>Por Primal Order (Druida, nivel 1)</span></summary><div class="oc-desplegable-dentro"><ul class="oc-desplegable-datos"><li>Truco</li><li>Nigromancia</li><li>1 acción</li><li>4,5 m</li><li>V, S</li><li>Instantáneo</li></ul><div class="oc-texto"><p>Choose a creature within range that has 0 Hit Points and isn’t dead. The creature becomes Stable.</p>
+<p><strong><em>Cantrip Upgrade.</strong></em> The range doubles when you reach levels 5 (30 feet), 11 (60 feet), and 17 (120 feet).</p></div></div></details></li><li><details class="oc-desplegable"><summary><span class="oc-desplegable-flecha" aria-hidden="true">▸</span><span class="oc-desplegable-cabeza">Reparar</span><span class="oc-origen"><span class="visually-hidden">, </span>Por Magic Initiate (Druid) (Dote)</span></summary><div class="oc-desplegable-dentro"><ul class="oc-desplegable-datos"><li>Truco</li><li>Transmutación</li><li>1 minuto</li><li>Toque</li><li>V, S, M (two lodestones)</li><li>Instantáneo</li></ul><div class="oc-texto"><p>This spell repairs a single break or tear in an object you touch, such as a broken chain link, two halves of a broken key, a torn cloak, or a leaking wineskin. As long as the break or tear is no larger than 1 foot in any dimension, you mend it, leaving no trace of the former damage.</p>
+<p>This spell can physically repair a magic item, but it can’t restore magic to such an object.</p></div></div></details></li><li><details class="oc-desplegable"><summary><span class="oc-desplegable-flecha" aria-hidden="true">▸</span><span class="oc-desplegable-cabeza">Resistencia</span><span class="oc-origen"><span class="visually-hidden">, </span>Por Magic Initiate (Druid) (Dote)</span></summary><div class="oc-desplegable-dentro"><ul class="oc-desplegable-datos"><li>Truco</li><li>Abjuración</li><li>1 acción</li><li>Toque</li><li>V, S</li><li>Concentración, hasta 1 minuto</li></ul><div class="oc-texto"><p>You touch a willing creature and choose a damage type: Acid, Bludgeoning, Cold, Fire, Lightning, Necrotic, Piercing, Poison, Radiant, Slashing, or Thunder. When the creature takes damage of the chosen type before the spell ends, the creature reduces the total damage taken by 1d4. A creature can benefit from this spell only once per turn.</p></div></div></details></li><li><details class="oc-desplegable"><summary><span class="oc-desplegable-flecha" aria-hidden="true">▸</span><span class="oc-desplegable-cabeza">Saber druídico</span><span class="oc-origen"><span class="visually-hidden">, </span>Por Elven Lineage Spells (Raza: Elfo)</span></summary><div class="oc-desplegable-dentro"><ul class="oc-desplegable-datos"><li>Truco</li><li>Transmutación</li><li>1 acción</li><li>9 m</li><li>V, S</li><li>Instantáneo</li></ul><div class="oc-texto"><p>Whispering to the spirits of nature, you create one of the following effects within range.</p>
+<p><strong><em>Weather Sensor.</strong></em> You create a Tiny, harmless sensory effect that predicts what the weather will be at your location for the next 24 hours. The effect might manifest as a golden orb for clear skies, a cloud for rain, falling snowflakes for snow, and so on. This effect persists for 1 round.</p>
+<p><strong><em>Bloom.</strong></em> You instantly make a flower blossom, a seed pod open, or a leaf bud bloom.</p>
+<p><strong><em>Sensory Effect.</strong></em> You create a harmless sensory effect, such as falling leaves, spectral dancing fairies, a gentle breeze, the sound of an animal, or the faint odor of skunk. The effect must fit in a 5-foot Cube.</p>
+<p><strong><em>Fire Play.</strong></em> You light or snuff out a candle, a torch, or a campfire.</p></div></div></details></li><li><details class="oc-desplegable"><summary><span class="oc-desplegable-flecha" aria-hidden="true">▸</span><span class="oc-desplegable-cabeza">Starry Wisp</span><span class="oc-origen"><span class="visually-hidden">, </span>Lista de Druida</span></summary><div class="oc-desplegable-dentro"><ul class="oc-desplegable-datos"><li>Truco</li><li>Evocación</li><li>1 acción</li><li>18 m</li><li>V, S</li><li>Instantáneo</li></ul><div class="oc-texto"><p>You launch a mote of light at one creature or object within range. Make a ranged spell attack against the target. On a hit, the target takes 1d8 Radiant damage, and until the end of your next turn, it emits Dim Light in a 10-foot radius and can’t benefit from the Invisible condition.</p>
+<p><strong><em>Cantrip Upgrade.</strong></em> The damage increases by 1d8 when you reach levels 5 (2d8), 11 (3d8), and 17 (4d8).</p></div></div></details></li></ul></div></div><div class="oc-hoja-caja"><div class="recent-entries-header"><h4 class="oc-hoja-titulo"><span class="oc-hoja-emoji" aria-hidden="true">📖</span>nivel_1.lst</h4><div class="window-controls window-controls-small" data-window-controls aria-hidden="true"></div></div><div class="oc-hoja-dentro"><p class="oc-hoja-espacios"><span class="oc-marcas" aria-hidden="true"><span class="oc-marca"></span></span><span class="oc-marcas" aria-hidden="true"><span class="oc-marca"></span></span><span class="oc-marcas" aria-hidden="true"><span class="oc-marca"></span></span><span class="oc-marcas" aria-hidden="true"><span class="oc-marca"></span></span>4 espacios</p><ul class="oc-lista-maquina"><li><details class="oc-desplegable"><summary><span class="oc-desplegable-flecha" aria-hidden="true">▸</span><span class="oc-desplegable-cabeza">Bayas buenas</span><span class="oc-origen"><span class="visually-hidden">, </span>Por Magic Initiate (Druid) (Dote)</span></summary><div class="oc-desplegable-dentro"><ul class="oc-desplegable-datos"><li>Nivel 1</li><li>Conjuración</li><li>1 acción</li><li>Personal</li><li>V, S, M (a sprig of mistletoe)</li><li>24 horas</li></ul><div class="oc-texto"><p>Ten berries appear in your hand and are infused with magic for the duration. A creature can take a Bonus Action to eat one berry. Eating a berry restores 1 Hit Point, and the berry provides enough nourishment to sustain a creature for one day.</p>
+<p>Uneaten berries disappear when the spell ends.</p></div></div></details></li><li><details class="oc-desplegable"><summary><span class="oc-desplegable-flecha" aria-hidden="true">▸</span><span class="oc-desplegable-cabeza">Curar heridas</span><span class="oc-origen"><span class="visually-hidden">, </span>Lista de Druida</span></summary><div class="oc-desplegable-dentro"><ul class="oc-desplegable-datos"><li>Nivel 1</li><li>Abjuración</li><li>1 acción</li><li>Toque</li><li>V, S</li><li>Instantáneo</li></ul><div class="oc-texto"><p>A creature you touch regains a number of Hit Points equal to 2d8 plus your spellcasting ability modifier.</p>
+<p><strong><em>Using a Higher-Level Spell Slot.</strong></em> The healing increases by 2d8 for each spell slot level above 1.</p></div></div></details></li><li><details class="oc-desplegable"><summary><span class="oc-desplegable-flecha" aria-hidden="true">▸</span><span class="oc-desplegable-cabeza">Encontrar familiar</span><span class="oc-origen"><span class="visually-hidden">, </span>Por Wild Companion (Druida, nivel 2)</span></summary><div class="oc-desplegable-dentro"><ul class="oc-desplegable-datos"><li>Nivel 1</li><li>Conjuración</li><li>1 hora</li><li>3 m</li><li>V, S, M (burning incense worth 10+ GP, which the spell consumes)</li><li>Instantáneo</li><li>ritual</li></ul><div class="oc-texto"><p>You gain the service of a familiar, a spirit that takes an animal form you choose: Bat, Cat, Frog, Hawk, Lizard, Octopus, Owl, Rat, Raven, Spider, Weasel, or another Beast that has a Challenge Rating of 0. Appearing in an unoccupied space within range, the familiar has the statistics of the chosen form, though it is a Celestial, Fey, or Fiend (your choice) instead of a Beast. Your familiar acts independently of you, but it obeys your commands.</p>
+<p><strong><em>Telepathic Connection.</strong></em> While your familiar is within 100 feet of you, you can communicate with it telepathically. Additionally, as a Bonus Action, you can see through the familiar’s eyes and hear what it hears until the start of your next turn, gaining the benefits of any special senses it has.</p>
+<p>Finally, when you cast a spell with a range of touch, your familiar can deliver the touch. Your familiar must be within 100 feet of you, and it must take a Reaction to deliver the touch when you cast the spell.</p>
+<p><strong><em>Combat.</strong></em> The familiar is an ally to you and your allies. It rolls its own Initiative and acts on its own turn. A familiar can’t attack, but it can take other actions as normal.</p>
+<p><strong><em>Disappearance of the Familiar.</strong></em> When the familiar drops to 0 Hit Points, it disappears. It reappears after you cast this spell again. As a Magic action, you can temporarily dismiss the familiar to a pocket dimension. Alternatively, you can dismiss it forever. As a Magic action while it is temporarily dismissed, you can cause it to reappear in an unoccupied space within 30 feet of you. Whenever the familiar drops to 0 Hit Points or disappears into the pocket dimension, it leaves behind in its space anything it was wearing or carrying.</p>
+<p><strong><em>One Familiar Only.</strong></em> You can’t have more than one familiar at a time. If you cast this spell while you have a familiar, you instead cause it to adopt a new eligible form.</p></div></div></details></li><li><details class="oc-desplegable"><summary><span class="oc-desplegable-flecha" aria-hidden="true">▸</span><span class="oc-desplegable-cabeza">Fuego feérico</span><span class="oc-origen"><span class="visually-hidden">, </span>Lista de Druida</span></summary><div class="oc-desplegable-dentro"><ul class="oc-desplegable-datos"><li>Nivel 1</li><li>Evocación</li><li>1 acción</li><li>18 m (cubo de 6 m)</li><li>V</li><li>Concentración, hasta 1 minuto</li></ul><div class="oc-texto"><p>Objects in a 20-foot Cube within range are outlined in blue, green, or violet light (your choice). Each creature in the Cube is also outlined if it fails a Dexterity saving throw. For the duration, objects and affected creatures shed Dim Light in a 10-foot radius and can’t benefit from the Invisible condition.</p>
+<p>Attack rolls against an affected creature or object have Advantage if the attacker can see it.</p></div></div></details></li><li><details class="oc-desplegable"><summary><span class="oc-desplegable-flecha" aria-hidden="true">▸</span><span class="oc-desplegable-cabeza">Hablar con los animales</span><span class="oc-origen"><span class="visually-hidden">, </span>Lista de Druida</span></summary><div class="oc-desplegable-dentro"><ul class="oc-desplegable-datos"><li>Nivel 1</li><li>Adivinación</li><li>1 acción</li><li>Personal</li><li>V, S</li><li>10 minutos</li><li>ritual</li></ul><div class="oc-texto"><p>For the duration, you can comprehend and verbally communicate with Beasts, and you can use any of the Influence action’s skill options with them.</p>
+<p>Most Beasts have little to say about topics that don’t pertain to survival or companionship, but at minimum, a Beast can give you information about nearby locations and monsters, including whatever it has perceived within the past day.</p></div></div></details></li><li><details class="oc-desplegable"><summary><span class="oc-desplegable-flecha" aria-hidden="true">▸</span><span class="oc-desplegable-cabeza">Palabra de curación</span><span class="oc-origen"><span class="visually-hidden">, </span>Lista de Druida</span></summary><div class="oc-desplegable-dentro"><ul class="oc-desplegable-datos"><li>Nivel 1</li><li>Abjuración</li><li>1 acción adicional</li><li>18 m</li><li>V</li><li>Instantáneo</li></ul><div class="oc-texto"><p>A creature of your choice that you can see within range regains Hit Points equal to 2d4 plus your spellcasting ability modifier.</p>
+<p><strong><em>Using a Higher-Level Spell Slot.</strong></em> The healing increases by 2d4 for each spell slot level above 1.</p></div></div></details></li><li><details class="oc-desplegable"><summary><span class="oc-desplegable-flecha" aria-hidden="true">▸</span><span class="oc-desplegable-cabeza">Saeta guía</span><span class="oc-origen"><span class="visually-hidden">, </span>Por Star Map (Circle of the Stars, nivel 3)</span></summary><div class="oc-desplegable-dentro"><ul class="oc-desplegable-datos"><li>Nivel 1</li><li>Evocación</li><li>1 acción</li><li>36 m</li><li>V, S</li><li>1 asalto</li></ul><div class="oc-texto"><p>You hurl a bolt of light toward a creature within range. Make a ranged spell attack against the target. On a hit, it takes 4d6 Radiant damage, and the next attack roll made against it before the end of your next turn has Advantage.</p>
+<p><strong><em>Using a Higher-Level Spell Slot.</strong></em> The damage increases by 1d6 for each spell slot level above 1.</p></div></div></details></li><li><details class="oc-desplegable"><summary><span class="oc-desplegable-flecha" aria-hidden="true">▸</span><span class="oc-desplegable-cabeza">Zancada prodigiosa</span><span class="oc-origen"><span class="visually-hidden">, </span>Por Elven Lineage Spells (Raza: Elfo)</span></summary><div class="oc-desplegable-dentro"><ul class="oc-desplegable-datos"><li>Nivel 1</li><li>Transmutación</li><li>1 acción</li><li>Toque</li><li>V, S, M (a pinch of dirt)</li><li>1 hora</li></ul><div class="oc-texto"><p>You touch a creature. The target’s Speed increases by 10 feet until the spell ends.</p>
+<p><strong><em>Using a Higher-Level Spell Slot.</strong></em> You can target one additional creature for each spell slot level above 1.</p></div></div></details></li></ul></div></div><div class="oc-hoja-caja"><div class="recent-entries-header"><h4 class="oc-hoja-titulo"><span class="oc-hoja-emoji" aria-hidden="true">📖</span>nivel_2.lst</h4><div class="window-controls window-controls-small" data-window-controls aria-hidden="true"></div></div><div class="oc-hoja-dentro"><p class="oc-hoja-espacios"><span class="oc-marcas" aria-hidden="true"><span class="oc-marca"></span></span><span class="oc-marcas" aria-hidden="true"><span class="oc-marca"></span></span>2 espacios</p><ul class="oc-lista-maquina"><li><details class="oc-desplegable"><summary><span class="oc-desplegable-flecha" aria-hidden="true">▸</span><span class="oc-desplegable-cabeza">Agrandar/reducir</span><span class="oc-origen"><span class="visually-hidden">, </span>Lista de Druida</span></summary><div class="oc-desplegable-dentro"><ul class="oc-desplegable-datos"><li>Nivel 2</li><li>Transmutación</li><li>1 acción</li><li>9 m</li><li>V, S, M (a pinch of powdered iron)</li><li>Concentración, hasta 1 minuto</li></ul><div class="oc-texto"><p>For the duration, the spell enlarges or reduces a creature or an object you can see within range (see the chosen effect below). A targeted object must be neither worn nor carried. If the target is an unwilling creature, it can make a Constitution saving throw. On a successful save, the spell has no effect.</p>
+<p>Everything that a targeted creature is wearing and carrying changes size with it. Any item it drops returns to normal size at once. A thrown weapon or piece of ammunition returns to normal size immediately after it hits or misses a target.</p>
+<p><strong><em>Enlarge.</strong></em> The target’s size increases by one category—from Medium to Large, for example. The target also has Advantage on Strength checks and Strength saving throws. The target’s attacks with its enlarged weapons or Unarmed Strikes deal an extra 1d4 damage on a hit.</p>
+<p><strong><em>Reduce.</strong></em> The target’s size decreases by one category—from Medium to Small, for example. The target also has Disadvantage on Strength checks and Strength saving throws. The target’s attacks with its reduced weapons or Unarmed Strikes deal 1d4 less damage on a hit (this can’t reduce the damage below 1).</p></div></div></details></li><li><details class="oc-desplegable"><summary><span class="oc-desplegable-flecha" aria-hidden="true">▸</span><span class="oc-desplegable-cabeza">Rayo de luna</span><span class="oc-origen"><span class="visually-hidden">, </span>Lista de Druida</span></summary><div class="oc-desplegable-dentro"><ul class="oc-desplegable-datos"><li>Nivel 2</li><li>Evocación</li><li>1 acción</li><li>36 m (cilindro de 1,5 m)</li><li>V, S, M (a moonseed leaf)</li><li>Concentración, hasta 1 minuto</li></ul><div class="oc-texto"><p>A silvery beam of pale light shines down in a 5-foot-radius, 40-foot-high Cylinder centered on a point within range. Until the spell ends, Dim Light fills the Cylinder, and you can take a Magic action on later turns to move the Cylinder up to 60 feet.</p>
+<p>When the Cylinder appears, each creature in it makes a Constitution saving throw. On a failed save, a creature takes 2d10 Radiant damage, and if the creature is shape-shifted (as a result of the Polymorph spell, for example), it reverts to its true form and can’t shape-shift until it leaves the Cylinder. On a successful save, a creature takes half as much damage only. A creature also makes this save when the spell’s area moves into its space and when it enters the spell’s area or ends its turn there. A creature makes this save only once per turn.</p>
+<p><strong><em>Using a Higher-Level Spell Slot.</strong></em> The damage increases by 1d10 for each spell slot level above 2.</p></div></div></details></li></ul></div></div></div></div><div class="oc-hoja-grupo" id="oc-ficha-inventario" data-oc-subapartado="inventario"><h3 class="oc-hoja-grupo-titulo"><span aria-hidden="true">🎒</span> inventario</h3><div class="oc-hoja"><div class="oc-hoja-caja es-ancha"><div class="recent-entries-header"><h4 class="oc-hoja-titulo"><span class="oc-hoja-emoji" aria-hidden="true">💰</span>bolsa.txt</h4><div class="window-controls window-controls-small" data-window-controls aria-hidden="true"></div></div><div class="oc-hoja-dentro"><ul class="oc-cajitas"><li class="oc-cajita"><span class="oc-cajita-nombre">oro</span><span class="oc-cajita-valor">72</span><span class="oc-cajita-barra" aria-hidden="true">po</span></li></ul></div></div><div class="oc-hoja-caja es-ancha"><div class="recent-entries-header"><h4 class="oc-hoja-titulo"><span class="oc-hoja-emoji" aria-hidden="true">🎒</span>inventario.lst</h4><div class="window-controls window-controls-small" data-window-controls aria-hidden="true"></div></div><div class="oc-hoja-dentro"><ul class="oc-lista-maquina"><li><details class="oc-desplegable"><summary><span class="oc-desplegable-flecha" aria-hidden="true">▸</span><span class="oc-desplegable-cabeza"><span class="oc-objeto-emoji" aria-hidden="true">🛡️</span>Escudo</span></summary><div class="oc-desplegable-dentro"><ul class="oc-desplegable-datos"><li>Armadura</li><li>lo lleva puesto</li></ul><div class="oc-texto"><p>Shields require the Utilize action to Don or Doff. You gain the Armor Class benefit of a Shield only if you have training with it.</p></div></div></details></li><li><details class="oc-desplegable"><summary><span class="oc-desplegable-flecha" aria-hidden="true">▸</span><span class="oc-desplegable-cabeza"><span class="oc-objeto-emoji" aria-hidden="true">🛡️</span>Armadura de cuero</span></summary><div class="oc-desplegable-dentro"><ul class="oc-desplegable-datos"><li>Armadura</li><li>lo lleva puesto</li></ul><div class="oc-texto"><p>The breastplate and shoulder protectors of this armor are made of leather that has been stiffened by being boiled in oil. The rest of the armor is made of softer and more flexible materials.</p></div></div></details></li><li><details class="oc-desplegable"><summary><span class="oc-desplegable-flecha" aria-hidden="true">▸</span><span class="oc-desplegable-cabeza"><span class="oc-objeto-emoji" aria-hidden="true">🏹</span>Arco corto</span></summary><div class="oc-desplegable-dentro"><ul class="oc-desplegable-datos"><li>Arma</li><li>lo lleva puesto</li></ul><div class="oc-texto"><p>Proficiency with a Shortbow allows you to add your proficiency bonus to the attack roll for any attack you make with it.</p>
+<p>This weapon has the following mastery property. To use this property, you must have a feature that lets you use it.</p>
+<p><strong><em>Vex.</strong></em> If you hit a creature with this weapon and deal damage to the creature, you have Advantage on your next attack roll against that creature before the end of your next turn.</p></div></div></details></li><li><span class="oc-objeto-emoji" aria-hidden="true">🎒</span>Mochila</li><li><span class="oc-objeto-emoji" aria-hidden="true">🧰</span>Útiles de herborista</li><li><span class="oc-objeto-emoji" aria-hidden="true">🏹</span>Flechas <span class="oc-hoja-cuantos">×20</span></li><li><span class="oc-objeto-emoji" aria-hidden="true">📦</span>Staff</li><li><span class="oc-objeto-emoji" aria-hidden="true">📦</span>Traveler&#x27;s Clothes</li><li><span class="oc-objeto-emoji" aria-hidden="true">📦</span>Hoz</li><li><span class="oc-objeto-emoji" aria-hidden="true">📦</span>Oil <span class="oc-hoja-cuantos">×2</span></li><li><span class="oc-objeto-emoji" aria-hidden="true">📦</span>Rations <span class="oc-hoja-cuantos">×10</span></li><li><span class="oc-objeto-emoji" aria-hidden="true">📦</span>Cartographer&#x27;s Tools</li><li><span class="oc-objeto-emoji" aria-hidden="true">📦</span>Rope</li><li><span class="oc-objeto-emoji" aria-hidden="true">⛺</span>Petate</li><li><span class="oc-objeto-emoji" aria-hidden="true">📦</span>Tent</li><li><span class="oc-objeto-emoji" aria-hidden="true">🔥</span>Yesquero</li><li><span class="oc-objeto-emoji" aria-hidden="true">🔥</span>Antorcha <span class="oc-hoja-cuantos">×10</span></li><li><span class="oc-objeto-emoji" aria-hidden="true">🍶</span>Odre</li></ul></div></div></div></div><div class="oc-hoja-grupo" id="oc-ficha-rasgos" data-oc-subapartado="rasgos"><h3 class="oc-hoja-grupo-titulo"><span aria-hidden="true">🧬</span> rasgos</h3><div class="oc-hoja"><div class="oc-hoja-caja es-ancha"><div class="recent-entries-header"><h4 class="oc-hoja-titulo"><span class="oc-hoja-emoji" aria-hidden="true">🧬</span>rasgos.txt</h4><div class="window-controls window-controls-small" data-window-controls aria-hidden="true"></div></div><div class="oc-hoja-dentro"><ul class="oc-lista-maquina oc-hoja-rasgos"><li><details class="oc-desplegable"><summary><span class="oc-desplegable-flecha" aria-hidden="true">▸</span><span class="oc-desplegable-cabeza"><span class="oc-desplegable-nombre">Visión en la oscuridad</span></span><span class="oc-origen"><span class="visually-hidden">, </span>Raza: Elfo</span></summary><div class="oc-desplegable-dentro"><div class="oc-texto"><p>You have Darkvision with a range of 60 feet.</p></div></div></details></li><li><details class="oc-desplegable"><summary><span class="oc-desplegable-flecha" aria-hidden="true">▸</span><span class="oc-desplegable-cabeza"><span class="oc-desplegable-nombre">Elven Lineage</span></span><span class="oc-origen"><span class="visually-hidden">, </span>Raza: Elfo</span></summary><div class="oc-desplegable-dentro"><div class="oc-texto"><p>You are part of a lineage that grants you supernatural abilities. Choose a lineage from the Elven Lineages table. You gain the level 1 benefit of that lineage.</p>
+<p>When you reach character levels 3 and 5, you learn a higher-level spell, as shown on the table. You always have that spell prepared. You can cast it once without a spell slot, and you regain the ability to cast it in that way when you finish a Long Rest. You can also cast the spell using any spell slots you have of the appropriate level.</p>
+<p>Intelligence, Wisdom, or Charisma is your spellcasting ability for the spells you cast with this trait (choose the ability when you select the lineage).</p>
+<p>Elven Lineages</p>
+<ul><li>Lineage · Level 1 · Level 3 · Level 5</li><li>Drow · The range of your Darkvision increases to 120 feet. You also know the <em>Dancing Lights</em> cantrip. · <em>Faerie Fire</em> · <em>Darkness</em></li><li>High Elf · You know the <em>Prestidigitation</em> cantrip. Whenever you finish a Long Rest, you can replace that cantrip with a different cantrip from the Wizard spell list. · <em>Detect Magic</em> · <em>Misty Step</em></li><li>Wood Elf · Your Speed increases to 35 feet. You also know the <em>Druidcraft</em> cantrip. · <em>Longstrider</em> · <em>Pass without Trace</em></li></ul></div></div></details></li><li><details class="oc-desplegable"><summary><span class="oc-desplegable-flecha" aria-hidden="true">▸</span><span class="oc-desplegable-cabeza"><span class="oc-desplegable-nombre">Linaje feérico</span></span><span class="oc-origen"><span class="visually-hidden">, </span>Raza: Elfo</span></summary><div class="oc-desplegable-dentro"><div class="oc-texto"><p>You have Advantage on saving throws you make to avoid or end the Charmed condition.</p></div></div></details></li><li><details class="oc-desplegable"><summary><span class="oc-desplegable-flecha" aria-hidden="true">▸</span><span class="oc-desplegable-cabeza"><span class="oc-desplegable-nombre">Sentidos agudos</span></span><span class="oc-origen"><span class="visually-hidden">, </span>Raza: Elfo</span></summary><div class="oc-desplegable-dentro"><div class="oc-texto"><p>You have proficiency in the Insight, Perception, or Survival skill.</p></div></div></details></li><li><details class="oc-desplegable"><summary><span class="oc-desplegable-flecha" aria-hidden="true">▸</span><span class="oc-desplegable-cabeza"><span class="oc-desplegable-nombre">Trance</span></span><span class="oc-origen"><span class="visually-hidden">, </span>Raza: Elfo</span></summary><div class="oc-desplegable-dentro"><div class="oc-texto"><p>You don’t need to sleep, and magic can’t put you to sleep. You can finish a Long Rest in 4 hours if you spend those hours in a trancelike meditation, during which you retain consciousness.</p></div></div></details></li><li><details class="oc-desplegable"><summary><span class="oc-desplegable-flecha" aria-hidden="true">▸</span><span class="oc-desplegable-cabeza"><span class="oc-desplegable-nombre">Elven Lineage Spells</span></span><span class="oc-origen"><span class="visually-hidden">, </span>Raza: Elfo</span></summary><div class="oc-desplegable-dentro"><div class="oc-texto"><p>When you choose your Elven Lineage, and at character levels 3 and 5, you learn a spell as shown on the table. You always have that spell prepared. You can cast it once without a spell slot, and you regain the ability to cast it in that way when you finish a Long Rest. You can also cast the spell using any spell slots you have of the appropriate level.</p>
+<p>Intelligence, Wisdom, or Charisma is your spellcasting ability for the spells you cast with this trait (choose the ability when you select the lineage).</p></div></div></details></li><li><details class="oc-desplegable"><summary><span class="oc-desplegable-flecha" aria-hidden="true">▸</span><span class="oc-desplegable-cabeza"><span class="oc-desplegable-nombre">Ability Score Increases</span></span><span class="oc-origen"><span class="visually-hidden">, </span>Raza: Elfo</span></summary><div class="oc-desplegable-dentro"><div class="oc-texto"><p>When determining your character’s ability scores, increase one score by 2 and a different one by 1, or increase three scores by 1. None of these increases can raise a score above 20.</p></div></div></details></li><li><details class="oc-desplegable"><summary><span class="oc-desplegable-flecha" aria-hidden="true">▸</span><span class="oc-desplegable-cabeza"><span class="oc-desplegable-nombre">Star Map</span></span><span class="oc-origen"><span class="visually-hidden">, </span>Circle of the Stars, nivel 3</span></summary><div class="oc-desplegable-dentro"><div class="oc-texto"><p>You’ve created a star chart as part of your heavenly studies. It is a Tiny object, and you can use it as a Spellcasting Focus for your Druid spells. You determine its form by rolling on the Star Map table or by choosing one.</p>
+<p>While holding the map, you have the Guidance and Guiding Bolt spells prepared, and you can cast <em>Guiding Bolt</em> without expending a spell slot. You can cast it in that way a number of times equal to your Wisdom modifier (minimum of once), and you regain all expended uses when you finish a Long Rest.</p>
+<p>If you lose the map, you can perform a 1-hour ceremony to magically create a replacement. This ceremony can be performed during a Short or Long Rest, and it destroys the previous map.</p>
+<p>Star Map</p>
+<ul><li>1d6 · Map Form</li><li>1 · A scroll bearing depictions of constellations</li><li>2 · A stone tablet with fine holes drilled through it</li><li>3 · An owlbear hide tooled with stellar symbols</li><li>4 · A collection of maps bound in an ebony cover</li><li>5 · A crystal engraved with starry patterns</li><li>6 · A glass disk etched with constellations</li></ul></div></div></details></li><li><details class="oc-desplegable"><summary><span class="oc-desplegable-flecha" aria-hidden="true">▸</span><span class="oc-desplegable-cabeza"><span class="oc-desplegable-nombre">Starry Form</span></span><span class="oc-origen"><span class="visually-hidden">, </span>Circle of the Stars, nivel 3</span></summary><div class="oc-desplegable-dentro"><div class="oc-texto"><p>As a Bonus Action, you can expend a use of your Wild Shape feature to take on a starry form rather than shape-shifting.</p>
+<p>While in your starry form, you retain your game statistics, but your body becomes luminous, your joints glimmer like stars, and glowing lines connect them as on a star chart. This form sheds Bright Light in a 10-foot radius and Dim Light for an additional 10 feet. The form lasts for 10 minutes. It ends early if you dismiss it (no action required), have the Incapacitated condition, or use this feature again.</p>
+<p>Whenever you assume your starry form, choose which of the following constellations glimmers on your body; your choice gives you certain benefits while in the form.</p>
+<p><strong><em>Archer.</strong></em> A constellation of an archer appears on you. When you activate this form and as a Bonus Action on your subsequent turns while it lasts, you can make a ranged spell attack, hurling a luminous arrow that targets one creature within 60 feet of yourself. On a hit, the attack deals Radiant damage equal to 1d8 plus your Wisdom modifier.</p>
+<p><strong><em>Chalice.</strong></em> A constellation of a life-giving goblet appears on you. Whenever you cast a spell using a spell slot that restores Hit Points to a creature, you or another creature within 30 feet of you can regain Hit Points equal to 1d8 plus your Wisdom modifier.</p>
+<p><strong><em>Dragon.</strong></em> A constellation of a wise dragon appears on you. When you make an Intelligence or a Wisdom check or a Constitution saving throw to maintain Concentration, you can treat a roll of 9 or lower on the d20 as a 10.</p></div></div></details></li><li><details class="oc-desplegable"><summary><span class="oc-desplegable-flecha" aria-hidden="true">▸</span><span class="oc-desplegable-cabeza"><span class="oc-desplegable-nombre">Core Druid Traits</span></span><span class="oc-origen"><span class="visually-hidden">, </span>Druida, nivel 1</span></summary><div class="oc-desplegable-dentro"><div class="oc-texto"><p>As a Level 1 Character:</p>
+<ul><li>Gain all the traits in the Core Druid Traits table.</li><li>Gain the Druid’s level 1 features, which are listed in the Druid Features table.</li></ul>
+<p>Core Druid Traits</p>
+<ul><li>Primary Ability · Wisdom</li><li>Hit Point Die · D8 per Druid level</li><li>Saving Throw Proficiencies · Intelligence and Wisdom</li><li>Skill Proficiencies · <em>Choose 2:</em> Animal Handling, Arcana, Insight, Medicine, Nature, Perception, Religion, or Survival</li><li>Weapon Proficiencies · Simple weapons</li><li>Tool Proficiencies · Herbalism Kit</li><li>Armor Training · Light armor and Shields</li><li>Starting Equipment · <em>Choose A or B:</em> (A) Leather Armor, Shield, Sickle, Druidic Focus (Quarterstaff), Explorer’s Pack, Herbalism Kit, and 9 GP; or (B) 50 GP</li></ul></div></div></details></li><li><details class="oc-desplegable"><summary><span class="oc-desplegable-flecha" aria-hidden="true">▸</span><span class="oc-desplegable-cabeza"><span class="oc-desplegable-nombre">Lanzamiento de conjuros</span></span><span class="oc-origen"><span class="visually-hidden">, </span>Druida, nivel 1</span></summary><div class="oc-desplegable-dentro"><div class="oc-texto"><p>You have learned to cast spells through studying the mystical forces of nature. See chapter 7 for the rules on spellcasting. The information below details how you use those rules with Druid spells, which appear on the Druid spell list later in the class’s description.</p>
+<p><strong><em>Cantrips.</strong></em> You know two cantrips of your choice from the Druid spell list.</p>
+<p>Whenever you gain a Druid level, you can replace one of your cantrips with another cantrip of your choice from the Druid spell list.</p>
+<p>When you reach Druid levels 4 and 10, you learn another cantrip of your choice from the Druid spell list, as shown in the Cantrips column of the Druid Features table.</p>
+<p><strong><em>Spell Slots.</strong></em> The Druid Features table shows how many spell slots you have to cast your level 1+ spells. You regain all expended slots when you finish a Long Rest.</p>
+<p><strong><em>Prepared Spells of Level 1+.</strong></em> You prepare the list of level 1+ spells that are available for you to cast with this feature. To start, choose four level 1 spells from the Druid spell list.</p>
+<p>The number of spells on your list increases as you gain Druid levels, as shown in the Prepared Spells column of the Druid Features table. Whenever that number increases, choose additional spells from the Druid spell list until the number of spells on your list matches the number on the table. The chosen spells must be of a level for which you have spell slots. For example, if you’re a level 3 Druid, your list of prepared spells can include six spells of levels 1 and 2 in any combination.</p>
+<p>If another Druid feature gives you spells that you always have prepared, those spells don’t count against the number of spells you can prepare with this feature, but those spells otherwise count as Druid spells for you.</p>
+<p><strong><em>Changing Your Prepared Spells.</strong></em> Whenever you finish a Long Rest, you can change your list of prepared spells, replacing any of the spells with other Druid spells for which you have spell slots.</p>
+<p><strong><em>Spellcasting Ability.</strong></em> Wisdom is your spellcasting ability for your Druid spells.</p>
+<p><strong><em>Spellcasting Focus.</strong></em> You can use a Druidic Focus as a Spellcasting Focus for your Druid spells.</p></div></div></details></li><li><details class="oc-desplegable"><summary><span class="oc-desplegable-flecha" aria-hidden="true">▸</span><span class="oc-desplegable-cabeza"><span class="oc-desplegable-nombre">Druídico</span></span><span class="oc-origen"><span class="visually-hidden">, </span>Druida, nivel 1</span></summary><div class="oc-desplegable-dentro"><div class="oc-texto"><p>You know Druidic, the secret language of Druids. While learning this ancient tongue, you also unlocked the magic of communicating with animals; you always have the Speak with Animals spell prepared.</p>
+<p>You can use Druidic to leave hidden messages. You and others who know Druidic automatically spot such a message. Others spot the message’s presence with a successful DC 15 Intelligence (Investigation) check but can’t decipher it without magic.</p></div></div></details></li><li><details class="oc-desplegable"><summary><span class="oc-desplegable-flecha" aria-hidden="true">▸</span><span class="oc-desplegable-cabeza"><span class="oc-desplegable-nombre">Primal Order</span></span><span class="oc-origen"><span class="visually-hidden">, </span>Druida, nivel 1</span></summary><div class="oc-desplegable-dentro"><div class="oc-texto"><p>You have dedicated yourself to one of the following sacred roles of your choice.</p>
+<p><strong>Magician</strong>
+You know one extra cantrip from the Druid spell list. In addition, your mystical connection to nature gives you a bonus to your Intelligence (Arcana or Nature) checks. The bonus equals your Wisdom modifier (minimum bonus of +1).</p>
+<p><strong>Warden</strong>
+Trained for battle, you gain proficiency with Martial weapons and training with Medium armor.</p></div></div></details></li><li><details class="oc-desplegable"><summary><span class="oc-desplegable-flecha" aria-hidden="true">▸</span><span class="oc-desplegable-cabeza"><span class="oc-desplegable-nombre">Forma salvaje</span></span><span class="oc-origen"><span class="visually-hidden">, </span>Por Forma salvaje (Druida, nivel 2)</span></summary><div class="oc-desplegable-dentro"><div class="oc-texto"><p>The power of nature allows you to assume the form of an animal. As a Bonus Action, you [rules]shape-shifting;shape-shift[/rules] into a Beast form that you have learned for this feature (see “Known Forms” below). You stay in that form for a number of hours equal to half your Druid level or until you use Wild Shape again, have the [condition]Incapacitated[/condition] condition, or die. You can also leave the form early as a Bonus Action.</p>
+<p><strong><em>Number of Uses.</strong></em> You can use Wild Shape twice. You regain one expended use when you finish a Short Rest, and you regain all expended uses when you finish a Long Rest.</p>
+<p>You gain additional uses when you reach certain Druid levels, as shown in the Wild Shape column of the Druid Features table.</p>
+<p><strong><em>Known Forms.</strong></em> You know four Beast forms for this feature, chosen from among Beast stat blocks that have a maximum Challenge Rating of 1/4 and that lack a Fly Speed. Whenever you finish a Long Rest, you can replace one of your known forms with another eligible form.</p>
+<p>When you reach certain Druid levels, your number of known forms and the maximum Challenge Rating for those forms increases, as shown in the Beast Shapes table. In addition, starting at level 8, you can adopt a form that has a Fly Speed.</p>
+<p>When choosing known forms, you may look in the <em>Monster Manual</em> or elsewhere for eligible Beasts if the Dungeon Master permits you to do so.</p>
+<p>Beast Shapes</p>
+<ul><li>Druid Level · Known Forms · Max CR · Fly Speed</li><li>2 · 4 · 1/4 · No</li><li>4 · 6 · 1/2 · No</li><li>8 · 8 · 1 · Yes</li></ul>
+<p><strong><em>Rules While Shape-Shifted.</strong></em> While in a form, you retain your personality, memories, and ability to speak, and the following rules apply:</p>
+<p><strong><em>Temporary Hit Points.</strong></em> When you assume a Wild Shape form, you gain a number of [rules]Temporary Hit Points[/rules] equal to your Druid level.</p>
+<p><strong><em>Game Statistics.</strong></em> Your game statistics are replaced by the Beast’s stat block, but you retain your creature type; Hit Points; Hit Point Dice; Intelligence, Wisdom, and Charisma scores; class features; languages; and feats. You also retain your skill and saving throw proficiencies and use your Proficiency Bonus for them, in addition to gaining the proficiencies of the creature. If a skill or saving throw modifier in the Beast’s stat block is higher than yours, use the one in the stat block.</p>
+<p><strong><em>No Spellcasting.</strong></em> You can’t cast spells, but shape-shifting doesn’t break your [rules]Concentration[/rules] or otherwise interfere with a spell you’ve already cast.</p>
+<p><strong><em>Objects.</strong></em> Your ability to handle objects is determined by the form’s limbs rather than your own. In addition, you choose whether your equipment falls in your space, merges into your new form, or is worn by it. Worn equipment functions as normal, but the DM decides whether it’s practical for the new form to wear a piece of equipment based on the creature’s size and shape. Your equipment doesn’t change size or shape to match the new form, and any equipment that the new form can’t wear must either fall to the ground or merge with the form. Equipment that merges with the form has no effect while you’re in that form.</p></div></div></details></li><li><details class="oc-desplegable"><summary><span class="oc-desplegable-flecha" aria-hidden="true">▸</span><span class="oc-desplegable-cabeza"><span class="oc-desplegable-nombre">Wild Companion</span></span><span class="oc-origen"><span class="visually-hidden">, </span>Druida, nivel 2</span></summary><div class="oc-desplegable-dentro"><div class="oc-texto"><p>You can summon a nature spirit that assumes an animal form to aid you. As a Magic action, you can expend a spell slot or a use of Wild Shape to cast the Find Familiar spell without Material components.</p>
+<p>When you cast the spell in this way, the familiar is Fey and disappears when you finish a Long Rest.</p></div></div></details></li><li><details class="oc-desplegable"><summary><span class="oc-desplegable-flecha" aria-hidden="true">▸</span><span class="oc-desplegable-cabeza"><span class="oc-desplegable-nombre">Druid Subclass</span></span><span class="oc-origen"><span class="visually-hidden">, </span>Druida, nivel 3</span></summary><div class="oc-desplegable-dentro"><div class="oc-texto"><p>You gain a Druid subclass of your choice. A subclass is a specialization that grants you features at certain Druid levels. For the rest of your career, you gain each of your subclass’s features that are of your Druid level or lower.</p></div></div></details></li><li><details class="oc-desplegable"><summary><span class="oc-desplegable-flecha" aria-hidden="true">▸</span><span class="oc-desplegable-cabeza"><span class="oc-desplegable-nombre">Guide Ability Score Improvements</span></span><span class="oc-origen"><span class="visually-hidden">, </span>Dote</span></summary><div class="oc-desplegable-dentro"><div class="oc-texto"><p>The Guide Background allows you to choose between Dexterity, Constitution, and Wisdom. Increase one of these scores by 2 and another one by 1, or increase all three by 1. None of these increases can raise a score above 20.</p></div></div></details></li><li><details class="oc-desplegable"><summary><span class="oc-desplegable-flecha" aria-hidden="true">▸</span><span class="oc-desplegable-cabeza"><span class="oc-desplegable-nombre">Magic Initiate (Druid)</span></span><span class="oc-origen"><span class="visually-hidden">, </span>Dote</span></summary><div class="oc-desplegable-dentro"><div class="oc-texto"><p><em>Origin Feat</em></p>
+<p>You gain the following benefits.</p>
+<p><strong><em>Two Cantrips.</strong></em> You learn two cantrips of your choice from the Druid spell list. Intelligence, Wisdom, or Charisma is your spellcasting ability for this feat’s spells (choose when you select this feat).</p>
+<p><strong>*Level 1 Spell.</strong> *Choose a level 1 spell from the same list you selected for this feat’s cantrips. You always have that spell prepared. You can cast it once without a spell slot, and you regain the ability to cast it in that way when you finish a Long Rest. You can also cast the spell using any spell slots you have.</p>
+<p><strong><em>Spell Change.</strong></em> Whenever you gain a new level, you can replace one of the spells you chose for this feat with a different spell of the same level from the chosen spell list.</p>
+<p><strong><em>Repeatable.</strong></em> You can take this feat more than once, but you must choose a different spell list each time.</p></div></div></details></li><li><details class="oc-desplegable"><summary><span class="oc-desplegable-flecha" aria-hidden="true">▸</span><span class="oc-desplegable-cabeza"><span class="oc-desplegable-nombre">Dark Bargain</span></span><span class="oc-origen"><span class="visually-hidden">, </span>Dote</span></summary><div class="oc-desplegable-dentro"><div class="oc-texto"><p>At your GM's discretion, you can take a Dark Bargain.</p></div></div></details></li><li><details class="oc-desplegable"><summary><span class="oc-desplegable-flecha" aria-hidden="true">▸</span><span class="oc-desplegable-cabeza"><span class="oc-desplegable-nombre">Character Threads</span></span><span class="oc-origen"><span class="visually-hidden">, </span>Dote</span></summary><div class="oc-desplegable-dentro"><div class="oc-texto"><p>Threads are aspects added to characters at any time during their career that have a specific short or long-term goal.</p></div></div></details></li><li><details class="oc-desplegable"><summary><span class="oc-desplegable-flecha" aria-hidden="true">▸</span><span class="oc-desplegable-cabeza"><span class="oc-desplegable-nombre">Runestones</span></span><span class="oc-origen"><span class="visually-hidden">, </span>Dote</span></summary><div class="oc-desplegable-dentro"><div class="oc-texto"><p>At the beginning of the <em>Northlands Sagas</em> adventure path, each player should draw one Runestone randomly.</p></div></div></details></li></ul></div></div></div></div><div class="oc-hoja-grupo" id="oc-ficha-competencias" data-oc-subapartado="competencias"><h3 class="oc-hoja-grupo-titulo"><span aria-hidden="true">🗣️</span> competencias</h3><div class="oc-hoja"><div class="oc-hoja-caja"><div class="recent-entries-header"><h4 class="oc-hoja-titulo"><span class="oc-hoja-emoji" aria-hidden="true">🗣️</span>idiomas.txt</h4><div class="window-controls window-controls-small" data-window-controls aria-hidden="true"></div></div><div class="oc-hoja-dentro"><ul class="oc-lista-maquina"><li>Común</li><li>Élfico</li><li>Gnomo</li><li>Druídico</li></ul></div></div><div class="oc-hoja-caja"><div class="recent-entries-header"><h4 class="oc-hoja-titulo"><span class="oc-hoja-emoji" aria-hidden="true">🛠️</span>competencias.txt</h4><div class="window-controls window-controls-small" data-window-controls aria-hidden="true"></div></div><div class="oc-hoja-dentro"><ul class="oc-lista-maquina"><li>Armas sencillas</li><li>Armadura ligera</li><li>Escudos</li><li>Útiles de herborista</li><li>Cartographer&#x27;s Tools</li></ul></div></div></div></div><div class="oc-hoja-grupo" id="oc-ficha-trasfondo" data-oc-subapartado="trasfondo"><h3 class="oc-hoja-grupo-titulo"><span aria-hidden="true">📜</span> trasfondo</h3><div class="oc-hoja"><div class="oc-hoja-caja"><div class="recent-entries-header"><h4 class="oc-hoja-titulo"><span class="oc-hoja-emoji" aria-hidden="true">🏛️</span>origen.txt</h4><div class="window-controls window-controls-small" data-window-controls aria-hidden="true"></div></div><div class="oc-hoja-dentro"><dl class="oc-datos"><div class="oc-dato"><dt>Trasfondo</dt><dd>Guide</dd></div></dl></div></div></div></div></div></div>
+                        </div>
+                        <div class="oc-apartado" id="oc-gente" data-oc-apartado="gente">
+                            <h2 class="oc-apartado-titulo">npcs</h2>
+                            <div class="oc-lista"><p class="oc-vacio">Todavía no hay nadie apuntado.</p></div>
+                        </div>
+                        <div class="oc-apartado" id="oc-imagenes" data-oc-apartado="imagenes">
+                            <h2 class="oc-apartado-titulo">imágenes</h2>
+                            <div class="oc-lista"><p class="oc-vacio">Todavía no hay imágenes.</p></div>
+                        </div>
+                        <div class="oc-apartado" id="oc-extra" data-oc-apartado="extra">
+                            <h2 class="oc-apartado-titulo">extra</h2>
+                            <div class="oc-texto"><p class="oc-vacio">Nada más, de momento.</p></div>
+                        </div>
+                    </div>
+            </div>
+
+            <a class="oc-volver oc-volver-abajo" href="/web/personajes/index_personajes.html">← volver a mis personajes</a>
+        </section>
+    </main>
+</body>
+</html>
