@@ -1823,14 +1823,72 @@ li > .oc-origen {
     outline-offset: 2px;
 }
 
-/* Cada dado con su silueta (triángulo el d4, cuadrado el d6…) encima
-   del nombre. */
-.oc-dados-cara {
+/* Cada dado en su casilla: el botón con su silueta (triángulo el d4,
+   cuadrado el d6…) encima del nombre y, cuando hay alguno, cuántos
+   (×2) y debajo, en la misma casilla, «−» y «+». La casilla con dados,
+   rellena. */
+.oc-dados-celda {
     display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+
+.oc-dados-cara {
+    position: relative;
+    display: flex;
+    flex: 1 1 auto;
     flex-direction: column;
     align-items: center;
     gap: 2px;
     padding: 6px 2px 4px;
+}
+
+.oc-dados-celda.tiene .oc-dados-cara {
+    background: var(--yellow);
+    color: var(--yellow-contrast);
+}
+
+.oc-dados-cuantos {
+    position: absolute;
+    top: 2px;
+    right: 4px;
+    font-size: 0.75rem;
+}
+
+.oc-dados-cara-pasos {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+}
+
+.oc-dados-cara-pasos[hidden] {
+    display: none;
+}
+
+.oc-dados-cara-paso {
+    padding: 1px 0;
+    border: 2px solid var(--yellow);
+    border-top: 0;
+    background: var(--purple);
+    color: var(--yellow);
+    font-family: var(--fuente-mono);
+    font-size: 1rem;
+    font-weight: 700;
+    line-height: 1.2;
+    cursor: pointer;
+}
+
+.oc-dados-cara-paso + .oc-dados-cara-paso {
+    border-left: 0;
+}
+
+.oc-dados-cara-paso:hover {
+    background: var(--yellow);
+    color: var(--yellow-contrast);
+}
+
+.oc-dados-cara-paso:focus-visible {
+    outline: 2px solid var(--yellow);
+    outline-offset: -4px;
 }
 
 .oc-dados-silueta {

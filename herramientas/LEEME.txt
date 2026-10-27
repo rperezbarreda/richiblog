@@ -3883,11 +3883,14 @@
   escritos en las descripciones («1d10», «8d6»). Y con el botón 🎲, la
   BANDEJA: cada pulsación en d4, d6, d8, d10, d12, d20 o d100 añade un
   dado (cada uno con su silueta: triángulo el d4, cuadrado el d6, rombo
-  el d8…), el modificador (con − y +), y «tirar»; «vaciar» deja la
-  bandeja vacía. Con «ventaja» o «desventaja» elegido, lo que se tire con
+  el d8…); en cuanto un dado tiene alguno, su casilla se rellena, dice
+  cuántos (×2) y salen en ella «−» y «+» para quitar o poner; el
+  modificador, también con − y +; y «tirar»; «vaciar» deja la bandeja
+  vacía. Con «ventaja» o «desventaja» elegido, lo que se tire con
   un solo d20 se tira dos veces y se queda el mayor o el menor. Al tirar
   suena un traqueteo de dados (hecho con el navegador, sin archivos; el
-  🔊 de la barra lo apaga y se acuerda). Las tiradas salen en la
+  🔊 de la barra lo apaga y se acuerda), y detrás, si sale un 20 natural,
+  unas notas que suben, y si sale una pifia (un 1), unas que bajan. Las tiradas salen en la
   ventanita «dados.exe»: la última arriba, en colores invertidos; marca
   el 20 y el 1 naturales; cada una con «↻ repetir» y su ✕ para borrarla,
   y «borrar todo» arriba. La ventanita se mueve ARRASTRÁNDOLA por su

@@ -156,6 +156,33 @@ function montarPestanasDePersonaje(menu, panel, o) {
         } catch (e) {
         }
     }
+    function sonarFinal(critico) {
+        if (!estado.sonido || !audio) {
+            return;
+        }
+        try {
+            const notas = critico ? [523, 659, 784, 1047] : [392, 349, 311, 233];
+            const empieza = audio.currentTime + 0.42;
+            notas.forEach((frecuencia, i) => {
+                const osc = audio.createOscillator();
+                const volumen = audio.createGain();
+                const t = empieza + i * (critico ? 0.09 : 0.16);
+                osc.type = critico ? "triangle" : "sawtooth";
+                osc.frequency.setValueAtTime(frecuencia, t);
+                if (!critico && i === notas.length - 1) {
+                    osc.frequency.exponentialRampToValueAtTime(frecuencia * 0.8, t + 0.45);
+                }
+                const largo = critico ? (i === notas.length - 1 ? 0.5 : 0.14) : (i === notas.length - 1 ? 0.55 : 0.18);
+                volumen.gain.setValueAtTime(0.0001, t);
+                volumen.gain.exponentialRampToValueAtTime(critico ? 0.22 : 0.09, t + 0.02);
+                volumen.gain.exponentialRampToValueAtTime(0.0001, t + largo);
+                osc.connect(volumen).connect(audio.destination);
+                osc.start(t);
+                osc.stop(t + largo + 0.02);
+            });
+        } catch (e) {
+        }
+    }
     function trozosDe(formula) {
         const trozos = [];
         const texto = String(formula).replace(/−/g, "-").replace(/\s+/g, "");
@@ -213,6 +240,9 @@ function montarPestanasDePersonaje(menu, panel, o) {
             desglose: partes.join(" "), critico: d20s === 1 && natural === 20,
             pifia: d20s === 1 && natural === 1 };
         sonar();
+        if (r.critico || r.pifia) {
+            sonarFinal(r.critico);
+        }
         anadir(r);
         return r;
     }
@@ -275,7 +305,31 @@ function montarPestanasDePersonaje(menu, panel, o) {
         }
         return texto;
     }
+    const celdas = {};
+    function cambiarDado(c, n, volverA) {
+        const enPasos = celdas[c].pasos.contains(document.activeElement);
+        estado.mano[c] = Math.max(0, Math.min(99, (estado.mano[c] || 0) + n));
+        if (!estado.mano[c]) {
+            delete estado.mano[c];
+        }
+        pintarMano();
+        if (!estado.mano[c] && enPasos) {
+            volverA.focus();
+        }
+        avisar(estado.mano[c] ? "Llevas " + estado.mano[c] + "d" + c + "." : "Sin d" + c + ".");
+    }
     function pintarMano() {
+        CARAS.forEach((c) => {
+            const x = celdas[c];
+            if (!x) {
+                return;
+            }
+            const n = estado.mano[c] || 0;
+            x.celda.classList.toggle("tiene", n > 0);
+            x.cuantos.textContent = n ? "×" + n : "";
+            x.pasos.hidden = !n;
+            x.boton.setAttribute("aria-label", "Añadir un d" + c + (n ? " (hay " + n + ")" : ""));
+        });
         const hay = CARAS.some((c) => estado.mano[c]);
         manoTexto.textContent = hay ? formulaDeLaMano() : "elige los dados de arriba";
         tirarBoton.disabled = !hay;
@@ -309,12 +363,19 @@ function montarPestanasDePersonaje(menu, panel, o) {
         bandeja.setAttribute("role", "group");
         bandeja.setAttribute("aria-label", "Añadir dados");
         CARAS.forEach((c) => {
-            const b = botonDe("oc-dados-cara", undefined, () => {
-                estado.mano[c] = (estado.mano[c] || 0) + 1;
-                pintarMano();
-            }, "Añadir un d" + c);
-            b.append(silueta(c), crear("span", "oc-dados-cara-nombre", "d" + c));
-            bandeja.appendChild(b);
+            const celda = crear("div", "oc-dados-celda");
+            const b = botonDe("oc-dados-cara", undefined, () => cambiarDado(c, 1, b), "Añadir un d" + c);
+            const cuantos = crear("span", "oc-dados-cuantos");
+            cuantos.setAttribute("aria-hidden", "true");
+            b.append(silueta(c), crear("span", "oc-dados-cara-nombre", "d" + c), cuantos);
+            const pasos = crear("div", "oc-dados-cara-pasos");
+            pasos.hidden = true;
+            pasos.append(
+                botonDe("oc-dados-cara-paso", "−", () => cambiarDado(c, -1, b), "Quitar un d" + c),
+                botonDe("oc-dados-cara-paso", "+", () => cambiarDado(c, 1, b), "Añadir otro d" + c));
+            celda.append(b, pasos);
+            celdas[c] = { celda, boton: b, cuantos, pasos };
+            bandeja.appendChild(celda);
         });
         manoTexto = crear("p", "oc-dados-mano");
         const fila = crear("div", "oc-dados-fila");
@@ -351,6 +412,7 @@ function montarPestanasDePersonaje(menu, panel, o) {
         tirarBoton = botonDe("oc-dados-tirar", "tirar", () => tirar(formulaDeLaMano(), "bandeja"));
         const vaciar = botonDe("oc-dados-vaciar", "vaciar", () => {
             estado.mano = {};
+            avisar("Bandeja vacía.");
             modInput.value = "0";
             pintarMano();
         }, "Vaciar la bandeja");
@@ -461,7 +523,7 @@ function montarPestanasDePersonaje(menu, panel, o) {
         estado.tiradas.unshift(r);
         estado.tiradas = estado.tiradas.slice(0, 30);
         pintarHistorial();
-        avisar(r.que + ": " + r.total + (r.critico ? ", ¡20 natural!" : "") + (r.pifia ? ", 1 natural" : "")
+        avisar(r.que + ": " + r.total + (r.critico ? ", ¡20 natural!" : "") + (r.pifia ? ", pifia, 1 natural" : "")
             + ". " + r.desglose);
     }
     function pintarHistorial() {
@@ -473,7 +535,7 @@ function montarPestanasDePersonaje(menu, panel, o) {
                 crear("span", "oc-dados-formula", r.formula.replace(/-/g, "−")));
             const total = crear("p", "oc-dados-total", String(r.total));
             if (r.critico || r.pifia) {
-                total.appendChild(crear("span", "oc-dados-natural", r.critico ? "¡20 natural!" : "1 natural"));
+                total.appendChild(crear("span", "oc-dados-natural", r.critico ? "¡20 natural!" : "pifia (1 natural)"));
             }
             const botones = crear("div", "oc-dados-tirada-botones");
             botones.append(
