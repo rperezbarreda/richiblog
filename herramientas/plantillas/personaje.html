@@ -55,14 +55,14 @@
     <link rel="alternate" type="application/rss+xml" title="El Blog de Richi — blog, relatos y rol" href="/blog/rss.xml">
     <!-- ==== CSS ==== -->
     <link rel="stylesheet" href="/estilos/paquete-comun.css?v=e94b0ddd">
-    <link rel="stylesheet" href="/ligero/estilos/paginas/personajes.css?v=18c3c707">
+    <link rel="stylesheet" href="/ligero/estilos/paginas/personajes.css?v=568acb08">
     <link rel="stylesheet" href="/ligero/estilos/paginas/personajes.responsive.css?v=b8bae932">
     <link rel="stylesheet" href="/estilos/paquete-cierre.css?v=a49d87f4">
     <!-- ==== fin del CSS ==== -->
     <script src="/ligero/scripts/cargador-scripts.js?v=e5f01c9b"></script>
     <!-- ==== JS ==== -->
     <script defer src="/scripts/paquete-comun.js?v=5806fd68"></script>
-    <script defer src="/ligero/scripts/paginas/personajes.js?v=2ae51f49"></script>
+    <script defer src="/ligero/scripts/paginas/personajes.js?v=2e4bbd7b"></script>
     <!-- ==== fin del JS ==== -->
   </head>
 <body>
@@ -88,10 +88,10 @@
                  el móvil, donde va una debajo de otra, la foto sale arriba
                  sin tener que reordenar nada con CSS. -->
             <div class="oc-columnas">
-                <aside class="oc-lateral" aria-label="Ficha de {{NOMBRE_ATRIBUTO}}">
+                <div class="oc-lateral" role="group" aria-label="Ficha de {{NOMBRE_ATRIBUTO}}">
 {{POSTIT}}
 {{PDF}}
-                </aside>
+                </div>
 
                 <div class="oc-principal">
 {{PESTANAS}}

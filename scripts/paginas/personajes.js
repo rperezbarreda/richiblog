@@ -14,13 +14,24 @@
 const ocPestanas = document.querySelector("[data-oc-pestanas]");
 const ocPanel = document.querySelector("[data-oc-panel]");
 
+// LAS SUBPESTAÑAS de la pestaña «ficha» (estadísticas, equipamiento,
+// magia, rasgos): lo mismo, pero dentro de ella y sin tocar la dirección
+// (la dirección dice la pestaña de arriba).
+const ocSubpestanas = document.querySelector("[data-oc-subpestanas]");
+const ocSubpanel = document.querySelector("[data-oc-subpanel]");
+
 if (ocPestanas && ocPanel) {
-    montarPestanasDePersonaje(ocPestanas, ocPanel);
+    montarPestanasDePersonaje(ocPestanas, ocPanel, { apartado: "data-oc-apartado", prefijo: "oc-pestana-",
+        clase: "oc-pestana", lista: "oc-pestanas-lista", conDireccion: true });
+}
+if (ocSubpestanas && ocSubpanel) {
+    montarPestanasDePersonaje(ocSubpestanas, ocSubpanel, { apartado: "data-oc-subapartado",
+        prefijo: "oc-subpestana-", clase: "oc-subpestana", lista: "oc-subpestanas-lista", conDireccion: false });
 }
 
-function montarPestanasDePersonaje(menu, panel) {
+function montarPestanasDePersonaje(menu, panel, o) {
     const enlaces = Array.from(menu.querySelectorAll("[data-oc-pestana]"));
-    const apartados = enlaces.map((a) => panel.querySelector("[data-oc-apartado='" + a.dataset.ocPestana + "']"));
+    const apartados = enlaces.map((a) => panel.querySelector("[" + o.apartado + "='" + a.dataset.ocPestana + "']"));
     if (!enlaces.length || apartados.some((x) => !x)) {
         return;
     }
@@ -28,14 +39,14 @@ function montarPestanasDePersonaje(menu, panel) {
     // Cada enlace se cambia por un botón: una pestaña no lleva a ningún
     // sitio, cambia lo que se ve.
     const lista = document.createElement("div");
-    lista.className = "oc-pestanas-lista";
+    lista.className = o.lista;
     lista.setAttribute("role", "tablist");
     lista.setAttribute("aria-label", menu.getAttribute("aria-label") || "Apartados");
     const botones = enlaces.map((a, i) => {
         const b = document.createElement("button");
         b.type = "button";
-        b.className = "oc-pestana";
-        b.id = "oc-pestana-" + a.dataset.ocPestana;
+        b.className = o.clase;
+        b.id = o.prefijo + a.dataset.ocPestana;
         b.textContent = a.textContent;
         b.setAttribute("role", "tab");
         b.setAttribute("aria-controls", apartados[i].id);
@@ -63,7 +74,7 @@ function montarPestanasDePersonaje(menu, panel) {
         if (conFoco) {
             botones[i].focus();
         }
-        if (apuntar) {
+        if (apuntar && o.conDireccion) {
             try {
                 history.replaceState(null, "", "#" + apartados[i].id);
             } catch (error) {
@@ -96,6 +107,10 @@ function montarPestanasDePersonaje(menu, panel) {
         return i < 0 ? 0 : i;
     }
 
-    window.addEventListener("hashchange", () => elegir(desdeLaDireccion(), false, false));
-    elegir(desdeLaDireccion(), false, false);
+    if (o.conDireccion) {
+        window.addEventListener("hashchange", () => elegir(desdeLaDireccion(), false, false));
+        elegir(desdeLaDireccion(), false, false);
+    } else {
+        elegir(0, false, false);
+    }
 }

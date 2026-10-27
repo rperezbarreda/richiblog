@@ -108,6 +108,11 @@ STATS = (("fue", "FUE", "Fuerza"), ("des", "DES", "Destreza"), ("con", "CON", "C
 PESTANAS = (("historia", "historia"), ("ficha", "ficha"), ("gente", "npcs"), ("imagenes", "imágenes"),
             ("extra", "extra"))
 
+# Las subpestañas de la pestaña «ficha» (lo de D&D), en su orden: qué
+# recuadros van en cada una lo dice apartado_ficha().
+SUBPESTANAS_DE_FICHA = (("estadisticas", "estadísticas"), ("equipamiento", "equipamiento"), ("magia", "magia"),
+                        ("rasgos", "rasgos"))
+
 # Las dieciocho habilidades de D&D 5e, con la característica de la que
 # tiran. Se escriben en «habilidades» una por línea («Sigilo»,
 # «Percepción (pericia)»); el nombre se compara sin tildes ni mayúsculas.
@@ -430,7 +435,7 @@ def bonificador_de_competencia(p):
 
 
 def recuadro(titulo, dentro, clase=""):
-    return ('<div class="oc-hoja-caja%s"><h3 class="oc-hoja-titulo">%s</h3>%s</div>'
+    return ('<div class="oc-hoja-caja%s"><h4 class="oc-hoja-titulo">%s</h4>%s</div>'
             % ((" " + clase) if clase else "", e(titulo), dentro))
 
 
@@ -441,7 +446,8 @@ def lista_simple(cosas, clase="oc-hoja-lista"):
 def apartado_ficha(p, c, personajes, avisos):
     mods = {k: (modificador_num(numero(p.get(k))) if numero(p.get(k)) is not None else None) for k, _, _ in STATS}
     comp = bonificador_de_competencia(p)
-    cajas = []
+    # Los recuadros, repartidos en las SUBPESTAÑAS de la ficha.
+    grupos = {g: [] for g, _ in SUBPESTANAS_DE_FICHA}
 
     # EL COMBATE: los numeritos grandes.
     datos = []
@@ -468,7 +474,7 @@ def apartado_ficha(p, c, personajes, avisos):
     if dados:
         datos.append(("Dados de golpe", dados))
     if datos:
-        cajas.append(recuadro("combate", '<dl class="oc-hoja-numeros">%s</dl>' % "".join(
+        grupos["estadisticas"].append(recuadro("combate", '<dl class="oc-hoja-numeros">%s</dl>' % "".join(
             '<div class="oc-hoja-numero"><dt>%s</dt><dd>%s</dd></div>' % (e(a), e(b)) for a, b in datos),
             "es-ancha"))
 
@@ -481,7 +487,7 @@ def apartado_ficha(p, c, personajes, avisos):
                 continue
             es = k in salva
             filas.append(fila_de_tirada(largo, mods[k] + ((comp or 0) if es else 0), 1 if es else 0))
-        cajas.append(recuadro("tiradas de salvación", '<ul class="oc-hoja-tiradas">%s</ul>' % "".join(filas)))
+        grupos["estadisticas"].append(recuadro("tiradas de salvación", '<ul class="oc-hoja-tiradas">%s</ul>' % "".join(filas)))
         filas = []
         for nombre, k in HABILIDADES:
             if mods[k] is None:
@@ -489,11 +495,11 @@ def apartado_ficha(p, c, personajes, avisos):
             nivel = competentes.get(llano(nombre), 0)
             filas.append(fila_de_tirada(nombre, mods[k] + (comp or 0) * nivel, nivel,
                                         dict((a, b) for a, b, _ in STATS)[k]))
-        cajas.append(recuadro("habilidades", '<ul class="oc-hoja-tiradas">%s</ul>' % "".join(filas)))
+        grupos["estadisticas"].append(recuadro("habilidades", '<ul class="oc-hoja-tiradas">%s</ul>' % "".join(filas)))
 
     ataques = lineas_de(p.get("ataques"))
     if ataques:
-        cajas.append(recuadro("ataques", lista_simple(ataques), "es-ancha"))
+        grupos["equipamiento"].append(recuadro("ataques", lista_simple(ataques), "es-ancha"))
 
     # LA MAGIA: la característica con la que lanza, la CD y el ataque
     # (calculados), los espacios y los conjuros por nivel.
@@ -521,22 +527,47 @@ def apartado_ficha(p, c, personajes, avisos):
         por_nivel.setdefault(clave_n, []).append(nombre.strip())
     for clave_n in sorted(por_nivel, key=lambda x: (x == "?", int(x) if x.isdigit() else 99)):
         titulo = "Trucos" if clave_n == "0" else ("Nivel %s" % clave_n if clave_n != "?" else "Conjuros")
-        magia.append('<h4 class="oc-hoja-subtitulo">%s</h4>%s' % (titulo, lista_simple(por_nivel[clave_n])))
+        magia.append('<h5 class="oc-hoja-subtitulo">%s</h5>%s' % (titulo, lista_simple(por_nivel[clave_n])))
     if magia:
-        cajas.append(recuadro("magia", "".join(magia), "es-ancha"))
+        grupos["magia"].append(recuadro("magia", "".join(magia), "es-ancha"))
 
     objetos = lineas_de(p.get("objetos"))
     dinero = str(p.get("dinero") or "").strip()
     if objetos or dinero:
-        cajas.append(recuadro("objetos", (('<p class="oc-hoja-dinero"><strong>Dinero:</strong> %s</p>' % e(dinero))
+        grupos["equipamiento"].append(recuadro("objetos", (('<p class="oc-hoja-dinero"><strong>Dinero:</strong> %s</p>' % e(dinero))
                                           if dinero else "") + (lista_simple(objetos) if objetos else "")))
     competencias = lineas_de(p.get("competencias"))
     if competencias:
-        cajas.append(recuadro("competencias e idiomas", lista_simple(competencias)))
+        grupos["rasgos"].append(recuadro("competencias e idiomas", lista_simple(competencias)))
     rasgos = markdown(p.get("rasgos"), c, personajes, avisos)
     if rasgos:
-        cajas.append(recuadro("rasgos y dotes", '<div class="oc-texto">%s</div>' % rasgos, "es-ancha"))
-    return '<div class="oc-hoja">%s</div>' % "".join(cajas) if cajas else ""
+        grupos["rasgos"].append(recuadro("rasgos y dotes", '<div class="oc-texto">%s</div>' % rasgos, "es-ancha"))
+    return hoja_con_subpestanas(grupos)
+
+
+def hoja_con_subpestanas(grupos):
+    """Los grupos que tienen algo, cada uno en su apartado, y encima unos
+    enlaces para saltar a cada uno: personajes.js los convierte en
+    subpestañas (debajo de las de historia, ficha…). Sin JavaScript se ven
+    todos, uno debajo de otro, con su título. Con un solo grupo, sin
+    subpestañas."""
+    llenos = [(g, texto) for g, texto in SUBPESTANAS_DE_FICHA if grupos[g]]
+    if not llenos:
+        return ""
+    cajas = []
+    for g, texto in llenos:
+        cajas.append('<div class="oc-hoja-grupo" id="oc-ficha-%s" data-oc-subapartado="%s">'
+                     '<h3 class="oc-hoja-grupo-titulo">%s</h3><div class="oc-hoja">%s</div></div>'
+                     % (g, g, texto, "".join(grupos[g])))
+    if len(llenos) == 1:
+        return cajas[0]
+    menu = ('<nav class="oc-subpestanas" aria-label="Partes de la ficha" data-oc-subpestanas>%s</nav>'
+            % "".join('<a class="oc-subpestana" href="#oc-ficha-%s" data-oc-pestana="%s">%s</a>' % (g, g, texto)
+                      for g, texto in llenos))
+    return menu + '<div class="oc-hoja-grupos" data-oc-subpanel>%s</div>' % "".join(cajas)
+
+
+
 
 
 def modificador_num(valor):

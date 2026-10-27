@@ -375,6 +375,72 @@
 .oc-texto .mundo-enlace-vacio {
     border-bottom: 1px dashed var(--muted);
 }
+.oc-subpestanas,
+.oc-subpestanas-lista {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin: 0 0 16px;
+    padding-bottom: 10px;
+    border-bottom: 2px solid var(--yellow);
+}
+.oc-subpestana {
+    display: inline-block;
+    padding: 5px 12px;
+    border: 2px solid var(--yellow);
+    border-radius: 999px;
+    background: transparent;
+    color: var(--yellow);
+    font-family: var(--fuente-mono);
+    font-size: 0.8125rem;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    text-decoration: none;
+    cursor: pointer;
+}
+.oc-subpestana:hover {
+    background: var(--purple);
+    text-decoration: underline;
+}
+.oc-subpestana[aria-selected="true"] {
+    background: var(--yellow);
+    color: var(--yellow-contrast);
+    text-decoration: none;
+}
+.oc-subpestana:focus-visible {
+    outline: 2px solid var(--yellow);
+    outline-offset: 3px;
+}
+.oc-hoja-grupo[hidden] {
+    display: none;
+}
+.oc-hoja-grupo:focus-visible {
+    outline: 2px solid var(--yellow);
+    outline-offset: 6px;
+}
+.oc-hoja-grupo + .oc-hoja-grupo {
+    margin-top: 22px;
+}
+.oc-hoja-grupo-titulo {
+    margin: 0 0 10px;
+    color: var(--yellow);
+    font-family: var(--fuente-mono);
+    font-size: 0.875rem;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+}
+.oc-hoja-grupos.con-pestanas .oc-hoja-grupo-titulo {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+}
+.oc-hoja-grupos.con-pestanas .oc-hoja-grupo + .oc-hoja-grupo {
+    margin-top: 0;
+}
 .oc-hoja {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(min(100%, 15rem), 1fr));

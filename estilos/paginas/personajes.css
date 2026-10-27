@@ -496,6 +496,89 @@
     border-bottom: 1px dashed var(--muted);
 }
 
+/* ---- LAS SUBPESTAÑAS DE LA FICHA (estadísticas, equipamiento, magia,
+   rasgos): más bajitas que las de arriba, en letra de máquina y con una
+   raya debajo que las une al contenido. Sin JavaScript son enlaces y los
+   grupos salen todos, cada uno con su título. ---- */
+.oc-subpestanas,
+.oc-subpestanas-lista {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin: 0 0 16px;
+    padding-bottom: 10px;
+    border-bottom: 2px solid var(--yellow);
+}
+
+.oc-subpestana {
+    display: inline-block;
+    padding: 5px 12px;
+    border: 2px solid var(--yellow);
+    border-radius: 999px;
+    background: transparent;
+    color: var(--yellow);
+    font-family: var(--fuente-mono);
+    font-size: 0.8125rem;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.oc-subpestana:hover {
+    background: var(--purple);
+    text-decoration: underline;
+}
+
+.oc-subpestana[aria-selected="true"] {
+    background: var(--yellow);
+    color: var(--yellow-contrast);
+    text-decoration: none;
+}
+
+.oc-subpestana:focus-visible {
+    outline: 2px solid var(--yellow);
+    outline-offset: 3px;
+}
+
+.oc-hoja-grupo[hidden] {
+    display: none;
+}
+
+.oc-hoja-grupo:focus-visible {
+    outline: 2px solid var(--yellow);
+    outline-offset: 6px;
+}
+
+/* Sin subpestañas, un grupo debajo de otro con su título. */
+.oc-hoja-grupo + .oc-hoja-grupo {
+    margin-top: 22px;
+}
+
+.oc-hoja-grupo-titulo {
+    margin: 0 0 10px;
+    color: var(--yellow);
+    font-family: var(--fuente-mono);
+    font-size: 0.875rem;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+}
+
+/* Con subpestañas el título ya es la subpestaña: solo para el lector. */
+.oc-hoja-grupos.con-pestanas .oc-hoja-grupo-titulo {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+}
+
+.oc-hoja-grupos.con-pestanas .oc-hoja-grupo + .oc-hoja-grupo {
+    margin-top: 0;
+}
+
 /* ---- LA FICHA DE D&D (pestaña ficha) ----
    Recuadros como los de una hoja de personaje: dos columnas en
    escritorio (los anchos, el combate, la magia y los rasgos, ocupan las
