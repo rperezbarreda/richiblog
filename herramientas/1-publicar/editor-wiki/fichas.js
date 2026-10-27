@@ -783,8 +783,10 @@ const ACCIONES_DE_FICHA = {
                 return;
             }
             Object.entries(hecho.campos || {}).forEach(([clave, valor]) => {
-                // El nombre que ya tenga se queda (el de aquí manda).
-                if ((clave === "nombre" || clave === "nombre_completo") && String(f[clave] || "").trim()) {
+                // Lo que ya tenga escrito de su nombre, su historia y su
+                // personalidad se queda (lo de aquí manda); lo demás se pone.
+                if (["nombre", "nombre_completo", "historia", "personalidad", "ideales", "vinculos", "defectos"]
+                    .includes(clave) && String(f[clave] || "").trim()) {
                     return;
                 }
                 f[clave] = Array.isArray(valor) ? valor.join("\n") : valor;

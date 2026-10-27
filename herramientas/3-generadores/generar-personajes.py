@@ -46,7 +46,12 @@
 #         "conjuros": ["Truco: Luz", "1: Escudo", "1: Proyectil mágico"],
 #         "objetos": ["Armadura de cuero"], "dinero": "15 po",
 #         "competencias": ["Común", "Élfico", "Herramientas de ladrón"],
-#         "rasgos": "En Markdown (rasgos de raza, de clase, dotes)"
+#         "rasgos": "En Markdown (rasgos de raza, de clase, dotes)",
+#         "sentidos": "Visión en la oscuridad 18 m", "defensas": ["Resistencia: fuego"],
+#         "acciones": ["Acción adicional: Acción astuta", "Reacción: Esquiva asombrosa"],
+#         "trasfondo": "…", "alineamiento": "…", "fe": "…", "edad": "…", "altura": "…",
+#         "peso": "…", "ojos": "…", "pelo": "…", "piel": "…",
+#         "personalidad", "ideales", "vinculos", "defectos": en Markdown
 #     }],
 #     "gente":    [{"personaje": "yorel", "cosas": [{"nombre", "que",
 #                   "relacion", "token", "notas"}]}],
@@ -108,10 +113,19 @@ STATS = (("fue", "FUE", "Fuerza"), ("des", "DES", "Destreza"), ("con", "CON", "C
 PESTANAS = (("historia", "historia"), ("ficha", "ficha"), ("gente", "npcs"), ("imagenes", "imágenes"),
             ("extra", "extra"))
 
-# Las subpestañas de la pestaña «ficha» (lo de D&D), en su orden: qué
-# recuadros van en cada una lo dice apartado_ficha().
-SUBPESTANAS_DE_FICHA = (("estadisticas", "estadísticas"), ("equipamiento", "equipamiento"), ("magia", "magia"),
-                        ("rasgos", "rasgos"))
+# Las subpestañas de la pestaña «ficha» (lo de D&D), en su orden y con su
+# emoji, como las secciones de la hoja de D&D Beyond: qué ventanitas van en
+# cada una lo dice apartado_ficha(). Solo salen las que tienen algo.
+SUBPESTANAS_DE_FICHA = (
+    ("combate", "📊", "combate"),
+    ("habilidades", "🎯", "habilidades"),
+    ("acciones", "⚔️", "acciones"),
+    ("conjuros", "✨", "conjuros"),
+    ("inventario", "🎒", "inventario"),
+    ("rasgos", "🧬", "rasgos"),
+    ("competencias", "🗣️", "competencias"),
+    ("trasfondo", "📜", "trasfondo"),
+)
 
 # Las dieciocho habilidades de D&D 5e, con la característica de la que
 # tiran. Se escriben en «habilidades» una por línea («Sigilo»,
@@ -434,22 +448,71 @@ def bonificador_de_competencia(p):
     return 2 + (max(1, min(nivel, 20)) - 1) // 4 if nivel else None
 
 
-def recuadro(titulo, dentro, clase=""):
-    return ('<div class="oc-hoja-caja%s"><h4 class="oc-hoja-titulo">%s</h4>%s</div>'
-            % ((" " + clase) if clase else "", e(titulo), dentro))
+def recuadro(titulo, dentro, clase="", emoji=""):
+    """Una ventanita como las del resto del sitio: su barra de título con
+    nombre de archivo («combate.dat») y los −■✕ (que la pliegan: lo hace
+    scripts/componentes/ventanas-plegables.js), y lo de dentro."""
+    # Un <div> y no un <section>: base.css le da a TODA <section> alto,
+    # scroll y relleno de página entera.
+    return ('<div class="oc-hoja-caja%s"><div class="recent-entries-header">'
+            '<h4 class="oc-hoja-titulo">%s%s</h4>'
+            '<div class="window-controls window-controls-small" data-window-controls aria-hidden="true"></div>'
+            '</div><div class="oc-hoja-dentro">%s</div></div>'
+            % ((" " + clase) if clase else "",
+               ('<span class="oc-hoja-emoji" aria-hidden="true">%s</span>' % emoji) if emoji else "", e(titulo), dentro))
 
 
 def lista_simple(cosas, clase="oc-hoja-lista"):
     return '<ul class="%s">%s</ul>' % (clase, "".join("<li>%s</li>" % e(x) for x in cosas))
 
 
+def numeros(datos):
+    """Los numeritos grandes (CA, PG…), cada uno en su cuadradito."""
+    return '<dl class="oc-hoja-numeros">%s</dl>' % "".join(
+        '<div class="oc-hoja-numero"><dt>%s</dt><dd>%s</dd></div>' % (e(a), e(b)) for a, b in datos)
+
+
+def pares(datos):
+    """Una lista de «nombre: valor» (la apariencia, el trasfondo…)."""
+    return '<dl class="oc-hoja-pares">%s</dl>' % "".join(
+        '<div class="oc-hoja-par"><dt>%s</dt><dd>%s</dd></div>' % (e(a), e(b)) for a, b in datos)
+
+
+def etiquetas(cosas, clase="oc-hoja-etiquetas"):
+    """Cosas cortas en pastillas (los idiomas, las competencias)."""
+    return '<ul class="%s">%s</ul>' % (clase, "".join("<li>%s</li>" % e(x) for x in cosas))
+
+
+def objeto_con_cuantos(texto):
+    """«Antorcha ×5» -> el nombre y, aparte, la cantidad en su chapita."""
+    m = re.match(r"^(.*?)\s*[×x]\s*(\d+)$", texto.strip())
+    if m:
+        return '%s <span class="oc-hoja-cuantos">×%s</span>' % (e(m.group(1)), m.group(2))
+    return e(texto)
+
+
 def apartado_ficha(p, c, personajes, avisos):
     mods = {k: (modificador_num(numero(p.get(k))) if numero(p.get(k)) is not None else None) for k, _, _ in STATS}
     comp = bonificador_de_competencia(p)
-    # Los recuadros, repartidos en las SUBPESTAÑAS de la ficha.
-    grupos = {g: [] for g, _ in SUBPESTANAS_DE_FICHA}
+    corto_de = dict((a, b) for a, b, _ in STATS)
+    largo_de = dict((a, c3) for a, _, c3 in STATS)
+    # Las ventanitas, repartidas en las SUBPESTAÑAS de la ficha.
+    grupos = {g: [] for g, _, _ in SUBPESTANAS_DE_FICHA}
 
-    # EL COMBATE: los numeritos grandes.
+    competentes = {}
+    for linea in lineas_de(p.get("habilidades")):
+        nombre = llano(linea.split("(")[0])
+        competentes[nombre] = 2 if "pericia" in llano(linea) else 1
+    conocidas = {llano(n) for n, _ in HABILIDADES}
+    for nombre in competentes:
+        if nombre not in conocidas:
+            avisos.di("habilidad que no conozco", nombre)
+
+    def bono_de_habilidad(nombre):
+        k = dict(HABILIDADES)[nombre]
+        return None if mods[k] is None else mods[k] + (comp or 0) * competentes.get(llano(nombre), 0)
+
+    # 📊 COMBATE: los numeritos grandes, los sentidos y las defensas.
     datos = []
     for clave, texto in (("ca", "Clase de armadura"), ("pg", "Puntos de golpe"), ("velocidad", "Velocidad")):
         valor = str(p.get(clave) or "").strip()
@@ -459,89 +522,148 @@ def apartado_ficha(p, c, personajes, avisos):
         datos.append(("Iniciativa", con_signo(mods["des"])))
     if comp is not None:
         datos.append(("Competencia", con_signo(comp)))
-    competentes = {}
-    for linea in lineas_de(p.get("habilidades")):
-        nombre = llano(linea.split("(")[0])
-        competentes[nombre] = 2 if "pericia" in llano(linea) else 1
-    conocidas = {llano(n) for n, _ in HABILIDADES}
-    for nombre in competentes:
-        if nombre not in conocidas:
-            avisos.di("habilidad que no conozco", nombre)
-    if mods["sab"] is not None:
-        pasiva = 10 + mods["sab"] + (comp or 0) * competentes.get(llano("Percepción"), 0)
-        datos.append(("Percepción pasiva", str(pasiva)))
     dados = str(p.get("dados_golpe") or "").strip()
     if dados:
         datos.append(("Dados de golpe", dados))
     if datos:
-        grupos["estadisticas"].append(recuadro("combate", '<dl class="oc-hoja-numeros">%s</dl>' % "".join(
-            '<div class="oc-hoja-numero"><dt>%s</dt><dd>%s</dd></div>' % (e(a), e(b)) for a, b in datos),
-            "es-ancha"))
+        grupos["combate"].append(recuadro("combate.dat", numeros(datos), "es-ancha", "🛡️"))
+    sentidos = []
+    for nombre, texto in (("Percepción", "Percepción pasiva"), ("Investigación", "Investigación pasiva"),
+                          ("Perspicacia", "Perspicacia pasiva")):
+        bono = bono_de_habilidad(nombre)
+        if bono is not None:
+            sentidos.append((texto, str(10 + bono)))
+    extra_sentidos = str(p.get("sentidos") or "").strip()
+    if sentidos or extra_sentidos:
+        grupos["combate"].append(recuadro("sentidos.txt", (numeros(sentidos) if sentidos else "")
+                                          + ('<p class="oc-hoja-nota">%s</p>' % e(extra_sentidos)
+                                             if extra_sentidos else ""), "", "👁️"))
+    defensas = lineas_de(p.get("defensas"))
+    if defensas:
+        grupos["combate"].append(recuadro("defensas.txt", lista_simple(defensas), "", "🧱"))
 
-    # LAS SALVACIONES Y LAS HABILIDADES: solo con las características.
+    # 🎯 HABILIDADES: las salvaciones y las dieciocho, con su marca.
     if any(v is not None for v in mods.values()):
         salva = {llano(x)[:3] for x in str(p.get("salvaciones") or "").replace("\n", ",").split(",") if x.strip()}
-        filas = []
-        for k, corto, largo in STATS:
-            if mods[k] is None:
-                continue
-            es = k in salva
-            filas.append(fila_de_tirada(largo, mods[k] + ((comp or 0) if es else 0), 1 if es else 0))
-        grupos["estadisticas"].append(recuadro("tiradas de salvación", '<ul class="oc-hoja-tiradas">%s</ul>' % "".join(filas)))
-        filas = []
-        for nombre, k in HABILIDADES:
-            if mods[k] is None:
-                continue
-            nivel = competentes.get(llano(nombre), 0)
-            filas.append(fila_de_tirada(nombre, mods[k] + (comp or 0) * nivel, nivel,
-                                        dict((a, b) for a, b, _ in STATS)[k]))
-        grupos["estadisticas"].append(recuadro("habilidades", '<ul class="oc-hoja-tiradas">%s</ul>' % "".join(filas)))
+        filas = [fila_de_tirada(largo, mods[k] + ((comp or 0) if k in salva else 0), 1 if k in salva else 0)
+                 for k, _, largo in STATS if mods[k] is not None]
+        grupos["habilidades"].append(recuadro("salvaciones.lst", '<ul class="oc-hoja-tiradas">%s</ul>'
+                                              % "".join(filas), "", "🎲"))
+        filas = [fila_de_tirada(nombre, bono_de_habilidad(nombre), competentes.get(llano(nombre), 0), corto_de[k])
+                 for nombre, k in HABILIDADES if mods[k] is not None]
+        grupos["habilidades"].append(recuadro("habilidades.lst", '<ul class="oc-hoja-tiradas es-dos-columnas">%s</ul>'
+                                              % "".join(filas), "es-ancha", "🎯"))
 
+    # ⚔️ ACCIONES: los ataques y lo demás que hace en un turno.
     ataques = lineas_de(p.get("ataques"))
     if ataques:
-        grupos["equipamiento"].append(recuadro("ataques", lista_simple(ataques), "es-ancha"))
+        filas = []
+        for a in ataques:
+            nombre, _, resto = a.partition(":")
+            filas.append('<li><span class="oc-hoja-nombre">%s</span>%s</li>'
+                         % (e(nombre.strip()), ('<span class="oc-hoja-detalle">%s</span>' % e(resto.strip()))
+                            if resto.strip() else ""))
+        grupos["acciones"].append(recuadro("ataques.lst", '<ul class="oc-hoja-filas">%s</ul>' % "".join(filas),
+                                           "es-ancha", "🗡️"))
+    acciones = lineas_de(p.get("acciones"))
+    if acciones:
+        por_tipo = {}
+        for a in acciones:
+            tipo, _, que = a.partition(":")
+            if not que.strip():
+                tipo, que = "Otras", a
+            por_tipo.setdefault(tipo.strip(), []).append(que.strip())
+        dentro = "".join('<h5 class="oc-hoja-subtitulo">%s</h5>%s' % (e(tipo), lista_simple(cosas))
+                         for tipo, cosas in por_tipo.items())
+        grupos["acciones"].append(recuadro("acciones.txt", dentro, "es-ancha", "⏱️"))
 
-    # LA MAGIA: la característica con la que lanza, la CD y el ataque
-    # (calculados), los espacios y los conjuros por nivel.
-    magia = []
+    # ✨ CONJUROS: la aptitud, la CD y el ataque (calculados) en su
+    # ventanita, y una por nivel con sus espacios dibujados (▢▢▢).
     aptitud = llano(p.get("aptitud_magica"))[:3]
     if aptitud in mods and mods[aptitud] is not None and comp is not None:
-        nombre_apt = dict((a, c3) for a, _, c3 in STATS)[aptitud]
-        magia.append('<dl class="oc-hoja-numeros">'
-                     '<div class="oc-hoja-numero"><dt>Aptitud mágica</dt><dd>%s</dd></div>'
-                     '<div class="oc-hoja-numero"><dt>CD de salvación</dt><dd>%d</dd></div>'
-                     '<div class="oc-hoja-numero"><dt>Ataque de conjuro</dt><dd>%s</dd></div></dl>'
-                     % (e(nombre_apt), 8 + comp + mods[aptitud], con_signo(comp + mods[aptitud])))
-    espacios = lineas_de(p.get("espacios"))
-    if espacios:
-        magia.append('<p class="oc-hoja-espacios"><strong>Espacios:</strong> %s</p>'
-                     % " · ".join(e(x) for x in espacios))
+        grupos["conjuros"].append(recuadro("magia.dat", numeros([
+            ("Aptitud mágica", largo_de[aptitud]), ("CD de salvación", str(8 + comp + mods[aptitud])),
+            ("Ataque de conjuro", con_signo(comp + mods[aptitud]))]), "es-ancha", "🔮"))
+    espacios = {}
+    for linea in lineas_de(p.get("espacios")):
+        m = re.match(r"^\s*(\d+)\D*?:\s*(\d+)", linea)
+        if m:
+            espacios[m.group(1)] = int(m.group(2))
     por_nivel = {}
     for linea in lineas_de(p.get("conjuros")):
-        if ":" in linea:
-            nivel, nombre = linea.split(":", 1)
-        else:
+        nivel, sep, nombre = linea.partition(":")
+        if not sep:
             nivel, nombre = "", linea
         nivel = llano(nivel)
         clave_n = "0" if nivel.startswith("truco") else (nivel if nivel.isdigit() else "?")
         por_nivel.setdefault(clave_n, []).append(nombre.strip())
-    for clave_n in sorted(por_nivel, key=lambda x: (x == "?", int(x) if x.isdigit() else 99)):
-        titulo = "Trucos" if clave_n == "0" else ("Nivel %s" % clave_n if clave_n != "?" else "Conjuros")
-        magia.append('<h5 class="oc-hoja-subtitulo">%s</h5>%s' % (titulo, lista_simple(por_nivel[clave_n])))
-    if magia:
-        grupos["magia"].append(recuadro("magia", "".join(magia), "es-ancha"))
+    for clave_n in sorted(set(por_nivel) | set(espacios), key=lambda x: (x == "?", int(x) if x.isdigit() else 99)):
+        titulo = "trucos.lst" if clave_n == "0" else ("nivel_%s.lst" % clave_n if clave_n != "?" else "conjuros.lst")
+        dentro = ""
+        if espacios.get(clave_n):
+            n = espacios[clave_n]
+            dentro += ('<p class="oc-hoja-espacios"><span class="oc-hoja-casillas" aria-hidden="true">%s</span>'
+                       '%d %s</p>' % ("▢" * n, n, "espacio" if n == 1 else "espacios"))
+        if por_nivel.get(clave_n):
+            dentro += lista_simple(por_nivel[clave_n], "oc-hoja-lista oc-hoja-conjuros")
+        grupos["conjuros"].append(recuadro(titulo, dentro, "", "✨" if clave_n == "0" else "📖"))
 
-    objetos = lineas_de(p.get("objetos"))
+    # 🎒 INVENTARIO: el dinero en monedas y los objetos con su cantidad.
     dinero = str(p.get("dinero") or "").strip()
-    if objetos or dinero:
-        grupos["equipamiento"].append(recuadro("objetos", (('<p class="oc-hoja-dinero"><strong>Dinero:</strong> %s</p>' % e(dinero))
-                                          if dinero else "") + (lista_simple(objetos) if objetos else "")))
-    competencias = lineas_de(p.get("competencias"))
-    if competencias:
-        grupos["rasgos"].append(recuadro("competencias e idiomas", lista_simple(competencias)))
+    if dinero:
+        monedas = []
+        for trozo in re.split(r"\s*,\s*|\s+y\s+", dinero):
+            m = re.match(r"^(\d[\d.]*)\s*(\w+)$", trozo.strip())
+            if m:
+                monedas.append('<li class="oc-moneda"><span class="oc-moneda-cuanto">%s</span> %s</li>'
+                               % (e(m.group(1)), e(m.group(2))))
+            elif trozo.strip():
+                monedas.append('<li class="oc-moneda">%s</li>' % e(trozo.strip()))
+        grupos["inventario"].append(recuadro("bolsa.txt", '<ul class="oc-monedas">%s</ul>' % "".join(monedas), "",
+                                             "💰"))
+    objetos = lineas_de(p.get("objetos"))
+    if objetos:
+        grupos["inventario"].append(recuadro("inventario.lst", '<ul class="oc-hoja-lista oc-hoja-objetos">%s</ul>'
+                                             % "".join("<li>%s</li>" % objeto_con_cuantos(o) for o in objetos),
+                                             "es-ancha", "🎒"))
+
+    # 🧬 RASGOS: los de raza, de clase y las dotes.
     rasgos = markdown(p.get("rasgos"), c, personajes, avisos)
     if rasgos:
-        grupos["rasgos"].append(recuadro("rasgos y dotes", '<div class="oc-texto">%s</div>' % rasgos, "es-ancha"))
+        grupos["rasgos"].append(recuadro("rasgos.txt", '<div class="oc-texto">%s</div>' % rasgos, "es-ancha", "🧬"))
+
+    # 🗣️ COMPETENCIAS: los idiomas aparte, y lo demás en pastillas.
+    idiomas, otras = [], []
+    for linea in lineas_de(p.get("competencias")):
+        if llano(linea).startswith("idiomas:"):
+            idiomas += [x.strip() for x in linea.split(":", 1)[1].split(",") if x.strip()]
+        else:
+            otras.append(linea)
+    if idiomas:
+        grupos["competencias"].append(recuadro("idiomas.txt", etiquetas(idiomas), "", "🗣️"))
+    if otras:
+        grupos["competencias"].append(recuadro("competencias.txt", etiquetas(otras), "", "🛠️"))
+
+    # 📜 TRASFONDO: quién es, cómo es y qué le mueve.
+    quien = [(texto, str(p.get(clave) or "").strip()) for clave, texto in (
+        ("trasfondo", "Trasfondo"), ("alineamiento", "Alineamiento"), ("fe", "Fe"))]
+    quien = [(a, b) for a, b in quien if b]
+    if quien:
+        grupos["trasfondo"].append(recuadro("origen.txt", pares(quien), "", "🏛️"))
+    aspecto = [(texto, str(p.get(clave) or "").strip()) for clave, texto in (
+        ("edad", "Edad"), ("altura", "Altura"), ("peso", "Peso"), ("ojos", "Ojos"), ("pelo", "Pelo"),
+        ("piel", "Piel"))]
+    aspecto = [(a, b) for a, b in aspecto if b]
+    if aspecto:
+        grupos["trasfondo"].append(recuadro("aspecto.txt", pares(aspecto), "", "🪞"))
+    alma = []
+    for clave, texto in (("personalidad", "Rasgos de personalidad"), ("ideales", "Ideales"),
+                         ("vinculos", "Vínculos"), ("defectos", "Defectos")):
+        valor = markdown(p.get(clave), c, personajes, avisos)
+        if valor:
+            alma.append('<h5 class="oc-hoja-subtitulo">%s</h5><div class="oc-texto">%s</div>' % (texto, valor))
+    if alma:
+        grupos["trasfondo"].append(recuadro("personalidad.txt", "".join(alma), "es-ancha", "💭"))
     return hoja_con_subpestanas(grupos)
 
 
@@ -551,23 +673,22 @@ def hoja_con_subpestanas(grupos):
     subpestañas (debajo de las de historia, ficha…). Sin JavaScript se ven
     todos, uno debajo de otro, con su título. Con un solo grupo, sin
     subpestañas."""
-    llenos = [(g, texto) for g, texto in SUBPESTANAS_DE_FICHA if grupos[g]]
+    llenos = [(g, emoji, texto) for g, emoji, texto in SUBPESTANAS_DE_FICHA if grupos[g]]
     if not llenos:
         return ""
     cajas = []
-    for g, texto in llenos:
+    for g, emoji, texto in llenos:
         cajas.append('<div class="oc-hoja-grupo" id="oc-ficha-%s" data-oc-subapartado="%s">'
-                     '<h3 class="oc-hoja-grupo-titulo">%s</h3><div class="oc-hoja">%s</div></div>'
-                     % (g, g, texto, "".join(grupos[g])))
+                     '<h3 class="oc-hoja-grupo-titulo"><span aria-hidden="true">%s</span> %s</h3>'
+                     '<div class="oc-hoja">%s</div></div>'
+                     % (g, g, emoji, texto, "".join(grupos[g])))
     if len(llenos) == 1:
         return cajas[0]
     menu = ('<nav class="oc-subpestanas" aria-label="Partes de la ficha" data-oc-subpestanas>%s</nav>'
-            % "".join('<a class="oc-subpestana" href="#oc-ficha-%s" data-oc-pestana="%s">%s</a>' % (g, g, texto)
-                      for g, texto in llenos))
+            % "".join('<a class="oc-subpestana" href="#oc-ficha-%s" data-oc-pestana="%s">'
+                      '<span class="oc-subpestana-emoji" aria-hidden="true">%s</span>%s</a>'
+                      % (g, g, emoji, texto) for g, emoji, texto in llenos))
     return menu + '<div class="oc-hoja-grupos" data-oc-subpanel>%s</div>' % "".join(cajas)
-
-
-
 
 
 def modificador_num(valor):

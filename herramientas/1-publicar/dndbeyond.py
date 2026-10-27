@@ -47,6 +47,11 @@ URL_DE_LA_API = "https://character-service.dndbeyond.com/character/v5/character/
 RASGOS_QUE_SOBRAN = {"ability score increase", "ability score improvement", "age", "size", "speed", "languages",
                      "proficiencies", "hit points", "alignment", "creature type", "equipment"}
 
+SENTIDOS = {"darkvision": "Visión en la oscuridad", "blindsight": "Vista ciega", "tremorsense": "Sentido de la vibración",
+            "truesight": "Visión verdadera"}
+DEFENSAS = {"resistance": "Resistencia", "immunity": "Inmunidad", "vulnerability": "Vulnerabilidad"}
+TIPOS_DE_ACCION = {1: "Acción", 3: "Acción adicional", 4: "Reacción", 6: "Minutos", 7: "Horas", 8: "Especial"}
+
 ALINEAMIENTOS = {1: "Legal bueno", 2: "Neutral bueno", 3: "Caótico bueno", 4: "Legal neutral", 5: "Neutral",
                  6: "Caótico neutral", 7: "Legal malvado", 8: "Neutral malvado", 9: "Caótico malvado"}
 
@@ -148,6 +153,23 @@ def puntuaciones(d):
         valor = fijas.get(i) or (base.get(i, 10) + extra.get(i, 0) + suma[i])
         salida[i] = max(valor, minimo[i])
     return salida
+
+
+def _altura(texto):
+    """«5'9''» (pies y pulgadas) -> «1,75 m». Lo que no entienda, igual."""
+    texto = str(texto or "").strip()
+    m = re.search(r"(\d+)\s*'\s*(\d+)?", texto)
+    if not m:
+        return texto
+    metros = int(m.group(1)) * 0.3048 + int(m.group(2) or 0) * 0.0254
+    return ("%.2f m" % metros).replace(".", ",")
+
+
+def _peso(texto):
+    """«160» o «160 lb» (libras) -> «73 kg». Lo que no entienda, igual."""
+    texto = str(texto or "").strip()
+    m = re.match(r"^(\d+(?:\.\d+)?)\s*(?:lbs?\.?)?$", texto, re.I)
+    return "%d kg" % round(float(m.group(1)) * 0.4536) if m else texto
 
 
 def mod(valor):
@@ -337,16 +359,57 @@ def a_ficha(d, traducir=None):
         if nombre not in vistos_r:
             vistos_r.add(nombre)
             lineas.append("- **%s** (%s)" % (nombre, de))
+    campos["rasgos"] = "\n".join(lineas)
+
+    # EL TRASFONDO, la apariencia y la personalidad (lo de la pestaña
+    # «Background» de D&D Beyond). Lo escrito a mano allí viene en el
+    # idioma en que lo escribieras: se copia tal cual.
     trasfondo = ((d.get("background") or {}).get("definition") or {}).get("name")
-    if trasfondo:
-        lineas.insert(0, "**Trasfondo:** %s" % t(trasfondo))
-    alineamiento = ALINEAMIENTOS.get(d.get("alignmentId"))
-    if alineamiento:
-        lineas.insert(1 if trasfondo else 0, "**Alineamiento:** %s" % alineamiento)
-    # Trasfondo y alineamiento, cada uno en su párrafo; los rasgos, en lista.
-    cabeza = [l for l in lineas if not l.startswith("- ")]
-    lista = [l for l in lineas if l.startswith("- ")]
-    campos["rasgos"] = "\n\n".join(cabeza + (["\n".join(lista)] if lista else []))
+    campos["trasfondo"] = t(trasfondo) if trasfondo else ""
+    campos["alineamiento"] = ALINEAMIENTOS.get(d.get("alignmentId"), "")
+    for clave, de in (("fe", "faith"), ("edad", "age"), ("ojos", "eyes"), ("pelo", "hair"), ("piel", "skin")):
+        campos[clave] = str(d.get(de) or "").strip()
+    campos["altura"] = _altura(d.get("height"))
+    campos["peso"] = _peso(d.get("weight"))
+    rasgos_de_p = d.get("traits") or {}
+    for clave, de in (("personalidad", "personalityTraits"), ("ideales", "ideals"), ("vinculos", "bonds"),
+                      ("defectos", "flaws")):
+        campos[clave] = str(rasgos_de_p.get(de) or "").strip()
+    historia = str((d.get("notes") or {}).get("backstory") or "").strip()
+    if historia:
+        campos["historia"] = historia
+
+    # LOS SENTIDOS (visión en la oscuridad…) y LAS DEFENSAS (resistencias,
+    # inmunidades, vulnerabilidades), de los modificadores.
+    sentidos, defensas = [], {}
+    for m in modificadores:
+        tipo, sub = m.get("type"), str(m.get("subType") or "")
+        if tipo in ("set-base", "sense") and sub in SENTIDOS and m.get("value"):
+            texto = "%s %s m" % (SENTIDOS[sub], ("%g" % round(m["value"] * 0.3, 1)).replace(".", ","))
+            if texto not in sentidos:
+                sentidos.append(texto)
+        elif tipo in DEFENSAS:
+            nombre = t(sub.replace("-", " ").title()).lower()
+            defensas.setdefault(DEFENSAS[tipo], [])
+            if nombre not in defensas[DEFENSAS[tipo]]:
+                defensas[DEFENSAS[tipo]].append(nombre)
+    campos["sentidos"] = ", ".join(sentidos)
+    campos["defensas"] = ["%s: %s" % (k, ", ".join(v)) for k, v in defensas.items()]
+
+    # LAS ACCIONES (las de clase, raza, dotes y objetos), por su tipo.
+    acciones = []
+    for lista_a in (d.get("actions") or {}).values():
+        for a in lista_a or []:
+            nombre = str((a or {}).get("name") or "").strip()
+            if not nombre:
+                continue
+            tipo = TIPOS_DE_ACCION.get(((a.get("activation") or {}).get("activationType")), "Otras")
+            usos = (a.get("limitedUse") or {}).get("maxUses")
+            texto = "%s: %s%s" % (tipo, t(nombre), " (%s %s)" % (usos, "uso" if usos == 1 else "usos") if usos else "")
+            if texto not in acciones:
+                acciones.append(texto)
+    orden = list(TIPOS_DE_ACCION.values()) + ["Otras"]
+    campos["acciones"] = sorted(acciones, key=lambda x: orden.index(x.split(":")[0]) if x.split(":")[0] in orden else 99)
 
     # Lo que no se ha podido traducir: para cambiarlo a mano.
     if t.sin_traducir:

@@ -3802,14 +3802,28 @@
   el que se escriba), percepción pasiva, todas las tiradas de salvación
   y las 18 habilidades, la CD y el ataque de conjuro. Una habilidad mal
   escrita se avisa al generar.
-  DENTRO DE LA PESTAÑA «FICHA», SUBPESTAÑAS (desde el 27-10-2026), justo
-  debajo de las de historia, npcs…: estadísticas (combate, salvaciones y
-  habilidades), equipamiento (ataques, objetos y dinero), magia y
-  rasgos (competencias e idiomas, rasgos y dotes). Solo salen las que
-  tienen algo, y con una sola no hay subpestañas. Son pestañas de verdad
-  (las flechas, Inicio y Fin) y no cambian la dirección. Sin JavaScript,
-  los grupos uno debajo de otro con su título (generar-personajes.py,
-  SUBPESTANAS_DE_FICHA y hoja_con_subpestanas; personajes.js).
+  DENTRO DE LA PESTAÑA «FICHA», SUBPESTAÑAS como las secciones de D&D
+  Beyond, cada una con su emoji, justo debajo de las de historia, npcs…:
+  📊 combate (CA, PG, velocidad, iniciativa, competencia, dados; los
+  sentidos con las tres pasivas calculadas; las defensas), 🎯
+  habilidades (salvaciones y las 18), ⚔️ acciones (ataques y lo demás
+  por tipo: acción, acción adicional, reacción…), ✨ conjuros (la
+  aptitud, la CD y el ataque, y una ventanita por nivel con sus espacios
+  dibujados ▢▢▢), 🎒 inventario (el dinero en monedas y los objetos con
+  su cantidad), 🧬 rasgos, 🗣️ competencias (idiomas aparte) y 📜
+  trasfondo (trasfondo, alineamiento, fe, el aspecto y la personalidad:
+  rasgos, ideales, vínculos y defectos). Cada cosa va en una VENTANITA
+  como las del resto del sitio, con nombre de archivo («combate.dat»,
+  «nivel_1.lst») y sus −■✕ (el − la pliega). Solo salen las subpestañas
+  que tienen algo. Son pestañas de verdad (flechas, Inicio y Fin) y no
+  cambian la dirección. Sin JavaScript, los grupos uno debajo de otro
+  con su título (generar-personajes.py, SUBPESTANAS_DE_FICHA,
+  apartado_ficha y hoja_con_subpestanas; personajes.js). Los campos
+  nuevos del editor: sentidos, defensas, acciones, trasfondo,
+  alineamiento, fe, edad, altura, peso, ojos, pelo, piel, personalidad,
+  ideales, vínculos y defectos; el importador de D&D Beyond los rellena
+  (la altura y el peso, pasados a metros y kilos; la historia de allí,
+  solo si aquí no hay).
   LAS ETIQUETAS («D&D 5e, jugando»): cada una es un botón del filtro del
   índice (el de los relatos, scripts/componentes/filtros.js); sin
   ninguna etiqueta en ningún personaje, el filtro no sale.

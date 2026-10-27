@@ -28,7 +28,7 @@ function montarPestanasDePersonaje(menu, panel, o) {
         b.type = "button";
         b.className = o.clase;
         b.id = o.prefijo + a.dataset.ocPestana;
-        b.textContent = a.textContent;
+        [...a.childNodes].forEach((n) => b.appendChild(n.cloneNode(true)));
         b.setAttribute("role", "tab");
         b.setAttribute("aria-controls", apartados[i].id);
         b.dataset.ocPestana = a.dataset.ocPestana;
