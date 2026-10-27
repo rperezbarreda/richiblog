@@ -313,61 +313,78 @@
 /* ====================================================================
    LA FICHA DE UNO
    ====================================================================
-   En ESCRITORIO, una rejilla: el nombre arriba a la izquierda, la ficha
-   (foto, características y PDF) a la derecha desde arriba del todo, y
-   debajo del nombre las pestañas. El orden del HTML es el mismo que el de
-   lectura: nombre, ficha, pestañas.
-   Y en pantallas de escritorio de verdad (desde 1180px de ancho y 600 de
+   A la IZQUIERDA, la ficha: el post-it amarillo con el nombre y los PG y
+   la CA arriba, la foto, la raza y la clase y las características, y
+   debajo los botones (su ficha en D&D Beyond, el PDF y los dados). A la
+   DERECHA, arriba las pestañas y el «volver», y debajo su recuadro.
+   Es el orden del HTML, que es también el de lectura (el nombre, lo
+   primero).
+   En pantallas de escritorio de verdad (desde 1180px de ancho y 600 de
    alto) la página NO SE DESPLAZA entera: la ficha se queda quieta y el
-   recuadro de las pestañas ocupa el alto que queda y se desplaza por
-   dentro (en la pestaña «ficha», las subpestañas se quedan quietas y lo
-   que se desplaza es lo de debajo). Por debajo de eso, a la columna de las
-   pestañas no le queda alto ni ancho para desplazarse por dentro y se
-   leería por una mirilla: se desplaza la página, como siempre.
-   En el MÓVIL (ver el responsive), una cosa debajo de otra. */
+   recuadro ocupa el alto que queda y se desplaza por dentro (en la
+   pestaña «ficha», las subpestañas, en una sola línea, se quedan quietas
+   y se desplaza lo de debajo). Entre 861 y 1180, las dos columnas pero
+   se desplaza la página. En el MÓVIL (ver el responsive), una cosa debajo
+   de otra. */
 
 .oc-principal {
     min-width: 0;
 }
 
+.oc-lateral {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    min-width: 0;
+}
+
+/* Arriba de las pestañas: ellas a la izquierda y el «volver», a la
+   derecha. */
+.oc-arriba {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 10px 16px;
+    margin-bottom: 12px;
+}
+
+.oc-arriba .oc-pestanas,
+.oc-arriba .oc-pestanas-lista {
+    margin-bottom: 0;
+}
+
+.oc-arriba .oc-volver {
+    margin-left: auto;
+    padding: 6px 12px;
+}
+
 @media (min-width: 861px) {
     .oc-ficha-page {
         display: grid;
-        /* La ficha, algo más estrecha en pantallas pequeñas: si no, a
-           las pestañas les queda una tira. */
-        grid-template-columns: minmax(0, 1fr) clamp(12.5rem, 21vw, 16rem);
-        grid-template-rows: auto 1fr;
-        gap: 12px 28px;
-    }
-
-    .oc-ficha-page .oc-cabecera {
-        grid-column: 1;
-        grid-row: 1;
-        gap: 4px;
+        grid-template-columns: clamp(12rem, 22vw, 20rem) minmax(0, 1fr);
+        align-items: start;
+        gap: 0 28px;
     }
 
     .oc-ficha-page .oc-lateral {
-        grid-column: 2;
-        grid-row: 1 / 3;
-        align-self: start;
+        grid-column: 1;
+        grid-row: 1;
     }
 
     .oc-ficha-page .oc-principal {
-        grid-column: 1;
-        grid-row: 2;
+        grid-column: 2;
+        grid-row: 1;
     }
 
-    /* Todo un poco más apretado arriba, para que al recuadro le quede
-       alto: el nombre algo más pequeño, y las pestañas y subpestañas más
-       bajitas. */
-    .oc-ficha-page .home-title {
-        font-size: clamp(2.25rem, 3.5vw, 3.25rem);
+    /* El «volver» de abajo es para el móvil: aquí está arriba. */
+    .oc-ficha-page .oc-volver-abajo {
+        display: none;
     }
 
     .oc-ficha-page .oc-pestanas,
     .oc-ficha-page .oc-pestanas-lista {
         gap: 6px;
-        margin-bottom: 10px;
     }
 
     .oc-ficha-page .oc-pestana {
@@ -375,16 +392,28 @@
         font-size: 0.875rem;
     }
 
+    /* Las subpestañas, en UNA línea: si no caben, se desplazan de lado
+       (con la rueda, arrastrando o con las flechas, que llevan la
+       elegida a la vista). */
     .oc-ficha-page .oc-subpestanas,
     .oc-ficha-page .oc-subpestanas-lista {
-        gap: 5px;
+        /* flex: none, que si no la columna de la ficha la aplasta (con
+           el desplazamiento de lado puesto, ya no tiene alto mínimo). */
+        flex: none;
+        flex-wrap: nowrap;
+        gap: 6px;
         margin-bottom: 12px;
-        padding-bottom: 8px;
+        padding: 3px 3px 10px;
+        overflow-x: auto;
+        scrollbar-color: var(--yellow) transparent;
+        scrollbar-width: thin;
     }
 
     .oc-ficha-page .oc-subpestana {
+        flex: none;
         padding: 3px 10px;
-        font-size: 0.75rem;
+        font-size: 0.8125rem;
+        white-space: nowrap;
     }
 
     .oc-ficha-page .oc-panel {
@@ -397,35 +426,72 @@
         /* El recuadro nunca baja de 20rem: con el texto muy grande
            prefiero que se desplace un poco la página a leer por una
            mirilla. Si cabe, que es lo normal, no se desplaza nada. */
-        grid-template-rows: auto minmax(20rem, 1fr);
+        grid-template-rows: minmax(20rem, 1fr);
+        align-items: stretch;
         overflow-y: auto;
     }
 
     /* La ficha, quieta. Si con el texto muy grande no cabe de alto, se
        desplaza ella sola por dentro. */
     .oc-ficha-page .oc-lateral {
+        align-self: start;
         max-height: 100%;
+        padding: 0 8px 10px 0;
         overflow-y: auto;
-        padding-bottom: 10px;
     }
 
-    /* La foto, como mucho un poco más de un tercio del alto de la
-       pantalla (recortada, sin deformar): así caben debajo la raza, la
-       clase y las características sin desplazar nada. */
+    /* La foto, como mucho un tercio largo del alto de la pantalla
+       (recortada, sin deformar): así cabe todo lo de debajo sin
+       desplazar nada. */
     .oc-ficha-page .oc-retrato img,
     .oc-ficha-page .oc-retrato.es-sin-foto {
-        max-height: 36vh;
+        max-height: 23vh;
+    }
+
+    .oc-ficha-page .oc-postit .home-title {
+        font-size: clamp(1.75rem, 2.6vw, 2.5rem);
+    }
+
+    .oc-ficha-page .oc-vital dd {
+        font-size: 1.375rem;
+    }
+
+    /* Y todo el post-it un poco más apretado, para que quepan los
+       botones de debajo sin desplazar. */
+    .oc-ficha-page .oc-postit {
+        padding: 12px 12px 14px;
+    }
+
+    .oc-ficha-page .oc-postit-cabeza {
+        margin-bottom: 10px;
+    }
+
+    .oc-ficha-page .oc-postit-que {
+        margin-top: 8px;
+    }
+
+    .oc-ficha-page .oc-stats-titulo {
+        margin: 10px 0 6px;
+        padding-top: 8px;
+    }
+
+    .oc-ficha-page .oc-stats {
+        gap: 6px;
+    }
+
+    .oc-ficha-page .oc-stat {
+        padding: 3px 2px 5px;
+    }
+
+    .oc-ficha-page .oc-stat-valor {
+        font-size: 1.2rem;
+        line-height: 1.1;
     }
 
     .oc-ficha-page .oc-principal {
         display: flex;
         flex-direction: column;
         min-height: 0;
-    }
-
-    /* El de abajo sobra: el de arriba se ve siempre. */
-    .oc-ficha-page .oc-volver-abajo {
-        display: none;
     }
 
     /* El recuadro llena el alto que queda. Sin JavaScript (los apartados
@@ -478,15 +544,6 @@
         overflow-y: auto;
         padding: 0 12px 12px 0;
     }
-}
-
-.oc-lateral {
-    display: flex;
-    flex-direction: column;
-    gap: 18px;
-    min-width: 0;
-    /* Hueco para el post-it, que va un poco torcido y se saldría. */
-    padding: 6px 6px 0;
 }
 
 /* ---- LAS PESTAÑAS ----
@@ -1014,6 +1071,11 @@
     color: var(--white);
 }
 
+/* El nombre (que se despliega) y, al lado, las tiradas. */
+.oc-hoja-filas .oc-desplegable {
+    flex: 1 1 12rem;
+}
+
 .oc-hoja-detalle {
     color: var(--muted);
 }
@@ -1303,16 +1365,88 @@ li > .oc-origen {
     line-height: 1.4;
 }
 
-/* ---- EL POST-IT: la foto y las características ----
+/* ---- EL POST-IT: el nombre, los PG y la CA, la foto y las
+   características ----
    El amarillo de las barras de título con su contraste encima, como el
-   post-it de las notas de rol (ese par ya está medido en los diez temas),
-   y torcido un grado para que se lea como algo pegado. */
+   post-it de las notas de rol (ese par ya está medido en los diez temas).
+   Lo de dentro que va en oscuro (el nombre, los PG y la CA) lleva el
+   fondo y el texto de la página, que también están medidos. */
 .oc-postit {
     padding: 16px 16px 18px;
     background: var(--yellow);
     color: var(--yellow-contrast);
-    transform: rotate(1deg);
-    box-shadow: 3px 5px 0 var(--oc-color);
+    box-shadow: 4px 5px 0 var(--oc-color);
+}
+
+/* Arriba del post-it, el nombre en su recuadro oscuro y, al lado, los
+   puntos de golpe y la CA. */
+.oc-postit-cabeza {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: stretch;
+    gap: 10px;
+    margin-bottom: 14px;
+}
+
+.oc-postit .oc-cabecera {
+    justify-content: center;
+    gap: 2px;
+    min-width: 0;
+    padding: 8px 12px 10px;
+    background: var(--purple);
+    color: var(--white);
+}
+
+.oc-postit .home-title {
+    color: var(--white);
+    font-size: clamp(2rem, 3.2vw, 2.75rem);
+}
+
+.oc-postit .oc-nombre-completo {
+    font-size: 0.8125rem;
+    letter-spacing: 0.5px;
+}
+
+.oc-vitales {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 6px;
+    margin: 0;
+    padding: 8px 10px;
+    border: 3px solid var(--purple);
+    background: var(--purple);
+    box-shadow: inset 0 0 0 2px var(--yellow);
+    color: var(--white);
+}
+
+.oc-vital {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    line-height: 1.1;
+}
+
+.oc-vital dt {
+    color: var(--yellow);
+    font-family: var(--fuente-mono);
+    font-size: 0.6875rem;
+    letter-spacing: 1px;
+}
+
+.oc-vital abbr {
+    text-decoration: none;
+}
+
+.oc-vital-emoji {
+    margin-right: 4px;
+    font-family: initial;
+}
+
+.oc-vital dd {
+    margin: 0;
+    font-size: 1.625rem;
+    font-weight: 500;
 }
 
 .oc-retrato {
@@ -1413,29 +1547,56 @@ li > .oc-origen {
     font-size: 0.8125rem;
 }
 
-/* ---- VER LA FICHA EN PDF ---- */
-.oc-pdf {
-    display: block;
-    padding: 12px 14px;
-    border: 3px solid var(--yellow);
-    background: var(--purple-lighter);
-    box-shadow: 5px 5px 0 var(--yellow);
-    color: var(--yellow);
-    font-family: var(--fuente-mono);
-    font-size: 0.9375rem;
-    font-weight: 700;
-    letter-spacing: 1px;
-    text-align: center;
-    text-decoration: none;
+/* ---- LOS BOTONES DE DEBAJO: su ficha en D&D Beyond, el PDF y los
+   dados ---- */
+/* En una fila: si no caben, el texto de un botón parte a dos líneas
+   antes que bajar un botón debajo de otro. */
+.oc-botones {
+    display: flex;
+    align-items: stretch;
+    gap: 10px;
 }
 
-.oc-pdf:hover,
-.oc-pdf:focus-visible {
+.oc-botones:empty {
+    display: none;
+}
+
+.oc-boton {
+    flex: 1 1 auto;
+    min-width: 0;
+    padding: 7px 8px;
+    border: 3px solid var(--yellow);
+    background: var(--purple-lighter);
+    box-shadow: 4px 4px 0 var(--yellow);
+    color: var(--yellow);
+    font-family: var(--fuente-mono);
+    font-size: 0.8125rem;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    text-align: center;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.oc-boton-pdf,
+.oc-boton-dados {
+    flex: 0 1 auto;
+}
+
+.oc-boton-dados-emoji {
+    font-family: initial;
+    font-size: 1.125rem;
+    line-height: 1;
+}
+
+.oc-boton:hover,
+.oc-boton:focus-visible,
+.oc-boton[aria-expanded="true"] {
     background: var(--yellow);
     color: var(--yellow-contrast);
 }
 
-.oc-pdf:focus-visible {
+.oc-boton:focus-visible {
     outline: 2px solid var(--yellow);
     outline-offset: 4px;
 }
@@ -1448,5 +1609,319 @@ li > .oc-origen {
     .oc-tarjeta:hover .oc-tarjeta-foto,
     .oc-tarjeta:focus-visible .oc-tarjeta-foto {
         transform: none;
+    }
+}
+
+/* ====================================================================
+   LOS DADOS (personajes.js)
+   ==================================================================== */
+
+/* Lo que se tira al pulsarlo: se ve como el texto de siempre, con una
+   raya de puntos debajo, y al pasar por encima se rellena. */
+.oc-dado {
+    display: inline;
+    margin: 0;
+    padding: 0 2px;
+    border: 0;
+    border-bottom: 1px dotted currentColor;
+    background: transparent;
+    color: inherit;
+    font: inherit;
+    letter-spacing: inherit;
+    line-height: inherit;
+    cursor: pointer;
+}
+
+.oc-dado:hover {
+    background: var(--yellow);
+    color: var(--yellow-contrast);
+}
+
+.oc-dado:focus-visible {
+    outline: 2px solid currentColor;
+    outline-offset: 2px;
+}
+
+/* En la barra amarilla y en el post-it, el relleno al revés. */
+.oc-cajita-barra .oc-dado:hover,
+.oc-postit .oc-dado:hover {
+    background: var(--yellow-contrast);
+    color: var(--yellow);
+}
+
+/* LA VENTANITA DE LOS DADOS: abajo a la derecha, por encima de todo, con
+   la barra de título de las ventanas del sitio. */
+.oc-dados {
+    position: fixed;
+    right: 20px;
+    bottom: 20px;
+    z-index: 900;
+    display: flex;
+    flex-direction: column;
+    width: min(22rem, calc(100vw - 32px));
+    /* Que no tape el botón «Aa» de arriba a la derecha. */
+    max-height: min(36rem, calc(100vh - 110px));
+    border: 3px solid var(--yellow);
+    background: var(--purple-lighter);
+    box-shadow: 6px 6px 0 var(--yellow);
+    color: var(--white);
+}
+
+.oc-dados[hidden] {
+    display: none;
+}
+
+/* La barra de las ventanas del sitio, pero sin los márgenes negativos
+   (aquí la ventana no tiene relleno) y con un ✕ de verdad. */
+.oc-dados-barra {
+    display: flex;
+    flex: none;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    margin: 0;
+    padding: 8px 10px 8px 14px;
+    font-size: 1rem;
+}
+
+.oc-dados-titulo {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0;
+    font: inherit;
+    color: inherit;
+}
+
+.oc-dados-emoji {
+    font-family: initial;
+}
+
+.oc-dados-cerrar {
+    flex: none;
+    width: 26px;
+    height: 26px;
+    padding: 0;
+    border: 2px solid currentColor;
+    background: transparent;
+    color: inherit;
+    font-size: 0.875rem;
+    line-height: 1;
+    cursor: pointer;
+}
+
+.oc-dados-cerrar:hover,
+.oc-dados-cerrar:focus-visible {
+    background: var(--yellow);
+    color: var(--yellow-contrast);
+}
+
+.oc-dados-cerrar:focus-visible {
+    outline: 2px solid var(--yellow);
+    outline-offset: 2px;
+}
+
+.oc-dados-cuerpo {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    min-height: 0;
+    padding: 12px 14px 14px;
+    overflow-y: auto;
+}
+
+.oc-dados-bandeja {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 6px;
+}
+
+.oc-dados-cara,
+.oc-dados-modo,
+.oc-dados-tirar,
+.oc-dados-borrar {
+    padding: 6px 4px;
+    border: 2px solid var(--yellow);
+    background: var(--purple);
+    color: var(--yellow);
+    font-family: var(--fuente-mono);
+    font-size: 0.875rem;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.oc-dados-cara:hover,
+.oc-dados-modo:hover,
+.oc-dados-borrar:hover,
+.oc-dados-modo[aria-pressed="true"],
+.oc-dados-tirar {
+    background: var(--yellow);
+    color: var(--yellow-contrast);
+}
+
+.oc-dados-tirar:disabled {
+    background: transparent;
+    color: var(--muted);
+    border-color: var(--border);
+    cursor: default;
+}
+
+.oc-dados-cara:focus-visible,
+.oc-dados-modo:focus-visible,
+.oc-dados-tirar:focus-visible,
+.oc-dados-borrar:focus-visible,
+.oc-dados-mod:focus-visible {
+    outline: 2px solid var(--yellow);
+    outline-offset: 2px;
+}
+
+.oc-dados-mano {
+    margin: 0;
+    padding: 6px 8px;
+    border: 1px dashed var(--border);
+    color: var(--white);
+    font-family: var(--fuente-mono);
+    font-size: 0.875rem;
+    text-align: center;
+}
+
+.oc-dados-fila {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+}
+
+.oc-dados-etiqueta {
+    color: var(--yellow);
+    font-family: var(--fuente-mono);
+    font-size: 0.75rem;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+}
+
+.oc-dados-mod {
+    width: 5rem;
+    padding: 4px 6px;
+    border: 2px solid var(--yellow);
+    background: var(--purple);
+    color: var(--white);
+    font-family: var(--fuente-mono);
+    font-size: 0.9375rem;
+}
+
+.oc-dados-modos,
+.oc-dados-acciones {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 6px;
+}
+
+.oc-dados-acciones {
+    grid-template-columns: 2fr 1fr;
+}
+
+.oc-dados-modo {
+    font-size: 0.75rem;
+}
+
+.oc-dados-subtitulo {
+    margin: 4px 0 0;
+    padding-top: 10px;
+    border-top: 1px solid var(--border);
+    color: var(--yellow);
+    font-family: var(--fuente-mono);
+    font-size: 0.6875rem;
+    font-weight: 400;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+}
+
+.oc-dados-historial {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.oc-dados-historial:empty::before {
+    content: "todavía nada";
+    color: var(--muted);
+    font-family: var(--fuente-mono);
+    font-size: 0.8125rem;
+}
+
+.oc-dados-tirada {
+    padding: 8px 10px;
+    border: 2px solid var(--border);
+    background: var(--purple);
+}
+
+/* La última, la de arriba, resaltada. */
+.oc-dados-tirada:first-child {
+    border-color: var(--yellow);
+}
+
+.oc-dados-tirada.es-critico {
+    border-style: double;
+    border-width: 4px;
+}
+
+.oc-dados-que {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 2px 10px;
+    margin: 0;
+    font-family: var(--fuente-mono);
+    font-size: 0.75rem;
+}
+
+.oc-dados-que-nombre {
+    color: var(--yellow);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.oc-dados-formula {
+    color: var(--muted);
+}
+
+.oc-dados-total {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+    margin: 2px 0;
+    color: var(--white);
+    font-size: 2rem;
+    font-weight: 500;
+    line-height: 1.1;
+}
+
+.oc-dados-natural {
+    padding: 1px 6px;
+    background: var(--yellow);
+    color: var(--yellow-contrast);
+    font-family: var(--fuente-mono);
+    font-size: 0.6875rem;
+    font-weight: 700;
+    text-transform: uppercase;
+}
+
+.oc-dados-desglose {
+    margin: 0;
+    color: var(--muted);
+    font-family: var(--fuente-mono);
+    font-size: 0.75rem;
+    overflow-wrap: anywhere;
+}
+
+@media (max-width: 520px) {
+    .oc-dados {
+        right: 16px;
+        bottom: 16px;
+        max-height: calc(100vh - 90px);
     }
 }

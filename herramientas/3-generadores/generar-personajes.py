@@ -333,50 +333,122 @@ def numero(valor):
         return None
 
 
+def dado(dentro, formula, que):
+    """Algo que se tira al pulsarlo (un bono, un daño…): personajes.js lo
+    convierte en un botón que lanza «formula» («1d20+4», «1d6+2») en el
+    lanzador de dados, con «que» de nombre («sigilo», «arco corto:
+    daño»). Sin JavaScript, el texto tal cual. «dentro» ya va en HTML."""
+    return ('<span class="oc-dado" data-dados="%s" data-que="%s">%s</span>'
+            % (e(formula), e(que), dentro))
+
+
+def prueba(bono, que):
+    """Una tirada de d20 con su bono («+4» -> 1d20+4)."""
+    return dado(con_signo(bono), "1d20%+d" % bono if bono else "1d20", que)
+
+
+# Los dados que salen escritos en un texto («1d10», «2d8 + 1d6», «d20»,
+# «1d6+2»): cada uno, una tirada. No los que van pegados a una letra («los
+# d8s»).
+DADOS_EN_TEXTO = re.compile(r"(?<![\w])(\d*)d(\d+)(?!\w)((?:\s*[+−-]\s*\d+(?![\d]*\s*d))?)")
+
+
+def formula_de(cuantos, caras, mas):
+    mas = re.sub(r"\s+", "", mas or "").replace("−", "-")
+    return "%sd%s%s" % (cuantos or "1", caras, mas)
+
+
+def con_dados(html, que):
+    """El HTML de un texto con cada fórmula de dados convertida en una
+    tirada (solo en el texto, no dentro de las etiquetas ni de los
+    enlaces)."""
+    trozos = re.split(r"(<[^>]+>)", html)
+    dentro_de_a = 0
+    for n, trozo in enumerate(trozos):
+        if trozo.startswith("<"):
+            if re.match(r"<a[\s>]", trozo):
+                dentro_de_a += 1
+            elif trozo.startswith("</a"):
+                dentro_de_a = max(0, dentro_de_a - 1)
+            continue
+        if not dentro_de_a:
+            trozos[n] = DADOS_EN_TEXTO.sub(
+                lambda m: dado(m.group(0), formula_de(m.group(1), m.group(2), m.group(3)), que), trozo)
+    return "".join(trozos)
+
+
 def postit(p, c):
+    """Lo de debajo del nombre en el post-it: la foto, la raza y la clase,
+    la frase y las características (con el modificador, que se tira al
+    pulsarlo)."""
     nombre = str(p.get("nombre") or c)
     retrato = ruta_que_existe(p.get("retrato"))
     alt = str(p.get("retrato_alt") or "").strip() or "Retrato de %s" % nombre
-    partes = ['                    <div class="oc-postit">']
+    partes = []
     if retrato:
-        partes.append('                        <button class="lightbox-trigger oc-retrato" type="button" '
+        partes.append('                    <button class="lightbox-trigger oc-retrato" type="button" '
                       'aria-label="Ver en grande: %s">\n'
-                      '                            <img src="%s" alt="%s" decoding="async">\n'
-                      '                        </button>' % (e(alt), e(retrato), e(alt)))
+                      '                        <img src="%s" alt="%s" decoding="async">\n'
+                      '                    </button>' % (e(alt), e(retrato), e(alt)))
     else:
-        partes.append('                        <div class="oc-retrato es-sin-foto"><span class="oc-inicial" '
+        partes.append('                    <div class="oc-retrato es-sin-foto"><span class="oc-inicial" '
                       'aria-hidden="true">%s</span></div>' % e(inicial(nombre)))
     que = lo_que_es(p)
     if que:
-        partes.append('                        <p class="oc-postit-que">%s</p>' % e(que))
+        partes.append('                    <p class="oc-postit-que">%s</p>' % e(que))
     lema = str(p.get("lema") or "").strip()
     if lema:
-        partes.append('                        <p class="oc-postit-lema">«%s»</p>' % e(lema.strip("«»\"")))
+        partes.append('                    <p class="oc-postit-lema">«%s»</p>' % e(lema.strip("«»\"")))
     valores = [(k, corto, largo, numero(p.get(k))) for k, corto, largo in STATS]
     if any(v is not None for *_, v in valores):
-        partes.append('                        <h2 class="oc-stats-titulo">características</h2>')
-        partes.append('                        <dl class="oc-stats">')
+        partes.append('                    <h2 class="oc-stats-titulo">características</h2>')
+        partes.append('                    <dl class="oc-stats">')
         for _, corto, largo, v in valores:
+            mod = "" if v is None else (
+                '<span class="oc-stat-mod"><span class="visually-hidden">, modificador </span>%s</span>'
+                % dado(modificador(v), "1d20%+d" % modificador_num(v) if modificador_num(v) else "1d20",
+                       "prueba de " + largo.lower()))
             partes.append(
-                '                            <div class="oc-stat">'
+                '                        <div class="oc-stat">'
                 '<dt><abbr title="%s">%s</abbr></dt>'
                 '<dd><span class="oc-stat-valor">%s</span>%s</dd></div>'
-                % (largo, corto, "—" if v is None else v,
-                   "" if v is None else '<span class="oc-stat-mod"><span class="visually-hidden">, modificador </span>%s</span>' % modificador(v)))
-        partes.append('                        </dl>')
-    partes.append('                    </div>')
+                % (largo, corto, "—" if v is None else v, mod))
+        partes.append('                    </dl>')
     return "\n".join(partes)
 
 
-def boton_pdf(p, avisos):
+def vitales(p):
+    """Los puntos de golpe y la CA, en su cajita al lado del nombre."""
+    datos = [(corto, largo, str(p.get(k) or "").strip(), emoji) for k, corto, largo, emoji in (
+        ("pg", "PG", "Puntos de golpe", "❤️"), ("ca", "CA", "Clase de armadura", "🛡️"))]
+    datos = [x for x in datos if x[2]]
+    if not datos:
+        return ""
+    return ('                        <dl class="oc-vitales">%s</dl>' % "".join(
+        '<div class="oc-vital"><dt><span class="oc-vital-emoji" aria-hidden="true">%s</span>'
+        '<abbr title="%s">%s</abbr></dt><dd>%s</dd></div>' % (emoji, largo, corto, e(valor))
+        for corto, largo, valor, emoji in datos))
+
+
+def botones(p, avisos):
+    """Debajo del post-it: su ficha en D&D Beyond y en PDF."""
+    enlaces = []
+    ddb = str(p.get("dndbeyond") or "").strip()
+    if ddb:
+        if not re.match(r"^https?://", ddb):
+            ddb = "https://" + ddb.lstrip("/")
+        enlaces.append('<a class="oc-boton oc-boton-ddb" href="%s" target="_blank" rel="noopener">ficha dndbeyond'
+                       '<span class="visually-hidden"> (se abre en otra pestaña)</span></a>' % e(ddb))
     pedido = str(p.get("ficha") or "").strip()
     ruta = ruta_que_existe(pedido)
     if pedido and not ruta:
         avisos.di("ficha en PDF que no encuentro", pedido)
-    if not ruta:
-        return ""
-    return ('                    <a class="oc-pdf" href="%s" target="_blank" rel="noopener">ver ficha pdf'
-            '<span class="visually-hidden"> (se abre en otra pestaña)</span></a>' % e(ruta))
+    if ruta:
+        enlaces.append('<a class="oc-boton oc-boton-pdf" href="%s" target="_blank" rel="noopener">pdf'
+                       '<span class="visually-hidden"> de la ficha (se abre en otra pestaña)</span></a>' % e(ruta))
+    # Siempre está (aunque vacía): personajes.js mete aquí el botón de los
+    # dados.
+    return '                <div class="oc-botones" data-oc-botones>%s</div>' % "".join(enlaces)
 
 
 def apartado_gente(gente, c, personajes, avisos):
@@ -472,22 +544,30 @@ def numeros(datos):
     número en grande y una barra abajo. Cada dato es (nombre, valor,
     barra) o (nombre, valor, barra, dicho): la barra es solo para la
     vista (la abreviatura: «CA», «PG»…) salvo que lleve «dicho», que es
-    como se lee (el modificador de una característica)."""
+    como se lee (el modificador de una característica). Un quinto,
+    (fórmula, qué, "valor" o "barra"), hace que eso se tire al pulsarlo
+    (la iniciativa, el modificador de una característica…)."""
     cajas = []
     for dato in datos:
         nombre, valor, barra = dato[:3]
         dicho = dato[3] if len(dato) > 3 else None
+        tirada = dato[4] if len(dato) > 4 else None
+        valor_html, barra_html = e(valor), e(barra)
+        if tirada and tirada[2] == "valor":
+            valor_html = dado(valor_html, tirada[0], tirada[1])
+        elif tirada:
+            barra_html = dado(barra_html, tirada[0], tirada[1])
         if not barra:
             pie = ""
         elif dicho is None:
-            pie = '<span class="oc-cajita-barra" aria-hidden="true">%s</span>' % e(barra)
+            pie = '<span class="oc-cajita-barra" aria-hidden="true">%s</span>' % barra_html
         else:
             pie = ('<span class="oc-cajita-barra"><span class="visually-hidden">%s </span>%s</span>'
-                   % (e(dicho), e(barra)))
+                   % (e(dicho), barra_html))
         # Lo que no cabe en grande («10d6», «1208») va algo más pequeño.
         cajas.append('<li class="oc-cajita"><span class="oc-cajita-nombre">%s</span>'
                      '<span class="oc-cajita-valor%s">%s</span>%s</li>'
-                     % (e(nombre), " es-larga" if len(str(valor)) > 3 else "", e(valor), pie))
+                     % (e(nombre), " es-larga" if len(str(valor)) > 3 else "", valor_html, pie))
     return '<ul class="oc-cajitas">%s</ul>' % "".join(cajas)
 
 
@@ -652,7 +732,11 @@ def desplegable(cabeza, entrada, origen, c, personajes, avisos, cuerpo_extra="")
         dentro += '<ul class="oc-desplegable-datos">%s</ul>' % "".join(
             "<li>%s</li>" % e(x.strip()) for x in datos.split("·") if x.strip())
     if cuerpo:
-        dentro += '<div class="oc-texto">%s</div>' % markdown(cuerpo, c, personajes, avisos)
+        # Los dados del texto («1d10», «8d6»…) se tiran al pulsarlos.
+        que = re.sub(r'<span[^>]*aria-hidden="true"[^>]*>.*?</span>', "", cabeza)
+        que = re.sub(r"<[^>]+>", "", que).strip()
+        que = re.sub(r"\s+", " ", que)
+        dentro += '<div class="oc-texto">%s</div>' % con_dados(markdown(cuerpo, c, personajes, avisos), que)
     return ('<details class="oc-desplegable"><summary><span class="oc-desplegable-flecha" aria-hidden="true">▸</span>'
             '<span class="oc-desplegable-cabeza">%s</span>%s</summary>'
             '<div class="oc-desplegable-dentro">%s</div></details>' % (cabeza, chapa_de_origen(origen), dentro))
@@ -726,7 +810,8 @@ def apartado_ficha(p, c, personajes, avisos):
     # Primero, las seis características como en estadisticas.dat de
     # «quién soy»: el nombre, la puntuación en grande y el modificador en
     # la barra de abajo.
-    stats = [(largo.lower(), str(numero(p.get(k))), con_signo(mods[k]), "modificador")
+    stats = [(largo.lower(), str(numero(p.get(k))), con_signo(mods[k]), "modificador",
+              ("1d20%+d" % mods[k] if mods[k] else "1d20", "prueba de " + largo.lower(), "barra"))
              for k, _, largo in STATS if mods[k] is not None]
     if stats:
         grupos["combate"].append(recuadro("estadisticas.dat", numeros(stats), "es-ancha", "📊"))
@@ -737,12 +822,20 @@ def apartado_ficha(p, c, personajes, avisos):
         if valor:
             datos.append((texto, valor, barra))
     if mods["des"] is not None:
-        datos.append(("iniciativa", con_signo(mods["des"]), "DES"))
+        datos.append(("iniciativa", con_signo(mods["des"]), "DES", None,
+                      ("1d20%+d" % mods["des"] if mods["des"] else "1d20", "iniciativa", "valor")))
     if comp is not None:
         datos.append(("competencia", con_signo(comp), "bono"))
     dados = str(p.get("dados_golpe") or "").strip()
     if dados:
-        datos.append(("dados de golpe", dados, "DG"))
+        # Al pulsarlo, un dado de golpe con la Constitución (lo que se
+        # cura en un descanso corto por cada dado que se gasta).
+        m = re.search(r"d(\d+)", dados)
+        tirada = None
+        if m:
+            con = mods["con"] or 0
+            tirada = ("1d%s%s" % (m.group(1), ("%+d" % con) if con else ""), "dado de golpe", "valor")
+        datos.append(("dados de golpe", dados, "DG", None, tirada))
     if datos:
         grupos["combate"].append(recuadro("combate.dat", numeros(datos), "es-ancha", "🛡️"))
     sentidos = []
@@ -762,7 +855,8 @@ def apartado_ficha(p, c, personajes, avisos):
     # 🎯 HABILIDADES: las salvaciones y las dieciocho, con su marca.
     if any(v is not None for v in mods.values()):
         salva = {llano(x)[:3] for x in str(p.get("salvaciones") or "").replace("\n", ",").split(",") if x.strip()}
-        filas = [fila_de_tirada(largo.lower(), mods[k] + ((comp or 0) if k in salva else 0), 1 if k in salva else 0)
+        filas = [fila_de_tirada(largo.lower(), mods[k] + ((comp or 0) if k in salva else 0), 1 if k in salva else 0,
+                                que="salvación de " + largo.lower())
                  for k, _, largo in STATS if mods[k] is not None]
         grupos["habilidades"].append(recuadro("salvaciones.lst", '<ul class="oc-hoja-tiradas">%s</ul>'
                                               % "".join(filas), "", "🎲"))
@@ -777,12 +871,23 @@ def apartado_ficha(p, c, personajes, avisos):
     if ataques:
         filas = []
         for a in ataques:
+            # «Arco corto: +4, 1d6+2 perforante»: el +4 se tira como
+            # ataque (1d20+4) y el 1d6+2 como daño. Van FUERA del
+            # desplegable (un botón no puede ir dentro de otro): el nombre
+            # se despliega y las tiradas quedan al lado.
             nombre, _, resto = a.partition(":")
-            cabeza = ('<span class="oc-hoja-nombre">%s</span>%s'
-                      % (e(nombre.strip()), (' <span class="oc-hoja-detalle">%s</span>' % e(resto.strip()))
-                         if resto.strip() else ""))
-            filas.append('<li>%s</li>' % desplegable(cabeza, buscar_descripcion(descripciones, nombre), "",
-                                                     c, personajes, avisos))
+            nombre, resto = nombre.strip(), resto.strip()
+            detalle = e(resto)
+            m = re.match(r"^([+−-]\s*\d+)(.*)$", detalle)
+            if m:
+                bono = int(m.group(1).replace("−", "-").replace(" ", ""))
+                detalle = prueba(bono, nombre.lower() + ": ataque") + con_dados(m.group(2), nombre.lower() + ": daño")
+            else:
+                detalle = con_dados(detalle, nombre.lower() + ": daño")
+            filas.append('<li>%s%s</li>' % (
+                desplegable('<span class="oc-hoja-nombre">%s</span>' % e(nombre),
+                            buscar_descripcion(descripciones, nombre), "", c, personajes, avisos),
+                (' <span class="oc-hoja-detalle">%s</span>' % detalle) if resto else ""))
         grupos["acciones"].append(recuadro("ataques.lst", '<ul class="oc-hoja-filas">%s</ul>' % "".join(filas),
                                            "es-ancha", "🗡️"))
     acciones = lineas_de(p.get("acciones"))
@@ -804,7 +909,8 @@ def apartado_ficha(p, c, personajes, avisos):
         grupos["conjuros"].append(recuadro("magia.dat", numeros([
             ("aptitud mágica", corto_de[aptitud], largo_de[aptitud].lower(), ""),
             ("CD de salvación", str(8 + comp + mods[aptitud]), "CD"),
-            ("ataque de conjuro", con_signo(comp + mods[aptitud]), "ataque")]), "es-ancha", "🔮"))
+            ("ataque de conjuro", con_signo(comp + mods[aptitud]), "ataque", None,
+             ("1d20%+d" % (comp + mods[aptitud]), "ataque de conjuro", "valor"))]), "es-ancha", "🔮"))
     espacios = {}
     for linea in lineas_de(p.get("espacios")):
         m = re.match(r"^\s*(\d+)\D*?:\s*(\d+)", linea)
@@ -925,7 +1031,7 @@ def modificador_num(valor):
     return (valor - 10) // 2
 
 
-def fila_de_tirada(nombre, total, nivel, corto=""):
+def fila_de_tirada(nombre, total, nivel, corto="", que=None):
     """Una tirada como las de habilidades.lst en «quién soy»: el circulito
     (vacío, relleno si es competente, con aro si tiene pericia), el bono y
     el nombre, y de qué característica tira. El circulito es solo para la
@@ -934,7 +1040,7 @@ def fila_de_tirada(nombre, total, nivel, corto=""):
     dicho = ("", " (competente)", " (con pericia)")[nivel]
     return ('<li class="oc-tirada"><span class="oc-marca%s" aria-hidden="true"></span>'
             '<span><span class="oc-tirada-bono">%s</span> %s%s<span class="visually-hidden">%s</span></span></li>'
-            % (marca, con_signo(total), e(nombre),
+            % (marca, prueba(total, que or nombre), e(nombre),
                (' <span class="oc-tirada-de">(%s)</span>' % corto) if corto else "", dicho))
 
 
@@ -974,7 +1080,7 @@ def pestanas(p, c, datos, personajes, avisos):
             % (" es-ficha" if ident == "ficha" else "", ident, ident, texto, clase,
                dentro or '<p class="oc-vacio">%s</p>' % vacio[ident]))
     cajas.append('                    </div>')
-    return "\n".join(menu + cajas)
+    return "\n".join(menu), "\n".join(cajas)
 
 
 def pagina_ficha(p, datos, personajes, avisos):
@@ -992,6 +1098,7 @@ def pagina_ficha(p, datos, personajes, avisos):
     primera = next((l.strip() for l in historia_plana if l.strip()), "")
     descripcion = (completo or nombre) + (", " + que if que else "") + ". " + (primera[:180] if primera else
                                                                               "Uno de mis personajes de rol.")
+    menu, panel = pestanas(p, c, datos, personajes, avisos)
     cambios = {
         "{{TITULO}}": e("%s · Mis personajes" % (completo or nombre)),
         "{{DESCRIPCION}}": e(descripcion),
@@ -1003,9 +1110,11 @@ def pagina_ficha(p, datos, personajes, avisos):
         "{{NOMBRE}}": e(nombre),
         "{{NOMBRE_ATRIBUTO}}": e(nombre),
         "{{SUBTITULO}}": "\n                ".join(sub),
-        "{{PESTANAS}}": pestanas(p, c, datos, personajes, avisos),
+        "{{PESTANAS_MENU}}": menu,
+        "{{PANEL}}": panel,
+        "{{VITALES}}": vitales(p),
         "{{POSTIT}}": postit(p, c),
-        "{{PDF}}": boton_pdf(p, avisos),
+        "{{BOTONES}}": botones(p, avisos),
     }
     return rellenar(leer_texto(MOLDE_FICHA)[0], cambios)
 

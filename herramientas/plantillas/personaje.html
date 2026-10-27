@@ -55,14 +55,14 @@
     <link rel="alternate" type="application/rss+xml" title="El Blog de Richi — blog, relatos y rol" href="/blog/rss.xml">
     <!-- ==== CSS ==== -->
     <link rel="stylesheet" href="/estilos/paquete-comun.css?v=e94b0ddd">
-    <link rel="stylesheet" href="/ligero/estilos/paginas/personajes.css?v=4b332f08">
-    <link rel="stylesheet" href="/ligero/estilos/paginas/personajes.responsive.css?v=5867d4ab">
+    <link rel="stylesheet" href="/ligero/estilos/paginas/personajes.css?v=27fb2bae">
+    <link rel="stylesheet" href="/ligero/estilos/paginas/personajes.responsive.css?v=6137284f">
     <link rel="stylesheet" href="/estilos/paquete-cierre.css?v=a49d87f4">
     <!-- ==== fin del CSS ==== -->
     <script src="/ligero/scripts/cargador-scripts.js?v=e5f01c9b"></script>
     <!-- ==== JS ==== -->
     <script defer src="/scripts/paquete-comun.js?v=5806fd68"></script>
-    <script defer src="/ligero/scripts/paginas/personajes.js?v=3219b464"></script>
+    <script defer src="/ligero/scripts/paginas/personajes.js?v=6f7e7683"></script>
     <!-- ==== fin del JS ==== -->
   </head>
 <body>
@@ -77,26 +77,34 @@
              es el molde: los cambios de contenido van en el JSON, o en el
              editor, en Rol → «Mis personajes». -->
         <section id="home" class="home oc-page oc-ficha-page {{COLOR}}">
-            <div class="oc-cabecera">
-                <a class="oc-volver" href="/web/personajes/index_personajes.html">← volver a mis personajes</a>
-                <h1 class="home-title">{{NOMBRE}}</h1>
-                {{SUBTITULO}}
-            </div>
-
-            <!-- La ficha (la foto, las características y el PDF) va ANTES
-                 que las pestañas en el HTML. En escritorio la página no se
-                 desplaza: el nombre arriba a la izquierda, la ficha a la
-                 derecha desde arriba del todo y quieta, y las pestañas
-                 debajo del nombre con su recuadro desplazándose por dentro.
-                 En el móvil, todo una cosa debajo de otra (la foto después
-                 del nombre) y se desplaza la página. -->
+            <!-- A la izquierda, LA FICHA: un post-it con el nombre y los
+                 puntos de golpe y la CA arriba, la foto, la raza y la clase,
+                 y las características; debajo, los botones de su ficha en
+                 D&D Beyond y en PDF (y el de los dados, que lo pone
+                 personajes.js). A la derecha, las pestañas (y el «volver»)
+                 y su recuadro. En escritorio la página no se desplaza: la
+                 ficha se queda quieta y el recuadro se desplaza por dentro.
+                 En el móvil, una cosa debajo de otra, en este orden. -->
             <div class="oc-lateral" role="group" aria-label="Ficha de {{NOMBRE_ATRIBUTO}}">
+                <div class="oc-postit">
+                    <div class="oc-postit-cabeza">
+                        <div class="oc-cabecera">
+                            <h1 class="home-title">{{NOMBRE}}</h1>
+                            {{SUBTITULO}}
+                        </div>
+{{VITALES}}
+                    </div>
 {{POSTIT}}
-{{PDF}}
+                </div>
+{{BOTONES}}
             </div>
 
             <div class="oc-principal">
-{{PESTANAS}}
+                <div class="oc-arriba">
+{{PESTANAS_MENU}}
+                    <a class="oc-volver" href="/web/personajes/index_personajes.html">← volver a mis personajes</a>
+                </div>
+{{PANEL}}
             </div>
 
             <a class="oc-volver oc-volver-abajo" href="/web/personajes/index_personajes.html">← volver a mis personajes</a>

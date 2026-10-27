@@ -44,7 +44,7 @@ from dnd_es import CARACTERISTICA_DE_NOMBRE, CARACTERISTICAS, HABILIDADES, Tradu
 URL_DE_LA_API = "https://character-service.dndbeyond.com/character/v5/character/%s"
 
 # Lo que no aporta nada como rasgo (ya sale en otro sitio de la ficha).
-RASGOS_QUE_SOBRAN = {"ability score increase", "ability score improvement", "age", "size", "speed", "languages",
+RASGOS_QUE_SOBRAN = {"ability score increase", "ability score increases", "ability score improvement", "age", "size", "speed", "languages",
                      "proficiencies", "hit points", "alignment", "creature type", "equipment"}
 
 SENTIDOS = {"darkvision": "Visión en la oscuridad", "blindsight": "Vista ciega", "tremorsense": "Sentido de la vibración",
@@ -566,6 +566,9 @@ def a_ficha(d, traducir=None):
     modificadores = _cuentan(d)
 
     campos = {"nombre_completo": str(d.get("name") or "").strip()}
+    # El enlace a su ficha en D&D Beyond (el botón «ficha dndbeyond»).
+    if d.get("readonlyUrl") or d.get("id"):
+        campos["dndbeyond"] = str(d.get("readonlyUrl") or "https://www.dndbeyond.com/characters/%s" % d["id"])
     campos["nombre"] = campos["nombre_completo"].split(" ")[0] if campos["nombre_completo"] else ""
     raza = (d.get("race") or {}).get("fullName") or (d.get("race") or {}).get("baseName") or ""
     campos["raza"] = t(raza)
@@ -729,6 +732,10 @@ def a_ficha(d, traducir=None):
         nombre = ((f or {}).get("definition") or {}).get("name")
         if nombre:
             rasgos.append(t(nombre))
+    # Los de relleno de las fichas de 2024 («Core Druid Traits», «Druid
+    # Subclass», «… Ability Score Improvements»), fuera.
+    rasgos = [r for r in rasgos if not re.search(r"^core .* traits$| subclass$|ability score improvement",
+                                                 r.lower())]
     vistos_r, lineas = set(), []
     for nombre in rasgos:
         if nombre not in vistos_r:

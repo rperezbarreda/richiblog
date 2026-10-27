@@ -1,7 +1,8 @@
 /* MIS PERSONAJES en pantallas estrechas. */
 
-/* Una columna, en el orden del HTML: el nombre, la ficha (foto,
-   características y PDF) y las pestañas; y se desplaza la página. */
+/* Una columna, en el orden del HTML: la ficha (el nombre, la foto, las
+   características y los botones), las pestañas y su recuadro; y se
+   desplaza la página. */
 @media (max-width: 860px) {
     .oc-lateral {
         width: 100%;
@@ -13,11 +14,6 @@
 @media (max-width: 520px) {
     .oc-page {
         padding: 18px 16px;
-    }
-
-    /* Derecho: torcido, en el móvil se sale del borde. */
-    .oc-postit {
-        transform: none;
     }
 
     .oc-panel {

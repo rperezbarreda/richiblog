@@ -1521,8 +1521,11 @@ def colecciones():
                   C("ideales", "Ideales", "largo", vacio="quitar", markdown=True),
                   C("vinculos", "Vínculos", "largo", vacio="quitar", markdown=True),
                   C("defectos", "Defectos", "largo", vacio="quitar", markdown=True),
+                  C("dndbeyond", "Su ficha en D&D Beyond (el enlace)", vacio="quitar",
+                    ayuda="«https://www.dndbeyond.com/characters/12345678»: sale el botón «ficha dndbeyond»"
+                          " debajo de su foto. Al importar de D&D Beyond se pone solo."),
                   C("ficha", "La ficha en PDF", "pdf", vacio="quitar",
-                    ayuda="Se guarda en su carpeta y sale el botón «ver ficha pdf»."),
+                    ayuda="Se guarda en su carpeta y sale el botón «pdf» debajo de su foto."),
                   C("historia", "Historia", "largo", grande=True, vacio="quitar", markdown=True, imagenes="oc-imagen",
                     ayuda="Con formato: **negrita**, ## apartados, > citas, [[Otro personaje]] enlaza con su ficha."),
                   C("extra", "Extra", "largo", grande=True, vacio="quitar", markdown=True, imagenes="oc-imagen",

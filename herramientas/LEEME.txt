@@ -3859,13 +3859,35 @@
   viene; y al volver a importar NO pisa las descripciones que ya tengas,
   solo añade las nuevas (dndbeyond.py: descripciones_de, html_a_markdown,
   _plantillas; fichas.js: mezclarDescripcionesOc).
-  LA PÁGINA, SIN DESPLAZARSE ENTERA (escritorio, desde 1180px de ancho y
-  600 de alto): el nombre arriba a la izquierda, la ficha (foto y
-  características) a la derecha desde arriba del todo y quieta, y el
-  recuadro de las pestañas ocupando el alto que queda, desplazándose por
-  dentro; en «ficha», las subpestañas se quedan quietas y se desplaza lo
-  de debajo. La foto, como mucho un 36% del alto de la pantalla. Más
-  pequeño que eso (o en el móvil), se desplaza la página como siempre.
+  CÓMO SE REPARTE LA PÁGINA DE CADA UNO: a la IZQUIERDA, el post-it
+  amarillo con el nombre en su recuadro y, al lado, los PG y la CA; la
+  foto; la raza y la clase; y las características. Debajo, los botones:
+  «ficha dndbeyond» (si tiene el campo «Su ficha en D&D Beyond», que el
+  importador rellena solo), «pdf» (si tiene la ficha en PDF) y 🎲 (los
+  dados). A la DERECHA, las pestañas con el «volver» al lado, y debajo su
+  recuadro; las subpestañas de «ficha», en una sola línea (si no caben,
+  se desplazan de lado). En escritorio (desde 1180px de ancho y 600 de
+  alto) la página NO SE DESPLAZA entera: la ficha de la izquierda se
+  queda quieta (la foto, como mucho un 23% del alto de la pantalla) y el
+  recuadro se desplaza por dentro. Más pequeño, se desplaza la página; en
+  el móvil, todo una cosa debajo de otra (plantillas/personaje.html;
+  generar-personajes.py: postit, vitales, botones).
+  LOS DADOS (scripts/paginas/personajes.js): TODO LO QUE SE TIRA EN LA
+  FICHA SE PUEDE PULSAR, como en D&D Beyond: los bonos de las habilidades
+  y las salvaciones, el modificador de cada característica (en el
+  post-it y en estadisticas.dat), la iniciativa, el ataque de conjuro, el
+  ataque y el daño de las armas («+4» tira 1d20+4 y «1d6+2», el daño), el
+  dado de golpe (1 dado + la Constitución) y los dados que salgan
+  escritos en las descripciones («1d10», «8d6»). Y con el botón 🎲, la
+  BANDEJA: cada pulsación en d4, d6, d8, d10, d12, d20 o d100 añade un
+  dado, más un modificador, y «tirar». Con «ventaja» o «desventaja»
+  elegido, lo que se tire con un solo d20 se tira dos veces y se queda el
+  mayor o el menor. Las tiradas salen en la ventanita «dados.exe» (abajo
+  a la derecha; la última, arriba; marca el 20 y el 1 naturales) y el
+  lector de pantalla dice el resultado. Esc la cierra.
+  generar-personajes.py deja marcado lo que se tira (dado, prueba,
+  con_dados: <span class="oc-dado" data-dados="1d20+4" data-que="sigilo">)
+  y personajes.js lo convierte en botones.
   LAS ETIQUETAS («D&D 5e, jugando»): cada una es un botón del filtro del
   índice (el de los relatos, scripts/componentes/filtros.js); sin
   ninguna etiqueta en ningún personaje, el filtro no sale.
