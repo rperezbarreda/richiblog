@@ -462,33 +462,126 @@ def recuadro(titulo, dentro, clase="", emoji=""):
                ('<span class="oc-hoja-emoji" aria-hidden="true">%s</span>' % emoji) if emoji else "", e(titulo), dentro))
 
 
-def lista_simple(cosas, clase="oc-hoja-lista"):
+def lista_simple(cosas, clase="oc-lista-maquina"):
     return '<ul class="%s">%s</ul>' % (clase, "".join("<li>%s</li>" % e(x) for x in cosas))
 
 
 def numeros(datos):
-    """Los numeritos grandes (CA, PG…), cada uno en su cuadradito."""
-    return '<dl class="oc-hoja-numeros">%s</dl>' % "".join(
-        '<div class="oc-hoja-numero"><dt>%s</dt><dd>%s</dd></div>' % (e(a), e(b)) for a, b in datos)
+    """Los numeritos grandes (CA, PG, CD…), cada uno en su cajita como las
+    de estadisticas.dat en «quién soy»: lo que es arriba en pequeñito, el
+    número en grande y una barra abajo. Cada dato es (nombre, valor,
+    barra) o (nombre, valor, barra, dicho): la barra es solo para la
+    vista (la abreviatura: «CA», «PG»…) salvo que lleve «dicho», que es
+    como se lee (el modificador de una característica)."""
+    cajas = []
+    for dato in datos:
+        nombre, valor, barra = dato[:3]
+        dicho = dato[3] if len(dato) > 3 else None
+        if not barra:
+            pie = ""
+        elif dicho is None:
+            pie = '<span class="oc-cajita-barra" aria-hidden="true">%s</span>' % e(barra)
+        else:
+            pie = ('<span class="oc-cajita-barra"><span class="visually-hidden">%s </span>%s</span>'
+                   % (e(dicho), e(barra)))
+        # Lo que no cabe en grande («10d6», «1208») va algo más pequeño.
+        cajas.append('<li class="oc-cajita"><span class="oc-cajita-nombre">%s</span>'
+                     '<span class="oc-cajita-valor%s">%s</span>%s</li>'
+                     % (e(nombre), " es-larga" if len(str(valor)) > 3 else "", e(valor), pie))
+    return '<ul class="oc-cajitas">%s</ul>' % "".join(cajas)
 
 
 def pares(datos):
-    """Una lista de «nombre: valor» (la apariencia, el trasfondo…)."""
-    return '<dl class="oc-hoja-pares">%s</dl>' % "".join(
-        '<div class="oc-hoja-par"><dt>%s</dt><dd>%s</dd></div>' % (e(a), e(b)) for a, b in datos)
+    """Una lista de «nombre: valor» (la apariencia, el trasfondo…), como
+    los datos de «quién soy»: la etiqueta pequeñita encima, en amarillo,
+    y el valor debajo."""
+    return '<dl class="oc-datos">%s</dl>' % "".join(
+        '<div class="oc-dato"><dt>%s</dt><dd>%s</dd></div>' % (e(a), e(b)) for a, b in datos)
 
 
-def etiquetas(cosas, clase="oc-hoja-etiquetas"):
-    """Cosas cortas en pastillas (los idiomas, las competencias)."""
-    return '<ul class="%s">%s</ul>' % (clase, "".join("<li>%s</li>" % e(x) for x in cosas))
+def etiquetas(cosas):
+    """Cosas cortas en lista de máquina (los idiomas, las competencias),
+    como proficiencias.cfg en «quién soy»."""
+    return lista_simple(cosas, "oc-lista-maquina")
+
+
+# Un emoji para cada objeto del inventario, como en inventario.dat de
+# «quién soy». Se mira si alguna palabra del objeto EMPIEZA por una de
+# estas (así «raciones» cae en «racion»); manda la primera que case. Si
+# el objeto ya empieza por un emoji, se deja el suyo.
+EMOJIS_DE_OBJETOS = (
+    (("pocion", "tintura", "tincture", "elixir", "potion", "vial", "redoma"), "🧪"),
+    (("pergamino", "scroll"), "📜"),
+    (("libro", "grimorio", "tomo", "diario"), "📖"),
+    (("mapa",), "🗺️"),
+    (("arco", "flecha", "virote", "ballesta", "carcaj"), "🏹"),
+    (("espada", "daga", "estoque", "cimitarra", "sable", "punal", "cuchillo"), "🗡️"),
+    (("hacha",), "🪓"),
+    (("martillo", "maza", "lucero"), "🔨"),
+    (("lanza", "tridente", "alabarda", "pica", "jabalina"), "🔱"),
+    (("escudo", "rodela", "cota", "armadura", "coraza", "peto", "cuero"), "🛡️"),
+    (("anillo",), "💍"),
+    (("amuleto", "collar", "medallon", "colgante", "simbolo", "rosario"), "📿"),
+    (("varita", "baston", "vara", "cetro"), "🪄"),
+    (("orbe", "bola"), "🔮"),
+    (("piedra", "gema", "diamante", "cuarzo", "rubi", "zafiro", "esmeralda", "perla", "cristal"), "💎"),
+    (("tunica", "capa", "manto", "abrigo", "ropa", "ropaje", "vestido", "traje"), "🧥"),
+    (("bota", "botas", "zapato", "sandalia"), "🥾"),
+    (("guante", "guantelete", "brazal"), "🧤"),
+    (("sombrero", "yelmo", "casco", "capucha", "diadema", "corona"), "🎩"),
+    (("gafas", "lente", "anteojo", "catalejo"), "👓"),
+    (("mochila", "bolsa", "saco", "zurron", "morral", "bolsita"), "🎒"),
+    (("cuerda", "soga"), "🪢"),
+    (("cadena", "grillete"), "⛓️"),
+    (("antorcha", "yesquero", "pedernal"), "🔥"),
+    (("vela", "linterna", "lampara", "farol"), "🕯️"),
+    (("racion", "comida", "pan", "queso", "carne", "manzana"), "🍖"),
+    (("odre", "cantimplora", "botella", "frasco", "aceite", "vino", "cerveza"), "🍶"),
+    (("llave", "ganzua"), "🗝️"),
+    (("espejo",), "🪞"),
+    (("garfio", "gancho"), "🪝"),
+    (("cubo",), "🪣"),
+    (("red",), "🕸️"),
+    (("palanca", "piton", "polea", "pala", "pico", "clavo"), "🔧"),
+    (("utiles", "herramientas", "kit", "estuche", "instrumental"), "🧰"),
+    (("laud", "flauta", "tambor", "lira", "violin", "gaita", "cuerno", "instrumento"), "🎻"),
+    (("dado", "dados", "baraja", "cartas", "naipes"), "🎲"),
+    (("moneda", "monedas", "oro", "plata"), "🪙"),
+    (("tienda", "saco de dormir", "manta", "petate"), "⛺"),
+    (("pluma", "tinta", "papel", "pergaminos"), "✒️"),
+)
+
+
+def emoji_de_objeto(nombre):
+    if nombre and not nombre[0].isalnum() and not nombre[0] in "(«\"'¿¡":
+        return ""
+    palabras = llano(nombre).replace(",", " ").replace("(", " ").split()
+    for claves, emoji in EMOJIS_DE_OBJETOS:
+        if any(p.startswith(k) for k in claves for p in palabras):
+            return emoji
+    return "📦"
 
 
 def objeto_con_cuantos(texto):
-    """«Antorcha ×5» -> el nombre y, aparte, la cantidad en su chapita."""
+    """«Antorcha ×5» -> su emoji, el nombre y, aparte, la cantidad en su
+    chapita."""
     m = re.match(r"^(.*?)\s*[×x]\s*(\d+)$", texto.strip())
-    if m:
-        return '%s <span class="oc-hoja-cuantos">×%s</span>' % (e(m.group(1)), m.group(2))
-    return e(texto)
+    nombre, cuantos = (m.group(1), m.group(2)) if m else (texto.strip(), "")
+    emoji = emoji_de_objeto(nombre)
+    return ('%s%s%s' % (('<span class="oc-objeto-emoji" aria-hidden="true">%s</span>' % emoji) if emoji else "",
+                        e(nombre), (' <span class="oc-hoja-cuantos">×%s</span>' % cuantos) if cuantos else ""))
+
+
+# Las monedas de D&D: la abreviatura y cómo se llaman.
+MONEDAS = {"pc": "cobre", "pp": "plata", "pe": "electro", "po": "oro", "ppt": "platino",
+           "cp": "cobre", "sp": "plata", "ep": "electro", "gp": "oro", "pt": "platino"}
+
+
+def marcas(n, clase=""):
+    """Unos circulitos como los de habilidades.lst (los espacios de
+    conjuro). Solo para la vista."""
+    return '<span class="oc-marcas" aria-hidden="true">%s</span>' % (
+        '<span class="oc-marca%s"></span>' % ((" " + clase) if clase else "")) * n
 
 
 def apartado_ficha(p, c, personajes, avisos):
@@ -513,26 +606,33 @@ def apartado_ficha(p, c, personajes, avisos):
         return None if mods[k] is None else mods[k] + (comp or 0) * competentes.get(llano(nombre), 0)
 
     # 📊 COMBATE: los numeritos grandes, los sentidos y las defensas.
+    # Primero, las seis características como en estadisticas.dat de
+    # «quién soy»: el nombre, la puntuación en grande y el modificador en
+    # la barra de abajo.
+    stats = [(largo.lower(), str(numero(p.get(k))), con_signo(mods[k]), "modificador")
+             for k, _, largo in STATS if mods[k] is not None]
+    if stats:
+        grupos["combate"].append(recuadro("estadisticas.dat", numeros(stats), "es-ancha", "📊"))
     datos = []
-    for clave, texto in (("ca", "Clase de armadura"), ("pg", "Puntos de golpe"), ("velocidad", "Velocidad")):
+    for clave, texto, barra in (("ca", "clase de armadura", "CA"), ("pg", "puntos de golpe", "PG"),
+                                ("velocidad", "velocidad", "a pie")):
         valor = str(p.get(clave) or "").strip()
         if valor:
-            datos.append((texto, valor))
+            datos.append((texto, valor, barra))
     if mods["des"] is not None:
-        datos.append(("Iniciativa", con_signo(mods["des"])))
+        datos.append(("iniciativa", con_signo(mods["des"]), "DES"))
     if comp is not None:
-        datos.append(("Competencia", con_signo(comp)))
+        datos.append(("competencia", con_signo(comp), "bono"))
     dados = str(p.get("dados_golpe") or "").strip()
     if dados:
-        datos.append(("Dados de golpe", dados))
+        datos.append(("dados de golpe", dados, "DG"))
     if datos:
         grupos["combate"].append(recuadro("combate.dat", numeros(datos), "es-ancha", "🛡️"))
     sentidos = []
-    for nombre, texto in (("Percepción", "Percepción pasiva"), ("Investigación", "Investigación pasiva"),
-                          ("Perspicacia", "Perspicacia pasiva")):
+    for nombre in ("Percepción", "Investigación", "Perspicacia"):
         bono = bono_de_habilidad(nombre)
         if bono is not None:
-            sentidos.append((texto, str(10 + bono)))
+            sentidos.append((nombre.lower(), str(10 + bono), "pasiva", ""))
     extra_sentidos = str(p.get("sentidos") or "").strip()
     if sentidos or extra_sentidos:
         grupos["combate"].append(recuadro("sentidos.txt", (numeros(sentidos) if sentidos else "")
@@ -540,16 +640,17 @@ def apartado_ficha(p, c, personajes, avisos):
                                              if extra_sentidos else ""), "", "👁️"))
     defensas = lineas_de(p.get("defensas"))
     if defensas:
-        grupos["combate"].append(recuadro("defensas.txt", lista_simple(defensas), "", "🧱"))
+        grupos["combate"].append(recuadro("defensas.txt", lista_simple(defensas, "oc-lista-maquina"), "", "🧱"))
 
     # 🎯 HABILIDADES: las salvaciones y las dieciocho, con su marca.
     if any(v is not None for v in mods.values()):
         salva = {llano(x)[:3] for x in str(p.get("salvaciones") or "").replace("\n", ",").split(",") if x.strip()}
-        filas = [fila_de_tirada(largo, mods[k] + ((comp or 0) if k in salva else 0), 1 if k in salva else 0)
+        filas = [fila_de_tirada(largo.lower(), mods[k] + ((comp or 0) if k in salva else 0), 1 if k in salva else 0)
                  for k, _, largo in STATS if mods[k] is not None]
         grupos["habilidades"].append(recuadro("salvaciones.lst", '<ul class="oc-hoja-tiradas">%s</ul>'
                                               % "".join(filas), "", "🎲"))
-        filas = [fila_de_tirada(nombre, bono_de_habilidad(nombre), competentes.get(llano(nombre), 0), corto_de[k])
+        filas = [fila_de_tirada(nombre.lower(), bono_de_habilidad(nombre), competentes.get(llano(nombre), 0),
+                                corto_de[k].lower())
                  for nombre, k in HABILIDADES if mods[k] is not None]
         grupos["habilidades"].append(recuadro("habilidades.lst", '<ul class="oc-hoja-tiradas es-dos-columnas">%s</ul>'
                                               % "".join(filas), "es-ancha", "🎯"))
@@ -573,7 +674,7 @@ def apartado_ficha(p, c, personajes, avisos):
             if not que.strip():
                 tipo, que = "Otras", a
             por_tipo.setdefault(tipo.strip(), []).append(que.strip())
-        dentro = "".join('<h5 class="oc-hoja-subtitulo">%s</h5>%s' % (e(tipo), lista_simple(cosas))
+        dentro = "".join('<h5 class="oc-hoja-subtitulo">%s</h5>%s' % (e(tipo), lista_simple(cosas, "oc-lista-maquina"))
                          for tipo, cosas in por_tipo.items())
         grupos["acciones"].append(recuadro("acciones.txt", dentro, "es-ancha", "⏱️"))
 
@@ -582,8 +683,9 @@ def apartado_ficha(p, c, personajes, avisos):
     aptitud = llano(p.get("aptitud_magica"))[:3]
     if aptitud in mods and mods[aptitud] is not None and comp is not None:
         grupos["conjuros"].append(recuadro("magia.dat", numeros([
-            ("Aptitud mágica", largo_de[aptitud]), ("CD de salvación", str(8 + comp + mods[aptitud])),
-            ("Ataque de conjuro", con_signo(comp + mods[aptitud]))]), "es-ancha", "🔮"))
+            ("aptitud mágica", corto_de[aptitud], largo_de[aptitud].lower(), ""),
+            ("CD de salvación", str(8 + comp + mods[aptitud]), "CD"),
+            ("ataque de conjuro", con_signo(comp + mods[aptitud]), "ataque")]), "es-ancha", "🔮"))
     espacios = {}
     for linea in lineas_de(p.get("espacios")):
         m = re.match(r"^\s*(\d+)\D*?:\s*(\d+)", linea)
@@ -602,28 +704,30 @@ def apartado_ficha(p, c, personajes, avisos):
         dentro = ""
         if espacios.get(clave_n):
             n = espacios[clave_n]
-            dentro += ('<p class="oc-hoja-espacios"><span class="oc-hoja-casillas" aria-hidden="true">%s</span>'
-                       '%d %s</p>' % ("▢" * n, n, "espacio" if n == 1 else "espacios"))
+            dentro += ('<p class="oc-hoja-espacios">%s%d %s</p>'
+                       % (marcas(n), n, "espacio" if n == 1 else "espacios"))
         if por_nivel.get(clave_n):
-            dentro += lista_simple(por_nivel[clave_n], "oc-hoja-lista oc-hoja-conjuros")
+            dentro += lista_simple(por_nivel[clave_n], "oc-lista-maquina oc-hoja-conjuros")
         grupos["conjuros"].append(recuadro(titulo, dentro, "", "✨" if clave_n == "0" else "📖"))
 
     # 🎒 INVENTARIO: el dinero en monedas y los objetos con su cantidad.
     dinero = str(p.get("dinero") or "").strip()
     if dinero:
-        monedas = []
+        # Cada moneda en su cajita, como las estadísticas: cómo se llama,
+        # cuántas y la abreviatura en la barra.
+        monedas, sueltas = [], []
         for trozo in re.split(r"\s*,\s*|\s+y\s+", dinero):
             m = re.match(r"^(\d[\d.]*)\s*(\w+)$", trozo.strip())
             if m:
-                monedas.append('<li class="oc-moneda"><span class="oc-moneda-cuanto">%s</span> %s</li>'
-                               % (e(m.group(1)), e(m.group(2))))
+                monedas.append((MONEDAS.get(m.group(2).lower(), m.group(2)), m.group(1), m.group(2)))
             elif trozo.strip():
-                monedas.append('<li class="oc-moneda">%s</li>' % e(trozo.strip()))
-        grupos["inventario"].append(recuadro("bolsa.txt", '<ul class="oc-monedas">%s</ul>' % "".join(monedas), "",
-                                             "💰"))
+                sueltas.append(trozo.strip())
+        grupos["inventario"].append(recuadro("bolsa.txt", (numeros(monedas) if monedas else "")
+                                             + (lista_simple(sueltas, "oc-lista-maquina") if sueltas else ""),
+                                             "es-ancha", "💰"))
     objetos = lineas_de(p.get("objetos"))
     if objetos:
-        grupos["inventario"].append(recuadro("inventario.lst", '<ul class="oc-hoja-lista oc-hoja-objetos">%s</ul>'
+        grupos["inventario"].append(recuadro("inventario.lst", '<ul class="oc-lista-maquina oc-hoja-objetos">%s</ul>'
                                              % "".join("<li>%s</li>" % objeto_con_cuantos(o) for o in objetos),
                                              "es-ancha", "🎒"))
 
@@ -696,16 +800,16 @@ def modificador_num(valor):
 
 
 def fila_de_tirada(nombre, total, nivel, corto=""):
-    """Una tirada: la marca (vacía, competente o pericia), el nombre, de qué
-    característica tira y el bono. La marca es solo para la vista; para el
-    lector va dicho con palabras."""
-    marca = ("○", "●", "◆")[nivel]
-    dicho = ("", ", competente", ", con pericia")[nivel]
-    return ('<li class="oc-tirada%s"><span class="oc-tirada-marca" aria-hidden="true">%s</span>'
-            '<span class="oc-tirada-nombre">%s%s<span class="visually-hidden">%s</span></span>'
-            '<span class="oc-tirada-bono">%s</span></li>'
-            % (" es-competente" if nivel else "", marca, e(nombre),
-               (' <span class="oc-tirada-de">(%s)</span>' % corto) if corto else "", dicho, con_signo(total)))
+    """Una tirada como las de habilidades.lst en «quién soy»: el circulito
+    (vacío, relleno si es competente, con aro si tiene pericia), el bono y
+    el nombre, y de qué característica tira. El circulito es solo para la
+    vista; para el lector va dicho con palabras."""
+    marca = ("", " es-llena", " es-pericia")[nivel]
+    dicho = ("", " (competente)", " (con pericia)")[nivel]
+    return ('<li class="oc-tirada"><span class="oc-marca%s" aria-hidden="true"></span>'
+            '<span><span class="oc-tirada-bono">%s</span> %s%s<span class="visually-hidden">%s</span></span></li>'
+            % (marca, con_signo(total), e(nombre),
+               (' <span class="oc-tirada-de">(%s)</span>' % corto) if corto else "", dicho))
 
 
 def pestanas(p, c, datos, personajes, avisos):

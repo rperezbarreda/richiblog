@@ -3804,12 +3804,12 @@
   escrita se avisa al generar.
   DENTRO DE LA PESTAÑA «FICHA», SUBPESTAÑAS como las secciones de D&D
   Beyond, cada una con su emoji, justo debajo de las de historia, npcs…:
-  📊 combate (CA, PG, velocidad, iniciativa, competencia, dados; los
+  📊 combate (las seis características, CA, PG, velocidad, iniciativa, competencia, dados; los
   sentidos con las tres pasivas calculadas; las defensas), 🎯
   habilidades (salvaciones y las 18), ⚔️ acciones (ataques y lo demás
   por tipo: acción, acción adicional, reacción…), ✨ conjuros (la
   aptitud, la CD y el ataque, y una ventanita por nivel con sus espacios
-  dibujados ▢▢▢), 🎒 inventario (el dinero en monedas y los objetos con
+  dibujados ○○○), 🎒 inventario (el dinero en monedas y los objetos con
   su cantidad), 🧬 rasgos, 🗣️ competencias (idiomas aparte) y 📜
   trasfondo (trasfondo, alineamiento, fe, el aspecto y la personalidad:
   rasgos, ideales, vínculos y defectos). Cada cosa va en una VENTANITA
@@ -3818,7 +3818,21 @@
   que tienen algo. Son pestañas de verdad (flechas, Inicio y Fin) y no
   cambian la dirección. Sin JavaScript, los grupos uno debajo de otro
   con su título (generar-personajes.py, SUBPESTANAS_DE_FICHA,
-  apartado_ficha y hoja_con_subpestanas; personajes.js). Los campos
+  apartado_ficha y hoja_con_subpestanas; personajes.js).
+  EL ASPECTO, EL DE LA HOJA DE «QUIÉN SOY» (sobre-mi.css): estadisticas.dat
+  con las seis características en cajitas (el nombre, la puntuación en
+  grande y el modificador en la barra amarilla de abajo), y en cajitas
+  iguales la CA, los PG, las pasivas, la CD y las monedas (los números
+  largos, como «10d6», algo más pequeños); las salvaciones y las
+  habilidades con su circulito (○ vacío, ● competente, ● con aro si hay
+  pericia) y «+2 acrobacias (des)»; las listas en letra de máquina; los
+  objetos con un emoji según lo que sean (EMOJIS_DE_OBJETOS; si el
+  objeto ya empieza por un emoji, se queda el suyo; si no casa ninguno,
+  📦); los espacios de conjuro en circulitos; el trasfondo y el aspecto
+  con la etiquetita amarilla encima, como los datos de debajo del
+  retrato; y las ventanas con la rejilla de fondo. Si se cambia el
+  aspecto de «quién soy», cambiar también las clases oc-cajita,
+  oc-marca, oc-lista-maquina y oc-dato de personajes.css. Los campos
   nuevos del editor: sentidos, defensas, acciones, trasfondo,
   alineamiento, fe, edad, altura, peso, ojos, pelo, piel, personalidad,
   ideales, vínculos y defectos; el importador de D&D Beyond los rellena
