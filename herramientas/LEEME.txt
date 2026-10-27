@@ -3890,10 +3890,13 @@
   un solo d20 se tira dos veces y se queda el mayor o el menor. Al tirar
   suena un traqueteo de dados (hecho con el navegador, sin archivos; el
   🔊 de la barra lo apaga y se acuerda), y detrás, si sale un 20 natural,
-  unas notas que suben, y si sale una pifia (un 1), unas que bajan. Las tiradas salen en la
-  ventanita «dados.exe»: la última arriba, en colores invertidos; marca
-  el 20 y el 1 naturales; cada una con «↻ repetir» y su ✕ para borrarla,
-  y «borrar todo» arriba. La ventanita se mueve ARRASTRÁNDOLA por su
+  unas notas que suben, y si sale una pifia (un 1), unas que bajan. Las
+  tiradas salen en la ventanita «dados.exe»: la última arriba, en
+  colores invertidos; marca el 20 y el 1 naturales; cada una con
+  «↻ repetir» y su ✕ para borrarla, y «borrar todo» arriba. Las de un d20
+  tiradas en normal llevan además «▲ ventaja» y «▼ desventaja»: se tira
+  el otro d20 y se rehace esa misma tirada en su sitio (total, desglose y
+  natural), sin volver a tirar lo demás. La ventanita se mueve ARRASTRÁNDOLA por su
   barra y se queda donde la dejes (en este navegador); su ✕ o Esc la
   cierran. El lector de pantalla dice cada resultado. (La barra lleva su
   clase propia, oc-dados-barra, y no la de las ventanas del sitio: esa la

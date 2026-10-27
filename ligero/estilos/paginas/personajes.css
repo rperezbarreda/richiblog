@@ -1547,6 +1547,7 @@ li > .oc-origen {
     border-top: 1px solid var(--border);
 }
 .oc-dados-borrar-todo,
+.oc-dados-ventaja,
 .oc-dados-repetir,
 .oc-dados-quitar {
     padding: 2px 8px;
@@ -1565,6 +1566,7 @@ li > .oc-origen {
     cursor: default;
 }
 .oc-dados-borrar-todo:not(:disabled):hover,
+.oc-dados-ventaja:hover,
 .oc-dados-repetir:hover,
 .oc-dados-quitar:hover {
     background: var(--yellow);
@@ -1613,6 +1615,7 @@ li > .oc-origen {
     background: var(--yellow-contrast);
     color: var(--yellow);
 }
+.oc-dados-tirada:first-child .oc-dados-ventaja:hover,
 .oc-dados-tirada:first-child .oc-dados-repetir:hover,
 .oc-dados-tirada:first-child .oc-dados-quitar:hover {
     background: var(--yellow-contrast);
@@ -1620,13 +1623,19 @@ li > .oc-origen {
 }
 .oc-dados-tirada-botones {
     display: flex;
+    flex-wrap: wrap;
     justify-content: flex-end;
     gap: 6px;
     margin-top: 6px;
 }
+.oc-dados-ventaja:focus-visible,
 .oc-dados-repetir:focus-visible,
 .oc-dados-quitar:focus-visible {
-    outline-color: currentColor;
+    outline: 2px solid currentColor;
+    outline-offset: 2px;
+}
+.oc-dados-ventaja + .oc-dados-ventaja {
+    margin-right: auto;
 }
 .oc-dados-tirada.es-critico {
     border-style: double;

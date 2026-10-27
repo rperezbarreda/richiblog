@@ -273,53 +273,97 @@ function montarPestanasDePersonaje(menu, panel, o) {
         return trozos;
     }
 
+    // Una tirada guarda sus trozos ya tirados («partes»): así el desglose
+    // se puede volver a escribir si luego se le añade ventaja o
+    // desventaja. El d20 (cuando hay uno solo) va aparte, con sus dados.
     function tirar(formula, que) {
         const trozos = trozosDe(formula);
         if (!trozos.length) {
             return null;
         }
         const d20s = trozos.filter((t) => t.caras === 20).reduce((n, t) => n + t.cuantos, 0);
-        const conVentaja = estado.modo !== "normal" && d20s === 1;
         let total = 0;
-        let natural = null;
         const partes = [];
+        let d20 = null;
         trozos.forEach((t) => {
+            const signo = partes.length ? (t.signo < 0 ? "− " : "+ ") : (t.signo < 0 ? "− " : "");
             if (t.fijo !== undefined) {
                 total += t.signo * t.fijo;
-                partes.push((t.signo < 0 ? "− " : "+ ") + t.fijo);
+                partes.push({ texto: (t.signo < 0 ? "− " : "+ ") + t.fijo });
+                return;
+            }
+            if (t.caras === 20 && d20s === 1) {
+                const a = alAzar(20);
+                d20 = { d20: true, prefijo: signo, signo: t.signo, valores: [a], modo: "normal", queda: a };
+                if (estado.modo !== "normal") {
+                    ponerModo(d20, estado.modo);
+                }
+                total += t.signo * d20.queda;
+                partes.push(d20);
                 return;
             }
             const salen = [];
             for (let i = 0; i < t.cuantos; i++) {
-                if (t.caras === 20 && conVentaja) {
-                    const a = alAzar(20);
-                    const b = alAzar(20);
-                    const queda = estado.modo === "ventaja" ? Math.max(a, b) : Math.min(a, b);
-                    salen.push(queda + " (" + a + " y " + b + ", " + estado.modo + ")");
-                    total += t.signo * queda;
-                    natural = queda;
-                } else {
-                    const x = alAzar(t.caras);
-                    salen.push(String(x));
-                    total += t.signo * x;
-                    if (t.caras === 20 && t.cuantos === 1) {
-                        natural = x;
-                    }
-                }
+                const x = alAzar(t.caras);
+                salen.push(x);
+                total += t.signo * x;
             }
-            partes.push((partes.length ? (t.signo < 0 ? "− " : "+ ") : (t.signo < 0 ? "− " : ""))
-                + t.cuantos + "d" + t.caras + " [" + salen.join(", ") + "]");
+            partes.push({ texto: signo + t.cuantos + "d" + t.caras + " [" + salen.join(", ") + "]" });
         });
         estado.cuenta += 1;
-        const r = { id: estado.cuenta, que: que || "tirada", formula: String(formula), total,
-            desglose: partes.join(" "), critico: d20s === 1 && natural === 20,
-            pifia: d20s === 1 && natural === 1 };
+        const r = { id: estado.cuenta, que: que || "tirada", formula: String(formula), total, partes, d20 };
+        acabar(r);
         sonar();
         if (r.critico || r.pifia) {
             sonarFinal(r.critico);
         }
         anadir(r);
         return r;
+    }
+
+    // Tirar el segundo d20 y quedarse con el mayor (ventaja) o el menor.
+    function ponerModo(d20, modo) {
+        const b = alAzar(20);
+        d20.valores = [d20.valores[0], b];
+        d20.modo = modo;
+        d20.queda = modo === "ventaja" ? Math.max(d20.valores[0], b) : Math.min(d20.valores[0], b);
+    }
+
+    // El desglose y si es 20 o 1 natural, de las partes.
+    function acabar(r) {
+        r.desglose = r.partes.map((p) => {
+            if (!p.d20) {
+                return p.texto;
+            }
+            return p.prefijo + "1d20 [" + (p.modo === "normal" ? p.queda
+                : p.queda + " (" + p.valores.join(" y ") + ", " + p.modo + ")") + "]";
+        }).join(" ");
+        r.critico = !!r.d20 && r.d20.queda === 20;
+        r.pifia = !!r.d20 && r.d20.queda === 1;
+    }
+
+    // Una tirada de d20 hecha en normal, pasada a ventaja o desventaja
+    // desde el registro: se tira el otro d20 y se rehace la misma tirada
+    // (el total, el desglose y lo de natural), en su sitio.
+    function cambiarModo(r, modo) {
+        if (!r.d20 || r.d20.modo !== "normal") {
+            return;
+        }
+        const antes = r.d20.queda;
+        ponerModo(r.d20, modo);
+        r.total += r.d20.signo * (r.d20.queda - antes);
+        acabar(r);
+        sonar();
+        if (r.critico || r.pifia) {
+            sonarFinal(r.critico);
+        }
+        pintarHistorial();
+        avisar(r.que + " con " + modo + ": " + r.total + (r.critico ? ", ¡20 natural!" : "")
+            + (r.pifia ? ", pifia, 1 natural" : "") + ". " + r.desglose);
+        const li = historial.querySelector('[data-id="' + r.id + '"] .oc-dados-repetir');
+        if (li) {
+            li.focus();
+        }
     }
 
     // ---- LOS DIBUJOS DE CADA DADO (su silueta, en SVG) ----
@@ -657,6 +701,15 @@ function montarPestanasDePersonaje(menu, panel, o) {
                 total.appendChild(crear("span", "oc-dados-natural", r.critico ? "¡20 natural!" : "pifia (1 natural)"));
             }
             const botones = crear("div", "oc-dados-tirada-botones");
+            // Tirada de un d20 en normal: con ▲ y ▼ se le añade ventaja o
+            // desventaja (sin tirar otra vez lo demás).
+            if (r.d20 && r.d20.modo === "normal") {
+                botones.append(
+                    botonDe("oc-dados-ventaja", "▲ ventaja", () => cambiarModo(r, "ventaja"),
+                        "Añadir ventaja a: " + r.que + ", " + r.total),
+                    botonDe("oc-dados-ventaja", "▼ desventaja", () => cambiarModo(r, "desventaja"),
+                        "Añadir desventaja a: " + r.que + ", " + r.total));
+            }
             botones.append(
                 botonDe("oc-dados-repetir", "↻ repetir", () => tirar(r.formula, r.que), "Repetir: " + r.que),
                 botonDe("oc-dados-quitar", "✕", () => quitar(r.id, i), "Borrar esta tirada: " + r.que + ", " + r.total));
