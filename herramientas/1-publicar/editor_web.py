@@ -1487,7 +1487,10 @@ def colecciones():
                     ayuda="Uno por línea: «1.º: 4», «2.º: 2»."),
                   C("conjuros", "Conjuros", "lineas", vacio="quitar",
                     ayuda="Uno por línea, con su nivel delante: «Truco: Luz», «1: Escudo». Salen por niveles."),
-                  C("objetos", "Objetos", "lineas", vacio="quitar", ayuda="Uno por línea."),
+                  C("objetos", "Objetos", "lineas", vacio="quitar",
+                    ayuda="Uno por línea: «Antorcha ×5». Detrás, entre corchetes, si lo lleva puesto o es mágico:"
+                          " «Espada larga [equipado]», «Anillo de protección [mágico, equipado]». En la ficha se"
+                          " reparten en puesto, mágico y mochila, y dentro por tipo (armas, pociones…)."),
                   C("dinero", "Dinero", vacio="quitar", ayuda="«15 po, 4 pp»."),
                   C("competencias", "Competencias e idiomas", "lineas", vacio="quitar",
                     ayuda="Uno por línea: armas, armaduras, herramientas, idiomas…"),
@@ -1502,6 +1505,11 @@ def colecciones():
                     ayuda="Una por línea, con su tipo delante: «Acción adicional: Acción astuta», «Reacción: …»."
                           " Lo que se gasta, con sus usos y cómo se recarga detrás: «Acción adicional: Forma"
                           " salvaje (2 usos, descanso largo)» (sale una casilla por uso)."),
+                  C("combos", "Combos (para el combate)", "largo", grande=True, vacio="quitar",
+                    ayuda="Un bloque por combo: «## Fuego y escudo» y debajo, uno por línea, lo que hace con lo"
+                          " que gasta delante: «Acción: Bola de fuego», «Acción adicional: Forma salvaje»,"
+                          " «Reacción: Escudo», «Movimiento: …», «Gratis: …», y «Notas: …». Los ataques salen con"
+                          " sus tiradas y los conjuros se abren en su carta (escríbelos como en sus listas)."),
                   C("descripciones", "Descripciones (lo que sale al desplegar)", "largo", grande=True,
                     vacio="quitar", markdown=True,
                     ayuda="De cada conjuro, acción, rasgo, ataque u objeto que quieras desplegable, un bloque"

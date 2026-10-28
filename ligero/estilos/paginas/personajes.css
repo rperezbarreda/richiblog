@@ -419,6 +419,7 @@
 }
 .oc-menu-flecha {
     flex: none;
+    margin-left: 12px;
     font-size: 1rem;
 }
 .oc-menu-volver {
@@ -842,9 +843,12 @@
 button.oc-casilla {
     cursor: pointer;
 }
-button.oc-casilla:hover {
+button.oc-casilla[aria-pressed="false"]:hover {
     background: var(--purple-lighter);
     box-shadow: inset 0 0 0 2px var(--yellow);
+}
+button.oc-casilla[aria-pressed="true"]:hover {
+    box-shadow: 0 0 0 2px var(--purple-lighter), 0 0 0 4px var(--yellow);
 }
 .oc-casilla[aria-pressed="true"] {
     background: var(--yellow);
@@ -1018,6 +1022,7 @@ button.oc-casilla:hover {
 }
 .oc-desplegable-flecha {
     flex: none;
+    margin-right: 6px;
     color: var(--yellow);
     transition: transform 0.15s ease;
 }
@@ -2031,4 +2036,100 @@ li > .oc-origen {
 }
 .oc-desplegable-dentro > .oc-carta {
     box-shadow: none;
+}
+.oc-combo-nombre {
+    margin: 0 0 10px;
+    color: var(--white);
+    font-size: 1.125rem;
+    font-weight: 700;
+}
+.oc-combo-pasos {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+.oc-combo-paso {
+    display: grid;
+    grid-template-columns: 11rem minmax(0, 1fr);
+    align-items: baseline;
+    gap: 6px 12px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--border);
+    font-family: var(--fuente-mono);
+    font-size: 0.875rem;
+}
+.oc-combo-paso:last-child {
+    border-bottom: 0;
+}
+.oc-combo-coste {
+    justify-self: start;
+    padding: 2px 8px;
+    border: 2px solid var(--yellow);
+    color: var(--yellow);
+    font-family: var(--fuente-mono);
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    white-space: nowrap;
+}
+.oc-combo-coste.es-accion {
+    background: var(--yellow);
+    color: var(--yellow-contrast);
+}
+.oc-combo-coste.es-adicional {
+    border-style: double;
+    border-width: 4px;
+    padding: 0 6px;
+}
+.oc-combo-coste.es-reaccion {
+    border-style: dashed;
+}
+.oc-combo-coste.es-movimiento,
+.oc-combo-coste.es-gratis {
+    border-width: 1px;
+}
+.oc-combo-que {
+    min-width: 0;
+    color: var(--white);
+}
+.oc-combo-tirada .oc-dado {
+    display: inline-block;
+    padding: 1px 8px;
+    border: 2px solid var(--yellow);
+    color: var(--yellow);
+    font-weight: 700;
+}
+.oc-combo-tirada.es-dano .oc-dado {
+    background: var(--yellow);
+    color: var(--yellow-contrast);
+}
+.oc-combo-extra {
+    color: var(--muted);
+}
+.oc-turno {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 12rem), 1fr));
+    gap: 14px 20px;
+    margin-top: 10px;
+}
+.oc-turno-columna .oc-hoja-subtitulo {
+    margin: 0 0 10px;
+    padding: 0;
+    border: 0;
+}
+.oc-turno-tipo {
+    color: var(--muted);
+    font-size: 0.6875rem;
+}
+.oc-subtitulo-emoji {
+    font-family: initial;
+}
+@media (max-width: 520px) {
+    .oc-combo-paso {
+        grid-template-columns: minmax(0, 1fr);
+    }
 }

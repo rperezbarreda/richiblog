@@ -3915,6 +3915,30 @@
   no las vuelve a bajar; también se pueden poner a mano con ese nombre).
   Los RASGOS, en tres ventanitas: raza.txt, clase.txt y dotes.txt
   (según su «(de dónde viene)»; los que no lo dicen, en rasgos.txt).
+  LOS COMBOS (⚡ combos, en la ficha): los escritos en el campo «Combos»
+  del editor, un bloque por combo: «## Fuego y escudo» y debajo, uno por
+  línea, lo que hace con lo que gasta delante («Acción: Bola de fuego»,
+  «Acción adicional: Forma salvaje» —o «Bonus:»—, «Reacción: Escudo»,
+  «Movimiento: …», «Gratis: …») y «Notas: …». Cada combo en su ventanita
+  (<nombre>.cmb), cada paso con lo que gasta en su chapita (la acción,
+  rellena; la adicional, borde doble; la reacción, discontinua): si es
+  un ataque, salen sus tiradas (ataque y daño); si es un conjuro, se abre
+  su carta; si tiene descripción, se despliega. Y debajo, turno.txt, que
+  se hace solo: todo lo que puede hacer con la acción, la acción
+  adicional y la reacción (los ataques, los conjuros por su tiempo de
+  lanzamiento y las acciones por su tipo), para pensar los combos
+  (generar-personajes.py: leer_combos, COSTES, partes_de_ataque).
+  EL INVENTARIO, REPARTIDO: equipado.lst (lo que lleva puesto),
+  magicos.lst y mochila.lst (lo demás), y dentro de cada uno por tipo
+  (armas, armaduras y escudos, munición, pociones y pergaminos, anillos
+  y joyas, varitas y bastones, ropa, herramientas, comida y bebida,
+  equipo de aventura), cada tipo con su galería. Lo de puesto y mágico se
+  escribe detrás del objeto, entre corchetes: «Espada larga [equipado]»,
+  «Anillo de protección [mágico, equipado]» (el importador lo pone solo);
+  si no lo dice, se mira en sus «Datos:» («lo lleva puesto», la rareza,
+  la sintonización). El tipo sale del primero de sus «Datos:» («Arma»,
+  «Poción»…) o de su nombre (CATEGORIAS_DE_OBJETO, lugar_de_objeto,
+  categoria_de_objeto).
   Las COMPETENCIAS, en idiomas.txt, armas.txt (las armas, y las
   armaduras y escudos aparte) y herramientas.txt (útiles, kits,
   instrumentos, juegos, vehículos); lo que no es nada de eso, en

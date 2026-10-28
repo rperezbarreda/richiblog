@@ -123,6 +123,7 @@ SUBPESTANAS_DE_FICHA = (
     ("combate", "📊", "combate"),
     ("habilidades", "🎯", "habilidades"),
     ("acciones", "⚔️", "acciones"),
+    ("combos", "⚡", "combos"),
     ("conjuros", "✨", "conjuros"),
     ("inventario", "🎒", "inventario"),
     ("rasgos", "🧬", "rasgos"),
@@ -962,6 +963,7 @@ def galeria_de_objetos(objetos, descripciones, c, personajes, avisos):
     debajo)."""
     tarjetas = []
     for o in objetos:
+        o = re.sub(r"\s*\[[^\]]*\]\s*$", "", o)
         m = re.match(r"^(.*?)\s*[×x]\s*(\d+)$", o.strip())
         nombre, cuantos = (m.group(1).strip(), m.group(2)) if m else (o.strip(), "")
         foto = foto_de_objeto(c, nombre)
@@ -990,6 +992,115 @@ def galeria_de_objetos(objetos, descripciones, c, personajes, avisos):
     return '<ul class="oc-inventario">%s</ul>' % "".join(tarjetas)
 
 
+def partes_de_ataque(a):
+    """«Arco corto: +4, 1d6+2 perforante; alcance 24/96 m» -> el nombre,
+    el modificador (que se tira: 1d20+4), el daño (todo, una tirada:
+    «1d8+3 cortante + 2d6 fuego» -> 1d8+3[cortante]+2d6[fuego], que sale
+    separado por tipo) y lo de «extra» (lo de detrás del «;»). Los dos de
+    en medio, en HTML (o «» si no hay)."""
+    nombre, _, resto = a.partition(":")
+    nombre, resto = nombre.strip(), resto.strip()
+    principal, _, extra = resto.partition(";")
+    principal, extra = principal.strip(), extra.strip()
+    mod = ""
+    m = re.match(r"^([+−-]\s*\d+)\s*,?\s*(.*)$", principal)
+    if m:
+        bono = int(m.group(1).replace("−", "-").replace(" ", ""))
+        mod = prueba(bono, nombre.lower() + ": ataque")
+        principal = m.group(2).strip()
+    dano = ""
+    trozos = list(DADOS_EN_TEXTO.finditer(principal))
+    if trozos:
+        formula = "+".join(formula_de(m.group(1), m.group(2), m.group(3), tipo_de(m)) for m in trozos)
+        dano = dado(e(principal), formula, nombre.lower() + ": daño")
+    elif principal:
+        extra = (principal + ("; " + extra if extra else "")).strip()
+    return nombre, mod, dano, extra
+
+
+# LOS COMBOS: lo que se hace en un turno de combate, escrito a mano en el
+# campo «combos», un bloque por combo:
+#     ## Fuego y escudo
+#     Acción: Bola de fuego
+#     Acción adicional: Forma salvaje
+#     Reacción: Escudo
+#     Movimiento: alejarse 9 m
+#     Notas: si están todos juntos.
+# Cada paso con lo que gasta delante (acción, acción adicional o «bonus»,
+# reacción, movimiento, gratis); «Notas:» (o una línea sin nada delante),
+# debajo. Lo de cada paso se busca entre los ataques (y sale con sus
+# tiradas), los conjuros (y se abre su carta) y las descripciones.
+COSTES = (("accion adicional", "acción adicional", "es-adicional"), ("bonus", "acción adicional", "es-adicional"),
+          ("accion bonus", "acción adicional", "es-adicional"), ("accion", "acción", "es-accion"),
+          ("reaccion", "reacción", "es-reaccion"), ("movimiento", "movimiento", "es-movimiento"),
+          ("gratis", "gratis", "es-gratis"), ("libre", "gratis", "es-gratis"))
+
+
+def leer_combos(texto):
+    combos, actual = [], None
+    for linea in str(texto or "").split("\n"):
+        if linea.startswith("## "):
+            actual = {"nombre": linea[3:].strip(), "pasos": [], "notas": []}
+            combos.append(actual)
+            continue
+        if actual is None or not linea.strip():
+            continue
+        tipo, sep, que = linea.partition(":")
+        l = llano(tipo)
+        coste = next(((n, cl) for k, n, cl in COSTES if l.startswith(k)), None) if sep else None
+        if coste and que.strip():
+            actual["pasos"].append((coste[0], coste[1], que.strip()))
+        elif sep and l.startswith("nota"):
+            actual["notas"].append(que.strip())
+        else:
+            actual["notas"].append(linea.strip())
+    return [x for x in combos if x["nombre"]]
+
+
+# EL INVENTARIO, repartido: lo que lleva PUESTO, lo MÁGICO y lo de la
+# MOCHILA (el importador escribe detrás de cada objeto [equipado] y
+# [mágico]; si no lo dice, se mira en sus «Datos:»: «lo lleva puesto», la
+# rareza, la sintonización). Y dentro de cada uno, por tipo de cosa (por
+# el primero de sus «Datos:», «Arma», «Poción»…, o por su nombre).
+CATEGORIAS_DE_OBJETO = (
+    ("armas", "⚔️", r"^arma$|\bweapon|espada|daga|\barco\b|ballesta|hacha|\bmaza\b|martillo|lanza|jabalina|"
+                   r"honda|estoque|cimitarra|\bhoz\b|garrote|quarterstaff|tridente|latigo|mangual|sword|bow|axe|"
+                   r"dagger|sickle|spear|mace"),
+    ("armaduras y escudos", "🛡️", r"armadura|escudo|rodela|\bcota\b|coraza|\bpeto\b|armor|shield"),
+    ("munición", "🏹", r"flecha|virote|municion|ammunition|arrow|bolt"),
+    ("pociones y pergaminos", "🧪", r"pocion|potion|pergamino|scroll|tintura|tincture|elixir|antitoxina"),
+    ("anillos y joyas", "💍", r"anillo|\bring\b|amuleto|collar|medallon|broche|piedra ioun|\bgema"),
+    ("varitas y bastones", "🪄", r"varita|\bwand|baston|\bstaff|\bvara\b|\brod\b|cetro|\borbe|foco"),
+    ("ropa", "🧥", r"\bropa|tunica|\bcapa\b|manto|botas|guantes|sombrero|clothes|robe|cloak|boots|gloves"),
+    ("herramientas", "🧰", r"utiles|herramient|tools|\bkit\b|instrumento|laud|flauta|tambor"),
+    ("comida y bebida", "🍖", r"racion|ration|comida|\bodre|waterskin|\bvino\b|cerveza|\bpan\b"),
+    ("equipo de aventura", "🎒", r"."),
+)
+RAREZAS = ("comun", "poco comun", "raro", "muy raro", "legendario", "artefacto")
+
+
+def lugar_de_objeto(linea, entrada):
+    """De un objeto («Anillo de protección [mágico, equipado]»): su nombre
+    con cuántos, y si va con lo PUESTO, lo MÁGICO o la MOCHILA."""
+    marcas = ""
+    m = re.match(r"^(.*?)\s*\[([^\]]*)\]\s*$", linea.strip())
+    if m:
+        linea, marcas = m.group(1), llano(m.group(2))
+    datos = [llano(x) for x in str((entrada or {}).get("datos") or "").split("·") if x.strip()]
+    magico = "magic" in marcas or any(x in RAREZAS or "sintoniz" in x for x in datos)
+    puesto = "equipad" in marcas or "puesto" in marcas or any("lo lleva puesto" in x for x in datos)
+    return linea.strip(), ("magicos" if magico else "equipado" if puesto else "mochila")
+
+
+def categoria_de_objeto(nombre, entrada):
+    datos = [x.strip() for x in str((entrada or {}).get("datos") or "").split("·") if x.strip()]
+    for texto in ([llano(datos[0])] if datos else []) + [llano(nombre)]:
+        for cat, emoji, patron in CATEGORIAS_DE_OBJETO[:-1]:
+            if re.search(patron, texto):
+                return cat
+    return CATEGORIAS_DE_OBJETO[-1][0]
+
+
 def tabla_de_ataques(ataques, descripciones, c, personajes, avisos):
     """Los ataques en una tabla: el nombre, el modificador (se tira:
     1d20+4), el daño (en su caja, que se tira) y lo demás («extra»: una
@@ -999,25 +1110,7 @@ def tabla_de_ataques(ataques, descripciones, c, personajes, avisos):
     pliega detrás de un botón con su nombre."""
     filas = []
     for n, a in enumerate(ataques):
-        nombre, _, resto = a.partition(":")
-        nombre, resto = nombre.strip(), resto.strip()
-        principal, _, extra = resto.partition(";")
-        principal, extra = principal.strip(), extra.strip()
-        mod = ""
-        m = re.match(r"^([+−-]\s*\d+)\s*,?\s*(.*)$", principal)
-        if m:
-            bono = int(m.group(1).replace("−", "-").replace(" ", ""))
-            mod = prueba(bono, nombre.lower() + ": ataque")
-            principal = m.group(2).strip()
-        dano = ""
-        trozos = list(DADOS_EN_TEXTO.finditer(principal))
-        if trozos:
-            # Todo el daño, UNA tirada: «1d8+3 cortante + 2d6 fuego» ->
-            # 1d8+3[cortante]+2d6[fuego], que sale separado por tipo.
-            formula = "+".join(formula_de(m.group(1), m.group(2), m.group(3), tipo_de(m)) for m in trozos)
-            dano = dado(e(principal), formula, nombre.lower() + ": daño")
-        elif principal:
-            extra = (principal + ("; " + extra if extra else "")).strip()
+        nombre, mod, dano, extra = partes_de_ataque(a)
         entrada = buscar_descripcion(descripciones, nombre)
         id_desc = "oc-ataque-%d" % n
         filas.append('<tr><th scope="row" class="oc-ataque-nombre"%s>%s</th><td class="oc-ataque-mod">%s</td>'
@@ -1199,8 +1292,23 @@ def apartado_ficha(p, c, personajes, avisos):
                                              "es-ancha", "💰"))
     objetos = lineas_de(p.get("objetos"))
     if objetos:
-        grupos["inventario"].append(recuadro("inventario.lst", galeria_de_objetos(
-            objetos, descripciones, c, personajes, avisos), "es-ancha", "🎒"))
+        # Lo puesto, lo mágico y la mochila, cada uno en su ventanita y,
+        # dentro, por tipo de cosa (armas, armaduras, pociones…).
+        lugares = {"equipado": {}, "magicos": {}, "mochila": {}}
+        for o in objetos:
+            sin_cuantos = re.sub(r"\s*[×x]\s*\d+\s*(\[[^\]]*\])?\s*$", "", re.sub(r"\s*\[[^\]]*\]\s*$", "", o))
+            entrada = buscar_descripcion(descripciones, sin_cuantos)
+            linea, lugar = lugar_de_objeto(o, entrada)
+            lugares[lugar].setdefault(categoria_de_objeto(sin_cuantos, entrada), []).append(linea)
+        for lugar, titulo, emoji in (("equipado", "equipado.lst", "🗡️"), ("magicos", "magicos.lst", "✨"),
+                                     ("mochila", "mochila.lst", "🎒")):
+            if not lugares[lugar]:
+                continue
+            dentro = "".join(
+                '<h5 class="oc-hoja-subtitulo"><span class="oc-subtitulo-emoji" aria-hidden="true">%s</span> %s</h5>%s'
+                % (emoji_c, e(cat), galeria_de_objetos(lugares[lugar][cat], descripciones, c, personajes, avisos))
+                for cat, emoji_c, _ in CATEGORIAS_DE_OBJETO if cat in lugares[lugar])
+            grupos["inventario"].append(recuadro(titulo, dentro, "es-ancha", emoji))
 
     # 🧬 RASGOS: en una ventanita los de raza, en otra los de clase y en
     # otra las dotes (y los que no dicen de dónde vienen, aparte).
@@ -1266,6 +1374,60 @@ def apartado_ficha(p, c, personajes, avisos):
             alma.append('<h5 class="oc-hoja-subtitulo">%s</h5><div class="oc-texto">%s</div>' % (texto, valor))
     if alma:
         grupos["trasfondo"].append(recuadro("personalidad.txt", "".join(alma), "es-ancha", "💭"))
+    # ⚡ COMBOS: los que estén escritos, cada uno en su ventanita con sus
+    # pasos (lo que gasta cada uno en su chapita de color), y una ventanita
+    # «turno.txt» con todo lo que se puede hacer con la acción, la acción
+    # adicional y la reacción (para pensar los combos).
+    nombres_de_conjuros = {llano(n) for lista in por_nivel.values() for n in lista}
+    ataque_de = {llano(a.partition(":")[0]): a for a in ataques}
+
+    def cosa_de_combo(que):
+        a = ataque_de.get(llano(que))
+        if a:
+            nombre, mod, dano, extra = partes_de_ataque(a)
+            return ('<span class="oc-desplegable-nombre">%s</span>%s%s%s'
+                    % (e(nombre), (' <span class="oc-combo-tirada">%s</span>' % mod) if mod else "",
+                       (' <span class="oc-combo-tirada es-dano">%s</span>' % dano) if dano else "",
+                       (' <span class="oc-combo-extra">%s</span>' % e(extra)) if extra else ""))
+        es_conjuro = llano(que) in nombres_de_conjuros
+        return desplegable('<span class="oc-desplegable-nombre">%s</span>' % e(que), buscar_descripcion(descripciones, que),
+                           "", c, personajes, avisos, chapas=es_conjuro, carta=que if es_conjuro else "")
+
+    for combo in leer_combos(p.get("combos")):
+        pasos = "".join('<li class="oc-combo-paso"><span class="oc-combo-coste %s">%s</span>'
+                        '<span class="oc-combo-que">%s</span></li>' % (clase, e(coste), cosa_de_combo(que))
+                        for coste, clase, que in combo["pasos"])
+        notas = "".join('<p class="oc-hoja-nota">%s</p>' % e(n) for n in combo["notas"] if n)
+        titulo = (nombre_archivo(combo["nombre"], "combo") or "combo") + ".cmb"
+        grupos["combos"].append(recuadro(titulo, '<p class="oc-combo-nombre">%s</p><ul class="oc-combo-pasos">%s</ul>%s'
+                                         % (e(combo["nombre"]), pasos, notas), "es-ancha", "⚡"))
+    turno = {"acción": [], "acción adicional": [], "reacción": []}
+    for a in ataques:
+        turno["acción"].append((a.partition(":")[0].strip(), "ataque"))
+    for lista in por_nivel.values():
+        for n in lista:
+            tiempo = llano(partes_de_conjuro((buscar_descripcion(descripciones, n) or {}).get("datos"))["tiempo"])
+            hueco = ("acción adicional" if "adicional" in tiempo else "reacción" if "reaccion" in tiempo
+                     else "acción" if "accion" in tiempo else None)
+            if hueco:
+                turno[hueco].append((n, "conjuro"))
+    for a in acciones:
+        tipo, _, que = a.partition(":")
+        hueco = {"accion": "acción", "accion adicional": "acción adicional", "reaccion": "reacción"}.get(llano(tipo))
+        if hueco and que.strip():
+            turno[hueco].append((USOS.sub(r"\1", que.strip()) if USOS.match(que.strip()) else que.strip(), "rasgo"))
+    if any(turno.values()):
+        columnas = "".join(
+            '<div class="oc-turno-columna"><h5 class="oc-hoja-subtitulo"><span class="oc-combo-coste %s">%s</span></h5>'
+            '<ul class="oc-lista-maquina">%s</ul></div>'
+            % (clase, e(hueco), "".join('<li>%s <span class="oc-turno-tipo">%s</span></li>' % (e(n), e(tipo))
+                                         for n, tipo in turno[hueco]) or "<li>—</li>")
+            for hueco, clase in (("acción", "es-accion"), ("acción adicional", "es-adicional"),
+                                 ("reacción", "es-reaccion")))
+        grupos["combos"].append(recuadro("turno.txt", '<p class="oc-hoja-nota">Lo que puede hacer en un turno, por'
+                                         ' lo que gasta (para pensar combos).</p><div class="oc-turno">%s</div>'
+                                         % columnas, "es-ancha", "⏳"))
+
     return [(g, emoji, texto, "".join(grupos[g])) for g, emoji, texto in SUBPESTANAS_DE_FICHA if grupos[g]]
 
 

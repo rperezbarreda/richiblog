@@ -709,7 +709,11 @@ def a_ficha(d, traducir=None):
         if not defin.get("name"):
             continue
         cuantos = int(i.get("quantity") or 0)
-        objetos.append(t(defin["name"]) + (" ×%d" % cuantos if cuantos > 1 else ""))
+        # Detrás, si lo lleva puesto y si es mágico (en la ficha, el
+        # inventario se reparte así: puesto, mágico y mochila).
+        marcas = [x for x, si in (("equipado", i.get("equipped")), ("mágico", defin.get("magic"))) if si]
+        objetos.append(t(defin["name"]) + (" ×%d" % cuantos if cuantos > 1 else "")
+                       + (" [%s]" % ", ".join(marcas) if marcas else ""))
     campos["objetos"] = objetos
     monedas = d.get("currencies") or {}
     dinero = ["%d %s" % (monedas[k], t(k)) for k in ("pp", "gp", "ep", "sp", "cp") if monedas.get(k)]
