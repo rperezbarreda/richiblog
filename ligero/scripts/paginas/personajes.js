@@ -117,10 +117,6 @@
     abrirFicha(false);
     const pagina = document.querySelector(".oc-ficha-page");
     const lateral = document.querySelector(".oc-lateral");
-    const barra = document.createElement("div");
-    barra.className = "oc-panel-barra";
-    barra.setAttribute("role", "group");
-    barra.setAttribute("aria-label", "Espacio");
     const ns = "http://www.w3.org/2000/svg";
     function dibujo(trazos) {
         const svg = document.createElementNS(ns, "svg");
@@ -130,9 +126,11 @@
         svg.innerHTML = trazos;
         return svg;
     }
-    function esconderSoloALaVista(x, si) {
-        x.classList.toggle("oc-escondida", si);
+    function fueraDelTabulador(x, si, salvo) {
         x.querySelectorAll("a[href], button, input, [tabindex]").forEach((y) => {
+            if (y === salvo) {
+                return;
+            }
             if (si) {
                 if (!("tabAntes" in y.dataset)) {
                     y.dataset.tabAntes = y.getAttribute("tabindex") === null ? "" : y.getAttribute("tabindex");
@@ -148,27 +146,21 @@
             }
         });
     }
-    function plegador(que, nombre, clave, trazos, alCambiar, soloALaVista) {
-        if (!que) {
+    function plegador(caja, clase, nombre, clave, trazos, plegar) {
+        if (!caja) {
             return;
         }
-        que.id = que.id || clave;
+        caja.id = caja.id || "oc-" + clave;
         const b = document.createElement("button");
         b.type = "button";
-        b.className = "oc-panel-plegar";
-        b.setAttribute("aria-controls", que.id);
+        b.className = "oc-plegar " + clase;
+        b.setAttribute("aria-controls", caja.id);
         b.appendChild(dibujo(trazos));
-        const esta = () => (soloALaVista ? !que.classList.contains("oc-escondida") : !que.hidden);
         const poner = (abierto) => {
-            if (soloALaVista) {
-                esconderSoloALaVista(que, !abierto);
-            } else {
-                que.hidden = !abierto;
-            }
+            plegar(!abierto, b);
             b.setAttribute("aria-expanded", abierto ? "true" : "false");
-            b.setAttribute("aria-label", (abierto ? "Esconder " : "Enseñar ") + nombre);
-            b.title = (abierto ? "Esconder " : "Enseñar ") + nombre;
-            alCambiar(abierto);
+            b.setAttribute("aria-label", (abierto ? "Plegar " : "Desplegar ") + nombre);
+            b.title = (abierto ? "Plegar " : "Desplegar ") + nombre;
         };
         let guardado = null;
         try {
@@ -176,24 +168,34 @@
         } catch (e) {
             guardado = null;
         }
+        caja.insertBefore(b, caja.firstChild);
         poner(guardado !== "cerrado");
         b.addEventListener("click", () => {
-            const abierto = !esta();
+            const abierto = b.getAttribute("aria-expanded") !== "true";
             poner(abierto);
             try {
                 localStorage.setItem("richi-oc-" + clave, abierto ? "abierto" : "cerrado");
             } catch (e) {
             }
         });
-        barra.appendChild(b);
     }
-    plegador(lateral, "la ficha de la izquierda", "lateral",
+    plegador(lateral, "es-de-la-ficha", "la ficha de la izquierda", "lateral",
         '<rect x="3" y="4" width="18" height="16" rx="1"/><rect x="3" y="4" width="7" height="16" class="relleno"/>',
-        (abierto) => pagina && pagina.classList.toggle("sin-lateral", !abierto), true);
-    plegador(menu, "el menú", "menu",
+        (si, b) => {
+            lateral.classList.toggle("oc-plegada", si);
+            fueraDelTabulador(lateral, si, b);
+            if (pagina) {
+                pagina.classList.toggle("sin-lateral", si);
+            }
+        });
+    plegador(menu, "es-del-menu", "el menú", "menu",
         '<path d="M4 6h16M4 12h16M4 18h16"/>',
-        (abierto) => panel.classList.toggle("sin-menu", !abierto));
-    panel.insertBefore(barra, panel.firstChild);
+        (si) => {
+            menu.querySelectorAll(":scope > .oc-menu-lista, :scope > .oc-menu-volver").forEach((x) => {
+                x.hidden = si;
+            });
+            panel.classList.toggle("sin-menu", si);
+        });
     window.addEventListener("hashchange", () => mostrar(desdeLaDireccion(), false, false));
     mostrar(desdeLaDireccion(), false, false);
 })();
@@ -901,7 +903,7 @@ document.querySelectorAll("[data-oc-casillas]").forEach((grupo) => {
 })();
 (function () {
     const sitio = document.querySelector("[data-oc-botones-pdf]");
-    if (!sitio || sitio.querySelector("a")) {
+    if (!sitio || sitio.querySelector(".oc-boton-pdf")) {
         return;
     }
     const b = document.createElement("button");

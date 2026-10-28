@@ -1195,6 +1195,27 @@ li > .oc-origen {
     gap: 6px;
     margin-bottom: 12px;
 }
+.oc-postit-fila {
+    display: flex;
+    align-items: stretch;
+    gap: 6px;
+}
+.oc-postit-fila .oc-cabecera {
+    flex: 1 1 auto;
+}
+.oc-postit-clase {
+    display: flex;
+    flex: none;
+    align-items: center;
+    margin: 0;
+    padding: 2px 8px;
+    border: 2px solid var(--yellow-contrast);
+    background: var(--yellow);
+    color: var(--yellow-contrast);
+    font-family: var(--fuente-mono);
+    font-size: 0.875rem;
+    font-weight: 700;
+}
 .oc-postit .oc-cabecera {
     justify-content: center;
     gap: 0;
@@ -1205,6 +1226,7 @@ li > .oc-origen {
 }
 .oc-postit .home-title {
     color: var(--white);
+    text-transform: none;
     font-size: clamp(1.5rem, 2.1vw, 2rem);
     letter-spacing: -0.5px;
     line-height: 1.2;
@@ -1245,6 +1267,13 @@ li > .oc-origen {
     margin-right: 4px;
     font-family: initial;
 }
+.oc-vital-corto {
+    margin-left: 2px;
+    color: var(--yellow);
+    font-family: var(--fuente-mono);
+    font-size: 0.75rem;
+    font-weight: 400;
+}
 .oc-vital dd {
     margin: 0;
     font-size: 1.375rem;
@@ -1252,6 +1281,21 @@ li > .oc-origen {
 }
 .oc-retrato {
     position: relative;
+}
+.oc-retrato-marco {
+    position: relative;
+}
+.oc-postit-nivel {
+    position: absolute;
+    right: 6px;
+    bottom: 6px;
+    padding: 1px 8px;
+    border: 2px solid var(--yellow-contrast);
+    background: var(--yellow);
+    color: var(--yellow-contrast);
+    font-family: var(--fuente-mono);
+    font-size: 0.875rem;
+    font-weight: 700;
 }
 .oc-retrato img {
     display: block;
@@ -1344,6 +1388,22 @@ li > .oc-origen {
     align-items: stretch;
     gap: 10px;
 }
+.oc-botones-pila {
+    display: flex;
+    flex: 1 1 auto;
+    flex-direction: column;
+    gap: 8px;
+    min-width: 0;
+}
+.oc-botones-pila:empty {
+    display: none;
+}
+.oc-botones-pila .oc-boton {
+    padding: 6px 4px;
+    font-size: 0.6875rem;
+    letter-spacing: 0;
+    white-space: nowrap;
+}
 .oc-botones:empty {
     display: none;
 }
@@ -1367,10 +1427,16 @@ li > .oc-origen {
 .oc-boton-dados {
     flex: 0 1 auto;
 }
+.oc-boton.oc-boton-dados {
+    display: flex;
+    flex: none;
+    align-items: center;
+    justify-content: center;
+    width: 3.4rem;
+}
 .oc-boton-dados .oc-dados-silueta {
-    width: 1.4rem;
-    height: 1.4rem;
-    vertical-align: middle;
+    width: 2.2rem;
+    height: 2.2rem;
 }
 .oc-boton-icono {
     font-family: initial;
@@ -2165,6 +2231,10 @@ li > .oc-origen {
     margin-right: 14px;
     margin-left: 14px;
 }
+.oc-hoja-caja.es-criatura .oc-bloque {
+    border: 0;
+    box-shadow: none;
+}
 .oc-bloque-nombre {
     margin: 0;
     padding: 6px 14px;
@@ -2317,10 +2387,47 @@ li > .oc-origen {
 .oc-menu a::before {
     content: none;
 }
-.oc-menu[hidden] {
+.oc-menu-lista[hidden],
+.oc-menu-volver[hidden] {
     display: none;
 }
-.oc-lateral.oc-escondida {
+.oc-plegar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.25rem;
+    height: 2.25rem;
+    padding: 0;
+    border: 2px solid var(--yellow);
+    background: var(--purple);
+    color: var(--yellow);
+    cursor: pointer;
+}
+.oc-plegar svg {
+    width: 1.3rem;
+    height: 1.3rem;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2;
+}
+.oc-plegar svg .relleno {
+    fill: currentColor;
+}
+.oc-plegar[aria-expanded="false"] {
+    background: var(--yellow);
+    color: var(--yellow-contrast);
+}
+.oc-plegar:hover {
+    box-shadow: 3px 3px 0 var(--yellow);
+}
+.oc-plegar:focus-visible {
+    outline: 2px solid var(--yellow);
+    outline-offset: 2px;
+}
+.oc-lateral {
+    position: relative;
+}
+.oc-lateral.oc-plegada > :not(.oc-plegar) {
     position: absolute;
     width: 1px;
     height: 1px;
@@ -2330,60 +2437,48 @@ li > .oc-origen {
     clip: rect(0 0 0 0);
     white-space: nowrap;
 }
-.oc-panel-barra {
-    display: flex;
-    gap: 6px;
-    margin-bottom: 10px;
+.oc-menu {
+    position: relative;
 }
-.oc-panel-plegar {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 2.1rem;
-    height: 2.1rem;
-    padding: 0;
-    border: 2px solid var(--yellow);
-    background: transparent;
-    color: var(--yellow);
-    cursor: pointer;
-}
-.oc-panel-plegar svg {
-    width: 1.25rem;
-    height: 1.25rem;
-    fill: none;
-    stroke: currentColor;
-    stroke-width: 2;
-}
-.oc-panel-plegar svg .relleno {
-    fill: currentColor;
-}
-.oc-panel-plegar[aria-expanded="false"] {
-    background: var(--yellow);
-    color: var(--yellow-contrast);
-}
-.oc-panel-plegar:hover {
-    box-shadow: 3px 3px 0 var(--yellow);
-}
-.oc-panel-plegar:focus-visible {
-    outline: 2px solid var(--yellow);
-    outline-offset: 2px;
+.oc-menu-lista > li:first-child {
+    margin-right: 2.75rem;
 }
 @media (min-width: 861px) {
-    .oc-panel.con-menu {
-        grid-template-columns: auto minmax(8.5rem, 11rem) minmax(0, 1fr);
+    .oc-plegar.es-de-la-ficha {
+        position: absolute;
+        top: 0;
+        left: 0;
+        z-index: 3;
+    }
+    .oc-ficha-page .oc-lateral:not(.oc-plegada) {
+        padding-top: 8px;
+        padding-left: 8px;
+    }
+    .oc-lateral.oc-plegada .oc-plegar.es-de-la-ficha {
+        position: static;
+    }
+    .oc-plegar.es-del-menu {
+        position: absolute;
+        top: 0;
+        right: 10px;
+        z-index: 2;
+    }
+    .oc-panel.sin-menu .oc-plegar.es-del-menu {
+        position: static;
+    }
+    .oc-ficha-page.sin-lateral {
+        grid-template-columns: auto minmax(0, 1fr);
     }
     .oc-panel.con-menu.sin-menu {
         grid-template-columns: auto minmax(0, 1fr);
     }
-    .oc-panel-barra {
-        flex-direction: column;
-        margin: 0;
+    .oc-panel.sin-menu .oc-menu {
+        padding-right: 12px;
     }
-    .oc-ficha-page.sin-lateral {
-        grid-template-columns: minmax(0, 1fr);
-    }
-    .oc-ficha-page.sin-lateral .oc-principal {
-        grid-column: 1;
+}
+@media (max-width: 860px) {
+    .oc-plegar {
+        margin-bottom: 8px;
     }
 }
 @media print {
@@ -2404,7 +2499,6 @@ li > .oc-origen {
         overflow: visible !important;
     }
     .oc-menu,
-    .oc-panel-barra,
     .oc-botones,
     .oc-dados,
     .oc-modal-fondo,
@@ -2427,7 +2521,7 @@ li > .oc-origen {
         clip: auto;
         white-space: normal;
     }
-    .oc-lateral.oc-escondida {
+    .oc-lateral.oc-plegada > * {
         position: static;
         width: auto;
         height: auto;
@@ -2435,6 +2529,9 @@ li > .oc-origen {
         overflow: visible;
         clip: auto;
         white-space: normal;
+    }
+    .oc-plegar {
+        display: none;
     }
     .oc-hoja-caja,
     .oc-bloque,

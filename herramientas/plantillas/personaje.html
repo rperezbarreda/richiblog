@@ -55,14 +55,14 @@
     <link rel="alternate" type="application/rss+xml" title="El Blog de Richi — blog, relatos y rol" href="/blog/rss.xml">
     <!-- ==== CSS ==== -->
     <link rel="stylesheet" href="/estilos/paquete-comun.css?v=e94b0ddd">
-    <link rel="stylesheet" href="/ligero/estilos/paginas/personajes.css?v=91e959a2">
+    <link rel="stylesheet" href="/ligero/estilos/paginas/personajes.css?v=47616fcd">
     <link rel="stylesheet" href="/ligero/estilos/paginas/personajes.responsive.css?v=c7139086">
     <link rel="stylesheet" href="/estilos/paquete-cierre.css?v=a49d87f4">
     <!-- ==== fin del CSS ==== -->
     <script src="/ligero/scripts/cargador-scripts.js?v=e5f01c9b"></script>
     <!-- ==== JS ==== -->
     <script defer src="/scripts/paquete-comun.js?v=5806fd68"></script>
-    <script defer src="/ligero/scripts/paginas/personajes.js?v=9b295d2c"></script>
+    <script defer src="/ligero/scripts/paginas/personajes.js?v=b0be6092"></script>
     <!-- ==== fin del JS ==== -->
   </head>
 <body>
@@ -88,9 +88,12 @@
             <div class="oc-lateral" role="group" aria-label="Ficha de {{NOMBRE_ATRIBUTO}}">
                 <div class="oc-postit">
                     <div class="oc-postit-cabeza">
-                        <div class="oc-cabecera">
-                            <h1 class="home-title">{{NOMBRE}}</h1>
-                            {{SUBTITULO}}
+                        <div class="oc-postit-fila">
+                            <div class="oc-cabecera">
+                                <h1 class="home-title">{{NOMBRE}}</h1>
+                                {{SUBTITULO}}
+                            </div>
+{{CLASE}}
                         </div>
 {{VITALES}}
                     </div>

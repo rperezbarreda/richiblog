@@ -1569,6 +1569,31 @@ li > .oc-origen {
     margin-bottom: 12px;
 }
 
+/* Arriba, el nombre y, a su lado, la clase en su caja. */
+.oc-postit-fila {
+    display: flex;
+    align-items: stretch;
+    gap: 6px;
+}
+
+.oc-postit-fila .oc-cabecera {
+    flex: 1 1 auto;
+}
+
+.oc-postit-clase {
+    display: flex;
+    flex: none;
+    align-items: center;
+    margin: 0;
+    padding: 2px 8px;
+    border: 2px solid var(--yellow-contrast);
+    background: var(--yellow);
+    color: var(--yellow-contrast);
+    font-family: var(--fuente-mono);
+    font-size: 0.875rem;
+    font-weight: 700;
+}
+
 /* Bajito: el nombre en una línea y el completo debajo, pequeño. */
 .oc-postit .oc-cabecera {
     justify-content: center;
@@ -1583,6 +1608,9 @@ li > .oc-origen {
    las letras se montaban (y las diéresis de «Faëlar» se perdían). */
 .oc-postit .home-title {
     color: var(--white);
+    /* Como se escribe («Faëlar»), no en minúsculas como los títulos del
+       sitio: es un nombre. */
+    text-transform: none;
     font-size: clamp(1.5rem, 2.1vw, 2rem);
     letter-spacing: -0.5px;
     line-height: 1.2;
@@ -1632,6 +1660,15 @@ li > .oc-origen {
     font-family: initial;
 }
 
+/* La abreviatura, pequeña y detrás del número: «27PG». */
+.oc-vital-corto {
+    margin-left: 2px;
+    color: var(--yellow);
+    font-family: var(--fuente-mono);
+    font-size: 0.75rem;
+    font-weight: 400;
+}
+
 .oc-vital dd {
     margin: 0;
     font-size: 1.375rem;
@@ -1640,6 +1677,24 @@ li > .oc-origen {
 
 .oc-retrato {
     position: relative;
+}
+
+/* La foto, con el nivel en su chapita en la esquina de abajo. */
+.oc-retrato-marco {
+    position: relative;
+}
+
+.oc-postit-nivel {
+    position: absolute;
+    right: 6px;
+    bottom: 6px;
+    padding: 1px 8px;
+    border: 2px solid var(--yellow-contrast);
+    background: var(--yellow);
+    color: var(--yellow-contrast);
+    font-family: var(--fuente-mono);
+    font-size: 0.875rem;
+    font-weight: 700;
 }
 
 .oc-retrato img {
@@ -1750,12 +1805,33 @@ li > .oc-origen {
 
 /* ---- LOS BOTONES DE DEBAJO: su ficha en D&D Beyond, el PDF y los
    dados ---- */
-/* En una fila: si no caben, el texto de un botón parte a dos líneas
-   antes que bajar un botón debajo de otro. */
+/* A la izquierda, uno encima de otro, «ficha dndbeyond» y «ficha en
+   pdf»; a la derecha, el de los dados, grande y cuadrado. */
 .oc-botones {
     display: flex;
     align-items: stretch;
     gap: 10px;
+}
+
+.oc-botones-pila {
+    display: flex;
+    flex: 1 1 auto;
+    flex-direction: column;
+    gap: 8px;
+    min-width: 0;
+}
+
+.oc-botones-pila:empty {
+    display: none;
+}
+
+/* Los dos de la pila, con la letra algo más pequeña: que quepan en una
+   línea en la columna estrecha. */
+.oc-botones-pila .oc-boton {
+    padding: 6px 4px;
+    font-size: 0.6875rem;
+    letter-spacing: 0;
+    white-space: nowrap;
 }
 
 .oc-botones:empty {
@@ -1785,10 +1861,17 @@ li > .oc-origen {
 }
 
 /* El d20 del botón de los dados (el mismo dibujo que en la bandeja). */
+.oc-boton.oc-boton-dados {
+    display: flex;
+    flex: none;
+    align-items: center;
+    justify-content: center;
+    width: 3.4rem;
+}
+
 .oc-boton-dados .oc-dados-silueta {
-    width: 1.4rem;
-    height: 1.4rem;
-    vertical-align: middle;
+    width: 2.2rem;
+    height: 2.2rem;
 }
 
 .oc-boton-icono {
@@ -2755,6 +2838,12 @@ li > .oc-origen {
     margin-left: 14px;
 }
 
+/* Dentro de su ventanita, el bloque sin borde ni sombra propios. */
+.oc-hoja-caja.es-criatura .oc-bloque {
+    border: 0;
+    box-shadow: none;
+}
+
 .oc-bloque-nombre {
     margin: 0;
     padding: 6px 14px;
@@ -2937,7 +3026,10 @@ li > .oc-origen {
 
 /* ====================================================================
    PLEGAR LA FICHA DE LA IZQUIERDA Y EL MENÚ (personajes.js)
-   ==================================================================== */
+   ====================================================================
+   El botón de la ficha, en su esquina de arriba a la izquierda; el del
+   menú, en la de arriba a la derecha del menú. Plegado, de cada uno se
+   queda solo su botón, en una tira estrecha. */
 
 /* El menú de la ficha está en un <nav>, y a todo enlace de un <nav> el
    sitio le pone una flechita «↪» al pasar por encima (es la del menú de
@@ -2946,13 +3038,60 @@ li > .oc-origen {
     content: none;
 }
 
-.oc-menu[hidden] {
+.oc-menu-lista[hidden],
+.oc-menu-volver[hidden] {
     display: none;
 }
 
-/* La ficha de la izquierda, escondida: fuera de la vista, pero no del
-   lector de pantalla (lleva el nombre, que es el título de la página). */
-.oc-lateral.oc-escondida {
+.oc-plegar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.25rem;
+    height: 2.25rem;
+    padding: 0;
+    border: 2px solid var(--yellow);
+    background: var(--purple);
+    color: var(--yellow);
+    cursor: pointer;
+}
+
+.oc-plegar svg {
+    width: 1.3rem;
+    height: 1.3rem;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2;
+}
+
+.oc-plegar svg .relleno {
+    fill: currentColor;
+}
+
+/* Plegado lo que controla: el botón, relleno (así se ve que hay algo
+   escondido). */
+.oc-plegar[aria-expanded="false"] {
+    background: var(--yellow);
+    color: var(--yellow-contrast);
+}
+
+.oc-plegar:hover {
+    box-shadow: 3px 3px 0 var(--yellow);
+}
+
+.oc-plegar:focus-visible {
+    outline: 2px solid var(--yellow);
+    outline-offset: 2px;
+}
+
+/* LA FICHA plegada: lo de dentro, fuera de la vista (pero no del lector
+   de pantalla: lleva el nombre, que es el título de la página); solo se
+   ve el botón. */
+.oc-lateral {
+    position: relative;
+}
+
+.oc-lateral.oc-plegada > :not(.oc-plegar) {
     position: absolute;
     width: 1px;
     height: 1px;
@@ -2963,75 +3102,63 @@ li > .oc-origen {
     white-space: nowrap;
 }
 
-.oc-panel-barra {
-    display: flex;
-    gap: 6px;
-    margin-bottom: 10px;
+/* EL MENÚ: el botón arriba a la derecha, al lado de la primera parte. */
+.oc-menu {
+    position: relative;
 }
 
-.oc-panel-plegar {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 2.1rem;
-    height: 2.1rem;
-    padding: 0;
-    border: 2px solid var(--yellow);
-    background: transparent;
-    color: var(--yellow);
-    cursor: pointer;
-}
-
-.oc-panel-plegar svg {
-    width: 1.25rem;
-    height: 1.25rem;
-    fill: none;
-    stroke: currentColor;
-    stroke-width: 2;
-}
-
-.oc-panel-plegar svg .relleno {
-    fill: currentColor;
-}
-
-/* Escondido lo que controla: el botón, relleno (así se ve que hay algo
-   plegado). */
-.oc-panel-plegar[aria-expanded="false"] {
-    background: var(--yellow);
-    color: var(--yellow-contrast);
-}
-
-.oc-panel-plegar:hover {
-    box-shadow: 3px 3px 0 var(--yellow);
-}
-
-.oc-panel-plegar:focus-visible {
-    outline: 2px solid var(--yellow);
-    outline-offset: 2px;
+.oc-menu-lista > li:first-child {
+    margin-right: 2.75rem;
 }
 
 @media (min-width: 861px) {
-    /* La tira, en vertical, a la izquierda del todo del recuadro. */
-    .oc-panel.con-menu {
-        grid-template-columns: auto minmax(8.5rem, 11rem) minmax(0, 1fr);
+    /* En la esquina del post-it, montado encima (la columna de la ficha
+       se desplaza por dentro, así que no puede salirse de ella). */
+    .oc-plegar.es-de-la-ficha {
+        position: absolute;
+        top: 0;
+        left: 0;
+        z-index: 3;
     }
 
+    .oc-ficha-page .oc-lateral:not(.oc-plegada) {
+        padding-top: 8px;
+        padding-left: 8px;
+    }
+
+    .oc-lateral.oc-plegada .oc-plegar.es-de-la-ficha {
+        position: static;
+    }
+
+    .oc-plegar.es-del-menu {
+        position: absolute;
+        top: 0;
+        right: 10px;
+        z-index: 2;
+    }
+
+    .oc-panel.sin-menu .oc-plegar.es-del-menu {
+        position: static;
+    }
+
+    /* Plegada la ficha, su columna es solo el botón. */
+    .oc-ficha-page.sin-lateral {
+        grid-template-columns: auto minmax(0, 1fr);
+    }
+
+    /* Plegado el menú, su columna es solo el botón. */
     .oc-panel.con-menu.sin-menu {
         grid-template-columns: auto minmax(0, 1fr);
     }
 
-    .oc-panel-barra {
-        flex-direction: column;
-        margin: 0;
+    .oc-panel.sin-menu .oc-menu {
+        padding-right: 12px;
     }
+}
 
-    /* Sin la ficha de la izquierda, el recuadro a todo lo ancho. */
-    .oc-ficha-page.sin-lateral {
-        grid-template-columns: minmax(0, 1fr);
-    }
-
-    .oc-ficha-page.sin-lateral .oc-principal {
-        grid-column: 1;
+@media (max-width: 860px) {
+    .oc-plegar {
+        margin-bottom: 8px;
     }
 }
 
@@ -3062,7 +3189,6 @@ li > .oc-origen {
     }
 
     .oc-menu,
-    .oc-panel-barra,
     .oc-botones,
     .oc-dados,
     .oc-modal-fondo,
@@ -3088,7 +3214,7 @@ li > .oc-origen {
         white-space: normal;
     }
 
-    .oc-lateral.oc-escondida {
+    .oc-lateral.oc-plegada > * {
         position: static;
         width: auto;
         height: auto;
@@ -3096,6 +3222,10 @@ li > .oc-origen {
         overflow: visible;
         clip: auto;
         white-space: normal;
+    }
+
+    .oc-plegar {
+        display: none;
     }
 
     .oc-hoja-caja,

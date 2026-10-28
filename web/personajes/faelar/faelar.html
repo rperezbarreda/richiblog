@@ -55,14 +55,14 @@
     <link rel="alternate" type="application/rss+xml" title="El Blog de Richi — blog, relatos y rol" href="/blog/rss.xml">
     <!-- ==== CSS ==== -->
     <link rel="stylesheet" href="/estilos/paquete-comun.css?v=e94b0ddd">
-    <link rel="stylesheet" href="/ligero/estilos/paginas/personajes.css?v=91e959a2">
+    <link rel="stylesheet" href="/ligero/estilos/paginas/personajes.css?v=47616fcd">
     <link rel="stylesheet" href="/ligero/estilos/paginas/personajes.responsive.css?v=c7139086">
     <link rel="stylesheet" href="/estilos/paquete-cierre.css?v=a49d87f4">
     <!-- ==== fin del CSS ==== -->
     <script src="/ligero/scripts/cargador-scripts.js?v=e5f01c9b"></script>
     <!-- ==== JS ==== -->
     <script defer src="/scripts/paquete-comun.js?v=5806fd68"></script>
-    <script defer src="/ligero/scripts/paginas/personajes.js?v=9b295d2c"></script>
+    <script defer src="/ligero/scripts/paginas/personajes.js?v=b0be6092"></script>
     <!-- ==== fin del JS ==== -->
   </head>
 <body>
@@ -344,16 +344,17 @@
             <div class="oc-lateral" role="group" aria-label="Ficha de Faëlar">
                 <div class="oc-postit">
                     <div class="oc-postit-cabeza">
-                        <div class="oc-cabecera">
-                            <h1 class="home-title">Faëlar</h1>
-                            <p class="oc-nombre-completo">Faëlar Corbec</p>
+                        <div class="oc-postit-fila">
+                            <div class="oc-cabecera">
+                                <h1 class="home-title">Faëlar</h1>
+                                <p class="oc-nombre-completo">Faëlar Corbec</p>
+                            </div>
+                            <p class="oc-postit-clase"><span class="visually-hidden">Clase: </span>Druida</p>
                         </div>
-                        <dl class="oc-vitales"><div class="oc-vital"><dt><span class="oc-vital-emoji" aria-hidden="true">❤️</span><abbr title="Puntos de golpe">PG</abbr></dt><dd>27</dd></div><div class="oc-vital"><dt><span class="oc-vital-emoji" aria-hidden="true">🛡️</span><abbr title="Clase de armadura">CA</abbr></dt><dd>15</dd></div></dl>
+                        <dl class="oc-vitales"><div class="oc-vital"><dt><span class="oc-vital-emoji" aria-hidden="true">❤️</span><span class="visually-hidden">Puntos de golpe</span></dt><dd>27<span class="oc-vital-corto" aria-hidden="true">PG</span></dd></div><div class="oc-vital"><dt><span class="oc-vital-emoji" aria-hidden="true">🛡️</span><span class="visually-hidden">Clase de armadura</span></dt><dd>15<span class="oc-vital-corto" aria-hidden="true">CA</span></dd></div></dl>
                     </div>
-                    <button class="lightbox-trigger oc-retrato" type="button" aria-label="Ver en grande: Retrato de Faëlar">
-                        <img src="/imagenes/personajes/faelar/faelar.webp" alt="Retrato de Faëlar" decoding="async">
-                    </button>
-                    <p class="oc-postit-que">Elfo · Druida (Circle of the Stars) · nivel 3</p>
+                    <div class="oc-retrato-marco"><button class="lightbox-trigger oc-retrato" type="button" aria-label="Ver en grande: Retrato de Faëlar"><img src="/imagenes/personajes/faelar/faelar.webp" alt="Retrato de Faëlar" decoding="async"></button><span class="oc-postit-nivel">nivel 3</span></div>
+                    <p class="oc-postit-que">Elfo · Circle of the Stars</p>
                     <h2 class="oc-stats-titulo">características</h2>
                     <dl class="oc-stats">
                         <div class="oc-stat"><dt><abbr title="Fuerza">FUE</abbr></dt><dd><span class="oc-stat-mod"><span class="visually-hidden">modificador </span><span class="oc-dado" data-dados="1d20-1" data-que="prueba de fuerza">−1</span></span><span class="oc-stat-valor"><span class="visually-hidden">, puntuación </span>9</span></dd></div>
@@ -364,8 +365,7 @@
                         <div class="oc-stat"><dt><abbr title="Carisma">CAR</abbr></dt><dd><span class="oc-stat-mod"><span class="visually-hidden">modificador </span><span class="oc-dado" data-dados="1d20+1" data-que="prueba de carisma">+1</span></span><span class="oc-stat-valor"><span class="visually-hidden">, puntuación </span>12</span></dd></div>
                     </dl>
                 </div>
-                <div class="oc-botones" data-oc-botones><a class="oc-boton oc-boton-ddb" href="https://www.dndbeyond.com/characters/170554638" target="_blank" rel="noopener">ficha dndbeyond<span class="visually-hidden"> (se abre en otra pestaña)</span></a></div>
-                <div class="oc-botones" data-oc-botones-pdf></div>
+                <div class="oc-botones" data-oc-botones><div class="oc-botones-pila" data-oc-botones-pdf><a class="oc-boton oc-boton-ddb" href="https://www.dndbeyond.com/characters/170554638" target="_blank" rel="noopener">ficha dndbeyond<span class="visually-hidden"> (se abre en otra pestaña)</span></a></div></div>
             </div>
 
             <div class="oc-principal">
@@ -497,11 +497,11 @@ Trained for battle, you gain proficiency with Martial weapons and training with 
                         </div>
                         <div class="oc-apartado" id="oc-criaturas" data-oc-parte>
                             <h2 class="oc-apartado-titulo">criaturas</h2>
-                            <div class="oc-lista"><div class="oc-bloques"><div class="oc-bloque"><h3 class="oc-bloque-nombre">Mita</h3><p class="oc-bloque-tipo">Feérica diminuta, sin alineamiento</p><div class="oc-bloque-raya" aria-hidden="true"></div><dl class="oc-bloque-basicos"><div><dt>CA</dt><dd>12</dd></div><div><dt>Velocidad</dt><dd>1,5 m, volar 9 m</dd></div><div><dt>PG</dt><dd>1 (<span class="oc-dado" data-dados="1d4-1" data-que="mita: puntos de golpe">1d4 − 1</span>)</dd></div><div><dt>Desafío</dt><dd>0 (10 PX)</dd></div><div><dt>Iniciativa</dt><dd><span class="oc-dado" data-dados="1d20+2" data-que="mita: iniciativa">+2</span></dd></div><div><dt>Competencia</dt><dd>+2</dd></div></dl><div class="oc-bloque-raya" aria-hidden="true"></div><dl class="oc-bloque-stats"><div><dt><abbr title="Fuerza">FUE</abbr></dt><dd>2 (<span class="oc-dado" data-dados="1d20-4" data-que="mita: fuerza">−4</span>)</dd></div><div><dt><abbr title="Destreza">DES</abbr></dt><dd>15 (<span class="oc-dado" data-dados="1d20+2" data-que="mita: destreza">+2</span>)</dd></div><div><dt><abbr title="Constitución">CON</abbr></dt><dd>8 (<span class="oc-dado" data-dados="1d20-1" data-que="mita: constitución">−1</span>)</dd></div><div><dt><abbr title="Inteligencia">INT</abbr></dt><dd>2 (<span class="oc-dado" data-dados="1d20-4" data-que="mita: inteligencia">−4</span>)</dd></div><div><dt><abbr title="Sabiduría">SAB</abbr></dt><dd>12 (<span class="oc-dado" data-dados="1d20+1" data-que="mita: sabiduría">+1</span>)</dd></div><div><dt><abbr title="Carisma">CAR</abbr></dt><dd>4 (<span class="oc-dado" data-dados="1d20-3" data-que="mita: carisma">−3</span>)</dd></div></dl><div class="oc-bloque-raya" aria-hidden="true"></div><div class="oc-bloque-medio"><dl class="oc-bloque-datos"><div><dt>Sentidos</dt><dd>Vista ciega 18 m, Percepción pasiva 11</dd></div><div><dt>Idiomas</dt><dd>—</dd></div></dl><button class="lightbox-trigger oc-bloque-foto" type="button" aria-label="Ver en grande: Mita, una polilla blanca y peluda de alas grandes"><img src="/imagenes/personajes/faelar/criaturas/mita.webp" alt="Mita, una polilla blanca y peluda de alas grandes" loading="lazy" decoding="async"></button></div><div class="oc-bloque-raya" aria-hidden="true"></div><div class="oc-texto oc-bloque-texto"><p><strong>Familiar.</strong> Es un espíritu feérico que ha tomado forma de polilla, ligado a Faëlar por el conjuro <em>Encontrar familiar</em>. Le obedece y es su aliada.</p>
+                            <div class="oc-lista"><div class="oc-bloques"><div class="oc-hoja-caja es-ancha es-criatura"><div class="recent-entries-header"><h3 class="oc-hoja-titulo"><span class="oc-hoja-emoji" aria-hidden="true">🐾</span>mita.mon</h3><div class="window-controls window-controls-small" data-window-controls aria-hidden="true"></div></div><div class="oc-hoja-dentro"><div class="oc-bloque"><h4 class="oc-bloque-nombre">Mita</h4><p class="oc-bloque-tipo">Feérica diminuta, sin alineamiento</p><div class="oc-bloque-raya" aria-hidden="true"></div><dl class="oc-bloque-basicos"><div><dt>CA</dt><dd>12</dd></div><div><dt>Velocidad</dt><dd>1,5 m, volar 9 m</dd></div><div><dt>PG</dt><dd>1 (<span class="oc-dado" data-dados="1d4-1" data-que="mita: puntos de golpe">1d4 − 1</span>)</dd></div><div><dt>Desafío</dt><dd>0 (10 PX)</dd></div><div><dt>Iniciativa</dt><dd><span class="oc-dado" data-dados="1d20+2" data-que="mita: iniciativa">+2</span></dd></div><div><dt>Competencia</dt><dd>+2</dd></div></dl><div class="oc-bloque-raya" aria-hidden="true"></div><dl class="oc-bloque-stats"><div><dt><abbr title="Fuerza">FUE</abbr></dt><dd>2 (<span class="oc-dado" data-dados="1d20-4" data-que="mita: fuerza">−4</span>)</dd></div><div><dt><abbr title="Destreza">DES</abbr></dt><dd>15 (<span class="oc-dado" data-dados="1d20+2" data-que="mita: destreza">+2</span>)</dd></div><div><dt><abbr title="Constitución">CON</abbr></dt><dd>8 (<span class="oc-dado" data-dados="1d20-1" data-que="mita: constitución">−1</span>)</dd></div><div><dt><abbr title="Inteligencia">INT</abbr></dt><dd>2 (<span class="oc-dado" data-dados="1d20-4" data-que="mita: inteligencia">−4</span>)</dd></div><div><dt><abbr title="Sabiduría">SAB</abbr></dt><dd>12 (<span class="oc-dado" data-dados="1d20+1" data-que="mita: sabiduría">+1</span>)</dd></div><div><dt><abbr title="Carisma">CAR</abbr></dt><dd>4 (<span class="oc-dado" data-dados="1d20-3" data-que="mita: carisma">−3</span>)</dd></div></dl><div class="oc-bloque-raya" aria-hidden="true"></div><div class="oc-bloque-medio"><dl class="oc-bloque-datos"><div><dt>Sentidos</dt><dd>Vista ciega 18 m, Percepción pasiva 11</dd></div><div><dt>Idiomas</dt><dd>—</dd></div></dl><button class="lightbox-trigger oc-bloque-foto" type="button" aria-label="Ver en grande: Mita, una polilla blanca y peluda de alas grandes"><img src="/imagenes/personajes/faelar/criaturas/mita.webp" alt="Mita, una polilla blanca y peluda de alas grandes" loading="lazy" decoding="async"></button></div><div class="oc-bloque-raya" aria-hidden="true"></div><div class="oc-texto oc-bloque-texto"><p><strong>Familiar.</strong> Es un espíritu feérico que ha tomado forma de polilla, ligado a Faëlar por el conjuro <em>Encontrar familiar</em>. Le obedece y es su aliada.</p>
 <p><strong>Conexión telepática.</strong> Mientras estén a 30 m o menos, se comunican telepáticamente. Con una acción adicional, Faëlar puede ver lo que ve Mita y oír lo que oye hasta el inicio de su siguiente turno.</p>
 <p><strong>Entregar conjuros.</strong> Cuando Faëlar lanza un conjuro de alcance «toque», Mita puede entregarlo con su reacción si está a 30 m o menos de él.</p>
 <p><strong>En combate.</strong> Tira su propia iniciativa y actúa en su turno. No puede atacar, pero sí hacer otras acciones.</p>
-<p><strong>Si cae.</strong> Si se queda a 0 puntos de golpe, desaparece; vuelve cuando Faëlar lanza otra vez el conjuro. Faëlar también puede despedirla un rato a una dimensión de bolsillo y volver a llamarla.</p></div><h4 class="oc-bloque-titulo">Acciones</h4><div class="oc-texto oc-bloque-texto"><p><strong><em>Mordisco.</em></strong> <em>Tirada de ataque:</em> <span class="oc-dado" data-dados="1d20+4" data-que="mordisco: ataque">+4</span>. <em>Impacto:</em> <span class="oc-dado" data-dados="1[perforante]" data-que="mordisco: daño">1 perforante</span>. Alcance 1,5 m (como familiar, no puede atacar).</p></div><h4 class="oc-bloque-titulo">Lo que hay que saber</h4><div class="oc-texto oc-bloque-texto"><ul><li>Familiar de Faëlar.</li><li>Nombre original: Palomita.</li><li>La conocimos en el Bosque de Hadas (campaña de Ragna).</li></ul></div><p class="oc-bloque-pie">Familiar · polilla feérica (con las estadísticas de un murciélago)</p></div></div></div>
+<p><strong>Si cae.</strong> Si se queda a 0 puntos de golpe, desaparece; vuelve cuando Faëlar lanza otra vez el conjuro. Faëlar también puede despedirla un rato a una dimensión de bolsillo y volver a llamarla.</p></div><h5 class="oc-bloque-titulo">Acciones</h5><div class="oc-texto oc-bloque-texto"><p><strong><em>Mordisco.</em></strong> <em>Tirada de ataque:</em> <span class="oc-dado" data-dados="1d20+4" data-que="mordisco: ataque">+4</span>. <em>Impacto:</em> <span class="oc-dado" data-dados="1[perforante]" data-que="mordisco: daño">1 perforante</span>. Alcance 1,5 m (como familiar, no puede atacar).</p></div><h5 class="oc-bloque-titulo">Lo que hay que saber</h5><div class="oc-texto oc-bloque-texto"><ul><li>Familiar de Faëlar.</li><li>Nombre original: Palomita.</li><li>La conocimos en el Bosque de Hadas (campaña de Ragna).</li></ul></div><p class="oc-bloque-pie">Familiar · polilla feérica (con las estadísticas de un murciélago)</p></div></div></div></div></div>
                         </div>
                         <div class="oc-apartado" id="oc-gente" data-oc-parte>
                             <h2 class="oc-apartado-titulo">npcs</h2>

@@ -410,6 +410,21 @@ def con_dados(html, que):
     return "".join(trozos)
 
 
+def clase_y_subclase(p):
+    """«Druida (Circle of the Stars)» -> «Druida» y «Circle of the
+    Stars». Con varias clases («Mago 3 / Guerrero 2»), todo es la clase."""
+    clase = str(p.get("clase") or "").strip()
+    m = re.match(r"^([^()/]+?)\s*\(([^()]+)\)\s*$", clase)
+    return (m.group(1).strip(), m.group(2).strip()) if m else (clase, "")
+
+
+def clase_del_postit(p):
+    """La clase, en su caja al lado del nombre."""
+    clase, _ = clase_y_subclase(p)
+    return ('                            <p class="oc-postit-clase"><span class="visually-hidden">Clase: </span>%s</p>'
+            % e(clase)) if clase else ""
+
+
 def postit(p, c):
     """Lo de debajo del nombre en el post-it: la foto, la raza y la clase,
     la frase y las características (con el modificador, que se tira al
@@ -418,15 +433,19 @@ def postit(p, c):
     retrato = ruta_que_existe(p.get("retrato"))
     alt = str(p.get("retrato_alt") or "").strip() or "Retrato de %s" % nombre
     partes = []
+    # La foto, con el nivel en su chapita en la esquina de abajo; debajo,
+    # la raza y la subclase (la clase va al lado del nombre).
+    nivel = str(p.get("nivel") or "").strip()
+    chapa = ('<span class="oc-postit-nivel">nivel %s</span>' % e(nivel)) if nivel else ""
     if retrato:
-        partes.append('                    <button class="lightbox-trigger oc-retrato" type="button" '
-                      'aria-label="Ver en grande: %s">\n'
-                      '                        <img src="%s" alt="%s" decoding="async">\n'
-                      '                    </button>' % (e(alt), e(retrato), e(alt)))
+        partes.append('                    <div class="oc-retrato-marco">'
+                      '<button class="lightbox-trigger oc-retrato" type="button" aria-label="Ver en grande: %s">'
+                      '<img src="%s" alt="%s" decoding="async"></button>%s</div>' % (e(alt), e(retrato), e(alt), chapa))
     else:
-        partes.append('                    <div class="oc-retrato es-sin-foto"><span class="oc-inicial" '
-                      'aria-hidden="true">%s</span></div>' % e(inicial(nombre)))
-    que = lo_que_es(p)
+        partes.append('                    <div class="oc-retrato-marco"><div class="oc-retrato es-sin-foto">'
+                      '<span class="oc-inicial" aria-hidden="true">%s</span></div>%s</div>' % (e(inicial(nombre)), chapa))
+    _, subclase = clase_y_subclase(p)
+    que = " · ".join(x for x in (str(p.get("raza") or "").strip(), subclase) if x)
     if que:
         partes.append('                    <p class="oc-postit-que">%s</p>' % e(que))
     lema = str(p.get("lema") or "").strip()
@@ -460,9 +479,12 @@ def vitales(p):
     datos = [x for x in datos if x[2]]
     if not datos:
         return ""
+    # A la vista: el dibujo, el número y la abreviatura pequeña detrás
+    # («❤️ 27PG»); para el lector, «Puntos de golpe: 27».
     return ('                        <dl class="oc-vitales">%s</dl>' % "".join(
         '<div class="oc-vital"><dt><span class="oc-vital-emoji" aria-hidden="true">%s</span>'
-        '<abbr title="%s">%s</abbr></dt><dd>%s</dd></div>' % (emoji, largo, corto, e(valor))
+        '<span class="visually-hidden">%s</span></dt><dd>%s<span class="oc-vital-corto" aria-hidden="true">%s</span>'
+        '</dd></div>' % (emoji, largo, e(valor), corto)
         for corto, largo, valor, emoji in datos))
 
 
@@ -487,10 +509,11 @@ def botones(p, avisos):
     if ruta:
         pdf = ('<a class="oc-boton oc-boton-pdf" href="%s" download>'
                '<span class="oc-boton-icono" aria-hidden="true">📄</span> ficha en pdf</a>' % e(ruta))
-    # La primera fila siempre está (aunque vacía): personajes.js mete en
-    # ella el botón de los dados.
-    return ('                <div class="oc-botones" data-oc-botones>%s</div>\n'
-            '                <div class="oc-botones" data-oc-botones-pdf>%s</div>' % ("".join(enlaces), pdf))
+    # A la izquierda, uno encima de otro, «ficha dndbeyond» y «ficha en
+    # pdf» (si no hay PDF subido, personajes.js pone ahí el suyo); a la
+    # derecha, el de los dados, grande (también lo pone personajes.js).
+    return ('                <div class="oc-botones" data-oc-botones>'
+            '<div class="oc-botones-pila" data-oc-botones-pdf>%s%s</div></div>' % ("".join(enlaces), pdf))
 
 
 def apartado_gente(gente, c, personajes, avisos):
@@ -1490,7 +1513,7 @@ def apartado_criaturas(criaturas, c, personajes, avisos):
         mods = {s: (modificador_num(numero(k.get(s))) if numero(k.get(s)) is not None else None) for s, _, _ in STATS}
         comp = numero(k.get("competencia"))
         raya = '<div class="oc-bloque-raya" aria-hidden="true"></div>'
-        partes = ['<h3 class="oc-bloque-nombre">%s</h3>' % e(nombre)]
+        partes = ['<h4 class="oc-bloque-nombre">%s</h4>' % e(nombre)]
         tipo = str(k.get("tipo") or "").strip()
         if tipo:
             partes.append('<p class="oc-bloque-tipo">%s</p>' % e(tipo))
@@ -1581,16 +1604,19 @@ def apartado_criaturas(criaturas, c, personajes, avisos):
                 if extra:
                     trozos.append(e(extra[0].upper() + extra[1:]) + ("" if extra.endswith(".") else "."))
                 filas.append("<p>%s</p>" % " ".join(trozos))
-            partes.append('<h4 class="oc-bloque-titulo">Acciones</h4><div class="oc-texto oc-bloque-texto">%s</div>'
+            partes.append('<h5 class="oc-bloque-titulo">Acciones</h5><div class="oc-texto oc-bloque-texto">%s</div>'
                           % "".join(filas))
         notas = markdown(k.get("notas"), c, personajes, avisos)
         if notas:
-            partes.append('<h4 class="oc-bloque-titulo">Lo que hay que saber</h4>'
+            partes.append('<h5 class="oc-bloque-titulo">Lo que hay que saber</h5>'
                           '<div class="oc-texto oc-bloque-texto">%s</div>' % con_dados(notas, nombre.lower()))
         que = str(k.get("que") or "").strip()
         if que:
             partes.append('<p class="oc-bloque-pie">%s</p>' % e(que))
-        bloques.append('<div class="oc-bloque">%s</div>' % "".join(partes))
+        # En una ventanita del sitio («mita.mon»), que se pliega con su −.
+        bloques.append(recuadro((nombre_archivo(nombre, "criatura") or "criatura") + ".mon",
+                                '<div class="oc-bloque">%s</div>' % "".join(partes), "es-ancha es-criatura", "🐾",
+                                nivel=3))
     return '<div class="oc-bloques">%s</div>' % "".join(bloques) if bloques else ""
 
 
@@ -1691,6 +1717,7 @@ def pagina_ficha(p, datos, personajes, avisos):
         "{{SUBTITULO}}": "\n                ".join(sub),
         "{{PANEL}}": panel,
         "{{VITALES}}": vitales(p),
+        "{{CLASE}}": clase_del_postit(p),
         "{{POSTIT}}": postit(p, c),
         "{{BOTONES}}": botones(p, avisos),
     }

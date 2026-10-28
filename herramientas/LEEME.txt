@@ -3917,7 +3917,8 @@
   (según su «(de dónde viene)»; los que no lo dicen, en rasgos.txt).
   LAS CRIATURAS (🐾 criaturas, en el menú, debajo de ficha; solo sale si
   tiene alguna): familiares, invocaciones, mascotas… cada una como un
-  BLOQUE DE ESTADÍSTICAS de los del Manual de monstruos: el nombre en su
+  BLOQUE DE ESTADÍSTICAS de los del Manual de monstruos, dentro de una
+  ventanita del sitio (<nombre>.mon) que se pliega con su −: el nombre en su
   barra, el tamaño, tipo y alineamiento en cursiva, rayas entre las
   partes; la CA, la velocidad, los PG (sus dados se tiran: «1 (1d4 −
   1)»), el desafío, la iniciativa (se tira) y la competencia a dos
@@ -3934,19 +3935,24 @@
   familiar de Faëlar (polilla feérica con las estadísticas de un
   murciélago, las del Manual de monstruos de 2024; la imagen, la de la
   campaña de Ragna).
-  MÁS ESPACIO: en una tira a la izquierda del recuadro, dos botones: uno
-  esconde la ficha de la izquierda (la foto y las características: se
-  quita de la vista, pero el lector de pantalla la sigue teniendo, que
-  lleva el nombre de la página) y otro el menú. Se acuerdan (en este
-  navegador). EL POST-IT: el nombre a todo lo ancho y, debajo, los PG y
-  la CA cada uno en su caja; en las características, el modificador en
-  grande y la puntuación en una cajita con los colores al revés. En
-  estadisticas.dat, igual: el modificador en grande (se tira) y la
-  puntuación en la barra. LOS BOTONES de debajo: «ficha dndbeyond» y el
-  de los dados (con el dibujo del d20); y debajo, «ficha en pdf»: si hay
-  un PDF subido, se descarga ese; si no, abre imprimir para guardarla
-  como PDF, con todo una parte detrás de otra (el @media print de
-  personajes.css). El menú de la ficha no lleva la flechita «↪» que el
+  MÁS ESPACIO: dos botones para plegar, uno en la esquina de arriba a la
+  izquierda de la ficha (la foto y las características) y otro en la de
+  arriba a la derecha del menú; plegado, de cada uno se queda solo su
+  botón y lo elegido se lleva el ancho (la ficha plegada se quita de la
+  vista, pero el lector de pantalla la sigue teniendo, que lleva el
+  nombre de la página). Se acuerdan (en este navegador). EL POST-IT: el
+  nombre (como se escribe, con su mayúscula) y a su lado la CLASE en su
+  caja; debajo, los PG y la CA cada uno en su caja («❤️ 27PG»); la foto,
+  con el NIVEL en una chapita en su esquina de abajo; debajo, la raza y
+  la subclase («Elfo · Circle of the Stars»; de «Druida (Circle of the
+  Stars)» se saca la clase y la subclase); y las características, con el
+  modificador en grande y la puntuación en una cajita con los colores al
+  revés. En estadisticas.dat, igual: el modificador en grande (se tira) y
+  la puntuación en la barra. LOS BOTONES de debajo: a la izquierda, uno
+  encima de otro, «ficha dndbeyond» y «ficha en pdf» (si hay un PDF
+  subido, se descarga ese; si no, abre imprimir para guardarla como PDF,
+  con todo una parte detrás de otra: el @media print de
+  personajes.css); a la derecha, el de los dados, grande. El menú de la ficha no lleva la flechita «↪» que el
   sitio pone a los enlaces de los <nav> al pasar por encima.
   LOS COMBOS (⚡ combos, en la ficha): los escritos en el campo «Combos»
   del editor, un bloque por combo: «## Fuego y escudo» y debajo, uno por
