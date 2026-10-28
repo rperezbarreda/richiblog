@@ -3916,24 +3916,38 @@
   Los RASGOS, en tres ventanitas: raza.txt, clase.txt y dotes.txt
   (según su «(de dónde viene)»; los que no lo dicen, en rasgos.txt).
   LAS CRIATURAS (🐾 criaturas, en el menú, debajo de ficha; solo sale si
-  tiene alguna): familiares, invocaciones, mascotas… cada una con su
-  ficha de monstruo en una ventanita (<nombre>.mon): su imagen (se ve en
-  grande al pulsarla), qué es y su tamaño, tipo y alineamiento; la CA,
-  los PG (el número en grande y los dados en la barra, que se tiran:
-  «1 (1d4 − 1)»), la velocidad (la primera en grande y lo demás en la
-  barra: «1,5 m, volar 9 m») y la iniciativa (se tira); las seis
-  características en fila, con el modificador en grande (se tira); las
+  tiene alguna): familiares, invocaciones, mascotas… cada una como un
+  BLOQUE DE ESTADÍSTICAS de los del Manual de monstruos: el nombre en su
+  barra, el tamaño, tipo y alineamiento en cursiva, rayas entre las
+  partes; la CA, la velocidad, los PG (sus dados se tiran: «1 (1d4 −
+  1)»), el desafío, la iniciativa (se tira) y la competencia a dos
+  columnas; las seis en fila, «15 (+2)» (el modificador se tira); las
   salvaciones y habilidades («Percepción +3»: cada bono se tira), los
-  sentidos (con la percepción pasiva calculada), los idiomas, el desafío
-  y la competencia; y sus rasgos, sus acciones (en la tabla de ataques,
-  con sus tiradas; un daño fijo, «1 perforante», también) y lo que hay
-  que saber. Están en «criaturas» de personajes.json, agrupadas por
+  sentidos (con la percepción pasiva calculada) y los idiomas, con la
+  imagen al lado (se ve en grande al pulsarla); sus rasgos; «Acciones»,
+  como en el libro («Mordisco. Tirada de ataque: +4. Impacto: 1
+  perforante.», con sus tiradas); lo que hay que saber; y en la barra de
+  abajo, qué es. Están en «criaturas» de personajes.json, agrupadas por
   personaje como la gente; en el editor, «Sus criaturas», con su imagen
   (sitio «oc-criatura»: imagenes/personajes/<clave>/criaturas/)
   (generar-personajes.py: apartado_criaturas). La primera: Mita, el
   familiar de Faëlar (polilla feérica con las estadísticas de un
   murciélago, las del Manual de monstruos de 2024; la imagen, la de la
   campaña de Ragna).
+  MÁS ESPACIO: en una tira a la izquierda del recuadro, dos botones: uno
+  esconde la ficha de la izquierda (la foto y las características: se
+  quita de la vista, pero el lector de pantalla la sigue teniendo, que
+  lleva el nombre de la página) y otro el menú. Se acuerdan (en este
+  navegador). EL POST-IT: el nombre a todo lo ancho y, debajo, los PG y
+  la CA cada uno en su caja; en las características, el modificador en
+  grande y la puntuación en una cajita con los colores al revés. En
+  estadisticas.dat, igual: el modificador en grande (se tira) y la
+  puntuación en la barra. LOS BOTONES de debajo: «ficha dndbeyond» y el
+  de los dados (con el dibujo del d20); y debajo, «ficha en pdf»: si hay
+  un PDF subido, se descarga ese; si no, abre imprimir para guardarla
+  como PDF, con todo una parte detrás de otra (el @media print de
+  personajes.css). El menú de la ficha no lleva la flechita «↪» que el
+  sitio pone a los enlaces de los <nav> al pasar por encima.
   LOS COMBOS (⚡ combos, en la ficha): los escritos en el campo «Combos»
   del editor, un bloque por combo: «## Fuego y escudo» y debajo, uno por
   línea, lo que hace con lo que gasta delante («Acción: Bola de fuego»,
@@ -3976,8 +3990,8 @@
   rojo, frío azul verdoso, relámpago azul, veneno verde…; colores fijos,
   medidos). La fórmula lleva el tipo entre corchetes:
   1d8+3[cortante]+2d6[fuego] (TIPOS_DE_DANO en generar-personajes.py). Y con el botón 🎲, la
-  BANDEJA: cada pulsación en d4, d6, d8, d10, d12, d20 o d100 añade un
-  dado (cada uno con su silueta: triángulo el d4, cuadrado el d6, rombo
+  BANDEJA: cada pulsación en d2, d4, d6, d8, d10, d12, d20 o d100 añade un
+  dado (cada uno con su silueta: una moneda el d2, triángulo el d4, cuadrado el d6, rombo
   el d8…); en cuanto un dado tiene alguno, su casilla se rellena, dice
   cuántos (×2) y salen en ella «−» y «+» para quitar o poner; el
   modificador, también con − y +; y «tirar»; «vaciar» deja la bandeja

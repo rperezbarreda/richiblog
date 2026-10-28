@@ -333,7 +333,7 @@
 .oc-lateral {
     display: flex;
     flex-direction: column;
-    gap: 14px;
+    gap: 10px;
     min-width: 0;
 }
 
@@ -398,7 +398,7 @@
        del alto de la pantalla, recortada, sin deformar. */
     .oc-ficha-page .oc-retrato img,
     .oc-ficha-page .oc-retrato.es-sin-foto {
-        max-height: 29vh;
+        max-height: 18vh;
     }
 
     /* Y todo el post-it un poco más apretado, para que quepan los
@@ -1560,11 +1560,12 @@ li > .oc-origen {
 
 /* Arriba del post-it, el nombre en su recuadro oscuro y, al lado, los
    puntos de golpe y la CA. */
+/* El nombre a todo lo ancho y, debajo, los PG y la CA, cada uno en su
+   caja (bajitas: el nombre de lo que es y el número en la misma línea). */
 .oc-postit-cabeza {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) auto;
-    align-items: stretch;
-    gap: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
     margin-bottom: 12px;
 }
 
@@ -1593,23 +1594,25 @@ li > .oc-origen {
 }
 
 /* Los PG y la CA, uno al lado del otro. */
+/* Los PG y la CA, cada uno en su caja. */
 .oc-vitales {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 10px;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 6px;
     margin: 0;
-    padding: 5px 10px;
-    border: 3px solid var(--purple);
-    background: var(--purple);
-    box-shadow: inset 0 0 0 2px var(--yellow);
-    color: var(--white);
 }
 
 .oc-vital {
     display: flex;
-    flex-direction: column;
-    align-items: center;
+    align-items: baseline;
+    justify-content: center;
+    gap: 8px;
+    min-width: 0;
+    padding: 3px 8px;
+    border: 3px solid var(--purple);
+    background: var(--purple);
+    box-shadow: inset 0 0 0 2px var(--yellow);
+    color: var(--white);
     line-height: 1.1;
 }
 
@@ -1735,6 +1738,16 @@ li > .oc-origen {
     font-size: 0.8125rem;
 }
 
+/* En el post-it, la puntuación en una cajita con los colores al revés,
+   para que destaque. */
+.oc-stat .oc-stat-valor {
+    margin-top: 3px;
+    padding: 0 6px;
+    background: var(--yellow-contrast);
+    color: var(--yellow);
+    font-weight: 700;
+}
+
 /* ---- LOS BOTONES DE DEBAJO: su ficha en D&D Beyond, el PDF y los
    dados ---- */
 /* En una fila: si no caben, el texto de un botón parte a dos líneas
@@ -1771,10 +1784,15 @@ li > .oc-origen {
     flex: 0 1 auto;
 }
 
-.oc-boton-dados-emoji {
+/* El d20 del botón de los dados (el mismo dibujo que en la bandeja). */
+.oc-boton-dados .oc-dados-silueta {
+    width: 1.4rem;
+    height: 1.4rem;
+    vertical-align: middle;
+}
+
+.oc-boton-icono {
     font-family: initial;
-    font-size: 1.125rem;
-    line-height: 1;
 }
 
 .oc-boton:hover,
@@ -2701,143 +2719,392 @@ li > .oc-origen {
 }
 
 @media (max-width: 520px) {
-    .oc-criatura-stats {
-        grid-template-columns: repeat(3, minmax(0, 1fr));
-    }
-
     .oc-combo-paso {
         grid-template-columns: minmax(0, 1fr);
     }
 }
 
 /* ====================================================================
-   LAS CRIATURAS (familiares, invocaciones, mascotas)
-   ====================================================================
-   Su ficha de monstruo: la imagen (se ve en grande al pulsarla) con el
-   nombre y qué es al lado; las cajitas de CA, PG, velocidad e
-   iniciativa; las seis características en fila (el modificador en
-   grande, que se tira); los datos; y sus rasgos, acciones y notas. */
-.oc-criatura {
+   LAS CRIATURAS: su bloque de estadísticas, como los del Manual de
+   monstruos (el nombre en su barra, rayas entre las partes, las seis en
+   fila, la imagen al lado de los sentidos y una barra abajo), con los
+   colores del sitio.
+   ==================================================================== */
+.oc-bloques {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 26rem), 1fr));
+    align-items: start;
+    gap: 22px;
+}
+
+.oc-bloque {
     display: flex;
     flex-direction: column;
-    gap: 16px;
-}
-
-.oc-criatura-cabeza {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 16px;
-}
-
-.oc-criatura-foto {
-    flex: none;
-    width: 9rem;
-    aspect-ratio: 1 / 1;
-    padding: 0;
+    gap: 8px;
+    padding: 0 0 0;
     border: 3px solid var(--yellow);
     background: var(--purple);
+    box-shadow: 6px 6px 0 var(--yellow);
+    color: var(--white);
+    font-size: 0.9375rem;
+    line-height: 1.5;
+}
+
+.oc-bloque > :not(.oc-bloque-nombre):not(.oc-bloque-pie):not(.oc-bloque-raya) {
+    margin-right: 14px;
+    margin-left: 14px;
+}
+
+.oc-bloque-nombre {
+    margin: 0;
+    padding: 6px 14px;
+    border-bottom: 3px solid var(--yellow);
+    background: var(--yellow);
+    color: var(--yellow-contrast);
+    font-size: clamp(1.5rem, 2.6vw, 2rem);
+    line-height: 1.1;
+    text-align: center;
+    letter-spacing: 1px;
+}
+
+.oc-bloque-tipo {
+    margin-top: 0;
+    margin-bottom: 0;
+    color: var(--muted);
+    font-style: italic;
+    text-align: center;
+}
+
+/* Las rayas que separan las partes: gruesas y del amarillo. */
+.oc-bloque-raya {
+    height: 3px;
+    margin: 0 14px;
+    background: var(--yellow);
+}
+
+.oc-bloque-basicos,
+.oc-bloque-datos {
+    display: grid;
+    gap: 2px 18px;
+    margin-top: 0;
+    margin-bottom: 0;
+}
+
+.oc-bloque-basicos {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.oc-bloque-basicos > div,
+.oc-bloque-datos > div {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0 8px;
+}
+
+.oc-bloque-basicos dt,
+.oc-bloque-datos dt {
+    color: var(--yellow);
+    font-weight: 700;
+}
+
+.oc-bloque-basicos dt::after,
+.oc-bloque-datos dt::after {
+    content: ":";
+}
+
+.oc-bloque-basicos dd,
+.oc-bloque-datos dd {
+    margin: 0;
+}
+
+/* Las seis en fila: el nombre arriba y «15 (+2)» debajo. */
+.oc-bloque-stats {
+    display: grid;
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+    gap: 4px;
+    margin-top: 0;
+    margin-bottom: 0;
+    text-align: center;
+}
+
+.oc-bloque-stats dt {
+    color: var(--yellow);
+    font-family: var(--fuente-mono);
+    font-size: 0.8125rem;
+    font-weight: 700;
+    letter-spacing: 1px;
+}
+
+.oc-bloque-stats abbr {
+    text-decoration: none;
+}
+
+.oc-bloque-stats dd {
+    margin: 0;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+/* Los sentidos y demás a la izquierda; la imagen, a la derecha. */
+.oc-bloque-medio {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+}
+
+.oc-bloque-datos {
+    flex: 1 1 auto;
+    min-width: 0;
+}
+
+.oc-bloque-foto {
+    flex: none;
+    width: 8rem;
+    aspect-ratio: 1 / 1;
+    padding: 0;
+    border: 2px solid var(--yellow);
+    background: var(--purple-lighter);
+    cursor: zoom-in;
     overflow: hidden;
 }
 
-.oc-criatura-foto img {
+.oc-bloque-foto img {
     display: block;
     width: 100%;
     height: 100%;
     object-fit: cover;
 }
 
-button.oc-criatura-foto {
-    cursor: zoom-in;
-}
-
-button.oc-criatura-foto:hover {
+.oc-bloque-foto:hover {
     box-shadow: 4px 4px 0 var(--yellow);
 }
 
-button.oc-criatura-foto:focus-visible {
+.oc-bloque-foto:focus-visible {
     outline: 2px solid var(--yellow);
     outline-offset: 3px;
 }
 
-.oc-criatura-foto.es-sin-foto {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: var(--yellow);
-    font-size: 3.5rem;
+.oc-bloque-texto {
+    font-size: 0.9375rem;
+    line-height: 1.55;
 }
 
-.oc-criatura-quien {
-    flex: 1 1 14rem;
-    min-width: 0;
+.oc-bloque-texto p {
+    margin: 0 0 8px;
 }
 
-.oc-criatura-nombre {
-    margin: 0;
+.oc-bloque-texto strong,
+.oc-bloque-texto em {
     color: var(--white);
-    font-size: clamp(1.75rem, 3vw, 2.25rem);
-    line-height: 1.1;
 }
 
-.oc-criatura-que {
-    margin: 4px 0 0;
+/* «Acciones», con su raya debajo, como en el libro. */
+.oc-bloque-titulo {
+    margin-top: 6px;
+    margin-bottom: 0;
+    padding-bottom: 2px;
+    border-bottom: 2px solid var(--yellow);
     color: var(--yellow);
-    font-family: var(--fuente-mono);
-    font-size: 0.875rem;
-}
-
-.oc-criatura-tipo {
-    margin: 2px 0 0;
-    color: var(--muted);
-    font-family: var(--fuente-mono);
-    font-size: 0.8125rem;
-    font-style: italic;
-}
-
-.oc-criatura-stats {
-    display: grid;
-    grid-template-columns: repeat(6, minmax(0, 1fr));
-    gap: 8px;
-    margin: 0;
-}
-
-.oc-criatura-stat {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding: 6px 4px 8px;
-    border: 2px solid var(--yellow);
-    background: var(--purple);
-    text-align: center;
-}
-
-.oc-criatura-stat dt {
-    color: var(--yellow);
-    font-family: var(--fuente-mono);
-    font-size: 0.75rem;
-    font-weight: 700;
+    font-size: 1.125rem;
+    font-variant: small-caps;
     letter-spacing: 1px;
 }
 
-.oc-criatura-stat abbr {
-    text-decoration: none;
+.oc-bloque-pie {
+    margin: 6px 0 0;
+    padding: 5px 14px;
+    background: var(--yellow);
+    color: var(--yellow-contrast);
+    font-family: var(--fuente-mono);
+    font-size: 0.8125rem;
+    font-weight: 700;
 }
 
-.oc-criatura-stat dd {
+@media (max-width: 520px) {
+    .oc-bloque-stats {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        row-gap: 8px;
+    }
+
+    .oc-bloque-medio {
+        flex-direction: column-reverse;
+    }
+
+    .oc-bloque-basicos {
+        grid-template-columns: minmax(0, 1fr);
+    }
+}
+
+/* ====================================================================
+   PLEGAR LA FICHA DE LA IZQUIERDA Y EL MENÚ (personajes.js)
+   ==================================================================== */
+
+/* El menú de la ficha está en un <nav>, y a todo enlace de un <nav> el
+   sitio le pone una flechita «↪» al pasar por encima (es la del menú de
+   la izquierda del sitio). Aquí sobra. */
+.oc-menu a::before {
+    content: none;
+}
+
+.oc-menu[hidden] {
+    display: none;
+}
+
+/* La ficha de la izquierda, escondida: fuera de la vista, pero no del
+   lector de pantalla (lleva el nombre, que es el título de la página). */
+.oc-lateral.oc-escondida {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    padding: 0;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+}
+
+.oc-panel-barra {
     display: flex;
-    flex-direction: column;
+    gap: 6px;
+    margin-bottom: 10px;
+}
+
+.oc-panel-plegar {
+    display: flex;
     align-items: center;
-    margin: 0;
-    color: var(--white);
+    justify-content: center;
+    width: 2.1rem;
+    height: 2.1rem;
+    padding: 0;
+    border: 2px solid var(--yellow);
+    background: transparent;
+    color: var(--yellow);
+    cursor: pointer;
 }
 
-.oc-criatura-datos {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(min(100%, 14rem), 1fr));
-    gap: 6px 20px;
+.oc-panel-plegar svg {
+    width: 1.25rem;
+    height: 1.25rem;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2;
 }
 
-.oc-criatura .oc-hoja-subtitulo {
-    margin-bottom: 0;
+.oc-panel-plegar svg .relleno {
+    fill: currentColor;
+}
+
+/* Escondido lo que controla: el botón, relleno (así se ve que hay algo
+   plegado). */
+.oc-panel-plegar[aria-expanded="false"] {
+    background: var(--yellow);
+    color: var(--yellow-contrast);
+}
+
+.oc-panel-plegar:hover {
+    box-shadow: 3px 3px 0 var(--yellow);
+}
+
+.oc-panel-plegar:focus-visible {
+    outline: 2px solid var(--yellow);
+    outline-offset: 2px;
+}
+
+@media (min-width: 861px) {
+    /* La tira, en vertical, a la izquierda del todo del recuadro. */
+    .oc-panel.con-menu {
+        grid-template-columns: auto minmax(8.5rem, 11rem) minmax(0, 1fr);
+    }
+
+    .oc-panel.con-menu.sin-menu {
+        grid-template-columns: auto minmax(0, 1fr);
+    }
+
+    .oc-panel-barra {
+        flex-direction: column;
+        margin: 0;
+    }
+
+    /* Sin la ficha de la izquierda, el recuadro a todo lo ancho. */
+    .oc-ficha-page.sin-lateral {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .oc-ficha-page.sin-lateral .oc-principal {
+        grid-column: 1;
+    }
+}
+
+/* ====================================================================
+   EN PAPEL (y al guardar en PDF): la ficha entera, una parte detrás de
+   otra, sin menú, sin botones y sin desplazarse por dentro.
+   ==================================================================== */
+@media print {
+    /* Todo lo que en pantalla tiene alto fijo (para que la página no se
+       desplace), en papel crece con lo de dentro: si no, sale una hoja y
+       lo demás cortado. */
+    html,
+    body,
+    main {
+        height: auto !important;
+        overflow: visible !important;
+    }
+
+    .oc-ficha-page,
+    .oc-ficha-page .oc-lateral,
+    .oc-ficha-page .oc-principal,
+    .oc-ficha-page .oc-panel,
+    .oc-ficha-page .oc-partes {
+        display: block !important;
+        height: auto !important;
+        max-height: none !important;
+        overflow: visible !important;
+    }
+
+    .oc-menu,
+    .oc-panel-barra,
+    .oc-botones,
+    .oc-dados,
+    .oc-modal-fondo,
+    .oc-volver {
+        display: none;
+    }
+
+    .oc-apartado[hidden],
+    .oc-hoja-grupo[hidden],
+    .oc-apartado-titulo,
+    .oc-hoja-grupo-titulo {
+        display: block;
+    }
+
+    .oc-panel.con-menu .oc-apartado-titulo,
+    .oc-hoja-grupo-titulo {
+        position: static;
+        width: auto;
+        height: auto;
+        margin: 18px 0 8px;
+        overflow: visible;
+        clip: auto;
+        white-space: normal;
+    }
+
+    .oc-lateral.oc-escondida {
+        position: static;
+        width: auto;
+        height: auto;
+        margin: 0;
+        overflow: visible;
+        clip: auto;
+        white-space: normal;
+    }
+
+    .oc-hoja-caja,
+    .oc-bloque,
+    .oc-objeto {
+        break-inside: avoid;
+    }
+
+    .oc-retrato img {
+        max-width: 8cm;
+    }
 }

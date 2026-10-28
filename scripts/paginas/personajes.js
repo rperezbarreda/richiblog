@@ -143,6 +143,97 @@
 
     panel.classList.add("con-menu");
     abrirFicha(false);
+
+    // ---- PLEGAR LA FICHA DE LA IZQUIERDA Y EL MENÚ ----
+    // Dos botones en una tira a la izquierda del recuadro: uno esconde la
+    // ficha de la izquierda (la foto y las características) y otro el
+    // menú, para dejarle todo el ancho a lo elegido. Se acuerda (en este
+    // navegador).
+    const pagina = document.querySelector(".oc-ficha-page");
+    const lateral = document.querySelector(".oc-lateral");
+    const barra = document.createElement("div");
+    barra.className = "oc-panel-barra";
+    barra.setAttribute("role", "group");
+    barra.setAttribute("aria-label", "Espacio");
+    const ns = "http://www.w3.org/2000/svg";
+    function dibujo(trazos) {
+        const svg = document.createElementNS(ns, "svg");
+        svg.setAttribute("viewBox", "0 0 24 24");
+        svg.setAttribute("aria-hidden", "true");
+        svg.setAttribute("focusable", "false");
+        svg.innerHTML = trazos;
+        return svg;
+    }
+    // La ficha de la izquierda no se esconde del todo: lleva el título de
+    // la página (el nombre, el <h1>), así que se quita de la vista pero el
+    // lector de pantalla la sigue teniendo; lo que se puede pulsar dentro,
+    // fuera del tabulador mientras está escondida.
+    function esconderSoloALaVista(x, si) {
+        x.classList.toggle("oc-escondida", si);
+        x.querySelectorAll("a[href], button, input, [tabindex]").forEach((y) => {
+            if (si) {
+                if (!("tabAntes" in y.dataset)) {
+                    y.dataset.tabAntes = y.getAttribute("tabindex") === null ? "" : y.getAttribute("tabindex");
+                }
+                y.setAttribute("tabindex", "-1");
+            } else if ("tabAntes" in y.dataset) {
+                if (y.dataset.tabAntes === "") {
+                    y.removeAttribute("tabindex");
+                } else {
+                    y.setAttribute("tabindex", y.dataset.tabAntes);
+                }
+                delete y.dataset.tabAntes;
+            }
+        });
+    }
+
+    function plegador(que, nombre, clave, trazos, alCambiar, soloALaVista) {
+        if (!que) {
+            return;
+        }
+        que.id = que.id || clave;
+        const b = document.createElement("button");
+        b.type = "button";
+        b.className = "oc-panel-plegar";
+        b.setAttribute("aria-controls", que.id);
+        b.appendChild(dibujo(trazos));
+        const esta = () => (soloALaVista ? !que.classList.contains("oc-escondida") : !que.hidden);
+        const poner = (abierto) => {
+            if (soloALaVista) {
+                esconderSoloALaVista(que, !abierto);
+            } else {
+                que.hidden = !abierto;
+            }
+            b.setAttribute("aria-expanded", abierto ? "true" : "false");
+            b.setAttribute("aria-label", (abierto ? "Esconder " : "Enseñar ") + nombre);
+            b.title = (abierto ? "Esconder " : "Enseñar ") + nombre;
+            alCambiar(abierto);
+        };
+        let guardado = null;
+        try {
+            guardado = localStorage.getItem("richi-oc-" + clave);
+        } catch (e) {
+            guardado = null;
+        }
+        poner(guardado !== "cerrado");
+        b.addEventListener("click", () => {
+            const abierto = !esta();
+            poner(abierto);
+            try {
+                localStorage.setItem("richi-oc-" + clave, abierto ? "abierto" : "cerrado");
+            } catch (e) {
+                // Sin almacenamiento: da igual.
+            }
+        });
+        barra.appendChild(b);
+    }
+    plegador(lateral, "la ficha de la izquierda", "lateral",
+        '<rect x="3" y="4" width="18" height="16" rx="1"/><rect x="3" y="4" width="7" height="16" class="relleno"/>',
+        (abierto) => pagina && pagina.classList.toggle("sin-lateral", !abierto), true);
+    plegador(menu, "el menú", "menu",
+        '<path d="M4 6h16M4 12h16M4 18h16"/>',
+        (abierto) => panel.classList.toggle("sin-menu", !abierto));
+    panel.insertBefore(barra, panel.firstChild);
     window.addEventListener("hashchange", () => mostrar(desdeLaDireccion(), false, false));
     mostrar(desdeLaDireccion(), false, false);
 })();
@@ -208,7 +299,7 @@ document.querySelectorAll(".oc-ataques th[data-oc-desc]").forEach((th) => {
     if (!marcas.length && !sitioDelBoton) {
         return;
     }
-    const CARAS = [4, 6, 8, 10, 12, 20, 100];
+    const CARAS = [2, 4, 6, 8, 10, 12, 20, 100];
     const estado = { mano: {}, modo: "normal", tiradas: [], cuenta: 0, sonido: leer("richi-dados-sonido") !== "no" };
 
     function leer(clave) {
@@ -460,6 +551,7 @@ document.querySelectorAll(".oc-ataques th[data-oc-desc]").forEach((th) => {
 
     // ---- LOS DIBUJOS DE CADA DADO (su silueta, en SVG) ----
     const SILUETAS = {
+        2: '<circle cx="12" cy="12" r="9.5"/><circle cx="12" cy="12" r="5.5"/>',
         4: '<polygon points="12,3 22,20 2,20"/><path d="M12 3 L12 20"/>',
         6: '<rect x="4" y="4" width="16" height="16" rx="2"/><circle cx="9" cy="9" r="1.2"/><circle cx="15" cy="15" r="1.2"/>',
         8: '<polygon points="12,2 21,12 12,22 3,12"/><path d="M3 12 H21"/>',
@@ -838,9 +930,8 @@ document.querySelectorAll(".oc-ataques th[data-oc-desc]").forEach((th) => {
         boton = crear("button", "oc-boton oc-boton-dados");
         boton.type = "button";
         boton.title = "Lanzador de dados";
-        const dibujo = crear("span", "oc-boton-dados-emoji", "🎲");
-        dibujo.setAttribute("aria-hidden", "true");
-        boton.append(dibujo, crear("span", "visually-hidden", "dados"));
+        // El dibujo, el de un d20 (el de la bandeja).
+        boton.append(silueta(20), crear("span", "visually-hidden", "dados"));
         boton.setAttribute("aria-controls", "oc-dados");
         boton.setAttribute("aria-expanded", "false");
         boton.addEventListener("click", () => abrir(ventana.hidden, false));
@@ -1001,4 +1092,30 @@ document.querySelectorAll("[data-oc-casillas]").forEach((grupo) => {
             primero.focus();
         }
     });
+})();
+
+// =========================================
+// LA FICHA EN PDF
+// =========================================
+// Si no hay un PDF subido (generar-personajes.py pone el enlace en
+// [data-oc-botones-pdf]), un botón que la saca en PDF con el navegador:
+// abre imprimir, donde se elige «Guardar como PDF». En papel sale todo,
+// una parte detrás de otra (ver el @media print de personajes.css).
+
+(function () {
+    const sitio = document.querySelector("[data-oc-botones-pdf]");
+    if (!sitio || sitio.querySelector("a")) {
+        return;
+    }
+    const b = document.createElement("button");
+    b.type = "button";
+    b.className = "oc-boton oc-boton-pdf";
+    const icono = document.createElement("span");
+    icono.className = "oc-boton-icono";
+    icono.setAttribute("aria-hidden", "true");
+    icono.textContent = "📄";
+    b.append(icono, document.createTextNode(" ficha en pdf"));
+    b.title = "Abre imprimir: elige «Guardar como PDF»";
+    b.addEventListener("click", () => window.print());
+    sitio.appendChild(b);
 })();
