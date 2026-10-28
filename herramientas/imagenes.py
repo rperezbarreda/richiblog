@@ -174,6 +174,13 @@ SITIOS = {
         "lado": 600,
         "cuadrada": False,
     },
+    "oc-criatura": {
+        "que": "una criatura de uno de mis personajes (familiar, invocación, mascota)",
+        "carpeta": "imagenes/personajes/{personaje}/criaturas",
+        "sufijo": "",
+        "lado": 900,
+        "cuadrada": False,
+    },
     "oc-npc": {
         "que": "alguien de la gente de uno de mis personajes",
         "carpeta": "imagenes/personajes/{personaje}/gente",

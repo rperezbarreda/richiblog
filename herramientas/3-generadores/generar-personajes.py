@@ -113,7 +113,8 @@ STATS = (("fue", "FUE", "Fuerza"), ("des", "DES", "Destreza"), ("con", "CON", "C
 # Las partes de la página de cada uno, en el MENÚ de la izquierda del
 # recuadro (y con su emoji). «ficha» lleva dentro, como un submenú, las de
 # SUBPESTANAS_DE_FICHA.
-PESTANAS = (("historia", "📖", "historia"), ("ficha", "📋", "ficha"), ("gente", "👥", "npcs"),
+PESTANAS = (("historia", "📖", "historia"), ("ficha", "📋", "ficha"), ("criaturas", "🐾", "criaturas"),
+            ("gente", "👥", "npcs"),
             ("imagenes", "🖼️", "imágenes"), ("extra", "📎", "extra"))
 
 # Las subpestañas de la pestaña «ficha» (lo de D&D), en su orden y con su
@@ -555,18 +556,19 @@ def bonificador_de_competencia(p):
     return 2 + (max(1, min(nivel, 20)) - 1) // 4 if nivel else None
 
 
-def recuadro(titulo, dentro, clase="", emoji=""):
+def recuadro(titulo, dentro, clase="", emoji="", nivel=4):
     """Una ventanita como las del resto del sitio: su barra de título con
     nombre de archivo («combate.dat») y los −■✕ (que la pliegan: lo hace
     scripts/componentes/ventanas-plegables.js), y lo de dentro."""
     # Un <div> y no un <section>: base.css le da a TODA <section> alto,
     # scroll y relleno de página entera.
     return ('<div class="oc-hoja-caja%s"><div class="recent-entries-header">'
-            '<h4 class="oc-hoja-titulo">%s%s</h4>'
+            '<h%d class="oc-hoja-titulo">%s%s</h%d>'
             '<div class="window-controls window-controls-small" data-window-controls aria-hidden="true"></div>'
             '</div><div class="oc-hoja-dentro">%s</div></div>'
-            % ((" " + clase) if clase else "",
-               ('<span class="oc-hoja-emoji" aria-hidden="true">%s</span>' % emoji) if emoji else "", e(titulo), dentro))
+            % ((" " + clase) if clase else "", nivel,
+               ('<span class="oc-hoja-emoji" aria-hidden="true">%s</span>' % emoji) if emoji else "", e(titulo), nivel,
+               dentro))
 
 
 def lista_simple(cosas, clase="oc-lista-maquina"):
@@ -1010,9 +1012,14 @@ def partes_de_ataque(a):
         principal = m.group(2).strip()
     dano = ""
     trozos = list(DADOS_EN_TEXTO.finditer(principal))
+    fijo = re.match(r"^(\d+)\s+(\w+)", principal)
     if trozos:
         formula = "+".join(formula_de(m.group(1), m.group(2), m.group(3), tipo_de(m)) for m in trozos)
         dano = dado(e(principal), formula, nombre.lower() + ": daño")
+    elif fijo:
+        # Un daño fijo («1 perforante», como el mordisco de un murciélago).
+        tipo = TIPOS_DE_DANO.get(llano(fijo.group(2)), "")
+        dano = dado(e(principal), fijo.group(1) + ("[%s]" % tipo if tipo else ""), nombre.lower() + ": daño")
     elif principal:
         extra = (principal + ("; " + extra if extra else "")).strip()
     return nombre, mod, dano, extra
@@ -1448,6 +1455,125 @@ def fila_de_tirada(nombre, total, nivel, corto="", que=None):
                (' <span class="oc-tirada-de">(%s)</span>' % corto) if corto else "", dicho))
 
 
+# =========================================
+# LAS CRIATURAS (familiares, invocaciones, mascotas…)
+# =========================================
+# Cada una con su ficha de monstruo, como las del Manual de monstruos: su
+# imagen, qué es, la CA, los PG, la velocidad y la iniciativa en cajitas,
+# las seis características (el modificador en grande, que se tira), las
+# habilidades, los sentidos, los idiomas y el desafío, sus rasgos, sus
+# acciones (en la tabla de los ataques, con sus tiradas) y lo que haya
+# que saber. Están en «criaturas» de personajes.json (agrupadas por
+# personaje, como la gente), y en el editor, en «Sus criaturas».
+
+def apartado_criaturas(criaturas, c, personajes, avisos):
+    fichas = []
+    for k in criaturas:
+        nombre = str(k.get("nombre") or "").strip()
+        if not nombre:
+            continue
+        mods = {s: (modificador_num(numero(k.get(s))) if numero(k.get(s)) is not None else None) for s, _, _ in STATS}
+        comp = numero(k.get("competencia"))
+        # La imagen (se ve en grande al pulsarla) o, si no tiene, su
+        # inicial.
+        imagen = ruta_que_existe(k.get("imagen")) or ruta_que_existe(k.get("token"))
+        alt = str(k.get("imagen_alt") or "").strip() or nombre
+        if imagen:
+            foto = ('<button class="lightbox-trigger oc-criatura-foto" type="button" aria-label="Ver en grande: %s">'
+                    '<img src="%s" alt="%s" loading="lazy" decoding="async"></button>' % (e(alt), e(imagen), e(alt)))
+        else:
+            foto = '<span class="oc-criatura-foto es-sin-foto" aria-hidden="true">%s</span>' % e(inicial(nombre))
+        que, tipo = str(k.get("que") or "").strip(), str(k.get("tipo") or "").strip()
+        cabeza = ('<div class="oc-criatura-cabeza">%s<div class="oc-criatura-quien"><h4 class="oc-criatura-nombre">%s'
+                  '</h4>%s%s</div></div>' % (foto, e(nombre), ('<p class="oc-criatura-que">%s</p>' % e(que)) if que else "",
+                                             ('<p class="oc-criatura-tipo">%s</p>' % e(tipo)) if tipo else ""))
+        # CA, PG, velocidad e iniciativa. Los PG, «1 (1d4 − 1)»: el número
+        # en grande y los dados en la barra (que se tiran); la velocidad,
+        # «1,5 m, volar 9 m»: la primera en grande y lo demás en la barra.
+        datos = []
+        ca = str(k.get("ca") or "").strip()
+        if ca:
+            datos.append(("clase de armadura", ca, "CA"))
+        pg = str(k.get("pg") or "").strip()
+        if pg:
+            m = re.match(r"^(\d+)\s*\(([^)]*)\)\s*$", pg)
+            if m:
+                formula = re.sub(r"\s+", "", m.group(2)).replace("−", "-")
+                datos.append(("puntos de golpe", m.group(1), m.group(2), "dados de golpe",
+                              (formula, nombre.lower() + ": puntos de golpe", "barra")))
+            else:
+                datos.append(("puntos de golpe", pg, "PG"))
+        velocidad = str(k.get("velocidad") or "").strip()
+        if velocidad:
+            # Partida por la coma que va detrás de un espacio y antes de una
+            # palabra (no la de los decimales: «1,5 m»).
+            trozos = re.split(r",\s+(?=[^\d\s])", velocidad, maxsplit=1)
+            primera, resto = trozos[0], (trozos[1] if len(trozos) > 1 else "")
+            datos.append(("velocidad", primera.strip(), resto.strip() or "a pie", ""))
+        if mods["des"] is not None:
+            datos.append(("iniciativa", con_signo(mods["des"]), "DES", None,
+                          ("1d20%+d" % mods["des"] if mods["des"] else "1d20", nombre.lower() + ": iniciativa", "valor")))
+        partes = [cabeza]
+        if datos:
+            partes.append(numeros(datos))
+        # Las seis: el modificador en grande (se tira) y la puntuación.
+        if any(v is not None for v in mods.values()):
+            partes.append('<dl class="oc-criatura-stats">%s</dl>' % "".join(
+                '<div class="oc-criatura-stat"><dt><abbr title="%s">%s</abbr></dt><dd><span class="oc-stat-mod">'
+                '<span class="visually-hidden">modificador </span>%s</span><span class="oc-stat-valor">'
+                '<span class="visually-hidden">, puntuación </span>%s</span></dd></div>'
+                % (largo, corto, dado(con_signo(mods[s]), "1d20%+d" % mods[s] if mods[s] else "1d20",
+                                      nombre.lower() + ": " + largo.lower()), numero(k.get(s)))
+                for s, corto, largo in STATS if mods[s] is not None))
+        # Habilidades («Percepción +3, Sigilo +4»: cada bono se tira),
+        # sentidos (con la percepción pasiva), idiomas y desafío.
+        pares_html = []
+        for clave, texto in (("salvaciones", "Salvaciones"), ("habilidades", "Habilidades")):
+            valor = str(k.get(clave) or "").strip()
+            if valor:
+                trozos = []
+                for x in re.split(r"\s*[,;]\s*", valor):
+                    m = re.match(r"^(.*?)\s*([+−-]\s*\d+)$", x.strip())
+                    if m:
+                        bono = int(m.group(2).replace("−", "-").replace(" ", ""))
+                        trozos.append("%s %s" % (e(m.group(1)), prueba(bono, nombre.lower() + ": " + m.group(1).lower())))
+                    elif x.strip():
+                        trozos.append(e(x.strip()))
+                pares_html.append((texto, ", ".join(trozos)))
+        sentidos = str(k.get("sentidos") or "").strip()
+        if mods["sab"] is not None:
+            percepcion = 10 + mods["sab"]
+            m = re.search(r"percepci[oó]n\s*([+−-]\s*\d+)", llano(k.get("habilidades")) and str(k.get("habilidades")), re.I)
+            if m:
+                percepcion = 10 + int(m.group(1).replace("−", "-").replace(" ", ""))
+            sentidos = (sentidos + " · " if sentidos else "") + "Percepción pasiva %d" % percepcion
+        for clave, texto, valor in (("sentidos", "Sentidos", sentidos), ("idiomas", "Idiomas", k.get("idiomas")),
+                                    ("desafio", "Desafío", k.get("desafio"))):
+            valor = str(valor or "").strip()
+            if valor:
+                pares_html.append((texto, e(valor)))
+        if comp is not None:
+            pares_html.append(("Competencia", con_signo(comp)))
+        if pares_html:
+            partes.append('<dl class="oc-datos oc-criatura-datos">%s</dl>' % "".join(
+                '<div class="oc-dato"><dt>%s</dt><dd>%s</dd></div>' % (a, b) for a, b in pares_html))
+        rasgos = markdown(k.get("rasgos"), c, personajes, avisos)
+        if rasgos:
+            partes.append('<h5 class="oc-hoja-subtitulo">rasgos</h5><div class="oc-texto">%s</div>'
+                          % con_dados(rasgos, nombre.lower()))
+        acciones = lineas_de(k.get("acciones"))
+        if acciones:
+            partes.append('<h5 class="oc-hoja-subtitulo">acciones</h5>'
+                          + tabla_de_ataques(acciones, {}, c, personajes, avisos))
+        notas = markdown(k.get("notas"), c, personajes, avisos)
+        if notas:
+            partes.append('<h5 class="oc-hoja-subtitulo">lo que hay que saber</h5><div class="oc-texto">%s</div>'
+                          % con_dados(notas, nombre.lower()))
+        titulo = (nombre_archivo(nombre, "criatura") or "criatura") + ".mon"
+        fichas.append(recuadro(titulo, '<div class="oc-criatura">%s</div>' % "".join(partes), "es-ancha", "🐾", nivel=3))
+    return '<div class="oc-hoja">%s</div>' % "".join(fichas) if fichas else ""
+
+
 def pestanas(p, c, datos, personajes, avisos):
     """El recuadro: a la izquierda el MENÚ (historia, ficha —con sus
     partes debajo, como un submenú: combate, habilidades…—, npcs, imágenes
@@ -1459,6 +1585,7 @@ def pestanas(p, c, datos, personajes, avisos):
     contenido = {
         "historia": markdown(p.get("historia"), c, personajes, avisos),
         "gente": apartado_gente(grupos_de(datos, "gente", c), c, personajes, avisos),
+        "criaturas": apartado_criaturas(grupos_de(datos, "criaturas", c), c, personajes, avisos),
         "imagenes": apartado_imagenes(grupos_de(datos, "imagenes", c), nombre),
         "extra": markdown(p.get("extra"), c, personajes, avisos),
     }
@@ -1466,6 +1593,7 @@ def pestanas(p, c, datos, personajes, avisos):
         "historia": "Todavía no he escrito su historia.",
         "ficha": "Todavía no tiene la ficha apuntada.",
         "gente": "Todavía no hay nadie apuntado.",
+        "criaturas": "",
         "imagenes": "Todavía no hay imágenes.",
         "extra": "Nada más, de momento.",
     }
@@ -1473,6 +1601,9 @@ def pestanas(p, c, datos, personajes, avisos):
             '                        <ul class="oc-menu-lista">']
     cajas = ['                    <div class="oc-partes" data-oc-partes>']
     for ident, emoji, texto in PESTANAS:
+        # Las criaturas solo salen si tiene alguna.
+        if ident == "criaturas" and not contenido["criaturas"]:
+            continue
         cabeza = ('<span class="oc-menu-emoji" aria-hidden="true">%s</span><span class="oc-menu-texto">%s</span>'
                   % (emoji, texto))
         if ident == "ficha" and partes_ficha:

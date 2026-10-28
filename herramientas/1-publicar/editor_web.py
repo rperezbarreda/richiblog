@@ -1553,6 +1553,35 @@ def colecciones():
                   C("token", "Foto (el redondel)", "imagen", sitio="oc-npc", vacio="quitar"),
                   C("notas", "Lo que hay que saber", "largo", vacio="quitar", markdown=True),
               ]},
+             {"id": "criaturas", "camino": ["criaturas"],
+              "titulo": "Sus criaturas (familiares, invocaciones, mascotas: la pestaña criaturas)",
+              "agrupada": {"clave": "personaje", "nombre": "personaje", "dentro": "cosas", "libre": True},
+              "nombre_de": "nombre", "detalle": ["que"], "campos": [
+                  C("_grupo", "De quién", "elegir", obligatorio=True,
+                    ayuda="El personaje en cuya ficha sale (tiene que estar guardado ya)."),
+                  C("nombre", "Nombre", obligatorio=True),
+                  C("que", "Qué es", vacio="quitar", ayuda="«Familiar · polilla feérica», «Compañero animal»…"),
+                  C("tipo", "Tamaño, tipo y alineamiento", vacio="quitar", ayuda="«Feérica diminuta, sin alineamiento»."),
+                  C("imagen", "Imagen", "imagen", sitio="oc-criatura", vacio="quitar"),
+                  C("imagen_alt", "Qué se ve en la imagen", vacio="quitar"),
+                  C("ca", "Clase de armadura (CA)", vacio="quitar"),
+                  C("pg", "Puntos de golpe", vacio="quitar", ayuda="«1 (1d4 − 1)»."),
+                  C("velocidad", "Velocidad", vacio="quitar", ayuda="«1,5 m, volar 9 m»."),
+              ] + [C(k, n, "numero", minimo=1, maximo=30, vacio="quitar")
+                   for k, n in (("fue", "Fuerza"), ("des", "Destreza"), ("con", "Constitución"),
+                                ("int", "Inteligencia"), ("sab", "Sabiduría"), ("car", "Carisma"))] + [
+                  C("salvaciones", "Salvaciones", vacio="quitar", ayuda="«Destreza +4, Sabiduría +3» (cada bono se tira)."),
+                  C("habilidades", "Habilidades", vacio="quitar", ayuda="«Percepción +3, Sigilo +4» (cada bono se tira)."),
+                  C("sentidos", "Sentidos", vacio="quitar", ayuda="«Vista ciega 18 m». La percepción pasiva se calcula."),
+                  C("idiomas", "Idiomas", vacio="quitar"),
+                  C("desafio", "Desafío", vacio="quitar", ayuda="«0 (10 PX)»."),
+                  C("competencia", "Bonificador de competencia", "numero", minimo=1, maximo=10, vacio="quitar"),
+                  C("rasgos", "Rasgos", "largo", vacio="quitar", markdown=True,
+                    ayuda="Con formato: **Nombre.** Lo que hace. Los dados del texto se tiran al pulsarlos."),
+                  C("acciones", "Acciones", "lineas", vacio="quitar",
+                    ayuda="Como los ataques, una por línea: «Mordisco: +4, 1 perforante; alcance 1,5 m»."),
+                  C("notas", "Lo que hay que saber", "largo", vacio="quitar", markdown=True),
+              ]},
              {"id": "imagenes", "camino": ["imagenes"], "titulo": "Sus imágenes (la pestaña imágenes)",
               "agrupada": {"clave": "personaje", "nombre": "personaje", "dentro": "cosas", "libre": True},
               "nombre_de": "alt", "detalle": ["pie"], "campos": [
@@ -2120,7 +2149,7 @@ def _clave_oc(p):
 
 def _arreglar_personajes(datos):
     """Cada personaje con su clave (si no la tiene, la de su nombre) y sin
-    repetir; y lo de las pestañas npcs e imágenes, de uno que exista."""
+    repetir; y lo de las pestañas npcs, imágenes y criaturas, de uno que exista."""
     vistas = set()
     for p in datos.get("personajes") or []:
         if not isinstance(p, dict):
@@ -2134,11 +2163,10 @@ def _arreglar_personajes(datos):
         p["clave"] = clave
         if not re.fullmatch(r"[a-z0-9-]+", clave):
             raise ValueError("la dirección «%s» solo puede llevar letras sin tilde, números y guiones" % clave)
-    for lista in ("gente", "imagenes"):
+    for lista, que in (("gente", "gente"), ("imagenes", "imágenes"), ("criaturas", "criaturas")):
         for grupo in datos.get(lista) or []:
             if isinstance(grupo, dict) and grupo.get("personaje") not in vistas:
-                raise ValueError("hay %s de «%s», que no es ninguno de los personajes"
-                                 % ("gente" if lista == "gente" else "imágenes", grupo.get("personaje")))
+                raise ValueError("hay %s de «%s», que no es ninguno de los personajes" % (que, grupo.get("personaje")))
 
 
 def _generador(nombre):

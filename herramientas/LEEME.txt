@@ -3915,6 +3915,25 @@
   no las vuelve a bajar; también se pueden poner a mano con ese nombre).
   Los RASGOS, en tres ventanitas: raza.txt, clase.txt y dotes.txt
   (según su «(de dónde viene)»; los que no lo dicen, en rasgos.txt).
+  LAS CRIATURAS (🐾 criaturas, en el menú, debajo de ficha; solo sale si
+  tiene alguna): familiares, invocaciones, mascotas… cada una con su
+  ficha de monstruo en una ventanita (<nombre>.mon): su imagen (se ve en
+  grande al pulsarla), qué es y su tamaño, tipo y alineamiento; la CA,
+  los PG (el número en grande y los dados en la barra, que se tiran:
+  «1 (1d4 − 1)»), la velocidad (la primera en grande y lo demás en la
+  barra: «1,5 m, volar 9 m») y la iniciativa (se tira); las seis
+  características en fila, con el modificador en grande (se tira); las
+  salvaciones y habilidades («Percepción +3»: cada bono se tira), los
+  sentidos (con la percepción pasiva calculada), los idiomas, el desafío
+  y la competencia; y sus rasgos, sus acciones (en la tabla de ataques,
+  con sus tiradas; un daño fijo, «1 perforante», también) y lo que hay
+  que saber. Están en «criaturas» de personajes.json, agrupadas por
+  personaje como la gente; en el editor, «Sus criaturas», con su imagen
+  (sitio «oc-criatura»: imagenes/personajes/<clave>/criaturas/)
+  (generar-personajes.py: apartado_criaturas). La primera: Mita, el
+  familiar de Faëlar (polilla feérica con las estadísticas de un
+  murciélago, las del Manual de monstruos de 2024; la imagen, la de la
+  campaña de Ragna).
   LOS COMBOS (⚡ combos, en la ficha): los escritos en el campo «Combos»
   del editor, un bloque por combo: «## Fuego y escudo» y debajo, uno por
   línea, lo que hace con lo que gasta delante («Acción: Bola de fuego»,

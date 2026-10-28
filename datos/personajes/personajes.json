@@ -111,5 +111,37 @@
         }
     ],
     "gente": [],
-    "imagenes": []
+    "imagenes": [],
+    "criaturas": [
+        {
+            "personaje": "faelar",
+            "cosas": [
+                {
+                    "nombre": "Mita",
+                    "que": "Familiar · polilla feérica (con las estadísticas de un murciélago)",
+                    "tipo": "Feérica diminuta, sin alineamiento",
+                    "imagen": "/imagenes/personajes/faelar/criaturas/mita.webp",
+                    "imagen_alt": "Mita, una polilla blanca y peluda de alas grandes",
+                    "ca": "12",
+                    "pg": "1 (1d4 − 1)",
+                    "velocidad": "1,5 m, volar 9 m",
+                    "fue": 2,
+                    "des": 15,
+                    "con": 8,
+                    "int": 2,
+                    "sab": 12,
+                    "car": 4,
+                    "sentidos": "Vista ciega 18 m",
+                    "idiomas": "—",
+                    "desafio": "0 (10 PX)",
+                    "competencia": 2,
+                    "rasgos": "**Familiar.** Es un espíritu feérico que ha tomado forma de polilla, ligado a Faëlar por el conjuro *Encontrar familiar*. Le obedece y es su aliada.\n\n**Conexión telepática.** Mientras estén a 30 m o menos, se comunican telepáticamente. Con una acción adicional, Faëlar puede ver lo que ve Mita y oír lo que oye hasta el inicio de su siguiente turno.\n\n**Entregar conjuros.** Cuando Faëlar lanza un conjuro de alcance «toque», Mita puede entregarlo con su reacción si está a 30 m o menos de él.\n\n**En combate.** Tira su propia iniciativa y actúa en su turno. No puede atacar, pero sí hacer otras acciones.\n\n**Si cae.** Si se queda a 0 puntos de golpe, desaparece; vuelve cuando Faëlar lanza otra vez el conjuro. Faëlar también puede despedirla un rato a una dimensión de bolsillo y volver a llamarla.",
+                    "acciones": [
+                        "Mordisco: +4, 1 perforante; alcance 1,5 m (como familiar, no puede atacar)"
+                    ],
+                    "notas": "- Familiar de Faëlar.\n- Nombre original: Palomita.\n- La conocimos en el Bosque de Hadas (campaña de Ragna)."
+                }
+            ]
+        }
+    ]
 }

@@ -2129,7 +2129,116 @@ li > .oc-origen {
     font-family: initial;
 }
 @media (max-width: 520px) {
+    .oc-criatura-stats {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
     .oc-combo-paso {
         grid-template-columns: minmax(0, 1fr);
     }
+}
+.oc-criatura {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+.oc-criatura-cabeza {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 16px;
+}
+.oc-criatura-foto {
+    flex: none;
+    width: 9rem;
+    aspect-ratio: 1 / 1;
+    padding: 0;
+    border: 3px solid var(--yellow);
+    background: var(--purple);
+    overflow: hidden;
+}
+.oc-criatura-foto img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+button.oc-criatura-foto {
+    cursor: zoom-in;
+}
+button.oc-criatura-foto:hover {
+    box-shadow: 4px 4px 0 var(--yellow);
+}
+button.oc-criatura-foto:focus-visible {
+    outline: 2px solid var(--yellow);
+    outline-offset: 3px;
+}
+.oc-criatura-foto.es-sin-foto {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--yellow);
+    font-size: 3.5rem;
+}
+.oc-criatura-quien {
+    flex: 1 1 14rem;
+    min-width: 0;
+}
+.oc-criatura-nombre {
+    margin: 0;
+    color: var(--white);
+    font-size: clamp(1.75rem, 3vw, 2.25rem);
+    line-height: 1.1;
+}
+.oc-criatura-que {
+    margin: 4px 0 0;
+    color: var(--yellow);
+    font-family: var(--fuente-mono);
+    font-size: 0.875rem;
+}
+.oc-criatura-tipo {
+    margin: 2px 0 0;
+    color: var(--muted);
+    font-family: var(--fuente-mono);
+    font-size: 0.8125rem;
+    font-style: italic;
+}
+.oc-criatura-stats {
+    display: grid;
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+    gap: 8px;
+    margin: 0;
+}
+.oc-criatura-stat {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 6px 4px 8px;
+    border: 2px solid var(--yellow);
+    background: var(--purple);
+    text-align: center;
+}
+.oc-criatura-stat dt {
+    color: var(--yellow);
+    font-family: var(--fuente-mono);
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 1px;
+}
+.oc-criatura-stat abbr {
+    text-decoration: none;
+}
+.oc-criatura-stat dd {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin: 0;
+    color: var(--white);
+}
+.oc-criatura-datos {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 14rem), 1fr));
+    gap: 6px 20px;
+}
+.oc-criatura .oc-hoja-subtitulo {
+    margin-bottom: 0;
 }
