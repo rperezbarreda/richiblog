@@ -316,16 +316,15 @@
    A la IZQUIERDA, la ficha: el post-it amarillo con el nombre y los PG y
    la CA arriba, la foto, la raza y la clase y las características, y
    debajo los botones (su ficha en D&D Beyond, el PDF y los dados). A la
-   DERECHA, arriba las pestañas y el «volver», y debajo su recuadro.
-   Es el orden del HTML, que es también el de lectura (el nombre, lo
-   primero).
+   DERECHA, el recuadro, con su MENÚ a la izquierda (historia, ficha —con
+   sus partes debajo, como un submenú—, npcs, imágenes y extra, y el
+   «volver») y lo elegido a la derecha. Es el orden del HTML, que es
+   también el de lectura (el nombre, lo primero).
    En pantallas de escritorio de verdad (desde 1180px de ancho y 600 de
-   alto) la página NO SE DESPLAZA entera: la ficha se queda quieta y el
-   recuadro ocupa el alto que queda y se desplaza por dentro (en la
-   pestaña «ficha», las subpestañas, en una sola línea, se quedan quietas
-   y se desplaza lo de debajo). Entre 861 y 1180, las dos columnas pero
-   se desplaza la página. En el MÓVIL (ver el responsive), una cosa debajo
-   de otra. */
+   alto) la página NO SE DESPLAZA entera: la ficha y el menú se quedan
+   quietos y lo elegido se desplaza por dentro. Entre 861 y 1180, las dos
+   columnas pero se desplaza la página. En el MÓVIL (ver el responsive),
+   una cosa debajo de otra, y el menú encima de lo elegido. */
 
 .oc-principal {
     min-width: 0;
@@ -338,33 +337,13 @@
     min-width: 0;
 }
 
-/* Arriba de las pestañas: ellas a la izquierda y el «volver», a la
-   derecha. */
-.oc-arriba {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: flex-start;
-    justify-content: space-between;
-    gap: 10px 16px;
-    margin-bottom: 12px;
-}
-
-.oc-arriba .oc-pestanas,
-.oc-arriba .oc-pestanas-lista {
-    margin-bottom: 0;
-}
-
-.oc-arriba .oc-volver {
-    margin-left: auto;
-    padding: 6px 12px;
-}
-
 @media (min-width: 861px) {
     .oc-ficha-page {
         display: grid;
-        grid-template-columns: clamp(12rem, 22vw, 20rem) minmax(0, 1fr);
+        /* La ficha, estrecha: lo que se lee es lo de la derecha. */
+        grid-template-columns: clamp(11.5rem, 18vw, 16.5rem) minmax(0, 1fr);
         align-items: start;
-        gap: 0 28px;
+        gap: 0 26px;
     }
 
     .oc-ficha-page .oc-lateral {
@@ -377,23 +356,22 @@
         grid-row: 1;
     }
 
-    /* El «volver» de abajo es para el móvil: aquí está arriba. */
+    /* El «volver» de abajo es para el móvil: aquí está en el menú. */
     .oc-ficha-page .oc-volver-abajo {
         display: none;
     }
 
-    .oc-ficha-page .oc-pestanas,
-    .oc-ficha-page .oc-pestanas-lista {
-        gap: 6px;
-    }
-
-    .oc-ficha-page .oc-pestana {
-        padding: 5px 12px;
-        font-size: 0.875rem;
-    }
-
-    .oc-ficha-page .oc-panel {
+    /* El recuadro, con el menú en una columna a la izquierda. */
+    .oc-panel.con-menu {
+        display: grid;
+        grid-template-columns: minmax(8.5rem, 11rem) minmax(0, 1fr);
+        gap: 0 18px;
         padding: 14px 16px;
+    }
+
+    .oc-panel.con-menu .oc-menu {
+        padding: 0 10px 0 0;
+        border-right: 2px solid var(--yellow);
     }
 }
 
@@ -416,20 +394,17 @@
         overflow-y: auto;
     }
 
-    /* La foto, como mucho un tercio largo del alto de la pantalla
-       (recortada, sin deformar): así cabe todo lo de debajo sin
-       desplazar nada. */
+    /* La foto, alta (la ficha es estrecha): como mucho un tercio largo
+       del alto de la pantalla, recortada, sin deformar. */
     .oc-ficha-page .oc-retrato img,
     .oc-ficha-page .oc-retrato.es-sin-foto {
-        max-height: 23vh;
+        max-height: 29vh;
     }
-
-
 
     /* Y todo el post-it un poco más apretado, para que quepan los
        botones de debajo sin desplazar. */
     .oc-ficha-page .oc-postit {
-        padding: 12px 12px 14px;
+        padding: 10px 10px 12px;
     }
 
     .oc-ficha-page .oc-postit-cabeza {
@@ -446,7 +421,7 @@
     }
 
     .oc-ficha-page .oc-stats {
-        gap: 6px;
+        gap: 5px;
     }
 
     .oc-ficha-page .oc-stat {
@@ -458,152 +433,37 @@
         line-height: 1.1;
     }
 
+    /* El recuadro llena el alto. Sin JavaScript (las partes una debajo
+       de otra) se desplaza él entero; con el menú, el menú se queda
+       quieto y lo que se desplaza es lo elegido. */
     .oc-ficha-page .oc-principal {
         display: flex;
         flex-direction: column;
         min-height: 0;
     }
 
-    /* El recuadro llena el alto que queda. Sin JavaScript (los apartados
-       uno debajo de otro) se desplaza él entero. */
     .oc-ficha-page .oc-panel {
         flex: 1 1 auto;
         min-height: 0;
         overflow-y: auto;
     }
 
-    /* Con pestañas, el que se desplaza es el apartado elegido (que es el
-       que se puede enfocar con el teclado), y el recuadro se queda quieto. */
-    .oc-ficha-page .oc-panel.con-pestanas {
-        display: flex;
-        flex-direction: column;
+    .oc-ficha-page .oc-panel.con-menu {
+        grid-template-rows: minmax(0, 1fr);
         overflow: hidden;
     }
 
-    .oc-ficha-page .oc-panel.con-pestanas > .oc-apartado {
-        flex: 1 1 auto;
+    .oc-ficha-page .oc-panel.con-menu .oc-menu {
+        min-height: 0;
+        overflow-y: auto;
+    }
+
+    .oc-ficha-page .oc-panel.con-menu .oc-partes {
         min-height: 0;
         overflow-y: auto;
         /* Hueco para la sombra de las ventanitas y la barra. */
-        padding: 0 10px 10px 0;
-    }
-
-    /* La pestaña «ficha»: las subpestañas quietas arriba y, debajo, lo que
-       se desplaza (las ventanitas). */
-    .oc-ficha-page .oc-panel.con-pestanas > .oc-apartado.es-ficha {
-        display: flex;
-        flex-direction: column;
-        overflow: hidden;
-        padding: 0;
-    }
-
-    .oc-ficha-page .oc-panel.con-pestanas > .oc-apartado.es-ficha[hidden] {
-        display: none;
-    }
-
-    .oc-ficha-page .es-ficha > .oc-lista {
-        display: flex;
-        flex: 1 1 auto;
-        flex-direction: column;
-        min-height: 0;
-    }
-
-    /* LAS SUBPESTAÑAS DE LA FICHA, EN COLUMNA: una lista a la izquierda
-       del recuadro, como las carpetas de un explorador (la elegida,
-       rellena), y lo elegido a la derecha, desplazándose por dentro. */
-    .oc-ficha-page .oc-ficha-partes {
-        display: grid;
-        flex: 1 1 auto;
-        grid-template-columns: minmax(8rem, 10.5rem) minmax(0, 1fr);
-        grid-template-rows: minmax(0, 1fr);
-        gap: 0 18px;
-        min-height: 0;
-    }
-
-    .oc-ficha-page .oc-ficha-partes .oc-subpestanas,
-    .oc-ficha-page .oc-ficha-partes .oc-subpestanas-lista {
-        flex-direction: column;
-        flex-wrap: nowrap;
-        gap: 2px;
-        min-height: 0;
-        margin: 0;
-        padding: 0 10px 0 0;
-        border-bottom: 0;
-        border-right: 2px solid var(--yellow);
-        overflow-y: auto;
-    }
-
-    .oc-ficha-page .oc-ficha-partes .oc-subpestana {
-        display: flex;
-        align-items: center;
-        flex: none;
-        width: 100%;
-        padding: 7px 10px;
-        border: 0;
-        border-left: 4px solid transparent;
-        border-radius: 0;
-        font-size: 0.875rem;
-        text-align: left;
-    }
-
-    .oc-ficha-page .oc-ficha-partes .oc-subpestana[aria-selected="true"] {
-        border-left-color: var(--oc-color);
-    }
-
-    .oc-ficha-page .oc-ficha-partes .oc-subpestana:focus-visible {
-        outline-offset: -2px;
-    }
-
-    .oc-ficha-page .es-ficha .oc-hoja-grupos {
-        min-height: 0;
-        overflow-y: auto;
         padding: 0 12px 12px 0;
     }
-}
-
-/* ---- LAS PESTAÑAS ----
-   Sin JavaScript son enlaces (un <nav> que salta a cada apartado); con
-   él, botones con role="tab". Se ven igual de las dos maneras. */
-.oc-pestanas,
-.oc-pestanas-lista {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-    margin-bottom: 12px;
-}
-
-.oc-pestana {
-    display: inline-block;
-    padding: 8px 14px;
-    border: 3px solid var(--yellow);
-    background: var(--purple-lighter);
-    color: var(--yellow);
-    font-family: var(--fuente-mono);
-    font-size: 0.9375rem;
-    font-weight: 700;
-    letter-spacing: 1px;
-    text-align: left;
-    text-decoration: none;
-    cursor: pointer;
-}
-
-.oc-pestana:hover {
-    background: var(--purple);
-    text-decoration: underline;
-}
-
-/* La elegida: rellena, y con una raya del color del personaje debajo
-   (el garabato del dibujo). */
-.oc-pestana[aria-selected="true"] {
-    background: var(--yellow);
-    color: var(--yellow-contrast);
-    box-shadow: 0 5px 0 var(--oc-color);
-    text-decoration: none;
-}
-
-.oc-pestana:focus-visible {
-    outline: 2px solid var(--yellow);
-    outline-offset: 3px;
 }
 
 /* ---- EL RECUADRO ---- */
@@ -616,23 +476,142 @@
     color: var(--white);
 }
 
-.oc-apartado:focus-visible {
-    outline: 2px solid var(--yellow);
-    outline-offset: 6px;
+/* ---- EL MENÚ del recuadro: como las carpetas de un explorador o el
+   menú del sitio. Una parte por línea, con su emoji; la elegida,
+   rellena y con la raya del color del personaje a la izquierda. «ficha»
+   abre y cierra su submenú (+ y −), con sus partes un poco metidas. Sin
+   JavaScript son enlaces que saltan a cada parte. ---- */
+.oc-menu {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    margin: 0 0 16px;
 }
 
-.oc-apartado[hidden] {
+.oc-panel.con-menu .oc-menu {
+    margin: 0;
+}
+
+.oc-menu-lista,
+.oc-menu-sub {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.oc-menu-sub {
+    margin: 2px 0 4px 14px;
+    padding-left: 6px;
+    border-left: 1px dashed var(--border);
+}
+
+.oc-menu-sub[hidden] {
     display: none;
 }
 
-/* Sin pestañas (sin JavaScript), los cuatro uno debajo de otro. */
+.oc-menu-enlace {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+    padding: 6px 10px;
+    border: 0;
+    border-left: 4px solid transparent;
+    background: transparent;
+    color: var(--yellow);
+    font-family: var(--fuente-mono);
+    font-size: 0.875rem;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    text-align: left;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.oc-menu-enlace.es-sub {
+    padding-top: 4px;
+    padding-bottom: 4px;
+    font-size: 0.8125rem;
+}
+
+.oc-menu-enlace:hover {
+    background: var(--purple);
+    text-decoration: underline;
+}
+
+.oc-menu-enlace[aria-current="true"] {
+    border-left-color: var(--oc-color);
+    background: var(--yellow);
+    color: var(--yellow-contrast);
+    text-decoration: none;
+}
+
+/* «ficha», cuando lo que se ve es una de sus partes: subrayada. */
+.oc-menu-abrir.es-la-de-ahora .oc-menu-texto {
+    text-decoration: underline;
+    text-decoration-thickness: 2px;
+    text-underline-offset: 3px;
+}
+
+.oc-menu-enlace:focus-visible {
+    outline: 2px solid var(--yellow);
+    outline-offset: -2px;
+}
+
+.oc-menu-emoji {
+    flex: none;
+    font-family: initial;
+}
+
+.oc-menu-texto {
+    flex: 1 1 auto;
+    min-width: 0;
+}
+
+.oc-menu-flecha {
+    flex: none;
+    font-size: 1rem;
+}
+
+.oc-menu-volver {
+    align-self: flex-start;
+    padding: 5px 10px;
+    font-size: 0.75rem;
+}
+
+/* ---- LAS PARTES ---- */
+.oc-apartado:focus,
+.oc-hoja-grupo:focus {
+    outline: none;
+}
+
+.oc-apartado:focus-visible,
+.oc-hoja-grupo:focus-visible {
+    outline: 2px solid var(--yellow);
+    outline-offset: 4px;
+}
+
+.oc-apartado[hidden],
+.oc-hoja-grupo[hidden] {
+    display: none;
+}
+
+/* Sin el menú (sin JavaScript), una debajo de otra, con su título. */
 .oc-apartado + .oc-apartado {
     margin-top: 26px;
     padding-top: 20px;
     border-top: 2px dashed var(--border);
 }
 
-.oc-apartado-titulo {
+.oc-hoja-grupo + .oc-hoja-grupo {
+    margin-top: 22px;
+}
+
+.oc-apartado-titulo,
+.oc-hoja-grupo-titulo {
     margin: 0 0 12px;
     color: var(--yellow);
     font-family: var(--fuente-mono);
@@ -641,8 +620,9 @@
     text-transform: uppercase;
 }
 
-/* Con pestañas, el título ya es la pestaña: solo para el lector. */
-.oc-panel.con-pestanas .oc-apartado-titulo {
+/* Con el menú, el título ya es el del menú: solo para el lector. */
+.oc-panel.con-menu .oc-apartado-titulo,
+.oc-panel.con-menu .oc-hoja-grupo-titulo {
     position: absolute;
     width: 1px;
     height: 1px;
@@ -652,7 +632,8 @@
     white-space: nowrap;
 }
 
-.oc-panel.con-pestanas .oc-apartado + .oc-apartado {
+.oc-panel.con-menu .oc-apartado + .oc-apartado,
+.oc-panel.con-menu .oc-hoja-grupo + .oc-hoja-grupo {
     margin-top: 0;
     padding-top: 0;
     border-top: 0;
@@ -718,89 +699,6 @@
     border-bottom: 1px dashed var(--muted);
 }
 
-/* ---- LAS SUBPESTAÑAS DE LA FICHA (estadísticas, equipamiento, magia,
-   rasgos): más bajitas que las de arriba, en letra de máquina y con una
-   raya debajo que las une al contenido. Sin JavaScript son enlaces y los
-   grupos salen todos, cada uno con su título. ---- */
-.oc-subpestanas,
-.oc-subpestanas-lista {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 6px;
-    margin: 0 0 16px;
-    padding-bottom: 10px;
-    border-bottom: 2px solid var(--yellow);
-}
-
-.oc-subpestana {
-    display: inline-block;
-    padding: 5px 12px;
-    border: 2px solid var(--yellow);
-    border-radius: 999px;
-    background: transparent;
-    color: var(--yellow);
-    font-family: var(--fuente-mono);
-    font-size: 0.8125rem;
-    font-weight: 700;
-    letter-spacing: 0.5px;
-    text-decoration: none;
-    cursor: pointer;
-}
-
-.oc-subpestana:hover {
-    background: var(--purple);
-    text-decoration: underline;
-}
-
-.oc-subpestana[aria-selected="true"] {
-    background: var(--yellow);
-    color: var(--yellow-contrast);
-    text-decoration: none;
-}
-
-.oc-subpestana:focus-visible {
-    outline: 2px solid var(--yellow);
-    outline-offset: 3px;
-}
-
-.oc-hoja-grupo[hidden] {
-    display: none;
-}
-
-.oc-hoja-grupo:focus-visible {
-    outline: 2px solid var(--yellow);
-    outline-offset: 6px;
-}
-
-/* Sin subpestañas, un grupo debajo de otro con su título. */
-.oc-hoja-grupo + .oc-hoja-grupo {
-    margin-top: 22px;
-}
-
-.oc-hoja-grupo-titulo {
-    margin: 0 0 10px;
-    color: var(--yellow);
-    font-family: var(--fuente-mono);
-    font-size: 0.875rem;
-    letter-spacing: 1px;
-    text-transform: uppercase;
-}
-
-/* Con subpestañas el título ya es la subpestaña: solo para el lector. */
-.oc-hoja-grupos.con-pestanas .oc-hoja-grupo-titulo {
-    position: absolute;
-    width: 1px;
-    height: 1px;
-    margin: -1px;
-    overflow: hidden;
-    clip: rect(0 0 0 0);
-    white-space: nowrap;
-}
-
-.oc-hoja-grupos.con-pestanas .oc-hoja-grupo + .oc-hoja-grupo {
-    margin-top: 0;
-}
-
 /* ---- LA FICHA DE D&D (pestaña ficha) ----
    Hecha con las mismas piezas que la hoja de personaje de «quién soy»
    (estilos/paginas/sobre-mi.css): cada cosa en su VENTANITA con la rejilla
@@ -847,6 +745,34 @@
 
 .oc-hoja-caja.es-ancha {
     grid-column: 1 / -1;
+}
+
+/* En colores invertidos (las salvaciones): el amarillo de fondo y lo de
+   dentro en su contraste, los circulitos y los bonos también. */
+.oc-hoja-caja.es-invertida .oc-hoja-dentro {
+    margin: -14px -16px -16px;
+    padding: 14px 16px 16px;
+    background: var(--yellow);
+    color: var(--yellow-contrast);
+}
+
+.oc-hoja-caja.es-invertida .oc-hoja-tiradas,
+.oc-hoja-caja.es-invertida .oc-tirada-bono {
+    color: inherit;
+}
+
+.oc-hoja-caja.es-invertida .oc-marca {
+    border-color: var(--yellow-contrast);
+}
+
+.oc-hoja-caja.es-invertida .oc-marca.es-llena,
+.oc-hoja-caja.es-invertida .oc-marca.es-pericia {
+    background: var(--yellow-contrast);
+}
+
+.oc-hoja-caja.es-invertida .oc-dado:hover {
+    background: var(--yellow-contrast);
+    color: var(--yellow);
 }
 
 /* La barra de título: la de las ventanas del sitio (cabecera-ventana.css),
@@ -902,6 +828,12 @@
     margin: 0;
     padding: 0;
     list-style: none;
+}
+
+/* De dos en dos (estadisticas.dat y combate.dat, que van una al lado de
+   la otra). */
+.oc-cajitas.es-de-dos {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
 .oc-cajita {
@@ -980,21 +912,22 @@
     line-height: 1.5;
 }
 
-/* A dos columnas si caben (las dieciocho habilidades, los conjuros, el
-   inventario): en columnas de texto, que con flex no se reparten. */
-.oc-hoja-tiradas.es-dos-columnas,
-.oc-hoja-conjuros,
-.oc-hoja-objetos {
+/* A dos columnas si caben (las salvaciones y las dieciocho habilidades):
+   en columnas de texto, que con flex no se reparten. */
+.oc-hoja-tiradas.es-dos-columnas {
     display: block;
     column-width: 14rem;
     column-gap: 28px;
 }
 
-.oc-hoja-tiradas.es-dos-columnas > li,
-.oc-hoja-conjuros > li,
-.oc-hoja-objetos > li {
+.oc-hoja-tiradas.es-dos-columnas > li {
     margin-bottom: 8px;
     break-inside: avoid;
+}
+
+/* Los conjuros, uno por línea, a todo lo ancho. */
+.oc-hoja-conjuros {
+    gap: 10px;
 }
 
 /* Rejilla (circulito + texto) y no flex, como en «quién soy»: así el
@@ -1040,12 +973,6 @@
     font-size: 0.6875rem;
 }
 
-/* Los objetos, cada uno con su emoji delante, como en inventario.dat. */
-.oc-objeto-emoji {
-    margin-right: 8px;
-    font-family: initial;
-}
-
 .oc-hoja-cuantos {
     margin-left: 2px;
     padding: 0 5px;
@@ -1055,44 +982,217 @@
     white-space: nowrap;
 }
 
-/* LOS ATAQUES: el nombre y, en la misma fila o debajo, su bono y daño. */
-.oc-hoja-filas {
-    margin: 0;
-    padding: 0;
-    list-style: none;
+/* LOS ATAQUES, en tabla: el nombre, el modificador (en su caja con
+   borde), el daño (en su caja rellena, como un botón) y lo demás. Si no
+   cabe a lo ancho, la tabla se desplaza de lado dentro de su ventana. */
+.oc-tabla-caja {
+    overflow-x: auto;
+}
+
+.oc-ataques {
+    width: 100%;
+    border-collapse: collapse;
     font-family: var(--fuente-mono);
     font-size: 0.8125rem;
 }
 
-.oc-hoja-filas li {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: baseline;
-    justify-content: space-between;
-    gap: 4px 12px;
-    padding: 8px 0;
+.oc-ataques th,
+.oc-ataques td {
+    padding: 8px 10px;
     border-bottom: 1px solid var(--border);
+    color: var(--white);
+    text-align: left;
+    vertical-align: middle;
 }
 
-.oc-hoja-filas li:first-child {
+.oc-ataques thead th {
     padding-top: 0;
+    border-bottom: 2px solid var(--yellow);
+    color: var(--yellow);
+    font-size: 0.6875rem;
+    font-weight: 400;
+    letter-spacing: 1px;
+    text-transform: uppercase;
 }
 
-.oc-hoja-filas li:last-child {
+.oc-ataques tbody th {
+    font-weight: 500;
+}
+
+.oc-ataques tbody tr:last-child > * {
     border-bottom: 0;
 }
 
-.oc-hoja-nombre {
-    color: var(--white);
-}
-
-/* El nombre (que se despliega) y, al lado, las tiradas. */
-.oc-hoja-filas .oc-desplegable {
-    flex: 1 1 12rem;
-}
-
-.oc-hoja-detalle {
+.oc-ataque-extra {
     color: var(--muted);
+}
+
+/* El modificador y el daño, en cajas como botones (que lo son: se
+   tiran). */
+.oc-ataques .oc-dado {
+    display: inline-block;
+    padding: 3px 9px;
+    border: 2px solid var(--yellow);
+    color: var(--yellow);
+    font-weight: 700;
+}
+
+.oc-ataque-dano .oc-dado {
+    background: var(--yellow);
+    color: var(--yellow-contrast);
+}
+
+.oc-ataques .oc-dado:hover {
+    background: var(--white);
+    border-color: var(--white);
+    color: var(--purple);
+}
+
+/* El nombre, cuando tiene descripción: un botón que la abre debajo. */
+.oc-ataque-abrir {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 8px;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: inherit;
+    font: inherit;
+    text-align: left;
+    cursor: pointer;
+}
+
+.oc-ataque-abrir:hover {
+    text-decoration: underline;
+}
+
+.oc-ataque-abrir:focus-visible {
+    outline: 2px solid var(--yellow);
+    outline-offset: 3px;
+}
+
+.oc-ataque-abrir[aria-expanded="true"] .oc-desplegable-flecha {
+    transform: rotate(90deg);
+}
+
+.oc-ataque-desc > td {
+    padding-top: 0;
+}
+
+/* LO QUE SE GASTA: una casilla por uso, como los espacios de conjuro, y
+   cómo se recarga en su chapita. */
+.oc-usos {
+    display: inline-flex;
+    align-items: center;
+    margin: 0 4px;
+    vertical-align: middle;
+}
+
+.oc-usos .oc-marca {
+    border-radius: 0;
+}
+
+/* Las chapitas del título (el tiempo de un conjuro, la concentración, el
+   ritual, la recarga de unos usos). */
+.oc-chapa {
+    display: inline-block;
+    padding: 0 6px;
+    border: 1px solid var(--yellow);
+    color: var(--yellow);
+    font-family: var(--fuente-mono);
+    font-size: 0.6875rem;
+    letter-spacing: 0.5px;
+    white-space: nowrap;
+}
+
+.oc-chapa.es-concentracion {
+    background: var(--yellow);
+    color: var(--yellow-contrast);
+}
+
+.oc-chapa.es-ritual {
+    border-style: dashed;
+}
+
+.oc-desplegable-cabeza .oc-chapa {
+    margin-left: 6px;
+}
+
+/* EL INVENTARIO, en galería: una tarjeta por objeto, con su imagen (que
+   se ve en grande al pulsarla) o su emoji, su nombre y cuántos. */
+.oc-inventario {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(8rem, 1fr));
+    align-items: start;
+    gap: 12px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.oc-objeto {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    min-width: 0;
+    padding: 8px;
+    border: 2px solid var(--yellow);
+    background: var(--purple);
+    font-family: var(--fuente-mono);
+    font-size: 0.8125rem;
+}
+
+.oc-objeto-foto {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    aspect-ratio: 1 / 1;
+    width: 100%;
+    padding: 0;
+    border: 1px solid var(--border);
+    background: var(--purple-lighter);
+    overflow: hidden;
+}
+
+.oc-objeto-foto img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+button.oc-objeto-foto {
+    cursor: zoom-in;
+}
+
+button.oc-objeto-foto:hover,
+button.oc-objeto-foto:focus-visible {
+    border-color: var(--yellow);
+}
+
+button.oc-objeto-foto:focus-visible {
+    outline: 2px solid var(--yellow);
+    outline-offset: 2px;
+}
+
+.oc-objeto-foto.es-sin-foto {
+    font-family: initial;
+    font-size: 2.75rem;
+}
+
+.oc-objeto-texto {
+    min-width: 0;
+    overflow-wrap: anywhere;
+}
+
+.oc-objeto summary {
+    flex-wrap: nowrap;
+}
+
+/* El texto de un objeto desplegado, a lo ancho de su tarjeta. */
+.oc-objeto .oc-desplegable-dentro {
+    margin-left: 0;
+    padding-left: 8px;
 }
 
 /* LOS DATOS (trasfondo, aspecto…): los de debajo del retrato en «quién
@@ -1256,10 +1356,6 @@ li > .oc-origen {
     margin-top: 14px;
 }
 
-.oc-subpestana-emoji {
-    margin-right: 6px;
-    font-family: initial;
-}
 
 /* ---- LA GENTE (pestaña npcs) ---- */
 .oc-npcs {

@@ -167,6 +167,13 @@ SITIOS = {
         "lado": 1600,
         "cuadrada": False,
     },
+    "oc-objeto": {
+        "que": "un objeto del inventario de uno de mis personajes",
+        "carpeta": "imagenes/personajes/{personaje}/objetos",
+        "sufijo": "",
+        "lado": 600,
+        "cuadrada": False,
+    },
     "oc-npc": {
         "que": "alguien de la gente de uno de mis personajes",
         "carpeta": "imagenes/personajes/{personaje}/gente",

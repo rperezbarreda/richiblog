@@ -22,14 +22,6 @@
         box-shadow: 4px 4px 0 var(--yellow);
     }
 
-    /* Las cinco pestañas, tres y dos, del mismo ancho cada fila. */
-    .oc-pestana {
-        flex: 1 1 30%;
-        min-width: 0;
-        padding: 8px 10px;
-        text-align: center;
-    }
-
     .oc-npc-foto {
         width: 4rem;
     }

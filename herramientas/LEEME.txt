@@ -3859,21 +3859,48 @@
   viene; y al volver a importar NO pisa las descripciones que ya tengas,
   solo añade las nuevas (dndbeyond.py: descripciones_de, html_a_markdown,
   _plantillas; fichas.js: mezclarDescripcionesOc).
-  CÓMO SE REPARTE LA PÁGINA DE CADA UNO: a la IZQUIERDA, el post-it
-  amarillo con el nombre en su recuadro (bajito) y, al lado, los PG y la CA; la
-  foto; la raza y la clase; y las características. Debajo, los botones:
-  «ficha dndbeyond» (si tiene el campo «Su ficha en D&D Beyond», que el
-  importador rellena solo), «pdf» (si tiene la ficha en PDF) y 🎲 (los
-  dados). A la DERECHA, las pestañas con el «volver» al lado, y debajo su
-  recuadro. En escritorio, las subpestañas de «ficha» van en una
-  COLUMNA a la izquierda del recuadro, como las carpetas de un explorador
-  (con las flechas de arriba y abajo se pasa de una a otra), y lo elegido
-  a la derecha; en pantallas más pequeñas, encima, en pastillas. En escritorio (desde 1180px de ancho y 600 de
-  alto) la página NO SE DESPLAZA entera: la ficha de la izquierda se
-  queda quieta (la foto, como mucho un 23% del alto de la pantalla) y el
-  recuadro se desplaza por dentro. Más pequeño, se desplaza la página; en
-  el móvil, todo una cosa debajo de otra (plantillas/personaje.html;
-  generar-personajes.py: postit, vitales, botones).
+  CÓMO SE REPARTE LA PÁGINA DE CADA UNO: a la IZQUIERDA, estrecho y
+  alto, el post-it amarillo con el nombre en su recuadro (bajito) y, al
+  lado, los PG y la CA; la foto; la raza y la clase; y las
+  características. Debajo, los botones: «ficha dndbeyond» (si tiene el
+  campo «Su ficha en D&D Beyond», que el importador rellena solo), «pdf»
+  (si tiene la ficha en PDF) y 🎲 (los dados). A la DERECHA, el recuadro,
+  con su MENÚ a la izquierda, como el menú del sitio: 📖 historia,
+  📋 ficha (un botón que abre y cierra su submenú, con sus partes:
+  combate, habilidades, acciones, conjuros, inventario, rasgos,
+  competencias y trasfondo), 👥 npcs, 🖼️ imágenes, 📎 extra, y el
+  «← mis personajes»; y lo elegido a la derecha. La parte elegida va en
+  la dirección (#oc-ficha-combate) y al elegirla el foco pasa a ella. En
+  escritorio (desde 1180px de ancho y 600 de alto) la página NO SE
+  DESPLAZA entera: la ficha de la izquierda y el menú se quedan quietos
+  (la foto, como mucho un 29% del alto de la pantalla) y lo elegido se
+  desplaza por dentro. Más pequeño, se desplaza la página; en el móvil,
+  todo una cosa debajo de otra y el menú encima de lo elegido. Sin
+  JavaScript, el menú son enlaces y se ven todas las partes
+  (plantillas/personaje.html; generar-personajes.py: postit, vitales,
+  botones, pestanas; personajes.js).
+  LO DE DENTRO DE LA FICHA: en «combate», estadisticas.dat y combate.dat
+  una al lado de la otra, con sus cajitas de dos en dos. Las salvaciones,
+  a dos columnas y en colores invertidos. Los ATAQUES, en una tabla
+  (ataque, modificador, daño y extra): el modificador y el daño, en cajas
+  como botones (se tiran), el daño rellena; cada línea se escribe
+  «Arco corto: +4, 1d6+2 perforante; lo de extra» (lo de detrás del «;»
+  va a «extra»: una salvación, un alcance…); con descripción, el nombre
+  es un botón que la abre en una fila debajo. Lo que se GASTA («Forma
+  salvaje (2 usos, descanso largo)», en acciones) lleva una casilla por
+  uso y cómo se recarga, en su chapita (el importador pone la recarga:
+  descanso corto, descanso largo, al amanecer). Los CONJUROS, uno por
+  línea y cada nivel a todo lo ancho, con chapitas en su título: el
+  tiempo (acción, acción adicional, reacción, 1 minuto…), concentración
+  (rellena) y ritual (sacados de su «Datos:»). El INVENTARIO, en galería:
+  cada objeto en su tarjeta con su imagen (se ve en grande al pulsarla,
+  con el visor del sitio) o su emoji, su nombre y cuántos; las imágenes
+  se buscan en imagenes/personajes/<clave>/objetos/<nombre-del-objeto>.webp
+  (las baja ahí el importador de D&D Beyond con la casilla «Traer las
+  imágenes de los objetos», sitio de imagen «oc-objeto»; las que ya están
+  no las vuelve a bajar; también se pueden poner a mano con ese nombre).
+  Los RASGOS, en tres ventanitas: raza.txt, clase.txt y dotes.txt
+  (según su «(de dónde viene)»; los que no lo dicen, en rasgos.txt).
   LOS DADOS (scripts/paginas/personajes.js): TODO LO QUE SE TIRA EN LA
   FICHA SE PUEDE PULSAR, como en D&D Beyond: los bonos de las habilidades
   y las salvaciones, el modificador de cada característica (en el

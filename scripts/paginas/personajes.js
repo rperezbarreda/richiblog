@@ -1,130 +1,182 @@
 // =========================================
-// LA FICHA DE UNO DE MIS PERSONAJES: LAS PESTAÑAS
+// LA FICHA DE UNO DE MIS PERSONAJES: EL MENÚ DEL RECUADRO
 // =========================================
-// La página la escribe entera generar-personajes.py: los cuatro apartados
-// (historia, npcs, imágenes y extra) uno debajo de otro, y encima unos
-// enlaces para saltar a cada uno. Así se lee todo aunque esto no cargue.
+// La página la escribe entera generar-personajes.py: todas las partes
+// (historia, las de la ficha —combate, habilidades…—, npcs, imágenes y
+// extra) una debajo de otra, y a la izquierda un menú de enlaces para
+// saltar a cada una. Así se lee todo aunque esto no cargue.
 //
-// Con esto, los enlaces pasan a ser PESTAÑAS de las de verdad (role=tab,
-// con las flechas, Inicio y Fin para moverse entre ellas, como manda el
-// patrón de ARIA) y solo se ve el apartado elegido. El elegido va en la
-// dirección (#oc-imagenes…), así que un enlace a una pestaña abre esa, y
-// atrás y adelante del navegador también cambian de pestaña.
+// Con esto, se ve SOLO LA PARTE ELEGIDA. El menú se queda de enlaces (se
+// recorre con el tabulador, como el menú del sitio), con aria-current en
+// el de la parte que se ve, y «ficha» pasa a ser un botón que abre y
+// cierra su submenú, como los del menú del sitio (al abrirlo, enseña su
+// primera parte). La parte elegida va en la dirección (#oc-ficha-combate),
+// así que un enlace a una parte abre esa, y atrás y adelante del
+// navegador también. Al elegir una, el foco va a ella (para el lector de
+// pantalla, que empiece a leer ahí).
 
-const ocPestanas = document.querySelector("[data-oc-pestanas]");
-const ocPanel = document.querySelector("[data-oc-panel]");
-
-// LAS SUBPESTAÑAS de la pestaña «ficha» (combate, habilidades, acciones…):
-// lo mismo, pero dentro de ella, sin tocar la dirección (la dirección dice
-// la pestaña de arriba) y en columna (en escritorio van en una lista a la
-// izquierda del recuadro, como las carpetas de un explorador).
-const ocSubpestanas = document.querySelector("[data-oc-subpestanas]");
-const ocSubpanel = document.querySelector("[data-oc-subpanel]");
-
-if (ocPestanas && ocPanel) {
-    montarPestanasDePersonaje(ocPestanas, ocPanel, { apartado: "data-oc-apartado", prefijo: "oc-pestana-",
-        clase: "oc-pestana", lista: "oc-pestanas-lista", conDireccion: true });
-}
-if (ocSubpestanas && ocSubpanel) {
-    montarPestanasDePersonaje(ocSubpestanas, ocSubpanel, { apartado: "data-oc-subapartado",
-        prefijo: "oc-subpestana-", clase: "oc-subpestana", lista: "oc-subpestanas-lista", conDireccion: false,
-        vertical: true });
-}
-
-function montarPestanasDePersonaje(menu, panel, o) {
-    const enlaces = Array.from(menu.querySelectorAll("[data-oc-pestana]"));
-    const apartados = enlaces.map((a) => panel.querySelector("[" + o.apartado + "='" + a.dataset.ocPestana + "']"));
-    if (!enlaces.length || apartados.some((x) => !x)) {
+(function () {
+    const menu = document.querySelector("[data-oc-menu]");
+    const panel = document.querySelector("[data-oc-panel]");
+    const contenedor = document.querySelector("[data-oc-partes]");
+    if (!menu || !panel || !contenedor) {
         return;
     }
-
-    // Cada enlace se cambia por un botón: una pestaña no lleva a ningún
-    // sitio, cambia lo que se ve.
-    const lista = document.createElement("div");
-    lista.className = o.lista;
-    lista.setAttribute("role", "tablist");
-    lista.setAttribute("aria-label", menu.getAttribute("aria-label") || "Apartados");
-    // Las de la ficha van en columna (en escritorio): se mueve con las
-    // flechas de arriba y abajo, y también con las de los lados.
-    if (o.vertical) {
-        lista.setAttribute("aria-orientation", "vertical");
+    const partes = Array.from(contenedor.querySelectorAll("[data-oc-parte]"));
+    const ficha = document.getElementById("oc-ficha");
+    const enlaces = Array.from(menu.querySelectorAll("a[data-oc-ir]"));
+    if (!partes.length) {
+        return;
     }
-    const botones = enlaces.map((a, i) => {
-        const b = document.createElement("button");
-        b.type = "button";
-        b.className = o.clase;
-        b.id = o.prefijo + a.dataset.ocPestana;
-        // Lo de dentro tal cual (el emoji va con aria-hidden: el lector
-        // dice solo el nombre).
-        [...a.childNodes].forEach((n) => b.appendChild(n.cloneNode(true)));
-        b.setAttribute("role", "tab");
-        b.setAttribute("aria-controls", apartados[i].id);
-        b.dataset.ocPestana = a.dataset.ocPestana;
-        lista.appendChild(b);
-        return b;
-    });
-    // El <nav> ya no hace falta como zona de navegación: se queda la lista.
-    menu.replaceWith(lista);
-    panel.classList.add("con-pestanas");
-
-    apartados.forEach((ap, i) => {
-        ap.setAttribute("role", "tabpanel");
-        ap.setAttribute("aria-labelledby", botones[i].id);
-        ap.tabIndex = 0;
+    partes.forEach((p) => {
+        p.tabIndex = -1;
     });
 
-    function elegir(i, conFoco, apuntar) {
-        botones.forEach((b, j) => {
-            const es = j === i;
-            b.setAttribute("aria-selected", es ? "true" : "false");
-            b.tabIndex = es ? 0 : -1;
-            apartados[j].hidden = !es;
+    // «ficha», de enlace a botón de abrir y cerrar su submenú.
+    let botonFicha = null;
+    const enlaceFicha = menu.querySelector("a[data-oc-grupo]");
+    const sub = document.getElementById("oc-menu-ficha");
+    if (enlaceFicha && sub) {
+        botonFicha = document.createElement("button");
+        botonFicha.type = "button";
+        botonFicha.className = enlaceFicha.className + " oc-menu-abrir";
+        [...enlaceFicha.childNodes].forEach((n) => botonFicha.appendChild(n.cloneNode(true)));
+        const flecha = document.createElement("span");
+        flecha.className = "oc-menu-flecha";
+        flecha.setAttribute("aria-hidden", "true");
+        botonFicha.appendChild(flecha);
+        botonFicha.setAttribute("aria-controls", sub.id);
+        enlaceFicha.replaceWith(botonFicha);
+        botonFicha.addEventListener("click", () => {
+            const abrir = botonFicha.getAttribute("aria-expanded") !== "true";
+            abrirFicha(abrir);
+            if (abrir && !(ficha && ficha.contains(actual()))) {
+                const primera = sub.querySelector("a[data-oc-ir]");
+                if (primera) {
+                    mostrar(primera.dataset.ocIr, false, true);
+                }
+            }
         });
-        if (conFoco) {
-            botones[i].focus();
+    }
+
+    function abrirFicha(si) {
+        if (!botonFicha) {
+            return;
         }
-        if (apuntar && o.conDireccion) {
+        botonFicha.setAttribute("aria-expanded", si ? "true" : "false");
+        sub.hidden = !si;
+        flechaDe(botonFicha).textContent = si ? "−" : "+";
+    }
+
+    function flechaDe(b) {
+        return b.querySelector(".oc-menu-flecha");
+    }
+
+    let elegida = null;
+
+    function actual() {
+        return elegida;
+    }
+
+    function mostrar(id, conFoco, apuntar) {
+        let parte = document.getElementById(id);
+        if (!parte || !partes.includes(parte)) {
+            parte = partes[0];
+        }
+        elegida = parte;
+        const enFicha = !!(ficha && ficha.contains(parte));
+        partes.forEach((p) => {
+            p.hidden = p !== parte;
+        });
+        if (ficha) {
+            ficha.hidden = !enFicha;
+        }
+        // Las de fuera de la ficha son hijas directas; la ficha es una caja
+        // con sus partes dentro.
+        Array.from(contenedor.children).forEach((x) => {
+            if (x !== ficha) {
+                x.hidden = x !== parte;
+            }
+        });
+        enlaces.forEach((a) => {
+            if (a.dataset.ocIr === parte.id) {
+                a.setAttribute("aria-current", "true");
+            } else {
+                a.removeAttribute("aria-current");
+            }
+        });
+        if (botonFicha) {
+            botonFicha.classList.toggle("es-la-de-ahora", enFicha);
+            if (enFicha) {
+                abrirFicha(true);
+            }
+        }
+        contenedor.scrollTop = 0;
+        if (conFoco) {
+            parte.focus({ preventScroll: true });
+        }
+        if (apuntar) {
             try {
-                history.replaceState(null, "", "#" + apartados[i].id);
+                history.replaceState(null, "", "#" + parte.id);
             } catch (error) {
                 // Sin historial (un archivo abierto a pelo): da igual.
             }
         }
     }
 
-    botones.forEach((b, i) => {
-        b.addEventListener("click", () => elegir(i, false, true));
-        b.addEventListener("keydown", (evento) => {
-            const ultimo = botones.length - 1;
-            const a = {
-                ArrowRight: i === ultimo ? 0 : i + 1,
-                ArrowLeft: i === 0 ? ultimo : i - 1,
-                ArrowDown: o.vertical ? (i === ultimo ? 0 : i + 1) : undefined,
-                ArrowUp: o.vertical ? (i === 0 ? ultimo : i - 1) : undefined,
-                Home: 0,
-                End: ultimo,
-            }[evento.key];
-            if (a === undefined) {
-                return;
-            }
-            evento.preventDefault();
-            elegir(a, true, true);
+    enlaces.forEach((a) => {
+        a.addEventListener("click", (e) => {
+            e.preventDefault();
+            mostrar(a.dataset.ocIr, true, true);
         });
     });
 
     function desdeLaDireccion() {
         const pedido = decodeURIComponent((location.hash || "").slice(1));
-        const i = apartados.findIndex((ap) => ap.id === pedido);
-        return i < 0 ? 0 : i;
+        // Las direcciones de antes (#oc-ficha), a su primera parte.
+        if (pedido === "oc-ficha" && sub) {
+            const primera = sub.querySelector("a[data-oc-ir]");
+            return primera ? primera.dataset.ocIr : "";
+        }
+        return pedido;
     }
 
-    if (o.conDireccion) {
-        window.addEventListener("hashchange", () => elegir(desdeLaDireccion(), false, false));
-        elegir(desdeLaDireccion(), false, false);
-    } else {
-        elegir(0, false, false);
+    panel.classList.add("con-menu");
+    abrirFicha(false);
+    window.addEventListener("hashchange", () => mostrar(desdeLaDireccion(), false, false));
+    mostrar(desdeLaDireccion(), false, false);
+})();
+
+// =========================================
+// LA DESCRIPCIÓN DE LOS ATAQUES
+// =========================================
+// En la tabla de ataques, la descripción de cada uno va en una fila
+// debajo (generar-personajes.py). Aquí se pliega: el nombre del ataque
+// pasa a ser un botón que la abre y la cierra.
+
+document.querySelectorAll(".oc-ataques th[data-oc-desc]").forEach((th) => {
+    const fila = document.getElementById(th.dataset.ocDesc);
+    if (!fila) {
+        return;
     }
-}
+    const b = document.createElement("button");
+    b.type = "button";
+    b.className = "oc-ataque-abrir";
+    const flecha = document.createElement("span");
+    flecha.className = "oc-desplegable-flecha";
+    flecha.setAttribute("aria-hidden", "true");
+    flecha.textContent = "▸";
+    b.append(flecha, document.createTextNode(th.textContent));
+    b.setAttribute("aria-expanded", "false");
+    b.setAttribute("aria-controls", fila.id);
+    th.replaceChildren(b);
+    fila.hidden = true;
+    b.addEventListener("click", () => {
+        const abrir = fila.hidden;
+        fila.hidden = !abrir;
+        b.setAttribute("aria-expanded", abrir ? "true" : "false");
+    });
+});
 
 // =========================================
 // LOS DADOS

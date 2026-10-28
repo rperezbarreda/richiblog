@@ -51,6 +51,8 @@ SENTIDOS = {"darkvision": "Visión en la oscuridad", "blindsight": "Vista ciega"
             "truesight": "Visión verdadera"}
 DEFENSAS = {"resistance": "Resistencia", "immunity": "Inmunidad", "vulnerability": "Vulnerabilidad"}
 TIPOS_DE_ACCION = {1: "Acción", 3: "Acción adicional", 4: "Reacción", 6: "Minutos", 7: "Horas", 8: "Especial"}
+# Cuándo se recuperan los usos (limitedUse.resetType de D&D Beyond).
+RECARGAS = {1: "descanso corto", 2: "descanso largo", 3: "al amanecer", 4: "otra"}
 
 ALINEAMIENTOS = {1: "Legal bueno", 2: "Neutral bueno", 3: "Caótico bueno", 4: "Legal neutral", 5: "Neutral",
                  6: "Caótico neutral", 7: "Legal malvado", 8: "Neutral malvado", 9: "Caótico malvado"}
@@ -362,7 +364,7 @@ def _plantillas(texto, valores):
 def _datos_de_conjuro(defin, t):
     datos = []
     nivel = int(defin.get("level") or 0)
-    escuela = ESCUELAS.get(str(defin.get("school") or "").lower(), t(defin.get("school")))
+    escuela = ESCUELAS.get(str(defin.get("school") or "").lower()) or t(defin.get("school"))
     datos.append(("Truco" if nivel == 0 else "Nivel %d" % nivel) + (" · " + escuela if escuela else ""))
     act = defin.get("activation") or {}
     if act.get("activationType") in TIEMPOS:
@@ -373,7 +375,7 @@ def _datos_de_conjuro(defin, t):
     if origen == "ranged" and alcance.get("rangeValue"):
         texto = _metros(alcance["rangeValue"])
     if alcance.get("aoeType") and alcance.get("aoeValue"):
-        area = "%s de %s" % (AREAS.get(str(alcance["aoeType"]).lower(), t(alcance["aoeType"]).lower()),
+        area = "%s de %s" % (AREAS.get(str(alcance["aoeType"]).lower()) or t(alcance["aoeType"]).lower(),
                              _metros(alcance["aoeValue"]))
         texto = ("%s (%s)" % (texto, area)) if texto else area
     if texto:
@@ -788,7 +790,10 @@ def a_ficha(d, traducir=None):
                 continue
             tipo = TIPOS_DE_ACCION.get(((a.get("activation") or {}).get("activationType")), "Otras")
             usos = (a.get("limitedUse") or {}).get("maxUses")
-            texto = "%s: %s%s" % (tipo, t(nombre), " (%s %s)" % (usos, "uso" if usos == 1 else "usos") if usos else "")
+            # Y cómo se recargan: «(2 usos, descanso largo)».
+            recarga = RECARGAS.get((a.get("limitedUse") or {}).get("resetType"), "")
+            texto = "%s: %s%s" % (tipo, t(nombre), " (%s %s%s)" % (usos, "uso" if usos == 1 else "usos",
+                                                                  ", " + recarga if recarga else "") if usos else "")
             if texto not in acciones:
                 acciones.append(texto)
     orden = list(TIPOS_DE_ACCION.values()) + ["Otras"]
@@ -800,6 +805,21 @@ def a_ficha(d, traducir=None):
                       " próxima): " + "; ".join(t.sin_traducir[:40]) + ("…" if len(t.sin_traducir) > 40 else ""))
     retrato = ((d.get("decorations") or {}).get("avatarUrl") or "").strip()
     return campos, avisos, retrato
+
+
+def imagenes_de_objetos(d, traducir=None):
+    """{nombre del objeto (traducido, como sale en «objetos»): la URL de su
+    imagen en D&D Beyond}, de los que tienen. Las baja el editor a
+    imagenes/personajes/<clave>/objetos/, que es donde las busca la
+    galería del inventario."""
+    t = traducir or Traductor()
+    salida = {}
+    for i in d.get("inventory") or []:
+        defin = (i or {}).get("definition") or {}
+        url = str(defin.get("largeAvatarUrl") or defin.get("avatarUrl") or "").strip()
+        if defin.get("name") and url.startswith("http"):
+            salida.setdefault(t(defin["name"], apuntar=False), url.split("?", 1)[0])
+    return salida
 
 
 def main():

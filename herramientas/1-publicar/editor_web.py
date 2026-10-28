@@ -1477,7 +1477,8 @@ def colecciones():
                           "Investigación, Juego de manos, Medicina, Naturaleza, Percepción, Perspicacia, "
                           "Persuasión, Religión, Sigilo, Supervivencia y Trato con animales."),
                   C("ataques", "Ataques", "lineas", vacio="quitar",
-                    ayuda="Uno por línea: «Espada corta: +6, 1d6+4 perforante»."),
+                    ayuda="Uno por línea: «Espada corta: +6, 1d6+4 perforante». Lo de detrás de un «;» sale"
+                          " en la columna «extra»: «Aliento: CD 13, 2d6 fuego; salvación de Destreza»."),
                   C("aptitud_magica", "Aptitud mágica", "elegir", vacio="quitar",
                     opciones=[["fue", "Fuerza"], ["des", "Destreza"], ["con", "Constitución"],
                               ["int", "Inteligencia"], ["sab", "Sabiduría"], ["car", "Carisma"]],
@@ -1498,7 +1499,9 @@ def colecciones():
                   C("defensas", "Defensas", "lineas", vacio="quitar",
                     ayuda="Una por línea: «Resistencia: fuego», «Inmunidad: veneno», «Ventaja contra ser hechizado»."),
                   C("acciones", "Acciones", "lineas", vacio="quitar",
-                    ayuda="Una por línea, con su tipo delante: «Acción adicional: Acción astuta», «Reacción: …»."),
+                    ayuda="Una por línea, con su tipo delante: «Acción adicional: Acción astuta», «Reacción: …»."
+                          " Lo que se gasta, con sus usos y cómo se recarga detrás: «Acción adicional: Forma"
+                          " salvaje (2 usos, descanso largo)» (sale una casilla por uso)."),
                   C("descripciones", "Descripciones (lo que sale al desplegar)", "largo", grande=True,
                     vacio="quitar", markdown=True,
                     ayuda="De cada conjuro, acción, rasgo, ataque u objeto que quieras desplegable, un bloque"
@@ -2219,6 +2222,37 @@ def importar_de_dndbeyond(peticion):
                     temporal.unlink()
                 except OSError:
                     pass
+    # LAS IMÁGENES DE LOS OBJETOS (para la galería del inventario), a
+    # imagenes/personajes/<clave>/objetos/<su-nombre>.webp. Las que ya
+    # estén no se vuelven a bajar.
+    if "objetos" in quiere and clave:
+        bajadas = 0
+        for nombre, url in ddb.imagenes_de_objetos(datos).items():
+            carpeta = RAIZ / "imagenes" / "personajes" / clave / "objetos"
+            if (carpeta / ("%s.webp" % nombre_archivo(nombre, "objeto"))).exists():
+                continue
+            temporal = None
+            try:
+                peticion_img = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0 (editor de richi.blog)"})
+                with urllib.request.urlopen(peticion_img, timeout=20) as respuesta:
+                    crudo = respuesta.read(10 * 1024 * 1024)
+                temporal = _temporal(crudo, Path(url).suffix.lower() or ".png")
+                hecho = subir_imagen({"sitio": "oc-objeto", "campos": {"personaje": clave}, "nombre": nombre,
+                                      "ruta": str(temporal)})
+                if hecho.get("ok"):
+                    bajadas += 1
+                else:
+                    avisos.append("La imagen de «%s» no ha podido ser: %s" % (nombre, hecho.get("error")))
+            except (urllib.error.URLError, OSError, ValueError) as error:
+                avisos.append("No he podido bajar la imagen de «%s» (%s)." % (nombre, getattr(error, "reason", error)))
+            finally:
+                if temporal:
+                    try:
+                        temporal.unlink()
+                    except OSError:
+                        pass
+        if bajadas:
+            avisos.append("%d imagen(es) de objetos guardadas para el inventario." % bajadas)
     return {"ok": True, "campos": campos, "imagenes": imagenes, "avisos": avisos}
 
 

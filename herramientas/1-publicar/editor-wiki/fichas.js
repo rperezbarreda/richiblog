@@ -756,14 +756,18 @@ const ACCIONES_DE_FICHA = {
             + " el nivel y las características, en español. No se guarda hasta que guardes."));
         panel.appendChild(campo);
         const casillas = [["retrato", "Traer también su retrato como imagen de perfil"],
-            ["token", "Y como token de la galería"]].map(([clave, texto2]) => {
+            ["token", "Y como token de la galería"],
+            ["objetos", "Traer las imágenes de los objetos (para la galería del inventario)"]].map(([clave, texto2]) => {
             const lab = crearEditor("label", "campo-si-no");
             const c = document.createElement("input");
             c.type = "checkbox";
             c.value = clave;
-            c.checked = !f[clave];
+            // Las de los objetos, siempre marcadas (las que ya estén no se
+            // vuelven a bajar); el retrato y el token, solo si no tiene.
+            c.checked = clave === "objetos" || !f[clave];
             lab.appendChild(c);
-            lab.appendChild(document.createTextNode(" " + texto2 + (f[clave] ? " (ya tiene una)" : "")));
+            lab.appendChild(document.createTextNode(" " + texto2
+                + (clave !== "objetos" && f[clave] ? " (ya tiene una)" : "")));
             panel.appendChild(lab);
             return c;
         });
