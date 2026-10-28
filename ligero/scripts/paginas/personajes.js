@@ -232,18 +232,36 @@ document.querySelectorAll(".oc-ataques th[data-oc-desc]").forEach((th) => {
     }
     function trozosDe(formula) {
         const trozos = [];
-        const texto = String(formula).replace(/−/g, "-").replace(/\s+/g, "");
-        const patron = /([+-]?)(\d*)d(\d+)|([+-]?)(\d+)/g;
+        const texto = String(formula).replace(/−/g, "-");
+        const segmentos = [];
+        const conTipo = /([^\[\]]*)\[([^\]]+)\]/g;
         let m;
-        while ((m = patron.exec(texto))) {
-            if (m[3]) {
-                trozos.push({ signo: m[1] === "-" ? -1 : 1, cuantos: Math.min(parseInt(m[2] || "1", 10), 100),
-                    caras: parseInt(m[3], 10) });
-            } else {
-                trozos.push({ signo: m[4] === "-" ? -1 : 1, fijo: parseInt(m[5], 10) });
-            }
+        let fin = 0;
+        while ((m = conTipo.exec(texto))) {
+            segmentos.push([m[1], m[2]]);
+            fin = conTipo.lastIndex;
         }
+        segmentos.push([texto.slice(fin), ""]);
+        const patron = /([+-]?)\s*(\d*)d(\d+)|([+-]?)\s*(\d+)/g;
+        segmentos.forEach(([trozo, tipo]) => {
+            patron.lastIndex = 0;
+            while ((m = patron.exec(trozo))) {
+                if (m[3]) {
+                    trozos.push({ signo: m[1] === "-" ? -1 : 1, cuantos: Math.min(parseInt(m[2] || "1", 10), 100),
+                        caras: parseInt(m[3], 10), tipo });
+                } else {
+                    trozos.push({ signo: m[4] === "-" ? -1 : 1, fijo: parseInt(m[5], 10), tipo });
+                }
+            }
+        });
         return trozos;
+    }
+    function formulaParaVer(formula) {
+        return String(formula).replace(/\s*\[([^\]]+)\]/g, " $1").replace(/\+/g, " + ").replace(/-/g, " − ")
+            .replace(/\s+/g, " ").trim();
+    }
+    function claveDeTipo(tipo) {
+        return String(tipo).normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/[^a-z]/g, "");
     }
     function tirar(formula, que) {
         const trozos = trozosDe(formula);
@@ -254,10 +272,23 @@ document.querySelectorAll(".oc-ataques th[data-oc-desc]").forEach((th) => {
         let total = 0;
         const partes = [];
         let d20 = null;
+        const tipos = [];
+        const sumar = (tipo, n) => {
+            if (!tipo) {
+                return;
+            }
+            const ya = tipos.find((x) => x.tipo === tipo);
+            if (ya) {
+                ya.total += n;
+            } else {
+                tipos.push({ tipo, total: n });
+            }
+        };
         trozos.forEach((t) => {
             const signo = partes.length ? (t.signo < 0 ? "− " : "+ ") : (t.signo < 0 ? "− " : "");
             if (t.fijo !== undefined) {
                 total += t.signo * t.fijo;
+                sumar(t.tipo, t.signo * t.fijo);
                 partes.push({ texto: (t.signo < 0 ? "− " : "+ ") + t.fijo });
                 return;
             }
@@ -276,11 +307,12 @@ document.querySelectorAll(".oc-ataques th[data-oc-desc]").forEach((th) => {
                 const x = alAzar(t.caras);
                 salen.push(x);
                 total += t.signo * x;
+                sumar(t.tipo, t.signo * x);
             }
             partes.push({ texto: signo + t.cuantos + "d" + t.caras + " [" + salen.join(", ") + "]" });
         });
         estado.cuenta += 1;
-        const r = { id: estado.cuenta, que: que || "tirada", formula: String(formula), total, partes, d20 };
+        const r = { id: estado.cuenta, que: que || "tirada", formula: String(formula), total, partes, d20, tipos };
         acabar(r);
         sonar();
         if (r.critico || r.pifia) {
@@ -604,6 +636,7 @@ document.querySelectorAll(".oc-ataques th[data-oc-desc]").forEach((th) => {
         estado.tiradas = estado.tiradas.slice(0, 30);
         pintarHistorial();
         avisar(r.que + ": " + r.total + (r.critico ? ", ¡20 natural!" : "") + (r.pifia ? ", pifia, 1 natural" : "")
+            + (r.tipos.length ? " (" + r.tipos.map((x) => x.total + " " + x.tipo).join(", ") + ")" : "")
             + ". " + r.desglose);
     }
     function pintarHistorial() {
@@ -612,11 +645,15 @@ document.querySelectorAll(".oc-ataques th[data-oc-desc]").forEach((th) => {
             li.dataset.id = r.id;
             const cabeza = crear("p", "oc-dados-que");
             cabeza.append(crear("span", "oc-dados-que-nombre", r.que),
-                crear("span", "oc-dados-formula", r.formula.replace(/-/g, "−")));
+                crear("span", "oc-dados-formula", formulaParaVer(r.formula)));
             const total = crear("p", "oc-dados-total", String(r.total));
             if (r.critico || r.pifia) {
                 total.appendChild(crear("span", "oc-dados-natural", r.critico ? "¡20 natural!" : "pifia (1 natural)"));
             }
+            const tipos = crear("p", "oc-dados-tipos");
+            (r.tipos || []).forEach((x) => {
+                tipos.appendChild(crear("span", "oc-dano oc-dano-" + claveDeTipo(x.tipo), x.total + " " + x.tipo));
+            });
             const botones = crear("div", "oc-dados-tirada-botones");
             if (r.d20 && r.d20.modo === "normal") {
                 botones.append(
@@ -628,7 +665,11 @@ document.querySelectorAll(".oc-ataques th[data-oc-desc]").forEach((th) => {
             botones.append(
                 botonDe("oc-dados-repetir", "↻ repetir", () => tirar(r.formula, r.que), "Repetir: " + r.que),
                 botonDe("oc-dados-quitar", "✕", () => quitar(r.id, i), "Borrar esta tirada: " + r.que + ", " + r.total));
-            li.append(cabeza, total, crear("p", "oc-dados-desglose", r.desglose), botones);
+            li.append(cabeza, total);
+            if (tipos.childNodes.length) {
+                li.appendChild(tipos);
+            }
+            li.append(crear("p", "oc-dados-desglose", r.desglose), botones);
             return li;
         }));
         borrarTodo.disabled = !estado.tiradas.length;
@@ -660,13 +701,123 @@ document.querySelectorAll(".oc-ataques th[data-oc-desc]").forEach((th) => {
         b.dataset.que = m.dataset.que || "";
         b.innerHTML = m.innerHTML;
         b.setAttribute("aria-label", m.textContent.trim() + ", tirar " + (m.dataset.que || m.dataset.dados)
-            + " (" + m.dataset.dados.replace(/-/g, " menos ") + ")");
-        b.title = "Tirar " + m.dataset.dados;
-        b.addEventListener("click", (e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            tirar(b.dataset.dados, b.dataset.que);
-        });
+            + " (" + formulaParaVer(m.dataset.dados).replace(/−/g, "menos") + ")");
+        b.title = "Tirar " + formulaParaVer(m.dataset.dados);
         m.replaceWith(b);
+    });
+    document.addEventListener("click", (e) => {
+        const b = e.target.closest("button.oc-dado");
+        if (!b) {
+            return;
+        }
+        e.preventDefault();
+        e.stopPropagation();
+        tirar(b.dataset.dados, b.dataset.que);
+    });
+})();
+document.querySelectorAll("[data-oc-casillas]").forEach((grupo) => {
+    const que = grupo.dataset.ocCasillas;
+    const sueltas = Array.from(grupo.querySelectorAll(".oc-casilla"));
+    sueltas.forEach((s, i) => {
+        const b = document.createElement("button");
+        b.type = "button";
+        b.className = "oc-casilla";
+        b.setAttribute("aria-pressed", "false");
+        b.setAttribute("aria-label", que + ": " + (i + 1) + " de " + sueltas.length + ", gastado");
+        b.addEventListener("click", () => {
+            b.setAttribute("aria-pressed", b.getAttribute("aria-pressed") === "true" ? "false" : "true");
+        });
+        s.replaceWith(b);
+    });
+});
+(function () {
+    const conVentana = document.querySelectorAll("details[data-oc-modal]");
+    if (!conVentana.length) {
+        return;
+    }
+    const fondo = document.createElement("div");
+    fondo.className = "oc-modal-fondo";
+    fondo.hidden = true;
+    const ventana = document.createElement("div");
+    ventana.className = "oc-modal";
+    ventana.setAttribute("role", "dialog");
+    ventana.setAttribute("aria-modal", "true");
+    const cerrar = document.createElement("button");
+    cerrar.type = "button";
+    cerrar.className = "oc-modal-cerrar";
+    cerrar.setAttribute("aria-label", "Cerrar");
+    cerrar.textContent = "✕";
+    const cuerpo = document.createElement("div");
+    cuerpo.className = "oc-modal-cuerpo";
+    ventana.append(cerrar, cuerpo);
+    fondo.appendChild(ventana);
+    document.body.appendChild(fondo);
+    let vuelta = null;
+    function abrir(detalles) {
+        const carta = detalles.querySelector(".oc-carta");
+        if (!carta) {
+            return;
+        }
+        const copia = carta.cloneNode(true);
+        copia.querySelectorAll("[id]").forEach((x) => x.removeAttribute("id"));
+        const titulo = copia.querySelector(".oc-carta-titulo");
+        if (titulo) {
+            titulo.id = "oc-modal-titulo";
+            ventana.setAttribute("aria-labelledby", "oc-modal-titulo");
+        }
+        ventana.classList.toggle("es-objeto", detalles.dataset.ocModal === "objeto");
+        cuerpo.replaceChildren(copia);
+        vuelta = detalles.querySelector("summary");
+        fondo.hidden = false;
+        cuerpo.scrollTop = 0;
+        cerrar.focus();
+    }
+    function cerrarla() {
+        if (fondo.hidden) {
+            return;
+        }
+        fondo.hidden = true;
+        cuerpo.replaceChildren();
+        if (vuelta) {
+            vuelta.focus();
+        }
+    }
+    conVentana.forEach((d) => {
+        const s = d.querySelector("summary");
+        s.setAttribute("aria-haspopup", "dialog");
+        s.addEventListener("click", (e) => {
+            e.preventDefault();
+            abrir(d);
+        });
+    });
+    cerrar.addEventListener("click", cerrarla);
+    fondo.addEventListener("click", (e) => {
+        if (e.target === fondo) {
+            cerrarla();
+        }
+    });
+    ventana.addEventListener("keydown", (e) => {
+        if (e.key === "Escape") {
+            e.stopPropagation();
+            cerrarla();
+            return;
+        }
+        if (e.key !== "Tab") {
+            return;
+        }
+        const enfocables = Array.from(ventana.querySelectorAll("button, a[href], [tabindex]:not([tabindex='-1'])"))
+            .filter((x) => !x.disabled && x.offsetParent !== null);
+        if (!enfocables.length) {
+            return;
+        }
+        const primero = enfocables[0];
+        const ultimo = enfocables[enfocables.length - 1];
+        if (e.shiftKey && document.activeElement === primero) {
+            e.preventDefault();
+            ultimo.focus();
+        } else if (!e.shiftKey && document.activeElement === ultimo) {
+            e.preventDefault();
+            primero.focus();
+        }
     });
 })();

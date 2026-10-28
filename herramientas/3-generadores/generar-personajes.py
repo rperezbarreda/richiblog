@@ -350,15 +350,43 @@ def prueba(bono, que):
     return dado(con_signo(bono), "1d20%+d" % bono if bono else "1d20", que)
 
 
+# LOS TIPOS DE DAÑO, en español y en inglés (las descripciones de D&D
+# Beyond vienen en inglés), al nombre que se enseña. Al tirar, el daño sale
+# separado por tipo, cada uno con su color (personajes.js y
+# personajes.css: oc-dano-<tipo sin tildes>).
+TIPOS_DE_DANO = {
+    "perforante": "perforante", "piercing": "perforante", "cortante": "cortante", "slashing": "cortante",
+    "contundente": "contundente", "bludgeoning": "contundente", "fuego": "fuego", "fire": "fuego",
+    "frio": "frío", "cold": "frío", "acido": "ácido", "acid": "ácido", "relampago": "relámpago",
+    "rayo": "relámpago", "lightning": "relámpago", "trueno": "trueno", "thunder": "trueno",
+    "veneno": "veneno", "poison": "veneno", "necrotico": "necrótico", "necrotic": "necrótico",
+    "radiante": "radiante", "radiant": "radiante", "fuerza": "fuerza", "force": "fuerza",
+    "psiquico": "psíquico", "psychic": "psíquico",
+}
+_EN = "piercing|slashing|bludgeoning|fire|cold|acid|lightning|thunder|poison|necrotic|radiant|force|psychic"
+_ES = ("perforante|cortante|contundente|fuego|fr[ií]o|[aá]cido|rel[aá]mpago|rayo|trueno|veneno|necr[oó]tico|"
+       "radiante|ps[ií]quico")
+
 # Los dados que salen escritos en un texto («1d10», «2d8 + 1d6», «d20»,
 # «1d6+2»): cada uno, una tirada. No los que van pegados a una letra («los
-# d8s»).
-DADOS_EN_TEXTO = re.compile(r"(?<![\w])(\d*)d(\d+)(?!\w)((?:\s*[+−-]\s*\d+(?![\d]*\s*d))?)")
+# d8s»). Si detrás dice de qué tipo es el daño («1d10 fire damage»,
+# «2d6 de daño de fuego», «1d6+2 perforante»), se apunta (grupo «tipo»;
+# «fuerza» solo detrás de «daño de», que si no es la característica).
+DADOS_EN_TEXTO = re.compile(
+    r"(?<![\w])(\d*)d(\d+)(?!\w)((?:\s*[+−-]\s*\d+(?![\d]*\s*d))?)"
+    r"(?=(?:\s+(?:(?P<en>" + _EN + r")\s+damage|(?:de\s+)?da[ñn]o\s+(?:de\s+|por\s+)?(?P<es1>" + _ES
+    + r"|fuerza)|(?P<es2>" + _ES + r"))\b)?)", re.I)
 
 
-def formula_de(cuantos, caras, mas):
+def tipo_de(m):
+    """El tipo de daño de una fórmula encontrada, o «»."""
+    palabra = m.group("en") or m.group("es1") or m.group("es2") or ""
+    return TIPOS_DE_DANO.get(llano(palabra), "")
+
+
+def formula_de(cuantos, caras, mas, tipo=""):
     mas = re.sub(r"\s+", "", mas or "").replace("−", "-")
-    return "%sd%s%s" % (cuantos or "1", caras, mas)
+    return "%sd%s%s%s" % (cuantos or "1", caras, mas, ("[%s]" % tipo) if tipo else "")
 
 
 def con_dados(html, que):
@@ -376,7 +404,7 @@ def con_dados(html, que):
             continue
         if not dentro_de_a:
             trozos[n] = DADOS_EN_TEXTO.sub(
-                lambda m: dado(m.group(0), formula_de(m.group(1), m.group(2), m.group(3)), que), trozo)
+                lambda m: dado(m.group(0), formula_de(m.group(1), m.group(2), m.group(3), tipo_de(m)), que), trozo)
     return "".join(trozos)
 
 
@@ -406,16 +434,19 @@ def postit(p, c):
     if any(v is not None for *_, v in valores):
         partes.append('                    <h2 class="oc-stats-titulo">características</h2>')
         partes.append('                    <dl class="oc-stats">')
+        # El MODIFICADOR en grande (es lo que se usa, y se tira al
+        # pulsarlo) y la puntuación pequeña debajo.
         for _, corto, largo, v in valores:
-            mod = "" if v is None else (
-                '<span class="oc-stat-mod"><span class="visually-hidden">, modificador </span>%s</span>'
-                % dado(modificador(v), "1d20%+d" % modificador_num(v) if modificador_num(v) else "1d20",
-                       "prueba de " + largo.lower()))
+            if v is None:
+                dentro = '<span class="oc-stat-mod">—</span>'
+            else:
+                dentro = ('<span class="oc-stat-mod"><span class="visually-hidden">modificador </span>%s</span>'
+                          '<span class="oc-stat-valor"><span class="visually-hidden">, puntuación </span>%s</span>'
+                          % (dado(modificador(v), "1d20%+d" % modificador_num(v) if modificador_num(v) else "1d20",
+                                  "prueba de " + largo.lower()), v))
             partes.append(
                 '                        <div class="oc-stat">'
-                '<dt><abbr title="%s">%s</abbr></dt>'
-                '<dd><span class="oc-stat-valor">%s</span>%s</dd></div>'
-                % (largo, corto, "—" if v is None else v, mod))
+                '<dt><abbr title="%s">%s</abbr></dt><dd>%s</dd></div>' % (largo, corto, dentro))
         partes.append('                    </dl>')
     return "\n".join(partes)
 
@@ -650,11 +681,13 @@ MONEDAS = {"pc": "cobre", "pp": "plata", "pe": "electro", "po": "oro", "ppt": "p
            "cp": "cobre", "sp": "plata", "ep": "electro", "gp": "oro", "pt": "platino"}
 
 
-def marcas(n, clase=""):
-    """Unos circulitos como los de habilidades.lst (los espacios de
-    conjuro). Solo para la vista."""
-    return '<span class="oc-marcas" aria-hidden="true">%s</span>' % (
-        '<span class="oc-marca%s"></span>' % ((" " + clase) if clase else "")) * n
+def casillas(n, que):
+    """Una casilla por uso o por espacio de conjuro, que se puede marcar
+    como gastada al pulsarla (personajes.js las vuelve botones; solo para
+    llevar la cuenta mientras se juega: no se guarda). «que» es de qué
+    son («forma salvaje», «espacios de nivel 1»), para el lector."""
+    return '<span class="oc-casillas" data-oc-casillas="%s">%s</span>' % (
+        e(que), '<span class="oc-casilla"></span>' * n)
 
 
 # LAS DESCRIPCIONES: lo que sale al desplegar un conjuro, una acción, un
@@ -728,11 +761,88 @@ def chapas_de_conjuro(datos):
                    for clase, x in chapas)
 
 
-def desplegable(cabeza, entrada, origen, c, personajes, avisos, cuerpo_extra="", chapas=False):
+ESCUELAS = ("abjuracion", "conjuracion", "adivinacion", "encantamiento", "evocacion", "ilusion", "nigromancia",
+            "transmutacion", "abjuration", "conjuration", "divination", "enchantment", "evocation", "illusion",
+            "necromancy", "transmutation")
+
+
+def partes_de_conjuro(datos):
+    """Los datos de un conjuro («Nivel 3 · Evocación · 1 acción · 45 m ·
+    V, S, M (guano) · Instantáneo»), cada uno en su sitio de la carta. Van
+    en ese orden (el del importador); lo que no se reconoce, a «otros»."""
+    r = {"nivel": "", "escuela": "", "tiempo": "", "alcance": "", "componentes": "", "duracion": "", "otros": []}
+    for x in [x.strip() for x in str(datos or "").split("·") if x.strip()]:
+        l = llano(x)
+        if not r["nivel"] and (l.startswith("truco") or re.match(r"^nivel \d", l)):
+            r["nivel"] = x
+        elif not r["escuela"] and l in ESCUELAS:
+            r["escuela"] = x
+        elif l == "ritual":
+            r["otros"].append(x)
+        elif not r["componentes"] and re.match(r"^[vsm](\s*,\s*[vsm])*(\s|\(|$)", l):
+            r["componentes"] = x
+        elif not (r["tiempo"] or r["alcance"] or r["componentes"]) and re.search(
+                r"acci|reacci|^\d+ (minuto|hora)s?$|especial", l):
+            r["tiempo"] = x
+        elif not (r["alcance"] or r["componentes"]) and (re.search(r"\d\s*(m|km)\b", l) or l.startswith(
+                ("personal", "toque", "a la vista", "ilimitado", "self", "touch"))):
+            r["alcance"] = x
+        elif not r["duracion"]:
+            r["duracion"] = x
+        else:
+            r["otros"].append(x)
+    return r
+
+
+def carta_de_conjuro(nombre, entrada, origen, cuerpo_html):
+    """Un conjuro como una CARTA (la ventana que sale al pulsarlo): el
+    nombre, el nivel y la escuela; en una caja, el tiempo, el alcance, los
+    componentes y la duración; la descripción; y abajo, los componentes en
+    redondelitos y el material."""
+    d = partes_de_conjuro((entrada or {}).get("datos"))
+    sub = " · ".join(x for x in (d["nivel"], d["escuela"]) if x)
+    chapas = []
+    if "concentracion" in llano(d["duracion"]):
+        chapas.append("concentración")
+    if any(llano(x) == "ritual" for x in d["otros"]):
+        chapas.append("ritual")
+    letras, material = d["componentes"], ""
+    m = re.match(r"^([^(]*?)\s*\((.*)\)\s*$", d["componentes"])
+    if m:
+        letras, material = m.group(1).strip(), m.group(2).strip()
+    datos = [(n, v) for n, v in (("tiempo de lanzamiento", d["tiempo"]), ("alcance", d["alcance"]),
+                                 ("componentes", letras), ("duración", d["duracion"])) if v]
+    partes = ['<div class="oc-carta es-conjuro">',
+              '<div class="oc-carta-cabeza"><h3 class="oc-carta-titulo">%s</h3>%s%s</div>' % (
+                  e(nombre), ('<p class="oc-carta-sub">%s</p>' % e(sub)) if sub else "",
+                  ('<p class="oc-carta-chapas">%s</p>' % "".join(
+                      '<span class="oc-chapa es-concentracion">%s</span>' % e(x) for x in chapas)) if chapas else "")]
+    if datos:
+        partes.append('<dl class="oc-carta-datos">%s</dl>' % "".join(
+            '<div><dt>%s</dt><dd>%s</dd></div>' % (e(n), e(v)) for n, v in datos))
+    if cuerpo_html:
+        partes.append('<p class="oc-carta-banda">descripción</p><div class="oc-texto oc-carta-texto">%s</div>'
+                      % cuerpo_html)
+    if letras or material:
+        redondeles = "".join('<span class="oc-carta-letra">%s</span>' % e(x.strip())
+                             for x in letras.split(",") if x.strip())
+        partes.append('<div class="oc-carta-pie"><span class="oc-carta-letras" aria-hidden="true">%s</span>'
+                      '<span class="visually-hidden">Componentes: %s. </span>%s</div>'
+                      % (redondeles, e(letras), ('<span class="oc-carta-material">%s</span>' % e(material))
+                         if material else ""))
+    if origen:
+        partes.append('<p class="oc-carta-origen">%s</p>' % e(origen))
+    partes.append("</div>")
+    return "".join(partes)
+
+
+def desplegable(cabeza, entrada, origen, c, personajes, avisos, cuerpo_extra="", chapas=False, carta=""):
     """Una cosa de la ficha: si tiene descripción (o texto propio), un
     <details> que se despliega con sus datos y su texto; si no, solo su
     nombre, con de dónde le viene detrás si se sabe. «cabeza» ya va en
-    HTML (el nombre, su emoji, sus usos…)."""
+    HTML (el nombre, su emoji…). Con «carta» (el nombre de un conjuro), lo
+    de dentro es su carta, y al pulsarlo personajes.js la abre en una
+    ventana en vez de desplegarla."""
     origen = (entrada or {}).get("origen") or origen
     cuerpo = (entrada or {}).get("cuerpo") or cuerpo_extra
     datos = (entrada or {}).get("datos") or ""
@@ -740,6 +850,13 @@ def desplegable(cabeza, entrada, origen, c, personajes, avisos, cuerpo_extra="",
         cabeza += chapas_de_conjuro(datos)
     if not (cuerpo or datos):
         return cabeza + chapa_de_origen(origen)
+    if carta:
+        cuerpo_html = con_dados(markdown(cuerpo, c, personajes, avisos), carta.lower()) if cuerpo else ""
+        return ('<details class="oc-desplegable" data-oc-modal="carta"><summary>'
+                '<span class="oc-desplegable-flecha" aria-hidden="true">▸</span>'
+                '<span class="oc-desplegable-cabeza">%s</span>%s</summary>'
+                '<div class="oc-desplegable-dentro">%s</div></details>'
+                % (cabeza, chapa_de_origen(origen), carta_de_conjuro(carta, entrada, origen, cuerpo_html)))
     dentro = ""
     if datos:
         dentro += '<ul class="oc-desplegable-datos">%s</ul>' % "".join(
@@ -762,17 +879,18 @@ USOS = re.compile(r"^(.*?)\s*\((\d+)\s+usos?(?:\s*[,;]\s*([^)]+))?\)\s*$", re.I)
 
 
 def con_usos(texto):
-    """El nombre de algo, con sus casillas de usos si los tiene (y si no,
-    tal cual). En HTML."""
+    """El nombre de algo y, aparte, sus casillas de usos y cómo se recarga
+    (o «» si no tiene usos). En HTML. Van aparte porque las casillas son
+    botones y no pueden ir dentro del nombre que se despliega."""
     m = USOS.match(str(texto or "").strip())
     if not m:
-        return e(texto)
+        return e(texto), ""
     n = int(m.group(2))
     recarga = (m.group(3) or "").strip()
-    return ('%s <span class="oc-usos">%s<span class="visually-hidden">, %d %s</span></span>%s'
-            % (e(m.group(1)), marcas(min(n, 20)), n, "uso" if n == 1 else "usos",
-               ('<span class="oc-chapa es-recarga"><span class="visually-hidden">, se recarga: </span>'
-                '<span aria-hidden="true">↻ </span>%s</span>' % e(recarga)) if recarga else ""))
+    return e(m.group(1)), ('<span class="oc-usos"><span class="visually-hidden">%d %s: </span>%s%s</span>'
+                           % (n, "uso" if n == 1 else "usos", casillas(min(n, 20), m.group(1).strip().lower()),
+                              ('<span class="oc-chapa es-recarga"><span class="visually-hidden">, se recarga: '
+                               '</span><span aria-hidden="true">↻ </span>%s</span>' % e(recarga)) if recarga else ""))
 
 
 def lista_desplegable(cosas, clase, descripciones, c, personajes, avisos, cabeza=None, chapas=False):
@@ -780,9 +898,11 @@ def lista_desplegable(cosas, clase, descripciones, c, personajes, avisos, cabeza
     si tiene descripción."""
     filas = []
     for x in cosas:
-        filas.append("<li>%s</li>" % desplegable(cabeza(x) if cabeza else con_usos(x),
-                                                 buscar_descripcion(descripciones, x),
-                                                 "", c, personajes, avisos, chapas=chapas))
+        nombre, usos = (cabeza(x), "") if cabeza else con_usos(x)
+        filas.append('<li class="oc-fila%s">%s%s</li>' % (
+            " con-usos" if usos else "",
+            desplegable(nombre, buscar_descripcion(descripciones, x), "", c, personajes, avisos, chapas=chapas,
+                        carta=re.sub(r"<[^>]+>", "", nombre) if chapas else ""), usos))
     return '<ul class="%s">%s</ul>' % (clase, "".join(filas))
 
 
@@ -836,25 +956,37 @@ def foto_de_objeto(c, nombre):
 
 def galeria_de_objetos(objetos, descripciones, c, personajes, avisos):
     """El inventario en GALERÍA: cada objeto en su tarjeta, con su imagen
-    (que se ve en grande al pulsarla, con el visor del sitio) o, si no
-    tiene, su emoji en grande; su nombre (desplegable si tiene
-    descripción) y cuántos lleva."""
+    (o, si no tiene, su emoji en grande), su nombre y cuántos lleva. TODA
+    la tarjeta se pulsa y abre una ventana con el objeto en grande, sus
+    datos y su descripción (personajes.js; sin JavaScript se despliega
+    debajo)."""
     tarjetas = []
     for o in objetos:
         m = re.match(r"^(.*?)\s*[×x]\s*(\d+)$", o.strip())
         nombre, cuantos = (m.group(1).strip(), m.group(2)) if m else (o.strip(), "")
         foto = foto_de_objeto(c, nombre)
         if foto:
-            dibujo = ('<button class="lightbox-trigger oc-objeto-foto" type="button" aria-label="Ver en grande: %s">'
-                      '<img src="%s" alt="%s" loading="lazy" decoding="async"></button>' % (e(nombre), e(foto), e(nombre)))
+            dibujo = '<img src="%s" alt="" loading="lazy" decoding="async">' % e(foto)
+            grande = '<img class="oc-carta-imagen" src="%s" alt="%s" decoding="async">' % (e(foto), e(nombre))
         else:
-            dibujo = ('<span class="oc-objeto-foto es-sin-foto" aria-hidden="true">%s</span>'
-                      % (emoji_de_objeto(nombre) or "📦"))
-        cabeza = ('<span class="oc-desplegable-nombre">%s</span>%s'
-                  % (e(nombre), (' <span class="oc-hoja-cuantos">×%s</span>' % cuantos) if cuantos else ""))
-        tarjetas.append('<li class="oc-objeto">%s<div class="oc-objeto-texto">%s</div></li>'
-                        % (dibujo, desplegable(cabeza, buscar_descripcion(descripciones, nombre), "", c, personajes,
-                                               avisos)))
+            emoji = emoji_de_objeto(nombre) or "📦"
+            dibujo = '<span aria-hidden="true">%s</span>' % emoji
+            grande = '<span class="oc-carta-imagen es-sin-foto" aria-hidden="true">%s</span>' % emoji
+        entrada = buscar_descripcion(descripciones, nombre) or {}
+        datos = [x.strip() for x in str(entrada.get("datos") or "").split("·") if x.strip()]
+        cuerpo = entrada.get("cuerpo") or ""
+        carta = ('<div class="oc-carta es-objeto"><div class="oc-carta-cabeza"><h3 class="oc-carta-titulo">%s%s</h3>'
+                 '%s</div>%s%s</div>'
+                 % (e(nombre), (' <span class="oc-hoja-cuantos">×%s</span>' % cuantos) if cuantos else "",
+                    ('<p class="oc-carta-sub">%s</p>' % e(" · ".join(datos))) if datos else "", grande,
+                    ('<p class="oc-carta-banda">descripción</p><div class="oc-texto oc-carta-texto">%s</div>'
+                     % con_dados(markdown(cuerpo, c, personajes, avisos), nombre.lower())) if cuerpo else ""))
+        tarjetas.append(
+            '<li class="oc-objeto"><details class="oc-objeto-detalles" data-oc-modal="objeto"><summary>'
+            '<span class="oc-objeto-foto%s">%s</span><span class="oc-objeto-nombre">%s%s</span></summary>'
+            '<div class="oc-desplegable-dentro">%s</div></details></li>'
+            % ("" if foto else " es-sin-foto", dibujo, e(nombre),
+               (' <span class="oc-hoja-cuantos">×%s</span>' % cuantos) if cuantos else "", carta))
     return '<ul class="oc-inventario">%s</ul>' % "".join(tarjetas)
 
 
@@ -878,8 +1010,12 @@ def tabla_de_ataques(ataques, descripciones, c, personajes, avisos):
             mod = prueba(bono, nombre.lower() + ": ataque")
             principal = m.group(2).strip()
         dano = ""
-        if DADOS_EN_TEXTO.search(principal):
-            dano = con_dados(e(principal), nombre.lower() + ": daño")
+        trozos = list(DADOS_EN_TEXTO.finditer(principal))
+        if trozos:
+            # Todo el daño, UNA tirada: «1d8+3 cortante + 2d6 fuego» ->
+            # 1d8+3[cortante]+2d6[fuego], que sale separado por tipo.
+            formula = "+".join(formula_de(m.group(1), m.group(2), m.group(3), tipo_de(m)) for m in trozos)
+            dano = dado(e(principal), formula, nombre.lower() + ": daño")
         elif principal:
             extra = (principal + ("; " + extra if extra else "")).strip()
         entrada = buscar_descripcion(descripciones, nombre)
@@ -1036,8 +1172,9 @@ def apartado_ficha(p, c, personajes, avisos):
         dentro = ""
         if espacios.get(clave_n):
             n = espacios[clave_n]
-            dentro += ('<p class="oc-hoja-espacios">%s%d %s</p>'
-                       % (marcas(n), n, "espacio" if n == 1 else "espacios"))
+            dentro += ('<p class="oc-hoja-espacios">%s<span>%d %s</span></p>'
+                       % (casillas(n, "espacios de %s" % ("nivel " + clave_n if clave_n != "?" else "conjuro")),
+                          n, "espacio" if n == 1 else "espacios"))
         if por_nivel.get(clave_n):
             # A dos columnas solo si no se despliega ninguno (desplegado, un
             # conjuro a media columna no se lee).
@@ -1077,17 +1214,37 @@ def apartado_ficha(p, c, personajes, avisos):
         titulo, emoji = ventanas[g]
         grupos["rasgos"].append(recuadro(titulo, html_g, "es-ancha", emoji))
 
-    # 🗣️ COMPETENCIAS: los idiomas aparte, y lo demás en pastillas.
-    idiomas, otras = [], []
+    # 🗣️ COMPETENCIAS: los idiomas, las armas (y armaduras y escudos) y
+    # las herramientas, cada cosa en su ventanita.
+    idiomas, armas, armaduras, herramientas, otras = [], [], [], [], []
     for linea in lineas_de(p.get("competencias")):
-        if llano(linea).startswith("idiomas:"):
+        l = llano(linea)
+        if l.startswith("idiomas:"):
             idiomas += [x.strip() for x in linea.split(":", 1)[1].split(",") if x.strip()]
+        elif re.search(r"armadura|escudo|armor|shield", l):
+            armaduras.append(linea)
+        elif re.search(r"\barmas?\b|weapon|espada|ballesta|arco|daga|hacha|maza|lanza|jabalina|honda|martillo|"
+                       r"estoque|cimitarra|\bhoz\b|baston|garrote|dardo|tridente|latigo|pica|alabarda|mangual|"
+                       r"lucero|sword|bow|axe|dagger|club|mace|spear|sickle|staff|sling|dart|whip", l):
+            armas.append(linea)
+        elif re.search(r"util|herramient|tool|kit|juego|instrumento|vehiculo|suministro|supplies|set\b|laud|"
+                       r"flauta|tambor|gaita|lira|cuerno|vehicle|dados|baraja|ajedrez", l):
+            herramientas.append(linea)
         else:
             otras.append(linea)
     if idiomas:
         grupos["competencias"].append(recuadro("idiomas.txt", etiquetas(idiomas), "", "🗣️"))
+    if armas or armaduras:
+        dentro = ""
+        if armas:
+            dentro += '<h5 class="oc-hoja-subtitulo">armas</h5>' + etiquetas(armas)
+        if armaduras:
+            dentro += '<h5 class="oc-hoja-subtitulo">armaduras y escudos</h5>' + etiquetas(armaduras)
+        grupos["competencias"].append(recuadro("armas.txt", dentro, "", "⚔️"))
+    if herramientas:
+        grupos["competencias"].append(recuadro("herramientas.txt", etiquetas(herramientas), "", "🛠️"))
     if otras:
-        grupos["competencias"].append(recuadro("competencias.txt", etiquetas(otras), "", "🛠️"))
+        grupos["competencias"].append(recuadro("otras.txt", etiquetas(otras), "", "📌"))
 
     # 📜 TRASFONDO: quién es, cómo es y qué le mueve.
     quien = [(texto, str(p.get(clave) or "").strip()) for clave, texto in (

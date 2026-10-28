@@ -3889,25 +3889,50 @@
   es un botón que la abre en una fila debajo. Lo que se GASTA («Forma
   salvaje (2 usos, descanso largo)», en acciones) lleva una casilla por
   uso y cómo se recarga, en su chapita (el importador pone la recarga:
-  descanso corto, descanso largo, al amanecer). Los CONJUROS, uno por
+  descanso corto, descanso largo, al amanecer). Esas casillas, y las de
+  los espacios de conjuro, son grandes y SE MARCAN AL PULSARLAS (rellenas
+  y con su aspa), para llevar la cuenta de lo gastado mientras se juega;
+  no se guarda: al recargar, todas libres (generar-personajes.py:
+  casillas; personajes.js). Los CONJUROS, uno por
   línea y cada nivel a todo lo ancho, con chapitas en su título: el
   tiempo (acción, acción adicional, reacción, 1 minuto…), concentración
-  (rellena) y ritual (sacados de su «Datos:»). El INVENTARIO, en galería:
-  cada objeto en su tarjeta con su imagen (se ve en grande al pulsarla,
-  con el visor del sitio) o su emoji, su nombre y cuántos; las imágenes
+  (rellena) y ritual (sacados de su «Datos:»). Al pulsar uno se abre su
+  CARTA en una ventana, como las cartas de conjuro de papel: el nombre,
+  el nivel y la escuela; en una caja redondeada el tiempo de
+  lanzamiento, el alcance, los componentes y la duración; la descripción
+  (con sus dados, que se tiran); los componentes en redondelitos con el
+  material; y de dónde le viene (partes_de_conjuro y carta_de_conjuro,
+  que reparten los «Datos:» en ese orden). El INVENTARIO, en galería:
+  cada objeto en su tarjeta con su imagen o su emoji, su nombre y
+  cuántos; TODA la tarjeta se pulsa y abre una ventana con el objeto en
+  grande, sus datos y su descripción. Las ventanas (de conjuros y de
+  objetos) son modales: el foco se queda dentro, Esc, la ✕ o pulsar
+  fuera las cierran y el foco vuelve a donde estaba; sin JavaScript, la
+  carta se despliega debajo. Las imágenes
   se buscan en imagenes/personajes/<clave>/objetos/<nombre-del-objeto>.webp
   (las baja ahí el importador de D&D Beyond con la casilla «Traer las
   imágenes de los objetos», sitio de imagen «oc-objeto»; las que ya están
   no las vuelve a bajar; también se pueden poner a mano con ese nombre).
   Los RASGOS, en tres ventanitas: raza.txt, clase.txt y dotes.txt
   (según su «(de dónde viene)»; los que no lo dicen, en rasgos.txt).
+  Las COMPETENCIAS, en idiomas.txt, armas.txt (las armas, y las
+  armaduras y escudos aparte) y herramientas.txt (útiles, kits,
+  instrumentos, juegos, vehículos); lo que no es nada de eso, en
+  otras.txt. En el POST-IT, de cada característica sale en grande el
+  MODIFICADOR (que se tira al pulsarlo) y pequeña la puntuación.
   LOS DADOS (scripts/paginas/personajes.js): TODO LO QUE SE TIRA EN LA
   FICHA SE PUEDE PULSAR, como en D&D Beyond: los bonos de las habilidades
   y las salvaciones, el modificador de cada característica (en el
   post-it y en estadisticas.dat), la iniciativa, el ataque de conjuro, el
   ataque y el daño de las armas («+4» tira 1d20+4 y «1d6+2», el daño), el
   dado de golpe (1 dado + la Constitución) y los dados que salgan
-  escritos en las descripciones («1d10», «8d6»). Y con el botón 🎲, la
+  escritos en las descripciones («1d10», «8d6»). EL DAÑO, POR TIPO: si
+  detrás de los dados dice el tipo («1d6+2 perforante», «1d8+3 cortante
+  + 2d6 fuego», «1d10 fire damage», «2d6 de daño de fuego»), al tirar
+  sale el total y, debajo, lo de cada tipo en su chapita de color (fuego
+  rojo, frío azul verdoso, relámpago azul, veneno verde…; colores fijos,
+  medidos). La fórmula lleva el tipo entre corchetes:
+  1d8+3[cortante]+2d6[fuego] (TIPOS_DE_DANO en generar-personajes.py). Y con el botón 🎲, la
   BANDEJA: cada pulsación en d4, d6, d8, d10, d12, d20 o d100 añade un
   dado (cada uno con su silueta: triángulo el d4, cuadrado el d6, rombo
   el d8…); en cuanto un dado tiene alguno, su casilla se rellena, dice
