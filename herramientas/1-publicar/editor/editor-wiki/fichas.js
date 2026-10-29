@@ -25,7 +25,8 @@ const estadoFichas = { colecciones: [], campanas: [], sitios: [], col: null, id:
 const EMOJIS_DE_COLECCIONES = {
     rol: "🎒", npcs: "👥", campana: "📜", misiones: "📌", botin: "🗡️", dinero: "💰", personajes: "🧙",
     recomendaciones: "⭐", "en-lo-que-ando": "📝", gatos: "🐱", reto: "🗓️", calendario: "📆", linea: "⏳",
-    diccionario: "🔤",
+    diccionario: "🔤", "compendio-conjuros": "✨", "compendio-objetos": "🎁", "compendio-rasgos": "🧬",
+    "compendio-acciones": "⚔️",
 };
 
 async function cargarColeccionesWeb() {
@@ -1337,8 +1338,9 @@ empezarFichasWeb();
 
 // Las descripciones de un personaje (bloques que empiezan por «## Nombre»)
 // juntando las que ya tiene con las que trae el importador: si ya tiene
-// una con ese nombre se queda la suya; las que no tiene, se añaden al
-// final.
+// una con ese nombre se queda la suya (con lo que le hayas cambiado solo a
+// él); las que no tiene, se añaden al final. El texto de cada cosa ya no
+// viene aquí: el servidor lo pasa al compendio (0-comun/compendio.py).
 function mezclarDescripcionesOc(viejo, nuevo) {
     const bloques = (texto) => String(texto || "").split(/\n(?=## )/).map((b) => b.trim()).filter(Boolean);
     const nombreDe = (b) => b.startsWith("## ") ? b.split("\n")[0].slice(3).trim().toLowerCase() : "";

@@ -1,0 +1,214 @@
+{
+    "acciones": [
+        {
+            "nombre": "Archer: Luminous Arrow",
+            "datos": "",
+            "texto": "A constellation of an archer appears on you. When you activate this form and as a Bonus Action on your subsequent turns while it lasts, you can make a ranged spell attack, hurling a luminous arrow that targets one creature within 60 feet of yourself. On a hit, the attack deals Radiant damage equal to 1d8 plus your Wisdom modifier."
+        },
+        {
+            "nombre": "Assume Starry Form",
+            "datos": "",
+            "texto": "As a Bonus Action, you can expend a use of your Wild Shape feature to take on a starry form rather than shape-shifting.\n\nWhile in your starry form, you retain your game statistics, but your body becomes luminous, your joints glimmer like stars, and glowing lines connect them as on a star chart. This form sheds [rules]Bright Light[/rules] in a 10-foot radius and [rules]Dim Light[/rules] for an additional 10 feet. The form lasts for 10 minutes. It ends early if you dismiss it (no action required), have the [condition]Incapacitated[/condition] condition, or use this feature again.\n\nWhenever you assume your starry form, choose which of the following constellations glimmers on your body; your choice gives you certain benefits while in the form."
+        },
+        {
+            "nombre": "Ataque adicional",
+            "datos": "",
+            "texto": "You can attack twice, instead of once, whenever you take the Attack action on your turn."
+        },
+        {
+            "nombre": "Canalizar divinidad",
+            "datos": "",
+            "texto": "Your oath allows you to channel divine energy to fuel magical effects. When you use your Channel Divinity, you choose which option to use. You must then finish a short or long rest to use your Channel Divinity again. Some Channel Divinity effects require saving throws (DC ?)."
+        },
+        {
+            "nombre": "Castigo divino",
+            "datos": "",
+            "texto": "Starting at 2nd level, when you hit a creature with a melee weapon attack, you can expend one spell slot to deal radiant damage to the target, in addition to the weapon’s damage. The extra damage is 2d8 for a 1st-level spell slot, plus 1d8 for each spell level higher than 1st, to a maximum of 5d8. The damage increases by 1d8 if the target is an undead or a fiend, to a maximum of 6d8."
+        },
+        {
+            "nombre": "Channel Divinity: Emissary of Peace",
+            "datos": "",
+            "texto": "You can use your Channel Divinity to augment your presence with divine power. As a bonus action, you grant yourself a +5 bonus to Charisma ([skill]Persuasion[/skill]) checks for the next 10 minutes."
+        },
+        {
+            "nombre": "Channel Divinity: Rebuke the Violent",
+            "datos": "",
+            "texto": "You can use your Channel Divinity to rebuke those who use violence. Immediately after an attacker within 30 feet of you deals damage with an attack against a creature other than you, you can use your reaction to force the attacker to make a Wisdom saving throw. On a failed save, the attacker takes radiant damage equal to the damage it just dealt. On a successful save, it takes half as much damage."
+        },
+        {
+            "nombre": "Chef: Cook Treats",
+            "datos": "",
+            "texto": "Time spent mastering the culinary arts has paid off , granting you the following benefits:\n\n- Increase your Constitution or Wisdom score by 1, to a maximum of 20.\n- You gain proficiency with cook’s utensils if you don’t already have it.\n- As part of a short rest, you can cook special food, provided you have ingredients and cook’s utensils on hand. You can prepare enough of this food for a number of creatures equal to 4 + your proficiency bonus. At the end of the short rest, any creature who eats the food and spends one or more Hit Dice to regain hit points regains an extra 1d8 hit points.\n- With one hour of work or when you finish a long rest, you can cook a number of treats equal to your proficiency bonus. These special treats last 8 hours after being made. A creature can use a bonus action to eat one of those treats to gain temporary hit points equal to your proficiency bonus."
+        },
+        {
+            "nombre": "Chef: Special Food",
+            "datos": "",
+            "texto": "Time spent mastering the culinary arts has paid off , granting you the following benefits:\n\n- Increase your Constitution or Wisdom score by 1, to a maximum of 20.\n- You gain proficiency with cook’s utensils if you don’t already have it.\n- As part of a short rest, you can cook special food, provided you have ingredients and cook’s utensils on hand. You can prepare enough of this food for a number of creatures equal to 4 + your proficiency bonus. At the end of the short rest, any creature who eats the food and spends one or more Hit Dice to regain hit points regains an extra 1d8 hit points.\n- With one hour of work or when you finish a long rest, you can cook a number of treats equal to your proficiency bonus. These special treats last 8 hours after being made. A creature can use a bonus action to eat one of those treats to gain temporary hit points equal to your proficiency bonus."
+        },
+        {
+            "nombre": "Circle Spell: Augment",
+            "datos": "",
+            "texto": "When you cast a spell with a range of at least 5 feet, you can increase the range of the spell by 1,000 feet per secondary caster contributing to the spell, up to a maximum of a 1-mile increase."
+        },
+        {
+            "nombre": "Circle Spell: Distribute",
+            "datos": "",
+            "texto": "When you cast a spell that requires Concentration, you can distribute the mental load of the spell among you and the secondary casters. Once the casting is complete, you and all secondary casters can maintain Concentration on this spell. As long as at least one caster who contributed to the spell maintains this Concentration, the spell’s effects remain active."
+        },
+        {
+            "nombre": "Circle Spell: Expand",
+            "datos": "",
+            "texto": "When you cast a spell that creates an area of effect, you can increase one dimension of the spell’s area of effect for this casting by 10 feet per secondary caster contributing to the spell. For example, if a spell creates a 20-foot-radius Sphere, casting it as a Circle spell with two secondary casters would increase the radius to 40 feet. A spell that creates a Line that is 5 feet wide and 300 feet long, cast as a Circle spell with two secondary casters, could make a Line that is either 25 feet wide or 320 feet long.\n\nEach secondary caster contributing to the spell must expend a spell slot (no action required). If the spell fails, these spell slots aren’t expended."
+        },
+        {
+            "nombre": "Circle Spell: Prolong",
+            "datos": "",
+            "texto": "When you cast a spell that has a duration of 1 minute or longer, you can increase the duration of the spell depending on the number of secondary casters contributing to the spell, as detailed in the table below.\n\nEach secondary caster contributing to the spell must expend a spell slot (no action required). If the spell fails, these spell slots aren’t expended.\n\n**Spell Duration**\n\n- Secondary Casters · The Spell Increases Duration by\n- 1–3 · 1 hour\n- 4–6 · 8 hours\n- 7+ · 24 hours"
+        },
+        {
+            "nombre": "Circle Spell: Safeguard",
+            "datos": "",
+            "texto": "When you cast a spell that creates an area of effect, you can carve out a safe zone within that area of effect that is unaffected by the spell for its duration. This safe zone consists of a number of 5-foot Cubes equal to your spellcasting ability modifier plus the number of secondary casters contributing to the spell (minimum of one Cube). You can arrange the Cubes as you like, but each Cube must be contiguous with at least one other Cube.\n\nIf the spell’s area of effect can be moved, the safe zone moves with it."
+        },
+        {
+            "nombre": "Circle Spell: Supplant",
+            "datos": "",
+            "texto": "When you cast a spell that requires at least one Material component with a specified cost that is consumed by the spell, you can reduce the minimum cost of one such Material component by 50 GP per each secondary caster contributing to the spell. For example, casting [spells]Revivify[/spells] as a Circle spell with two secondary casters would reduce the Material component’s minimum cost to 200 GP.\n\nEach secondary caster contributing to the spell must expend a spell slot of a level greater than or equal to the spell’s level (no action required). If the spell fails, these spell slots aren’t expended."
+        },
+        {
+            "nombre": "Convertir puntos de hechicería",
+            "datos": "",
+            "texto": "You can use your sorcery points to gain additional spell slots or sacrifice spell slots to gain additional sorcery points as a bonus action."
+        },
+        {
+            "nombre": "Cutting Words",
+            "datos": "",
+            "texto": "As a reaction when a creature (that's not immune to being charmed) you can see within 60 ft. makes an attack roll, ability check, or damage roll, you can expend one use of Bardic Inspiration, roll the die, and subtract the number from the creature's roll. You can do so after the roll but before knowing the result."
+        },
+        {
+            "nombre": "Eerie Token - Create",
+            "datos": "",
+            "texto": "As a bonus action, you can harmlessly remove a lock of your hair, one of your nails, or one of your teeth. This token is imbued with magic until you finish a long rest. While the token is imbued in this way, you can take these actions:\n\n**Telepathic Message.** As an action, you can send a telepathic message to the creature holding or carrying the token, as long as you are within 10 miles of it. The message can contain up to twenty-five words.\n\n**Remote Viewing.** If you are within 10 miles of the token, you can enter a trance as an action. The trance lasts for 1 minute, but it ends early if you dismiss it (no action required) or are [condition]incapacitated[/condition]. During this trance, you can see and hear from the token as if you were located where it is. While you are using your senses at the token’s location, you are [condition]blinded[/condition] and [condition]deafened[/condition] in regard to your own surroundings. When the trance ends, the token is harmlessly destroyed.\n\nOnce you create a token using this feature, you can’t do so again until you finish a long rest, at which point your missing part regrows."
+        },
+        {
+            "nombre": "Eerie Token - Remote Viewing",
+            "datos": "",
+            "texto": "As a bonus action, you can harmlessly remove a lock of your hair, one of your nails, or one of your teeth. This token is imbued with magic until you finish a long rest. While the token is imbued in this way, you can take these actions:\n\n**Telepathic Message.** As an action, you can send a telepathic message to the creature holding or carrying the token, as long as you are within 10 miles of it. The message can contain up to twenty-five words.\n\n**Remote Viewing.** If you are within 10 miles of the token, you can enter a trance as an action. The trance lasts for 1 minute, but it ends early if you dismiss it (no action required) or are [condition]incapacitated[/condition]. During this trance, you can see and hear from the token as if you were located where it is. While you are using your senses at the token’s location, you are [condition]blinded[/condition] and [condition]deafened[/condition] in regard to your own surroundings. When the trance ends, the token is harmlessly destroyed.\n\nOnce you create a token using this feature, you can’t do so again until you finish a long rest, at which point your missing part regrows."
+        },
+        {
+            "nombre": "Eerie Token - Telepathic Message",
+            "datos": "",
+            "texto": "As a bonus action, you can harmlessly remove a lock of your hair, one of your nails, or one of your teeth. This token is imbued with magic until you finish a long rest. While the token is imbued in this way, you can take these actions:\n\n**Telepathic Message.** As an action, you can send a telepathic message to the creature holding or carrying the token, as long as you are within 10 miles of it. The message can contain up to twenty-five words.\n\n**Remote Viewing.** If you are within 10 miles of the token, you can enter a trance as an action. The trance lasts for 1 minute, but it ends early if you dismiss it (no action required) or are [condition]incapacitated[/condition]. During this trance, you can see and hear from the token as if you were located where it is. While you are using your senses at the token’s location, you are [condition]blinded[/condition] and [condition]deafened[/condition] in regard to your own surroundings. When the trance ends, the token is harmlessly destroyed.\n\nOnce you create a token using this feature, you can’t do so again until you finish a long rest, at which point your missing part regrows."
+        },
+        {
+            "nombre": "Favored Foe",
+            "datos": "",
+            "texto": "*1st-level ranger feature, which replaces the Favored Enemy feature and works with the Foe Slayer feature*\nWhen you hit a creature with an attack roll, you can call on your mystical bond with nature to mark the target as your favored enemy for 1 minute or until you lose your concentration (as if you were concentrating on a spell).\n\nThe first time on each of your turns that you hit the favored enemy and deal damage to it, including when you mark it, you can increase that damage by 1d4.\n\nYou can use this feature to mark a favored enemy a number of times equal to your proficiency bonus, and you regain all expended uses when you finish a long rest.\n\nThis feature’s extra damage increases when you reach certain levels in this class: to 1d6 at 6th level and to 1d8 at 14th level."
+        },
+        {
+            "nombre": "Forma salvaje",
+            "datos": "",
+            "texto": "The power of nature allows you to assume the form of an animal. As a Bonus Action, you [rules]shape-shifting;shape-shift[/rules] into a Beast form that you have learned for this feature (see “Known Forms” below). You stay in that form for a number of hours equal to half your Druid level or until you use Wild Shape again, have the [condition]Incapacitated[/condition] condition, or die. You can also leave the form early as a Bonus Action.\n\n***Number of Uses.*** You can use Wild Shape twice. You regain one expended use when you finish a Short Rest, and you regain all expended uses when you finish a Long Rest.\n\nYou gain additional uses when you reach certain Druid levels, as shown in the Wild Shape column of the Druid Features table.\n\n***Known Forms.*** You know four Beast forms for this feature, chosen from among Beast stat blocks that have a maximum Challenge Rating of 1/4 and that lack a Fly Speed. Whenever you finish a Long Rest, you can replace one of your known forms with another eligible form.\n\nWhen you reach certain Druid levels, your number of known forms and the maximum Challenge Rating for those forms increases, as shown in the Beast Shapes table. In addition, starting at level 8, you can adopt a form that has a Fly Speed.\n\nWhen choosing known forms, you may look in the *Monster Manual* or elsewhere for eligible Beasts if the Dungeon Master permits you to do so.\n\nBeast Shapes\n- Druid Level · Known Forms · Max CR · Fly Speed\n- 2 · 4 · 1/4 · No\n- 4 · 6 · 1/2 · No\n- 8 · 8 · 1 · Yes\n\n***Rules While Shape-Shifted.*** While in a form, you retain your personality, memories, and ability to speak, and the following rules apply:\n\n***Temporary Hit Points.*** When you assume a Wild Shape form, you gain a number of [rules]Temporary Hit Points[/rules] equal to your Druid level.\n\n***Game Statistics.*** Your game statistics are replaced by the Beast’s stat block, but you retain your creature type; Hit Points; Hit Point Dice; Intelligence, Wisdom, and Charisma scores; class features; languages; and feats. You also retain your skill and saving throw proficiencies and use your Proficiency Bonus for them, in addition to gaining the proficiencies of the creature. If a skill or saving throw modifier in the Beast’s stat block is higher than yours, use the one in the stat block.\n\n***No Spellcasting.*** You can’t cast spells, but shape-shifting doesn’t break your [rules]Concentration[/rules] or otherwise interfere with a spell you’ve already cast.\n\n***Objects.*** Your ability to handle objects is determined by the form’s limbs rather than your own. In addition, you choose whether your equipment falls in your space, merges into your new form, or is worn by it. Worn equipment functions as normal, but the DM decides whether it’s practical for the new form to wear a piece of equipment based on the creature’s size and shape. Your equipment doesn’t change size or shape to match the new form, and any equipment that the new form can’t wear must either fall to the ground or merge with the form. Equipment that merges with the form has no effect while you’re in that form."
+        },
+        {
+            "nombre": "Fury of the Small",
+            "datos": "",
+            "texto": "When you damage a creature with an attack or a spell and the creature’s size is larger than yours, you can cause the attack or spell to deal extra damage to the creature. The extra damage equals your proficiency bonus.\n\nYou can use this trait a number of times equal to your proficiency bonus, regaining all expended uses when you finish a long rest, and you can use it no more than once per turn."
+        },
+        {
+            "nombre": "Gathered Swarm",
+            "datos": "",
+            "texto": "*3rd-level Swarmkeeper feature *\n\nA swarm of intangible nature spirits has bonded itself to you and can assist you in battle. While you’re alive, the swarm remains in your space, crawling on you or flying and skittering around you within your space. You determine its appearance, or you generate its appearance by rolling on the Swarm Appearance table.\n\n**Swarm Appearance**\n\n- d4 · Appearance\n- 1 · Swarming insects\n- 2 · Miniature twig blights\n- 3 · Fluttering birds\n- 4 · Playful pixies\n\nOnce on each of your turns, you can cause the swarm to assist you in one of the following ways, immediately after you hit a creature with an attack:\n\n- The attack’s target takes 1d6 piercing damage from the swarm.\n- The attack’s target must succeed on a Strength saving throw against your spell save DC or be moved by the swarm up to 15 feet horizontally in a direction of your choice.\n- You are moved by the swarm 5 feet horizontally in a direction of your choice."
+        },
+        {
+            "nombre": "Harness Divine Power",
+            "datos": "",
+            "texto": "*3rd-level paladin feature*\nYou can expend a use of your Channel Divinity to fuel your spells. As a bonus action, you touch your holy symbol, utter a prayer, and regain one expended spell slot, the level of which can be no higher than half your proficiency bonus (rounded up). The number of times you can use this feature is based on the level you’ve reached in this class: 3rd level, once; 7th level, twice; and 15th level, thrice. You regain all expended uses when you finish a long rest."
+        },
+        {
+            "nombre": "Initiate a Circle Spell",
+            "datos": "",
+            "texto": "You take a Magic action to initiate casting a Circle spell. When you do so, choose which Circle casting option you’re using for this casting; you must also meet any of the other requirements described in that option’s text. Until the Circle spell’s casting is complete, you must maintain Concentration on the spell."
+        },
+        {
+            "nombre": "Inspiración bárdica",
+            "datos": "",
+            "texto": "As a bonus action, a creature (other than yourself) within 60 ft. that can hear you gains an inspiration die (?). For 10 minutes, the creature can add it to one ability check, attack roll, or saving throw. This can be added after seeing the roll, but before knowing the outcome."
+        },
+        {
+            "nombre": "Lay on Hands Pool",
+            "datos": "",
+            "texto": "Your blessed touch can heal wounds. You have a pool of healing power that replenishes when you take a long rest. With that pool, you can restore a total number of hit points equal to your paladin level × 5.\n\nAs an action, you can touch a creature and draw power from the pool to restore a number of hit points to that creature, up to the maximum amount remaining in your pool.\n\nAlternatively, you can expend 5 hit points from your pool of healing to cure the target of one disease or neutralize one poison affecting it. You can cure multiple diseases and neutralize multiple poisons with a single use of Lay on Hands, expending hit points separately for each one.\n\nThis feature has no effect on undead and constructs."
+        },
+        {
+            "nombre": "Leave Druidic Message",
+            "datos": "",
+            "texto": "You know Druidic, the secret language of Druids. While learning this ancient tongue, you also unlocked the magic of communicating with animals; you always have the [spells]Speak with Animals[/spells] spell prepared.\n\nYou can use Druidic to leave hidden messages. You and others who know Druidic automatically spot such a message. Others spot the message’s presence with a successful DC 15 Intelligence ([skill]Investigation[/skill]) check but can’t decipher it without magic."
+        },
+        {
+            "nombre": "Magical Inspiration",
+            "datos": "",
+            "texto": "*2nd-level bard feature*\nIf a creature has a Bardic Inspiration die from you and casts a spell that restores hit points or deals damage, the creature can roll that die and choose a target affected by the spell. Add the number rolled as a bonus to the hit points regained or the damage dealt. The Bardic Inspiration die is then lost."
+        },
+        {
+            "nombre": "Metamagia: Conjuro duplicado",
+            "datos": "",
+            "texto": "When you cast a spell that targets only one creature and doesn’t have a range of self, you can spend a number of sorcery points equal to the spell’s level to target a second creature in range with the same spell (1 sorcery point if the spell is a cantrip).\n\nTo be eligible, a spell must be incapable of targeting more than one creature at the spell’s current level. For example, [spell]magic missile[/spell] and [spell]scorching ray[/spell] aren’t eligible, but [spell]ray of frost[/spell] and [spell]chromatic orb[/spell] are."
+        },
+        {
+            "nombre": "Metamagia: Conjuro potenciado",
+            "datos": "",
+            "texto": "When you roll damage for a spell, you can spend 1 sorcery point to reroll a number of the damage dice up to your Charisma modifier (minimum of one). You must use the new rolls.\n\nYou can use Empowered Spell even if you have already used a different Metamagic option during the casting of the spell."
+        },
+        {
+            "nombre": "Nimble Escape: Disengage",
+            "datos": "",
+            "texto": "You can take the Disengage or Hide action as a bonus action on each of your turns."
+        },
+        {
+            "nombre": "Nimble Escape: Hide",
+            "datos": "",
+            "texto": "You can take the Disengage or Hide action as a bonus action on each of your turns."
+        },
+        {
+            "nombre": "Puntos de hechicería",
+            "datos": "",
+            "texto": "You have 3 sorcery points that you regain when you finish a long rest."
+        },
+        {
+            "nombre": "Recuperación arcana",
+            "datos": "",
+            "texto": "You can regain some of your magical energy by studying your spellbook. When you finish a Short Rest, you can choose expended spell slots to recover. The spell slots can have a combined level equal to no more than half your Wizard level (round up), and none of the slots can be level 6 or higher. For example, if you’re a level 4 Wizard, you can recover up to two levels’ worth of spell slots, regaining either one level 2 spell slot or two level 1 spell slots.\n\nOnce you use this feature, you can’t do so again until you finish a Long Rest."
+        },
+        {
+            "nombre": "Restore Balance",
+            "datos": "",
+            "texto": "*1st-level Clockwork Soul feature*\n\nYour connection to the plane of absolute order allows you to equalize chaotic moments. When a creature you can see within 60 feet of you is about to roll a d20 with advantage or disadvantage, you can use your reaction to prevent the roll from being affected by advantage and disadvantage.\n\nYou can use this feature a number of times equal to your proficiency bonus, and you regain all expended uses when you finish a long rest."
+        },
+        {
+            "nombre": "Sentido divino",
+            "datos": "",
+            "texto": "The presence of strong evil registers on your senses like a noxious odor, and powerful good rings like heavenly music in your ears. As an action, you can open your awareness to detect such forces. Until the end of your next turn, you know the location of any celestial, fiend, or undead within 60 feet of you that is not behind total cover. You know the type (celestial, fiend, or undead) of any being whose presence you sense, but not its identity (the vampire Count Strahd von Zarovich, for instance). Within the same radius, you also detect the presence of any place or object that has been consecrated or desecrated, as with the [spell]hallow[/spell] spell.\n\nYou can use this feature a number of times equal to 1 + your Charisma modifier. When you finish a long rest, you regain all expended uses."
+        },
+        {
+            "nombre": "Star Map: Ceremony",
+            "datos": "",
+            "texto": "You’ve created a star chart as part of your heavenly studies. It is a Tiny object, and you can use it as a Spellcasting Focus for your Druid spells. You determine its form by rolling on the Star Map table or by choosing one.\n\nWhile holding the map, you have the [spells]Guidance[/spells] and [spells]Guiding Bolt[/spells] spells prepared, and you can cast *Guiding Bolt* without expending a spell slot. You can cast it in that way a number of times equal to your Wisdom modifier (minimum of once), and you regain all expended uses when you finish a [rules]Long Rest[/rules].\n\nIf you lose the map, you can perform a 1-hour ceremony to magically create a replacement. This ceremony can be performed during a Short or Long Rest, and it destroys the previous map.\n\nStar Map\n- 1d6 · Map Form\n- 1 · A scroll bearing depictions of constellations\n- 2 · A stone tablet with fine holes drilled through it\n- 3 · An owlbear hide tooled with stellar symbols\n- 4 · A collection of maps bound in an ebony cover\n- 5 · A crystal engraved with starry patterns\n- 6 · A glass disk etched with constellations"
+        },
+        {
+            "nombre": "Strength of the Grave",
+            "datos": "",
+            "texto": "When damage (that isn't radiant or from a critical hit) reduces you to 0 HP, you can make a CHA saving throw (DC 5 + the damage taken). On a success, you instead drop to 1 HP (and can't use this feature again until you finish a long rest)."
+        },
+        {
+            "nombre": "Strixhaven Mascot (Familiar Reaction)",
+            "datos": "",
+            "texto": "You have learned how to summon a Strixhaven mascot to assist you, granting you these benefits:\n\n- You can cast the [spell]find familiar[/spell] spell as a ritual. Your familiar can take the form of the mascot associated with the college you chose for the Strixhaven Initiate feat: a [monster]spirit statue mascot[/monster] (Lorehold), an [monster]art elemental mascot[/monster] (Prismari), a [monster]fractal mascot[/monster] (Quandrix), an [monster]inkling mascot[/monster] (Silverquill), or a [monster]pest mascot[/monster] (Witherbloom). Stat blocks for these creatures appear in chapter 7.\n- When you take the [action]Attack[/action] action on your turn, you can forgo one attack to allow your mascot familiar to make one attack of its own with its reaction.\n- If your mascot familiar is within 60 feet of you, you can teleport as an action, swapping places with the familiar. If your destination space is too small for you to occupy, the teleportation fails and is wasted. Once you teleport in this way, you can’t do so again until you finish a long rest, unless you expend a spell slot of 2nd level or higher to do it again."
+        },
+        {
+            "nombre": "Strixhaven Mascot (Teleport)",
+            "datos": "",
+            "texto": "You have learned how to summon a Strixhaven mascot to assist you, granting you these benefits:\n\n- You can cast the [spell]find familiar[/spell] spell as a ritual. Your familiar can take the form of the mascot associated with the college you chose for the Strixhaven Initiate feat: a [monster]spirit statue mascot[/monster] (Lorehold), an [monster]art elemental mascot[/monster] (Prismari), a [monster]fractal mascot[/monster] (Quandrix), an [monster]inkling mascot[/monster] (Silverquill), or a [monster]pest mascot[/monster] (Witherbloom). Stat blocks for these creatures appear in chapter 7.\n- When you take the [action]Attack[/action] action on your turn, you can forgo one attack to allow your mascot familiar to make one attack of its own with its reaction.\n- If your mascot familiar is within 60 feet of you, you can teleport as an action, swapping places with the familiar. If your destination space is too small for you to occupy, the teleportation fails and is wasted. Once you teleport in this way, you can’t do so again until you finish a long rest, unless you expend a spell slot of 2nd level or higher to do it again."
+        }
+    ]
+}

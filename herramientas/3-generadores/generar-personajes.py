@@ -84,6 +84,7 @@
 
 import html
 import re
+from collections import ChainMap
 import sys
 from pathlib import Path
 
@@ -91,6 +92,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "0-comun"))
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 from comun import PLANTILLAS, RAIZ, escribir_texto, leer_json, leer_texto, nombre_archivo  # noqa: E402
+import compendio  # noqa: E402
 from mundo_formato import Avisos, Conversor  # noqa: E402
 
 DATOS = RAIZ / "datos" / "personajes" / "personajes.json"
@@ -723,35 +725,79 @@ def casillas(n, que):
 
 
 # LAS DESCRIPCIONES: lo que sale al desplegar un conjuro, una acción, un
-# rasgo, un ataque o un objeto. Van todas en el campo «descripciones», un
-# bloque por cosa, y se buscan por el nombre (sin mirar mayúsculas ni
-# tildes; y si no está, sin lo de entre paréntesis del final: «Puntos de
-# hechicería (10 usos)» encuentra «Puntos de hechicería»):
+# rasgo, un ataque o un objeto. Lo de cada cosa (sus datos y su texto)
+# está en el COMPENDIO, compartido por todos mis personajes (un JSON por
+# tipo en datos/personajes/compendio/: ver herramientas/0-comun/
+# compendio.py). En el campo «descripciones» de cada personaje se queda
+# lo suyo, un bloque por cosa:
 #     ## Bola de fuego
+#     Tipo: conjuros
 #     Origen: Lista de Hechicero
-#     Datos: Nivel 3 · Evocación · 1 acción · 45 m · V, S, M · Instantáneo
-#     El texto, con formato…
-# «Origen» (de dónde le viene: «Hechicero, nivel 3», «Dote»…) y «Datos»
-# (en pastillitas) son opcionales.
+# «Tipo» (conjuros, objetos, rasgos o acciones) dice a cuál del compendio
+# va; «Origen», de dónde le viene. Si debajo hay «Datos:» o un texto, esos
+# mandan para este personaje (cambiarle algo solo a él). Se busca por el
+# nombre (sin mirar mayúsculas ni tildes; y si no está, sin lo de entre
+# paréntesis del final: «Puntos de hechicería (10 usos)» encuentra
+# «Puntos de hechicería»).
 
 def leer_descripciones(texto):
     salida, actual = {}, None
     for linea in str(texto or "").split("\n"):
         if linea.startswith("## "):
             nombre = linea[3:].strip()
-            actual = {"nombre": nombre, "origen": "", "datos": "", "cuerpo": []}
+            actual = {"nombre": nombre, "origen": "", "datos": "", "tipo": "", "cuerpo": []}
             if nombre and llano(nombre) not in salida:
                 salida[llano(nombre)] = actual
             continue
         if actual is None:
             continue
-        m = re.match(r"^\s*(origen|datos)\s*:\s*(.*)$", linea, re.I)
+        m = re.match(r"^\s*(origen|datos|tipo)\s*:\s*(.*)$", linea, re.I)
         if m and not any(x.strip() for x in actual["cuerpo"]):
             actual[llano(m.group(1))] = m.group(2).strip()
             continue
         actual["cuerpo"].append(linea)
     for d in salida.values():
         d["cuerpo"] = "\n".join(d["cuerpo"]).strip()
+    return salida
+
+
+# El compendio, leído una vez.
+_COMPENDIO = {}
+
+
+def compendio_de(tipo):
+    if tipo not in _COMPENDIO:
+        _COMPENDIO[tipo] = {k: {"nombre": x["nombre"], "datos": str(x.get("datos") or ""),
+                                "cuerpo": str(x.get("texto") or ""), "origen": ""}
+                            for k, x in compendio.por_nombre(tipo).items()}
+    return _COMPENDIO[tipo]
+
+
+def descripciones_de(p):
+    """Para cada tipo (conjuros, objetos, rasgos, acciones), dónde buscar
+    lo de este personaje: lo suyo encima de lo del compendio, primero lo
+    de ese tipo y luego lo de los demás (una acción cuyo texto está con los
+    rasgos, «Forma salvaje»…)."""
+    propias = leer_descripciones(p.get("descripciones"))
+    juntas = {}
+    for tipo in compendio.TIPOS:
+        base = compendio_de(tipo)
+        mios = {}
+        for k, x in propias.items():
+            t_propio = llano(x.get("tipo"))
+            if t_propio and t_propio != tipo:
+                continue
+            de_base = base.get(k) or {}
+            if not (t_propio or de_base or x["cuerpo"] or x["datos"]):
+                continue
+            mios[k] = {"nombre": x["nombre"], "origen": x["origen"],
+                       "datos": x["datos"] or de_base.get("datos", ""),
+                       "cuerpo": x["cuerpo"] or de_base.get("cuerpo", "")}
+        juntas[tipo] = (mios, base)
+    salida = {}
+    for tipo in compendio.TIPOS:
+        orden = [tipo] + [t for t in compendio.TIPOS if t != tipo]
+        salida[tipo] = ChainMap(*[d for t in orden for d in juntas[t]])
     return salida
 
 
@@ -1175,10 +1221,10 @@ def apartado_ficha(p, c, personajes, avisos):
     largo_de = dict((a, c3) for a, _, c3 in STATS)
     # Las ventanitas, repartidas en las SUBPESTAÑAS de la ficha.
     grupos = {g: [] for g, _, _ in SUBPESTANAS_DE_FICHA}
-    descripciones = leer_descripciones(p.get("descripciones"))
+    desc = descripciones_de(p)
 
-    def lista_con(cosas, clase="oc-lista-maquina", cabeza=None, chapas=False):
-        return lista_desplegable(cosas, clase, descripciones, c, personajes, avisos, cabeza, chapas)
+    def lista_con(cosas, clase="oc-lista-maquina", cabeza=None, chapas=False, tipo="acciones"):
+        return lista_desplegable(cosas, clase, desc[tipo], c, personajes, avisos, cabeza, chapas)
 
     competentes = {}
     for linea in lineas_de(p.get("habilidades")):
@@ -1261,7 +1307,7 @@ def apartado_ficha(p, c, personajes, avisos):
     # ⚔️ ACCIONES: los ataques y lo demás que hace en un turno.
     ataques = lineas_de(p.get("ataques"))
     if ataques:
-        grupos["acciones"].append(recuadro("ataques.lst", tabla_de_ataques(ataques, descripciones, c, personajes,
+        grupos["acciones"].append(recuadro("ataques.lst", tabla_de_ataques(ataques, desc["objetos"], c, personajes,
                                                                            avisos), "es-ancha", "🗡️"))
     acciones = lineas_de(p.get("acciones"))
     if acciones:
@@ -1308,7 +1354,7 @@ def apartado_ficha(p, c, personajes, avisos):
         if por_nivel.get(clave_n):
             # A dos columnas solo si no se despliega ninguno (desplegado, un
             # conjuro a media columna no se lee).
-            dentro += lista_con(por_nivel[clave_n], "oc-lista-maquina oc-hoja-conjuros", chapas=True)
+            dentro += lista_con(por_nivel[clave_n], "oc-lista-maquina oc-hoja-conjuros", chapas=True, tipo="conjuros")
         # Cada nivel a todo lo ancho, uno detrás de otro.
         grupos["conjuros"].append(recuadro(titulo, dentro, "es-ancha", "✨" if clave_n == "0" else "📖"))
 
@@ -1334,7 +1380,7 @@ def apartado_ficha(p, c, personajes, avisos):
         lugares = {"equipado": {}, "magicos": {}, "mochila": {}}
         for o in objetos:
             sin_cuantos = re.sub(r"\s*[×x]\s*\d+\s*(\[[^\]]*\])?\s*$", "", re.sub(r"\s*\[[^\]]*\]\s*$", "", o))
-            entrada = buscar_descripcion(descripciones, sin_cuantos)
+            entrada = buscar_descripcion(desc["objetos"], sin_cuantos)
             linea, lugar = lugar_de_objeto(o, entrada)
             lugares[lugar].setdefault(categoria_de_objeto(sin_cuantos, entrada), []).append(linea)
         for lugar, titulo, emoji in (("equipado", "equipado.lst", "🗡️"), ("magicos", "magicos.lst", "✨"),
@@ -1343,13 +1389,13 @@ def apartado_ficha(p, c, personajes, avisos):
                 continue
             dentro = "".join(
                 '<h5 class="oc-hoja-subtitulo"><span class="oc-subtitulo-emoji" aria-hidden="true">%s</span> %s</h5>%s'
-                % (emoji_c, e(cat), galeria_de_objetos(lugares[lugar][cat], descripciones, c, personajes, avisos))
+                % (emoji_c, e(cat), galeria_de_objetos(lugares[lugar][cat], desc["objetos"], c, personajes, avisos))
                 for cat, emoji_c, _ in CATEGORIAS_DE_OBJETO if cat in lugares[lugar])
             grupos["inventario"].append(recuadro(titulo, dentro, "es-ancha", emoji))
 
     # 🧬 RASGOS: en una ventanita los de raza, en otra los de clase y en
     # otra las dotes (y los que no dicen de dónde vienen, aparte).
-    rasgos = rasgos_desplegables(p.get("rasgos"), descripciones, c, personajes, avisos)
+    rasgos = rasgos_desplegables(p.get("rasgos"), desc["rasgos"], c, personajes, avisos)
     if rasgos is None:
         texto = markdown(p.get("rasgos"), c, personajes, avisos)
         rasgos = [("otros", '<div class="oc-texto">%s</div>' % texto)] if texto else []
@@ -1427,7 +1473,7 @@ def apartado_ficha(p, c, personajes, avisos):
                        (' <span class="oc-combo-tirada es-dano">%s</span>' % dano) if dano else "",
                        (' <span class="oc-combo-extra">%s</span>' % e(extra)) if extra else ""))
         es_conjuro = llano(que) in nombres_de_conjuros
-        return desplegable('<span class="oc-desplegable-nombre">%s</span>' % e(que), buscar_descripcion(descripciones, que),
+        return desplegable('<span class="oc-desplegable-nombre">%s</span>' % e(que), buscar_descripcion(desc["conjuros" if es_conjuro else "acciones"], que),
                            "", c, personajes, avisos, chapas=es_conjuro, carta=que if es_conjuro else "")
 
     for combo in leer_combos(p.get("combos")):
@@ -1443,7 +1489,7 @@ def apartado_ficha(p, c, personajes, avisos):
         turno["acción"].append((a.partition(":")[0].strip(), "ataque"))
     for lista in por_nivel.values():
         for n in lista:
-            tiempo = llano(partes_de_conjuro((buscar_descripcion(descripciones, n) or {}).get("datos"))["tiempo"])
+            tiempo = llano(partes_de_conjuro((buscar_descripcion(desc["conjuros"], n) or {}).get("datos"))["tiempo"])
             hueco = ("acción adicional" if "adicional" in tiempo else "reacción" if "reaccion" in tiempo
                      else "acción" if "accion" in tiempo else None)
             if hueco:

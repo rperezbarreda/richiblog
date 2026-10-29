@@ -328,6 +328,8 @@
                                     preguntar, la lista de GENERADORES…)
               imagenes.py           los sitios de las imágenes y cómo se dejan
               dnd_es.py             el diccionario de D&D en español
+              compendio.py          el compendio de mis personajes: cada conjuro,
+                                    objeto, rasgo y acción, una vez para todos
               resumenes.py          los resúmenes de las notas de rol
               mapas_mundo.py        situar un mapa en el mapamundi y ampliarlo a la
                                     escala común (lo usa el editor de mapas)
@@ -3861,21 +3863,42 @@
   alcance, componentes, duración…) y su texto entero. Al lado del nombre,
   en una chapita, DE DÓNDE LE VIENE («Hechicero, nivel 3», «Raza:
   Semielfo», «Dote», «Por Fuente de magia (Hechicero, nivel 2)», «Lista de
-  Hechicero»). Las descripciones van en el campo «Descripciones», un
-  bloque por cosa que empieza por «## Nombre» (el mismo nombre que en su
-  lista; no mira mayúsculas ni tildes, y «Puntos de hechicería (10 usos)»
-  encuentra «Puntos de hechicería»), con «Origen:» y «Datos:» opcionales
-  debajo y luego el texto con formato. Los RASGOS, si se escriben en lista
-  («- **Nombre** (de dónde le viene)» o «- **Nombre.** Lo que hace.»),
-  salen también desplegables; escritos de otra manera, salen tal cual
-  (generar-personajes.py: leer_descripciones, buscar_descripcion,
-  desplegable, rasgos_desplegables). El importador de D&D Beyond las
-  rellena: el texto de cada cosa (pasado de HTML a Markdown, con las
-  cuentas de D&D Beyond hechas: usos, competencia, nivel…; EN INGLÉS, que
-  es como lo da D&D Beyond: tradúcelo a mano si quieres) y de dónde le
-  viene; y al volver a importar NO pisa las descripciones que ya tengas,
-  solo añade las nuevas (dndbeyond.py: descripciones_de, html_a_markdown,
-  _plantillas; fichas.js: mezclarDescripcionesOc).
+  Hechicero»).
+  EL COMPENDIO: lo que cuenta cada cosa (sus datos y su texto) está UNA
+  VEZ para todos mis personajes, en un JSON por cada tipo:
+      datos/personajes/compendio/conjuros.json
+      datos/personajes/compendio/objetos.json   (también las armas)
+      datos/personajes/compendio/rasgos.json    (de raza, de clase, dotes)
+      datos/personajes/compendio/acciones.json
+  Cada uno es {"conjuros": [{"nombre": …, "datos": …, "texto": …}, …]}:
+  «datos» son las pastillitas separadas por «·» y «texto», lo que hace,
+  con formato. SI CAMBIAS UNA, CAMBIA EN TODAS LAS FICHAS QUE LA TENGAN.
+  Se editan a mano o en el editor: Rol → «✨ Compendio: conjuros», «🎁
+  Compendio: objetos», «🧬 Compendio: rasgos», «⚔️ Compendio: acciones»
+  (y al guardar se rehacen las fichas). El código, en
+  herramientas/0-comun/compendio.py.
+  EN CADA PERSONAJE, su campo «Descripciones» (la pestaña 📝) solo dice
+  qué tiene y de dónde le viene: un bloque por cosa que empieza por «##
+  Nombre» (el mismo nombre que en su lista; no mira mayúsculas ni tildes,
+  y «Puntos de hechicería (10 usos)» encuentra «Puntos de hechicería»), y
+  debajo «Tipo:» (conjuros, objetos, rasgos o acciones: en qué JSON del
+  compendio mirar primero) y «Origen:». Si en un bloque escribes también
+  «Datos:» o un texto, ese MANDA SOLO PARA ESE PERSONAJE (para cambiarle
+  algo a él sin tocar a los demás; así están, por ejemplo, los conjuros
+  que un personaje tiene en su versión de 2014 y otro en la de 2024). Los
+  RASGOS, si se escriben en lista («- **Nombre** (de dónde le viene)» o
+  «- **Nombre.** Lo que hace.»), salen también desplegables; escritos de
+  otra manera, salen tal cual (generar-personajes.py: leer_descripciones,
+  descripciones_de, compendio_de, desplegable, rasgos_desplegables).
+  El importador de D&D Beyond trae el texto de cada cosa (pasado de HTML
+  a Markdown, con las cuentas de D&D Beyond hechas: usos, competencia,
+  nivel…; EN INGLÉS, que es como lo da D&D Beyond: tradúcelo en el
+  compendio si quieres) y lo AÑADE AL COMPENDIO si aún no está; lo que ya
+  está en el compendio no lo toca. Al personaje le deja solo los bloques
+  con «Tipo:» y «Origen:», y al volver a importar NO pisa los bloques que
+  ya tenga, solo añade los nuevos (dndbeyond.py: descripciones_de,
+  html_a_markdown, _plantillas; editor_web.py: _al_compendio; fichas.js:
+  mezclarDescripcionesOc).
   CÓMO SE REPARTE LA PÁGINA DE CADA UNO: a la IZQUIERDA, estrecho y
   alto, el post-it amarillo con el nombre en su recuadro (bajito) y, al
   lado, los PG y la CA; la foto; la raza y la clase; y las

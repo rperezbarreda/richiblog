@@ -1,0 +1,389 @@
+{
+    "conjuros": [
+        {
+            "nombre": "Acelerar",
+            "datos": "Nivel 3 · Transmutación · 1 acción · 9 m · V, S, M (a shaving of licorice root) · Concentración, hasta 1 minuto",
+            "texto": "Choose a willing creature that you can see within range. Until the spell ends, the target’s Speed is doubled, it gains a +2 bonus to Armor Class, it has Advantage on Dexterity saving throws, and it gains an additional action on each of its turns. That action can be used to take only the Attack (one attack only), Dash, Disengage, Hide, or Utilize action.\n\nWhen the spell ends, the target is Incapacitated and has a Speed of 0 until the end of its next turn, as a wave of lethargy washes over it."
+        },
+        {
+            "nombre": "Agrandar/reducir",
+            "datos": "Nivel 2 · Transmutación · 1 acción · 9 m · V, S, M (a pinch of powdered iron) · Concentración, hasta 1 minuto",
+            "texto": "For the duration, the spell enlarges or reduces a creature or an object you can see within range (see the chosen effect below). A targeted object must be neither worn nor carried. If the target is an unwilling creature, it can make a Constitution saving throw. On a successful save, the spell has no effect.\n\nEverything that a targeted creature is wearing and carrying changes size with it. Any item it drops returns to normal size at once. A thrown weapon or piece of ammunition returns to normal size immediately after it hits or misses a target.\n\n***Enlarge.*** The target’s size increases by one category—from Medium to Large, for example. The target also has Advantage on Strength checks and Strength saving throws. The target’s attacks with its enlarged weapons or Unarmed Strikes deal an extra 1d4 damage on a hit.\n\n***Reduce.*** The target’s size decreases by one category—from Medium to Small, for example. The target also has Disadvantage on Strength checks and Strength saving throws. The target’s attacks with its reduced weapons or Unarmed Strikes deal 1d4 less damage on a hit (this can’t reduce the damage below 1)."
+        },
+        {
+            "nombre": "Alarma",
+            "datos": "Nivel 1 · Abjuración · 1 minuto · 9 m · V, S, M (a tiny bell and a piece of fine silver wire) · 8 horas · ritual",
+            "texto": "You set an alarm against unwanted intrusion. Choose a door, a window, or an area within range that is no larger than a 20-foot cube. Until the spell ends, an alarm alerts you whenever a Tiny or larger creature touches or enters the warded area. When you cast the spell, you can designate creatures that won't set off the alarm. You also choose whether the alarm is mental or audible.\n\nA mental alarm alerts you with a ping in your mind if you are within 1 mile of the warded area. This ping awakens you if you are sleeping.\n\nAn audible alarm produces the sound of a hand bell for 10 seconds within 60 feet."
+        },
+        {
+            "nombre": "Armadura de mago",
+            "datos": "Nivel 1 · Abjuración · 1 acción · Toque · V, S, M (a piece of cured leather) · 8 horas",
+            "texto": "You touch a willing creature who isn’t wearing armor. Until the spell ends, the target’s base AC becomes 13 plus its Dexterity modifier. The spell ends early if the target dons armor."
+        },
+        {
+            "nombre": "Ayuda",
+            "datos": "Nivel 2 · Abjuración · 1 acción · 9 m · V, S, M (a tiny strip of white cloth) · 8 horas",
+            "texto": "Your spell bolsters your allies with toughness and resolve. Choose up to three creatures within range. Each target's hit point maximum and current hit points increase by 5 for the duration.\n\n***At Higher Levels.*** When you cast this spell using a spell slot of 3rd level or higher, a target's hit points increase by an additional 5 for each slot level above 2nd."
+        },
+        {
+            "nombre": "Bayas buenas",
+            "datos": "Nivel 1 · Conjuración · 1 acción · Personal · V, S, M (a sprig of mistletoe) · 24 horas",
+            "texto": "Ten berries appear in your hand and are infused with magic for the duration. A creature can take a Bonus Action to eat one berry. Eating a berry restores 1 Hit Point, and the berry provides enough nourishment to sustain a creature for one day.\n\nUneaten berries disappear when the spell ends."
+        },
+        {
+            "nombre": "Bendecir",
+            "datos": "Nivel 1 · Encantamiento · 1 acción · 9 m · V, S, M (a sprinkling of holy water) · Concentración, hasta 1 minuto",
+            "texto": "You bless up to three creatures of your choice within range. Whenever a target makes an attack roll or a saving throw before the spell ends, the target can roll a d4 and add the number rolled to the attack roll or saving throw.\n\n**At Higher Levels.** When you cast this spell using a spell slot of 2nd level or higher, you can target one additional creature for each slot level above 1st."
+        },
+        {
+            "nombre": "Calentar metal",
+            "datos": "Nivel 2 · Transmutación · 1 acción · 18 m · V, S, M (a piece of iron and a flame) · Concentración, hasta 1 minuto",
+            "texto": "Choose a manufactured metal object, such as a metal weapon or a suit of heavy or medium metal armor, that you can see within range. You cause the object to glow red-hot. Any creature in physical contact with the object takes 2d8 fire damage when you cast the spell. Until the spell ends, you can use a bonus action on each of your subsequent turns to cause this damage again.\n\nIf a creature is holding or wearing the object and takes the damage from it, the creature must succeed on a Constitution saving throw or drop the object if it can. If it doesn’t drop the object, it has disadvantage on attack rolls and ability checks until the start of your next turn.\n\n***At Higher Levels.*** When you cast this spell using a spell slot of 3rd level or higher, the damage increases by 1d8 for each slot level above 2nd."
+        },
+        {
+            "nombre": "Ceguera/sordera",
+            "datos": "Nivel 2 · Transmutación · 1 acción · 36 m · V · 1 minuto",
+            "texto": "One creature that you can see within range must succeed on a Constitution saving throw, or it has the Blinded or Deafened condition (your choice) for the duration. At the end of each of its turns, the target repeats the save, ending the spell on itself on a success.\n\n***Using a Higher-Level Spell Slot.*** You can target one additional creature for each spell slot level above 2."
+        },
+        {
+            "nombre": "Comprensión idiomática",
+            "datos": "Nivel 1 · Adivinación · 1 acción · Personal · V, S, M (a pinch of soot and salt) · 1 hora · ritual",
+            "texto": "For the duration, you understand the literal meaning of any spoken language that you hear. You also understand any written language that you see, but you must be touching the surface on which the words are written. It takes about 1 minute to read one page of text.\n\nThis spell doesn't decode secret messages in a text or a glyph, such as an arcane sigil, that isn't part of a written language."
+        },
+        {
+            "nombre": "Conocimiento de leyendas",
+            "datos": "Nivel 5 · Adivinación · 10 minutos · Personal · V, S, M (incense worth at least 250 gp, which the spell consumes, and four ivory strips worth at least 50 gp each) · Instantáneo",
+            "texto": "Name or describe a person, place, or object. The spell brings to your mind a brief summary of the significant lore about the thing you named. The lore might consist of current tales, forgotten stories, or even secret lore that has never been widely known. If the thing you named isn't of legendary importance, you gain no information. The more information you already have about the thing, the more precise and detailed the information you receive is.\n\nThe information you learn is accurate but might be couched in figurative language. For example, if you have a mysterious magic axe on hand, the spell might yield this information: “Woe to the evildoer whose hand touches the axe, for even the haft slices the hand of the evil ones. Only a true Child of Stone, lover and beloved of Moradin, may awaken the true powers of the axe, and only with the sacred word **Rudnogg** on the lips.\""
+        },
+        {
+            "nombre": "Contraconjuro",
+            "datos": "Nivel 3 · Abjuración · 1 reacción · 18 m · S · Instantáneo",
+            "texto": "You attempt to interrupt a creature in the process of casting a spell. The creature makes a Constitution saving throw. On a failed save, the spell dissipates with no effect, and the action, Bonus Action, or Reaction used to cast it is wasted. If that spell was cast with a spell slot, the slot isn’t expended."
+        },
+        {
+            "nombre": "Controlar llamas",
+            "datos": "Truco · Transmutación · 1 acción · 18 m (cubo de 1,5 m) · S · Instantáneo",
+            "texto": "You choose nonmagical flame that you can see within range and that fits within a 5-foot cube. You affect it in one of the following ways:\n\n- You instantaneously expand the flame 5 feet in one direction, provided that wood or other fuel is present in the new location.\n- You instantaneously extinguish the flames within the cube.\n- You double or halve the area of bright light and dim light cast by the flame, change its color, or both. The change lasts for 1 hour.\n- You cause simple shapes—such as the vague form of a creature, an inanimate object, or a location—to appear within the flames and animate as you like. The shapes last for 1 hour.\n\nIf you cast this spell multiple times, you can have up to three of its non-instantaneous effects active at a time, and you can dismiss such an effect as an action."
+        },
+        {
+            "nombre": "Crear hoguera",
+            "datos": "Truco · Conjuración · 1 acción · 18 m (cubo de 1,5 m) · V, S · Concentración, hasta 1 minuto",
+            "texto": "You create a bonfire on ground that you can see within range. Until the spell ends, the magic bonfire fills a 5-foot cube. Any creature in the bonfire’s space when you cast the spell must succeed on a Dexterity saving throw or take 1d8 fire damage. A creature must also make the saving throw when it moves into the bonfire’s space for the first time on a turn or ends its turn there.\n\nThe bonfire ignites flammable objects in its area that aren’t being worn or carried.\n\nThe spell’s damage increases by 1d8 when you reach 5th level (2d8), 11th level (3d8), and 17th level (4d8)."
+        },
+        {
+            "nombre": "Curar heridas",
+            "datos": "Nivel 1 · Abjuración · 1 acción · Toque · V, S · Instantáneo",
+            "texto": "A creature you touch regains a number of Hit Points equal to 2d8 plus your spellcasting ability modifier.\n\n***Using a Higher-Level Spell Slot.*** The healing increases by 2d8 for each spell slot level above 1."
+        },
+        {
+            "nombre": "Descarga de fuego",
+            "datos": "Truco · Evocación · 1 acción · 36 m · V, S · Instantáneo",
+            "texto": "You hurl a mote of fire at a creature or object within range. Make a ranged spell attack against the target. On a hit, the target takes 1d10 fire damage. A flammable object hit by this spell ignites if it isn't being worn or carried.\n\nThis spell's damage increases by 1d10 when you reach 5th level (2d10), 11th level (3d10), and 17th level (4d10)."
+        },
+        {
+            "nombre": "Descarga del caos",
+            "datos": "Nivel 1 · Evocación · 1 acción · 36 m · V, S · Instantáneo",
+            "texto": "You hurl an undulating, warbling mass of chaotic energy at one creature in range. Make a ranged spell attack against the target. On a hit, the target takes 2d8 + 1d6 damage. Choose one of the d8s. The number rolled on that die determines the attack’s damage type, as shown below.\n\n- d8 · Damage Type\n- 1 · Acid\n- 2 · Cold\n- 3 · Fire\n- 4 · Force\n- 5 · Lightning\n- 6 · Poison\n- 7 · Psychic\n- 8 · Thunder\n\nIf you roll the same number on both d8s, the chaotic energy leaps from the target to a different creature of your choice within 30 feet of it. Make a new attack roll against the new target, and make a new damage roll, which could cause the chaotic energy to leap again.\n\nA creature can be targeted only once by each casting of this spell.\n\n***At Higher Levels.*** When you cast this spell using a spell slot of 2nd level or higher, each target takes 1d6 extra damage of the type rolled for each slot level above 1st."
+        },
+        {
+            "nombre": "Detectar magia",
+            "datos": "Nivel 1 · Adivinación · 1 acción · Personal (esfera de 9 m) · V, S · Concentración, hasta 10 minutos · ritual",
+            "texto": "For the duration, you sense the presence of magic within 30 feet of you. If you sense magic in this way, you can use your action to see a faint aura around any visible creature or object in the area that bears magic, and you learn its school of magic, if any.\n\nThe spell can penetrate most barriers, but it is blocked by 1 foot of stone, 1 inch of common metal, a thin sheet of lead, or 3 feet of wood or dirt."
+        },
+        {
+            "nombre": "Detectar pensamientos",
+            "datos": "Nivel 2 · Adivinación · 1 acción · Personal · V, S, M (a copper piece) · Concentración, hasta 1 minuto",
+            "texto": "For the duration, you can read the thoughts of certain creatures. When you cast the spell and as your action on each turn until the spell ends, you can focus your mind on any one creature that you can see within 30 feet of you. If the creature you choose has an Intelligence of 3 or lower or doesn’t speak any language, the creature is unaffected.\n\nYou initially learn the surface thoughts of the creature—what is most on its mind in that moment. As an action, you can either shift your attention to another creature’s thoughts or attempt to probe deeper into the same creature’s mind. If you probe deeper, the target must make a Wisdom saving throw. If it fails, you gain insight into its reasoning (if any), its emotional state, and something that looms large in its mind (such as something it worries over, loves, or hates). If it succeeds, the spell ends. Either way, the target knows that you are probing into its mind, and unless you shift your attention to another creature’s thoughts, the creature can use its action on its turn to make an Intelligence check contested by your Intelligence check; if it succeeds, the spell ends.\n\nQuestions verbally directed at the target creature naturally shape the course of its thoughts, so this spell is particularly effective as part of an interrogation.\n\nYou can also use this spell to detect the presence of thinking creatures you can’t see. When you cast the spell or as your action during the duration, you can search for thoughts within 30 feet of you. The spell can penetrate barriers, but 2 feet of rock, 2 inches of any metal other than lead, or a thin sheet of lead blocks you. You can’t detect a creature with an Intelligence of 3 or lower or one that doesn’t speak any language.\n\nOnce you detect the presence of a creature in this way, you can read its thoughts for the rest of the duration as described above, even if you can’t see it, but it must still be within range."
+        },
+        {
+            "nombre": "Disfrazarse",
+            "datos": "Nivel 1 · Ilusión · 1 acción · Personal · V, S · 1 hora",
+            "texto": "You make yourself--including your clothing, armor, weapons, and other belongings on your person--look different until the spell ends or until you use your action to dismiss it. You can seem 1 foot shorter or taller and can appear thin, fat, or in between. You can't change your body type, so you must adopt a form that has the same basic arrangement of limbs. Otherwise, the extent of the illusion is up to you.\n\nThe changes wrought by this spell fail to hold up to physical inspection. For example, if you use this spell to add a hat to your outfit, objects pass through the hat, and anyone who touches it would feel nothing or would feel your head and hair. If you use this spell to appear thinner than you are, the hand of someone who reaches out to touch you would bump into you while it was seemingly still in midair.\n\nTo discern that you are disguised, a creature can use its action to inspect your appearance and must succeed on an Intelligence (Investigation) check against your spell save DC."
+        },
+        {
+            "nombre": "Elementalism",
+            "datos": "Truco · Transmutación · 1 acción · 9 m (cubo de 1,5 m) · V, S · Instantáneo",
+            "texto": "You exert control over the elements, creating one of the following effects within range.\n\n***Beckon Air.*** You create a breeze strong enough to ripple cloth, stir dust, rustle leaves, and close open doors and shutters, all in a 5-foot Cube. Doors and shutters being held open by someone or something aren’t affected.\n\n***Beckon Earth.*** You create a thin shroud of dust or sand that covers surfaces in a 5-foot-square area, or you cause a single word to appear in your handwriting in a patch of dirt or sand.\n\n***Beckon Fire.*** You create a thin cloud of harmless embers and colored, scented smoke in a 5-foot Cube. You choose the color and scent, and the embers can light candles, torches, or lamps in that area. The smoke’s scent lingers for 1 minute.\n\n***Beckon Water.*** You create a spray of cool mist that lightly dampens creatures and objects in a 5-foot Cube. Alternatively, you create 1 cup of clean water either in an open container or on a surface, and the water evaporates in 1 minute.\n\n***Sculpt Element.*** You cause dirt, sand, fire, smoke, mist, or water that can fit in a 1-foot Cube to assume a crude shape (such as that of a creature) for 1 hour."
+        },
+        {
+            "nombre": "Encontrar familiar",
+            "datos": "Nivel 1 · Conjuración · 1 hora · 3 m · V, S, M (burning incense worth 10+ GP, which the spell consumes) · Instantáneo · ritual",
+            "texto": "You gain the service of a familiar, a spirit that takes an animal form you choose: Bat, Cat, Frog, Hawk, Lizard, Octopus, Owl, Rat, Raven, Spider, Weasel, or another Beast that has a Challenge Rating of 0. Appearing in an unoccupied space within range, the familiar has the statistics of the chosen form, though it is a Celestial, Fey, or Fiend (your choice) instead of a Beast. Your familiar acts independently of you, but it obeys your commands.\n\n***Telepathic Connection.*** While your familiar is within 100 feet of you, you can communicate with it telepathically. Additionally, as a Bonus Action, you can see through the familiar’s eyes and hear what it hears until the start of your next turn, gaining the benefits of any special senses it has.\n\nFinally, when you cast a spell with a range of touch, your familiar can deliver the touch. Your familiar must be within 100 feet of you, and it must take a Reaction to deliver the touch when you cast the spell.\n\n***Combat.*** The familiar is an ally to you and your allies. It rolls its own Initiative and acts on its own turn. A familiar can’t attack, but it can take other actions as normal.\n\n***Disappearance of the Familiar.*** When the familiar drops to 0 Hit Points, it disappears. It reappears after you cast this spell again. As a Magic action, you can temporarily dismiss the familiar to a pocket dimension. Alternatively, you can dismiss it forever. As a Magic action while it is temporarily dismissed, you can cause it to reappear in an unoccupied space within 30 feet of you. Whenever the familiar drops to 0 Hit Points or disappears into the pocket dimension, it leaves behind in its space anything it was wearing or carrying.\n\n***One Familiar Only.*** You can’t have more than one familiar at a time. If you cast this spell while you have a familiar, you instead cause it to adopt a new eligible form."
+        },
+        {
+            "nombre": "Encontrar montura",
+            "datos": "Nivel 2 · Conjuración · 10 minutos · 9 m · V, S · Instantáneo",
+            "texto": "You summon a spirit that assumes the form of an unusually intelligent, strong, and loyal steed, creating a long-lasting bond with it. Appearing in an unoccupied space within range, the steed takes on a form that you choose: a warhorse, a pony, a camel, an elk, or a mastiff. (Your GM might allow other animals to be summoned as steeds.) The steed has the statistics of the chosen form, though it is a celestial, fey, or fiend (your choice) instead of its normal type. Additionally, if your steed has an Intelligence of 5 or less, its Intelligence becomes 6, and it gains the ability to understand one language of your choice that you speak.\n\nYour steed serves you as a mount, both in combat and out, and you have an instinctive bond with it that allows you to fight as a seamless unit. While mounted on your steed, you can make any spell you cast that targets only you also target your steed.\n\nWhen the steed drops to 0 hit points, it disappears, leaving behind no physical form. You can also dismiss your steed at any time as an action, causing it to disappear. In either case, casting this spell again summons the same steed, restored to its hit point maximum.\n\nWhile your steed is within 1 mile of you, you can communicate with each other telepathically.\n\nYou can't have more than one steed bonded by this spell at a time. As an action, you can release the steed from its bond at any time, causing it to disappear."
+        },
+        {
+            "nombre": "Escudo",
+            "datos": "Nivel 1 · Abjuración · 1 reacción · Personal · V, S · 1 asalto",
+            "texto": "An invisible barrier of magical force appears and protects you. Until the start of your next turn, you have a +5 bonus to AC, including against the triggering attack, and you take no damage from **magic missile**."
+        },
+        {
+            "nombre": "Escudo de fe",
+            "datos": "Nivel 1 · Abjuración · 1 acción adicional · 18 m · V, S, M (a small parchment with a bit of holy text written on it) · Concentración, hasta 10 minutos",
+            "texto": "A shimmering field appears and surrounds a creature of your choice within range, granting it a +2 bonus to AC for the duration."
+        },
+        {
+            "nombre": "Flecha ácida de Melf",
+            "datos": "Nivel 2 · Evocación · 1 acción · 27 m · V, S, M (powdered rhubarb leaf) · Instantáneo",
+            "texto": "A shimmering green arrow streaks toward a target within range and bursts in a spray of acid. Make a ranged spell attack against the target. On a hit, the target takes 4d4 Acid damage and 2d4 Acid damage at the end of its next turn. On a miss, the arrow splashes the target with acid for half as much of the initial damage only.\n\n***Using a Higher-Level Spell Slot.*** The damage (both initial and later) increases by 1d4 for each spell slot level above 2."
+        },
+        {
+            "nombre": "Fuego feérico",
+            "datos": "Nivel 1 · Evocación · 1 acción · 18 m (cubo de 6 m) · V · Concentración, hasta 1 minuto",
+            "texto": "Objects in a 20-foot Cube within range are outlined in blue, green, or violet light (your choice). Each creature in the Cube is also outlined if it fails a Dexterity saving throw. For the duration, objects and affected creatures shed Dim Light in a 10-foot radius and can’t benefit from the Invisible condition.\n\nAttack rolls against an affected creature or object have Advantage if the attacker can see it."
+        },
+        {
+            "nombre": "Garrote",
+            "datos": "Truco · Transmutación · 1 acción adicional · Personal · V, S, M (mistletoe) · 1 minuto",
+            "texto": "A Club or Quarterstaff you are holding is imbued with nature’s power. For the duration, you can use your spellcasting ability instead of Strength for the attack and damage rolls of melee attacks using that weapon, and the weapon’s damage die becomes a d8. If the attack deals damage, it can be Force damage or the weapon’s normal damage type (your choice).\n\nThe spell ends early if you cast it again or if you let go of the weapon.\n\n***Cantrip Upgrade.*** The damage die changes when you reach levels 5 (d10), 11 (d12), and 17 (2d6)."
+        },
+        {
+            "nombre": "Golpe atrapador",
+            "datos": "Nivel 1 · Conjuración · 1 acción adicional · Personal · V · Concentración, hasta 1 minuto",
+            "texto": "The next time you hit a creature with a weapon attack before this spell ends, a writhing mass of thorny vines appears at the point of impact, and the target must succeed on a Strength saving throw or be restrained by the magical vines until the spell ends. A Large or larger creature has advantage on this saving throw. If the target succeeds on the save, the vines shrivel away.\nWhile restrained by this spell, the target takes 1d6 piercing damage at the start of each of its turns. A creature restrained by the vines or one that can touch the creature can use its action to make a Strength check against your spell save DC. On a success, the target is freed.\n\n**At Higher Levels.** If you cast this spell using a spell slot of 2nd level or higher, the damage increases by 1d6 for each slot level above 1st."
+        },
+        {
+            "nombre": "Grasa",
+            "datos": "Nivel 1 · Conjuración · 1 acción · 18 m (cuadrado de 3 m) · V, S, M (a bit of pork rind or butter) · 1 minuto",
+            "texto": "Nonflammable grease covers the ground in a 10-foot square centered on a point within range and turns it into Difficult Terrain for the duration.\n\nWhen the grease appears, each creature standing in its area must succeed on a Dexterity saving throw or have the Prone condition. A creature that enters the area or ends its turn there must also succeed on that save or fall Prone."
+        },
+        {
+            "nombre": "Hablar con los animales",
+            "datos": "Nivel 1 · Adivinación · 1 acción · Personal · V, S · 10 minutos · ritual",
+            "texto": "For the duration, you can comprehend and verbally communicate with Beasts, and you can use any of the Influence action’s skill options with them.\n\nMost Beasts have little to say about topics that don’t pertain to survival or companionship, but at minimum, a Beast can give you information about nearby locations and monsters, including whatever it has perceived within the past day."
+        },
+        {
+            "nombre": "Heroísmo",
+            "datos": "Nivel 1 · Encantamiento · 1 acción · Toque · V, S · Concentración, hasta 1 minuto",
+            "texto": "A willing creature you touch is imbued with bravery. Until the spell ends, the creature is immune to being frightened and gains temporary hit points equal to your spellcasting ability modifier at the start of each of its turns. When the spell ends, the target loses any remaining temporary hit points from this spell.\n\n**At Higher Levels.** When you cast this spell using a spell slot of 2nd level or higher, you can target one additional creature for each slot level above 1st."
+        },
+        {
+            "nombre": "Identificar",
+            "datos": "Nivel 1 · Adivinación · 1 minuto · Toque · V, S, M (a pearl worth 100+ GP) · Instantáneo · ritual",
+            "texto": "You touch an object throughout the spell’s casting. If the object is a magic item or some other magical object, you learn its properties and how to use them, whether it requires Attunement, and how many charges it has, if any. You learn whether any ongoing spells are affecting the item and what they are. If the item was created by a spell, you learn that spell’s name.\n\nIf you instead touch a creature throughout the casting, you learn which ongoing spells, if any, are currently affecting it."
+        },
+        {
+            "nombre": "Ilusión menor",
+            "datos": "Truco · Ilusión · 1 acción · 9 m (cubo de 1,5 m) · S, M (a bit of fleece) · 1 minuto",
+            "texto": "You create a sound or an image of an object within range that lasts for the duration. See the descriptions below for the effects of each. The illusion ends if you cast this spell again.\n\nIf a creature takes a Study action to examine the sound or image, the creature can determine that it is an illusion with a successful Intelligence (Investigation) check against your spell save DC. If a creature discerns the illusion for what it is, the illusion becomes faint to the creature.\n\n***Sound.*** If you create a sound, its volume can range from a whisper to a scream. It can be your voice, someone else’s voice, a lion’s roar, a beating of drums, or any other sound you choose. The sound continues unabated throughout the duration, or you can make discrete sounds at different times before the spell ends.\n\n***Image.*** If you create an image of an object—such as a chair, muddy footprints, or a small chest—it must be no larger than a 5-foot Cube. The image can’t create sound, light, smell, or any other sensory effect. Physical interaction with the image reveals it to be an illusion, since things can pass through it."
+        },
+        {
+            "nombre": "Imagen mayor",
+            "datos": "Nivel 3 · Ilusión · 1 acción · 36 m (cubo de 6 m) · V, S, M (a bit of fleece) · Concentración, hasta 10 minutos",
+            "texto": "You create the image of an object, a creature, or some other visible phenomenon that is no larger than a 20-foot Cube. The image appears at a spot that you can see within range and lasts for the duration. It seems real, including sounds, smells, and temperature appropriate to the thing depicted, but it can’t deal damage or cause conditions.\n\nIf you are within range of the illusion, you can take a Magic action to cause the image to move to any other spot within range. As the image changes location, you can alter its appearance so that its movements appear natural for the image. For example, if you create an image of a creature and move it, you can alter the image so that it appears to be walking. Similarly, you can cause the illusion to make different sounds at different times, even making it carry on a conversation, for example.\n\nPhysical interaction with the image reveals it to be an illusion, for things can pass through it. A creature that takes a Study action to examine the image can determine that it is an illusion with a successful Intelligence (Investigation) check against your spell save DC. If a creature discerns the illusion for what it is, the creature can see through the image, and its other sensory qualities become faint to the creature.\n\n***Using a Higher-Level Spell Slot.*** The spell lasts until dispelled, without requiring Concentration, if cast with a level 4+ spell slot."
+        },
+        {
+            "nombre": "Imagen múltiple",
+            "datos": "Nivel 2 · Ilusión · 1 acción · Personal · V, S · 1 minuto",
+            "texto": "Three illusory duplicates of yourself appear in your space. Until the spell ends, the duplicates move with you and mimic your actions, shifting position so it's impossible to track which image is real. You can use your action to dismiss the illusory duplicates.\n\nEach time a creature targets you with an attack during the spell's duration, roll a d20 to determine whether the attack instead targets one of your duplicates.\n\nIf you have three duplicates, you must roll a 6 or higher to change the attack's target to a duplicate. With two duplicates, you must roll an 8 or higher. With one duplicate, you must roll an 11 or higher.\n\nA duplicate's AC equals 10 + your Dexterity modifier. If an attack hits a duplicate, the duplicate is destroyed. A duplicate can be destroyed only by an attack that hits it. It ignores all other damage and effects. The spell ends when all three duplicates are destroyed.\n\nA creature is unaffected by this spell if it can't see, if it relies on senses other than sight, such as blindsight, or if it can perceive illusions as false, as with truesight."
+        },
+        {
+            "nombre": "Infestación",
+            "datos": "Truco · Conjuración · 1 acción · 9 m · V, S, M (a living flea) · Instantáneo",
+            "texto": "You cause a cloud of mites, fleas, and other parasites to appear momentarily on one creature you can see within range. The target must succeed on a Constitution saving throw, or it takes 1d6 poison damage and moves 5 feet in a random direction if it can move and its speed is at least 5 feet. Roll a d4 for the direction: 1, north; 2, south; 3, east; or 4, west. This movement doesn’t provoke opportunity attacks, and if the direction rolled is blocked, the target doesn’t move.\n\nThe spell’s damage increases by 1d6 when you reach 5th level (2d6), 11th level (3d6), and 17th level (4d6)."
+        },
+        {
+            "nombre": "Infligir heridas",
+            "datos": "Nivel 1 · Nigromancia · 1 acción · Toque · V, S · Instantáneo",
+            "texto": "Make a melee spell attack against a creature you can reach. On a hit, the target takes 3d10 necrotic damage.\n\n**At Higher Levels.** When you cast this spell using a spell slot of 2nd level or higher, the damage increases by 1d10 for each slot level above 1st."
+        },
+        {
+            "nombre": "Intermitencia",
+            "datos": "Nivel 3 · Transmutación · 1 acción · Personal · V, S · 1 minuto",
+            "texto": "Roll 1d6 at the end of each of your turns for the duration. On a roll of 4–6, you vanish from your current plane of existence and appear in the Ethereal Plane (the spell ends instantly if you are already on that plane). While on the Ethereal Plane, you can perceive the plane you left, which is cast in shades of gray, but you can’t see anything there more than 60 feet away. You can affect and be affected only by other creatures on the Ethereal Plane, and creatures on the other plane can’t perceive you unless they have a special ability that lets them perceive things on the Ethereal Plane.\n\nYou return to the other plane at the start of your next turn and when the spell ends if you are on the Ethereal Plane. You return to an unoccupied space of your choice that you can see within 10 feet of the space you left. If no unoccupied space is available within that range, you appear in the nearest unoccupied space."
+        },
+        {
+            "nombre": "Invisibilidad",
+            "datos": "Nivel 2 · Ilusión · 1 acción · Toque · V, S, M (an eyelash in gum arabic) · Concentración, hasta 1 hora",
+            "texto": "A creature you touch has the Invisible condition until the spell ends. The spell ends early immediately after the target makes an attack roll, deals damage, or casts a spell.\n\n***Using a Higher-Level Spell Slot.*** You can target one additional creature for each spell slot level above 2."
+        },
+        {
+            "nombre": "Llama sagrada",
+            "datos": "Truco · Evocación · 1 acción · 18 m · V, S · Instantáneo",
+            "texto": "Flame-like radiance descends on a creature that you can see within range. The target must succeed on a Dexterity saving throw or take 1d8 radiant damage. The target gains no benefit from cover for this saving throw.\n\nThe spell's damage increases by 1d8 when you reach 5th level (2d8), 11th level (3d8), and 17th level (4d8)."
+        },
+        {
+            "nombre": "Luces danzantes",
+            "datos": "Truco · Evocación · 1 acción · 36 m · V, S, M (a bit of phosphorus or wychwood, or a glowworm) · Concentración, hasta 1 minuto",
+            "texto": "You create up to four torch-sized lights within range, making them appear as torches, lanterns, or glowing orbs that hover in the air for the duration. You can also combine the four lights into one glowing vaguely humanoid form of Medium size. Whichever form you choose, each light sheds dim light in a 10-foot radius.\n\nAs a bonus action on your turn, you can move the lights up to 60 feet to a new spot within range. A light must be within 20 feet of another light created by this spell, and a light winks out if it exceeds the spell's range."
+        },
+        {
+            "nombre": "Luz",
+            "datos": "Truco · Evocación · 1 acción · Toque (esfera de 6 m) · V, M (a firefly or phosphorescent moss) · 1 hora",
+            "texto": "You touch one object that is no larger than 10 feet in any dimension. Until the spell ends, the object sheds bright light in a 20-foot radius and dim light for an additional 20 feet. The light can be colored as you like. Completely covering the object with something opaque blocks the light. The spell ends if you cast it again or dismiss it as an action.\n\nIf you target an object held or worn by a hostile creature, that creature must succeed on a Dexterity saving throw to avoid the spell."
+        },
+        {
+            "nombre": "Maleficio",
+            "datos": "Nivel 1 · Encantamiento · 1 acción adicional · 27 m · V, S, M (the petrified eye of a newt) · Concentración, hasta 1 hora",
+            "texto": "You place a curse on a creature that you can see within range. Until the spell ends, you deal an extra 1d6 necrotic damage to the target whenever you hit it with an attack. Also, choose one ability when you cast the spell. The target has disadvantage on ability checks made with the chosen ability.\nIf the target drops to 0 hit points before this spell ends, you can use a bonus action on a subsequent turn of yours to curse a new creature.\nA remove curse cast on the target ends this spell early.\n\n**At Higher Levels.** When you cast this spell using a spell slot of 3rd or 4th level, you can maintain your concentration on the spell for up to 8 hours. When you use a spell slot of 5th level or higher, you can maintain your concentration on the spell for up to 24 hours."
+        },
+        {
+            "nombre": "Mano de mago",
+            "datos": "Truco · Conjuración · 1 acción · 9 m · V, S · 1 minuto",
+            "texto": "A spectral, floating hand appears at a point you choose within range. The hand lasts for the duration or until you dismiss it as an action. The hand vanishes if it is ever more than 30 feet away from you or if you cast this spell again.\n\nYou can use your action to control the hand. You can use the hand to manipulate an object, open an unlocked door or container, stow or retrieve an item from an open container, or pour the contents out of a vial. You can move the hand up to 30 feet each time you use it.\n\nThe hand can't attack, activate magic items, or carry more than 10 pounds."
+        },
+        {
+            "nombre": "Manos ardientes",
+            "datos": "Nivel 1 · Evocación · 1 acción · Personal (cono de 4,5 m) · V, S · Instantáneo",
+            "texto": "As you hold your hands with thumbs touching and fingers spread, a thin sheet of flames shoots forth from your outstretched fingertips. Each creature in a 15-foot cone must make a Dexterity saving throw. A creature takes 3d6 fire damage on a failed save, or half as much damage on a successful one.\n\nThe fire ignites any flammable objects in the area that aren't being worn or carried.\n\n**At Higher Levels.** When you cast this spell using a spell slot of 2nd level or higher, the damage increases by 1d6 for each slot level above 1st."
+        },
+        {
+            "nombre": "Moldear tierra",
+            "datos": "Truco · Transmutación · 1 acción · 9 m (cubo de 1,5 m) · S · Instantáneo",
+            "texto": "You choose a portion of dirt or stone that you can see within range and that fits within a 5-foot cube. You manipulate it in one of the following ways:\n\n- If you target an area of loose earth, you can instantaneously excavate it, move it along the ground, and deposit it up to 5 feet away. This movement doesn’t have enough force to cause damage.\n\n- You cause shapes, colors, or both to appear on the dirt or stone, spelling out words, creating images, or shaping patterns. The changes last for 1 hour.\n\n- If the dirt or stone you target is on the ground, you cause it to become difficult terrain. Alternatively, you can cause the ground to become normal terrain if it is already difficult terrain. This change lasts for 1 hour.\n\nIf you cast this spell multiple times, you can have no more than two of its non-instantaneous effects active at a time, and you can dismiss such an effect as an action."
+        },
+        {
+            "nombre": "Orbe cromático",
+            "datos": "Nivel 1 · Evocación · 1 acción · 27 m · V, S, M (a diamond worth at least 50 gp) · Instantáneo",
+            "texto": "You hurl a 4-inch-diameter sphere of energy at a creature that you can see within range. You choose acid, cold, fire, lightning, poison, or thunder for the type of orb you create, and then make a ranged spell attack against the target. If the attack hits, the creature takes 3d8 damage of the type you chose.\n\n**At Higher Levels.** When you cast this spell using a spell slot of 2nd level or higher, the damage increases by 1d8 for each slot level above 1st."
+        },
+        {
+            "nombre": "Orden imperiosa",
+            "datos": "Nivel 1 · Encantamiento · 1 acción · 18 m · V · 1 asalto",
+            "texto": "You speak a one-word command to a creature you can see within range. The target must succeed on a Wisdom saving throw or follow the command on its next turn. The spell has no effect if the target is undead, if it doesn't understand your language, or if your command is directly harmful to it.\n\nSome typical commands and their effects follow. You might issue a command other than one described here. If you do so, the DM determines how the target behaves. If the target can't follow your command, the spell ends.\n\n***Approach.*** The target moves toward you by the shortest and most direct route, ending its turn if it moves within 5 feet of you.\n\n***Drop.*** The target drops whatever it is holding and then ends its turn.\n\n***Flee.*** The target spends its turn moving away from you by the fastest available means.\n\n***Grovel.*** The target falls prone and then ends its turn.\n\n***Halt.*** The target doesn't move and takes no actions. A flying creature stays aloft, provided that it is able to do so. If it must move to stay aloft, it flies the minimum distance needed to remain in the air.\n\n***At Higher Levels.*** When you cast this spell using a spell slot of 2nd level or higher, you can affect one additional creature for each slot level above 1st. The creatures must be within 30 feet of each other when you target them."
+        },
+        {
+            "nombre": "Orientación divina",
+            "datos": "Truco · Adivinación · 1 acción · Toque · V, S · Concentración, hasta 1 minuto",
+            "texto": "You touch a willing creature and choose a skill. Until the spell ends, the creature adds 1d4 to any ability check using the chosen skill."
+        },
+        {
+            "nombre": "Palabra de curación",
+            "datos": "Nivel 1 · Abjuración · 1 acción adicional · 18 m · V · Instantáneo",
+            "texto": "A creature of your choice that you can see within range regains Hit Points equal to 2d4 plus your spellcasting ability modifier.\n\n***Using a Higher-Level Spell Slot.*** The healing increases by 2d4 for each spell slot level above 1."
+        },
+        {
+            "nombre": "Paso brumoso",
+            "datos": "Nivel 2 · Conjuración · 1 acción adicional · Personal · V · Instantáneo",
+            "texto": "Briefly surrounded by silvery mist, you teleport up to 30 feet to an unoccupied space you can see."
+        },
+        {
+            "nombre": "Patrón hipnótico",
+            "datos": "Nivel 3 · Ilusión · 1 acción · 36 m (cubo de 9 m) · S, M (a pinch of confetti) · Concentración, hasta 1 minuto",
+            "texto": "You create a twisting pattern of colors in a 30-foot Cube within range. The pattern appears for a moment and vanishes. Each creature in the area who can see the pattern must succeed on a Wisdom saving throw or have the Charmed condition for the duration. While Charmed, the creature has the Incapacitated condition and a Speed of 0.\n\nThe spell ends for an affected creature if it takes any damage or if someone else uses an action to shake the creature out of its stupor."
+        },
+        {
+            "nombre": "Piedad con los moribundos",
+            "datos": "Truco · Nigromancia · 1 acción · 4,5 m · V, S · Instantáneo",
+            "texto": "Choose a creature within range that has 0 Hit Points and isn’t dead. The creature becomes Stable.\n\n***Cantrip Upgrade.*** The range doubles when you reach levels 5 (30 feet), 11 (60 feet), and 17 (120 feet)."
+        },
+        {
+            "nombre": "Prestidigitación",
+            "datos": "Truco · Transmutación · 1 acción · 3 m · V, S · 1 hora",
+            "texto": "This spell is a minor magical trick that novice spellcasters use for practice. You create one of the following magical effects within range:\n\n- You create an instantaneous, harmless sensory effect, such as a shower of sparks, a puff of wind, faint musical notes, or an odd odor.\n- You instantaneously light or snuff out a candle, a torch, or a small campfire.\n- You instantaneously clean or soil an object no larger than 1 cubic foot.\n- You chill, warm, or flavor up to 1 cubic foot of nonliving material for 1 hour.\n- You make a color, a small mark, or a symbol appear on an object or a surface for 1 hour.\n- You create a nonmagical trinket or an illusory image that can fit in your hand and that lasts until the end of your next turn.\n\nIf you cast this spell multiple times, you can have up to three of its non-instantaneous effects active at a time, and you can dismiss such an effect as an action."
+        },
+        {
+            "nombre": "Protección contra el bien y el mal",
+            "datos": "Nivel 1 · Abjuración · 1 acción · Toque · V, S, M (holy water or powdered silver and iron, which the spell consumes) · Concentración, hasta 10 minutos",
+            "texto": "Until the spell ends, one willing creature you touch is protected against certain types of creatures: aberrations, celestials, elementals, fey, fiends, and undead.\n\nThe protection grants several benefits. Creatures of those types have disadvantage on attack rolls against the target. The target also can't be charmed, frightened, or possessed by them. If the target is already charmed, frightened, or possessed by such a creature, the target has advantage on any new saving throw against the relevant effect."
+        },
+        {
+            "nombre": "Proyectil mágico",
+            "datos": "Nivel 1 · Evocación · 1 acción · 36 m · V, S · Instantáneo",
+            "texto": "You create three glowing darts of magical force. Each dart strikes a creature of your choice that you can see within range. A dart deals 1d4 + 1 Force damage to its target. The darts all strike simultaneously, and you can direct them to hit one creature or several.\n\n***Using a Higher-Level Spell Slot.*** The spell creates one more dart for each spell slot level above 1."
+        },
+        {
+            "nombre": "Ráfaga",
+            "datos": "Truco · Transmutación · 1 acción · 9 m · V, S · Instantáneo",
+            "texto": "You seize the air and compel it to create one of the following effects at a point you can see within range:\n\n- One Medium or smaller creature that you choose must succeed on a Strength saving throw or be pushed up to 5 feet away from you.\n\n- You create a small blast of air capable of moving one object that is neither held nor carried and that weighs no more than 5 pounds. The object is pushed up to 10 feet away from you. It isn’t pushed with enough force to cause damage.\n\n- You create a harmless sensory effect using air, such as causing leaves to rustle, wind to slam shutters shut, or your clothing to ripple in a breeze."
+        },
+        {
+            "nombre": "Rayo de bruja",
+            "datos": "Nivel 1 · Evocación · 1 acción · 18 m · V, S, M (a twig struck by lightning) · Concentración, hasta 1 minuto",
+            "texto": "A beam of crackling energy lances toward a creature within range, forming a sustained arc of lightning between you and the target. Make a ranged spell attack against it. On a hit, the target takes 2d12 Lightning damage.\n\nOn each of your subsequent turns, you can take a Bonus Action to deal 1d12 Lightning damage to the target automatically, even if the first attack missed.\n\nThe spell ends if the target is ever outside the spell’s range or if it has Total Cover from you.\n\n***Using a Higher-Level Spell Slot.*** The initial damage increases by 1d12 for each spell slot level above 1."
+        },
+        {
+            "nombre": "Rayo de escarcha",
+            "datos": "Truco · Evocación · 1 acción · 18 m · V, S · Instantáneo",
+            "texto": "A frigid beam of blue-white light streaks toward a creature within range. Make a ranged spell attack against the target. On a hit, it takes 1d8 cold damage, and its speed is reduced by 10 feet until the start of your next turn.\n\nThe spell's damage increases by 1d8 when you reach 5th level (2d8), 11th level (3d8), and 17th level (4d8)."
+        },
+        {
+            "nombre": "Rayo de luna",
+            "datos": "Nivel 2 · Evocación · 1 acción · 36 m (cilindro de 1,5 m) · V, S, M (a moonseed leaf) · Concentración, hasta 1 minuto",
+            "texto": "A silvery beam of pale light shines down in a 5-foot-radius, 40-foot-high Cylinder centered on a point within range. Until the spell ends, Dim Light fills the Cylinder, and you can take a Magic action on later turns to move the Cylinder up to 60 feet.\n\nWhen the Cylinder appears, each creature in it makes a Constitution saving throw. On a failed save, a creature takes 2d10 Radiant damage, and if the creature is shape-shifted (as a result of the Polymorph spell, for example), it reverts to its true form and can’t shape-shift until it leaves the Cylinder. On a successful save, a creature takes half as much damage only. A creature also makes this save when the spell’s area moves into its space and when it enters the spell’s area or ends its turn there. A creature makes this save only once per turn.\n\n***Using a Higher-Level Spell Slot.*** The damage increases by 1d10 for each spell slot level above 2."
+        },
+        {
+            "nombre": "Recado",
+            "datos": "Nivel 3 · Evocación · 1 acción · Ilimitado · V, S, M (a short piece of fine copper wire) · 1 asalto",
+            "texto": "You send a short message of twenty-five words or less to a creature with which you are familiar. The creature hears the message in its mind, recognizes you as the sender if it knows you, and can answer in a like manner immediately. The spell enables creatures with Intelligence scores of at least 1 to understand the meaning of your message.\n\nYou can send the message across any distance and even to other planes of existence, but if the target is on a different plane than you, there is a 5 percent chance that the message doesn't arrive."
+        },
+        {
+            "nombre": "Reparar",
+            "datos": "Truco · Transmutación · 1 minuto · Toque · V, S, M (two lodestones) · Instantáneo",
+            "texto": "This spell repairs a single break or tear in an object you touch, such as a broken chain link, two halves of a broken key, a torn cloak, or a leaking wineskin. As long as the break or tear is no larger than 1 foot in any dimension, you mend it, leaving no trace of the former damage.\n\nThis spell can physically repair a magic item, but it can’t restore magic to such an object."
+        },
+        {
+            "nombre": "Resistencia",
+            "datos": "Truco · Abjuración · 1 acción · Toque · V, S · Concentración, hasta 1 minuto",
+            "texto": "You touch a willing creature and choose a damage type: Acid, Bludgeoning, Cold, Fire, Lightning, Necrotic, Piercing, Poison, Radiant, Slashing, or Thunder. When the creature takes damage of the chosen type before the spell ends, the creature reduces the total damage taken by 1d4. A creature can benefit from this spell only once per turn."
+        },
+        {
+            "nombre": "Respirar bajo el agua",
+            "datos": "Nivel 3 · Transmutación · 1 acción · 9 m · V, S, M (a short reed) · 24 horas · ritual",
+            "texto": "This spell grants up to ten willing creatures of your choice within range the ability to breathe underwater until the spell ends. Affected creatures also retain their normal mode of respiration."
+        },
+        {
+            "nombre": "Restablecimiento menor",
+            "datos": "Nivel 2 · Abjuración · 1 acción · Toque · V, S · Instantáneo",
+            "texto": "You touch a creature and can end either one disease or one condition afflicting it. The condition can be blinded, deafened, paralyzed, or poisoned."
+        },
+        {
+            "nombre": "Romper",
+            "datos": "Nivel 2 · Evocación · 1 acción · 18 m (esfera de 3 m) · V, S, M (a chip of mica) · Instantáneo",
+            "texto": "A sudden loud ringing noise, painfully intense, erupts from a point of your choice within range. Each creature in a 10-foot-radius sphere centered on that point must make a Constitution saving throw. A creature takes 3d8 thunder damage on a failed save, or half as much damage on a successful one. A creature made of inorganic material such as stone, crystal, or metal has disadvantage on this saving throw.\n\nA nonmagical object that isn't being worn or carried also takes the damage if it's in the spell's area.\n\n**At Higher Levels.** When you cast this spell using a spell slot of 3rd level or higher, the damage increases by 1d8 for each slot level above 2nd."
+        },
+        {
+            "nombre": "Saber druídico",
+            "datos": "Truco · Transmutación · 1 acción · 9 m · V, S · Instantáneo",
+            "texto": "Whispering to the spirits of nature, you create one of the following effects within range.\n\n***Weather Sensor.*** You create a Tiny, harmless sensory effect that predicts what the weather will be at your location for the next 24 hours. The effect might manifest as a golden orb for clear skies, a cloud for rain, falling snowflakes for snow, and so on. This effect persists for 1 round.\n\n***Bloom.*** You instantly make a flower blossom, a seed pod open, or a leaf bud bloom.\n\n***Sensory Effect.*** You create a harmless sensory effect, such as falling leaves, spectral dancing fairies, a gentle breeze, the sound of an animal, or the faint odor of skunk. The effect must fit in a 5-foot Cube.\n\n***Fire Play.*** You light or snuff out a candle, a torch, or a campfire."
+        },
+        {
+            "nombre": "Saeta guía",
+            "datos": "Nivel 1 · Evocación · 1 acción · 36 m · V, S · 1 asalto",
+            "texto": "You hurl a bolt of light toward a creature within range. Make a ranged spell attack against the target. On a hit, it takes 4d6 Radiant damage, and the next attack roll made against it before the end of your next turn has Advantage.\n\n***Using a Higher-Level Spell Slot.*** The damage increases by 1d6 for each spell slot level above 1."
+        },
+        {
+            "nombre": "Salpicadura de ácido",
+            "datos": "Truco · Evocación · 1 acción · 18 m (esfera de 1,5 m) · V, S · Instantáneo",
+            "texto": "You create an acidic bubble at a point within range, where it explodes in a 5-foot-radius Sphere. Each creature in that Sphere must succeed on a Dexterity saving throw or take 1d6 Acid damage.\n\n***Cantrip Upgrade.*** The damage increases by 1d6 when you reach levels 5 (2d6), 11 (3d6), and 17 (4d6)."
+        },
+        {
+            "nombre": "Silvery Barbs",
+            "datos": "Nivel 1 · Encantamiento · 1 reacción · 18 m · V · Instantáneo",
+            "texto": "You magically distract the triggering creature and turn its momentary uncertainty into encouragement for another creature. The triggering creature must reroll the d20 and use the lower roll.\n\nYou can then choose a different creature you can see within range (you can choose yourself). The chosen creature has advantage on the next attack roll, ability check, or saving throw it makes within 1 minute. A creature can be empowered by only one use of this spell at a time."
+        },
+        {
+            "nombre": "Starry Wisp",
+            "datos": "Truco · Evocación · 1 acción · 18 m · V, S · Instantáneo",
+            "texto": "You launch a mote of light at one creature or object within range. Make a ranged spell attack against the target. On a hit, the target takes 1d8 Radiant damage, and until the end of your next turn, it emits Dim Light in a 10-foot radius and can’t benefit from the Invisible condition.\n\n***Cantrip Upgrade.*** The damage increases by 1d8 when you reach levels 5 (2d8), 11 (3d8), and 17 (4d8)."
+        },
+        {
+            "nombre": "Summon Beast",
+            "datos": "Nivel 2 · Conjuración · 1 acción · 27 m · V, S, M (a feather, tuft of fur, and fish tail inside a gilded acorn worth 200+ GP) · Concentración, hasta 1 hora",
+            "texto": "You call forth a bestial spirit. It manifests in an unoccupied space that you can see within range and uses the **Bestial Spirit** stat block. When you cast the spell, choose an environment: Air, Land, or Water. The creature resembles an animal of your choice that is native to the chosen environment, which determines certain details in its stat block. The creature disappears when it drops to 0 Hit Points or when the spell ends.\n\nThe creature is an ally to you and your allies. In combat, the creature shares your Initiative count, but it takes its turn immediately after yours. It obeys your verbal commands (no action required by you). If you don’t issue any, it takes the Dodge action and uses its movement to avoid danger.\n\n***Using a Higher-Level Spell Slot.*** Use the spell slot’s level for the spell’s level in the stat block.\n\n**Bestial Spirit**\n\nSmall Beast, Neutral\n\n**AC** 11 + the spell’s level\n\n**HP** 20 (Air only) or 30 (Land and Water only) + 5 for each spell level above 2\n\n**Speed** 30 ft.; Climb 30 ft. (Land only); Fly 60 ft. (Air only); Swim 30 ft. (Water only)\n\n- · · Mod · Save\n- STR · 18 · +4 · +4\n- DEX · 11 · +0 · +0\n- CON · 16 · +3 · +3\n\n- · · Mod · Save\n- INT · 4 · –3 · –3\n- WIS · 14 · +2 · +2\n- CHA · 5 · −3 · −3\n\n**Senses** Darkvision 60 ft.; Passive Perception 12\n\n**Languages** Understands the languages you know\n\n**CR** None (XP 0; PB equals your Proficiency Bonus)\n\nTraits\n\n***Flyby (Air Only).*** The spirit doesn’t provoke Opportunity Attacks when it flies out of an enemy’s reach.\n\n***Pack Tactics (Land and Water Only).*** The spirit has Advantage on an attack roll against a creature if at least one of the spirit’s allies is within 5 feet of the creature and the ally doesn’t have the Incapacitated condition.\n\n***Water Breathing (Water Only).*** The spirit can breathe only underwater.\n\nActions\n\n***Multiattack.*** The spirit makes a number of Rend attacks equal to half this spell’s level (round down).\n\n***Rend.*** *Melee Attack Roll:* Bonus equals your spell attack modifier, reach 5 ft. *Hit:* 1d8 + 4 + the spell’s level Piercing damage."
+        },
+        {
+            "nombre": "Summon Fey",
+            "datos": "Nivel 3 · Conjuración · 1 acción · 27 m · V, S, M (a gilded flower worth 300+ GP) · Concentración, hasta 1 hora",
+            "texto": "You call forth a Fey spirit. It manifests in an unoccupied space that you can see within range and uses the **Fey Spirit** stat block. When you cast the spell, choose a mood: Fuming, Mirthful, or Tricksy. The creature resembles a Fey creature of your choice marked by the chosen mood, which determines certain details in its stat block. The creature disappears when it drops to 0 Hit Points or when the spell ends.\n\nThe creature is an ally to you and your allies. In combat, the creature shares your Initiative count, but it takes its turn immediately after yours. It obeys your verbal commands (no action required by you). If you don’t issue any, it takes the Dodge action and uses its movement to avoid danger.\n\n***Using a Higher-Level Spell Slot.*** Use the spell slot’s level for the spell’s level in the stat block.\n\n**Fey Spirit**\n\nSmall Fey, Neutral\n\n**AC** 12 + the spell’s level\n\n**HP** 30 + 10 for each spell level above 3\n\n**Speed** 30 ft., Fly 30 ft.\n\n- · · Mod · Save\n- STR · 13 · +1 · +1\n- DEX · 16 · +3 · +3\n- CON · 14 · +2 · +2\n\n- · · Mod · Save\n- INT · 14 · +2 · +2\n- WIS · 11 · +0 · +0\n- CHA · 16 · +3 · +3\n\n**Immunities** Charmed\n\n**Senses** Darkvision 60 ft.; Passive Perception 10\n\n**Languages** Sylvan, understands the languages you know\n\n**CR** None (XP 0; PB equals your Proficiency Bonus)\n\nActions\n\n***Multiattack.*** The spirit makes a number of Fey Blade attacks equal to half this spell’s level (round down).\n\n***Fey Blade.*** *Melee Attack Roll:* Bonus equals your spell attack modifier, reach 5 ft. *Hit:* 2d6 + 3 + the spell’s level Force damage.\n\nBonus Actions\n\n***Fey Step.*** The spirit magically teleports up to 30 feet to an unoccupied space it can see. Then one of the following effects occurs, based on the spirit’s chosen mood:\n\n**Fuming.** The spirit has Advantage on the next attack roll it makes before the end of this turn.\n\n**Mirthful.** *Wisdom Saving Throw:* DC equals your spell save DC, one creature the spirit can see within 10 feet of itself. *Failure:* The target is Charmed by you and the spirit for 1 minute or until the target takes any damage.\n\n**Tricksy.** The spirit fills a 10-foot Cube within 5 feet of it with magical Darkness, which lasts until the end of its next turn."
+        },
+        {
+            "nombre": "Toque helado",
+            "datos": "Truco · Nigromancia · 1 acción · 36 m · V, S · 1 asalto",
+            "texto": "You create a ghostly, skeletal hand in the space of a creature within range. Make a ranged spell attack against the creature to assail it with the chill of the grave. On a hit, the target takes 1d8 necrotic damage, and it can't regain hit points until the start of your next turn. Until then, the hand clings to the target.\n\nIf you hit an undead target, it also has disadvantage on attack rolls against you until the end of your next turn.\n\nThis spell's damage increases by 1d8 when you reach 5th level (2d8), 11th level (3d8), and 17th level (4d8)."
+        },
+        {
+            "nombre": "Vortex Warp",
+            "datos": "Nivel 2 · Conjuración · 1 acción · 27 m · V, S · Instantáneo",
+            "texto": "You magically twist space around another creature you can see within range. The target must succeed on a Constitution saving throw (the target can choose to fail), or the target is teleported to an unoccupied space of your choice that you can see within range. The chosen space must be on a surface or in a liquid that can support the target without the target having to squeeze.\n\n***At Higher Levels.*** When you cast this spell using a spell slot of 3rd level or higher, the range of the spell increases by 30 feet for each slot level above 2nd."
+        },
+        {
+            "nombre": "Zancada prodigiosa",
+            "datos": "Nivel 1 · Transmutación · 1 acción · Toque · V, S, M (a pinch of dirt) · 1 hora",
+            "texto": "You touch a creature. The target’s Speed increases by 10 feet until the spell ends.\n\n***Using a Higher-Level Spell Slot.*** You can target one additional creature for each spell slot level above 1."
+        }
+    ]
+}

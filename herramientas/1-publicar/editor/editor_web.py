@@ -1546,11 +1546,12 @@ def colecciones():
                           " sus tiradas y los conjuros se abren en su carta (escríbelos como en sus listas)."),
                   C("descripciones", "Descripciones (lo que sale al desplegar)", "largo", grande=True,
                     vacio="quitar", markdown=True,
-                    ayuda="De cada conjuro, acción, rasgo, ataque u objeto que quieras desplegable, un bloque"
-                          " que empieza con ## y su nombre, igual que en su lista. Debajo, si quieres, «Origen:»"
-                          " (de dónde le viene: «Hechicero, nivel 3», «Dote») y «Datos:» (separados por ·), y"
-                          " luego el texto, con formato. El importador de D&D Beyond las rellena (el texto, en"
-                          " inglés) sin pisar las que ya tengas."),
+                    ayuda="Lo que cuenta cada conjuro, objeto, rasgo o acción está en el compendio (Rol →"
+                          " «Compendio: …»), compartido por todas las fichas. Aquí, de cada uno, un bloque que"
+                          " empieza con ## y su nombre, igual que en su lista, y debajo «Tipo:» (conjuros,"
+                          " objetos, rasgos o acciones) y «Origen:» (de dónde le viene: «Hechicero, nivel 3»,"
+                          " «Dote»). Si debajo escribes «Datos:» o un texto, ese manda solo para este personaje."
+                          " El importador de D&D Beyond lo rellena y añade al compendio lo que falte."),
                   C("trasfondo", "Trasfondo", vacio="quitar", ayuda="«Criminal», «Sabio»…"),
                   C("alineamiento", "Alineamiento", "elegir", libre=True, vacio="quitar",
                     opciones=_opciones(["Legal bueno", "Neutral bueno", "Caótico bueno", "Legal neutral", "Neutral",
@@ -1626,6 +1627,26 @@ def colecciones():
                   C("pie", "Pie de foto", vacio="quitar"),
               ]},
          ]},
+    ] + [
+        # EL COMPENDIO (0-comun/compendio.py): cada conjuro, objeto, rasgo y
+        # acción, una vez para todos mis personajes. Lo que cambies aquí
+        # cambia en todas las fichas que lo tengan.
+        {"id": "compendio-" + tipo, "apartado": "personajes", "titulo": "Compendio: " + tipo,
+         "corto": "%s %s de todas las fichas: %s una vez y cambian en todas." % (
+             art.capitalize(), tipo, "cámbialas" if art == "las" else "cámbialos"),
+         "ayuda": "Lo que sale al desplegar cada uno de los %s en las fichas de mis personajes (el nombre tiene"
+                  " que ser igual que en su lista; no mira mayúsculas ni tildes). Si a un personaje le quieres"
+                  " poner otro texto solo a él, escríbelo en su pestaña «descripciones»." % tipo,
+         "archivo": "datos/personajes/compendio/%s.json" % tipo, "despues": "personajes",
+         "partes": [{"id": tipo, "camino": [tipo], "titulo": art.capitalize() + " " + tipo, "nombre_de": "nombre",
+                     "detalle": ["datos"], "campos": [
+                         C("nombre", "Nombre", obligatorio=True),
+                         C("datos", "Datos (las pastillitas)", vacio="quitar",
+                           ayuda="Separados por «·»: «Nivel 3 · Evocación · 1 acción · 45 m»."),
+                         C("texto", "Lo que hace", "largo", grande=True, markdown=True, vacio="quitar"),
+                     ]}]}
+        for tipo, art in (("conjuros", "los"), ("objetos", "los"), ("rasgos", "los"), ("acciones", "las"))
+    ] + [
         {"id": "recomendaciones", "apartado": "rincon", "corto": "Libros, series, pelis y juegos.", "titulo": "Recomendaciones",
          "ayuda": "Libros, series, pelis, juegos… las ventanitas de la página de recomendaciones.",
          "archivo": "datos/mi_rincon/recomendaciones.json", "despues": None,
@@ -2254,6 +2275,32 @@ def vista_previa_personaje(peticion):
             "avisos": ["%s «%s»" % (q, d) for q, d in avisos.lista]}
 
 
+def _al_compendio(campos, avisos):
+    """Lo que cuenta D&D Beyond de cada conjuro, objeto, rasgo o acción va
+    al compendio (datos/personajes/compendio/, ver 0-comun/compendio.py)
+    si aún no está; lo que ya está no se toca (puede que lo hayas
+    cambiado a tu gusto). En el personaje se queda solo de dónde le viene
+    cada cosa."""
+    import compendio
+    gen = _generador("generar-personajes")
+    nuevas, por_tipo, bloques = 0, {}, []
+    for d in gen.leer_descripciones(campos.get("descripciones")).values():
+        tipo = d.get("tipo") if d.get("tipo") in compendio.TIPOS else (
+            compendio.tipo_de_datos(d.get("datos")) or "rasgos")
+        por_tipo.setdefault(tipo, []).append({"nombre": d["nombre"], "datos": d.get("datos"),
+                                              "texto": d.get("cuerpo")})
+        partes = ["## " + d["nombre"], "Tipo: " + tipo]
+        if d.get("origen"):
+            partes.append("Origen: " + d["origen"])
+        bloques.append("\n".join(partes))
+    for tipo, entradas in por_tipo.items():
+        nuevas += compendio.anadir(tipo, entradas)
+    if bloques:
+        campos["descripciones"] = "\n\n".join(bloques)
+    if nuevas:
+        avisos.append("%d cosa(s) nuevas añadidas al compendio (Rol → «Compendio: …»)." % nuevas)
+
+
 def importar_de_dndbeyond(peticion):
     """La ficha de D&D Beyond como las casillas de uno de mis personajes
     (1-publicar/editor/dndbeyond.py), y si se pide, su retrato de allí como
@@ -2264,6 +2311,7 @@ def importar_de_dndbeyond(peticion):
         campos, avisos, retrato = ddb.a_ficha(datos)
     except ddb.ErrorDeImportacion as error:
         return {"error": str(error)}
+    _al_compendio(campos, avisos)
     clave = nombre_archivo(str(peticion.get("personaje") or campos.get("nombre") or ""), "")
     imagenes = {}
     quiere = peticion.get("imagenes") or []

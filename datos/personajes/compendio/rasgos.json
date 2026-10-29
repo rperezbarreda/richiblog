@@ -1,0 +1,319 @@
+{
+    "rasgos": [
+        {
+            "nombre": "Ability Score Increases",
+            "datos": "",
+            "texto": "When determining your character’s ability scores, increase one score by 2 and a different one by 1, or increase three scores by 1. None of these increases can raise a score above 20."
+        },
+        {
+            "nombre": "Acolyte of the Avowed",
+            "datos": "",
+            "texto": "Once per short rest, you can cast the detect thoughts spell (save DC 15 if you don't have a spell DC). Additionally, you can cast the legend lore spell once per week."
+        },
+        {
+            "nombre": "Ancestral Legacy",
+            "datos": "",
+            "texto": "If you replace a race with this lineage, you can keep the following elements of that race: any skill proficiencies you gained from it and any climbing, flying, or swimming speed you gained from it.\n\nIf you don’t keep any of those elements or you choose this lineage at character creation, you gain proficiency in two skills of your choice."
+        },
+        {
+            "nombre": "Bard College",
+            "datos": "",
+            "texto": "At 3rd level, you delve into the advanced techniques of a bard college of your choice: the College of Lore detailed at the end of the class description or another from the *Player's Handbook* or other sources. Your choice grants you features at 3rd level and again at 6th and 14th level."
+        },
+        {
+            "nombre": "Bonus Proficiencies",
+            "datos": "",
+            "texto": "When you join the College of Lore at 3rd level, you gain proficiency with three skills of your choice."
+        },
+        {
+            "nombre": "Canción de descanso",
+            "datos": "",
+            "texto": "Beginning at 2nd level, you can use soothing music or oration to help revitalize your wounded allies during a short rest. If you or any friendly creatures who can hear your performance regain hit points at the end of the short rest by spending one or more Hit Dice, each of those creatures regains an extra 1d6 hit points.\n\nThe extra hit points increase when you reach certain levels in this class: to 1d8 at 9th level, to 1d10 at 13th level, and to 1d12 at 17th level."
+        },
+        {
+            "nombre": "Character Threads",
+            "datos": "",
+            "texto": "Threads are aspects added to characters at any time during their career that have a specific short or long-term goal."
+        },
+        {
+            "nombre": "Chef",
+            "datos": "",
+            "texto": "Time spent mastering the culinary arts has paid off , granting you the following benefits:\n\n- Increase your Constitution or Wisdom score by 1, to a maximum of 20.\n- You gain proficiency with cook’s utensils if you don’t already have it.\n- As part of a short rest, you can cook special food, provided you have ingredients and cook’s utensils on hand. You can prepare enough of this food for a number of creatures equal to 4 + your proficiency bonus. At the end of the short rest, any creature who eats the food and spends one or more Hit Dice to regain hit points regains an extra 1d8 hit points.\n- With one hour of work or when you finish a long rest, you can cook a number of treats equal to your proficiency bonus. These special treats last 8 hours after being made. A creature can use a bonus action to eat one of those treats to gain temporary hit points equal to your proficiency bonus."
+        },
+        {
+            "nombre": "Circle Magic (Intelligence)",
+            "datos": "",
+            "texto": "**Initiating a Circle Spell**\n\nYou take a Magic action to initiate casting a Circle spell. When you do so, choose which Circle casting option you’re using for this casting; you must also meet any of the other requirements described in that option’s text. Until the Circle spell’s casting is complete, you must maintain Concentration on the spell.\n\nIf a Reaction would trigger when a creature casts a spell—such as the Reaction taken to cast Counterspell— it also triggers when you take this action to initiate a Circle spell.\n\n**Circle Casting Options**\n\nThe following options provide ways to enhance a spell when casting it as a Circle spell. You can use only one Circle casting option on a spell at a time.\n\nSome spells have a “Casting as a Circle Spell” section in their description. Instead of using one of the following options, you can create the effect described in that section when casting the spell as a Circle spell. Such effects are often uniquely powerful and specific to their respective spells.\n\n**Augment**\n\nWhen you cast a spell with a range of at least 5 feet, you can increase the range of the spell by 1,000 feet per secondary caster contributing to the spell, up to a maximum of a 1-mile increase.\n\n**Distribute**\n\nWhen you cast a spell that requires Concentration, you can distribute the mental load of the spell among you and the secondary casters. Once the casting is complete, you and all secondary casters can maintain Concentration on this spell. As long as at least one caster who contributed to the spell maintains this Concentration, the spell’s effects remain active.\n\n**Expand**\n\nWhen you cast a spell that creates an area of effect, you can increase one dimension of the spell’s area of effect for this casting by 10 feet per secondary caster contributing to the spell. For example, if a spell creates a 20-foot-radius Sphere, casting it as a Circle spell with two secondary casters would increase the radius to 40 feet. A spell that creates a Line that is 5 feet wide and 300 feet long, cast as a Circle spell with two secondary casters, could make a Line that is either 25 feet wide or 320 feet long.\n\nEach secondary caster contributing to the spell must expend a spell slot (no action required). If the spell fails, these spell slots aren’t expended.\n\n**Prolong**\n\nWhen you cast a spell that has a duration of 1 minute or longer, you can increase the duration of the spell depending on the number of secondary casters contributing to the spell, as detailed in the table below.\n\nEach secondary caster contributing to the spell must expend a spell slot (no action required). If the spell fails, these spell slots aren’t expended.\n\n**Spell Duration**\n\n- Secondary Casters · The Spell Increases Duration by\n- 1–3 · 1 hour\n- 4–6 · 8 hours\n- 7+ · 24 hours\n\n**Safeguard**\n\nWhen you cast a spell that creates an area of effect, you can carve out a safe zone within that area of effect that is unaffected by the spell for its duration. This safe zone consists of a number of 5-foot Cubes equal to your spellcasting ability modifier plus the number of secondary casters contributing to the spell (minimum of one Cube). You can arrange the Cubes as you like, but each Cube must be contiguous with at least one other Cube.\n\nIf the spell’s area of effect can be moved, the safe zone moves with it.\n\n**Supplant**\n\nWhen you cast a spell that requires at least one Material component with a specified cost that is consumed by the spell, you can reduce the minimum cost of one such Material component by 50 GP per each secondary caster contributing to the spell. For example, casting Revivify as a Circle spell with two secondary casters would reduce the Material component’s minimum cost to 200 GP.\n\nEach secondary caster contributing to the spell must expend a spell slot of a level greater than or equal to the spell’s level (no action required). If the spell fails, these spell slots aren’t expended."
+        },
+        {
+            "nombre": "Clockwork Magic",
+            "datos": "",
+            "texto": "*1st-level Clockwork Soul feature *\n\nYou learn additional spells when you reach certain levels in this class, as shown on the Clockwork Spells table. Each of these spells counts as a sorcerer spell for you, but it doesn’t count against the number of sorcerer spells you know.\n\nWhenever you gain a sorcerer level, you can replace one spell you gained from this feature with another spell of the same level. The new spell must be an abjuration or a transmutation spell from the sorcerer, warlock, or wizard spell list.\n\n**Clockwork Spells**\n\n- Sorcerer Level · Spells\n- 1st · alarm, protection from evil and good\n- 3rd · aid, lesser restoration\n- 5th · dispel magic, protection from energy\n- 7th · freedom of movement, summon construct (a spell in chapter 3)\n- 9th · greater restoration, wall of force\n\nIn addition, consult the Manifestations of Order table and choose or randomly determine a way your connection to order manifests while you are casting any of your sorcerer spells.\n\n**Manifestations of Order**\n\n- d6 · Manifestation\n- 1 · Spectral cogwheels hover behind you.\n- 2 · The hands of a clock spin in your eyes.\n- 3 · Your skin glows with a brassy sheen.\n- 4 · Floating equations and geometric objects overlay your body.\n- 5 · Your spellcasting focus temporarily takes the form of a Tiny clockwork mechanism.\n- 6 · The ticking of gears or ringing of a clock can be heard by you and those affected by your magic."
+        },
+        {
+            "nombre": "Core Druid Traits",
+            "datos": "",
+            "texto": "As a Level 1 Character:\n\n- Gain all the traits in the Core Druid Traits table.\n- Gain the Druid’s level 1 features, which are listed in the Druid Features table.\n\nCore Druid Traits\n- Primary Ability · Wisdom\n- Hit Point Die · D8 per Druid level\n- Saving Throw Proficiencies · Intelligence and Wisdom\n- Skill Proficiencies · *Choose 2:* Animal Handling, Arcana, Insight, Medicine, Nature, Perception, Religion, or Survival\n- Weapon Proficiencies · Simple weapons\n- Tool Proficiencies · Herbalism Kit\n- Armor Training · Light armor and Shields\n- Starting Equipment · *Choose A or B:* (A) Leather Armor, Shield, Sickle, Druidic Focus (Quarterstaff), Explorer’s Pack, Herbalism Kit, and 9 GP; or (B) 50 GP"
+        },
+        {
+            "nombre": "Core Wizard Traits",
+            "datos": "",
+            "texto": "As a Level 1 Character:\n\n- Gain all the traits in the Core Wizard Traits table.\n- Gain the Wizard’s level 1 features.\n\nCore Wizard Traits\n- Primary Ability · Intelligence\n- Hit Point Die · D6 per Wizard level\n- Saving Throw Proficiencies · Intelligence and Wisdom\n- Skill Proficiencies · *Choose 2:* Arcana, History, Insight, Investigation, Medicine, Nature, or Religion\n- Weapon Proficiencies · Simple weapons\n- Armor Training · None\n- Starting Equipment · *Choose A or B:* (A) 2 Daggers, Arcane Focus (Quarterstaff), Robe, Spellbook, Scholar’s Pack, and 5 GP; or (B) 55 GP"
+        },
+        {
+            "nombre": "Dark Bargain",
+            "datos": "",
+            "texto": "At your GM's discretion, you can take a Dark Bargain."
+        },
+        {
+            "nombre": "Divine Health",
+            "datos": "",
+            "texto": "By 3rd level, the divine magic flowing through you makes you immune to disease."
+        },
+        {
+            "nombre": "Druid Subclass",
+            "datos": "",
+            "texto": "You gain a Druid subclass of your choice. A subclass is a specialization that grants you features at certain Druid levels. For the rest of your career, you gain each of your subclass’s features that are of your Druid level or lower."
+        },
+        {
+            "nombre": "Druídico",
+            "datos": "",
+            "texto": "You know Druidic, the secret language of Druids. While learning this ancient tongue, you also unlocked the magic of communicating with animals; you always have the Speak with Animals spell prepared.\n\nYou can use Druidic to leave hidden messages. You and others who know Druidic automatically spot such a message. Others spot the message’s presence with a successful DC 15 Intelligence (Investigation) check but can’t decipher it without magic."
+        },
+        {
+            "nombre": "Eerie Token",
+            "datos": "",
+            "texto": "As a bonus action, you can harmlessly remove a lock of your hair, one of your nails, or one of your teeth. This token is imbued with magic until you finish a long rest. While the token is imbued in this way, you can take these actions:\n\n**Telepathic Message.** As an action, you can send a telepathic message to the creature holding or carrying the token, as long as you are within 10 miles of it. The message can contain up to twenty-five words.\n\n**Remote Viewing.** If you are within 10 miles of the token, you can enter a trance as an action. The trance lasts for 1 minute, but it ends early if you dismiss it (no action required) or are incapacitated. During this trance, you can see and hear from the token as if you were located where it is. While you are using your senses at the token’s location, you are blinded and deafened in regard to your own surroundings. When the trance ends, the token is harmlessly destroyed.\n\nOnce you create a token using this feature, you can’t do so again until you finish a long rest, at which point your missing part regrows."
+        },
+        {
+            "nombre": "Elven Lineage",
+            "datos": "",
+            "texto": "You are part of a lineage that grants you supernatural abilities. Choose a lineage from the Elven Lineages table. You gain the level 1 benefit of that lineage.\n\nWhen you reach character levels 3 and 5, you learn a higher-level spell, as shown on the table. You always have that spell prepared. You can cast it once without a spell slot, and you regain the ability to cast it in that way when you finish a Long Rest. You can also cast the spell using any spell slots you have of the appropriate level.\n\nIntelligence, Wisdom, or Charisma is your spellcasting ability for the spells you cast with this trait (choose the ability when you select the lineage).\n\nElven Lineages\n- Lineage · Level 1 · Level 3 · Level 5\n- Drow · The range of your Darkvision increases to 120 feet. You also know the *Dancing Lights* cantrip. · *Faerie Fire* · *Darkness*\n- High Elf · You know the *Prestidigitation* cantrip. Whenever you finish a Long Rest, you can replace that cantrip with a different cantrip from the Wizard spell list. · *Detect Magic* · *Misty Step*\n- Wood Elf · Your Speed increases to 35 feet. You also know the *Druidcraft* cantrip. · *Longstrider* · *Pass without Trace*"
+        },
+        {
+            "nombre": "Elven Lineage Spells",
+            "datos": "",
+            "texto": "When you choose your Elven Lineage, and at character levels 3 and 5, you learn a spell as shown on the table. You always have that spell prepared. You can cast it once without a spell slot, and you regain the ability to cast it in that way when you finish a Long Rest. You can also cast the spell using any spell slots you have of the appropriate level.\n\nIntelligence, Wisdom, or Charisma is your spellcasting ability for the spells you cast with this trait (choose the ability when you select the lineage)."
+        },
+        {
+            "nombre": "Enemigo predilecto",
+            "datos": "",
+            "texto": "Beginning at 1st level, you have significant experience studying, tracking, hunting, and even talking to a certain type of enemy.\n\nChoose a type of favored enemy: aberrations, beasts, celestials, constructs, dragons, elementals, fey, fiends, giants, monstrosities, oozes, plants, or undead. Alternatively, you can select two races of humanoid (such as gnolls and orcs) as favored enemies.\n\nYou have advantage on Wisdom (Survival) checks to track your favored enemies, as well as on Intelligence checks to recall information about them.\n\nWhen you gain this feature, you also learn one language of your choice that is spoken by your favored enemies, if they speak one at all.\n\nYou choose one additional favored enemy, as well as an associated language, at 6th and 14th level. As you gain levels, your choices should reflect the types of monsters you have encountered on your adventures."
+        },
+        {
+            "nombre": "Estilo de combate",
+            "datos": "",
+            "texto": "At 2nd level, you adopt a particular style of fighting as your specialty. Choose one of the following options.\n\nYou can’t take a Fighting Style option more than once, even if you later get to choose again."
+        },
+        {
+            "nombre": "Explorador nato",
+            "datos": "",
+            "texto": "You are particularly familiar with one type of natural environment and are adept at traveling and surviving in such regions. Choose one type of favored terrain: arctic, coast, desert, forest, grassland, mountain, swamp, or the Underdark. When you make an Intelligence or Wisdom check related to your favored terrain, your proficiency bonus is doubled if you are using a skill that you’re proficient in.\n\nWhile traveling for an hour or more in your favored terrain, you gain the following benefits:\n\n- Difficult terrain doesn’t slow your group’s travel.\n- Your group can’t become lost except by magical means.\n- Even when you are engaged in another activity while traveling (such as foraging, navigating, or tracking), you remain alert to danger.\n- If you are traveling alone, you can move stealthily at a normal pace.\n- When you forage, you find twice as much food as you normally would.\n- While tracking other creatures, you also learn their exact number, their sizes, and how long ago they passed through the area.\n\nYou choose additional favored terrain types at 6th and 10th level."
+        },
+        {
+            "nombre": "Eyes of the Dark",
+            "datos": "",
+            "texto": "Starting at 1st level, you have darkvision with a range of 120 feet.\n\nWhen you reach 3rd level in this class, you learn the darkness spell, which doesn’t count against your number of sorcerer spells known. In addition, you can cast it by spending 2 sorcery points or by expending a spell slot. If you cast it with sorcery points, you can see through the darkness created by the spell."
+        },
+        {
+            "nombre": "Feat",
+            "datos": "",
+            "texto": "You gain one feat of your choice."
+        },
+        {
+            "nombre": "Fuente de magia",
+            "datos": "",
+            "texto": "At 2nd level, you tap into a deep wellspring of magic within yourself. This wellspring is represented by sorcery points, which allow you to create a variety of magical effects.\n\n**Sorcery Points**\n\nYou have 2 sorcery points, and you gain more as you reach higher levels, as shown in the Sorcery Points column of the Sorcerer table. You can never have more sorcery points than shown on the table for your level. You regain all spent sorcery points when you finish a long rest.\n\n**Flexible Casting**\n\nYou can use your sorcery points to gain additional spell slots, or sacrifice spell slots to gain additional sorcery points. You learn other ways to use your sorcery points as you reach higher levels.\n\n**Creating Spell Slots.** You can transform unexpended sorcery points into one spell slot as a bonus action on your turn. The Creating Spell Slots table shows the cost of creating a spell slot of a given level. You can create spell slots no higher in level than 5th.\n\nAny spell slot you create with this feature vanishes when you finish a long rest.\n\n**Creating Spell Slots**\n\n- SPELL SLOT LEVEL · SORCERY POINT COST\n- 1st · 2\n- 2nd · 3\n- 3rd · 5\n- 4th · 6\n- 5th · 7\n\n**Converting a Spell Slot to Sorcery Points.** As a bonus action on your turn, you can expend one spell slot and gain a number of sorcery points equal to the slot’s level."
+        },
+        {
+            "nombre": "Guide Ability Score Improvements",
+            "datos": "",
+            "texto": "The Guide Background allows you to choose between Dexterity, Constitution, and Wisdom. Increase one of these scores by 2 and another one by 1, or increase all three by 1. None of these increases can raise a score above 20."
+        },
+        {
+            "nombre": "Hex Magic",
+            "datos": "",
+            "texto": "You can cast the disguise self and hex spells with this trait. Once you cast either of these spells with this trait, you can’t cast that spell with it again until you finish a long rest. You can also cast these spells using any spell slots you have.\n\nIntelligence, Wisdom, or Charisma is your spellcasting ability for these spells (choose the ability when you gain this lineage)."
+        },
+        {
+            "nombre": "Horrible Scar",
+            "datos": "",
+            "texto": "You are disfigured to the extent that the wound can’t be easily concealed. You have disadvantage on Charisma Persuasion checks and advantage on Charisma Intimidation checks. High level magical healing may be able to remove the scar."
+        },
+        {
+            "nombre": "Illusion Savant",
+            "datos": "",
+            "texto": "Choose two Wizard spells from the Illusion school, each of which must be no higher than level 2, and add them to your spellbook for free.\n\nIn addition, whenever you gain access to a new level of spell slots in this class, you can add one Wizard spell from the Illusion school to your spellbook for free. The chosen spell must be of a level for which you have spell slots."
+        },
+        {
+            "nombre": "Imposición de manos",
+            "datos": "",
+            "texto": "Your blessed touch can heal wounds. You have a pool of healing power that replenishes when you take a long rest. With that pool, you can restore a total number of hit points equal to your paladin level × 5.\n\nAs an action, you can touch a creature and draw power from the pool to restore a number of hit points to that creature, up to the maximum amount remaining in your pool.\n\nAlternatively, you can expend 5 hit points from your pool of healing to cure the target of one disease or neutralize one poison affecting it. You can cure multiple diseases and neutralize multiple poisons with a single use of Lay on Hands, expending hit points separately for each one.\n\nThis feature has no effect on undead and constructs."
+        },
+        {
+            "nombre": "Improved Illusions",
+            "datos": "",
+            "texto": "You can cast Illusion spells without providing Verbal components, and if an Illusion spell you cast has a range of 10+ feet, the range increases by 60 feet.\n\nYou also know the Minor Illusion cantrip. If you already know it, you learn a different Wizard cantrip of your choice. The cantrip doesn’t count against your number of cantrips known. You can create both a sound and an image with a single casting of *Minor Illusion*, and you can cast it as a Bonus Action."
+        },
+        {
+            "nombre": "Lanzamiento de conjuros",
+            "datos": "",
+            "texto": "You have learned to cast spells through studying the mystical forces of nature. See chapter 7 for the rules on spellcasting. The information below details how you use those rules with Druid spells, which appear on the Druid spell list later in the class’s description.\n\n***Cantrips.*** You know two cantrips of your choice from the Druid spell list.\n\nWhenever you gain a Druid level, you can replace one of your cantrips with another cantrip of your choice from the Druid spell list.\n\nWhen you reach Druid levels 4 and 10, you learn another cantrip of your choice from the Druid spell list, as shown in the Cantrips column of the Druid Features table.\n\n***Spell Slots.*** The Druid Features table shows how many spell slots you have to cast your level 1+ spells. You regain all expended slots when you finish a Long Rest.\n\n***Prepared Spells of Level 1+.*** You prepare the list of level 1+ spells that are available for you to cast with this feature. To start, choose four level 1 spells from the Druid spell list.\n\nThe number of spells on your list increases as you gain Druid levels, as shown in the Prepared Spells column of the Druid Features table. Whenever that number increases, choose additional spells from the Druid spell list until the number of spells on your list matches the number on the table. The chosen spells must be of a level for which you have spell slots. For example, if you’re a level 3 Druid, your list of prepared spells can include six spells of levels 1 and 2 in any combination.\n\nIf another Druid feature gives you spells that you always have prepared, those spells don’t count against the number of spells you can prepare with this feature, but those spells otherwise count as Druid spells for you.\n\n***Changing Your Prepared Spells.*** Whenever you finish a Long Rest, you can change your list of prepared spells, replacing any of the spells with other Druid spells for which you have spell slots.\n\n***Spellcasting Ability.*** Wisdom is your spellcasting ability for your Druid spells.\n\n***Spellcasting Focus.*** You can use a Druidic Focus as a Spellcasting Focus for your Druid spells."
+        },
+        {
+            "nombre": "Linaje feérico",
+            "datos": "",
+            "texto": "You have Advantage on saving throws you make to avoid or end the Charmed condition."
+        },
+        {
+            "nombre": "Magic Initiate (Bard)",
+            "datos": "",
+            "texto": "You learn two cantrips of your choice from the bard's spell list.\n\n- In addition, choose one 1st-level spell from the bard's spell list. You learn that spell and can cast it at its lowest level. Once you cast it, you must finish a long rest before you can cast it again using this feat.\n- Charisma is your spellcasting ability for these spells."
+        },
+        {
+            "nombre": "Magic Initiate (Druid)",
+            "datos": "",
+            "texto": "*Origin Feat*\n\nYou gain the following benefits.\n\n***Two Cantrips.*** You learn two cantrips of your choice from the Druid spell list. Intelligence, Wisdom, or Charisma is your spellcasting ability for this feat’s spells (choose when you select this feat).\n\n***Level 1 Spell.** *Choose a level 1 spell from the same list you selected for this feat’s cantrips. You always have that spell prepared. You can cast it once without a spell slot, and you regain the ability to cast it in that way when you finish a Long Rest. You can also cast the spell using any spell slots you have.\n\n***Spell Change.*** Whenever you gain a new level, you can replace one of the spells you chose for this feat with a different spell of the same level from the chosen spell list.\n\n***Repeatable.*** You can take this feat more than once, but you must choose a different spell list each time."
+        },
+        {
+            "nombre": "Magic Initiate (Wizard)",
+            "datos": "",
+            "texto": "You learn two cantrips of your choice from the wizard's spell list.\n\n- In addition, choose one 1st-level spell from the wizard's spell list. You learn that spell and can cast it at its lowest level. Once you cast it, you must finish a long rest before you can cast it again using this feat.\n- Intelligence is your spellcasting ability for these spells."
+        },
+        {
+            "nombre": "Mejora de característica",
+            "datos": "",
+            "texto": "*General Feat (Prerequisite: Level 4+)*\n\nIncrease one ability score of your choice by 2, or increase two ability scores of your choice by 1. This feat can’t increase an ability score above 20.\n\n***Repeatable.*** You can take this feat more than once."
+        },
+        {
+            "nombre": "Memorize Spell",
+            "datos": "",
+            "texto": "Whenever you finish a Short Rest, you can study your spellbook and replace one of the level 1+ Wizard spells you have prepared for your Spellcasting feature with another level 1+ spell from the book."
+        },
+        {
+            "nombre": "Metamagia",
+            "datos": "",
+            "texto": "At 3rd level, you gain the ability to twist your spells to suit your needs. You gain two of the following Metamagic options of your choice. You gain another one at 10th and 17th level.\n\nYou can use only one Metamagic option on a spell when you cast it, unless otherwise noted."
+        },
+        {
+            "nombre": "Nimble Escape",
+            "datos": "",
+            "texto": "You can take the Disengage or Hide action as a bonus action on each of your turns."
+        },
+        {
+            "nombre": "Oath Spells",
+            "datos": "",
+            "texto": "You gain oath spells at the paladin levels listed in the Oath of Redemption Spells table. See the Sacred Oath class feature for how oath spells work.\n\n**Oath of Redemption Spells**\n\n- Paladin Level · Spells\n- 3rd · sanctuary, sleep\n- 5th · calm emotions, hold person\n- 9th · counterspell, hypnotic pattern\n- 13th · Otiluke’s resilient sphere, stoneskin\n- 17th · hold monster, wall of force"
+        },
+        {
+            "nombre": "Origen hechicero",
+            "datos": "",
+            "texto": "Choose a sorcerous origin, which describes the source of your innate magical power: Draconic Bloodline, detailed at the end of the class description, or one from another source.\n\nYour choice grants you features when you choose it at 1st level and again at 6th, 14th, and 18th level."
+        },
+        {
+            "nombre": "Pericia",
+            "datos": "",
+            "texto": "At 3rd level, choose two of your skill proficiencies. Your proficiency bonus is doubled for any ability check you make that uses either of the chosen proficiencies."
+        },
+        {
+            "nombre": "Phantasmal Creatures",
+            "datos": "",
+            "texto": "You always have the Summon Beast and Summon Fey spells prepared. Whenever you cast either spell, you can change its school to Illusion, which causes the summoned creature to appear spectral. You can cast the Illusion version of each spell without expending a spell slot, but casting it without a slot halves the creature’s Hit Points. Once you cast either spell without a spell slot, you must finish a Long Rest before you can cast the spell in that way again."
+        },
+        {
+            "nombre": "Polivalente",
+            "datos": "",
+            "texto": "Starting at 2nd level, you can add half your proficiency bonus, rounded down, to any ability check you make that doesn’t already include your proficiency bonus."
+        },
+        {
+            "nombre": "Primal Order",
+            "datos": "",
+            "texto": "You have dedicated yourself to one of the following sacred roles of your choice.\n\n**Magician**\nYou know one extra cantrip from the Druid spell list. In addition, your mystical connection to nature gives you a bonus to your Intelligence (Arcana or Nature) checks. The bonus equals your Wisdom modifier (minimum bonus of +1).\n\n**Warden**\nTrained for battle, you gain proficiency with Martial weapons and training with Medium armor."
+        },
+        {
+            "nombre": "Primeval Awareness",
+            "datos": "",
+            "texto": "Beginning at 3rd level, you can use your action and expend one ranger spell slot to focus your awareness on the region around you. For 1 minute per level of the spell slot you expend, you can sense whether the following types of creatures are present within 1 mile of you (or within up to 6 miles if you are in your favored terrain): aberrations, celestials, dragons, elementals, fey, fiends, and undead. This feature doesn’t reveal the creatures’ location or number."
+        },
+        {
+            "nombre": "Ranger Archetype",
+            "datos": "",
+            "texto": "At 3rd level, you choose an archetype that you strive to emulate: the Hunter that is detailed at the end of the class description or one from another source. Your choice grants you features at 3rd level and again at 7th, 11th, and 15th level."
+        },
+        {
+            "nombre": "Ritual Adept",
+            "datos": "",
+            "texto": "You can cast any spell as a Ritual if that spell has the Ritual tag and the spell is in your spellbook. You needn’t have the spell prepared, but you must read from the book to cast a spell in this way."
+        },
+        {
+            "nombre": "Rune Shaper",
+            "datos": "",
+            "texto": "You’ve studied the magic of Giant runes, granting you the following benefits:\n\n**Comprehend Languages.** You learn the comprehend languages spell. You can cast this spell without expending a spell slot, and you must finish a long rest before you can cast it in this way again. You can also cast this spell using any spell slots you have.\n\n**Rune Magic.** You know a number of runes equal to half your proficiency bonus (rounded down), chosen from the Rune Spells table. Whenever you finish a long rest, you can inscribe each rune you know onto one nonmagical weapon, armor, piece of clothing, or other object you touch. You temporarily learn the 1st-level spells that correspond to the runes you inscribed, as specified on the Rune Spells table, and you know those spells until you finish a long rest, when the runes fade. While you are wearing or carrying any rune-marked object, you can cast the spells associated with those runes using any spell slots you have.\n\nYou can also invoke a rune inscribed on an object you are wearing or carrying and cast its associated spell without expending a spell slot or using material components. Once you cast the spell in this way, you can’t do so again until you finish a long rest. Your spellcasting ability for this feat is Intelligence, Wisdom, or Charisma (choose when you select this feat).\n\nEach time you gain a level, you can replace one of the runes you know with another one from the Rune Spells table.\n\n**Rune Spells**\n\n- Rune · Spell\n- Cloud · Fog cloud\n- Death · Inflict wounds\n- Dragon · Chromatic orb\n- Enemy · Disguise self\n- Fire · Burning hands\n- Friend · Speak with animals\n- Frost · Armor of Agathys\n- Hill · Goodberry\n- Journey · Longstrider\n- King · Command\n- Mountain · Entangle\n- Stone · Sanctuary\n- Storm · Thunderwave"
+        },
+        {
+            "nombre": "Runestones",
+            "datos": "",
+            "texto": "At the beginning of the *Northlands Sagas* adventure path, each player should draw one Runestone randomly."
+        },
+        {
+            "nombre": "Sacred Oath",
+            "datos": "",
+            "texto": "When you reach 3rd level, you swear the oath that binds you as a paladin forever. Up to this time you have been in a preparatory stage, committed to the path but not yet sworn to it. Now you choose the Oath of Devotion detailed at the end of the class description or one from another source.\n\nYour choice grants you features at 3rd level and again at 7th, 15th, and 20th level. Those features include oath spells and the Channel Divinity feature.\n\n**Oath Spells**\n\nEach oath has a list of associated spells. You gain access to these spells at the levels specified in the oath description. Once you gain access to an oath spell, you always have it prepared. Oath spells don’t count against the number of spells you can prepare each day.\n\nIf you gain an oath spell that doesn’t appear on the paladin spell list, the spell is nonetheless a paladin spell for you.\n\n**Channel Divinity**\n\nYour oath allows you to channel divine energy to fuel magical effects. Each Channel Divinity option provided by your oath explains how to use it.\n\nWhen you use your Channel Divinity, you choose which option to use. You must then finish a short or long rest to use your Channel Divinity again.\n\nSome Channel Divinity effects require saving throws. When you use such an effect from this class, the DC equals your paladin spell save DC."
+        },
+        {
+            "nombre": "Scholar",
+            "datos": "",
+            "texto": "While studying magic, you also specialized in another field of study. Choose one of the following skills in which you have proficiency: Arcana, History, Investigation, Medicine, Nature, or Religion. You have Expertise in the chosen skill."
+        },
+        {
+            "nombre": "Sentidos agudos",
+            "datos": "",
+            "texto": "You have proficiency in the Insight, Perception, or Survival skill."
+        },
+        {
+            "nombre": "Skills",
+            "datos": "",
+            "texto": "You gain proficiency in one skill of your choice."
+        },
+        {
+            "nombre": "Star Map",
+            "datos": "",
+            "texto": "You’ve created a star chart as part of your heavenly studies. It is a Tiny object, and you can use it as a Spellcasting Focus for your Druid spells. You determine its form by rolling on the Star Map table or by choosing one.\n\nWhile holding the map, you have the Guidance and Guiding Bolt spells prepared, and you can cast *Guiding Bolt* without expending a spell slot. You can cast it in that way a number of times equal to your Wisdom modifier (minimum of once), and you regain all expended uses when you finish a Long Rest.\n\nIf you lose the map, you can perform a 1-hour ceremony to magically create a replacement. This ceremony can be performed during a Short or Long Rest, and it destroys the previous map.\n\nStar Map\n- 1d6 · Map Form\n- 1 · A scroll bearing depictions of constellations\n- 2 · A stone tablet with fine holes drilled through it\n- 3 · An owlbear hide tooled with stellar symbols\n- 4 · A collection of maps bound in an ebony cover\n- 5 · A crystal engraved with starry patterns\n- 6 · A glass disk etched with constellations"
+        },
+        {
+            "nombre": "Starry Form",
+            "datos": "",
+            "texto": "As a Bonus Action, you can expend a use of your Wild Shape feature to take on a starry form rather than shape-shifting.\n\nWhile in your starry form, you retain your game statistics, but your body becomes luminous, your joints glimmer like stars, and glowing lines connect them as on a star chart. This form sheds Bright Light in a 10-foot radius and Dim Light for an additional 10 feet. The form lasts for 10 minutes. It ends early if you dismiss it (no action required), have the Incapacitated condition, or use this feature again.\n\nWhenever you assume your starry form, choose which of the following constellations glimmers on your body; your choice gives you certain benefits while in the form.\n\n***Archer.*** A constellation of an archer appears on you. When you activate this form and as a Bonus Action on your subsequent turns while it lasts, you can make a ranged spell attack, hurling a luminous arrow that targets one creature within 60 feet of yourself. On a hit, the attack deals Radiant damage equal to 1d8 plus your Wisdom modifier.\n\n***Chalice.*** A constellation of a life-giving goblet appears on you. Whenever you cast a spell using a spell slot that restores Hit Points to a creature, you or another creature within 30 feet of you can regain Hit Points equal to 1d8 plus your Wisdom modifier.\n\n***Dragon.*** A constellation of a wise dragon appears on you. When you make an Intelligence or a Wisdom check or a Constitution saving throw to maintain Concentration, you can treat a roll of 9 or lower on the d20 as a 10."
+        },
+        {
+            "nombre": "Strixhaven Mascot",
+            "datos": "",
+            "texto": "You have learned how to summon a Strixhaven mascot to assist you, granting you these benefits:\n\n- You can cast the find familiar spell as a ritual. Your familiar can take the form of the mascot associated with the college you chose for the Strixhaven Initiate feat: a spirit statue mascot (Lorehold), an art elemental mascot (Prismari), a fractal mascot (Quandrix), an inkling mascot (Silverquill), or a pest mascot (Witherbloom). Stat blocks for these creatures appear in chapter 7.\n- When you take the Attack action on your turn, you can forgo one attack to allow your mascot familiar to make one attack of its own with its reaction.\n- If your mascot familiar is within 60 feet of you, you can teleport as an action, swapping places with the familiar. If your destination space is too small for you to occupy, the teleportation fails and is wasted. Once you teleport in this way, you can’t do so again until you finish a long rest, unless you expend a spell slot of 2nd level or higher to do it again."
+        },
+        {
+            "nombre": "Swarmkeeper Magic",
+            "datos": "",
+            "texto": "*3rd-level Swarmkeeper feature *\n\nYou learn the mage hand cantrip if you don’t already know it. When you cast it, the hand takes the form of your swarming nature spirits.\n\nYou also learn an additional spell of 1st level or higher when you reach certain levels in this class, as shown in the Swarmkeeper Spells table. Each spell counts as a ranger spell for you, but it doesn’t count against the number of ranger spells you know.\n\n**Swarmkeeper Spells**\n\n- Ranger Level · Spells\n- 3rd · faerie fire, mage hand\n- 5th · web\n- 9th · gaseous form\n- 13th · arcane eye\n- 17th · insect plague"
+        },
+        {
+            "nombre": "Trance",
+            "datos": "",
+            "texto": "You don’t need to sleep, and magic can’t put you to sleep. You can finish a Long Rest in 4 hours if you spend those hours in a trancelike meditation, during which you retain consciousness."
+        },
+        {
+            "nombre": "Visión en la oscuridad",
+            "datos": "",
+            "texto": "You have Darkvision with a range of 60 feet."
+        },
+        {
+            "nombre": "Wild Companion",
+            "datos": "",
+            "texto": "You can summon a nature spirit that assumes an animal form to aid you. As a Magic action, you can expend a spell slot or a use of Wild Shape to cast the Find Familiar spell without Material components.\n\nWhen you cast the spell in this way, the familiar is Fey and disappears when you finish a Long Rest."
+        },
+        {
+            "nombre": "Wizard Subclass",
+            "datos": "",
+            "texto": "You gain a Wizard subclass of your choice. A subclass is a specialization that grants you features at certain Wizard levels. For the rest of your career, you gain each of your subclass’s features that are of your Wizard level or lower."
+        }
+    ]
+}

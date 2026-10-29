@@ -469,6 +469,9 @@ def descripciones_de(d, t, mods, comp, nivel):
                 "background": "De su trasfondo"}.get(clave_lista, "")
 
     bloques, vistos = [], set()
+    # A cuál del compendio va cada cosa (lo dice su apartado, aquí debajo):
+    # sale en su bloque como «Tipo:» y el editor lo pasa al compendio.
+    tipo = ["conjuros"]
 
     def anadir(nombre, origen, datos, html, valores=None):
         nombre = str(nombre or "").strip()
@@ -476,7 +479,7 @@ def descripciones_de(d, t, mods, comp, nivel):
         if not nombre or nombre in vistos or not (texto or origen or datos):
             return
         vistos.add(nombre)
-        partes = ["## " + nombre]
+        partes = ["## " + nombre, "Tipo: " + tipo[0]]
         if origen:
             partes.append("Origen: " + origen)
         if datos:
@@ -485,6 +488,7 @@ def descripciones_de(d, t, mods, comp, nivel):
             partes.append(texto)
         bloques.append("\n".join(partes))
 
+    tipo[0] = "conjuros"
     # LOS CONJUROS: los de la lista de su clase y los que le dan sus
     # rasgos, su raza, sus dotes o sus objetos.
     nombre_de_clase = {c.get("id"): t((c.get("definition") or {}).get("name")) for c in clases}
@@ -501,6 +505,7 @@ def descripciones_de(d, t, mods, comp, nivel):
             anadir(t(defin.get("name")), por(clave_lista, s.get("componentId")), _datos_de_conjuro(defin, t),
                    defin.get("description"))
 
+    tipo[0] = "acciones"
     # LAS ACCIONES (con sus usos en las cuentas).
     for clave_lista, lista in (d.get("actions") or {}).items():
         for a in lista or []:
@@ -511,6 +516,7 @@ def descripciones_de(d, t, mods, comp, nivel):
                    a.get("description") or a.get("snippet"),
                    {"limiteduse": usos if usos else "?", "classlevel": nivel_c})
 
+    tipo[0] = "rasgos"
     # LOS RASGOS de raza y de clase, y las dotes.
     for r in (d.get("race") or {}).get("racialTraits") or []:
         defin = (r or {}).get("definition") or {}
@@ -533,6 +539,7 @@ def descripciones_de(d, t, mods, comp, nivel):
         defin = (f or {}).get("definition") or {}
         anadir(t(defin.get("name")), "Dote", "", defin.get("description"))
 
+    tipo[0] = "objetos"
     # LOS OBJETOS: los mágicos y lo que lleva puesto (armas, armadura).
     for i in d.get("inventory") or []:
         defin = (i or {}).get("definition") or {}
