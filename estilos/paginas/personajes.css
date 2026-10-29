@@ -3033,141 +3033,11 @@ li > .oc-origen {
     }
 }
 
-/* ====================================================================
-   PLEGAR LA FICHA DE LA IZQUIERDA Y EL MENÚ (personajes.js)
-   ====================================================================
-   El botón de la ficha, en su esquina de arriba a la izquierda; el del
-   menú, en la de arriba a la derecha del menú. Plegado, de cada uno se
-   queda solo su botón, en una tira estrecha. */
-
 /* El menú de la ficha está en un <nav>, y a todo enlace de un <nav> el
    sitio le pone una flechita «↪» al pasar por encima (es la del menú de
    la izquierda del sitio). Aquí sobra. */
 .oc-menu a::before {
     content: none;
-}
-
-.oc-menu-lista[hidden],
-.oc-menu-volver[hidden] {
-    display: none;
-}
-
-.oc-plegar {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 2.25rem;
-    height: 2.25rem;
-    padding: 0;
-    border: 2px solid var(--yellow);
-    background: var(--purple);
-    color: var(--yellow);
-    cursor: pointer;
-}
-
-.oc-plegar svg {
-    width: 1.3rem;
-    height: 1.3rem;
-    fill: none;
-    stroke: currentColor;
-    stroke-width: 2;
-}
-
-.oc-plegar svg .relleno {
-    fill: currentColor;
-}
-
-/* Plegado lo que controla: el botón, relleno (así se ve que hay algo
-   escondido). */
-.oc-plegar[aria-expanded="false"] {
-    background: var(--yellow);
-    color: var(--yellow-contrast);
-}
-
-.oc-plegar:hover {
-    box-shadow: 3px 3px 0 var(--yellow);
-}
-
-.oc-plegar:focus-visible {
-    outline: 2px solid var(--yellow);
-    outline-offset: 2px;
-}
-
-/* LA FICHA plegada: lo de dentro, fuera de la vista (pero no del lector
-   de pantalla: lleva el nombre, que es el título de la página); solo se
-   ve el botón. */
-.oc-lateral {
-    position: relative;
-}
-
-.oc-lateral.oc-plegada > :not(.oc-plegar) {
-    position: absolute;
-    width: 1px;
-    height: 1px;
-    margin: -1px;
-    padding: 0;
-    overflow: hidden;
-    clip: rect(0 0 0 0);
-    white-space: nowrap;
-}
-
-.oc-menu[hidden] {
-    display: none;
-}
-
-.oc-panel {
-    position: relative;
-}
-
-@media (min-width: 861px) {
-    /* EL DE LA FICHA: en su borde derecho, a la altura de los PG y la CA
-       (--arriba lo mide personajes.js), montado medio fuera del post-it.
-       La columna deja hueco a la derecha para que no se corte. */
-    .oc-ficha-page .oc-lateral:not(.oc-plegada) {
-        padding-right: calc(2.25rem - 4px);
-    }
-
-    .oc-plegar.es-de-la-ficha {
-        position: absolute;
-        top: var(--arriba, 4.5rem);
-        right: 0;
-        z-index: 3;
-    }
-
-    .oc-lateral.oc-plegada .oc-plegar.es-de-la-ficha {
-        position: static;
-    }
-
-    /* EL DEL MENÚ: arriba del todo del recuadro, encima de la raya que
-       separa el menú de lo elegido (--izquierda lo mide personajes.js). */
-    .oc-plegar.es-del-menu {
-        position: absolute;
-        top: 0;
-        left: var(--izquierda, 11rem);
-        z-index: 3;
-    }
-
-    /* Plegado el menú, el botón arriba a la izquierda y lo elegido a todo
-       lo ancho, dejándole hueco. */
-    .oc-panel.sin-menu .oc-plegar.es-del-menu {
-        left: 0;
-    }
-
-    .oc-panel.con-menu.sin-menu {
-        grid-template-columns: minmax(0, 1fr);
-        padding-left: calc(16px + 2.75rem);
-    }
-
-    /* Plegada la ficha, su columna es solo el botón. */
-    .oc-ficha-page.sin-lateral {
-        grid-template-columns: auto minmax(0, 1fr);
-    }
-}
-
-@media (max-width: 860px) {
-    .oc-plegar {
-        margin-bottom: 8px;
-    }
 }
 
 /* ====================================================================
@@ -3220,20 +3090,6 @@ li > .oc-origen {
         overflow: visible;
         clip: auto;
         white-space: normal;
-    }
-
-    .oc-lateral.oc-plegada > * {
-        position: static;
-        width: auto;
-        height: auto;
-        margin: 0;
-        overflow: visible;
-        clip: auto;
-        white-space: normal;
-    }
-
-    .oc-plegar {
-        display: none;
     }
 
     .oc-hoja-caja,
