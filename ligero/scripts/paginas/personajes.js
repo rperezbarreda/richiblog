@@ -146,7 +146,7 @@
             }
         });
     }
-    function plegador(caja, clase, nombre, clave, trazos, plegar) {
+    function plegador(caja, donde, clase, nombre, clave, trazos, plegar) {
         if (!caja) {
             return;
         }
@@ -168,18 +168,19 @@
         } catch (e) {
             guardado = null;
         }
-        caja.insertBefore(b, caja.firstChild);
+        donde.insertBefore(b, donde.firstChild);
         poner(guardado !== "cerrado");
         b.addEventListener("click", () => {
             const abierto = b.getAttribute("aria-expanded") !== "true";
             poner(abierto);
+            colocar();
             try {
                 localStorage.setItem("richi-oc-" + clave, abierto ? "abierto" : "cerrado");
             } catch (e) {
             }
         });
     }
-    plegador(lateral, "es-de-la-ficha", "la ficha de la izquierda", "lateral",
+    plegador(lateral, lateral, "es-de-la-ficha", "la ficha de la izquierda", "lateral",
         '<rect x="3" y="4" width="18" height="16" rx="1"/><rect x="3" y="4" width="7" height="16" class="relleno"/>',
         (si, b) => {
             lateral.classList.toggle("oc-plegada", si);
@@ -188,14 +189,37 @@
                 pagina.classList.toggle("sin-lateral", si);
             }
         });
-    plegador(menu, "es-del-menu", "el menú", "menu",
+    plegador(menu, panel, "es-del-menu", "el menú", "menu",
         '<path d="M4 6h16M4 12h16M4 18h16"/>',
         (si) => {
-            menu.querySelectorAll(":scope > .oc-menu-lista, :scope > .oc-menu-volver").forEach((x) => {
-                x.hidden = si;
-            });
+            menu.hidden = si;
             panel.classList.toggle("sin-menu", si);
         });
+    const botonFichaPlegar = lateral && lateral.querySelector(":scope > .oc-plegar");
+    const botonMenuPlegar = panel.querySelector(":scope > .oc-plegar");
+    function colocar() {
+        const vitales = lateral && lateral.querySelector(".oc-vitales");
+        if (botonFichaPlegar && vitales && !lateral.classList.contains("oc-plegada")) {
+            const arriba = vitales.getBoundingClientRect().top - lateral.getBoundingClientRect().top
+                + lateral.scrollTop;
+            botonFichaPlegar.style.setProperty("--arriba",
+                Math.round(arriba + (vitales.offsetHeight - botonFichaPlegar.offsetHeight) / 2) + "px");
+        }
+        if (botonMenuPlegar && !menu.hidden) {
+            const izquierda = menu.getBoundingClientRect().right - panel.getBoundingClientRect().left
+                - panel.clientLeft;
+            botonMenuPlegar.style.setProperty("--izquierda",
+                Math.round(izquierda - botonMenuPlegar.offsetWidth / 2) + "px");
+        }
+    }
+    colocar();
+    window.addEventListener("resize", colocar);
+    if (window.ResizeObserver) {
+        new ResizeObserver(colocar).observe(panel);
+    }
+    if (document.fonts && document.fonts.ready) {
+        document.fonts.ready.then(colocar);
+    }
     window.addEventListener("hashchange", () => mostrar(desdeLaDireccion(), false, false));
     mostrar(desdeLaDireccion(), false, false);
 })();

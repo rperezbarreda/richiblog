@@ -1569,29 +1569,38 @@ li > .oc-origen {
     margin-bottom: 12px;
 }
 
-/* Arriba, el nombre y, a su lado, la clase en su caja. */
+/* Arriba, el recuadro oscuro con el nombre y, en su esquina de abajo a
+   la derecha, la clase en una cajita pequeña (al lado del nombre
+   completo, sin taparlo: si no cabe, baja). */
 .oc-postit-fila {
     display: flex;
-    align-items: stretch;
-    gap: 6px;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 4px 8px;
+    padding-right: 5px;
+    padding-bottom: 5px;
+    background: var(--purple);
 }
 
 .oc-postit-fila .oc-cabecera {
     flex: 1 1 auto;
+    min-width: 0;
+    padding-bottom: 1px;
 }
 
 .oc-postit-clase {
-    display: flex;
     flex: none;
-    align-items: center;
-    margin: 0;
-    padding: 2px 8px;
+    max-width: 100%;
+    margin: 0 0 0 auto;
+    padding: 1px 6px;
     border: 2px solid var(--yellow-contrast);
     background: var(--yellow);
     color: var(--yellow-contrast);
     font-family: var(--fuente-mono);
-    font-size: 0.875rem;
+    font-size: 0.6875rem;
     font-weight: 700;
+    overflow-wrap: anywhere;
 }
 
 /* Bajito: el nombre en una línea y el completo debajo, pequeño. */
@@ -3102,57 +3111,56 @@ li > .oc-origen {
     white-space: nowrap;
 }
 
-/* EL MENÚ: el botón arriba a la derecha, al lado de la primera parte. */
-.oc-menu {
+.oc-menu[hidden] {
+    display: none;
+}
+
+.oc-panel {
     position: relative;
 }
 
-.oc-menu-lista > li:first-child {
-    margin-right: 2.75rem;
-}
-
 @media (min-width: 861px) {
-    /* En la esquina del post-it, montado encima (la columna de la ficha
-       se desplaza por dentro, así que no puede salirse de ella). */
-    .oc-plegar.es-de-la-ficha {
-        position: absolute;
-        top: 0;
-        left: 0;
-        z-index: 3;
+    /* EL DE LA FICHA: en su borde derecho, a la altura de los PG y la CA
+       (--arriba lo mide personajes.js), montado medio fuera del post-it.
+       La columna deja hueco a la derecha para que no se corte. */
+    .oc-ficha-page .oc-lateral:not(.oc-plegada) {
+        padding-right: calc(2.25rem - 4px);
     }
 
-    .oc-ficha-page .oc-lateral:not(.oc-plegada) {
-        padding-top: 8px;
-        padding-left: 8px;
+    .oc-plegar.es-de-la-ficha {
+        position: absolute;
+        top: var(--arriba, 4.5rem);
+        right: 0;
+        z-index: 3;
     }
 
     .oc-lateral.oc-plegada .oc-plegar.es-de-la-ficha {
         position: static;
     }
 
+    /* EL DEL MENÚ: arriba del todo del recuadro, encima de la raya que
+       separa el menú de lo elegido (--izquierda lo mide personajes.js). */
     .oc-plegar.es-del-menu {
         position: absolute;
         top: 0;
-        right: 10px;
-        z-index: 2;
+        left: var(--izquierda, 11rem);
+        z-index: 3;
     }
 
+    /* Plegado el menú, el botón arriba a la izquierda y lo elegido a todo
+       lo ancho, dejándole hueco. */
     .oc-panel.sin-menu .oc-plegar.es-del-menu {
-        position: static;
+        left: 0;
+    }
+
+    .oc-panel.con-menu.sin-menu {
+        grid-template-columns: minmax(0, 1fr);
+        padding-left: calc(16px + 2.75rem);
     }
 
     /* Plegada la ficha, su columna es solo el botón. */
     .oc-ficha-page.sin-lateral {
         grid-template-columns: auto minmax(0, 1fr);
-    }
-
-    /* Plegado el menú, su columna es solo el botón. */
-    .oc-panel.con-menu.sin-menu {
-        grid-template-columns: auto minmax(0, 1fr);
-    }
-
-    .oc-panel.sin-menu .oc-menu {
-        padding-right: 12px;
     }
 }
 

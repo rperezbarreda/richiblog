@@ -3935,14 +3935,15 @@
   familiar de Faëlar (polilla feérica con las estadísticas de un
   murciélago, las del Manual de monstruos de 2024; la imagen, la de la
   campaña de Ragna).
-  MÁS ESPACIO: dos botones para plegar, uno en la esquina de arriba a la
-  izquierda de la ficha (la foto y las características) y otro en la de
-  arriba a la derecha del menú; plegado, de cada uno se queda solo su
+  MÁS ESPACIO: dos botones para plegar, uno en el borde derecho de la
+  ficha (la foto y las características), a la altura de los PG y la CA,
+  y otro arriba del recuadro, encima de la raya que separa el menú de lo
+  elegido (personajes.js mide dónde van: colocar()); plegado, de cada uno se queda solo su
   botón y lo elegido se lleva el ancho (la ficha plegada se quita de la
   vista, pero el lector de pantalla la sigue teniendo, que lleva el
   nombre de la página). Se acuerdan (en este navegador). EL POST-IT: el
-  nombre (como se escribe, con su mayúscula) y a su lado la CLASE en su
-  caja; debajo, los PG y la CA cada uno en su caja («❤️ 27PG»); la foto,
+  nombre (como se escribe, con su mayúscula) y, en la esquina de abajo de
+  su recuadro, la CLASE en una cajita pequeña; debajo, los PG y la CA cada uno en su caja («❤️ 27PG»); la foto,
   con el NIVEL en una chapita en su esquina de abajo; debajo, la raza y
   la subclase («Elfo · Circle of the Stars»; de «Druida (Circle of the
   Stars)» se saca la clase y la subclase); y las características, con el
