@@ -349,15 +349,82 @@
                 <p class="oc-intro">Mis personajes de rol: los que he llevado en partidas y los que tengo esperando la suya. Pulsa en cualquiera para ver su ficha.</p>
             </div>
 
+            <div class="filtros" data-filtros
+                 data-filtros-items=".oc-celda"
+                 data-filtros-orden="aparicion">
+                <span class="filtros-label" id="filtros-label">filtrar:</span>
+
+                <button class="filtros-toggle" type="button" data-filtros-toggle
+                        aria-expanded="false" aria-controls="filtros-lista">
+                    <span class="visually-hidden">Filtrando por: </span>
+                    <span class="filtros-toggle-label" data-filtros-label>todas</span>
+                    <span class="filtros-toggle-arrow" aria-hidden="true">▾</span>
+                </button>
+
+                <div class="filtros-list" id="filtros-lista" role="group" aria-labelledby="filtros-label"></div>
+            </div>
+
+            <p class="filtros-vacio" data-filtros-vacio role="status" hidden></p>
+
             <ul class="oc-rejilla">
-                <li class="oc-celda">
-                    <a class="oc-tarjeta oc-color-azul" href="/web/personajes/faelar/faelar.html">
+                <li class="oc-celda" data-categoria="D&amp;D 5e, jugando, Ragna">
+                    <a class="oc-tarjeta oc-color-amarillo" href="/web/personajes/faelar/faelar.html">
                         <span class="oc-tarjeta-aro">
                             <span class="oc-tarjeta-foto"><img src="/imagenes/personajes/faelar/faelar_tkn.webp" alt="" loading="lazy" decoding="async"></span>
                             <span class="oc-tarjeta-nombre" aria-hidden="true">Faëlar</span>
                         </span>
-                        <span class="oc-tarjeta-etiqueta"><span class="oc-tarjeta-completo">Faëlar Corbec</span></span>
-                        <span class="oc-tarjeta-que">Elfo · Druida (Circle of the Stars) · nivel 3</span>
+                        <span class="oc-tarjeta-etiqueta"><span class="oc-icono" aria-hidden="true">🏵</span><span class="oc-tarjeta-completo">Faëlar Corbec</span></span>
+                        <span class="oc-tarjeta-que">Elfo · Druida (Círculo de Constelaciones) · nivel 3</span>
+                    </a>
+                </li>
+                <li class="oc-celda">
+                    <a class="oc-tarjeta oc-color-azul" href="/web/personajes/dahlia/dahlia.html">
+                        <span class="oc-tarjeta-aro">
+                            <span class="oc-tarjeta-foto"><img src="/imagenes/personajes/dahlia/dahlia_tkn.webp" alt="" loading="lazy" decoding="async"></span>
+                            <span class="oc-tarjeta-nombre" aria-hidden="true">Dahlia</span>
+                        </span>
+                        <span class="oc-tarjeta-etiqueta"><span class="oc-tarjeta-completo">Dahlia</span></span>
+                        <span class="oc-tarjeta-que">Hexblood · Explorador (Swarmkeeper) · nivel 4</span>
+                    </a>
+                </li>
+                <li class="oc-celda">
+                    <a class="oc-tarjeta oc-color-azul" href="/web/personajes/sevro/sevro.html">
+                        <span class="oc-tarjeta-aro">
+                            <span class="oc-tarjeta-foto"><img src="/imagenes/personajes/sevro/sevro_tkn.webp" alt="" loading="lazy" decoding="async"></span>
+                            <span class="oc-tarjeta-nombre" aria-hidden="true">Sevro</span>
+                        </span>
+                        <span class="oc-tarjeta-etiqueta"><span class="oc-tarjeta-completo">Sevro</span></span>
+                        <span class="oc-tarjeta-que">Humano (variante) · Bardo (Colegio del Conocimiento) 4 / Hechicero (Shadow Magic) 1 · nivel 5</span>
+                    </a>
+                </li>
+                <li class="oc-celda">
+                    <a class="oc-tarjeta oc-color-azul" href="/web/personajes/yorel/yorel.html">
+                        <span class="oc-tarjeta-aro">
+                            <span class="oc-tarjeta-foto"><img src="/imagenes/personajes/yorel/yorel_tkn.webp" alt="" loading="lazy" decoding="async"></span>
+                            <span class="oc-tarjeta-nombre" aria-hidden="true">Yorel</span>
+                        </span>
+                        <span class="oc-tarjeta-etiqueta"><span class="oc-tarjeta-completo">Yorel Telvet</span></span>
+                        <span class="oc-tarjeta-que">Humano (variante) · Hechicero (Clockwork Soul) · nivel 3</span>
+                    </a>
+                </li>
+                <li class="oc-celda">
+                    <a class="oc-tarjeta oc-color-azul" href="/web/personajes/ceris/ceris.html">
+                        <span class="oc-tarjeta-aro">
+                            <span class="oc-tarjeta-foto"><img src="/imagenes/personajes/ceris/ceris_tkn.webp" alt="" loading="lazy" decoding="async"></span>
+                            <span class="oc-tarjeta-nombre" aria-hidden="true">Ceris</span>
+                        </span>
+                        <span class="oc-tarjeta-etiqueta"><span class="oc-tarjeta-completo">Ceris Desapellidada</span></span>
+                        <span class="oc-tarjeta-que">Humano (variante) · Paladín (Oath of Redemption) · nivel 5</span>
+                    </a>
+                </li>
+                <li class="oc-celda">
+                    <a class="oc-tarjeta oc-color-azul" href="/web/personajes/zuncho/zuncho.html">
+                        <span class="oc-tarjeta-aro">
+                            <span class="oc-tarjeta-foto"><img src="/imagenes/personajes/zuncho/zuncho_tkn.webp" alt="" loading="lazy" decoding="async"></span>
+                            <span class="oc-tarjeta-nombre" aria-hidden="true">Zuncho</span>
+                        </span>
+                        <span class="oc-tarjeta-etiqueta"><span class="oc-tarjeta-completo">Zuncho Kaprik</span></span>
+                        <span class="oc-tarjeta-que">Goblin · Mago (Illusionist) · nivel 6</span>
                     </a>
                 </li>
             </ul>
