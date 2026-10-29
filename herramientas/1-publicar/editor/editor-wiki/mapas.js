@@ -13,7 +13,7 @@
 // El .cmap se guarda ENTERO: llega del servidor, se cambian aquí solo las
 // cosas que se tocan (label, targetPage, kind, color, x/y, points, size,
 // angle, taper, scale) y vuelve tal cual con lo que traiga de Chronicler.
-// El formato está explicado en herramientas/3-generadores/mundo_mapas.py.
+// El formato está explicado en herramientas/0-comun/mundo_mapas.py.
 // Usa $, crearEditor, pedirEditor, avisarEditor e irAEditor de editor.js.
 
 const SVG_MAPA = "http://www.w3.org/2000/svg";
@@ -3641,7 +3641,7 @@ function pasarAImagenNueva(hecha) {
 // los regionales a la ESCALA COMÚN (8 píxeles por unidad del mapamundi,
 // la de Prunia). Buscarlo solo (OpenCV, en el servidor), retocarlo a
 // mano, llevarlo a la escala común y ampliar la imagen (con IA si está
-// instalada: herramientas/mapas_mundo.py).
+// instalada: herramientas/0-comun/mapas_mundo.py).
 const MODELOS_DE_IMAGEN = [["pintado", "Pintada o con texturas (la mayoría)"], ["dibujo", "Dibujo de líneas limpias"]];
 let ayudasDeMapas = null;
 

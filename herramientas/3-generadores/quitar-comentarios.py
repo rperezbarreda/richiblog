@@ -47,7 +47,7 @@ import sys
 from pathlib import Path
 
 # comun.py vive un piso más arriba, en herramientas/.
-sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "0-comun"))
 
 from comun import (RAIZ, es_borrador, escribir_texto, leer_texto,  # noqa: E402
                    limpiar_comentarios_html as limpiar)

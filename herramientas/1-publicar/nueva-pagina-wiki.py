@@ -68,7 +68,7 @@ import re
 import sys
 from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "0-comun"))
 
 from comun import (RAIZ, elegir, esta_fuera, guardar_wiki_fuera,  # noqa: E402
                    leer_json, pasar_generadores, preguntar, sin_tildes, wiki_fuera)
@@ -312,7 +312,7 @@ def desde_plantilla(plantilla, nombre, fijos=None):
 
 def carpeta_de(plantilla, valores):
     """Dónde se guarda, dentro de wiki/, con las respuestas ya dadas (la
-    usa también el editor: herramientas/1-publicar/editor-wiki.py)."""
+    usa también el editor: herramientas/1-publicar/editor/editor-wiki.py)."""
     carpeta = plantilla["carpeta"] or "otros"
     m = re.match(r"^junto a \{\{(\w+)\}\}(/.*)?$", carpeta)
     if m:
@@ -465,11 +465,11 @@ def crear(nombre, carpeta, texto):
     if esta_fuera(relativo, reglas):
         quedan = [r for r in reglas if r.lower() != relativo.lower()]
         if esta_fuera(relativo, quedan):
-            print(f"  OJO: su carpeta está entera en herramientas/wiki-fuera.txt;"
+            print(f"  OJO: su carpeta está entera en herramientas/0-comun/datos/wiki-fuera.txt;"
                   " quítala de ahí o no saldrá.")
         else:
             guardar_wiki_fuera(quedan)
-            print("  (estaba en herramientas/wiki-fuera.txt, la lista de lo que no se"
+            print("  (estaba en herramientas/0-comun/datos/wiki-fuera.txt, la lista de lo que no se"
                   " publica: la he quitado de ahí)")
     print("  Ábrela con cualquier editor de texto y escribe. Los campos de la ficha")
     print("  que dejes vacíos no salen, ni las notas <!-- así --> de cada apartado.")

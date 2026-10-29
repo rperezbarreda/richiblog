@@ -23,7 +23,7 @@
 import sys
 from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "0-comun"))
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 from comun import pasar_generadores  # noqa: E402

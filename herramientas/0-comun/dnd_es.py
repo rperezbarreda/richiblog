@@ -2,7 +2,7 @@
 # =========================================
 # D&D EN ESPAÑOL: LOS NOMBRES DE LAS COSAS
 # =========================================
-# Lo que usa el importador de D&D Beyond (1-publicar/dndbeyond.py) para
+# Lo que usa el importador de D&D Beyond (1-publicar/editor/dndbeyond.py) para
 # pasar al español lo que llega en inglés: características, habilidades,
 # clases, razas, idiomas, competencias, tipos de daño, objetos de lo más
 # corriente y conjuros. Los nombres son los de la traducción oficial de
@@ -10,7 +10,7 @@
 #
 # LO QUE NO ESTÉ AQUÍ SE QUEDA EN INGLÉS, y el editor dice cuáles han sido
 # para que los cambies a mano. Si quieres que la próxima vez salga ya en
-# español, apúntalo en herramientas/dnd-es-propias.json (lo lee esto y
+# español, apúntalo en herramientas/0-comun/datos/dnd-es-propias.json (lo lee esto y
 # manda sobre lo de aquí):
 #
 #     {
@@ -25,7 +25,7 @@ import json
 import re
 from pathlib import Path
 
-PROPIAS = Path(__file__).resolve().parent / "dnd-es-propias.json"
+PROPIAS = Path(__file__).resolve().parent / "datos" / "dnd-es-propias.json"
 
 # Las seis características, por su número en D&D Beyond (1 a 6).
 CARACTERISTICAS = {1: ("fue", "Fuerza"), 2: ("des", "Destreza"), 3: ("con", "Constitución"),

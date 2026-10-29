@@ -41,7 +41,7 @@
 
   Casi todo lo de esta chuleta, con ventanas en vez de preguntas:
 
-      python herramientas/1-publicar/editor-wiki.py
+      python herramientas/1-publicar/editor/editor-wiki.py
 
   o, lo mismo, python herramientas/menu.py (o la última cosa de cada
   apartado del menú de texto, que lo abre ya en el suyo con
@@ -71,7 +71,7 @@
       imagenes/notas_rol/<campaña>/notas/, una página de la wiki a la
       bóveda (wiki/_imagenes/) y el texto de un evento de la línea de
       tiempo a imagenes/wiki/eventos/ (los sitios, en SITIOS de
-      herramientas/imagenes.py). En los textos como un Word va como
+      herramientas/0-comun/imagenes.py). En los textos como un Word va como
       <figure> DETRÁS del párrafo o la lista donde está el cursor (no a
       mitad de una frase, que la partía); en los de la wiki y los
       eventos, en su línea, ![[nombre.webp|qué se ve]] y el pie en
@@ -254,11 +254,11 @@
       alineamiento, rasgos y dotes. Y si lo marcas, su retrato de allí
       como imagen de perfil y token. No guarda: repásalo y guarda. La
       ficha tiene que ser pública en D&D Beyond. Lo hace
-      1-publicar/dndbeyond.py (se puede probar suelto: python
-      herramientas/1-publicar/dndbeyond.py ficha.json); los nombres en
-      español salen de herramientas/dnd_es.py, y lo que no esté ahí se
+      1-publicar/editor/dndbeyond.py (se puede probar suelto: python
+      herramientas/1-publicar/editor/dndbeyond.py ficha.json); los nombres en
+      español salen de herramientas/0-comun/dnd_es.py, y lo que no esté ahí se
       queda en inglés y se dice cuál es: apúntalo en
-      herramientas/dnd-es-propias.json ({"Spellweaver": "Tejedor de
+      herramientas/0-comun/datos/dnd-es-propias.json ({"Spellweaver": "Tejedor de
       conjuros"}) y la próxima vez saldrá traducido.
     · PUBLICAR EN NEOCITIES (su propio apartado): 1, repasar el sitio y
       volver a generar; 2, ver qué se subiría (el ensayo); 3, subirlo; y
@@ -316,17 +316,34 @@
 
       herramientas/
           menu.py ............. el "¿qué quieres hacer?"
-          comun.py ............ el cajón compartido. No se ejecuta.
-          mapas_mundo.py ...... situar un mapa en el mapamundi y ampliarlo a la
-                                escala común (lo usa el editor de mapas)
+          LEEME.txt ........... esto
+          plantillas/ ......... los moldes de las páginas nuevas
           programas/ .......... lo que bajan las herramientas (el ampliador con
                                 IA). Solo en tu ordenador: no va a GitHub.
-          LEEME.txt ........... esto
-          mundo-origen.txt .... dónde está la bóveda de Chronicler
-                                (lo escribe importar-mundo.py)
-          wiki-fuera.txt ...... lo de la bóveda que NO se publica
-                                (importar-mundo.py --elegir)
-          plantillas/ ......... los moldes de las páginas nuevas
+          originales-sustituidas/  las copias de las fotos que el optimizador
+                                cambia a WebP. Solo en tu ordenador.
+
+          0-comun/ ............ LO QUE COMPARTEN: no se ejecuta, lo leen las demás
+              comun.py              el cajón compartido (rutas, leer y escribir,
+                                    preguntar, la lista de GENERADORES…)
+              imagenes.py           los sitios de las imágenes y cómo se dejan
+              dnd_es.py             el diccionario de D&D en español
+              resumenes.py          los resúmenes de las notas de rol
+              mapas_mundo.py        situar un mapa en el mapamundi y ampliarlo a la
+                                    escala común (lo usa el editor de mapas)
+              ligero.py             el CSS y el JS sin comentarios
+              mundo_formato.py      el Markdown de la wiki y de mis personajes
+              mundo_mapas.py        los mapas de la wiki
+              mundo_linea.py        la línea de tiempo
+              mundo_piezas.py       trocitos de las páginas de la wiki
+              mundo_situacion.py    dónde cae cada sitio en el mapamundi
+              datos/ .............. lo que apuntan las herramientas:
+                  wiki-fuera.txt        lo de la bóveda que NO se publica
+                                        (importar-mundo.py --elegir)
+                  mundo-origen.txt      dónde está la bóveda de Chronicler
+                                        (lo escribe importar-mundo.py)
+                  imagenes-pasadas.json las fotos ya optimizadas
+                  dnd-es-propias.json   tus traducciones de D&D (si lo creas)
 
           1-publicar/ ......... LO QUE USAS CASI SIEMPRE
               nuevo.py              escribir algo nuevo
@@ -336,8 +353,11 @@
               botin.py              el botín de una campaña
               nueva-recomendacion.py
               en-lo-que-ando.py     lo que pone «en lo que ando»
-              editor-wiki.py        el editor de la web (y de la wiki y sus mapas), en el navegador
-              editor_web.py         (no se ejecuta) lo suyo de las entradas y las fichas
+              editor/ ............. EL EDITOR DE LA WEB, todo junto:
+                  editor-wiki.py        el editor (y de la wiki y sus mapas), en el navegador
+                  editor_web.py         (no se ejecuta) lo suyo de las entradas y las fichas
+                  dndbeyond.py          traer un personaje de D&D Beyond
+                  editor-wiki/          sus páginas: HTML, CSS y JS
               nueva-pagina-wiki.py  una página nueva de la wiki
               importar-mundo.py     (fuera del menú) traer una bóveda de Chronicler
               linea-de-tiempo.py    los eventos de la línea de tiempo
@@ -363,12 +383,9 @@
               textos-npcs.py        el nombre y la intro de la página de npcs
               quitar-comentarios.py lo de las plantillas, fuera de lo publicado
               generar-mundo.py      la wiki del mundo y sus mapas
-              mundo_formato.py      (lo lee generar-mundo.py)
-              mundo_mapas.py        (lo lee generar-mundo.py)
+              generar-personajes.py mis personajes (el índice y la ficha de cada uno)
               generar-linea-tiempo.py  la línea de tiempo de la wiki
-              mundo_linea.py        (lo leen los dos de arriba)
               actualizar-cabeceras.py
-              ligero.py             (lo lee actualizar-cabeceras.py)
 
           4-comprobar/ ........ MIRAN, NO TOCAN
               enlaces-rotos.py
@@ -1262,7 +1279,7 @@
     · SE HACE SOLO al publicar (y cada vez que se pasan los generadores,
       mientras sea el automático: "resumen_auto": true), leyendo las
       notas: de cada escena, su nombre y la primera frase de lo que pasó
-      (herramientas/resumenes.py, desde generar-posts.py).
+      (herramientas/0-comun/resumenes.py, desde generar-posts.py).
     · SE CAMBIA A MANO en el editor de las notas, en «Resumen de la
       sesión»: lo que escribas se queda y ya no se rehace solo. Vacío,
       vuelve el automático. El botón «Rehacer el resumen automático» lo
@@ -1624,7 +1641,7 @@
   nombre del archivo es el de la página: es como se la enlaza desde
   otra, [[Valderín]]. LO MÁS FÁCIL, EL EDITOR:
 
-      python herramientas/1-publicar/editor-wiki.py
+      python herramientas/1-publicar/editor/editor-wiki.py
 
   (en el menú, Wiki Cralëa → Escribir en la wiki con el editor). Se abre
   en el navegador: crea una página nueva (con su plantilla, eligiendo de
@@ -1744,7 +1761,7 @@
 
   LO QUE LAS PÁGINAS SE PONEN SOLAS (desde el 16-10-2026). Sale de las
   fichas de las demás páginas, así que no hay ninguna lista que mantener
-  a mano (el código, en herramientas/3-generadores/mundo_piezas.py):
+  a mano (el código, en herramientas/0-comun/mundo_piezas.py):
 
     - LUGARES de un país o zona: los lugares cuya ficha dice
       «ubicación: [[ese país]]». PERSONAJES de una raza: los que dicen
@@ -1915,7 +1932,7 @@
   importar-mundo.py, que se traía la bóveda y dejaba elegir qué entraba.
   Ya no está en el menú; el archivo sigue ahí por si un día vuelve a
   hacer falta. Lo que eligió dejar fuera sigue en
-  herramientas/wiki-fuera.txt (una ruta por línea, desde wiki/; si acaba
+  herramientas/0-comun/datos/wiki-fuera.txt (una ruta por línea, desde wiki/; si acaba
   en «/», la carpeta entera), y generar-mundo.py lo sigue respetando: lo
   que esté ahí no se publica. nueva-pagina-wiki.py quita de esa lista la
   página que crea, si estaba.
@@ -2463,7 +2480,7 @@
       en "world" (x, y, ancho y alto en unidades del mapamundi; Chronicler
       no lo usa). Si no lo encuentra, el mapa se hace igual, tal cual, y
       lo dice. Como mucho 8192 px de lado: uno más grande va a la escala
-      que quepa, y avisa. Todo en herramientas/mapas_mundo.py.
+      que quepa, y avisa. Todo en herramientas/0-comun/mapas_mundo.py.
     - EN «EL MAPA EN SÍ» → EN EL MAPAMUNDI: dónde está (con el mapamundi
       en pequeño y su recuadro) y a qué escala va; «Buscarlo en el
       mapamundi» (para los de antes, como Prunia); X, Y y el ancho a mano,
@@ -2699,7 +2716,7 @@
   nombre («Reino de Prunia» → su .md, esté en la carpeta que esté), lleva a
   esa. Así están enlazadas las 120 regiones del mapamundi sin tocar el
   .cmap, y una página nueva queda enlazada desde el mapa en cuanto existe
-  (está en _destinos, en herramientas/3-generadores/mundo_mapas.py).
+  (está en _destinos, en herramientas/0-comun/mundo_mapas.py).
 
   REGIONES Y PAÍSES. El mapamundi tiene dos tamaños de cosa: las
   REGIONES (Azarasia, Partaria, Tierras Encantadas, un archipiélago…) y
@@ -2751,7 +2768,7 @@
   ancho del texto y después del primer párrafo (no en la ficha: a 17rem
   una isla era un punto). Debajo, «Dónde está <la página>, en el
   Mapamundi de Cralëa», con enlace al mapa. Los hace
-  herramientas/3-generadores/mundo_situacion.py al pasar la wiki, en
+  herramientas/0-comun/mundo_situacion.py al pasar la wiki, en
   imagenes/wiki/situacion/ (1200x800, unos 75 KB cada uno; 116 son unos
   9 MB), y solo rehace los que hagan falta: si cambias el .cmap, la
   imagen del mapa o la forma de dibujarlos, se rehacen todos.
@@ -3058,7 +3075,7 @@
   quepan las tarjetas. Las rayitas son años redondos (cada 1000, cada
   50…, según la escala) y una de cada cinco lleva el año escrito, como
   una regla. Los números están al principio de
-  herramientas/3-generadores/mundo_linea.py (OBJETIVO, MINIMO, MAXIMO,
+  herramientas/0-comun/mundo_linea.py (OBJETIVO, MINIMO, MAXIMO,
   CORTE) por si un día quieres la línea más apretada o más suelta.
 
   En el móvil (por debajo de 860 px) la línea se va a la izquierda y
@@ -3783,7 +3800,7 @@
       se ve (obligatorio) y un pie.
   Las imágenes se suben desde su casilla y van solas a la carpeta del
   personaje, en WebP y a su tamaño (sitios oc-token, oc-retrato,
-  oc-imagen y oc-npc de herramientas/imagenes.py; traer-imagen.py los
+  oc-imagen y oc-npc de herramientas/0-comun/imagenes.py; traer-imagen.py los
   acepta con --personaje <clave>). Al guardar se pasan
   generar-personajes, quitar-comentarios, el sitemap, el buscador y
   las cabeceras. Para la gente y las imágenes, el personaje tiene que
@@ -4013,6 +4030,20 @@
   generar-personajes.py deja marcado lo que se tira (dado, prueba,
   con_dados: <span class="oc-dado" data-dados="1d20+4" data-que="sigilo">)
   y personajes.js lo convierte en botones.
+  EN EL EDITOR, CADA PERSONAJE POR PESTAÑAS: al abrir uno, arriba los
+  botones de importar de D&D Beyond y de ver cómo queda, y debajo una
+  pestaña por cosa (se pasa de una a otra con las flechas): 📇 datos,
+  📊 stats, ⚔️ acciones (ataques, acciones y combos), ✨ conjuros,
+  🎒 inventario, 🧬 rasgos y competencias, 📝 descripciones, 📜
+  trasfondo, 📖 historia y extra, 🖼️ fotos (el token, la imagen de
+  perfil y sus imágenes), 👥 npcs y 🐾 criaturas. En cada una solo salen
+  sus casillas (lo de las demás se queda, no se pierde). Las de npcs,
+  fotos y criaturas enseñan las de ESE personaje, cada una para abrirla
+  y editarla, y «Añadir» añade una suya; por eso ya no salen sueltas
+  debajo (para un personaje nuevo, guárdalo primero). Qué casilla va en
+  qué pestaña lo dice «pestanas» en la colección de mis personajes de
+  editor_web.py («dentro_de» en las partes que van dentro); lo pinta
+  fichas.js (pintarFichaWeb).
   LAS ETIQUETAS («D&D 5e, jugando»): cada una es un botón del filtro del
   índice (el de los relatos, scripts/componentes/filtros.js); sin
   ninguna etiqueta en ningún personaje, el filtro no sale.
@@ -4380,15 +4411,15 @@
   5-consulta/pendientes-wiki.py  cuenta lo que falta en la wiki (páginas
                         por escribir, «por decidir», relleno, imágenes).
                         No cambia nada.
-  1-publicar/editor-wiki.py  el editor de la web en el navegador (en
+  1-publicar/editor/editor-wiki.py  el editor de la web en el navegador (en
                         127.0.0.1, solo este ordenador): la wiki y sus
                         mapas, y desde el 18-10-2026 las entradas, los
                         relatos, el reto, las notas de partida y las
                         fichas de los JSON. Ver EL EDITOR DE LA WEB. Su
-                        página: 1-publicar/editor-wiki/ (redactor.js es
+                        página: 1-publicar/editor/editor-wiki/ (redactor.js es
                         el «Word», escribir.js las entradas, fichas.js
                         las fichas).
-  1-publicar/editor_web.py  (no se ejecuta) lo que hace editor-wiki.py
+  1-publicar/editor/editor_web.py  (no se ejecuta) lo que hace editor-wiki.py
                         con las entradas y las fichas: las lee, las
                         guarda con cada herramienta y pasa lo que toque
                         a la web en segundo plano, con su progreso.
@@ -4420,7 +4451,7 @@
                         pase de 1920 px y les quita los datos de dentro.
                         SOLO MIRA LO NUEVO: lo que ya ha pasado se apunta
                         (con una huella del contenido) en
-                        herramientas/imagenes-pasadas.json y no se
+                        herramientas/0-comun/datos/imagenes-pasadas.json y no se
                         vuelve a mirar ni a nombrar; con --todas se
                         olvida de la lista. Los .webp nuevos también se
                         miran (los metadatos se quitan sin recomprimir, y
@@ -4865,7 +4896,7 @@
 
   LO DELICADO es quitar comentarios de JavaScript sin romper nada: un
   "//" puede estar dentro de una cadena ("https://...") y un "/*" dentro
-  de una expresión regular. Lo hace herramientas/3-generadores/ligero.py
+  de una expresión regular. Lo hace herramientas/0-comun/ligero.py
   leyendo el código como lo lee el navegador (sabe cuándo está en una
   cadena, en una plantilla `${...}` o en una expresión regular). No junta
   líneas ni cambia nombres: lo que queda se lee igual en el inspector.

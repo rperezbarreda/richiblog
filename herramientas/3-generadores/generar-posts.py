@@ -63,7 +63,7 @@ from pathlib import Path
 # comun.py vive un piso más arriba, en herramientas/, y Python solo busca
 # los imports en la carpeta del propio archivo. Sin esta línea, al estar
 # esto dentro de una subcarpeta, "from comun import ..." no lo encuentra.
-sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "0-comun"))
 
 import json
 import re
@@ -414,7 +414,7 @@ def poner_fichas_de_campana(probar):
 
 
 # EL RESUMEN DE CADA SESIÓN, para su botón en el índice de la campaña. Se
-# saca de las notas (herramientas/resumenes.py) cuando la sesión está
+# saca de las notas (herramientas/0-comun/resumenes.py) cuando la sesión está
 # publicada, y se guarda en su "resumen" del JSON de la campaña con
 # "resumen_auto": true. Mientras siga así, se rehace cada vez que se pasa
 # esto (si cambian las notas, cambia el resumen). Si se escribe a mano en

@@ -7,7 +7,7 @@
 #
 #     python herramientas/menu.py
 #
-# y SE ABRE EL EDITOR DE LA WEB, en el navegador (1-publicar/editor-wiki.py):
+# y SE ABRE EL EDITOR DE LA WEB, en el navegador (1-publicar/editor/editor-wiki.py):
 # ahí está casi todo con ventanas, y en su apartado «Comandos», cada cosa
 # de este menú con un botón que la abre en su propia ventana de comandos.
 # El menú de siempre, aquí mismo, con:
@@ -53,7 +53,7 @@ PUBLICAR = ("Publicar un borrador",
 # El editor de la web (en el navegador) sale el último en cada apartado
 # (para no mover los números de siempre), abierto ya en el suyo: lo mismo
 # que lo de encima, pero con ventanas.
-EDITOR = "1-publicar/editor-wiki.py"
+EDITOR = "1-publicar/editor/editor-wiki.py"
 
 
 def editor(en, que):
@@ -226,7 +226,7 @@ def hacer(opcion, al_acabar="Hecho. Pulsa Enter para volver al menú. "):
         # Los generadores, en el mismo orden que usan nuevo.py y
         # publicar.py: ese orden importa (ver GENERADORES en comun.py), así
         # que se coge de ahí en vez de repetirlo.
-        sys.path.insert(0, str(HERRAMIENTAS))
+        sys.path.insert(0, str(HERRAMIENTAS / "0-comun"))
         from comun import GENERADORES
         for uno in GENERADORES:
             pasar(uno)

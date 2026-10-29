@@ -6,7 +6,7 @@ INSTALAR LAS AYUDAS DE LOS MAPAS (una vez en cada ordenador)
     python herramientas/2-imagenes/instalar-ayudas-de-mapas.py
     python herramientas/2-imagenes/instalar-ayudas-de-mapas.py --comprobar
 
-Dos cosas que el editor de mapas usa si están (ver herramientas/mapas_mundo.py):
+Dos cosas que el editor de mapas usa si están (ver herramientas/0-comun/mapas_mundo.py):
 
   1. OPENCV, para BUSCAR SOLO dónde cae un mapa regional en el mapamundi.
      Se instala con pip (opencv-python-headless, unos 40 MB).
@@ -34,7 +34,7 @@ import zipfile
 from pathlib import Path
 
 HERRAMIENTAS = Path(__file__).resolve().parent.parent
-sys.path.insert(0, str(HERRAMIENTAS))
+sys.path.insert(0, str(HERRAMIENTAS / "0-comun"))
 
 import mapas_mundo  # noqa: E402
 

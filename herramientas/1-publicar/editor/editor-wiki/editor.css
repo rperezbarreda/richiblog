@@ -1,4 +1,4 @@
-/* EL EDITOR DE LA WIKI (herramientas/1-publicar/editor-wiki.py).
+/* EL EDITOR DE LA WIKI (herramientas/1-publicar/editor/editor-wiki.py).
 
    Con los colores del sitio (morado y amarillo; en claro, crema y
    granate) y letra grande: es para escribir un buen rato. Todo lo que se
@@ -2723,4 +2723,62 @@ textarea + .redactor-cuenta {
 
 .importar-ddb .campo-si-no {
     margin-bottom: 0;
+}
+
+/* LAS PESTAÑAS DE UNA FICHA (la de cada personaje: datos, stats,
+   acciones, conjuros, inventario, npcs, fotos…). Arriba de las casillas;
+   la elegida, rellena. Se mueve con las flechas (fichas.js). */
+.ficha-pestanas {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin: 14px 0 0;
+    padding-bottom: 10px;
+    border-bottom: 2px solid var(--acento);
+}
+
+.ficha-pestana {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    border: 2px solid var(--acento);
+    background: transparent;
+    color: var(--acento);
+    font: inherit;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.ficha-pestana:hover {
+    text-decoration: underline;
+}
+
+.ficha-pestana[aria-selected="true"] {
+    background: var(--acento);
+    color: var(--sobre-acento);
+    text-decoration: none;
+}
+
+.ficha-pestana:focus-visible {
+    outline: 3px solid var(--acento);
+    outline-offset: 3px;
+}
+
+.ficha-pestana-emoji {
+    font-family: initial;
+}
+
+.ficha-panel {
+    padding-top: 12px;
+}
+
+/* Dentro de una pestaña, la lista de otra parte (la gente, las fotos o
+   las criaturas de este personaje), con su ficha debajo. */
+.ficha-hija {
+    margin-top: 8px;
+}
+
+.ficha-hija .ficha-editor {
+    box-shadow: none;
 }

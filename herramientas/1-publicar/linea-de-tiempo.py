@@ -54,8 +54,7 @@
 import sys
 from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
-sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "3-generadores"))
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "0-comun"))
 
 from comun import RAIZ, escribir_json, leer_json, pasar_generadores, preguntar  # noqa: E402
 from imagenes import SITIOS, nombre_para, parece_de_fuera, traer  # noqa: E402

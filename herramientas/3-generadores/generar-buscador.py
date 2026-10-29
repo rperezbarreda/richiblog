@@ -43,7 +43,7 @@
 # CUÁNDO HAY QUE EJECUTARLO
 # -------------------------
 # Siempre antes de subir, si has escrito o cambiado algo. Va en la lista
-# GENERADORES de herramientas/comun.py, así que nuevo.py y publicar.py ya
+# GENERADORES de herramientas/0-comun/comun.py, así que nuevo.py y publicar.py ya
 # lo pasan ellos solos y no hay que acordarse.
 #
 #     python3 herramientas/3-generadores/generar-buscador.py
@@ -58,7 +58,7 @@ from pathlib import Path
 # comun.py vive un piso más arriba, en herramientas/, y Python solo busca
 # los imports en la carpeta del propio archivo. Sin esta línea, al estar
 # esto dentro de una subcarpeta, "from comun import ..." no lo encuentra.
-sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "0-comun"))
 
 import re
 from html.parser import HTMLParser

@@ -55,7 +55,7 @@ from pathlib import Path
 # comun.py vive un piso más arriba, en herramientas/, y Python solo busca
 # los imports en la carpeta del propio archivo. Sin esta línea, al estar
 # esto dentro de una subcarpeta, "from comun import ..." no lo encuentra.
-sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "0-comun"))
 
 import argparse
 
@@ -70,7 +70,7 @@ from comun import (
 )
 # Para poder pegar la ruta de una imagen que tengas por ahí fuera y que se
 # traiga sola, en vez de copiarla, renombrarla y convertirla a mano antes
-# de volver aquí. Lo de verdad está en herramientas/imagenes.py.
+# de volver aquí. Lo de verdad está en herramientas/0-comun/imagenes.py.
 from imagenes import SITIOS, nombre_para, parece_de_fuera, traer
 
 # Las palabras que la web pinta con marquita de color (ver NPC_TONOS en

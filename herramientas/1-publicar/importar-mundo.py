@@ -10,7 +10,7 @@
 #     python herramientas/1-publicar/importar-mundo.py ~/Documentos/mundo
 #
 # LA SEGUNDA VEZ NO HACE FALTA LA RUTA: se la apunta en
-# herramientas/mundo-origen.txt y, si no le dices otra, usa esa.
+# herramientas/0-comun/datos/mundo-origen.txt y, si no le dices otra, usa esa.
 #
 #     python herramientas/1-publicar/importar-mundo.py
 #
@@ -54,7 +54,7 @@
 # Sale la lista de páginas y mapas por carpetas, con [x] lo que entra y
 # [ ] lo que no, y se cambia escribiendo números («3», «5-8»), el nombre
 # de una carpeta («gente/») o «todo» / «nada». Lo que dejes fuera se apunta
-# en herramientas/wiki-fuera.txt y SE QUEDA FUERA hasta que lo vuelvas a
+# en herramientas/0-comun/datos/wiki-fuera.txt y SE QUEDA FUERA hasta que lo vuelvas a
 # marcar: ni se trae ni lo publica generar-mundo.py, aunque siga en la
 # bóveda. Las imágenes no se eligen: el generador solo publica las que use
 # alguna página.
@@ -77,20 +77,28 @@ from pathlib import Path
 # comun.py vive un piso más arriba, en herramientas/, y Python solo busca
 # los imports en la carpeta del propio archivo. Sin esta línea, al estar
 # esto dentro de una subcarpeta, "from comun import ..." no lo encuentra.
-sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "0-comun"))
 
 from comun import (RAIZ, RUTAS_QUE_NO_SON_EL_MUNDO,  # noqa: E402
                    WIKI_FUERA, es_del_mundo, esta_fuera, guardar_wiki_fuera,
                    pasar_generadores, preguntar, wiki_fuera)
 
 DESTINO = RAIZ / "wiki"
-ORIGEN_APUNTADO = RAIZ / "herramientas" / "mundo-origen.txt"
+ORIGEN_APUNTADO = RAIZ / "herramientas" / "0-comun" / "datos" / "mundo-origen.txt"
+# Donde se apuntaba antes de ordenar las herramientas en carpetas: si
+# todavía está ahí, se pasa a su sitio nuevo.
+_ORIGEN_VIEJO = RAIZ / "herramientas" / "mundo-origen.txt"
+if _ORIGEN_VIEJO.is_file() and not ORIGEN_APUNTADO.is_file():
+    try:
+        _ORIGEN_VIEJO.replace(ORIGEN_APUNTADO)
+    except OSError:
+        ORIGEN_APUNTADO = _ORIGEN_VIEJO
 
 PAGINAS = {".md"}
 IMAGENES = {".webp", ".png", ".jpg", ".jpeg", ".gif", ".svg", ".avif"}
 # Los mapas interactivos. Un .cmap es un JSON con el tamaño del lienzo, las
 # capas de fondo y los contornos de cada región; lo convierte
-# herramientas/3-generadores/mundo_mapas.py.
+# herramientas/0-comun/mundo_mapas.py.
 MAPAS = {".cmap"}
 
 # Lo que no se trae nunca, ni con --todo: son cosas de la propia

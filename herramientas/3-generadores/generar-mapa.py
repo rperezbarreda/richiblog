@@ -63,7 +63,7 @@ from pathlib import Path
 # comun.py vive un piso más arriba, en herramientas/, y Python solo busca
 # los imports en la carpeta del propio archivo. Sin esta línea, al estar
 # esto dentro de una subcarpeta, "from comun import ..." no lo encuentra.
-sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "0-comun"))
 
 import datetime as dt
 import hashlib

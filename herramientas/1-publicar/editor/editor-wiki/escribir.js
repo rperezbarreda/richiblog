@@ -3,7 +3,7 @@
 // =========================================
 // Las entradas del blog, los relatos, los días del reto y las notas de las
 // partidas: la lista de lo que hay (borradores y publicadas), hacer una
-// nueva y escribirla. Habla con herramientas/1-publicar/editor_web.py
+// nueva y escribirla. Habla con herramientas/1-publicar/editor/editor_web.py
 // (/api/web/…). El texto se escribe con el editor de redactor.js.
 //
 // Lo que llega del servidor se pone con textContent; el texto de una

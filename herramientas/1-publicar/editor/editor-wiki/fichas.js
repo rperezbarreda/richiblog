@@ -18,7 +18,7 @@
 // sitio y volver a generarlo.
 
 const estadoFichas = { colecciones: [], campanas: [], sitios: [], col: null, id: "", campana: "", elegidas: {},
-    cambiado: false, guardando: false, filtros: {}, grupos: {} };
+    cambiado: false, guardando: false, filtros: {}, grupos: {}, pestanas: {} };
 
 // El emoji de cada colección en su botón grande (solo de adorno: el lector
 // lee el título). Una nueva sin emoji aquí sale con 📋.
@@ -92,6 +92,7 @@ function ponerFichasWeb(col, deCero) {
         estadoFichas.elegidas = {};
         estadoFichas.filtros = {};
         estadoFichas.grupos = {};
+        estadoFichas.pestanas = {};
     }
     $("[data-fichas-titulo]").textContent = col.titulo;
     $("[data-fichas-ayuda]").textContent = col.ayuda + " (En " + col.archivo + ".)";
@@ -127,6 +128,12 @@ function pintarPartesWeb(enfocar) {
     const caja = $("[data-fichas-partes]");
     caja.textContent = "";
     col.partes_def.forEach((parte) => {
+        // Las partes que van DENTRO de otra (la gente, las imágenes y las
+        // criaturas de cada personaje) salen en su pestaña de la ficha de
+        // ese, no sueltas.
+        if (parte.dentro_de && col.partes_def.some((x) => x.id === parte.dentro_de)) {
+            return;
+        }
         const sec = crearEditor("section", "bloque");
         const idT = "t-parte-" + parte.id;
         sec.setAttribute("aria-labelledby", idT);
@@ -168,11 +175,15 @@ function nombreDeFichaWeb(parte, f) {
     return { nombre: nombre || "(sin nombre)", detalle: detalle.join(" · ") };
 }
 
-function pintarListaDeFichasWeb(sec, parte) {
+// «soloDe»: solo las de ese grupo (la gente de un personaje, en la
+// pestaña de su ficha); y lo que se añada, de ese grupo.
+function pintarListaDeFichasWeb(sec, parte, soloDe) {
     const col = estadoFichas.col;
     const fichas = col.partes[parte.id];
     const elegida = estadoFichas.elegidas[parte.id];
-    const cuenta = crearEditor("p", "ayuda", fichas.length === 1 ? "1 ficha." : fichas.length + " fichas.");
+    const deAqui = (f) => soloDe === undefined || f._grupo === soloDe;
+    const cuantas = fichas.filter(deAqui).length;
+    const cuenta = crearEditor("p", "ayuda", cuantas === 1 ? "1 ficha." : cuantas + " fichas.");
     sec.appendChild(cuenta);
     let filtro = estadoFichas.filtros[parte.id] || "";
     if (fichas.length > 10) {
@@ -241,6 +252,9 @@ function pintarListaDeFichasWeb(sec, parte) {
     const vistos = new Set();
     const ul = crearEditor("ul", "fichas-lista");
     const pintarUna = (f, i, lista) => {
+        if (!deAqui(f)) {
+            return;
+        }
         const { nombre, detalle } = nombreDeFichaWeb(parte, f);
         if (filtro && !sinTildesWeb(nombre + " " + detalle).includes(filtro)) {
             return;
@@ -327,7 +341,7 @@ function pintarListaDeFichasWeb(sec, parte) {
                 }
             });
             if (parte.agrupada) {
-                nueva._grupo = ((estadoFichas.col.opciones._grupo || [])[0] || [""])[0];
+                nueva._grupo = soloDe !== undefined ? soloDe : ((estadoFichas.col.opciones._grupo || [])[0] || [""])[0];
             }
             if (parte.nuevas_arriba) {
                 fichas.unshift(nueva);
@@ -342,7 +356,7 @@ function pintarListaDeFichasWeb(sec, parte) {
         });
         sec.appendChild(anadir);
     }
-    if (elegida !== undefined && fichas[elegida]) {
+    if (elegida !== undefined && fichas[elegida] && deAqui(fichas[elegida])) {
         pintarFichaWeb(sec, parte, fichas, elegida);
         // Partida por grupos (o por cómo van), la ficha se abre debajo de
         // su grupo (el primero en el que sale), no al final de todo.
@@ -376,12 +390,67 @@ function pintarFichaWeb(sec, parte, fichas, i) {
     const mirarCondiciones = () => condicionadas.forEach(([sitio, c]) => {
         sitio.hidden = !Object.entries(c.si).every(([k, valores]) => valores.includes(String(f[k] || "")));
     });
-    parte.campos.forEach((c) => {
-        let dentro = caja;
+    // POR PESTAÑAS (parte.pestanas): las casillas de «siempre» arriba y,
+    // debajo, una pestaña por cosa; solo se pintan las casillas de la
+    // elegida (lo escrito en las demás se queda en la ficha).
+    let campos = parte.campos;
+    let panel = caja;
+    let pestana = null;
+    if (parte.pestanas && parte.pestanas.length) {
+        const siempre = parte.siempre || [];
+        const repartidas = new Set(parte.pestanas.flatMap((p) => p.campos || []).concat(siempre));
+        const ids = parte.pestanas.map((p) => p.id);
+        const activa = ids.includes(estadoFichas.pestanas[parte.id]) ? estadoFichas.pestanas[parte.id] : ids[0];
+        pestana = parte.pestanas.find((p) => p.id === activa);
+        const suyas = new Set(pestana.campos || []);
+        parte.campos.filter((c) => siempre.includes(c.clave))
+            .forEach((c) => casillaDeFichaWeb(caja, f, c, "f-" + parte.id + "-" + i, parte, null));
+        const lista = crearEditor("div", "ficha-pestanas");
+        lista.setAttribute("role", "tablist");
+        lista.setAttribute("aria-label", "Partes de la ficha de " + nombreDeFichaWeb(parte, f).nombre);
+        const botones = parte.pestanas.map((p, n) => {
+            const b = crearEditor("button", "ficha-pestana");
+            b.type = "button";
+            b.id = "pestana-" + parte.id + "-" + p.id;
+            b.setAttribute("role", "tab");
+            b.setAttribute("aria-controls", "panel-" + parte.id);
+            b.setAttribute("aria-selected", p.id === activa ? "true" : "false");
+            b.tabIndex = p.id === activa ? 0 : -1;
+            const emoji = crearEditor("span", "ficha-pestana-emoji", p.emoji || "");
+            emoji.setAttribute("aria-hidden", "true");
+            b.appendChild(emoji);
+            b.appendChild(document.createTextNode(p.texto));
+            const ir = (cual) => {
+                estadoFichas.pestanas[parte.id] = parte.pestanas[cual].id;
+                pintarPartesWeb("pestana-" + parte.id + "-" + parte.pestanas[cual].id);
+            };
+            b.addEventListener("click", () => ir(n));
+            b.addEventListener("keydown", (e) => {
+                const ultimo = parte.pestanas.length - 1;
+                const a = { ArrowRight: n === ultimo ? 0 : n + 1, ArrowLeft: n === 0 ? ultimo : n - 1, Home: 0,
+                    End: ultimo }[e.key];
+                if (a !== undefined) {
+                    e.preventDefault();
+                    ir(a);
+                }
+            });
+            lista.appendChild(b);
+            return b;
+        });
+        caja.appendChild(lista);
+        panel = crearEditor("div", "ficha-panel");
+        panel.id = "panel-" + parte.id;
+        panel.setAttribute("role", "tabpanel");
+        panel.setAttribute("aria-labelledby", botones[ids.indexOf(activa)].id);
+        caja.appendChild(panel);
+        campos = parte.campos.filter((c) => suyas.has(c.clave) || (activa === ids[0] && !repartidas.has(c.clave)));
+    }
+    campos.forEach((c) => {
+        let dentro = panel;
         if (c.si) {
             dentro = crearEditor("div", "");
             condicionadas.push([dentro, c]);
-            caja.appendChild(dentro);
+            panel.appendChild(dentro);
         }
         casillaDeFichaWeb(dentro, f, c, "f-" + parte.id + "-" + i, parte, () => {
         mirarCondiciones();
@@ -398,6 +467,27 @@ function pintarFichaWeb(sec, parte, fichas, i) {
     });
     });
     mirarCondiciones();
+    // Una pestaña con otra parte dentro (la gente, las fotos, las
+    // criaturas de este personaje): su lista, solo con las suyas.
+    if (pestana && pestana.parte) {
+        const hija = estadoFichas.col.partes_def.find((x) => x.id === pestana.parte);
+        if (hija) {
+            const grupo = personajeDeFichaWeb(f);
+            const guardado = ((estadoFichas.col.opciones || {})._grupo || []).some((x) => x[0] === grupo);
+            const zona = crearEditor("div", "ficha-hija");
+            zona.appendChild(crearEditor("h3", "fichas-grupo", hija.titulo));
+            if (hija.ayuda) {
+                zona.appendChild(crearEditor("p", "ayuda", hija.ayuda));
+            }
+            if (guardado) {
+                pintarListaDeFichasWeb(zona, hija, grupo);
+            } else {
+                zona.appendChild(crearEditor("p", "ayuda", "Guarda primero el personaje (Ctrl+S) para poder"
+                    + " añadirle esto."));
+            }
+            panel.appendChild(zona);
+        }
+    }
     const fila = crearEditor("div", "fila");
     const boton = (texto, ayuda, alPulsar) => {
         const b = crearEditor("button", "", texto);

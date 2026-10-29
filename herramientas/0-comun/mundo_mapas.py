@@ -30,7 +30,7 @@ Un JSON. Éste es uno de verdad, recortado:
     }
 
 LO QUE AÑADE ESTA WEB AL FORMATO (lo escribe el editor de mapas,
-herramientas/1-publicar/editor-wiki.py; Chronicler no lo conoce y, si
+herramientas/1-publicar/editor/editor-wiki.py; Chronicler no lo conoce y, si
 abres el mapa allí y lo guardas, puede perderlo):
 
     "page": "Reino de Prunia"          de qué página es el mapa: esa
@@ -239,7 +239,7 @@ def leer_cmap(texto, avisar=None):
         "pagina": str(crudo.get("page") or "").strip(),
         "rosa": _rosa_valida(crudo.get("compass")),
         # Dónde cae en el mapamundi (si es un mapa regional situado; lo
-        # pone el editor de mapas, ver herramientas/mapas_mundo.py).
+        # pone el editor de mapas, ver herramientas/0-comun/mapas_mundo.py).
         "mundo": _mundo(crudo.get("world")),
     }
 

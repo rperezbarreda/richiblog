@@ -48,7 +48,7 @@ import sys
 import unicodedata
 from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "0-comun"))
 
 from comun import RAIZ, escribir_json, leer_json, preguntar  # noqa: E402
 

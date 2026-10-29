@@ -977,7 +977,7 @@ function prepararZonasDeMapa(caja) {
 }
 
 // PAÍSES O REGIONES. En un mapa con las dos cosas (ver niveles() en
-// herramientas/3-generadores/mundo_mapas.py) se ve una u otra: una región
+// herramientas/0-comun/mundo_mapas.py) se ve una u otra: una región
 // pintada encima tapa a sus países. Los países que no son de ninguna
 // región (una isla independiente) llevan es-suelto y salen también con
 // las regiones, que si no se quedaría un hueco en el mapa.

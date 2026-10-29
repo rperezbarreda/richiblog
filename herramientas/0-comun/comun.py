@@ -27,7 +27,7 @@ from pathlib import Path
 
 # La carpeta del sitio. Se calcula desde ESTE archivo, así que da igual
 # desde dónde ejecutes la herramienta.
-RAIZ = Path(__file__).resolve().parent.parent
+RAIZ = Path(__file__).resolve().parents[2]
 HERRAMIENTAS = RAIZ / "herramientas"
 PLANTILLAS = HERRAMIENTAS / "plantillas"
 
@@ -329,7 +329,7 @@ def es_del_mundo(archivo, boveda):
 #
 #     python herramientas/1-publicar/importar-mundo.py --elegir
 #
-# y se apunta en herramientas/wiki-fuera.txt, una ruta por línea, contando
+# y se apunta en herramientas/0-comun/datos/wiki-fuera.txt, una ruta por línea, contando
 # desde la raíz de la bóveda. Lo leen las DOS herramientas, por lo mismo
 # que es_del_mundo: si solo lo supiera el importador, el generador volvería
 # a publicar la página en cuanto Chronicler escribiera directamente en
@@ -338,7 +338,7 @@ def es_del_mundo(archivo, boveda):
 # Se puede escribir a mano. Una línea que acabe en "/" deja fuera la
 # carpeta entera, con lo que se añada a ella en el futuro incluido. Las
 # mayúsculas dan igual, como en Windows.
-WIKI_FUERA = HERRAMIENTAS / "wiki-fuera.txt"
+WIKI_FUERA = HERRAMIENTAS / "0-comun" / "datos" / "wiki-fuera.txt"
 
 
 def wiki_fuera():

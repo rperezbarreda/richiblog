@@ -2350,7 +2350,7 @@ html:not(.js) .mundo-spoiler {
 /* ====================================================================
    LO QUE LAS PÁGINAS SE PONEN SOLAS
    ====================================================================
-   Lo escribe herramientas/3-generadores/mundo_piezas.py sacándolo de las
+   Lo escribe herramientas/0-comun/mundo_piezas.py sacándolo de las
    fichas de las demás páginas: los lugares de un país, los personajes de
    una raza, los aliados y enemigos, el árbol de lo que «pertenece a» algo
    (el panteón), el árbol familiar y la caja de navegación del pie. */

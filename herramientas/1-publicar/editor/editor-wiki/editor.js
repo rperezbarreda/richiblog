@@ -1,7 +1,7 @@
 // =========================================
 // EL EDITOR DE LA WIKI — lo de la página
 // =========================================
-// Habla con herramientas/1-publicar/editor-wiki.py, que es quien lee y
+// Habla con herramientas/1-publicar/editor/editor-wiki.py, que es quien lee y
 // escribe los .md. Cuatro vistas (inicio, página nueva, las que faltan y
 // escribir) y solo una a la vista; las dos de los mapas están en mapas.js.
 // Todo lo que llega del servidor se pone con textContent: un nombre con <

@@ -42,7 +42,7 @@
 # LO QUE YA HA PASADO NO SE VUELVE A MIRAR
 # ----------------------------------------
 # Cada imagen que pasa por aquí se apunta en
-# herramientas/imagenes-pasadas.json con una huella de su CONTENIDO (no
+# herramientas/0-comun/datos/imagenes-pasadas.json con una huella de su CONTENIDO (no
 # de la fecha del archivo, que se pierde al copiar la carpeta o al
 # descomprimir un zip). La vez siguiente, lo que esté apuntado y no haya
 # cambiado ni se mira ni se nombra: solo sale lo nuevo. Si cambias una
@@ -70,7 +70,7 @@ from pathlib import Path
 # comun.py vive un piso más arriba, en herramientas/, y Python solo busca
 # los imports en la carpeta del propio archivo. Sin esta línea, al estar
 # esto dentro de una subcarpeta, "from comun import ..." no lo encuentra.
-sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "0-comun"))
 
 import shutil
 
@@ -105,7 +105,7 @@ EXCLUIDAS = ("favicon.ico", "social_media/")
 
 # La lista de lo que ya ha pasado (ver arriba). En herramientas/, que no
 # se sube a Neocities; sí va en git, para que valga en cualquier ordenador.
-PASADAS = RAIZ / "herramientas" / "imagenes-pasadas.json"
+PASADAS = RAIZ / "herramientas" / "0-comun" / "datos" / "imagenes-pasadas.json"
 
 
 def huella(archivo):

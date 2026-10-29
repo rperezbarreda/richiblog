@@ -56,7 +56,7 @@ from pathlib import Path
 # comun.py vive un piso más arriba, en herramientas/, y Python solo busca
 # los imports en la carpeta del propio archivo. Sin esta línea, al estar
 # esto dentro de una subcarpeta, "from comun import ..." no lo encuentra.
-sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "0-comun"))
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import mundo_piezas  # noqa: E402
 
@@ -133,7 +133,7 @@ def leer_vault():
     paginas = {}
     imagenes = {}
     mapas = {}
-    # Lo que has elegido dejar fuera (herramientas/wiki-fuera.txt). Solo
+    # Lo que has elegido dejar fuera (herramientas/0-comun/datos/wiki-fuera.txt). Solo
     # páginas y mapas: las imágenes se publican si alguna página las usa.
     fuera = wiki_fuera()
     dejadas = []
@@ -188,7 +188,7 @@ def leer_vault():
             imagenes[archivo.relative_to(VAULT).as_posix().lower()] = archivo
     if dejadas:
         print(f"\n  {len(dejadas)} cosa(s) de la bóveda que has dejado fuera"
-              " (herramientas/wiki-fuera.txt):")
+              " (herramientas/0-comun/datos/wiki-fuera.txt):")
         for ruta in dejadas[:12]:
             print(f"     {ruta}")
         if len(dejadas) > 12:
@@ -1405,7 +1405,7 @@ def escribir_paginas(paginas, probar, categorias=(), eventos=()):
         # enlaces y nombres, y ahí no hace falta).
         cuerpo = mundo_piezas.con_glosario(cuerpo, palabras)
         # LO QUE SALE SOLO, sacado de las fichas de las demás páginas (ver
-        # herramientas/3-generadores/mundo_piezas.py): sus lugares, sus
+        # herramientas/0-comun/mundo_piezas.py): sus lugares, sus
         # personajes, sus aliados y enemigos, lo que cuelga de ella, su
         # árbol familiar y, si es un idioma, sus palabras.
         for ancla, titulo, lista in mundo_piezas.apartados_inversos(ficha, paginas):

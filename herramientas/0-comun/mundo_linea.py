@@ -49,7 +49,6 @@ import unicodedata
 import urllib.parse
 from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 from comun import (RAIZ, escribir_json, escribir_texto, leer_json,  # noqa: E402

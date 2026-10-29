@@ -29,7 +29,7 @@
 import sys
 from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "0-comun"))
 
 from comun import RAIZ, escribir_json, leer_json, pasar_generadores, preguntar, sin_tildes  # noqa: E402
 

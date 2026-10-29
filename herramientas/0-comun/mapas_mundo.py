@@ -45,7 +45,7 @@ import subprocess
 import tempfile
 from pathlib import Path
 
-RAIZ = Path(__file__).resolve().parent.parent
+RAIZ = Path(__file__).resolve().parents[2]
 VAULT = RAIZ / "wiki"
 NOMBRE_DEL_MAPAMUNDI = "Mapamundi de Cralëa.cmap"
 CARPETA_DEL_AMPLIADOR = RAIZ / "herramientas" / "programas" / "realesrgan"

@@ -25,7 +25,7 @@
 # las mismas herramientas de siempre por debajo (nuevo.py, publicar.py,
 # calendario.py…), así que el resultado es igual que con ellas.
 #
-#     python herramientas/1-publicar/editor-wiki.py [--en escribir]
+#     python herramientas/1-publicar/editor/editor-wiki.py [--en escribir]
 #
 # o, igual, python herramientas/menu.py, que desde el 18-10-2026 abre esto
 # (el menú de texto de antes, con menu.py --texto). --en
@@ -46,7 +46,7 @@
 # apartado del texto, un recuadro donde escribir, con la nota de la
 # plantilla encima diciendo qué va ahí.
 #
-#     python herramientas/1-publicar/editor-wiki.py
+#     python herramientas/1-publicar/editor/editor-wiki.py
 #
 # (o desde el menú: Wiki Cralëa → Escribir en la wiki con el editor). Se
 # abre solo en el navegador; si no, la dirección sale aquí escrita. Para
@@ -88,7 +88,7 @@
 # (y Pillow para subir imágenes, que ya lo usa el resto de herramientas).
 #
 # Los archivos de la página del editor están en
-# herramientas/1-publicar/editor-wiki/: editor.html, editor.css,
+# herramientas/1-publicar/editor/editor-wiki/: editor.html, editor.css,
 # editor.js (lo común y la wiki), mapas.js (el editor de mapas),
 # redactor.js (el «Word»), escribir.js (las entradas) y fichas.js (las
 # fichas y lo de imágenes y repasar).
@@ -111,8 +111,8 @@ import webbrowser
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 
-HERRAMIENTAS = Path(__file__).resolve().parent.parent
-sys.path.insert(0, str(HERRAMIENTAS))
+HERRAMIENTAS = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(HERRAMIENTAS / "0-comun"))
 
 from comun import (RAIZ, esta_fuera, escribir_como_estaba, escribir_texto,  # noqa: E402
                    guardar_wiki_fuera, leer_json, leer_texto, sin_tildes, wiki_fuera)
@@ -641,7 +641,7 @@ def subir_imagen(peticion):
     try:
         import imagenes as img
     except ImportError:
-        return {"error": "No encuentro herramientas/imagenes.py."}
+        return {"error": "No encuentro herramientas/0-comun/imagenes.py."}
     campo = str(peticion.get("campo") or "image").lower()
     titulo = str(peticion.get("pagina") or "imagen")
     carpeta = "wiki/_imagenes/banderas" if campo in ("bandera", "blasón", "blason", "escudo") else "wiki/_imagenes"
@@ -675,7 +675,7 @@ def subir_imagen(peticion):
 # LOS MAPAS
 # =========================================
 # Los .cmap de la bóveda (el formato está explicado en
-# herramientas/3-generadores/mundo_mapas.py). El editor los lee enteros y
+# herramientas/0-comun/mundo_mapas.py). El editor los lee enteros y
 # los devuelve enteros: lo que no conoce (lo que escribió Chronicler) va y
 # vuelve sin tocar. Aquí solo se comprueba que lo que llega es un mapa y
 # que se escribe dentro de la bóveda.
@@ -1001,7 +1001,7 @@ def traer_emblema(peticion):
     try:
         import imagenes as img
     except ImportError:
-        return {"error": "No encuentro herramientas/imagenes.py."}
+        return {"error": "No encuentro herramientas/0-comun/imagenes.py."}
     nombre = str(peticion.get("nombre") or "").strip() or "emblema"
     ruta = str(peticion.get("ruta") or "").strip()
     temporal = None
@@ -1073,7 +1073,7 @@ def traer_imagen_de_mapa(peticion, nombre):
     try:
         import imagenes as img
     except ImportError:
-        return {"error": "No encuentro herramientas/imagenes.py."}
+        return {"error": "No encuentro herramientas/0-comun/imagenes.py."}
     ruta, temporal, error = _imagen_que_llega(peticion)
     if error:
         return {"error": error}
@@ -1086,7 +1086,7 @@ def traer_imagen_de_mapa(peticion, nombre):
     return _hecha(RAIZ / CARPETA_MAPAS / Path(hecha).name, aviso)
 
 
-# ---- A LA ESCALA COMÚN (herramientas/mapas_mundo.py) ----
+# ---- A LA ESCALA COMÚN (herramientas/0-comun/mapas_mundo.py) ----
 # Un mapa regional nuevo se busca en el mapamundi y su imagen se agranda
 # (con IA si está) hasta la escala común: así todos los regionales se
 # pueden juntar luego sin estirar nada. Su sitio queda en "world".
@@ -1179,7 +1179,7 @@ def ampliar_mapa(archivo, peticion):
     try:
         import imagenes as img
     except ImportError:
-        return {"error": "No encuentro herramientas/imagenes.py."}
+        return {"error": "No encuentro herramientas/0-comun/imagenes.py."}
     mm = _mapas_mundo()
     imagen, _ = _imagen_del_mapa(archivo, peticion.get("imagen"))
     if not imagen:

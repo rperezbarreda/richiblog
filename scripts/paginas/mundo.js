@@ -520,7 +520,7 @@ function bloqueDeVistasMundo(cual, titulo) {
 // página) y cada era como una franja con su nombre (que lleva a su sitio
 // en la línea grande). Las posiciones vienen calculadas en el JSON, en rem
 // de la escala de la página (ver mini() en
-// herramientas/3-generadores/mundo_linea.py); aquí solo se pasan a píxeles.
+// herramientas/0-comun/mundo_linea.py); aquí solo se pasan a píxeles.
 //
 // NO ES UN ENLACE ENTERO, como la tarjeta de un mapa: dentro hay un enlace
 // por evento, y un enlace no puede ir dentro de otro. El título de abajo

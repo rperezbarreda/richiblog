@@ -50,9 +50,10 @@ import time
 from html.parser import HTMLParser
 from pathlib import Path
 
-HERRAMIENTAS = Path(__file__).resolve().parent.parent
+HERRAMIENTAS = Path(__file__).resolve().parents[2]
 PUBLICAR = HERRAMIENTAS / "1-publicar"
-sys.path.insert(0, str(HERRAMIENTAS))
+EDITOR = Path(__file__).resolve().parent
+sys.path.insert(0, str(HERRAMIENTAS / "0-comun"))
 sys.path.insert(0, str(HERRAMIENTAS / "3-generadores"))
 
 from comun import (GENERADORES, RAIZ, campanas_que_hay, escapar, escribir_como_estaba,  # noqa: E402
@@ -76,8 +77,11 @@ _CARGADAS = {}
 
 def herramienta(nombre):
     if nombre not in _CARGADAS:
-        spec = importlib.util.spec_from_file_location("editor_web_" + nombre.replace("-", "_"),
-                                                      PUBLICAR / (nombre + ".py"))
+        # Las de 1-publicar/, o las del propio editor (dndbeyond).
+        ruta = PUBLICAR / (nombre + ".py")
+        if not ruta.is_file():
+            ruta = EDITOR / (nombre + ".py")
+        spec = importlib.util.spec_from_file_location("editor_web_" + nombre.replace("-", "_"), ruta)
         modulo = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(modulo)
         _CARGADAS[nombre] = modulo
@@ -1432,7 +1436,37 @@ def colecciones():
                  C("titulo", "Título", ayuda="«mis personajes»: el grande de arriba del índice."),
                  C("intro", "La entradilla", "largo")]},
              {"id": "personajes", "camino": ["personajes"], "titulo": "Los personajes", "nombre_de": "nombre",
-              "detalle": ["nombre_completo", "color"], "campos": [
+              "detalle": ["nombre_completo", "color"],
+              # LA FICHA DE CADA UNO, POR PESTAÑAS (fichas.js): arriba, los
+              # botones de importar y ver; debajo, una pestaña por cosa, cada
+              # una con sus casillas. Las de npcs, fotos y criaturas enseñan
+              # las de las otras partes de ese personaje («parte»), para
+              # editarlas una a una o añadir. Una casilla que no esté en
+              # ninguna pestaña sale en la primera.
+              "siempre": ["_dndbeyond", "_previa"],
+              "pestanas": [
+                  {"id": "datos", "emoji": "📇", "texto": "datos", "campos": [
+                      "nombre", "nombre_completo", "clave", "icono", "etiquetas", "color", "raza", "clase", "nivel",
+                      "lema", "dndbeyond", "ficha"]},
+                  {"id": "stats", "emoji": "📊", "texto": "stats", "campos": [
+                      "fue", "des", "con", "int", "sab", "car", "ca", "pg", "velocidad", "dados_golpe", "competencia",
+                      "salvaciones", "habilidades", "sentidos", "defensas"]},
+                  {"id": "acciones", "emoji": "⚔️", "texto": "acciones", "campos": ["ataques", "acciones", "combos"]},
+                  {"id": "conjuros", "emoji": "✨", "texto": "conjuros", "campos": [
+                      "aptitud_magica", "espacios", "conjuros"]},
+                  {"id": "inventario", "emoji": "🎒", "texto": "inventario", "campos": ["objetos", "dinero"]},
+                  {"id": "rasgos", "emoji": "🧬", "texto": "rasgos y competencias", "campos": ["rasgos", "competencias"]},
+                  {"id": "descripciones", "emoji": "📝", "texto": "descripciones", "campos": ["descripciones"]},
+                  {"id": "trasfondo", "emoji": "📜", "texto": "trasfondo", "campos": [
+                      "trasfondo", "alineamiento", "fe", "edad", "altura", "peso", "ojos", "pelo", "piel",
+                      "personalidad", "ideales", "vinculos", "defectos"]},
+                  {"id": "textos", "emoji": "📖", "texto": "historia y extra", "campos": ["historia", "extra"]},
+                  {"id": "fotos", "emoji": "🖼️", "texto": "fotos", "campos": ["token", "retrato", "retrato_alt"],
+                   "parte": "imagenes"},
+                  {"id": "npcs", "emoji": "👥", "texto": "npcs", "campos": [], "parte": "gente"},
+                  {"id": "criaturas", "emoji": "🐾", "texto": "criaturas", "campos": [], "parte": "criaturas"},
+              ],
+              "campos": [
                   C("_dndbeyond", "Importar de D&D Beyond", "accion", accion="personaje-dndbeyond",
                     ayuda="Rellena su ficha con la de D&D Beyond (el enlace, el número o el JSON), en español. No"
                           " guarda: repásalo y guarda tú."),
@@ -1542,7 +1576,7 @@ def colecciones():
                   C("extra", "Extra", "largo", grande=True, vacio="quitar", markdown=True, imagenes="oc-imagen",
                     ayuda="Lo que no es historia: manías, curiosidades, canciones…"),
               ]},
-             {"id": "gente", "camino": ["gente"], "titulo": "Su gente (la pestaña npcs)",
+             {"id": "gente", "camino": ["gente"], "dentro_de": "personajes", "titulo": "Su gente (la pestaña npcs)",
               "agrupada": {"clave": "personaje", "nombre": "personaje", "dentro": "cosas", "libre": True},
               "nombre_de": "nombre", "detalle": ["que", "relacion"], "campos": [
                   C("_grupo", "De quién", "elegir", obligatorio=True,
@@ -1553,7 +1587,7 @@ def colecciones():
                   C("token", "Foto (el redondel)", "imagen", sitio="oc-npc", vacio="quitar"),
                   C("notas", "Lo que hay que saber", "largo", vacio="quitar", markdown=True),
               ]},
-             {"id": "criaturas", "camino": ["criaturas"],
+             {"id": "criaturas", "camino": ["criaturas"], "dentro_de": "personajes",
               "titulo": "Sus criaturas (familiares, invocaciones, mascotas: la pestaña criaturas)",
               "agrupada": {"clave": "personaje", "nombre": "personaje", "dentro": "cosas", "libre": True},
               "nombre_de": "nombre", "detalle": ["que"], "campos": [
@@ -1582,7 +1616,8 @@ def colecciones():
                     ayuda="Como los ataques, una por línea: «Mordisco: +4, 1 perforante; alcance 1,5 m»."),
                   C("notas", "Lo que hay que saber", "largo", vacio="quitar", markdown=True),
               ]},
-             {"id": "imagenes", "camino": ["imagenes"], "titulo": "Sus imágenes (la pestaña imágenes)",
+             {"id": "imagenes", "camino": ["imagenes"], "dentro_de": "personajes",
+              "titulo": "Sus imágenes (la pestaña imágenes)",
               "agrupada": {"clave": "personaje", "nombre": "personaje", "dentro": "cosas", "libre": True},
               "nombre_de": "alt", "detalle": ["pie"], "campos": [
                   C("_grupo", "De quién", "elegir", obligatorio=True),
@@ -2221,7 +2256,7 @@ def vista_previa_personaje(peticion):
 
 def importar_de_dndbeyond(peticion):
     """La ficha de D&D Beyond como las casillas de uno de mis personajes
-    (1-publicar/dndbeyond.py), y si se pide, su retrato de allí como
+    (1-publicar/editor/dndbeyond.py), y si se pide, su retrato de allí como
     imagen de perfil y token de la galería (los que no tenga)."""
     ddb = herramienta("dndbeyond")
     try:

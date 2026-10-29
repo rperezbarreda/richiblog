@@ -5,7 +5,7 @@
 # Lo usa el editor, en Rol → «Mis personajes», con el botón «Importar de
 # D&D Beyond» de cada personaje: rellena su ficha (lo de la pestaña
 # «ficha» y el post-it) con lo que tenga en D&D Beyond, pasado al español
-# con herramientas/dnd_es.py. No guarda nada: deja las casillas rellenas
+# con herramientas/0-comun/dnd_es.py. No guarda nada: deja las casillas rellenas
 # para que las repases y guardes tú.
 #
 # DE DÓNDE LO SACA. Vale cualquiera de estas tres cosas:
@@ -28,7 +28,7 @@
 # objetos, el dinero, y los rasgos y dotes por su nombre.
 #
 # Probarlo sin editor (con un JSON guardado o un número):
-#     python herramientas/1-publicar/dndbeyond.py ficha.json
+#     python herramientas/1-publicar/editor/dndbeyond.py ficha.json
 
 import json
 import re
@@ -37,7 +37,7 @@ import urllib.error
 import urllib.request
 from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "0-comun"))
 
 from dnd_es import CARACTERISTICA_DE_NOMBRE, CARACTERISTICAS, HABILIDADES, Traductor  # noqa: E402
 
@@ -805,7 +805,7 @@ def a_ficha(d, traducir=None):
 
     # Lo que no se ha podido traducir: para cambiarlo a mano.
     if t.sin_traducir:
-        avisos.append("Sin traducir (cámbialo a mano, o apúntalo en herramientas/dnd-es-propias.json para la"
+        avisos.append("Sin traducir (cámbialo a mano, o apúntalo en herramientas/0-comun/datos/dnd-es-propias.json para la"
                       " próxima): " + "; ".join(t.sin_traducir[:40]) + ("…" if len(t.sin_traducir) > 40 else ""))
     retrato = ((d.get("decorations") or {}).get("avatarUrl") or "").strip()
     return campos, avisos, retrato
