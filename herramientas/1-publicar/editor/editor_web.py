@@ -43,6 +43,7 @@ import subprocess
 import sys
 import tempfile
 import urllib.error
+import urllib.parse
 import urllib.request
 import unicodedata
 import threading
@@ -1264,6 +1265,13 @@ def colecciones():
     con_descripcion = {"tipo": ["pergaminos", "objetos mágicos"]}
     rarezas = ["común", "poco común", "rara", "muy rara", "legendaria", "artefacto"]
     colores_oc = ["azul", "celeste", "naranja", "verde", "gris", "morado", "rojo", "rosa", "amarillo"]
+    # Los sistemas de rol de mis personajes (0-comun/sistemas_rol.py): las
+    # pestañas de D&D solo salen con D&D; las de la hoja genérica, con los
+    # demás.
+    import sistemas_rol
+    sistemas_oc = [[k, v["nombre"]] for k, v in sistemas_rol.SISTEMAS.items() if k != "dnd5e"]
+    es_dnd = {"sistema": ["", "dnd5e"]}
+    no_es_dnd = {"sistema": [k for k, _ in sistemas_oc]}
     monedas = [["po", "po (oro)"], ["pp", "pp (plata)"], ["pc", "pc (cobre)"], ["pe", "pe (electro)"],
                ["ppt", "ppt (platino)"]]
     return [
@@ -1444,30 +1452,37 @@ def colecciones():
               # editarlas una a una o añadir. Una casilla que no esté en
               # ninguna pestaña sale en la primera.
               "siempre": ["_dndbeyond", "_previa"],
+              # Al elegir un sistema, lo que esté vacío se rellena con lo de
+              # su plantilla (fichas.js).
+              "plantillas": sistemas_rol.PLANTILLAS,
               "pestanas": [
                   {"id": "datos", "emoji": "📇", "texto": "datos", "campos": [
-                      "nombre", "nombre_completo", "clave", "icono", "etiquetas", "color", "raza", "clase", "nivel",
-                      "lema", "dndbeyond", "ficha"]},
-                  {"id": "stats", "emoji": "📊", "texto": "stats", "campos": [
+                      "nombre", "nombre_completo", "clave", "icono", "etiquetas", "color", "sistema", "raza", "clase",
+                      "nivel", "lema", "dndbeyond", "ficha"]},
+                  {"id": "hoja", "emoji": "🎲", "texto": "hoja", "si": no_es_dnd, "campos": [
+                      "tirada", "conceptos", "atributos", "pericias", "recursos", "armas", "poderes", "equipo"]},
+                  {"id": "stats", "emoji": "📊", "texto": "stats", "si": es_dnd, "campos": [
                       "fue", "des", "con", "int", "sab", "car", "ca", "pg", "velocidad", "dados_golpe", "competencia",
                       "salvaciones", "habilidades", "sentidos", "defensas"]},
-                  {"id": "acciones", "emoji": "⚔️", "texto": "acciones", "campos": ["ataques", "acciones", "combos"]},
-                  {"id": "conjuros", "emoji": "✨", "texto": "conjuros", "campos": [
+                  {"id": "acciones", "emoji": "⚔️", "texto": "acciones", "si": es_dnd, "campos": ["ataques", "acciones", "combos"]},
+                  {"id": "conjuros", "emoji": "✨", "texto": "conjuros", "si": es_dnd, "campos": [
                       "aptitud_magica", "espacios", "conjuros"]},
-                  {"id": "inventario", "emoji": "🎒", "texto": "inventario", "campos": ["objetos", "dinero"]},
-                  {"id": "rasgos", "emoji": "🧬", "texto": "rasgos y competencias", "campos": ["rasgos", "competencias"]},
-                  {"id": "descripciones", "emoji": "📝", "texto": "descripciones", "campos": ["descripciones"]},
+                  {"id": "inventario", "emoji": "🎒", "texto": "inventario", "si": es_dnd, "campos": ["objetos", "dinero"]},
+                  {"id": "rasgos", "emoji": "🧬", "texto": "rasgos y competencias", "si": es_dnd, "campos": ["rasgos", "competencias"]},
+                  {"id": "descripciones", "emoji": "📝", "texto": "descripciones", "si": es_dnd, "campos": ["descripciones"]},
                   {"id": "trasfondo", "emoji": "📜", "texto": "trasfondo", "campos": [
                       "trasfondo", "alineamiento", "fe", "edad", "altura", "peso", "ojos", "pelo", "piel",
                       "personalidad", "ideales", "vinculos", "defectos"]},
                   {"id": "textos", "emoji": "📖", "texto": "historia y extra", "campos": ["historia", "extra"]},
+                  {"id": "frases", "emoji": "💬", "texto": "frases y música", "campos": ["frases", "musica", "paleta"]},
                   {"id": "fotos", "emoji": "🖼️", "texto": "fotos", "campos": ["token", "retrato", "retrato_alt"],
                    "parte": "imagenes"},
                   {"id": "npcs", "emoji": "👥", "texto": "npcs", "campos": [], "parte": "gente"},
                   {"id": "criaturas", "emoji": "🐾", "texto": "criaturas", "campos": [], "parte": "criaturas"},
+                  {"id": "moodboard", "emoji": "📌", "texto": "moodboard", "campos": [], "parte": "moodboard"},
               ],
               "campos": [
-                  C("_dndbeyond", "Importar de D&D Beyond", "accion", accion="personaje-dndbeyond",
+                  C("_dndbeyond", "Importar de D&D Beyond", "accion", accion="personaje-dndbeyond", si=es_dnd,
                     ayuda="Rellena su ficha con la de D&D Beyond (el enlace, el número o el JSON), en español. No"
                           " guarda: repásalo y guarda tú."),
                   C("_previa", "Ver cómo queda (sin guardar)", "accion", accion="personaje-previa",
@@ -1481,14 +1496,18 @@ def colecciones():
                   C("etiquetas", "Etiquetas (para el filtro del índice)", vacio="quitar",
                     ayuda="Separadas por comas: «D&D 5e, jugando, Ragna». Cada una sale como un botón del filtro."),
                   C("color", "Color del aro", "elegir", obligatorio=True, opciones=_opciones(colores_oc)),
+                  C("sistema", "Sistema de juego", "elegir", vacio="quitar", ninguno="D&D 5e", opciones=sistemas_oc,
+                    ayuda="Con otro que no sea D&D, su ficha es la «hoja» (en vez de stats, acciones, conjuros…), y"
+                          " al elegirlo se rellena con lo de ese juego lo que esté vacío."),
                   C("token", "Token de la galería", "imagen", sitio="oc-token", siempre=True,
                     ayuda="El redondel del índice de mis personajes (cuadrado; se recorta solo). Solo sale ahí."),
                   C("retrato", "Imagen de perfil", "imagen", sitio="oc-retrato", siempre=True,
                     ayuda="La del post-it de su ficha (de pie, mejor). Solo sale ahí: no se usa el token."),
                   C("retrato_alt", "Cómo es (para quien no ve la imagen de perfil)", vacio="quitar"),
-                  C("raza", "Raza", vacio="quitar"),
-                  C("clase", "Clase", vacio="quitar"),
-                  C("nivel", "Nivel", "numero", minimo=1, maximo=30, vacio="quitar"),
+                  C("raza", "Raza", vacio="quitar", ayuda="En otros sistemas, lo que sea: «Toreador», «Humana»…"),
+                  C("clase", "Clase", vacio="quitar", ayuda="En otros sistemas, lo que sea: «Neonata», «Netrunner»…"),
+                  C("nivel", "Nivel", "numero", minimo=1, maximo=30, vacio="quitar",
+                    ayuda="En Vampiro, su generación; en Cyberpunk RED, su rango (sale en la chapita de la foto)."),
                   C("lema", "Una frase suya", vacio="quitar", ayuda="Sale en el post-it, debajo de la clase."),
               ] + [C(k, n, "numero", minimo=1, maximo=30, vacio="quitar",
                      ayuda="La puntuación (el modificador se calcula solo)." if k == "fue" else "")
@@ -1576,6 +1595,34 @@ def colecciones():
                     ayuda="Con formato: **negrita**, ## apartados, > citas, [[Otro personaje]] enlaza con su ficha."),
                   C("extra", "Extra", "largo", grande=True, vacio="quitar", markdown=True, imagenes="oc-imagen",
                     ayuda="Lo que no es historia: manías, curiosidades, canciones…"),
+                  # LA HOJA DE OTROS SISTEMAS (0-comun/sistemas_rol.py).
+                  C("tirada", "Con qué se tira", vacio="quitar", si={"sistema": ["generico"]},
+                    ayuda="«1d20», «2d6», «1d100»: a eso se suma el atributo o la habilidad al pulsarlos."),
+                  C("conceptos", "Lo que le define", "lineas", vacio="quitar",
+                    ayuda="Uno por línea, «Etiqueta: texto»: «Clan: Toreador», «Concepto principal: …» (en Fate,"
+                          " sus aspectos), «Rol: Netrunner»."),
+                  C("atributos", "Atributos", "lineas", vacio="quitar",
+                    ayuda="Uno por línea, «Nombre: valor» («Fuerza: 3»). «## Físicos» encima de unos los agrupa."),
+                  C("pericias", "Habilidades", "lineas", vacio="quitar",
+                    ayuda="Igual: «Pelea: 2». Con un atributo entre paréntesis, la tirada suma los dos: «Pelea"
+                          " (DES): 2». Lo de detrás del número es una nota: «Persuasión: 3 (seducción)»."),
+                  C("recursos", "Recursos (lo que se gasta)", "lineas", vacio="quitar",
+                    ayuda="Uno por línea: «Salud: 0/7» son 7 casillas que se marcan jugando (0 marcadas de"
+                          " inicio); «Recuperación: 3», un número; «Consecuencia leve (2): …», un texto."),
+                  C("armas", "Armas", "lineas", vacio="quitar",
+                    ayuda="Una por línea: «Pistola pesada: 3d6; CdF 2» (el daño se tira; lo de detrás del «;», aparte)."),
+                  C("poderes", "Poderes (disciplinas, proezas, ciberware…)", "largo", grande=True, vacio="quitar",
+                    markdown=True, ayuda="Con formato; cada «## Apartado» sale en su ventanita."),
+                  C("equipo", "Equipo", "lineas", vacio="quitar", ayuda="Un objeto por línea."),
+                  # SUS FRASES, SU MÚSICA Y SU PALETA (para todos).
+                  C("frases", "Frases suyas", "lineas", vacio="quitar",
+                    ayuda="Una por línea; detrás de un «|», cuándo la dijo: «No me mires así. | En la sesión 3»."),
+                  C("musica", "Su música (de Spotify)", "lineas", vacio="quitar",
+                    ayuda="Un enlace de Spotify por línea (canción, disco o lista: «Compartir → Copiar enlace»)."
+                          " Delante, con «|», el título y detrás una nota: «Su tema | https://open.spotify.com/… |"
+                          " cuando entra en escena». Si no pones título, al guardar se pone el de Spotify."),
+                  C("paleta", "Su paleta de colores", "lineas", vacio="quitar",
+                    ayuda="Un color por línea, en hexadecimal y su nombre: «#5b0a1a Sangre seca»."),
               ]},
              {"id": "gente", "camino": ["gente"], "dentro_de": "personajes", "titulo": "Su gente (la pestaña npcs)",
               "agrupada": {"clave": "personaje", "nombre": "personaje", "dentro": "cosas", "libre": True},
@@ -1584,6 +1631,21 @@ def colecciones():
                     ayuda="El personaje en cuya ficha sale (tiene que estar guardado ya)."),
                   C("nombre", "Nombre", obligatorio=True),
                   C("que", "Quién es", vacio="quitar", ayuda="«Su hermana», «su maestro»…"),
+                  C("vinculo", "Vínculo", "elegir", libre=True, vacio="quitar",
+                    opciones=_opciones(["Familia", "Pareja", "Amistad", "Aliado", "Mentor", "Rival", "Enemigo",
+                                        "Contacto"]),
+                    ayuda="En la pestaña npcs se agrupan por él."),
+                  C("parentesco", "Parentesco (para el árbol familiar)", "elegir", libre=True, vacio="quitar",
+                    opciones=_opciones(["Madre", "Padre", "Hermana", "Hermano", "Abuela", "Abuelo", "Tía", "Tío",
+                                        "Prima", "Primo", "Pareja", "Hija", "Hijo", "Sobrina", "Sobrino", "Nieta",
+                                        "Nieto", "Bisabuela", "Bisabuelo"]),
+                    ayuda="Con él sale en el árbol, en la fila de su generación (abuelos, padres y tíos, la suya,"
+                          " hijos y sobrinos…)."),
+                  C("estado", "Estado", "elegir", libre=True, vacio="quitar",
+                    opciones=_opciones(["Fallecida", "Fallecido", "Desaparecida", "Desaparecido"]),
+                    ayuda="Si ha muerto, en el árbol sale con † y la foto en gris."),
+                  C("oc", "Es uno de mis personajes", "elegir", vacio="quitar",
+                    ayuda="Su nombre enlaza con su ficha (y si no le pones foto, lleva su token)."),
                   C("relacion", "Cómo se llevan", vacio="quitar"),
                   C("token", "Foto (el redondel)", "imagen", sitio="oc-npc", vacio="quitar"),
                   C("notas", "Lo que hay que saber", "largo", vacio="quitar", markdown=True),
@@ -1616,6 +1678,16 @@ def colecciones():
                   C("acciones", "Acciones", "lineas", vacio="quitar",
                     ayuda="Como los ataques, una por línea: «Mordisco: +4, 1 perforante; alcance 1,5 m»."),
                   C("notas", "Lo que hay que saber", "largo", vacio="quitar", markdown=True),
+              ]},
+             {"id": "moodboard", "camino": ["moodboard"], "dentro_de": "personajes",
+              "titulo": "Su moodboard (en la pestaña inspiración)",
+              "agrupada": {"clave": "personaje", "nombre": "personaje", "dentro": "cosas", "libre": True},
+              "nombre_de": "alt", "detalle": ["texto"], "campos": [
+                  C("_grupo", "De quién", "elegir", obligatorio=True),
+                  C("imagen", "Imagen", "imagen", sitio="oc-moodboard", vacio="quitar"),
+                  C("alt", "Qué se ve", vacio="quitar", ayuda="Para quien no la ve."),
+                  C("texto", "O una palabra o una frase (en vez de imagen)", vacio="quitar",
+                    ayuda="Sale en una tarjetita pegada entre las fotos."),
               ]},
              {"id": "imagenes", "camino": ["imagenes"], "dentro_de": "personajes",
               "titulo": "Sus imágenes (la pestaña imágenes)",
@@ -1882,6 +1954,7 @@ def opciones_de(col, clave_campana, datos):
     if col["id"] == "personajes":
         salida["_grupo"] = [[_clave_oc(p), str(p.get("nombre") or _clave_oc(p))]
                             for p in (datos or {}).get("personajes") or [] if isinstance(p, dict) and _clave_oc(p)]
+        salida["oc"] = salida["_grupo"]
     if col["id"] == "recomendaciones":
         salida["_grupo"] = [[g.get("clave"), g.get("nombre")] for g in datos or [] if isinstance(g, dict)]
     if col["id"] == "calendario":
@@ -2219,10 +2292,44 @@ def _arreglar_personajes(datos):
         p["clave"] = clave
         if not re.fullmatch(r"[a-z0-9-]+", clave):
             raise ValueError("la dirección «%s» solo puede llevar letras sin tilde, números y guiones" % clave)
-    for lista, que in (("gente", "gente"), ("imagenes", "imágenes"), ("criaturas", "criaturas")):
+        if p.get("musica"):
+            p["musica"] = _titulos_de_spotify(p["musica"])
+    for lista, que in (("gente", "gente"), ("imagenes", "imágenes"), ("criaturas", "criaturas"),
+                       ("moodboard", "moodboard")):
         for grupo in datos.get(lista) or []:
             if isinstance(grupo, dict) and grupo.get("personaje") not in vistas:
                 raise ValueError("hay %s de «%s», que no es ninguno de los personajes" % (que, grupo.get("personaje")))
+
+
+# Lo que dice Spotify de un enlace suyo (su título), ya preguntado.
+_SPOTIFY_TITULOS = {}
+
+
+def _titulos_de_spotify(musica):
+    """La música de un personaje con el título de Spotify puesto en las
+    líneas que solo traen el enlace («Título | enlace»). Si Spotify no
+    contesta (sin internet…), se queda como estaba."""
+    lineas = musica if isinstance(musica, list) else str(musica or "").split("\n")
+    salida = []
+    for linea in lineas:
+        trozos = [x.strip() for x in str(linea).split("|")]
+        enlaces = [x for x in trozos if re.match(r"^https://open\.spotify\.com/", x)]
+        if len(enlaces) == 1 and len([x for x in trozos if x]) == 1:
+            url = enlaces[0].split("?", 1)[0]
+            if url not in _SPOTIFY_TITULOS:
+                try:
+                    pedir = urllib.request.Request(
+                        "https://open.spotify.com/oembed?url=" + urllib.parse.quote(url, safe=""),
+                        headers={"User-Agent": "Mozilla/5.0 (editor de richi.blog)"})
+                    with urllib.request.urlopen(pedir, timeout=6) as respuesta:
+                        _SPOTIFY_TITULOS[url] = str(json.loads(respuesta.read(200000)).get("title") or "").strip()
+                except (urllib.error.URLError, OSError, ValueError):
+                    _SPOTIFY_TITULOS[url] = ""
+            titulo = _SPOTIFY_TITULOS[url].replace("|", "/")
+            if titulo:
+                linea = "%s | %s" % (titulo, enlaces[0])
+        salida.append(linea)
+    return salida if isinstance(musica, list) else "\n".join(salida)
 
 
 def _generador(nombre):

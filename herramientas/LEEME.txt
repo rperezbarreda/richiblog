@@ -330,6 +330,8 @@
               dnd_es.py             el diccionario de D&D en español
               compendio.py          el compendio de mis personajes: cada conjuro,
                                     objeto, rasgo y acción, una vez para todos
+              sistemas_rol.py       los sistemas de rol de mis personajes (Vampiro,
+                                    Fate, Cyberpunk RED…) y sus plantillas
               resumenes.py          los resúmenes de las notas de rol
               mapas_mundo.py        situar un mapa en el mapamundi y ampliarlo a la
                                     escala común (lo usa el editor de mapas)
@@ -4067,6 +4069,80 @@
   qué pestaña lo dice «pestanas» en la colección de mis personajes de
   editor_web.py («dentro_de» en las partes que van dentro); lo pinta
   fichas.js (pintarFichaWeb).
+  OTROS SISTEMAS DE ROL (no solo D&D): en 📇 datos, «Sistema de juego»:
+  D&D 5e (el de siempre, si no se elige nada), Vampiro: la Mascarada V5,
+  Fate, Cyberpunk RED u «Otro sistema» (la hoja genérica). Con uno que no
+  es D&D, en el editor desaparecen stats, acciones, conjuros, inventario,
+  rasgos y descripciones, y sale 🎲 HOJA, y al elegirlo se rellena con la
+  PLANTILLA de ese juego lo que esté vacío (sus atributos, sus
+  habilidades y sus recursos, con los nombres en español: cámbialos si
+  quieres). La hoja son unos campos de texto, uno por cosa:
+      Lo que le define   «Etiqueta: texto» por línea («Clan: Toreador»,
+                         «Concepto principal: …», «Rol: Netrunner»).
+      Atributos          «Fuerza: 3»; «## Físicos» encima los agrupa.
+      Habilidades        «Pelea: 2»; «Pelea (DES): 2» suma el atributo al
+                         tirar; «Persuasión: 3 (seducción)», con su nota.
+      Recursos           «Salud: 0/7» = 7 casillas que se marcan jugando
+                         (más de 12, sale el número: «PG: 40/40»);
+                         «Recuperación: 3», un número; «Consecuencia leve
+                         (2): …», un texto.
+      Armas              «Pistola pesada: 3d6; CdF 2» (el daño se tira).
+      Poderes            con formato; cada «## Apartado», su ventanita
+                         (disciplinas, proezas, ciberware…).
+      Equipo             un objeto por línea.
+      Con qué se tira    solo en «Otro sistema»: «1d20», «2d6»… (se le
+                         suma el atributo o la habilidad).
+  En la web, su pestaña «ficha» lleva 📊 hoja (lo que le define, los
+  atributos y los recursos), 🎯 habilidades, ⚔️ armas, los poderes (🩸
+  disciplinas, ⭐ proezas, 🦾 ciberware…), 🎒 equipo y 📜 trasfondo; en el
+  post-it, sus ATRIBUTOS (en vez de las seis de D&D) y arriba, en vez de
+  PG y CA, los suyos (Salud y Voluntad; Puntos de destino y
+  Recuperación; PG y Blindaje). La chapita de la foto dice «generación
+  12» en Vampiro y «rango 4» en Cyberpunk (el campo Nivel). CÓMO SE TIRA:
+    · VAMPIRO V5: los atributos y las habilidades salen con sus puntos
+      (●●●○○), en columnas como en la hoja de papel. Al pulsar uno NO se
+      tira: va a la RESERVA, arriba de la ventana de dados (un atributo +
+      una habilidad, los dados de más o de menos y el HAMBRE, que empieza
+      con lo marcado en el recurso «Hambre»), y se tira con «tirar
+      reserva»: éxitos con 6+, cada pareja de dieces suma dos (crítico;
+      «crítico sucio» si hay un 10 de hambre) y un 1 de hambre avisa del
+      fallo bestial. Las casillas de Salud y Voluntad tienen tres
+      estados: libre, superficial (/) y agravado (✕).
+    · FATE: las habilidades en su PIRÁMIDE (Grande +4, Bueno +3…; las de
+      0, en pequeño). Al pulsar una se tiran 4dF + la habilidad, con el
+      nombre de su escalón. En los dados, «tirar 4dF» (+ el modificador).
+    · CYBERPUNK RED: 1d10 + atributo + habilidad (al lado de cada una,
+      «(REF 6 + 2)»); un 10 tira otro y lo suma (crítico) y un 1 tira otro
+      y lo resta (pifia). En los dados, «tirar 1d10».
+  Todo en herramientas/0-comun/sistemas_rol.py (los sistemas, sus
+  plantillas y la escalera de Fate: ahí se cambian los nombres para los
+  que se hagan después), generar-personajes.py (hoja_de_otro_sistema,
+  atributos_del_postit) y personajes.js (tirarReserva, tirarCyberpunk,
+  los dF).
+  LA GENTE: RELACIONES Y ÁRBOL FAMILIAR. Cada persona de 👥 npcs puede
+  llevar «Vínculo» (familia, pareja, amistad, aliado, mentor, rival,
+  enemigo, contacto… o lo que escribas): en la web se agrupan por él, con
+  su título; «Parentesco» (madre, hermano, abuela, sobrina…): con él sale
+  en el ÁRBOL FAMILIAR, arriba de la pestaña, en la fila de su
+  generación (bisabuelos, abuelos, padres y tíos, la suya —con el
+  personaje en medio, sus hermanos y primos a un lado y su pareja al
+  otro—, hijos y sobrinos, nietos), cada uno con su redondel y llevando a
+  su ficha de abajo; «Estado» (fallecida…: en el árbol, con † y la foto
+  en gris); y «Es uno de mis personajes»: su nombre enlaza con su ficha y,
+  sin foto, lleva su token. (generar-personajes.py: GENERACIONES,
+  arbol_familiar, apartado_gente.)
+  💬 FRASES: una por línea en «Frases suyas» (pestaña «frases y música»
+  del editor), con «| cuándo la dijo» detrás; cada una en su tarjeta.
+  🎨 INSPIRACIÓN: su MÚSICA (un enlace de Spotify por línea: canción,
+  disco o lista, «Título | enlace | nota»; si no pones título, al guardar
+  el editor le pone el de Spotify), con «▶ escuchar aquí», que pone el
+  reproductor de Spotify en la página (solo se carga si se pulsa; esas
+  páginas, y solo esas, dejan entrar a open.spotify.com en su política de
+  seguridad: actualizar-cabeceras.py, CSP_SPOTIFY); su PALETA («#5b0a1a
+  Sangre seca», un color por línea); y su MOODBOARD, fotos y palabras
+  pegadas con celo (pestaña 📌 moodboard del editor; las imágenes, sitio
+  «oc-moodboard»: imagenes/personajes/<clave>/moodboard/). Frases e
+  inspiración solo salen en el menú si tienen algo.
   LAS ETIQUETAS («D&D 5e, jugando»): cada una es un botón del filtro del
   índice (el de los relatos, scripts/componentes/filtros.js); sin
   ninguna etiqueta en ningún personaje, el filtro no sale.

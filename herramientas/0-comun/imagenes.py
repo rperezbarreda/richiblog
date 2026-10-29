@@ -181,6 +181,13 @@ SITIOS = {
         "lado": 900,
         "cuadrada": False,
     },
+    "oc-moodboard": {
+        "que": "una imagen del moodboard de uno de mis personajes",
+        "carpeta": "imagenes/personajes/{personaje}/moodboard",
+        "sufijo": "",
+        "lado": 1000,
+        "cuadrada": False,
+    },
     "oc-npc": {
         "que": "alguien de la gente de uno de mis personajes",
         "carpeta": "imagenes/personajes/{personaje}/gente",

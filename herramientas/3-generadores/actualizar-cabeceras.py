@@ -1477,8 +1477,12 @@ YA_PUESTO = re.compile(
 #     fuera está dibujada así en el CSS);
 #   - peticiones: las de la web y las del guestbook, que habla con Google
 #     (script.google.com, que contesta desde script.googleusercontent.com);
-#   - ni plugins, ni <base>, ni formularios que manden a otra web.
+#   - ni plugins, ni <base>, ni formularios que manden a otra web;
+#   - marcos (iframes): ninguno, salvo el reproductor de Spotify en las
+#     páginas que lo llevan (la música de mis personajes: data-oc-spotify,
+#     y solo se carga si se pide).
 CSP_GOOGLE = "https://script.google.com https://script.googleusercontent.com"
+CSP_SPOTIFY = "https://open.spotify.com"
 RE_SCRIPT_EN_LINEA = re.compile(r"<script(?![^>]*\bsrc=)[^>]*>(.*?)</script>", re.S)
 RE_CSP = re.compile(r'[ \t]*<meta http-equiv="Content-Security-Policy"[^>]*>\n')
 RE_CHARSET = re.compile(r'(<meta charset="[^"]*">\n)', re.I)
@@ -1501,7 +1505,7 @@ def politica(texto):
         "object-src 'none'",
         "base-uri 'self'",
         "form-action 'self'",
-    ])
+    ] + (["frame-src " + CSP_SPOTIFY] if "data-oc-spotify=" in sin else []))
 
 
 def poner_csp(texto):

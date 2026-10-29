@@ -148,7 +148,10 @@ document.querySelectorAll(".oc-ataques th[data-oc-desc]").forEach((th) => {
         return;
     }
     const CARAS = [2, 4, 6, 8, 10, 12, 20, 100];
-    const estado = { mano: {}, modo: "normal", tiradas: [], cuenta: 0, sonido: leer("richi-dados-sonido") !== "no" };
+    const SISTEMA = (sitioDelBoton && sitioDelBoton.dataset.ocSistema) || "dnd5e";
+    const estado = { mano: {}, modo: "normal", tiradas: [], cuenta: 0, sonido: leer("richi-dados-sonido") !== "no",
+        reserva: { atributo: null, habilidad: null, extra: 0,
+            hambre: parseInt((sitioDelBoton && sitioDelBoton.dataset.ocHambre) || "0", 10) || 0 } };
     function leer(clave) {
         try {
             return localStorage.getItem(clave);
@@ -242,13 +245,13 @@ document.querySelectorAll(".oc-ataques th[data-oc-desc]").forEach((th) => {
             fin = conTipo.lastIndex;
         }
         segmentos.push([texto.slice(fin), ""]);
-        const patron = /([+-]?)\s*(\d*)d(\d+)|([+-]?)\s*(\d+)/g;
+        const patron = /([+-]?)\s*(\d*)d(\d+|F)|([+-]?)\s*(\d+)/g;
         segmentos.forEach(([trozo, tipo]) => {
             patron.lastIndex = 0;
             while ((m = patron.exec(trozo))) {
                 if (m[3]) {
                     trozos.push({ signo: m[1] === "-" ? -1 : 1, cuantos: Math.min(parseInt(m[2] || "1", 10), 100),
-                        caras: parseInt(m[3], 10), tipo });
+                        caras: m[3] === "F" ? "F" : parseInt(m[3], 10), tipo });
                 } else {
                     trozos.push({ signo: m[4] === "-" ? -1 : 1, fijo: parseInt(m[5], 10), tipo });
                 }
@@ -264,6 +267,11 @@ document.querySelectorAll(".oc-ataques th[data-oc-desc]").forEach((th) => {
         return String(tipo).normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/[^a-z]/g, "");
     }
     function tirar(formula, que) {
+        const especial = /^(v5|cp):(-?\d+)$/.exec(String(formula));
+        if (especial) {
+            return especial[1] === "v5" ? tirarReserva(parseInt(especial[2], 10), que, formula)
+                : tirarCyberpunk(parseInt(especial[2], 10), que, formula);
+        }
         const trozos = trozosDe(formula);
         if (!trozos.length) {
             return null;
@@ -304,22 +312,76 @@ document.querySelectorAll(".oc-ataques th[data-oc-desc]").forEach((th) => {
             }
             const salen = [];
             for (let i = 0; i < t.cuantos; i++) {
-                const x = alAzar(t.caras);
-                salen.push(x);
+                const x = t.caras === "F" ? alAzar(3) - 2 : alAzar(t.caras);
+                salen.push(t.caras === "F" ? ["−", "0", "+"][x + 1] : x);
                 total += t.signo * x;
                 sumar(t.tipo, t.signo * x);
             }
             partes.push({ texto: signo + t.cuantos + "d" + t.caras + " [" + salen.join(", ") + "]" });
         });
+        const r = guardarTirada({ que: que || "tirada", formula: String(formula), total, partes, d20, tipos });
+        if (trozos.some((t) => t.caras === "F")) {
+            r.nota = escalera(total);
+        }
+        return terminar(r);
+    }
+    function guardarTirada(r) {
         estado.cuenta += 1;
-        const r = { id: estado.cuenta, que: que || "tirada", formula: String(formula), total, partes, d20, tipos };
+        r.id = estado.cuenta;
+        r.tipos = r.tipos || [];
         acabar(r);
+        return r;
+    }
+    function terminar(r) {
         sonar();
         if (r.critico || r.pifia) {
             sonarFinal(r.critico);
         }
         anadir(r);
         return r;
+    }
+    const ESCALERA = { 8: "Legendario", 7: "Épico", 6: "Fantástico", 5: "Soberbio", 4: "Grande", 3: "Bueno",
+        2: "Normal", 1: "Mediano", 0: "Mediocre", "-1": "Malo", "-2": "Terrible" };
+    function escalera(n) {
+        return ESCALERA[Math.max(-2, Math.min(8, n))] || "";
+    }
+    function tirarReserva(cuantos, que, formula) {
+        const n = Math.max(1, cuantos);
+        const hambre = Math.min(estado.reserva.hambre, n);
+        const normales = [];
+        const deHambre = [];
+        for (let i = 0; i < n; i++) {
+            (i < hambre ? deHambre : normales).push(alAzar(10));
+        }
+        const todos = normales.concat(deHambre);
+        const dieces = todos.filter((x) => x === 10).length;
+        const parejas = Math.floor(dieces / 2);
+        const exitos = todos.filter((x) => x >= 6).length + parejas * 2;
+        const r = guardarTirada({ que: que || "reserva", formula: formula || "v5:" + n, total: exitos,
+            unidad: exitos === 1 ? "éxito" : "éxitos", partes: [], d20: null });
+        r.desglose = n + "d10 [" + (normales.join(", ") || "—") + "]" + (hambre ? " · hambre [" + deHambre.join(", ") + "]" : "");
+        r.formulaVista = n + " dados" + (hambre ? ", " + hambre + " de hambre" : "");
+        const sucio = parejas && deHambre.includes(10);
+        const bestial = deHambre.includes(1);
+        r.critico = parejas > 0 && !sucio;
+        r.pifia = !!sucio || (bestial && !exitos);
+        r.nota = [parejas ? (sucio ? "crítico sucio" : "crítico") : "",
+            bestial ? (exitos ? "un 1 de hambre: si no llega, fallo bestial" : "fallo bestial") : ""]
+            .filter(Boolean).join("; ");
+        return terminar(r);
+    }
+    function tirarCyberpunk(base, que, formula) {
+        const d = alAzar(10);
+        const otro = d === 10 || d === 1 ? alAzar(10) : 0;
+        const dado = d === 10 ? d + otro : d === 1 ? d - otro : d;
+        const r = guardarTirada({ que: que || "tirada", formula, total: dado + base, partes: [], d20: null });
+        r.desglose = "1d10 [" + d + (d === 10 ? " + " + otro : d === 1 ? " − " + otro : "") + "]"
+            + (base ? (base > 0 ? " + " : " − ") + Math.abs(base) : "");
+        r.formulaVista = "1d10" + (base ? (base > 0 ? " + " : " − ") + Math.abs(base) : "");
+        r.critico = d === 10;
+        r.pifia = d === 1;
+        r.nota = d === 10 ? "¡crítico! (+" + otro + ")" : d === 1 ? "pifia (−" + otro + ")" : "";
+        return terminar(r);
     }
     function ponerModo(d20, modo) {
         const b = alAzar(20);
@@ -328,6 +390,9 @@ document.querySelectorAll(".oc-ataques th[data-oc-desc]").forEach((th) => {
         d20.queda = modo === "ventaja" ? Math.max(d20.valores[0], b) : Math.min(d20.valores[0], b);
     }
     function acabar(r) {
+        if (!r.d20 && !r.partes.length) {
+            return;
+        }
         r.desglose = r.partes.map((p) => {
             if (!p.d20) {
                 return p.texto;
@@ -337,6 +402,12 @@ document.querySelectorAll(".oc-ataques th[data-oc-desc]").forEach((th) => {
         }).join(" ");
         r.critico = !!r.d20 && r.d20.queda === 20;
         r.pifia = !!r.d20 && r.d20.queda === 1;
+        if (r.d20) {
+            r.nota = r.critico ? "¡20 natural!" : r.pifia ? "pifia (1 natural)" : "";
+        }
+    }
+    function dicho(r) {
+        return r.que + ": " + r.total + (r.unidad ? " " + r.unidad : "") + (r.nota ? ", " + r.nota : "");
     }
     function cambiarModo(r, modo) {
         if (!r.d20 || r.d20.modo !== "normal") {
@@ -351,8 +422,7 @@ document.querySelectorAll(".oc-ataques th[data-oc-desc]").forEach((th) => {
             sonarFinal(r.critico);
         }
         pintarHistorial();
-        avisar(r.que + " con " + modo + ": " + r.total + (r.critico ? ", ¡20 natural!" : "")
-            + (r.pifia ? ", pifia, 1 natural" : "") + ". " + r.desglose);
+        avisar(dicho(r).replace(r.que + ":", r.que + " con " + modo + ":") + ". " + r.desglose);
         const li = historial.querySelector('[data-id="' + r.id + '"] .oc-dados-repetir');
         if (li) {
             li.focus();
@@ -530,6 +600,14 @@ document.querySelectorAll(".oc-ataques th[data-oc-desc]").forEach((th) => {
             pintarMano();
         }, "Vaciar la bandeja");
         acciones.append(tirarBoton, vaciar);
+        if (SISTEMA === "fate" || SISTEMA === "cpred") {
+            const fate = SISTEMA === "fate";
+            acciones.appendChild(botonDe("oc-dados-tirar es-del-sistema", fate ? "tirar 4dF" : "tirar 1d10", () => {
+                const mod = modificador();
+                tirar(fate ? "4dF" + (mod ? (mod > 0 ? "+" : "") + mod : "") : "cp:" + mod, fate ? "4dF" : "1d10");
+            }, fate ? "Tirar 4dF más el modificador" : "Tirar 1d10 más el modificador (con críticos y pifias)"));
+        }
+        const reserva = SISTEMA === "vtm5" ? montarReserva() : null;
         const cabeza = crear("div", "oc-dados-cabeza-historial");
         cabeza.appendChild(crear("h3", "oc-dados-subtitulo", "tiradas"));
         borrarTodo = botonDe("oc-dados-borrar-todo", "borrar todo", () => {
@@ -541,7 +619,11 @@ document.querySelectorAll(".oc-ataques th[data-oc-desc]").forEach((th) => {
         historial = crear("ol", "oc-dados-historial");
         aviso = crear("p", "visually-hidden");
         aviso.setAttribute("role", "status");
-        cuerpo.append(bandeja, manoTexto, fila, modos, acciones, cabeza, historial, aviso);
+        if (reserva) {
+            cuerpo.append(reserva, bandeja, manoTexto, fila, acciones, cabeza, historial, aviso);
+        } else {
+            cuerpo.append(bandeja, manoTexto, fila, modos, acciones, cabeza, historial, aviso);
+        }
         ventana.append(barra, cuerpo);
         ventana.addEventListener("keydown", (e) => {
             if (e.key === "Escape") {
@@ -552,6 +634,122 @@ document.querySelectorAll(".oc-ataques th[data-oc-desc]").forEach((th) => {
         colocarDondeEstaba();
         pintarMano();
         pintarHistorial();
+    }
+    let reservaTexto = null;
+    const reservaSelects = {};
+    let hambreInput = null;
+    function opcionesDe(tipo) {
+        const vistas = new Map();
+        document.querySelectorAll('.oc-dado[data-reserva="' + tipo + '"]').forEach((x) => {
+            if (!vistas.has(x.dataset.que)) {
+                vistas.set(x.dataset.que, parseInt(x.dataset.valor || "0", 10) || 0);
+            }
+        });
+        return vistas;
+    }
+    function cuantosEnReserva() {
+        const r = estado.reserva;
+        return (r.atributo ? r.atributo[1] : 0) + (r.habilidad ? r.habilidad[1] : 0) + r.extra;
+    }
+    function textoDeReserva() {
+        const r = estado.reserva;
+        const trozos = [r.atributo, r.habilidad].filter(Boolean).map((x) => x[0] + " " + x[1]);
+        if (r.extra) {
+            trozos.push((r.extra > 0 ? "+" : "−") + Math.abs(r.extra) + " de más");
+        }
+        const n = Math.max(0, cuantosEnReserva());
+        return (trozos.join(" + ") || "nada") + ": " + n + (n === 1 ? " dado" : " dados")
+            + (n ? ", " + Math.min(r.hambre, n) + " de hambre" : "");
+    }
+    function pintarReserva() {
+        if (!reservaTexto) {
+            return;
+        }
+        reservaTexto.textContent = textoDeReserva();
+        ["atributo", "habilidad"].forEach((tipo) => {
+            reservaSelects[tipo].value = estado.reserva[tipo] ? estado.reserva[tipo][0] : "";
+        });
+        hambreInput.value = String(estado.reserva.hambre);
+    }
+    function montarReserva() {
+        const caja = crear("div", "oc-dados-reserva");
+        caja.setAttribute("role", "group");
+        caja.setAttribute("aria-labelledby", "oc-reserva-titulo");
+        const titulo = crear("h3", "oc-dados-subtitulo", "reserva");
+        titulo.id = "oc-reserva-titulo";
+        caja.appendChild(titulo);
+        [["atributo", "atributo"], ["habilidad", "habilidad"]].forEach(([tipo, texto]) => {
+            const fila = crear("div", "oc-dados-fila");
+            const etiqueta = crear("label", "oc-dados-etiqueta", texto);
+            const sel = crear("select", "oc-dados-elegir");
+            sel.id = "oc-reserva-" + tipo;
+            etiqueta.htmlFor = sel.id;
+            const ninguno = crear("option", "", "— ninguno —");
+            ninguno.value = "";
+            sel.appendChild(ninguno);
+            const opciones = opcionesDe(tipo);
+            opciones.forEach((valor, nombre) => {
+                const o = crear("option", "", nombre + " (" + valor + ")");
+                o.value = nombre;
+                sel.appendChild(o);
+            });
+            sel.addEventListener("change", () => {
+                estado.reserva[tipo] = sel.value ? [sel.value, opciones.get(sel.value)] : null;
+                pintarReserva();
+            });
+            reservaSelects[tipo] = sel;
+            fila.append(etiqueta, sel);
+            caja.appendChild(fila);
+        });
+        const numero = (id, texto, leer, poner, etiquetas) => {
+            const fila = crear("div", "oc-dados-fila");
+            const etiqueta = crear("label", "oc-dados-etiqueta", texto);
+            const input = crear("input", "oc-dados-mod");
+            input.type = "number";
+            input.id = id;
+            input.step = "1";
+            input.value = String(leer());
+            etiqueta.htmlFor = id;
+            input.addEventListener("input", () => {
+                poner(parseInt(input.value || "0", 10) || 0);
+                pintarReserva();
+            });
+            const cambiar = (n) => {
+                poner(leer() + n);
+                pintarReserva();
+            };
+            const mandos = crear("div", "oc-dados-mod-caja");
+            mandos.append(botonDe("oc-dados-paso", "−", () => cambiar(-1), etiquetas[0]), input,
+                botonDe("oc-dados-paso", "+", () => cambiar(1), etiquetas[1]));
+            fila.append(etiqueta, mandos);
+            caja.appendChild(fila);
+            return input;
+        };
+        numero("oc-reserva-extra", "dados de más", () => estado.reserva.extra, (n) => {
+            estado.reserva.extra = Math.max(-20, Math.min(20, n));
+        }, ["Un dado menos", "Un dado más"]);
+        hambreInput = numero("oc-reserva-hambre", "hambre", () => estado.reserva.hambre, (n) => {
+            estado.reserva.hambre = Math.max(0, Math.min(5, n));
+        }, ["Un punto menos de hambre", "Un punto más de hambre"]);
+        reservaTexto = crear("p", "oc-dados-mano");
+        caja.appendChild(reservaTexto);
+        const tirarla = botonDe("oc-dados-tirar es-del-sistema", "tirar reserva", () => {
+            const r = estado.reserva;
+            const que = [r.atributo, r.habilidad].filter(Boolean).map((x) => x[0]).join(" + ") || "reserva";
+            tirarReserva(cuantosEnReserva(), que);
+        });
+        caja.appendChild(tirarla);
+        pintarReserva();
+        return caja;
+    }
+    function ponerEnReserva(b) {
+        const tipo = b.dataset.reserva === "habilidad" ? "habilidad" : "atributo";
+        estado.reserva[tipo] = [b.dataset.que, parseInt(b.dataset.valor || "0", 10) || 0];
+        pintarReserva();
+        if (ventana.hidden) {
+            abrir(true, false);
+        }
+        avisar("Reserva: " + textoDeReserva() + ". Tírala con «tirar reserva», en los dados.");
     }
     function dejarDentro(x, y) {
         const ancho = ventana.offsetWidth;
@@ -636,7 +834,7 @@ document.querySelectorAll(".oc-ataques th[data-oc-desc]").forEach((th) => {
         estado.tiradas.unshift(r);
         estado.tiradas = estado.tiradas.slice(0, 30);
         pintarHistorial();
-        avisar(r.que + ": " + r.total + (r.critico ? ", ¡20 natural!" : "") + (r.pifia ? ", pifia, 1 natural" : "")
+        avisar(dicho(r)
             + (r.tipos.length ? " (" + r.tipos.map((x) => x.total + " " + x.tipo).join(", ") + ")" : "")
             + ". " + r.desglose);
     }
@@ -646,10 +844,13 @@ document.querySelectorAll(".oc-ataques th[data-oc-desc]").forEach((th) => {
             li.dataset.id = r.id;
             const cabeza = crear("p", "oc-dados-que");
             cabeza.append(crear("span", "oc-dados-que-nombre", r.que),
-                crear("span", "oc-dados-formula", formulaParaVer(r.formula)));
+                crear("span", "oc-dados-formula", r.formulaVista || formulaParaVer(r.formula)));
             const total = crear("p", "oc-dados-total", String(r.total));
-            if (r.critico || r.pifia) {
-                total.appendChild(crear("span", "oc-dados-natural", r.critico ? "¡20 natural!" : "pifia (1 natural)"));
+            if (r.unidad) {
+                total.appendChild(crear("span", "oc-dados-unidad", r.unidad));
+            }
+            if (r.nota) {
+                total.appendChild(crear("span", "oc-dados-natural", r.nota));
             }
             const tipos = crear("p", "oc-dados-tipos");
             (r.tipos || []).forEach((x) => {
@@ -698,10 +899,19 @@ document.querySelectorAll(".oc-ataques th[data-oc-desc]").forEach((th) => {
         b.type = "button";
         b.dataset.dados = m.dataset.dados;
         b.dataset.que = m.dataset.que || "";
+        if (m.dataset.reserva) {
+            b.dataset.reserva = m.dataset.reserva;
+            b.dataset.valor = m.dataset.valor || "0";
+        }
         b.innerHTML = m.innerHTML;
-        b.setAttribute("aria-label", m.textContent.trim() + ", tirar " + (m.dataset.que || m.dataset.dados)
-            + " (" + formulaParaVer(m.dataset.dados).replace(/−/g, "menos") + ")");
-        b.title = "Tirar " + formulaParaVer(m.dataset.dados);
+        if (m.dataset.reserva && SISTEMA === "vtm5") {
+            b.setAttribute("aria-label", m.dataset.que + ", " + m.dataset.valor + ": a la reserva de dados");
+            b.title = "A la reserva de los dados";
+        } else {
+            b.setAttribute("aria-label", m.textContent.trim() + ", tirar " + (m.dataset.que || m.dataset.dados)
+                + " (" + formulaParaVer(m.dataset.dados).replace(/−/g, "menos") + ")");
+            b.title = "Tirar " + formulaParaVer(m.dataset.dados);
+        }
         m.replaceWith(b);
     });
     document.addEventListener("click", (e) => {
@@ -711,24 +921,62 @@ document.querySelectorAll(".oc-ataques th[data-oc-desc]").forEach((th) => {
         }
         e.preventDefault();
         e.stopPropagation();
+        if (b.dataset.reserva && SISTEMA === "vtm5") {
+            ponerEnReserva(b);
+            return;
+        }
         tirar(b.dataset.dados, b.dataset.que);
     });
 })();
-document.querySelectorAll("[data-oc-casillas]").forEach((grupo) => {
-    const que = grupo.dataset.ocCasillas;
-    const sueltas = Array.from(grupo.querySelectorAll(".oc-casilla"));
-    sueltas.forEach((s, i) => {
-        const b = document.createElement("button");
-        b.type = "button";
-        b.className = "oc-casilla";
-        b.setAttribute("aria-pressed", "false");
-        b.setAttribute("aria-label", que + ": " + (i + 1) + " de " + sueltas.length + ", gastado");
-        b.addEventListener("click", () => {
-            b.setAttribute("aria-pressed", b.getAttribute("aria-pressed") === "true" ? "false" : "true");
+(function () {
+    const grupos = document.querySelectorAll("[data-oc-casillas]");
+    if (!grupos.length) {
+        return;
+    }
+    const ESTADOS = ["libre", "superficial", "agravado"];
+    let aviso = null;
+    const avisar = (texto) => {
+        if (!aviso) {
+            aviso = document.createElement("p");
+            aviso.className = "visually-hidden";
+            aviso.setAttribute("role", "status");
+            document.body.appendChild(aviso);
+        }
+        aviso.textContent = "";
+        setTimeout(() => {
+            aviso.textContent = texto;
+        }, 50);
+    };
+    grupos.forEach((grupo) => {
+        const que = grupo.dataset.ocCasillas;
+        const tres = grupo.dataset.ocEstados === "3";
+        const sueltas = Array.from(grupo.querySelectorAll(".oc-casilla"));
+        sueltas.forEach((s, i) => {
+            const b = document.createElement("button");
+            b.type = "button";
+            b.className = "oc-casilla";
+            const nombre = que + ": " + (i + 1) + " de " + sueltas.length;
+            if (tres) {
+                const poner = (estadoNuevo) => {
+                    b.dataset.estado = estadoNuevo;
+                    b.setAttribute("aria-label", nombre + ", " + estadoNuevo);
+                };
+                poner(s.classList.contains("es-marcada") ? "superficial" : "libre");
+                b.addEventListener("click", () => {
+                    poner(ESTADOS[(ESTADOS.indexOf(b.dataset.estado) + 1) % 3]);
+                    avisar(b.getAttribute("aria-label"));
+                });
+            } else {
+                b.setAttribute("aria-pressed", s.classList.contains("es-marcada") ? "true" : "false");
+                b.setAttribute("aria-label", nombre + ", gastado");
+                b.addEventListener("click", () => {
+                    b.setAttribute("aria-pressed", b.getAttribute("aria-pressed") === "true" ? "false" : "true");
+                });
+            }
+            s.replaceWith(b);
         });
-        s.replaceWith(b);
     });
-});
+})();
 (function () {
     const conVentana = document.querySelectorAll("details[data-oc-modal]");
     if (!conVentana.length) {
@@ -836,4 +1084,32 @@ document.querySelectorAll("[data-oc-casillas]").forEach((grupo) => {
     b.title = "Abre imprimir: elige «Guardar como PDF»";
     b.addEventListener("click", () => window.print());
     sitio.appendChild(b);
+})();
+(function () {
+    document.querySelectorAll("[data-oc-spotify]").forEach((cancion) => {
+        const [tipo, id] = cancion.dataset.ocSpotify.split("/");
+        if (!/^[a-z]+$/.test(tipo || "") || !/^[A-Za-z0-9]+$/.test(id || "")) {
+            return;
+        }
+        const titulo = cancion.dataset.ocTitulo || "Spotify";
+        const sitio = cancion.querySelector(".oc-cancion-botones");
+        const b = document.createElement("button");
+        b.type = "button";
+        b.className = "oc-cancion-escuchar";
+        b.textContent = "▶ escuchar aquí";
+        b.setAttribute("aria-label", "Escuchar aquí: " + titulo + " (carga el reproductor de Spotify)");
+        b.addEventListener("click", () => {
+            const marco = document.createElement("iframe");
+            marco.className = "oc-cancion-reproductor";
+            marco.src = "https://open.spotify.com/embed/" + encodeURIComponent(tipo) + "/" + encodeURIComponent(id);
+            marco.title = "Reproductor de Spotify: " + titulo;
+            marco.height = tipo === "track" || tipo === "episode" ? "152" : "352";
+            marco.loading = "lazy";
+            marco.setAttribute("allow", "autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture");
+            cancion.querySelector(".oc-cancion-texto").appendChild(marco);
+            b.remove();
+            marco.focus();
+        });
+        sitio.prepend(b);
+    });
 })();

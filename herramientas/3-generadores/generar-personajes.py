@@ -52,11 +52,28 @@
 #         "trasfondo": "…", "alineamiento": "…", "fe": "…", "edad": "…", "altura": "…",
 #         "peso": "…", "ojos": "…", "pelo": "…", "piel": "…",
 #         "personalidad", "ideales", "vinculos", "defectos": en Markdown
+#
+#         "sistema": "vtm5"                 (o "fate", "cpred", "generico";
+#                                           sin él, D&D 5e). Los que no son
+#                                           de D&D llevan, en vez de lo de
+#                                           D&D, la hoja genérica: "conceptos",
+#                                           "atributos", "pericias",
+#                                           "recursos", "armas", "poderes",
+#                                           "equipo" y "tirada" (ver
+#                                           0-comun/sistemas_rol.py)
+#
+#         Y para todos (cada cosa, su pestaña, que sale solo si tiene algo):
+#         "frases": ["Una frase suya | cuándo la dijo"],      💬 frases
+#         "musica": ["Título | enlace de Spotify | nota"],    🎨 inspiración
+#         "paleta": ["#5b0a1a Sangre seca"],                  🎨 inspiración
 #     }],
 #     "gente":    [{"personaje": "yorel", "cosas": [{"nombre", "que",
-#                   "relacion", "token", "notas"}]}],
+#                   "vinculo", "parentesco", "estado", "oc", "relacion",
+#                   "token", "notas"}]}],    (ver LA GENTE, más abajo)
 #     "imagenes": [{"personaje": "yorel", "cosas": [{"imagen", "alt",
-#                   "pie"}]}]
+#                   "pie"}]}],
+#     "moodboard": [{"personaje": "yorel", "cosas": [{"imagen", "alt"} o
+#                   {"texto"}]}]             (en 🎨 inspiración)
 #   }
 #
 # Solo hace falta la clave y el nombre: lo que falte no sale (sin foto,
@@ -93,6 +110,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 from comun import PLANTILLAS, RAIZ, escribir_texto, leer_json, leer_texto, nombre_archivo  # noqa: E402
 import compendio  # noqa: E402
+import sistemas_rol  # noqa: E402
 from mundo_formato import Avisos, Conversor  # noqa: E402
 
 DATOS = RAIZ / "datos" / "personajes" / "personajes.json"
@@ -116,8 +134,10 @@ STATS = (("fue", "FUE", "Fuerza"), ("des", "DES", "Destreza"), ("con", "CON", "C
 # recuadro (y con su emoji). «ficha» lleva dentro, como un submenú, las de
 # SUBPESTANAS_DE_FICHA.
 PESTANAS = (("historia", "📖", "historia"), ("ficha", "📋", "ficha"), ("criaturas", "🐾", "criaturas"),
-            ("gente", "👥", "npcs"),
-            ("imagenes", "🖼️", "imágenes"), ("extra", "📎", "extra"))
+            ("gente", "👥", "npcs"), ("frases", "💬", "frases"),
+            ("imagenes", "🖼️", "imágenes"), ("inspiracion", "🎨", "inspiración"), ("extra", "📎", "extra"))
+# Las que solo salen si tienen algo.
+PESTANAS_SI_HAY = ("criaturas", "frases", "inspiracion")
 
 # Las subpestañas de la pestaña «ficha» (lo de D&D), en su orden y con su
 # emoji, como las secciones de la hoja de D&D Beyond: qué ventanitas van en
@@ -186,7 +206,8 @@ def lo_que_es(p):
     """«Humano · Pícaro · nivel 5», con lo que haya."""
     trozos = [str(p.get(k) or "").strip() for k in ("raza", "clase")]
     if str(p.get("nivel") or "").strip():
-        trozos.append("nivel %s" % str(p.get("nivel")).strip())
+        de_nivel = sistemas_rol.SISTEMAS[sistemas_rol.sistema_de(p)].get("nivel", "nivel")
+        trozos.append(("%s %s" % (de_nivel, str(p.get("nivel")).strip())).strip())
     return " · ".join(t for t in trozos if t)
 
 
@@ -438,7 +459,9 @@ def postit(p, c):
     # La foto, con el nivel en su chapita en la esquina de abajo; debajo,
     # la raza y la subclase (la clase va al lado del nombre).
     nivel = str(p.get("nivel") or "").strip()
-    chapa = ('<span class="oc-postit-nivel">nivel %s</span>' % e(nivel)) if nivel else ""
+    sistema = sistemas_rol.sistema_de(p)
+    de_nivel = sistemas_rol.SISTEMAS[sistema].get("nivel", "nivel")
+    chapa = ('<span class="oc-postit-nivel">%s</span>' % e((de_nivel + " " + nivel).strip())) if nivel else ""
     if retrato:
         partes.append('                    <div class="oc-retrato-marco">'
                       '<button class="lightbox-trigger oc-retrato" type="button" aria-label="Ver en grande: %s">'
@@ -448,11 +471,17 @@ def postit(p, c):
                       '<span class="oc-inicial" aria-hidden="true">%s</span></div>%s</div>' % (e(inicial(nombre)), chapa))
     _, subclase = clase_y_subclase(p)
     que = " · ".join(x for x in (str(p.get("raza") or "").strip(), subclase) if x)
+    if not que and sistema != "dnd5e":
+        # Sin raza: lo primero que le define («Concepto principal: …»).
+        que = next((v for _, cosas in sistemas_rol.bloques(p.get("conceptos")) for _, v in cosas if v), "")
     if que:
         partes.append('                    <p class="oc-postit-que">%s</p>' % e(que))
     lema = str(p.get("lema") or "").strip()
     if lema:
         partes.append('                    <p class="oc-postit-lema">«%s»</p>' % e(lema.strip("«»\"")))
+    if sistema != "dnd5e":
+        partes.append(atributos_del_postit(p, sistema))
+        return "\n".join(x for x in partes if x)
     valores = [(k, corto, largo, numero(p.get(k))) for k, corto, largo in STATS]
     if any(v is not None for *_, v in valores):
         partes.append('                    <h2 class="oc-stats-titulo">características</h2>')
@@ -474,10 +503,51 @@ def postit(p, c):
     return "\n".join(partes)
 
 
+def atributos_del_postit(p, sistema):
+    """Los atributos de un personaje que no es de D&D, en el post-it: la
+    abreviatura, el número en grande (que se tira, o va a la reserva) y,
+    en Vampiro, sus puntos."""
+    atributos, _ = leer_hoja(p)
+    todos = [(n, v) for _, cosas in atributos for n, v in cosas]
+    todos = [(n, sistemas_rol.valor_y_nota(v)[0]) for n, v in todos]
+    todos = [(n, v) for n, v in todos if v is not None]
+    if not todos:
+        return ""
+    largos = sistemas_rol.SISTEMAS[sistema].get("largos", {})
+    cortos = abreviaturas([n for n, _ in todos])
+    base = str(p.get("tirada") or "").strip()
+    celdas = []
+    for nombre, v in todos:
+        largo = largos.get(nombre, nombre)
+        corto = nombre if nombre in largos else cortos[nombre]
+        if sistema == "vtm5":
+            dentro = a_la_reserva('<span class="oc-stat-mod">%d</span>' % v, v, largo.lower(), "atributo")
+            dentro += '<span class="oc-stat-puntos" aria-hidden="true">%s</span>' % ("●" * v)
+        else:
+            formula = formula_de_sistema(sistema, v, base)
+            numero_html = '<span class="oc-stat-mod">%d</span>' % v
+            dentro = dado(numero_html, formula, largo.lower()) if formula else numero_html
+        celdas.append('                        <div class="oc-stat"><dt><abbr title="%s">%s</abbr></dt><dd>%s</dd></div>'
+                      % (e(largo), e(corto), dentro))
+    return ('                    <h2 class="oc-stats-titulo">atributos</h2>\n'
+            '                    <dl class="oc-stats%s">\n%s\n                    </dl>'
+            % (" es-de-cinco" if len(celdas) == 10 else "", "\n".join(celdas)))
+
+
 def vitales(p):
-    """Los puntos de golpe y la CA, en su cajita al lado del nombre."""
-    datos = [(corto, largo, str(p.get(k) or "").strip(), emoji) for k, corto, largo, emoji in (
-        ("pg", "PG", "Puntos de golpe", "❤️"), ("ca", "CA", "Clase de armadura", "🛡️"))]
+    """Los puntos de golpe y la CA, en su cajita al lado del nombre (en
+    otros sistemas, los suyos: la salud y la voluntad…)."""
+    sistema = sistemas_rol.sistema_de(p)
+    if sistema != "dnd5e":
+        recursos = {llano(n): v for n, v in recursos_de(p)}
+        datos = []
+        for nombre, emoji, corto in sistemas_rol.SISTEMAS[sistema].get("vitales", ()):
+            m = sistemas_rol.marcador(recursos.get(llano(nombre), ""))
+            if m:
+                datos.append((corto, nombre, str(m[1]), emoji))
+    else:
+        datos = [(corto, largo, str(p.get(k) or "").strip(), emoji) for k, corto, largo, emoji in (
+            ("pg", "PG", "Puntos de golpe", "❤️"), ("ca", "CA", "Clase de armadura", "🛡️"))]
     datos = [x for x in datos if x[2]]
     if not datos:
         return ""
@@ -514,29 +584,255 @@ def botones(p, avisos):
     # A la izquierda, uno encima de otro, «ficha dndbeyond» y «ficha en
     # pdf» (si no hay PDF subido, personajes.js pone ahí el suyo); a la
     # derecha, el de los dados, grande (también lo pone personajes.js).
-    return ('                <div class="oc-botones" data-oc-botones>'
-            '<div class="oc-botones-pila" data-oc-botones-pdf>%s%s</div></div>' % ("".join(enlaces), pdf))
+    # Para los dados (personajes.js): el sistema y, en Vampiro, el hambre.
+    sistema = sistemas_rol.sistema_de(p)
+    hambre = hambre_de(p)
+    return ('                <div class="oc-botones" data-oc-botones data-oc-sistema="%s"%s>'
+            '<div class="oc-botones-pila" data-oc-botones-pdf>%s%s</div></div>'
+            % (sistema, (' data-oc-hambre="%d"' % hambre) if hambre is not None else "", "".join(enlaces), pdf))
 
 
-def apartado_gente(gente, c, personajes, avisos):
+# LA GENTE: sus relaciones y su árbol familiar. Cada persona de «gente»
+# puede llevar, además de quién es y cómo se llevan:
+#   · «vinculo»: familia, pareja, amistad, aliado, mentor, rival,
+#     enemigo, contacto… (se agrupan por él, con su chapita);
+#   · «parentesco»: madre, hermano, abuela, sobrina… Con él sale en el
+#     ÁRBOL FAMILIAR, en la fila de su generación (ver GENERACIONES);
+#   · «estado»: fallecido/a, desaparecido/a… (en el árbol, con su †);
+#   · «oc»: la clave de otro de mis personajes, si lo es: su nombre
+#     enlaza con su ficha y, si no tiene foto, lleva su token.
+
+# La generación de cada parentesco respecto al personaje (−1, sus padres;
+# +1, sus hijos), por cómo EMPIEZA alguna palabra del parentesco (sin
+# tildes); manda la primera que case.
+GENERACIONES = (
+    (("bisabuel", "tatarabuel"), -3), (("bisniet", "tataraniet"), 3),
+    (("abuel",), -2), (("niet",), 2),
+    (("padre", "madre", "padrastr", "madrastr", "padrin", "madrin", "tio", "tia", "suegr", "progenitor"), -1),
+    (("hij", "sobrin", "yerno", "nuera", "ahijad"), 1),
+    (("herman", "prim", "pareja", "espos", "marido", "mujer", "cunad", "gemel", "melliz", "novi", "consorte"), 0),
+)
+NOMBRES_DE_GENERACION = {-3: "bisabuelos", -2: "abuelos", -1: "padres y tíos", 0: "su generación",
+                         1: "hijos y sobrinos", 2: "nietos", 3: "bisnietos"}
+# Las que van al lado del personaje en su fila (las parejas); las demás
+# de su generación (hermanos, primos), al otro lado.
+PAREJAS = ("pareja", "espos", "marido", "mujer", "novi", "consorte")
+
+
+def generacion_de(parentesco):
+    palabras = llano(parentesco).replace("/", " ").replace("-", " ").split()
+    for claves, gen in GENERACIONES:
+        if any(p.startswith(k) for k in claves for p in palabras):
+            return gen
+    return None
+
+
+def es_pareja(parentesco):
+    return any(p.startswith(k) for k in PAREJAS for p in llano(parentesco).split())
+
+
+def foto_de_persona(g, personajes):
+    """La foto de alguien de la gente: la suya o, si es uno de mis
+    personajes, su token."""
+    foto = ruta_que_existe(g.get("token"))
+    if not foto and g.get("oc"):
+        otro = next((x for x in personajes if clave_de(x) == g.get("oc")), None)
+        foto = ruta_que_existe((otro or {}).get("token"))
+    return foto
+
+
+def enlace_de_ficha(g, personajes):
+    clave = str(g.get("oc") or "").strip()
+    if clave and any(clave_de(x) == clave for x in personajes):
+        return URL + "%s/%s.html" % (clave, clave)
+    return ""
+
+
+def arbol_familiar(p, c, gente, personajes):
+    """Las filas del árbol, de los más viejos a los más jóvenes; en la
+    suya, el personaje en medio, sus hermanos y primos a un lado y su
+    pareja al otro. Cada uno lleva a su ficha de abajo (o a la suya, si es
+    de mis personajes). Sin parentescos, nada."""
+    por_gen = {}
+    for i, g in enumerate(gente):
+        gen = generacion_de(g.get("parentesco") or "")
+        if gen is not None and str(g.get("nombre") or "").strip():
+            por_gen.setdefault(gen, []).append((i, g))
+    if not por_gen:
+        return ""
+
+    def nodo(i, g):
+        nombre = str(g.get("nombre")).strip()
+        estado = str(g.get("estado") or "").strip()
+        muerto = llano(estado).startswith(("falleci", "muert", "difunt"))
+        destino = enlace_de_ficha(g, personajes) or "#oc-npc-%d" % i
+        return ('<li class="oc-arbol-persona%s"><a class="oc-arbol-enlace" href="%s">%s'
+                '<span class="oc-arbol-nombre">%s%s</span><span class="oc-arbol-parentesco">%s%s</span></a></li>'
+                % (" es-fallecida" if muerto else "", e(destino),
+                   redondel(foto_de_persona(g, personajes), nombre, "oc-arbol-foto"), e(nombre),
+                   ' <span aria-hidden="true">†</span>' if muerto else "",
+                   e(str(g.get("parentesco") or "").strip()),
+                   (" · " + e(estado.lower())) if estado else ""))
+
+    filas = []
+    for gen in range(min(min(por_gen), 0), max(max(por_gen), 0) + 1):
+        cosas = por_gen.get(gen, [])
+        if gen == 0:
+            yo = str(p.get("nombre") or c)
+            centro = ('<li class="oc-arbol-persona es-yo"><span class="oc-arbol-enlace">%s'
+                      '<span class="oc-arbol-nombre">%s</span><span class="oc-arbol-parentesco">este personaje</span>'
+                      '</span></li>' % (redondel(ruta_que_existe(p.get("token")), yo, "oc-arbol-foto"), e(yo)))
+            parejas = [nodo(i, g) for i, g in cosas if es_pareja(g.get("parentesco") or "")]
+            otros = [nodo(i, g) for i, g in cosas if not es_pareja(g.get("parentesco") or "")]
+            dentro = "".join(otros) + centro + "".join(parejas)
+        elif not cosas:
+            continue
+        else:
+            dentro = "".join(nodo(i, g) for i, g in cosas)
+        filas.append('<li class="oc-arbol-fila"><h4 class="oc-arbol-generacion">%s</h4>'
+                     '<ul class="oc-arbol-personas">%s</ul></li>' % (NOMBRES_DE_GENERACION.get(gen, ""), dentro))
+    return recuadro("arbol-familiar.txt", '<ol class="oc-arbol">%s</ol>' % "".join(filas), "es-ancha", "🌳", 3)
+
+
+def apartado_gente(gente, c, personajes, avisos, p=None):
     if not gente:
         return ""
-    filas = []
-    for g in gente:
-        nombre = str(g.get("nombre") or "").strip()
-        if not nombre:
+    arbol = arbol_familiar(p or {}, c, gente, personajes)
+    # Por vínculo, en el orden en que salen (sin vínculo, al final).
+    grupos, orden = {}, []
+    for i, g in enumerate(gente):
+        if not str(g.get("nombre") or "").strip():
             continue
-        foto = ruta_que_existe(g.get("token"))
-        que = str(g.get("que") or "").strip()
-        relacion = str(g.get("relacion") or "").strip()
-        notas = markdown(g.get("notas"), c, personajes, avisos)
-        filas.append(
-            '<li class="oc-npc">%s<div class="oc-npc-texto"><h3 class="oc-npc-nombre">%s</h3>%s%s%s</div></li>'
-            % (redondel(foto, nombre, "oc-npc-foto"), e(nombre),
-               ('<p class="oc-npc-que">%s</p>' % e(que)) if que else "",
-               ('<p class="oc-npc-relacion">%s</p>' % e(relacion)) if relacion else "",
-               ('<div class="oc-texto oc-npc-notas">%s</div>' % notas) if notas else ""))
-    return '<ul class="oc-npcs">%s</ul>' % "".join(filas) if filas else ""
+        vinculo = str(g.get("vinculo") or "").strip()
+        if llano(vinculo) not in grupos:
+            grupos[llano(vinculo)] = (vinculo, [])
+            orden.append(llano(vinculo))
+        grupos[llano(vinculo)][1].append((i, g))
+    if "" in orden:
+        orden.remove("")
+        orden.append("")
+    con_grupos = any(orden)
+    bloques = []
+    for clave in orden:
+        vinculo, cosas = grupos[clave]
+        filas = []
+        for i, g in cosas:
+            nombre = str(g.get("nombre")).strip()
+            que = str(g.get("que") or "").strip()
+            relacion = str(g.get("relacion") or "").strip()
+            parentesco = str(g.get("parentesco") or "").strip()
+            estado = str(g.get("estado") or "").strip()
+            notas = markdown(g.get("notas"), c, personajes, avisos)
+            destino = enlace_de_ficha(g, personajes)
+            nombre_html = ('<a href="%s">%s</a>' % (e(destino), e(nombre))) if destino else e(nombre)
+            chapas = "".join('<span class="oc-npc-chapa%s">%s</span>' % (clase, e(x)) for x, clase in (
+                (parentesco, ""), (estado, " es-estado")) if x)
+            filas.append(
+                '<li class="oc-npc" id="oc-npc-%d">%s<div class="oc-npc-texto"><h%d class="oc-npc-nombre">%s</h%d>'
+                '%s%s%s%s</div></li>'
+                % (i, redondel(foto_de_persona(g, personajes), nombre, "oc-npc-foto"), 4 if con_grupos else 3,
+                   nombre_html, 4 if con_grupos else 3,
+                   ('<p class="oc-npc-chapas">%s</p>' % chapas) if chapas else "",
+                   ('<p class="oc-npc-que">%s</p>' % e(que)) if que else "",
+                   ('<p class="oc-npc-relacion">%s</p>' % e(relacion)) if relacion else "",
+                   ('<div class="oc-texto oc-npc-notas">%s</div>' % notas) if notas else ""))
+        lista = '<ul class="oc-npcs">%s</ul>' % "".join(filas)
+        if con_grupos:
+            bloques.append('<div class="oc-npcs-grupo es-%s"><h3 class="oc-npcs-vinculo">%s</h3>%s</div>'
+                           % (nombre_archivo(vinculo or "otros", "otros"), e((vinculo or "otros").lower()), lista))
+        else:
+            bloques.append(lista)
+    return arbol + "".join(bloques)
+
+
+# =========================================
+# LAS FRASES, LA MÚSICA Y LA INSPIRACIÓN
+# =========================================
+
+def apartado_frases(p):
+    """💬 Sus frases, una por línea; detrás de un «|», cuándo la dijo."""
+    filas = []
+    for linea in lineas_de(p.get("frases")):
+        texto, _, contexto = linea.partition("|")
+        texto, contexto = texto.strip().strip("«»\"“”"), contexto.strip()
+        if texto:
+            filas.append('<li class="oc-frase"><figure><blockquote><p>«%s»</p></blockquote>%s</figure></li>'
+                         % (e(texto), ('<figcaption>— %s</figcaption>' % e(contexto)) if contexto else ""))
+    return '<ul class="oc-frases">%s</ul>' % "".join(filas) if filas else ""
+
+
+SPOTIFY = re.compile(r"(?:https?://open\.spotify\.com/(?:intl-[a-z-]+/)?(?:embed/)?|spotify:)"
+                     r"(track|album|playlist|artist|episode|show)[/:]([A-Za-z0-9]+)")
+QUE_ES_DE_SPOTIFY = {"track": ("🎵", "canción"), "album": ("💿", "disco"), "playlist": ("📼", "lista"),
+                     "artist": ("🎤", "artista"), "episode": ("🎙️", "episodio"), "show": ("🎙️", "podcast")}
+
+
+def canciones_de(p):
+    """Su música, una por línea: «Título | enlace de Spotify | nota» (en
+    cualquier orden; solo hace falta el enlace). -> [(tipo, id, título,
+    nota)]. El editor rellena el título si falta."""
+    salida = []
+    for linea in lineas_de(p.get("musica")):
+        trozos = [x.strip() for x in linea.split("|")]
+        m = next((SPOTIFY.search(x) for x in trozos if SPOTIFY.search(x)), None)
+        if not m:
+            continue
+        resto = [x for x in trozos if x and not SPOTIFY.search(x)]
+        salida.append((m.group(1), m.group(2), resto[0] if resto else "", resto[1] if len(resto) > 1 else ""))
+    return salida
+
+
+def paleta_de(p):
+    """Sus colores, uno por línea: «#5b0a1a Sangre seca»."""
+    salida = []
+    for linea in lineas_de(p.get("paleta")):
+        m = re.match(r"^(#[0-9a-fA-F]{6}|#[0-9a-fA-F]{3})\b\s*(.*)$", linea)
+        if m:
+            salida.append((m.group(1).lower(), m.group(2).strip()))
+    return salida
+
+
+def apartado_inspiracion(p, moodboard, nombre):
+    """🎨 Su música (de Spotify), su paleta de colores y su moodboard."""
+    cajas = []
+    canciones = canciones_de(p)
+    if canciones:
+        filas = []
+        for tipo, ident, titulo, nota in canciones:
+            emoji, que = QUE_ES_DE_SPOTIFY[tipo]
+            url = "https://open.spotify.com/%s/%s" % (tipo, ident)
+            filas.append(
+                '<li class="oc-cancion" data-oc-spotify="%s/%s" data-oc-titulo="%s">'
+                '<span class="oc-cancion-icono" aria-hidden="true">%s</span><div class="oc-cancion-texto">'
+                '<p class="oc-cancion-titulo">%s</p>%s<p class="oc-cancion-botones"><a class="oc-cancion-enlace" href="%s"'
+                ' target="_blank" rel="noopener">abrir en Spotify<span class="visually-hidden"> (se abre en otra'
+                ' pestaña)</span></a></p></div></li>'
+                % (tipo, ident, e(titulo or que), emoji, e(titulo or ("una " if que in ("canción", "lista") else "un ")
+                                                          + que + " de Spotify"),
+                   ('<p class="oc-cancion-nota">%s</p>' % e(nota)) if nota else "", e(url)))
+        cajas.append(recuadro("musica.m3u", '<ul class="oc-musica">%s</ul><p class="oc-hoja-nota">El reproductor'
+                                            ' es de Spotify: solo se carga si lo pides.</p>' % "".join(filas),
+                              "es-ancha", "🎧", 3))
+    colores = paleta_de(p)
+    if colores:
+        cajas.append(recuadro("paleta.pal", '<ul class="oc-paleta">%s</ul>' % "".join(
+            '<li class="oc-color"><span class="oc-color-muestra" style="background-color: %s" aria-hidden="true">'
+            '</span><span class="oc-color-nombre">%s</span><span class="oc-color-hex">%s</span></li>'
+            % (hexa, e(nombre_color or hexa), hexa) for hexa, nombre_color in colores), "es-ancha", "🎨", 3))
+    piezas = []
+    for cosa in moodboard:
+        ruta = ruta_que_existe(cosa.get("imagen"))
+        texto = str(cosa.get("texto") or "").strip()
+        if ruta:
+            alt = str(cosa.get("alt") or "Imagen del moodboard de %s" % nombre).strip()
+            piezas.append('<li class="oc-mood es-imagen"><button class="lightbox-trigger" type="button"'
+                          ' aria-label="Ver en grande: %s"><img src="%s" alt="%s" loading="lazy" decoding="async">'
+                          '</button></li>' % (e(alt), e(ruta), e(alt)))
+        elif texto:
+            piezas.append('<li class="oc-mood es-texto"><p>%s</p></li>' % e(texto))
+    if piezas:
+        cajas.append(recuadro("moodboard.jpg", '<ul class="oc-moodboard">%s</ul>' % "".join(piezas), "es-ancha", "📌", 3))
+    return '<div class="oc-hoja">%s</div>' % "".join(cajas) if cajas else ""
 
 
 def apartado_imagenes(fotos, nombre):
@@ -1183,7 +1479,7 @@ def categoria_de_objeto(nombre, entrada):
     return CATEGORIAS_DE_OBJETO[-1][0]
 
 
-def tabla_de_ataques(ataques, descripciones, c, personajes, avisos):
+def tabla_de_ataques(ataques, descripciones, c, personajes, avisos, con_mod=True):
     """Los ataques en una tabla: el nombre, el modificador (se tira:
     1d20+4), el daño (en su caja, que se tira) y lo demás («extra»: una
     salvación, un alcance…). Cada línea es «Arco corto: +4, 1d6+2
@@ -1195,9 +1491,10 @@ def tabla_de_ataques(ataques, descripciones, c, personajes, avisos):
         nombre, mod, dano, extra = partes_de_ataque(a)
         entrada = buscar_descripcion(descripciones, nombre)
         id_desc = "oc-ataque-%d" % n
-        filas.append('<tr><th scope="row" class="oc-ataque-nombre"%s>%s</th><td class="oc-ataque-mod">%s</td>'
+        filas.append('<tr><th scope="row" class="oc-ataque-nombre"%s>%s</th>%s'
                      '<td class="oc-ataque-dano">%s</td><td class="oc-ataque-extra">%s</td></tr>'
-                     % ((' data-oc-desc="%s"' % id_desc) if entrada else "", e(nombre), mod or "—",
+                     % ((' data-oc-desc="%s"' % id_desc) if entrada else "", e(nombre),
+                        ('<td class="oc-ataque-mod">%s</td>' % (mod or "—")) if con_mod else "",
                         dano or "—", e(extra) if extra else "—"))
         if entrada:
             dentro = ""
@@ -1209,9 +1506,11 @@ def tabla_de_ataques(ataques, descripciones, c, personajes, avisos):
                     markdown(entrada["cuerpo"], c, personajes, avisos), nombre.lower())
             filas.append('<tr class="oc-ataque-desc" id="%s"><td colspan="4"><div class="oc-desplegable-dentro">%s'
                          '</div></td></tr>' % (id_desc, dentro))
-    return ('<div class="oc-tabla-caja"><table class="oc-ataques"><thead><tr><th scope="col">ataque</th>'
-            '<th scope="col">modificador</th><th scope="col">daño</th><th scope="col">extra</th></tr></thead>'
-            '<tbody>%s</tbody></table></div>' % "".join(filas))
+    return ('<div class="oc-tabla-caja"><table class="oc-ataques"><thead><tr><th scope="col">%s</th>%s'
+            '<th scope="col">daño</th><th scope="col">extra</th></tr></thead>'
+            '<tbody>%s</tbody></table></div>' % ("ataque" if con_mod else "arma",
+                                                 '<th scope="col">modificador</th>' if con_mod else "",
+                                                 "".join(filas)))
 
 
 def apartado_ficha(p, c, personajes, avisos):
@@ -1438,25 +1737,7 @@ def apartado_ficha(p, c, personajes, avisos):
         grupos["competencias"].append(recuadro("otras.txt", etiquetas(otras), "", "📌"))
 
     # 📜 TRASFONDO: quién es, cómo es y qué le mueve.
-    quien = [(texto, str(p.get(clave) or "").strip()) for clave, texto in (
-        ("trasfondo", "Trasfondo"), ("alineamiento", "Alineamiento"), ("fe", "Fe"))]
-    quien = [(a, b) for a, b in quien if b]
-    if quien:
-        grupos["trasfondo"].append(recuadro("origen.txt", pares(quien), "", "🏛️"))
-    aspecto = [(texto, str(p.get(clave) or "").strip()) for clave, texto in (
-        ("edad", "Edad"), ("altura", "Altura"), ("peso", "Peso"), ("ojos", "Ojos"), ("pelo", "Pelo"),
-        ("piel", "Piel"))]
-    aspecto = [(a, b) for a, b in aspecto if b]
-    if aspecto:
-        grupos["trasfondo"].append(recuadro("aspecto.txt", pares(aspecto), "", "🪞"))
-    alma = []
-    for clave, texto in (("personalidad", "Rasgos de personalidad"), ("ideales", "Ideales"),
-                         ("vinculos", "Vínculos"), ("defectos", "Defectos")):
-        valor = markdown(p.get(clave), c, personajes, avisos)
-        if valor:
-            alma.append('<h5 class="oc-hoja-subtitulo">%s</h5><div class="oc-texto">%s</div>' % (texto, valor))
-    if alma:
-        grupos["trasfondo"].append(recuadro("personalidad.txt", "".join(alma), "es-ancha", "💭"))
+    grupos["trasfondo"].extend(recuadros_de_trasfondo(p, c, personajes, avisos))
     # ⚡ COMBOS: los que estén escritos, cada uno en su ventanita con sus
     # pasos (lo que gasta cada uno en su chapita de color), y una ventanita
     # «turno.txt» con todo lo que se puede hacer con la acción, la acción
@@ -1514,6 +1795,32 @@ def apartado_ficha(p, c, personajes, avisos):
     return [(g, emoji, texto, "".join(grupos[g])) for g, emoji, texto in SUBPESTANAS_DE_FICHA if grupos[g]]
 
 
+def recuadros_de_trasfondo(p, c, personajes, avisos):
+    """📜 TRASFONDO (para todos los sistemas): quién es, cómo es y qué le
+    mueve."""
+    salida = []
+    quien = [(texto, str(p.get(clave) or "").strip()) for clave, texto in (
+        ("trasfondo", "Trasfondo"), ("alineamiento", "Alineamiento"), ("fe", "Fe"))]
+    quien = [(a, b) for a, b in quien if b]
+    if quien:
+        salida.append(recuadro("origen.txt", pares(quien), "", "🏛️"))
+    aspecto = [(texto, str(p.get(clave) or "").strip()) for clave, texto in (
+        ("edad", "Edad"), ("altura", "Altura"), ("peso", "Peso"), ("ojos", "Ojos"), ("pelo", "Pelo"),
+        ("piel", "Piel"))]
+    aspecto = [(a, b) for a, b in aspecto if b]
+    if aspecto:
+        salida.append(recuadro("aspecto.txt", pares(aspecto), "", "🪞"))
+    alma = []
+    for clave, texto in (("personalidad", "Rasgos de personalidad"), ("ideales", "Ideales"),
+                         ("vinculos", "Vínculos"), ("defectos", "Defectos")):
+        valor = markdown(p.get(clave), c, personajes, avisos)
+        if valor:
+            alma.append('<h5 class="oc-hoja-subtitulo">%s</h5><div class="oc-texto">%s</div>' % (texto, valor))
+    if alma:
+        salida.append(recuadro("personalidad.txt", "".join(alma), "es-ancha", "💭"))
+    return salida
+
+
 def modificador_num(valor):
     return (valor - 10) // 2
 
@@ -1529,6 +1836,270 @@ def fila_de_tirada(nombre, total, nivel, corto="", que=None):
             '<span><span class="oc-tirada-bono">%s</span> %s%s<span class="visually-hidden">%s</span></span></li>'
             % (marca, prueba(total, que or nombre), e(nombre),
                (' <span class="oc-tirada-de">(%s)</span>' % corto) if corto else "", dicho))
+
+
+# =========================================
+# LA FICHA DE OTROS SISTEMAS (Vampiro V5, Fate, Cyberpunk RED, la genérica)
+# =========================================
+# Un personaje que no es de D&D (su campo «sistema»: ver
+# herramientas/0-comun/sistemas_rol.py, que explica los campos de la hoja
+# genérica y cómo se tira en cada juego) lleva en su pestaña «ficha» estas
+# subpestañas en vez de las de D&D. Solo salen las que tienen algo.
+
+def subpestanas_de_otro(sistema):
+    emoji, texto, _ = sistemas_rol.SISTEMAS[sistema]["poderes"]
+    return (("hoja", "📊", "hoja"), ("habilidades", "🎯", "habilidades"), ("armas", "⚔️", "armas"),
+            ("poderes", emoji, texto), ("equipo", "🎒", "equipo"), ("trasfondo", "📜", "trasfondo"))
+
+
+def puntos(n, maximo=5):
+    """●●●○○ para la vista y «3 de 5» para el lector."""
+    n = max(0, n)
+    tope = max(maximo, n)
+    return ('<span class="oc-puntos" aria-hidden="true">%s<span class="oc-puntos-vacios">%s</span></span>'
+            '<span class="visually-hidden">%d de %d</span>' % ("●" * n, "○" * (tope - n), n, tope))
+
+
+def a_la_reserva(dentro, n, que, tipo):
+    """Vampiro V5: un atributo o una habilidad que, al pulsarlo, va a la
+    reserva de la ventana de dados (personajes.js)."""
+    return ('<span class="oc-dado" data-dados="v5:%d" data-que="%s" data-reserva="%s" data-valor="%d">%s</span>'
+            % (n, e(que), tipo, n, dentro))
+
+
+def formula_de_sistema(sistema, total, base=""):
+    """Lo que se tira con «total» (el atributo, la habilidad o los dos
+    sumados) en cada sistema; None si no se tira."""
+    if sistema == "fate":
+        return "4dF%+d" % total if total else "4dF"
+    if sistema == "cpred":
+        return "cp:%d" % total
+    if sistema == "generico" and re.match(r"^\s*\d*d\d+\s*$", base or ""):
+        return base.strip() + ("%+d" % total if total else "")
+    return None
+
+
+def abreviaturas(nombres):
+    """Tres letras para cada atributo, sin repetir (FUE, DES, RES, RSL…)."""
+    salida, usadas = {}, set()
+    for nombre in nombres:
+        limpio = llano(nombre).replace(" ", "")
+        corto = limpio[:3]
+        if corto in usadas:
+            consonantes = [x for x in limpio[1:] if x not in "aeiou"]
+            corto = limpio[:1] + "".join(consonantes[:2])
+        usadas.add(corto)
+        salida[nombre] = corto.upper()
+    return salida
+
+
+def leer_hoja(p):
+    """Lo de la hoja genérica, ya leído: los atributos por su nombre (sin
+    tildes) y por su abreviatura, para sumarlos a las habilidades."""
+    atributos = sistemas_rol.bloques(p.get("atributos"))
+    valores = {}
+    for _, cosas in atributos:
+        for nombre, valor in cosas:
+            n, _ = sistemas_rol.valor_y_nota(valor)
+            if n is not None:
+                valores[llano(nombre)] = n
+    largos = sistemas_rol.SISTEMAS[sistemas_rol.sistema_de(p)].get("largos", {})
+    for corto, largo in largos.items():
+        if llano(corto) in valores:
+            valores.setdefault(llano(largo), valores[llano(corto)])
+    return atributos, valores
+
+
+def valor_para_ver(sistema, n, maximo=5):
+    if sistema == "vtm5":
+        return puntos(n, maximo)
+    if sistema == "fate":
+        signo, nombre = sistemas_rol.escalera(n)
+        return '%s <span class="oc-escalera">%s</span>' % (signo, e(nombre))
+    return str(n)
+
+
+def recursos_de(p):
+    return [(nombre, valor) for _, cosas in sistemas_rol.bloques(p.get("recursos")) for nombre, valor in cosas]
+
+
+def casillas_de_recurso(nombre, marcadas, total, tres):
+    """Las casillas de un recurso («Salud: 1/7»): las primeras, marcadas.
+    Con «tres», cada una pasa por libre, superficial y agravado."""
+    return ('<span class="oc-casillas" data-oc-casillas="%s"%s>%s</span>'
+            % (e(nombre.lower()), ' data-oc-estados="3"' if tres else "",
+               "".join('<span class="oc-casilla%s"></span>' % (" es-marcada" if i < marcadas else "")
+                       for i in range(total))))
+
+
+def hoja_de_otro_sistema(p, c, personajes, avisos):
+    """Las subpestañas de la ficha de un personaje que no es de D&D, como
+    las de apartado_ficha: [(id, emoji, texto, html)]."""
+    sistema = sistemas_rol.sistema_de(p)
+    datos_sis = sistemas_rol.SISTEMAS[sistema]
+    maximo = datos_sis.get("maximo", 5)
+    grupos = {g: [] for g, _, _ in subpestanas_de_otro(sistema)}
+    base = str(p.get("tirada") or "").strip()
+    atributos, valor_de_atributo = leer_hoja(p)
+    largos = datos_sis.get("largos", {})
+
+    # 📊 HOJA: lo que le define, lo que se gasta y los atributos.
+    conceptos = [(n, v) for _, cosas in sistemas_rol.bloques(p.get("conceptos")) for n, v in cosas if v]
+    if conceptos:
+        grupos["hoja"].append(recuadro("conceptos.txt" if sistema != "fate" else "aspectos.txt",
+                                       pares(conceptos), "es-ancha", "🏷️"))
+    if sistema == "vtm5" and atributos:
+        # Vampiro: los tres grupos en columnas, con sus puntos (como en la
+        # hoja de papel).
+        grupos["hoja"].append(recuadro("atributos.dat", columnas_de_puntos(atributos, maximo, "atributo"),
+                                       "es-ancha", "📊"))
+    for grupo, cosas in atributos if sistema != "vtm5" else ():
+        cajas = []
+        for nombre, valor in cosas:
+            n, nota = sistemas_rol.valor_y_nota(valor)
+            largo = largos.get(nombre, "")
+            formula = formula_de_sistema(sistema, n, base) if n is not None else None
+            cajas.append((largo.lower() or nombre, str(n) if n is not None else nota,
+                          nombre if largo else "", None,
+                          (formula, largo.lower() or nombre.lower(), "valor") if formula else None))
+        grupos["hoja"].append(recuadro((llano(grupo).replace(" ", "-") or "atributos") + ".dat",
+                                       numeros(cajas, "es-de-cinco" if len(cajas) >= 8 else ""), "es-ancha", "📊"))
+
+    filas = []
+    de_tres = datos_sis.get("de_tres", ())
+    for nombre, valor in recursos_de(p):
+        # Cada uno en su fila: el nombre y, al lado, sus casillas (que se
+        # marcan jugando), su número o su texto.
+        m = sistemas_rol.marcador(valor)
+        if m and m[0] is not None and m[1] <= 12:
+            dentro = casillas_de_recurso(nombre, m[0], m[1], llano(nombre) in de_tres)
+        elif m:
+            dentro = '<span class="oc-recurso-numero">%s</span>' % (("%d / %d" % m) if m[0] is not None else m[1])
+        else:
+            dentro = '<span class="oc-recurso-texto">%s</span>' % e(valor or "—")
+        filas.append('<li class="oc-recurso"><span class="oc-recurso-nombre">%s</span>%s</li>' % (e(nombre), dentro))
+    if filas:
+        grupos["hoja"].append(recuadro("recursos.dat", '<ul class="oc-recursos">%s</ul>' % "".join(filas),
+                                       "es-ancha", "❤️"))
+    # 🎯 HABILIDADES
+    pericias = sistemas_rol.bloques(p.get("pericias"))
+    if sistema == "fate":
+        # La pirámide: de la más alta a la más baja; las que están a 0, en
+        # pequeño al final.
+        por_valor = {}
+        for _, cosas in pericias:
+            for nombre, valor in cosas:
+                n, _ = sistemas_rol.valor_y_nota(valor)
+                por_valor.setdefault(n or 0, []).append(nombre)
+        filas = []
+        for n in sorted(por_valor, reverse=True):
+            signo, escalon = sistemas_rol.escalera(n)
+            botones_html = "".join(
+                '<li>%s</li>' % dado(e(nombre), formula_de_sistema("fate", n), nombre.lower())
+                for nombre in por_valor[n])
+            filas.append('<li class="oc-piramide-fila%s"><span class="oc-piramide-escalon">%s <span>%s</span></span>'
+                         '<ul class="oc-piramide-cosas">%s</ul></li>'
+                         % (" es-mediocre" if n == 0 else "", e(escalon), signo, botones_html))
+        if filas:
+            grupos["habilidades"].append(recuadro("piramide.fate", '<ul class="oc-piramide">%s</ul>' % "".join(filas),
+                                                  "es-ancha", "🔺"))
+    elif sistema == "vtm5":
+        if pericias:
+            grupos["habilidades"].append(recuadro("habilidades.lst", columnas_de_puntos(pericias, maximo, "habilidad"),
+                                                  "es-ancha", "🎯"))
+    else:
+        for grupo, cosas in pericias:
+            items = []
+            for nombre, valor in cosas:
+                n, nota = sistemas_rol.valor_y_nota(valor)
+                solo, atributo = sistemas_rol.atributo_de(nombre)
+                extra = ' <span class="oc-tirada-nota">(%s)</span>' % e(nota) if nota else ""
+                suma = valor_de_atributo.get(llano(atributo)) if atributo else None
+                total = (n or 0) + (suma or 0)
+                formula = formula_de_sistema(sistema, total, base)
+                cifra = con_signo(total) if sistema == "cpred" or base else str(n if n is not None else "—")
+                bono = dado(cifra, formula, solo.lower()) if formula else cifra
+                de = ""
+                if atributo:
+                    de = ' <span class="oc-tirada-de">(%s%s)</span>' % (
+                        e(atributo), (" %d + %d" % (suma, n or 0)) if suma is not None else "")
+                items.append('<li class="oc-tirada%s"><span class="oc-marca%s" aria-hidden="true"></span>'
+                             '<span><span class="oc-tirada-bono">%s</span> %s%s%s</span></li>'
+                             % (" es-cero" if not n else "", " es-llena" if n else "", bono, e(solo), de, extra))
+            if items:
+                grupos["habilidades"].append(recuadro(
+                    (llano(grupo).replace(" ", "-") or "habilidades") + ".lst",
+                    '<ul class="oc-hoja-tiradas%s">%s</ul>' % (" es-dos-columnas" if len(items) > 8 else "",
+                                                               "".join(items)),
+                    "es-ancha" if len(pericias) == 1 or len(items) > 8 else "", "🎯"))
+
+    # ⚔️ ARMAS
+    armas = lineas_de(p.get("armas"))
+    if armas:
+        grupos["armas"].append(recuadro("armas.dat", tabla_de_ataques(armas, {}, c, personajes, avisos, False),
+                                        "es-ancha", "⚔️"))
+
+    # LOS PODERES: cada «## Apartado», en su ventanita.
+    emoji, _, archivo = datos_sis["poderes"]
+    for titulo, texto in apartados_de(p.get("poderes")):
+        html_p = con_dados(markdown(texto, c, personajes, avisos), (titulo or "poder").lower())
+        if html_p:
+            grupos["poderes"].append(recuadro((nombre_archivo(titulo, "") + ".txt") if titulo else archivo,
+                                              '<div class="oc-texto">%s</div>' % html_p, "es-ancha", emoji))
+
+    # 🎒 EQUIPO
+    equipo = lineas_de(p.get("equipo"))
+    dinero = str(p.get("dinero") or "").strip()
+    if equipo or dinero:
+        lista = "".join('<li><span class="oc-objeto-emoji" aria-hidden="true">%s</span>%s</li>'
+                        % (emoji_de_objeto(x), e(x)) for x in equipo)
+        grupos["equipo"].append(recuadro("equipo.dat", ('<ul class="oc-lista-maquina">%s</ul>' % lista if lista else "")
+                                         + ('<p class="oc-hoja-nota">Dinero: %s</p>' % e(dinero) if dinero else ""),
+                                         "es-ancha", "🎒"))
+
+    grupos["trasfondo"].extend(recuadros_de_trasfondo(p, c, personajes, avisos))
+    return [(g, em, tx, "".join(grupos[g])) for g, em, tx in subpestanas_de_otro(sistema) if grupos[g]]
+
+
+def columnas_de_puntos(bloques, maximo, tipo):
+    """Vampiro V5: los atributos o las habilidades, cada grupo en su
+    columna (con su título), y cada uno con sus puntos, que al pulsarlos
+    van a la reserva de los dados."""
+    columnas = []
+    for grupo, cosas in bloques:
+        filas = []
+        for nombre, valor in cosas:
+            n, nota = sistemas_rol.valor_y_nota(valor)
+            n = n or 0
+            filas.append('<li class="oc-puntuada%s"><span class="oc-puntuada-nombre">%s%s</span>%s</li>'
+                         % (" es-cero" if not n else "", e(nombre),
+                            ' <span class="oc-tirada-nota">(%s)</span>' % e(nota) if nota else "",
+                            a_la_reserva(puntos(n, maximo), n, nombre.lower(), tipo)))
+        columnas.append('<div class="oc-columna">%s<ul class="oc-puntuadas">%s</ul></div>'
+                        % ('<h5 class="oc-hoja-subtitulo">%s</h5>' % e(grupo) if grupo else "", "".join(filas)))
+    return '<div class="oc-columnas">%s</div>' % "".join(columnas)
+
+
+def apartados_de(texto):
+    """«## Título» y lo de debajo -> [(título, texto)]; lo de antes del
+    primero, sin título."""
+    salida = [["", []]]
+    for linea in str(texto or "").split("\n"):
+        if re.match(r"^##\s", linea):
+            salida.append([linea[2:].strip(), []])
+        else:
+            salida[-1][1].append(linea)
+    return [(t, "\n".join(l).strip()) for t, l in salida if "\n".join(l).strip()]
+
+
+def hambre_de(p):
+    """Vampiro V5: lo marcado en el recurso «Hambre» (los dados de hambre)."""
+    clave = sistemas_rol.SISTEMAS[sistemas_rol.sistema_de(p)].get("hambre")
+    for nombre, valor in recursos_de(p) if clave else []:
+        if llano(nombre) == clave:
+            m = sistemas_rol.marcador(valor)
+            return (m[0] if m[0] is not None else m[1]) if m else 0
+    return None
 
 
 # =========================================
@@ -1673,10 +2244,13 @@ def pestanas(p, c, datos, personajes, avisos):
     que saltan a cada parte y se ven todas, una debajo de otra, con su
     título; con él (personajes.js), solo la elegida."""
     nombre = str(p.get("nombre") or c)
-    partes_ficha = apartado_ficha(p, c, personajes, avisos)
+    partes_ficha = (apartado_ficha(p, c, personajes, avisos) if sistemas_rol.es_dnd(p)
+                    else hoja_de_otro_sistema(p, c, personajes, avisos))
     contenido = {
         "historia": markdown(p.get("historia"), c, personajes, avisos),
-        "gente": apartado_gente(grupos_de(datos, "gente", c), c, personajes, avisos),
+        "gente": apartado_gente(grupos_de(datos, "gente", c), c, personajes, avisos, p),
+        "frases": apartado_frases(p),
+        "inspiracion": apartado_inspiracion(p, grupos_de(datos, "moodboard", c), nombre),
         "criaturas": apartado_criaturas(grupos_de(datos, "criaturas", c), c, personajes, avisos),
         "imagenes": apartado_imagenes(grupos_de(datos, "imagenes", c), nombre),
         "extra": markdown(p.get("extra"), c, personajes, avisos),
@@ -1693,8 +2267,8 @@ def pestanas(p, c, datos, personajes, avisos):
             '                        <ul class="oc-menu-lista">']
     cajas = ['                    <div class="oc-partes" data-oc-partes>']
     for ident, emoji, texto in PESTANAS:
-        # Las criaturas solo salen si tiene alguna.
-        if ident == "criaturas" and not contenido["criaturas"]:
+        # Las criaturas, las frases y la inspiración solo salen si tiene algo.
+        if ident in PESTANAS_SI_HAY and not contenido[ident]:
             continue
         cabeza = ('<span class="oc-menu-emoji" aria-hidden="true">%s</span><span class="oc-menu-texto">%s</span>'
                   % (emoji, texto))
@@ -1719,6 +2293,8 @@ def pestanas(p, c, datos, personajes, avisos):
                     % (ident, ident, cabeza))
         dentro = contenido.get(ident, "")
         clase = "oc-texto" if ident in ("historia", "extra") else "oc-lista"
+        if ident == "inspiracion":
+            clase = "oc-inspiracion"
         cajas.append(
             '                        <div class="oc-apartado" id="oc-%s" data-oc-parte>\n'
             '                            <h2 class="oc-apartado-titulo">%s</h2>\n'

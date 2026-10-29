@@ -388,8 +388,9 @@ function pintarFichaWeb(sec, parte, fichas, i) {
     // ["pergaminos"]}, lo de un pergamino en el botín) salen y se esconden
     // según lo elegido; lo escrito en ellas se queda.
     const condicionadas = [];
+    const cumple = (si) => Object.entries(si).every(([k, valores]) => valores.includes(String(f[k] || "")));
     const mirarCondiciones = () => condicionadas.forEach(([sitio, c]) => {
-        sitio.hidden = !Object.entries(c.si).every(([k, valores]) => valores.includes(String(f[k] || "")));
+        sitio.hidden = !cumple(c.si);
     });
     // POR PESTAÑAS (parte.pestanas): las casillas de «siempre» arriba y,
     // debajo, una pestaña por cosa; solo se pintan las casillas de la
@@ -397,19 +398,22 @@ function pintarFichaWeb(sec, parte, fichas, i) {
     let campos = parte.campos;
     let panel = caja;
     let pestana = null;
-    if (parte.pestanas && parte.pestanas.length) {
+    // Las pestañas que solo valen para unas fichas (p.si: las de D&D, solo
+    // con D&D; la «hoja», con los demás sistemas).
+    const pestanas = (parte.pestanas || []).filter((p) => !p.si || cumple(p.si));
+    if (pestanas.length) {
         const siempre = parte.siempre || [];
         const repartidas = new Set(parte.pestanas.flatMap((p) => p.campos || []).concat(siempre));
-        const ids = parte.pestanas.map((p) => p.id);
+        const ids = pestanas.map((p) => p.id);
         const activa = ids.includes(estadoFichas.pestanas[parte.id]) ? estadoFichas.pestanas[parte.id] : ids[0];
-        pestana = parte.pestanas.find((p) => p.id === activa);
+        pestana = pestanas.find((p) => p.id === activa);
         const suyas = new Set(pestana.campos || []);
-        parte.campos.filter((c) => siempre.includes(c.clave))
+        parte.campos.filter((c) => siempre.includes(c.clave) && (!c.si || cumple(c.si)))
             .forEach((c) => casillaDeFichaWeb(caja, f, c, "f-" + parte.id + "-" + i, parte, null));
         const lista = crearEditor("div", "ficha-pestanas");
         lista.setAttribute("role", "tablist");
         lista.setAttribute("aria-label", "Partes de la ficha de " + nombreDeFichaWeb(parte, f).nombre);
-        const botones = parte.pestanas.map((p, n) => {
+        const botones = pestanas.map((p, n) => {
             const b = crearEditor("button", "ficha-pestana");
             b.type = "button";
             b.id = "pestana-" + parte.id + "-" + p.id;
@@ -422,12 +426,12 @@ function pintarFichaWeb(sec, parte, fichas, i) {
             b.appendChild(emoji);
             b.appendChild(document.createTextNode(p.texto));
             const ir = (cual) => {
-                estadoFichas.pestanas[parte.id] = parte.pestanas[cual].id;
-                pintarPartesWeb("pestana-" + parte.id + "-" + parte.pestanas[cual].id);
+                estadoFichas.pestanas[parte.id] = pestanas[cual].id;
+                pintarPartesWeb("pestana-" + parte.id + "-" + pestanas[cual].id);
             };
             b.addEventListener("click", () => ir(n));
             b.addEventListener("keydown", (e) => {
-                const ultimo = parte.pestanas.length - 1;
+                const ultimo = pestanas.length - 1;
                 const a = { ArrowRight: n === ultimo ? 0 : n + 1, ArrowLeft: n === 0 ? ultimo : n - 1, Home: 0,
                     End: ultimo }[e.key];
                 if (a !== undefined) {
@@ -453,8 +457,21 @@ function pintarFichaWeb(sec, parte, fichas, i) {
             condicionadas.push([dentro, c]);
             panel.appendChild(dentro);
         }
+        const antes = c.clave === "sistema" ? String(f.sistema || "") : null;
         casillaDeFichaWeb(dentro, f, c, "f-" + parte.id + "-" + i, parte, () => {
         mirarCondiciones();
+        // Otro sistema de juego: lo vacío, con su plantilla, y las
+        // pestañas que le tocan (el foco se queda en el sistema).
+        if (antes !== null && String(f.sistema || "") !== antes) {
+            const plantilla = (parte.plantillas || {})[f.sistema] || {};
+            Object.entries(plantilla).forEach(([k, v]) => {
+                if (!String(f[k] || "").trim()) {
+                    f[k] = v;
+                }
+            });
+            pintarPartesWeb("f-" + parte.id + "-" + i + "-sistema");
+            return;
+        }
         leyenda.textContent = nombreDeFichaWeb(parte, f).nombre;
         const boton = document.getElementById("ficha-" + parte.id + "-" + i);
         if (boton) {
@@ -588,7 +605,7 @@ function casillaDeFichaWeb(dentro, f, c, base, parte, alCambiar) {
         return;
     }
     if (c.tipo === "elegir" && !c.libre) {
-        const lista = (c.obligatorio ? [] : [["", "— ninguno —"]]).concat(opciones);
+        const lista = (c.obligatorio ? [] : [["", c.ninguno || "— ninguno —"]]).concat(opciones);
         const el = campoWeb(dentro, id, nombre, { tipo: "elegir", opciones: lista, ayuda, opcional: !c.obligatorio });
         el.value = String(valor);
         if (el.value !== String(valor) && valor !== "") {
