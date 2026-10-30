@@ -4180,24 +4180,20 @@
   pegadas con celo (pestaña 📌 moodboard del editor; las imágenes, sitio
   «oc-moodboard»: imagenes/personajes/<clave>/moodboard/). Frases e
   inspiración solo salen en el menú si tienen algo.
-  EN EL MÓVIL (hasta 860 px de ancho) el menú de la ficha (historia,
-  ficha y sus partes, npcs…) es una TIRA fija justo debajo de la barra de
-  arriba del sitio, en una sola línea que se desplaza de lado; la parte
-  elegida, con la raya del color del personaje debajo. Al pulsar una, la
-  página baja hasta ella y la tira se mueve para que se vea la elegida.
-  Es fija y no «sticky» (sticky falla en algunos navegadores); su alto lo
-  mide personajes.js (--oc-tira-alto) para dejarle hueco arriba; y queda
-  por debajo del menú lateral del sitio, que la tapa al abrirse
-  (personajes.responsive.css; personajes.js: medirTira, verEnLaTira,
-  bajarHasta).
-  Y EN LA TIRA DEL MÓVIL: «ficha» abre una VENTANA con sus partes
-  (combate, habilidades…; la de ahora, marcada), y al lado de «ficha»
-  pone cuál se ve («ficha · conjuros»); al final, fijo, el botón 🪪, que
-  enseña o esconde la ficha del personaje de arriba (post-it, foto,
-  atributos) y el botón de los dados (se acuerda en ese navegador); el
-  botón de los dados flota abajo a la derecha, encima del de subir; y al
-  bajar la página la tira se esconde detrás de la barra del sitio, y
-  vuelve al subir (personajes.js: abrirVentanaFicha, ponerModo, alDesplazar).
+  EN EL MÓVIL (hasta 860 px de ancho), en vez del menú de la ficha, un
+  BOTÓN fijo justo debajo de la barra de arriba del sitio con la parte que
+  se ve («📖 historia ▾», «🎯 ficha · habilidades ▾»), que abre una
+  VENTANA con todas: 📇 resumen, historia, las de la ficha (en su grupo),
+  npcs… y «volver a mis personajes» (la de ahora, marcada; Esc o la ✕
+  la cierran). Al bajar la página el botón se esconde detrás de la barra
+  del sitio, y vuelve al subir. El RESUMEN (solo en el móvil) es la ficha
+  del personaje de arriba (post-it, foto, atributos): solo se ve al
+  elegirlo, y es lo primero al entrar sin nada en la dirección
+  (#oc-resumen). El botón de los DADOS flota abajo a la izquierda (el de
+  subir, a la derecha). Fijo y no «sticky» (sticky falla en algunos
+  navegadores); su alto lo mide personajes.js (--oc-tira-alto)
+  (personajes.responsive.css; personajes.js: el menú, abrirVentana,
+  alDesplazar; y en los dados, colocar).
   LAS ETIQUETAS («D&D 5e, jugando»): cada una es un botón del filtro del
   índice (el de los relatos, scripts/componentes/filtros.js); sin
   ninguna etiqueta en ningún personaje, el filtro no sale.
