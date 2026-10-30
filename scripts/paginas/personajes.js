@@ -47,7 +47,15 @@
         botonFicha.appendChild(flecha);
         botonFicha.setAttribute("aria-controls", sub.id);
         enlaceFicha.replaceWith(botonFicha);
+        // En el móvil, al lado de «ficha», cuál de sus partes se ve.
+        const deAhora = document.createElement("span");
+        deAhora.className = "oc-menu-actual";
+        botonFicha.insertBefore(deAhora, flecha);
         botonFicha.addEventListener("click", () => {
+            if (enMovil.matches) {
+                abrirVentanaFicha();
+                return;
+            }
             const abrir = botonFicha.getAttribute("aria-expanded") !== "true";
             abrirFicha(abrir);
             if (abrir && !(ficha && ficha.contains(actual()))) {
@@ -107,8 +115,10 @@
             }
         });
         if (botonFicha) {
+            const suya = enFicha && sub.querySelector('a[data-oc-ir="' + parte.id + '"] .oc-menu-texto');
+            botonFicha.querySelector(".oc-menu-actual").textContent = suya ? " · " + suya.textContent : "";
             botonFicha.classList.toggle("es-la-de-ahora", enFicha);
-            if (enFicha) {
+            if (enFicha && !enMovil.matches) {
                 abrirFicha(true);
             }
         }
@@ -139,23 +149,205 @@
         }
     }
 
+    // Lo que se desplaza de lado en la tira es la lista (el botón de la
+    // ficha del personaje se queda fijo al final).
+    const tiraLista = menu.querySelector(".oc-menu-lista");
+
     function verEnLaTira(x) {
-        if (!enMovil.matches || !x) {
+        if (!enMovil.matches || !x || !tiraLista) {
             return;
         }
         const r = x.getBoundingClientRect();
-        const m = menu.getBoundingClientRect();
+        const m = tiraLista.getBoundingClientRect();
         if (r.left < m.left + 8) {
-            menu.scrollLeft -= m.left - r.left + 24;
+            tiraLista.scrollLeft -= m.left - r.left + 24;
         } else if (r.right > m.right - 8) {
-            menu.scrollLeft += r.right - m.right + 24;
+            tiraLista.scrollLeft += r.right - m.right + 24;
         }
+    }
+
+    // LA VENTANA DE LAS PARTES DE LA FICHA (en el móvil, en vez del
+    // submenú): una lista de botones grandes; la de ahora, marcada. Modal:
+    // el foco se queda dentro, Esc, la ✕ o pulsar fuera la cierran y el
+    // foco vuelve a «ficha».
+    let fondoFicha = null;
+
+    function abrirVentanaFicha() {
+        if (!fondoFicha) {
+            fondoFicha = document.createElement("div");
+            fondoFicha.className = "oc-menu-fondo";
+            fondoFicha.hidden = true;
+            fondoFicha.addEventListener("click", (e) => {
+                if (e.target === fondoFicha) {
+                    cerrarVentanaFicha(true);
+                }
+            });
+            document.body.appendChild(fondoFicha);
+        }
+        const ventanaFicha = document.createElement("div");
+        ventanaFicha.className = "oc-menu-ventana";
+        ventanaFicha.setAttribute("role", "dialog");
+        ventanaFicha.setAttribute("aria-modal", "true");
+        ventanaFicha.setAttribute("aria-labelledby", "oc-menu-ventana-titulo");
+        const barra = document.createElement("div");
+        barra.className = "oc-menu-ventana-barra";
+        const titulo = document.createElement("h2");
+        titulo.id = "oc-menu-ventana-titulo";
+        titulo.className = "oc-menu-ventana-titulo";
+        titulo.textContent = "ficha";
+        const cerrar = document.createElement("button");
+        cerrar.type = "button";
+        cerrar.className = "oc-menu-ventana-cerrar";
+        cerrar.textContent = "✕";
+        cerrar.setAttribute("aria-label", "Cerrar");
+        cerrar.addEventListener("click", () => cerrarVentanaFicha(true));
+        barra.append(titulo, cerrar);
+        const lista = document.createElement("ul");
+        lista.className = "oc-menu-ventana-lista";
+        sub.querySelectorAll("a[data-oc-ir]").forEach((a) => {
+            const li = document.createElement("li");
+            const b = document.createElement("button");
+            b.type = "button";
+            b.className = "oc-menu-ventana-opcion";
+            [...a.childNodes].forEach((n) => b.appendChild(n.cloneNode(true)));
+            if (elegida && a.dataset.ocIr === elegida.id) {
+                b.setAttribute("aria-current", "true");
+            }
+            b.addEventListener("click", () => {
+                cerrarVentanaFicha(false);
+                mostrar(a.dataset.ocIr, true, true);
+                verEnLaTira(botonFicha);
+                bajarHasta(elegida);
+            });
+            li.appendChild(b);
+            lista.appendChild(li);
+        });
+        ventanaFicha.append(barra, lista);
+        ventanaFicha.addEventListener("keydown", (e) => {
+            if (e.key === "Escape") {
+                e.stopPropagation();
+                cerrarVentanaFicha(true);
+                return;
+            }
+            if (e.key !== "Tab") {
+                return;
+            }
+            const todos = Array.from(ventanaFicha.querySelectorAll("button"));
+            const primero = todos[0];
+            const ultimo = todos[todos.length - 1];
+            if (e.shiftKey && document.activeElement === primero) {
+                e.preventDefault();
+                ultimo.focus();
+            } else if (!e.shiftKey && document.activeElement === ultimo) {
+                e.preventDefault();
+                primero.focus();
+            }
+        });
+        fondoFicha.replaceChildren(ventanaFicha);
+        fondoFicha.hidden = false;
+        botonFicha.setAttribute("aria-expanded", "true");
+        (lista.querySelector('[aria-current="true"]') || lista.querySelector("button")).focus();
+    }
+
+    function cerrarVentanaFicha(volver) {
+        if (!fondoFicha || fondoFicha.hidden) {
+            return;
+        }
+        fondoFicha.hidden = true;
+        fondoFicha.replaceChildren();
+        botonFicha.setAttribute("aria-expanded", "false");
+        if (volver) {
+            botonFicha.focus();
+        }
+    }
+
+    // En el móvil «ficha» abre una ventana; en el ordenador, su submenú.
+    function ponerModo() {
+        if (!botonFicha) {
+            return;
+        }
+        if (enMovil.matches) {
+            botonFicha.setAttribute("aria-haspopup", "dialog");
+            botonFicha.removeAttribute("aria-controls");
+            botonFicha.setAttribute("aria-expanded", "false");
+        } else {
+            botonFicha.removeAttribute("aria-haspopup");
+            botonFicha.setAttribute("aria-controls", sub.id);
+            abrirFicha(!!(ficha && ficha.contains(elegida)));
+            cerrarVentanaFicha(false);
+        }
+    }
+
+    // EL BOTÓN DE LA FICHA DEL PERSONAJE (en el móvil, fijo al final de la
+    // tira): enseña o esconde la ficha de arriba (el post-it, la foto, los
+    // atributos) y el botón de los dados. Se acuerda en este navegador.
+    const lateral = document.querySelector(".oc-lateral");
+    let botonInfo = null;
+    if (lateral && pagina) {
+        lateral.id = lateral.id || "oc-lateral";
+        botonInfo = document.createElement("button");
+        botonInfo.type = "button";
+        botonInfo.className = "oc-menu-info";
+        const icono = document.createElement("span");
+        icono.setAttribute("aria-hidden", "true");
+        icono.textContent = "🪪";
+        botonInfo.appendChild(icono);
+        botonInfo.setAttribute("aria-label", "Su ficha y los dados");
+        botonInfo.title = "Enseñar o esconder su ficha y los dados";
+        botonInfo.setAttribute("aria-controls", lateral.id);
+        const ponerInfo = (si) => {
+            pagina.classList.toggle("sin-info", !si);
+            botonInfo.setAttribute("aria-expanded", si ? "true" : "false");
+        };
+        let guardado = null;
+        try {
+            guardado = localStorage.getItem("richi-oc-info");
+        } catch (e) {
+            guardado = null;
+        }
+        ponerInfo(guardado !== "no");
+        botonInfo.addEventListener("click", () => {
+            const si = botonInfo.getAttribute("aria-expanded") !== "true";
+            ponerInfo(si);
+            try {
+                localStorage.setItem("richi-oc-info", si ? "si" : "no");
+            } catch (e) {
+                // Sin almacenamiento: da igual.
+            }
+        });
+        menu.appendChild(botonInfo);
+    }
+
+    // AL BAJAR, LA TIRA SE ESCONDE (detrás de la barra del sitio); al
+    // subir, vuelve. No se esconde si tiene el foco (con el teclado).
+    let ultimaAltura = 0;
+    // Cuando baja la página ella sola (al elegir una parte), no cuenta.
+    let quietaHasta = 0;
+
+    function alDesplazar() {
+        if (!enMovil.matches || !pagina) {
+            return;
+        }
+        const ahora = pagina.scrollHeight > pagina.clientHeight ? pagina.scrollTop : window.scrollY;
+        if (performance.now() < quietaHasta) {
+            ultimaAltura = ahora;
+            return;
+        }
+        const cambio = ahora - ultimaAltura;
+        if (Math.abs(cambio) < 8) {
+            return;
+        }
+        const esconder = cambio > 0 && ahora > menu.offsetHeight && !menu.contains(document.activeElement);
+        pagina.classList.toggle("tira-escondida", esconder);
+        ultimaAltura = ahora;
     }
 
     function bajarHasta(parte) {
         if (!enMovil.matches || !pagina) {
             return;
         }
+        pagina.classList.remove("tira-escondida");
+        quietaHasta = performance.now() + 500;
         const hueco = parte.getBoundingClientRect().top - menu.getBoundingClientRect().bottom - 14;
         // Lo que se desplaza es la página de la ficha (o, si no, la ventana).
         if (pagina.scrollHeight > pagina.clientHeight) {
@@ -187,7 +379,22 @@
     panel.classList.add("con-menu");
     abrirFicha(false);
     medirTira();
+    ponerModo();
     window.addEventListener("resize", medirTira);
+    if (enMovil.addEventListener) {
+        enMovil.addEventListener("change", () => {
+            ponerModo();
+            medirTira();
+            if (pagina) {
+                pagina.classList.remove("tira-escondida");
+            }
+        });
+    }
+    if (pagina) {
+        pagina.addEventListener("scroll", alDesplazar, { passive: true });
+    }
+    window.addEventListener("scroll", alDesplazar, { passive: true });
+    menu.addEventListener("focusin", () => pagina && pagina.classList.remove("tira-escondida"));
     if (window.ResizeObserver) {
         new ResizeObserver(medirTira).observe(menu);
     }
@@ -1510,11 +1717,14 @@ document.querySelectorAll(".oc-ataques th[data-oc-desc]").forEach((th) => {
         if (reserva) {
             // En Vampiro la reserva va arriba (es lo que más se usa) y no
             // hay ventaja ni desventaja.
-            cuerpo.append(reserva, bandeja, manoTexto, fila, acciones, filaAspecto, cabeza, historial, aviso);
+            cuerpo.append(reserva, bandeja, manoTexto, fila, acciones, filaAspecto, cabeza, historial);
         } else {
-            cuerpo.append(bandeja, manoTexto, fila, modos, acciones, filaAspecto, cabeza, historial, aviso);
+            cuerpo.append(bandeja, manoTexto, fila, modos, acciones, filaAspecto, cabeza, historial);
         }
         ventana.append(barra, cuerpo);
+        // Lo que dice el lector de pantalla, fuera de la ventana (que puede
+        // estar cerrada al tirar desde la ficha).
+        document.body.appendChild(aviso);
         ventana.addEventListener("keydown", (e) => {
             if (e.key === "Escape") {
                 abrir(false, true);
@@ -1717,6 +1927,9 @@ document.querySelectorAll(".oc-ataques th[data-oc-desc]").forEach((th) => {
 
     function abrir(si, devolverFoco) {
         ventana.hidden = !si;
+        if (si) {
+            cerrarResultado();
+        }
         if (si && estado.tresD && window.ocDados3d) {
             (window.requestIdleCallback || setTimeout)(() => window.ocDados3d.preparar());
         }
@@ -1746,8 +1959,10 @@ document.querySelectorAll(".oc-ataques th[data-oc-desc]").forEach((th) => {
     }
 
     function anadir(r) {
+        // Con la ventana cerrada (al tirar desde la ficha) no se abre: sale
+        // el resultado en un aviso flotante. El registro, en la ventana.
         if (ventana.hidden) {
-            abrir(true, false);
+            mostrarResultado(r);
         }
         estado.tiradas.unshift(r);
         estado.tiradas = estado.tiradas.slice(0, 30);
@@ -1755,6 +1970,105 @@ document.querySelectorAll(".oc-ataques th[data-oc-desc]").forEach((th) => {
         avisar(dicho(r)
             + (r.tipos.length ? " (" + r.tipos.map((x) => x.total + " " + x.tipo).join(", ") + ")" : "")
             + ". " + r.desglose);
+    }
+
+    // ---- EL AVISO FLOTANTE CON EL RESULTADO ----
+    // Grande, con doble reborde, arriba en medio (debajo de la barra y de
+    // la tira del menú en el móvil). Sale cuando se paran los dados en 3D
+    // (o enseguida, sin ellos) y se va solo a los cinco segundos, salvo
+    // que tenga el ratón o el foco encima. «ver tiradas» abre la ventana.
+    // El lector de pantalla ya lo ha dicho (avisar): este es para la vista
+    // y no se lleva el foco.
+    let flotante = null;
+    let flotanteVa = 0;
+    let flotanteSale = 0;
+
+    function montarFlotante() {
+        flotante = crear("div", "oc-resultado");
+        flotante.hidden = true;
+        flotante.setAttribute("role", "group");
+        flotante.setAttribute("aria-label", "Resultado de la tirada");
+        const quedarse = () => clearTimeout(flotanteVa);
+        const irse = () => {
+            clearTimeout(flotanteVa);
+            flotanteVa = setTimeout(cerrarResultado, 2500);
+        };
+        flotante.addEventListener("mouseenter", quedarse);
+        flotante.addEventListener("focusin", quedarse);
+        flotante.addEventListener("mouseleave", irse);
+        flotante.addEventListener("focusout", irse);
+        flotante.addEventListener("keydown", (e) => {
+            if (e.key === "Escape") {
+                cerrarResultado();
+            }
+        });
+        document.body.appendChild(flotante);
+    }
+
+    function cerrarResultado() {
+        clearTimeout(flotanteVa);
+        clearTimeout(flotanteSale);
+        if (!flotante || flotante.hidden) {
+            return;
+        }
+        const tenia = flotante.contains(document.activeElement);
+        flotante.hidden = true;
+        if (tenia && boton) {
+            boton.focus();
+        }
+    }
+
+    function mostrarResultado(r) {
+        if (!flotante) {
+            montarFlotante();
+        }
+        clearTimeout(flotanteVa);
+        clearTimeout(flotanteSale);
+        const pintar = () => {
+            const cabeza = crear("p", "oc-resultado-que");
+            cabeza.append(crear("span", "", r.que), crear("span", "oc-resultado-formula",
+                r.formulaVista || formulaParaVer(r.formula)));
+            const total = crear("p", "oc-resultado-total" + (r.critico ? " es-critico" : "") + (r.pifia ? " es-pifia" : ""),
+                String(r.total));
+            if (r.unidad) {
+                total.appendChild(crear("span", "oc-resultado-unidad", r.unidad));
+            }
+            const filas = [cabeza, total];
+            if (r.nota) {
+                filas.push(crear("p", "oc-resultado-nota", r.nota));
+            }
+            if (r.tipos && r.tipos.length) {
+                const tipos = crear("p", "oc-dados-tipos");
+                r.tipos.forEach((x) => tipos.appendChild(crear("span", "oc-dano oc-dano-" + claveDeTipo(x.tipo),
+                    x.total + " " + x.tipo)));
+                filas.push(tipos);
+            }
+            filas.push(crear("p", "oc-resultado-desglose", r.desglose));
+            const botones = crear("div", "oc-resultado-botones");
+            botones.append(
+                botonDe("oc-resultado-ver", "ver tiradas", () => {
+                    cerrarResultado();
+                    abrir(true, false);
+                    const repetir = historial.querySelector(".oc-dados-repetir");
+                    (repetir || ventana).focus();
+                }, "Ver todas las tiradas (abre los dados)"),
+                botonDe("oc-resultado-cerrar", "✕", cerrarResultado, "Cerrar el resultado"));
+            filas.push(botones);
+            flotante.replaceChildren(...filas);
+            // Debajo de lo fijo de arriba (la barra del sitio y, en el móvil,
+            // la tira del menú).
+            let arriba = 16;
+            document.querySelectorAll(".mobile-topbar, [data-oc-menu]").forEach((x) => {
+                if (getComputedStyle(x).position === "fixed") {
+                    arriba = Math.max(arriba, x.getBoundingClientRect().bottom + 12);
+                }
+            });
+            flotante.style.top = arriba + "px";
+            flotante.hidden = false;
+            flotanteVa = setTimeout(cerrarResultado, 5000);
+        };
+        // Con los dados en 3D, cuando se paran; si no, enseguida.
+        flotanteSale = setTimeout(pintar, estado.tresD ? 1000 : 0);
     }
 
     function pintarHistorial() {

@@ -23,12 +23,11 @@
         left: 0;
         z-index: 80;
         flex-direction: row;
-        align-items: center;
+        align-items: stretch;
         gap: 0;
         margin: 0;
-        padding: 4px 8px;
-        overflow-x: auto;
-        overflow-y: hidden;
+        padding: 0;
+        overflow: hidden;
         /* Los <nav> del sitio van de derecha a izquierda (para tener la
            barra de desplazar a la izquierda): esta, no. */
         direction: ltr;
@@ -36,7 +35,90 @@
         border-bottom: 3px solid var(--yellow);
         background: var(--purple);
         box-shadow: 0 3px 0 var(--oc-color);
+        transition: transform 0.2s ease;
+    }
+
+    /* Al bajar, se esconde detrás de la barra del sitio (personajes.js). */
+    .oc-ficha-page.tira-escondida .oc-panel.con-menu .oc-menu {
+        transform: translateY(calc(-100% - 8px));
+    }
+
+    /* Lo que se desplaza de lado es la lista; el botón de la ficha del
+       personaje, fijo al final. */
+    .oc-panel.con-menu .oc-menu > .oc-menu-lista {
+        flex: 1 1 auto;
+        min-width: 0;
+        padding: 4px 8px;
+        overflow-x: auto;
+        overflow-y: hidden;
         scrollbar-width: thin;
+    }
+
+    .oc-panel.con-menu .oc-menu-info {
+        display: flex;
+        flex: none;
+        align-items: center;
+        justify-content: center;
+        width: 3.2rem;
+        min-height: 44px;
+        padding: 0;
+        border: 0;
+        border-left: 3px solid var(--yellow);
+        background: transparent;
+        font-family: initial;
+        font-size: 1.25rem;
+        cursor: pointer;
+    }
+
+    .oc-panel.con-menu .oc-menu-info[aria-expanded="true"] {
+        background: var(--yellow);
+    }
+
+    .oc-panel.con-menu .oc-menu-info:focus-visible {
+        outline: 3px solid var(--yellow);
+        outline-offset: -6px;
+    }
+
+    .oc-panel.con-menu .oc-menu-info[aria-expanded="true"]:focus-visible {
+        outline-color: var(--yellow-contrast);
+    }
+
+    /* Sin la ficha del personaje (el botón de arriba): ni el post-it ni
+       los dados. */
+    .oc-ficha-page.sin-info .oc-lateral {
+        display: none;
+    }
+
+    /* El botón de los dados, flotando abajo a la derecha, encima del de
+       subir. */
+    .oc-ficha-page .oc-boton-dados {
+        position: fixed;
+        right: 16px;
+        bottom: calc(16px + 52px + 12px + var(--hueco-abajo));
+        z-index: 445;
+        width: 52px;
+        height: 52px;
+        box-shadow: 0 0 0 3px var(--purple), 4px 4px 0 3px var(--oc-color);
+    }
+
+    /* «ficha» abre una ventana con sus partes: el submenú, fuera; al
+       lado, cuál se ve. */
+    .oc-panel.con-menu .oc-menu-sub {
+        display: none;
+    }
+
+    .oc-panel.con-menu .oc-menu-actual {
+        display: inline;
+        font-weight: 400;
+    }
+
+    .oc-panel.con-menu .oc-menu-abrir .oc-menu-flecha {
+        display: none;
+    }
+
+    .oc-panel.con-menu .oc-menu-abrir::after {
+        content: "▾";
+        margin-left: 6px;
     }
 
     .oc-page.oc-ficha-page {
@@ -58,13 +140,6 @@
     .oc-panel.con-menu .oc-menu-grupo {
         display: flex;
         align-items: center;
-    }
-
-    /* Las partes de la ficha, al lado de «ficha», con una raya delante. */
-    .oc-panel.con-menu .oc-menu-sub {
-        margin: 0 4px;
-        padding: 0 0 0 4px;
-        border-left: 2px dashed var(--border);
     }
 
     .oc-panel.con-menu .oc-menu-enlace {
@@ -104,4 +179,111 @@
     .oc-npc-foto {
         width: 4rem;
     }
+}
+
+/* Lo del móvil, fuera en el ordenador: el botón de la ficha del
+   personaje en la tira y lo de «· hoja» al lado de «ficha». */
+.oc-menu-info,
+.oc-menu-actual {
+    display: none;
+}
+
+/* LA VENTANA DE LAS PARTES DE LA FICHA (en el móvil). */
+.oc-menu-fondo {
+    position: fixed;
+    inset: 0;
+    z-index: 890;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    background: rgba(10, 6, 16, 0.72);
+}
+
+.oc-menu-fondo[hidden] {
+    display: none;
+}
+
+.oc-menu-ventana {
+    display: flex;
+    flex-direction: column;
+    width: min(20rem, 100%);
+    max-height: calc(100dvh - 40px);
+    border: 3px solid var(--yellow);
+    background: var(--purple-lighter);
+    box-shadow: 6px 6px 0 var(--oc-color);
+}
+
+.oc-menu-ventana-barra {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 6px 6px 6px 14px;
+    background: var(--yellow);
+    color: var(--yellow-contrast);
+}
+
+.oc-menu-ventana-titulo {
+    margin: 0;
+    font-family: var(--fuente-mono);
+    font-size: 1rem;
+}
+
+.oc-menu-ventana-cerrar {
+    width: 44px;
+    height: 44px;
+    padding: 0;
+    border: 2px solid var(--yellow-contrast);
+    background: transparent;
+    color: var(--yellow-contrast);
+    font-size: 1rem;
+    cursor: pointer;
+}
+
+.oc-menu-ventana-cerrar:focus-visible {
+    outline: 3px solid var(--yellow-contrast);
+    outline-offset: 2px;
+}
+
+.oc-menu-ventana-lista {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin: 0;
+    padding: 14px;
+    overflow-y: auto;
+    list-style: none;
+}
+
+.oc-menu-ventana-opcion {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    min-height: 48px;
+    padding: 8px 12px;
+    border: 2px solid var(--yellow);
+    background: transparent;
+    color: var(--yellow);
+    font-family: var(--fuente-mono);
+    font-size: 0.9375rem;
+    font-weight: 700;
+    text-align: left;
+    cursor: pointer;
+}
+
+.oc-menu-ventana-opcion:hover,
+.oc-menu-ventana-opcion[aria-current="true"] {
+    background: var(--yellow);
+    color: var(--yellow-contrast);
+}
+
+.oc-menu-ventana-opcion[aria-current="true"] {
+    box-shadow: inset 6px 0 0 var(--oc-color);
+}
+
+.oc-menu-ventana-opcion:focus-visible {
+    outline: 3px solid var(--yellow);
+    outline-offset: 3px;
 }

@@ -4052,6 +4052,14 @@
   cierran. El lector de pantalla dice cada resultado. (La barra lleva su
   clase propia, oc-dados-barra, y no la de las ventanas del sitio: esa la
   coge ventanas-plegables.js y la vuelve un botón de plegar.)
+  AL TIRAR DESDE LA FICHA (con la ventana de los dados cerrada), la
+  ventana NO se abre: ruedan los dados en 3D y, al pararse, sale el
+  RESULTADO en un aviso flotante arriba en medio, grande y con doble
+  reborde (qué es, el total, crítico o pifia, el daño por tipos y el
+  desglose), que se va solo a los cinco segundos (no mientras tenga el
+  ratón o el foco encima). «ver tiradas» abre la ventana con el registro;
+  y el botón de los dados también. El lector de pantalla dice la tirada
+  como siempre (personajes.js: mostrarResultado).
   LOS DADOS EN 3D: al tirar, los dados ruedan por la pantalla (por
   encima de la página, en la parte que no tapa la ventana) y se paran
   enseñando lo que ha salido: cada uno con su forma (d4, d6, d8, d10,
@@ -4182,6 +4190,14 @@
   por debajo del menú lateral del sitio, que la tapa al abrirse
   (personajes.responsive.css; personajes.js: medirTira, verEnLaTira,
   bajarHasta).
+  Y EN LA TIRA DEL MÓVIL: «ficha» abre una VENTANA con sus partes
+  (combate, habilidades…; la de ahora, marcada), y al lado de «ficha»
+  pone cuál se ve («ficha · conjuros»); al final, fijo, el botón 🪪, que
+  enseña o esconde la ficha del personaje de arriba (post-it, foto,
+  atributos) y el botón de los dados (se acuerda en ese navegador); el
+  botón de los dados flota abajo a la derecha, encima del de subir; y al
+  bajar la página la tira se esconde detrás de la barra del sitio, y
+  vuelve al subir (personajes.js: abrirVentanaFicha, ponerModo, alDesplazar).
   LAS ETIQUETAS («D&D 5e, jugando»): cada una es un botón del filtro del
   índice (el de los relatos, scripts/componentes/filtros.js); sin
   ninguna etiqueta en ningún personaje, el filtro no sale.
