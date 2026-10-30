@@ -185,6 +185,13 @@ RE_SOLO_CONSTANTES = re.compile(
 # vuelve a salir y hay que volver a mirarlo. Mover la línea de sitio no
 # lo despierta; tocar lo que hace, sí.
 REVISADOS = {
+    ("scripts/paginas/pantalla-master.js", "archivoBlob"):
+        "una dirección blob: que hace el navegador con el .json de"
+        " «⬇ exportar» (URL.createObjectURL): no viene de fuera.",
+    ("scripts/paginas/pantalla-master.js", 'String(html || "")'):
+        "es el propio limpiador de los post-its (sanearHtml): lo pega en un"
+        " <template>, que no ejecuta nada, para quedarse solo con las"
+        " etiquetas permitidas.",
     ("scripts/componentes/gatin-random.js", "gatinAHtml()"):
         "el HTML está escrito entero ahí dentro; la foto se pone después"
         " con img.src y pasando por encodeURIComponent.",

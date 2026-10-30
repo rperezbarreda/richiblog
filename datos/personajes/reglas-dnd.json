@@ -5,7 +5,7 @@
             "grupo": "Estados",
             "nombre": "Agarrado",
             "icono": "🤝",
-            "texto": "**Velocidad 0.** Tu velocidad es 0 y no puede aumentar.\n\n**Ataques afectados.** Tienes desventaja en las tiradas de ataque contra cualquier objetivo que no sea quien te agarra.\n\n**Se te puede mover.** Quien te agarra puede arrastrarte o llevarte cuando se mueve, pero cada metro le cuesta un metro más, salvo que seas Diminuto o dos o más tamaños más pequeño que él.\n\n**Escapar.** Con tu acción, una prueba de Fuerza (Atletismo) o Destreza (Acrobacias) contra la CD de escape del agarre. También se acaba si quien te agarra queda incapacitado o si la distancia entre los dos supera el alcance del agarre."
+            "texto": "**Velocidad 0.** Tu velocidad es 0 y no puede aumentar.\n\n**Ataques afectados.** Tienes desventaja en las tiradas de ataque contra cualquier objetivo que no sea quien te agarra.\n\n**Se te puede mover.** Quien te agarra puede arrastrarte o llevarte cuando se mueve, pero cada pie le cuesta un pie más, salvo que seas Diminuto o dos o más tamaños más pequeño que él.\n\n**Escapar.** Con tu acción, una prueba de Fuerza (Atletismo) o Destreza (Acrobacias) contra la CD de escape del agarre. También se acaba si quien te agarra queda incapacitado o si la distancia entre los dos supera el alcance del agarre."
         },
         {
             "grupo": "Estados",
@@ -35,7 +35,7 @@
             "grupo": "Estados",
             "nombre": "Derribado",
             "icono": "🛌",
-            "texto": "**Movimiento limitado.** Solo puedes arrastrarte o gastar la mitad de tu velocidad (redondeando hacia abajo) en levantarte, lo que acaba con el estado. Si tu velocidad es 0, no puedes levantarte.\n\n**Ataques afectados.** Tienes desventaja en las tiradas de ataque. Un ataque contra ti tiene ventaja si quien ataca está a 1,5 m o menos; si no, tiene desventaja."
+            "texto": "**Movimiento limitado.** Solo puedes arrastrarte o gastar la mitad de tu velocidad (redondeando hacia abajo) en levantarte, lo que acaba con el estado. Si tu velocidad es 0, no puedes levantarte.\n\n**Ataques afectados.** Tienes desventaja en las tiradas de ataque. Un ataque contra ti tiene ventaja si quien ataca está a 5 pies o menos; si no, tiene desventaja."
         },
         {
             "grupo": "Estados",
@@ -65,7 +65,7 @@
             "grupo": "Estados",
             "nombre": "Inconsciente",
             "icono": "😵",
-            "texto": "**Inerte.** Tienes los estados incapacitado y derribado, y sueltas lo que tengas en las manos. Cuando se acaba este estado, sigues derribado.\n\n**Velocidad 0.** Tu velocidad es 0 y no puede aumentar.\n\n**Ataques afectados.** Las tiradas de ataque contra ti tienen ventaja.\n\n**Salvaciones afectadas.** Fallas automáticamente las tiradas de salvación de Fuerza y Destreza.\n\n**Críticos automáticos.** Cualquier ataque que te impacte es un golpe crítico si quien ataca está a 1,5 m o menos.\n\n**Sin consciencia.** No te enteras de lo que pasa a tu alrededor."
+            "texto": "**Inerte.** Tienes los estados incapacitado y derribado, y sueltas lo que tengas en las manos. Cuando se acaba este estado, sigues derribado.\n\n**Velocidad 0.** Tu velocidad es 0 y no puede aumentar.\n\n**Ataques afectados.** Las tiradas de ataque contra ti tienen ventaja.\n\n**Salvaciones afectadas.** Fallas automáticamente las tiradas de salvación de Fuerza y Destreza.\n\n**Críticos automáticos.** Cualquier ataque que te impacte es un golpe crítico si quien ataca está a 5 pies o menos.\n\n**Sin consciencia.** No te enteras de lo que pasa a tu alrededor."
         },
         {
             "grupo": "Estados",
@@ -77,7 +77,7 @@
             "grupo": "Estados",
             "nombre": "Paralizado",
             "icono": "🧊",
-            "texto": "**Incapacitado.** Tienes el estado incapacitado.\n\n**Velocidad 0.** Tu velocidad es 0 y no puede aumentar.\n\n**Salvaciones afectadas.** Fallas automáticamente las tiradas de salvación de Fuerza y Destreza.\n\n**Ataques afectados.** Las tiradas de ataque contra ti tienen ventaja.\n\n**Críticos automáticos.** Cualquier ataque que te impacte es un golpe crítico si quien ataca está a 1,5 m o menos."
+            "texto": "**Incapacitado.** Tienes el estado incapacitado.\n\n**Velocidad 0.** Tu velocidad es 0 y no puede aumentar.\n\n**Salvaciones afectadas.** Fallas automáticamente las tiradas de salvación de Fuerza y Destreza.\n\n**Ataques afectados.** Las tiradas de ataque contra ti tienen ventaja.\n\n**Críticos automáticos.** Cualquier ataque que te impacte es un golpe crítico si quien ataca está a 5 pies o menos."
         },
         {
             "grupo": "Estados",
@@ -89,7 +89,8 @@
             "grupo": "Estados",
             "nombre": "Agotamiento",
             "icono": "🥵",
-            "texto": "**Niveles de agotamiento.** Este estado se acumula: cada vez que lo recibes, ganas 1 nivel de agotamiento. Mueres si llegas al nivel 6.\n\n**Pruebas de d20 afectadas.** Cuando haces una prueba de d20, a la tirada se le resta el doble de tu nivel de agotamiento.\n\n**Velocidad reducida.** Tu velocidad baja 1,5 m por cada nivel de agotamiento.\n\n**Quitarse niveles.** Terminar un descanso largo quita 1 nivel de agotamiento. Cuando llegas a 0, se acaba el estado."
+            "texto": "**Niveles de agotamiento.** Este estado se acumula: cada vez que lo recibes, ganas 1 nivel de agotamiento. Mueres si llegas al nivel 6.\n\n**Pruebas de d20 afectadas.** Cuando haces una prueba de d20, a la tirada se le resta el doble de tu nivel de agotamiento.\n\n**Velocidad reducida.** Tu velocidad baja 5 pies por cada nivel de agotamiento.\n\n**Quitarse niveles.** Terminar un descanso largo quita 1 nivel de agotamiento. Cuando llegas a 0, se acaba el estado.",
+            "alias": "cansancio, fatiga"
         },
         {
             "grupo": "Acciones",
@@ -101,7 +102,7 @@
             "grupo": "Acciones",
             "nombre": "Correr",
             "icono": "🏃",
-            "texto": "Ganas movimiento extra durante este turno: tanto como tu velocidad después de aplicar modificadores. Con 9 m de velocidad, por ejemplo, puedes moverte hasta 18 m si corres; si tu velocidad baja a 4,5 m, hasta 9 m.\n\nSi tienes una velocidad especial, como la de vuelo o la de nado, puedes usarla en lugar de tu velocidad. Eliges cuál cada vez."
+            "texto": "Ganas movimiento extra durante este turno: tanto como tu velocidad después de aplicar modificadores. Con 30 pies de velocidad, por ejemplo, puedes moverte hasta 60 pies si corres; si tu velocidad baja a 15 pies, hasta 30.\n\nSi tienes una velocidad especial, como la de vuelo o la de nado, puedes usarla en lugar de tu velocidad. Eliges cuál cada vez."
         },
         {
             "grupo": "Acciones",
@@ -119,7 +120,7 @@
             "grupo": "Acciones",
             "nombre": "Ayudar",
             "icono": "🤲",
-            "texto": "Haces una de estas dos cosas:\n\n**Ayudar en una prueba.** Eliges una competencia en habilidad o herramienta y un aliado lo bastante cerca como para ayudarle con palabras o físicamente. Tiene ventaja en la siguiente prueba que haga con esa habilidad o herramienta. Se pierde si no la usa antes del comienzo de tu siguiente turno. El DM decide si tu ayuda es posible.\n\n**Ayudar en un ataque.** Distraes un momento a un enemigo a 1,5 m o menos: la siguiente tirada de ataque de uno de tus aliados contra él tiene ventaja. Se pierde al comienzo de tu siguiente turno.\n\nTambién sirve para estabilizar a alguien (mira «Estabilizar»)."
+            "texto": "Haces una de estas dos cosas:\n\n**Ayudar en una prueba.** Eliges una competencia en habilidad o herramienta y un aliado lo bastante cerca como para ayudarle con palabras o físicamente. Tiene ventaja en la siguiente prueba que haga con esa habilidad o herramienta. Se pierde si no la usa antes del comienzo de tu siguiente turno. El DM decide si tu ayuda es posible.\n\n**Ayudar en un ataque.** Distraes un momento a un enemigo a 5 pies o menos: la siguiente tirada de ataque de uno de tus aliados contra él tiene ventaja. Se pierde al comienzo de tu siguiente turno.\n\nTambién sirve para estabilizar a alguien (mira «Estabilizar»)."
         },
         {
             "grupo": "Acciones",
@@ -209,7 +210,7 @@
             "grupo": "Combate",
             "nombre": "Ataque sin armas: agarrar y empujar",
             "icono": "💪",
-            "texto": "Un puñetazo, una patada o similar contra un objetivo a 1,5 m o menos. Eliges uno de estos efectos:\n\n**Daño.** Tirada de ataque con tu modificador de Fuerza + tu bonificador por competencia. Si impacta, hace 1 + tu modificador de Fuerza de daño contundente.\n\n**Agarrar.** El objetivo tiene que superar una salvación de Fuerza o Destreza (elige él) o queda agarrado. CD = 8 + tu modificador de Fuerza + tu bonificador por competencia (también es la CD para escapar). Solo si no es más de un tamaño mayor que tú y tienes una mano libre.\n\n**Empujar.** La misma salvación y CD; si falla, lo empujas 1,5 m o lo derribas. Solo si no es más de un tamaño mayor que tú."
+            "texto": "Un puñetazo, una patada o similar contra un objetivo a 5 pies o menos. Eliges uno de estos efectos:\n\n**Daño.** Tirada de ataque con tu modificador de Fuerza + tu bonificador por competencia. Si impacta, hace 1 + tu modificador de Fuerza de daño contundente.\n\n**Agarrar.** El objetivo tiene que superar una salvación de Fuerza o Destreza (elige él) o queda agarrado. CD = 8 + tu modificador de Fuerza + tu bonificador por competencia (también es la CD para escapar). Solo si no es más de un tamaño mayor que tú y tienes una mano libre.\n\n**Empujar.** La misma salvación y CD; si falla, lo empujas 5 pies o lo derribas. Solo si no es más de un tamaño mayor que tú."
         },
         {
             "grupo": "Combate",
@@ -227,13 +228,37 @@
             "grupo": "Combate",
             "nombre": "Combate montado",
             "icono": "🐎",
-            "texto": "**Montar y desmontar.** Durante tu movimiento, puedes montar en una criatura a 1,5 m o menos, o desmontar. Cuesta la mitad de tu velocidad. La montura tiene que estar dispuesta, ser al menos un tamaño mayor que tú y tener la anatomía adecuada.\n\n**Controlar la montura.** Solo si está entrenada. Al montar, su iniciativa pasa a ser la tuya; se mueve en tu turno como digas y solo puede correr, destrabarse o esquivar. Una montura independiente conserva su iniciativa y hace lo que quiere.\n\n**Caerse.** Si algo va a mover a tu montura contra su voluntad, salvación de Destreza CD 10 o te caes derribado a 1,5 m. La misma salvación si te derriban a ti o a la montura."
+            "texto": "**Montar y desmontar.** Durante tu movimiento, puedes montar en una criatura a 5 pies o menos, o desmontar. Cuesta la mitad de tu velocidad. La montura tiene que estar dispuesta, ser al menos un tamaño mayor que tú y tener la anatomía adecuada.\n\n**Controlar la montura.** Solo si está entrenada. Al montar, su iniciativa pasa a ser la tuya; se mueve en tu turno como digas y solo puede correr, destrabarse o esquivar. Una montura independiente conserva su iniciativa y hace lo que quiere.\n\n**Caerse.** Si algo va a mover a tu montura contra su voluntad, salvación de Destreza CD 10 o te caes derribado a 5 pies. La misma salvación si te derriban a ti o a la montura."
         },
         {
             "grupo": "Combate",
             "nombre": "Combate bajo el agua",
             "icono": "🌊",
             "texto": "**Armas cuerpo a cuerpo.** Sin velocidad de nado, desventaja en el ataque salvo que el arma haga daño perforante.\n\n**Armas a distancia.** Fallan automáticamente más allá del alcance normal, y tienen desventaja dentro de él.\n\n**Fuego.** Todo lo que está bajo el agua tiene resistencia al daño de fuego."
+        },
+        {
+            "grupo": "Combate",
+            "nombre": "Tipos de daño",
+            "icono": "💥",
+            "texto": "Cada ataque o efecto dañino hace un tipo de daño. Los tipos no tienen reglas propias, pero otras reglas (resistencia, vulnerabilidad, inmunidad) dependen de ellos.\n\n| Tipo | Ejemplos |\n| --- | --- |\n| Ácido | Líquidos corrosivos, jugos gástricos |\n| Contundente | Objetos romos, constricción, caídas |\n| Cortante | Garras, filos |\n| Frío | Agua helada, ráfagas de hielo |\n| Fuego | Llamas, calor insoportable |\n| Fuerza | Energía mágica pura |\n| Necrótico | Energía que roba la vida |\n| Perforante | Colmillos, puntas |\n| Psíquico | Energía que desgarra la mente |\n| Radiante | Energía sagrada, radiación abrasadora |\n| Relámpago | Electricidad |\n| Trueno | Sonido atronador |\n| Veneno | Gases tóxicos, ponzoña |"
+        },
+        {
+            "grupo": "Combate",
+            "nombre": "Resistencia, vulnerabilidad e inmunidad",
+            "icono": "🛡️",
+            "texto": "**Resistencia.** El daño de ese tipo se reduce a la mitad (redondeando hacia abajo).\n\n**Vulnerabilidad.** El daño de ese tipo se duplica.\n\n**Inmunidad.** Ese tipo de daño, o ese estado, no te afecta en absoluto.\n\nLa resistencia y la vulnerabilidad se aplican una sola vez a cada daño. Si hay modificadores, primero se suman y restan, después la resistencia y al final la vulnerabilidad."
+        },
+        {
+            "grupo": "Combate",
+            "nombre": "Umbral de daño",
+            "icono": "🧱",
+            "texto": "Una criatura u objeto con umbral de daño es inmune a todo el daño salvo que reciba, de un solo ataque o efecto, una cantidad igual o mayor que su umbral: entonces recibe todo ese daño. Lo que no llega al umbral es superficial y no le quita PG (con umbral 10, un golpe de 9 no hace nada y uno de 11 hace los 11)."
+        },
+        {
+            "grupo": "Combate",
+            "nombre": "Efectos a la vez",
+            "icono": "⏳",
+            "texto": "Si dos o más cosas pasan a la vez en un turno, decide el orden quien juega ese turno (el jugador o el DM). Por ejemplo, si dos efectos ocurren al inicio del turno de un personaje, su jugador elige cuál va primero."
         },
         {
             "grupo": "Magia",
@@ -266,6 +291,60 @@
             "texto": "**CD de salvación de conjuros** = 8 + tu modificador de la característica de lanzamiento + tu bonificador por competencia.\n\n**Ataque de conjuro** = tu modificador de la característica de lanzamiento + tu bonificador por competencia.\n\nLa característica de lanzamiento la marca tu clase: Inteligencia (mago), Sabiduría (clérigo, druida, explorador) o Carisma (bardo, brujo, hechicero, paladín)."
         },
         {
+            "grupo": "Objetos y magia",
+            "nombre": "Pociones",
+            "icono": "🧪",
+            "texto": "**Beber o dar una poción.** Beber una poción, o dársela a otra criatura a 5 pies o menos de ti, es una **acción adicional**. La poción se gasta al beberla.\n\n**Poción de curación.** Quien la bebe recupera puntos de golpe según la poción:\n\n| Poción | Rareza | Recupera |\n| --- | --- | --- |\n| De curación | Común | 2d4 + 2 PG |\n| De curación mayor | Poco común | 4d4 + 4 PG |\n| De curación superior | Rara | 8d4 + 8 PG |\n| De curación suprema | Muy rara | 10d4 + 20 PG |\n\n**Otras pociones.** Cada una dice lo que hace; las que duran un tiempo empiezan al beberlas."
+        },
+        {
+            "grupo": "Objetos y magia",
+            "nombre": "Sintonización",
+            "icono": "🔗",
+            "texto": "Algunos objetos mágicos necesitan que una criatura forme un vínculo con ellos —la **sintonización**— antes de poder usar sus propiedades mágicas. Una criatura puede estar sintonizada con **tres objetos mágicos como máximo** a la vez.\n\nSintonizarse requiere pasar un descanso corto concentrado en el objeto. Una criatura deja de estar sintonizada si deja de cumplir los requisitos, si el objeto pasa más de 24 horas a más de 100 pies de ella, si muere o si otra criatura se sintoniza con él; también puede acabar la sintonización a voluntad al final de un descanso corto."
+        },
+        {
+            "grupo": "Objetos y magia",
+            "nombre": "Romper objetos",
+            "icono": "🔨",
+            "texto": "Los objetos se pueden dañar con ataques y con algunos conjuros. Si un objeto es muy frágil, el DM puede dejar que se rompa automáticamente con la acción de atacar o de usar.\n\n**Clase de armadura** (según el material):\n\n| CA | Material |\n| --- | --- |\n| 11 | Tela, papel, cuerda |\n| 13 | Cristal, vidrio, hielo |\n| 15 | Madera |\n| 17 | Piedra |\n| 19 | Hierro, acero |\n| 21 | Mithral |\n| 23 | Adamantina |\n\n**Puntos de golpe.** Un objeto se destruye al llegar a 0 PG. Los Enormes o Gargantuescos se dividen en partes Grandes o más pequeñas, cada una con sus PG.\n\n| Tamaño | Frágil | Resistente |\n| --- | --- | --- |\n| Diminuto (botella, cerradura) | 2 (1d4) | 5 (2d4) |\n| Pequeño (cofre, laúd) | 3 (1d6) | 10 (3d6) |\n| Mediano (barril, lámpara) | 4 (1d8) | 18 (4d8) |\n| Grande (carro, mesa) | 5 (1d10) | 27 (5d10) |\n\n**Tipos de daño.** Los objetos son inmunes al daño de veneno y psíquico; el DM puede decidir que otros tipos les hacen más o menos (el contundente rompe bien, pero no corta; el papel o la tela pueden ser vulnerables al fuego).\n\n**Umbral de daño.** Los objetos grandes, como las murallas, pueden tener un umbral de daño: ignoran el daño de un solo golpe o efecto que no llegue a esa cifra.\n\n**Sin características.** Un objeto no tiene puntuaciones de característica salvo que una regla se las dé: no hace pruebas y falla todas las salvaciones."
+        },
+        {
+            "grupo": "Objetos y magia",
+            "nombre": "Armas improvisadas",
+            "icono": "🍳",
+            "texto": "Un arma improvisada es un objeto usado como arma: un trozo de cristal, la pata de una mesa, una sartén… También lo es un arma sencilla o marcial usada de una forma para la que no está hecha (un arma a distancia para atacar cuerpo a cuerpo, o lanzar un arma cuerpo a cuerpo sin la propiedad arrojadiza).\n\n**Competencia.** No sumas tu bonificador por competencia a la tirada de ataque.\n\n**Daño.** Al impactar hace 1d4 de daño del tipo que el DM vea adecuado.\n\n**Alcance.** Si la lanzas, alcance normal de 20 pies y largo de 60.\n\n**Equivalentes.** Si se parece a un arma sencilla o marcial, el DM puede tratarla como esa arma (la pata de una mesa, como una clava)."
+        },
+        {
+            "grupo": "Objetos y magia",
+            "nombre": "Maldiciones",
+            "icono": "🧿",
+            "texto": "Algunos efectos maldicen a una criatura o un objeto; el propio efecto dice qué hace la maldición. Se quitan con los conjuros *Levantar maldición* y *Restablecimiento mayor*, o con otra magia que diga expresamente que acaba con las maldiciones."
+        },
+        {
+            "grupo": "Objetos y magia",
+            "nombre": "Ilusiones",
+            "icono": "🎭",
+            "texto": "Algunos conjuros y efectos crean ilusiones mágicas; el efecto dice qué hace la ilusión y qué sentidos o facultades engaña.\n\nSi la ilusión aparece en el espacio, es intangible y no pesa, pero parece afectada por el entorno como si fuera real (salvo que el efecto diga otra cosa): una criatura ilusoria hace sombras y reflejos y el viento la mueve; un sonido ilusorio hace eco en un sitio con eco."
+        },
+        {
+            "grupo": "Objetos y magia",
+            "nombre": "Teletransporte",
+            "icono": "🌀",
+            "texto": "Teletransportarse es desaparecer y aparecer en otro sitio al instante, sin pasar por el espacio de en medio. **No gasta movimiento** (salvo que una regla diga lo contrario) y **nunca provoca ataques de oportunidad**.\n\nTe llevas todo lo que lleves puesto y encima. Si tocas a otra criatura, no viene contigo salvo que el efecto lo diga.\n\nSi el sitio de llegada está ocupado por otra criatura o bloqueado por algo sólido, apareces en el espacio desocupado más cercano que elijas. El efecto dice si tienes que ver el destino."
+        },
+        {
+            "grupo": "Objetos y magia",
+            "nombre": "Cambiar de forma",
+            "icono": "🐺",
+            "texto": "Si un efecto, como *Forma salvaje* o el conjuro *Polimorfar*, te deja cambiar de forma, su descripción dice qué te pasa. Salvo que diga otra cosa, todo lo que te afecte —estados, conjuros, maldiciones…— sigue contigo de una forma a otra. Si mueres, vuelves a tu forma verdadera."
+        },
+        {
+            "grupo": "Objetos y magia",
+            "nombre": "Posesión",
+            "icono": "👤",
+            "texto": "Algunos efectos hacen que otra criatura o entidad posea a una criatura; el efecto dice cómo funciona. El conjuro *Protección contra el mal y el bien* impide la posesión, y *Disipar el mal y el bien* la acaba."
+        },
+        {
             "grupo": "Descansos y salud",
             "nombre": "Descanso corto",
             "icono": "☕",
@@ -287,7 +366,7 @@
             "grupo": "Descansos y salud",
             "nombre": "Estabilizar",
             "icono": "🩹",
-            "texto": "Con la acción de ayudar puedes intentar estabilizar a una criatura a 0 PG a 1,5 m o menos: prueba de Sabiduría (Medicina) CD 10.\n\nUna criatura estable no hace salvaciones de muerte aunque tenga 0 PG, pero sigue inconsciente. Si recibe daño, deja de estar estable y vuelve a hacerlas. Si nadie la cura, recupera 1 PG al cabo de 1d4 horas."
+            "texto": "Con la acción de ayudar puedes intentar estabilizar a una criatura a 0 PG a 5 pies o menos: prueba de Sabiduría (Medicina) CD 10.\n\nUna criatura estable no hace salvaciones de muerte aunque tenga 0 PG, pero sigue inconsciente. Si recibe daño, deja de estar estable y vuelve a hacerlas. Si nadie la cura, recupera 1 PG al cabo de 1d4 horas."
         },
         {
             "grupo": "Descansos y salud",
@@ -308,22 +387,40 @@
             "texto": "Una criatura está maltrecha mientras le quede la mitad de sus PG o menos."
         },
         {
+            "grupo": "Descansos y salud",
+            "nombre": "Dados de golpe",
+            "icono": "🎲",
+            "texto": "Los dados de golpe ayudan a fijar el máximo de PG de un personaje, y la mayoría de los monstruos también los tienen. En un **descanso corto** puedes gastar dados de golpe para curarte: por cada uno, tira el dado y suma tu modificador de Constitución, y recuperas esos PG. Con un **descanso largo** recuperas todos los dados de golpe gastados."
+        },
+        {
+            "grupo": "Descansos y salud",
+            "nombre": "Muerte",
+            "icono": "🪦",
+            "texto": "Una criatura muerta no tiene PG y no puede recuperarlos salvo que antes la revivan con magia, como *Revivir a los muertos* o *Revivificar*. El espíritu sabe quién lanza el conjuro y puede negarse.\n\nAl volver a la vida, el efecto que la revive dice con cuántos PG vuelve. Salvo que diga otra cosa, vuelve con los estados, contagios mágicos y maldiciones que tenía al morir, si su duración no ha acabado. Si murió con niveles de agotamiento, vuelve con uno menos. Si estaba sintonizada con objetos mágicos, ya no lo está."
+        },
+        {
+            "grupo": "Descansos y salud",
+            "nombre": "Inspiración heroica",
+            "icono": "🌟",
+            "texto": "Si tienes inspiración heroica, puedes gastarla para **repetir cualquier dado justo después de tirarlo**, y te quedas con la nueva tirada. Si ganas inspiración heroica y ya la tenías, la pierdes, salvo que se la des a otro personaje que no la tenga."
+        },
+        {
             "grupo": "Movimiento y entorno",
             "nombre": "Terreno difícil",
             "icono": "🪨",
-            "texto": "Cada metro de movimiento en terreno difícil cuesta un metro más (moverse 1,5 m cuesta 3 m). No se acumula: un espacio lo es o no lo es.\n\nEs terreno difícil un espacio con: una criatura que no sea Diminuta ni aliada; muebles de tu tamaño o mayores; nieve espesa, hielo, escombros o maleza; líquido entre la espinilla y la cintura; una abertura para una criatura un tamaño más pequeña; una pendiente de 20 grados o más.\n\n**En cuadrícula:** cada casilla son 1,5 m; una casilla de terreno difícil cuesta 2."
+            "texto": "Cada pie de movimiento en terreno difícil cuesta un pie más (moverse 5 pies cuesta 10). No se acumula: un espacio lo es o no lo es.\n\nEs terreno difícil un espacio con: una criatura que no sea Diminuta ni aliada; muebles de tu tamaño o mayores; nieve espesa, hielo, escombros o maleza; líquido entre la espinilla y la cintura; una abertura para una criatura un tamaño más pequeña; una pendiente de 20 grados o más.\n\n**En cuadrícula:** cada casilla son 5 pies; una casilla de terreno difícil cuesta 2."
         },
         {
             "grupo": "Movimiento y entorno",
             "nombre": "Caídas",
             "icono": "🪂",
-            "texto": "Al acabar la caída, la criatura recibe 1d6 de daño contundente por cada 3 m que ha caído, hasta un máximo de 20d6. Al aterrizar queda derribada, salvo que no reciba nada de daño.\n\nSi cae al agua u otro líquido, puede usar su reacción para una prueba de Fuerza (Atletismo) o Destreza (Acrobacias) CD 15 y entrar de cabeza o de pie: si la supera, el daño se reduce a la mitad."
+            "texto": "Al acabar la caída, la criatura recibe 1d6 de daño contundente por cada 10 pies que ha caído, hasta un máximo de 20d6. Al aterrizar queda derribada, salvo que no reciba nada de daño.\n\nSi cae al agua u otro líquido, puede usar su reacción para una prueba de Fuerza (Atletismo) o Destreza (Acrobacias) CD 15 y entrar de cabeza o de pie: si la supera, el daño se reduce a la mitad."
         },
         {
             "grupo": "Movimiento y entorno",
             "nombre": "Saltar",
             "icono": "🦘",
-            "texto": "**De longitud.** Saltas tantos pies como tu puntuación de Fuerza (unos 30 cm por punto) si te mueves al menos 3 m justo antes; sin carrerilla, la mitad. Si aterrizas en terreno difícil, prueba de Destreza (Acrobacias) CD 10 o quedas derribado. Para salvar un obstáculo bajo, el DM puede pedir Fuerza (Atletismo) CD 10.\n\n**De altura.** Saltas 3 + tu modificador de Fuerza en pies (unos 30 cm cada uno; mínimo 0) si te mueves al menos 3 m justo antes; sin carrerilla, la mitad. Puedes alcanzar la altura del salto más una vez y media tu altura.\n\nCada metro de salto cuesta un metro de movimiento."
+            "texto": "**De longitud.** Saltas tantos pies como tu puntuación de Fuerza (1 pie por punto) si te mueves al menos 10 pies justo antes; sin carrerilla, la mitad. Si aterrizas en terreno difícil, prueba de Destreza (Acrobacias) CD 10 o quedas derribado. Para salvar un obstáculo bajo, el DM puede pedir Fuerza (Atletismo) CD 10.\n\n**De altura.** Saltas 3 + tu modificador de Fuerza en pies (unos 1 pie cada uno; mínimo 0) si te mueves al menos 10 pies justo antes; sin carrerilla, la mitad. Puedes alcanzar la altura del salto más una vez y media tu altura.\n\nCada pie de salto cuesta un pie de movimiento."
         },
         {
             "grupo": "Movimiento y entorno",
@@ -348,6 +445,30 @@
             "nombre": "Comida y agua",
             "icono": "🍖",
             "texto": "**Agua.** Si bebe menos de la mitad de lo que necesita en un día (Mediano: unos 4 litros), gana 1 nivel de agotamiento al final del día.\n\n**Comida.** Si come menos de la mitad (Mediano: medio kilo), salvación de Constitución CD 10 o 1 nivel de agotamiento al final del día. Sin comer nada 5 días, gana 1 nivel al final del quinto y otro por cada día más.\n\nEl agotamiento por hambre o sed no se quita hasta comer o beber lo necesario de un día."
+        },
+        {
+            "grupo": "Movimiento y entorno",
+            "nombre": "Trepar, nadar y arrastrarse",
+            "icono": "🧗",
+            "texto": "Mientras trepas, nadas o te arrastras, **cada pie de movimiento cuesta un pie más** (dos más en terreno difícil). Si tienes velocidad trepando o nadando y la usas, no pagas ese coste extra.\n\nA criterio del DM, trepar por una superficie resbaladiza o con pocos asideros, o moverse por aguas agitadas, puede pedir una prueba de Fuerza (Atletismo) CD 15."
+        },
+        {
+            "grupo": "Movimiento y entorno",
+            "nombre": "Volar",
+            "icono": "🪽",
+            "texto": "Mientras vuelas, **te caes** si quedas incapacitado o derribado o si tu velocidad volando baja a 0, salvo que puedas **flotar** (sostenerte en el aire)."
+        },
+        {
+            "grupo": "Movimiento y entorno",
+            "nombre": "Capacidad de carga",
+            "icono": "🎒",
+            "texto": "Tu tamaño y tu Fuerza deciden cuánto peso puedes llevar y cuánto puedes arrastrar, levantar o empujar. Mientras arrastras, levantas o empujas más de lo que puedes llevar, tu velocidad no puede pasar de 5 pies.\n\n| Tamaño | Llevar | Arrastrar, levantar o empujar |\n| --- | --- | --- |\n| Diminuto | Fuerza × 7,5 libras | Fuerza × 15 libras |\n| Pequeño o Mediano | Fuerza × 15 libras | Fuerza × 30 libras |\n| Grande | Fuerza × 30 libras | Fuerza × 60 libras |\n| Enorme | Fuerza × 60 libras | Fuerza × 120 libras |\n| Gargantuesco | Fuerza × 120 libras | Fuerza × 240 libras |"
+        },
+        {
+            "grupo": "Movimiento y entorno",
+            "nombre": "Percepción pasiva",
+            "icono": "👁️",
+            "texto": "La percepción pasiva mide lo atenta que está una criatura a lo que la rodea. El DM la usa para saber si nota algo sin hacer una prueba de Sabiduría (Percepción).\n\n**Percepción pasiva = 10 + el bonificador de Sabiduría (Percepción).** Con ventaja en esas pruebas, +5; con desventaja, −5. Por ejemplo, un personaje de nivel 1 con Sabiduría 15 y competencia en Percepción tiene 14 (10 + 2 + 2)."
         }
     ]
 }

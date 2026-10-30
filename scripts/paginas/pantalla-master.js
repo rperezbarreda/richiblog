@@ -101,6 +101,10 @@
             const l = linea.trim();
             // Las tablas: «| a | b |» por fila (la primera, la cabecera).
             if (/^\|.*\|$/.test(l)) {
+                // La raya de debajo de la cabecera («| --- | --- |»), fuera.
+                if (/^\|[\s:|-]+\|$/.test(l)) {
+                    return;
+                }
                 cerrarParrafo();
                 lista = null;
                 const celdas = l.slice(1, -1).split("|").map((c) => c.trim());
@@ -178,42 +182,247 @@
 
     // ---- LAS REGLAS (o solo las de un grupo: las condiciones son
     // «Estados» y las acciones, «Acciones») ----
+    // ---- LAS REGLAS PROPIAS (homebrew): las de tu mesa, guardadas en el
+    // navegador («richi-master-homebrew»: [{id, nombre, icono, texto}]),
+    // las mismas en todos los perfiles. Salen en su ventana, al final de
+    // «todas las reglas» y en el buscador de arriba. ----
+    const CLAVE_HOMEBREW = "richi-master-homebrew";
+
+    function leerHomebrew() {
+        try {
+            const x = JSON.parse(localStorage.getItem(CLAVE_HOMEBREW) || "[]");
+            return Array.isArray(x) ? x : [];
+        } catch (e) {
+            return [];
+        }
+    }
+
+    function guardarHomebrew(lista) {
+        try {
+            localStorage.setItem(CLAVE_HOMEBREW, JSON.stringify(lista));
+        } catch (e) {
+            // Sin almacenamiento: solo mientras esté abierta.
+        }
+        document.dispatchEvent(new CustomEvent("master:homebrew"));
+    }
+
+    // Escucha un evento mientras «dentro» siga en la página.
+    function mientrasEste(dentro, evento, alPasar) {
+        let puesta = false;
+        const f = () => {
+            if (dentro.isConnected) {
+                puesta = true;
+                alPasar();
+            } else if (puesta) {
+                document.removeEventListener(evento, f);
+            }
+        };
+        document.addEventListener(evento, f);
+    }
+
+    // Una regla en su ventana (las del SRD y las propias).
+    function abrirRegla(r, vuelta, fuente) {
+        const cuerpo = crear("div", "oc-regla-ventana");
+        if (r.icono) {
+            const grande = crear("p", "oc-regla-ventana-dibujo", r.icono);
+            grande.setAttribute("aria-hidden", "true");
+            cuerpo.appendChild(grande);
+        }
+        if (r.grupo) {
+            cuerpo.appendChild(crear("p", "oc-hoja-nota", r.grupo + (r.alias ? " · también: " + r.alias : "")));
+        }
+        cuerpo.appendChild(markdown(r.texto));
+        if (fuente) {
+            cuerpo.appendChild(crear("p", "oc-hoja-nota master-fuente", fuente));
+        }
+        if (window.ocDadosEnTexto) {
+            window.ocDadosEnTexto(cuerpo);
+        }
+        const fijar = botonDe("oc-vida-accion", "📌 al tablero", () => {
+            cerrar();
+            anadir("ficha", { titulo: r.nombre, datos: { que: r.propia ? "propia" : "regla", id: r.id || r.nombre } });
+        }, "Poner " + r.nombre + " en el tablero");
+        cuerpo.appendChild(fijar);
+        const cerrar = window.ocVentana.abrir({ titulo: r.nombre, cuerpo, vuelta, clase: "es-regla" });
+    }
+
     function montarReglas(dentro, m, soloGrupo) {
+        m.datos = m.datos || {};
         dentro.appendChild(crear("p", "oc-hoja-nota", "Cargando las reglas…"));
         pedir("/datos/personajes/reglas-dnd.json").then((datos) => {
-            const reglas = (datos.reglas || []).filter((r) => !soloGrupo || r.grupo === soloGrupo);
-            const caja = crear("div", "oc-reglas");
-            const grupos = {};
-            reglas.forEach((r) => {
-                if (!grupos[r.grupo]) {
-                    const g = crear("div", "oc-reglas-grupo");
-                    const lista = crear("ul", "oc-reglas-lista");
-                    if (!soloGrupo) {
-                        g.appendChild(crear("h3", "oc-reglas-titulo", r.grupo));
+            const pintar = () => {
+                const propias = soloGrupo ? [] : leerHomebrew().map((r) => Object.assign({ grupo: "🏠 Reglas propias" }, r));
+                const reglas = (datos.reglas || []).filter((r) => !soloGrupo || r.grupo === soloGrupo).concat(propias);
+                const caja = crear("div", "oc-reglas");
+                const grupos = {};
+                const plegados = m.datos.plegados || [];
+                reglas.forEach((r) => {
+                    if (!grupos[r.grupo]) {
+                        const g = crear("div", "oc-reglas-grupo");
+                        const lista = crear("ul", "oc-reglas-lista");
+                        lista.id = "master-reglas-" + m.id + "-" + Object.keys(grupos).length;
+                        if (!soloGrupo) {
+                            // Cada grupo se pliega y despliega con su título.
+                            const h = crear("h3", "oc-reglas-titulo master-reglas-plegable");
+                            const b = botonDe("master-reglas-grupo", "", () => {
+                                const abierto = b.getAttribute("aria-expanded") === "true";
+                                b.setAttribute("aria-expanded", abierto ? "false" : "true");
+                                lista.hidden = abierto;
+                                m.datos.plegados = abierto ? (m.datos.plegados || []).concat(r.grupo)
+                                    : (m.datos.plegados || []).filter((x) => x !== r.grupo);
+                                guardar();
+                            });
+                            const flecha = crear("span", "master-reglas-flecha", "▸");
+                            flecha.setAttribute("aria-hidden", "true");
+                            b.append(flecha, document.createTextNode(r.grupo));
+                            const plegado = plegados.indexOf(r.grupo) >= 0;
+                            b.setAttribute("aria-expanded", plegado ? "false" : "true");
+                            b.setAttribute("aria-controls", lista.id);
+                            lista.hidden = plegado;
+                            h.appendChild(b);
+                            g.appendChild(h);
+                        }
+                        g.appendChild(lista);
+                        caja.appendChild(g);
+                        grupos[r.grupo] = lista;
                     }
-                    g.appendChild(lista);
-                    caja.appendChild(g);
-                    grupos[r.grupo] = lista;
+                    const li = crear("li", "oc-regla");
+                    const detalles = crear("details");
+                    const resumen = crear("summary");
+                    if (r.icono) {
+                        resumen.appendChild(crear("span", "oc-regla-icono", r.icono));
+                    }
+                    resumen.appendChild(crear("span", "oc-regla-nombre", r.nombre + (r.alias ? " (" + r.alias + ")" : "")));
+                    detalles.append(resumen, markdown(r.texto));
+                    li.appendChild(detalles);
+                    grupos[r.grupo].appendChild(li);
+                });
+                dentro.replaceChildren(caja);
+                window.ocMontar.reglas(caja, "master-buscar-" + m.id);
+                // Al buscar, se ven todos los grupos (los plegados también).
+                const buscar = caja.querySelector("input[type=search]");
+                if (buscar) {
+                    buscar.addEventListener("input", () => {
+                        const hay = !!buscar.value.trim();
+                        caja.querySelectorAll(".master-reglas-grupo").forEach((b) => {
+                            const lista = document.getElementById(b.getAttribute("aria-controls"));
+                            lista.hidden = !hay && b.getAttribute("aria-expanded") === "false";
+                        });
+                    });
                 }
-                const li = crear("li", "oc-regla");
-                const detalles = crear("details");
-                const resumen = crear("summary");
-                if (r.icono) {
-                    resumen.appendChild(crear("span", "oc-regla-icono", r.icono));
+                if (datos.fuente) {
+                    dentro.appendChild(crear("p", "oc-hoja-nota master-fuente", datos.fuente));
                 }
-                resumen.appendChild(crear("span", "oc-regla-nombre", r.nombre));
-                detalles.append(resumen, markdown(r.texto));
-                li.appendChild(detalles);
-                grupos[r.grupo].appendChild(li);
-            });
-            dentro.replaceChildren(caja);
-            window.ocMontar.reglas(caja, "master-buscar-" + m.id);
-            if (datos.fuente) {
-                dentro.appendChild(crear("p", "oc-hoja-nota master-fuente", datos.fuente));
+            };
+            pintar();
+            if (!soloGrupo) {
+                mientrasEste(dentro, "master:homebrew", pintar);
             }
         }).catch(() => {
             dentro.replaceChildren(crear("p", "oc-vacio", "No he podido cargar las reglas."));
         });
+    }
+
+    function montarHomebrew(dentro) {
+        const lista = crear("ul", "master-homebrew");
+        lista.setAttribute("aria-label", "Reglas propias");
+        const vacio = crear("p", "oc-vacio", "Todavía no hay reglas propias.");
+        // El formulario: para una nueva o para cambiar una.
+        const form = crear("form", "master-homebrew-form");
+        form.hidden = true;
+        const campo = (id, texto, etiqueta) => {
+            const et = crear("label", "oc-dados-etiqueta", texto);
+            const x = crear(etiqueta || "input", "oc-dados-texto" + (etiqueta === "textarea" ? " oc-notas-texto" : ""));
+            x.id = "master-homebrew-" + id;
+            et.htmlFor = x.id;
+            if (etiqueta !== "textarea") {
+                x.autocomplete = "off";
+            }
+            form.append(et, x);
+            return x;
+        };
+        const nombre = campo("nombre", "nombre");
+        nombre.maxLength = 60;
+        nombre.required = true;
+        const icono = campo("icono", "dibujo (un emoji, si quieres)");
+        icono.maxLength = 4;
+        icono.placeholder = "🍺";
+        const texto = campo("texto", "la regla (con **negrita**, *cursiva*, «- » para listas y «| a | b |» para tablas)",
+            "textarea");
+        texto.rows = 8;
+        const botones = crear("div", "master-anadir-otras");
+        const listo = crear("button", "oc-vida-accion es-principal", "guardar");
+        listo.type = "submit";
+        let editando = null;
+        const cancelar = botonDe("oc-vida-accion", "cancelar", () => cerrarForm());
+        botones.append(listo, cancelar);
+        form.appendChild(botones);
+        const nueva = botonDe("oc-vida-accion es-principal", "＋ regla propia", () => abrirForm(null));
+        function abrirForm(r) {
+            editando = r;
+            nombre.value = r ? r.nombre : "";
+            icono.value = r ? r.icono || "" : "";
+            texto.value = r ? r.texto : "";
+            form.hidden = false;
+            nueva.hidden = true;
+            nombre.focus();
+        }
+        function cerrarForm() {
+            form.hidden = true;
+            nueva.hidden = false;
+            nueva.focus();
+        }
+        form.addEventListener("submit", (e) => {
+            e.preventDefault();
+            const todas = leerHomebrew();
+            const datos = { nombre: nombre.value.trim(), icono: icono.value.trim(), texto: texto.value.trim() };
+            if (!datos.nombre) {
+                nombre.focus();
+                return;
+            }
+            if (editando) {
+                const i = todas.findIndex((x) => x.id === editando.id);
+                if (i >= 0) {
+                    todas[i] = Object.assign(todas[i], datos);
+                }
+            } else {
+                todas.push(Object.assign({ id: "h" + Date.now().toString(36) }, datos));
+            }
+            guardarHomebrew(todas);
+            avisar("Guardada: " + datos.nombre + ".");
+            cerrarForm();
+        });
+        const pintar = () => {
+            const todas = leerHomebrew();
+            lista.replaceChildren(...todas.map((r) => {
+                const li = crear("li", "master-homebrew-regla");
+                const ver = botonDe("oc-regla-boton", "", () => abrirRegla(Object.assign({ propia: true,
+                    grupo: "🏠 Reglas propias" }, r), ver));
+                ver.setAttribute("aria-haspopup", "dialog");
+                const d = crear("span", "oc-regla-dibujo", r.icono || "🏠");
+                d.setAttribute("aria-hidden", "true");
+                ver.append(d, crear("span", "oc-regla-texto", r.nombre));
+                const cambiar = botonDe("master-party-quitar", "✎", () => abrirForm(r), "Cambiar " + r.nombre);
+                let seguro = false;
+                const quitar = botonDe("master-party-quitar", "✕", () => {
+                    if (!seguro) {
+                        seguro = true;
+                        quitar.setAttribute("aria-label", "¿Seguro? Pulsa otra vez para borrar " + r.nombre);
+                        avisar("Pulsa otra vez para borrar " + r.nombre + ".");
+                        return;
+                    }
+                    guardarHomebrew(leerHomebrew().filter((x) => x.id !== r.id));
+                    avisar("Borrada: " + r.nombre + ".");
+                    nueva.focus();
+                }, "Borrar " + r.nombre);
+                li.append(ver, cambiar, quitar);
+                return li;
+            }));
+            vacio.hidden = !!todas.length;
+        };
+        mientrasEste(dentro, "master:homebrew", pintar);
+        dentro.append(lista, vacio, nueva, form);
+        pintar();
     }
 
     // ---- LOS CONJUROS: los 339 del SRD 5.2 (D&D 2024), en
@@ -223,6 +432,16 @@
     const nivelDe = (c) => (c.nivel ? "Nivel " + c.nivel : "Truco");
 
     function abrirConjuro(c, vuelta, fuente) {
+        const cuerpo = cuerpoConjuro(c, fuente);
+        const fijar = botonDe("oc-vida-accion", "📌 al tablero", () => {
+            cerrar();
+            anadir("ficha", { titulo: c.nombre, datos: { que: "conjuro", id: c.en } });
+        }, "Poner " + c.nombre + " en el tablero");
+        cuerpo.appendChild(fijar);
+        const cerrar = window.ocVentana.abrir({ titulo: c.nombre, cuerpo, vuelta, clase: "es-regla" });
+    }
+
+    function cuerpoConjuro(c, fuente) {
         const cuerpo = crear("div", "oc-regla-ventana");
         const chapas = crear("ul", "oc-desplegable-datos");
         [nivelDe(c), c.escuela, c.ritual ? "ritual" : "", c.conc ? "concentración" : ""].filter(Boolean)
@@ -245,7 +464,94 @@
         if (fuente) {
             cuerpo.appendChild(crear("p", "oc-hoja-nota master-fuente", fuente));
         }
-        window.ocVentana.abrir({ titulo: c.nombre, cuerpo, vuelta, clase: "es-regla" });
+        if (window.ocDadosEnTexto) {
+            window.ocDadosEnTexto(cuerpo);
+        }
+        return cuerpo;
+    }
+
+    // Lo de un objeto (de tienda.json): sus datos y qué hace.
+    function datosObjeto(o) {
+        const cuerpo = crear("div", "master-objeto");
+        const dl = crear("dl", "master-bicho-datos");
+        const fila = (que, valor) => {
+            if (valor) {
+                dl.append(crear("dt", "", que), crear("dd", "", String(valor)));
+            }
+        };
+        fila("Categoría", o.cat);
+        fila("Rareza", o.rareza);
+        fila("Sintonía", o.sint ? "la requiere" : "");
+        fila("Detalles", o.det);
+        fila("Peso", o.peso);
+        fila("Nota", o.nota);
+        fila("Precio", o.cp ? moneda(o.cp) : "");
+        fila("Se vende en", (o.tiendas || []).join(", ").toLowerCase());
+        fila("En inglés", o.en);
+        cuerpo.appendChild(dl);
+        if (o.texto) {
+            const que = markdown(o.texto);
+            que.classList.add("master-objeto-texto");
+            cuerpo.appendChild(que);
+            if (window.ocDadosEnTexto) {
+                window.ocDadosEnTexto(que);
+            }
+            enlazarConjuros(que);
+        }
+        return cuerpo;
+    }
+
+    function abrirObjeto(o, vuelta, fuente) {
+        const cuerpo = datosObjeto(o);
+        if (fuente) {
+            cuerpo.appendChild(crear("p", "oc-hoja-nota master-fuente", fuente));
+        }
+        cuerpo.appendChild(botonDe("oc-vida-accion", "📌 al tablero", () => {
+            cerrar();
+            anadir("ficha", { titulo: o.nombre, datos: { que: "objeto", id: o.en } });
+        }, "Poner " + o.nombre + " en el tablero"));
+        const cerrar = window.ocVentana.abrir({ titulo: o.nombre, cuerpo, vuelta, clase: "es-regla" });
+    }
+
+    // UNA FICHA EN EL TABLERO (📌): un conjuro, una regla (del SRD o
+    // propia) o un objeto, en su ventana. «datos»: {que, id}.
+    function montarFicha(dentro, m) {
+        m.datos = m.datos || {};
+        const que = m.datos.que;
+        const id = m.datos.id;
+        const poner = (x) => dentro.replaceChildren(x || crear("p", "oc-vacio", "Ya no está."));
+        dentro.appendChild(crear("p", "oc-hoja-nota", "Cargando…"));
+        if (que === "propia") {
+            const pintar = () => {
+                const r = leerHomebrew().find((x) => x.id === id);
+                poner(r ? markdown(r.texto) : null);
+            };
+            pintar();
+            mientrasEste(dentro, "master:homebrew", pintar);
+            return;
+        }
+        const ruta = { conjuro: CONJUROS_SRD, regla: "/datos/personajes/reglas-dnd.json",
+            objeto: "/datos/personajes/compendio/tienda.json" }[que];
+        if (!ruta) {
+            poner(null);
+            return;
+        }
+        pedir(ruta).then((datos) => {
+            if (que === "conjuro") {
+                const c = (datos.conjuros || []).find((x) => x.en === id);
+                poner(c ? cuerpoConjuro(c, datos.fuente) : null);
+            } else if (que === "regla") {
+                const r = (datos.reglas || []).find((x) => x.nombre === id);
+                const t = r ? markdown(r.texto) : null;
+                if (t && window.ocDadosEnTexto) {
+                    window.ocDadosEnTexto(t);
+                }
+                poner(t);
+            } else {
+                const o = (datos.objetos || []).find((x) => x.en === id);
+                poner(o ? datosObjeto(o) : null);
+            }
+        }).catch(() => poner(crear("p", "oc-vacio", "No he podido cargarlo.")));
     }
 
     // Un botón con el nombre de un conjuro que abre su ventana.
@@ -427,10 +733,154 @@
     function montarParty(dentro, m) {
         m.datos = m.datos || {};
         m.datos.pjs = Array.isArray(m.datos.pjs) ? m.datos.pjs : [];
-        const lista = crear("ul", "master-party");
-        lista.setAttribute("aria-label", "Jugadores");
-        lista.dataset.queSolo = "si";
         const numero = (v) => (v === "" || v === undefined || v === null || isNaN(parseInt(v, 10)) ? "" : parseInt(v, 10));
+        const mod = (n) => Math.floor((n - 10) / 2);
+        const conSigno = (n) => (n >= 0 ? "+" : "−") + Math.abs(n);
+        const quienEs = (pj, i) => pj.nombre || "jugador " + (i + 1);
+        const uid = "master-party-" + m.id;
+
+        // ---- las dos pestañas: la lista (para mirar) y el editor ----
+        const pestanas = crear("div", "master-bicho-pestanas");
+        pestanas.setAttribute("role", "tablist");
+        pestanas.setAttribute("aria-label", "Party");
+        const panelLista = crear("div", "master-bicho-panel");
+        const panelEditor = crear("div", "master-bicho-panel");
+        const paneles = [["👥 la party", panelLista], ["✏️ editar", panelEditor]];
+        const tabs = paneles.map(([titulo, panel], i) => {
+            const t = botonDe("master-bicho-pestana", titulo, () => elegir(i, false));
+            t.setAttribute("role", "tab");
+            t.id = uid + "-t" + i;
+            panel.id = uid + "-p" + i;
+            t.setAttribute("aria-controls", panel.id);
+            panel.setAttribute("role", "tabpanel");
+            panel.setAttribute("aria-labelledby", t.id);
+            panel.tabIndex = 0;
+            t.addEventListener("keydown", (e) => {
+                if (e.key === "ArrowRight" || e.key === "ArrowLeft") {
+                    e.preventDefault();
+                    elegir(1 - i, true);
+                }
+            });
+            pestanas.appendChild(t);
+            return t;
+        });
+        function elegir(i, foco) {
+            tabs.forEach((t, j) => {
+                t.setAttribute("aria-selected", j === i ? "true" : "false");
+                t.tabIndex = j === i ? 0 : -1;
+            });
+            paneles.forEach(([, panel], j) => {
+                panel.hidden = j !== i;
+            });
+            m.datos.pestana = i;
+            guardar();
+            if (i === 0) {
+                pintarLista();
+            } else {
+                pintarEditor();
+            }
+            if (foco) {
+                tabs[i].focus();
+            }
+        }
+
+        // ---- LA LISTA: de un vistazo, sin campos; con sus dados y «a la
+        // iniciativa» (tira 1d20 + su bono de Destreza) ----
+        const alIni = (pj, i) => {
+            const des = numero(pj.des);
+            const nombre = meterEnIniciativa({ nombre: quienEs(pj, i), bono: des === "" ? 0 : mod(des), ca: pj.ca,
+                pg: numero(pj.pg), color: "#3fae5a" });
+            return nombre;
+        };
+        function pintarLista() {
+            const pjs = m.datos.pjs;
+            panelLista.replaceChildren();
+            if (!pjs.length) {
+                panelLista.appendChild(crear("p", "oc-vacio", "Todavía no hay jugadores: añádelos en «editar»."));
+                return;
+            }
+            const todos = botonDe("oc-vida-accion es-principal", "⚔️ todos a la iniciativa", () => {
+                const entran = pjs.map((pj, i) => alIni(pj, i)).filter(Boolean);
+                avisar(entran.length ? "A la iniciativa: " + entran.join(", ") + "." : "Ya estaban todos en la iniciativa.");
+            }, "Poner a toda la party en la iniciativa (tira su iniciativa)");
+            const resumen = crear("p", "master-party-resumen");
+            const trozos = PASIVAS.map(([k, texto]) => {
+                const con = pjs.filter((pj) => numero(pj[k]) !== "");
+                if (!con.length) {
+                    return "";
+                }
+                const mejor = con.reduce((a, b) => (numero(b[k]) > numero(a[k]) ? b : a));
+                return texto.replace(" pasiva", "") + " " + numero(mejor[k]) + " (" + (mejor.nombre || "sin nombre") + ")";
+            }).filter(Boolean);
+            resumen.textContent = trozos.length ? "La más alta: " + trozos.join(" · ") : "";
+            resumen.hidden = !trozos.length;
+            const ul = crear("ul", "master-party es-lista");
+            ul.dataset.queSolo = "si";
+            ul.setAttribute("aria-label", "Jugadores");
+            pjs.forEach((pj, i) => {
+                const quien = quienEs(pj, i);
+                const li = crear("li", "master-party-pj es-lista");
+                const cabeza = crear("div", "master-party-cabeza");
+                const nombre = crear("p", "master-party-nombre");
+                nombre.appendChild(crear("strong", "", quien));
+                if (pj.clase) {
+                    nombre.appendChild(crear("span", "master-party-clase", pj.clase));
+                }
+                const ini = botonDe("oc-vida-accion", "＋ iniciativa", () => {
+                    const n = alIni(pj, i);
+                    avisar(n ? "A la iniciativa: " + n + "." : quien + " ya está en la iniciativa.");
+                }, "Poner a " + quien + " en la iniciativa (tira su iniciativa)");
+                cabeza.append(nombre, ini);
+                const vitales = crear("dl", "master-party-vitales");
+                const vital = (et, valor, titulo) => {
+                    if (valor === "" || valor === undefined) {
+                        return;
+                    }
+                    const dt = crear("dt", "", et);
+                    dt.title = titulo;
+                    vitales.append(dt, crear("dd", "", String(valor)));
+                };
+                vital("PG", numero(pj.pg) === "" ? "" : numero(pj.pg) + (numero(pj.pgmax) !== "" ? " / " + numero(pj.pgmax) : ""),
+                    "Puntos de golpe");
+                vital("CA", numero(pj.ca), "Clase de armadura");
+                PASIVAS.forEach(([k, texto, emoji]) => vital(emoji, numero(pj[k]), texto));
+                vitales.querySelectorAll("dt").forEach((dt) => {
+                    if (/\p{Extended_Pictographic}/u.test(dt.textContent)) {
+                        const t = dt.title;
+                        const e = dt.textContent;
+                        dt.textContent = "";
+                        const em = crear("span", "", e);
+                        em.setAttribute("aria-hidden", "true");
+                        dt.append(em, crear("span", "visually-hidden", t));
+                    }
+                });
+                const car = crear("ul", "master-party-caracteristicas");
+                car.setAttribute("aria-label", "Características de " + quien);
+                CARACTERISTICAS.forEach((k) => {
+                    const n = numero(pj[k.toLowerCase()]);
+                    if (n === "") {
+                        return;
+                    }
+                    const c = crear("li", "master-party-c");
+                    c.appendChild(crear("span", "master-party-et", k));
+                    c.appendChild(crear("span", "master-party-valor", String(n)));
+                    c.appendChild(window.ocDadoBoton ? window.ocDadoBoton(conSigno(mod(n)), "1d20" + (mod(n) >= 0 ? "+" : "")
+                        + mod(n), k + " de " + quien) : document.createTextNode(conSigno(mod(n))));
+                    car.appendChild(c);
+                });
+                li.append(cabeza, vitales);
+                if (car.children.length) {
+                    li.appendChild(car);
+                }
+                ul.appendChild(li);
+            });
+            panelLista.append(todos, resumen, ul);
+        }
+
+        // ---- EL EDITOR: una tarjeta con campos por jugador ----
+        const lista = crear("ul", "master-party");
+        lista.setAttribute("aria-label", "Jugadores (editar)");
+        lista.dataset.queSolo = "si";
         const campo = (pj, i, clave, texto, tipo, clase) => {
             const et = crear("label", "master-party-campo" + (clase ? " " + clase : ""));
             et.appendChild(crear("span", "master-party-et", texto));
@@ -442,55 +892,51 @@
                 input.autocomplete = "off";
                 input.maxLength = 40;
             }
-            input.id = "master-party-" + m.id + "-" + i + "-" + clave;
+            input.id = uid + "-" + i + "-" + clave;
             input.value = pj[clave] === undefined ? "" : String(pj[clave]);
             input.addEventListener("change", () => {
                 pj[clave] = input.type === "number" ? numero(input.value) : input.value.trim();
                 guardar();
-                if (input.alCambiar) {
-                    input.alCambiar();
-                }
             });
             et.appendChild(input);
             return et;
         };
-        const pintar = (foco) => {
+        const vacio = crear("p", "oc-vacio", "Todavía no hay jugadores.");
+        const nuevo = botonDe("oc-vida-accion es-principal", "＋ jugador", () => {
+            m.datos.pjs.push({});
+            guardar();
+            pintarEditor();
+            const inputs = lista.querySelectorAll(".es-nombre input");
+            inputs[inputs.length - 1].focus();
+        }, "Añadir un jugador");
+        function pintarEditor(foco) {
             lista.replaceChildren(...m.datos.pjs.map((pj, i) => {
                 const li = crear("li", "master-party-pj");
-                const quien = pj.nombre || "jugador " + (i + 1);
-                li.setAttribute("aria-label", quien);
+                const quien = quienEs(pj, i);
                 const arriba = crear("div", "master-party-fila");
                 arriba.append(campo(pj, i, "nombre", "nombre", "text", "es-nombre"), campo(pj, i, "clase", "clase", "text", "es-clase"),
                     campo(pj, i, "pg", "PG"), campo(pj, i, "pgmax", "máx"), campo(pj, i, "ca", "CA"));
+                let seguro = false;
                 const quitar = botonDe("master-party-quitar", "✕", () => {
+                    if (!seguro) {
+                        seguro = true;
+                        quitar.setAttribute("aria-label", "¿Seguro? Pulsa otra vez para quitar a " + quien);
+                        avisar("Pulsa otra vez para quitar a " + quien + ".");
+                        return;
+                    }
                     m.datos.pjs.splice(i, 1);
                     guardar();
-                    pintar(Math.min(i, m.datos.pjs.length - 1));
+                    pintarEditor(Math.min(i, m.datos.pjs.length - 1));
                     avisar("Quitado: " + quien + ".");
                 }, "Quitar a " + quien);
                 arriba.appendChild(quitar);
-                const car = crear("div", "master-party-fila es-caracteristicas");
+                const car = crear("div", "master-party-fila");
                 CARACTERISTICAS.forEach((k) => {
-                    const c = campo(pj, i, k.toLowerCase(), k, "number", "es-car");
-                    const bono = crear("span", "master-party-bono");
-                    const ponerBono = () => {
-                        const n = numero(pj[k.toLowerCase()]);
-                        bono.replaceChildren();
-                        if (n === "") {
-                            return;
-                        }
-                        const mo = Math.floor((n - 10) / 2);
-                        const texto = (mo >= 0 ? "+" : "−") + Math.abs(mo);
-                        bono.appendChild(window.ocDadoBoton ? window.ocDadoBoton(texto, "1d20" + (mo >= 0 ? "+" : "") + mo,
-                            k + " de " + quien) : document.createTextNode(texto));
-                    };
-                    c.querySelector("input").alCambiar = ponerBono;
-                    ponerBono();
-                    const caja = crear("div", "master-party-car");
-                    caja.append(c, bono);
-                    car.appendChild(caja);
+                    const c = crear("div", "master-party-car");
+                    c.appendChild(campo(pj, i, k.toLowerCase(), k, "number", "es-car"));
+                    car.appendChild(c);
                 });
-                const pas = crear("div", "master-party-fila es-pasivas");
+                const pas = crear("div", "master-party-fila");
                 PASIVAS.forEach(([k, texto, emoji]) => {
                     const c = campo(pj, i, k, texto, "number", "es-pasiva");
                     const et = c.querySelector(".master-party-et");
@@ -506,74 +952,389 @@
                 return li;
             }));
             vacio.hidden = !!m.datos.pjs.length;
-            resumen();
             if (typeof foco === "number") {
                 const q = foco >= 0 ? lista.querySelectorAll(".master-party-quitar")[foco] : null;
                 (q || nuevo).focus();
             }
-        };
-        // Lo más alto de cada pasiva en la party (para «¿alguien lo ve?»).
-        const arribaDe = crear("p", "master-party-resumen");
-        function resumen() {
-            const trozos = PASIVAS.map(([k, texto]) => {
-                const con = m.datos.pjs.filter((pj) => numero(pj[k]) !== "");
-                if (!con.length) {
-                    return "";
-                }
-                const mejor = con.reduce((a, b) => (numero(b[k]) > numero(a[k]) ? b : a));
-                return texto.replace(" pasiva", "") + " " + numero(mejor[k]) + " (" + (mejor.nombre || "sin nombre") + ")";
-            }).filter(Boolean);
-            arribaDe.textContent = trozos.length ? "La más alta: " + trozos.join(" · ") : "";
-            arribaDe.hidden = !trozos.length;
         }
-        lista.addEventListener("change", resumen);
-        const vacio = crear("p", "oc-vacio", "Todavía no hay jugadores.");
-        const nuevo = botonDe("oc-vida-accion es-principal", "＋ jugador", () => {
-            m.datos.pjs.push({});
-            guardar();
-            pintar();
-            const inputs = lista.querySelectorAll(".es-nombre input");
-            inputs[inputs.length - 1].focus();
-        }, "Añadir un jugador");
-        dentro.append(arribaDe, lista, vacio, nuevo);
+        panelEditor.append(lista, vacio, nuevo);
+        dentro.append(pestanas, panelLista, panelEditor);
+        elegir(typeof m.datos.pestana === "number" ? m.datos.pestana : (m.datos.pjs.length ? 0 : 1), false);
+    }
+
+    // ---- UN POST-IT: texto con formato, como en un procesador de textos
+    // (negrita, cursiva, subrayado, tachado, títulos, listas, citas,
+    // alineación, colores y resaltado), con su barra de herramientas.
+    // «✏️ editar» lo abre para escribir; «listo» lo deja para leer (y
+    // entonces los dados del texto se tiran). Se guarda como HTML limpio
+    // (m.datos.html; los de antes, en Markdown, se pasan solos). ----
+    const ETIQUETAS_POSTIT = ["P", "DIV", "BR", "B", "STRONG", "I", "EM", "U", "S", "STRIKE", "DEL", "H3", "H4", "UL", "OL",
+        "LI", "BLOCKQUOTE", "SPAN", "MARK"];
+
+    // Solo lo que hace la barra: lo demás (scripts, enlaces, imágenes,
+    // estilos raros pegados de otra web) se quita o se queda en texto.
+    function sanearHtml(html) {
+        const caja = document.createElement("template");
+        caja.innerHTML = String(html || "");
+        const limpiar = (nodo) => {
+            Array.from(nodo.childNodes).forEach((n) => {
+                if (n.nodeType === 3) {
+                    return;
+                }
+                if (n.nodeType !== 1) {
+                    n.remove();
+                    return;
+                }
+                let tag = n.tagName === "FONT" ? "SPAN" : n.tagName;
+                if (["SCRIPT", "STYLE", "IFRAME", "OBJECT", "TEMPLATE"].indexOf(tag) >= 0) {
+                    n.remove();
+                    return;
+                }
+                limpiar(n);
+                if (ETIQUETAS_POSTIT.indexOf(tag) < 0) {
+                    tag = /^(H1|H2|H5|H6)$/.test(tag) ? "H3" : null;
+                    if (!tag) {
+                        n.replaceWith(...n.childNodes);
+                        return;
+                    }
+                }
+                const nuevo = document.createElement(tag);
+                const st = n.style || {};
+                const color = n.getAttribute && n.getAttribute("color");
+                const estilos = [];
+                if (st.color || color) {
+                    estilos.push("color: " + (st.color || color));
+                }
+                if (st.backgroundColor) {
+                    estilos.push("background-color: " + st.backgroundColor);
+                }
+                if (st.textAlign && /^(left|center|right|justify)$/.test(st.textAlign)) {
+                    estilos.push("text-align: " + st.textAlign);
+                }
+                if (estilos.length) {
+                    nuevo.setAttribute("style", estilos.join("; "));
+                }
+                nuevo.append(...n.childNodes);
+                n.replaceWith(nuevo);
+            });
+        };
+        limpiar(caja.content);
+        return caja.innerHTML;
+    }
+
+    const COLORES_LETRA = [["", "la del tema"], ["#d23b3b", "rojo"], ["#e07a1f", "naranja"], ["#2f9e4f", "verde"],
+        ["#3b7ddd", "azul"], ["#8e5bd6", "morado"]];
+    const COLORES_RESALTE = [["", "sin resaltar"], ["#ffe873", "amarillo"], ["#8fe8a2", "verde"], ["#7fdcff", "celeste"],
+        ["#ffa6d5", "rosa"], ["#ffb870", "naranja"]];
+
+    function montarTarjeta(dentro, m) {
+        m.datos = m.datos || {};
+        if (m.datos.html === undefined && m.datos.texto) {
+            m.datos.html = sanearHtml(markdown(m.datos.texto).innerHTML);
+        }
+        const ver = crear("div", "oc-texto master-postit");
+        const area = crear("div", "oc-texto master-postit es-editable");
+        area.contentEditable = "true";
+        area.setAttribute("role", "textbox");
+        area.setAttribute("aria-multiline", "true");
+        area.setAttribute("aria-label", "Texto del post-it");
+        area.hidden = true;
+        // ---- la barra de herramientas ----
+        const barra = crear("div", "master-postit-barra");
+        barra.setAttribute("role", "toolbar");
+        barra.setAttribute("aria-label", "Formato del texto");
+        barra.hidden = true;
+        const estados = [];
+        const orden = (cmd, valor) => {
+            area.focus();
+            try {
+                document.execCommand("styleWithCSS", false, cmd === "hiliteColor" || cmd === "foreColor");
+            } catch (e) {
+                // Navegadores sin styleWithCSS: da igual.
+            }
+            document.execCommand(cmd, false, valor);
+            alEscribir();
+            repintarEstados();
+        };
+        const herramienta = (texto, etiqueta, cmd, valor, clase, atajo) => {
+            const b = botonDe("master-postit-boton" + (clase ? " " + clase : ""), texto, () => orden(cmd, valor), etiqueta);
+            b.title = etiqueta + (atajo ? " (" + atajo + ")" : "");
+            // Que pulsar no quite la selección del texto.
+            b.addEventListener("mousedown", (e) => e.preventDefault());
+            if (["bold", "italic", "underline", "strikeThrough", "insertUnorderedList", "insertOrderedList",
+                "justifyLeft", "justifyCenter", "justifyRight"].indexOf(cmd) >= 0) {
+                b.setAttribute("aria-pressed", "false");
+                estados.push([b, cmd]);
+            }
+            return b;
+        };
+        const grupo = (...hijos) => {
+            const g = crear("span", "master-postit-grupo");
+            g.append(...hijos);
+            return g;
+        };
+        const elegir = (etiqueta, opciones, cmd, nombre) => {
+            const sel = crear("select", "master-postit-elegir");
+            sel.setAttribute("aria-label", nombre);
+            sel.title = nombre;
+            const primera = crear("option", "", etiqueta);
+            primera.value = "-";
+            sel.appendChild(primera);
+            opciones.forEach(([hex, nombre]) => {
+                const o = crear("option", "", nombre);
+                o.value = hex;
+                sel.appendChild(o);
+            });
+            sel.addEventListener("change", () => {
+                if (sel.value === "-") {
+                    return;
+                }
+                if (cmd === "hiliteColor") {
+                    // Resaltar: el fondo claro y la letra oscura (que se
+                    // lea en todos los temas).
+                    orden("hiliteColor", sel.value || "transparent");
+                    if (sel.value) {
+                        orden("foreColor", "#14101a");
+                    }
+                } else if (sel.value) {
+                    orden("foreColor", sel.value);
+                } else {
+                    orden("removeFormat");
+                }
+                sel.value = "-";
+            });
+            return sel;
+        };
+        const parrafo = crear("select", "master-postit-elegir");
+        parrafo.setAttribute("aria-label", "Tipo de párrafo");
+        parrafo.title = "Tipo de párrafo";
+        [["P", "párrafo"], ["H3", "título"], ["H4", "subtítulo"], ["BLOCKQUOTE", "cita"]].forEach(([v, n]) => {
+            const o = crear("option", "", n);
+            o.value = v;
+            parrafo.appendChild(o);
+        });
+        parrafo.addEventListener("change", () => orden("formatBlock", parrafo.value));
+        barra.append(
+            grupo(herramienta("B", "Negrita", "bold", null, "es-negrita", "Ctrl+B"),
+                herramienta("I", "Cursiva", "italic", null, "es-cursiva", "Ctrl+I"),
+                herramienta("U", "Subrayado", "underline", null, "es-subrayado", "Ctrl+U"),
+                herramienta("S", "Tachado", "strikeThrough", null, "es-tachado")),
+            grupo(parrafo),
+            grupo(herramienta("•", "Lista", "insertUnorderedList"), herramienta("1.", "Lista numerada", "insertOrderedList")),
+            grupo(herramienta("⇤", "Alinear a la izquierda", "justifyLeft"), herramienta("↔", "Centrar", "justifyCenter"),
+                herramienta("⇥", "Alinear a la derecha", "justifyRight")),
+            grupo(elegir("🎨 letra", COLORES_LETRA, "foreColor", "Color de la letra"), elegir("🖍️ resaltar", COLORES_RESALTE, "hiliteColor", "Resaltar")),
+            grupo(herramienta("⌫", "Quitar el formato", "removeFormat"), herramienta("↶", "Deshacer", "undo", null, "", "Ctrl+Z"),
+                herramienta("↷", "Rehacer", "redo", null, "", "Ctrl+Y")));
+        // Las flechas mueven el foco por la barra (como en un procesador).
+        barra.addEventListener("keydown", (e) => {
+            if (e.key !== "ArrowRight" && e.key !== "ArrowLeft" || e.target.tagName === "SELECT") {
+                return;
+            }
+            const todos = Array.from(barra.querySelectorAll("button, select"));
+            const i = todos.indexOf(e.target);
+            if (i >= 0) {
+                e.preventDefault();
+                todos[(i + (e.key === "ArrowRight" ? 1 : -1) + todos.length) % todos.length].focus();
+            }
+        });
+        function repintarEstados() {
+            estados.forEach(([b, cmd]) => {
+                let si = false;
+                try {
+                    si = document.queryCommandState(cmd);
+                } catch (e) {
+                    si = false;
+                }
+                b.setAttribute("aria-pressed", si ? "true" : "false");
+            });
+            let bloque = "P";
+            try {
+                bloque = String(document.queryCommandValue("formatBlock") || "p").toUpperCase();
+            } catch (e) {
+                bloque = "P";
+            }
+            parrafo.value = ["H3", "H4", "BLOCKQUOTE"].indexOf(bloque) >= 0 ? bloque : "P";
+        }
+        document.addEventListener("selectionchange", () => {
+            if (!area.hidden && area.contains(document.getSelection().anchorNode)) {
+                repintarEstados();
+            }
+        });
+        let espera = 0;
+        function alEscribir() {
+            clearTimeout(espera);
+            espera = setTimeout(() => {
+                m.datos.html = sanearHtml(area.innerHTML);
+                delete m.datos.texto;
+                guardar();
+            }, 400);
+        }
+        area.addEventListener("input", alEscribir);
+        // Lo pegado, sin el formato de fuera (sí con saltos de línea).
+        area.addEventListener("paste", (e) => {
+            const texto = e.clipboardData && e.clipboardData.getData("text/plain");
+            if (texto !== undefined && texto !== null) {
+                e.preventDefault();
+                document.execCommand("insertText", false, texto);
+            }
+        });
+        const pintar = () => {
+            ver.innerHTML = sanearHtml(m.datos.html || "");
+            if (!ver.textContent.trim()) {
+                ver.replaceChildren(crear("p", "oc-vacio", "Vacío: pulsa «editar» y escribe lo que quieras tener a mano."));
+            } else if (window.ocDadosEnTexto) {
+                window.ocDadosEnTexto(ver);
+            }
+        };
+        const boton = botonDe("oc-vida-accion", "✏️ editar", () => {
+            const editando = area.hidden;
+            if (editando) {
+                area.innerHTML = sanearHtml(m.datos.html || "") || "<p><br></p>";
+                area.hidden = false;
+                barra.hidden = false;
+                ver.hidden = true;
+                boton.textContent = "✔ listo";
+                area.focus();
+            } else {
+                clearTimeout(espera);
+                m.datos.html = sanearHtml(area.innerHTML);
+                delete m.datos.texto;
+                guardar();
+                area.hidden = true;
+                barra.hidden = true;
+                ver.hidden = false;
+                boton.textContent = "✏️ editar";
+                pintar();
+                boton.focus();
+            }
+        });
+        boton.classList.add("master-postit-editar");
+        dentro.append(barra, ver, area, boton);
         pintar();
     }
 
-    // ---- UNA TARJETA PROPIA: un título y un texto con formato, que se
-    // edita con «editar» y se ve con formato al guardar ----
-    function montarTarjeta(dentro, m) {
+    // ---- EL GENERADOR DE NOMBRES: personajes por especie y género (de
+    // sílabas, con su apellido) y lugares (pueblos, tabernas, parajes y
+    // mazmorras), de datos/personajes/compendio/nombres.json. Cada nombre,
+    // con «copiar». ----
+    const NOMBRES = "/datos/personajes/compendio/nombres.json";
+
+    function alAzar(lista) {
+        const u = new Uint32Array(1);
+        crypto.getRandomValues(u);
+        return lista[u[0] % lista.length];
+    }
+
+    function nombreDe(datos, especie, genero, conApellido) {
+        const e = datos.especies[especie];
+        const g = genero === "cualquiera" ? alAzar(["m", "f", "n"]) : genero;
+        let nombre = alAzar(e.ini) + alAzar(e[g]);
+        // Los tiflin, a veces, con un nombre de virtud.
+        if (especie === "tiflin" && alAzar([0, 0, 1])) {
+            nombre = alAzar(datos.virtudes);
+        }
+        nombre = nombre.charAt(0).toUpperCase() + nombre.slice(1).toLowerCase();
+        const ap = datos.apellidos[e.apellido];
+        if (conApellido && ap) {
+            const a = alAzar(ap.ini) + alAzar(ap.fin);
+            nombre += " " + a.charAt(0).toUpperCase() + a.slice(1);
+        }
+        return nombre;
+    }
+
+    function lugarDe(datos, tipo) {
+        const l = datos.lugares[tipo];
+        if (tipo === "taberna") {
+            const [sust, g] = alAzar(l.sust);
+            const adj = alAzar(l.adj);
+            return sust + " " + (g === "f" ? adj[1] : adj[0]);
+        }
+        if (tipo === "pueblo" && alAzar([0, 1])) {
+            return alAzar(l.pre) + alAzar(l.adj);
+        }
+        return alAzar(l.base) + " " + alAzar(l.de);
+    }
+
+    function montarNombres(dentro, m) {
         m.datos = m.datos || {};
-        const ver = crear("div", "master-tarjeta");
-        const editar = crear("div", "master-tarjeta-editar");
-        editar.hidden = true;
-        const etX = crear("label", "oc-dados-etiqueta", "texto (con «- » para listas, **negrita**, *cursiva*)");
-        const texto = crear("textarea", "oc-notas-texto");
-        texto.id = "master-tarjeta-texto-" + m.id;
-        etX.htmlFor = texto.id;
-        texto.rows = 8;
-        const pintar = () => {
-            ver.replaceChildren(m.datos.texto ? markdown(m.datos.texto)
-                : crear("p", "oc-vacio", "Vacía: pulsa «editar» y escribe lo que quieras tener a mano."));
-        };
-        const guardarla = botonDe("oc-vida-accion es-principal", "guardar", () => {
-            m.datos.texto = texto.value;
-            guardar();
-            editar.hidden = true;
-            ver.hidden = false;
-            boton.hidden = false;
+        dentro.appendChild(crear("p", "oc-hoja-nota", "Cargando…"));
+        pedir(NOMBRES).then((datos) => {
+            const form = crear("form", "master-nombres-form");
+            const sel = (id, texto, opciones, valor) => {
+                const et = crear("label", "oc-dados-etiqueta", texto);
+                const x = crear("select", "oc-dados-elegir");
+                x.id = "master-nombres-" + id + "-" + m.id;
+                et.htmlFor = x.id;
+                opciones.forEach(([v, n]) => {
+                    const o = crear("option", "", n);
+                    o.value = v;
+                    x.appendChild(o);
+                });
+                x.value = valor;
+                const caja = crear("div", "master-nombres-campo");
+                caja.append(et, x);
+                form.appendChild(caja);
+                return x;
+            };
+            const que = sel("que", "qué", [["personaje", "personaje"]].concat(Object.keys(datos.lugares)
+                .map((k) => [k, datos.lugares[k].nombre])), m.datos.que || "personaje");
+            const especie = sel("especie", "especie", Object.keys(datos.especies).map((k) => [k, datos.especies[k].nombre]),
+                m.datos.especie || "humano");
+            const genero = sel("genero", "género", [["cualquiera", "cualquiera"], ["f", "femenino"], ["m", "masculino"],
+                ["n", "neutro"]], m.datos.genero || "cualquiera");
+            const etAp = crear("label", "master-nombres-apellido");
+            const ap = crear("input");
+            ap.type = "checkbox";
+            ap.checked = m.datos.apellido !== false;
+            etAp.append(ap, document.createTextNode(" con apellido"));
+            form.appendChild(etAp);
+            const generar = crear("button", "oc-vida-accion es-principal", "🎲 generar");
+            generar.type = "submit";
+            form.appendChild(generar);
+            const lista = crear("ul", "master-nombres");
+            lista.setAttribute("aria-label", "Nombres");
+            lista.setAttribute("aria-live", "polite");
+            const ajustar = () => {
+                const persona = que.value === "personaje";
+                especie.parentElement.hidden = !persona;
+                genero.parentElement.hidden = !persona;
+                etAp.hidden = !persona;
+            };
+            const pintar = () => {
+                lista.replaceChildren(...(m.datos.salen || []).map((n) => {
+                    const li = crear("li", "master-nombre");
+                    li.appendChild(crear("span", "master-nombre-texto", n));
+                    const copiar = botonDe("master-party-quitar", "⧉", () => {
+                        const hecho = () => avisar("Copiado: " + n + ".");
+                        if (navigator.clipboard) {
+                            navigator.clipboard.writeText(n).then(hecho).catch(() => avisar("No se ha podido copiar."));
+                        }
+                    }, "Copiar " + n);
+                    copiar.title = "Copiar";
+                    li.appendChild(copiar);
+                    return li;
+                }));
+            };
+            que.addEventListener("change", ajustar);
+            form.addEventListener("submit", (e) => {
+                e.preventDefault();
+                Object.assign(m.datos, { que: que.value, especie: especie.value, genero: genero.value, apellido: ap.checked });
+                const salen = new Set();
+                for (let i = 0; i < 40 && salen.size < 8; i++) {
+                    salen.add(que.value === "personaje" ? nombreDe(datos, especie.value, genero.value, ap.checked)
+                        : lugarDe(datos, que.value));
+                }
+                m.datos.salen = Array.from(salen);
+                guardar();
+                pintar();
+            });
+            dentro.replaceChildren(form, lista);
+            ajustar();
             pintar();
-            boton.focus();
+        }).catch(() => {
+            dentro.replaceChildren(crear("p", "oc-vacio", "No he podido cargar los nombres."));
         });
-        editar.append(etX, texto, guardarla);
-        const boton = botonDe("oc-vida-accion", "✏️ editar", () => {
-            texto.value = m.datos.texto || "";
-            editar.hidden = false;
-            ver.hidden = true;
-            boton.hidden = true;
-            texto.focus();
-        });
-        dentro.append(ver, editar, boton);
-        pintar();
     }
 
     // ---- UNA TABLA PARA TIRAR: una cosa por línea; «tirar» saca una al
@@ -640,7 +1401,10 @@
         return base + " " + (mayor + 1);
     }
 
-    function aLaIniciativa(b, boton, nombreBase) {
+    // Apuntar a alguien en la iniciativa («richi-oc-iniciativa»): tira
+    // 1d20 + su bono y avisa a la ventana de la iniciativa. «c»: {nombre,
+    // bono, ca, pg, color}. Devuelve el nombre con el que entra, o null.
+    function meterEnIniciativa(c, numerar) {
         const CLAVE_INI = "richi-oc-iniciativa";
         let datos = { lista: [], turno: -1, ronda: 1 };
         try {
@@ -648,28 +1412,39 @@
         } catch (e) {
             // Sin almacenamiento: no se puede apuntar.
         }
-        // Si ya hay uno con ese nombre, llevan número (Lobo 1, Lobo 2…).
-        // Una del tablero va con su nombre («Lobo 2», «Elminster») si no
-        // está ya.
-        const nombres = datos.lista.map((c) => c.nombre);
-        const nombre = nombreBase && nombres.indexOf(nombreBase) < 0 ? nombreBase : conNumero(b.nombre, nombres, (viejo, nuevo) => {
-            datos.lista.forEach((c) => {
-                if (c.nombre === viejo) {
-                    c.nombre = nuevo;
-                }
+        const nombres = datos.lista.map((x) => x.nombre);
+        let nombre = c.nombre;
+        if (numerar) {
+            nombre = numerar(nombres, (viejo, nuevo) => {
+                datos.lista.forEach((x) => {
+                    if (x.nombre === viejo) {
+                        x.nombre = nuevo;
+                    }
+                });
             });
-        });
-        const bono = parseInt(b.ini, 10) || 0;
+        } else if (nombres.indexOf(nombre) >= 0) {
+            return null;
+        }
+        const bono = parseInt(c.bono, 10) || 0;
         const r = window.ocDados ? window.ocDados.tirar("1d20" + (bono ? (bono > 0 ? "+" : "") + bono : ""),
             "iniciativa de " + nombre) : null;
-        datos.lista.push({ id: Date.now().toString(36) + Math.random().toString(36).slice(2, 6), nombre, color: "#d23b3b",
-            ini: r ? r.total : 10 + bono, ca: parseInt(b.ca, 10) || "", pg: b.pg || "" });
+        datos.lista.push({ id: Date.now().toString(36) + Math.random().toString(36).slice(2, 6), nombre, color: c.color,
+            ini: r ? r.total : 10 + bono, ca: parseInt(c.ca, 10) || "", pg: c.pg === undefined ? "" : c.pg });
         try {
             localStorage.setItem(CLAVE_INI, JSON.stringify(datos));
         } catch (e) {
             // Sin almacenamiento: da igual.
         }
         document.dispatchEvent(new CustomEvent("oc-iniciativa:cambio"));
+        return nombre;
+    }
+
+    function aLaIniciativa(b, boton, nombreBase) {
+        // Una del tablero va con su nombre («Lobo 2», «Elminster») si no
+        // está ya; si no, con número si se repite (Lobo 1, Lobo 2…).
+        const nombre = meterEnIniciativa({ nombre: nombreBase || b.nombre, bono: b.ini, ca: b.ca, pg: b.pg || "",
+            color: "#d23b3b" }, (nombres, renombrar) => (nombreBase && nombres.indexOf(nombreBase) < 0 ? nombreBase
+            : conNumero(b.nombre, nombres, renombrar)));
         avisar("A la iniciativa: " + nombre + ".");
         if (boton) {
             boton.focus();
@@ -789,7 +1564,9 @@
         const repintables = [];
         const caja = crear("div", "master-bicho");
         const tipo = crear("p", "master-bicho-tipo", b.tipo + ", " + b.alin);
-        caja.appendChild(tipo);
+        const cabeza = crear("div", "master-bicho-cabeza");
+        cabeza.append(tokenDe(b, true), tipo);
+        caja.appendChild(cabeza);
         if (guardado && guardado.nombre) {
             // En el tablero, qué es de verdad (si se le ha cambiado el
             // nombre) y un botón para cambiárselo.
@@ -1108,6 +1885,44 @@
         });
     }
 
+    // EL TOKEN DE UN MONSTRUO: una ficha redonda hecha aquí (no son las
+    // ilustraciones de 5e.tools, que no se pueden copiar), con el dibujo de
+    // su tipo, el borde del color de su tipo y más grande cuanto mayor es.
+    const TOKENS = { Aberración: ["👁️", "#8e5bd6"], Bestia: ["🐾", "#3fae5a"], Celestial: ["😇", "#e6c229"],
+        Autómata: ["⚙️", "#8a8a99"], Dragón: ["🐉", "#d23b3b"], Elemental: ["🌪️", "#3bb3c9"], Feérico: ["🧚", "#e05aa8"],
+        Infernal: ["😈", "#b3261e"], Gigante: ["🗿", "#a06a3b"], Humanoide: ["🧑", "#3b7ddd"], Monstruosidad: ["🦂", "#e88a2a"],
+        Muerto: ["💀", "#5f6b7a"], Enjambre: ["🐝", "#9a8a2a"], Planta: ["🌿", "#2f9e4f"], Cieno: ["🫧", "#5aa88f"] };
+    const TAMANOS = { Diminuto: 1, Diminutos: 1, Diminutas: 1, Pequeño: 2, Mediano: 3, Grande: 4, Enorme: 5, Gargantuesco: 6 };
+
+    function tokenDe(b, grande) {
+        const tipo = b.tipo.split(" (")[0].split(" ")[0];
+        const [emoji, color] = TOKENS[tipo] || ["❔", "#8a8a99"];
+        const tam = TAMANOS[b.tipo.split(" ").pop()] || 3;
+        const t = crear("span", "master-token es-tam-" + tam + (grande ? " es-grande" : ""), emoji);
+        t.style.setProperty("--token", color);
+        t.setAttribute("aria-hidden", "true");
+        return t;
+    }
+
+    // Un monstruo en su ventana, con «📌 al tablero» (que lo deja como
+    // ventana, con número si ya hay otro igual: Lobo 1, Lobo 2…).
+    function abrirBicho(b, vuelta, fuente) {
+        const cerrar = window.ocVentana.abrir({ titulo: b.nombre, vuelta, clase: "es-regla",
+            cuerpo: perfil(b, fuente, () => {
+                cerrar();
+                const titulo = conNumero(b.nombre, estado.modulos.filter((m) => m.tipo === "criatura")
+                    .map((m) => m.titulo || ""), (viejo, nuevo) => {
+                    estado.modulos.forEach((m) => {
+                        if (m.tipo === "criatura" && m.titulo === viejo) {
+                            m.titulo = nuevo;
+                            ponerTitulo(m);
+                        }
+                    });
+                });
+                anadir("criatura", { titulo, datos: { en: b.en }, w: 440, h: 520 });
+            }) });
+    }
+
     function montarBestiario(dentro, m) {
         dentro.appendChild(crear("p", "oc-hoja-nota", "Cargando el bestiario…"));
         pedir("/datos/personajes/compendio/bestiario.json").then((datos) => {
@@ -1148,24 +1963,10 @@
                     && (!tipo.value || x.b.tipo.indexOf(tipo.value) === 0));
                 lista.replaceChildren(...salen.slice(0, 60).map((x) => {
                     const li = crear("li");
-                    const b = botonDe("master-conjuro", "", () => {
-                        const cerrar = window.ocVentana.abrir({ titulo: x.b.nombre, vuelta: b, clase: "es-regla",
-                            cuerpo: perfil(x.b, datos.fuente, () => {
-                                cerrar();
-                                const titulo = conNumero(x.b.nombre, estado.modulos.filter((m) => m.tipo === "criatura")
-                                    .map((m) => m.titulo || ""), (viejo, nuevo) => {
-                                    estado.modulos.forEach((m) => {
-                                        if (m.tipo === "criatura" && m.titulo === viejo) {
-                                            m.titulo = nuevo;
-                                            ponerTitulo(m);
-                                        }
-                                    });
-                                });
-                                anadir("criatura", { titulo, datos: { en: x.b.en }, w: 440, h: 520 });
-                            }) });
-                    });
+                    const b = botonDe("master-conjuro", "", () => abrirBicho(x.b, b, datos.fuente));
                     b.setAttribute("aria-haspopup", "dialog");
-                    b.append(crear("span", "master-conjuro-nombre", x.b.nombre),
+                    b.classList.add("con-token");
+                    b.append(tokenDe(x.b), crear("span", "master-conjuro-nombre", x.b.nombre),
                         crear("span", "master-conjuro-datos", "VD " + x.b.cr + " · " + x.b.tipo + " · CA " + parseInt(x.b.ca, 10)
                             + " · " + x.b.pg + " PG"));
                     li.appendChild(b);
@@ -1343,22 +2144,7 @@
             // La ventana de cada objeto: sus datos, el precio de lista, el de
             // la tienda y el regateo (un % propio, con lo que queda).
             function ficha(o, vuelta) {
-                const cuerpo = crear("div", "master-objeto");
-                const dl = crear("dl", "master-bicho-datos");
-                const fila = (que, valor) => {
-                    if (valor) {
-                        dl.append(crear("dt", "", que), crear("dd", "", String(valor)));
-                    }
-                };
-                fila("Categoría", o.cat);
-                fila("Rareza", o.rareza);
-                fila("Sintonía", o.sint ? "la requiere" : "");
-                fila("Detalles", o.det);
-                fila("Peso", o.peso);
-                fila("Nota", o.nota);
-                fila("Se vende en", o.tiendas.join(", ").toLowerCase());
-                fila("En inglés", o.en);
-                cuerpo.appendChild(dl);
+                const cuerpo = datosObjeto(Object.assign({}, o, { cp: 0 }));
                 if (o.cp) {
                     const precios = crear("dl", "master-bicho-datos master-objeto-precios");
                     const tiendaP = Math.round(porcentaje() * 100);
@@ -1541,27 +2327,44 @@
     // LOS MÓDULOS QUE HAY: su nombre, su dibujo, cómo se montan, su
     // tamaño al añadirlos y si solo puede haber uno.
     const MODULOS = {
-        iniciativa: { nombre: "iniciativa", emoji: "⏱️", unico: true, w: 420, h: 520,
+        iniciativa: { nombre: "iniciativa", emoji: "⏱️", grupo: "combate", unico: true, w: 420, h: 520,
+            desc: "El orden de turnos, con rondas, PG y marcas.",
             montar: (d) => window.ocMontar.iniciativa(d, { suelta: true }) },
-        condiciones: { nombre: "condiciones", emoji: "🙈", unico: true, w: 460, h: 420,
-            montar: (d, m) => montarReglas(d, m, "Estados") },
-        acciones: { nombre: "acciones", emoji: "⚔️", unico: true, w: 460, h: 420,
-            montar: (d, m) => montarReglas(d, m, "Acciones") },
-        reglas: { nombre: "todas las reglas", emoji: "📚", unico: true, w: 480, h: 520,
-            montar: (d, m) => montarReglas(d, m, null) },
-        conjuros: { nombre: "conjuros", emoji: "✨", unico: true, w: 420, h: 480, montar: montarConjuros },
-        bestiario: { nombre: "bestiario", emoji: "🐉", unico: true, w: 460, h: 520, montar: montarBestiario },
-        tienda: { nombre: "tienda", emoji: "💰", w: 520, h: 560, montar: montarTienda },
+        condiciones: { nombre: "condiciones", emoji: "🙈", grupo: "combate", unico: true, w: 460, h: 420,
+            desc: "Los estados: agarrado, cegado, derribado…", montar: (d, m) => montarReglas(d, m, "Estados") },
+        acciones: { nombre: "acciones", emoji: "⚔️", grupo: "combate", unico: true, w: 460, h: 420,
+            desc: "Lo que se puede hacer en un turno.", montar: (d, m) => montarReglas(d, m, "Acciones") },
+        dados: { nombre: "dados", emoji: "🎲", grupo: "combate", w: 360, h: 230, desc: "Del d4 al d100 y fórmulas.",
+            montar: montarDados },
+        registro: { nombre: "registro de tiradas", emoji: "📜", grupo: "combate", unico: true, w: 340, h: 420,
+            desc: "Las últimas tiradas, para repetirlas.", montar: montarRegistro },
+        reglas: { nombre: "todas las reglas", emoji: "📚", grupo: "consulta", unico: true, w: 480, h: 520,
+            desc: "Las reglas del SRD 5.2, por temas.", montar: (d, m) => montarReglas(d, m, null) },
+        homebrew: { nombre: "reglas propias", emoji: "🏠", grupo: "consulta", unico: true, w: 460, h: 460,
+            desc: "Las reglas de tu mesa (homebrew).", montar: montarHomebrew },
+        conjuros: { nombre: "conjuros", emoji: "✨", grupo: "consulta", unico: true, w: 420, h: 480,
+            desc: "Los 339 del SRD, por nivel, escuela y clase.", montar: montarConjuros },
+        bestiario: { nombre: "bestiario", emoji: "🐉", grupo: "consulta", unico: true, w: 460, h: 520,
+            desc: "Los 330 monstruos del SRD, con su perfil.", montar: montarBestiario },
+        party: { nombre: "party (jugadores)", emoji: "🛡️", grupo: "mesa", unico: true, w: 600, h: 440,
+            desc: "Los personajes de los jugadores, de un vistazo.", montar: montarParty },
+        tienda: { nombre: "tienda", emoji: "💰", grupo: "mundo", w: 520, h: 560, desc: "Precios, rarezas y regateo.",
+            montar: montarTienda },
+        monedas: { nombre: "conversor de monedas", emoji: "🪙", grupo: "mundo", w: 420, h: 440,
+            desc: "Cambiar y repartir el botín.", montar: montarMonedas },
+        nombres: { nombre: "generador de nombres", emoji: "🎭", grupo: "mundo", w: 420, h: 460,
+            desc: "Personajes por especie y género, y lugares.", montar: montarNombres },
+        tarjeta: { nombre: "post-it", emoji: "🗒️", grupo: "apuntes", w: 420, h: 340,
+            desc: "Un texto con formato: negrita, listas, colores…", montar: montarTarjeta },
+        notas: { nombre: "notas", emoji: "📝", grupo: "apuntes", unico: true, w: 420, h: 420,
+            desc: "Las notas de la sesión.", montar: (d) => window.ocMontar.notas(d, { soloNotas: true }) },
+        tabla: { nombre: "tabla para tirar", emoji: "🔮", grupo: "apuntes", w: 360, h: 380,
+            desc: "Una lista de la que sale una cosa al azar.", montar: montarTabla },
         criatura: { nombre: "criatura", emoji: "🐾", oculto: true, w: 440, h: 520, montar: montarCriatura },
-        monedas: { nombre: "conversor de monedas", emoji: "🪙", w: 420, h: 440, montar: montarMonedas },
-        party: { nombre: "party (jugadores)", emoji: "🛡️", unico: true, w: 600, h: 440, montar: montarParty },
-        dados: { nombre: "dados", emoji: "🎲", w: 360, h: 230, montar: montarDados },
-        registro: { nombre: "registro de tiradas", emoji: "📜", unico: true, w: 340, h: 420, montar: montarRegistro },
-        notas: { nombre: "notas", emoji: "📝", unico: true, w: 420, h: 420,
-            montar: (d) => window.ocMontar.notas(d, { soloNotas: true }) },
-        tarjeta: { nombre: "tarjeta", emoji: "📌", w: 360, h: 280, montar: montarTarjeta },
-        tabla: { nombre: "tabla para tirar", emoji: "🔮", w: 360, h: 380, montar: montarTabla },
+        ficha: { nombre: "ficha", emoji: "📖", oculto: true, w: 420, h: 420, montar: montarFicha },
     };
+    const GRUPOS = [["combate", "⚔️ combate"], ["consulta", "📚 consulta"], ["mesa", "🛡️ la mesa"], ["mundo", "🌍 el mundo"],
+        ["apuntes", "🗒️ apuntes"]];
 
     // ---- EL ESTADO (lo que se guarda) ----
     // Los colores de las ventanas, como post-its: fijos, iguales en todos
@@ -1570,6 +2373,13 @@
         ["rojo", "rojo", "#ff8f8f"], ["rosa", "rosa", "#ffa6d5"], ["morado", "morado", "#c9a2ff"], ["azul", "azul", "#8fb8ff"],
         ["celeste", "celeste", "#7fdcff"], ["verde", "verde", "#8fe8a2"], ["gris", "gris", "#c9c9d1"]];
     const hexDe = (color) => (COLORES.find((c) => c[0] === color) || [])[2] || "";
+    // Los colores del tablero (el fondo del lienzo de cada perfil), como
+    // tapetes: fijos, iguales en todos los temas. Las rayas de la
+    // cuadrícula, claras u oscuras según el fondo.
+    const TABLEROS = [["", "el del tema"], ["tapete", "tapete verde", "#1f4d36"], ["vino", "rojo vino", "#5a1f2a"],
+        ["noche", "azul noche", "#1d2b4f"], ["madera", "madera", "#5b3b22"], ["pizarra", "pizarra", "#2f3438"],
+        ["uva", "morado", "#3d2552"], ["pergamino", "pergamino", "#e8dcc0"], ["arena", "arena", "#d9c7a3"],
+        ["cielo", "cielo", "#bfd6e6"]];
 
     // Varios PERFILES, como pestañas de un navegador (combate, vista
     // rápida…): cada uno con sus ventanas. «estado» es el que se ve.
@@ -1606,7 +2416,7 @@
     let estado = todo.perfiles.find((pf) => pf.id === todo.activo) || todo.perfiles[0];
 
     function guardar() {
-        const salida = { activo: estado.id, perfiles: todo.perfiles.map((pf) => ({ id: pf.id, nombre: pf.nombre,
+        const salida = { activo: estado.id, perfiles: todo.perfiles.map((pf) => ({ id: pf.id, nombre: pf.nombre, color: pf.color || "",
             modulos: pf.modulos.map((m) => ({ id: m.id, tipo: m.tipo, x: m.x, y: m.y, w: m.w, h: m.h,
                 titulo: m.titulo || "", color: m.color || "", plegado: !!m.plegado, datos: m.datos })) })) };
         try {
@@ -1730,8 +2540,9 @@
         titulo.append(em, crear("span", "master-ventana-nombre", m.titulo || def.nombre));
         // El asa: arrastrar la barra mueve la ventana; con el teclado, el ⠿
         // y las flechas.
-        const asa = botonDe("master-ventana-mando es-asa", "⠿", () => {}, "Mover la ventana (con las flechas)");
-        asa.title = "Arrástrala por la barra, o pulsa aquí y usa las flechas";
+        const asa = botonDe("master-ventana-mando es-asa", "⠿", () => {}, "Mover la ventana con las flechas; con Alt y las"
+            + " flechas, cambiar su tamaño");
+        asa.title = "Arrástrala por la barra, o pulsa aquí y usa las flechas (con Alt, el tamaño)";
         asa.addEventListener("keydown", (e) => {
             const paso = e.shiftKey ? 60 : 20;
             const d = { ArrowLeft: [-paso, 0], ArrowRight: [paso, 0], ArrowUp: [0, -paso], ArrowDown: [0, paso] }[e.key];
@@ -1739,8 +2550,16 @@
                 return;
             }
             e.preventDefault();
-            m.x = Math.min(topeX(m), Math.max(0, m.x + d[0]));
-            m.y = Math.max(0, m.y + d[1]);
+            if (e.altKey) {
+                // El tamaño: derecha e izquierda, el ancho; arriba y
+                // abajo, el alto.
+                m.w = Math.max(240, Math.min(lienzo.clientWidth - m.x - 4, m.w + d[0]));
+                m.h = Math.max(120, m.h + d[1]);
+                avisar(m.w + " por " + m.h + " píxeles.");
+            } else {
+                m.x = Math.min(topeX(m), Math.max(0, m.x + d[0]));
+                m.y = Math.max(0, m.y + d[1]);
+            }
             colocar(m);
             crecerLienzo();
             guardar();
@@ -1772,7 +2591,28 @@
         const cuerpo = crear("div", "oc-hoja-dentro master-ventana-cuerpo");
         cuerpo.hidden = !!m.plegado;
         v.classList.toggle("es-plegada", !!m.plegado);
-        v.append(cabeza, cuerpo);
+        // El tamaño, por la esquina de abajo a la derecha: con el ratón, el
+        // dedo o el lápiz (en las tabletas no vale el «resize» de CSS).
+        const esquina = crear("span", "master-ventana-tamano");
+        esquina.setAttribute("aria-hidden", "true");
+        esquina.title = "Arrastra para cambiar el tamaño";
+        esquina.addEventListener("pointerdown", (e) => {
+            if (enMovil.matches || m.plegado || e.button > 0) {
+                return;
+            }
+            e.preventDefault();
+            e.stopPropagation();
+            alFrente(m);
+            const w0 = v.offsetWidth;
+            const h0 = v.offsetHeight;
+            v.classList.add("es-arrastrada");
+            arrastrar(e, esquina, (dx, dy) => {
+                m.w = Math.max(240, Math.min(lienzo.clientWidth - m.x - 4, Math.round(w0 + dx)));
+                m.h = Math.max(120, Math.round(h0 + dy));
+                colocar(m);
+            }, () => v.classList.remove("es-arrastrada"));
+        });
+        v.append(cabeza, cuerpo, esquina);
         m.el = v;
         ponerColor(m);
         // Arrastrar por la barra (no por sus botones).
@@ -1782,59 +2622,109 @@
             }
             e.preventDefault();
             alFrente(m);
-            const x0 = e.clientX;
-            const y0 = e.clientY;
             const mx = m.x;
             const my = m.y;
             v.classList.add("es-arrastrada");
-            const mover = (ev) => {
-                m.x = Math.min(topeX(m), Math.max(0, mx + ev.clientX - x0));
-                m.y = Math.max(0, my + ev.clientY - y0);
+            arrastrar(e, cabeza, (dx, dy) => {
+                m.x = Math.min(topeX(m), Math.max(0, mx + dx));
+                m.y = Math.max(0, my + dy);
                 colocar(m);
-            };
-            const soltar = () => {
-                document.removeEventListener("pointermove", mover);
-                document.removeEventListener("pointerup", soltar);
-                document.removeEventListener("pointercancel", soltar);
-                v.classList.remove("es-arrastrada");
-                crecerLienzo();
-                guardar();
-            };
-            document.addEventListener("pointermove", mover);
-            document.addEventListener("pointerup", soltar);
-            document.addEventListener("pointercancel", soltar);
+            }, () => v.classList.remove("es-arrastrada"));
         });
         v.addEventListener("pointerdown", () => alFrente(m));
-        // El tamaño, por la esquina (resize de CSS): se apunta al cambiar.
-        if (window.ResizeObserver) {
-            let primera = true;
-            new ResizeObserver(() => {
-                if (primera) {
-                    primera = false;
-                    return;
-                }
-                if (enMovil.matches || m.plegado) {
-                    return;
-                }
-                m.w = Math.round(v.offsetWidth);
-                m.h = Math.round(v.offsetHeight);
-                crecerLienzo();
-                guardar();
-            }).observe(v);
-        }
         colocar(m);
         def.montar(cuerpo, m);
         return v;
     }
 
-    // El lienzo, tan alto y ancho como lo que tiene (más un margen).
-    function crecerLienzo() {
+    // El lienzo, tan alto como lo que tiene más un margen holgado (para
+    // que haya sitio donde soltar sin que salte). «soloCrecer»: mientras
+    // se arrastra, crece pero no encoge; al soltar, encoge despacio (con
+    // la transición del CSS).
+    function crecerLienzo(soloCrecer) {
         if (enMovil.matches) {
             lienzo.style.height = "";
             return;
         }
-        const fondo = Math.max(400, ...estado.modulos.map((m) => m.y + (m.plegado ? 60 : m.h) + 40));
-        lienzo.style.height = fondo + "px";
+        const fondo = Math.max(480, ...estado.modulos.map((m) => m.y + (m.plegado ? 60 : m.h) + 240));
+        const ahora = parseInt(lienzo.style.height, 10) || 0;
+        if (!soloCrecer || fondo > ahora) {
+            lienzo.style.height = fondo + "px";
+        }
+    }
+
+    // Lo que hace scroll alrededor del lienzo (la página o su caja).
+    function scrollDe(el) {
+        for (let p = el.parentElement; p; p = p.parentElement) {
+            const o = getComputedStyle(p).overflowY;
+            if ((o === "auto" || o === "scroll") && p.scrollHeight > p.clientHeight) {
+                return p;
+            }
+        }
+        return document.scrollingElement || document.documentElement;
+    }
+
+    // ARRASTRAR (mover o cambiar el tamaño): sigue al puntero con
+    // requestAnimationFrame (un cambio por fotograma, sin tirones), hace
+    // scroll solo cerca del borde de arriba o de abajo y va agrandando el
+    // lienzo. «alMover(dx, dy)» recibe lo movido desde el principio
+    // (contando el scroll).
+    function arrastrar(e, origen, alMover, alSoltar) {
+        const caja = scrollDe(lienzo);
+        const esPagina = caja === document.scrollingElement || caja === document.documentElement;
+        const scroll0 = caja.scrollTop;
+        const x0 = e.clientX;
+        const y0 = e.clientY;
+        let ultimo = e;
+        let pendiente = 0;
+        let vivo = true;
+        try {
+            origen.setPointerCapture(e.pointerId);
+        } catch (err) {
+            // Sin captura: siguen llegando al documento.
+        }
+        const paso = () => {
+            pendiente = 0;
+            if (!vivo) {
+                return;
+            }
+            // Cerca del borde de la caja que hace scroll, se desliza.
+            const r = esPagina ? { top: 0, bottom: window.innerHeight } : caja.getBoundingClientRect();
+            const margen = 48;
+            let velocidad = 0;
+            if (ultimo.clientY > r.bottom - margen) {
+                velocidad = Math.ceil((ultimo.clientY - (r.bottom - margen)) / 4);
+            } else if (ultimo.clientY < r.top + margen && caja.scrollTop > 0) {
+                velocidad = -Math.ceil(((r.top + margen) - ultimo.clientY) / 4);
+            }
+            if (velocidad) {
+                caja.scrollTop += velocidad;
+            }
+            alMover(Math.round(ultimo.clientX - x0), Math.round(ultimo.clientY - y0 + caja.scrollTop - scroll0));
+            crecerLienzo(true);
+            if (velocidad) {
+                pendiente = requestAnimationFrame(paso);
+            }
+        };
+        const mover = (ev) => {
+            ultimo = ev;
+            if (!pendiente) {
+                pendiente = requestAnimationFrame(paso);
+            }
+        };
+        const soltar = () => {
+            vivo = false;
+            cancelAnimationFrame(pendiente);
+            document.removeEventListener("pointermove", mover);
+            document.removeEventListener("pointerup", soltar);
+            document.removeEventListener("pointercancel", soltar);
+            alSoltar();
+            crecerLienzo();
+            guardar();
+        };
+        document.addEventListener("pointermove", mover);
+        document.addEventListener("pointerup", soltar);
+        document.addEventListener("pointercancel", soltar);
     }
 
     function pintarTodo() {
@@ -1846,27 +2736,213 @@
         crecerLienzo();
     }
 
+    // ---- EL BUSCADOR DE ARRIBA: busca a la vez en los conjuros, los
+    // monstruos, las reglas (las del SRD y las propias) y los objetos; lo
+    // elegido se abre en su ventana, con «📌 al tablero». Es un combobox:
+    // con las flechas se va por los resultados e Intro abre. ----
+    let indice = null;
+
+    function cargarIndice() {
+        if (!indice) {
+            indice = Promise.all([pedir(CONJUROS_SRD), pedir("/datos/personajes/compendio/bestiario.json"),
+                pedir("/datos/personajes/reglas-dnd.json"), pedir("/datos/personajes/compendio/tienda.json")])
+                .then(([conj, best, reg, tienda]) => {
+                    const cosas = [];
+                    (conj.conjuros || []).forEach((c) => cosas.push({ tipo: "conjuro", emoji: "✨", nombre: c.nombre,
+                        detalle: nivelDe(c) + " · " + c.escuela, buscar: llano(c.nombre + " " + c.en),
+                        abrir: (v) => abrirConjuro(c, v, conj.fuente) }));
+                    (best.monstruos || []).forEach((b) => cosas.push({ tipo: "monstruo", emoji: tokenDe(b).textContent, nombre: b.nombre,
+                        detalle: "VD " + b.cr + " · " + b.tipo, buscar: llano(b.nombre + " " + b.en),
+                        abrir: (v) => abrirBicho(b, v, best.fuente) }));
+                    (reg.reglas || []).forEach((r) => cosas.push({ tipo: "regla", emoji: r.icono || "📚", nombre: r.nombre,
+                        detalle: "Regla · " + r.grupo, buscar: llano(r.nombre + " " + (r.alias || "")),
+                        abrir: (v) => abrirRegla(r, v, reg.fuente) }));
+                    (tienda.objetos || []).forEach((o) => cosas.push({ tipo: "objeto", emoji: "💰", nombre: o.nombre,
+                        detalle: "Objeto · " + o.cat + (o.rareza ? " · " + o.rareza : ""), buscar: llano(o.nombre + " " + o.en),
+                        abrir: (v) => abrirObjeto(o, v, tienda.fuente) }));
+                    return cosas;
+                });
+        }
+        return indice;
+    }
+
+    function montarBuscador() {
+        const caja = crear("div", "master-buscador");
+        caja.setAttribute("role", "search");
+        const et = crear("label", "visually-hidden", "Buscar conjuros, monstruos, reglas u objetos");
+        const input = crear("input", "master-buscador-texto");
+        input.type = "search";
+        input.id = "master-buscador";
+        input.placeholder = "🔍 buscar: bola de fuego, goblin, derribado…";
+        input.autocomplete = "off";
+        input.setAttribute("role", "combobox");
+        input.setAttribute("aria-autocomplete", "list");
+        input.setAttribute("aria-expanded", "false");
+        input.setAttribute("aria-controls", "master-buscador-lista");
+        et.htmlFor = input.id;
+        const lista = crear("ul", "master-buscador-lista");
+        lista.id = "master-buscador-lista";
+        lista.setAttribute("role", "listbox");
+        lista.setAttribute("aria-label", "Resultados");
+        lista.hidden = true;
+        const cuantos = crear("p", "visually-hidden");
+        cuantos.setAttribute("role", "status");
+        let salen = [];
+        let activo = -1;
+        const cerrarLista = () => {
+            lista.hidden = true;
+            input.setAttribute("aria-expanded", "false");
+            input.removeAttribute("aria-activedescendant");
+            activo = -1;
+        };
+        const marcar = (i) => {
+            activo = i;
+            lista.querySelectorAll("[role=option]").forEach((o, j) => o.setAttribute("aria-selected", j === i ? "true" : "false"));
+            const o = lista.querySelectorAll("[role=option]")[i];
+            if (o) {
+                input.setAttribute("aria-activedescendant", o.id);
+                o.scrollIntoView({ block: "nearest" });
+            }
+        };
+        const abrir = (x) => {
+            cerrarLista();
+            x.abrir(input);
+        };
+        let espera = 0;
+        const buscar = () => {
+            const q = llano(input.value.trim());
+            if (q.length < 2) {
+                cerrarLista();
+                cuantos.textContent = "";
+                return;
+            }
+            cargarIndice().then((cosas) => {
+                const propias = leerHomebrew().map((r) => ({ tipo: "propia", emoji: r.icono || "🏠", nombre: r.nombre,
+                    detalle: "Regla propia", buscar: llano(r.nombre),
+                    abrir: (v) => abrirRegla(Object.assign({ propia: true, grupo: "🏠 Reglas propias" }, r), v) }));
+                const todas = propias.concat(cosas);
+                // Primero lo que empieza por lo buscado; luego lo que lo lleva.
+                const empieza = todas.filter((x) => x.buscar.startsWith(q));
+                const lleva = todas.filter((x) => !x.buscar.startsWith(q) && x.buscar.includes(q));
+                salen = empieza.concat(lleva).slice(0, 12);
+                lista.replaceChildren(...salen.map((x, i) => {
+                    const li = crear("li", "master-buscador-opcion");
+                    li.id = "master-buscador-o" + i;
+                    li.setAttribute("role", "option");
+                    li.setAttribute("aria-selected", "false");
+                    const em = crear("span", "master-buscador-emoji", x.emoji);
+                    em.setAttribute("aria-hidden", "true");
+                    li.append(em, crear("span", "master-buscador-nombre", x.nombre), crear("span", "master-buscador-detalle",
+                        x.detalle));
+                    li.addEventListener("mousedown", (e) => e.preventDefault());
+                    li.addEventListener("click", () => abrir(x));
+                    return li;
+                }));
+                if (!salen.length) {
+                    const li = crear("li", "master-buscador-nada", "Nada con eso.");
+                    lista.appendChild(li);
+                }
+                lista.hidden = false;
+                input.setAttribute("aria-expanded", "true");
+                activo = -1;
+                cuantos.textContent = salen.length ? salen.length + (salen.length === 1 ? " resultado" : " resultados")
+                    + "; con las flechas se elige" : "Nada con eso.";
+            });
+        };
+        input.addEventListener("input", () => {
+            clearTimeout(espera);
+            espera = setTimeout(buscar, 120);
+        });
+        input.addEventListener("focus", () => cargarIndice());
+        input.addEventListener("keydown", (e) => {
+            if (e.key === "ArrowDown" || e.key === "ArrowUp") {
+                if (lista.hidden || !salen.length) {
+                    return;
+                }
+                e.preventDefault();
+                marcar((activo + (e.key === "ArrowDown" ? 1 : -1) + salen.length) % salen.length);
+            } else if (e.key === "Enter") {
+                if (salen.length && !lista.hidden) {
+                    e.preventDefault();
+                    abrir(salen[Math.max(0, activo)]);
+                }
+            } else if (e.key === "Escape" && !lista.hidden) {
+                e.preventDefault();
+                e.stopPropagation();
+                cerrarLista();
+            }
+        });
+        input.addEventListener("blur", () => setTimeout(cerrarLista, 150));
+        caja.append(et, input, lista, cuantos);
+        return caja;
+    }
+
     // ---- EL BOTÓN DE AÑADIR (y el de los dados, que pone personajes.js).
     // Su ventana tiene también «ordenar» y «quitar todas». ----
     const botonAnadir = botonDe("oc-vida-accion es-principal", "＋ añadir", () => {
         const cuerpo = crear("div", "master-anadir");
-        const lista = crear("ul", "oc-menu-ventana-lista");
-        Object.keys(MODULOS).filter((tipo) => !MODULOS[tipo].oculto).forEach((tipo) => {
-            const def = MODULOS[tipo];
-            const ya = def.unico && estado.modulos.some((m) => m.tipo === tipo);
-            const li = crear("li");
-            const b = botonDe("oc-menu-ventana-opcion", "", () => {
-                cerrar();
-                anadir(tipo);
+        // Un filtro arriba y las ventanas por grupos, como tarjetas con su
+        // dibujo, su nombre y para qué son.
+        const etFiltro = crear("label", "oc-dados-etiqueta", "filtrar");
+        const filtro = crear("input", "oc-dados-texto");
+        filtro.type = "search";
+        filtro.id = "master-anadir-filtro";
+        filtro.placeholder = "dados, monstruos, nombres…";
+        filtro.autocomplete = "off";
+        etFiltro.htmlFor = filtro.id;
+        const cuantas = crear("p", "visually-hidden");
+        cuantas.setAttribute("role", "status");
+        cuerpo.append(etFiltro, filtro, cuantas);
+        const tarjetas = [];
+        GRUPOS.forEach(([grupo, titulo]) => {
+            const seccion = crear("div", "master-anadir-grupo");
+            const h = crear("h3", "master-anadir-titulo", titulo);
+            h.id = "master-anadir-" + grupo;
+            const lista = crear("ul", "master-anadir-lista");
+            lista.setAttribute("aria-labelledby", h.id);
+            Object.keys(MODULOS).filter((tipo) => MODULOS[tipo].grupo === grupo).forEach((tipo) => {
+                const def = MODULOS[tipo];
+                const ya = def.unico && estado.modulos.some((m) => m.tipo === tipo);
+                const li = crear("li");
+                const b = botonDe("master-anadir-tarjeta", "", () => {
+                    cerrar();
+                    anadir(tipo);
+                });
+                const em = crear("span", "master-anadir-emoji", def.emoji);
+                em.setAttribute("aria-hidden", "true");
+                const nombre = crear("span", "master-anadir-nombre", def.nombre);
+                const desc = crear("span", "master-anadir-desc", ya ? "Ya está en el tablero." : def.desc);
+                b.append(em, nombre, desc);
+                b.disabled = ya;
+                li.appendChild(b);
+                lista.appendChild(li);
+                tarjetas.push({ li, seccion, texto: llano(def.nombre + " " + def.desc + " " + titulo) });
             });
-            const em = crear("span", "oc-menu-emoji", def.emoji);
-            em.setAttribute("aria-hidden", "true");
-            b.append(em, document.createTextNode(def.nombre + (ya ? " (ya está)" : "")));
-            b.disabled = ya;
-            li.appendChild(b);
-            lista.appendChild(li);
+            seccion.append(h, lista);
+            cuerpo.appendChild(seccion);
         });
-        cuerpo.appendChild(lista);
+        filtro.addEventListener("input", () => {
+            const q = llano(filtro.value.trim());
+            let n = 0;
+            tarjetas.forEach((t) => {
+                t.li.hidden = !!q && !t.texto.includes(q);
+                n += t.li.hidden ? 0 : 1;
+            });
+            cuerpo.querySelectorAll(".master-anadir-grupo").forEach((sec) => {
+                sec.hidden = !sec.querySelector("li:not([hidden])");
+            });
+            cuantas.textContent = q ? (n ? n + (n === 1 ? " ventana" : " ventanas") : "Ninguna con eso.") : "";
+        });
+        filtro.addEventListener("keydown", (e) => {
+            // Intro: la primera que queda.
+            if (e.key === "Enter") {
+                const b = cuerpo.querySelector(".master-anadir-lista li:not([hidden]) button:not([disabled])");
+                if (b) {
+                    e.preventDefault();
+                    b.click();
+                }
+            }
+        });
         if (estado.modulos.length) {
             const otras = crear("div", "master-anadir-otras");
             const ordenarlas = botonDe("oc-vida-accion", "▦ ordenar las ventanas", () => {
@@ -1892,16 +2968,92 @@
             otras.append(ordenarlas, vaciar);
             cuerpo.appendChild(otras);
         }
-        const cerrar = window.ocVentana.abrir({ titulo: "añadir una ventana", cuerpo, vuelta: botonAnadir,
-            foco: lista.querySelector("button:not([disabled])") || undefined });
+        cuerpo.appendChild(copias(() => cerrar()));
+        const cerrar = window.ocVentana.abrir({ titulo: "añadir una ventana", cuerpo, vuelta: botonAnadir, foco: filtro,
+            clase: "es-ancha" });
     });
     botonAnadir.setAttribute("aria-haspopup", "dialog");
 
+    // ---- EXPORTAR E IMPORTAR: todo lo de la pantalla de máster (los
+    // perfiles con sus ventanas, la iniciativa, las marcas propias y las
+    // tiradas guardadas) a un archivo .json, y de vuelta. Para guardarlo,
+    // pasarlo a otro navegador o compartir un tablero montado. ----
+    const CLAVES = (k) => k === CLAVE || k === CLAVE_HOMEBREW || /^richi-oc-(iniciativa|marcas|partida-pantalla-master)/.test(k);
+
+    function copias(alTerminar) {
+        const caja = crear("div", "master-anadir-otras");
+        const exportar = botonDe("oc-vida-accion", "⬇ exportar", () => {
+            guardar();
+            const claves = {};
+            try {
+                for (let i = 0; i < localStorage.length; i++) {
+                    const k = localStorage.key(i);
+                    if (CLAVES(k)) {
+                        claves[k] = localStorage.getItem(k);
+                    }
+                }
+            } catch (e) {
+                avisar("Este navegador no deja leer lo guardado.");
+                return;
+            }
+            const datos = { pantallaDeMaster: 1, fecha: new Date().toISOString(), claves };
+            const a = crear("a");
+            // Una dirección blob: que hace el propio navegador con el archivo.
+            const archivoBlob = URL.createObjectURL(new Blob([JSON.stringify(datos, null, 1)], { type: "application/json" }));
+            a.href = archivoBlob;
+            a.download = "pantalla-de-master-" + new Date().toISOString().slice(0, 10) + ".json";
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+            setTimeout(() => URL.revokeObjectURL(archivoBlob), 1000);
+            avisar("Exportado: " + a.download + ".");
+        }, "Exportar todo a un archivo");
+        exportar.title = "Guarda los perfiles, sus ventanas y la iniciativa en un archivo .json";
+        const archivo = crear("input");
+        archivo.type = "file";
+        archivo.accept = ".json,application/json";
+        archivo.hidden = true;
+        let seguro = false;
+        const importar = botonDe("oc-vida-accion", "⬆ importar", () => {
+            if (!seguro) {
+                seguro = true;
+                importar.textContent = "⬆ ¿reemplazar todo? pulsa otra vez";
+                return;
+            }
+            archivo.click();
+        }, "Importar desde un archivo (reemplaza lo de ahora)");
+        importar.title = "Carga un archivo exportado; reemplaza lo que hay ahora";
+        archivo.addEventListener("change", () => {
+            const f = archivo.files && archivo.files[0];
+            if (!f) {
+                return;
+            }
+            f.text().then((texto) => {
+                const datos = JSON.parse(texto);
+                if (!datos || datos.pantallaDeMaster !== 1 || typeof datos.claves !== "object") {
+                    throw new Error("no es");
+                }
+                Object.keys(datos.claves).filter(CLAVES).forEach((k) => {
+                    localStorage.setItem(k, String(datos.claves[k]));
+                });
+                alTerminar();
+                location.reload();
+            }).catch(() => {
+                avisar("Ese archivo no es una exportación de la pantalla de máster.");
+                importar.textContent = "⬆ importar";
+                seguro = false;
+            });
+        });
+        caja.append(exportar, importar, archivo);
+        return caja;
+    }
+
     function anadir(tipo, extra) {
         const def = MODULOS[tipo];
-        // Donde quepa: debajo de todo, a la izquierda.
-        const y = estado.modulos.length ? Math.max(...estado.modulos.map((m) => m.y + (m.plegado ? 60 : m.h))) + 20 : 0;
-        const m = Object.assign({ id: "m" + siguienteId++, tipo, x: 0, y: enMovil.matches ? 0 : y, w: def.w, h: def.h }, extra || {});
+        const w = (extra && extra.w) || def.w;
+        const h = (extra && extra.h) || def.h;
+        const sitio = enMovil.matches ? { x: 0, y: 0 } : hueco(w, h);
+        const m = Object.assign({ id: "m" + siguienteId++, tipo, x: sitio.x, y: sitio.y, w, h }, extra || {});
         estado.modulos.push(m);
         pintarTodo();
         guardar();
@@ -1911,6 +3063,34 @@
             || m.el.querySelector(".es-asa");
         primero.focus();
         avisar("Añadido: " + (m.titulo || def.nombre) + ".");
+    }
+
+    // EL PRIMER HUECO LIBRE para una ventana de w × h: empezando por lo
+    // que se ve ahora del lienzo (de arriba abajo y de izquierda a
+    // derecha), sin pisar ninguna; si no cabe en ningún sitio, debajo de
+    // todo. Así añadir no estira el lienzo si hay sitio.
+    function hueco(w, h) {
+        const ancho = Math.max(w, lienzo.clientWidth - 4);
+        const ocupado = estado.modulos.map((m) => ({ x: m.x, y: m.y, w: m.w, h: m.plegado ? 60 : m.h }));
+        const libre = (x, y) => ocupado.every((o) => x + w + 16 <= o.x || o.x + o.w + 16 <= x || y + h + 16 <= o.y
+            || o.y + o.h + 16 <= y);
+        const fondo = ocupado.reduce((a, o) => Math.max(a, o.y + o.h), 0);
+        const visto = Math.max(0, Math.round(-lienzo.getBoundingClientRect().top / 20) * 20);
+        const filas = [];
+        for (let y = visto; y <= fondo; y += 20) {
+            filas.push(y);
+        }
+        for (let y = 0; y < visto; y += 20) {
+            filas.push(y);
+        }
+        for (const y of filas) {
+            for (let x = 0; x + w <= ancho; x += 20) {
+                if (libre(x, y)) {
+                    return { x, y };
+                }
+            }
+        }
+        return { x: 0, y: ocupado.length ? fondo + 20 : 0 };
     }
 
     // En filas, una al lado de otra hasta el ancho del lienzo.
@@ -1941,6 +3121,19 @@
     tablist.setAttribute("aria-label", "Perfiles de la pantalla de máster");
     lienzo.setAttribute("role", "tabpanel");
 
+    function colorTablero() {
+        const t = TABLEROS.find((x) => x[0] === estado.color && x[2]);
+        lienzo.classList.toggle("con-tablero", !!t);
+        if (t) {
+            const claro = parseInt(t[2].slice(1, 3), 16) + parseInt(t[2].slice(3, 5), 16) + parseInt(t[2].slice(5, 7), 16) > 384;
+            lienzo.style.setProperty("--tablero", t[2]);
+            lienzo.style.setProperty("--tablero-raya", claro ? "rgba(0, 0, 0, 0.14)" : "rgba(255, 255, 255, 0.1)");
+        } else {
+            lienzo.style.removeProperty("--tablero");
+            lienzo.style.removeProperty("--tablero-raya");
+        }
+    }
+
     function activar(pf, foco) {
         // Las ventanas del que se deja se desmontan: al volver se montan
         // de nuevo con lo guardado (así la iniciativa o las notas de dos
@@ -1950,6 +3143,7 @@
         });
         estado = pf;
         guardar();
+        colorTablero();
         pintarPestanas(foco);
         pintarTodo();
     }
@@ -1990,6 +3184,23 @@
     function renombrar() {
         const cuerpo = crear("form", "master-personalizar");
         const et = crear("label", "oc-dados-etiqueta", "nombre del perfil");
+        // El color del tablero (el fondo del lienzo).
+        const grupo = crear("fieldset", "master-colores");
+        grupo.appendChild(crear("legend", "oc-dados-etiqueta", "color del tablero"));
+        let elegido = estado.color || "";
+        const muestras = TABLEROS.map(([valor, nombre, hex]) => {
+            const b = botonDe("master-color" + (valor ? "" : " es-ninguno"), "", () => {
+                elegido = valor;
+                muestras.forEach((x) => x.setAttribute("aria-pressed", x === b ? "true" : "false"));
+            }, nombre);
+            b.title = nombre;
+            if (hex) {
+                b.style.backgroundColor = hex;
+            }
+            b.setAttribute("aria-pressed", valor === elegido ? "true" : "false");
+            grupo.appendChild(b);
+            return b;
+        });
         const input = crear("input", "oc-dados-texto");
         input.id = "master-perfil-nombre";
         input.value = estado.nombre;
@@ -1998,16 +3209,18 @@
         et.htmlFor = input.id;
         const listo = crear("button", "oc-vida-accion es-principal", "guardar");
         listo.type = "submit";
-        cuerpo.append(et, input, listo);
+        cuerpo.append(et, input, grupo, listo);
         cuerpo.addEventListener("submit", (e) => {
             e.preventDefault();
             estado.nombre = input.value.trim() || estado.nombre;
+            estado.color = elegido;
+            colorTablero();
             guardar();
             cerrar();
             pintarPestanas(true);
             avisar("Perfil: " + estado.nombre + ".");
         });
-        const cerrar = window.ocVentana.abrir({ titulo: "renombrar el perfil", cuerpo, vuelta: botonRenombrar, foco: input });
+        const cerrar = window.ocVentana.abrir({ titulo: "nombre y color del perfil", cuerpo, vuelta: botonRenombrar, foco: input });
     }
 
     const botonNueva = botonDe("master-pestana-mando", "＋", () => {
@@ -2017,8 +3230,8 @@
         avisar("Perfil nuevo: " + pf.nombre + ". Ponle nombre con ✎.");
     }, "Perfil nuevo");
     botonNueva.title = "Perfil nuevo";
-    const botonRenombrar = botonDe("master-pestana-mando", "✎", renombrar, "Renombrar este perfil");
-    botonRenombrar.title = "Renombrar este perfil";
+    const botonRenombrar = botonDe("master-pestana-mando", "✎", renombrar, "Nombre y color de este perfil");
+    botonRenombrar.title = "Nombre y color de este perfil";
     botonRenombrar.setAttribute("aria-haspopup", "dialog");
     let seguroCerrar = false;
     const botonCerrar = botonDe("master-pestana-mando", "✕", () => {
@@ -2044,6 +3257,7 @@
             m.el = null;
         });
         estado = todo.perfiles[Math.max(0, i - 1)];
+        colorTablero();
         guardar();
         pintarPestanas(true);
         pintarTodo();
@@ -2057,7 +3271,7 @@
     // Todo en una línea: las pestañas a la izquierda; «＋ añadir» y los
     // dados (que pone personajes.js en la barra), a la derecha.
     const mandos = crear("div", "master-barra-mandos");
-    mandos.append(botonAnadir);
+    mandos.append(montarBuscador(), botonAnadir);
     const dados = barra.querySelector(".oc-boton-dados");
     if (dados) {
         mandos.appendChild(dados);
@@ -2065,6 +3279,7 @@
     barra.prepend(pestanas, mandos);
 
     lienzo.classList.add("con-lienzo");
+    colorTablero();
     pintarPestanas(false);
     pintarTodo();
     if (enMovil.addEventListener) {

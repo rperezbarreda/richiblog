@@ -1,0 +1,1008 @@
+{
+ "especies": {
+  "humano": {
+   "nombre": "humano",
+   "ini": [
+    "Al",
+    "Ber",
+    "Cal",
+    "Dar",
+    "El",
+    "Fen",
+    "Gar",
+    "Hal",
+    "Is",
+    "Jor",
+    "Ken",
+    "Lis",
+    "Mar",
+    "Nor",
+    "Os",
+    "Per",
+    "Ro",
+    "Sil",
+    "Tor",
+    "Ul",
+    "Val",
+    "Ar",
+    "Bel",
+    "Cor",
+    "Ed",
+    "Gil",
+    "Mil",
+    "Rin",
+    "Ser",
+    "Teo"
+   ],
+   "m": [
+    "ric",
+    "an",
+    "ias",
+    "en",
+    "aldo",
+    "o",
+    "mundo",
+    "berto",
+    "ardo",
+    "el",
+    "ión",
+    "us"
+   ],
+   "f": [
+    "a",
+    "ena",
+    "ia",
+    "ine",
+    "ara",
+    "ela",
+    "isa",
+    "ora",
+    "ith",
+    "eth",
+    "ina",
+    "ilde"
+   ],
+   "n": [
+    "is",
+    "ey",
+    "an",
+    "el",
+    "ys",
+    "in",
+    "ae",
+    "ian"
+   ],
+   "apellido": "humano"
+  },
+  "elfo": {
+   "nombre": "elfo",
+   "ini": [
+    "Ae",
+    "Ela",
+    "Fae",
+    "Gal",
+    "Ith",
+    "Lae",
+    "Mir",
+    "Nae",
+    "Syl",
+    "Tha",
+    "Vae",
+    "Yl",
+    "Ara",
+    "Cae",
+    "Eri",
+    "Iri",
+    "Lua",
+    "Sae",
+    "Thi",
+    "Elo"
+   ],
+   "m": [
+    "ndil",
+    "rion",
+    "thas",
+    "las",
+    "vir",
+    "dor",
+    "lan",
+    "ros",
+    "lar",
+    "mir"
+   ],
+   "f": [
+    "riel",
+    "wyn",
+    "lia",
+    "nara",
+    "sha",
+    "thiel",
+    "dra",
+    "lith",
+    "ra",
+    "wen"
+   ],
+   "n": [
+    "rin",
+    "ael",
+    "ys",
+    "il",
+    "ren",
+    "vel"
+   ],
+   "apellido": "elfo"
+  },
+  "enano": {
+   "nombre": "enano",
+   "ini": [
+    "Bar",
+    "Bru",
+    "Dag",
+    "Dur",
+    "Ebe",
+    "Fal",
+    "Gim",
+    "Har",
+    "Kil",
+    "Mor",
+    "Nor",
+    "Orsi",
+    "Rur",
+    "Thor",
+    "Tor",
+    "Ul",
+    "Vond",
+    "Brot",
+    "Gar",
+    "Hel"
+   ],
+   "m": [
+    "in",
+    "ak",
+    "ur",
+    "rik",
+    "gar",
+    "dain",
+    "nar",
+    "bek",
+    "grim",
+    "ok"
+   ],
+   "f": [
+    "a",
+    "dis",
+    "hild",
+    "ra",
+    "eth",
+    "gunn",
+    "ja",
+    "wynn",
+    "ina",
+    "rid"
+   ],
+   "n": [
+    "an",
+    "ik",
+    "el",
+    "um"
+   ],
+   "apellido": "enano"
+  },
+  "mediano": {
+   "nombre": "mediano",
+   "ini": [
+    "Al",
+    "Ben",
+    "Cora",
+    "Dim",
+    "Eri",
+    "Fin",
+    "Gar",
+    "Jil",
+    "Lav",
+    "Mer",
+    "Os",
+    "Pip",
+    "Ros",
+    "Sera",
+    "Tob",
+    "Vani",
+    "Wel",
+    "Bree",
+    "Kith",
+    "Lin"
+   ],
+   "m": [
+    "ton",
+    "do",
+    "bo",
+    "rick",
+    "wyn",
+    "lo",
+    "by",
+    "ric"
+   ],
+   "f": [
+    "lie",
+    "la",
+    "ly",
+    "sy",
+    "ra",
+    "belle",
+    "na",
+    "wyn"
+   ],
+   "n": [
+    "kin",
+    "py",
+    "ry"
+   ],
+   "apellido": "mediano"
+  },
+  "gnomo": {
+   "nombre": "gnomo",
+   "ini": [
+    "Al",
+    "Bim",
+    "Dim",
+    "Ell",
+    "Fon",
+    "Glim",
+    "Jeb",
+    "Kel",
+    "Nim",
+    "Orl",
+    "Quil",
+    "Rox",
+    "Sin",
+    "Tik",
+    "War",
+    "Zan",
+    "Bod",
+    "Fiz",
+    "Nack",
+    "Pip"
+   ],
+   "m": [
+    "ston",
+    "ble",
+    "wick",
+    "dle",
+    "kin",
+    "nock",
+    "ziz",
+    "bo"
+   ],
+   "f": [
+    "wyn",
+    "ella",
+    "ix",
+    "ra",
+    "na",
+    "lie",
+    "ri",
+    "bi"
+   ],
+   "n": [
+    "kin",
+    "ix",
+    "ek"
+   ],
+   "apellido": "gnomo"
+  },
+  "draconido": {
+   "nombre": "dracónido",
+   "ini": [
+    "Ar",
+    "Bal",
+    "Dona",
+    "Ghe",
+    "Hes",
+    "Kri",
+    "Med",
+    "Ner",
+    "Pan",
+    "Rho",
+    "Sha",
+    "Tor",
+    "Vyr",
+    "Zor",
+    "Bir",
+    "Daar",
+    "Kava",
+    "Sor",
+    "Thav",
+    "Ux"
+   ],
+   "m": [
+    "jhan",
+    "asar",
+    "esh",
+    "ash",
+    "thar",
+    "xan",
+    "vos",
+    "kar"
+   ],
+   "f": [
+    "ra",
+    "rinn",
+    "nna",
+    "ys",
+    "ola",
+    "iri",
+    "ash",
+    "sha"
+   ],
+   "n": [
+    "an",
+    "ex",
+    "ur"
+   ],
+   "apellido": "draconido"
+  },
+  "orco": {
+   "nombre": "orco",
+   "ini": [
+    "Gor",
+    "Grum",
+    "Kra",
+    "Mog",
+    "Ruk",
+    "Shag",
+    "Thok",
+    "Ug",
+    "Varg",
+    "Zug",
+    "Bag",
+    "Dren",
+    "Hol",
+    "Ov",
+    "Ron",
+    "Sut",
+    "Yev",
+    "Emen",
+    "Ark",
+    "Dush"
+   ],
+   "m": [
+    "ash",
+    "gash",
+    "nar",
+    "ruk",
+    "tak",
+    "or",
+    "uk",
+    "mok"
+   ],
+   "f": [
+    "a",
+    "ga",
+    "ka",
+    "gha",
+    "ra",
+    "vi",
+    "ysh",
+    "ma"
+   ],
+   "n": [
+    "rak",
+    "ush",
+    "ek"
+   ],
+   "apellido": "orco"
+  },
+  "tiflin": {
+   "nombre": "tiflin",
+   "ini": [
+    "Ak",
+    "Am",
+    "Bar",
+    "Dam",
+    "Ekem",
+    "Ia",
+    "Kal",
+    "Leu",
+    "Mor",
+    "Nem",
+    "Ori",
+    "Ska",
+    "Mak",
+    "Bry",
+    "Cri",
+    "Dor",
+    "Kae",
+    "Ren",
+    "Zeth",
+    "Vel"
+   ],
+   "m": [
+    "menos",
+    "akos",
+    "ios",
+    "eon",
+    "ias",
+    "ar",
+    "ath",
+    "ius"
+   ],
+   "f": [
+    "ra",
+    "eisa",
+    "ia",
+    "ika",
+    "ith",
+    "ele",
+    "aya",
+    "iel"
+   ],
+   "n": [
+    "is",
+    "ex",
+    "an"
+   ],
+   "apellido": "humano"
+  },
+  "goliat": {
+   "nombre": "goliat",
+   "ini": [
+    "Au",
+    "Eg",
+    "Gae",
+    "Ilik",
+    "Kav",
+    "Keo",
+    "Lo",
+    "Mau",
+    "Na",
+    "Orila",
+    "Paav",
+    "Tha",
+    "Uth",
+    "Vau",
+    "Gau",
+    "Kuo",
+    "Ma",
+    "Ul",
+    "Ke",
+    "Apo"
+   ],
+   "m": [
+    "kan",
+    "lath",
+    "ak",
+    "gath",
+    "ul",
+    "ath",
+    "thal",
+    "vi"
+   ],
+   "f": [
+    "ara",
+    "nala",
+    "kea",
+    "thea",
+    "ma",
+    "ni",
+    "ola",
+    "ra"
+   ],
+   "n": [
+    "ak",
+    "ul",
+    "i"
+   ],
+   "apellido": "goliat"
+  },
+  "aasimar": {
+   "nombre": "aasimar",
+   "ini": [
+    "Ar",
+    "Cel",
+    "Eli",
+    "Gal",
+    "Ira",
+    "Lu",
+    "Mae",
+    "Ori",
+    "Rha",
+    "Sol",
+    "Tal",
+    "Ura",
+    "Vae",
+    "Ze",
+    "Ad",
+    "Bry",
+    "Dra",
+    "Is",
+    "Na",
+    "Sei"
+   ],
+   "m": [
+    "iel",
+    "adon",
+    "iah",
+    "on",
+    "ael",
+    "ias",
+    "ion",
+    "ar"
+   ],
+   "f": [
+    "iel",
+    "ara",
+    "ina",
+    "ela",
+    "ia",
+    "ira",
+    "ene",
+    "wyn"
+   ],
+   "n": [
+    "ae",
+    "is",
+    "el"
+   ],
+   "apellido": "humano"
+  }
+ },
+ "apellidos": {
+  "humano": {
+   "ini": [
+    "Piedra",
+    "Roble",
+    "Hierro",
+    "Monte",
+    "Vado",
+    "Bruma",
+    "Ceniza",
+    "Alba",
+    "Fuente",
+    "Torre",
+    "Prado",
+    "Cuervo",
+    "Oro",
+    "Sal",
+    "Peña",
+    "Valle"
+   ],
+   "fin": [
+    "verde",
+    "gris",
+    "fuerte",
+    "leal",
+    "real",
+    "mayor",
+    "dulce",
+    "libre",
+    "noble"
+   ]
+  },
+  "elfo": {
+   "ini": [
+    "Ama",
+    "Gala",
+    "Hola",
+    "Ilphe",
+    "Lia",
+    "Nail",
+    "Sian",
+    "Xil",
+    "Eve",
+    "Tal",
+    "Amak",
+    "Brae"
+   ],
+   "fin": [
+    "kiir",
+    "nodel",
+    "nthil",
+    "rel",
+    "vanthe",
+    "lyn",
+    "thir",
+    "ndra",
+    "riel",
+    "sae"
+   ]
+  },
+  "enano": {
+   "ini": [
+    "Barba",
+    "Pico",
+    "Roca",
+    "Forja",
+    "Yunque",
+    "Hacha",
+    "Mina",
+    "Piedra",
+    "Escudo",
+    "Martillo"
+   ],
+   "fin": [
+    "gris",
+    "fuerte",
+    "ardiente",
+    "firme",
+    "leal",
+    "feroz",
+    "terrible",
+    "veloz"
+   ]
+  },
+  "mediano": {
+   "ini": [
+    "Buen",
+    "Alta",
+    "Hoja",
+    "Cardo",
+    "Rama",
+    "Trébol",
+    "Miel",
+    "Pie",
+    "Cesta",
+    "Pan"
+   ],
+   "fin": [
+    "barril",
+    "hierba",
+    "verde",
+    "dulce",
+    "colina",
+    "sombra",
+    "bota",
+    "ligero",
+    "tierno"
+   ]
+  },
+  "gnomo": {
+   "ini": [
+    "Engranaje",
+    "Chispa",
+    "Tuerca",
+    "Lente",
+    "Muelle",
+    "Rueda",
+    "Resorte",
+    "Bobina"
+   ],
+   "fin": [
+    "veloz",
+    "alegre",
+    "feliz",
+    "sutil",
+    "ágil",
+    "gentil",
+    "audaz"
+   ]
+  },
+  "draconido": {
+   "ini": [
+    "Kim",
+    "Del",
+    "Myas",
+    "Ner",
+    "Ophi",
+    "Ker",
+    "Yar",
+    "Dar",
+    "Ver",
+    "Clet"
+   ],
+   "fin": [
+    "bralan",
+    "mirev",
+    "tor",
+    "thandon",
+    "nemar",
+    "rhylar",
+    "jerith",
+    "haal"
+   ]
+  },
+  "orco": {
+   "ini": [
+    "Rompe",
+    "Muerde",
+    "Parte",
+    "Quiebra",
+    "Tumba",
+    "Arranca",
+    "Pisa",
+    "Traga"
+   ],
+   "fin": [
+    "huesos",
+    "cráneos",
+    "piedras",
+    "escudos",
+    "muros",
+    "dientes",
+    "lanzas",
+    "cuernos"
+   ]
+  },
+  "goliat": {
+   "ini": [
+    "Caza",
+    "Corre",
+    "Pisa",
+    "Teje",
+    "Busca",
+    "Alza",
+    "Salta",
+    "Mira"
+   ],
+   "fin": [
+    "osos",
+    "montes",
+    "cumbres",
+    "nubes",
+    "rayos",
+    "vientos",
+    "nieves",
+    "águilas"
+   ]
+  }
+ },
+ "virtudes": [
+  "Esperanza",
+  "Canción",
+  "Ruina",
+  "Brasa",
+  "Gloria",
+  "Sombra",
+  "Temor",
+  "Credo",
+  "Alba",
+  "Tormento",
+  "Duelo",
+  "Júbilo",
+  "Ceniza",
+  "Piedad",
+  "Ansia",
+  "Silencio"
+ ],
+ "lugares": {
+  "pueblo": {
+   "nombre": "pueblo o ciudad",
+   "pre": [
+    "Villa",
+    "Puebla",
+    "Torre",
+    "Peña",
+    "Fuente"
+   ],
+   "adj": [
+    "seca",
+    "alta",
+    "roja",
+    "blanca",
+    "fría",
+    "vieja",
+    "honda",
+    "clara",
+    "negra",
+    "rubia"
+   ],
+   "base": [
+    "Puente",
+    "Castro",
+    "Vado",
+    "Monte",
+    "Valle",
+    "Aldea",
+    "Cruz",
+    "Molino",
+    "Pozo",
+    "Atalaya"
+   ],
+   "de": [
+    "del Roble",
+    "de los Cuervos",
+    "del Río",
+    "de Ceniza",
+    "de la Niebla",
+    "del Lobo",
+    "de Abajo",
+    "del Conde",
+    "de las Ánimas",
+    "del Pinar",
+    "de la Sal",
+    "de los Tres Pozos"
+   ]
+  },
+  "taberna": {
+   "nombre": "taberna o posada",
+   "sust": [
+    [
+     "La Jarra",
+     "f"
+    ],
+    [
+     "El Grifo",
+     "m"
+    ],
+    [
+     "La Cabra",
+     "f"
+    ],
+    [
+     "El Barril",
+     "m"
+    ],
+    [
+     "La Sirena",
+     "f"
+    ],
+    [
+     "El Dragón",
+     "m"
+    ],
+    [
+     "La Herradura",
+     "f"
+    ],
+    [
+     "El Caldero",
+     "m"
+    ],
+    [
+     "La Oca",
+     "f"
+    ],
+    [
+     "El Cuervo",
+     "m"
+    ],
+    [
+     "La Linterna",
+     "f"
+    ],
+    [
+     "El Yunque",
+     "m"
+    ],
+    [
+     "La Rana",
+     "f"
+    ],
+    [
+     "El Tejón",
+     "m"
+    ],
+    [
+     "La Escoba",
+     "f"
+    ],
+    [
+     "El Jabalí",
+     "m"
+    ]
+   ],
+   "adj": [
+    [
+     "Torcido",
+     "Torcida"
+    ],
+    [
+     "Dorado",
+     "Dorada"
+    ],
+    [
+     "Borracho",
+     "Borracha"
+    ],
+    [
+     "Tuerto",
+     "Tuerta"
+    ],
+    [
+     "Cojo",
+     "Coja"
+    ],
+    [
+     "Risueño",
+     "Risueña"
+    ],
+    [
+     "Dormido",
+     "Dormida"
+    ],
+    [
+     "Plateado",
+     "Plateada"
+    ],
+    [
+     "Gruñón",
+     "Gruñona"
+    ],
+    [
+     "Alegre",
+     "Alegre"
+    ],
+    [
+     "Bailarín",
+     "Bailarina"
+    ],
+    [
+     "Oxidado",
+     "Oxidada"
+    ],
+    [
+     "Hambriento",
+     "Hambrienta"
+    ],
+    [
+     "Sin Cabeza",
+     "Sin Cabeza"
+    ]
+   ]
+  },
+  "region": {
+   "nombre": "región o paraje",
+   "base": [
+    "Bosque",
+    "Sierra",
+    "Ciénaga",
+    "Llanos",
+    "Colinas",
+    "Páramo",
+    "Costa",
+    "Montes",
+    "Valle",
+    "Desfiladero",
+    "Marismas",
+    "Estepa"
+   ],
+   "de": [
+    "de los Susurros",
+    "del Rey Muerto",
+    "de Ámbar",
+    "de las Brumas",
+    "de los Mil Ojos",
+    "del Ocaso",
+    "de Hierro",
+    "de la Luna Rota",
+    "de los Ahorcados",
+    "del Último Verano",
+    "de Cristal",
+    "de las Ánimas",
+    "del Viejo Dios",
+    "de las Cenizas"
+   ]
+  },
+  "mazmorra": {
+   "nombre": "mazmorra o ruina",
+   "base": [
+    "Cripta",
+    "Catacumbas",
+    "Torre",
+    "Fortaleza",
+    "Cavernas",
+    "Templo",
+    "Pozo",
+    "Bóveda",
+    "Minas",
+    "Laberinto",
+    "Santuario",
+    "Ruinas"
+   ],
+   "de": [
+    "del Rey Exiliado",
+    "de la Llama Negra",
+    "de los Susurros",
+    "del Dios Olvidado",
+    "de Hueso",
+    "del Gusano",
+    "de las Mil Puertas",
+    "de la Reina Pálida",
+    "del Eco",
+    "de Óxido",
+    "de la Serpiente",
+    "del Archimago Loco"
+   ]
+  }
+ },
+ "nota": "Sílabas y palabras inventadas para la pantalla de máster (no salen de ningún libro)."
+}
