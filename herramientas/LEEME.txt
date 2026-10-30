@@ -4317,7 +4317,8 @@
       (en rojo, con su CA y sus PG; si se repite, con número: «Goblin
       guerrero 2»). La iniciativa se entera por el evento
       «oc-iniciativa:cambio» (personajes.js).
-    · EL PERFIL DE UN MONSTRUO va por pestañas: estadísticas, rasgos,
+    · EL PERFIL DE UN MONSTRUO va por partes, que se eligen en un
+      desplegable («ver», en una sola línea): estadísticas, rasgos,
       acciones (los ataques en una tabla: ataque, bono, alcance y daño, con
       los dados que se tiran), bonus, reacciones, legendarias y hechizos
       (ordenados; cada uno abre la ventana del conjuro). Lo que se gasta

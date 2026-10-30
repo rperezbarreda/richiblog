@@ -457,35 +457,22 @@
     content: none;
 }
 
-/* El perfil por pestañas (estadísticas, rasgos, acciones…). */
-.master-bicho-pestanas {
+/* Qué parte del perfil se ve (estadísticas, rasgos, acciones…): un
+   desplegable en una línea. */
+.master-bicho-ver {
     display: flex;
-    flex-wrap: wrap;
-    gap: 4px;
+    align-items: center;
+    gap: 8px;
     width: 100%;
+    padding-bottom: 8px;
     border-bottom: 2px solid var(--yellow);
 }
 
-.master-bicho-pestana {
-    min-height: 36px;
-    padding: 4px 10px;
-    border: 2px solid var(--border);
-    border-bottom: 0;
-    background: transparent;
-    color: var(--yellow);
-    font-family: var(--fuente-mono);
-    font-size: 0.8125rem;
-    cursor: pointer;
+.master-bicho-ver .oc-dados-elegir {
+    flex: 1 1 auto;
+    min-height: 40px;
 }
 
-.master-bicho-pestana[aria-selected="true"] {
-    border-color: var(--yellow);
-    background: var(--yellow);
-    color: var(--yellow-contrast);
-    font-weight: 700;
-}
-
-.master-bicho-pestana:focus-visible,
 .master-bicho-panel:focus-visible {
     outline: 3px solid var(--yellow);
     outline-offset: 2px;
@@ -619,6 +606,25 @@
 .master-conjuro-enlace:hover {
     background: var(--yellow);
     color: var(--yellow-contrast);
+}
+
+/* Las tablas de los textos (las de algunos conjuros). */
+.master-tabla-texto {
+    width: 100%;
+    margin: 0 0 10px;
+    border-collapse: collapse;
+}
+
+.master-tabla-texto th,
+.master-tabla-texto td {
+    padding: 4px 6px;
+    border: 2px solid var(--border);
+    text-align: left;
+    vertical-align: top;
+}
+
+.master-tabla-texto th {
+    color: var(--yellow);
 }
 
 /* El perfil de un monstruo: sus botones (a la iniciativa, al tablero). */

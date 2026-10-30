@@ -67,8 +67,38 @@
                 parrafo = [];
             }
         };
+        let tabla = null;
         String(texto || "").split("\n").forEach((linea) => {
             const l = linea.trim();
+            if (/^\|.*\|$/.test(l)) {
+                cerrarParrafo();
+                lista = null;
+                const celdas = l.slice(1, -1).split("|").map((c) => c.trim());
+                if (!tabla) {
+                    tabla = crear("table", "master-tabla-texto");
+                    const tr = crear("tr");
+                    celdas.forEach((c) => {
+                        const th = crear("th");
+                        th.scope = "col";
+                        th.append(...enLinea(c));
+                        tr.appendChild(th);
+                    });
+                    const thead = crear("thead");
+                    thead.appendChild(tr);
+                    tabla.append(thead, crear("tbody"));
+                    caja.appendChild(tabla);
+                    return;
+                }
+                const tr = crear("tr");
+                celdas.forEach((c) => {
+                    const td = crear("td");
+                    td.append(...enLinea(c));
+                    tr.appendChild(td);
+                });
+                tabla.querySelector("tbody").appendChild(tr);
+                return;
+            }
+            tabla = null;
             if (/^[-*] /.test(l)) {
                 cerrarParrafo();
                 if (!lista) {
@@ -654,51 +684,40 @@
             }).catch(() => {});
             paneles.push(["hechizos", panel]);
         }
-        const lista = crear("div", "master-bicho-pestanas");
-        lista.setAttribute("role", "tablist");
-        lista.setAttribute("aria-label", "Partes del perfil de " + b.nombre);
         const uid = "bicho-" + Math.random().toString(36).slice(2, 8);
         let actual = (guardado && guardado.pestana) || 0;
         if (actual >= paneles.length) {
             actual = 0;
         }
-        const pestanas = paneles.map(([titulo, panel], i) => {
-            const t = botonDe("master-bicho-pestana", titulo, () => elegir(i, true));
-            t.setAttribute("role", "tab");
-            t.id = uid + "-" + i;
+        const lista = crear("div", "master-bicho-ver");
+        const etVer = crear("label", "oc-dados-etiqueta", "ver");
+        const ver = crear("select", "oc-dados-elegir");
+        ver.id = uid + "-ver";
+        etVer.htmlFor = ver.id;
+        paneles.forEach(([titulo, panel], i) => {
+            const o = crear("option", "", titulo);
+            o.value = String(i);
+            ver.appendChild(o);
             panel.id = uid + "-p" + i;
-            panel.setAttribute("role", "tabpanel");
-            panel.setAttribute("aria-labelledby", t.id);
-            panel.tabIndex = 0;
-            t.setAttribute("aria-controls", panel.id);
-            t.addEventListener("keydown", (e) => {
-                const d = { ArrowRight: 1, ArrowLeft: -1 }[e.key];
-                if (d) {
-                    e.preventDefault();
-                    elegir((i + d + paneles.length) % paneles.length, true);
-                }
-            });
-            lista.appendChild(t);
-            return t;
+            panel.setAttribute("role", "region");
+            panel.setAttribute("aria-label", titulo + " de " + b.nombre);
         });
-        function elegir(i, foco) {
+        ver.addEventListener("change", () => elegir(parseInt(ver.value, 10) || 0));
+        lista.append(etVer, ver);
+        function elegir(i) {
             actual = i;
-            pestanas.forEach((t, j) => {
-                t.setAttribute("aria-selected", j === i ? "true" : "false");
-                t.tabIndex = j === i ? 0 : -1;
-                paneles[j][1].hidden = j !== i;
+            ver.value = String(i);
+            paneles.forEach(([, panel], j) => {
+                panel.hidden = j !== i;
             });
             if (guardado) {
                 guardado.pestana = i;
                 guardado.guardar();
             }
-            if (foco) {
-                pestanas[i].focus();
-            }
         }
         caja.appendChild(lista);
         paneles.forEach(([, panel]) => caja.appendChild(panel));
-        elegir(actual, false);
+        elegir(actual);
         enlazarConjuros(caja);
         if (f) {
             caja.appendChild(crear("p", "oc-hoja-nota master-fuente", f));
