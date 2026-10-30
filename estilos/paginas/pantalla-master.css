@@ -1,0 +1,289 @@
+/* ====================================================================
+   LA PANTALLA DE MÁSTER (web/pantalla_master/pantalla_master.html)
+   ====================================================================
+
+   Un lienzo con ventanas que se mueven (scripts/paginas/pantalla-master.js).
+   Lo de dentro de cada módulo (la iniciativa, las reglas, los dados, las
+   notas…) lleva las clases de mis personajes (personajes.css), que esta
+   página también carga; aquí solo el lienzo, las ventanas y lo propio
+   (el buscador de conjuros, las tarjetas y las tablas). */
+
+.master-page {
+    gap: 16px;
+}
+
+.master-intro {
+    max-width: 52rem;
+    margin: 0;
+    color: var(--white);
+    font-size: 0.9375rem;
+}
+
+/* La barra de arriba: añadir, ordenar, como al principio y los dados. */
+.master-barra {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px;
+}
+
+.master-barra-mandos {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.master-barra .oc-boton-dados {
+    width: 48px;
+    height: 48px;
+}
+
+/* EL LIENZO: las ventanas van donde se las deja (left y top, que pone el
+   JavaScript). Una cuadrícula de fondo, como una mesa con su tapete. */
+.master-lienzo {
+    position: relative;
+    min-height: 400px;
+    overflow-x: auto;
+    overflow-y: hidden;
+}
+
+.master-lienzo.con-lienzo {
+    border: 2px dashed var(--border);
+    background-image:
+        linear-gradient(var(--border) 1px, transparent 1px),
+        linear-gradient(90deg, var(--border) 1px, transparent 1px);
+    background-size: 40px 40px;
+    background-position: -1px -1px;
+}
+
+.master-ventana {
+    position: absolute;
+    display: flex;
+    flex-direction: column;
+    min-width: 240px;
+    min-height: 120px;
+    margin: 0;
+    overflow: hidden;
+    /* El tamaño, por la esquina de abajo a la derecha. */
+    resize: both;
+}
+
+.master-ventana.es-plegada {
+    min-height: 0;
+    resize: horizontal;
+}
+
+.master-ventana.es-arrastrada {
+    opacity: 0.92;
+    box-shadow: 10px 10px 0 var(--oc-color);
+}
+
+.master-ventana-barra {
+    display: flex;
+    flex: none;
+    flex-wrap: nowrap;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    cursor: move;
+    touch-action: none;
+    user-select: none;
+}
+
+.master-ventana-titulo {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.master-ventana-mandos {
+    display: flex;
+    flex: none;
+    gap: 4px;
+}
+
+.master-ventana-mando {
+    width: 28px;
+    height: 28px;
+    padding: 0;
+    border: 2px solid currentColor;
+    background: transparent;
+    color: inherit;
+    font-size: 0.875rem;
+    line-height: 1;
+    cursor: pointer;
+}
+
+.master-ventana-mando.es-asa {
+    cursor: move;
+}
+
+.master-ventana-mando:hover,
+.master-ventana-mando:focus-visible {
+    background: var(--yellow);
+    color: var(--yellow-contrast);
+}
+
+.master-ventana-mando:focus-visible {
+    outline: 2px solid var(--yellow);
+    outline-offset: 2px;
+}
+
+.master-ventana-cuerpo {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow: auto;
+}
+
+.master-ventana-cuerpo[hidden] {
+    display: none;
+}
+
+/* EL BUSCADOR DE CONJUROS. */
+.master-conjuros-buscar {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: end;
+    gap: 4px 8px;
+}
+
+.master-conjuros-buscar .oc-dados-etiqueta {
+    grid-row: 1;
+}
+
+.master-conjuros-buscar .oc-dados-texto,
+.master-conjuros-buscar .oc-dados-elegir {
+    grid-row: 2;
+    min-height: 40px;
+}
+
+.master-conjuros {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.master-conjuro {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    width: 100%;
+    padding: 6px 10px;
+    border: 2px solid var(--yellow);
+    background: transparent;
+    color: var(--yellow);
+    text-align: left;
+    cursor: pointer;
+}
+
+.master-conjuro:hover {
+    background: var(--yellow);
+    color: var(--yellow-contrast);
+}
+
+.master-conjuro:focus-visible {
+    outline: 2px solid var(--yellow);
+    outline-offset: 2px;
+}
+
+.master-conjuro-nombre {
+    font-weight: 700;
+}
+
+.master-conjuro-datos {
+    font-family: var(--fuente-mono);
+    font-size: 0.75rem;
+}
+
+/* LOS DADOS. */
+.master-dados {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(3.4rem, 1fr));
+    gap: 6px;
+    margin-bottom: 12px;
+}
+
+.master-formula {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: end;
+    gap: 4px 8px;
+}
+
+.master-formula .oc-dados-etiqueta {
+    grid-column: 1 / -1;
+}
+
+/* LAS TARJETAS Y LAS TABLAS. */
+.master-tarjeta {
+    margin-bottom: 10px;
+}
+
+.master-tarjeta-editar {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.master-tarjeta-editar[hidden],
+.master-tarjeta[hidden],
+.master-ventana-cuerpo .oc-vida-accion[hidden] {
+    display: none;
+}
+
+.oc-notas-texto.es-corta {
+    min-height: 8rem;
+}
+
+.master-tabla-sale {
+    min-height: 1.5em;
+    margin: 10px 0 0;
+    color: var(--white);
+    font-size: 1.125rem;
+    font-weight: 700;
+}
+
+.master-ventana-cuerpo label.oc-dados-etiqueta {
+    display: block;
+    margin-top: 6px;
+}
+
+/* La iniciativa, suelta (sin sus ventanitas de dentro). */
+.oc-ini-bloque + .oc-ini-bloque {
+    margin-top: 16px;
+    padding-top: 12px;
+    border-top: 1px dashed var(--border);
+}
+
+/* En estrecho, sin lienzo: una debajo de otra. */
+@media (max-width: 860px) {
+    .master-lienzo.con-lienzo {
+        display: flex;
+        flex-direction: column;
+        gap: 18px;
+        min-height: 0;
+        border: 0;
+        background: none;
+    }
+
+    .master-ventana {
+        position: static;
+        width: auto;
+        height: auto;
+        max-height: 80vh;
+        resize: none;
+    }
+
+    .master-ventana-mando.es-asa {
+        display: none;
+    }
+
+    .master-ventana-barra {
+        cursor: default;
+    }
+}
