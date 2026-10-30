@@ -1513,7 +1513,10 @@ def politica(texto):
         "default-src 'self'",
         "script-src 'self'" + "".join(" " + h for h in huellas),
         "style-src 'self' 'unsafe-inline'",
-        "img-src 'self' data:",
+        # Las páginas con data-oc-imagenes-de-fuera (la pantalla de
+        # máster: la imagen que pone cada uno a un monstruo u objeto)
+        # dejan ver imágenes de cualquier web segura.
+        "img-src 'self' data:" + (" https:" if "data-oc-imagenes-de-fuera" in sin else ""),
         "font-src 'self'",
         "connect-src 'self' " + CSP_GOOGLE,
         "object-src 'none'",

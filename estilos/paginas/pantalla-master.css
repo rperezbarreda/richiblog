@@ -2056,6 +2056,68 @@
     cursor: default;
 }
 
+/* LAS IMÁGENES de monstruos y objetos: el enlace a la oficial y la
+   tuya, a lo ancho y sin pasarse de alto. */
+.master-imagen {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.master-imagen-oficial {
+    margin: 0 0 6px;
+}
+
+.master-imagen-oficial a {
+    color: var(--yellow);
+    font-weight: 700;
+    text-underline-offset: 3px;
+}
+
+.master-imagen-oficial a:focus-visible {
+    outline: 3px solid var(--yellow);
+    outline-offset: 2px;
+}
+
+.master-imagen-credito {
+    display: block;
+    color: var(--muted);
+    font-size: 0.875rem;
+}
+
+.master-imagen-propia {
+    display: block;
+    max-width: 100%;
+    max-height: 22rem;
+    margin: 4px auto;
+    object-fit: contain;
+}
+
+.master-imagen-grande {
+    display: block;
+    max-width: 100%;
+    max-height: 80vh;
+    margin: 0 auto;
+    object-fit: contain;
+}
+
+.master-imagen-propia[hidden],
+.master-imagen-botones[hidden],
+.master-imagen .oc-vacio[hidden] {
+    display: none;
+}
+
+.master-imagen-botones {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.master-imagen-titulo {
+    margin: 16px 0 6px;
+    font-size: 1rem;
+}
+
 /* LOS DADOS. */
 .master-dados {
     display: grid;

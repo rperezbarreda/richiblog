@@ -4380,6 +4380,20 @@
       palabra; la misma palabra da siempre lo mismo), y en la tarjeta,
       debajo, cómo se escribe en su alfabeto y «Torrefría» en enano. Se
       guarda como {n, es, idioma} (lo de antes, texto, sigue valiendo).
+    · 🖼️ IMÁGENES de monstruos y objetos: pestaña «imagen» en el perfil
+      del monstruo (la última) y apartado al final de cada objeto
+      (panelImagen()). La ilustración oficial NO se incrusta: es de WotC y
+      5e.tools la tiene sin permiso, así que solo hay un enlace que la
+      abre en otra pestaña (https://5e.tools/img/ + «ilus», con «ilusDe»,
+      el artista; sacados de fluff-bestiary-xmm.json y fluff-items.json:
+      119 monstruos y 261 objetos). Lo que sí se ve dentro es la imagen
+      que pongas tú: pegas el enlace https de una imagen y sale ahí, con
+      «🔍 en grande» y «✕ quitar». Se guarda solo en ese navegador
+      («richi-master-imagenes»: {"monstruo:Aboleth": url, "objeto:…"}; va
+      en exportar/importar); urlImagenSegura() solo deja https. Para eso,
+      la pantalla de máster lleva data-oc-imagenes-de-fuera en su
+      <section> y actualizar-cabeceras.py le pone img-src … https: en la
+      CSP (solo a las páginas con esa marca).
     · 💰 botín y 🗺️ encuentros: generadores PROPIOS. Las tablas de botín
       y de encuentros de 5e.tools (loot.json, encounters.json) son de la
       DMG, la Xanathar's y otros libros, no del SRD: no se pueden copiar.

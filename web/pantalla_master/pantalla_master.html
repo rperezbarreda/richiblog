@@ -2,7 +2,7 @@
 <html lang="es">
   <head>
     <meta charset="UTF-8">
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-aDtzI6QgHfitL7afCewTh/rpYprDOJvupEIYVZKPk8Y='; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self' https://script.google.com https://script.googleusercontent.com; object-src 'none'; base-uri 'self'; form-action 'self'">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-aDtzI6QgHfitL7afCewTh/rpYprDOJvupEIYVZKPk8Y='; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self'; connect-src 'self' https://script.google.com https://script.googleusercontent.com; object-src 'none'; base-uri 'self'; form-action 'self'">
     <!-- ==== TEMA ==== -->
     <meta name="theme-color" content="#12091c">
     <script>
@@ -59,14 +59,14 @@
     <link rel="stylesheet" href="/estilos/paquete-comun.css?v=e94b0ddd">
     <link rel="stylesheet" href="/ligero/estilos/paginas/personajes.css?v=1ec2aa46">
     <link rel="stylesheet" href="/ligero/estilos/paginas/personajes.responsive.css?v=b0d76880">
-    <link rel="stylesheet" href="/ligero/estilos/paginas/pantalla-master.css?v=907a0556">
+    <link rel="stylesheet" href="/ligero/estilos/paginas/pantalla-master.css?v=5149bd42">
     <link rel="stylesheet" href="/estilos/paquete-cierre.css?v=a49d87f4">
     <!-- ==== fin del CSS ==== -->
     <script src="/ligero/scripts/cargador-scripts.js?v=0572d5cf"></script>
     <!-- ==== JS ==== -->
     <script defer src="/scripts/paquete-comun.js?v=5806fd68"></script>
     <script defer src="/ligero/scripts/paginas/personajes.js?v=b2b9c2d5"></script>
-    <script defer src="/ligero/scripts/paginas/pantalla-master.js?v=bc35bef0"></script>
+    <script defer src="/ligero/scripts/paginas/pantalla-master.js?v=b6ca1084"></script>
     <!-- ==== fin del JS ==== -->
   </head>
 
@@ -346,7 +346,7 @@
     </div>
 
     <main id="main-content">
-        <section id="home" class="home oc-page master-page oc-color-morado">
+        <section id="home" class="home oc-page master-page oc-color-morado" data-oc-imagenes-de-fuera>
             <h1 class="visually-hidden">pantalla de máster</h1>
 
             <div class="master-barra" data-master-barra

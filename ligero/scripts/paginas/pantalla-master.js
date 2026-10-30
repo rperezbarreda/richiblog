@@ -146,6 +146,7 @@
         return pedidos[ruta];
     }
     const CLAVE_HOMEBREW = "richi-master-homebrew";
+    const CLAVE_IMAGENES = "richi-master-imagenes";
     function leerHomebrew() {
         try {
             const x = JSON.parse(localStorage.getItem(CLAVE_HOMEBREW) || "[]");
@@ -410,6 +411,109 @@
         }
         return cuerpo;
     }
+    function urlImagenSegura(u) {
+        const x = String(u || "").trim();
+        return /^https:\/\/[^\s"'<>()\\]+$/.test(x) ? x : "";
+    }
+    function leerImagenes() {
+        try {
+            return JSON.parse(localStorage.getItem(CLAVE_IMAGENES) || "{}") || {};
+        } catch (e) {
+            return {};
+        }
+    }
+    function panelImagen(clave, nombre, ilus, credito) {
+        const caja = crear("div", "master-imagen");
+        const oficial = crear("p", "master-imagen-oficial");
+        if (ilus) {
+            const a = crear("a", "", "🖼️ ver la ilustración oficial en 5e.tools");
+            a.href = "https://5e.tools/img/" + encodeURI(ilus);
+            a.target = "_blank";
+            a.rel = "noopener noreferrer";
+            a.setAttribute("aria-label", "Ver la ilustración oficial de " + nombre + " en 5e.tools (se abre en otra pestaña)");
+            oficial.append(a, crear("span", "master-imagen-credito", (credito ? "Ilustración de " + credito + ", " : "") +
+                "© Wizards of the Coast."));
+        } else {
+            oficial.textContent = "No hay ilustración oficial de esto en 5e.tools.";
+        }
+        const id = "master-imagen-" + clave.replace(/[^\w]+/g, "-") + "-" + Math.random().toString(36).slice(2, 6);
+        const et = crear("label", "oc-dados-etiqueta", "tu imagen (pega su enlace https)");
+        const campo = crear("input", "master-elegir");
+        campo.type = "url";
+        campo.id = id;
+        campo.placeholder = "https://…";
+        et.htmlFor = campo.id;
+        const img = crear("img", "master-imagen-propia");
+        img.alt = "Tu imagen de " + nombre;
+        img.referrerPolicy = "no-referrer";
+        img.loading = "lazy";
+        const fallo = crear("p", "oc-vacio", "No se ha podido cargar esa imagen (¿el enlace es de la imagen en sí?).");
+        fallo.hidden = true;
+        img.addEventListener("error", () => {
+            if (img.getAttribute("src")) {
+                fallo.hidden = false;
+                img.hidden = true;
+            }
+        });
+        img.addEventListener("load", () => {
+            fallo.hidden = true;
+        });
+        const grande = botonDe("oc-vida-accion", "🔍 en grande", () => {
+            const g = crear("img", "master-imagen-grande");
+            g.alt = img.alt;
+            g.referrerPolicy = "no-referrer";
+            g.src = urlImagenSegura(img.getAttribute("src"));
+            window.ocVentana.abrir({ titulo: nombre, cuerpo: g, vuelta: grande, clase: "es-ancha" });
+        }, "Ver tu imagen de " + nombre + " en grande");
+        const quitar = botonDe("oc-vida-accion", "✕ quitar", () => {
+            const todas = leerImagenes();
+            delete todas[clave];
+            try {
+                localStorage.setItem(CLAVE_IMAGENES, JSON.stringify(todas));
+            } catch (e) {
+            }
+            campo.value = "";
+            poner("");
+            avisar("Imagen quitada.");
+        }, "Quitar tu imagen de " + nombre);
+        const botones = crear("div", "master-imagen-botones");
+        botones.append(grande, quitar);
+        const poner = (url) => {
+            const bien = urlImagenSegura(url);
+            fallo.hidden = true;
+            img.hidden = !bien;
+            botones.hidden = !bien;
+            if (bien) {
+                img.src = bien;
+            } else {
+                img.removeAttribute("src");
+            }
+        };
+        campo.addEventListener("change", () => {
+            const bien = urlImagenSegura(campo.value);
+            if (campo.value.trim() && !bien) {
+                avisar("Tiene que ser un enlace que empiece por https://.");
+                return;
+            }
+            const todas = leerImagenes();
+            if (bien) {
+                todas[clave] = bien;
+            } else {
+                delete todas[clave];
+            }
+            try {
+                localStorage.setItem(CLAVE_IMAGENES, JSON.stringify(todas));
+            } catch (e) {
+            }
+            poner(bien);
+            avisar(bien ? "Imagen puesta." : "Imagen quitada.");
+        });
+        const ya = leerImagenes()[clave] || "";
+        campo.value = ya;
+        poner(ya);
+        caja.append(oficial, et, campo, fallo, img, botones);
+        return caja;
+    }
     function datosObjeto(o) {
         const cuerpo = crear("div", "master-objeto");
         const dl = crear("dl", "master-bicho-datos");
@@ -437,6 +541,7 @@
             }
             enlazarConjuros(que);
         }
+        cuerpo.append(crear("h3", "master-imagen-titulo", "🖼️ imagen"), panelImagen("objeto:" + o.en, o.nombre, o.ilus, o.ilusDe));
         return cuerpo;
     }
     function abrirObjeto(o, vuelta, fuente) {
@@ -2592,6 +2697,7 @@
             }).catch(() => {});
             paneles.push(["hechizos", panel]);
         }
+        paneles.push(["imagen", panelImagen("monstruo:" + b.en, b.nombre, b.ilus, b.ilusDe)]);
         let actual = (guardado && guardado.pestana) || 0;
         if (actual >= paneles.length) {
             actual = 0;
@@ -3672,7 +3778,7 @@
             clase: "es-ancha" });
     });
     botonAnadir.setAttribute("aria-haspopup", "dialog");
-    const CLAVES = (k) => k === CLAVE || k === CLAVE_HOMEBREW || /^richi-oc-(iniciativa|marcas|partida-pantalla-master)/.test(k);
+    const CLAVES = (k) => k === CLAVE || k === CLAVE_HOMEBREW || k === CLAVE_IMAGENES || /^richi-oc-(iniciativa|marcas|partida-pantalla-master)/.test(k);
     function copias(alTerminar) {
         const caja = crear("div", "master-anadir-otras");
         const exportar = botonDe("oc-vida-accion", "⬇ exportar", () => {
