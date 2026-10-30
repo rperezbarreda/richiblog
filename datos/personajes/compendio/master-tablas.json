@@ -556,7 +556,6 @@
   "calidades": {
    "pobre": {
     "nombre": "pobre",
-    "por": 0.5,
     "ambiente": [
      "el suelo está pegajoso y huele a cerveza vieja",
      "hay más ratas que clientes",
@@ -565,22 +564,13 @@
      "un perro sarnoso duerme junto a la barra",
      "hay goteras y cubos debajo"
     ],
-    "habitaciones": [
-     [
-      "un hueco en el suelo de la sala común",
-      1,
-      "una manta (con suerte)"
-     ],
-     [
-      "un catre en el dormitorio compartido",
-      3,
-      "paja limpia y un orinal para todos"
-     ]
+    "estilos": [
+     "miserable",
+     "pobre"
     ]
    },
    "modesta": {
     "nombre": "modesta",
-    "por": 1,
     "ambiente": [
      "es acogedora, con un fuego que calienta de verdad",
      "hay un bardo regular que cree que es bueno",
@@ -589,27 +579,13 @@
      "hay un tablón de anuncios lleno de encargos",
      "la posadera se sabe el nombre de todos"
     ],
-    "habitaciones": [
-     [
-      "una cama en una habitación compartida",
-      5,
-      "sábanas limpias y un baúl con candado"
-     ],
-     [
-      "una habitación para uno o dos",
-      10,
-      "cama, palangana y una vela"
-     ],
-     [
-      "una habitación con chimenea",
-      20,
-      "leña, desayuno incluido"
-     ]
+    "estilos": [
+     "pobre",
+     "modesta"
     ]
    },
    "acomodada": {
     "nombre": "acomodada",
-    "por": 2,
     "ambiente": [
      "tiene alfombras y lámparas de aceite en cada mesa",
      "hay un salón privado para quien pague",
@@ -618,27 +594,13 @@
      "las paredes tienen cuadros de caza",
      "hay una mesa de juego con apuestas altas"
     ],
-    "habitaciones": [
-     [
-      "una habitación privada",
-      40,
-      "cama grande, armario y agua caliente"
-     ],
-     [
-      "una habitación con vistas",
-      60,
-      "balcón, desayuno y cena incluidos"
-     ],
-     [
-      "una suite pequeña",
-      100,
-      "salita, bañera y un mozo para los recados"
-     ]
+    "estilos": [
+     "cómoda",
+     "rica"
     ]
    },
    "lujosa": {
     "nombre": "lujosa",
-    "por": 5,
     "ambiente": [
      "hay mármol, terciopelo y espejos dorados",
      "un mayordomo recibe en la puerta",
@@ -647,187 +609,12 @@
      "hay un jardín interior con una fuente",
      "se entra solo con invitación (o con oro)"
     ],
-    "habitaciones": [
-     [
-      "una habitación de invitados",
-      200,
-      "sábanas de seda, baño y todas las comidas"
-     ],
-     [
-      "la suite del ala este",
-      400,
-      "dos estancias, baño propio, criado y cuadra para el caballo"
-     ],
-     [
-      "la suite real",
-      1000,
-      "todo lo anterior, un cocinero propio y discreción absoluta"
-     ]
+    "estilos": [
+     "rica",
+     "aristocrática"
     ]
    }
   },
-  "bebidas": [
-   [
-    "jarra de cerveza",
-    4
-   ],
-   [
-    "jarra de cerveza negra",
-    6
-   ],
-   [
-    "vaso de sidra",
-    4
-   ],
-   [
-    "jarra de aguamiel",
-    8
-   ],
-   [
-    "copa de vino de la casa",
-    10
-   ],
-   [
-    "botella de vino de la casa",
-    50
-   ],
-   [
-    "copa de vino élfico",
-    200
-   ],
-   [
-    "vaso de licor de enano",
-    30
-   ],
-   [
-    "chupito de aguardiente",
-    8
-   ],
-   [
-    "té de hierbas",
-    2
-   ],
-   [
-    "leche de cabra",
-    1
-   ],
-   [
-    "ponche caliente con especias",
-    12
-   ],
-   [
-    "jarra de cerveza de jengibre",
-    5
-   ],
-   [
-    "vaso de hidromiel de las montañas",
-    15
-   ],
-   [
-    "botella de vino espumoso",
-    400
-   ]
-  ],
-  "comidas": [
-   [
-    "cuenco de guiso del día",
-    10
-   ],
-   [
-    "pan con queso",
-    5
-   ],
-   [
-    "empanada de carne",
-    8
-   ],
-   [
-    "sopa de cebolla",
-    4
-   ],
-   [
-    "muslo de pollo asado",
-    15
-   ],
-   [
-    "costillas de cerdo con miel",
-    30
-   ],
-   [
-    "trucha a la brasa",
-    25
-   ],
-   [
-    "salchichas con alubias",
-    12
-   ],
-   [
-    "tabla de quesos y embutidos",
-    40
-   ],
-   [
-    "pastel de setas",
-    10
-   ],
-   [
-    "estofado de jabalí",
-    50
-   ],
-   [
-    "tortilla de patatas",
-    6
-   ],
-   [
-    "gachas con manzana",
-    3
-   ],
-   [
-    "cordero al horno",
-    80
-   ],
-   [
-    "tarta de frutas del bosque",
-    15
-   ],
-   [
-    "buñuelos con miel",
-    6
-   ]
-  ],
-  "especialidades": [
-   [
-    "el guiso de la abuela, con una receta secreta",
-    15
-   ],
-   [
-    "un asado de grifo (dicen)",
-    300
-   ],
-   [
-    "pescado del río en salsa picante",
-    30
-   ],
-   [
-    "el «matadragones»: carne con guindillas que hacen llorar",
-    25
-   ],
-   [
-    "pan negro con mantequilla de hierbas de la casa",
-    6
-   ],
-   [
-    "el plato del día, que nadie sabe qué es",
-    8
-   ],
-   [
-    "pastel de calabaza que hornea el hijo del posadero",
-    10
-   ],
-   [
-    "cerveza de la casa, que se fermenta en el sótano",
-    6
-   ]
-  ],
   "rumores": [
    "dicen que en el bosque se ha visto una luz que se mueve sola",
    "alguien está comprando todos los mapas antiguos del pueblo",
@@ -844,7 +631,6 @@
  "negocios": {
   "calidades": {
    "pobre": {
-    "por": 0.8,
     "tope": 5000,
     "cuantos": 5,
     "rareza": 2,
@@ -853,10 +639,10 @@
      "la mitad del género es de segunda mano",
      "el tejado tiene goteras y hay cubos por el suelo",
      "el mostrador es un tablón sobre dos barriles"
-    ]
+    ],
+    "nivel": 2
    },
    "modesta": {
-    "por": 1,
     "tope": 50000,
     "cuantos": 7,
     "rareza": 3,
@@ -865,10 +651,10 @@
      "hay un gato dormido encima del mostrador",
      "una campanilla suena al abrir la puerta",
      "los precios están escritos con tiza en una pizarra"
-    ]
+    ],
+    "nivel": 3
    },
    "acomodada": {
-    "por": 1.25,
     "tope": 500000,
     "cuantos": 9,
     "rareza": 4,
@@ -877,10 +663,10 @@
      "un aprendiz atiende mientras el dueño mira desde el fondo",
      "hay sillas para los clientes y te ofrecen algo de beber",
      "todo está etiquetado con letra elegante"
-    ]
+    ],
+    "nivel": 5
    },
    "lujosa": {
-    "por": 1.5,
     "tope": 0,
     "cuantos": 12,
     "rareza": 5,
@@ -889,13 +675,18 @@
      "sólo se entra con cita o con recomendación",
      "las vitrinas están cerradas con llave y protegidas con runas",
      "hay alfombras, incienso y un sirviente para cada cliente"
-    ]
+    ],
+    "nivel": 9
    }
   },
   "tipos": {
    "taberna": {
     "nombre": "taberna o posada",
-    "emoji": "🍺"
+    "emoji": "🍺",
+    "asalariados": [
+     "sin",
+     "mensajero"
+    ]
    },
    "general": {
     "nombre": "tienda general",
@@ -948,33 +739,17 @@
      "los críos del barrio vienen a por caramelos de miel",
      "la dueña apunta las deudas en un libro gordísimo"
     ],
-    "servicios": [
-     [
-      "llevar el pedido a la posada",
-      5,
-      "en el mismo pueblo"
-     ],
-     [
-      "preparar provisiones para una semana",
-      500,
-      "raciones, agua y yesca"
-     ],
-     [
-      "encargar algo de fuera",
-      1000,
-      "llega en 1d6 días"
-     ],
-     [
-      "guardar un fardo en la trastienda",
-      10,
-      "por día"
-     ]
-    ],
     "ganchos": [
      "el proveedor de siempre no ha llegado y pagan bien por ir a buscarlo",
      "alguien compra cuerda y aceite en cantidades sospechosas",
      "hay una caja que nadie ha reclamado y hace ruido por las noches",
      "el dueño fía a todo el pueblo… y alguien le debe demasiado"
+    ],
+    "conjuros": [],
+    "asalariados": [
+     "cualificado",
+     "sin",
+     "mensajero"
     ]
    },
    "herreria": {
@@ -1028,38 +803,18 @@
      "las paredes están llenas de herraduras de la suerte",
      "el herrero tiene un brazo el doble de gordo que el otro"
     ],
-    "servicios": [
-     [
-      "afilar un arma",
-      10,
-      "listo en una hora"
-     ],
-     [
-      "reparar una armadura",
-      1000,
-      "la décima parte de lo que vale, según el daño"
-     ],
-     [
-      "herrar un caballo",
-      50,
-      ""
-     ],
-     [
-      "grabar un nombre o un escudo de armas",
-      500,
-      ""
-     ],
-     [
-      "hacer un arma por encargo",
-      0,
-      "el doble de su precio; tarda 1d4 semanas"
-     ]
-    ],
     "ganchos": [
      "le han encargado cien puntas de lanza y no dice para quién",
      "busca alguien que le traiga mineral de una mina abandonada",
      "una espada que forjó apareció en el cuerpo de un noble",
      "el aprendiz ha desaparecido con un martillo de la casa"
+    ],
+    "conjuros": [
+     "Mending"
+    ],
+    "asalariados": [
+     "cualificado",
+     "sin"
     ]
    },
    "herramientas": {
@@ -1113,33 +868,17 @@
      "un relojero gnomo repara algo diminuto con una lupa",
      "hay instrumentos colgados del techo que suenan con la corriente"
     ],
-    "servicios": [
-     [
-      "afinar o reparar un instrumento",
-      50,
-      ""
-     ],
-     [
-      "arreglar una herramienta",
-      20,
-      ""
-     ],
-     [
-      "una clase con el maestro",
-      100,
-      "por hora"
-     ],
-     [
-      "hacer una llave nueva",
-      200,
-      "si se trae el molde"
-     ]
-    ],
     "ganchos": [
      "un gremio rival le está haciendo la vida imposible",
      "le han pedido una ganzúa de las buenas y no sabe si debe",
      "en el laúd que vende hay escondido un mensaje",
      "busca a un bardo que se fue sin pagar"
+    ],
+    "conjuros": [
+     "Mending"
+    ],
+    "asalariados": [
+     "cualificado"
     ]
    },
    "alquimista": {
@@ -1193,33 +932,23 @@
      "el mostrador está lleno de manchas y quemaduras",
      "una lechuza disecada (¿o no?) vigila desde una balda"
     ],
-    "servicios": [
-     [
-      "identificar una poción",
-      500,
-      "tarda 1 hora"
-     ],
-     [
-      "preparar un remedio contra el veneno",
-      500,
-      ""
-     ],
-     [
-      "curar una enfermedad común",
-      1000,
-      "con hierbas, 1d4 días"
-     ],
-     [
-      "comprar ingredientes raros",
-      0,
-      "la mitad de lo que valgan"
-     ]
-    ],
     "ganchos": [
      "necesita una flor que sólo crece en una ciénaga peligrosa",
      "una de sus pociones ha salido mal y anda buscando a quien la compró",
      "le pagan mucho por algo que no debería vender",
      "el último que probó su elixir nuevo sigue siendo un poco verde"
+    ],
+    "conjuros": [
+     "Detect Poison and Disease",
+     "Goodberry",
+     "Purify Food and Drink",
+     "Cure Wounds",
+     "Lesser Restoration",
+     "Protection from Poison",
+     "Locate Animals or Plants"
+    ],
+    "asalariados": [
+     "cualificado"
     ]
    },
    "templo": {
@@ -1273,43 +1002,34 @@
      "una sacerdotisa reparte pan en la puerta",
      "las vidrieras pintan colores en el suelo"
     ],
-    "servicios": [
-     [
-      "una bendición antes del viaje",
-      50,
-      "o una donación"
-     ],
-     [
-      "curar heridas",
-      1000,
-      "lo lanza un acólito"
-     ],
-     [
-      "quitar un veneno o una enfermedad",
-      4000,
-      ""
-     ],
-     [
-      "quitar una maldición",
-      10000,
-      "sólo si el templo se fía de ti"
-     ],
-     [
-      "devolver la vida",
-      100000,
-      "y un diamante; no siempre lo aceptan"
-     ],
-     [
-      "un entierro digno",
-      500,
-      ""
-     ]
-    ],
     "ganchos": [
      "han robado una reliquia y no quieren que se sepa",
      "un sacerdote joven tiene visiones que nadie cree",
      "necesitan escolta para unos peregrinos",
      "en la cripta se oyen pasos por la noche"
+    ],
+    "conjuros": [
+     "Bless",
+     "Cure Wounds",
+     "Sanctuary",
+     "Augury",
+     "Lesser Restoration",
+     "Protection from Poison",
+     "Prayer of Healing",
+     "Remove Curse",
+     "Revivify",
+     "Speak with Dead",
+     "Divination",
+     "Greater Restoration",
+     "Raise Dead",
+     "Commune",
+     "Heal",
+     "Resurrection",
+     "Regenerate",
+     "True Resurrection"
+    ],
+    "asalariados": [
+     "mensajero"
     ]
    },
    "arcanista": {
@@ -1363,33 +1083,33 @@
      "huele a tinta y a pergamino viejo",
      "los mapas de las paredes cambian según la luna"
     ],
-    "servicios": [
-     [
-      "copiar un conjuro en un libro",
-      0,
-      "50 po por nivel del conjuro"
-     ],
-     [
-      "identificar un objeto mágico",
-      2000,
-      "tarda 1 hora"
-     ],
-     [
-      "traducir un texto antiguo",
-      500,
-      "por página"
-     ],
-     [
-      "consulta con el sabio",
-      1000,
-      "sobre historia o arcanos"
-     ]
-    ],
     "ganchos": [
      "vende un libro que su antiguo dueño quiere recuperar a toda costa",
      "busca a alguien que entre en una torre sellada",
      "uno de sus pergaminos tiene un conjuro que nadie conoce",
      "un aprendiz suyo invocó algo y no lo ha devuelto"
+    ],
+    "conjuros": [
+     "Comprehend Languages",
+     "Detect Magic",
+     "Identify",
+     "Illusory Script",
+     "Alarm",
+     "Arcane Lock",
+     "Locate Object",
+     "Magic Mouth",
+     "Dispel Magic",
+     "Remove Curse",
+     "Sending",
+     "Tongues",
+     "Legend Lore",
+     "Teleportation Circle",
+     "Scrying",
+     "Teleport",
+     "Plane Shift"
+    ],
+    "asalariados": [
+     "cualificado"
     ]
    },
    "establos": {
@@ -1443,33 +1163,20 @@
      "se oye a una mula protestar",
      "los carros esperan en fila con las ruedas recién engrasadas"
     ],
-    "servicios": [
-     [
-      "guardar y dar de comer a una montura",
-      50,
-      "por día"
-     ],
-     [
-      "un asiento en la diligencia",
-      30,
-      "por milla"
-     ],
-     [
-      "alquilar un caballo",
-      200,
-      "por día, con fianza"
-     ],
-     [
-      "un guía para el camino",
-      200,
-      "por día"
-     ]
-    ],
     "ganchos": [
      "la diligencia de ayer no llegó a su destino",
      "alguien quiere comprar un caballo concreto a cualquier precio",
      "los caballos se ponen nerviosos todas las noches a la misma hora",
      "buscan escolta para un carro que nadie sabe qué lleva"
+    ],
+    "conjuros": [
+     "Speak with Animals",
+     "Animal Messenger"
+    ],
+    "asalariados": [
+     "cualificado",
+     "sin",
+     "mensajero"
     ]
    },
    "magia": {
@@ -1523,34 +1230,20 @@
      "un espejo comenta lo que compras",
      "las vitrinas zumban con un ruido grave"
     ],
-    "servicios": [
-     [
-      "identificar un objeto mágico",
-      2000,
-      ""
-     ],
-     [
-      "comprar un objeto mágico",
-      0,
-      "la mitad de lo que vale, si se fía"
-     ],
-     [
-      "buscar un objeto por encargo",
-      0,
-      "1d4 semanas; señal del 10 %"
-     ],
-     [
-      "recargar una varita",
-      0,
-      "según la varita"
-     ]
-    ],
     "ganchos": [
      "uno de los objetos está maldito y el dueño lo sabe",
      "busca quien recupere un objeto que vendió por error",
      "un objeto de la tienda ha empezado a hablar",
      "alguien muy poderoso le ha prohibido vender una cosa"
-    ]
+    ],
+    "conjuros": [
+     "Detect Magic",
+     "Identify",
+     "Dispel Magic",
+     "Remove Curse",
+     "Legend Lore"
+    ],
+    "asalariados": []
    },
    "escriba": {
     "nombre": "escriba y cartógrafo",
@@ -1594,48 +1287,35 @@
      "se oye el rasgueo de tres plumas a la vez",
      "un pájaro mensajero espera en una percha"
     ],
-    "servicios": [
-     [
-      "escribir una carta",
-      10,
-      "por página"
-     ],
-     [
-      "un mapa de la región",
-      2500,
-      ""
-     ],
-     [
-      "un mapa de la ciudad",
-      1000,
-      ""
-     ],
-     [
-      "copiar un documento",
-      50,
-      "por página"
-     ],
-     [
-      "mandar una carta",
-      20,
-      "por cada 50 millas"
-     ],
-     [
-      "redactar un contrato",
-      500,
-      "con testigo"
-     ],
-     [
-      "falsificar un documento",
-      0,
-      "no lo hace… salvo que se le convenza"
-     ]
-    ],
     "ganchos": [
      "un mapa suyo marca una ruina que no sale en ningún otro",
      "ha copiado una carta que no debería haber leído",
      "le han encargado un mapa de las alcantarillas",
      "el último cliente pagó con monedas que nadie conoce"
+    ],
+    "conjuros": [
+     "Comprehend Languages",
+     "Illusory Script",
+     "Tongues",
+     "Sending"
+    ],
+    "asalariados": [
+     "cualificado",
+     "mensajero"
+    ],
+    "objetos": [
+     "Papel",
+     "Pergamino",
+     "Tinta",
+     "Pluma",
+     "Mapa",
+     "Libro",
+     "Estuche para mapas o pergaminos",
+     "Suministros de calígrafo",
+     "Herramientas de cartógrafo",
+     "Útiles de falsificador",
+     "Lupa",
+     "Vela"
     ]
    },
    "barberia": {
@@ -1680,43 +1360,34 @@
      "las navajas brillan colgadas de la pared",
      "hay un cartel que dice «se cose, se corta, se reza»"
     ],
-    "servicios": [
-     [
-      "un afeitado y corte de pelo",
-      3,
-      ""
-     ],
-     [
-      "un baño caliente",
-      5,
-      ""
-     ],
-     [
-      "coser una herida",
-      50,
-      "recupera 1d4 PG"
-     ],
-     [
-      "sacar una muela",
-      20,
-      ""
-     ],
-     [
-      "cuidar a un herido",
-      200,
-      "por día, cama incluida"
-     ],
-     [
-      "cambiar de aspecto",
-      500,
-      "pelo, barba y tinte"
-     ]
-    ],
     "ganchos": [
      "sabe quién ha venido herido de noche y no lo dice",
      "alguien le paga por avisar de ciertos clientes",
      "ha visto una herida que no es de arma ni de bestia",
      "busca hierbas para una fiebre que se está extendiendo"
+    ],
+    "conjuros": [
+     "Spare the Dying",
+     "Cure Wounds",
+     "Healing Word",
+     "Disguise Self",
+     "Lesser Restoration",
+     "Alter Self"
+    ],
+    "asalariados": [
+     "cualificado"
+    ],
+    "objetos": [
+     "Útiles de sanador",
+     "Útiles de herborista",
+     "Antitoxina",
+     "Perfume",
+     "Espejo",
+     "Útiles de disfraz",
+     "Poción de curación",
+     "Ropa fina",
+     "Vela",
+     "Vial"
     ]
    }
   }

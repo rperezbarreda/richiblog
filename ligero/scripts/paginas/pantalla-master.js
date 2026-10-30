@@ -4828,18 +4828,6 @@
         pintarQuien();
         pintar();
     }
-    function precioBonito(cp) {
-        if (cp < 10) {
-            return Math.max(1, Math.round(cp));
-        }
-        if (cp < 100) {
-            return Math.round(cp / 10) * 10 || 10;
-        }
-        if (cp < 1000) {
-            return Math.round(cp / 50) * 50;
-        }
-        return Math.round(cp / 100) * 100;
-    }
     function descargarArchivo(blob, archivo) {
         const a = crear("a");
         const archivoBlob = URL.createObjectURL(blob);
@@ -4966,10 +4954,11 @@
         });
         return lienzo;
     }
+    const PRECIO_CONJURO = [3000, 5000, 20000, 30000, 200000, 200000, 2000000, 2000000, 2000000, 10000000];
     function montarNegocio(dentro, m) {
         m.datos = m.datos || {};
         dentro.appendChild(crear("p", "oc-hoja-nota", "Cargando…"));
-        Promise.all([pedir(TABLAS), pedir(NOMBRES), pedir(TIENDA)]).then(([tablas, nombres, tienda]) => {
+        Promise.all([pedir(TABLAS), pedir(NOMBRES), pedir(TIENDA), pedir(CONJUROS_SRD)]).then(([tablas, nombres, tienda, conjuros]) => {
             const d = m.datos;
             if (d.taberna && !d.negocio) {
                 d.negocio = negocioDeTaberna(d.taberna);
@@ -5001,27 +4990,48 @@
                 return salen;
             };
             const objetoDe = (nombre) => (tienda.objetos || []).find((o) => o.nombre === nombre);
+            const conjuroDe = (en) => (conjuros.conjuros || []).find((c) => c.en === en);
+            const fila = (o) => [o.nombre, o.cp, o.rareza || "", "o"];
+            const asalariados = { cualificado: "Skilled Hireling", sin: "Untrained Hireling", mensajero: "Messenger" };
+            const servicios = (tp, nivel) => {
+                const filas = (tp.asalariados || []).map((k) => (tienda.objetos || []).find((o) => o.en === asalariados[k]))
+                    .filter(Boolean).map(fila);
+                (tp.conjuros || []).map(conjuroDe).filter((c) => c && c.nivel <= nivel).forEach((c) => {
+                    const componente = /(\d[\d.]*) po/.exec(c.comp || "");
+                    const extra = componente ? Number(componente[1].replace(/\./g, "")) * 100 : 0;
+                    filas.push(["Lanzar " + c.nombre, PRECIO_CONJURO[c.nivel] + extra, (c.nivel ? "nivel " + c.nivel : "truco") +
+                        (extra ? "; con el componente (" + moneda(extra) + ")" : ""), "c:" + c.en]);
+                });
+                return filas;
+            };
             const generar = () => {
                 const k = tipo.elegir.value;
                 const tp = N.tipos[k];
                 const cal = calidad.valor();
+                const nc = N.calidades[cal];
                 const g = alAzar(["f", "m"]);
                 const especie = alAzar(Object.keys(nombres.especies));
                 const dueno = nombreDe(nombres, especie, g, false);
                 const quien = dueno + " (" + nombres.especies[especie].nombre + "), que " + alAzar(tablas.pnj.rasgos);
+                const caro = (a, b) => a.cp - b.cp;
                 if (k === "taberna") {
                     const tc = t.calidades[cal];
-                    const por = tc.por;
-                    d.negocio = negocioDeTaberna({
-                        calidad: cal, nombre: lugarDe(nombres, "taberna"), ambiente: alAzar(tc.ambiente), quien,
-                        bebidas: variosDe(t.bebidas, 5).map(([n, cp]) => [n, precioBonito(cp * por)]),
-                        comidas: variosDe(t.comidas, 5).map(([n, cp]) => [n, precioBonito(cp * por)]),
-                        especialidad: (([n, cp]) => [n, precioBonito(cp * por)])(alAzar(t.especialidades)),
-                        habitaciones: tc.habitaciones.map(([n, pp, inc]) => [n, precioBonito(pp * 10), inc]),
-                        rumor: alAzar(t.rumores),
-                    });
+                    const deLaTaberna = (tienda.objetos || []).filter((o) => (o.tiendas || []).includes("Taberna"));
+                    const deSuNivel = (o) => !/\(/.test(o.nombre) || /\(jarra|hogaza|cuña|1 día|botella\)/.test(o.nombre) ||
+                        tc.estilos.some((e) => o.nombre.endsWith("(" + e + ")"));
+                    const fino = cal === "acomodada" || cal === "lujosa";
+                    const comer = deLaTaberna.filter((o) => o.cat !== "alojamiento" && deSuNivel(o) && (fino || o.en !== "Fine Wine (bottle)"))
+                        .sort(caro).map(fila);
+                    const dormir = deLaTaberna.filter((o) => o.cat === "alojamiento" && deSuNivel(o)).sort(caro).map(fila);
+                    const rumor = alAzar(t.rumores);
+                    d.negocio = {
+                        tipo: k, calidad: cal, nombre: lugarDe(nombres, "taberna"), emoji: tp.emoji, ambiente: alAzar(tc.ambiente), quien,
+                        destacado: null, secciones: [{ titulo: "🍺 Comida y bebida", filas: comer },
+                            { titulo: "🛏️ Alojamiento (por noche)", filas: dormir },
+                            { titulo: "🛠️ Servicios", filas: servicios(tp, nc.nivel) }],
+                        gancho: ["👂 Se oye que", rumor + "."],
+                    };
                 } else {
-                    const nc = N.calidades[cal];
                     let nombre;
                     if (alAzar([0, 1])) {
                         const [sust, gs] = alAzar(tp.sust);
@@ -5030,17 +5040,17 @@
                     } else {
                         nombre = alAzar(tp.plantillas).replace("{d}", dueno);
                     }
-                    const precio = (cp) => (nc.por === 1 ? cp : precioBonito(cp * nc.por));
                     const secciones = [];
-                    if (tp.tienda) {
-                        const hay = (tienda.objetos || []).filter((o) => (o.tiendas || []).includes(tp.tienda) && o.cp &&
-                            (k === "magia" ? RAREZAS.indexOf(o.rareza) > -1 && RAREZAS.indexOf(o.rareza) < nc.rareza
-                                : !nc.tope || o.cp <= nc.tope));
-                        const filas = variosDe(hay, nc.cuantos).sort((a, b) => a.cp - b.cp)
-                            .map((o) => [o.nombre, precio(o.cp), o.rareza || "", true]);
-                        secciones.push({ titulo: "🛒 Lo que vende", filas });
+                    const hay = (tienda.objetos || []).filter((o) => o.cp && (tp.objetos ? tp.objetos.includes(o.nombre)
+                        : (o.tiendas || []).includes(tp.tienda)) && (k === "magia"
+                        ? RAREZAS.indexOf(o.rareza) > -1 && RAREZAS.indexOf(o.rareza) < nc.rareza : !nc.tope || o.cp <= nc.tope));
+                    if (hay.length) {
+                        secciones.push({ titulo: "🛒 Lo que vende", filas: variosDe(hay, nc.cuantos).sort(caro).map(fila) });
                     }
-                    secciones.push({ titulo: "🛠️ Servicios", filas: tp.servicios.map(([n, cp, extra]) => [n, cp ? precio(cp) : 0, extra]) });
+                    const sv = servicios(tp, nc.nivel);
+                    if (sv.length) {
+                        secciones.push({ titulo: "🛠️ Servicios", filas: sv });
+                    }
                     const gancho = alAzar(tp.ganchos);
                     d.negocio = {
                         tipo: k, calidad: cal, nombre, emoji: tp.emoji, ambiente: alAzar(tp.ambiente) + "; " + alAzar(nc.ambiente), quien,
@@ -5049,17 +5059,21 @@
                 }
                 guardar();
                 pintar();
-                avisar(N.tipos[k].nombre.charAt(0).toUpperCase() + N.tipos[k].nombre.slice(1) + ": " + d.negocio.nombre + ".");
+                avisar(tp.nombre.charAt(0).toUpperCase() + tp.nombre.slice(1) + ": " + d.negocio.nombre + ".");
             };
             const nombreTipo = () => (N.tipos[(d.negocio || {}).tipo] || N.tipos.taberna).nombre;
             const carta = (s) => {
                 const sec = crear("div", "master-negocio-carta");
                 sec.appendChild(crear("h4", "master-negocio-titulo", s.titulo));
                 const dl = crear("dl", "master-negocio-lista");
-                s.filas.forEach(([n, cp, extra, srd]) => {
+                s.filas.forEach(([n, cp, extra, ref]) => {
                     const dt = crear("dt");
-                    const o = srd ? objetoDe(n) : null;
-                    if (o) {
+                    const c = typeof ref === "string" && ref.startsWith("c:") ? conjuroDe(ref.slice(2)) : null;
+                    const o = !c && ref ? objetoDe(n) : null;
+                    if (c) {
+                        const ver = botonDe("master-botin-objeto", n, () => abrirConjuro(c, ver, conjuros.fuente), "Ver el conjuro " + c.nombre);
+                        dt.appendChild(ver);
+                    } else if (o) {
                         const ver = botonDe("master-botin-objeto", n, () => abrirObjeto(o, ver, tienda.fuente), "Ver " + n);
                         dt.appendChild(ver);
                     } else {
@@ -5109,7 +5123,7 @@
             const arriba = crear("div", "master-nombres-form");
             arriba.append(tipo, etCal, calidad, boton);
             dentro.replaceChildren(arriba, sale, acciones, crear("p", "oc-hoja-nota master-fuente",
-                "Lo que venden las tiendas: SRD 5.2 (CC BY 4.0). Platos, servicios, precios de los servicios y ganchos: tablas propias."));
+                "Lo que venden, los servicios y sus precios: SRD 5.2 (CC BY 4.0). Nombres, ambientes, rumores y ganchos: tablas propias."));
             pintar();
         }).catch(() => {
             dentro.replaceChildren(crear("p", "oc-vacio", "No he podido cargar las tablas."));

@@ -4505,20 +4505,38 @@
       sustantivo del tipo con un adjetivo del generador de nombres, o
       una plantilla con el nombre de quien lo lleva: «La forja de …»),
       el ambiente, quién está al frente (nombre y una manía de PNJ), lo
-      que vende, los servicios y un gancho.
-      - La taberna: como antes (master-tablas.json, «taberna»): bebidas,
-        comidas, especialidad, habitaciones de la posada y un rumor.
-      - Las tiendas venden objetos del SRD de tienda.json (los de su
-        «tiendas»), al azar y ordenados por precio; cuántos y hasta qué
+      que vende, los servicios y un gancho. Lo que se vende y los
+      servicios NO se inventan: todo es del SRD 5.2, con su precio de
+      lista, y se abre con su ficha (abrirObjeto / abrirConjuro). Cada
+      fila es [nombre, pc, detalle, ref]: ref «o» es un objeto de
+      tienda.json (por su nombre) y «c:<en>», un conjuro de
+      conjuros-srd.json.
+      - La taberna: «Comida y bebida» (cerveza, pan, queso, vino,
+        raciones y la comida de los niveles de vida que le tocan; el
+        vino fino, sólo en las acomodadas y lujosas) y «Alojamiento»
+        (la estancia en la posada de esos niveles: taberna.calidades
+        .estilos en master-tablas.json). Las comidas, las estancias, los
+        asalariados y el mensajero se añadieron a tienda.json desde las
+        tablas «Comida, bebida y alojamiento» y «Asalariados» del SRD
+        5.2 (cat «comida y bebida», «alojamiento» y «servicio»). El
+        ambiente y el rumor, de la tabla propia «taberna».
+      - Las tiendas venden objetos de tienda.json: los de su «tienda»
+        (o, el escriba y el barbero, que no tienen, los de su lista
+        «objetos»), al azar y ordenados por precio; cuántos y hasta qué
         precio, según lo buenas que sean; la tienda de magia, hasta una
-        rareza (pobre: común y poco común … lujosa: legendaria). Los
-        objetos se abren con su ficha (abrirObjeto).
-      - Lo demás es de tablas propias, en master-tablas.json,
-        «negocios»: calidades (por, el multiplicador de precios; tope,
-        en pc, 0 sin tope; cuantos; rareza, hasta qué índice de RAREZAS;
-        ambiente) y tipos (nombre, emoji, tienda de tienda.json si vende
+        rareza (pobre: común y poco común … lujosa: legendaria).
+      - Servicios: los asalariados de su lista («cualificado», «sin»
+        formación, «mensajero») y lanzar conjuros de su lista
+        «conjuros» (por su nombre en inglés), hasta el nivel que haya
+        según lo bueno que sea (pobre, un pueblo: hasta 2; modesta, 3;
+        acomodada, 5; lujosa, 9), con el precio de la tabla «Servicios
+        de lanzamiento de conjuros» del SRD (PRECIO_CONJURO) más lo que
+        cueste el componente, si pone «… po».
+      - En master-tablas.json, «negocios», sólo hay lo propio: calidades
+        (tope, en pc, 0 sin tope; cuantos; rareza, hasta qué índice de
+        RAREZAS; nivel; ambiente) y tipos (nombre, emoji, tienda,
         objetos, sust [nombre, género], plantillas con {d}, ambiente,
-        servicios [nombre, pc (0 = «a convenir»), detalle] y ganchos).
+        asalariados, conjuros y ganchos).
       «⧉ copiar», «📄 guardar como texto» (.txt, negocioEnTexto()) y
       «🖼️ guardar como imagen» (.png: negocioEnLienzo() lo pinta en un
       canvas de colores fijos, como un pergamino; descargarArchivo()).
@@ -4659,8 +4677,9 @@
       en la ventana del bestiario, solo mientras está abierta. Los
       conjuros de los monstruos van aparte en bestiario.json («conjuros»:
       la frase, dónde se lanzan y las listas con sus usos).
-    · 💰 tienda: los 601 objetos del SRD 5.2 con su precio
-      (datos/personajes/compendio/tienda.json), repartidos en nueve
+    · 💰 tienda: los 616 objetos del SRD 5.2 con su precio
+      (datos/personajes/compendio/tienda.json; 15 son las comidas, las
+      estancias en la posada, los asalariados y el mensajero), repartidos en nueve
       tiendas (general, herrería y armería, herramientas e instrumentos,
       alquimista y herbolario, templo, arcanista, taberna, establos y
       transportes, magia), con categoría, rareza, precios al gusto (de
