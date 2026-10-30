@@ -4328,25 +4328,37 @@
   veces).
   LAS VENTANAS SE MUEVEN Y ESTIRAN con el ratón, el dedo o el lápiz (el
   asa de la esquina, .master-ventana-tamano; ya no es el «resize» de CSS)
-  y con el teclado (el ✥: flechas para mover, Alt + flechas para el
-  tamaño). Moverlas hay que activarlo en cada una con su ✥ (aria-pressed;
-  «movible» en la ventana): mientras está puesto, la barra se arrastra y
-  la ventana lleva un reborde a rayas del color del texto del tema
-  (.es-movible); si no, se queda fija. Al arrastrar, todo va con requestAnimationFrame (arrastrar()),
+  y con el teclado (en su nombre: flechas para mover, con Mayús más
+  deprisa, y Alt + flechas para el tamaño). Para moverla con el ratón o
+  el dedo se MANTIENE PULSADA LA BARRA un momento (ESPERA_COGER, 350 ms):
+  entonces se coge (reborde a rayas del color del texto del tema,
+  .es-cogida) y se mueve hasta soltar; si el puntero se mueve antes, no
+  pasa nada. Un clic simple en la barra la pliega o despliega. La barra
+  no selecciona texto ni saca el menú del sistema al mantener el dedo.
+  (Antes había un ✥ para activarlo; ya no está.) Al arrastrar, todo va con requestAnimationFrame (arrastrar()),
   el lienzo crece mientras (y encoge despacio al soltar) y cerca del borde
   de arriba o de abajo se hace scroll solo. Las ventanas nuevas van al
   PRIMER HUECO LIBRE (hueco()), empezando por lo que se ve.
   EL COLOR DEL TABLERO: el ✎ de las pestañas cambia el nombre y el color
   del perfil (TABLEROS: tapete, vino, noche, madera…; «color» en cada
   perfil); la cuadrícula se pone clara u oscura según el fondo.
-  «＋ añadir» abre una ventana para elegir qué poner, y debajo, si ya hay
-  algo, «▦ ordenar las ventanas» (en filas, sin solaparse) y «🗑️ quitar
-  todas» (pide pulsar dos veces). En cada ventana: pulsar su NOMBRE la
+  «＋ añadir» abre una ventana para elegir qué poner: un filtro y una
+  PESTAÑA POR GRUPO (combate, consulta, la mesa, el mundo, apuntes; se
+  acuerda de la última, pestanaAnadir) y «⚙️ más», con «▦ ordenar las
+  ventanas» (en filas, sin solaparse), «🗑️ quitar todas» (pide pulsar
+  dos veces), exportar e importar. Al filtrar se esconden las pestañas y
+  salen las que valen de todos los grupos.
+  LAS PESTAÑAS (pestanasDe(): las de los monstruos, la party, las fichas,
+  las opciones de la ventana y añadir) son como las de un navegador:
+  redondeadas arriba, la elegida del color de la ventana (--fondo-pestana;
+  las ventanas con color la cambian), encima de la raya y con una franja
+  arriba; con las flechas, Inicio y Fin se va de una a otra. En cada ventana: pulsar su NOMBRE la
   pliega o despliega (como en el resto de la web; es un botón con
-  aria-expanded, igual que −; si se acaba de arrastrar, no cuenta), ✥
-  activa o desactiva moverla (arrastrando la barra o con las flechas),
+  aria-expanded, igual que −; si se acaba de arrastrar, no cuenta; un
+  clic en el resto de la barra hace lo mismo), mantener pulsada la barra
+  la mueve,
   cambia de tamaño por la esquina de abajo a la derecha, ✎ abre sus
-  OPCIONES: el TÍTULO, el COLOR (como un post-it: la barra de ese color y
+  OPCIONES (en tres pestañas: 📝 título, 🎨 color y 🔠 tamaño): el TÍTULO, el COLOR (como un post-it: la barra de ese color y
   el fondo un poco teñido; colores fijos, iguales en todos los temas) y
   el TAMAÑO DEL CONTENIDO (A− / A+ / 100 %, de 60 % a 200 %, al momento:
   zoom de CSS en su cuerpo, ponerEscala(); «escala» en la ventana), − la

@@ -6649,7 +6649,7 @@
         const salida = { activo: estado.id, perfiles: todo.perfiles.map((pf) => ({ id: pf.id, nombre: pf.nombre, color: pf.color || "",
             zoom: pf.zoom || 1,
             modulos: pf.modulos.map((m) => ({ id: m.id, tipo: m.tipo, x: m.x, y: m.y, w: m.w, h: m.h,
-                titulo: m.titulo || "", color: m.color || "", plegado: !!m.plegado, movible: !!m.movible,
+                titulo: m.titulo || "", color: m.color || "", plegado: !!m.plegado,
                 escala: m.escala || 1, datos: m.datos })) })) };
         try {
             localStorage.setItem(CLAVE, JSON.stringify(salida));
@@ -6737,7 +6737,16 @@
         tam.append(menos, valor, mas, igual);
         const listo = crear("button", "oc-vida-accion es-principal", "guardar");
         listo.type = "submit";
-        cuerpo.append(et, input, grupo, tam, listo);
+        const pTitulo = crear("div");
+        pTitulo.append(et, input);
+        const pColor = crear("div");
+        pColor.appendChild(grupo);
+        const pTam = crear("div");
+        pTam.appendChild(tam);
+        const { lista: pestanas, elegir } = pestanasDe([["📝 título", pTitulo], ["🎨 color", pColor], ["🔠 tamaño", pTam]],
+            "Opciones de la ventana", "master-personalizar-" + m.id);
+        cuerpo.append(pestanas, pTitulo, pColor, pTam, listo);
+        elegir(0, false);
         cuerpo.addEventListener("submit", (e) => {
             e.preventDefault();
             m.titulo = input.value.trim();
@@ -6770,6 +6779,7 @@
         encima += 1;
         m.el.style.zIndex = String(encima);
     }
+    const ESPERA_COGER = 350;
     function ventanaDe(m) {
         const def = MODULOS[m.tipo];
         m.w = m.w || def.w;
@@ -6793,31 +6803,15 @@
             }
             plegar.click();
         });
-        nombre.title = "Plegar o desplegar";
         titulo.append(em, nombre);
-        const asa = botonDe("master-ventana-mando es-asa", "✥", () => {
-            m.movible = !m.movible;
-            pintarMovible();
-            guardar();
-            avisar(m.movible ? "Se puede mover: arrástrala por la barra o usa las flechas (con Alt, el tamaño)."
-                : "Fija en su sitio.");
-        }, "Poder moverla");
-        const pintarMovible = () => {
-            asa.setAttribute("aria-pressed", String(!!m.movible));
-            asa.title = m.movible ? "Dejarla fija" : "Poder moverla (arrastrando la barra o con las flechas)";
-            v.classList.toggle("es-movible", !!m.movible);
-        };
-        asa.addEventListener("keydown", (e) => {
+        nombre.title = "Clic: plegar o desplegar · mantener pulsado: moverla · flechas: moverla (con Alt, el tamaño)";
+        nombre.addEventListener("keydown", (e) => {
             const paso = e.shiftKey ? 60 : 20;
             const d = { ArrowLeft: [-paso, 0], ArrowRight: [paso, 0], ArrowUp: [0, -paso], ArrowDown: [0, paso] }[e.key];
             if (!d || enMovil.matches) {
                 return;
             }
             e.preventDefault();
-            if (!m.movible) {
-                avisar("Pulsa ✥ para poder moverla.");
-                return;
-            }
             if (e.altKey) {
                 m.w = Math.max(240, Math.min(anchoLienzo() - m.x - 4, m.w + d[0]));
                 m.h = Math.max(120, m.h + d[1]);
@@ -6855,7 +6849,7 @@
         cambiar.title = "Título, color y tamaño del contenido";
         cambiar.setAttribute("aria-haspopup", "dialog");
         const mandos = crear("div", "master-ventana-mandos");
-        mandos.append(asa, cambiar, plegar, quitar);
+        mandos.append(cambiar, plegar, quitar);
         cabeza.append(titulo, mandos);
         const cuerpo = crear("div", "oc-hoja-dentro master-ventana-cuerpo");
         cuerpo.id = "master-cuerpo-" + m.id;
@@ -6888,29 +6882,57 @@
         m.el = v;
         ponerColor(m);
         cabeza.addEventListener("pointerdown", (e) => {
-            if (enMovil.matches || !m.movible || e.target.closest("button:not(.es-asa):not(.master-ventana-nombre)") ||
-                e.button > 0) {
+            if (enMovil.matches || e.button > 0 || e.target.closest(".master-ventana-mandos")) {
                 return;
             }
-            e.preventDefault();
             alFrente(m);
-            const mx = m.x;
-            const my = m.y;
-            delete v.dataset.recienMovida;
-            v.classList.add("es-arrastrada");
-            arrastrar(e, cabeza, (dx, dy) => {
-                if (Math.abs(dx) + Math.abs(dy) > 3) {
-                    v.dataset.recienMovida = "si";
+            const x0 = e.clientX;
+            const y0 = e.clientY;
+            const quieto = (ev) => {
+                if (Math.abs(ev.clientX - x0) + Math.abs(ev.clientY - y0) > 8) {
+                    dejar();
                 }
-                m.x = Math.min(topeX(m), Math.max(0, mx + dx));
-                m.y = Math.max(0, my + dy);
-                colocar(m);
-            }, () => {
-                v.classList.remove("es-arrastrada");
-                setTimeout(() => delete v.dataset.recienMovida, 0);
-            });
+            };
+            const dejar = () => {
+                clearTimeout(reloj);
+                document.removeEventListener("pointermove", quieto);
+                document.removeEventListener("pointerup", dejar);
+                document.removeEventListener("pointercancel", dejar);
+            };
+            const reloj = setTimeout(() => {
+                dejar();
+                const mx = m.x;
+                const my = m.y;
+                v.dataset.recienMovida = "si";
+                v.classList.add("es-arrastrada", "es-cogida");
+                arrastrar(e, cabeza, (dx, dy) => {
+                    m.x = Math.min(topeX(m), Math.max(0, mx + dx));
+                    m.y = Math.max(0, my + dy);
+                    colocar(m);
+                }, () => {
+                    v.classList.remove("es-arrastrada", "es-cogida");
+                    setTimeout(() => delete v.dataset.recienMovida, 0);
+                });
+            }, ESPERA_COGER);
+            document.addEventListener("pointermove", quieto);
+            document.addEventListener("pointerup", dejar);
+            document.addEventListener("pointercancel", dejar);
         });
-        pintarMovible();
+        cabeza.addEventListener("click", (e) => {
+            if (e.target.closest("button")) {
+                return;
+            }
+            if (v.dataset.recienMovida) {
+                delete v.dataset.recienMovida;
+                return;
+            }
+            plegar.click();
+        });
+        cabeza.addEventListener("contextmenu", (e) => {
+            if (!enMovil.matches) {
+                e.preventDefault();
+            }
+        });
         v.addEventListener("pointerdown", () => alFrente(m));
         colocar(m);
         def.montar(cuerpo, m);
@@ -7131,6 +7153,7 @@
         caja.append(et, input, lista, cuantos);
         return caja;
     }
+    let pestanaAnadir = 0;
     const botonAnadir = botonDe("oc-vida-accion es-principal", "＋ añadir", () => {
         const cuerpo = crear("div", "master-anadir");
         const etFiltro = crear("label", "oc-dados-etiqueta", "filtrar");
@@ -7144,12 +7167,10 @@
         cuantas.setAttribute("role", "status");
         cuerpo.append(etFiltro, filtro, cuantas);
         const tarjetas = [];
-        GRUPOS.forEach(([grupo, titulo]) => {
+        const paneles = GRUPOS.map(([grupo, titulo]) => {
             const seccion = crear("div", "master-anadir-grupo");
-            const h = crear("h3", "master-anadir-titulo", titulo);
-            h.id = "master-anadir-" + grupo;
             const lista = crear("ul", "master-anadir-lista");
-            lista.setAttribute("aria-labelledby", h.id);
+            lista.setAttribute("aria-label", titulo);
             Object.keys(MODULOS).filter((tipo) => MODULOS[tipo].grupo === grupo).forEach((tipo) => {
                 const def = MODULOS[tipo];
                 const ya = def.unico && estado.modulos.some((m) => m.tipo === tipo);
@@ -7168,9 +7189,17 @@
                 lista.appendChild(li);
                 tarjetas.push({ li, seccion, b, nombre: llano(def.nombre), texto: llano(def.nombre + " " + def.desc + " " + titulo) });
             });
-            seccion.append(h, lista);
-            cuerpo.appendChild(seccion);
+            seccion.appendChild(lista);
+            return [titulo, seccion];
         });
+        const panelMas = crear("div", "master-anadir-grupo");
+        paneles.push(["⚙️ más", panelMas]);
+        const { lista: pestanasAnadir, elegir: elegirAnadir } = pestanasDe(paneles, "Grupos de ventanas", "master-anadir",
+            (i) => {
+                pestanaAnadir = i;
+            });
+        cuerpo.appendChild(pestanasAnadir);
+        paneles.forEach(([, x]) => cuerpo.appendChild(x));
         filtro.addEventListener("input", () => {
             const q = llano(filtro.value.trim());
             let n = 0;
@@ -7178,15 +7207,20 @@
                 t.li.hidden = !!q && !t.texto.includes(q);
                 n += t.li.hidden ? 0 : 1;
             });
-            cuerpo.querySelectorAll(".master-anadir-grupo").forEach((sec) => {
-                sec.hidden = !sec.querySelector("li:not([hidden])");
-            });
             cuantas.textContent = q ? (n ? n + (n === 1 ? " ventana" : " ventanas") : "Ninguna con eso.") : "";
+            pestanasAnadir.hidden = !!q;
+            if (q) {
+                paneles.forEach(([, x]) => {
+                    x.hidden = x === panelMas || !x.querySelector("li:not([hidden])");
+                });
+            } else {
+                elegirAnadir(pestanaAnadir, false);
+            }
         });
         filtro.addEventListener("keydown", (e) => {
             if (e.key === "Enter") {
                 const q = llano(filtro.value.trim());
-                const quedan = tarjetas.filter((t) => !t.li.hidden && !t.b.disabled);
+                const quedan = tarjetas.filter((t) => !t.li.hidden && !t.seccion.hidden && !t.b.disabled);
                 const t = quedan.find((x) => q && x.nombre.includes(q)) || quedan[0];
                 const b = t && t.b;
                 if (b) {
@@ -7218,9 +7252,10 @@
                 avisar("Pantalla vacía.");
             });
             otras.append(ordenarlas, vaciar);
-            cuerpo.appendChild(otras);
+            panelMas.appendChild(otras);
         }
-        cuerpo.appendChild(copias(() => cerrar()));
+        panelMas.appendChild(copias(() => cerrar()));
+        elegirAnadir(Math.min(pestanaAnadir, paneles.length - 1), false);
         const cerrar = window.ocVentana.abrir({ titulo: "añadir una ventana", cuerpo, vuelta: botonAnadir, foco: filtro,
             clase: "es-ancha" });
     });
@@ -7304,7 +7339,7 @@
         alFrente(m);
         m.el.scrollIntoView({ block: "nearest" });
         const primero = m.el.querySelector(".master-ventana-cuerpo button, .master-ventana-cuerpo input, .master-ventana-cuerpo textarea")
-            || m.el.querySelector(".es-asa");
+            || m.el.querySelector(".master-ventana-nombre");
         primero.focus();
         avisar("Añadido: " + (m.titulo || def.nombre) + ".");
     }
@@ -7506,7 +7541,7 @@
             const lista = leerPlantillas();
             lista.push({ id: Date.now().toString(36), nombre: input.value.trim() || estado.nombre,
                 ventanas: estado.modulos.map((x) => ({ tipo: x.tipo, x: x.x, y: x.y, w: x.w, h: x.h, titulo: x.titulo || "",
-                    color: x.color || "", escala: x.escala || 1, movible: !!x.movible })) });
+                    color: x.color || "", escala: x.escala || 1 })) });
             guardarPlantillas(lista);
             avisar("Guardada la plantilla «" + (input.value.trim() || estado.nombre) + "»: sale al crear un perfil con ＋.");
         }, "Guardar las ventanas de este perfil como plantilla");
@@ -7672,8 +7707,9 @@
         ["El tablero", [["/", "ir al buscador"], ["A", "añadir una ventana"], ["N", "post-it nuevo"], ["D", "los dados"],
             ["I", "la iniciativa (la abre si no está)"], ["+ / −", "acercar o alejar el tablero"], ["0", "el tablero al 100 %"],
             ["[ / ]", "perfil anterior o siguiente"], ["?", "estos atajos"]]],
-        ["Las ventanas", [["✥ + flechas", "moverla (con Mayús, más deprisa)"], ["✥ + Alt + flechas", "cambiar su tamaño"],
-            ["Intro en el nombre", "plegarla o desplegarla"], ["Esc", "cerrar una ventana modal"]]],
+        ["Las ventanas", [["clic en la barra", "plegarla o desplegarla"], ["mantener pulsada la barra", "cogerla y moverla"],
+            ["Intro en el nombre", "plegarla o desplegarla"], ["flechas en el nombre", "moverla (con Mayús, más deprisa)"],
+            ["Alt + flechas en el nombre", "cambiar su tamaño"], ["Esc", "cerrar una ventana modal"]]],
         ["El dibujo (con el foco en el lienzo)", [["B", "lápiz"], ["E", "goma"], ["G", "bote"], ["M", "seleccionar y mover"],
             ["I", "cuentagotas"], ["L", "línea"], ["U", "rectángulo"], ["O", "elipse"], ["T", "texto"], ["Ctrl+Z / Ctrl+Y", "deshacer y rehacer"],
             ["flechas", "mover la selección (Mayús: de 10 en 10)"], ["+ / −", "agrandar o encoger la selección"],

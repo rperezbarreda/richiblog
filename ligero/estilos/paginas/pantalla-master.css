@@ -122,6 +122,7 @@
     overflow: hidden;
     border: 2px solid var(--border);
     border-bottom: 0;
+    border-radius: 8px 8px 0 0;
     background: var(--purple);
     color: var(--muted);
     font-family: var(--fuente-mono);
@@ -282,17 +283,17 @@
     outline: 3px solid currentColor;
     outline-offset: 2px;
 }
-.master-ventana.es-movible {
+.master-ventana.es-cogida {
     outline: 3px dashed var(--white);
     outline-offset: 3px;
 }
-.master-ventana.es-movible .master-ventana-barra,
-.master-ventana.es-movible .master-ventana-nombre {
-    cursor: move;
+.master-ventana.es-cogida .master-ventana-barra,
+.master-ventana.es-cogida .master-ventana-nombre {
+    cursor: grabbing;
 }
-.master-ventana-mando.es-asa[aria-pressed="true"] {
-    background: var(--white);
-    color: var(--purple);
+.master-ventana-barra {
+    -webkit-touch-callout: none;
+    user-select: none;
 }
 .master-escala {
     align-items: center;
@@ -318,9 +319,6 @@
     line-height: 1;
     cursor: pointer;
 }
-.master-ventana-mando.es-asa {
-    cursor: move;
-}
 .master-ventana-mando:hover,
 .master-ventana-mando:focus-visible {
     background: var(--yellow);
@@ -341,6 +339,7 @@
     display: none;
 }
 .master-ventana.con-color {
+    --fondo-pestana: color-mix(in srgb, var(--postit) 14%, var(--purple-lighter));
     border-color: var(--postit);
     box-shadow: 6px 6px 0 var(--postit);
     background: var(--purple-lighter);
@@ -412,13 +411,8 @@
 .master-anadir-grupo[hidden] {
     display: none;
 }
-.master-anadir-titulo {
-    margin: 16px 0 8px;
-    color: var(--yellow);
-    font-family: var(--fuente-mono);
-    font-size: 0.875rem;
-    letter-spacing: 1px;
-    text-transform: uppercase;
+.master-anadir-grupo {
+    padding-top: 12px;
 }
 .master-anadir-lista {
     display: grid;
@@ -620,15 +614,24 @@
 .master-bicho-pestanas {
     display: flex;
     flex-wrap: wrap;
-    gap: 4px;
+    align-items: flex-end;
+    gap: 2px;
     width: 100%;
+    padding: 4px 4px 0;
     border-bottom: 2px solid var(--yellow);
+    background: var(--surface);
+}
+.master-bicho-pestanas[hidden] {
+    display: none;
 }
 .master-bicho-pestana {
+    position: relative;
     min-height: 36px;
-    padding: 4px 10px;
+    margin-bottom: -2px;
+    padding: 4px 12px;
     border: 2px solid var(--border);
-    border-bottom: 0;
+    border-bottom: 2px solid var(--yellow);
+    border-radius: 8px 8px 0 0;
     background: transparent;
     color: var(--muted);
     font-family: var(--fuente-mono);
@@ -637,14 +640,18 @@
 }
 .master-bicho-pestana[aria-selected="true"] {
     border-color: var(--yellow);
-    background: var(--yellow);
-    color: var(--yellow-contrast);
+    border-bottom-color: var(--fondo-pestana, var(--purple-lighter));
+    background: var(--fondo-pestana, var(--purple-lighter));
+    box-shadow: inset 0 3px 0 var(--yellow);
+    color: var(--white);
     font-weight: 700;
 }
 .master-bicho-pestana:hover:not([aria-selected="true"]) {
+    border-color: var(--yellow);
     color: var(--white);
 }
 .master-bicho-pestana:focus-visible {
+    z-index: 1;
     outline: 3px solid var(--yellow);
     outline-offset: 2px;
 }
@@ -2718,9 +2725,6 @@
         max-height: 80vh;
     }
     .master-ventana-tamano {
-        display: none;
-    }
-    .master-ventana-mando.es-asa {
         display: none;
     }
     .master-ventana-barra {
