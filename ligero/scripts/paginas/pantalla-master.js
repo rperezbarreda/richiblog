@@ -147,6 +147,7 @@
     }
     const CLAVE_HOMEBREW = "richi-master-homebrew";
     const CLAVE_IMAGENES = "richi-master-imagenes";
+    const CLAVE_PLANTILLAS = "richi-master-plantillas";
     function leerHomebrew() {
         try {
             const x = JSON.parse(localStorage.getItem(CLAVE_HOMEBREW) || "[]");
@@ -3576,6 +3577,803 @@
         pintarCapas();
         repintar();
     }
+    const TABLAS = "/datos/personajes/compendio/master-tablas.json";
+    const segunGenero = (texto, genero) => {
+        const [m, f] = String(texto).split("|");
+        if (f === undefined) {
+            return m;
+        }
+        return genero === "f" ? f : genero === "m" ? m : alAzar([m, f]);
+    };
+    const PNJ_CAMPOS = [["oficio", "Oficio", "oficios"], ["aspecto", "Aspecto", "aspecto"], ["rasgo", "Carácter", "rasgos"],
+        ["mania", "Al hablar", "manias"], ["quiere", "Quiere", "quiere"], ["secreto", "Secreto", "secretos"]];
+    function montarPnj(dentro, m) {
+        m.datos = m.datos || {};
+        dentro.appendChild(crear("p", "oc-hoja-nota", "Cargando…"));
+        Promise.all([pedir(TABLAS), pedir(NOMBRES)]).then(([tablas, nombres]) => {
+            const d = m.datos;
+            const t = tablas.pnj;
+            const especie = elegirDe("master-pnj-especie-" + m.id, "especie",
+                [["", "al azar"]].concat(Object.keys(nombres.especies).map((k) => [k, nombres.especies[k].nombre])), d.especie || "");
+            const genero = botonesDe("género", [["cualquiera", "cualquiera"], ["f", "♀"], ["m", "♂"], ["n", "⚪ neutro"]],
+                d.genero || "cualquiera", (v) => {
+                    d.genero = v;
+                    guardar();
+                });
+            const etGen = crear("p", "oc-dados-etiqueta", "género");
+            etGen.setAttribute("aria-hidden", "true");
+            const nuevo = () => {
+                const esp = especie.elegir.value || alAzar(Object.keys(nombres.especies));
+                const g = genero.valor() === "cualquiera" ? alAzar(["f", "m", "n"]) : genero.valor();
+                const p = { nombre: nombreDe(nombres, esp, g, true), especie: nombres.especies[esp].nombre, genero: g };
+                PNJ_CAMPOS.forEach(([k, , lista]) => {
+                    p[k] = segunGenero(alAzar(t[lista]), g);
+                });
+                return p;
+            };
+            const ficha = crear("div", "master-pnj");
+            ficha.setAttribute("aria-live", "polite");
+            const guardados = crear("ul", "master-pnj-guardados");
+            guardados.setAttribute("aria-label", "PNJ guardados");
+            const tituloG = crear("h3", "master-nombres-titulo", "⭐ guardados");
+            const texto = (p) => p.nombre + " (" + p.especie + ")\n" + PNJ_CAMPOS.map(([k, n]) => n + ": " + p[k]).join("\n");
+            const pintarFicha = () => {
+                const p = d.pnj;
+                ficha.replaceChildren();
+                if (!p) {
+                    ficha.appendChild(crear("p", "oc-vacio", "Pulsa «generar»."));
+                    return;
+                }
+                const cab = crear("div", "master-pnj-cabeza");
+                const h = crear("h3", "master-pnj-nombre", p.nombre);
+                cab.append(h, crear("span", "master-pnj-especie", p.especie + " · " + ({ f: "♀", m: "♂", n: "neutro" }[p.genero] || "")));
+                const dl = crear("dl", "master-pnj-datos");
+                PNJ_CAMPOS.forEach(([k, nombre, lista]) => {
+                    const dd = crear("dd", "", p[k]);
+                    const otra = botonDe("master-nombre-boton", "🎲", () => {
+                        p[k] = segunGenero(alAzar(t[lista]), p.genero);
+                        guardar();
+                        pintarFicha();
+                        avisar(nombre + ": " + p[k] + ".");
+                    }, "Otro valor para " + nombre.toLowerCase());
+                    otra.title = "Otro";
+                    dd.appendChild(otra);
+                    dl.append(crear("dt", "", nombre), dd);
+                });
+                const botones = crear("div", "master-pnj-botones");
+                botones.append(
+                    botonDe("oc-vida-accion", "☆ guardar", () => {
+                        d.guardados = (d.guardados || []).concat([Object.assign({}, p)]);
+                        guardar();
+                        pintarGuardados();
+                        avisar("Guardado: " + p.nombre + ".");
+                    }, "Guardar a " + p.nombre),
+                    botonDe("oc-vida-accion", "⧉ copiar", () => copiarTexto(texto(p), "Copiado: " + p.nombre + "."), "Copiar a " + p.nombre));
+                ficha.append(cab, dl, botones);
+            };
+            const pintarGuardados = () => {
+                const lista = d.guardados || [];
+                guardados.replaceChildren(...lista.map((p, i) => {
+                    const li = crear("li", "master-nombre");
+                    const ver = botonDe("master-botin-objeto", p.nombre + " · " + p.oficio, () => {
+                        d.pnj = Object.assign({}, p);
+                        guardar();
+                        pintarFicha();
+                        avisar("PNJ: " + p.nombre + ", " + p.oficio + ".");
+                    }, "Ver a " + p.nombre);
+                    const quitar = botonDe("master-nombre-boton", "✕", () => {
+                        lista.splice(i, 1);
+                        guardar();
+                        pintarGuardados();
+                        avisar("Quitado: " + p.nombre + ".");
+                    }, "Quitar a " + p.nombre + " de guardados");
+                    li.append(ver, quitar);
+                    return li;
+                }));
+                tituloG.hidden = guardados.hidden = !lista.length;
+            };
+            const generar = botonDe("oc-vida-accion es-principal master-nombres-generar", "🎲 generar PNJ", () => {
+                d.especie = especie.elegir.value;
+                d.pnj = nuevo();
+                guardar();
+                pintarFicha();
+                avisar("PNJ: " + d.pnj.nombre + ", " + d.pnj.oficio + ".");
+            });
+            const arriba = crear("div", "master-nombres-form");
+            arriba.append(especie, etGen, genero, generar);
+            dentro.replaceChildren(arriba, ficha, tituloG, guardados);
+            pintarFicha();
+            pintarGuardados();
+        }).catch(() => {
+            dentro.replaceChildren(crear("p", "oc-vacio", "No he podido cargar las tablas."));
+        });
+    }
+    const SVG = "http://www.w3.org/2000/svg";
+    function dibujoReloj(partes, llenas, alPinchar) {
+        const svg = document.createElementNS(SVG, "svg");
+        svg.setAttribute("viewBox", "-52 -52 104 104");
+        svg.setAttribute("class", "master-reloj-dibujo");
+        svg.setAttribute("aria-hidden", "true");
+        for (let i = 0; i < partes; i++) {
+            const a0 = (i / partes) * Math.PI * 2 - Math.PI / 2;
+            const a1 = ((i + 1) / partes) * Math.PI * 2 - Math.PI / 2;
+            const trozo = document.createElementNS(SVG, "path");
+            trozo.setAttribute("d", "M0 0 L" + (48 * Math.cos(a0)).toFixed(2) + " " + (48 * Math.sin(a0)).toFixed(2) + " A48 48 0 0 1 " +
+                (48 * Math.cos(a1)).toFixed(2) + " " + (48 * Math.sin(a1)).toFixed(2) + " Z");
+            trozo.setAttribute("class", "master-reloj-trozo" + (i < llenas ? " es-lleno" : ""));
+            trozo.addEventListener("click", () => alPinchar(i));
+            svg.appendChild(trozo);
+        }
+        return svg;
+    }
+    function montarRelojes(dentro, m) {
+        m.datos = m.datos || {};
+        const d = m.datos;
+        d.relojes = Array.isArray(d.relojes) ? d.relojes : [];
+        const lista = crear("ul", "master-relojes");
+        lista.setAttribute("aria-label", "Relojes");
+        const pintar = () => {
+            lista.replaceChildren(...d.relojes.map((r, i) => {
+                const li = crear("li", "master-reloj" + (r.llenas >= r.partes ? " es-lleno" : ""));
+                const nombre = crear("input", "master-elegir master-reloj-nombre");
+                nombre.value = r.nombre;
+                nombre.setAttribute("aria-label", "Nombre del reloj");
+                nombre.addEventListener("change", () => {
+                    r.nombre = nombre.value.trim() || "reloj";
+                    guardar();
+                });
+                const poner = (n) => {
+                    const antes = r.llenas;
+                    r.llenas = Math.min(r.partes, Math.max(0, n));
+                    guardar();
+                    pintar();
+                    const foco = lista.children[i] && lista.children[i].querySelector(n > antes ? ".es-mas" : ".es-menos");
+                    if (foco) {
+                        foco.focus();
+                    }
+                    avisar(r.nombre + ": " + r.llenas + " de " + r.partes + (r.llenas >= r.partes ? ". ¡Lleno!" : "."));
+                };
+                const barra = crear("div", "master-reloj-cuenta");
+                barra.setAttribute("role", "meter");
+                barra.setAttribute("aria-valuemin", "0");
+                barra.setAttribute("aria-valuemax", String(r.partes));
+                barra.setAttribute("aria-valuenow", String(r.llenas));
+                barra.setAttribute("aria-label", r.nombre);
+                barra.append(dibujoReloj(r.partes, r.llenas, (j) => poner(j + 1 === r.llenas ? j : j + 1)),
+                    crear("span", "master-reloj-numero", r.llenas + "/" + r.partes));
+                const menos = botonDe("master-pestana-mando es-menos", "−", () => poner(r.llenas - 1), "Vaciar un trozo de " + r.nombre);
+                const mas = botonDe("master-pestana-mando es-mas", "+", () => poner(r.llenas + 1), "Llenar un trozo de " + r.nombre);
+                menos.disabled = r.llenas <= 0;
+                mas.disabled = r.llenas >= r.partes;
+                const partes = crear("select", "master-postit-elegir");
+                partes.setAttribute("aria-label", "Trozos de " + r.nombre);
+                [4, 6, 8, 10, 12].forEach((n) => {
+                    const o = crear("option", "", n + " trozos");
+                    o.value = n;
+                    partes.appendChild(o);
+                });
+                partes.value = r.partes;
+                partes.addEventListener("change", () => {
+                    r.partes = parseInt(partes.value, 10);
+                    r.llenas = Math.min(r.llenas, r.partes);
+                    guardar();
+                    pintar();
+                });
+                const quitar = botonDe("master-nombre-boton", "✕", () => {
+                    d.relojes.splice(i, 1);
+                    guardar();
+                    pintar();
+                    avisar("Quitado: " + r.nombre + ".");
+                    nuevoNombre.focus();
+                }, "Quitar el reloj " + r.nombre);
+                const mandos = crear("div", "master-reloj-mandos");
+                mandos.append(menos, mas, partes, quitar);
+                li.append(nombre, barra, mandos);
+                return li;
+            }));
+            if (!d.relojes.length) {
+                lista.appendChild(crear("li", "oc-vacio", "Sin relojes todavía."));
+            }
+        };
+        const form = crear("form", "master-reloj-nuevo");
+        const nuevoNombre = crear("input", "master-elegir");
+        nuevoNombre.placeholder = "la guardia llega, el ritual se completa…";
+        nuevoNombre.setAttribute("aria-label", "Nombre del reloj nuevo");
+        const nuevoPartes = crear("select", "master-postit-elegir");
+        nuevoPartes.setAttribute("aria-label", "Trozos del reloj nuevo");
+        [4, 6, 8, 10, 12].forEach((n) => {
+            const o = crear("option", "", n + " trozos");
+            o.value = n;
+            nuevoPartes.appendChild(o);
+        });
+        nuevoPartes.value = "6";
+        const anadirReloj = crear("button", "oc-vida-accion es-principal", "＋ reloj");
+        anadirReloj.type = "submit";
+        form.append(nuevoNombre, nuevoPartes, anadirReloj);
+        form.addEventListener("submit", (e) => {
+            e.preventDefault();
+            const r = { nombre: nuevoNombre.value.trim() || "reloj " + (d.relojes.length + 1), partes: parseInt(nuevoPartes.value, 10), llenas: 0 };
+            d.relojes.push(r);
+            nuevoNombre.value = "";
+            guardar();
+            pintar();
+            avisar("Reloj nuevo: " + r.nombre + ", de " + r.partes + " trozos.");
+        });
+        dentro.append(form, lista);
+        pintar();
+    }
+    const MESES_GREGORIANO = ["enero", "febrero", "marzo", "abril", "mayo", "junio", "julio", "agosto", "septiembre", "octubre",
+        "noviembre", "diciembre"];
+    const SEMANA_GREGORIANO = ["lun", "mar", "mié", "jue", "vie", "sáb", "dom"];
+    function montarCalendario(dentro, m) {
+        m.datos = m.datos || {};
+        dentro.appendChild(crear("p", "oc-hoja-nota", "Cargando…"));
+        pedir(TABLAS).then((tablas) => {
+            const d = m.datos;
+            const hoyReal = new Date();
+            d.tipo = d.tipo || "gregoriano";
+            d.propio = Object.assign({ nombre: "propio", anio: "", meses: "Primero: 30\nSegundo: 30\nTercero: 30\nCuarto: 30",
+                semana: "uno, dos, tres, cuatro, cinco, seis, siete" }, d.propio || {});
+            d.apuntes = d.apuntes || {};
+            const harptos = tablas.calendarios.harptos;
+            const mesesDe = (anio) => {
+                if (d.tipo === "gregoriano") {
+                    return MESES_GREGORIANO.map((nombre, i) => ({ nombre, dias: new Date(anio, i + 1, 0).getDate() }));
+                }
+                if (d.tipo === "harptos") {
+                    return harptos.meses.filter((x) => !x.cada || anio % x.cada === 0);
+                }
+                return d.propio.meses.split("\n").map((l) => l.split(":")).filter((x) => x[0].trim())
+                    .map(([nombre, dias]) => ({ nombre: nombre.trim(), dias: Math.max(1, Math.min(100, parseInt(dias, 10) || 30)) }));
+            };
+            const semana = () => (d.tipo === "gregoriano" ? SEMANA_GREGORIANO : d.tipo === "harptos" ? harptos.dias
+                : d.propio.semana.split(",").map((x) => x.trim()).filter(Boolean));
+            const sufijo = () => (d.tipo === "harptos" ? " " + harptos.anio : d.tipo === "propio" && d.propio.anio ? " " + d.propio.anio : "");
+            const diaSemana = (f) => {
+                if (d.tipo === "gregoriano") {
+                    return (new Date(f.anio, f.mes, f.dia).getDay() + 6) % 7;
+                }
+                if (d.tipo === "harptos") {
+                    return (f.dia - 1) % 10;
+                }
+                const meses = mesesDe(f.anio);
+                const largo = meses.reduce((t, x) => t + x.dias, 0);
+                let n = (f.anio - 1) * largo;
+                for (let i = 0; i < f.mes; i++) {
+                    n += meses[i].dias;
+                }
+                n += f.dia - 1;
+                const s = semana().length || 7;
+                return ((n % s) + s) % s;
+            };
+            const arreglar = (f) => {
+                const meses = mesesDe(f.anio);
+                f.mes = Math.min(Math.max(0, f.mes), meses.length - 1);
+                f.dia = Math.min(Math.max(1, f.dia), meses[f.mes].dias);
+                return f;
+            };
+            if (!d.fecha) {
+                d.fecha = d.tipo === "gregoriano" ? { anio: hoyReal.getFullYear(), mes: hoyReal.getMonth(), dia: hoyReal.getDate() }
+                    : { anio: 1492, mes: 0, dia: 1 };
+                d.hora = 8;
+            }
+            arreglar(d.fecha);
+            d.viendo = d.viendo || { anio: d.fecha.anio, mes: d.fecha.mes };
+            const clave = (f) => d.tipo + ":" + f.anio + "-" + f.mes + "-" + f.dia;
+            const nombreFecha = (f) => {
+                const mes = mesesDe(f.anio)[f.mes];
+                if (mes.fiesta) {
+                    return mes.nombre + " de " + f.anio + sufijo();
+                }
+                const dia = d.tipo === "gregoriano" ? ["lunes", "martes", "miércoles", "jueves", "viernes", "sábado", "domingo"][diaSemana(f)]
+                    + " " + f.dia : d.tipo === "harptos" ? "día " + f.dia : f.dia + " (" + semana()[diaSemana(f)] + ")";
+                return dia + " de " + mes.nombre + " de " + f.anio + sufijo();
+            };
+            const momento = (h) => (h < 6 ? "de madrugada" : h < 12 ? "por la mañana" : h < 14 ? "a mediodía" : h < 20 ? "por la tarde"
+                : "por la noche");
+            const pasar = (horas) => {
+                let h = (d.hora || 0) + horas;
+                let dias = Math.floor(h / 24);
+                h = ((h % 24) + 24) % 24;
+                d.hora = h;
+                const f = d.fecha;
+                while (dias > 0) {
+                    f.dia++;
+                    if (f.dia > mesesDe(f.anio)[f.mes].dias) {
+                        f.dia = 1;
+                        f.mes++;
+                        if (f.mes >= mesesDe(f.anio).length) {
+                            f.mes = 0;
+                            f.anio++;
+                        }
+                    }
+                    dias--;
+                }
+                while (dias < 0) {
+                    f.dia--;
+                    if (f.dia < 1) {
+                        f.mes--;
+                        if (f.mes < 0) {
+                            f.anio--;
+                            f.mes = mesesDe(f.anio).length - 1;
+                        }
+                        f.dia = mesesDe(f.anio)[f.mes].dias;
+                    }
+                    dias++;
+                }
+                d.viendo = { anio: f.anio, mes: f.mes };
+                guardar();
+                pintar();
+                avisar("Ahora: " + nombreFecha(f) + ", a las " + d.hora + ":00 (" + momento(d.hora) + ").");
+            };
+            const tipo = elegirDe("master-cal-tipo-" + m.id, "calendario", [["gregoriano", "gregoriano"], ["harptos", harptos.nombre],
+                ["propio", "propio"]], d.tipo);
+            tipo.elegir.addEventListener("change", () => {
+                d.tipo = tipo.elegir.value;
+                d.fecha = d.tipo === "gregoriano" ? { anio: hoyReal.getFullYear(), mes: hoyReal.getMonth(), dia: hoyReal.getDate() }
+                    : { anio: d.tipo === "harptos" ? 1492 : 1, mes: 0, dia: 1 };
+                d.viendo = { anio: d.fecha.anio, mes: d.fecha.mes };
+                guardar();
+                pintar();
+                avisar("Calendario " + tipo.elegir.selectedOptions[0].textContent + ".");
+            });
+            const ahora = crear("p", "master-cal-ahora");
+            ahora.setAttribute("aria-live", "polite");
+            const tiempo = crear("div", "master-cal-tiempo");
+            tiempo.setAttribute("role", "group");
+            tiempo.setAttribute("aria-label", "Que pase el tiempo");
+            [["−1 día", -24], ["+1 h", 1], ["+8 h (descanso largo)", 8], ["+1 día", 24], ["+1 semana", 0]].forEach(([texto, h]) => {
+                tiempo.appendChild(botonDe("oc-vida-accion", texto, () => pasar(h || 24 * (semana().length || 7))));
+            });
+            const propio = crear("div", "master-cal-propio");
+            const etMeses = crear("label", "oc-dados-etiqueta", "meses (uno por línea: «nombre: días»)");
+            const meses = crear("textarea", "oc-notas-texto es-corta");
+            meses.id = "master-cal-meses-" + m.id;
+            etMeses.htmlFor = meses.id;
+            meses.value = d.propio.meses;
+            const etSemana = crear("label", "oc-dados-etiqueta", "días de la semana (separados por comas)");
+            const sem = crear("input", "master-elegir");
+            sem.id = "master-cal-semana-" + m.id;
+            etSemana.htmlFor = sem.id;
+            sem.value = d.propio.semana;
+            const etAnio = crear("label", "oc-dados-etiqueta", "detrás del año (DEM, AEM…)");
+            const anio = crear("input", "master-elegir");
+            anio.id = "master-cal-anio-" + m.id;
+            etAnio.htmlFor = anio.id;
+            anio.value = d.propio.anio;
+            const etNum = crear("label", "oc-dados-etiqueta", "año de la partida");
+            const numAnio = crear("input", "master-elegir");
+            numAnio.type = "number";
+            numAnio.id = "master-cal-num-" + m.id;
+            etNum.htmlFor = numAnio.id;
+            const usar = botonDe("oc-vida-accion", "✔ usar", () => {
+                Object.assign(d.propio, { meses: meses.value, semana: sem.value, anio: anio.value.trim() });
+                d.fecha.anio = parseInt(numAnio.value, 10) || d.fecha.anio;
+                arreglar(d.fecha);
+                d.viendo = { anio: d.fecha.anio, mes: d.fecha.mes };
+                guardar();
+                pintar();
+                avisar("Calendario propio puesto.");
+            });
+            propio.append(etMeses, meses, etSemana, sem, etAnio, anio, etNum, numAnio, usar);
+            const cabeza = crear("div", "master-cal-cabeza");
+            const titulo = crear("h3", "master-cal-mes");
+            titulo.setAttribute("aria-live", "polite");
+            const verMes = (paso) => {
+                let { anio: a, mes: me } = d.viendo;
+                me += paso;
+                if (me < 0) {
+                    a--;
+                    me = mesesDe(a).length - 1;
+                } else if (me >= mesesDe(a).length) {
+                    a++;
+                    me = 0;
+                }
+                d.viendo = { anio: a, mes: me };
+                guardar();
+                pintarMes();
+            };
+            const antes = botonDe("master-pestana-mando", "‹", () => verMes(-1), "Mes anterior");
+            const despues = botonDe("master-pestana-mando", "›", () => verMes(1), "Mes siguiente");
+            const volver = botonDe("oc-vida-accion", "hoy", () => {
+                d.viendo = { anio: d.fecha.anio, mes: d.fecha.mes };
+                guardar();
+                pintarMes();
+            }, "Volver al mes de la partida");
+            cabeza.append(antes, titulo, despues, volver);
+            const rejilla = crear("table", "master-cal-rejilla");
+            let elegido = Object.assign({}, d.fecha);
+            const etDia = crear("label", "oc-dados-etiqueta");
+            const apunte = crear("textarea", "oc-notas-texto es-corta");
+            apunte.id = "master-cal-apunte-" + m.id;
+            etDia.htmlFor = apunte.id;
+            apunte.rows = 3;
+            const esHoy = botonDe("oc-vida-accion", "📍 que la partida esté en este día", () => {
+                d.fecha = Object.assign({}, elegido);
+                guardar();
+                pintar();
+                avisar("La partida está en " + nombreFecha(d.fecha) + ".");
+            });
+            let espera = 0;
+            apunte.addEventListener("input", () => {
+                clearTimeout(espera);
+                espera = setTimeout(() => {
+                    if (apunte.value.trim()) {
+                        d.apuntes[clave(elegido)] = apunte.value;
+                    } else {
+                        delete d.apuntes[clave(elegido)];
+                    }
+                    guardar();
+                    pintarMes();
+                }, 400);
+            });
+            const pintarDia = () => {
+                etDia.textContent = "apuntes del " + nombreFecha(elegido);
+                apunte.value = d.apuntes[clave(elegido)] || "";
+            };
+            function pintarMes() {
+                const { anio: a, mes: me } = d.viendo;
+                const lista = mesesDe(a);
+                const mes = lista[Math.min(me, lista.length - 1)];
+                titulo.textContent = mes.nombre + " de " + a + sufijo();
+                const dias = semana();
+                const cols = Math.max(1, dias.length);
+                const cab = crear("tr");
+                dias.forEach((x) => cab.appendChild(crear("th", "", x)));
+                const filas = [cab];
+                let fila = crear("tr");
+                const hueco = mes.fiesta ? 0 : diaSemana({ anio: a, mes: me, dia: 1 });
+                for (let i = 0; i < hueco; i++) {
+                    fila.appendChild(crear("td"));
+                }
+                for (let dia = 1; dia <= mes.dias; dia++) {
+                    const f = { anio: a, mes: me, dia };
+                    const td = crear("td");
+                    const b = botonDe("master-cal-dia", String(dia), () => {
+                        elegido = f;
+                        pintarMes();
+                        pintarDia();
+                        apunte.focus();
+                    }, nombreFecha(f) + (d.apuntes[clave(f)] ? " (con apuntes)" : ""));
+                    if (a === d.fecha.anio && me === d.fecha.mes && dia === d.fecha.dia) {
+                        b.classList.add("es-hoy");
+                        b.setAttribute("aria-current", "date");
+                    }
+                    if (a === elegido.anio && me === elegido.mes && dia === elegido.dia) {
+                        b.classList.add("es-elegido");
+                    }
+                    if (d.apuntes[clave(f)]) {
+                        b.classList.add("con-apunte");
+                    }
+                    td.appendChild(b);
+                    fila.appendChild(td);
+                    if (fila.children.length === cols || mes.fiesta) {
+                        filas.push(fila);
+                        fila = crear("tr");
+                    }
+                }
+                if (fila.children.length) {
+                    filas.push(fila);
+                }
+                rejilla.replaceChildren(...filas);
+                rejilla.setAttribute("aria-label", titulo.textContent);
+            }
+            function pintar() {
+                ahora.replaceChildren(crear("strong", "", "En la partida: "), document.createTextNode(nombreFecha(d.fecha) + ", a las " +
+                    (d.hora || 0) + ":00 (" + momento(d.hora || 0) + ")"));
+                propio.hidden = d.tipo !== "propio";
+                numAnio.value = d.fecha.anio;
+                elegido = Object.assign({}, d.fecha);
+                pintarMes();
+                pintarDia();
+            }
+            const arriba = crear("div", "master-nombres-form");
+            arriba.append(tipo, propio, ahora, tiempo);
+            dentro.replaceChildren(arriba, cabeza, rejilla, etDia, apunte, esHoy);
+            pintar();
+        }).catch(() => {
+            dentro.replaceChildren(crear("p", "oc-vacio", "No he podido cargar los calendarios."));
+        });
+    }
+    const DUNGEON_ANCHO = 48;
+    const DUNGEON_ALTO = 36;
+    const DUNGEON_CELDA = 20;
+    const DUNGEON_TAMANOS = [["5", "pequeño (5 salas)"], ["8", "mediano (8 salas)"], ["12", "grande (12 salas)"]];
+    const DUNGEON_TRAMPA = [[4, 12, "2d10"], [10, 14, "4d10"], [16, 16, "8d10"], [99, 18, "10d10"]];
+    function hacerMapa(salasQuiero) {
+        const celdas = Array.from({ length: DUNGEON_ALTO }, () => new Array(DUNGEON_ANCHO).fill(0));
+        const salas = [];
+        const azar = (a, b) => a + tiradaSuelta("1d" + (b - a + 1)) - 1;
+        for (let intento = 0; intento < 400 && salas.length < salasQuiero; intento++) {
+            const w = azar(4, 9);
+            const h = azar(3, 7);
+            const x = azar(1, DUNGEON_ANCHO - w - 2);
+            const y = azar(1, DUNGEON_ALTO - h - 2);
+            if (salas.some((s) => x < s.x + s.w + 2 && s.x < x + w + 2 && y < s.y + s.h + 2 && s.y < y + h + 2)) {
+                continue;
+            }
+            salas.push({ x, y, w, h });
+        }
+        salas.sort((a, b) => (a.x + a.w / 2) - (b.x + b.w / 2));
+        salas.forEach((s) => {
+            for (let j = s.y; j < s.y + s.h; j++) {
+                for (let i = s.x; i < s.x + s.w; i++) {
+                    celdas[j][i] = 1;
+                }
+            }
+        });
+        const centro = (s) => [Math.floor(s.x + s.w / 2), Math.floor(s.y + s.h / 2)];
+        const pasillo = (a, b) => {
+            const [x0, y0] = centro(a);
+            const [x1, y1] = centro(b);
+            const primeroX = tiradaSuelta("1d2") === 1;
+            const marcar = (i, j) => {
+                if (celdas[j][i] === 0) {
+                    celdas[j][i] = 2;
+                }
+            };
+            if (primeroX) {
+                for (let i = Math.min(x0, x1); i <= Math.max(x0, x1); i++) {
+                    marcar(i, y0);
+                }
+                for (let j = Math.min(y0, y1); j <= Math.max(y0, y1); j++) {
+                    marcar(x1, j);
+                }
+            } else {
+                for (let j = Math.min(y0, y1); j <= Math.max(y0, y1); j++) {
+                    marcar(x0, j);
+                }
+                for (let i = Math.min(x0, x1); i <= Math.max(x0, x1); i++) {
+                    marcar(i, y1);
+                }
+            }
+        };
+        for (let i = 1; i < salas.length; i++) {
+            pasillo(salas[i - 1], salas[i]);
+        }
+        for (let k = 0; k < Math.min(2, salas.length - 2); k++) {
+            const a = alAzar(salas);
+            const b = alAzar(salas.filter((s) => s !== a));
+            pasillo(a, b);
+        }
+        return { filas: celdas.map((f) => f.join("")), salas };
+    }
+    function pintarMapa(lienzoMapa, mapa) {
+        const c = DUNGEON_CELDA;
+        lienzoMapa.width = DUNGEON_ANCHO * c;
+        lienzoMapa.height = DUNGEON_ALTO * c;
+        const ctx = lienzoMapa.getContext("2d");
+        ctx.fillStyle = "#3a332b";
+        ctx.fillRect(0, 0, lienzoMapa.width, lienzoMapa.height);
+        mapa.filas.forEach((fila, j) => {
+            Array.from(fila).forEach((v, i) => {
+                if (v !== "0") {
+                    ctx.fillStyle = v === "1" ? "#efe2bf" : "#d9c79c";
+                    ctx.fillRect(i * c, j * c, c, c);
+                }
+            });
+        });
+        ctx.strokeStyle = "rgba(59, 42, 23, 0.25)";
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        mapa.filas.forEach((fila, j) => {
+            Array.from(fila).forEach((v, i) => {
+                if (v !== "0") {
+                    ctx.rect(i * c + 0.5, j * c + 0.5, c - 1, c - 1);
+                }
+            });
+        });
+        ctx.stroke();
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        mapa.salas.forEach((s, i) => {
+            const x = (s.x + s.w / 2) * c;
+            const y = (s.y + s.h / 2) * c;
+            ctx.fillStyle = "#7a1c12";
+            ctx.beginPath();
+            ctx.arc(x, y, c * 0.75, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.fillStyle = "#fdfaf0";
+            ctx.font = "bold " + Math.round(c * 0.8) + "px sans-serif";
+            ctx.fillText(String(i + 1), x, y + 1);
+        });
+        if (mapa.salas[0]) {
+            const s = mapa.salas[0];
+            ctx.fillStyle = "#2e7d32";
+            ctx.font = "bold " + Math.round(c * 0.7) + "px sans-serif";
+            ctx.fillText("entrada", (s.x + s.w / 2) * c, (s.y + s.h) * c - c * 0.6);
+        }
+    }
+    function montarDungeon(dentro, m) {
+        m.datos = m.datos || {};
+        dentro.appendChild(crear("p", "oc-hoja-nota", "Cargando…"));
+        Promise.all([pedir(TABLAS), pedir(BESTIARIO), pedir(TIENDA)]).then(([tablas, best, tienda]) => {
+            const d = m.datos;
+            const t = tablas.dungeon;
+            const porEn = {};
+            best.monstruos.forEach((b) => {
+                porEn[b.en] = b;
+            });
+            const objetos = {};
+            tienda.objetos.forEach((o) => {
+                objetos[o.en] = o;
+            });
+            const tema = elegirDe("master-dungeon-tema-" + m.id, "qué es", Object.keys(t.temas).map((k) => [k, t.temas[k].emoji + " " +
+                t.temas[k].nombre]), d.tema || "cripta");
+            const tamano = elegirDe("master-dungeon-tam-" + m.id, "tamaño", DUNGEON_TAMANOS, d.salas || "8");
+            const enParty = estado.modulos.filter((x) => x.tipo === "party").reduce((n, x) => n + ((x.datos && x.datos.pjs) || []).length, 0);
+            const numero = (id, texto, valor, min, max) => {
+                const caja = crear("div", "master-campo");
+                const et = crear("label", "oc-dados-etiqueta", texto);
+                const x = crear("input", "master-elegir");
+                x.type = "number";
+                x.min = min;
+                x.max = max;
+                x.value = valor;
+                x.id = id + m.id;
+                et.htmlFor = x.id;
+                caja.append(et, x);
+                caja.elegir = x;
+                return caja;
+            };
+            const nivel = numero("master-dungeon-nivel-", "nivel de la party", d.nivel || 3, 1, 20);
+            const pjs = numero("master-dungeon-pjs-", "cuántos PJ", d.pjs || enParty || 4, 1, 10);
+            const fila = crear("div", "master-encuentro-fila");
+            fila.append(tema, tamano, nivel, pjs);
+            const mapaLienzo = crear("canvas", "master-dungeon-mapa");
+            mapaLienzo.setAttribute("role", "img");
+            const salasLista = crear("ol", "master-dungeon-salas");
+            salasLista.setAttribute("aria-label", "Las salas");
+            const botones = crear("div", "master-notas-botones");
+            const generar = () => {
+                d.tema = tema.elegir.value;
+                d.salas = tamano.elegir.value;
+                d.nivel = Math.min(20, Math.max(1, parseInt(nivel.elegir.value, 10) || 1));
+                d.pjs = Math.min(10, Math.max(1, parseInt(pjs.elegir.value, 10) || 1));
+                const tm = t.temas[d.tema];
+                const mapa = hacerMapa(parseInt(d.salas, 10));
+                let bichos = best.monstruos.filter((b) => tm.tipos.some((x) => b.tipo.indexOf(x) === 0) &&
+                    (!tm.habitat || (b.habitat || []).some((h) => h === tm.habitat || h === "cualquiera")));
+                if (bichos.length < 8) {
+                    bichos = best.monstruos.filter((b) => tm.tipos.some((x) => b.tipo.indexOf(x) === 0));
+                }
+                const franja = d.nivel <= 4 ? 0 : d.nivel <= 10 ? 1 : d.nivel <= 16 ? 2 : 3;
+                const [, cd, dano] = DUNGEON_TRAMPA.find((x) => d.nivel <= x[0]);
+                const usadas = new Set();
+                const unaDe = (lista) => {
+                    const libres = lista.filter((x) => !usadas.has(x));
+                    const x = alAzar(libres.length ? libres : lista);
+                    usadas.add(x);
+                    return x;
+                };
+                const salas = mapa.salas.map((s, i) => {
+                    const ultima = i === mapa.salas.length - 1;
+                    const sala = { que: unaDe(tm.salas), detalle: alAzar(tm.detalles) };
+                    const tirada = i === 0 ? 6 : tiradaSuelta("1d6");
+                    if (ultima || tirada <= 2 || tirada === 4) {
+                        const enc = hacerEncuentro(bichos, "", d.nivel, d.pjs, ultima ? 0.6 : 0.3);
+                        sala.bichos = enc.grupos;
+                        sala.hacen = enc.hacen;
+                    }
+                    if (tirada === 3 || (tirada === 5 && tiradaSuelta("1d2") === 1)) {
+                        const tr = alAzar(t.trampas);
+                        sala.trampa = { nombre: tr.nombre, texto: tr.texto.replace(/\{cd\}/g, cd).replace(/\{dano\}/g, dano) };
+                    }
+                    if (ultima || tirada === 4 || tirada === 5) {
+                        sala.botin = hacerBotin(tienda.objetos, franja, ultima || tirada === 5 ? "tesoro" : "uno");
+                        sala.donde = alAzar(t.tesoros_sala);
+                    }
+                    return sala;
+                });
+                d.mapa = mapa;
+                d.contenido = salas;
+                guardar();
+                pintar();
+                avisar("Dungeon nuevo: " + tm.nombre + " de " + salas.length + " salas.");
+            };
+            const botinTexto = (r) => {
+                const partes = r.monedas.filter((x) => x[1]).map((x) => x[1].toLocaleString("es-ES") + " " + x[0]);
+                r.cosas.forEach((c) => partes.push((c.n > 1 ? c.n + " × " : "") + c.texto + " (" + c.valor + " po)"));
+                return partes.join(", ");
+            };
+            function pintar() {
+                if (!d.mapa) {
+                    mapaLienzo.hidden = true;
+                    salasLista.replaceChildren(crear("li", "oc-vacio", "Elige y pulsa «generar»."));
+                    botones.hidden = true;
+                    return;
+                }
+                mapaLienzo.hidden = false;
+                botones.hidden = false;
+                pintarMapa(mapaLienzo, d.mapa);
+                const tm = t.temas[d.tema] || { nombre: "dungeon" };
+                mapaLienzo.setAttribute("aria-label", "Mapa de " + tm.nombre + ": " + d.mapa.salas.length +
+                    " salas numeradas unidas por pasillos; la 1 es la entrada. Lo que hay en cada una, en la lista de debajo.");
+                salasLista.replaceChildren(...d.contenido.map((s, i) => {
+                    const li = crear("li", "master-dungeon-sala");
+                    const h = crear("h3", "master-dungeon-sala-titulo", "Sala " + (i + 1) + (i === 0 ? " (entrada)" : "") +
+                        (i === d.contenido.length - 1 ? " (la última)" : ""));
+                    const desc = crear("p", "", "Es " + s.que + "; " + s.detalle + ".");
+                    li.append(h, desc);
+                    if (s.bichos && s.bichos.length) {
+                        const p = crear("p", "master-dungeon-cosa");
+                        p.append(crear("strong", "", "Monstruos: "));
+                        s.bichos.forEach((g, k) => {
+                            const b = porEn[g.en];
+                            if (!b) {
+                                return;
+                            }
+                            if (k) {
+                                p.appendChild(document.createTextNode(" y "));
+                            }
+                            const ver = botonDe("master-botin-objeto", (g.n > 1 ? g.n + " × " : "") + b.nombre, () => abrirBicho(b, ver, best.fuente),
+                                "Ver " + b.nombre);
+                            p.appendChild(ver);
+                        });
+                        p.appendChild(document.createTextNode(" (están " + s.hacen + ")."));
+                        const ini = botonDe("oc-vida-accion", "⚔️ a la iniciativa", () => {
+                            const entran = [];
+                            s.bichos.forEach((g) => {
+                                const b = porEn[g.en];
+                                for (let k = 0; k < g.n && b; k++) {
+                                    entran.push(meterEnIniciativa({ nombre: b.nombre, bono: b.ini, ca: b.ca, pg: b.pg || "", color: "#d23b3b" },
+                                        (nombres, renombrar) => conNumero(b.nombre, nombres, renombrar)));
+                                }
+                            });
+                            avisar("A la iniciativa: " + entran.filter(Boolean).join(", ") + ".");
+                        }, "Los monstruos de la sala " + (i + 1) + " a la iniciativa");
+                        li.append(p, ini);
+                    }
+                    if (s.trampa) {
+                        const p = crear("p", "master-dungeon-cosa");
+                        p.append(crear("strong", "", "Trampa: " + s.trampa.nombre + ". "), document.createTextNode(s.trampa.texto));
+                        if (window.ocDadosEnTexto) {
+                            window.ocDadosEnTexto(p);
+                        }
+                        li.appendChild(p);
+                    }
+                    if (s.botin) {
+                        const p = crear("p", "master-dungeon-cosa");
+                        p.append(crear("strong", "", "Botín (" + s.donde + "): "), document.createTextNode(botinTexto(s.botin)));
+                        s.botin.objetos.forEach((en) => {
+                            const o = objetos[en];
+                            if (!o) {
+                                return;
+                            }
+                            p.appendChild(document.createTextNode(", "));
+                            const ver = botonDe("master-botin-objeto", "✨ " + o.nombre, () => abrirObjeto(o, ver, tienda.fuente), "Ver " + o.nombre);
+                            p.appendChild(ver);
+                        });
+                        p.appendChild(document.createTextNode("."));
+                        li.appendChild(p);
+                    }
+                    if (!s.bichos && !s.trampa && !s.botin) {
+                        li.appendChild(crear("p", "master-dungeon-cosa", "No hay nada más (o eso parece)."));
+                    }
+                    return li;
+                }));
+            }
+            const boton = botonDe("oc-vida-accion es-principal master-nombres-generar", "🎲 generar dungeon", generar);
+            const alDibujo = botonDe("oc-vida-accion", "🎨 al dibujo", () => {
+                const l = crear("canvas");
+                pintarMapa(l, d.mapa);
+                anadir("dibujo", { titulo: "mapa: " + ((t.temas[d.tema] || {}).nombre || "dungeon"), w: 900, h: 700,
+                    datos: { ancho: l.width, alto: l.height, capas: [{ id: "c1", tipo: "capa", nombre: "mapa", visible: true, opacidad: 100,
+                        imagen: l.toDataURL("image/png") }, { id: "c2", tipo: "capa", nombre: "notas", visible: true, opacidad: 100, imagen: "" }],
+                    activa: "c2", rejilla: { ver: false, tipo: "cuadrada", tam: DUNGEON_CELDA, color: "#000000", opacidad: 40 } } });
+            }, "Pasar el mapa a una ventana de dibujo, para pintar encima");
+            const copiar = botonDe("oc-vida-accion", "⧉ copiar", () => copiarTexto(Array.from(salasLista.children).map((li) => li.innerText)
+                .join("\n\n"), "Copiado el dungeon."), "Copiar las salas");
+            botones.append(alDibujo, copiar);
+            const arriba = crear("div", "master-nombres-form");
+            arriba.append(fila, boton);
+            dentro.replaceChildren(arriba, mapaLienzo, botones, salasLista,
+                crear("p", "oc-hoja-nota master-fuente", "Salas, trampas, gemas y arte: tablas propias. Monstruos y objetos: SRD 5.2 (CC BY 4.0)."));
+            pintar();
+        }).catch(() => {
+            dentro.replaceChildren(crear("p", "oc-vacio", "No he podido cargar las tablas."));
+        });
+    }
     function montarTabla(dentro, m) {
         m.datos = m.datos || {};
         const etX = crear("label", "oc-dados-etiqueta", "lo que puede salir (una cosa por línea)");
@@ -4505,6 +5303,14 @@
             desc: "Monedas, gemas, arte y objetos mágicos según el VD.", montar: montarBotin },
         encuentros: { nombre: "encuentros", emoji: "🗺️", grupo: "combate", w: 440, h: 620,
             desc: "Monstruos del SRD por hábitat para tu party.", montar: montarEncuentros },
+        pnj: { nombre: "PNJ rápidos", emoji: "🧑", grupo: "mundo", w: 460, h: 620,
+            desc: "Un PNJ con oficio, aspecto, carácter, manía, lo que quiere y un secreto.", montar: montarPnj },
+        dungeon: { nombre: "generador de dungeons", emoji: "🗝️", grupo: "mundo", w: 680, h: 780,
+            desc: "Un mapa en cuadrícula con sus salas, monstruos, trampas y botín.", montar: montarDungeon },
+        calendario: { nombre: "calendario", emoji: "📅", grupo: "mundo", w: 520, h: 720,
+            desc: "Gregoriano, el de Harptos o uno propio, con la hora y apuntes.", montar: montarCalendario },
+        relojes: { nombre: "relojes", emoji: "⏳", grupo: "mesa", w: 440, h: 480,
+            desc: "Relojes de progreso: amenazas que avanzan, cuentas atrás…", montar: montarRelojes },
         idiomas: { nombre: "notas en otros idiomas", emoji: "🪶", grupo: "mundo", w: 480, h: 680,
             desc: "Escribe una nota y mírala en élfico, enano, infernal…", montar: montarIdiomas },
         tarjeta: { nombre: "post-it", emoji: "🗒️", grupo: "apuntes", w: 420, h: 340,
@@ -5137,7 +5943,7 @@
             clase: "es-ancha" });
     });
     botonAnadir.setAttribute("aria-haspopup", "dialog");
-    const CLAVES = (k) => k === CLAVE || k === CLAVE_HOMEBREW || k === CLAVE_IMAGENES || /^richi-oc-(iniciativa|marcas|partida-pantalla-master)/.test(k);
+    const CLAVES = (k) => k === CLAVE || k === CLAVE_HOMEBREW || k === CLAVE_IMAGENES || k === CLAVE_PLANTILLAS || /^richi-oc-(iniciativa|marcas|partida-pantalla-master)/.test(k);
     function copias(alTerminar) {
         const caja = crear("div", "master-anadir-otras");
         const exportar = botonDe("oc-vida-accion", "⬇ exportar", () => {
@@ -5414,7 +6220,18 @@
         et.htmlFor = input.id;
         const listo = crear("button", "oc-vida-accion es-principal", "guardar");
         listo.type = "submit";
-        cuerpo.append(et, input, grupo, listo);
+        const comoPlantilla = botonDe("oc-vida-accion", "💾 guardar como plantilla", () => {
+            const lista = leerPlantillas();
+            lista.push({ id: Date.now().toString(36), nombre: input.value.trim() || estado.nombre,
+                ventanas: estado.modulos.map((x) => ({ tipo: x.tipo, x: x.x, y: x.y, w: x.w, h: x.h, titulo: x.titulo || "",
+                    color: x.color || "", escala: x.escala || 1, movible: !!x.movible })) });
+            guardarPlantillas(lista);
+            avisar("Guardada la plantilla «" + (input.value.trim() || estado.nombre) + "»: sale al crear un perfil con ＋.");
+        }, "Guardar las ventanas de este perfil como plantilla");
+        comoPlantilla.title = "Las ventanas, donde están, sin lo que tienen dentro";
+        const botonesPerfil = crear("div", "master-notas-botones");
+        botonesPerfil.append(listo, comoPlantilla);
+        cuerpo.append(et, input, grupo, botonesPerfil);
         cuerpo.addEventListener("submit", (e) => {
             e.preventDefault();
             estado.nombre = input.value.trim() || estado.nombre;
@@ -5427,12 +6244,94 @@
         });
         const cerrar = window.ocVentana.abrir({ titulo: "nombre y color del perfil", cuerpo, vuelta: botonRenombrar, foco: input });
     }
-    const botonNueva = botonDe("master-pestana-mando", "＋", () => {
-        const pf = { id: "p" + siguientePerfil++, nombre: "perfil " + (todo.perfiles.length + 1), modulos: [] };
-        todo.perfiles.push(pf);
-        activar(pf, true);
-        avisar("Perfil nuevo: " + pf.nombre + ". Ponle nombre con ✎.");
-    }, "Perfil nuevo");
+    const PLANTILLAS = [["vacio", "⬜ vacío", "Sin ventanas.", []],
+        ["combate", "⚔️ combate", "Iniciativa, dados, tiradas, condiciones, acciones y bestiario.",
+            ["iniciativa", "dados", "registro", "condiciones", "acciones", "bestiario"]],
+        ["exploracion", "🧭 exploración", "Encuentros, dados, relojes, calendario, reglas y notas.",
+            ["encuentros", "dados", "relojes", "calendario", "reglas", "notas"]],
+        ["social", "🗣️ rol y social", "PNJ, nombres, idiomas, tienda y notas.", ["pnj", "nombres", "idiomas", "tienda", "notas"]],
+        ["preparar", "📋 preparar la sesión", "Dungeon, PNJ, botín, encuentros y un post-it.",
+            ["dungeon", "pnj", "botin", "encuentros", "tarjeta"]]];
+    const leerPlantillas = () => {
+        try {
+            const x = JSON.parse(localStorage.getItem(CLAVE_PLANTILLAS) || "[]");
+            return Array.isArray(x) ? x : [];
+        } catch (e) {
+            return [];
+        }
+    };
+    const guardarPlantillas = (lista) => {
+        try {
+            localStorage.setItem(CLAVE_PLANTILLAS, JSON.stringify(lista));
+        } catch (e) {
+            avisar("No se ha podido guardar la plantilla.");
+        }
+    };
+    function perfilNuevo() {
+        const cuerpo = crear("form", "master-personalizar");
+        const et = crear("label", "oc-dados-etiqueta", "nombre del perfil");
+        const input = crear("input", "oc-dados-texto");
+        input.id = "master-perfil-nuevo";
+        input.value = "perfil " + (todo.perfiles.length + 1);
+        input.maxLength = 30;
+        input.autocomplete = "off";
+        et.htmlFor = input.id;
+        const grupo = crear("fieldset", "master-plantillas");
+        grupo.appendChild(crear("legend", "oc-dados-etiqueta", "con qué ventanas"));
+        const propias = leerPlantillas();
+        const opcion = (valor, nombre, desc, borrable) => {
+            const caja = crear("div", "master-plantilla");
+            const radio = crear("input");
+            radio.type = "radio";
+            radio.name = "master-plantilla";
+            radio.value = valor;
+            radio.id = "master-plantilla-" + valor;
+            const lab = crear("label", "master-plantilla-texto");
+            lab.htmlFor = radio.id;
+            lab.append(crear("strong", "", nombre), crear("span", "", desc));
+            caja.append(radio, lab);
+            if (borrable) {
+                const quitar = botonDe("master-nombre-boton", "✕", () => {
+                    guardarPlantillas(leerPlantillas().filter((x) => x.id !== borrable));
+                    caja.remove();
+                    avisar("Plantilla quitada: " + nombre + ".");
+                }, "Quitar la plantilla " + nombre);
+                caja.appendChild(quitar);
+            }
+            grupo.appendChild(caja);
+            return radio;
+        };
+        const radios = PLANTILLAS.map(([v, n, desc]) => opcion(v, n, desc));
+        propias.forEach((pl) => radios.push(opcion("propia-" + pl.id, "💾 " + pl.nombre, pl.ventanas.length + " ventanas, donde las dejaste.",
+            pl.id)));
+        radios[0].checked = true;
+        const listo = crear("button", "oc-vida-accion es-principal", "＋ crear");
+        listo.type = "submit";
+        cuerpo.append(et, input, grupo, listo);
+        cuerpo.addEventListener("submit", (e) => {
+            e.preventDefault();
+            const elegida = (grupo.querySelector("input:checked") || radios[0]).value;
+            const pf = { id: "p" + siguientePerfil++, nombre: input.value.trim() || "perfil " + (todo.perfiles.length + 1), modulos: [] };
+            const propia = propias.find((x) => "propia-" + x.id === elegida);
+            if (propia) {
+                pf.modulos = propia.ventanas.filter((v) => MODULOS[v.tipo]).map((v) => Object.assign({}, v, { id: "m" + siguienteId++ }));
+            } else {
+                const pl = PLANTILLAS.find((x) => x[0] === elegida) || PLANTILLAS[0];
+                pf.modulos = pl[3].map((tipo) => ({ id: "m" + siguienteId++, tipo, x: 0, y: 0, w: MODULOS[tipo].w, h: MODULOS[tipo].h }));
+            }
+            cerrar();
+            todo.perfiles.push(pf);
+            activar(pf, true);
+            if (!propia) {
+                ordenar();
+                pintarTodo();
+                guardar();
+            }
+            avisar("Perfil nuevo: " + pf.nombre + (pf.modulos.length ? ", con " + pf.modulos.length + " ventanas." : "."));
+        });
+        const cerrar = window.ocVentana.abrir({ titulo: "perfil nuevo", cuerpo, vuelta: botonNueva, foco: input });
+    }
+    const botonNueva = botonDe("master-pestana-mando", "＋", () => perfilNuevo(), "Perfil nuevo");
     botonNueva.title = "Perfil nuevo";
     const botonRenombrar = botonDe("master-pestana-mando", "✎", renombrar, "Nombre y color de este perfil");
     botonRenombrar.title = "Nombre y color de este perfil";
@@ -5477,12 +6376,107 @@
     zoomCaja.setAttribute("aria-label", "Zoom del tablero");
     zoomCaja.append(menosZoom, botonZoom, masZoom);
     zoomCaja.hidden = !HAY_ZOOM;
-    mandos.append(montarBuscador(), zoomCaja, botonAnadir);
+    const botonAtajos = botonDe("master-pestana-mando", "⌨", () => verAtajos(), "Atajos de teclado");
+    botonAtajos.title = "Atajos de teclado (?)";
+    botonAtajos.setAttribute("aria-haspopup", "dialog");
+    botonAtajos.setAttribute("aria-keyshortcuts", "?");
+    mandos.append(montarBuscador(), zoomCaja, botonAtajos, botonAnadir);
     const dados = barra.querySelector(".oc-boton-dados");
     if (dados) {
         mandos.appendChild(dados);
     }
     barra.prepend(pestanas, mandos);
+    const ATAJOS = [
+        ["El tablero", [["/", "ir al buscador"], ["A", "añadir una ventana"], ["N", "post-it nuevo"], ["D", "los dados"],
+            ["I", "la iniciativa (la abre si no está)"], ["+ / −", "acercar o alejar el tablero"], ["0", "el tablero al 100 %"],
+            ["[ / ]", "perfil anterior o siguiente"], ["?", "estos atajos"]]],
+        ["Las ventanas", [["✥ + flechas", "moverla (con Mayús, más deprisa)"], ["✥ + Alt + flechas", "cambiar su tamaño"],
+            ["Intro en el nombre", "plegarla o desplegarla"], ["Esc", "cerrar una ventana modal"]]],
+        ["El dibujo (con el foco en el lienzo)", [["B", "lápiz"], ["E", "goma"], ["G", "bote"], ["M", "seleccionar y mover"],
+            ["I", "cuentagotas"], ["L", "línea"], ["U", "rectángulo"], ["O", "elipse"], ["T", "texto"], ["Ctrl+Z / Ctrl+Y", "deshacer y rehacer"],
+            ["flechas", "mover la selección (Mayús: de 10 en 10)"], ["+ / −", "agrandar o encoger la selección"],
+            ["Supr", "borrar la selección"], ["Esc", "soltar la selección"], ["Ctrl+V", "pegar una imagen"]]],
+        ["Post-its y notas", [["Ctrl+B / I / U", "negrita, cursiva, subrayado"], ["Ctrl+Z / Ctrl+Y", "deshacer y rehacer"],
+            ["← → en la barra", "ir de un botón a otro"]]],
+        ["El buscador", [["↓ ↑", "por los resultados"], ["Intro", "abrir el elegido"], ["Esc", "cerrar"]]],
+    ];
+    function verAtajos() {
+        const cuerpo = crear("div", "master-atajos");
+        ATAJOS.forEach(([titulo, lista]) => {
+            cuerpo.appendChild(crear("h3", "master-atajos-titulo", titulo));
+            const dl = crear("dl", "master-atajos-lista");
+            lista.forEach(([tecla, que]) => {
+                const dt = crear("dt");
+                tecla.split(" / ").forEach((t, i) => {
+                    if (i) {
+                        dt.appendChild(document.createTextNode(" / "));
+                    }
+                    dt.appendChild(crear("kbd", "", t));
+                });
+                dl.append(dt, crear("dd", "", que));
+            });
+            cuerpo.appendChild(dl);
+        });
+        window.ocVentana.abrir({ titulo: "atajos de teclado", cuerpo, vuelta: botonAtajos, clase: "es-ancha" });
+    }
+    document.addEventListener("keydown", (e) => {
+        if (e.defaultPrevented || e.ctrlKey || e.metaKey || e.altKey || !lienzo.isConnected) {
+            return;
+        }
+        const t = e.target;
+        if (t && t.closest && t.closest("input, textarea, select, canvas, [contenteditable='true']")) {
+            return;
+        }
+        if (window.ventanaModal && window.ventanaModal.abierta && window.ventanaModal.abierta()) {
+            return;
+        }
+        const tecla = e.key;
+        const hacer = {
+            "/": () => {
+                const b = document.getElementById("master-buscador");
+                if (b) {
+                    b.focus();
+                }
+            },
+            "?": verAtajos,
+            a: () => botonAnadir.click(),
+            n: () => anadir("tarjeta"),
+            d: () => {
+                const b = document.querySelector(".oc-boton-dados");
+                if (b) {
+                    b.click();
+                }
+            },
+            i: () => {
+                const m = estado.modulos.find((x) => x.tipo === "iniciativa");
+                if (m && m.el) {
+                    alFrente(m);
+                    m.el.scrollIntoView({ block: "nearest" });
+                    m.el.querySelector(".master-ventana-nombre").focus();
+                } else {
+                    anadir("iniciativa");
+                }
+            },
+            "+": () => pasoZoom(1),
+            "=": () => pasoZoom(1),
+            "-": () => pasoZoom(-1),
+            "0": () => ponerZoom(1, true),
+            "[": () => cambiarPerfil(-1),
+            "]": () => cambiarPerfil(1),
+        }[tecla.length === 1 ? tecla.toLowerCase() : tecla];
+        if (hacer) {
+            e.preventDefault();
+            hacer();
+        }
+    });
+    function cambiarPerfil(paso) {
+        const i = todo.perfiles.indexOf(estado);
+        const pf = todo.perfiles[(i + paso + todo.perfiles.length) % todo.perfiles.length];
+        if (pf !== estado) {
+            activar(pf, true);
+            avisar("Perfil: " + pf.nombre + ".");
+        }
+    }
     lienzo.classList.add("con-lienzo");
     colorTablero();
     pintarPestanas(false);

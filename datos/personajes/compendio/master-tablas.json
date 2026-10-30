@@ -1,0 +1,555 @@
+{
+ "nota": "Tablas propias de la pantalla de máster (inventadas aquí, sin nada de los libros): los PNJ rápidos, el generador de dungeons (temas, salas, detalles y trampas) y los calendarios. Se pueden retocar a mano.",
+ "pnj": {
+  "oficios": [
+   "posadero|posadera",
+   "herrero|herrera",
+   "guardia de la puerta",
+   "sacerdote de pueblo|sacerdotisa de pueblo",
+   "mercader de especias",
+   "pescador|pescadora",
+   "escribano|escribana",
+   "curandero|curandera",
+   "cazador de recompensas|cazadora de recompensas",
+   "bardo ambulante|barda ambulante",
+   "mozo de cuadra|moza de cuadra",
+   "alquimista",
+   "contrabandista",
+   "cartógrafo|cartógrafa",
+   "molinero|molinera",
+   "panadero|panadera",
+   "sepulturero|sepulturera",
+   "noble venido a menos|noble venida a menos",
+   "capitán de barco|capitana de barco",
+   "jugador profesional|jugadora profesional",
+   "carpintero|carpintera",
+   "recaudador de impuestos|recaudadora de impuestos",
+   "monje mendicante|monja mendicante",
+   "pastor|pastora",
+   "ladrón de poca monta|ladrona de poca monta",
+   "bibliotecario|bibliotecaria",
+   "cocinero de campaña|cocinera de campaña",
+   "mensajero|mensajera",
+   "tabernero|tabernera",
+   "vendedor de amuletos|vendedora de amuletos",
+   "minero|minera",
+   "soldado retirado|soldado retirada",
+   "zapatero|zapatera",
+   "partero|partera",
+   "trampero|trampera",
+   "titiritero|titiritera",
+   "prestamista",
+   "guía de montaña",
+   "sastre|costurera",
+   "aprendiz de mago|aprendiz de maga"
+  ],
+  "aspecto": [
+   "una cicatriz que le cruza la ceja",
+   "manos manchadas de tinta",
+   "un diente de oro",
+   "ropa elegante pero remendada",
+   "un loro en el hombro",
+   "botas llenas de barro",
+   "el pelo trenzado con cuentas",
+   "tatuajes de olas en los brazos",
+   "un parche en el ojo",
+   "una pipa que nunca enciende",
+   "gafas redondas muy gruesas",
+   "un sombrero enorme con una pluma",
+   "olor a humo",
+   "las uñas pintadas de negro",
+   "una cojera leve",
+   "un abrigo de piel de oso",
+   "pecas por todas partes",
+   "anillos en todos los dedos",
+   "la voz ronca",
+   "una sonrisa que no llega a los ojos",
+   "cejas espesísimas",
+   "un amuleto de hueso al cuello",
+   "las mejillas siempre coloradas",
+   "un bastón tallado con caras",
+   "harina en la ropa",
+   "una barba trenzada con lazos",
+   "la piel curtida por el sol",
+   "un pañuelo rojo al cuello",
+   "la cabeza rapada",
+   "un cuervo que le sigue a todas partes"
+  ],
+  "rasgos": [
+   "habla demasiado cuando está nervioso",
+   "desconfía de cualquiera que lleve armadura",
+   "es amable con todo el mundo, hasta con quien no lo merece",
+   "no soporta que le lleven la contraria",
+   "se ríe de sus propios chistes",
+   "lo apunta todo en una libreta",
+   "siempre está comiendo algo",
+   "es muy supersticioso",
+   "cree que todo tiempo pasado fue mejor",
+   "regatea hasta por una moneda de cobre",
+   "es muy valiente, pero solo cuando le miran",
+   "nunca dice que no a una apuesta",
+   "es tímido hasta que se toca su tema favorito",
+   "le encantan los cotilleos",
+   "es honrado hasta la exageración",
+   "miente sin necesidad, por costumbre",
+   "tiene un humor muy negro",
+   "es muy religioso",
+   "se ofende con facilidad",
+   "es un romántico empedernido",
+   "presume de conocer a gente importante",
+   "es tacaño, pero generoso con los niños",
+   "se pone a cantar cuando está contento",
+   "no se fía de la magia",
+   "quiere caer bien a toda costa",
+   "es brusco, pero tiene buen corazón",
+   "siempre tiene prisa",
+   "lo sabe todo (o eso cree)",
+   "colecciona cosas raras",
+   "se enfada y se le pasa enseguida"
+  ],
+  "manias": [
+   "termina las frases con «¿sabes lo que te digo?»",
+   "habla de sí mismo en tercera persona",
+   "susurra como si alguien escuchara",
+   "silba entre frase y frase",
+   "se frota las manos al hablar de dinero",
+   "tartamudea con las palabras largas",
+   "usa refranes para todo, aunque no vengan a cuento",
+   "cuenta con los dedos mientras habla",
+   "llama «cielo» a todo el mundo",
+   "hace pausas larguísimas antes de contestar",
+   "imita la voz de quien cita",
+   "habla muy alto, como si todos fueran sordos",
+   "se toca el amuleto cada vez que nombra a un dios",
+   "corrige la gramática de los demás",
+   "pregunta el nombre de todos y lo olvida",
+   "carraspea antes de decir algo importante",
+   "usa palabras raras para parecer culto",
+   "se ríe con un resoplido",
+   "acaba las frases subiendo el tono, como preguntando",
+   "mira de reojo a la puerta todo el rato"
+  ],
+  "quiere": [
+   "saldar una deuda antes de que vengan a cobrarla",
+   "encontrar a su hermano, desaparecido hace un año",
+   "que su negocio sobreviva al invierno",
+   "vengarse de quien le arruinó",
+   "salir de este pueblo y ver mundo",
+   "que su hija se case bien",
+   "recuperar una reliquia familiar robada",
+   "que nadie descubra lo que hizo",
+   "proteger a su pueblo de lo que hay en el bosque",
+   "hacerse rico, rápido y sin trabajar mucho",
+   "ser aceptado en un gremio importante",
+   "que alguien escriba una canción sobre él",
+   "redimirse por algo de su pasado",
+   "descubrir qué hay de verdad en una vieja leyenda",
+   "sacar a un amigo de la cárcel",
+   "que le dejen en paz",
+   "ganar una apuesta que hizo borracho",
+   "conseguir una cura para su madre enferma",
+   "ocupar el puesto de su jefe",
+   "que vuelvan los buenos tiempos"
+  ],
+  "secretos": [
+   "no es quien dice ser",
+   "trabaja como espía para alguien poderoso",
+   "le debe dinero a gente peligrosa",
+   "vio algo que no debía y lo calla",
+   "tiene un pacto con una criatura de otro plano",
+   "está enamorado de quien no debe",
+   "robó lo que tiene",
+   "sabe dónde está escondido un tesoro",
+   "es hijo ilegítimo de un noble",
+   "su familia es de una secta",
+   "es un desertor",
+   "tiene un hermano gemelo del que nadie sabe nada",
+   "esconde a un fugitivo en el sótano",
+   "no sabe leer, aunque disimula",
+   "ha envenenado a alguien",
+   "es mucho más viejo de lo que parece",
+   "tiene miedo a la oscuridad",
+   "es licántropo y aún no lo sabe",
+   "cambió el testamento de su padre",
+   "nada: es tan simple como parece"
+  ]
+ },
+ "dungeon": {
+  "temas": {
+   "cripta": {
+    "nombre": "cripta",
+    "emoji": "⚰️",
+    "habitat": "",
+    "tipos": [
+     "Muerto viviente",
+     "Infernal",
+     "Monstruosidad",
+     "Autómata"
+    ],
+    "salas": [
+     "un osario con calaveras ordenadas en las paredes",
+     "una capilla con un altar profanado",
+     "un pasillo de nichos, algunos abiertos",
+     "una sala de embalsamar con mesas de piedra",
+     "un mausoleo con un sarcófago tallado",
+     "una cámara inundada hasta los tobillos de agua negra",
+     "una galería con estatuas de los difuntos",
+     "un pozo de cadáveres tapado con una reja",
+     "la tumba del fundador, con su epitafio",
+     "una sala de ofrendas con vasijas rotas",
+     "una cámara de guardia con armaduras viejas",
+     "una biblioteca de registros funerarios"
+    ],
+    "detalles": [
+     "huele a incienso rancio",
+     "se oye un goteo constante",
+     "hay velas que se encienden solas",
+     "el suelo está cubierto de polvo sin pisadas",
+     "hay un frío que no es natural",
+     "las paredes tienen nombres arañados",
+     "hay telarañas del suelo al techo",
+     "un eco devuelve los susurros con retraso"
+    ]
+   },
+   "cueva": {
+    "nombre": "cueva",
+    "emoji": "🕳️",
+    "habitat": "Infraoscuridad",
+    "tipos": [
+     "Bestia",
+     "Monstruosidad",
+     "Humanoide",
+     "Cieno",
+     "Aberración"
+    ],
+    "salas": [
+     "una gruta con estalactitas que gotean",
+     "un lago subterráneo de agua helada",
+     "una caverna con un nido de huesos",
+     "un paso estrecho por el que hay que ir de lado",
+     "una cámara con hongos que brillan",
+     "una sima con un puente de cuerdas",
+     "una sala con pinturas antiguas en las paredes",
+     "una cueva con restos de una hoguera reciente",
+     "una galería con un río que se oye pero no se ve",
+     "una caverna enorme con eco",
+     "un túnel de una mina abandonada",
+     "una cámara con cristales en las paredes"
+    ],
+    "detalles": [
+     "el aire es húmedo y pesado",
+     "hay excrementos de algo grande",
+     "se nota una corriente de aire",
+     "la roca está caliente al tacto",
+     "hay murciélagos colgados del techo",
+     "el suelo resbala",
+     "hay huellas que no son humanas",
+     "la luz de las antorchas parpadea sin viento"
+    ]
+   },
+   "fortaleza": {
+    "nombre": "fortaleza en ruinas",
+    "emoji": "🏰",
+    "habitat": "",
+    "tipos": [
+     "Humanoide",
+     "Gigante",
+     "Bestia",
+     "Monstruosidad"
+    ],
+    "salas": [
+     "un patio de armas con un pozo",
+     "unos barracones con catres podridos",
+     "una armería saqueada",
+     "el gran salón con un trono roto",
+     "unas cocinas con calderos oxidados",
+     "una torre de vigilancia sin techo",
+     "unas mazmorras con celdas abiertas",
+     "una capilla convertida en almacén",
+     "los aposentos del señor, con un tapiz rasgado",
+     "unos establos llenos de paja vieja",
+     "una sala de mapas con una mesa enorme",
+     "una bodega con toneles reventados"
+    ],
+    "detalles": [
+     "hay restos de una batalla",
+     "el viento silba por las troneras",
+     "hay un estandarte de una casa olvidada",
+     "se oyen pasos en el piso de arriba",
+     "hay una hoguera de campamento reciente",
+     "las puertas están atrancadas desde dentro",
+     "hay flechas clavadas en las vigas",
+     "huele a guiso"
+    ]
+   },
+   "templo": {
+    "nombre": "templo olvidado",
+    "emoji": "🛕",
+    "habitat": "",
+    "tipos": [
+     "Celestial",
+     "Infernal",
+     "Autómata",
+     "Humanoide",
+     "Aberración"
+    ],
+    "salas": [
+     "un vestíbulo con columnas cubiertas de enredaderas",
+     "un santuario con una estatua sin cabeza",
+     "una sala de abluciones con una fuente seca",
+     "una cámara de reliquias con hornacinas vacías",
+     "un claustro con un jardín asilvestrado",
+     "un scriptorium con pergaminos podridos",
+     "una sala de rezos con alfombras raídas",
+     "una cripta bajo el altar",
+     "un observatorio con un techo abierto",
+     "una cámara de pruebas con símbolos en el suelo",
+     "las celdas de los monjes",
+     "una sala del tesoro con una puerta sellada"
+    ],
+    "detalles": [
+     "se oye un cántico lejano",
+     "hay mosaicos que cuentan una historia",
+     "la luz entra por vidrieras de colores",
+     "huele a flores secas",
+     "hay ofrendas recientes",
+     "el suelo forma un dibujo que solo se ve desde arriba",
+     "hay una inscripción en una lengua antigua",
+     "el silencio es total"
+    ]
+   },
+   "cloaca": {
+    "nombre": "cloacas",
+    "emoji": "🐀",
+    "habitat": "ciudad",
+    "tipos": [
+     "Bestia",
+     "Cieno",
+     "Humanoide",
+     "Monstruosidad"
+    ],
+    "salas": [
+     "un colector con agua hasta la cintura",
+     "una cámara de compuertas con una rueda oxidada",
+     "un escondite de contrabandistas",
+     "una sala de bombeo abandonada",
+     "un túnel que da a una cripta antigua",
+     "un nido de ratas enorme",
+     "una plataforma seca con restos de un campamento",
+     "un pozo que sube a un patio de la ciudad",
+     "una sala con tuberías que silban",
+     "una cámara de desagüe con una reja",
+     "un altar improvisado de una secta",
+     "una galería derrumbada a medias"
+    ],
+    "detalles": [
+     "el olor es insoportable",
+     "se oye la ciudad por encima",
+     "hay marcas de tiza de alguien que pasó antes",
+     "el agua lleva cosas flotando",
+     "hay ojillos que brillan en la oscuridad",
+     "gotea de las rejas de arriba",
+     "hay un rastro de baba en la pared",
+     "las paredes están cubiertas de moho"
+    ]
+   },
+   "torre": {
+    "nombre": "torre de mago",
+    "emoji": "🗼",
+    "habitat": "",
+    "tipos": [
+     "Autómata",
+     "Elemental",
+     "Aberración",
+     "Feérico",
+     "Infernal"
+    ],
+    "salas": [
+     "un vestíbulo con un suelo que cambia de color",
+     "una biblioteca con libros que se reordenan",
+     "un laboratorio con alambiques burbujeando",
+     "una sala de invocación con un círculo dibujado",
+     "un observatorio con un telescopio enorme",
+     "un invernadero con plantas que se mueven",
+     "una sala de trofeos con criaturas disecadas",
+     "un dormitorio lleno de pergaminos",
+     "una cámara de espejos",
+     "una despensa de componentes raros",
+     "una escalera de caracol que no termina",
+     "un estudio con una puerta pintada en la pared"
+    ],
+    "detalles": [
+     "el aire huele a ozono",
+     "los objetos flotan un palmo del suelo",
+     "hay un gato que habla",
+     "las sombras van a destiempo",
+     "suena un tictac sin reloj",
+     "hay notas en los márgenes de todo",
+     "las ventanas dan a sitios distintos",
+     "la gravedad está un poco torcida"
+    ]
+   }
+  },
+  "trampas": [
+   {
+    "nombre": "Agujas en la cerradura",
+    "texto": "Al abrir la cerradura sin desarmarla, una aguja pincha: salvación de Constitución CD {cd} o {dano} de daño de veneno y envenenado 1 hora. Se ve con Sabiduría (Percepción) CD {cd}; se desarma con herramientas de ladrón, CD {cd}."
+   },
+   {
+    "nombre": "Losa que dispara dardos",
+    "texto": "Una losa suelta dispara dardos desde las paredes: salvación de Destreza CD {cd} o {dano} de daño perforante. Se ve con Sabiduría (Percepción) CD {cd}; se calza con un clavo o una cuña."
+   },
+   {
+    "nombre": "Foso escondido",
+    "texto": "El suelo cede: salvación de Destreza CD {cd} para agarrarse al borde; si no, cae y recibe {dano} de daño contundente. Se ve con Sabiduría (Percepción) CD {cd}."
+   },
+   {
+    "nombre": "Runa de fuego",
+    "texto": "Una runa en el suelo estalla en llamas: salvación de Destreza CD {cd} o {dano} de daño de fuego (la mitad si la supera). Se ve con Inteligencia (Investigación) CD {cd}; se borra con Inteligencia (Arcanos) CD {cd}."
+   },
+   {
+    "nombre": "Bloque que cae",
+    "texto": "Un bloque de piedra cae del techo: salvación de Destreza CD {cd} o {dano} de daño contundente y derribado. Se ve con Sabiduría (Percepción) CD {cd}."
+   },
+   {
+    "nombre": "Gas adormecedor",
+    "texto": "La sala se llena de gas: salvación de Constitución CD {cd} o inconsciente 10 minutos (despierta si le hacen daño o le zarandean). Se ve con Sabiduría (Percepción) CD {cd}: un tubo en la pared."
+   },
+   {
+    "nombre": "Cuchilla en péndulo",
+    "texto": "Una cuchilla barre el pasillo: salvación de Destreza CD {cd} o {dano} de daño cortante. Se ve con Sabiduría (Percepción) CD {cd}; se atasca con Fuerza (Atletismo) CD {cd}."
+   },
+   {
+    "nombre": "Red que cae",
+    "texto": "Una red cae sobre quien pisa el centro: salvación de Destreza CD {cd} o apresado (se suelta con Fuerza CD {cd} o cortándola: CA 10, 20 PG)."
+   },
+   {
+    "nombre": "Glifo de relámpago",
+    "texto": "Un glifo en la puerta suelta un relámpago: salvación de Destreza CD {cd} o {dano} de daño de relámpago (la mitad si la supera). Se ve con Inteligencia (Investigación) CD {cd}."
+   },
+   {
+    "nombre": "Paredes que se cierran",
+    "texto": "Al cerrar la puerta, las paredes avanzan: hay 3 rondas para salir o pararlas (Fuerza (Atletismo) CD {cd}, entre dos con ventaja). Después, {dano} de daño contundente por ronda."
+   },
+   {
+    "nombre": "Ácido en el picaporte",
+    "texto": "El picaporte está untado de ácido: salvación de Destreza CD {cd} o {dano} de daño de ácido. Se ve con Sabiduría (Percepción) CD {cd}: el metal está corroído."
+   },
+   {
+    "nombre": "Ilusión de suelo",
+    "texto": "Un trozo del suelo es una ilusión sobre un pozo de 20 pies: salvación de Destreza CD {cd} o cae ({dano} de daño contundente). Se descubre con Inteligencia (Investigación) CD {cd} o tocándolo."
+   }
+  ],
+  "tesoros_sala": [
+   "en un cofre cerrado",
+   "escondido bajo una losa suelta",
+   "entre los restos de un aventurero",
+   "en un hueco de la pared",
+   "dentro de una urna",
+   "colgado del cuello de una estatua",
+   "en el fondo de un charco",
+   "bajo el colchón de un catre"
+  ]
+ },
+ "calendarios": {
+  "harptos": {
+   "nombre": "de Harptos (Reinos Olvidados)",
+   "anio": "DR",
+   "semana": 10,
+   "nombreSemana": "decanario",
+   "dias": [
+    "1.º",
+    "2.º",
+    "3.º",
+    "4.º",
+    "5.º",
+    "6.º",
+    "7.º",
+    "8.º",
+    "9.º",
+    "10.º"
+   ],
+   "meses": [
+    {
+     "nombre": "Hammer (martillo)",
+     "dias": 30
+    },
+    {
+     "nombre": "Midwinter (pleno invierno)",
+     "dias": 1,
+     "fiesta": true
+    },
+    {
+     "nombre": "Alturiak (la garra del invierno)",
+     "dias": 30
+    },
+    {
+     "nombre": "Ches (la garra de los ocasos)",
+     "dias": 30
+    },
+    {
+     "nombre": "Tarsakh (la garra de las tormentas)",
+     "dias": 30
+    },
+    {
+     "nombre": "Greengrass (hierba verde)",
+     "dias": 1,
+     "fiesta": true
+    },
+    {
+     "nombre": "Mirtul (el deshielo)",
+     "dias": 30
+    },
+    {
+     "nombre": "Kythorn (la época de las flores)",
+     "dias": 30
+    },
+    {
+     "nombre": "Flamerule (la época del calor)",
+     "dias": 30
+    },
+    {
+     "nombre": "Midsummer (pleno verano)",
+     "dias": 1,
+     "fiesta": true
+    },
+    {
+     "nombre": "Shieldmeet (encuentro de escudos)",
+     "dias": 1,
+     "fiesta": true,
+     "cada": 4
+    },
+    {
+     "nombre": "Eleasis (alto sol)",
+     "dias": 30
+    },
+    {
+     "nombre": "Eleint (el desvanecer)",
+     "dias": 30
+    },
+    {
+     "nombre": "Highharvestide (alta cosecha)",
+     "dias": 1,
+     "fiesta": true
+    },
+    {
+     "nombre": "Marpenoth (la caída de las hojas)",
+     "dias": 30
+    },
+    {
+     "nombre": "Uktar (la podredumbre)",
+     "dias": 30
+    },
+    {
+     "nombre": "Feast of the Moon (fiesta de la luna)",
+     "dias": 1,
+     "fiesta": true
+    },
+    {
+     "nombre": "Nightal (el ocaso)",
+     "dias": 30
+    }
+   ]
+  }
+ }
+}

@@ -2066,6 +2066,299 @@
     margin: 16px 0 6px;
     font-size: 1rem;
 }
+.master-pnj {
+    margin-top: 12px;
+    padding: 10px 12px;
+    border: 2px solid var(--yellow);
+}
+.master-pnj-cabeza {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 4px 10px;
+}
+.master-pnj-nombre {
+    margin: 0;
+    font-size: 1.25rem;
+}
+.master-pnj-especie {
+    color: var(--muted);
+}
+.master-pnj-datos {
+    display: grid;
+    grid-template-columns: max-content 1fr;
+    gap: 4px 10px;
+    margin: 10px 0;
+}
+.master-pnj-datos dt {
+    color: var(--yellow);
+    font-weight: 700;
+}
+.master-pnj-datos dd {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 6px;
+    margin: 0;
+}
+.master-pnj-botones {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+.master-pnj-guardados {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    margin: 6px 0 0;
+    padding: 0;
+    list-style: none;
+}
+.master-pnj-guardados[hidden] {
+    display: none;
+}
+.master-reloj-nuevo {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 12px;
+}
+.master-reloj-nuevo .master-elegir {
+    flex: 1 1 12rem;
+}
+.master-relojes {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(11rem, 1fr));
+    gap: 10px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+.master-relojes .oc-vacio {
+    grid-column: 1 / -1;
+}
+.master-reloj {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding: 8px;
+    border: 2px solid var(--border);
+}
+.master-reloj.es-lleno {
+    border-color: var(--yellow);
+}
+.master-reloj-cuenta {
+    position: relative;
+    width: 100%;
+    max-width: 9rem;
+    margin: 0 auto;
+}
+.master-reloj-dibujo {
+    display: block;
+    width: 100%;
+    height: auto;
+}
+.master-reloj-trozo {
+    fill: transparent;
+    stroke: var(--white);
+    stroke-width: 2;
+    cursor: pointer;
+}
+.master-reloj-trozo.es-lleno {
+    fill: var(--yellow);
+}
+.master-reloj-numero {
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    padding: 0 4px;
+    background: var(--purple);
+    font-family: var(--fuente-mono);
+    font-size: 0.875rem;
+}
+.master-reloj-mandos {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 4px;
+}
+.master-cal-ahora {
+    margin: 0;
+}
+.master-cal-tiempo,
+.master-cal-cabeza {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px;
+}
+.master-cal-cabeza {
+    margin: 12px 0 6px;
+}
+.master-cal-mes {
+    flex: 1 1 auto;
+    margin: 0;
+    font-size: 1rem;
+    text-align: center;
+}
+.master-cal-propio {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+.master-cal-propio[hidden] {
+    display: none;
+}
+.master-cal-rejilla {
+    width: 100%;
+    margin-bottom: 10px;
+    border-collapse: collapse;
+    table-layout: fixed;
+}
+.master-cal-rejilla th {
+    padding: 2px;
+    color: var(--muted);
+    font-size: 0.75rem;
+    font-weight: 400;
+    text-align: center;
+    overflow-wrap: anywhere;
+}
+.master-cal-rejilla td {
+    padding: 2px;
+}
+.master-cal-dia {
+    position: relative;
+    width: 100%;
+    min-height: 34px;
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--white);
+    font: inherit;
+    font-size: 0.875rem;
+    cursor: pointer;
+}
+.master-cal-dia:hover {
+    border-color: var(--yellow);
+}
+.master-cal-dia:focus-visible {
+    outline: 3px solid var(--yellow);
+    outline-offset: 1px;
+}
+.master-cal-dia.es-hoy {
+    border: 3px solid var(--yellow);
+    font-weight: 700;
+}
+.master-cal-dia.es-elegido {
+    background: var(--yellow);
+    color: var(--yellow-contrast);
+}
+.master-cal-dia.con-apunte::after {
+    position: absolute;
+    top: 3px;
+    right: 3px;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: currentColor;
+    content: "";
+}
+.master-dungeon-mapa {
+    display: block;
+    width: 100%;
+    height: auto;
+    margin: 12px 0 8px;
+    border: 2px solid var(--border);
+}
+.master-dungeon-mapa[hidden],
+.master-notas-botones[hidden] {
+    display: none;
+}
+.master-dungeon-salas {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin: 10px 0 0;
+    padding: 0;
+    list-style: none;
+}
+.master-dungeon-sala {
+    padding: 8px 10px;
+    border: 1px solid var(--border);
+    border-left: 4px solid var(--yellow);
+}
+.master-dungeon-sala-titulo {
+    margin: 0 0 4px;
+    font-size: 1rem;
+}
+.master-dungeon-sala p {
+    margin: 4px 0;
+}
+.master-dungeon-cosa .master-botin-objeto {
+    flex: none;
+    min-height: 0;
+    padding: 0 2px;
+}
+.master-plantillas {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin: 4px 0 10px;
+    padding: 0;
+    border: 0;
+}
+.master-plantilla {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 6px 8px;
+    border: 1px solid var(--border);
+}
+.master-plantilla:has(input:checked) {
+    border-color: var(--yellow);
+    background: color-mix(in srgb, var(--yellow) 15%, transparent);
+}
+.master-plantilla input {
+    flex: none;
+    width: 20px;
+    height: 20px;
+    accent-color: var(--yellow);
+}
+.master-plantilla-texto {
+    display: flex;
+    flex: 1 1 auto;
+    flex-direction: column;
+    cursor: pointer;
+}
+.master-plantilla-texto span {
+    color: var(--muted);
+    font-size: 0.875rem;
+}
+.master-atajos-titulo {
+    margin: 14px 0 6px;
+    font-size: 1rem;
+}
+.master-atajos-titulo:first-child {
+    margin-top: 0;
+}
+.master-atajos-lista {
+    display: grid;
+    grid-template-columns: max-content 1fr;
+    gap: 4px 14px;
+    margin: 0;
+}
+.master-atajos-lista dd {
+    margin: 0;
+}
+.master-atajos-lista kbd {
+    display: inline-block;
+    min-width: 1.6em;
+    padding: 0 6px;
+    border: 2px solid var(--yellow);
+    border-bottom-width: 4px;
+    font-family: var(--fuente-mono);
+    font-size: 0.875rem;
+    text-align: center;
+}
 .master-dados {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(3.4rem, 1fr));

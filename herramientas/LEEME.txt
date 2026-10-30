@@ -4426,6 +4426,44 @@
       (hasta 6 de cada) de VD hasta nivel + 3, qué están haciendo
       (QUE_HACEN), cada monstruo se abre y «⚔️ todos a la iniciativa» los
       apunta numerados. El hábitat sale también en el perfil del monstruo.
+    · 🧑 PNJ rápidos: nombre (del generador de nombres, por especie —o
+      al azar— y género), oficio, aspecto, carácter, manía al hablar, qué
+      quiere y un secreto; cada cosa con su 🎲 para tirarla otra vez, ☆
+      guardar (m.datos.guardados; pulsando uno vuelve a la ficha) y ⧉
+      copiar. Las tablas, en datos/personajes/compendio/master-tablas.json
+      («pnj»: los oficios van «posadero|posadera» y sale el de su género).
+    · ⏳ relojes (de progreso, en «la mesa»): varios por ventana, cada uno
+      con su nombre (se cambia ahí mismo), de 4 a 12 trozos; − y + (o
+      pinchar un trozo) lo llenan o vacían; avisa al llenarse. Para el
+      lector de pantalla es un role="meter" con su valor; el círculo
+      (SVG) va escondido.
+    · 📅 calendario: gregoriano (el de verdad), el de Harptos (Reinos
+      Olvidados: 12 meses de 30 días con decanarios, las 5 fiestas de un
+      día y Shieldmeet cada 4 años; los nombres, en master-tablas.json,
+      «calendarios») o uno propio (meses «nombre: días», uno por línea,
+      días de la semana separados por comas y lo que va detrás del año:
+      sirve para Cralëa con AEM/DEM). Arriba, la fecha y la hora de la
+      partida y botones para que pase el tiempo (−1 día, +1 h, +8 h
+      descanso largo, +1 día, +1 semana). Debajo, el mes en rejilla (‹ ›,
+      «hoy»): hoy, con borde gordo (aria-current="date"); el elegido,
+      relleno; con apuntes, un punto. Cada día tiene sus apuntes
+      (m.datos.apuntes, por calendario y fecha) y «📍 que la partida esté
+      en este día».
+    · 🗝️ generador de dungeons: qué es (cripta, cueva, fortaleza, templo,
+      cloacas, torre de mago), tamaño (5, 8 o 12 salas), nivel y PJ.
+      hacerMapa() pone las salas al azar en una cuadrícula de 48 × 36 sin
+      que se toquen y las une con pasillos en L (cada una con la
+      siguiente, y una o dos más para que haya vueltas); pintarMapa() lo
+      pinta en un canvas de colores fijos (pergamino), con los números y
+      la entrada (la 1). Cada sala: qué es y un detalle (del tema) y, al
+      azar, monstruos (del SRD, de los tipos y hábitat del tema, con la
+      cuenta de los encuentros; la última, más dura), una trampa (tablas
+      propias, con CD y daño según el nivel: DUNGEON_TRAMPA) y/o botín
+      (el del generador de botín; la última, un tesoro). Los monstruos y
+      los objetos se abren; «⚔️ a la iniciativa» por sala; «🎨 al dibujo»
+      abre una ventana de dibujo con el mapa en una capa (y otra encima
+      para apuntar); «⧉ copiar» copia las salas. Para el lector de
+      pantalla, el mapa es role="img" y lo que cuenta es la lista.
     · 🪶 notas en otros idiomas: escribes lo que pone (o «🎲 nota al azar»,
       de NOTAS_AL_AZAR con nombres y lugares del generador) y se ve en un
       pergamino con el alfabeto del idioma. Los idiomas, en
@@ -4584,6 +4622,18 @@
   bestiary/bestiary-xmm.json, items.json, items-base.json y
   magicvariants.json; solo lo marcado «srd52», que es lo que se puede
   copiar). Son JSON normales: se pueden retocar a mano.
+  ATAJOS DE TECLADO (fuera de los campos de texto y sin ventana modal
+  abierta; ⌨ o «?» los enseña todos, ATAJOS): / buscador, A añadir, N
+  post-it nuevo, D dados, I iniciativa, + − 0 zoom, [ ] perfil anterior o
+  siguiente. Si otra cosa ya ha usado la tecla (el dibujo con sus letras),
+  no hace nada.
+  PLANTILLAS DE PERFIL: «＋» (perfil nuevo) pregunta el nombre y con qué
+  ventanas: vacío, combate, exploración, rol y social, preparar la sesión
+  (PLANTILLAS: las pone ordenadas) o una propia. En el ✎ del perfil,
+  «💾 guardar como plantilla» guarda sus ventanas, donde están (título,
+  color, tamaño del contenido; sin lo de dentro), en
+  «richi-master-plantillas» (va en exportar/importar); en el «＋», ✕ la
+  quita.
   ZOOM DEL TABLERO: arriba, junto a «＋ añadir», «－ 100 % ＋» (el del
   medio lo deja en 100 %), y también Ctrl + rueda (o el pellizco del
   panel táctil) y dos dedos en el fondo del tablero en la tableta. Va de
