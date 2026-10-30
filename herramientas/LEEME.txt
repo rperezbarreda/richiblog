@@ -4064,6 +4064,13 @@
   sistema pide menos movimiento, empiezan apagados). Sin librerías: un
   motor 3D pequeñito en un <canvas> (personajes.js: window.ocDados3d,
   caras() saca las caras de cada sólido de sus vértices).
+  RENDIMIENTO (medido con Playwright, también con la CPU 4 y 6 veces más
+  lenta): a 60 fotogramas por segundo con 20 dados en un equipo normal.
+  Para eso solo se borra y se pinta el trozo por donde ruedan; parados ya
+  no se pintan (se desvanecen con CSS); las formas se calculan una vez,
+  cuando el navegador está desocupado; y si van a menos de ~30
+  fotogramas, mientras ruedan se quitan los números de las otras caras y
+  las sombras. Sin tirar, no gasta nada.
   generar-personajes.py deja marcado lo que se tira (dado, prueba,
   con_dados: <span class="oc-dado" data-dados="1d20+4" data-que="sigilo">)
   y personajes.js lo convierte en botones.

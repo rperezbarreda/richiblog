@@ -1582,6 +1582,10 @@ li > .oc-origen {
     z-index: 950;
     pointer-events: none;
 }
+.oc-dados-3d.se-va {
+    opacity: 0;
+    transition: opacity 0.45s ease;
+}
 .oc-dados-mando:focus-visible {
     outline: 2px solid var(--yellow);
     outline-offset: 2px;

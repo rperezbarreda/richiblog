@@ -387,6 +387,16 @@ document.querySelectorAll(".oc-ataques th[data-oc-desc]").forEach((th) => {
     let dados = [];
     let empieza = 0;
     let pedido = 0;
+    // EL RENDIMIENTO: solo se borra y se pinta el trozo por donde pasan
+    // los dados (no la pantalla entera); cuando están quietos no se pinta
+    // más (se dejan como están y se desvanecen con CSS); y si el equipo va
+    // justo (fotogramas de más de 30 ms), mientras ruedan se dejan de
+    // pintar los números de las otras caras y las sombras.
+    let sucia = null;
+    let esperas = [];
+    let ultimoFotograma = 0;
+    let lento = 0;
+    let fuenteActual = "";
     const RUEDA = 1100;
     const QUIETOS = 1700;
     const SE_VA = 450;
@@ -418,6 +428,8 @@ document.querySelectorAll(".oc-ataques th[data-oc-desc]").forEach((th) => {
         lienzo.height = Math.round(window.innerHeight * dpr);
         lienzo.style.width = window.innerWidth + "px";
         lienzo.style.height = window.innerHeight + "px";
+        // Al cambiar de tamaño, el lienzo olvida la letra puesta.
+        fuenteActual = "";
         return dpr;
     }
 
@@ -496,9 +508,39 @@ document.querySelectorAll(".oc-ataques th[data-oc-desc]").forEach((th) => {
                 retraso: i * 35, color, tinta, tipo,
             };
         });
+        // El trozo de pantalla por donde van a pasar (con los botes).
+        const margen = lado * 2.2;
+        const xs = dados.flatMap((d) => [d.desde.x, d.destino.x]);
+        const ys = dados.flatMap((d) => [d.desde.y - 130, d.destino.y]);
+        sucia = { x: Math.min(...xs) - margen, y: Math.min(...ys) - margen,
+            x2: Math.max(...xs) + margen, y2: Math.max(...ys) + margen };
+        esperas.forEach(clearTimeout);
+        esperas = [];
+        lienzo.classList.remove("se-va");
+        borrar(true);
         empieza = performance.now();
+        ultimoFotograma = 0;
+        lento = 0;
         cancelAnimationFrame(pedido);
         pedido = requestAnimationFrame(pintar);
+    }
+
+    function borrar(todo) {
+        const dpr = window.devicePixelRatio || 1;
+        ctx.setTransform(1, 0, 0, 1, 0, 0);
+        ctx.globalAlpha = 1;
+        if (todo || !sucia) {
+            ctx.clearRect(0, 0, lienzo.width, lienzo.height);
+            return;
+        }
+        ctx.clearRect(sucia.x * dpr, sucia.y * dpr, (sucia.x2 - sucia.x) * dpr, (sucia.y2 - sucia.y) * dpr);
+    }
+
+    // Las formas se calculan una vez; esto las deja hechas de antemano
+    // (al abrir la ventana de los dados), para que la primera tirada no
+    // tenga que esperar.
+    function preparar() {
+        [4, 6, 8, 10, 12, 20, 2].forEach(solido);
     }
 
     const LUZ = unitario([-0.45, 0.6, 0.85]);
@@ -508,20 +550,30 @@ document.querySelectorAll(".oc-ataques th[data-oc-desc]").forEach((th) => {
         if (lienzo.width !== Math.round(window.innerWidth * dpr)) {
             medir();
         }
-        ctx.setTransform(1, 0, 0, 1, 0, 0);
-        ctx.clearRect(0, 0, lienzo.width, lienzo.height);
+        if (ultimoFotograma && ahora - ultimoFotograma > 30) {
+            lento++;
+        }
+        ultimoFotograma = ahora;
+        borrar(false);
         const pasado = ahora - empieza;
-        const total = RUEDA + QUIETOS + SE_VA + dados.length * 35;
-        if (pasado > total) {
-            dados = [];
+        const rodando = RUEDA + dados.length * 35;
+        const ligero = lento >= 3;
+        dados.forEach((d) => pintarDado(d, Math.min(1, Math.max(0, (pasado - d.retraso) / RUEDA)), dpr, ligero));
+        if (pasado < rodando) {
+            pedido = requestAnimationFrame(pintar);
             return;
         }
-        ctx.globalAlpha = pasado > total - SE_VA ? Math.max(0, (total - pasado) / SE_VA) : 1;
-        dados.forEach((d) => pintarDado(d, Math.min(1, Math.max(0, (pasado - d.retraso) / RUEDA)), dpr));
-        pedido = requestAnimationFrame(pintar);
+        // Quietos: ya no se pinta más; al rato, se desvanecen (CSS) y se
+        // borran.
+        esperas.push(setTimeout(() => lienzo.classList.add("se-va"), QUIETOS));
+        esperas.push(setTimeout(() => {
+            borrar(true);
+            lienzo.classList.remove("se-va");
+            dados = [];
+        }, QUIETOS + SE_VA));
     }
 
-    function pintarDado(d, t, dpr) {
+    function pintarDado(d, t, dpr, ligero) {
         const suave = 1 - Math.pow(1 - t, 3);
         // Los botes: cada vez más bajitos.
         const bote = Math.abs(Math.sin(t * Math.PI * 2.6)) * Math.pow(1 - t, 2) * 120;
@@ -534,12 +586,15 @@ document.querySelectorAll(".oc-ataques th[data-oc-desc]").forEach((th) => {
             const k = foco / (foco - p[2] * d.lado);
             return [(x + p[0] * d.lado * k) * dpr, (y - p[1] * d.lado * k) * dpr];
         };
+        const quieto = t >= 1;
         // La sombra.
-        ctx.fillStyle = "rgba(0, 0, 0, 0.28)";
-        ctx.beginPath();
-        ctx.ellipse(d.destino.x * dpr, (d.destino.y + d.lado * 1.05) * dpr, d.lado * (0.9 - bote / 400) * dpr,
-            d.lado * 0.22 * dpr, 0, 0, Math.PI * 2);
-        ctx.fill();
+        if (!ligero || quieto) {
+            ctx.fillStyle = "rgba(0, 0, 0, 0.28)";
+            ctx.beginPath();
+            ctx.ellipse(d.destino.x * dpr, (d.destino.y + d.lado * 1.05) * dpr, d.lado * (0.9 - bote / 400) * dpr,
+                d.lado * 0.22 * dpr, 0, 0, Math.PI * 2);
+            ctx.fill();
+        }
         const puntos = d.s.vertices.map(proyectar);
         d.s.caras.forEach((c) => {
             const n = aplicar(giro, c.normal);
@@ -558,7 +613,7 @@ document.querySelectorAll(".oc-ataques th[data-oc-desc]").forEach((th) => {
             ctx.strokeStyle = "rgba(" + d.tinta.join(",") + ",0.7)";
             ctx.stroke();
             const texto = d.letras.get(c);
-            if (!texto || n[2] < 0.3) {
+            if (!texto || n[2] < 0.3 || (ligero && !quieto)) {
                 return;
             }
             // El número, en el plano de su cara: tres puntos proyectados
@@ -568,7 +623,11 @@ document.querySelectorAll(".oc-ataques th[data-oc-desc]").forEach((th) => {
             const ey = proyectar(suma(c.centro, por(c.arriba, -0.01)));
             ctx.setTransform(ex[0] - o[0], ex[1] - o[1], ey[0] - o[0], ey[1] - o[1], o[0], o[1]);
             const tam = c.radio * (texto.length > 1 ? 0.95 : 1.25) * 100;
-            ctx.font = "700 " + tam + "px system-ui, sans-serif";
+            const fuente = "700 " + Math.round(tam) + "px system-ui, sans-serif";
+            if (fuente !== fuenteActual) {
+                ctx.font = fuente;
+                fuenteActual = fuente;
+            }
             ctx.textAlign = "center";
             ctx.textBaseline = "middle";
             ctx.fillStyle = "rgb(" + d.tinta.join(",") + ")";
@@ -581,7 +640,7 @@ document.querySelectorAll(".oc-ataques th[data-oc-desc]").forEach((th) => {
         ctx.setTransform(1, 0, 0, 1, 0, 0);
     }
 
-    window.ocDados3d = { lanzar };
+    window.ocDados3d = { lanzar, preparar };
 })();
 
 // =========================================
@@ -1420,6 +1479,9 @@ document.querySelectorAll(".oc-ataques th[data-oc-desc]").forEach((th) => {
 
     function abrir(si, devolverFoco) {
         ventana.hidden = !si;
+        if (si && estado.tresD && window.ocDados3d) {
+            (window.requestIdleCallback || setTimeout)(() => window.ocDados3d.preparar());
+        }
         if (si && ventana.dataset.sitio) {
             const [x, y] = ventana.dataset.sitio.split(",").map(Number);
             delete ventana.dataset.sitio;
@@ -1509,6 +1571,11 @@ document.querySelectorAll(".oc-ataques th[data-oc-desc]").forEach((th) => {
     }
 
     montar();
+    // Las formas de los dados en 3D, hechas cuando el navegador esté
+    // desocupado (así la primera tirada no espera a calcularlas).
+    if (estado.tresD && window.ocDados3d) {
+        (window.requestIdleCallback || setTimeout)(() => window.ocDados3d.preparar());
+    }
 
     if (sitioDelBoton) {
         // Solo el dado a la vista (que «ficha dndbeyond» quepa al lado);
