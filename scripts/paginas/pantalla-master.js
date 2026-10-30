@@ -4978,7 +4978,8 @@
         const salida = { activo: estado.id, perfiles: todo.perfiles.map((pf) => ({ id: pf.id, nombre: pf.nombre, color: pf.color || "",
             zoom: pf.zoom || 1,
             modulos: pf.modulos.map((m) => ({ id: m.id, tipo: m.tipo, x: m.x, y: m.y, w: m.w, h: m.h,
-                titulo: m.titulo || "", color: m.color || "", plegado: !!m.plegado, datos: m.datos })) })) };
+                titulo: m.titulo || "", color: m.color || "", plegado: !!m.plegado, movible: !!m.movible,
+                escala: m.escala || 1, datos: m.datos })) })) };
         try {
             localStorage.setItem(CLAVE, JSON.stringify(salida));
             return true;
@@ -5024,6 +5025,17 @@
     }
 
     // ✎: una ventanita para cambiarle el título y el color.
+    // EL TAMAÑO DEL CONTENIDO de una ventana (m.escala, de 0,6 a 2): zoom
+    // de CSS en su cuerpo, así crece todo (letra, botones y dibujos).
+    function ponerEscala(m) {
+        const e = Math.min(2, Math.max(0.6, Math.round((m.escala || 1) * 10) / 10));
+        m.escala = e === 1 ? undefined : e;
+        if (m.cuerpo) {
+            m.cuerpo.style.zoom = e === 1 ? "" : String(e);
+        }
+        return e;
+    }
+
     function personalizar(m, vuelta) {
         const def = MODULOS[m.tipo];
         const cuerpo = crear("form", "master-personalizar");
@@ -5051,9 +5063,28 @@
             grupo.appendChild(b);
             return b;
         });
+        // El tamaño de lo de dentro: se ve al momento.
+        const tam = crear("fieldset", "master-colores master-escala");
+        tam.appendChild(crear("legend", "oc-dados-etiqueta", "tamaño del contenido"));
+        const valor = crear("output", "master-escala-valor", Math.round((m.escala || 1) * 100) + " %");
+        const paso = (d) => {
+            m.escala = (m.escala || 1) + d;
+            const e = ponerEscala(m);
+            valor.textContent = Math.round(e * 100) + " %";
+            menos.disabled = e <= 0.6;
+            mas.disabled = e >= 2;
+            guardar();
+            avisar("Contenido al " + Math.round(e * 100) + " %.");
+        };
+        const menos = botonDe("master-pestana-mando", "A−", () => paso(-0.1), "Contenido más pequeño");
+        const mas = botonDe("master-pestana-mando", "A+", () => paso(0.1), "Contenido más grande");
+        const igual = botonDe("oc-vida-accion", "100 %", () => paso(1 - (m.escala || 1)), "Contenido a su tamaño normal");
+        menos.disabled = (m.escala || 1) <= 0.6;
+        mas.disabled = (m.escala || 1) >= 2;
+        tam.append(menos, valor, mas, igual);
         const listo = crear("button", "oc-vida-accion es-principal", "guardar");
         listo.type = "submit";
-        cuerpo.append(et, input, grupo, listo);
+        cuerpo.append(et, input, grupo, tam, listo);
         cuerpo.addEventListener("submit", (e) => {
             e.preventDefault();
             m.titulo = input.value.trim();
@@ -5067,7 +5098,7 @@
             }
             avisar("Guardado.");
         });
-        const cerrar = window.ocVentana.abrir({ titulo: "título y color", cuerpo, vuelta, foco: input });
+        const cerrar = window.ocVentana.abrir({ titulo: "opciones de la ventana", cuerpo, vuelta, foco: input });
     }
 
     function colocar(m) {
@@ -5107,12 +5138,32 @@
         v.setAttribute("aria-labelledby", idTitulo);
         const em = crear("span", "oc-hoja-emoji", def.emoji);
         em.setAttribute("aria-hidden", "true");
-        titulo.append(em, crear("span", "master-ventana-nombre", m.titulo || def.nombre));
-        // El asa: arrastrar la barra mueve la ventana; con el teclado, el ⠿
-        // y las flechas.
-        const asa = botonDe("master-ventana-mando es-asa", "⠿", () => {}, "Mover la ventana con las flechas; con Alt y las"
-            + " flechas, cambiar su tamaño");
-        asa.title = "Arrástrala por la barra, o pulsa aquí y usa las flechas (con Alt, el tamaño)";
+        // El nombre es un botón que pliega y despliega la ventana (como en
+        // el resto de la web).
+        const nombre = botonDe("master-ventana-nombre", m.titulo || def.nombre, () => {
+            if (v.dataset.recienMovida) {
+                delete v.dataset.recienMovida;
+                return;
+            }
+            plegar.click();
+        });
+        nombre.title = "Plegar o desplegar";
+        titulo.append(em, nombre);
+        // ✥: activa o desactiva moverla. Con él puesto, la barra se
+        // arrastra (y la ventana lleva un reborde de otro color); con el
+        // teclado, ✥ y las flechas (con Alt, el tamaño).
+        const asa = botonDe("master-ventana-mando es-asa", "✥", () => {
+            m.movible = !m.movible;
+            pintarMovible();
+            guardar();
+            avisar(m.movible ? "Se puede mover: arrástrala por la barra o usa las flechas (con Alt, el tamaño)."
+                : "Fija en su sitio.");
+        }, "Poder moverla");
+        const pintarMovible = () => {
+            asa.setAttribute("aria-pressed", String(!!m.movible));
+            asa.title = m.movible ? "Dejarla fija" : "Poder moverla (arrastrando la barra o con las flechas)";
+            v.classList.toggle("es-movible", !!m.movible);
+        };
         asa.addEventListener("keydown", (e) => {
             const paso = e.shiftKey ? 60 : 20;
             const d = { ArrowLeft: [-paso, 0], ArrowRight: [paso, 0], ArrowUp: [0, -paso], ArrowDown: [0, paso] }[e.key];
@@ -5120,6 +5171,10 @@
                 return;
             }
             e.preventDefault();
+            if (!m.movible) {
+                avisar("Pulsa ✥ para poder moverla.");
+                return;
+            }
             if (e.altKey) {
                 // El tamaño: derecha e izquierda, el ancho; arriba y
                 // abajo, el alto.
@@ -5139,11 +5194,14 @@
             cuerpo.hidden = m.plegado;
             plegar.textContent = m.plegado ? "+" : "−";
             plegar.setAttribute("aria-expanded", m.plegado ? "false" : "true");
+            nombre.setAttribute("aria-expanded", m.plegado ? "false" : "true");
             v.classList.toggle("es-plegada", m.plegado);
             colocar(m);
+            crecerLienzo();
             guardar();
         }, "Plegar o desplegar");
         plegar.setAttribute("aria-expanded", m.plegado ? "false" : "true");
+        nombre.setAttribute("aria-expanded", m.plegado ? "false" : "true");
         const quitar = botonDe("master-ventana-mando", "✕", () => {
             estado.modulos = estado.modulos.filter((x) => x !== m);
             v.remove();
@@ -5151,15 +5209,20 @@
             avisar("Quitado: " + (m.titulo || def.nombre) + ".");
             botonAnadir.focus();
         }, "Quitar esta ventana");
-        const cambiar = botonDe("master-ventana-mando", "✎", () => personalizar(m, cambiar), "Cambiar el título y el color");
-        cambiar.title = "Título y color";
+        const cambiar = botonDe("master-ventana-mando", "✎", () => personalizar(m, cambiar),
+            "Opciones: título, color y tamaño del contenido");
+        cambiar.title = "Título, color y tamaño del contenido";
         cambiar.setAttribute("aria-haspopup", "dialog");
-        titulo.addEventListener("dblclick", () => personalizar(m, cambiar));
         const mandos = crear("div", "master-ventana-mandos");
         mandos.append(asa, cambiar, plegar, quitar);
         cabeza.append(titulo, mandos);
         const cuerpo = crear("div", "oc-hoja-dentro master-ventana-cuerpo");
+        cuerpo.id = "master-cuerpo-" + m.id;
+        nombre.setAttribute("aria-controls", cuerpo.id);
+        plegar.setAttribute("aria-controls", cuerpo.id);
         cuerpo.hidden = !!m.plegado;
+        m.cuerpo = cuerpo;
+        ponerEscala(m);
         v.classList.toggle("es-plegada", !!m.plegado);
         // El tamaño, por la esquina de abajo a la derecha: con el ratón, el
         // dedo o el lápiz (en las tabletas no vale el «resize» de CSS).
@@ -5185,22 +5248,33 @@
         v.append(cabeza, cuerpo, esquina);
         m.el = v;
         ponerColor(m);
-        // Arrastrar por la barra (no por sus botones).
+        // Arrastrar por la barra (no por sus botones, salvo ✥ y el nombre),
+        // solo si se puede mover (✥).
         cabeza.addEventListener("pointerdown", (e) => {
-            if (enMovil.matches || e.target.closest("button:not(.es-asa)") || e.button > 0) {
+            if (enMovil.matches || !m.movible || e.target.closest("button:not(.es-asa):not(.master-ventana-nombre)") ||
+                e.button > 0) {
                 return;
             }
             e.preventDefault();
             alFrente(m);
             const mx = m.x;
             const my = m.y;
+            delete v.dataset.recienMovida;
             v.classList.add("es-arrastrada");
             arrastrar(e, cabeza, (dx, dy) => {
+                if (Math.abs(dx) + Math.abs(dy) > 3) {
+                    // Si se ha movido, soltar no cuenta como pulsar.
+                    v.dataset.recienMovida = "si";
+                }
                 m.x = Math.min(topeX(m), Math.max(0, mx + dx));
                 m.y = Math.max(0, my + dy);
                 colocar(m);
-            }, () => v.classList.remove("es-arrastrada"));
+            }, () => {
+                v.classList.remove("es-arrastrada");
+                setTimeout(() => delete v.dataset.recienMovida, 0);
+            });
         });
+        pintarMovible();
         v.addEventListener("pointerdown", () => alFrente(m));
         colocar(m);
         def.montar(cuerpo, m);

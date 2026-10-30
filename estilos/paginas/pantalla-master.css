@@ -330,6 +330,57 @@
     overflow-wrap: anywhere;
 }
 
+/* El nombre de la ventana: un botón que la pliega y despliega (como en
+   el resto de la web), con la pinta del título. */
+.master-ventana-nombre {
+    padding: 2px 0;
+    border: 0;
+    background: transparent;
+    color: inherit;
+    font: inherit;
+    text-align: left;
+    overflow-wrap: anywhere;
+    cursor: pointer;
+}
+
+.master-ventana-nombre:hover {
+    text-decoration: underline;
+    text-underline-offset: 3px;
+}
+
+.master-ventana-nombre:focus-visible {
+    outline: 3px solid currentColor;
+    outline-offset: 2px;
+}
+
+/* ✥ puesto: se puede mover. Un reborde a rayas de otro color (el del
+   texto del tema) alrededor, y la barra con su cursor de mover. */
+.master-ventana.es-movible {
+    outline: 3px dashed var(--white);
+    outline-offset: 3px;
+}
+
+.master-ventana.es-movible .master-ventana-barra,
+.master-ventana.es-movible .master-ventana-nombre {
+    cursor: move;
+}
+
+.master-ventana-mando.es-asa[aria-pressed="true"] {
+    background: var(--white);
+    color: var(--purple);
+}
+
+/* El tamaño del contenido, en «opciones de la ventana». */
+.master-escala {
+    align-items: center;
+}
+
+.master-escala-valor {
+    min-width: 3.5em;
+    font-family: var(--fuente-mono);
+    text-align: center;
+}
+
 .master-ventana-mandos {
     display: flex;
     flex: none;

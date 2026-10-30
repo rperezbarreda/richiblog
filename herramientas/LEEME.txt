@@ -4328,8 +4328,11 @@
   veces).
   LAS VENTANAS SE MUEVEN Y ESTIRAN con el ratón, el dedo o el lápiz (el
   asa de la esquina, .master-ventana-tamano; ya no es el «resize» de CSS)
-  y con el teclado (el ⠿: flechas para mover, Alt + flechas para el
-  tamaño). Al arrastrar, todo va con requestAnimationFrame (arrastrar()),
+  y con el teclado (el ✥: flechas para mover, Alt + flechas para el
+  tamaño). Moverlas hay que activarlo en cada una con su ✥ (aria-pressed;
+  «movible» en la ventana): mientras está puesto, la barra se arrastra y
+  la ventana lleva un reborde a rayas del color del texto del tema
+  (.es-movible); si no, se queda fija. Al arrastrar, todo va con requestAnimationFrame (arrastrar()),
   el lienzo crece mientras (y encoge despacio al soltar) y cerca del borde
   de arriba o de abajo se hace scroll solo. Las ventanas nuevas van al
   PRIMER HUECO LIBRE (hueco()), empezando por lo que se ve.
@@ -4338,12 +4341,16 @@
   perfil); la cuadrícula se pone clara u oscura según el fondo.
   «＋ añadir» abre una ventana para elegir qué poner, y debajo, si ya hay
   algo, «▦ ordenar las ventanas» (en filas, sin solaparse) y «🗑️ quitar
-  todas» (pide pulsar dos veces). Cada ventana se mueve arrastrando su
-  barra (o con el ⠿ y las flechas), cambia de tamaño por la esquina de
-  abajo a la derecha, ✎ (o doble clic en el título) le cambia el TÍTULO y
-  el COLOR (como un post-it: la barra de ese color y el fondo un poco
-  teñido; colores fijos, iguales en todos los temas), − la pliega y ✕ la
-  quita. Todo se guarda en el navegador («richi-master»). En el móvil van
+  todas» (pide pulsar dos veces). En cada ventana: pulsar su NOMBRE la
+  pliega o despliega (como en el resto de la web; es un botón con
+  aria-expanded, igual que −; si se acaba de arrastrar, no cuenta), ✥
+  activa o desactiva moverla (arrastrando la barra o con las flechas),
+  cambia de tamaño por la esquina de abajo a la derecha, ✎ abre sus
+  OPCIONES: el TÍTULO, el COLOR (como un post-it: la barra de ese color y
+  el fondo un poco teñido; colores fijos, iguales en todos los temas) y
+  el TAMAÑO DEL CONTENIDO (A− / A+ / 100 %, de 60 % a 200 %, al momento:
+  zoom de CSS en su cuerpo, ponerEscala(); «escala» en la ventana), − la
+  pliega y ✕ la quita. Todo se guarda en el navegador («richi-master»). En el móvil van
   una debajo de otra, sin mover ni redimensionar.
   Las ventanas que hay (MODULOS en scripts/paginas/pantalla-master.js):
     · ⏱️ iniciativa (la misma de las fichas), 🙈 condiciones (las reglas
