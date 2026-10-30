@@ -4384,7 +4384,13 @@
       (y debajo pone cómo suena). «ver lo que pone debajo» enseña el
       original. «👁️ enseñar» la abre en grande, «⧉ copiar» copia las
       letras raras, «🖼️ imagen» baja un PNG del pergamino (canvas) y
-      A−/A+ cambian el tamaño. Para el lector de pantalla, el pergamino es
+      A−/A+ cambian el tamaño. «🔑 alfabeto» (aria-expanded; se queda
+      abierto en m.datos.clave) despliega debajo el alfabeto de
+      referencia: cada letra con su símbolo, en rejilla (claveDe()), y
+      «👁️ enseñar el alfabeto» lo abre en grande. Si el alfabeto tiene
+      menos de 27 símbolos (la jerga, con el fenicio), lo avisa: algunas
+      letras comparten símbolo. En común no sale. Para el lector de
+      pantalla, el pergamino es
       role="img" con lo que pone de verdad. Común va con Pangolin (letra
       de mano). Los alfabetos son fuentes Noto con licencia OFL
       (tipografias/noto-*.woff2 y noto-licencia-OFL.txt), sacadas de

@@ -1522,6 +1522,23 @@
         });
     }
 
+    // El alfabeto de referencia de un idioma: cada letra con su símbolo.
+    // El símbolo, escondido al lector de pantalla (no dice nada); la
+    // letra, no.
+    function claveDe(idioma, clase) {
+        const lista = crear("ul", "master-idioma-clave " + clase + " es-" + idioma.id);
+        lista.setAttribute("aria-label", "Alfabeto " + idioma.nombre.toLowerCase());
+        const glifos = Array.from(idioma.glifos || "");
+        "abcdefghijklmnopqrstuvwxyzñ".split("").forEach((letra, i) => {
+            const li = crear("li", "master-idioma-letra");
+            const g = crear("span", "master-idioma-glifo", glifos[i] || "");
+            g.setAttribute("aria-hidden", "true");
+            li.append(g, crear("span", "master-idioma-latina", letra));
+            lista.appendChild(li);
+        });
+        return lista;
+    }
+
     function montarIdiomas(dentro, m) {
         m.datos = m.datos || {};
         dentro.appendChild(crear("p", "oc-hoja-nota", "Cargando…"));
@@ -1589,8 +1606,35 @@
                 notaEnImagen(e.letras || " ", e.id, e.id.glifos ? "Richi " + e.id.fuente : "Pangolin")
                     .catch(() => avisar("No se ha podido hacer la imagen."));
             }, "Descargar la nota como imagen");
+            const clave = crear("div", "master-idioma-panel");
+            clave.id = "master-idioma-clave-" + m.id;
+            const verClave = botonDe("oc-vida-accion", "🔑 alfabeto", () => {
+                d.clave = !d.clave;
+                guardar();
+                pintar();
+            }, "Alfabeto de referencia");
+            verClave.setAttribute("aria-controls", clave.id);
+            const pintarClave = (id) => {
+                verClave.hidden = !id.glifos;
+                verClave.setAttribute("aria-expanded", String(!!d.clave));
+                clave.hidden = !d.clave || !id.glifos;
+                if (clave.hidden) {
+                    clave.replaceChildren();
+                    return;
+                }
+                const grande = botonDe("oc-vida-accion", "👁️ enseñar el alfabeto", () => {
+                    window.ocVentana.abrir({ titulo: "Alfabeto " + id.nombre.toLowerCase() + " (" + id.alfabeto + ")",
+                        cuerpo: claveDe(id, "es-grande"), vuelta: grande, clase: "es-ancha" });
+                });
+                clave.replaceChildren(claveDe(id, ""), grande);
+                if (Array.from(new Set(Array.from(id.glifos))).length < 27) {
+                    clave.insertBefore(crear("p", "oc-hoja-nota", "Este alfabeto tiene menos símbolos: algunas letras comparten el mismo."),
+                        grande);
+                }
+            };
             const pintar = () => {
                 const e = escrito();
+                pintarClave(e.id);
                 hoja.className = "master-idioma-hoja es-" + e.id.id;
                 hoja.textContent = e.letras || "…";
                 hoja.setAttribute("aria-label", "Nota en " + e.id.nombre + " (" + e.id.alfabeto + "). Pone: " +
@@ -1632,8 +1676,8 @@
             tamanos.setAttribute("aria-label", "Tamaño de la letra");
             tamanos.append(menos, mas);
             const botones = crear("div", "master-idioma-botones");
-            botones.append(ensenar, copiar, imagen, tamanos);
-            dentro.replaceChildren(arriba, escribir, hoja, ver, dice, botones);
+            botones.append(ensenar, copiar, imagen, verClave, tamanos);
+            dentro.replaceChildren(arriba, escribir, hoja, ver, dice, botones, clave);
             pintar();
         }).catch(() => {
             dentro.replaceChildren(crear("p", "oc-vacio", "No he podido cargar los idiomas."));
