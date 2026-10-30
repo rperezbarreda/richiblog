@@ -4439,6 +4439,20 @@
     · 🎲 dados (d4–d100 y una fórmula), 🗒️ post-it (tipo «tarjeta») y 🔮
       tabla para tirar (una cosa por línea; «tirar» saca una al azar):
       tantas como se quiera.
+    · 🎨 dibujo (en «apuntes», tantos como se quiera): un lienzo de papel
+      para dibujar con el ratón, el dedo o un lápiz (pointer events,
+      touch-action: none), con lápiz y goma, ocho colores, tres grosores,
+      ↶ deshacer y ↷ rehacer (15 pasos, solo mientras está abierto), 🖼️
+      poner una imagen, ⬇ descargarlo en PNG y 🗑️ borrarlo todo (dos
+      veces; se puede deshacer). Las imágenes también se pegan con Ctrl+V
+      (con el foco en la ventana del dibujo) o arrastrándolas encima, y se
+      encogen hasta el 80 % del lienzo. El lienzo mide siempre 1000 × 750
+      (DIBUJO_ANCHO/ALTO) y se estira a lo ancho de la ventana. Se guarda
+      como imagen WebP (PNG si el navegador no sabe) en m.datos.imagen,
+      dentro de «richi-master» (y va en exportar/importar); como
+      localStorage tiene un tope de unos 5 MB, si no cabe lo avisa.
+      guardar() devuelve si ha podido. «de qué es» es la descripción para
+      el lector de pantalla (el lienzo es role="img").
     · EL POST-IT es texto con formato, como un procesador de textos:
       «✏️ editar» lo abre con su barra (negrita, cursiva, subrayado,
       tachado, párrafo/título/subtítulo/cita, listas, alineación, color de

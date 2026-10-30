@@ -1891,6 +1891,290 @@
             dentro.replaceChildren(crear("p", "oc-vacio", "No he podido cargar el bestiario."));
         });
     }
+    const DIBUJO_ANCHO = 1000;
+    const DIBUJO_ALTO = 750;
+    const DIBUJO_PAPEL = "#fdfaf0";
+    const DIBUJO_COLORES = [["#1d1b26", "negro"], ["#c62828", "rojo"], ["#1565c0", "azul"], ["#2e7d32", "verde"],
+        ["#ef6c00", "naranja"], ["#6a1b9a", "morado"], ["#8d6e63", "marrón"], ["#fdd835", "amarillo"]];
+    const DIBUJO_GROSORES = [["3", "fino"], ["8", "medio"], ["18", "gordo"]];
+    function montarDibujo(dentro, m) {
+        m.datos = m.datos || {};
+        const d = m.datos;
+        const lienzo = crear("canvas", "master-dibujo");
+        lienzo.width = DIBUJO_ANCHO;
+        lienzo.height = DIBUJO_ALTO;
+        lienzo.tabIndex = 0;
+        lienzo.setAttribute("role", "img");
+        const ctx = lienzo.getContext("2d");
+        const papel = () => {
+            ctx.fillStyle = DIBUJO_PAPEL;
+            ctx.fillRect(0, 0, DIBUJO_ANCHO, DIBUJO_ALTO);
+        };
+        papel();
+        let herramienta = d.herramienta || "lapiz";
+        let color = d.color || DIBUJO_COLORES[0][0];
+        let grosor = parseInt(d.grosor, 10) || 8;
+        const atras = [];
+        const adelante = [];
+        const etiqueta = () => {
+            lienzo.setAttribute("aria-label", "Dibujo" + (d.desc ? ": " + d.desc : " (sin descripción)") +
+                ". Se dibuja con el ratón, el dedo o un lápiz; Ctrl+V pega una imagen.");
+        };
+        etiqueta();
+        const cargar = (src, alAcabar) => {
+            const img = new Image();
+            img.onload = () => {
+                papel();
+                ctx.drawImage(img, 0, 0, DIBUJO_ANCHO, DIBUJO_ALTO);
+                if (alAcabar) {
+                    alAcabar();
+                }
+            };
+            img.src = src;
+        };
+        if (d.imagen) {
+            cargar(d.imagen);
+        }
+        const foto = () => {
+            const webp = lienzo.toDataURL("image/webp", 0.85);
+            return webp.indexOf("data:image/webp") === 0 ? webp : lienzo.toDataURL("image/png");
+        };
+        let espera = 0;
+        const guardarDibujo = () => {
+            clearTimeout(espera);
+            espera = setTimeout(() => {
+                d.imagen = foto();
+                if (!guardar()) {
+                    avisar("No se ha podido guardar el dibujo: no cabe. Borra alguna imagen o descárgalo.");
+                }
+            }, 300);
+        };
+        const recordar = () => {
+            atras.push(foto());
+            if (atras.length > 15) {
+                atras.shift();
+            }
+            adelante.length = 0;
+            pintarBotones();
+        };
+        const punto = (e) => {
+            const r = lienzo.getBoundingClientRect();
+            return [(e.clientX - r.left) * DIBUJO_ANCHO / r.width, (e.clientY - r.top) * DIBUJO_ALTO / r.height];
+        };
+        let trazo = null;
+        lienzo.addEventListener("pointerdown", (e) => {
+            if (e.button !== 0 && e.pointerType === "mouse") {
+                return;
+            }
+            e.preventDefault();
+            lienzo.setPointerCapture(e.pointerId);
+            recordar();
+            trazo = punto(e);
+            ctx.lineCap = "round";
+            ctx.lineJoin = "round";
+            ctx.strokeStyle = herramienta === "goma" ? DIBUJO_PAPEL : color;
+            ctx.lineWidth = herramienta === "goma" ? grosor * 3 : grosor;
+            ctx.beginPath();
+            ctx.moveTo(trazo[0], trazo[1]);
+            ctx.lineTo(trazo[0] + 0.1, trazo[1] + 0.1);
+            ctx.stroke();
+        });
+        lienzo.addEventListener("pointermove", (e) => {
+            if (!trazo) {
+                return;
+            }
+            const eventos = e.getCoalescedEvents ? e.getCoalescedEvents() : [e];
+            ctx.beginPath();
+            ctx.moveTo(trazo[0], trazo[1]);
+            (eventos.length ? eventos : [e]).forEach((x) => {
+                trazo = punto(x);
+                ctx.lineTo(trazo[0], trazo[1]);
+            });
+            ctx.stroke();
+        });
+        const soltar = () => {
+            if (trazo) {
+                trazo = null;
+                guardarDibujo();
+            }
+        };
+        lienzo.addEventListener("pointerup", soltar);
+        lienzo.addEventListener("pointercancel", soltar);
+        const pegar = (archivo, x, y) => {
+            if (!archivo || !/^image\//.test(archivo.type)) {
+                avisar("Eso no es una imagen.");
+                return;
+            }
+            const lector = new FileReader();
+            lector.onload = () => {
+                const img = new Image();
+                img.onload = () => {
+                    const escala = Math.min(1, DIBUJO_ANCHO * 0.8 / img.width, DIBUJO_ALTO * 0.8 / img.height);
+                    const w = img.width * escala;
+                    const h = img.height * escala;
+                    const cx = x === undefined ? DIBUJO_ANCHO / 2 : x;
+                    const cy = y === undefined ? DIBUJO_ALTO / 2 : y;
+                    recordar();
+                    ctx.drawImage(img, Math.max(0, Math.min(DIBUJO_ANCHO - w, cx - w / 2)),
+                        Math.max(0, Math.min(DIBUJO_ALTO - h, cy - h / 2)), w, h);
+                    guardarDibujo();
+                    avisar("Imagen pegada en el dibujo.");
+                };
+                img.onerror = () => avisar("No he podido abrir esa imagen.");
+                img.src = lector.result;
+            };
+            lector.readAsDataURL(archivo);
+        };
+        const alPegar = (e) => {
+            if (!dentro.isConnected) {
+                document.removeEventListener("paste", alPegar);
+                return;
+            }
+            if (!dentro.contains(document.activeElement) || document.activeElement.matches("input, textarea")) {
+                return;
+            }
+            const archivo = Array.from((e.clipboardData && e.clipboardData.files) || [])[0];
+            if (archivo) {
+                e.preventDefault();
+                pegar(archivo);
+            }
+        };
+        document.addEventListener("paste", alPegar);
+        lienzo.addEventListener("dragover", (e) => {
+            e.preventDefault();
+            lienzo.classList.add("es-encima");
+        });
+        lienzo.addEventListener("dragleave", () => lienzo.classList.remove("es-encima"));
+        lienzo.addEventListener("drop", (e) => {
+            e.preventDefault();
+            lienzo.classList.remove("es-encima");
+            const archivo = Array.from(e.dataTransfer.files || [])[0];
+            const [x, y] = punto(e);
+            pegar(archivo, x, y);
+        });
+        const barra = crear("div", "master-postit-barra es-dibujo");
+        barra.setAttribute("role", "toolbar");
+        barra.setAttribute("aria-label", "Herramientas del dibujo");
+        const grupo = (...cosas) => {
+            const g = crear("span", "master-postit-grupo");
+            g.append(...cosas);
+            barra.appendChild(g);
+            return g;
+        };
+        const lapiz = botonDe("master-postit-boton", "✏️", () => elegirHerramienta("lapiz"), "Lápiz");
+        const goma = botonDe("master-postit-boton", "🧽", () => elegirHerramienta("goma"), "Goma");
+        lapiz.title = "Lápiz";
+        goma.title = "Goma";
+        const elegirHerramienta = (h) => {
+            herramienta = h;
+            d.herramienta = h;
+            lapiz.setAttribute("aria-pressed", String(h === "lapiz"));
+            goma.setAttribute("aria-pressed", String(h === "goma"));
+            guardar();
+        };
+        grupo(lapiz, goma);
+        const colores = DIBUJO_COLORES.map(([hex, nombre]) => {
+            const b = botonDe("master-postit-boton master-dibujo-color", "", () => {
+                color = hex;
+                d.color = hex;
+                colores.forEach((x) => x.setAttribute("aria-pressed", String(x === b)));
+                elegirHerramienta("lapiz");
+            }, "Color " + nombre);
+            b.title = nombre;
+            b.style.setProperty("--muestra", hex);
+            b.setAttribute("aria-pressed", String(hex === color));
+            return b;
+        });
+        grupo(...colores);
+        const grosores = DIBUJO_GROSORES.map(([g, nombre]) => {
+            const b = botonDe("master-postit-boton master-dibujo-grosor es-" + nombre, "", () => {
+                grosor = parseInt(g, 10);
+                d.grosor = grosor;
+                grosores.forEach((x) => x.setAttribute("aria-pressed", String(x === b)));
+                guardar();
+            }, "Trazo " + nombre);
+            b.title = "Trazo " + nombre;
+            b.setAttribute("aria-pressed", String(parseInt(g, 10) === grosor));
+            return b;
+        });
+        grupo(...grosores);
+        const deshacer = botonDe("master-postit-boton", "↶", () => {
+            if (!atras.length) {
+                return;
+            }
+            adelante.push(foto());
+            cargar(atras.pop(), guardarDibujo);
+            pintarBotones();
+        }, "Deshacer");
+        const rehacer = botonDe("master-postit-boton", "↷", () => {
+            if (!adelante.length) {
+                return;
+            }
+            atras.push(foto());
+            cargar(adelante.pop(), guardarDibujo);
+            pintarBotones();
+        }, "Rehacer");
+        deshacer.title = "Deshacer";
+        rehacer.title = "Rehacer";
+        const pintarBotones = () => {
+            deshacer.disabled = !atras.length;
+            rehacer.disabled = !adelante.length;
+        };
+        grupo(deshacer, rehacer);
+        const archivo = crear("input");
+        archivo.type = "file";
+        archivo.accept = "image/*";
+        archivo.hidden = true;
+        archivo.addEventListener("change", () => {
+            pegar(archivo.files && archivo.files[0]);
+            archivo.value = "";
+        });
+        const imagen = botonDe("master-postit-boton", "🖼️", () => archivo.click(), "Poner una imagen");
+        imagen.title = "Poner una imagen (o pégala con Ctrl+V)";
+        const bajar = botonDe("master-postit-boton", "⬇", () => {
+            const a = crear("a");
+            a.href = lienzo.toDataURL("image/png");
+            a.download = (m.titulo || "dibujo").replace(/[^\p{L}\p{N}]+/gu, "-") + ".png";
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+            avisar("Descargado: " + a.download + ".");
+        }, "Descargar el dibujo");
+        bajar.title = "Descargar como PNG";
+        let seguro = false;
+        const borrar = botonDe("master-postit-boton", "🗑️", () => {
+            if (!seguro) {
+                seguro = true;
+                borrar.textContent = "🗑️ ¿seguro?";
+                setTimeout(() => {
+                    seguro = false;
+                    borrar.textContent = "🗑️";
+                }, 4000);
+                return;
+            }
+            seguro = false;
+            borrar.textContent = "🗑️";
+            recordar();
+            papel();
+            guardarDibujo();
+            avisar("Dibujo borrado (se puede deshacer).");
+        }, "Borrarlo todo");
+        borrar.title = "Borrarlo todo";
+        grupo(imagen, bajar, borrar);
+        const etD = crear("label", "oc-dados-etiqueta", "de qué es (para el lector de pantalla)");
+        const desc = crear("input", "master-elegir");
+        desc.id = "master-dibujo-desc-" + m.id;
+        desc.value = d.desc || "";
+        etD.htmlFor = desc.id;
+        desc.addEventListener("input", () => {
+            d.desc = desc.value;
+            etiqueta();
+            guardar();
+        });
+        elegirHerramienta(herramienta);
+        pintarBotones();
+        dentro.append(barra, archivo, lienzo, etD, desc);
+    }
     function montarTabla(dentro, m) {
         m.datos = m.datos || {};
         const etX = crear("label", "oc-dados-etiqueta", "lo que puede salir (una cosa por línea)");
@@ -2823,6 +3107,8 @@
             desc: "Escribe una nota y mírala en élfico, enano, infernal…", montar: montarIdiomas },
         tarjeta: { nombre: "post-it", emoji: "🗒️", grupo: "apuntes", w: 420, h: 340,
             desc: "Un texto con formato: negrita, listas, colores…", montar: montarTarjeta },
+        dibujo: { nombre: "dibujo", emoji: "🎨", grupo: "apuntes", w: 520, h: 520,
+            desc: "Dibuja a mano o pega imágenes (Ctrl+V).", montar: montarDibujo },
         notas: { nombre: "notas", emoji: "📝", grupo: "apuntes", unico: true, w: 420, h: 420,
             desc: "Las notas de la sesión.", montar: (d) => window.ocMontar.notas(d, { soloNotas: true }) },
         tabla: { nombre: "tabla para tirar", emoji: "🔮", grupo: "apuntes", w: 360, h: 380,
@@ -2875,7 +3161,9 @@
                 titulo: m.titulo || "", color: m.color || "", plegado: !!m.plegado, datos: m.datos })) })) };
         try {
             localStorage.setItem(CLAVE, JSON.stringify(salida));
+            return true;
         } catch (e) {
+            return false;
         }
     }
     let encima = 10;

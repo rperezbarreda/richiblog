@@ -1952,6 +1952,83 @@
     gap: 10px;
 }
 
+/* EL DIBUJO: el lienzo, de papel (color fijo, como los post-its), a lo
+   ancho de la ventana; sin gestos del navegador encima, para dibujar con
+   el dedo. */
+.master-dibujo {
+    display: block;
+    box-sizing: border-box;
+    width: 100%;
+    height: auto;
+    margin-bottom: 8px;
+    border: 2px solid var(--border);
+    cursor: crosshair;
+    touch-action: none;
+}
+
+/* La barra del dibujo, en varias filas: que se vea todo. */
+.master-postit-barra.es-dibujo {
+    top: 0;
+    flex-wrap: wrap;
+    margin: 0 0 8px;
+    padding: 0 0 8px;
+    overflow-x: visible;
+}
+
+.master-dibujo:focus-visible,
+.master-dibujo.es-encima {
+    outline: 3px solid var(--yellow);
+    outline-offset: 2px;
+}
+
+.master-dibujo-color {
+    --muestra: #1d1b26;
+    --papel-dibujo: #fdfaf0;
+    position: relative;
+}
+
+.master-dibujo-color::after {
+    position: absolute;
+    inset: 6px;
+    border: 1px solid var(--papel-dibujo);
+    background: var(--muestra);
+    content: "";
+}
+
+.master-dibujo-color[aria-pressed="true"] {
+    outline: 3px solid var(--yellow);
+    outline-offset: 1px;
+}
+
+.master-dibujo-grosor {
+    position: relative;
+}
+
+.master-dibujo-grosor::after {
+    position: absolute;
+    top: 50%;
+    right: 7px;
+    left: 7px;
+    height: var(--trazo, 2px);
+    background: currentColor;
+    border-radius: 4px;
+    content: "";
+    transform: translateY(-50%);
+}
+
+.master-dibujo-grosor.es-medio {
+    --trazo: 5px;
+}
+
+.master-dibujo-grosor.es-gordo {
+    --trazo: 10px;
+}
+
+.master-postit-boton:disabled {
+    opacity: 0.5;
+    cursor: default;
+}
+
 /* LOS DADOS. */
 .master-dados {
     display: grid;
