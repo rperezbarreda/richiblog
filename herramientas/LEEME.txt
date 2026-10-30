@@ -4339,6 +4339,22 @@
   el lienzo crece mientras (y encoge despacio al soltar) y cerca del borde
   de arriba o de abajo se hace scroll solo. Las ventanas nuevas van al
   PRIMER HUECO LIBRE (hueco()), empezando por lo que se ve.
+  LAS CAMPAÑAS: configuraciones separadas (dos campañas, dos partys que
+  no se mezclan). «richi-master» guarda {activa, campanas: [{id, nombre,
+  activo, pjs, perfiles}]}; cada campaña tiene sus perfiles (las
+  pestañas, con sus ventanas) y su party (pjs: la ventana «party» y las
+  fichas de PJ leen y escriben ahí, todo.pjs, así que es la misma en
+  todos los perfiles de la campaña). Lo de antes (sin campañas, y la
+  party dentro de su ventana, m.datos.pjs) pasa solo a «mi campaña». El
+  botón 📚 de la izquierda del todo de la barra (o la tecla C) abre la
+  lista: cambiar de campaña (activarCampana(): desmonta las ventanas y
+  monta las de la otra), crear una nueva, renombrar la de ahora o
+  borrarla (pide pulsar dos veces; la última no se borra). Las
+  plantillas, las reglas propias y la iniciativa son de todas.
+  LAS PESTAÑAS caben en un ancho fijo (como mucho 32rem): si hay más, se
+  deslizan de lado (sin barra de scroll) con ‹ › (pintarFlechas(); sólo
+  salen si no caben) y la elegida siempre se ve. La barra va en una sola
+  línea (el buscador se encoge); sólo si no cabe pasa a dos.
   EL COLOR DEL TABLERO: el ✎ de las pestañas cambia el nombre y el color
   del perfil (TABLEROS: tapete, vino, noche, madera…; «color» en cada
   perfil); la cuadrícula se pone clara u oscura según el fondo.
@@ -4692,37 +4708,32 @@
       la frase, dónde se lanzan y las listas con sus usos).
     · 🛡️ party: tres pestañas (pestanasDe(), las de los monstruos):
       «👥 la party» (de un vistazo; cada uno con «📖 ficha» y «＋
-      iniciativa»), «✏️ editar» (a mano, con el nivel; y «📥 traer» un
-      personaje del blog, de datos/personajes/personajes.json: sus
-      números y las pasivas calculadas; pj.blog es su clave) y «✨
+      iniciativa»), «✏️ editar» (a mano: nombre, especie, clase, nivel,
+      PG, CA, características y pasivas; no se traen los personajes del
+      blog) y «✨
       hechizos» (los de todos, por jugador, con su nivel; cada uno se
       abre). Cada PJ tiene un id (pj.id, nuevoIdPj()).
       📖 ficha: una ventana del tablero (tipo «pj», m.datos.pj = su id;
-      abrirFichaPj() la trae delante si ya está) con su raza, clase y
+      abrirFichaPj() la trae delante si ya está) con su especie, clase y
       nivel arriba, sus miedos (si hay) y seis pestañas:
-      - 🎯 habilidades: CA, PG, velocidad, dados de golpe, competencia,
-        iniciativa, características, salvaciones y las 18 habilidades
+      - 🎯 habilidades: CA, PG, competencia, iniciativa,
+        características, salvaciones y las 18 habilidades
         (HABILIDADES_PJ) con su bono (competente, pericia ×2) y su dado;
-        las pasivas; y los rasgos y acciones de clase (los que su ficha
-        explica se abren: descripcionesPj() lee «descripciones»).
-      - ⚔️ armas: ataques (con dados), CA, defensas, objetos (los de
-        tienda.json se abren), dinero y competencias.
-      - ✨ hechizos: aptitud, CD, ataque, espacios y la lista por nivel
-        (conjurosPj()); cada uno, el del SRD con su ficha, el de su hoja
-        con su texto o, si no hay nada, 🔎 en D&D Beyond (conjuroPj()).
-      - 📜 historia: trasfondo, cómo es, personalidad, ideales,
-        vínculos, defectos, su historia y el enlace a su ficha del blog.
-      - 👥 relaciones: su gente (la de «gente» de personajes.json) y los
-        apuntes del máster (relaciones en la partida; deudas, promesas y
-        rencores).
-      - 📎 extra: su «extra» y los apuntes del máster: miedos (salen
-        arriba en todas las pestañas), secretos, ganchos y notas.
-      Los del blog leen todo de personajes.json, siempre al día; los de a
-      mano tienen cuadros para escribir (salvaciones y habilidades con
-      competencia, que cambian los bonos al momento; rasgos, armas,
-      objetos, trasfondo e historia) y los hechizos se añaden (los del
+        las pasivas; y los rasgos y habilidades de clase.
+      - ⚔️ armas: ataques; objetos, armadura y dinero.
+      - ✨ hechizos: aptitud, CD, ataque y la lista por nivel
+        (conjurosPj()); cada uno, el del SRD con su ficha o, si no está,
+        🔎 en D&D Beyond (conjuroPj()).
+      - 📜 historia: trasfondo, cómo es… y su historia.
+      - 👥 relaciones: relaciones en la partida; deudas, promesas y
+        rencores.
+      - 📎 extra: miedos (salen arriba en todas las pestañas), secretos,
+        ganchos y notas.
+      Todo lo escribe el máster: cuadros para salvaciones y habilidades
+      con competencia (cambian los bonos al momento), rasgos, armas,
+      objetos, trasfondo e historia; los hechizos se añaden (los del
       SRD, de una lista) con su aptitud mágica. Los apuntes del máster
-      van en pj.apuntes.
+      van en pj.apuntes. Los PJ son de la campaña (todo.pjs).
     · 💰 tienda: los 616 objetos del SRD 5.2 con su precio
       (datos/personajes/compendio/tienda.json; 15 son las comidas, las
       estancias en la posada, los asalariados y el mensajero), repartidos en nueve
