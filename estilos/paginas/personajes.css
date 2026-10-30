@@ -4531,6 +4531,77 @@ button.oc-casilla[data-estado="libre"]:hover {
     grid-column: 3;
 }
 
+/* El dibujo de cada marca (emoji o la forma de su color). */
+.oc-ini-marca-dibujo {
+    margin-right: 4px;
+    font-size: 1.1em;
+    line-height: 1;
+}
+
+.oc-ini-marca-buscador {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    margin-bottom: 8px;
+}
+
+.oc-ini-marca-buscador .oc-dados-texto {
+    min-height: 40px;
+}
+
+.oc-ini-marca-aspecto {
+    grid-column: 1 / -1;
+    grid-row: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin: 8px 0 0;
+    padding: 0;
+    border: 0;
+}
+
+.oc-ini-marca-aspecto legend {
+    margin-bottom: 4px;
+    padding: 0;
+}
+
+.oc-ini-color[aria-pressed="true"],
+.oc-ini-forma[aria-pressed="true"] {
+    box-shadow: 0 0 0 3px var(--purple-lighter), 0 0 0 6px var(--yellow);
+}
+
+/* La forma, de su color, sobre el fondo oscuro de siempre (que se vea
+   en todos los temas). */
+.oc-ini-forma {
+    width: 30px;
+    height: 30px;
+    padding: 0;
+    border: 2px solid var(--yellow);
+    background: #14101a;
+    font-size: 1rem;
+    line-height: 1;
+    cursor: pointer;
+}
+
+.oc-ini-forma:focus-visible {
+    outline: 3px solid var(--yellow);
+    outline-offset: 5px;
+}
+
+.oc-ini-marca-guardar {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    color: var(--white);
+    font-size: 0.875rem;
+}
+
+.oc-ini-marca-guardar input {
+    width: 20px;
+    height: 20px;
+    accent-color: var(--yellow);
+}
+
 .oc-ini-marcas-titulo {
     margin: 16px 0 6px;
     font-size: 1rem;
@@ -4942,5 +5013,12 @@ button.oc-casilla[data-estado="libre"]:hover {
 .oc-dado-texto:focus-visible {
     outline: 2px solid var(--yellow);
     outline-offset: 2px;
+}
+
+/* El cuerpo de las ventanas se puede enfocar (para desplazarlo con el
+   teclado): que se vea cuando lo está. */
+.oc-menu-ventana-cuerpo:focus-visible {
+    outline: 3px solid var(--yellow);
+    outline-offset: -3px;
 }
 

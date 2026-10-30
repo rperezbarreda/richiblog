@@ -4228,6 +4228,12 @@
       una a mano, con rondas si se quiere; al empezar cada ronda se les
       quita una y, a 0, se acaban (se avisa). Se guardan con cada uno
       («marcas» en «richi-oc-iniciativa»).
+    · Las marcas llevan su dibujo (las de siempre, el de las reglas), hay
+      un buscador encima y las propias se crean con su color y su forma
+      (círculo, cuadrado, triángulo, rombo, estrella, corazón); con
+      «guardarla para otra vez» quedan en la lista («richi-oc-marcas»).
+      En el combate, las marcas de a quien le toca salen también en
+      grande, debajo de su nombre.
     · DADOS EN LOS TEXTOS (personajes.js: ocDadosEnTexto): en las fichas y
       en la pantalla de máster, cada «2d6 + 3» de un texto es un botón que
       lo tira (con el nombre de lo que haya en negrita delante); en los
@@ -4291,15 +4297,15 @@
   barra (o con el ⠿ y las flechas), cambia de tamaño por la esquina de
   abajo a la derecha, ✎ (o doble clic en el título) le cambia el TÍTULO y
   el COLOR (como un post-it: la barra de ese color y el fondo un poco
-  teñido; son los .oc-color-* de personajes.css), − la pliega y ✕ la
+  teñido; colores fijos, iguales en todos los temas), − la pliega y ✕ la
   quita. Todo se guarda en el navegador («richi-master»). En el móvil van
   una debajo de otra, sin mover ni redimensionar.
   Las ventanas que hay (MODULOS en scripts/paginas/pantalla-master.js):
     · ⏱️ iniciativa (la misma de las fichas), 🙈 condiciones (las reglas
       del grupo «Estados»), ⚔️ acciones (las del grupo «Acciones»), 📚
-      todas las reglas, ✨ conjuros (buscador por nombre y nivel sobre
-      datos/personajes/compendio/conjuros.json) y 📝 notas: solo una de
-      cada.
+      todas las reglas, ✨ conjuros (buscador por nombre, nivel, escuela y
+      clase sobre datos/personajes/compendio/conjuros-srd.json: los 339
+      del SRD 5.2; cada uno abre su ventana) y 📝 notas: solo una de cada.
     · 🎲 dados (d4–d100 y una fórmula), 📌 tarjeta (texto propio, con
       negrita, cursiva y listas) y 🔮 tabla para tirar (una cosa por línea;
       «tirar» saca una al azar): tantas como se quiera.
@@ -4311,6 +4317,17 @@
       (en rojo, con su CA y sus PG; si se repite, con número: «Goblin
       guerrero 2»). La iniciativa se entera por el evento
       «oc-iniciativa:cambio» (personajes.js).
+    · EL PERFIL DE UN MONSTRUO va por pestañas: estadísticas, rasgos,
+      acciones (los ataques en una tabla: ataque, bono, alcance y daño, con
+      los dados que se tiran), bonus, reacciones, legendarias y hechizos
+      (ordenados; cada uno abre la ventana del conjuro). Lo que se gasta
+      lleva casillas que se marcan al pulsarlas: lo de recarga (con «🎲
+      recarga», que tira 1d6 y la recupera si sale), lo de x/día, los usos
+      de acción legendaria y los conjuros de x/día; «↺ recuperar usos» las
+      vacía. En una criatura del tablero se guardan (y la pestaña abierta);
+      en la ventana del bestiario, solo mientras está abierta. Los
+      conjuros de los monstruos van aparte en bestiario.json («conjuros»:
+      la frase, dónde se lanzan y las listas con sus usos).
     · 💰 tienda: los 601 objetos del SRD 5.2 con su precio
       (datos/personajes/compendio/tienda.json), repartidos en nueve
       tiendas (general, herrería y armería, herramientas e instrumentos,

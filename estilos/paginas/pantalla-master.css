@@ -355,13 +355,6 @@
     color: var(--yellow);
 }
 
-.master-bicho-seccion {
-    width: 100%;
-    margin: 8px 0 0;
-    padding-bottom: 4px;
-    border-bottom: 2px solid var(--yellow);
-    font-size: 1.05rem;
-}
 
 .master-bicho .oc-texto p {
     margin: 0 0 6px;
@@ -462,6 +455,170 @@
    en su casilla). */
 .master-bicho-car .oc-dado-texto::before {
     content: none;
+}
+
+/* El perfil por pestañas (estadísticas, rasgos, acciones…). */
+.master-bicho-pestanas {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    width: 100%;
+    border-bottom: 2px solid var(--yellow);
+}
+
+.master-bicho-pestana {
+    min-height: 36px;
+    padding: 4px 10px;
+    border: 2px solid var(--border);
+    border-bottom: 0;
+    background: transparent;
+    color: var(--yellow);
+    font-family: var(--fuente-mono);
+    font-size: 0.8125rem;
+    cursor: pointer;
+}
+
+.master-bicho-pestana[aria-selected="true"] {
+    border-color: var(--yellow);
+    background: var(--yellow);
+    color: var(--yellow-contrast);
+    font-weight: 700;
+}
+
+.master-bicho-pestana:focus-visible,
+.master-bicho-panel:focus-visible {
+    outline: 3px solid var(--yellow);
+    outline-offset: 2px;
+}
+
+.master-bicho-panel {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    width: 100%;
+}
+
+.master-bicho-panel[hidden] {
+    display: none;
+}
+
+.master-bicho-entrada .oc-texto p {
+    margin: 0 0 6px;
+}
+
+.master-bicho-nombre {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px 10px;
+    margin: 0 0 4px;
+}
+
+/* Las casillas de usos: un cuadrado por uso; el gastado, relleno y
+   tachado (no solo por el color). */
+.master-usos {
+    display: inline-flex;
+    flex-wrap: wrap;
+    gap: 4px;
+}
+
+.master-uso {
+    width: 24px;
+    height: 24px;
+    padding: 0;
+    border: 2px solid var(--yellow);
+    background: transparent;
+    cursor: pointer;
+}
+
+.master-uso[aria-pressed="true"] {
+    background:
+        linear-gradient(to top right, transparent calc(50% - 2px), var(--yellow-contrast) calc(50% - 2px),
+            var(--yellow-contrast) calc(50% + 2px), transparent calc(50% + 2px)),
+        var(--yellow);
+}
+
+.master-uso:focus-visible,
+.master-recarga:focus-visible,
+.master-conjuro-enlace:focus-visible {
+    outline: 2px solid var(--yellow);
+    outline-offset: 2px;
+}
+
+.master-recarga {
+    min-height: 28px;
+    padding: 0 8px;
+    border: 2px solid var(--yellow);
+    background: transparent;
+    color: var(--yellow);
+    font-size: 0.8125rem;
+    cursor: pointer;
+}
+
+.master-recarga:hover {
+    background: var(--yellow);
+    color: var(--yellow-contrast);
+}
+
+/* Los ataques, en tabla. */
+.master-ataques {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.master-ataques th,
+.master-ataques td {
+    padding: 6px 4px;
+    border-bottom: 2px solid var(--border);
+    text-align: left;
+    vertical-align: top;
+}
+
+.master-ataques thead th {
+    color: var(--yellow);
+    font-size: 0.875rem;
+}
+
+.master-ataque-tipo {
+    display: block;
+    font-size: 0.75rem;
+    font-weight: 400;
+}
+
+.master-ataques .oc-texto p {
+    margin: 0 0 4px;
+}
+
+/* Los conjuros de un monstruo: cada uno, un botón a su ventana. */
+.master-bicho-conjuros {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    margin: 0;
+    padding-left: 18px;
+}
+
+.master-bicho-conjuros li {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 4px 8px;
+}
+
+.master-conjuro-enlace {
+    padding: 0;
+    border: 0;
+    border-bottom: 2px dotted currentColor;
+    background: transparent;
+    color: var(--yellow);
+    font: inherit;
+    font-style: italic;
+    cursor: pointer;
+}
+
+.master-conjuro-enlace:hover {
+    background: var(--yellow);
+    color: var(--yellow-contrast);
 }
 
 /* El perfil de un monstruo: sus botones (a la iniciativa, al tablero). */

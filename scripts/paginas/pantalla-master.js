@@ -184,66 +184,126 @@
         });
     }
 
-    // ---- EL BUSCADOR DE CONJUROS (los del compendio de mis personajes:
-    // datos/personajes/compendio/conjuros.json) ----
+    // ---- LOS CONJUROS: los 339 del SRD 5.2 (D&D 2024), en
+    // datos/personajes/compendio/conjuros-srd.json. Cada uno abre su
+    // ventana (abrirConjuro), desde el buscador o desde un monstruo. ----
+    const CONJUROS_SRD = "/datos/personajes/compendio/conjuros-srd.json";
+    const nivelDe = (c) => (c.nivel ? "Nivel " + c.nivel : "Truco");
+
+    function abrirConjuro(c, vuelta, fuente) {
+        const cuerpo = crear("div", "oc-regla-ventana");
+        const chapas = crear("ul", "oc-desplegable-datos");
+        [nivelDe(c), c.escuela, c.ritual ? "ritual" : "", c.conc ? "concentración" : ""].filter(Boolean)
+            .forEach((t) => chapas.appendChild(crear("li", "", t)));
+        const dl = crear("dl", "master-bicho-datos");
+        [["Lanzamiento", c.tiempo], ["Alcance", c.alcance], ["Componentes", c.comp], ["Duración", c.dur],
+            ["Clases", (c.clases || []).join(", ")]].forEach(([k, v]) => {
+            if (v) {
+                dl.append(crear("dt", "", k), crear("dd", "", v));
+            }
+        });
+        cuerpo.append(chapas, dl);
+        if (c.ingles) {
+            cuerpo.appendChild(crear("p", "oc-hoja-nota", "Este todavía no está traducido: va en inglés."));
+        }
+        cuerpo.appendChild(markdown(c.texto));
+        if (c.superior) {
+            cuerpo.appendChild(markdown(c.superior));
+        }
+        if (fuente) {
+            cuerpo.appendChild(crear("p", "oc-hoja-nota master-fuente", fuente));
+        }
+        window.ocVentana.abrir({ titulo: c.nombre, cuerpo, vuelta, clase: "es-regla" });
+    }
+
+    // Un botón con el nombre de un conjuro que abre su ventana.
+    function botonConjuro(c, texto, fuente) {
+        const b = botonDe("master-conjuro-enlace", texto || c.nombre, () => abrirConjuro(c, b, fuente));
+        b.setAttribute("aria-haspopup", "dialog");
+        return b;
+    }
+
+    // En un texto ya montado, cada nombre de conjuro en cursiva
+    // («*Bola de fuego*») pasa a ser su botón.
+    function enlazarConjuros(raiz) {
+        pedir(CONJUROS_SRD).then((datos) => {
+            const porNombre = {};
+            (datos.conjuros || []).forEach((c) => {
+                porNombre[llano(c.nombre)] = c;
+            });
+            raiz.querySelectorAll("em").forEach((em) => {
+                const c = porNombre[llano(em.textContent.trim())];
+                if (c && !em.closest("button")) {
+                    const b = botonConjuro(c, em.textContent, datos.fuente);
+                    em.replaceWith(b);
+                }
+            });
+        }).catch(() => {
+            // Sin los conjuros: se quedan en cursiva.
+        });
+    }
+
     function montarConjuros(dentro, m) {
         dentro.appendChild(crear("p", "oc-hoja-nota", "Cargando los conjuros…"));
-        pedir("/datos/personajes/compendio/conjuros.json").then((datos) => {
-            const conjuros = (datos.conjuros || []).map((c) => {
-                const trozos = String(c.datos || "").split("·").map((x) => x.trim()).filter(Boolean);
-                const nivel = /truco/i.test(trozos[0] || "") ? 0 : parseInt((/(\d+)/.exec(trozos[0] || "") || [])[1], 10);
-                return { c, trozos, nivel: isNaN(nivel) ? -1 : nivel, buscar: llano(c.nombre + " " + c.datos) };
-            });
-            const fila = crear("div", "master-conjuros-buscar");
-            const et = crear("label", "oc-dados-etiqueta", "buscar");
-            const input = crear("input", "oc-dados-texto");
-            input.type = "search";
-            input.id = "master-conjuros-" + m.id;
-            input.placeholder = "bola de fuego, evocación, concentración…";
-            et.htmlFor = input.id;
-            const etNivel = crear("label", "oc-dados-etiqueta", "nivel");
-            const nivel = crear("select", "oc-dados-elegir");
-            nivel.id = "master-conjuros-nivel-" + m.id;
-            etNivel.htmlFor = nivel.id;
-            [["", "todos"], ["0", "trucos"]].concat([1, 2, 3, 4, 5, 6, 7, 8, 9].map((n) => [String(n), "nivel " + n]))
-                .forEach(([v, t]) => {
+        pedir(CONJUROS_SRD).then((datos) => {
+            const conjuros = (datos.conjuros || []).map((c) => ({ c, buscar: llano(c.nombre + " " + c.en + " " + c.escuela) }));
+            const fila = crear("div", "master-tienda-campos");
+            const campo = (control, texto, id) => {
+                const caja = crear("div", "master-tienda-campo" + (control.tagName === "INPUT" ? " es-ancho" : ""));
+                const et = crear("label", "oc-dados-etiqueta", texto);
+                control.id = id + m.id;
+                et.htmlFor = control.id;
+                caja.append(et, control);
+                fila.appendChild(caja);
+                return control;
+            };
+            const elegir = (opciones) => {
+                const sel = crear("select", "oc-dados-elegir");
+                opciones.forEach(([v, t]) => {
                     const o = crear("option", "", t);
                     o.value = v;
-                    nivel.appendChild(o);
+                    sel.appendChild(o);
                 });
+                return sel;
+            };
+            const input = crear("input", "oc-dados-texto");
+            input.type = "search";
+            input.placeholder = "bola de fuego, fireball…";
+            const nivel = campo(elegir([["", "todos"], ["0", "trucos"]].concat([1, 2, 3, 4, 5, 6, 7, 8, 9].map((n) => [String(n), "nivel " + n]))),
+                "nivel", "master-conjuros-nivel-");
+            const escuelas = Array.from(new Set(conjuros.map((x) => x.c.escuela))).sort();
+            const escuela = campo(elegir([["", "todas"]].concat(escuelas.map((e) => [e, e]))), "escuela", "master-conjuros-escuela-");
+            const clases = Array.from(new Set(conjuros.flatMap((x) => x.c.clases || []))).sort();
+            const clase = campo(elegir([["", "todas"]].concat(clases.map((e) => [e, e]))), "clase", "master-conjuros-clase-");
+            campo(input, "buscar", "master-conjuros-");
             const cuantos = crear("p", "oc-hoja-nota");
             cuantos.setAttribute("role", "status");
             const lista = crear("ul", "master-conjuros");
-            fila.append(et, input, etNivel, nivel);
             const pintar = () => {
                 const q = llano(input.value.trim());
                 const n = nivel.value === "" ? null : parseInt(nivel.value, 10);
-                const salen = conjuros.filter((x) => (!q || x.buscar.includes(q)) && (n === null || x.nivel === n));
-                lista.replaceChildren(...salen.slice(0, 60).map((x) => {
+                const salen = conjuros.filter((x) => (!q || x.buscar.includes(q)) && (n === null || x.c.nivel === n)
+                    && (!escuela.value || x.c.escuela === escuela.value) && (!clase.value || (x.c.clases || []).indexOf(clase.value) >= 0));
+                lista.replaceChildren(...salen.slice(0, 80).map((x) => {
                     const li = crear("li");
-                    const b = botonDe("master-conjuro", "", () => {
-                        const cuerpo = crear("div", "oc-regla-ventana");
-                        const chapas = crear("ul", "oc-desplegable-datos");
-                        x.trozos.forEach((t) => chapas.appendChild(crear("li", "", t)));
-                        cuerpo.append(chapas, markdown(x.c.texto));
-                        window.ocVentana.abrir({ titulo: x.c.nombre, cuerpo, vuelta: b, clase: "es-regla" });
-                    });
+                    const b = botonDe("master-conjuro", "", () => abrirConjuro(x.c, b, datos.fuente));
                     b.setAttribute("aria-haspopup", "dialog");
                     b.append(crear("span", "master-conjuro-nombre", x.c.nombre),
-                        crear("span", "master-conjuro-datos", x.trozos.slice(0, 2).join(" · ")));
+                        crear("span", "master-conjuro-datos", [nivelDe(x.c), x.c.escuela, x.c.tiempo].join(" · ")
+                            + (x.c.ingles ? " · (en inglés)" : "")));
                     li.appendChild(b);
                     return li;
                 }));
                 cuantos.textContent = salen.length ? salen.length + (salen.length === 1 ? " conjuro" : " conjuros")
-                    + (salen.length > 60 ? " (salen los 60 primeros)" : "") : "Ningún conjuro con eso.";
+                    + (salen.length > 80 ? " (salen los 80 primeros)" : "") : "Ningún conjuro con eso.";
             };
             let espera = 0;
             input.addEventListener("input", () => {
                 clearTimeout(espera);
                 espera = setTimeout(pintar, 150);
             });
-            nivel.addEventListener("change", pintar);
-            dentro.replaceChildren(fila, cuantos, lista);
+            [nivel, escuela, clase].forEach((c) => c.addEventListener("change", pintar));
+            dentro.replaceChildren(fila, cuantos, lista, crear("p", "oc-hoja-nota master-fuente", datos.fuente || ""));
             pintar();
         }).catch(() => {
             dentro.replaceChildren(crear("p", "oc-vacio", "No he podido cargar los conjuros."));
@@ -416,7 +476,95 @@
         return dd;
     }
 
-    function perfil(b, f, alTablero) {
+    // LAS CASILLAS DE USOS: un cuadrado por uso (marcado = gastado), que
+    // se marca y desmarca al pulsarlo. «usos» guarda cuántos lleva
+    // gastados cada cosa (en una criatura del tablero, en su ventana; en
+    // la ventana del bestiario, solo mientras está abierta).
+    function casillas(usos, clave, n, que, alCambiar) {
+        const caja = crear("span", "master-usos");
+        caja.setAttribute("role", "group");
+        caja.setAttribute("aria-label", "Usos de " + que);
+        const pintar = () => {
+            caja.replaceChildren(...Array.from({ length: n }, (x, i) => {
+                const gastado = i < (usos[clave] || 0);
+                const b = botonDe("master-uso", "", () => {
+                    usos[clave] = gastado ? i : i + 1;
+                    pintar();
+                    alCambiar();
+                    caja.querySelectorAll(".master-uso")[i].focus();
+                    avisar(que + ": " + (usos[clave] || 0) + " de " + n + " gastados.");
+                }, que + ", uso " + (i + 1) + " de " + n);
+                b.setAttribute("aria-pressed", gastado ? "true" : "false");
+                return b;
+            }));
+        };
+        caja.repintar = pintar;
+        pintar();
+        return caja;
+    }
+
+    // Las acciones de ataque, en tabla (como en las fichas): ataque, bono,
+    // alcance y daño; lo que hace además, debajo del daño.
+    function tablaDeAtaques(lista) {
+        const filas = [];
+        lista.forEach((r) => {
+            const m = /^\*(Ataque[^:*]*):\* ([+−-]\d+), ([^*]+?) \*Impacto:\* (.*)$/s.exec(r.t);
+            if (!m) {
+                return;
+            }
+            const resto = m[4];
+            const corte = resto.search(/\.(\s|$)/);
+            filas.push({ r, tipo: m[1].replace(/^Ataque /, ""), bono: m[2], alcance: m[3],
+                dano: corte >= 0 ? resto.slice(0, corte + 1) : resto, efecto: corte >= 0 ? resto.slice(corte + 1).trim() : "" });
+        });
+        if (!filas.length) {
+            return null;
+        }
+        const tabla = crear("table", "master-ataques");
+        tabla.appendChild(crear("caption", "visually-hidden", "Ataques"));
+        const cab = crear("tr");
+        ["Ataque", "Bono", "Alcance", "Daño"].forEach((t) => {
+            const th = crear("th", "", t);
+            th.scope = "col";
+            cab.appendChild(th);
+        });
+        const thead = crear("thead");
+        thead.appendChild(cab);
+        const tbody = crear("tbody");
+        filas.forEach((x) => {
+            const tr = crear("tr");
+            const th = crear("th", "master-ataque-nombre");
+            th.scope = "row";
+            th.append(crear("strong", "", x.r.n), crear("span", "master-ataque-tipo", x.tipo));
+            const n = parseInt(x.bono.replace("−", "-"), 10);
+            const tdB = crear("td");
+            tdB.appendChild(window.ocDadoBoton ? window.ocDadoBoton(x.bono, "1d20" + (n >= 0 ? "+" : "") + n, x.r.n + " · ataque")
+                : document.createTextNode(x.bono));
+            const tdA = crear("td", "", x.alcance);
+            const tdD = crear("td");
+            tdD.appendChild(markdown(x.dano + (x.efecto ? "\n\n" + x.efecto : "")));
+            tr.append(th, tdB, tdA, tdD);
+            tbody.appendChild(tr);
+        });
+        tabla.append(thead, tbody);
+        tabla.atacantes = filas.map((x) => x.r);
+        return tabla;
+    }
+
+    // EL PERFIL DE UN MONSTRUO, por pestañas: estadísticas, rasgos,
+    // acciones (los ataques en tabla), bonus, reacciones, legendarias y
+    // hechizos. Con casillas para lo que se gasta: lo que se recarga (con
+    // «🎲» para tirar la recarga), lo de x/día, las acciones legendarias y
+    // los conjuros de x/día.
+    function perfil(b, f, alTablero, guardado) {
+        const usos = (guardado && guardado.usos) || {};
+        const alCambiar = () => {
+            if (guardado) {
+                guardado.usos = usos;
+                guardado.guardar();
+            }
+        };
+        const repintables = [];
         const caja = crear("div", "master-bicho");
         caja.appendChild(crear("p", "master-bicho-tipo", b.tipo + ", " + b.alin));
         const fila = (dl, que, valor) => {
@@ -425,13 +573,29 @@
             }
             dl.append(crear("dt", "", que), crear("dd", "", String(valor)));
         };
+        const sumar = botonDe("oc-vida-accion es-principal", "＋ a la iniciativa", () => aLaIniciativa(b, sumar),
+            "Añadir " + b.nombre + " a la iniciativa (tira su iniciativa)");
+        const botones = crear("div", "master-bicho-botones");
+        botones.appendChild(sumar);
+        if (alTablero) {
+            botones.appendChild(botonDe("oc-vida-accion", "📌 al tablero", alTablero, "Poner " + b.nombre + " en el tablero, como una ventana"));
+        }
+        const recuperar = botonDe("oc-vida-accion", "↺ recuperar usos", () => {
+            Object.keys(usos).forEach((k) => delete usos[k]);
+            repintables.forEach((r) => r.repintar());
+            alCambiar();
+            avisar("Usos recuperados.");
+        }, "Recuperar todos los usos (descanso largo)");
+        botones.appendChild(recuperar);
+        caja.appendChild(botones);
+
+        // ---- estadísticas ----
+        const stats = crear("div", "master-bicho-panel");
         const arriba = crear("dl", "master-bicho-datos");
         fila(arriba, "CA", b.ca);
         fila(arriba, "Iniciativa", b.ini);
         fila(arriba, "PG", b.pg + (b.pgf ? " (" + b.pgf + ")" : ""));
         fila(arriba, "Velocidad", b.vel);
-        // Las características: una tabla de dos filas (puntuación y
-        // modificador), que se lee bien con lector de pantalla.
         const tabla = crear("table", "master-bicho-car");
         tabla.appendChild(crear("caption", "visually-hidden", "Características"));
         const cab = crear("tr");
@@ -441,10 +605,10 @@
             th.scope = "col";
             cab.appendChild(th);
             const n = b.car[k];
-            const m = Math.floor((n - 10) / 2);
+            const mo = Math.floor((n - 10) / 2);
             const td = crear("td", "", n + " ");
-            const bono = (m >= 0 ? "+" : "−") + Math.abs(m);
-            td.appendChild(window.ocDadoBoton ? window.ocDadoBoton("(" + bono + ")", "1d20" + (m >= 0 ? "+" : "") + m,
+            const bono = (mo >= 0 ? "+" : "−") + Math.abs(mo);
+            td.appendChild(window.ocDadoBoton ? window.ocDadoBoton("(" + bono + ")", "1d20" + (mo >= 0 ? "+" : "") + mo,
                 "prueba de " + k) : document.createTextNode("(" + bono + ")"));
             val.appendChild(td);
         });
@@ -467,26 +631,163 @@
         fila(abajo, "Sentidos", b.sent);
         fila(abajo, "Idiomas", b.idio);
         fila(abajo, "VD", b.vd);
-        const sumar = botonDe("oc-vida-accion es-principal", "＋ a la iniciativa", () => aLaIniciativa(b, sumar),
-            "Añadir " + b.nombre + " a la iniciativa (tira su iniciativa)");
-        const botones = crear("div", "master-bicho-botones");
-        botones.appendChild(sumar);
-        if (alTablero) {
-            const fijar = botonDe("oc-vida-accion", "📌 al tablero", alTablero, "Poner " + b.nombre + " en el tablero, como una ventana");
-            botones.appendChild(fijar);
-        }
-        caja.append(botones, arriba, tabla, abajo);
-        [["rasgos", "Rasgos"], ["acciones", "Acciones"], ["adicionales", "Acciones adicionales"],
-            ["reacciones", "Reacciones"], ["legendarias", "Acciones legendarias"]].forEach(([k, titulo]) => {
-            if (!b[k]) {
+        stats.append(arriba, tabla, abajo);
+
+        // Un rasgo o acción: su nombre en negrita (con sus casillas si se
+        // gasta) y su texto.
+        const entrada = (r, seccion) => {
+            const div = crear("div", "master-bicho-entrada");
+            const cabeza = crear("p", "master-bicho-nombre");
+            cabeza.appendChild(crear("strong", "", r.n));
+            const rec = /Recarga (\d)(?:–6)?/.exec(r.n);
+            const dia = /\((\d+)\/día/.exec(r.n);
+            if (rec) {
+                const clave = seccion + ":" + r.n;
+                const c = casillas(usos, clave, 1, r.n, alCambiar);
+                repintables.push(c);
+                const desde = parseInt(rec[1], 10);
+                const tirarRecarga = botonDe("master-recarga", "🎲 recarga", () => {
+                    const t = window.ocDados ? window.ocDados.tirar("1d6", "recarga de " + r.n) : null;
+                    if (t && t.total >= desde) {
+                        usos[clave] = 0;
+                        c.repintar();
+                        alCambiar();
+                        avisar(r.n + ": recargada (" + t.total + ").");
+                    } else if (t) {
+                        avisar(r.n + ": sin recargar (" + t.total + ").");
+                    }
+                }, "Tirar la recarga de " + r.n + " (" + desde + " o más en 1d6)");
+                cabeza.append(c, tirarRecarga);
+            } else if (dia) {
+                const c = casillas(usos, seccion + ":" + r.n, parseInt(dia[1], 10), r.n, alCambiar);
+                repintables.push(c);
+                cabeza.appendChild(c);
+            }
+            div.append(cabeza, markdown(r.t));
+            return div;
+        };
+        const paneles = [["estadísticas", stats]];
+        [["rasgos", "rasgos"], ["acciones", "acciones"], ["adicionales", "bonus"], ["reacciones", "reacciones"],
+            ["legendarias", "legendarias"]].forEach(([k, titulo]) => {
+            if (!b[k] || !b[k].length) {
                 return;
             }
-            caja.appendChild(crear("h3", "master-bicho-seccion", titulo));
+            const panel = crear("div", "master-bicho-panel");
+            let lista = b[k];
             if (k === "legendarias" && b.legInfo) {
-                caja.appendChild(markdown(b.legInfo));
+                const cuantas = parseInt((/Usos de acción legendaria:\* (\d+)/.exec(b.legInfo) || [])[1], 10) || 3;
+                const p = crear("p", "master-bicho-nombre");
+                p.appendChild(crear("strong", "", "Usos"));
+                const c = casillas(usos, "legendarias", cuantas, "acciones legendarias", alCambiar);
+                repintables.push(c);
+                p.appendChild(c);
+                panel.append(p, markdown(b.legInfo));
             }
-            b[k].forEach((r) => caja.appendChild(markdown("**" + r.n + ".** " + r.t)));
+            if (k === "acciones" || k === "adicionales") {
+                const t = tablaDeAtaques(lista);
+                if (t) {
+                    panel.appendChild(t);
+                    lista = lista.filter((r) => t.atacantes.indexOf(r) < 0);
+                }
+            }
+            lista.forEach((r) => panel.appendChild(entrada(r, k)));
+            paneles.push([titulo, panel]);
         });
+        if (b.conjuros) {
+            const panel = crear("div", "master-bicho-panel");
+            panel.appendChild(markdown(b.conjuros.t));
+            panel.appendChild(crear("p", "oc-hoja-nota", "Se lanzan como " + b.conjuros.donde + "."));
+            b.conjuros.listas.forEach((l, i) => {
+                const div = crear("div", "master-bicho-entrada");
+                const cabeza = crear("p", "master-bicho-nombre");
+                cabeza.appendChild(crear("strong", "", l.et));
+                if (l.usos && !l.cada) {
+                    const c = casillas(usos, "conj:" + i, l.usos, l.et, alCambiar);
+                    repintables.push(c);
+                    cabeza.appendChild(c);
+                }
+                const ul = crear("ul", "master-bicho-conjuros");
+                l.conj.forEach((cj) => {
+                    const li = crear("li");
+                    const nombre = crear("span", "master-bicho-conjuro", cj.es);
+                    nombre.dataset.en = cj.en || "";
+                    li.appendChild(nombre);
+                    if (cj.nota) {
+                        li.appendChild(document.createTextNode(" " + cj.nota));
+                    }
+                    if (l.usos && l.cada) {
+                        const c = casillas(usos, "conj:" + i + ":" + cj.es, l.usos, cj.es, alCambiar);
+                        repintables.push(c);
+                        li.appendChild(c);
+                    }
+                    ul.appendChild(li);
+                });
+                div.append(cabeza, ul);
+                panel.appendChild(div);
+            });
+            // Cada conjuro, a su ventana.
+            pedir(CONJUROS_SRD).then((datos) => {
+                const porEn = {};
+                (datos.conjuros || []).forEach((c) => {
+                    porEn[c.en] = c;
+                });
+                panel.querySelectorAll(".master-bicho-conjuro").forEach((sp) => {
+                    const c = porEn[sp.dataset.en];
+                    if (c) {
+                        sp.replaceWith(botonConjuro(c, sp.textContent, datos.fuente));
+                    }
+                });
+            }).catch(() => {});
+            paneles.push(["hechizos", panel]);
+        }
+
+        // Las pestañas.
+        const lista = crear("div", "master-bicho-pestanas");
+        lista.setAttribute("role", "tablist");
+        lista.setAttribute("aria-label", "Partes del perfil de " + b.nombre);
+        const uid = "bicho-" + Math.random().toString(36).slice(2, 8);
+        let actual = (guardado && guardado.pestana) || 0;
+        if (actual >= paneles.length) {
+            actual = 0;
+        }
+        const pestanas = paneles.map(([titulo, panel], i) => {
+            const t = botonDe("master-bicho-pestana", titulo, () => elegir(i, true));
+            t.setAttribute("role", "tab");
+            t.id = uid + "-" + i;
+            panel.id = uid + "-p" + i;
+            panel.setAttribute("role", "tabpanel");
+            panel.setAttribute("aria-labelledby", t.id);
+            panel.tabIndex = 0;
+            t.setAttribute("aria-controls", panel.id);
+            t.addEventListener("keydown", (e) => {
+                const d = { ArrowRight: 1, ArrowLeft: -1 }[e.key];
+                if (d) {
+                    e.preventDefault();
+                    elegir((i + d + paneles.length) % paneles.length, true);
+                }
+            });
+            lista.appendChild(t);
+            return t;
+        });
+        function elegir(i, foco) {
+            actual = i;
+            pestanas.forEach((t, j) => {
+                t.setAttribute("aria-selected", j === i ? "true" : "false");
+                t.tabIndex = j === i ? 0 : -1;
+                paneles[j][1].hidden = j !== i;
+            });
+            if (guardado) {
+                guardado.pestana = i;
+                guardado.guardar();
+            }
+            if (foco) {
+                pestanas[i].focus();
+            }
+        }
+        caja.appendChild(lista);
+        paneles.forEach(([, panel]) => caja.appendChild(panel));
+        elegir(actual, false);
+        enlazarConjuros(caja);
         if (f) {
             caja.appendChild(crear("p", "oc-hoja-nota master-fuente", f));
         }
@@ -500,7 +801,12 @@
         dentro.appendChild(crear("p", "oc-hoja-nota", "Cargando…"));
         pedir("/datos/personajes/compendio/bestiario.json").then((datos) => {
             const b = (datos.monstruos || []).find((x) => x.en === m.datos.en);
-            dentro.replaceChildren(b ? perfil(b, "") : crear("p", "oc-vacio", "No encuentro esa criatura."));
+            const guardado = { usos: m.datos.usos || {}, pestana: m.datos.pestana || 0, guardar() {
+                m.datos.usos = guardado.usos;
+                m.datos.pestana = guardado.pestana;
+                guardar();
+            } };
+            dentro.replaceChildren(b ? perfil(b, "", null, guardado) : crear("p", "oc-vacio", "No encuentro esa criatura."));
         }).catch(() => {
             dentro.replaceChildren(crear("p", "oc-vacio", "No he podido cargar el bestiario."));
         });

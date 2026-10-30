@@ -69,6 +69,9 @@ window.ocMontar = window.ocMontar || {};
             barra.append(titulo, cerrar);
             const cuerpo = document.createElement("div");
             cuerpo.className = "oc-menu-ventana-cuerpo";
+            cuerpo.tabIndex = 0;
+            cuerpo.setAttribute("role", "region");
+            cuerpo.setAttribute("aria-labelledby", "oc-ventana-titulo");
             cuerpo.appendChild(opciones.cuerpo);
             ventana.append(barra, cuerpo);
             const cerrarla = (volver) => {
@@ -2984,15 +2987,58 @@ window.ocMontar.iniciativa = function (sitio, opciones) {
         pintar();
         avisar("Añadido: " + c.nombre + (c.ini !== "" ? ", iniciativa " + c.ini : "") + ".");
     }
-    const MARCAS = ["concentración", "bendecido", "maldito", "ventaja", "desventaja", "escondido", "agarrado", "apresado",
-        "asustado", "aturdido", "cegado", "derribado", "ensordecido", "envenenado", "hechizado", "incapacitado",
-        "inconsciente", "invisible", "paralizado", "petrificado", "agotamiento"];
+    const MARCAS = [["concentración", "🧘"], ["bendecido", "✨"], ["maldito", "💀"], ["ventaja", "⬆️"], ["desventaja", "⬇️"],
+        ["escondido", "🥷"], ["agarrado", "🤝"], ["apresado", "⛓️"], ["asustado", "😱"], ["aturdido", "💫"], ["cegado", "🙈"],
+        ["derribado", "🛌"], ["ensordecido", "🙉"], ["envenenado", "🤢"], ["hechizado", "💘"], ["incapacitado", "🚫"],
+        ["inconsciente", "😵"], ["invisible", "👻"], ["paralizado", "🧊"], ["petrificado", "🗿"], ["agotamiento", "🥵"]];
+    const ICONO = {};
+    MARCAS.forEach(([t, i]) => {
+        ICONO[t] = i;
+    });
+    const FORMAS = [["●", "círculo"], ["■", "cuadrado"], ["▲", "triángulo"], ["◆", "rombo"], ["★", "estrella"], ["♥", "corazón"]];
+    const COLORES_MARCA = [["#ffe873", "amarillo"], ["#ffb870", "naranja"], ["#ff8f8f", "rojo"], ["#ffa6d5", "rosa"],
+        ["#c9a2ff", "morado"], ["#8fb8ff", "azul"], ["#7fdcff", "celeste"], ["#8fe8a2", "verde"]];
+    let propias = [];
+    try {
+        propias = JSON.parse(localStorage.getItem("richi-oc-marcas") || "[]");
+    } catch (e) {
+        propias = [];
+    }
+    const guardarPropias = () => {
+        try {
+            localStorage.setItem("richi-oc-marcas", JSON.stringify(propias));
+        } catch (e) {
+        }
+    };
     const marcasDe = (c) => (Array.isArray(c.marcas) ? c.marcas : (c.marcas = []));
     const textoMarca = (mk) => mk.t + (mk.r ? " (" + mk.r + (mk.r === 1 ? " ronda" : " rondas") + ")" : "");
+    function dibujoDe(mk) {
+        const propia = propias.find((p) => p.t === mk.t);
+        const forma = mk.f || (propia && propia.f);
+        const color = mk.c || (propia && propia.c);
+        if (!ICONO[mk.t] && !forma) {
+            return null;
+        }
+        const d = crear("span", "oc-ini-marca-dibujo", ICONO[mk.t] || forma);
+        d.setAttribute("aria-hidden", "true");
+        if (!ICONO[mk.t] && color) {
+            d.style.color = color;
+        }
+        return d;
+    }
+    function chapa(mk) {
+        const li = crear("li", "oc-ini-marca");
+        const d = dibujoDe(mk);
+        if (d) {
+            li.appendChild(d);
+        }
+        li.appendChild(document.createTextNode(textoMarca(mk)));
+        return li;
+    }
     function chapasDe(c) {
         const ul = crear("ul", "oc-ini-marcas");
         ul.setAttribute("aria-label", "Marcas de " + c.nombre);
-        marcasDe(c).forEach((mk) => ul.appendChild(crear("li", "oc-ini-marca", textoMarca(mk))));
+        marcasDe(c).forEach((mk) => ul.appendChild(chapa(mk)));
         ul.hidden = !marcasDe(c).length;
         return ul;
     }
@@ -3001,8 +3047,8 @@ window.ocMontar.iniciativa = function (sitio, opciones) {
         const actuales = crear("ul", "oc-ini-marcas-actuales");
         const rehacer = () => {
             actuales.replaceChildren(...marcasDe(c).map((mk, i) => {
-                const li = crear("li", "oc-ini-marca");
-                li.append(document.createTextNode(textoMarca(mk) + " "),
+                const li = chapa(mk);
+                li.append(document.createTextNode(" "),
                     botonDe("oc-ini-marca-quitar", "✕", () => {
                         marcasDe(c).splice(i, 1);
                         guardar();
@@ -3015,25 +3061,52 @@ window.ocMontar.iniciativa = function (sitio, opciones) {
             if (!marcasDe(c).length) {
                 actuales.appendChild(crear("li", "oc-vacio", "Sin marcas."));
             }
-            rapidas.forEach((b) => b.setAttribute("aria-pressed", marcasDe(c).some((mk) => mk.t === b.dataset.marca) ? "true" : "false"));
+            hacerRapidas();
         };
-        const rapidas = MARCAS.map((t) => {
-            const b = botonDe("oc-ini-marca-rapida", t, () => {
-                const i = marcasDe(c).findIndex((mk) => mk.t === t);
-                if (i >= 0) {
-                    marcasDe(c).splice(i, 1);
-                } else {
-                    marcasDe(c).push({ t, r: numeroDe(rondas.value) || null });
-                }
-                guardar();
-                rehacer();
-                pintar();
-            });
-            b.dataset.marca = t;
-            return b;
-        });
+        const buscar = crear("input", "oc-dados-texto");
+        buscar.type = "search";
+        buscar.id = "oc-ini-marca-buscar";
+        buscar.placeholder = "envenenado, bendecido…";
+        buscar.autocomplete = "off";
+        const etBuscar = crear("label", "oc-dados-etiqueta", "buscar");
+        etBuscar.htmlFor = buscar.id;
         const rapidasCaja = crear("div", "oc-ini-marcas-rapidas");
-        rapidasCaja.append(...rapidas);
+        let rapidas = [];
+        function hacerRapidas() {
+            const q = String(buscar.value || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim();
+            const todas = MARCAS.map(([t]) => ({ t })).concat(propias.map((p) => ({ t: p.t, c: p.c, f: p.f, propia: true })));
+            rapidas = todas.filter((x) => !q || x.t.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().includes(q))
+                .map((x) => {
+                    const b = botonDe("oc-ini-marca-rapida", "", () => {
+                        const i = marcasDe(c).findIndex((mk) => mk.t === x.t);
+                        if (i >= 0) {
+                            marcasDe(c).splice(i, 1);
+                        } else {
+                            marcasDe(c).push({ t: x.t, r: numeroDe(rondas.value) || null });
+                        }
+                        guardar();
+                        rehacer();
+                        pintar();
+                        const otra = rapidasCaja.querySelector('[data-marca="' + CSS.escape(x.t) + '"]');
+                        if (otra) {
+                            otra.focus();
+                        }
+                    });
+                    const d = dibujoDe(x);
+                    if (d) {
+                        b.appendChild(d);
+                    }
+                    b.appendChild(document.createTextNode(x.t));
+                    b.dataset.marca = x.t;
+                    b.setAttribute("aria-pressed", marcasDe(c).some((mk) => mk.t === x.t) ? "true" : "false");
+                    return b;
+                });
+            rapidasCaja.replaceChildren(...rapidas);
+            if (!rapidas.length) {
+                rapidasCaja.appendChild(crear("p", "oc-vacio", "Ninguna con eso: créala abajo."));
+            }
+        }
+        buscar.addEventListener("input", hacerRapidas);
         const form = crear("form", "oc-ini-marca-nueva");
         const etT = crear("label", "oc-dados-etiqueta", "otra marca");
         const texto = crear("input", "oc-dados-texto");
@@ -3050,7 +3123,42 @@ window.ocMontar.iniciativa = function (sitio, opciones) {
         etR.htmlFor = rondas.id;
         const poner = crear("button", "oc-vida-accion es-principal", "＋ poner");
         poner.type = "submit";
-        form.append(etT, texto, etR, rondas, poner);
+        const aspecto = crear("fieldset", "oc-ini-marca-aspecto");
+        aspecto.appendChild(crear("legend", "oc-dados-etiqueta", "color y forma (para una nueva)"));
+        let color = COLORES_MARCA[2][0];
+        let forma = FORMAS[0][0];
+        const muestrasC = COLORES_MARCA.map(([hex, nombre]) => {
+            const b = botonDe("oc-ini-color", "", () => {
+                color = hex;
+                muestrasC.forEach((x) => x.setAttribute("aria-pressed", x === b ? "true" : "false"));
+                muestrasF.forEach((x) => {
+                    x.style.color = color;
+                });
+            }, nombre);
+            b.style.backgroundColor = hex;
+            b.setAttribute("aria-pressed", hex === color ? "true" : "false");
+            return b;
+        });
+        const muestrasF = FORMAS.map(([sim, nombre]) => {
+            const b = botonDe("oc-ini-forma", sim, () => {
+                forma = sim;
+                muestrasF.forEach((x) => x.setAttribute("aria-pressed", x === b ? "true" : "false"));
+            }, nombre);
+            b.style.color = color;
+            b.setAttribute("aria-pressed", sim === forma ? "true" : "false");
+            return b;
+        });
+        const filaC = crear("div", "oc-ini-colores");
+        filaC.append(...muestrasC);
+        const filaF = crear("div", "oc-ini-colores");
+        filaF.append(...muestrasF);
+        const etGuardar = crear("label", "oc-ini-marca-guardar");
+        const guardarla = crear("input");
+        guardarla.type = "checkbox";
+        guardarla.checked = true;
+        etGuardar.append(guardarla, document.createTextNode(" guardarla para otra vez"));
+        aspecto.append(filaC, filaF, etGuardar);
+        form.append(etT, texto, etR, rondas, poner, aspecto);
         form.addEventListener("submit", (e) => {
             e.preventDefault();
             const t = texto.value.trim();
@@ -3058,7 +3166,13 @@ window.ocMontar.iniciativa = function (sitio, opciones) {
                 texto.focus();
                 return;
             }
-            marcasDe(c).push({ t, r: numeroDe(rondas.value) || null });
+            const yaPropia = propias.find((p) => p.t === t);
+            if (!ICONO[t] && guardarla.checked && !yaPropia) {
+                propias.push({ t, c: color, f: forma });
+                guardarPropias();
+            }
+            marcasDe(c).push(ICONO[t] || yaPropia || guardarla.checked ? { t, r: numeroDe(rondas.value) || null }
+                : { t, r: numeroDe(rondas.value) || null, c: color, f: forma });
             texto.value = "";
             guardar();
             rehacer();
@@ -3066,10 +3180,12 @@ window.ocMontar.iniciativa = function (sitio, opciones) {
             avisar("Puesta: " + t + ".");
             texto.focus();
         });
+        const buscarCaja = crear("div", "oc-ini-marca-buscador");
+        buscarCaja.append(etBuscar, buscar);
         cuerpo.append(crear("p", "oc-hoja-nota", "Las rondas son opcionales y valen también para las de un toque."),
-            rapidasCaja, form, crear("h3", "oc-ini-marcas-titulo", "Lleva ahora"), actuales);
+            buscarCaja, rapidasCaja, form, crear("h3", "oc-ini-marcas-titulo", "Lleva ahora"), actuales);
         rehacer();
-        window.ocVentana.abrir({ titulo: "marcas de " + c.nombre, cuerpo, vuelta, foco: rapidas[0] });
+        window.ocVentana.abrir({ titulo: "marcas de " + c.nombre, cuerpo, vuelta, foco: buscar });
     }
     function gastarRonda() {
         const acabadas = [];
@@ -3265,7 +3381,7 @@ window.ocMontar.iniciativa = function (sitio, opciones) {
         }
         const ahora = datos.lista[datos.turno];
         rondaC.textContent = "Ronda " + datos.ronda;
-        toca.replaceChildren(crear("span", "oc-ini-combate-le", "le toca a "), crear("strong", "", ahora.nombre));
+        toca.replaceChildren(crear("span", "oc-ini-combate-le", "le toca a "), crear("strong", "", ahora.nombre), chapasDe(ahora));
         toca.style.borderLeftColor = colorDe(ahora);
         listaC.replaceChildren(...datos.lista.map((c, i) => {
             const li = crear("li", "oc-ini-fila es-combate" + (i === datos.turno ? " es-su-turno" : ""));
