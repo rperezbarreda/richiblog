@@ -4424,7 +4424,12 @@
       Los mágicos sin precio propio llevan el de su rareza (común 100 po,
       poco común 400, rara 4.000, muy rara 40.000, legendaria 200.000; la
       mitad si se gasta al usarlo). Se pueden tener varias tiendas
-      abiertas, cada una con lo suyo.
+      abiertas, cada una con lo suyo. Los 528 objetos que tienen texto
+      en el SRD llevan «texto»: qué hacen, traducido a mano al español,
+      en markdown (negritas, listas y tablas con su fila «| --- |»; los
+      conjuros en cursiva con su nombre en español, que se enlazan solos,
+      y los dados se pueden tirar con un clic). Se ve al abrir el objeto
+      (en la tienda o desde el buscador) y en su ficha 📌 del tablero.
   El bestiario y la tienda se montaron una vez desde los datos de
   5e.tools (en GitHub: 5etools-mirror-3/5etools-src, carpeta data:
   bestiary/bestiary-xmm.json, items.json, items-base.json y
