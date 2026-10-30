@@ -484,7 +484,7 @@
             img.hidden = !bien;
             botones.hidden = !bien;
             if (bien) {
-                img.src = bien;
+                img.src = urlImagenSegura(bien);
             } else {
                 img.removeAttribute("src");
             }
