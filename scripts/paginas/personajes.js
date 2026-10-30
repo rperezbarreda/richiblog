@@ -3756,6 +3756,16 @@ window.ocMontar.iniciativa = function (sitio, opciones) {
         ventanita("añadir.txt", "＋", anadirme ? [form, anadirme] : [form]));
     sitio.replaceChildren(caja, aviso);
     pintar();
+    // Si otro (el bestiario de la pantalla de máster) mete a alguien en
+    // «richi-oc-iniciativa», avisa con este evento y se vuelve a leer.
+    document.addEventListener("oc-iniciativa:cambio", () => {
+        try {
+            datos = Object.assign({ lista: [], turno: -1, ronda: 1 }, JSON.parse(localStorage.getItem(CLAVE) || "{}"));
+        } catch (e) {
+            return;
+        }
+        pintar();
+    });
 };
 
 (function () {

@@ -234,7 +234,161 @@
     margin-top: 12px;
 }
 
-/* EL BUSCADOR DE CONJUROS.
+/* EL BESTIARIO: el buscador lleva tres campos (nombre, VD y tipo); el
+   perfil de cada monstruo sale en una ventana (.master-bicho). */
+.master-conjuros-buscar.es-bestiario {
+    grid-template-columns: minmax(0, 1fr) auto auto;
+}
+
+.master-bicho {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+}
+
+.master-bicho-tipo {
+    margin: 0;
+    font-style: italic;
+}
+
+.master-bicho-datos {
+    display: grid;
+    grid-template-columns: max-content minmax(0, 1fr);
+    gap: 4px 12px;
+    width: 100%;
+    margin: 0;
+}
+
+.master-bicho-datos dt {
+    font-weight: 700;
+    color: var(--yellow);
+}
+
+.master-bicho-datos dd {
+    margin: 0;
+}
+
+.master-bicho-car {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: center;
+}
+
+.master-bicho-car th,
+.master-bicho-car td {
+    padding: 4px 2px;
+    border: 2px solid var(--border);
+}
+
+.master-bicho-car th {
+    color: var(--yellow);
+}
+
+.master-bicho-seccion {
+    width: 100%;
+    margin: 8px 0 0;
+    padding-bottom: 4px;
+    border-bottom: 2px solid var(--yellow);
+    font-size: 1.05rem;
+}
+
+.master-bicho .oc-texto p {
+    margin: 0 0 6px;
+}
+
+@media (max-width: 520px) {
+    .master-conjuros-buscar.es-bestiario {
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    }
+
+    .master-conjuros-buscar.es-bestiario .oc-dados-etiqueta,
+    .master-conjuros-buscar.es-bestiario .oc-dados-texto,
+    .master-conjuros-buscar.es-bestiario .oc-dados-elegir {
+        grid-row: auto;
+    }
+
+    .master-conjuros-buscar.es-bestiario .oc-dados-texto {
+        grid-column: 1 / -1;
+    }
+
+    .master-bicho-car {
+        font-size: 0.875rem;
+    }
+}
+
+/* LA TIENDA: los filtros en una rejilla que se adapta al ancho de la
+   ventana, el surtido al azar y la tabla de objetos y precios. */
+.master-tienda-campos {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(9rem, 1fr));
+    gap: 8px;
+}
+
+.master-tienda-campo {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    min-width: 0;
+}
+
+.master-tienda-campo.es-ancho {
+    grid-column: 1 / -1;
+}
+
+.master-tienda-campo .oc-dados-elegir,
+.master-tienda-campo .oc-dados-texto {
+    flex: none;
+    width: 100%;
+    height: auto;
+    min-height: 40px;
+}
+
+.master-tienda-azar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    gap: 8px;
+    margin: 10px 0 4px;
+}
+
+.master-tienda-cuantos {
+    width: 5rem;
+}
+
+.master-tienda-tabla {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.master-tienda-tabla th,
+.master-tienda-tabla td {
+    padding: 6px 4px;
+    border-bottom: 2px solid var(--border);
+    text-align: left;
+    vertical-align: top;
+}
+
+.master-tienda-tabla th {
+    color: var(--yellow);
+}
+
+.master-tienda-tabla .es-precio {
+    text-align: right;
+    white-space: nowrap;
+}
+
+.master-tienda-nombre {
+    display: block;
+    font-weight: 700;
+}
+
+.master-tienda-datos {
+    display: block;
+    font-size: 0.8125rem;
+}
+
+/* EL BUSCADOR DE CONJUROS. */
 .master-conjuros-buscar {
     display: grid;
     grid-template-columns: minmax(0, 1fr) auto;

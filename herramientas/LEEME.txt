@@ -4288,6 +4288,30 @@
     · 🎲 dados (d4–d100 y una fórmula), 📌 tarjeta (texto propio, con
       negrita, cursiva y listas) y 🔮 tabla para tirar (una cosa por línea;
       «tirar» saca una al azar): tantas como se quiera.
+    · 🐉 bestiario: los 330 monstruos del SRD 5.2 (D&D 2024), traducidos
+      enteros (las distancias, en pies), de
+      datos/personajes/compendio/bestiario.json. Se buscan por nombre (en
+      español o en inglés), VD y tipo; cada uno abre su perfil en una
+      ventana con «＋ a la iniciativa», que tira su iniciativa y lo apunta
+      (en rojo, con su CA y sus PG; si se repite, con número: «Goblin
+      guerrero 2»). La iniciativa se entera por el evento
+      «oc-iniciativa:cambio» (personajes.js).
+    · 💰 tienda: los 601 objetos del SRD 5.2 con su precio
+      (datos/personajes/compendio/tienda.json), repartidos en nueve
+      tiendas (general, herrería y armería, herramientas e instrumentos,
+      alquimista y herbolario, templo, arcanista, taberna, establos y
+      transportes, magia), con categoría, rareza, precios al gusto (de
+      saldo ×½ … abusivos ×2) y «🎲 surtido al azar», que elige unos
+      cuantos de lo que se ve y se queda guardado («ver todo» lo quita).
+      Los mágicos sin precio propio llevan el de su rareza (común 100 po,
+      poco común 400, rara 4.000, muy rara 40.000, legendaria 200.000; la
+      mitad si se gasta al usarlo). Se pueden tener varias tiendas
+      abiertas, cada una con lo suyo.
+  El bestiario y la tienda se montaron una vez desde los datos de
+  5e.tools (en GitHub: 5etools-mirror-3/5etools-src, carpeta data:
+  bestiary/bestiary-xmm.json, items.json, items-base.json y
+  magicvariants.json; solo lo marcado «srd52», que es lo que se puede
+  copiar). Son JSON normales: se pueden retocar a mano.
   Para añadir una ventana nueva: una entrada en MODULOS (nombre, emoji,
   unico, w, h, montar(cuerpo, modulo)). Estilos: estilos/paginas/pantalla-master.css
   (usa también personajes.css). actualizar-cabeceras.py le pone sus hojas

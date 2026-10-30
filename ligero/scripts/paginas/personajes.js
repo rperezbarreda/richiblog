@@ -3170,6 +3170,14 @@ window.ocMontar.iniciativa = function (sitio, opciones) {
         ventanita("añadir.txt", "＋", anadirme ? [form, anadirme] : [form]));
     sitio.replaceChildren(caja, aviso);
     pintar();
+    document.addEventListener("oc-iniciativa:cambio", () => {
+        try {
+            datos = Object.assign({ lista: [], turno: -1, ronda: 1 }, JSON.parse(localStorage.getItem(CLAVE) || "{}"));
+        } catch (e) {
+            return;
+        }
+        pintar();
+    });
 };
 (function () {
     const sitio = document.querySelector("[data-oc-iniciativa]");

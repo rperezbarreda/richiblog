@@ -179,6 +179,178 @@
 .master-fuente {
     margin-top: 12px;
 }
+.master-conjuros-buscar.es-bestiario {
+    grid-template-columns: minmax(0, 1fr) auto auto;
+}
+.master-bicho {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+}
+.master-bicho-tipo {
+    margin: 0;
+    font-style: italic;
+}
+.master-bicho-datos {
+    display: grid;
+    grid-template-columns: max-content minmax(0, 1fr);
+    gap: 4px 12px;
+    width: 100%;
+    margin: 0;
+}
+.master-bicho-datos dt {
+    font-weight: 700;
+    color: var(--yellow);
+}
+.master-bicho-datos dd {
+    margin: 0;
+}
+.master-bicho-car {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: center;
+}
+.master-bicho-car th,
+.master-bicho-car td {
+    padding: 4px 2px;
+    border: 2px solid var(--border);
+}
+.master-bicho-car th {
+    color: var(--yellow);
+}
+.master-bicho-seccion {
+    width: 100%;
+    margin: 8px 0 0;
+    padding-bottom: 4px;
+    border-bottom: 2px solid var(--yellow);
+    font-size: 1.05rem;
+}
+.master-bicho .oc-texto p {
+    margin: 0 0 6px;
+}
+@media (max-width: 520px) {
+    .master-conjuros-buscar.es-bestiario {
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    }
+    .master-conjuros-buscar.es-bestiario .oc-dados-etiqueta,
+    .master-conjuros-buscar.es-bestiario .oc-dados-texto,
+    .master-conjuros-buscar.es-bestiario .oc-dados-elegir {
+        grid-row: auto;
+    }
+    .master-conjuros-buscar.es-bestiario .oc-dados-texto {
+        grid-column: 1 / -1;
+    }
+    .master-bicho-car {
+        font-size: 0.875rem;
+    }
+}
+.master-tienda-campos {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(9rem, 1fr));
+    gap: 8px;
+}
+.master-tienda-campo {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    min-width: 0;
+}
+.master-tienda-campo.es-ancho {
+    grid-column: 1 / -1;
+}
+.master-tienda-campo .oc-dados-elegir,
+.master-tienda-campo .oc-dados-texto {
+    flex: none;
+    width: 100%;
+    height: auto;
+    min-height: 40px;
+}
+.master-tienda-azar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    gap: 8px;
+    margin: 10px 0 4px;
+}
+.master-tienda-cuantos {
+    width: 5rem;
+}
+.master-tienda-tabla {
+    width: 100%;
+    border-collapse: collapse;
+}
+.master-tienda-tabla th,
+.master-tienda-tabla td {
+    padding: 6px 4px;
+    border-bottom: 2px solid var(--border);
+    text-align: left;
+    vertical-align: top;
+}
+.master-tienda-tabla th {
+    color: var(--yellow);
+}
+.master-tienda-tabla .es-precio {
+    text-align: right;
+    white-space: nowrap;
+}
+.master-tienda-nombre {
+    display: block;
+    font-weight: 700;
+}
+.master-tienda-datos {
+    display: block;
+    font-size: 0.8125rem;
+}
+.master-conjuros-buscar {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: end;
+    gap: 4px 8px;
+}
+.master-conjuros-buscar .oc-dados-etiqueta {
+    grid-row: 1;
+}
+.master-conjuros-buscar .oc-dados-texto,
+.master-conjuros-buscar .oc-dados-elegir {
+    grid-row: 2;
+    min-height: 40px;
+}
+.master-conjuros {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+.master-conjuro {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    width: 100%;
+    padding: 6px 10px;
+    border: 2px solid var(--yellow);
+    background: transparent;
+    color: var(--yellow);
+    text-align: left;
+    cursor: pointer;
+}
+.master-conjuro:hover {
+    background: var(--yellow);
+    color: var(--yellow-contrast);
+}
+.master-conjuro:focus-visible {
+    outline: 2px solid var(--yellow);
+    outline-offset: 2px;
+}
+.master-conjuro-nombre {
+    font-weight: 700;
+}
+.master-conjuro-datos {
+    font-family: var(--fuente-mono);
+    font-size: 0.75rem;
+}
 .master-dados {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(3.4rem, 1fr));

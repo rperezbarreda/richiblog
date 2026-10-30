@@ -313,6 +313,322 @@
         });
         dentro.append(etX, texto, tirar, sale);
     }
+    const VDS = ["0", "1/8", "1/4", "1/2"].concat(Array.from({ length: 30 }, (x, i) => String(i + 1)));
+    function aLaIniciativa(b, boton) {
+        const CLAVE_INI = "richi-oc-iniciativa";
+        let datos = { lista: [], turno: -1, ronda: 1 };
+        try {
+            datos = Object.assign(datos, JSON.parse(localStorage.getItem(CLAVE_INI) || "{}"));
+        } catch (e) {
+        }
+        const iguales = datos.lista.filter((c) => c.nombre === b.nombre || c.nombre.indexOf(b.nombre + " ") === 0).length;
+        const nombre = b.nombre + (iguales ? " " + (iguales + 1) : "");
+        const bono = parseInt(b.ini, 10) || 0;
+        const r = window.ocDados ? window.ocDados.tirar("1d20" + (bono ? (bono > 0 ? "+" : "") + bono : ""),
+            "iniciativa de " + nombre) : null;
+        datos.lista.push({ id: Date.now().toString(36) + Math.random().toString(36).slice(2, 6), nombre, color: "#d23b3b",
+            ini: r ? r.total : 10 + bono, ca: parseInt(b.ca, 10) || "", pg: b.pg || "" });
+        try {
+            localStorage.setItem(CLAVE_INI, JSON.stringify(datos));
+        } catch (e) {
+        }
+        document.dispatchEvent(new CustomEvent("oc-iniciativa:cambio"));
+        avisar("A la iniciativa: " + nombre + ".");
+        if (boton) {
+            boton.focus();
+        }
+    }
+    function perfil(b, f) {
+        const caja = crear("div", "master-bicho");
+        caja.appendChild(crear("p", "master-bicho-tipo", b.tipo + ", " + b.alin));
+        const fila = (dl, que, valor) => {
+            if (valor === undefined || valor === "") {
+                return;
+            }
+            dl.append(crear("dt", "", que), crear("dd", "", String(valor)));
+        };
+        const arriba = crear("dl", "master-bicho-datos");
+        fila(arriba, "CA", b.ca);
+        fila(arriba, "Iniciativa", b.ini);
+        fila(arriba, "PG", b.pg + (b.pgf ? " (" + b.pgf + ")" : ""));
+        fila(arriba, "Velocidad", b.vel);
+        const tabla = crear("table", "master-bicho-car");
+        tabla.appendChild(crear("caption", "visually-hidden", "Características"));
+        const cab = crear("tr");
+        const val = crear("tr");
+        Object.keys(b.car).forEach((k) => {
+            const th = crear("th", "", k);
+            th.scope = "col";
+            cab.appendChild(th);
+            const n = b.car[k];
+            const m = Math.floor((n - 10) / 2);
+            val.appendChild(crear("td", "", n + " (" + (m >= 0 ? "+" : "−") + Math.abs(m) + ")"));
+        });
+        const thead = crear("thead");
+        thead.appendChild(cab);
+        const tbody = crear("tbody");
+        tbody.appendChild(val);
+        tabla.append(thead, tbody);
+        const abajo = crear("dl", "master-bicho-datos");
+        fila(abajo, "Salvaciones", b.salv);
+        fila(abajo, "Habilidades", b.hab);
+        fila(abajo, "Vulnerabilidades", b.vuln);
+        fila(abajo, "Resistencias", b.res);
+        fila(abajo, "Inmunidades", [b.inm, b.inmE].filter(Boolean).join("; "));
+        fila(abajo, "Equipo", b.equipo);
+        fila(abajo, "Sentidos", b.sent);
+        fila(abajo, "Idiomas", b.idio);
+        fila(abajo, "VD", b.vd);
+        const sumar = botonDe("oc-vida-accion es-principal", "＋ a la iniciativa", () => aLaIniciativa(b, sumar),
+            "Añadir " + b.nombre + " a la iniciativa (tira su iniciativa)");
+        caja.append(sumar, arriba, tabla, abajo);
+        [["rasgos", "Rasgos"], ["acciones", "Acciones"], ["adicionales", "Acciones adicionales"],
+            ["reacciones", "Reacciones"], ["legendarias", "Acciones legendarias"]].forEach(([k, titulo]) => {
+            if (!b[k]) {
+                return;
+            }
+            caja.appendChild(crear("h3", "master-bicho-seccion", titulo));
+            if (k === "legendarias" && b.legInfo) {
+                caja.appendChild(markdown(b.legInfo));
+            }
+            b[k].forEach((r) => caja.appendChild(markdown("**" + r.n + ".** " + r.t)));
+        });
+        if (f) {
+            caja.appendChild(crear("p", "oc-hoja-nota master-fuente", f));
+        }
+        return caja;
+    }
+    function montarBestiario(dentro, m) {
+        dentro.appendChild(crear("p", "oc-hoja-nota", "Cargando el bestiario…"));
+        pedir("/datos/personajes/compendio/bestiario.json").then((datos) => {
+            const bichos = (datos.monstruos || []).map((b) => ({ b, buscar: llano(b.nombre + " " + b.en + " " + b.tipo) }));
+            const fila = crear("div", "master-conjuros-buscar es-bestiario");
+            const et = crear("label", "oc-dados-etiqueta", "buscar");
+            const input = crear("input", "oc-dados-texto");
+            input.type = "search";
+            input.id = "master-bichos-" + m.id;
+            input.placeholder = "goblin, dragón, owlbear…";
+            et.htmlFor = input.id;
+            const etVd = crear("label", "oc-dados-etiqueta", "VD");
+            const vd = crear("select", "oc-dados-elegir");
+            vd.id = "master-bichos-vd-" + m.id;
+            etVd.htmlFor = vd.id;
+            [""].concat(VDS).forEach((v) => {
+                const o = crear("option", "", v || "todos");
+                o.value = v;
+                vd.appendChild(o);
+            });
+            const etTipo = crear("label", "oc-dados-etiqueta", "tipo");
+            const tipo = crear("select", "oc-dados-elegir");
+            tipo.id = "master-bichos-tipo-" + m.id;
+            etTipo.htmlFor = tipo.id;
+            const tipos = Array.from(new Set(bichos.map((x) => x.b.tipo.split(/[ (]/)[0]))).sort();
+            [""].concat(tipos).forEach((v) => {
+                const o = crear("option", "", v || "todos");
+                o.value = v;
+                tipo.appendChild(o);
+            });
+            const cuantos = crear("p", "oc-hoja-nota");
+            cuantos.setAttribute("role", "status");
+            const lista = crear("ul", "master-conjuros");
+            fila.append(et, input, etVd, vd, etTipo, tipo);
+            const pintar = () => {
+                const q = llano(input.value.trim());
+                const salen = bichos.filter((x) => (!q || x.buscar.includes(q)) && (!vd.value || x.b.cr === vd.value)
+                    && (!tipo.value || x.b.tipo.indexOf(tipo.value) === 0));
+                lista.replaceChildren(...salen.slice(0, 60).map((x) => {
+                    const li = crear("li");
+                    const b = botonDe("master-conjuro", "", () => {
+                        window.ocVentana.abrir({ titulo: x.b.nombre, cuerpo: perfil(x.b, datos.fuente), vuelta: b,
+                            clase: "es-regla" });
+                    });
+                    b.setAttribute("aria-haspopup", "dialog");
+                    b.append(crear("span", "master-conjuro-nombre", x.b.nombre),
+                        crear("span", "master-conjuro-datos", "VD " + x.b.cr + " · " + x.b.tipo + " · CA " + parseInt(x.b.ca, 10)
+                            + " · " + x.b.pg + " PG"));
+                    li.appendChild(b);
+                    return li;
+                }));
+                cuantos.textContent = salen.length ? salen.length + (salen.length === 1 ? " monstruo" : " monstruos")
+                    + (salen.length > 60 ? " (salen los 60 primeros)" : "") : "Ningún monstruo con eso.";
+            };
+            let espera = 0;
+            input.addEventListener("input", () => {
+                clearTimeout(espera);
+                espera = setTimeout(pintar, 150);
+            });
+            vd.addEventListener("change", pintar);
+            tipo.addEventListener("change", pintar);
+            dentro.replaceChildren(fila, cuantos, lista, crear("p", "oc-hoja-nota master-fuente", datos.fuente || ""));
+            pintar();
+        }).catch(() => {
+            dentro.replaceChildren(crear("p", "oc-vacio", "No he podido cargar el bestiario."));
+        });
+    }
+    const PRECIOS = [["1", "normales"], ["0.5", "de saldo (×½)"], ["0.75", "baratos (×¾)"], ["1.5", "caros (×1½)"],
+        ["2", "abusivos (×2)"]];
+    const RAREZAS = ["común", "poco común", "rara", "muy rara", "legendaria"];
+    function moneda(cp) {
+        const total = Math.round(cp);
+        const po = Math.floor(total / 100);
+        const pp = Math.floor((total % 100) / 10);
+        const pc = total % 10;
+        const trozos = [];
+        if (po) {
+            trozos.push(po.toLocaleString("es-ES") + " po");
+        }
+        if (pp) {
+            trozos.push(pp + " pp");
+        }
+        if (pc || !trozos.length) {
+            trozos.push(pc + " pc");
+        }
+        return trozos.join(" ");
+    }
+    function montarTienda(dentro, m) {
+        m.datos = m.datos || {};
+        dentro.appendChild(crear("p", "oc-hoja-nota", "Abriendo la tienda…"));
+        pedir("/datos/personajes/compendio/tienda.json").then((datos) => {
+            const objetos = (datos.objetos || []).map((o) => ({ o, buscar: llano(o.nombre + " " + o.en + " " + o.cat) }));
+            const elegir = (id, texto, opciones, valor) => {
+                const et = crear("label", "oc-dados-etiqueta", texto);
+                const sel = crear("select", "oc-dados-elegir");
+                sel.id = id + m.id;
+                et.htmlFor = sel.id;
+                opciones.forEach(([v, t]) => {
+                    const op = crear("option", "", t);
+                    op.value = v;
+                    sel.appendChild(op);
+                });
+                sel.value = valor || "";
+                return [et, sel];
+            };
+            const [etTienda, tienda] = elegir("master-tienda-", "tienda",
+                [["", "todas"]].concat((datos.tiendas || []).map((t) => [t, t])), m.datos.tienda);
+            const [etCat, cat] = elegir("master-tienda-cat-", "categoría", [["", "todas"]], "");
+            const [etRareza, rareza] = elegir("master-tienda-rareza-", "rareza",
+                [["", "todas"]].concat(RAREZAS.map((r) => [r, r])), m.datos.rareza);
+            const [etPrecio, precio] = elegir("master-tienda-precio-", "precios", PRECIOS, m.datos.precio || "1");
+            const etBuscar = crear("label", "oc-dados-etiqueta", "buscar");
+            const buscar = crear("input", "oc-dados-texto");
+            buscar.type = "search";
+            buscar.id = "master-tienda-buscar-" + m.id;
+            buscar.placeholder = "cuerda, poción, espada…";
+            etBuscar.htmlFor = buscar.id;
+            const campos = crear("div", "master-tienda-campos");
+            [[etTienda, tienda], [etCat, cat], [etRareza, rareza], [etPrecio, precio], [etBuscar, buscar]].forEach(([e, c]) => {
+                const caja = crear("div", "master-tienda-campo" + (c === buscar ? " es-ancho" : ""));
+                caja.append(e, c);
+                campos.appendChild(caja);
+            });
+            const cuantosAzar = crear("input", "oc-dados-texto master-tienda-cuantos");
+            cuantosAzar.type = "number";
+            cuantosAzar.min = "1";
+            cuantosAzar.max = "40";
+            cuantosAzar.value = String(m.datos.cuantos || 8);
+            cuantosAzar.id = "master-tienda-cuantos-" + m.id;
+            const etCuantos = crear("label", "oc-dados-etiqueta", "cuántos");
+            etCuantos.htmlFor = cuantosAzar.id;
+            const azar = botonDe("oc-vida-accion es-principal", "🎲 surtido al azar", () => {
+                const n = Math.max(1, Math.min(40, parseInt(cuantosAzar.value, 10) || 8));
+                const pool = filtrados(false).slice();
+                const u = new Uint32Array(pool.length);
+                crypto.getRandomValues(u);
+                for (let i = pool.length - 1; i > 0; i -= 1) {
+                    const j = u[i] % (i + 1);
+                    [pool[i], pool[j]] = [pool[j], pool[i]];
+                }
+                m.datos.surtido = pool.slice(0, n).map((x) => x.o.en);
+                m.datos.cuantos = n;
+                guardar();
+                pintar();
+                avisar("Surtido nuevo: " + m.datos.surtido.length + " objetos.");
+            });
+            const todo = botonDe("oc-vida-accion", "ver todo", () => {
+                delete m.datos.surtido;
+                guardar();
+                pintar();
+                avisar("Se ve todo.");
+            });
+            const surtidoFila = crear("div", "master-tienda-azar");
+            const cajaCuantos = crear("div", "master-tienda-campo");
+            cajaCuantos.append(etCuantos, cuantosAzar);
+            surtidoFila.append(cajaCuantos, azar, todo);
+            const cuantos = crear("p", "oc-hoja-nota");
+            cuantos.setAttribute("role", "status");
+            const tabla = crear("table", "master-tienda-tabla");
+            const cap = crear("caption", "visually-hidden", "Objetos y precios");
+            const cab = crear("tr");
+            [["Objeto", ""], ["Precio", "es-precio"]].forEach(([t, c]) => {
+                const th = crear("th", c, t);
+                th.scope = "col";
+                cab.appendChild(th);
+            });
+            const thead = crear("thead");
+            thead.appendChild(cab);
+            const cuerpo = crear("tbody");
+            tabla.append(cap, thead, cuerpo);
+            function filtrados(conSurtido) {
+                const q = llano(buscar.value.trim());
+                const enSurtido = conSurtido && m.datos.surtido ? new Set(m.datos.surtido) : null;
+                return objetos.filter((x) => (!tienda.value || x.o.tiendas.indexOf(tienda.value) >= 0)
+                    && (!cat.value || x.o.cat === cat.value) && (!rareza.value || x.o.rareza === rareza.value)
+                    && (!q || x.buscar.includes(q)) && (!enSurtido || enSurtido.has(x.o.en)));
+            }
+            function categorias() {
+                const antes = cat.value;
+                const hay = Array.from(new Set(objetos.filter((x) => !tienda.value || x.o.tiendas.indexOf(tienda.value) >= 0)
+                    .map((x) => x.o.cat))).sort();
+                cat.replaceChildren(...[["", "todas"]].concat(hay.map((c) => [c, c])).map(([v, t]) => {
+                    const op = crear("option", "", t);
+                    op.value = v;
+                    return op;
+                }));
+                cat.value = hay.indexOf(antes) >= 0 ? antes : "";
+            }
+            function pintar() {
+                const veces = parseFloat(precio.value) || 1;
+                const salen = filtrados(true);
+                todo.hidden = !m.datos.surtido;
+                cuerpo.replaceChildren(...salen.slice(0, 100).map((x) => {
+                    const tr = crear("tr");
+                    const td = crear("td");
+                    td.appendChild(crear("span", "master-tienda-nombre", x.o.nombre));
+                    const extra = [x.o.cat, x.o.rareza, x.o.sint ? "requiere sintonía" : "", x.o.det, x.o.peso, x.o.nota]
+                        .filter(Boolean).join(" · ");
+                    td.appendChild(crear("span", "master-tienda-datos", extra));
+                    const tdP = crear("td", "es-precio", x.o.cp ? moneda(x.o.cp * veces) : "—");
+                    tr.append(td, tdP);
+                    return tr;
+                }));
+                cuantos.textContent = (m.datos.surtido ? "Surtido de hoy: " : "") + (salen.length
+                    ? salen.length + (salen.length === 1 ? " objeto" : " objetos") + (salen.length > 100 ? " (salen los 100 primeros)" : "")
+                    : "Nada con eso.");
+            }
+            const alCambiar = () => {
+                m.datos.tienda = tienda.value;
+                m.datos.rareza = rareza.value;
+                m.datos.precio = precio.value;
+                guardar();
+                pintar();
+            };
+            tienda.addEventListener("change", () => {
+                categorias();
+                alCambiar();
+            });
+            [cat, rareza, precio].forEach((c) => c.addEventListener("change", alCambiar));
+            let espera = 0;
+            buscar.addEventListener("input", () => {
+                clearTimeout(espera);
+                espera = setTimeout(pintar, 150);
+            });
+            categorias();
+            dentro.replaceChildren(campos, surtidoFila, cuantos, tabla, crear("p", "oc-hoja-nota master-fuente", datos.fuente || ""));
+            pintar();
+        }).catch(() => {
+            dentro.replaceChildren(crear("p", "oc-vacio", "No he podido abrir la tienda."));
+        });
+    }
     const MODULOS = {
         iniciativa: { nombre: "iniciativa", emoji: "⏱️", unico: true, w: 420, h: 520,
             montar: (d) => window.ocMontar.iniciativa(d, { suelta: true }) },
@@ -323,6 +639,8 @@
         reglas: { nombre: "todas las reglas", emoji: "📚", unico: true, w: 480, h: 520,
             montar: (d, m) => montarReglas(d, m, null) },
         conjuros: { nombre: "conjuros", emoji: "✨", unico: true, w: 420, h: 480, montar: montarConjuros },
+        bestiario: { nombre: "bestiario", emoji: "🐉", unico: true, w: 460, h: 520, montar: montarBestiario },
+        tienda: { nombre: "tienda", emoji: "💰", w: 520, h: 560, montar: montarTienda },
         dados: { nombre: "dados", emoji: "🎲", w: 360, h: 230, montar: montarDados },
         notas: { nombre: "notas", emoji: "📝", unico: true, w: 420, h: 420,
             montar: (d) => window.ocMontar.notas(d, { soloNotas: true }) },
