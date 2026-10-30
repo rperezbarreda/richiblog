@@ -4194,6 +4194,40 @@
   navegadores); su alto lo mide personajes.js (--oc-tira-alto)
   (personajes.responsive.css; personajes.js: el menú, abrirVentana,
   alDesplazar; y en los dados, colocar).
+  PARA JUGAR (personajes.js):
+    · MODO PARTIDA: lo que se marca jugando se guarda en el navegador, por
+      personaje (window.ocPartida: «richi-oc-partida-<clave>»): las
+      casillas (usos, espacios, recursos), la vida, el hambre, las notas y
+      las tiradas guardadas. No se pierde al recargar.
+    · LA VIDA (D&D): los PG del post-it son un botón («27/38 PG +5») que
+      abre una ventana: daño (se quita primero de los temporales; a 0 PG,
+      daño = un fallo), curar, PG temporales (no se suman: el más alto),
+      las salvaciones de muerte (3 éxitos y 3 fallos, y «tirar salvación»:
+      20 natural, 1 PG; 1 natural, dos fallos) y los descansos. El corto
+      desmarca lo que dice «descanso corto» en sus usos; el largo, todo
+      (también los espacios de conjuro) y deja la vida al máximo
+      (generar-personajes.py marca cada grupo de casillas con
+      data-oc-recarga).
+    · ATAQUE Y DAÑO A LA VEZ: en las tablas de ataques, la columna «a la
+      vez» (🎲🎲) tira los dos de golpe; el aviso flotante enseña las dos.
+    · TIRADAS GUARDADAS: en la ventana de los dados, «guardadas»: ☆ en
+      cualquier tirada del registro la guarda; «＋ nueva» escribe una
+      (nombre y dados, varios separados por «;», que se tiran a la vez).
+    · ⏱️ INICIATIVA (en el menú): el orden de los turnos. Se añade a
+      quien sea (nombre, tipo —personaje, npc o monstruo, cada uno con su
+      color— y, si se quiere, iniciativa, CA y PG), o a este personaje
+      con su iniciativa tirada; se ordena arrastrando por el ⠿, con ↑ y ↓
+      o «por iniciativa»; «siguiente turno» marca a quién le toca y cuenta
+      las rondas. Es la misma en todas las fichas («richi-oc-iniciativa»).
+    · 📝 NOTAS (en el menú): un cuaderno para la sesión que se guarda solo
+      (con «poner la fecha», «descargar» en .txt y «borrar»), y «partida»:
+      los descansos (D&D) y «empezar de cero» (desmarca todo y la vida al
+      máximo; las notas se quedan).
+    · 📚 REGLAS (en el menú, solo con D&D): lo que más se busca jugando
+      (estados, ventaja, flanqueo, cobertura, concentración, salvaciones
+      de muerte, descansos…; con lo que cambia en 2024), con un buscador.
+      Salen de datos/personajes/reglas-dnd.json, que se edita en el
+      editor: Rol → «📚 Reglas rápidas (D&D)».
   LAS ETIQUETAS («D&D 5e, jugando»): cada una es un botón del filtro del
   índice (el de los relatos, scripts/componentes/filtros.js); sin
   ninguna etiqueta en ningún personaje, el filtro no sale.

@@ -1,4 +1,134 @@
 // =========================================
+// EL MODO PARTIDA Y LAS VENTANAS (lo que usan las demás partes)
+// =========================================
+// window.ocPartida: lo que se juega con cada personaje se guarda en el
+// navegador (localStorage), por personaje: las casillas marcadas, la vida
+// (PG actuales, temporales, salvaciones de muerte), el hambre, las notas y
+// las tiradas guardadas. Así no se pierde al recargar o al cerrar la
+// página. leer(campo, porDefecto) y guardar(campo, valor); sin
+// almacenamiento (ventana privada…), todo funciona igual, sin guardar.
+//
+// window.ocVentana.abrir({titulo, cuerpo, vuelta, clase}): una ventana
+// modal como las del sitio (barra con su título y ✕): el foco se queda
+// dentro, Esc, la ✕ o pulsar fuera la cierran y el foco vuelve a «vuelta».
+// Devuelve una función para cerrarla.
+
+(function () {
+    const botones = document.querySelector("[data-oc-botones]");
+    const clave = (botones && botones.dataset.ocClave) || "";
+    const nombre = "richi-oc-partida-" + clave;
+    let datos = {};
+    try {
+        datos = JSON.parse(localStorage.getItem(nombre) || "{}") || {};
+    } catch (e) {
+        datos = {};
+    }
+
+    window.ocPartida = {
+        clave,
+        leer(campo, porDefecto) {
+            return datos[campo] === undefined ? porDefecto : datos[campo];
+        },
+        guardar(campo, valor) {
+            if (valor === undefined) {
+                delete datos[campo];
+            } else {
+                datos[campo] = valor;
+            }
+            if (!clave) {
+                return;
+            }
+            try {
+                localStorage.setItem(nombre, JSON.stringify(datos));
+            } catch (e) {
+                // Sin almacenamiento: se juega igual, sin guardar.
+            }
+        },
+    };
+
+    let fondo = null;
+    let cerrarAhora = null;
+
+    window.ocVentana = {
+        abrir(opciones) {
+            if (cerrarAhora) {
+                cerrarAhora(false);
+            }
+            if (!fondo) {
+                fondo = document.createElement("div");
+                fondo.className = "oc-menu-fondo";
+                fondo.hidden = true;
+                fondo.addEventListener("click", (e) => {
+                    if (e.target === fondo && cerrarAhora) {
+                        cerrarAhora(true);
+                    }
+                });
+                document.body.appendChild(fondo);
+            }
+            const ventana = document.createElement("div");
+            ventana.className = "oc-menu-ventana" + (opciones.clase ? " " + opciones.clase : "");
+            ventana.setAttribute("role", "dialog");
+            ventana.setAttribute("aria-modal", "true");
+            ventana.setAttribute("aria-labelledby", "oc-ventana-titulo");
+            const barra = document.createElement("div");
+            barra.className = "oc-menu-ventana-barra";
+            const titulo = document.createElement("h2");
+            titulo.id = "oc-ventana-titulo";
+            titulo.className = "oc-menu-ventana-titulo";
+            titulo.textContent = opciones.titulo;
+            const cerrar = document.createElement("button");
+            cerrar.type = "button";
+            cerrar.className = "oc-menu-ventana-cerrar";
+            cerrar.textContent = "✕";
+            cerrar.setAttribute("aria-label", "Cerrar");
+            barra.append(titulo, cerrar);
+            const cuerpo = document.createElement("div");
+            cuerpo.className = "oc-menu-ventana-cuerpo";
+            cuerpo.appendChild(opciones.cuerpo);
+            ventana.append(barra, cuerpo);
+            const cerrarla = (volver) => {
+                fondo.hidden = true;
+                fondo.replaceChildren();
+                cerrarAhora = null;
+                if (opciones.alCerrar) {
+                    opciones.alCerrar();
+                }
+                if (volver && opciones.vuelta) {
+                    opciones.vuelta.focus();
+                }
+            };
+            cerrarAhora = cerrarla;
+            cerrar.addEventListener("click", () => cerrarla(true));
+            ventana.addEventListener("keydown", (e) => {
+                if (e.key === "Escape") {
+                    e.stopPropagation();
+                    cerrarla(true);
+                    return;
+                }
+                if (e.key !== "Tab") {
+                    return;
+                }
+                const todos = Array.from(ventana.querySelectorAll("button, a[href], input, select, textarea"))
+                    .filter((x) => !x.disabled && x.offsetParent !== null);
+                const primero = todos[0];
+                const ultimo = todos[todos.length - 1];
+                if (e.shiftKey && document.activeElement === primero) {
+                    e.preventDefault();
+                    ultimo.focus();
+                } else if (!e.shiftKey && document.activeElement === ultimo) {
+                    e.preventDefault();
+                    primero.focus();
+                }
+            });
+            fondo.replaceChildren(ventana);
+            fondo.hidden = false;
+            (opciones.foco || cerrar).focus();
+            return () => cerrarla(true);
+        },
+    };
+})();
+
+// =========================================
 // LA FICHA DE UNO DE MIS PERSONAJES: EL MENÚ DEL RECUADRO
 // =========================================
 // La página la escribe entera generar-personajes.py: todas las partes
@@ -1124,7 +1254,8 @@ document.querySelectorAll(".oc-ataques th[data-oc-desc]").forEach((th) => {
         aspecto: leer("richi-dados-aspecto") || "",
         aspectoDelPersonaje: (sitioDelBoton && sitioDelBoton.dataset.ocAspecto) || "",
         reserva: { atributo: null, habilidad: null, extra: 0,
-            hambre: parseInt((sitioDelBoton && sitioDelBoton.dataset.ocHambre) || "0", 10) || 0 } };
+            hambre: window.ocPartida && window.ocPartida.leer("hambre") !== undefined ? window.ocPartida.leer("hambre")
+                : parseInt((sitioDelBoton && sitioDelBoton.dataset.ocHambre) || "0", 10) || 0 } };
 
     function leer(clave) {
         try {
@@ -1349,6 +1480,12 @@ document.querySelectorAll(".oc-ataques th[data-oc-desc]").forEach((th) => {
     }
 
     function terminar(r) {
+        // Varias de golpe (tirarVarias): se apuntan y se enseñan juntas.
+        if (estado.agrupando) {
+            estado.agrupando.push(r);
+            anadir(r);
+            return r;
+        }
         enTresD(r.dados3d);
         sonar();
         if (r.critico || r.pifia) {
@@ -1356,6 +1493,29 @@ document.querySelectorAll(".oc-ataques th[data-oc-desc]").forEach((th) => {
         }
         anadir(r);
         return r;
+    }
+
+    // VARIAS TIRADAS DE GOLPE (el ataque y el daño, una tirada guardada
+    // con varias fórmulas…): ruedan todos los dados juntos y el aviso
+    // flotante las enseña todas. «lista» = [{formula, que}].
+    function tirarVarias(lista, nombre) {
+        estado.agrupando = [];
+        lista.forEach((x) => tirar(x.formula, x.que));
+        const grupo = estado.agrupando;
+        estado.agrupando = null;
+        if (!grupo.length) {
+            return grupo;
+        }
+        enTresD(grupo.flatMap((r) => r.dados3d || []));
+        sonar();
+        const especial = grupo.find((r) => r.critico || r.pifia);
+        if (especial) {
+            sonarFinal(especial.critico);
+        }
+        if (ventana.hidden) {
+            mostrarResultado(grupo, nombre);
+        }
+        return grupo;
     }
 
     // Los dados rodando en 3D (si están encendidos y el navegador puede).
@@ -1701,6 +1861,8 @@ document.querySelectorAll(".oc-ataques th[data-oc-desc]").forEach((th) => {
         }
         const reserva = SISTEMA === "vtm5" ? montarReserva() : null;
 
+        const guardadasCaja = montarGuardadas();
+
         // El aspecto de los dados en 3D. Al cambiarlo, sale un d20 de
         // muestra.
         const filaAspecto = crear("div", "oc-dados-fila");
@@ -1742,9 +1904,9 @@ document.querySelectorAll(".oc-ataques th[data-oc-desc]").forEach((th) => {
         if (reserva) {
             // En Vampiro la reserva va arriba (es lo que más se usa) y no
             // hay ventaja ni desventaja.
-            cuerpo.append(reserva, bandeja, manoTexto, fila, acciones, filaAspecto, cabeza, historial);
+            cuerpo.append(reserva, bandeja, manoTexto, fila, acciones, guardadasCaja, filaAspecto, cabeza, historial);
         } else {
-            cuerpo.append(bandeja, manoTexto, fila, modos, acciones, filaAspecto, cabeza, historial);
+            cuerpo.append(bandeja, manoTexto, fila, modos, acciones, guardadasCaja, filaAspecto, cabeza, historial);
         }
         ventana.append(barra, cuerpo);
         // Lo que dice el lector de pantalla, fuera de la ventana (que puede
@@ -1865,6 +2027,9 @@ document.querySelectorAll(".oc-ataques th[data-oc-desc]").forEach((th) => {
         }, ["Un dado menos", "Un dado más"]);
         hambreInput = numero("oc-reserva-hambre", "hambre", () => estado.reserva.hambre, (n) => {
             estado.reserva.hambre = Math.max(0, Math.min(5, n));
+            if (window.ocPartida) {
+                window.ocPartida.guardar("hambre", estado.reserva.hambre);
+            }
         }, ["Un punto menos de hambre", "Un punto más de hambre"]);
         reservaTexto = crear("p", "oc-dados-mano");
         caja.appendChild(reservaTexto);
@@ -1986,7 +2151,7 @@ document.querySelectorAll(".oc-ataques th[data-oc-desc]").forEach((th) => {
     function anadir(r) {
         // Con la ventana cerrada (al tirar desde la ficha) no se abre: sale
         // el resultado en un aviso flotante. El registro, en la ventana.
-        if (ventana.hidden) {
+        if (ventana.hidden && !estado.agrupando) {
             mostrarResultado(r);
         }
         estado.tiradas.unshift(r);
@@ -1995,6 +2160,102 @@ document.querySelectorAll(".oc-ataques th[data-oc-desc]").forEach((th) => {
         avisar(dicho(r)
             + (r.tipos.length ? " (" + r.tipos.map((x) => x.total + " " + x.tipo).join(", ") + ")" : "")
             + ". " + r.desglose);
+    }
+
+    // ---- LAS TIRADAS GUARDADAS ----
+    // Las de siempre de este personaje («ataque y daño con la espada»),
+    // para tirarlas con un botón: cada una con su nombre y una o varias
+    // fórmulas (varias se tiran de golpe). Se guardan con ☆ desde el
+    // registro, o se escriben a mano: el nombre y las fórmulas separadas
+    // por «;» («1d20+5; 1d8+3[cortante]»). Se guardan en el navegador
+    // (window.ocPartida, «guardadas»), y el descanso no las toca.
+    let listaGuardadas = null;
+
+    function leerGuardadas() {
+        return (window.ocPartida && window.ocPartida.leer("guardadas", [])) || [];
+    }
+
+    function apuntarGuardada(nombre, formulas) {
+        const todas = leerGuardadas();
+        todas.push({ nombre: String(nombre || "tirada").slice(0, 60), formulas });
+        if (window.ocPartida) {
+            window.ocPartida.guardar("guardadas", todas.slice(-30));
+        }
+        pintarGuardadas();
+        avisar("Guardada: " + nombre + ".");
+    }
+
+    function pintarGuardadas() {
+        if (!listaGuardadas) {
+            return;
+        }
+        const todas = leerGuardadas();
+        listaGuardadas.replaceChildren(...todas.map((g, i) => {
+            const li = crear("li", "oc-guardada");
+            const que = g.formulas.map((f) => formulaParaVer(f.formula)).join(" · ");
+            const tirarla = botonDe("oc-guardada-tirar", undefined, () => {
+                if (g.formulas.length === 1) {
+                    tirar(g.formulas[0].formula, g.formulas[0].que || g.nombre);
+                } else {
+                    tirarVarias(g.formulas, g.nombre);
+                }
+            }, "Tirar " + g.nombre + " (" + que + ")");
+            tirarla.append(crear("span", "oc-guardada-nombre", g.nombre), crear("span", "oc-guardada-formula", que));
+            const quitarla = botonDe("oc-dados-quitar", "✕", () => {
+                const quedan = leerGuardadas().filter((_, j) => j !== i);
+                window.ocPartida.guardar("guardadas", quedan);
+                pintarGuardadas();
+                avisar("Quitada: " + g.nombre + ".");
+                (listaGuardadas.querySelectorAll(".oc-guardada-tirar")[Math.min(i, quedan.length - 1)]
+                    || nuevaNombre).focus();
+            }, "Quitar la guardada: " + g.nombre);
+            li.append(tirarla, quitarla);
+            return li;
+        }));
+        listaGuardadas.hidden = !todas.length;
+    }
+
+    let nuevaNombre = null;
+
+    function montarGuardadas() {
+        const caja = crear("div", "oc-dados-guardadas");
+        const cabeza = crear("h3", "oc-dados-subtitulo", "guardadas");
+        cabeza.id = "oc-guardadas-titulo";
+        listaGuardadas = crear("ul", "oc-guardadas");
+        listaGuardadas.setAttribute("aria-labelledby", cabeza.id);
+        // Escribir una nueva: plegado detrás de un botón.
+        const detalles = crear("details", "oc-guardada-nueva");
+        const resumen = crear("summary", "", "＋ nueva");
+        nuevaNombre = crear("input", "oc-dados-texto");
+        nuevaNombre.id = "oc-guardada-nombre";
+        nuevaNombre.placeholder = "ataque con espada";
+        const etNombre = crear("label", "oc-dados-etiqueta", "nombre");
+        etNombre.htmlFor = nuevaNombre.id;
+        const formulas = crear("input", "oc-dados-texto");
+        formulas.id = "oc-guardada-formulas";
+        formulas.placeholder = "1d20+5; 1d8+3";
+        formulas.setAttribute("aria-describedby", "oc-guardada-ayuda");
+        const etFormulas = crear("label", "oc-dados-etiqueta", "dados");
+        etFormulas.htmlFor = formulas.id;
+        const ayuda = crear("p", "oc-dados-ayuda", "Varias, separadas por «;», se tiran a la vez.");
+        ayuda.id = "oc-guardada-ayuda";
+        const guardarla = botonDe("oc-dados-vaciar", "guardar", () => {
+            const lista = formulas.value.split(";").map((x) => x.trim()).filter((x) => /^(v5|cp):-?\d+$/.test(x)
+                || /\d*d(\d+|F)/i.test(x));
+            if (!lista.length) {
+                avisar("Escribe los dados: «1d20+5; 1d8+3».");
+                formulas.focus();
+                return;
+            }
+            const nombre = nuevaNombre.value.trim() || lista.join(" · ");
+            apuntarGuardada(nombre, lista.map((f, i) => ({ formula: f, que: lista.length > 1 ? nombre + " (" + (i + 1) + ")" : nombre })));
+            nuevaNombre.value = "";
+            formulas.value = "";
+        });
+        detalles.append(resumen, etNombre, nuevaNombre, etFormulas, formulas, ayuda, guardarla);
+        caja.append(cabeza, listaGuardadas, detalles);
+        pintarGuardadas();
+        return caja;
     }
 
     // ---- EL AVISO FLOTANTE CON EL RESULTADO ----
@@ -2011,7 +2272,7 @@ document.querySelectorAll(".oc-ataques th[data-oc-desc]").forEach((th) => {
     function montarFlotante() {
         flotante = crear("div", "oc-resultado");
         flotante.hidden = true;
-        flotante.setAttribute("role", "group");
+        flotante.setAttribute("role", "region");
         flotante.setAttribute("aria-label", "Resultado de la tirada");
         const quedarse = () => clearTimeout(flotanteVa);
         const irse = () => {
@@ -2043,32 +2304,45 @@ document.querySelectorAll(".oc-ataques th[data-oc-desc]").forEach((th) => {
         }
     }
 
-    function mostrarResultado(r) {
+    // Una tirada, o varias (una lista, con su nombre): cada una con lo
+    // suyo, y el total de cada una algo más pequeño si son varias.
+    function bloqueDeResultado(r, varias) {
+        const caja = crear("div", "oc-resultado-uno" + (varias ? " es-de-varias" : ""));
+        const cabeza = crear("p", "oc-resultado-que");
+        cabeza.append(crear("span", "", r.que), crear("span", "oc-resultado-formula",
+            r.formulaVista || formulaParaVer(r.formula)));
+        const total = crear("p", "oc-resultado-total" + (r.critico ? " es-critico" : "") + (r.pifia ? " es-pifia" : ""),
+            String(r.total));
+        if (r.unidad) {
+            total.appendChild(crear("span", "oc-resultado-unidad", r.unidad));
+        }
+        caja.append(cabeza, total);
+        if (r.nota) {
+            caja.appendChild(crear("p", "oc-resultado-nota", r.nota));
+        }
+        if (r.tipos && r.tipos.length) {
+            const tipos = crear("p", "oc-dados-tipos");
+            r.tipos.forEach((x) => tipos.appendChild(crear("span", "oc-dano oc-dano-" + claveDeTipo(x.tipo),
+                x.total + " " + x.tipo)));
+            caja.appendChild(tipos);
+        }
+        caja.appendChild(crear("p", "oc-resultado-desglose", r.desglose));
+        return caja;
+    }
+
+    function mostrarResultado(cual, nombre) {
         if (!flotante) {
             montarFlotante();
         }
         clearTimeout(flotanteVa);
         clearTimeout(flotanteSale);
+        const lista = Array.isArray(cual) ? cual : [cual];
         const pintar = () => {
-            const cabeza = crear("p", "oc-resultado-que");
-            cabeza.append(crear("span", "", r.que), crear("span", "oc-resultado-formula",
-                r.formulaVista || formulaParaVer(r.formula)));
-            const total = crear("p", "oc-resultado-total" + (r.critico ? " es-critico" : "") + (r.pifia ? " es-pifia" : ""),
-                String(r.total));
-            if (r.unidad) {
-                total.appendChild(crear("span", "oc-resultado-unidad", r.unidad));
+            const filas = [];
+            if (lista.length > 1 && nombre) {
+                filas.push(crear("p", "oc-resultado-nombre", nombre));
             }
-            const filas = [cabeza, total];
-            if (r.nota) {
-                filas.push(crear("p", "oc-resultado-nota", r.nota));
-            }
-            if (r.tipos && r.tipos.length) {
-                const tipos = crear("p", "oc-dados-tipos");
-                r.tipos.forEach((x) => tipos.appendChild(crear("span", "oc-dano oc-dano-" + claveDeTipo(x.tipo),
-                    x.total + " " + x.tipo)));
-                filas.push(tipos);
-            }
-            filas.push(crear("p", "oc-resultado-desglose", r.desglose));
+            lista.forEach((r) => filas.push(bloqueDeResultado(r, lista.length > 1)));
             const botones = crear("div", "oc-resultado-botones");
             botones.append(
                 botonDe("oc-resultado-ver", "ver tiradas", () => {
@@ -2081,7 +2355,7 @@ document.querySelectorAll(".oc-ataques th[data-oc-desc]").forEach((th) => {
             filas.push(botones);
             flotante.replaceChildren(...filas);
             // Debajo de lo fijo de arriba (la barra del sitio y, en el móvil,
-            // la tira del menú).
+            // el botón del menú).
             let arriba = 16;
             document.querySelectorAll(".mobile-topbar, .oc-menu-movil").forEach((x) => {
                 if (getComputedStyle(x).position === "fixed") {
@@ -2090,7 +2364,7 @@ document.querySelectorAll(".oc-ataques th[data-oc-desc]").forEach((th) => {
             });
             flotante.style.top = arriba + "px";
             flotante.hidden = false;
-            flotanteVa = setTimeout(cerrarResultado, 5000);
+            flotanteVa = setTimeout(cerrarResultado, lista.length > 1 ? 7000 : 5000);
         };
         // Con los dados en 3D, cuando se paran; si no, enseguida.
         flotanteSale = setTimeout(pintar, estado.tresD ? 1000 : 0);
@@ -2126,6 +2400,8 @@ document.querySelectorAll(".oc-ataques th[data-oc-desc]").forEach((th) => {
                         "Añadir desventaja a: " + r.que + ", " + r.total));
             }
             botones.append(
+                botonDe("oc-dados-guardar", "☆", () => apuntarGuardada(r.que, [{ formula: r.formula, que: r.que }]),
+                    "Guardar esta tirada: " + r.que),
                 botonDe("oc-dados-repetir", "↻ repetir", () => tirar(r.formula, r.que), "Repetir: " + r.que),
                 botonDe("oc-dados-quitar", "✕", () => quitar(r.id, i), "Borrar esta tirada: " + r.que + ", " + r.total));
             li.append(cabeza, total);
@@ -2201,6 +2477,50 @@ document.querySelectorAll(".oc-ataques th[data-oc-desc]").forEach((th) => {
         }
         m.replaceWith(b);
     });
+    // ATAQUE Y DAÑO A LA VEZ: en las tablas de ataques, una columna más con
+    // un botón que tira los dos de golpe.
+    document.querySelectorAll("table.oc-ataques").forEach((tabla) => {
+        const filas = Array.from(tabla.querySelectorAll("tbody tr:not(.oc-ataque-desc)"));
+        const conLasDos = filas.filter((tr) => tr.querySelector(".oc-ataque-mod .oc-dado") && tr.querySelector(".oc-ataque-dano .oc-dado"));
+        if (!conLasDos.length) {
+            return;
+        }
+        const th = crear("th", "", "a la vez");
+        th.scope = "col";
+        tabla.querySelector("thead tr").appendChild(th);
+        tabla.querySelectorAll("tr.oc-ataque-desc td[colspan]").forEach((td) => {
+            td.colSpan = td.colSpan + 1;
+        });
+        filas.forEach((tr) => {
+            const td = crear("td", "oc-ataque-ambas");
+            if (conLasDos.includes(tr)) {
+                const ataque = tr.querySelector(".oc-ataque-mod .oc-dado");
+                const dano = tr.querySelector(".oc-ataque-dano .oc-dado");
+                const nombre = tr.querySelector("th").textContent.replace(/^[▸▾\s]+/, "").trim();
+                const b = botonDe("oc-ataque-ambas-boton", "🎲🎲", () => tirarVarias([
+                    { formula: ataque.dataset.dados, que: ataque.dataset.que },
+                    { formula: dano.dataset.dados, que: dano.dataset.que }], nombre),
+                "Tirar ataque y daño a la vez: " + nombre);
+                b.title = "Ataque y daño a la vez";
+                td.appendChild(b);
+            }
+            tr.appendChild(td);
+        });
+    });
+
+    // Para las demás partes (la vida, la iniciativa): tirar desde fuera.
+    window.ocDados = {
+        tirar,
+        tirarVarias,
+        reiniciarHambre() {
+            estado.reserva.hambre = parseInt((sitioDelBoton && sitioDelBoton.dataset.ocHambre) || "0", 10) || 0;
+            if (window.ocPartida) {
+                window.ocPartida.guardar("hambre", undefined);
+            }
+            pintarReserva();
+        },
+    };
+
     document.addEventListener("click", (e) => {
         const b = e.target.closest("button.oc-dado");
         if (!b) {
@@ -2229,8 +2549,15 @@ document.querySelectorAll(".oc-ataques th[data-oc-desc]").forEach((th) => {
 // tres estados (data-oc-estados="3"): libre, daño superficial (/) y
 // agravado (✕); cada pulsación pasa al siguiente, y se dice cuál.
 
+//
+// MODO PARTIDA: lo marcado se guarda (window.ocPartida, «casillas»: el
+// estado de cada casilla de cada grupo, por su orden en la página), y
+// window.ocCasillas.descansar(«corto», «largo» o «todo») desmarca las que
+// se recargan con ese descanso (data-oc-recarga, de generar-personajes.py)
+// o todas, volviendo a como estaban al empezar.
+
 (function () {
-    const grupos = document.querySelectorAll("[data-oc-casillas]");
+    const grupos = Array.from(document.querySelectorAll("[data-oc-casillas]"));
     if (!grupos.length) {
         return;
     }
@@ -2248,35 +2575,81 @@ document.querySelectorAll(".oc-ataques th[data-oc-desc]").forEach((th) => {
             aviso.textContent = texto;
         }, 50);
     };
-    grupos.forEach((grupo) => {
+    const partida = window.ocPartida;
+    const guardadas = (partida && partida.leer("casillas", {})) || {};
+    // Cada grupo: sus botones, cómo poner cada uno (0, 1 o 2) y cómo
+    // estaban al empezar.
+    const todos = [];
+
+    function guardar() {
+        if (!partida) {
+            return;
+        }
+        const salida = {};
+        todos.forEach((g) => {
+            salida[g.clave] = g.botones.map((b) => g.leer(b));
+        });
+        partida.guardar("casillas", salida);
+    }
+
+    grupos.forEach((grupo, n) => {
         const que = grupo.dataset.ocCasillas;
         const tres = grupo.dataset.ocEstados === "3";
         const sueltas = Array.from(grupo.querySelectorAll(".oc-casilla"));
+        const clave = n + ":" + que;
+        const antes = guardadas[clave];
+        const g = { clave, recarga: grupo.dataset.ocRecarga || "", botones: [], inicio: [] };
+        g.leer = (b) => (tres ? ESTADOS.indexOf(b.dataset.estado) : (b.getAttribute("aria-pressed") === "true" ? 1 : 0));
         sueltas.forEach((s, i) => {
             const b = document.createElement("button");
             b.type = "button";
             b.className = "oc-casilla";
             const nombre = que + ": " + (i + 1) + " de " + sueltas.length;
+            const deInicio = s.classList.contains("es-marcada") ? 1 : 0;
+            const empieza = Array.isArray(antes) && antes.length === sueltas.length ? antes[i] : deInicio;
             if (tres) {
-                const poner = (estadoNuevo) => {
-                    b.dataset.estado = estadoNuevo;
-                    b.setAttribute("aria-label", nombre + ", " + estadoNuevo);
+                const poner = (cual) => {
+                    b.dataset.estado = ESTADOS[cual] || "libre";
+                    b.setAttribute("aria-label", nombre + ", " + b.dataset.estado);
                 };
-                poner(s.classList.contains("es-marcada") ? "superficial" : "libre");
+                b.poner = poner;
+                poner(empieza);
                 b.addEventListener("click", () => {
-                    poner(ESTADOS[(ESTADOS.indexOf(b.dataset.estado) + 1) % 3]);
+                    poner((ESTADOS.indexOf(b.dataset.estado) + 1) % 3);
                     avisar(b.getAttribute("aria-label"));
+                    guardar();
                 });
             } else {
-                b.setAttribute("aria-pressed", s.classList.contains("es-marcada") ? "true" : "false");
+                b.poner = (cual) => b.setAttribute("aria-pressed", cual ? "true" : "false");
+                b.poner(empieza);
                 b.setAttribute("aria-label", nombre + ", gastado");
                 b.addEventListener("click", () => {
                     b.setAttribute("aria-pressed", b.getAttribute("aria-pressed") === "true" ? "false" : "true");
+                    guardar();
                 });
             }
+            g.botones.push(b);
+            g.inicio.push(deInicio);
             s.replaceWith(b);
         });
+        todos.push(g);
     });
+
+    window.ocCasillas = {
+        // Devuelve cuántos grupos ha desmarcado.
+        descansar(tipo) {
+            let cuantos = 0;
+            todos.forEach((g) => {
+                const vale = tipo === "todo" || (tipo === "largo" && g.recarga) || (tipo === "corto" && g.recarga === "corto");
+                if (vale) {
+                    g.botones.forEach((b, i) => b.poner(tipo === "todo" ? g.inicio[i] : 0));
+                    cuantos++;
+                }
+            });
+            guardar();
+            return cuantos;
+        },
+    };
 })();
 
 // =========================================
@@ -2446,5 +2819,783 @@ document.querySelectorAll(".oc-ataques th[data-oc-desc]").forEach((th) => {
             marco.focus();
         });
         sitio.prepend(b);
+    });
+})();
+
+// =========================================
+// LA VIDA (D&D): PG ACTUALES, TEMPORALES Y SALVACIONES DE MUERTE
+// =========================================
+// Los PG del post-it pasan a ser un botón («27/38 PG», con «+5» si tiene
+// temporales) que abre una ventana para llevar la vida jugando: el daño
+// (que se quita primero de los temporales), la curación, los PG
+// temporales (no se suman: se queda el más alto), las salvaciones de
+// muerte (tres éxitos y tres fallos, y un botón para tirarlas) y los
+// descansos (corto: lo que se recarga con él; largo: todo, y los PG al
+// máximo). Se guarda en el navegador (window.ocPartida, «vida»).
+
+(function () {
+    const botones = document.querySelector("[data-oc-botones]");
+    const maximo = botones ? parseInt(botones.dataset.ocPg || "", 10) : NaN;
+    const vital = Array.from(document.querySelectorAll(".oc-vital"))
+        .find((v) => /puntos de golpe/i.test(v.querySelector("dt") ? v.querySelector("dt").textContent : ""));
+    if (!vital || !maximo || !window.ocPartida) {
+        return;
+    }
+    const partida = window.ocPartida;
+    const vida = Object.assign({ actual: maximo, temp: 0, exitos: 0, fallos: 0 }, partida.leer("vida", {}));
+    const dd = vital.querySelector("dd");
+    // Con los máximos y los temporales no cabe en media caja: toda la fila.
+    vital.classList.add("es-vida");
+    const boton = document.createElement("button");
+    boton.type = "button";
+    boton.className = "oc-vida-boton";
+    boton.setAttribute("aria-haspopup", "dialog");
+    dd.replaceChildren(boton);
+
+    function crear(tag, clase, texto) {
+        const x = document.createElement(tag);
+        if (clase) {
+            x.className = clase;
+        }
+        if (texto !== undefined) {
+            x.textContent = texto;
+        }
+        return x;
+    }
+
+    function guardar() {
+        partida.guardar("vida", vida);
+        pintarBoton();
+        if (pintarVentana) {
+            pintarVentana();
+        }
+    }
+
+    function pintarBoton() {
+        boton.replaceChildren(document.createTextNode(String(vida.actual)),
+            crear("span", "oc-vida-max", "/" + maximo), crear("span", "oc-vital-corto", "PG"));
+        if (vida.temp) {
+            boton.appendChild(crear("span", "oc-vida-temp", "+" + vida.temp));
+        }
+        boton.classList.toggle("es-caido", vida.actual <= 0);
+        boton.setAttribute("aria-label", "Puntos de golpe: " + vida.actual + " de " + maximo
+            + (vida.temp ? ", y " + vida.temp + " temporales" : "") + ". Abrir la vida");
+    }
+
+    let pintarVentana = null;
+    let aviso = null;
+
+    function avisar(texto) {
+        if (!aviso) {
+            return;
+        }
+        aviso.textContent = "";
+        setTimeout(() => {
+            aviso.textContent = texto;
+        }, 50);
+    }
+
+    function cambiar(tipo, n) {
+        if (!(n > 0)) {
+            avisar("Pon cuánto.");
+            return;
+        }
+        if (tipo === "dano") {
+            const deTemp = Math.min(vida.temp, n);
+            vida.temp -= deTemp;
+            const antes = vida.actual;
+            vida.actual = Math.max(0, vida.actual - (n - deTemp));
+            // Daño estando a 0: un fallo de salvación de muerte.
+            if (antes === 0 && n - deTemp > 0) {
+                vida.fallos = Math.min(3, vida.fallos + 1);
+            }
+            avisar(n + " de daño" + (deTemp ? " (" + deTemp + " de los temporales)" : "") + ". Quedan "
+                + vida.actual + (vida.actual === 0 ? ": a 0, tiradas de muerte." : "."));
+        } else if (tipo === "curar") {
+            const desde0 = vida.actual === 0;
+            vida.actual = Math.min(maximo, vida.actual + n);
+            if (desde0) {
+                vida.exitos = 0;
+                vida.fallos = 0;
+            }
+            avisar("Curados " + n + ". Tiene " + vida.actual + " de " + maximo + ".");
+        } else {
+            // Los temporales no se suman: se queda el más alto.
+            vida.temp = Math.max(vida.temp, n);
+            avisar("Temporales: " + vida.temp + ".");
+        }
+        guardar();
+    }
+
+    function tirarMuerte() {
+        if (!window.ocDados) {
+            return;
+        }
+        const r = window.ocDados.tirar("1d20", "salvación de muerte");
+        const d = r && r.d20 ? r.d20.queda : r ? r.total : 0;
+        if (d === 20) {
+            vida.actual = 1;
+            vida.exitos = 0;
+            vida.fallos = 0;
+            avisar("¡20 natural! Recupera 1 PG.");
+        } else if (d === 1) {
+            vida.fallos = Math.min(3, vida.fallos + 2);
+            avisar("1 natural: dos fallos.");
+        } else if (d >= 10) {
+            vida.exitos = Math.min(3, vida.exitos + 1);
+            avisar(d + ": éxito." + (vida.exitos === 3 ? " Estable." : ""));
+        } else {
+            vida.fallos = Math.min(3, vida.fallos + 1);
+            avisar(d + ": fallo." + (vida.fallos === 3 ? " Muere." : ""));
+        }
+        guardar();
+    }
+
+    function descansar(tipo) {
+        const cuantas = window.ocCasillas ? window.ocCasillas.descansar(tipo) : 0;
+        if (tipo === "largo") {
+            vida.actual = maximo;
+            vida.temp = 0;
+            vida.exitos = 0;
+            vida.fallos = 0;
+        }
+        guardar();
+        avisar(tipo === "largo" ? "Descanso largo: PG al máximo y todo recargado."
+            : "Descanso corto: " + (cuantas ? "recargado lo que se recarga con él." : "nada que recargar.")
+            + " Los dados de golpe, en la ficha.");
+    }
+
+    // Las casillas de las salvaciones: tres de cada, que se marcan al
+    // pulsarlas (hasta esa).
+    function marcas(que, campo) {
+        const fila = crear("div", "oc-vida-muerte-fila");
+        const nombre = crear("span", "oc-vida-muerte-nombre", que);
+        fila.appendChild(nombre);
+        for (let i = 1; i <= 3; i++) {
+            const b = crear("button", "oc-casilla");
+            b.type = "button";
+            b.setAttribute("aria-pressed", vida[campo] >= i ? "true" : "false");
+            b.setAttribute("aria-label", que + ": " + i + " de 3");
+            b.addEventListener("click", () => {
+                vida[campo] = vida[campo] >= i ? i - 1 : i;
+                guardar();
+                fila.querySelectorAll(".oc-casilla")[i - 1].focus();
+            });
+            fila.appendChild(b);
+        }
+        return fila;
+    }
+
+    function abrirVentana() {
+        const cuerpo = crear("div", "oc-vida");
+        const grande = crear("p", "oc-vida-grande");
+        const cantidad = crear("input", "oc-dados-mod oc-vida-cantidad");
+        cantidad.type = "number";
+        cantidad.min = "0";
+        cantidad.id = "oc-vida-cantidad";
+        cantidad.inputMode = "numeric";
+        const etiqueta = crear("label", "oc-dados-etiqueta", "cuánto");
+        etiqueta.htmlFor = cantidad.id;
+        const fila = crear("div", "oc-vida-fila");
+        const acciones = crear("div", "oc-vida-acciones");
+        [["dano", "💥 daño"], ["curar", "💚 curar"], ["temp", "🛡️ temporales"]].forEach(([tipo, texto]) => {
+            const b = crear("button", "oc-vida-accion es-" + tipo, texto);
+            b.type = "button";
+            b.addEventListener("click", () => {
+                cambiar(tipo, parseInt(cantidad.value || "0", 10));
+                cantidad.value = "";
+                cantidad.focus();
+            });
+            acciones.appendChild(b);
+        });
+        fila.append(etiqueta, cantidad);
+        const muerte = crear("fieldset", "oc-vida-muerte");
+        muerte.appendChild(crear("legend", "", "salvaciones de muerte"));
+        const dentroMuerte = crear("div", "");
+        const tirarla = crear("button", "oc-vida-accion", "🎲 tirar salvación");
+        tirarla.type = "button";
+        tirarla.addEventListener("click", tirarMuerte);
+        muerte.append(dentroMuerte, tirarla);
+        const descansos = crear("div", "oc-vida-descansos");
+        [["corto", "☕ descanso corto"], ["largo", "🛏️ descanso largo"]].forEach(([tipo, texto]) => {
+            const b = crear("button", "oc-vida-accion", texto);
+            b.type = "button";
+            b.addEventListener("click", () => descansar(tipo));
+            descansos.appendChild(b);
+        });
+        aviso = crear("p", "oc-vida-aviso");
+        aviso.setAttribute("role", "status");
+        cuerpo.append(grande, fila, acciones, muerte, descansos, aviso);
+        pintarVentana = () => {
+            grande.replaceChildren(crear("span", "oc-vida-actual", String(vida.actual)),
+                document.createTextNode(" / " + maximo + " PG"));
+            if (vida.temp) {
+                grande.appendChild(crear("span", "oc-vida-temp", "+" + vida.temp + " temporales"));
+            }
+            const foco = document.activeElement;
+            const enMuerte = dentroMuerte.contains(foco);
+            dentroMuerte.replaceChildren(marcas("éxitos", "exitos"), marcas("fallos", "fallos"));
+            if (enMuerte) {
+                tirarla.focus();
+            }
+        };
+        pintarVentana();
+        window.ocVentana.abrir({ titulo: "vida", cuerpo, vuelta: boton, foco: cantidad, clase: "es-vida",
+            alCerrar: () => {
+                pintarVentana = null;
+                aviso = null;
+            } });
+    }
+
+    boton.addEventListener("click", abrirVentana);
+    pintarBoton();
+    // Para la pestaña de notas (sus botones de descanso y de empezar de
+    // cero).
+    window.ocVida = {
+        descansar,
+        reiniciar() {
+            Object.assign(vida, { actual: maximo, temp: 0, exitos: 0, fallos: 0 });
+            guardar();
+        },
+    };
+})();
+
+// =========================================
+// LAS NOTAS DE LA SESIÓN Y LA PARTIDA
+// =========================================
+// En la pestaña 📝 notas: un cuaderno para apuntar mientras se juega (se
+// guarda solo en el navegador, en window.ocPartida, «notas»), que se
+// puede descargar en .txt; y debajo, «partida»: los descansos (D&D) y
+// empezar de cero (desmarca todo y deja la vida al máximo).
+
+(function () {
+    const sitio = document.querySelector("[data-oc-notas]");
+    if (!sitio || !window.ocPartida) {
+        return;
+    }
+    const partida = window.ocPartida;
+    const botones = document.querySelector("[data-oc-botones]");
+    const nombre = (botones && botones.dataset.ocNombre) || "personaje";
+    const caja = document.createElement("div");
+    caja.className = "oc-hoja";
+    const crear = (tag, clase, texto) => {
+        const x = document.createElement(tag);
+        if (clase) {
+            x.className = clase;
+        }
+        if (texto !== undefined) {
+            x.textContent = texto;
+        }
+        return x;
+    };
+    const ventanita = (titulo, emoji, dentro) => {
+        const v = crear("div", "oc-hoja-caja es-ancha");
+        const barra = crear("div", "recent-entries-header");
+        const h = crear("h3", "oc-hoja-titulo");
+        const em = crear("span", "oc-hoja-emoji", emoji);
+        em.setAttribute("aria-hidden", "true");
+        h.append(em, document.createTextNode(titulo));
+        barra.appendChild(h);
+        const d = crear("div", "oc-hoja-dentro");
+        d.append(...dentro);
+        v.append(barra, d);
+        return v;
+    };
+    const aviso = crear("p", "oc-hoja-nota");
+    aviso.setAttribute("role", "status");
+    const avisar = (texto) => {
+        aviso.textContent = "";
+        setTimeout(() => {
+            aviso.textContent = texto;
+        }, 50);
+    };
+
+    const etiqueta = crear("label", "oc-notas-etiqueta", "Lo que pasa en la sesión (se guarda solo)");
+    const texto = crear("textarea", "oc-notas-texto");
+    texto.id = "oc-notas-texto";
+    etiqueta.htmlFor = texto.id;
+    texto.rows = 12;
+    texto.value = partida.leer("notas", "");
+    let espera = 0;
+    texto.addEventListener("input", () => {
+        clearTimeout(espera);
+        espera = setTimeout(() => partida.guardar("notas", texto.value), 400);
+    });
+    const fecha = crear("button", "oc-vida-accion", "📅 poner la fecha");
+    fecha.type = "button";
+    fecha.addEventListener("click", () => {
+        const hoy = new Date().toLocaleDateString("es-ES", { day: "numeric", month: "long", year: "numeric" });
+        texto.value = (texto.value.trim() ? texto.value.replace(/\s*$/, "") + "\n\n" : "") + "## " + hoy + "\n";
+        partida.guardar("notas", texto.value);
+        texto.focus();
+        texto.selectionStart = texto.selectionEnd = texto.value.length;
+    });
+    const bajar = crear("button", "oc-vida-accion", "💾 descargar");
+    bajar.type = "button";
+    bajar.addEventListener("click", () => {
+        const a = document.createElement("a");
+        // Una dirección blob: hecha aquí mismo con el texto: siempre segura.
+        const blobSegura = (contenido) => URL.createObjectURL(new Blob([contenido], { type: "text/plain;charset=utf-8" }));
+        a.href = blobSegura(texto.value);
+        a.download = "notas-" + (partida.clave || "personaje") + ".txt";
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+    });
+    // Borrar, en dos pasos (sin ventanas del navegador, que se bloquean).
+    const borrar = crear("button", "oc-vida-accion", "🗑️ borrar");
+    borrar.type = "button";
+    let seguro = false;
+    borrar.addEventListener("click", () => {
+        if (!seguro) {
+            seguro = true;
+            borrar.textContent = "🗑️ ¿seguro? pulsa otra vez";
+            setTimeout(() => {
+                seguro = false;
+                borrar.textContent = "🗑️ borrar";
+            }, 4000);
+            return;
+        }
+        texto.value = "";
+        partida.guardar("notas", "");
+        seguro = false;
+        borrar.textContent = "🗑️ borrar";
+        avisar("Notas borradas.");
+        texto.focus();
+    });
+    const filaNotas = crear("div", "oc-vida-descansos");
+    filaNotas.append(fecha, bajar, borrar);
+
+    // La partida: los descansos (con D&D) y empezar de cero.
+    const filaPartida = crear("div", "oc-vida-descansos");
+    const esDnd = botones && botones.dataset.ocSistema === "dnd5e";
+    const boton = (txt, alPulsar) => {
+        const b = crear("button", "oc-vida-accion", txt);
+        b.type = "button";
+        b.addEventListener("click", alPulsar);
+        filaPartida.appendChild(b);
+        return b;
+    };
+    const descansar = (tipo) => {
+        if (window.ocVida) {
+            window.ocVida.descansar(tipo);
+        } else if (window.ocCasillas) {
+            window.ocCasillas.descansar(tipo);
+        }
+    };
+    if (esDnd) {
+        boton("☕ descanso corto", () => {
+            descansar("corto");
+            avisar("Descanso corto: recargado lo que se recarga con él.");
+        });
+        boton("🛏️ descanso largo", () => {
+            descansar("largo");
+            avisar("Descanso largo: todo recargado y la vida al máximo.");
+        });
+    }
+    let deCero = false;
+    const cero = boton("🔄 empezar de cero", () => {
+        if (!deCero) {
+            deCero = true;
+            cero.textContent = "🔄 ¿seguro? pulsa otra vez";
+            setTimeout(() => {
+                deCero = false;
+                cero.textContent = "🔄 empezar de cero";
+            }, 4000);
+            return;
+        }
+        deCero = false;
+        cero.textContent = "🔄 empezar de cero";
+        if (window.ocCasillas) {
+            window.ocCasillas.descansar("todo");
+        }
+        if (window.ocVida) {
+            window.ocVida.reiniciar();
+        }
+        if (window.ocDados && window.ocDados.reiniciarHambre) {
+            window.ocDados.reiniciarHambre();
+        }
+        avisar("Partida de cero: todo desmarcado y la vida al máximo. Las notas se quedan.");
+    });
+    caja.append(
+        ventanita("notas-de-" + (partida.clave || "sesion") + ".txt", "📝", [etiqueta, texto, filaNotas]),
+        ventanita("partida.dat", "🎲", [crear("p", "oc-hoja-nota", "Lo que marcas en la ficha de " + nombre
+            + " (usos, espacios, la vida…) se guarda en este navegador."), filaPartida, aviso]));
+    sitio.replaceChildren(caja);
+})();
+
+// =========================================
+// LA INICIATIVA
+// =========================================
+// En la pestaña ⏱️ iniciativa: el orden de los turnos del combate. Se
+// añade a quien sea con su nombre y su tipo (personaje, npc o monstruo;
+// cada uno con su color) y, si se quiere, su iniciativa, su CA y sus PG.
+// Se ordena arrastrando (por el ⠿, con el ratón o el dedo), con ↑ y ↓
+// (con el teclado) o por la iniciativa de mayor a menor. «siguiente
+// turno» marca a quién le toca y cuenta las rondas. Es la misma en todas
+// las fichas (se guarda en el navegador: «richi-oc-iniciativa»).
+
+(function () {
+    const sitio = document.querySelector("[data-oc-iniciativa]");
+    if (!sitio) {
+        return;
+    }
+    const CLAVE = "richi-oc-iniciativa";
+    const TIPOS = [["personaje", "personaje"], ["npc", "npc"], ["monstruo", "monstruo"]];
+    let datos = { lista: [], turno: -1, ronda: 1 };
+    try {
+        datos = Object.assign(datos, JSON.parse(localStorage.getItem(CLAVE) || "{}"));
+    } catch (e) {
+        // Sin almacenamiento: empieza vacía.
+    }
+    const guardar = () => {
+        try {
+            localStorage.setItem(CLAVE, JSON.stringify(datos));
+        } catch (e) {
+            // Sin almacenamiento: da igual.
+        }
+    };
+    const crear = (tag, clase, texto) => {
+        const x = document.createElement(tag);
+        if (clase) {
+            x.className = clase;
+        }
+        if (texto !== undefined) {
+            x.textContent = texto;
+        }
+        return x;
+    };
+    const botonDe = (clase, texto, alPulsar, etiqueta) => {
+        const b = crear("button", clase, texto);
+        b.type = "button";
+        if (etiqueta) {
+            b.setAttribute("aria-label", etiqueta);
+        }
+        b.addEventListener("click", alPulsar);
+        return b;
+    };
+    const aviso = crear("p", "visually-hidden");
+    aviso.setAttribute("role", "status");
+    const avisar = (texto) => {
+        aviso.textContent = "";
+        setTimeout(() => {
+            aviso.textContent = texto;
+        }, 50);
+    };
+    const numeroDe = (v) => (v === "" || v === null || v === undefined || isNaN(parseInt(v, 10)) ? "" : parseInt(v, 10));
+
+    // ---- AÑADIR ----
+    const form = crear("form", "oc-ini-nuevo");
+    const campo = (id, texto, tipo, extra) => {
+        const caja = crear("div", "oc-ini-campo" + (extra ? " " + extra : ""));
+        const l = crear("label", "oc-dados-etiqueta", texto);
+        const i = crear(tipo === "select" ? "select" : "input", tipo === "select" ? "oc-dados-elegir" : "oc-dados-texto");
+        i.id = id;
+        if (tipo !== "select") {
+            i.type = tipo;
+            if (tipo === "number") {
+                i.inputMode = "numeric";
+            }
+        }
+        l.htmlFor = id;
+        caja.append(l, i);
+        form.appendChild(caja);
+        return i;
+    };
+    const nombre = campo("oc-ini-nombre", "nombre", "text", "es-nombre");
+    nombre.required = true;
+    nombre.autocomplete = "off";
+    const tipo = campo("oc-ini-tipo", "tipo", "select");
+    TIPOS.forEach(([v, t]) => {
+        const o = crear("option", "", t);
+        o.value = v;
+        tipo.appendChild(o);
+    });
+    tipo.value = "monstruo";
+    const ini = campo("oc-ini-ini", "iniciativa", "number");
+    const ca = campo("oc-ini-ca", "CA", "number");
+    const pg = campo("oc-ini-pg", "PG", "number");
+    const anadir = crear("button", "oc-vida-accion es-principal", "＋ añadir");
+    anadir.type = "submit";
+    form.appendChild(anadir);
+    form.addEventListener("submit", (e) => {
+        e.preventDefault();
+        if (!nombre.value.trim()) {
+            avisar("Ponle nombre.");
+            nombre.focus();
+            return;
+        }
+        meter({ nombre: nombre.value.trim(), tipo: tipo.value, ini: numeroDe(ini.value), ca: numeroDe(ca.value),
+            pg: numeroDe(pg.value) });
+        nombre.value = "";
+        ini.value = "";
+        ca.value = "";
+        pg.value = "";
+        nombre.focus();
+    });
+
+    // Este personaje, con su iniciativa tirada (y su CA y sus PG).
+    const botones = document.querySelector("[data-oc-botones]");
+    const yo = botones && botones.dataset.ocNombre;
+    let anadirme = null;
+    if (yo) {
+        anadirme = botonDe("oc-vida-accion", "＋ " + yo + " (tirar su iniciativa)", () => {
+            const bono = parseInt(botones.dataset.ocIni || "0", 10) || 0;
+            const r = window.ocDados ? window.ocDados.tirar("1d20" + (bono ? (bono > 0 ? "+" : "") + bono : ""),
+                "iniciativa de " + yo) : null;
+            const vida = window.ocPartida && window.ocPartida.leer("vida");
+            meter({ nombre: yo, tipo: "personaje", ini: r ? r.total : "", ca: numeroDe(botones.dataset.ocCa),
+                pg: vida && vida.actual !== undefined ? vida.actual : numeroDe(botones.dataset.ocPg) });
+        });
+    }
+
+    function meter(c) {
+        c.id = Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+        datos.lista.push(c);
+        guardar();
+        pintar();
+        avisar("Añadido: " + c.nombre + (c.ini !== "" ? ", iniciativa " + c.ini : "") + ".");
+    }
+
+    // ---- LA LISTA ----
+    const ronda = crear("p", "oc-ini-ronda");
+    const lista = crear("ol", "oc-ini-lista");
+    lista.setAttribute("aria-label", "Orden de los turnos");
+    const siguiente = botonDe("oc-vida-accion es-principal", "▶ siguiente turno", () => {
+        if (!datos.lista.length) {
+            return;
+        }
+        datos.turno += 1;
+        if (datos.turno >= datos.lista.length) {
+            datos.turno = 0;
+            datos.ronda += 1;
+        }
+        if (datos.turno < 0) {
+            datos.turno = 0;
+        }
+        guardar();
+        pintar();
+        const c = datos.lista[datos.turno];
+        avisar("Ronda " + datos.ronda + ": le toca a " + c.nombre + ".");
+    });
+    const ordenar = botonDe("oc-vida-accion", "⇅ por iniciativa", () => {
+        const deAhora = datos.lista[datos.turno];
+        datos.lista.sort((a, b) => (b.ini === "" ? -999 : b.ini) - (a.ini === "" ? -999 : a.ini));
+        datos.turno = deAhora ? datos.lista.indexOf(deAhora) : -1;
+        guardar();
+        pintar();
+        avisar("Ordenados por iniciativa.");
+    });
+    let seguro = false;
+    const vaciar = botonDe("oc-vida-accion", "🗑️ vaciar", () => {
+        if (!seguro) {
+            seguro = true;
+            vaciar.textContent = "🗑️ ¿seguro? pulsa otra vez";
+            setTimeout(() => {
+                seguro = false;
+                vaciar.textContent = "🗑️ vaciar";
+            }, 4000);
+            return;
+        }
+        seguro = false;
+        vaciar.textContent = "🗑️ vaciar";
+        datos = { lista: [], turno: -1, ronda: 1 };
+        guardar();
+        pintar();
+        avisar("Combate vacío.");
+    });
+
+    function mover(desde, hasta, foco) {
+        if (hasta < 0 || hasta >= datos.lista.length || desde === hasta) {
+            return;
+        }
+        const deAhora = datos.lista[datos.turno];
+        const [c] = datos.lista.splice(desde, 1);
+        datos.lista.splice(hasta, 0, c);
+        datos.turno = deAhora ? datos.lista.indexOf(deAhora) : -1;
+        guardar();
+        pintar();
+        avisar(c.nombre + ": puesto " + (hasta + 1) + " de " + datos.lista.length + ".");
+        if (foco) {
+            const b = lista.querySelectorAll(foco)[hasta];
+            if (b) {
+                b.focus();
+            }
+        }
+    }
+
+    function numeroEn(c, campoN, texto, i) {
+        const caja = crear("label", "oc-ini-dato");
+        caja.appendChild(crear("span", "oc-ini-dato-nombre", texto));
+        const input = crear("input", "oc-ini-numero");
+        input.type = "number";
+        input.inputMode = "numeric";
+        input.value = c[campoN] === "" || c[campoN] === undefined ? "" : String(c[campoN]);
+        input.setAttribute("aria-label", texto + " de " + c.nombre);
+        input.addEventListener("change", () => {
+            c[campoN] = numeroDe(input.value);
+            guardar();
+        });
+        caja.appendChild(input);
+        return caja;
+    }
+
+    function pintar() {
+        ronda.textContent = datos.lista.length ? "ronda " + datos.ronda : "";
+        lista.replaceChildren(...datos.lista.map((c, i) => {
+            const li = crear("li", "oc-ini-fila es-" + c.tipo + (i === datos.turno ? " es-su-turno" : ""));
+            li.dataset.id = c.id;
+            if (i === datos.turno) {
+                li.setAttribute("aria-current", "true");
+            }
+            const asa = crear("span", "oc-ini-asa", "⠿");
+            asa.setAttribute("aria-hidden", "true");
+            asa.title = "Arrástralo para cambiarlo de sitio";
+            asa.addEventListener("pointerdown", (e) => empezarArrastre(e, li, i));
+            const quien = crear("div", "oc-ini-quien");
+            const n = crear("span", "oc-ini-nombre", c.nombre);
+            const t = crear("span", "oc-ini-tipo", c.tipo);
+            quien.append(n, t);
+            if (i === datos.turno) {
+                quien.prepend(crear("span", "oc-ini-le-toca", "▶ le toca"));
+            }
+            const datosC = crear("div", "oc-ini-datos");
+            datosC.append(numeroEn(c, "ini", "ini", i), numeroEn(c, "ca", "CA", i), numeroEn(c, "pg", "PG", i));
+            const mandos = crear("div", "oc-ini-mandos");
+            mandos.append(
+                botonDe("oc-ini-mando es-subir", "↑", () => mover(i, i - 1, ".es-subir"), "Subir a " + c.nombre),
+                botonDe("oc-ini-mando es-bajar", "↓", () => mover(i, i + 1, ".es-bajar"), "Bajar a " + c.nombre),
+                botonDe("oc-ini-mando", "✕", () => {
+                    const deAhora = datos.lista[datos.turno];
+                    datos.lista.splice(i, 1);
+                    datos.turno = deAhora && deAhora !== c ? datos.lista.indexOf(deAhora) : Math.min(datos.turno, datos.lista.length - 1);
+                    guardar();
+                    pintar();
+                    avisar("Quitado: " + c.nombre + ".");
+                    (lista.querySelectorAll(".oc-ini-mando")[Math.min(i, datos.lista.length - 1) * 3 + 2] || nombre).focus();
+                }, "Quitar a " + c.nombre));
+            li.append(asa, quien, datosC, mandos);
+            return li;
+        }));
+        lista.hidden = !datos.lista.length;
+        vacio.hidden = !!datos.lista.length;
+    }
+
+    // ARRASTRAR: por el ⠿, con el ratón o el dedo; al soltar, se queda
+    // donde esté.
+    function empezarArrastre(e, li, desde) {
+        e.preventDefault();
+        const filas = Array.from(lista.children);
+        const alto = li.getBoundingClientRect().height;
+        const inicioY = e.clientY;
+        let hasta = desde;
+        li.classList.add("es-arrastrado");
+        const mientras = (ev) => {
+            const dy = ev.clientY - inicioY;
+            li.style.transform = "translateY(" + dy + "px)";
+            hasta = Math.max(0, Math.min(filas.length - 1, desde + Math.round(dy / (alto + 8))));
+            filas.forEach((f, j) => {
+                let mueve = 0;
+                if (j !== desde) {
+                    if (desde < hasta && j > desde && j <= hasta) {
+                        mueve = -(alto + 8);
+                    } else if (desde > hasta && j < desde && j >= hasta) {
+                        mueve = alto + 8;
+                    }
+                    f.style.transform = mueve ? "translateY(" + mueve + "px)" : "";
+                }
+            });
+        };
+        const fin = () => {
+            document.removeEventListener("pointermove", mientras);
+            document.removeEventListener("pointerup", fin);
+            document.removeEventListener("pointercancel", fin);
+            filas.forEach((f) => {
+                f.style.transform = "";
+            });
+            li.classList.remove("es-arrastrado");
+            mover(desde, hasta, null);
+        };
+        document.addEventListener("pointermove", mientras);
+        document.addEventListener("pointerup", fin);
+        document.addEventListener("pointercancel", fin);
+    }
+
+    const vacio = crear("p", "oc-vacio", "Todavía no hay nadie en el combate.");
+    const caja = crear("div", "oc-hoja");
+    const ventanita = (titulo, emoji, dentro) => {
+        const v = crear("div", "oc-hoja-caja es-ancha");
+        const barra = crear("div", "recent-entries-header");
+        const h = crear("h3", "oc-hoja-titulo");
+        const em = crear("span", "oc-hoja-emoji", emoji);
+        em.setAttribute("aria-hidden", "true");
+        h.append(em, document.createTextNode(titulo));
+        barra.appendChild(h);
+        const d = crear("div", "oc-hoja-dentro");
+        d.append(...dentro);
+        v.append(barra, d);
+        return v;
+    };
+    const mandos = crear("div", "oc-vida-descansos");
+    mandos.append(siguiente, ordenar, vaciar);
+    const leyenda = crear("p", "oc-hoja-nota", "Arrastra por el ⠿ (o usa ↑ y ↓) para cambiar el orden. Iniciativa, CA y"
+        + " PG son opcionales.");
+    caja.append(
+        ventanita("combate.ini", "⏱️", [ronda, mandos, vacio, lista, leyenda]),
+        ventanita("añadir.txt", "＋", anadirme ? [form, anadirme] : [form]));
+    sitio.replaceChildren(caja, aviso);
+    pintar();
+})();
+
+// =========================================
+// EL BUSCADOR DE LAS REGLAS
+// =========================================
+// En la pestaña 📚 reglas: escribir filtra las reglas (por su nombre y su
+// texto, sin mirar tildes) y abre las que casan.
+
+(function () {
+    const sitio = document.querySelector("[data-oc-reglas]");
+    if (!sitio) {
+        return;
+    }
+    const llano = (t) => String(t || "").normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
+    const reglas = Array.from(sitio.querySelectorAll(".oc-regla"));
+    const grupos = Array.from(sitio.querySelectorAll(".oc-reglas-grupo"));
+    const caja = document.createElement("div");
+    caja.className = "oc-reglas-buscar";
+    const etiqueta = document.createElement("label");
+    etiqueta.className = "oc-dados-etiqueta";
+    etiqueta.textContent = "buscar";
+    const input = document.createElement("input");
+    input.type = "search";
+    input.id = "oc-reglas-buscar";
+    input.className = "oc-dados-texto";
+    input.placeholder = "concentración, derribado, cobertura…";
+    etiqueta.htmlFor = input.id;
+    const cuantas = document.createElement("p");
+    cuantas.className = "oc-hoja-nota";
+    cuantas.setAttribute("role", "status");
+    caja.append(etiqueta, input, cuantas);
+    sitio.prepend(caja);
+    let espera = 0;
+    input.addEventListener("input", () => {
+        clearTimeout(espera);
+        espera = setTimeout(() => {
+            const q = llano(input.value.trim());
+            let n = 0;
+            reglas.forEach((r) => {
+                const vale = !q || llano(r.textContent).includes(q);
+                r.hidden = !vale;
+                r.querySelector("details").open = !!q && vale;
+                if (vale) {
+                    n++;
+                }
+            });
+            grupos.forEach((g) => {
+                g.hidden = !g.querySelector(".oc-regla:not([hidden])");
+            });
+            cuantas.textContent = q ? (n ? n + (n === 1 ? " regla" : " reglas") : "Ninguna regla con eso.") : "";
+        }, 150);
     });
 })();

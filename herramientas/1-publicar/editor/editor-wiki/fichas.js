@@ -26,7 +26,7 @@ const EMOJIS_DE_COLECCIONES = {
     rol: "🎒", npcs: "👥", campana: "📜", misiones: "📌", botin: "🗡️", dinero: "💰", personajes: "🧙",
     recomendaciones: "⭐", "en-lo-que-ando": "📝", gatos: "🐱", reto: "🗓️", calendario: "📆", linea: "⏳",
     diccionario: "🔤", "compendio-conjuros": "✨", "compendio-objetos": "🎁", "compendio-rasgos": "🧬",
-    "compendio-acciones": "⚔️",
+    "compendio-acciones": "⚔️", "reglas-dnd": "📚",
 };
 
 async function cargarColeccionesWeb() {

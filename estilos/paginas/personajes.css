@@ -2125,6 +2125,7 @@ li > .oc-origen {
 .oc-dados-mod:focus-visible,
 .oc-dados-borrar-todo:focus-visible,
 .oc-dados-repetir:focus-visible,
+.oc-dados-guardar:focus-visible,
 .oc-dados-quitar:focus-visible {
     outline: 2px solid var(--yellow);
     outline-offset: 2px;
@@ -2297,6 +2298,7 @@ li > .oc-origen {
 .oc-dados-borrar-todo,
 .oc-dados-ventaja,
 .oc-dados-repetir,
+.oc-dados-guardar,
 .oc-dados-quitar {
     padding: 2px 8px;
     border: 1px solid currentColor;
@@ -2393,6 +2395,7 @@ li > .oc-origen {
 
 .oc-dados-ventaja:focus-visible,
 .oc-dados-repetir:focus-visible,
+.oc-dados-guardar:focus-visible,
 .oc-dados-quitar:focus-visible {
     outline: 2px solid currentColor;
     outline-offset: 2px;
@@ -3825,6 +3828,627 @@ button.oc-casilla[data-estado="libre"]:hover {
 .oc-resultado-cerrar:focus-visible {
     outline: 2px solid var(--yellow);
     outline-offset: 2px;
+}
+
+/* ---- PARA LA PARTIDA (personajes.js): la vida, las tiradas guardadas,
+   ataque y daño a la vez, la iniciativa, las notas y las reglas ---- */
+
+/* Los PG del post-it, ya botón: «27/38PG +5», en toda la fila. */
+.oc-vital.es-vida {
+    grid-column: 1 / -1;
+}
+
+/* Los PG del post-it, ya botón: «27/38PG +5». */
+.oc-vida-boton {
+    padding: 0;
+    border: 0;
+    border-bottom: 2px dotted var(--yellow);
+    background: transparent;
+    color: inherit;
+    font: inherit;
+    cursor: pointer;
+}
+
+.oc-vida-boton:hover,
+.oc-vida-boton:focus-visible {
+    outline: 2px solid var(--yellow);
+    outline-offset: 2px;
+}
+
+.oc-vida-max {
+    font-size: 0.75em;
+    font-weight: 400;
+}
+
+.oc-vida-temp {
+    margin-left: 4px;
+    padding: 0 4px;
+    background: var(--yellow);
+    color: var(--yellow-contrast);
+    font-family: var(--fuente-mono);
+    font-size: 0.6875rem;
+    font-weight: 700;
+    vertical-align: middle;
+}
+
+/* A 0 PG: la raya de debajo, doble (el lector lo dice con palabras). */
+.oc-vida-boton.es-caido {
+    border-bottom: 4px double var(--yellow);
+}
+
+/* La ventana de la vida. */
+.oc-vida {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.oc-vida-grande {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 6px 10px;
+    margin: 0;
+    color: var(--white);
+    font-family: var(--fuente-mono);
+    font-size: 1rem;
+}
+
+.oc-vida-actual {
+    font-size: 2.75rem;
+    font-weight: 700;
+    line-height: 1;
+}
+
+.oc-vida-grande .oc-vida-temp {
+    font-size: 0.8125rem;
+}
+
+.oc-vida-fila {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.oc-vida-cantidad {
+    width: 6rem;
+    min-height: 44px;
+    border: 2px solid var(--yellow);
+}
+
+.oc-vida-acciones,
+.oc-vida-descansos {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.oc-vida-accion {
+    min-height: 44px;
+    padding: 6px 12px;
+    border: 2px solid var(--yellow);
+    background: transparent;
+    color: var(--yellow);
+    font-family: var(--fuente-mono);
+    font-size: 0.8125rem;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.oc-vida-accion:hover,
+.oc-vida-accion.es-principal {
+    background: var(--yellow);
+    color: var(--yellow-contrast);
+}
+
+.oc-vida-accion:focus-visible {
+    outline: 3px solid var(--yellow);
+    outline-offset: 2px;
+}
+
+.oc-vida-muerte {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin: 0;
+    padding: 10px 12px 12px;
+    border: 2px dashed var(--border);
+}
+
+.oc-vida-muerte legend {
+    padding: 0 6px;
+    color: var(--yellow);
+    font-family: var(--fuente-mono);
+    font-size: 0.75rem;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+}
+
+.oc-vida-muerte-fila {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 6px;
+}
+
+.oc-vida-muerte-nombre {
+    width: 4.5rem;
+    color: var(--white);
+    font-family: var(--fuente-mono);
+    font-size: 0.8125rem;
+}
+
+.oc-vida-muerte .oc-casilla {
+    width: 1.75rem;
+    height: 1.75rem;
+}
+
+.oc-vida-aviso {
+    min-height: 1.4em;
+    margin: 0;
+    color: var(--white);
+    font-family: var(--fuente-mono);
+    font-size: 0.8125rem;
+}
+
+.oc-menu-ventana.es-vida {
+    width: min(24rem, 100%);
+}
+
+/* Los campos de texto de la ventana de los dados y de la partida. */
+.oc-dados-texto {
+    width: 100%;
+    min-height: 40px;
+    padding: 4px 8px;
+    border: 2px solid var(--yellow);
+    background: var(--purple);
+    color: var(--white);
+    font-family: var(--fuente-mono);
+    font-size: 0.875rem;
+}
+
+.oc-dados-texto:focus-visible {
+    outline: 2px solid var(--yellow);
+    outline-offset: 2px;
+}
+
+.oc-dados-ayuda {
+    margin: 0;
+    color: var(--muted);
+    font-family: var(--fuente-mono);
+    font-size: 0.6875rem;
+}
+
+/* LAS TIRADAS GUARDADAS, en la ventana de los dados. */
+.oc-dados-guardadas {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.oc-dados-guardadas .oc-dados-subtitulo {
+    margin: 0;
+}
+
+.oc-guardadas {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.oc-guardadas[hidden] {
+    display: none;
+}
+
+.oc-guardada {
+    display: flex;
+    gap: 6px;
+}
+
+.oc-guardada-tirar {
+    display: flex;
+    flex: 1 1 auto;
+    flex-direction: column;
+    align-items: flex-start;
+    min-width: 0;
+    padding: 6px 10px;
+    border: 2px solid var(--yellow);
+    background: transparent;
+    color: var(--yellow);
+    text-align: left;
+    cursor: pointer;
+}
+
+.oc-guardada-tirar:hover {
+    background: var(--yellow);
+    color: var(--yellow-contrast);
+}
+
+.oc-guardada-tirar:focus-visible {
+    outline: 2px solid var(--yellow);
+    outline-offset: 2px;
+}
+
+.oc-guardada-nombre {
+    font-weight: 700;
+}
+
+.oc-guardada-formula {
+    font-family: var(--fuente-mono);
+    font-size: 0.75rem;
+}
+
+.oc-guardada .oc-dados-quitar {
+    color: var(--yellow);
+}
+
+.oc-guardada-nueva {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.oc-guardada-nueva summary {
+    align-self: flex-start;
+    padding: 4px 10px;
+    border: 2px dashed var(--yellow);
+    color: var(--yellow);
+    font-family: var(--fuente-mono);
+    font-size: 0.8125rem;
+    cursor: pointer;
+}
+
+.oc-guardada-nueva summary:focus-visible {
+    outline: 2px solid var(--yellow);
+    outline-offset: 2px;
+}
+
+.oc-guardada-nueva[open] {
+    padding: 10px;
+    border: 1px dashed var(--border);
+}
+
+.oc-guardada-nueva[open] > :not(summary) {
+    margin-top: 6px;
+}
+
+/* ATAQUE Y DAÑO A LA VEZ: la columna de más de la tabla de ataques. */
+.oc-ataque-ambas-boton {
+    min-width: 44px;
+    min-height: 36px;
+    padding: 2px 8px;
+    border: 2px solid var(--yellow);
+    background: transparent;
+    font-family: initial;
+    font-size: 0.875rem;
+    cursor: pointer;
+}
+
+.oc-ataque-ambas-boton:hover {
+    background: var(--yellow);
+}
+
+.oc-ataque-ambas-boton:focus-visible {
+    outline: 2px solid var(--yellow);
+    outline-offset: 2px;
+}
+
+/* El aviso con varias tiradas: el nombre arriba y cada una separada. */
+.oc-resultado-nombre {
+    margin: 0 0 6px;
+    color: var(--yellow);
+    font-family: var(--fuente-mono);
+    font-size: 0.875rem;
+    font-weight: 700;
+}
+
+.oc-resultado-uno.es-de-varias + .oc-resultado-uno {
+    margin-top: 8px;
+    padding-top: 8px;
+    border-top: 1px dashed var(--border);
+}
+
+.oc-resultado-uno.es-de-varias .oc-resultado-total {
+    font-size: 2.25rem;
+}
+
+/* LA INICIATIVA. */
+.oc-ini-ronda {
+    margin: 0 0 10px;
+    color: var(--yellow);
+    font-family: var(--fuente-mono);
+    font-size: 0.875rem;
+    font-weight: 700;
+    text-transform: uppercase;
+}
+
+.oc-ini-ronda:empty {
+    display: none;
+}
+
+.oc-ini-lista {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin: 14px 0 0;
+    padding: 0;
+    list-style: none;
+}
+
+.oc-ini-lista[hidden] {
+    display: none;
+}
+
+/* Cada uno: la raya de su color a la izquierda (personaje, npc,
+   monstruo) y su tipo escrito (el color no lo dice solo). */
+.oc-ini-fila {
+    --oc-ini-color: var(--oc-verde);
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    grid-template-areas: "asa quien mandos" "asa datos datos";
+    align-items: center;
+    gap: 6px 10px;
+    padding: 8px 10px 8px 0;
+    border: 2px solid var(--border);
+    border-left: 8px solid var(--oc-ini-color);
+    background: var(--purple-lighter);
+}
+
+.oc-ini-fila.es-npc {
+    --oc-ini-color: var(--oc-azul);
+}
+
+.oc-ini-fila.es-monstruo {
+    --oc-ini-color: var(--oc-rojo);
+}
+
+.oc-ini-fila.es-su-turno {
+    border-color: var(--yellow);
+    box-shadow: 0 0 0 2px var(--yellow);
+}
+
+.oc-ini-fila.es-arrastrado {
+    position: relative;
+    z-index: 2;
+    box-shadow: 6px 6px 0 var(--oc-color);
+}
+
+.oc-ini-asa {
+    grid-area: asa;
+    align-self: stretch;
+    display: flex;
+    align-items: center;
+    padding: 0 8px;
+    color: var(--muted);
+    font-size: 1.25rem;
+    cursor: grab;
+    touch-action: none;
+    user-select: none;
+}
+
+.oc-ini-quien {
+    grid-area: quien;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 4px 8px;
+    min-width: 0;
+}
+
+.oc-ini-nombre {
+    color: var(--white);
+    font-weight: 700;
+}
+
+.oc-ini-tipo {
+    padding: 0 6px;
+    border: 1px solid var(--oc-ini-color);
+    color: var(--yellow);
+    font-family: var(--fuente-mono);
+    font-size: 0.6875rem;
+}
+
+.oc-ini-le-toca {
+    padding: 0 6px;
+    background: var(--yellow);
+    color: var(--yellow-contrast);
+    font-family: var(--fuente-mono);
+    font-size: 0.6875rem;
+    font-weight: 700;
+}
+
+.oc-ini-datos {
+    grid-area: datos;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.oc-ini-dato {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    color: var(--muted);
+    font-family: var(--fuente-mono);
+    font-size: 0.6875rem;
+    text-transform: uppercase;
+}
+
+.oc-ini-numero {
+    width: 3.6rem;
+    min-height: 36px;
+    padding: 2px 4px;
+    border: 2px solid var(--yellow);
+    background: var(--purple);
+    color: var(--white);
+    font-family: var(--fuente-mono);
+    font-size: 0.875rem;
+    text-align: center;
+}
+
+.oc-ini-numero:focus-visible {
+    outline: 2px solid var(--yellow);
+    outline-offset: 2px;
+}
+
+.oc-ini-mandos {
+    grid-area: mandos;
+    display: flex;
+    gap: 4px;
+}
+
+.oc-ini-mando {
+    width: 36px;
+    height: 36px;
+    padding: 0;
+    border: 2px solid var(--yellow);
+    background: transparent;
+    color: var(--yellow);
+    font-size: 0.875rem;
+    cursor: pointer;
+}
+
+.oc-ini-mando:hover {
+    background: var(--yellow);
+    color: var(--yellow-contrast);
+}
+
+.oc-ini-mando:focus-visible {
+    outline: 2px solid var(--yellow);
+    outline-offset: 2px;
+}
+
+.oc-ini-nuevo {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 6rem), 1fr));
+    align-items: end;
+    gap: 10px;
+    margin-bottom: 12px;
+}
+
+.oc-ini-campo {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.oc-ini-campo.es-nombre {
+    grid-column: 1 / -1;
+}
+
+.oc-ini-nuevo .oc-dados-elegir {
+    min-height: 40px;
+}
+
+/* LAS NOTAS. */
+.oc-notas-etiqueta {
+    display: block;
+    margin-bottom: 6px;
+    color: var(--yellow);
+    font-family: var(--fuente-mono);
+    font-size: 0.75rem;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+}
+
+.oc-notas-texto {
+    width: 100%;
+    min-height: 14rem;
+    margin-bottom: 10px;
+    padding: 10px 12px;
+    border: 2px solid var(--yellow);
+    background: var(--purple);
+    color: var(--white);
+    font-family: var(--fuente-mono);
+    font-size: 0.9375rem;
+    line-height: 1.5;
+    resize: vertical;
+}
+
+.oc-notas-texto:focus-visible {
+    outline: 2px solid var(--yellow);
+    outline-offset: 2px;
+}
+
+/* LAS REGLAS. */
+.oc-reglas-buscar {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-bottom: 16px;
+}
+
+.oc-reglas-grupo + .oc-reglas-grupo {
+    margin-top: 22px;
+}
+
+.oc-reglas-grupo[hidden],
+.oc-regla[hidden] {
+    display: none;
+}
+
+.oc-reglas-titulo {
+    display: inline-block;
+    margin: 0 0 10px;
+    padding: 2px 10px;
+    background: var(--yellow);
+    color: var(--yellow-contrast);
+    font-family: var(--fuente-mono);
+    font-size: 0.8125rem;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+}
+
+.oc-reglas-lista {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.oc-regla summary {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-height: 40px;
+    padding: 4px 10px;
+    border: 2px solid var(--yellow);
+    color: var(--yellow);
+    font-family: var(--fuente-mono);
+    font-size: 0.875rem;
+    font-weight: 700;
+    list-style: none;
+    cursor: pointer;
+}
+
+.oc-regla summary::-webkit-details-marker {
+    display: none;
+}
+
+.oc-regla summary:focus-visible {
+    outline: 2px solid var(--yellow);
+    outline-offset: 2px;
+}
+
+.oc-regla details[open] summary {
+    background: var(--yellow);
+    color: var(--yellow-contrast);
+}
+
+.oc-regla details[open] .oc-desplegable-flecha {
+    transform: rotate(90deg);
+}
+
+.oc-regla .oc-texto {
+    padding: 10px 12px 4px;
+    border: 2px solid var(--yellow);
+    border-top: 0;
+    font-size: 0.9375rem;
 }
 
 /* LOS DADOS DE OTROS SISTEMAS: la reserva de Vampiro, arriba de la

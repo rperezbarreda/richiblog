@@ -1728,6 +1728,23 @@ def colecciones():
                      ]}]}
         for tipo, art in (("conjuros", "los"), ("objetos", "los"), ("rasgos", "los"), ("acciones", "las"))
     ] + [
+        # LAS REGLAS RÁPIDAS DE D&D: la pestaña 📚 reglas de las fichas de
+        # D&D (generar-personajes.py: apartado_reglas).
+        {"id": "reglas-dnd", "apartado": "personajes", "titulo": "Reglas rápidas (D&D)",
+         "corto": "Lo que más se busca jugando: estados, combate, concentración…",
+         "ayuda": "Las reglas de la pestaña «reglas» de las fichas de D&D, por grupos (cada una, desplegable y con"
+                  " su buscador). Salen en el orden de aquí.",
+         "archivo": "datos/personajes/reglas-dnd.json", "despues": "personajes",
+         "partes": [{"id": "reglas", "camino": ["reglas"], "titulo": "Las reglas", "nombre_de": "nombre",
+                     "detalle": ["grupo"], "campos": [
+                         C("grupo", "Grupo", "elegir", libre=True, obligatorio=True,
+                           opciones=_opciones(["Estados", "Combate", "Magia", "Descansos y salud",
+                                               "Movimiento y entorno"])),
+                         C("nombre", "Nombre", obligatorio=True),
+                         C("texto", "Lo que dice", "largo", grande=True, markdown=True,
+                           ayuda="Con formato: una lista con «- », **negrita**, *cursiva* (para lo de 2024)."),
+                     ]}]},
+    ] + [
         {"id": "recomendaciones", "apartado": "rincon", "corto": "Libros, series, pelis y juegos.", "titulo": "Recomendaciones",
          "ayuda": "Libros, series, pelis, juegos… las ventanitas de la página de recomendaciones.",
          "archivo": "datos/mi_rincon/recomendaciones.json", "despues": None,

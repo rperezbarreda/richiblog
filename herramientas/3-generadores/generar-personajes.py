@@ -135,9 +135,13 @@ STATS = (("fue", "FUE", "Fuerza"), ("des", "DES", "Destreza"), ("con", "CON", "C
 # SUBPESTANAS_DE_FICHA.
 PESTANAS = (("historia", "📖", "historia"), ("ficha", "📋", "ficha"), ("criaturas", "🐾", "criaturas"),
             ("gente", "👥", "npcs"), ("frases", "💬", "frases"),
-            ("imagenes", "🖼️", "imágenes"), ("inspiracion", "🎨", "inspiración"), ("extra", "📎", "extra"))
-# Las que solo salen si tienen algo.
-PESTANAS_SI_HAY = ("criaturas", "frases", "inspiracion")
+            ("imagenes", "🖼️", "imágenes"), ("inspiracion", "🎨", "inspiración"), ("extra", "📎", "extra"),
+            ("iniciativa", "⏱️", "iniciativa"), ("notas", "📝", "notas"), ("reglas", "📚", "reglas"))
+# Las que solo salen si tienen algo (las reglas, solo con D&D).
+PESTANAS_SI_HAY = ("criaturas", "frases", "inspiracion", "reglas")
+# Las reglas rápidas de D&D (la pestaña 📚 reglas): un JSON que se puede
+# cambiar (o en el editor, Rol → «Reglas rápidas»).
+REGLAS = RAIZ / "datos" / "personajes" / "reglas-dnd.json"
 
 # Las subpestañas de la pestaña «ficha» (lo de D&D), en su orden y con su
 # emoji, como las secciones de la hoja de D&D Beyond: qué ventanitas van en
@@ -590,10 +594,22 @@ def botones(p, avisos):
     hambre = hambre_de(p)
     aspecto = str(p.get("aspecto_dados") or "").strip()
     aspecto = aspecto if re.fullmatch(r"[a-z]+", aspecto) else ""
-    return ('                <div class="oc-botones" data-oc-botones data-oc-sistema="%s"%s%s>'
+    # Y para el modo partida: su clave (donde se guarda lo suyo), sus PG
+    # máximos, su CA y su iniciativa (para añadirlo a la iniciativa).
+    pg = re.match(r"\s*(\d+)", str(p.get("pg") or ""))
+    extra = ' data-oc-clave="%s" data-oc-nombre="%s"' % (e(clave_de(p)), e(str(p.get("nombre") or "")))
+    if pg and sistema == "dnd5e":
+        extra += ' data-oc-pg="%s"' % pg.group(1)
+    ca = re.match(r"\s*(\d+)", str(p.get("ca") or ""))
+    if ca:
+        extra += ' data-oc-ca="%s"' % ca.group(1)
+    des = numero(p.get("des"))
+    if des is not None and sistema == "dnd5e":
+        extra += ' data-oc-ini="%d"' % modificador_num(des)
+    return ('                <div class="oc-botones" data-oc-botones data-oc-sistema="%s"%s%s%s>'
             '<div class="oc-botones-pila" data-oc-botones-pdf>%s%s</div></div>'
             % (sistema, (' data-oc-hambre="%d"' % hambre) if hambre is not None else "",
-               (' data-oc-aspecto="%s"' % aspecto) if aspecto else "", "".join(enlaces), pdf))
+               (' data-oc-aspecto="%s"' % aspecto) if aspecto else "", extra, "".join(enlaces), pdf))
 
 
 # LA GENTE: sus relaciones y su árbol familiar. Cada persona de «gente»
@@ -752,6 +768,43 @@ def apartado_gente(gente, c, personajes, avisos, p=None):
 # =========================================
 # LAS FRASES, LA MÚSICA Y LA INSPIRACIÓN
 # =========================================
+
+# =========================================
+# PARA LA PARTIDA: LA INICIATIVA, LAS NOTAS Y LAS REGLAS
+# =========================================
+# La iniciativa y las notas las monta personajes.js (y se guardan en el
+# navegador): aquí solo su sitio. Las reglas salen de REGLAS, por grupos,
+# cada una desplegable (y personajes.js les pone un buscador).
+
+APARTADO_INICIATIVA = ('<div class="oc-iniciativa" data-oc-iniciativa><p class="oc-vacio">El orden de los turnos'
+                       ' del combate necesita JavaScript.</p></div>')
+APARTADO_NOTAS = ('<div class="oc-notas" data-oc-notas><p class="oc-vacio">Las notas de la sesión necesitan'
+                  ' JavaScript.</p></div>')
+
+
+def apartado_reglas(c, personajes, avisos):
+    reglas = [x for x in (leer_json(REGLAS, {}) or {}).get("reglas") or []
+              if isinstance(x, dict) and str(x.get("nombre") or "").strip()]
+    if not reglas:
+        return ""
+    grupos, orden = {}, []
+    for x in reglas:
+        g = str(x.get("grupo") or "Otras").strip()
+        if g not in grupos:
+            grupos[g] = []
+            orden.append(g)
+        grupos[g].append(x)
+    bloques = []
+    for g in orden:
+        cosas = "".join(
+            '<li class="oc-regla"><details><summary><span class="oc-desplegable-flecha" aria-hidden="true">▸</span>'
+            '%s</summary><div class="oc-texto">%s</div></details></li>'
+            % (e(x["nombre"].strip()), markdown(x.get("texto"), c, personajes, avisos)) for x in grupos[g])
+        bloques.append('<div class="oc-reglas-grupo"><h3 class="oc-reglas-titulo">%s</h3><ul class="oc-reglas-lista">%s'
+                       '</ul></div>' % (e(g), cosas))
+    return ('<div class="oc-reglas" data-oc-reglas><p class="oc-hoja-nota">Lo que más se busca jugando a D&amp;D 5e'
+            ' (con lo que cambia en 2024).</p>%s</div>' % "".join(bloques))
+
 
 def apartado_frases(p):
     """💬 Sus frases, una por línea; detrás de un «|», cuándo la dijo."""
@@ -1015,13 +1068,15 @@ MONEDAS = {"pc": "cobre", "pp": "plata", "pe": "electro", "po": "oro", "ppt": "p
            "cp": "cobre", "sp": "plata", "ep": "electro", "gp": "oro", "pt": "platino"}
 
 
-def casillas(n, que):
+def casillas(n, que, recarga=""):
     """Una casilla por uso o por espacio de conjuro, que se puede marcar
     como gastada al pulsarla (personajes.js las vuelve botones; solo para
     llevar la cuenta mientras se juega: no se guarda). «que» es de qué
     son («forma salvaje», «espacios de nivel 1»), para el lector."""
-    return '<span class="oc-casillas" data-oc-casillas="%s">%s</span>' % (
-        e(que), '<span class="oc-casilla"></span>' * n)
+    # «recarga» (corto o largo): con qué descanso se vuelven a desmarcar
+    # (los botones de descanso de la ventana de la vida, en personajes.js).
+    return '<span class="oc-casillas" data-oc-casillas="%s"%s>%s</span>' % (
+        e(que), (' data-oc-recarga="%s"' % recarga) if recarga else "", '<span class="oc-casilla"></span>' * n)
 
 
 # LAS DESCRIPCIONES: lo que sale al desplegar un conjuro, una acción, un
@@ -1265,8 +1320,9 @@ def con_usos(texto):
         return e(texto), ""
     n = int(m.group(2))
     recarga = (m.group(3) or "").strip()
+    descanso = "corto" if "corto" in llano(recarga) else "largo" if recarga else ""
     return e(m.group(1)), ('<span class="oc-usos"><span class="visually-hidden">%d %s: </span>%s%s</span>'
-                           % (n, "uso" if n == 1 else "usos", casillas(min(n, 20), m.group(1).strip().lower()),
+                           % (n, "uso" if n == 1 else "usos", casillas(min(n, 20), m.group(1).strip().lower(), descanso),
                               ('<span class="oc-chapa es-recarga"><span class="visually-hidden">, se recarga: '
                                '</span><span aria-hidden="true">↻ </span>%s</span>' % e(recarga)) if recarga else ""))
 
@@ -1652,7 +1708,7 @@ def apartado_ficha(p, c, personajes, avisos):
         if espacios.get(clave_n):
             n = espacios[clave_n]
             dentro += ('<p class="oc-hoja-espacios">%s<span>%d %s</span></p>'
-                       % (casillas(n, "espacios de %s" % ("nivel " + clave_n if clave_n != "?" else "conjuro")),
+                       % (casillas(n, "espacios de %s" % ("nivel " + clave_n if clave_n != "?" else "conjuro"), "largo"),
                           n, "espacio" if n == 1 else "espacios"))
         if por_nivel.get(clave_n):
             # A dos columnas solo si no se despliega ninguno (desplegado, un
@@ -2255,6 +2311,9 @@ def pestanas(p, c, datos, personajes, avisos):
         "gente": apartado_gente(grupos_de(datos, "gente", c), c, personajes, avisos, p),
         "frases": apartado_frases(p),
         "inspiracion": apartado_inspiracion(p, grupos_de(datos, "moodboard", c), nombre),
+        "iniciativa": APARTADO_INICIATIVA,
+        "notas": APARTADO_NOTAS,
+        "reglas": apartado_reglas(c, personajes, avisos) if sistemas_rol.es_dnd(p) else "",
         "criaturas": apartado_criaturas(grupos_de(datos, "criaturas", c), c, personajes, avisos),
         "imagenes": apartado_imagenes(grupos_de(datos, "imagenes", c), nombre),
         "extra": markdown(p.get("extra"), c, personajes, avisos),
@@ -2297,6 +2356,8 @@ def pestanas(p, c, datos, personajes, avisos):
                     % (ident, ident, cabeza))
         dentro = contenido.get(ident, "")
         clase = "oc-texto" if ident in ("historia", "extra") else "oc-lista"
+        if ident in ("iniciativa", "notas", "reglas"):
+            clase = "oc-partida"
         if ident == "inspiracion":
             clase = "oc-inspiracion"
         cajas.append(
