@@ -584,12 +584,16 @@ def botones(p, avisos):
     # A la izquierda, uno encima de otro, «ficha dndbeyond» y «ficha en
     # pdf» (si no hay PDF subido, personajes.js pone ahí el suyo); a la
     # derecha, el de los dados, grande (también lo pone personajes.js).
-    # Para los dados (personajes.js): el sistema y, en Vampiro, el hambre.
+    # Para los dados (personajes.js): el sistema, en Vampiro el hambre, y
+    # el aspecto de sus dados en 3D (si tiene uno: «aspecto_dados»).
     sistema = sistemas_rol.sistema_de(p)
     hambre = hambre_de(p)
-    return ('                <div class="oc-botones" data-oc-botones data-oc-sistema="%s"%s>'
+    aspecto = str(p.get("aspecto_dados") or "").strip()
+    aspecto = aspecto if re.fullmatch(r"[a-z]+", aspecto) else ""
+    return ('                <div class="oc-botones" data-oc-botones data-oc-sistema="%s"%s%s>'
             '<div class="oc-botones-pila" data-oc-botones-pdf>%s%s</div></div>'
-            % (sistema, (' data-oc-hambre="%d"' % hambre) if hambre is not None else "", "".join(enlaces), pdf))
+            % (sistema, (' data-oc-hambre="%d"' % hambre) if hambre is not None else "",
+               (' data-oc-aspecto="%s"' % aspecto) if aspecto else "", "".join(enlaces), pdf))
 
 
 # LA GENTE: sus relaciones y su árbol familiar. Cada persona de «gente»

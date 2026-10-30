@@ -4064,6 +4064,16 @@
   sistema pide menos movimiento, empiezan apagados). Sin librerías: un
   motor 3D pequeñito en un <canvas> (personajes.js: window.ocDados3d,
   caras() saca las caras de cada sólido de sus vértices).
+  ASPECTOS (SKINS) DE LOS DADOS: en la ventana de los dados, «aspecto»
+  (sale con el 3D encendido): el del tema, hueso, obsidiana, sangre, oro,
+  plata (de metal, con brillo), cristal (se ven las caras de detrás),
+  mármol y madera (con vetas), galaxia (con estrellas), neón (aristas y
+  números que brillan) y arcoíris (cada dado de un color). Al cambiarlo
+  sale un d20 de muestra, y se acuerda en ese navegador. «El de cada
+  personaje» usa el que tenga cada uno en el editor (📇 datos → «Aspecto
+  de sus dados (3D)»; en el JSON, "aspecto_dados"). Los de hambre de
+  Vampiro, siempre rojos. Para añadir uno: ASPECTOS en personajes.js
+  (sus colores y su acabado) y aspectos_dados en editor_web.py.
   RENDIMIENTO (medido con Playwright, también con la CPU 4 y 6 veces más
   lenta): a 60 fotogramas por segundo con 20 dados en un equipo normal.
   Para eso solo se borra y se pinta el trozo por donde ruedan; parados ya

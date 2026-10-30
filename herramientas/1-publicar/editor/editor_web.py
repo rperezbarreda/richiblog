@@ -1269,6 +1269,11 @@ def colecciones():
     # pestañas de D&D solo salen con D&D; las de la hoja genérica, con los
     # demás.
     import sistemas_rol
+    # Los aspectos de los dados en 3D (las mismas claves que ASPECTOS en
+    # scripts/paginas/personajes.js).
+    aspectos_dados = [["hueso", "hueso"], ["obsidiana", "obsidiana"], ["sangre", "sangre"], ["oro", "oro"],
+                      ["plata", "plata"], ["cristal", "cristal"], ["marmol", "mármol"], ["madera", "madera"],
+                      ["galaxia", "galaxia"], ["neon", "neón"], ["arcoiris", "arcoíris"]]
     sistemas_oc = [[k, v["nombre"]] for k, v in sistemas_rol.SISTEMAS.items() if k != "dnd5e"]
     es_dnd = {"sistema": ["", "dnd5e"]}
     no_es_dnd = {"sistema": [k for k, _ in sistemas_oc]}
@@ -1458,7 +1463,7 @@ def colecciones():
               "pestanas": [
                   {"id": "datos", "emoji": "📇", "texto": "datos", "campos": [
                       "nombre", "nombre_completo", "clave", "icono", "etiquetas", "color", "sistema", "raza", "clase",
-                      "nivel", "lema", "dndbeyond", "ficha"]},
+                      "nivel", "lema", "aspecto_dados", "dndbeyond", "ficha"]},
                   {"id": "hoja", "emoji": "🎲", "texto": "hoja", "si": no_es_dnd, "campos": [
                       "tirada", "conceptos", "atributos", "pericias", "recursos", "armas", "poderes", "equipo"]},
                   {"id": "stats", "emoji": "📊", "texto": "stats", "si": es_dnd, "campos": [
@@ -1509,6 +1514,10 @@ def colecciones():
                   C("nivel", "Nivel", "numero", minimo=1, maximo=30, vacio="quitar",
                     ayuda="En Vampiro, su generación; en Cyberpunk RED, su rango (sale en la chapita de la foto)."),
                   C("lema", "Una frase suya", vacio="quitar", ayuda="Sale en el post-it, debajo de la clase."),
+                  C("aspecto_dados", "Aspecto de sus dados (3D)", "elegir", vacio="quitar", ninguno="el del tema",
+                    opciones=aspectos_dados,
+                    ayuda="Los dados en 3D de su ficha salen así, salvo que quien la mire elija otro en la"
+                          " ventana de los dados."),
               ] + [C(k, n, "numero", minimo=1, maximo=30, vacio="quitar",
                      ayuda="La puntuación (el modificador se calcula solo)." if k == "fue" else "")
                    for k, n in (("fue", "Fuerza"), ("des", "Destreza"), ("con", "Constitución"),

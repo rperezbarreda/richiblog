@@ -381,6 +381,55 @@ document.querySelectorAll(".oc-ataques th[data-oc-desc]").forEach((th) => {
         return a.map((fila) => [0, 1, 2].map((j) => fila[0] * b[0][j] + fila[1] * b[1][j] + fila[2] * b[2][j]));
     }
 
+    // ---- LOS ASPECTOS (las «skins») ----
+    // Cada uno: el color del dado («cuerpo»), el de los números («tinta»),
+    // el de las aristas («borde»), la letra y el acabado: liso, brillo
+    // (con su reflejo), metal (degradado), cristal (se ve lo de detrás),
+    // vetas (el mármol) y madera, galaxia (con estrellas), neon (aristas
+    // que brillan) y arcoiris (cada dado de un color). Las claves son las
+    // mismas que en el editor (editor_web.py: ASPECTOS_DE_DADOS); «tema» es
+    // el de los colores del tema elegido.
+    const ASPECTOS = {
+        tema: { nombre: "el del tema" },
+        hueso: { nombre: "hueso", cuerpo: [236, 226, 200], tinta: [52, 38, 28], borde: [140, 118, 92],
+            fuente: "Georgia, serif" },
+        obsidiana: { nombre: "obsidiana", cuerpo: [30, 26, 38], tinta: [228, 186, 84], borde: [150, 120, 60],
+            acabado: "brillo", fuente: "Georgia, serif" },
+        sangre: { nombre: "sangre", cuerpo: [112, 8, 22], tinta: [248, 228, 205], borde: [50, 0, 8], acabado: "brillo" },
+        oro: { nombre: "oro", cuerpo: [214, 166, 58], tinta: [74, 44, 6], borde: [128, 86, 14], acabado: "metal" },
+        plata: { nombre: "plata", cuerpo: [192, 198, 208], tinta: [32, 36, 48], borde: [96, 100, 116], acabado: "metal" },
+        cristal: { nombre: "cristal", cuerpo: [110, 196, 255], tinta: [255, 255, 255], borde: [225, 246, 255],
+            acabado: "cristal" },
+        marmol: { nombre: "mármol", cuerpo: [238, 236, 232], tinta: [34, 34, 42], borde: [150, 150, 162],
+            acabado: "vetas", vetas: [128, 128, 142] },
+        madera: { nombre: "madera", cuerpo: [158, 104, 60], tinta: [248, 234, 205], borde: [86, 52, 24],
+            acabado: "madera", vetas: [112, 70, 38], fuente: "Georgia, serif" },
+        galaxia: { nombre: "galaxia", cuerpo: [44, 22, 86], tinta: [255, 238, 176], borde: [156, 118, 255],
+            acabado: "galaxia" },
+        neon: { nombre: "neón", cuerpo: [16, 14, 24], tinta: [70, 255, 210], borde: [70, 255, 210], acabado: "neon" },
+        arcoiris: { nombre: "arcoíris", tinta: [255, 255, 255], borde: [255, 255, 255], acabado: "arcoiris" },
+    };
+
+    function hsl(h) {
+        const f = (n) => {
+            const k = (n + h / 30) % 12;
+            return Math.round(255 * (0.5 - 0.42 * Math.max(-1, Math.min(k - 3, 9 - k, 1))));
+        };
+        return [f(0), f(8), f(4)];
+    }
+
+    // Números al azar pero siempre los mismos para cada cara (las vetas y
+    // las estrellas no bailan al girar).
+    function azarFijo(semilla) {
+        let a = semilla >>> 0;
+        return () => {
+            a = (a + 0x6D2B79F5) >>> 0;
+            let x = Math.imul(a ^ (a >>> 15), 1 | a);
+            x = (x + Math.imul(x ^ (x >>> 7), 61 | x)) ^ x;
+            return ((x ^ (x >>> 14)) >>> 0) / 4294967296;
+        };
+    }
+
     // ---- EL LIENZO ----
     let lienzo = null;
     let ctx = null;
@@ -446,7 +495,8 @@ document.querySelectorAll(".oc-ataques th[data-oc-desc]").forEach((th) => {
         return { x, y: window.innerHeight * 0.55 };
     }
 
-    function lanzar(lista) {
+    function lanzar(lista, aspecto) {
+        const piel = ASPECTOS[aspecto] || ASPECTOS.tema;
         if (!lista || !lista.length) {
             return;
         }
@@ -498,14 +548,33 @@ document.querySelectorAll(".oc-ataques th[data-oc-desc]").forEach((th) => {
             };
             // Los de Vampiro, con sus colores de siempre en cualquier tema:
             // negros los normales y rojo sangre los de hambre.
-            const color = d.color === "hambre" ? [168, 14, 28] : d.color === "vampiro" ? [34, 30, 40] : tema.cuerpo;
-            const tinta = d.color === "hambre" || d.color === "vampiro" ? [255, 255, 255] : tema.tinta;
+            // El aspecto elegido; con el del tema, los colores del tema (y en
+            // Vampiro, negros). Los de hambre, siempre rojos.
+            let color = piel.cuerpo || tema.cuerpo;
+            let tinta = piel.tinta || tema.tinta;
+            let borde = piel.borde || tema.tinta;
+            if (piel.acabado === "arcoiris") {
+                color = hsl((i * 360) / Math.max(1, visibles.length));
+            }
+            if (d.color === "vampiro" && !piel.cuerpo && piel.acabado !== "arcoiris") {
+                color = [34, 30, 40];
+                tinta = [255, 255, 255];
+                borde = tinta;
+            }
+            let acabado = piel.acabado || "liso";
+            if (d.color === "hambre") {
+                color = [196, 18, 34];
+                tinta = [255, 255, 255];
+                borde = [90, 0, 10];
+                acabado = "brillo";
+            }
             return {
                 s, letras, final: inclinado, destino, lado: lado * (tipo === 4 ? 1.15 : tipo === 2 ? 0.95 : 1),
                 desde: { x: destino.x + (Math.random() - 0.5) * 500, y: destino.y - 260 - Math.random() * 160 },
                 eje: [Math.random() - 0.5, Math.random() - 0.5, Math.random() - 0.5],
                 vueltas: (3 + Math.random() * 2.5) * Math.PI * 2,
-                retraso: i * 35, color, tinta, tipo,
+                retraso: i * 35, color, tinta, borde, acabado, tipo, numero: i,
+                fuente: piel.fuente || "system-ui, sans-serif", vetas: piel.vetas,
             };
         });
         // El trozo de pantalla por donde van a pasar (con los botes).
@@ -544,6 +613,8 @@ document.querySelectorAll(".oc-ataques th[data-oc-desc]").forEach((th) => {
     }
 
     const LUZ = unitario([-0.45, 0.6, 0.85]);
+    // Entre la luz y quien mira: donde sale el reflejo.
+    const MEDIO = unitario(suma(LUZ, [0, 0, 1]));
 
     function pintar(ahora) {
         const dpr = window.devicePixelRatio || 1;
@@ -596,51 +667,135 @@ document.querySelectorAll(".oc-ataques th[data-oc-desc]").forEach((th) => {
             ctx.fill();
         }
         const puntos = d.s.vertices.map(proyectar);
-        d.s.caras.forEach((c) => {
-            const n = aplicar(giro, c.normal);
-            if (n[2] <= 0.01) {
+        const rgb = (c, a) => (a === undefined ? "rgb(" : "rgba(") + c.map((x) => Math.max(0, Math.min(255, Math.round(x))))
+            .join(",") + (a === undefined ? ")" : "," + a + ")");
+        // Si el equipo va justo, mientras ruedan: todos lisos (sin
+        // degradados ni caras de detrás), y al pararse, con su acabado.
+        const sencillo = ligero && !quieto;
+        const acabado = sencillo ? "liso" : d.acabado;
+        const cristal = acabado === "cristal";
+        // El cristal deja ver las caras de detrás: primero esas, flojitas.
+        const orden = cristal ? d.s.caras.map((c) => [c, aplicar(giro, c.normal)]).sort((p, q) => p[1][2] - q[1][2])
+            : d.s.caras.map((c) => [c, aplicar(giro, c.normal)]);
+        orden.forEach(([c, n], j) => {
+            const deFrente = n[2] > 0.01;
+            if (!deFrente && !cristal) {
                 return;
             }
             const luz = 0.42 + 0.58 * Math.max(0, punto(n, LUZ));
+            const brillo = Math.pow(Math.max(0, punto(n, MEDIO)), 22);
             ctx.setTransform(1, 0, 0, 1, 0, 0);
             ctx.beginPath();
             c.idx.forEach((v, m) => (m ? ctx.lineTo(...puntos[v]) : ctx.moveTo(...puntos[v])));
             ctx.closePath();
-            ctx.fillStyle = "rgb(" + d.color.map((x) => Math.round(x * luz)).join(",") + ")";
+            const base = d.color.map((x) => x * luz);
+            if (acabado === "metal") {
+                const a = puntos[c.idx[0]];
+                const b = puntos[c.idx[Math.floor(c.idx.length / 2)]];
+                const g = ctx.createLinearGradient(a[0], a[1], b[0], b[1]);
+                g.addColorStop(0, rgb(d.color.map((x) => x + (255 - x) * 0.6 * luz)));
+                g.addColorStop(0.55, rgb(base));
+                g.addColorStop(1, rgb(d.color.map((x) => x * 0.38)));
+                ctx.fillStyle = g;
+            } else if (cristal) {
+                ctx.fillStyle = rgb(base.map((x) => x + 255 * brillo * 0.7), deFrente ? 0.42 : 0.18);
+            } else if (acabado === "galaxia") {
+                const o = proyectar(c.centro);
+                const g = ctx.createRadialGradient(o[0], o[1], 0, o[0], o[1], d.lado * 0.9 * dpr);
+                g.addColorStop(0, rgb([d.color[0] * 2.2 * luz, d.color[1] * 1.6 * luz, d.color[2] * 1.9 * luz]));
+                g.addColorStop(1, rgb([6, 4, 18]));
+                ctx.fillStyle = g;
+            } else {
+                const reflejo = acabado === "brillo" || acabado === "neon" ? brillo * 0.55 : brillo * 0.12;
+                ctx.fillStyle = rgb(base.map((x) => x + 255 * reflejo));
+            }
             ctx.fill();
-            ctx.lineWidth = 1.5 * dpr;
+            // Lo de dentro de la cara (vetas, estrellas), en su plano.
+            const enSuPlano = () => {
+                const o = proyectar(c.centro);
+                const ex = proyectar(suma(c.centro, por(c.derecha, 0.01)));
+                const ey = proyectar(suma(c.centro, por(c.arriba, -0.01)));
+                ctx.setTransform(ex[0] - o[0], ex[1] - o[1], ey[0] - o[0], ey[1] - o[1], o[0], o[1]);
+            };
+            if (deFrente && !ligero && ["vetas", "madera", "galaxia"].includes(d.acabado)) {
+                ctx.save();
+                ctx.clip();
+                enSuPlano();
+                const azar = azarFijo(d.numero * 97 + j * 13 + 7);
+                const r = c.radio * 160;
+                if (d.acabado !== "galaxia") {
+                    const madera = d.acabado === "madera";
+                    ctx.strokeStyle = rgb(d.vetas.map((x) => x * luz), madera ? 0.55 : 0.7);
+                    for (let k = 0; k < (madera ? 7 : 3); k++) {
+                        ctx.lineWidth = (madera ? 2 + azar() * 3 : 1 + azar() * 2.5) * 1;
+                        ctx.beginPath();
+                        const y0 = madera ? -r + (k + azar() * 0.6) * (2 * r / 7) : (azar() - 0.5) * 2 * r;
+                        ctx.moveTo(-r * 1.2, y0);
+                        ctx.bezierCurveTo(-r * 0.4, y0 + (azar() - 0.5) * r * (madera ? 0.4 : 1.4),
+                            r * 0.4, y0 + (azar() - 0.5) * r * (madera ? 0.4 : 1.4), r * 1.2,
+                            y0 + (azar() - 0.5) * r * (madera ? 0.3 : 1));
+                        ctx.stroke();
+                    }
+                } else {
+                    for (let k = 0; k < 14; k++) {
+                        ctx.fillStyle = "rgba(255, 255, 255, " + (0.4 + azar() * 0.6).toFixed(2) + ")";
+                        ctx.beginPath();
+                        ctx.arc((azar() - 0.5) * 2 * r, (azar() - 0.5) * 2 * r, 1 + azar() * 2.4, 0, Math.PI * 2);
+                        ctx.fill();
+                    }
+                }
+                ctx.restore();
+                ctx.setTransform(1, 0, 0, 1, 0, 0);
+                // El camino de la cara otra vez (las vetas lo han cambiado),
+                // para sus aristas.
+                ctx.beginPath();
+                c.idx.forEach((v, m) => (m ? ctx.lineTo(...puntos[v]) : ctx.moveTo(...puntos[v])));
+                ctx.closePath();
+            }
+            ctx.lineWidth = (d.acabado === "neon" ? 2.2 : 1.5) * dpr;
             ctx.lineJoin = "round";
-            ctx.strokeStyle = "rgba(" + d.tinta.join(",") + ",0.7)";
+            ctx.strokeStyle = rgb(d.borde, d.acabado === "neon" || cristal ? (deFrente ? 0.95 : 0.35) : 0.75);
+            if (d.acabado === "neon" && !ligero) {
+                ctx.shadowColor = rgb(d.borde);
+                ctx.shadowBlur = 9 * dpr;
+            }
             ctx.stroke();
+            ctx.shadowBlur = 0;
             const texto = d.letras.get(c);
-            if (!texto || n[2] < 0.3 || (ligero && !quieto)) {
+            if (!deFrente || !texto || n[2] < 0.3 || (ligero && !quieto)) {
                 return;
             }
             // El número, en el plano de su cara: tres puntos proyectados
             // dan cómo se estira y se gira.
-            const o = proyectar(c.centro);
-            const ex = proyectar(suma(c.centro, por(c.derecha, 0.01)));
-            const ey = proyectar(suma(c.centro, por(c.arriba, -0.01)));
-            ctx.setTransform(ex[0] - o[0], ex[1] - o[1], ey[0] - o[0], ey[1] - o[1], o[0], o[1]);
+            enSuPlano();
             const tam = c.radio * (texto.length > 1 ? 0.95 : 1.25) * 100;
-            const fuente = "700 " + Math.round(tam) + "px system-ui, sans-serif";
+            const fuente = "700 " + Math.round(tam) + "px " + d.fuente;
             if (fuente !== fuenteActual) {
                 ctx.font = fuente;
                 fuenteActual = fuente;
             }
             ctx.textAlign = "center";
             ctx.textBaseline = "middle";
-            ctx.fillStyle = "rgb(" + d.tinta.join(",") + ")";
+            ctx.fillStyle = rgb(d.tinta);
+            if (d.acabado === "neon" && !ligero) {
+                ctx.shadowColor = rgb(d.tinta);
+                ctx.shadowBlur = 8 * dpr;
+            }
             // El 6 y el 9 con su rayita, para no confundirlos.
             ctx.fillText(texto, 0, tam * 0.05);
             if ((texto === "6" || texto === "9") && d.tipo !== 6) {
                 ctx.fillRect(-tam * 0.28, tam * 0.42, tam * 0.56, tam * 0.08);
             }
+            ctx.shadowBlur = 0;
         });
         ctx.setTransform(1, 0, 0, 1, 0, 0);
     }
 
-    window.ocDados3d = { lanzar, preparar };
+    function aspectos() {
+        return Object.keys(ASPECTOS).map((k) => [k, ASPECTOS[k].nombre]);
+    }
+
+    window.ocDados3d = { lanzar, preparar, aspectos };
 })();
 
 // =========================================
@@ -683,6 +838,11 @@ document.querySelectorAll(".oc-ataques th[data-oc-desc]").forEach((th) => {
     const menosMovimiento = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     const estado = { mano: {}, modo: "normal", tiradas: [], cuenta: 0, sonido: leer("richi-dados-sonido") !== "no",
         tresD: leer("richi-dados-3d") ? leer("richi-dados-3d") === "si" : !menosMovimiento,
+        // El aspecto de los dados: el elegido en la ventana (se acuerda);
+        // si no, el de este personaje (editor: «Aspecto de sus dados»); si
+        // no, el del tema.
+        aspecto: leer("richi-dados-aspecto") || "",
+        aspectoDelPersonaje: (sitioDelBoton && sitioDelBoton.dataset.ocAspecto) || "",
         reserva: { atributo: null, habilidad: null, extra: 0,
             hambre: parseInt((sitioDelBoton && sitioDelBoton.dataset.ocHambre) || "0", 10) || 0 } };
 
@@ -922,7 +1082,7 @@ document.querySelectorAll(".oc-ataques th[data-oc-desc]").forEach((th) => {
     function enTresD(lista) {
         if (estado.tresD && lista && lista.length && window.ocDados3d) {
             try {
-                window.ocDados3d.lanzar(lista);
+                window.ocDados3d.lanzar(lista, estado.aspecto || estado.aspectoDelPersonaje || "tema");
             } catch (e) {
                 // Si falla el dibujo, la tirada vale igual.
             }
@@ -1171,6 +1331,10 @@ document.querySelectorAll(".oc-ataques th[data-oc-desc]").forEach((th) => {
         const tresD = botonDe("oc-dados-mando es-3d", "3D", () => {
             estado.tresD = !estado.tresD;
             tresD.setAttribute("aria-pressed", estado.tresD ? "true" : "false");
+            const fila = document.getElementById("oc-dados-aspecto");
+            if (fila) {
+                fila.parentNode.hidden = !estado.tresD;
+            }
             guardar("richi-dados-3d", estado.tresD ? "si" : "no");
         }, "Dados en 3D");
         tresD.setAttribute("aria-pressed", estado.tresD ? "true" : "false");
@@ -1257,6 +1421,32 @@ document.querySelectorAll(".oc-ataques th[data-oc-desc]").forEach((th) => {
         }
         const reserva = SISTEMA === "vtm5" ? montarReserva() : null;
 
+        // El aspecto de los dados en 3D. Al cambiarlo, sale un d20 de
+        // muestra.
+        const filaAspecto = crear("div", "oc-dados-fila");
+        const etiquetaAspecto = crear("label", "oc-dados-etiqueta", "aspecto");
+        const elegirAspecto = crear("select", "oc-dados-elegir");
+        elegirAspecto.id = "oc-dados-aspecto";
+        etiquetaAspecto.htmlFor = elegirAspecto.id;
+        const propio = ((window.ocDados3d && window.ocDados3d.aspectos()) || [])
+            .find((x) => x[0] === estado.aspectoDelPersonaje);
+        const deCada = crear("option", "", propio ? "el de este personaje (" + propio[1] + ")" : "el de cada personaje");
+        deCada.value = "";
+        elegirAspecto.appendChild(deCada);
+        ((window.ocDados3d && window.ocDados3d.aspectos()) || []).forEach(([clave, nombre]) => {
+            const o = crear("option", "", nombre);
+            o.value = clave;
+            elegirAspecto.appendChild(o);
+        });
+        elegirAspecto.value = estado.aspecto;
+        elegirAspecto.addEventListener("change", () => {
+            estado.aspecto = elegirAspecto.value;
+            guardar("richi-dados-aspecto", estado.aspecto);
+            enTresD([{ caras: 20, valor: 20 }]);
+        });
+        filaAspecto.append(etiquetaAspecto, elegirAspecto);
+        filaAspecto.hidden = !estado.tresD;
+
         const cabeza = crear("div", "oc-dados-cabeza-historial");
         cabeza.appendChild(crear("h3", "oc-dados-subtitulo", "tiradas"));
         borrarTodo = botonDe("oc-dados-borrar-todo", "borrar todo", () => {
@@ -1272,9 +1462,9 @@ document.querySelectorAll(".oc-ataques th[data-oc-desc]").forEach((th) => {
         if (reserva) {
             // En Vampiro la reserva va arriba (es lo que más se usa) y no
             // hay ventaja ni desventaja.
-            cuerpo.append(reserva, bandeja, manoTexto, fila, acciones, cabeza, historial, aviso);
+            cuerpo.append(reserva, bandeja, manoTexto, fila, acciones, filaAspecto, cabeza, historial, aviso);
         } else {
-            cuerpo.append(bandeja, manoTexto, fila, modos, acciones, cabeza, historial, aviso);
+            cuerpo.append(bandeja, manoTexto, fila, modos, acciones, filaAspecto, cabeza, historial, aviso);
         }
         ventana.append(barra, cuerpo);
         ventana.addEventListener("keydown", (e) => {

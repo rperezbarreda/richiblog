@@ -2228,6 +2228,10 @@ li > .oc-origen {
     gap: 10px;
 }
 
+.oc-dados-fila[hidden] {
+    display: none;
+}
+
 .oc-dados-etiqueta {
     color: var(--yellow);
     font-family: var(--fuente-mono);
