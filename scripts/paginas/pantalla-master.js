@@ -2084,6 +2084,13 @@
         ["#ef6c00", "naranja"], ["#6a1b9a", "morado"], ["#8d6e63", "marrón"], ["#fdd835", "amarillo"]];
     const DIBUJO_GROSORES = [["3", "fino"], ["8", "medio"], ["18", "gordo"]];
 
+    // Solo imágenes metidas en la propia dirección (data:image/…): lo
+    // único que lee el dibujo (lo que guarda él y los archivos que se
+    // pegan). Cualquier otra cosa, nada.
+    function imagenSegura(url) {
+        return /^data:image\/(png|jpeg|gif|webp|bmp|svg\+xml|avif);base64,[A-Za-z0-9+/=]+$/.test(String(url || "")) ? url : "";
+    }
+
     function montarDibujo(dentro, m) {
         m.datos = m.datos || {};
         const d = m.datos;
@@ -2117,7 +2124,7 @@
                     alAcabar();
                 }
             };
-            img.src = src;
+            img.src = imagenSegura(src);
         };
         if (d.imagen) {
             cargar(d.imagen);
@@ -2212,7 +2219,7 @@
                     avisar("Imagen pegada en el dibujo.");
                 };
                 img.onerror = () => avisar("No he podido abrir esa imagen.");
-                img.src = lector.result;
+                img.src = imagenSegura(lector.result);
             };
             lector.readAsDataURL(archivo);
         };
