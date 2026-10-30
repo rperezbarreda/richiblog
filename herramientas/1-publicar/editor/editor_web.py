@@ -1741,6 +1741,8 @@ def colecciones():
                            opciones=_opciones(["Estados", "Combate", "Magia", "Descansos y salud",
                                                "Movimiento y entorno"])),
                          C("nombre", "Nombre", obligatorio=True),
+                         C("icono", "Su dibujo (un emoji)", vacio="quitar",
+                           ayuda="El que sale grande en su botón: 🙈, 🧘…"),
                          C("texto", "Lo que dice", "largo", grande=True, markdown=True,
                            ayuda="Con formato: una lista con «- », **negrita**, *cursiva* (para lo de 2024)."),
                      ]}]},

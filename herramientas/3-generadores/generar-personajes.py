@@ -606,6 +606,13 @@ def botones(p, avisos):
     des = numero(p.get("des"))
     if des is not None and sistema == "dnd5e":
         extra += ' data-oc-ini="%d"' % modificador_num(des)
+    # Los dados de golpe («4d8 + 1d6») y la Constitución, para gastarlos
+    # en un descanso corto (la ventana de los descansos).
+    dg = re.findall(r"(\d+)\s*d\s*(\d+)", str(p.get("dados_golpe") or ""))
+    con = numero(p.get("con"))
+    if dg and sistema == "dnd5e":
+        extra += ' data-oc-dg="%s" data-oc-con="%d"' % (" ".join("%sd%s" % x for x in dg),
+                                                       modificador_num(con) if con is not None else 0)
     return ('                <div class="oc-botones" data-oc-botones data-oc-sistema="%s"%s%s%s>'
             '<div class="oc-botones-pila" data-oc-botones-pdf>%s%s</div></div>'
             % (sistema, (' data-oc-hambre="%d"' % hambre) if hambre is not None else "",
@@ -798,8 +805,10 @@ def apartado_reglas(c, personajes, avisos):
     for g in orden:
         cosas = "".join(
             '<li class="oc-regla"><details><summary><span class="oc-desplegable-flecha" aria-hidden="true">▸</span>'
-            '%s</summary><div class="oc-texto">%s</div></details></li>'
-            % (e(x["nombre"].strip()), markdown(x.get("texto"), c, personajes, avisos)) for x in grupos[g])
+            '%s<span class="oc-regla-nombre">%s</span></summary><div class="oc-texto">%s</div></details></li>'
+            % (('<span class="oc-regla-icono" aria-hidden="true">%s</span>' % e(str(x.get("icono") or "").strip()))
+               if str(x.get("icono") or "").strip() else "",
+               e(x["nombre"].strip()), markdown(x.get("texto"), c, personajes, avisos)) for x in grupos[g])
         bloques.append('<div class="oc-reglas-grupo"><h3 class="oc-reglas-titulo">%s</h3><ul class="oc-reglas-lista">%s'
                        '</ul></div>' % (e(g), cosas))
     return ('<div class="oc-reglas" data-oc-reglas><p class="oc-hoja-nota">Lo que más se busca jugando a D&amp;D 5e'

@@ -13,9 +13,13 @@
 // dentro, Esc, la ✕ o pulsar fuera la cierran y el foco vuelve a «vuelta».
 // Devuelve una función para cerrarla.
 
+window.ocMontar = window.ocMontar || {};
+
 (function () {
-    const botones = document.querySelector("[data-oc-botones]");
-    const clave = (botones && botones.dataset.ocClave) || "";
+    // La clave (donde se guarda lo de cada uno): la del personaje o, en la
+    // pantalla de máster, la suya.
+    const conClave = document.querySelector("[data-oc-clave]");
+    const clave = (conClave && conClave.dataset.ocClave) || "";
     const nombre = "richi-oc-partida-" + clave;
     let datos = {};
     try {
@@ -163,6 +167,11 @@
     partes.forEach((p) => {
         p.tabIndex = -1;
     });
+    // Lo elegido se desplaza por dentro: que se pueda llegar con el
+    // teclado para desplazarlo (aunque no tenga nada que se pueda pulsar).
+    contenedor.tabIndex = 0;
+    contenedor.setAttribute("role", "region");
+    contenedor.setAttribute("aria-label", "Lo elegido del menú");
     const enMovil = window.matchMedia ? window.matchMedia("(max-width: 860px)") : { matches: false };
     const pagina = document.querySelector(".oc-ficha-page");
     const lateral = document.querySelector(".oc-lateral");
@@ -1498,9 +1507,22 @@ document.querySelectorAll(".oc-ataques th[data-oc-desc]").forEach((th) => {
     // VARIAS TIRADAS DE GOLPE (el ataque y el daño, una tirada guardada
     // con varias fórmulas…): ruedan todos los dados juntos y el aviso
     // flotante las enseña todas. «lista» = [{formula, que}].
+    // Con un 20 natural en la primera (el ataque), los dados de las demás
+    // (el daño) se doblan: «1d8+3» pasa a «2d8+3».
+    function doblarDados(formula) {
+        return String(formula).replace(/(\d*)d(\d+)/g, (_, n, caras) => (parseInt(n || "1", 10) * 2) + "d" + caras);
+    }
+
     function tirarVarias(lista, nombre) {
         estado.agrupando = [];
-        lista.forEach((x) => tirar(x.formula, x.que));
+        let critico = false;
+        lista.forEach((x, i) => {
+            const r = tirar(i > 0 && critico ? doblarDados(x.formula) : x.formula,
+                i > 0 && critico ? x.que + " (crítico)" : x.que);
+            if (i === 0 && r && r.critico && r.d20) {
+                critico = true;
+            }
+        });
         const grupo = estado.agrupando;
         estado.agrupando = null;
         if (!grupo.length) {
@@ -2958,6 +2980,9 @@ document.querySelectorAll(".oc-ataques th[data-oc-desc]").forEach((th) => {
             vida.temp = 0;
             vida.exitos = 0;
             vida.fallos = 0;
+            // Los dados de golpe, todos de vuelta (como en 2024; en 2014,
+            // la mitad).
+            partida.guardar("dadosGolpe", {});
         }
         guardar();
         avisar(tipo === "largo" ? "Descanso largo: PG al máximo y todo recargado."
@@ -3049,6 +3074,121 @@ document.querySelectorAll(".oc-ataques th[data-oc-desc]").forEach((th) => {
 
     boton.addEventListener("click", abrirVentana);
     pintarBoton();
+
+    // LOS DESCANSOS: un botón en el hueco de al lado de la CA (la vida ocupa
+    // toda su fila) que abre su ventana: en el corto, gastar dados de golpe
+    // (cada uno se tira con la Constitución y cura eso; se lleva la cuenta
+    // de los gastados) y terminarlo (recarga lo de descanso corto); y el
+    // largo (todo, la vida al máximo y los dados de golpe de vuelta).
+    const dg = (botones.dataset.ocDg || "").split(" ").map((x) => /^(\d+)d(\d+)$/.exec(x)).filter(Boolean)
+        .map((m) => ({ cuantos: parseInt(m[1], 10), caras: parseInt(m[2], 10) }));
+    const con = parseInt(botones.dataset.ocCon || "0", 10) || 0;
+    const huecoDescanso = document.createElement("div");
+    huecoDescanso.className = "oc-vital es-descanso";
+    const dtDescanso = crear("dt", "visually-hidden", "Descansos");
+    const ddDescanso = document.createElement("dd");
+    const botonDescanso = crear("button", "oc-descanso-boton");
+    botonDescanso.type = "button";
+    botonDescanso.setAttribute("aria-haspopup", "dialog");
+    const iconoDescanso = crear("span", "oc-vital-emoji", "🛏️");
+    iconoDescanso.setAttribute("aria-hidden", "true");
+    botonDescanso.append(iconoDescanso, document.createTextNode("descansar"));
+    ddDescanso.appendChild(botonDescanso);
+    huecoDescanso.append(dtDescanso, ddDescanso);
+    vital.parentNode.appendChild(huecoDescanso);
+
+    function abrirDescansos() {
+        const cuerpo = crear("div", "oc-vida");
+        const vidaAhora = crear("p", "oc-vida-grande");
+        const pintarVida = () => {
+            vidaAhora.replaceChildren(crear("span", "oc-vida-actual", String(vida.actual)),
+                document.createTextNode(" / " + maximo + " PG"));
+        };
+        pintarVida();
+        const corto = crear("fieldset", "oc-vida-muerte");
+        corto.appendChild(crear("legend", "", "☕ descanso corto (1 hora)"));
+        const usados = partida.leer("dadosGolpe", {});
+        dg.forEach((g) => {
+            const fila = crear("div", "oc-vida-fila es-dados-golpe");
+            const quedan = () => g.cuantos - (usados["d" + g.caras] || 0);
+            const texto = crear("span", "oc-vida-muerte-nombre");
+            const gastar = crear("button", "oc-vida-accion");
+            gastar.type = "button";
+            const pintarDg = () => {
+                texto.textContent = "d" + g.caras + ": " + quedan() + " de " + g.cuantos;
+                gastar.textContent = "🎲 gastar un d" + g.caras + (con ? (con > 0 ? " + " : " − ") + Math.abs(con) : "");
+                gastar.disabled = quedan() <= 0;
+            };
+            gastar.addEventListener("click", () => {
+                if (quedan() <= 0 || !window.ocDados) {
+                    return;
+                }
+                const r = window.ocDados.tirar("1d" + g.caras + (con ? (con > 0 ? "+" : "") + con : ""), "dado de golpe");
+                const cura = Math.max(0, r ? r.total : 0);
+                usados["d" + g.caras] = (usados["d" + g.caras] || 0) + 1;
+                partida.guardar("dadosGolpe", usados);
+                vida.actual = Math.min(maximo, vida.actual + cura);
+                guardar();
+                pintarDg();
+                pintarVida();
+                avisarDescanso("Cura " + cura + ". Tiene " + vida.actual + " de " + maximo + ".");
+                if (gastar.disabled) {
+                    terminarCorto.focus();
+                }
+            });
+            pintarDg();
+            fila.append(texto, gastar);
+            corto.appendChild(fila);
+        });
+        if (!dg.length) {
+            corto.appendChild(crear("p", "oc-hoja-nota", "Sin dados de golpe apuntados en su ficha."));
+        }
+        const terminarCorto = crear("button", "oc-vida-accion es-principal", "terminar el descanso corto");
+        terminarCorto.type = "button";
+        terminarCorto.addEventListener("click", () => {
+            descansar("corto");
+            avisarDescanso("Descanso corto: recargado lo que se recarga con él.");
+        });
+        corto.appendChild(terminarCorto);
+        const largo = crear("fieldset", "oc-vida-muerte");
+        largo.appendChild(crear("legend", "", "🛏️ descanso largo (8 horas)"));
+        largo.appendChild(crear("p", "oc-hoja-nota", "Todo recargado, la vida al máximo, sin temporales ni"
+            + " salvaciones de muerte, y los dados de golpe de vuelta (en 2014, solo la mitad)."));
+        const hacerLargo = crear("button", "oc-vida-accion es-principal", "hacer el descanso largo");
+        hacerLargo.type = "button";
+        hacerLargo.addEventListener("click", () => {
+            descansar("largo");
+            Object.keys(usados).forEach((k) => delete usados[k]);
+            cerrarDescansos();
+            avisarFuera("Descanso largo hecho: " + vida.actual + " PG.");
+        });
+        largo.appendChild(hacerLargo);
+        const avisoDescanso = crear("p", "oc-vida-aviso");
+        avisoDescanso.setAttribute("role", "status");
+        const avisarDescanso = (x) => {
+            avisoDescanso.textContent = "";
+            setTimeout(() => {
+                avisoDescanso.textContent = x;
+            }, 50);
+        };
+        cuerpo.append(vidaAhora, corto, largo, avisoDescanso);
+        const primero = corto.querySelector("button:not([disabled])") || terminarCorto;
+        const cerrarDescansos = window.ocVentana.abrir({ titulo: "descansos", cuerpo, vuelta: botonDescanso,
+            foco: primero, clase: "es-vida" });
+    }
+
+    // Un aviso para el lector cuando la ventana ya se ha cerrado.
+    const avisoFuera = crear("p", "visually-hidden");
+    avisoFuera.setAttribute("role", "status");
+    document.body.appendChild(avisoFuera);
+    function avisarFuera(x) {
+        avisoFuera.textContent = "";
+        setTimeout(() => {
+            avisoFuera.textContent = x;
+        }, 50);
+    }
+
+    botonDescanso.addEventListener("click", abrirDescansos);
     // Para la pestaña de notas (sus botones de descanso y de empezar de
     // cero).
     window.ocVida = {
@@ -3068,9 +3208,12 @@ document.querySelectorAll(".oc-ataques th[data-oc-desc]").forEach((th) => {
 // puede descargar en .txt; y debajo, «partida»: los descansos (D&D) y
 // empezar de cero (desmarca todo y deja la vida al máximo).
 
-(function () {
-    const sitio = document.querySelector("[data-oc-notas]");
-    if (!sitio || !window.ocPartida) {
+// window.ocMontar.notas(sitio): las monta en un sitio (la pestaña o el
+// módulo de notas de la pantalla de máster).
+
+window.ocMontar.notas = function (sitio, opciones) {
+    const soloNotas = !!(opciones && opciones.soloNotas);
+    if (!window.ocPartida) {
         return;
     }
     const partida = window.ocPartida;
@@ -3218,11 +3361,26 @@ document.querySelectorAll(".oc-ataques th[data-oc-desc]").forEach((th) => {
         }
         avisar("Partida de cero: todo desmarcado y la vida al máximo. Las notas se quedan.");
     });
-    caja.append(
-        ventanita("notas-de-" + (partida.clave || "sesion") + ".txt", "📝", [etiqueta, texto, filaNotas]),
-        ventanita("partida.dat", "🎲", [crear("p", "oc-hoja-nota", "Lo que marcas en la ficha de " + nombre
-            + " (usos, espacios, la vida…) se guarda en este navegador."), filaPartida, aviso]));
+    if (soloNotas) {
+        // En la pantalla de máster: solo el cuaderno (el módulo ya es su
+        // ventanita).
+        etiqueta.textContent = "Notas del máster (se guardan solas)";
+        caja.className = "oc-notas-sueltas";
+        caja.append(etiqueta, texto, filaNotas, aviso);
+    } else {
+        caja.append(
+            ventanita("notas-de-" + (partida.clave || "sesion") + ".txt", "📝", [etiqueta, texto, filaNotas]),
+            ventanita("partida.dat", "🎲", [crear("p", "oc-hoja-nota", "Lo que marcas en la ficha de " + nombre
+                + " (usos, espacios, la vida…) se guarda en este navegador."), filaPartida, aviso]));
+    }
     sitio.replaceChildren(caja);
+};
+
+(function () {
+    const sitio = document.querySelector("[data-oc-notas]");
+    if (sitio) {
+        window.ocMontar.notas(sitio);
+    }
 })();
 
 // =========================================
@@ -3236,13 +3394,22 @@ document.querySelectorAll(".oc-ataques th[data-oc-desc]").forEach((th) => {
 // turno» marca a quién le toca y cuenta las rondas. Es la misma en todas
 // las fichas (se guarda en el navegador: «richi-oc-iniciativa»).
 
-(function () {
-    const sitio = document.querySelector("[data-oc-iniciativa]");
-    if (!sitio) {
-        return;
-    }
+// window.ocMontar.iniciativa(sitio): la monta en un sitio (en la ficha, la
+// pestaña; en la pantalla de máster, su módulo).
+
+window.ocMontar.iniciativa = function (sitio, opciones) {
+    // Suelta (en un módulo de la pantalla de máster, que ya es su
+    // ventanita): sin sus dos ventanitas de dentro.
+    const suelta = !!(opciones && opciones.suelta);
     const CLAVE = "richi-oc-iniciativa";
-    const TIPOS = [["personaje", "personaje"], ["npc", "npc"], ["monstruo", "monstruo"]];
+    // Los colores para distinguirlos (o uno a mano): el nombre es para el
+    // lector de pantalla.
+    const COLORES = [["#3fae5a", "verde"], ["#3b7ddd", "azul"], ["#d23b3b", "rojo"], ["#8e5bd6", "morado"],
+        ["#e88a2a", "naranja"], ["#e6c229", "amarillo"], ["#e05aa8", "rosa"], ["#8a8a99", "gris"]];
+    // Los de antes (con tipo), a su color.
+    const DE_TIPO = { personaje: "#3fae5a", npc: "#3b7ddd", monstruo: "#d23b3b" };
+    const colorDe = (c) => (/^#[0-9a-f]{6}$/i.test(c.color || "") ? c.color : DE_TIPO[c.tipo] || COLORES[0][0]);
+    const nombreDeColor = (hex) => (COLORES.find((x) => x[0] === hex) || [hex, "a medida"])[1];
     let datos = { lista: [], turno: -1, ronda: 1 };
     try {
         datos = Object.assign(datos, JSON.parse(localStorage.getItem(CLAVE) || "{}"));
@@ -3286,17 +3453,17 @@ document.querySelectorAll(".oc-ataques th[data-oc-desc]").forEach((th) => {
     const numeroDe = (v) => (v === "" || v === null || v === undefined || isNaN(parseInt(v, 10)) ? "" : parseInt(v, 10));
 
     // ---- AÑADIR ----
+    // Una línea: nombre, iniciativa, CA y PG (los tres, si se quiere);
+    // debajo, los colores (y uno a medida), y añadir.
     const form = crear("form", "oc-ini-nuevo");
     const campo = (id, texto, tipo, extra) => {
         const caja = crear("div", "oc-ini-campo" + (extra ? " " + extra : ""));
         const l = crear("label", "oc-dados-etiqueta", texto);
-        const i = crear(tipo === "select" ? "select" : "input", tipo === "select" ? "oc-dados-elegir" : "oc-dados-texto");
+        const i = crear("input", "oc-dados-texto");
         i.id = id;
-        if (tipo !== "select") {
-            i.type = tipo;
-            if (tipo === "number") {
-                i.inputMode = "numeric";
-            }
+        i.type = tipo;
+        if (tipo === "number") {
+            i.inputMode = "numeric";
         }
         l.htmlFor = id;
         caja.append(l, i);
@@ -3304,21 +3471,57 @@ document.querySelectorAll(".oc-ataques th[data-oc-desc]").forEach((th) => {
         return i;
     };
     const nombre = campo("oc-ini-nombre", "nombre", "text", "es-nombre");
-    nombre.required = true;
     nombre.autocomplete = "off";
-    const tipo = campo("oc-ini-tipo", "tipo", "select");
-    TIPOS.forEach(([v, t]) => {
-        const o = crear("option", "", t);
-        o.value = v;
-        tipo.appendChild(o);
-    });
-    tipo.value = "monstruo";
-    const ini = campo("oc-ini-ini", "iniciativa", "number");
+    const ini = campo("oc-ini-ini", "ini", "number");
     const ca = campo("oc-ini-ca", "CA", "number");
     const pg = campo("oc-ini-pg", "PG", "number");
+    const colores = crear("div", "oc-ini-colores");
+    colores.setAttribute("role", "radiogroup");
+    colores.setAttribute("aria-label", "Color");
+    let elegido = COLORES[2][0];
+    const muestras = [];
+    const marcar = (hex) => {
+        elegido = hex;
+        muestras.forEach((b) => b.setAttribute("aria-checked", b.dataset.color === hex ? "true" : "false"));
+        muestras.forEach((b) => {
+            b.tabIndex = b.dataset.color === hex ? 0 : -1;
+        });
+    };
+    COLORES.forEach(([hex, n]) => {
+        const b = botonDe("oc-ini-color", "", () => marcar(hex), n);
+        b.setAttribute("role", "radio");
+        b.dataset.color = hex;
+        b.style.backgroundColor = hex;
+        b.addEventListener("keydown", (e) => {
+            const i = muestras.indexOf(b);
+            const a = { ArrowRight: i + 1, ArrowDown: i + 1, ArrowLeft: i - 1, ArrowUp: i - 1 }[e.key];
+            if (a !== undefined) {
+                e.preventDefault();
+                const otra = muestras[(a + muestras.length) % muestras.length];
+                marcar(otra.dataset.color);
+                otra.focus();
+            }
+        });
+        muestras.push(b);
+        colores.appendChild(b);
+    });
+    // Uno a medida: el selector de color del navegador.
+    const aMedida = crear("input", "oc-ini-color-medida");
+    aMedida.type = "color";
+    aMedida.value = "#ffffff";
+    aMedida.setAttribute("aria-label", "Otro color, a medida");
+    aMedida.title = "Otro color";
+    aMedida.addEventListener("input", () => {
+        elegido = aMedida.value;
+        muestras.forEach((b) => b.setAttribute("aria-checked", "false"));
+    });
+    colores.appendChild(aMedida);
+    marcar(elegido);
     const anadir = crear("button", "oc-vida-accion es-principal", "＋ añadir");
     anadir.type = "submit";
-    form.appendChild(anadir);
+    const pie = crear("div", "oc-ini-pie");
+    pie.append(colores, anadir);
+    form.appendChild(pie);
     form.addEventListener("submit", (e) => {
         e.preventDefault();
         if (!nombre.value.trim()) {
@@ -3326,7 +3529,7 @@ document.querySelectorAll(".oc-ataques th[data-oc-desc]").forEach((th) => {
             nombre.focus();
             return;
         }
-        meter({ nombre: nombre.value.trim(), tipo: tipo.value, ini: numeroDe(ini.value), ca: numeroDe(ca.value),
+        meter({ nombre: nombre.value.trim(), color: elegido, ini: numeroDe(ini.value), ca: numeroDe(ca.value),
             pg: numeroDe(pg.value) });
         nombre.value = "";
         ini.value = "";
@@ -3345,7 +3548,7 @@ document.querySelectorAll(".oc-ataques th[data-oc-desc]").forEach((th) => {
             const r = window.ocDados ? window.ocDados.tirar("1d20" + (bono ? (bono > 0 ? "+" : "") + bono : ""),
                 "iniciativa de " + yo) : null;
             const vida = window.ocPartida && window.ocPartida.leer("vida");
-            meter({ nombre: yo, tipo: "personaje", ini: r ? r.total : "", ca: numeroDe(botones.dataset.ocCa),
+            meter({ nombre: yo, color: COLORES[0][0], ini: r ? r.total : "", ca: numeroDe(botones.dataset.ocCa),
                 pg: vida && vida.actual !== undefined ? vida.actual : numeroDe(botones.dataset.ocPg) });
         });
     }
@@ -3444,8 +3647,9 @@ document.querySelectorAll(".oc-ataques th[data-oc-desc]").forEach((th) => {
     function pintar() {
         ronda.textContent = datos.lista.length ? "ronda " + datos.ronda : "";
         lista.replaceChildren(...datos.lista.map((c, i) => {
-            const li = crear("li", "oc-ini-fila es-" + c.tipo + (i === datos.turno ? " es-su-turno" : ""));
+            const li = crear("li", "oc-ini-fila" + (i === datos.turno ? " es-su-turno" : ""));
             li.dataset.id = c.id;
+            li.style.borderLeftColor = colorDe(c);
             if (i === datos.turno) {
                 li.setAttribute("aria-current", "true");
             }
@@ -3455,8 +3659,9 @@ document.querySelectorAll(".oc-ataques th[data-oc-desc]").forEach((th) => {
             asa.addEventListener("pointerdown", (e) => empezarArrastre(e, li, i));
             const quien = crear("div", "oc-ini-quien");
             const n = crear("span", "oc-ini-nombre", c.nombre);
-            const t = crear("span", "oc-ini-tipo", c.tipo);
-            quien.append(n, t);
+            // El color, dicho para el lector.
+            n.appendChild(crear("span", "visually-hidden", " (" + nombreDeColor(colorDe(c)) + ")"));
+            quien.append(n);
             if (i === datos.turno) {
                 quien.prepend(crear("span", "oc-ini-le-toca", "▶ le toca"));
             }
@@ -3523,8 +3728,13 @@ document.querySelectorAll(".oc-ataques th[data-oc-desc]").forEach((th) => {
     }
 
     const vacio = crear("p", "oc-vacio", "Todavía no hay nadie en el combate.");
-    const caja = crear("div", "oc-hoja");
+    const caja = crear("div", suelta ? "oc-ini-suelta" : "oc-hoja");
     const ventanita = (titulo, emoji, dentro) => {
+        if (suelta) {
+            const v = crear("div", "oc-ini-bloque");
+            v.append(...dentro);
+            return v;
+        }
         const v = crear("div", "oc-hoja-caja es-ancha");
         const barra = crear("div", "recent-entries-header");
         const h = crear("h3", "oc-hoja-titulo");
@@ -3546,22 +3756,64 @@ document.querySelectorAll(".oc-ataques th[data-oc-desc]").forEach((th) => {
         ventanita("añadir.txt", "＋", anadirme ? [form, anadirme] : [form]));
     sitio.replaceChildren(caja, aviso);
     pintar();
+};
+
+(function () {
+    const sitio = document.querySelector("[data-oc-iniciativa]");
+    if (sitio) {
+        window.ocMontar.iniciativa(sitio);
+    }
 })();
 
 // =========================================
-// EL BUSCADOR DE LAS REGLAS
+// LAS REGLAS: BOTONES CON SU DIBUJO Y SU BUSCADOR
 // =========================================
-// En la pestaña 📚 reglas: escribir filtra las reglas (por su nombre y su
-// texto, sin mirar tildes) y abre las que casan.
+// En la pestaña 📚 reglas (y en el módulo de reglas de la pantalla de
+// máster): cada regla, un botón grande con su dibujo (su emoji) y su
+// nombre, en una rejilla por grupos; al pulsarlo, su texto en una ventana.
+// Sin JavaScript, cada una es un desplegable. Encima, un buscador que
+// filtra (por el nombre y el texto, sin mirar tildes).
+// window.ocMontar.reglas(sitio) lo monta en un sitio con esas reglas
+// (<li class="oc-regla"><details>…); se monta solo en la de la ficha.
 
-(function () {
-    const sitio = document.querySelector("[data-oc-reglas]");
-    if (!sitio) {
-        return;
-    }
-    const llano = (t) => String(t || "").normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
+window.ocMontar.reglas = function (sitio, idBuscar) {
+    const llano = (t) => String(t || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
     const reglas = Array.from(sitio.querySelectorAll(".oc-regla"));
     const grupos = Array.from(sitio.querySelectorAll(".oc-reglas-grupo"));
+    reglas.forEach((r) => {
+        const detalles = r.querySelector("details");
+        const icono = r.querySelector(".oc-regla-icono");
+        const nombre = r.querySelector(".oc-regla-nombre") || r.querySelector("summary");
+        const texto = r.querySelector(".oc-texto");
+        const b = document.createElement("button");
+        b.type = "button";
+        b.className = "oc-regla-boton";
+        b.setAttribute("aria-haspopup", "dialog");
+        const dibujo = document.createElement("span");
+        dibujo.className = "oc-regla-dibujo";
+        dibujo.setAttribute("aria-hidden", "true");
+        dibujo.textContent = icono ? icono.textContent : "📖";
+        const n = document.createElement("span");
+        n.className = "oc-regla-texto";
+        n.textContent = nombre.textContent.replace(/^▸\s*/, "");
+        b.append(dibujo, n);
+        b.addEventListener("click", () => {
+            const cuerpo = document.createElement("div");
+            cuerpo.className = "oc-regla-ventana";
+            const grande = document.createElement("p");
+            grande.className = "oc-regla-ventana-dibujo";
+            grande.setAttribute("aria-hidden", "true");
+            grande.textContent = dibujo.textContent;
+            const copia = texto.cloneNode(true);
+            copia.hidden = false;
+            cuerpo.append(grande, copia);
+            window.ocVentana.abrir({ titulo: n.textContent, cuerpo, vuelta: b, clase: "es-regla" });
+        });
+        // El texto se queda (para buscar en él), escondido.
+        texto.hidden = true;
+        r.dataset.buscar = llano(n.textContent + " " + texto.textContent);
+        detalles.replaceWith(b, texto);
+    });
     const caja = document.createElement("div");
     caja.className = "oc-reglas-buscar";
     const etiqueta = document.createElement("label");
@@ -3569,7 +3821,7 @@ document.querySelectorAll(".oc-ataques th[data-oc-desc]").forEach((th) => {
     etiqueta.textContent = "buscar";
     const input = document.createElement("input");
     input.type = "search";
-    input.id = "oc-reglas-buscar";
+    input.id = idBuscar || "oc-reglas-buscar";
     input.className = "oc-dados-texto";
     input.placeholder = "concentración, derribado, cobertura…";
     etiqueta.htmlFor = input.id;
@@ -3585,9 +3837,8 @@ document.querySelectorAll(".oc-ataques th[data-oc-desc]").forEach((th) => {
             const q = llano(input.value.trim());
             let n = 0;
             reglas.forEach((r) => {
-                const vale = !q || llano(r.textContent).includes(q);
+                const vale = !q || r.dataset.buscar.includes(q);
                 r.hidden = !vale;
-                r.querySelector("details").open = !!q && vale;
                 if (vale) {
                     n++;
                 }
@@ -3598,4 +3849,11 @@ document.querySelectorAll(".oc-ataques th[data-oc-desc]").forEach((th) => {
             cuantas.textContent = q ? (n ? n + (n === 1 ? " regla" : " reglas") : "Ninguna regla con eso.") : "";
         }, 150);
     });
+};
+
+(function () {
+    const sitio = document.querySelector("[data-oc-reglas]");
+    if (sitio) {
+        window.ocMontar.reglas(sitio);
+    }
 })();

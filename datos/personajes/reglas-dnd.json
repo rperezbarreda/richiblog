@@ -3,206 +3,247 @@
         {
             "grupo": "Estados",
             "nombre": "Agarrado",
+            "icono": "🤝",
             "texto": "- Tu velocidad es 0 y no puede aumentar.\n- Se acaba si quien te agarra queda incapacitado o algo te saca de su alcance.\n- *2024:* además, desventaja en los ataques contra cualquiera que no sea quien te agarra, y te puede arrastrar (cuesta el doble de movimiento)."
         },
         {
             "grupo": "Estados",
             "nombre": "Apresado",
+            "icono": "⛓️",
             "texto": "- Velocidad 0.\n- Los ataques contra ti tienen ventaja; los tuyos, desventaja.\n- Desventaja en las salvaciones de Destreza."
         },
         {
             "grupo": "Estados",
             "nombre": "Asustado",
+            "icono": "😱",
             "texto": "- Desventaja en pruebas de característica y ataques mientras veas lo que te asusta.\n- No puedes acercarte a ello por tu voluntad."
         },
         {
             "grupo": "Estados",
             "nombre": "Aturdido",
+            "icono": "💫",
             "texto": "- Estás incapacitado y fallas las salvaciones de Fuerza y Destreza.\n- Los ataques contra ti tienen ventaja.\n- *2014:* no te puedes mover y apenas hablas."
         },
         {
             "grupo": "Estados",
             "nombre": "Cegado",
+            "icono": "🙈",
             "texto": "- Fallas lo que necesite la vista.\n- Los ataques contra ti tienen ventaja; los tuyos, desventaja."
         },
         {
             "grupo": "Estados",
             "nombre": "Derribado",
+            "icono": "🛌",
             "texto": "- Solo puedes arrastrarte (cada metro cuesta el doble) o levantarte (gasta la mitad de tu velocidad).\n- Tus ataques tienen desventaja.\n- Los ataques contra ti: con ventaja si vienen de 1,5 m; con desventaja si son de más lejos."
         },
         {
             "grupo": "Estados",
             "nombre": "Ensordecido",
+            "icono": "🙉",
             "texto": "- Fallas lo que necesite el oído."
         },
         {
             "grupo": "Estados",
             "nombre": "Envenenado",
+            "icono": "🤢",
             "texto": "- Desventaja en los ataques y en las pruebas de característica."
         },
         {
             "grupo": "Estados",
             "nombre": "Hechizado",
+            "icono": "💘",
             "texto": "- No puedes atacar a quien te hechizó ni hacerle daño con lo que hagas.\n- Él tiene ventaja en las pruebas para tratar contigo."
         },
         {
             "grupo": "Estados",
             "nombre": "Incapacitado",
+            "icono": "🚫",
             "texto": "- No puedes hacer acciones ni reacciones.\n- *2024:* tampoco acciones adicionales, no puedes hablar, pierdes la concentración y tienes desventaja en la iniciativa."
         },
         {
             "grupo": "Estados",
             "nombre": "Inconsciente",
+            "icono": "😵",
             "texto": "- Incapacitado: no te mueves ni hablas y no te enteras de nada. Sueltas lo que lleves y caes derribado.\n- Fallas las salvaciones de Fuerza y Destreza.\n- Los ataques contra ti tienen ventaja; si te dan desde 1,5 m, es crítico."
         },
         {
             "grupo": "Estados",
             "nombre": "Invisible",
+            "icono": "👻",
             "texto": "- Nadie te ve sin magia o sentidos especiales (pero pueden oírte o ver tus huellas).\n- Tus ataques tienen ventaja; los de contra ti, desventaja."
         },
         {
             "grupo": "Estados",
             "nombre": "Paralizado",
+            "icono": "🧊",
             "texto": "- Incapacitado; no te mueves ni hablas.\n- Fallas las salvaciones de Fuerza y Destreza.\n- Los ataques contra ti tienen ventaja; si te dan desde 1,5 m, es crítico."
         },
         {
             "grupo": "Estados",
             "nombre": "Petrificado",
+            "icono": "🗿",
             "texto": "- Te vuelves de piedra (o lo que sea): incapacitado, no te mueves ni hablas.\n- Resistencia a todo el daño; inmune a veneno y enfermedad.\n- Los ataques contra ti tienen ventaja; fallas las salvaciones de Fuerza y Destreza."
         },
         {
             "grupo": "Estados",
             "nombre": "Agotamiento",
+            "icono": "🥵",
             "texto": "Se acumula por niveles; con 6, mueres. Un descanso largo quita uno.\n\n- *2014:* 1, desventaja en pruebas; 2, velocidad a la mitad; 3, desventaja en ataques y salvaciones; 4, PG máximos a la mitad; 5, velocidad 0.\n- *2024:* cada nivel resta 2 a todas las tiradas de d20 y 1,5 m a la velocidad."
         },
         {
             "grupo": "Combate",
             "nombre": "Ventaja y desventaja",
+            "icono": "⚖️",
             "texto": "- Tira 2d20: con ventaja te quedas el mayor; con desventaja, el menor.\n- Varias no se suman: o tienes, o no. Si tienes las dos a la vez, se anulan."
         },
         {
             "grupo": "Combate",
             "nombre": "Flanqueo (regla opcional)",
+            "icono": "🗡️",
             "texto": "- Si tú y un aliado estáis a los dos lados de un enemigo, justo enfrente el uno del otro, tenéis **ventaja** en los ataques cuerpo a cuerpo contra él.\n- No vale si el aliado está incapacitado. Es una regla opcional (Guía del Dungeon Master): pregunta en tu mesa."
         },
         {
             "grupo": "Combate",
             "nombre": "Cobertura",
+            "icono": "🧱",
             "texto": "- **Media** (la mitad tapada): +2 a la CA y a las salvaciones de Destreza.\n- **Tres cuartos**: +5.\n- **Total**: no te pueden apuntar directamente."
         },
         {
             "grupo": "Combate",
             "nombre": "Ataque de oportunidad",
+            "icono": "⚡",
             "texto": "- Con tu reacción, un ataque cuerpo a cuerpo a un enemigo que ves cuando sale de tu alcance.\n- No lo provoca quien se destraba ni a quien mueven otros (empujones, teletransporte…)."
         },
         {
             "grupo": "Combate",
             "nombre": "Acciones en combate",
+            "icono": "📋",
             "texto": "Atacar, Lanzar un conjuro, Correr (otra vez tu velocidad), Destrabarse (moverte sin ataques de oportunidad), Esquivar (los ataques contra ti con desventaja y ventaja en salvaciones de Destreza), Ayudar (ventaja a un aliado), Esconderse, Prepararse (una reacción para cuando pase algo), Buscar y Usar un objeto. *2024:* también Influir y Estudiar."
         },
         {
             "grupo": "Combate",
             "nombre": "Críticos y pifias",
+            "icono": "🎯",
             "texto": "- Un **20 natural** en un ataque siempre impacta y tira **el doble de dados** de daño.\n- Un **1 natural** siempre falla.\n- (En pruebas y salvaciones no hay críticos, salvo que lo diga tu mesa.)"
         },
         {
             "grupo": "Combate",
             "nombre": "Combatir con dos armas",
+            "icono": "🔪",
             "texto": "- Si atacas con un arma ligera cuerpo a cuerpo, con tu acción adicional puedes atacar con otra arma ligera.\n- A ese daño no le sumas tu modificador (salvo que sea negativo)."
         },
         {
             "grupo": "Combate",
             "nombre": "Agarrar y empujar",
+            "icono": "💪",
             "texto": "- *2014:* en vez de un ataque, prueba de Atletismo contra su Atletismo o Acrobacias. Solo contra criaturas de, como mucho, un tamaño más que tú.\n- *2024:* el objetivo hace una salvación de Fuerza o Destreza contra CD 8 + tu Fuerza + tu competencia."
         },
         {
             "grupo": "Combate",
             "nombre": "Sorpresa",
+            "icono": "❗",
             "texto": "- *2014:* quien es sorprendido no se mueve ni actúa en su primer turno, ni puede reaccionar hasta que acabe.\n- *2024:* quien es sorprendido tira la iniciativa con desventaja."
         },
         {
             "grupo": "Combate",
             "nombre": "Iniciativa",
+            "icono": "⏱️",
             "texto": "- Prueba de Destreza (con su bono) de cada uno; se juega de mayor a menor.\n- Empates: entre jugadores lo decidís vosotros; entre los del máster, él."
         },
         {
             "grupo": "Combate",
             "nombre": "Esconderse",
+            "icono": "🥷",
             "texto": "- Prueba de Sigilo; quien te busca la compara con su Percepción (la pasiva, si no está buscando).\n- No te puedes esconder de quien te ve claramente. Al atacar o hacer ruido, se acaba."
         },
         {
             "grupo": "Magia",
             "nombre": "Concentración",
+            "icono": "🧘",
             "texto": "- Solo un conjuro de concentración a la vez: si empiezas otro, el primero acaba.\n- Al recibir daño: salvación de Constitución con CD 10 o la mitad del daño (la que sea mayor; *2024:* como mucho CD 30). Si la fallas, se pierde.\n- También se pierde si quedas incapacitado o mueres."
         },
         {
             "grupo": "Magia",
             "nombre": "Conjuros con acción adicional",
+            "icono": "✨",
             "texto": "- *2014:* si lanzas uno con tu acción adicional, el otro conjuro de ese turno solo puede ser un truco de una acción.\n- *2024:* solo puedes gastar un espacio de conjuro por turno."
         },
         {
             "grupo": "Magia",
             "nombre": "Rituales",
+            "icono": "🕯️",
             "texto": "- Un conjuro con la etiqueta ritual se puede lanzar sin gastar espacio, tardando 10 minutos más."
         },
         {
             "grupo": "Magia",
             "nombre": "Componentes",
+            "icono": "🧪",
             "texto": "- **V** hablar, **S** mover las manos, **M** materiales.\n- Un foco o una bolsa de componentes sustituye los materiales que no tienen precio ni se gastan."
         },
         {
             "grupo": "Magia",
             "nombre": "CD y ataque de conjuro",
+            "icono": "🔮",
             "texto": "- **CD de salvación:** 8 + competencia + modificador de tu aptitud mágica.\n- **Ataque de conjuro:** competencia + modificador de tu aptitud mágica."
         },
         {
             "grupo": "Descansos y salud",
             "nombre": "Descanso corto",
+            "icono": "☕",
             "texto": "- Al menos 1 hora.\n- Puedes gastar dados de golpe: tiras cada uno y sumas tu Constitución; eso recuperas.\n- Algunas cosas se recargan (las que dicen «descanso corto»)."
         },
         {
             "grupo": "Descansos y salud",
             "nombre": "Descanso largo",
+            "icono": "🛏️",
             "texto": "- 8 horas (al menos 6 durmiendo); uno cada 24 horas.\n- Recuperas todos los PG y los espacios de conjuro; *2014:* la mitad de tus dados de golpe; *2024:* todos.\n- Quita un nivel de agotamiento."
         },
         {
             "grupo": "Descansos y salud",
             "nombre": "Salvaciones de muerte",
+            "icono": "💀",
             "texto": "- A 0 PG, al empezar tu turno tiras 1d20: con 10 o más, éxito; con menos, fallo.\n- 3 éxitos: estable (inconsciente, pero no mueres). 3 fallos: mueres.\n- **20 natural:** recuperas 1 PG. **1 natural:** cuenta como dos fallos.\n- Si te hacen daño a 0 PG, un fallo (si es crítico, dos).\n- Si el daño que queda tras dejarte a 0 iguala tus PG máximos, mueres en el acto."
         },
         {
             "grupo": "Descansos y salud",
             "nombre": "Puntos de golpe temporales",
+            "icono": "🛡️",
             "texto": "- No se suman entre sí: si te dan más, te quedas con los que sean más.\n- Se pierden antes que los normales y no cuentan para curarte.\n- Se van con un descanso largo (salvo que digan otra cosa)."
         },
         {
             "grupo": "Descansos y salud",
             "nombre": "Estabilizar",
+            "icono": "🩹",
             "texto": "- Una prueba de Sabiduría (Medicina) CD 10 con tu acción estabiliza a alguien a 0 PG."
         },
         {
             "grupo": "Movimiento y entorno",
             "nombre": "Terreno difícil",
+            "icono": "🪨",
             "texto": "- Cada metro te cuesta el doble de movimiento."
         },
         {
             "grupo": "Movimiento y entorno",
             "nombre": "Caídas",
+            "icono": "🪂",
             "texto": "- 1d6 de daño contundente cada 3 m de caída (como mucho 20d6). Acabas derribado si te haces daño."
         },
         {
             "grupo": "Movimiento y entorno",
             "nombre": "Saltar",
+            "icono": "🦘",
             "texto": "- **Largo:** tantos pies como tu Fuerza (unos 30 cm por punto) con 3 m de carrerilla; sin ella, la mitad.\n- **Alto:** 3 pies + tu modificador de Fuerza (unos 90 cm + 30 cm por punto); sin carrerilla, la mitad."
         },
         {
             "grupo": "Movimiento y entorno",
             "nombre": "Luz y visión",
+            "icono": "🔦",
             "texto": "- **Penumbra:** desventaja en las pruebas de Percepción que usen la vista.\n- **Oscuridad:** como si estuvieras cegado.\n- **Visión en la oscuridad:** la oscuridad cuenta como penumbra (en blanco y negro), hasta su alcance."
         },
         {
             "grupo": "Movimiento y entorno",
             "nombre": "Aguantar la respiración",
+            "icono": "🫧",
             "texto": "- Puedes aguantar 1 + tu modificador de Constitución minutos (mínimo 30 segundos).\n- Después, aguantas tantos asaltos como tu modificador de Constitución (mínimo 1); al acabar, caes a 0 PG."
         }
     ]
