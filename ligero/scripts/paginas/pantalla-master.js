@@ -422,19 +422,50 @@
             return {};
         }
     }
-    function panelImagen(clave, nombre, ilus, credito) {
+    function enlaceFuera(texto, href, etiqueta) {
+        const a = crear("a", "", texto);
+        a.href = urlImagenSegura(href) || "#";
+        a.target = "_blank";
+        a.rel = "noopener noreferrer";
+        a.setAttribute("aria-label", etiqueta + " (se abre en otra pestaña)");
+        return a;
+    }
+    function panelImagen(clave, nombre, ilus, credito, en) {
         const caja = crear("div", "master-imagen");
-        const oficial = crear("p", "master-imagen-oficial");
+        const oficial = crear("div", "master-imagen-oficial");
+        const esBicho = clave.indexOf("monstruo:") === 0;
+        const ddb = enlaceFuera("🔎 buscarla en D&D Beyond", "https://www.dndbeyond.com/" + (esBicho ? "monsters" : "magic-items") +
+            "?filter-search=" + encodeURIComponent(en || nombre), "Buscar " + nombre + " en D&D Beyond");
         if (ilus) {
-            const a = crear("a", "", "🖼️ ver la ilustración oficial en 5e.tools");
-            a.href = "https://5e.tools/img/" + encodeURI(ilus);
-            a.target = "_blank";
-            a.rel = "noopener noreferrer";
-            a.setAttribute("aria-label", "Ver la ilustración oficial de " + nombre + " en 5e.tools (se abre en otra pestaña)");
-            oficial.append(a, crear("span", "master-imagen-credito", (credito ? "Ilustración de " + credito + ", " : "") +
-                "© Wizards of the Coast."));
+            const url = "https://5e.tools/img/" + encodeURI(ilus);
+            const previa = crear("img", "master-imagen-previa");
+            previa.alt = "Ilustración oficial de " + nombre;
+            previa.referrerPolicy = "no-referrer";
+            previa.loading = "lazy";
+            previa.src = encodeURI(decodeURI(url));
+            const verGrande = botonDe("master-imagen-boton", "", () => {
+                const g = crear("img", "master-imagen-grande");
+                g.alt = previa.alt;
+                g.referrerPolicy = "no-referrer";
+                g.src = encodeURI(decodeURI(url));
+                window.ocVentana.abrir({ titulo: nombre, cuerpo: g, vuelta: verGrande, clase: "es-ancha" });
+            }, "Ver en grande la ilustración oficial de " + nombre);
+            verGrande.appendChild(previa);
+            const sinPrevia = crear("p", "oc-vacio", "No se ha podido cargar la vista previa (¿sin conexión?). El enlace sí vale.");
+            sinPrevia.hidden = true;
+            previa.addEventListener("error", () => {
+                verGrande.hidden = true;
+                sinPrevia.hidden = false;
+            });
+            const enlaces = crear("p", "master-imagen-enlaces");
+            enlaces.append(enlaceFuera("🖼️ abrirla en 5e.tools", url, "Abrir la ilustración oficial de " + nombre + " en 5e.tools"),
+                document.createTextNode(" · "), ddb);
+            oficial.append(verGrande, sinPrevia, enlaces, crear("p", "master-imagen-credito", (credito ? "Ilustración de " + credito +
+                ", " : "") + "© Wizards of the Coast. Se ve desde 5e.tools; aquí no se guarda."));
         } else {
-            oficial.textContent = "No hay ilustración oficial de esto en 5e.tools.";
+            const p = crear("p", "master-imagen-enlaces", "5e.tools no tiene ilustración de esto. ");
+            p.appendChild(ddb);
+            oficial.appendChild(p);
         }
         const id = "master-imagen-" + clave.replace(/[^\w]+/g, "-") + "-" + Math.random().toString(36).slice(2, 6);
         const et = crear("label", "oc-dados-etiqueta", "tu imagen (pega su enlace https)");
@@ -541,7 +572,7 @@
             }
             enlazarConjuros(que);
         }
-        cuerpo.append(crear("h3", "master-imagen-titulo", "🖼️ imagen"), panelImagen("objeto:" + o.en, o.nombre, o.ilus, o.ilusDe));
+        cuerpo.append(crear("h3", "master-imagen-titulo", "🖼️ imagen"), panelImagen("objeto:" + o.en, o.nombre, o.ilus, o.ilusDe, o.en));
         return cuerpo;
     }
     function abrirObjeto(o, vuelta, fuente) {
@@ -2194,7 +2225,7 @@
                     ctx.globalAlpha = a;
                     ctx.drawImage(lienzos[n.id], 0, 0);
                     if (conFlotante && flotante && n.id === activa) {
-                        ctx.drawImage(flotante.lienzo, flotante.x, flotante.y);
+                        ctx.drawImage(flotante.lienzo, flotante.x, flotante.y, flotante.w, flotante.h);
                     }
                 }
             };
@@ -2218,6 +2249,17 @@
                 ce.lineDashOffset = 7;
                 ce.strokeStyle = "#ffffff";
                 ce.strokeRect(sel.x, sel.y, sel.w, sel.h);
+                if (herramienta === "seleccionar") {
+                    const t = tolerancia() * 0.9;
+                    ce.setLineDash([]);
+                    ce.lineWidth = 2;
+                    asas().forEach(([, x, y]) => {
+                        ce.fillStyle = "#ffffff";
+                        ce.fillRect(x - t / 2, y - t / 2, t, t);
+                        ce.strokeStyle = "#000000";
+                        ce.strokeRect(x - t / 2, y - t / 2, t, t);
+                    });
+                }
                 ce.restore();
             }
         };
@@ -2314,6 +2356,20 @@
             const r = encima.getBoundingClientRect();
             return [Math.round((e.clientX - r.left) * DIBUJO_ANCHO / r.width), Math.round((e.clientY - r.top) * DIBUJO_ALTO / r.height)];
         };
+        const tolerancia = () => 14 * DIBUJO_ANCHO / Math.max(1, encima.getBoundingClientRect().width);
+        const asas = () => {
+            if (!sel) {
+                return [];
+            }
+            const { x, y, w, h } = sel;
+            return [["nw", x, y], ["n", x + w / 2, y], ["ne", x + w, y], ["e", x + w, y + h / 2], ["se", x + w, y + h],
+                ["s", x + w / 2, y + h], ["sw", x, y + h], ["w", x, y + h / 2]];
+        };
+        const asaEn = (p) => {
+            const t = tolerancia();
+            const a = asas().find(([, x, y]) => Math.abs(p[0] - x) <= t && Math.abs(p[1] - y) <= t);
+            return a ? a[0] : null;
+        };
         const dentroDe = (p, s) => s && p[0] >= s.x && p[0] <= s.x + s.w && p[1] >= s.y && p[1] <= s.y + s.h;
         function trazarFigura(ctx, f) {
             ctx.save();
@@ -2347,7 +2403,7 @@
             const capa = lienzos[c.id].getContext("2d");
             l.getContext("2d").drawImage(lienzos[c.id], sel.x, sel.y, sel.w, sel.h, 0, 0, sel.w, sel.h);
             capa.clearRect(sel.x, sel.y, sel.w, sel.h);
-            flotante = { lienzo: l, x: sel.x, y: sel.y, capa: c.id };
+            flotante = { lienzo: l, x: sel.x, y: sel.y, w: sel.w, h: sel.h, capa: c.id };
             return true;
         };
         function soltarFlotante(dejar) {
@@ -2355,7 +2411,7 @@
                 return;
             }
             if (dejar !== false && lienzos[flotante.capa]) {
-                lienzos[flotante.capa].getContext("2d").drawImage(flotante.lienzo, flotante.x, flotante.y);
+                lienzos[flotante.capa].getContext("2d").drawImage(flotante.lienzo, flotante.x, flotante.y, flotante.w, flotante.h);
                 guardarDibujo(flotante.capa);
             }
             flotante = null;
@@ -2384,7 +2440,10 @@
             }
             if (herramienta === "seleccionar") {
                 encima.setPointerCapture(e.pointerId);
-                if (dentroDe(p, sel) && levantar()) {
+                const asa = asaEn(p);
+                if (asa && levantar()) {
+                    gesto = { que: "tamano", asa, desde: p, antes: Object.assign({}, sel) };
+                } else if (dentroDe(p, sel) && levantar()) {
                     gesto = { que: "mover", desde: p, x: flotante.x, y: flotante.y, sx: sel.x, sy: sel.y };
                 } else {
                     soltarFlotante();
@@ -2436,8 +2495,15 @@
             }
             repintar();
         });
+        const CURSOR_ASA = { nw: "nwse-resize", se: "nwse-resize", ne: "nesw-resize", sw: "nesw-resize", n: "ns-resize", s: "ns-resize",
+            e: "ew-resize", w: "ew-resize" };
         encima.addEventListener("pointermove", (e) => {
             if (!gesto) {
+                if (herramienta === "seleccionar") {
+                    const p = punto(e);
+                    const asa = asaEn(p);
+                    encima.style.cursor = asa ? CURSOR_ASA[asa] : dentroDe(p, sel) ? "move" : "";
+                }
                 return;
             }
             const eventos = gesto.que === "trazo" && e.getCoalescedEvents ? e.getCoalescedEvents() : [];
@@ -2458,6 +2524,36 @@
                 const x = Math.max(0, Math.min(x0, p[0]));
                 const y = Math.max(0, Math.min(y0, p[1]));
                 sel = { x, y, w: Math.min(DIBUJO_ANCHO, Math.max(x0, p[0])) - x, h: Math.min(DIBUJO_ALTO, Math.max(y0, p[1])) - y };
+            } else if (gesto.que === "tamano") {
+                const a = gesto.antes;
+                const dx = p[0] - gesto.desde[0];
+                const dy = p[1] - gesto.desde[1];
+                let { x, y, w, h } = a;
+                if (gesto.asa.indexOf("w") >= 0) {
+                    x = Math.min(a.x + a.w - 4, a.x + dx);
+                    w = a.x + a.w - x;
+                }
+                if (gesto.asa.indexOf("e") >= 0) {
+                    w = Math.max(4, a.w + dx);
+                }
+                if (gesto.asa.indexOf("n") >= 0) {
+                    y = Math.min(a.y + a.h - 4, a.y + dy);
+                    h = a.y + a.h - y;
+                }
+                if (gesto.asa.indexOf("s") >= 0) {
+                    h = Math.max(4, a.h + dy);
+                }
+                if (e.shiftKey && gesto.asa.length === 2) {
+                    const k = Math.max(w / a.w, h / a.h);
+                    const nw = a.w * k;
+                    const nh = a.h * k;
+                    x = gesto.asa.indexOf("w") >= 0 ? a.x + a.w - nw : a.x;
+                    y = gesto.asa.indexOf("n") >= 0 ? a.y + a.h - nh : a.y;
+                    w = nw;
+                    h = nh;
+                }
+                sel = { x, y, w, h };
+                Object.assign(flotante, { x, y, w, h });
             } else if (gesto.que === "mover") {
                 const dx = p[0] - gesto.desde[0];
                 const dy = p[1] - gesto.desde[1];
@@ -2482,7 +2578,7 @@
             } else if (gesto.que === "elegir" && sel && (sel.w < 3 || sel.h < 3)) {
                 sel = null;
             } else if (gesto.que === "elegir" && sel) {
-                avisar("Seleccionado. Arrástralo o muévelo con las flechas; Supr lo borra, Esc lo suelta.");
+                avisar("Seleccionado. Arrástralo o muévelo con las flechas; las asas o + y − cambian el tamaño; Supr lo borra, Esc lo suelta.");
             }
             gesto = null;
             repintar();
@@ -2516,6 +2612,20 @@
                 sel.x += dx;
                 sel.y += dy;
                 repintar();
+                return;
+            }
+            if (sel && (e.key === "+" || e.key === "-")) {
+                e.preventDefault();
+                if (!levantar()) {
+                    return;
+                }
+                const k = e.key === "+" ? 1.1 : 1 / 1.1;
+                const w = Math.max(4, sel.w * k);
+                const h = Math.max(4, sel.h * k);
+                sel = { x: sel.x + (sel.w - w) / 2, y: sel.y + (sel.h - h) / 2, w, h };
+                Object.assign(flotante, sel);
+                repintar();
+                avisar("Tamaño: " + Math.round(w) + " × " + Math.round(h) + ".");
                 return;
             }
             if (sel && (e.key === "Delete" || e.key === "Backspace")) {
@@ -3541,7 +3651,7 @@
             }).catch(() => {});
             paneles.push(["hechizos", panel]);
         }
-        paneles.push(["imagen", panelImagen("monstruo:" + b.en, b.nombre, b.ilus, b.ilusDe)]);
+        paneles.push(["imagen", panelImagen("monstruo:" + b.en, b.nombre, b.ilus, b.ilusDe, b.en)]);
         let actual = (guardado && guardado.pestana) || 0;
         if (actual >= paneles.length) {
             actual = 0;

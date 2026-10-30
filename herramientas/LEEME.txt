@@ -4382,18 +4382,24 @@
       guarda como {n, es, idioma} (lo de antes, texto, sigue valiendo).
     · 🖼️ IMÁGENES de monstruos y objetos: pestaña «imagen» en el perfil
       del monstruo (la última) y apartado al final de cada objeto
-      (panelImagen()). La ilustración oficial NO se incrusta: es de WotC y
-      5e.tools la tiene sin permiso, así que solo hay un enlace que la
-      abre en otra pestaña (https://5e.tools/img/ + «ilus», con «ilusDe»,
-      el artista; sacados de fluff-bestiary-xmm.json y fluff-items.json:
-      119 monstruos y 261 objetos). Lo que sí se ve dentro es la imagen
-      que pongas tú: pegas el enlace https de una imagen y sale ahí, con
-      «🔍 en grande» y «✕ quitar». Se guarda solo en ese navegador
-      («richi-master-imagenes»: {"monstruo:Aboleth": url, "objeto:…"}; va
-      en exportar/importar); urlImagenSegura() solo deja https. Para eso,
-      la pantalla de máster lleva data-oc-imagenes-de-fuera en su
-      <section> y actualizar-cabeceras.py le pone img-src … https: en la
-      CSP (solo a las páginas con esa marca).
+      (panelImagen()). Si hay ilustración oficial, se ve una VISTA PREVIA
+      cargada de 5e.tools (https://5e.tools/img/ + «ilus»; no se guarda
+      aquí) que, pulsada, se abre en grande, con el enlace para abrirla en
+      5e.tools, el artista («ilusDe») y © Wizards of the Coast. OJO: son
+      ilustraciones de WotC que 5e.tools tiene sin permiso; enseñarlas
+      incrustadas en una web pública tiene su riesgo (decisión de Richi).
+      «ilus» sale de fluff-bestiary-xmm.json (y, si no, de la del Monster
+      Manual de 2014, fluff-bestiary-mm.json) y de fluff-items.json: 188
+      monstruos y 266 objetos. Siempre hay además «🔎 buscarla en D&D
+      Beyond» (su buscador con el nombre en inglés; de allí no se puede
+      sacar la imagen). Y la imagen que pongas tú: pegas el enlace https de
+      una imagen y sale ahí, con «🔍 en grande» y «✕ quitar»; se guarda
+      solo en ese navegador («richi-master-imagenes»: {"monstruo:Aboleth":
+      url, "objeto:…"}; va en exportar/importar); urlImagenSegura() solo
+      deja https. Para todo esto, la pantalla de máster lleva
+      data-oc-imagenes-de-fuera en su <section> y actualizar-cabeceras.py
+      le pone img-src … https: en la CSP (solo a las páginas con esa
+      marca).
     · 💰 botín y 🗺️ encuentros: generadores PROPIOS. Las tablas de botín
       y de encuentros de 5e.tools (loot.json, encounters.json) son de la
       DMG, la Xanathar's y otros libros, no del SRD: no se pueden copiar.
@@ -4459,7 +4465,9 @@
       verdad: deja transparente), 🪣 bote (G: rellena la zona del mismo
       color de la capa activa, con algo de margen; rellenar()), ⬚
       seleccionar y mover (M: un rectángulo; se arrastra, o con las
-      flechas, Mayús ×10; Supr lo borra y Esc lo suelta), 💧 cuentagotas
+      flechas, Mayús ×10; sus ocho asas cambian el tamaño, con Mayús sin
+      deformar, y + / − lo agrandan o lo encogen un 10 %; Supr lo borra y
+      Esc lo suelta), 💧 cuentagotas
       (I: coge el color de lo que se ve), ╱ línea (L), ▭ rectángulo (U) y
       ◯ elipse (O). Debajo, diez colores, «cualquier color» (el selector
       del navegador), tres grosores, ↶/↷ (Ctrl+Z / Ctrl+Y; 20 pasos, por
