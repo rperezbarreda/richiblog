@@ -38,6 +38,7 @@
                 const primera = sub.querySelector("a[data-oc-ir]");
                 if (primera) {
                     mostrar(primera.dataset.ocIr, false, true);
+                    bajarHasta(elegida);
                 }
             }
         });
@@ -99,10 +100,42 @@
             }
         }
     }
+    const enMovil = window.matchMedia ? window.matchMedia("(max-width: 860px)") : { matches: false };
+    const pagina = document.querySelector(".oc-ficha-page");
+    function medirTira() {
+        if (pagina) {
+            pagina.style.setProperty("--oc-tira-alto", enMovil.matches ? menu.offsetHeight + "px" : "");
+        }
+    }
+    function verEnLaTira(x) {
+        if (!enMovil.matches || !x) {
+            return;
+        }
+        const r = x.getBoundingClientRect();
+        const m = menu.getBoundingClientRect();
+        if (r.left < m.left + 8) {
+            menu.scrollLeft -= m.left - r.left + 24;
+        } else if (r.right > m.right - 8) {
+            menu.scrollLeft += r.right - m.right + 24;
+        }
+    }
+    function bajarHasta(parte) {
+        if (!enMovil.matches || !pagina) {
+            return;
+        }
+        const hueco = parte.getBoundingClientRect().top - menu.getBoundingClientRect().bottom - 14;
+        if (pagina.scrollHeight > pagina.clientHeight) {
+            pagina.scrollTop += hueco;
+        } else {
+            window.scrollBy(0, hueco);
+        }
+    }
     enlaces.forEach((a) => {
         a.addEventListener("click", (e) => {
             e.preventDefault();
             mostrar(a.dataset.ocIr, true, true);
+            verEnLaTira(a);
+            bajarHasta(elegida);
         });
     });
     function desdeLaDireccion() {
@@ -115,6 +148,11 @@
     }
     panel.classList.add("con-menu");
     abrirFicha(false);
+    medirTira();
+    window.addEventListener("resize", medirTira);
+    if (window.ResizeObserver) {
+        new ResizeObserver(medirTira).observe(menu);
+    }
     window.addEventListener("hashchange", () => mostrar(desdeLaDireccion(), false, false));
     mostrar(desdeLaDireccion(), false, false);
 })();

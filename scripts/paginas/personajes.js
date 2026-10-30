@@ -54,6 +54,7 @@
                 const primera = sub.querySelector("a[data-oc-ir]");
                 if (primera) {
                     mostrar(primera.dataset.ocIr, false, true);
+                    bajarHasta(elegida);
                 }
             }
         });
@@ -124,10 +125,52 @@
         }
     }
 
+    // EN EL MÓVIL el menú es una tira fija debajo de la barra de arriba
+    // (personajes.responsive.css). Aquí: su alto, para dejarle sitio
+    // (--oc-tira-alto); que lo elegido se vea en la tira (se desplaza de
+    // lado); y al elegir una parte, la página baja hasta ella, justo
+    // debajo de la tira.
+    const enMovil = window.matchMedia ? window.matchMedia("(max-width: 860px)") : { matches: false };
+    const pagina = document.querySelector(".oc-ficha-page");
+
+    function medirTira() {
+        if (pagina) {
+            pagina.style.setProperty("--oc-tira-alto", enMovil.matches ? menu.offsetHeight + "px" : "");
+        }
+    }
+
+    function verEnLaTira(x) {
+        if (!enMovil.matches || !x) {
+            return;
+        }
+        const r = x.getBoundingClientRect();
+        const m = menu.getBoundingClientRect();
+        if (r.left < m.left + 8) {
+            menu.scrollLeft -= m.left - r.left + 24;
+        } else if (r.right > m.right - 8) {
+            menu.scrollLeft += r.right - m.right + 24;
+        }
+    }
+
+    function bajarHasta(parte) {
+        if (!enMovil.matches || !pagina) {
+            return;
+        }
+        const hueco = parte.getBoundingClientRect().top - menu.getBoundingClientRect().bottom - 14;
+        // Lo que se desplaza es la página de la ficha (o, si no, la ventana).
+        if (pagina.scrollHeight > pagina.clientHeight) {
+            pagina.scrollTop += hueco;
+        } else {
+            window.scrollBy(0, hueco);
+        }
+    }
+
     enlaces.forEach((a) => {
         a.addEventListener("click", (e) => {
             e.preventDefault();
             mostrar(a.dataset.ocIr, true, true);
+            verEnLaTira(a);
+            bajarHasta(elegida);
         });
     });
 
@@ -143,6 +186,11 @@
 
     panel.classList.add("con-menu");
     abrirFicha(false);
+    medirTira();
+    window.addEventListener("resize", medirTira);
+    if (window.ResizeObserver) {
+        new ResizeObserver(medirTira).observe(menu);
+    }
 
     window.addEventListener("hashchange", () => mostrar(desdeLaDireccion(), false, false));
     mostrar(desdeLaDireccion(), false, false);

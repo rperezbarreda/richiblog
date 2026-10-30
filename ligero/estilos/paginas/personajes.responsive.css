@@ -7,6 +7,65 @@
         max-width: 24rem;
         align-self: center;
     }
+    .oc-ficha-page .oc-panel.con-menu .oc-menu {
+        position: fixed;
+        top: var(--barra-alto);
+        right: 0;
+        left: 0;
+        z-index: 80;
+        flex-direction: row;
+        align-items: center;
+        gap: 0;
+        margin: 0;
+        padding: 4px 8px;
+        overflow-x: auto;
+        overflow-y: hidden;
+        direction: ltr;
+        scrollbar-gutter: auto;
+        border-bottom: 3px solid var(--yellow);
+        background: var(--purple);
+        box-shadow: 0 3px 0 var(--oc-color);
+        scrollbar-width: thin;
+    }
+    .oc-page.oc-ficha-page {
+        padding-top: calc(var(--oc-tira-alto, 3.2rem) + 18px);
+    }
+    .oc-panel.con-menu .oc-menu-lista,
+    .oc-panel.con-menu .oc-menu-sub {
+        flex: none;
+        flex-direction: row;
+        align-items: center;
+        gap: 2px;
+    }
+    .oc-panel.con-menu .oc-menu-lista > li {
+        flex: none;
+    }
+    .oc-panel.con-menu .oc-menu-grupo {
+        display: flex;
+        align-items: center;
+    }
+    .oc-panel.con-menu .oc-menu-sub {
+        margin: 0 4px;
+        padding: 0 0 0 4px;
+        border-left: 2px dashed var(--border);
+    }
+    .oc-panel.con-menu .oc-menu-enlace {
+        width: auto;
+        min-height: 44px;
+        padding: 6px 10px;
+        border-bottom: 4px solid transparent;
+        border-left: 0;
+        white-space: nowrap;
+    }
+    .oc-panel.con-menu .oc-menu-enlace[aria-current="true"] {
+        border-bottom-color: var(--oc-color);
+    }
+    .oc-panel.con-menu .oc-menu-flecha {
+        margin-left: 6px;
+    }
+    .oc-panel.con-menu .oc-menu-volver {
+        display: none;
+    }
 }
 @media (max-width: 520px) {
     .oc-page {
