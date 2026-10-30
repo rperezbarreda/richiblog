@@ -4358,12 +4358,13 @@
       todas las reglas, ✨ conjuros (buscador por nombre, nivel, escuela y
       clase sobre datos/personajes/compendio/conjuros-srd.json: los 339
       del SRD 5.2; cada uno abre su ventana) y 📝 notas: solo una de cada.
-    · 🛡️ party (jugadores), en dos pestañas: «👥 la party», para mirar
+    · 🛡️ party (jugadores) (más abajo, «🛡️ party: tres pestañas», la
+      de hechizos, traer del blog y la ficha de cada uno): «👥 la party», para mirar
       (nombre y clase, PG, CA y pasivas en chapas, las características
       con su dado, «＋ iniciativa» en cada uno y «⚔️ todos a la
       iniciativa»: tira 1d20 + su bono de Destreza y los apunta en verde;
       si ya está, no lo repite; arriba, la pasiva más alta de cada tipo) y
-      «✏️ editar» (los campos: nombre, clase, PG y máx, CA, las seis
+      «✏️ editar» (los campos: nombre, clase, nivel, PG y máx, CA, las seis
       características y Percepción, Investigación y Perspicacia pasivas).
       Solo una.
     · 🏠 reglas propias (homebrew): las de tu mesa, con nombre, emoji y
@@ -4677,6 +4678,39 @@
       en la ventana del bestiario, solo mientras está abierta. Los
       conjuros de los monstruos van aparte en bestiario.json («conjuros»:
       la frase, dónde se lanzan y las listas con sus usos).
+    · 🛡️ party: tres pestañas (pestanasDe(), las de los monstruos):
+      «👥 la party» (de un vistazo; cada uno con «📖 ficha» y «＋
+      iniciativa»), «✏️ editar» (a mano, con el nivel; y «📥 traer» un
+      personaje del blog, de datos/personajes/personajes.json: sus
+      números y las pasivas calculadas; pj.blog es su clave) y «✨
+      hechizos» (los de todos, por jugador, con su nivel; cada uno se
+      abre). Cada PJ tiene un id (pj.id, nuevoIdPj()).
+      📖 ficha: una ventana del tablero (tipo «pj», m.datos.pj = su id;
+      abrirFichaPj() la trae delante si ya está) con su raza, clase y
+      nivel arriba, sus miedos (si hay) y seis pestañas:
+      - 🎯 habilidades: CA, PG, velocidad, dados de golpe, competencia,
+        iniciativa, características, salvaciones y las 18 habilidades
+        (HABILIDADES_PJ) con su bono (competente, pericia ×2) y su dado;
+        las pasivas; y los rasgos y acciones de clase (los que su ficha
+        explica se abren: descripcionesPj() lee «descripciones»).
+      - ⚔️ armas: ataques (con dados), CA, defensas, objetos (los de
+        tienda.json se abren), dinero y competencias.
+      - ✨ hechizos: aptitud, CD, ataque, espacios y la lista por nivel
+        (conjurosPj()); cada uno, el del SRD con su ficha, el de su hoja
+        con su texto o, si no hay nada, 🔎 en D&D Beyond (conjuroPj()).
+      - 📜 historia: trasfondo, cómo es, personalidad, ideales,
+        vínculos, defectos, su historia y el enlace a su ficha del blog.
+      - 👥 relaciones: su gente (la de «gente» de personajes.json) y los
+        apuntes del máster (relaciones en la partida; deudas, promesas y
+        rencores).
+      - 📎 extra: su «extra» y los apuntes del máster: miedos (salen
+        arriba en todas las pestañas), secretos, ganchos y notas.
+      Los del blog leen todo de personajes.json, siempre al día; los de a
+      mano tienen cuadros para escribir (salvaciones y habilidades con
+      competencia, que cambian los bonos al momento; rasgos, armas,
+      objetos, trasfondo e historia) y los hechizos se añaden (los del
+      SRD, de una lista) con su aptitud mágica. Los apuntes del máster
+      van en pj.apuntes.
     · 💰 tienda: los 616 objetos del SRD 5.2 con su precio
       (datos/personajes/compendio/tienda.json; 15 son las comidas, las
       estancias en la posada, los asalariados y el mensajero), repartidos en nueve

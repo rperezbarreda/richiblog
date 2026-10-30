@@ -780,6 +780,493 @@
         dentro.append(cabeza, lista);
         pintar();
     }
+    const PERSONAJES_BLOG = "/datos/personajes/personajes.json";
+    const HABILIDADES_PJ = [["Acrobacias", "des"], ["Atletismo", "fue"], ["Conocimiento arcano", "int", "arcan"], ["Engaño", "car"],
+        ["Historia", "int"], ["Interpretación", "car"], ["Intimidación", "car"], ["Investigación", "int"], ["Juego de manos", "des"],
+        ["Medicina", "sab"], ["Naturaleza", "int"], ["Percepción", "sab"], ["Perspicacia", "sab"], ["Persuasión", "car"],
+        ["Religión", "int"], ["Sigilo", "des"], ["Supervivencia", "sab"], ["Trato con animales", "sab"]];
+    const NOMBRES_CAR = { fue: "Fuerza", des: "Destreza", con: "Constitución", int: "Inteligencia", sab: "Sabiduría", car: "Carisma" };
+    function nuevoIdPj() {
+        const u = new Uint32Array(2);
+        crypto.getRandomValues(u);
+        return "pj" + u[0].toString(36) + u[1].toString(36);
+    }
+    function rutaPjSegura(clave) {
+        return /^[a-z0-9-]+$/.test(clave || "") ? "/web/personajes/" + clave + "/" + clave + ".html" : "";
+    }
+    function descripcionesPj(texto) {
+        const salen = {};
+        String(texto || "").split(/^## /m).slice(1).forEach((trozo) => {
+            const lineas = trozo.split("\n");
+            const d = { nombre: lineas.shift().trim(), texto: [] };
+            lineas.forEach((l) => {
+                const x = /^(Tipo|Origen|Datos): (.*)$/.exec(l);
+                if (x && !d.texto.length) {
+                    d[x[1].toLowerCase()] = x[2];
+                } else {
+                    d.texto.push(l);
+                }
+            });
+            d.texto = d.texto.join("\n").trim();
+            salen[llano(d.nombre)] = d;
+        });
+        return salen;
+    }
+    function conjurosPj(pj, p, srd) {
+        if (p) {
+            return (p.conjuros || []).map((s) => {
+                const x = /^(Truco|\d+)\s*:\s*(.+)$/.exec(s);
+                return x ? { nivel: x[1] === "Truco" ? 0 : parseInt(x[1], 10), nombre: x[2].trim() } : { nivel: null, nombre: s };
+            });
+        }
+        return (pj.conjuros || []).map((n) => ({ nivel: srd[llano(n)] ? srd[llano(n)].nivel : null, nombre: n }));
+    }
+    function ventanaDescripcion(d, vuelta) {
+        const cuerpo = crear("div", "oc-texto");
+        if (d.datos) {
+            cuerpo.appendChild(crear("p", "oc-hoja-nota", d.datos));
+        }
+        if (d.texto) {
+            cuerpo.appendChild(markdown(d.texto));
+        }
+        if (d.origen) {
+            cuerpo.appendChild(crear("p", "oc-hoja-nota master-fuente", "De: " + d.origen));
+        }
+        if (window.ocDadosEnTexto) {
+            window.ocDadosEnTexto(cuerpo);
+        }
+        window.ocVentana.abrir({ titulo: d.nombre, cuerpo, vuelta, clase: "es-regla" });
+    }
+    function cosaPj(nombre, desc) {
+        if (desc && (desc.texto || desc.datos)) {
+            const b = botonDe("master-conjuro-enlace", nombre, () => ventanaDescripcion(desc, b));
+            b.setAttribute("aria-haspopup", "dialog");
+            return b;
+        }
+        return crear("span", "", nombre);
+    }
+    function conjuroPj(nombre, srd, descs, fuente) {
+        const c = srd[llano(nombre)];
+        if (c) {
+            return botonConjuro(c, nombre, fuente);
+        }
+        const d = descs[llano(nombre)];
+        if (d && (d.texto || d.datos)) {
+            return cosaPj(nombre, d);
+        }
+        const caja = crear("span", "", nombre + " ");
+        caja.appendChild(enlaceFuera("🔎", "https://www.dndbeyond.com/spells?filter-search=" + encodeURIComponent(nombre),
+            "Buscar " + nombre + " en D&D Beyond"));
+        return caja;
+    }
+    function pestanasDe(paneles, etiqueta, uid, alElegir) {
+        const lista = crear("div", "master-bicho-pestanas");
+        lista.setAttribute("role", "tablist");
+        lista.setAttribute("aria-label", etiqueta);
+        const tabs = paneles.map(([titulo, panel], i) => {
+            const t = botonDe("master-bicho-pestana", titulo, () => elegir(i, false));
+            t.setAttribute("role", "tab");
+            t.id = uid + "-t" + i;
+            panel.id = uid + "-p" + i;
+            panel.classList.add("master-bicho-panel");
+            t.setAttribute("aria-controls", panel.id);
+            panel.setAttribute("role", "tabpanel");
+            panel.setAttribute("aria-labelledby", t.id);
+            panel.tabIndex = 0;
+            t.addEventListener("keydown", (e) => {
+                const d = { ArrowRight: 1, ArrowLeft: -1, Home: -i, End: paneles.length - 1 - i }[e.key];
+                if (d === undefined) {
+                    return;
+                }
+                e.preventDefault();
+                elegir((i + d + paneles.length) % paneles.length, true);
+            });
+            lista.appendChild(t);
+            return t;
+        });
+        function elegir(i, foco) {
+            tabs.forEach((t, j) => {
+                t.setAttribute("aria-selected", j === i ? "true" : "false");
+                t.tabIndex = j === i ? 0 : -1;
+            });
+            paneles.forEach(([, panel], j) => {
+                panel.hidden = j !== i;
+            });
+            if (foco) {
+                tabs[i].focus();
+            }
+            if (alElegir) {
+                alElegir(i);
+            }
+        }
+        return { lista, elegir };
+    }
+    function abrirFichaPj(pj, quien) {
+        if (!pj.id) {
+            pj.id = nuevoIdPj();
+            guardar();
+        }
+        const ya = estado.modulos.find((x) => x.tipo === "pj" && x.datos && x.datos.pj === pj.id);
+        if (ya && ya.el) {
+            alFrente(ya);
+            ya.el.scrollIntoView({ block: "nearest" });
+            (ya.el.querySelector("[role=tab][aria-selected=true]") || ya.el).focus();
+            return;
+        }
+        anadir("pj", { titulo: quien, datos: { pj: pj.id } });
+    }
+    function montarPj(dentro, m) {
+        m.datos = m.datos || {};
+        const partyM = estado.modulos.find((x) => x.tipo === "party");
+        const pj = partyM && partyM.datos && (partyM.datos.pjs || []).find((x) => x.id === m.datos.pj);
+        if (!pj) {
+            dentro.appendChild(crear("p", "oc-vacio", "Este personaje ya no está en la party."));
+            return;
+        }
+        dentro.appendChild(crear("p", "oc-hoja-nota", "Cargando…"));
+        Promise.all([pedir(PERSONAJES_BLOG).catch(() => ({})), pedir(CONJUROS_SRD), pedir(TIENDA)]).then(([blog, conj, tienda]) => {
+            const p = pj.blog ? (blog.personajes || []).find((x) => x.clave === pj.blog) : null;
+            const descs = descripcionesPj(p && p.descripciones);
+            const srd = {};
+            (conj.conjuros || []).forEach((c) => {
+                srd[llano(c.nombre)] = c;
+            });
+            const objetos = {};
+            (tienda.objetos || []).forEach((o) => {
+                objetos[llano(o.nombre)] = o;
+            });
+            const apuntes = pj.apuntes = pj.apuntes || {};
+            const uid = "master-pj-" + m.id;
+            const quien = pj.nombre || (p && p.nombre) || "PJ";
+            const num = (v) => {
+                const n = parseInt(v, 10);
+                return isNaN(n) ? null : n;
+            };
+            const car = (k) => num(p ? p[k] : pj[k]);
+            const mod = (n) => Math.floor((n - 10) / 2);
+            const nivel = num(p ? p.nivel : pj.nivel);
+            const prof = num(p && p.competencia) || (nivel ? 2 + Math.floor((nivel - 1) / 4) : 0);
+            const conSigno = (n) => (n >= 0 ? "+" : "−") + Math.abs(n);
+            const dado = (n, que) => (window.ocDadoBoton ? window.ocDadoBoton(conSigno(n), "1d20" + (n >= 0 ? "+" : "") + n, que)
+                : document.createTextNode(conSigno(n)));
+            let espera = 0;
+            const area = (obj, clave, texto, filas, alCambiar) => {
+                const caja = crear("div", "master-campo");
+                const et = crear("label", "oc-dados-etiqueta", texto);
+                const t = crear("textarea", "oc-notas-texto es-corta");
+                t.id = uid + "-" + clave;
+                et.htmlFor = t.id;
+                t.rows = filas || 4;
+                t.value = obj[clave] || "";
+                t.addEventListener("input", () => {
+                    obj[clave] = t.value;
+                    clearTimeout(espera);
+                    espera = setTimeout(guardar, 400);
+                    if (alCambiar) {
+                        alCambiar();
+                    }
+                });
+                caja.append(et, t);
+                return caja;
+            };
+            const titulo = (panel, texto) => panel.appendChild(crear("h3", "master-pj-titulo", texto));
+            const listaDe = (cosas, etiqueta) => {
+                const ul = crear("ul", "master-pj-lista");
+                if (etiqueta) {
+                    ul.setAttribute("aria-label", etiqueta);
+                }
+                cosas.forEach((x) => {
+                    const li = crear("li");
+                    li.append(...[].concat(x));
+                    ul.appendChild(li);
+                });
+                return ul;
+            };
+            const datosDe = (filas) => {
+                const dl = crear("dl", "master-pj-datos");
+                filas.filter(([, v]) => v !== null && v !== undefined && v !== "").forEach(([k, v]) => {
+                    const dd = crear("dd");
+                    dd.append(...[].concat(typeof v === "string" || typeof v === "number" ? String(v) : v));
+                    dl.append(crear("dt", "", k), dd);
+                });
+                return dl;
+            };
+            const texto = (md) => {
+                const t = markdown(md);
+                enlazarConjuros(t);
+                if (window.ocDadosEnTexto) {
+                    window.ocDadosEnTexto(t);
+                }
+                return t;
+            };
+            const cabeza = crear("div", "master-pj-cabeza");
+            const queEs = [p ? p.raza : pj.raza, p ? p.clase : pj.clase, nivel ? "nivel " + nivel : ""].filter(Boolean).join(" · ");
+            cabeza.appendChild(crear("p", "master-pj-que", queEs || "Sin raza ni clase todavía."));
+            const recordar = crear("p", "master-pj-recordar");
+            const pintarRecordar = () => {
+                recordar.replaceChildren(crear("strong", "", "😨 Miedos: "), document.createTextNode(apuntes.miedos || ""));
+                recordar.hidden = !(apuntes.miedos || "").trim();
+            };
+            pintarRecordar();
+            cabeza.appendChild(recordar);
+            const panelHab = crear("div");
+            const competente = () => {
+                const lista = p ? (p.habilidades || []) : String(pj.habilidadesTxt || "").split(",");
+                return lista.map((s) => s.trim()).filter(Boolean);
+            };
+            const vitales = datosDe([["CA", p ? p.ca : pj.ca], ["PG", (p ? p.pg : pj.pgmax) || pj.pg], ["Velocidad", p && p.velocidad],
+                ["Dados de golpe", p && p.dados_golpe], ["Competencia", prof ? conSigno(prof) : ""],
+                ["Iniciativa", car("des") !== null ? dado(mod(car("des")), "Iniciativa de " + quien) : ""], ["Sentidos", p && p.sentidos]]);
+            const cars = crear("ul", "master-party-caracteristicas");
+            cars.setAttribute("aria-label", "Características de " + quien);
+            Object.keys(NOMBRES_CAR).forEach((k) => {
+                const n = car(k);
+                if (n === null) {
+                    return;
+                }
+                const li = crear("li", "master-party-c");
+                li.append(crear("span", "master-party-et", k.toUpperCase()), crear("span", "master-party-valor", String(n)),
+                    dado(mod(n), NOMBRES_CAR[k] + " de " + quien));
+                cars.appendChild(li);
+            });
+            const cajaHab = crear("div");
+            const pintarHab = () => {
+                cajaHab.replaceChildren();
+                const salv = llano(p ? p.salvaciones || "" : pj.salvacionesTxt || "");
+                const filasSalv = Object.keys(NOMBRES_CAR).filter((k) => car(k) !== null).map((k) => {
+                    const es = salv.includes(llano(NOMBRES_CAR[k])) || salv.includes(k);
+                    const bono = mod(car(k)) + (es ? prof : 0);
+                    return [crear("span", "", NOMBRES_CAR[k]), es ? crear("span", "master-pj-marca", "competente") : "",
+                        dado(bono, "Salvación de " + NOMBRES_CAR[k] + " de " + quien)];
+                });
+                if (filasSalv.length) {
+                    titulo(cajaHab, "🛡️ Salvaciones");
+                    cajaHab.appendChild(listaDe(filasSalv, "Salvaciones de " + quien));
+                }
+                const comp = competente().map(llano);
+                const bonos = {};
+                const filasHab = HABILIDADES_PJ.filter(([, k]) => car(k) !== null).map(([nombre, k, clave]) => {
+                    const busca = clave || llano(nombre);
+                    const suya = comp.find((c) => c.startsWith(busca) || c.includes(busca));
+                    const pericia = suya && /pericia|experto|expertise/.test(suya);
+                    const bono = mod(car(k)) + (suya ? prof * (pericia ? 2 : 1) : 0);
+                    bonos[nombre] = bono;
+                    return [crear("span", "", nombre + " (" + k.toUpperCase() + ")"),
+                        suya ? crear("span", "master-pj-marca", pericia ? "pericia" : "competente") : "",
+                        dado(bono, nombre + " de " + quien)];
+                });
+                if (filasHab.length) {
+                    titulo(cajaHab, "🎯 Habilidades");
+                    cajaHab.appendChild(listaDe(filasHab, "Habilidades de " + quien));
+                    const pas = (h, guardado) => (p || (pj.habilidadesTxt || "").trim() || guardado === null ? 10 + bonos[h] : guardado);
+                    cajaHab.appendChild(datosDe([["👁️ Percepción pasiva", pas("Percepción", num(pj.per))],
+                        ["🔍 Investigación pasiva", pas("Investigación", num(pj.inv))], ["💭 Perspicacia pasiva",
+                            pas("Perspicacia", num(pj.persp))]]));
+                }
+            };
+            panelHab.append(vitales, cars);
+            if (!p) {
+                panelHab.append(area(pj, "salvacionesTxt", "salvaciones con competencia (Destreza, Sabiduría…)", 1, pintarHab),
+                    area(pj, "habilidadesTxt", "habilidades con competencia, separadas por comas (Sigilo (pericia), Percepción…)", 2,
+                        pintarHab));
+            }
+            panelHab.appendChild(cajaHab);
+            pintarHab();
+            titulo(panelHab, "⭐ Rasgos y habilidades de clase");
+            if (p) {
+                const nombreDe = (s) => s.replace(/^[^:]+:\s*/, "").replace(/\s*\(.*$/, "").trim();
+                if ((p.acciones || []).length) {
+                    panelHab.appendChild(listaDe(p.acciones.map((s) => {
+                        const tipo = /^([^:]+):/.exec(s);
+                        const resto = s.replace(/^[^:]+:\s*/, "");
+                        const usos = /\(([^)]*)\)\s*$/.exec(resto);
+                        return [crear("span", "master-pj-marca", tipo ? tipo[1] : ""), cosaPj(nombreDe(s), descs[llano(nombreDe(s))]),
+                            usos ? crear("span", "master-pj-nota", " (" + usos[1] + ")") : ""];
+                    }), "Acciones de " + quien));
+                }
+                const rasgos = String(p.rasgos || "").split("\n").map((l) => /\*\*(.+?)\*\*\s*(\((.*)\))?/.exec(l)).filter(Boolean);
+                if (rasgos.length) {
+                    panelHab.appendChild(listaDe(rasgos.map((x) => [cosaPj(x[1], descs[llano(x[1])]),
+                        x[3] ? crear("span", "master-pj-nota", " — " + x[3]) : ""]), "Rasgos de " + quien));
+                }
+            } else {
+                panelHab.appendChild(area(pj, "rasgosTxt", "rasgos, dotes y habilidades de clase (con lo que hacen)", 8));
+            }
+            const panelArmas = crear("div");
+            if (p) {
+                if ((p.ataques || []).length) {
+                    titulo(panelArmas, "⚔️ Ataques");
+                    const at = listaDe(p.ataques.map((s) => s), "Ataques de " + quien);
+                    if (window.ocDadosEnTexto) {
+                        window.ocDadosEnTexto(at);
+                    }
+                    panelArmas.appendChild(at);
+                }
+                panelArmas.appendChild(datosDe([["CA", p.ca], ["Defensas", (p.defensas || []).join(", ")]]));
+                if ((p.objetos || []).length) {
+                    titulo(panelArmas, "🎒 Objetos");
+                    panelArmas.appendChild(listaDe(p.objetos.map((s) => {
+                        const limpio = s.replace(/\s*\[[^\]]*\]/g, "").replace(/\s*×\s*\d+$/, "").trim();
+                        const o = objetos[llano(limpio)];
+                        if (!o) {
+                            return s;
+                        }
+                        const b = botonDe("master-conjuro-enlace", s, () => abrirObjeto(o, b, tienda.fuente), "Ver " + limpio);
+                        b.setAttribute("aria-haspopup", "dialog");
+                        return b;
+                    }), "Objetos de " + quien));
+                }
+                panelArmas.appendChild(datosDe([["Dinero", p.dinero]]));
+                if ((p.competencias || []).length) {
+                    titulo(panelArmas, "🧰 Competencias");
+                    panelArmas.appendChild(listaDe(p.competencias, "Competencias de " + quien));
+                }
+            } else {
+                panelArmas.append(area(pj, "armasTxt", "armas y ataques (Espada larga: +5, 1d8+3 cortante…)", 4),
+                    area(pj, "objetosTxt", "objetos, armadura y dinero", 6));
+            }
+            const panelConj = crear("div");
+            const aptitud = p ? p.aptitud_magica : pj.aptitud;
+            if (aptitud && car(aptitud) !== null) {
+                const bono = mod(car(aptitud)) + prof;
+                panelConj.appendChild(datosDe([["Aptitud", NOMBRES_CAR[aptitud] || aptitud], ["CD de salvación", 8 + bono],
+                    ["Ataque de conjuro", dado(bono, "Ataque de conjuro de " + quien)], ["Espacios", p ? (p.espacios || []).join(" · ") : ""]]));
+            }
+            const listaConj = crear("div");
+            const pintarConj = () => {
+                listaConj.replaceChildren();
+                const todos = conjurosPj(pj, p, srd);
+                if (!todos.length) {
+                    listaConj.appendChild(crear("p", "oc-vacio", "No tiene hechizos apuntados."));
+                }
+                const niveles = Array.from(new Set(todos.map((c) => c.nivel))).sort((a, b) => (a === null) - (b === null) || a - b);
+                niveles.forEach((n) => {
+                    titulo(listaConj, n === null ? "Otros" : n === 0 ? "Trucos" : "Nivel " + n);
+                    listaConj.appendChild(listaDe(todos.filter((c) => c.nivel === n).map((c) => {
+                        const cosas = [conjuroPj(c.nombre, srd, descs, conj.fuente)];
+                        if (!p) {
+                            cosas.push(botonDe("master-party-quitar", "✕", () => {
+                                pj.conjuros = (pj.conjuros || []).filter((x) => x !== c.nombre);
+                                guardar();
+                                pintarConj();
+                                avisar("Quitado: " + c.nombre + ".");
+                                nuevoConj.focus();
+                            }, "Quitar " + c.nombre));
+                        }
+                        return cosas;
+                    }), (n === null ? "Otros hechizos" : n === 0 ? "Trucos" : "Hechizos de nivel " + n) + " de " + quien));
+                });
+            };
+            const nuevoConj = crear("input", "oc-dados-texto");
+            if (!p) {
+                const form = crear("form", "master-pj-anadir");
+                const et = crear("label", "oc-dados-etiqueta", "añadir un hechizo (los del SRD salen solos)");
+                nuevoConj.id = uid + "-conj";
+                et.htmlFor = nuevoConj.id;
+                nuevoConj.autocomplete = "off";
+                const dl = crear("datalist");
+                dl.id = uid + "-conj-lista";
+                (conj.conjuros || []).forEach((c) => {
+                    const o = crear("option");
+                    o.value = c.nombre;
+                    dl.appendChild(o);
+                });
+                nuevoConj.setAttribute("list", dl.id);
+                const sel = crear("select", "master-elegir");
+                sel.setAttribute("aria-label", "Aptitud mágica de " + quien);
+                [["", "aptitud mágica: ninguna"]].concat(Object.keys(NOMBRES_CAR).map((k) => [k, "aptitud mágica: " + NOMBRES_CAR[k]]))
+                    .forEach(([v, t]) => {
+                        const o = crear("option", "", t);
+                        o.value = v;
+                        sel.appendChild(o);
+                    });
+                sel.value = pj.aptitud || "";
+                sel.addEventListener("change", () => {
+                    pj.aptitud = sel.value;
+                    guardar();
+                    dentro.replaceChildren();
+                    montarPj(dentro, m);
+                });
+                const anadirB = crear("button", "oc-vida-accion", "＋ añadir");
+                anadirB.type = "submit";
+                form.append(et, nuevoConj, dl, anadirB);
+                form.addEventListener("submit", (e) => {
+                    e.preventDefault();
+                    const v = nuevoConj.value.trim();
+                    if (!v) {
+                        return;
+                    }
+                    const c = srd[llano(v)];
+                    pj.conjuros = (pj.conjuros || []).concat(c ? c.nombre : v);
+                    nuevoConj.value = "";
+                    guardar();
+                    pintarConj();
+                    avisar("Añadido: " + (c ? c.nombre : v) + ".");
+                });
+                panelConj.append(sel, form);
+            }
+            panelConj.appendChild(listaConj);
+            pintarConj();
+            const panelHist = crear("div");
+            if (p) {
+                panelHist.appendChild(datosDe([["Trasfondo", p.trasfondo], ["Alineamiento", p.alineamiento], ["Fe", p.fe],
+                    ["Edad", p.edad], ["Altura", p.altura], ["Peso", p.peso], ["Ojos", p.ojos], ["Pelo", p.pelo], ["Piel", p.piel]]));
+                [["personalidad", "Personalidad"], ["ideales", "Ideales"], ["vinculos", "Vínculos"], ["defectos", "Defectos"]]
+                    .forEach(([k, t]) => {
+                        if (p[k]) {
+                            titulo(panelHist, t);
+                            panelHist.appendChild(texto(p[k]));
+                        }
+                    });
+                if (p.historia) {
+                    titulo(panelHist, "📜 Su historia");
+                    panelHist.appendChild(texto(p.historia));
+                }
+                if (rutaPjSegura(p.clave)) {
+                    const a = crear("a", "", "Ver su ficha completa en el blog");
+                    a.href = rutaPjSegura(p.clave);
+                    a.target = "_blank";
+                    a.rel = "noopener";
+                    a.setAttribute("aria-label", "Ver la ficha completa de " + quien + " en el blog (se abre en otra pestaña)");
+                    const pa = crear("p");
+                    pa.appendChild(a);
+                    panelHist.appendChild(pa);
+                }
+            } else {
+                panelHist.append(area(pj, "trasfondo", "trasfondo y cómo es", 3),
+                    area(pj, "historiaTxt", "su historia", 10));
+            }
+            const panelRel = crear("div");
+            const gente = p ? ((blog.gente || []).find((g) => g.personaje === p.clave) || {}).cosas || [] : [];
+            if (gente.length) {
+                titulo(panelRel, "👥 Su gente");
+                panelRel.appendChild(listaDe(gente.map((g) => {
+                    const que = [g.que, g.parentesco || g.vinculo, g.relacion, g.estado].filter(Boolean).join(" · ");
+                    return [crear("strong", "", g.nombre || "¿?"), que ? " — " + que : "", g.notas ? crear("span", "master-pj-nota",
+                        " " + g.notas) : ""];
+                }), "Gente de " + quien));
+            }
+            panelRel.append(area(apuntes, "relaciones", "relaciones en la partida (con otros PJ, PNJ, facciones…)", 6),
+                area(apuntes, "deudas", "deudas, promesas y rencores", 3));
+            const panelExtra = crear("div");
+            if (p && p.extra) {
+                panelExtra.appendChild(texto(p.extra));
+            }
+            panelExtra.append(area(apuntes, "miedos", "miedos (salen arriba, en todas las pestañas)", 2, pintarRecordar),
+                area(apuntes, "secretos", "secretos (sólo para el máster)", 3), area(apuntes, "ganchos", "ganchos para la historia", 3),
+                area(apuntes, "notas", "otras notas", 4));
+            const paneles = [["🎯 habilidades", panelHab], ["⚔️ armas", panelArmas], ["✨ hechizos", panelConj],
+                ["📜 historia", panelHist], ["👥 relaciones", panelRel], ["📎 extra", panelExtra]];
+            const { lista, elegir } = pestanasDe(paneles, "Ficha de " + quien, uid, (i) => {
+                m.datos.pestana = i;
+                guardar();
+            });
+            dentro.replaceChildren(cabeza, lista, ...paneles.map(([, x]) => x));
+            elegir(Math.min(m.datos.pestana || 0, paneles.length - 1), false);
+        }).catch(() => {
+            dentro.replaceChildren(crear("p", "oc-vacio", "No he podido cargar su ficha."));
+        });
+    }
     const CARACTERISTICAS = ["FUE", "DES", "CON", "INT", "SAB", "CAR"];
     const PASIVAS = [["per", "Percepción pasiva", "👁️"], ["inv", "Investigación pasiva", "🔍"],
         ["persp", "Perspicacia pasiva", "💭"]];
@@ -791,48 +1278,50 @@
         const conSigno = (n) => (n >= 0 ? "+" : "−") + Math.abs(n);
         const quienEs = (pj, i) => pj.nombre || "jugador " + (i + 1);
         const uid = "master-party-" + m.id;
-        const pestanas = crear("div", "master-bicho-pestanas");
-        pestanas.setAttribute("role", "tablist");
-        pestanas.setAttribute("aria-label", "Party");
-        const panelLista = crear("div", "master-bicho-panel");
-        const panelEditor = crear("div", "master-bicho-panel");
-        const paneles = [["👥 la party", panelLista], ["✏️ editar", panelEditor]];
-        const tabs = paneles.map(([titulo, panel], i) => {
-            const t = botonDe("master-bicho-pestana", titulo, () => elegir(i, false));
-            t.setAttribute("role", "tab");
-            t.id = uid + "-t" + i;
-            panel.id = uid + "-p" + i;
-            t.setAttribute("aria-controls", panel.id);
-            panel.setAttribute("role", "tabpanel");
-            panel.setAttribute("aria-labelledby", t.id);
-            panel.tabIndex = 0;
-            t.addEventListener("keydown", (e) => {
-                if (e.key === "ArrowRight" || e.key === "ArrowLeft") {
-                    e.preventDefault();
-                    elegir(1 - i, true);
-                }
-            });
-            pestanas.appendChild(t);
-            return t;
+        m.datos.pjs.forEach((pj) => {
+            pj.id = pj.id || nuevoIdPj();
         });
-        function elegir(i, foco) {
-            tabs.forEach((t, j) => {
-                t.setAttribute("aria-selected", j === i ? "true" : "false");
-                t.tabIndex = j === i ? 0 : -1;
-            });
-            paneles.forEach(([, panel], j) => {
-                panel.hidden = j !== i;
-            });
+        const panelLista = crear("div");
+        const panelEditor = crear("div");
+        const panelConjuros = crear("div");
+        const { lista: pestanas, elegir } = pestanasDe([["👥 la party", panelLista], ["✏️ editar", panelEditor],
+            ["✨ hechizos", panelConjuros]], "Party", uid, (i) => {
             m.datos.pestana = i;
             guardar();
-            if (i === 0) {
-                pintarLista();
-            } else {
-                pintarEditor();
-            }
-            if (foco) {
-                tabs[i].focus();
-            }
+            [pintarLista, pintarEditor, pintarConjuros][i]();
+        });
+        function pintarConjuros() {
+            panelConjuros.replaceChildren(crear("p", "oc-hoja-nota", "Cargando…"));
+            Promise.all([pedir(PERSONAJES_BLOG).catch(() => ({})), pedir(CONJUROS_SRD)]).then(([blog, conj]) => {
+                const srd = {};
+                (conj.conjuros || []).forEach((c) => {
+                    srd[llano(c.nombre)] = c;
+                });
+                panelConjuros.replaceChildren();
+                let alguno = false;
+                m.datos.pjs.forEach((pj, i) => {
+                    const p = pj.blog ? (blog.personajes || []).find((x) => x.clave === pj.blog) : null;
+                    const descs = descripcionesPj(p && p.descripciones);
+                    const todos = conjurosPj(pj, p, srd).sort((x, y) => (x.nivel === null) - (y.nivel === null) || x.nivel - y.nivel);
+                    if (!todos.length) {
+                        return;
+                    }
+                    alguno = true;
+                    panelConjuros.appendChild(crear("h3", "master-pj-titulo", quienEs(pj, i)));
+                    const ul = crear("ul", "master-pj-lista");
+                    ul.setAttribute("aria-label", "Hechizos de " + quienEs(pj, i));
+                    todos.forEach((c) => {
+                        const li = crear("li");
+                        li.append(crear("span", "master-pj-marca", c.nivel === null ? "¿?" : c.nivel === 0 ? "truco" : "nv " + c.nivel),
+                            conjuroPj(c.nombre, srd, descs, conj.fuente));
+                        ul.appendChild(li);
+                    });
+                    panelConjuros.appendChild(ul);
+                });
+                if (!alguno) {
+                    panelConjuros.appendChild(crear("p", "oc-vacio", "Nadie tiene hechizos apuntados (se ponen en la ficha de cada uno)."));
+                }
+            }).catch(() => panelConjuros.replaceChildren(crear("p", "oc-vacio", "No he podido cargar los hechizos.")));
         }
         const alIni = (pj, i) => {
             const des = numero(pj.des);
@@ -878,7 +1367,11 @@
                     const n = alIni(pj, i);
                     avisar(n ? "A la iniciativa: " + n + "." : quien + " ya está en la iniciativa.");
                 }, "Poner a " + quien + " en la iniciativa (tira su iniciativa)");
-                cabeza.append(nombre, ini);
+                const ficha = botonDe("oc-vida-accion", "📖 ficha", () => abrirFichaPj(pj, quien),
+                    "Abrir la ficha de " + quien + " (habilidades, armas, hechizos, historia…)");
+                const botones = crear("div", "master-pj-botones");
+                botones.append(ficha, ini);
+                cabeza.append(nombre, botones);
                 const vitales = crear("dl", "master-party-vitales");
                 const vital = (et, valor, titulo) => {
                     if (valor === "" || valor === undefined) {
@@ -949,7 +1442,7 @@
         };
         const vacio = crear("p", "oc-vacio", "Todavía no hay jugadores.");
         const nuevo = botonDe("oc-vida-accion es-principal", "＋ jugador", () => {
-            m.datos.pjs.push({});
+            m.datos.pjs.push({ id: nuevoIdPj() });
             guardar();
             pintarEditor();
             const inputs = lista.querySelectorAll(".es-nombre input");
@@ -961,7 +1454,7 @@
                 const quien = quienEs(pj, i);
                 const arriba = crear("div", "master-party-fila");
                 arriba.append(campo(pj, i, "nombre", "nombre", "text", "es-nombre"), campo(pj, i, "clase", "clase", "text", "es-clase"),
-                    campo(pj, i, "pg", "PG"), campo(pj, i, "pgmax", "máx"), campo(pj, i, "ca", "CA"));
+                    campo(pj, i, "nivel", "nv"), campo(pj, i, "pg", "PG"), campo(pj, i, "pgmax", "máx"), campo(pj, i, "ca", "CA"));
                 let seguro = false;
                 const quitar = botonDe("master-party-quitar", "✕", () => {
                     if (!seguro) {
@@ -1003,9 +1496,38 @@
                 (q || nuevo).focus();
             }
         }
-        panelEditor.append(lista, vacio, nuevo);
-        dentro.append(pestanas, panelLista, panelEditor);
-        elegir(typeof m.datos.pestana === "number" ? m.datos.pestana : (m.datos.pjs.length ? 0 : 1), false);
+        const traer = crear("div", "master-pj-traer");
+        pedir(PERSONAJES_BLOG).then((blog) => {
+            const todos = blog.personajes || [];
+            if (!todos.length) {
+                return;
+            }
+            const sel = elegirDe(uid + "-blog", "traer un personaje del blog", todos.map((p) => [p.clave, p.nombre_completo || p.nombre]),
+                todos[0].clave);
+            const boton = botonDe("oc-vida-accion", "📥 traer", () => {
+                const p = todos.find((x) => x.clave === sel.elegir.value);
+                if (m.datos.pjs.some((x) => x.blog === p.clave)) {
+                    avisar(p.nombre + " ya está en la party.");
+                    return;
+                }
+                const n = (v) => numero(v);
+                const nivel = n(p.nivel) || 1;
+                const comp = n(p.competencia) || 2 + Math.floor((nivel - 1) / 4);
+                const sabe = (h) => (p.habilidades || []).some((x) => llano(x).startsWith(llano(h)));
+                const pas = (k, h) => (n(p[k]) === "" ? "" : 10 + mod(n(p[k])) + (sabe(h) ? comp : 0));
+                m.datos.pjs.push({ id: nuevoIdPj(), blog: p.clave, nombre: p.nombre, clase: p.clase, raza: p.raza, nivel, pg: n(p.pg),
+                    pgmax: n(p.pg), ca: n(p.ca), fue: n(p.fue), des: n(p.des), con: n(p.con), int: n(p.int), sab: n(p.sab), car: n(p.car),
+                    per: pas("sab", "Percepción"), inv: pas("int", "Investigación"), persp: pas("sab", "Perspicacia") });
+                guardar();
+                pintarEditor();
+                avisar("Traído del blog: " + p.nombre + ". Su ficha (📖) lee todo lo demás de su página.");
+            }, "Traer a la party el personaje elegido del blog");
+            traer.append(sel, boton);
+        }).catch(() => {
+        });
+        panelEditor.append(lista, vacio, nuevo, traer);
+        dentro.append(pestanas, panelLista, panelEditor, panelConjuros);
+        elegir(typeof m.datos.pestana === "number" ? Math.min(m.datos.pestana, 2) : (m.datos.pjs.length ? 0 : 1), false);
     }
     const ETIQUETAS_POSTIT = ["P", "DIV", "BR", "B", "STRONG", "I", "EM", "U", "S", "STRIKE", "DEL", "H3", "H4", "UL", "OL",
         "LI", "BLOCKQUOTE", "SPAN", "MARK", "HR"];
@@ -6047,7 +6569,7 @@
         bestiario: { nombre: "bestiario", emoji: "🐉", grupo: "consulta", unico: true, w: 460, h: 520,
             desc: "Los 330 monstruos del SRD, con su perfil.", montar: montarBestiario },
         party: { nombre: "party (jugadores)", emoji: "🛡️", grupo: "mesa", unico: true, w: 600, h: 440,
-            desc: "Los personajes de los jugadores, de un vistazo.", montar: montarParty },
+            desc: "Los personajes de los jugadores: de un vistazo, sus hechizos y su ficha entera (con pestañas).", montar: montarParty },
         tienda: { nombre: "tienda", emoji: "💰", grupo: "mundo", w: 520, h: 560, desc: "Precios, rarezas y regateo.",
             montar: montarTienda },
         monedas: { nombre: "conversor de monedas", emoji: "🪙", grupo: "mundo", w: 420, h: 440,
@@ -6082,6 +6604,7 @@
             desc: "Una lista de la que sale una cosa al azar.", montar: montarTabla },
         criatura: { nombre: "criatura", emoji: "🐾", oculto: true, w: 440, h: 520, montar: montarCriatura },
         ficha: { nombre: "ficha", emoji: "📖", oculto: true, w: 420, h: 420, montar: montarFicha },
+        pj: { nombre: "ficha de personaje", emoji: "🧝", oculto: true, w: 560, h: 680, montar: montarPj },
     };
     const GRUPOS = [["combate", "⚔️ combate"], ["consulta", "📚 consulta"], ["mesa", "🛡️ la mesa"], ["mundo", "🌍 el mundo"],
         ["apuntes", "🗒️ apuntes"]];

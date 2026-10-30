@@ -1365,6 +1365,109 @@
     font-weight: 700;
 }
 
+/* LA FICHA DE UN PJ: arriba quién es y sus miedos; luego las pestañas
+   (las de los monstruos) con listas y datos. */
+.master-pj-cabeza {
+    margin-bottom: 8px;
+}
+
+.master-pj-que {
+    margin: 0 0 6px;
+    color: var(--muted);
+    font-family: var(--fuente-mono);
+    font-size: 0.8125rem;
+}
+
+.master-pj-recordar {
+    margin: 0 0 6px;
+    padding: 6px 10px;
+    border-left: 6px solid var(--error);
+    background: var(--surface);
+}
+
+.master-pj-recordar[hidden] {
+    display: none;
+}
+
+.master-pj-titulo {
+    margin: 14px 0 6px;
+    font-size: 1rem;
+}
+
+.master-pj-lista {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.master-pj-lista li {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 4px 8px;
+    padding: 3px 0;
+    border-bottom: 1px dotted var(--border);
+}
+
+.master-pj-marca {
+    padding: 1px 6px;
+    border: 1px solid var(--yellow);
+    font-family: var(--fuente-mono);
+    font-size: 0.75rem;
+}
+
+.master-pj-nota {
+    color: var(--muted);
+    font-size: 0.875rem;
+}
+
+.master-pj-datos {
+    display: grid;
+    grid-template-columns: minmax(0, max-content) minmax(0, 1fr);
+    gap: 4px 12px;
+    margin: 8px 0;
+}
+
+.master-pj-datos dt {
+    font-weight: 700;
+}
+
+.master-pj-datos dd {
+    margin: 0;
+    overflow-wrap: anywhere;
+}
+
+.master-pj-anadir {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    gap: 6px;
+    margin: 8px 0;
+}
+
+.master-pj-anadir .oc-dados-etiqueta {
+    flex-basis: 100%;
+}
+
+.master-pj-anadir .oc-dados-texto {
+    flex: 1 1 12rem;
+}
+
+.master-pj-botones,
+.master-pj-traer {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    gap: 6px;
+}
+
+.master-pj-traer {
+    margin-top: 12px;
+}
+
 /* LOS POST-ITS: la barra de formato (botones en grupos) y el texto. */
 .master-postit-barra {
     position: sticky;
