@@ -3452,6 +3452,9 @@ window.ocMontar.iniciativa = function (sitio, opciones) {
         } catch (e) {
             // Sin almacenamiento: da igual.
         }
+        // Para quien quiera enterarse (los efectos con duración de la
+        // pantalla de máster cuentan las rondas con esto).
+        document.dispatchEvent(new CustomEvent("oc-iniciativa:guardada", { detail: { ronda: datos.ronda, modo: datos.modo } }));
     };
     const crear = (tag, clase, texto) => {
         const x = document.createElement(tag);

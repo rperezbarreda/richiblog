@@ -3905,6 +3905,7 @@
                 guardar();
                 pintar();
                 avisar("Ahora: " + nombreFecha(f) + ", a las " + d.hora + ":00 (" + momento(d.hora) + ").");
+                document.dispatchEvent(new CustomEvent("master:tiempo", { detail: { horas } }));
             };
             const tipo = elegirDe("master-cal-tipo-" + m.id, "calendario", [["gregoriano", "gregoriano"], ["harptos", harptos.nombre],
                 ["propio", "propio"]], d.tipo);
@@ -4080,13 +4081,15 @@
     const DUNGEON_CELDA = 20;
     const DUNGEON_TAMANOS = [["5", "pequeño (5 salas)"], ["8", "mediano (8 salas)"], ["12", "grande (12 salas)"]];
     const DUNGEON_TRAMPA = [[4, 12, "2d10"], [10, 14, "4d10"], [16, 16, "8d10"], [99, 18, "10d10"]];
-    function hacerMapa(salasQuiero) {
+    function hacerMapa(salasQuiero, estilo, cds) {
         const celdas = Array.from({ length: DUNGEON_ALTO }, () => new Array(DUNGEON_ANCHO).fill(0));
+        const zonas = Array.from({ length: DUNGEON_ALTO }, () => new Array(DUNGEON_ANCHO).fill("."));
         const salas = [];
         const azar = (a, b) => a + tiradaSuelta("1d" + (b - a + 1)) - 1;
+        const cavernas = estilo === "cavernas";
         for (let intento = 0; intento < 400 && salas.length < salasQuiero; intento++) {
-            const w = azar(4, 9);
-            const h = azar(3, 7);
+            const w = azar(4, cavernas ? 10 : 9);
+            const h = azar(3, cavernas ? 8 : 7);
             const x = azar(1, DUNGEON_ANCHO - w - 2);
             const y = azar(1, DUNGEON_ALTO - h - 2);
             if (salas.some((s) => x < s.x + s.w + 2 && s.x < x + w + 2 && y < s.y + s.h + 2 && s.y < y + h + 2)) {
@@ -4095,86 +4098,211 @@
             salas.push({ x, y, w, h });
         }
         salas.sort((a, b) => (a.x + a.w / 2) - (b.x + b.w / 2));
-        salas.forEach((s) => {
+        salas.forEach((s, n) => {
+            const rx = s.w / 2;
+            const ry = s.h / 2;
+            s.cx = Math.floor(s.x + rx);
+            s.cy = Math.floor(s.y + ry);
             for (let j = s.y; j < s.y + s.h; j++) {
                 for (let i = s.x; i < s.x + s.w; i++) {
-                    celdas[j][i] = 1;
+                    const dx = (i + 0.5 - s.x - rx) / rx;
+                    const dy = (j + 0.5 - s.y - ry) / ry;
+                    const dentro = !cavernas || (i === s.cx && j === s.cy) || dx * dx + dy * dy <= 0.75 + tiradaSuelta("1d40") / 100;
+                    if (dentro) {
+                        celdas[j][i] = 1;
+                        zonas[j][i] = n.toString(36);
+                    }
                 }
             }
         });
-        const centro = (s) => [Math.floor(s.x + s.w / 2), Math.floor(s.y + s.h / 2)];
-        const pasillo = (a, b) => {
-            const [x0, y0] = centro(a);
-            const [x1, y1] = centro(b);
-            const primeroX = tiradaSuelta("1d2") === 1;
-            const marcar = (i, j) => {
-                if (celdas[j][i] === 0) {
-                    celdas[j][i] = 2;
+        const pasillos = [];
+        const puertas = [];
+        const pasillo = (a, b, secreto) => {
+            const sa = salas[a];
+            const sb = salas[b];
+            const [x0, y0, x1, y1] = [sa.cx, sa.cy, sb.cx, sb.cy];
+            const camino = [];
+            const tramo = (desde, hasta, fijo, horizontal) => {
+                const paso = desde <= hasta ? 1 : -1;
+                for (let k = desde; k !== hasta + paso; k += paso) {
+                    camino.push(horizontal ? [k, fijo] : [fijo, k]);
                 }
             };
-            if (primeroX) {
-                for (let i = Math.min(x0, x1); i <= Math.max(x0, x1); i++) {
-                    marcar(i, y0);
-                }
-                for (let j = Math.min(y0, y1); j <= Math.max(y0, y1); j++) {
-                    marcar(x1, j);
-                }
+            if (tiradaSuelta("1d2") === 1) {
+                tramo(x0, x1, y0, true);
+                tramo(y0, y1, x1, false);
             } else {
-                for (let j = Math.min(y0, y1); j <= Math.max(y0, y1); j++) {
-                    marcar(x0, j);
-                }
-                for (let i = Math.min(x0, x1); i <= Math.max(x0, x1); i++) {
-                    marcar(i, y1);
-                }
+                tramo(y0, y1, x0, false);
+                tramo(x0, x1, y1, true);
             }
+            const celdasP = [];
+            const n = pasillos.length;
+            camino.forEach(([i, j], k) => {
+                if (celdas[j][i] !== 1) {
+                    celdasP.push([i, j]);
+                }
+                if (celdas[j][i] === 0) {
+                    celdas[j][i] = secreto ? 3 : 2;
+                    if (cavernas && tiradaSuelta("1d3") === 1) {
+                        const [di, dj] = alAzar([[1, 0], [0, 1], [-1, 0], [0, -1]]);
+                        const ni = i + di;
+                        const nj = j + dj;
+                        if (ni > 0 && nj > 0 && ni < DUNGEON_ANCHO - 1 && nj < DUNGEON_ALTO - 1 && celdas[nj][ni] === 0) {
+                            celdas[nj][ni] = secreto ? 3 : 2;
+                            celdasP.push([ni, nj]);
+                        }
+                    }
+                }
+                if (cavernas || celdas[j][i] === 1) {
+                    return;
+                }
+                const vecinas = [camino[k - 1], camino[k + 1]].filter(Boolean);
+                const sala = vecinas.find(([vi, vj]) => zonas[vj][vi] !== "." && [a, b].indexOf(parseInt(zonas[vj][vi], 36)) >= 0);
+                if (!sala || puertas.some((p) => (p.x === i && p.y === j) ||
+                    (p.pasillo === n && p.sala === parseInt(zonas[sala[1]][sala[0]], 36)))) {
+                    return;
+                }
+                let tipo = "normal";
+                const r = tiradaSuelta("1d20");
+                if (secreto) {
+                    tipo = "secreta";
+                } else if (r >= 17) {
+                    tipo = "cerrada";
+                } else if (r >= 15) {
+                    tipo = "atrancada";
+                }
+                puertas.push({ x: i, y: j, tipo, cd: cds[tipo] || 0, sala: parseInt(zonas[sala[1]][sala[0]], 36),
+                    vertical: sala[1] === j, pasillo: n });
+            });
+            pasillos.push({ a, b, secreto: !!secreto, celdas: celdasP });
         };
         for (let i = 1; i < salas.length; i++) {
-            pasillo(salas[i - 1], salas[i]);
+            pasillo(i - 1, i, false);
         }
         for (let k = 0; k < Math.min(2, salas.length - 2); k++) {
-            const a = alAzar(salas);
-            const b = alAzar(salas.filter((s) => s !== a));
-            pasillo(a, b);
+            const a = azar(0, salas.length - 1);
+            let b = azar(0, salas.length - 2);
+            b = b >= a ? b + 1 : b;
+            pasillo(a, b, k === 0);
         }
-        return { filas: celdas.map((f) => f.join("")), salas };
+        if (cavernas) {
+            for (let vuelta = 0; vuelta < 2; vuelta++) {
+                const antes = celdas.map((f) => f.slice());
+                for (let j = 1; j < DUNGEON_ALTO - 1; j++) {
+                    for (let i = 1; i < DUNGEON_ANCHO - 1; i++) {
+                        if (antes[j][i] !== 0) {
+                            continue;
+                        }
+                        let suelo = 0;
+                        for (let dj = -1; dj <= 1; dj++) {
+                            for (let di = -1; di <= 1; di++) {
+                                suelo += antes[j + dj][i + di] === 1 || antes[j + dj][i + di] === 2 ? 1 : 0;
+                            }
+                        }
+                        if (suelo >= 5) {
+                            celdas[j][i] = 2;
+                            const cerca = [[i - 1, j], [i + 1, j], [i, j - 1], [i, j + 1]].find(([a, b]) => zonas[b][a] !== ".");
+                            if (cerca) {
+                                celdas[j][i] = 1;
+                                zonas[j][i] = zonas[cerca[1]][cerca[0]];
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return { estilo: cavernas ? "cavernas" : "salas", filas: celdas.map((f) => f.join("")), zonas: zonas.map((f) => f.join("")),
+            salas: salas.map(({ x, y, w, h, cx, cy }) => ({ x, y, w, h, cx, cy })), pasillos, puertas };
     }
-    function pintarMapa(lienzoMapa, mapa) {
+    function pintarMapa(lienzoMapa, mapa, op) {
+        op = op || {};
+        const jug = !!op.jugadores;
+        const vistas = new Set(op.vistas || []);
+        const encontrados = new Set(op.encontrados || []);
         const c = DUNGEON_CELDA;
         lienzoMapa.width = DUNGEON_ANCHO * c;
         lienzoMapa.height = DUNGEON_ALTO * c;
         const ctx = lienzoMapa.getContext("2d");
         ctx.fillStyle = "#3a332b";
         ctx.fillRect(0, 0, lienzoMapa.width, lienzoMapa.height);
+        const pasilloVisto = (p, i) => (!p.secreto || encontrados.has(i)) && (vistas.has(p.a) || vistas.has(p.b));
+        const vista = new Set();
+        if (jug) {
+            (mapa.pasillos || []).forEach((p, i) => {
+                if (pasilloVisto(p, i)) {
+                    p.celdas.forEach(([x, y]) => vista.add(x + "," + y));
+                }
+            });
+        }
+        const seVe = (i, j, v) => {
+            if (!jug) {
+                return true;
+            }
+            if (v === "1") {
+                return vistas.has(parseInt(mapa.zonas[j][i], 36));
+            }
+            return vista.has(i + "," + j);
+        };
+        const pisables = [];
         mapa.filas.forEach((fila, j) => {
             Array.from(fila).forEach((v, i) => {
-                if (v !== "0") {
-                    ctx.fillStyle = v === "1" ? "#efe2bf" : "#d9c79c";
-                    ctx.fillRect(i * c, j * c, c, c);
+                if (v === "0" || !seVe(i, j, v)) {
+                    return;
                 }
+                ctx.fillStyle = v === "1" ? "#efe2bf" : v === "3" && !jug ? "#e3c3a8" : "#d9c79c";
+                ctx.fillRect(i * c, j * c, c, c);
+                pisables.push([i, j, v]);
             });
         });
         ctx.strokeStyle = "rgba(59, 42, 23, 0.25)";
         ctx.lineWidth = 1;
         ctx.beginPath();
-        mapa.filas.forEach((fila, j) => {
-            Array.from(fila).forEach((v, i) => {
-                if (v !== "0") {
-                    ctx.rect(i * c + 0.5, j * c + 0.5, c - 1, c - 1);
-                }
-            });
-        });
+        pisables.forEach(([i, j]) => ctx.rect(i * c + 0.5, j * c + 0.5, c - 1, c - 1));
         ctx.stroke();
+        if (!jug) {
+            ctx.strokeStyle = "#a3261a";
+            ctx.lineWidth = 2;
+            ctx.setLineDash([4, 4]);
+            pisables.filter((x) => x[2] === "3").forEach(([i, j]) => ctx.strokeRect(i * c + 3, j * c + 3, c - 6, c - 6));
+            ctx.setLineDash([]);
+        }
+        (mapa.puertas || []).forEach((p) => {
+            const secreta = p.tipo === "secreta";
+            if (jug && (!vista.has(p.x + "," + p.y) || (secreta && !encontrados.has(p.pasillo)))) {
+                return;
+            }
+            const x = p.x * c;
+            const y = p.y * c;
+            ctx.fillStyle = secreta && !jug ? "#a3261a" : "#6b4423";
+            if (p.vertical) {
+                ctx.fillRect(x + c * 0.35, y + 1, c * 0.3, c - 2);
+            } else {
+                ctx.fillRect(x + 1, y + c * 0.35, c - 2, c * 0.3);
+            }
+            if (!jug && p.tipo !== "normal") {
+                ctx.fillStyle = "#1d1b26";
+                ctx.fillRect(x + c * 0.15, y + c * 0.15, c * 0.7, c * 0.7);
+                ctx.font = "bold " + Math.round(c * 0.6) + "px sans-serif";
+                ctx.textAlign = "center";
+                ctx.textBaseline = "middle";
+                ctx.fillStyle = "#fdfaf0";
+                ctx.fillText({ secreta: "S", cerrada: "C", atrancada: "A" }[p.tipo], x + c / 2, y + c / 2 + 1);
+            }
+        });
+        if (jug) {
+            return;
+        }
         ctx.textAlign = "center";
         ctx.textBaseline = "middle";
         mapa.salas.forEach((s, i) => {
-            const x = (s.x + s.w / 2) * c;
-            const y = (s.y + s.h / 2) * c;
+            const x = (s.cx + 0.5) * c;
+            const y = (s.cy + 0.5) * c;
             ctx.fillStyle = "#7a1c12";
             ctx.beginPath();
-            ctx.arc(x, y, c * 0.75, 0, Math.PI * 2);
+            ctx.arc(x, y, c * 0.8, 0, Math.PI * 2);
             ctx.fill();
             ctx.fillStyle = "#fdfaf0";
-            ctx.font = "bold " + Math.round(c * 0.8) + "px sans-serif";
+            ctx.font = "bold " + Math.round(c * 0.85) + "px sans-serif";
             ctx.fillText(String(i + 1), x, y + 1);
         });
         if (mapa.salas[0]) {
@@ -4218,8 +4346,16 @@
             };
             const nivel = numero("master-dungeon-nivel-", "nivel de la party", d.nivel || 3, 1, 20);
             const pjs = numero("master-dungeon-pjs-", "cuántos PJ", d.pjs || enParty || 4, 1, 10);
+            const estilo = elegirDe("master-dungeon-estilo-" + m.id, "estilo del mapa", [["", "según el sitio"], ["salas", "salas y puertas"],
+                ["cavernas", "cavernas"]], d.estilo || "");
             const fila = crear("div", "master-encuentro-fila");
-            fila.append(tema, tamano, nivel, pjs);
+            fila.append(tema, tamano, nivel, pjs, estilo);
+            const vista = botonesDe("qué mapa se ve", [["master", "🧙 el del máster"], ["jugadores", "👥 el de los jugadores"]],
+                d.vista || "master", (v) => {
+                    d.vista = v;
+                    guardar();
+                    pintar();
+                });
             const mapaLienzo = crear("canvas", "master-dungeon-mapa");
             mapaLienzo.setAttribute("role", "img");
             const salasLista = crear("ol", "master-dungeon-salas");
@@ -4231,7 +4367,12 @@
                 d.nivel = Math.min(20, Math.max(1, parseInt(nivel.elegir.value, 10) || 1));
                 d.pjs = Math.min(10, Math.max(1, parseInt(pjs.elegir.value, 10) || 1));
                 const tm = t.temas[d.tema];
-                const mapa = hacerMapa(parseInt(d.salas, 10));
+                d.estilo = estilo.elegir.value;
+                const [, cdBase] = DUNGEON_TRAMPA.find((x) => d.nivel <= x[0]);
+                const mapa = hacerMapa(parseInt(d.salas, 10), d.estilo || (d.tema === "cueva" ? "cavernas" : "salas"),
+                    { cerrada: cdBase + 1, atrancada: cdBase + 2, secreta: cdBase });
+                d.vistas = [0];
+                d.encontrados = [];
                 let bichos = best.monstruos.filter((b) => tm.tipos.some((x) => b.tipo.indexOf(x) === 0) &&
                     (!tm.habitat || (b.habitat || []).some((h) => h === tm.habitat || h === "cualquiera")));
                 if (bichos.length < 8) {
@@ -4281,20 +4422,34 @@
                     mapaLienzo.hidden = true;
                     salasLista.replaceChildren(crear("li", "oc-vacio", "Elige y pulsa «generar»."));
                     botones.hidden = true;
+                    leyenda.hidden = true;
                     return;
                 }
                 mapaLienzo.hidden = false;
                 botones.hidden = false;
-                pintarMapa(mapaLienzo, d.mapa);
-                const tm = t.temas[d.tema] || { nombre: "dungeon" };
-                mapaLienzo.setAttribute("aria-label", "Mapa de " + tm.nombre + ": " + d.mapa.salas.length +
-                    " salas numeradas unidas por pasillos; la 1 es la entrada. Lo que hay en cada una, en la lista de debajo.");
+                d.vistas = d.vistas || [0];
+                d.encontrados = d.encontrados || [];
+                const deJugadores = d.vista === "jugadores";
+                pintarVista();
+                leyenda.hidden = deJugadores || d.mapa.estilo === "cavernas";
+                descubrir.hidden = tapar.hidden = !deJugadores;
                 salasLista.replaceChildren(...d.contenido.map((s, i) => {
                     const li = crear("li", "master-dungeon-sala");
                     const h = crear("h3", "master-dungeon-sala-titulo", "Sala " + (i + 1) + (i === 0 ? " (entrada)" : "") +
                         (i === d.contenido.length - 1 ? " (la última)" : ""));
                     const desc = crear("p", "", "Es " + s.que + "; " + s.detalle + ".");
-                    li.append(h, desc);
+                    const etVista = crear("label", "master-nombres-apellido");
+                    const caja = crear("input");
+                    caja.type = "checkbox";
+                    caja.checked = d.vistas.indexOf(i) >= 0;
+                    caja.addEventListener("change", () => {
+                        d.vistas = d.vistas.filter((x) => x !== i).concat(caja.checked ? [i] : []);
+                        guardar();
+                        pintarVista();
+                        avisar("Sala " + (i + 1) + (caja.checked ? " descubierta." : " tapada."));
+                    });
+                    etVista.append(caja, document.createTextNode(" descubierta (sale en el mapa de los jugadores)"));
+                    li.append(h, desc, etVista);
                     if (s.bichos && s.bichos.length) {
                         const p = crear("p", "master-dungeon-cosa");
                         p.append(crear("strong", "", "Monstruos: "));
@@ -4350,8 +4505,45 @@
                     if (!s.bichos && !s.trampa && !s.botin) {
                         li.appendChild(crear("p", "master-dungeon-cosa", "No hay nada más (o eso parece)."));
                     }
+                    (d.mapa.puertas || []).filter((pu) => pu.sala === i && pu.tipo !== "normal").forEach((pu) => {
+                        const pas = d.mapa.pasillos[pu.pasillo] || {};
+                        const otra = pas.a === i ? pas.b : pas.a;
+                        const p = crear("p", "master-dungeon-cosa");
+                        const que = {
+                            cerrada: "Puerta cerrada con llave hacia la sala " + (otra + 1) + ": se abre con herramientas de ladrón (Destreza CD " +
+                                pu.cd + ") o se echa abajo (Fuerza (Atletismo) CD " + (pu.cd + 2) + ").",
+                            atrancada: "Puerta atrancada por el otro lado (hacia la sala " + (otra + 1) + "): Fuerza (Atletismo) CD " + pu.cd +
+                                " para forzarla; hace ruido.",
+                            secreta: "Puerta secreta a un pasillo oculto que lleva a la sala " + (otra + 1) + ": Sabiduría (Percepción) CD " +
+                                pu.cd + " para verla.",
+                        }[pu.tipo];
+                        p.append(crear("strong", "", "🚪 "), document.createTextNode(que));
+                        li.appendChild(p);
+                        if (pu.tipo === "secreta") {
+                            const etE = crear("label", "master-nombres-apellido");
+                            const enc = crear("input");
+                            enc.type = "checkbox";
+                            enc.checked = d.encontrados.indexOf(pu.pasillo) >= 0;
+                            enc.addEventListener("change", () => {
+                                d.encontrados = d.encontrados.filter((x) => x !== pu.pasillo).concat(enc.checked ? [pu.pasillo] : []);
+                                guardar();
+                                pintarVista();
+                                avisar(enc.checked ? "Pasillo secreto encontrado." : "Pasillo secreto escondido otra vez.");
+                            });
+                            etE.append(enc, document.createTextNode(" la han encontrado"));
+                            li.appendChild(etE);
+                        }
+                    });
                     return li;
                 }));
+            }
+            function pintarVista() {
+                const deJugadores = d.vista === "jugadores" && !!d.mapa.zonas;
+                pintarMapa(mapaLienzo, d.mapa, deJugadores ? { jugadores: true, vistas: d.vistas, encontrados: d.encontrados } : {});
+                const tm = t.temas[d.tema] || { nombre: "dungeon" };
+                mapaLienzo.setAttribute("aria-label", deJugadores ? "Mapa de los jugadores: se ven " + d.vistas.length + " de " +
+                    d.mapa.salas.length + " salas, sin números ni secretos." : "Mapa de " + tm.nombre + ": " + d.mapa.salas.length +
+                    " salas numeradas unidas por pasillos; la 1 es la entrada. Lo que hay en cada una, en la lista de debajo.");
             }
             const boton = botonDe("oc-vida-accion es-principal master-nombres-generar", "🎲 generar dungeon", generar);
             const alDibujo = botonDe("oc-vida-accion", "🎨 al dibujo", () => {
@@ -4384,11 +4576,364 @@
                 a.remove();
                 avisar("Descargado: " + a.download + ".");
             }, "Descargar la imagen del mapa (PNG)");
-            botones.append(copiarImagen, bajarImagen, alDibujo, copiar);
+            const ensenar = botonDe("oc-vida-accion es-principal", "👁️ enseñar a la mesa", () => {
+                const l = crear("canvas", "master-dungeon-mapa es-grande");
+                pintarMapa(l, d.mapa, { jugadores: true, vistas: d.vistas, encontrados: d.encontrados });
+                l.setAttribute("role", "img");
+                l.setAttribute("aria-label", "Mapa de los jugadores: lo descubierto.");
+                window.ocVentana.abrir({ titulo: "el mapa", cuerpo: l, vuelta: ensenar, clase: "es-ancha" });
+            }, "Enseñar en grande el mapa de los jugadores (solo lo descubierto)");
+            const descubrir = botonDe("oc-vida-accion", "☀️ descubrir todas", () => {
+                d.vistas = d.mapa.salas.map((x, i) => i);
+                guardar();
+                pintar();
+                avisar("Todas las salas descubiertas.");
+            });
+            const tapar = botonDe("oc-vida-accion", "🌑 tapar todas", () => {
+                d.vistas = [0];
+                guardar();
+                pintar();
+                avisar("Tapadas todas menos la entrada.");
+            });
+            botones.append(ensenar, copiarImagen, bajarImagen, alDibujo, copiar, descubrir, tapar);
+            const leyenda = crear("p", "oc-hoja-nota master-dungeon-leyenda",
+                "Puertas: C cerrada con llave, A atrancada, S secreta; a rayas rojas, el pasillo secreto. Copiar y descargar, el mapa que se ve.");
             const arriba = crear("div", "master-nombres-form");
-            arriba.append(fila, boton);
-            dentro.replaceChildren(arriba, mapaLienzo, botones, salasLista,
+            arriba.append(fila, boton, vista);
+            dentro.replaceChildren(arriba, mapaLienzo, leyenda, botones, salasLista,
                 crear("p", "oc-hoja-nota master-fuente", "Salas, trampas, gemas y arte: tablas propias. Monstruos y objetos: SRD 5.2 (CC BY 4.0)."));
+            pintar();
+        }).catch(() => {
+            dentro.replaceChildren(crear("p", "oc-vacio", "No he podido cargar las tablas."));
+        });
+    }
+    const UNIDADES = [["rondas", "rondas", 6], ["minutos", "minutos", 60], ["horas", "horas", 3600], ["dias", "días", 86400]];
+    function duracionDe(texto) {
+        const t = llano(texto);
+        const m = /(\d+)\s*(asalto|ronda|minuto|hora|dia)/.exec(t);
+        if (!m) {
+            return null;
+        }
+        const unidad = { asalto: "rondas", ronda: "rondas", minuto: "minutos", hora: "horas", dia: "dias" }[m[2]];
+        return { n: parseInt(m[1], 10), unidad, conc: t.indexOf("concentracion") >= 0 };
+    }
+    function cuantoQueda(seg) {
+        if (seg <= 0) {
+            return "se ha acabado";
+        }
+        if (seg < 60) {
+            const r = Math.ceil(seg / 6);
+            return r + (r === 1 ? " ronda" : " rondas");
+        }
+        if (seg < 3600) {
+            const mi = Math.ceil(seg / 60);
+            return mi + (mi === 1 ? " minuto" : " minutos") + (mi <= 10 ? " (" + Math.ceil(seg / 6) + " rondas)" : "");
+        }
+        if (seg < 86400) {
+            const minutos = Math.ceil(seg / 60);
+            const h = Math.floor(minutos / 60);
+            const mi = minutos % 60;
+            return h + " h" + (mi ? " " + mi + " min" : "");
+        }
+        const horas = Math.ceil(seg / 3600);
+        const di = Math.floor(horas / 24);
+        const h = horas % 24;
+        return di + (di === 1 ? " día" : " días") + (h ? " " + h + " h" : "");
+    }
+    function montarEfectos(dentro, m) {
+        m.datos = m.datos || {};
+        const d = m.datos;
+        d.efectos = Array.isArray(d.efectos) ? d.efectos : [];
+        const leerIni = () => {
+            try {
+                return JSON.parse(localStorage.getItem("richi-oc-iniciativa") || "{}");
+            } catch (e) {
+                return {};
+            }
+        };
+        if (d.ronda === undefined) {
+            d.ronda = leerIni().ronda || 1;
+        }
+        const form = crear("form", "master-efecto-nuevo");
+        const etN = crear("label", "oc-dados-etiqueta", "qué es (un conjuro del SRD pone su duración)");
+        const nombre = crear("input", "master-elegir");
+        nombre.id = "master-efecto-nombre-" + m.id;
+        etN.htmlFor = nombre.id;
+        nombre.placeholder = "Bendecir, Armadura de mago, veneno…";
+        const lista = crear("datalist");
+        lista.id = "master-efecto-conjuros-" + m.id;
+        nombre.setAttribute("list", lista.id);
+        const sobre = elegirDe("master-efecto-sobre-" + m.id, "sobre quién", [["", "—"]], "");
+        const numero = crear("input", "master-elegir");
+        numero.type = "number";
+        numero.min = 1;
+        numero.value = 1;
+        numero.setAttribute("aria-label", "Cuánto dura");
+        const unidad = crear("select", "master-elegir");
+        unidad.setAttribute("aria-label", "En qué");
+        UNIDADES.forEach(([v, n]) => {
+            const o = crear("option", "", n);
+            o.value = v;
+            unidad.appendChild(o);
+        });
+        unidad.value = "minutos";
+        const etDura = crear("p", "oc-dados-etiqueta", "cuánto dura");
+        etDura.setAttribute("aria-hidden", "true");
+        const dura = crear("div", "master-efecto-dura");
+        dura.append(numero, unidad);
+        const etConc = crear("label", "master-nombres-apellido");
+        const conc = crear("input");
+        conc.type = "checkbox";
+        etConc.append(conc, document.createTextNode(" de concentración"));
+        const anadirE = crear("button", "oc-vida-accion es-principal", "＋ efecto");
+        anadirE.type = "submit";
+        form.append(etN, nombre, lista, sobre, etDura, dura, etConc, anadirE);
+        let conjuros = [];
+        pedir(CONJUROS_SRD).then((c) => {
+            conjuros = c.conjuros || [];
+            conjuros.filter((x) => duracionDe(x.dur || "")).forEach((x) => {
+                const o = crear("option");
+                o.value = x.nombre;
+                lista.appendChild(o);
+            });
+        }).catch(() => {});
+        nombre.addEventListener("change", () => {
+            const c = conjuros.find((x) => llano(x.nombre) === llano(nombre.value));
+            const du = c && duracionDe(c.dur || "");
+            if (du) {
+                numero.value = du.n;
+                unidad.value = du.unidad;
+                conc.checked = du.conc;
+                avisar(c.nombre + ": " + c.dur + ".");
+            }
+        });
+        const pintarQuien = () => {
+            const ahora = sobre.elegir.value;
+            const nombres = (leerIni().lista || []).map((x) => x.nombre);
+            sobre.elegir.replaceChildren(...[["", "—"]].concat(nombres.map((x) => [x, x])).map(([v, n]) => {
+                const o = crear("option", "", n);
+                o.value = v;
+                return o;
+            }));
+            sobre.elegir.value = nombres.indexOf(ahora) >= 0 ? ahora : "";
+        };
+        form.addEventListener("submit", (e) => {
+            e.preventDefault();
+            const n = Math.max(1, parseInt(numero.value, 10) || 1);
+            const seg = n * UNIDADES.find((x) => x[0] === unidad.value)[2];
+            const ef = { id: Date.now().toString(36), nombre: nombre.value.trim() || "efecto", sobre: sobre.elegir.value, quedan: seg,
+                total: seg, conc: conc.checked };
+            d.efectos.push(ef);
+            nombre.value = "";
+            conc.checked = false;
+            guardar();
+            pintar();
+            avisar("Efecto: " + ef.nombre + (ef.sobre ? " en " + ef.sobre : "") + ", " + cuantoQueda(seg) + ".");
+        });
+        const pasar = (seg, porque) => {
+            const acaban = [];
+            d.efectos.forEach((ef) => {
+                if (ef.quedan > 0) {
+                    ef.quedan = Math.max(0, ef.quedan - seg);
+                    if (!ef.quedan) {
+                        acaban.push(ef.nombre + (ef.sobre ? " en " + ef.sobre : ""));
+                    }
+                }
+            });
+            guardar();
+            pintar();
+            if (acaban.length) {
+                avisar("Se acaba: " + acaban.join(", ") + ".");
+            } else if (porque) {
+                avisar(porque);
+            }
+        };
+        const aMano = crear("div", "master-cal-tiempo");
+        aMano.setAttribute("role", "group");
+        aMano.setAttribute("aria-label", "Que pase el tiempo a mano");
+        [["+1 ronda", 6], ["+1 minuto", 60], ["+10 minutos", 600], ["+1 hora", 3600]].forEach(([t, seg]) => {
+            aMano.appendChild(botonDe("oc-vida-accion", t, () => pasar(seg, "Pasa " + t.slice(1) + ".")));
+        });
+        const listaE = crear("ul", "master-efectos");
+        listaE.setAttribute("aria-label", "Efectos");
+        const quitarAcabados = botonDe("oc-vida-accion", "🧹 quitar los acabados", () => {
+            d.efectos = d.efectos.filter((x) => x.quedan > 0);
+            guardar();
+            pintar();
+            avisar("Quitados los que se habían acabado.");
+        });
+        function pintar() {
+            listaE.replaceChildren(...d.efectos.map((ef, i) => {
+                const li = crear("li", "master-efecto" + (ef.quedan <= 0 ? " es-acabado" : ""));
+                const cab = crear("p", "master-efecto-nombre");
+                cab.append(crear("strong", "", ef.nombre), document.createTextNode((ef.sobre ? " · " + ef.sobre : "") + (ef.conc ? " · 🧠 concentración" : "")));
+                const barra = crear("div", "master-efecto-barra");
+                barra.setAttribute("role", "meter");
+                barra.setAttribute("aria-valuemin", "0");
+                barra.setAttribute("aria-valuemax", String(ef.total));
+                barra.setAttribute("aria-valuenow", String(ef.quedan));
+                barra.setAttribute("aria-valuetext", "Queda: " + cuantoQueda(ef.quedan));
+                barra.setAttribute("aria-label", ef.nombre);
+                const lleno = crear("span", "master-efecto-lleno");
+                lleno.style.setProperty("--parte", Math.round(100 * ef.quedan / Math.max(1, ef.total)) + "%");
+                barra.appendChild(lleno);
+                const queda = crear("p", "master-efecto-queda", ef.quedan > 0 ? "Queda: " + cuantoQueda(ef.quedan) : "⌛ Se ha acabado");
+                const quitar = botonDe("master-nombre-boton", "✕", () => {
+                    d.efectos.splice(i, 1);
+                    guardar();
+                    pintar();
+                    avisar("Quitado: " + ef.nombre + ".");
+                    nombre.focus();
+                }, "Quitar " + ef.nombre);
+                const fila = crear("div", "master-efecto-fila");
+                fila.append(cab, quitar);
+                li.append(fila, barra, queda);
+                return li;
+            }));
+            if (!d.efectos.length) {
+                listaE.appendChild(crear("li", "oc-vacio", "Sin efectos. Añade uno arriba."));
+            }
+            quitarAcabados.hidden = !d.efectos.some((x) => x.quedan <= 0);
+        }
+        const alIni = (e) => {
+            if (!dentro.isConnected) {
+                document.removeEventListener("oc-iniciativa:guardada", alIni);
+                document.removeEventListener("master:tiempo", alTiempo);
+                return;
+            }
+            const r = (e.detail && e.detail.ronda) || 1;
+            const antes = d.ronda || 1;
+            d.ronda = r;
+            pintarQuien();
+            if (r > antes) {
+                pasar((r - antes) * 6, "Ronda " + r + ".");
+            } else {
+                guardar();
+            }
+        };
+        const alTiempo = (e) => {
+            if (!dentro.isConnected) {
+                return;
+            }
+            const h = (e.detail && e.detail.horas) || 0;
+            if (h > 0) {
+                pasar(h * 3600);
+            }
+        };
+        document.addEventListener("oc-iniciativa:guardada", alIni);
+        document.addEventListener("master:tiempo", alTiempo);
+        document.addEventListener("oc-iniciativa:cambio", pintarQuien);
+        const etTiempo = crear("p", "oc-hoja-nota", "Se descuentan solos con las rondas de la iniciativa y el tiempo del calendario; o a mano:");
+        dentro.append(form, etTiempo, aMano, listaE, quitarAcabados);
+        pintarQuien();
+        pintar();
+    }
+    function precioBonito(cp) {
+        if (cp < 10) {
+            return Math.max(1, Math.round(cp));
+        }
+        if (cp < 100) {
+            return Math.round(cp / 10) * 10 || 10;
+        }
+        if (cp < 1000) {
+            return Math.round(cp / 50) * 50;
+        }
+        return Math.round(cp / 100) * 100;
+    }
+    function montarTaberna(dentro, m) {
+        m.datos = m.datos || {};
+        dentro.appendChild(crear("p", "oc-hoja-nota", "Cargando…"));
+        Promise.all([pedir(TABLAS), pedir(NOMBRES)]).then(([tablas, nombres]) => {
+            const d = m.datos;
+            const t = tablas.taberna;
+            const calidad = botonesDe("lo buena que es", Object.keys(t.calidades).map((k) => [k, t.calidades[k].nombre]),
+                d.calidad || "modesta", (v) => {
+                    d.calidad = v;
+                    guardar();
+                });
+            const etCal = crear("p", "oc-dados-etiqueta", "lo buena que es");
+            etCal.setAttribute("aria-hidden", "true");
+            const sale = crear("div", "master-taberna");
+            sale.setAttribute("aria-live", "polite");
+            const variosDe = (lista, n) => {
+                const copia = lista.slice();
+                const salen = [];
+                while (copia.length && salen.length < n) {
+                    salen.push(copia.splice(tiradaSuelta("1d" + copia.length) - 1, 1)[0]);
+                }
+                return salen;
+            };
+            const generar = () => {
+                const cal = t.calidades[calidad.valor()];
+                const por = cal.por;
+                const g = alAzar(["f", "m"]);
+                const especie = alAzar(Object.keys(nombres.especies));
+                d.taberna = {
+                    calidad: calidad.valor(),
+                    nombre: lugarDe(nombres, "taberna"),
+                    ambiente: alAzar(cal.ambiente),
+                    quien: nombreDe(nombres, especie, g, false) + " (" + nombres.especies[especie].nombre + "), que " +
+                        alAzar(tablas.pnj.rasgos),
+                    bebidas: variosDe(t.bebidas, 5).map(([n, cp]) => [n, precioBonito(cp * por)]),
+                    comidas: variosDe(t.comidas, 5).map(([n, cp]) => [n, precioBonito(cp * por)]),
+                    especialidad: (([n, cp]) => [n, precioBonito(cp * por)])(alAzar(t.especialidades)),
+                    habitaciones: cal.habitaciones.map(([n, pp, inc]) => [n, precioBonito(pp * 10), inc]),
+                    rumor: alAzar(t.rumores),
+                };
+                guardar();
+                pintar();
+                avisar("Taberna: " + d.taberna.nombre + ".");
+            };
+            const texto = () => {
+                const x = d.taberna;
+                if (!x) {
+                    return "";
+                }
+                return [x.nombre + " (" + x.calidad + ")", x.ambiente + ".", "La lleva " + x.quien + ".", "",
+                    "BEBIDAS", ...x.bebidas.map(([n, cp]) => "· " + n + ": " + moneda(cp)), "",
+                    "COMIDAS", ...x.comidas.map(([n, cp]) => "· " + n + ": " + moneda(cp)), "",
+                    "ESPECIALIDAD DE LA CASA: " + x.especialidad[0] + ": " + moneda(x.especialidad[1]), "",
+                    "HABITACIONES (por noche)", ...x.habitaciones.map(([n, cp, inc]) => "· " + n + ": " + moneda(cp) + " (" + inc + ")"), "",
+                    "Se oye que " + x.rumor + "."].join("\n");
+            };
+            const carta = (titulo, filas) => {
+                const sec = crear("div", "master-taberna-carta");
+                sec.appendChild(crear("h4", "master-taberna-titulo", titulo));
+                const dl = crear("dl", "master-taberna-lista");
+                filas.forEach(([n, cp, extra]) => {
+                    const dt = crear("dt", "", n);
+                    if (extra) {
+                        dt.appendChild(crear("span", "master-taberna-extra", extra));
+                    }
+                    dl.append(dt, crear("dd", "", moneda(cp)));
+                });
+                sec.appendChild(dl);
+                return sec;
+            };
+            function pintar() {
+                const x = d.taberna;
+                sale.replaceChildren();
+                if (!x) {
+                    sale.appendChild(crear("p", "oc-vacio", "Elige cómo es y pulsa «generar»."));
+                    return;
+                }
+                const cab = crear("div", "master-taberna-cabeza");
+                cab.append(crear("h3", "master-taberna-nombre", "🍺 " + x.nombre), crear("p", "master-taberna-ambiente", x.ambiente.charAt(0)
+                    .toUpperCase() + x.ambiente.slice(1) + ". La lleva " + x.quien + "."));
+                const esp = crear("p", "master-taberna-especial");
+                esp.append(crear("strong", "", "⭐ Especialidad de la casa: "), document.createTextNode(x.especialidad[0] + " — " +
+                    moneda(x.especialidad[1])));
+                const rumor = crear("p", "master-taberna-rumor");
+                rumor.append(crear("strong", "", "👂 Se oye que "), document.createTextNode(x.rumor + "."));
+                sale.append(cab, esp, carta("🍷 Bebidas", x.bebidas), carta("🍲 Comidas", x.comidas),
+                    carta("🛏️ Habitaciones (por noche)", x.habitaciones.map(([n, cp, inc]) => [n, cp, inc])), rumor);
+            }
+            const boton = botonDe("oc-vida-accion es-principal master-nombres-generar", "🎲 generar taberna", generar);
+            const copiar = botonDe("oc-vida-accion", "⧉ copiar el menú", () => copiarTexto(texto(), "Copiado el menú."), "Copiar el menú");
+            const arriba = crear("div", "master-nombres-form");
+            arriba.append(etCal, calidad, boton);
+            dentro.replaceChildren(arriba, sale, copiar,
+                crear("p", "oc-hoja-nota master-fuente", "Platos, precios y rumores: tablas propias (master-tablas.json)."));
             pintar();
         }).catch(() => {
             dentro.replaceChildren(crear("p", "oc-vacio", "No he podido cargar las tablas."));
@@ -5329,6 +5874,10 @@
             desc: "Un mapa en cuadrícula con sus salas, monstruos, trampas y botín.", montar: montarDungeon },
         calendario: { nombre: "calendario", emoji: "📅", grupo: "mundo", w: 520, h: 720,
             desc: "Gregoriano, el de Harptos o uno propio, con la hora y apuntes.", montar: montarCalendario },
+        efectos: { nombre: "efectos con duración", emoji: "⌛", grupo: "combate", w: 460, h: 620,
+            desc: "Bendecir 1 minuto, Armadura de mago 8 horas…: se descuentan solos.", montar: montarEfectos },
+        taberna: { nombre: "menú de taberna", emoji: "🍺", grupo: "mundo", w: 480, h: 720,
+            desc: "Bebidas, comidas, especialidad y habitaciones, con precios.", montar: montarTaberna },
         relojes: { nombre: "relojes", emoji: "⏳", grupo: "mesa", w: 440, h: 480,
             desc: "Relojes de progreso: amenazas que avanzan, cuentas atrás…", montar: montarRelojes },
         idiomas: { nombre: "notas en otros idiomas", emoji: "🪶", grupo: "mundo", w: 480, h: 680,

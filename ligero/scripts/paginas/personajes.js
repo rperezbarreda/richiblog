@@ -2874,6 +2874,7 @@ window.ocMontar.iniciativa = function (sitio, opciones) {
             localStorage.setItem(CLAVE, JSON.stringify(datos));
         } catch (e) {
         }
+        document.dispatchEvent(new CustomEvent("oc-iniciativa:guardada", { detail: { ronda: datos.ronda, modo: datos.modo } }));
     };
     const crear = (tag, clase, texto) => {
         const x = document.createElement(tag);

@@ -2786,6 +2786,18 @@
     border: 2px solid var(--border);
 }
 
+.master-dungeon-mapa.es-grande {
+    max-height: 80vh;
+    margin: 0;
+    object-fit: contain;
+}
+
+.master-dungeon-leyenda {
+    margin: 0 0 8px;
+}
+
+.master-dungeon-leyenda[hidden],
+.master-notas-botones .oc-vida-accion[hidden],
 .master-dungeon-mapa[hidden],
 .master-notas-botones[hidden] {
     display: none;
@@ -2893,6 +2905,130 @@
     font-family: var(--fuente-mono);
     font-size: 0.875rem;
     text-align: center;
+}
+
+/* LOS EFECTOS CON DURACIÓN: el formulario y cada efecto con su barra
+   (lo que queda) y, si se ha acabado, tachado y apagado. */
+.master-efecto-nuevo {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-bottom: 8px;
+}
+
+.master-efecto-nuevo .oc-vida-accion {
+    align-self: flex-start;
+}
+
+.master-efecto-dura {
+    display: grid;
+    grid-template-columns: 6rem 1fr;
+    gap: 6px;
+}
+
+.master-efectos {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin: 10px 0;
+    padding: 0;
+    list-style: none;
+}
+
+.master-efecto {
+    padding: 6px 8px;
+    border: 1px solid var(--border);
+    border-left: 4px solid var(--yellow);
+}
+
+.master-efecto.es-acabado {
+    border-left-color: var(--muted);
+    color: var(--muted);
+}
+
+.master-efecto.es-acabado .master-efecto-nombre strong {
+    text-decoration: line-through;
+}
+
+.master-efecto-fila {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 6px;
+}
+
+.master-efecto-nombre,
+.master-efecto-queda {
+    margin: 0;
+}
+
+.master-efecto-queda {
+    font-size: 0.875rem;
+}
+
+.master-efecto-barra {
+    height: 10px;
+    margin: 4px 0;
+    border: 1px solid var(--border);
+}
+
+.master-efecto-lleno {
+    --parte: 100%;
+    display: block;
+    width: var(--parte);
+    height: 100%;
+    background: var(--yellow);
+}
+
+/* EL MENÚ DE TABERNA: como una carta, con los precios a la derecha. */
+.master-taberna {
+    margin: 12px 0;
+}
+
+.master-taberna-nombre {
+    margin: 0 0 4px;
+    font-size: 1.25rem;
+}
+
+.master-taberna-ambiente,
+.master-taberna-especial,
+.master-taberna-rumor {
+    margin: 0 0 8px;
+}
+
+.master-taberna-carta {
+    margin: 10px 0;
+    padding: 8px 10px;
+    border: 2px double var(--yellow);
+}
+
+.master-taberna-titulo {
+    margin: 0 0 6px;
+    font-size: 1rem;
+}
+
+.master-taberna-lista {
+    display: grid;
+    grid-template-columns: 1fr max-content;
+    gap: 4px 12px;
+    margin: 0;
+}
+
+.master-taberna-lista dt {
+    border-bottom: 1px dotted var(--border);
+}
+
+.master-taberna-lista dd {
+    margin: 0;
+    font-family: var(--fuente-mono);
+    font-size: 0.875rem;
+    text-align: right;
+}
+
+.master-taberna-extra {
+    display: block;
+    color: var(--muted);
+    font-size: 0.875rem;
 }
 
 /* LOS DADOS. */

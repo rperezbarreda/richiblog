@@ -551,5 +551,294 @@
     }
    ]
   }
+ },
+ "taberna": {
+  "calidades": {
+   "pobre": {
+    "nombre": "pobre",
+    "por": 0.5,
+    "ambiente": [
+     "el suelo está pegajoso y huele a cerveza vieja",
+     "hay más ratas que clientes",
+     "la chimenea tira mal y todo está lleno de humo",
+     "las mesas son toneles con tablones encima",
+     "un perro sarnoso duerme junto a la barra",
+     "hay goteras y cubos debajo"
+    ],
+    "habitaciones": [
+     [
+      "un hueco en el suelo de la sala común",
+      1,
+      "una manta (con suerte)"
+     ],
+     [
+      "un catre en el dormitorio compartido",
+      3,
+      "paja limpia y un orinal para todos"
+     ]
+    ]
+   },
+   "modesta": {
+    "nombre": "modesta",
+    "por": 1,
+    "ambiente": [
+     "es acogedora, con un fuego que calienta de verdad",
+     "hay un bardo regular que cree que es bueno",
+     "los parroquianos juegan a los dados en un rincón",
+     "huele a pan recién hecho",
+     "hay un tablón de anuncios lleno de encargos",
+     "la posadera se sabe el nombre de todos"
+    ],
+    "habitaciones": [
+     [
+      "una cama en una habitación compartida",
+      5,
+      "sábanas limpias y un baúl con candado"
+     ],
+     [
+      "una habitación para uno o dos",
+      10,
+      "cama, palangana y una vela"
+     ],
+     [
+      "una habitación con chimenea",
+      20,
+      "leña, desayuno incluido"
+     ]
+    ]
+   },
+   "acomodada": {
+    "nombre": "acomodada",
+    "por": 2,
+    "ambiente": [
+     "tiene alfombras y lámparas de aceite en cada mesa",
+     "hay un salón privado para quien pague",
+     "los camareros llevan delantal limpio",
+     "un cuarteto toca música suave",
+     "las paredes tienen cuadros de caza",
+     "hay una mesa de juego con apuestas altas"
+    ],
+    "habitaciones": [
+     [
+      "una habitación privada",
+      40,
+      "cama grande, armario y agua caliente"
+     ],
+     [
+      "una habitación con vistas",
+      60,
+      "balcón, desayuno y cena incluidos"
+     ],
+     [
+      "una suite pequeña",
+      100,
+      "salita, bañera y un mozo para los recados"
+     ]
+    ]
+   },
+   "lujosa": {
+    "nombre": "lujosa",
+    "por": 5,
+    "ambiente": [
+     "hay mármol, terciopelo y espejos dorados",
+     "un mayordomo recibe en la puerta",
+     "la vajilla es de porcelana fina",
+     "la clientela es de la nobleza y lo hace notar",
+     "hay un jardín interior con una fuente",
+     "se entra solo con invitación (o con oro)"
+    ],
+    "habitaciones": [
+     [
+      "una habitación de invitados",
+      200,
+      "sábanas de seda, baño y todas las comidas"
+     ],
+     [
+      "la suite del ala este",
+      400,
+      "dos estancias, baño propio, criado y cuadra para el caballo"
+     ],
+     [
+      "la suite real",
+      1000,
+      "todo lo anterior, un cocinero propio y discreción absoluta"
+     ]
+    ]
+   }
+  },
+  "bebidas": [
+   [
+    "jarra de cerveza",
+    4
+   ],
+   [
+    "jarra de cerveza negra",
+    6
+   ],
+   [
+    "vaso de sidra",
+    4
+   ],
+   [
+    "jarra de aguamiel",
+    8
+   ],
+   [
+    "copa de vino de la casa",
+    10
+   ],
+   [
+    "botella de vino de la casa",
+    50
+   ],
+   [
+    "copa de vino élfico",
+    200
+   ],
+   [
+    "vaso de licor de enano",
+    30
+   ],
+   [
+    "chupito de aguardiente",
+    8
+   ],
+   [
+    "té de hierbas",
+    2
+   ],
+   [
+    "leche de cabra",
+    1
+   ],
+   [
+    "ponche caliente con especias",
+    12
+   ],
+   [
+    "jarra de cerveza de jengibre",
+    5
+   ],
+   [
+    "vaso de hidromiel de las montañas",
+    15
+   ],
+   [
+    "botella de vino espumoso",
+    400
+   ]
+  ],
+  "comidas": [
+   [
+    "cuenco de guiso del día",
+    10
+   ],
+   [
+    "pan con queso",
+    5
+   ],
+   [
+    "empanada de carne",
+    8
+   ],
+   [
+    "sopa de cebolla",
+    4
+   ],
+   [
+    "muslo de pollo asado",
+    15
+   ],
+   [
+    "costillas de cerdo con miel",
+    30
+   ],
+   [
+    "trucha a la brasa",
+    25
+   ],
+   [
+    "salchichas con alubias",
+    12
+   ],
+   [
+    "tabla de quesos y embutidos",
+    40
+   ],
+   [
+    "pastel de setas",
+    10
+   ],
+   [
+    "estofado de jabalí",
+    50
+   ],
+   [
+    "tortilla de patatas",
+    6
+   ],
+   [
+    "gachas con manzana",
+    3
+   ],
+   [
+    "cordero al horno",
+    80
+   ],
+   [
+    "tarta de frutas del bosque",
+    15
+   ],
+   [
+    "buñuelos con miel",
+    6
+   ]
+  ],
+  "especialidades": [
+   [
+    "el guiso de la abuela, con una receta secreta",
+    15
+   ],
+   [
+    "un asado de grifo (dicen)",
+    300
+   ],
+   [
+    "pescado del río en salsa picante",
+    30
+   ],
+   [
+    "el «matadragones»: carne con guindillas que hacen llorar",
+    25
+   ],
+   [
+    "pan negro con mantequilla de hierbas de la casa",
+    6
+   ],
+   [
+    "el plato del día, que nadie sabe qué es",
+    8
+   ],
+   [
+    "pastel de calabaza que hornea el hijo del posadero",
+    10
+   ],
+   [
+    "cerveza de la casa, que se fermenta en el sótano",
+    6
+   ]
+  ],
+  "rumores": [
+   "dicen que en el bosque se ha visto una luz que se mueve sola",
+   "alguien está comprando todos los mapas antiguos del pueblo",
+   "el molinero no ha vuelto del mercado",
+   "hay recompensa por unos bandidos del camino del norte",
+   "el sacerdote se ha encerrado en el templo y no abre",
+   "una caravana trae algo que vigilan seis guardias",
+   "han encontrado huesos enormes en la cantera",
+   "el señor del castillo busca gente que no haga preguntas",
+   "a la hija del herrero la han visto hablando con un cuervo",
+   "las ratas de las bodegas se han ido todas a la vez"
+  ]
  }
 }

@@ -4450,12 +4450,30 @@
       (m.datos.apuntes, por calendario y fecha) y «📍 que la partida esté
       en este día».
     · 🗝️ generador de dungeons: qué es (cripta, cueva, fortaleza, templo,
-      cloacas, torre de mago), tamaño (5, 8 o 12 salas), nivel y PJ.
-      hacerMapa() pone las salas al azar en una cuadrícula de 48 × 36 sin
-      que se toquen y las une con pasillos en L (cada una con la
-      siguiente, y una o dos más para que haya vueltas); pintarMapa() lo
-      pinta en un canvas de colores fijos (pergamino), con los números y
-      la entrada (la 1). Cada sala: qué es y un detalle (del tema) y, al
+      cloacas, torre de mago), tamaño (5, 8 o 12 salas), nivel, PJ y
+      estilo del mapa («según el sitio»: la cueva sale en cavernas; o
+      «salas» / «cavernas»). hacerMapa(salas, estilo, cds) pone las salas
+      al azar en una cuadrícula de 48 × 36 sin que se toquen y las une
+      con pasillos en L (cada una con la siguiente, y una o dos más para
+      que haya vueltas; la primera de esas vueltas es un pasillo
+      secreto). En cavernas, las salas son manchas redondeadas, los
+      pasillos a veces se ensanchan, se alisa dos veces y no hay puertas.
+      Devuelve filas (0 roca, 1 sala, 2 pasillo, 3 pasillo secreto),
+      zonas (a qué sala es cada casilla), salas, pasillos (con sus
+      casillas) y puertas (como mucho una por pasillo y sala: normal,
+      cerrada CD+1, atrancada CD+2 o secreta CD, con la CD de
+      DUNGEON_TRAMPA). pintarMapa(lienzo, mapa, op) lo pinta en un canvas
+      de colores fijos (pergamino). Vista de máster: números, la entrada,
+      los pasillos secretos a rayas rojas y las puertas con C/A/S. Vista
+      de jugadores (botones máster/jugadores, d.vista): sólo las salas
+      descubiertas (d.vistas; empieza con la entrada) y los pasillos que
+      las tocan (los secretos, sólo si se han encontrado: d.encontrados),
+      sin números. Cada sala tiene «descubierta», sus puertas especiales
+      y, si es secreta, «la han encontrado». «☀️ descubrir todas», «🌑
+      tapar todas» y «👁️ enseñar a la mesa» (un modal con el mapa de los
+      jugadores en grande). Los mapas guardados de antes (sin zonas) se
+      ven siempre como el del máster. Debajo del mapa, una leyenda. Cada
+      sala: qué es y un detalle (del tema) y, al
       azar, monstruos (del SRD, de los tipos y hábitat del tema, con la
       cuenta de los encuentros; la última, más dura), una trampa (tablas
       propias, con CD y daño según el nivel: DUNGEON_TRAMPA) y/o botín
@@ -4463,7 +4481,28 @@
       los objetos se abren; «⚔️ a la iniciativa» por sala; «🎨 al dibujo»
       abre una ventana de dibujo con el mapa en una capa (y otra encima
       para apuntar); «🖼️ copiar la imagen» (portapapeles, PNG), «⬇ descargar la imagen» y «⧉ copiar las salas» copia las salas. Para el lector de
-      pantalla, el mapa es role="img" y lo que cuenta es la lista.
+      pantalla, el mapa es role="img" y lo que cuenta es la lista. Las
+      imágenes copiadas o descargadas son de la vista que esté puesta.
+    · ⌛ efectos con duración: qué es, sobre quién (los de la iniciativa,
+      richi-oc-iniciativa) y cuánto dura (rondas, minutos, horas o días;
+      se guarda en segundos, la ronda son 6). Si el nombre es un conjuro
+      del SRD (lista para elegir), pone solo su duración y si es de
+      concentración (duracionDe()). Cada efecto, con una barra de lo que
+      queda y «Queda: …» (cuantoQueda()) o «⌛ Se ha acabado»; «🧹 quitar
+      los acabados». El tiempo pasa solo: la iniciativa (personajes.js),
+      al guardar, lanza el evento «oc-iniciativa:guardada» con {ronda,
+      modo}, y cuenta la diferencia de rondas; el calendario, al pasar
+      el tiempo, lanza «master:tiempo» con {horas}. O a mano: +1 ronda,
+      +1 minuto, +10 minutos, +1 hora.
+    · 🍺 menú de taberna: lo buena que es (pobre, modesta, acomodada,
+      lujosa) y «🎲 generar taberna»: nombre (lugarDe), ambiente, quién
+      la lleva (nombre y una manía de PNJ), la especialidad, 5 bebidas y
+      5 comidas con precio, las habitaciones de la posada y un rumor.
+      Todo de tablas propias en master-tablas.json, «taberna»: calidades
+      (con «por», el multiplicador de los precios, ambientes y
+      habitaciones [nombre, pp, qué incluye]), bebidas y comidas
+      [nombre, pc], especialidades y rumores. Los precios se enseñan con
+      moneda() (precioBonito redondea). «⧉ copiar el menú».
     · 🪶 notas en otros idiomas: escribes lo que pone (o «🎲 nota al azar»,
       de NOTAS_AL_AZAR con nombres y lugares del generador) y se ve en un
       pergamino con el alfabeto del idioma. Los idiomas, en
