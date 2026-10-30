@@ -4372,7 +4372,14 @@
       botonesDe() y elegirDe() en pantalla-master.js, también para otras
       ventanas). Ocho de cada vez, en tarjetas: ☆ lo guarda en
       «⭐ guardados» (m.datos.guardados, se quedan aunque generes más; ✕
-      lo quita) y ⧉ lo copia.
+      lo quita) y ⧉ lo copia. Para los lugares, «en qué idioma»: común (en
+      español, como siempre) o cualquiera de las notas en otros idiomas
+      (idiomas.json). Entonces sale el nombre en español (sin «de», «la»…)
+      con cada palabra pasada a ese idioma, igual que las «palabras
+      inventadas» de las notas (inventar() con un tope de 3 sílabas por
+      palabra; la misma palabra da siempre lo mismo), y en la tarjeta,
+      debajo, cómo se escribe en su alfabeto y «Torrefría» en enano. Se
+      guarda como {n, es, idioma} (lo de antes, texto, sigue valiendo).
     · 🪶 notas en otros idiomas: escribes lo que pone (o «🎲 nota al azar»,
       de NOTAS_AL_AZAR con nombres y lugares del generador) y se ve en un
       pergamino con el alfabeto del idioma. Los idiomas, en

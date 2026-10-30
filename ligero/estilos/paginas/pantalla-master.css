@@ -1233,6 +1233,22 @@
     outline: 3px solid var(--yellow);
     outline-offset: 1px;
 }
+.master-campo[hidden] {
+    display: none;
+}
+.master-nombre-glifos,
+.master-nombre-es {
+    display: block;
+    font-weight: 400;
+}
+.master-nombre-glifos {
+    font-size: 1.25rem;
+    line-height: 1.5;
+}
+.master-nombre-es {
+    color: var(--muted);
+    font-size: 0.875rem;
+}
 .master-nombres-titulo {
     margin: 14px 0 0;
     font-size: 0.9375rem;
@@ -1264,7 +1280,8 @@
     direction: ltr;
 }
 .master-idioma-hoja.es-grande,
-.master-idioma-clave.es-grande .master-idioma-glifo {
+.master-idioma-clave.es-grande .master-idioma-glifo,
+.master-nombre-glifos.es-grande {
     margin: 0;
     font-size: 3rem;
 }
@@ -1328,7 +1345,8 @@
     font-size: 1.75rem;
     line-height: 1.5;
 }
-.master-idioma-clave.es-grande .master-idioma-glifo {
+.master-idioma-clave.es-grande .master-idioma-glifo,
+.master-nombre-glifos.es-grande {
     font-size: 3rem;
 }
 .master-idioma-latina {
@@ -1346,7 +1364,8 @@
     font-display: swap;
 }
 .master-idioma-hoja.es-elfico,
-.master-idioma-clave.es-elfico .master-idioma-glifo {
+.master-idioma-clave.es-elfico .master-idioma-glifo,
+.master-nombre-glifos.es-elfico {
     font-family: "Richi noto-shavian", "Pangolin", sans-serif;
 }
 @font-face {
@@ -1355,7 +1374,8 @@
     font-display: swap;
 }
 .master-idioma-hoja.es-silvano,
-.master-idioma-clave.es-silvano .master-idioma-glifo {
+.master-idioma-clave.es-silvano .master-idioma-glifo,
+.master-nombre-glifos.es-silvano {
     font-family: "Richi noto-ol-chiki", "Pangolin", sans-serif;
 }
 @font-face {
@@ -1364,7 +1384,8 @@
     font-display: swap;
 }
 .master-idioma-hoja.es-infracomun,
-.master-idioma-clave.es-infracomun .master-idioma-glifo {
+.master-idioma-clave.es-infracomun .master-idioma-glifo,
+.master-nombre-glifos.es-infracomun {
     font-family: "Richi noto-osage", "Pangolin", sans-serif;
 }
 @font-face {
@@ -1373,7 +1394,8 @@
     font-display: swap;
 }
 .master-idioma-hoja.es-enano,
-.master-idioma-clave.es-enano .master-idioma-glifo {
+.master-idioma-clave.es-enano .master-idioma-glifo,
+.master-nombre-glifos.es-enano {
     font-family: "Richi noto-runic", "Pangolin", sans-serif;
 }
 @font-face {
@@ -1382,7 +1404,8 @@
     font-display: swap;
 }
 .master-idioma-hoja.es-gigante,
-.master-idioma-clave.es-gigante .master-idioma-glifo {
+.master-idioma-clave.es-gigante .master-idioma-glifo,
+.master-nombre-glifos.es-gigante {
     font-family: "Richi noto-old-turkic", "Pangolin", sans-serif;
 }
 @font-face {
@@ -1391,7 +1414,8 @@
     font-display: swap;
 }
 .master-idioma-hoja.es-gnomo,
-.master-idioma-clave.es-gnomo .master-idioma-glifo {
+.master-idioma-clave.es-gnomo .master-idioma-glifo,
+.master-nombre-glifos.es-gnomo {
     font-family: "Richi noto-old-permic", "Pangolin", sans-serif;
 }
 @font-face {
@@ -1400,7 +1424,8 @@
     font-display: swap;
 }
 .master-idioma-hoja.es-goblin,
-.master-idioma-clave.es-goblin .master-idioma-glifo {
+.master-idioma-clave.es-goblin .master-idioma-glifo,
+.master-nombre-glifos.es-goblin {
     font-family: "Richi noto-old-south-arabian", "Pangolin", sans-serif;
 }
 @font-face {
@@ -1409,7 +1434,8 @@
     font-display: swap;
 }
 .master-idioma-hoja.es-orco,
-.master-idioma-clave.es-orco .master-idioma-glifo {
+.master-idioma-clave.es-orco .master-idioma-glifo,
+.master-nombre-glifos.es-orco {
     font-family: "Richi noto-old-hungarian", "Pangolin", sans-serif;
 }
 @font-face {
@@ -1418,7 +1444,8 @@
     font-display: swap;
 }
 .master-idioma-hoja.es-draconico,
-.master-idioma-clave.es-draconico .master-idioma-glifo {
+.master-idioma-clave.es-draconico .master-idioma-glifo,
+.master-nombre-glifos.es-draconico {
     font-family: "Richi noto-old-persian", "Pangolin", sans-serif;
 }
 @font-face {
@@ -1427,7 +1454,8 @@
     font-display: swap;
 }
 .master-idioma-hoja.es-infernal,
-.master-idioma-clave.es-infernal .master-idioma-glifo {
+.master-idioma-clave.es-infernal .master-idioma-glifo,
+.master-nombre-glifos.es-infernal {
     font-family: "Richi noto-glagolitic", "Pangolin", sans-serif;
 }
 @font-face {
@@ -1436,7 +1464,8 @@
     font-display: swap;
 }
 .master-idioma-hoja.es-abisal,
-.master-idioma-clave.es-abisal .master-idioma-glifo {
+.master-idioma-clave.es-abisal .master-idioma-glifo,
+.master-nombre-glifos.es-abisal {
     font-family: "Richi noto-meroitic", "Pangolin", sans-serif;
 }
 @font-face {
@@ -1445,7 +1474,8 @@
     font-display: swap;
 }
 .master-idioma-hoja.es-celestial,
-.master-idioma-clave.es-celestial .master-idioma-glifo {
+.master-idioma-clave.es-celestial .master-idioma-glifo,
+.master-nombre-glifos.es-celestial {
     font-family: "Richi noto-bamum", "Pangolin", sans-serif;
 }
 @font-face {
@@ -1454,7 +1484,8 @@
     font-display: swap;
 }
 .master-idioma-hoja.es-druidico,
-.master-idioma-clave.es-druidico .master-idioma-glifo {
+.master-idioma-clave.es-druidico .master-idioma-glifo,
+.master-nombre-glifos.es-druidico {
     font-family: "Richi noto-ogham", "Pangolin", sans-serif;
 }
 @font-face {
@@ -1463,7 +1494,8 @@
     font-display: swap;
 }
 .master-idioma-hoja.es-primordial,
-.master-idioma-clave.es-primordial .master-idioma-glifo {
+.master-idioma-clave.es-primordial .master-idioma-glifo,
+.master-nombre-glifos.es-primordial {
     font-family: "Richi noto-tifinagh", "Pangolin", sans-serif;
 }
 @font-face {
@@ -1472,7 +1504,8 @@
     font-display: swap;
 }
 .master-idioma-hoja.es-profundo,
-.master-idioma-clave.es-profundo .master-idioma-glifo {
+.master-idioma-clave.es-profundo .master-idioma-glifo,
+.master-nombre-glifos.es-profundo {
     font-family: "Richi noto-linear-a", "Pangolin", sans-serif;
 }
 @font-face {
@@ -1481,7 +1514,8 @@
     font-display: swap;
 }
 .master-idioma-hoja.es-jerga,
-.master-idioma-clave.es-jerga .master-idioma-glifo {
+.master-idioma-clave.es-jerga .master-idioma-glifo,
+.master-nombre-glifos.es-jerga {
     font-family: "Richi noto-phoenician", "Pangolin", sans-serif;
 }
 .master-dados {

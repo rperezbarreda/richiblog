@@ -1175,11 +1175,19 @@
             navigator.clipboard.writeText(texto).then(() => avisar(aviso || "Copiado.")).catch(() => avisar("No se ha podido copiar."));
         }
     }
+    function lugarEn(nombre, idioma) {
+        const sin = nombre.split(/\s+/).filter((p) => !/^(de|del|la|el|los|las|y|en)$/i.test(p)).join(" ");
+        const n = inventar(sin, idioma, 3).replace(/(^|\s)(\p{Ll})/gu, (x, a, b) => a + b.toUpperCase());
+        return { n, es: nombre, idioma: idioma.id };
+    }
     function montarNombres(dentro, m) {
         m.datos = m.datos || {};
         dentro.appendChild(crear("p", "oc-hoja-nota", "Cargando…"));
-        pedir(NOMBRES).then((datos) => {
+        Promise.all([pedir(NOMBRES), pedir(IDIOMAS)]).then(([datos, lenguas]) => {
             const d = m.datos;
+            const otras = lenguas.idiomas.filter((x) => x.id !== "comun");
+            const lenguaDe = (id) => otras.find((x) => x.id === id);
+            const nombreDe_ = (x) => (typeof x === "string" ? x : x.n);
             const tipos = [["personaje", "👤 personaje"]].concat(Object.keys(datos.lugares)
                 .map((k) => [k, ({ pueblo: "🏘️ ", taberna: "🍺 ", region: "🏔️ ", mazmorra: "🕳️ " }[k] || "") + datos.lugares[k].nombre]));
             const que = elegirDe("master-nombres-que-" + m.id, "qué", tipos, d.que || "personaje");
@@ -1190,6 +1198,8 @@
                 d.genero = v;
                 guardar();
             });
+            const lengua = elegirDe("master-nombres-lengua-" + m.id, "en qué idioma",
+                [["", "común (en español)"]].concat(otras.map((x) => [x.id, x.nombre])), d.lengua || "");
             const etAp = crear("label", "master-nombres-apellido");
             const ap = crear("input");
             ap.type = "checkbox";
@@ -1201,13 +1211,16 @@
             persona.append(especie, etAp, etGen, genero);
             const generar = botonDe("oc-vida-accion es-principal master-nombres-generar", "🎲 generar 8", () => {
                 Object.assign(d, { que: que.elegir.value, especie: especie.elegir.value, genero: genero.valor(),
-                    apellido: ap.checked });
-                const salen = new Set();
+                    apellido: ap.checked, lengua: lengua.elegir.value });
+                const salen = new Map();
+                const enOtra = d.que !== "personaje" && lenguaDe(d.lengua);
                 for (let i = 0; i < 40 && salen.size < 8; i++) {
-                    salen.add(d.que === "personaje" ? nombreDe(datos, d.especie, d.genero, d.apellido)
-                        : lugarDe(datos, d.que));
+                    const x = d.que === "personaje" ? nombreDe(datos, d.especie, d.genero, d.apellido)
+                        : lugarDe(datos, d.que);
+                    const sale = enOtra ? lugarEn(x, enOtra) : x;
+                    salen.set(nombreDe_(sale), sale);
                 }
-                d.salen = Array.from(salen);
+                d.salen = Array.from(salen.values());
                 guardar();
                 pintar();
                 avisar(d.salen.length + " nombres nuevos.");
@@ -1217,13 +1230,21 @@
             const guardadosT = crear("h3", "master-nombres-titulo", "⭐ guardados");
             const guardados = crear("ul", "master-nombres es-guardados");
             guardados.setAttribute("aria-label", "Nombres guardados");
-            const fila = (n, guardado) => {
+            const fila = (x, guardado) => {
+                const n = nombreDe_(x);
                 const li = crear("li", "master-nombre");
-                li.appendChild(crear("span", "master-nombre-texto", n));
+                const texto = crear("span", "master-nombre-texto", n);
+                const otra = typeof x === "string" ? null : lenguaDe(x.idioma);
+                if (otra) {
+                    const glifos = crear("span", "master-nombre-glifos es-" + otra.id, aSuAlfabeto(n, otra));
+                    glifos.setAttribute("aria-hidden", "true");
+                    texto.append(glifos, crear("span", "master-nombre-es", "«" + x.es + "» en " + otra.nombre.toLowerCase()));
+                }
+                li.appendChild(texto);
                 const marcar = botonDe("master-nombre-boton", guardado ? "✕" : "☆", () => {
-                    d.guardados = (d.guardados || []).filter((x) => x !== n);
+                    d.guardados = (d.guardados || []).filter((y) => nombreDe_(y) !== n);
                     if (!guardado) {
-                        d.guardados.push(n);
+                        d.guardados.push(x);
                     }
                     guardar();
                     pintar();
@@ -1236,8 +1257,8 @@
                 return li;
             };
             const pintar = () => {
-                const ya = new Set(d.guardados || []);
-                lista.replaceChildren(...(d.salen || []).filter((n) => !ya.has(n)).map((n) => fila(n, false)));
+                const ya = new Set((d.guardados || []).map(nombreDe_));
+                lista.replaceChildren(...(d.salen || []).filter((x) => !ya.has(nombreDe_(x))).map((x) => fila(x, false)));
                 if (!lista.children.length) {
                     lista.appendChild(crear("li", "oc-vacio", d.salen ? "Todos guardados. Genera más." : "Pulsa «generar»."));
                 }
@@ -1246,10 +1267,11 @@
             };
             const ajustar = () => {
                 persona.hidden = que.elegir.value !== "personaje";
+                lengua.hidden = !persona.hidden;
             };
             que.elegir.addEventListener("change", ajustar);
             const arriba = crear("div", "master-nombres-form");
-            arriba.append(que, persona, generar);
+            arriba.append(que, persona, lengua, generar);
             dentro.replaceChildren(arriba, lista, guardadosT, guardados);
             ajustar();
             pintar();
@@ -1285,17 +1307,23 @@
         }
         return h >>> 0;
     }
-    function inventar(texto, idioma) {
+    function inventar(texto, idioma, tope) {
         return texto.replace(/[\p{L}]+/gu, (palabra) => {
             let h = huella(idioma.id + ":" + palabra.toLowerCase());
             const siguiente = () => {
                 h = Math.imul(h ^ (h >>> 15), 2246822519) >>> 0;
                 return h;
             };
-            const n = Math.max(1, Math.round(palabra.length / 3));
+            const n = Math.min(tope || 99, Math.max(1, Math.round(palabra.length / 3)));
             let sale = "";
+            let antes = -1;
             for (let i = 0; i < n; i++) {
-                sale += idioma.silabas[siguiente() % idioma.silabas.length];
+                let j = siguiente() % idioma.silabas.length;
+                if (j === antes) {
+                    j = (j + 1) % idioma.silabas.length;
+                }
+                antes = j;
+                sale += idioma.silabas[j];
             }
             const mayus = palabra.charAt(0) !== palabra.charAt(0).toLowerCase();
             return mayus ? sale.charAt(0).toUpperCase() + sale.slice(1) : sale;
