@@ -4453,22 +4453,42 @@
     · 🎲 dados (d4–d100 y una fórmula), 🗒️ post-it (tipo «tarjeta») y 🔮
       tabla para tirar (una cosa por línea; «tirar» saca una al azar):
       tantas como se quiera.
-    · 🎨 dibujo (en «apuntes», tantos como se quiera): un lienzo de papel
-      para dibujar con el ratón, el dedo o un lápiz (pointer events,
-      touch-action: none). Como el Paint: las herramientas en una columna
-      a la izquierda (.master-dibujo-zona; cada grupo de la barra, en una
-      rejilla de dos en dos) y el lienzo al lado. Lápiz y goma, ocho colores, tres grosores,
-      ↶ deshacer y ↷ rehacer (15 pasos, solo mientras está abierto), 🖼️
-      poner una imagen, ⬇ descargarlo en PNG y 🗑️ borrarlo todo (dos
-      veces: la primera se pone ⚠️; se puede deshacer). Las imágenes también se pegan con Ctrl+V
-      (con el foco en la ventana del dibujo) o arrastrándolas encima, y se
-      encogen hasta el 80 % del lienzo. El lienzo mide siempre 1000 × 750
-      (DIBUJO_ANCHO/ALTO) y se estira a lo ancho de la ventana. Se guarda
-      como imagen WebP (PNG si el navegador no sabe) en m.datos.imagen,
-      dentro de «richi-master» (y va en exportar/importar); como
-      localStorage tiene un tope de unos 5 MB, si no cabe lo avisa.
-      guardar() devuelve si ha podido. «de qué es» es la descripción para
-      el lector de pantalla (el lienzo es role="img").
+    · 🎨 dibujo (en «apuntes», tantos como se quiera): un Paint con capas.
+      A la izquierda, las herramientas (con su letra, como el Photoshop,
+      con el foco en el lienzo): ✏️ lápiz (B), 🧽 goma (E, borra de
+      verdad: deja transparente), 🪣 bote (G: rellena la zona del mismo
+      color de la capa activa, con algo de margen; rellenar()), ⬚
+      seleccionar y mover (M: un rectángulo; se arrastra, o con las
+      flechas, Mayús ×10; Supr lo borra y Esc lo suelta), 💧 cuentagotas
+      (I: coge el color de lo que se ve), ╱ línea (L), ▭ rectángulo (U) y
+      ◯ elipse (O). Debajo, diez colores, «cualquier color» (el selector
+      del navegador), tres grosores, ↶/↷ (Ctrl+Z / Ctrl+Y; 20 pasos, por
+      capa, solo mientras está abierto), 🖼️ imagen, ⬇ descargar en PNG y
+      # rejilla. Las imágenes (🖼️, Ctrl+V o arrastrándolas) van a una
+      capa nueva, encogidas al 80 % como mucho, y quedan seleccionadas
+      para moverlas.
+      A la derecha, LAS CAPAS: ＋ capa y 📁 carpeta (se crean encima de la
+      activa), y cada una con 👁 para esconderla, ▸/▾ las carpetas y su
+      miniatura. Con la activa: ↑ ↓ (subirla o bajarla), ⇥ meterla en la
+      carpeta de encima, ⇤ sacarla, ✎ nombre, ⧉ duplicar, 🗑️ borrar (dos
+      veces; no se deshace; tiene que quedar una capa) y su opacidad. No
+      se pinta en una capa escondida (avisa). LA REJILLA DE ROL (plegada):
+      cuadrada o hexagonal, tamaño de casilla (sobre 1000 de ancho), color,
+      cuánto se ve y si sale al descargar; va encima de todo y no se
+      pinta en ninguna capa (pintarRejilla()).
+      Cómo va por dentro: cada capa es un canvas de 1000 × 750
+      transparente; «vista» pinta el papel y las capas visibles (de abajo
+      arriba, con la opacidad de la capa por la de su carpeta) y
+      «encima», otro canvas pegado sobre ella, pinta la rejilla, la
+      figura a medias y la selección, y es el que recibe el ratón o el
+      dedo (touch-action: none). En m.datos: «capas» (el árbol, la de
+      arriba primero: {id, tipo: capa|carpeta, nombre, visible, opacidad,
+      imagen (WebP con transparencia) | abierta, hijos}), «activa»,
+      «rejilla», «herramienta», «color», «grosor» y «desc». Lo de antes (una
+      sola «imagen») pasa solo a «capa 1». Se guarda dentro de
+      «richi-master» (y va en exportar/importar); localStorage tiene un
+      tope de unos 5 MB, y si no cabe lo avisa (guardar() devuelve si ha
+      podido). «de qué es» es la descripción para el lector de pantalla.
     · EL POST-IT es texto con formato, como un procesador de textos:
       «✏️ editar» lo abre con su barra (negrita, cursiva, subrayado,
       tachado, párrafo/título/subtítulo/cita, listas, alineación, color de

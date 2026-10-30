@@ -1999,115 +1999,556 @@
     const DIBUJO_ANCHO = 1000;
     const DIBUJO_ALTO = 750;
     const DIBUJO_PAPEL = "#fdfaf0";
-    const DIBUJO_COLORES = [["#1d1b26", "negro"], ["#c62828", "rojo"], ["#1565c0", "azul"], ["#2e7d32", "verde"],
-        ["#ef6c00", "naranja"], ["#6a1b9a", "morado"], ["#8d6e63", "marrón"], ["#fdd835", "amarillo"]];
+    const DIBUJO_COLORES = [["#1d1b26", "negro"], ["#ffffff", "blanco"], ["#c62828", "rojo"], ["#1565c0", "azul"],
+        ["#2e7d32", "verde"], ["#ef6c00", "naranja"], ["#6a1b9a", "morado"], ["#8d6e63", "marrón"], ["#fdd835", "amarillo"],
+        ["#9e9e9e", "gris"]];
     const DIBUJO_GROSORES = [["3", "fino"], ["8", "medio"], ["18", "gordo"]];
+    const DIBUJO_HERRAMIENTAS = [["lapiz", "✏️", "Lápiz", "b"], ["goma", "🧽", "Goma", "e"], ["bote", "🪣", "Bote de pintura", "g"],
+        ["seleccionar", "⬚", "Seleccionar y mover", "m"], ["cuentagotas", "💧", "Cuentagotas (coger un color)", "i"],
+        ["linea", "╱", "Línea recta", "l"], ["rectangulo", "▭", "Rectángulo", "u"], ["elipse", "◯", "Elipse", "o"]];
     function imagenSegura(url) {
         return /^data:image\/(png|jpeg|gif|webp|bmp|svg\+xml|avif);base64,[A-Za-z0-9+/=]+$/.test(String(url || "")) ? url : "";
+    }
+    function lienzoNuevo() {
+        const c = document.createElement("canvas");
+        c.width = DIBUJO_ANCHO;
+        c.height = DIBUJO_ALTO;
+        return c;
+    }
+    const rgbDe = (hex) => [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16));
+    function rellenar(datos, x, y, color) {
+        const w = datos.width;
+        const h = datos.height;
+        const px = datos.data;
+        const i0 = (y * w + x) * 4;
+        const base = [px[i0], px[i0 + 1], px[i0 + 2], px[i0 + 3]];
+        const [r, g, b] = rgbDe(color);
+        if (base[0] === r && base[1] === g && base[2] === b && base[3] === 255) {
+            return false;
+        }
+        const margen = 40;
+        const igual = (i) => Math.abs(px[i] - base[0]) <= margen && Math.abs(px[i + 1] - base[1]) <= margen &&
+            Math.abs(px[i + 2] - base[2]) <= margen && Math.abs(px[i + 3] - base[3]) <= margen;
+        const hecho = new Uint8Array(w * h);
+        const pila = [[x, y]];
+        while (pila.length) {
+            let [cx, cy] = pila.pop();
+            while (cx >= 0 && !hecho[cy * w + cx] && igual((cy * w + cx) * 4)) {
+                cx--;
+            }
+            cx++;
+            let arriba = false;
+            let abajo = false;
+            while (cx < w && !hecho[cy * w + cx] && igual((cy * w + cx) * 4)) {
+                const i = (cy * w + cx) * 4;
+                px[i] = r;
+                px[i + 1] = g;
+                px[i + 2] = b;
+                px[i + 3] = 255;
+                hecho[cy * w + cx] = 1;
+                if (cy > 0) {
+                    const sigue = !hecho[(cy - 1) * w + cx] && igual(((cy - 1) * w + cx) * 4);
+                    if (sigue && !arriba) {
+                        pila.push([cx, cy - 1]);
+                    }
+                    arriba = sigue;
+                }
+                if (cy < h - 1) {
+                    const sigue = !hecho[(cy + 1) * w + cx] && igual(((cy + 1) * w + cx) * 4);
+                    if (sigue && !abajo) {
+                        pila.push([cx, cy + 1]);
+                    }
+                    abajo = sigue;
+                }
+                cx++;
+            }
+        }
+        return true;
+    }
+    function pintarRejilla(ctx, r) {
+        const t = Math.max(10, parseInt(r.tam, 10) || 50);
+        ctx.save();
+        ctx.globalAlpha = Math.min(1, Math.max(0.05, (parseInt(r.opacidad, 10) || 40) / 100));
+        ctx.strokeStyle = /^#[0-9a-f]{6}$/i.test(r.color || "") ? r.color : "#000000";
+        ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        if (r.tipo === "hex") {
+            const radio = t / Math.sqrt(3);
+            const alto = radio * 1.5;
+            for (let fila = -1; fila * alto < DIBUJO_ALTO + alto; fila++) {
+                for (let col = -1; col * t < DIBUJO_ANCHO + t; col++) {
+                    const cx = col * t + (fila % 2 ? t / 2 : 0);
+                    const cy = fila * alto;
+                    for (let k = 0; k <= 6; k++) {
+                        const a = Math.PI / 180 * (60 * k - 90);
+                        const x = cx + radio * Math.cos(a);
+                        const y = cy + radio * Math.sin(a);
+                        if (k) {
+                            ctx.lineTo(x, y);
+                        } else {
+                            ctx.moveTo(x, y);
+                        }
+                    }
+                }
+            }
+        } else {
+            for (let x = 0; x <= DIBUJO_ANCHO; x += t) {
+                ctx.moveTo(x, 0);
+                ctx.lineTo(x, DIBUJO_ALTO);
+            }
+            for (let y = 0; y <= DIBUJO_ALTO; y += t) {
+                ctx.moveTo(0, y);
+                ctx.lineTo(DIBUJO_ANCHO, y);
+            }
+        }
+        ctx.stroke();
+        ctx.restore();
     }
     function montarDibujo(dentro, m) {
         m.datos = m.datos || {};
         const d = m.datos;
-        const lienzo = crear("canvas", "master-dibujo");
-        lienzo.width = DIBUJO_ANCHO;
-        lienzo.height = DIBUJO_ALTO;
-        lienzo.tabIndex = 0;
-        lienzo.setAttribute("role", "img");
-        const ctx = lienzo.getContext("2d");
-        const papel = () => {
-            ctx.fillStyle = DIBUJO_PAPEL;
-            ctx.fillRect(0, 0, DIBUJO_ANCHO, DIBUJO_ALTO);
+        let cuenta = 1;
+        const nuevoId = () => "c" + Date.now().toString(36) + (cuenta++);
+        if (!Array.isArray(d.capas)) {
+            d.capas = [{ id: nuevoId(), tipo: "capa", nombre: "capa 1", visible: true, opacidad: 100, imagen: d.imagen || "" }];
+            delete d.imagen;
+        }
+        d.rejilla = Object.assign({ ver: false, tipo: "cuadrada", tam: 50, color: "#000000", opacidad: 40, bajar: false },
+            d.rejilla || {});
+        const recorrer = (f, lista = d.capas, padre = null) => {
+            for (const n of lista) {
+                if (f(n, lista, padre) === false) {
+                    return false;
+                }
+                if (n.tipo === "carpeta" && recorrer(f, n.hijos, n) === false) {
+                    return false;
+                }
+            }
+            return true;
         };
-        papel();
-        let herramienta = d.herramienta || "lapiz";
-        let color = d.color || DIBUJO_COLORES[0][0];
-        let grosor = parseInt(d.grosor, 10) || 8;
-        const atras = [];
-        const adelante = [];
+        const buscar = (id) => {
+            let sale = null;
+            recorrer((n, lista, padre) => {
+                if (n.id === id) {
+                    sale = { n, lista, padre };
+                    return false;
+                }
+                return true;
+            });
+            return sale;
+        };
+        const lienzos = {};
+        recorrer((n) => {
+            if (n.tipo === "carpeta") {
+                n.hijos = n.hijos || [];
+            } else {
+                lienzos[n.id] = lienzoNuevo();
+            }
+        });
+        let activa = buscar(d.activa) ? d.activa : null;
+        if (!activa) {
+            recorrer((n) => {
+                if (n.tipo === "capa") {
+                    activa = n.id;
+                    return false;
+                }
+                return true;
+            });
+        }
+        const marco = crear("div", "master-dibujo-marco");
+        const vista = lienzoNuevo();
+        vista.className = "master-dibujo";
+        const encima = lienzoNuevo();
+        encima.className = "master-dibujo-encima";
+        encima.tabIndex = 0;
+        encima.setAttribute("role", "img");
+        marco.append(vista, encima);
+        const cv = vista.getContext("2d");
+        const ce = encima.getContext("2d");
         const etiqueta = () => {
-            lienzo.setAttribute("aria-label", "Dibujo" + (d.desc ? ": " + d.desc : " (sin descripción)") +
+            encima.setAttribute("aria-label", "Dibujo" + (d.desc ? ": " + d.desc : " (sin descripción)") +
                 ". Se dibuja con el ratón, el dedo o un lápiz; Ctrl+V pega una imagen.");
         };
         etiqueta();
-        const cargar = (src, alAcabar) => {
-            const img = new Image();
-            img.onload = () => {
-                papel();
-                ctx.drawImage(img, 0, 0, DIBUJO_ANCHO, DIBUJO_ALTO);
-                if (alAcabar) {
-                    alAcabar();
+        let herramienta = DIBUJO_HERRAMIENTAS.some((h) => h[0] === d.herramienta) ? d.herramienta : "lapiz";
+        let color = /^#[0-9a-f]{6}$/i.test(d.color || "") ? d.color : DIBUJO_COLORES[0][0];
+        let grosor = parseInt(d.grosor, 10) || 8;
+        let sel = null;
+        let flotante = null;
+        let figura = null;
+        const componer = (ctx, conFlotante) => {
+            ctx.globalAlpha = 1;
+            ctx.fillStyle = DIBUJO_PAPEL;
+            ctx.fillRect(0, 0, DIBUJO_ANCHO, DIBUJO_ALTO);
+            const pintar = (lista, alfa) => {
+                for (let i = lista.length - 1; i >= 0; i--) {
+                    const n = lista[i];
+                    if (!n.visible) {
+                        continue;
+                    }
+                    const a = alfa * (n.opacidad === undefined ? 1 : n.opacidad / 100);
+                    if (n.tipo === "carpeta") {
+                        pintar(n.hijos, a);
+                        continue;
+                    }
+                    ctx.globalAlpha = a;
+                    ctx.drawImage(lienzos[n.id], 0, 0);
+                    if (conFlotante && flotante && n.id === activa) {
+                        ctx.drawImage(flotante.lienzo, flotante.x, flotante.y);
+                    }
                 }
             };
-            img.src = imagenSegura(src);
+            pintar(d.capas, 1);
+            ctx.globalAlpha = 1;
         };
-        if (d.imagen) {
-            cargar(d.imagen);
-        }
-        const foto = () => {
-            const webp = lienzo.toDataURL("image/webp", 0.85);
-            return webp.indexOf("data:image/webp") === 0 ? webp : lienzo.toDataURL("image/png");
+        const pintarEncima = () => {
+            ce.clearRect(0, 0, DIBUJO_ANCHO, DIBUJO_ALTO);
+            if (d.rejilla.ver) {
+                pintarRejilla(ce, d.rejilla);
+            }
+            if (figura) {
+                trazarFigura(ce, figura);
+            }
+            if (sel) {
+                ce.save();
+                ce.lineWidth = 2;
+                ce.setLineDash([8, 6]);
+                ce.strokeStyle = "#000000";
+                ce.strokeRect(sel.x, sel.y, sel.w, sel.h);
+                ce.lineDashOffset = 7;
+                ce.strokeStyle = "#ffffff";
+                ce.strokeRect(sel.x, sel.y, sel.w, sel.h);
+                ce.restore();
+            }
         };
+        let pendiente = 0;
+        const repintar = () => {
+            if (pendiente) {
+                return;
+            }
+            pendiente = requestAnimationFrame(() => {
+                pendiente = 0;
+                componer(cv, true);
+                pintarEncima();
+            });
+        };
+        const tocadas = new Set();
         let espera = 0;
-        const guardarDibujo = () => {
+        const fotoDe = (c) => {
+            const webp = c.toDataURL("image/webp", 0.9);
+            return webp.indexOf("data:image/webp") === 0 ? webp : c.toDataURL("image/png");
+        };
+        const guardarDibujo = (id) => {
+            if (id) {
+                tocadas.add(id);
+            }
             clearTimeout(espera);
             espera = setTimeout(() => {
-                d.imagen = foto();
+                tocadas.forEach((x) => {
+                    const b = buscar(x);
+                    if (b && lienzos[x]) {
+                        b.n.imagen = fotoDe(lienzos[x]);
+                    }
+                });
+                tocadas.clear();
+                pintarMinis();
+                d.activa = activa;
                 if (!guardar()) {
-                    avisar("No se ha podido guardar el dibujo: no cabe. Borra alguna imagen o descárgalo.");
+                    avisar("No se ha podido guardar el dibujo: no cabe. Quita alguna imagen o capa, o descárgalo.");
                 }
-            }, 300);
+            }, 400);
         };
-        const recordar = () => {
-            atras.push(foto());
-            if (atras.length > 15) {
+        const atras = [];
+        const adelante = [];
+        const recordar = (id) => {
+            if (!lienzos[id]) {
+                return;
+            }
+            atras.push({ id, px: lienzos[id].getContext("2d").getImageData(0, 0, DIBUJO_ANCHO, DIBUJO_ALTO) });
+            if (atras.length > 20) {
                 atras.shift();
             }
             adelante.length = 0;
-            pintarBotones();
+            pintarMandos();
+        };
+        const volverA = (de, a) => {
+            soltarFlotante(false);
+            while (de.length) {
+                const x = de.pop();
+                if (!lienzos[x.id]) {
+                    continue;
+                }
+                const c = lienzos[x.id].getContext("2d");
+                a.push({ id: x.id, px: c.getImageData(0, 0, DIBUJO_ANCHO, DIBUJO_ALTO) });
+                c.putImageData(x.px, 0, 0);
+                guardarDibujo(x.id);
+                break;
+            }
+            sel = null;
+            repintar();
+            pintarMandos();
+        };
+        const capaActiva = () => {
+            const b = buscar(activa);
+            return b && b.n.tipo === "capa" ? b.n : null;
+        };
+        const sePuede = () => {
+            const c = capaActiva();
+            if (!c) {
+                avisar("Elige una capa (no una carpeta) para pintar.");
+                return null;
+            }
+            let ve = true;
+            let b = buscar(c.id);
+            while (b) {
+                ve = ve && b.n.visible;
+                b = b.padre ? buscar(b.padre.id) : null;
+            }
+            if (!ve) {
+                avisar("La capa «" + c.nombre + "» está escondida: enséñala para pintar en ella.");
+                return null;
+            }
+            return c;
         };
         const punto = (e) => {
-            const r = lienzo.getBoundingClientRect();
-            return [(e.clientX - r.left) * DIBUJO_ANCHO / r.width, (e.clientY - r.top) * DIBUJO_ALTO / r.height];
+            const r = encima.getBoundingClientRect();
+            return [Math.round((e.clientX - r.left) * DIBUJO_ANCHO / r.width), Math.round((e.clientY - r.top) * DIBUJO_ALTO / r.height)];
         };
-        let trazo = null;
-        lienzo.addEventListener("pointerdown", (e) => {
+        const dentroDe = (p, s) => s && p[0] >= s.x && p[0] <= s.x + s.w && p[1] >= s.y && p[1] <= s.y + s.h;
+        function trazarFigura(ctx, f) {
+            ctx.save();
+            ctx.strokeStyle = f.color;
+            ctx.lineWidth = f.grosor;
+            ctx.lineCap = "round";
+            ctx.lineJoin = "round";
+            ctx.beginPath();
+            const [x0, y0] = f.a;
+            const [x1, y1] = f.b;
+            if (f.que === "linea") {
+                ctx.moveTo(x0, y0);
+                ctx.lineTo(x1, y1);
+            } else if (f.que === "rectangulo") {
+                ctx.rect(Math.min(x0, x1), Math.min(y0, y1), Math.abs(x1 - x0), Math.abs(y1 - y0));
+            } else {
+                ctx.ellipse((x0 + x1) / 2, (y0 + y1) / 2, Math.abs(x1 - x0) / 2, Math.abs(y1 - y0) / 2, 0, 0, Math.PI * 2);
+            }
+            ctx.stroke();
+            ctx.restore();
+        }
+        const levantar = () => {
+            const c = sePuede();
+            if (!c || !sel || flotante) {
+                return !!flotante;
+            }
+            recordar(c.id);
+            const l = lienzoNuevo();
+            l.width = Math.max(1, sel.w);
+            l.height = Math.max(1, sel.h);
+            const capa = lienzos[c.id].getContext("2d");
+            l.getContext("2d").drawImage(lienzos[c.id], sel.x, sel.y, sel.w, sel.h, 0, 0, sel.w, sel.h);
+            capa.clearRect(sel.x, sel.y, sel.w, sel.h);
+            flotante = { lienzo: l, x: sel.x, y: sel.y, capa: c.id };
+            return true;
+        };
+        function soltarFlotante(dejar) {
+            if (!flotante) {
+                return;
+            }
+            if (dejar !== false && lienzos[flotante.capa]) {
+                lienzos[flotante.capa].getContext("2d").drawImage(flotante.lienzo, flotante.x, flotante.y);
+                guardarDibujo(flotante.capa);
+            }
+            flotante = null;
+        }
+        const quitarSeleccion = () => {
+            soltarFlotante();
+            sel = null;
+            repintar();
+        };
+        let gesto = null;
+        encima.addEventListener("pointerdown", (e) => {
             if (e.button !== 0 && e.pointerType === "mouse") {
                 return;
             }
             e.preventDefault();
-            lienzo.setPointerCapture(e.pointerId);
-            recordar();
-            trazo = punto(e);
-            ctx.lineCap = "round";
-            ctx.lineJoin = "round";
-            ctx.strokeStyle = herramienta === "goma" ? DIBUJO_PAPEL : color;
-            ctx.lineWidth = herramienta === "goma" ? grosor * 3 : grosor;
-            ctx.beginPath();
-            ctx.moveTo(trazo[0], trazo[1]);
-            ctx.lineTo(trazo[0] + 0.1, trazo[1] + 0.1);
-            ctx.stroke();
-        });
-        lienzo.addEventListener("pointermove", (e) => {
-            if (!trazo) {
+            encima.focus();
+            const p = punto(e);
+            if (herramienta === "cuentagotas") {
+                componer(cv, true);
+                const px = cv.getImageData(Math.min(DIBUJO_ANCHO - 1, Math.max(0, p[0])), Math.min(DIBUJO_ALTO - 1, Math.max(0, p[1])),
+                    1, 1).data;
+                ponerColor("#" + [px[0], px[1], px[2]].map((x) => x.toString(16).padStart(2, "0")).join(""));
+                avisar("Color cogido: " + color + ".");
+                elegirHerramienta("lapiz");
                 return;
             }
-            const eventos = e.getCoalescedEvents ? e.getCoalescedEvents() : [e];
-            ctx.beginPath();
-            ctx.moveTo(trazo[0], trazo[1]);
-            (eventos.length ? eventos : [e]).forEach((x) => {
-                trazo = punto(x);
-                ctx.lineTo(trazo[0], trazo[1]);
-            });
-            ctx.stroke();
-        });
-        const soltar = () => {
-            if (trazo) {
-                trazo = null;
-                guardarDibujo();
+            if (herramienta === "seleccionar") {
+                encima.setPointerCapture(e.pointerId);
+                if (dentroDe(p, sel) && levantar()) {
+                    gesto = { que: "mover", desde: p, x: flotante.x, y: flotante.y, sx: sel.x, sy: sel.y };
+                } else {
+                    soltarFlotante();
+                    sel = null;
+                    gesto = { que: "elegir", desde: p };
+                }
+                repintar();
+                return;
             }
+            soltarFlotante();
+            sel = null;
+            const c = sePuede();
+            if (!c) {
+                return;
+            }
+            if (herramienta === "bote") {
+                const x = Math.min(DIBUJO_ANCHO - 1, Math.max(0, p[0]));
+                const y = Math.min(DIBUJO_ALTO - 1, Math.max(0, p[1]));
+                const ctx = lienzos[c.id].getContext("2d");
+                const datos = ctx.getImageData(0, 0, DIBUJO_ANCHO, DIBUJO_ALTO);
+                const antes = ctx.getImageData(0, 0, DIBUJO_ANCHO, DIBUJO_ALTO);
+                if (rellenar(datos, x, y, color)) {
+                    atras.push({ id: c.id, px: antes });
+                    adelante.length = 0;
+                    ctx.putImageData(datos, 0, 0);
+                    guardarDibujo(c.id);
+                    pintarMandos();
+                    repintar();
+                }
+                return;
+            }
+            encima.setPointerCapture(e.pointerId);
+            recordar(c.id);
+            if (herramienta === "lapiz" || herramienta === "goma") {
+                const ctx = lienzos[c.id].getContext("2d");
+                ctx.globalCompositeOperation = herramienta === "goma" ? "destination-out" : "source-over";
+                ctx.strokeStyle = color;
+                ctx.lineWidth = herramienta === "goma" ? grosor * 3 : grosor;
+                ctx.lineCap = "round";
+                ctx.lineJoin = "round";
+                ctx.beginPath();
+                ctx.moveTo(p[0], p[1]);
+                ctx.lineTo(p[0] + 0.1, p[1] + 0.1);
+                ctx.stroke();
+                gesto = { que: "trazo", ultimo: p, ctx, capa: c.id };
+            } else {
+                figura = { que: herramienta, a: p, b: p, color, grosor };
+                gesto = { que: "figura", capa: c.id };
+            }
+            repintar();
+        });
+        encima.addEventListener("pointermove", (e) => {
+            if (!gesto) {
+                return;
+            }
+            const eventos = gesto.que === "trazo" && e.getCoalescedEvents ? e.getCoalescedEvents() : [];
+            const p = punto(e);
+            if (gesto.que === "trazo") {
+                const ctx = gesto.ctx;
+                ctx.beginPath();
+                ctx.moveTo(gesto.ultimo[0], gesto.ultimo[1]);
+                (eventos.length ? eventos : [e]).forEach((x) => {
+                    gesto.ultimo = punto(x);
+                    ctx.lineTo(gesto.ultimo[0], gesto.ultimo[1]);
+                });
+                ctx.stroke();
+            } else if (gesto.que === "figura") {
+                figura.b = p;
+            } else if (gesto.que === "elegir") {
+                const [x0, y0] = gesto.desde;
+                const x = Math.max(0, Math.min(x0, p[0]));
+                const y = Math.max(0, Math.min(y0, p[1]));
+                sel = { x, y, w: Math.min(DIBUJO_ANCHO, Math.max(x0, p[0])) - x, h: Math.min(DIBUJO_ALTO, Math.max(y0, p[1])) - y };
+            } else if (gesto.que === "mover") {
+                const dx = p[0] - gesto.desde[0];
+                const dy = p[1] - gesto.desde[1];
+                flotante.x = gesto.x + dx;
+                flotante.y = gesto.y + dy;
+                sel.x = gesto.sx + dx;
+                sel.y = gesto.sy + dy;
+            }
+            repintar();
+        });
+        const acabar = () => {
+            if (!gesto) {
+                return;
+            }
+            if (gesto.que === "trazo") {
+                gesto.ctx.globalCompositeOperation = "source-over";
+                guardarDibujo(gesto.capa);
+            } else if (gesto.que === "figura") {
+                trazarFigura(lienzos[gesto.capa].getContext("2d"), figura);
+                figura = null;
+                guardarDibujo(gesto.capa);
+            } else if (gesto.que === "elegir" && sel && (sel.w < 3 || sel.h < 3)) {
+                sel = null;
+            } else if (gesto.que === "elegir" && sel) {
+                avisar("Seleccionado. Arrástralo o muévelo con las flechas; Supr lo borra, Esc lo suelta.");
+            }
+            gesto = null;
+            repintar();
         };
-        lienzo.addEventListener("pointerup", soltar);
-        lienzo.addEventListener("pointercancel", soltar);
+        encima.addEventListener("pointerup", acabar);
+        encima.addEventListener("pointercancel", acabar);
+        encima.addEventListener("keydown", (e) => {
+            const k = e.key.toLowerCase();
+            if ((e.ctrlKey || e.metaKey) && (k === "z" || k === "y")) {
+                e.preventDefault();
+                if (k === "z" && !e.shiftKey) {
+                    volverA(atras, adelante);
+                } else {
+                    volverA(adelante, atras);
+                }
+                return;
+            }
+            if (e.ctrlKey || e.metaKey || e.altKey) {
+                return;
+            }
+            if (sel && /^Arrow/.test(e.key)) {
+                e.preventDefault();
+                if (!levantar()) {
+                    return;
+                }
+                const paso = e.shiftKey ? 10 : 1;
+                const dx = { ArrowLeft: -paso, ArrowRight: paso }[e.key] || 0;
+                const dy = { ArrowUp: -paso, ArrowDown: paso }[e.key] || 0;
+                flotante.x += dx;
+                flotante.y += dy;
+                sel.x += dx;
+                sel.y += dy;
+                repintar();
+                return;
+            }
+            if (sel && (e.key === "Delete" || e.key === "Backspace")) {
+                e.preventDefault();
+                if (flotante) {
+                    flotante = null;
+                } else {
+                    const c = sePuede();
+                    if (c) {
+                        recordar(c.id);
+                        lienzos[c.id].getContext("2d").clearRect(sel.x, sel.y, sel.w, sel.h);
+                        guardarDibujo(c.id);
+                    }
+                }
+                sel = null;
+                repintar();
+                avisar("Borrado lo seleccionado.");
+                return;
+            }
+            if (sel && e.key === "Escape") {
+                e.preventDefault();
+                e.stopPropagation();
+                quitarSeleccion();
+                avisar("Selección soltada.");
+                return;
+            }
+            const h = DIBUJO_HERRAMIENTAS.find((x) => x[3] === k);
+            if (h) {
+                e.preventDefault();
+                elegirHerramienta(h[0]);
+                avisar(h[2] + ".");
+            }
+        });
         const pegar = (archivo, x, y) => {
             if (!archivo || !/^image\//.test(archivo.type)) {
                 avisar("Eso no es una imagen.");
@@ -2118,15 +2559,20 @@
                 const img = new Image();
                 img.onload = () => {
                     const escala = Math.min(1, DIBUJO_ANCHO * 0.8 / img.width, DIBUJO_ALTO * 0.8 / img.height);
-                    const w = img.width * escala;
-                    const h = img.height * escala;
+                    const w = Math.round(img.width * escala);
+                    const h = Math.round(img.height * escala);
                     const cx = x === undefined ? DIBUJO_ANCHO / 2 : x;
                     const cy = y === undefined ? DIBUJO_ALTO / 2 : y;
-                    recordar();
-                    ctx.drawImage(img, Math.max(0, Math.min(DIBUJO_ANCHO - w, cx - w / 2)),
-                        Math.max(0, Math.min(DIBUJO_ALTO - h, cy - h / 2)), w, h);
-                    guardarDibujo();
-                    avisar("Imagen pegada en el dibujo.");
+                    const px = Math.round(Math.max(0, Math.min(DIBUJO_ANCHO - w, cx - w / 2)));
+                    const py = Math.round(Math.max(0, Math.min(DIBUJO_ALTO - h, cy - h / 2)));
+                    soltarFlotante();
+                    const c = nuevaCapa("imagen");
+                    lienzos[c.id].getContext("2d").drawImage(img, px, py, w, h);
+                    guardarDibujo(c.id);
+                    elegirHerramienta("seleccionar");
+                    sel = { x: px, y: py, w, h };
+                    repintar();
+                    avisar("Imagen pegada en una capa nueva, seleccionada para moverla.");
                 };
                 img.onerror = () => avisar("No he podido abrir esa imagen.");
                 img.src = imagenSegura(lector.result);
@@ -2148,17 +2594,16 @@
             }
         };
         document.addEventListener("paste", alPegar);
-        lienzo.addEventListener("dragover", (e) => {
+        encima.addEventListener("dragover", (e) => {
             e.preventDefault();
-            lienzo.classList.add("es-encima");
+            marco.classList.add("es-encima");
         });
-        lienzo.addEventListener("dragleave", () => lienzo.classList.remove("es-encima"));
-        lienzo.addEventListener("drop", (e) => {
+        encima.addEventListener("dragleave", () => marco.classList.remove("es-encima"));
+        encima.addEventListener("drop", (e) => {
             e.preventDefault();
-            lienzo.classList.remove("es-encima");
-            const archivo = Array.from(e.dataTransfer.files || [])[0];
+            marco.classList.remove("es-encima");
             const [x, y] = punto(e);
-            pegar(archivo, x, y);
+            pegar(Array.from(e.dataTransfer.files || [])[0], x, y);
         });
         const barra = crear("div", "master-postit-barra es-dibujo");
         barra.setAttribute("role", "toolbar");
@@ -2169,31 +2614,51 @@
             barra.appendChild(g);
             return g;
         };
-        const lapiz = botonDe("master-postit-boton", "✏️", () => elegirHerramienta("lapiz"), "Lápiz");
-        const goma = botonDe("master-postit-boton", "🧽", () => elegirHerramienta("goma"), "Goma");
-        lapiz.title = "Lápiz";
-        goma.title = "Goma";
-        const elegirHerramienta = (h) => {
-            herramienta = h;
-            d.herramienta = h;
-            lapiz.setAttribute("aria-pressed", String(h === "lapiz"));
-            goma.setAttribute("aria-pressed", String(h === "goma"));
-            guardar();
-        };
-        grupo(lapiz, goma);
-        const colores = DIBUJO_COLORES.map(([hex, nombre]) => {
-            const b = botonDe("master-postit-boton master-dibujo-color", "", () => {
-                color = hex;
-                d.color = hex;
-                colores.forEach((x) => x.setAttribute("aria-pressed", String(x === b)));
-                elegirHerramienta("lapiz");
-            }, "Color " + nombre);
-            b.title = nombre;
-            b.style.setProperty("--muestra", hex);
-            b.setAttribute("aria-pressed", String(hex === color));
+        const botonesH = DIBUJO_HERRAMIENTAS.map(([id, emoji, nombre, tecla]) => {
+            const b = botonDe("master-postit-boton", emoji, () => elegirHerramienta(id), nombre);
+            b.title = nombre + " (" + tecla.toUpperCase() + ")";
+            b.setAttribute("aria-keyshortcuts", tecla.toUpperCase());
+            b.dataset.herramienta = id;
             return b;
         });
-        grupo(...colores);
+        function elegirHerramienta(h) {
+            if (h !== "seleccionar") {
+                quitarSeleccion();
+            }
+            herramienta = h;
+            d.herramienta = h;
+            botonesH.forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.herramienta === h)));
+            encima.dataset.herramienta = h;
+            guardar();
+        }
+        grupo(...botonesH);
+        const muestras = DIBUJO_COLORES.map(([hex, nombre]) => {
+            const b = botonDe("master-postit-boton master-dibujo-color", "", () => {
+                ponerColor(hex);
+                if (herramienta === "goma" || herramienta === "seleccionar" || herramienta === "cuentagotas") {
+                    elegirHerramienta("lapiz");
+                }
+            }, "Color " + nombre);
+            b.title = nombre;
+            b.dataset.hex = hex;
+            b.style.setProperty("--muestra", hex);
+            return b;
+        });
+        const elegirColor = crear("input", "master-dibujo-selector");
+        elegirColor.type = "color";
+        elegirColor.title = "Cualquier color";
+        elegirColor.setAttribute("aria-label", "Elegir cualquier color");
+        elegirColor.addEventListener("input", () => ponerColor(elegirColor.value));
+        function ponerColor(hex) {
+            color = hex.toLowerCase();
+            d.color = color;
+            elegirColor.value = color;
+            muestras.forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.hex === color)));
+            guardar();
+        }
+        grupo(...muestras);
+        const conSelector = grupo(elegirColor);
+        conSelector.classList.add("es-selector");
         const grosores = DIBUJO_GROSORES.map(([g, nombre]) => {
             const b = botonDe("master-postit-boton master-dibujo-grosor es-" + nombre, "", () => {
                 grosor = parseInt(g, 10);
@@ -2206,28 +2671,10 @@
             return b;
         });
         grupo(...grosores);
-        const deshacer = botonDe("master-postit-boton", "↶", () => {
-            if (!atras.length) {
-                return;
-            }
-            adelante.push(foto());
-            cargar(atras.pop(), guardarDibujo);
-            pintarBotones();
-        }, "Deshacer");
-        const rehacer = botonDe("master-postit-boton", "↷", () => {
-            if (!adelante.length) {
-                return;
-            }
-            atras.push(foto());
-            cargar(adelante.pop(), guardarDibujo);
-            pintarBotones();
-        }, "Rehacer");
-        deshacer.title = "Deshacer";
-        rehacer.title = "Rehacer";
-        const pintarBotones = () => {
-            deshacer.disabled = !atras.length;
-            rehacer.disabled = !adelante.length;
-        };
+        const deshacer = botonDe("master-postit-boton", "↶", () => volverA(atras, adelante), "Deshacer");
+        const rehacer = botonDe("master-postit-boton", "↷", () => volverA(adelante, atras), "Rehacer");
+        deshacer.title = "Deshacer (Ctrl+Z)";
+        rehacer.title = "Rehacer (Ctrl+Y)";
         grupo(deshacer, rehacer);
         const archivo = crear("input");
         archivo.type = "file";
@@ -2238,40 +2685,417 @@
             archivo.value = "";
         });
         const imagen = botonDe("master-postit-boton", "🖼️", () => archivo.click(), "Poner una imagen");
-        imagen.title = "Poner una imagen (o pégala con Ctrl+V)";
+        imagen.title = "Poner una imagen en una capa nueva (o pégala con Ctrl+V)";
         const bajar = botonDe("master-postit-boton", "⬇", () => {
+            soltarFlotante();
+            const l = lienzoNuevo();
+            const c = l.getContext("2d");
+            componer(c, false);
+            if (d.rejilla.ver && d.rejilla.bajar) {
+                pintarRejilla(c, d.rejilla);
+            }
             const a = crear("a");
-            a.href = lienzo.toDataURL("image/png");
+            a.href = l.toDataURL("image/png");
             a.download = (m.titulo || "dibujo").replace(/[^\p{L}\p{N}]+/gu, "-") + ".png";
             document.body.appendChild(a);
             a.click();
             a.remove();
             avisar("Descargado: " + a.download + ".");
         }, "Descargar el dibujo");
-        bajar.title = "Descargar como PNG";
-        let seguro = false;
-        const borrar = botonDe("master-postit-boton", "🗑️", () => {
-            const volver = () => {
-                seguro = false;
-                borrar.textContent = "🗑️";
-                borrar.setAttribute("aria-label", "Borrarlo todo");
-            };
-            if (!seguro) {
-                seguro = true;
-                borrar.textContent = "⚠️";
-                borrar.setAttribute("aria-label", "¿Seguro? Pulsa otra vez para borrarlo todo");
-                avisar("Pulsa otra vez para borrarlo todo.");
-                setTimeout(volver, 4000);
+        bajar.title = "Descargar como PNG (todas las capas que se ven)";
+        const botonRejilla = crear("button", "master-postit-boton", "#");
+        botonRejilla.type = "button";
+        botonRejilla.setAttribute("aria-label", "Rejilla de rol");
+        botonRejilla.title = "Enseñar o esconder la rejilla";
+        grupo(imagen, bajar, botonRejilla);
+        const panel = crear("div", "master-dibujo-panel");
+        const tituloCapas = crear("h3", "master-dibujo-titulo", "capas");
+        const listaCapas = crear("ul", "master-dibujo-capas");
+        let minis = {};
+        function pintarMinis() {
+            Object.keys(minis).forEach((id) => {
+                if (!lienzos[id]) {
+                    return;
+                }
+                const mc = minis[id].getContext("2d");
+                mc.fillStyle = DIBUJO_PAPEL;
+                mc.fillRect(0, 0, 40, 30);
+                mc.drawImage(lienzos[id], 0, 0, 40, 30);
+            });
+        }
+        listaCapas.setAttribute("aria-label", "Capas y carpetas (la de arriba se ve encima)");
+        function nuevaCapa(nombre) {
+            const c = { id: nuevoId(), tipo: "capa", nombre: nombre || "capa " + (Object.keys(lienzos).length + 1), visible: true,
+                opacidad: 100, imagen: "" };
+            lienzos[c.id] = lienzoNuevo();
+            const b = buscar(activa);
+            const lista = b ? b.lista : d.capas;
+            lista.splice(b ? lista.indexOf(b.n) : 0, 0, c);
+            activa = c.id;
+            d.activa = activa;
+            pintarCapas();
+            guardar();
+            return c;
+        }
+        const masCapa = botonDe("oc-vida-accion", "＋ capa", () => {
+            const c = nuevaCapa();
+            avisar("Capa nueva: " + c.nombre + ".");
+        }, "Capa nueva");
+        const masCarpeta = botonDe("oc-vida-accion", "📁 carpeta", () => {
+            const n = { id: nuevoId(), tipo: "carpeta", nombre: "carpeta", visible: true, opacidad: 100, abierta: true, hijos: [] };
+            const b = buscar(activa);
+            const lista = b ? b.lista : d.capas;
+            lista.splice(b ? lista.indexOf(b.n) : 0, 0, n);
+            activa = n.id;
+            pintarCapas();
+            guardar();
+            avisar("Carpeta nueva. Mete capas en ella con «⇥ a la carpeta».");
+        }, "Carpeta nueva");
+        const nuevas = crear("div", "master-dibujo-nuevas");
+        nuevas.append(masCapa, masCarpeta);
+        const fila = (n, nivel) => {
+            const li = crear("li", "master-dibujo-capa" + (n.id === activa ? " es-activa" : "") + (n.tipo === "carpeta" ? " es-carpeta" : ""));
+            li.style.setProperty("--nivel", nivel);
+            const ojo = botonDe("master-nombre-boton", n.visible ? "👁" : "—", () => {
+                n.visible = !n.visible;
+                pintarCapas();
+                repintar();
+                guardar();
+                avisar((n.visible ? "Se ve: " : "Escondida: ") + n.nombre + ".");
+            }, (n.visible ? "Esconder " : "Enseñar ") + n.nombre);
+            ojo.setAttribute("aria-pressed", String(!!n.visible));
+            ojo.title = n.visible ? "Esconder" : "Enseñar";
+            li.appendChild(ojo);
+            if (n.tipo === "carpeta") {
+                const plegar = botonDe("master-nombre-boton", n.abierta ? "▾" : "▸", () => {
+                    n.abierta = !n.abierta;
+                    pintarCapas();
+                    guardar();
+                }, (n.abierta ? "Cerrar " : "Abrir ") + "la carpeta " + n.nombre);
+                plegar.setAttribute("aria-expanded", String(!!n.abierta));
+                li.appendChild(plegar);
+            }
+            const nombre = botonDe("master-dibujo-capa-nombre", (n.tipo === "carpeta" ? "📁 " : "") + n.nombre, () => {
+                soltarFlotante();
+                sel = null;
+                activa = n.id;
+                d.activa = activa;
+                pintarCapas();
+                repintar();
+                guardar();
+            }, (n.tipo === "carpeta" ? "Carpeta " : "Capa ") + n.nombre + (n.visible ? "" : " (escondida)"));
+            if (n.id === activa) {
+                nombre.setAttribute("aria-current", "true");
+            }
+            if (n.tipo === "capa" && lienzos[n.id]) {
+                const mini = lienzoNuevo();
+                mini.width = 40;
+                mini.height = 30;
+                mini.className = "master-dibujo-mini";
+                mini.setAttribute("aria-hidden", "true");
+                minis[n.id] = mini;
+                nombre.prepend(mini);
+            }
+            li.appendChild(nombre);
+            return li;
+        };
+        const mandos = crear("div", "master-dibujo-mandos");
+        const mando = (texto, nombre, f) => {
+            const b = botonDe("master-postit-boton", texto, f, nombre);
+            b.title = nombre;
+            mandos.appendChild(b);
+            return b;
+        };
+        const mover = (paso) => {
+            const b = buscar(activa);
+            if (!b) {
                 return;
             }
-            volver();
-            recordar();
-            papel();
-            guardarDibujo();
-            avisar("Dibujo borrado (se puede deshacer).");
-        }, "Borrarlo todo");
-        borrar.title = "Borrarlo todo";
-        grupo(imagen, bajar, borrar);
+            const i = b.lista.indexOf(b.n);
+            const j = i + paso;
+            if (j < 0 || j >= b.lista.length) {
+                return;
+            }
+            b.lista.splice(i, 1);
+            b.lista.splice(j, 0, b.n);
+            pintarCapas();
+            repintar();
+            guardar();
+            avisar((paso < 0 ? "Subida: " : "Bajada: ") + b.n.nombre + ".");
+        };
+        const subir = mando("↑", "Subir (que se vea más encima)", () => mover(-1));
+        const bajarCapa = mando("↓", "Bajar (que se vea más debajo)", () => mover(1));
+        const aCarpeta = mando("⇥", "Meterla en la carpeta de encima", () => {
+            const b = buscar(activa);
+            if (!b) {
+                return;
+            }
+            const i = b.lista.indexOf(b.n);
+            const carpeta = b.lista.slice(0, i).reverse().find((x) => x.tipo === "carpeta" && x !== b.n);
+            if (!carpeta) {
+                avisar("No hay ninguna carpeta encima de esta, al mismo nivel.");
+                return;
+            }
+            b.lista.splice(i, 1);
+            carpeta.hijos.push(b.n);
+            carpeta.abierta = true;
+            pintarCapas();
+            repintar();
+            guardar();
+            avisar(b.n.nombre + " va ahora en la carpeta " + carpeta.nombre + ".");
+        });
+        const fuera = mando("⇤", "Sacarla de su carpeta", () => {
+            const b = buscar(activa);
+            if (!b || !b.padre) {
+                return;
+            }
+            const arriba = buscar(b.padre.id);
+            b.lista.splice(b.lista.indexOf(b.n), 1);
+            arriba.lista.splice(arriba.lista.indexOf(b.padre), 0, b.n);
+            pintarCapas();
+            repintar();
+            guardar();
+            avisar(b.n.nombre + " ya no va en " + b.padre.nombre + ".");
+        });
+        const renombrar = mando("✎", "Cambiarle el nombre", () => {
+            const b = buscar(activa);
+            if (!b) {
+                return;
+            }
+            const campo = crear("input", "master-elegir master-dibujo-renombrar");
+            campo.value = b.n.nombre;
+            campo.setAttribute("aria-label", "Nombre de " + b.n.nombre);
+            const actual = listaCapas.querySelector(".es-activa .master-dibujo-capa-nombre");
+            if (!actual) {
+                return;
+            }
+            actual.replaceWith(campo);
+            campo.focus();
+            campo.select();
+            let hecho = false;
+            const acabarNombre = (vale) => {
+                if (hecho) {
+                    return;
+                }
+                hecho = true;
+                if (vale && campo.value.trim()) {
+                    b.n.nombre = campo.value.trim().slice(0, 40);
+                    guardar();
+                }
+                pintarCapas();
+                renombrar.focus();
+            };
+            campo.addEventListener("keydown", (e) => {
+                if (e.key === "Enter") {
+                    e.preventDefault();
+                    acabarNombre(true);
+                } else if (e.key === "Escape") {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    acabarNombre(false);
+                }
+            });
+            campo.addEventListener("blur", () => acabarNombre(true));
+        });
+        const duplicar = mando("⧉", "Duplicar la capa", () => {
+            const c = capaActiva();
+            if (!c) {
+                avisar("Solo se pueden duplicar capas.");
+                return;
+            }
+            soltarFlotante();
+            const original = lienzos[c.id];
+            const copia = nuevaCapa(c.nombre + " (copia)");
+            lienzos[copia.id].getContext("2d").drawImage(original, 0, 0);
+            copia.opacidad = c.opacidad;
+            guardarDibujo(copia.id);
+            pintarCapas();
+            repintar();
+        });
+        let seguro = false;
+        const borrarCapa = mando("🗑️", "Borrar la capa o carpeta", () => {
+            const b = buscar(activa);
+            if (!b) {
+                return;
+            }
+            let capas = 0;
+            recorrer((n) => {
+                capas += n.tipo === "capa" ? 1 : 0;
+            });
+            const dentroHay = [];
+            recorrer((n) => {
+                if (n.tipo === "capa") {
+                    dentroHay.push(n.id);
+                }
+            }, b.n.tipo === "carpeta" ? b.n.hijos : [b.n]);
+            if (capas - dentroHay.length < 1) {
+                avisar("Tiene que quedar al menos una capa.");
+                return;
+            }
+            if (!seguro) {
+                seguro = true;
+                borrarCapa.textContent = "⚠️";
+                borrarCapa.setAttribute("aria-label", "¿Seguro? Pulsa otra vez para borrar " + b.n.nombre);
+                avisar("Pulsa otra vez para borrar " + b.n.nombre + (b.n.tipo === "carpeta" ? " y todo lo que tiene" : "") +
+                    ". No se puede deshacer.");
+                setTimeout(() => {
+                    seguro = false;
+                    borrarCapa.textContent = "🗑️";
+                    borrarCapa.setAttribute("aria-label", "Borrar la capa o carpeta");
+                }, 4000);
+                return;
+            }
+            seguro = false;
+            borrarCapa.textContent = "🗑️";
+            borrarCapa.setAttribute("aria-label", "Borrar la capa o carpeta");
+            soltarFlotante(false);
+            sel = null;
+            const i = b.lista.indexOf(b.n);
+            b.lista.splice(i, 1);
+            dentroHay.forEach((id) => {
+                delete lienzos[id];
+            });
+            const siguiente = b.lista[Math.min(i, b.lista.length - 1)] || b.padre;
+            activa = siguiente ? siguiente.id : null;
+            if (!activa) {
+                recorrer((n) => {
+                    if (n.tipo === "capa") {
+                        activa = n.id;
+                        return false;
+                    }
+                    return true;
+                });
+            }
+            d.activa = activa;
+            pintarCapas();
+            repintar();
+            guardar();
+            avisar("Borrada: " + b.n.nombre + ".");
+        });
+        const etOpa = crear("label", "oc-dados-etiqueta master-dibujo-opacidad");
+        const opacidad = crear("input");
+        opacidad.type = "range";
+        opacidad.min = 0;
+        opacidad.max = 100;
+        opacidad.step = 5;
+        const valorOpa = crear("span", "", "");
+        etOpa.append(document.createTextNode("opacidad "), valorOpa, opacidad);
+        opacidad.addEventListener("input", () => {
+            const b = buscar(activa);
+            if (!b) {
+                return;
+            }
+            b.n.opacidad = parseInt(opacidad.value, 10);
+            valorOpa.textContent = b.n.opacidad + " %";
+            repintar();
+            guardar();
+        });
+        function pintarMandos() {
+            deshacer.disabled = !atras.length;
+            rehacer.disabled = !adelante.length;
+            const b = buscar(activa);
+            const i = b ? b.lista.indexOf(b.n) : -1;
+            subir.disabled = !b || i <= 0;
+            bajarCapa.disabled = !b || i >= b.lista.length - 1;
+            aCarpeta.disabled = !b || !b.lista.slice(0, i).some((x) => x.tipo === "carpeta");
+            fuera.disabled = !b || !b.padre;
+            renombrar.disabled = !b;
+            duplicar.disabled = !b || b.n.tipo !== "capa";
+            borrarCapa.disabled = !b;
+            opacidad.disabled = !b;
+            opacidad.value = b ? (b.n.opacidad === undefined ? 100 : b.n.opacidad) : 100;
+            valorOpa.textContent = opacidad.value + " %";
+            opacidad.setAttribute("aria-valuetext", opacidad.value + " %");
+        }
+        function pintarCapas() {
+            const filas = [];
+            const pasar = (lista, nivel) => lista.forEach((n) => {
+                filas.push(fila(n, nivel));
+                if (n.tipo === "carpeta" && n.abierta) {
+                    pasar(n.hijos, nivel + 1);
+                    if (!n.hijos.length) {
+                        const vacia = crear("li", "master-dibujo-capa es-vacia", "(vacía)");
+                        vacia.style.setProperty("--nivel", nivel + 1);
+                        filas.push(vacia);
+                    }
+                }
+            });
+            minis = {};
+            pasar(d.capas, 0);
+            listaCapas.replaceChildren(...filas);
+            pintarMinis();
+            pintarMandos();
+        }
+        const rejilla = crear("div", "master-dibujo-rejilla");
+        const tituloR = crear("h3", "master-dibujo-titulo");
+        const plegarR = botonDe("master-dibujo-plegar", (d.rejilla.abierta ? "▾" : "▸") + " rejilla de rol", () => {
+            d.rejilla.abierta = !d.rejilla.abierta;
+            plegarR.textContent = (d.rejilla.abierta ? "▾" : "▸") + " rejilla de rol";
+            plegarR.setAttribute("aria-expanded", String(!!d.rejilla.abierta));
+            ajustesR.hidden = !d.rejilla.abierta;
+            guardar();
+        });
+        plegarR.setAttribute("aria-expanded", String(!!d.rejilla.abierta));
+        tituloR.appendChild(plegarR);
+        const ajustesR = crear("div", "master-dibujo-ajustes");
+        ajustesR.hidden = !d.rejilla.abierta;
+        const caja = (texto, control) => {
+            const et = crear("label", "master-dibujo-campo");
+            et.append(crear("span", "oc-dados-etiqueta", texto), control);
+            return et;
+        };
+        const ver = crear("input");
+        ver.type = "checkbox";
+        ver.checked = !!d.rejilla.ver;
+        const etVer = crear("label", "master-nombres-apellido");
+        etVer.append(ver, document.createTextNode(" enseñar la rejilla"));
+        const tipo = crear("select", "master-elegir");
+        [["cuadrada", "cuadrada"], ["hex", "hexagonal"]].forEach(([v, n]) => {
+            const o = crear("option", "", n);
+            o.value = v;
+            tipo.appendChild(o);
+        });
+        tipo.value = d.rejilla.tipo;
+        const tam = crear("input", "master-elegir");
+        tam.type = "number";
+        tam.min = 10;
+        tam.max = 250;
+        tam.step = 5;
+        tam.value = d.rejilla.tam;
+        const colorR = crear("input", "master-dibujo-selector");
+        colorR.type = "color";
+        colorR.value = d.rejilla.color;
+        const opaR = crear("input");
+        opaR.type = "range";
+        opaR.min = 10;
+        opaR.max = 100;
+        opaR.step = 5;
+        opaR.value = d.rejilla.opacidad;
+        const bajarR = crear("input");
+        bajarR.type = "checkbox";
+        bajarR.checked = !!d.rejilla.bajar;
+        const etBajar = crear("label", "master-nombres-apellido");
+        etBajar.append(bajarR, document.createTextNode(" en la imagen al descargar"));
+        const cambiarRejilla = () => {
+            Object.assign(d.rejilla, { ver: ver.checked, tipo: tipo.value, tam: Math.min(250, Math.max(10, parseInt(tam.value, 10) || 50)),
+                color: colorR.value, opacidad: parseInt(opaR.value, 10), bajar: bajarR.checked });
+            opaR.setAttribute("aria-valuetext", opaR.value + " %");
+            botonRejilla.setAttribute("aria-pressed", String(ver.checked));
+            repintar();
+            guardar();
+        };
+        [ver, tipo, tam, colorR, opaR, bajarR].forEach((x) => x.addEventListener(x.type === "range" || x.type === "color" ? "input" : "change",
+            cambiarRejilla));
+        ajustesR.append(etVer, caja("forma", tipo), caja("casilla (de 1000 de ancho)", tam), caja("color", colorR),
+            caja("cuánto se ve", opaR), etBajar);
+        rejilla.append(tituloR, ajustesR);
+        botonRejilla.addEventListener("click", () => {
+            ver.checked = !ver.checked;
+            cambiarRejilla();
+            avisar(ver.checked ? "Rejilla a la vista." : "Rejilla escondida.");
+        });
+        botonRejilla.setAttribute("aria-pressed", String(!!d.rejilla.ver));
+        panel.append(tituloCapas, nuevas, listaCapas, mandos, etOpa, rejilla);
         const etD = crear("label", "oc-dados-etiqueta", "de qué es (para el lector de pantalla)");
         const desc = crear("input", "master-elegir");
         desc.id = "master-dibujo-desc-" + m.id;
@@ -2282,11 +3106,31 @@
             etiqueta();
             guardar();
         });
-        elegirHerramienta(herramienta);
-        pintarBotones();
         const zona = crear("div", "master-dibujo-zona");
-        zona.append(barra, lienzo);
+        zona.append(barra, marco, panel);
         dentro.append(zona, archivo, etD, desc);
+        const cargas = [];
+        recorrer((n) => {
+            if (n.tipo === "capa" && n.imagen) {
+                cargas.push(new Promise((hecho) => {
+                    const img = new Image();
+                    img.onload = () => {
+                        lienzos[n.id].getContext("2d").drawImage(img, 0, 0, DIBUJO_ANCHO, DIBUJO_ALTO);
+                        hecho();
+                    };
+                    img.onerror = hecho;
+                    img.src = imagenSegura(n.imagen);
+                }));
+            }
+        });
+        Promise.all(cargas).then(() => {
+            pintarCapas();
+            repintar();
+        });
+        elegirHerramienta(herramienta);
+        ponerColor(color);
+        pintarCapas();
+        repintar();
     }
     function montarTabla(dentro, m) {
         m.datos = m.datos || {};
@@ -3221,8 +4065,8 @@
             desc: "Escribe una nota y mírala en élfico, enano, infernal…", montar: montarIdiomas },
         tarjeta: { nombre: "post-it", emoji: "🗒️", grupo: "apuntes", w: 420, h: 340,
             desc: "Un texto con formato: negrita, listas, colores…", montar: montarTarjeta },
-        dibujo: { nombre: "dibujo", emoji: "🎨", grupo: "apuntes", w: 520, h: 520,
-            desc: "Dibuja a mano o pega imágenes (Ctrl+V).", montar: montarDibujo },
+        dibujo: { nombre: "dibujo", emoji: "🎨", grupo: "apuntes", w: 900, h: 660,
+            desc: "Un Paint con capas, bote, selección y rejilla de rol.", montar: montarDibujo },
         notas: { nombre: "notas", emoji: "📝", grupo: "apuntes", unico: true, w: 420, h: 420,
             desc: "Las notas de la sesión.", montar: (d) => window.ocMontar.notas(d, { soloNotas: true }) },
         tabla: { nombre: "tabla para tirar", emoji: "🔮", grupo: "apuntes", w: 360, h: 380,
