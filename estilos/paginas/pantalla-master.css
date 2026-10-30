@@ -31,6 +31,80 @@
     height: 48px;
 }
 
+/* LAS PESTAÑAS (los perfiles), como las de un navegador: pegadas al
+   lienzo por abajo; la de ahora, del color del lienzo. */
+.master-pestanas {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 6px;
+    margin-bottom: -16px;
+    border-bottom: 2px solid var(--yellow);
+}
+
+.master-pestanas-lista {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    min-width: 0;
+}
+
+.master-pestana {
+    min-height: 40px;
+    max-width: 14rem;
+    padding: 6px 14px;
+    overflow: hidden;
+    border: 2px solid var(--border);
+    border-bottom: 0;
+    background: var(--purple);
+    color: var(--muted);
+    font-family: var(--fuente-mono);
+    font-size: 0.875rem;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    cursor: pointer;
+}
+
+.master-pestana[aria-selected="true"] {
+    border-color: var(--yellow);
+    background: var(--yellow);
+    color: var(--yellow-contrast);
+    font-weight: 700;
+}
+
+.master-pestana:focus-visible,
+.master-pestana-mando:focus-visible {
+    outline: 3px solid var(--yellow);
+    outline-offset: 2px;
+}
+
+.master-pestanas-mandos {
+    display: flex;
+    gap: 4px;
+    padding-bottom: 4px;
+}
+
+.master-pestana-mando {
+    width: 36px;
+    height: 36px;
+    padding: 0;
+    border: 2px solid var(--yellow);
+    background: transparent;
+    color: var(--yellow);
+    cursor: pointer;
+}
+
+.master-pestana-mando:hover:not(:disabled) {
+    background: var(--yellow);
+    color: var(--yellow-contrast);
+}
+
+.master-pestana-mando:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
 /* EL LIENZO: las ventanas van donde se las deja (left y top, que pone el
    JavaScript). Una cuadrícula de fondo, como una mesa con su tapete. */
 .master-lienzo {
@@ -136,33 +210,30 @@
 }
 
 /* EL COLOR DE UNA VENTANA (✎), como un post-it: la barra del color
-   elegido (.oc-color-* de personajes.css) y el fondo, un poco teñido. Los
-   colores son claros en los temas oscuros y oscuros en los claros, así que
-   la letra de la barra va al revés; en los puros y los de terminal todos
-   son el amarillo del tema. */
+   elegido (--postit, que pone el JavaScript: colores fijos, iguales en
+   todos los temas) con la letra oscura, el borde y la sombra de ese color
+   y el fondo un poco teñido. */
 .master-ventana.con-color {
-    --master-tinta: #14101a;
-    border-color: var(--oc-color);
-    box-shadow: 6px 6px 0 var(--oc-color);
+    border-color: var(--postit);
+    box-shadow: 6px 6px 0 var(--postit);
     background: var(--purple-lighter);
-    background: color-mix(in srgb, var(--oc-color) 14%, var(--purple-lighter));
-}
-
-:root[data-theme="light"] .master-ventana.con-color,
-:root[data-theme="tranquilo"] .master-ventana.con-color {
-    --master-tinta: #ffffff;
-}
-
-:root[data-theme="puro-claro"] .master-ventana.con-color,
-:root[data-theme="puro-oscuro"] .master-ventana.con-color,
-:root[data-theme^="terminal"] .master-ventana.con-color {
-    --master-tinta: var(--yellow-contrast);
+    background: color-mix(in srgb, var(--postit) 14%, var(--purple-lighter));
 }
 
 .master-ventana.con-color .master-ventana-barra {
-    border-bottom-color: var(--oc-color);
-    background: var(--oc-color);
-    color: var(--master-tinta);
+    border-bottom-color: var(--postit);
+    background: var(--postit);
+    color: #14101a;
+}
+
+.master-ventana.con-color .master-ventana-mando:hover,
+.master-ventana.con-color .master-ventana-mando:focus-visible {
+    background: #14101a;
+    color: var(--postit);
+}
+
+.master-ventana.con-color .master-ventana-mando:focus-visible {
+    outline-color: #14101a;
 }
 
 /* La ventanita de ✎: el título y las muestras de color. */
@@ -198,7 +269,6 @@
     height: 36px;
     padding: 0;
     border: 2px solid var(--yellow);
-    background: var(--oc-color);
     cursor: pointer;
 }
 
@@ -386,6 +456,93 @@
 .master-tienda-datos {
     display: block;
     font-size: 0.8125rem;
+}
+
+/* En la tabla de características, el bono va sin el dado delante (cabe
+   en su casilla). */
+.master-bicho-car .oc-dado-texto::before {
+    content: none;
+}
+
+/* El perfil de un monstruo: sus botones (a la iniciativa, al tablero). */
+.master-bicho-botones {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+/* La tienda: el nombre de cada objeto es un botón que abre su ventana. */
+.master-tienda-tabla .master-tienda-nombre {
+    padding: 0;
+    border: 0;
+    border-bottom: 2px dotted currentColor;
+    background: transparent;
+    color: var(--white);
+    font: inherit;
+    font-weight: 700;
+    text-align: left;
+    cursor: pointer;
+}
+
+.master-tienda-tabla .master-tienda-nombre:hover,
+.master-tienda-tabla .master-tienda-nombre:focus-visible {
+    color: var(--yellow);
+}
+
+.master-tienda-tabla .master-tienda-nombre:focus-visible {
+    outline: 2px solid var(--yellow);
+    outline-offset: 2px;
+}
+
+.master-tienda-ayuda {
+    margin: 0;
+    font-size: 0.75rem;
+}
+
+.master-objeto,
+.master-regateo {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.master-objeto-precios {
+    margin-top: 6px;
+}
+
+.master-regateo .oc-dados-texto {
+    width: 8rem;
+    min-height: 40px;
+}
+
+.master-regateo-rapidos {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.master-regateo-queda {
+    margin: 0;
+    color: var(--yellow);
+    font-size: 1.125rem;
+    font-weight: 700;
+}
+
+/* El conversor de monedas: una casilla por moneda y lo que sale. */
+.master-monedas {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(7.5rem, 1fr));
+    gap: 8px;
+    margin-bottom: 12px;
+}
+
+.master-monedas .oc-dados-texto {
+    width: 100%;
+    min-height: 40px;
+}
+
+.master-monedas-salida {
+    margin-bottom: 12px;
 }
 
 /* EL BUSCADOR DE CONJUROS. */

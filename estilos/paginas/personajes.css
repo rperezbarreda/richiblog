@@ -4360,6 +4360,199 @@ button.oc-casilla[data-estado="libre"]:hover {
     outline-offset: 2px;
 }
 
+/* Las dos pestañas de la iniciativa: preparar y combate. */
+.oc-ini-modos {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 12px;
+}
+
+.oc-ini-modo {
+    min-height: 40px;
+    padding: 6px 14px;
+    border: 2px solid var(--yellow);
+    background: transparent;
+    color: var(--yellow);
+    font-family: var(--fuente-mono);
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.oc-ini-modo[aria-selected="true"] {
+    background: var(--yellow);
+    color: var(--yellow-contrast);
+}
+
+.oc-ini-modo:focus-visible {
+    outline: 3px solid var(--yellow);
+    outline-offset: 3px;
+}
+
+.oc-ini-panel {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.oc-ini-panel[hidden] {
+    display: none;
+}
+
+/* El combate: la ronda, a quién le toca en grande (con la raya de su
+   color) y, en las filas, la iniciativa y la CA fijas y los PG con − y +. */
+.oc-ini-combate-ronda {
+    margin: 0;
+    color: var(--yellow);
+    font-family: var(--fuente-mono);
+    font-weight: 700;
+    text-transform: uppercase;
+}
+
+.oc-ini-combate-toca {
+    margin: 6px 0 12px;
+    padding: 6px 12px;
+    border-left: 10px solid var(--yellow);
+    color: var(--white);
+    font-size: 1.5rem;
+}
+
+.oc-ini-combate-le {
+    display: block;
+    color: var(--muted);
+    font-family: var(--fuente-mono);
+    font-size: 0.75rem;
+    text-transform: uppercase;
+}
+
+.oc-ini-fila.es-combate {
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-areas: "quien mandos" "datos datos";
+    padding-left: 10px;
+}
+
+.oc-ini-datos.es-combate {
+    align-items: center;
+    gap: 6px;
+}
+
+.oc-ini-fijo {
+    margin-right: 8px;
+    color: var(--muted);
+    font-family: var(--fuente-mono);
+    font-size: 0.75rem;
+}
+
+/* Las marcas: chapitas debajo del nombre; en su ventana, las de un toque
+   (pulsadas, marcadas) y una a mano con sus rondas. */
+.oc-ini-marcas,
+.oc-ini-marcas-actuales {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    width: 100%;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.oc-ini-marcas[hidden] {
+    display: none;
+}
+
+.oc-ini-marca {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 1px 6px;
+    border: 1px solid var(--yellow);
+    color: var(--yellow);
+    font-family: var(--fuente-mono);
+    font-size: 0.75rem;
+}
+
+.oc-ini-marca-quitar {
+    min-width: 28px;
+    min-height: 28px;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: inherit;
+    cursor: pointer;
+}
+
+.oc-ini-marca-quitar:focus-visible,
+.oc-ini-marca-rapida:focus-visible {
+    outline: 2px solid var(--yellow);
+    outline-offset: 2px;
+}
+
+.oc-ini-marcas-rapidas {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 12px;
+}
+
+.oc-ini-marca-rapida {
+    min-height: 36px;
+    padding: 4px 10px;
+    border: 2px solid var(--yellow);
+    background: transparent;
+    color: var(--yellow);
+    font-size: 0.875rem;
+    cursor: pointer;
+}
+
+.oc-ini-marca-rapida[aria-pressed="true"] {
+    background: var(--yellow);
+    color: var(--yellow-contrast);
+}
+
+.oc-ini-marca-nueva {
+    display: grid;
+    grid-template-columns: minmax(0, 2fr) minmax(5rem, 1fr) auto;
+    grid-template-rows: auto auto;
+    align-items: end;
+    gap: 4px 8px;
+}
+
+.oc-ini-marca-nueva .oc-dados-etiqueta {
+    grid-row: 1;
+}
+
+.oc-ini-marca-nueva .oc-dados-texto,
+.oc-ini-marca-nueva button {
+    grid-row: 2;
+    min-height: 40px;
+}
+
+.oc-ini-marca-nueva button {
+    grid-column: 3;
+}
+
+.oc-ini-marcas-titulo {
+    margin: 16px 0 6px;
+    font-size: 1rem;
+}
+
+@media (max-width: 520px) {
+    .oc-ini-marca-nueva {
+        grid-template-columns: minmax(0, 1fr) 6rem;
+        grid-template-rows: none;
+    }
+
+    .oc-ini-marca-nueva .oc-dados-etiqueta,
+    .oc-ini-marca-nueva .oc-dados-texto,
+    .oc-ini-marca-nueva button {
+        grid-row: auto;
+    }
+
+    .oc-ini-marca-nueva button {
+        grid-column: 1 / -1;
+    }
+}
+
 /* Añadir: el nombre, y la iniciativa, la CA y los PG estrechos, en una
    línea; debajo, los colores y «añadir». */
 .oc-ini-nuevo {
@@ -4718,3 +4911,36 @@ button.oc-casilla[data-estado="libre"]:hover {
         max-width: 8cm;
     }
 }
+
+/* LOS DADOS DE LOS TEXTOS (personajes.js: ocDadosEnTexto): cada «2d6 + 3»
+   de un texto es un botón que lo tira; se ve como el texto, con un
+   subrayado de puntos y un dado delante, y se rellena al pasar. */
+.oc-dado-texto {
+    display: inline;
+    padding: 0 2px;
+    border: 0;
+    border-bottom: 2px dotted currentColor;
+    background: transparent;
+    color: var(--yellow);
+    font: inherit;
+    font-weight: 700;
+    line-height: inherit;
+    cursor: pointer;
+}
+
+.oc-dado-texto::before {
+    content: "🎲";
+    margin-right: 2px;
+    font-size: 0.8em;
+}
+
+.oc-dado-texto:hover {
+    background: var(--yellow);
+    color: var(--yellow-contrast);
+}
+
+.oc-dado-texto:focus-visible {
+    outline: 2px solid var(--yellow);
+    outline-offset: 2px;
+}
+

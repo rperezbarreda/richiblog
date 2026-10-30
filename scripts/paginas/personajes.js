@@ -3561,26 +3561,174 @@ window.ocMontar.iniciativa = function (sitio, opciones) {
         avisar("Añadido: " + c.nombre + (c.ini !== "" ? ", iniciativa " + c.ini : "") + ".");
     }
 
+    // ---- LAS MARCAS: lo que lleva encima cada uno (un estado, la
+    // concentración, un conjuro, un efecto…), con rondas si se quiere: al
+    // empezar cada ronda se les quita una y, al llegar a 0, se acaban. ----
+    const MARCAS = ["concentración", "bendecido", "maldito", "ventaja", "desventaja", "escondido", "agarrado", "apresado",
+        "asustado", "aturdido", "cegado", "derribado", "ensordecido", "envenenado", "hechizado", "incapacitado",
+        "inconsciente", "invisible", "paralizado", "petrificado", "agotamiento"];
+    const marcasDe = (c) => (Array.isArray(c.marcas) ? c.marcas : (c.marcas = []));
+    const textoMarca = (mk) => mk.t + (mk.r ? " (" + mk.r + (mk.r === 1 ? " ronda" : " rondas") + ")" : "");
+
+    function chapasDe(c) {
+        const ul = crear("ul", "oc-ini-marcas");
+        ul.setAttribute("aria-label", "Marcas de " + c.nombre);
+        marcasDe(c).forEach((mk) => ul.appendChild(crear("li", "oc-ini-marca", textoMarca(mk))));
+        ul.hidden = !marcasDe(c).length;
+        return ul;
+    }
+
+    function editarMarcas(c, vuelta) {
+        const cuerpo = crear("div", "oc-ini-marcas-ventana");
+        const actuales = crear("ul", "oc-ini-marcas-actuales");
+        const rehacer = () => {
+            actuales.replaceChildren(...marcasDe(c).map((mk, i) => {
+                const li = crear("li", "oc-ini-marca");
+                li.append(document.createTextNode(textoMarca(mk) + " "),
+                    botonDe("oc-ini-marca-quitar", "✕", () => {
+                        marcasDe(c).splice(i, 1);
+                        guardar();
+                        rehacer();
+                        pintar();
+                        avisar("Quitada: " + mk.t + ".");
+                    }, "Quitar la marca " + mk.t));
+                return li;
+            }));
+            if (!marcasDe(c).length) {
+                actuales.appendChild(crear("li", "oc-vacio", "Sin marcas."));
+            }
+            rapidas.forEach((b) => b.setAttribute("aria-pressed", marcasDe(c).some((mk) => mk.t === b.dataset.marca) ? "true" : "false"));
+        };
+        // Las de siempre, a un toque (vuelven a quitarse con otro).
+        const rapidas = MARCAS.map((t) => {
+            const b = botonDe("oc-ini-marca-rapida", t, () => {
+                const i = marcasDe(c).findIndex((mk) => mk.t === t);
+                if (i >= 0) {
+                    marcasDe(c).splice(i, 1);
+                } else {
+                    marcasDe(c).push({ t, r: numeroDe(rondas.value) || null });
+                }
+                guardar();
+                rehacer();
+                pintar();
+            });
+            b.dataset.marca = t;
+            return b;
+        });
+        const rapidasCaja = crear("div", "oc-ini-marcas-rapidas");
+        rapidasCaja.append(...rapidas);
+        // Una a mano: «Bendición», «Escudo de fe», «-2 CA»…
+        const form = crear("form", "oc-ini-marca-nueva");
+        const etT = crear("label", "oc-dados-etiqueta", "otra marca");
+        const texto = crear("input", "oc-dados-texto");
+        texto.id = "oc-ini-marca-texto";
+        texto.placeholder = "Escudo de fe, +2 CA, quemándose…";
+        texto.autocomplete = "off";
+        etT.htmlFor = texto.id;
+        const etR = crear("label", "oc-dados-etiqueta", "rondas");
+        const rondas = crear("input", "oc-dados-texto");
+        rondas.id = "oc-ini-marca-rondas";
+        rondas.type = "number";
+        rondas.min = "1";
+        rondas.inputMode = "numeric";
+        etR.htmlFor = rondas.id;
+        const poner = crear("button", "oc-vida-accion es-principal", "＋ poner");
+        poner.type = "submit";
+        form.append(etT, texto, etR, rondas, poner);
+        form.addEventListener("submit", (e) => {
+            e.preventDefault();
+            const t = texto.value.trim();
+            if (!t) {
+                texto.focus();
+                return;
+            }
+            marcasDe(c).push({ t, r: numeroDe(rondas.value) || null });
+            texto.value = "";
+            guardar();
+            rehacer();
+            pintar();
+            avisar("Puesta: " + t + ".");
+            texto.focus();
+        });
+        cuerpo.append(crear("p", "oc-hoja-nota", "Las rondas son opcionales y valen también para las de un toque."),
+            rapidasCaja, form, crear("h3", "oc-ini-marcas-titulo", "Lleva ahora"), actuales);
+        rehacer();
+        window.ocVentana.abrir({ titulo: "marcas de " + c.nombre, cuerpo, vuelta, foco: rapidas[0] });
+    }
+
+    // Al empezar una ronda, a cada marca con rondas se le quita una.
+    function gastarRonda() {
+        const acabadas = [];
+        datos.lista.forEach((c) => {
+            c.marcas = marcasDe(c).filter((mk) => {
+                if (!mk.r) {
+                    return true;
+                }
+                mk.r -= 1;
+                if (mk.r <= 0) {
+                    acabadas.push(mk.t + " en " + c.nombre);
+                    return false;
+                }
+                return true;
+            });
+        });
+        return acabadas;
+    }
+
     // ---- LA LISTA ----
     const ronda = crear("p", "oc-ini-ronda");
     const lista = crear("ol", "oc-ini-lista");
     lista.setAttribute("aria-label", "Orden de los turnos");
-    const siguiente = botonDe("oc-vida-accion es-principal", "▶ siguiente turno", () => {
+    const pasar = (paso) => {
         if (!datos.lista.length) {
             return;
         }
-        datos.turno += 1;
+        let acabadas = [];
+        datos.turno += paso;
         if (datos.turno >= datos.lista.length) {
             datos.turno = 0;
             datos.ronda += 1;
+            acabadas = gastarRonda();
         }
         if (datos.turno < 0) {
-            datos.turno = 0;
+            if (datos.ronda > 1) {
+                datos.turno = datos.lista.length - 1;
+                datos.ronda -= 1;
+            } else {
+                datos.turno = 0;
+            }
         }
         guardar();
         pintar();
         const c = datos.lista[datos.turno];
-        avisar("Ronda " + datos.ronda + ": le toca a " + c.nombre + ".");
+        avisar("Ronda " + datos.ronda + ": le toca a " + c.nombre + "."
+            + (acabadas.length ? " Se acaba: " + acabadas.join(", ") + "." : ""));
+    };
+    const siguiente = botonDe("oc-vida-accion es-principal", "siguiente ▶", () => pasar(1));
+    const anterior = botonDe("oc-vida-accion", "◀ anterior", () => pasar(-1));
+    // Las dos pantallas: preparar (añadir, ordenar, quitar) y combate
+    // (quién va, avanzar y retroceder, los PG y las marcas).
+    const empezar = botonDe("oc-vida-accion es-principal", "⚔️ empezar el combate", () => {
+        if (!datos.lista.length) {
+            avisar("Primero añade a alguien.");
+            return;
+        }
+        datos.modo = "combate";
+        datos.turno = 0;
+        datos.ronda = 1;
+        guardar();
+        pintar();
+        avisar("¡Combate! Ronda 1: le toca a " + datos.lista[0].nombre + ".");
+        pestanas[1].focus();
+    });
+    const terminar = botonDe("oc-vida-accion", "🏁 terminar el combate", () => {
+        datos.modo = "preparar";
+        datos.turno = -1;
+        datos.ronda = 1;
+        guardar();
+        pintar();
+        avisar("Combate terminado.");
+        pestanas[0].focus();
     });
     const ordenar = botonDe("oc-vida-accion", "⇅ por iniciativa", () => {
         const deAhora = datos.lista[datos.turno];
@@ -3645,7 +3793,18 @@ window.ocMontar.iniciativa = function (sitio, opciones) {
     }
 
     function pintar() {
-        ronda.textContent = datos.lista.length ? "ronda " + datos.ronda : "";
+        const enCombate = datos.modo === "combate" && datos.lista.length > 0;
+        pestanas.forEach((b, i) => {
+            const activa = (i === 1) === enCombate;
+            b.setAttribute("aria-selected", activa ? "true" : "false");
+            b.tabIndex = activa ? 0 : -1;
+        });
+        panelPreparar.hidden = enCombate;
+        panelCombate.hidden = !enCombate;
+        if (enCombate) {
+            pintarCombate();
+        }
+        ronda.textContent = "";
         lista.replaceChildren(...datos.lista.map((c, i) => {
             const li = crear("li", "oc-ini-fila" + (i === datos.turno ? " es-su-turno" : ""));
             li.dataset.id = c.id;
@@ -3661,14 +3820,16 @@ window.ocMontar.iniciativa = function (sitio, opciones) {
             const n = crear("span", "oc-ini-nombre", c.nombre);
             // El color, dicho para el lector.
             n.appendChild(crear("span", "visually-hidden", " (" + nombreDeColor(colorDe(c)) + ")"));
-            quien.append(n);
+            quien.append(n, chapasDe(c));
             if (i === datos.turno) {
                 quien.prepend(crear("span", "oc-ini-le-toca", "▶ le toca"));
             }
             const datosC = crear("div", "oc-ini-datos");
             datosC.append(numeroEn(c, "ini", "ini", i), numeroEn(c, "ca", "CA", i), numeroEn(c, "pg", "PG", i));
             const mandos = crear("div", "oc-ini-mandos");
-            mandos.append(
+            const bMarcas = botonDe("oc-ini-mando es-marcas", "🏷", () => editarMarcas(c, bMarcas), "Marcas de " + c.nombre);
+            bMarcas.setAttribute("aria-haspopup", "dialog");
+            mandos.append(bMarcas,
                 botonDe("oc-ini-mando es-subir", "↑", () => mover(i, i - 1, ".es-subir"), "Subir a " + c.nombre),
                 botonDe("oc-ini-mando es-bajar", "↓", () => mover(i, i + 1, ".es-bajar"), "Bajar a " + c.nombre),
                 botonDe("oc-ini-mando", "✕", () => {
@@ -3678,13 +3839,65 @@ window.ocMontar.iniciativa = function (sitio, opciones) {
                     guardar();
                     pintar();
                     avisar("Quitado: " + c.nombre + ".");
-                    (lista.querySelectorAll(".oc-ini-mando")[Math.min(i, datos.lista.length - 1) * 3 + 2] || nombre).focus();
+                    (lista.querySelectorAll(".oc-ini-mando")[Math.min(i, datos.lista.length - 1) * 4 + 3] || nombre).focus();
                 }, "Quitar a " + c.nombre));
             li.append(asa, quien, datosC, mandos);
             return li;
         }));
         lista.hidden = !datos.lista.length;
         vacio.hidden = !!datos.lista.length;
+        empezar.hidden = !datos.lista.length;
+    }
+
+    // ---- EL COMBATE: la ronda, a quién le toca (en grande), avanzar y
+    // retroceder, y la lista con sus PG (a mano o con − y +) y sus marcas. ----
+    const rondaC = crear("p", "oc-ini-combate-ronda");
+    const toca = crear("p", "oc-ini-combate-toca");
+    toca.setAttribute("aria-live", "polite");
+    const listaC = crear("ol", "oc-ini-lista es-combate");
+    listaC.setAttribute("aria-label", "Orden de los turnos");
+
+    function pintarCombate() {
+        if (datos.turno < 0 || datos.turno >= datos.lista.length) {
+            datos.turno = 0;
+        }
+        const ahora = datos.lista[datos.turno];
+        rondaC.textContent = "Ronda " + datos.ronda;
+        toca.replaceChildren(crear("span", "oc-ini-combate-le", "le toca a "), crear("strong", "", ahora.nombre));
+        toca.style.borderLeftColor = colorDe(ahora);
+        listaC.replaceChildren(...datos.lista.map((c, i) => {
+            const li = crear("li", "oc-ini-fila es-combate" + (i === datos.turno ? " es-su-turno" : ""));
+            li.style.borderLeftColor = colorDe(c);
+            if (i === datos.turno) {
+                li.setAttribute("aria-current", "true");
+            }
+            const quien = crear("div", "oc-ini-quien");
+            const n = crear("span", "oc-ini-nombre", c.nombre);
+            n.appendChild(crear("span", "visually-hidden", " (" + nombreDeColor(colorDe(c)) + ")"));
+            quien.append(n, chapasDe(c));
+            if (i === datos.turno) {
+                quien.prepend(crear("span", "oc-ini-le-toca", "▶ le toca"));
+            }
+            const datosC = crear("div", "oc-ini-datos es-combate");
+            datosC.appendChild(crear("span", "oc-ini-fijo", "ini " + (c.ini === "" || c.ini === undefined ? "—" : c.ini)
+                + " · CA " + (c.ca === "" || c.ca === undefined ? "—" : c.ca)));
+            const pgCaja = numeroEn(c, "pg", "PG", i);
+            const pgIn = pgCaja.querySelector("input");
+            const sumar = (d) => {
+                c.pg = (numeroDe(c.pg) || 0) + d;
+                pgIn.value = String(c.pg);
+                guardar();
+                avisar(c.nombre + ": " + c.pg + " PG.");
+            };
+            datosC.append(botonDe("oc-ini-mando", "−", () => sumar(-1), "Quitar 1 PG a " + c.nombre), pgCaja,
+                botonDe("oc-ini-mando", "+", () => sumar(1), "Sumar 1 PG a " + c.nombre));
+            const bMarcas = botonDe("oc-ini-mando es-marcas", "🏷", () => editarMarcas(c, bMarcas), "Marcas de " + c.nombre);
+            bMarcas.setAttribute("aria-haspopup", "dialog");
+            const mandos = crear("div", "oc-ini-mandos");
+            mandos.appendChild(bMarcas);
+            li.append(quien, datosC, mandos);
+            return li;
+        }));
     }
 
     // ARRASTRAR: por el ⠿, con el ratón o el dedo; al soltar, se queda
@@ -3748,12 +3961,51 @@ window.ocMontar.iniciativa = function (sitio, opciones) {
         return v;
     };
     const mandos = crear("div", "oc-vida-descansos");
-    mandos.append(siguiente, ordenar, vaciar);
+    mandos.append(empezar, ordenar, vaciar);
     const leyenda = crear("p", "oc-hoja-nota", "Arrastra por el ⠿ (o usa ↑ y ↓) para cambiar el orden. Iniciativa, CA y"
-        + " PG son opcionales.");
-    caja.append(
+        + " PG son opcionales; 🏷 pone marcas (estados, concentración, conjuros…).");
+    // Las dos pestañas: preparar y combate.
+    const barraModos = crear("div", "oc-ini-modos");
+    barraModos.setAttribute("role", "tablist");
+    barraModos.setAttribute("aria-label", "Iniciativa");
+    const pestanas = [["preparar", "🛠️ preparar"], ["combate", "⚔️ combate"]].map(([modo, texto], i) => {
+        const b = botonDe("oc-ini-modo", texto, () => {
+            if (modo === "combate" && datos.modo !== "combate") {
+                empezar.click();
+                return;
+            }
+            if (modo === "preparar") {
+                datos.modo = "preparar";
+                guardar();
+                pintar();
+            }
+        });
+        b.setAttribute("role", "tab");
+        b.id = "oc-ini-pestana-" + modo + (suelta ? "-suelta" : "");
+        b.addEventListener("keydown", (e) => {
+            if (e.key === "ArrowRight" || e.key === "ArrowLeft") {
+                e.preventDefault();
+                pestanas[1 - i].focus();
+            }
+        });
+        barraModos.appendChild(b);
+        return b;
+    });
+    const panelPreparar = crear("div", "oc-ini-panel");
+    const panelCombate = crear("div", "oc-ini-panel es-combate");
+    [[panelPreparar, pestanas[0]], [panelCombate, pestanas[1]]].forEach(([p, b]) => {
+        p.setAttribute("role", "tabpanel");
+        p.id = b.id + "-panel";
+        p.setAttribute("aria-labelledby", b.id);
+        b.setAttribute("aria-controls", p.id);
+    });
+    const mandosC = crear("div", "oc-vida-descansos oc-ini-combate-mandos");
+    mandosC.append(anterior, siguiente, terminar);
+    panelPreparar.append(
         ventanita("combate.ini", "⏱️", [ronda, mandos, vacio, lista, leyenda]),
         ventanita("añadir.txt", "＋", anadirme ? [form, anadirme] : [form]));
+    panelCombate.append(ventanita("¡combate!", "⚔️", [rondaC, toca, mandosC, listaC]));
+    caja.append(barraModos, panelPreparar, panelCombate);
     sitio.replaceChildren(caja, aviso);
     pintar();
     // Si otro (el bestiario de la pantalla de máster) mete a alguien en
@@ -3866,4 +4118,107 @@ window.ocMontar.reglas = function (sitio, idBuscar) {
     if (sitio) {
         window.ocMontar.reglas(sitio);
     }
+})();
+
+// =========================================
+// LOS DADOS DE LOS TEXTOS: en cualquier texto de una ficha o de la
+// pantalla de máster (rasgos, conjuros, reglas, monstruos…), cada «2d6 + 3»
+// se vuelve un botón que lo tira, y en los ataques de los monstruos el
+// «+9» de detrás de «Ataque cuerpo a cuerpo:» tira 1d20+9. La tirada va
+// a la bandeja de dados de siempre (window.ocDados), con el nombre de lo
+// que se tira (lo que haya en negrita delante, o el título del
+// desplegable). Un solo «click» en el documento para todos: así también
+// valen en las copias de las ventanas (las de las reglas se clonan).
+// =========================================
+(function () {
+    const DADOS = /\b(\d+d\d+(?:\s*[+−-]\s*\d+)?)\b/g;
+    const ATAQUE = /^(\s*)([+−-]\d+)\b/;
+
+    function boton(texto, formula, que) {
+        const b = document.createElement("button");
+        b.type = "button";
+        b.className = "oc-dado-texto";
+        b.textContent = texto;
+        b.dataset.formula = formula;
+        if (que) {
+            b.dataset.que = que;
+        }
+        b.setAttribute("aria-label", "Tirar " + texto + (que ? " (" + que + ")" : ""));
+        return b;
+    }
+    const limpia = (f) => f.replace(/\s+/g, "").replace(/−/g, "-");
+
+    function trocear(nodo) {
+        const t = nodo.nodeValue;
+        DADOS.lastIndex = 0;
+        if (!DADOS.test(t)) {
+            return;
+        }
+        DADOS.lastIndex = 0;
+        const trozo = document.createDocumentFragment();
+        let fin = 0;
+        let m;
+        while ((m = DADOS.exec(t))) {
+            trozo.appendChild(document.createTextNode(t.slice(fin, m.index)));
+            trozo.appendChild(boton(m[1], limpia(m[1])));
+            fin = DADOS.lastIndex;
+        }
+        trozo.appendChild(document.createTextNode(t.slice(fin)));
+        nodo.replaceWith(trozo);
+    }
+
+    window.ocDadosEnTexto = function (raiz) {
+        if (!raiz) {
+            return;
+        }
+        const nodos = [];
+        const andar = document.createTreeWalker(raiz, NodeFilter.SHOW_TEXT, {
+            acceptNode(n) {
+                return n.parentElement && n.parentElement.closest("button, a, input, textarea, select, script, style, summary")
+                    ? NodeFilter.FILTER_REJECT : NodeFilter.FILTER_ACCEPT;
+            },
+        });
+        while (andar.nextNode()) {
+            nodos.push(andar.currentNode);
+        }
+        nodos.forEach((n) => {
+            // El bono de ataque: el texto que va justo detrás de
+            // «Ataque …:» (en cursiva).
+            const antes = n.previousSibling;
+            const m = ATAQUE.exec(n.nodeValue);
+            if (m && antes && antes.nodeType === 1 && /^Ataque\b.*:$/.test(antes.textContent.trim())) {
+                const resto = document.createTextNode(n.nodeValue.slice(m[0].length));
+                n.replaceWith(document.createTextNode(m[1]), boton(m[2], "1d20" + limpia(m[2]).replace(/^\+?/, "+").replace("+-", "-"), "ataque"), resto);
+                trocear(resto);
+                return;
+            }
+            trocear(n);
+        });
+    };
+    window.ocDadoBoton = boton;
+
+    // Qué se tira: lo que haya en negrita al principio de su párrafo, o
+    // el título del desplegable o de la ventana.
+    function nombreDe(b) {
+        const caja = b.closest("p, li, td, dd, .oc-texto, details");
+        const fuerte = caja && caja.querySelector("strong");
+        let n = fuerte ? fuerte.textContent : "";
+        if (!n) {
+            const det = b.closest("details");
+            const ven = b.closest("[role=dialog], .master-ventana");
+            n = det ? (det.querySelector("summary") || {}).textContent || "" : ven ? (ven.querySelector("h2") || {}).textContent || "" : "";
+        }
+        return n.replace(/[.:]\s*$/, "").trim();
+    }
+
+    document.addEventListener("click", (e) => {
+        const b = e.target.closest(".oc-dado-texto");
+        if (!b || !window.ocDados) {
+            return;
+        }
+        const que = [nombreDe(b), b.dataset.que].filter(Boolean).join(" · ") || b.textContent;
+        window.ocDados.tirar(b.dataset.formula, que);
+    });
+
+    document.querySelectorAll(".oc-texto").forEach((t) => window.ocDadosEnTexto(t));
 })();

@@ -4219,6 +4219,21 @@
     · TIRADAS GUARDADAS: en la ventana de los dados, «guardadas»: ☆ en
       cualquier tirada del registro la guarda; «＋ nueva» escribe una
       (nombre y dados, varios separados por «;», que se tiran a la vez).
+    · ⏱️ INICIATIVA, DOS PANTALLAS (pestañas «🛠️ preparar» y «⚔️ combate»):
+      en preparar se añade, se ordena y se quita; «⚔️ empezar el combate»
+      pasa a la otra, con la ronda, a quién le toca en grande, «◀ anterior»
+      y «siguiente ▶» (retroceder deshace también la ronda), los PG con
+      − y + y «🏁 terminar el combate». MARCAS (🏷 en cada uno): las de un
+      toque (concentración, bendecido, maldito, ventaja, los estados…) o
+      una a mano, con rondas si se quiere; al empezar cada ronda se les
+      quita una y, a 0, se acaban (se avisa). Se guardan con cada uno
+      («marcas» en «richi-oc-iniciativa»).
+    · DADOS EN LOS TEXTOS (personajes.js: ocDadosEnTexto): en las fichas y
+      en la pantalla de máster, cada «2d6 + 3» de un texto es un botón que
+      lo tira (con el nombre de lo que haya en negrita delante); en los
+      monstruos, también el bono de ataque («+9» → 1d20+9), las
+      características, las salvaciones y las habilidades. Un solo «click»
+      en el documento para todos (vale en las copias de las ventanas).
     · ⏱️ INICIATIVA (en el menú): el orden de los turnos. Se añade a
       quien sea (nombre, un color —una fila de muestras y una a elegir,
       para distinguir bandos como uno quiera— y, si se quiere, iniciativa,
@@ -4312,6 +4327,20 @@
   bestiary/bestiary-xmm.json, items.json, items-base.json y
   magicvariants.json; solo lo marcado «srd52», que es lo que se puede
   copiar). Son JSON normales: se pueden retocar a mano.
+  PERFILES: arriba del lienzo, pestañas como las de un navegador (con las
+  flechas se pasa de una a otra): «＋» abre una nueva, ✎ (o doble clic)
+  la renombra y ✕ la cierra (dos veces; la última no). Cada perfil tiene
+  sus ventanas («richi-master»: {perfiles: [{id, nombre, modulos}],
+  activo}); al cambiar, las ventanas se vuelven a montar con lo guardado.
+  LOS COLORES de las ventanas son fijos (COLORES en pantalla-master.js,
+  --postit): iguales en todos los temas, con la letra de la barra oscura.
+  MÁS VENTANAS: 🪙 conversor de monedas (cada moneda, el total en oro,
+  plata y cobre, y repartir entre varios; 1 ppt = 10 po, 1 po = 2 pe =
+  10 pp = 100 pc). En la tienda, el precio es un % libre (100 normal) y
+  cada objeto abre su ventana con sus datos, el precio de lista, el de la
+  tienda y el regateo (un % propio, con −20 … +20 %). En el bestiario,
+  «📌 al tablero» deja la criatura como ventana (tipo «criatura», que no
+  sale en «＋ añadir»).
   Para añadir una ventana nueva: una entrada en MODULOS (nombre, emoji,
   unico, w, h, montar(cuerpo, modulo)). Estilos: estilos/paginas/pantalla-master.css
   (usa también personajes.css). actualizar-cabeceras.py le pone sus hojas

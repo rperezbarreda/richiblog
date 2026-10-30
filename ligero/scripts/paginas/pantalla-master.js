@@ -95,6 +95,9 @@
             parrafo.push(l);
         });
         cerrarParrafo();
+        if (window.ocDadosEnTexto) {
+            window.ocDadosEnTexto(caja);
+        }
         return caja;
     }
     const pedidos = {};
@@ -338,7 +341,24 @@
             boton.focus();
         }
     }
-    function perfil(b, f) {
+    function bonosQueSeTiran(texto, que) {
+        const dd = crear("dd", "master-bicho-bonos");
+        texto.split(/,\s*/).forEach((trozo, i) => {
+            const m = /^(.*?)\s*([+−-]\d+)$/.exec(trozo);
+            if (i) {
+                dd.appendChild(document.createTextNode(", "));
+            }
+            if (!m || !window.ocDadoBoton) {
+                dd.appendChild(document.createTextNode(trozo));
+                return;
+            }
+            dd.appendChild(document.createTextNode(m[1] + " "));
+            const n = parseInt(m[2].replace("−", "-"), 10);
+            dd.appendChild(window.ocDadoBoton(m[2], "1d20" + (n >= 0 ? "+" : "") + n, que + " de " + m[1]));
+        });
+        return dd;
+    }
+    function perfil(b, f, alTablero) {
         const caja = crear("div", "master-bicho");
         caja.appendChild(crear("p", "master-bicho-tipo", b.tipo + ", " + b.alin));
         const fila = (dl, que, valor) => {
@@ -362,7 +382,11 @@
             cab.appendChild(th);
             const n = b.car[k];
             const m = Math.floor((n - 10) / 2);
-            val.appendChild(crear("td", "", n + " (" + (m >= 0 ? "+" : "−") + Math.abs(m) + ")"));
+            const td = crear("td", "", n + " ");
+            const bono = (m >= 0 ? "+" : "−") + Math.abs(m);
+            td.appendChild(window.ocDadoBoton ? window.ocDadoBoton("(" + bono + ")", "1d20" + (m >= 0 ? "+" : "") + m,
+                "prueba de " + k) : document.createTextNode("(" + bono + ")"));
+            val.appendChild(td);
         });
         const thead = crear("thead");
         thead.appendChild(cab);
@@ -370,8 +394,12 @@
         tbody.appendChild(val);
         tabla.append(thead, tbody);
         const abajo = crear("dl", "master-bicho-datos");
-        fila(abajo, "Salvaciones", b.salv);
-        fila(abajo, "Habilidades", b.hab);
+        if (b.salv) {
+            abajo.append(crear("dt", "", "Salvaciones"), bonosQueSeTiran(b.salv, "salvación"));
+        }
+        if (b.hab) {
+            abajo.append(crear("dt", "", "Habilidades"), bonosQueSeTiran(b.hab, "prueba"));
+        }
         fila(abajo, "Vulnerabilidades", b.vuln);
         fila(abajo, "Resistencias", b.res);
         fila(abajo, "Inmunidades", [b.inm, b.inmE].filter(Boolean).join("; "));
@@ -381,7 +409,13 @@
         fila(abajo, "VD", b.vd);
         const sumar = botonDe("oc-vida-accion es-principal", "＋ a la iniciativa", () => aLaIniciativa(b, sumar),
             "Añadir " + b.nombre + " a la iniciativa (tira su iniciativa)");
-        caja.append(sumar, arriba, tabla, abajo);
+        const botones = crear("div", "master-bicho-botones");
+        botones.appendChild(sumar);
+        if (alTablero) {
+            const fijar = botonDe("oc-vida-accion", "📌 al tablero", alTablero, "Poner " + b.nombre + " en el tablero, como una ventana");
+            botones.appendChild(fijar);
+        }
+        caja.append(botones, arriba, tabla, abajo);
         [["rasgos", "Rasgos"], ["acciones", "Acciones"], ["adicionales", "Acciones adicionales"],
             ["reacciones", "Reacciones"], ["legendarias", "Acciones legendarias"]].forEach(([k, titulo]) => {
             if (!b[k]) {
@@ -397,6 +431,16 @@
             caja.appendChild(crear("p", "oc-hoja-nota master-fuente", f));
         }
         return caja;
+    }
+    function montarCriatura(dentro, m) {
+        m.datos = m.datos || {};
+        dentro.appendChild(crear("p", "oc-hoja-nota", "Cargando…"));
+        pedir("/datos/personajes/compendio/bestiario.json").then((datos) => {
+            const b = (datos.monstruos || []).find((x) => x.en === m.datos.en);
+            dentro.replaceChildren(b ? perfil(b, "") : crear("p", "oc-vacio", "No encuentro esa criatura."));
+        }).catch(() => {
+            dentro.replaceChildren(crear("p", "oc-vacio", "No he podido cargar el bestiario."));
+        });
     }
     function montarBestiario(dentro, m) {
         dentro.appendChild(crear("p", "oc-hoja-nota", "Cargando el bestiario…"));
@@ -439,8 +483,11 @@
                 lista.replaceChildren(...salen.slice(0, 60).map((x) => {
                     const li = crear("li");
                     const b = botonDe("master-conjuro", "", () => {
-                        window.ocVentana.abrir({ titulo: x.b.nombre, cuerpo: perfil(x.b, datos.fuente), vuelta: b,
-                            clase: "es-regla" });
+                        const cerrar = window.ocVentana.abrir({ titulo: x.b.nombre, vuelta: b, clase: "es-regla",
+                            cuerpo: perfil(x.b, datos.fuente, () => {
+                                cerrar();
+                                anadir("criatura", { titulo: x.b.nombre, datos: { en: x.b.en }, w: 440, h: 520 });
+                            }) });
                     });
                     b.setAttribute("aria-haspopup", "dialog");
                     b.append(crear("span", "master-conjuro-nombre", x.b.nombre),
@@ -465,8 +512,6 @@
             dentro.replaceChildren(crear("p", "oc-vacio", "No he podido cargar el bestiario."));
         });
     }
-    const PRECIOS = [["1", "normales"], ["0.5", "de saldo (×½)"], ["0.75", "baratos (×¾)"], ["1.5", "caros (×1½)"],
-        ["2", "abusivos (×2)"]];
     const RAREZAS = ["común", "poco común", "rara", "muy rara", "legendaria"];
     function moneda(cp) {
         const total = Math.round(cp);
@@ -508,7 +553,22 @@
             const [etCat, cat] = elegir("master-tienda-cat-", "categoría", [["", "todas"]], "");
             const [etRareza, rareza] = elegir("master-tienda-rareza-", "rareza",
                 [["", "todas"]].concat(RAREZAS.map((r) => [r, r])), m.datos.rareza);
-            const [etPrecio, precio] = elegir("master-tienda-precio-", "precios", PRECIOS, m.datos.precio || "1");
+            if (m.datos.porc === undefined && m.datos.precio) {
+                m.datos.porc = Math.round(parseFloat(m.datos.precio) * 100) || 100;
+            }
+            const etPrecio = crear("label", "oc-dados-etiqueta", "precios (%)");
+            const precio = crear("input", "oc-dados-texto");
+            precio.type = "number";
+            precio.min = "0";
+            precio.max = "1000";
+            precio.step = "5";
+            precio.inputMode = "numeric";
+            precio.value = String(m.datos.porc || 100);
+            precio.id = "master-tienda-precio-" + m.id;
+            precio.setAttribute("aria-describedby", "master-tienda-precio-ayuda-" + m.id);
+            etPrecio.htmlFor = precio.id;
+            const ayudaPrecio = crear("p", "oc-hoja-nota master-tienda-ayuda", "100 = normal; 80 = un 20 % más barato; 150 = la mitad más caro.");
+            ayudaPrecio.id = "master-tienda-precio-ayuda-" + m.id;
             const etBuscar = crear("label", "oc-dados-etiqueta", "buscar");
             const buscar = crear("input", "oc-dados-texto");
             buscar.type = "search";
@@ -519,6 +579,9 @@
             [[etTienda, tienda], [etCat, cat], [etRareza, rareza], [etPrecio, precio], [etBuscar, buscar]].forEach(([e, c]) => {
                 const caja = crear("div", "master-tienda-campo" + (c === buscar ? " es-ancho" : ""));
                 caja.append(e, c);
+                if (c === precio) {
+                    caja.appendChild(ayudaPrecio);
+                }
                 campos.appendChild(caja);
             });
             const cuantosAzar = crear("input", "oc-dados-texto master-tienda-cuantos");
@@ -586,14 +649,77 @@
                 }));
                 cat.value = hay.indexOf(antes) >= 0 ? antes : "";
             }
+            const porcentaje = () => Math.max(0, parseFloat(precio.value) || 0) / 100 || (precio.value === "0" ? 0 : 1);
+            function ficha(o, vuelta) {
+                const cuerpo = crear("div", "master-objeto");
+                const dl = crear("dl", "master-bicho-datos");
+                const fila = (que, valor) => {
+                    if (valor) {
+                        dl.append(crear("dt", "", que), crear("dd", "", String(valor)));
+                    }
+                };
+                fila("Categoría", o.cat);
+                fila("Rareza", o.rareza);
+                fila("Sintonía", o.sint ? "la requiere" : "");
+                fila("Detalles", o.det);
+                fila("Peso", o.peso);
+                fila("Nota", o.nota);
+                fila("Se vende en", o.tiendas.join(", ").toLowerCase());
+                fila("En inglés", o.en);
+                cuerpo.appendChild(dl);
+                if (o.cp) {
+                    const precios = crear("dl", "master-bicho-datos master-objeto-precios");
+                    const tiendaP = Math.round(porcentaje() * 100);
+                    precios.append(crear("dt", "", "De lista"), crear("dd", "", moneda(o.cp)),
+                        crear("dt", "", "En esta tienda (" + tiendaP + " %)"), crear("dd", "", moneda(o.cp * porcentaje())));
+                    const form = crear("form", "master-regateo");
+                    const et = crear("label", "oc-dados-etiqueta", "regatear: precio final (%)");
+                    const pct = crear("input", "oc-dados-texto");
+                    pct.type = "number";
+                    pct.min = "0";
+                    pct.max = "1000";
+                    pct.step = "5";
+                    pct.inputMode = "numeric";
+                    pct.id = "master-regateo-" + m.id;
+                    pct.value = String(tiendaP);
+                    et.htmlFor = pct.id;
+                    const queda = crear("p", "master-regateo-queda");
+                    queda.setAttribute("aria-live", "polite");
+                    const echar = () => {
+                        const v = Math.max(0, parseFloat(pct.value) || 0);
+                        queda.textContent = "Queda en " + moneda(o.cp * v / 100) + " (" + v + " % del precio de lista).";
+                    };
+                    pct.addEventListener("input", echar);
+                    const rapidos = crear("div", "master-regateo-rapidos");
+                    [-20, -10, -5, 5, 10, 20].forEach((d) => {
+                        rapidos.appendChild(botonDe("oc-vida-accion", (d > 0 ? "+" : "−") + Math.abs(d) + " %", () => {
+                            pct.value = String(Math.max(0, (parseFloat(pct.value) || 0) + d));
+                            echar();
+                        }, (d > 0 ? "Subir " : "Bajar ") + Math.abs(d) + " puntos"));
+                    });
+                    form.addEventListener("submit", (e) => {
+                        e.preventDefault();
+                        echar();
+                    });
+                    form.append(et, pct, rapidos, queda);
+                    echar();
+                    cuerpo.append(precios, form);
+                } else {
+                    cuerpo.appendChild(crear("p", "oc-hoja-nota", "No tiene precio: lo pone el DM."));
+                }
+                cuerpo.appendChild(crear("p", "oc-hoja-nota master-fuente", datos.fuente || ""));
+                window.ocVentana.abrir({ titulo: o.nombre, cuerpo, vuelta, clase: "es-regla" });
+            }
             function pintar() {
-                const veces = parseFloat(precio.value) || 1;
+                const veces = porcentaje();
                 const salen = filtrados(true);
                 todo.hidden = !m.datos.surtido;
                 cuerpo.replaceChildren(...salen.slice(0, 100).map((x) => {
                     const tr = crear("tr");
                     const td = crear("td");
-                    td.appendChild(crear("span", "master-tienda-nombre", x.o.nombre));
+                    const b = botonDe("master-tienda-nombre", x.o.nombre, () => ficha(x.o, b));
+                    b.setAttribute("aria-haspopup", "dialog");
+                    td.appendChild(b);
                     const extra = [x.o.cat, x.o.rareza, x.o.sint ? "requiere sintonía" : "", x.o.det, x.o.peso, x.o.nota]
                         .filter(Boolean).join(" · ");
                     td.appendChild(crear("span", "master-tienda-datos", extra));
@@ -608,7 +734,8 @@
             const alCambiar = () => {
                 m.datos.tienda = tienda.value;
                 m.datos.rareza = rareza.value;
-                m.datos.precio = precio.value;
+                m.datos.porc = parseFloat(precio.value) || 0;
+                delete m.datos.precio;
                 guardar();
                 pintar();
             };
@@ -616,7 +743,8 @@
                 categorias();
                 alCambiar();
             });
-            [cat, rareza, precio].forEach((c) => c.addEventListener("change", alCambiar));
+            [cat, rareza].forEach((c) => c.addEventListener("change", alCambiar));
+            precio.addEventListener("input", alCambiar);
             let espera = 0;
             buscar.addEventListener("input", () => {
                 clearTimeout(espera);
@@ -628,6 +756,87 @@
         }).catch(() => {
             dentro.replaceChildren(crear("p", "oc-vacio", "No he podido abrir la tienda."));
         });
+    }
+    const MONEDAS = [["ppt", "platino", 1000], ["po", "oro", 100], ["pe", "electro", 50], ["pp", "plata", 10], ["pc", "cobre", 1]];
+    function enMonedas(cp, conPlatino) {
+        const trozos = [];
+        let resto = Math.floor(cp);
+        MONEDAS.filter((x) => x[0] !== "pe" && (conPlatino || x[0] !== "ppt")).forEach(([k, , v]) => {
+            const n = Math.floor(resto / v);
+            resto -= n * v;
+            if (n) {
+                trozos.push(n.toLocaleString("es-ES") + " " + k);
+            }
+        });
+        return trozos.join(" ") || "0 pc";
+    }
+    function montarMonedas(dentro, m) {
+        m.datos = m.datos || {};
+        const form = crear("form", "master-monedas");
+        const campos = {};
+        MONEDAS.forEach(([k, nombre]) => {
+            const caja = crear("div", "master-tienda-campo");
+            const et = crear("label", "oc-dados-etiqueta", k + " (" + nombre + ")");
+            const i = crear("input", "oc-dados-texto");
+            i.type = "number";
+            i.min = "0";
+            i.inputMode = "numeric";
+            i.id = "master-monedas-" + k + "-" + m.id;
+            i.value = m.datos[k] ? String(m.datos[k]) : "";
+            et.htmlFor = i.id;
+            caja.append(et, i);
+            form.appendChild(caja);
+            campos[k] = i;
+        });
+        const entreCaja = crear("div", "master-tienda-campo");
+        const etEntre = crear("label", "oc-dados-etiqueta", "repartir entre");
+        const entre = crear("input", "oc-dados-texto");
+        entre.type = "number";
+        entre.min = "1";
+        entre.inputMode = "numeric";
+        entre.id = "master-monedas-entre-" + m.id;
+        entre.value = String(m.datos.entre || 1);
+        etEntre.htmlFor = entre.id;
+        entreCaja.append(etEntre, entre);
+        form.appendChild(entreCaja);
+        const salida = crear("dl", "master-bicho-datos master-monedas-salida");
+        salida.setAttribute("aria-live", "polite");
+        const vaciar = botonDe("oc-vida-accion", "🗑️ vaciar", () => {
+            MONEDAS.forEach(([k]) => {
+                campos[k].value = "";
+            });
+            calcular();
+            campos.po.focus();
+        });
+        function calcular() {
+            let cp = 0;
+            MONEDAS.forEach(([k, , v]) => {
+                const n = Math.max(0, parseFloat(campos[k].value) || 0);
+                m.datos[k] = n;
+                cp += n * v;
+            });
+            const n = Math.max(1, parseInt(entre.value, 10) || 1);
+            m.datos.entre = n;
+            guardar();
+            const filas = [["Total", enMonedas(cp, true)], ["En oro", (cp / 100).toLocaleString("es-ES", { maximumFractionDigits: 2 }) + " po"],
+                ["En plata", (cp / 10).toLocaleString("es-ES", { maximumFractionDigits: 1 }) + " pp"],
+                ["En cobre", cp.toLocaleString("es-ES") + " pc"]];
+            if (n > 1) {
+                const cada = Math.floor(cp / n);
+                filas.push(["Para cada uno (" + n + ")", enMonedas(cada, false)]);
+                if (cp - cada * n) {
+                    filas.push(["Sobra", enMonedas(cp - cada * n, false)]);
+                }
+            }
+            salida.replaceChildren(...filas.flatMap(([a, b]) => [crear("dt", "", a), crear("dd", "", b)]));
+        }
+        form.addEventListener("input", calcular);
+        form.addEventListener("submit", (e) => {
+            e.preventDefault();
+            calcular();
+        });
+        dentro.append(form, salida, vaciar);
+        calcular();
     }
     const MODULOS = {
         iniciativa: { nombre: "iniciativa", emoji: "⏱️", unico: true, w: 420, h: 520,
@@ -641,37 +850,51 @@
         conjuros: { nombre: "conjuros", emoji: "✨", unico: true, w: 420, h: 480, montar: montarConjuros },
         bestiario: { nombre: "bestiario", emoji: "🐉", unico: true, w: 460, h: 520, montar: montarBestiario },
         tienda: { nombre: "tienda", emoji: "💰", w: 520, h: 560, montar: montarTienda },
+        criatura: { nombre: "criatura", emoji: "🐾", oculto: true, w: 440, h: 520, montar: montarCriatura },
+        monedas: { nombre: "conversor de monedas", emoji: "🪙", w: 420, h: 440, montar: montarMonedas },
         dados: { nombre: "dados", emoji: "🎲", w: 360, h: 230, montar: montarDados },
         notas: { nombre: "notas", emoji: "📝", unico: true, w: 420, h: 420,
             montar: (d) => window.ocMontar.notas(d, { soloNotas: true }) },
         tarjeta: { nombre: "tarjeta", emoji: "📌", w: 360, h: 280, montar: montarTarjeta },
         tabla: { nombre: "tabla para tirar", emoji: "🔮", w: 360, h: 380, montar: montarTabla },
     };
-    const COLORES = [["", "sin color"], ["amarillo", "amarillo"], ["naranja", "naranja"], ["rojo", "rojo"],
-        ["rosa", "rosa"], ["morado", "morado"], ["azul", "azul"], ["celeste", "celeste"], ["verde", "verde"],
-        ["gris", "gris"]];
-    let estado = null;
+    const COLORES = [["", "sin color"], ["amarillo", "amarillo", "#ffe873"], ["naranja", "naranja", "#ffb870"],
+        ["rojo", "rojo", "#ff8f8f"], ["rosa", "rosa", "#ffa6d5"], ["morado", "morado", "#c9a2ff"], ["azul", "azul", "#8fb8ff"],
+        ["celeste", "celeste", "#7fdcff"], ["verde", "verde", "#8fe8a2"], ["gris", "gris", "#c9c9d1"]];
+    const hexDe = (color) => (COLORES.find((c) => c[0] === color) || [])[2] || "";
+    let todo = null;
     try {
-        estado = JSON.parse(localStorage.getItem(CLAVE) || "null");
+        todo = JSON.parse(localStorage.getItem(CLAVE) || "null");
     } catch (e) {
-        estado = null;
+        todo = null;
     }
-    if (!estado || !Array.isArray(estado.modulos)) {
-        estado = { modulos: [] };
+    if (todo && Array.isArray(todo.modulos) && !todo.perfiles) {
+        todo = { perfiles: [{ id: "p1", nombre: "principal", modulos: todo.modulos }], activo: "p1" };
+    }
+    if (!todo || !Array.isArray(todo.perfiles) || !todo.perfiles.length) {
+        todo = { perfiles: [{ id: "p1", nombre: "principal", modulos: [] }], activo: "p1" };
     }
     let siguienteId = 1;
-    estado.modulos = estado.modulos.filter((m) => MODULOS[m.tipo]);
-    estado.modulos.forEach((m) => {
-        if (!m.titulo && m.datos && m.datos.titulo) {
-            m.titulo = m.datos.titulo;
-        }
-        m.color = COLORES.some((c) => c[0] === m.color) ? m.color : "";
-        m.id = m.id || "m" + siguienteId++;
-        siguienteId = Math.max(siguienteId, parseInt(String(m.id).slice(1), 10) + 1 || siguienteId);
+    let siguientePerfil = 1;
+    todo.perfiles.forEach((pf) => {
+        pf.id = pf.id || "p" + siguientePerfil;
+        siguientePerfil = Math.max(siguientePerfil, parseInt(String(pf.id).slice(1), 10) + 1 || siguientePerfil);
+        pf.nombre = pf.nombre || "perfil";
+        pf.modulos = (Array.isArray(pf.modulos) ? pf.modulos : []).filter((m) => MODULOS[m.tipo]);
+        pf.modulos.forEach((m) => {
+            if (!m.titulo && m.datos && m.datos.titulo) {
+                m.titulo = m.datos.titulo;
+            }
+            m.color = hexDe(m.color) ? m.color : "";
+            m.id = m.id || "m" + siguienteId++;
+            siguienteId = Math.max(siguienteId, parseInt(String(m.id).slice(1), 10) + 1 || siguienteId);
+        });
     });
+    let estado = todo.perfiles.find((pf) => pf.id === todo.activo) || todo.perfiles[0];
     function guardar() {
-        const salida = { modulos: estado.modulos.map((m) => ({ id: m.id, tipo: m.tipo, x: m.x, y: m.y, w: m.w, h: m.h,
-            titulo: m.titulo || "", color: m.color || "", plegado: !!m.plegado, datos: m.datos })) };
+        const salida = { activo: estado.id, perfiles: todo.perfiles.map((pf) => ({ id: pf.id, nombre: pf.nombre,
+            modulos: pf.modulos.map((m) => ({ id: m.id, tipo: m.tipo, x: m.x, y: m.y, w: m.w, h: m.h,
+                titulo: m.titulo || "", color: m.color || "", plegado: !!m.plegado, datos: m.datos })) })) };
         try {
             localStorage.setItem(CLAVE, JSON.stringify(salida));
         } catch (e) {
@@ -690,10 +913,11 @@
         if (!m.el) {
             return;
         }
-        COLORES.forEach((c) => c[0] && m.el.classList.remove("oc-color-" + c[0]));
         m.el.classList.toggle("con-color", !!m.color);
         if (m.color) {
-            m.el.classList.add("oc-color-" + m.color);
+            m.el.style.setProperty("--postit", hexDe(m.color));
+        } else {
+            m.el.style.removeProperty("--postit");
         }
     }
     function personalizar(m, vuelta) {
@@ -711,16 +935,13 @@
         grupo.appendChild(crear("legend", "oc-dados-etiqueta", "color"));
         let elegido = m.color || "";
         const muestras = COLORES.map(([valor, nombre]) => {
-            const b = botonDe("master-color" + (valor ? " oc-color-" + valor : " es-ninguno"), "", () => {
+            const b = botonDe("master-color" + (valor ? "" : " es-ninguno"), "", () => {
                 elegido = valor;
                 muestras.forEach((x) => x.setAttribute("aria-pressed", x === b ? "true" : "false"));
             }, nombre);
             b.title = nombre;
             if (valor) {
-                const prueba = crear("span", "oc-color-" + valor);
-                lienzo.appendChild(prueba);
-                b.style.backgroundColor = getComputedStyle(prueba).getPropertyValue("--oc-color").trim();
-                prueba.remove();
+                b.style.backgroundColor = hexDe(valor);
             }
             b.setAttribute("aria-pressed", valor === elegido ? "true" : "false");
             grupo.appendChild(b);
@@ -886,7 +1107,7 @@
     const botonAnadir = botonDe("oc-vida-accion es-principal", "＋ añadir", () => {
         const cuerpo = crear("div", "master-anadir");
         const lista = crear("ul", "oc-menu-ventana-lista");
-        Object.keys(MODULOS).forEach((tipo) => {
+        Object.keys(MODULOS).filter((tipo) => !MODULOS[tipo].oculto).forEach((tipo) => {
             const def = MODULOS[tipo];
             const ya = def.unico && estado.modulos.some((m) => m.tipo === tipo);
             const li = crear("li");
@@ -931,10 +1152,10 @@
             foco: lista.querySelector("button:not([disabled])") || undefined });
     });
     botonAnadir.setAttribute("aria-haspopup", "dialog");
-    function anadir(tipo) {
+    function anadir(tipo, extra) {
         const def = MODULOS[tipo];
         const y = estado.modulos.length ? Math.max(...estado.modulos.map((m) => m.y + (m.plegado ? 60 : m.h))) + 20 : 0;
-        const m = { id: "m" + siguienteId++, tipo, x: 0, y: enMovil.matches ? 0 : y, w: def.w, h: def.h };
+        const m = Object.assign({ id: "m" + siguienteId++, tipo, x: 0, y: enMovil.matches ? 0 : y, w: def.w, h: def.h }, extra || {});
         estado.modulos.push(m);
         pintarTodo();
         guardar();
@@ -943,7 +1164,7 @@
         const primero = m.el.querySelector(".master-ventana-cuerpo button, .master-ventana-cuerpo input, .master-ventana-cuerpo textarea")
             || m.el.querySelector(".es-asa");
         primero.focus();
-        avisar("Añadido: " + def.nombre + ".");
+        avisar("Añadido: " + (m.titulo || def.nombre) + ".");
     }
     function ordenar() {
         const ancho = Math.max(400, lienzo.clientWidth);
@@ -962,10 +1183,123 @@
             alto = Math.max(alto, m.plegado ? 60 : m.h);
         });
     }
+    const pestanas = crear("div", "master-pestanas");
+    const tablist = crear("div", "master-pestanas-lista");
+    tablist.setAttribute("role", "tablist");
+    tablist.setAttribute("aria-label", "Perfiles de la pantalla de máster");
+    lienzo.setAttribute("role", "tabpanel");
+    function activar(pf, foco) {
+        estado.modulos.forEach((m) => {
+            m.el = null;
+        });
+        estado = pf;
+        guardar();
+        pintarPestanas(foco);
+        pintarTodo();
+    }
+    function pintarPestanas(foco) {
+        tablist.replaceChildren(...todo.perfiles.map((pf, i) => {
+            const b = botonDe("master-pestana", pf.nombre, () => {
+                if (pf !== estado) {
+                    activar(pf, true);
+                    avisar("Perfil: " + pf.nombre + ".");
+                }
+            });
+            b.setAttribute("role", "tab");
+            b.id = "master-pestana-" + pf.id;
+            b.setAttribute("aria-controls", lienzo.id || (lienzo.id = "master-lienzo"));
+            const activa = pf === estado;
+            b.setAttribute("aria-selected", activa ? "true" : "false");
+            b.tabIndex = activa ? 0 : -1;
+            b.addEventListener("keydown", (e) => {
+                const d = { ArrowRight: 1, ArrowLeft: -1, Home: -i, End: todo.perfiles.length - 1 - i }[e.key];
+                if (d === undefined) {
+                    return;
+                }
+                e.preventDefault();
+                const otro = todo.perfiles[(i + d + todo.perfiles.length) % todo.perfiles.length];
+                activar(otro, true);
+            });
+            b.addEventListener("dblclick", () => renombrar());
+            return b;
+        }));
+        lienzo.setAttribute("aria-labelledby", "master-pestana-" + estado.id);
+        botonCerrar.disabled = todo.perfiles.length < 2;
+        if (foco) {
+            tablist.querySelector('[aria-selected="true"]').focus();
+        }
+    }
+    function renombrar() {
+        const cuerpo = crear("form", "master-personalizar");
+        const et = crear("label", "oc-dados-etiqueta", "nombre del perfil");
+        const input = crear("input", "oc-dados-texto");
+        input.id = "master-perfil-nombre";
+        input.value = estado.nombre;
+        input.maxLength = 30;
+        input.autocomplete = "off";
+        et.htmlFor = input.id;
+        const listo = crear("button", "oc-vida-accion es-principal", "guardar");
+        listo.type = "submit";
+        cuerpo.append(et, input, listo);
+        cuerpo.addEventListener("submit", (e) => {
+            e.preventDefault();
+            estado.nombre = input.value.trim() || estado.nombre;
+            guardar();
+            cerrar();
+            pintarPestanas(true);
+            avisar("Perfil: " + estado.nombre + ".");
+        });
+        const cerrar = window.ocVentana.abrir({ titulo: "renombrar el perfil", cuerpo, vuelta: botonRenombrar, foco: input });
+    }
+    const botonNueva = botonDe("master-pestana-mando", "＋", () => {
+        const pf = { id: "p" + siguientePerfil++, nombre: "perfil " + (todo.perfiles.length + 1), modulos: [] };
+        todo.perfiles.push(pf);
+        activar(pf, true);
+        avisar("Perfil nuevo: " + pf.nombre + ". Ponle nombre con ✎.");
+    }, "Perfil nuevo");
+    botonNueva.title = "Perfil nuevo";
+    const botonRenombrar = botonDe("master-pestana-mando", "✎", renombrar, "Renombrar este perfil");
+    botonRenombrar.title = "Renombrar este perfil";
+    botonRenombrar.setAttribute("aria-haspopup", "dialog");
+    let seguroCerrar = false;
+    const botonCerrar = botonDe("master-pestana-mando", "✕", () => {
+        if (todo.perfiles.length < 2) {
+            return;
+        }
+        if (!seguroCerrar) {
+            seguroCerrar = true;
+            botonCerrar.setAttribute("aria-label", "¿Seguro? Pulsa otra vez para cerrar " + estado.nombre);
+            avisar("Pulsa otra vez para cerrar el perfil " + estado.nombre + " y sus ventanas.");
+            setTimeout(() => {
+                seguroCerrar = false;
+                botonCerrar.setAttribute("aria-label", "Cerrar este perfil");
+            }, 4000);
+            return;
+        }
+        seguroCerrar = false;
+        botonCerrar.setAttribute("aria-label", "Cerrar este perfil");
+        const i = todo.perfiles.indexOf(estado);
+        const nombre = estado.nombre;
+        todo.perfiles.splice(i, 1);
+        estado.modulos.forEach((m) => {
+            m.el = null;
+        });
+        estado = todo.perfiles[Math.max(0, i - 1)];
+        guardar();
+        pintarPestanas(true);
+        pintarTodo();
+        avisar("Cerrado: " + nombre + ".");
+    }, "Cerrar este perfil");
+    botonCerrar.title = "Cerrar este perfil";
+    const mandosPestanas = crear("div", "master-pestanas-mandos");
+    mandosPestanas.append(botonNueva, botonRenombrar, botonCerrar);
+    pestanas.append(tablist, mandosPestanas);
+    lienzo.before(pestanas);
     const mandos = crear("div", "master-barra-mandos");
     mandos.append(botonAnadir);
     barra.prepend(mandos);
     lienzo.classList.add("con-lienzo");
+    pintarPestanas(false);
     pintarTodo();
     if (enMovil.addEventListener) {
         enMovil.addEventListener("change", pintarTodo);
