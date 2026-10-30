@@ -4351,6 +4351,13 @@
   monta las de la otra), crear una nueva, renombrar la de ahora o
   borrarla (pide pulsar dos veces; la última no se borra). Las
   plantillas, las reglas propias y la iniciativa son de todas.
+  MOVER LAS PESTAÑAS: mantener pulsada una (ESPERA_COGER) la coge
+  (reborde a rayas, .es-cogida) y se arrastra a su sitio entre las demás
+  (cerca de los bordes de la fila, se desliza sola); al soltar se guarda
+  el orden (y soltar no cuenta como pulsar: pestanaMovida). Si el puntero
+  se mueve antes de cogerla, no pasa nada. Con el teclado, Alt + ← →
+  (moverPestana()). Las pestañas no deslizan la fila con el dedo
+  (touch-action: none): para eso, las flechas ‹ ›.
   LAS PESTAÑAS caben en un ancho fijo (como mucho 32rem): si hay más, se
   deslizan de lado (sin barra de scroll) con ‹ › (pintarFlechas(); sólo
   salen si no caben) y la elegida siempre se ve. La barra va en una sola

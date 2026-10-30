@@ -267,6 +267,23 @@
     cursor: pointer;
 }
 
+/* Mantener pulsada una pestaña la coge para moverla: que no seleccione
+   texto ni saque el menú del sistema, y que el dedo no deslice la fila
+   (para eso están las flechas ‹ ›). */
+.master-pestana {
+    -webkit-touch-callout: none;
+    touch-action: none;
+    user-select: none;
+}
+
+.master-pestana.es-cogida {
+    position: relative;
+    z-index: 2;
+    outline: 3px dashed var(--white);
+    outline-offset: -5px;
+    cursor: grabbing;
+}
+
 .master-pestana[aria-selected="true"] {
     border-color: var(--yellow);
     background: var(--yellow);

@@ -7297,6 +7297,9 @@
     function pintarPestanas(foco) {
         tablist.replaceChildren(...todo.perfiles.map((pf, i) => {
             const b = botonDe("master-pestana", pf.nombre, () => {
+                if (pestanaMovida) {
+                    return;
+                }
                 if (pf !== estado) {
                     activar(pf, true);
                     avisar("Perfil: " + pf.nombre + ".");
@@ -7309,6 +7312,11 @@
             b.setAttribute("aria-selected", activa ? "true" : "false");
             b.tabIndex = activa ? 0 : -1;
             b.addEventListener("keydown", (e) => {
+                if (e.altKey && (e.key === "ArrowLeft" || e.key === "ArrowRight")) {
+                    e.preventDefault();
+                    moverPestana(pf, e.key === "ArrowLeft" ? -1 : 1);
+                    return;
+                }
                 const d = { ArrowRight: 1, ArrowLeft: -1, Home: -i, End: todo.perfiles.length - 1 - i }[e.key];
                 if (d === undefined) {
                     return;
@@ -7318,6 +7326,8 @@
                 activar(otro, true);
             });
             b.addEventListener("dblclick", () => renombrar());
+            b.addEventListener("pointerdown", (e) => cogerPestana(e, b));
+            b.addEventListener("contextmenu", (e) => e.preventDefault());
             return b;
         }));
         lienzo.setAttribute("aria-labelledby", "master-pestana-" + estado.id);
@@ -7333,6 +7343,107 @@
         if (foco) {
             activa.focus();
         }
+    }
+    let pestanaMovida = false;
+    function moverPestana(pf, paso) {
+        const i = todo.perfiles.indexOf(pf);
+        const k = Math.max(0, Math.min(todo.perfiles.length - 1, i + paso));
+        if (k === i) {
+            return;
+        }
+        todo.perfiles.splice(i, 1);
+        todo.perfiles.splice(k, 0, pf);
+        guardar();
+        pintarPestanas(false);
+        document.getElementById("master-pestana-" + pf.id).focus();
+        avisar(pf.nombre + ": pestaña " + (k + 1) + " de " + todo.perfiles.length + ".");
+    }
+    function cogerPestana(e, b) {
+        if (e.button > 0 || todo.perfiles.length < 2) {
+            return;
+        }
+        const x0 = e.clientX;
+        const y0 = e.clientY;
+        const quieto = (ev) => {
+            if (Math.abs(ev.clientX - x0) + Math.abs(ev.clientY - y0) > 8) {
+                dejar();
+            }
+        };
+        const dejar = () => {
+            clearTimeout(reloj);
+            document.removeEventListener("pointermove", quieto);
+            document.removeEventListener("pointerup", dejar);
+            document.removeEventListener("pointercancel", dejar);
+        };
+        const reloj = setTimeout(() => {
+            dejar();
+            arrastrarPestana(e, b);
+        }, ESPERA_COGER);
+        document.addEventListener("pointermove", quieto);
+        document.addEventListener("pointerup", dejar);
+        document.addEventListener("pointercancel", dejar);
+    }
+    function arrastrarPestana(e, b) {
+        try {
+            b.setPointerCapture(e.pointerId);
+        } catch (err) {
+        }
+        pestanaMovida = true;
+        b.classList.add("es-cogida");
+        let x = e.clientX;
+        let rueda = 0;
+        const colocarla = () => {
+            const otras = Array.from(tablist.children).filter((o) => o !== b);
+            const antes = otras.find((o) => {
+                const r = o.getBoundingClientRect();
+                return x < r.left + r.width / 2;
+            });
+            if (antes) {
+                if (b.nextSibling !== antes) {
+                    tablist.insertBefore(b, antes);
+                }
+            } else if (tablist.lastChild !== b) {
+                tablist.appendChild(b);
+            }
+        };
+        const deslizar = () => {
+            rueda = 0;
+            const r = tablist.getBoundingClientRect();
+            const v = x > r.right - 32 ? 8 : x < r.left + 32 ? -8 : 0;
+            if (v && (v > 0 ? tablist.scrollLeft + tablist.clientWidth < tablist.scrollWidth : tablist.scrollLeft > 0)) {
+                tablist.scrollLeft += v;
+                colocarla();
+                rueda = requestAnimationFrame(deslizar);
+            }
+        };
+        const mover = (ev) => {
+            x = ev.clientX;
+            colocarla();
+            if (!rueda) {
+                rueda = requestAnimationFrame(deslizar);
+            }
+        };
+        const soltar = () => {
+            cancelAnimationFrame(rueda);
+            document.removeEventListener("pointermove", mover);
+            document.removeEventListener("pointerup", soltar);
+            document.removeEventListener("pointercancel", soltar);
+            b.classList.remove("es-cogida");
+            const orden = Array.from(tablist.children).map((o) => o.id);
+            const pf = todo.perfiles.find((x2) => "master-pestana-" + x2.id === b.id);
+            todo.perfiles.sort((p1, p2) => orden.indexOf("master-pestana-" + p1.id) - orden.indexOf("master-pestana-" + p2.id));
+            guardar();
+            setTimeout(() => {
+                pestanaMovida = false;
+                pintarPestanas(false);
+                if (pf) {
+                    avisar(pf.nombre + ": pestaña " + (todo.perfiles.indexOf(pf) + 1) + " de " + todo.perfiles.length + ".");
+                }
+            }, 0);
+        };
+        document.addEventListener("pointermove", mover);
+        document.addEventListener("pointerup", soltar);
+        document.addEventListener("pointercancel", soltar);
     }
     function renombrar() {
         const cuerpo = crear("form", "master-personalizar");
@@ -7658,7 +7769,9 @@
     const ATAJOS = [
         ["El tablero", [["/", "ir al buscador"], ["A", "añadir una ventana"], ["N", "post-it nuevo"], ["D", "los dados"],
             ["I", "la iniciativa (la abre si no está)"], ["+ / −", "acercar o alejar el tablero"], ["0", "el tablero al 100 %"],
-            ["[ / ]", "perfil anterior o siguiente"], ["C", "campañas (cambiar, crear…)"], ["?", "estos atajos"]]],
+            ["[ / ]", "perfil anterior o siguiente"], ["Alt + ← / Alt + →", "mover la pestaña elegida"],
+            ["mantener pulsada una pestaña", "arrastrarla a otro sitio"], ["C", "campañas (cambiar, crear…)"],
+            ["?", "estos atajos"]]],
         ["Las ventanas", [["clic en la barra", "plegarla o desplegarla"], ["mantener pulsada la barra", "cogerla y moverla"],
             ["Intro en el nombre", "plegarla o desplegarla"], ["flechas en el nombre", "moverla (con Mayús, más deprisa)"],
             ["Alt + flechas en el nombre", "cambiar su tamaño"], ["Esc", "cerrar una ventana modal"]]],
