@@ -2343,17 +2343,20 @@
         bajar.title = "Descargar como PNG";
         let seguro = false;
         const borrar = botonDe("master-postit-boton", "🗑️", () => {
+            const volver = () => {
+                seguro = false;
+                borrar.textContent = "🗑️";
+                borrar.setAttribute("aria-label", "Borrarlo todo");
+            };
             if (!seguro) {
                 seguro = true;
-                borrar.textContent = "🗑️ ¿seguro?";
-                setTimeout(() => {
-                    seguro = false;
-                    borrar.textContent = "🗑️";
-                }, 4000);
+                borrar.textContent = "⚠️";
+                borrar.setAttribute("aria-label", "¿Seguro? Pulsa otra vez para borrarlo todo");
+                avisar("Pulsa otra vez para borrarlo todo.");
+                setTimeout(volver, 4000);
                 return;
             }
-            seguro = false;
-            borrar.textContent = "🗑️";
+            volver();
             recordar();
             papel();
             guardarDibujo();
@@ -2374,7 +2377,10 @@
         });
         elegirHerramienta(herramienta);
         pintarBotones();
-        dentro.append(barra, archivo, lienzo, etD, desc);
+        // Como el Paint: las herramientas a la izquierda y el lienzo al lado.
+        const zona = crear("div", "master-dibujo-zona");
+        zona.append(barra, lienzo);
+        dentro.append(zona, archivo, etD, desc);
     }
 
     // ---- UNA TABLA PARA TIRAR: una cosa por línea; «tirar» saca una al

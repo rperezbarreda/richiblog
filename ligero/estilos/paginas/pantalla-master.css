@@ -1590,20 +1590,43 @@
 }
 .master-dibujo {
     display: block;
+    flex: 1 1 auto;
     box-sizing: border-box;
     width: 100%;
+    min-width: 0;
     height: auto;
-    margin-bottom: 8px;
     border: 2px solid var(--border);
     cursor: crosshair;
     touch-action: none;
 }
+.master-dibujo-zona {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    margin-bottom: 8px;
+}
 .master-postit-barra.es-dibujo {
     top: 0;
-    flex-wrap: wrap;
-    margin: 0 0 8px;
-    padding: 0 0 8px;
-    overflow-x: visible;
+    flex: none;
+    flex-direction: column;
+    gap: 8px;
+    margin: 0;
+    padding: 0 8px 0 0;
+    overflow: visible;
+    border-right: 2px dashed var(--border);
+    border-bottom: 0;
+    background: transparent;
+}
+.master-postit-barra.es-dibujo .master-postit-grupo {
+    display: grid;
+    grid-template-columns: repeat(2, 36px);
+    gap: 3px;
+}
+.master-postit-barra.es-dibujo .master-postit-boton {
+    width: 36px;
+    min-width: 0;
+    height: 36px;
+    padding: 0;
 }
 .master-dibujo:focus-visible,
 .master-dibujo.es-encima {

@@ -4441,10 +4441,12 @@
       tantas como se quiera.
     · 🎨 dibujo (en «apuntes», tantos como se quiera): un lienzo de papel
       para dibujar con el ratón, el dedo o un lápiz (pointer events,
-      touch-action: none), con lápiz y goma, ocho colores, tres grosores,
+      touch-action: none). Como el Paint: las herramientas en una columna
+      a la izquierda (.master-dibujo-zona; cada grupo de la barra, en una
+      rejilla de dos en dos) y el lienzo al lado. Lápiz y goma, ocho colores, tres grosores,
       ↶ deshacer y ↷ rehacer (15 pasos, solo mientras está abierto), 🖼️
       poner una imagen, ⬇ descargarlo en PNG y 🗑️ borrarlo todo (dos
-      veces; se puede deshacer). Las imágenes también se pegan con Ctrl+V
+      veces: la primera se pone ⚠️; se puede deshacer). Las imágenes también se pegan con Ctrl+V
       (con el foco en la ventana del dibujo) o arrastrándolas encima, y se
       encogen hasta el 80 % del lienzo. El lienzo mide siempre 1000 × 750
       (DIBUJO_ANCHO/ALTO) y se estira a lo ancho de la ventana. Se guarda
