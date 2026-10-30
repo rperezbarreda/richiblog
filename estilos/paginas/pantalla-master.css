@@ -12,35 +12,45 @@
     gap: 16px;
 }
 
-/* La barra de arriba: añadir, ordenar, como al principio y los dados. */
+/* La barra de arriba, en una línea: las pestañas (los perfiles) a la
+   izquierda, pegadas al lienzo por abajo; «＋ añadir» y los dados, a la
+   derecha. */
 .master-barra {
     display: flex;
     flex-wrap: wrap;
-    align-items: center;
-    gap: 10px;
+    align-items: flex-end;
+    gap: 6px 10px;
+    margin-bottom: -16px;
+    border-bottom: 2px solid var(--yellow);
 }
 
 .master-barra-mandos {
     display: flex;
     flex-wrap: wrap;
+    align-items: center;
     gap: 8px;
+    margin-left: auto;
+    padding-bottom: 4px;
+}
+
+.master-barra-mandos .oc-vida-accion {
+    min-height: 40px;
 }
 
 .master-barra .oc-boton-dados {
-    width: 48px;
-    height: 48px;
+    width: 40px;
+    height: 40px;
 }
 
-/* LAS PESTAÑAS (los perfiles), como las de un navegador: pegadas al
-   lienzo por abajo; la de ahora, del color del lienzo. */
+/* LAS PESTAÑAS (los perfiles), como las de un navegador; la de ahora,
+   del color del lienzo. */
 .master-pestanas {
     display: flex;
+    flex: 1 1 auto;
     flex-wrap: wrap;
     align-items: flex-end;
-    justify-content: space-between;
     gap: 6px;
-    margin-bottom: -16px;
-    border-bottom: 2px solid var(--yellow);
+    min-width: 0;
 }
 
 .master-pestanas-lista {
@@ -457,8 +467,78 @@
     content: none;
 }
 
-/* Qué parte del perfil se ve (estadísticas, rasgos, acciones…): un
-   desplegable en una línea. */
+/* Las partes del perfil (estadísticas, rasgos, acciones, hechizos), en
+   pestañas; dentro de «acciones», un desplegable en una línea para
+   elegir cuáles (acciones, adicionales, reacciones, legendarias). */
+.master-bicho-pestanas {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    width: 100%;
+    border-bottom: 2px solid var(--yellow);
+}
+
+.master-bicho-pestana {
+    min-height: 36px;
+    padding: 4px 10px;
+    border: 2px solid var(--border);
+    border-bottom: 0;
+    background: transparent;
+    color: var(--muted);
+    font-family: var(--fuente-mono);
+    font-size: 0.8125rem;
+    cursor: pointer;
+}
+
+.master-bicho-pestana[aria-selected="true"] {
+    border-color: var(--yellow);
+    background: var(--yellow);
+    color: var(--yellow-contrast);
+    font-weight: 700;
+}
+
+.master-bicho-pestana:hover:not([aria-selected="true"]) {
+    color: var(--white);
+}
+
+.master-bicho-pestana:focus-visible {
+    outline: 3px solid var(--yellow);
+    outline-offset: 2px;
+}
+
+.master-bicho-parte {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.master-bicho-parte[hidden] {
+    display: none;
+}
+
+/* En el tablero: qué es de verdad y «✎ nombre». */
+.master-bicho-renombrar {
+    min-height: 28px;
+    margin-left: 8px;
+    padding: 0 8px;
+    border: 1px solid var(--yellow);
+    background: transparent;
+    color: var(--yellow);
+    font-family: var(--fuente-mono);
+    font-size: 0.75rem;
+    cursor: pointer;
+}
+
+.master-bicho-renombrar:hover {
+    background: var(--yellow);
+    color: var(--yellow-contrast);
+}
+
+.master-bicho-renombrar:focus-visible {
+    outline: 2px solid var(--yellow);
+    outline-offset: 2px;
+}
+
 .master-bicho-ver {
     display: flex;
     align-items: center;
@@ -825,6 +905,132 @@
     margin-top: 16px;
     padding-top: 12px;
     border-top: 1px dashed var(--border);
+}
+
+/* EL REGISTRO DE TIRADAS: el de la ventana de los dados, en su ventana. */
+.master-registro {
+    margin-top: 8px;
+}
+
+/* LA PARTY: una tarjeta por jugador, con sus datos en filas que se
+   reparten el ancho de la ventana. */
+.master-party-resumen {
+    margin: 0 0 10px;
+    color: var(--muted);
+    font-family: var(--fuente-mono);
+    font-size: 0.75rem;
+}
+
+.master-party {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin: 0 0 12px;
+    padding: 0;
+    list-style: none;
+}
+
+.master-party-pj {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 8px 10px;
+    border: 2px solid var(--border);
+    border-left: 6px solid var(--yellow);
+}
+
+.master-party-fila {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    gap: 6px 8px;
+}
+
+.master-party-campo {
+    display: flex;
+    flex: 0 0 3rem;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+}
+
+.master-party-campo.es-nombre {
+    flex: 2 1 6rem;
+}
+
+.master-party-campo.es-clase {
+    flex: 1 1 4rem;
+}
+
+.master-party-campo.es-car {
+    flex: none;
+    width: 100%;
+}
+
+.master-party-campo.es-pasiva {
+    flex: 1 1 5rem;
+}
+
+.master-party-et {
+    overflow: hidden;
+    color: var(--muted);
+    font-family: var(--fuente-mono);
+    font-size: 0.6875rem;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.master-party-input {
+    width: 100%;
+    min-height: 34px;
+    padding: 2px 6px;
+    border: 2px solid var(--border);
+    background: var(--purple);
+    color: var(--white);
+    font: inherit;
+}
+
+.master-party-campo.es-nombre .master-party-input {
+    font-weight: 700;
+}
+
+.master-party-input:focus-visible {
+    outline: 3px solid var(--yellow);
+    outline-offset: 1px;
+}
+
+.master-party-car {
+    display: flex;
+    flex: 1 1 0;
+    flex-direction: column;
+    min-width: 2.75rem;
+    align-items: center;
+    gap: 2px;
+}
+
+.master-party-bono {
+    min-height: 24px;
+}
+
+.master-party-quitar {
+    width: 34px;
+    height: 34px;
+    margin-left: auto;
+    padding: 0;
+    border: 2px solid var(--yellow);
+    background: transparent;
+    color: var(--yellow);
+    cursor: pointer;
+}
+
+.master-party-quitar:hover {
+    background: var(--yellow);
+    color: var(--yellow-contrast);
+}
+
+.master-party-quitar:focus-visible {
+    outline: 3px solid var(--yellow);
+    outline-offset: 2px;
 }
 
 /* En estrecho, sin lienzo: una debajo de otra. */

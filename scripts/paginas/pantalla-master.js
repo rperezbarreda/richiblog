@@ -3,8 +3,9 @@
 // =========================================
 // Un lienzo con ventanas, como el escritorio de un ordenador viejo: cada
 // una es un MÓDULO (la iniciativa, las reglas, las condiciones, el
-// buscador de conjuros, los dados, las notas, una tarjeta propia o una
-// tabla para tirar). Empieza vacía: se añaden con «＋ añadir» (que también
+// buscador de conjuros, el bestiario, la tienda, la party, los dados, el
+// registro de tiradas, las notas, una tarjeta propia o una tabla para
+// tirar). Empieza vacía: se añaden con «＋ añadir» (que también
 // ordena o las quita todas), se mueven arrastrando su barra (o con las
 // flechas, desde su ⠿), cambian de tamaño por la esquina de abajo a la
 // derecha, se les cambia el título y el color con ✎ (o con doble clic en
@@ -373,9 +374,169 @@
                 window.ocDados.tirar(f, f);
             }
         });
-        const nota = crear("p", "oc-hoja-nota", "El registro, las tiradas guardadas y la bandeja, en la ventana de los"
-            + " dados (el botón de arriba).");
+        const nota = crear("p", "oc-hoja-nota", "Las tiradas salen en la ventana «registro de tiradas»; las guardadas y"
+            + " la bandeja, en los dados de arriba.");
         dentro.append(fila, formula, nota);
+    }
+
+    // ---- EL REGISTRO DE TIRADAS: las últimas (de los dados, los
+    // monstruos, la iniciativa…), la de ahora arriba; cada una con
+    // «repetir» y ✕, y «borrar todo». ----
+    function montarRegistro(dentro) {
+        const cabeza = crear("div", "oc-dados-cabeza-historial");
+        cabeza.appendChild(crear("p", "oc-hoja-nota", "La última, arriba."));
+        const borrar = botonDe("oc-dados-borrar-todo", "borrar todo", () => {
+            if (window.ocDados && window.ocDados.borrarRegistro) {
+                window.ocDados.borrarRegistro();
+            }
+        }, "Borrar todas las tiradas");
+        cabeza.appendChild(borrar);
+        const lista = crear("ol", "oc-dados-historial master-registro");
+        lista.setAttribute("aria-label", "Tiradas");
+        const pintar = (foco) => {
+            const filas = window.ocDados && window.ocDados.registro ? window.ocDados.registro((i) => pintar(i)) : [];
+            lista.replaceChildren(...filas);
+            borrar.disabled = !filas.length;
+            if (typeof foco === "number") {
+                const quedan = lista.querySelectorAll(".oc-dados-quitar");
+                (quedan[Math.min(foco, quedan.length - 1)] || borrar).focus();
+            }
+        };
+        // Al quitar la ventana (o cambiar de perfil), deja de escuchar.
+        let puesta = false;
+        const alCambiar = () => {
+            if (dentro.isConnected) {
+                puesta = true;
+                pintar();
+            } else if (puesta) {
+                document.removeEventListener("oc-dados:registro", alCambiar);
+            }
+        };
+        document.addEventListener("oc-dados:registro", alCambiar);
+        dentro.append(cabeza, lista);
+        pintar();
+    }
+
+    // ---- LA PARTY: los jugadores, a mano y deprisa: nombre, clase, PG,
+    // CA, las seis características (su bono tira 1d20+bono) y las
+    // pasivas (Percepción, Investigación y Perspicacia). ----
+    const CARACTERISTICAS = ["FUE", "DES", "CON", "INT", "SAB", "CAR"];
+    const PASIVAS = [["per", "Percepción pasiva", "👁️"], ["inv", "Investigación pasiva", "🔍"],
+        ["persp", "Perspicacia pasiva", "💭"]];
+
+    function montarParty(dentro, m) {
+        m.datos = m.datos || {};
+        m.datos.pjs = Array.isArray(m.datos.pjs) ? m.datos.pjs : [];
+        const lista = crear("ul", "master-party");
+        lista.setAttribute("aria-label", "Jugadores");
+        lista.dataset.queSolo = "si";
+        const numero = (v) => (v === "" || v === undefined || v === null || isNaN(parseInt(v, 10)) ? "" : parseInt(v, 10));
+        const campo = (pj, i, clave, texto, tipo, clase) => {
+            const et = crear("label", "master-party-campo" + (clase ? " " + clase : ""));
+            et.appendChild(crear("span", "master-party-et", texto));
+            const input = crear("input", "master-party-input");
+            input.type = tipo || "number";
+            if (input.type === "number") {
+                input.inputMode = "numeric";
+            } else {
+                input.autocomplete = "off";
+                input.maxLength = 40;
+            }
+            input.id = "master-party-" + m.id + "-" + i + "-" + clave;
+            input.value = pj[clave] === undefined ? "" : String(pj[clave]);
+            input.addEventListener("change", () => {
+                pj[clave] = input.type === "number" ? numero(input.value) : input.value.trim();
+                guardar();
+                if (input.alCambiar) {
+                    input.alCambiar();
+                }
+            });
+            et.appendChild(input);
+            return et;
+        };
+        const pintar = (foco) => {
+            lista.replaceChildren(...m.datos.pjs.map((pj, i) => {
+                const li = crear("li", "master-party-pj");
+                const quien = pj.nombre || "jugador " + (i + 1);
+                li.setAttribute("aria-label", quien);
+                const arriba = crear("div", "master-party-fila");
+                arriba.append(campo(pj, i, "nombre", "nombre", "text", "es-nombre"), campo(pj, i, "clase", "clase", "text", "es-clase"),
+                    campo(pj, i, "pg", "PG"), campo(pj, i, "pgmax", "máx"), campo(pj, i, "ca", "CA"));
+                const quitar = botonDe("master-party-quitar", "✕", () => {
+                    m.datos.pjs.splice(i, 1);
+                    guardar();
+                    pintar(Math.min(i, m.datos.pjs.length - 1));
+                    avisar("Quitado: " + quien + ".");
+                }, "Quitar a " + quien);
+                arriba.appendChild(quitar);
+                const car = crear("div", "master-party-fila es-caracteristicas");
+                CARACTERISTICAS.forEach((k) => {
+                    const c = campo(pj, i, k.toLowerCase(), k, "number", "es-car");
+                    const bono = crear("span", "master-party-bono");
+                    const ponerBono = () => {
+                        const n = numero(pj[k.toLowerCase()]);
+                        bono.replaceChildren();
+                        if (n === "") {
+                            return;
+                        }
+                        const mo = Math.floor((n - 10) / 2);
+                        const texto = (mo >= 0 ? "+" : "−") + Math.abs(mo);
+                        bono.appendChild(window.ocDadoBoton ? window.ocDadoBoton(texto, "1d20" + (mo >= 0 ? "+" : "") + mo,
+                            k + " de " + quien) : document.createTextNode(texto));
+                    };
+                    c.querySelector("input").alCambiar = ponerBono;
+                    ponerBono();
+                    const caja = crear("div", "master-party-car");
+                    caja.append(c, bono);
+                    car.appendChild(caja);
+                });
+                const pas = crear("div", "master-party-fila es-pasivas");
+                PASIVAS.forEach(([k, texto, emoji]) => {
+                    const c = campo(pj, i, k, texto, "number", "es-pasiva");
+                    const et = c.querySelector(".master-party-et");
+                    et.textContent = "";
+                    const em = crear("span", "", emoji + " ");
+                    em.setAttribute("aria-hidden", "true");
+                    et.append(em, document.createTextNode(texto.replace(" pasiva", "")));
+                    c.title = texto;
+                    c.querySelector("input").setAttribute("aria-label", texto + " de " + quien);
+                    pas.appendChild(c);
+                });
+                li.append(arriba, car, pas);
+                return li;
+            }));
+            vacio.hidden = !!m.datos.pjs.length;
+            resumen();
+            if (typeof foco === "number") {
+                const q = foco >= 0 ? lista.querySelectorAll(".master-party-quitar")[foco] : null;
+                (q || nuevo).focus();
+            }
+        };
+        // Lo más alto de cada pasiva en la party (para «¿alguien lo ve?»).
+        const arribaDe = crear("p", "master-party-resumen");
+        function resumen() {
+            const trozos = PASIVAS.map(([k, texto]) => {
+                const con = m.datos.pjs.filter((pj) => numero(pj[k]) !== "");
+                if (!con.length) {
+                    return "";
+                }
+                const mejor = con.reduce((a, b) => (numero(b[k]) > numero(a[k]) ? b : a));
+                return texto.replace(" pasiva", "") + " " + numero(mejor[k]) + " (" + (mejor.nombre || "sin nombre") + ")";
+            }).filter(Boolean);
+            arribaDe.textContent = trozos.length ? "La más alta: " + trozos.join(" · ") : "";
+            arribaDe.hidden = !trozos.length;
+        }
+        lista.addEventListener("change", resumen);
+        const vacio = crear("p", "oc-vacio", "Todavía no hay jugadores.");
+        const nuevo = botonDe("oc-vida-accion es-principal", "＋ jugador", () => {
+            m.datos.pjs.push({});
+            guardar();
+            pintar();
+            const inputs = lista.querySelectorAll(".es-nombre input");
+            inputs[inputs.length - 1].focus();
+        }, "Añadir un jugador");
+        dentro.append(arribaDe, lista, vacio, nuevo);
+        pintar();
     }
 
     // ---- UNA TARJETA PROPIA: un título y un texto con formato, que se
@@ -460,7 +621,26 @@
     // su CA y sus PG en «richi-oc-iniciativa»). ----
     const VDS = ["0", "1/8", "1/4", "1/2"].concat(Array.from({ length: 30 }, (x, i) => String(i + 1)));
 
-    function aLaIniciativa(b, boton) {
+    // «Lobo», y si ya hay uno, «Lobo 1» y «Lobo 2» (y «Lobo 3»…). «lista»
+    // son los nombres que ya hay; «renombrar(viejo, nuevo)» cambia el que
+    // estaba sin número.
+    function conNumero(base, nombres, renombrar) {
+        const patron = new RegExp("^" + base.replace(/[.*+?^${}()|[\]\\]/g, "\\$&") + "(?: (\\d+))?$");
+        const iguales = nombres.map((n) => patron.exec(n)).filter(Boolean);
+        if (!iguales.length) {
+            return base;
+        }
+        let mayor = Math.max(0, ...iguales.map((x) => parseInt(x[1] || "0", 10)));
+        if (iguales.some((x) => !x[1]) && renombrar) {
+            // El que no tenía número, el 1 (o el siguiente, si ya hay un 1).
+            const ya = iguales.some((x) => x[1] === "1");
+            renombrar(base, base + " " + (ya ? mayor + 1 : 1));
+            mayor = ya ? mayor + 1 : Math.max(mayor, 1);
+        }
+        return base + " " + (mayor + 1);
+    }
+
+    function aLaIniciativa(b, boton, nombreBase) {
         const CLAVE_INI = "richi-oc-iniciativa";
         let datos = { lista: [], turno: -1, ronda: 1 };
         try {
@@ -468,9 +648,17 @@
         } catch (e) {
             // Sin almacenamiento: no se puede apuntar.
         }
-        // Si ya hay uno con ese nombre, el siguiente lleva número.
-        const iguales = datos.lista.filter((c) => c.nombre === b.nombre || c.nombre.indexOf(b.nombre + " ") === 0).length;
-        const nombre = b.nombre + (iguales ? " " + (iguales + 1) : "");
+        // Si ya hay uno con ese nombre, llevan número (Lobo 1, Lobo 2…).
+        // Una del tablero va con su nombre («Lobo 2», «Elminster») si no
+        // está ya.
+        const nombres = datos.lista.map((c) => c.nombre);
+        const nombre = nombreBase && nombres.indexOf(nombreBase) < 0 ? nombreBase : conNumero(b.nombre, nombres, (viejo, nuevo) => {
+            datos.lista.forEach((c) => {
+                if (c.nombre === viejo) {
+                    c.nombre = nuevo;
+                }
+            });
+        });
         const bono = parseInt(b.ini, 10) || 0;
         const r = window.ocDados ? window.ocDados.tirar("1d20" + (bono ? (bono > 0 ? "+" : "") + bono : ""),
             "iniciativa de " + nombre) : null;
@@ -588,6 +776,9 @@
     // «🎲» para tirar la recarga), lo de x/día, las acciones legendarias y
     // los conjuros de x/día.
     function perfil(b, f, alTablero, guardado) {
+        // El nombre que tiene en el tablero (se cambia con ✎: el «Mago»
+        // puede ser Elminster); si no, el suyo.
+        const quien = () => (guardado && guardado.nombre && guardado.nombre()) || b.nombre;
         const usos = (guardado && guardado.usos) || {};
         const alCambiar = () => {
             if (guardado) {
@@ -597,15 +788,25 @@
         };
         const repintables = [];
         const caja = crear("div", "master-bicho");
-        caja.appendChild(crear("p", "master-bicho-tipo", b.tipo + ", " + b.alin));
+        const tipo = crear("p", "master-bicho-tipo", b.tipo + ", " + b.alin);
+        caja.appendChild(tipo);
+        if (guardado && guardado.nombre) {
+            // En el tablero, qué es de verdad (si se le ha cambiado el
+            // nombre) y un botón para cambiárselo.
+            const cambiar = botonDe("master-bicho-renombrar", "✎ nombre", () => guardado.renombrar(cambiar),
+                "Cambiar el nombre de " + quien());
+            cambiar.setAttribute("aria-haspopup", "dialog");
+            tipo.prepend(crear("strong", "", b.nombre + " · "));
+            tipo.appendChild(cambiar);
+        }
         const fila = (dl, que, valor) => {
             if (valor === undefined || valor === "") {
                 return;
             }
             dl.append(crear("dt", "", que), crear("dd", "", String(valor)));
         };
-        const sumar = botonDe("oc-vida-accion es-principal", "＋ a la iniciativa", () => aLaIniciativa(b, sumar),
-            "Añadir " + b.nombre + " a la iniciativa (tira su iniciativa)");
+        const sumar = botonDe("oc-vida-accion es-principal", "＋ a la iniciativa", () => aLaIniciativa(b, sumar, quien()),
+            "Añadir " + quien() + " a la iniciativa (tira su iniciativa)");
         const botones = crear("div", "master-bicho-botones");
         botones.appendChild(sumar);
         if (alTablero) {
@@ -698,12 +899,20 @@
             return div;
         };
         const paneles = [["estadísticas", stats]];
-        [["rasgos", "rasgos"], ["acciones", "acciones"], ["adicionales", "bonus"], ["reacciones", "reacciones"],
+        if (b.rasgos && b.rasgos.length) {
+            const panel = crear("div", "master-bicho-panel");
+            b.rasgos.forEach((r) => panel.appendChild(entrada(r, "rasgos")));
+            paneles.push(["rasgos", panel]);
+        }
+        // LAS ACCIONES: acciones, adicionales, reacciones y legendarias en
+        // una pestaña, con un desplegable para elegir cuáles se ven.
+        const partes = [];
+        [["acciones", "acciones"], ["adicionales", "acciones adicionales"], ["reacciones", "reacciones"],
             ["legendarias", "legendarias"]].forEach(([k, titulo]) => {
             if (!b[k] || !b[k].length) {
                 return;
             }
-            const panel = crear("div", "master-bicho-panel");
+            const parte = crear("div", "master-bicho-parte");
             let lista = b[k];
             if (k === "legendarias" && b.legInfo) {
                 const cuantas = parseInt((/Usos de acción legendaria:\* (\d+)/.exec(b.legInfo) || [])[1], 10) || 3;
@@ -712,18 +921,56 @@
                 const c = casillas(usos, "legendarias", cuantas, "acciones legendarias", alCambiar);
                 repintables.push(c);
                 p.appendChild(c);
-                panel.append(p, markdown(b.legInfo));
+                parte.append(p, markdown(b.legInfo));
             }
             if (k === "acciones" || k === "adicionales") {
                 const t = tablaDeAtaques(lista);
                 if (t) {
-                    panel.appendChild(t);
+                    parte.appendChild(t);
                     lista = lista.filter((r) => t.atacantes.indexOf(r) < 0);
                 }
             }
-            lista.forEach((r) => panel.appendChild(entrada(r, k)));
-            paneles.push([titulo, panel]);
+            lista.forEach((r) => parte.appendChild(entrada(r, k)));
+            partes.push([titulo, parte]);
         });
+        const uid = "bicho-" + Math.random().toString(36).slice(2, 8);
+        if (partes.length) {
+            const panel = crear("div", "master-bicho-panel");
+            let deAhora = (guardado && guardado.parte) || 0;
+            if (deAhora >= partes.length) {
+                deAhora = 0;
+            }
+            if (partes.length > 1) {
+                const fila = crear("div", "master-bicho-ver");
+                const etVer = crear("label", "oc-dados-etiqueta", "ver");
+                const ver = crear("select", "oc-dados-elegir");
+                ver.id = uid + "-ver";
+                etVer.htmlFor = ver.id;
+                partes.forEach(([titulo], i) => {
+                    const o = crear("option", "", titulo);
+                    o.value = String(i);
+                    ver.appendChild(o);
+                });
+                ver.value = String(deAhora);
+                ver.addEventListener("change", () => {
+                    const i = parseInt(ver.value, 10) || 0;
+                    partes.forEach(([, parte], j) => {
+                        parte.hidden = j !== i;
+                    });
+                    if (guardado) {
+                        guardado.parte = i;
+                        guardado.guardar();
+                    }
+                });
+                fila.append(etVer, ver);
+                panel.appendChild(fila);
+            }
+            partes.forEach(([, parte], j) => {
+                parte.hidden = j !== deAhora;
+                panel.appendChild(parte);
+            });
+            paneles.push(["acciones", panel]);
+        }
         if (b.conjuros) {
             const panel = crear("div", "master-bicho-panel");
             panel.appendChild(markdown(b.conjuros.t));
@@ -772,33 +1019,47 @@
             paneles.push(["hechizos", panel]);
         }
 
-        // Qué parte se ve: un desplegable (una sola línea).
-        const uid = "bicho-" + Math.random().toString(36).slice(2, 8);
+        // LAS PESTAÑAS: estadísticas, rasgos, acciones y hechizos (las que
+        // tenga), con las flechas para ir de una a otra.
         let actual = (guardado && guardado.pestana) || 0;
         if (actual >= paneles.length) {
             actual = 0;
         }
-        const lista = crear("div", "master-bicho-ver");
-        const etVer = crear("label", "oc-dados-etiqueta", "ver");
-        const ver = crear("select", "oc-dados-elegir");
-        ver.id = uid + "-ver";
-        etVer.htmlFor = ver.id;
-        paneles.forEach(([titulo, panel], i) => {
-            const o = crear("option", "", titulo);
-            o.value = String(i);
-            ver.appendChild(o);
+        const lista = crear("div", "master-bicho-pestanas");
+        lista.setAttribute("role", "tablist");
+        lista.setAttribute("aria-label", "Partes del perfil de " + quien());
+        const pestanas = paneles.map(([titulo, panel], i) => {
+            const t = botonDe("master-bicho-pestana", titulo, () => elegir(i, false));
+            t.setAttribute("role", "tab");
+            t.id = uid + "-t" + i;
             panel.id = uid + "-p" + i;
-            panel.setAttribute("role", "region");
-            panel.setAttribute("aria-label", titulo + " de " + b.nombre);
+            t.setAttribute("aria-controls", panel.id);
+            panel.setAttribute("role", "tabpanel");
+            panel.setAttribute("aria-labelledby", t.id);
+            panel.tabIndex = 0;
+            t.addEventListener("keydown", (e) => {
+                const d = { ArrowRight: 1, ArrowLeft: -1, Home: -i, End: paneles.length - 1 - i }[e.key];
+                if (d === undefined) {
+                    return;
+                }
+                e.preventDefault();
+                elegir((i + d + paneles.length) % paneles.length, true);
+            });
+            lista.appendChild(t);
+            return t;
         });
-        ver.addEventListener("change", () => elegir(parseInt(ver.value, 10) || 0));
-        lista.append(etVer, ver);
-        function elegir(i) {
+        function elegir(i, foco) {
             actual = i;
-            ver.value = String(i);
+            pestanas.forEach((t, j) => {
+                t.setAttribute("aria-selected", j === i ? "true" : "false");
+                t.tabIndex = j === i ? 0 : -1;
+            });
             paneles.forEach(([, panel], j) => {
                 panel.hidden = j !== i;
             });
+            if (foco) {
+                pestanas[i].focus();
+            }
             if (guardado) {
                 guardado.pestana = i;
                 guardado.guardar();
@@ -806,7 +1067,7 @@
         }
         caja.appendChild(lista);
         paneles.forEach(([, panel]) => caja.appendChild(panel));
-        elegir(actual);
+        elegir(actual, false);
         enlazarConjuros(caja);
         if (f) {
             caja.appendChild(crear("p", "oc-hoja-nota master-fuente", f));
@@ -821,12 +1082,27 @@
         dentro.appendChild(crear("p", "oc-hoja-nota", "Cargando…"));
         pedir("/datos/personajes/compendio/bestiario.json").then((datos) => {
             const b = (datos.monstruos || []).find((x) => x.en === m.datos.en);
-            const guardado = { usos: m.datos.usos || {}, pestana: m.datos.pestana || 0, guardar() {
-                m.datos.usos = guardado.usos;
-                m.datos.pestana = guardado.pestana;
-                guardar();
-            } };
-            dentro.replaceChildren(b ? perfil(b, "", null, guardado) : crear("p", "oc-vacio", "No encuentro esa criatura."));
+            const guardado = { usos: m.datos.usos || {}, pestana: m.datos.pestana || 0, parte: m.datos.parte || 0,
+                guardar() {
+                    m.datos.usos = guardado.usos;
+                    m.datos.pestana = guardado.pestana;
+                    m.datos.parte = guardado.parte;
+                    guardar();
+                },
+                // Su nombre es el título de la ventana (✎ nombre lo cambia,
+                // como el ✎ de la barra).
+                nombre: () => m.titulo || (b && b.nombre) || "",
+                renombrar: (vuelta) => personalizar(m, vuelta) };
+            const pintarla = () => {
+                const foco = dentro.contains(document.activeElement) ? document.activeElement.className : "";
+                dentro.replaceChildren(b ? perfil(b, "", null, guardado) : crear("p", "oc-vacio", "No encuentro esa criatura."));
+                const otro = foco && dentro.querySelector("." + foco.split(" ")[0]);
+                if (otro) {
+                    otro.focus();
+                }
+            };
+            m.alRenombrar = pintarla;
+            pintarla();
         }).catch(() => {
             dentro.replaceChildren(crear("p", "oc-vacio", "No he podido cargar el bestiario."));
         });
@@ -876,7 +1152,16 @@
                         const cerrar = window.ocVentana.abrir({ titulo: x.b.nombre, vuelta: b, clase: "es-regla",
                             cuerpo: perfil(x.b, datos.fuente, () => {
                                 cerrar();
-                                anadir("criatura", { titulo: x.b.nombre, datos: { en: x.b.en }, w: 440, h: 520 });
+                                const titulo = conNumero(x.b.nombre, estado.modulos.filter((m) => m.tipo === "criatura")
+                                    .map((m) => m.titulo || ""), (viejo, nuevo) => {
+                                    estado.modulos.forEach((m) => {
+                                        if (m.tipo === "criatura" && m.titulo === viejo) {
+                                            m.titulo = nuevo;
+                                            ponerTitulo(m);
+                                        }
+                                    });
+                                });
+                                anadir("criatura", { titulo, datos: { en: x.b.en }, w: 440, h: 520 });
                             }) });
                     });
                     b.setAttribute("aria-haspopup", "dialog");
@@ -1269,7 +1554,9 @@
         tienda: { nombre: "tienda", emoji: "💰", w: 520, h: 560, montar: montarTienda },
         criatura: { nombre: "criatura", emoji: "🐾", oculto: true, w: 440, h: 520, montar: montarCriatura },
         monedas: { nombre: "conversor de monedas", emoji: "🪙", w: 420, h: 440, montar: montarMonedas },
+        party: { nombre: "party (jugadores)", emoji: "🛡️", unico: true, w: 600, h: 440, montar: montarParty },
         dados: { nombre: "dados", emoji: "🎲", w: 360, h: 230, montar: montarDados },
+        registro: { nombre: "registro de tiradas", emoji: "📜", unico: true, w: 340, h: 420, montar: montarRegistro },
         notas: { nombre: "notas", emoji: "📝", unico: true, w: 420, h: 420,
             montar: (d) => window.ocMontar.notas(d, { soloNotas: true }) },
         tarjeta: { nombre: "tarjeta", emoji: "📌", w: 360, h: 280, montar: montarTarjeta },
@@ -1395,6 +1682,9 @@
             ponerColor(m);
             guardar();
             cerrar();
+            if (m.alRenombrar) {
+                m.alRenombrar();
+            }
             avisar("Guardado.");
         });
         const cerrar = window.ocVentana.abrir({ titulo: "título y color", cuerpo, vuelta, foco: input });
@@ -1763,11 +2053,16 @@
     const mandosPestanas = crear("div", "master-pestanas-mandos");
     mandosPestanas.append(botonNueva, botonRenombrar, botonCerrar);
     pestanas.append(tablist, mandosPestanas);
-    lienzo.before(pestanas);
 
+    // Todo en una línea: las pestañas a la izquierda; «＋ añadir» y los
+    // dados (que pone personajes.js en la barra), a la derecha.
     const mandos = crear("div", "master-barra-mandos");
     mandos.append(botonAnadir);
-    barra.prepend(mandos);
+    const dados = barra.querySelector(".oc-boton-dados");
+    if (dados) {
+        mandos.appendChild(dados);
+    }
+    barra.prepend(pestanas, mandos);
 
     lienzo.classList.add("con-lienzo");
     pintarPestanas(false);

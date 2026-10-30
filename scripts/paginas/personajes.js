@@ -2397,48 +2397,55 @@ document.querySelectorAll(".oc-ataques th[data-oc-desc]").forEach((th) => {
         flotanteSale = setTimeout(pintar, estado.tresD ? 1000 : 0);
     }
 
-    function pintarHistorial() {
-        historial.replaceChildren(...estado.tiradas.map((r, i) => {
-            const li = crear("li", "oc-dados-tirada" + (r.critico ? " es-critico" : "") + (r.pifia ? " es-pifia" : ""));
-            li.dataset.id = r.id;
-            const cabeza = crear("p", "oc-dados-que");
-            cabeza.append(crear("span", "oc-dados-que-nombre", r.que),
-                crear("span", "oc-dados-formula", r.formulaVista || formulaParaVer(r.formula)));
-            const total = crear("p", "oc-dados-total", String(r.total));
-            if (r.unidad) {
-                total.appendChild(crear("span", "oc-dados-unidad", r.unidad));
-            }
-            if (r.nota) {
-                total.appendChild(crear("span", "oc-dados-natural", r.nota));
-            }
-            // El daño, separado por tipo, cada uno con su color.
-            const tipos = crear("p", "oc-dados-tipos");
-            (r.tipos || []).forEach((x) => {
-                tipos.appendChild(crear("span", "oc-dano oc-dano-" + claveDeTipo(x.tipo), x.total + " " + x.tipo));
-            });
-            const botones = crear("div", "oc-dados-tirada-botones");
-            // Tirada de un d20 en normal: con ▲ y ▼ se le añade ventaja o
-            // desventaja (sin tirar otra vez lo demás).
-            if (r.d20 && r.d20.modo === "normal") {
-                botones.append(
-                    botonDe("oc-dados-ventaja", "▲ ventaja", () => cambiarModo(r, "ventaja"),
-                        "Añadir ventaja a: " + r.que + ", " + r.total),
-                    botonDe("oc-dados-ventaja", "▼ desventaja", () => cambiarModo(r, "desventaja"),
-                        "Añadir desventaja a: " + r.que + ", " + r.total));
-            }
+    // Una tirada del registro: qué, fórmula, total, el daño por tipos, el
+    // desglose y sus botones. «alQuitar» la borra (en la ventana de los
+    // dados o en la ventana «registro de tiradas» de la pantalla de máster).
+    function filaDeTirada(r, i, alQuitar) {
+        const li = crear("li", "oc-dados-tirada" + (r.critico ? " es-critico" : "") + (r.pifia ? " es-pifia" : ""));
+        li.dataset.id = r.id;
+        const cabeza = crear("p", "oc-dados-que");
+        cabeza.append(crear("span", "oc-dados-que-nombre", r.que),
+            crear("span", "oc-dados-formula", r.formulaVista || formulaParaVer(r.formula)));
+        const total = crear("p", "oc-dados-total", String(r.total));
+        if (r.unidad) {
+            total.appendChild(crear("span", "oc-dados-unidad", r.unidad));
+        }
+        if (r.nota) {
+            total.appendChild(crear("span", "oc-dados-natural", r.nota));
+        }
+        // El daño, separado por tipo, cada uno con su color.
+        const tipos = crear("p", "oc-dados-tipos");
+        (r.tipos || []).forEach((x) => {
+            tipos.appendChild(crear("span", "oc-dano oc-dano-" + claveDeTipo(x.tipo), x.total + " " + x.tipo));
+        });
+        const botones = crear("div", "oc-dados-tirada-botones");
+        // Tirada de un d20 en normal: con ▲ y ▼ se le añade ventaja o
+        // desventaja (sin tirar otra vez lo demás).
+        if (r.d20 && r.d20.modo === "normal") {
             botones.append(
-                botonDe("oc-dados-guardar", "☆", () => apuntarGuardada(r.que, [{ formula: r.formula, que: r.que }]),
-                    "Guardar esta tirada: " + r.que),
-                botonDe("oc-dados-repetir", "↻ repetir", () => tirar(r.formula, r.que), "Repetir: " + r.que),
-                botonDe("oc-dados-quitar", "✕", () => quitar(r.id, i), "Borrar esta tirada: " + r.que + ", " + r.total));
-            li.append(cabeza, total);
-            if (tipos.childNodes.length) {
-                li.appendChild(tipos);
-            }
-            li.append(crear("p", "oc-dados-desglose", r.desglose), botones);
-            return li;
-        }));
+                botonDe("oc-dados-ventaja", "▲ ventaja", () => cambiarModo(r, "ventaja"),
+                    "Añadir ventaja a: " + r.que + ", " + r.total),
+                botonDe("oc-dados-ventaja", "▼ desventaja", () => cambiarModo(r, "desventaja"),
+                    "Añadir desventaja a: " + r.que + ", " + r.total));
+        }
+        botones.append(
+            botonDe("oc-dados-guardar", "☆", () => apuntarGuardada(r.que, [{ formula: r.formula, que: r.que }]),
+                "Guardar esta tirada: " + r.que),
+            botonDe("oc-dados-repetir", "↻ repetir", () => tirar(r.formula, r.que), "Repetir: " + r.que),
+            botonDe("oc-dados-quitar", "✕", () => alQuitar(r.id, i), "Borrar esta tirada: " + r.que + ", " + r.total));
+        li.append(cabeza, total);
+        if (tipos.childNodes.length) {
+            li.appendChild(tipos);
+        }
+        li.append(crear("p", "oc-dados-desglose", r.desglose), botones);
+        return li;
+    }
+
+    function pintarHistorial() {
+        historial.replaceChildren(...estado.tiradas.map((r, i) => filaDeTirada(r, i, quitar)));
         borrarTodo.disabled = !estado.tiradas.length;
+        // Para la ventana «registro de tiradas» de la pantalla de máster.
+        document.dispatchEvent(new CustomEvent("oc-dados:registro"));
     }
 
     function quitar(id, i) {
@@ -2539,6 +2546,24 @@ document.querySelectorAll(".oc-ataques th[data-oc-desc]").forEach((th) => {
     window.ocDados = {
         tirar,
         tirarVarias,
+        // El registro, para pintarlo en otra parte (la pantalla de máster):
+        // las filas de las tiradas, borrar una y borrarlas todas. Cada
+        // cambio avisa con «oc-dados:registro».
+        registro(alQuitar) {
+            return estado.tiradas.map((r, i) => filaDeTirada(r, i, (id) => {
+                estado.tiradas = estado.tiradas.filter((x) => x.id !== id);
+                pintarHistorial();
+                avisar("Tirada borrada.");
+                if (alQuitar) {
+                    alQuitar(i);
+                }
+            }));
+        },
+        borrarRegistro() {
+            estado.tiradas = [];
+            pintarHistorial();
+            avisar("Tiradas borradas.");
+        },
         reiniciarHambre() {
             estado.reserva.hambre = parseInt((sitioDelBoton && sitioDelBoton.dataset.ocHambre) || "0", 10) || 0;
             if (window.ocPartida) {
@@ -3578,6 +3603,75 @@ window.ocMontar.iniciativa = function (sitio, opciones) {
     MARCAS.forEach(([t, i]) => {
         ICONO[t] = i;
     });
+    // Qué es cada una, en corto (al pasar el ratón por encima); al
+    // pulsarla, la regla entera (reglas-dnd.json) si la hay.
+    const QUE_ES = { "concentración": "Mantiene un conjuro de concentración: lo pierde si lanza otro, queda incapacitado"
+            + " o falla la salvación de Constitución al recibir daño (CD 10 o la mitad del daño).",
+        bendecido: "Bajo un efecto que ayuda (como Bendición: suma 1d4 a sus ataques y salvaciones).",
+        maldito: "Bajo un efecto que estorba (como Perdición: resta 1d4 a sus ataques y salvaciones, o una maldición).",
+        ventaja: "Tira dos d20 y se queda con el mayor.", desventaja: "Tira dos d20 y se queda con el menor.",
+        escondido: "No se le ve ni se le oye: los ataques contra él tienen desventaja y los suyos, ventaja.",
+        agarrado: "Velocidad 0; desventaja al atacar a cualquiera que no sea quien le agarra.",
+        apresado: "Velocidad 0; desventaja en sus ataques y en las salvaciones de Destreza; los ataques contra él, con ventaja.",
+        asustado: "Desventaja en pruebas y ataques mientras ve lo que le asusta; no puede acercarse a ello.",
+        aturdido: "Incapacitado; falla las salvaciones de Fuerza y Destreza; los ataques contra él, con ventaja.",
+        cegado: "No ve: falla lo que necesite la vista; sus ataques, con desventaja; los de los demás, con ventaja.",
+        derribado: "Solo se arrastra; desventaja al atacar; ataques cuerpo a cuerpo contra él a 5 pies, con ventaja.",
+        ensordecido: "No oye: falla lo que necesite el oído.",
+        envenenado: "Desventaja en las tiradas de ataque y en las pruebas de característica.",
+        hechizado: "No puede atacar a quien le hechiza; este tiene ventaja en sus pruebas sociales con él.",
+        incapacitado: "No puede hacer acciones, acciones adicionales ni reacciones; pierde la concentración.",
+        inconsciente: "Incapacitado y derribado; falla Fuerza y Destreza; golpes a 5 pies, críticos.",
+        invisible: "No se le ve: sus ataques, con ventaja; los de los demás contra él, con desventaja.",
+        paralizado: "Incapacitado, velocidad 0; falla Fuerza y Destreza; golpes a 5 pies, críticos.",
+        petrificado: "Convertido en piedra: incapacitado, resistencia a todo el daño, no envejece.",
+        agotamiento: "Cada nivel resta 2 a sus pruebas de d20 y 5 pies a su velocidad; con 6, muere." };
+    // La regla de reglas-dnd.json que explica cada una.
+    const REGLA_DE = { "concentración": "Concentración", ventaja: "Ventaja y desventaja", desventaja: "Ventaja y desventaja",
+        escondido: "Esconderse" };
+    let reglasTexto = null;
+
+    function leerReglas() {
+        if (!reglasTexto) {
+            reglasTexto = fetch("/datos/personajes/reglas-dnd.json").then((r) => r.json()).then((d) => {
+                const porNombre = {};
+                (d.reglas || []).forEach((x) => {
+                    porNombre[x.nombre.toLowerCase()] = x.texto;
+                });
+                return porNombre;
+            }).catch(() => ({}));
+        }
+        return reglasTexto;
+    }
+
+    // Un texto con «**negrita**», párrafos y listas «- », en nodos.
+    function textoConFormato(texto) {
+        const caja = crear("div", "oc-texto");
+        String(texto || "").split(/\n{2,}/).forEach((bloque) => {
+            const lineas = bloque.split("\n");
+            const esLista = lineas.every((l) => /^- /.test(l));
+            const pon = (dentro, t) => {
+                t.split(/(\*\*[^*]+\*\*)/).forEach((trozo) => {
+                    const m = /^\*\*([^*]+)\*\*$/.exec(trozo);
+                    dentro.appendChild(m ? crear("strong", "", m[1]) : document.createTextNode(trozo));
+                });
+            };
+            if (esLista) {
+                const ul = crear("ul");
+                lineas.forEach((l) => {
+                    const li = crear("li");
+                    pon(li, l.slice(2));
+                    ul.appendChild(li);
+                });
+                caja.appendChild(ul);
+            } else {
+                const p = crear("p");
+                pon(p, bloque.replace(/\n/g, " "));
+                caja.appendChild(p);
+            }
+        });
+        return caja;
+    }
     // Las propias (las que se crean a mano), con su color y su forma, se
     // guardan para otra vez («richi-oc-marcas»).
     const FORMAS = [["●", "círculo"], ["■", "cuadrado"], ["▲", "triángulo"], ["◆", "rombo"], ["★", "estrella"], ["♥", "corazón"]];
@@ -3626,12 +3720,78 @@ window.ocMontar.iniciativa = function (sitio, opciones) {
         return li;
     }
 
+    const queEs = (mk) => {
+        const propia = propias.find((p) => p.t === mk.t);
+        return mk.d || (propia && propia.d) || QUE_ES[mk.t] || "";
+    };
+
+    // En la lista, solo el dibujo (y las rondas que le quedan, en
+    // pequeño): al pasar por encima dice qué es; al pulsarlo, su ventana.
+    function chapaCorta(mk, c) {
+        const li = crear("li", "oc-ini-marca es-corta");
+        const desc = queEs(mk);
+        const b = botonDe("oc-ini-marca-boton", "", () => verMarca(mk, c, b),
+            textoMarca(mk) + (desc ? ": " + desc : ""));
+        b.title = textoMarca(mk) + (desc ? "\n" + desc : "");
+        b.setAttribute("aria-haspopup", "dialog");
+        b.appendChild(dibujoDe(mk) || crear("span", "oc-ini-marca-dibujo", "●"));
+        if (mk.r) {
+            const r = crear("span", "oc-ini-marca-rondas", String(mk.r));
+            r.setAttribute("aria-hidden", "true");
+            b.appendChild(r);
+        }
+        li.appendChild(b);
+        return li;
+    }
+
     function chapasDe(c) {
         const ul = crear("ul", "oc-ini-marcas");
         ul.setAttribute("aria-label", "Marcas de " + c.nombre);
-        marcasDe(c).forEach((mk) => ul.appendChild(chapa(mk)));
+        marcasDe(c).forEach((mk) => ul.appendChild(chapaCorta(mk, c)));
         ul.hidden = !marcasDe(c).length;
         return ul;
+    }
+
+    // La ventana de una marca: su dibujo en grande, las rondas, qué es (la
+    // regla entera si la hay) y «quitar».
+    function verMarca(mk, c, vuelta) {
+        const cuerpo = crear("div", "oc-regla-ventana oc-ini-marca-ventana");
+        const grande = crear("p", "oc-regla-ventana-dibujo");
+        grande.setAttribute("aria-hidden", "true");
+        const d = dibujoDe(mk);
+        if (d) {
+            grande.appendChild(d);
+        }
+        cuerpo.appendChild(grande);
+        cuerpo.appendChild(crear("p", "oc-hoja-nota", c.nombre + (mk.r ? " · le quedan " + mk.r + (mk.r === 1 ? " ronda" : " rondas")
+            : " · sin límite de rondas")));
+        const texto = crear("div", "oc-ini-marca-que");
+        texto.appendChild(crear("p", "", queEs(mk) || "Una marca propia, sin descripción."));
+        cuerpo.appendChild(texto);
+        const regla = REGLA_DE[mk.t] || (ICONO[mk.t] ? mk.t : "");
+        if (regla && !mk.d) {
+            leerReglas().then((porNombre) => {
+                const t = porNombre[regla.toLowerCase()];
+                if (t) {
+                    texto.replaceChildren(textoConFormato(t));
+                }
+            });
+        }
+        const quitarla = botonDe("oc-vida-accion", "✕ quitar la marca", () => {
+            const i = marcasDe(c).indexOf(mk);
+            if (i >= 0) {
+                marcasDe(c).splice(i, 1);
+            }
+            guardar();
+            cerrar();
+            pintar();
+            avisar("Quitada: " + mk.t + " de " + c.nombre + ".");
+            const visible = Array.from(caja.querySelectorAll('.oc-ini-fila[data-id="' + CSS.escape(c.id) + '"] .es-marcas'))
+                .find((x) => x.offsetParent);
+            (visible || vuelta).focus();
+        });
+        cuerpo.appendChild(quitarla);
+        const cerrar = window.ocVentana.abrir({ titulo: textoMarca(mk), cuerpo, vuelta, clase: "es-regla" });
     }
 
     function editarMarcas(c, vuelta) {
@@ -3716,6 +3876,12 @@ window.ocMontar.iniciativa = function (sitio, opciones) {
         rondas.min = "1";
         rondas.inputMode = "numeric";
         etR.htmlFor = rondas.id;
+        const etD = crear("label", "oc-dados-etiqueta es-desc", "qué hace (opcional)");
+        const desc = crear("input", "oc-dados-texto es-desc");
+        desc.id = "oc-ini-marca-desc";
+        desc.placeholder = "+2 a la CA mientras rece…";
+        desc.autocomplete = "off";
+        etD.htmlFor = desc.id;
         const poner = crear("button", "oc-vida-accion es-principal", "＋ poner");
         poner.type = "submit";
         // Su color y su forma (para las nuevas).
@@ -3754,7 +3920,7 @@ window.ocMontar.iniciativa = function (sitio, opciones) {
         guardarla.checked = true;
         etGuardar.append(guardarla, document.createTextNode(" guardarla para otra vez"));
         aspecto.append(filaC, filaF, etGuardar);
-        form.append(etT, texto, etR, rondas, poner, aspecto);
+        form.append(etT, texto, etR, rondas, etD, desc, poner, aspecto);
         form.addEventListener("submit", (e) => {
             e.preventDefault();
             const t = texto.value.trim();
@@ -3763,13 +3929,19 @@ window.ocMontar.iniciativa = function (sitio, opciones) {
                 return;
             }
             const yaPropia = propias.find((p) => p.t === t);
+            const d = desc.value.trim();
             if (!ICONO[t] && guardarla.checked && !yaPropia) {
-                propias.push({ t, c: color, f: forma });
+                propias.push(d ? { t, c: color, f: forma, d } : { t, c: color, f: forma });
                 guardarPropias();
             }
-            marcasDe(c).push(ICONO[t] || yaPropia || guardarla.checked ? { t, r: numeroDe(rondas.value) || null }
-                : { t, r: numeroDe(rondas.value) || null, c: color, f: forma });
+            const nueva = ICONO[t] || yaPropia || guardarla.checked ? { t, r: numeroDe(rondas.value) || null }
+                : { t, r: numeroDe(rondas.value) || null, c: color, f: forma };
+            if (d && (ICONO[t] || yaPropia || !guardarla.checked)) {
+                nueva.d = d;
+            }
+            marcasDe(c).push(nueva);
             texto.value = "";
+            desc.value = "";
             guardar();
             rehacer();
             pintar();
@@ -3945,9 +4117,23 @@ window.ocMontar.iniciativa = function (sitio, opciones) {
             asa.title = "Arrástralo para cambiarlo de sitio";
             asa.addEventListener("pointerdown", (e) => empezarArrastre(e, li, i));
             const quien = crear("div", "oc-ini-quien");
-            const n = crear("span", "oc-ini-nombre", c.nombre);
-            // El color, dicho para el lector.
-            n.appendChild(crear("span", "visually-hidden", " (" + nombreDeColor(colorDe(c)) + ")"));
+            // El nombre se cambia aquí mismo (el «Mago» del bestiario puede
+            // ser Elminster).
+            const n = crear("input", "oc-ini-nombre es-campo");
+            n.value = c.nombre;
+            n.maxLength = 60;
+            n.autocomplete = "off";
+            n.setAttribute("aria-label", "Nombre (" + nombreDeColor(colorDe(c)) + ")");
+            n.addEventListener("change", () => {
+                const nuevo = n.value.trim();
+                if (!nuevo) {
+                    n.value = c.nombre;
+                    return;
+                }
+                c.nombre = nuevo;
+                guardar();
+                avisar("Ahora se llama " + nuevo + ".");
+            });
             quien.append(n, chapasDe(c));
             if (i === datos.turno) {
                 quien.prepend(crear("span", "oc-ini-le-toca", "▶ le toca"));
@@ -3955,7 +4141,7 @@ window.ocMontar.iniciativa = function (sitio, opciones) {
             const datosC = crear("div", "oc-ini-datos");
             datosC.append(numeroEn(c, "ini", "ini", i), numeroEn(c, "ca", "CA", i), numeroEn(c, "pg", "PG", i));
             const mandos = crear("div", "oc-ini-mandos");
-            const bMarcas = botonDe("oc-ini-mando es-marcas", "🏷", () => editarMarcas(c, bMarcas), "Marcas de " + c.nombre);
+            const bMarcas = botonDe("oc-ini-mando es-marcas", "⭐", () => editarMarcas(c, bMarcas), "Marcas de " + c.nombre);
             bMarcas.setAttribute("aria-haspopup", "dialog");
             mandos.append(bMarcas,
                 botonDe("oc-ini-mando es-subir", "↑", () => mover(i, i - 1, ".es-subir"), "Subir a " + c.nombre),
@@ -3995,6 +4181,7 @@ window.ocMontar.iniciativa = function (sitio, opciones) {
         toca.style.borderLeftColor = colorDe(ahora);
         listaC.replaceChildren(...datos.lista.map((c, i) => {
             const li = crear("li", "oc-ini-fila es-combate" + (i === datos.turno ? " es-su-turno" : ""));
+            li.dataset.id = c.id;
             li.style.borderLeftColor = colorDe(c);
             if (i === datos.turno) {
                 li.setAttribute("aria-current", "true");
@@ -4019,7 +4206,7 @@ window.ocMontar.iniciativa = function (sitio, opciones) {
             };
             datosC.append(botonDe("oc-ini-mando", "−", () => sumar(-1), "Quitar 1 PG a " + c.nombre), pgCaja,
                 botonDe("oc-ini-mando", "+", () => sumar(1), "Sumar 1 PG a " + c.nombre));
-            const bMarcas = botonDe("oc-ini-mando es-marcas", "🏷", () => editarMarcas(c, bMarcas), "Marcas de " + c.nombre);
+            const bMarcas = botonDe("oc-ini-mando es-marcas", "⭐", () => editarMarcas(c, bMarcas), "Marcas de " + c.nombre);
             bMarcas.setAttribute("aria-haspopup", "dialog");
             const mandos = crear("div", "oc-ini-mandos");
             mandos.appendChild(bMarcas);
@@ -4091,7 +4278,7 @@ window.ocMontar.iniciativa = function (sitio, opciones) {
     const mandos = crear("div", "oc-vida-descansos");
     mandos.append(empezar, ordenar, vaciar);
     const leyenda = crear("p", "oc-hoja-nota", "Arrastra por el ⠿ (o usa ↑ y ↓) para cambiar el orden. Iniciativa, CA y"
-        + " PG son opcionales; 🏷 pone marcas (estados, concentración, conjuros…).");
+        + " PG son opcionales; ⭐ pone marcas (estados, concentración, conjuros…).");
     // Las dos pestañas: preparar y combate.
     const barraModos = crear("div", "oc-ini-modos");
     barraModos.setAttribute("role", "tablist");
@@ -4328,13 +4515,18 @@ window.ocMontar.reglas = function (sitio, idBuscar) {
     // Qué se tira: lo que haya en negrita al principio de su párrafo, o
     // el título del desplegable o de la ventana.
     function nombreDe(b) {
+        // Los que ya dicen qué son entero (la party de la pantalla de máster).
+        if (b.closest("[data-que-solo]")) {
+            return "";
+        }
         const caja = b.closest("p, li, td, dd, .oc-texto, details");
         const fuerte = caja && caja.querySelector("strong");
         let n = fuerte ? fuerte.textContent : "";
         if (!n) {
             const det = b.closest("details");
             const ven = b.closest("[role=dialog], .master-ventana");
-            n = det ? (det.querySelector("summary") || {}).textContent || "" : ven ? (ven.querySelector("h2") || {}).textContent || "" : "";
+            n = det ? (det.querySelector("summary") || {}).textContent || ""
+                : ven ? (ven.querySelector(".master-ventana-nombre, h2") || {}).textContent || "" : "";
         }
         return n.replace(/[.:]\s*$/, "").trim();
     }

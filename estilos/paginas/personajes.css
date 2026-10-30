@@ -4290,6 +4290,29 @@ button.oc-casilla[data-estado="libre"]:hover {
     font-weight: 700;
 }
 
+/* En «preparar», el nombre se cambia ahí mismo: un campo que parece
+   texto hasta que se pasa por encima o se escribe en él. */
+.oc-ini-nombre.es-campo {
+    flex: 1 1 8rem;
+    min-width: 0;
+    min-height: 32px;
+    padding: 2px 4px;
+    border: 1px dashed transparent;
+    background: transparent;
+    font: inherit;
+    font-weight: 700;
+}
+
+.oc-ini-nombre.es-campo:hover {
+    border-color: var(--border);
+}
+
+.oc-ini-nombre.es-campo:focus-visible {
+    border-color: var(--yellow);
+    outline: 2px solid var(--yellow);
+    outline-offset: 1px;
+}
+
 .oc-ini-le-toca {
     padding: 0 6px;
     background: var(--yellow);
@@ -4538,6 +4561,70 @@ button.oc-casilla[data-estado="libre"]:hover {
     line-height: 1;
 }
 
+/* En la lista, solo el dibujo (las rondas que le quedan, en una
+   esquinita): al pasar por encima dice qué es; al pulsarlo, su ventana. */
+.oc-ini-marca.es-corta {
+    padding: 0;
+    border: 0;
+}
+
+.oc-ini-marca-boton {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 32px;
+    min-height: 32px;
+    padding: 0 4px;
+    border: 1px solid var(--yellow);
+    background: transparent;
+    color: var(--yellow);
+    cursor: pointer;
+}
+
+.oc-ini-marca-boton .oc-ini-marca-dibujo {
+    margin: 0;
+}
+
+.oc-ini-marca-boton:hover {
+    border-width: 2px;
+}
+
+.oc-ini-marca-boton:focus-visible {
+    outline: 2px solid var(--yellow);
+    outline-offset: 2px;
+}
+
+.oc-ini-marca-rondas {
+    position: absolute;
+    right: -5px;
+    bottom: -5px;
+    min-width: 15px;
+    padding: 0 2px;
+    background: var(--yellow);
+    color: var(--yellow-contrast);
+    font-family: var(--fuente-mono);
+    font-size: 0.625rem;
+    font-weight: 700;
+    line-height: 15px;
+    text-align: center;
+}
+
+.oc-ini-marca-que {
+    margin-bottom: 12px;
+}
+
+/* «qué hace», a todo lo ancho debajo del nombre y las rondas. */
+.oc-ini-marca-nueva .oc-dados-etiqueta.es-desc {
+    grid-row: 3;
+    grid-column: 1 / -1;
+}
+
+.oc-ini-marca-nueva .oc-dados-texto.es-desc {
+    grid-row: 4;
+    grid-column: 1 / -1;
+}
+
 .oc-ini-marca-buscador {
     display: flex;
     flex-direction: column;
@@ -4615,6 +4702,8 @@ button.oc-casilla[data-estado="libre"]:hover {
 
     .oc-ini-marca-nueva .oc-dados-etiqueta,
     .oc-ini-marca-nueva .oc-dados-texto,
+    .oc-ini-marca-nueva .oc-dados-etiqueta.es-desc,
+    .oc-ini-marca-nueva .oc-dados-texto.es-desc,
     .oc-ini-marca-nueva button {
         grid-row: auto;
     }

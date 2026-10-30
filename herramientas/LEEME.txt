@@ -4223,7 +4223,7 @@
       en preparar se añade, se ordena y se quita; «⚔️ empezar el combate»
       pasa a la otra, con la ronda, a quién le toca en grande, «◀ anterior»
       y «siguiente ▶» (retroceder deshace también la ronda), los PG con
-      − y + y «🏁 terminar el combate». MARCAS (🏷 en cada uno): las de un
+      − y + y «🏁 terminar el combate». MARCAS (⭐ en cada uno): las de un
       toque (concentración, bendecido, maldito, ventaja, los estados…) o
       una a mano, con rondas si se quiere; al empezar cada ronda se les
       quita una y, a 0, se acaban (se avisa). Se guardan con cada uno
@@ -4234,6 +4234,14 @@
       «guardarla para otra vez» quedan en la lista («richi-oc-marcas»).
       En el combate, las marcas de a quien le toca salen también en
       grande, debajo de su nombre.
+    · En la lista, cada marca es SOLO SU DIBUJO (con las rondas que le
+      quedan en una esquinita): al pasar el ratón dice qué es y qué hace
+      (QUE_ES en personajes.js; las propias, con su «qué hace (opcional)»,
+      que se guarda como «d»); al pulsarla abre su ventana con la regla
+      entera (reglas-dnd.json: los estados, «Concentración», «Ventaja y
+      desventaja», «Esconderse») y «✕ quitar la marca».
+    · En «preparar», el NOMBRE de cada uno se cambia ahí mismo (es un
+      campo): el «Mago» del bestiario puede ser Elminster.
     · DADOS EN LOS TEXTOS (personajes.js: ocDadosEnTexto): en las fichas y
       en la pantalla de máster, cada «2d6 + 3» de un texto es un botón que
       lo tira (con el nombre de lo que haya en negrita delante); en los
@@ -4290,7 +4298,9 @@
   LA PANTALLA DE MÁSTER (web/pantalla_master/pantalla_master.html, en
   la barra lateral bajo «roleito»): un lienzo con ventanas para dirigir.
   Empieza VACÍA y sin textos (el título de la página solo lo leen los
-  lectores de pantalla): arriba solo «＋ añadir» y el botón de los dados.
+  lectores de pantalla): arriba, en UNA LÍNEA, las pestañas de los
+  perfiles (a la izquierda) y «＋ añadir» y el botón de los dados (a la
+  derecha; pantalla-master.js mete el de los dados en .master-barra-mandos).
   «＋ añadir» abre una ventana para elegir qué poner, y debajo, si ya hay
   algo, «▦ ordenar las ventanas» (en filas, sin solaparse) y «🗑️ quitar
   todas» (pide pulsar dos veces). Cada ventana se mueve arrastrando su
@@ -4306,6 +4316,15 @@
       todas las reglas, ✨ conjuros (buscador por nombre, nivel, escuela y
       clase sobre datos/personajes/compendio/conjuros-srd.json: los 339
       del SRD 5.2; cada uno abre su ventana) y 📝 notas: solo una de cada.
+    · 🛡️ party (jugadores): una tarjeta por jugador con nombre, clase, PG
+      (y máx), CA, las seis características (su bono es un dado que tira
+      1d20+bono) y las pasivas (Percepción, Investigación y Perspicacia);
+      arriba, la más alta de cada pasiva y de quién es. Solo una.
+    · 📜 registro de tiradas: el registro de la ventana de los dados en su
+      propia ventana (la última arriba, «repetir», ✕ y «borrar todo»).
+      personajes.js lo da con window.ocDados.registro(alQuitar) y
+      borrarRegistro(), y avisa de cada cambio con «oc-dados:registro».
+      Solo una.
     · 🎲 dados (d4–d100 y una fórmula), 📌 tarjeta (texto propio, con
       negrita, cursiva y listas) y 🔮 tabla para tirar (una cosa por línea;
       «tirar» saca una al azar): tantas como se quiera.
@@ -4314,18 +4333,22 @@
       datos/personajes/compendio/bestiario.json. Se buscan por nombre (en
       español o en inglés), VD y tipo; cada uno abre su perfil en una
       ventana con «＋ a la iniciativa», que tira su iniciativa y lo apunta
-      (en rojo, con su CA y sus PG; si se repite, con número: «Goblin
-      guerrero 2»). La iniciativa se entera por el evento
+      (en rojo, con su CA y sus PG; si se repite, todos con número: el
+      primero pasa a «Lobo 1» y el nuevo es «Lobo 2»; conNumero en
+      pantalla-master.js). Una criatura del tablero va con el nombre de su
+      ventana («Lobo 2», «Elminster»). La iniciativa se entera por el evento
       «oc-iniciativa:cambio» (personajes.js).
-    · EL PERFIL DE UN MONSTRUO va por partes, que se eligen en un
-      desplegable («ver», en una sola línea): estadísticas, rasgos,
-      acciones (los ataques en una tabla: ataque, bono, alcance y daño, con
-      los dados que se tiran), bonus, reacciones, legendarias y hechizos
-      (ordenados; cada uno abre la ventana del conjuro). Lo que se gasta
+    · EL PERFIL DE UN MONSTRUO va en PESTAÑAS (las que tenga):
+      estadísticas, rasgos, acciones y hechizos (ordenados; cada uno abre
+      la ventana del conjuro). Dentro de «acciones», un desplegable («ver»,
+      en una línea) elige cuáles: acciones (los ataques en una tabla:
+      ataque, bono, alcance y daño, con los dados que se tiran), acciones
+      adicionales, reacciones y legendarias. Lo que se gasta
       lleva casillas que se marcan al pulsarlas: lo de recarga (con «🎲
       recarga», que tira 1d6 y la recupera si sale), lo de x/día, los usos
       de acción legendaria y los conjuros de x/día; «↺ recuperar usos» las
-      vacía. En una criatura del tablero se guardan (y la pestaña abierta);
+      vacía. En una criatura del tablero se guardan (y la pestaña y la
+      parte de las acciones abiertas: «pestana» y «parte»);
       en la ventana del bestiario, solo mientras está abierta. Los
       conjuros de los monstruos van aparte en bestiario.json («conjuros»:
       la frase, dónde se lanzan y las listas con sus usos).
@@ -4358,7 +4381,10 @@
   cada objeto abre su ventana con sus datos, el precio de lista, el de la
   tienda y el regateo (un % propio, con −20 … +20 %). En el bestiario,
   «📌 al tablero» deja la criatura como ventana (tipo «criatura», que no
-  sale en «＋ añadir»).
+  sale en «＋ añadir»); si ya hay una igual, con número (Lobo 1, Lobo
+  2…). Su nombre es el título de la ventana: «✎ nombre» (al lado de lo
+  que es) o el ✎ de la barra lo cambian, y arriba sigue diciendo qué
+  monstruo es de verdad.
   Para añadir una ventana nueva: una entrada en MODULOS (nombre, emoji,
   unico, w, h, montar(cuerpo, modulo)). Estilos: estilos/paginas/pantalla-master.css
   (usa también personajes.css). actualizar-cabeceras.py le pone sus hojas
