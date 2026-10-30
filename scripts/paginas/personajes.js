@@ -180,6 +180,411 @@ document.querySelectorAll(".oc-ataques th[data-oc-desc]").forEach((th) => {
 });
 
 // =========================================
+// LOS DADOS EN 3D
+// =========================================
+// Al tirar, los dados ruedan por la pantalla y se paran enseñando lo que ha
+// salido (el resultado ya está echado antes: esto solo lo enseña). Sin
+// librerías: un motor 3D pequeñito en un <canvas> que dibuja cada dado con
+// su forma (d4 tetraedro, d6 cubo, d8 octaedro, d10 trapezoedro, d12
+// dodecaedro, d20 icosaedro, el d2 como una moneda y los dF de Fate como
+// cubos con +, − y nada). Las caras salen de los vértices (caras(): las de
+// un sólido convexo), con sus números, y al final la del resultado queda
+// mirando a la pantalla, un poco inclinada.
+//
+// Es solo para la vista (aria-hidden y sin ratón): el lector de pantalla
+// dice la tirada como siempre. Se apaga con el botón «3D» de la ventana de
+// los dados (y empieza apagado si el sistema pide menos movimiento).
+// La usa la ventana de los dados de abajo: window.ocDados3d.lanzar(dados),
+// con dados = [{caras: 20, valor: 17}, {caras: 10, valor: 3, color:
+// "hambre"}, {caras: "F", valor: "+"}, …].
+
+(function () {
+    const PHI = (1 + Math.sqrt(5)) / 2;
+    const resta = (a, b) => [a[0] - b[0], a[1] - b[1], a[2] - b[2]];
+    const suma = (a, b) => [a[0] + b[0], a[1] + b[1], a[2] + b[2]];
+    const por = (a, k) => [a[0] * k, a[1] * k, a[2] * k];
+    const punto = (a, b) => a[0] * b[0] + a[1] * b[1] + a[2] * b[2];
+    const cruz = (a, b) => [a[1] * b[2] - a[2] * b[1], a[2] * b[0] - a[0] * b[2], a[0] * b[1] - a[1] * b[0]];
+    const unitario = (a) => por(a, 1 / (Math.hypot(a[0], a[1], a[2]) || 1));
+
+    // Las caras de un sólido convexo: cada plano que deja todos los
+    // vértices a un lado es una cara; sus vértices, en orden alrededor.
+    function caras(vertices) {
+        const salida = [];
+        const vistas = new Set();
+        const n = vertices.length;
+        for (let i = 0; i < n; i++) {
+            for (let j = i + 1; j < n; j++) {
+                for (let k = j + 1; k < n; k++) {
+                    let normal = cruz(resta(vertices[j], vertices[i]), resta(vertices[k], vertices[i]));
+                    if (Math.hypot(normal[0], normal[1], normal[2]) < 1e-6) {
+                        continue;
+                    }
+                    normal = unitario(normal);
+                    let d = punto(normal, vertices[i]);
+                    let encima = 0;
+                    let debajo = 0;
+                    vertices.forEach((v) => {
+                        const s = punto(normal, v) - d;
+                        if (s > 1e-4) {
+                            encima++;
+                        } else if (s < -1e-4) {
+                            debajo++;
+                        }
+                    });
+                    if (encima && debajo) {
+                        continue;
+                    }
+                    if (encima) {
+                        normal = por(normal, -1);
+                        d = -d;
+                    }
+                    const en = [];
+                    vertices.forEach((v, x) => {
+                        if (Math.abs(punto(normal, v) - d) < 1e-4) {
+                            en.push(x);
+                        }
+                    });
+                    const clave = en.slice().sort((a, b) => a - b).join(",");
+                    if (vistas.has(clave)) {
+                        continue;
+                    }
+                    vistas.add(clave);
+                    const centro = por(en.reduce((s, x) => suma(s, vertices[x]), [0, 0, 0]), 1 / en.length);
+                    const ref = unitario(resta(vertices[en[0]], centro));
+                    const otro = cruz(normal, ref);
+                    en.sort((a, b) => {
+                        const pa = resta(vertices[a], centro);
+                        const pb = resta(vertices[b], centro);
+                        return Math.atan2(punto(pa, otro), punto(pa, ref)) - Math.atan2(punto(pb, otro), punto(pb, ref));
+                    });
+                    // Lo «de arriba» de la cara (para escribir su número
+                    // derecho): hacia su primer vértice.
+                    let radio = Infinity;
+                    en.forEach((x, m) => {
+                        const a = vertices[x];
+                        const b = vertices[en[(m + 1) % en.length]];
+                        const lado = unitario(resta(b, a));
+                        const p = resta(centro, a);
+                        const dist = Math.hypot(...resta(p, por(lado, punto(p, lado))));
+                        radio = Math.min(radio, dist);
+                    });
+                    salida.push({ idx: en, normal, centro, arriba: ref, derecha: cruz(ref, normal), radio });
+                }
+            }
+        }
+        return salida;
+    }
+
+    // Los vértices de cada dado (luego se escalan a radio 1).
+    function vertices(tipo) {
+        const s = [-1, 1];
+        if (tipo === 4) {
+            return [[1, 1, 1], [1, -1, -1], [-1, 1, -1], [-1, -1, 1]];
+        }
+        if (tipo === 6 || tipo === "F") {
+            return s.flatMap((x) => s.flatMap((y) => s.map((z) => [x, y, z])));
+        }
+        if (tipo === 8) {
+            return [[1, 0, 0], [-1, 0, 0], [0, 1, 0], [0, -1, 0], [0, 0, 1], [0, 0, -1]];
+        }
+        if (tipo === 10) {
+            // Dos coronas de cinco (una girada 36°) y dos puntas, a la
+            // altura justa para que cada cara (una cometa) sea plana.
+            const z0 = 0.105;
+            const corona = (i, z, giro) => [Math.cos((i * 72 + giro) * Math.PI / 180),
+                Math.sin((i * 72 + giro) * Math.PI / 180), z];
+            const a0 = corona(0, z0, 0);
+            const b0 = corona(0, -z0, 36);
+            const a1 = corona(1, z0, 0);
+            const n = cruz(resta(b0, a0), resta(a1, a0));
+            const punta = z0 + (n[0] * a0[0] + n[1] * a0[1]) / n[2];
+            const vs = [[0, 0, punta], [0, 0, -punta]];
+            for (let i = 0; i < 5; i++) {
+                vs.push(corona(i, z0, 0), corona(i, -z0, 36));
+            }
+            return vs;
+        }
+        if (tipo === 12) {
+            const vs = s.flatMap((x) => s.flatMap((y) => s.map((z) => [x, y, z])));
+            s.forEach((a) => s.forEach((b) => {
+                vs.push([0, a / PHI, b * PHI], [a / PHI, b * PHI, 0], [a * PHI, 0, b / PHI]);
+            }));
+            return vs;
+        }
+        if (tipo === 20) {
+            const vs = [];
+            s.forEach((a) => s.forEach((b) => {
+                vs.push([0, a, b * PHI], [a, b * PHI, 0], [a * PHI, 0, b]);
+            }));
+            return vs;
+        }
+        // El d2: una moneda (un prisma de 16 lados, plano).
+        const vs = [];
+        for (let i = 0; i < 16; i++) {
+            const a = i * Math.PI / 8;
+            vs.push([Math.cos(a), Math.sin(a), 0.16], [Math.cos(a), Math.sin(a), -0.16]);
+        }
+        return vs;
+    }
+
+    const SOLIDOS = {};
+
+    function solido(tipo) {
+        if (!SOLIDOS[tipo]) {
+            const vs = vertices(tipo);
+            const r = Math.max(...vs.map((v) => Math.hypot(v[0], v[1], v[2])));
+            const escalados = vs.map((v) => por(v, 1 / r));
+            const todas = caras(escalados);
+            // Las caras con número: todas, salvo el canto de la moneda.
+            const numeradas = tipo === 2 ? todas.filter((c) => c.idx.length > 4) : todas;
+            SOLIDOS[tipo] = { vertices: escalados, caras: todas, numeradas };
+        }
+        return SOLIDOS[tipo];
+    }
+
+    // Lo que pone en cada cara de cada dado.
+    function etiquetas(dado) {
+        if (dado.caras === "F") {
+            return ["+", "+", "−", "−", "", ""];
+        }
+        if (dado.caras === "decenas") {
+            return ["00", "10", "20", "30", "40", "50", "60", "70", "80", "90"];
+        }
+        if (dado.caras === "unidades") {
+            return ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"];
+        }
+        return Array.from({ length: dado.caras }, (_, i) => String(i + 1));
+    }
+
+    function tipoDe(caras) {
+        if (caras === "decenas" || caras === "unidades") {
+            return 10;
+        }
+        return [2, 4, 6, 8, 10, 12, 20, "F"].includes(caras) ? caras : 6;
+    }
+
+    // ---- LAS GIRAS (matrices de 3×3, por filas) ----
+    function girar(eje, angulo) {
+        const [x, y, z] = unitario(eje);
+        const c = Math.cos(angulo);
+        const s = Math.sin(angulo);
+        const t = 1 - c;
+        return [[t * x * x + c, t * x * y - s * z, t * x * z + s * y],
+            [t * x * y + s * z, t * y * y + c, t * y * z - s * x],
+            [t * x * z - s * y, t * y * z + s * x, t * z * z + c]];
+    }
+
+    const aplicar = (m, v) => [punto(m[0], v), punto(m[1], v), punto(m[2], v)];
+
+    function componer(a, b) {
+        return a.map((fila) => [0, 1, 2].map((j) => fila[0] * b[0][j] + fila[1] * b[1][j] + fila[2] * b[2][j]));
+    }
+
+    // ---- EL LIENZO ----
+    let lienzo = null;
+    let ctx = null;
+    let dados = [];
+    let empieza = 0;
+    let pedido = 0;
+    const RUEDA = 1100;
+    const QUIETOS = 1700;
+    const SE_VA = 450;
+
+    function colorDe(nombre, porDefecto) {
+        const valor = getComputedStyle(document.documentElement).getPropertyValue(nombre).trim() || porDefecto;
+        ctx.fillStyle = "#000";
+        ctx.fillStyle = valor;
+        const hex = ctx.fillStyle;
+        const m = /^#([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})$/i.exec(hex);
+        if (m) {
+            return [parseInt(m[1], 16), parseInt(m[2], 16), parseInt(m[3], 16)];
+        }
+        const n = (hex.match(/[\d.]+/g) || [0, 0, 0]).map(Number);
+        return n.slice(0, 3);
+    }
+
+    function montar() {
+        lienzo = document.createElement("canvas");
+        lienzo.className = "oc-dados-3d";
+        lienzo.setAttribute("aria-hidden", "true");
+        document.body.appendChild(lienzo);
+        ctx = lienzo.getContext("2d");
+    }
+
+    function medir() {
+        const dpr = window.devicePixelRatio || 1;
+        lienzo.width = Math.round(window.innerWidth * dpr);
+        lienzo.height = Math.round(window.innerHeight * dpr);
+        lienzo.style.width = window.innerWidth + "px";
+        lienzo.style.height = window.innerHeight + "px";
+        return dpr;
+    }
+
+    // Dónde caen: en la parte de la pantalla que no tapa la ventana de los
+    // dados.
+    function zona() {
+        const ventana = document.getElementById("oc-dados");
+        const ancho = window.innerWidth;
+        let x = ancho / 2;
+        if (ventana && !ventana.hidden && ancho > 700) {
+            const r = ventana.getBoundingClientRect();
+            x = r.left + r.width / 2 > ancho / 2 ? r.left / 2 : (r.right + ancho) / 2;
+        }
+        return { x, y: window.innerHeight * 0.55 };
+    }
+
+    function lanzar(lista) {
+        if (!lista || !lista.length) {
+            return;
+        }
+        if (!lienzo) {
+            montar();
+        }
+        medir();
+        const raiz = parseFloat(getComputedStyle(document.documentElement).fontSize) || 16;
+        const visibles = lista.slice(0, 20);
+        const lado = Math.max(34, Math.min(60, raiz * 2.6, (window.innerWidth - 40) / 7 / 1.7));
+        const porFila = Math.max(1, Math.min(visibles.length, Math.floor(Math.min(window.innerWidth - 40, 760)
+            / (lado * 2.4))));
+        const filas = Math.ceil(visibles.length / porFila);
+        const centro = zona();
+        const tema = {
+            cuerpo: colorDe("--yellow", "#f5d76e"),
+            tinta: colorDe("--yellow-contrast", "#1a1423"),
+        };
+        dados = visibles.map((d, i) => {
+            const tipo = tipoDe(d.caras);
+            const s = solido(tipo);
+            const nombres = etiquetas(d);
+            // La cara del resultado: una cualquiera; las demás, con los otros
+            // números revueltos.
+            const final = Math.floor(Math.random() * s.numeradas.length);
+            const valor = d.caras === "F" && String(d.valor) === "0" ? "" : String(d.valor);
+            let resto = nombres.slice();
+            const cual = resto.indexOf(valor);
+            if (cual >= 0) {
+                resto.splice(cual, 1);
+            }
+            resto = resto.sort(() => Math.random() - 0.5);
+            const letras = new Map();
+            s.numeradas.forEach((c, j) => {
+                letras.set(c, j === final ? valor : (resto.pop() || ""));
+            });
+            // Al final: esa cara hacia la pantalla, derecha, y un poco
+            // inclinada para que se vea que es un dado.
+            const cara = s.numeradas[final];
+            const derecha = cruz(cara.arriba, cara.normal);
+            const deFrente = [derecha, cara.arriba, cara.normal];
+            const inclinado = componer(componer(girar([1, 0, 0], -0.32), girar([0, 1, 0], (Math.random() - 0.5) * 0.6)),
+                componer(girar([0, 0, 1], (Math.random() - 0.5) * 0.35), deFrente));
+            const fila = Math.floor(i / porFila);
+            const enFila = Math.min(porFila, visibles.length - fila * porFila);
+            const destino = {
+                x: centro.x + (i % porFila - (enFila - 1) / 2) * lado * 2.4,
+                y: centro.y + (fila - (filas - 1) / 2) * lado * 2.5,
+            };
+            // Los de Vampiro, con sus colores de siempre en cualquier tema:
+            // negros los normales y rojo sangre los de hambre.
+            const color = d.color === "hambre" ? [168, 14, 28] : d.color === "vampiro" ? [34, 30, 40] : tema.cuerpo;
+            const tinta = d.color === "hambre" || d.color === "vampiro" ? [255, 255, 255] : tema.tinta;
+            return {
+                s, letras, final: inclinado, destino, lado: lado * (tipo === 4 ? 1.15 : tipo === 2 ? 0.95 : 1),
+                desde: { x: destino.x + (Math.random() - 0.5) * 500, y: destino.y - 260 - Math.random() * 160 },
+                eje: [Math.random() - 0.5, Math.random() - 0.5, Math.random() - 0.5],
+                vueltas: (3 + Math.random() * 2.5) * Math.PI * 2,
+                retraso: i * 35, color, tinta, tipo,
+            };
+        });
+        empieza = performance.now();
+        cancelAnimationFrame(pedido);
+        pedido = requestAnimationFrame(pintar);
+    }
+
+    const LUZ = unitario([-0.45, 0.6, 0.85]);
+
+    function pintar(ahora) {
+        const dpr = window.devicePixelRatio || 1;
+        if (lienzo.width !== Math.round(window.innerWidth * dpr)) {
+            medir();
+        }
+        ctx.setTransform(1, 0, 0, 1, 0, 0);
+        ctx.clearRect(0, 0, lienzo.width, lienzo.height);
+        const pasado = ahora - empieza;
+        const total = RUEDA + QUIETOS + SE_VA + dados.length * 35;
+        if (pasado > total) {
+            dados = [];
+            return;
+        }
+        ctx.globalAlpha = pasado > total - SE_VA ? Math.max(0, (total - pasado) / SE_VA) : 1;
+        dados.forEach((d) => pintarDado(d, Math.min(1, Math.max(0, (pasado - d.retraso) / RUEDA)), dpr));
+        pedido = requestAnimationFrame(pintar);
+    }
+
+    function pintarDado(d, t, dpr) {
+        const suave = 1 - Math.pow(1 - t, 3);
+        // Los botes: cada vez más bajitos.
+        const bote = Math.abs(Math.sin(t * Math.PI * 2.6)) * Math.pow(1 - t, 2) * 120;
+        const x = d.desde.x + (d.destino.x - d.desde.x) * suave;
+        const y = d.desde.y + (d.destino.y - d.desde.y) * Math.min(1, t * 1.6) - bote;
+        const giro = componer(girar(d.eje, d.vueltas * (1 - suave)), d.final);
+        const foco = d.lado * 7;
+        const proyectar = (v) => {
+            const p = aplicar(giro, v);
+            const k = foco / (foco - p[2] * d.lado);
+            return [(x + p[0] * d.lado * k) * dpr, (y - p[1] * d.lado * k) * dpr];
+        };
+        // La sombra.
+        ctx.fillStyle = "rgba(0, 0, 0, 0.28)";
+        ctx.beginPath();
+        ctx.ellipse(d.destino.x * dpr, (d.destino.y + d.lado * 1.05) * dpr, d.lado * (0.9 - bote / 400) * dpr,
+            d.lado * 0.22 * dpr, 0, 0, Math.PI * 2);
+        ctx.fill();
+        const puntos = d.s.vertices.map(proyectar);
+        d.s.caras.forEach((c) => {
+            const n = aplicar(giro, c.normal);
+            if (n[2] <= 0.01) {
+                return;
+            }
+            const luz = 0.42 + 0.58 * Math.max(0, punto(n, LUZ));
+            ctx.setTransform(1, 0, 0, 1, 0, 0);
+            ctx.beginPath();
+            c.idx.forEach((v, m) => (m ? ctx.lineTo(...puntos[v]) : ctx.moveTo(...puntos[v])));
+            ctx.closePath();
+            ctx.fillStyle = "rgb(" + d.color.map((x) => Math.round(x * luz)).join(",") + ")";
+            ctx.fill();
+            ctx.lineWidth = 1.5 * dpr;
+            ctx.lineJoin = "round";
+            ctx.strokeStyle = "rgba(" + d.tinta.join(",") + ",0.7)";
+            ctx.stroke();
+            const texto = d.letras.get(c);
+            if (!texto || n[2] < 0.3) {
+                return;
+            }
+            // El número, en el plano de su cara: tres puntos proyectados
+            // dan cómo se estira y se gira.
+            const o = proyectar(c.centro);
+            const ex = proyectar(suma(c.centro, por(c.derecha, 0.01)));
+            const ey = proyectar(suma(c.centro, por(c.arriba, -0.01)));
+            ctx.setTransform(ex[0] - o[0], ex[1] - o[1], ey[0] - o[0], ey[1] - o[1], o[0], o[1]);
+            const tam = c.radio * (texto.length > 1 ? 0.95 : 1.25) * 100;
+            ctx.font = "700 " + tam + "px system-ui, sans-serif";
+            ctx.textAlign = "center";
+            ctx.textBaseline = "middle";
+            ctx.fillStyle = "rgb(" + d.tinta.join(",") + ")";
+            // El 6 y el 9 con su rayita, para no confundirlos.
+            ctx.fillText(texto, 0, tam * 0.05);
+            if ((texto === "6" || texto === "9") && d.tipo !== 6) {
+                ctx.fillRect(-tam * 0.28, tam * 0.42, tam * 0.56, tam * 0.08);
+            }
+        });
+        ctx.setTransform(1, 0, 0, 1, 0, 0);
+    }
+
+    window.ocDados3d = { lanzar };
+})();
+
+// =========================================
 // LOS DADOS
 // =========================================
 // Un lanzador de dados, como el de D&D Beyond, de dos maneras:
@@ -214,7 +619,11 @@ document.querySelectorAll(".oc-ataques th[data-oc-desc]").forEach((th) => {
     // los botones de debajo del post-it): cambia cómo se tira (ver
     // herramientas/0-comun/sistemas_rol.py).
     const SISTEMA = (sitioDelBoton && sitioDelBoton.dataset.ocSistema) || "dnd5e";
+    // Los dados en 3D: encendidos, salvo que se hayan apagado o que el
+    // sistema pida menos movimiento.
+    const menosMovimiento = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     const estado = { mano: {}, modo: "normal", tiradas: [], cuenta: 0, sonido: leer("richi-dados-sonido") !== "no",
+        tresD: leer("richi-dados-3d") ? leer("richi-dados-3d") === "si" : !menosMovimiento,
         reserva: { atributo: null, habilidad: null, extra: 0,
             hambre: parseInt((sitioDelBoton && sitioDelBoton.dataset.ocHambre) || "0", 10) || 0 } };
 
@@ -374,6 +783,8 @@ document.querySelectorAll(".oc-ataques th[data-oc-desc]").forEach((th) => {
         let total = 0;
         const partes = [];
         let d20 = null;
+        // Cada dado y lo que ha sacado, para los dados en 3D.
+        const dados3d = [];
         // Lo de cada tipo de daño, por separado (en el orden en que salen).
         const tipos = [];
         const sumar = (tipo, n) => {
@@ -401,6 +812,7 @@ document.querySelectorAll(".oc-ataques th[data-oc-desc]").forEach((th) => {
                 if (estado.modo !== "normal") {
                     ponerModo(d20, estado.modo);
                 }
+                d20.valores.forEach((v) => dados3d.push({ caras: 20, valor: v }));
                 total += t.signo * d20.queda;
                 partes.push(d20);
                 return;
@@ -410,12 +822,19 @@ document.querySelectorAll(".oc-ataques th[data-oc-desc]").forEach((th) => {
                 // Los de Fate: −, 0 o + (−1, 0 o 1).
                 const x = t.caras === "F" ? alAzar(3) - 2 : alAzar(t.caras);
                 salen.push(t.caras === "F" ? ["−", "0", "+"][x + 1] : x);
+                if (t.caras === 100) {
+                    // El d100, como se tira: las decenas y las unidades.
+                    dados3d.push({ caras: "decenas", valor: String(Math.floor((x % 100) / 10) * 10).padStart(2, "0") },
+                        { caras: "unidades", valor: x % 10 });
+                } else {
+                    dados3d.push({ caras: t.caras, valor: t.caras === "F" ? salen[salen.length - 1] : x });
+                }
                 total += t.signo * x;
                 sumar(t.tipo, t.signo * x);
             }
             partes.push({ texto: signo + t.cuantos + "d" + t.caras + " [" + salen.join(", ") + "]" });
         });
-        const r = guardarTirada({ que: que || "tirada", formula: String(formula), total, partes, d20, tipos });
+        const r = guardarTirada({ que: que || "tirada", formula: String(formula), total, partes, d20, tipos, dados3d });
         if (trozos.some((t) => t.caras === "F")) {
             r.nota = escalera(total);
         }
@@ -431,12 +850,24 @@ document.querySelectorAll(".oc-ataques th[data-oc-desc]").forEach((th) => {
     }
 
     function terminar(r) {
+        enTresD(r.dados3d);
         sonar();
         if (r.critico || r.pifia) {
             sonarFinal(r.critico);
         }
         anadir(r);
         return r;
+    }
+
+    // Los dados rodando en 3D (si están encendidos y el navegador puede).
+    function enTresD(lista) {
+        if (estado.tresD && lista && lista.length && window.ocDados3d) {
+            try {
+                window.ocDados3d.lanzar(lista);
+            } catch (e) {
+                // Si falla el dibujo, la tirada vale igual.
+            }
+        }
     }
 
     // LA ESCALERA DE FATE (la misma que en sistemas_rol.py).
@@ -464,7 +895,9 @@ document.querySelectorAll(".oc-ataques th[data-oc-desc]").forEach((th) => {
         const parejas = Math.floor(dieces / 2);
         const exitos = todos.filter((x) => x >= 6).length + parejas * 2;
         const r = guardarTirada({ que: que || "reserva", formula: formula || "v5:" + n, total: exitos,
-            unidad: exitos === 1 ? "éxito" : "éxitos", partes: [], d20: null });
+            unidad: exitos === 1 ? "éxito" : "éxitos", partes: [], d20: null,
+            dados3d: normales.map((v) => ({ caras: 10, valor: v, color: "vampiro" }))
+                .concat(deHambre.map((v) => ({ caras: 10, valor: v, color: "hambre" }))) });
         r.desglose = n + "d10 [" + (normales.join(", ") || "—") + "]" + (hambre ? " · hambre [" + deHambre.join(", ") + "]" : "");
         r.formulaVista = n + " dados" + (hambre ? ", " + hambre + " de hambre" : "");
         const sucio = parejas && deHambre.includes(10);
@@ -483,7 +916,8 @@ document.querySelectorAll(".oc-ataques th[data-oc-desc]").forEach((th) => {
         const d = alAzar(10);
         const otro = d === 10 || d === 1 ? alAzar(10) : 0;
         const dado = d === 10 ? d + otro : d === 1 ? d - otro : d;
-        const r = guardarTirada({ que: que || "tirada", formula, total: dado + base, partes: [], d20: null });
+        const r = guardarTirada({ que: que || "tirada", formula, total: dado + base, partes: [], d20: null,
+            dados3d: [{ caras: 10, valor: d }].concat(otro ? [{ caras: 10, valor: otro }] : []) });
         r.desglose = "1d10 [" + d + (d === 10 ? " + " + otro : d === 1 ? " − " + otro : "") + "]"
             + (base ? (base > 0 ? " + " : " − ") + Math.abs(base) : "");
         r.formulaVista = "1d10" + (base ? (base > 0 ? " + " : " − ") + Math.abs(base) : "");
@@ -534,6 +968,7 @@ document.querySelectorAll(".oc-ataques th[data-oc-desc]").forEach((th) => {
         }
         const antes = r.d20.queda;
         ponerModo(r.d20, modo);
+        enTresD(r.d20.valores.map((v) => ({ caras: 20, valor: v })));
         r.total += r.d20.signo * (r.d20.queda - antes);
         acabar(r);
         sonar();
@@ -674,9 +1109,15 @@ document.querySelectorAll(".oc-ataques th[data-oc-desc]").forEach((th) => {
             guardar("richi-dados-sonido", estado.sonido ? "si" : "no");
         }, "Sonido al tirar");
         sonido.setAttribute("aria-pressed", estado.sonido ? "true" : "false");
+        const tresD = botonDe("oc-dados-mando es-3d", "3D", () => {
+            estado.tresD = !estado.tresD;
+            tresD.setAttribute("aria-pressed", estado.tresD ? "true" : "false");
+            guardar("richi-dados-3d", estado.tresD ? "si" : "no");
+        }, "Dados en 3D");
+        tresD.setAttribute("aria-pressed", estado.tresD ? "true" : "false");
         const cerrar = botonDe("oc-dados-mando", "✕", () => abrir(false, true), "Cerrar los dados");
         const mandos = crear("div", "oc-dados-mandos");
-        mandos.append(sonido, cerrar);
+        mandos.append(tresD, sonido, cerrar);
         barra.append(titulo, mandos);
         arrastrable(barra);
 

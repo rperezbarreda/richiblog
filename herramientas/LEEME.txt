@@ -4052,6 +4052,18 @@
   cierran. El lector de pantalla dice cada resultado. (La barra lleva su
   clase propia, oc-dados-barra, y no la de las ventanas del sitio: esa la
   coge ventanas-plegables.js y la vuelve un botón de plegar.)
+  LOS DADOS EN 3D: al tirar, los dados ruedan por la pantalla (por
+  encima de la página, en la parte que no tapa la ventana) y se paran
+  enseñando lo que ha salido: cada uno con su forma (d4, d6, d8, d10,
+  d12, d20, el d2 como una moneda, el d100 como dos d10 —decenas y
+  unidades— y los dF de Fate como cubos con +, − y nada), con sus números
+  en las caras, del color de los botones del tema. En Vampiro, negros los
+  normales y rojos los de hambre. Es solo para verlo: el lector de
+  pantalla dice la tirada como siempre. Se encienden y se apagan con
+  «3D» en la barra de la ventana (se acuerda en ese navegador; si el
+  sistema pide menos movimiento, empiezan apagados). Sin librerías: un
+  motor 3D pequeñito en un <canvas> (personajes.js: window.ocDados3d,
+  caras() saca las caras de cada sólido de sus vértices).
   generar-personajes.py deja marcado lo que se tira (dado, prueba,
   con_dados: <span class="oc-dado" data-dados="1d20+4" data-que="sigilo">)
   y personajes.js lo convierte en botones.
