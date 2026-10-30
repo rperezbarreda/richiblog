@@ -4721,9 +4721,31 @@
                         imagen: l.toDataURL("image/png") }, { id: "c2", tipo: "capa", nombre: "notas", visible: true, opacidad: 100, imagen: "" }],
                     activa: "c2", rejilla: { ver: false, tipo: "cuadrada", tam: DUNGEON_CELDA, color: "#000000", opacidad: 40 } } });
             }, "Pasar el mapa a una ventana de dibujo, para pintar encima");
-            const copiar = botonDe("oc-vida-accion", "⧉ copiar", () => copiarTexto(Array.from(salasLista.children).map((li) => li.innerText)
-                .join("\n\n"), "Copiado el dungeon."), "Copiar las salas");
-            botones.append(alDibujo, copiar);
+            const copiar = botonDe("oc-vida-accion", "⧉ copiar las salas", () => copiarTexto(Array.from(salasLista.children).map((li) => li.innerText)
+                .join("\n\n"), "Copiado el dungeon."), "Copiar las salas (texto)");
+            // La imagen del mapa: copiarla (para pegarla en otro sitio) o
+            // descargarla en PNG.
+            const copiarImagen = botonDe("oc-vida-accion", "🖼️ copiar la imagen", () => {
+                if (!window.ClipboardItem || !navigator.clipboard || !navigator.clipboard.write) {
+                    avisar("Este navegador no deja copiar imágenes: descárgala.");
+                    return;
+                }
+                mapaLienzo.toBlob((blob) => {
+                    navigator.clipboard.write([new ClipboardItem({ "image/png": blob })])
+                        .then(() => avisar("Copiada la imagen del mapa."))
+                        .catch(() => avisar("No se ha podido copiar la imagen: descárgala."));
+                }, "image/png");
+            }, "Copiar la imagen del mapa");
+            const bajarImagen = botonDe("oc-vida-accion", "⬇ descargar la imagen", () => {
+                const a = crear("a");
+                a.href = mapaLienzo.toDataURL("image/png");
+                a.download = "dungeon-" + (d.tema || "mapa") + ".png";
+                document.body.appendChild(a);
+                a.click();
+                a.remove();
+                avisar("Descargado: " + a.download + ".");
+            }, "Descargar la imagen del mapa (PNG)");
+            botones.append(copiarImagen, bajarImagen, alDibujo, copiar);
             const arriba = crear("div", "master-nombres-form");
             arriba.append(fila, boton);
             dentro.replaceChildren(arriba, mapaLienzo, botones, salasLista,

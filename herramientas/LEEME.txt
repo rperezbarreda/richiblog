@@ -4462,7 +4462,7 @@
       (el del generador de botín; la última, un tesoro). Los monstruos y
       los objetos se abren; «⚔️ a la iniciativa» por sala; «🎨 al dibujo»
       abre una ventana de dibujo con el mapa en una capa (y otra encima
-      para apuntar); «⧉ copiar» copia las salas. Para el lector de
+      para apuntar); «🖼️ copiar la imagen» (portapapeles, PNG), «⬇ descargar la imagen» y «⧉ copiar las salas» copia las salas. Para el lector de
       pantalla, el mapa es role="img" y lo que cuenta es la lista.
     · 🪶 notas en otros idiomas: escribes lo que pone (o «🎲 nota al azar»,
       de NOTAS_AL_AZAR con nombres y lugares del generador) y se ve en un
