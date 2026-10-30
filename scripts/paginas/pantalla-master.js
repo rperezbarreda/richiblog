@@ -1256,84 +1256,387 @@
         return alAzar(l.base) + " " + alAzar(l.de);
     }
 
+    // Un grupo de botones que se comportan como opciones (uno pulsado):
+    // «opciones» [[valor, texto]], «alCambiar(valor)». Devuelve la caja,
+    // con .valor() para leerlo.
+    function botonesDe(etiqueta, opciones, valor, alCambiar) {
+        const caja = crear("div", "master-opciones");
+        caja.setAttribute("role", "group");
+        caja.setAttribute("aria-label", etiqueta);
+        let actual = valor;
+        const botones = opciones.map(([v, texto]) => {
+            const b = botonDe("master-opcion", texto, () => {
+                actual = v;
+                botones.forEach((x) => x.setAttribute("aria-pressed", String(x === b)));
+                alCambiar(v);
+            });
+            b.setAttribute("aria-pressed", String(v === valor));
+            return b;
+        });
+        caja.append(...botones);
+        caja.valor = () => actual;
+        return caja;
+    }
+
+    // Un desplegable con su etiqueta encima.
+    function elegirDe(id, texto, opciones, valor) {
+        const caja = crear("div", "master-campo");
+        const et = crear("label", "oc-dados-etiqueta", texto);
+        const x = crear("select", "master-elegir");
+        x.id = id;
+        et.htmlFor = x.id;
+        opciones.forEach(([v, n]) => {
+            const o = crear("option", "", n);
+            o.value = v;
+            x.appendChild(o);
+        });
+        x.value = valor;
+        caja.append(et, x);
+        caja.elegir = x;
+        return caja;
+    }
+
+    function copiarTexto(texto, aviso) {
+        if (navigator.clipboard) {
+            navigator.clipboard.writeText(texto).then(() => avisar(aviso || "Copiado.")).catch(() => avisar("No se ha podido copiar."));
+        }
+    }
+
     function montarNombres(dentro, m) {
         m.datos = m.datos || {};
         dentro.appendChild(crear("p", "oc-hoja-nota", "Cargando…"));
         pedir(NOMBRES).then((datos) => {
-            const form = crear("form", "master-nombres-form");
-            const sel = (id, texto, opciones, valor) => {
-                const et = crear("label", "oc-dados-etiqueta", texto);
-                const x = crear("select", "oc-dados-elegir");
-                x.id = "master-nombres-" + id + "-" + m.id;
-                et.htmlFor = x.id;
-                opciones.forEach(([v, n]) => {
-                    const o = crear("option", "", n);
-                    o.value = v;
-                    x.appendChild(o);
-                });
-                x.value = valor;
-                const caja = crear("div", "master-nombres-campo");
-                caja.append(et, x);
-                form.appendChild(caja);
-                return x;
-            };
-            const que = sel("que", "qué", [["personaje", "personaje"]].concat(Object.keys(datos.lugares)
-                .map((k) => [k, datos.lugares[k].nombre])), m.datos.que || "personaje");
-            const especie = sel("especie", "especie", Object.keys(datos.especies).map((k) => [k, datos.especies[k].nombre]),
-                m.datos.especie || "humano");
-            const genero = sel("genero", "género", [["cualquiera", "cualquiera"], ["f", "femenino"], ["m", "masculino"],
-                ["n", "neutro"]], m.datos.genero || "cualquiera");
+            const d = m.datos;
+            const tipos = [["personaje", "👤 personaje"]].concat(Object.keys(datos.lugares)
+                .map((k) => [k, ({ pueblo: "🏘️ ", taberna: "🍺 ", region: "🏔️ ", mazmorra: "🕳️ " }[k] || "") + datos.lugares[k].nombre]));
+            const que = elegirDe("master-nombres-que-" + m.id, "qué", tipos, d.que || "personaje");
+            const especie = elegirDe("master-nombres-especie-" + m.id, "especie",
+                Object.keys(datos.especies).map((k) => [k, datos.especies[k].nombre]), d.especie || "humano");
+            const genero = botonesDe("género", [["cualquiera", "cualquiera"], ["f", "♀ femenino"], ["m", "♂ masculino"],
+                ["n", "⚪ neutro"]], d.genero || "cualquiera", (v) => {
+                d.genero = v;
+                guardar();
+            });
             const etAp = crear("label", "master-nombres-apellido");
             const ap = crear("input");
             ap.type = "checkbox";
-            ap.checked = m.datos.apellido !== false;
+            ap.checked = d.apellido !== false;
             etAp.append(ap, document.createTextNode(" con apellido"));
-            form.appendChild(etAp);
-            const generar = crear("button", "oc-vida-accion es-principal", "🎲 generar");
-            generar.type = "submit";
-            form.appendChild(generar);
-            const lista = crear("ul", "master-nombres");
-            lista.setAttribute("aria-label", "Nombres");
-            lista.setAttribute("aria-live", "polite");
-            const ajustar = () => {
-                const persona = que.value === "personaje";
-                especie.parentElement.hidden = !persona;
-                genero.parentElement.hidden = !persona;
-                etAp.hidden = !persona;
-            };
-            const pintar = () => {
-                lista.replaceChildren(...(m.datos.salen || []).map((n) => {
-                    const li = crear("li", "master-nombre");
-                    li.appendChild(crear("span", "master-nombre-texto", n));
-                    const copiar = botonDe("master-party-quitar", "⧉", () => {
-                        const hecho = () => avisar("Copiado: " + n + ".");
-                        if (navigator.clipboard) {
-                            navigator.clipboard.writeText(n).then(hecho).catch(() => avisar("No se ha podido copiar."));
-                        }
-                    }, "Copiar " + n);
-                    copiar.title = "Copiar";
-                    li.appendChild(copiar);
-                    return li;
-                }));
-            };
-            que.addEventListener("change", ajustar);
-            form.addEventListener("submit", (e) => {
-                e.preventDefault();
-                Object.assign(m.datos, { que: que.value, especie: especie.value, genero: genero.value, apellido: ap.checked });
+            const persona = crear("div", "master-nombres-persona");
+            const etGen = crear("p", "oc-dados-etiqueta", "género");
+            etGen.setAttribute("aria-hidden", "true");
+            persona.append(especie, etAp, etGen, genero);
+            const generar = botonDe("oc-vida-accion es-principal master-nombres-generar", "🎲 generar 8", () => {
+                Object.assign(d, { que: que.elegir.value, especie: especie.elegir.value, genero: genero.valor(),
+                    apellido: ap.checked });
                 const salen = new Set();
                 for (let i = 0; i < 40 && salen.size < 8; i++) {
-                    salen.add(que.value === "personaje" ? nombreDe(datos, especie.value, genero.value, ap.checked)
-                        : lugarDe(datos, que.value));
+                    salen.add(d.que === "personaje" ? nombreDe(datos, d.especie, d.genero, d.apellido)
+                        : lugarDe(datos, d.que));
                 }
-                m.datos.salen = Array.from(salen);
+                d.salen = Array.from(salen);
                 guardar();
                 pintar();
+                avisar(d.salen.length + " nombres nuevos.");
             });
-            dentro.replaceChildren(form, lista);
+            const lista = crear("ul", "master-nombres");
+            lista.setAttribute("aria-label", "Nombres que han salido");
+            const guardadosT = crear("h3", "master-nombres-titulo", "⭐ guardados");
+            const guardados = crear("ul", "master-nombres es-guardados");
+            guardados.setAttribute("aria-label", "Nombres guardados");
+            const fila = (n, guardado) => {
+                const li = crear("li", "master-nombre");
+                li.appendChild(crear("span", "master-nombre-texto", n));
+                const marcar = botonDe("master-nombre-boton", guardado ? "✕" : "☆", () => {
+                    d.guardados = (d.guardados || []).filter((x) => x !== n);
+                    if (!guardado) {
+                        d.guardados.push(n);
+                    }
+                    guardar();
+                    pintar();
+                    avisar(guardado ? "Quitado: " + n + "." : "Guardado: " + n + ".");
+                }, (guardado ? "Quitar de guardados: " : "Guardar: ") + n);
+                marcar.title = guardado ? "Quitar" : "Guardar";
+                const copiar = botonDe("master-nombre-boton", "⧉", () => copiarTexto(n, "Copiado: " + n + "."), "Copiar " + n);
+                copiar.title = "Copiar";
+                li.append(marcar, copiar);
+                return li;
+            };
+            const pintar = () => {
+                const ya = new Set(d.guardados || []);
+                lista.replaceChildren(...(d.salen || []).filter((n) => !ya.has(n)).map((n) => fila(n, false)));
+                if (!lista.children.length) {
+                    lista.appendChild(crear("li", "oc-vacio", d.salen ? "Todos guardados. Genera más." : "Pulsa «generar»."));
+                }
+                guardados.replaceChildren(...(d.guardados || []).map((n) => fila(n, true)));
+                guardadosT.hidden = guardados.hidden = !guardados.children.length;
+            };
+            const ajustar = () => {
+                persona.hidden = que.elegir.value !== "personaje";
+            };
+            que.elegir.addEventListener("change", ajustar);
+            const arriba = crear("div", "master-nombres-form");
+            arriba.append(que, persona, generar);
+            dentro.replaceChildren(arriba, lista, guardadosT, guardados);
             ajustar();
             pintar();
         }).catch(() => {
             dentro.replaceChildren(crear("p", "oc-vacio", "No he podido cargar los nombres."));
+        });
+    }
+
+    // ---- NOTAS EN OTROS IDIOMAS: se escribe (o se saca al azar) lo que
+    // pone y se ve en el alfabeto de ese idioma, para enseñárselo a la
+    // mesa. Los idiomas, sus letras y sus sílabas, en
+    // datos/personajes/compendio/idiomas.json; las letras son fuentes Noto
+    // (OFL) de escrituras reales, en tipografias/noto-*.woff2. Dos formas:
+    // «letra a letra» (se puede descifrar) o «palabras inventadas» (cada
+    // palabra pasa a una del idioma, siempre la misma). ----
+    const IDIOMAS = "/datos/personajes/compendio/idiomas.json";
+    const NOTAS_AL_AZAR = [
+        "Nos vemos en {taberna} cuando suene la {hora} campanada. Ven solo.",
+        "{nombre} sabe lo que hiciste. Paga {numero} piezas de oro o hablará.",
+        "La entrada está bajo {pueblo}. No pises la tercera losa.",
+        "Aquí yace {nombre}, que entró sin llamar.",
+        "Prohibido el paso. Los intrusos serán devorados.",
+        "El cargamento cruza {region} dentro de {numero} días. Que nadie lo vea.",
+        "Si lees esto, ya es tarde.",
+        "No te fíes de {nombre}. Lleva el anillo.",
+        "{nombre}: la llave está en {mazmorra}. Quema esta nota.",
+        "Tres pasos al norte, dos al este, y cava.",
+        "Hemos perdido a {numero}. Los túneles cambian de sitio.",
+        "Por orden de {nombre}, nadie sale de {pueblo} hasta la luna nueva.",
+        "Lo que duerme bajo {region} no debe despertar.",
+        "Debo {numero} monedas en {taberna}. Si no vuelvo, que las pague {nombre}.",
+        "Al portador: dadle cama, comida y silencio.",
+        "Cuidado: el puente no aguanta a más de dos.",
+        "La puerta solo se abre a quien dice su nombre verdadero.",
+        "{nombre} no murió en {mazmorra}. Lo he visto en {pueblo}.",
+    ];
+
+    // Un número que sale siempre igual para el mismo texto.
+    function huella(texto) {
+        let h = 2166136261;
+        for (let i = 0; i < texto.length; i++) {
+            h = Math.imul(h ^ texto.charCodeAt(i), 16777619);
+        }
+        return h >>> 0;
+    }
+
+    // Cada palabra, a una inventada con las sílabas del idioma.
+    function inventar(texto, idioma) {
+        return texto.replace(/[\p{L}]+/gu, (palabra) => {
+            let h = huella(idioma.id + ":" + palabra.toLowerCase());
+            const siguiente = () => {
+                h = Math.imul(h ^ (h >>> 15), 2246822519) >>> 0;
+                return h;
+            };
+            const n = Math.max(1, Math.round(palabra.length / 3));
+            let sale = "";
+            for (let i = 0; i < n; i++) {
+                sale += idioma.silabas[siguiente() % idioma.silabas.length];
+            }
+            const mayus = palabra.charAt(0) !== palabra.charAt(0).toLowerCase();
+            return mayus ? sale.charAt(0).toUpperCase() + sale.slice(1) : sale;
+        });
+    }
+
+    // Las letras (a-z y ñ) a las del alfabeto del idioma.
+    function aSuAlfabeto(texto, idioma) {
+        if (!idioma.glifos) {
+            return texto;
+        }
+        const glifos = Array.from(idioma.glifos);
+        return Array.from(texto.replace(/ñ/gi, "\u0000").normalize("NFD").replace(/[̀-ͯ]/g, ""))
+            .map((c) => {
+                if (c === "\u0000") {
+                    return glifos[26];
+                }
+                const i = c.toLowerCase().charCodeAt(0) - 97;
+                return i >= 0 && i < 26 ? glifos[i] : c;
+            }).join("");
+    }
+
+    function notaAlAzar(nombres) {
+        const lugar = (t) => lugarDe(nombres, t);
+        return alAzar(NOTAS_AL_AZAR).replace(/\{(\w+)\}/g, (x, que) => {
+            if (que === "nombre") {
+                return nombreDe(nombres, alAzar(Object.keys(nombres.especies)), "cualquiera", alAzar([true, false]));
+            }
+            if (que === "numero") {
+                return String(alAzar([2, 3, 5, 7, 12, 20, 50, 100]));
+            }
+            if (que === "hora") {
+                return alAzar(["primera", "tercera", "sexta", "novena", "duodécima"]);
+            }
+            return nombres.lugares[que] ? lugar(que) : x;
+        });
+    }
+
+    // La nota escrita en una imagen PNG (para enseñarla o pasarla).
+    function notaEnImagen(texto, idioma, familia) {
+        const tam = 44;
+        const fuente = tam + "px \"" + familia + "\", \"Pangolin\", sans-serif";
+        return document.fonts.load(fuente, texto).then(() => {
+            const lienzo = document.createElement("canvas");
+            const ctx = lienzo.getContext("2d");
+            ctx.font = fuente;
+            const ancho = 900;
+            const lineas = [];
+            texto.split("\n").forEach((parrafo) => {
+                let linea = "";
+                parrafo.split(" ").forEach((p) => {
+                    const prueba = linea ? linea + " " + p : p;
+                    if (linea && ctx.measureText(prueba).width > ancho) {
+                        lineas.push(linea);
+                        linea = p;
+                    } else {
+                        linea = prueba;
+                    }
+                });
+                lineas.push(linea);
+            });
+            const alto = Math.round(tam * 1.6);
+            lienzo.width = ancho + 120;
+            lienzo.height = lineas.length * alto + 120;
+            ctx.fillStyle = "#efe2bf";
+            ctx.fillRect(0, 0, lienzo.width, lienzo.height);
+            ctx.strokeStyle = "#8a6a3a";
+            ctx.lineWidth = 6;
+            ctx.strokeRect(12, 12, lienzo.width - 24, lienzo.height - 24);
+            ctx.fillStyle = "#3b2a17";
+            ctx.font = fuente;
+            ctx.textBaseline = "top";
+            lineas.forEach((l, i) => ctx.fillText(l, 60, 60 + i * alto));
+            return new Promise((hecho) => lienzo.toBlob(hecho, "image/png"));
+        }).then((blob) => {
+            const a = crear("a");
+            const archivoBlob = URL.createObjectURL(blob);
+            a.href = archivoBlob;
+            a.download = "nota-" + idioma.id + ".png";
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+            setTimeout(() => URL.revokeObjectURL(archivoBlob), 1000);
+            avisar("Descargada la imagen: " + a.download + ".");
+        });
+    }
+
+    function montarIdiomas(dentro, m) {
+        m.datos = m.datos || {};
+        dentro.appendChild(crear("p", "oc-hoja-nota", "Cargando…"));
+        Promise.all([pedir(IDIOMAS), pedir(NOMBRES)]).then(([datos, nombres]) => {
+            const d = m.datos;
+            const de = (id) => datos.idiomas.find((x) => x.id === id) || datos.idiomas[1];
+            const idioma = elegirDe("master-idioma-que-" + m.id, "idioma",
+                datos.idiomas.map((x) => [x.id, x.nombre + " (" + x.alfabeto + ")"]), de(d.idioma).id);
+            const como = botonesDe("cómo se escribe", [["letras", "🔤 letra a letra"], ["inventado", "🗣️ palabras inventadas"]],
+                d.como || "letras", (v) => {
+                    d.como = v;
+                    guardar();
+                    pintar();
+                });
+            como.title = "Letra a letra: se puede descifrar. Palabras inventadas: cada palabra pasa a una de ese idioma.";
+            const etT = crear("label", "oc-dados-etiqueta", "lo que pone");
+            const texto = crear("textarea", "oc-notas-texto es-corta");
+            texto.id = "master-idioma-texto-" + m.id;
+            texto.rows = 3;
+            texto.value = d.texto || "";
+            etT.htmlFor = texto.id;
+            const azar = botonDe("oc-vida-accion", "🎲 nota al azar", () => {
+                texto.value = notaAlAzar(nombres);
+                d.texto = texto.value;
+                guardar();
+                pintar();
+                avisar("Nota nueva: " + texto.value);
+            });
+            const hoja = crear("div", "master-idioma-hoja");
+            hoja.setAttribute("role", "img");
+            const dice = crear("p", "master-idioma-dice");
+            const ver = crear("label", "master-nombres-apellido");
+            const verCaja = crear("input");
+            verCaja.type = "checkbox";
+            verCaja.checked = d.ver !== false;
+            ver.append(verCaja, document.createTextNode(" ver lo que pone debajo"));
+            const tam = d.tam || 2;
+            hoja.style.setProperty("--tam", tam + "rem");
+            const cambiaTam = (mas) => {
+                d.tam = Math.min(4, Math.max(1, (d.tam || 2) + mas));
+                hoja.style.setProperty("--tam", d.tam + "rem");
+                guardar();
+                avisar("Tamaño " + Math.round(d.tam * 50) + " %.");
+            };
+            const menos = botonDe("master-nombre-boton", "A−", () => cambiaTam(-0.25), "Letra más pequeña");
+            const mas = botonDe("master-nombre-boton", "A+", () => cambiaTam(0.25), "Letra más grande");
+            const escrito = () => {
+                const id = de(idioma.elegir.value);
+                const palabras = (d.como || "letras") === "inventado" ? inventar(texto.value, id) : texto.value;
+                return { id, palabras, letras: aSuAlfabeto(palabras, id) };
+            };
+            const ensenar = botonDe("oc-vida-accion es-principal", "👁️ enseñar", () => {
+                const e = escrito();
+                const grande = crear("div", "master-idioma-hoja es-grande es-" + e.id.id);
+                grande.textContent = e.letras;
+                grande.setAttribute("role", "img");
+                grande.setAttribute("aria-label", "Nota en " + e.id.nombre + ". Pone: " + texto.value);
+                window.ocVentana.abrir({ titulo: "Nota en " + e.id.nombre.toLowerCase(), cuerpo: grande, vuelta: ensenar,
+                    clase: "es-ancha" });
+            }, "Enseñar la nota en grande");
+            const copiar = botonDe("oc-vida-accion", "⧉ copiar", () => copiarTexto(escrito().letras, "Copiada la nota."),
+                "Copiar la nota en su alfabeto");
+            const imagen = botonDe("oc-vida-accion", "🖼️ imagen", () => {
+                const e = escrito();
+                notaEnImagen(e.letras || " ", e.id, e.id.glifos ? "Richi " + e.id.fuente : "Pangolin")
+                    .catch(() => avisar("No se ha podido hacer la imagen."));
+            }, "Descargar la nota como imagen");
+            const pintar = () => {
+                const e = escrito();
+                hoja.className = "master-idioma-hoja es-" + e.id.id;
+                hoja.textContent = e.letras || "…";
+                hoja.setAttribute("aria-label", "Nota en " + e.id.nombre + " (" + e.id.alfabeto + "). Pone: " +
+                    (texto.value || "nada todavía"));
+                dice.replaceChildren();
+                if (verCaja.checked && texto.value) {
+                    dice.append(crear("strong", "", "Pone: "), document.createTextNode(texto.value));
+                    if (e.palabras !== texto.value) {
+                        dice.append(crear("br"), crear("strong", "", "Suena: "), document.createTextNode(e.palabras));
+                    }
+                }
+                dice.hidden = !dice.childNodes.length;
+            };
+            let espera = 0;
+            texto.addEventListener("input", () => {
+                pintar();
+                clearTimeout(espera);
+                espera = setTimeout(() => {
+                    d.texto = texto.value;
+                    guardar();
+                }, 400);
+            });
+            idioma.elegir.addEventListener("change", () => {
+                d.idioma = idioma.elegir.value;
+                guardar();
+                pintar();
+            });
+            verCaja.addEventListener("change", () => {
+                d.ver = verCaja.checked;
+                guardar();
+                pintar();
+            });
+            const arriba = crear("div", "master-nombres-form");
+            arriba.append(idioma, como);
+            const escribir = crear("div", "master-idioma-escribir");
+            escribir.append(etT, texto, azar);
+            const tamanos = crear("div", "master-idioma-tam");
+            tamanos.setAttribute("role", "group");
+            tamanos.setAttribute("aria-label", "Tamaño de la letra");
+            tamanos.append(menos, mas);
+            const botones = crear("div", "master-idioma-botones");
+            botones.append(ensenar, copiar, imagen, tamanos);
+            dentro.replaceChildren(arriba, escribir, hoja, ver, dice, botones);
+            pintar();
+        }).catch(() => {
+            dentro.replaceChildren(crear("p", "oc-vacio", "No he podido cargar los idiomas."));
         });
     }
 
@@ -2352,8 +2655,10 @@
             montar: montarTienda },
         monedas: { nombre: "conversor de monedas", emoji: "🪙", grupo: "mundo", w: 420, h: 440,
             desc: "Cambiar y repartir el botín.", montar: montarMonedas },
-        nombres: { nombre: "generador de nombres", emoji: "🎭", grupo: "mundo", w: 420, h: 460,
+        nombres: { nombre: "generador de nombres", emoji: "🎭", grupo: "mundo", w: 440, h: 560,
             desc: "Personajes por especie y género, y lugares.", montar: montarNombres },
+        idiomas: { nombre: "notas en otros idiomas", emoji: "🪶", grupo: "mundo", w: 480, h: 680,
+            desc: "Escribe una nota y mírala en élfico, enano, infernal…", montar: montarIdiomas },
         tarjeta: { nombre: "post-it", emoji: "🗒️", grupo: "apuntes", w: 420, h: 340,
             desc: "Un texto con formato: negrita, listas, colores…", montar: montarTarjeta },
         notas: { nombre: "notas", emoji: "📝", grupo: "apuntes", unico: true, w: 420, h: 420,

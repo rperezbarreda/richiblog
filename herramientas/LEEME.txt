@@ -4367,8 +4367,38 @@
       sílabas inventadas): personajes por especie (humano, elfo, enano,
       mediano, gnomo, dracónido, orco, tiflin, goliat, aasimar) y género
       (o cualquiera), con apellido si se quiere, y lugares (pueblos,
-      tabernas, parajes y mazmorras). Ocho de cada vez, cada uno con ⧉
-      para copiarlo.
+      tabernas, parajes y mazmorras). Arriba, «qué» (desplegable), la
+      especie, «con apellido» y el género en botones-opción (aria-pressed;
+      botonesDe() y elegirDe() en pantalla-master.js, también para otras
+      ventanas). Ocho de cada vez, en tarjetas: ☆ lo guarda en
+      «⭐ guardados» (m.datos.guardados, se quedan aunque generes más; ✕
+      lo quita) y ⧉ lo copia.
+    · 🪶 notas en otros idiomas: escribes lo que pone (o «🎲 nota al azar»,
+      de NOTAS_AL_AZAR con nombres y lugares del generador) y se ve en un
+      pergamino con el alfabeto del idioma. Los idiomas, en
+      datos/personajes/compendio/idiomas.json: «glifos» son las letras de
+      la a a la z y la ñ, en ese orden, en el alfabeto que lo simula, y
+      «silabas», para inventar palabras. «🔤 letra a letra» cambia cada
+      letra (las tildes se quitan; se puede descifrar); «🗣️ palabras
+      inventadas» cambia cada palabra por una del idioma, siempre la misma
+      (y debajo pone cómo suena). «ver lo que pone debajo» enseña el
+      original. «👁️ enseñar» la abre en grande, «⧉ copiar» copia las
+      letras raras, «🖼️ imagen» baja un PNG del pergamino (canvas) y
+      A−/A+ cambian el tamaño. Para el lector de pantalla, el pergamino es
+      role="img" con lo que pone de verdad. Común va con Pangolin (letra
+      de mano). Los alfabetos son fuentes Noto con licencia OFL
+      (tipografias/noto-*.woff2 y noto-licencia-OFL.txt), sacadas de
+      @fontsource (npm), solo el trozo de su escritura: élfico = Shavian,
+      silvano = Ol Chiki, infracomún = Osage, enano = rúnico, gigante =
+      túrquico antiguo, gnomo = pérmico antiguo, goblin = sudarábigo,
+      orco = húngaro antiguo, dracónico = persa antiguo (cuneiforme),
+      infernal = glagolítico, abisal = meroítico cursivo, celestial =
+      bamum, druídico = ogam, primordial = tifinag, lenguaje profundo =
+      lineal A, jerga de ladrones = fenicio. Escrituras reales elegidas
+      solo por cómo se ven; nada de D&D. Las @font-face y las clases
+      .es-<idioma> están en pantalla-master.css (la fuente solo se baja
+      cuando se usa). Para añadir un idioma: su entrada en idiomas.json,
+      su .woff2 y sus dos reglas en el CSS.
     · 📜 registro de tiradas: el registro de la ventana de los dados en su
       propia ventana (la última arriba, «repetir», ✕ y «borrar todo»).
       personajes.js lo da con window.ocDados.registro(alQuitar) y
@@ -4736,7 +4766,10 @@
 
   imagenes/ ............ todas las imágenes
   tipografias/ ......... las letras (se sirven desde aquí, no
-                         desde Google)
+                         desde Google). Las noto-*.woff2 son los
+                         alfabetos de las notas en otros idiomas de
+                         la pantalla de máster (licencia OFL, en
+                         noto-licencia-OFL.txt)
   herramientas/ ........ esta carpeta. Solo para ti: NO hace
                          falta subirla a Neocities.
   ligero/ .............. el CSS y el JS SIN COMENTARIOS, que es lo

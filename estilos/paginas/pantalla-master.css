@@ -1381,23 +1381,76 @@
     margin-top: 8px;
 }
 
-/* EL GENERADOR DE NOMBRES. */
+/* EL GENERADOR DE NOMBRES y LAS NOTAS EN OTROS IDIOMAS: arriba, los
+   desplegables y los grupos de botones-opción. */
 .master-nombres-form {
     display: flex;
-    flex-wrap: wrap;
-    align-items: flex-end;
-    gap: 8px 10px;
+    flex-direction: column;
+    gap: 10px;
 }
 
-.master-nombres-campo {
+.master-campo {
     display: flex;
-    flex: 1 1 8rem;
     flex-direction: column;
     gap: 2px;
 }
 
-.master-nombres-campo[hidden],
-.master-nombres-apellido[hidden] {
+.master-elegir {
+    width: 100%;
+    min-height: 44px;
+    padding: 6px 8px;
+    border: 2px solid var(--border);
+    background: var(--purple);
+    color: var(--white);
+    font: inherit;
+}
+
+.master-elegir:focus-visible {
+    outline: 3px solid var(--yellow);
+    outline-offset: 2px;
+}
+
+.master-opciones {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.master-opcion {
+    flex: 1 1 auto;
+    min-height: 40px;
+    padding: 4px 10px;
+    border: 2px solid var(--border);
+    background: transparent;
+    color: var(--white);
+    font: inherit;
+    font-size: 0.875rem;
+    cursor: pointer;
+}
+
+.master-opcion[aria-pressed="true"] {
+    border-color: var(--yellow);
+    background: var(--yellow);
+    color: var(--yellow-contrast);
+    font-weight: 700;
+}
+
+.master-opcion:focus-visible {
+    outline: 3px solid var(--yellow);
+    outline-offset: 2px;
+}
+
+.master-nombres-persona {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.master-nombres-persona[hidden],
+.master-nombres-apellido[hidden],
+.master-nombres-titulo[hidden],
+.master-nombres[hidden],
+.master-idioma-dice[hidden] {
     display: none;
 }
 
@@ -1414,27 +1467,291 @@
     accent-color: var(--yellow);
 }
 
+.master-nombres-generar {
+    width: 100%;
+    font-size: 1rem;
+}
+
 .master-nombres {
-    display: flex;
-    flex-direction: column;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(11rem, 1fr));
     gap: 6px;
     margin: 12px 0 0;
     padding: 0;
     list-style: none;
 }
 
+.master-nombres .oc-vacio {
+    grid-column: 1 / -1;
+}
+
 .master-nombre {
     display: flex;
     align-items: center;
-    justify-content: space-between;
-    gap: 8px;
+    gap: 4px;
     padding: 4px 4px 4px 10px;
     border: 1px solid var(--border);
+    border-left: 4px solid var(--yellow);
+    background: var(--purple);
 }
 
 .master-nombre-texto {
+    flex: 1 1 auto;
+    min-width: 0;
     font-size: 1.0625rem;
     font-weight: 700;
+    overflow-wrap: anywhere;
+}
+
+.master-nombre-boton {
+    flex: none;
+    min-width: 36px;
+    min-height: 36px;
+    border: 1px solid transparent;
+    background: transparent;
+    color: var(--white);
+    font: inherit;
+    cursor: pointer;
+}
+
+.master-nombre-boton:hover {
+    border-color: var(--yellow);
+}
+
+.master-nombre-boton:focus-visible {
+    outline: 3px solid var(--yellow);
+    outline-offset: 1px;
+}
+
+.master-nombres-titulo {
+    margin: 14px 0 0;
+    font-size: 0.9375rem;
+}
+
+/* LAS NOTAS EN OTROS IDIOMAS: la nota, en un pergamino (de color fijo,
+   igual en todos los temas, como los post-its), con la letra de su
+   alfabeto (fuentes Noto, OFL). */
+.master-idioma-escribir {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    margin-top: 10px;
+}
+
+.master-idioma-escribir .oc-vida-accion {
+    align-self: flex-start;
+}
+
+.master-idioma-hoja {
+    --pergamino: #efe2bf;
+    --tinta: #3b2a17;
+    --borde-pergamino: #8a6a3a;
+    margin-top: 12px;
+    padding: 16px 18px;
+    border: 3px double var(--borde-pergamino);
+    background: var(--pergamino);
+    color: var(--tinta);
+    font-family: "Pangolin", sans-serif;
+    font-size: var(--tam, 2rem);
+    line-height: 1.5;
+    overflow-wrap: anywhere;
+    white-space: pre-wrap;
+    unicode-bidi: bidi-override;
+    direction: ltr;
+}
+
+.master-idioma-hoja.es-grande {
+    margin: 0;
+    font-size: 3rem;
+}
+
+.master-idioma-dice {
+    margin: 4px 0 0;
+}
+
+.master-idioma-botones {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px;
+    margin-top: 10px;
+}
+
+.master-idioma-tam {
+    display: flex;
+    gap: 4px;
+    margin-left: auto;
+}
+
+.master-idioma-tam .master-nombre-boton {
+    min-width: 44px;
+    min-height: 44px;
+    border-color: var(--border);
+}
+
+.master-idioma-escribir .oc-notas-texto {
+    min-height: 5rem;
+    margin-bottom: 4px;
+}
+
+@font-face {
+    font-family: "Richi noto-shavian";
+    src: url("/tipografias/noto-shavian.woff2") format("woff2");
+    font-display: swap;
+}
+
+.master-idioma-hoja.es-elfico {
+    font-family: "Richi noto-shavian", "Pangolin", sans-serif;
+}
+
+@font-face {
+    font-family: "Richi noto-ol-chiki";
+    src: url("/tipografias/noto-ol-chiki.woff2") format("woff2");
+    font-display: swap;
+}
+
+.master-idioma-hoja.es-silvano {
+    font-family: "Richi noto-ol-chiki", "Pangolin", sans-serif;
+}
+
+@font-face {
+    font-family: "Richi noto-osage";
+    src: url("/tipografias/noto-osage.woff2") format("woff2");
+    font-display: swap;
+}
+
+.master-idioma-hoja.es-infracomun {
+    font-family: "Richi noto-osage", "Pangolin", sans-serif;
+}
+
+@font-face {
+    font-family: "Richi noto-runic";
+    src: url("/tipografias/noto-runic.woff2") format("woff2");
+    font-display: swap;
+}
+
+.master-idioma-hoja.es-enano {
+    font-family: "Richi noto-runic", "Pangolin", sans-serif;
+}
+
+@font-face {
+    font-family: "Richi noto-old-turkic";
+    src: url("/tipografias/noto-old-turkic.woff2") format("woff2");
+    font-display: swap;
+}
+
+.master-idioma-hoja.es-gigante {
+    font-family: "Richi noto-old-turkic", "Pangolin", sans-serif;
+}
+
+@font-face {
+    font-family: "Richi noto-old-permic";
+    src: url("/tipografias/noto-old-permic.woff2") format("woff2");
+    font-display: swap;
+}
+
+.master-idioma-hoja.es-gnomo {
+    font-family: "Richi noto-old-permic", "Pangolin", sans-serif;
+}
+
+@font-face {
+    font-family: "Richi noto-old-south-arabian";
+    src: url("/tipografias/noto-old-south-arabian.woff2") format("woff2");
+    font-display: swap;
+}
+
+.master-idioma-hoja.es-goblin {
+    font-family: "Richi noto-old-south-arabian", "Pangolin", sans-serif;
+}
+
+@font-face {
+    font-family: "Richi noto-old-hungarian";
+    src: url("/tipografias/noto-old-hungarian.woff2") format("woff2");
+    font-display: swap;
+}
+
+.master-idioma-hoja.es-orco {
+    font-family: "Richi noto-old-hungarian", "Pangolin", sans-serif;
+}
+
+@font-face {
+    font-family: "Richi noto-old-persian";
+    src: url("/tipografias/noto-old-persian.woff2") format("woff2");
+    font-display: swap;
+}
+
+.master-idioma-hoja.es-draconico {
+    font-family: "Richi noto-old-persian", "Pangolin", sans-serif;
+}
+
+@font-face {
+    font-family: "Richi noto-glagolitic";
+    src: url("/tipografias/noto-glagolitic.woff2") format("woff2");
+    font-display: swap;
+}
+
+.master-idioma-hoja.es-infernal {
+    font-family: "Richi noto-glagolitic", "Pangolin", sans-serif;
+}
+
+@font-face {
+    font-family: "Richi noto-meroitic";
+    src: url("/tipografias/noto-meroitic.woff2") format("woff2");
+    font-display: swap;
+}
+
+.master-idioma-hoja.es-abisal {
+    font-family: "Richi noto-meroitic", "Pangolin", sans-serif;
+}
+
+@font-face {
+    font-family: "Richi noto-bamum";
+    src: url("/tipografias/noto-bamum.woff2") format("woff2");
+    font-display: swap;
+}
+
+.master-idioma-hoja.es-celestial {
+    font-family: "Richi noto-bamum", "Pangolin", sans-serif;
+}
+
+@font-face {
+    font-family: "Richi noto-ogham";
+    src: url("/tipografias/noto-ogham.woff2") format("woff2");
+    font-display: swap;
+}
+
+.master-idioma-hoja.es-druidico {
+    font-family: "Richi noto-ogham", "Pangolin", sans-serif;
+}
+
+@font-face {
+    font-family: "Richi noto-tifinagh";
+    src: url("/tipografias/noto-tifinagh.woff2") format("woff2");
+    font-display: swap;
+}
+
+.master-idioma-hoja.es-primordial {
+    font-family: "Richi noto-tifinagh", "Pangolin", sans-serif;
+}
+
+@font-face {
+    font-family: "Richi noto-linear-a";
+    src: url("/tipografias/noto-linear-a.woff2") format("woff2");
+    font-display: swap;
+}
+
+.master-idioma-hoja.es-profundo {
+    font-family: "Richi noto-linear-a", "Pangolin", sans-serif;
+}
+
+@font-face {
+    font-family: "Richi noto-phoenician";
+    src: url("/tipografias/noto-phoenician.woff2") format("woff2");
+    font-display: swap;
+}
+
+.master-idioma-hoja.es-jerga {
+    font-family: "Richi noto-phoenician", "Pangolin", sans-serif;
 }
 
 /* LOS DADOS. */
@@ -1456,19 +1773,7 @@
     grid-column: 1 / -1;
 }
 
-/* LAS TARJETAS Y LAS TABLAS. */
-.master-tarjeta {
-    margin-bottom: 10px;
-}
-
-.master-tarjeta-editar {
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-}
-
-.master-tarjeta-editar[hidden],
-.master-tarjeta[hidden],
+/* LAS TABLAS. */
 .master-ventana-cuerpo .oc-vida-accion[hidden] {
     display: none;
 }
@@ -1596,10 +1901,6 @@
     min-width: 2.75rem;
     align-items: center;
     gap: 2px;
-}
-
-.master-party-bono {
-    min-height: 24px;
 }
 
 .master-party-quitar {
