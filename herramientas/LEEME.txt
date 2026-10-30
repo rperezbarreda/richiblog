@@ -4494,15 +4494,34 @@
       modo}, y cuenta la diferencia de rondas; el calendario, al pasar
       el tiempo, lanza «master:tiempo» con {horas}. O a mano: +1 ronda,
       +1 minuto, +10 minutos, +1 hora.
-    · 🍺 menú de taberna: lo buena que es (pobre, modesta, acomodada,
-      lujosa) y «🎲 generar taberna»: nombre (lugarDe), ambiente, quién
-      la lleva (nombre y una manía de PNJ), la especialidad, 5 bebidas y
-      5 comidas con precio, las habitaciones de la posada y un rumor.
-      Todo de tablas propias en master-tablas.json, «taberna»: calidades
-      (con «por», el multiplicador de los precios, ambientes y
-      habitaciones [nombre, pp, qué incluye]), bebidas y comidas
-      [nombre, pc], especialidades y rumores. Los precios se enseñan con
-      moneda() (precioBonito redondea). «⧉ copiar el menú».
+    · 🏪 negocios (el módulo se sigue llamando «taberna» por dentro, para
+      que los perfiles de antes no se pierdan; un m.datos.taberna viejo
+      pasa solo a m.datos.negocio con negocioDeTaberna()): qué negocio
+      (taberna o posada, tienda general, herrería y armería,
+      herramientas e instrumentos, alquimista y herbolario, templo,
+      arcanista, establos y transportes, tienda de magia, escriba y
+      cartógrafo, barbero y sanador), lo bueno que es (pobre, modesta,
+      acomodada, lujosa) y «🎲 generar negocio». Sale el nombre (un
+      sustantivo del tipo con un adjetivo del generador de nombres, o
+      una plantilla con el nombre de quien lo lleva: «La forja de …»),
+      el ambiente, quién está al frente (nombre y una manía de PNJ), lo
+      que vende, los servicios y un gancho.
+      - La taberna: como antes (master-tablas.json, «taberna»): bebidas,
+        comidas, especialidad, habitaciones de la posada y un rumor.
+      - Las tiendas venden objetos del SRD de tienda.json (los de su
+        «tiendas»), al azar y ordenados por precio; cuántos y hasta qué
+        precio, según lo buenas que sean; la tienda de magia, hasta una
+        rareza (pobre: común y poco común … lujosa: legendaria). Los
+        objetos se abren con su ficha (abrirObjeto).
+      - Lo demás es de tablas propias, en master-tablas.json,
+        «negocios»: calidades (por, el multiplicador de precios; tope,
+        en pc, 0 sin tope; cuantos; rareza, hasta qué índice de RAREZAS;
+        ambiente) y tipos (nombre, emoji, tienda de tienda.json si vende
+        objetos, sust [nombre, género], plantillas con {d}, ambiente,
+        servicios [nombre, pc (0 = «a convenir»), detalle] y ganchos).
+      «⧉ copiar», «📄 guardar como texto» (.txt, negocioEnTexto()) y
+      «🖼️ guardar como imagen» (.png: negocioEnLienzo() lo pinta en un
+      canvas de colores fijos, como un pergamino; descargarArchivo()).
     · 🪶 notas en otros idiomas: escribes lo que pone (o «🎲 nota al azar»,
       de NOTAS_AL_AZAR con nombres y lugares del generador) y se ve en un
       pergamino con el alfabeto del idioma. Los idiomas, en

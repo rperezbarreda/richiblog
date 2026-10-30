@@ -4840,20 +4840,157 @@
         }
         return Math.round(cp / 100) * 100;
     }
-    function montarTaberna(dentro, m) {
+    function descargarArchivo(blob, archivo) {
+        const a = crear("a");
+        const archivoBlob = URL.createObjectURL(blob);
+        a.href = archivoBlob;
+        a.download = archivo;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        setTimeout(() => URL.revokeObjectURL(archivoBlob), 1000);
+        avisar("Descargado: " + archivo + ".");
+    }
+    const precioDe = (cp) => (cp ? moneda(cp) : "a convenir");
+    function negocioDeTaberna(x) {
+        return {
+            tipo: "taberna", calidad: x.calidad, nombre: x.nombre, emoji: "🍺", ambiente: x.ambiente, quien: x.quien,
+            destacado: ["⭐ Especialidad de la casa:", x.especialidad[0] + " — " + moneda(x.especialidad[1])],
+            secciones: [{ titulo: "🍷 Bebidas", filas: x.bebidas }, { titulo: "🍲 Comidas", filas: x.comidas },
+                { titulo: "🛏️ Habitaciones (por noche)", filas: x.habitaciones }],
+            gancho: ["👂 Se oye que", x.rumor + "."],
+        };
+    }
+    function negocioEnTexto(x, nombreTipo) {
+        const lineas = [x.nombre + " — " + nombreTipo + " (" + x.calidad + ")", "",
+            x.ambiente.charAt(0).toUpperCase() + x.ambiente.slice(1) + ".", "Al frente: " + x.quien + "."];
+        if (x.destacado) {
+            lineas.push("", x.destacado.join(" "));
+        }
+        x.secciones.forEach((s) => {
+            lineas.push("", s.titulo.replace(/^\S+\s/u, "").toUpperCase());
+            s.filas.forEach(([n, cp, extra]) => lineas.push("· " + n + ": " + precioDe(cp) + (extra ? " (" + extra + ")" : "")));
+        });
+        lineas.push("", x.gancho.join(" "));
+        return lineas.join("\n");
+    }
+    function negocioEnLienzo(x, nombreTipo) {
+        const lienzo = crear("canvas");
+        const ctx = lienzo.getContext("2d");
+        const ancho = 820;
+        const margen = 54;
+        const util = ancho - margen * 2;
+        const letra = (tam, estilo) => estilo + " " + tam + "px Georgia, 'Times New Roman', serif";
+        const pasos = [];
+        let y = margen;
+        const trocear = (texto, max) => {
+            const salen = [];
+            let linea = "";
+            texto.split(" ").forEach((p) => {
+                const prueba = linea ? linea + " " + p : p;
+                if (linea && ctx.measureText(prueba).width > max) {
+                    salen.push(linea);
+                    linea = p;
+                } else {
+                    linea = prueba;
+                }
+            });
+            salen.push(linea);
+            return salen;
+        };
+        const parrafo = (texto, tam, estilo, color) => {
+            ctx.font = letra(tam, estilo);
+            trocear(texto, util).forEach((l) => {
+                pasos.push({ texto: l, x: margen, y, font: ctx.font, color });
+                y += Math.round(tam * 1.4);
+            });
+        };
+        parrafo(x.emoji + " " + x.nombre, 34, "bold", "#3b2a17");
+        parrafo(nombreTipo + " · " + x.calidad, 18, "italic", "#6b4e2a");
+        y += 10;
+        parrafo(x.ambiente.charAt(0).toUpperCase() + x.ambiente.slice(1) + ". Al frente: " + x.quien + ".", 18, "normal", "#3b2a17");
+        if (x.destacado) {
+            y += 6;
+            parrafo(x.destacado.join(" "), 18, "bold", "#3b2a17");
+        }
+        x.secciones.forEach((s) => {
+            y += 18;
+            parrafo(s.titulo, 22, "bold", "#7a1f12");
+            pasos.push({ raya: true, y: y - 4 });
+            y += 6;
+            s.filas.forEach(([n, cp, extra]) => {
+                ctx.font = letra(18, "bold");
+                const precio = precioDe(cp);
+                const anchoPrecio = ctx.measureText(precio).width;
+                ctx.font = letra(18, "normal");
+                const lineas = trocear(n, util - anchoPrecio - 24);
+                pasos.push({ texto: precio, x: ancho - margen, y, font: letra(18, "bold"), color: "#3b2a17", derecha: true });
+                lineas.forEach((l) => {
+                    pasos.push({ texto: l, x: margen, y, font: letra(18, "normal"), color: "#3b2a17" });
+                    y += 26;
+                });
+                if (extra) {
+                    ctx.font = letra(15, "italic");
+                    trocear(extra, util - anchoPrecio - 24).forEach((l) => {
+                        pasos.push({ texto: l, x: margen + 14, y, font: ctx.font, color: "#6b4e2a" });
+                        y += 21;
+                    });
+                }
+                y += 4;
+            });
+        });
+        y += 14;
+        parrafo(x.gancho.join(" "), 18, "italic", "#3b2a17");
+        lienzo.width = ancho;
+        lienzo.height = y + margen;
+        ctx.fillStyle = "#efe2bf";
+        ctx.fillRect(0, 0, lienzo.width, lienzo.height);
+        ctx.strokeStyle = "#8a6a3a";
+        ctx.lineWidth = 6;
+        ctx.strokeRect(14, 14, lienzo.width - 28, lienzo.height - 28);
+        ctx.textBaseline = "top";
+        pasos.forEach((p) => {
+            if (p.raya) {
+                ctx.strokeStyle = "#8a6a3a";
+                ctx.lineWidth = 1;
+                ctx.beginPath();
+                ctx.moveTo(margen, p.y);
+                ctx.lineTo(ancho - margen, p.y);
+                ctx.stroke();
+                return;
+            }
+            ctx.font = p.font;
+            ctx.fillStyle = p.color;
+            ctx.textAlign = p.derecha ? "right" : "left";
+            ctx.fillText(p.texto, p.x, p.y);
+        });
+        return lienzo;
+    }
+    function montarNegocio(dentro, m) {
         m.datos = m.datos || {};
         dentro.appendChild(crear("p", "oc-hoja-nota", "Cargando…"));
-        Promise.all([pedir(TABLAS), pedir(NOMBRES)]).then(([tablas, nombres]) => {
+        Promise.all([pedir(TABLAS), pedir(NOMBRES), pedir(TIENDA)]).then(([tablas, nombres, tienda]) => {
             const d = m.datos;
+            if (d.taberna && !d.negocio) {
+                d.negocio = negocioDeTaberna(d.taberna);
+                delete d.taberna;
+            }
             const t = tablas.taberna;
-            const calidad = botonesDe("lo buena que es", Object.keys(t.calidades).map((k) => [k, t.calidades[k].nombre]),
+            const N = tablas.negocios;
+            const tipo = elegirDe("master-negocio-tipo-" + m.id, "qué negocio",
+                Object.keys(N.tipos).map((k) => [k, N.tipos[k].emoji + " " + N.tipos[k].nombre]), d.tipo || "taberna");
+            tipo.elegir.addEventListener("change", () => {
+                d.tipo = tipo.elegir.value;
+                guardar();
+            });
+            const calidad = botonesDe("lo bueno que es", Object.keys(N.calidades).map((k) => [k, k]),
                 d.calidad || "modesta", (v) => {
                     d.calidad = v;
                     guardar();
                 });
-            const etCal = crear("p", "oc-dados-etiqueta", "lo buena que es");
+            const etCal = crear("p", "oc-dados-etiqueta", "lo bueno que es");
             etCal.setAttribute("aria-hidden", "true");
-            const sale = crear("div", "master-taberna");
+            const sale = crear("div", "master-negocio");
             sale.setAttribute("aria-live", "polite");
             const variosDe = (lista, n) => {
                 const copia = lista.slice();
@@ -4863,77 +5000,116 @@
                 }
                 return salen;
             };
+            const objetoDe = (nombre) => (tienda.objetos || []).find((o) => o.nombre === nombre);
             const generar = () => {
-                const cal = t.calidades[calidad.valor()];
-                const por = cal.por;
+                const k = tipo.elegir.value;
+                const tp = N.tipos[k];
+                const cal = calidad.valor();
                 const g = alAzar(["f", "m"]);
                 const especie = alAzar(Object.keys(nombres.especies));
-                d.taberna = {
-                    calidad: calidad.valor(),
-                    nombre: lugarDe(nombres, "taberna"),
-                    ambiente: alAzar(cal.ambiente),
-                    quien: nombreDe(nombres, especie, g, false) + " (" + nombres.especies[especie].nombre + "), que " +
-                        alAzar(tablas.pnj.rasgos),
-                    bebidas: variosDe(t.bebidas, 5).map(([n, cp]) => [n, precioBonito(cp * por)]),
-                    comidas: variosDe(t.comidas, 5).map(([n, cp]) => [n, precioBonito(cp * por)]),
-                    especialidad: (([n, cp]) => [n, precioBonito(cp * por)])(alAzar(t.especialidades)),
-                    habitaciones: cal.habitaciones.map(([n, pp, inc]) => [n, precioBonito(pp * 10), inc]),
-                    rumor: alAzar(t.rumores),
-                };
+                const dueno = nombreDe(nombres, especie, g, false);
+                const quien = dueno + " (" + nombres.especies[especie].nombre + "), que " + alAzar(tablas.pnj.rasgos);
+                if (k === "taberna") {
+                    const tc = t.calidades[cal];
+                    const por = tc.por;
+                    d.negocio = negocioDeTaberna({
+                        calidad: cal, nombre: lugarDe(nombres, "taberna"), ambiente: alAzar(tc.ambiente), quien,
+                        bebidas: variosDe(t.bebidas, 5).map(([n, cp]) => [n, precioBonito(cp * por)]),
+                        comidas: variosDe(t.comidas, 5).map(([n, cp]) => [n, precioBonito(cp * por)]),
+                        especialidad: (([n, cp]) => [n, precioBonito(cp * por)])(alAzar(t.especialidades)),
+                        habitaciones: tc.habitaciones.map(([n, pp, inc]) => [n, precioBonito(pp * 10), inc]),
+                        rumor: alAzar(t.rumores),
+                    });
+                } else {
+                    const nc = N.calidades[cal];
+                    let nombre;
+                    if (alAzar([0, 1])) {
+                        const [sust, gs] = alAzar(tp.sust);
+                        const adj = alAzar(nombres.lugares.taberna.adj);
+                        nombre = sust + " " + (gs === "f" ? adj[1] : adj[0]);
+                    } else {
+                        nombre = alAzar(tp.plantillas).replace("{d}", dueno);
+                    }
+                    const precio = (cp) => (nc.por === 1 ? cp : precioBonito(cp * nc.por));
+                    const secciones = [];
+                    if (tp.tienda) {
+                        const hay = (tienda.objetos || []).filter((o) => (o.tiendas || []).includes(tp.tienda) && o.cp &&
+                            (k === "magia" ? RAREZAS.indexOf(o.rareza) > -1 && RAREZAS.indexOf(o.rareza) < nc.rareza
+                                : !nc.tope || o.cp <= nc.tope));
+                        const filas = variosDe(hay, nc.cuantos).sort((a, b) => a.cp - b.cp)
+                            .map((o) => [o.nombre, precio(o.cp), o.rareza || "", true]);
+                        secciones.push({ titulo: "🛒 Lo que vende", filas });
+                    }
+                    secciones.push({ titulo: "🛠️ Servicios", filas: tp.servicios.map(([n, cp, extra]) => [n, cp ? precio(cp) : 0, extra]) });
+                    const gancho = alAzar(tp.ganchos);
+                    d.negocio = {
+                        tipo: k, calidad: cal, nombre, emoji: tp.emoji, ambiente: alAzar(tp.ambiente) + "; " + alAzar(nc.ambiente), quien,
+                        destacado: null, secciones, gancho: ["🪝 Gancho:", gancho.charAt(0).toUpperCase() + gancho.slice(1) + "."],
+                    };
+                }
                 guardar();
                 pintar();
-                avisar("Taberna: " + d.taberna.nombre + ".");
+                avisar(N.tipos[k].nombre.charAt(0).toUpperCase() + N.tipos[k].nombre.slice(1) + ": " + d.negocio.nombre + ".");
             };
-            const texto = () => {
-                const x = d.taberna;
-                if (!x) {
-                    return "";
-                }
-                return [x.nombre + " (" + x.calidad + ")", x.ambiente + ".", "La lleva " + x.quien + ".", "",
-                    "BEBIDAS", ...x.bebidas.map(([n, cp]) => "· " + n + ": " + moneda(cp)), "",
-                    "COMIDAS", ...x.comidas.map(([n, cp]) => "· " + n + ": " + moneda(cp)), "",
-                    "ESPECIALIDAD DE LA CASA: " + x.especialidad[0] + ": " + moneda(x.especialidad[1]), "",
-                    "HABITACIONES (por noche)", ...x.habitaciones.map(([n, cp, inc]) => "· " + n + ": " + moneda(cp) + " (" + inc + ")"), "",
-                    "Se oye que " + x.rumor + "."].join("\n");
-            };
-            const carta = (titulo, filas) => {
-                const sec = crear("div", "master-taberna-carta");
-                sec.appendChild(crear("h4", "master-taberna-titulo", titulo));
-                const dl = crear("dl", "master-taberna-lista");
-                filas.forEach(([n, cp, extra]) => {
-                    const dt = crear("dt", "", n);
-                    if (extra) {
-                        dt.appendChild(crear("span", "master-taberna-extra", extra));
+            const nombreTipo = () => (N.tipos[(d.negocio || {}).tipo] || N.tipos.taberna).nombre;
+            const carta = (s) => {
+                const sec = crear("div", "master-negocio-carta");
+                sec.appendChild(crear("h4", "master-negocio-titulo", s.titulo));
+                const dl = crear("dl", "master-negocio-lista");
+                s.filas.forEach(([n, cp, extra, srd]) => {
+                    const dt = crear("dt");
+                    const o = srd ? objetoDe(n) : null;
+                    if (o) {
+                        const ver = botonDe("master-botin-objeto", n, () => abrirObjeto(o, ver, tienda.fuente), "Ver " + n);
+                        dt.appendChild(ver);
+                    } else {
+                        dt.textContent = n;
                     }
-                    dl.append(dt, crear("dd", "", moneda(cp)));
+                    if (extra) {
+                        dt.appendChild(crear("span", "master-negocio-extra", extra));
+                    }
+                    dl.append(dt, crear("dd", "", precioDe(cp)));
                 });
                 sec.appendChild(dl);
                 return sec;
             };
+            const acciones = crear("div", "master-negocio-acciones");
             function pintar() {
-                const x = d.taberna;
+                const x = d.negocio;
                 sale.replaceChildren();
+                acciones.hidden = !x;
                 if (!x) {
-                    sale.appendChild(crear("p", "oc-vacio", "Elige cómo es y pulsa «generar»."));
+                    sale.appendChild(crear("p", "oc-vacio", "Elige el negocio, cómo es y pulsa «generar»."));
                     return;
                 }
-                const cab = crear("div", "master-taberna-cabeza");
-                cab.append(crear("h3", "master-taberna-nombre", "🍺 " + x.nombre), crear("p", "master-taberna-ambiente", x.ambiente.charAt(0)
-                    .toUpperCase() + x.ambiente.slice(1) + ". La lleva " + x.quien + "."));
-                const esp = crear("p", "master-taberna-especial");
-                esp.append(crear("strong", "", "⭐ Especialidad de la casa: "), document.createTextNode(x.especialidad[0] + " — " +
-                    moneda(x.especialidad[1])));
-                const rumor = crear("p", "master-taberna-rumor");
-                rumor.append(crear("strong", "", "👂 Se oye que "), document.createTextNode(x.rumor + "."));
-                sale.append(cab, esp, carta("🍷 Bebidas", x.bebidas), carta("🍲 Comidas", x.comidas),
-                    carta("🛏️ Habitaciones (por noche)", x.habitaciones.map(([n, cp, inc]) => [n, cp, inc])), rumor);
+                const cab = crear("h3", "master-negocio-nombre", x.emoji + " " + x.nombre);
+                const sub = crear("p", "master-negocio-tipo", nombreTipo() + " · " + x.calidad);
+                const amb = crear("p", "master-negocio-ambiente", x.ambiente.charAt(0).toUpperCase() + x.ambiente.slice(1) +
+                    ". Al frente: " + x.quien + ".");
+                sale.append(cab, sub, amb);
+                if (x.destacado) {
+                    const esp = crear("p", "master-negocio-ambiente");
+                    esp.append(crear("strong", "", x.destacado[0] + " "), document.createTextNode(x.destacado[1]));
+                    sale.appendChild(esp);
+                }
+                x.secciones.forEach((s) => sale.appendChild(carta(s)));
+                const gancho = crear("p", "master-negocio-ambiente");
+                gancho.append(crear("strong", "", x.gancho[0] + " "), document.createTextNode(x.gancho[1]));
+                sale.appendChild(gancho);
             }
-            const boton = botonDe("oc-vida-accion es-principal master-nombres-generar", "🎲 generar taberna", generar);
-            const copiar = botonDe("oc-vida-accion", "⧉ copiar el menú", () => copiarTexto(texto(), "Copiado el menú."), "Copiar el menú");
+            const archivo = (ext) => (d.negocio.nombre || "negocio").replace(/[^\p{L}\p{N}]+/gu, "-").toLowerCase() + "." + ext;
+            acciones.append(
+                botonDe("oc-vida-accion", "⧉ copiar", () => copiarTexto(negocioEnTexto(d.negocio, nombreTipo()), "Copiado."),
+                    "Copiar el negocio como texto"),
+                botonDe("oc-vida-accion", "📄 guardar como texto", () => descargarArchivo(new Blob([negocioEnTexto(d.negocio,
+                    nombreTipo())], { type: "text/plain;charset=utf-8" }), archivo("txt"))),
+                botonDe("oc-vida-accion", "🖼️ guardar como imagen", () => negocioEnLienzo(d.negocio, nombreTipo())
+                    .toBlob((blob) => descargarArchivo(blob, archivo("png")), "image/png")));
+            const boton = botonDe("oc-vida-accion es-principal master-nombres-generar", "🎲 generar negocio", generar);
             const arriba = crear("div", "master-nombres-form");
-            arriba.append(etCal, calidad, boton);
-            dentro.replaceChildren(arriba, sale, copiar,
-                crear("p", "oc-hoja-nota master-fuente", "Platos, precios y rumores: tablas propias (master-tablas.json)."));
+            arriba.append(tipo, etCal, calidad, boton);
+            dentro.replaceChildren(arriba, sale, acciones, crear("p", "oc-hoja-nota master-fuente",
+                "Lo que venden las tiendas: SRD 5.2 (CC BY 4.0). Platos, servicios, precios de los servicios y ganchos: tablas propias."));
             pintar();
         }).catch(() => {
             dentro.replaceChildren(crear("p", "oc-vacio", "No he podido cargar las tablas."));
@@ -5876,8 +6052,8 @@
             desc: "Gregoriano, el de Harptos o uno propio, con la hora y apuntes.", montar: montarCalendario },
         efectos: { nombre: "efectos con duración", emoji: "⌛", grupo: "combate", w: 460, h: 620,
             desc: "Bendecir 1 minuto, Armadura de mago 8 horas…: se descuentan solos.", montar: montarEfectos },
-        taberna: { nombre: "menú de taberna", emoji: "🍺", grupo: "mundo", w: 480, h: 720,
-            desc: "Bebidas, comidas, especialidad y habitaciones, con precios.", montar: montarTaberna },
+        taberna: { nombre: "negocios", emoji: "🏪", grupo: "mundo", w: 500, h: 760,
+            desc: "Tabernas y posadas, tiendas, templos, establos…: con lo que venden, sus precios y un gancho.", montar: montarNegocio },
         relojes: { nombre: "relojes", emoji: "⏳", grupo: "mesa", w: 440, h: 480,
             desc: "Relojes de progreso: amenazas que avanzan, cuentas atrás…", montar: montarRelojes },
         idiomas: { nombre: "notas en otros idiomas", emoji: "🪶", grupo: "mundo", w: 480, h: 680,

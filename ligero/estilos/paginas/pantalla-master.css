@@ -2428,46 +2428,57 @@
     height: 100%;
     background: var(--yellow);
 }
-.master-taberna {
+.master-negocio {
     margin: 12px 0;
 }
-.master-taberna-nombre {
-    margin: 0 0 4px;
+.master-negocio-nombre {
+    margin: 0;
     font-size: 1.25rem;
 }
-.master-taberna-ambiente,
-.master-taberna-especial,
-.master-taberna-rumor {
+.master-negocio-tipo {
+    margin: 0 0 8px;
+    color: var(--muted);
+    font-style: italic;
+}
+.master-negocio-ambiente {
     margin: 0 0 8px;
 }
-.master-taberna-carta {
+.master-negocio-carta {
     margin: 10px 0;
     padding: 8px 10px;
     border: 2px double var(--yellow);
 }
-.master-taberna-titulo {
+.master-negocio-titulo {
     margin: 0 0 6px;
     font-size: 1rem;
 }
-.master-taberna-lista {
+.master-negocio-lista {
     display: grid;
     grid-template-columns: 1fr max-content;
     gap: 4px 12px;
     margin: 0;
 }
-.master-taberna-lista dt {
+.master-negocio-lista dt {
     border-bottom: 1px dotted var(--border);
 }
-.master-taberna-lista dd {
+.master-negocio-lista dd {
     margin: 0;
     font-family: var(--fuente-mono);
     font-size: 0.875rem;
     text-align: right;
 }
-.master-taberna-extra {
+.master-negocio-extra {
     display: block;
     color: var(--muted);
     font-size: 0.875rem;
+}
+.master-negocio-acciones {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+.master-negocio-acciones[hidden] {
+    display: none;
 }
 .master-dados {
     display: grid;

@@ -840,5 +840,885 @@
    "a la hija del herrero la han visto hablando con un cuervo",
    "las ratas de las bodegas se han ido todas a la vez"
   ]
+ },
+ "negocios": {
+  "calidades": {
+   "pobre": {
+    "por": 0.8,
+    "tope": 5000,
+    "cuantos": 5,
+    "rareza": 2,
+    "ambiente": [
+     "todo está lleno de polvo y a medio colocar",
+     "la mitad del género es de segunda mano",
+     "el tejado tiene goteras y hay cubos por el suelo",
+     "el mostrador es un tablón sobre dos barriles"
+    ]
+   },
+   "modesta": {
+    "por": 1,
+    "tope": 50000,
+    "cuantos": 7,
+    "rareza": 3,
+    "ambiente": [
+     "está ordenado y huele a madera vieja",
+     "hay un gato dormido encima del mostrador",
+     "una campanilla suena al abrir la puerta",
+     "los precios están escritos con tiza en una pizarra"
+    ]
+   },
+   "acomodada": {
+    "por": 1.25,
+    "tope": 500000,
+    "cuantos": 9,
+    "rareza": 4,
+    "ambiente": [
+     "tiene escaparate con cristales de verdad",
+     "un aprendiz atiende mientras el dueño mira desde el fondo",
+     "hay sillas para los clientes y te ofrecen algo de beber",
+     "todo está etiquetado con letra elegante"
+    ]
+   },
+   "lujosa": {
+    "por": 1.5,
+    "tope": 0,
+    "cuantos": 12,
+    "rareza": 5,
+    "ambiente": [
+     "un guardia armado vigila la puerta",
+     "sólo se entra con cita o con recomendación",
+     "las vitrinas están cerradas con llave y protegidas con runas",
+     "hay alfombras, incienso y un sirviente para cada cliente"
+    ]
+   }
+  },
+  "tipos": {
+   "taberna": {
+    "nombre": "taberna o posada",
+    "emoji": "🍺"
+   },
+   "general": {
+    "nombre": "tienda general",
+    "emoji": "🧺",
+    "tienda": "Tienda general",
+    "sust": [
+     [
+      "El Zurrón",
+      "m"
+     ],
+     [
+      "La Alforja",
+      "f"
+     ],
+     [
+      "El Cesto",
+      "m"
+     ],
+     [
+      "La Despensa",
+      "f"
+     ],
+     [
+      "El Baúl",
+      "m"
+     ],
+     [
+      "La Cuerda",
+      "f"
+     ],
+     [
+      "El Farol",
+      "m"
+     ],
+     [
+      "La Mochila",
+      "f"
+     ]
+    ],
+    "plantillas": [
+     "Ultramarinos {d}",
+     "El almacén de {d}",
+     "Abastos {d}"
+    ],
+    "ambiente": [
+     "huele a cuero, cera y especias",
+     "hay sacos de grano apilados hasta el techo",
+     "venden de todo, aunque nada esté donde debería",
+     "una lista de encargos cuelga junto a la puerta",
+     "los críos del barrio vienen a por caramelos de miel",
+     "la dueña apunta las deudas en un libro gordísimo"
+    ],
+    "servicios": [
+     [
+      "llevar el pedido a la posada",
+      5,
+      "en el mismo pueblo"
+     ],
+     [
+      "preparar provisiones para una semana",
+      500,
+      "raciones, agua y yesca"
+     ],
+     [
+      "encargar algo de fuera",
+      1000,
+      "llega en 1d6 días"
+     ],
+     [
+      "guardar un fardo en la trastienda",
+      10,
+      "por día"
+     ]
+    ],
+    "ganchos": [
+     "el proveedor de siempre no ha llegado y pagan bien por ir a buscarlo",
+     "alguien compra cuerda y aceite en cantidades sospechosas",
+     "hay una caja que nadie ha reclamado y hace ruido por las noches",
+     "el dueño fía a todo el pueblo… y alguien le debe demasiado"
+    ]
+   },
+   "herreria": {
+    "nombre": "herrería y armería",
+    "emoji": "⚒️",
+    "tienda": "Herrería y armería",
+    "sust": [
+     [
+      "El Yunque",
+      "m"
+     ],
+     [
+      "La Fragua",
+      "f"
+     ],
+     [
+      "El Martillo",
+      "m"
+     ],
+     [
+      "La Tenaza",
+      "f"
+     ],
+     [
+      "El Fuelle",
+      "m"
+     ],
+     [
+      "La Herradura",
+      "f"
+     ],
+     [
+      "El Escudo",
+      "m"
+     ],
+     [
+      "La Espada",
+      "f"
+     ]
+    ],
+    "plantillas": [
+     "La forja de {d}",
+     "Armas {d}",
+     "Herrería {d}"
+    ],
+    "ambiente": [
+     "el calor de la fragua se nota desde la calle",
+     "suena el martillo sin parar",
+     "hay armaduras de exposición con abolladuras de verdad",
+     "un aprendiz con quemaduras en los brazos aviva el fuego",
+     "las paredes están llenas de herraduras de la suerte",
+     "el herrero tiene un brazo el doble de gordo que el otro"
+    ],
+    "servicios": [
+     [
+      "afilar un arma",
+      10,
+      "listo en una hora"
+     ],
+     [
+      "reparar una armadura",
+      1000,
+      "la décima parte de lo que vale, según el daño"
+     ],
+     [
+      "herrar un caballo",
+      50,
+      ""
+     ],
+     [
+      "grabar un nombre o un escudo de armas",
+      500,
+      ""
+     ],
+     [
+      "hacer un arma por encargo",
+      0,
+      "el doble de su precio; tarda 1d4 semanas"
+     ]
+    ],
+    "ganchos": [
+     "le han encargado cien puntas de lanza y no dice para quién",
+     "busca alguien que le traiga mineral de una mina abandonada",
+     "una espada que forjó apareció en el cuerpo de un noble",
+     "el aprendiz ha desaparecido con un martillo de la casa"
+    ]
+   },
+   "herramientas": {
+    "nombre": "herramientas e instrumentos",
+    "emoji": "🪚",
+    "tienda": "Herramientas e instrumentos",
+    "sust": [
+     [
+      "El Cincel",
+      "m"
+     ],
+     [
+      "La Garlopa",
+      "f"
+     ],
+     [
+      "El Compás",
+      "m"
+     ],
+     [
+      "La Lira",
+      "f"
+     ],
+     [
+      "El Torno",
+      "m"
+     ],
+     [
+      "La Escuadra",
+      "f"
+     ],
+     [
+      "El Laúd",
+      "m"
+     ],
+     [
+      "La Gubia",
+      "f"
+     ]
+    ],
+    "plantillas": [
+     "El taller de {d}",
+     "Útiles {d}",
+     "Herramientas {d}"
+    ],
+    "ambiente": [
+     "hay virutas en el suelo y un banco de trabajo lleno de piezas",
+     "alguien afina un laúd en la trastienda",
+     "cada herramienta tiene su sitio marcado en la pared",
+     "huele a cola de carpintero y barniz",
+     "un relojero gnomo repara algo diminuto con una lupa",
+     "hay instrumentos colgados del techo que suenan con la corriente"
+    ],
+    "servicios": [
+     [
+      "afinar o reparar un instrumento",
+      50,
+      ""
+     ],
+     [
+      "arreglar una herramienta",
+      20,
+      ""
+     ],
+     [
+      "una clase con el maestro",
+      100,
+      "por hora"
+     ],
+     [
+      "hacer una llave nueva",
+      200,
+      "si se trae el molde"
+     ]
+    ],
+    "ganchos": [
+     "un gremio rival le está haciendo la vida imposible",
+     "le han pedido una ganzúa de las buenas y no sabe si debe",
+     "en el laúd que vende hay escondido un mensaje",
+     "busca a un bardo que se fue sin pagar"
+    ]
+   },
+   "alquimista": {
+    "nombre": "alquimista y herbolario",
+    "emoji": "⚗️",
+    "tienda": "Alquimista y herbolario",
+    "sust": [
+     [
+      "El Alambique",
+      "m"
+     ],
+     [
+      "La Mandrágora",
+      "f"
+     ],
+     [
+      "El Mortero",
+      "m"
+     ],
+     [
+      "La Retorta",
+      "f"
+     ],
+     [
+      "El Caldero",
+      "m"
+     ],
+     [
+      "La Ortiga",
+      "f"
+     ],
+     [
+      "El Frasco",
+      "m"
+     ],
+     [
+      "La Salvia",
+      "f"
+     ]
+    ],
+    "plantillas": [
+     "Remedios {d}",
+     "El herbolario de {d}",
+     "Pociones {d}"
+    ],
+    "ambiente": [
+     "huele a azufre y a menta a la vez",
+     "del techo cuelgan manojos de hierbas secas",
+     "algo burbujea en un rincón y cambia de color",
+     "hay frascos con cosas que se mueven",
+     "el mostrador está lleno de manchas y quemaduras",
+     "una lechuza disecada (¿o no?) vigila desde una balda"
+    ],
+    "servicios": [
+     [
+      "identificar una poción",
+      500,
+      "tarda 1 hora"
+     ],
+     [
+      "preparar un remedio contra el veneno",
+      500,
+      ""
+     ],
+     [
+      "curar una enfermedad común",
+      1000,
+      "con hierbas, 1d4 días"
+     ],
+     [
+      "comprar ingredientes raros",
+      0,
+      "la mitad de lo que valgan"
+     ]
+    ],
+    "ganchos": [
+     "necesita una flor que sólo crece en una ciénaga peligrosa",
+     "una de sus pociones ha salido mal y anda buscando a quien la compró",
+     "le pagan mucho por algo que no debería vender",
+     "el último que probó su elixir nuevo sigue siendo un poco verde"
+    ]
+   },
+   "templo": {
+    "nombre": "templo",
+    "emoji": "⛪",
+    "tienda": "Templo",
+    "sust": [
+     [
+      "La Llama",
+      "f"
+     ],
+     [
+      "El Alba",
+      "m"
+     ],
+     [
+      "La Balanza",
+      "f"
+     ],
+     [
+      "El Faro",
+      "m"
+     ],
+     [
+      "La Espiga",
+      "f"
+     ],
+     [
+      "El Roble",
+      "m"
+     ],
+     [
+      "La Estrella",
+      "f"
+     ],
+     [
+      "El Cáliz",
+      "m"
+     ]
+    ],
+    "plantillas": [
+     "Santuario de {d}",
+     "La capilla de {d}",
+     "Casa de oración de {d}"
+    ],
+    "ambiente": [
+     "huele a incienso y cera de abeja",
+     "un coro ensaya al fondo",
+     "hay ofrendas de flores frescas en el altar",
+     "los peregrinos duermen en los bancos",
+     "una sacerdotisa reparte pan en la puerta",
+     "las vidrieras pintan colores en el suelo"
+    ],
+    "servicios": [
+     [
+      "una bendición antes del viaje",
+      50,
+      "o una donación"
+     ],
+     [
+      "curar heridas",
+      1000,
+      "lo lanza un acólito"
+     ],
+     [
+      "quitar un veneno o una enfermedad",
+      4000,
+      ""
+     ],
+     [
+      "quitar una maldición",
+      10000,
+      "sólo si el templo se fía de ti"
+     ],
+     [
+      "devolver la vida",
+      100000,
+      "y un diamante; no siempre lo aceptan"
+     ],
+     [
+      "un entierro digno",
+      500,
+      ""
+     ]
+    ],
+    "ganchos": [
+     "han robado una reliquia y no quieren que se sepa",
+     "un sacerdote joven tiene visiones que nadie cree",
+     "necesitan escolta para unos peregrinos",
+     "en la cripta se oyen pasos por la noche"
+    ]
+   },
+   "arcanista": {
+    "nombre": "arcanista",
+    "emoji": "🔮",
+    "tienda": "Arcanista",
+    "sust": [
+     [
+      "El Orbe",
+      "m"
+     ],
+     [
+      "La Runa",
+      "f"
+     ],
+     [
+      "El Grimorio",
+      "m"
+     ],
+     [
+      "La Varita",
+      "f"
+     ],
+     [
+      "El Astrolabio",
+      "m"
+     ],
+     [
+      "La Lechuza",
+      "f"
+     ],
+     [
+      "El Sello",
+      "m"
+     ],
+     [
+      "La Pluma",
+      "f"
+     ]
+    ],
+    "plantillas": [
+     "Arcanos {d}",
+     "La biblioteca de {d}",
+     "Componentes {d}"
+    ],
+    "ambiente": [
+     "los libros flotan solos hasta las baldas",
+     "hay un círculo pintado en el suelo que nadie pisa",
+     "las velas no se apagan nunca",
+     "un familiar parlanchín atiende cuando el dueño no está",
+     "huele a tinta y a pergamino viejo",
+     "los mapas de las paredes cambian según la luna"
+    ],
+    "servicios": [
+     [
+      "copiar un conjuro en un libro",
+      0,
+      "50 po por nivel del conjuro"
+     ],
+     [
+      "identificar un objeto mágico",
+      2000,
+      "tarda 1 hora"
+     ],
+     [
+      "traducir un texto antiguo",
+      500,
+      "por página"
+     ],
+     [
+      "consulta con el sabio",
+      1000,
+      "sobre historia o arcanos"
+     ]
+    ],
+    "ganchos": [
+     "vende un libro que su antiguo dueño quiere recuperar a toda costa",
+     "busca a alguien que entre en una torre sellada",
+     "uno de sus pergaminos tiene un conjuro que nadie conoce",
+     "un aprendiz suyo invocó algo y no lo ha devuelto"
+    ]
+   },
+   "establos": {
+    "nombre": "establos y transportes",
+    "emoji": "🐎",
+    "tienda": "Establos y transportes",
+    "sust": [
+     [
+      "El Potro",
+      "m"
+     ],
+     [
+      "La Yegua",
+      "f"
+     ],
+     [
+      "El Carro",
+      "m"
+     ],
+     [
+      "La Diligencia",
+      "f"
+     ],
+     [
+      "El Estribo",
+      "m"
+     ],
+     [
+      "La Brida",
+      "f"
+     ],
+     [
+      "El Mulo",
+      "m"
+     ],
+     [
+      "La Herradura",
+      "f"
+     ]
+    ],
+    "plantillas": [
+     "Cuadras {d}",
+     "Los establos de {d}",
+     "Transportes {d}"
+    ],
+    "ambiente": [
+     "huele a paja, cuero y estiércol",
+     "un mozo cepilla a un caballo enorme",
+     "hay un mapa de rutas clavado en la puerta",
+     "un perro pastor ladra a todo el que entra",
+     "se oye a una mula protestar",
+     "los carros esperan en fila con las ruedas recién engrasadas"
+    ],
+    "servicios": [
+     [
+      "guardar y dar de comer a una montura",
+      50,
+      "por día"
+     ],
+     [
+      "un asiento en la diligencia",
+      30,
+      "por milla"
+     ],
+     [
+      "alquilar un caballo",
+      200,
+      "por día, con fianza"
+     ],
+     [
+      "un guía para el camino",
+      200,
+      "por día"
+     ]
+    ],
+    "ganchos": [
+     "la diligencia de ayer no llegó a su destino",
+     "alguien quiere comprar un caballo concreto a cualquier precio",
+     "los caballos se ponen nerviosos todas las noches a la misma hora",
+     "buscan escolta para un carro que nadie sabe qué lleva"
+    ]
+   },
+   "magia": {
+    "nombre": "tienda de magia",
+    "emoji": "✨",
+    "tienda": "Tienda de magia",
+    "sust": [
+     [
+      "El Unicornio",
+      "m"
+     ],
+     [
+      "La Esfera",
+      "f"
+     ],
+     [
+      "El Espejo",
+      "m"
+     ],
+     [
+      "La Gema",
+      "f"
+     ],
+     [
+      "El Dragón",
+      "m"
+     ],
+     [
+      "La Corona",
+      "f"
+     ],
+     [
+      "El Anillo",
+      "m"
+     ],
+     [
+      "La Luna",
+      "f"
+     ]
+    ],
+    "plantillas": [
+     "Maravillas {d}",
+     "El bazar de {d}",
+     "Curiosidades {d}"
+    ],
+    "ambiente": [
+     "la puerta no está siempre en el mismo sitio",
+     "cada objeto tiene una etiqueta que cambia de idioma",
+     "el dueño sabe tu nombre antes de que lo digas",
+     "hay que dejar las armas en la entrada",
+     "un espejo comenta lo que compras",
+     "las vitrinas zumban con un ruido grave"
+    ],
+    "servicios": [
+     [
+      "identificar un objeto mágico",
+      2000,
+      ""
+     ],
+     [
+      "comprar un objeto mágico",
+      0,
+      "la mitad de lo que vale, si se fía"
+     ],
+     [
+      "buscar un objeto por encargo",
+      0,
+      "1d4 semanas; señal del 10 %"
+     ],
+     [
+      "recargar una varita",
+      0,
+      "según la varita"
+     ]
+    ],
+    "ganchos": [
+     "uno de los objetos está maldito y el dueño lo sabe",
+     "busca quien recupere un objeto que vendió por error",
+     "un objeto de la tienda ha empezado a hablar",
+     "alguien muy poderoso le ha prohibido vender una cosa"
+    ]
+   },
+   "escriba": {
+    "nombre": "escriba y cartógrafo",
+    "emoji": "📜",
+    "sust": [
+     [
+      "La Pluma",
+      "f"
+     ],
+     [
+      "El Tintero",
+      "m"
+     ],
+     [
+      "La Rosa de los Vientos",
+      "f"
+     ],
+     [
+      "El Pergamino",
+      "m"
+     ],
+     [
+      "La Brújula",
+      "f"
+     ],
+     [
+      "El Sello",
+      "m"
+     ]
+    ],
+    "plantillas": [
+     "Escribanía {d}",
+     "Mapas {d}",
+     "El despacho de {d}"
+    ],
+    "ambiente": [
+     "hay mapas desplegados por todas las mesas",
+     "huele a tinta fresca y a lacre",
+     "el escriba tiene los dedos manchados de negro",
+     "los legajos llegan hasta el techo",
+     "se oye el rasgueo de tres plumas a la vez",
+     "un pájaro mensajero espera en una percha"
+    ],
+    "servicios": [
+     [
+      "escribir una carta",
+      10,
+      "por página"
+     ],
+     [
+      "un mapa de la región",
+      2500,
+      ""
+     ],
+     [
+      "un mapa de la ciudad",
+      1000,
+      ""
+     ],
+     [
+      "copiar un documento",
+      50,
+      "por página"
+     ],
+     [
+      "mandar una carta",
+      20,
+      "por cada 50 millas"
+     ],
+     [
+      "redactar un contrato",
+      500,
+      "con testigo"
+     ],
+     [
+      "falsificar un documento",
+      0,
+      "no lo hace… salvo que se le convenza"
+     ]
+    ],
+    "ganchos": [
+     "un mapa suyo marca una ruina que no sale en ningún otro",
+     "ha copiado una carta que no debería haber leído",
+     "le han encargado un mapa de las alcantarillas",
+     "el último cliente pagó con monedas que nadie conoce"
+    ]
+   },
+   "barberia": {
+    "nombre": "barbero y sanador",
+    "emoji": "💈",
+    "sust": [
+     [
+      "La Navaja",
+      "f"
+     ],
+     [
+      "El Peine",
+      "m"
+     ],
+     [
+      "La Sanguijuela",
+      "f"
+     ],
+     [
+      "El Espejo",
+      "m"
+     ],
+     [
+      "La Venda",
+      "f"
+     ],
+     [
+      "El Bigote",
+      "m"
+     ]
+    ],
+    "plantillas": [
+     "Barbería {d}",
+     "El sillón de {d}",
+     "Afeitados {d}"
+    ],
+    "ambiente": [
+     "huele a jabón, alcohol y sangre",
+     "el barbero cuenta todos los chismes del pueblo",
+     "hay un tarro de sanguijuelas en el escaparate",
+     "un cliente se queja en el sillón mientras le sacan una muela",
+     "las navajas brillan colgadas de la pared",
+     "hay un cartel que dice «se cose, se corta, se reza»"
+    ],
+    "servicios": [
+     [
+      "un afeitado y corte de pelo",
+      3,
+      ""
+     ],
+     [
+      "un baño caliente",
+      5,
+      ""
+     ],
+     [
+      "coser una herida",
+      50,
+      "recupera 1d4 PG"
+     ],
+     [
+      "sacar una muela",
+      20,
+      ""
+     ],
+     [
+      "cuidar a un herido",
+      200,
+      "por día, cama incluida"
+     ],
+     [
+      "cambiar de aspecto",
+      500,
+      "pelo, barba y tinte"
+     ]
+    ],
+    "ganchos": [
+     "sabe quién ha venido herido de noche y no lo dice",
+     "alguien le paga por avisar de ciertos clientes",
+     "ha visto una herida que no es de arma ni de bestia",
+     "busca hierbas para una fiebre que se está extendiendo"
+    ]
+   }
+  }
  }
 }
