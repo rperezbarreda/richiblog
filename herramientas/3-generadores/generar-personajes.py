@@ -811,8 +811,9 @@ def apartado_reglas(c, personajes, avisos):
                e(x["nombre"].strip()), markdown(x.get("texto"), c, personajes, avisos)) for x in grupos[g])
         bloques.append('<div class="oc-reglas-grupo"><h3 class="oc-reglas-titulo">%s</h3><ul class="oc-reglas-lista">%s'
                        '</ul></div>' % (e(g), cosas))
-    return ('<div class="oc-reglas" data-oc-reglas><p class="oc-hoja-nota">Lo que más se busca jugando a D&amp;D 5e'
-            ' (con lo que cambia en 2024).</p>%s</div>' % "".join(bloques))
+    fuente = str((leer_json(REGLAS, {}) or {}).get("fuente") or "").strip()
+    return ('<div class="oc-reglas" data-oc-reglas><p class="oc-hoja-nota">Lo que más se busca jugando a D&amp;D'
+            ' (reglas de 2024).%s</p>%s</div>' % ((" " + e(fuente)) if fuente else "", "".join(bloques)))
 
 
 def apartado_frases(p):

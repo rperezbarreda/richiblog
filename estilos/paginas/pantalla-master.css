@@ -12,13 +12,6 @@
     gap: 16px;
 }
 
-.master-intro {
-    max-width: 52rem;
-    margin: 0;
-    color: var(--white);
-    font-size: 0.9375rem;
-}
-
 /* La barra de arriba: añadir, ordenar, como al principio y los dados. */
 .master-barra {
     display: flex;
@@ -86,6 +79,9 @@
     align-items: center;
     justify-content: space-between;
     gap: 8px;
+    /* Sin el hueco de la derecha de las otras barras (el de los −■✕ de
+       adorno): aquí los mandos van en la misma fila, y así cabe el título. */
+    padding-right: 12px;
     cursor: move;
     touch-action: none;
     user-select: none;
@@ -93,9 +89,7 @@
 
 .master-ventana-titulo {
     min-width: 0;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
+    overflow-wrap: anywhere;
 }
 
 .master-ventana-mandos {
@@ -141,7 +135,106 @@
     display: none;
 }
 
-/* EL BUSCADOR DE CONJUROS. */
+/* EL COLOR DE UNA VENTANA (✎), como un post-it: la barra del color
+   elegido (.oc-color-* de personajes.css) y el fondo, un poco teñido. Los
+   colores son claros en los temas oscuros y oscuros en los claros, así que
+   la letra de la barra va al revés; en los puros y los de terminal todos
+   son el amarillo del tema. */
+.master-ventana.con-color {
+    --master-tinta: #14101a;
+    border-color: var(--oc-color);
+    box-shadow: 6px 6px 0 var(--oc-color);
+    background: var(--purple-lighter);
+    background: color-mix(in srgb, var(--oc-color) 14%, var(--purple-lighter));
+}
+
+:root[data-theme="light"] .master-ventana.con-color,
+:root[data-theme="tranquilo"] .master-ventana.con-color {
+    --master-tinta: #ffffff;
+}
+
+:root[data-theme="puro-claro"] .master-ventana.con-color,
+:root[data-theme="puro-oscuro"] .master-ventana.con-color,
+:root[data-theme^="terminal"] .master-ventana.con-color {
+    --master-tinta: var(--yellow-contrast);
+}
+
+.master-ventana.con-color .master-ventana-barra {
+    border-bottom-color: var(--oc-color);
+    background: var(--oc-color);
+    color: var(--master-tinta);
+}
+
+/* La ventanita de ✎: el título y las muestras de color. */
+.master-personalizar {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+}
+
+.master-personalizar .oc-dados-texto {
+    width: 100%;
+}
+
+.master-colores {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin: 4px 0 8px;
+    padding: 0;
+    border: 0;
+}
+
+.master-colores legend {
+    width: 100%;
+    margin-bottom: 6px;
+    padding: 0;
+}
+
+/* Cada muestra, un cuadrado de su color; la elegida, con doble aro. */
+.master-color {
+    width: 36px;
+    height: 36px;
+    padding: 0;
+    border: 2px solid var(--yellow);
+    background: var(--oc-color);
+    cursor: pointer;
+}
+
+/* «Sin color»: tachada en diagonal. */
+.master-color.es-ninguno {
+    background:
+        linear-gradient(to top right, transparent calc(50% - 2px), var(--yellow) calc(50% - 2px),
+            var(--yellow) calc(50% + 2px), transparent calc(50% + 2px)),
+        var(--purple);
+}
+
+.master-color[aria-pressed="true"] {
+    box-shadow: 0 0 0 3px var(--purple-lighter), 0 0 0 6px var(--yellow);
+}
+
+.master-color:focus-visible {
+    outline: 3px solid var(--yellow);
+    outline-offset: 5px;
+}
+
+/* En la ventana de añadir, debajo de la lista: ordenar y quitar todas. */
+.master-anadir-otras {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 14px;
+    padding-top: 12px;
+    border-top: 2px dashed var(--border);
+}
+
+/* De dónde salen las reglas. */
+.master-fuente {
+    margin-top: 12px;
+}
+
+/* EL BUSCADOR DE CONJUROS.
 .master-conjuros-buscar {
     display: grid;
     grid-template-columns: minmax(0, 1fr) auto;

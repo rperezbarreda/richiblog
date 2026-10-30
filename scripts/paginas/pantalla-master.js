@@ -4,11 +4,13 @@
 // Un lienzo con ventanas, como el escritorio de un ordenador viejo: cada
 // una es un MÓDULO (la iniciativa, las reglas, las condiciones, el
 // buscador de conjuros, los dados, las notas, una tarjeta propia o una
-// tabla para tirar). Se añaden con «＋ añadir», se mueven arrastrando su
-// barra (o con las flechas, desde su ⠿), cambian de tamaño por la esquina
-// de abajo a la derecha, se pliegan con − y se quitan con ✕. Todo se
-// guarda en el navegador («richi-master»): qué hay, dónde y de qué tamaño,
-// y lo que tenga dentro (lo de las tarjetas y las tablas).
+// tabla para tirar). Empieza vacía: se añaden con «＋ añadir» (que también
+// ordena o las quita todas), se mueven arrastrando su barra (o con las
+// flechas, desde su ⠿), cambian de tamaño por la esquina de abajo a la
+// derecha, se les cambia el título y el color con ✎ (o con doble clic en
+// el título), se pliegan con − y se quitan con ✕. Todo se guarda en el
+// navegador («richi-master»): qué hay, dónde, de qué tamaño, con qué
+// título y color, y lo que tenga dentro (lo de las tarjetas y las tablas).
 //
 // En el móvil (hasta 860 px) no hay lienzo: van una debajo de otra, en el
 // orden en que estén (de arriba abajo y de izquierda a derecha).
@@ -139,18 +141,19 @@
         return pedidos[ruta];
     }
 
-    // ---- LAS REGLAS (y las condiciones: solo las del grupo «Estados») ----
-    function montarReglas(dentro, m, soloEstados) {
+    // ---- LAS REGLAS (o solo las de un grupo: las condiciones son
+    // «Estados» y las acciones, «Acciones») ----
+    function montarReglas(dentro, m, soloGrupo) {
         dentro.appendChild(crear("p", "oc-hoja-nota", "Cargando las reglas…"));
         pedir("/datos/personajes/reglas-dnd.json").then((datos) => {
-            const reglas = (datos.reglas || []).filter((r) => !soloEstados || r.grupo === "Estados");
+            const reglas = (datos.reglas || []).filter((r) => !soloGrupo || r.grupo === soloGrupo);
             const caja = crear("div", "oc-reglas");
             const grupos = {};
             reglas.forEach((r) => {
                 if (!grupos[r.grupo]) {
                     const g = crear("div", "oc-reglas-grupo");
                     const lista = crear("ul", "oc-reglas-lista");
-                    if (!soloEstados) {
+                    if (!soloGrupo) {
                         g.appendChild(crear("h3", "oc-reglas-titulo", r.grupo));
                     }
                     g.appendChild(lista);
@@ -170,6 +173,9 @@
             });
             dentro.replaceChildren(caja);
             window.ocMontar.reglas(caja, "master-buscar-" + m.id);
+            if (datos.fuente) {
+                dentro.appendChild(crear("p", "oc-hoja-nota master-fuente", datos.fuente));
+            }
         }).catch(() => {
             dentro.replaceChildren(crear("p", "oc-vacio", "No he podido cargar las reglas."));
         });
@@ -285,23 +291,16 @@
         const ver = crear("div", "master-tarjeta");
         const editar = crear("div", "master-tarjeta-editar");
         editar.hidden = true;
-        const etT = crear("label", "oc-dados-etiqueta", "título");
-        const titulo = crear("input", "oc-dados-texto");
-        titulo.id = "master-tarjeta-titulo-" + m.id;
-        etT.htmlFor = titulo.id;
         const etX = crear("label", "oc-dados-etiqueta", "texto (con «- » para listas, **negrita**, *cursiva*)");
         const texto = crear("textarea", "oc-notas-texto");
         texto.id = "master-tarjeta-texto-" + m.id;
         etX.htmlFor = texto.id;
         texto.rows = 8;
         const pintar = () => {
-            m.titulo = m.datos.titulo || "tarjeta";
-            ponerTitulo(m);
             ver.replaceChildren(m.datos.texto ? markdown(m.datos.texto)
                 : crear("p", "oc-vacio", "Vacía: pulsa «editar» y escribe lo que quieras tener a mano."));
         };
         const guardarla = botonDe("oc-vida-accion es-principal", "guardar", () => {
-            m.datos.titulo = titulo.value.trim();
             m.datos.texto = texto.value;
             guardar();
             editar.hidden = true;
@@ -310,14 +309,13 @@
             pintar();
             boton.focus();
         });
-        editar.append(etT, titulo, etX, texto, guardarla);
+        editar.append(etX, texto, guardarla);
         const boton = botonDe("oc-vida-accion", "✏️ editar", () => {
-            titulo.value = m.datos.titulo || "";
             texto.value = m.datos.texto || "";
             editar.hidden = false;
             ver.hidden = true;
             boton.hidden = true;
-            titulo.focus();
+            texto.focus();
         });
         dentro.append(ver, editar, boton);
         pintar();
@@ -327,14 +325,6 @@
     // azar (encuentros, nombres, el tiempo que hace…) ----
     function montarTabla(dentro, m) {
         m.datos = m.datos || {};
-        m.titulo = m.datos.titulo || "";
-        ponerTitulo(m);
-        const etT = crear("label", "oc-dados-etiqueta", "nombre");
-        const titulo = crear("input", "oc-dados-texto");
-        titulo.id = "master-tabla-titulo-" + m.id;
-        titulo.value = m.datos.titulo || "";
-        titulo.placeholder = "encuentros en el bosque";
-        etT.htmlFor = titulo.id;
         const etX = crear("label", "oc-dados-etiqueta", "lo que puede salir (una cosa por línea)");
         const texto = crear("textarea", "oc-notas-texto es-corta");
         texto.id = "master-tabla-texto-" + m.id;
@@ -347,14 +337,10 @@
         const alEscribir = () => {
             clearTimeout(espera);
             espera = setTimeout(() => {
-                m.datos.titulo = titulo.value.trim();
                 m.datos.texto = texto.value;
-                m.titulo = m.datos.titulo || "tabla";
-                ponerTitulo(m);
                 guardar();
             }, 400);
         };
-        titulo.addEventListener("input", alEscribir);
         texto.addEventListener("input", alEscribir);
         const tirar = botonDe("oc-vida-accion es-principal", "🎲 tirar en la tabla", () => {
             const cosas = texto.value.split("\n").map((x) => x.trim()).filter(Boolean);
@@ -370,7 +356,7 @@
                 sale.textContent = (i + 1) + " de " + cosas.length + ": " + cosas[i];
             }, 50);
         });
-        dentro.append(etT, titulo, etX, texto, tirar, sale);
+        dentro.append(etX, texto, tirar, sale);
     }
 
     // LOS MÓDULOS QUE HAY: su nombre, su dibujo, cómo se montan, su
@@ -379,43 +365,50 @@
         iniciativa: { nombre: "iniciativa", emoji: "⏱️", unico: true, w: 420, h: 520,
             montar: (d) => window.ocMontar.iniciativa(d, { suelta: true }) },
         condiciones: { nombre: "condiciones", emoji: "🙈", unico: true, w: 460, h: 420,
-            montar: (d, m) => montarReglas(d, m, true) },
-        reglas: { nombre: "reglas", emoji: "📚", unico: true, w: 480, h: 520, montar: (d, m) => montarReglas(d, m, false) },
+            montar: (d, m) => montarReglas(d, m, "Estados") },
+        acciones: { nombre: "acciones", emoji: "⚔️", unico: true, w: 460, h: 420,
+            montar: (d, m) => montarReglas(d, m, "Acciones") },
+        reglas: { nombre: "todas las reglas", emoji: "📚", unico: true, w: 480, h: 520,
+            montar: (d, m) => montarReglas(d, m, null) },
         conjuros: { nombre: "conjuros", emoji: "✨", unico: true, w: 420, h: 480, montar: montarConjuros },
         dados: { nombre: "dados", emoji: "🎲", w: 360, h: 230, montar: montarDados },
         notas: { nombre: "notas", emoji: "📝", unico: true, w: 420, h: 420,
             montar: (d) => window.ocMontar.notas(d, { soloNotas: true }) },
-        tarjeta: { nombre: "tarjeta", emoji: "📌", w: 320, h: 280, montar: montarTarjeta },
-        tabla: { nombre: "tabla para tirar", emoji: "🔮", w: 340, h: 380, montar: montarTabla },
+        tarjeta: { nombre: "tarjeta", emoji: "📌", w: 360, h: 280, montar: montarTarjeta },
+        tabla: { nombre: "tabla para tirar", emoji: "🔮", w: 360, h: 380, montar: montarTabla },
     };
 
     // ---- EL ESTADO (lo que se guarda) ----
+    // Los colores de las ventanas (como post-its): los de mis personajes
+    // (personajes.css: .oc-color-*).
+    const COLORES = [["", "sin color"], ["amarillo", "amarillo"], ["naranja", "naranja"], ["rojo", "rojo"],
+        ["rosa", "rosa"], ["morado", "morado"], ["azul", "azul"], ["celeste", "celeste"], ["verde", "verde"],
+        ["gris", "gris"]];
+
     let estado = null;
     try {
         estado = JSON.parse(localStorage.getItem(CLAVE) || "null");
     } catch (e) {
         estado = null;
     }
-    const DE_INICIO = () => ({ modulos: [
-        { tipo: "iniciativa", x: 0, y: 0 },
-        { tipo: "condiciones", x: 440, y: 0 },
-        { tipo: "dados", x: 920, y: 0 },
-        { tipo: "notas", x: 920, y: 250 },
-    ] });
     if (!estado || !Array.isArray(estado.modulos)) {
-        estado = DE_INICIO();
-        estado.nueva = true;
+        estado = { modulos: [] };
     }
     let siguienteId = 1;
     estado.modulos = estado.modulos.filter((m) => MODULOS[m.tipo]);
     estado.modulos.forEach((m) => {
+        // Las tarjetas y tablas de antes tenían el título dentro.
+        if (!m.titulo && m.datos && m.datos.titulo) {
+            m.titulo = m.datos.titulo;
+        }
+        m.color = COLORES.some((c) => c[0] === m.color) ? m.color : "";
         m.id = m.id || "m" + siguienteId++;
         siguienteId = Math.max(siguienteId, parseInt(String(m.id).slice(1), 10) + 1 || siguienteId);
     });
 
     function guardar() {
         const salida = { modulos: estado.modulos.map((m) => ({ id: m.id, tipo: m.tipo, x: m.x, y: m.y, w: m.w, h: m.h,
-            plegado: !!m.plegado, datos: m.datos })) };
+            titulo: m.titulo || "", color: m.color || "", plegado: !!m.plegado, datos: m.datos })) };
         try {
             localStorage.setItem(CLAVE, JSON.stringify(salida));
         } catch (e) {
@@ -436,6 +429,66 @@
         if (m.el) {
             m.el.querySelector(".master-ventana-nombre").textContent = m.titulo || MODULOS[m.tipo].nombre;
         }
+    }
+
+    function ponerColor(m) {
+        if (!m.el) {
+            return;
+        }
+        COLORES.forEach((c) => c[0] && m.el.classList.remove("oc-color-" + c[0]));
+        m.el.classList.toggle("con-color", !!m.color);
+        if (m.color) {
+            m.el.classList.add("oc-color-" + m.color);
+        }
+    }
+
+    // ✎: una ventanita para cambiarle el título y el color.
+    function personalizar(m, vuelta) {
+        const def = MODULOS[m.tipo];
+        const cuerpo = crear("form", "master-personalizar");
+        const et = crear("label", "oc-dados-etiqueta", "título");
+        const input = crear("input", "oc-dados-texto");
+        input.id = "master-personalizar-" + m.id;
+        input.value = m.titulo || "";
+        input.placeholder = def.nombre;
+        input.maxLength = 60;
+        input.autocomplete = "off";
+        et.htmlFor = input.id;
+        const grupo = crear("fieldset", "master-colores");
+        grupo.appendChild(crear("legend", "oc-dados-etiqueta", "color"));
+        let elegido = m.color || "";
+        const muestras = COLORES.map(([valor, nombre]) => {
+            const b = botonDe("master-color" + (valor ? " oc-color-" + valor : " es-ninguno"), "", () => {
+                elegido = valor;
+                muestras.forEach((x) => x.setAttribute("aria-pressed", x === b ? "true" : "false"));
+            }, nombre);
+            b.title = nombre;
+            // La ventanita va fuera de la página y ahí no están los colores
+            // de mis personajes: se miden dentro, en la propia ventana.
+            if (valor) {
+                const prueba = crear("span", "oc-color-" + valor);
+                lienzo.appendChild(prueba);
+                b.style.backgroundColor = getComputedStyle(prueba).getPropertyValue("--oc-color").trim();
+                prueba.remove();
+            }
+            b.setAttribute("aria-pressed", valor === elegido ? "true" : "false");
+            grupo.appendChild(b);
+            return b;
+        });
+        const listo = crear("button", "oc-vida-accion es-principal", "guardar");
+        listo.type = "submit";
+        cuerpo.append(et, input, grupo, listo);
+        cuerpo.addEventListener("submit", (e) => {
+            e.preventDefault();
+            m.titulo = input.value.trim();
+            m.color = elegido;
+            ponerTitulo(m);
+            ponerColor(m);
+            guardar();
+            cerrar();
+            avisar("Guardado.");
+        });
+        const cerrar = window.ocVentana.abrir({ titulo: "título y color", cuerpo, vuelta, foco: input });
     }
 
     function colocar(m) {
@@ -466,6 +519,9 @@
         const v = crear("div", "master-ventana oc-hoja-caja");
         v.setAttribute("role", "region");
         const cabeza = crear("div", "recent-entries-header master-ventana-barra");
+        // Que no le monte encima su mando ventanas-plegables.js (taparía
+        // los ✎ − ✕ y estas ya se pliegan con su −).
+        cabeza.dataset.ventanaLista = "si";
         const titulo = crear("h2", "oc-hoja-titulo master-ventana-titulo");
         const idTitulo = "master-titulo-" + m.id;
         titulo.id = idTitulo;
@@ -506,15 +562,20 @@
             guardar();
             avisar("Quitado: " + (m.titulo || def.nombre) + ".");
             botonAnadir.focus();
-        }, "Quitar este módulo");
+        }, "Quitar esta ventana");
+        const cambiar = botonDe("master-ventana-mando", "✎", () => personalizar(m, cambiar), "Cambiar el título y el color");
+        cambiar.title = "Título y color";
+        cambiar.setAttribute("aria-haspopup", "dialog");
+        titulo.addEventListener("dblclick", () => personalizar(m, cambiar));
         const mandos = crear("div", "master-ventana-mandos");
-        mandos.append(asa, plegar, quitar);
+        mandos.append(asa, cambiar, plegar, quitar);
         cabeza.append(titulo, mandos);
         const cuerpo = crear("div", "oc-hoja-dentro master-ventana-cuerpo");
         cuerpo.hidden = !!m.plegado;
         v.classList.toggle("es-plegada", !!m.plegado);
         v.append(cabeza, cuerpo);
         m.el = v;
+        ponerColor(m);
         // Arrastrar por la barra (no por sus botones).
         cabeza.addEventListener("pointerdown", (e) => {
             if (enMovil.matches || e.target.closest("button:not(.es-asa)") || e.button > 0) {
@@ -586,8 +647,8 @@
         crecerLienzo();
     }
 
-    // ---- LA BARRA DE ARRIBA: añadir, ordenar y como al principio (y el
-    // botón de los dados, que pone personajes.js) ----
+    // ---- EL BOTÓN DE AÑADIR (y el de los dados, que pone personajes.js).
+    // Su ventana tiene también «ordenar» y «quitar todas». ----
     const botonAnadir = botonDe("oc-vida-accion es-principal", "＋ añadir", () => {
         const cuerpo = crear("div", "master-anadir");
         const lista = crear("ul", "oc-menu-ventana-lista");
@@ -607,7 +668,32 @@
             lista.appendChild(li);
         });
         cuerpo.appendChild(lista);
-        const cerrar = window.ocVentana.abrir({ titulo: "añadir un módulo", cuerpo, vuelta: botonAnadir,
+        if (estado.modulos.length) {
+            const otras = crear("div", "master-anadir-otras");
+            const ordenarlas = botonDe("oc-vida-accion", "▦ ordenar las ventanas", () => {
+                cerrar();
+                ordenar();
+                pintarTodo();
+                guardar();
+                avisar("Ordenadas.");
+            });
+            let seguro = false;
+            const vaciar = botonDe("oc-vida-accion", "🗑️ quitar todas", () => {
+                if (!seguro) {
+                    seguro = true;
+                    vaciar.textContent = "🗑️ ¿seguro? pulsa otra vez";
+                    return;
+                }
+                cerrar();
+                estado.modulos = [];
+                pintarTodo();
+                guardar();
+                avisar("Pantalla vacía.");
+            });
+            otras.append(ordenarlas, vaciar);
+            cuerpo.appendChild(otras);
+        }
+        const cerrar = window.ocVentana.abrir({ titulo: "añadir una ventana", cuerpo, vuelta: botonAnadir,
             foco: lista.querySelector("button:not([disabled])") || undefined });
     });
     botonAnadir.setAttribute("aria-haspopup", "dialog");
@@ -647,49 +733,11 @@
         });
     }
 
-    const botonOrdenar = botonDe("oc-vida-accion", "▦ ordenar", () => {
-        ordenar();
-        pintarTodo();
-        guardar();
-        avisar("Ordenados.");
-    });
-    let seguro = false;
-    const botonInicio = botonDe("oc-vida-accion", "↺ como al principio", () => {
-        if (!seguro) {
-            seguro = true;
-            botonInicio.textContent = "↺ ¿seguro? pulsa otra vez";
-            setTimeout(() => {
-                seguro = false;
-                botonInicio.textContent = "↺ como al principio";
-            }, 4000);
-            return;
-        }
-        seguro = false;
-        botonInicio.textContent = "↺ como al principio";
-        estado = DE_INICIO();
-        estado.modulos.forEach((m) => {
-            m.id = "m" + siguienteId++;
-            m.w = MODULOS[m.tipo].w;
-            m.h = MODULOS[m.tipo].h;
-        });
-        ordenar();
-        pintarTodo();
-        guardar();
-        avisar("La pantalla, como al principio.");
-    });
     const mandos = crear("div", "master-barra-mandos");
-    mandos.append(botonAnadir, botonOrdenar, botonInicio);
+    mandos.append(botonAnadir);
     barra.prepend(mandos);
 
     lienzo.classList.add("con-lienzo");
-    // La primera vez, ordenadas según el ancho que haya.
-    if (estado.nueva) {
-        estado.modulos.forEach((m) => {
-            m.w = MODULOS[m.tipo].w;
-            m.h = MODULOS[m.tipo].h;
-        });
-        ordenar();
-    }
     pintarTodo();
     if (enMovil.addEventListener) {
         enMovil.addEventListener("change", pintarTodo);

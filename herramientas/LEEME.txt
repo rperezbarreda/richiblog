@@ -4231,8 +4231,15 @@
       los descansos (D&D) y «empezar de cero» (desmarca todo y la vida al
       máximo; las notas se quedan).
     · 📚 REGLAS (en el menú, solo con D&D): lo que más se busca jugando
-      (estados, ventaja, flanqueo, cobertura, concentración, salvaciones
-      de muerte, descansos…; con lo que cambia en 2024), con un buscador.
+      (estados, acciones, ventaja, cobertura, concentración, salvaciones
+      de muerte, descansos…), con un buscador. Son las de D&D 2024, del
+      SRD 5.2 (licencia CC BY 4.0: hay que nombrar de dónde salen, y lo
+      dice el campo «fuente» del JSON, que sale debajo), sacadas de
+      5e.tools y traducidas. Los datos de 5e.tools están en GitHub
+      (5etools-mirror-3/5etools-src, carpeta data: conditionsdiseases,
+      actions, variantrules, trapshazards y book/book-xphb). Ojo: lo que
+      no es del SRD (como el flanqueo, que es del libro del DM) no se
+      puede copiar.
       Cada regla es un botón grande con su dibujo (el campo «icono», un
       emoji) que abre una ventana con la explicación. Salen de
       datos/personajes/reglas-dnd.json, que se edita en el editor: Rol →
@@ -4261,24 +4268,34 @@
 
   LA PANTALLA DE MÁSTER (web/pantalla_master/pantalla_master.html, en
   la barra lateral bajo «roleito»): un lienzo con ventanas para dirigir.
-  Cada ventana se mueve arrastrando su barra (o con el ⠿ y las flechas),
-  cambia de tamaño por la esquina de abajo a la derecha, se pliega (−) y
-  se quita (✕). Arriba: «＋ añadir» (elige qué ventana), «▦ ordenar» (las
-  coloca en columnas sin solaparse) y «↺ como al principio» (pide
-  confirmar). Todo se guarda en el navegador («richi-master»). En el
-  móvil van una debajo de otra, sin mover ni redimensionar.
+  Empieza VACÍA y sin textos (el título de la página solo lo leen los
+  lectores de pantalla): arriba solo «＋ añadir» y el botón de los dados.
+  «＋ añadir» abre una ventana para elegir qué poner, y debajo, si ya hay
+  algo, «▦ ordenar las ventanas» (en filas, sin solaparse) y «🗑️ quitar
+  todas» (pide pulsar dos veces). Cada ventana se mueve arrastrando su
+  barra (o con el ⠿ y las flechas), cambia de tamaño por la esquina de
+  abajo a la derecha, ✎ (o doble clic en el título) le cambia el TÍTULO y
+  el COLOR (como un post-it: la barra de ese color y el fondo un poco
+  teñido; son los .oc-color-* de personajes.css), − la pliega y ✕ la
+  quita. Todo se guarda en el navegador («richi-master»). En el móvil van
+  una debajo de otra, sin mover ni redimensionar.
   Las ventanas que hay (MODULOS en scripts/paginas/pantalla-master.js):
     · ⏱️ iniciativa (la misma de las fichas), 🙈 condiciones (las reglas
-      del grupo «Estados»), 📚 reglas, ✨ conjuros (buscador por nombre y
-      nivel sobre datos/personajes/compendio/conjuros.json) y 📝 notas:
-      solo una de cada.
-    · 🎲 dados (d4–d100 y una fórmula), 📌 tarjeta (título y texto
-      propios, con negrita, cursiva y listas) y 🔮 tabla para tirar (una
-      cosa por línea; «tirar» saca una al azar): tantas como se quiera.
+      del grupo «Estados»), ⚔️ acciones (las del grupo «Acciones»), 📚
+      todas las reglas, ✨ conjuros (buscador por nombre y nivel sobre
+      datos/personajes/compendio/conjuros.json) y 📝 notas: solo una de
+      cada.
+    · 🎲 dados (d4–d100 y una fórmula), 📌 tarjeta (texto propio, con
+      negrita, cursiva y listas) y 🔮 tabla para tirar (una cosa por línea;
+      «tirar» saca una al azar): tantas como se quiera.
   Para añadir una ventana nueva: una entrada en MODULOS (nombre, emoji,
   unico, w, h, montar(cuerpo, modulo)). Estilos: estilos/paginas/pantalla-master.css
   (usa también personajes.css). actualizar-cabeceras.py le pone sus hojas
   y scripts (es_master).
+  Las barras de estas ventanas llevan data-ventana-lista="si" para que
+  ventanas-plegables.js no les monte encima su botón de plegar (taparía
+  los ✎ − ✕). El color de las muestras de ✎ se mide dentro de la página
+  (la ventanita va fuera y ahí no existen los --oc-*).
 
 
 ---------------------------------------------------------------
