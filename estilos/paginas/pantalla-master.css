@@ -1868,6 +1868,90 @@
     font-family: "Richi noto-phoenician", "Pangolin", sans-serif;
 }
 
+/* EL BOTÍN Y LOS ENCUENTROS: una lista de lo que ha salido, con el
+   icono, la cosa (botón si se puede abrir) y su valor a la derecha. */
+.master-botin {
+    margin-top: 12px;
+}
+
+.master-botin-lista {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.master-botin-cosa {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 8px;
+    border: 1px solid var(--border);
+    border-left: 4px solid var(--yellow);
+    background: var(--purple);
+}
+
+.master-botin-cosa.es-magico {
+    border-left-style: double;
+}
+
+.master-botin-icono {
+    flex: none;
+    font-size: 1.25rem;
+}
+
+.master-botin-objeto {
+    flex: 1 1 auto;
+    min-height: 36px;
+    padding: 2px 4px;
+    border: 0;
+    background: transparent;
+    color: var(--white);
+    font: inherit;
+    font-weight: 700;
+    text-align: left;
+    text-decoration: underline dotted;
+    text-underline-offset: 3px;
+    cursor: pointer;
+}
+
+.master-botin-objeto:hover {
+    color: var(--yellow);
+}
+
+.master-botin-objeto:focus-visible {
+    outline: 3px solid var(--yellow);
+    outline-offset: 1px;
+}
+
+.master-botin-valor {
+    flex: none;
+    margin-left: auto;
+    color: var(--muted);
+    font-size: 0.875rem;
+    text-align: right;
+}
+
+.master-botin-total,
+.master-encuentro-hacen {
+    margin: 10px 0;
+    font-weight: 700;
+}
+
+.master-encuentro-hacen {
+    margin-top: 0;
+    font-style: italic;
+    font-weight: 400;
+}
+
+.master-encuentro-fila {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+}
+
 /* LOS DADOS. */
 .master-dados {
     display: grid;

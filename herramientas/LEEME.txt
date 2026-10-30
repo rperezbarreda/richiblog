@@ -4380,6 +4380,25 @@
       palabra; la misma palabra da siempre lo mismo), y en la tarjeta,
       debajo, cómo se escribe en su alfabeto y «Torrefría» en enano. Se
       guarda como {n, es, idioma} (lo de antes, texto, sigue valiendo).
+    · 💰 botín y 🗺️ encuentros: generadores PROPIOS. Las tablas de botín
+      y de encuentros de 5e.tools (loot.json, encounters.json) son de la
+      DMG, la Xanathar's y otros libros, no del SRD: no se pueden copiar.
+      BOTÍN: por franja de VD (0–4, 5–10, 11–16, 17+) y «lo que lleva
+      encima uno» o «un tesoro». Monedas (BOTIN_MONEDAS), gemas
+      (BOTIN_GEMAS, por valor) y obras de arte (BOTIN_ARTE) en tablas
+      inventadas aquí; los objetos mágicos, al azar de tienda.json según
+      la rareza (BOTIN_TESORO: cuántos y con qué peso cada rareza; sin
+      artefactos). Uno suelto lleva algo mágico 1 de cada 20. Cada objeto
+      se abre con su descripción; abajo, el valor de monedas, gemas y
+      arte, y «⧉ copiar». ENCUENTROS: hábitat («cualquier sitio» o uno de
+      bestiario.json, «habitat», sacado de la «environment» de 5e.tools
+      y traducido; los «cualquiera» salen en todos), nivel, cuántos PJ (si
+      hay ventana de party, dice cuántos tiene) y dificultad. El
+      presupuesto es una cuenta propia: PJ × PX de un monstruo de VD igual
+      al nivel (PX_POR_VD) × 0,25 / 0,4 / 0,6. Salen uno o dos grupos
+      (hasta 6 de cada) de VD hasta nivel + 3, qué están haciendo
+      (QUE_HACEN), cada monstruo se abre y «⚔️ todos a la iniciativa» los
+      apunta numerados. El hábitat sale también en el perfil del monstruo.
     · 🪶 notas en otros idiomas: escribes lo que pone (o «🎲 nota al azar»,
       de NOTAS_AL_AZAR con nombres y lugares del generador) y se ve en un
       pergamino con el alfabeto del idioma. Los idiomas, en

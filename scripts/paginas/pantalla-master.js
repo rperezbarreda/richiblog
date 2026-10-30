@@ -1719,6 +1719,358 @@
         });
     }
 
+    // ---- BOTÍN Y ENCUENTROS: generadores PROPIOS (las tablas de la DMG y
+    // la Xanathar's no son del SRD). Las monedas, gemas y obras de arte,
+    // en tablas inventadas aquí; los objetos mágicos y los monstruos, del
+    // SRD (tienda.json y bestiario.json). ----
+    const TIENDA = "/datos/personajes/compendio/tienda.json";
+    const BESTIARIO = "/datos/personajes/compendio/bestiario.json";
+    const FRANJAS = [["0", "VD 0–4"], ["1", "VD 5–10"], ["2", "VD 11–16"], ["3", "VD 17 o más"]];
+
+    // «3d6» a un número, sin pasar por el registro de tiradas.
+    function tiradaSuelta(formula) {
+        const m = /^(\d+)d(\d+)$/.exec(formula);
+        if (!m) {
+            return parseInt(formula, 10) || 0;
+        }
+        const u = new Uint32Array(parseInt(m[1], 10));
+        crypto.getRandomValues(u);
+        return Array.from(u).reduce((t, x) => t + (x % parseInt(m[2], 10)) + 1, 0);
+    }
+
+    // Monedas: [moneda, dados, por cuánto se multiplica], por franja.
+    const BOTIN_MONEDAS = {
+        uno: [[["pp", "3d6", 1], ["po", "1d6", 1]], [["pp", "2d6", 10], ["po", "4d6", 1]],
+            [["po", "2d6", 10], ["ppt", "1d6", 1]], [["po", "4d6", 10], ["ppt", "2d6", 1]]],
+        tesoro: [[["pc", "2d6", 100], ["pp", "2d6", 100], ["po", "2d6", 20]],
+            [["pp", "2d6", 100], ["po", "4d6", 100], ["ppt", "1d6", 10]],
+            [["po", "4d6", 500], ["ppt", "2d6", 50]], [["po", "6d6", 2000], ["ppt", "4d6", 500]]],
+    };
+    const BOTIN_GEMAS = {
+        10: ["ágata", "cuarzo azul", "hematites", "lapislázuli", "malaquita", "obsidiana", "ojo de tigre", "turquesa"],
+        50: ["calcedonia", "citrino", "cornalina", "jaspe sanguíneo", "ónice", "piedra de luna", "cuarzo rosa", "circón"],
+        100: ["ámbar", "amatista", "coral rojo", "granate", "jade", "perla", "espinela", "turmalina"],
+        500: ["aguamarina", "alejandrita", "perla negra", "peridoto", "topacio dorado", "espinela azul"],
+        1000: ["ópalo negro", "ópalo de fuego", "zafiro azul", "esmeralda", "zafiro estrella", "rubí estrella"],
+        5000: ["diamante", "rubí sangre", "zafiro negro", "jacinto", "esmeralda sin defecto"],
+    };
+    const BOTIN_ARTE = {
+        25: ["un aguamanil de cobre con asas de serpiente", "una baraja de naipes pintados a mano",
+            "un espejo de mano con marco de plata", "una figurita de hueso tallado de un búho", "un par de dados de marfil",
+            "un incensario de latón", "un pañuelo de seda bordado", "una pipa de brezo con boquilla de ámbar"],
+        250: ["una copa de plata con incrustaciones de ámbar", "un tapiz pequeño de una cacería",
+            "un broche de oro con forma de hoja", "una caja de música de nogal", "una máscara ceremonial de bronce",
+            "un catalejo de latón grabado", "un anillo de sello de oro", "un cuadro al óleo de un puerto"],
+        750: ["una corona de plata con perlas", "un cáliz de oro con granates", "una daga ceremonial con empuñadura de jade",
+            "un tablero de ajedrez de ébano y marfil", "un collar de cuentas de amatista",
+            "una estatuilla de oro de un dragón dormido"],
+        2500: ["un brazalete de platino con zafiros", "un ídolo de jade del tamaño de un puño",
+            "una diadema de oro con esmeraldas", "un relicario de oro con un retrato en miniatura",
+            "un tapiz enorme tejido con hilo de oro"],
+        7500: ["una corona de oro con rubíes", "un cetro de platino con un diamante en la punta",
+            "una armadura ceremonial dorada, de adorno", "una estatua de mithral de una diosa",
+            "un huevo de oro con joyas incrustadas"],
+    };
+    // En un tesoro, por franja: cuántas gemas u obras de arte, de qué
+    // valores, y cuántos objetos mágicos y de qué rareza (con su peso).
+    const BOTIN_TESORO = [
+        { cuantas: "1d4", gemas: [10, 50], arte: [25], magicos: "1d4", menos: 1,
+            rarezas: [["común", 30], ["poco común", 70]] },
+        { cuantas: "1d6", gemas: [50, 100], arte: [250], magicos: "1d4", menos: 0,
+            rarezas: [["poco común", 55], ["rara", 40], ["muy rara", 5]] },
+        { cuantas: "1d6", gemas: [500, 1000], arte: [750, 2500], magicos: "1d4", menos: -1,
+            rarezas: [["poco común", 20], ["rara", 50], ["muy rara", 25], ["legendaria", 5]] },
+        { cuantas: "2d4", gemas: [1000, 5000], arte: [2500, 7500], magicos: "1d6", menos: -1,
+            rarezas: [["rara", 25], ["muy rara", 45], ["legendaria", 30]] },
+    ];
+    const VALOR_MONEDA = { pc: 1, pp: 10, pe: 50, po: 100, ppt: 1000 };
+
+    function conPeso(lista) {
+        const total = lista.reduce((t, x) => t + x[1], 0);
+        let r = tiradaSuelta("1d" + total);
+        for (const [x, p] of lista) {
+            r -= p;
+            if (r <= 0) {
+                return x;
+            }
+        }
+        return lista[0][0];
+    }
+
+    function hacerBotin(objetos, franja, tipo) {
+        const sale = { monedas: [], cosas: [], objetos: [] };
+        BOTIN_MONEDAS[tipo][franja].forEach(([k, dados, por]) => {
+            sale.monedas.push([k, tiradaSuelta(dados) * por]);
+        });
+        const t = BOTIN_TESORO[franja];
+        const magicos = objetos.filter((o) => o.rareza && o.rareza !== "artefacto");
+        const unObjeto = () => {
+            const rareza = conPeso(t.rarezas);
+            const de = magicos.filter((o) => o.rareza === rareza);
+            return de.length ? alAzar(de).en : null;
+        };
+        if (tipo === "tesoro") {
+            const que = tiradaSuelta("1d6");
+            if (que >= 3) {
+                const gemas = que <= 4;
+                const valor = alAzar(gemas ? t.gemas : t.arte);
+                const n = tiradaSuelta(t.cuantas);
+                const lista = (gemas ? BOTIN_GEMAS : BOTIN_ARTE)[valor];
+                const cuantas = {};
+                for (let i = 0; i < n; i++) {
+                    const x = alAzar(lista);
+                    cuantas[x] = (cuantas[x] || 0) + 1;
+                }
+                Object.keys(cuantas).forEach((x) => sale.cosas.push({ que: gemas ? "gema" : "arte", texto: x, n: cuantas[x], valor }));
+            }
+            const n = Math.max(0, tiradaSuelta(t.magicos) - t.menos);
+            for (let i = 0; i < n; i++) {
+                const o = unObjeto();
+                if (o) {
+                    sale.objetos.push(o);
+                }
+            }
+        } else if (tiradaSuelta("1d20") === 20) {
+            // Uno de cada veinte lleva encima algo mágico.
+            const o = unObjeto();
+            if (o) {
+                sale.objetos.push(o);
+            }
+        }
+        return sale;
+    }
+
+    function montarBotin(dentro, m) {
+        m.datos = m.datos || {};
+        dentro.appendChild(crear("p", "oc-hoja-nota", "Cargando…"));
+        pedir(TIENDA).then((tienda) => {
+            const d = m.datos;
+            const porEn = {};
+            tienda.objetos.forEach((o) => {
+                porEn[o.en] = o;
+            });
+            const franja = elegirDe("master-botin-franja-" + m.id, "de quién (su valor de desafío)", FRANJAS, d.franja || "0");
+            const tipo = botonesDe("qué", [["uno", "👤 lo que lleva encima uno"], ["tesoro", "💎 un tesoro"]], d.tipo || "tesoro",
+                (v) => {
+                    d.tipo = v;
+                    guardar();
+                });
+            const sale = crear("div", "master-botin");
+            sale.setAttribute("aria-live", "polite");
+            const texto = () => {
+                const r = d.sale;
+                const lineas = [];
+                if (!r) {
+                    return "";
+                }
+                lineas.push("Monedas: " + r.monedas.filter((x) => x[1]).map((x) => x[1].toLocaleString("es-ES") + " " + x[0]).join(", "));
+                r.cosas.forEach((c) => lineas.push((c.n > 1 ? c.n + " × " : "") + c.texto + " (" + c.valor.toLocaleString("es-ES") +
+                    " po" + (c.n > 1 ? " cada " + (c.que === "gema" ? "una" : "uno") : "") + ")"));
+                r.objetos.forEach((en) => lineas.push((porEn[en] || { nombre: en }).nombre));
+                return lineas.join("\n");
+            };
+            const pintar = () => {
+                const r = d.sale;
+                sale.replaceChildren();
+                if (!r) {
+                    sale.appendChild(crear("p", "oc-vacio", "Elige y pulsa «generar»."));
+                    return;
+                }
+                const lista = crear("ul", "master-botin-lista");
+                const monedas = r.monedas.filter((x) => x[1]);
+                const li = crear("li", "master-botin-cosa es-monedas");
+                li.append(crear("span", "master-botin-icono", "🪙"), crear("span", "",
+                    monedas.map((x) => x[1].toLocaleString("es-ES") + " " + x[0]).join(" · ")));
+                li.querySelector("span:last-child").setAttribute("aria-label", "Monedas: " + monedas.map((x) =>
+                    x[1].toLocaleString("es-ES") + " " + (MONEDAS.find((y) => y[0] === x[0]) || [0, x[0]])[1]).join(", "));
+                lista.appendChild(li);
+                r.cosas.forEach((c) => {
+                    const x = crear("li", "master-botin-cosa");
+                    x.append(crear("span", "master-botin-icono", c.que === "gema" ? "💎" : "🏺"),
+                        crear("span", "", (c.n > 1 ? c.n + " × " : "") + c.texto),
+                        crear("span", "master-botin-valor", c.valor.toLocaleString("es-ES") + " po" + (c.n > 1 ? " c/u" : "")));
+                    lista.appendChild(x);
+                });
+                r.objetos.forEach((en) => {
+                    const o = porEn[en];
+                    if (!o) {
+                        return;
+                    }
+                    const x = crear("li", "master-botin-cosa es-magico");
+                    const b = botonDe("master-botin-objeto", o.nombre, () => abrirObjeto(o, b, tienda.fuente), "Ver " + o.nombre);
+                    x.append(crear("span", "master-botin-icono", "✨"), b, crear("span", "master-botin-valor", o.rareza));
+                    lista.appendChild(x);
+                });
+                let total = monedas.reduce((t, x) => t + x[1] * VALOR_MONEDA[x[0]], 0) / 100;
+                r.cosas.forEach((c) => {
+                    total += c.n * c.valor;
+                });
+                sale.append(lista, crear("p", "master-botin-total", "Monedas, gemas y arte: unas " +
+                    Math.round(total).toLocaleString("es-ES") + " po" + (r.objetos.length ? ", más " + r.objetos.length +
+                    (r.objetos.length > 1 ? " objetos mágicos." : " objeto mágico.") : ".")));
+            };
+            const generar = botonDe("oc-vida-accion es-principal master-nombres-generar", "🎲 generar botín", () => {
+                d.franja = franja.elegir.value;
+                d.tipo = tipo.valor();
+                d.sale = hacerBotin(tienda.objetos, parseInt(d.franja, 10), d.tipo);
+                guardar();
+                pintar();
+                avisar("Botín nuevo: " + texto().replace(/\n/g, ". ") + ".");
+            });
+            const copiar = botonDe("oc-vida-accion", "⧉ copiar", () => copiarTexto(texto(), "Copiado el botín."), "Copiar el botín");
+            const arriba = crear("div", "master-nombres-form");
+            arriba.append(franja, tipo, generar);
+            dentro.replaceChildren(arriba, sale, copiar,
+                crear("p", "oc-hoja-nota master-fuente", "Monedas, gemas y arte: tablas propias. Objetos: SRD 5.2 (CC BY 4.0)."));
+            pintar();
+        }).catch(() => {
+            dentro.replaceChildren(crear("p", "oc-vacio", "No he podido cargar los objetos."));
+        });
+    }
+
+    // ENCUENTROS: monstruos del SRD de un hábitat que quepan en lo que
+    // aguanta la party. El presupuesto, una cuenta propia: por cada PJ,
+    // los PX de un monstruo de VD igual a su nivel, por 0,25 (bajo), 0,4
+    // (moderado) o 0,6 (alto).
+    const DIFICULTADES = [["baja", "baja", 0.25], ["moderada", "moderada", 0.4], ["alta", "alta", 0.6]];
+    const QUE_HACEN = ["acampando alrededor de una hoguera", "de caza", "peleándose entre ellos", "persiguiendo a alguien",
+        "vigilando algo que no quieren que se vea", "durmiendo (casi todos)", "de paso, sin prisa", "preparando una emboscada",
+        "huyendo de algo peor", "repartiéndose un botín", "perdidos", "buscando a los PJ"];
+    // Los PX de un monstruo de VD 1 a 20 (los de sus perfiles del SRD).
+    const PX_POR_VD = [200, 450, 700, 1100, 1800, 2300, 2900, 3900, 5000, 5900, 7200, 8400, 10000, 11500, 13000, 15000, 18000,
+        20000, 22000, 25000];
+    const pxDe = (b) => {
+        const m = /\(([\d.]+) PX/.exec(b.vd || "");
+        return m ? parseInt(m[1].replace(/\./g, ""), 10) : 0;
+    };
+    const vdNum = (vd) => (vd.indexOf("/") >= 0 ? 1 / parseInt(vd.split("/")[1], 10) : parseFloat(vd));
+
+    function hacerEncuentro(bichos, habitat, nivel, pjs, factor) {
+        const presupuesto = Math.round(pjs * PX_POR_VD[Math.min(20, Math.max(1, nivel)) - 1] * factor);
+        const de = bichos.filter((b) => pxDe(b) && (habitat === "" || (b.habitat || []).some((h) => h === habitat || h === "cualquiera"))
+            && vdNum(b.cr) <= nivel + 3);
+        const grupos = [];
+        let queda = presupuesto;
+        for (let intento = 0; intento < 2 && queda > presupuesto * 0.15; intento++) {
+            const minimo = intento ? 0 : presupuesto * 0.2;
+            const caben = de.filter((b) => pxDe(b) <= queda && pxDe(b) >= minimo && !grupos.some((g) => g.en === b.en));
+            if (!caben.length) {
+                break;
+            }
+            const b = alAzar(caben);
+            const n = tiradaSuelta("1d" + Math.min(6, Math.floor(queda / pxDe(b))));
+            grupos.push({ en: b.en, n });
+            queda -= n * pxDe(b);
+        }
+        return { presupuesto, grupos, hacen: alAzar(QUE_HACEN) };
+    }
+
+    function montarEncuentros(dentro, m) {
+        m.datos = m.datos || {};
+        dentro.appendChild(crear("p", "oc-hoja-nota", "Cargando…"));
+        pedir(BESTIARIO).then((datos) => {
+            const d = m.datos;
+            const bichos = datos.monstruos;
+            const porEn = {};
+            bichos.forEach((b) => {
+                porEn[b.en] = b;
+            });
+            const habitats = Array.from(new Set(bichos.flatMap((b) => b.habitat || []))).filter((h) => h !== "cualquiera")
+                .sort((a, b) => a.localeCompare(b, "es"));
+            const habitat = elegirDe("master-encuentro-habitat-" + m.id, "dónde",
+                [["", "cualquier sitio"]].concat(habitats.map((h) => [h, h])), d.habitat || "");
+            const enParty = estado.modulos.filter((x) => x.tipo === "party")
+                .reduce((t, x) => t + ((x.datos && x.datos.pjs) || []).length, 0);
+            const numero = (id, texto, valor, min, max) => {
+                const caja = crear("div", "master-campo");
+                const et = crear("label", "oc-dados-etiqueta", texto);
+                const x = crear("input", "master-elegir");
+                x.type = "number";
+                x.min = min;
+                x.max = max;
+                x.value = valor;
+                x.id = id + m.id;
+                et.htmlFor = x.id;
+                caja.append(et, x);
+                caja.elegir = x;
+                return caja;
+            };
+            const nivel = numero("master-encuentro-nivel-", "nivel de la party", d.nivel || 3, 1, 20);
+            const pjs = numero("master-encuentro-pjs-", "cuántos PJ" + (enParty ? " (en la party hay " + enParty + ")" : ""),
+                d.pjs || enParty || 4, 1, 10);
+            const fila = crear("div", "master-encuentro-fila");
+            fila.append(nivel, pjs);
+            const dificultad = botonesDe("dificultad", DIFICULTADES.map((x) => [x[0], x[1]]), d.dificultad || "moderada", (v) => {
+                d.dificultad = v;
+                guardar();
+            });
+            const etDif = crear("p", "oc-dados-etiqueta", "dificultad");
+            etDif.setAttribute("aria-hidden", "true");
+            const sale = crear("div", "master-botin");
+            sale.setAttribute("aria-live", "polite");
+            const pintar = () => {
+                const r = d.sale;
+                sale.replaceChildren();
+                if (!r) {
+                    sale.appendChild(crear("p", "oc-vacio", "Elige y pulsa «generar»."));
+                    return;
+                }
+                if (!r.grupos.length) {
+                    sale.appendChild(crear("p", "oc-vacio", "No cabe ningún monstruo de ese sitio. Prueba con otro o sube la dificultad."));
+                    return;
+                }
+                const lista = crear("ul", "master-botin-lista");
+                let px = 0;
+                r.grupos.forEach((g) => {
+                    const b = porEn[g.en];
+                    if (!b) {
+                        return;
+                    }
+                    px += g.n * pxDe(b);
+                    const li = crear("li", "master-botin-cosa");
+                    const ver = botonDe("master-botin-objeto", (g.n > 1 ? g.n + " × " : "") + b.nombre, () => abrirBicho(b, ver, datos.fuente),
+                        "Ver " + b.nombre);
+                    li.append(tokenDe(b), ver, crear("span", "master-botin-valor", "VD " + b.cr + " · " +
+                        (g.n * pxDe(b)).toLocaleString("es-ES") + " PX"));
+                    lista.appendChild(li);
+                });
+                const todos = botonDe("oc-vida-accion es-principal", "⚔️ todos a la iniciativa", () => {
+                    const entran = [];
+                    r.grupos.forEach((g) => {
+                        const b = porEn[g.en];
+                        for (let i = 0; i < g.n && b; i++) {
+                            entran.push(meterEnIniciativa({ nombre: b.nombre, bono: b.ini, ca: b.ca, pg: b.pg || "", color: "#d23b3b" },
+                                (nombres, renombrar) => conNumero(b.nombre, nombres, renombrar)));
+                        }
+                    });
+                    avisar("A la iniciativa: " + entran.filter(Boolean).join(", ") + ".");
+                });
+                sale.append(crear("p", "master-encuentro-hacen", "Están " + r.hacen + "."), lista,
+                    crear("p", "master-botin-total", px.toLocaleString("es-ES") + " PX de " +
+                        r.presupuesto.toLocaleString("es-ES") + " que aguanta la party."), todos);
+            };
+            const generar = botonDe("oc-vida-accion es-principal master-nombres-generar", "🎲 generar encuentro", () => {
+                d.habitat = habitat.elegir.value;
+                d.nivel = Math.min(20, Math.max(1, parseInt(nivel.elegir.value, 10) || 1));
+                d.pjs = Math.min(10, Math.max(1, parseInt(pjs.elegir.value, 10) || 1));
+                d.dificultad = dificultad.valor();
+                const f = (DIFICULTADES.find((x) => x[0] === d.dificultad) || DIFICULTADES[1])[2];
+                d.sale = hacerEncuentro(bichos, d.habitat, d.nivel, d.pjs, f);
+                guardar();
+                pintar();
+                avisar(d.sale.grupos.length ? "Encuentro: " + d.sale.grupos.map((g) => g.n + " " + (porEn[g.en] || {}).nombre)
+                    .join(" y ") + ", " + d.sale.hacen + "." : "No cabe ningún monstruo.");
+            });
+            const arriba = crear("div", "master-nombres-form");
+            arriba.append(habitat, fila, etDif, dificultad, generar);
+            dentro.replaceChildren(arriba, sale, crear("p", "oc-hoja-nota master-fuente",
+                "Monstruos: SRD 5.2 (CC BY 4.0). La dificultad es una cuenta propia, aproximada."));
+            pintar();
+        }).catch(() => {
+            dentro.replaceChildren(crear("p", "oc-vacio", "No he podido cargar el bestiario."));
+        });
+    }
+
     // ---- UNA TABLA PARA TIRAR: una cosa por línea; «tirar» saca una al
     // azar (encuentros, nombres, el tiempo que hace…) ----
     function montarTabla(dentro, m) {
@@ -2022,6 +2374,7 @@
         fila(abajo, "Sentidos", b.sent);
         fila(abajo, "Idiomas", b.idio);
         fila(abajo, "VD", b.vd);
+        fila(abajo, "Hábitat", (b.habitat || []).join(", "));
         stats.append(arriba, tabla, abajo);
 
         // Un rasgo o acción: su nombre en negrita (con sus casillas si se
@@ -2736,6 +3089,10 @@
             desc: "Cambiar y repartir el botín.", montar: montarMonedas },
         nombres: { nombre: "generador de nombres", emoji: "🎭", grupo: "mundo", w: 440, h: 560,
             desc: "Personajes por especie y género, y lugares.", montar: montarNombres },
+        botin: { nombre: "botín", emoji: "💰", grupo: "mundo", w: 440, h: 560,
+            desc: "Monedas, gemas, arte y objetos mágicos según el VD.", montar: montarBotin },
+        encuentros: { nombre: "encuentros", emoji: "🗺️", grupo: "combate", w: 440, h: 620,
+            desc: "Monstruos del SRD por hábitat para tu party.", montar: montarEncuentros },
         idiomas: { nombre: "notas en otros idiomas", emoji: "🪶", grupo: "mundo", w: 480, h: 680,
             desc: "Escribe una nota y mírala en élfico, enano, infernal…", montar: montarIdiomas },
         tarjeta: { nombre: "post-it", emoji: "🗒️", grupo: "apuntes", w: 420, h: 340,
@@ -3300,7 +3657,7 @@
                 b.disabled = ya;
                 li.appendChild(b);
                 lista.appendChild(li);
-                tarjetas.push({ li, seccion, texto: llano(def.nombre + " " + def.desc + " " + titulo) });
+                tarjetas.push({ li, seccion, b, nombre: llano(def.nombre), texto: llano(def.nombre + " " + def.desc + " " + titulo) });
             });
             seccion.append(h, lista);
             cuerpo.appendChild(seccion);
@@ -3318,9 +3675,13 @@
             cuantas.textContent = q ? (n ? n + (n === 1 ? " ventana" : " ventanas") : "Ninguna con eso.") : "";
         });
         filtro.addEventListener("keydown", (e) => {
-            // Intro: la primera que queda.
+            // Intro: la primera que queda, mejor una que lo tenga en el
+            // nombre («botín» es el botín, no el conversor que lo reparte).
             if (e.key === "Enter") {
-                const b = cuerpo.querySelector(".master-anadir-lista li:not([hidden]) button:not([disabled])");
+                const q = llano(filtro.value.trim());
+                const quedan = tarjetas.filter((t) => !t.li.hidden && !t.b.disabled);
+                const t = quedan.find((x) => q && x.nombre.includes(q)) || quedan[0];
+                const b = t && t.b;
                 if (b) {
                     e.preventDefault();
                     b.click();
