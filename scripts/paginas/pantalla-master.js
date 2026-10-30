@@ -1122,7 +1122,12 @@
     // entonces los dados del texto se tiran). Se guarda como HTML limpio
     // (m.datos.html; los de antes, en Markdown, se pasan solos). ----
     const ETIQUETAS_POSTIT = ["P", "DIV", "BR", "B", "STRONG", "I", "EM", "U", "S", "STRIKE", "DEL", "H3", "H4", "UL", "OL",
-        "LI", "BLOCKQUOTE", "SPAN", "MARK"];
+        "LI", "BLOCKQUOTE", "SPAN", "MARK", "HR"];
+    // Los tamaños de letra de la barra, en «em» (relativos a la letra de
+    // alrededor: las palabras «large» y compañía van por su cuenta).
+    const TAMANOS_LETRA = { 1: "0.7em", 2: "0.8em", 3: "1em", 4: "1.2em", 5: "1.4em", 6: "1.9em", 7: "2.4em" };
+    const TAMANOS_PALABRA = { "x-small": "0.7em", small: "0.8em", medium: "1em", large: "1.2em", "x-large": "1.4em",
+        "xx-large": "1.9em", "xxx-large": "2.4em" };
 
     // Solo lo que hace la barra: lo demás (scripts, enlaces, imágenes,
     // estilos raros pegados de otra web) se quita o se queda en texto.
@@ -1164,6 +1169,13 @@
                 if (st.textAlign && /^(left|center|right|justify)$/.test(st.textAlign)) {
                     estilos.push("text-align: " + st.textAlign);
                 }
+                const tam = TAMANOS_PALABRA[st.fontSize] || st.fontSize || TAMANOS_LETRA[n.getAttribute && n.getAttribute("size")] || "";
+                if (/^(0\.7|0\.8|1|1\.2|1\.4|1\.9|2\.4)em$/.test(tam)) {
+                    estilos.push("font-size: " + tam);
+                }
+                if (st.marginLeft && /^\d+(\.\d+)?(px|em)$/.test(st.marginLeft)) {
+                    estilos.push("margin-left: " + st.marginLeft);
+                }
                 if (estilos.length) {
                     nuevo.setAttribute("style", estilos.join("; "));
                 }
@@ -1180,32 +1192,37 @@
     const COLORES_RESALTE = [["", "sin resaltar"], ["#ffe873", "amarillo"], ["#8fe8a2", "verde"], ["#7fdcff", "celeste"],
         ["#ffa6d5", "rosa"], ["#ffb870", "naranja"]];
 
-    function montarTarjeta(dentro, m) {
-        m.datos = m.datos || {};
-        if (m.datos.html === undefined && m.datos.texto) {
-            m.datos.html = sanearHtml(markdown(m.datos.texto).innerHTML);
-        }
-        const ver = crear("div", "oc-texto master-postit");
+    // EL EDITOR CON FORMATO (como un procesador de textos), el de los
+    // post-its y las notas: una barra de herramientas y un texto
+    // editable. «alCambiar()» avisa de cada cambio; .leer() da el HTML
+    // ya saneado.
+    function editorRico(etiquetaTexto, alCambiar) {
         const area = crear("div", "oc-texto master-postit es-editable");
         area.contentEditable = "true";
         area.setAttribute("role", "textbox");
         area.setAttribute("aria-multiline", "true");
-        area.setAttribute("aria-label", "Texto del post-it");
-        area.hidden = true;
+        area.setAttribute("aria-label", etiquetaTexto);
         // ---- la barra de herramientas ----
         const barra = crear("div", "master-postit-barra");
         barra.setAttribute("role", "toolbar");
         barra.setAttribute("aria-label", "Formato del texto");
-        barra.hidden = true;
         const estados = [];
         const orden = (cmd, valor) => {
             area.focus();
             try {
-                document.execCommand("styleWithCSS", false, cmd === "hiliteColor" || cmd === "foreColor");
+                document.execCommand("styleWithCSS", false, cmd === "hiliteColor" || cmd === "foreColor" || cmd === "fontSize");
             } catch (e) {
                 // Navegadores sin styleWithCSS: da igual.
             }
             document.execCommand(cmd, false, valor);
+            if (cmd === "fontSize") {
+                // De «x-large» (que no depende de la letra de alrededor) a «em».
+                area.querySelectorAll("[style*='font-size']").forEach((x) => {
+                    if (TAMANOS_PALABRA[x.style.fontSize]) {
+                        x.style.fontSize = TAMANOS_PALABRA[x.style.fontSize];
+                    }
+                });
+            }
             alEscribir();
             repintarEstados();
         };
@@ -1267,17 +1284,33 @@
             parrafo.appendChild(o);
         });
         parrafo.addEventListener("change", () => orden("formatBlock", parrafo.value));
+        const tamano = crear("select", "master-postit-elegir");
+        tamano.setAttribute("aria-label", "Tamaño de la letra");
+        tamano.title = "Tamaño de la letra";
+        [["-", "🗚 tamaño"], ["2", "pequeña"], ["3", "normal"], ["5", "grande"], ["6", "enorme"]].forEach(([v, n]) => {
+            const o = crear("option", "", n);
+            o.value = v;
+            tamano.appendChild(o);
+        });
+        tamano.addEventListener("change", () => {
+            if (tamano.value !== "-") {
+                orden("fontSize", tamano.value);
+            }
+            tamano.value = "-";
+        });
         barra.append(
             grupo(herramienta("B", "Negrita", "bold", null, "es-negrita", "Ctrl+B"),
                 herramienta("I", "Cursiva", "italic", null, "es-cursiva", "Ctrl+I"),
                 herramienta("U", "Subrayado", "underline", null, "es-subrayado", "Ctrl+U"),
                 herramienta("S", "Tachado", "strikeThrough", null, "es-tachado")),
             grupo(parrafo),
-            grupo(herramienta("•", "Lista", "insertUnorderedList"), herramienta("1.", "Lista numerada", "insertOrderedList")),
+            grupo(tamano),
+            grupo(herramienta("•", "Lista", "insertUnorderedList"), herramienta("1.", "Lista numerada", "insertOrderedList"),
+                herramienta("→", "Más sangría", "indent"), herramienta("←", "Menos sangría", "outdent")),
             grupo(herramienta("⇤", "Alinear a la izquierda", "justifyLeft"), herramienta("↔", "Centrar", "justifyCenter"),
                 herramienta("⇥", "Alinear a la derecha", "justifyRight")),
             grupo(elegir("🎨 letra", COLORES_LETRA, "foreColor", "Color de la letra"), elegir("🖍️ resaltar", COLORES_RESALTE, "hiliteColor", "Resaltar")),
-            grupo(herramienta("⌫", "Quitar el formato", "removeFormat"), herramienta("↶", "Deshacer", "undo", null, "", "Ctrl+Z"),
+            grupo(herramienta("―", "Línea de separación", "insertHorizontalRule"), herramienta("⌫", "Quitar el formato", "removeFormat"), herramienta("↶", "Deshacer", "undo", null, "", "Ctrl+Z"),
                 herramienta("↷", "Rehacer", "redo", null, "", "Ctrl+Y")));
         // Las flechas mueven el foco por la barra (como en un procesador).
         barra.addEventListener("keydown", (e) => {
@@ -1309,19 +1342,19 @@
             }
             parrafo.value = ["H3", "H4", "BLOCKQUOTE"].indexOf(bloque) >= 0 ? bloque : "P";
         }
-        document.addEventListener("selectionchange", () => {
+        const alSeleccionar = () => {
+            if (!area.isConnected && barra.dataset.montado) {
+                document.removeEventListener("selectionchange", alSeleccionar);
+                return;
+            }
+            barra.dataset.montado = "1";
             if (!area.hidden && area.contains(document.getSelection().anchorNode)) {
                 repintarEstados();
             }
-        });
-        let espera = 0;
+        };
+        document.addEventListener("selectionchange", alSeleccionar);
         function alEscribir() {
-            clearTimeout(espera);
-            espera = setTimeout(() => {
-                m.datos.html = sanearHtml(area.innerHTML);
-                delete m.datos.texto;
-                guardar();
-            }, 400);
+            alCambiar();
         }
         area.addEventListener("input", alEscribir);
         // Lo pegado, sin el formato de fuera (sí con saltos de línea).
@@ -1332,6 +1365,26 @@
                 document.execCommand("insertText", false, texto);
             }
         });
+        return { area, barra, leer: () => sanearHtml(area.innerHTML) };
+    }
+
+    function montarTarjeta(dentro, m) {
+        m.datos = m.datos || {};
+        if (m.datos.html === undefined && m.datos.texto) {
+            m.datos.html = sanearHtml(markdown(m.datos.texto).innerHTML);
+        }
+        const ver = crear("div", "oc-texto master-postit");
+        let espera = 0;
+        const { area, barra, leer } = editorRico("Texto del post-it", () => {
+            clearTimeout(espera);
+            espera = setTimeout(() => {
+                m.datos.html = leer();
+                delete m.datos.texto;
+                guardar();
+            }, 400);
+        });
+        area.hidden = true;
+        barra.hidden = true;
         const pintar = () => {
             ver.innerHTML = sanearHtml(m.datos.html || "");
             if (!ver.textContent.trim()) {
@@ -1351,7 +1404,7 @@
                 area.focus();
             } else {
                 clearTimeout(espera);
-                m.datos.html = sanearHtml(area.innerHTML);
+                m.datos.html = leer();
                 delete m.datos.texto;
                 guardar();
                 area.hidden = true;
@@ -1365,6 +1418,80 @@
         boton.classList.add("master-postit-editar");
         dentro.append(barra, ver, area, boton);
         pintar();
+    }
+
+    // ---- LAS NOTAS DEL MÁSTER: el editor con formato siempre abierto,
+    // con «poner la fecha», «descargar» (un .html que abre Word o el
+    // navegador) y «borrar». Lo de antes (texto suelto de ocPartida,
+    // «notas») pasa solo la primera vez. ----
+    function montarNotas(dentro, m) {
+        m.datos = m.datos || {};
+        if (m.datos.html === undefined) {
+            const antes = window.ocPartida && window.ocPartida.leer ? window.ocPartida.leer("notas", "") : "";
+            m.datos.html = antes ? sanearHtml(markdown(antes).innerHTML) : "";
+        }
+        let espera = 0;
+        const { area, barra, leer } = editorRico("Notas del máster (se guardan solas)", () => {
+            clearTimeout(espera);
+            espera = setTimeout(() => {
+                m.datos.html = leer();
+                guardar();
+            }, 400);
+        });
+        area.classList.add("es-notas");
+        area.innerHTML = sanearHtml(m.datos.html) || "<p><br></p>";
+        const fecha = botonDe("oc-vida-accion", "📅 poner la fecha", () => {
+            const hoy = new Date().toLocaleDateString("es-ES", { day: "numeric", month: "long", year: "numeric" });
+            const h = crear("h3", "", hoy);
+            const p = crear("p");
+            p.appendChild(crear("br"));
+            area.append(h, p);
+            m.datos.html = leer();
+            guardar();
+            area.focus();
+            const rango = document.createRange();
+            rango.setStart(p, 0);
+            rango.collapse(true);
+            const sel = document.getSelection();
+            sel.removeAllRanges();
+            sel.addRange(rango);
+            avisar("Fecha puesta: " + hoy + ".");
+        });
+        const bajar = botonDe("oc-vida-accion", "💾 descargar", () => {
+            const pagina = "<!doctype html><html lang=\"es\"><head><meta charset=\"utf-8\"><title>Notas del máster</title></head><body>" +
+                leer() + "</body></html>";
+            const a = crear("a");
+            // Una dirección blob: que hace el propio navegador con el archivo.
+            const archivoBlob = URL.createObjectURL(new Blob([pagina], { type: "text/html;charset=utf-8" }));
+            a.href = archivoBlob;
+            a.download = "notas-del-master-" + new Date().toISOString().slice(0, 10) + ".html";
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+            setTimeout(() => URL.revokeObjectURL(archivoBlob), 1000);
+            avisar("Descargado: " + a.download + " (se abre con Word o el navegador).");
+        }, "Descargar las notas (.html, con su formato)");
+        let seguro = false;
+        const borrar = botonDe("oc-vida-accion", "🗑️ borrar", () => {
+            if (!seguro) {
+                seguro = true;
+                borrar.textContent = "🗑️ ¿seguro? pulsa otra vez";
+                setTimeout(() => {
+                    seguro = false;
+                    borrar.textContent = "🗑️ borrar";
+                }, 4000);
+                return;
+            }
+            seguro = false;
+            borrar.textContent = "🗑️ borrar";
+            area.innerHTML = "<p><br></p>";
+            m.datos.html = "";
+            guardar();
+            avisar("Notas borradas.");
+        });
+        const botones = crear("div", "master-notas-botones");
+        botones.append(fecha, bajar, borrar);
+        dentro.append(barra, area, botones);
     }
 
     // ---- EL GENERADOR DE NOMBRES: personajes por especie y género (de
@@ -2244,11 +2371,13 @@
     const DIBUJO_COLORES = [["#1d1b26", "negro"], ["#ffffff", "blanco"], ["#c62828", "rojo"], ["#1565c0", "azul"],
         ["#2e7d32", "verde"], ["#ef6c00", "naranja"], ["#6a1b9a", "morado"], ["#8d6e63", "marrón"], ["#fdd835", "amarillo"],
         ["#9e9e9e", "gris"]];
-    const DIBUJO_GROSORES = [["3", "fino"], ["8", "medio"], ["18", "gordo"]];
     // [id, emoji, nombre, tecla]
     const DIBUJO_HERRAMIENTAS = [["lapiz", "✏️", "Lápiz", "b"], ["goma", "🧽", "Goma", "e"], ["bote", "🪣", "Bote de pintura", "g"],
         ["seleccionar", "⬚", "Seleccionar y mover", "m"], ["cuentagotas", "💧", "Cuentagotas (coger un color)", "i"],
-        ["linea", "╱", "Línea recta", "l"], ["rectangulo", "▭", "Rectángulo", "u"], ["elipse", "◯", "Elipse", "o"]];
+        ["linea", "╱", "Línea recta", "l"], ["rectangulo", "▭", "Rectángulo", "u"], ["elipse", "◯", "Elipse", "o"],
+        ["texto", "T", "Texto", "t"]];
+    const DIBUJO_FUENTES = [["Pangolin", "a mano"], ["Space Grotesk", "normal"], ["Georgia, serif", "con serifa"],
+        ["DM Mono", "de máquina"], ["Jersey 10", "de píxeles"]];
 
     // Solo imágenes metidas en la propia dirección (data:image/…): lo
     // único que lee el dibujo (lo que guarda él y los archivos que se
@@ -2257,10 +2386,10 @@
         return /^data:image\/(png|jpeg|gif|webp|bmp|svg\+xml|avif);base64,[A-Za-z0-9+/=]+$/.test(String(url || "")) ? url : "";
     }
 
-    function lienzoNuevo() {
+    function lienzoNuevo(ancho, alto) {
         const c = document.createElement("canvas");
-        c.width = DIBUJO_ANCHO;
-        c.height = DIBUJO_ALTO;
+        c.width = ancho || DIBUJO_ANCHO;
+        c.height = alto || DIBUJO_ALTO;
         return c;
     }
 
@@ -2269,7 +2398,7 @@
 
     // EL BOTE: rellena la zona del mismo color (con algo de margen) que
     // hay alrededor del punto, en los píxeles de «datos» (ImageData).
-    function rellenar(datos, x, y, color) {
+    function rellenar(datos, x, y, color, margen) {
         const w = datos.width;
         const h = datos.height;
         const px = datos.data;
@@ -2279,7 +2408,7 @@
         if (base[0] === r && base[1] === g && base[2] === b && base[3] === 255) {
             return false;
         }
-        const margen = 40;
+        margen = margen === undefined ? 40 : margen;
         const igual = (i) => Math.abs(px[i] - base[0]) <= margen && Math.abs(px[i + 1] - base[1]) <= margen &&
             Math.abs(px[i + 2] - base[2]) <= margen && Math.abs(px[i + 3] - base[3]) <= margen;
         const hecho = new Uint8Array(w * h);
@@ -2331,8 +2460,8 @@
             // Hexágonos con la punta arriba, de «t» de ancho.
             const radio = t / Math.sqrt(3);
             const alto = radio * 1.5;
-            for (let fila = -1; fila * alto < DIBUJO_ALTO + alto; fila++) {
-                for (let col = -1; col * t < DIBUJO_ANCHO + t; col++) {
+            for (let fila = -1; fila * alto < ctx.canvas.height + alto; fila++) {
+                for (let col = -1; col * t < ctx.canvas.width + t; col++) {
                     const cx = col * t + (fila % 2 ? t / 2 : 0);
                     const cy = fila * alto;
                     for (let k = 0; k <= 6; k++) {
@@ -2348,13 +2477,13 @@
                 }
             }
         } else {
-            for (let x = 0; x <= DIBUJO_ANCHO; x += t) {
+            for (let x = 0; x <= ctx.canvas.width; x += t) {
                 ctx.moveTo(x, 0);
-                ctx.lineTo(x, DIBUJO_ALTO);
+                ctx.lineTo(x, ctx.canvas.height);
             }
-            for (let y = 0; y <= DIBUJO_ALTO; y += t) {
+            for (let y = 0; y <= ctx.canvas.height; y += t) {
                 ctx.moveTo(0, y);
-                ctx.lineTo(DIBUJO_ANCHO, y);
+                ctx.lineTo(ctx.canvas.width, y);
             }
         }
         ctx.stroke();
@@ -2364,6 +2493,9 @@
     function montarDibujo(dentro, m) {
         m.datos = m.datos || {};
         const d = m.datos;
+        // El tamaño del lienzo (se puede cambiar: «tamaño del lienzo»).
+        let ANCHO = Math.min(3000, Math.max(200, parseInt(d.ancho, 10) || DIBUJO_ANCHO));
+        let ALTO = Math.min(3000, Math.max(200, parseInt(d.alto, 10) || DIBUJO_ALTO));
         let cuenta = 1;
         const nuevoId = () => "c" + Date.now().toString(36) + (cuenta++);
         // Lo de antes (una sola imagen): pasa a ser la primera capa.
@@ -2401,7 +2533,7 @@
             if (n.tipo === "carpeta") {
                 n.hijos = n.hijos || [];
             } else {
-                lienzos[n.id] = lienzoNuevo();
+                lienzos[n.id] = lienzoNuevo(ANCHO, ALTO);
             }
         });
         let activa = buscar(d.activa) ? d.activa : null;
@@ -2417,9 +2549,9 @@
 
         // LOS DOS LIENZOS: la vista y lo de encima.
         const marco = crear("div", "master-dibujo-marco");
-        const vista = lienzoNuevo();
+        const vista = lienzoNuevo(ANCHO, ALTO);
         vista.className = "master-dibujo";
-        const encima = lienzoNuevo();
+        const encima = lienzoNuevo(ANCHO, ALTO);
         encima.className = "master-dibujo-encima";
         encima.tabIndex = 0;
         encima.setAttribute("role", "img");
@@ -2443,7 +2575,7 @@
         const componer = (ctx, conFlotante) => {
             ctx.globalAlpha = 1;
             ctx.fillStyle = DIBUJO_PAPEL;
-            ctx.fillRect(0, 0, DIBUJO_ANCHO, DIBUJO_ALTO);
+            ctx.fillRect(0, 0, ANCHO, ALTO);
             const pintar = (lista, alfa) => {
                 for (let i = lista.length - 1; i >= 0; i--) {
                     const n = lista[i];
@@ -2467,7 +2599,7 @@
         };
         // Lo de encima: la rejilla, la figura a medias y la selección.
         const pintarEncima = () => {
-            ce.clearRect(0, 0, DIBUJO_ANCHO, DIBUJO_ALTO);
+            ce.clearRect(0, 0, ANCHO, ALTO);
             if (d.rejilla.ver) {
                 pintarRejilla(ce, d.rejilla);
             }
@@ -2545,7 +2677,7 @@
             if (!lienzos[id]) {
                 return;
             }
-            atras.push({ id, px: lienzos[id].getContext("2d").getImageData(0, 0, DIBUJO_ANCHO, DIBUJO_ALTO) });
+            atras.push({ id, px: lienzos[id].getContext("2d").getImageData(0, 0, ANCHO, ALTO) });
             if (atras.length > 20) {
                 atras.shift();
             }
@@ -2560,7 +2692,7 @@
                     continue;
                 }
                 const c = lienzos[x.id].getContext("2d");
-                a.push({ id: x.id, px: c.getImageData(0, 0, DIBUJO_ANCHO, DIBUJO_ALTO) });
+                a.push({ id: x.id, px: c.getImageData(0, 0, ANCHO, ALTO) });
                 c.putImageData(x.px, 0, 0);
                 guardarDibujo(x.id);
                 break;
@@ -2597,11 +2729,11 @@
 
         const punto = (e) => {
             const r = encima.getBoundingClientRect();
-            return [Math.round((e.clientX - r.left) * DIBUJO_ANCHO / r.width), Math.round((e.clientY - r.top) * DIBUJO_ALTO / r.height)];
+            return [Math.round((e.clientX - r.left) * ANCHO / r.width), Math.round((e.clientY - r.top) * ALTO / r.height)];
         };
         // Las ocho asas de la selección: [cuál, x, y]. «tolerancia»: cuánto
         // mide un asa en píxeles del lienzo (unos 14 de pantalla).
-        const tolerancia = () => 14 * DIBUJO_ANCHO / Math.max(1, encima.getBoundingClientRect().width);
+        const tolerancia = () => 14 * ANCHO / Math.max(1, encima.getBoundingClientRect().width);
         const asas = () => {
             if (!sel) {
                 return [];
@@ -2645,7 +2777,7 @@
                 return !!flotante;
             }
             recordar(c.id);
-            const l = lienzoNuevo();
+            const l = lienzoNuevo(ANCHO, ALTO);
             l.width = Math.max(1, sel.w);
             l.height = Math.max(1, sel.h);
             const capa = lienzos[c.id].getContext("2d");
@@ -2670,6 +2802,76 @@
             repintar();
         };
 
+        // EL TEXTO: al pinchar sale un cuadro para escribir encima del
+        // lienzo, donde se ha pinchado; Intro (o pinchar fuera) lo deja
+        // en la capa, Mayús+Intro hace otra línea y Esc lo deja estar.
+        let escribiendo = null;
+        const letraDe = () => (d.texto.negrita ? "bold " : "") + d.texto.tam + "px " +
+            (d.texto.fuente.indexOf(",") >= 0 ? d.texto.fuente : "\"" + d.texto.fuente + "\"");
+        function empezarTexto(c, p) {
+            acabarTexto(true);
+            const caja = crear("textarea", "master-dibujo-texto");
+            caja.rows = 1;
+            caja.setAttribute("aria-label", "Texto para el dibujo (Intro lo pone; Esc lo quita)");
+            const k = encima.getBoundingClientRect().width / ANCHO;
+            caja.style.left = (p[0] / ANCHO * 100) + "%";
+            caja.style.top = (p[1] / ALTO * 100) + "%";
+            caja.style.font = (d.texto.negrita ? "bold " : "") + (d.texto.tam * k) + "px " +
+                (d.texto.fuente.indexOf(",") >= 0 ? d.texto.fuente : "\"" + d.texto.fuente + "\"");
+            caja.style.color = color;
+            marco.appendChild(caja);
+            escribiendo = { caja, capa: c.id, x: p[0], y: p[1], color };
+            caja.addEventListener("keydown", (e) => {
+                if (e.key === "Enter" && !e.shiftKey) {
+                    e.preventDefault();
+                    acabarTexto(true);
+                    encima.focus();
+                } else if (e.key === "Escape") {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    acabarTexto(false);
+                    encima.focus();
+                }
+            });
+            caja.addEventListener("input", () => {
+                caja.rows = Math.max(1, caja.value.split("\n").length);
+            });
+            caja.addEventListener("blur", () => setTimeout(() => acabarTexto(true), 0));
+            setTimeout(() => caja.focus(), 0);
+        }
+        function acabarTexto(dejar) {
+            if (!escribiendo) {
+                return;
+            }
+            const e = escribiendo;
+            escribiendo = null;
+            const texto = e.caja.value;
+            e.caja.remove();
+            if (!dejar || !texto.trim() || !lienzos[e.capa]) {
+                return;
+            }
+            recordar(e.capa);
+            const letra = letraDe();
+            const tam = d.texto.tam;
+            // La letra tiene que estar cargada para pintarla en el canvas.
+            const cargada = document.fonts && document.fonts.load ? document.fonts.load(letra, texto) : Promise.resolve();
+            cargada.catch(() => {}).then(() => {
+                if (!lienzos[e.capa]) {
+                    return;
+                }
+                const ctx = lienzos[e.capa].getContext("2d");
+                ctx.save();
+                ctx.font = letra;
+                ctx.fillStyle = e.color;
+                ctx.textBaseline = "top";
+                texto.split("\n").forEach((linea, i) => ctx.fillText(linea, e.x, e.y + i * tam * 1.25));
+                ctx.restore();
+                guardarDibujo(e.capa);
+                repintar();
+                avisar("Texto puesto: " + texto.replace(/\n/g, " ") + ".");
+            });
+        }
+
         // EL RATÓN (o el dedo, o el lápiz) sobre el lienzo.
         let gesto = null;
         encima.addEventListener("pointerdown", (e) => {
@@ -2681,7 +2883,7 @@
             const p = punto(e);
             if (herramienta === "cuentagotas") {
                 componer(cv, true);
-                const px = cv.getImageData(Math.min(DIBUJO_ANCHO - 1, Math.max(0, p[0])), Math.min(DIBUJO_ALTO - 1, Math.max(0, p[1])),
+                const px = cv.getImageData(Math.min(ANCHO - 1, Math.max(0, p[0])), Math.min(ALTO - 1, Math.max(0, p[1])),
                     1, 1).data;
                 ponerColor("#" + [px[0], px[1], px[2]].map((x) => x.toString(16).padStart(2, "0")).join(""));
                 avisar("Color cogido: " + color + ".");
@@ -2709,13 +2911,17 @@
             if (!c) {
                 return;
             }
+            if (herramienta === "texto") {
+                empezarTexto(c, p);
+                return;
+            }
             if (herramienta === "bote") {
-                const x = Math.min(DIBUJO_ANCHO - 1, Math.max(0, p[0]));
-                const y = Math.min(DIBUJO_ALTO - 1, Math.max(0, p[1]));
+                const x = Math.min(ANCHO - 1, Math.max(0, p[0]));
+                const y = Math.min(ALTO - 1, Math.max(0, p[1]));
                 const ctx = lienzos[c.id].getContext("2d");
-                const datos = ctx.getImageData(0, 0, DIBUJO_ANCHO, DIBUJO_ALTO);
-                const antes = ctx.getImageData(0, 0, DIBUJO_ANCHO, DIBUJO_ALTO);
-                if (rellenar(datos, x, y, color)) {
+                const datos = ctx.getImageData(0, 0, ANCHO, ALTO);
+                const antes = ctx.getImageData(0, 0, ANCHO, ALTO);
+                if (rellenar(datos, x, y, color, margenBote)) {
                     atras.push({ id: c.id, px: antes });
                     adelante.length = 0;
                     ctx.putImageData(datos, 0, 0);
@@ -2773,7 +2979,7 @@
                 const [x0, y0] = gesto.desde;
                 const x = Math.max(0, Math.min(x0, p[0]));
                 const y = Math.max(0, Math.min(y0, p[1]));
-                sel = { x, y, w: Math.min(DIBUJO_ANCHO, Math.max(x0, p[0])) - x, h: Math.min(DIBUJO_ALTO, Math.max(y0, p[1])) - y };
+                sel = { x, y, w: Math.min(ANCHO, Math.max(x0, p[0])) - x, h: Math.min(ALTO, Math.max(y0, p[1])) - y };
             } else if (gesto.que === "tamano") {
                 // Cambiar el tamaño desde un asa (con Mayús, sin deformar).
                 const a = gesto.antes;
@@ -2928,13 +3134,13 @@
             lector.onload = () => {
                 const img = new Image();
                 img.onload = () => {
-                    const escala = Math.min(1, DIBUJO_ANCHO * 0.8 / img.width, DIBUJO_ALTO * 0.8 / img.height);
+                    const escala = Math.min(1, ANCHO * 0.8 / img.width, ALTO * 0.8 / img.height);
                     const w = Math.round(img.width * escala);
                     const h = Math.round(img.height * escala);
-                    const cx = x === undefined ? DIBUJO_ANCHO / 2 : x;
-                    const cy = y === undefined ? DIBUJO_ALTO / 2 : y;
-                    const px = Math.round(Math.max(0, Math.min(DIBUJO_ANCHO - w, cx - w / 2)));
-                    const py = Math.round(Math.max(0, Math.min(DIBUJO_ALTO - h, cy - h / 2)));
+                    const cx = x === undefined ? ANCHO / 2 : x;
+                    const cy = y === undefined ? ALTO / 2 : y;
+                    const px = Math.round(Math.max(0, Math.min(ANCHO - w, cx - w / 2)));
+                    const py = Math.round(Math.max(0, Math.min(ALTO - h, cy - h / 2)));
                     soltarFlotante();
                     const c = nuevaCapa("imagen");
                     lienzos[c.id].getContext("2d").drawImage(img, px, py, w, h);
@@ -3001,6 +3207,8 @@
             d.herramienta = h;
             botonesH.forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.herramienta === h)));
             encima.dataset.herramienta = h;
+            pintarOpciones();
+            acabarTexto(true);
             guardar();
         }
         grupo(...botonesH);
@@ -3032,23 +3240,84 @@
         grupo(...muestras);
         const conSelector = grupo(elegirColor);
         conSelector.classList.add("es-selector");
-        const grosores = DIBUJO_GROSORES.map(([g, nombre]) => {
-            const b = botonDe("master-postit-boton master-dibujo-grosor es-" + nombre, "", () => {
-                grosor = parseInt(g, 10);
-                d.grosor = grosor;
-                grosores.forEach((x) => x.setAttribute("aria-pressed", String(x === b)));
-                guardar();
-            }, "Trazo " + nombre);
-            b.title = "Trazo " + nombre;
-            b.setAttribute("aria-pressed", String(parseInt(g, 10) === grosor));
-            return b;
+        // ---- LAS OPCIONES (arriba del lienzo, como el Paint): las de la
+        // herramienta (grosor; letra y tamaño del texto; margen del bote) y
+        // deshacer, imagen, descargar y rejilla. ----
+        const opciones = crear("div", "master-dibujo-opciones");
+        opciones.setAttribute("role", "toolbar");
+        opciones.setAttribute("aria-label", "Opciones del dibujo");
+        const deslizador = (texto, min, max, valor, alCambiar, unidad) => {
+            const et = crear("label", "master-dibujo-deslizador");
+            const r = crear("input");
+            r.type = "range";
+            r.min = min;
+            r.max = max;
+            r.value = valor;
+            const v = crear("span", "master-dibujo-valor", valor + (unidad || ""));
+            v.setAttribute("aria-hidden", "true");
+            r.setAttribute("aria-valuetext", valor + (unidad || ""));
+            r.addEventListener("input", () => {
+                v.textContent = r.value + (unidad || "");
+                r.setAttribute("aria-valuetext", r.value + (unidad || ""));
+                alCambiar(parseInt(r.value, 10));
+            });
+            et.append(crear("span", "oc-dados-etiqueta", texto), r, v);
+            return et;
+        };
+        const opGrosor = deslizador("grosor", 1, 80, grosor, (x) => {
+            grosor = x;
+            d.grosor = x;
+            guardar();
+        }, " px");
+        let margenBote = parseInt(d.margen, 10) || 40;
+        const opMargen = deslizador("margen del bote", 0, 160, margenBote, (x) => {
+            margenBote = x;
+            d.margen = x;
+            guardar();
         });
-        grupo(...grosores);
+        opMargen.title = "Cuánto se puede parecer un color al de donde pinchas para que también se rellene";
+        // El texto: letra, tamaño y negrita.
+        d.texto = Object.assign({ fuente: "Pangolin", tam: 40, negrita: false }, d.texto || {});
+        const opTexto = crear("span", "master-dibujo-optexto");
+        const fuente = crear("select", "master-postit-elegir");
+        fuente.setAttribute("aria-label", "Letra del texto");
+        DIBUJO_FUENTES.forEach(([f, n]) => {
+            const o = crear("option", "", n);
+            o.value = f;
+            fuente.appendChild(o);
+        });
+        fuente.value = d.texto.fuente;
+        const tamTexto = crear("input", "master-dibujo-numero");
+        tamTexto.type = "number";
+        tamTexto.min = 8;
+        tamTexto.max = 300;
+        tamTexto.value = d.texto.tam;
+        tamTexto.setAttribute("aria-label", "Tamaño del texto");
+        tamTexto.title = "Tamaño del texto";
+        const negrita = botonDe("master-postit-boton es-negrita", "B", () => {
+            d.texto.negrita = !d.texto.negrita;
+            negrita.setAttribute("aria-pressed", String(d.texto.negrita));
+            guardar();
+        }, "Texto en negrita");
+        negrita.setAttribute("aria-pressed", String(!!d.texto.negrita));
+        fuente.addEventListener("change", () => {
+            d.texto.fuente = fuente.value;
+            guardar();
+        });
+        tamTexto.addEventListener("change", () => {
+            d.texto.tam = Math.min(300, Math.max(8, parseInt(tamTexto.value, 10) || 40));
+            guardar();
+        });
+        opTexto.append(fuente, tamTexto, negrita);
+        const pintarOpciones = () => {
+            opGrosor.hidden = ["lapiz", "goma", "linea", "rectangulo", "elipse"].indexOf(herramienta) < 0;
+            opMargen.hidden = herramienta !== "bote";
+            opTexto.hidden = herramienta !== "texto";
+        };
         const deshacer = botonDe("master-postit-boton", "↶", () => volverA(atras, adelante), "Deshacer");
         const rehacer = botonDe("master-postit-boton", "↷", () => volverA(adelante, atras), "Rehacer");
         deshacer.title = "Deshacer (Ctrl+Z)";
         rehacer.title = "Rehacer (Ctrl+Y)";
-        grupo(deshacer, rehacer);
         const archivo = crear("input");
         archivo.type = "file";
         archivo.accept = "image/*";
@@ -3061,7 +3330,7 @@
         imagen.title = "Poner una imagen en una capa nueva (o pégala con Ctrl+V)";
         const bajar = botonDe("master-postit-boton", "⬇", () => {
             soltarFlotante();
-            const l = lienzoNuevo();
+            const l = lienzoNuevo(ANCHO, ALTO);
             const c = l.getContext("2d");
             componer(c, false);
             if (d.rejilla.ver && d.rejilla.bajar) {
@@ -3080,7 +3349,10 @@
         botonRejilla.type = "button";
         botonRejilla.setAttribute("aria-label", "Rejilla de rol");
         botonRejilla.title = "Enseñar o esconder la rejilla";
-        grupo(imagen, bajar, botonRejilla);
+
+        const acciones = crear("span", "master-postit-grupo master-dibujo-acciones");
+        acciones.append(deshacer, rehacer, imagen, bajar, botonRejilla);
+        opciones.append(opGrosor, opMargen, opTexto, acciones);
 
         // ---- LAS CAPAS (a la derecha) ----
         const panel = crear("div", "master-dibujo-panel");
@@ -3096,14 +3368,15 @@
                 const mc = minis[id].getContext("2d");
                 mc.fillStyle = DIBUJO_PAPEL;
                 mc.fillRect(0, 0, 40, 30);
-                mc.drawImage(lienzos[id], 0, 0, 40, 30);
+                const k = Math.min(40 / ANCHO, 30 / ALTO);
+                mc.drawImage(lienzos[id], (40 - ANCHO * k) / 2, (30 - ALTO * k) / 2, ANCHO * k, ALTO * k);
             });
         }
         listaCapas.setAttribute("aria-label", "Capas y carpetas (la de arriba se ve encima)");
         function nuevaCapa(nombre) {
             const c = { id: nuevoId(), tipo: "capa", nombre: nombre || "capa " + (Object.keys(lienzos).length + 1), visible: true,
                 opacidad: 100, imagen: "" };
-            lienzos[c.id] = lienzoNuevo();
+            lienzos[c.id] = lienzoNuevo(ANCHO, ALTO);
             // Encima de la activa, en su misma carpeta.
             const b = buscar(activa);
             const lista = b ? b.lista : d.capas;
@@ -3165,7 +3438,7 @@
                 nombre.setAttribute("aria-current", "true");
             }
             if (n.tipo === "capa" && lienzos[n.id]) {
-                const mini = lienzoNuevo();
+                const mini = lienzoNuevo(ANCHO, ALTO);
                 mini.width = 40;
                 mini.height = 30;
                 mini.className = "master-dibujo-mini";
@@ -3476,7 +3749,86 @@
             avisar(ver.checked ? "Rejilla a la vista." : "Rejilla escondida.");
         });
         botonRejilla.setAttribute("aria-pressed", String(!!d.rejilla.ver));
-        panel.append(tituloCapas, nuevas, listaCapas, mandos, etOpa, rejilla);
+        // ---- EL TAMAÑO DEL LIENZO (plegado): unos cuantos ya hechos o el
+        // que se quiera, y si lo dibujado se estira o se queda como está
+        // (y se recorta o sobra sitio). ----
+        const tamanoL = crear("div", "master-dibujo-rejilla");
+        const tituloT = crear("h3", "master-dibujo-titulo");
+        const ajustesT = crear("div", "master-dibujo-ajustes");
+        ajustesT.hidden = true;
+        const plegarT = botonDe("master-dibujo-plegar", "▸ tamaño del lienzo", () => {
+            ajustesT.hidden = !ajustesT.hidden;
+            plegarT.textContent = (ajustesT.hidden ? "▸" : "▾") + " tamaño del lienzo";
+            plegarT.setAttribute("aria-expanded", String(!ajustesT.hidden));
+        });
+        plegarT.setAttribute("aria-expanded", "false");
+        tituloT.appendChild(plegarT);
+        const hechos = crear("select", "master-elegir");
+        [["", "a medida"], ["1000x750", "normal (1000 × 750)"], ["1200x1200", "cuadrado (1200 × 1200)"],
+            ["1600x900", "panorámico (1600 × 900)"], ["750x1000", "de pie (750 × 1000)"], ["2000x1500", "grande (2000 × 1500)"]]
+            .forEach(([v, n]) => {
+                const o = crear("option", "", n);
+                o.value = v;
+                hechos.appendChild(o);
+            });
+        const numero = (valor) => {
+            const x = crear("input", "master-elegir");
+            x.type = "number";
+            x.min = 200;
+            x.max = 3000;
+            x.step = 50;
+            x.value = valor;
+            return x;
+        };
+        const anchoT = numero(ANCHO);
+        const altoT = numero(ALTO);
+        hechos.value = hechos.querySelector("option[value='" + ANCHO + "x" + ALTO + "']") ? ANCHO + "x" + ALTO : "";
+        hechos.addEventListener("change", () => {
+            if (hechos.value) {
+                [anchoT.value, altoT.value] = hechos.value.split("x");
+            }
+        });
+        const estirar = crear("input");
+        estirar.type = "checkbox";
+        const etEstirar = crear("label", "master-nombres-apellido");
+        etEstirar.append(estirar, document.createTextNode(" estirar lo dibujado"));
+        const cambiarT = botonDe("oc-vida-accion", "↔ cambiar el tamaño", () => {
+            const w = Math.min(3000, Math.max(200, parseInt(anchoT.value, 10) || ANCHO));
+            const h = Math.min(3000, Math.max(200, parseInt(altoT.value, 10) || ALTO));
+            if (w === ANCHO && h === ALTO) {
+                return;
+            }
+            acabarTexto(true);
+            soltarFlotante();
+            sel = null;
+            Object.keys(lienzos).forEach((id) => {
+                const nuevo = lienzoNuevo(w, h);
+                if (estirar.checked) {
+                    nuevo.getContext("2d").drawImage(lienzos[id], 0, 0, w, h);
+                } else {
+                    nuevo.getContext("2d").drawImage(lienzos[id], 0, 0);
+                }
+                lienzos[id] = nuevo;
+                tocadas.add(id);
+            });
+            ANCHO = w;
+            ALTO = h;
+            d.ancho = w;
+            d.alto = h;
+            [vista, encima].forEach((c) => {
+                c.width = w;
+                c.height = h;
+            });
+            atras.length = 0;
+            adelante.length = 0;
+            guardarDibujo();
+            pintarCapas();
+            repintar();
+            avisar("El lienzo mide ahora " + w + " × " + h + ". (Esto no se deshace.)");
+        });
+        ajustesT.append(caja("ya hecho", hechos), caja("ancho", anchoT), caja("alto", altoT), etEstirar, cambiarT);
+        tamanoL.append(tituloT, ajustesT);
+        panel.append(tituloCapas, nuevas, listaCapas, mandos, etOpa, rejilla, tamanoL);
 
         // Lo que es el dibujo, para quien no lo ve.
         const etD = crear("label", "oc-dados-etiqueta", "de qué es (para el lector de pantalla)");
@@ -3492,8 +3844,18 @@
 
         // Como el Paint: herramientas a la izquierda, el lienzo en medio y
         // las capas a la derecha (debajo, si no cabe).
+        const centro = crear("div", "master-dibujo-centro");
+        centro.append(opciones, marco);
         const zona = crear("div", "master-dibujo-zona");
-        zona.append(barra, marco, panel);
+        zona.append(barra, centro, panel);
+        // Si la ventana es estrecha, las herramientas pasan arriba, en
+        // fila, y las capas abajo: se ve bien a cualquier tamaño.
+        if (window.ResizeObserver) {
+            const mirar = new ResizeObserver(() => {
+                zona.classList.toggle("es-estrecha", zona.clientWidth < 620);
+            });
+            mirar.observe(zona);
+        }
         dentro.append(zona, archivo, etD, desc);
 
         // Cargar las capas guardadas (de una en una) y pintar.
@@ -3503,7 +3865,7 @@
                 cargas.push(new Promise((hecho) => {
                     const img = new Image();
                     img.onload = () => {
-                        lienzos[n.id].getContext("2d").drawImage(img, 0, 0, DIBUJO_ANCHO, DIBUJO_ALTO);
+                        lienzos[n.id].getContext("2d").drawImage(img, 0, 0, ANCHO, ALTO);
                         hecho();
                     };
                     img.onerror = hecho;
@@ -3517,6 +3879,8 @@
         });
         elegirHerramienta(herramienta);
         ponerColor(color);
+        vista.width = encima.width = ANCHO;
+        vista.height = encima.height = ALTO;
         pintarCapas();
         repintar();
     }
@@ -4551,8 +4915,8 @@
             desc: "Un texto con formato: negrita, listas, colores…", montar: montarTarjeta },
         dibujo: { nombre: "dibujo", emoji: "🎨", grupo: "apuntes", w: 900, h: 660,
             desc: "Un Paint con capas, bote, selección y rejilla de rol.", montar: montarDibujo },
-        notas: { nombre: "notas", emoji: "📝", grupo: "apuntes", unico: true, w: 420, h: 420,
-            desc: "Las notas de la sesión.", montar: (d) => window.ocMontar.notas(d, { soloNotas: true }) },
+        notas: { nombre: "notas", emoji: "📝", grupo: "apuntes", unico: true, w: 520, h: 480,
+            desc: "Las notas de la sesión, con formato (como un Word).", montar: montarNotas },
         tabla: { nombre: "tabla para tirar", emoji: "🔮", grupo: "apuntes", w: 360, h: 380,
             desc: "Una lista de la que sale una cosa al azar.", montar: montarTabla },
         criatura: { nombre: "criatura", emoji: "🐾", oculto: true, w: 440, h: 520, montar: montarCriatura },
@@ -4612,6 +4976,7 @@
 
     function guardar() {
         const salida = { activo: estado.id, perfiles: todo.perfiles.map((pf) => ({ id: pf.id, nombre: pf.nombre, color: pf.color || "",
+            zoom: pf.zoom || 1,
             modulos: pf.modulos.map((m) => ({ id: m.id, tipo: m.tipo, x: m.x, y: m.y, w: m.w, h: m.h,
                 titulo: m.titulo || "", color: m.color || "", plegado: !!m.plegado, datos: m.datos })) })) };
         try {
@@ -4626,10 +4991,18 @@
     // ---- LAS VENTANAS ----
     let encima = 10;
 
+    // EL ZOOM del tablero (zoom de CSS en el lienzo; por perfil, en
+    // «zoom»). El ancho del lienzo, en sus píxeles: con zoom de menos cabe
+    // más; con zoom de más, el de siempre (y se desliza de lado).
+    const zoomAhora = () => (enMovil.matches || !HAY_ZOOM ? 1 : estado.zoom || 1);
+    function anchoLienzo() {
+        return Math.max(lienzo.clientWidth, Math.round(lienzo.getBoundingClientRect().width));
+    }
+
     // Lo más a la derecha que puede ir una ventana (que no se salga del
     // lienzo).
     function topeX(m) {
-        return Math.max(0, lienzo.clientWidth - m.w - 4);
+        return Math.max(0, anchoLienzo() - m.w - 4);
     }
 
     function ponerTitulo(m) {
@@ -4750,7 +5123,7 @@
             if (e.altKey) {
                 // El tamaño: derecha e izquierda, el ancho; arriba y
                 // abajo, el alto.
-                m.w = Math.max(240, Math.min(lienzo.clientWidth - m.x - 4, m.w + d[0]));
+                m.w = Math.max(240, Math.min(anchoLienzo() - m.x - 4, m.w + d[0]));
                 m.h = Math.max(120, m.h + d[1]);
                 avisar(m.w + " por " + m.h + " píxeles.");
             } else {
@@ -4804,7 +5177,7 @@
             const h0 = v.offsetHeight;
             v.classList.add("es-arrastrada");
             arrastrar(e, esquina, (dx, dy) => {
-                m.w = Math.max(240, Math.min(lienzo.clientWidth - m.x - 4, Math.round(w0 + dx)));
+                m.w = Math.max(240, Math.min(anchoLienzo() - m.x - 4, Math.round(w0 + dx)));
                 m.h = Math.max(120, Math.round(h0 + dy));
                 colocar(m);
             }, () => v.classList.remove("es-arrastrada"));
@@ -4897,7 +5270,9 @@
             if (velocidad) {
                 caja.scrollTop += velocidad;
             }
-            alMover(Math.round(ultimo.clientX - x0), Math.round(ultimo.clientY - y0 + caja.scrollTop - scroll0));
+            // Lo movido en la pantalla, en píxeles del lienzo (con el zoom).
+            const z = zoomAhora();
+            alMover(Math.round((ultimo.clientX - x0) / z), Math.round((ultimo.clientY - y0 + caja.scrollTop - scroll0) / z));
             crecerLienzo(true);
             if (velocidad) {
                 pendiente = requestAnimationFrame(paso);
@@ -5271,12 +5646,12 @@
     // derecha), sin pisar ninguna; si no cabe en ningún sitio, debajo de
     // todo. Así añadir no estira el lienzo si hay sitio.
     function hueco(w, h) {
-        const ancho = Math.max(w, lienzo.clientWidth - 4);
+        const ancho = Math.max(w, anchoLienzo() - 4);
         const ocupado = estado.modulos.map((m) => ({ x: m.x, y: m.y, w: m.w, h: m.plegado ? 60 : m.h }));
         const libre = (x, y) => ocupado.every((o) => x + w + 16 <= o.x || o.x + o.w + 16 <= x || y + h + 16 <= o.y
             || o.y + o.h + 16 <= y);
         const fondo = ocupado.reduce((a, o) => Math.max(a, o.y + o.h), 0);
-        const visto = Math.max(0, Math.round(-lienzo.getBoundingClientRect().top / 20) * 20);
+        const visto = Math.max(0, Math.round(-lienzo.getBoundingClientRect().top / zoomAhora() / 20) * 20);
         const filas = [];
         for (let y = visto; y <= fondo; y += 20) {
             filas.push(y);
@@ -5296,7 +5671,7 @@
 
     // En filas, una al lado de otra hasta el ancho del lienzo.
     function ordenar() {
-        const ancho = Math.max(400, lienzo.clientWidth);
+        const ancho = Math.max(400, anchoLienzo());
         let x = 0;
         let y = 0;
         let alto = 0;
@@ -5322,6 +5697,56 @@
     tablist.setAttribute("aria-label", "Perfiles de la pantalla de máster");
     lienzo.setAttribute("role", "tabpanel");
 
+    // Los mandos del zoom (− 100 % +): el del medio lo deja en 100 %.
+    const HAY_ZOOM = !!(window.CSS && CSS.supports && CSS.supports("zoom", "2"));
+    const menosZoom = botonDe("master-pestana-mando", "－", () => pasoZoom(-1), "Alejar el tablero");
+    const masZoom = botonDe("master-pestana-mando", "＋", () => pasoZoom(1), "Acercar el tablero");
+    const botonZoom = botonDe("master-zoom-valor", "100 %", () => ponerZoom(1, true), "Dejar el zoom del tablero en 100 %");
+    menosZoom.title = "Alejar (Ctrl + rueda)";
+    masZoom.title = "Acercar (Ctrl + rueda)";
+    botonZoom.title = "Volver al 100 %";
+    // Ctrl + rueda (o el pellizco del panel táctil) sobre el tablero.
+    lienzo.addEventListener("wheel", (e) => {
+        if (!e.ctrlKey || !HAY_ZOOM || enMovil.matches) {
+            return;
+        }
+        e.preventDefault();
+        ponerZoom((estado.zoom || 1) * Math.exp(-e.deltaY * 0.002), false);
+        clearTimeout(lienzo.esperaZoom);
+        lienzo.esperaZoom = setTimeout(() => ponerZoom(estado.zoom, true), 300);
+    }, { passive: false });
+    // El pellizco con dos dedos en el fondo del tablero (en la tableta).
+    const dedos = new Map();
+    let pellizco = null;
+    lienzo.addEventListener("pointerdown", (e) => {
+        if (e.pointerType !== "touch" || e.target !== lienzo || !HAY_ZOOM || enMovil.matches) {
+            return;
+        }
+        dedos.set(e.pointerId, [e.clientX, e.clientY]);
+        if (dedos.size === 2) {
+            const [a, b] = Array.from(dedos.values());
+            pellizco = { d: Math.hypot(a[0] - b[0], a[1] - b[1]) || 1, z: estado.zoom || 1 };
+        }
+    });
+    lienzo.addEventListener("pointermove", (e) => {
+        if (!dedos.has(e.pointerId)) {
+            return;
+        }
+        dedos.set(e.pointerId, [e.clientX, e.clientY]);
+        if (pellizco && dedos.size === 2) {
+            const [a, b] = Array.from(dedos.values());
+            ponerZoom(pellizco.z * Math.hypot(a[0] - b[0], a[1] - b[1]) / pellizco.d, false);
+        }
+    });
+    const sinDedo = (e) => {
+        if (dedos.delete(e.pointerId) && pellizco && dedos.size < 2) {
+            pellizco = null;
+            ponerZoom(estado.zoom, true);
+        }
+    };
+    lienzo.addEventListener("pointerup", sinDedo);
+    lienzo.addEventListener("pointercancel", sinDedo);
+
     function colorTablero() {
         const t = TABLEROS.find((x) => x[0] === estado.color && x[2]);
         lienzo.classList.toggle("con-tablero", !!t);
@@ -5333,7 +5758,31 @@
             lienzo.style.removeProperty("--tablero");
             lienzo.style.removeProperty("--tablero-raya");
         }
+        ponerZoom(estado.zoom || 1, false);
     }
+
+    // Los niveles de zoom, y ponerlo (con aviso si lo ha pedido alguien).
+    const ZOOMS = [0.25, 0.33, 0.5, 0.67, 0.75, 0.9, 1, 1.1, 1.25, 1.5, 1.75, 2];
+    function ponerZoom(z, decirlo) {
+        z = Math.min(2, Math.max(0.25, Math.round(z * 100) / 100));
+        estado.zoom = z;
+        lienzo.style.zoom = zoomAhora() === 1 ? "" : String(zoomAhora());
+        if (botonZoom) {
+            botonZoom.textContent = Math.round(z * 100) + " %";
+            menosZoom.disabled = z <= ZOOMS[0];
+            masZoom.disabled = z >= ZOOMS[ZOOMS.length - 1];
+        }
+        crecerLienzo();
+        if (decirlo) {
+            guardar();
+            avisar("Zoom del tablero: " + Math.round(z * 100) + " %.");
+        }
+    }
+    const pasoZoom = (sentido) => {
+        const z = estado.zoom || 1;
+        const sig = sentido > 0 ? ZOOMS.find((x) => x > z + 0.001) : ZOOMS.slice().reverse().find((x) => x < z - 0.001);
+        ponerZoom(sig || z, true);
+    };
 
     function activar(pf, foco) {
         // Las ventanas del que se deja se desmontan: al volver se montan
@@ -5472,7 +5921,12 @@
     // Todo en una línea: las pestañas a la izquierda; «＋ añadir» y los
     // dados (que pone personajes.js en la barra), a la derecha.
     const mandos = crear("div", "master-barra-mandos");
-    mandos.append(montarBuscador(), botonAnadir);
+    const zoomCaja = crear("div", "master-zoom");
+    zoomCaja.setAttribute("role", "group");
+    zoomCaja.setAttribute("aria-label", "Zoom del tablero");
+    zoomCaja.append(menosZoom, botonZoom, masZoom);
+    zoomCaja.hidden = !HAY_ZOOM;
+    mandos.append(montarBuscador(), zoomCaja, botonAnadir);
     const dados = barra.querySelector(".oc-boton-dados");
     if (dados) {
         mandos.appendChild(dados);

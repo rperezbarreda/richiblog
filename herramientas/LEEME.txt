@@ -4463,49 +4463,71 @@
       A la izquierda, las herramientas (con su letra, como el Photoshop,
       con el foco en el lienzo): ✏️ lápiz (B), 🧽 goma (E, borra de
       verdad: deja transparente), 🪣 bote (G: rellena la zona del mismo
-      color de la capa activa, con algo de margen; rellenar()), ⬚
+      color de la capa activa; rellenar(), con su «margen»), ⬚
       seleccionar y mover (M: un rectángulo; se arrastra, o con las
       flechas, Mayús ×10; sus ocho asas cambian el tamaño, con Mayús sin
       deformar, y + / − lo agrandan o lo encogen un 10 %; Supr lo borra y
-      Esc lo suelta), 💧 cuentagotas
-      (I: coge el color de lo que se ve), ╱ línea (L), ▭ rectángulo (U) y
-      ◯ elipse (O). Debajo, diez colores, «cualquier color» (el selector
-      del navegador), tres grosores, ↶/↷ (Ctrl+Z / Ctrl+Y; 20 pasos, por
-      capa, solo mientras está abierto), 🖼️ imagen, ⬇ descargar en PNG y
-      # rejilla. Las imágenes (🖼️, Ctrl+V o arrastrándolas) van a una
-      capa nueva, encogidas al 80 % como mucho, y quedan seleccionadas
-      para moverlas.
+      Esc lo suelta), 💧 cuentagotas (I: coge el color de lo que se ve), ╱
+      línea (L), ▭ rectángulo (U), ◯ elipse (O) y T texto (T: al pinchar
+      sale un cuadro para escribir donde se pincha; Intro lo deja en la
+      capa, Mayús+Intro hace otra línea, Esc lo quita). Debajo, diez
+      colores y «cualquier color» (el selector del navegador).
+      ARRIBA DEL LIENZO, como el Paint, las opciones de la herramienta: el
+      grosor (de 1 a 80 px), el margen del bote o, para el texto, la letra
+      (DIBUJO_FUENTES: a mano, normal, con serifa, de máquina, de
+      píxeles), su tamaño y negrita; y a la derecha ↶/↷ (Ctrl+Z / Ctrl+Y;
+      20 pasos, por capa, solo mientras está abierto), 🖼️ imagen, ⬇
+      descargar en PNG y # rejilla. Las imágenes (🖼️, Ctrl+V o
+      arrastrándolas) van a una capa nueva, encogidas al 80 % como mucho,
+      y quedan seleccionadas para moverlas.
       A la derecha, LAS CAPAS: ＋ capa y 📁 carpeta (se crean encima de la
       activa), y cada una con 👁 para esconderla, ▸/▾ las carpetas y su
       miniatura. Con la activa: ↑ ↓ (subirla o bajarla), ⇥ meterla en la
       carpeta de encima, ⇤ sacarla, ✎ nombre, ⧉ duplicar, 🗑️ borrar (dos
       veces; no se deshace; tiene que quedar una capa) y su opacidad. No
       se pinta en una capa escondida (avisa). LA REJILLA DE ROL (plegada):
-      cuadrada o hexagonal, tamaño de casilla (sobre 1000 de ancho), color,
-      cuánto se ve y si sale al descargar; va encima de todo y no se
-      pinta en ninguna capa (pintarRejilla()).
-      Cómo va por dentro: cada capa es un canvas de 1000 × 750
-      transparente; «vista» pinta el papel y las capas visibles (de abajo
-      arriba, con la opacidad de la capa por la de su carpeta) y
-      «encima», otro canvas pegado sobre ella, pinta la rejilla, la
-      figura a medias y la selección, y es el que recibe el ratón o el
-      dedo (touch-action: none). En m.datos: «capas» (el árbol, la de
-      arriba primero: {id, tipo: capa|carpeta, nombre, visible, opacidad,
-      imagen (WebP con transparencia) | abierta, hijos}), «activa»,
-      «rejilla», «herramienta», «color», «grosor» y «desc». Lo de antes (una
-      sola «imagen») pasa solo a «capa 1». Se guarda dentro de
+      cuadrada o hexagonal, tamaño de casilla, color, cuánto se ve y si
+      sale al descargar; va encima de todo y no se pinta en ninguna capa
+      (pintarRejilla()). EL TAMAÑO DEL LIENZO (plegado): uno hecho
+      (normal, cuadrado, panorámico, de pie, grande) o el que se quiera
+      (de 200 a 3000), y «estirar lo dibujado» o dejarlo como está (se
+      recorta o sobra papel). No se deshace.
+      Si la ventana es estrecha (menos de 620 px; un ResizeObserver le
+      pone .es-estrecha), las herramientas pasan arriba en fila y las capas
+      abajo: se ve bien a cualquier tamaño.
+      Cómo va por dentro: cada capa es un canvas de ANCHO × ALTO (d.ancho
+      y d.alto; 1000 × 750 si no) transparente; «vista» pinta el papel y
+      las capas visibles (de abajo arriba, con la opacidad de la capa por
+      la de su carpeta) y «encima», otro canvas pegado sobre ella, pinta la
+      rejilla, la figura a medias y la selección, y es el que recibe el
+      ratón o el dedo (touch-action: none). En m.datos: «capas» (el árbol,
+      la de arriba primero: {id, tipo: capa|carpeta, nombre, visible,
+      opacidad, imagen (WebP con transparencia) | abierta, hijos}),
+      «activa», «rejilla», «ancho», «alto», «herramienta», «color»,
+      «grosor», «margen», «texto» ({fuente, tam, negrita}) y «desc». Lo de
+      antes (una sola «imagen») pasa solo a «capa 1». Se guarda dentro de
       «richi-master» (y va en exportar/importar); localStorage tiene un
       tope de unos 5 MB, y si no cabe lo avisa (guardar() devuelve si ha
       podido). «de qué es» es la descripción para el lector de pantalla.
     · EL POST-IT es texto con formato, como un procesador de textos:
       «✏️ editar» lo abre con su barra (negrita, cursiva, subrayado,
-      tachado, párrafo/título/subtítulo/cita, listas, alineación, color de
-      la letra, resaltado, quitar el formato, deshacer y rehacer; las
-      flechas van por la barra y valen Ctrl+B, Ctrl+I, Ctrl+U…) y «✔ listo»
-      lo deja para leer (con sus dados). Se guarda como HTML limpio
-      (m.datos.html; sanearHtml() deja solo esas etiquetas y el color, el
-      fondo y la alineación); los de antes, en Markdown, se pasan solos. Lo
-      pegado entra sin formato.
+      tachado, párrafo/título/subtítulo/cita, tamaño de la letra, listas,
+      más y menos sangría, alineación, color de la letra, resaltado, línea
+      de separación, quitar el formato, deshacer y rehacer; las flechas van
+      por la barra y valen Ctrl+B, Ctrl+I, Ctrl+U…) y «✔ listo» lo deja
+      para leer (con sus dados). La barra y el texto los hace editorRico()
+      (también para las notas). Se guarda como HTML limpio (m.datos.html;
+      sanearHtml() deja solo esas etiquetas —y <hr>— y el color, el fondo,
+      la alineación, la sangría y el tamaño, en «em»: TAMANOS_LETRA y
+      TAMANOS_PALABRA pasan los «x-large» del navegador a algo relativo a
+      la letra de alrededor); los de antes, en Markdown, se pasan solos.
+      Lo pegado entra sin formato.
+    · 📝 NOTAS (solo una): el mismo editor, siempre abierto, con «📅 poner
+      la fecha» (un título con la de hoy), «💾 descargar» (un .html con su
+      formato, que abre Word o el navegador) y «🗑️ borrar» (dos veces). Se
+      guardan en m.datos.html; lo de antes (texto suelto en ocPartida,
+      «notas») se pasa solo la primera vez. Ya no usa ocMontar.notas de
+      personajes.js (eso sigue para las fichas de personaje).
     · 🐉 bestiario: los 330 monstruos del SRD 5.2 (D&D 2024), traducidos
       enteros (las distancias, en pies), de
       datos/personajes/compendio/bestiario.json. Se buscan por nombre (en
@@ -4555,6 +4577,18 @@
   bestiary/bestiary-xmm.json, items.json, items-base.json y
   magicvariants.json; solo lo marcado «srd52», que es lo que se puede
   copiar). Son JSON normales: se pueden retocar a mano.
+  ZOOM DEL TABLERO: arriba, junto a «＋ añadir», «－ 100 % ＋» (el del
+  medio lo deja en 100 %), y también Ctrl + rueda (o el pellizco del
+  panel táctil) y dos dedos en el fondo del tablero en la tableta. Va de
+  25 % a 200 % (ZOOMS) y se guarda en cada perfil («zoom»). Es el zoom de
+  CSS en el lienzo: lo arrastrado se divide entre el zoom (arrastrar()) y
+  el ancho de las ventanas sale de anchoLienzo() (con zoom de menos cabe
+  más; con zoom de más, se desliza de lado). En el móvil no hay (las
+  ventanas van en columna). Si el navegador no sabe de «zoom», no sale.
+  LAS VENTANAS llevan 4 px de aire por dentro (.master-ventana-cuerpo,
+  con -4 px de margen para que quede igual): si no, el borde y el
+  contorno del foco de lo que va pegado arriba o a la izquierda se
+  cortaban.
   PERFILES: arriba del lienzo, pestañas como las de un navegador (con las
   flechas se pasa de una a otra): «＋» abre una nueva, ✎ (o doble clic)
   la renombra y ✕ la cierra (dos veces; la última no). Cada perfil tiene

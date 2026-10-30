@@ -193,6 +193,45 @@
     cursor: pointer;
 }
 
+/* EL ZOOM DEL TABLERO: − 100 % + (en el móvil no, que va en columna). */
+.master-zoom {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+}
+
+.master-zoom[hidden] {
+    display: none;
+}
+
+.master-zoom-valor {
+    min-width: 4.2em;
+    height: 36px;
+    padding: 0 4px;
+    border: 2px solid var(--yellow);
+    background: transparent;
+    color: var(--yellow);
+    font-family: var(--fuente-mono);
+    font-size: 0.8125rem;
+    cursor: pointer;
+}
+
+.master-zoom-valor:hover {
+    background: var(--yellow);
+    color: var(--yellow-contrast);
+}
+
+.master-zoom-valor:focus-visible {
+    outline: 3px solid var(--yellow);
+    outline-offset: 2px;
+}
+
+@media (max-width: 860px) {
+    .master-zoom {
+        display: none;
+    }
+}
+
 .master-pestana-mando:hover:not(:disabled) {
     background: var(--yellow);
     color: var(--yellow-contrast);
@@ -208,6 +247,9 @@
 .master-lienzo {
     position: relative;
     min-height: 400px;
+    /* Los dos dedos en el fondo son el zoom del tablero, no el de la
+       página. */
+    touch-action: pan-x pan-y;
     overflow-x: auto;
     overflow-y: hidden;
     /* Al encoger (después de soltar una ventana), despacio. */
@@ -321,9 +363,14 @@
     outline-offset: 2px;
 }
 
+/* Con un poco de aire por dentro (y el mismo hacia fuera, para que
+   quede donde estaba): si no, el borde y el contorno del foco de lo que
+   va pegado arriba o a la izquierda se cortan al desplazarse. */
 .master-ventana-cuerpo {
     flex: 1 1 auto;
     min-height: 0;
+    margin: -4px;
+    padding: 4px;
     overflow: auto;
 }
 
@@ -1270,16 +1317,13 @@
 /* LOS POST-ITS: la barra de formato (botones en grupos) y el texto. */
 .master-postit-barra {
     position: sticky;
-    top: -16px;
+    top: -4px;
     z-index: 1;
     display: flex;
-    flex-wrap: nowrap;
+    flex-wrap: wrap;
     gap: 6px;
-    margin: -16px -16px 8px;
-    padding: 12px 16px 8px;
-    /* En una sola fila: si no cabe, se desliza de lado. */
-    overflow-x: auto;
-    scrollbar-width: thin;
+    margin: -4px -4px 8px;
+    padding: 6px 4px 8px;
     border-bottom: 2px dashed var(--border);
     /* El fondo de la ventana (que no se vea el texto por debajo al bajar). */
     background: var(--purple-lighter);
@@ -1381,6 +1425,24 @@
     margin-top: 8px;
 }
 
+/* LAS NOTAS DEL MÁSTER: el editor siempre abierto y sus botones. */
+.master-postit.es-notas {
+    min-height: 12rem;
+}
+
+.master-notas-botones {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 10px;
+}
+
+.master-postit hr {
+    margin: 12px 0;
+    border: 0;
+    border-top: 2px solid var(--border);
+}
+
 /* EL GENERADOR DE NOMBRES y LAS NOTAS EN OTROS IDIOMAS: arriba, los
    desplegables y los grupos de botones-opción. */
 .master-nombres-form {
@@ -1420,7 +1482,7 @@
     flex: 1 1 auto;
     min-height: 40px;
     padding: 4px 10px;
-    border: 2px solid var(--border);
+    border: 2px solid var(--yellow);
     background: transparent;
     color: var(--white);
     font: inherit;
@@ -1995,10 +2057,108 @@
     padding: 0;
 }
 
+.master-dibujo-centro {
+    display: flex;
+    flex: 1 1 320px;
+    flex-direction: column;
+    gap: 8px;
+    min-width: 0;
+}
+
 .master-dibujo-marco {
     position: relative;
-    flex: 1 1 320px;
     min-width: 0;
+}
+
+/* Las opciones de arriba: las de la herramienta y las acciones. */
+.master-dibujo-opciones {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px 14px;
+}
+
+.master-dibujo-deslizador,
+.master-dibujo-optexto {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.master-dibujo-deslizador[hidden],
+.master-dibujo-optexto[hidden] {
+    display: none;
+}
+
+.master-dibujo-deslizador input {
+    width: 8rem;
+    accent-color: var(--yellow);
+}
+
+.master-dibujo-valor {
+    min-width: 3.5em;
+    font-family: var(--fuente-mono);
+    font-size: 0.875rem;
+}
+
+.master-dibujo-numero {
+    width: 4.5rem;
+    min-height: 34px;
+    padding: 2px 6px;
+    border: 2px solid var(--yellow);
+    background: var(--purple);
+    color: var(--white);
+    font: inherit;
+}
+
+.master-dibujo-numero:focus-visible {
+    outline: 3px solid var(--yellow);
+    outline-offset: 2px;
+}
+
+.master-dibujo-acciones {
+    margin-left: auto;
+}
+
+/* El cuadro para escribir un texto, encima del lienzo donde se pincha. */
+.master-dibujo-texto {
+    position: absolute;
+    z-index: 2;
+    min-width: 6em;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    --fondo-texto: rgba(255, 255, 255, 0.35);
+    border: 1px dashed var(--yellow);
+    background: var(--fondo-texto);
+    line-height: 1.25;
+    white-space: pre;
+    resize: none;
+    field-sizing: content;
+}
+
+.master-dibujo-texto:focus-visible {
+    outline: 2px solid var(--yellow);
+}
+
+/* Estrecha: las herramientas arriba, en fila, y las capas abajo. */
+.master-dibujo-zona.es-estrecha .master-postit-barra.es-dibujo {
+    flex: 1 1 100%;
+    flex-direction: row;
+    flex-wrap: wrap;
+    padding: 0 0 8px;
+    border-right: 0;
+    border-bottom: 2px dashed var(--border);
+}
+
+.master-dibujo-zona.es-estrecha .master-postit-barra.es-dibujo .master-postit-grupo {
+    display: flex;
+    flex-wrap: wrap;
+}
+
+.master-dibujo-zona.es-estrecha .master-dibujo-panel {
+    flex: 1 1 100%;
+    max-width: none;
 }
 
 .master-dibujo {
@@ -2223,30 +2383,6 @@
     outline-offset: 1px;
 }
 
-.master-dibujo-grosor {
-    position: relative;
-}
-
-.master-dibujo-grosor::after {
-    position: absolute;
-    top: 50%;
-    right: 7px;
-    left: 7px;
-    height: var(--trazo, 2px);
-    background: currentColor;
-    border-radius: 4px;
-    content: "";
-    transform: translateY(-50%);
-}
-
-.master-dibujo-grosor.es-medio {
-    --trazo: 5px;
-}
-
-.master-dibujo-grosor.es-gordo {
-    --trazo: 10px;
-}
-
 .master-postit-boton:disabled {
     opacity: 0.5;
     cursor: default;
@@ -2332,6 +2468,7 @@
     object-fit: contain;
 }
 
+.master-imagen[hidden],
 .master-imagen-propia[hidden],
 .master-imagen-botones[hidden],
 .master-imagen .oc-vacio[hidden] {
