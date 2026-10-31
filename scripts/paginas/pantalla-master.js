@@ -7208,7 +7208,10 @@
 
     function ponerTitulo(m) {
         if (m.el) {
-            m.el.querySelector(".master-ventana-nombre").textContent = m.titulo || MODULOS[m.tipo].nombre;
+            const n = m.el.querySelector(".master-ventana-nombre");
+            if (n) {
+                n.textContent = m.titulo || MODULOS[m.tipo].nombre;
+            }
         }
     }
 
@@ -7321,7 +7324,7 @@
                     x.el = null;
                 });
                 pintarTodo();
-                m.el.querySelector(".master-ventana-nombre").focus();
+                focoDe(m).focus();
             }
             if (m.alRenombrar) {
                 m.alRenombrar();
@@ -7365,6 +7368,29 @@
     // suya (m.grupo, el mismo en todas; m.delante, la que se ve) y
     // comparten sitio, tamaño y plegado. ----
     const delGrupo = (m) => (m.grupo ? estado.modulos.filter((x) => x.grupo === m.grupo) : [m]);
+    // Lo que se enfoca de una ventana: su nombre o, en un grupo, su pestaña.
+    const focoDe = (m) => m.el.querySelector(".master-grupo-pestana[aria-selected='true']") || m.el.querySelector(".master-ventana-nombre");
+    // Moverla con las flechas (con Mayús, más deprisa; con Alt, el tamaño).
+    function moverConTeclas(m, e) {
+        const paso = e.shiftKey ? 60 : 20;
+        const d = { ArrowLeft: [-paso, 0], ArrowRight: [paso, 0], ArrowUp: [0, -paso], ArrowDown: [0, paso] }[e.key];
+        if (!d || enMovil.matches) {
+            return false;
+        }
+        e.preventDefault();
+        if (e.altKey) {
+            m.w = Math.max(240, Math.min(anchoLienzo() - m.x - 4, m.w + d[0]));
+            m.h = Math.max(120, m.h + d[1]);
+            avisar(m.w + " por " + m.h + " píxeles.");
+        } else {
+            m.x = Math.min(topeX(m), Math.max(0, m.x + d[0]));
+            m.y = Math.max(0, m.y + d[1]);
+        }
+        colocar(m);
+        crecerLienzo();
+        guardar();
+        return true;
+    }
     const nombreDeVentana = (m) => m.titulo || MODULOS[m.tipo].nombre;
     function verEnGrupo(m, foco) {
         const todas = delGrupo(m);
@@ -7401,12 +7427,17 @@
         m.el.querySelector(".master-grupo-pestana[aria-selected='true']").focus();
         avisar("Juntas en pestañas: " + juntas.map(nombreDeVentana).join(", ") + ".");
     }
-    function sacarDelGrupo(m) {
+    function sacarDelGrupo(m, sitio) {
         const resto = delGrupo(m).filter((x) => x !== m);
         delete m.grupo;
         delete m.delante;
-        m.x = Math.min(topeX(m), m.x + 40);
-        m.y += 40;
+        if (sitio) {
+            m.x = Math.min(topeX(m), Math.max(0, sitio.x));
+            m.y = Math.max(0, sitio.y);
+        } else {
+            m.x = Math.min(topeX(m), m.x + 40);
+            m.y += 40;
+        }
         if (resto.length === 1) {
             delete resto[0].grupo;
             delete resto[0].delante;
@@ -7419,9 +7450,92 @@
         pintarTodo();
         guardar();
         alFrente(m);
-        m.el.querySelector(".master-ventana-nombre").focus();
+        focoDe(m).focus();
         avisar("Sacada del grupo: " + nombreDeVentana(m) + ".");
     }
+    // SEPARAR ARRASTRANDO: mantener pulsada la pestaña de una ventana de un
+    // grupo la coge; soltada fuera de la barra, sale del grupo (donde se
+    // suelta); sobre la barra de otra ventana, se junta con esa. Soltar no
+    // cuenta como pulsar (pestanaSoltada).
+    let pestanaSoltada = false;
+    function cogerDelGrupo(e, t, x, v, cabeza) {
+        if (enMovil.matches || e.button > 0) {
+            return;
+        }
+        e.stopPropagation();
+        const x0 = e.clientX;
+        const y0 = e.clientY;
+        const quieto = (ev) => {
+            if (Math.abs(ev.clientX - x0) + Math.abs(ev.clientY - y0) > 8) {
+                dejar();
+            }
+        };
+        const dejar = () => {
+            clearTimeout(reloj);
+            document.removeEventListener("pointermove", quieto);
+            document.removeEventListener("pointerup", dejar);
+            document.removeEventListener("pointercancel", dejar);
+        };
+        const reloj = setTimeout(() => {
+            dejar();
+            try {
+                t.setPointerCapture(e.pointerId);
+            } catch (err) {
+                // Sin captura: siguen llegando al documento.
+            }
+            pestanaSoltada = true;
+            t.classList.add("es-cogida");
+            let destino = null;
+            let fuera = false;
+            const marcar = (d) => {
+                if (destino && destino.el) {
+                    destino.el.classList.remove("es-destino");
+                }
+                destino = d;
+                if (destino) {
+                    destino.el.classList.add("es-destino");
+                }
+            };
+            const mover = (ev) => {
+                const r = cabeza.getBoundingClientRect();
+                fuera = ev.clientY < r.top - 16 || ev.clientY > r.bottom + 16 || ev.clientX < r.left - 16 || ev.clientX > r.right + 16;
+                v.classList.toggle("es-saliendo", fuera);
+                const d = ventanaBajo(ev.clientX, ev.clientY, v);
+                if (d !== destino) {
+                    marcar(d);
+                }
+            };
+            const soltar = (ev) => {
+                document.removeEventListener("pointermove", mover);
+                document.removeEventListener("pointerup", soltar);
+                document.removeEventListener("pointercancel", soltar);
+                t.classList.remove("es-cogida");
+                v.classList.remove("es-saliendo");
+                const d = destino;
+                marcar(null);
+                setTimeout(() => {
+                    pestanaSoltada = false;
+                }, 0);
+                if (d) {
+                    sacarDelGrupo(x);
+                    agrupar(x, d);
+                } else if (fuera) {
+                    // Donde se suelta: la barra, bajo el puntero.
+                    const r = lienzo.getBoundingClientRect();
+                    const z = zoomAhora();
+                    sacarDelGrupo(x, { x: Math.round((ev.clientX - r.left + lienzo.scrollLeft) / z) - 60,
+                        y: Math.round((ev.clientY - r.top) / z) - 16 });
+                }
+            };
+            document.addEventListener("pointermove", mover);
+            document.addEventListener("pointerup", soltar);
+            document.addEventListener("pointercancel", soltar);
+        }, ESPERA_COGER);
+        document.addEventListener("pointermove", quieto);
+        document.addEventListener("pointerup", dejar);
+        document.addEventListener("pointercancel", dejar);
+    }
+
     // La ventana (de otra) cuya barra o pestañas están en ese punto.
     function ventanaBajo(x, y, yo) {
         const el = document.elementsFromPoint(x, y).find((e) => e.closest(".master-ventana-barra, .master-grupo-pestanas")
@@ -7462,27 +7576,7 @@
         nombre.title = "Clic: plegar o desplegar · mantener pulsado: moverla · flechas: moverla (con Alt, el tamaño)";
         // Con el teclado, las flechas en su nombre la mueven (con Mayús,
         // más deprisa; con Alt, cambian su tamaño).
-        nombre.addEventListener("keydown", (e) => {
-            const paso = e.shiftKey ? 60 : 20;
-            const d = { ArrowLeft: [-paso, 0], ArrowRight: [paso, 0], ArrowUp: [0, -paso], ArrowDown: [0, paso] }[e.key];
-            if (!d || enMovil.matches) {
-                return;
-            }
-            e.preventDefault();
-            if (e.altKey) {
-                // El tamaño: derecha e izquierda, el ancho; arriba y
-                // abajo, el alto.
-                m.w = Math.max(240, Math.min(anchoLienzo() - m.x - 4, m.w + d[0]));
-                m.h = Math.max(120, m.h + d[1]);
-                avisar(m.w + " por " + m.h + " píxeles.");
-            } else {
-                m.x = Math.min(topeX(m), Math.max(0, m.x + d[0]));
-                m.y = Math.max(0, m.y + d[1]);
-            }
-            colocar(m);
-            crecerLienzo();
-            guardar();
-        });
+        nombre.addEventListener("keydown", (e) => moverConTeclas(m, e));
         const pintarPlegado = () => {
             cuerpo.hidden = !!m.plegado;
             plegar.textContent = m.plegado ? "+" : "−";
@@ -7527,7 +7621,7 @@
             guardar();
             avisar("Quitado: " + (m.titulo || def.nombre) + ".");
             const sigue = resto[0] && resto[0].el;
-            (sigue ? sigue.querySelector(".master-ventana-nombre") : botonAnadir).focus();
+            (sigue ? focoDe(resto[0]) : botonAnadir).focus();
         }, "Quitar esta ventana");
         const cambiar = botonDe("master-ventana-mando", "✎", () => personalizar(m, cambiar),
             "Opciones: título, color y tamaño del contenido");
@@ -7536,37 +7630,53 @@
         const mandos = crear("div", "master-ventana-mandos");
         mandos.append(cambiar, plegar, quitar);
         cabeza.append(titulo, mandos);
-        // EN UN GRUPO: debajo de la barra, una pestaña por ventana (con las
-        // flechas, Inicio y Fin), y «⇱» para sacar la de ahora.
-        let tiras = null;
+        // EN UN GRUPO: las pestañas son la barra (una por ventana; la de
+        // ahora, con su nombre; las demás, sólo el icono). Pulsar otra la
+        // trae delante (y la de ahora, la pliega); con las flechas, Inicio
+        // y Fin se va de una a otra (con Mayús + flechas se mueve el grupo,
+        // con Alt + Mayús, su tamaño). Mantener pulsada una y sacarla de
+        // la barra la separa (y soltarla sobre otra ventana, la junta con
+        // esa).
         if (m.grupo) {
-            const sacar = botonDe("master-ventana-mando", "⇱", () => sacarDelGrupo(m), "Sacar esta ventana del grupo");
-            sacar.title = "Sacarla del grupo";
-            mandos.prepend(sacar);
-            tiras = crear("div", "master-grupo-pestanas");
+            cabeza.classList.add("es-grupo");
+            titulo.classList.add("visually-hidden");
+            titulo.replaceChildren(document.createTextNode(nombreDeVentana(m)));
+            const tiras = crear("div", "master-grupo-pestanas");
             tiras.setAttribute("role", "tablist");
             tiras.setAttribute("aria-label", "Ventanas juntas");
             const juntas = delGrupo(m);
             juntas.forEach((x, i) => {
                 const d = MODULOS[x.tipo];
-                const t = botonDe("master-grupo-pestana", "", () => {
-                    if (x !== m) {
+                const ahora = x === m;
+                const t = botonDe("master-grupo-pestana" + (ahora ? "" : " es-compacta"), "", () => {
+                    if (pestanaSoltada) {
+                        return;
+                    }
+                    if (ahora) {
+                        plegar.click();
+                    } else {
                         verEnGrupo(x, true);
                     }
                 });
-                const e2 = crear("span", "", d.emoji + " ");
+                const e2 = crear("span", "master-grupo-emoji", d.emoji);
                 e2.setAttribute("aria-hidden", "true");
-                t.append(e2, document.createTextNode(nombreDeVentana(x)));
+                t.append(e2, crear("span", "master-grupo-nombre", nombreDeVentana(x)));
+                t.title = nombreDeVentana(x) + (ahora ? " (clic: plegar; mantener y sacar: separarla)" : " (mantener y sacar: separarla)");
                 t.setAttribute("role", "tab");
-                t.setAttribute("aria-selected", x === m ? "true" : "false");
+                // El nombre entero, también en las que sólo enseñan el icono.
+                t.setAttribute("aria-label", nombreDeVentana(x));
+                t.setAttribute("aria-selected", ahora ? "true" : "false");
                 t.setAttribute("aria-controls", "master-cuerpo-" + x.id);
-                t.tabIndex = x === m ? 0 : -1;
+                t.tabIndex = ahora ? 0 : -1;
                 if (x.color) {
                     t.classList.add("con-color");
                     t.style.setProperty("--pestana-color", hexDe(x.color));
                     t.style.setProperty("--pestana-tinta", tintaDe(hexDe(x.color)));
                 }
                 t.addEventListener("keydown", (ev) => {
+                    if (ev.shiftKey && moverConTeclas(m, ev)) {
+                        return;
+                    }
                     const paso = { ArrowRight: 1, ArrowLeft: -1, Home: -i, End: juntas.length - 1 - i }[ev.key];
                     if (paso === undefined) {
                         return;
@@ -7574,8 +7684,10 @@
                     ev.preventDefault();
                     verEnGrupo(juntas[(i + paso + juntas.length) % juntas.length], true);
                 });
+                t.addEventListener("pointerdown", (ev) => cogerDelGrupo(ev, t, x, v, cabeza));
                 tiras.appendChild(t);
             });
+            cabeza.insertBefore(tiras, mandos);
         }
         const cuerpo = crear("div", "oc-hoja-dentro master-ventana-cuerpo");
         cuerpo.id = "master-cuerpo-" + m.id;
@@ -7606,18 +7718,14 @@
                 colocar(m);
             }, () => v.classList.remove("es-arrastrada"));
         });
-        v.append(cabeza);
-        if (tiras) {
-            v.appendChild(tiras);
-        }
-        v.append(cuerpo, esquina);
+        v.append(cabeza, cuerpo, esquina);
         m.el = v;
         ponerColor(m);
         // LA BARRA: un clic la pliega o despliega; mantenerla pulsada un
         // momento (ESPERA_COGER) la coge (reborde a rayas) y se mueve
         // hasta soltar. Si el puntero se va antes, no pasa nada.
         cabeza.addEventListener("pointerdown", (e) => {
-            if (enMovil.matches || e.button > 0 || e.target.closest(".master-ventana-mandos")) {
+            if (enMovil.matches || e.button > 0 || e.target.closest(".master-ventana-mandos, .master-grupo-pestana")) {
                 return;
             }
             alFrente(m);
@@ -8957,7 +9065,10 @@
                 if (m && m.el) {
                     alFrente(m);
                     m.el.scrollIntoView({ block: "nearest" });
-                    m.el.querySelector(".master-ventana-nombre").focus();
+                    if (m.grupo && !m.delante) {
+                        verEnGrupo(m, false);
+                    }
+                    focoDe(m).focus();
                 } else {
                     anadir("iniciativa");
                 }

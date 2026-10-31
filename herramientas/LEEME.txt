@@ -4352,17 +4352,25 @@
   otro») y el del fondo del tablero (color). Las de antes, sin
   colorPestana, llevan el de su tablero (colorDePestana()).
   LOS GRUPOS DE VENTANAS: mantener pulsada la barra de una y soltarla
-  sobre la barra (o las pestañas) de otra las junta en una con
-  pestañas (la de debajo se marca con un reborde a rayas, .es-destino;
-  ventanaBajo()). Con el teclado, en su ✎, «🗂️ agrupar» (con cuál) y
-  «⇱ sacarla del grupo». Cada ventana sigue siendo suya: m.grupo (el
+  sobre la barra de otra las junta en una con pestañas (la de debajo se
+  marca con un reborde a rayas, .es-destino; ventanaBajo()). En un grupo,
+  LAS PESTAÑAS SON LA BARRA (.master-ventana-barra.es-grupo con
+  .master-grupo-pestanas, role="tablist"; el h2 queda para el lector):
+  cada una del color de su ventana; la de delante, con icono y nombre;
+  las demás, sólo el icono (.es-compacta; el nombre, en su aria-label y
+  al pasar por encima). Pulsar otra la trae delante; pulsar la de ahora
+  la pliega; flechas, Inicio y Fin van de una a otra; Mayús + flechas
+  mueven el grupo (moverConTeclas(); con Alt, el tamaño). PARA SEPARAR UNA
+  se mantiene pulsada su pestaña y se saca de la barra (la ventana se
+  pone medio transparente, .es-saliendo): sale donde se suelta
+  (cogerDelGrupo(), sacarDelGrupo(m, sitio)); soltada sobre la barra de
+  otra ventana, se junta con esa. Con el teclado, en su ✎, «🗂️ agrupar»
+  y «⇱ sacarla del grupo». Cada ventana sigue siendo suya: m.grupo (el
   mismo en todas) y m.delante (la que se ve; las demás, hidden) y
-  comparten sitio, tamaño y plegado (colocar(), verEnGrupo(),
-  agrupar(), sacarDelGrupo(); ordenar las trata como una). Debajo de la
-  barra, .master-grupo-pestanas (role="tablist", con las flechas, Inicio
-  y Fin; del color de cada ventana); «⇱» en sus mandos la saca; ✕ quita
-  sólo la de delante (si queda una, sola). Al cargar, los grupos de una
-  sola o sin la de delante se arreglan.
+  comparten sitio, TAMAÑO (estirar una estira todas) y plegado
+  (colocar(), verEnGrupo(), agrupar(); ordenar las trata como una). ✕
+  quita sólo la de delante (si queda una, sola). Al cargar, los grupos
+  de una sola o sin la de delante se arreglan.
   LA BARRA DE ARRIBA, como un navegador: a la izquierda, en un bloque
   pegado al tablero y acabado en diagonal (clip-path; en el móvil sin
   diagonal y en dos filas si no cabe), 🧰 (herramientas: añadir una
@@ -4404,7 +4412,9 @@
   se mueve antes de cogerla, no pasa nada. Con el teclado, Alt + ← →
   (moverPestana()). Las pestañas no deslizan la fila con el dedo
   (touch-action: none): para eso, las flechas ‹ ›.
-  LAS PESTAÑAS caben en un ancho fijo (como mucho 32rem): si hay más, se
+  LAS PESTAÑAS ocupan todo el sitio que deja la barra (en una pantalla
+  ancha caben siete; la ✕ de cada una sólo se ve en la elegida y al
+  pasar por encima, sin ocupar sitio): si hay más, se
   deslizan de lado (sin barra de scroll) con ‹ › (pintarFlechas(); sólo
   salen si no caben) y la elegida siempre se ve. La barra va en una sola
   línea (el buscador se encoge); sólo si no cabe pasa a dos.
