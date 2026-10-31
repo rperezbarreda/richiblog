@@ -3926,3 +3926,74 @@
     border: 2px solid var(--border);
     background: #ffffff;
 }
+
+/* EL SONIDO AMBIENTE: arriba el volumen general y silencio; cada sonido,
+   un botón que se queda pulsado mientras suena y su volumen. */
+.master-ambiente-arriba {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    margin-bottom: 10px;
+}
+
+.master-ambiente-lista {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    margin: 10px 0;
+    padding: 0;
+    list-style: none;
+}
+
+.master-ambiente-fila {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 4px 10px;
+    padding: 2px 4px;
+    border: 2px solid transparent;
+}
+
+.master-ambiente-fila.es-sonando {
+    border-color: var(--yellow);
+}
+
+.master-ambiente-boton {
+    display: inline-flex;
+    flex: 1 1 8.5rem;
+    align-items: center;
+    gap: 8px;
+    min-width: 0;
+    min-height: 38px;
+    padding: 4px 10px;
+    border: 2px solid var(--yellow);
+    background: transparent;
+    color: var(--white);
+    font: inherit;
+    text-align: left;
+    cursor: pointer;
+}
+
+.master-ambiente-boton[aria-pressed="true"] {
+    background: var(--yellow);
+    color: var(--yellow-contrast);
+    font-weight: 700;
+}
+
+.master-ambiente-boton:focus-visible,
+.master-ambiente-volumen:focus-visible {
+    outline: 3px solid var(--yellow);
+    outline-offset: 2px;
+}
+
+.master-ambiente-emoji {
+    font-size: 1.25rem;
+}
+
+.master-ambiente-volumen {
+    flex: 1 1 5rem;
+    min-width: 0;
+    accent-color: var(--yellow);
+}

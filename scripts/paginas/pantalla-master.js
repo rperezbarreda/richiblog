@@ -7754,6 +7754,564 @@
         dentro.append(fila, cuando, barra, area);
     }
 
+    // ---- EL SONIDO AMBIENTE: lluvia, viento, hoguera, mercado… hechos
+    // aquí mismo con Web Audio (ruido filtrado y golpecitos al azar): no
+    // hay archivos de sonido que alojar. Se mezclan (cada uno con su
+    // volumen) y siguen sonando al cambiar de pestaña; se paran al quitar
+    // la ventana. También los propios: un audio del ordenador, en bucle,
+    // guardado en este navegador (IndexedDB, como los documentos). ----
+    const SONIDOS = [["lluvia", "🌧️", "lluvia"], ["tormenta", "⛈️", "tormenta"], ["viento", "💨", "viento"],
+        ["hoguera", "🔥", "hoguera"], ["rio", "🏞️", "río"], ["mar", "🌊", "mar"], ["carro", "🐴", "carro en marcha"],
+        ["mercado", "🛒", "mercado"], ["taberna", "🍺", "taberna"], ["noche", "🦗", "noche (grillos)"],
+        ["bosque", "🐦", "bosque (pájaros)"], ["mazmorra", "🕳️", "mazmorra (goteo)"]];
+    // El motor: uno para toda la página. «activos»: id → {salida, parar}.
+    const AMBIENTE = { ctx: null, general: null, ruido: {}, eco: null, activos: {}, vigila: 0 };
+    const azar = (a, b) => a + Math.random() * (b - a);
+    function motorAudio() {
+        if (!AMBIENTE.ctx) {
+            const C = window.AudioContext || window.webkitAudioContext;
+            const ctx = new C();
+            AMBIENTE.ctx = ctx;
+            AMBIENTE.general = ctx.createGain();
+            AMBIENTE.general.connect(ctx.destination);
+            // Tres ruidos de 3 s: blanco, rosa (más suave) y marrón (grave).
+            const n = ctx.sampleRate * 3;
+            const hacer = (f) => {
+                const b = ctx.createBuffer(1, n, ctx.sampleRate);
+                f(b.getChannelData(0));
+                return b;
+            };
+            AMBIENTE.ruido.blanco = hacer((d) => {
+                for (let i = 0; i < n; i++) {
+                    d[i] = Math.random() * 2 - 1;
+                }
+            });
+            AMBIENTE.ruido.rosa = hacer((d) => {
+                let b0 = 0;
+                let b1 = 0;
+                let b2 = 0;
+                for (let i = 0; i < n; i++) {
+                    const w = Math.random() * 2 - 1;
+                    b0 = 0.99765 * b0 + w * 0.099;
+                    b1 = 0.963 * b1 + w * 0.2965;
+                    b2 = 0.57 * b2 + w * 1.0526;
+                    d[i] = (b0 + b1 + b2 + w * 0.1848) * 0.18;
+                }
+            });
+            AMBIENTE.ruido.marron = hacer((d) => {
+                let u = 0;
+                for (let i = 0; i < n; i++) {
+                    u = (u + 0.02 * (Math.random() * 2 - 1)) / 1.02;
+                    d[i] = u * 3.5;
+                }
+            });
+            // Un eco de cueva (para la mazmorra): ruido que se apaga.
+            const largo = ctx.sampleRate * 2.5;
+            const ir = ctx.createBuffer(2, largo, ctx.sampleRate);
+            for (let c = 0; c < 2; c++) {
+                const d = ir.getChannelData(c);
+                for (let i = 0; i < largo; i++) {
+                    d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / largo, 3);
+                }
+            }
+            AMBIENTE.eco = ir;
+        }
+        if (AMBIENTE.ctx.state === "suspended") {
+            AMBIENTE.ctx.resume();
+        }
+        return AMBIENTE;
+    }
+    // Las piezas: un ruido en bucle, un filtro, un golpecito y un tono.
+    const ruidoSin = (A, tipo) => {
+        const s = A.ctx.createBufferSource();
+        s.buffer = A.ruido[tipo];
+        s.loop = true;
+        s.start(0, Math.random() * 2.5);
+        return s;
+    };
+    const filtro = (A, tipo, f, q) => {
+        const x = A.ctx.createBiquadFilter();
+        x.type = tipo;
+        x.frequency.value = f;
+        if (q) {
+            x.Q.value = q;
+        }
+        return x;
+    };
+    const volumen = (A, v) => {
+        const g = A.ctx.createGain();
+        g.gain.value = v;
+        return g;
+    };
+    const cadena = (...nodos) => {
+        for (let i = 0; i < nodos.length - 1; i++) {
+            nodos[i].connect(nodos[i + 1]);
+        }
+        return nodos[0];
+    };
+    // Una onda lenta (LFO) que mueve un parámetro: «base ± hondo».
+    const onda = (A, param, hz, hondo) => {
+        const o = A.ctx.createOscillator();
+        o.frequency.value = hz;
+        const g = volumen(A, hondo);
+        o.connect(g);
+        g.connect(param);
+        o.start();
+        return o;
+    };
+    function golpe(A, salida, t, { f = 2000, q = 1, dur = 0.05, vol = 0.3, tipo = "bandpass", ruido = "blanco" }) {
+        const s = A.ctx.createBufferSource();
+        s.buffer = A.ruido[ruido];
+        const g = volumen(A, 0);
+        g.gain.setValueAtTime(vol, t);
+        g.gain.exponentialRampToValueAtTime(0.0008, t + dur);
+        cadena(s, filtro(A, tipo, f, q), g, salida);
+        s.start(t, Math.random() * 2);
+        s.stop(t + dur + 0.05);
+    }
+    function tono(A, salida, t, { f = 1000, fin = 0, dur = 0.1, vol = 0.1, forma = "sine", ataque = 0.005 }) {
+        const o = A.ctx.createOscillator();
+        o.type = forma;
+        o.frequency.setValueAtTime(f, t);
+        if (fin) {
+            o.frequency.exponentialRampToValueAtTime(fin, t + dur);
+        }
+        const g = volumen(A, 0);
+        g.gain.setValueAtTime(0.0001, t);
+        g.gain.exponentialRampToValueAtTime(vol, t + ataque);
+        g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+        cadena(o, g, salida);
+        o.start(t);
+        o.stop(t + dur + 0.05);
+    }
+    // Algo que pasa de vez en cuando (entre «min» y «max» segundos).
+    function deVezEnCuando(A, min, max, hacer) {
+        let vivo = true;
+        let reloj = 0;
+        const otra = () => {
+            if (!vivo) {
+                return;
+            }
+            hacer(A.ctx.currentTime + 0.05);
+            reloj = setTimeout(otra, azar(min, max) * 1000);
+        };
+        reloj = setTimeout(otra, azar(0, max) * 1000);
+        return () => {
+            vivo = false;
+            clearTimeout(reloj);
+        };
+    }
+    // CADA SONIDO: monta lo suyo hacia «salida» y devuelve con qué pararlo.
+    const RECETAS = {
+        lluvia(A, salida, fuerte) {
+            const base = ruidoSin(A, "rosa");
+            cadena(base, filtro(A, "highpass", 500), filtro(A, "lowpass", 7000), volumen(A, fuerte ? 0.55 : 0.35), salida);
+            const gotas = deVezEnCuando(A, 0.02, fuerte ? 0.05 : 0.09, (t) => golpe(A, salida, t,
+                { f: azar(2500, 6500), q: 4, dur: azar(0.015, 0.05), vol: azar(0.04, 0.22) }));
+            return [base, gotas];
+        },
+        tormenta(A, salida) {
+            const lluvia = RECETAS.lluvia(A, salida, true);
+            const truenos = deVezEnCuando(A, 12, 35, (t) => {
+                const s = A.ctx.createBufferSource();
+                s.buffer = A.ruido.marron;
+                const g = volumen(A, 0);
+                const sube = azar(0.1, 0.5);
+                g.gain.setValueAtTime(0.0001, t);
+                g.gain.exponentialRampToValueAtTime(azar(0.8, 1.4), t + sube);
+                g.gain.exponentialRampToValueAtTime(0.0001, t + sube + azar(3, 6));
+                cadena(s, filtro(A, "lowpass", azar(90, 180)), g, salida);
+                s.start(t, Math.random());
+                s.stop(t + 7);
+                golpe(A, salida, t, { f: 600, tipo: "lowpass", dur: 0.4, vol: 0.5 });
+            });
+            return lluvia.concat([truenos]);
+        },
+        viento(A, salida) {
+            const b = ruidoSin(A, "marron");
+            const f = filtro(A, "bandpass", 500, 0.8);
+            const g = volumen(A, 0.5);
+            cadena(b, f, g, salida);
+            const o1 = onda(A, f.frequency, 0.07, 320);
+            const o2 = onda(A, g.gain, 0.13, 0.25);
+            const r = ruidoSin(A, "rosa");
+            const f2 = filtro(A, "bandpass", 1400, 3);
+            cadena(r, f2, volumen(A, 0.06), salida);
+            const o3 = onda(A, f2.frequency, 0.05, 600);
+            return [b, r, o1, o2, o3];
+        },
+        hoguera(A, salida, suave) {
+            const b = ruidoSin(A, "marron");
+            cadena(b, filtro(A, "lowpass", 420), volumen(A, suave ? 0.12 : 0.28), salida);
+            const chispas = deVezEnCuando(A, 0.03, suave ? 0.4 : 0.22, (t) => golpe(A, salida, t,
+                { f: azar(1800, 4000), tipo: "highpass", dur: azar(0.003, 0.012), vol: azar(0.08, suave ? 0.25 : 0.55) }));
+            const pops = deVezEnCuando(A, 2, 6, (t) => golpe(A, salida, t, { f: azar(700, 1200), q: 2, dur: 0.06, vol: suave ? 0.2 : 0.45 }));
+            return [b, chispas, pops];
+        },
+        rio(A, salida) {
+            const r = ruidoSin(A, "rosa");
+            cadena(r, filtro(A, "bandpass", 1100, 0.6), volumen(A, 0.4), salida);
+            const w = ruidoSin(A, "blanco");
+            const g = volumen(A, 0.05);
+            cadena(w, filtro(A, "bandpass", 3500, 2), g, salida);
+            const o = onda(A, g.gain, 5.5, 0.03);
+            const burbujas = deVezEnCuando(A, 0.1, 0.5, (t) => tono(A, salida, t, { f: azar(500, 1100), fin: azar(1300, 2200), dur: 0.05,
+                vol: azar(0.01, 0.04) }));
+            return [r, w, o, burbujas];
+        },
+        mar(A, salida) {
+            const b = ruidoSin(A, "marron");
+            const g = volumen(A, 0.35);
+            cadena(b, filtro(A, "lowpass", 900), g, salida);
+            const o = onda(A, g.gain, 0.1, 0.28);
+            const e = ruidoSin(A, "rosa");
+            const g2 = volumen(A, 0.06);
+            cadena(e, filtro(A, "highpass", 2000), g2, salida);
+            const o2 = onda(A, g2.gain, 0.1, 0.05);
+            return [b, e, o, o2];
+        },
+        carro(A, salida) {
+            const b = ruidoSin(A, "marron");
+            const g = volumen(A, 0.22);
+            cadena(b, filtro(A, "lowpass", 220), g, salida);
+            const o = onda(A, g.gain, 3, 0.06);
+            // Los cascos: clop-clop, y las ruedas que crujen.
+            const cascos = deVezEnCuando(A, 0.42, 0.52, (t) => {
+                golpe(A, salida, t, { f: azar(700, 950), q: 3, dur: 0.06, vol: 0.45 });
+                golpe(A, salida, t + azar(0.11, 0.14), { f: azar(550, 750), q: 3, dur: 0.06, vol: 0.35 });
+            });
+            const cruje = deVezEnCuando(A, 1.1, 1.8, (t) => {
+                const f = filtro(A, "bandpass", azar(700, 1100), 6);
+                f.connect(salida);
+                tono(A, f, t, { f: azar(150, 220), fin: azar(100, 140), dur: azar(0.2, 0.35), vol: 0.25, forma: "sawtooth", ataque: 0.05 });
+            });
+            return [b, o, cascos, cruje];
+        },
+        mercado(A, salida, taberna) {
+            // El murmullo: cuatro bandas de voz que suben y bajan a ritmo de
+            // sílabas (y el ritmo cambia de vez en cuando).
+            const bandas = (taberna ? [260, 420, 700, 1000] : [350, 600, 900, 1400]).map((fr) => {
+                const r = ruidoSin(A, "rosa");
+                const g = volumen(A, 0.22);
+                cadena(r, filtro(A, "bandpass", fr, 3), g, salida);
+                const o = onda(A, g.gain, azar(2.5, 5), 0.18);
+                return [r, o];
+            });
+            const cambia = deVezEnCuando(A, 1.5, 3, (t) => bandas.forEach(([, o]) => o.frequency.setTargetAtTime(azar(2, 5.5), t, 0.5)));
+            const cosas = deVezEnCuando(A, taberna ? 0.8 : 0.6, taberna ? 3.5 : 3, (t) => {
+                const f = taberna ? azar(1600, 2600) : azar(2500, 4200);
+                tono(A, salida, t, { f, dur: 0.35, vol: 0.05 });
+                tono(A, salida, t, { f: f * 2.7, dur: 0.2, vol: 0.02 });
+            });
+            const sale = [cambia, cosas];
+            bandas.forEach(([r, o]) => sale.push(r, o));
+            return sale;
+        },
+        taberna(A, salida) {
+            return RECETAS.mercado(A, salida, true).concat(RECETAS.hoguera(A, salida, true));
+        },
+        noche(A, salida) {
+            const b = ruidoSin(A, "marron");
+            cadena(b, filtro(A, "lowpass", 300), volumen(A, 0.06), salida);
+            const grillos = deVezEnCuando(A, 0.3, 0.9, (t) => {
+                const f = azar(4200, 4800);
+                for (let i = 0; i < 3; i++) {
+                    tono(A, salida, t + i * 0.06, { f, dur: 0.04, vol: 0.08 });
+                }
+            });
+            const otro = deVezEnCuando(A, 0.5, 1.4, (t) => {
+                const f = azar(3600, 4100);
+                for (let i = 0; i < 4; i++) {
+                    tono(A, salida, t + i * 0.05, { f, dur: 0.03, vol: 0.05 });
+                }
+            });
+            return [b, grillos, otro];
+        },
+        bosque(A, salida) {
+            const r = ruidoSin(A, "rosa");
+            const g = volumen(A, 0.05);
+            cadena(r, filtro(A, "bandpass", 600, 0.7), g, salida);
+            const o = onda(A, g.gain, 0.1, 0.03);
+            const pajaros = deVezEnCuando(A, 0.8, 4, (t) => {
+                const notas = Math.floor(azar(2, 6));
+                const base = azar(2200, 4500);
+                for (let i = 0; i < notas; i++) {
+                    tono(A, salida, t + i * azar(0.09, 0.16), { f: base * azar(0.85, 1.2), fin: base * azar(0.7, 1.4), dur: azar(0.06, 0.14),
+                        vol: azar(0.06, 0.13) });
+                }
+            });
+            return [r, o, pajaros];
+        },
+        mazmorra(A, salida) {
+            // Todo con eco de cueva.
+            const eco = A.ctx.createConvolver();
+            eco.buffer = A.eco;
+            const conEco = volumen(A, 0.9);
+            cadena(eco, conEco, salida);
+            const z1 = A.ctx.createOscillator();
+            const z2 = A.ctx.createOscillator();
+            z1.frequency.value = 55;
+            z2.frequency.value = 55.7;
+            const zg = volumen(A, 0.06);
+            z1.connect(zg);
+            z2.connect(zg);
+            zg.connect(salida);
+            z1.start();
+            z2.start();
+            const b = ruidoSin(A, "marron");
+            cadena(b, filtro(A, "lowpass", 150), volumen(A, 0.12), salida);
+            const gotas = deVezEnCuando(A, 1.2, 4.5, (t) => {
+                const f = azar(900, 1700);
+                tono(A, eco, t, { f, fin: f * 0.55, dur: 0.09, vol: 0.3 });
+                tono(A, salida, t, { f, fin: f * 0.55, dur: 0.07, vol: 0.08 });
+            });
+            return [z1, z2, b, gotas];
+        },
+    };
+    // Encender uno: su salida (con su volumen) hacia la general, subiendo
+    // poco a poco.
+    function sonar(id, vol, montar) {
+        const A = motorAudio();
+        if (AMBIENTE.activos[id]) {
+            return;
+        }
+        const salida = volumen(A, 0);
+        salida.connect(A.general);
+        salida.gain.setTargetAtTime(vol, A.ctx.currentTime, 0.4);
+        const piezas = montar(A, salida) || [];
+        AMBIENTE.activos[id] = {
+            salida,
+            parar() {
+                salida.gain.setTargetAtTime(0, A.ctx.currentTime, 0.25);
+                setTimeout(() => {
+                    piezas.forEach((p) => {
+                        if (typeof p === "function") {
+                            p();
+                        } else {
+                            try {
+                                p.stop();
+                            } catch (e) {
+                                // Ya parado.
+                            }
+                        }
+                    });
+                    salida.disconnect();
+                }, 1200);
+            },
+        };
+        vigilarAmbiente();
+    }
+    function callar(id) {
+        const x = AMBIENTE.activos[id];
+        if (x) {
+            x.parar();
+            delete AMBIENTE.activos[id];
+        }
+    }
+    const callarTodo = () => Object.keys(AMBIENTE.activos).forEach(callar);
+    // Si ya no queda ninguna ventana de sonido en la campaña, silencio.
+    function vigilarAmbiente() {
+        if (AMBIENTE.vigila) {
+            return;
+        }
+        AMBIENTE.vigila = setInterval(() => {
+            const hay = todo.perfiles.some((pf) => pf.modulos.some((x) => x.tipo === "ambiente"));
+            if (!hay || !Object.keys(AMBIENTE.activos).length) {
+                if (!hay) {
+                    callarTodo();
+                }
+                clearInterval(AMBIENTE.vigila);
+                AMBIENTE.vigila = 0;
+            }
+        }, 1500);
+    }
+
+    function montarAmbiente(dentro, m) {
+        m.datos = m.datos || {};
+        const d = m.datos;
+        d.vol = d.vol || {};
+        d.propios = Array.isArray(d.propios) ? d.propios : [];
+        if (!(window.AudioContext || window.webkitAudioContext)) {
+            dentro.appendChild(crear("p", "oc-vacio", "Este navegador no puede hacer sonidos."));
+            return;
+        }
+        // EL VOLUMEN GENERAL y parar todo.
+        const arriba = crear("div", "master-ambiente-arriba");
+        const etG = crear("label", "master-dibujo-deslizador");
+        const general = crear("input");
+        general.type = "range";
+        general.min = 0;
+        general.max = 100;
+        general.value = d.general === undefined ? 80 : d.general;
+        general.setAttribute("aria-label", "Volumen general");
+        general.setAttribute("aria-valuetext", general.value + " %");
+        etG.append(crear("span", "oc-dados-etiqueta", "🔊 general"), general);
+        const ponerGeneral = () => {
+            if (AMBIENTE.general) {
+                AMBIENTE.general.gain.setTargetAtTime(general.value / 100, AMBIENTE.ctx.currentTime, 0.1);
+            }
+        };
+        general.addEventListener("input", () => {
+            d.general = Number(general.value);
+            general.setAttribute("aria-valuetext", general.value + " %");
+            ponerGeneral();
+            guardar();
+        });
+        const parar = botonDe("oc-vida-accion", "⏹ silencio", () => {
+            callarTodo();
+            d.sonando = [];
+            guardar();
+            pintar();
+            avisar("Silencio.");
+        }, "Parar todos los sonidos");
+        arriba.append(etG, parar);
+        // Lo que sonaba antes de recargar (el navegador no deja que suene
+        // solo: hay que pulsar).
+        const volver = botonDe("oc-vida-accion es-principal", "", () => {
+            (d.sonando || []).forEach((id) => encender(id));
+            volver.hidden = true;
+            pintar();
+        });
+        const lista = crear("ul", "master-ambiente-lista");
+        lista.setAttribute("aria-label", "Sonidos");
+        const filas = [];
+        const datosDe = (id) => {
+            const p = d.propios.find((x) => "propio-" + x.id === id);
+            return p ? ["🎵", p.nombre] : (SONIDOS.find((s) => s[0] === id) || []).slice(1);
+        };
+        function encender(id) {
+            const vol = (d.vol[id] === undefined ? 70 : d.vol[id]) / 100;
+            motorAudio();
+            ponerGeneral();
+            const p = d.propios.find((x) => "propio-" + x.id === id);
+            if (p) {
+                return archivoLeer(p.archivo).then((blob) => (blob ? blob.arrayBuffer() : null)).then((buf) => (buf
+                    ? AMBIENTE.ctx.decodeAudioData(buf) : null)).then((audio) => {
+                    if (!audio) {
+                        avisar("Ese sonido ya no está en este navegador.");
+                        return;
+                    }
+                    sonar(id, vol, (A, salida) => {
+                        const s = A.ctx.createBufferSource();
+                        s.buffer = audio;
+                        s.loop = true;
+                        s.connect(salida);
+                        s.start();
+                        return [s];
+                    });
+                    d.sonando = Array.from(new Set((d.sonando || []).concat(id)));
+                    guardar();
+                    pintar();
+                }).catch(() => avisar("No se ha podido poner ese sonido."));
+            }
+            if (RECETAS[id]) {
+                sonar(id, vol, (A, salida) => RECETAS[id](A, salida));
+                d.sonando = Array.from(new Set((d.sonando || []).concat(id)));
+                guardar();
+            }
+            return Promise.resolve();
+        }
+        function fila(id) {
+            const [emoji, nombre] = datosDe(id);
+            const li = crear("li", "master-ambiente-fila");
+            const b = botonDe("master-ambiente-boton", "", () => {
+                if (AMBIENTE.activos[id]) {
+                    callar(id);
+                    d.sonando = (d.sonando || []).filter((x) => x !== id);
+                    guardar();
+                    avisar("Parado: " + nombre + ".");
+                } else {
+                    encender(id);
+                    avisar("Suena: " + nombre + ".");
+                }
+                pintar();
+            });
+            const em = crear("span", "master-ambiente-emoji", emoji);
+            em.setAttribute("aria-hidden", "true");
+            b.append(em, crear("span", "", nombre));
+            const r = crear("input", "master-ambiente-volumen");
+            r.type = "range";
+            r.min = 0;
+            r.max = 100;
+            r.value = d.vol[id] === undefined ? 70 : d.vol[id];
+            r.setAttribute("aria-label", "Volumen de " + nombre);
+            r.setAttribute("aria-valuetext", r.value + " %");
+            r.addEventListener("input", () => {
+                d.vol[id] = Number(r.value);
+                r.setAttribute("aria-valuetext", r.value + " %");
+                const x = AMBIENTE.activos[id];
+                if (x) {
+                    x.salida.gain.setTargetAtTime(r.value / 100, AMBIENTE.ctx.currentTime, 0.1);
+                }
+                guardar();
+            });
+            li.append(b, r);
+            if (id.indexOf("propio-") === 0) {
+                const p = d.propios.find((x) => "propio-" + x.id === id);
+                let seguro = false;
+                const quitar = botonDe("master-docs-mando", "✕", () => {
+                    if (!seguro) {
+                        seguro = true;
+                        quitar.classList.add("es-seguro");
+                        avisar("Pulsa otra vez para quitar " + nombre + ".");
+                        return;
+                    }
+                    callar(id);
+                    archivoBorrar(p.archivo);
+                    d.propios = d.propios.filter((x) => x !== p);
+                    guardar();
+                    pintarFilas();
+                    avisar("Quitado: " + nombre + ".");
+                    otro.focus();
+                }, "Quitar el sonido " + nombre);
+                li.appendChild(quitar);
+            }
+            filas.push({ id, b, li });
+            return li;
+        }
+        function pintarFilas() {
+            filas.length = 0;
+            lista.replaceChildren(...SONIDOS.map(([id]) => fila(id)), ...d.propios.map((p) => fila("propio-" + p.id)));
+            pintar();
+        }
+        function pintar() {
+            filas.forEach(({ id, b, li }) => {
+                const suena = !!AMBIENTE.activos[id];
+                b.setAttribute("aria-pressed", suena ? "true" : "false");
+                li.classList.toggle("es-sonando", suena);
+            });
+            const antes = (d.sonando || []).filter((id) => !AMBIENTE.activos[id] && datosDe(id).length);
+            volver.textContent = "▶ volver a poner lo de antes (" + antes.map((id) => datosDe(id)[1]).join(", ") + ")";
+            volver.hidden = !antes.length || Object.keys(AMBIENTE.activos).length > 0;
+        }
+        // LOS PROPIOS: un audio del ordenador, en bucle.
+        const subir = crear("input");
+        subir.type = "file";
+        subir.accept = "audio/*";
+        subir.hidden = true;
+        const otro = botonDe("oc-vida-accion", "＋ 🎵 tu sonido", () => subir.click(), "Añadir un sonido tuyo (un audio, en bucle)");
+        otro.title = "Un audio de tu ordenador, en bucle (se queda sólo en este navegador)";
+        subir.addEventListener("change", () => {
+            const f = subir.files && subir.files[0];
+            subir.value = "";
+            if (!f || !/^audio\//.test(f.type) || f.size > MAX_ARCHIVO) {
+                avisar("Sólo audios de hasta 50 MB.");
+                return;
+            }
+            const id = idDoc("a");
+            archivoGuardar(id, f).then(() => {
+                d.propios.push({ id, archivo: id, nombre: f.name.replace(/\.[^.]+$/, "").slice(0, 40) || "sonido" });
+                guardar();
+                pintarFilas();
+                avisar("Añadido: " + f.name + ". Se queda sólo en este navegador (⚙ → exportar para no perderlo).");
+            }).catch(() => avisar("No se ha podido guardar el sonido."));
+        });
+        const nota = crear("p", "oc-hoja-nota", "Los sonidos se hacen aquí mismo (no se descarga nada). Se mezclan y siguen sonando"
+            + " al cambiar de pestaña; al quitar esta ventana, se paran. Los tuyos se quedan sólo en este navegador.");
+        dentro.append(arriba, volver, lista, otro, subir, nota);
+        pintarFilas();
+    }
+
     const MODULOS = {
         iniciativa: { nombre: "iniciativa", emoji: "⏱️", grupo: "combate", unico: true, w: 420, h: 520,
             desc: "El orden de turnos, con rondas, PG y marcas.",
@@ -7796,6 +8354,8 @@
             desc: "Bendecir 1 minuto, Armadura de mago 8 horas…: se descuentan solos.", montar: montarEfectos },
         taberna: { nombre: "negocios", emoji: "🏪", grupo: "mundo", w: 500, h: 760,
             desc: "Tabernas y posadas, tiendas, templos, establos…: con lo que venden, sus precios y un gancho.", montar: montarNegocio },
+        ambiente: { nombre: "sonido ambiente", emoji: "🎧", grupo: "mesa", unico: true, w: 440, h: 640,
+            desc: "Lluvia, viento, hoguera, mercado, carro…: se mezclan, en bucle (y tus propios audios).", montar: montarAmbiente },
         relojes: { nombre: "relojes", emoji: "⏳", grupo: "mesa", w: 440, h: 480,
             desc: "Relojes de progreso: amenazas que avanzan, cuentas atrás…", montar: montarRelojes },
         idiomas: { nombre: "notas en otros idiomas", emoji: "🪶", grupo: "mundo", w: 480, h: 680,

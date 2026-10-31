@@ -4453,6 +4453,20 @@
   y, tras una raya, lo de guardar (🖼️ poner una imagen, ⬇ descargar y
   📁 guardar en documentos). Arriba del lienzo, sólo las opciones de la
   herramienta.
+  🎧 SONIDO AMBIENTE (en «la mesa», sólo una por pestaña): lluvia,
+  tormenta, viento, hoguera, río, mar, carro en marcha, mercado, taberna,
+  noche (grillos), bosque (pájaros) y mazmorra (goteo con eco). No hay
+  archivos de sonido: se hacen con Web Audio (RECETAS: ruido blanco,
+  rosa y marrón en bucle con filtros y ondas lentas, y golpecitos o tonos
+  de vez en cuando: deVezEnCuando()). Un motor para toda la página
+  (AMBIENTE; sonar(), callar(), callarTodo()): cada sonido se enciende y
+  se apaga con su botón (aria-pressed), tiene su volumen y hay un volumen
+  general y «⏹ silencio». Siguen sonando al cambiar de pestaña y se paran
+  al quitar la última ventana de sonido de la campaña (vigilarAmbiente()).
+  Al recargar no suenan solos (el navegador no deja): «▶ volver a poner
+  lo de antes». «＋ 🎵 tu sonido»: un audio del ordenador, en bucle, en
+  IndexedDB como los documentos (decodeAudioData: no hace falta
+  media-src), sólo en este navegador.
   LOS DADOS (la ventana): cada dado con su dibujo (el de la bandeja:
   window.ocDados.silueta, de personajes.js) y su nombre debajo.
   LAS CAMPAÑAS: configuraciones separadas (dos campañas, dos partys que
