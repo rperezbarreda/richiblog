@@ -7053,6 +7053,66 @@
         return salen;
     }
 
+    // ---- LOS ARCHIVOS de los documentos (imágenes y PDF subidos): en
+    // IndexedDB («richi-master-archivos», almacén «archivos»: id → Blob),
+    // que cabe mucho más que lo demás. El documento sólo lleva su id
+    // ({tipo: "archivo", archivo, mime, tamano}). Los enlaces (una imagen
+    // o un PDF de otra web) son {tipo: "enlace", url, clase}. ----
+    const BASE_ARCHIVOS = "richi-master-archivos";
+    const MAX_ARCHIVO = 50 * 1024 * 1024;
+    function baseArchivos() {
+        return new Promise((hecho, fallo) => {
+            if (!window.indexedDB) {
+                fallo(new Error("sin IndexedDB"));
+                return;
+            }
+            const pet = indexedDB.open(BASE_ARCHIVOS, 1);
+            pet.onupgradeneeded = () => pet.result.createObjectStore("archivos");
+            pet.onsuccess = () => hecho(pet.result);
+            pet.onerror = () => fallo(pet.error);
+        });
+    }
+    // Una operación en el almacén: «hacer(almacen)» devuelve la petición.
+    const enArchivos = (modo, hacer) => baseArchivos().then((db) => new Promise((hecho, fallo) => {
+        const tx = db.transaction("archivos", modo);
+        const pet = hacer(tx.objectStore("archivos"));
+        tx.oncomplete = () => hecho(pet && pet.result);
+        tx.onerror = () => fallo(tx.error);
+        tx.onabort = () => fallo(tx.error);
+    }));
+    const archivoGuardar = (id, blob) => enArchivos("readwrite", (a) => a.put(blob, id));
+    const archivoLeer = (id) => enArchivos("readonly", (a) => a.get(id));
+    const archivoBorrar = (id) => enArchivos("readwrite", (a) => a.delete(id)).catch(() => {});
+    const todosLosArchivos = () => enArchivos("readonly", (a) => a.getAllKeys()).then((ids) =>
+        Promise.all((ids || []).map((id) => archivoLeer(id).then((blob) => [id, blob]))));
+    const tamanoBonito = (b) => (b > 1048576 ? (b / 1048576).toFixed(1).replace(".", ",") + " MB" : Math.max(1, Math.round(b / 1024)) + " KB");
+    // Un Blob a «data:…» (para exportar) y de vuelta (sin fetch: la página
+    // no deja pedir direcciones data:).
+    const blobADatos = (blob) => new Promise((hecho) => {
+        const r = new FileReader();
+        r.onload = () => hecho(r.result);
+        r.readAsDataURL(blob);
+    });
+    function datosABlob(datos) {
+        const m = /^data:([^;,]+)(;base64)?,(.*)$/.exec(datos || "");
+        if (!m || !m[2]) {
+            return null;
+        }
+        const bin = atob(m[3]);
+        const bytes = new Uint8Array(bin.length);
+        for (let i = 0; i < bin.length; i++) {
+            bytes[i] = bin.charCodeAt(i);
+        }
+        return new Blob([bytes], { type: m[1] });
+    }
+    // Una dirección para un enlace: https, o un blob: del propio
+    // navegador (los archivos subidos); si no, a ninguna parte.
+    function direccionSegura(h) {
+        return /^blob:https?:\/\/[^\s"'<>]+$/.test(String(h || "")) ? h : urlImagenSegura(h) || "#";
+    }
+    const iconoDoc = (n) => (n.tipo === "dibujo" ? "🖼️" : n.tipo === "archivo" ? (/pdf/.test(n.mime || "") ? "📕" : "🏞️")
+        : n.tipo === "enlace" ? (n.clase === "pdf" ? "🔗📕" : "🔗🏞️") : "📄");
+
     function abrirDocumento(id) {
         const n = docsDe().notas.find((x) => x.id === id);
         const esDibujo = n && n.tipo === "dibujo";
@@ -7201,8 +7261,98 @@
             avisarDocs();
             abrirDocumento(n.id);
         });
+        // SUBIR imágenes o PDF (uno o varios), a la carpeta de ahora.
+        const subir = crear("input");
+        subir.type = "file";
+        subir.accept = "image/*,application/pdf";
+        subir.multiple = true;
+        subir.hidden = true;
+        const nuevoArchivo = botonDe("oc-vida-accion", "＋ 📎 archivo", () => subir.click(), "Subir una imagen o un PDF");
+        nuevoArchivo.title = "Una imagen o un PDF de tu ordenador (se guarda en este navegador)";
+        subir.addEventListener("change", () => {
+            const lista = Array.from(subir.files || []);
+            subir.value = "";
+            const valen = lista.filter((f) => /^image\/|^application\/pdf$/.test(f.type) && f.size <= MAX_ARCHIVO);
+            if (valen.length < lista.length) {
+                avisar("Sólo imágenes y PDF de hasta 50 MB.");
+            }
+            Promise.all(valen.map((f) => {
+                const id = idDoc("a");
+                return archivoGuardar(id, f).then(() => {
+                    docsDe().notas.push({ id: idDoc("n"), tipo: "archivo", titulo: f.name.replace(/\.[^.]+$/, "") || f.name, carpeta: aqui,
+                        archivo: id, mime: f.type, tamano: f.size, cambiada: Date.now() });
+                    return f.name;
+                });
+            })).then((nombres) => {
+                if (!nombres.length) {
+                    return;
+                }
+                if (aqui && d.abiertas.indexOf(aqui) < 0) {
+                    d.abiertas.push(aqui);
+                }
+                guardar();
+                avisarDocs();
+                avisar("Subido a 📁 " + rutaDe(aqui) + ": " + nombres.join(", ") + ".");
+            }).catch(() => avisar("No se ha podido guardar el archivo (este navegador no deja, o no cabe)."));
+        });
+        // UN ENLACE: una imagen o un PDF de otra web (https).
+        const nuevoEnlace = botonDe("oc-vida-accion", "＋ 🔗 enlace", () => {
+            const cuerpo = crear("form", "master-personalizar");
+            const etU = crear("label", "oc-dados-etiqueta", "dirección (https://…)");
+            const url = crear("input", "oc-dados-texto");
+            url.id = "master-doc-url";
+            url.type = "url";
+            url.placeholder = "https://…/mapa.jpg";
+            url.autocomplete = "off";
+            etU.htmlFor = url.id;
+            const etN = crear("label", "oc-dados-etiqueta", "nombre");
+            const nombre = crear("input", "oc-dados-texto");
+            nombre.id = "master-doc-url-nombre";
+            nombre.maxLength = 80;
+            nombre.autocomplete = "off";
+            etN.htmlFor = nombre.id;
+            const clase = elegirDe("master-doc-url-clase", "qué es", [["imagen", "🏞️ una imagen"], ["pdf", "📕 un PDF"]], "imagen");
+            url.addEventListener("input", () => {
+                if (/\.pdf([?#]|$)/i.test(url.value)) {
+                    clase.elegir.value = "pdf";
+                }
+                if (!nombre.dataset.tocado) {
+                    let n = url.value.split(/[?#]/)[0].split("/").pop() || "";
+                    try {
+                        n = decodeURIComponent(n);
+                    } catch (e) {
+                        // Un % suelto: tal cual.
+                    }
+                    nombre.value = n.replace(/\.[^.]+$/, "").slice(0, 80);
+                }
+            });
+            nombre.addEventListener("input", () => {
+                nombre.dataset.tocado = "si";
+            });
+            const listo = crear("button", "oc-vida-accion es-principal", "＋ añadir");
+            listo.type = "submit";
+            cuerpo.append(etU, url, etN, nombre, clase, listo);
+            cuerpo.addEventListener("submit", (e) => {
+                e.preventDefault();
+                const u = urlImagenSegura(url.value);
+                if (!u) {
+                    avisar("La dirección tiene que empezar por https://.");
+                    url.focus();
+                    return;
+                }
+                docsDe().notas.push({ id: idDoc("n"), tipo: "enlace", titulo: nombre.value.trim() || u, carpeta: aqui, url: u,
+                    clase: clase.elegir.value, cambiada: Date.now() });
+                cerrar();
+                guardar();
+                avisarDocs();
+                avisar("Enlace añadido a 📁 " + rutaDe(aqui) + ".");
+            });
+            const cerrar = window.ocVentana.abrir({ titulo: "enlace a una imagen o un PDF", cuerpo, vuelta: nuevoEnlace, foco: url });
+        }, "Añadir un enlace a una imagen o un PDF de otra web");
+        nuevoEnlace.setAttribute("aria-haspopup", "dialog");
         const botones = crear("div", "master-docs-botones");
-        botones.append(nuevaNota, nuevaCarpeta);
+        botones.append(nuevaNota, nuevaCarpeta, nuevoArchivo, nuevoEnlace, subir);
+
         const arbol = crear("div", "master-docs-arbol");
         const cuantos = crear("p", "visually-hidden");
         cuantos.setAttribute("role", "status");
@@ -7231,11 +7381,14 @@
         const filaNota = (n, conRuta, trozo) => {
             const li = crear("li", "master-docs-fila es-nota");
             const abrir = botonDe("master-docs-abrir", "", () => abrirDocumento(n.id), "Abrir la nota " + n.titulo);
-            const em = crear("span", "master-docs-icono", n.tipo === "dibujo" ? "🖼️" : "📄");
+            const em = crear("span", "master-docs-icono", iconoDoc(n));
             em.setAttribute("aria-hidden", "true");
             abrir.append(em, crear("span", "master-docs-nombre", n.titulo));
             if (n.tipo === "dibujo") {
                 abrir.setAttribute("aria-label", "Abrir el dibujo " + n.titulo);
+            } else if (n.tipo === "archivo" || n.tipo === "enlace") {
+                abrir.setAttribute("aria-label", "Abrir " + (n.tipo === "enlace" ? "el enlace " : (/pdf/.test(n.mime || "")
+                    ? "el PDF " : "la imagen ")) + n.titulo);
             }
             if (conRuta) {
                 abrir.appendChild(crear("span", "master-docs-ruta", rutaDe(n.carpeta)));
@@ -7245,6 +7398,9 @@
             }
             const quitar = borrador("Borrar la nota " + n.titulo, () => {
                 docsDe().notas = docsDe().notas.filter((x) => x !== n);
+                if (n.tipo === "archivo" && n.archivo) {
+                    archivoBorrar(n.archivo);
+                }
                 // Sus ventanas, fuera.
                 estado.modulos.filter((x) => x.tipo === "documento" && x.datos && x.datos.nota === n.id).forEach((x) => {
                     x.datos.nota = null;
@@ -7358,7 +7514,7 @@
             const docs = docsDe();
             if (!q) {
                 arbol.replaceChildren(docs.carpetas.length || docs.notas.length ? lista(null, 0)
-                    : crear("p", "oc-vacio", "Todavía no hay nada: crea una nota o una carpeta."));
+                    : crear("p", "oc-vacio", "Todavía no hay nada: crea una nota o una carpeta, o sube una imagen o un PDF."));
                 cuantos.textContent = "";
             } else {
                 const ul = crear("ul", "master-docs-lista");
@@ -7389,7 +7545,8 @@
                 });
                 docs.notas.forEach((x) => {
                     const enNombre = llano(x.titulo).includes(q);
-                    const trozo = trozoDe(x.tipo === "dibujo" ? (x.datos && x.datos.desc) || "" : textoDeHtml(x.html), q);
+                    const trozo = trozoDe(x.tipo === "dibujo" ? (x.datos && x.datos.desc) || "" : x.tipo === "enlace" ? x.url || ""
+                        : x.tipo === "archivo" ? "" : textoDeHtml(x.html), q);
                     if (enNombre || trozo) {
                         n += 1;
                         ul.appendChild(filaNota(x, true, trozo));
@@ -7415,11 +7572,86 @@
         mientrasEste(dentro, "master:documentos", () => pintar());
     }
 
+    // Lo de dentro de un archivo o un enlace: la imagen (con su texto
+    // alternativo, el nombre), o el PDF en un marco (los subidos: el visor
+    // del navegador) y, siempre, abrirlo en otra pestaña y descargarlo.
+    function montarArchivoDoc(n) {
+        const caja = crear("div", "master-doc-archivo");
+        const mandos = crear("div", "master-docs-botones");
+        const enlace = (texto, href, etiqueta, descargar) => {
+            const a = crear("a", "oc-vida-accion", texto);
+            a.href = direccionSegura(href);
+            if (descargar) {
+                a.download = descargar;
+            } else {
+                a.target = "_blank";
+                a.rel = "noopener noreferrer";
+            }
+            a.setAttribute("aria-label", etiqueta);
+            return a;
+        };
+        if (n.tipo === "enlace") {
+            const u = urlImagenSegura(n.url);
+            if (!u) {
+                caja.appendChild(crear("p", "oc-vacio", "La dirección no vale."));
+                return caja;
+            }
+            if (n.clase === "pdf") {
+                caja.appendChild(crear("p", "oc-hoja-nota", "Los PDF de otras webs no se pueden ver aquí dentro: se abren en otra pestaña."));
+            } else {
+                const img = crear("img", "master-doc-imagen");
+                img.alt = n.titulo;
+                img.referrerPolicy = "no-referrer";
+                img.loading = "lazy";
+                img.src = urlImagenSegura(n.url);
+                img.addEventListener("error", () => img.replaceWith(crear("p", "oc-vacio", "No se ha podido cargar la imagen.")));
+                caja.appendChild(img);
+            }
+            mandos.appendChild(enlace("↗ abrir el original", u, "Abrir " + n.titulo + " en otra pestaña"));
+            caja.appendChild(mandos);
+            return caja;
+        }
+        caja.appendChild(crear("p", "oc-hoja-nota", "Cargando…"));
+        archivoLeer(n.archivo).then((blob) => {
+            if (!blob) {
+                caja.replaceChildren(crear("p", "oc-vacio", "El archivo no está en este navegador (¿se importó sin él, o se borró?)."));
+                return;
+            }
+            // Una dirección blob: que hace el propio navegador con el archivo.
+            const archivoBlob = URL.createObjectURL(blob);
+            const esPdf = /pdf/.test(blob.type || n.mime || "");
+            caja.replaceChildren();
+            if (esPdf) {
+                const marco = crear("iframe", "master-doc-pdf");
+                marco.title = "PDF: " + n.titulo;
+                marco.src = archivoBlob;
+                caja.appendChild(marco);
+            } else {
+                const img = crear("img", "master-doc-imagen");
+                img.alt = n.titulo;
+                img.src = archivoBlob;
+                caja.appendChild(img);
+            }
+            const ext = esPdf ? ".pdf" : "." + ((blob.type.split("/")[1] || "png").replace("jpeg", "jpg").replace("svg+xml", "svg"));
+            mandos.append(enlace("↗ abrir en otra pestaña", archivoBlob, "Abrir " + n.titulo + " en otra pestaña"),
+                enlace("⬇ descargar", archivoBlob, "Descargar " + n.titulo, (n.titulo || "archivo").replace(/[^\p{L}\p{N} _-]+/gu, "") + ext));
+            caja.appendChild(mandos);
+        }).catch(() => caja.replaceChildren(crear("p", "oc-vacio", "Este navegador no deja leer los archivos guardados.")));
+        return caja;
+    }
+
     // UNA NOTA, en su ventana: el título, en qué carpeta va y lo escrito
     // (con la barra de formato). Se guarda sola.
     function montarDocumento(dentro, m) {
         m.datos = m.datos || {};
         const n = docsDe().notas.find((x) => x.id === m.datos.nota && x.tipo !== "dibujo");
+        const esNota = n && n.tipo !== "archivo" && n.tipo !== "enlace";
+        // Para el lector, qué es (dos con el mismo nombre no se confunden).
+        const h2 = m.el && m.el.querySelector(".master-ventana-titulo");
+        if (n && h2 && !h2.querySelector(".visually-hidden")) {
+            h2.appendChild(crear("span", "visually-hidden", n.tipo === "enlace" ? " (enlace)" : n.tipo === "archivo"
+                ? (/pdf/.test(n.mime || "") ? " (PDF)" : " (imagen)") : " (nota)"));
+        }
         if (!n) {
             dentro.appendChild(crear("p", "oc-vacio", "Esta nota ya no está (se ha borrado, o es de otra campaña)."));
             return;
@@ -7439,11 +7671,34 @@
         fila.append(cajaT, carpeta);
         const cuando = crear("p", "oc-hoja-nota master-doc-cuando");
         const pintarCuando = () => {
-            cuando.textContent = "Cambiada: " + new Date(n.cambiada || Date.now()).toLocaleString("es-ES",
-                { day: "numeric", month: "long", hour: "2-digit", minute: "2-digit" }) + " · en 📁 " + rutaDe(n.carpeta);
+            cuando.textContent = (esNota ? "Cambiada: " : "Añadido: ") + new Date(n.cambiada || Date.now()).toLocaleString("es-ES",
+                { day: "numeric", month: "long", hour: "2-digit", minute: "2-digit" }) + " · en 📁 " + rutaDe(n.carpeta) +
+                (n.tamano ? " · " + tamanoBonito(n.tamano) : "");
         };
         pintarCuando();
         let espera = 0;
+        if (!esNota) {
+            const ver = montarArchivoDoc(n);
+            titulo.addEventListener("input", () => {
+                n.titulo = titulo.value.trim() || "sin nombre";
+                m.titulo = n.titulo;
+                ponerTitulo(m);
+                clearTimeout(espera);
+                espera = setTimeout(() => {
+                    guardar();
+                    avisarDocs();
+                }, 400);
+            });
+            carpeta.elegir.addEventListener("change", () => {
+                n.carpeta = carpeta.elegir.value || null;
+                pintarCuando();
+                guardar();
+                avisarDocs();
+                avisar("Ahora en: " + rutaDe(n.carpeta) + ".");
+            });
+            dentro.append(fila, cuando, ver);
+            return;
+        }
         const { area, barra, leer } = editorRico("Lo que pone la nota " + n.titulo + " (se guarda sola)", () => {
             clearTimeout(espera);
             espera = setTimeout(() => {
@@ -8762,16 +9017,26 @@
                 return;
             }
             const datos = { pantallaDeMaster: 1, fecha: new Date().toISOString(), claves };
-            const a = crear("a");
-            // Una dirección blob: que hace el propio navegador con el archivo.
-            const archivoBlob = URL.createObjectURL(new Blob([JSON.stringify(datos, null, 1)], { type: "application/json" }));
-            a.href = archivoBlob;
-            a.download = "pantalla-de-master-" + new Date().toISOString().slice(0, 10) + ".json";
-            document.body.appendChild(a);
-            a.click();
-            a.remove();
-            setTimeout(() => URL.revokeObjectURL(archivoBlob), 1000);
-            avisar("Exportado: " + a.download + ".");
+            // Con los archivos de los documentos (imágenes y PDF), en «data:».
+            todosLosArchivos().catch(() => []).then((lista) => Promise.all(lista.filter(([, b]) => b)
+                .map(([id, b]) => blobADatos(b).then((x) => [id, x])))).then((lista) => {
+                if (lista.length) {
+                    datos.archivos = {};
+                    lista.forEach(([id, x]) => {
+                        datos.archivos[id] = x;
+                    });
+                }
+                const a = crear("a");
+                // Una dirección blob: que hace el propio navegador con el archivo.
+                const archivoBlob = URL.createObjectURL(new Blob([JSON.stringify(datos, null, 1)], { type: "application/json" }));
+                a.href = archivoBlob;
+                a.download = "pantalla-de-master-" + new Date().toISOString().slice(0, 10) + ".json";
+                document.body.appendChild(a);
+                a.click();
+                a.remove();
+                setTimeout(() => URL.revokeObjectURL(archivoBlob), 1000);
+                avisar("Exportado: " + a.download + (lista.length ? " (con " + lista.length + " archivos)." : "."));
+            });
         }, "Exportar todo a un archivo");
         exportar.title = "Guarda los perfiles, sus ventanas y la iniciativa en un archivo .json";
         const archivo = crear("input");
@@ -8801,8 +9066,14 @@
                 Object.keys(datos.claves).filter(CLAVES).forEach((k) => {
                     localStorage.setItem(k, String(datos.claves[k]));
                 });
-                alTerminar();
-                location.reload();
+                const archivos = datos.archivos && typeof datos.archivos === "object" ? Object.keys(datos.archivos) : [];
+                return Promise.all(archivos.map((id) => {
+                    const blob = /^a[a-z0-9]+$/.test(id) ? datosABlob(datos.archivos[id]) : null;
+                    return blob ? archivoGuardar(id, blob).catch(() => {}) : null;
+                })).then(() => {
+                    alTerminar();
+                    location.reload();
+                });
             }).catch(() => {
                 avisar("Ese archivo no es una exportación de la pantalla de máster.");
                 importar.textContent = "⬆ importar";

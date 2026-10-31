@@ -3896,3 +3896,26 @@
 .master-doc-cuando {
     margin: 4px 0 8px;
 }
+
+/* Un archivo o un enlace en su ventana: la imagen entera (a lo ancho) o
+   el PDF en su marco (el visor del navegador), y debajo abrir y bajar. */
+.master-doc-archivo {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.master-doc-imagen {
+    display: block;
+    max-width: 100%;
+    height: auto;
+    border: 2px solid var(--border);
+}
+
+.master-doc-pdf {
+    width: 100%;
+    min-height: 420px;
+    height: 70vh;
+    border: 2px solid var(--border);
+    background: #ffffff;
+}

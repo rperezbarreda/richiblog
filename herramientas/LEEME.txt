@@ -4414,6 +4414,24 @@
     cuándo se cambió y lo escrito con la barra de formato (editorRico,
     como las notas). Se guarda sola. Cada cambio avisa con
     «master:documentos» (el árbol y los desplegables, al día).
+  IMÁGENES Y PDF EN LOS DOCUMENTOS: «＋ 📎 archivo» sube una o varias
+  imágenes o PDF (hasta 50 MB cada uno) a la carpeta de ahora; se
+  guardan en IndexedDB («richi-master-archivos», almacén «archivos»: id
+  → Blob; archivoGuardar/Leer/Borrar()), que cabe mucho más que
+  localStorage, y el documento sólo lleva {tipo: "archivo", archivo,
+  mime, tamano}. «＋ 🔗 enlace» apunta a una imagen o un PDF de otra web
+  (https; {tipo: "enlace", url, clase}). En el árbol, 🏞️ / 📕 / 🔗; se
+  buscan por el nombre (y los enlaces, por la dirección). Se abren en su
+  ventana («documento»): la imagen a lo ancho; el PDF subido, en un marco
+  con el visor del navegador; y siempre «↗ abrir en otra pestaña» y «⬇
+  descargar» (los de otras webs: «↗ abrir el original»; los PDF de fuera
+  no se pueden ver dentro). Borrar el documento borra su archivo. Para el
+  lector, el título de la ventana dice qué es («(PDF)», «(imagen)»…).
+  «⬇ exportar» mete los archivos en el .json («archivos»: id → data:) e
+  «⬆ importar» los devuelve a IndexedDB. La página lleva
+  data-oc-archivos: actualizar-cabeceras.py le deja img-src blob: y
+  frame-src blob: (sólo las direcciones blob: que hace el propio
+  navegador con esos archivos).
   GUARDAR EN DOCUMENTOS desde las notas («📁 guardar en documentos») y
   el dibujo (📁, con sus capas): guardarEnDocumentos(). La primera vez
   pide nombre y carpeta; si lo de la ventana ya viene de un documento

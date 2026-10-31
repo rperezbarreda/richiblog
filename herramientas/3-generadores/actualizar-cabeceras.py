@@ -1494,7 +1494,9 @@ YA_PUESTO = re.compile(
 #   - ni plugins, ni <base>, ni formularios que manden a otra web;
 #   - marcos (iframes): ninguno, salvo el reproductor de Spotify en las
 #     páginas que lo llevan (la música de mis personajes: data-oc-spotify,
-#     y solo se carga si se pide).
+#     y solo se carga si se pide) y los PDF subidos a los documentos de la
+#     pantalla de máster (blob:, en las que llevan data-oc-archivos; ahí
+#     también las imágenes subidas: img-src blob:).
 CSP_GOOGLE = "https://script.google.com https://script.googleusercontent.com"
 CSP_SPOTIFY = "https://open.spotify.com"
 RE_SCRIPT_EN_LINEA = re.compile(r"<script(?![^>]*\bsrc=)[^>]*>(.*?)</script>", re.S)
@@ -1516,13 +1518,23 @@ def politica(texto):
         # Las páginas con data-oc-imagenes-de-fuera (la pantalla de
         # máster: la imagen que pone cada uno a un monstruo u objeto)
         # dejan ver imágenes de cualquier web segura.
-        "img-src 'self' data:" + (" https:" if "data-oc-imagenes-de-fuera" in sin else ""),
+        "img-src 'self' data:" + (" https:" if "data-oc-imagenes-de-fuera" in sin else "")
+        + (" blob:" if "data-oc-archivos" in sin else ""),
         "font-src 'self'",
         "connect-src 'self' " + CSP_GOOGLE,
         "object-src 'none'",
         "base-uri 'self'",
         "form-action 'self'",
-    ] + (["frame-src " + CSP_SPOTIFY] if "data-oc-spotify=" in sin else []))
+    ] + marcos(sin))
+
+
+def marcos(sin):
+    """Los marcos (iframes) que deja: el reproductor de Spotify en las
+    páginas que lo llevan y, en las que llevan data-oc-archivos (la pantalla de
+    máster: los PDF que sube cada uno a sus documentos), los blob: que
+    hace el propio navegador con esos archivos."""
+    fuentes = ([CSP_SPOTIFY] if "data-oc-spotify=" in sin else []) + (["blob:"] if "data-oc-archivos" in sin else [])
+    return ["frame-src " + " ".join(fuentes)] if fuentes else []
 
 
 def poner_csp(texto):
