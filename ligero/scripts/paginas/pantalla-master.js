@@ -7120,332 +7120,138 @@
         });
         dentro.append(fila, cuando, barra, area);
     }
-    const SONIDOS = [["lluvia", "🌧️", "lluvia"], ["tormenta", "⛈️", "tormenta"], ["viento", "💨", "viento"],
-        ["hoguera", "🔥", "hoguera"], ["rio", "🏞️", "río"], ["mar", "🌊", "mar"], ["carro", "🐴", "carro en marcha"],
-        ["mercado", "🛒", "mercado"], ["taberna", "🍺", "taberna"], ["noche", "🦗", "noche (grillos)"],
-        ["bosque", "🐦", "bosque (pájaros)"], ["mazmorra", "🕳️", "mazmorra (goteo)"]];
-    const AMBIENTE = { ctx: null, general: null, ruido: {}, eco: null, activos: {}, vigila: 0 };
-    const azar = (a, b) => a + Math.random() * (b - a);
+    const SONIDOS_DE = "https://actions.google.com/sounds/v1/";
+    const SONIDOS = [["lluvia", "🌧️", "lluvia", ["weather/rain_on_roof"]],
+        ["tormenta", "⛈️", "tormenta", ["weather/thunderstorm_long"]],
+        ["viento", "💨", "viento", ["weather/strong_wind"]],
+        ["hoguera", "🔥", "hoguera", ["ambiences/fire"]],
+        ["rio", "🏞️", "río", ["water/small_stream_flowing"]],
+        ["mar", "🌊", "mar", ["water/waves_crashing_on_rock_beach"]],
+        ["carro", "🐴", "carro en marcha", ["transportation/horse_and_carriage"]],
+        ["mercado", "🛒", "mercado", ["ambiences/small_outdoor_marketplace"]],
+        ["taberna", "🍺", "taberna", ["crowds/murmuring_and_talking_men"]],
+        ["noche", "🦗", "noche", ["ambiences/outside_night"]],
+        ["bosque", "🐦", "bosque", ["ambiences/spring_day_forest"]],
+        ["mazmorra", "🕳️", "mazmorra (viento y goteo)", ["horror/hallow_wind", "water/water_leak"]],
+        ["barco", "⛵", "barco (madera que cruje)", ["transportation/wood_creak_on_old_ship_series"]],
+        ["granja", "🐓", "granja", ["ambiences/morning_farm"]]];
+    function urlSonidoSegura(ruta) {
+        const u = SONIDOS_DE + ruta + ".ogg";
+        return /^https:\/\/actions\.google\.com\/sounds\/v1\/[a-z_]+\/[a-z0-9_]+\.ogg$/.test(u) ? u : "";
+    }
+    const AMBIENTE = { ctx: null, general: null, nivel: 0.8, activos: {}, vigila: 0 };
     function motorAudio() {
         if (!AMBIENTE.ctx) {
             const C = window.AudioContext || window.webkitAudioContext;
-            const ctx = new C();
-            AMBIENTE.ctx = ctx;
-            AMBIENTE.general = ctx.createGain();
-            AMBIENTE.general.connect(ctx.destination);
-            const n = ctx.sampleRate * 3;
-            const hacer = (f) => {
-                const b = ctx.createBuffer(1, n, ctx.sampleRate);
-                f(b.getChannelData(0));
-                return b;
-            };
-            AMBIENTE.ruido.blanco = hacer((d) => {
-                for (let i = 0; i < n; i++) {
-                    d[i] = Math.random() * 2 - 1;
-                }
-            });
-            AMBIENTE.ruido.rosa = hacer((d) => {
-                let b0 = 0;
-                let b1 = 0;
-                let b2 = 0;
-                for (let i = 0; i < n; i++) {
-                    const w = Math.random() * 2 - 1;
-                    b0 = 0.99765 * b0 + w * 0.099;
-                    b1 = 0.963 * b1 + w * 0.2965;
-                    b2 = 0.57 * b2 + w * 1.0526;
-                    d[i] = (b0 + b1 + b2 + w * 0.1848) * 0.18;
-                }
-            });
-            AMBIENTE.ruido.marron = hacer((d) => {
-                let u = 0;
-                for (let i = 0; i < n; i++) {
-                    u = (u + 0.02 * (Math.random() * 2 - 1)) / 1.02;
-                    d[i] = u * 3.5;
-                }
-            });
-            const largo = ctx.sampleRate * 2.5;
-            const ir = ctx.createBuffer(2, largo, ctx.sampleRate);
-            for (let c = 0; c < 2; c++) {
-                const d = ir.getChannelData(c);
-                for (let i = 0; i < largo; i++) {
-                    d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / largo, 3);
-                }
-            }
-            AMBIENTE.eco = ir;
+            AMBIENTE.ctx = new C();
+            AMBIENTE.general = AMBIENTE.ctx.createGain();
+            AMBIENTE.general.gain.value = AMBIENTE.nivel;
+            AMBIENTE.general.connect(AMBIENTE.ctx.destination);
         }
         if (AMBIENTE.ctx.state === "suspended") {
             AMBIENTE.ctx.resume();
         }
         return AMBIENTE;
     }
-    const ruidoSin = (A, tipo) => {
-        const s = A.ctx.createBufferSource();
-        s.buffer = A.ruido[tipo];
-        s.loop = true;
-        s.start(0, Math.random() * 2.5);
-        return s;
-    };
-    const filtro = (A, tipo, f, q) => {
-        const x = A.ctx.createBiquadFilter();
-        x.type = tipo;
-        x.frequency.value = f;
-        if (q) {
-            x.Q.value = q;
-        }
-        return x;
-    };
-    const volumen = (A, v) => {
-        const g = A.ctx.createGain();
-        g.gain.value = v;
-        return g;
-    };
-    const cadena = (...nodos) => {
-        for (let i = 0; i < nodos.length - 1; i++) {
-            nodos[i].connect(nodos[i + 1]);
-        }
-        return nodos[0];
-    };
-    const onda = (A, param, hz, hondo) => {
-        const o = A.ctx.createOscillator();
-        o.frequency.value = hz;
-        const g = volumen(A, hondo);
-        o.connect(g);
-        g.connect(param);
-        o.start();
-        return o;
-    };
-    function golpe(A, salida, t, { f = 2000, q = 1, dur = 0.05, vol = 0.3, tipo = "bandpass", ruido = "blanco" }) {
-        const s = A.ctx.createBufferSource();
-        s.buffer = A.ruido[ruido];
-        const g = volumen(A, 0);
-        g.gain.setValueAtTime(vol, t);
-        g.gain.exponentialRampToValueAtTime(0.0008, t + dur);
-        cadena(s, filtro(A, tipo, f, q), g, salida);
-        s.start(t, Math.random() * 2);
-        s.stop(t + dur + 0.05);
-    }
-    function tono(A, salida, t, { f = 1000, fin = 0, dur = 0.1, vol = 0.1, forma = "sine", ataque = 0.005 }) {
-        const o = A.ctx.createOscillator();
-        o.type = forma;
-        o.frequency.setValueAtTime(f, t);
-        if (fin) {
-            o.frequency.exponentialRampToValueAtTime(fin, t + dur);
-        }
-        const g = volumen(A, 0);
-        g.gain.setValueAtTime(0.0001, t);
-        g.gain.exponentialRampToValueAtTime(vol, t + ataque);
-        g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
-        cadena(o, g, salida);
-        o.start(t);
-        o.stop(t + dur + 0.05);
-    }
-    function deVezEnCuando(A, min, max, hacer) {
-        let vivo = true;
-        let reloj = 0;
-        const otra = () => {
-            if (!vivo) {
-                return;
+    function fundir(audios, hasta, alAcabar) {
+        const pasos = 12;
+        const desde = audios.map((a) => a.volume);
+        let i = 0;
+        const t = setInterval(() => {
+            i += 1;
+            audios.forEach((a, k) => {
+                a.volume = Math.max(0, Math.min(1, desde[k] + (hasta - desde[k]) * i / pasos));
+            });
+            if (i >= pasos) {
+                clearInterval(t);
+                if (alAcabar) {
+                    alAcabar();
+                }
             }
-            hacer(A.ctx.currentTime + 0.05);
-            reloj = setTimeout(otra, azar(min, max) * 1000);
-        };
-        reloj = setTimeout(otra, azar(0, max) * 1000);
-        return () => {
-            vivo = false;
-            clearTimeout(reloj);
-        };
+        }, 50);
     }
-    const RECETAS = {
-        lluvia(A, salida, fuerte) {
-            const base = ruidoSin(A, "rosa");
-            cadena(base, filtro(A, "highpass", 500), filtro(A, "lowpass", 7000), volumen(A, fuerte ? 0.55 : 0.35), salida);
-            const gotas = deVezEnCuando(A, 0.02, fuerte ? 0.05 : 0.09, (t) => golpe(A, salida, t,
-                { f: azar(2500, 6500), q: 4, dur: azar(0.015, 0.05), vol: azar(0.04, 0.22) }));
-            return [base, gotas];
-        },
-        tormenta(A, salida) {
-            const lluvia = RECETAS.lluvia(A, salida, true);
-            const truenos = deVezEnCuando(A, 12, 35, (t) => {
-                const s = A.ctx.createBufferSource();
-                s.buffer = A.ruido.marron;
-                const g = volumen(A, 0);
-                const sube = azar(0.1, 0.5);
-                g.gain.setValueAtTime(0.0001, t);
-                g.gain.exponentialRampToValueAtTime(azar(0.8, 1.4), t + sube);
-                g.gain.exponentialRampToValueAtTime(0.0001, t + sube + azar(3, 6));
-                cadena(s, filtro(A, "lowpass", azar(90, 180)), g, salida);
-                s.start(t, Math.random());
-                s.stop(t + 7);
-                golpe(A, salida, t, { f: 600, tipo: "lowpass", dur: 0.4, vol: 0.5 });
-            });
-            return lluvia.concat([truenos]);
-        },
-        viento(A, salida) {
-            const b = ruidoSin(A, "marron");
-            const f = filtro(A, "bandpass", 500, 0.8);
-            const g = volumen(A, 0.5);
-            cadena(b, f, g, salida);
-            const o1 = onda(A, f.frequency, 0.07, 320);
-            const o2 = onda(A, g.gain, 0.13, 0.25);
-            const r = ruidoSin(A, "rosa");
-            const f2 = filtro(A, "bandpass", 1400, 3);
-            cadena(r, f2, volumen(A, 0.06), salida);
-            const o3 = onda(A, f2.frequency, 0.05, 600);
-            return [b, r, o1, o2, o3];
-        },
-        hoguera(A, salida, suave) {
-            const b = ruidoSin(A, "marron");
-            cadena(b, filtro(A, "lowpass", 420), volumen(A, suave ? 0.12 : 0.28), salida);
-            const chispas = deVezEnCuando(A, 0.03, suave ? 0.4 : 0.22, (t) => golpe(A, salida, t,
-                { f: azar(1800, 4000), tipo: "highpass", dur: azar(0.003, 0.012), vol: azar(0.08, suave ? 0.25 : 0.55) }));
-            const pops = deVezEnCuando(A, 2, 6, (t) => golpe(A, salida, t, { f: azar(700, 1200), q: 2, dur: 0.06, vol: suave ? 0.2 : 0.45 }));
-            return [b, chispas, pops];
-        },
-        rio(A, salida) {
-            const r = ruidoSin(A, "rosa");
-            cadena(r, filtro(A, "bandpass", 1100, 0.6), volumen(A, 0.4), salida);
-            const w = ruidoSin(A, "blanco");
-            const g = volumen(A, 0.05);
-            cadena(w, filtro(A, "bandpass", 3500, 2), g, salida);
-            const o = onda(A, g.gain, 5.5, 0.03);
-            const burbujas = deVezEnCuando(A, 0.1, 0.5, (t) => tono(A, salida, t, { f: azar(500, 1100), fin: azar(1300, 2200), dur: 0.05,
-                vol: azar(0.01, 0.04) }));
-            return [r, w, o, burbujas];
-        },
-        mar(A, salida) {
-            const b = ruidoSin(A, "marron");
-            const g = volumen(A, 0.35);
-            cadena(b, filtro(A, "lowpass", 900), g, salida);
-            const o = onda(A, g.gain, 0.1, 0.28);
-            const e = ruidoSin(A, "rosa");
-            const g2 = volumen(A, 0.06);
-            cadena(e, filtro(A, "highpass", 2000), g2, salida);
-            const o2 = onda(A, g2.gain, 0.1, 0.05);
-            return [b, e, o, o2];
-        },
-        carro(A, salida) {
-            const b = ruidoSin(A, "marron");
-            const g = volumen(A, 0.22);
-            cadena(b, filtro(A, "lowpass", 220), g, salida);
-            const o = onda(A, g.gain, 3, 0.06);
-            const cascos = deVezEnCuando(A, 0.42, 0.52, (t) => {
-                golpe(A, salida, t, { f: azar(700, 950), q: 3, dur: 0.06, vol: 0.45 });
-                golpe(A, salida, t + azar(0.11, 0.14), { f: azar(550, 750), q: 3, dur: 0.06, vol: 0.35 });
-            });
-            const cruje = deVezEnCuando(A, 1.1, 1.8, (t) => {
-                const f = filtro(A, "bandpass", azar(700, 1100), 6);
-                f.connect(salida);
-                tono(A, f, t, { f: azar(150, 220), fin: azar(100, 140), dur: azar(0.2, 0.35), vol: 0.25, forma: "sawtooth", ataque: 0.05 });
-            });
-            return [b, o, cascos, cruje];
-        },
-        mercado(A, salida, taberna) {
-            const bandas = (taberna ? [260, 420, 700, 1000] : [350, 600, 900, 1400]).map((fr) => {
-                const r = ruidoSin(A, "rosa");
-                const g = volumen(A, 0.22);
-                cadena(r, filtro(A, "bandpass", fr, 3), g, salida);
-                const o = onda(A, g.gain, azar(2.5, 5), 0.18);
-                return [r, o];
-            });
-            const cambia = deVezEnCuando(A, 1.5, 3, (t) => bandas.forEach(([, o]) => o.frequency.setTargetAtTime(azar(2, 5.5), t, 0.5)));
-            const cosas = deVezEnCuando(A, taberna ? 0.8 : 0.6, taberna ? 3.5 : 3, (t) => {
-                const f = taberna ? azar(1600, 2600) : azar(2500, 4200);
-                tono(A, salida, t, { f, dur: 0.35, vol: 0.05 });
-                tono(A, salida, t, { f: f * 2.7, dur: 0.2, vol: 0.02 });
-            });
-            const sale = [cambia, cosas];
-            bandas.forEach(([r, o]) => sale.push(r, o));
-            return sale;
-        },
-        taberna(A, salida) {
-            return RECETAS.mercado(A, salida, true).concat(RECETAS.hoguera(A, salida, true));
-        },
-        noche(A, salida) {
-            const b = ruidoSin(A, "marron");
-            cadena(b, filtro(A, "lowpass", 300), volumen(A, 0.06), salida);
-            const grillos = deVezEnCuando(A, 0.3, 0.9, (t) => {
-                const f = azar(4200, 4800);
-                for (let i = 0; i < 3; i++) {
-                    tono(A, salida, t + i * 0.06, { f, dur: 0.04, vol: 0.08 });
+    function sonarGrabacion(id, rutas, vol, alFallar) {
+        if (AMBIENTE.activos[id]) {
+            return;
+        }
+        const audios = rutas.map((r) => {
+            const a = new Audio();
+            a.loop = true;
+            a.preload = "auto";
+            a.volume = 0;
+            a.src = urlSonidoSegura(r);
+            a.addEventListener("error", () => {
+                if (AMBIENTE.activos[id]) {
+                    callar(id);
+                    alFallar();
                 }
             });
-            const otro = deVezEnCuando(A, 0.5, 1.4, (t) => {
-                const f = azar(3600, 4100);
-                for (let i = 0; i < 4; i++) {
-                    tono(A, salida, t + i * 0.05, { f, dur: 0.03, vol: 0.05 });
+            a.play().catch(() => {
+                if (AMBIENTE.activos[id]) {
+                    callar(id);
+                    alFallar();
                 }
             });
-            return [b, grillos, otro];
-        },
-        bosque(A, salida) {
-            const r = ruidoSin(A, "rosa");
-            const g = volumen(A, 0.05);
-            cadena(r, filtro(A, "bandpass", 600, 0.7), g, salida);
-            const o = onda(A, g.gain, 0.1, 0.03);
-            const pajaros = deVezEnCuando(A, 0.8, 4, (t) => {
-                const notas = Math.floor(azar(2, 6));
-                const base = azar(2200, 4500);
-                for (let i = 0; i < notas; i++) {
-                    tono(A, salida, t + i * azar(0.09, 0.16), { f: base * azar(0.85, 1.2), fin: base * azar(0.7, 1.4), dur: azar(0.06, 0.14),
-                        vol: azar(0.06, 0.13) });
-                }
-            });
-            return [r, o, pajaros];
-        },
-        mazmorra(A, salida) {
-            const eco = A.ctx.createConvolver();
-            eco.buffer = A.eco;
-            const conEco = volumen(A, 0.9);
-            cadena(eco, conEco, salida);
-            const z1 = A.ctx.createOscillator();
-            const z2 = A.ctx.createOscillator();
-            z1.frequency.value = 55;
-            z2.frequency.value = 55.7;
-            const zg = volumen(A, 0.06);
-            z1.connect(zg);
-            z2.connect(zg);
-            zg.connect(salida);
-            z1.start();
-            z2.start();
-            const b = ruidoSin(A, "marron");
-            cadena(b, filtro(A, "lowpass", 150), volumen(A, 0.12), salida);
-            const gotas = deVezEnCuando(A, 1.2, 4.5, (t) => {
-                const f = azar(900, 1700);
-                tono(A, eco, t, { f, fin: f * 0.55, dur: 0.09, vol: 0.3 });
-                tono(A, salida, t, { f, fin: f * 0.55, dur: 0.07, vol: 0.08 });
-            });
-            return [z1, z2, b, gotas];
-        },
-    };
-    function sonar(id, vol, montar) {
+            return a;
+        });
+        let mio = vol;
+        fundir(audios, mio * AMBIENTE.nivel);
+        AMBIENTE.activos[id] = {
+            volumen(v) {
+                mio = v === undefined ? mio : v;
+                audios.forEach((a) => {
+                    a.volume = Math.max(0, Math.min(1, mio * AMBIENTE.nivel));
+                });
+            },
+            parar() {
+                fundir(audios, 0, () => audios.forEach((a) => {
+                    a.pause();
+                    a.removeAttribute("src");
+                    a.load();
+                }));
+            },
+        };
+        vigilarAmbiente();
+    }
+    function sonarPropio(id, audio, vol) {
         const A = motorAudio();
         if (AMBIENTE.activos[id]) {
             return;
         }
-        const salida = volumen(A, 0);
+        const salida = A.ctx.createGain();
+        salida.gain.value = 0;
         salida.connect(A.general);
-        salida.gain.setTargetAtTime(vol, A.ctx.currentTime, 0.4);
-        const piezas = montar(A, salida) || [];
+        salida.gain.setTargetAtTime(vol, A.ctx.currentTime, 0.3);
+        const s = A.ctx.createBufferSource();
+        s.buffer = audio;
+        s.loop = true;
+        s.connect(salida);
+        s.start();
         AMBIENTE.activos[id] = {
-            salida,
+            volumen(v) {
+                if (v !== undefined) {
+                    salida.gain.setTargetAtTime(v, A.ctx.currentTime, 0.1);
+                }
+            },
             parar() {
-                salida.gain.setTargetAtTime(0, A.ctx.currentTime, 0.25);
+                salida.gain.setTargetAtTime(0, A.ctx.currentTime, 0.2);
                 setTimeout(() => {
-                    piezas.forEach((p) => {
-                        if (typeof p === "function") {
-                            p();
-                        } else {
-                            try {
-                                p.stop();
-                            } catch (e) {
-                            }
-                        }
-                    });
+                    try {
+                        s.stop();
+                    } catch (e) {
+                    }
                     salida.disconnect();
-                }, 1200);
+                }, 900);
             },
         };
         vigilarAmbiente();
+    }
+    function volumenGeneral(v) {
+        AMBIENTE.nivel = v;
+        if (AMBIENTE.general) {
+            AMBIENTE.general.gain.setTargetAtTime(v, AMBIENTE.ctx.currentTime, 0.1);
+        }
+        Object.values(AMBIENTE.activos).forEach((x) => x.volumen());
     }
     function callar(id) {
         const x = AMBIENTE.activos[id];
@@ -7475,8 +7281,8 @@
         const d = m.datos;
         d.vol = d.vol || {};
         d.propios = Array.isArray(d.propios) ? d.propios : [];
-        if (!(window.AudioContext || window.webkitAudioContext)) {
-            dentro.appendChild(crear("p", "oc-vacio", "Este navegador no puede hacer sonidos."));
+        if (!window.Audio) {
+            dentro.appendChild(crear("p", "oc-vacio", "Este navegador no puede poner sonidos."));
             return;
         }
         const arriba = crear("div", "master-ambiente-arriba");
@@ -7489,11 +7295,8 @@
         general.setAttribute("aria-label", "Volumen general");
         general.setAttribute("aria-valuetext", general.value + " %");
         etG.append(crear("span", "oc-dados-etiqueta", "🔊 general"), general);
-        const ponerGeneral = () => {
-            if (AMBIENTE.general) {
-                AMBIENTE.general.gain.setTargetAtTime(general.value / 100, AMBIENTE.ctx.currentTime, 0.1);
-            }
-        };
+        const ponerGeneral = () => volumenGeneral(general.value / 100);
+        AMBIENTE.nivel = general.value / 100;
         general.addEventListener("input", () => {
             d.general = Number(general.value);
             general.setAttribute("aria-valuetext", general.value + " %");
@@ -7518,35 +7321,34 @@
         const filas = [];
         const datosDe = (id) => {
             const p = d.propios.find((x) => "propio-" + x.id === id);
-            return p ? ["🎵", p.nombre] : (SONIDOS.find((s) => s[0] === id) || []).slice(1);
+            return p ? ["🎵", p.nombre] : (SONIDOS.find((s) => s[0] === id) || []).slice(1, 3);
         };
         function encender(id) {
             const vol = (d.vol[id] === undefined ? 70 : d.vol[id]) / 100;
-            motorAudio();
             ponerGeneral();
             const p = d.propios.find((x) => "propio-" + x.id === id);
             if (p) {
+                motorAudio();
                 return archivoLeer(p.archivo).then((blob) => (blob ? blob.arrayBuffer() : null)).then((buf) => (buf
                     ? AMBIENTE.ctx.decodeAudioData(buf) : null)).then((audio) => {
                     if (!audio) {
                         avisar("Ese sonido ya no está en este navegador.");
                         return;
                     }
-                    sonar(id, vol, (A, salida) => {
-                        const s = A.ctx.createBufferSource();
-                        s.buffer = audio;
-                        s.loop = true;
-                        s.connect(salida);
-                        s.start();
-                        return [s];
-                    });
+                    sonarPropio(id, audio, vol);
                     d.sonando = Array.from(new Set((d.sonando || []).concat(id)));
                     guardar();
                     pintar();
                 }).catch(() => avisar("No se ha podido poner ese sonido."));
             }
-            if (RECETAS[id]) {
-                sonar(id, vol, (A, salida) => RECETAS[id](A, salida));
+            const s = SONIDOS.find((x) => x[0] === id);
+            if (s) {
+                sonarGrabacion(id, s[3], vol, () => {
+                    d.sonando = (d.sonando || []).filter((x) => x !== id);
+                    guardar();
+                    pintar();
+                    avisar("No se ha podido poner «" + s[2] + "»: ¿hay conexión a internet?");
+                });
                 d.sonando = Array.from(new Set((d.sonando || []).concat(id)));
                 guardar();
             }
@@ -7582,7 +7384,7 @@
                 r.setAttribute("aria-valuetext", r.value + " %");
                 const x = AMBIENTE.activos[id];
                 if (x) {
-                    x.salida.gain.setTargetAtTime(r.value / 100, AMBIENTE.ctx.currentTime, 0.1);
+                    x.volumen(r.value / 100);
                 }
                 guardar();
             });
@@ -7646,8 +7448,15 @@
                 avisar("Añadido: " + f.name + ". Se queda sólo en este navegador (⚙ → exportar para no perderlo).");
             }).catch(() => avisar("No se ha podido guardar el sonido."));
         });
-        const nota = crear("p", "oc-hoja-nota", "Los sonidos se hacen aquí mismo (no se descarga nada). Se mezclan y siguen sonando"
-            + " al cambiar de pestaña; al quitar esta ventana, se paran. Los tuyos se quedan sólo en este navegador.");
+        const nota = crear("p", "oc-hoja-nota master-fuente");
+        const enlaceG = crear("a", "", "Google Sound Library");
+        enlaceG.href = "https://developers.google.com/assistant/tools/sound-library";
+        enlaceG.target = "_blank";
+        enlaceG.rel = "noopener noreferrer";
+        enlaceG.setAttribute("aria-label", "Google Sound Library (se abre en otra pestaña)");
+        nota.append("Grabaciones de la ", enlaceG, " (Google, CC BY 4.0): se oyen desde sus servidores, así que hace falta"
+            + " conexión. Se mezclan y siguen sonando al cambiar de pestaña; al quitar esta ventana, se paran. Los tuyos se quedan"
+            + " sólo en este navegador.");
         dentro.append(arriba, volver, lista, otro, subir, nota);
         pintarFilas();
     }
@@ -7694,7 +7503,8 @@
         taberna: { nombre: "negocios", emoji: "🏪", grupo: "mundo", w: 500, h: 760,
             desc: "Tabernas y posadas, tiendas, templos, establos…: con lo que venden, sus precios y un gancho.", montar: montarNegocio },
         ambiente: { nombre: "sonido ambiente", emoji: "🎧", grupo: "mesa", unico: true, w: 440, h: 640,
-            desc: "Lluvia, viento, hoguera, mercado, carro…: se mezclan, en bucle (y tus propios audios).", montar: montarAmbiente },
+            desc: "Lluvia, viento, hoguera, mercado, carro…: grabaciones de verdad en bucle, mezcladas (y tus audios).",
+            montar: montarAmbiente },
         relojes: { nombre: "relojes", emoji: "⏳", grupo: "mesa", w: 440, h: 480,
             desc: "Relojes de progreso: amenazas que avanzan, cuentas atrás…", montar: montarRelojes },
         idiomas: { nombre: "notas en otros idiomas", emoji: "🪶", grupo: "mundo", w: 480, h: 680,
