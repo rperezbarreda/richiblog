@@ -6679,7 +6679,8 @@
                 }
                 guardar();
                 avisarDocs();
-                avisar("Subido a 📁 " + rutaDe(aqui) + ": " + nombres.join(", ") + ".");
+                avisar("Subido a 📁 " + rutaDe(aqui) + ": " + nombres.join(", ") + ". Se queda sólo en este navegador: para no"
+                    + " perderlo, ⚙ → exportar.");
             }).catch(() => avisar("No se ha podido guardar el archivo (este navegador no deja, o no cabe)."));
         });
         const nuevoEnlace = botonDe("oc-vida-accion", "＋ 🔗 enlace", () => {
@@ -6737,6 +6738,11 @@
         nuevoEnlace.setAttribute("aria-haspopup", "dialog");
         const botones = crear("div", "master-docs-botones");
         botones.append(nuevaNota, nuevaCarpeta, nuevoArchivo, nuevoEnlace, subir);
+        const privado = crear("p", "oc-hoja-nota master-docs-aviso");
+        privado.append(crear("strong", "", "🔒 Todo se queda en este navegador: "),
+            document.createTextNode("las notas, los dibujos y lo que subes no se suben a la web ni los ve nadie más. Tampoco pasan"
+                + " solos a otro ordenador, y se pierden si se borran los datos del navegador: para guardarlos o llevarlos, ⚙ →"
+                + " exportar (y luego importar)."));
         const arbol = crear("div", "master-docs-arbol");
         const cuantos = crear("p", "visually-hidden");
         cuantos.setAttribute("role", "status");
@@ -6945,7 +6951,7 @@
             clearTimeout(espera);
             espera = setTimeout(() => pintar(), 150);
         });
-        dentro.append(etBuscar, buscar, botones, donde, cuantos, arbol);
+        dentro.append(etBuscar, buscar, botones, privado, donde, cuantos, arbol);
         pintar();
         mientrasEste(dentro, "master:documentos", () => pintar());
     }

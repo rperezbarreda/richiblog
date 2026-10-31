@@ -4414,6 +4414,11 @@
     cuándo se cambió y lo escrito con la barra de formato (editorRico,
     como las notas). Se guarda sola. Cada cambio avisa con
     «master:documentos» (el árbol y los desplegables, al día).
+  NADA DE ESTO SE SUBE A LA WEB: las notas, los dibujos y los archivos
+  se quedan en el navegador de quien lo usa (localStorage e IndexedDB).
+  Lo dice la ventana «documentos» (.master-docs-aviso) y el aviso al
+  subir un archivo: para guardarlo o llevarlo a otro sitio, ⚙ →
+  exportar.
   IMÁGENES Y PDF EN LOS DOCUMENTOS: «＋ 📎 archivo» sube una o varias
   imágenes o PDF (hasta 50 MB cada uno) a la carpeta de ahora; se
   guardan en IndexedDB («richi-master-archivos», almacén «archivos»: id
