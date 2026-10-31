@@ -851,6 +851,9 @@
             guardar();
         }
         const ya = estado.modulos.find((x) => x.tipo === "pj" && x.datos && x.datos.pj === pj.id);
+        if (ya && ya.grupo && !ya.delante) {
+            verEnGrupo(ya, false);
+        }
         if (ya && ya.el) {
             alFrente(ya);
             ya.el.scrollIntoView({ block: "nearest" });
@@ -6426,6 +6429,10 @@
         ["negro", "negro", "#121212"], ["uva", "morado", "#3d2552"], ["pergamino", "pergamino", "#e8dcc0"],
         ["arena", "arena", "#d9c7a3"], ["crema", "crema", "#f4ecd8"], ["cielo", "cielo", "#bfd6e6"], ["menta", "menta", "#cde8d5"]];
     const hexTablero = (c) => hexPropio(c) || (TABLEROS.find((x) => x[0] === c) || [])[2] || "";
+    const COLORES_PESTANA = [["", "sin color"]].concat(TABLEROS.slice(1),
+        COLORES.slice(1).filter((c) => !TABLEROS.some((t) => t[0] === c[0])));
+    const hexPestana = (c) => hexPropio(c) || (COLORES_PESTANA.find((x) => x[0] === c) || [])[2] || "";
+    const colorDePestana = (pf) => (pf.colorPestana !== undefined ? pf.colorPestana : pf.color || "");
     function muestrasDe(leyenda, lista, valor, idOtro) {
         const grupo = crear("fieldset", "master-colores");
         grupo.appendChild(crear("legend", "oc-dados-etiqueta", leyenda));
@@ -6460,6 +6467,42 @@
         grupo.valor = () => elegido;
         return grupo;
     }
+    const PERFILES_DE_SERIE = [
+        ["⭐home", "", [
+            ["registro", 1289, 9, 352, 457, "", 0, 1], ["acciones", 0, 105, 335, 607, "#ad1f1f", 1, 1],
+            ["reglas", 361, 3, 537, 725, "fucsia", 1, 1], ["conjuros", 0, 6, 339, 605, "celeste", 1, 1],
+            ["notas", 0, 203, 1271, 546, "#5d5b5b", 0, 1], ["homebrew", 921, 103, 341, 393, "blanco", 1, 1],
+            ["dados", 1290, 471, 360, 279, "azul", 0, 1], ["calendario", 919, 10, 346, 768, "gris", 1, 0.8]
+        ]],
+        ["⚔combate", "carmesi", [
+            ["iniciativa", 0, 0, 341, 761, "blanco", 0, 1], ["dados", 1292, 456, 358, 322, "", 0, 1],
+            ["registro", 1291, 0, 359, 447, "amarillo", 0, 1], ["condiciones", 973, 317, 311, 333, "morado", 0, 1],
+            ["acciones", 970, 215, 308, 341, "fucsia", 1, 1], ["bestiario", 821, 2, 456, 511, "azul", 1, 1],
+            ["relojes", 971, 113, 313, 407, "blanco", 1, 1], ["encuentros", 354, 4, 455, 614, "turquesa", 1, 1],
+            ["party", 357, 108, 600, 440, "", 0, 1]
+        ]],
+        ["🖊notas", "noche", [
+            ["dibujo", 2, 2, 1191, 726, "arena", 0, 1], ["tarjeta", 1263, 106, 322, 330, "amarillo", 1, 1],
+            ["idiomas", 1204, 0, 433, 781, "", 1, 1], ["tarjeta", 1269, 209, 319, 307, "verde", 0, 1]
+        ]],
+        ["💰tiendas", "arena", [
+            ["tienda", 0, 0, 528, 633, "coral", 0, 1], ["monedas", 1219, 0, 420, 440, "amarillo", 0, 1],
+            ["taberna", 540, 0, 662, 635, "morado", 0, 1]
+        ]],
+        ["🧙‍♂️NPCs", "bosque", [
+            ["nombres", 0, 114, 457, 555, "azul", 0, 1], ["pnj", 1186, 5, 460, 620, "marron", 0, 1],
+            ["bestiario", 1, 0, 460, 520, "rojo", 1, 1], ["tarjeta", 533, 38, 594, 505, "amarillo", 0, 1]
+        ]],
+        ["🎲generadores", "pizarra", [
+            ["dungeon", 0, 0, 1189, 722, "gris", 0, 1], ["botin", 1210, 1, 440, 456, "naranja", 0, 1],
+            ["nombres", 1211, 467, 439, 256, "verde", 0, 1]
+        ]]
+    ];
+    function perfilesDeSerie() {
+        return PERFILES_DE_SERIE.map(([nombre, color, ventanas]) => ({ nombre, color, colorPestana: color,
+            modulos: ventanas.filter((v) => MODULOS[v[0]]).map(([tipo, x, y, w, h, c, plegado, escala]) => ({ tipo, x, y, w, h,
+                color: c, plegado: !!plegado, escala })) }));
+    }
     let todas = null;
     try {
         todas = JSON.parse(localStorage.getItem(CLAVE) || "null");
@@ -6473,7 +6516,7 @@
         todas = { activa: "c1", campanas: [{ id: "c1", nombre: "mi campaña", activo: todas.activo, perfiles: todas.perfiles }] };
     }
     if (!todas || !Array.isArray(todas.campanas) || !todas.campanas.length) {
-        todas = { activa: "c1", campanas: [{ id: "c1", nombre: "mi campaña", activo: "p1", perfiles: [] }] };
+        todas = { activa: "c1", campanas: [{ id: "c1", nombre: "mi campaña", perfiles: perfilesDeSerie() }] };
     }
     let siguienteId = 1;
     let siguientePerfil = 1;
@@ -6482,7 +6525,7 @@
         c.id = c.id || "c" + siguienteCampana;
         siguienteCampana = Math.max(siguienteCampana, parseInt(String(c.id).slice(1), 10) + 1 || siguienteCampana);
         c.nombre = c.nombre || "campaña";
-        c.perfiles = Array.isArray(c.perfiles) && c.perfiles.length ? c.perfiles : [{ nombre: "principal", modulos: [] }];
+        c.perfiles = Array.isArray(c.perfiles) && c.perfiles.length ? c.perfiles : perfilesDeSerie();
         c.pjs = Array.isArray(c.pjs) ? c.pjs : [];
         c.perfiles.forEach((pf) => {
             pf.id = pf.id || "p" + siguientePerfil;
@@ -6507,15 +6550,35 @@
             });
         });
     });
+    todas.campanas.forEach((c) => c.perfiles.forEach((pf) => {
+        const grupos = {};
+        pf.modulos.filter((m) => m.grupo).forEach((m) => {
+            (grupos[m.grupo] = grupos[m.grupo] || []).push(m);
+        });
+        Object.values(grupos).forEach((g) => {
+            if (g.length < 2) {
+                delete g[0].grupo;
+                delete g[0].delante;
+            } else if (!g.some((m) => m.delante)) {
+                g[0].delante = true;
+            } else {
+                g.filter((m) => m.delante).slice(1).forEach((m) => {
+                    m.delante = false;
+                });
+            }
+        });
+    }));
     let todo = todas.campanas.find((c) => c.id === todas.activa) || todas.campanas[0];
     let estado = todo.perfiles.find((pf) => pf.id === todo.activo) || todo.perfiles[0];
     function guardar() {
         todo.activo = estado.id;
         const salida = { activa: todo.id, campanas: todas.campanas.map((c) => ({ id: c.id, nombre: c.nombre, activo: c.activo,
-            pjs: c.pjs, perfiles: c.perfiles.map((pf) => ({ id: pf.id, nombre: pf.nombre, color: pf.color || "", zoom: pf.zoom || 1,
+            pjs: c.pjs, perfiles: c.perfiles.map((pf) => ({ id: pf.id, nombre: pf.nombre, color: pf.color || "",
+                colorPestana: pf.colorPestana, zoom: pf.zoom || 1,
                 modulos: pf.modulos.map((m) => ({ id: m.id, tipo: m.tipo, x: m.x, y: m.y, w: m.w, h: m.h,
                     titulo: m.titulo || "", color: m.color || "", plegado: !!m.plegado,
-                    escala: m.escala || 1, datos: m.datos })) })) })) };
+                    escala: m.escala || 1, grupo: m.grupo || undefined, delante: m.grupo ? !!m.delante : undefined,
+                    datos: m.datos })) })) })) };
         try {
             localStorage.setItem(CLAVE, JSON.stringify(salida));
             return true;
@@ -6595,9 +6658,32 @@
         pColor.appendChild(grupo);
         const pTam = crear("div");
         pTam.appendChild(tam);
-        const { lista: pestanas, elegir } = pestanasDe([["📝 título", pTitulo], ["🎨 color", pColor], ["🔠 tamaño", pTam]],
-            "Opciones de la ventana", "master-personalizar-" + m.id);
-        cuerpo.append(pestanas, pTitulo, pColor, pTam, listo);
+        const pGrupo = crear("div");
+        const otras = estado.modulos.filter((x) => x !== m && (!x.grupo || x.delante) && (!m.grupo || x.grupo !== m.grupo));
+        if (otras.length) {
+            const con = elegirDe("master-agrupar-" + m.id, "juntarla en pestañas con", otras.map((x) => [x.id, MODULOS[x.tipo].emoji + " "
+                + nombreDeVentana(x) + (x.grupo ? " (y las de su grupo)" : "")]), otras[0].id);
+            const juntar = botonDe("oc-vida-accion", "🗂️ agrupar", () => {
+                const d = estado.modulos.find((x) => x.id === con.elegir.value);
+                cerrar();
+                if (d) {
+                    agrupar(m, d);
+                }
+            });
+            pGrupo.append(con, juntar);
+        } else {
+            pGrupo.appendChild(crear("p", "oc-hoja-nota", "No hay otras ventanas en esta pestaña."));
+        }
+        if (m.grupo) {
+            pGrupo.appendChild(botonDe("oc-vida-accion", "⇱ sacarla del grupo", () => {
+                cerrar();
+                sacarDelGrupo(m);
+            }));
+        }
+        pGrupo.appendChild(crear("p", "oc-hoja-nota", "También: mantén pulsada su barra y suéltala sobre la barra de otra."));
+        const { lista: pestanas, elegir } = pestanasDe([["📝 título", pTitulo], ["🎨 color", pColor], ["🔠 tamaño", pTam],
+            ["🗂️ agrupar", pGrupo]], "Opciones de la ventana", "master-personalizar-" + m.id);
+        cuerpo.append(pestanas, pTitulo, pColor, pTam, pGrupo, listo);
         elegir(0, false);
         cuerpo.addEventListener("submit", (e) => {
             e.preventDefault();
@@ -6607,6 +6693,13 @@
             ponerColor(m);
             guardar();
             cerrar();
+            if (m.grupo) {
+                delGrupo(m).forEach((x) => {
+                    x.el = null;
+                });
+                pintarTodo();
+                m.el.querySelector(".master-ventana-nombre").focus();
+            }
             if (m.alRenombrar) {
                 m.alRenombrar();
             }
@@ -6615,6 +6708,13 @@
         const cerrar = window.ocVentana.abrir({ titulo: "opciones de la ventana", cuerpo, vuelta, foco: input });
     }
     function colocar(m) {
+        if (m.grupo && m.delante) {
+            delGrupo(m).forEach((x) => {
+                if (x !== m) {
+                    Object.assign(x, { x: m.x, y: m.y, w: m.w, h: m.h });
+                }
+            });
+        }
         if (enMovil.matches) {
             m.el.style.left = "";
             m.el.style.top = "";
@@ -6632,6 +6732,70 @@
         m.el.style.zIndex = String(encima);
     }
     const ESPERA_COGER = 350;
+    const delGrupo = (m) => (m.grupo ? estado.modulos.filter((x) => x.grupo === m.grupo) : [m]);
+    const nombreDeVentana = (m) => m.titulo || MODULOS[m.tipo].nombre;
+    function verEnGrupo(m, foco) {
+        const todas = delGrupo(m);
+        const antes = todas.find((x) => x.delante) || todas[0];
+        todas.forEach((x) => {
+            Object.assign(x, { x: antes.x, y: antes.y, w: antes.w, h: antes.h, plegado: !!antes.plegado, delante: x === m });
+            if (x.el) {
+                x.el.hidden = !x.delante;
+                if (x.pintarPlegado) {
+                    x.pintarPlegado();
+                }
+                colocar(x);
+            }
+        });
+        if (m.el) {
+            alFrente(m);
+            if (foco) {
+                m.el.querySelector(".master-grupo-pestana[aria-selected='true']").focus();
+            }
+        }
+        guardar();
+    }
+    function agrupar(m, destino) {
+        const g = destino.grupo || "g" + destino.id;
+        const juntas = delGrupo(destino).concat(delGrupo(m).filter((x) => x.grupo !== g || !destino.grupo));
+        juntas.forEach((x) => {
+            Object.assign(x, { grupo: g, x: destino.x, y: destino.y, w: destino.w, h: destino.h, plegado: !!destino.plegado,
+                delante: x === m });
+            x.el = null;
+        });
+        pintarTodo();
+        guardar();
+        alFrente(m);
+        m.el.querySelector(".master-grupo-pestana[aria-selected='true']").focus();
+        avisar("Juntas en pestañas: " + juntas.map(nombreDeVentana).join(", ") + ".");
+    }
+    function sacarDelGrupo(m) {
+        const resto = delGrupo(m).filter((x) => x !== m);
+        delete m.grupo;
+        delete m.delante;
+        m.x = Math.min(topeX(m), m.x + 40);
+        m.y += 40;
+        if (resto.length === 1) {
+            delete resto[0].grupo;
+            delete resto[0].delante;
+        } else {
+            resto[0].delante = true;
+        }
+        [m].concat(resto).forEach((x) => {
+            x.el = null;
+        });
+        pintarTodo();
+        guardar();
+        alFrente(m);
+        m.el.querySelector(".master-ventana-nombre").focus();
+        avisar("Sacada del grupo: " + nombreDeVentana(m) + ".");
+    }
+    function ventanaBajo(x, y, yo) {
+        const el = document.elementsFromPoint(x, y).find((e) => e.closest(".master-ventana-barra, .master-grupo-pestanas")
+            && !yo.contains(e));
+        const v = el && el.closest(".master-ventana");
+        return v ? estado.modulos.find((m) => m.el === v && !v.hidden) : null;
+    }
     function ventanaDe(m) {
         const def = MODULOS[m.tipo];
         m.w = m.w || def.w;
@@ -6640,6 +6804,7 @@
         m.y = Math.max(0, m.y || 0);
         const v = crear("div", "master-ventana oc-hoja-caja");
         v.setAttribute("role", "region");
+        v.hidden = !!m.grupo && !m.delante;
         const cabeza = crear("div", "recent-entries-header master-ventana-barra");
         cabeza.dataset.ventanaLista = "si";
         const titulo = crear("h2", "oc-hoja-titulo master-ventana-titulo");
@@ -6676,13 +6841,22 @@
             crecerLienzo();
             guardar();
         });
-        const plegar = botonDe("master-ventana-mando", m.plegado ? "+" : "−", () => {
-            m.plegado = !m.plegado;
-            cuerpo.hidden = m.plegado;
+        const pintarPlegado = () => {
+            cuerpo.hidden = !!m.plegado;
             plegar.textContent = m.plegado ? "+" : "−";
             plegar.setAttribute("aria-expanded", m.plegado ? "false" : "true");
             nombre.setAttribute("aria-expanded", m.plegado ? "false" : "true");
-            v.classList.toggle("es-plegada", m.plegado);
+            v.classList.toggle("es-plegada", !!m.plegado);
+        };
+        m.pintarPlegado = pintarPlegado;
+        const plegar = botonDe("master-ventana-mando", m.plegado ? "+" : "−", () => {
+            m.plegado = !m.plegado;
+            delGrupo(m).forEach((x) => {
+                x.plegado = m.plegado;
+                if (x.pintarPlegado) {
+                    x.pintarPlegado();
+                }
+            });
             colocar(m);
             crecerLienzo();
             guardar();
@@ -6690,11 +6864,25 @@
         plegar.setAttribute("aria-expanded", m.plegado ? "false" : "true");
         nombre.setAttribute("aria-expanded", m.plegado ? "false" : "true");
         const quitar = botonDe("master-ventana-mando", "✕", () => {
+            const resto = delGrupo(m).filter((x) => x !== m);
             estado.modulos = estado.modulos.filter((x) => x !== m);
             v.remove();
+            if (m.grupo) {
+                if (resto.length === 1) {
+                    delete resto[0].grupo;
+                    delete resto[0].delante;
+                } else {
+                    resto[0].delante = true;
+                }
+                resto.forEach((x) => {
+                    x.el = null;
+                });
+                pintarTodo();
+            }
             guardar();
             avisar("Quitado: " + (m.titulo || def.nombre) + ".");
-            botonAnadir.focus();
+            const sigue = resto[0] && resto[0].el;
+            (sigue ? sigue.querySelector(".master-ventana-nombre") : botonAnadir).focus();
         }, "Quitar esta ventana");
         const cambiar = botonDe("master-ventana-mando", "✎", () => personalizar(m, cambiar),
             "Opciones: título, color y tamaño del contenido");
@@ -6703,6 +6891,45 @@
         const mandos = crear("div", "master-ventana-mandos");
         mandos.append(cambiar, plegar, quitar);
         cabeza.append(titulo, mandos);
+        let tiras = null;
+        if (m.grupo) {
+            const sacar = botonDe("master-ventana-mando", "⇱", () => sacarDelGrupo(m), "Sacar esta ventana del grupo");
+            sacar.title = "Sacarla del grupo";
+            mandos.prepend(sacar);
+            tiras = crear("div", "master-grupo-pestanas");
+            tiras.setAttribute("role", "tablist");
+            tiras.setAttribute("aria-label", "Ventanas juntas");
+            const juntas = delGrupo(m);
+            juntas.forEach((x, i) => {
+                const d = MODULOS[x.tipo];
+                const t = botonDe("master-grupo-pestana", "", () => {
+                    if (x !== m) {
+                        verEnGrupo(x, true);
+                    }
+                });
+                const e2 = crear("span", "", d.emoji + " ");
+                e2.setAttribute("aria-hidden", "true");
+                t.append(e2, document.createTextNode(nombreDeVentana(x)));
+                t.setAttribute("role", "tab");
+                t.setAttribute("aria-selected", x === m ? "true" : "false");
+                t.setAttribute("aria-controls", "master-cuerpo-" + x.id);
+                t.tabIndex = x === m ? 0 : -1;
+                if (x.color) {
+                    t.classList.add("con-color");
+                    t.style.setProperty("--pestana-color", hexDe(x.color));
+                    t.style.setProperty("--pestana-tinta", tintaDe(hexDe(x.color)));
+                }
+                t.addEventListener("keydown", (ev) => {
+                    const paso = { ArrowRight: 1, ArrowLeft: -1, Home: -i, End: juntas.length - 1 - i }[ev.key];
+                    if (paso === undefined) {
+                        return;
+                    }
+                    ev.preventDefault();
+                    verEnGrupo(juntas[(i + paso + juntas.length) % juntas.length], true);
+                });
+                tiras.appendChild(t);
+            });
+        }
         const cuerpo = crear("div", "oc-hoja-dentro master-ventana-cuerpo");
         cuerpo.id = "master-cuerpo-" + m.id;
         nombre.setAttribute("aria-controls", cuerpo.id);
@@ -6730,7 +6957,11 @@
                 colocar(m);
             }, () => v.classList.remove("es-arrastrada"));
         });
-        v.append(cabeza, cuerpo, esquina);
+        v.append(cabeza);
+        if (tiras) {
+            v.appendChild(tiras);
+        }
+        v.append(cuerpo, esquina);
         m.el = v;
         ponerColor(m);
         cabeza.addEventListener("pointerdown", (e) => {
@@ -6757,13 +6988,32 @@
                 const my = m.y;
                 v.dataset.recienMovida = "si";
                 v.classList.add("es-arrastrada", "es-cogida");
-                arrastrar(e, cabeza, (dx, dy) => {
+                let destino = null;
+                const marcar = (d) => {
+                    if (destino && destino.el) {
+                        destino.el.classList.remove("es-destino");
+                    }
+                    destino = d;
+                    if (destino) {
+                        destino.el.classList.add("es-destino");
+                    }
+                };
+                arrastrar(e, cabeza, (dx, dy, ev) => {
                     m.x = Math.min(topeX(m), Math.max(0, mx + dx));
                     m.y = Math.max(0, my + dy);
                     colocar(m);
+                    const d = ventanaBajo(ev.clientX, ev.clientY, v);
+                    if (d !== destino && !(d && m.grupo && d.grupo === m.grupo)) {
+                        marcar(d);
+                    }
                 }, () => {
                     v.classList.remove("es-arrastrada", "es-cogida");
                     setTimeout(() => delete v.dataset.recienMovida, 0);
+                    if (destino) {
+                        const d = destino;
+                        marcar(null);
+                        agrupar(m, d);
+                    }
                 });
             }, ESPERA_COGER);
             document.addEventListener("pointermove", quieto);
@@ -6840,7 +7090,7 @@
                 caja.scrollTop += velocidad;
             }
             const z = zoomAhora();
-            alMover(Math.round((ultimo.clientX - x0) / z), Math.round((ultimo.clientY - y0 + caja.scrollTop - scroll0) / z));
+            alMover(Math.round((ultimo.clientX - x0) / z), Math.round((ultimo.clientY - y0 + caja.scrollTop - scroll0) / z), ultimo);
             crecerLienzo(true);
             if (velocidad) {
                 pendiente = requestAnimationFrame(paso);
@@ -6858,7 +7108,7 @@
             document.removeEventListener("pointermove", mover);
             document.removeEventListener("pointerup", soltar);
             document.removeEventListener("pointercancel", soltar);
-            alSoltar();
+            alSoltar(ultimo);
             crecerLienzo();
             guardar();
         };
@@ -7195,7 +7445,7 @@
         let x = 0;
         let y = 0;
         let alto = 0;
-        estado.modulos.forEach((m) => {
+        estado.modulos.filter((m) => !m.grupo || m.delante).forEach((m) => {
             if (x + m.w > ancho && x > 0) {
                 x = 0;
                 y += alto + 20;
@@ -7205,6 +7455,12 @@
             m.y = y;
             x += m.w + 20;
             alto = Math.max(alto, m.plegado ? 60 : m.h);
+            colocarGrupo(m);
+        });
+    }
+    function colocarGrupo(m) {
+        delGrupo(m).forEach((x) => {
+            Object.assign(x, { x: m.x, y: m.y, w: m.w, h: m.h });
         });
     }
     const pestanas = crear("div", "master-pestanas");
@@ -7342,7 +7598,7 @@
             b.addEventListener("pointerdown", (e) => cogerPestana(e, b));
             b.addEventListener("contextmenu", (e) => e.preventDefault());
             b.setAttribute("aria-keyshortcuts", "Delete");
-            const hex = hexTablero(pf.color);
+            const hex = hexPestana(colorDePestana(pf));
             if (hex) {
                 b.classList.add("con-color");
                 b.style.setProperty("--pestana-color", hex);
@@ -7482,7 +7738,8 @@
     function renombrar() {
         const cuerpo = crear("form", "master-personalizar");
         const et = crear("label", "oc-dados-etiqueta", "nombre del perfil");
-        const grupo = muestrasDe("color del tablero y de su pestaña", TABLEROS, estado.color || "", "master-perfil-otro");
+        const grupoPestana = muestrasDe("color de la pestaña", COLORES_PESTANA, colorDePestana(estado), "master-perfil-otro-pestana");
+        const grupo = muestrasDe("color del fondo del tablero", TABLEROS, estado.color || "", "master-perfil-otro");
         const input = crear("input", "oc-dados-texto");
         input.id = "master-perfil-nombre";
         input.value = estado.nombre;
@@ -7495,7 +7752,7 @@
             const lista = leerPlantillas();
             lista.push({ id: Date.now().toString(36), nombre: input.value.trim() || estado.nombre,
                 ventanas: estado.modulos.map((x) => ({ tipo: x.tipo, x: x.x, y: x.y, w: x.w, h: x.h, titulo: x.titulo || "",
-                    color: x.color || "", escala: x.escala || 1 })) });
+                    color: x.color || "", escala: x.escala || 1, plegado: !!x.plegado, grupo: x.grupo, delante: x.delante })) });
             guardarPlantillas(lista);
             avisar("Guardada la plantilla «" + (input.value.trim() || estado.nombre) + "»: sale al crear un perfil con ＋.");
         }, "Guardar las ventanas de este perfil como plantilla");
@@ -7511,27 +7768,23 @@
         cerrarEsta.disabled = todo.perfiles.length < 2;
         const botonesPerfil = crear("div", "master-notas-botones");
         botonesPerfil.append(listo, comoPlantilla, cerrarEsta);
-        cuerpo.append(et, input, grupo, botonesPerfil);
+        cuerpo.append(et, input, grupoPestana, grupo, botonesPerfil);
         cuerpo.addEventListener("submit", (e) => {
             e.preventDefault();
             estado.nombre = input.value.trim() || estado.nombre;
             estado.color = grupo.valor();
+            estado.colorPestana = grupoPestana.valor();
             colorTablero();
             guardar();
             cerrar();
             pintarPestanas(true);
             avisar("Perfil: " + estado.nombre + ".");
         });
-        const cerrar = window.ocVentana.abrir({ titulo: "nombre y color de la pestaña", cuerpo, vuelta: botonRenombrar, foco: input });
+        const cerrar = window.ocVentana.abrir({ titulo: "nombre y colores de la pestaña", cuerpo, vuelta: botonRenombrar, foco: input });
     }
-    const PLANTILLAS = [["vacio", "⬜ vacío", "Sin ventanas.", []],
-        ["combate", "⚔️ combate", "Iniciativa, dados, tiradas, condiciones, acciones y bestiario.",
-            ["iniciativa", "dados", "registro", "condiciones", "acciones", "bestiario"]],
-        ["exploracion", "🧭 exploración", "Encuentros, dados, relojes, calendario, reglas y notas.",
-            ["encuentros", "dados", "relojes", "calendario", "reglas", "notas"]],
-        ["social", "🗣️ rol y social", "PNJ, nombres, idiomas, tienda y notas.", ["pnj", "nombres", "idiomas", "tienda", "notas"]],
-        ["preparar", "📋 preparar la sesión", "Dungeon, PNJ, botín, encuentros y un post-it.",
-            ["dungeon", "pnj", "botin", "encuentros", "tarjeta"]]];
+    const PLANTILLAS = [["vacio", "⬜ vacío", "Sin ventanas.", -1]].concat(PERFILES_DE_SERIE.map(([nombre, color, ventanas], i) =>
+        ["serie" + i, nombre, ventanas.length + " ventanas, donde van" + (color ? " · tablero " +
+            ((TABLEROS.find((t) => t[0] === color) || [])[1] || color) : "") + ".", i]));
     const leerPlantillas = () => {
         try {
             const x = JSON.parse(localStorage.getItem(CLAVE_PLANTILLAS) || "[]");
@@ -7556,6 +7809,10 @@
         input.maxLength = 30;
         input.autocomplete = "off";
         et.htmlFor = input.id;
+        let nombreTocado = false;
+        input.addEventListener("input", () => {
+            nombreTocado = true;
+        });
         const grupo = crear("fieldset", "master-plantillas");
         grupo.appendChild(crear("legend", "oc-dados-etiqueta", "con qué ventanas"));
         const propias = leerPlantillas();
@@ -7597,24 +7854,27 @@
                 pf.modulos = propia.ventanas.filter((v) => MODULOS[v.tipo]).map((v) => Object.assign({}, v, { id: "m" + siguienteId++ }));
             } else {
                 const pl = PLANTILLAS.find((x) => x[0] === elegida) || PLANTILLAS[0];
-                pf.modulos = pl[3].map((tipo) => ({ id: "m" + siguienteId++, tipo, x: 0, y: 0, w: MODULOS[tipo].w, h: MODULOS[tipo].h }));
+                if (pl[3] >= 0) {
+                    const de = perfilesDeSerie()[pl[3]];
+                    pf.modulos = de.modulos.map((m) => Object.assign(m, { id: "m" + siguienteId++ }));
+                    pf.color = de.color;
+                    pf.colorPestana = de.colorPestana;
+                    if (!nombreTocado) {
+                        pf.nombre = de.nombre;
+                    }
+                }
             }
             cerrar();
             todo.perfiles.push(pf);
             activar(pf, true);
-            if (!propia) {
-                ordenar();
-                pintarTodo();
-                guardar();
-            }
             avisar("Perfil nuevo: " + pf.nombre + (pf.modulos.length ? ", con " + pf.modulos.length + " ventanas." : "."));
         });
         const cerrar = window.ocVentana.abrir({ titulo: "perfil nuevo", cuerpo, vuelta: botonNueva, foco: input });
     }
     const botonNueva = botonDe("master-pestana-mando", "＋", () => perfilNuevo(), "Perfil nuevo");
     botonNueva.title = "Perfil nuevo";
-    const botonRenombrar = botonDe("master-pestana-mando", "✎", renombrar, "Nombre y color de este perfil");
-    botonRenombrar.title = "Nombre y color de este perfil";
+    const botonRenombrar = botonDe("master-pestana-mando", "✎", renombrar, "Nombre y colores de esta pestaña");
+    botonRenombrar.title = "Nombre, color de la pestaña y fondo del tablero";
     botonRenombrar.setAttribute("aria-haspopup", "dialog");
     let porCerrar = null;
     let esperaCerrar = 0;
@@ -7742,7 +8002,8 @@
         };
         const nueva = formulario("master-campana-nueva", "campaña nueva", "campaña " + (todas.campanas.length + 1), "＋ crear", (n) => {
             const c = { id: "c" + siguienteCampana++, nombre: n || "campaña " + (todas.campanas.length + 1), pjs: [],
-                perfiles: [{ id: "p" + siguientePerfil++, nombre: "principal", modulos: [] }] };
+                perfiles: perfilesDeSerie().map((pf) => Object.assign(pf, { id: "p" + siguientePerfil++,
+                    modulos: pf.modulos.map((m) => Object.assign(m, { id: "m" + siguienteId++ })) })) };
             c.activo = c.perfiles[0].id;
             todas.campanas.push(c);
             cerrar();
@@ -7861,6 +8122,7 @@
             ["mantener pulsada una pestaña", "arrastrarla a otro sitio"], ["C", "campañas (cambiar, crear…)"],
             ["?", "estos atajos"]]],
         ["Las ventanas", [["clic en la barra", "plegarla o desplegarla"], ["mantener pulsada la barra", "cogerla y moverla"],
+            ["soltarla sobre la barra de otra", "juntarlas en pestañas (⇱ la saca)"],
             ["Intro en el nombre", "plegarla o desplegarla"], ["flechas en el nombre", "moverla (con Mayús, más deprisa)"],
             ["Alt + flechas en el nombre", "cambiar su tamaño"], ["Esc", "cerrar una ventana modal"]]],
         ["El dibujo (con el foco en el lienzo)", [["B", "lápiz"], ["E", "goma"], ["G", "bote"], ["M", "seleccionar y mover"],

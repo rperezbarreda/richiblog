@@ -4339,6 +4339,30 @@
   el lienzo crece mientras (y encoge despacio al soltar) y cerca del borde
   de arriba o de abajo se hace scroll solo. Las ventanas nuevas van al
   PRIMER HUECO LIBRE (hueco()), empezando por lo que se ve.
+  LAS PESTAÑAS DE SERIE (PERFILES_DE_SERIE, la disposición de Richi:
+  ⭐home, ⚔combate, 🖊notas, 💰tiendas, 🧙‍♂️NPCs y 🎲generadores, cada
+  una con su color y sus ventanas [tipo, x, y, ancho, alto, color,
+  plegada, escala], sin lo de dentro): las trae una campaña nueva (y la
+  pantalla la primera vez) y son las plantillas de «＋» (con «⬜ vacío» y
+  las propias); si no se le cambia el nombre, la pestaña nueva se llama
+  como la plantilla. Para cambiarlas: exportar desde ⚙, y pasar las
+  ventanas de cada perfil a esa lista.
+  DOS COLORES POR PESTAÑA (en su ✎): el de la pestaña (colorPestana;
+  COLORES_PESTANA: los de los tableros y los de las ventanas, y «🎨
+  otro») y el del fondo del tablero (color). Las de antes, sin
+  colorPestana, llevan el de su tablero (colorDePestana()).
+  LOS GRUPOS DE VENTANAS: mantener pulsada la barra de una y soltarla
+  sobre la barra (o las pestañas) de otra las junta en una con
+  pestañas (la de debajo se marca con un reborde a rayas, .es-destino;
+  ventanaBajo()). Con el teclado, en su ✎, «🗂️ agrupar» (con cuál) y
+  «⇱ sacarla del grupo». Cada ventana sigue siendo suya: m.grupo (el
+  mismo en todas) y m.delante (la que se ve; las demás, hidden) y
+  comparten sitio, tamaño y plegado (colocar(), verEnGrupo(),
+  agrupar(), sacarDelGrupo(); ordenar las trata como una). Debajo de la
+  barra, .master-grupo-pestanas (role="tablist", con las flechas, Inicio
+  y Fin; del color de cada ventana); «⇱» en sus mandos la saca; ✕ quita
+  sólo la de delante (si queda una, sola). Al cargar, los grupos de una
+  sola o sin la de delante se arreglan.
   LA BARRA DE ARRIBA, como un navegador: a la izquierda, en un bloque
   pegado al tablero y acabado en diagonal (clip-path; en el móvil sin
   diagonal y en dos filas si no cabe), 🧰 (herramientas: añadir una

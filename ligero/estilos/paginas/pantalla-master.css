@@ -395,6 +395,65 @@
 .master-ventana.es-plegada {
     min-height: 0;
 }
+.master-ventana[hidden] {
+    display: none;
+}
+.master-ventana.es-destino {
+    outline: 4px dashed var(--yellow);
+    outline-offset: 4px;
+}
+.master-grupo-pestanas {
+    display: flex;
+    flex: none;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    gap: 2px;
+    padding: 4px 6px 0;
+    border-bottom: 2px solid var(--yellow);
+    background: var(--surface);
+}
+.master-grupo-pestana {
+    max-width: 12rem;
+    min-height: 30px;
+    margin-bottom: -2px;
+    padding: 2px 10px;
+    overflow: hidden;
+    border: 2px solid var(--border);
+    border-bottom: 2px solid var(--yellow);
+    border-radius: 8px 8px 0 0;
+    background: transparent;
+    color: var(--muted);
+    font-family: var(--fuente-mono);
+    font-size: 0.75rem;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    cursor: pointer;
+}
+.master-grupo-pestana:hover {
+    color: var(--white);
+}
+.master-grupo-pestana[aria-selected="true"] {
+    border-color: var(--yellow);
+    border-bottom-color: var(--fondo-pestana, var(--purple-lighter));
+    background: var(--fondo-pestana, var(--purple-lighter));
+    box-shadow: inset 0 3px 0 var(--yellow);
+    color: var(--white);
+    font-weight: 700;
+}
+.master-grupo-pestana.con-color {
+    border-color: var(--pestana-color);
+    border-bottom-color: var(--yellow);
+    background: var(--pestana-color);
+    color: var(--pestana-tinta);
+}
+.master-grupo-pestana.con-color[aria-selected="true"] {
+    border-color: var(--yellow);
+    border-bottom-color: var(--pestana-color);
+}
+.master-grupo-pestana:focus-visible {
+    outline: 3px solid var(--yellow);
+    outline-offset: 2px;
+}
 .master-ventana-tamano {
     position: absolute;
     right: 0;
