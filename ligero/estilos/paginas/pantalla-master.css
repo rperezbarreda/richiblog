@@ -3182,58 +3182,101 @@
     flex-wrap: wrap;
     align-items: center;
     justify-content: space-between;
-    gap: 8px;
+    gap: 8px 16px;
     margin-bottom: 10px;
 }
-.master-ambiente-lista {
+.master-ambiente-general {
     display: flex;
-    flex-direction: column;
-    gap: 4px;
+    flex: 1 1 12rem;
+    align-items: center;
+    gap: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+}
+.master-ambiente-general input {
+    flex: 1 1 6rem;
+    min-width: 0;
+    accent-color: var(--yellow);
+}
+.master-ambiente-lista {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(10.5rem, 1fr));
+    gap: 10px;
     margin: 10px 0;
     padding: 0;
     list-style: none;
 }
 .master-ambiente-fila {
+    position: relative;
     display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 4px 10px;
-    padding: 2px 4px;
-    border: 2px solid transparent;
+    flex-direction: column;
+    gap: 8px;
+    padding: 8px;
+    border: 2px solid var(--border);
 }
 .master-ambiente-fila.es-sonando {
     border-color: var(--yellow);
 }
 .master-ambiente-boton {
-    display: inline-flex;
-    flex: 1 1 8.5rem;
+    display: flex;
+    flex-direction: column;
     align-items: center;
-    gap: 8px;
+    justify-content: center;
+    gap: 4px;
     min-width: 0;
-    min-height: 38px;
-    padding: 4px 10px;
-    border: 2px solid var(--yellow);
+    min-height: 64px;
+    padding: 6px 8px;
+    border: 2px solid transparent;
     background: transparent;
     color: var(--white);
     font: inherit;
-    text-align: left;
+    text-align: center;
+    overflow-wrap: anywhere;
     cursor: pointer;
 }
-.master-ambiente-boton[aria-pressed="true"] {
+.master-ambiente-boton:hover {
+    border-color: var(--yellow);
+}
+.master-ambiente-boton[aria-pressed="true"],
+.master-ambiente-fila.es-sonando .master-ambiente-boton {
     background: var(--yellow);
     color: var(--yellow-contrast);
     font-weight: 700;
 }
 .master-ambiente-boton:focus-visible,
-.master-ambiente-volumen:focus-visible {
+.master-ambiente-volumen:focus-visible,
+.master-ambiente-general input:focus-visible {
     outline: 3px solid var(--yellow);
     outline-offset: 2px;
 }
 .master-ambiente-emoji {
-    font-size: 1.25rem;
+    font-size: 1.6rem;
+    line-height: 1.2;
 }
 .master-ambiente-volumen {
-    flex: 1 1 5rem;
+    width: 100%;
     min-width: 0;
     accent-color: var(--yellow);
+}
+.master-ambiente-quitar {
+    position: absolute;
+    top: 2px;
+    right: 2px;
+}
+.master-sonidos-seccion {
+    margin: 14px 0 0;
+    font-size: 1rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+}
+.master-sonidos-lista {
+    grid-template-columns: repeat(auto-fill, minmax(8.5rem, 1fr));
+    gap: 8px;
+}
+.master-sonidos-lista .master-ambiente-fila {
+    padding: 4px;
+}
+.master-sonidos-lista .master-ambiente-boton {
+    min-height: 58px;
 }

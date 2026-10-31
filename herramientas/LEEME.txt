@@ -4466,13 +4466,23 @@
   direcciones de esa biblioteca. Un motor para toda la página
   (AMBIENTE; sonarGrabacion(), callar(), callarTodo(),
   volumenGeneral()): cada sonido se enciende y se apaga con su botón
-  (aria-pressed) y tiene su volumen; hay un volumen general y «⏹
-  silencio». Siguen sonando al cambiar de pestaña y se paran al quitar
+  (aria-pressed) y tiene su volumen; hay un volumen general y «■
+  silencio». Se ven como tarjetas (icono y nombre, y su volumen debajo)
+  en tantas columnas como quepan en la ventana (grid auto-fill). Siguen sonando al cambiar de pestaña y se paran al quitar
   la última ventana de sonido de la campaña (vigilarAmbiente()). Al
   recargar no suenan solos (el navegador no deja): «▶ volver a poner lo
   de antes». «＋ 🎵 tu sonido»: un audio del ordenador, en bucle, en
   IndexedDB como los documentos (con Web Audio, sonarPropio(): bucle sin
   cortes y sin media-src), sólo en este navegador.
+  🔔 EFECTOS DE SONIDO (en «la mesa», tipo «sonidos», montarSonidos):
+  suenan UNA vez al pulsar, y se pueden pisar. Misma biblioteca y misma
+  CSP (urlSonidoSegura). EFECTOS_SONOROS: [título de sección, [[emoji,
+  nombre, ruta]]]: puertas y cerrojos, combate (no hay espadas en la
+  biblioteca: tajos, golpes, metal, estocada…), magia y explosiones,
+  gritos y voces, monstruos y animales, otros. Un volumen para todos y
+  «■ parar» (EFECTOS_SUENAN). La tarjeta se marca mientras suena; si no
+  carga, se avisa. «＋ 🎵 tu efecto»: audios propios en IndexedDB,
+  tocados con Web Audio (tocarEfectoPropio), sólo en este navegador.
   LOS DADOS (la ventana): cada dado con su dibujo (el de la bandeja:
   window.ocDados.silueta, de personajes.js) y su nombre debajo.
   LAS CAMPAÑAS: configuraciones separadas (dos campañas, dos partys que

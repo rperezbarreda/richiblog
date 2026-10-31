@@ -7286,7 +7286,7 @@
             return;
         }
         const arriba = crear("div", "master-ambiente-arriba");
-        const etG = crear("label", "master-dibujo-deslizador");
+        const etG = crear("label", "master-ambiente-general");
         const general = crear("input");
         general.type = "range";
         general.min = 0;
@@ -7294,7 +7294,7 @@
         general.value = d.general === undefined ? 80 : d.general;
         general.setAttribute("aria-label", "Volumen general");
         general.setAttribute("aria-valuetext", general.value + " %");
-        etG.append(crear("span", "oc-dados-etiqueta", "🔊 general"), general);
+        etG.append(crear("span", "", "🔊 general"), general);
         const ponerGeneral = () => volumenGeneral(general.value / 100);
         AMBIENTE.nivel = general.value / 100;
         general.addEventListener("input", () => {
@@ -7303,7 +7303,7 @@
             ponerGeneral();
             guardar();
         });
-        const parar = botonDe("oc-vida-accion", "⏹ silencio", () => {
+        const parar = botonDe("oc-vida-accion", "■ silencio", () => {
             callarTodo();
             d.sonando = [];
             guardar();
@@ -7392,7 +7392,7 @@
             if (id.indexOf("propio-") === 0) {
                 const p = d.propios.find((x) => "propio-" + x.id === id);
                 let seguro = false;
-                const quitar = botonDe("master-docs-mando", "✕", () => {
+                const quitar = botonDe("master-docs-mando master-ambiente-quitar", "✕", () => {
                     if (!seguro) {
                         seguro = true;
                         quitar.classList.add("es-seguro");
@@ -7460,6 +7460,214 @@
         dentro.append(arriba, volver, lista, otro, subir, nota);
         pintarFilas();
     }
+    const EFECTOS_SONOROS = [
+        ["🚪 Puertas y cerrojos", [["🚪", "puerta que cruje", "doors/creaking_wooden_door"],
+            ["🚪", "abrir una puerta", "doors/wood_door_open"], ["💥", "portazo", "doors/wood_door_close_hard"],
+            ["🏰", "portón pesado", "doors/heavy_door_close"], ["✊", "llamar a la puerta", "doors/knock_on_wooden_door"],
+            ["🗝️", "llave en la cerradura", "doors/key_in_lock"], ["🔒", "puerta cerrada (forcejeo)", "doors/locked_doorknob_jiggle"],
+            ["🔩", "cerrojo", "doors/deadbolt_lock"], ["📦", "tapa de cofre", "doors/lid_close_wood"]]],
+        ["⚔️ Combate", [["🌬️", "tajo al aire", "horror/swoosh"], ["🪓", "hachazo", "impacts/chop"],
+            ["🔨", "golpe de maza", "impacts/hit_with_club"], ["🛡️", "golpe en el escudo", "impacts/metal_strike_on_wood"],
+            ["⚔️", "choque de metal", "impacts/metal_crash"], ["🗡️", "estocada", "horror/puncture_pop"],
+            ["🥩", "golpe en carne", "horror/meat_punch"], ["👊", "puñetazos", "impacts/body_punch_series"],
+            ["🦴", "hueso roto", "horror/leg_bone_break"], ["🔪", "arma que cae", "impacts/knife_drop"],
+            ["⛓️", "cadenas", "impacts/chain_jingle"], ["💣", "cañonazo", "weapons/howitzer_cannon_fire"]]],
+        ["✨ Magia y explosiones", [["⚡", "rayo", "science_fiction/alien_beam"], ["🌀", "portal", "science_fiction/sci_fi_vortex"],
+            ["🔮", "encantamiento", "science_fiction/windchime_drone"], ["🌫️", "susurro mágico", "science_fiction/dream_breath"],
+            ["📉", "conjuro que se apaga", "science_fiction/high_to_low_sweep"], ["👁️", "presagio", "science_fiction/forboding_resonance"],
+            ["💨", "nube de humo", "weapons/smoke_bomb"], ["🔥", "bola de fuego", "weapons/explosion_hiss_bop_bang"],
+            ["💥", "explosión lejana", "weapons/big_explosion_distant"], ["🌩️", "trueno", "weather/thunder_crack"],
+            ["🪨", "derrumbe", "impacts/rubble_crash"], ["🪟", "cristal que estalla", "impacts/glass_shatters_into_debris"]]],
+        ["😱 Gritos y voces", [["😱", "grito de muerte", "human_voices/death_impact_yell_single"],
+            ["😵", "varios gritos", "human_voices/death_impact_yell_multiple"], ["💀", "último aliento", "human_voices/death_rattle_breath"],
+            ["📣", "grito de guerra", "crowds/battle_cry_high_pitch"], ["🙌", "gente que grita", "crowds/human_group_cry_out"],
+            ["😠", "multitud enfadada", "crowds/voices_angry"], ["🎉", "vítores", "crowds/battle_crowd_celebration"],
+            ["🤕", "heridos que gimen", "crowds/battle_agony_moans"], ["😏", "risita", "human_voices/male_chuckling"],
+            ["😂", "carcajada", "human_voices/man_laugh_and_knee_slap"]]],
+        ["🐺 Monstruos y animales", [["🧟", "zombi", "horror/aggressive_zombie_snarls"],
+            ["👹", "rugido de monstruo", "horror/female_monster_growls"], ["😾", "gruñido", "horror/monster_alien_growl_tense"],
+            ["🐍", "siseo", "horror/monster_alien_grunt_hiss"], ["🐕", "perro que gruñe", "animals/dog_growling"],
+            ["🪱", "cascabel de serpiente", "animals/animal_hiss_and_rattle"], ["🦉", "búho", "animals/owl_hooting"],
+            ["🐦", "cuervo", "animals/crow_call"], ["🐝", "enjambre", "animals/swarming_bees"],
+            ["🐙", "tentáculo", "animals/tentacle_flop_down"], ["🐀", "ratas", "animals/mouse_squeaking"],
+            ["🐎", "caballos", "transportation/horse_team"]]],
+        ["🎲 Otros", [["🪙", "monedas", "impacts/loose_change_on_wood"], ["🥂", "brindis", "impacts/silverware_on_glass_toast"],
+            ["🌲", "rama que se parte", "impacts/forest_wood_snapping"], ["🪵", "crujido de madera", "impacts/stress_creak"],
+            ["⚰️", "tierra sobre un ataúd", "impacts/dirt_on_coffin_lid"], ["💦", "algo cae al agua", "water/rocks_into_water"]]],
+    ];
+    const EFECTOS_SUENAN = new Set();
+    let salidaEfectos = null;
+    function tocarEfecto(ruta, vol, alAcabar) {
+        const a = new Audio();
+        a.preload = "auto";
+        a.volume = Math.max(0, Math.min(1, vol));
+        a.src = urlSonidoSegura(ruta);
+        const fin = () => {
+            EFECTOS_SUENAN.delete(a);
+            alAcabar();
+        };
+        a.addEventListener("ended", fin);
+        EFECTOS_SUENAN.add(a);
+        return a.play().catch((e) => {
+            fin();
+            throw e;
+        });
+    }
+    function tocarEfectoPropio(audio, vol, alAcabar) {
+        const A = motorAudio();
+        if (!salidaEfectos) {
+            salidaEfectos = A.ctx.createGain();
+            salidaEfectos.connect(A.ctx.destination);
+        }
+        salidaEfectos.gain.value = vol;
+        const s = A.ctx.createBufferSource();
+        s.buffer = audio;
+        s.connect(salidaEfectos);
+        const x = { pause: () => {
+            try {
+                s.stop();
+            } catch (e) {
+            }
+        } };
+        s.addEventListener("ended", () => {
+            EFECTOS_SUENAN.delete(x);
+            alAcabar();
+        });
+        EFECTOS_SUENAN.add(x);
+        s.start();
+    }
+    function montarSonidos(dentro, m) {
+        m.datos = m.datos || {};
+        const d = m.datos;
+        d.propios = Array.isArray(d.propios) ? d.propios : [];
+        if (!window.Audio) {
+            dentro.appendChild(crear("p", "oc-vacio", "Este navegador no puede poner sonidos."));
+            return;
+        }
+        const arriba = crear("div", "master-ambiente-arriba");
+        const etG = crear("label", "master-ambiente-general");
+        const general = crear("input");
+        general.type = "range";
+        general.min = 0;
+        general.max = 100;
+        general.value = d.general === undefined ? 80 : d.general;
+        general.setAttribute("aria-label", "Volumen de los efectos");
+        general.setAttribute("aria-valuetext", general.value + " %");
+        etG.append(crear("span", "", "🔊 volumen"), general);
+        general.addEventListener("input", () => {
+            d.general = Number(general.value);
+            general.setAttribute("aria-valuetext", general.value + " %");
+            guardar();
+        });
+        const parar = botonDe("oc-vida-accion", "■ parar", () => {
+            EFECTOS_SUENAN.forEach((a) => a.pause());
+            EFECTOS_SUENAN.clear();
+            dentro.querySelectorAll(".master-ambiente-fila.es-sonando").forEach((li) => li.classList.remove("es-sonando"));
+            avisar("Parados los efectos.");
+        }, "Parar los efectos que estén sonando");
+        arriba.append(etG, parar);
+        const vol = () => general.value / 100;
+        function tarjeta(emoji, nombre, alPulsar) {
+            const li = crear("li", "master-ambiente-fila");
+            const b = botonDe("master-ambiente-boton", "", () => {
+                li.classList.add("es-sonando");
+                alPulsar(() => li.classList.remove("es-sonando"));
+            });
+            const em = crear("span", "master-ambiente-emoji", emoji);
+            em.setAttribute("aria-hidden", "true");
+            b.append(em, crear("span", "", nombre));
+            li.appendChild(b);
+            return li;
+        }
+        const partes = [];
+        EFECTOS_SONOROS.forEach(([titulo, lista]) => {
+            const h = crear("h3", "master-sonidos-seccion", titulo);
+            const ul = crear("ul", "master-ambiente-lista master-sonidos-lista");
+            ul.setAttribute("aria-label", titulo.replace(/^\S+\s/, ""));
+            lista.forEach(([emoji, nombre, ruta]) => {
+                ul.appendChild(tarjeta(emoji, nombre, (acabar) => {
+                    tocarEfecto(ruta, vol(), acabar).catch(() => {
+                        acabar();
+                        avisar("No se ha podido poner «" + nombre + "»: ¿hay conexión a internet?");
+                    });
+                }));
+            });
+            partes.push(h, ul);
+        });
+        const hP = crear("h3", "master-sonidos-seccion", "🎵 Los tuyos");
+        const listaP = crear("ul", "master-ambiente-lista master-sonidos-lista");
+        listaP.setAttribute("aria-label", "Los tuyos");
+        const vacioP = crear("p", "oc-hoja-nota", "Aún no hay. Añade un audio de tu ordenador: sonará una vez al pulsarlo.");
+        function pintarPropios() {
+            listaP.replaceChildren(...d.propios.map((p) => {
+                const li = tarjeta("🎵", p.nombre, (acabar) => {
+                    motorAudio();
+                    archivoLeer(p.archivo).then((blob) => (blob ? blob.arrayBuffer() : null)).then((buf) => (buf
+                        ? AMBIENTE.ctx.decodeAudioData(buf) : null)).then((audio) => {
+                        if (!audio) {
+                            acabar();
+                            avisar("Ese sonido ya no está en este navegador.");
+                            return;
+                        }
+                        tocarEfectoPropio(audio, vol(), acabar);
+                    }).catch(() => {
+                        acabar();
+                        avisar("No se ha podido poner ese sonido.");
+                    });
+                });
+                let seguro = false;
+                const quitar = botonDe("master-docs-mando master-ambiente-quitar", "✕", () => {
+                    if (!seguro) {
+                        seguro = true;
+                        quitar.classList.add("es-seguro");
+                        avisar("Pulsa otra vez para quitar " + p.nombre + ".");
+                        return;
+                    }
+                    archivoBorrar(p.archivo);
+                    d.propios = d.propios.filter((x) => x !== p);
+                    guardar();
+                    pintarPropios();
+                    avisar("Quitado: " + p.nombre + ".");
+                    otro.focus();
+                }, "Quitar el sonido " + p.nombre);
+                li.appendChild(quitar);
+                return li;
+            }));
+            listaP.hidden = !d.propios.length;
+            vacioP.hidden = !!d.propios.length;
+        }
+        const subir = crear("input");
+        subir.type = "file";
+        subir.accept = "audio/*";
+        subir.hidden = true;
+        const otro = botonDe("oc-vida-accion", "＋ 🎵 tu efecto", () => subir.click(), "Añadir un efecto tuyo (un audio que suena una vez)");
+        otro.title = "Un audio de tu ordenador (se queda sólo en este navegador)";
+        subir.addEventListener("change", () => {
+            const f = subir.files && subir.files[0];
+            subir.value = "";
+            if (!f || !/^audio\//.test(f.type) || f.size > MAX_ARCHIVO) {
+                avisar("Sólo audios de hasta 50 MB.");
+                return;
+            }
+            const id = idDoc("a");
+            archivoGuardar(id, f).then(() => {
+                d.propios.push({ id, archivo: id, nombre: f.name.replace(/\.[^.]+$/, "").slice(0, 40) || "sonido" });
+                guardar();
+                pintarPropios();
+                avisar("Añadido: " + f.name + ". Se queda sólo en este navegador (⚙ → exportar para no perderlo).");
+            }).catch(() => avisar("No se ha podido guardar el sonido."));
+        });
+        const nota = crear("p", "oc-hoja-nota master-fuente");
+        const enlaceG = crear("a", "", "Google Sound Library");
+        enlaceG.href = "https://developers.google.com/assistant/tools/sound-library";
+        enlaceG.target = "_blank";
+        enlaceG.rel = "noopener noreferrer";
+        enlaceG.setAttribute("aria-label", "Google Sound Library (se abre en otra pestaña)");
+        nota.append("Grabaciones de la ", enlaceG, " (Google, CC BY 4.0): se oyen desde sus servidores, así que hace falta"
+            + " conexión. Cada una suena una vez; se pueden pisar unas con otras. Los tuyos se quedan sólo en este navegador.");
+        dentro.append(arriba, ...partes, hP, vacioP, listaP, otro, subir, nota);
+        pintarPropios();
+    }
     const MODULOS = {
         iniciativa: { nombre: "iniciativa", emoji: "⏱️", grupo: "combate", unico: true, w: 420, h: 520,
             desc: "El orden de turnos, con rondas, PG y marcas.",
@@ -7505,6 +7713,9 @@
         ambiente: { nombre: "sonido ambiente", emoji: "🎧", grupo: "mesa", unico: true, w: 440, h: 640,
             desc: "Lluvia, viento, hoguera, mercado, carro…: grabaciones de verdad en bucle, mezcladas (y tus audios).",
             montar: montarAmbiente },
+        sonidos: { nombre: "efectos de sonido", emoji: "🔔", grupo: "mesa", unico: true, w: 560, h: 680,
+            desc: "Puertas, tajos, conjuros, gritos, monstruos…: suenan una vez al pulsar (y tus audios).",
+            montar: montarSonidos },
         relojes: { nombre: "relojes", emoji: "⏳", grupo: "mesa", w: 440, h: 480,
             desc: "Relojes de progreso: amenazas que avanzan, cuentas atrás…", montar: montarRelojes },
         idiomas: { nombre: "notas en otros idiomas", emoji: "🪶", grupo: "mundo", w: 480, h: 680,
