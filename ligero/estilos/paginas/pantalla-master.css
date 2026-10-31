@@ -13,6 +13,12 @@
     border-bottom: 2px solid var(--yellow);
 }
 .master-barra-mandos {
+    align-self: flex-end;
+    padding: 4px 6px;
+    border: 2px solid var(--yellow);
+    border-bottom: 0;
+    border-radius: 10px 10px 0 0;
+    background: color-mix(in srgb, var(--yellow) 14%, transparent);
     display: flex;
     flex: 0 1 auto;
     flex-wrap: nowrap;
@@ -20,7 +26,6 @@
     justify-content: flex-end;
     gap: 8px;
     margin-left: auto;
-    padding-bottom: 4px;
 }
 .master-buscador {
     position: relative;
@@ -32,6 +37,19 @@
 @media (max-width: 700px) {
     .master-barra-mandos {
         flex-wrap: wrap;
+    }
+    .master-barra .master-pestanas {
+        flex-wrap: wrap;
+        padding-right: 6px;
+        border-radius: 10px 10px 0 0;
+        clip-path: none;
+    }
+    .master-barra .master-pestanas-marco {
+        flex: 1 1 8rem;
+    }
+    .master-barra .master-pestanas-lista {
+        flex: 1 1 auto;
+        min-width: 0;
     }
 }
 .master-buscador-texto {
@@ -111,6 +129,10 @@
 .master-pestanas {
     display: flex;
     flex: 1 1 22rem;
+    padding: 4px 30px 0 6px;
+    border-radius: 10px 0 0 0;
+    background: color-mix(in srgb, var(--yellow) 14%, transparent);
+    clip-path: polygon(0 0, calc(100% - 26px) 0, 100% 100%, 0 100%);
     flex-wrap: nowrap;
     align-items: flex-end;
     gap: 6px;
@@ -146,36 +168,28 @@
 .master-pestanas-flecha[hidden] {
     display: none;
 }
-.master-campana {
-    display: flex;
+.master-campana,
+.master-herramientas {
     flex: none;
-    align-items: center;
-    gap: 6px;
-    max-width: 7rem;
-    min-height: 40px;
     margin-bottom: 4px;
-    padding: 4px 10px;
+    font-size: 1.125rem;
+}
+.master-campana {
+    width: 36px;
+    height: 36px;
+    padding: 0;
     border: 2px solid var(--yellow);
     border-radius: 6px;
     background: var(--yellow);
     color: var(--yellow-contrast);
-    font-family: var(--fuente-mono);
-    font-size: 0.875rem;
-    font-weight: 700;
     cursor: pointer;
 }
 .master-campana:hover {
     background: transparent;
-    color: var(--yellow);
 }
 .master-campana:focus-visible {
     outline: 3px solid var(--yellow);
     outline-offset: 2px;
-}
-.master-campana-nombre {
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
 }
 .master-campanas .master-anadir-lista {
     margin-bottom: 16px;
@@ -231,6 +245,63 @@
     background: var(--yellow);
     color: var(--yellow-contrast);
     font-weight: 700;
+}
+.master-pestana-caja {
+    display: flex;
+    flex: none;
+    align-items: stretch;
+}
+.master-pestana-caja .master-pestana {
+    border-radius: 8px 0 0 0;
+}
+.master-pestana-caja:has(> .master-pestana-cerrar[hidden]) .master-pestana {
+    border-radius: 8px 8px 0 0;
+}
+.master-pestana-cerrar {
+    width: 26px;
+    padding: 0;
+    border: 2px solid var(--border);
+    border-bottom: 0;
+    border-left: 0;
+    border-radius: 0 8px 0 0;
+    background: var(--purple);
+    color: var(--muted);
+    font-size: 0.75rem;
+    cursor: pointer;
+}
+.master-pestana-cerrar[hidden] {
+    display: none;
+}
+.master-pestana-cerrar:hover {
+    color: var(--white);
+}
+.master-pestana-caja.es-elegida .master-pestana-cerrar {
+    border-color: var(--yellow);
+    background: var(--yellow);
+    color: var(--yellow-contrast);
+}
+.master-pestana-cerrar.es-seguro,
+.master-pestana-caja.es-elegida .master-pestana-cerrar.es-seguro {
+    background: var(--error);
+    color: #ffffff;
+}
+.master-pestana.es-seguro {
+    outline: 3px dashed var(--error);
+    outline-offset: -5px;
+}
+.master-pestana.con-color,
+.master-pestana.con-color + .master-pestana-cerrar {
+    border-color: var(--pestana-color);
+    background: var(--pestana-color);
+    color: var(--pestana-tinta);
+}
+.master-pestana-cerrar.es-seguro {
+    border-color: var(--error);
+}
+.master-pestana.con-color[aria-selected="true"],
+.master-pestana.con-color[aria-selected="true"] + .master-pestana-cerrar {
+    border-color: var(--yellow);
+    box-shadow: inset 0 4px 0 var(--yellow);
 }
 .master-pestana:focus-visible,
 .master-pestana-mando:focus-visible {
@@ -443,15 +514,15 @@
 .master-ventana.con-color .master-ventana-barra {
     border-bottom-color: var(--postit);
     background: var(--postit);
-    color: #14101a;
+    color: var(--postit-tinta, #14101a);
 }
 .master-ventana.con-color .master-ventana-mando:hover,
 .master-ventana.con-color .master-ventana-mando:focus-visible {
-    background: #14101a;
+    background: var(--postit-tinta, #14101a);
     color: var(--postit);
 }
 .master-ventana.con-color .master-ventana-mando:focus-visible {
-    outline-color: #14101a;
+    outline-color: var(--postit-tinta, #14101a);
 }
 .master-personalizar {
     display: flex;
@@ -494,6 +565,41 @@
 .master-color:focus-visible {
     outline: 3px solid var(--yellow);
     outline-offset: 5px;
+}
+.master-color-otro-caja {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    min-height: 36px;
+    padding: 0 8px;
+    border: 2px solid var(--yellow);
+    font-family: var(--fuente-mono);
+    font-size: 0.8125rem;
+    cursor: pointer;
+}
+.master-color-otro {
+    width: 28px;
+    height: 28px;
+    padding: 0;
+    border: 0;
+    background: none;
+    cursor: pointer;
+}
+.master-color-otro:focus-visible {
+    outline: 3px solid var(--yellow);
+    outline-offset: 2px;
+}
+.master-opciones-fila {
+    margin-bottom: 14px;
+}
+.master-opciones-titulo {
+    margin: 0 0 6px;
+    color: var(--yellow);
+    font-family: var(--fuente-mono);
+    font-size: 0.875rem;
+}
+.master-barra > .oc-boton-dados {
+    display: none;
 }
 .oc-menu-ventana.es-ancha {
     width: min(46rem, 100%);

@@ -6404,13 +6404,62 @@
     const GRUPOS = [["combate", "⚔️ combate"], ["consulta", "📚 consulta"], ["mesa", "🛡️ la mesa"], ["mundo", "🌍 el mundo"],
         ["apuntes", "🗒️ apuntes"]];
     const COLORES = [["", "sin color"], ["amarillo", "amarillo", "#ffe873"], ["naranja", "naranja", "#ffb870"],
-        ["rojo", "rojo", "#ff8f8f"], ["rosa", "rosa", "#ffa6d5"], ["morado", "morado", "#c9a2ff"], ["azul", "azul", "#8fb8ff"],
-        ["celeste", "celeste", "#7fdcff"], ["verde", "verde", "#8fe8a2"], ["gris", "gris", "#c9c9d1"]];
-    const hexDe = (color) => (COLORES.find((c) => c[0] === color) || [])[2] || "";
-    const TABLEROS = [["", "el del tema"], ["tapete", "tapete verde", "#1f4d36"], ["vino", "rojo vino", "#5a1f2a"],
-        ["noche", "azul noche", "#1d2b4f"], ["madera", "madera", "#5b3b22"], ["pizarra", "pizarra", "#2f3438"],
-        ["uva", "morado", "#3d2552"], ["pergamino", "pergamino", "#e8dcc0"], ["arena", "arena", "#d9c7a3"],
-        ["cielo", "cielo", "#bfd6e6"]];
+        ["melocoton", "melocotón", "#ffcfa8"], ["rojo", "rojo", "#ff8f8f"], ["coral", "coral", "#ff7f6e"], ["rosa", "rosa", "#ffa6d5"],
+        ["fucsia", "fucsia", "#ff6fcf"], ["morado", "morado", "#c9a2ff"], ["lavanda", "lavanda", "#ddd0ff"], ["azul", "azul", "#8fb8ff"],
+        ["celeste", "celeste", "#7fdcff"], ["turquesa", "turquesa", "#5fe0c8"], ["menta", "menta", "#b8f5d0"], ["verde", "verde", "#8fe8a2"],
+        ["lima", "lima", "#d4f27a"], ["arena", "arena", "#e8d8b0"], ["marron", "marrón", "#c9a37a"], ["gris", "gris", "#c9c9d1"],
+        ["blanco", "blanco", "#f7f5f0"]];
+    const hexPropio = (c) => (/^#[0-9a-f]{6}$/i.test(c || "") ? c.toLowerCase() : "");
+    const hexDe = (color) => hexPropio(color) || (COLORES.find((c) => c[0] === color) || [])[2] || "";
+    function tintaDe(hex) {
+        const lin = (i) => {
+            const v = parseInt(hex.slice(i, i + 2), 16) / 255;
+            return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4);
+        };
+        const l = 0.2126 * lin(1) + 0.7152 * lin(3) + 0.0722 * lin(5);
+        return (l + 0.05) / 0.05 > 1.05 / (l + 0.05) ? "#14101a" : "#ffffff";
+    }
+    const TABLEROS = [["", "el del tema"], ["tapete", "tapete verde", "#1f4d36"], ["bosque", "bosque", "#2d5a27"],
+        ["musgo", "musgo", "#4a5d23"], ["vino", "rojo vino", "#5a1f2a"], ["carmesi", "carmesí", "#8b1e2d"],
+        ["teja", "teja", "#9c4a2f"], ["noche", "azul noche", "#1d2b4f"], ["oceano", "océano", "#1f5f7a"],
+        ["madera", "madera", "#5b3b22"], ["pizarra", "pizarra", "#2f3438"], ["ceniza", "ceniza", "#5c5c66"],
+        ["negro", "negro", "#121212"], ["uva", "morado", "#3d2552"], ["pergamino", "pergamino", "#e8dcc0"],
+        ["arena", "arena", "#d9c7a3"], ["crema", "crema", "#f4ecd8"], ["cielo", "cielo", "#bfd6e6"], ["menta", "menta", "#cde8d5"]];
+    const hexTablero = (c) => hexPropio(c) || (TABLEROS.find((x) => x[0] === c) || [])[2] || "";
+    function muestrasDe(leyenda, lista, valor, idOtro) {
+        const grupo = crear("fieldset", "master-colores");
+        grupo.appendChild(crear("legend", "oc-dados-etiqueta", leyenda));
+        let elegido = valor || "";
+        const otro = crear("input", "master-color-otro");
+        const marcar = () => muestras.forEach((x) => x.setAttribute("aria-pressed", x.dataset.valor === elegido ? "true" : "false"));
+        const muestras = lista.map(([v, nombre, hex]) => {
+            const b = botonDe("master-color" + (v ? "" : " es-ninguno"), "", () => {
+                elegido = v;
+                marcar();
+            }, nombre);
+            b.dataset.valor = v;
+            b.title = nombre;
+            if (hex) {
+                b.style.backgroundColor = hex;
+            }
+            grupo.appendChild(b);
+            return b;
+        });
+        const etOtro = crear("label", "master-color-otro-caja");
+        otro.type = "color";
+        otro.id = idOtro;
+        otro.value = hexPropio(elegido) || "#8fb8ff";
+        etOtro.htmlFor = otro.id;
+        etOtro.append(otro, crear("span", "", "🎨 otro"));
+        otro.addEventListener("input", () => {
+            elegido = otro.value;
+            marcar();
+        });
+        grupo.appendChild(etOtro);
+        marcar();
+        grupo.valor = () => elegido;
+        return grupo;
+    }
     let todas = null;
     try {
         todas = JSON.parse(localStorage.getItem(CLAVE) || "null");
@@ -6494,8 +6543,10 @@
         m.el.classList.toggle("con-color", !!m.color);
         if (m.color) {
             m.el.style.setProperty("--postit", hexDe(m.color));
+            m.el.style.setProperty("--postit-tinta", tintaDe(hexDe(m.color)));
         } else {
             m.el.style.removeProperty("--postit");
+            m.el.style.removeProperty("--postit-tinta");
         }
     }
     function ponerEscala(m) {
@@ -6517,22 +6568,7 @@
         input.maxLength = 60;
         input.autocomplete = "off";
         et.htmlFor = input.id;
-        const grupo = crear("fieldset", "master-colores");
-        grupo.appendChild(crear("legend", "oc-dados-etiqueta", "color"));
-        let elegido = m.color || "";
-        const muestras = COLORES.map(([valor, nombre]) => {
-            const b = botonDe("master-color" + (valor ? "" : " es-ninguno"), "", () => {
-                elegido = valor;
-                muestras.forEach((x) => x.setAttribute("aria-pressed", x === b ? "true" : "false"));
-            }, nombre);
-            b.title = nombre;
-            if (valor) {
-                b.style.backgroundColor = hexDe(valor);
-            }
-            b.setAttribute("aria-pressed", valor === elegido ? "true" : "false");
-            grupo.appendChild(b);
-            return b;
-        });
+        const grupo = muestrasDe("color", COLORES, m.color || "", "master-personalizar-otro-" + m.id);
         const tam = crear("fieldset", "master-colores master-escala");
         tam.appendChild(crear("legend", "oc-dados-etiqueta", "tamaño del contenido"));
         const valor = crear("output", "master-escala-valor", Math.round((m.escala || 1) * 100) + " %");
@@ -6566,7 +6602,7 @@
         cuerpo.addEventListener("submit", (e) => {
             e.preventDefault();
             m.titulo = input.value.trim();
-            m.color = elegido;
+            m.color = grupo.valor();
             ponerTitulo(m);
             ponerColor(m);
             guardar();
@@ -6867,7 +6903,7 @@
         const input = crear("input", "master-buscador-texto");
         input.type = "search";
         input.id = "master-buscador";
-        input.placeholder = "🔍 buscar: bola de fuego, goblin, derribado…";
+        input.placeholder = "buscar: bola de fuego, goblin, derribado…";
         input.autocomplete = "off";
         input.setAttribute("role", "combobox");
         input.setAttribute("aria-autocomplete", "list");
@@ -7008,8 +7044,6 @@
             seccion.appendChild(lista);
             return [titulo, seccion];
         });
-        const panelMas = crear("div", "master-anadir-grupo");
-        paneles.push(["⚙️ más", panelMas]);
         const { lista: pestanasAnadir, elegir: elegirAnadir } = pestanasDe(paneles, "Grupos de ventanas", "master-anadir",
             (i) => {
                 pestanaAnadir = i;
@@ -7027,7 +7061,7 @@
             pestanasAnadir.hidden = !!q;
             if (q) {
                 paneles.forEach(([, x]) => {
-                    x.hidden = x === panelMas || !x.querySelector("li:not([hidden])");
+                    x.hidden = !x.querySelector("li:not([hidden])");
                 });
             } else {
                 elegirAnadir(pestanaAnadir, false);
@@ -7045,32 +7079,6 @@
                 }
             }
         });
-        if (estado.modulos.length) {
-            const otras = crear("div", "master-anadir-otras");
-            const ordenarlas = botonDe("oc-vida-accion", "▦ ordenar las ventanas", () => {
-                cerrar();
-                ordenar();
-                pintarTodo();
-                guardar();
-                avisar("Ordenadas.");
-            });
-            let seguro = false;
-            const vaciar = botonDe("oc-vida-accion", "🗑️ quitar todas", () => {
-                if (!seguro) {
-                    seguro = true;
-                    vaciar.textContent = "🗑️ ¿seguro? pulsa otra vez";
-                    return;
-                }
-                cerrar();
-                estado.modulos = [];
-                pintarTodo();
-                guardar();
-                avisar("Pantalla vacía.");
-            });
-            otras.append(ordenarlas, vaciar);
-            panelMas.appendChild(otras);
-        }
-        panelMas.appendChild(copias(() => cerrar()));
         elegirAnadir(Math.min(pestanaAnadir, paneles.length - 1), false);
         const cerrar = window.ocVentana.abrir({ titulo: "añadir una ventana", cuerpo, vuelta: botonAnadir, foco: filtro,
             clase: "es-ancha" });
@@ -7251,11 +7259,11 @@
     lienzo.addEventListener("pointerup", sinDedo);
     lienzo.addEventListener("pointercancel", sinDedo);
     function colorTablero() {
-        const t = TABLEROS.find((x) => x[0] === estado.color && x[2]);
+        const t = hexTablero(estado.color);
         lienzo.classList.toggle("con-tablero", !!t);
         if (t) {
-            const claro = parseInt(t[2].slice(1, 3), 16) + parseInt(t[2].slice(3, 5), 16) + parseInt(t[2].slice(5, 7), 16) > 384;
-            lienzo.style.setProperty("--tablero", t[2]);
+            const claro = tintaDe(t) !== "#ffffff";
+            lienzo.style.setProperty("--tablero", t);
             lienzo.style.setProperty("--tablero-raya", claro ? "rgba(0, 0, 0, 0.14)" : "rgba(255, 255, 255, 0.1)");
         } else {
             lienzo.style.removeProperty("--tablero");
@@ -7317,6 +7325,11 @@
                     moverPestana(pf, e.key === "ArrowLeft" ? -1 : 1);
                     return;
                 }
+                if (e.key === "Delete") {
+                    e.preventDefault();
+                    cerrarPerfil(pf, b);
+                    return;
+                }
                 const d = { ArrowRight: 1, ArrowLeft: -1, Home: -i, End: todo.perfiles.length - 1 - i }[e.key];
                 if (d === undefined) {
                     return;
@@ -7328,11 +7341,31 @@
             b.addEventListener("dblclick", () => renombrar());
             b.addEventListener("pointerdown", (e) => cogerPestana(e, b));
             b.addEventListener("contextmenu", (e) => e.preventDefault());
-            return b;
+            b.setAttribute("aria-keyshortcuts", "Delete");
+            const hex = hexTablero(pf.color);
+            if (hex) {
+                b.classList.add("con-color");
+                b.style.setProperty("--pestana-color", hex);
+                b.style.setProperty("--pestana-tinta", tintaDe(hex));
+            }
+            const x = crear("button", "master-pestana-cerrar", "✕");
+            x.type = "button";
+            x.tabIndex = -1;
+            x.setAttribute("aria-hidden", "true");
+            x.title = "Cerrar «" + pf.nombre + "» (pulsa dos veces)";
+            x.hidden = todo.perfiles.length < 2;
+            x.addEventListener("click", (e) => {
+                e.stopPropagation();
+                cerrarPerfil(pf, x);
+            });
+            const caja = crear("div", "master-pestana-caja" + (activa ? " es-elegida" : ""));
+            caja.setAttribute("role", "none");
+            caja.dataset.perfil = pf.id;
+            caja.append(b, x);
+            return caja;
         }));
         lienzo.setAttribute("aria-labelledby", "master-pestana-" + estado.id);
-        botonCerrar.disabled = todo.perfiles.length < 2;
-        const activa = tablist.querySelector('[aria-selected="true"]');
+        const activa = tablist.querySelector(".es-elegida");
         const izq = activa.offsetLeft - tablist.offsetLeft;
         if (izq < tablist.scrollLeft) {
             tablist.scrollLeft = izq;
@@ -7341,7 +7374,7 @@
         }
         pintarFlechas();
         if (foco) {
-            activa.focus();
+            activa.querySelector("[role=tab]").focus();
         }
     }
     let pestanaMovida = false;
@@ -7390,20 +7423,21 @@
         }
         pestanaMovida = true;
         b.classList.add("es-cogida");
+        const yo = b.parentNode;
         let x = e.clientX;
         let rueda = 0;
         const colocarla = () => {
-            const otras = Array.from(tablist.children).filter((o) => o !== b);
+            const otras = Array.from(tablist.children).filter((o) => o !== yo);
             const antes = otras.find((o) => {
                 const r = o.getBoundingClientRect();
                 return x < r.left + r.width / 2;
             });
             if (antes) {
-                if (b.nextSibling !== antes) {
-                    tablist.insertBefore(b, antes);
+                if (yo.nextSibling !== antes) {
+                    tablist.insertBefore(yo, antes);
                 }
-            } else if (tablist.lastChild !== b) {
-                tablist.appendChild(b);
+            } else if (tablist.lastChild !== yo) {
+                tablist.appendChild(yo);
             }
         };
         const deslizar = () => {
@@ -7429,9 +7463,9 @@
             document.removeEventListener("pointerup", soltar);
             document.removeEventListener("pointercancel", soltar);
             b.classList.remove("es-cogida");
-            const orden = Array.from(tablist.children).map((o) => o.id);
-            const pf = todo.perfiles.find((x2) => "master-pestana-" + x2.id === b.id);
-            todo.perfiles.sort((p1, p2) => orden.indexOf("master-pestana-" + p1.id) - orden.indexOf("master-pestana-" + p2.id));
+            const orden = Array.from(tablist.children).map((o) => o.dataset.perfil);
+            const pf = todo.perfiles.find((x2) => x2.id === yo.dataset.perfil);
+            todo.perfiles.sort((p1, p2) => orden.indexOf(p1.id) - orden.indexOf(p2.id));
             guardar();
             setTimeout(() => {
                 pestanaMovida = false;
@@ -7448,22 +7482,7 @@
     function renombrar() {
         const cuerpo = crear("form", "master-personalizar");
         const et = crear("label", "oc-dados-etiqueta", "nombre del perfil");
-        const grupo = crear("fieldset", "master-colores");
-        grupo.appendChild(crear("legend", "oc-dados-etiqueta", "color del tablero"));
-        let elegido = estado.color || "";
-        const muestras = TABLEROS.map(([valor, nombre, hex]) => {
-            const b = botonDe("master-color" + (valor ? "" : " es-ninguno"), "", () => {
-                elegido = valor;
-                muestras.forEach((x) => x.setAttribute("aria-pressed", x === b ? "true" : "false"));
-            }, nombre);
-            b.title = nombre;
-            if (hex) {
-                b.style.backgroundColor = hex;
-            }
-            b.setAttribute("aria-pressed", valor === elegido ? "true" : "false");
-            grupo.appendChild(b);
-            return b;
-        });
+        const grupo = muestrasDe("color del tablero y de su pestaña", TABLEROS, estado.color || "", "master-perfil-otro");
         const input = crear("input", "oc-dados-texto");
         input.id = "master-perfil-nombre";
         input.value = estado.nombre;
@@ -7481,20 +7500,29 @@
             avisar("Guardada la plantilla «" + (input.value.trim() || estado.nombre) + "»: sale al crear un perfil con ＋.");
         }, "Guardar las ventanas de este perfil como plantilla");
         comoPlantilla.title = "Las ventanas, donde están, sin lo que tienen dentro";
+        const cerrarEsta = botonDe("oc-vida-accion", "🗑️ cerrar esta pestaña", () => {
+            if (porCerrar !== estado) {
+                cerrarEsta.textContent = "🗑️ ¿seguro? pulsa otra vez";
+            } else {
+                cerrar();
+            }
+            cerrarPerfil(estado, null);
+        });
+        cerrarEsta.disabled = todo.perfiles.length < 2;
         const botonesPerfil = crear("div", "master-notas-botones");
-        botonesPerfil.append(listo, comoPlantilla);
+        botonesPerfil.append(listo, comoPlantilla, cerrarEsta);
         cuerpo.append(et, input, grupo, botonesPerfil);
         cuerpo.addEventListener("submit", (e) => {
             e.preventDefault();
             estado.nombre = input.value.trim() || estado.nombre;
-            estado.color = elegido;
+            estado.color = grupo.valor();
             colorTablero();
             guardar();
             cerrar();
             pintarPestanas(true);
             avisar("Perfil: " + estado.nombre + ".");
         });
-        const cerrar = window.ocVentana.abrir({ titulo: "nombre y color del perfil", cuerpo, vuelta: botonRenombrar, foco: input });
+        const cerrar = window.ocVentana.abrir({ titulo: "nombre y color de la pestaña", cuerpo, vuelta: botonRenombrar, foco: input });
     }
     const PLANTILLAS = [["vacio", "⬜ vacío", "Sin ventanas.", []],
         ["combate", "⚔️ combate", "Iniciativa, dados, tiradas, condiciones, acciones y bestiario.",
@@ -7588,39 +7616,44 @@
     const botonRenombrar = botonDe("master-pestana-mando", "✎", renombrar, "Nombre y color de este perfil");
     botonRenombrar.title = "Nombre y color de este perfil";
     botonRenombrar.setAttribute("aria-haspopup", "dialog");
-    let seguroCerrar = false;
-    const botonCerrar = botonDe("master-pestana-mando", "✕", () => {
+    let porCerrar = null;
+    let esperaCerrar = 0;
+    function cerrarPerfil(pf, quien) {
         if (todo.perfiles.length < 2) {
+            avisar("Es la única pestaña: no se puede cerrar.");
             return;
         }
-        if (!seguroCerrar) {
-            seguroCerrar = true;
-            botonCerrar.setAttribute("aria-label", "¿Seguro? Pulsa otra vez para cerrar " + estado.nombre);
-            avisar("Pulsa otra vez para cerrar el perfil " + estado.nombre + " y sus ventanas.");
-            setTimeout(() => {
-                seguroCerrar = false;
-                botonCerrar.setAttribute("aria-label", "Cerrar este perfil");
+        if (porCerrar !== pf) {
+            porCerrar = pf;
+            if (quien) {
+                quien.classList.add("es-seguro");
+            }
+            avisar("Pulsa otra vez para cerrar la pestaña " + pf.nombre + " y sus ventanas.");
+            clearTimeout(esperaCerrar);
+            esperaCerrar = setTimeout(() => {
+                porCerrar = null;
+                tablist.querySelectorAll(".es-seguro").forEach((x) => x.classList.remove("es-seguro"));
             }, 4000);
             return;
         }
-        seguroCerrar = false;
-        botonCerrar.setAttribute("aria-label", "Cerrar este perfil");
-        const i = todo.perfiles.indexOf(estado);
-        const nombre = estado.nombre;
+        porCerrar = null;
+        clearTimeout(esperaCerrar);
+        const i = todo.perfiles.indexOf(pf);
         todo.perfiles.splice(i, 1);
-        estado.modulos.forEach((m) => {
+        pf.modulos.forEach((m) => {
             m.el = null;
         });
-        estado = todo.perfiles[Math.max(0, i - 1)];
-        colorTablero();
+        if (pf === estado) {
+            estado = todo.perfiles[Math.max(0, i - 1)];
+            colorTablero();
+            pintarTodo();
+        }
         guardar();
         pintarPestanas(true);
-        pintarTodo();
-        avisar("Cerrado: " + nombre + ".");
-    }, "Cerrar este perfil");
-    botonCerrar.title = "Cerrar este perfil";
+        avisar("Cerrada: " + pf.nombre + ".");
+    }
     const mandosPestanas = crear("div", "master-pestanas-mandos");
-    mandosPestanas.append(botonNueva, botonRenombrar, botonCerrar);
+    mandosPestanas.append(botonNueva, botonRenombrar);
     const desliza = (s) => {
         const reducir = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
         tablist.scrollBy({ left: s * Math.max(120, Math.round(tablist.clientWidth * 0.7)), behavior: reducir ? "auto" : "smooth" });
@@ -7646,9 +7679,7 @@
     botonCampana.setAttribute("aria-haspopup", "dialog");
     botonCampana.setAttribute("aria-keyshortcuts", "C");
     function pintarCampana() {
-        const em = crear("span", "", "📚");
-        em.setAttribute("aria-hidden", "true");
-        botonCampana.replaceChildren(em, crear("span", "master-campana-nombre", todo.nombre));
+        botonCampana.textContent = "📚";
         botonCampana.setAttribute("aria-label", "Campaña: " + todo.nombre + " (cambiar de campaña)");
         botonCampana.title = "Campaña: " + todo.nombre + " — cambiar, crear o renombrar";
     }
@@ -7749,23 +7780,80 @@
         const cerrar = window.ocVentana.abrir({ titulo: "campañas", cuerpo, vuelta: botonCampana, clase: "es-ancha" });
     }
     pintarCampana();
-    pestanas.append(botonCampana, marco, mandosPestanas);
+    botonAnadir.className = "master-pestana-mando master-herramientas";
+    botonAnadir.textContent = "🧰";
+    botonAnadir.setAttribute("aria-label", "Añadir una ventana (herramientas)");
+    botonAnadir.setAttribute("aria-keyshortcuts", "A");
+    botonAnadir.title = "Herramientas: añadir una ventana (A)";
+    pestanas.append(botonAnadir, botonCampana, marco, mandosPestanas);
     const mandos = crear("div", "master-barra-mandos");
     const zoomCaja = crear("div", "master-zoom");
     zoomCaja.setAttribute("role", "group");
     zoomCaja.setAttribute("aria-label", "Zoom del tablero");
     zoomCaja.append(menosZoom, botonZoom, masZoom);
     zoomCaja.hidden = !HAY_ZOOM;
-    const botonAtajos = botonDe("master-pestana-mando", "⌨", () => verAtajos(), "Atajos de teclado");
-    botonAtajos.title = "Atajos de teclado (?)";
-    botonAtajos.setAttribute("aria-haspopup", "dialog");
-    botonAtajos.setAttribute("aria-keyshortcuts", "?");
-    mandos.append(montarBuscador(), zoomCaja, botonAtajos, botonAnadir);
-    const dados = barra.querySelector(".oc-boton-dados");
-    if (dados) {
-        mandos.appendChild(dados);
-    }
+    const buscador = montarBuscador();
+    const botonBuscar = botonDe("master-pestana-mando master-buscar", "🔍", () => {
+        const input = document.getElementById("master-buscador");
+        input.focus();
+        if (input.value.trim()) {
+            input.dispatchEvent(new Event("input", { bubbles: true }));
+        }
+    }, "Buscar");
+    botonBuscar.title = "Buscar (/)";
+    const botonOpciones = botonDe("master-pestana-mando master-opciones-boton", "⚙", () => verOpciones(), "Opciones del tablero");
+    botonOpciones.title = "Opciones: zoom, dados, atajos, ordenar, exportar…";
+    botonOpciones.setAttribute("aria-haspopup", "dialog");
+    mandos.append(buscador, botonBuscar, botonOpciones);
     barra.prepend(pestanas, mandos);
+    function verOpciones() {
+        const cuerpo = crear("div", "master-opciones-tablero");
+        const fila = (titulo, ...cosas) => {
+            const sec = crear("div", "master-opciones-fila");
+            sec.append(crear("h3", "master-opciones-titulo", titulo), ...cosas);
+            cuerpo.appendChild(sec);
+        };
+        if (HAY_ZOOM && !enMovil.matches) {
+            fila("Zoom del tablero", zoomCaja);
+        }
+        const accion = (texto, alPulsar) => botonDe("oc-vida-accion", texto, () => {
+            cerrar();
+            alPulsar();
+        });
+        const herramientas = crear("div", "master-anadir-otras");
+        herramientas.append(accion("🎲 dados (D)", () => {
+            const d = document.querySelector(".oc-boton-dados");
+            if (d) {
+                d.click();
+            }
+        }), accion("⌨ atajos de teclado (?)", () => verAtajos()));
+        fila("A mano", herramientas);
+        if (estado.modulos.length) {
+            const otras = crear("div", "master-anadir-otras");
+            let seguro = false;
+            const vaciar = botonDe("oc-vida-accion", "🗑️ quitar todas", () => {
+                if (!seguro) {
+                    seguro = true;
+                    vaciar.textContent = "🗑️ ¿seguro? pulsa otra vez";
+                    return;
+                }
+                cerrar();
+                estado.modulos = [];
+                pintarTodo();
+                guardar();
+                avisar("Pestaña vacía.");
+            });
+            otras.append(accion("▦ ordenar las ventanas", () => {
+                ordenar();
+                pintarTodo();
+                guardar();
+                avisar("Ordenadas.");
+            }), vaciar);
+            fila("Las ventanas de esta pestaña", otras);
+        }
+        fila("Copia de seguridad", copias(() => cerrar()));
+        const cerrar = window.ocVentana.abrir({ titulo: "opciones", cuerpo, vuelta: botonOpciones });
+    }
     const ATAJOS = [
         ["El tablero", [["/", "ir al buscador"], ["A", "añadir una ventana"], ["N", "post-it nuevo"], ["D", "los dados"],
             ["I", "la iniciativa (la abre si no está)"], ["+ / −", "acercar o alejar el tablero"], ["0", "el tablero al 100 %"],
@@ -7800,7 +7888,7 @@
             });
             cuerpo.appendChild(dl);
         });
-        window.ocVentana.abrir({ titulo: "atajos de teclado", cuerpo, vuelta: botonAtajos, clase: "es-ancha" });
+        window.ocVentana.abrir({ titulo: "atajos de teclado", cuerpo, vuelta: botonOpciones, clase: "es-ancha" });
     }
     document.addEventListener("keydown", (e) => {
         if (e.defaultPrevented || e.ctrlKey || e.metaKey || e.altKey || !lienzo.isConnected) {

@@ -4339,6 +4339,28 @@
   el lienzo crece mientras (y encoge despacio al soltar) y cerca del borde
   de arriba o de abajo se hace scroll solo. Las ventanas nuevas van al
   PRIMER HUECO LIBRE (hueco()), empezando por lo que se ve.
+  LA BARRA DE ARRIBA, como un navegador: a la izquierda, en un bloque
+  pegado al tablero y acabado en diagonal (clip-path; en el móvil sin
+  diagonal y en dos filas si no cabe), 🧰 (herramientas: añadir una
+  ventana, tecla A), 📚 (la campaña, sólo el icono; su nombre, en la
+  etiqueta y al pasar por encima), las pestañas (cada una con su ✕:
+  .master-pestana-caja con role="none"; la ✕ va fuera del tabulador y
+  escondida al lector, que cierra con Supr en la pestaña; pide pulsar dos
+  veces, se pone roja, .es-seguro; cerrarPerfil() cierra cualquiera, la
+  última no) y ＋ / ✎ (en el ✎, también «🗑️ cerrar esta pestaña»). A la
+  derecha, en su caja, el buscador, 🔍 (lo enfoca y saca los resultados)
+  y ⚙ (verOpciones(): el zoom, 🎲 los dados, ⌨ los atajos, ordenar y
+  quitar las ventanas de la pestaña, exportar e importar). El botón de
+  los dados de personajes.js no se ve en la barra (va en ⚙ y con la D;
+  en el móvil sigue flotando).
+  LOS COLORES: las ventanas tienen 19 (COLORES) y las pestañas/tableros
+  18 (TABLEROS), y en las dos «🎨 otro», el selector de color del
+  sistema, para uno propio («#rrggbb»; hexPropio()). muestrasDe() hace
+  las muestras. La tinta encima de cada color (casi negra o blanca) sale
+  de su luminancia (tintaDe(), como el contraste de la WCAG): la barra
+  de una ventana con color (--postit-tinta) y su pestaña. La PESTAÑA SE
+  PINTA DEL COLOR DE SU TABLERO (.con-color, --pestana-color y
+  --pestana-tinta); la elegida, con el borde y una franja amarillos.
   LAS CAMPAÑAS: configuraciones separadas (dos campañas, dos partys que
   no se mezclan). «richi-master» guarda {activa, campanas: [{id, nombre,
   activo, pjs, perfiles}]}; cada campaña tiene sus perfiles (las
