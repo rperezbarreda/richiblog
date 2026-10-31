@@ -4414,6 +4414,22 @@
     cuándo se cambió y lo escrito con la barra de formato (editorRico,
     como las notas). Se guarda sola. Cada cambio avisa con
     «master:documentos» (el árbol y los desplegables, al día).
+  GUARDAR EN DOCUMENTOS desde las notas («📁 guardar en documentos») y
+  el dibujo (📁, con sus capas): guardarEnDocumentos(). La primera vez
+  pide nombre y carpeta; si lo de la ventana ya viene de un documento
+  (m.datos.doc / d.doc), «💾 guardar encima» o «📄 guardar como uno
+  nuevo…». Si no cabe en el almacenamiento del navegador, no se guarda
+  y se avisa. Los dibujos son documentos {tipo: "dibujo", datos: copia
+  de las capas, el tamaño, la rejilla y la descripción}: en el árbol
+  con 🖼️ (se buscan por el nombre y la descripción) y se abren en una
+  ventana de dibujo con una copia (y 📁 la guarda encima).
+  EL DIBUJO, reorganizado: a la izquierda, las herramientas y los
+  colores; debajo, deshacer y rehacer, el ZOOM DEL LIENZO (− 100 % +,
+  y Ctrl + rueda encima; d.zoom; de 50 % a 400 %: el lienzo crece
+  dentro de un visor que se desliza, .master-dibujo-visor) y la rejilla;
+  y, tras una raya, lo de guardar (🖼️ poner una imagen, ⬇ descargar y
+  📁 guardar en documentos). Arriba del lienzo, sólo las opciones de la
+  herramienta.
   LOS DADOS (la ventana): cada dado con su dibujo (el de la bandeja:
   window.ocDados.silueta, de personajes.js) y su nombre debajo.
   LAS CAMPAÑAS: configuraciones separadas (dos campañas, dos partys que

@@ -196,7 +196,7 @@
     flex: 0 1 auto;
     flex-wrap: nowrap;
     gap: 4px;
-    min-width: 5rem;
+    min-width: min(5rem, max-content);
     overflow-x: auto;
     overflow-y: hidden;
     scrollbar-width: none;
@@ -2648,8 +2648,29 @@
     outline-offset: 2px;
 }
 
-.master-dibujo-acciones {
-    margin-left: auto;
+/* El visor del lienzo: con zoom de más, el lienzo se desliza dentro. */
+.master-dibujo-visor {
+    max-width: 100%;
+    overflow: auto;
+}
+
+.master-postit-barra.es-dibujo .master-postit-boton.master-dibujo-zoom-valor {
+    width: 75px;
+    font-family: var(--fuente-mono);
+    font-size: 0.75rem;
+}
+
+/* Lo de guardar, separado de lo de pintar con una raya. */
+.master-postit-barra.es-dibujo .master-postit-grupo.es-guardar {
+    padding-top: 8px;
+    border-top: 2px dashed var(--border);
+}
+
+.master-dibujo-zona.es-estrecha .master-postit-barra.es-dibujo .master-postit-grupo.es-guardar {
+    padding-top: 0;
+    padding-left: 8px;
+    border-top: 0;
+    border-left: 2px dashed var(--border);
 }
 
 /* El cuadro para escribir un texto, encima del lienzo donde se pincha. */

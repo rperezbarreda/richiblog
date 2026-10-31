@@ -1643,6 +1643,13 @@
             sel.addRange(rango);
             avisar("Fecha puesta: " + hoy + ".");
         });
+        const aDocs = botonDe("oc-vida-accion", "📁 guardar en documentos", () => {
+            m.datos.html = leer();
+            guardarEnDocumentos(aDocs, m.datos.doc, () => ({ tipo: "nota", titulo: "notas de la sesión", html: leer() }), (id) => {
+                m.datos.doc = id;
+            });
+        });
+        aDocs.setAttribute("aria-haspopup", "dialog");
         const bajar = botonDe("oc-vida-accion", "💾 descargar", () => {
             const pagina = "<!doctype html><html lang=\"es\"><head><meta charset=\"utf-8\"><title>Notas del máster</title></head><body>" +
                 leer() + "</body></html>";
@@ -1675,7 +1682,7 @@
             avisar("Notas borradas.");
         });
         const botones = crear("div", "master-notas-botones");
-        botones.append(fecha, bajar, borrar);
+        botones.append(fecha, aDocs, bajar, borrar);
         dentro.append(barra, area, botones);
     }
     const NOMBRES = "/datos/personajes/compendio/nombres.json";
@@ -2723,21 +2730,25 @@
             const webp = c.toDataURL("image/webp", 0.9);
             return webp.indexOf("data:image/webp") === 0 ? webp : c.toDataURL("image/png");
         };
+        const volcar = () => {
+            clearTimeout(espera);
+            tocadas.forEach((x) => {
+                const b = buscar(x);
+                if (b && lienzos[x]) {
+                    b.n.imagen = fotoDe(lienzos[x]);
+                }
+            });
+            tocadas.clear();
+            pintarMinis();
+            d.activa = activa;
+        };
         const guardarDibujo = (id) => {
             if (id) {
                 tocadas.add(id);
             }
             clearTimeout(espera);
             espera = setTimeout(() => {
-                tocadas.forEach((x) => {
-                    const b = buscar(x);
-                    if (b && lienzos[x]) {
-                        b.n.imagen = fotoDe(lienzos[x]);
-                    }
-                });
-                tocadas.clear();
-                pintarMinis();
-                d.activa = activa;
+                volcar();
                 if (!guardar()) {
                     avisar("No se ha podido guardar el dibujo: no cabe. Quita alguna imagen o capa, o descárgalo.");
                 }
@@ -3388,9 +3399,69 @@
         botonRejilla.type = "button";
         botonRejilla.setAttribute("aria-label", "Rejilla de rol");
         botonRejilla.title = "Enseñar o esconder la rejilla";
-        const acciones = crear("span", "master-postit-grupo master-dibujo-acciones");
-        acciones.append(deshacer, rehacer, imagen, bajar, botonRejilla);
-        opciones.append(opGrosor, opMargen, opTexto, acciones);
+        const aDocs = botonDe("master-postit-boton", "📁", () => {
+            soltarFlotante();
+            volcar();
+            guardarEnDocumentos(aDocs, d.doc, () => {
+                const copia = JSON.parse(JSON.stringify(d));
+                delete copia.doc;
+                delete copia.zoom;
+                return { tipo: "dibujo", titulo: m.titulo || "dibujo", datos: copia };
+            }, (id) => {
+                d.doc = id;
+            });
+        }, "Guardar en documentos (con sus capas)");
+        aDocs.title = "Guardar en documentos (con sus capas)";
+        aDocs.setAttribute("aria-haspopup", "dialog");
+        const ZOOMS_DIBUJO = [0.5, 0.75, 1, 1.5, 2, 3, 4];
+        let zoomD = ZOOMS_DIBUJO.indexOf(Number(d.zoom)) >= 0 ? Number(d.zoom) : 1;
+        const visor = crear("div", "master-dibujo-visor");
+        const valorZoom = botonDe("master-postit-boton master-dibujo-zoom-valor", "100 %", () => ponerZoomD(1, true),
+            "Zoom del lienzo al 100 %");
+        const menosZoom = botonDe("master-postit-boton", "－", () => pasoZoomD(-1), "Alejar el lienzo");
+        const masZoom = botonDe("master-postit-boton", "＋", () => pasoZoomD(1), "Acercar el lienzo");
+        menosZoom.title = "Alejar (Ctrl + rueda)";
+        masZoom.title = "Acercar (Ctrl + rueda)";
+        function ponerZoomD(z, decirlo) {
+            zoomD = z;
+            d.zoom = z === 1 ? undefined : z;
+            marco.style.width = z === 1 ? "" : (z * 100) + "%";
+            valorZoom.textContent = Math.round(z * 100) + " %";
+            valorZoom.setAttribute("aria-label", "Zoom del lienzo: " + Math.round(z * 100) + " % (pulsa para el 100 %)");
+            menosZoom.disabled = z <= ZOOMS_DIBUJO[0];
+            masZoom.disabled = z >= ZOOMS_DIBUJO[ZOOMS_DIBUJO.length - 1];
+            pintarEncima();
+            guardar();
+            if (decirlo) {
+                avisar("Zoom del lienzo: " + Math.round(z * 100) + " %.");
+            }
+        }
+        const pasoZoomD = (s) => {
+            const sig = s > 0 ? ZOOMS_DIBUJO.find((x) => x > zoomD) : ZOOMS_DIBUJO.slice().reverse().find((x) => x < zoomD);
+            if (sig) {
+                ponerZoomD(sig, true);
+            }
+        };
+        encima.addEventListener("wheel", (e) => {
+            if (!e.ctrlKey) {
+                return;
+            }
+            e.preventDefault();
+            e.stopPropagation();
+            pasoZoomD(e.deltaY < 0 ? 1 : -1);
+        }, { passive: false });
+        const titulado = (texto, ...cosas) => {
+            const g = grupo(...cosas);
+            g.setAttribute("role", "group");
+            g.setAttribute("aria-label", texto);
+            return g;
+        };
+        titulado("Deshacer y rehacer", deshacer, rehacer);
+        titulado("Zoom del lienzo", menosZoom, masZoom);
+        titulado("Zoom actual", valorZoom).classList.add("es-selector");
+        titulado("Rejilla", botonRejilla);
+        titulado("Guardar", imagen, bajar, aDocs).classList.add("es-guardar");
+        opciones.append(opGrosor, opMargen, opTexto);
         const panel = crear("div", "master-dibujo-panel");
         const tituloCapas = crear("h3", "master-dibujo-titulo", "capas");
         const listaCapas = crear("ul", "master-dibujo-capas");
@@ -3867,7 +3938,8 @@
             guardar();
         });
         const centro = crear("div", "master-dibujo-centro");
-        centro.append(opciones, marco);
+        visor.appendChild(marco);
+        centro.append(opciones, visor);
         const zona = crear("div", "master-dibujo-zona");
         zona.append(barra, centro, panel);
         if (window.ResizeObserver) {
@@ -3897,6 +3969,7 @@
         });
         elegirHerramienta(herramienta);
         ponerColor(color);
+        ponerZoomD(zoomD, false);
         vista.width = encima.width = ANCHO;
         vista.height = encima.height = ALTO;
         pintarCapas();
@@ -6392,7 +6465,10 @@
         return salen;
     }
     function abrirDocumento(id) {
-        const ya = estado.modulos.find((x) => x.tipo === "documento" && x.datos && x.datos.nota === id);
+        const n = docsDe().notas.find((x) => x.id === id);
+        const esDibujo = n && n.tipo === "dibujo";
+        const ya = estado.modulos.find((x) => x.datos && (esDibujo ? x.tipo === "dibujo" && x.datos.doc === id
+            : x.tipo === "documento" && x.datos.nota === id));
         if (ya && ya.grupo && !ya.delante) {
             verEnGrupo(ya, false);
         }
@@ -6402,7 +6478,10 @@
             focoDe(ya).focus();
             return;
         }
-        const n = docsDe().notas.find((x) => x.id === id);
+        if (esDibujo) {
+            anadir("dibujo", { titulo: n.titulo, datos: Object.assign(JSON.parse(JSON.stringify(n.datos || {})), { doc: id }) });
+            return;
+        }
         anadir("documento", { titulo: n ? n.titulo : "", datos: { nota: id } });
     }
     function pedirNombreDoc(titulo, valor, vuelta, alGuardar, conCarpeta) {
@@ -6434,6 +6513,56 @@
             alGuardar(n, donde ? donde.elegir.value || null : null);
         });
         const cerrar = window.ocVentana.abrir({ titulo, cuerpo, vuelta, foco: input });
+    }
+    function guardarEnDocumentos(vuelta, actual, hacer, alGuardar) {
+        const docs = docsDe();
+        const ya = actual ? docs.notas.find((x) => x.id === actual) : null;
+        const cabe = (deshacer) => {
+            if (guardar()) {
+                return true;
+            }
+            deshacer();
+            guardar();
+            avisar("No cabe en el almacenamiento del navegador: descárgalo o borra algún documento grande.");
+            return false;
+        };
+        const nuevo = () => pedirNombreDoc("guardar en documentos", ya ? ya.titulo + " (copia)" : hacer().titulo, vuelta, (nombre, carpeta) => {
+            const n = Object.assign({ id: idDoc("n"), carpeta, cambiada: Date.now() }, hacer(), { titulo: nombre });
+            docs.notas.push(n);
+            if (!cabe(() => docs.notas.splice(docs.notas.indexOf(n), 1))) {
+                return;
+            }
+            alGuardar(n.id);
+            guardar();
+            avisarDocs();
+            avisar("Guardado en 📁 " + rutaDe(carpeta) + ": " + nombre + ".");
+        }, { sin: [], valor: (ya && ya.carpeta) || "" });
+        if (!ya) {
+            nuevo();
+            return;
+        }
+        const cuerpo = crear("div", "master-docs-guardar");
+        cuerpo.appendChild(crear("p", "", "Viene de «" + ya.titulo + "» (📁 " + rutaDe(ya.carpeta) + ")."));
+        const botones = crear("div", "master-docs-botones");
+        const encima = botonDe("oc-vida-accion es-principal", "💾 guardar encima", () => {
+            const antes = Object.assign({}, ya);
+            Object.assign(ya, hacer(), { titulo: ya.titulo, cambiada: Date.now() });
+            cerrar();
+            if (cabe(() => {
+                Object.keys(ya).forEach((k) => delete ya[k]);
+                Object.assign(ya, antes);
+            })) {
+                avisarDocs();
+                avisar("Guardado: " + ya.titulo + ".");
+            }
+        });
+        const otro = botonDe("oc-vida-accion", "📄 guardar como uno nuevo…", () => {
+            cerrar();
+            nuevo();
+        });
+        botones.append(encima, otro);
+        cuerpo.appendChild(botones);
+        const cerrar = window.ocVentana.abrir({ titulo: "guardar en documentos", cuerpo, vuelta });
     }
     function montarDocumentos(dentro, m) {
         m.datos = m.datos || {};
@@ -6498,9 +6627,12 @@
         const filaNota = (n, conRuta, trozo) => {
             const li = crear("li", "master-docs-fila es-nota");
             const abrir = botonDe("master-docs-abrir", "", () => abrirDocumento(n.id), "Abrir la nota " + n.titulo);
-            const em = crear("span", "master-docs-icono", "📄");
+            const em = crear("span", "master-docs-icono", n.tipo === "dibujo" ? "🖼️" : "📄");
             em.setAttribute("aria-hidden", "true");
             abrir.append(em, crear("span", "master-docs-nombre", n.titulo));
+            if (n.tipo === "dibujo") {
+                abrir.setAttribute("aria-label", "Abrir el dibujo " + n.titulo);
+            }
             if (conRuta) {
                 abrir.appendChild(crear("span", "master-docs-ruta", rutaDe(n.carpeta)));
             }
@@ -6511,6 +6643,9 @@
                 docsDe().notas = docsDe().notas.filter((x) => x !== n);
                 estado.modulos.filter((x) => x.tipo === "documento" && x.datos && x.datos.nota === n.id).forEach((x) => {
                     x.datos.nota = null;
+                });
+                estado.modulos.filter((x) => x.datos && x.datos.doc === n.id).forEach((x) => {
+                    delete x.datos.doc;
                 });
                 guardar();
                 avisarDocs();
@@ -6523,9 +6658,6 @@
         const lista = (padre, nivel) => {
             const { carpetas, notas } = docsDe();
             const ul = crear("ul", "master-docs-lista");
-            if (nivel) {
-                ul.setAttribute("role", "group");
-            }
             carpetas.filter((c) => (c.padre || null) === padre).sort((a, b) => a.nombre.localeCompare(b.nombre, "es")).forEach((c) => {
                 const li = crear("li", "master-docs-fila es-carpeta");
                 const abierta = d.abiertas.indexOf(c.id) >= 0;
@@ -6549,7 +6681,7 @@
                 const em = crear("span", "master-docs-icono", abierta ? "📂" : "📁");
                 em.setAttribute("aria-hidden", "true");
                 const n = notas.filter((x) => x.carpeta === c.id).length;
-                b.append(em, crear("span", "master-docs-nombre", c.nombre), crear("span", "master-docs-ruta", n + (n === 1 ? " nota" : " notas")));
+                b.append(em, crear("span", "master-docs-nombre", c.nombre), crear("span", "master-docs-ruta", n + (n === 1 ? " documento" : " documentos")));
                 const cambiar = mando("✎", "Renombrar o mover la carpeta " + c.nombre, () => {
                     pedirNombreDoc("carpeta", c.nombre, cambiar, (nombre, padreNuevo) => {
                         c.nombre = nombre;
@@ -6650,7 +6782,7 @@
                 });
                 docs.notas.forEach((x) => {
                     const enNombre = llano(x.titulo).includes(q);
-                    const trozo = trozoDe(textoDeHtml(x.html), q);
+                    const trozo = trozoDe(x.tipo === "dibujo" ? (x.datos && x.datos.desc) || "" : textoDeHtml(x.html), q);
                     if (enNombre || trozo) {
                         n += 1;
                         ul.appendChild(filaNota(x, true, trozo));
@@ -6677,7 +6809,7 @@
     }
     function montarDocumento(dentro, m) {
         m.datos = m.datos || {};
-        const n = docsDe().notas.find((x) => x.id === m.datos.nota);
+        const n = docsDe().notas.find((x) => x.id === m.datos.nota && x.tipo !== "dibujo");
         if (!n) {
             dentro.appendChild(crear("p", "oc-vacio", "Esta nota ya no está (se ha borrado, o es de otra campaña)."));
             return;
