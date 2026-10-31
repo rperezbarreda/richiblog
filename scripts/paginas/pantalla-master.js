@@ -8242,9 +8242,32 @@
             li.appendChild(b);
             return li;
         }
+        // Cada sección se pliega (y se acuerda: d.plegadas).
+        d.plegadas = Array.isArray(d.plegadas) ? d.plegadas : [];
+        function seccion(titulo, ...cosas) {
+            const h = crear("h3", "master-sonidos-seccion");
+            const caja = crear("div", "master-sonidos-caja");
+            caja.id = "master-sonidos-" + m.id + "-" + titulo.replace(/[^a-z]/gi, "").toLowerCase();
+            const abierta = !d.plegadas.includes(titulo);
+            caja.hidden = !abierta;
+            const b = botonDe("master-sonidos-plegar", "", () => {
+                const ya = d.plegadas.includes(titulo);
+                d.plegadas = ya ? d.plegadas.filter((x) => x !== titulo) : d.plegadas.concat(titulo);
+                caja.hidden = !ya;
+                b.setAttribute("aria-expanded", ya ? "true" : "false");
+                guardar();
+            });
+            b.setAttribute("aria-expanded", abierta ? "true" : "false");
+            b.setAttribute("aria-controls", caja.id);
+            const flecha = crear("span", "master-musica-flecha", "▸");
+            flecha.setAttribute("aria-hidden", "true");
+            b.append(flecha, crear("span", "", titulo));
+            h.appendChild(b);
+            caja.append(...cosas);
+            return [h, caja];
+        }
         const partes = [];
         EFECTOS_SONOROS.forEach(([titulo, lista]) => {
-            const h = crear("h3", "master-sonidos-seccion", titulo);
             const ul = crear("ul", "master-ambiente-lista master-sonidos-lista");
             ul.setAttribute("aria-label", titulo.replace(/^\S+\s/, ""));
             lista.forEach(([emoji, nombre, ruta]) => {
@@ -8255,10 +8278,9 @@
                     });
                 }));
             });
-            partes.push(h, ul);
+            partes.push(...seccion(titulo, ul));
         });
         // LOS PROPIOS.
-        const hP = crear("h3", "master-sonidos-seccion", "🎵 Los tuyos");
         const listaP = crear("ul", "master-ambiente-lista master-sonidos-lista");
         listaP.setAttribute("aria-label", "Los tuyos");
         const vacioP = crear("p", "oc-hoja-nota", "Aún no hay. Añade un audio de tu ordenador: sonará una vez al pulsarlo.");
@@ -8329,8 +8351,499 @@
         enlaceG.setAttribute("aria-label", "Google Sound Library (se abre en otra pestaña)");
         nota.append("Grabaciones de la ", enlaceG, " (Google, CC BY 4.0): se oyen desde sus servidores, así que hace falta"
             + " conexión. Cada una suena una vez; se pueden pisar unas con otras. Los tuyos se quedan sólo en este navegador.");
-        dentro.append(arriba, ...partes, hP, vacioP, listaP, otro, subir, nota);
+        dentro.append(arriba, ...partes, ...seccion("🎵 Los tuyos", vacioP, listaP, otro, subir), nota);
         pintarPropios();
+    }
+
+    // ---- LA MÚSICA: las canciones de cada uno (audios del ordenador,
+    // guardados sólo en este navegador, en IndexedDB como los documentos),
+    // en carpetas y subcarpetas de la campaña (todo.musica: {carpetas:
+    // [{id, nombre, padre}], canciones: [{id, archivo, nombre, carpeta}]}).
+    // Una canción o una carpeta entera (con sus subcarpetas), en bucle o
+    // no. Un reproductor para toda la página: sigue sonando al cambiar de
+    // pestaña y se para al quitar la ventana. ----
+    function musicaDe() {
+        todo.musica = todo.musica || { carpetas: [], canciones: [] };
+        return todo.musica;
+    }
+    const MUSICA = { audio: null, cola: [], pos: -1, modo: "carpeta", origen: "", alCambiar: null, vigila: 0, url: "", volumen: 0.8 };
+    // Las canciones de una carpeta, en el orden en que se ven: las de sus
+    // subcarpetas y luego las suyas. Sin carpeta («»): todas.
+    function cancionesDe(carpeta) {
+        const mu = musicaDe();
+        const propias = mu.canciones.filter((c) => (c.carpeta || "") === carpeta);
+        const hijas = mu.carpetas.filter((c) => (c.padre || "") === carpeta);
+        return [].concat(...hijas.map((h) => cancionesDe(h.id)), propias);
+    }
+    function musicaAviso() {
+        if (MUSICA.alCambiar) {
+            MUSICA.alCambiar();
+        }
+    }
+    function musicaParar() {
+        if (MUSICA.audio) {
+            MUSICA.audio.pause();
+            MUSICA.audio.removeAttribute("src");
+            MUSICA.audio.load();
+        }
+        if (MUSICA.url) {
+            URL.revokeObjectURL(MUSICA.url);
+            MUSICA.url = "";
+        }
+        MUSICA.cola = [];
+        MUSICA.pos = -1;
+        musicaAviso();
+    }
+    const musicaActual = () => MUSICA.cola[MUSICA.pos] || null;
+    function musicaPoner(cola, pos, origen) {
+        const c = cola[pos];
+        if (!c) {
+            musicaParar();
+            return;
+        }
+        if (!MUSICA.audio) {
+            MUSICA.audio = new Audio();
+            MUSICA.audio.preload = "auto";
+            MUSICA.audio.volume = MUSICA.volumen;
+            MUSICA.audio.addEventListener("ended", () => musicaSiguiente(true));
+            MUSICA.audio.addEventListener("timeupdate", musicaAviso);
+            MUSICA.audio.addEventListener("play", musicaAviso);
+            MUSICA.audio.addEventListener("pause", musicaAviso);
+            MUSICA.audio.addEventListener("loadedmetadata", musicaAviso);
+        }
+        MUSICA.cola = cola;
+        MUSICA.pos = pos;
+        MUSICA.origen = origen;
+        archivoLeer(c.archivo).then((blob) => {
+            if (!blob) {
+                avisar("«" + c.nombre + "» ya no está en este navegador.");
+                return;
+            }
+            if (MUSICA.url) {
+                URL.revokeObjectURL(MUSICA.url);
+            }
+            // Una dirección blob: que hace el propio navegador con el archivo.
+            const archivoBlob = URL.createObjectURL(blob);
+            MUSICA.url = archivoBlob;
+            MUSICA.audio.src = archivoBlob;
+            MUSICA.audio.loop = MUSICA.modo === "una";
+            return MUSICA.audio.play().then(() => {
+                vigilarMusica();
+                musicaAviso();
+            });
+        }).catch(() => avisar("No se ha podido poner «" + c.nombre + "»."));
+        musicaAviso();
+    }
+    // La siguiente (al acabar una, o con ⏭). Al final de la carpeta:
+    // vuelve a empezar si se repite la carpeta; si no, se para.
+    function musicaSiguiente(alAcabar) {
+        if (!MUSICA.cola.length) {
+            return;
+        }
+        let i = MUSICA.pos + 1;
+        if (i >= MUSICA.cola.length) {
+            if (MUSICA.modo !== "carpeta" && alAcabar) {
+                MUSICA.audio.pause();
+                MUSICA.audio.currentTime = 0;
+                musicaAviso();
+                return;
+            }
+            i = 0;
+        }
+        musicaPoner(MUSICA.cola, i, MUSICA.origen);
+    }
+    function musicaAnterior() {
+        if (!MUSICA.cola.length) {
+            return;
+        }
+        if (MUSICA.audio.currentTime > 3) {
+            MUSICA.audio.currentTime = 0;
+            return;
+        }
+        musicaPoner(MUSICA.cola, (MUSICA.pos - 1 + MUSICA.cola.length) % MUSICA.cola.length, MUSICA.origen);
+    }
+    function vigilarMusica() {
+        if (MUSICA.vigila) {
+            return;
+        }
+        MUSICA.vigila = setInterval(() => {
+            const hay = todo.perfiles.some((pf) => pf.modulos.some((x) => x.tipo === "musica"));
+            if (!hay || !MUSICA.cola.length) {
+                if (!hay) {
+                    musicaParar();
+                }
+                clearInterval(MUSICA.vigila);
+                MUSICA.vigila = 0;
+            }
+        }, 1500);
+    }
+    const minutos = (s) => (isFinite(s) ? Math.floor(s / 60) + ":" + String(Math.floor(s % 60)).padStart(2, "0") : "0:00");
+
+    function montarMusica(dentro, m) {
+        m.datos = m.datos || {};
+        const d = m.datos;
+        d.plegadas = Array.isArray(d.plegadas) ? d.plegadas : [];
+        d.modo = ["una", "carpeta", "nada"].includes(d.modo) ? d.modo : "carpeta";
+        MUSICA.modo = d.modo;
+        const mu = musicaDe();
+        if (!window.Audio) {
+            dentro.appendChild(crear("p", "oc-vacio", "Este navegador no puede poner música."));
+            return;
+        }
+        // EL REPRODUCTOR.
+        const repro = crear("div", "master-musica-repro");
+        const ahora = crear("p", "master-musica-ahora");
+        const mandos = crear("div", "master-musica-mandos");
+        const ant = botonDe("master-musica-mando", "⏮", musicaAnterior, "Anterior");
+        const tocar = botonDe("master-musica-mando es-grande", "▶", () => {
+            if (!MUSICA.cola.length) {
+                const todas = cancionesDe("");
+                if (todas.length) {
+                    musicaPoner(todas, 0, "");
+                } else {
+                    avisar("Aún no hay canciones.");
+                }
+            } else if (MUSICA.audio.paused) {
+                MUSICA.audio.play().catch(() => {});
+            } else {
+                MUSICA.audio.pause();
+            }
+        }, "Reproducir");
+        const sig = botonDe("master-musica-mando", "⏭", () => musicaSiguiente(false), "Siguiente");
+        const parar = botonDe("master-musica-mando", "■", () => {
+            musicaParar();
+            avisar("Música parada.");
+        }, "Parar");
+        const barra = crear("input", "master-musica-barra");
+        barra.type = "range";
+        barra.min = 0;
+        barra.max = 1000;
+        barra.value = 0;
+        barra.setAttribute("aria-label", "Por dónde va");
+        barra.addEventListener("input", () => {
+            const a = MUSICA.audio;
+            if (a && isFinite(a.duration)) {
+                a.currentTime = a.duration * barra.value / 1000;
+            }
+        });
+        const tiempo = crear("span", "master-musica-tiempo", "0:00 / 0:00");
+        tiempo.setAttribute("aria-hidden", "true");
+        mandos.append(ant, tocar, sig, parar, barra, tiempo);
+        // Volumen y cómo se repite.
+        const abajo = crear("div", "master-ambiente-arriba");
+        const etV = crear("label", "master-ambiente-general");
+        const vol = crear("input");
+        vol.type = "range";
+        vol.min = 0;
+        vol.max = 100;
+        vol.value = d.vol === undefined ? 80 : d.vol;
+        vol.setAttribute("aria-label", "Volumen de la música");
+        vol.setAttribute("aria-valuetext", vol.value + " %");
+        etV.append(crear("span", "", "🔊 volumen"), vol);
+        const ponerVol = () => {
+            MUSICA.volumen = vol.value / 100;
+            if (MUSICA.audio) {
+                MUSICA.audio.volume = vol.value / 100;
+            }
+        };
+        vol.addEventListener("input", () => {
+            d.vol = Number(vol.value);
+            vol.setAttribute("aria-valuetext", vol.value + " %");
+            ponerVol();
+            guardar();
+        });
+        const modos = crear("div", "master-musica-modos");
+        modos.setAttribute("role", "group");
+        modos.setAttribute("aria-label", "Repetir");
+        const botonesModo = [["una", "🔂 la canción"], ["carpeta", "🔁 la carpeta"], ["nada", "➡️ sin repetir"]].map(([v, t]) => {
+            const b = botonDe("master-musica-modo", t, () => {
+                d.modo = v;
+                MUSICA.modo = v;
+                if (MUSICA.audio) {
+                    MUSICA.audio.loop = v === "una";
+                }
+                guardar();
+                pintarModo();
+                avisar(v === "una" ? "Se repite la canción." : v === "carpeta" ? "Se repite la carpeta entera." : "Sin repetir: al acabar la carpeta, se para.");
+            });
+            b.dataset.modo = v;
+            return b;
+        });
+        modos.append(...botonesModo);
+        function pintarModo() {
+            botonesModo.forEach((b) => b.setAttribute("aria-pressed", b.dataset.modo === d.modo ? "true" : "false"));
+        }
+        abajo.append(etV, modos);
+        repro.append(ahora, mandos, abajo);
+
+        // LAS CARPETAS Y CANCIONES.
+        const herramientas = crear("div", "master-musica-herramientas");
+        const nuevaCarpeta = botonDe("oc-vida-accion", "＋ 📁 carpeta", () => formulario({ tipo: "carpeta", padre: "" }),
+            "Nueva carpeta");
+        const subirRaiz = botonDe("oc-vida-accion", "＋ 🎵 canciones", () => subirA(""), "Añadir canciones (sin carpeta)");
+        herramientas.append(nuevaCarpeta, subirRaiz);
+        const form = crear("form", "master-musica-form");
+        form.hidden = true;
+        const arbol = crear("ul", "master-musica-arbol");
+        arbol.setAttribute("aria-label", "Carpetas y canciones");
+        const vacio = crear("p", "oc-hoja-nota", "Aún no hay canciones. Haz carpetas (por ejemplo «combate» o «tabernas»,"
+            + " con subcarpetas) y añade tus audios.");
+        const subir = crear("input");
+        subir.type = "file";
+        subir.accept = "audio/*";
+        subir.multiple = true;
+        subir.hidden = true;
+        let destino = "";
+        function subirA(carpeta) {
+            destino = carpeta;
+            subir.click();
+        }
+        subir.addEventListener("change", () => {
+            const fs = Array.from(subir.files || []);
+            subir.value = "";
+            const buenos = fs.filter((f) => /^audio\//.test(f.type) && f.size <= MAX_ARCHIVO);
+            if (buenos.length < fs.length) {
+                avisar("Sólo audios de hasta 50 MB cada uno.");
+            }
+            Promise.all(buenos.map((f) => {
+                const id = idDoc("a");
+                return archivoGuardar(id, f).then(() => {
+                    mu.canciones.push({ id, archivo: id, nombre: f.name.replace(/\.[^.]+$/, "").slice(0, 80) || "canción",
+                        carpeta: destino || "" });
+                });
+            })).then(() => {
+                if (!buenos.length) {
+                    return;
+                }
+                d.plegadas = d.plegadas.filter((x) => x !== destino);
+                guardar();
+                pintarArbol();
+                avisar("Añadidas " + buenos.length + " canciones. Se quedan sólo en este navegador, no se suben a la web"
+                    + " (⚙ → exportar para no perderlas).");
+            }).catch(() => avisar("No se han podido guardar (¿no queda sitio en el navegador?)."));
+        });
+        // Las carpetas para elegir dónde va algo (sin la propia ni las de dentro).
+        function opcionesDeCarpeta(sin) {
+            const salida = [["", "— ninguna (arriba del todo)"]];
+            const meter = (padre, nivel) => mu.carpetas.filter((c) => (c.padre || "") === padre && c.id !== sin).forEach((c) => {
+                salida.push([c.id, "  ".repeat(nivel) + "📁 " + c.nombre]);
+                meter(c.id, nivel + 1);
+            });
+            meter("", 0);
+            return salida;
+        }
+        // Crear o cambiar una carpeta o una canción: el nombre y dónde va.
+        let volverA = null;
+        function formulario(x) {
+            volverA = document.activeElement;
+            const esCarpeta = x.tipo === "carpeta";
+            const cosa = x.id ? (esCarpeta ? mu.carpetas : mu.canciones).find((c) => c.id === x.id) : null;
+            const titulo = crear("p", "master-musica-form-titulo", cosa ? "✎ " + cosa.nombre : "＋ 📁 nueva carpeta");
+            const et = crear("label", "oc-dados-etiqueta", "nombre");
+            const input = crear("input", "oc-dados-texto");
+            input.id = "master-musica-nombre";
+            input.maxLength = 80;
+            input.autocomplete = "off";
+            input.value = cosa ? cosa.nombre : "";
+            et.htmlFor = input.id;
+            const donde = elegirDe("master-musica-donde", esCarpeta ? "dentro de" : "en la carpeta", opcionesDeCarpeta(esCarpeta && cosa ? cosa.id : ""),
+                cosa ? (esCarpeta ? cosa.padre : cosa.carpeta) || "" : x.padre || "");
+            const ok = crear("button", "oc-vida-accion es-principal", "✓ guardar");
+            ok.type = "submit";
+            const no = botonDe("oc-vida-accion", "cancelar", cerrar);
+            const fila = crear("div", "master-musica-form-botones");
+            fila.append(ok, no);
+            form.replaceChildren(titulo, et, input, donde, fila);
+            form.onsubmit = (e) => {
+                e.preventDefault();
+                const nombre = input.value.trim();
+                if (!nombre) {
+                    avisar("Ponle un nombre.");
+                    input.focus();
+                    return;
+                }
+                const sitio = donde.elegir.value;
+                let id = x.id;
+                if (cosa) {
+                    cosa.nombre = nombre;
+                    cosa[esCarpeta ? "padre" : "carpeta"] = sitio;
+                } else {
+                    id = idDoc("m");
+                    mu.carpetas.push({ id, nombre, padre: sitio });
+                }
+                d.plegadas = d.plegadas.filter((p) => p !== sitio);
+                guardar();
+                form.hidden = true;
+                pintarArbol();
+                avisar((cosa ? "Guardado: " : "Carpeta creada: ") + nombre + ".");
+                const b = arbol.querySelector("[data-foco='" + id + "']");
+                (b || nuevaCarpeta).focus();
+            };
+            form.onkeydown = (e) => {
+                if (e.key === "Escape") {
+                    e.preventDefault();
+                    cerrar();
+                }
+            };
+            form.hidden = false;
+            input.focus();
+        }
+        function cerrar() {
+            form.hidden = true;
+            if (volverA && volverA.isConnected) {
+                volverA.focus();
+            } else {
+                nuevaCarpeta.focus();
+            }
+        }
+        // Borrar con dos pulsaciones.
+        function botonQuitar(nombre, hacer) {
+            let seguro = false;
+            const b = botonDe("master-docs-mando", "✕", () => {
+                if (!seguro) {
+                    seguro = true;
+                    b.classList.add("es-seguro");
+                    avisar("Pulsa otra vez para quitar " + nombre + ".");
+                    return;
+                }
+                hacer();
+            }, "Quitar " + nombre);
+            return b;
+        }
+        function quitarCarpeta(c) {
+            const ids = [];
+            const juntar = (id) => {
+                ids.push(id);
+                mu.carpetas.filter((x) => x.padre === id).forEach((x) => juntar(x.id));
+            };
+            juntar(c.id);
+            const fuera = mu.canciones.filter((x) => ids.includes(x.carpeta));
+            fuera.forEach((x) => archivoBorrar(x.archivo));
+            if (fuera.some((x) => musicaActual() && musicaActual().id === x.id)) {
+                musicaParar();
+            }
+            mu.canciones = mu.canciones.filter((x) => !ids.includes(x.carpeta));
+            mu.carpetas = mu.carpetas.filter((x) => !ids.includes(x.id));
+            guardar();
+            pintarArbol();
+            avisar("Quitada la carpeta " + c.nombre + (fuera.length ? " y sus " + fuera.length + " canciones." : "."));
+            nuevaCarpeta.focus();
+        }
+        function filaCancion(c) {
+            const li = crear("li", "master-musica-cancion");
+            const b = botonDe("master-musica-tocar", "", () => {
+                const cola = cancionesDe(c.carpeta || "");
+                musicaPoner(cola, cola.indexOf(c), c.carpeta || "");
+                avisar("Suena: " + c.nombre + ".");
+            });
+            b.dataset.foco = c.id;
+            b.dataset.cancion = c.id;
+            const em = crear("span", "master-ambiente-emoji", "🎵");
+            em.setAttribute("aria-hidden", "true");
+            b.append(em, crear("span", "", c.nombre));
+            const editar = botonDe("master-docs-mando", "✎", () => formulario({ tipo: "cancion", id: c.id }),
+                "Cambiar el nombre o la carpeta de " + c.nombre);
+            const quitar = botonQuitar(c.nombre, () => {
+                if (musicaActual() && musicaActual().id === c.id) {
+                    musicaParar();
+                }
+                archivoBorrar(c.archivo);
+                mu.canciones = mu.canciones.filter((x) => x !== c);
+                guardar();
+                pintarArbol();
+                avisar("Quitada: " + c.nombre + ".");
+                nuevaCarpeta.focus();
+            });
+            li.append(b, editar, quitar);
+            return li;
+        }
+        function filaCarpeta(c) {
+            const li = crear("li", "master-musica-carpeta");
+            const cab = crear("div", "master-musica-cabeza");
+            const abierta = !d.plegadas.includes(c.id);
+            const total = cancionesDe(c.id).length;
+            const dentroUl = crear("ul", "master-musica-dentro");
+            dentroUl.id = "master-musica-" + m.id + "-" + c.id;
+            dentroUl.hidden = !abierta;
+            const plegar = botonDe("master-musica-plegar", "", () => {
+                const ya = d.plegadas.includes(c.id);
+                d.plegadas = ya ? d.plegadas.filter((x) => x !== c.id) : d.plegadas.concat(c.id);
+                dentroUl.hidden = !ya;
+                plegar.setAttribute("aria-expanded", ya ? "true" : "false");
+                guardar();
+            });
+            plegar.dataset.foco = c.id;
+            plegar.setAttribute("aria-expanded", abierta ? "true" : "false");
+            plegar.setAttribute("aria-controls", dentroUl.id);
+            const flecha = crear("span", "master-musica-flecha", "▸");
+            flecha.setAttribute("aria-hidden", "true");
+            plegar.append(flecha, crear("span", "", "📁 " + c.nombre), crear("span", "master-musica-cuenta", " (" + total + ")"));
+            const tocarC = botonDe("master-docs-mando", "▶", () => {
+                const cola = cancionesDe(c.id);
+                if (!cola.length) {
+                    avisar("La carpeta " + c.nombre + " está vacía.");
+                    return;
+                }
+                musicaPoner(cola, 0, c.id);
+                avisar("Suena la carpeta " + c.nombre + ": " + cola.length + " canciones.");
+            }, "Reproducir la carpeta " + c.nombre);
+            const mas = botonDe("master-docs-mando es-texto", "＋🎵", () => subirA(c.id), "Añadir canciones a " + c.nombre);
+            const sub = botonDe("master-docs-mando es-texto", "＋📁", () => formulario({ tipo: "carpeta", padre: c.id }),
+                "Nueva subcarpeta en " + c.nombre);
+            const editar = botonDe("master-docs-mando", "✎", () => formulario({ tipo: "carpeta", id: c.id }),
+                "Cambiar el nombre o el sitio de " + c.nombre);
+            cab.append(plegar, tocarC, mas, sub, editar, botonQuitar("la carpeta " + c.nombre, () => quitarCarpeta(c)));
+            dentroUl.append(...ramas(c.id));
+            li.append(cab, dentroUl);
+            return li;
+        }
+        const ramas = (padre) => mu.carpetas.filter((c) => (c.padre || "") === padre).map(filaCarpeta)
+            .concat(mu.canciones.filter((c) => (c.carpeta || "") === padre).map(filaCancion));
+        function pintarArbol() {
+            arbol.replaceChildren(...ramas(""));
+            const hay = mu.carpetas.length || mu.canciones.length;
+            arbol.hidden = !hay;
+            vacio.hidden = !!hay;
+            pintar();
+        }
+        // Lo que suena ahora, por dónde va y qué canción está marcada.
+        function pintar() {
+            if (!dentro.isConnected) {
+                return;
+            }
+            const c = musicaActual();
+            const a = MUSICA.audio;
+            const suena = !!(c && a && !a.paused);
+            const carpeta = c && mu.carpetas.find((x) => x.id === MUSICA.origen);
+            ahora.textContent = c ? (suena ? "▶ " : "⏸ ") + c.nombre + (carpeta ? " · 📁 " + carpeta.nombre : "")
+                + " (" + (MUSICA.pos + 1) + " de " + MUSICA.cola.length + ")" : "Nada sonando.";
+            tocar.textContent = suena ? "⏸" : "▶";
+            tocar.setAttribute("aria-label", suena ? "Pausa" : "Reproducir");
+            const dur = a && isFinite(a.duration) ? a.duration : 0;
+            const t = a && c ? a.currentTime : 0;
+            if (document.activeElement !== barra) {
+                barra.value = dur ? Math.round(t / dur * 1000) : 0;
+            }
+            barra.setAttribute("aria-valuetext", minutos(t) + " de " + minutos(dur));
+            tiempo.textContent = minutos(t) + " / " + minutos(dur);
+            arbol.querySelectorAll("[data-cancion]").forEach((b) => {
+                const es = !!c && b.dataset.cancion === c.id;
+                b.closest("li").classList.toggle("es-sonando", es);
+                if (es) {
+                    b.setAttribute("aria-current", "true");
+                } else {
+                    b.removeAttribute("aria-current");
+                }
+            });
+        }
+        MUSICA.alCambiar = pintar;
+        ponerVol();
+        const nota = crear("p", "oc-hoja-nota master-fuente", "Tus canciones se quedan sólo en este navegador: no se suben a"
+            + " la web. Para no perderlas (o llevarlas a otro ordenador), ⚙ → exportar. Siguen sonando al cambiar de pestaña;"
+            + " al quitar esta ventana, se paran.");
+        dentro.append(repro, herramientas, form, vacio, arbol, subir, nota);
+        pintarModo();
+        pintarArbol();
     }
 
     const MODULOS = {
@@ -8381,6 +8894,9 @@
         sonidos: { nombre: "efectos de sonido", emoji: "🔔", grupo: "mesa", unico: true, w: 560, h: 680,
             desc: "Puertas, tajos, conjuros, gritos, monstruos…: suenan una vez al pulsar (y tus audios).",
             montar: montarSonidos },
+        musica: { nombre: "música", emoji: "🎶", grupo: "mesa", unico: true, w: 560, h: 720,
+            desc: "Tus canciones en carpetas y subcarpetas: una en bucle o la carpeta entera (se quedan en tu navegador).",
+            montar: montarMusica },
         relojes: { nombre: "relojes", emoji: "⏳", grupo: "mesa", w: 440, h: 480,
             desc: "Relojes de progreso: amenazas que avanzan, cuentas atrás…", montar: montarRelojes },
         idiomas: { nombre: "notas en otros idiomas", emoji: "🪶", grupo: "mundo", w: 480, h: 680,
@@ -8560,6 +9076,7 @@
         c.perfiles = Array.isArray(c.perfiles) && c.perfiles.length ? c.perfiles : perfilesDeSerie();
         c.pjs = Array.isArray(c.pjs) ? c.pjs : [];
         c.docs = c.docs && Array.isArray(c.docs.carpetas) && Array.isArray(c.docs.notas) ? c.docs : { carpetas: [], notas: [] };
+        c.musica = c.musica && Array.isArray(c.musica.carpetas) && Array.isArray(c.musica.canciones) ? c.musica : undefined;
         c.perfiles.forEach((pf) => {
             pf.id = pf.id || "p" + siguientePerfil;
             siguientePerfil = Math.max(siguientePerfil, parseInt(String(pf.id).slice(1), 10) + 1 || siguientePerfil);
@@ -8612,7 +9129,7 @@
     function guardar() {
         todo.activo = estado.id;
         const salida = { activa: todo.id, campanas: todas.campanas.map((c) => ({ id: c.id, nombre: c.nombre, activo: c.activo,
-            pjs: c.pjs, docs: c.docs, perfiles: c.perfiles.map((pf) => ({ id: pf.id, nombre: pf.nombre, color: pf.color || "",
+            pjs: c.pjs, docs: c.docs, musica: c.musica, perfiles: c.perfiles.map((pf) => ({ id: pf.id, nombre: pf.nombre, color: pf.color || "",
                 colorPestana: pf.colorPestana, zoom: pf.zoom || 1,
                 modulos: pf.modulos.map((m) => ({ id: m.id, tipo: m.tipo, x: m.x, y: m.y, w: m.w, h: m.h,
                     titulo: m.titulo || "", color: m.color || "", plegado: !!m.plegado,

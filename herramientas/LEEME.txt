@@ -4483,6 +4483,24 @@
   «■ parar» (EFECTOS_SUENAN). La tarjeta se marca mientras suena; si no
   carga, se avisa. «＋ 🎵 tu efecto»: audios propios en IndexedDB,
   tocados con Web Audio (tocarEfectoPropio), sólo en este navegador.
+  Cada sección se pliega con su título (botón con aria-expanded; se
+  acuerda en datos.plegadas).
+  🎶 MÚSICA (en «la mesa», tipo «musica», montarMusica): las canciones
+  de cada uno (audios del ordenador, en IndexedDB, sólo en este
+  navegador; el aviso, en la ventana y al subir) en carpetas y
+  subcarpetas DE LA CAMPAÑA (todo.musica: {carpetas: [{id, nombre,
+  padre}], canciones: [{id, archivo, nombre, carpeta}]}; guardar() la
+  lleva y el exportar ya mete sus archivos). Cada carpeta se pliega y
+  tiene ▶ (toda la carpeta, con sus subcarpetas: cancionesDe(), en el
+  orden en que se ven), ＋🎵, ＋📁, ✎ (nombre y dónde va) y ✕ (dos
+  pulsaciones; se lleva lo de dentro). Pulsar una canción pone su
+  carpeta desde ella. Repetir: 🔂 la canción (audio.loop), 🔁 la
+  carpeta (al acabar vuelve a empezar) o ➡️ sin repetir (se para al
+  final). ⏮ ⏯ ⏭ ■, barra para saltar y volumen. Un reproductor para
+  toda la página (MUSICA, musicaPoner(), musicaParar()): sigue al
+  cambiar de pestaña y se para al quitar la última ventana de música
+  (vigilarMusica()). Suena con <audio> y una dirección blob: (por eso
+  media-src lleva blob: en las páginas con data-oc-archivos).
   LOS DADOS (la ventana): cada dado con su dibujo (el de la bandeja:
   window.ocDados.silueta, de personajes.js) y su nombre debajo.
   LAS CAMPAÑAS: configuraciones separadas (dos campañas, dos partys que

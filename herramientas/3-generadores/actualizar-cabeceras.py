@@ -1500,7 +1500,8 @@ YA_PUESTO = re.compile(
 CSP_GOOGLE = "https://script.google.com https://script.googleusercontent.com"
 CSP_SPOTIFY = "https://open.spotify.com"
 # Los sonidos ambiente de la pantalla de máster (data-oc-sonidos): las
-# grabaciones de la Google Sound Library, que se oyen desde allí.
+# grabaciones de la Google Sound Library, que se oyen desde allí; y, con
+# data-oc-archivos, las canciones de cada uno (blob: de su navegador).
 CSP_SONIDOS = "https://actions.google.com"
 RE_SCRIPT_EN_LINEA = re.compile(r"<script(?![^>]*\bsrc=)[^>]*>(.*?)</script>", re.S)
 RE_CSP = re.compile(r'[ \t]*<meta http-equiv="Content-Security-Policy"[^>]*>\n')
@@ -1528,7 +1529,8 @@ def politica(texto):
         "object-src 'none'",
         "base-uri 'self'",
         "form-action 'self'",
-    ] + (["media-src 'self' " + CSP_SONIDOS] if "data-oc-sonidos" in sin else []) + marcos(sin))
+    ] + (["media-src 'self' " + CSP_SONIDOS + (" blob:" if "data-oc-archivos" in sin else "")]
+         if "data-oc-sonidos" in sin else []) + marcos(sin))
 
 
 def marcos(sin):

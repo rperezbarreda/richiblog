@@ -4049,3 +4049,203 @@
 .master-sonidos-lista .master-ambiente-boton {
     min-height: 58px;
 }
+
+/* LAS SECCIONES QUE SE PLIEGAN (efectos de sonido): el título es el botón. */
+.master-sonidos-plegar,
+.master-musica-plegar {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 2px 4px;
+    border: 0;
+    background: transparent;
+    color: inherit;
+    font: inherit;
+    letter-spacing: inherit;
+    text-align: left;
+    text-transform: inherit;
+    cursor: pointer;
+}
+
+.master-sonidos-plegar:focus-visible,
+.master-musica-plegar:focus-visible,
+.master-musica-tocar:focus-visible,
+.master-musica-mando:focus-visible,
+.master-musica-modo:focus-visible,
+.master-musica-barra:focus-visible {
+    outline: 3px solid var(--yellow);
+    outline-offset: 2px;
+}
+
+.master-musica-flecha {
+    display: inline-block;
+    transition: transform 0.15s;
+}
+
+[aria-expanded="true"] > .master-musica-flecha {
+    transform: rotate(90deg);
+}
+
+/* LA MÚSICA: el reproductor arriba y, debajo, el árbol de carpetas. */
+.master-musica-repro {
+    padding: 10px;
+    border: 2px solid var(--border);
+    margin-bottom: 10px;
+}
+
+.master-musica-ahora {
+    margin: 0 0 8px;
+    font-weight: 700;
+    overflow-wrap: anywhere;
+}
+
+.master-musica-mandos {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px 8px;
+    margin-bottom: 10px;
+}
+
+.master-musica-mando {
+    min-width: 38px;
+    min-height: 38px;
+    border: 2px solid var(--yellow);
+    background: transparent;
+    color: var(--white);
+    font: inherit;
+    cursor: pointer;
+}
+
+.master-musica-mando.es-grande {
+    min-width: 48px;
+    background: var(--yellow);
+    color: var(--yellow-contrast);
+}
+
+.master-musica-barra {
+    flex: 1 1 8rem;
+    min-width: 0;
+    accent-color: var(--yellow);
+}
+
+.master-musica-tiempo {
+    font-variant-numeric: tabular-nums;
+}
+
+.master-musica-modos {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+}
+
+.master-musica-modo {
+    min-height: 34px;
+    padding: 2px 8px;
+    border: 2px solid var(--yellow);
+    background: transparent;
+    color: var(--white);
+    font: inherit;
+    cursor: pointer;
+}
+
+.master-musica-modo[aria-pressed="true"] {
+    background: var(--yellow);
+    color: var(--yellow-contrast);
+    font-weight: 700;
+}
+
+.master-musica-herramientas {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 8px;
+}
+
+.master-musica-form {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding: 10px;
+    margin-bottom: 10px;
+    border: 2px solid var(--yellow);
+}
+
+.master-musica-form[hidden] {
+    display: none;
+}
+
+.master-musica-form-titulo {
+    margin: 0;
+    font-weight: 700;
+}
+
+.master-musica-form-botones {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.master-musica-arbol,
+.master-musica-dentro {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.master-musica-dentro {
+    margin-left: 14px;
+    padding-left: 10px;
+    border-left: 2px solid var(--border);
+}
+
+.master-musica-cabeza,
+.master-musica-cancion {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 4px;
+    padding: 2px 0;
+}
+
+.master-musica-cabeza .master-musica-plegar {
+    flex: 1 1 10rem;
+    min-height: 36px;
+    font-weight: 700;
+}
+
+.master-musica-cuenta {
+    font-weight: 400;
+    opacity: 0.85;
+}
+
+.master-musica-tocar {
+    display: flex;
+    flex: 1 1 10rem;
+    align-items: center;
+    gap: 8px;
+    min-width: 0;
+    min-height: 36px;
+    padding: 2px 8px;
+    border: 2px solid transparent;
+    background: transparent;
+    color: var(--white);
+    font: inherit;
+    text-align: left;
+    overflow-wrap: anywhere;
+    cursor: pointer;
+}
+
+.master-musica-tocar:hover {
+    border-color: var(--yellow);
+}
+
+.master-musica-cancion.es-sonando .master-musica-tocar {
+    background: var(--yellow);
+    color: var(--yellow-contrast);
+    font-weight: 700;
+}
+
+.master-musica-tocar .master-ambiente-emoji {
+    font-size: 1.1rem;
+}
