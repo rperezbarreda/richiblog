@@ -4485,6 +4485,43 @@
   tocados con Web Audio (tocarEfectoPropio), sólo en este navegador.
   Cada sección se pliega con su título (botón con aria-expanded; se
   acuerda en datos.plegadas).
+  🛠️ TUS CREACIONES (tipo «creador», montarCreador; se abre con el ＋
+  de al lado del buscador, abrirCreador(), o desde herramientas →
+  consulta): monstruos, objetos, conjuros y «más cosas» (especies,
+  dotes, trasfondos…) de otros manuales o inventados. NO se mete en la
+  web nada de los manuales con copyright: lo crea o lo copia cada uno, y
+  se queda en SU navegador (localStorage «richi-master-propios»:
+  {monstruos, objetos, conjuros, otros}, los mismos en todas las
+  campañas; va en ⚙ → exportar porque está en CLAVES). Cada uno lleva
+  propio: true, un id «p…» y «en» único (es por lo que se encuentran).
+  CÓMO SALEN: pedir() mezcla lo tuyo al final de bestiario.json,
+  conjuros-srd.json y tienda.json (PROPIOS_EN), así que sale en el
+  bestiario, los encuentros (por su hábitat y VD), la tienda y los
+  negocios (por sus tiendas), el botín (por su rareza), los conjuros, la
+  party y el buscador (con «🛠️ tuyo»; el índice se rehace con el evento
+  master:propios). Las «más cosas», en el buscador y en su ventana
+  (abrirOtro; 📌 → ficha con que: "otro"). En vez del crédito del SRD,
+  «🛠️ Creado por ti · <de dónde sale>» (fuenteDe()).
+  LA VENTANA: una pestaña por tipo con la lista (ver, ✎, ⧉ copia, ✕ con
+  dos pulsaciones), «＋ nuevo», «partir de uno del SRD» (⧉ copiar: para
+  hacer versiones) y un buscador. El formulario sale en la misma
+  ventana, por grupos (fieldset); en los monstruos, listas de rasgos,
+  acciones, adicionales, reacciones y legendarias con ＋ añadir, ＋ ataque
+  y ＋ salvación (el formato que tablaDeAtaques() pone en tabla). Lo que
+  falta se rellena solo (limpiarPropio(): iniciativa por la Destreza,
+  Percepción pasiva, «VD (PX; BC)» con vdDe()). Todo lo que entra pasa
+  por limpiarPropio() (sólo esos campos, textos con tope).
+  IMPORTAR/EXPORTAR: un .json {monstruos, objetos, conjuros, otros} con
+  los mismos campos (📄 plantilla: un ejemplo inventado de cada); si un
+  id ya está, se cambia; si no, se añade.
+  🌐 TRADUCIR: traducir() pasa al español del SRD los términos de reglas
+  en inglés (T_FRASES: «*Melee Attack Roll:*», «*Hit:*», daños, estados,
+  características, habilidades, sentidos, velocidades, alineamientos,
+  escuelas, rarezas, clases, duraciones…); traducirTipo() da la vuelta a
+  «Large Dragon» → «Dragón Grande»; las categorías de objeto, T_CATS. Las
+  frases normales se quedan en inglés (no hay traductor de verdad). Se
+  aplica al importar (casilla, recordada) y con «🌐 traducir términos»
+  en el formulario.
   🎶 MÚSICA (en «la mesa», tipo «musica», montarMusica): las canciones
   de cada uno (audios del ordenador, en IndexedDB, sólo en este
   navegador; el aviso, en la ventana y al subir) en carpetas y

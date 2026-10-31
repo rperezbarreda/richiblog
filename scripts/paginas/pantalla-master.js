@@ -177,7 +177,174 @@
                 return r.json();
             });
         }
-        return pedidos[ruta];
+        const k = PROPIOS_EN[ruta];
+        if (!k) {
+            return pedidos[ruta];
+        }
+        // Con lo tuyo (si hay) al final.
+        return pedidos[ruta].then((d) => {
+            const tuyos = leerPropios()[k];
+            if (!tuyos.length) {
+                return d;
+            }
+            const x = Object.assign({}, d);
+            x[k] = (d[k] || []).concat(tuyos);
+            return x;
+        });
+    }
+
+    // ---- LO TUYO: monstruos, objetos, conjuros y otras cosas (especies,
+    // dotes…) que crea cada uno (de otros manuales o inventados). Se
+    // guardan sólo en este navegador («richi-master-propios»: {monstruos,
+    // objetos, conjuros, otros}), los mismos en todas las campañas, y se
+    // mezclan con los del SRD al pedir sus archivos: así salen en el
+    // bestiario, los encuentros, la tienda, el botín, los conjuros y el
+    // buscador sin tocar nada más. Cada uno lleva «propio: true». ----
+    const CLAVE_PROPIOS = "richi-master-propios";
+    const PROPIOS_EN = { "/datos/personajes/compendio/bestiario.json": "monstruos",
+        "/datos/personajes/compendio/conjuros-srd.json": "conjuros", "/datos/personajes/compendio/tienda.json": "objetos" };
+
+    function leerPropios() {
+        let x = {};
+        try {
+            x = JSON.parse(localStorage.getItem(CLAVE_PROPIOS) || "{}") || {};
+        } catch (e) {
+            x = {};
+        }
+        ["monstruos", "objetos", "conjuros", "otros"].forEach((k) => {
+            x[k] = Array.isArray(x[k]) ? x[k] : [];
+        });
+        return x;
+    }
+
+    function guardarPropios(p) {
+        try {
+            localStorage.setItem(CLAVE_PROPIOS, JSON.stringify(p));
+        } catch (e) {
+            return false;
+        }
+        document.dispatchEvent(new Event("master:propios"));
+        return true;
+    }
+
+    // De dónde sale (en vez del crédito del SRD).
+    const fuenteDe = (x, f) => (x && x.propio ? "🛠️ Creado por ti" + (x.libro ? " · " + x.libro : "")
+        + ". Se guarda sólo en este navegador." : f);
+
+    // EL TRADUCTOR DE TÉRMINOS: pasa al español (el del SRD 5.2 en
+    // español) lo que se repite en los bloques de estadísticas y las
+    // reglas en inglés: tipos, tamaños, daños, estados, características,
+    // habilidades, sentidos, escuelas, rarezas, «Melee Attack Roll:»,
+    // «Hit:»… El resto del texto (las frases) se queda como está.
+    const T_CARACT = [["Strength", "Fuerza"], ["Dexterity", "Destreza"], ["Constitution", "Constitución"],
+        ["Intelligence", "Inteligencia"], ["Wisdom", "Sabiduría"], ["Charisma", "Carisma"]];
+    const T_TAMANOS = [["Tiny", "Diminuto"], ["Small", "Pequeño"], ["Medium", "Mediano"], ["Large", "Grande"],
+        ["Huge", "Enorme"], ["Gargantuan", "Gargantuesco"]];
+    const T_TIPOS = [["Aberration", "Aberración"], ["Beast", "Bestia"], ["Celestial", "Celestial"], ["Construct", "Autómata"],
+        ["Dragon", "Dragón"], ["Elemental", "Elemental"], ["Fey", "Feérico"], ["Fiend", "Infernal"], ["Giant", "Gigante"],
+        ["Humanoid", "Humanoide"], ["Monstrosity", "Monstruosidad"], ["Ooze", "Cieno"], ["Plant", "Planta"],
+        ["Undead", "Muerto viviente"], ["Swarm", "Enjambre"]];
+    const T_DANOS = [["Acid", "ácido"], ["Bludgeoning", "contundente"], ["Cold", "frío"], ["Fire", "fuego"], ["Force", "fuerza"],
+        ["Lightning", "relámpago"], ["Necrotic", "necrótico"], ["Piercing", "perforante"], ["Poison", "veneno"],
+        ["Psychic", "psíquico"], ["Radiant", "radiante"], ["Slashing", "cortante"], ["Thunder", "trueno"]];
+    const T_ESTADOS = [["Blinded", "cegado"], ["Charmed", "hechizado"], ["Deafened", "ensordecido"], ["Exhaustion", "agotamiento"],
+        ["Frightened", "asustado"], ["Grappled", "agarrado"], ["Incapacitated", "incapacitado"], ["Invisible", "invisible"],
+        ["Paralyzed", "paralizado"], ["Petrified", "petrificado"], ["Poisoned", "envenenado"], ["Prone", "derribado"],
+        ["Restrained", "apresado"], ["Stunned", "aturdido"], ["Unconscious", "inconsciente"]];
+    const T_FRASES = [
+        [/\*Melee or Ranged Attack Roll:\*/g, "*Ataque cuerpo a cuerpo o a distancia:*"],
+        [/\*Melee Attack Roll:\*/g, "*Ataque cuerpo a cuerpo:*"], [/\*Ranged Attack Roll:\*/g, "*Ataque a distancia:*"],
+        [/\*Melee Weapon Attack:\*/g, "*Ataque cuerpo a cuerpo:*"], [/\*Ranged Weapon Attack:\*/g, "*Ataque a distancia:*"],
+        [/\*Melee Spell Attack:\*/g, "*Ataque cuerpo a cuerpo:*"], [/\*Ranged Spell Attack:\*/g, "*Ataque a distancia:*"],
+        [/\*Hit or Miss:\*/g, "*Impacto o fallo:*"], [/\*Hit:\*/g, "*Impacto:*"], [/\*Miss:\*/g, "*Fallo:*"],
+        [/\*Failure or Success:\*/g, "*Fallo o éxito:*"], [/\*Success or Failure:\*/g, "*Éxito o fallo:*"],
+        [/\*First Failure:\*/g, "*Primer fallo:*"], [/\*Second Failure:\*/g, "*Segundo fallo:*"],
+        [/\*Failure:\*/g, "*Fallo:*"], [/\*Success:\*/g, "*Éxito:*"], [/\*Trigger:\*/g, "*Desencadenante:*"],
+        [/\*Response:\*/g, "*Respuesta:*"], [/\*Legendary Action Uses:\*/g, "*Usos de acción legendaria:*"],
+        [/\bHit: /g, "Impacto: "], [/\bMelee Attack Roll: /g, "Ataque cuerpo a cuerpo: "], [/\bRanged Attack Roll: /g, "Ataque a distancia: "],
+        [/\breach (\d+) ft\./g, "alcance $1 ft."], [/\brange (\d+(?:\/\d+)?) ft\./g, "distancia $1 ft."],
+        [/\bMultiattack\b/g, "Ataque múltiple"], [/\bLegendary Resistance\b/g, "Resistencia legendaria"],
+        [/\bSpellcasting\b/g, "Lanzamiento de conjuros"], [/\bAmphibious\b/g, "Anfibio"],
+        [/\bRecharge (\d)/g, "Recarga $1"], [/(\d+)\/Day\b/g, "$1/día"], [/\/Day Each\b/g, "/día cada uno"],
+        [/\bAt Will\b/g, "A voluntad"], [/\bin Lair\b/g, "en su guarida"],
+        [/\bDC (\d+)/g, "CD $1"], [/\bPassive Perception (\d+)/g, "Percepción pasiva $1"],
+        [/\bProficiency Bonus\b|\bPB\b/g, "BC"], [/\bXP\b/g, "PX"],
+        [/\bHit Points\b/g, "puntos de golpe"], [/\bTemporary Hit Points\b/g, "puntos de golpe temporales"],
+        [/\bHit Point\b/g, "punto de golpe"], [/\bArmor Class\b/g, "Clase de Armadura"], [/\bAC\b/g, "CA"],
+        [/\bAdvantage\b/g, "ventaja"], [/\bDisadvantage\b/g, "desventaja"],
+        [/\bBonus Action\b/g, "acción adicional"], [/\bReaction\b/g, "reacción"],
+        [/\b(\d+) feet\b/g, "$1 pies"], [/\b(\d+)-foot\b/g, "de $1 pies"],
+        [/\bDarkvision\b/gi, "visión en la oscuridad"], [/\bBlindsight\b/gi, "vista ciega"],
+        [/\bTremorsense\b/gi, "sentido de la vibración"], [/\bTruesight\b/gi, "visión verdadera"],
+        [/\bFly (\d+)/gi, "vuelo $1"], [/\bSwim (\d+)/gi, "nado $1"], [/\bClimb (\d+)/gi, "trepar $1"],
+        [/\bBurrow (\d+)/gi, "excavar $1"], [/\(hover\)/g, "(levitar)"],
+        [/\bLawful Good\b/gi, "legal bueno"], [/\bNeutral Good\b/gi, "neutral bueno"], [/\bChaotic Good\b/gi, "caótico bueno"],
+        [/\bLawful Neutral\b/gi, "legal neutral"], [/\bChaotic Neutral\b/gi, "caótico neutral"],
+        [/\bLawful Evil\b/gi, "legal malvado"], [/\bNeutral Evil\b/gi, "neutral malvado"], [/\bChaotic Evil\b/gi, "caótico malvado"],
+        [/\bUnaligned\b/gi, "sin alineamiento"],
+        [/\bAnimal Handling\b/g, "Trato con animales"], [/\bSleight of Hand\b/g, "Juego de manos"],
+        [/\bAcrobatics\b/g, "Acrobacias"], [/\bArcana\b/g, "Arcanos"], [/\bAthletics\b/g, "Atletismo"],
+        [/\bDeception\b/g, "Engaño"], [/\bHistory\b/g, "Historia"], [/\bInsight\b/g, "Perspicacia"],
+        [/\bIntimidation\b/g, "Intimidación"], [/\bInvestigation\b/g, "Investigación"], [/\bMedicine\b/g, "Medicina"],
+        [/\bNature\b/g, "Naturaleza"], [/\bPerception\b/g, "Percepción"], [/\bPerformance\b/g, "Interpretación"],
+        [/\bPersuasion\b/g, "Persuasión"], [/\bReligion\b/g, "Religión"], [/\bStealth\b/g, "Sigilo"],
+        [/\bSurvival\b/g, "Supervivencia"],
+        [/\bStr\b/g, "Fue"], [/\bDex\b/g, "Des"], [/\bWis\b/g, "Sab"], [/\bCha\b/g, "Car"],
+        [/\bAbjuration\b/g, "Abjuración"], [/\bConjuration\b/g, "Conjuración"], [/\bDivination\b/g, "Adivinación"],
+        [/\bEnchantment\b/g, "Encantamiento"], [/\bEvocation\b/g, "Evocación"], [/\bIllusion\b/g, "Ilusionismo"],
+        [/\bNecromancy\b/g, "Nigromancia"], [/\bTransmutation\b/g, "Transmutación"],
+        [/\bConcentration, up to (\d+) minutes?\b/gi, (x, n) => "Concentración, hasta " + n + (n === "1" ? " minuto" : " minutos")],
+        [/\bConcentration, up to (\d+) hours?\b/gi, (x, n) => "Concentración, hasta " + n + (n === "1" ? " hora" : " horas")],
+        [/\bInstantaneous\b/gi, "Instantánea"], [/\bUntil Dispelled\b/gi, "Hasta que se disipe"],
+        [/^Self\b/g, "Personal"], [/^Touch$/g, "Toque"], [/\bSight\b/g, "Vista"], [/\bUnlimited\b/g, "Ilimitado"],
+        [/\b(\d+) actions?\b/gi, (x, n) => n + (n === "1" ? " acción" : " acciones")], [/^Action$/g, "1 acción"],
+        [/\b(\d+) minutes?\b/g, (x, n) => n + (n === "1" ? " minuto" : " minutos")],
+        [/\b(\d+) hours?\b/g, (x, n) => n + (n === "1" ? " hora" : " horas")],
+        [/\b(\d+) days?\b/g, (x, n) => n + (n === "1" ? " día" : " días")],
+        [/\b(\d+) rounds?\b/g, (x, n) => n + (n === "1" ? " asalto" : " asaltos")],
+        [/\bRequires Attunement\b/gi, "requiere sintonía"], [/\bWondrous Item\b/gi, "objeto maravilloso"],
+        [/\bVery Rare\b/g, "muy rara"], [/\bUncommon\b/g, "poco común"], [/\bLegendary\b/g, "legendaria"],
+        [/\bArtifact\b/g, "artefacto"], [/\bRare\b/g, "rara"], [/\bCommon\b/g, "común"],
+        [/\bBard\b/g, "bardo"], [/\bCleric\b/g, "clérigo"], [/\bDruid\b/g, "druida"], [/\bPaladin\b/g, "paladín"],
+        [/\bRanger\b/g, "explorador"], [/\bSorcerer\b/g, "hechicero"], [/\bWarlock\b/g, "brujo"], [/\bWizard\b/g, "mago"],
+    ].concat(T_CARACT.map(([en, es]) => [new RegExp("\\*" + en + " Saving Throw:\\*", "gi"), "*Tirada de salvación de " + es + ":*"]),
+        T_CARACT.map(([en, es]) => [new RegExp("\\b" + en + " saving throws?\\b", "gi"), "tirada de salvación de " + es]),
+        T_CARACT.map(([en, es]) => [new RegExp("\\b" + en + " \\(([A-Z][a-z]+(?: [A-Z][a-z]+)*)\\) check\\b", "g"),
+            "prueba de " + es + " ($1)"]),
+        T_CARACT.map(([en, es]) => [new RegExp("\\b" + en + " check\\b", "g"), "prueba de " + es]),
+        T_CARACT.map(([en, es]) => [new RegExp("\\b" + en + "\\b", "g"), es]),
+        // «7 (2d6) Fire damage» → «7 (2d6) de daño de fuego».
+        T_DANOS.map(([en, es]) => [new RegExp("\\) " + en + " damage\\b", "gi"),
+            ") de daño " + (/^(contundente|cortante|perforante|necrótico|psíquico|radiante)$/.test(es) ? "" : "de ") + es]),
+        T_DANOS.map(([en, es]) => [new RegExp("\\b" + en + " damage\\b", "gi"), "daño " +
+            (/^(contundente|cortante|perforante|necrótico|psíquico|radiante)$/.test(es) ? "" : "de ") + es]),
+        T_DANOS.map(([en, es]) => [new RegExp("\\b" + en + "\\b", "g"), es]),
+        T_ESTADOS.map(([en, es]) => [new RegExp("\\b" + en + "\\b", "g"), es]),
+        [[/\bsaving throws?\b/gi, "tirada de salvación"], [/\battack rolls?\b/gi, "tirada de ataque"],
+            [/\bability checks?\b/gi, "prueba de característica"], [/\bthe (\S+) condition\b/g, "el estado $1"]]);
+
+    function traducir(texto) {
+        let t = String(texto || "");
+        if (!t) {
+            return t;
+        }
+        T_FRASES.forEach(([re, por]) => {
+            t = t.replace(re, por);
+        });
+        return t;
+    }
+
+    // «Large Dragon (Chromatic)» → «Dragón (Chromatic) Grande»; si ya
+    // está en español, tal cual.
+    function traducirTipo(texto) {
+        const m = /^(Tiny|Small|Medium|Large|Huge|Gargantuan)(?: or (Tiny|Small|Medium|Large|Huge|Gargantuan))? ([A-Za-z]+)(.*)$/
+            .exec(String(texto || "").trim());
+        if (!m) {
+            return traducir(texto);
+        }
+        const tam = (x) => (T_TAMANOS.find(([en]) => en === x) || [x, x])[1];
+        const tipo = (T_TIPOS.find(([en]) => en === m[3]) || [m[3], m[3]])[1];
+        return tipo + traducir(m[4]) + " " + tam(m[1]) + (m[2] ? " o " + tam(m[2]) : "");
     }
 
     // ---- LAS REGLAS (o solo las de un grupo: las condiciones son
@@ -443,7 +610,8 @@
         const cerrar = window.ocVentana.abrir({ titulo: c.nombre, cuerpo, vuelta, clase: "es-regla" });
     }
 
-    function cuerpoConjuro(c, fuente) {
+    function cuerpoConjuro(c, fuenteSrd) {
+        const fuente = fuenteDe(c, fuenteSrd);
         const cuerpo = crear("div", "oc-regla-ventana");
         const chapas = crear("ul", "oc-desplegable-datos");
         [nivelDe(c), c.escuela, c.ritual ? "ritual" : "", c.conc ? "concentración" : ""].filter(Boolean)
@@ -655,7 +823,8 @@
         return cuerpo;
     }
 
-    function abrirObjeto(o, vuelta, fuente) {
+    function abrirObjeto(o, vuelta, fuenteSrd) {
+        const fuente = fuenteDe(o, fuenteSrd);
         const cuerpo = datosObjeto(o);
         if (fuente) {
             cuerpo.appendChild(crear("p", "oc-hoja-nota master-fuente", fuente));
@@ -682,6 +851,19 @@
             };
             pintar();
             mientrasEste(dentro, "master:homebrew", pintar);
+            return;
+        }
+        if (que === "otro") {
+            const pintar = () => {
+                const x = leerPropios().otros.find((y) => y.id === id);
+                const caja = x ? crear("div") : null;
+                if (x) {
+                    caja.append(crear("p", "oc-hoja-nota", x.cat), markdown(x.texto), crear("p", "oc-hoja-nota master-fuente", fuenteDe(x)));
+                }
+                poner(caja);
+            };
+            pintar();
+            mientrasEste(dentro, "master:propios", pintar);
             return;
         }
         const ruta = { conjuro: CONJUROS_SRD, regla: "/datos/personajes/reglas-dnd.json",
@@ -6222,7 +6404,8 @@
     // hechizos. Con casillas para lo que se gasta: lo que se recarga (con
     // «🎲» para tirar la recarga), lo de x/día, las acciones legendarias y
     // los conjuros de x/día.
-    function perfil(b, f, alTablero, guardado) {
+    function perfil(b, fuente, alTablero, guardado) {
+        const f = fuenteDe(b, fuente);
         // El nombre que tiene en el tablero (se cambia con ✎: el «Mago»
         // puede ser Elminster); si no, el suyo.
         const quien = () => (guardado && guardado.nombre && guardado.nombre()) || b.nombre;
@@ -8846,6 +9029,806 @@
         pintarArbol();
     }
 
+    // ---- 🛠️ TUS CREACIONES: crear, cambiar, copiar (de uno del SRD),
+    // importar y exportar lo tuyo (leerPropios). Se abre con el ＋ de al
+    // lado del buscador. Una lista por pestaña y, al crear o cambiar, su
+    // formulario en la misma ventana. ----
+    const CR_LISTA = ["0", "1/8", "1/4", "1/2"].concat(Array.from({ length: 30 }, (x, i) => String(i + 1)));
+    const CR_PX = { 0: 10, "1/8": 25, "1/4": 50, "1/2": 100, 1: 200, 2: 450, 3: 700, 4: 1100, 5: 1800, 6: 2300, 7: 2900, 8: 3900,
+        9: 5000, 10: 5900, 11: 7200, 12: 8400, 13: 10000, 14: 11500, 15: 13000, 16: 15000, 17: 18000, 18: 20000, 19: 22000,
+        20: 25000, 21: 33000, 22: 41000, 23: 50000, 24: 62000, 25: 75000, 26: 90000, 27: 105000, 28: 120000, 29: 135000, 30: 155000 };
+    function vdDe(cr) {
+        const n = cr.indexOf("/") > 0 ? 0 : parseInt(cr, 10) || 0;
+        const bc = n < 5 ? 2 : Math.min(9, 2 + Math.ceil((n - 4) / 4));
+        return cr + " (" + (CR_PX[cr] || 0).toLocaleString("es-ES") + " PX; BC +" + bc + ")";
+    }
+    const PROPIO_TIPOS = ["Aberración", "Autómata", "Bestia", "Celestial", "Cieno", "Dragón", "Elemental", "Enjambre", "Feérico",
+        "Gigante", "Humanoide", "Infernal", "Monstruosidad", "Muerto viviente", "Planta"];
+    const PROPIO_TAMANOS = ["Diminuto", "Pequeño", "Mediano", "Grande", "Enorme", "Gargantuesco", "Pequeño o Mediano"];
+    const PROPIO_ALIN = ["legal bueno", "neutral bueno", "caótico bueno", "legal neutral", "neutral", "caótico neutral",
+        "legal malvado", "neutral malvado", "caótico malvado", "sin alineamiento"];
+    const PROPIO_HABITATS = ["ártico", "bajo el agua", "bosque", "ciudad", "colinas", "costa", "cualquiera", "desierto",
+        "montañas", "pantano", "praderas", "Infraoscuridad", "Feywild", "Shadowfell", "plano Etéreo", "planos elementales",
+        "planos inferiores", "planos superiores", "Abismo", "Nueve Infiernos"];
+    const PROPIO_ESCUELAS = ["Abjuración", "Adivinación", "Conjuración", "Encantamiento", "Evocación", "Ilusionismo", "Nigromancia",
+        "Transmutación"];
+    const PROPIO_CLASES = ["bardo", "brujo", "clérigo", "druida", "explorador", "hechicero", "mago", "paladín"];
+    const PROPIO_RAREZAS = ["común", "poco común", "rara", "muy rara", "legendaria", "artefacto"];
+    const PROPIO_TIENDAS = ["Tienda general", "Herrería y armería", "Herramientas e instrumentos", "Alquimista y herbolario",
+        "Templo", "Arcanista", "Taberna", "Establos y transportes", "Tienda de magia"];
+    const PROPIO_CATS = ["objeto maravilloso", "arma", "armadura", "escudo", "poción", "anillo", "varita", "bastón", "cetro",
+        "pergamino", "munición", "equipo", "herramienta", "instrumento", "comida y bebida", "montura", "vehículo"];
+    const PROPIO_OTROS = ["especie", "trasfondo", "dote", "clase", "subclase", "rasgo de clase", "regla", "lugar", "deidad", "otro"];
+    const SECCIONES_BICHO = [["rasgos", "Rasgos"], ["acciones", "Acciones"], ["adicionales", "Acciones adicionales"],
+        ["reacciones", "Reacciones"], ["legendarias", "Acciones legendarias"]];
+
+    // Lo que entra (de un archivo o del formulario), limpio: sólo lo que
+    // se usa, textos con tope y números de verdad. Sin nombre, nada.
+    function limpiarPropio(tipo, x) {
+        if (!x || typeof x !== "object") {
+            return null;
+        }
+        const txt = (v, max) => (typeof v === "string" || typeof v === "number" ? String(v).slice(0, max || 400).trim() : "");
+        const num = (v, min, max, def) => {
+            const n = Number(v);
+            return isFinite(n) ? Math.max(min, Math.min(max, Math.round(n))) : def;
+        };
+        const nombre = txt(x.nombre, 120);
+        if (!nombre) {
+            return null;
+        }
+        const o = { id: /^p[a-z0-9]{4,20}$/.test(x.id || "") ? x.id : idDoc("p"), propio: true, nombre,
+            en: txt(x.en, 120) || nombre, libro: txt(x.libro, 160) };
+        const entradas = (v) => (Array.isArray(v) ? v : []).slice(0, 60).map((r) => ({ n: txt(r && r.n, 160), t: txt(r && r.t, 6000) }))
+            .filter((r) => r.n || r.t);
+        if (tipo === "monstruos") {
+            ["tipo", "alin", "ca", "ini", "pgf", "vel", "salv", "hab", "vuln", "res", "inm", "inmE", "sent", "idio", "equipo"].forEach((k) => {
+                const v = txt(x[k], 600);
+                if (v) {
+                    o[k] = v;
+                }
+            });
+            o.tipo = o.tipo || "Monstruosidad Mediano";
+            o.alin = o.alin || "neutral";
+            o.ca = o.ca || "10";
+            o.vel = o.vel || "30 ft.";
+            o.pg = num(x.pg, 1, 9999, 10);
+            const c = x.car && typeof x.car === "object" ? x.car : {};
+            o.car = {};
+            ["Fue", "Des", "Con", "Int", "Sab", "Car"].forEach((k) => {
+                o.car[k] = num(c[k], 1, 30, 10);
+            });
+            o.cr = CR_LISTA.includes(String(x.cr)) ? String(x.cr) : "1";
+            o.vd = txt(x.vd, 120) || vdDe(o.cr);
+            if (!o.ini) {
+                const d = Math.floor((o.car.Des - 10) / 2);
+                o.ini = (d >= 0 ? "+" : "−") + Math.abs(d) + " (" + (10 + d) + ")";
+            }
+            o.sent = o.sent || "Percepción pasiva " + (10 + Math.floor((o.car.Sab - 10) / 2));
+            o.idio = o.idio || "—";
+            o.habitat = (Array.isArray(x.habitat) ? x.habitat : []).map((h) => txt(h, 60)).filter(Boolean).slice(0, 20);
+            SECCIONES_BICHO.forEach(([k]) => {
+                const l = entradas(x[k]);
+                if (l.length) {
+                    o[k] = l;
+                }
+            });
+            o.acciones = o.acciones || [];
+            const li = txt(x.legInfo, 2000);
+            if (li && o.legendarias) {
+                o.legInfo = li;
+            }
+        } else if (tipo === "objetos") {
+            o.cat = txt(x.cat, 80) || "objeto maravilloso";
+            const r = txt(x.rareza, 40);
+            if (r) {
+                o.rareza = r;
+            }
+            if (x.sint) {
+                o.sint = 1;
+            }
+            ["det", "peso", "nota"].forEach((k) => {
+                const v = txt(x[k], 300);
+                if (v) {
+                    o[k] = v;
+                }
+            });
+            o.cp = num(x.cp, 0, 1e9, 0);
+            o.tiendas = (Array.isArray(x.tiendas) ? x.tiendas : []).filter((t) => PROPIO_TIENDAS.includes(t));
+            o.texto = txt(x.texto, 12000);
+        } else if (tipo === "conjuros") {
+            o.nivel = num(x.nivel, 0, 9, 1);
+            o.escuela = txt(x.escuela, 40) || "Evocación";
+            ["tiempo", "alcance", "comp", "dur"].forEach((k) => {
+                o[k] = txt(x[k], 300) || "—";
+            });
+            o.clases = (Array.isArray(x.clases) ? x.clases : []).map((c) => txt(c, 40).toLowerCase()).filter(Boolean).slice(0, 20);
+            if (x.ritual) {
+                o.ritual = true;
+            }
+            if (x.conc) {
+                o.conc = true;
+            }
+            o.texto = txt(x.texto, 12000);
+            const s = txt(x.superior, 4000);
+            if (s) {
+                o.superior = s;
+            }
+        } else {
+            o.cat = txt(x.cat, 60) || "otro";
+            o.texto = txt(x.texto, 20000);
+        }
+        return o;
+    }
+
+    // Lo mismo, con los términos en inglés pasados al español.
+    const T_CATS = { ring: "anillo", weapon: "arma", armor: "armadura", "light armor": "armadura ligera",
+        "medium armor": "armadura intermedia", "heavy armor": "armadura pesada", shield: "escudo", potion: "poción", rod: "cetro",
+        scroll: "pergamino", staff: "bastón", wand: "varita", ammunition: "munición", "wondrous item": "objeto maravilloso",
+        "adventuring gear": "equipo", tool: "herramienta", "artisan's tools": "herramienta de artesano", instrument: "instrumento",
+        "spellcasting focus": "canalizador", mount: "montura", vehicle: "vehículo", "food and drink": "comida y bebida" };
+    function traducirPropio(tipo, o) {
+        const x = JSON.parse(JSON.stringify(o));
+        Object.keys(x).forEach((k) => {
+            if (typeof x[k] === "string" && !["id", "nombre", "en", "libro", "cr"].includes(k)) {
+                const cat = k === "cat" && tipo === "objetos" && T_CATS[x[k].trim().toLowerCase()];
+                x[k] = cat || (k === "tipo" && tipo === "monstruos" ? traducirTipo(x[k]) : traducir(x[k]));
+            }
+        });
+        SECCIONES_BICHO.forEach(([k]) => {
+            if (Array.isArray(x[k])) {
+                x[k] = x[k].map((r) => ({ n: traducir(r.n), t: traducir(r.t) }));
+            }
+        });
+        if (Array.isArray(x.clases)) {
+            x.clases = x.clases.map((c) => traducir(c.charAt(0).toUpperCase() + c.slice(1)).toLowerCase());
+        }
+        return x;
+    }
+
+    // Que no se repita el «en» (es por lo que se encuentra cada uno).
+    function enUnico(tipo, o, srd) {
+        const usados = new Set(srd.map((x) => x.en).concat(leerPropios()[tipo].filter((x) => x.id !== o.id).map((x) => x.en)));
+        let en = o.en;
+        let n = 2;
+        while (usados.has(en)) {
+            en = o.en + " (" + n + ")";
+            n += 1;
+        }
+        o.en = en;
+        return o;
+    }
+
+    // Una de las «otras cosas» (especie, dote…) en su ventana.
+    function abrirOtro(x, vuelta) {
+        const cuerpo = crear("div", "oc-regla-ventana");
+        cuerpo.appendChild(crear("p", "oc-hoja-nota", x.cat));
+        const t = markdown(x.texto);
+        cuerpo.appendChild(t);
+        if (window.ocDadosEnTexto) {
+            window.ocDadosEnTexto(t);
+        }
+        enlazarConjuros(t);
+        cuerpo.appendChild(crear("p", "oc-hoja-nota master-fuente", fuenteDe(x)));
+        cuerpo.appendChild(botonDe("oc-vida-accion", "📌 al tablero", () => {
+            cerrar();
+            anadir("ficha", { titulo: x.nombre, datos: { que: "otro", id: x.id } });
+        }, "Poner " + x.nombre + " en el tablero"));
+        const cerrar = window.ocVentana.abrir({ titulo: x.nombre, cuerpo, vuelta, clase: "es-regla" });
+    }
+
+    // Un archivo para bajar (con una dirección blob: del propio navegador).
+    function bajarJson(datos, nombre) {
+        const a = crear("a");
+        const archivoBlob = URL.createObjectURL(new Blob([JSON.stringify(datos, null, 1)], { type: "application/json" }));
+        a.href = archivoBlob;
+        a.download = nombre;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        setTimeout(() => URL.revokeObjectURL(archivoBlob), 1000);
+    }
+
+    // La plantilla: un ejemplo de cada (inventados), con todos los campos.
+    const PLANTILLA_PROPIOS = { pantallaDeMasterPropios: 1,
+        ayuda: "Rellena las listas y cárgalo con ⬆ importar. Sólo «nombre» es obligatorio. Los textos admiten *cursiva* y **negrita**. Los ataques, con el formato «*Ataque cuerpo a cuerpo:* +4, alcance 5 ft. *Impacto:* 5 (1d6 + 2) de daño cortante.» salen en tabla con sus dados. Si algo va en inglés, se traducen los términos de reglas al importar.",
+        monstruos: [{ nombre: "Rata de alcantarilla gigante", en: "Giant Sewer Rat", libro: "inventado", tipo: "Bestia Pequeño",
+            alin: "sin alineamiento", ca: "12", pg: 9, pgf: "2d6 + 2", vel: "30 ft., trepar 20 ft.",
+            car: { Fue: 7, Des: 15, Con: 12, Int: 2, Sab: 10, Car: 4 }, hab: "Sigilo +4", sent: "visión en la oscuridad 60 ft.; Percepción pasiva 10",
+            idio: "—", cr: "1/4", habitat: ["ciudad"],
+            rasgos: [{ n: "Olfato agudo", t: "La rata tiene ventaja en las pruebas de Sabiduría (Percepción) que dependen del olfato." }],
+            acciones: [{ n: "Mordisco", t: "*Ataque cuerpo a cuerpo:* +4, alcance 5 ft. *Impacto:* 4 (1d4 + 2) de daño perforante. Si el objetivo es una criatura, *Tirada de salvación de Constitución:* CD 11. *Fallo:* queda envenenado hasta el final de su siguiente turno." }],
+            reacciones: [{ n: "Escabullirse", t: "*Desencadenante:* Una criatura falla un ataque contra la rata. *Respuesta:* La rata se mueve 10 ft. sin provocar ataques de oportunidad." }] }],
+        objetos: [{ nombre: "Farol del vigía", en: "Watchman's Lantern", libro: "inventado", cat: "objeto maravilloso", rareza: "poco común",
+            sint: false, cp: 25000, peso: "2 lb.", tiendas: ["Tienda de magia"],
+            texto: "Mientras está encendido, las criaturas invisibles a 30 ft. o menos del farol dejan ver su silueta. Se enciende y se apaga con una acción adicional." }],
+        conjuros: [{ nombre: "Paso de niebla gris", en: "Grey Mist Step", libro: "inventado", nivel: 2, escuela: "Conjuración",
+            tiempo: "1 acción adicional", alcance: "Personal", comp: "V", dur: "Instantánea", clases: ["brujo", "hechicero", "mago"],
+            ritual: false, conc: false, texto: "Te envuelve una niebla gris y te teletransportas hasta 30 ft. a un espacio desocupado que veas. Cada criatura a 5 ft. del sitio del que te vas recibe 1d6 de daño de frío.",
+            superior: "**Con un espacio de nivel superior.** El daño aumenta en 1d6 por cada nivel por encima de 2." }],
+        otros: [{ nombre: "Dote: Centinela del puerto", libro: "inventado", cat: "dote",
+            texto: "*Requisito: nivel 4 o más.*\n\n**Ojo de marino.** Tienes ventaja en las pruebas de Sabiduría (Percepción) en barcos y muelles.\n\n**Amarre firme.** No pueden derribarte mientras estés sobre una cubierta." }] };
+
+    function montarCreador(dentro, m) {
+        m.datos = m.datos || {};
+        const d = m.datos;
+        const TIPOS = [["monstruos", "🐉 monstruos", "monstruo"], ["objetos", "💰 objetos", "objeto"], ["conjuros", "✨ conjuros", "conjuro"],
+            ["otros", "📜 más cosas", "cosa"]];
+        const RUTA_DE = { monstruos: "/datos/personajes/compendio/bestiario.json", objetos: "/datos/personajes/compendio/tienda.json",
+            conjuros: "/datos/personajes/compendio/conjuros-srd.json" };
+        const uid = "master-creador-" + m.id;
+        // Lo del SRD de cada tipo (para copiar uno y para que no se repitan).
+        const srd = { monstruos: [], objetos: [], conjuros: [], otros: [] };
+        const cargado = Promise.all(Object.keys(RUTA_DE).map((k) => pedidos[RUTA_DE[k]] || pedir(RUTA_DE[k]))).then((xs) => {
+            Object.keys(RUTA_DE).forEach((k, i) => {
+                srd[k] = (xs[i][k] || []).filter((x) => !x.propio);
+            });
+        }).catch(() => {});
+
+        // ARRIBA: el aviso, importar, exportar y la plantilla.
+        const vista = crear("div", "master-creador-vista");
+        const nota = crear("p", "oc-hoja-nota", "Monstruos, objetos, conjuros y más cosas de otros manuales (cópialos de tu libro)"
+            + " o inventados. Salen en el bestiario, los encuentros, la tienda, el botín, los conjuros y el buscador, como los del SRD."
+            + " Se quedan sólo en este navegador: no se suben a la web. Para no perderlos o pasárselos a otro máster, ⬇ exportar.");
+        const barra = crear("div", "master-creador-barra");
+        const archivo = crear("input");
+        archivo.type = "file";
+        archivo.accept = ".json,application/json";
+        archivo.hidden = true;
+        const importar = botonDe("oc-vida-accion", "⬆ importar .json", () => archivo.click(), "Importar creaciones desde un archivo .json");
+        const exportar = botonDe("oc-vida-accion", "⬇ exportar", () => {
+            const p = leerPropios();
+            const n = p.monstruos.length + p.objetos.length + p.conjuros.length + p.otros.length;
+            if (!n) {
+                avisar("Aún no hay nada tuyo que exportar.");
+                return;
+            }
+            bajarJson(Object.assign({ pantallaDeMasterPropios: 1 }, p), "mis-creaciones-" + new Date().toISOString().slice(0, 10) + ".json");
+            avisar("Exportadas " + n + " creaciones.");
+        }, "Exportar todas tus creaciones a un archivo .json");
+        const plantilla = botonDe("oc-vida-accion", "📄 plantilla", () => {
+            bajarJson(PLANTILLA_PROPIOS, "plantilla-creaciones.json");
+            avisar("Bajada la plantilla, con un ejemplo de cada.");
+        }, "Bajar una plantilla .json de ejemplo para rellenar");
+        const etTr = crear("label", "master-creador-check");
+        const conTraducir = crear("input");
+        conTraducir.type = "checkbox";
+        conTraducir.checked = d.traducir !== false;
+        conTraducir.addEventListener("change", () => {
+            d.traducir = conTraducir.checked;
+            guardar();
+        });
+        etTr.append(conTraducir, " 🌐 traducir los términos al importar");
+        barra.append(importar, exportar, plantilla, etTr, archivo);
+        archivo.addEventListener("change", () => {
+            const f = archivo.files && archivo.files[0];
+            archivo.value = "";
+            if (!f) {
+                return;
+            }
+            Promise.all([f.text(), cargado]).then(([texto]) => {
+                const datos = JSON.parse(texto);
+                if (!datos || typeof datos !== "object") {
+                    throw new Error("no es");
+                }
+                const p = leerPropios();
+                let nuevos = 0;
+                let cambiados = 0;
+                TIPOS.forEach(([k]) => {
+                    (Array.isArray(datos[k]) ? datos[k] : []).slice(0, 2000).forEach((x) => {
+                        let o = limpiarPropio(k, x);
+                        if (!o) {
+                            return;
+                        }
+                        if (conTraducir.checked) {
+                            o = traducirPropio(k, o);
+                        }
+                        const i = p[k].findIndex((y) => y.id === o.id);
+                        if (i >= 0) {
+                            p[k][i] = o;
+                            cambiados += 1;
+                        } else {
+                            p[k].push(o);
+                            nuevos += 1;
+                        }
+                        if (k !== "otros") {
+                            const usados = new Set(srd[k].map((y) => y.en).concat(p[k].filter((y) => y !== o).map((y) => y.en)));
+                            let en = o.en;
+                            let n = 2;
+                            while (usados.has(en)) {
+                                en = o.en + " (" + n + ")";
+                                n += 1;
+                            }
+                            o.en = en;
+                        }
+                    });
+                });
+                if (!nuevos && !cambiados) {
+                    throw new Error("vacío");
+                }
+                if (!guardarPropios(p)) {
+                    avisar("No se ha podido guardar: ¿no queda sitio en el navegador?");
+                    return;
+                }
+                pintarListas();
+                avisar("Importado: " + nuevos + " nuevos" + (cambiados ? " y " + cambiados + " cambiados" : "") + ".");
+            }).catch(() => avisar("Ese archivo no tiene creaciones que yo entienda (mira la 📄 plantilla)."));
+        });
+
+        // LAS LISTAS, una por pestaña.
+        const listas = {};
+        const filtros = {};
+        const paneles = TIPOS.map(([k, titulo, uno]) => {
+            const panel = crear("div", "master-creador-panel");
+            const botones = crear("div", "master-creador-barra");
+            botones.appendChild(botonDe("oc-vida-accion es-principal", "＋ " + uno + " nuevo", () => editar(k, null), "Crear " +
+                (k === "otros" ? "una cosa nueva (especie, dote…)" : "un " + uno + " nuevo")));
+            if (k !== "otros") {
+                // Partir de uno del SRD (para hacer una versión).
+                const sel = crear("select", "master-elegir");
+                sel.id = uid + "-base-" + k;
+                const etSel = crear("label", "oc-dados-etiqueta", "o partir de uno del SRD");
+                etSel.htmlFor = sel.id;
+                cargado.then(() => {
+                    sel.replaceChildren(...srd[k].slice().sort((a, b) => a.nombre.localeCompare(b.nombre, "es")).map((x) => {
+                        const o = crear("option", "", x.nombre);
+                        o.value = x.en;
+                        return o;
+                    }));
+                });
+                const copiar = botonDe("oc-vida-accion", "⧉ copiar", () => {
+                    const base = srd[k].find((x) => x.en === sel.value);
+                    if (base) {
+                        const x = JSON.parse(JSON.stringify(base));
+                        delete x.ilus;
+                        delete x.ilusDe;
+                        x.libro = "";
+                        x.nombre = base.nombre + " (versión)";
+                        x.en = base.en + " (versión)";
+                        editar(k, x, true);
+                    }
+                }, "Copiar el elegido para hacer tu versión");
+                const caja = crear("div", "master-creador-base");
+                caja.append(etSel, sel, copiar);
+                botones.appendChild(caja);
+            }
+            const etF = crear("label", "oc-dados-etiqueta", "buscar entre los tuyos");
+            const filtro = crear("input", "oc-dados-texto");
+            filtro.type = "search";
+            filtro.id = uid + "-filtro-" + k;
+            etF.htmlFor = filtro.id;
+            filtro.addEventListener("input", () => pintarLista(k));
+            filtros[k] = filtro;
+            const ul = crear("ul", "master-creador-lista");
+            ul.setAttribute("aria-label", titulo.replace(/^\S+\s/, "") + " tuyos");
+            listas[k] = ul;
+            panel.append(botones, etF, filtro, ul);
+            return [titulo, panel];
+        });
+        const elegido = Math.min(d.pestana || 0, TIPOS.length - 1);
+        const { lista: pestanas, elegir } = pestanasDe(paneles, "Qué crear", uid, (i) => {
+            d.pestana = i;
+            guardar();
+        });
+        vista.append(nota, barra, pestanas, ...paneles.map(([, x]) => x));
+        const editor = crear("form", "master-creador-form");
+        editor.hidden = true;
+        dentro.append(vista, editor);
+
+        function detalleDe(k, x) {
+            if (k === "monstruos") {
+                return "VD " + x.cr + " · " + x.tipo;
+            }
+            if (k === "objetos") {
+                return x.cat + (x.rareza ? " · " + x.rareza : "");
+            }
+            if (k === "conjuros") {
+                return nivelDe(x) + " · " + x.escuela;
+            }
+            return x.cat;
+        }
+        function abrirUno(k, x, vuelta) {
+            pedir(RUTA_DE[k] || "/datos/personajes/compendio/tienda.json").then((datos) => {
+                if (k === "monstruos") {
+                    abrirBicho(x, vuelta, datos.fuente);
+                } else if (k === "objetos") {
+                    abrirObjeto(x, vuelta, datos.fuente);
+                } else if (k === "conjuros") {
+                    abrirConjuro(x, vuelta, datos.fuente);
+                } else {
+                    abrirOtro(x, vuelta);
+                }
+            }).catch(() => (k === "otros" ? abrirOtro(x, vuelta) : avisar("No he podido cargarlo.")));
+        }
+        function pintarLista(k) {
+            const ul = listas[k];
+            const q = llano(filtros[k].value.trim());
+            const todos = leerPropios()[k].slice().sort((a, b) => a.nombre.localeCompare(b.nombre, "es"));
+            const salen = todos.filter((x) => !q || llano(x.nombre + " " + x.en + " " + (x.libro || "")).includes(q));
+            ul.replaceChildren(...salen.map((x) => {
+                const li = crear("li", "master-creador-fila");
+                const ver = botonDe("master-creador-ver", "", () => abrirUno(k, x, ver));
+                ver.dataset.id = x.id;
+                ver.setAttribute("aria-haspopup", "dialog");
+                ver.append(crear("span", "master-creador-nombre", x.nombre), crear("span", "master-creador-detalle",
+                    detalleDe(k, x) + (x.libro ? " · " + x.libro : "")));
+                const cambiar = botonDe("master-docs-mando", "✎", () => editar(k, x), "Cambiar " + x.nombre);
+                const duplicar = botonDe("master-docs-mando", "⧉", () => {
+                    const y = JSON.parse(JSON.stringify(x));
+                    delete y.id;
+                    y.nombre = x.nombre + " (copia)";
+                    y.en = x.en + " (copia)";
+                    editar(k, y, true);
+                }, "Hacer una copia de " + x.nombre);
+                let seguro = false;
+                const quitar = botonDe("master-docs-mando", "✕", () => {
+                    if (!seguro) {
+                        seguro = true;
+                        quitar.classList.add("es-seguro");
+                        avisar("Pulsa otra vez para quitar " + x.nombre + ".");
+                        return;
+                    }
+                    const p = leerPropios();
+                    p[k] = p[k].filter((y) => y.id !== x.id);
+                    guardarPropios(p);
+                    pintarLista(k);
+                    avisar("Quitado: " + x.nombre + ".");
+                    filtros[k].focus();
+                }, "Quitar " + x.nombre);
+                li.append(ver, cambiar, duplicar, quitar);
+                return li;
+            }));
+            if (!salen.length) {
+                ul.appendChild(crear("li", "oc-vacio", todos.length ? "Nada con eso." : "Aún no hay. Crea uno, copia uno del SRD"
+                    + " o importa un .json."));
+            }
+        }
+        function pintarListas() {
+            TIPOS.forEach(([k]) => pintarLista(k));
+        }
+
+        // EL FORMULARIO (crear o cambiar).
+        let n = 0;
+        function campo(caja, etiqueta, valor, op) {
+            const o = op || {};
+            n += 1;
+            const id = uid + "-c" + n;
+            const et = crear("label", "oc-dados-etiqueta", etiqueta);
+            et.htmlFor = id;
+            let x;
+            if (o.opciones) {
+                x = crear("select", "master-elegir");
+                const lista = o.opciones.slice();
+                if (valor && !lista.includes(valor)) {
+                    lista.push(valor);
+                }
+                lista.forEach((v) => {
+                    const op2 = crear("option", "", Array.isArray(v) ? v[1] : v || "—");
+                    op2.value = Array.isArray(v) ? v[0] : v;
+                    x.appendChild(op2);
+                });
+                x.value = valor === undefined ? "" : String(valor);
+            } else if (o.filas) {
+                x = crear("textarea", "oc-dados-texto master-creador-area");
+                x.rows = o.filas;
+                x.value = valor || "";
+            } else {
+                x = crear("input", "oc-dados-texto");
+                x.type = o.tipo || "text";
+                if (o.tipo === "number") {
+                    x.min = o.min === undefined ? 0 : o.min;
+                    x.max = o.max === undefined ? 99999 : o.max;
+                    x.step = o.paso || 1;
+                }
+                x.value = valor === undefined || valor === null ? "" : String(valor);
+                x.autocomplete = "off";
+                if (o.lista) {
+                    const dl = crear("datalist");
+                    dl.id = id + "-l";
+                    o.lista.forEach((v) => {
+                        const op2 = crear("option");
+                        op2.value = v;
+                        dl.appendChild(op2);
+                    });
+                    x.setAttribute("list", dl.id);
+                    caja.appendChild(dl);
+                }
+            }
+            x.id = id;
+            if (o.ayuda) {
+                x.placeholder = o.ayuda;
+            }
+            if (o.obligatorio) {
+                x.required = true;
+                x.setAttribute("aria-required", "true");
+            }
+            const div = crear("div", "master-creador-campo" + (o.ancho ? " es-ancho" : ""));
+            div.append(et, x);
+            caja.appendChild(div);
+            return x;
+        }
+        function grupo(titulo) {
+            const fs = crear("fieldset", "master-creador-grupo");
+            fs.appendChild(crear("legend", "", titulo));
+            const rejilla = crear("div", "master-creador-rejilla");
+            fs.appendChild(rejilla);
+            editor.appendChild(fs);
+            return rejilla;
+        }
+        function marcasDe(titulo, opciones, marcadas) {
+            const fs = crear("fieldset", "master-creador-grupo");
+            fs.appendChild(crear("legend", "", titulo));
+            const caja = crear("div", "master-creador-casillas");
+            const cajas = opciones.map((v) => {
+                const et = crear("label", "master-creador-check");
+                const c = crear("input");
+                c.type = "checkbox";
+                c.value = v;
+                c.checked = (marcadas || []).includes(v);
+                et.append(c, " " + v);
+                caja.appendChild(et);
+                return c;
+            });
+            fs.appendChild(caja);
+            editor.appendChild(fs);
+            return () => cajas.filter((c) => c.checked).map((c) => c.value);
+        }
+        // Una lista de entradas (rasgos, acciones…): nombre y texto, con
+        // ＋ y ✕.
+        function entradas(titulo, lista, conAtaque) {
+            const fs = crear("fieldset", "master-creador-grupo");
+            fs.appendChild(crear("legend", "", titulo));
+            const ul = crear("ol", "master-creador-entradas");
+            const filas = [];
+            const fila = (r, foco) => {
+                const li = crear("li", "master-creador-entrada");
+                const nom = campo(li, "nombre", r.n);
+                const tex = campo(li, "texto", r.t, { filas: 3, ancho: true });
+                const quitar = botonDe("master-docs-mando", "✕", () => {
+                    filas.splice(filas.indexOf(x), 1);
+                    li.remove();
+                    mas.focus();
+                    avisar("Quitado de " + titulo.toLowerCase() + ".");
+                }, "Quitar esta entrada de " + titulo.toLowerCase());
+                li.appendChild(quitar);
+                const x = { nom, tex };
+                filas.push(x);
+                ul.appendChild(li);
+                if (foco) {
+                    nom.focus();
+                }
+            };
+            (lista || []).forEach((r) => fila(r));
+            const botones = crear("div", "master-creador-barra");
+            const mas = botonDe("oc-vida-accion", "＋ añadir", () => fila({ n: "", t: "" }, true), "Añadir a " + titulo.toLowerCase());
+            botones.appendChild(mas);
+            if (conAtaque) {
+                botones.appendChild(botonDe("oc-vida-accion", "＋ ataque", () => fila({ n: "Ataque",
+                    t: "*Ataque cuerpo a cuerpo:* +4, alcance 5 ft. *Impacto:* 5 (1d6 + 2) de daño cortante." }, true),
+                "Añadir un ataque (con el formato que sale en tabla)"));
+                botones.appendChild(botonDe("oc-vida-accion", "＋ salvación", () => fila({ n: "Aliento",
+                    t: "*Tirada de salvación de Destreza:* CD 13, cada criatura en un cono de 15 ft. *Fallo:* 14 (4d6) de daño de fuego. *Éxito:* la mitad del daño." }, true),
+                "Añadir un efecto con tirada de salvación"));
+            }
+            fs.append(ul, botones);
+            editor.appendChild(fs);
+            return () => filas.map((x) => ({ n: x.nom.value.trim(), t: x.tex.value.trim() })).filter((r) => r.n || r.t);
+        }
+        let volverA = null;
+        function editar(k, x, esNuevo) {
+            volverA = document.activeElement;
+            const actual = x && !esNuevo ? x : null;
+            const v = x || {};
+            n = 0;
+            editor.replaceChildren();
+            const uno = TIPOS.find((t) => t[0] === k)[2];
+            editor.appendChild(crear("h3", "master-creador-titulo", actual ? "✎ " + actual.nombre : "＋ " + (k === "otros" ? "cosa nueva"
+                : uno + " nuevo")));
+            const base = grupo("Lo básico");
+            const nombre = campo(base, "nombre (en español)", v.nombre, { obligatorio: true });
+            const en = k === "otros" ? null : campo(base, "nombre original (opcional)", v.en === v.nombre ? "" : v.en);
+            const libro = campo(base, "de dónde sale", v.libro, { ayuda: "Monster Manual 2025, p. 12 · inventado…" });
+            const leer = { comun: () => ({ nombre: nombre.value, en: (en && en.value.trim()) || nombre.value, libro: libro.value }) };
+            if (k === "monstruos") {
+                const t = /^(.+?)(?: \(([^)]*)\))? ((?:Diminuto|Pequeño|Mediano|Grande|Enorme|Gargantuesco)(?: o \S+)?)$/
+                    .exec(v.tipo || "") || [];
+                const tipo = campo(base, "tipo", t[1] || (v.tipo ? v.tipo : "Monstruosidad"), { opciones: PROPIO_TIPOS });
+                const etiqueta = campo(base, "etiqueta (opcional)", t[2] || "", { ayuda: "goblinoide, cromático…" });
+                const tam = campo(base, "tamaño", t[3] || (v.tipo ? "" : "Mediano"), { opciones: PROPIO_TAMANOS });
+                const alin = campo(base, "alineamiento", v.alin || "neutral", { opciones: PROPIO_ALIN });
+                const cr = campo(base, "VD", v.cr || "1", { opciones: CR_LISTA });
+                const comb = grupo("Combate");
+                const ca = campo(comb, "CA", v.ca, { ayuda: "15 (cota de mallas)" });
+                const pg = campo(comb, "PG", v.pg, { tipo: "number", min: 1 });
+                const pgf = campo(comb, "dados de PG", v.pgf, { ayuda: "4d8 + 4" });
+                const ini = campo(comb, "iniciativa", v.ini, { ayuda: "vacío: la de su Destreza" });
+                const vel = campo(comb, "velocidad", v.vel, { ayuda: "30 ft., vuelo 60 ft.", ancho: true });
+                const ca2 = grupo("Características");
+                const car = {};
+                ["Fue", "Des", "Con", "Int", "Sab", "Car"].forEach((c) => {
+                    car[c] = campo(ca2, c, (v.car || {})[c] || 10, { tipo: "number", min: 1, max: 30 });
+                });
+                const mas = grupo("Más datos");
+                const otros = {};
+                [["salv", "salvaciones", "Des +5, Sab +3"], ["hab", "habilidades", "Percepción +4, Sigilo +6"],
+                    ["vuln", "vulnerabilidades", "fuego"], ["res", "resistencias", "frío; contundente"],
+                    ["inm", "inmunidades al daño", "veneno"], ["inmE", "inmunidades a estados", "envenenado, asustado"],
+                    ["sent", "sentidos", "visión en la oscuridad 60 ft.; Percepción pasiva 12"], ["idio", "idiomas", "común, dracónico"],
+                    ["equipo", "equipo", "espada larga, escudo"]].forEach(([c, et, ayuda]) => {
+                    otros[c] = campo(mas, et, v[c], { ayuda, ancho: true });
+                });
+                const habitat = marcasDe("Hábitat (para los encuentros)", PROPIO_HABITATS, v.habitat);
+                const secc = {};
+                SECCIONES_BICHO.forEach(([c, titulo]) => {
+                    secc[c] = entradas(titulo, v[c], c === "acciones" || c === "adicionales" || c === "legendarias");
+                });
+                const legInfo = campo(grupo("Uso de las legendarias (si tiene)"), "cómo se usan", v.legInfo, { filas: 2, ancho: true,
+                    ayuda: "*Usos de acción legendaria:* 3. Justo después del turno de otra criatura, puede gastar un uso…" });
+                leer.resto = () => {
+                    const o = { tipo: tipo.value + (etiqueta.value.trim() ? " (" + etiqueta.value.trim() + ")" : "") + " " + tam.value,
+                        alin: alin.value, cr: cr.value, vd: v.cr === cr.value ? v.vd : "", ca: ca.value, pg: pg.value, pgf: pgf.value,
+                        ini: ini.value, vel: vel.value, car: {}, habitat: habitat(), legInfo: legInfo.value };
+                    Object.keys(car).forEach((c) => {
+                        o.car[c] = car[c].value;
+                    });
+                    Object.keys(otros).forEach((c) => {
+                        o[c] = otros[c].value;
+                    });
+                    Object.keys(secc).forEach((c) => {
+                        o[c] = secc[c]();
+                    });
+                    return o;
+                };
+            } else if (k === "objetos") {
+                const cat = campo(base, "categoría", v.cat || "objeto maravilloso", { lista: PROPIO_CATS });
+                const rareza = campo(base, "rareza", v.rareza || "", { opciones: [["", "— (no mágico)"]].concat(PROPIO_RAREZAS) });
+                const precio = campo(base, "precio (po)", v.cp ? v.cp / 100 : "", { tipo: "number", paso: "any" });
+                const peso = campo(base, "peso", v.peso, { ayuda: "2 lb." });
+                const det = campo(base, "detalles", v.det, { ayuda: "1d8 cortante, versátil…", ancho: true });
+                const nota2 = campo(base, "nota", v.nota, { ancho: true });
+                const etS = crear("label", "master-creador-check");
+                const sint = crear("input");
+                sint.type = "checkbox";
+                sint.checked = !!v.sint;
+                etS.append(sint, " requiere sintonía");
+                base.appendChild(etS);
+                const tiendas = marcasDe("Se vende en (para la tienda y los negocios)", PROPIO_TIENDAS, v.tiendas);
+                const texto = campo(grupo("Qué hace"), "texto", v.texto, { filas: 8, ancho: true,
+                    ayuda: "Admite *cursiva* y **negrita**; los conjuros en cursiva se enlazan." });
+                leer.resto = () => ({ cat: cat.value, rareza: rareza.value, cp: Math.round((Number(precio.value) || 0) * 100),
+                    peso: peso.value, det: det.value, nota: nota2.value, sint: sint.checked, tiendas: tiendas(), texto: texto.value });
+            } else if (k === "conjuros") {
+                const nivel = campo(base, "nivel", v.nivel === undefined ? 1 : v.nivel, { opciones: [["0", "truco"]]
+                    .concat(Array.from({ length: 9 }, (x2, i) => [String(i + 1), "nivel " + (i + 1)])) });
+                const escuela = campo(base, "escuela", v.escuela || "Evocación", { opciones: PROPIO_ESCUELAS });
+                const tiempo = campo(base, "tiempo de lanzamiento", v.tiempo, { ayuda: "1 acción" });
+                const alcance = campo(base, "alcance", v.alcance, { ayuda: "60 ft." });
+                const comp = campo(base, "componentes", v.comp, { ayuda: "V, S, M (una pluma)" });
+                const dur = campo(base, "duración", v.dur, { ayuda: "Concentración, hasta 1 minuto" });
+                const marcas = crear("div", "master-creador-barra");
+                const caja = (texto, valor) => {
+                    const et = crear("label", "master-creador-check");
+                    const c = crear("input");
+                    c.type = "checkbox";
+                    c.checked = !!valor;
+                    et.append(c, " " + texto);
+                    marcas.appendChild(et);
+                    return c;
+                };
+                const ritual = caja("ritual", v.ritual);
+                const conc = caja("concentración", v.conc);
+                base.appendChild(marcas);
+                const otrasClases = (v.clases || []).filter((c) => !PROPIO_CLASES.includes(c));
+                const clases = marcasDe("Clases", PROPIO_CLASES, v.clases);
+                const mas = campo(grupo("Otras clases o subclases"), "separadas por comas", otrasClases.join(", "), { ancho: true });
+                const tx = grupo("Qué hace");
+                const texto = campo(tx, "texto", v.texto, { filas: 8, ancho: true });
+                const superior = campo(tx, "a nivel superior / mejora del truco", v.superior, { filas: 2, ancho: true });
+                leer.resto = () => ({ nivel: nivel.value, escuela: escuela.value, tiempo: tiempo.value, alcance: alcance.value,
+                    comp: comp.value, dur: dur.value, ritual: ritual.checked, conc: conc.checked,
+                    clases: clases().concat(mas.value.split(",").map((c) => c.trim()).filter(Boolean)), texto: texto.value,
+                    superior: superior.value });
+            } else {
+                const cat = campo(base, "qué es", v.cat || "dote", { lista: PROPIO_OTROS });
+                const texto = campo(grupo("Texto"), "texto", v.texto, { filas: 12, ancho: true,
+                    ayuda: "Admite **negrita**, *cursiva*, listas con «- » y párrafos." });
+                leer.resto = () => ({ cat: cat.value, texto: texto.value });
+            }
+            // Los botones, abajo.
+            const botones = crear("div", "master-creador-barra master-creador-final");
+            const ok = crear("button", "oc-vida-accion es-principal", "✓ guardar");
+            ok.type = "submit";
+            const traducirB = botonDe("oc-vida-accion", "🌐 traducir términos", () => {
+                editor.querySelectorAll("input[type=text], input:not([type]), textarea").forEach((c) => {
+                    if (c !== nombre && c !== en && c !== libro) {
+                        c.value = traducir(c.value);
+                    }
+                });
+                if (k === "monstruos") {
+                    avisar("Términos traducidos. El tipo y el tamaño, en sus desplegables.");
+                } else {
+                    avisar("Términos traducidos (las frases se quedan como estaban).");
+                }
+            }, "Traducir al español los términos de reglas en inglés de este formulario");
+            const no = botonDe("oc-vida-accion", "cancelar", cerrar);
+            botones.append(ok, traducirB, no);
+            editor.appendChild(botones);
+            editor.onsubmit = (e) => {
+                e.preventDefault();
+                if (!nombre.value.trim()) {
+                    avisar("Ponle un nombre.");
+                    nombre.focus();
+                    return;
+                }
+                const datos = Object.assign(leer.comun(), leer.resto());
+                if (actual) {
+                    datos.id = actual.id;
+                }
+                const o = limpiarPropio(k, datos);
+                if (k !== "otros") {
+                    enUnico(k, o, srd[k]);
+                }
+                const p = leerPropios();
+                const i = p[k].findIndex((y) => y.id === o.id);
+                if (i >= 0) {
+                    p[k][i] = o;
+                } else {
+                    p[k].push(o);
+                }
+                if (!guardarPropios(p)) {
+                    avisar("No se ha podido guardar: ¿no queda sitio en el navegador?");
+                    return;
+                }
+                cerrar(o.id);
+                avisar("Guardado: " + o.nombre + ".");
+            };
+            editor.onkeydown = (e) => {
+                if (e.key === "Escape" && e.target.tagName !== "SELECT") {
+                    e.preventDefault();
+                    cerrar();
+                }
+            };
+            vista.hidden = true;
+            editor.hidden = false;
+            dentro.scrollTop = 0;
+            nombre.focus();
+        }
+        function cerrar(idNuevo) {
+            editor.hidden = true;
+            editor.replaceChildren();
+            vista.hidden = false;
+            pintarListas();
+            const b = idNuevo && vista.querySelector(".master-creador-ver[data-id='" + idNuevo + "']");
+            if (b) {
+                b.focus();
+            } else if (volverA && volverA.isConnected) {
+                volverA.focus();
+            }
+        }
+        pintarListas();
+        elegir(elegido, false);
+        mientrasEste(dentro, "master:propios", () => {
+            if (editor.hidden) {
+                pintarListas();
+            }
+        });
+    }
+
+    // Abre la ventana de tus creaciones (o la trae delante si ya está).
+    function abrirCreador() {
+        const ya = estado.modulos.find((x) => x.tipo === "creador");
+        if (!ya) {
+            anadir("creador");
+            return;
+        }
+        if (ya.grupo && !ya.delante) {
+            verEnGrupo(ya, false);
+        }
+        alFrente(ya);
+        ya.el.scrollIntoView({ block: "nearest" });
+        focoDe(ya).focus();
+    }
+
     const MODULOS = {
         iniciativa: { nombre: "iniciativa", emoji: "⏱️", grupo: "combate", unico: true, w: 420, h: 520,
             desc: "El orden de turnos, con rondas, PG y marcas.",
@@ -8894,6 +9877,9 @@
         sonidos: { nombre: "efectos de sonido", emoji: "🔔", grupo: "mesa", unico: true, w: 560, h: 680,
             desc: "Puertas, tajos, conjuros, gritos, monstruos…: suenan una vez al pulsar (y tus audios).",
             montar: montarSonidos },
+        creador: { nombre: "tus creaciones", emoji: "🛠️", grupo: "consulta", unico: true, w: 640, h: 760,
+            desc: "Monstruos, objetos, conjuros y más de otros manuales o inventados (se quedan en tu navegador).",
+            montar: montarCreador },
         musica: { nombre: "música", emoji: "🎶", grupo: "mesa", unico: true, w: 560, h: 720,
             desc: "Tus canciones en carpetas y subcarpetas: una en bucle o la carpeta entera (se quedan en tu navegador).",
             montar: montarMusica },
@@ -9877,6 +10863,10 @@
     // elegido se abre en su ventana, con «📌 al tablero». Es un combobox:
     // con las flechas se va por los resultados e Intro abre. ----
     let indice = null;
+    // Si cambia lo tuyo, el índice se vuelve a hacer.
+    document.addEventListener("master:propios", () => {
+        indice = null;
+    });
 
     function cargarIndice() {
         if (!indice) {
@@ -9885,16 +10875,16 @@
                 .then(([conj, best, reg, tienda]) => {
                     const cosas = [];
                     (conj.conjuros || []).forEach((c) => cosas.push({ tipo: "conjuro", emoji: "✨", nombre: c.nombre,
-                        detalle: nivelDe(c) + " · " + c.escuela, buscar: llano(c.nombre + " " + c.en),
+                        detalle: nivelDe(c) + " · " + c.escuela + (c.propio ? " · 🛠️ tuyo" : ""), buscar: llano(c.nombre + " " + c.en),
                         abrir: (v) => abrirConjuro(c, v, conj.fuente) }));
                     (best.monstruos || []).forEach((b) => cosas.push({ tipo: "monstruo", emoji: tokenDe(b).textContent, nombre: b.nombre,
-                        detalle: "VD " + b.cr + " · " + b.tipo, buscar: llano(b.nombre + " " + b.en),
+                        detalle: "VD " + b.cr + " · " + b.tipo + (b.propio ? " · 🛠️ tuyo" : ""), buscar: llano(b.nombre + " " + b.en),
                         abrir: (v) => abrirBicho(b, v, best.fuente) }));
                     (reg.reglas || []).forEach((r) => cosas.push({ tipo: "regla", emoji: r.icono || "📚", nombre: r.nombre,
                         detalle: "Regla · " + r.grupo, buscar: llano(r.nombre + " " + (r.alias || "")),
                         abrir: (v) => abrirRegla(r, v, reg.fuente) }));
                     (tienda.objetos || []).forEach((o) => cosas.push({ tipo: "objeto", emoji: "💰", nombre: o.nombre,
-                        detalle: "Objeto · " + o.cat + (o.rareza ? " · " + o.rareza : ""), buscar: llano(o.nombre + " " + o.en),
+                        detalle: "Objeto · " + o.cat + (o.rareza ? " · " + o.rareza : "") + (o.propio ? " · 🛠️ tuyo" : ""), buscar: llano(o.nombre + " " + o.en),
                         abrir: (v) => abrirObjeto(o, v, tienda.fuente) }));
                     return cosas;
                 });
@@ -9956,7 +10946,9 @@
                 const propias = leerHomebrew().map((r) => ({ tipo: "propia", emoji: r.icono || "🏠", nombre: r.nombre,
                     detalle: "Regla propia", buscar: llano(r.nombre),
                     abrir: (v) => abrirRegla(Object.assign({ propia: true, grupo: "🏠 Reglas propias" }, r), v) }));
-                const todas = propias.concat(cosas);
+                const otras = leerPropios().otros.map((x) => ({ tipo: "otro", emoji: "📜", nombre: x.nombre,
+                    detalle: x.cat + " · 🛠️ tuyo", buscar: llano(x.nombre + " " + x.cat), abrir: (v) => abrirOtro(x, v) }));
+                const todas = propias.concat(otras, cosas);
                 // Primero lo que empieza por lo buscado; luego lo que lo lleva.
                 const empieza = todas.filter((x) => x.buscar.startsWith(q));
                 const lleva = todas.filter((x) => !x.buscar.startsWith(q) && x.buscar.includes(q));
@@ -10107,7 +11099,7 @@
     // perfiles con sus ventanas, la iniciativa, las marcas propias y las
     // tiradas guardadas) a un archivo .json, y de vuelta. Para guardarlo,
     // pasarlo a otro navegador o compartir un tablero montado. ----
-    const CLAVES = (k) => k === CLAVE || k === CLAVE_HOMEBREW || k === CLAVE_IMAGENES || k === CLAVE_PLANTILLAS || /^richi-oc-(iniciativa|marcas|partida-pantalla-master)/.test(k);
+    const CLAVES = (k) => k === CLAVE || k === CLAVE_HOMEBREW || k === CLAVE_IMAGENES || k === CLAVE_PLANTILLAS || k === CLAVE_PROPIOS || /^richi-oc-(iniciativa|marcas|partida-pantalla-master)/.test(k);
 
     function copias(alTerminar) {
         const caja = crear("div", "master-anadir-otras");
@@ -10921,7 +11913,9 @@
     const botonOpciones = botonDe("master-pestana-mando master-opciones-boton", "⚙", () => verOpciones(), "Opciones del tablero");
     botonOpciones.title = "Opciones: zoom, dados, atajos, ordenar, exportar…";
     botonOpciones.setAttribute("aria-haspopup", "dialog");
-    mandos.append(buscador, botonBuscar, botonOpciones);
+    const botonCrear = botonDe("master-pestana-mando master-crear", "＋", abrirCreador, "Tus creaciones: crear monstruos, objetos, conjuros…");
+    botonCrear.title = "Tus creaciones: crear o importar monstruos, objetos, conjuros y más";
+    mandos.append(buscador, botonBuscar, botonCrear, botonOpciones);
     barra.prepend(pestanas, mandos);
 
     function verOpciones() {
