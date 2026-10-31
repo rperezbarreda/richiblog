@@ -2546,6 +2546,9 @@ document.querySelectorAll(".oc-ataques th[data-oc-desc]").forEach((th) => {
     window.ocDados = {
         tirar,
         tirarVarias,
+        // El dibujo de un dado (un svg, escondido al lector): 2, 4, 6, 8,
+        // 10, 12, 20 o 100 caras.
+        silueta,
         // El registro, para pintarlo en otra parte (la pantalla de máster):
         // las filas de las tiradas, borrar una y borrarlas todas. Cada
         // cambio avisa con «oc-dados:registro».

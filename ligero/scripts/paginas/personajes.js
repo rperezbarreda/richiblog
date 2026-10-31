@@ -2117,6 +2117,7 @@ document.querySelectorAll(".oc-ataques th[data-oc-desc]").forEach((th) => {
     window.ocDados = {
         tirar,
         tirarVarias,
+        silueta,
         registro(alQuitar) {
             return estado.tiradas.map((r, i) => filaDeTirada(r, i, (id) => {
                 estado.tiradas = estado.tiradas.filter((x) => x.id !== id);

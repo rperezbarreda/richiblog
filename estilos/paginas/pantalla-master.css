@@ -182,9 +182,10 @@
 
 /* Las pestañas, en todo el sitio que deja la barra: si no caben, se
    deslizan de lado (sin barra de scroll) con las flechas ‹ ›. */
+/* ＋ y ✎ van justo detrás de la última pestaña (el marco no crece). */
 .master-pestanas-marco {
     display: flex;
-    flex: 1 1 auto;
+    flex: 0 1 auto;
     align-items: flex-end;
     gap: 2px;
     min-width: 0;
@@ -516,8 +517,9 @@
 }
 
 /* LOS GRUPOS: las pestañas son la barra (como las de un navegador):
-   pegadas abajo, cada una del color de su ventana; la de ahora, con su
-   nombre; las demás, sólo el icono. */
+   pegadas abajo, cada una del color de su ventana y con su nombre; si no
+   caben, las de detrás se quedan en el icono (.es-apretadas). La de
+   ahora, con un reborde por dentro. */
 .master-ventana-barra.es-grupo {
     align-items: flex-end;
     padding-top: 6px;
@@ -559,11 +561,15 @@
     cursor: pointer;
 }
 
-.master-grupo-pestana.es-compacta {
+.master-grupo-pestana:not([aria-selected="true"]) {
+    font-weight: 400;
+}
+
+.master-grupo-pestanas.es-apretadas .master-grupo-pestana:not([aria-selected="true"]) {
     padding: 4px 8px;
 }
 
-.master-grupo-pestana.es-compacta .master-grupo-nombre {
+.master-grupo-pestanas.es-apretadas .master-grupo-pestana:not([aria-selected="true"]) .master-grupo-nombre {
     display: none;
 }
 
@@ -577,8 +583,11 @@
 }
 
 .master-grupo-pestana[aria-selected="true"] {
+    flex-shrink: 1;
+    min-width: 4rem;
     background: var(--yellow);
     color: var(--yellow-contrast);
+    box-shadow: inset 0 0 0 3px currentColor;
 }
 
 .master-grupo-pestana.con-color {
@@ -587,7 +596,7 @@
 }
 
 .master-grupo-pestana[aria-selected="true"].con-color {
-    box-shadow: inset 0 3px 0 var(--pestana-tinta);
+    box-shadow: inset 0 0 0 3px var(--pestana-tinta), inset 0 0 0 5px var(--pestana-color);
 }
 
 .master-grupo-pestana:hover:not([aria-selected="true"]) {
@@ -3520,9 +3529,27 @@
 /* LOS DADOS. */
 .master-dados {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(3.4rem, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(3.6rem, 1fr));
     gap: 6px;
     margin-bottom: 12px;
+}
+
+/* Cada dado: su dibujo (el de la bandeja) y debajo su nombre. */
+.master-dado {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    padding: 6px 4px;
+}
+
+.master-dado .oc-dados-silueta {
+    width: 1.9rem;
+    height: 1.9rem;
+}
+
+.master-dado-nombre {
+    font-size: 0.8125rem;
 }
 
 .master-formula {
@@ -3712,4 +3739,139 @@
     .master-ventana-barra {
         cursor: default;
     }
+}
+
+/* LOS DOCUMENTOS: el árbol de carpetas y notas (cada fila: abrir, ✎ y
+   ✕), y debajo de cada carpeta abierta, lo suyo con sangría. */
+.master-docs-botones {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin: 8px 0;
+}
+
+.master-docs-donde {
+    margin: 0 0 8px;
+    color: var(--muted);
+    font-size: 0.875rem;
+}
+
+.master-docs-lista {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.master-docs-lista .master-docs-lista {
+    margin-left: 14px;
+    padding-left: 8px;
+    border-left: 2px dotted var(--border);
+}
+
+.master-docs-fila {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 2px 4px;
+}
+
+.master-docs-fila > .master-docs-lista {
+    flex-basis: 100%;
+}
+
+.master-docs-abrir {
+    display: grid;
+    flex: 1 1 10rem;
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: 0 8px;
+    min-height: 36px;
+    padding: 4px 6px;
+    border: 2px solid transparent;
+    background: transparent;
+    color: var(--white);
+    font: inherit;
+    text-align: left;
+    cursor: pointer;
+}
+
+.master-docs-abrir:hover {
+    border-color: var(--border);
+}
+
+.master-docs-abrir:focus-visible {
+    outline: 3px solid var(--yellow);
+    outline-offset: 1px;
+}
+
+.master-docs-abrir[aria-current="true"] {
+    border-color: var(--yellow);
+}
+
+.master-docs-icono {
+    grid-row: 1 / 4;
+}
+
+.master-docs-nombre {
+    overflow-wrap: anywhere;
+}
+
+.es-carpeta > .master-docs-abrir .master-docs-nombre {
+    font-weight: 700;
+}
+
+.master-docs-ruta,
+.master-docs-trozo {
+    grid-column: 2;
+    color: var(--muted);
+    font-size: 0.8125rem;
+}
+
+.master-docs-trozo {
+    font-style: italic;
+}
+
+.master-docs-mando {
+    width: 30px;
+    height: 30px;
+    padding: 0;
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--white);
+    cursor: pointer;
+}
+
+.master-docs-mando.es-texto {
+    width: auto;
+    padding: 0 8px;
+    font-size: 0.8125rem;
+}
+
+.master-docs-mando:hover {
+    border-color: var(--yellow);
+}
+
+.master-docs-mando:focus-visible {
+    outline: 3px solid var(--yellow);
+    outline-offset: 1px;
+}
+
+.master-docs-mando.es-seguro {
+    border-color: var(--error);
+    background: var(--error);
+    color: #ffffff;
+}
+
+/* Una nota en su ventana: el título y la carpeta en una fila. */
+.master-doc-cabeza {
+    display: grid;
+    grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
+    gap: 8px;
+}
+
+.master-doc-cabeza .oc-dados-texto {
+    width: 100%;
+}
+
+.master-doc-cuando {
+    margin: 4px 0 8px;
 }

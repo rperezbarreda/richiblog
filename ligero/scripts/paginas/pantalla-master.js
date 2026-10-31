@@ -715,11 +715,16 @@
     function montarDados(dentro, m) {
         const fila = crear("div", "master-dados");
         [4, 6, 8, 10, 12, 20, 100].forEach((c) => {
-            fila.appendChild(botonDe("oc-vida-accion", "d" + c, () => {
+            const b = botonDe("oc-vida-accion master-dado", "", () => {
                 if (window.ocDados) {
                     window.ocDados.tirar("1d" + c, "d" + c);
                 }
-            }, "Tirar un d" + c));
+            }, "Tirar un d" + c);
+            if (window.ocDados && window.ocDados.silueta) {
+                b.appendChild(window.ocDados.silueta(c));
+            }
+            b.appendChild(crear("span", "master-dado-nombre", "d" + c));
+            fila.appendChild(b);
         });
         const formula = crear("form", "master-formula");
         const et = crear("label", "oc-dados-etiqueta", "dados");
@@ -6346,6 +6351,403 @@
         dentro.append(form, salida, vaciar);
         calcular();
     }
+    const docsDe = () => {
+        todo.docs = todo.docs || { carpetas: [], notas: [] };
+        return todo.docs;
+    };
+    const idDoc = (pre) => pre + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+    const avisarDocs = () => document.dispatchEvent(new CustomEvent("master:documentos"));
+    function textoDeHtml(html) {
+        const t = document.createElement("template");
+        t.innerHTML = sanearHtml(html);
+        return (t.content.textContent || "").replace(/\s+/g, " ").trim();
+    }
+    function rutaDe(idCarpeta) {
+        const { carpetas } = docsDe();
+        const trozos = [];
+        let c = carpetas.find((x) => x.id === idCarpeta);
+        while (c && trozos.length < 20) {
+            trozos.unshift(c.nombre);
+            c = carpetas.find((x) => x.id === c.padre);
+        }
+        return trozos.length ? trozos.join(" / ") : "documentos";
+    }
+    function dentroDe(idCarpeta) {
+        const { carpetas } = docsDe();
+        const salen = [idCarpeta];
+        for (let i = 0; i < salen.length; i += 1) {
+            carpetas.filter((c) => c.padre === salen[i]).forEach((c) => salen.push(c.id));
+        }
+        return salen;
+    }
+    function opcionesCarpetas(sin) {
+        const { carpetas } = docsDe();
+        const salen = [["", "📁 documentos (fuera de carpetas)"]];
+        const bajar = (padre, nivel) => carpetas.filter((c) => (c.padre || null) === padre && sin.indexOf(c.id) < 0)
+            .sort((a, b) => a.nombre.localeCompare(b.nombre, "es")).forEach((c) => {
+                salen.push([c.id, "  ".repeat(nivel) + "📁 " + c.nombre]);
+                bajar(c.id, nivel + 1);
+            });
+        bajar(null, 1);
+        return salen;
+    }
+    function abrirDocumento(id) {
+        const ya = estado.modulos.find((x) => x.tipo === "documento" && x.datos && x.datos.nota === id);
+        if (ya && ya.grupo && !ya.delante) {
+            verEnGrupo(ya, false);
+        }
+        if (ya && ya.el) {
+            alFrente(ya);
+            ya.el.scrollIntoView({ block: "nearest" });
+            focoDe(ya).focus();
+            return;
+        }
+        const n = docsDe().notas.find((x) => x.id === id);
+        anadir("documento", { titulo: n ? n.titulo : "", datos: { nota: id } });
+    }
+    function pedirNombreDoc(titulo, valor, vuelta, alGuardar, conCarpeta) {
+        const cuerpo = crear("form", "master-personalizar");
+        const et = crear("label", "oc-dados-etiqueta", "nombre");
+        const input = crear("input", "oc-dados-texto");
+        input.id = "master-doc-nombre";
+        input.value = valor || "";
+        input.maxLength = 80;
+        input.autocomplete = "off";
+        et.htmlFor = input.id;
+        cuerpo.append(et, input);
+        let donde = null;
+        if (conCarpeta) {
+            donde = elegirDe("master-doc-donde", "dentro de", opcionesCarpetas(conCarpeta.sin), conCarpeta.valor || "");
+            cuerpo.appendChild(donde);
+        }
+        const listo = crear("button", "oc-vida-accion es-principal", "guardar");
+        listo.type = "submit";
+        cuerpo.appendChild(listo);
+        cuerpo.addEventListener("submit", (e) => {
+            e.preventDefault();
+            const n = input.value.trim();
+            if (!n) {
+                input.focus();
+                return;
+            }
+            cerrar();
+            alGuardar(n, donde ? donde.elegir.value || null : null);
+        });
+        const cerrar = window.ocVentana.abrir({ titulo, cuerpo, vuelta, foco: input });
+    }
+    function montarDocumentos(dentro, m) {
+        m.datos = m.datos || {};
+        const d = m.datos;
+        d.abiertas = Array.isArray(d.abiertas) ? d.abiertas : [];
+        const uid = "master-docs-" + m.id;
+        let aqui = d.aqui || null;
+        const etBuscar = crear("label", "oc-dados-etiqueta", "buscar en los nombres y en lo escrito");
+        const buscar = crear("input", "oc-dados-texto");
+        buscar.type = "search";
+        buscar.id = uid + "-buscar";
+        buscar.placeholder = "taberna, Elara, deuda…";
+        buscar.autocomplete = "off";
+        etBuscar.htmlFor = buscar.id;
+        const donde = crear("p", "master-docs-donde");
+        const nuevaCarpeta = botonDe("oc-vida-accion", "＋ 📁 carpeta", () => {
+            pedirNombreDoc("carpeta nueva", "", nuevaCarpeta, (n) => {
+                const c = { id: idDoc("c"), nombre: n, padre: aqui };
+                docsDe().carpetas.push(c);
+                if (aqui && d.abiertas.indexOf(aqui) < 0) {
+                    d.abiertas.push(aqui);
+                }
+                guardar();
+                avisarDocs();
+                avisar("Carpeta nueva: " + n + ".");
+            });
+        });
+        const nuevaNota = botonDe("oc-vida-accion es-principal", "＋ 📄 nota", () => {
+            const n = { id: idDoc("n"), titulo: "nota sin título", carpeta: aqui, html: "", cambiada: Date.now() };
+            docsDe().notas.push(n);
+            if (aqui && d.abiertas.indexOf(aqui) < 0) {
+                d.abiertas.push(aqui);
+            }
+            guardar();
+            avisarDocs();
+            abrirDocumento(n.id);
+        });
+        const botones = crear("div", "master-docs-botones");
+        botones.append(nuevaNota, nuevaCarpeta);
+        const arbol = crear("div", "master-docs-arbol");
+        const cuantos = crear("p", "visually-hidden");
+        cuantos.setAttribute("role", "status");
+        const mando = (texto, etiqueta, alPulsar) => {
+            const b = botonDe("master-docs-mando", texto, alPulsar, etiqueta);
+            b.title = etiqueta;
+            return b;
+        };
+        const borrador = (etiqueta, alBorrar) => {
+            let seguro = false;
+            const b = mando("✕", etiqueta, () => {
+                if (!seguro) {
+                    seguro = true;
+                    b.classList.add("es-seguro");
+                    b.setAttribute("aria-label", "¿Seguro? Pulsa otra vez: " + etiqueta);
+                    avisar("Pulsa otra vez para borrar.");
+                    return;
+                }
+                alBorrar();
+            });
+            return b;
+        };
+        const filaNota = (n, conRuta, trozo) => {
+            const li = crear("li", "master-docs-fila es-nota");
+            const abrir = botonDe("master-docs-abrir", "", () => abrirDocumento(n.id), "Abrir la nota " + n.titulo);
+            const em = crear("span", "master-docs-icono", "📄");
+            em.setAttribute("aria-hidden", "true");
+            abrir.append(em, crear("span", "master-docs-nombre", n.titulo));
+            if (conRuta) {
+                abrir.appendChild(crear("span", "master-docs-ruta", rutaDe(n.carpeta)));
+            }
+            if (trozo) {
+                abrir.appendChild(crear("span", "master-docs-trozo", trozo));
+            }
+            const quitar = borrador("Borrar la nota " + n.titulo, () => {
+                docsDe().notas = docsDe().notas.filter((x) => x !== n);
+                estado.modulos.filter((x) => x.tipo === "documento" && x.datos && x.datos.nota === n.id).forEach((x) => {
+                    x.datos.nota = null;
+                });
+                guardar();
+                avisarDocs();
+                avisar("Borrada la nota " + n.titulo + ".");
+                buscar.focus();
+            });
+            li.append(abrir, quitar);
+            return li;
+        };
+        const lista = (padre, nivel) => {
+            const { carpetas, notas } = docsDe();
+            const ul = crear("ul", "master-docs-lista");
+            if (nivel) {
+                ul.setAttribute("role", "group");
+            }
+            carpetas.filter((c) => (c.padre || null) === padre).sort((a, b) => a.nombre.localeCompare(b.nombre, "es")).forEach((c) => {
+                const li = crear("li", "master-docs-fila es-carpeta");
+                const abierta = d.abiertas.indexOf(c.id) >= 0;
+                const b = botonDe("master-docs-abrir", "", () => {
+                    const i = d.abiertas.indexOf(c.id);
+                    if (i >= 0 && aqui === c.id) {
+                        d.abiertas.splice(i, 1);
+                    } else if (i < 0) {
+                        d.abiertas.push(c.id);
+                    }
+                    aqui = c.id;
+                    d.aqui = aqui;
+                    guardar();
+                    pintar(c.id);
+                });
+                b.setAttribute("aria-expanded", abierta ? "true" : "false");
+                b.dataset.carpeta = c.id;
+                if (aqui === c.id) {
+                    b.setAttribute("aria-current", "true");
+                }
+                const em = crear("span", "master-docs-icono", abierta ? "📂" : "📁");
+                em.setAttribute("aria-hidden", "true");
+                const n = notas.filter((x) => x.carpeta === c.id).length;
+                b.append(em, crear("span", "master-docs-nombre", c.nombre), crear("span", "master-docs-ruta", n + (n === 1 ? " nota" : " notas")));
+                const cambiar = mando("✎", "Renombrar o mover la carpeta " + c.nombre, () => {
+                    pedirNombreDoc("carpeta", c.nombre, cambiar, (nombre, padreNuevo) => {
+                        c.nombre = nombre;
+                        c.padre = padreNuevo;
+                        guardar();
+                        avisarDocs();
+                    }, { sin: dentroDe(c.id), valor: c.padre || "" });
+                });
+                cambiar.setAttribute("aria-haspopup", "dialog");
+                const quitar = borrador("Borrar la carpeta " + c.nombre + " (lo de dentro sube un nivel)", () => {
+                    const docs = docsDe();
+                    docs.carpetas.filter((x) => x.padre === c.id).forEach((x) => {
+                        x.padre = c.padre || null;
+                    });
+                    docs.notas.filter((x) => x.carpeta === c.id).forEach((x) => {
+                        x.carpeta = c.padre || null;
+                    });
+                    docs.carpetas = docs.carpetas.filter((x) => x !== c);
+                    if (aqui === c.id) {
+                        aqui = c.padre || null;
+                        d.aqui = aqui;
+                    }
+                    guardar();
+                    avisarDocs();
+                    avisar("Borrada la carpeta " + c.nombre + "; lo de dentro, un nivel más arriba.");
+                    buscar.focus();
+                });
+                li.append(b, cambiar, quitar);
+                if (abierta) {
+                    li.appendChild(lista(c.id, nivel + 1));
+                }
+                ul.appendChild(li);
+            });
+            notas.filter((x) => (x.carpeta || null) === padre).sort((a, b) => a.titulo.localeCompare(b.titulo, "es"))
+                .forEach((x) => ul.appendChild(filaNota(x)));
+            return ul;
+        };
+        const trozoDe = (texto, q) => {
+            let plano = "";
+            const mapa = [];
+            Array.from(texto).forEach((ch, i) => {
+                Array.from(llano(ch)).forEach((x) => {
+                    plano += x;
+                    mapa.push(i);
+                });
+            });
+            const k = plano.indexOf(q);
+            if (k < 0) {
+                return "";
+            }
+            const letras = Array.from(texto);
+            const a = Math.max(0, mapa[k] - 40);
+            const b = Math.min(letras.length, mapa[Math.min(mapa.length - 1, k + q.length)] + 60);
+            return (a ? "…" : "") + letras.slice(a, b).join("") + (b < letras.length ? "…" : "");
+        };
+        function pintar(foco) {
+            const q = llano(buscar.value.trim());
+            donde.replaceChildren(crear("strong", "", "Las nuevas van en: "), document.createTextNode("📁 " + rutaDe(aqui)));
+            if (aqui) {
+                const raiz = botonDe("master-docs-mando es-texto", "↑ fuera", () => {
+                    aqui = null;
+                    d.aqui = null;
+                    guardar();
+                    pintar();
+                }, "Que las nuevas vayan fuera de las carpetas");
+                donde.append(" ", raiz);
+            }
+            const docs = docsDe();
+            if (!q) {
+                arbol.replaceChildren(docs.carpetas.length || docs.notas.length ? lista(null, 0)
+                    : crear("p", "oc-vacio", "Todavía no hay nada: crea una nota o una carpeta."));
+                cuantos.textContent = "";
+            } else {
+                const ul = crear("ul", "master-docs-lista");
+                let n = 0;
+                docs.carpetas.filter((c) => llano(c.nombre).includes(q)).forEach((c) => {
+                    n += 1;
+                    const li = crear("li", "master-docs-fila es-carpeta");
+                    const b = botonDe("master-docs-abrir", "", () => {
+                        let x = c;
+                        while (x) {
+                            if (d.abiertas.indexOf(x.id) < 0) {
+                                d.abiertas.push(x.id);
+                            }
+                            x = docs.carpetas.find((y) => y.id === x.padre);
+                        }
+                        aqui = c.id;
+                        d.aqui = aqui;
+                        buscar.value = "";
+                        guardar();
+                        pintar(c.id);
+                    });
+                    const em = crear("span", "master-docs-icono", "📁");
+                    em.setAttribute("aria-hidden", "true");
+                    b.append(em, crear("span", "master-docs-nombre", c.nombre), crear("span", "master-docs-ruta", rutaDe(c.padre)));
+                    li.appendChild(b);
+                    ul.appendChild(li);
+                });
+                docs.notas.forEach((x) => {
+                    const enNombre = llano(x.titulo).includes(q);
+                    const trozo = trozoDe(textoDeHtml(x.html), q);
+                    if (enNombre || trozo) {
+                        n += 1;
+                        ul.appendChild(filaNota(x, true, trozo));
+                    }
+                });
+                arbol.replaceChildren(n ? ul : crear("p", "oc-vacio", "Nada con eso."));
+                cuantos.textContent = n ? n + (n === 1 ? " resultado" : " resultados") : "Nada con eso.";
+            }
+            if (foco) {
+                const b = arbol.querySelector("[data-carpeta='" + foco + "']");
+                if (b) {
+                    b.focus();
+                }
+            }
+        }
+        let espera = 0;
+        buscar.addEventListener("input", () => {
+            clearTimeout(espera);
+            espera = setTimeout(() => pintar(), 150);
+        });
+        dentro.append(etBuscar, buscar, botones, donde, cuantos, arbol);
+        pintar();
+        mientrasEste(dentro, "master:documentos", () => pintar());
+    }
+    function montarDocumento(dentro, m) {
+        m.datos = m.datos || {};
+        const n = docsDe().notas.find((x) => x.id === m.datos.nota);
+        if (!n) {
+            dentro.appendChild(crear("p", "oc-vacio", "Esta nota ya no está (se ha borrado, o es de otra campaña)."));
+            return;
+        }
+        const uid = "master-doc-" + m.id;
+        const fila = crear("div", "master-doc-cabeza");
+        const etT = crear("label", "oc-dados-etiqueta", "título");
+        const titulo = crear("input", "oc-dados-texto");
+        titulo.id = uid + "-titulo";
+        titulo.value = n.titulo;
+        titulo.maxLength = 80;
+        titulo.autocomplete = "off";
+        etT.htmlFor = titulo.id;
+        const cajaT = crear("div", "master-campo");
+        cajaT.append(etT, titulo);
+        const carpeta = elegirDe(uid + "-carpeta", "carpeta", opcionesCarpetas([]), n.carpeta || "");
+        fila.append(cajaT, carpeta);
+        const cuando = crear("p", "oc-hoja-nota master-doc-cuando");
+        const pintarCuando = () => {
+            cuando.textContent = "Cambiada: " + new Date(n.cambiada || Date.now()).toLocaleString("es-ES",
+                { day: "numeric", month: "long", hour: "2-digit", minute: "2-digit" }) + " · en 📁 " + rutaDe(n.carpeta);
+        };
+        pintarCuando();
+        let espera = 0;
+        const { area, barra, leer } = editorRico("Lo que pone la nota " + n.titulo + " (se guarda sola)", () => {
+            clearTimeout(espera);
+            espera = setTimeout(() => {
+                n.html = leer();
+                n.cambiada = Date.now();
+                pintarCuando();
+                guardar();
+                avisarDocs();
+            }, 500);
+        });
+        area.classList.add("es-notas");
+        area.innerHTML = sanearHtml(n.html) || "<p><br></p>";
+        titulo.addEventListener("input", () => {
+            n.titulo = titulo.value.trim() || "nota sin título";
+            n.cambiada = Date.now();
+            m.titulo = n.titulo;
+            ponerTitulo(m);
+            clearTimeout(espera);
+            espera = setTimeout(() => {
+                guardar();
+                avisarDocs();
+            }, 400);
+        });
+        carpeta.elegir.addEventListener("change", () => {
+            n.carpeta = carpeta.elegir.value || null;
+            n.cambiada = Date.now();
+            pintarCuando();
+            guardar();
+            avisarDocs();
+            avisar("Ahora en: " + rutaDe(n.carpeta) + ".");
+        });
+        mientrasEste(dentro, "master:documentos", () => {
+            if (!docsDe().notas.includes(n)) {
+                dentro.replaceChildren(crear("p", "oc-vacio", "Esta nota se ha borrado."));
+                return;
+            }
+            const valor = n.carpeta || "";
+            carpeta.elegir.replaceChildren(...opcionesCarpetas([]).map(([v, t]) => {
+                const o = crear("option", "", t);
+                o.value = v;
+                return o;
+            }));
+            carpeta.elegir.value = valor;
+        });
+        dentro.append(fila, cuando, barra, area);
+    }
     const MODULOS = {
         iniciativa: { nombre: "iniciativa", emoji: "⏱️", grupo: "combate", unico: true, w: 420, h: 520,
             desc: "El orden de turnos, con rondas, PG y marcas.",
@@ -6398,11 +6800,14 @@
             desc: "Un Paint con capas, bote, selección y rejilla de rol.", montar: montarDibujo },
         notas: { nombre: "notas", emoji: "📝", grupo: "apuntes", unico: true, w: 520, h: 480,
             desc: "Las notas de la sesión, con formato (como un Word).", montar: montarNotas },
+        documentos: { nombre: "documentos", emoji: "🗂️", grupo: "apuntes", w: 420, h: 560,
+            desc: "Tus carpetas y notas: búscalas (nombre y contenido) y ábrelas en el tablero.", montar: montarDocumentos },
         tabla: { nombre: "tabla para tirar", emoji: "🔮", grupo: "apuntes", w: 360, h: 380,
             desc: "Una lista de la que sale una cosa al azar.", montar: montarTabla },
         criatura: { nombre: "criatura", emoji: "🐾", oculto: true, w: 440, h: 520, montar: montarCriatura },
         ficha: { nombre: "ficha", emoji: "📖", oculto: true, w: 420, h: 420, montar: montarFicha },
         pj: { nombre: "ficha de personaje", emoji: "🧝", oculto: true, w: 560, h: 680, montar: montarPj },
+        documento: { nombre: "nota", emoji: "📄", oculto: true, w: 560, h: 560, montar: montarDocumento },
     };
     const GRUPOS = [["combate", "⚔️ combate"], ["consulta", "📚 consulta"], ["mesa", "🛡️ la mesa"], ["mundo", "🌍 el mundo"],
         ["apuntes", "🗒️ apuntes"]];
@@ -6468,40 +6873,46 @@
         return grupo;
     }
     const PERFILES_DE_SERIE = [
-        ["⭐home", "", [
-            ["registro", 1289, 9, 352, 457, "", 0, 1], ["acciones", 0, 105, 335, 607, "#ad1f1f", 1, 1],
-            ["reglas", 361, 3, 537, 725, "fucsia", 1, 1], ["conjuros", 0, 6, 339, 605, "celeste", 1, 1],
-            ["notas", 0, 203, 1271, 546, "#5d5b5b", 0, 1], ["homebrew", 921, 103, 341, 393, "blanco", 1, 1],
-            ["dados", 1290, 471, 360, 279, "azul", 0, 1], ["calendario", 919, 10, 346, 768, "gris", 1, 0.8]
+        ["⭐home", "#000000", "", [
+            ["registro", 1256, 1, 384, 442, "", 0, 1], ["acciones", 6, 3, 597, 581, "#ad1f1f", 1, 1, "gm90", 0],
+            ["reglas", 691, 8, 542, 723, "naranja", 1, 1, "gm89", 1], ["conjuros", 6, 3, 597, 581, "celeste", 1, 1, "gm90", 1],
+            ["notas", 0, 105, 1242, 627, "#5d5b5b", 0, 1], ["homebrew", 691, 8, 542, 723, "blanco", 1, 1, "gm89", 0],
+            ["dados", 1252, 458, 389, 273, "azul", 0, 1], ["calendario", 691, 8, 542, 723, "gris", 1, 0.8, "gm89", 0],
+            ["bestiario", 6, 3, 597, 581, "#151619", 1, 1, "gm90", 0]
         ]],
-        ["⚔combate", "carmesi", [
-            ["iniciativa", 0, 0, 341, 761, "blanco", 0, 1], ["dados", 1292, 456, 358, 322, "", 0, 1],
-            ["registro", 1291, 0, 359, 447, "amarillo", 0, 1], ["condiciones", 973, 317, 311, 333, "morado", 0, 1],
-            ["acciones", 970, 215, 308, 341, "fucsia", 1, 1], ["bestiario", 821, 2, 456, 511, "azul", 1, 1],
-            ["relojes", 971, 113, 313, 407, "blanco", 1, 1], ["encuentros", 354, 4, 455, 614, "turquesa", 1, 1],
-            ["party", 357, 108, 600, 440, "", 0, 1]
+        ["⚔combate", "carmesi", null, [
+            ["iniciativa", 0, 0, 341, 761, "blanco", 0, 1, "gm43", 1], ["dados", 1293, 435, 353, 320, "", 0, 1],
+            ["registro", 1291, 0, 356, 427, "amarillo", 0, 1], ["condiciones", 814, 6, 472, 579, "morado", 0, 1, "gm46", 0],
+            ["acciones", 814, 6, 472, 579, "fucsia", 0, 1, "gm46", 1],
+            ["bestiario", 354, 4, 448, 579, "#000000", 0, 1, "gm72", 1], ["relojes", 0, 0, 341, 761, "lavanda", 0, 1, "gm43", 0],
+            ["encuentros", 354, 4, 448, 579, "turquesa", 0, 1, "gm72", 0], ["party", 354, 4, 448, 579, "blanco", 0, 1, "gm72", 0]
         ]],
-        ["🖊notas", "noche", [
-            ["dibujo", 2, 2, 1191, 726, "arena", 0, 1], ["tarjeta", 1263, 106, 322, 330, "amarillo", 1, 1],
-            ["idiomas", 1204, 0, 433, 781, "", 1, 1], ["tarjeta", 1269, 209, 319, 307, "verde", 0, 1]
-        ]],
-        ["💰tiendas", "arena", [
+        ["💰tiendas", "arena", null, [
             ["tienda", 0, 0, 528, 633, "coral", 0, 1], ["monedas", 1219, 0, 420, 440, "amarillo", 0, 1],
             ["taberna", 540, 0, 662, 635, "morado", 0, 1]
         ]],
-        ["🧙‍♂️NPCs", "bosque", [
-            ["nombres", 0, 114, 457, 555, "azul", 0, 1], ["pnj", 1186, 5, 460, 620, "marron", 0, 1],
-            ["bestiario", 1, 0, 460, 520, "rojo", 1, 1], ["tarjeta", 533, 38, 594, 505, "amarillo", 0, 1]
+        ["🧙‍♂️NPCs", "bosque", null, [
+            ["nombres", 1186, 5, 460, 620, "azul", 0, 1, "gm70", 1], ["pnj", 1186, 5, 460, 620, "marron", 0, 1, "gm70", 0],
+            ["bestiario", 1, 0, 457, 554, "rojo", 0, 1], ["tarjeta", 516, 28, 594, 505, "amarillo", 0, 1, "gm75", 1],
+            ["tarjeta", 516, 28, 594, 505, "turquesa", 0, 1, "gm75", 0], ["tarjeta", 516, 28, 594, 505, "azul", 0, 1, "gm75", 0],
+            ["tarjeta", 516, 28, 594, 505, "morado", 0, 1, "gm75", 0], ["tarjeta", 516, 28, 594, 505, "coral", 0, 1, "gm75", 0]
         ]],
-        ["🎲generadores", "pizarra", [
+        ["🎲generadores", "pizarra", null, [
             ["dungeon", 0, 0, 1189, 722, "gris", 0, 1], ["botin", 1210, 1, 440, 456, "naranja", 0, 1],
             ["nombres", 1211, 467, 439, 256, "verde", 0, 1]
+        ]],
+        ["🖊notas", "noche", null, [
+            ["dibujo", 2, 2, 1191, 726, "arena", 0, 1], ["tarjeta", 1221, 196, 392, 412, "amarillo", 0, 1, "gm61", 1],
+            ["idiomas", 1204, 0, 433, 781, "", 1, 1], ["tarjeta", 1221, 196, 392, 412, "verde", 0, 1, "gm61", 0],
+            ["tarjeta", 1221, 196, 392, 412, "celeste", 0, 1, "gm61", 0],
+            ["tarjeta", 1221, 196, 392, 412, "coral", 0, 1, "gm61", 0]
         ]]
     ];
     function perfilesDeSerie() {
-        return PERFILES_DE_SERIE.map(([nombre, color, ventanas]) => ({ nombre, color, colorPestana: color,
-            modulos: ventanas.filter((v) => MODULOS[v[0]]).map(([tipo, x, y, w, h, c, plegado, escala]) => ({ tipo, x, y, w, h,
-                color: c, plegado: !!plegado, escala })) }));
+        return PERFILES_DE_SERIE.map(([nombre, color, colorPestana, ventanas]) => ({ nombre, color,
+            colorPestana: colorPestana === null ? color : colorPestana,
+            modulos: ventanas.filter((v) => MODULOS[v[0]]).map(([tipo, x, y, w, h, c, plegado, escala, grupo, delante]) => Object.assign(
+                { tipo, x, y, w, h, color: c, plegado: !!plegado, escala }, grupo ? { grupo, delante: !!delante } : {})) }));
     }
     let todas = null;
     try {
@@ -6527,6 +6938,7 @@
         c.nombre = c.nombre || "campaña";
         c.perfiles = Array.isArray(c.perfiles) && c.perfiles.length ? c.perfiles : perfilesDeSerie();
         c.pjs = Array.isArray(c.pjs) ? c.pjs : [];
+        c.docs = c.docs && Array.isArray(c.docs.carpetas) && Array.isArray(c.docs.notas) ? c.docs : { carpetas: [], notas: [] };
         c.perfiles.forEach((pf) => {
             pf.id = pf.id || "p" + siguientePerfil;
             siguientePerfil = Math.max(siguientePerfil, parseInt(String(pf.id).slice(1), 10) + 1 || siguientePerfil);
@@ -6573,7 +6985,7 @@
     function guardar() {
         todo.activo = estado.id;
         const salida = { activa: todo.id, campanas: todas.campanas.map((c) => ({ id: c.id, nombre: c.nombre, activo: c.activo,
-            pjs: c.pjs, perfiles: c.perfiles.map((pf) => ({ id: pf.id, nombre: pf.nombre, color: pf.color || "",
+            pjs: c.pjs, docs: c.docs, perfiles: c.perfiles.map((pf) => ({ id: pf.id, nombre: pf.nombre, color: pf.color || "",
                 colorPestana: pf.colorPestana, zoom: pf.zoom || 1,
                 modulos: pf.modulos.map((m) => ({ id: m.id, tipo: m.tipo, x: m.x, y: m.y, w: m.w, h: m.h,
                     titulo: m.titulo || "", color: m.color || "", plegado: !!m.plegado,
@@ -6989,7 +7401,7 @@
             juntas.forEach((x, i) => {
                 const d = MODULOS[x.tipo];
                 const ahora = x === m;
-                const t = botonDe("master-grupo-pestana" + (ahora ? "" : " es-compacta"), "", () => {
+                const t = botonDe("master-grupo-pestana", "", () => {
                     if (pestanaSoltada) {
                         return;
                     }
@@ -7028,6 +7440,16 @@
                 tiras.appendChild(t);
             });
             cabeza.insertBefore(tiras, mandos);
+            const ajustar = () => {
+                tiras.classList.remove("es-apretadas");
+                if (tiras.scrollWidth > tiras.clientWidth + 1) {
+                    tiras.classList.add("es-apretadas");
+                }
+            };
+            if (window.ResizeObserver) {
+                new ResizeObserver(ajustar).observe(tiras);
+            }
+            requestAnimationFrame(ajustar);
         }
         const cuerpo = crear("div", "oc-hoja-dentro master-ventana-cuerpo");
         cuerpo.id = "master-cuerpo-" + m.id;
@@ -7877,7 +8299,7 @@
         });
         const cerrar = window.ocVentana.abrir({ titulo: "nombre y colores de la pestaña", cuerpo, vuelta: botonRenombrar, foco: input });
     }
-    const PLANTILLAS = [["vacio", "⬜ vacío", "Sin ventanas.", -1]].concat(PERFILES_DE_SERIE.map(([nombre, color, ventanas], i) =>
+    const PLANTILLAS = [["vacio", "⬜ vacío", "Sin ventanas.", -1]].concat(PERFILES_DE_SERIE.map(([nombre, color, , ventanas], i) =>
         ["serie" + i, nombre, ventanas.length + " ventanas, donde van" + (color ? " · tablero " +
             ((TABLEROS.find((t) => t[0] === color) || [])[1] || color) : "") + ".", i]));
     const leerPlantillas = () => {

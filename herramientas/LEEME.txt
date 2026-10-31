@@ -4340,9 +4340,10 @@
   de arriba o de abajo se hace scroll solo. Las ventanas nuevas van al
   PRIMER HUECO LIBRE (hueco()), empezando por lo que se ve.
   LAS PESTAÑAS DE SERIE (PERFILES_DE_SERIE, la disposición de Richi:
-  ⭐home, ⚔combate, 🖊notas, 💰tiendas, 🧙‍♂️NPCs y 🎲generadores, cada
-  una con su color y sus ventanas [tipo, x, y, ancho, alto, color,
-  plegada, escala], sin lo de dentro): las trae una campaña nueva (y la
+  ⭐home, ⚔combate, 💰tiendas, 🧙‍♂️NPCs, 🎲generadores y 🖊notas: cada una
+  [nombre, color del tablero, color de la pestaña (null: el del
+  tablero), ventanas [tipo, x, y, ancho, alto, color, plegada, escala,
+  grupo, delante]], sin lo de dentro; con sus grupos de ventanas): las trae una campaña nueva (y la
   pantalla la primera vez) y son las plantillas de «＋» (con «⬜ vacío» y
   las propias); si no se le cambia el nombre, la pestaña nueva se llama
   como la plantilla. Para cambiarlas: exportar desde ⚙, y pasar las
@@ -4356,9 +4357,10 @@
   marca con un reborde a rayas, .es-destino; ventanaBajo()). En un grupo,
   LAS PESTAÑAS SON LA BARRA (.master-ventana-barra.es-grupo con
   .master-grupo-pestanas, role="tablist"; el h2 queda para el lector):
-  cada una del color de su ventana; la de delante, con icono y nombre;
-  las demás, sólo el icono (.es-compacta; el nombre, en su aria-label y
-  al pasar por encima). Pulsar otra la trae delante; pulsar la de ahora
+  cada una del color de su ventana, con icono y nombre; si no caben
+  (ResizeObserver), las de detrás se quedan en el icono
+  (.es-apretadas; el nombre, en su aria-label y al pasar por encima).
+  La de delante, en negrita y con un reborde por dentro. Pulsar otra la trae delante; pulsar la de ahora
   la pliega; flechas, Inicio y Fin van de una a otra; Mayús + flechas
   mueven el grupo (moverConTeclas(); con Alt, el tamaño). PARA SEPARAR UNA
   se mantiene pulsada su pestaña y se saca de la barra (la ventana se
@@ -4393,6 +4395,27 @@
   de una ventana con color (--postit-tinta) y su pestaña. La PESTAÑA SE
   PINTA DEL COLOR DE SU TABLERO (.con-color, --pestana-color y
   --pestana-tinta); la elegida, con el borde y una franja amarillos.
+  ＋ y ✎ de las pestañas van justo detrás de la última (el marco de las
+  pestañas no crece), así que se mueven al añadir o quitar una.
+  LOS DOCUMENTOS (de cada campaña: todo.docs = {carpetas: [{id, nombre,
+  padre}], notas: [{id, titulo, carpeta, html, cambiada}]}):
+  · 🗂️ documentos (en «apuntes»): un buscador (en los nombres de
+    carpetas y notas y en lo escrito: textoDeHtml(); de las notas sale
+    un trozo alrededor de lo encontrado), «＋ 📄 nota» y «＋ 📁 carpeta»
+    (se crean en la carpeta elegida: «Las nuevas van en…», «↑ fuera») y
+    el árbol: cada carpeta se abre y se cierra (aria-expanded;
+    m.datos.abiertas) y tiene ✎ (nombre y dentro de cuál:
+    pedirNombreDoc(), sin poder meterla en sí misma: dentroDe()) y ✕
+    (pide dos pulsaciones; lo de dentro sube un nivel); cada nota se
+    abre (abrirDocumento(): su ventana, o la trae delante si ya está) y
+    tiene ✕ (dos pulsaciones).
+  · 📄 nota (ventana oculta, m.datos.nota): el título (también el de la
+    ventana), la carpeta (desplegable con sangría: opcionesCarpetas()),
+    cuándo se cambió y lo escrito con la barra de formato (editorRico,
+    como las notas). Se guarda sola. Cada cambio avisa con
+    «master:documentos» (el árbol y los desplegables, al día).
+  LOS DADOS (la ventana): cada dado con su dibujo (el de la bandeja:
+  window.ocDados.silueta, de personajes.js) y su nombre debajo.
   LAS CAMPAÑAS: configuraciones separadas (dos campañas, dos partys que
   no se mezclan). «richi-master» guarda {activa, campanas: [{id, nombre,
   activo, pjs, perfiles}]}; cada campaña tiene sus perfiles (las
