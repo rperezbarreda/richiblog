@@ -5,8 +5,17 @@
         <link>https://richi.blog/</link>
         <description>Todo lo que voy publicando: entradas del blog, relatos y material de rol.</description>
         <language>es</language>
-        <lastBuildDate>Sat, 24 Oct 2026 00:00:00 +0000</lastBuildDate>
+        <lastBuildDate>Mon, 02 Nov 2026 00:00:00 +0000</lastBuildDate>
         <atom:link href="https://richi.blog/blog/rss.xml" rel="self" type="application/rss+xml"/>
+        <item>
+            <title>Halloween y mas movidas</title>
+            <link>https://richi.blog/web/blog/2026/noviembre/halloween-y-mas-movidas.html</link>
+            <guid isPermaLink="true">https://richi.blog/web/blog/2026/noviembre/halloween-y-mas-movidas.html</guid>
+            <pubDate>Mon, 02 Nov 2026 00:00:00 +0000</pubDate>
+            <category>blog</category>
+            <category>diario</category>
+            <description>Este mes ha sido super estresante en muchísimos sentidos. En primer lugar estoy bastante harto de que mi casa se convierta cada dos por tres en una guardería a tiempo completo. Mis sobrinos parece que se turnan para dar que hacer a cada rato, si no es uno que llora es otro pesado que echa de menos a los padres o que no quiere dormir. Que yo los quiero muchísimo, pero a ver si crecen y espabilan ya y no dan tanto que hacer.</description>
+        </item>
         <item>
             <title>Sesión 2 — Rumbo hacia las montañas</title>
             <link>https://richi.blog/web/notas_rol/ragna/sesion-02.html</link>
