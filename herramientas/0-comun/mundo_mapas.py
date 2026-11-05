@@ -44,7 +44,11 @@ abres el mapa allí y lo guardas, puede perderlo):
                          "maritima" | "muralla" | "ruta",
                  "points": [ {"x": 10, "y": 20}, … ],
                  "label": "Río Lorem", "targetPage": "Río Lorem",
-                 "taper": false, "width": 3, "dash": "dotted", "gap": 8 } ]
+                 "taper": false, "width": 3, "dash": "dotted", "gap": 8,
+                 "fromMap": "Mapamundi/…/Reino de Prunia.cmap", "fromLine": "…" } ]
+                                        (fromMap y fromLine: traída de un
+                                        mapa vecino desde el editor; en
+                                        el mapamundi no pasa)
                                         rayas abiertas. Los ríos se
                                         ensanchan hacia el final (la
                                         desembocadura) salvo con
@@ -318,7 +322,7 @@ def juntar_regionales(mundo, regionales, avisar=None):
             nueva["grueso"] = max(reg["ancho"], reg["alto"]) / 1200 * fx
             mundo.setdefault("zonas_regionales", []).append(nueva)
         for linea in reg.get("lineas") or []:
-            if linea.get("tipo") in RAYAS_QUE_NO_PASAN:
+            if linea.get("tipo") in RAYAS_QUE_NO_PASAN or linea.get("copia"):
                 continue
             nueva = dict(linea)
             nueva["puntos"] = [a_mundo(x, y) for x, y in linea["puntos"]]
@@ -620,6 +624,9 @@ def _linea(crudo):
         "mapa": str(crudo.get("targetMap") or "").strip(),
         "color": _color(crudo.get("color")),
         "ensancha": crudo.get("taper") is not False,
+        # Traída de un mapa vecino (en el editor: «Los caminos y ríos de los
+        # vecinos»): en el mapamundi no pasa, que allí va la de su mapa.
+        "copia": bool(crudo.get("fromMap")),
         # Su estilo propio, si lo tiene (si no, el de su tipo).
         "ancho": _entre(_numero(crudo.get("width"), None), 0.5, 20),
         "trazo": str(crudo.get("dash") or "").strip().lower() if str(crudo.get("dash") or "").strip().lower()

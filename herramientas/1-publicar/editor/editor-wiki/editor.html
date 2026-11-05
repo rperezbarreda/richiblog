@@ -1031,6 +1031,23 @@
                         <p class="ayuda">X, Y y el ancho, en unidades del mapamundi, por si hay que situarlo o
                             retocarlo a mano (el alto va en proporción).</p>
                     </fieldset>
+                    <!-- TRAER LO DE LOS VECINOS: copiar a este mapa los ríos y
+                         caminos de los mapas que se pisan con él (mapas.js,
+                         traerDeLosVecinos). -->
+                    <fieldset class="opciones campo" data-mapa-traer-caja hidden>
+                        <legend>Los caminos y ríos de los vecinos</legend>
+                        <p class="ayuda" data-mapa-traer-estado aria-live="polite"></p>
+                        <label class="opcion"><input type="checkbox" data-mapa-traer="rio" checked> Ríos</label>
+                        <label class="opcion"><input type="checkbox" data-mapa-traer="camino" checked> Caminos principales</label>
+                        <label class="opcion"><input type="checkbox" data-mapa-traer="sendero" checked> Senderos</label>
+                        <div class="mapa-emblema-botones">
+                            <button type="button" data-mapa-traer-boton>Traerlos a este mapa</button>
+                            <button type="button" data-mapa-traer-quitar hidden>Quitar lo traído</button>
+                        </div>
+                        <p class="ayuda">Se copian recortados al borde de este mapa, como rayas suyas (se pueden
+                            retocar). Volver a traerlos rehace lo traído con lo que tengan ahora los vecinos. En el
+                            mapamundi no salen dos veces: allí va el de su mapa.</p>
+                    </fieldset>
                     <fieldset class="opciones campo">
                         <legend>Ampliar la imagen</legend>
                         <p class="ayuda">Más grande y con más resolución: lo puesto encima se queda en su sitio.</p>

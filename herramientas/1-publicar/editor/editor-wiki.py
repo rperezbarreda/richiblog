@@ -999,14 +999,19 @@ def vecinos_de(archivo, datos):
         for linea in suyos.get("lines") or []:
             if not isinstance(linea, dict) or linea.get("kind") not in RAYAS_VECINAS or not _lista_de_puntos(linea.get("points")):
                 continue
-            rayas.append({"kind": linea["kind"], "label": str(linea.get("label") or ""),
+            # Las que ese mapa trajo a su vez de otro, no (serían copias de
+            # copias, y la de verdad ya sale de su mapa).
+            if linea.get("fromMap"):
+                continue
+            rayas.append({"kind": linea["kind"], "label": str(linea.get("label") or ""), "id": str(linea.get("id") or ""),
                           "points": [aqui(*mundo(p)) for p in linea["points"]]})
         sitios = []
         for pin in suyos.get("pins") or []:
             if isinstance(pin, dict) and _numero(pin.get("x")) and _numero(pin.get("y")) and not pin.get("hidden"):
                 sitios.append(dict(aqui(*mundo(pin)), label=str(pin.get("label") or ""), kind=str(pin.get("kind") or "")))
         if rayas or sitios:
-            salida.append({"titulo": str(suyos.get("title") or otro.stem), "rayas": rayas, "sitios": sitios})
+            salida.append({"titulo": str(suyos.get("title") or otro.stem), "archivo": otro.relative_to(VAULT).as_posix(),
+                           "rayas": rayas, "sitios": sitios})
     return salida
 
 

@@ -1114,6 +1114,8 @@ function ponerCasillaDeVecinos() {
     const caja = $("[data-mapa-vecinos-caja]");
     const hay = estadoMapa.vecinos && estadoMapa.vecinos.length;
     caja.hidden = !hay;
+    $("[data-mapa-traer-caja]").hidden = !hay;
+    pintarEstadoDeLoTraido();
     if (hay) {
         const nombres = estadoMapa.vecinos.map((v) => v.titulo).join(", ");
         caja.title = "En gris, lo de " + nombres + ": el imán engancha a sus rayas y sus sitios, para seguir un río o"
@@ -1121,6 +1123,147 @@ function ponerCasillaDeVecinos() {
         $("[data-mapa-vecinos-ayuda]").textContent = "En gris, las rayas y los sitios de " + nombres
             + ". El imán engancha a ellos.";
     }
+}
+
+// ---- TRAER LOS CAMINOS Y RÍOS DE LOS VECINOS ----
+// Se copian a este mapa, recortados a su borde, como rayas suyas con
+// "fromMap" (el .cmap de donde vienen) y "fromLine" (su id allí). Así:
+// se pueden retocar; volver a traerlos rehace lo traído (no se duplica);
+// en el mapamundi no salen dos veces (juntar_regionales se salta las que
+// llevan "fromMap": allí va la de su mapa); y los vecinos no se traen las
+// copias de vuelta (vecinos_de, editor-wiki.py).
+
+// Lo que queda de una raya dentro del rectángulo del mapa: puede salir en
+// varios trozos (sale y vuelve a entrar). Cada tramo, con Liang-Barsky.
+function recortarRayaAlMapa(puntos, ancho, alto) {
+    const trozos = [];
+    let actual = [];
+    const igual = (p, q) => Math.abs(p.x - q.x) < 0.05 && Math.abs(p.y - q.y) < 0.05;
+    for (let i = 0; i < puntos.length - 1; i++) {
+        const a = puntos[i];
+        const b = puntos[i + 1];
+        const dx = b.x - a.x;
+        const dy = b.y - a.y;
+        let t0 = 0;
+        let t1 = 1;
+        const lados = [[-dx, a.x], [dx, ancho - a.x], [-dy, a.y], [dy, alto - a.y]];
+        let fuera = false;
+        for (const [pp, q] of lados) {
+            if (pp === 0) {
+                if (q < 0) {
+                    fuera = true;
+                    break;
+                }
+                continue;
+            }
+            const t = q / pp;
+            if (pp < 0) {
+                t0 = Math.max(t0, t);
+            } else {
+                t1 = Math.min(t1, t);
+            }
+            if (t0 > t1) {
+                fuera = true;
+                break;
+            }
+        }
+        if (fuera) {
+            if (actual.length > 1) {
+                trozos.push(actual);
+            }
+            actual = [];
+            continue;
+        }
+        const ini = { x: redondoMapa(a.x + dx * t0), y: redondoMapa(a.y + dy * t0) };
+        const fin = { x: redondoMapa(a.x + dx * t1), y: redondoMapa(a.y + dy * t1) };
+        if (!actual.length || !igual(actual[actual.length - 1], ini)) {
+            if (actual.length > 1) {
+                trozos.push(actual);
+            }
+            actual = [ini];
+        }
+        actual.push(fin);
+        if (t1 < 1) {
+            trozos.push(actual);
+            actual = [];
+        }
+    }
+    if (actual.length > 1) {
+        trozos.push(actual);
+    }
+    return trozos;
+}
+
+function pintarEstadoDeLoTraido() {
+    const d = estadoMapa.datos;
+    if (!d) {
+        return;
+    }
+    const traidas = d.lines.filter((l) => l.fromMap).length;
+    $("[data-mapa-traer-quitar]").hidden = !traidas;
+    $("[data-mapa-traer-estado]").textContent = (estadoMapa.vecinos || []).length
+        ? "De " + estadoMapa.vecinos.map((v) => v.titulo).join(", ") + ". "
+            + (traidas ? "Ahora hay " + traidas + (traidas === 1 ? " raya traída." : " rayas traídas.") : "Aún no hay nada traído.")
+        : "";
+}
+
+function traerDeLosVecinos() {
+    const d = estadoMapa.datos;
+    const tipos = Array.from(document.querySelectorAll("[data-mapa-traer]:checked")).map((c) => c.getAttribute("data-mapa-traer"));
+    if (!d || !tipos.length) {
+        avisarEditor("Marca qué traer: ríos, caminos o senderos.", true);
+        return;
+    }
+    apuntarPaso();
+    // Lo traído antes de esas clases, fuera: se rehace con lo de ahora.
+    const antes = d.lines.length;
+    d.lines = d.lines.filter((l) => !(l.fromMap && tipos.includes(l.kind)));
+    const quitadas = antes - d.lines.length;
+    let traidas = 0;
+    // Lo que este mapa ya tiene dibujado (la misma clase y el mismo nombre:
+    // el Río Negro de los dos lados) no se trae: saldría doble.
+    const suyas = new Set(d.lines.filter((l) => !l.fromMap && l.label).map((l) => l.kind + "|" + l.label.trim().toLowerCase()));
+    const yaTiene = new Set();
+    estadoMapa.vecinos.forEach((v) => v.rayas.forEach((r) => {
+        if (!tipos.includes(r.kind)) {
+            return;
+        }
+        if (r.label && suyas.has(r.kind + "|" + r.label.trim().toLowerCase())) {
+            yaTiene.add(r.label);
+            return;
+        }
+        recortarRayaAlMapa(r.points, d.width, d.height).forEach((puntos) => {
+            const raya = { id: idNuevoMapa(), kind: r.kind, points: puntos, fromMap: v.archivo, fromLine: r.id };
+            if (r.label) {
+                raya.label = r.label;
+            }
+            d.lines.push(raya);
+            traidas++;
+        });
+    }));
+    estadoMapa.elegido = null;
+    estadoMapa.varios = [];
+    pintarCosasMapa();
+    pintarEstadoDeLoTraido();
+    const nota = yaTiene.size ? " No se traen " + Array.from(yaTiene).join(", ") + ": ya están dibujados aquí." : "";
+    avisarEditor((traidas ? "Traídas " + traidas + (traidas === 1 ? " raya" : " rayas") + " de los vecinos"
+        + (quitadas ? " (en lugar de las " + quitadas + " de antes)." : ".") : "Los vecinos no tienen nada de eso dentro de este mapa.")
+        + nota);
+}
+
+function quitarLoTraido() {
+    const d = estadoMapa.datos;
+    const traidas = d.lines.filter((l) => l.fromMap).length;
+    if (!traidas) {
+        return;
+    }
+    apuntarPaso();
+    d.lines = d.lines.filter((l) => !l.fromMap);
+    estadoMapa.elegido = null;
+    estadoMapa.varios = [];
+    pintarCosasMapa();
+    pintarEstadoDeLoTraido();
+    avisarEditor("Quitadas las " + traidas + " rayas traídas de los vecinos (Ctrl+Z las devuelve).");
 }
 
 function pintarVecinosMapa() {
@@ -1209,6 +1352,7 @@ function pintarCosasMapa() {
     pintarAsasMapa();
     escalarMarcasMapa();
     pintarListaDeCosas();
+    pintarEstadoDeLoTraido();
 }
 
 // Vuelve a pintar una sola cosa (mientras se arrastra: el mapamundi
@@ -5043,6 +5187,8 @@ function empezarMapas() {
     });
     $("[data-mapa-curva-quitar]").addEventListener("click", quitarCurvaDelTexto);
     $("#mapa-curva-nueva").addEventListener("change", () => ponerHerramienta(estadoMapa.herramienta));
+    $("[data-mapa-traer-boton]").addEventListener("click", traerDeLosVecinos);
+    $("[data-mapa-traer-quitar]").addEventListener("click", quitarLoTraido);
     $("#mapa-vecinos").addEventListener("change", () => {
         pintarVecinosMapa();
         escalarMarcasMapa();

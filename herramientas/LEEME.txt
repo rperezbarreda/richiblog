@@ -2539,6 +2539,19 @@
           Río Iblis en Prunia y en Telzaria) sale una vez: el del mapa más
           fino, alargado con lo que el otro tenga de más por sus puntas.
           Así no sale dos veces en la lista ni pintado doble.
+        · TRAERLOS A ESTE MAPA: en «El mapa en sí» → «Los caminos y ríos
+          de los vecinos» (sale si hay vecinos) se marcan ríos, caminos
+          principales y senderos y «Traerlos a este mapa» los COPIA como
+          rayas suyas, recortadas al borde del mapa (traerDeLosVecinos y
+          recortarRayaAlMapa, mapas.js). Así la página del mapa regional
+          enseña también los del país de al lado. Llevan "fromMap" (el
+          .cmap de donde vienen) y "fromLine" (su id allí): volver a
+          traerlos rehace lo traído con lo que tengan ahora los vecinos (no
+          se duplica), «Quitar lo traído» los quita todos (Ctrl+Z los
+          devuelve), en el mapamundi no pasan (allí ya va el de su mapa:
+          juntar_regionales se salta las "copia") y los vecinos no se los
+          traen de vuelta. Lo que este mapa ya tiene dibujado (la misma
+          clase y el mismo nombre, como el Río Negro) no se trae.
     - AMPLIAR EL MAPAMUNDI: solo cambia su imagen, NO sus coordenadas
       (siguen siendo 1920 × 1080): los mapas regionales guardan su sitio
       en ellas. Por eso en el mapamundi no sale «En el mapamundi».
