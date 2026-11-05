@@ -1424,6 +1424,39 @@ body.en-mapa .saltar {
     fill: #241a2e;
 }
 
+/* Lo de los mapas vecinos (pintarVecinosMapa): en gris, debajo de lo
+   suyo y sin poder tocarlo. */
+.mapa-ed-vecino-borde {
+    stroke: #1b1020;
+    opacity: 0.45;
+}
+
+.mapa-ed-vecino {
+    stroke: #c9c2d6;
+    opacity: 0.85;
+}
+
+.mapa-ed-vecino.es-rio {
+    stroke: #9db8cf;
+}
+
+.mapa-ed-vecino-sitio {
+    fill: #e4dfec;
+    stroke: #1b1020;
+    stroke-width: 1.5;
+    opacity: 0.9;
+}
+
+.mapa-ed-vecino-nombre {
+    fill: #e4dfec;
+    font-size: 12px;
+    font-style: italic;
+    paint-order: stroke;
+    stroke: #1b1020;
+    stroke-width: 3px;
+    opacity: 0.9;
+}
+
 .mapa-ed-cosa {
     cursor: pointer;
 }

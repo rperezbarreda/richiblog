@@ -946,6 +946,70 @@ def vista_previa(cuerpo):
     return {"html": html_, "avisos": ["%s%s" % (que, (": " + donde) if donde else "") for que, donde in avisos.lista]}
 
 
+# LOS MAPAS VECINOS: los regionales situados en el mapamundi ("world")
+# cuyo recuadro se pisa con el de éste. Sus rayas y sus sitios, pasados a
+# las medidas de ESTE mapa, para verlos en gris en el editor y que el imán
+# enganche a ellos: así un río o un camino que sigue en el reino de al
+# lado se dibuja hasta tocar el suyo, y en la web (el mapamundi) se juntan
+# (mundo_mapas.juntar_regionales y la red de caminos).
+RAYAS_VECINAS = {"rio", "camino", "sendero", "ruta", "frontera", "maritima", "viaje"}
+
+
+def _numero(x):
+    return isinstance(x, (int, float)) and not isinstance(x, bool)
+
+
+def _sitio_en_el_mundo(datos):
+    w = datos.get("world")
+    if not isinstance(w, dict) or not all(_numero(w.get(k)) for k in ("x", "y", "w", "h")):
+        return None
+    if not _numero(datos.get("width")) or not _numero(datos.get("height")) or not datos["width"] or not datos["height"]:
+        return None
+    return w
+
+
+def vecinos_de(archivo, datos):
+    yo = _sitio_en_el_mundo(datos)
+    if not yo:
+        return []
+    fx, fy = datos["width"] / yo["w"], datos["height"] / yo["h"]
+
+    def aqui(x, y):
+        return {"x": round((x - yo["x"]) * fx, 1), "y": round((y - yo["y"]) * fy, 1)}
+
+    salida = []
+    for otro in sorted(VAULT.rglob("*.cmap"), key=lambda a: a.stem.lower()):
+        if otro.resolve() == archivo.resolve():
+            continue
+        suyos = _leer_cmap(otro)
+        el = _sitio_en_el_mundo(suyos) if suyos else None
+        if not el:
+            continue
+        # ¿Se pisan los dos recuadros (con un poco de margen)?
+        m = max(yo["w"], yo["h"]) * 0.05
+        if (el["x"] > yo["x"] + yo["w"] + m or el["x"] + el["w"] < yo["x"] - m
+                or el["y"] > yo["y"] + yo["h"] + m or el["y"] + el["h"] < yo["y"] - m):
+            continue
+        gx, gy = el["w"] / suyos["width"], el["h"] / suyos["height"]
+
+        def mundo(p):
+            return el["x"] + p["x"] * gx, el["y"] + p["y"] * gy
+
+        rayas = []
+        for linea in suyos.get("lines") or []:
+            if not isinstance(linea, dict) or linea.get("kind") not in RAYAS_VECINAS or not _lista_de_puntos(linea.get("points")):
+                continue
+            rayas.append({"kind": linea["kind"], "label": str(linea.get("label") or ""),
+                          "points": [aqui(*mundo(p)) for p in linea["points"]]})
+        sitios = []
+        for pin in suyos.get("pins") or []:
+            if isinstance(pin, dict) and _numero(pin.get("x")) and _numero(pin.get("y")) and not pin.get("hidden"):
+                sitios.append(dict(aqui(*mundo(pin)), label=str(pin.get("label") or ""), kind=str(pin.get("kind") or "")))
+        if rayas or sitios:
+            salida.append({"titulo": str(suyos.get("title") or otro.stem), "rayas": rayas, "sitios": sitios})
+    return salida
+
+
 def leer_mapa(archivo):
     datos = _leer_cmap(archivo)
     if datos is None:
@@ -958,7 +1022,7 @@ def leer_mapa(archivo):
         if isinstance(em, dict) and em.get("image"):
             imagenes[str(em["image"])] = url_de_imagen(em["image"])
     return {"archivo": archivo.relative_to(VAULT).as_posix(), "datos": datos,
-            "imagenes": imagenes,
+            "imagenes": imagenes, "vecinos": vecinos_de(archivo, datos),
             "url": url_de_la_pagina(str(datos.get("title") or archivo.stem))}
 
 

@@ -2518,6 +2518,27 @@
       mapa regional. Lo junta juntar_regionales (mundo_mapas.py), lo llama
       generar-mundo.py. Un mapa sin situar no sale: sitúalo en «El mapa en
       sí» → «En el mapamundi».
+    - LOS MAPAS VECINOS Y LO QUE PASA DE UN REINO A OTRO (desde el
+      05-11-2026). Cada mapa regional sigue con sus rayas, pero:
+        · EN EL EDITOR, en un mapa situado, la casilla «Los mapas vecinos»
+          (debajo de «Imán»; sale si hay alguno) pinta EN GRIS las rayas y
+          los sitios (con su nombre) de los regionales cuyo recuadro se
+          pisa con el suyo en el mapamundi, ya en las medidas de este mapa
+          (vecinos_de, editor-wiki.py; pintarVecinosMapa, mapas.js). No se
+          tocan ni se guardan: están para ver por dónde sigue un río o un
+          camino al otro lado y para que EL IMÁN ENGANCHE A ELLOS (a sus
+          puntos y a sus bordes). Un camino que se lleva con el imán hasta
+          el del reino de al lado queda unido.
+        · EN EL MAPAMUNDI, LOS CAMINOS ENGANCHADOS SON UNO: la red de
+          caminos junta las puntas que se tocan, así que «ruta» va de una
+          ciudad de un reino a una de otro por los caminos de los dos.
+        · Y LOS RÍOS SE JUNTAN (_juntar_rios_que_siguen, mundo_mapas.py):
+          un río que en un mapa acaba donde empieza el del otro (punta con
+          punta: el imán) sale como uno solo, que se ensancha seguido. Y EL
+          MISMO RÍO DIBUJADO EN LOS DOS MAPAS (con el mismo nombre, como el
+          Río Iblis en Prunia y en Telzaria) sale una vez: el del mapa más
+          fino, alargado con lo que el otro tenga de más por sus puntas.
+          Así no sale dos veces en la lista ni pintado doble.
     - AMPLIAR EL MAPAMUNDI: solo cambia su imagen, NO sus coordenadas
       (siguen siendo 1920 × 1080): los mapas regionales guardan su sitio
       en ellas. Por eso en el mapamundi no sale «En el mapamundi».

@@ -691,8 +691,9 @@ function ponerMapa(mapa) {
         archivo: mapa.archivo, datos: d, imagenes: mapa.imagenes || {}, url: mapa.url || "",
         cambiado: false, elegido: null, dibujo: null, capasOcultas: {}, cuantasRegiones: d.shapes.length,
         medida: [], tramoEscala: [], ratonMedida: null, iman: null, ultimoCampo: null, varios: [], curvaPara: null,
-        cajaEleccion: null,
+        cajaEleccion: null, vecinos: Array.isArray(mapa.vecinos) ? mapa.vecinos : [],
     });
+    ponerCasillaDeVecinos();
     // El tamaño de los textos nuevos, de salida: el de un texto mediano.
     $("#mapa-tamano-nuevo").value = Math.round(Math.max(d.width, d.height) / 70);
     historiaMapa.atras = [];
@@ -1007,6 +1008,13 @@ function imantar(p, evitar) {
         }));
     });
     (estadoMapa.dibujo ? estadoMapa.dibujo.puntos.slice(0, -1) : []).forEach(mirar);
+    // Y lo de los mapas vecinos (sus sitios y los puntos de sus rayas).
+    if (hayVecinosAVista()) {
+        estadoMapa.vecinos.forEach((v) => {
+            v.sitios.forEach(mirar);
+            v.rayas.forEach((rr) => rr.points.forEach(mirar));
+        });
+    }
     if (mejor) {
         return { p: { x: mejor.x, y: mejor.y }, pegado: "punto" };
     }
@@ -1039,6 +1047,27 @@ function imantar(p, evitar) {
             }
         });
     });
+    if (hayVecinosAVista()) {
+        estadoMapa.vecinos.forEach((v) => v.rayas.forEach((rr) => {
+            for (let n = 0; n < rr.points.length - 1; n++) {
+                const a = rr.points[n];
+                const b = rr.points[n + 1];
+                const dx = b.x - a.x;
+                const dy = b.y - a.y;
+                const largo = dx * dx + dy * dy;
+                if (!largo) {
+                    continue;
+                }
+                const f = Math.max(0, Math.min(1, ((p.x - a.x) * dx + (p.y - a.y) * dy) / largo));
+                const q = { x: a.x + dx * f, y: a.y + dy * f };
+                const dist = Math.hypot(q.x - p.x, q.y - p.y);
+                if (dist < lejos) {
+                    lejos = dist;
+                    sobre = q;
+                }
+            }
+        }));
+    }
     if (sobre) {
         return { p: { x: redondoMapa(sobre.x), y: redondoMapa(sobre.y) }, pegado: "borde" };
     }
@@ -1058,12 +1087,76 @@ function pintarTodoElMapa() {
     defs.innerHTML = TIPOS_DE_ZONA.map((z) => '<pattern id="ed-trama-' + z[0] + '" patternUnits="userSpaceOnUse" width="'
         + redondoMapa(s) + '" height="' + redondoMapa(s) + '">' + tramaDeZona(z[0], s) + "</pattern>").join("");
     svg.appendChild(defs);
-    ["fondo", "regiones", "rayas", "puentes", "textos", "rosa", "emblemas", "sitios", "dibujo", "asas"].forEach((g) => {
+    ["fondo", "regiones", "vecinos", "rayas", "puentes", "textos", "rosa", "emblemas", "sitios", "dibujo", "asas"].forEach((g) => {
         svg.appendChild(svgMapa("g", { "data-capa-mapa": g }));
     });
     pintarFondoMapa();
+    pintarVecinosMapa();
     pintarCosasMapa();
     pintarRosaMapa();
+}
+
+// ---- LOS MAPAS VECINOS ----
+// Los regionales que se pisan con éste en el mapamundi (los manda el
+// servidor ya en las medidas de este mapa: vecinos_de, editor-wiki.py).
+// Sus rayas y sus sitios, en gris y sin poder tocarlos: están para ver por
+// dónde sigue un río o un camino al otro lado de la frontera y que el imán
+// enganche a ellos. En la web, lo que se toca se junta (el río sigue
+// siendo uno y la ruta pasa de un reino a otro).
+const GRIS_VECINO = { rio: [4, null], camino: [4, null], sendero: [2.5, [5, 5]], ruta: [2.5, [9, 6]],
+    frontera: [2.5, [12, 5, 2, 5]], maritima: [3, [0.5, 8]], viaje: [2.5, [9, 6]] };
+
+function hayVecinosAVista() {
+    return estadoMapa.vecinos && estadoMapa.vecinos.length && $("#mapa-vecinos").checked;
+}
+
+function ponerCasillaDeVecinos() {
+    const caja = $("[data-mapa-vecinos-caja]");
+    const hay = estadoMapa.vecinos && estadoMapa.vecinos.length;
+    caja.hidden = !hay;
+    if (hay) {
+        const nombres = estadoMapa.vecinos.map((v) => v.titulo).join(", ");
+        caja.title = "En gris, lo de " + nombres + ": el imán engancha a sus rayas y sus sitios, para seguir un río o"
+            + " un camino que pasa al otro lado.";
+        $("[data-mapa-vecinos-ayuda]").textContent = "En gris, las rayas y los sitios de " + nombres
+            + ". El imán engancha a ellos.";
+    }
+}
+
+function pintarVecinosMapa() {
+    const g = capaMapa("vecinos");
+    if (!g) {
+        return;
+    }
+    g.textContent = "";
+    if (!hayVecinosAVista()) {
+        return;
+    }
+    const comun = { fill: "none", "stroke-linejoin": "round", "stroke-linecap": "round", "vector-effect": "non-scaling-stroke",
+        "pointer-events": "none" };
+    estadoMapa.vecinos.forEach((v) => {
+        v.rayas.forEach((r) => {
+            const [ancho, trazos] = GRIS_VECINO[r.kind] || [2.5, null];
+            const d = trazoMapa(r.points, false);
+            g.appendChild(svgMapa("path", Object.assign({ d, class: "mapa-ed-vecino-borde", "stroke-width": ancho + 3 }, comun)));
+            g.appendChild(svgMapa("path", Object.assign({
+                d, class: "mapa-ed-vecino" + (r.kind === "rio" ? " es-rio" : ""), "stroke-width": ancho,
+                "stroke-dasharray": trazos ? trazos.join(" ") : "none",
+            }, comun)));
+        });
+        // Los sitios: un punto y su nombre, del mismo tamaño a cualquier
+        // zoom (como las marcas: escalarMarcasMapa).
+        v.sitios.forEach((s) => {
+            const m = svgMapa("g", { class: "mapa-ed-marca", "data-x": s.x, "data-y": s.y, "pointer-events": "none" });
+            m.appendChild(svgMapa("circle", { r: 4.5, class: "mapa-ed-vecino-sitio" }));
+            if (s.label) {
+                const t = svgMapa("text", { x: 8, y: 4, class: "mapa-ed-vecino-nombre" });
+                t.textContent = s.label;
+                m.appendChild(t);
+            }
+            g.appendChild(m);
+        });
+    });
 }
 
 function capaMapa(nombre) {
@@ -4950,6 +5043,10 @@ function empezarMapas() {
     });
     $("[data-mapa-curva-quitar]").addEventListener("click", quitarCurvaDelTexto);
     $("#mapa-curva-nueva").addEventListener("change", () => ponerHerramienta(estadoMapa.herramienta));
+    $("#mapa-vecinos").addEventListener("change", () => {
+        pintarVecinosMapa();
+        escalarMarcasMapa();
+    });
     document.querySelectorAll("[data-mapa-letras]").forEach((s) => opcionesMapa(s, LETRAS_DE_TEXTO, false));
     document.querySelectorAll("[data-mapa-formas-emblema]").forEach((s) => opcionesMapa(s, FORMAS_DE_EMBLEMA, false));
     document.querySelectorAll("[data-mapa-tamanos-emblema]").forEach((s) => {

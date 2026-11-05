@@ -329,6 +329,8 @@ def juntar_regionales(mundo, regionales, avisar=None):
             # caminos: _red_de_caminos).
             nueva["escala_de"] = max(reg["ancho"], reg["alto"]) * fx / max(mundo["ancho"], mundo["alto"])
             nueva["regional"] = True
+            # De qué mapa viene (para juntar los ríos que siguen en otro).
+            nueva["de_mapa"] = reg.get("titulo") or ""
             mundo["lineas"].append(nueva)
         # La escala: la del primer regional que la tenga, si el mapamundi
         # no tiene la suya (en píxeles del regional; aquí, en unidades).
@@ -338,10 +340,117 @@ def juntar_regionales(mundo, regionales, avisar=None):
             mundo["escala"] = escala
         juntados += 1
         mundo.setdefault("regionales", []).append(reg.get("titulo") or "")
+    _juntar_rios_que_siguen(mundo)
     if juntados:
         mundo["zoom_maximo"] = ZOOM_MAXIMO_CON_REGIONALES
         mundo["cerca"] = CERCA_CON_REGIONALES
         mundo["pin_en_pantalla"] = PIN_CON_REGIONALES
+    return juntados
+
+
+def _juntar_rios_que_siguen(mundo):
+    """LOS RÍOS QUE PASAN DE UN MAPA REGIONAL A OTRO: en el mapamundi, uno.
+
+    Dos casos, siempre entre rayas de río de mapas regionales distintos:
+
+    - EL MISMO RÍO DIBUJADO EN LOS DOS (se llaman igual): los mapas se
+      pisan, y cada uno lo tiene entero o a trozos. Sale uno: el del mapa
+      más fino (el de más detalle) y, si el otro sigue más allá por alguna
+      de las puntas, se le añade ese trozo que le falta. Se pone del
+      derecho del fino (un río va de donde nace a donde acaba).
+    - UNO QUE SIGUE EN EL OTRO (en el editor, el segundo se engancha con
+      el imán a la punta del primero: «Los mapas vecinos»): la punta de
+      uno cae encima de la del otro; el final de uno con el principio del
+      otro (si se tocan los dos finales, el segundo se da la vuelta).
+
+    Así se ensancha seguido de donde nace a donde acaba y sale una vez en
+    la lista. Los caminos no hace falta juntarlos: la red de caminos ya
+    engancha las puntas que se tocan (y la ruta pasa de un reino a otro).
+    """
+    rios = [l for l in mundo.get("lineas") or [] if l.get("regional") and l.get("tipo") == "rio"]
+    if len(rios) < 2:
+        return 0
+    lado = max(mundo.get("ancho") or 1, mundo.get("alto") or 1) / 400
+    # Para «el mismo río»: cuánto pueden separarse los dos dibujos (cada
+    # mapa lo calca a su manera).
+    cubre = lado * 0.3
+
+    def lejos(p, q):
+        return math.hypot(p[0] - q[0], p[1] - q[1])
+
+    def a_la_raya(p, puntos):
+        mejor = 1e18
+        for a, b in zip(puntos, puntos[1:]):
+            dx, dy = b[0] - a[0], b[1] - a[1]
+            largo = dx * dx + dy * dy
+            f = 0.0 if not largo else max(0.0, min(1.0, ((p[0] - a[0]) * dx + (p[1] - a[1]) * dy) / largo))
+            mejor = min(mejor, math.hypot(a[0] + dx * f - p[0], a[1] + dy * f - p[1]))
+        return mejor
+
+    def juntar(a, b, puntos):
+        a["puntos"] = puntos
+        a["etiqueta"] = a.get("etiqueta") or b.get("etiqueta") or ""
+        if not a.get("pagina"):
+            a["pagina"], a["mapa"] = b.get("pagina") or "", b.get("mapa") or ""
+        a["detalle"] = min(a.get("detalle") or 0, b.get("detalle") or 0) or a.get("detalle")
+        a["escala_de"] = min(a.get("escala_de") or 1, b.get("escala_de") or 1)
+        a["de_mapa"] = (a.get("de_mapa") or "") + "+" + (b.get("de_mapa") or "")
+        mundo["lineas"].remove(b)
+        rios.remove(b)
+
+    def mismo_rio(a, b):
+        """a es el fino; b, el otro. Lo de b que no está encima de a, por
+        las puntas, se le añade a a."""
+        pa, pb = list(a["puntos"]), list(b["puntos"])
+        # b del mismo derecho que a.
+        if lejos(pa[0], pb[-1]) + lejos(pa[-1], pb[0]) < lejos(pa[0], pb[0]) + lejos(pa[-1], pb[-1]):
+            pb.reverse()
+        encima = [a_la_raya(p, pa) <= cubre for p in pb]
+        if not any(encima):
+            return None
+        primero = encima.index(True)
+        ultimo = len(encima) - 1 - encima[::-1].index(True)
+        antes, despues = pb[:primero], pb[ultimo + 1:]
+        # Solo si de verdad siguen por esa punta (y no por en medio).
+        if antes and lejos(pb[primero], pa[0]) > cubre * 3:
+            antes = []
+        if despues and lejos(pb[ultimo], pa[-1]) > cubre * 3:
+            despues = []
+        return antes + pa + despues
+
+    juntados = 0
+    seguir = True
+    while seguir:
+        seguir = False
+        for a in rios:
+            for b in rios:
+                if a is b or a.get("de_mapa") == b.get("de_mapa"):
+                    continue
+                # El mismo río (con el mismo nombre) en los dos mapas.
+                if a.get("etiqueta") and a.get("etiqueta").lower() == (b.get("etiqueta") or "").lower():
+                    if (a.get("escala_de") or 1) > (b.get("escala_de") or 1):
+                        continue  # se mira al revés: el fino manda
+                    puntos = mismo_rio(a, b)
+                    if puntos:
+                        juntar(a, b, puntos)
+                        juntados += 1
+                        seguir = True
+                        break
+                    continue
+                # Uno que sigue en el otro (punta con punta).
+                tol = lado * min(a.get("escala_de") or 1, b.get("escala_de") or 1)
+                if lejos(a["puntos"][-1], b["puntos"][0]) <= tol:
+                    puntos = list(a["puntos"]) + list(b["puntos"][1:])
+                elif lejos(a["puntos"][-1], b["puntos"][-1]) <= tol:
+                    puntos = list(a["puntos"]) + list(reversed(b["puntos"][:-1]))
+                else:
+                    continue
+                juntar(a, b, puntos)
+                juntados += 1
+                seguir = True
+                break
+            if seguir:
+                break
     return juntados
 
 
