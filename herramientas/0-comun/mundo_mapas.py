@@ -352,6 +352,114 @@ def juntar_regionales(mundo, regionales, avisar=None):
     return juntados
 
 
+def _recortar(puntos, ancho, alto):
+    """Los trozos de una raya que caen dentro del rectángulo (0, 0, ancho,
+    alto): puede salir y volver a entrar. Cada tramo, con Liang-Barsky (lo
+    mismo que recortarRayaAlMapa en el editor)."""
+    trozos, actual = [], []
+    for (ax, ay), (bx, by) in zip(puntos, puntos[1:]):
+        dx, dy = bx - ax, by - ay
+        t0, t1, fuera = 0.0, 1.0, False
+        for pp, q in ((-dx, ax), (dx, ancho - ax), (-dy, ay), (dy, alto - ay)):
+            if pp == 0:
+                if q < 0:
+                    fuera = True
+                    break
+                continue
+            t = q / pp
+            if pp < 0:
+                t0 = max(t0, t)
+            else:
+                t1 = min(t1, t)
+            if t0 > t1:
+                fuera = True
+                break
+        if fuera:
+            if len(actual) > 1:
+                trozos.append(actual)
+            actual = []
+            continue
+        ini = (ax + dx * t0, ay + dy * t0)
+        fin = (ax + dx * t1, ay + dy * t1)
+        if not actual or math.hypot(actual[-1][0] - ini[0], actual[-1][1] - ini[1]) > 1e-6:
+            if len(actual) > 1:
+                trozos.append(actual)
+            actual = [ini]
+        actual.append(fin)
+        if t1 < 1:
+            trozos.append(actual)
+            actual = []
+    if len(actual) > 1:
+        trozos.append(actual)
+    return trozos
+
+
+def poner_vecinos(regionales):
+    """LO DE LOS VECINOS EN CADA MAPA REGIONAL: a cada mapa regional
+    situado ("mundo") se le añade lo de los otros regionales situados que
+    cae DENTRO DE SU IMAGEN (recortado a su rectángulo, no todo el país
+    vecino): sus sitios y sus rayas de las que pasan al mapamundi (ríos,
+    caminos, senderos, rutas…), pasados a sus medidas. Así el mapa de
+    Neclaverna enseña los caminos y los pueblos de Prunia que salen en su
+    imagen, y su ruta puede seguirlos.
+
+    No se repite lo que ya tiene: un sitio o una raya del vecino que se
+    llama igual que uno suyo (y es de la misma clase), las rayas del vecino
+    que este mapa se trajo en el editor ("fromLine") y las que el vecino a
+    su vez se trajo de otro ("copia"). Lo añadido lleva "vecino" (el título
+    de su mapa) y "copia" (para que no pase al mapamundi). Se calcula todo
+    antes de añadir nada: lo de un vecino no se le pasa a un tercero.
+    Devuelve cuántas cosas ha añadido en total."""
+    situados = [r for r in regionales if r.get("mundo") and r.get("ancho") and r.get("alto")]
+    nuevos = []
+    for yo in situados:
+        w = yo["mundo"]
+        fx, fy = w["w"] / yo["ancho"], w["h"] / yo["alto"]
+        mis_rayas = {(l["tipo"], l["etiqueta"].lower()) for l in yo.get("lineas") or [] if l.get("etiqueta") and not l.get("copia")}
+        traidas = {l.get("de_linea") for l in yo.get("lineas") or [] if l.get("copia") and l.get("de_linea")}
+        mis_sitios = {(p.get("etiqueta") or "").lower() for p in yo.get("pines") or [] if p.get("etiqueta")}
+        pines, lineas = [], []
+        for otro in situados:
+            if otro is yo:
+                continue
+            v = otro["mundo"]
+            if (v["x"] > w["x"] + w["w"] or v["x"] + v["w"] < w["x"]
+                    or v["y"] > w["y"] + w["h"] or v["y"] + v["h"] < w["y"]):
+                continue
+            gx, gy = v["w"] / otro["ancho"], v["h"] / otro["alto"]
+
+            def aqui(x, y):
+                return ((v["x"] + x * gx - w["x"]) / fx, (v["y"] + y * gy - w["y"]) / fy)
+
+            for pin in otro.get("pines") or []:
+                if pin.get("escondido") or (pin.get("tipo") == "puente" and not pin.get("etiqueta")):
+                    continue
+                if (pin.get("etiqueta") or "").lower() in mis_sitios and pin.get("etiqueta"):
+                    continue
+                x, y = aqui(pin["x"], pin["y"])
+                if 0 <= x <= yo["ancho"] and 0 <= y <= yo["alto"]:
+                    nuevo = dict(pin, x=x, y=y, capa="", vecino=otro.get("titulo") or "")
+                    pines.append(nuevo)
+            for linea in otro.get("lineas") or []:
+                if linea.get("tipo") in RAYAS_QUE_NO_PASAN or linea.get("copia"):
+                    continue
+                if linea.get("id") and linea["id"] in traidas:
+                    continue
+                if linea.get("etiqueta") and (linea["tipo"], linea["etiqueta"].lower()) in mis_rayas:
+                    continue
+                for trozo in _recortar([aqui(x, y) for x, y in linea["puntos"]], yo["ancho"], yo["alto"]):
+                    nueva = dict(linea, puntos=trozo, capa="", copia=True, vecino=otro.get("titulo") or "")
+                    nueva["detalle"] = (linea.get("detalle") or detalle_de(otro)) * gx / fx
+                    lineas.append(nueva)
+        nuevos.append((yo, pines, lineas))
+    total = 0
+    for yo, pines, lineas in nuevos:
+        yo.setdefault("pines", []).extend(pines)
+        yo.setdefault("lineas", []).extend(lineas)
+        total += len(pines) + len(lineas)
+    return total
+
+
 def _juntar_rios_que_siguen(mundo):
     """LOS RÍOS QUE PASAN DE UN MAPA REGIONAL A OTRO: en el mapamundi, uno.
 
@@ -627,6 +735,8 @@ def _linea(crudo):
         # Traída de un mapa vecino (en el editor: «Los caminos y ríos de los
         # vecinos»): en el mapamundi no pasa, que allí va la de su mapa.
         "copia": bool(crudo.get("fromMap")),
+        "id": str(crudo.get("id") or ""),
+        "de_linea": str(crudo.get("fromLine") or ""),
         # Su estilo propio, si lo tiene (si no, el de su tipo).
         "ancho": _entre(_numero(crudo.get("width"), None), 0.5, 20),
         "trazo": str(crudo.get("dash") or "").strip().lower() if str(crudo.get("dash") or "").strip().lower()

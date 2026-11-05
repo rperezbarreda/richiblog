@@ -2539,6 +2539,15 @@
           Río Iblis en Prunia y en Telzaria) sale una vez: el del mapa más
           fino, alargado con lo que el otro tenga de más por sus puntas.
           Así no sale dos veces en la lista ni pintado doble.
+        · Y EN LA WEB, CADA MAPA REGIONAL ENSEÑA LO DE SUS VECINOS QUE CAE
+          DENTRO DE SU IMAGEN, solo (poner_vecinos, mundo_mapas.py; lo
+          llama generar-mundo.py después de juntar el mapamundi): sus
+          sitios y sus caminos, senderos, rutas y ríos, recortados al borde
+          de la imagen, sin tocar el .cmap. Telzaria lleva los pueblos y
+          caminos de Prunia que salen en su dibujo, y su ruta los sigue. No
+          repite lo que el mapa ya tiene: lo que se llama igual que algo
+          suyo de la misma clase, lo que se trajo en el editor ("fromLine")
+          y lo que el vecino trajo de otro. Esto no pasa al mapamundi.
         · TRAERLOS A ESTE MAPA: en «El mapa en sí» → «Los caminos y ríos
           de los vecinos» (sale si hay vecinos) se marcan ríos, caminos
           principales y senderos y «Traerlos a este mapa» los COPIA como

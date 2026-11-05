@@ -920,6 +920,16 @@ def convertir_mapas(mapas, paginas, imagenes, avisos_por_pagina, detalle):
             cuantos = mundo_mapas.juntar_regionales(mundo["leido"], regionales)
             print("  En %s: lo de %d mapa(s) regional(es)." % (Path(nombre_mundo).stem, cuantos))
 
+    # Y EN CADA MAPA REGIONAL, LO DE SUS VECINOS que cae dentro de su imagen
+    # (sus sitios y sus caminos y ríos, recortados): ver poner_vecinos en
+    # mundo_mapas.py. Después de juntar: lo de los vecinos no pasa al
+    # mapamundi (ya va el de su mapa).
+    situados = [m["leido"] for m in mapas.values() if m["leido"].get("mundo")]
+    if len(situados) > 1:
+        cuantas = mundo_mapas.poner_vecinos(situados)
+        if cuantas:
+            print("  En los mapas regionales: %d cosa(s) de sus vecinos." % cuantas)
+
     indices = indice_de_imagenes(imagenes)
     cuaderno = [None]
 
