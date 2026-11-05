@@ -607,9 +607,129 @@
             "dndbeyond": "https://dndbeyond.com/characters/157153694",
             "historia": "Zuncho es un goblin que decidió abandonar a su tribu al dase cuenta de lo peligroso que era y el poco futuro que le deparaba si se quedaba; no encajaba con la vida tribal ni la violencia constante que suponía, por lo que hizo el petate y se marchó hacia la gran ciudad.\n\nSu sobrino Pirp lo siguió sin que se diese cuenta, ya que lo tenía en muy alta estima y confiaba plenamente en él. Cuando Zuncho se dio cuenta de que su sobrino le estaba siguiendo ya era demasiado tarde para dar marcha atrás, por lo que acabó haciéndose cargo del niño.\n\nAmbos llegaron a la ciudad de Waterdeep, donde se asentaron en los bajos fondos de la ciudad. Zuncho comenzó a trabajar principalmente como mensajero para el gremio del\nXanathar, realizando encargos menores y peligrosos, pero constantes. \n\nEl dinero apenas alcanzaba para mantenerse, y mucho menos para cuidar de su sobrino Pirp, por lo que\nZuncho empezó a buscar una fuente de ingresos adicional.\n\nTodo cambió en la taberna de la Mantícora Coja, donde apareció un hechicero humano llamado Gregory Thastar, que celebraba su reciente entrada en el consejo de la ciudad.\nZuncho vio una oportunidad clara y se encargó de que Gregory no dejara de beber, consiguiendo finalmente sentarlo a la mesa de juego con los habituales. \n\nAquella noche, completamente borracho, Gregory decidió apostar su libro de hechizos y Zuncho logró ganarlo, sin ser consciente de que se trataba de un objeto peligroso.\n\nAl día siguiente Zuncho mostró el libro a Pirp. El niño, movido por la curiosidad, lo abrió y balbuceó palabras de una página al azar, activando un efecto mágico que absorbió a Pirp dentro del propio libro. Desde entonces, el sobrino de Zuncho permanece atrapado en su interior.\n\nTras lo ocurrido, Zuncho comenzó a estudiar el libro de forma autodidacta, ya que nadie estaba dispuesto a enseñar magia a un goblin. Su aprendizaje fue duro, lento y lleno de errores, y acabó desarrollando una afinidad especial por la magia de ilusión casi simbiótica debido a su experiencia como jugador y embaucador. Aunque no es un mago académico ha logrado dominar la magia lo suficiente como para defenderse y seguir investigando el libro.\n\nDesde la desaparición de Pirp, Zuncho escucha ocasionalmente su voz y sus llantos, especialmente en sueños, lo que lo atormenta y refuerza su determinación por liberarlo.\n\nHa oído rumores de que en lo más profundo de la mazmorra bajo el Portal Bostezante podría concederse un deseo, pero su objetivo principal es encontrar mientras explora la\nmazmorra y amplía sus conocimientos mágicos, buscando una forma de liberar a su sobrino del libro sin tener que recurrir a ese último recurso.",
             "clave": "zuncho"
+        },
+        {
+            "nombre": "Héctor",
+            "nombre_completo": "Héctor Escamilla",
+            "clave": "hector",
+            "icono": "🩸",
+            "etiquetas": "Vampiro V5, jugando, Seattle By Night",
+            "color": "rojo",
+            "sistema": "vtm5",
+            "raza": "Malkavian",
+            "clase": "Ladrón con un sexto sentido",
+            "nivel": "12",
+            "edad": "36 (aparenta 28)",
+            "pelo": "Oscuro y despeinado, con la perilla y el bigote cuidados",
+            "ojos": "Castaños",
+            "piel": "Bronceada",
+            "conceptos": [
+                "Concepto: Ladrón con un sexto sentido",
+                "Clan: Malkavian",
+                "Depredador: Sandman",
+                "Sire: Maeve Kolya",
+                "Ambición: Imponer mi visión en la Camarilla",
+                "Deseo: Dormir en una cama cómoda",
+                "Crónica: Seattle By Night",
+                "Nacimiento: 2 de febrero de 1990",
+                "Abrazo: 4 de marzo de 2019"
+            ],
+            "atributos": [
+                "## Físicos",
+                "Fuerza: 1",
+                "Destreza: 4",
+                "Resistencia: 2",
+                "## Sociales",
+                "Carisma: 2",
+                "Manipulación: 2",
+                "Compostura: 3",
+                "## Mentales",
+                "Inteligencia: 2",
+                "Astucia: 3",
+                "Resolución: 3"
+            ],
+            "pericias": [
+                "## Físicas",
+                "Armas cuerpo a cuerpo: 0",
+                "Armas de fuego: 1",
+                "Artesanía: 0",
+                "Atletismo: 1",
+                "Conducir: 1",
+                "Latrocinio: 3",
+                "Pelea: 0",
+                "Sigilo: 3 (allanamiento)",
+                "Supervivencia: 0",
+                "## Sociales",
+                "Callejeo: 3",
+                "Etiqueta: 1",
+                "Interpretación: 0",
+                "Intimidación: 0",
+                "Liderazgo: 0",
+                "Perspicacia: 2",
+                "Persuasión: 2",
+                "Subterfugio: 1",
+                "Trato con animales: 0",
+                "## Mentales",
+                "Academicismo: 1 (ingeniería)",
+                "Ciencia: 0",
+                "Consciencia: 2",
+                "Finanzas: 1",
+                "Investigación: 2",
+                "Medicina: 1",
+                "Ocultismo: 0",
+                "Política: 1",
+                "Tecnología: 2 (mecánica)"
+            ],
+            "recursos": [
+                "Salud: 0/5",
+                "Voluntad: 1/6",
+                "Hambre: 1/5",
+                "Humanidad: 7/10",
+                "Potencia de sangre: 1",
+                "Experiencia: 6 (de 28 ganada)"
+            ],
+            "armas": [
+                "Glock 19x 9 mm: +2; Destreza + Armas de fuego · oculta, desenfundado rápido, perforante"
+            ],
+            "poderes": "## Disciplinas\n- **Auspex** ●●●: Sense the Unseen (1), Premonition (2), Scry the Soul (3)\n- **Ofuscación** ●●: Cloak of Shadows (1), Unseen Passage (2)\n- **Olvido** ●: Oblivion’s Sight (1)\n\n## Ventajas, trasfondos y defectos\n- **Eat Food** ●● (ventaja)\n- **Check The Trunk** ● (ventaja)\n- **Recursos** ●● (trasfondo)\n- **Mawla (Cowboy)** ●●● (trasfondo)\n- **Refugio** ● (trasfondo)\n- **Refugio móvil** ●● (trasfondo)\n- **Criados (Dorito, un gato gordo naranja)** ● (trasfondo)\n- **Resonance Feeding** ●● (defecto)\n\n## Convicciones y piedras de toque\n- **No drogarse:** Una foto de Nico y él juntos\n- **Robar solo a los ricos:** Facturas sin pagar en la cartera\n- **La violencia es la última opción:** Colgante de mi diente roto\n\n## Credo: Creed of justice\n- Never kill the innocent\n- Be your own, never submit\n- Without a cause, you are nothing",
+            "equipo": [
+                "Glock 19x 9 mm",
+                "La Brújula del Deseo Verdadero (su aguja apunta a lo que más anhela el alma de quien la lleva)"
+            ],
+            "historia": "Héctor Escamilla ha vivido casi toda su vida en casas de acogida desde que sus padres fueron repatriados, ahi conoció a Nico, un niño dos años mayor que él que le protegió como su hermano pequeño y desde entonces son inseparables. (Y Héctor tiene sentimientos por Nico aunque nunca se lo ha confesado).\n\nTras dejar el orfanato sobrevivían juntos con trabajos precarios, Héctor consiguió hacerse técnico de calderas pero Nico se dió a las drogas. Ahogado en deudas de prestamistas un día a Héctor lo esperaron en su apartamento varios hombres que querían cobrarse las deudas de Nico y le propinaron una paliza. En el hospital Nico le confesó todo a Héctor, prometió ir a un programa de desintoxicación y siguieron juntos.\n\nLas deudas eran enormes y la única salida que vió Héctor fue aprovechar su trabajo como técnico de calderas para robar en casas poco vigiladas y así ir pagando facturas. En su último trabajo entraron a robar sin saberlo en el refugio de una vampiro.\n\nLa mansión era un refugio de Maeve Kolya, una malkavian que había tenido visiones de que iba a hacer algo horrible por culpa de su sed de sangre y quiso refugiarse hasta recuperar el control, pero al toparse con dos humanos en su casa no pudo evitar atacarles. A Nico lo mató y a Héctor lo dejó agonizando. Tras recuperar el control quiso enmendar su error y convirtió al vampirismo a Héctor para que pudiese sobrevivir.\n\nMaeve pidió ayuda al progenitor de su secta, Cowboy, ya que con lo ocurrido Héctor no querría cooperar y sería un peligro tanto para él como para el resto. Poco a poco le enseñaron a como sobrevivir a su no vida y cómo relacionarse con el resto de la Mascarada, y Héctor empezó a comprender que en realidad fue un accidente lo que les ocurrió a Nico y a él,  pero no podía perdonar a Maeve por ello y su relación es complicada, y mucho menos cuando empezaron a manifestarse las visiones de Nico.\n\nHector acostumbra a verlo en todas partes, como si se tratase de un fantasma. Podía hablar con él y le contestaba, pero muchas veces Nico no reaccionaba como de costumbre y eso le desconcentraba. A veces le advertía de peligros o de cosas que pasaba por alto, le hacía algo de compañía o cuando algo le afectaba Nico empezaba a criticarle y hacer comentarios hirientes impropios de él.\n\nCon el paso del tiempo Héctor empezó a tener de nuevo el control y, aunque tardó en acostumbrarse a su nueva vida procura llevar un perfil bajo en la ciudad, decidiendo vivir en las afueras y interactuando con el resto de su gente sólo cuando es estrictamente necesario. El parque de caravanas en el que vive es un lugar perfecto para alimentarse por la gente que vive en él, y se ha hecho amigo de un gato callejero naranja al que llama Dorito.\n\nLe da asco en lo que se ha convertido y el constante tormento de las visiones de Nico hace que se sienta muy miserable, pero quiere intentar hacer lo posible para que no nazcan mas vampiros de forma tan violenta como la suya.",
+            "extra": "- Suele llevar ropa cómoda, normalmente ropa de deporte o alguna sudadera.\n- Idiomas conocidos: Inglés y Español"
         }
     ],
-    "gente": [],
+    "gente": [
+        {
+            "personaje": "hector",
+            "cosas": [
+                {
+                    "nombre": "Nico",
+                    "que": "Su hermano de las casas de acogida",
+                    "vinculo": "Familia",
+                    "estado": "Fallecido",
+                    "relacion": "Inseparables; ahora lo ve en todas partes, como un fantasma"
+                },
+                {
+                    "nombre": "Maeve Kolya",
+                    "que": "Su sire (Malkavian)",
+                    "vinculo": "Sire",
+                    "relacion": "Complicada: no le perdona lo de Nico"
+                },
+                {
+                    "nombre": "Isaac «Cowboy» Blackwater",
+                    "que": "Príncipe y su mawla",
+                    "vinculo": "Mentor"
+                },
+                {
+                    "nombre": "Dorito",
+                    "que": "Un gato callejero naranja del parque de caravanas",
+                    "vinculo": "Mascota"
+                }
+            ]
+        }
+    ],
     "imagenes": [],
     "criaturas": [
         {
