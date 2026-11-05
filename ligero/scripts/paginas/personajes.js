@@ -3852,9 +3852,9 @@ window.ocMontar.reglas = function (sitio, idBuscar) {
         let n = fuerte ? fuerte.textContent : "";
         if (!n) {
             const det = b.closest("details");
-            const ven = b.closest("[role=dialog], .master-ventana");
+            const ven = b.closest("[role=dialog]");
             n = det ? (det.querySelector("summary") || {}).textContent || ""
-                : ven ? (ven.querySelector(".master-ventana-nombre, h2") || {}).textContent || "" : "";
+                : ven ? (ven.querySelector("h2") || {}).textContent || "" : "";
         }
         return n.replace(/[.:]\s*$/, "").trim();
     }

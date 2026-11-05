@@ -29,6 +29,13 @@
 //   kofi         enlace del botón principal.
 //   drive        enlace de descarga directa. Opcional: sin él, la
 //                tarjeta se queda con un solo botón.
+//   enlace       sin Ko-fi, adónde lleva desde la portada y el RSS (la
+//                página de la descarga). Aquí no sale.
+//   descargas    más botones, opcional: [{"texto": "Windows ↓", "url":
+//                "https://…"}, …]. Para lo que se baja en varias
+//                versiones (la pantalla de máster: Windows, Mac, Linux).
+//                Si no hay Ko-fi, el primero va relleno (el principal) y
+//                los demás sin relleno.
 
 const ROL_URL = "/datos/mis_movidas/rol.json";
 
@@ -102,10 +109,22 @@ function tarjetaRol(ficha) {
     // la lista de enlaces de la página y oiría "Ver en Ko-fi" tres o
     // cuatro veces seguidas sin saber de qué aventura es cada uno. Y de
     // paso avisa de que se abre en otra pestaña.
+    const conKofi = Boolean((ficha.kofi || "").trim());
+    const descargas = (Array.isArray(ficha.descargas) ? ficha.descargas : [])
+        .filter((d) => d && typeof d === "object")
+        .map((d, i) =>
+            boton(
+                d.url,
+                escaparHtml(d.texto || "Descargar ↓"),
+                titulo,
+                !conKofi && i === 0 ? "" : " portfolio-card-btn-secondary"
+            )
+        );
     const botones = [
         boton(ficha.kofi, "Ver en Ko-fi →", titulo, ""),
         boton(ficha.drive, "Descargar gratis ↓", titulo, " portfolio-card-btn-secondary"),
     ]
+        .concat(descargas)
         .filter(Boolean)
         .join("");
 

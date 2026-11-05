@@ -47,10 +47,22 @@ function tarjetaRol(ficha) {
     const fecha = escaparHtml(ficha.date || "");
     const sistema = (ficha.system || "").trim();
     const descripcion = (ficha.description || "").trim();
+    const conKofi = Boolean((ficha.kofi || "").trim());
+    const descargas = (Array.isArray(ficha.descargas) ? ficha.descargas : [])
+        .filter((d) => d && typeof d === "object")
+        .map((d, i) =>
+            boton(
+                d.url,
+                escaparHtml(d.texto || "Descargar ↓"),
+                titulo,
+                !conKofi && i === 0 ? "" : " portfolio-card-btn-secondary"
+            )
+        );
     const botones = [
         boton(ficha.kofi, "Ver en Ko-fi →", titulo, ""),
         boton(ficha.drive, "Descargar gratis ↓", titulo, " portfolio-card-btn-secondary"),
     ]
+        .concat(descargas)
         .filter(Boolean)
         .join("");
     return (

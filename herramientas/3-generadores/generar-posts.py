@@ -470,8 +470,9 @@ def recoger_blog():
 # El portfolio de rol vive en datos/mis_movidas/rol.json, que es el archivo que se
 # toca (a mano o con nuevo.py --rol) y del que la propia página saca sus
 # tarjetas. Aquí solo se traduce al formato del listado: de cada ficha
-# se queda el título, la categoría, la fecha y el enlace de Ko-fi, que
-# es lo que necesitan la portada y el RSS.
+# se queda el título, la categoría, la fecha y el enlace de Ko-fi (o el
+# de «enlace», si no está en Ko-fi), que es lo que necesitan la portada
+# y el RSS.
 # Antes las tarjetas estaban escritas dentro de index_rol.html y esto
 # las leía de allí con expresiones regulares; se cambió porque esa
 # página crecía ~2 KB por cosa publicada y había que editar HTML para
@@ -497,7 +498,9 @@ def recoger_rol():
         titulo = (ficha.get("title") or "").strip()
         subcategoria = (ficha.get("subcategory") or "").strip()
         fecha = (ficha.get("date") or "").strip()
-        enlace = (ficha.get("kofi") or "").strip()
+        # Ko-fi o, si no está allí (la pantalla de máster, que se baja de
+        # GitHub), su «enlace»: la página desde donde se descarga.
+        enlace = (ficha.get("kofi") or ficha.get("enlace") or "").strip()
         fallos = []
         if not titulo:
             fallos.append("la ficha no tiene título (title)")
@@ -506,7 +509,7 @@ def recoger_rol():
         if not fecha or len(fecha.split("-")) != 3:
             fallos.append(f"falta o no entiendo date, que va en dd-mm-aaaa (encontré: {fecha!r})")
         if not enlace:
-            fallos.append("la ficha no tiene enlace de Ko-fi (kofi)")
+            fallos.append("la ficha no tiene enlace de Ko-fi (kofi) ni otro (enlace)")
         if fallos:
             nombre = titulo or "ficha sin título"
             avisos.append((JSON_ROL, [f"[{nombre}] {f}" for f in fallos]))

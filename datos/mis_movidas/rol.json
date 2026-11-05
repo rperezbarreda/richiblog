@@ -1,5 +1,37 @@
 [
     {
+        "title": "Pantalla de máster",
+        "subcategory": "recursos",
+        "date": "05-11-2026",
+        "image": "/imagenes/mis_movidas/rol/thumbnail_pantalla_master.webp",
+        "alt": "La pantalla de máster abierta en el tablero de combate: las pestañas de los tableros arriba y la ventana de iniciativa",
+        "system": "D&D 5e (SRD 5.2) · Windows, macOS y Linux",
+        "description": "Programa gratuito para dirigir partidas: tableros con ventanas que colocas a tu gusto (iniciativa, bestiario, conjuros, fichas de la party, música, sonido ambiente, generadores, notas…). Funciona sin conexión y todo se guarda en tu ordenador. Descomprime el .zip y ábrelo con doble clic.",
+        "descargas": [
+            {
+                "texto": "Windows ↓",
+                "url": "https://github.com/rperezbarreda/pantalla_master/releases/latest/download/PantallaMaster-Windows.zip"
+            },
+            {
+                "texto": "Mac (Apple Silicon) ↓",
+                "url": "https://github.com/rperezbarreda/pantalla_master/releases/latest/download/PantallaMaster-macOS-AppleSilicon.zip"
+            },
+            {
+                "texto": "Mac (Intel) ↓",
+                "url": "https://github.com/rperezbarreda/pantalla_master/releases/latest/download/PantallaMaster-macOS-Intel.zip"
+            },
+            {
+                "texto": "Linux ↓",
+                "url": "https://github.com/rperezbarreda/pantalla_master/releases/latest/download/PantallaMaster-Linux.zip"
+            },
+            {
+                "texto": "Código en GitHub →",
+                "url": "https://github.com/rperezbarreda/pantalla_master"
+            }
+        ],
+        "enlace": "https://github.com/rperezbarreda/pantalla_master/releases/latest"
+    },
+    {
         "title": "Fichas DnD 5e - Formato A5",
         "subcategory": "recursos",
         "date": "23-09-2026",

@@ -68,7 +68,7 @@
     const VERSIONES = {
         // ==== generado ====
         "/fragmentos/ajustes.html": "abbc4adc",
-        "/fragmentos/barra-lateral.html": "94c0be6e",
+        "/fragmentos/barra-lateral.html": "83ab1110",
         "/fragmentos/buscar.html": "0172e5dd",
         "/fragmentos/frases.html": "2720019e",
         "/fragmentos/texto-a-voz.html": "5a69ce50",

@@ -5,8 +5,16 @@
         <link>https://richi.blog/</link>
         <description>Todo lo que voy publicando: entradas del blog, relatos y material de rol.</description>
         <language>es</language>
-        <lastBuildDate>Mon, 02 Nov 2026 00:00:00 +0000</lastBuildDate>
+        <lastBuildDate>Thu, 05 Nov 2026 00:00:00 +0000</lastBuildDate>
         <atom:link href="https://richi.blog/blog/rss.xml" rel="self" type="application/rss+xml"/>
+        <item>
+            <title>Pantalla de máster</title>
+            <link>https://github.com/rperezbarreda/pantalla_master/releases/latest</link>
+            <guid isPermaLink="false">https://richi.blog/#rol-pantalla-de-master-05-11-2026</guid>
+            <pubDate>Thu, 05 Nov 2026 00:00:00 +0000</pubDate>
+            <category>rol</category>
+            <category>recursos</category>
+        </item>
         <item>
             <title>Halloween y mas movidas</title>
             <link>https://richi.blog/web/blog/2026/noviembre/halloween-y-mas-movidas.html</link>

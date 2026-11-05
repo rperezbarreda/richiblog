@@ -187,9 +187,6 @@ def hojas_de(ruta):
     # Mis personajes (mis OC): el índice y la ficha de cada uno. Van
     # aparte de las notas de rol y de la wiki, con su propia hoja.
     es_personajes = "/web/personajes/" in ruta
-    # La pantalla de máster (roleito): usa lo de mis personajes (los
-    # dados, la iniciativa, las reglas, las ventanas) y lo suyo.
-    es_master = "/pantalla_master/" in ruta
     es_accesibilidad = "/accesibilidad/" in ruta
     es_changelog = "/changelog/" in ruta
     es_mapa = "/mapa/" in ruta
@@ -354,12 +351,6 @@ def hojas_de(ruta):
                 "/estilos/componentes/filtros.css",
                 "/estilos/componentes/filtros.responsive.css",
             ]
-    elif es_master:
-        hojas += [
-            "/estilos/paginas/personajes.css",
-            "/estilos/paginas/personajes.responsive.css",
-            "/estilos/paginas/pantalla-master.css",
-        ]
     elif es_accesibilidad:
         # Sin portada.css: esta página no usa nada de la portada, se
         # dibuja sus propios marcos (ver el comentario de .acc-bloque).
@@ -502,7 +493,6 @@ def scripts_de(ruta):
     es_404 = camino.endswith("/not_found")
     # La ficha de uno de mis personajes (no el índice): las pestañas.
     es_ficha_personaje = bool(re.search(r"/web/personajes/[^/]+/[^/]+$", camino))
-    es_master = "/pantalla_master/" in camino
     es_changelog = "/changelog/" in camino
     es_mapa = "/mapa/" in camino
     es_buscar = "/buscar/" in camino
@@ -690,10 +680,6 @@ def scripts_de(ruta):
         js.append("/scripts/paginas/santuarios.js")
     elif es_ficha_personaje:
         js.append("/scripts/paginas/personajes.js")
-    elif es_master:
-        # Primero lo de mis personajes (los dados, la iniciativa, las
-        # reglas, las ventanas: window.ocMontar…) y luego el lienzo.
-        js += ["/scripts/paginas/personajes.js", "/scripts/paginas/pantalla-master.js"]
     elif camino.endswith("/web/personajes/index_personajes"):
         # El filtro de etiquetas del índice de mis personajes.
         js.append("/scripts/componentes/filtros.js")
@@ -1494,15 +1480,9 @@ YA_PUESTO = re.compile(
 #   - ni plugins, ni <base>, ni formularios que manden a otra web;
 #   - marcos (iframes): ninguno, salvo el reproductor de Spotify en las
 #     páginas que lo llevan (la música de mis personajes: data-oc-spotify,
-#     y solo se carga si se pide) y los PDF subidos a los documentos de la
-#     pantalla de máster (blob:, en las que llevan data-oc-archivos; ahí
-#     también las imágenes subidas: img-src blob:).
+#     y solo se carga si se pide).
 CSP_GOOGLE = "https://script.google.com https://script.googleusercontent.com"
 CSP_SPOTIFY = "https://open.spotify.com"
-# Los sonidos ambiente de la pantalla de máster (data-oc-sonidos): las
-# grabaciones de la Google Sound Library, que se oyen desde allí; y, con
-# data-oc-archivos, las canciones de cada uno (blob: de su navegador).
-CSP_SONIDOS = "https://actions.google.com"
 RE_SCRIPT_EN_LINEA = re.compile(r"<script(?![^>]*\bsrc=)[^>]*>(.*?)</script>", re.S)
 RE_CSP = re.compile(r'[ \t]*<meta http-equiv="Content-Security-Policy"[^>]*>\n')
 RE_CHARSET = re.compile(r'(<meta charset="[^"]*">\n)', re.I)
@@ -1519,26 +1499,19 @@ def politica(texto):
         "default-src 'self'",
         "script-src 'self'" + "".join(" " + h for h in huellas),
         "style-src 'self' 'unsafe-inline'",
-        # Las páginas con data-oc-imagenes-de-fuera (la pantalla de
-        # máster: la imagen que pone cada uno a un monstruo u objeto)
-        # dejan ver imágenes de cualquier web segura.
-        "img-src 'self' data:" + (" https:" if "data-oc-imagenes-de-fuera" in sin else "")
-        + (" blob:" if "data-oc-archivos" in sin else ""),
+        "img-src 'self' data:",
         "font-src 'self'",
         "connect-src 'self' " + CSP_GOOGLE,
         "object-src 'none'",
         "base-uri 'self'",
         "form-action 'self'",
-    ] + (["media-src 'self' " + CSP_SONIDOS + (" blob:" if "data-oc-archivos" in sin else "")]
-         if "data-oc-sonidos" in sin else []) + marcos(sin))
+    ] + marcos(sin))
 
 
 def marcos(sin):
     """Los marcos (iframes) que deja: el reproductor de Spotify en las
-    páginas que lo llevan y, en las que llevan data-oc-archivos (la pantalla de
-    máster: los PDF que sube cada uno a sus documentos), los blob: que
-    hace el propio navegador con esos archivos."""
-    fuentes = ([CSP_SPOTIFY] if "data-oc-spotify=" in sin else []) + (["blob:"] if "data-oc-archivos" in sin else [])
+    páginas que lo llevan."""
+    fuentes = [CSP_SPOTIFY] if "data-oc-spotify=" in sin else []
     return ["frame-src " + " ".join(fuentes)] if fuentes else []
 
 

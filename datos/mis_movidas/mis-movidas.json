@@ -1,5 +1,12 @@
 [
     {
+        "title": "Pantalla de máster",
+        "category": "rol",
+        "subcategory": "recursos",
+        "date": "05-11-2026",
+        "url": "https://github.com/rperezbarreda/pantalla_master/releases/latest"
+    },
+    {
         "title": "Mamá",
         "category": "relatos",
         "subcategory": "writeober26",

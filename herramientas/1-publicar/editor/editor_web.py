@@ -1293,7 +1293,11 @@ def colecciones():
                          C("description", "Descripción", "largo", obligatorio=True),
                          C("image", "Portada", "imagen", sitio="rol"),
                          C("alt", "Descripción de la portada", ayuda="Para quien no la ve."),
-                         C("kofi", "Enlace de Ko-fi", "enlace", obligatorio=True),
+                         C("kofi", "Enlace de Ko-fi", "enlace",
+                           ayuda="Si no está en Ko-fi (la pantalla de máster), en blanco y rellena «Otro enlace»."),
+                         C("enlace", "Otro enlace (sin Ko-fi)", "enlace",
+                           ayuda="Adónde lleva desde la portada y el RSS si no hay Ko-fi. Los botones de"
+                                 " descarga de la pantalla de máster («descargas») van en el JSON."),
                          C("drive", "Enlace de Google Drive", "enlace", siempre=True,
                            ayuda="Opcional: sin él, la tarjeta sale con un solo botón."),
                      ]}]},

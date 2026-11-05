@@ -12,6 +12,8 @@
 //
 //   - La wiki se llamaba mundo/ hasta el 10-10-2026 (web/mundo/ y su
 //     portada index_mundo.html).
+//   - La pantalla de máster (web/pantalla_master/) se fue el 05-11-2026:
+//     lleva a «recursos de rol», donde se descarga la app.
 //   - El 18-10-2026 cada país de la wiki pasó a tener su propia carpeta
 //     (wiki/Mapamundi/Azarasia/Reino de Prunia/Reino de Prunia.md), así
 //     que sus páginas también: …/azarasia/reino_de_prunia.html está ahora
@@ -27,6 +29,9 @@
 
 (function () {
     const REDIRECCIONES = [
+        // La pantalla de máster se fue de la web el 05-11-2026 (ahora es
+        // una app aparte): a «recursos de rol», donde se descarga.
+        ["/web/pantalla_master/pantalla_master.html", "/web/mis_movidas/rol/index_rol.html"],
         // Movida o renombrada desde el editor.
         ["/web/wiki/mapamundi/azarasia/condado_de_burcrecia/condado_de_burcrecia.html", "/web/wiki/mapamundi/azarasia/condado_de_burcrelle/condado_de_burcrelle.html"],
         // Movida o renombrada desde el editor.
