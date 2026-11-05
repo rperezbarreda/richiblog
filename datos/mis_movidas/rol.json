@@ -59,26 +59,11 @@
         ],
         "descargas": [
             {
-                "texto": "Windows ↓",
-                "url": "https://github.com/rperezbarreda/pantalla_master/releases/latest/download/PantallaMaster-Windows.zip"
-            },
-            {
-                "texto": "Mac (Apple Silicon) ↓",
-                "url": "https://github.com/rperezbarreda/pantalla_master/releases/latest/download/PantallaMaster-macOS-AppleSilicon.zip"
-            },
-            {
-                "texto": "Mac (Intel) ↓",
-                "url": "https://github.com/rperezbarreda/pantalla_master/releases/latest/download/PantallaMaster-macOS-Intel.zip"
-            },
-            {
-                "texto": "Linux ↓",
-                "url": "https://github.com/rperezbarreda/pantalla_master/releases/latest/download/PantallaMaster-Linux.zip"
-            },
-            {
-                "texto": "Código en GitHub →",
-                "url": "https://github.com/rperezbarreda/pantalla_master"
+                "texto": "Descargar en GitHub →",
+                "url": "https://github.com/rperezbarreda/pantalla_master/releases/latest"
             }
         ],
+        "kofi": "",
         "enlace": "https://github.com/rperezbarreda/pantalla_master/releases/latest"
     },
     {
