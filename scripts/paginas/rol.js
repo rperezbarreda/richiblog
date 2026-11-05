@@ -31,6 +31,11 @@
 //                tarjeta se queda con un solo botón.
 //   enlace       sin Ko-fi, adónde lleva desde la portada y el RSS (la
 //                página de la descarga). Aquí no sale.
+//   galeria      capturas, opcional: [{"imagen": "/…/grande.webp",
+//                "miniatura": "/…/peque.webp", "alt": "qué se ve",
+//                "pie": "texto corto debajo en el visor"}, …]. Salen
+//                en miniatura bajo la descripción y se amplían en el
+//                visor, pasando de una a otra.
 //   descargas    más botones, opcional: [{"texto": "Windows ↓", "url":
 //                "https://…"}, …]. Para lo que se baja en varias
 //                versiones (la pantalla de máster: Windows, Mac, Linux).
@@ -139,6 +144,7 @@ function tarjetaRol(ficha) {
         (descripcion
             ? `<p class="portfolio-card-desc">${escaparHtml(descripcion)}</p>`
             : "") +
+        galeriaRol(ficha, titulo) +
         (botones ? `<div class="portfolio-card-actions">${botones}</div>` : "") +
         "</div>" +
         "</div>"
@@ -157,6 +163,39 @@ function imagen(ficha, titulo) {
     return (
         `<img class="portfolio-card-photo" src="${escaparHtml(rutaSegura(ruta))}"` +
         ` alt="${alt}" loading="lazy">`
+    );
+}
+
+// Las capturas (si la ficha trae «galeria»): miniaturas que se amplían
+// en el visor, y en él se pasa de una a otra (‹ ›, o las flechas).
+function galeriaRol(ficha, titulo) {
+    const fotos = (Array.isArray(ficha.galeria) ? ficha.galeria : []).filter(
+        (f) => f && typeof f === "object" && (f.imagen || "").trim()
+    );
+    if (!fotos.length) {
+        return "";
+    }
+    const items = fotos
+        .map((f) => {
+            const grande = escaparHtml(rutaSegura(f.imagen));
+            const peque = escaparHtml(rutaSegura(f.miniatura || f.imagen));
+            const alt = escaparHtml((f.alt || "").trim());
+            const pie = escaparHtml((f.pie || "").trim());
+            return (
+                "<li>" +
+                `<button class="lightbox-trigger portfolio-card-captura" type="button" data-completa="${grande}"` +
+                ` data-pie="${pie}">` +
+                `<img src="${peque}" alt="${alt}" loading="lazy" width="320" height="180">` +
+                `<span class="visually-hidden"> (ampliar)</span>` +
+                "</button>" +
+                "</li>"
+            );
+        })
+        .join("");
+    return (
+        `<ul class="portfolio-card-galeria" data-visor-grupo aria-label="Capturas de ${titulo}">` +
+        items +
+        "</ul>"
     );
 }
 

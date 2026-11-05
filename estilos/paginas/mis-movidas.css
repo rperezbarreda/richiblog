@@ -225,6 +225,41 @@
     line-height: 1.6;
 }
 
+/* Las capturas de una ficha (la pantalla de máster): miniaturas en
+   rejilla; al pulsar, el visor las enseña en grande y se pasa de una
+   a otra (ver visor-imagenes.js, data-visor-grupo). */
+.portfolio-card-galeria {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    gap: 8px;
+    margin: 0 0 16px;
+    padding: 0;
+    list-style: none;
+}
+
+.portfolio-card-captura {
+    display: block;
+    width: 100%;
+    padding: 0;
+    border: 2px solid var(--yellow);
+    background: var(--purple-lighter);
+    cursor: zoom-in;
+}
+
+.portfolio-card-captura img {
+    display: block;
+    width: 100%;
+    height: auto;
+    aspect-ratio: 16 / 9;
+    object-fit: cover;
+}
+
+.portfolio-card-captura:hover,
+.portfolio-card-captura:focus-visible {
+    outline: 3px solid var(--yellow);
+    outline-offset: 2px;
+}
+
 /* Los dos botones (Ko-fi + descarga gratis) van uno junto al otro,
    y se apilan si no caben en el ancho de la tarjeta. */
 .portfolio-card-actions {

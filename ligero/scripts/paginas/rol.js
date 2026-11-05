@@ -74,6 +74,7 @@ function tarjetaRol(ficha) {
         (descripcion
             ? `<p class="portfolio-card-desc">${escaparHtml(descripcion)}</p>`
             : "") +
+        galeriaRol(ficha, titulo) +
         (botones ? `<div class="portfolio-card-actions">${botones}</div>` : "") +
         "</div>" +
         "</div>"
@@ -88,6 +89,36 @@ function imagen(ficha, titulo) {
     return (
         `<img class="portfolio-card-photo" src="${escaparHtml(rutaSegura(ruta))}"` +
         ` alt="${alt}" loading="lazy">`
+    );
+}
+function galeriaRol(ficha, titulo) {
+    const fotos = (Array.isArray(ficha.galeria) ? ficha.galeria : []).filter(
+        (f) => f && typeof f === "object" && (f.imagen || "").trim()
+    );
+    if (!fotos.length) {
+        return "";
+    }
+    const items = fotos
+        .map((f) => {
+            const grande = escaparHtml(rutaSegura(f.imagen));
+            const peque = escaparHtml(rutaSegura(f.miniatura || f.imagen));
+            const alt = escaparHtml((f.alt || "").trim());
+            const pie = escaparHtml((f.pie || "").trim());
+            return (
+                "<li>" +
+                `<button class="lightbox-trigger portfolio-card-captura" type="button" data-completa="${grande}"` +
+                ` data-pie="${pie}">` +
+                `<img src="${peque}" alt="${alt}" loading="lazy" width="320" height="180">` +
+                `<span class="visually-hidden"> (ampliar)</span>` +
+                "</button>" +
+                "</li>"
+            );
+        })
+        .join("");
+    return (
+        `<ul class="portfolio-card-galeria" data-visor-grupo aria-label="Capturas de ${titulo}">` +
+        items +
+        "</ul>"
     );
 }
 function boton(enlace, texto, tituloEscapado, claseExtra) {

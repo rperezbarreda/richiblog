@@ -7,6 +7,56 @@
         "alt": "La pantalla de máster abierta en el tablero de combate: las pestañas de los tableros arriba y la ventana de iniciativa",
         "system": "D&D 5e (SRD 5.2) · Windows, macOS y Linux",
         "description": "Programa gratuito para dirigir partidas: tableros con ventanas que colocas a tu gusto (iniciativa, bestiario, conjuros, fichas de la party, música, sonido ambiente, generadores, notas…). Funciona sin conexión y todo se guarda en tu ordenador. Descomprime el .zip y ábrelo con doble clic.",
+        "galeria": [
+            {
+                "imagen": "/imagenes/mis_movidas/rol/pantalla_master/combate.webp",
+                "miniatura": "/imagenes/mis_movidas/rol/pantalla_master/combate-peque.webp",
+                "alt": "El tablero de combate: la iniciativa en la ronda 1 con la party y unos goblins (con sus casillas de acción, adicional y reacción), el bestiario buscando «goblin», las condiciones y la ventana de la pantalla de jugadores.",
+                "pie": "Combate"
+            },
+            {
+                "imagen": "/imagenes/mis_movidas/rol/pantalla_master/bestiario.webp",
+                "miniatura": "/imagenes/mis_movidas/rol/pantalla_master/bestiario-peque.webp",
+                "alt": "La ficha del capitán hobgoblin abierta desde el bestiario: sus ataques con los dados para tirarlos con un clic y los botones para meterlo en la iniciativa o dejarlo en el tablero.",
+                "pie": "Bestiario del SRD"
+            },
+            {
+                "imagen": "/imagenes/mis_movidas/rol/pantalla_master/party.webp",
+                "miniatura": "/imagenes/mis_movidas/rol/pantalla_master/party-peque.webp",
+                "alt": "El tablero de la party: la lista de personajes con sus PG, CA y PX, la tirada de grupo, el reparto de PX, la ficha de Ysolde Varn abierta y el inventario común.",
+                "pie": "La party"
+            },
+            {
+                "imagen": "/imagenes/mis_movidas/rol/pantalla_master/campana.webp",
+                "miniatura": "/imagenes/mis_movidas/rol/pantalla_master/campana-peque.webp",
+                "alt": "El mapa de relaciones (personajes, PNJ, una facción y un lugar unidos por líneas de colores: aliado, enemigo, familia…) junto a la línea temporal de la campaña, sesión a sesión.",
+                "pie": "Relaciones y línea temporal"
+            },
+            {
+                "imagen": "/imagenes/mis_movidas/rol/pantalla_master/jugadores.webp",
+                "miniatura": "/imagenes/mis_movidas/rol/pantalla_master/jugadores-peque.webp",
+                "alt": "La ventana para enseñar a los jugadores (en una tele, Discord u OBS): la iniciativa con a quién le toca y los PG de la party, sin los de los monstruos.",
+                "pie": "Pantalla de jugadores"
+            },
+            {
+                "imagen": "/imagenes/mis_movidas/rol/pantalla_master/generadores.webp",
+                "miniatura": "/imagenes/mis_movidas/rol/pantalla_master/generadores-peque.webp",
+                "alt": "El generador de dungeons con un mapa de una cripta de ocho salas numeradas, el de botín y el de nombres.",
+                "pie": "Generadores"
+            },
+            {
+                "imagen": "/imagenes/mis_movidas/rol/pantalla_master/tiendas.webp",
+                "miniatura": "/imagenes/mis_movidas/rol/pantalla_master/tiendas-peque.webp",
+                "alt": "Una tienda con su surtido al azar y sus precios, una taberna generada («El Cuervo Dorado», con su menú) y el conversor de monedas.",
+                "pie": "Tiendas y tabernas"
+            },
+            {
+                "imagen": "/imagenes/mis_movidas/rol/pantalla_master/musica.webp",
+                "miniatura": "/imagenes/mis_movidas/rol/pantalla_master/musica-peque.webp",
+                "alt": "El reproductor de música con sus carpetas (taberna, combate), fundido, aleatorio y la opción de bajar la música con los efectos, junto a los efectos de sonido y el sonido ambiente.",
+                "pie": "Música y sonido"
+            }
+        ],
         "descargas": [
             {
                 "texto": "Windows ↓",

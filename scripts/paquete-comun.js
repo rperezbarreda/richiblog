@@ -1471,6 +1471,11 @@ function tieneTextoFuera(enlace) {
 let lightboxOverlay = null;
 let lightboxImage = null;
 let lightboxLastTrigger = null;
+let lightboxGrupo = [];
+let lightboxPos = 0;
+let lightboxPie = null;
+let lightboxAnterior = null;
+let lightboxSiguiente = null;
 initializeLightbox();
 function initializeLightbox() {
     document.addEventListener("click", (event) => {
@@ -1484,8 +1489,14 @@ function initializeLightbox() {
         }
     });
     document.addEventListener("keydown", (event) => {
-        if (event.key === "Escape" && lightboxOverlay) {
+        if (!lightboxOverlay || lightboxOverlay.hidden) {
+            return;
+        }
+        if (event.key === "Escape") {
             closeLightbox();
+        } else if (lightboxGrupo.length > 1 && (event.key === "ArrowLeft" || event.key === "ArrowRight")) {
+            event.preventDefault();
+            moverLightbox(event.key === "ArrowLeft" ? -1 : 1);
         }
     });
 }
@@ -1507,8 +1518,29 @@ function ensureOverlay() {
     lightboxImage = document.createElement("img");
     lightboxImage.className = "lightbox-image";
     lightboxImage.alt = "";
+    lightboxAnterior = document.createElement("button");
+    lightboxAnterior.type = "button";
+    lightboxAnterior.className = "lightbox-paso lightbox-anterior";
+    lightboxAnterior.setAttribute("aria-label", "Imagen anterior");
+    lightboxAnterior.textContent = "‹";
+    lightboxAnterior.addEventListener("click", () => moverLightbox(-1));
+    lightboxSiguiente = document.createElement("button");
+    lightboxSiguiente.type = "button";
+    lightboxSiguiente.className = "lightbox-paso lightbox-siguiente";
+    lightboxSiguiente.setAttribute("aria-label", "Imagen siguiente");
+    lightboxSiguiente.textContent = "›";
+    lightboxSiguiente.addEventListener("click", () => moverLightbox(1));
+    lightboxPie = document.createElement("p");
+    lightboxPie.className = "lightbox-pie";
+    lightboxPie.setAttribute("aria-live", "polite");
+    const marco = document.createElement("div");
+    marco.className = "lightbox-marco";
+    marco.appendChild(lightboxImage);
+    marco.appendChild(lightboxPie);
     lightboxOverlay.appendChild(closeBtn);
-    lightboxOverlay.appendChild(lightboxImage);
+    lightboxOverlay.appendChild(lightboxAnterior);
+    lightboxOverlay.appendChild(marco);
+    lightboxOverlay.appendChild(lightboxSiguiente);
     document.body.appendChild(lightboxOverlay);
 }
 let lightboxInertados = [];
@@ -1533,16 +1565,44 @@ function openLightbox(trigger) {
         return;
     }
     ensureOverlay();
-    lightboxImage.src = imagenSeguraLightbox(
-        trigger.dataset.completa || img.currentSrc || img.src
-    );
-    lightboxImage.alt = img.alt || "";
+    const grupo = trigger.closest("[data-visor-grupo]");
+    lightboxGrupo = grupo ? Array.from(grupo.querySelectorAll(".lightbox-trigger")) : [trigger];
+    lightboxPos = Math.max(0, lightboxGrupo.indexOf(trigger));
+    const varias = lightboxGrupo.length > 1;
+    lightboxAnterior.hidden = !varias;
+    lightboxSiguiente.hidden = !varias;
+    ponerLightbox(trigger);
     lightboxOverlay.hidden = false;
     document.body.classList.add("lightbox-open");
     lightboxLastTrigger = trigger;
     setBackgroundInert(true);
     const closeBtn = lightboxOverlay.querySelector(".lightbox-close");
     closeBtn.focus();
+}
+function ponerLightbox(trigger) {
+    const img = trigger.querySelector("img");
+    if (!img) {
+        return;
+    }
+    lightboxImage.src = imagenSeguraLightbox(
+        trigger.dataset.completa || img.currentSrc || img.src
+    );
+    lightboxImage.alt = img.alt || "";
+    const pie = (trigger.dataset.pie || "").trim();
+    if (lightboxGrupo.length > 1) {
+        lightboxPie.textContent = lightboxPos + 1 + " de " + lightboxGrupo.length + (pie ? " · " + pie : "");
+    } else {
+        lightboxPie.textContent = pie;
+    }
+    lightboxPie.hidden = !lightboxPie.textContent;
+}
+function moverLightbox(paso) {
+    if (lightboxGrupo.length < 2) {
+        return;
+    }
+    lightboxPos = (lightboxPos + paso + lightboxGrupo.length) % lightboxGrupo.length;
+    lightboxLastTrigger = lightboxGrupo[lightboxPos];
+    ponerLightbox(lightboxLastTrigger);
 }
 function imagenSeguraLightbox(url) {
     const limpia = (url || "").toString().trim();
@@ -1559,6 +1619,7 @@ function closeLightbox() {
     setBackgroundInert(false);
     lightboxOverlay.hidden = true;
     lightboxImage.src = "";
+    lightboxGrupo = [];
     document.body.classList.remove("lightbox-open");
     if (lightboxLastTrigger) {
         lightboxLastTrigger.focus();
