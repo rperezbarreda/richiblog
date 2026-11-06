@@ -145,6 +145,13 @@ SITIOS = {
         "lado": 1200,
         "cuadrada": False,
     },
+    "recetas": {
+        "que": "la foto de una receta",
+        "carpeta": "imagenes/mis_movidas/recetas",
+        "sufijo": "",
+        "lado": 1200,
+        "cuadrada": False,
+    },
     # Mis personajes (mis OC): todo lo de cada uno en su carpeta.
     "oc-token": {
         "que": "el redondel de uno de mis personajes (el índice)",

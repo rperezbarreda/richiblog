@@ -1,0 +1,472 @@
+/* =========================================
+   LAS RECETAS (mis movidas → recetas)
+   =========================================
+   El índice (index_recetas.html: buscador, filtros y una tarjeta por
+   receta) y la página de cada una. Las dos las escribe
+   herramientas/3-generadores/generar-recetas.py. Los colores, siempre de
+   las variables del tema; los recuadros, con su barra de título de
+   ventana (como los de la portada o mis personajes). */
+
+/* La página: una columna que se desplaza, como la de mis personajes. */
+.receta-page {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    justify-content: flex-start;
+    gap: 22px;
+    overflow-y: auto;
+    padding: 24px 4%;
+}
+
+.receta-page > * {
+    flex: none;
+}
+
+.receta-cabecera {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+    max-width: 60rem;
+}
+
+.receta-page .home-title {
+    margin: 0;
+    font-size: clamp(2.75rem, 5vw, 4.5rem);
+    line-height: 1.05;
+    letter-spacing: -2px;
+    overflow-wrap: break-word;
+}
+
+/* El de una receta, en minúsculas no: es un nombre («Tortilla de
+   patatas»), y un poco más pequeño, que suelen ser largos. */
+.receta-page .receta-titulo {
+    font-size: clamp(2.25rem, 4.2vw, 3.75rem);
+    text-transform: none;
+    letter-spacing: -1px;
+}
+
+.receta-intro,
+.receta-desc {
+    margin: 0;
+    max-width: 48rem;
+    color: var(--white);
+    font-size: 1rem;
+    line-height: 1.6;
+}
+
+.receta-fecha {
+    margin: 0;
+    color: var(--muted);
+    font-family: var(--fuente-mono);
+    font-size: 0.85rem;
+}
+
+.receta-volver {
+    align-self: flex-start;
+    color: var(--yellow);
+    font-family: var(--fuente-mono);
+    font-size: 0.9rem;
+}
+
+.receta-volver:hover,
+.receta-volver:focus-visible {
+    color: var(--white);
+}
+
+.receta-vacio {
+    color: var(--white);
+}
+
+/* ---- Las etiquetas (chapitas) ---- */
+.receta-etiquetas {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.receta-etiquetas li {
+    padding: 2px 8px;
+    border: 1px solid var(--yellow);
+    color: var(--yellow);
+    font-family: var(--fuente-mono);
+    font-size: 0.8rem;
+}
+
+/* En la página de una receta, cada chapita lleva al índice ya filtrado. */
+.receta-etiquetas.es-enlaces li {
+    padding: 0;
+}
+
+.receta-etiquetas.es-enlaces a {
+    display: block;
+    padding: 2px 8px;
+    color: inherit;
+    text-decoration: none;
+}
+
+.receta-etiquetas.es-enlaces a:hover,
+.receta-etiquetas.es-enlaces a:focus-visible {
+    background: var(--yellow);
+    color: var(--yellow-contrast);
+}
+
+/* =========================================
+   EL ÍNDICE: la rejilla de tarjetas
+   ========================================= */
+.receta-rejilla {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 17rem), 1fr));
+    gap: 22px;
+    margin: 0;
+    padding: 0 6px 6px 0;
+    list-style: none;
+}
+
+.receta-celda[hidden] {
+    display: none;
+}
+
+.receta-tarjeta {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    background: var(--purple-lighter);
+    border: 3px solid var(--yellow);
+    box-shadow: 6px 6px 0 var(--yellow);
+}
+
+.receta-tarjeta-foto {
+    display: block;
+    width: 100%;
+    height: auto;
+    aspect-ratio: 3 / 2;
+    object-fit: cover;
+    border-bottom: 3px solid var(--yellow);
+    background: var(--purple);
+}
+
+.receta-tarjeta-foto.es-sin-foto {
+    display: grid;
+    place-items: center;
+    font-size: 3rem;
+}
+
+.receta-tarjeta-texto {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 12px 14px 14px;
+}
+
+.receta-tarjeta-titulo {
+    margin: 0;
+    font-family: var(--fuente-texto);
+    font-size: 1.25rem;
+    font-style: italic;
+    font-weight: 500;
+    line-height: 1.25;
+}
+
+/* Toda la tarjeta se pulsa: el enlace del título se estira por encima. */
+.receta-tarjeta-titulo a {
+    color: var(--yellow);
+    text-decoration: none;
+}
+
+.receta-tarjeta-titulo a::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+}
+
+.receta-tarjeta:hover,
+.receta-tarjeta:focus-within {
+    outline: 3px solid var(--white);
+    outline-offset: 3px;
+}
+
+.receta-tarjeta-titulo a:focus-visible {
+    outline: none;
+}
+
+.receta-tarjeta-datos {
+    margin: 0;
+    color: var(--white);
+    font-family: var(--fuente-mono);
+    font-size: 0.8rem;
+}
+
+.receta-tarjeta-desc {
+    margin: 0;
+    color: var(--white);
+    font-size: 0.95rem;
+    line-height: 1.5;
+}
+
+/* =========================================
+   UNA RECETA
+   ========================================= */
+
+/* Arriba, la foto y al lado los datos (tiempos, raciones…). */
+.receta-arriba {
+    display: grid;
+    grid-template-columns: minmax(0, 3fr) minmax(16rem, 2fr);
+    gap: 22px;
+    align-items: start;
+    max-width: 72rem;
+}
+
+.receta-arriba.es-sin-foto {
+    grid-template-columns: minmax(0, 32rem);
+}
+
+.receta-foto {
+    display: block;
+    width: 100%;
+    padding: 0;
+    border: 3px solid var(--yellow);
+    box-shadow: 6px 6px 0 var(--yellow);
+    background: var(--purple);
+    cursor: zoom-in;
+}
+
+.receta-foto img {
+    display: block;
+    width: 100%;
+    height: auto;
+    aspect-ratio: 3 / 2;
+    object-fit: cover;
+}
+
+.receta-foto:focus-visible {
+    outline: 3px solid var(--white);
+    outline-offset: 4px;
+}
+
+/* Los ingredientes y los pasos, uno al lado del otro (en el móvil, uno
+   debajo del otro: recetas.responsive.css). */
+.receta-columnas {
+    display: grid;
+    grid-template-columns: minmax(16rem, 2fr) minmax(0, 3fr);
+    gap: 22px;
+    align-items: start;
+    max-width: 72rem;
+}
+
+/* ---- Los recuadros con barra de ventana ----
+   Son <section> (cada uno con su título): base.css les da a todas alto
+   entero, desplazamiento propio y un relleno enorme, que aquí no van. */
+.receta-ventana {
+    height: auto;
+    overflow: visible;
+    display: block;
+    padding: 0;
+    max-width: 72rem;
+    background: var(--purple-lighter);
+    border: 3px solid var(--yellow);
+    box-shadow: 6px 6px 0 var(--yellow);
+}
+
+.receta-ventana-barra {
+    position: relative;
+    /* El hueco de la derecha, para los −■✕ (como .recent-entries-header). */
+    padding: 10px 3.7rem 8px 14px;
+    background: var(--purple);
+    border-bottom: 2px solid var(--yellow);
+    color: var(--yellow);
+    font-family: var(--fuente-ventana);
+}
+
+.receta-ventana-barra h2 {
+    margin: 0;
+    font: inherit;
+    font-size: 1.05rem;
+    color: inherit;
+    overflow-wrap: anywhere;
+}
+
+.receta-ventana-cuerpo {
+    padding: 14px 16px 16px;
+    color: var(--white);
+}
+
+.receta-grupo {
+    margin: 14px 0 6px;
+    color: var(--yellow);
+    font-family: var(--fuente-mono);
+    font-size: 0.95rem;
+    font-weight: 700;
+}
+
+.receta-grupo:first-child {
+    margin-top: 0;
+}
+
+/* Los datos: cada uno en su línea, con su emoji. */
+.receta-datos {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    line-height: 1.4;
+}
+
+.receta-dato-que {
+    color: var(--yellow);
+    font-family: var(--fuente-mono);
+    font-size: 0.9rem;
+}
+
+.receta-datos .es-total {
+    padding-top: 8px;
+    border-top: 1px dashed var(--yellow);
+    font-weight: 700;
+}
+
+/* ---- Los ingredientes, con su casilla ---- */
+.receta-marcas {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    margin: 0 0 10px;
+}
+
+.receta-marcas[hidden] {
+    display: none;
+}
+
+.receta-marcas-cuenta {
+    margin: 0;
+    color: var(--yellow);
+    font-family: var(--fuente-mono);
+    font-size: 0.85rem;
+}
+
+.receta-boton {
+    min-height: 36px;
+    padding: 4px 12px;
+    border: 2px solid var(--yellow);
+    background: transparent;
+    color: var(--yellow);
+    font-family: var(--fuente-mono);
+    font-size: 0.85rem;
+    cursor: pointer;
+}
+
+.receta-boton[hidden] {
+    display: none;
+}
+
+.receta-boton:hover,
+.receta-boton:focus-visible {
+    background: var(--yellow);
+    color: var(--yellow-contrast);
+}
+
+.receta-boton:focus-visible {
+    outline: 2px solid var(--white);
+    outline-offset: 2px;
+}
+
+.receta-ayuda {
+    margin: 0 0 10px;
+    color: var(--muted);
+    font-size: 0.85rem;
+}
+
+.receta-ingredientes {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.receta-ingrediente {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 6px 0;
+    border-bottom: 1px dashed var(--border);
+    line-height: 1.45;
+    cursor: pointer;
+}
+
+.receta-ingrediente input {
+    flex: none;
+    width: 1.15rem;
+    height: 1.15rem;
+    margin: 0.15rem 0 0;
+    accent-color: var(--yellow);
+    cursor: pointer;
+}
+
+.receta-ingrediente input:focus-visible {
+    outline: 2px solid var(--yellow);
+    outline-offset: 2px;
+}
+
+/* Marcado: tachado y más apagado (pero se sigue leyendo). */
+.receta-ingrediente input:checked + span {
+    color: var(--muted);
+    text-decoration: line-through;
+}
+
+/* ---- Los pasos, numerados en grande ---- */
+.receta-pasos {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    counter-reset: paso;
+}
+
+.receta-pasos li {
+    position: relative;
+    padding: 0 0 14px 2.6rem;
+    line-height: 1.6;
+    counter-increment: paso;
+}
+
+.receta-pasos li::before {
+    content: counter(paso);
+    position: absolute;
+    top: 0;
+    left: 0;
+    display: grid;
+    place-items: center;
+    width: 1.9rem;
+    height: 1.9rem;
+    background: var(--yellow);
+    color: var(--yellow-contrast);
+    font-family: var(--fuente-mono);
+    font-weight: 700;
+    line-height: 1;
+}
+
+/* ---- Las notas (markdown) ---- */
+.receta-notas {
+    line-height: 1.6;
+}
+
+.receta-notas > * + * {
+    margin-top: 0.8em;
+}
+
+.receta-notas > :first-child {
+    margin-top: 0;
+}
+
+.receta-notas > :last-child {
+    margin-bottom: 0;
+}
+
+.receta-notas a {
+    color: var(--yellow);
+}

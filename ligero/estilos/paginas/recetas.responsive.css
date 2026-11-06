@@ -1,0 +1,17 @@
+/* Copia sin comentarios. La escribe actualizar-cabeceras.py: no se edita.
+   fuente: /estilos/paginas/recetas.responsive.css
+*/
+@media (max-width: 900px) {
+    .receta-arriba,
+    .receta-columnas {
+        grid-template-columns: minmax(0, 1fr);
+    }
+}
+@media (max-width: 480px) {
+    .receta-page {
+        padding: 16px 16px 24px;
+    }
+    .receta-pasos li {
+        padding-left: 2.3rem;
+    }
+}

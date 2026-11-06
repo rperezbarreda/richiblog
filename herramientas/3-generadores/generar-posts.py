@@ -76,6 +76,7 @@ from comun import (
     escribir_texto,
     leer_texto,
     limpiar_html,
+    nombre_archivo,
     paginas,
     sin_tildes,
     url_de,
@@ -86,6 +87,10 @@ NOTAS_ROL = RAIZ / "web" / "notas_rol"
 JSON_ROL = RAIZ / "datos" / "mis_movidas" / "rol.json"
 JSON_BLOG = RAIZ / "datos" / "blog" / "entradas-blog.json"
 JSON_MOVIDAS = RAIZ / "datos" / "mis_movidas" / "mis-movidas.json"
+# Las recetas: su JSON lo rellena el editor y sus páginas las escribe
+# generar-recetas.py. Aquí solo se recogen para que salgan en la portada
+# (novedades) y en el RSS, como un relato más.
+JSON_RECETAS = RAIZ / "datos" / "mis_movidas" / "recetas.json"
 # Las notas de las partidas de rol van en su propio listado y NO en
 # mis-movidas.json, a propósito: ese es el que leen la portada
 # (novedades.exe) y el listado de relatos, y las notas de una partida no
@@ -586,6 +591,42 @@ def recoger_notas_rol():
     return entradas, avisos
 
 
+def recoger_recetas():
+    """Las recetas publicadas, con la misma forma que un relato: van a la
+    portada y al RSS con la categoría «recetas» y su tipo (postre,
+    entrante…) de subcategoría. Sin fecha no salen (no se sabría dónde
+    ponerlas), pero se avisa."""
+    entradas, avisos = [], []
+    if not JSON_RECETAS.is_file():
+        return entradas, avisos
+    try:
+        datos = json.loads(JSON_RECETAS.read_text(encoding="utf-8"))
+    except json.JSONDecodeError as error:
+        return entradas, [(JSON_RECETAS, [f"no entiendo el JSON: {error}"])]
+
+    for r in (datos.get("recetas") if isinstance(datos, dict) else None) or []:
+        if not isinstance(r, dict):
+            continue
+        titulo = (r.get("titulo") or "").strip()
+        clave = nombre_archivo(str(r.get("clave") or titulo), "")
+        fecha = (r.get("fecha") or "").strip()
+        if not titulo or not clave:
+            continue
+        if len(fecha.split("-")) != 3:
+            avisos.append((JSON_RECETAS, [f"[{titulo}] falta o no entiendo la fecha, que va en dd-mm-aaaa (encontré: {fecha!r})"]))
+            continue
+        entradas.append(
+            {
+                "title": titulo,
+                "category": "recetas",
+                "subcategory": (r.get("tipo") or "").strip(),
+                "date": fecha,
+                "url": f"/web/mis_movidas/recetas/{clave}.html",
+            }
+        )
+    return entradas, avisos
+
+
 def recoger_movidas():
     entradas, avisos = [], []
     for ruta in paginas(RELATOS, "*.html"):
@@ -619,9 +660,10 @@ def recoger_movidas():
         poner_hueco_de_voz(ruta, "relato", PROBAR[0])
 
     rol, avisos_rol = recoger_rol()
-    todas = rol + entradas
+    recetas, avisos_recetas = recoger_recetas()
+    todas = rol + recetas + entradas
     todas.sort(key=clave_orden)
-    return todas, avisos + avisos_rol, len(rol)
+    return todas, avisos + avisos_rol + avisos_recetas, len(rol)
 
 
 def comparar(destino, datos):

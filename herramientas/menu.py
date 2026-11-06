@@ -76,15 +76,18 @@ APARTADOS = [
         editor("escribir", "Escribir como en un Word, seguir con una ya hecha y publicarla."),
     ]),
 
-    ("Mis movidas", "relatos y el reto de escritura", [
+    ("Mis movidas", "relatos, el reto de escritura y las recetas", [
         ("Escribir un relato",
          "1-publicar/nuevo.py", ["--relato"],
          "Igual que una entrada, pero va a mis movidas."),
         ("Escribir un día del reto de escritura",
          "1-publicar/nuevo.py", ["--reto"],
          "Coge el siguiente día que falte, con su palabra."),
+        ("Pasar mis recetas a la web",
+         "3-generadores/generar-recetas.py", [],
+         "Rehace el índice y la página de cada una desde datos/mis_movidas/recetas.json (se escriben con el editor)."),
         PUBLICAR,
-        editor("escribir", "Relatos y días del reto, escritos como en un Word."),
+        editor("escribir", "Relatos, días del reto y recetas, escritos como en un Word."),
     ]),
 
     ("Rol", "las campañas, los NPC, el botín y los recursos", [

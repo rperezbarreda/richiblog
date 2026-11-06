@@ -1,0 +1,21 @@
+/* =========================================
+   LAS RECETAS: pantallas estrechas
+   =========================================
+   La foto encima de los datos y los ingredientes encima de los pasos. */
+
+@media (max-width: 900px) {
+    .receta-arriba,
+    .receta-columnas {
+        grid-template-columns: minmax(0, 1fr);
+    }
+}
+
+@media (max-width: 480px) {
+    .receta-page {
+        padding: 16px 16px 24px;
+    }
+
+    .receta-pasos li {
+        padding-left: 2.3rem;
+    }
+}

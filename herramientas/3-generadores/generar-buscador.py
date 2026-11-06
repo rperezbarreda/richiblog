@@ -235,6 +235,8 @@ def seccion_de(url):
         return "relatos"
     if url.startswith("/web/mis_movidas/rol/"):
         return "rol"
+    if url.startswith("/web/mis_movidas/recetas/"):
+        return "recetas"
     if url.startswith("/web/notas_rol/"):
         return "notas de rol"
     # Mis personajes: aparte de las campañas y de la wiki.

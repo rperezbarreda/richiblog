@@ -388,6 +388,7 @@
               quitar-comentarios.py lo de las plantillas, fuera de lo publicado
               generar-mundo.py      la wiki del mundo y sus mapas
               generar-personajes.py mis personajes (el índice y la ficha de cada uno)
+              generar-recetas.py    las recetas (el índice y la página de cada una)
               generar-linea-tiempo.py  la línea de tiempo de la wiki
               actualizar-cabeceras.py
 
@@ -673,6 +674,52 @@
 
   Los retos viejos se quedan como están: siguen saliendo en el
   listado y en su filtro.
+
+
+  LAS RECETAS
+
+  Mis movidas → recetas. Se escriben desde el editor: Escribir → «Las
+  recetas» → Añadir. Al guardar se pasa todo solo (las páginas, la
+  portada, el RSS, el sitemap, el buscador y las cabeceras).
+
+  Dónde está cada cosa:
+      datos/mis_movidas/recetas.json     lo que se escribe (el editor)
+      web/mis_movidas/recetas/           lo que sale (NO se toca a mano:
+                                         lo reescribe generar-recetas.py)
+      imagenes/mis_movidas/recetas/      las fotos («Subir una» las deja
+                                         aquí, a 1200px y en WebP)
+      herramientas/plantillas/receta.html y recetas-index.html
+      estilos/paginas/recetas(.responsive).css, scripts/paginas/recetas.js
+
+  Sin el editor:  python3 herramientas/3-generadores/generar-recetas.py
+  (y luego los generadores de siempre, para la portada y el RSS).
+
+  CÓMO SE ESCRIBE UNA:
+      - Ingredientes y pasos, uno por línea. Una línea «## Para la
+        masa» encima de unos los agrupa con ese título.
+      - Los tiempos (preparación, cocción, reposo) van en minutos; la
+        página los pone bonitos («1 h 15 min») y suma el total.
+      - Notas: con formato (markdown), como la wiki.
+      - El nombre del archivo se pone solo la primera vez, del nombre
+        de la receta, y ya no cambia aunque la renombres: así no se
+        rompe ningún enlace. Si lo cambias tú, la página vieja se queda
+        y generar-recetas.py te avisa para que la borres.
+
+  LOS FILTROS: cada receta sale en el de su tipo de plato y en los de
+  sus etiquetas (separadas por comas). La de «rápida» se pone sola si
+  en total no pasa de 30 minutos (RAPIDA, arriba de generar-recetas.py).
+  Las etiquetas de la página de una receta llevan al índice ya
+  filtrado (?cat=…). El buscador del índice mira el nombre, la
+  descripción, las etiquetas y los ingredientes.
+
+  MARCAR INGREDIENTES: cada ingrediente lleva su casilla. Lo marcado
+  se queda tachado y se acuerda en ese navegador (localStorage,
+  «richi-receta-<archivo>»), con «desmarcar todo». Sin JavaScript se
+  marcan igual, solo que no se acuerdan.
+
+  Cada receta sale en la portada (novedades) y en el RSS como una
+  entrada más de mis movidas, con la categoría «recetas» y su tipo de
+  subcategoría. Para Google lleva sus datos de receta (JSON-LD).
 
 
   SUBIR FOTOS DE LOS GATOS

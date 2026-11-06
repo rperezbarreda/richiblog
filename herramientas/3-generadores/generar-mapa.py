@@ -93,7 +93,7 @@ CARPETAS_EXCLUIDAS = {"herramientas", "fragmentos"}
 # El orden en que salen las secciones en la tabla. Lo que no esté aquí
 # va al final, por orden alfabético.
 ORDEN_SECCIONES = [
-    "portada", "blog", "relatos", "rol", "notas de rol", "mis personajes", "wiki cralëa",
+    "portada", "blog", "relatos", "rol", "recetas", "notas de rol", "mis personajes", "wiki cralëa",
     "santuarios", "recomendaciones", "otras",
 ]
 
@@ -133,6 +133,8 @@ def seccion_de(url):
         return "relatos"
     if url.startswith("/web/mis_movidas/rol/"):
         return "rol"
+    if url.startswith("/web/mis_movidas/recetas/"):
+        return "recetas"
     # El portfolio de rol (lo que se publica) y las notas de las partidas
     # (lo que se juega) son dos cosas distintas y van en secciones
     # distintas, aunque las dos sean de rol.

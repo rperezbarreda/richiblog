@@ -24,7 +24,7 @@ const estadoFichas = { colecciones: [], campanas: [], sitios: [], col: null, id:
 // lee el título). Una nueva sin emoji aquí sale con 📋.
 const EMOJIS_DE_COLECCIONES = {
     rol: "🎒", npcs: "👥", campana: "📜", misiones: "📌", botin: "🗡️", dinero: "💰", personajes: "🧙",
-    recomendaciones: "⭐", "en-lo-que-ando": "📝", gatos: "🐱", reto: "🗓️", calendario: "📆", linea: "⏳",
+    recomendaciones: "⭐", "en-lo-que-ando": "📝", gatos: "🐱", reto: "🗓️", recetas: "🍳", calendario: "📆", linea: "⏳",
     diccionario: "🔤", "compendio-conjuros": "✨", "compendio-objetos": "🎁", "compendio-rasgos": "🧬",
     "compendio-acciones": "⚔️", "reglas-dnd": "📚",
 };

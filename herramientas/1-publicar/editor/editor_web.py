@@ -1796,6 +1796,47 @@ def colecciones():
                      "titulo": "Las fotos", "nombre_de": "alt", "detalle": ["archivo"], "campos": [
                          C("_grupo", "De quién", "ver"), C("archivo", "La foto", "ver", foto=True),
                          C("alt", "Descripción", "largo")]}]},
+        {"id": "recetas", "apartado": "escribir", "corto": "Mis recetas de cocina.", "titulo": "Las recetas",
+         "ayuda": "Las recetas de mis movidas → recetas: cada una con su página (ingredientes que se marcan, pasos"
+                  " y notas) y su tarjeta en el índice, con sus filtros. Lo último, arriba.",
+         "archivo": "datos/mis_movidas/recetas.json", "despues": "recetas",
+         "partes": [
+             {"id": "datos", "tipo": "objeto", "camino": [], "titulo": "La página de las recetas", "campos": [
+                 C("titulo", "Título", ayuda="El de arriba del índice: «recetas»."),
+                 C("intro", "La entradilla", "largo")]},
+             {"id": "recetas", "camino": ["recetas"], "titulo": "Las recetas", "nombre_de": "titulo",
+              "detalle": ["tipo", "fecha"], "nuevas_arriba": True, "campos": [
+                  C("titulo", "Nombre", obligatorio=True, ayuda="«Tortilla de patatas»."),
+                  C("clave", "Nombre del archivo",
+                    ayuda="Se pone solo al guardar, del nombre (tortilla-de-patatas.html), y ya no cambia aunque"
+                          " cambies el nombre. Si lo cambias tú, la página vieja se queda: bórrala a mano."),
+                  C("fecha", "Fecha de publicación", "fecha", obligatorio=True, hoy=True),
+                  C("tipo", "Tipo de plato", "elegir", libre=True,
+                    opciones=_opciones(["Postre", "Plato principal", "Entrante", "Guarnición", "Desayuno",
+                                        "Salsa", "Bebida", "Pan y masas"]),
+                    ayuda="Uno de estos o uno nuevo: sale su botón en los filtros."),
+                  C("etiquetas", "Etiquetas", vacio="quitar",
+                    ayuda="Separadas por comas: «vegetariana, sin gluten, de horno». Más botones de filtro. La de"
+                          " «rápida» se pone sola si en total no pasa de 30 minutos."),
+                  C("descripcion", "Descripción", "largo", ayuda="Una o dos frases: sale en la tarjeta y arriba."),
+                  C("imagen", "Foto", "imagen", sitio="recetas", siempre=True),
+                  C("imagen_alt", "Descripción de la foto", ayuda="Para quien no la ve.", siempre=True),
+                  C("raciones", "Raciones", vacio="quitar", ayuda="«4 personas», «12 galletas»."),
+                  C("preparacion", "Preparación (minutos)", "numero", minimo=0, vacio="quitar"),
+                  C("coccion", "Cocción (minutos)", "numero", minimo=0, vacio="quitar"),
+                  C("reposo", "Reposo (minutos)", "numero", minimo=0, vacio="quitar",
+                    ayuda="Nevera, levado… Cuenta en el total."),
+                  C("dificultad", "Dificultad", "elegir", vacio="quitar",
+                    opciones=[["", "—"], ["Fácil", "Fácil"], ["Media", "Media"], ["Difícil", "Difícil"]]),
+                  C("origen", "De dónde viene", vacio="quitar", ayuda="«De mi abuela», «Del libro de…»."),
+                  C("ingredientes", "Ingredientes", "lineas", obligatorio=True,
+                    ayuda="Uno por línea: «200 g de harina». Una línea «## Para la masa» encima de unos los agrupa."),
+                  C("pasos", "Pasos", "lineas", obligatorio=True,
+                    ayuda="Uno por línea, en orden (se numeran solos). También valen los «## …»."),
+                  C("notas", "Notas", "largo", vacio="quitar",
+                    ayuda="Con formato (markdown): trucos, variantes, cómo se guarda…"),
+              ]},
+         ]},
         {"id": "reto", "apartado": "escribir", "corto": "Una palabra para cada día.", "titulo": "Las palabras del reto",
          "ayuda": "Una palabra para cada día. Lo escrito de cada día se abre desde «Escribir».",
          "archivo": "datos/mis_movidas/reto-writeober26.json", "despues": "generadores",
@@ -2240,6 +2281,8 @@ def _mezclar_partes(col, archivo, datos, llegan):
         lista[:] = nuevas
     if col["id"] == "personajes":
         _arreglar_personajes(datos)
+    if col["id"] == "recetas":
+        _arreglar_recetas(datos)
     if col["id"] == "misiones":
         # Una misión cerrada (completada o fallada) sin decir en qué
         # sesión: en la última que haya, que es casi siempre la de
@@ -2306,6 +2349,23 @@ def _arreglar_evento_del_calendario(datos, evento):
 
 def _clave_oc(p):
     return nombre_archivo(str(p.get("clave") or p.get("nombre") or ""), "")
+
+
+def _arreglar_recetas(datos):
+    """Cada receta con su nombre de archivo, sin repetir. Se apunta la
+    primera vez (sale del nombre) y ya no cambia aunque se cambie el
+    nombre: así no se rompen los enlaces que ya haya a su página."""
+    vistas = set()
+    for r in datos.get("recetas") or []:
+        if not isinstance(r, dict):
+            continue
+        clave = nombre_archivo(str(r.get("clave") or r.get("titulo") or ""), "")
+        if not clave:
+            raise ValueError("«%s» necesita un nombre con alguna letra" % (r.get("titulo") or "?"))
+        if clave == "index_recetas" or clave in vistas:
+            raise ValueError("hay dos recetas con el archivo «%s»: cámbiale el nombre del archivo a una" % clave)
+        vistas.add(clave)
+        r["clave"] = clave
 
 
 def _arreglar_personajes(datos):
@@ -2551,6 +2611,11 @@ def pasos_despues(que):
     if que == "personajes":
         return [paso(s) for s in ("3-generadores/generar-personajes.py", "3-generadores/quitar-comentarios.py",
                                   "3-generadores/generar-sitemap.py", "3-generadores/generar-buscador.py",
+                                  "3-generadores/actualizar-cabeceras.py")]
+    if que == "recetas":
+        return [paso(s) for s in ("3-generadores/generar-recetas.py", "3-generadores/generar-posts.py",
+                                  "3-generadores/generar-rss.py", "3-generadores/generar-sitemap.py",
+                                  "3-generadores/generar-buscador.py", "3-generadores/generar-mapa.py",
                                   "3-generadores/actualizar-cabeceras.py")]
     if que == "mundo":
         return [paso("3-generadores/generar-mundo.py"), paso("3-generadores/actualizar-cabeceras.py")]

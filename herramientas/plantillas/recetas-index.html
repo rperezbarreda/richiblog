@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-aDtzI6QgHfitL7afCewTh/rpYprDOJvupEIYVZKPk8Y='; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self' https://script.google.com https://script.googleusercontent.com; object-src 'none'; base-uri 'self'; form-action 'self'">
+    <!-- ==== TEMA ==== -->
+    <meta name="theme-color" content="#12091c">
+    <script>
+      (function () {
+        document.documentElement.classList.add("js");
+        try {
+          var temas = {
+            "claro": ["light", "#f3e1d6"],
+            "oscuro-puro": ["puro-oscuro", "#000000"],
+            "claro-puro": ["puro-claro", "#ffffff"],
+            "tranquilo": ["tranquilo", "#f2efe9"],
+            "tranquilo-oscuro": ["tranquilo-oscuro", "#1b1e22"],
+            "terminal-verde": ["terminal-verde", "#000000"],
+            "terminal-azul": ["terminal-azul", "#000000"],
+            "terminal-rojo": ["terminal-rojo", "#000000"],
+            "terminal-ambar": ["terminal-ambar", "#000000"]
+          };
+          var guardado = localStorage.getItem("richi-theme");
+          var elegido = temas[guardado];
+          if (!elegido && !guardado &&
+              window.matchMedia("(prefers-color-scheme: light)").matches) {
+            elegido = temas.claro;
+          }
+          if (elegido) {
+            document.documentElement.setAttribute("data-theme", elegido[0]);
+            var barra = document.querySelector('meta[name="theme-color"]');
+            if (barra) { barra.setAttribute("content", elegido[1]); }
+          }
+          if (localStorage.getItem("richi-lateral") === "plegada") {
+            document.documentElement.classList.add("lateral-plegada");
+          }
+        } catch (e) {}
+      })();
+    </script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{TITULO}} · El Blog de Richi</title>
+    <meta name="description" content="{{DESCRIPCION}}">
+    <link rel="canonical" href="https://richi.blog{{URL}}">
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="El Blog de Richi">
+    <meta property="og:locale" content="es_ES">
+    <meta property="og:title" content="{{TITULO}} · El Blog de Richi">
+    <meta property="og:description" content="{{DESCRIPCION}}">
+    <meta property="og:url" content="https://richi.blog{{URL}}">
+    <meta property="og:image" content="https://richi.blog{{IMAGEN_OG}}">
+    <meta property="og:image:alt" content="{{IMAGEN_OG_ALT}}">
+    <meta name="twitter:card" content="summary_large_image">
+    <link rel="icon" type="image/x-icon" href="/imagenes/favicon.ico">
+    <link rel="preload" href="/tipografias/space-grotesk-400.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="alternate" type="application/rss+xml" title="El Blog de Richi — blog, relatos y rol" href="/blog/rss.xml">
+    <!-- ==== CSS ==== -->
+    <link rel="stylesheet" href="/estilos/paquete-comun.css?v=458b08aa">
+    <link rel="stylesheet" href="/ligero/estilos/paginas/recetas.css?v=73ea7777">
+    <link rel="stylesheet" href="/ligero/estilos/paginas/recetas.responsive.css?v=a38f04cc">
+    <link rel="stylesheet" href="/ligero/estilos/componentes/filtros.css?v=64cb8685">
+    <link rel="stylesheet" href="/ligero/estilos/componentes/filtros.responsive.css?v=f999e952">
+    <link rel="stylesheet" href="/ligero/estilos/componentes/buscador.css?v=8425040e">
+    <link rel="stylesheet" href="/estilos/paquete-cierre.css?v=a49d87f4">
+    <!-- ==== fin del CSS ==== -->
+    <script src="/ligero/scripts/cargador-scripts.js?v=e69e8da3"></script>
+    <!-- ==== JS ==== -->
+    <script defer src="/scripts/paquete-comun.js?v=f59810b3"></script>
+    <script defer src="/ligero/scripts/componentes/buscador.js?v=4107f902"></script>
+    <script defer src="/ligero/scripts/componentes/filtros.js?v=f742f6df"></script>
+    <!-- ==== fin del JS ==== -->
+  </head>
+<body>
+    <a class="skip-link" href="#main-content">Saltar al contenido</a>
+    <div id="sidebar-container"></div>
+
+    <main id="main-content">
+        <!-- LAS RECETAS (el índice). Lo escribe entero
+             herramientas/3-generadores/generar-recetas.py a partir de
+             datos/mis_movidas/recetas.json: lo que se toque aquí a mano se
+             pierde la próxima vez. Esta plantilla solo es el molde. -->
+        <section id="home" class="home receta-page">
+            <div class="receta-cabecera">
+                <h1 class="home-title">{{TITULO_H1}}</h1>
+                {{INTRO}}
+            </div>
+
+{{LISTA}}
+        </section>
+    </main>
+</body>
+</html>

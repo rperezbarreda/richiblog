@@ -4,7 +4,7 @@
 (function versionesDeArchivos() {
     const VERSIONES = {
         "/fragmentos/ajustes.html": "abbc4adc",
-        "/fragmentos/barra-lateral.html": "83ab1110",
+        "/fragmentos/barra-lateral.html": "de4ca773",
         "/fragmentos/buscar.html": "0172e5dd",
         "/fragmentos/frases.html": "2720019e",
         "/fragmentos/texto-a-voz.html": "5a69ce50",

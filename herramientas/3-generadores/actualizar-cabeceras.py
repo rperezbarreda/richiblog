@@ -96,6 +96,8 @@ PLANTILLAS = {
     "herramientas/plantillas/campana-rol.html": "/web/notas_rol/ragna/index_ragna.html",
     "herramientas/plantillas/personajes-index.html": "/web/personajes/index_personajes.html",
     "herramientas/plantillas/personaje.html": "/web/personajes/un-personaje/un-personaje.html",
+    "herramientas/plantillas/recetas-index.html": "/web/mis_movidas/recetas/index_recetas.html",
+    "herramientas/plantillas/receta.html": "/web/mis_movidas/recetas/una-receta.html",
 }
 
 # Carpetas que no son el sitio.
@@ -165,6 +167,8 @@ def hojas_de(ruta):
     es_santuarios = "/santuarios/" in ruta
     es_rol = "/mis_movidas/rol/" in ruta
     es_relatos = "/mis_movidas/relatos/" in ruta
+    # Las recetas: el índice (buscador y filtros) y cada receta.
+    es_recetas = "/mis_movidas/recetas/" in ruta
     # Las notas de las partidas de rol: el índice de una campaña y las
     # notas de cada partida. Las dos llevan la misma hoja, así que aquí no
     # hace falta distinguirlas (en scripts_de sí: el JavaScript solo lo
@@ -272,6 +276,19 @@ def hojas_de(ruta):
             "/estilos/componentes/filtros.responsive.css",
             "/estilos/componentes/buscador.css",
         ]
+    elif es_recetas:
+        hojas += [
+            "/estilos/paginas/recetas.css",
+            "/estilos/paginas/recetas.responsive.css",
+        ]
+        # El índice, con el buscador y los filtros de los relatos y el
+        # portfolio de rol.
+        if ruta.endswith("/index_recetas.html"):
+            hojas += [
+                "/estilos/componentes/filtros.css",
+                "/estilos/componentes/filtros.responsive.css",
+                "/estilos/componentes/buscador.css",
+            ]
     elif es_notas_rol:
         # Las dos páginas de una campaña (su índice y las notas de cada
         # partida) comparten hoja: tienen la mitad de las piezas en común
@@ -469,6 +486,8 @@ def scripts_de(ruta):
     es_diario = camino.endswith("/blog/diario")
     es_rol = "/mis_movidas/rol/" in camino
     es_lista_relatos = camino.endswith("/mis_movidas/relatos/index_relatos")
+    es_lista_recetas = camino.endswith("/mis_movidas/recetas/index_recetas")
+    es_receta = "/mis_movidas/recetas/" in camino and not es_lista_recetas
     # La página de un reto de escritura: una subcarpeta de relatos/ con
     # su propio index_. Se mira ANTES que es_lectura, que si no se la
     # traga (está dentro de relatos/ y no es el listado).
@@ -613,6 +632,15 @@ def scripts_de(ruta):
             "/scripts/componentes/filtros.js",
             "/scripts/paginas/rol.js",
         ]
+    elif es_lista_recetas:
+        # El buscador y los filtros (las tarjetas ya vienen escritas).
+        js += [
+            "/scripts/componentes/buscador.js",
+            "/scripts/componentes/filtros.js",
+        ]
+    elif es_receta:
+        # Las casillas de los ingredientes: recuerda las marcadas.
+        js.append("/scripts/paginas/recetas.js")
     elif es_lista_relatos:
         js += [
             "/scripts/componentes/buscador.js",

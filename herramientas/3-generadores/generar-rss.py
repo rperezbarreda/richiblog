@@ -108,6 +108,16 @@ def primer_parrafo(url, clase_cuerpo):
     return limpiar(parrafo.group(1)) if parrafo else ""
 
 
+def resumen_de_receta(url):
+    """La descripción de arriba de la página de una receta (la escribe
+    generar-recetas.py). Sin ella, el feed sale igual sin resumen."""
+    archivo = RAIZ / url.lstrip("/")
+    if not archivo.is_file():
+        return ""
+    desc = re.search(r'<p class="receta-desc">(.*?)</p>', archivo.read_text(encoding="utf-8"), re.S)
+    return limpiar(desc.group(1)) if desc else ""
+
+
 def descripciones_del_rol():
     """{título de la tarjeta: su descripción} leyendo index_rol.html."""
     if not ROL.is_file():
@@ -180,7 +190,9 @@ def cosas_de_mis_movidas():
             "guid": SITIO + url if propia else identificador(categoria, titulo, e["date"]),
             "guid_es_enlace": propia,
             "resumen": (
-                primer_parrafo(url, "relato-post-body")
+                resumen_de_receta(url)
+                if propia and categoria == "recetas"
+                else primer_parrafo(url, "relato-post-body")
                 if propia
                 else desc_rol.get(titulo, "")
             ),

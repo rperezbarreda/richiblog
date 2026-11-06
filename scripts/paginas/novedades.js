@@ -108,6 +108,7 @@ function parseItemDate(rawDate) {
 const PAGINAS_POR_CATEGORIA = {
     rol: "/web/mis_movidas/rol/index_rol.html",
     relatos: "/web/mis_movidas/relatos/index_relatos.html",
+    recetas: "/web/mis_movidas/recetas/index_recetas.html",
 };
 
 // Lo del portfolio de rol no tiene página aquí: lleva a Ko-fi o a
