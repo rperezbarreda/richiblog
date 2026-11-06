@@ -4330,6 +4330,8 @@
   negrita («**Los Äestere**») sale como título, y las negritas con el
   espacio por dentro («**Faëlar **nunca») se arreglan (texto_pegado;
   mundo_formato.py: arreglar_enfasis).
+  En «EXTRA», cada título (y lo que tiene debajo) SE PLIEGA pulsándolo;
+  empiezan abiertos (secciones_plegables; .oc-seccion en personajes.css).
   💬 FRASES: una por línea en «Frases suyas» (pestaña «frases y música»
   del editor), con «| cuándo la dijo» detrás; cada una en su tarjeta.
   🎨 INSPIRACIÓN: su MÚSICA (un enlace de Spotify por línea: canción,

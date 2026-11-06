@@ -2567,6 +2567,38 @@ a.oc-arbol-enlace:focus-visible {
     outline: 3px solid var(--yellow);
     outline-offset: 3px;
 }
+.oc-seccion + .oc-seccion,
+.oc-texto > p + .oc-seccion {
+    margin-top: 14px;
+}
+.oc-seccion-titulo {
+    display: flex;
+    align-items: baseline;
+    gap: 2px;
+    padding: 4px 0;
+    border-bottom: 2px solid var(--yellow);
+    list-style: none;
+    cursor: pointer;
+}
+.oc-seccion-titulo::-webkit-details-marker {
+    display: none;
+}
+.oc-texto .oc-seccion-nombre {
+    margin: 0;
+}
+.oc-seccion-titulo:hover .oc-seccion-nombre {
+    text-decoration: underline;
+}
+.oc-seccion-titulo:focus-visible {
+    outline: 2px solid var(--yellow);
+    outline-offset: 3px;
+}
+.oc-seccion[open] > .oc-seccion-titulo .oc-desplegable-flecha {
+    transform: rotate(90deg);
+}
+.oc-seccion-cuerpo {
+    padding-top: 10px;
+}
 .oc-texto a.oc-mencion {
     color: inherit;
     text-decoration: underline dotted var(--yellow);

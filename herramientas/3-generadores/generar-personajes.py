@@ -297,6 +297,27 @@ def texto_pegado(texto):
     return "\n".join(salida)
 
 
+def secciones_plegables(html_texto):
+    """Lo de «extra», por sus títulos («## El Bosque de Hadas», o una línea
+    que es solo una negrita): cada título con lo que tiene debajo se pliega
+    y se despliega pulsándolo (empiezan abiertas). Lo de antes del primer
+    título va suelto. Sin títulos, tal cual."""
+    trozos = re.split(r"(?=<h2[ >])", html_texto)
+    if len(trozos) < 2:
+        return html_texto
+    salida = [trozos[0]]
+    for trozo in trozos[1:]:
+        m = re.match(r"(<h2[^>]*>)(.*?)</h2>(.*)$", trozo, re.S)
+        if not m:
+            salida.append(trozo)
+            continue
+        salida.append('<details class="oc-seccion" open><summary class="oc-seccion-titulo">'
+                      '<span class="oc-desplegable-flecha" aria-hidden="true">▸</span>%s%s</h2></summary>'
+                      '<div class="oc-seccion-cuerpo">%s</div></details>'
+                      % (m.group(1).replace("<h2", '<h2 class="oc-seccion-nombre"', 1), m.group(2), m.group(3).strip()))
+    return "".join(salida)
+
+
 def con_menciones(html_texto, gente, yo):
     """En la historia, la PRIMERA vez que sale en negrita alguien de su
     gente («**Weslyria**», «**Maëzren Corbec**»), su nombre lleva a su
@@ -2432,7 +2453,7 @@ def pestanas(p, c, datos, personajes, avisos):
         "reglas": apartado_reglas(c, personajes, avisos) if sistemas_rol.es_dnd(p) else "",
         "criaturas": apartado_criaturas(grupos_de(datos, "criaturas", c), c, personajes, avisos),
         "imagenes": apartado_imagenes(grupos_de(datos, "imagenes", c), nombre),
-        "extra": markdown(p.get("extra"), c, personajes, avisos, True),
+        "extra": secciones_plegables(markdown(p.get("extra"), c, personajes, avisos, True)),
     }
     vacio = {
         "historia": "Todavía no he escrito su historia.",
