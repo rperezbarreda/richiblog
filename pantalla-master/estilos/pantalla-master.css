@@ -1,0 +1,5514 @@
+/* ====================================================================
+   LA PANTALLA DE MÁSTER (web/pantalla_master/pantalla_master.html)
+   ====================================================================
+
+   Un lienzo con ventanas que se mueven (scripts/paginas/pantalla-master.js).
+   Lo de dentro de cada módulo (la iniciativa, las reglas, los dados, las
+   notas…) lleva las clases de mis personajes (personajes.css), que esta
+   página también carga; aquí solo el lienzo, las ventanas y lo propio
+   (el buscador de conjuros, las tarjetas y las tablas). */
+
+.master-page {
+    gap: 16px;
+}
+
+/* La barra de arriba, en una sola línea: la campaña y las pestañas (los
+   perfiles) a la izquierda, pegadas al lienzo por abajo; el buscador,
+   el zoom, «＋ añadir» y los dados, a la derecha. Si no caben (pantallas
+   estrechas), pasa a dos, sin pisarse. */
+.master-barra {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    gap: 6px 10px;
+    margin-bottom: -16px;
+    border-bottom: 2px solid var(--yellow);
+}
+
+/* La caja de la derecha: el buscador, 🔍 y ⚙. */
+.master-barra-mandos {
+    align-self: flex-end;
+    padding: 4px 6px;
+    border: 2px solid var(--yellow);
+    border-bottom: 0;
+    border-radius: 10px 10px 0 0;
+    background: color-mix(in srgb, var(--yellow) 14%, transparent);
+    display: flex;
+    flex: 0 1 auto;
+    flex-wrap: nowrap;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 8px;
+    margin-left: auto;
+}
+
+/* EL BUSCADOR DE ARRIBA (un combobox): los resultados, debajo, por
+   encima de las ventanas. */
+.master-buscador {
+    position: relative;
+    flex: 0 1 9rem;
+    /* Con su ancho puesto, no empuja a las pestañas a otra línea. */
+    width: 9rem;
+    min-width: 6rem;
+    max-width: 26rem;
+}
+
+@media (max-width: 700px) {
+    .master-barra-mandos {
+        flex-wrap: wrap;
+    }
+
+    /* En el móvil, sin diagonal: si no cabe, ＋ y ✎ bajan a otra fila. */
+    .master-barra .master-pestanas {
+        flex-wrap: wrap;
+        padding-right: 6px;
+        border-radius: 10px 10px 0 0;
+        clip-path: none;
+    }
+
+    .master-barra .master-pestanas-marco {
+        flex: 1 1 8rem;
+    }
+
+    .master-barra .master-pestanas-lista {
+        flex: 1 1 auto;
+        min-width: 0;
+    }
+}
+
+.master-buscador-texto {
+    width: 100%;
+    min-height: 40px;
+    padding: 4px 10px;
+    border: 2px solid var(--yellow);
+    background: var(--purple);
+    color: var(--white);
+    font: inherit;
+    font-size: 0.9375rem;
+}
+
+.master-buscador-texto:focus-visible {
+    outline: 3px solid var(--yellow);
+    outline-offset: 2px;
+}
+
+.master-buscador-lista {
+    position: absolute;
+    top: calc(100% + 4px);
+    right: 0;
+    left: 0;
+    z-index: 9000;
+    max-height: min(26rem, 70vh);
+    margin: 0;
+    padding: 4px;
+    overflow-y: auto;
+    border: 3px solid var(--yellow);
+    background: var(--purple-lighter);
+    box-shadow: 6px 6px 0 var(--oc-color, var(--yellow));
+    list-style: none;
+}
+
+.master-buscador-lista[hidden] {
+    display: none;
+}
+
+.master-buscador-opcion {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    grid-template-rows: auto auto;
+    gap: 0 8px;
+    padding: 6px 8px;
+    border: 2px solid transparent;
+    color: var(--white);
+    cursor: pointer;
+}
+
+.master-buscador-opcion:hover,
+.master-buscador-opcion[aria-selected="true"] {
+    border-color: var(--yellow);
+    background: var(--purple);
+}
+
+.master-buscador-opcion[aria-selected="true"] {
+    outline: 2px solid var(--yellow);
+}
+
+.master-buscador-emoji {
+    grid-row: 1 / 3;
+    align-self: center;
+    font-size: 1.25rem;
+}
+
+.master-buscador-nombre {
+    font-weight: 700;
+}
+
+.master-buscador-detalle {
+    color: var(--muted);
+    font-family: var(--fuente-mono);
+    font-size: 0.75rem;
+}
+
+.master-buscador-nada {
+    padding: 8px;
+    color: var(--muted);
+}
+
+.master-barra-mandos .oc-vida-accion {
+    min-height: 40px;
+}
+
+.master-barra .oc-boton-dados {
+    width: 40px;
+    height: 40px;
+}
+
+/* LAS PESTAÑAS (los perfiles), como las de un navegador; la de ahora,
+   del color del lienzo. */
+/* El bloque de la izquierda, pegado al tablero y acabado en diagonal
+   (como las pestañas de un navegador). */
+.master-pestanas {
+    display: flex;
+    flex: 1 1 22rem;
+    padding: 4px 30px 0 6px;
+    border-radius: 10px 0 0 0;
+    background: color-mix(in srgb, var(--yellow) 14%, transparent);
+    clip-path: polygon(0 0, calc(100% - 26px) 0, 100% 100%, 0 100%);
+    flex-wrap: nowrap;
+    align-items: flex-end;
+    gap: 6px;
+    min-width: 0;
+}
+
+/* Las pestañas, en todo el sitio que deja la barra: si no caben, se
+   deslizan de lado (sin barra de scroll) con las flechas ‹ ›. */
+/* ＋ y ✎ van justo detrás de la última pestaña (el marco no crece). */
+.master-pestanas-marco {
+    display: flex;
+    flex: 0 1 auto;
+    align-items: flex-end;
+    gap: 2px;
+    min-width: 0;
+}
+
+.master-pestanas-lista {
+    display: flex;
+    flex: 0 1 auto;
+    flex-wrap: nowrap;
+    gap: 4px;
+    min-width: min(5rem, max-content);
+    overflow-x: auto;
+    overflow-y: hidden;
+    scrollbar-width: none;
+}
+
+.master-pestanas-lista::-webkit-scrollbar {
+    display: none;
+}
+
+.master-pestanas-flecha {
+    flex: none;
+    width: 28px;
+    margin-bottom: 4px;
+    font-size: 1.125rem;
+}
+
+.master-pestanas-flecha[hidden] {
+    display: none;
+}
+
+/* 🧰 (añadir una ventana) y 📚 (la campaña): iconos a la izquierda del
+   todo. */
+.master-campana,
+.master-crear,
+.master-herramientas {
+    flex: none;
+    margin-bottom: 4px;
+    font-size: 1.125rem;
+}
+
+.master-campana,
+.master-crear {
+    width: 36px;
+    height: 36px;
+    padding: 0;
+    border: 2px solid var(--yellow);
+    border-radius: 6px;
+    background: var(--yellow);
+    color: var(--yellow-contrast);
+    cursor: pointer;
+}
+
+.master-campana:hover,
+.master-crear:hover {
+    background: transparent;
+}
+
+.master-campana:focus-visible,
+.master-crear:focus-visible {
+    outline: 3px solid var(--yellow);
+    outline-offset: 2px;
+}
+
+.master-campanas .master-anadir-lista {
+    margin-bottom: 16px;
+}
+
+.master-campanas .master-anadir-tarjeta[aria-current="true"] {
+    border-color: var(--yellow);
+    box-shadow: inset 0 0 0 2px var(--yellow);
+}
+
+.master-campana-form {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    gap: 6px;
+    margin-bottom: 14px;
+}
+
+.master-campana-form .oc-dados-etiqueta {
+    flex-basis: 100%;
+}
+
+.master-campana-form .oc-dados-texto {
+    flex: 1 1 12rem;
+}
+
+.master-pestana {
+    flex: none;
+    min-height: 40px;
+    max-width: 7.5rem;
+    padding: 6px 8px;
+    overflow: hidden;
+    border: 2px solid var(--border);
+    border-bottom: 0;
+    border-radius: 8px 8px 0 0;
+    background: var(--purple);
+    color: var(--muted);
+    font-family: var(--fuente-mono);
+    font-size: 0.875rem;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    cursor: pointer;
+}
+
+/* Mantener pulsada una pestaña la coge para moverla: que no seleccione
+   texto ni saque el menú del sistema, y que el dedo no deslice la fila
+   (para eso están las flechas ‹ ›). */
+.master-pestana {
+    -webkit-touch-callout: none;
+    touch-action: none;
+    user-select: none;
+}
+
+.master-pestana.es-cogida {
+    position: relative;
+    z-index: 2;
+    outline: 3px dashed var(--white);
+    outline-offset: -5px;
+    cursor: grabbing;
+}
+
+.master-pestana[aria-selected="true"] {
+    border-color: var(--yellow);
+    background: var(--yellow);
+    color: var(--yellow-contrast);
+    font-weight: 700;
+}
+
+/* Cada pestaña con su ✕ encima, a la derecha (como en un navegador): sólo
+   se ve en la elegida y al pasar por encima, sin ocupar sitio en las
+   demás (con el teclado, Supr). */
+.master-pestana-caja {
+    position: relative;
+    display: flex;
+    flex: none;
+    align-items: stretch;
+}
+
+.master-pestana-caja.es-elegida .master-pestana {
+    padding-right: 28px;
+}
+
+.master-pestana-cerrar {
+    position: absolute;
+    top: 50%;
+    right: 3px;
+    width: 22px;
+    height: 22px;
+    padding: 0;
+    border: 0;
+    border-radius: 4px;
+    background: transparent;
+    color: inherit;
+    font-size: 0.75rem;
+    opacity: 0;
+    transform: translateY(-50%);
+    cursor: pointer;
+}
+
+.master-pestana-cerrar[hidden] {
+    display: none;
+}
+
+.master-pestana-caja.es-elegida .master-pestana-cerrar,
+.master-pestana-caja:hover .master-pestana-cerrar,
+.master-pestana-cerrar.es-seguro {
+    opacity: 1;
+}
+
+.master-pestana-cerrar:hover {
+    background: rgba(0, 0, 0, 0.2);
+}
+
+.master-pestana-caja.es-elegida .master-pestana-cerrar {
+    color: var(--yellow-contrast);
+}
+
+/* Pulsada una vez (falta otra para cerrar): en rojo. */
+.master-pestana-cerrar.es-seguro,
+.master-pestana-caja.es-elegida .master-pestana-cerrar.es-seguro {
+    background: var(--error);
+    color: #ffffff;
+}
+
+.master-pestana.es-seguro {
+    outline: 3px dashed var(--error);
+    outline-offset: -5px;
+}
+
+/* Una pestaña con color (el de su tablero): ella y su ✕ de ese color,
+   con la tinta que se lee encima; la elegida, con el borde y una franja
+   arriba amarillos. */
+.master-pestana.con-color {
+    border-color: var(--pestana-color);
+    background: var(--pestana-color);
+    color: var(--pestana-tinta);
+}
+
+.master-pestana.con-color + .master-pestana-cerrar {
+    color: var(--pestana-tinta);
+}
+
+.master-pestana.con-color[aria-selected="true"] {
+    border-color: var(--yellow);
+    box-shadow: inset 0 4px 0 var(--yellow);
+}
+
+.master-pestana:focus-visible,
+.master-pestana-mando:focus-visible {
+    outline: 3px solid var(--yellow);
+    outline-offset: 2px;
+}
+
+.master-pestanas-mandos {
+    display: flex;
+    gap: 4px;
+    padding-bottom: 4px;
+}
+
+.master-pestana-mando {
+    width: 36px;
+    height: 36px;
+    padding: 0;
+    border: 2px solid var(--yellow);
+    background: transparent;
+    color: var(--yellow);
+    cursor: pointer;
+}
+
+/* EL ZOOM DEL TABLERO: − 100 % + (en el móvil no, que va en columna). */
+.master-zoom {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+}
+
+.master-zoom[hidden] {
+    display: none;
+}
+
+.master-zoom-valor {
+    min-width: 4.2em;
+    height: 36px;
+    padding: 0 4px;
+    border: 2px solid var(--yellow);
+    background: transparent;
+    color: var(--yellow);
+    font-family: var(--fuente-mono);
+    font-size: 0.8125rem;
+    cursor: pointer;
+}
+
+.master-zoom-valor:hover {
+    background: var(--yellow);
+    color: var(--yellow-contrast);
+}
+
+.master-zoom-valor:focus-visible {
+    outline: 3px solid var(--yellow);
+    outline-offset: 2px;
+}
+
+@media (max-width: 860px) {
+    .master-zoom {
+        display: none;
+    }
+}
+
+.master-pestana-mando:hover:not(:disabled) {
+    background: var(--yellow);
+    color: var(--yellow-contrast);
+}
+
+.master-pestana-mando:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+/* EL LIENZO: las ventanas van donde se las deja (left y top, que pone el
+   JavaScript). Una cuadrícula de fondo, como una mesa con su tapete. */
+.master-lienzo {
+    position: relative;
+    min-height: 400px;
+    /* Los dos dedos en el fondo son el zoom del tablero, no el de la
+       página. */
+    touch-action: pan-x pan-y;
+    overflow-x: auto;
+    overflow-y: hidden;
+    /* Al encoger (después de soltar una ventana), despacio. */
+    transition: height 0.3s ease-out;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .master-lienzo {
+        transition: none;
+    }
+}
+
+.master-lienzo.con-lienzo {
+    border: 2px dashed var(--border);
+    background-image:
+        linear-gradient(var(--border) 1px, transparent 1px),
+        linear-gradient(90deg, var(--border) 1px, transparent 1px);
+    background-size: 40px 40px;
+    background-position: -1px -1px;
+}
+
+.master-ventana {
+    position: absolute;
+    display: flex;
+    flex-direction: column;
+    min-width: 240px;
+    min-height: 120px;
+    margin: 0;
+    overflow: hidden;
+}
+
+.master-ventana.es-plegada {
+    min-height: 0;
+}
+
+.master-ventana[hidden] {
+    display: none;
+}
+
+/* Soltando otra encima, la que la recibiría: con un reborde a rayas. */
+.master-ventana.es-destino {
+    outline: 4px dashed var(--yellow);
+    outline-offset: 4px;
+}
+
+/* LOS GRUPOS: las pestañas son la barra (como las de un navegador):
+   pegadas abajo, cada una del color de su ventana y con su nombre; si no
+   caben, las de detrás se quedan en el icono (.es-apretadas). La de
+   ahora, con un reborde por dentro. */
+.master-ventana-barra.es-grupo {
+    align-items: flex-end;
+    padding-top: 6px;
+    padding-bottom: 0;
+    padding-left: 8px;
+}
+
+.master-ventana-barra.es-grupo .master-ventana-mandos {
+    align-self: center;
+    margin-bottom: 4px;
+}
+
+.master-grupo-pestanas {
+    display: flex;
+    flex: 1 1 auto;
+    align-items: flex-end;
+    gap: 2px;
+    min-width: 0;
+    overflow: hidden;
+}
+
+.master-grupo-pestana {
+    display: inline-flex;
+    flex: none;
+    align-items: center;
+    gap: 6px;
+    max-width: 14rem;
+    min-height: 34px;
+    padding: 4px 12px;
+    overflow: hidden;
+    border: 0;
+    border-radius: 8px 8px 0 0;
+    background: transparent;
+    color: inherit;
+    font-family: var(--fuente-ventana);
+    font-size: 0.875rem;
+    font-weight: 700;
+    white-space: nowrap;
+    cursor: pointer;
+}
+
+.master-grupo-pestana:not([aria-selected="true"]) {
+    font-weight: 400;
+}
+
+.master-grupo-pestanas.es-apretadas .master-grupo-pestana:not([aria-selected="true"]) {
+    padding: 4px 8px;
+}
+
+.master-grupo-pestanas.es-apretadas .master-grupo-pestana:not([aria-selected="true"]) .master-grupo-nombre {
+    display: none;
+}
+
+.master-grupo-nombre {
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.master-grupo-emoji {
+    font-size: 1.05rem;
+}
+
+.master-grupo-pestana[aria-selected="true"] {
+    flex-shrink: 1;
+    min-width: 4rem;
+    background: var(--yellow);
+    color: var(--yellow-contrast);
+    box-shadow: inset 0 0 0 3px currentColor;
+}
+
+.master-grupo-pestana.con-color {
+    background: var(--pestana-color);
+    color: var(--pestana-tinta);
+}
+
+.master-grupo-pestana[aria-selected="true"].con-color {
+    box-shadow: inset 0 0 0 3px var(--pestana-tinta), inset 0 0 0 5px var(--pestana-color);
+}
+
+.master-grupo-pestana:hover:not([aria-selected="true"]) {
+    filter: brightness(1.1);
+}
+
+.master-grupo-pestana:focus-visible {
+    outline: 3px solid currentColor;
+    outline-offset: -4px;
+}
+
+.master-grupo-pestana.es-cogida {
+    outline: 3px dashed currentColor;
+    outline-offset: -4px;
+    cursor: grabbing;
+}
+
+/* Sacando una pestaña de la barra: la ventana, medio transparente. */
+.master-ventana.es-saliendo {
+    opacity: 0.6;
+}
+
+/* La esquina para cambiar el tamaño (con el ratón, el dedo o el lápiz):
+   un triángulo de rayas, como el de siempre, pero más grande. */
+.master-ventana-tamano {
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    z-index: 2;
+    width: 24px;
+    height: 24px;
+    background: repeating-linear-gradient(135deg, transparent 0 5px, var(--yellow) 5px 7px);
+    clip-path: polygon(100% 0, 100% 100%, 0 100%);
+    cursor: nwse-resize;
+    touch-action: none;
+}
+
+.master-ventana.es-plegada .master-ventana-tamano {
+    display: none;
+}
+
+.master-ventana.es-arrastrada {
+    opacity: 0.92;
+    box-shadow: 10px 10px 0 var(--oc-color);
+}
+
+.master-ventana-barra {
+    display: flex;
+    flex: none;
+    flex-wrap: nowrap;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    /* Sin el hueco de la derecha de las otras barras (el de los −■✕ de
+       adorno): aquí los mandos van en la misma fila, y así cabe el título. */
+    padding-right: 12px;
+    cursor: move;
+    touch-action: none;
+    user-select: none;
+}
+
+.master-ventana-titulo {
+    min-width: 0;
+    overflow-wrap: anywhere;
+}
+
+/* El nombre de la ventana: un botón que la pliega y despliega (como en
+   el resto de la web), con la pinta del título. */
+.master-ventana-nombre {
+    padding: 2px 0;
+    border: 0;
+    background: transparent;
+    color: inherit;
+    font: inherit;
+    text-align: left;
+    overflow-wrap: anywhere;
+    cursor: pointer;
+}
+
+.master-ventana-nombre:hover {
+    text-decoration: underline;
+    text-underline-offset: 3px;
+}
+
+.master-ventana-nombre:focus-visible {
+    outline: 3px solid currentColor;
+    outline-offset: 2px;
+}
+
+/* Cogida (manteniendo pulsada la barra): un reborde a rayas de otro
+   color (el del texto del tema) y el cursor de mover, hasta soltarla. La
+   barra no selecciona texto ni saca el menú al mantener el dedo. */
+.master-ventana.es-cogida {
+    outline: 3px dashed var(--white);
+    outline-offset: 3px;
+}
+
+.master-ventana.es-cogida .master-ventana-barra,
+.master-ventana.es-cogida .master-ventana-nombre {
+    cursor: grabbing;
+}
+
+.master-ventana-barra {
+    -webkit-touch-callout: none;
+    user-select: none;
+}
+
+/* El tamaño del contenido, en «opciones de la ventana». */
+.master-escala {
+    align-items: center;
+}
+
+.master-escala-valor {
+    min-width: 3.5em;
+    font-family: var(--fuente-mono);
+    text-align: center;
+}
+
+.master-ventana-mandos {
+    display: flex;
+    flex: none;
+    gap: 4px;
+}
+
+.master-ventana-mando {
+    width: 28px;
+    height: 28px;
+    padding: 0;
+    border: 2px solid currentColor;
+    background: transparent;
+    color: inherit;
+    font-size: 0.875rem;
+    line-height: 1;
+    cursor: pointer;
+}
+
+.master-ventana-mando:hover,
+.master-ventana-mando:focus-visible {
+    background: var(--yellow);
+    color: var(--yellow-contrast);
+}
+
+.master-ventana-mando:focus-visible {
+    outline: 2px solid var(--yellow);
+    outline-offset: 2px;
+}
+
+/* Con un poco de aire por dentro (y el mismo hacia fuera, para que
+   quede donde estaba): si no, el borde y el contorno del foco de lo que
+   va pegado arriba o a la izquierda se cortan al desplazarse. */
+.master-ventana-cuerpo {
+    flex: 1 1 auto;
+    min-height: 0;
+    margin: -4px;
+    padding: 4px;
+    overflow: auto;
+}
+
+.master-ventana-cuerpo[hidden] {
+    display: none;
+}
+
+/* EL COLOR DE UNA VENTANA (✎), como un post-it: la barra del color
+   elegido (--postit, que pone el JavaScript: colores fijos, iguales en
+   todos los temas) con la letra oscura, el borde y la sombra de ese color
+   y el fondo un poco teñido. */
+.master-ventana.con-color {
+    --fondo-pestana: color-mix(in srgb, var(--postit) 14%, var(--purple-lighter));
+    border-color: var(--postit);
+    box-shadow: 6px 6px 0 var(--postit);
+    background: var(--purple-lighter);
+    background: color-mix(in srgb, var(--postit) 14%, var(--purple-lighter));
+}
+
+.master-ventana.con-color .master-ventana-barra {
+    border-bottom-color: var(--postit);
+    background: var(--postit);
+    color: var(--postit-tinta, #14101a);
+}
+
+.master-ventana.con-color .master-ventana-mando:hover,
+.master-ventana.con-color .master-ventana-mando:focus-visible {
+    background: var(--postit-tinta, #14101a);
+    color: var(--postit);
+}
+
+.master-ventana.con-color .master-ventana-mando:focus-visible {
+    outline-color: var(--postit-tinta, #14101a);
+}
+
+/* La ventanita de ✎: el título y las muestras de color. */
+.master-personalizar {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+}
+
+.master-personalizar .oc-dados-texto {
+    width: 100%;
+}
+
+.master-colores {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin: 4px 0 8px;
+    padding: 0;
+    border: 0;
+}
+
+.master-colores legend {
+    width: 100%;
+    margin-bottom: 6px;
+    padding: 0;
+}
+
+/* Cada muestra, un cuadrado de su color; la elegida, con doble aro. */
+.master-color {
+    width: 36px;
+    height: 36px;
+    padding: 0;
+    border: 2px solid var(--yellow);
+    cursor: pointer;
+}
+
+/* «Sin color»: tachada en diagonal. */
+.master-color.es-ninguno {
+    background:
+        linear-gradient(to top right, transparent calc(50% - 2px), var(--yellow) calc(50% - 2px),
+            var(--yellow) calc(50% + 2px), transparent calc(50% + 2px)),
+        var(--purple);
+}
+
+.master-color[aria-pressed="true"] {
+    box-shadow: 0 0 0 3px var(--purple-lighter), 0 0 0 6px var(--yellow);
+}
+
+.master-color:focus-visible {
+    outline: 3px solid var(--yellow);
+    outline-offset: 5px;
+}
+
+/* «🎨 otro»: el selector de color del sistema, para uno propio. */
+.master-color-otro-caja {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    min-height: 36px;
+    padding: 0 8px;
+    border: 2px solid var(--yellow);
+    font-family: var(--fuente-mono);
+    font-size: 0.8125rem;
+    cursor: pointer;
+}
+
+.master-color-otro {
+    width: 28px;
+    height: 28px;
+    padding: 0;
+    border: 0;
+    background: none;
+    cursor: pointer;
+}
+
+.master-color-otro:focus-visible {
+    outline: 3px solid var(--yellow);
+    outline-offset: 2px;
+}
+
+/* ⚙ LAS OPCIONES DEL TABLERO: por partes, cada una con su título. */
+.master-opciones-fila {
+    margin-bottom: 14px;
+}
+
+.master-opciones-titulo {
+    margin: 0 0 6px;
+    color: var(--yellow);
+    font-family: var(--fuente-mono);
+    font-size: 0.875rem;
+}
+
+/* Los dados van en ⚙ (y con la D): su botón de la barra, fuera. */
+.master-barra > .oc-boton-dados {
+    display: none;
+}
+
+/* LA VENTANA DE AÑADIR: ancha, con un filtro arriba y las ventanas por
+   grupos, cada una como una tarjeta (su dibujo, su nombre y para qué es). */
+.oc-menu-ventana.es-ancha {
+    width: min(46rem, 100%);
+}
+
+.master-anadir .oc-dados-texto {
+    width: 100%;
+    min-height: 44px;
+    margin-bottom: 4px;
+}
+
+.master-anadir-grupo[hidden] {
+    display: none;
+}
+
+.master-anadir-grupo {
+    padding-top: 12px;
+}
+
+.master-anadir-lista {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(12.5rem, 1fr));
+    gap: 8px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.master-anadir-lista li[hidden] {
+    display: none;
+}
+
+.master-anadir-tarjeta {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    grid-template-rows: auto auto;
+    align-items: center;
+    gap: 2px 10px;
+    width: 100%;
+    height: 100%;
+    min-height: 64px;
+    padding: 10px 12px;
+    border: 2px solid var(--border);
+    background: var(--purple);
+    color: var(--white);
+    font: inherit;
+    text-align: left;
+    cursor: pointer;
+}
+
+.master-anadir-tarjeta:hover:not(:disabled) {
+    border-color: var(--yellow);
+    box-shadow: 4px 4px 0 var(--yellow);
+    transform: translate(-2px, -2px);
+}
+
+.master-anadir-tarjeta:focus-visible {
+    border-color: var(--yellow);
+    outline: 3px solid var(--yellow);
+    outline-offset: 2px;
+}
+
+.master-anadir-tarjeta:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+}
+
+.master-anadir-emoji {
+    grid-row: 1 / 3;
+    font-size: 1.75rem;
+    line-height: 1;
+}
+
+.master-anadir-nombre {
+    font-size: 1rem;
+    font-weight: 700;
+}
+
+.master-anadir-desc {
+    color: var(--muted);
+    font-size: 0.8125rem;
+    line-height: 1.3;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .master-anadir-tarjeta:hover:not(:disabled) {
+        transform: none;
+    }
+}
+
+/* El color del tablero (el del perfil), con su cuadrícula. */
+.master-lienzo.con-lienzo.con-tablero {
+    background-color: var(--tablero);
+    background-image:
+        linear-gradient(var(--tablero-raya) 1px, transparent 1px),
+        linear-gradient(90deg, var(--tablero-raya) 1px, transparent 1px);
+}
+
+/* En la ventana de añadir, debajo de la lista: ordenar y quitar todas. */
+.master-anadir-otras {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 14px;
+    padding-top: 12px;
+    border-top: 2px dashed var(--border);
+}
+
+/* De dónde salen las reglas. */
+.master-fuente {
+    margin-top: 12px;
+}
+
+/* EL BESTIARIO: el buscador lleva tres campos (nombre, VD y tipo); el
+   perfil de cada monstruo sale en una ventana (.master-bicho). */
+.master-conjuros-buscar.es-bestiario {
+    grid-template-columns: minmax(0, 1fr) auto auto;
+}
+
+.master-bicho {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+}
+
+.master-bicho-tipo {
+    margin: 0;
+    font-style: italic;
+}
+
+.master-bicho-datos {
+    display: grid;
+    grid-template-columns: max-content minmax(0, 1fr);
+    gap: 4px 12px;
+    width: 100%;
+    margin: 0;
+}
+
+.master-bicho-datos dt {
+    font-weight: 700;
+    color: var(--yellow);
+}
+
+.master-bicho-datos dd {
+    margin: 0;
+}
+
+.master-bicho-car {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: center;
+}
+
+.master-bicho-car th,
+.master-bicho-car td {
+    padding: 4px 2px;
+    border: 2px solid var(--border);
+}
+
+.master-bicho-car th {
+    color: var(--yellow);
+}
+
+
+.master-bicho .oc-texto p {
+    margin: 0 0 6px;
+}
+
+@media (max-width: 520px) {
+    .master-conjuros-buscar.es-bestiario {
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    }
+
+    .master-conjuros-buscar.es-bestiario .oc-dados-etiqueta,
+    .master-conjuros-buscar.es-bestiario .oc-dados-texto,
+    .master-conjuros-buscar.es-bestiario .oc-dados-elegir {
+        grid-row: auto;
+    }
+
+    .master-conjuros-buscar.es-bestiario .oc-dados-texto {
+        grid-column: 1 / -1;
+    }
+
+    .master-bicho-car {
+        font-size: 0.875rem;
+    }
+}
+
+/* LA TIENDA: los filtros en una rejilla que se adapta al ancho de la
+   ventana, el surtido al azar y la tabla de objetos y precios. */
+.master-tienda-campos {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(9rem, 1fr));
+    gap: 8px;
+}
+
+.master-tienda-campo {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    min-width: 0;
+}
+
+.master-tienda-campo.es-ancho {
+    grid-column: 1 / -1;
+}
+
+.master-tienda-campo .oc-dados-elegir,
+.master-tienda-campo .oc-dados-texto {
+    flex: none;
+    width: 100%;
+    height: auto;
+    min-height: 40px;
+}
+
+.master-tienda-azar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    gap: 8px;
+    margin: 10px 0 4px;
+}
+
+.master-tienda-cuantos {
+    width: 5rem;
+}
+
+.master-tienda-tabla {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.master-tienda-tabla th,
+.master-tienda-tabla td {
+    padding: 6px 4px;
+    border-bottom: 2px solid var(--border);
+    text-align: left;
+    vertical-align: top;
+}
+
+.master-tienda-tabla th {
+    color: var(--yellow);
+}
+
+.master-tienda-tabla .es-precio {
+    text-align: right;
+    white-space: nowrap;
+}
+
+.master-tienda-nombre {
+    display: block;
+    font-weight: 700;
+}
+
+.master-tienda-datos {
+    display: block;
+    font-size: 0.8125rem;
+}
+
+/* En la tabla de características, el bono va sin el dado delante (cabe
+   en su casilla). */
+.master-bicho-car .oc-dado-texto::before {
+    content: none;
+}
+
+/* Las partes del perfil (estadísticas, rasgos, acciones, hechizos), en
+   pestañas; dentro de «acciones», un desplegable en una línea para
+   elegir cuáles (acciones, adicionales, reacciones, legendarias). */
+.master-bicho-pestanas {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    gap: 2px;
+    width: 100%;
+    padding: 4px 4px 0;
+    border-bottom: 2px solid var(--yellow);
+    background: var(--surface);
+}
+
+.master-bicho-pestanas[hidden] {
+    display: none;
+}
+
+/* Como las de un navegador: redondeadas arriba; la elegida, del color de
+   la ventana, encima de la raya (así se une con lo de debajo) y con una
+   franja arriba. */
+.master-bicho-pestana {
+    position: relative;
+    min-height: 36px;
+    margin-bottom: -2px;
+    padding: 4px 12px;
+    border: 2px solid var(--border);
+    border-bottom: 2px solid var(--yellow);
+    border-radius: 8px 8px 0 0;
+    background: transparent;
+    color: var(--muted);
+    font-family: var(--fuente-mono);
+    font-size: 0.8125rem;
+    cursor: pointer;
+}
+
+.master-bicho-pestana[aria-selected="true"] {
+    border-color: var(--yellow);
+    border-bottom-color: var(--fondo-pestana, var(--purple-lighter));
+    background: var(--fondo-pestana, var(--purple-lighter));
+    box-shadow: inset 0 3px 0 var(--yellow);
+    color: var(--white);
+    font-weight: 700;
+}
+
+.master-bicho-pestana:hover:not([aria-selected="true"]) {
+    border-color: var(--yellow);
+    color: var(--white);
+}
+
+.master-bicho-pestana:focus-visible {
+    z-index: 1;
+    outline: 3px solid var(--yellow);
+    outline-offset: 2px;
+}
+
+.master-bicho-parte {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.master-bicho-parte[hidden] {
+    display: none;
+}
+
+/* En el tablero: qué es de verdad y «✎ nombre». */
+.master-bicho-renombrar {
+    min-height: 28px;
+    margin-left: 8px;
+    padding: 0 8px;
+    border: 1px solid var(--yellow);
+    background: transparent;
+    color: var(--yellow);
+    font-family: var(--fuente-mono);
+    font-size: 0.75rem;
+    cursor: pointer;
+}
+
+.master-bicho-renombrar:hover {
+    background: var(--yellow);
+    color: var(--yellow-contrast);
+}
+
+.master-bicho-renombrar:focus-visible {
+    outline: 2px solid var(--yellow);
+    outline-offset: 2px;
+}
+
+.master-bicho-ver {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+    padding-bottom: 8px;
+    border-bottom: 2px solid var(--yellow);
+}
+
+.master-bicho-ver .oc-dados-elegir {
+    flex: 1 1 auto;
+    min-height: 40px;
+}
+
+.master-bicho-panel:focus-visible {
+    outline: 3px solid var(--yellow);
+    outline-offset: 2px;
+}
+
+.master-bicho-panel {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    width: 100%;
+}
+
+.master-bicho-panel[hidden] {
+    display: none;
+}
+
+.master-bicho-entrada .oc-texto p {
+    margin: 0 0 6px;
+}
+
+.master-bicho-nombre {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px 10px;
+    margin: 0 0 4px;
+}
+
+/* Las casillas de usos: un cuadrado por uso; el gastado, relleno y
+   tachado (no solo por el color). */
+.master-usos {
+    display: inline-flex;
+    flex-wrap: wrap;
+    gap: 4px;
+}
+
+.master-uso {
+    width: 24px;
+    height: 24px;
+    padding: 0;
+    border: 2px solid var(--yellow);
+    background: transparent;
+    cursor: pointer;
+}
+
+.master-uso[aria-pressed="true"] {
+    background:
+        linear-gradient(to top right, transparent calc(50% - 2px), var(--yellow-contrast) calc(50% - 2px),
+            var(--yellow-contrast) calc(50% + 2px), transparent calc(50% + 2px)),
+        var(--yellow);
+}
+
+.master-uso:focus-visible,
+.master-recarga:focus-visible,
+.master-conjuro-enlace:focus-visible {
+    outline: 2px solid var(--yellow);
+    outline-offset: 2px;
+}
+
+.master-recarga {
+    min-height: 28px;
+    padding: 0 8px;
+    border: 2px solid var(--yellow);
+    background: transparent;
+    color: var(--yellow);
+    font-size: 0.8125rem;
+    cursor: pointer;
+}
+
+.master-recarga:hover {
+    background: var(--yellow);
+    color: var(--yellow-contrast);
+}
+
+/* Los ataques, en tabla. */
+.master-ataques {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.master-ataques th,
+.master-ataques td {
+    padding: 6px 4px;
+    border-bottom: 2px solid var(--border);
+    text-align: left;
+    vertical-align: top;
+}
+
+.master-ataques thead th {
+    color: var(--yellow);
+    font-size: 0.875rem;
+}
+
+.master-ataque-tipo {
+    display: block;
+    font-size: 0.75rem;
+    font-weight: 400;
+}
+
+.master-ataques .oc-texto p {
+    margin: 0 0 4px;
+}
+
+.master-ataques-caja {
+    container-type: inline-size;
+}
+
+.master-ataques td:nth-child(2),
+.master-ataques td:nth-child(3) {
+    white-space: nowrap;
+}
+
+.master-ataque-dado {
+    margin: 0 0 4px;
+}
+
+.master-ataque-dado .oc-dado-texto {
+    white-space: nowrap;
+    font-size: 1.1em;
+}
+
+.master-ataque-media {
+    font-size: 0.875rem;
+}
+
+/* Estrecha (una ventana pequeña o un móvil): cada ataque es una tarjeta:
+   nombre arriba; bono y alcance en una fila; el daño y su efecto, debajo,
+   a todo el ancho. */
+@container (max-width: 30rem) {
+    .master-ataques thead {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        overflow: hidden;
+        clip: rect(0 0 0 0);
+    }
+
+    .master-ataques,
+    .master-ataques tbody {
+        display: block;
+    }
+
+    .master-ataques tr {
+        display: grid;
+        grid-template-columns: auto 1fr;
+        gap: 2px 12px;
+        padding: 8px 0;
+        border-bottom: 2px solid var(--border);
+    }
+
+    .master-ataques th,
+    .master-ataques td {
+        padding: 0;
+        border: 0;
+    }
+
+    .master-ataques .master-ataque-nombre {
+        grid-column: 1 / -1;
+    }
+
+    .master-ataque-tipo {
+        display: inline;
+        margin-left: 6px;
+    }
+
+    .master-ataques td:nth-child(3) {
+        white-space: normal;
+    }
+
+    .master-ataques .master-ataque-dano {
+        grid-column: 1 / -1;
+    }
+}
+
+/* Los conjuros de un monstruo: cada uno, un botón a su ventana. */
+.master-bicho-conjuros {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    margin: 0;
+    padding-left: 18px;
+}
+
+.master-bicho-conjuros li {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 4px 8px;
+}
+
+.master-conjuro-enlace {
+    padding: 0;
+    border: 0;
+    border-bottom: 2px dotted currentColor;
+    background: transparent;
+    color: var(--yellow);
+    font: inherit;
+    font-style: italic;
+    cursor: pointer;
+}
+
+.master-conjuro-enlace:hover {
+    background: var(--yellow);
+    color: var(--yellow-contrast);
+}
+
+/* Los rasgos de la ficha: en negrita (como estaban), con su enlace. */
+.master-rasgo-enlace {
+    font-style: normal;
+    font-weight: 700;
+}
+
+/* Las tablas de los textos (las de algunos conjuros). */
+.master-tabla-texto {
+    width: 100%;
+    margin: 0 0 10px;
+    border-collapse: collapse;
+}
+
+.master-tabla-texto th,
+.master-tabla-texto td {
+    padding: 4px 6px;
+    border: 2px solid var(--border);
+    text-align: left;
+    vertical-align: top;
+}
+
+.master-tabla-texto th {
+    color: var(--yellow);
+}
+
+/* El perfil de un monstruo: sus botones (a la iniciativa, al tablero). */
+.master-bicho-botones {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+/* La tienda: el nombre de cada objeto es un botón que abre su ventana. */
+.master-tienda-tabla .master-tienda-nombre {
+    padding: 0;
+    border: 0;
+    border-bottom: 2px dotted currentColor;
+    background: transparent;
+    color: var(--white);
+    font: inherit;
+    font-weight: 700;
+    text-align: left;
+    cursor: pointer;
+}
+
+.master-tienda-tabla .master-tienda-nombre:hover,
+.master-tienda-tabla .master-tienda-nombre:focus-visible {
+    color: var(--yellow);
+}
+
+.master-tienda-tabla .master-tienda-nombre:focus-visible {
+    outline: 2px solid var(--yellow);
+    outline-offset: 2px;
+}
+
+.master-tienda-ayuda {
+    margin: 0;
+    font-size: 0.75rem;
+}
+
+.master-objeto,
+.master-regateo {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.master-objeto-precios {
+    margin-top: 6px;
+}
+
+.master-regateo .oc-dados-texto {
+    width: 8rem;
+    min-height: 40px;
+}
+
+.master-regateo-rapidos {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.master-regateo-queda {
+    margin: 0;
+    color: var(--yellow);
+    font-size: 1.125rem;
+    font-weight: 700;
+}
+
+/* El conversor de monedas: una casilla por moneda y lo que sale. */
+.master-monedas {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(7.5rem, 1fr));
+    gap: 8px;
+    margin-bottom: 12px;
+}
+
+.master-monedas .oc-dados-texto {
+    width: 100%;
+    min-height: 40px;
+}
+
+.master-monedas-salida {
+    margin-bottom: 12px;
+}
+
+/* EL BUSCADOR DE CONJUROS. */
+.master-conjuros-buscar {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: end;
+    gap: 4px 8px;
+}
+
+.master-conjuros-buscar .oc-dados-etiqueta {
+    grid-row: 1;
+}
+
+.master-conjuros-buscar .oc-dados-texto,
+.master-conjuros-buscar .oc-dados-elegir {
+    grid-row: 2;
+    min-height: 40px;
+}
+
+.master-conjuros {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.master-conjuro {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    width: 100%;
+    padding: 6px 10px;
+    border: 2px solid var(--yellow);
+    background: transparent;
+    color: var(--yellow);
+    text-align: left;
+    cursor: pointer;
+}
+
+.master-conjuro:hover {
+    background: var(--yellow);
+    color: var(--yellow-contrast);
+}
+
+.master-conjuro:focus-visible {
+    outline: 2px solid var(--yellow);
+    outline-offset: 2px;
+}
+
+.master-conjuro-nombre {
+    font-weight: 700;
+}
+
+.master-conjuro-datos {
+    font-family: var(--fuente-mono);
+    font-size: 0.75rem;
+}
+
+/* LOS TOKENS de los monstruos: redondos, con el dibujo de su tipo y el
+   borde de su color; más grandes cuanto mayor es el monstruo. */
+.master-token {
+    --lado: 1.75rem;
+    display: inline-flex;
+    flex: none;
+    align-items: center;
+    justify-content: center;
+    width: var(--lado);
+    height: var(--lado);
+    border: 3px solid var(--token);
+    border-radius: 50%;
+    background: radial-gradient(circle at 35% 30%, #ffffff40, transparent 60%), #1a1424;
+    box-shadow: 0 0 0 2px #00000059;
+    font-size: calc(var(--lado) * 0.5);
+    line-height: 1;
+}
+
+.master-token.es-grande {
+    --lado: 3rem;
+}
+
+.master-token.es-grande.es-tam-1 {
+    --lado: 2.25rem;
+}
+
+.master-token.es-grande.es-tam-2 {
+    --lado: 2.6rem;
+}
+
+.master-token.es-grande.es-tam-4 {
+    --lado: 3.5rem;
+}
+
+.master-token.es-grande.es-tam-5 {
+    --lado: 4rem;
+}
+
+.master-token.es-grande.es-tam-6 {
+    --lado: 4.5rem;
+}
+
+.master-bicho-cabeza {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.master-bicho-cabeza .master-bicho-tipo {
+    margin: 0;
+}
+
+.master-conjuro.con-token {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: 0 10px;
+    align-items: center;
+}
+
+.master-conjuro.con-token .master-token {
+    grid-row: 1 / 3;
+}
+
+/* LAS REGLAS: el título de cada grupo pliega y despliega. */
+.master-reglas-grupo {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+    min-height: 36px;
+    padding: 2px 4px;
+    border: 0;
+    background: transparent;
+    color: inherit;
+    font: inherit;
+    text-align: left;
+    cursor: pointer;
+}
+
+.master-reglas-grupo:focus-visible {
+    outline: 3px solid var(--yellow);
+    outline-offset: 2px;
+}
+
+.master-reglas-flecha {
+    display: inline-block;
+    transition: transform 0.15s;
+}
+
+.master-reglas-grupo[aria-expanded="true"] .master-reglas-flecha {
+    transform: rotate(90deg);
+}
+
+.oc-reglas-lista[hidden] {
+    display: none;
+}
+
+/* LAS REGLAS PROPIAS: cada una con su ✎ y su ✕. */
+.master-homebrew {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin: 0 0 12px;
+    padding: 0;
+    list-style: none;
+}
+
+.master-homebrew-regla {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.master-homebrew-regla .oc-regla-boton {
+    flex-direction: row;
+    justify-content: flex-start;
+    min-height: 44px;
+    padding: 6px 10px;
+}
+
+.master-homebrew-form {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.master-homebrew-form[hidden] {
+    display: none;
+}
+
+/* LA PARTY, en la lista (para mirar): cabeza con nombre y clase, los
+   vitales en chapas y las características con su dado. */
+.master-party.es-lista {
+    margin-top: 10px;
+}
+
+.master-party-cabeza {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 6px 10px;
+}
+
+.master-party-nombre {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 2px 8px;
+    margin: 0;
+    font-size: 1.0625rem;
+}
+
+.master-party-clase {
+    color: var(--muted);
+    font-family: var(--fuente-mono);
+    font-size: 0.8125rem;
+}
+
+.master-party-vitales {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin: 0;
+}
+
+.master-party-vitales dt {
+    padding: 2px 6px;
+    background: var(--yellow);
+    color: var(--yellow-contrast);
+    font-family: var(--fuente-mono);
+    font-size: 0.75rem;
+    font-weight: 700;
+}
+
+.master-party-vitales dd {
+    margin: 0 8px 0 -6px;
+    padding: 2px 8px;
+    border: 2px solid var(--yellow);
+    font-weight: 700;
+}
+
+.master-party-caracteristicas {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(4.2rem, 1fr));
+    gap: 6px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.master-party-c {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 4px;
+    border: 1px solid var(--border);
+}
+
+.master-party-valor {
+    font-size: 1.125rem;
+    font-weight: 700;
+}
+
+/* LA FICHA DE UN PJ: arriba quién es y sus miedos; luego las pestañas
+   (las de los monstruos) con listas y datos. */
+.master-pj-cabeza {
+    margin-bottom: 8px;
+}
+
+.master-pj-que {
+    margin: 0 0 6px;
+    color: var(--muted);
+    font-family: var(--fuente-mono);
+    font-size: 0.8125rem;
+}
+
+.master-pj-recordar {
+    margin: 0 0 6px;
+    padding: 6px 10px;
+    border-left: 6px solid var(--error);
+    background: var(--surface);
+}
+
+.master-pj-recordar[hidden] {
+    display: none;
+}
+
+.master-pj-titulo {
+    margin: 14px 0 6px;
+    font-size: 1rem;
+}
+
+.master-pj-lista {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.master-pj-lista li {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 4px 8px;
+    padding: 3px 0;
+    border-bottom: 1px dotted var(--border);
+}
+
+.master-pj-marca {
+    padding: 1px 6px;
+    border: 1px solid var(--yellow);
+    font-family: var(--fuente-mono);
+    font-size: 0.75rem;
+}
+
+.master-pj-datos {
+    display: grid;
+    grid-template-columns: minmax(0, max-content) minmax(0, 1fr);
+    gap: 4px 12px;
+    margin: 8px 0;
+}
+
+.master-pj-datos dt {
+    font-weight: 700;
+}
+
+.master-pj-datos dd {
+    margin: 0;
+    overflow-wrap: anywhere;
+}
+
+.master-pj-anadir {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    gap: 6px;
+    margin: 8px 0;
+}
+
+.master-pj-anadir .oc-dados-etiqueta {
+    flex-basis: 100%;
+}
+
+.master-pj-anadir .oc-dados-texto {
+    flex: 1 1 12rem;
+}
+
+.master-pj-botones {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    gap: 6px;
+}
+
+/* LOS POST-ITS: la barra de formato (botones en grupos) y el texto. */
+.master-postit-barra {
+    position: sticky;
+    top: -4px;
+    z-index: 1;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin: -4px -4px 8px;
+    padding: 6px 4px 8px;
+    border-bottom: 2px dashed var(--border);
+    /* El fondo de la ventana (que no se vea el texto por debajo al bajar). */
+    background: var(--purple-lighter);
+}
+
+.master-ventana.con-color .master-postit-barra {
+    background: color-mix(in srgb, var(--postit) 14%, var(--purple-lighter));
+}
+
+.master-postit-barra[hidden] {
+    display: none;
+}
+
+.master-postit-grupo {
+    display: inline-flex;
+    flex: none;
+    gap: 2px;
+}
+
+.master-postit-boton,
+.master-postit-elegir {
+    min-width: 34px;
+    min-height: 34px;
+    padding: 0 6px;
+    border: 2px solid var(--yellow);
+    background: transparent;
+    color: var(--yellow);
+    font: inherit;
+    font-size: 0.875rem;
+    cursor: pointer;
+}
+
+.master-postit-elegir {
+    max-width: 7.5rem;
+    background: var(--purple);
+}
+
+.master-postit-boton[aria-pressed="true"] {
+    background: var(--yellow);
+    color: var(--yellow-contrast);
+}
+
+.master-postit-boton:hover {
+    outline: 2px solid var(--yellow);
+}
+
+.master-postit-boton:focus-visible,
+.master-postit-elegir:focus-visible {
+    outline: 3px solid var(--yellow);
+    outline-offset: 2px;
+}
+
+.master-postit-boton.es-negrita {
+    font-weight: 800;
+}
+
+.master-postit-boton.es-cursiva {
+    font-style: italic;
+}
+
+.master-postit-boton.es-subrayado {
+    text-decoration: underline;
+}
+
+.master-postit-boton.es-tachado {
+    text-decoration: line-through;
+}
+
+.master-postit {
+    min-height: 4rem;
+}
+
+.master-postit.es-editable {
+    padding: 8px;
+    border: 2px solid var(--border);
+    background: var(--purple);
+    cursor: text;
+}
+
+.master-postit.es-editable:focus-visible {
+    border-color: var(--yellow);
+    outline: 3px solid var(--yellow);
+    outline-offset: 1px;
+}
+
+.master-postit h3,
+.master-postit h4 {
+    margin: 8px 0 4px;
+}
+
+.master-postit blockquote {
+    margin: 6px 0;
+    padding-left: 10px;
+    border-left: 4px solid var(--yellow);
+    font-style: italic;
+}
+
+.master-postit-editar {
+    margin-top: 8px;
+}
+
+/* LAS NOTAS DEL MÁSTER: el editor siempre abierto y sus botones. */
+.master-postit.es-notas {
+    min-height: 12rem;
+}
+
+.master-notas-botones {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 10px;
+}
+
+.master-postit hr {
+    margin: 12px 0;
+    border: 0;
+    border-top: 2px solid var(--border);
+}
+
+/* EL GENERADOR DE NOMBRES y LAS NOTAS EN OTROS IDIOMAS: arriba, los
+   desplegables y los grupos de botones-opción. */
+.master-nombres-form {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.master-campo {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.master-elegir {
+    width: 100%;
+    min-height: 44px;
+    padding: 6px 8px;
+    border: 2px solid var(--border);
+    background: var(--purple);
+    color: var(--white);
+    font: inherit;
+}
+
+.master-elegir:focus-visible {
+    outline: 3px solid var(--yellow);
+    outline-offset: 2px;
+}
+
+.master-opciones {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.master-opcion {
+    flex: 1 1 auto;
+    min-height: 40px;
+    padding: 4px 10px;
+    border: 2px solid var(--yellow);
+    background: transparent;
+    color: var(--white);
+    font: inherit;
+    font-size: 0.875rem;
+    cursor: pointer;
+}
+
+.master-opcion[aria-pressed="true"] {
+    border-color: var(--yellow);
+    background: var(--yellow);
+    color: var(--yellow-contrast);
+    font-weight: 700;
+}
+
+.master-opcion:focus-visible {
+    outline: 3px solid var(--yellow);
+    outline-offset: 2px;
+}
+
+.master-nombres-persona {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.master-nombres-persona[hidden],
+.master-nombres-apellido[hidden],
+.master-nombres-titulo[hidden],
+.master-nombres[hidden],
+.master-idioma-dice[hidden] {
+    display: none;
+}
+
+.master-nombres-apellido {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    min-height: 40px;
+}
+
+.master-nombres-apellido input {
+    width: 20px;
+    height: 20px;
+    accent-color: var(--yellow);
+}
+
+.master-nombres-generar {
+    width: 100%;
+    font-size: 1rem;
+}
+
+.master-nombres {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(11rem, 1fr));
+    gap: 6px;
+    margin: 12px 0 0;
+    padding: 0;
+    list-style: none;
+}
+
+.master-nombres .oc-vacio {
+    grid-column: 1 / -1;
+}
+
+.master-nombre {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 4px 4px 10px;
+    border: 1px solid var(--border);
+    border-left: 4px solid var(--yellow);
+    background: var(--purple);
+}
+
+.master-nombre-texto {
+    flex: 1 1 auto;
+    min-width: 0;
+    font-size: 1.0625rem;
+    font-weight: 700;
+    overflow-wrap: anywhere;
+}
+
+.master-nombre-boton {
+    flex: none;
+    min-width: 36px;
+    min-height: 36px;
+    border: 1px solid transparent;
+    background: transparent;
+    color: var(--white);
+    font: inherit;
+    cursor: pointer;
+}
+
+.master-nombre-boton:hover {
+    border-color: var(--yellow);
+}
+
+.master-nombre-boton:focus-visible {
+    outline: 3px solid var(--yellow);
+    outline-offset: 1px;
+}
+
+.master-campo[hidden] {
+    display: none;
+}
+
+.master-nombre-glifos,
+.master-nombre-es {
+    display: block;
+    font-weight: 400;
+}
+
+.master-nombre-glifos {
+    font-size: 1.25rem;
+    line-height: 1.5;
+}
+
+.master-nombre-es {
+    color: var(--muted);
+    font-size: 0.875rem;
+}
+
+.master-nombres-titulo {
+    margin: 14px 0 0;
+    font-size: 0.9375rem;
+}
+
+/* LAS NOTAS EN OTROS IDIOMAS: la nota, en un pergamino (de color fijo,
+   igual en todos los temas, como los post-its), con la letra de su
+   alfabeto (fuentes Noto, OFL). */
+.master-idioma-escribir {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    margin-top: 10px;
+}
+
+.master-idioma-escribir .oc-vida-accion {
+    align-self: flex-start;
+}
+
+.master-idioma-hoja {
+    --pergamino: #efe2bf;
+    --tinta: #3b2a17;
+    --borde-pergamino: #8a6a3a;
+    margin-top: 12px;
+    padding: 16px 18px;
+    border: 3px double var(--borde-pergamino);
+    background: var(--pergamino);
+    color: var(--tinta);
+    font-family: "Pangolin", sans-serif;
+    font-size: var(--tam, 2rem);
+    line-height: 1.5;
+    overflow-wrap: anywhere;
+    white-space: pre-wrap;
+    unicode-bidi: bidi-override;
+    direction: ltr;
+}
+
+.master-idioma-hoja.es-grande,
+.master-idioma-clave.es-grande .master-idioma-glifo,
+.master-nombre-glifos.es-grande {
+    margin: 0;
+    font-size: 3rem;
+}
+
+.master-idioma-dice {
+    margin: 4px 0 0;
+}
+
+.master-idioma-botones {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px;
+    margin-top: 10px;
+}
+
+.master-idioma-tam {
+    display: flex;
+    gap: 4px;
+    margin-left: auto;
+}
+
+.master-idioma-tam .master-nombre-boton {
+    min-width: 44px;
+    min-height: 44px;
+    border-color: var(--border);
+}
+
+.master-idioma-panel {
+    margin-top: 12px;
+}
+
+.master-idioma-panel[hidden],
+.master-idioma-botones .oc-vida-accion[hidden] {
+    display: none;
+}
+
+.master-idioma-panel .oc-vida-accion {
+    margin-top: 8px;
+}
+
+/* El alfabeto de referencia: en rejilla, el símbolo grande encima y la
+   letra debajo, en el pergamino. */
+.master-idioma-clave {
+    --pergamino: #efe2bf;
+    --tinta: #3b2a17;
+    --borde-pergamino: #8a6a3a;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(3rem, 1fr));
+    gap: 4px;
+    margin: 0;
+    padding: 10px;
+    border: 3px double var(--borde-pergamino);
+    background: var(--pergamino);
+    color: var(--tinta);
+    list-style: none;
+}
+
+.master-idioma-clave.es-grande {
+    grid-template-columns: repeat(auto-fill, minmax(5rem, 1fr));
+    gap: 8px;
+}
+
+.master-idioma-letra {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 4px 2px;
+    border: 1px solid var(--borde-pergamino);
+}
+
+.master-idioma-glifo {
+    min-height: 1.5em;
+    font-size: 1.75rem;
+    line-height: 1.5;
+}
+
+.master-idioma-clave.es-grande .master-idioma-glifo,
+.master-nombre-glifos.es-grande {
+    font-size: 3rem;
+}
+
+.master-idioma-latina {
+    font-family: var(--fuente-mono);
+    font-size: 1rem;
+    font-weight: 700;
+}
+
+.master-idioma-escribir .oc-notas-texto {
+    min-height: 5rem;
+    margin-bottom: 4px;
+}
+
+@font-face {
+    font-family: "Richi noto-shavian";
+    src: url("../tipografias/noto-shavian.woff2") format("woff2");
+    font-display: swap;
+}
+
+.master-idioma-hoja.es-elfico,
+.master-idioma-clave.es-elfico .master-idioma-glifo,
+.master-nombre-glifos.es-elfico {
+    font-family: "Richi noto-shavian", "Pangolin", sans-serif;
+}
+
+@font-face {
+    font-family: "Richi noto-ol-chiki";
+    src: url("../tipografias/noto-ol-chiki.woff2") format("woff2");
+    font-display: swap;
+}
+
+.master-idioma-hoja.es-silvano,
+.master-idioma-clave.es-silvano .master-idioma-glifo,
+.master-nombre-glifos.es-silvano {
+    font-family: "Richi noto-ol-chiki", "Pangolin", sans-serif;
+}
+
+@font-face {
+    font-family: "Richi noto-osage";
+    src: url("../tipografias/noto-osage.woff2") format("woff2");
+    font-display: swap;
+}
+
+.master-idioma-hoja.es-infracomun,
+.master-idioma-clave.es-infracomun .master-idioma-glifo,
+.master-nombre-glifos.es-infracomun {
+    font-family: "Richi noto-osage", "Pangolin", sans-serif;
+}
+
+@font-face {
+    font-family: "Richi noto-runic";
+    src: url("../tipografias/noto-runic.woff2") format("woff2");
+    font-display: swap;
+}
+
+.master-idioma-hoja.es-enano,
+.master-idioma-clave.es-enano .master-idioma-glifo,
+.master-nombre-glifos.es-enano {
+    font-family: "Richi noto-runic", "Pangolin", sans-serif;
+}
+
+@font-face {
+    font-family: "Richi noto-old-turkic";
+    src: url("../tipografias/noto-old-turkic.woff2") format("woff2");
+    font-display: swap;
+}
+
+.master-idioma-hoja.es-gigante,
+.master-idioma-clave.es-gigante .master-idioma-glifo,
+.master-nombre-glifos.es-gigante {
+    font-family: "Richi noto-old-turkic", "Pangolin", sans-serif;
+}
+
+@font-face {
+    font-family: "Richi noto-old-permic";
+    src: url("../tipografias/noto-old-permic.woff2") format("woff2");
+    font-display: swap;
+}
+
+.master-idioma-hoja.es-gnomo,
+.master-idioma-clave.es-gnomo .master-idioma-glifo,
+.master-nombre-glifos.es-gnomo {
+    font-family: "Richi noto-old-permic", "Pangolin", sans-serif;
+}
+
+@font-face {
+    font-family: "Richi noto-old-south-arabian";
+    src: url("../tipografias/noto-old-south-arabian.woff2") format("woff2");
+    font-display: swap;
+}
+
+.master-idioma-hoja.es-goblin,
+.master-idioma-clave.es-goblin .master-idioma-glifo,
+.master-nombre-glifos.es-goblin {
+    font-family: "Richi noto-old-south-arabian", "Pangolin", sans-serif;
+}
+
+@font-face {
+    font-family: "Richi noto-old-hungarian";
+    src: url("../tipografias/noto-old-hungarian.woff2") format("woff2");
+    font-display: swap;
+}
+
+.master-idioma-hoja.es-orco,
+.master-idioma-clave.es-orco .master-idioma-glifo,
+.master-nombre-glifos.es-orco {
+    font-family: "Richi noto-old-hungarian", "Pangolin", sans-serif;
+}
+
+@font-face {
+    font-family: "Richi noto-old-persian";
+    src: url("../tipografias/noto-old-persian.woff2") format("woff2");
+    font-display: swap;
+}
+
+.master-idioma-hoja.es-draconico,
+.master-idioma-clave.es-draconico .master-idioma-glifo,
+.master-nombre-glifos.es-draconico {
+    font-family: "Richi noto-old-persian", "Pangolin", sans-serif;
+}
+
+@font-face {
+    font-family: "Richi noto-glagolitic";
+    src: url("../tipografias/noto-glagolitic.woff2") format("woff2");
+    font-display: swap;
+}
+
+.master-idioma-hoja.es-infernal,
+.master-idioma-clave.es-infernal .master-idioma-glifo,
+.master-nombre-glifos.es-infernal {
+    font-family: "Richi noto-glagolitic", "Pangolin", sans-serif;
+}
+
+@font-face {
+    font-family: "Richi noto-meroitic";
+    src: url("../tipografias/noto-meroitic.woff2") format("woff2");
+    font-display: swap;
+}
+
+.master-idioma-hoja.es-abisal,
+.master-idioma-clave.es-abisal .master-idioma-glifo,
+.master-nombre-glifos.es-abisal {
+    font-family: "Richi noto-meroitic", "Pangolin", sans-serif;
+}
+
+@font-face {
+    font-family: "Richi noto-bamum";
+    src: url("../tipografias/noto-bamum.woff2") format("woff2");
+    font-display: swap;
+}
+
+.master-idioma-hoja.es-celestial,
+.master-idioma-clave.es-celestial .master-idioma-glifo,
+.master-nombre-glifos.es-celestial {
+    font-family: "Richi noto-bamum", "Pangolin", sans-serif;
+}
+
+@font-face {
+    font-family: "Richi noto-ogham";
+    src: url("../tipografias/noto-ogham.woff2") format("woff2");
+    font-display: swap;
+}
+
+.master-idioma-hoja.es-druidico,
+.master-idioma-clave.es-druidico .master-idioma-glifo,
+.master-nombre-glifos.es-druidico {
+    font-family: "Richi noto-ogham", "Pangolin", sans-serif;
+}
+
+@font-face {
+    font-family: "Richi noto-tifinagh";
+    src: url("../tipografias/noto-tifinagh.woff2") format("woff2");
+    font-display: swap;
+}
+
+.master-idioma-hoja.es-primordial,
+.master-idioma-clave.es-primordial .master-idioma-glifo,
+.master-nombre-glifos.es-primordial {
+    font-family: "Richi noto-tifinagh", "Pangolin", sans-serif;
+}
+
+@font-face {
+    font-family: "Richi noto-linear-a";
+    src: url("../tipografias/noto-linear-a.woff2") format("woff2");
+    font-display: swap;
+}
+
+.master-idioma-hoja.es-profundo,
+.master-idioma-clave.es-profundo .master-idioma-glifo,
+.master-nombre-glifos.es-profundo {
+    font-family: "Richi noto-linear-a", "Pangolin", sans-serif;
+}
+
+@font-face {
+    font-family: "Richi noto-phoenician";
+    src: url("../tipografias/noto-phoenician.woff2") format("woff2");
+    font-display: swap;
+}
+
+.master-idioma-hoja.es-jerga,
+.master-idioma-clave.es-jerga .master-idioma-glifo,
+.master-nombre-glifos.es-jerga {
+    font-family: "Richi noto-phoenician", "Pangolin", sans-serif;
+}
+
+/* EL BOTÍN Y LOS ENCUENTROS: una lista de lo que ha salido, con el
+   icono, la cosa (botón si se puede abrir) y su valor a la derecha. */
+.master-botin {
+    margin-top: 12px;
+}
+
+.master-botin-lista {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.master-botin-cosa {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 8px;
+    border: 1px solid var(--border);
+    border-left: 4px solid var(--yellow);
+    background: var(--purple);
+}
+
+.master-botin-cosa.es-magico {
+    border-left-style: double;
+}
+
+.master-botin-icono {
+    flex: none;
+    font-size: 1.25rem;
+}
+
+.master-botin-objeto {
+    flex: 1 1 auto;
+    min-height: 36px;
+    padding: 2px 4px;
+    border: 0;
+    background: transparent;
+    color: var(--white);
+    font: inherit;
+    font-weight: 700;
+    text-align: left;
+    text-decoration: underline dotted;
+    text-underline-offset: 3px;
+    cursor: pointer;
+}
+
+.master-botin-objeto:hover {
+    color: var(--yellow);
+}
+
+.master-botin-objeto:focus-visible {
+    outline: 3px solid var(--yellow);
+    outline-offset: 1px;
+}
+
+.master-botin-valor {
+    flex: none;
+    margin-left: auto;
+    color: var(--muted);
+    font-size: 0.875rem;
+    text-align: right;
+}
+
+.master-botin-total,
+.master-encuentro-hacen {
+    margin: 10px 0;
+    font-weight: 700;
+}
+
+.master-encuentro-hacen {
+    margin-top: 0;
+    font-style: italic;
+    font-weight: 400;
+}
+
+.master-encuentro-fila {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+}
+
+/* EL DIBUJO, como el Paint: las herramientas en una columna a la
+   izquierda (cada grupo, de dos en dos), el lienzo en medio y las capas a
+   la derecha; si la ventana es estrecha, las capas bajan. El lienzo es
+   de papel (color fijo, como los post-its) y sin gestos del navegador
+   encima, para dibujar con el dedo. */
+.master-dibujo-zona {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    gap: 10px;
+    margin-bottom: 8px;
+}
+
+.master-postit-barra.es-dibujo {
+    top: 0;
+    flex: none;
+    flex-direction: column;
+    gap: 8px;
+    margin: 0;
+    padding: 0 8px 0 0;
+    overflow: visible;
+    border-right: 2px dashed var(--border);
+    border-bottom: 0;
+    background: transparent;
+}
+
+.master-postit-barra.es-dibujo .master-postit-grupo {
+    display: grid;
+    grid-template-columns: repeat(2, 36px);
+    gap: 3px;
+}
+
+.master-postit-barra.es-dibujo .master-postit-grupo.es-selector {
+    grid-template-columns: 75px;
+}
+
+.master-postit-barra.es-dibujo .master-postit-boton {
+    width: 36px;
+    min-width: 0;
+    height: 36px;
+    padding: 0;
+}
+
+.master-dibujo-centro {
+    display: flex;
+    flex: 1 1 320px;
+    flex-direction: column;
+    gap: 8px;
+    min-width: 0;
+}
+
+.master-dibujo-marco {
+    position: relative;
+    min-width: 0;
+}
+
+/* Las opciones de arriba: las de la herramienta y las acciones. */
+.master-dibujo-opciones {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px 14px;
+}
+
+.master-dibujo-deslizador,
+.master-dibujo-optexto {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.master-dibujo-deslizador[hidden],
+.master-dibujo-optexto[hidden] {
+    display: none;
+}
+
+.master-dibujo-deslizador input {
+    width: 8rem;
+    accent-color: var(--yellow);
+}
+
+.master-dibujo-valor {
+    min-width: 3.5em;
+    font-family: var(--fuente-mono);
+    font-size: 0.875rem;
+}
+
+.master-dibujo-numero {
+    width: 4.5rem;
+    min-height: 34px;
+    padding: 2px 6px;
+    border: 2px solid var(--yellow);
+    background: var(--purple);
+    color: var(--white);
+    font: inherit;
+}
+
+.master-dibujo-numero:focus-visible {
+    outline: 3px solid var(--yellow);
+    outline-offset: 2px;
+}
+
+/* El visor del lienzo: con zoom de más, el lienzo se desliza dentro. */
+.master-dibujo-visor {
+    max-width: 100%;
+    overflow: auto;
+}
+
+.master-postit-barra.es-dibujo .master-postit-boton.master-dibujo-zoom-valor {
+    width: 75px;
+    font-family: var(--fuente-mono);
+    font-size: 0.75rem;
+}
+
+/* Lo de guardar, separado de lo de pintar con una raya. */
+.master-postit-barra.es-dibujo .master-postit-grupo.es-guardar {
+    padding-top: 8px;
+    border-top: 2px dashed var(--border);
+}
+
+.master-dibujo-zona.es-estrecha .master-postit-barra.es-dibujo .master-postit-grupo.es-guardar {
+    padding-top: 0;
+    padding-left: 8px;
+    border-top: 0;
+    border-left: 2px dashed var(--border);
+}
+
+/* El cuadro para escribir un texto, encima del lienzo donde se pincha. */
+.master-dibujo-texto {
+    position: absolute;
+    z-index: 2;
+    min-width: 6em;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    --fondo-texto: rgba(255, 255, 255, 0.35);
+    border: 1px dashed var(--yellow);
+    background: var(--fondo-texto);
+    line-height: 1.25;
+    white-space: pre;
+    resize: none;
+    field-sizing: content;
+}
+
+.master-dibujo-texto:focus-visible {
+    outline: 2px solid var(--yellow);
+}
+
+/* Estrecha: las herramientas arriba, en fila, y las capas abajo. */
+.master-dibujo-zona.es-estrecha .master-postit-barra.es-dibujo {
+    flex: 1 1 100%;
+    flex-direction: row;
+    flex-wrap: wrap;
+    padding: 0 0 8px;
+    border-right: 0;
+    border-bottom: 2px dashed var(--border);
+}
+
+.master-dibujo-zona.es-estrecha .master-postit-barra.es-dibujo .master-postit-grupo {
+    display: flex;
+    flex-wrap: wrap;
+}
+
+.master-dibujo-zona.es-estrecha .master-dibujo-panel {
+    flex: 1 1 100%;
+    max-width: none;
+}
+
+.master-dibujo {
+    display: block;
+    box-sizing: border-box;
+    width: 100%;
+    height: auto;
+    border: 2px solid var(--border);
+}
+
+.master-dibujo-encima {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    cursor: crosshair;
+    touch-action: none;
+}
+
+.master-dibujo-encima[data-herramienta="seleccionar"] {
+    cursor: move;
+}
+
+.master-dibujo-encima[data-herramienta="cuentagotas"],
+.master-dibujo-encima[data-herramienta="bote"] {
+    cursor: cell;
+}
+
+.master-dibujo-encima:focus-visible,
+.master-dibujo-marco.es-encima .master-dibujo-encima {
+    outline: 3px solid var(--yellow);
+    outline-offset: 2px;
+}
+
+.master-dibujo-selector {
+    width: 75px;
+    height: 36px;
+    padding: 2px;
+    border: 2px solid var(--yellow);
+    background: transparent;
+    cursor: pointer;
+}
+
+.master-dibujo-selector:focus-visible {
+    outline: 3px solid var(--yellow);
+    outline-offset: 2px;
+}
+
+/* El panel de las capas y la rejilla. */
+.master-dibujo-panel {
+    display: flex;
+    flex: 1 1 200px;
+    flex-direction: column;
+    gap: 6px;
+    max-width: 230px;
+    min-width: 180px;
+}
+
+.master-dibujo-titulo {
+    margin: 0;
+    font-size: 0.9375rem;
+}
+
+.master-dibujo-rejilla {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-top: 8px;
+    padding-top: 8px;
+    border-top: 2px dashed var(--border);
+}
+
+.master-dibujo-plegar {
+    width: 100%;
+    min-height: 36px;
+    padding: 2px 4px;
+    border: 0;
+    background: transparent;
+    color: var(--white);
+    font: inherit;
+    font-weight: 700;
+    text-align: left;
+    cursor: pointer;
+}
+
+.master-dibujo-plegar:focus-visible {
+    outline: 3px solid var(--yellow);
+    outline-offset: 1px;
+}
+
+.master-dibujo-ajustes {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.master-dibujo-ajustes[hidden] {
+    display: none;
+}
+
+.master-dibujo-nuevas,
+.master-dibujo-mandos {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+}
+
+.master-dibujo-nuevas .oc-vida-accion {
+    flex: 1 1 auto;
+    min-height: 36px;
+    padding: 4px 8px;
+}
+
+.master-dibujo-capas {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    max-height: 16rem;
+    margin: 0;
+    padding: 2px;
+    overflow-y: auto;
+    border: 1px solid var(--border);
+    list-style: none;
+}
+
+.master-dibujo-capa {
+    --nivel: 0;
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    padding-left: calc(var(--nivel) * 14px);
+}
+
+.master-dibujo-capa.es-activa {
+    background: color-mix(in srgb, var(--yellow) 22%, transparent);
+}
+
+.master-dibujo-capa.es-vacia {
+    min-height: 28px;
+    padding-left: calc(var(--nivel) * 14px + 40px);
+    color: var(--muted);
+    font-size: 0.875rem;
+}
+
+.master-dibujo-capa .master-nombre-boton {
+    min-width: 30px;
+    min-height: 34px;
+}
+
+.master-dibujo-capa-nombre {
+    display: flex;
+    flex: 1 1 auto;
+    align-items: center;
+    gap: 6px;
+    min-width: 0;
+    min-height: 34px;
+    padding: 2px 4px;
+    border: 1px solid transparent;
+    background: transparent;
+    color: var(--white);
+    font: inherit;
+    font-size: 0.875rem;
+    text-align: left;
+    overflow-wrap: anywhere;
+    cursor: pointer;
+}
+
+.master-dibujo-capa.es-activa .master-dibujo-capa-nombre {
+    font-weight: 700;
+}
+
+.master-dibujo-capa-nombre:hover {
+    border-color: var(--yellow);
+}
+
+.master-dibujo-capa-nombre:focus-visible {
+    outline: 3px solid var(--yellow);
+    outline-offset: 1px;
+}
+
+.master-dibujo-mini {
+    flex: none;
+    width: 40px;
+    height: 30px;
+    border: 1px solid var(--border);
+}
+
+.master-dibujo-renombrar {
+    flex: 1 1 auto;
+    min-height: 34px;
+}
+
+.master-dibujo-opacidad,
+.master-dibujo-campo {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.master-dibujo-opacidad input,
+.master-dibujo-campo input[type="range"] {
+    width: 100%;
+    accent-color: var(--yellow);
+}
+
+.master-dibujo-color {
+    --muestra: #1d1b26;
+    --papel-dibujo: #fdfaf0;
+    position: relative;
+}
+
+.master-dibujo-color::after {
+    position: absolute;
+    inset: 6px;
+    border: 1px solid var(--papel-dibujo);
+    background: var(--muestra);
+    content: "";
+}
+
+.master-dibujo-color[aria-pressed="true"] {
+    outline: 3px solid var(--yellow);
+    outline-offset: 1px;
+}
+
+.master-postit-boton:disabled {
+    opacity: 0.5;
+    cursor: default;
+}
+
+/* LAS IMÁGENES de monstruos y objetos: el enlace a la oficial y la
+   tuya, a lo ancho y sin pasarse de alto. */
+.master-imagen {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.master-imagen-boton {
+    display: block;
+    width: 100%;
+    padding: 4px;
+    border: 2px solid var(--border);
+    background: var(--purple);
+    cursor: zoom-in;
+}
+
+.master-imagen-boton:hover,
+.master-imagen-boton:focus-visible {
+    border-color: var(--yellow);
+    outline: 3px solid var(--yellow);
+    outline-offset: 2px;
+}
+
+.master-imagen-boton[hidden] {
+    display: none;
+}
+
+.master-imagen-propia {
+    display: block;
+    max-width: 100%;
+    max-height: 22rem;
+    margin: 4px auto;
+    object-fit: contain;
+}
+
+.master-imagen-grande {
+    display: block;
+    max-width: 100%;
+    max-height: 80vh;
+    margin: 0 auto;
+    object-fit: contain;
+}
+
+.master-imagen[hidden],
+.master-imagen-propia[hidden],
+.master-imagen-botones[hidden],
+.master-imagen .oc-vacio[hidden] {
+    display: none;
+}
+
+.master-imagen-botones {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.master-imagen-titulo {
+    margin: 16px 0 6px;
+    font-size: 1rem;
+}
+
+/* LOS PNJ RÁPIDOS: su ficha (nombre grande, especie, y cada dato con su
+   🎲 para tirarlo otra vez) y los guardados. */
+.master-pnj {
+    margin-top: 12px;
+    padding: 10px 12px;
+    border: 2px solid var(--yellow);
+}
+
+.master-pnj-cabeza {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 4px 10px;
+}
+
+.master-pnj-nombre {
+    margin: 0;
+    font-size: 1.25rem;
+}
+
+.master-pnj-especie {
+    color: var(--muted);
+}
+
+.master-pnj-datos {
+    display: grid;
+    grid-template-columns: max-content 1fr;
+    gap: 4px 10px;
+    margin: 10px 0;
+}
+
+.master-pnj-datos dt {
+    color: var(--yellow);
+    font-weight: 700;
+}
+
+.master-pnj-datos dd {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 6px;
+    margin: 0;
+}
+
+.master-pnj-botones {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.master-pnj-guardados {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    margin: 6px 0 0;
+    padding: 0;
+    list-style: none;
+}
+
+.master-pnj-guardados[hidden] {
+    display: none;
+}
+
+/* LOS RELOJES: el círculo partido en trozos (lleno: amarillo) con su
+   cuenta, y sus mandos. */
+.master-reloj-nuevo {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 12px;
+}
+
+.master-reloj-nuevo .master-elegir {
+    flex: 1 1 12rem;
+}
+
+.master-relojes {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(11rem, 1fr));
+    gap: 10px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.master-relojes .oc-vacio {
+    grid-column: 1 / -1;
+}
+
+.master-reloj {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding: 8px;
+    border: 2px solid var(--border);
+}
+
+.master-reloj.es-lleno {
+    border-color: var(--yellow);
+}
+
+.master-reloj-cuenta {
+    position: relative;
+    width: 100%;
+    max-width: 9rem;
+    margin: 0 auto;
+}
+
+.master-reloj-dibujo {
+    display: block;
+    width: 100%;
+    height: auto;
+}
+
+.master-reloj-trozo {
+    fill: transparent;
+    stroke: var(--white);
+    stroke-width: 2;
+    cursor: pointer;
+}
+
+.master-reloj-trozo.es-lleno {
+    fill: var(--yellow);
+}
+
+.master-reloj-numero {
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    padding: 0 4px;
+    background: var(--purple);
+    font-family: var(--fuente-mono);
+    font-size: 0.875rem;
+}
+
+.master-reloj-mandos {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 4px;
+}
+
+/* EL CALENDARIO: la fecha de la partida, el tiempo, el mes en rejilla
+   (hoy, rodeado; el elegido, relleno; con apuntes, un punto). */
+.master-cal-ahora {
+    margin: 0;
+}
+
+.master-cal-tiempo,
+.master-cal-cabeza {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px;
+}
+
+.master-cal-cabeza {
+    margin: 12px 0 6px;
+}
+
+.master-cal-mes {
+    flex: 1 1 auto;
+    margin: 0;
+    font-size: 1rem;
+    text-align: center;
+}
+
+.master-cal-propio {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.master-cal-propio[hidden] {
+    display: none;
+}
+
+.master-cal-rejilla {
+    width: 100%;
+    margin-bottom: 10px;
+    border-collapse: collapse;
+    table-layout: fixed;
+}
+
+.master-cal-rejilla th {
+    padding: 2px;
+    color: var(--muted);
+    font-size: 0.75rem;
+    font-weight: 400;
+    text-align: center;
+    overflow-wrap: anywhere;
+}
+
+.master-cal-rejilla td {
+    padding: 2px;
+}
+
+.master-cal-dia {
+    position: relative;
+    width: 100%;
+    min-height: 34px;
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--white);
+    font: inherit;
+    font-size: 0.875rem;
+    cursor: pointer;
+}
+
+.master-cal-dia:hover {
+    border-color: var(--yellow);
+}
+
+.master-cal-dia:focus-visible {
+    outline: 3px solid var(--yellow);
+    outline-offset: 1px;
+}
+
+.master-cal-dia.es-hoy {
+    border: 3px solid var(--yellow);
+    font-weight: 700;
+}
+
+.master-cal-dia.es-elegido {
+    background: var(--yellow);
+    color: var(--yellow-contrast);
+}
+
+.master-cal-dia.con-apunte::after {
+    position: absolute;
+    top: 3px;
+    right: 3px;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: currentColor;
+    content: "";
+}
+
+/* EL GENERADOR DE DUNGEONS: el mapa (un canvas de colores fijos, a lo
+   ancho) y las salas. */
+.master-dungeon-mapa {
+    display: block;
+    width: 100%;
+    height: auto;
+    margin: 12px 0 8px;
+    border: 2px solid var(--border);
+}
+
+.master-dungeon-mapa.es-grande {
+    max-height: 80vh;
+    margin: 0;
+    object-fit: contain;
+}
+
+.master-dungeon-leyenda {
+    margin: 0 0 8px;
+}
+
+.master-dungeon-leyenda[hidden],
+.master-notas-botones .oc-vida-accion[hidden],
+.master-dungeon-mapa[hidden],
+.master-notas-botones[hidden] {
+    display: none;
+}
+
+.master-dungeon-salas {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin: 10px 0 0;
+    padding: 0;
+    list-style: none;
+}
+
+.master-dungeon-sala {
+    padding: 8px 10px;
+    border: 1px solid var(--border);
+    border-left: 4px solid var(--yellow);
+}
+
+.master-dungeon-sala-titulo {
+    margin: 0 0 4px;
+    font-size: 1rem;
+}
+
+.master-dungeon-sala p {
+    margin: 4px 0;
+}
+
+.master-dungeon-cosa .master-botin-objeto {
+    flex: none;
+    min-height: 0;
+    padding: 0 2px;
+}
+
+/* LAS PLANTILLAS al crear un perfil: una por línea, con su radio. */
+.master-plantillas {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin: 4px 0 10px;
+    padding: 0;
+    border: 0;
+}
+
+.master-plantilla {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 6px 8px;
+    border: 1px solid var(--border);
+}
+
+.master-plantilla:has(input:checked) {
+    border-color: var(--yellow);
+    background: color-mix(in srgb, var(--yellow) 15%, transparent);
+}
+
+.master-plantilla input {
+    flex: none;
+    width: 20px;
+    height: 20px;
+    accent-color: var(--yellow);
+}
+
+.master-plantilla-texto {
+    display: flex;
+    flex: 1 1 auto;
+    flex-direction: column;
+    cursor: pointer;
+}
+
+.master-plantilla-texto span {
+    color: var(--muted);
+    font-size: 0.875rem;
+}
+
+/* LOS ATAJOS DE TECLADO. */
+.master-atajos-titulo {
+    margin: 14px 0 6px;
+    font-size: 1rem;
+}
+
+.master-atajos-titulo:first-child {
+    margin-top: 0;
+}
+
+.master-atajos-lista {
+    display: grid;
+    grid-template-columns: max-content 1fr;
+    gap: 4px 14px;
+    margin: 0;
+}
+
+.master-atajos-lista dd {
+    margin: 0;
+}
+
+.master-atajos-lista kbd {
+    display: inline-block;
+    min-width: 1.6em;
+    padding: 0 6px;
+    border: 2px solid var(--yellow);
+    border-bottom-width: 4px;
+    font-family: var(--fuente-mono);
+    font-size: 0.875rem;
+    text-align: center;
+}
+
+/* LOS EFECTOS CON DURACIÓN: el formulario y cada efecto con su barra
+   (lo que queda) y, si se ha acabado, tachado y apagado. */
+.master-efecto-nuevo {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-bottom: 8px;
+}
+
+.master-efecto-nuevo .oc-vida-accion {
+    align-self: flex-start;
+}
+
+.master-efecto-dura {
+    display: grid;
+    grid-template-columns: 6rem 1fr;
+    gap: 6px;
+}
+
+.master-efectos {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin: 10px 0;
+    padding: 0;
+    list-style: none;
+}
+
+.master-efecto {
+    padding: 6px 8px;
+    border: 1px solid var(--border);
+    border-left: 4px solid var(--yellow);
+}
+
+.master-efecto.es-acabado {
+    border-left-color: var(--muted);
+    color: var(--muted);
+}
+
+.master-efecto.es-acabado .master-efecto-nombre strong {
+    text-decoration: line-through;
+}
+
+.master-efecto-fila {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 6px;
+}
+
+.master-efecto-nombre,
+.master-efecto-queda {
+    margin: 0;
+}
+
+.master-efecto-queda {
+    font-size: 0.875rem;
+}
+
+.master-efecto-barra {
+    height: 10px;
+    margin: 4px 0;
+    border: 1px solid var(--border);
+}
+
+.master-efecto-lleno {
+    --parte: 100%;
+    display: block;
+    width: var(--parte);
+    height: 100%;
+    background: var(--yellow);
+}
+
+/* LOS NEGOCIOS: como una carta, con los precios a la derecha. */
+.master-negocio {
+    margin: 12px 0;
+}
+
+.master-negocio-nombre {
+    margin: 0;
+    font-size: 1.25rem;
+}
+
+.master-negocio-tipo {
+    margin: 0 0 8px;
+    color: var(--muted);
+    font-style: italic;
+}
+
+.master-negocio-ambiente {
+    margin: 0 0 8px;
+}
+
+.master-negocio-carta {
+    margin: 10px 0;
+    padding: 8px 10px;
+    border: 2px double var(--yellow);
+}
+
+.master-negocio-titulo {
+    margin: 0 0 6px;
+    font-size: 1rem;
+}
+
+.master-negocio-lista {
+    display: grid;
+    grid-template-columns: 1fr max-content;
+    gap: 4px 12px;
+    margin: 0;
+}
+
+.master-negocio-lista dt {
+    border-bottom: 1px dotted var(--border);
+}
+
+.master-negocio-lista dd {
+    margin: 0;
+    font-family: var(--fuente-mono);
+    font-size: 0.875rem;
+    text-align: right;
+}
+
+.master-negocio-extra {
+    display: block;
+    color: var(--muted);
+    font-size: 0.875rem;
+}
+
+.master-negocio-acciones {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.master-negocio-acciones[hidden] {
+    display: none;
+}
+
+/* LAS TABLAS. */
+.master-ventana-cuerpo .oc-vida-accion[hidden] {
+    display: none;
+}
+
+.oc-notas-texto.es-corta {
+    min-height: 8rem;
+}
+
+.master-tabla-sale {
+    min-height: 1.5em;
+    margin: 10px 0 0;
+    color: var(--white);
+    font-size: 1.125rem;
+    font-weight: 700;
+}
+
+.master-ventana-cuerpo label.oc-dados-etiqueta {
+    display: block;
+    margin-top: 6px;
+}
+
+/* La iniciativa, suelta (sin sus ventanitas de dentro). */
+.oc-ini-bloque + .oc-ini-bloque {
+    margin-top: 16px;
+    padding-top: 12px;
+    border-top: 1px dashed var(--border);
+}
+
+/* LA PARTY: una tarjeta por jugador, con sus datos en filas que se
+   reparten el ancho de la ventana. */
+.master-party-resumen {
+    margin: 0 0 10px;
+    color: var(--muted);
+    font-family: var(--fuente-mono);
+    font-size: 0.75rem;
+}
+
+.master-party {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin: 0 0 12px;
+    padding: 0;
+    list-style: none;
+}
+
+.master-party-pj {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 8px 10px;
+    border: 2px solid var(--border);
+    border-left: 6px solid var(--yellow);
+}
+
+.master-party-fila {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    gap: 6px 8px;
+}
+
+.master-party-campo {
+    display: flex;
+    flex: 0 0 3rem;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+}
+
+.master-party-campo.es-nombre {
+    flex: 2 1 6rem;
+}
+
+.master-party-campo.es-clase {
+    flex: 1 1 4rem;
+}
+
+.master-party-campo.es-car {
+    flex: none;
+    width: 100%;
+}
+
+.master-party-campo.es-pasiva {
+    flex: 1 1 5rem;
+}
+
+.master-party-et {
+    overflow: hidden;
+    color: var(--muted);
+    font-family: var(--fuente-mono);
+    font-size: 0.6875rem;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.master-party-input {
+    width: 100%;
+    min-height: 34px;
+    padding: 2px 6px;
+    border: 2px solid var(--border);
+    background: var(--purple);
+    color: var(--white);
+    font: inherit;
+}
+
+.master-party-campo.es-nombre .master-party-input {
+    font-weight: 700;
+}
+
+.master-party-input:focus-visible {
+    outline: 3px solid var(--yellow);
+    outline-offset: 1px;
+}
+
+.master-party-car {
+    display: flex;
+    flex: 1 1 0;
+    flex-direction: column;
+    min-width: 2.75rem;
+    align-items: center;
+    gap: 2px;
+}
+
+.master-party-quitar {
+    width: 34px;
+    height: 34px;
+    margin-left: auto;
+    padding: 0;
+    border: 2px solid var(--yellow);
+    background: transparent;
+    color: var(--yellow);
+    cursor: pointer;
+}
+
+.master-party-quitar:hover {
+    background: var(--yellow);
+    color: var(--yellow-contrast);
+}
+
+.master-party-quitar:focus-visible {
+    outline: 3px solid var(--yellow);
+    outline-offset: 2px;
+}
+
+/* En estrecho, sin lienzo: una debajo de otra. */
+@media (max-width: 860px) {
+    .master-lienzo.con-lienzo {
+        display: flex;
+        flex-direction: column;
+        gap: 18px;
+        min-height: 0;
+        border: 0;
+        background: none;
+    }
+
+    .master-ventana {
+        position: static;
+        width: auto;
+        height: auto;
+        max-height: 80vh;
+    }
+
+    .master-ventana-tamano {
+        display: none;
+    }
+
+    .master-ventana-barra {
+        cursor: default;
+    }
+}
+
+/* LOS DOCUMENTOS: el árbol de carpetas y notas (cada fila: abrir, ✎ y
+   ✕), y debajo de cada carpeta abierta, lo suyo con sangría. */
+.master-docs-botones {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin: 8px 0;
+}
+
+/* Dónde se quedan las cosas: un aviso con borde a la izquierda. */
+.master-docs-aviso {
+    margin: 0 0 10px;
+    padding: 6px 10px;
+    border-left: 4px solid var(--yellow);
+}
+
+.master-docs-donde {
+    margin: 0 0 8px;
+    color: var(--muted);
+    font-size: 0.875rem;
+}
+
+.master-docs-lista {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.master-docs-lista .master-docs-lista {
+    margin-left: 14px;
+    padding-left: 8px;
+    border-left: 2px dotted var(--border);
+}
+
+.master-docs-fila {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 2px 4px;
+}
+
+.master-docs-fila > .master-docs-lista {
+    flex-basis: 100%;
+}
+
+.master-docs-abrir {
+    display: grid;
+    flex: 1 1 10rem;
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: 0 8px;
+    min-height: 36px;
+    padding: 4px 6px;
+    border: 2px solid transparent;
+    background: transparent;
+    color: var(--white);
+    font: inherit;
+    text-align: left;
+    cursor: pointer;
+}
+
+.master-docs-abrir:hover {
+    border-color: var(--border);
+}
+
+.master-docs-abrir:focus-visible {
+    outline: 3px solid var(--yellow);
+    outline-offset: 1px;
+}
+
+.master-docs-abrir[aria-current="true"] {
+    border-color: var(--yellow);
+}
+
+.master-docs-icono {
+    grid-row: 1 / 4;
+}
+
+.master-docs-nombre {
+    overflow-wrap: anywhere;
+}
+
+.es-carpeta > .master-docs-abrir .master-docs-nombre {
+    font-weight: 700;
+}
+
+.master-docs-ruta,
+.master-docs-trozo {
+    grid-column: 2;
+    color: var(--muted);
+    font-size: 0.8125rem;
+}
+
+.master-docs-trozo {
+    font-style: italic;
+}
+
+.master-docs-mando {
+    width: 30px;
+    height: 30px;
+    padding: 0;
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--white);
+    cursor: pointer;
+}
+
+.master-docs-mando.es-texto {
+    width: auto;
+    padding: 0 8px;
+    font-size: 0.8125rem;
+}
+
+.master-docs-mando:hover {
+    border-color: var(--yellow);
+}
+
+.master-docs-mando:focus-visible {
+    outline: 3px solid var(--yellow);
+    outline-offset: 1px;
+}
+
+.master-docs-mando.es-seguro {
+    border-color: var(--error);
+    background: var(--error);
+    color: #ffffff;
+}
+
+/* Una nota en su ventana: el título y la carpeta en una fila. */
+.master-doc-cabeza {
+    display: grid;
+    grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
+    gap: 8px;
+}
+
+.master-doc-cabeza .oc-dados-texto {
+    width: 100%;
+}
+
+.master-doc-cuando {
+    margin: 4px 0 8px;
+}
+
+/* Un archivo o un enlace en su ventana: la imagen entera (a lo ancho) o
+   el PDF en su marco (el visor del navegador), y debajo abrir y bajar. */
+.master-doc-archivo {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.master-doc-imagen {
+    display: block;
+    max-width: 100%;
+    height: auto;
+    border: 2px solid var(--border);
+}
+
+.master-doc-pdf {
+    width: 100%;
+    min-height: 420px;
+    height: 70vh;
+    border: 2px solid var(--border);
+    background: #ffffff;
+}
+
+/* EL SONIDO AMBIENTE (y los efectos de sonido): arriba el volumen general
+   y silencio; debajo, cada sonido en una tarjeta (tantas columnas como
+   quepan): el botón con su icono y nombre y, debajo, su volumen. */
+.master-ambiente-arriba {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px 16px;
+    margin-bottom: 10px;
+}
+
+.master-ambiente-general {
+    display: flex;
+    flex: 1 1 12rem;
+    align-items: center;
+    gap: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+}
+
+.master-ambiente-general input {
+    flex: 1 1 6rem;
+    min-width: 0;
+    accent-color: var(--yellow);
+}
+
+.master-ambiente-lista {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(10.5rem, 1fr));
+    gap: 10px;
+    margin: 10px 0;
+    padding: 0;
+    list-style: none;
+}
+
+.master-ambiente-fila {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 8px;
+    border: 2px solid var(--border);
+}
+
+.master-ambiente-fila.es-sonando {
+    border-color: var(--yellow);
+}
+
+.master-ambiente-boton {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    min-width: 0;
+    min-height: 64px;
+    padding: 6px 8px;
+    border: 2px solid transparent;
+    background: transparent;
+    color: var(--white);
+    font: inherit;
+    text-align: center;
+    overflow-wrap: anywhere;
+    cursor: pointer;
+}
+
+.master-ambiente-boton:hover {
+    border-color: var(--yellow);
+}
+
+.master-ambiente-boton[aria-pressed="true"],
+.master-ambiente-fila.es-sonando .master-ambiente-boton {
+    background: var(--yellow);
+    color: var(--yellow-contrast);
+    font-weight: 700;
+}
+
+.master-ambiente-boton:focus-visible,
+.master-ambiente-volumen:focus-visible,
+.master-ambiente-general input:focus-visible {
+    outline: 3px solid var(--yellow);
+    outline-offset: 2px;
+}
+
+.master-ambiente-emoji {
+    font-size: 1.6rem;
+    line-height: 1.2;
+}
+
+.master-ambiente-volumen {
+    width: 100%;
+    min-width: 0;
+    accent-color: var(--yellow);
+}
+
+.master-ambiente-quitar {
+    position: absolute;
+    top: 2px;
+    right: 2px;
+}
+
+/* 🎨 de cada sonido: su emoji o su imagen; arriba a la izquierda. */
+.master-ambiente-aspecto {
+    position: absolute;
+    top: 2px;
+    left: 2px;
+}
+
+.master-ambiente-emoji img {
+    display: block;
+    width: 2.6rem;
+    height: 2.6rem;
+    object-fit: cover;
+    border: 2px solid var(--border);
+}
+
+.master-sonidos-seccion {
+    margin: 14px 0 0;
+    font-size: 1rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+}
+
+.master-sonidos-lista {
+    grid-template-columns: repeat(auto-fill, minmax(8.5rem, 1fr));
+    gap: 8px;
+}
+
+.master-sonidos-lista .master-ambiente-fila {
+    padding: 4px;
+}
+
+.master-sonidos-lista .master-ambiente-boton {
+    min-height: 58px;
+}
+
+/* LAS SECCIONES QUE SE PLIEGAN (efectos de sonido): el título es el botón. */
+.master-sonidos-plegar,
+.master-musica-plegar {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 2px 4px;
+    border: 0;
+    background: transparent;
+    color: inherit;
+    font: inherit;
+    letter-spacing: inherit;
+    text-align: left;
+    text-transform: inherit;
+    cursor: pointer;
+}
+
+.master-sonidos-plegar:focus-visible,
+.master-musica-plegar:focus-visible,
+.master-musica-tocar:focus-visible,
+.master-musica-mando:focus-visible,
+.master-musica-modo:focus-visible,
+.master-musica-barra:focus-visible {
+    outline: 3px solid var(--yellow);
+    outline-offset: 2px;
+}
+
+.master-musica-flecha {
+    display: inline-block;
+    transition: transform 0.15s;
+}
+
+[aria-expanded="true"] > .master-musica-flecha {
+    transform: rotate(90deg);
+}
+
+/* LA MÚSICA: el reproductor arriba y, debajo, el árbol de carpetas. */
+.master-musica-repro {
+    padding: 10px;
+    border: 2px solid var(--border);
+    margin-bottom: 10px;
+}
+
+.master-musica-ahora {
+    margin: 0 0 8px;
+    font-weight: 700;
+    overflow-wrap: anywhere;
+}
+
+.master-musica-mandos {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px 8px;
+    margin-bottom: 10px;
+}
+
+.master-musica-mando {
+    min-width: 38px;
+    min-height: 38px;
+    border: 2px solid var(--yellow);
+    background: transparent;
+    color: var(--white);
+    font: inherit;
+    cursor: pointer;
+}
+
+.master-musica-mando.es-grande {
+    min-width: 48px;
+    background: var(--yellow);
+    color: var(--yellow-contrast);
+}
+
+.master-musica-barra {
+    flex: 1 1 8rem;
+    min-width: 0;
+    accent-color: var(--yellow);
+}
+
+.master-musica-tiempo {
+    font-variant-numeric: tabular-nums;
+}
+
+.master-musica-modos {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+}
+
+.master-musica-modo {
+    min-height: 34px;
+    padding: 2px 8px;
+    border: 2px solid var(--yellow);
+    background: transparent;
+    color: var(--white);
+    font: inherit;
+    cursor: pointer;
+}
+
+.master-musica-modo[aria-pressed="true"] {
+    background: var(--yellow);
+    color: var(--yellow-contrast);
+    font-weight: 700;
+}
+
+.master-musica-herramientas {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 8px;
+}
+
+.master-musica-form {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding: 10px;
+    margin-bottom: 10px;
+    border: 2px solid var(--yellow);
+}
+
+.master-musica-form[hidden] {
+    display: none;
+}
+
+.master-musica-form-titulo {
+    margin: 0;
+    font-weight: 700;
+}
+
+.master-musica-form-botones {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.master-musica-arbol,
+.master-musica-resultados,
+.master-musica-dentro {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.master-musica-dentro {
+    margin-left: 14px;
+    padding-left: 10px;
+    border-left: 2px solid var(--border);
+}
+
+.master-musica-cabeza,
+.master-musica-cancion {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 4px;
+    padding: 2px 0;
+}
+
+.master-musica-cabeza .master-musica-plegar {
+    flex: 1 1 10rem;
+    min-height: 36px;
+    font-weight: 700;
+}
+
+.master-musica-cuenta {
+    font-weight: 400;
+    opacity: 0.85;
+}
+
+.master-musica-tocar {
+    display: flex;
+    flex: 1 1 10rem;
+    align-items: center;
+    gap: 8px;
+    min-width: 0;
+    min-height: 36px;
+    padding: 2px 8px;
+    border: 2px solid transparent;
+    background: transparent;
+    color: var(--white);
+    font: inherit;
+    text-align: left;
+    overflow-wrap: anywhere;
+    cursor: pointer;
+}
+
+.master-musica-tocar:hover {
+    border-color: var(--yellow);
+}
+
+.master-musica-cancion.es-sonando .master-musica-tocar {
+    background: var(--yellow);
+    color: var(--yellow-contrast);
+    font-weight: 700;
+}
+
+.master-musica-tocar .master-ambiente-emoji {
+    font-size: 1.1rem;
+}
+
+/* TUS CREACIONES (el ＋ de al lado del buscador): arriba importar y
+   exportar; una lista por pestaña; y, al crear o cambiar, el formulario
+   en la misma ventana, por grupos de campos. */
+.master-creador-barra {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px 10px;
+    margin: 8px 0;
+}
+
+.master-creador-check {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    min-height: 32px;
+    cursor: pointer;
+}
+
+.master-creador-check input {
+    width: 18px;
+    height: 18px;
+    accent-color: var(--yellow);
+}
+
+.master-creador-base {
+    display: flex;
+    flex: 1 1 18rem;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px;
+}
+
+.master-creador-base .master-elegir {
+    flex: 1 1 10rem;
+    min-width: 0;
+}
+
+.master-creador-lista {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    margin: 10px 0 0;
+    padding: 0;
+    list-style: none;
+}
+
+.master-creador-fila {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.master-creador-ver {
+    display: flex;
+    flex: 1 1 auto;
+    flex-direction: column;
+    align-items: flex-start;
+    min-width: 0;
+    padding: 4px 8px;
+    border: 2px solid var(--border);
+    background: transparent;
+    color: var(--white);
+    font: inherit;
+    text-align: left;
+    overflow-wrap: anywhere;
+    cursor: pointer;
+}
+
+.master-creador-ver:hover {
+    border-color: var(--yellow);
+}
+
+.master-creador-ver:focus-visible {
+    outline: 3px solid var(--yellow);
+    outline-offset: 2px;
+}
+
+.master-creador-nombre {
+    font-weight: 700;
+}
+
+.master-creador-detalle {
+    font-size: 0.875rem;
+}
+
+.master-creador-form {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.master-creador-form[hidden] {
+    display: none;
+}
+
+.master-creador-titulo {
+    margin: 0;
+    font-size: 1.1rem;
+}
+
+.master-creador-grupo {
+    margin: 0;
+    padding: 8px 10px 10px;
+    border: 2px solid var(--border);
+}
+
+.master-creador-grupo legend {
+    padding: 0 6px;
+    font-weight: 700;
+}
+
+.master-creador-rejilla {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(9rem, 1fr));
+    gap: 8px 10px;
+}
+
+.master-creador-campo {
+    display: grid;
+    grid-template-rows: 1fr auto;
+    gap: 2px;
+    min-width: 0;
+}
+
+/* La etiqueta abajo de su hueco: si una se parte en dos líneas, las
+   casillas de la fila siguen alineadas. */
+.master-creador-campo > .oc-dados-etiqueta {
+    align-self: end;
+}
+
+.master-creador-campo.es-ancho {
+    grid-column: 1 / -1;
+}
+
+.master-creador-campo .oc-dados-texto,
+.master-creador-campo .master-elegir {
+    min-height: 44px;
+    width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+}
+
+.master-creador-area {
+    resize: vertical;
+    font: inherit;
+}
+
+.master-creador-casillas {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(10rem, 1fr));
+    gap: 2px 10px;
+}
+
+.master-creador-entradas {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.master-creador-entrada {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 4px 6px;
+    padding-bottom: 10px;
+    border-bottom: 1px dashed var(--border);
+}
+
+.master-creador-entrada .master-creador-campo.es-ancho {
+    grid-column: 1 / 2;
+}
+
+.master-creador-entrada .master-docs-mando {
+    grid-row: 1;
+    grid-column: 2;
+    align-self: end;
+}
+
+.master-creador-final {
+    position: sticky;
+    bottom: 0;
+    padding: 8px 0;
+    border-top: 2px solid var(--border);
+    background: var(--purple-lighter);
+}
+
+/* LA VENTANA DEL ESTADO DE UNA IMPORTACIÓN (tus creaciones). */
+.master-informe-estado {
+    margin: 0 0 6px;
+    font-size: 1.15rem;
+    font-weight: 700;
+}
+
+.master-informe-estado.es-mal {
+    color: var(--error);
+}
+
+.master-informe-tabla {
+    width: 100%;
+    margin: 10px 0;
+    border-collapse: collapse;
+}
+
+.master-informe-tabla th,
+.master-informe-tabla td {
+    padding: 4px 8px;
+    border: 1px solid var(--border);
+    text-align: left;
+}
+
+.master-informe-tabla td {
+    font-variant-numeric: tabular-nums;
+    text-align: right;
+}
+
+.master-informe-detalle {
+    margin: 6px 0;
+}
+
+.master-informe-detalle summary {
+    cursor: pointer;
+    font-weight: 700;
+}
+
+.master-informe-detalle summary:focus-visible {
+    outline: 3px solid var(--yellow);
+    outline-offset: 2px;
+}
+
+/* PEGAR UN BLOQUE y SU GUÍA (tus creaciones). */
+.master-pegar {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.master-pegar-area {
+    width: 100%;
+    min-height: 14rem;
+    box-sizing: border-box;
+    font-family: var(--fuente-mono);
+    font-size: 0.875rem;
+    resize: vertical;
+}
+
+.master-guia {
+    max-width: 46rem;
+}
+
+.master-guia-paso {
+    display: block;
+    height: auto;
+    overflow: visible;
+    margin: 18px 0 0;
+    padding: 12px 0 0;
+    border-top: 2px dashed var(--border);
+}
+
+.master-guia-titulo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 0 0 6px;
+    font-size: 1.1rem;
+}
+
+.master-guia-numero {
+    display: inline-flex;
+    flex: none;
+    align-items: center;
+    justify-content: center;
+    width: 2rem;
+    height: 2rem;
+    border-radius: 50%;
+    background: var(--yellow);
+    color: var(--yellow-contrast);
+    font-weight: 700;
+}
+
+.master-guia-imagen {
+    display: block;
+    max-width: 100%;
+    height: auto;
+    margin: 8px 0;
+    border: 2px solid var(--border);
+}
+
+/* El dibujo del bloque seleccionado (paso 2). */
+.master-guia-bloque {
+    position: relative;
+    margin: 10px 0;
+    padding: 26px 14px 30px;
+    border: 2px solid var(--border);
+    background: var(--surface);
+    font-size: 0.875rem;
+}
+
+.master-guia-fila {
+    margin: 0;
+    padding: 2px 4px;
+    background: color-mix(in srgb, var(--yellow) 28%, transparent);
+}
+
+.master-guia-fila.es-nombre {
+    font-size: 1.1rem;
+    font-weight: 700;
+}
+
+.master-guia-fila.es-cursiva {
+    font-style: italic;
+}
+
+.master-guia-fila.es-tabla {
+    font-family: var(--fuente-mono);
+}
+
+.master-guia-fila.es-seccion {
+    margin-top: 6px;
+    font-weight: 700;
+    text-transform: uppercase;
+}
+
+.master-guia-marca {
+    position: absolute;
+    left: 14px;
+    font-size: 0.8125rem;
+    font-weight: 700;
+    color: var(--yellow);
+}
+
+.master-guia-marca.es-desde {
+    top: 4px;
+}
+
+.master-guia-marca.es-hasta {
+    right: 14px;
+    bottom: 6px;
+    left: auto;
+}
+
+/* LA ENTRADA: al abrir, con qué campaña se juega (o crear la primera).
+   A pantalla completa, encima de todo; el resto, inerte mientras. */
+.master-entrada {
+    position: fixed;
+    inset: 0;
+    z-index: 2000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+    overflow-y: auto;
+    background-color: var(--purple);
+}
+
+.master-entrada-caja {
+    width: min(34rem, 100%);
+    max-height: 100%;
+    margin: auto;
+    padding: 20px 24px 18px;
+    overflow-y: auto;
+    border: 3px solid var(--yellow);
+    background: var(--purple-lighter);
+    box-shadow: 8px 8px 0 var(--yellow);
+    color: var(--white);
+}
+
+.master-entrada-icono {
+    display: block;
+    width: 72px;
+    height: 72px;
+    margin: 0 auto 6px;
+}
+
+.master-entrada-titulo {
+    margin: 0 0 6px;
+    font-family: var(--fuente-ventana);
+    font-size: 2rem;
+    text-align: center;
+    color: var(--yellow);
+}
+
+.master-entrada-texto {
+    margin: 0 0 12px;
+    text-align: center;
+}
+
+.master-entrada-lista {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin: 0 0 16px;
+    padding: 0;
+    list-style: none;
+}
+
+.master-entrada-campana {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    width: 100%;
+    padding: 10px 14px;
+    border: 2px solid var(--yellow);
+    background: transparent;
+    color: var(--white);
+    font: inherit;
+    text-align: left;
+    cursor: pointer;
+}
+
+.master-entrada-campana:hover,
+.master-entrada-campana:focus-visible {
+    background: var(--yellow);
+    color: var(--yellow-contrast);
+}
+
+.master-entrada-campana:focus-visible {
+    outline: 3px solid var(--white);
+    outline-offset: 2px;
+}
+
+.master-entrada-nombre {
+    font-size: 1.15rem;
+    font-weight: 700;
+}
+
+.master-entrada-detalle {
+    font-size: 0.875rem;
+}
+
+.master-entrada-form {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding-top: 12px;
+    border-top: 2px dashed var(--border);
+}
+
+.master-entrada-traer {
+    margin-top: 12px;
+    padding-top: 10px;
+    border-top: 2px dashed var(--border);
+}
+
+.master-entrada-privado {
+    margin: 14px 0 0;
+    text-align: center;
+}
+
+/* EL COMPENDIO (el ＋ de arriba a la izquierda): una pantalla aparte,
+   encima del tablero (por debajo de las ventanas modales y los dados). */
+.master-compendio {
+    position: fixed;
+    inset: 0;
+    z-index: 880;
+    display: flex;
+    flex-direction: column;
+    background-color: var(--purple);
+}
+
+.master-compendio-cabeza {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px 16px;
+    padding: calc(10px + env(safe-area-inset-top, 0px)) 16px 10px;
+    border-bottom: 3px solid var(--yellow);
+    background: var(--purple-lighter);
+}
+
+.master-compendio-titulo {
+    margin: 0;
+    font-family: var(--fuente-ventana);
+    font-size: 1.6rem;
+    color: var(--yellow);
+}
+
+.master-compendio-cuerpo {
+    flex: 1 1 auto;
+    width: min(64rem, 100%);
+    margin: 0 auto;
+    padding: 12px 16px calc(16px + env(safe-area-inset-bottom, 0px));
+    overflow-y: auto;
+    box-sizing: border-box;
+}
+
+/* En el compendio, las pestañas siguen a la vista al bajar. */
+.master-compendio-cuerpo [role="tablist"] {
+    position: sticky;
+    top: -12px;
+    z-index: 3;
+    padding-top: 12px;
+    background: var(--purple);
+}
+
+/* LA FICHA DE UN PERSONAJE: las características con su salvación, las
+   habilidades con su marca (● competente, ◆ pericia), los espacios de
+   conjuro como casillas y los PNJ que conoce. */
+.master-pj-caracteristicas {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(7.5rem, 1fr));
+    gap: 8px;
+    margin: 10px 0;
+    padding: 0;
+    list-style: none;
+}
+
+.master-pj-c {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    padding: 6px 4px;
+    border: 2px solid var(--border);
+    text-align: center;
+}
+
+.master-pj-c.es-competente {
+    border-color: var(--yellow);
+}
+
+.master-pj-salv {
+    font-size: 0.8125rem;
+}
+
+.master-pj-marca-comp {
+    width: 1.2em;
+    color: var(--yellow);
+    text-align: center;
+}
+
+.master-pj-pg .master-party-input {
+    width: 5rem;
+}
+
+.master-pj-espacios {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin: 6px 0 10px;
+    padding: 0;
+    list-style: none;
+}
+
+.master-pj-espacios li {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+}
+
+.master-pj-casillas {
+    display: inline-flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.master-pj-casillas input {
+    width: 22px;
+    height: 22px;
+    accent-color: var(--yellow);
+}
+
+.master-pj-pnjs {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin: 0 0 10px;
+    padding: 0;
+    list-style: none;
+}
+
+.master-pj-pnj {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px;
+    margin: 0 0 4px;
+}
+
+.master-pjf-fila {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(9rem, 1fr));
+    align-items: end;
+    gap: 6px 10px;
+    padding-bottom: 10px;
+    border-bottom: 1px dashed var(--border);
+}
+
+/* EL INVENTARIO COMÚN DE LA PARTY. */
+.master-inv-monedas {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(5.5rem, 1fr));
+    gap: 8px;
+}
+
+.master-inv-moneda {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.master-inv-moneda .master-party-input {
+    width: 100%;
+}
+
+.master-inv-lista {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin: 10px 0;
+    padding: 0;
+    list-style: none;
+}
+
+.master-inv-objeto {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 0;
+    border-bottom: 1px dotted var(--border);
+}
+
+.master-inv-objeto > :first-child {
+    flex: 1 1 10rem;
+}
+
+.master-inv-cant {
+    min-width: 2.5rem;
+    font-weight: 700;
+    text-align: center;
+}
+
+.master-inv-dar {
+    max-width: 10rem;
+}
+
+/* LA MÚSICA EN TARJETAS (como un panel de sonidos): cada carpeta y canción,
+   un botón grande con su imagen o su emoji; la que suena, resaltada. */
+.master-musica-camino {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 4px 6px;
+    margin: 6px 0;
+}
+
+.master-musica-paso {
+    padding: 2px 8px;
+    border: 2px solid transparent;
+    background: transparent;
+    color: var(--white);
+    font: inherit;
+    cursor: pointer;
+}
+
+.master-musica-paso:hover,
+.master-musica-paso:focus-visible {
+    border-color: var(--yellow);
+}
+
+.master-musica-paso[aria-current] {
+    font-weight: 700;
+    color: var(--yellow);
+}
+
+.master-musica-tarjetas {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(8.5rem, 1fr));
+    gap: 10px;
+    margin: 8px 0;
+    padding: 0;
+    list-style: none;
+}
+
+.master-musica-tarjeta {
+    display: flex;
+    flex-direction: column;
+    border: 2px solid var(--border);
+    background: color-mix(in srgb, var(--yellow) 6%, transparent);
+}
+
+.master-musica-tarjeta.es-carpeta {
+    border-style: dashed;
+}
+
+.master-musica-tarjeta.es-sonando {
+    border-color: var(--yellow);
+    box-shadow: 0 0 0 2px var(--yellow);
+}
+
+.master-musica-tarjeta-boton {
+    display: flex;
+    flex: 1 1 auto;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    padding: 10px 6px 6px;
+    border: 0;
+    background: transparent;
+    color: var(--white);
+    font: inherit;
+    text-align: center;
+    overflow-wrap: anywhere;
+    cursor: pointer;
+}
+
+.master-musica-tarjeta-boton:hover {
+    background: color-mix(in srgb, var(--yellow) 18%, transparent);
+}
+
+.master-musica-tarjeta-boton:focus-visible {
+    outline: 3px solid var(--yellow);
+    outline-offset: -3px;
+}
+
+.master-musica-tarjeta.es-sonando .master-musica-tarjeta-boton {
+    background: var(--yellow);
+    color: var(--yellow-contrast);
+}
+
+.master-musica-icono {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 4.5rem;
+    height: 4.5rem;
+    font-size: 2.6rem;
+    line-height: 1;
+}
+
+.master-musica-icono img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 6px;
+}
+
+.master-musica-tarjeta-nombre {
+    font-weight: 700;
+}
+
+.master-musica-tarjeta-mandos {
+    display: flex;
+    justify-content: center;
+    gap: 4px;
+    padding: 4px;
+    border-top: 1px solid var(--border);
+}
+
+.master-musica-emojis {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+}
+
+.master-musica-emoji {
+    width: 2.4rem;
+    height: 2.4rem;
+    border: 2px solid var(--border);
+    background: transparent;
+    font-size: 1.3rem;
+    cursor: pointer;
+}
+
+.master-musica-emoji:hover,
+.master-musica-emoji:focus-visible {
+    border-color: var(--yellow);
+}
+
+.master-musica-tarjetas-caja[hidden] {
+    display: none;
+}
+
+/* De dónde se puede importar un personaje. */
+.master-importar-de {
+    margin: 0 0 10px;
+    padding-left: 1.2em;
+}
+
+.master-importar-de li {
+    margin: 2px 0;
+}
+
+/* LA FOTO del personaje: en su ficha (pulsar: verla grande), en la party
+   y en el editor. */
+.master-pj-foto-boton {
+    float: left;
+    margin: 0 12px 6px 0;
+    padding: 0;
+    border: 2px solid var(--border);
+    background: transparent;
+    cursor: zoom-in;
+}
+
+.master-pj-foto-boton:hover,
+.master-pj-foto-boton:focus-visible {
+    border-color: var(--yellow);
+    outline: 3px solid var(--yellow);
+    outline-offset: 2px;
+}
+
+.master-pj-cabeza::after {
+    content: "";
+    display: block;
+    clear: both;
+}
+
+.master-pj-foto {
+    display: block;
+    width: 84px;
+    height: 84px;
+    object-fit: cover;
+}
+
+.master-pjf-foto-vista .master-pj-foto {
+    width: 120px;
+    height: 120px;
+    border: 2px solid var(--border);
+}
+
+.master-pj-foto-grande {
+    display: block;
+    max-width: 100%;
+    max-height: 75vh;
+    margin: 0 auto;
+}
+
+.master-party-foto {
+    width: 36px;
+    height: 36px;
+    margin-right: 8px;
+    border: 2px solid var(--border);
+    border-radius: 50%;
+    object-fit: cover;
+    vertical-align: middle;
+}
+
+/* Editar la ficha: añadir rasgos y dotes del SRD (a lo ancho). */
+.master-pjf-srd {
+    grid-column: 1 / -1;
+}
+
+/* ＋ compendio → rasgos: los del SRD, plegados debajo de los tuyos. */
+.master-creador-srd {
+    margin-top: 14px;
+    border-top: 2px dashed var(--border);
+    padding-top: 10px;
+}
+
+.master-creador-srd summary {
+    cursor: pointer;
+    font-weight: 700;
+}
+
+.master-creador-srd summary:focus-visible {
+    outline: 3px solid var(--yellow);
+    outline-offset: 2px;
+}
+
+/* LICENCIAS Y CRÉDITOS (en la entrada, plegado, y en ⚙ opciones). */
+.master-creditos-seccion + .master-creditos-seccion {
+    margin-top: 14px;
+}
+
+.master-creditos-titulo {
+    margin: 0 0 4px;
+    font-size: 1rem;
+}
+
+.master-creditos-seccion p {
+    margin: 0 0 6px;
+}
+
+.master-creditos-enlaces {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.master-creditos-enlaces .oc-vida-accion,
+.master-anadir-otras a.oc-vida-accion {
+    text-decoration: none;
+}
+
+.master-entrada-licencias {
+    margin-top: 12px;
+    font-size: 0.875rem;
+    text-align: left;
+}
+
+.master-entrada-licencias summary {
+    cursor: pointer;
+}
+
+.master-entrada-licencias summary:focus-visible {
+    outline: 3px solid var(--yellow);
+    outline-offset: 2px;
+}
+
+.master-entrada-licencias[open] summary {
+    margin-bottom: 10px;
+}
+
+/* La party: tirada de grupo (una salvación o habilidad de todos). */
+.master-party-grupo {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: end;
+    gap: 6px 8px;
+    margin: 10px 0 6px;
+}
+
+.master-party-grupo .oc-dados-etiqueta {
+    flex-basis: 100%;
+}
+
+.master-party-grupo-resultado {
+    margin: 0 0 10px;
+    padding-left: 1.6em;
+}
+
+.master-party-grupo-resultado .es-critico strong {
+    color: var(--yellow);
+}
+
+.master-party-grupo-resultado .es-pifia {
+    opacity: 0.8;
+}
+
+/* Encuentros: con la party de la campaña. */
+.master-encuentro-party {
+    display: block;
+    margin: 6px 0;
+}
+
+/* Subir de nivel. */
+.master-subidas-lista {
+    padding-left: 1.2em;
+}
+
+.master-subidas-lista li {
+    margin: 6px 0;
+}
+
+.master-encuentro-fila[hidden] {
+    display: none;
+}
+
+/* La ventana «📺 jugadores» (lo que ven en la pantalla de jugadores). */
+.master-jug-ahora {
+    font-weight: 700;
+}
+
+.master-jug-form {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin: 10px 0;
+}
+
+.master-jug-form textarea {
+    width: 100%;
+}
+
+.master-jug-pg {
+    display: block;
+    margin: 6px 0;
+}
+
+/* ---- Tablas aleatorias ---- */
+.master-tablas-fila[hidden],
+.master-tablas-editar[hidden],
+.master-rel-form[hidden] {
+    display: none;
+}
+
+.master-rel-form .master-campo > * {
+    flex: 0 0 auto;
+}
+
+.master-tablas-fila {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: end;
+    gap: 8px;
+}
+
+.master-tablas-fila select {
+    flex: 1 1 180px;
+}
+
+.master-tablas-sale {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    min-height: 3em;
+    margin: 12px 0;
+    padding: 10px 12px;
+    border: 2px solid var(--yellow);
+    font-size: 1.125rem;
+}
+
+.master-tablas-de {
+    color: var(--yellow);
+    font-size: 0.875rem;
+}
+
+.master-tablas-hist {
+    margin: 0 0 12px;
+    padding-left: 1.4em;
+    font-size: 0.9375rem;
+}
+
+.master-tablas-editar {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-top: 12px;
+}
+
+/* ---- Línea temporal ---- */
+.master-linea-form {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-bottom: 12px;
+}
+
+.master-linea-cuando {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: end;
+    gap: 8px;
+}
+
+.master-linea-cuando .master-campo {
+    flex: 1 1 200px;
+}
+
+.master-linea {
+    list-style: none;
+    margin: 12px 0 0;
+    padding: 0 0 0 14px;
+    border-left: 3px solid var(--yellow);
+}
+
+.master-linea-paso {
+    position: relative;
+    margin: 0 0 14px;
+    padding: 0 0 0 8px;
+}
+
+.master-linea-paso::before {
+    content: "";
+    position: absolute;
+    left: -22px;
+    top: 0.35em;
+    width: 11px;
+    height: 11px;
+    border: 2px solid var(--yellow);
+    background: var(--purple-lighter);
+}
+
+.master-linea-paso.es-sesion::before {
+    background: var(--yellow);
+}
+
+.master-linea-cab {
+    display: flex;
+    flex-direction: column;
+    margin: 0;
+}
+
+.master-linea-cuandoes {
+    color: var(--yellow);
+    font-size: 0.875rem;
+}
+
+.master-linea-mandos {
+    display: flex;
+    gap: 4px;
+    margin-top: 4px;
+}
+
+.master-linea-sesion {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+/* ---- Mapa de relaciones ---- */
+.master-rel-form {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: end;
+    gap: 8px;
+    margin-bottom: 10px;
+}
+
+.master-rel-form .master-campo {
+    flex: 1 1 140px;
+}
+
+.master-rel-mapa {
+    display: block;
+    width: 100%;
+    height: auto;
+    border: 2px solid var(--border);
+    background: var(--purple-lighter);
+    touch-action: none;
+}
+
+.master-rel-nodo {
+    cursor: grab;
+}
+
+.master-rel-circulo {
+    fill: var(--purple);
+    stroke: var(--yellow);
+    stroke-width: 3;
+}
+
+.master-rel-circulo.es-pj {
+    stroke-width: 6;
+}
+
+.master-rel-emoji {
+    font-size: 34px;
+}
+
+.master-rel-nombre,
+.master-rel-lazo-texto {
+    fill: var(--white);
+    paint-order: stroke;
+    stroke: var(--purple-lighter);
+    stroke-width: 5px;
+}
+
+.master-rel-nombre {
+    font-size: 24px;
+}
+
+.master-rel-lazo-texto {
+    font-size: 20px;
+}
+
+.master-rel-lista {
+    list-style: none;
+    margin: 12px 0 0;
+    padding: 0;
+}
+
+.master-rel-quien {
+    margin-bottom: 8px;
+}
+
+.master-rel-cab {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin: 0;
+}
+
+.master-rel-lazos {
+    margin: 2px 0 0;
+    padding-left: 1.4em;
+}
+
+.master-rel-marca {
+    display: inline-block;
+    width: 14px;
+    height: 4px;
+    vertical-align: middle;
+}
+
+/* ---- Música: aleatorio, fundido, con efectos, buscar y puntos ---- */
+.master-musica-ajustes {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px 16px;
+    margin-bottom: 10px;
+}
+
+.master-musica-ajuste {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.master-musica-ajuste span {
+    white-space: nowrap;
+}
+
+.master-musica-ajuste select {
+    width: auto;
+}
+
+.master-musica-busca {
+    margin: 8px 0;
+}
+
+.master-musica-busca[hidden],
+.master-musica-resultados[hidden] {
+    display: none;
+}
+
+.master-musica-busca input {
+    width: 100%;
+}
+
+.master-musica-puntos {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 16px;
+    margin: 8px 0;
+    padding: 8px 10px;
+    border: 2px solid var(--border);
+}
+
+.master-musica-puntos legend {
+    padding: 0 4px;
+}
+
+.master-musica-punto {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: end;
+    gap: 6px;
+}
+
+.master-musica-punto .oc-dados-etiqueta {
+    flex: 1 0 100%;
+}
+
+.master-musica-punto input {
+    width: 9ch;
+}

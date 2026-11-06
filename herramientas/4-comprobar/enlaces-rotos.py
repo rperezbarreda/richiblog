@@ -62,7 +62,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "0-comun"))
 import json
 import re
 
-from comun import RAIZ
+from comun import APPS_APARTE, RAIZ
 
 # Las direcciones absolutas del propio sitio también se comprueban: en
 # las cabeceras hay bastantes (canonical, og:image, el RSS) y ahí es
@@ -122,6 +122,11 @@ LOS_LEEN_LAS_HERRAMIENTAS = {
     # evento esa página no existe, y nadie las pide; con el primero, sí.
     "estilos/paginas/mundo-linea.css",
     "estilos/paginas/mundo-linea.responsive.css",
+    # Las recetas: su JSON lo leen 3-generadores/generar-recetas.py (que
+    # escribe las páginas) y generar-posts.py; su script lo piden las
+    # páginas de cada receta, y mientras no haya ninguna nadie lo pide.
+    "datos/mis_movidas/recetas.json",
+    "ligero/scripts/paginas/recetas.js",
 }
 
 
@@ -602,6 +607,12 @@ def revisar(mirar_externos=False):
         if pagina in usados:
             continue
         if pagina.relative_to(RAIZ).as_posix() in ENTRADAS:
+            continue
+        # Las ventanas de las apps que van tal cual (la de jugadores y el
+        # reproductor de la pantalla de máster): las abre la app desde
+        # su JS, no un enlace.
+        partes = pagina.relative_to(RAIZ).parts
+        if partes[0] in APPS_APARTE and partes[1:] != ("index.html",):
             continue
         huerfanos.append(pagina)
 

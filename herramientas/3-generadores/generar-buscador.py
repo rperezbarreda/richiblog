@@ -63,12 +63,12 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "0-comun"))
 import re
 from html.parser import HTMLParser
 
-from comun import RAIZ, es_borrador, escribir_json, leer_json, limpiar_html
+from comun import APPS_APARTE, RAIZ, es_borrador, escribir_json, leer_json, limpiar_html
 
 SALIDA = RAIZ / "datos" / "sitio" / "buscador.json"
 
 EXCLUIDOS = {"not_found.html"}
-CARPETAS_EXCLUIDAS = {"herramientas", "fragmentos"}
+CARPETAS_EXCLUIDAS = {"herramientas", "fragmentos"} | APPS_APARTE
 
 # Las páginas que son solo un listado de otras cosas: salen en la
 # búsqueda (alguien puede buscar "mapa"), pero sin texto, porque su texto

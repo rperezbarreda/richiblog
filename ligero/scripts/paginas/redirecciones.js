@@ -3,7 +3,7 @@
 */
 (function () {
     const REDIRECCIONES = [
-        ["/web/pantalla_master/pantalla_master.html", "/web/mis_movidas/rol/index_rol.html"],
+        ["/web/pantalla_master/pantalla_master.html", "/pantalla-master/"],
         ["/web/wiki/mapamundi/azarasia/condado_de_burcrecia/condado_de_burcrecia.html", "/web/wiki/mapamundi/azarasia/condado_de_burcrelle/condado_de_burcrelle.html"],
         ["/web/wiki/mapamundi/azarasia/reino_de_nocravel/reino_de_nocravel.html", "/web/wiki/mapamundi/azarasia/reino_de_neclaverna/reino_de_neclaverna.html"],
         ["/web/wiki/mapamundi/azarasia/reino_de_terredia/reino_de_terredia.html", "/web/wiki/mapamundi/azarasia/reino_de_telzaria/reino_de_telzaria.html"],

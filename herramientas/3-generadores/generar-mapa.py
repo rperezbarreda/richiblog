@@ -70,6 +70,7 @@ import hashlib
 import re
 
 from comun import (
+    APPS_APARTE,
     MESES_CORTOS,
     RAIZ,
     es_borrador,
@@ -88,7 +89,7 @@ LISTADOS = (
 # Lo mismo que se queda fuera del sitemap: lo que no es una página de la
 # web que alguien pueda visitar.
 EXCLUIDOS = {"not_found.html"}
-CARPETAS_EXCLUIDAS = {"herramientas", "fragmentos"}
+CARPETAS_EXCLUIDAS = {"herramientas", "fragmentos"} | APPS_APARTE
 
 # El orden en que salen las secciones en la tabla. Lo que no esté aquí
 # va al final, por orden alfabético.

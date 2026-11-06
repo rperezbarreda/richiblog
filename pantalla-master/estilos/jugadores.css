@@ -1,0 +1,125 @@
+/* =========================================
+   LA PANTALLA DE JUGADORES (jugadores.html)
+   =========================================
+   A pantalla completa y en grande (para la tele o para compartirla):
+   una imagen ajustada, un texto, la iniciativa o una pantalla de espera. */
+
+.jug-cuerpo {
+    display: block;
+    height: auto;
+    min-height: 100vh;
+    margin: 0;
+    overflow-y: auto;
+}
+
+.jug {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    width: 100%;
+    min-height: 100vh;
+    margin: 0;
+    padding: 16px;
+    border: 0;
+    box-shadow: none;
+    background: transparent;
+    overflow: visible;
+}
+
+.jug-titulo {
+    margin: 0;
+    font-size: clamp(1.5rem, 4vw, 3rem);
+    text-align: center;
+}
+
+.jug-dentro {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    justify-content: center;
+    min-height: 0;
+}
+
+.jug-imagen {
+    display: block;
+    width: 100%;
+    max-height: calc(100vh - 120px);
+    object-fit: contain;
+}
+
+[data-modo="imagen"] .jug-titulo.visually-hidden + .jug-dentro .jug-imagen {
+    max-height: calc(100vh - 40px);
+}
+
+.jug-texto {
+    max-width: 60ch;
+    margin: 0 auto;
+    font-size: clamp(1.25rem, 2.6vw, 2rem);
+    line-height: 1.5;
+}
+
+.jug-espera,
+.jug-vacio {
+    margin: 0;
+    font-size: clamp(2rem, 8vw, 6rem);
+    text-align: center;
+}
+
+.jug-vacio {
+    font-size: clamp(1.25rem, 3vw, 2rem);
+}
+
+.jug-ronda {
+    margin: 0 0 8px;
+    color: var(--yellow);
+    font-size: clamp(1.25rem, 3vw, 2rem);
+    font-weight: 700;
+    text-align: center;
+}
+
+.jug-ini {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    width: min(100%, 48rem);
+    margin: 0 auto;
+    padding: 0;
+    list-style: none;
+}
+
+.jug-ini-fila {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px 14px;
+    padding: 10px 14px;
+    border: 2px solid var(--border);
+    border-left: 12px solid var(--yellow);
+    background: var(--purple-lighter);
+    font-size: clamp(1.125rem, 2.4vw, 1.75rem);
+}
+
+.jug-ini-fila.es-su-turno {
+    border-color: var(--yellow);
+    box-shadow: 0 0 0 3px var(--yellow);
+}
+
+.jug-le-toca {
+    padding: 0 8px;
+    background: var(--yellow);
+    color: var(--yellow-contrast);
+    font-weight: 700;
+}
+
+.jug-ini-nombre {
+    flex: 1;
+    font-weight: 700;
+}
+
+.jug-ini-pg {
+    font-variant-numeric: tabular-nums;
+}
+
+.jug-aviso:empty {
+    display: none;
+}

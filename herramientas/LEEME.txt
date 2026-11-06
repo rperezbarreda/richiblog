@@ -676,6 +676,41 @@
   listado y en su filtro.
 
 
+  LA PANTALLA DE MÁSTER
+
+  Es una app aparte (github.com/rperezbarreda/pantalla_master), y en la
+  web va TAL CUAL en pantalla-master/ (richi.blog/pantalla-master/): la
+  misma app que se descarga, sin el menú ni nada del blog. Se puede
+  instalar desde el navegador y va sin conexión (su sw.js). Lo que se
+  guarda se queda en el navegador de cada uno.
+
+  Cada vez que cambies la app y la subas a su GitHub (a main):
+
+      python herramientas/1-publicar/traer-pantalla-master.py
+
+  Se baja la última versión y la deja en pantalla-master/ (un espejo: lo
+  que ya no está en la app, se quita). Para probar algo de la app que
+  aún no has subido, pásale la carpeta de tu copia:
+
+      python herramientas/1-publicar/traer-pantalla-master.py "C:\ruta\pantalla_master"
+
+  NO SE TOCA NADA DE pantalla-master/ A MANO: se pisa la próxima vez.
+  Los cambios, en la app. Por eso las herramientas de la web la dejan en
+  paz (APPS_APARTE, en comun.py): ni cabeceras, ni buscador, ni mapa del
+  sitio, ni ligero/. Solo el sitemap enseña su entrada.
+
+  Se llega desde roleito → «pantalla de máster» en el menú y desde su
+  tarjeta en recursos de rol («Usar en el navegador»). La dirección vieja
+  (web/pantalla_master/pantalla_master.html) lleva aquí.
+
+  Comparte el navegador con el blog: el tema y los ajustes de
+  accesibilidad (richi-theme, richi-texto…) son los mismos en los dos.
+
+  OJO CON LOS SONIDOS: si la app lleva .ogg, la cuenta gratis de
+  Neocities no los deja subir, y sin ellos no se instala para ir sin
+  conexión. El script avisa.
+
+
   LAS RECETAS
 
   Mis movidas → recetas. Se escriben desde el editor: Escribir → «Las
@@ -4391,11 +4426,10 @@
   scripts/paginas/personajes.js (solo las pestañas).
 
 
-  LA PANTALLA DE MÁSTER ya no está en la web (desde el 05-11-2026): es
-  una app aparte, con su propio repositorio (github.com/rperezbarreda/
-  pantalla_master). En la web solo queda su descarga, en «recursos de
-  rol» (roleito → recursos de rol), que enlaza a la última versión que
-  publica ese repositorio (releases/latest).
+  LA PANTALLA DE MÁSTER es una app aparte, con su propio repositorio
+  (github.com/rperezbarreda/pantalla_master). En la web va tal cual en
+  pantalla-master/ (mira «LA PANTALLA DE MÁSTER», más arriba), y su
+  descarga en «recursos de rol» (releases/latest).
 
 
 ---------------------------------------------------------------

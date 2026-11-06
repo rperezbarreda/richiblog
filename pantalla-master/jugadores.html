@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https:; media-src 'self' blob:; font-src 'self'; connect-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#12091c">
+    <title>Pantalla de jugadores</title>
+    <link rel="icon" href="imagenes/icono.svg" type="image/svg+xml">
+    <link rel="stylesheet" href="estilos/base.css">
+    <link rel="stylesheet" href="estilos/jugadores.css">
+    <script src="scripts/arranque.js"></script>
+    <script defer src="scripts/jugadores.js"></script>
+</head>
+<body class="jug-cuerpo">
+    <main class="jug" data-jug>
+        <h1 class="jug-titulo visually-hidden" data-jug-titulo>Pantalla de jugadores</h1>
+        <div class="jug-dentro" data-jug-dentro></div>
+        <p class="jug-aviso" data-jug-aviso role="status"></p>
+    </main>
+</body>
+</html>

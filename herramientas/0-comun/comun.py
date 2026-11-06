@@ -29,6 +29,12 @@ from pathlib import Path
 # desde dónde ejecutes la herramienta.
 RAIZ = Path(__file__).resolve().parents[2]
 HERRAMIENTAS = RAIZ / "herramientas"
+# Apps que van TAL CUAL dentro del sitio, con sus propias páginas, su CSS y
+# su JS (sin el menú ni las cabeceras del blog): la pantalla de máster, que
+# es una app aparte y se copia con 1-publicar/traer-pantalla-master.py.
+# Los generadores (cabeceras, buscador, mapa del sitio) y las
+# comprobaciones no entran en ellas.
+APPS_APARTE = {"pantalla-master"}
 PLANTILLAS = HERRAMIENTAS / "plantillas"
 
 # Los meses, como los escribe la web. MESES_CORTOS es lo que se pinta en

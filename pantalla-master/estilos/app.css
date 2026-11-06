@@ -1,0 +1,181 @@
+/* =========================================
+   LA APP: la pantalla de máster a toda la ventana, sin el blog.
+   Lo de la web se queda (los colores, las letras, los temas, las
+   ventanas), pero sin barra lateral ni marco grande: un borde fino y lo
+   justo de aire, para que en una tablet quepa todo el tablero.
+   ========================================= */
+body.app {
+    padding:
+        env(safe-area-inset-top, 0)
+        env(safe-area-inset-right, 0)
+        max(var(--hueco-abajo, 0px), env(safe-area-inset-bottom, 0))
+        env(safe-area-inset-left, 0);
+}
+
+.app .app-principal {
+    margin: 10px;
+    width: auto;
+    border-width: 2px;
+    box-shadow: 4px 4px 0 var(--yellow);
+}
+
+.app .master-page {
+    height: 100%;
+    padding: 8px 12px 12px;
+    gap: 16px;
+}
+
+/* El «Aa» de accesibilidad, en la barra (no flotando encima). */
+.app .ajustes-abrir.app-aa {
+    position: static;
+    width: auto;
+    min-width: 2.25rem;
+    height: auto;
+    box-shadow: none;
+}
+
+.app .ajustes-abrir[hidden] {
+    display: none;
+}
+
+/* En tablet y móvil, sin margen ni sombra: a toda la pantalla. */
+@media (max-width: 1100px), (pointer: coarse) {
+    .app .app-principal {
+        margin: 0;
+        border-width: 0;
+        box-shadow: none;
+    }
+
+    .app .master-page {
+        padding: 6px 8px 8px;
+    }
+}
+
+/* Hay una versión nueva. */
+.app-actualizar {
+    position: fixed;
+    right: 16px;
+    bottom: 16px;
+    z-index: 10000;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+    max-width: min(420px, calc(100vw - 32px));
+    padding: 12px;
+    border: 2px solid var(--yellow);
+    background: var(--purple-lighter);
+    color: var(--white);
+    box-shadow: 6px 6px 0 var(--yellow);
+}
+
+.app-actualizar p {
+    flex: 1 1 100%;
+    margin: 0;
+}
+
+/* El ancho del lanzador de dados pegado a la derecha. */
+.app {
+    --app-dados-ancho: clamp(18rem, 32vw, 24rem);
+}
+
+/* LOS DADOS: un botón redondo con el d20, siempre abajo a la derecha;
+   abre y pliega (también con la tecla D) el lanzador de dados, pegado a
+   la derecha de arriba abajo. En pantallas anchas el tablero se encoge
+   para dejarle sitio; en las estrechas, va por encima. */
+.app .oc-boton.oc-boton-dados.es-redondo {
+    position: fixed;
+    right: calc(18px + env(safe-area-inset-right, 0px));
+    bottom: calc(18px + env(safe-area-inset-bottom, 0px));
+    z-index: 950;
+    width: 3.6rem;
+    height: 3.6rem;
+    padding: 0;
+    border: 2px solid var(--yellow);
+    border-radius: 50%;
+    background: var(--yellow);
+    color: var(--yellow-contrast);
+    box-shadow: 0 0 0 3px var(--purple), 4px 4px 0 3px color-mix(in srgb, var(--yellow) 45%, transparent);
+}
+
+.app .oc-boton.oc-boton-dados.es-redondo .oc-dados-silueta {
+    width: 2.1rem;
+    height: 2.1rem;
+}
+
+.app .oc-boton.oc-boton-dados.es-redondo:focus-visible {
+    outline: 3px solid var(--white);
+    outline-offset: 4px;
+}
+
+.app .oc-boton.oc-boton-dados.es-redondo[aria-expanded="true"] {
+    background: var(--purple-lighter);
+    color: var(--yellow);
+}
+
+.app .oc-dados.es-acoplada {
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: auto;
+    width: min(var(--app-dados-ancho), 100vw);
+    max-height: none;
+    padding-bottom: calc(5.5rem + env(safe-area-inset-bottom, 0px));
+    border-width: 0 0 0 3px;
+    box-shadow: -6px 0 0 color-mix(in srgb, var(--yellow) 35%, transparent);
+    animation: app-dados-entra 0.18s ease-out;
+}
+
+@keyframes app-dados-entra {
+    from {
+        transform: translateX(40px);
+        opacity: 0;
+    }
+}
+
+:root[data-movimiento="quieto"] .app .oc-dados.es-acoplada {
+    animation: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .app .oc-dados.es-acoplada {
+        animation: none;
+    }
+}
+
+/* Desde 900 px (un iPad en horizontal), el tablero se encoge para que
+   no quede nada tapado (ni el buscador ni ⚙ ni Aa, que van arriba a la
+   derecha); por debajo, el panel va por encima. */
+@media (min-width: 900px) {
+    .app.con-dados .app-principal {
+        margin-right: calc(var(--app-dados-ancho) + 10px);
+    }
+}
+
+@media (min-width: 900px) and (max-width: 1100px), (min-width: 900px) and (pointer: coarse) {
+    .app.con-dados .app-principal {
+        margin-right: var(--app-dados-ancho);
+    }
+}
+
+/* La barra de arriba (pestañas, buscador…) sigue a la vista al bajar por
+   el tablero. Las ventanas van en su propio contexto (isolation) para
+   que, por mucho que se traigan delante, no la tapen. */
+.app .master-barra {
+    position: sticky;
+    top: -8px;
+    z-index: 20;
+    padding-top: 8px;
+    background: var(--purple);
+}
+
+.app .master-lienzo {
+    isolation: isolate;
+}
+
+@media (max-width: 1100px), (pointer: coarse) {
+    .app .master-barra {
+        top: -6px;
+        padding-top: 6px;
+    }
+}

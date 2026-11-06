@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https:; media-src 'self' blob:; font-src 'self'; connect-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#12091c">
+    <title>Música · Pantalla de máster</title>
+    <link rel="icon" href="imagenes/icono.svg" type="image/svg+xml">
+    <link rel="stylesheet" href="estilos/base.css">
+    <link rel="stylesheet" href="estilos/reproductor.css">
+    <script src="scripts/arranque.js"></script>
+    <script defer src="scripts/reproductor.js"></script>
+</head>
+<body class="repro-cuerpo">
+    <main class="repro" data-repro>
+        <h1 class="visually-hidden">Música de la pantalla de máster</h1>
+        <div class="repro-portada" data-repro-portada aria-hidden="true">🎵</div>
+        <p class="repro-titulo" data-repro-titulo>Nada sonando.</p>
+        <p class="repro-carpeta" data-repro-carpeta></p>
+        <div class="repro-progreso">
+            <input class="repro-barra" type="range" min="0" max="1000" value="0" aria-label="Por dónde va" data-repro-barra>
+            <span class="repro-tiempo" data-repro-tiempo aria-hidden="true">0:00 / 0:00</span>
+        </div>
+        <div class="repro-mandos" data-repro-mandos>
+            <button class="repro-mando" type="button" data-repro-orden="anterior" aria-label="Anterior">⏮</button>
+            <button class="repro-mando es-grande" type="button" data-repro-orden="tocar" aria-label="Reproducir" data-repro-tocar>▶</button>
+            <button class="repro-mando" type="button" data-repro-orden="siguiente" aria-label="Siguiente">⏭</button>
+            <button class="repro-mando" type="button" data-repro-orden="parar" aria-label="Parar">■</button>
+        </div>
+        <div class="repro-abajo" data-repro-abajo>
+            <label class="repro-volumen"><span>🔊 volumen</span>
+                <input type="range" min="0" max="100" value="80" data-repro-volumen></label>
+            <div class="repro-modos" role="group" aria-label="Repetir">
+                <button class="repro-modo" type="button" data-repro-aleatorio aria-pressed="false">🔀 aleatorio</button>
+                <button class="repro-modo" type="button" data-repro-modo="una">🔂 la canción</button>
+                <button class="repro-modo" type="button" data-repro-modo="carpeta">🔁 la carpeta</button>
+                <button class="repro-modo" type="button" data-repro-modo="nada">➡️ sin repetir</button>
+            </div>
+        </div>
+        <p class="repro-aviso" data-repro-aviso role="status"></p>
+        <button class="repro-limpio" type="button" data-repro-limpio aria-pressed="false"
+            title="Esconde los mandos para compartir esta ventana (en Discord, OBS…); vuelven al pasar el ratón">🎬 sólo la canción</button>
+    </main>
+</body>
+</html>

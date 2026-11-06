@@ -81,7 +81,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "0-comun"))
 import hashlib
 import re
 
-from comun import RAIZ, leer_texto, escribir_texto
+from comun import APPS_APARTE, RAIZ, leer_texto, escribir_texto
 # El CSS y el JS sin comentarios, que es lo que se sirve (ver ligero.py).
 from ligero import sin_comentarios
 
@@ -100,8 +100,8 @@ PLANTILLAS = {
     "herramientas/plantillas/receta.html": "/web/mis_movidas/recetas/una-receta.html",
 }
 
-# Carpetas que no son el sitio.
-FUERA = {"herramientas", "fragmentos"}
+# Carpetas que no son el sitio, y las apps que van tal cual (comun.py).
+FUERA = {"herramientas", "fragmentos"} | APPS_APARTE
 
 
 # =========================================

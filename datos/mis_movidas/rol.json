@@ -5,8 +5,8 @@
         "date": "05-11-2026",
         "image": "/imagenes/mis_movidas/rol/thumbnail_pantalla_master.webp",
         "alt": "La pantalla de máster abierta en el tablero de combate: las pestañas de los tableros arriba y la ventana de iniciativa",
-        "system": "D&D 5e (SRD 5.2) · Windows, macOS y Linux",
-        "description": "Programa gratuito para dirigir partidas: tableros con ventanas que colocas a tu gusto (iniciativa, bestiario, conjuros, fichas de la party, música, sonido ambiente, generadores, notas…). Funciona sin conexión y todo se guarda en tu ordenador. Descomprime el .zip y ábrelo con doble clic.",
+        "system": "D&D 5e (SRD 5.2) · en el navegador, o para Windows, macOS y Linux",
+        "description": "Programa gratuito para dirigir partidas: tableros con ventanas que colocas a tu gusto (iniciativa, bestiario, conjuros, fichas de la party, música, sonido ambiente, generadores, notas…). Funciona sin conexión y todo se guarda en tu dispositivo. Úsala en el navegador (se puede instalar como app) o descárgala: descomprime el .zip y ábrela con doble clic.",
         "galeria": [
             {
                 "imagen": "/imagenes/mis_movidas/rol/pantalla_master/combate.webp",
@@ -58,6 +58,10 @@
             }
         ],
         "descargas": [
+            {
+                "texto": "Usar en el navegador →",
+                "url": "/pantalla-master/"
+            },
             {
                 "texto": "Descargar en GitHub →",
                 "url": "https://github.com/rperezbarreda/pantalla_master/releases/latest"

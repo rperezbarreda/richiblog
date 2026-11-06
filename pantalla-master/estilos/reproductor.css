@@ -1,0 +1,199 @@
+/* =========================================
+   EL REPRODUCTOR EN SU VENTANA (reproductor.html)
+   =========================================
+   Una sola columna centrada: la portada grande, el nombre, la barra y
+   los mandos. Con «sólo la canción», los mandos se esconden (para
+   compartir la ventana) y vuelven al pasar el ratón o con el teclado. */
+
+.repro-cuerpo {
+    display: block;
+    height: auto;
+    min-height: 100vh;
+    margin: 0;
+    overflow-y: auto;
+}
+
+.repro {
+    position: relative;
+    min-height: 100vh;
+    border: 0;
+    box-shadow: none;
+    background: transparent;
+    overflow: visible;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    max-width: 560px;
+    margin: 0 auto;
+    padding: 20px 16px 16px;
+    text-align: center;
+}
+
+.repro-portada {
+    display: grid;
+    place-items: center;
+    width: min(72vw, 280px);
+    aspect-ratio: 1;
+    border: 3px solid var(--border);
+    background: var(--purple-lighter);
+    font-size: min(30vw, 7rem);
+    line-height: 1;
+    overflow: hidden;
+}
+
+.repro.es-sonando .repro-portada {
+    border-color: var(--yellow);
+}
+
+.repro-portada img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.repro-titulo {
+    margin: 4px 0 0;
+    font-size: 1.5rem;
+    font-weight: 700;
+    overflow-wrap: anywhere;
+}
+
+.repro-carpeta {
+    min-height: 1.4em;
+    margin: 0;
+    color: var(--yellow);
+}
+
+.repro-progreso {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+}
+
+.repro-barra,
+.repro-volumen input {
+    flex: 1 1 auto;
+    width: 100%;
+    min-width: 80px;
+    accent-color: var(--yellow);
+}
+
+.repro-tiempo {
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+}
+
+.repro-mandos,
+.repro-modos {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 8px;
+}
+
+.repro-mando,
+.repro-modo,
+.repro-limpio {
+    min-width: 48px;
+    min-height: 44px;
+    padding: 4px 12px;
+    border: 2px solid var(--yellow);
+    background: transparent;
+    color: var(--yellow);
+    font: inherit;
+    font-size: 1.25rem;
+    cursor: pointer;
+}
+
+.repro-mando.es-grande {
+    min-width: 64px;
+    background: var(--yellow);
+    color: var(--yellow-contrast);
+}
+
+.repro-modo,
+.repro-limpio {
+    font-size: 0.9375rem;
+}
+
+.repro-modo[aria-pressed="true"],
+.repro-limpio[aria-pressed="true"] {
+    background: var(--yellow);
+    color: var(--yellow-contrast);
+    font-weight: 700;
+}
+
+.repro-mando:hover,
+.repro-modo:hover,
+.repro-limpio:hover {
+    outline: 2px solid var(--yellow);
+    outline-offset: 2px;
+}
+
+.repro-mando:focus-visible,
+.repro-modo:focus-visible,
+.repro-limpio:focus-visible,
+.repro-barra:focus-visible,
+.repro-volumen input:focus-visible {
+    outline: 3px solid var(--yellow);
+    outline-offset: 3px;
+}
+
+.repro-abajo {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+}
+
+.repro-volumen span {
+    white-space: nowrap;
+}
+
+.repro-volumen {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+}
+
+.repro-aviso {
+    min-height: 1.4em;
+    margin: 0;
+}
+
+.repro-aviso:empty {
+    min-height: 0;
+}
+
+/* «Sólo la canción»: los mandos, fuera de la vista (pero no del
+   teclado: al llegar a ellos, vuelven). */
+.repro.es-limpio .repro-mandos,
+.repro.es-limpio .repro-abajo,
+.repro.es-limpio .repro-limpio {
+    opacity: 0;
+    transition: opacity 0.2s;
+}
+
+.repro.es-limpio:hover .repro-mandos,
+.repro.es-limpio:hover .repro-abajo,
+.repro.es-limpio:hover .repro-limpio,
+.repro.es-limpio:focus-within .repro-mandos,
+.repro.es-limpio:focus-within .repro-abajo,
+.repro.es-limpio:focus-within .repro-limpio {
+    opacity: 1;
+}
+
+.repro.es-limpio .repro-barra {
+    pointer-events: none;
+}
+
+.repro.es-limpio:hover .repro-barra,
+.repro.es-limpio:focus-within .repro-barra {
+    pointer-events: auto;
+}

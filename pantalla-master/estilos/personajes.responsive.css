@@ -1,0 +1,264 @@
+/* MIS PERSONAJES en pantallas estrechas. */
+
+/* Una columna, en el orden del HTML: la ficha (el nombre, la foto, las
+   características y los botones), las pestañas y su recuadro; y se
+   desplaza la página. */
+@media (max-width: 860px) {
+    .oc-lateral {
+        width: 100%;
+        max-width: 24rem;
+        align-self: center;
+    }
+
+    /* EN EL MÓVIL, en vez del menú, un botón fijo debajo de la barra de
+       arriba del sitio con la parte que se ve («📖 historia ▾»), que abre
+       una ventana con todas (personajes.js). Fijo y no «sticky» (sticky
+       falla en algunos navegadores); su alto lo mide personajes.js
+       (--oc-tira-alto) para dejarle hueco arriba. Por debajo del menú
+       lateral del sitio (z-index 90-100), que lo tapa al abrirse. Al bajar
+       se esconde detrás de la barra del sitio. */
+    .oc-ficha-page .oc-panel.con-menu .oc-menu {
+        display: none;
+    }
+
+    .oc-ficha-page .oc-menu-movil {
+        position: fixed;
+        top: var(--barra-alto);
+        right: 0;
+        left: 0;
+        z-index: 80;
+        display: block;
+        padding: 6px 12px;
+        border-bottom: 3px solid var(--yellow);
+        background: var(--purple);
+        box-shadow: 0 3px 0 var(--oc-color);
+        transition: transform 0.2s ease;
+    }
+
+    .oc-ficha-page .oc-menu-movil.es-escondida {
+        transform: translateY(calc(-100% - 8px));
+    }
+
+    .oc-menu-movil-boton {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        width: 100%;
+        min-height: 44px;
+        padding: 6px 12px;
+        border: 2px solid var(--yellow);
+        background: var(--yellow);
+        color: var(--yellow-contrast);
+        font-family: var(--fuente-mono);
+        font-size: 0.9375rem;
+        font-weight: 700;
+        text-align: left;
+        cursor: pointer;
+    }
+
+    .oc-menu-movil-boton:focus-visible {
+        outline: 3px solid var(--yellow);
+        outline-offset: 3px;
+    }
+
+    .oc-menu-movil-texto {
+        flex: 1 1 auto;
+        min-width: 0;
+    }
+
+    .oc-page.oc-ficha-page {
+        padding-top: calc(var(--oc-tira-alto, 3.6rem) + 18px);
+    }
+
+    /* EL RESUMEN: la ficha del personaje (el post-it, la foto, los
+       atributos) solo se ve al elegir «resumen»; y entonces, solo ella. */
+    .oc-ficha-page .oc-lateral {
+        display: none;
+    }
+
+    .oc-ficha-page.ver-resumen .oc-lateral {
+        display: flex;
+    }
+
+    .oc-ficha-page.ver-resumen .oc-principal {
+        display: none;
+    }
+
+    .oc-ficha-page .oc-lateral:focus {
+        outline: none;
+    }
+}
+
+/* El botón de los dados en el móvil, flotando abajo a la izquierda (el de
+   subir va a la derecha). */
+.oc-boton-dados.es-flotante {
+    position: fixed;
+    bottom: calc(16px + var(--hueco-abajo));
+    left: 16px;
+    z-index: 445;
+    width: 52px;
+    height: 52px;
+    box-shadow: 0 0 0 3px var(--purple);
+}
+
+@media (max-width: 520px) {
+    .oc-page {
+        padding: 18px 16px;
+    }
+
+    .oc-panel {
+        min-height: 0;
+        padding: 16px 14px;
+        box-shadow: 4px 4px 0 var(--yellow);
+    }
+
+    .oc-npc-foto {
+        width: 4rem;
+    }
+}
+
+/* El botón del menú del móvil, fuera en el ordenador. */
+.oc-menu-movil {
+    display: none;
+}
+
+/* LA VENTANA CON TODAS LAS PARTES (en el móvil). */
+.oc-menu-fondo {
+    position: fixed;
+    inset: 0;
+    z-index: 890;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    background: rgba(10, 6, 16, 0.72);
+}
+
+.oc-menu-fondo[hidden] {
+    display: none;
+}
+
+.oc-menu-ventana {
+    display: flex;
+    flex-direction: column;
+    width: min(20rem, 100%);
+    max-height: calc(100dvh - 40px);
+    border: 3px solid var(--yellow);
+    background: var(--purple-lighter);
+    box-shadow: 6px 6px 0 var(--oc-color);
+}
+
+.oc-menu-ventana-barra {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 6px 6px 6px 14px;
+    background: var(--yellow);
+    color: var(--yellow-contrast);
+}
+
+.oc-menu-ventana-titulo {
+    margin: 0;
+    font-family: var(--fuente-mono);
+    font-size: 1rem;
+}
+
+.oc-menu-ventana-cerrar {
+    width: 44px;
+    height: 44px;
+    padding: 0;
+    border: 2px solid var(--yellow-contrast);
+    background: transparent;
+    color: var(--yellow-contrast);
+    font-size: 1rem;
+    cursor: pointer;
+}
+
+.oc-menu-ventana-cerrar:focus-visible {
+    outline: 3px solid var(--yellow-contrast);
+    outline-offset: 2px;
+}
+
+.oc-menu-ventana-cuerpo {
+    min-height: 0;
+    padding: 14px;
+    overflow-y: auto;
+}
+
+.oc-menu-ventana-lista {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+/* Las partes de la ficha, en su grupo: su título y, debajo, un poco
+   metidas, con una raya delante. */
+.oc-menu-ventana-grupo {
+    margin: 6px 0;
+}
+
+.oc-menu-ventana-subtitulo {
+    margin: 0 0 8px;
+    color: var(--yellow);
+    font-family: var(--fuente-mono);
+    font-size: 0.875rem;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+}
+
+.oc-menu-ventana-lista.es-de-grupo {
+    padding-left: 12px;
+    border-left: 2px dashed var(--border);
+}
+
+.oc-menu-ventana-volver {
+    display: block;
+    margin-top: 16px;
+    padding: 10px 12px;
+    border: 2px dashed var(--yellow);
+    color: var(--yellow);
+    font-family: var(--fuente-mono);
+    font-size: 0.875rem;
+    text-align: center;
+}
+
+.oc-menu-ventana-volver:focus-visible {
+    outline: 3px solid var(--yellow);
+    outline-offset: 3px;
+}
+
+.oc-menu-ventana-opcion {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    min-height: 48px;
+    padding: 8px 12px;
+    border: 2px solid var(--yellow);
+    background: transparent;
+    color: var(--yellow);
+    font-family: var(--fuente-mono);
+    font-size: 0.9375rem;
+    font-weight: 700;
+    text-align: left;
+    cursor: pointer;
+}
+
+.oc-menu-ventana-opcion:hover,
+.oc-menu-ventana-opcion[aria-current="true"] {
+    background: var(--yellow);
+    color: var(--yellow-contrast);
+}
+
+.oc-menu-ventana-opcion[aria-current="true"] {
+    box-shadow: inset 6px 0 0 var(--oc-color);
+}
+
+.oc-menu-ventana-opcion:focus-visible {
+    outline: 3px solid var(--yellow);
+    outline-offset: 3px;
+}
