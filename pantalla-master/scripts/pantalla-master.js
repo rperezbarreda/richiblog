@@ -17031,6 +17031,20 @@
             fila("Las ventanas de esta pestaña", otras);
         }
         fila("Copia de seguridad", copias(() => cerrar()));
+        // En la web (no en el ejecutable, que ya es la app en el
+        // ordenador): de dónde bajarla para usarla sin el navegador.
+        if (!(location.hostname === "127.0.0.1" && location.port === "47321")) {
+            const bajar = crear("a", "oc-vida-accion", "⬇️ descargar la app");
+            bajar.href = "https://github.com/rperezbarreda/pantalla_master/releases/latest";
+            bajar.target = "_blank";
+            bajar.rel = "noopener noreferrer";
+            bajar.setAttribute("aria-label", "Descargar la app para Windows, macOS o Linux (se abre aparte, en GitHub)");
+            const otras = crear("div", "master-anadir-otras");
+            otras.append(bajar);
+            fila("La app en tu ordenador", crear("p", "oc-hoja-nota", "Para Windows, macOS y Linux: descomprime el .zip y"
+                + " ábrela con doble clic. Lo guardado va en su carpeta, no en el navegador: para llevarte lo de aquí,"
+                + " haz antes una copia de seguridad e impórtala allí."), otras);
+        }
         const lic = crear("div", "master-anadir-otras");
         const web = crear("a", "oc-vida-accion", "🌐 el SRD en la web");
         web.href = "https://www.dndbeyond.com/srd";
