@@ -279,27 +279,69 @@ def _tabla():
     return tabla
 
 
+def _del_compendio():
+    """Tus nombres, los del compendio de mis personajes (0-comun/
+    compendio.py): {lo de D&D Beyond o un nombre de antes: el tuyo}. Mandan
+    sobre todo lo demás: si en el compendio llamas a «Goodberry» «Buenas
+    bayas», al importar sale «Buenas bayas»."""
+    try:
+        import compendio
+    except ImportError:
+        return {}, {}
+    originales, de_antes = {}, compendio.renombres()
+    for tipo in compendio.TIPOS:
+        for x in compendio.leer(tipo):
+            if str(x.get("original") or "").strip():
+                originales[_clave(x["original"])] = x["nombre"]
+    return originales, de_antes
+
+
 class Traductor:
     """traducir(«Fire Bolt») -> «Descarga de fuego». Lo que no sabe lo
-    devuelve igual y lo apunta en .sin_traducir (para el aviso)."""
+    devuelve igual y lo apunta en .sin_traducir (para el aviso). Con los
+    nombres del compendio por encima (_del_compendio). En .originales
+    apunta de qué venía cada cosa traducida ({«Descarga de fuego»: «Fire
+    Bolt»}), para guardarlo como «original» en el compendio."""
 
     def __init__(self):
         self.tabla = _tabla()
+        self.mios, self.de_antes = _del_compendio()
         self.sin_traducir = []
+        self.originales = {}
 
     def __call__(self, texto, apuntar=True):
         texto = str(texto or "").strip()
         if not texto:
             return ""
+        salida = self._traducir(texto, apuntar)
+        self.originales.setdefault(salida, texto)
+        return salida
+
+    def _mio(self, texto):
+        """El nombre del compendio, si lo hay (por lo de D&D Beyond o por un
+        nombre de antes)."""
+        if self.mios.get(_clave(texto)):
+            return self.mios[_clave(texto)]
+        if not self.de_antes:
+            return None
+        import compendio
+        return self.de_antes.get(compendio.llano(texto))
+
+    def _traducir(self, texto, apuntar):
+        if self.mios.get(_clave(texto)):
+            return self.mios[_clave(texto)]
         hallado = self.tabla.get(_clave(texto))
         if hallado:
-            return hallado
+            return self._mio(hallado) or hallado
         # «Wand of the War Mage, +1»: la parte de antes de la coma y lo de
         # detrás tal cual (los +1 no se traducen).
         if "," in texto:
             antes, despues = texto.split(",", 1)
-            if _clave(antes) in self.tabla and re.fullmatch(r"\s*\+\d+\s*", despues):
-                return self.tabla[_clave(antes)] + "," + despues
+            if re.fullmatch(r"\s*\+\d+\s*", despues) and (self.mios.get(_clave(antes)) or _clave(antes) in self.tabla):
+                base = self.mios.get(_clave(antes)) or self._mio(self.tabla[_clave(antes)]) or self.tabla[_clave(antes)]
+                return base + "," + despues
+        if self._mio(texto):
+            return self._mio(texto)
         if apuntar and texto not in self.sin_traducir:
             self.sin_traducir.append(texto)
         return texto

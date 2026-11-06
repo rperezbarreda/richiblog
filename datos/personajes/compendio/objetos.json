@@ -1,69 +1,82 @@
 {
     "objetos": [
         {
+            "nombre": "Anillo del Carnero",
+            "original": "Ring of the Ram",
+            "datos": "Anillo · raro · sintonizado · lo lleva puesto",
+            "texto": "Este anillo tiene 3 cargas y recupera diariamente al amanecer 1d3 cargas gastadas. Mientras lleves puesto el anillo, puedes utilizar una acción para gastar de 1 a 3 de sus cargas y realizar un ataque de conjuro a distancia contra una criatura que puedas ver a 60 pies (18 metros) o menos de ti. El anillo produce una cabeza espectral de carnero y realiza su tirada de ataque con un bonificador de +7. Si impacta, por cada carga que gastes, el objetivo recibe 2d10 de daño de Fuerza y es empujado 5 pies (1,5 metros) alejándose de ti.\n\nComo alternativa, puedes gastar de 1 a 3 cargas del anillo como una acción para intentar romper un objeto que puedas ver a 60 pies (18 metros) o menos de ti y que no esté puesto ni sea transportado por nadie. El anillo realiza una prueba de Fuerza con un bonificador de +5 por cada carga que gastes."
+        },
+        {
             "nombre": "Arco corto",
+            "original": "Shortbow",
             "datos": "Arma · lo lleva puesto",
             "texto": "El dominio del arco corto te permite añadir tu bonificador por competencia a la tirada de ataque de cualquier ataque que realices con él.\n\nEsta arma tiene la siguiente propiedad de maestría. Para utilizarla, debes tener un rasgo que te permita hacerlo.\n\n***Desventaja.*** Si impactas a una criatura con esta arma y le infliges daño, tienes ventaja en tu siguiente tirada de ataque contra esa criatura antes del final de tu siguiente turno."
         },
         {
             "nombre": "Arco largo, +1",
+            "original": "Longbow, +1",
             "datos": "Arma · poco común · lo lleva puesto",
             "texto": "Tienes un bonificador de +1 a las tiradas de ataque y daño que realices con esta arma mágica."
         },
         {
             "nombre": "Armadura de cuero",
+            "original": "Leather",
             "datos": "Armadura · lo lleva puesto",
             "texto": "La coraza y las hombreras de esta armadura están hechas de cuero endurecido al hervirlo en aceite. El resto de la armadura está hecho de materiales más blandos y flexibles."
         },
         {
+            "nombre": "Bastón Vuelacegadores",
+            "original": "Skyblinder Staff",
+            "datos": "Bastón · poco común · sintonizado · lo lleva puesto",
+            "texto": "Tienes un bonificador de +1 a las tiradas de ataque y daño que realices con este bastón mágico. Mientras lo sostengas, tienes un bonificador de +1 a las tiradas de ataque de conjuro.\n\nSi una criatura voladora que puedas ver a 30 pies (9 metros) o menos de ti realiza una tirada de ataque contra ti, puedes utilizar tu reacción para alzar el bastón y hacer que emita un destello de luz. El atacante tiene desventaja en la tirada de ataque y debe superar una tirada de salvación de Constitución con CD 15 o quedar cegado hasta el comienzo de su siguiente turno."
+        },
+        {
             "nombre": "Capa élfica",
+            "original": "Cloak of Elvenkind",
             "datos": "Objeto maravilloso · poco común · sintonizado · lo lleva puesto",
             "texto": "Mientras lleves puesta esta capa con la capucha levantada, las pruebas de Sabiduría (Percepción) realizadas para verte tienen desventaja, y tú tienes ventaja en las pruebas de Destreza (Sigilo) realizadas para esconderte, ya que el color de la capa cambia para camuflarte. Subir o bajar la capucha requiere una acción."
         },
         {
+            "nombre": "Casa de Naipes",
+            "original": "House of Cards",
+            "datos": "Objeto maravilloso · poco común · lo lleva puesto",
+            "texto": "Esta baraja de cartas está decorada con formas geométricas que presentan motivos protectores. Mientras sostengas la baraja, puedes utilizar una acción para barajarla y hacer que las cartas se repartan por sí solas y se transformen en un refugio hecho de cartas. El refugio puede adoptar la forma que desees, pero debe caber dentro de un cubo de 40 pies (12 metros) centrado en un punto situado a 30 pies (9 metros) o menos de ti. El refugio tiene una puerta y hasta cuatro ventanas, y solo tú puedes abrirlas o cerrarlas. Tiene suelo y techo, y mantiene una temperatura agradable en su interior.\n\nEl refugio tiene CA 15, 50 puntos de golpe e inmunidad al daño de veneno y psíquico. El refugio dura 24 horas, hasta que lo disipes como una acción o hasta que sus puntos de golpe se reduzcan a 0. Cuando termina la duración del refugio, este vuelve a transformarse en una baraja de cartas y aparece en tu mano. Una vez que la baraja se ha transformado en un refugio, no puede volver a utilizarse hasta el siguiente amanecer."
+        },
+        {
             "nombre": "Cota de mallas",
+            "original": "Chain Mail",
             "datos": "Armadura · lo lleva puesto",
             "texto": "La cota de malla, fabricada con anillas metálicas entrelazadas, incluye una capa de tela acolchada que se lleva debajo para evitar rozaduras y amortiguar el impacto de los golpes. La armadura incluye guanteletes."
         },
         {
             "nombre": "Daga",
+            "original": "Dagger",
             "datos": "Arma · lo lleva puesto",
             "texto": "El dominio de la daga te permite añadir tu bonificador por competencia a la tirada de ataque de cualquier ataque que realices con ella.\n\nEsta arma tiene la siguiente propiedad de maestría. Para utilizarla, debes tener un rasgo que te permita hacerlo.\n\n***Desventaja.*** Si impactas a una criatura con esta arma y le infliges daño, tienes ventaja en tu siguiente tirada de ataque contra esa criatura antes del final de tu siguiente turno."
         },
         {
             "nombre": "Escudo",
+            "original": "Shield",
             "datos": "Armadura · lo lleva puesto",
             "texto": "Para ponerse o quitarse un escudo, se requiere realizar la acción de Utilizar. Solo obtienes el beneficio del escudo a la Clase de Armadura si tienes entrenamiento con él."
         },
         {
             "nombre": "Espada larga",
+            "original": "Longsword",
             "datos": "Arma · lo lleva puesto",
             "texto": "El dominio de la espada larga te permite añadir tu bonificador por competencia a la tirada de ataque de cualquier ataque que realices con ella.\n\nEsta arma tiene la siguiente propiedad de maestría. Para utilizarla, debes tener un rasgo que te permita hacerlo.\n\n***Debilitar.*** Si impactas a una criatura con esta arma, dicha criatura tiene desventaja en su siguiente tirada de ataque antes del comienzo de tu siguiente turno."
         },
         {
-            "nombre": "Casa de Naipes",
-            "datos": "Objeto maravilloso · poco común · lo lleva puesto",
-            "texto": "Esta baraja de cartas está decorada con formas geométricas que presentan motivos protectores. Mientras sostengas la baraja, puedes utilizar una acción para barajarla y hacer que las cartas se repartan por sí solas y se transformen en un refugio hecho de cartas. El refugio puede adoptar la forma que desees, pero debe caber dentro de un cubo de 40 pies (12 metros) centrado en un punto situado a 30 pies (9 metros) o menos de ti. El refugio tiene una puerta y hasta cuatro ventanas, y solo tú puedes abrirlas o cerrarlas. Tiene suelo y techo, y mantiene una temperatura agradable en su interior.\n\nEl refugio tiene CA 15, 50 puntos de golpe e inmunidad al daño de veneno y psíquico. El refugio dura 24 horas, hasta que lo disipes como una acción o hasta que sus puntos de golpe se reduzcan a 0. Cuando termina la duración del refugio, este vuelve a transformarse en una baraja de cartas y aparece en tu mano. Una vez que la baraja se ha transformado en un refugio, no puede volver a utilizarse hasta el siguiente amanecer."
-        },
-        {
             "nombre": "Lanza",
+            "original": "Spear",
             "datos": "Arma · lo lleva puesto",
             "texto": "Proficiency with a Spear allows you to add your proficiency bonus to the attack roll for any attack you make with it.\n\nThis weapon has the following mastery property. To use this property, you must have a feature that lets you use it.\n\n***Sap.*** If you hit a creature with this weapon, that creature has Disadvantage on its next attack roll before the start of your next turn."
         },
         {
-            "nombre": "Anillo del Carnero",
-            "datos": "Anillo · raro · sintonizado · lo lleva puesto",
-            "texto": "Este anillo tiene 3 cargas y recupera diariamente al amanecer 1d3 cargas gastadas. Mientras lleves puesto el anillo, puedes utilizar una acción para gastar de 1 a 3 de sus cargas y realizar un ataque de conjuro a distancia contra una criatura que puedas ver a 60 pies (18 metros) o menos de ti. El anillo produce una cabeza espectral de carnero y realiza su tirada de ataque con un bonificador de +7. Si impacta, por cada carga que gastes, el objetivo recibe 2d10 de daño de Fuerza y es empujado 5 pies (1,5 metros) alejándose de ti.\n\nComo alternativa, puedes gastar de 1 a 3 cargas del anillo como una acción para intentar romper un objeto que puedas ver a 60 pies (18 metros) o menos de ti y que no esté puesto ni sea transportado por nadie. El anillo realiza una prueba de Fuerza con un bonificador de +5 por cada carga que gastes."
-        },
-        {
             "nombre": "Piedras Mensajeras",
+            "original": "Sending Stones",
             "datos": "Objeto maravilloso · poco común · lo lleva puesto",
             "texto": "**Piedras mensajeras** vienen en parejas, y cada piedra lisa está tallada para coincidir con la otra, de modo que resulta fácil reconocer cuáles forman una pareja. Mientras toques una de las piedras, puedes utilizar una acción para lanzar el conjuro *enviar* a través de ella. El objetivo es quien lleve la otra piedra. Si ninguna criatura lleva la otra piedra, lo sabes en cuanto utilizas la tuya y no lanzas el conjuro.\n\nUna vez lanzado *enviar* a través de las piedras, no pueden volver a utilizarse hasta el siguiente amanecer. Si una de las piedras de una pareja es destruida, la otra pierde sus propiedades mágicas."
-        },
-        {
-            "nombre": "Bastón Vuelacegadores",
-            "datos": "Bastón · poco común · sintonizado · lo lleva puesto",
-            "texto": "Tienes un bonificador de +1 a las tiradas de ataque y daño que realices con este bastón mágico. Mientras lo sostengas, tienes un bonificador de +1 a las tiradas de ataque de conjuro.\n\nSi una criatura voladora que puedas ver a 30 pies (9 metros) o menos de ti realiza una tirada de ataque contra ti, puedes utilizar tu reacción para alzar el bastón y hacer que emita un destello de luz. El atacante tiene desventaja en la tirada de ataque y debe superar una tirada de salvación de Constitución con CD 15 o quedar cegado hasta el comienzo de su siguiente turno."
         }
     ]
 }

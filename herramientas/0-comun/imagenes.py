@@ -181,6 +181,13 @@ SITIOS = {
         "lado": 600,
         "cuadrada": False,
     },
+    "oc-compendio-objeto": {
+        "que": "un objeto del compendio de mis personajes (para todas las fichas que lo tengan)",
+        "carpeta": "imagenes/personajes/compendio/objetos",
+        "sufijo": "",
+        "lado": 600,
+        "cuadrada": False,
+    },
     "oc-criatura": {
         "que": "una criatura de uno de mis personajes (familiar, invocación, mascota)",
         "carpeta": "imagenes/personajes/{personaje}/criaturas",

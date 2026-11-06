@@ -4004,6 +4004,27 @@
   Compendio: objetos», «🧬 Compendio: rasgos», «⚔️ Compendio: acciones»
   (y al guardar se rehacen las fichas). El código, en
   herramientas/0-comun/compendio.py.
+  TRADUCIR EL COMPENDIO: cámbiale el NOMBRE a lo que quieras («Ring of
+  the Ram» -> «Anillo del Carnero») y su texto. Cada entrada lleva además:
+      original       cómo lo llama D&D Beyond («Ring of the Ram»). Lo
+                     pone el importador y NO SE TOCA: por él se sabe, al
+                     importar otra vez (o un personaje nuevo), que es tu
+                     «Anillo del Carnero», y así viene ya con tu nombre (en
+                     su lista, sus ataques, sus «Origen: Por…») y no se
+                     añade otra vez en inglés (dnd_es.py: _del_compendio).
+      otros_nombres  los que ha tenido antes (el editor los apunta solo
+                     al cambiar el nombre; a mano, añádelo tú).
+  Las fichas salen SIEMPRE con el nombre de ahora: lo que en un personaje
+  aún diga el original, uno de antes o el mismo con otras mayúsculas, se
+  cambia (en sus conjuros, objetos, ataques, acciones, rasgos y
+  descripciones; solo nombres enteros, nunca dentro de un texto). Al
+  guardar el compendio en el editor se cambia también en personajes.json
+  (compendio.py: renombres, traducir_personaje).
+  IMÁGENES DE LOS OBJETOS: en «Compendio: objetos», el campo «Imagen»
+  («Subir una»; van a imagenes/personajes/compendio/objetos/). Sale en el
+  inventario de todas las fichas que lo tengan y manda sobre la bajada de
+  D&D Beyond. Vale para objetos sin descripción (una cuerda, una lámpara):
+  añade uno con solo el nombre, igual que en su lista, y la imagen.
   EN CADA PERSONAJE, su campo «Descripciones» (la pestaña 📝) solo dice
   qué tiene y de dónde le viene: un bloque por cosa que empieza por «##
   Nombre» (el mismo nombre que en su lista; no mira mayúsculas ni tildes,

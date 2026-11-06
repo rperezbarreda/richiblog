@@ -99,6 +99,7 @@
 # Un personaje que se quita del JSON NO se borra de la web: se avisa, y
 # su carpeta se borra a mano (por si era un error).
 
+import copy
 import html
 import re
 from collections import ChainMap
@@ -1133,9 +1134,17 @@ _COMPENDIO = {}
 def compendio_de(tipo):
     if tipo not in _COMPENDIO:
         _COMPENDIO[tipo] = {k: {"nombre": x["nombre"], "datos": str(x.get("datos") or ""),
-                                "cuerpo": str(x.get("texto") or ""), "origen": ""}
+                                "cuerpo": str(x.get("texto") or ""), "origen": "",
+                                "imagen": str(x.get("imagen") or "").strip(),
+                                "nombres": compendio.nombres(x)}
                             for k, x in compendio.por_nombre(tipo).items()}
     return _COMPENDIO[tipo]
+
+
+def _renombres():
+    if "_renombres" not in _COMPENDIO:
+        _COMPENDIO["_renombres"] = compendio.renombres()
+    return _COMPENDIO["_renombres"]
 
 
 def descripciones_de(p):
@@ -1157,7 +1166,8 @@ def descripciones_de(p):
                 continue
             mios[k] = {"nombre": x["nombre"], "origen": x["origen"],
                        "datos": x["datos"] or de_base.get("datos", ""),
-                       "cuerpo": x["cuerpo"] or de_base.get("cuerpo", "")}
+                       "cuerpo": x["cuerpo"] or de_base.get("cuerpo", ""),
+                       "imagen": de_base.get("imagen", ""), "nombres": de_base.get("nombres") or [x["nombre"]]}
         juntas[tipo] = (mios, base)
     salida = {}
     for tipo in compendio.TIPOS:
@@ -1386,15 +1396,24 @@ def rasgos_desplegables(texto, descripciones, c, personajes, avisos):
             for g, filas in por_grupo.items() if filas]
 
 
-def foto_de_objeto(c, nombre):
-    """La imagen de un objeto, si está en su carpeta: imagenes/personajes/
-    <clave>/objetos/<su-nombre>.webp (las baja ahí el importador de D&D
-    Beyond; también se pueden poner a mano con ese nombre)."""
-    base = "/imagenes/personajes/%s/objetos/%s" % (c, nombre_archivo(nombre, "objeto"))
-    for ext in (".webp", ".png", ".jpg", ".jpeg", ".gif"):
-        ruta = ruta_que_existe(base + ext)
+def foto_de_objeto(c, nombre, entrada=None):
+    """La imagen de un objeto: la suya del compendio («Imagen», en Rol →
+    Compendio: objetos; vale para todas las fichas que lo tengan) y, si no
+    tiene, la de su carpeta: imagenes/personajes/<clave>/objetos/
+    <su-nombre>.webp (las baja ahí el importador de D&D Beyond; también se
+    pueden poner a mano con ese nombre, o con el que tenía en inglés)."""
+    entrada = entrada or {}
+    propia = entrada.get("imagen")
+    if propia:
+        ruta = ruta_que_existe(propia)
         if ruta:
             return ruta
+    for n in [nombre] + [x for x in entrada.get("nombres") or [] if x != nombre]:
+        base = "/imagenes/personajes/%s/objetos/%s" % (c, nombre_archivo(n, "objeto"))
+        for ext in (".webp", ".png", ".jpg", ".jpeg", ".gif"):
+            ruta = ruta_que_existe(base + ext)
+            if ruta:
+                return ruta
     return None
 
 
@@ -1409,7 +1428,8 @@ def galeria_de_objetos(objetos, descripciones, c, personajes, avisos):
         o = re.sub(r"\s*\[[^\]]*\]\s*$", "", o)
         m = re.match(r"^(.*?)\s*[×x]\s*(\d+)$", o.strip())
         nombre, cuantos = (m.group(1).strip(), m.group(2)) if m else (o.strip(), "")
-        foto = foto_de_objeto(c, nombre)
+        entrada = buscar_descripcion(descripciones, nombre) or {}
+        foto = foto_de_objeto(c, nombre, entrada)
         if foto:
             dibujo = '<img src="%s" alt="" loading="lazy" decoding="async">' % e(foto)
             grande = '<img class="oc-carta-imagen" src="%s" alt="%s" decoding="async">' % (e(foto), e(nombre))
@@ -1417,7 +1437,6 @@ def galeria_de_objetos(objetos, descripciones, c, personajes, avisos):
             emoji = emoji_de_objeto(nombre) or "📦"
             dibujo = '<span aria-hidden="true">%s</span>' % emoji
             grande = '<span class="oc-carta-imagen es-sin-foto" aria-hidden="true">%s</span>' % emoji
-        entrada = buscar_descripcion(descripciones, nombre) or {}
         datos = [x.strip() for x in str(entrada.get("datos") or "").split("·") if x.strip()]
         cuerpo = entrada.get("cuerpo") or ""
         carta = ('<div class="oc-carta es-objeto"><div class="oc-carta-cabeza"><h3 class="oc-carta-titulo">%s%s</h3>'
@@ -2386,6 +2405,11 @@ def pestanas(p, c, datos, personajes, avisos):
 
 
 def pagina_ficha(p, datos, personajes, avisos):
+    # Con los nombres de ahora del compendio: lo que en su ficha aún se
+    # llame como en D&D Beyond o como antes («Ring of the Ram») sale con el
+    # nombre que le hayas puesto allí («Anillo del Carnero»).
+    p = copy.deepcopy(p)
+    compendio.traducir_personaje(p, _renombres())
     c = clave_de(p)
     nombre = str(p.get("nombre") or c)
     completo = str(p.get("nombre_completo") or "").strip()

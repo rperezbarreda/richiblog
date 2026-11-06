@@ -1725,7 +1725,21 @@ def colecciones():
          "archivo": "datos/personajes/compendio/%s.json" % tipo, "despues": "personajes",
          "partes": [{"id": tipo, "camino": [tipo], "titulo": art.capitalize() + " " + tipo, "nombre_de": "nombre",
                      "detalle": ["datos"], "campos": [
-                         C("nombre", "Nombre", obligatorio=True),
+                         C("nombre", "Nombre", obligatorio=True,
+                           ayuda="Cámbialo si quieres (para traducirlo): en las fichas que lo tengan sale el nuevo, y"
+                                 " al importar de D&D Beyond ya viene con él."),
+                         C("original", "Nombre en D&D Beyond", vacio="quitar",
+                           ayuda="Lo pone el importador: NO lo cambies. Es por lo que se sabe, al importar, que eso es"
+                                 " esto (y no se añade otra vez en inglés)."),
+                         C("otros_nombres", "Nombres de antes", "lineas", vacio="quitar",
+                           ayuda="Se apuntan solos al cambiarle el nombre: las fichas que aún digan uno de estos salen"
+                                 " con el de ahora."),
+                     ] + ([
+                         C("imagen", "Imagen", "imagen", sitio="oc-compendio-objeto", vacio="quitar",
+                           ayuda="La suya en el inventario de todas las fichas que lo tengan (manda sobre la que se baje"
+                                 " de D&D Beyond). Vale también para objetos sin descripción: añade uno con solo el"
+                                 " nombre (igual que en su lista) y la imagen."),
+                     ] if tipo == "objetos" else []) + [
                          C("datos", "Datos (las pastillitas)", vacio="quitar",
                            ayuda="Separados por «·»: «Nivel 3 · Evocación · 1 acción · 45 m»."),
                          C("texto", "Lo que hace", "largo", grande=True, markdown=True, vacio="quitar"),
@@ -2265,7 +2279,10 @@ def _mezclar_partes(col, archivo, datos, llegan):
             original = viejas[i] if isinstance(i, int) and 0 <= i < len(viejas) else {}
             if parte.get("fijas") and not original:
                 continue
-            nuevas.append(_montar_ficha(parte["campos"], original, ficha, parte.get("nombre_de")))
+            nueva = _montar_ficha(parte["campos"], original, ficha, parte.get("nombre_de"))
+            if col["id"].startswith("compendio-"):
+                _apuntar_nombre_de_antes(original, nueva)
+            nuevas.append(nueva)
         if parte.get("fijas"):
             # Las fijas no se añaden ni se quitan: se quedan todas, en su orden.
             vistas = {id(viejas[f.get("_i")]) for f in crudo if isinstance(f.get("_i"), int)
@@ -2314,6 +2331,9 @@ def guardar_coleccion(peticion):
             return {"error": "No encuentro %s." % archivo.relative_to(RAIZ).as_posix()}
         nuevas_categorias = _mezclar_partes(col, archivo, datos, peticion.get("partes") or {})
         _guardar_datos(col, archivo, datos)
+        if col["id"].startswith("compendio-"):
+            # Un nombre cambiado: en las fichas de mis personajes también.
+            _renombrar_en_personajes()
         if nuevas_categorias:
             nuevo = herramienta("nuevo")
             texto = leer_texto(nuevo.ROL)[0]
@@ -2349,6 +2369,37 @@ def _arreglar_evento_del_calendario(datos, evento):
 
 def _clave_oc(p):
     return nombre_archivo(str(p.get("clave") or p.get("nombre") or ""), "")
+
+
+def _apuntar_nombre_de_antes(viejo, nuevo):
+    """En el compendio: si le has cambiado el nombre a algo, el de antes va
+    a «otros_nombres» (así las fichas que aún lo digan lo encuentran, y al
+    guardar se les cambia: _renombrar_en_personajes)."""
+    import compendio
+    antes = str((viejo or {}).get("nombre") or "").strip()
+    if not antes or compendio.llano(antes) == compendio.llano(nuevo.get("nombre")):
+        return
+    if compendio.llano(antes) in {compendio.llano(n) for n in compendio.nombres(nuevo)}:
+        return
+    otros = [str(x) for x in nuevo.get("otros_nombres") or [] if str(x).strip()]
+    nuevo["otros_nombres"] = otros + [antes]
+
+
+def _renombrar_en_personajes():
+    """Los nombres de antes del compendio, cambiados por los de ahora en
+    datos/personajes/personajes.json (compendio.traducir_personaje).
+    Devuelve cuántos ha cambiado."""
+    import compendio
+    archivo = RAIZ / "datos" / "personajes" / "personajes.json"
+    try:
+        datos = json.loads(archivo.read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        return 0
+    mapa = compendio.renombres()
+    cambios = sum(compendio.traducir_personaje(p, mapa) for p in datos.get("personajes") or [])
+    if cambios:
+        archivo.write_text(json.dumps(datos, ensure_ascii=False, indent=4) + "\n", encoding="utf-8")
+    return cambios
 
 
 def _arreglar_recetas(datos):
@@ -2474,7 +2525,7 @@ def vista_previa_personaje(peticion):
             "avisos": ["%s «%s»" % (q, d) for q, d in avisos.lista]}
 
 
-def _al_compendio(campos, avisos):
+def _al_compendio(campos, avisos, originales=None):
     """Lo que cuenta D&D Beyond de cada conjuro, objeto, rasgo o acción va
     al compendio (datos/personajes/compendio/, ver 0-comun/compendio.py)
     si aún no está; lo que ya está no se toca (puede que lo hayas
@@ -2487,7 +2538,8 @@ def _al_compendio(campos, avisos):
         tipo = d.get("tipo") if d.get("tipo") in compendio.TIPOS else (
             compendio.tipo_de_datos(d.get("datos")) or "rasgos")
         por_tipo.setdefault(tipo, []).append({"nombre": d["nombre"], "datos": d.get("datos"),
-                                              "texto": d.get("cuerpo")})
+                                              "texto": d.get("cuerpo"),
+                                              "original": (originales or {}).get(d["nombre"], "")})
         partes = ["## " + d["nombre"], "Tipo: " + tipo]
         if d.get("origen"):
             partes.append("Origen: " + d["origen"])
@@ -2505,12 +2557,16 @@ def importar_de_dndbeyond(peticion):
     (1-publicar/editor/dndbeyond.py), y si se pide, su retrato de allí como
     imagen de perfil y token de la galería (los que no tenga)."""
     ddb = herramienta("dndbeyond")
+    # Un traductor para todo: con los nombres del compendio por encima
+    # (lo que ya hayas traducido allí sale traducido) y que apunta de qué
+    # nombre de D&D Beyond viene cada cosa (el «original» del compendio).
+    traducir = ddb.Traductor()
     try:
         datos = ddb.obtener(peticion.get("texto"))
-        campos, avisos, retrato = ddb.a_ficha(datos)
+        campos, avisos, retrato = ddb.a_ficha(datos, traducir)
     except ddb.ErrorDeImportacion as error:
         return {"error": str(error)}
-    _al_compendio(campos, avisos)
+    _al_compendio(campos, avisos, traducir.originales)
     clave = nombre_archivo(str(peticion.get("personaje") or campos.get("nombre") or ""), "")
     imagenes = {}
     quiere = peticion.get("imagenes") or []
@@ -2545,7 +2601,7 @@ def importar_de_dndbeyond(peticion):
     # estén no se vuelven a bajar.
     if "objetos" in quiere and clave:
         bajadas = 0
-        for nombre, url in ddb.imagenes_de_objetos(datos).items():
+        for nombre, url in ddb.imagenes_de_objetos(datos, traducir).items():
             carpeta = RAIZ / "imagenes" / "personajes" / clave / "objetos"
             if (carpeta / ("%s.webp" % nombre_archivo(nombre, "objeto"))).exists():
                 continue
