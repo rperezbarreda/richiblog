@@ -202,6 +202,13 @@ SITIOS = {
         "lado": 1000,
         "cuadrada": False,
     },
+    "oc-npc-grande": {
+        "que": "alguien de la gente de uno de mis personajes, en grande (al pulsar su redondel)",
+        "carpeta": "imagenes/personajes/{personaje}/gente",
+        "sufijo": "",
+        "lado": 1200,
+        "cuadrada": False,
+    },
     "oc-npc": {
         "que": "alguien de la gente de uno de mis personajes",
         "carpeta": "imagenes/personajes/{personaje}/gente",

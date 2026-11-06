@@ -112,7 +112,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 from comun import PLANTILLAS, RAIZ, escribir_texto, leer_json, leer_texto, nombre_archivo  # noqa: E402
 import compendio  # noqa: E402
 import sistemas_rol  # noqa: E402
-from mundo_formato import Avisos, Conversor  # noqa: E402
+from mundo_formato import Avisos, Conversor, arreglar_enfasis  # noqa: E402
 
 DATOS = RAIZ / "datos" / "personajes" / "personajes.json"
 WEB = RAIZ / "web" / "personajes"
@@ -253,11 +253,79 @@ def conversor_para(clave, personajes, avisos):
     return Conversor(enlace_a, imagen_a, avisos, None)
 
 
-def markdown(texto, clave, personajes, avisos):
+def markdown(texto, clave, personajes, avisos, pegado=False):
+    """El Markdown de un campo, en HTML. Con «pegado» (la historia, lo
+    extra, las notas de su gente: prosa escrita o pegada como en un Word),
+    antes pasa por texto_pegado."""
     texto = str(texto or "").strip()
     if not texto:
         return ""
-    return conversor_para(clave, personajes, avisos).a_html(texto)
+    if pegado:
+        texto = texto_pegado(texto)
+    # «**Faëlar **nunca» -> «**Faëlar** nunca» (mundo_formato.arreglar_enfasis):
+    # si no, salen los asteriscos a la vista.
+    return conversor_para(clave, personajes, avisos).a_html(arreglar_enfasis(texto))
+
+
+# Lo que no es prosa suelta: listas, títulos, citas, tablas, código.
+_LINEA_DE_BLOQUE = re.compile(r"^\s*(?:[-*+]\s|\d+[.)]\s|#|>|\||```|!\[\[|<)")
+
+
+def texto_pegado(texto):
+    """Lo que se escribe (o se pega de un documento) como en un Word, a
+    Markdown: cada línea que acaba en punto, su párrafo (en Markdown, un
+    salto solo no separa, y salía todo en un bloque); las viñetas «•» a
+    lista; y una
+    línea que es SOLO una negrita («**Los Äestere**», también con el
+    cierre en la línea de abajo) a título. Las listas, las tablas y lo
+    demás de Markdown se quedan como están."""
+    texto = re.sub(r"(?m)^[ \t]*[•·◦▪‣][ \t]*", "- ", texto)
+    texto = re.sub(r"(?m)^\*\*([^*\n]+?)[ \t]*\n\*\*", r"**\1**\n", texto)
+    texto = re.sub(r"(?m)^\*\*([^*\n]+?)\s*\*\*[ \t]*:?[ \t]*$", lambda m: "### " + m.group(1).strip(), texto)
+    lineas = texto.split("\n")
+    salida = []
+    for i, linea in enumerate(lineas):
+        salida.append(linea)
+        siguiente = lineas[i + 1] if i + 1 < len(lineas) else ""
+        # Si la línea no acaba en punto (o «:», «?», «»»…) es un texto
+        # cortado a mano a media frase (como la historia de Sevro): sigue
+        # el mismo párrafo.
+        if (linea.strip() and siguiente.strip() and not _LINEA_DE_BLOQUE.match(linea)
+                and not _LINEA_DE_BLOQUE.match(siguiente) and not linea.endswith("  ")
+                and re.search(r"[.!?:…»\")*]\s*$", linea)):
+            salida.append("")
+    return "\n".join(salida)
+
+
+def con_menciones(html_texto, gente, yo):
+    """En la historia, la PRIMERA vez que sale en negrita alguien de su
+    gente («**Weslyria**», «**Maëzren Corbec**»), su nombre lleva a su
+    ficha de la pestaña npcs (#oc-npc-N, que personajes.js abre). Vale el
+    nombre entero o solo el primero, si no hay dos con el mismo. El propio
+    personaje no."""
+    nombres, primeros = {}, {}
+    for i, g in enumerate(gente):
+        n = str(g.get("nombre") or "").strip()
+        if not n:
+            continue
+        nombres[llano(n)] = i
+        primeros.setdefault(llano(n.split()[0]), []).append(i)
+    for primero, cuales in primeros.items():
+        if len(cuales) == 1:
+            nombres.setdefault(primero, cuales[0])
+    for n in yo:
+        nombres.pop(llano(n), None)
+    if not nombres:
+        return html_texto
+    vistos = set()
+
+    def una(m):
+        i = nombres.get(llano(html.unescape(m.group(1))))
+        if i is None or i in vistos:
+            return m.group(0)
+        vistos.add(i)
+        return '<a class="oc-mencion" href="#oc-npc-%d">%s</a>' % (i, m.group(0))
+    return re.sub(r"(?<!>)<strong>([^<]+)</strong>", una, html_texto)
 
 
 # =========================================
@@ -750,15 +818,15 @@ def apartado_gente(gente, c, personajes, avisos, p=None):
             relacion = str(g.get("relacion") or "").strip()
             parentesco = str(g.get("parentesco") or "").strip()
             estado = str(g.get("estado") or "").strip()
-            notas = markdown(g.get("notas"), c, personajes, avisos)
+            notas = markdown(g.get("notas"), c, personajes, avisos, True)
             destino = enlace_de_ficha(g, personajes)
             nombre_html = ('<a href="%s">%s</a>' % (e(destino), e(nombre))) if destino else e(nombre)
             chapas = "".join('<span class="oc-npc-chapa%s">%s</span>' % (clase, e(x)) for x, clase in (
                 (parentesco, ""), (estado, " es-estado")) if x)
             filas.append(
-                '<li class="oc-npc" id="oc-npc-%d">%s<div class="oc-npc-texto"><h%d class="oc-npc-nombre">%s</h%d>'
+                '<li class="oc-npc" id="oc-npc-%d" tabindex="-1">%s<div class="oc-npc-texto"><h%d class="oc-npc-nombre">%s</h%d>'
                 '%s%s%s%s</div></li>'
-                % (i, redondel(foto_de_persona(g, personajes), nombre, "oc-npc-foto"), 4 if con_grupos else 3,
+                % (i, foto_de_npc(g, nombre, personajes), 4 if con_grupos else 3,
                    nombre_html, 4 if con_grupos else 3,
                    ('<p class="oc-npc-chapas">%s</p>' % chapas) if chapas else "",
                    ('<p class="oc-npc-que">%s</p>' % e(que)) if que else "",
@@ -770,7 +838,25 @@ def apartado_gente(gente, c, personajes, avisos, p=None):
                            % (nombre_archivo(vinculo or "otros", "otros"), e((vinculo or "otros").lower()), lista))
         else:
             bloques.append(lista)
-    return arbol + "".join(bloques)
+    # Todas las fotos, una galería en el visor (‹ › entre unos y otros).
+    return arbol + '<div class="oc-npcs-todos" data-visor-grupo>%s</div>' % "".join(bloques)
+
+
+def foto_de_npc(g, nombre, personajes):
+    """Su redondel; al pulsarlo, se ve en grande (el visor del sitio): su
+    «Imagen en grande» si la tiene; si es uno de mis personajes, su
+    retrato; si no, la del redondel."""
+    foto = foto_de_persona(g, personajes)
+    grande = ruta_que_existe(g.get("imagen"))
+    if not grande and g.get("oc"):
+        otro = next((x for x in personajes if clave_de(x) == g.get("oc")), None)
+        grande = ruta_que_existe((otro or {}).get("retrato"))
+    grande = grande or foto
+    if not grande:
+        return redondel(foto, nombre, "oc-npc-foto")
+    return ('<button class="lightbox-trigger oc-npc-foto-boton" type="button" aria-label="Ver en grande: %s"'
+            ' data-completa="%s" data-pie="%s">%s</button>'
+            % (e(nombre), e(grande), e(nombre), redondel(foto or grande, nombre, "oc-npc-foto")))
 
 
 # =========================================
@@ -2336,7 +2422,8 @@ def pestanas(p, c, datos, personajes, avisos):
     partes_ficha = (apartado_ficha(p, c, personajes, avisos) if sistemas_rol.es_dnd(p)
                     else hoja_de_otro_sistema(p, c, personajes, avisos))
     contenido = {
-        "historia": markdown(p.get("historia"), c, personajes, avisos),
+        "historia": con_menciones(markdown(p.get("historia"), c, personajes, avisos, True), grupos_de(datos, "gente", c),
+                                  [nombre, str(p.get("nombre_completo") or ""), c]),
         "gente": apartado_gente(grupos_de(datos, "gente", c), c, personajes, avisos, p),
         "frases": apartado_frases(p),
         "inspiracion": apartado_inspiracion(p, grupos_de(datos, "moodboard", c), nombre),
@@ -2345,7 +2432,7 @@ def pestanas(p, c, datos, personajes, avisos):
         "reglas": apartado_reglas(c, personajes, avisos) if sistemas_rol.es_dnd(p) else "",
         "criaturas": apartado_criaturas(grupos_de(datos, "criaturas", c), c, personajes, avisos),
         "imagenes": apartado_imagenes(grupos_de(datos, "imagenes", c), nombre),
-        "extra": markdown(p.get("extra"), c, personajes, avisos),
+        "extra": markdown(p.get("extra"), c, personajes, avisos, True),
     }
     vacio = {
         "historia": "Todavía no he escrito su historia.",

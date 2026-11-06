@@ -192,6 +192,14 @@ window.ocMontar = window.ocMontar || {};
             pagina.classList.toggle("ver-resumen", enResumen);
         }
         let parte = document.getElementById(id);
+        let dentro = null;
+        if (parte && !partes.includes(parte)) {
+            const suya = partes.find((p) => p.contains(parte));
+            if (suya) {
+                dentro = parte;
+                parte = suya;
+            }
+        }
         if (!parte || !partes.includes(parte)) {
             parte = enResumen && elegida ? elegida : partes[0];
         }
@@ -223,6 +231,13 @@ window.ocMontar = window.ocMontar || {};
         }
         pintarBotonMovil();
         contenedor.scrollTop = 0;
+        if (dentro) {
+            dentro.scrollIntoView({ block: "start" });
+            if (dentro.hasAttribute("tabindex")) {
+                dentro.focus({ preventScroll: true });
+            }
+            return;
+        }
         if (conFoco) {
             (enResumen && lateral ? lateral : parte).focus({ preventScroll: true });
         }

@@ -1661,6 +1661,9 @@ def colecciones():
                     ayuda="Su nombre enlaza con su ficha (y si no le pones foto, lleva su token)."),
                   C("relacion", "Cómo se llevan", vacio="quitar"),
                   C("token", "Foto (el redondel)", "imagen", sitio="oc-npc", vacio="quitar"),
+                  C("imagen", "Imagen en grande", "imagen", sitio="oc-npc-grande", vacio="quitar",
+                    ayuda="La que se ve al pulsar su redondel en la pestaña npcs (entera, sin recortar). Sin ella, se"
+                          " ve el redondel en grande."),
                   C("notas", "Lo que hay que saber", "largo", vacio="quitar", markdown=True),
               ]},
              {"id": "criaturas", "camino": ["criaturas"], "dentro_de": "personajes",

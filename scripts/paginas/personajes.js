@@ -246,6 +246,17 @@ window.ocMontar = window.ocMontar || {};
             pagina.classList.toggle("ver-resumen", enResumen);
         }
         let parte = document.getElementById(id);
+        // Algo de DENTRO de una parte (#oc-npc-2, una ficha de la pestaña
+        // npcs, desde el árbol o desde su nombre en la historia): se abre
+        // su parte y se va a ello.
+        let dentro = null;
+        if (parte && !partes.includes(parte)) {
+            const suya = partes.find((p) => p.contains(parte));
+            if (suya) {
+                dentro = parte;
+                parte = suya;
+            }
+        }
         if (!parte || !partes.includes(parte)) {
             parte = enResumen && elegida ? elegida : partes[0];
         }
@@ -279,6 +290,13 @@ window.ocMontar = window.ocMontar || {};
         }
         pintarBotonMovil();
         contenedor.scrollTop = 0;
+        if (dentro) {
+            dentro.scrollIntoView({ block: "start" });
+            if (dentro.hasAttribute("tabindex")) {
+                dentro.focus({ preventScroll: true });
+            }
+            return;
+        }
         if (conFoco) {
             (enResumen && lateral ? lateral : parte).focus({ preventScroll: true });
         }

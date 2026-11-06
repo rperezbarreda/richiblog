@@ -833,3 +833,41 @@ def _slug_corto(texto):
     plano = "".join(c for c in unicodedata.normalize("NFD", (texto or "").lower())
                     if unicodedata.category(c) != "Mn")
     return re.sub(r"^_+|_+$", "", re.sub(r"[^a-z0-9]+", "_", plano)) or "pagina"
+
+
+def arreglar_enfasis(texto):
+    """Negritas y cursivas con el espacio por dentro, que el Markdown no
+    entiende y salen con sus asteriscos a la vista: «**Faëlar **nunca» ->
+    «**Faëlar** nunca», «el* Bosque*» -> «el *Bosque*». Línea a línea, y
+    solo si en la línea las marcas van por pares (si no, se deja como
+    está: mejor un asterisco de más que una negrita que se come medio
+    párrafo). Los «* » de las listas no cuentan."""
+    def pares(linea, marca):
+        trozos = linea.split(marca)
+        if len(trozos) < 3 or len(trozos) % 2 == 0:
+            return linea
+        for i in range(1, len(trozos), 2):
+            dentro = trozos[i]
+            if not dentro.strip():
+                return linea
+            antes = dentro[:len(dentro) - len(dentro.lstrip())]
+            despues = dentro[len(dentro.rstrip()):]
+            if antes and despues:
+                # Con espacio a los dos lados («2 * 3 * 4») no es una
+                # cursiva mal cerrada: se deja.
+                return linea
+            trozos[i] = dentro.strip()
+            trozos[i - 1] += antes
+            trozos[i + 1] = despues + trozos[i + 1]
+        return marca.join(trozos)
+
+    salida = []
+    for linea in str(texto or "").split("\n"):
+        lista = re.match(r"^(\s*[*+-]\s+)", linea)
+        cabeza, resto = (lista.group(1), linea[lista.end():]) if lista else ("", linea)
+        resto = pares(resto, "**")
+        guardado = resto.replace("**", "\x00")
+        guardado = pares(guardado, "*")
+        salida.append(cabeza + guardado.replace("\x00", "**"))
+    return "\n".join(salida)
+

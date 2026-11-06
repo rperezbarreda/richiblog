@@ -3230,6 +3230,45 @@ a.oc-arbol-enlace:focus-visible {
     scroll-margin-top: 20px;
 }
 
+/* Al llegar a uno (desde el árbol o desde su nombre en la historia), su
+   ficha se marca un momento. */
+.oc-npc:target {
+    outline: 3px solid var(--yellow);
+    outline-offset: 6px;
+}
+
+/* Su redondel es un botón: al pulsarlo se ve en grande (el visor). */
+.oc-npc-foto-boton {
+    flex: 0 0 auto;
+    padding: 0;
+    border: 0;
+    border-radius: 50%;
+    background: none;
+    cursor: zoom-in;
+}
+
+.oc-npc-foto-boton:hover .oc-npc-foto {
+    border-color: var(--white);
+}
+
+.oc-npc-foto-boton:focus-visible {
+    outline: 3px solid var(--yellow);
+    outline-offset: 3px;
+}
+
+/* En la historia, el nombre de alguien de su gente lleva a su ficha. */
+.oc-texto a.oc-mencion {
+    color: inherit;
+    text-decoration: underline dotted var(--yellow);
+    text-decoration-thickness: 2px;
+    text-underline-offset: 3px;
+}
+
+.oc-texto a.oc-mencion:hover,
+.oc-texto a.oc-mencion:focus-visible {
+    color: var(--yellow);
+}
+
 .oc-npc-nombre a {
     color: inherit;
 }

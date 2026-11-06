@@ -4314,6 +4314,22 @@
   en gris); y «Es uno de mis personajes»: su nombre enlaza con su ficha y,
   sin foto, lleva su token. (generar-personajes.py: GENERACIONES,
   arbol_familiar, apartado_gente.)
+  Pulsando a alguien del árbol se abre la pestaña npcs en su ficha (que
+  se marca); pulsando su REDONDEL se ve en GRANDE (el visor del sitio, con
+  ‹ › para pasar de uno a otro): su «Imagen en grande» (campo del editor,
+  sitio de imagen «oc-npc-grande»: entera, sin recortar), o su retrato si
+  es uno de mis personajes, o si no el redondel mismo (generar-personajes.py:
+  foto_de_npc; personajes.js: mostrar, que abre la parte de lo pedido).
+  LA HISTORIA Y SU GENTE: la primera vez que alguien de su gente sale en
+  NEGRITA en la historia («**Weslyria**», nombre entero o solo el primero),
+  su nombre lleva a su ficha de npcs (subrayado de puntos; con_menciones).
+  TEXTOS PEGADOS (la historia, «extra» y las notas de su gente): se
+  escriben como en un Word y salen bien: cada línea que acaba en punto es
+  un párrafo (si no acaba en punto, era un corte a media frase y sigue el
+  párrafo), las viñetas «•» salen como lista, una línea que es solo una
+  negrita («**Los Äestere**») sale como título, y las negritas con el
+  espacio por dentro («**Faëlar **nunca») se arreglan (texto_pegado;
+  mundo_formato.py: arreglar_enfasis).
   💬 FRASES: una por línea en «Frases suyas» (pestaña «frases y música»
   del editor), con «| cuándo la dijo» detrás; cada una en su tarjeta.
   🎨 INSPIRACIÓN: su MÚSICA (un enlace de Spotify por línea: canción,
