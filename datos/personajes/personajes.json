@@ -8,7 +8,7 @@
             "color": "amarillo",
             "token": "/imagenes/personajes/faelar/faelar_tkn.webp",
             "retrato": "/imagenes/personajes/faelar/faelar.webp",
-            "raza": "Elfo",
+            "raza": "Elfo del Bosque",
             "clase": "Druida (Círculo de Constelaciones)",
             "nivel": 3,
             "fue": 9,
@@ -30,7 +30,10 @@
                 "Trato con animales"
             ],
             "ataques": [
-                "Arco corto: +4, 1d6+2 perforante"
+                "Arco corto: +4, 1d6+2 perforante",
+                "Luciérnaga Estelar: +6, 1d8 radiante",
+                "Saeta Guía: +6, 4d8 radiante",
+                "Garrote: +6, 1d8+4 contundente"
             ],
             "aptitud_magica": "sab",
             "espacios": [
@@ -39,13 +42,13 @@
             ],
             "conjuros": [
                 "Truco: Garrote",
+                "Truco: Luciérnaga estelar",
                 "Truco: Orientación divina",
                 "Truco: Piedad con los moribundos",
                 "Truco: Reparar",
                 "Truco: Resistencia",
                 "Truco: Saber druídico",
-                "Truco: Starry Wisp",
-                "1: Bayas buenas",
+                "1: Buenas Bayas",
                 "1: Curar heridas",
                 "1: Encontrar familiar",
                 "1: Fuego feérico",
@@ -108,7 +111,7 @@
             "trasfondo": "Guide",
             "clave": "faelar",
             "dndbeyond": "https://www.dndbeyond.com/characters/170554638",
-            "icono": "🏵",
+            "icono": "🌻",
             "etiquetas": "D&D 5e, jugando, Ragna",
             "retrato_alt": "Elfo con pelo corto casaño oscuro, ojos grises, viste una gorra estilo baker marrón con una chaqueta a juego y un pañuelo con estampado de estrellas junto a una polilla de mascota."
         },
@@ -618,7 +621,7 @@
             "sistema": "vtm5",
             "raza": "Malkavian",
             "clase": "Ladrón con un sexto sentido",
-            "nivel": "12",
+            "nivel": 12,
             "edad": "36 (aparenta 28)",
             "pelo": "Oscuro y despeinado, con la perilla y el bigote cuidados",
             "ojos": "Castaños",
@@ -697,7 +700,9 @@
                 "La Brújula del Deseo Verdadero (su aguja apunta a lo que más anhela el alma de quien la lleva)"
             ],
             "historia": "Héctor Escamilla ha vivido casi toda su vida en casas de acogida desde que sus padres fueron repatriados, ahi conoció a Nico, un niño dos años mayor que él que le protegió como su hermano pequeño y desde entonces son inseparables. (Y Héctor tiene sentimientos por Nico aunque nunca se lo ha confesado).\n\nTras dejar el orfanato sobrevivían juntos con trabajos precarios, Héctor consiguió hacerse técnico de calderas pero Nico se dió a las drogas. Ahogado en deudas de prestamistas un día a Héctor lo esperaron en su apartamento varios hombres que querían cobrarse las deudas de Nico y le propinaron una paliza. En el hospital Nico le confesó todo a Héctor, prometió ir a un programa de desintoxicación y siguieron juntos.\n\nLas deudas eran enormes y la única salida que vió Héctor fue aprovechar su trabajo como técnico de calderas para robar en casas poco vigiladas y así ir pagando facturas. En su último trabajo entraron a robar sin saberlo en el refugio de una vampiro.\n\nLa mansión era un refugio de Maeve Kolya, una malkavian que había tenido visiones de que iba a hacer algo horrible por culpa de su sed de sangre y quiso refugiarse hasta recuperar el control, pero al toparse con dos humanos en su casa no pudo evitar atacarles. A Nico lo mató y a Héctor lo dejó agonizando. Tras recuperar el control quiso enmendar su error y convirtió al vampirismo a Héctor para que pudiese sobrevivir.\n\nMaeve pidió ayuda al progenitor de su secta, Cowboy, ya que con lo ocurrido Héctor no querría cooperar y sería un peligro tanto para él como para el resto. Poco a poco le enseñaron a como sobrevivir a su no vida y cómo relacionarse con el resto de la Mascarada, y Héctor empezó a comprender que en realidad fue un accidente lo que les ocurrió a Nico y a él,  pero no podía perdonar a Maeve por ello y su relación es complicada, y mucho menos cuando empezaron a manifestarse las visiones de Nico.\n\nHector acostumbra a verlo en todas partes, como si se tratase de un fantasma. Podía hablar con él y le contestaba, pero muchas veces Nico no reaccionaba como de costumbre y eso le desconcentraba. A veces le advertía de peligros o de cosas que pasaba por alto, le hacía algo de compañía o cuando algo le afectaba Nico empezaba a criticarle y hacer comentarios hirientes impropios de él.\n\nCon el paso del tiempo Héctor empezó a tener de nuevo el control y, aunque tardó en acostumbrarse a su nueva vida procura llevar un perfil bajo en la ciudad, decidiendo vivir en las afueras y interactuando con el resto de su gente sólo cuando es estrictamente necesario. El parque de caravanas en el que vive es un lugar perfecto para alimentarse por la gente que vive en él, y se ha hecho amigo de un gato callejero naranja al que llama Dorito.\n\nLe da asco en lo que se ha convertido y el constante tormento de las visiones de Nico hace que se sienta muy miserable, pero quiere intentar hacer lo posible para que no nazcan mas vampiros de forma tan violenta como la suya.",
-            "extra": "- Suele llevar ropa cómoda, normalmente ropa de deporte o alguna sudadera.\n- Idiomas conocidos: Inglés y Español"
+            "extra": "- Suele llevar ropa cómoda, normalmente ropa de deporte o alguna sudadera.\n- Idiomas conocidos: Inglés y Español",
+            "token": "",
+            "retrato": ""
         }
     ],
     "gente": [
@@ -762,5 +767,6 @@
                 }
             ]
         }
-    ]
+    ],
+    "moodboard": []
 }

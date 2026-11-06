@@ -3,47 +3,47 @@
         {
             "nombre": "Arco corto",
             "datos": "Arma · lo lleva puesto",
-            "texto": "Proficiency with a Shortbow allows you to add your proficiency bonus to the attack roll for any attack you make with it.\n\nThis weapon has the following mastery property. To use this property, you must have a feature that lets you use it.\n\n***Vex.*** If you hit a creature with this weapon and deal damage to the creature, you have Advantage on your next attack roll against that creature before the end of your next turn."
+            "texto": "El dominio del arco corto te permite añadir tu bonificador por competencia a la tirada de ataque de cualquier ataque que realices con él.\n\nEsta arma tiene la siguiente propiedad de maestría. Para utilizarla, debes tener un rasgo que te permita hacerlo.\n\n***Desventaja.*** Si impactas a una criatura con esta arma y le infliges daño, tienes ventaja en tu siguiente tirada de ataque contra esa criatura antes del final de tu siguiente turno."
         },
         {
             "nombre": "Arco largo, +1",
             "datos": "Arma · poco común · lo lleva puesto",
-            "texto": "You have a +1 bonus to attack and damage rolls made with this magic weapon."
+            "texto": "Tienes un bonificador de +1 a las tiradas de ataque y daño que realices con esta arma mágica."
         },
         {
             "nombre": "Armadura de cuero",
             "datos": "Armadura · lo lleva puesto",
-            "texto": "The breastplate and shoulder protectors of this armor are made of leather that has been stiffened by being boiled in oil. The rest of the armor is made of softer and more flexible materials."
+            "texto": "La coraza y las hombreras de esta armadura están hechas de cuero endurecido al hervirlo en aceite. El resto de la armadura está hecho de materiales más blandos y flexibles."
         },
         {
             "nombre": "Capa élfica",
             "datos": "Objeto maravilloso · poco común · sintonizado · lo lleva puesto",
-            "texto": "While you wear this cloak with its hood up, Wisdom (Perception) checks made to see you have disadvantage, and you have advantage on Dexterity (Stealth) checks made to hide, as the cloak's color shifts to camouflage you. Pulling the hood up or down requires an action."
+            "texto": "Mientras lleves puesta esta capa con la capucha levantada, las pruebas de Sabiduría (Percepción) realizadas para verte tienen desventaja, y tú tienes ventaja en las pruebas de Destreza (Sigilo) realizadas para esconderte, ya que el color de la capa cambia para camuflarte. Subir o bajar la capucha requiere una acción."
         },
         {
             "nombre": "Cota de mallas",
             "datos": "Armadura · lo lleva puesto",
-            "texto": "Made of interlocking metal rings, chain mail includes a layer of quilted fabric worn underneath the mail to prevent chafing and to cushion the impact of blows. The suit includes gauntlets."
+            "texto": "La cota de malla, fabricada con anillas metálicas entrelazadas, incluye una capa de tela acolchada que se lleva debajo para evitar rozaduras y amortiguar el impacto de los golpes. La armadura incluye guanteletes."
         },
         {
             "nombre": "Daga",
             "datos": "Arma · lo lleva puesto",
-            "texto": "Proficiency with a Dagger allows you to add your proficiency bonus to the attack roll for any attack you make with it.\n\nThis weapon has the following mastery property. To use this property, you must have a feature that lets you use it.\n\n***Nick.*** When you make the extra attack of the Light property, you can make it as part of the Attack action instead of as a Bonus Action. You can make this extra attack only once per turn."
+            "texto": "El dominio de la daga te permite añadir tu bonificador por competencia a la tirada de ataque de cualquier ataque que realices con ella.\n\nEsta arma tiene la siguiente propiedad de maestría. Para utilizarla, debes tener un rasgo que te permita hacerlo.\n\n***Desventaja.*** Si impactas a una criatura con esta arma y le infliges daño, tienes ventaja en tu siguiente tirada de ataque contra esa criatura antes del final de tu siguiente turno."
         },
         {
             "nombre": "Escudo",
             "datos": "Armadura · lo lleva puesto",
-            "texto": "Shields require the Utilize action to Don or Doff. You gain the Armor Class benefit of a Shield only if you have training with it."
+            "texto": "Para ponerse o quitarse un escudo, se requiere realizar la acción de Utilizar. Solo obtienes el beneficio del escudo a la Clase de Armadura si tienes entrenamiento con él."
         },
         {
             "nombre": "Espada larga",
             "datos": "Arma · lo lleva puesto",
-            "texto": "Proficiency with a Longsword allows you to add your proficiency bonus to the attack roll for any attack you make with it.\n\nThis weapon has the following mastery property. To use this property, you must have a feature that lets you use it.\n\n***Sap.*** If you hit a creature with this weapon, that creature has Disadvantage on its next attack roll before the start of your next turn."
+            "texto": "El dominio de la espada larga te permite añadir tu bonificador por competencia a la tirada de ataque de cualquier ataque que realices con ella.\n\nEsta arma tiene la siguiente propiedad de maestría. Para utilizarla, debes tener un rasgo que te permita hacerlo.\n\n***Debilitar.*** Si impactas a una criatura con esta arma, dicha criatura tiene desventaja en su siguiente tirada de ataque antes del comienzo de tu siguiente turno."
         },
         {
-            "nombre": "House of Cards",
+            "nombre": "Casa de Naipes",
             "datos": "Objeto maravilloso · poco común · lo lleva puesto",
-            "texto": "This deck of cards is decorated with geometric shapes that have a protective motif. While you’re holding the deck, you can use an action to shuffle it and cause the cards to deal themselves out and transform into a shelter made of cards. The shelter can be shaped however you desire, but it must fit in a 40-foot cube centered on a point within 30 feet of you. The shelter has one door and up to four windows, and only you can open or close them. It has a floor and a roof, and it maintains a comfortable temperature inside.\n\nThe shelter has AC 15, 50 hit points, and immunity to poison and psychic damage. The shelter lasts for 24 hours, until you dismiss it as an action, or until it is reduced to 0 hit points. When the shelter’s duration ends, it transforms back into a deck of cards and appears in your hand. Once the deck has transformed into a shelter, it can’t be used again until the next dawn."
+            "texto": "Esta baraja de cartas está decorada con formas geométricas que presentan motivos protectores. Mientras sostengas la baraja, puedes utilizar una acción para barajarla y hacer que las cartas se repartan por sí solas y se transformen en un refugio hecho de cartas. El refugio puede adoptar la forma que desees, pero debe caber dentro de un cubo de 40 pies (12 metros) centrado en un punto situado a 30 pies (9 metros) o menos de ti. El refugio tiene una puerta y hasta cuatro ventanas, y solo tú puedes abrirlas o cerrarlas. Tiene suelo y techo, y mantiene una temperatura agradable en su interior.\n\nEl refugio tiene CA 15, 50 puntos de golpe e inmunidad al daño de veneno y psíquico. El refugio dura 24 horas, hasta que lo disipes como una acción o hasta que sus puntos de golpe se reduzcan a 0. Cuando termina la duración del refugio, este vuelve a transformarse en una baraja de cartas y aparece en tu mano. Una vez que la baraja se ha transformado en un refugio, no puede volver a utilizarse hasta el siguiente amanecer."
         },
         {
             "nombre": "Lanza",
@@ -51,19 +51,19 @@
             "texto": "Proficiency with a Spear allows you to add your proficiency bonus to the attack roll for any attack you make with it.\n\nThis weapon has the following mastery property. To use this property, you must have a feature that lets you use it.\n\n***Sap.*** If you hit a creature with this weapon, that creature has Disadvantage on its next attack roll before the start of your next turn."
         },
         {
-            "nombre": "Ring of the Ram",
+            "nombre": "Anillo del Carnero",
             "datos": "Anillo · raro · sintonizado · lo lleva puesto",
-            "texto": "This ring has 3 charges, and it regains 1d3 expended charges daily at dawn. While wearing the ring, you can use an action to expend 1 to 3 of its charges to make a ranged spell attack against one creature you can see within 60 feet of you. The ring produces a spectral ram's head and makes its attack roll with a +7 bonus. On a hit, for each charge you spend, the target takes 2d10 force damage and is pushed 5 feet away from you.\n\nAlternatively, you can expend 1 to 3 of the ring's charges as an action to try to break an object you can see within 60 feet of you that isn't being worn or carried. The ring makes a Strength check with a +5 bonus for each charge you spend."
+            "texto": "Este anillo tiene 3 cargas y recupera diariamente al amanecer 1d3 cargas gastadas. Mientras lleves puesto el anillo, puedes utilizar una acción para gastar de 1 a 3 de sus cargas y realizar un ataque de conjuro a distancia contra una criatura que puedas ver a 60 pies (18 metros) o menos de ti. El anillo produce una cabeza espectral de carnero y realiza su tirada de ataque con un bonificador de +7. Si impacta, por cada carga que gastes, el objetivo recibe 2d10 de daño de Fuerza y es empujado 5 pies (1,5 metros) alejándose de ti.\n\nComo alternativa, puedes gastar de 1 a 3 cargas del anillo como una acción para intentar romper un objeto que puedas ver a 60 pies (18 metros) o menos de ti y que no esté puesto ni sea transportado por nadie. El anillo realiza una prueba de Fuerza con un bonificador de +5 por cada carga que gastes."
         },
         {
-            "nombre": "Sending Stones",
+            "nombre": "Piedras Mensajeras",
             "datos": "Objeto maravilloso · poco común · lo lleva puesto",
-            "texto": "**Sending Stones** come in pairs, with each smooth stone carved to match the other so the pairing is easily recognized. While you touch one stone, you can use an action to cast the sending spell from it. The target is the bearer of the other stone. If no creature bears the other stone, you know that fact as soon as you use the stone and don't cast the spell.\n\nOnce sending is cast through the stones, they can't be used again until the next dawn. If one of the stones in a pair is destroyed, the other one becomes nonmagical."
+            "texto": "**Piedras mensajeras** vienen en parejas, y cada piedra lisa está tallada para coincidir con la otra, de modo que resulta fácil reconocer cuáles forman una pareja. Mientras toques una de las piedras, puedes utilizar una acción para lanzar el conjuro *enviar* a través de ella. El objetivo es quien lleve la otra piedra. Si ninguna criatura lleva la otra piedra, lo sabes en cuanto utilizas la tuya y no lanzas el conjuro.\n\nUna vez lanzado *enviar* a través de las piedras, no pueden volver a utilizarse hasta el siguiente amanecer. Si una de las piedras de una pareja es destruida, la otra pierde sus propiedades mágicas."
         },
         {
-            "nombre": "Skyblinder Staff",
+            "nombre": "Bastón Vuelacegadores",
             "datos": "Bastón · poco común · sintonizado · lo lleva puesto",
-            "texto": "You gain a +1 bonus to attack and damage rolls made with this magic quarterstaff. While holding it, you gain a +1 bonus to spell attack rolls.\n\nIf a flying creature you can see within 30 feet of you makes an attack roll against you, you can use your reaction to hold the staff aloft and cause it to flare with light. The attacker has disadvantage on the attack roll, and it must succeed on a DC 15 Constitution saving throw or be blinded until the start of its next turn."
+            "texto": "Tienes un bonificador de +1 a las tiradas de ataque y daño que realices con este bastón mágico. Mientras lo sostengas, tienes un bonificador de +1 a las tiradas de ataque de conjuro.\n\nSi una criatura voladora que puedas ver a 30 pies (9 metros) o menos de ti realiza una tirada de ataque contra ti, puedes utilizar tu reacción para alzar el bastón y hacer que emita un destello de luz. El atacante tiene desventaja en la tirada de ataque y debe superar una tirada de salvación de Constitución con CD 15 o quedar cegado hasta el comienzo de su siguiente turno."
         }
     ]
 }
