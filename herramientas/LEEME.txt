@@ -1378,6 +1378,47 @@
       python herramientas/3-generadores/generar-buscador.py
 
 
+  LAS IMÁGENES, LOS DOCUMENTOS Y EL MAPAMUNDI DE UNA CAMPAÑA
+
+  Tres botones más en el índice de la campaña, que salen solo si hay algo:
+
+    · «imágenes →»: las fotos que sacamos de dibujos y demás. Una
+      rejilla, de la sesión más reciente a la más vieja; cada una se ve en
+      grande al pulsarla (con ‹ › entre unas y otras). Se llevan en el
+      editor: Campañas → «🖼️ Las imágenes de una campaña» (qué es, la
+      foto, de qué sesión, de quién es el dibujo y una nota). Van a
+      imagenes/notas_rol/<campaña>/imagenes/ (sitio «rol-imagen»).
+    · «documentos →»: lo que encontramos escrito (cartas, libros,
+      carteles, diarios…). Cada uno con su tipo, su sesión, dónde lo
+      encontramos, hasta tres fotos (por delante, por detrás, otra
+      página) y, plegado, «lo que pone». Campañas → «📃 Los documentos de
+      una campaña»; las fotos, a imagenes/notas_rol/<campaña>/documentos/.
+    · «el mapamundi →»: lleva a la página de su mapa (ver abajo).
+  En el JSON: "imagenes": [{titulo, imagen, de, quien, nota}] y
+  "documentos": [{titulo, tipo, de, donde, imagen, imagen_2, imagen_3,
+  texto}] (notas-rol.js: llenarLasImagenes, llenarLosDocumentos).
+
+  EL MAPAMUNDI DE UNA CAMPAÑA es un mapa como los de la wiki (sitios,
+  caminos, ríos, regiones, escala, leyenda, medir…) pero NO es de la wiki:
+
+      mapas-rol/<campaña>/<Título>.cmap     lo que se dibuja
+      mapas-rol/<campaña>/imagenes/         su imagen, tal cual llega
+      web/notas_rol/<campaña>/mapa_<título>.html   su página
+      imagenes/notas_rol/<campaña>/mapa/    su imagen para la web (normal,
+                                            pequeña y máxima)
+
+  No va en wiki/ porque importar-mundo.py deja la bóveda igual que
+  Chronicler y lo borraría. mapas-rol/ no se sube a Neocities (como wiki/):
+  se sube lo que escribe generar-mapas-rol.py. SE HACE EN EL EDITOR:
+  Mapas → «Un mapa nuevo» → «Para qué es: una campaña: …», la imagen y,
+  si quieres, el título (si no, «Mapamundi de Ragna»). Sale en la lista
+  de mapas en «@campañas/<campaña>» y se dibuja con las mismas
+  herramientas. «Guardar y pasar a la web» lo publica, y apunta "mapa" en
+  el JSON de la campaña, que es lo que enciende su botón. A mano:
+
+      python herramientas/3-generadores/generar-mapas-rol.py
+
+
   LAS MISIONES PENDIENTES
 
   Lo que el grupo tiene a medias: a quién hay que ir a ver, qué hay

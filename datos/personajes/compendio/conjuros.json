@@ -1,6 +1,12 @@
 {
     "conjuros": [
         {
+            "nombre": "Absorber elementos",
+            "original": "Absorb Elements",
+            "datos": "Nivel 1 · Abjuración · 1 reacción · Personal · S · 1 asalto",
+            "texto": "The spell captures some of the incoming energy, lessening its effect on you and storing it for your next melee attack. You have resistance to the triggering damage type until the start of your next turn. Also, the first time you hit with a melee attack on your next turn, the target takes an extra 1d6 damage of the triggering type, and the spell ends.\n\nAt Higher Levels. When you cast this spell using a spell slot of 2nd level or higher, the extra damage increases by 1d6 for each slot level above 1st."
+        },
+        {
             "nombre": "Acelerar",
             "original": "Haste",
             "datos": "Nivel 3 · Transmutación · 1 acción · 9 m · V, S, M (a shaving of licorice root) · Concentración, hasta 1 minuto",
@@ -92,6 +98,12 @@
             "original": "Cure Wounds",
             "datos": "Nivel 1 · Abjuración · 1 acción · Toque · V, S · Instantáneo",
             "texto": "Una criatura que toques recupera una cantidad de puntos de golpe igual a 2d8 más tu modificador de característica de lanzamiento de conjuros.\n\n***Lanzamiento con un espacio de conjuro de nivel superior.*** La curación aumenta en 2d8 por cada nivel del espacio de conjuro por encima del nivel 1."
+        },
+        {
+            "nombre": "Curse Ward",
+            "original": "Curse Ward",
+            "datos": "Nivel 1 · Abjuración · 1 acción · Toque · V, S · 8 horas",
+            "texto": "You reach out your hand and touch a willing creature, raising a smoke-like barrier around it. For the duration, the target has Resistance to Necrotic damage and can't be cursed or possessed. If the target is already under one of these effects, the effect is suppressed until the spell ends."
         },
         {
             "nombre": "Descarga de fuego",
@@ -190,6 +202,12 @@
             "texto": "Mientras dure el conjuro, puedes comprender y comunicarte verbalmente con las Bestias, y puedes utilizar con ellas cualquiera de las opciones de habilidad de la acción de Influencia.\n\nLa mayoría de las Bestias tienen poco que decir sobre temas que no estén relacionados con la supervivencia o el compañerismo, pero, como mínimo, una Bestia puede proporcionarte información sobre lugares y monstruos cercanos, incluyendo todo lo que haya percibido durante el último día."
         },
         {
+            "nombre": "Halo of Flame",
+            "original": "Halo of Flame",
+            "datos": "Nivel 2 · Evocación · 1 acción · Personal (radio de 1,5 m) · V, S · Concentración, hasta 1 minuto",
+            "texto": "A ring of flame ignites above your head and emits heat in a 5-foot Emanation [Area of Effect|XPHB|Emanation] originating from you. Whenever the Emanation [Area of Effect|XPHB|Emanation] enters the space of a creature you can see and whenever a creature you can see enters the Emanation [Area of Effect|XPHB|Emanation] or ends its turn there, you can force that creature to make a Dexterity saving throw. On a failed save, the creature takes 2d8 type=fire damage, or half as much damage on a successful save. A creature makes this save only once per turn.\n\nUsing a Higher-Level Spell Slot. The damage increases by 1d8 for each spell slot level above 2."
+        },
+        {
             "nombre": "Heroísmo",
             "original": "Heroism",
             "datos": "Nivel 1 · Encantamiento · 1 acción · Toque · V, S · Concentración, hasta 1 minuto",
@@ -230,6 +248,12 @@
             "original": "Inflict Wounds",
             "datos": "Nivel 1 · Nigromancia · 1 acción · Toque · V, S · Instantáneo",
             "texto": "Make a melee spell attack against a creature you can reach. On a hit, the target takes 3d10 necrotic damage.\n\n**At Higher Levels.** When you cast this spell using a spell slot of 2nd level or higher, the damage increases by 1d10 for each slot level above 1st."
+        },
+        {
+            "nombre": "Inmovilizar persona",
+            "original": "Hold Person",
+            "datos": "Nivel 2 · Encantamiento · 1 acción · 18 m · V, S, M (a straight piece of iron) · Concentración, hasta 1 minuto",
+            "texto": "Choose a Humanoid that you can see within range. The target must succeed on a Wisdom saving throw or have the Paralyzed condition for the duration. At the end of each of its turns, the target repeats the save, ending the spell on itself on a success.\n\nUsing a Higher-Level Spell Slot. You can target one additional Humanoid for each spell slot level above 2."
         },
         {
             "nombre": "Intermitencia",
@@ -334,6 +358,12 @@
             "texto": "Elige una criatura dentro del alcance que tenga 0 puntos de golpe y no esté muerta. La criatura se estabiliza.\n\n***Mejora de truco (Cantrip Upgrade).*** El alcance se duplica cuando alcanzas los niveles 5 (30 pies), 11 (60 pies) y 17 (120 pies)."
         },
         {
+            "nombre": "Plegaria de curación",
+            "original": "Prayer of Healing",
+            "datos": "Nivel 2 · Abjuración · 10 minutos · 9 m · V · Instantáneo",
+            "texto": "Up to five creatures of your choice who remain within range for the spell's entire casting gain the benefits of a Short Rest and also regain 2d8 Hit Points. A creature can't be affected by this spell again until that creature finishes a Long Rest.\n\nUsing a Higher-Level Spell Slot. The healing increases by 1d8 for each spell slot level above 2."
+        },
+        {
             "nombre": "Prestidigitación",
             "original": "Prestidigitation",
             "datos": "Truco · Transmutación · 1 acción · 3 m · V, S · 1 hora",
@@ -344,6 +374,12 @@
             "original": "Protection from Evil and Good",
             "datos": "Nivel 1 · Abjuración · 1 acción · Toque · V, S, M (holy water or powdered silver and iron, which the spell consumes) · Concentración, hasta 10 minutos",
             "texto": "Until the spell ends, one willing creature you touch is protected against certain types of creatures: aberrations, celestials, elementals, fey, fiends, and undead.\n\nThe protection grants several benefits. Creatures of those types have disadvantage on attack rolls against the target. The target also can't be charmed, frightened, or possessed by them. If the target is already charmed, frightened, or possessed by such a creature, the target has advantage on any new saving throw against the relevant effect."
+        },
+        {
+            "nombre": "Protección contra veneno",
+            "original": "Protection from Poison",
+            "datos": "Nivel 2 · Abjuración · 1 acción · Toque · V, S · 1 hora",
+            "texto": "You touch a creature and end the Poisoned condition on it. For the duration, the target has Advantage on saving throws to avoid or end the Poisoned condition, and it has Resistance to Poison damage."
         },
         {
             "nombre": "Proyectil mágico",
@@ -430,10 +466,22 @@
             "texto": "You create an acidic bubble at a point within range, where it explodes in a 5-foot-radius Sphere. Each creature in that Sphere must succeed on a Dexterity saving throw or take 1d6 Acid damage.\n\n***Cantrip Upgrade.*** The damage increases by 1d6 when you reach levels 5 (2d6), 11 (3d6), and 17 (4d6)."
         },
         {
+            "nombre": "Sanction",
+            "original": "Sanction",
+            "datos": "Nivel 1 · Abjuración · 1 acción adicional · 9 m · V, S, M (a drop of blood) · Concentración, hasta 1 hora",
+            "texto": "You fling a drop of blood at a creature you can see within range, which must succeed a Constitution saving throw or be marked for the duration. Whenever you take damage, the marked target takes 1d8 Necrotic or Radiant damage (your choice). The spell ends early if you end your turn more than 30 feet away from the target."
+        },
+        {
             "nombre": "Silvery Barbs",
             "original": "Silvery Barbs",
             "datos": "Nivel 1 · Encantamiento · 1 reacción · 18 m · V · Instantáneo",
             "texto": "You magically distract the triggering creature and turn its momentary uncertainty into encouragement for another creature. The triggering creature must reroll the d20 and use the lower roll.\n\nYou can then choose a different creature you can see within range (you can choose yourself). The chosen creature has advantage on the next attack roll, ability check, or saving throw it makes within 1 minute. A creature can be empowered by only one use of this spell at a time."
+        },
+        {
+            "nombre": "Stone Bones",
+            "original": "Stone Bones",
+            "datos": "Nivel 2 · Transmutación · 1 acción adicional · 9 m · V, S · 1 asalto",
+            "texto": "Choose a creature you can see within range. The target has Resistance to Bludgeoning, Piercing, and Slashing damage until the spell ends at the end of your next turn."
         },
         {
             "nombre": "Summon Beast",
@@ -446,6 +494,12 @@
             "original": "Summon Fey",
             "datos": "Nivel 3 · Conjuración · 1 acción · 27 m · V, S, M (a gilded flower worth 300+ GP) · Concentración, hasta 1 hora",
             "texto": "You call forth a Fey spirit. It manifests in an unoccupied space that you can see within range and uses the **Fey Spirit** stat block. When you cast the spell, choose a mood: Fuming, Mirthful, or Tricksy. The creature resembles a Fey creature of your choice marked by the chosen mood, which determines certain details in its stat block. The creature disappears when it drops to 0 Hit Points or when the spell ends.\n\nThe creature is an ally to you and your allies. In combat, the creature shares your Initiative count, but it takes its turn immediately after yours. It obeys your verbal commands (no action required by you). If you don’t issue any, it takes the Dodge action and uses its movement to avoid danger.\n\n***Using a Higher-Level Spell Slot.*** Use the spell slot’s level for the spell’s level in the stat block.\n\n**Fey Spirit**\n\nSmall Fey, Neutral\n\n**AC** 12 + the spell’s level\n\n**HP** 30 + 10 for each spell level above 3\n\n**Speed** 30 ft., Fly 30 ft.\n\n- · · Mod · Save\n- STR · 13 · +1 · +1\n- DEX · 16 · +3 · +3\n- CON · 14 · +2 · +2\n\n- · · Mod · Save\n- INT · 14 · +2 · +2\n- WIS · 11 · +0 · +0\n- CHA · 16 · +3 · +3\n\n**Immunities** Charmed\n\n**Senses** Darkvision 60 ft.; Passive Perception 10\n\n**Languages** Sylvan, understands the languages you know\n\n**CR** None (XP 0; PB equals your Proficiency Bonus)\n\nActions\n\n***Multiattack.*** The spirit makes a number of Fey Blade attacks equal to half this spell’s level (round down).\n\n***Fey Blade.*** *Melee Attack Roll:* Bonus equals your spell attack modifier, reach 5 ft. *Hit:* 2d6 + 3 + the spell’s level Force damage.\n\nBonus Actions\n\n***Fey Step.*** The spirit magically teleports up to 30 feet to an unoccupied space it can see. Then one of the following effects occurs, based on the spirit’s chosen mood:\n\n**Fuming.** The spirit has Advantage on the next attack roll it makes before the end of this turn.\n\n**Mirthful.** *Wisdom Saving Throw:* DC equals your spell save DC, one creature the spirit can see within 10 feet of itself. *Failure:* The target is Charmed by you and the spirit for 1 minute or until the target takes any damage.\n\n**Tricksy.** The spirit fills a 10-foot Cube within 5 feet of it with magical Darkness, which lasts until the end of its next turn."
+        },
+        {
+            "nombre": "Swift Flight",
+            "original": "Swift Flight",
+            "datos": "Nivel 2 · Transmutación · 1 acción adicional · Toque · V, S, M (a bird's wing feather) · 1 asalto",
+            "texto": "Streaks of energy flow from the back of a creature you touch, tracing the shapes of wings. The target has a Fly Speed of 60 feet and can hover until the end of its next turn. When the spell ends, the target falls if it is in the air and nothing is holding it aloft."
         },
         {
             "nombre": "Toque helado",

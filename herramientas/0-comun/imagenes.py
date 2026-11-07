@@ -131,6 +131,20 @@ SITIOS = {
         "lado": 1400,
         "cuadrada": False,
     },
+    "rol-imagen": {
+        "que": "una imagen de una campaña (foto de un dibujo y demás)",
+        "carpeta": "imagenes/notas_rol/{campana}/imagenes",
+        "sufijo": "",
+        "lado": 1800,
+        "cuadrada": False,
+    },
+    "rol-documento": {
+        "que": "la foto de un documento que encontramos en una campaña",
+        "carpeta": "imagenes/notas_rol/{campana}/documentos",
+        "sufijo": "",
+        "lado": 1800,
+        "cuadrada": False,
+    },
     "notas": {
         "que": "una imagen dentro de las notas de una partida",
         "carpeta": "imagenes/notas_rol/{campana}/notas",

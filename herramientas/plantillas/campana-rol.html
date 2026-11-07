@@ -60,7 +60,7 @@
     <link rel="alternate" type="application/rss+xml" title="El Blog de Richi — blog, relatos y rol" href="/blog/rss.xml">
     <!-- ==== CSS ==== -->
     <link rel="stylesheet" href="/estilos/paquete-comun.css?v=458b08aa">
-    <link rel="stylesheet" href="/ligero/estilos/paginas/notas-rol.css?v=67998ce9">
+    <link rel="stylesheet" href="/ligero/estilos/paginas/notas-rol.css?v=7b8cbe9b">
     <link rel="stylesheet" href="/ligero/estilos/componentes/postit.css?v=c6f04f61">
     <link rel="stylesheet" href="/ligero/estilos/paginas/notas-rol.responsive.css?v=9c1d26db">
     <link rel="stylesheet" href="/ligero/estilos/componentes/ventana-modal.css?v=95db68e9">
@@ -70,10 +70,10 @@
     <!-- ==== fin del CSS ==== -->
     <script src="/ligero/scripts/cargador-scripts.js?v=218b9040"></script>
     <!-- ==== JS ==== -->
-    <script defer src="/scripts/paquete-comun.js?v=f59810b3"></script>
-    <script defer src="/ligero/scripts/componentes/ventana-modal.js?v=427a4c21"></script>
+    <script defer src="/scripts/paquete-comun.js?v=1c4b4e97"></script>
+    <script defer src="/ligero/scripts/componentes/ventana-modal.js?v=696073b4"></script>
     <script defer src="/ligero/scripts/componentes/lupa.js?v=cce10cd1"></script>
-    <script defer src="/ligero/scripts/paginas/notas-rol.js?v=3b898d7a"></script>
+    <script defer src="/ligero/scripts/paginas/notas-rol.js?v=4bc2b377"></script>
     <!-- ==== fin del JS ==== -->
   </head>
 <body>
@@ -138,6 +138,16 @@
                             data-campana-dinero-abrir aria-haspopup="dialog" data-por-ver>el dinero →</button>
                     <button class="campana-boton" type="button"
                             data-campana-cronica-abrir aria-haspopup="dialog" data-por-ver>la historia hasta ahora →</button>
+                    <!-- Las fotos de la campaña (dibujos y demás), los
+                         documentos que encontramos y el mapamundi: los
+                         tres salen solo si la campaña tiene algo
+                         (notas-rol.js: prepararBotones). El del mapa
+                         lleva a su página. -->
+                    <button class="campana-boton" type="button"
+                            data-campana-imagenes-abrir aria-haspopup="dialog" data-por-ver>imágenes →</button>
+                    <button class="campana-boton" type="button"
+                            data-campana-documentos-abrir aria-haspopup="dialog" data-por-ver>documentos →</button>
+                    <a class="campana-boton" data-campana-mapa href="#" data-por-ver>el mapamundi →</a>
                 </p>
             </div>
 

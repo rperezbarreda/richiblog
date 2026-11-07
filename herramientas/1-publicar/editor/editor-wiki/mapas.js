@@ -524,6 +524,33 @@ function regionesDeGrandeAPequena() {
 }
 
 // ---- LA LISTA DE MAPAS ----
+// En «Un mapa nuevo», lo de la wiki (de qué página es, la escala común)
+// solo si no es de una campaña.
+function mostrarLoDeLaWikiEnElMapaNuevo() {
+    const deCampana = Boolean($("#mapa-nuevo-de").value);
+    document.querySelectorAll("[data-mapa-solo-wiki]").forEach((x) => {
+        x.hidden = deCampana;
+    });
+    $("#ayuda-mapa-titulo").textContent = deCampana
+        ? "Si lo dejas vacío: «Mapamundi de» y el nombre de la campaña."
+        : "Si lo dejas vacío: «Mapa del» o «Mapa de» y el nombre de la página («Mapa del Reino de Prunia»).";
+}
+
+function ponerCampanasEnElMapaNuevo(campanas) {
+    const elegir = $("#mapa-nuevo-de");
+    if (!elegir || elegir.dataset.listo) {
+        return;
+    }
+    elegir.dataset.listo = "1";
+    (campanas || []).forEach((c) => {
+        const opcion = document.createElement("option");
+        opcion.value = c.clave;
+        opcion.textContent = "una campaña: " + c.nombre;
+        elegir.appendChild(opcion);
+    });
+    elegir.addEventListener("change", mostrarLoDeLaWikiEnElMapaNuevo);
+}
+
 async function pintarListaDeMapas() {
     const lista = $("[data-mapas-lista]");
     const hay = await pedirEditor("/api/mapas");
@@ -532,6 +559,7 @@ async function pintarListaDeMapas() {
         avisarEditor(hay.error, true);
         return;
     }
+    ponerCampanasEnElMapaNuevo(hay.campanas);
     if (!hay.mapas.length) {
         lista.appendChild(crearEditor("li", "", "Aún no hay ninguno."));
         return;
@@ -609,6 +637,26 @@ async function hacerMapaNuevo() {
     const boton = $('[data-mapa-nuevo] button[type="submit"]');
     boton.disabled = true;
     avisarEditor("Preparando la imagen y el mapa…");
+    // El de una campaña: ni página de la wiki ni escala común.
+    const campana = $("#mapa-nuevo-de").value;
+    if (campana) {
+        const hecho = await pedirEditor("/api/mapa/nuevo", Object.assign({
+            campana, titulo: $("#mapa-nuevo-titulo").value.trim(),
+        }, imagen || { ruta }));
+        boton.disabled = false;
+        if (hecho.error) {
+            avisarEditor(hecho.error, true);
+            return;
+        }
+        $("[data-mapa-nuevo]").reset();
+        mostrarLoDeLaWikiEnElMapaNuevo();
+        $("[data-mapa-nuevo-elegida]").textContent = "";
+        ponerMapa(hecho.mapa);
+        irAEditor("mapa");
+        avisarEditor("Hecho: " + hecho.mapa.archivo + ". " + (hecho.aviso ? hecho.aviso + " " : "")
+            + "Ya puedes poner sitios y pintar.");
+        return;
+    }
     const aEscala = $("#mapa-nuevo-escala").checked;
     if (aEscala) {
         avisarEditor("Buscándolo en el mapamundi y ampliándolo" + ($("#mapa-nuevo-ia").checked ? " con IA" : "")

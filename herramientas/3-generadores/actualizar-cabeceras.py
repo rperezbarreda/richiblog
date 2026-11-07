@@ -94,6 +94,7 @@ PLANTILLAS = {
     "herramientas/plantillas/sesion-rol.html": "/web/notas_rol/ragna/sesion-99.html",
     "herramientas/plantillas/npcs-rol.html": "/web/notas_rol/ragna/npcs_ragna.html",
     "herramientas/plantillas/campana-rol.html": "/web/notas_rol/ragna/index_ragna.html",
+    "herramientas/plantillas/mapa-rol.html": "/web/notas_rol/ragna/mapa_mapamundi_de_ragna.html",
     "herramientas/plantillas/personajes-index.html": "/web/personajes/index_personajes.html",
     "herramientas/plantillas/personaje.html": "/web/personajes/un-personaje/un-personaje.html",
     "herramientas/plantillas/recetas-index.html": "/web/mis_movidas/recetas/index_recetas.html",
@@ -173,7 +174,11 @@ def hojas_de(ruta):
     # notas de cada partida. Las dos llevan la misma hoja, así que aquí no
     # hace falta distinguirlas (en scripts_de sí: el JavaScript solo lo
     # necesita el índice).
-    es_notas_rol = "/notas_rol/" in ruta
+    # El MAPAMUNDI DE UNA CAMPAÑA (mapa_<clave>.html, lo escribe
+    # generar-mapas-rol.py): es un mapa como los de la wiki, con lo suyo
+    # (mundo.css y mundo-mapa.css), y NO una página del cuaderno.
+    es_mapa_rol = bool(re.search(r"/notas_rol/[^/]+/mapa_[^/]+\.html$", ruta))
+    es_notas_rol = "/notas_rol/" in ruta and not es_mapa_rol
     # La página de npcs de una campaña: la rejilla de tokens. Lleva lo
     # de las notas de rol MÁS su propia hoja y la de los filtros, que son
     # los mismos botones del archivo del blog y del portfolio.
@@ -203,9 +208,9 @@ def hojas_de(ruta):
     # La wiki del mundo. Son TRES páginas distintas: la portada, que lleva
     # buscador y filtros; cada artículo, que no lleva ninguno de los dos; y
     # cada mapa, que lleva lo suyo (el zoom, las capas y el dibujo).
-    es_mundo = "/web/wiki/" in ruta
+    es_mundo = "/web/wiki/" in ruta or es_mapa_rol
     es_mundo_indice = ruta.endswith("/wiki/index_wiki.html")
-    es_mundo_mapa = bool(re.search(r"/wiki/(?:.+/)?mapa_[^/]+\.html$", ruta))
+    es_mundo_mapa = bool(re.search(r"/wiki/(?:.+/)?mapa_[^/]+\.html$", ruta)) or es_mapa_rol
     # Y la línea de tiempo, que es un artículo más con su propia hoja (la
     # escribe generar-linea-tiempo.py; los eventos son artículos normales).
     es_mundo_linea = es_mundo and ruta.endswith("/linea_de_tiempo.html")
@@ -496,6 +501,8 @@ def scripts_de(ruta):
     # sesiones. Las notas de una partida son HTML escrito a mano y no
     # necesitan ningún script propio.
     es_campana_rol = bool(re.search(r"/notas_rol/[^/]+/index_[^/]+$", camino))
+    # El mapamundi de una campaña: un mapa como los de la wiki.
+    es_mapa_rol = bool(re.search(r"/notas_rol/[^/]+/mapa_[^/]+$", camino))
     # Y las notas de una partida: ahí el script pliega las escenas y
     # marca las cosas pendientes. La página funciona sin él —las escenas
     # las pliega el navegador solo, que son <details>—, pero con él se
@@ -505,7 +512,7 @@ def scripts_de(ruta):
     # y acabaría cargando el script del cuaderno, que allí no pinta nada.
     es_npcs_rol = bool(re.search(r"/notas_rol/[^/]+/npcs_[^/]+$", camino))
     es_sesion_rol = ("/notas_rol/" in camino and not es_campana_rol
-                     and not es_npcs_rol)
+                     and not es_npcs_rol and not es_mapa_rol)
     # Solo las fichas de cada gato: el índice de santuarios no tiene
     # galería.
     es_ficha_santuario = bool(re.search(r"/santuarios/[^/]+/[^/]+$", camino))
@@ -517,9 +524,9 @@ def scripts_de(ruta):
     es_buscar = "/buscar/" in camino
     es_recomendaciones = "/recomendaciones/" in camino
     es_ando = "/en_lo_que_ando/" in camino
-    es_mundo = "/web/wiki/" in camino
+    es_mundo = "/web/wiki/" in camino or es_mapa_rol
     es_mundo_indice = camino.endswith("/wiki/index_wiki")
-    es_mundo_mapa = bool(re.search(r"/wiki/(?:.+/)?mapa_[^/]+$", camino))
+    es_mundo_mapa = bool(re.search(r"/wiki/(?:.+/)?mapa_[^/]+$", camino)) or es_mapa_rol
     # Páginas de lectura: una entrada del blog (no el archivo del año)
     # o un relato (no su índice). Ahí va la ventana de "sigue leyendo".
     es_lectura = bool(

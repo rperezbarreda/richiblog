@@ -681,6 +681,44 @@ def subir_imagen(peticion):
 # que se escribe dentro de la bóveda.
 
 CARPETA_MAPAS = "wiki/_imagenes/mapas"
+# LOS MAPAS DE LAS CAMPAÑAS (el mapamundi de Ragna…): no son de la wiki,
+# así que no van en la bóveda (importar-mundo.py la deja como Chronicler y
+# los borraría). Van en mapas-rol/<campaña>/, con sus imágenes en
+# mapas-rol/<campaña>/imagenes/ (la carpeta no se sube: lo que se publica
+# lo escribe generar-mapas-rol.py). En el editor salen como
+# «@campañas/<campaña>/<Título>.cmap».
+MAPAS_ROL = RAIZ / "mapas-rol"
+PREFIJO_ROL = "@campañas/"
+
+
+def relativo_de_mapa(archivo):
+    """Cómo se llama un .cmap en el editor: su ruta en la bóveda, o
+    «@campañas/<campaña>/<archivo>» si es de una campaña."""
+    try:
+        return PREFIJO_ROL + archivo.relative_to(MAPAS_ROL).as_posix()
+    except ValueError:
+        return archivo.relative_to(VAULT).as_posix()
+
+
+def es_de_campana(archivo):
+    try:
+        archivo.resolve().relative_to(MAPAS_ROL.resolve())
+        return True
+    except ValueError:
+        return False
+
+
+def campanas_que_hay():
+    """Las campañas (datos/notas_rol/campana-<clave>.json): [{clave, nombre}]."""
+    salida = []
+    for archivo in sorted((RAIZ / "datos" / "notas_rol").glob("campana-*.json")):
+        try:
+            datos = json.loads(archivo.read_text(encoding="utf-8"))
+        except (OSError, ValueError):
+            continue
+        clave = archivo.stem[len("campana-"):]
+        salida.append({"clave": clave, "nombre": str(datos.get("nombre") or clave)})
+    return salida
 # Las imágenes de mapa, a su tamaño (o hasta este lado): un mapa encogido
 # a 1600 se queda sin detalle al acercarse.
 LADO_MAPA = 4096
@@ -696,11 +734,12 @@ def _leer_cmap(archivo):
 
 def mapas_que_hay():
     salida = []
-    for archivo in sorted(VAULT.rglob("*.cmap"), key=lambda a: a.stem.lower()):
+    de_rol = sorted(MAPAS_ROL.glob("*/*.cmap"), key=lambda a: a.stem.lower()) if MAPAS_ROL.is_dir() else []
+    for archivo in sorted(VAULT.rglob("*.cmap"), key=lambda a: a.stem.lower()) + de_rol:
         datos = _leer_cmap(archivo)
         if datos is None:
             continue
-        salida.append({"archivo": archivo.relative_to(VAULT).as_posix(),
+        salida.append({"archivo": relativo_de_mapa(archivo),
                        "titulo": str(datos.get("title") or archivo.stem),
                        "pagina": str(datos.get("page") or ""),
                        "pines": len(datos.get("pins") or []),
@@ -720,9 +759,12 @@ def ruta_de_mapa(relativo):
     relativo = str(relativo or "").replace("\\", "/").strip("/")
     if not relativo.lower().endswith(".cmap"):
         return None
-    archivo = (VAULT / relativo).resolve()
+    base = VAULT
+    if relativo.startswith(PREFIJO_ROL):
+        base, relativo = MAPAS_ROL, relativo[len(PREFIJO_ROL):]
+    archivo = (base / relativo).resolve()
     try:
-        archivo.relative_to(VAULT.resolve())
+        archivo.relative_to(base.resolve())
     except ValueError:
         return None
     return archivo if archivo.is_file() else None
@@ -732,11 +774,16 @@ def url_de_imagen(nombre):
     """Dónde la sirve el editor: se busca por el nombre en wiki/_imagenes/
     (igual que hace generar-mundo con las capas)."""
     nombre = str(nombre or "").replace("\\", "/").split("/")[-1].lower()
-    if not nombre or not IMAGENES.is_dir():
+    if not nombre:
         return ""
-    for archivo in sorted(IMAGENES.rglob("*")):
-        if archivo.name.lower() == nombre:
-            return "/" + urllib.parse.quote(archivo.relative_to(RAIZ).as_posix())
+    # Las de la wiki y, detrás, las de los mapas de las campañas.
+    donde = [IMAGENES] + ([MAPAS_ROL] if MAPAS_ROL.is_dir() else [])
+    for carpeta in donde:
+        if not carpeta.is_dir():
+            continue
+        for archivo in sorted(carpeta.rglob("*")):
+            if archivo.name.lower() == nombre and archivo.is_file():
+                return "/" + urllib.parse.quote(archivo.relative_to(RAIZ).as_posix())
     return ""
 
 
@@ -1026,9 +1073,23 @@ def leer_mapa(archivo):
     for em in (datos.get("emblems") or []) + (datos.get("pins") or []):
         if isinstance(em, dict) and em.get("image"):
             imagenes[str(em["image"])] = url_de_imagen(em["image"])
+    if es_de_campana(archivo):
+        # Uno de una campaña: sin vecinos ni página de la wiki; su página
+        # es la que escribe generar-mapas-rol.py.
+        clave = archivo.parent.name
+        return {"archivo": relativo_de_mapa(archivo), "datos": datos, "imagenes": imagenes, "vecinos": [],
+                "url": "/web/notas_rol/%s/mapa_%s.html" % (clave, slug_de_mapa_rol(datos, archivo)),
+                "campana": clave}
     return {"archivo": archivo.relative_to(VAULT).as_posix(), "datos": datos,
             "imagenes": imagenes, "vecinos": vecinos_de(archivo, datos),
             "url": url_de_la_pagina(str(datos.get("title") or archivo.stem))}
+
+
+def slug_de_mapa_rol(datos, archivo):
+    """El final de la dirección del mapa de una campaña (mapa_<esto>.html):
+    su título, sin tildes ni espacios. Lo mismo que generar-mapas-rol.py."""
+    texto = sin_tildes(str((datos or {}).get("title") or archivo.stem)).lower()
+    return re.sub(r"[^a-z0-9]+", "_", texto).strip("_") or "mapa"
 
 
 def _lista_de_puntos(puntos):
@@ -1136,8 +1197,9 @@ def _hecha(archivo, aviso="", **mas):
                  "url": url_de_imagen(archivo.name), "aviso": aviso}, **mas)
 
 
-def traer_imagen_de_mapa(peticion, nombre):
-    """La imagen que llega (subida o por su ruta) a wiki/_imagenes/mapas/.
+def traer_imagen_de_mapa(peticion, nombre, carpeta=None):
+    """La imagen que llega (subida o por su ruta) a wiki/_imagenes/mapas/
+    (o a la «carpeta» que se diga: la de una campaña).
     Devuelve {nombre, ancho, alto, url} o {error}."""
     try:
         import imagenes as img
@@ -1147,12 +1209,12 @@ def traer_imagen_de_mapa(peticion, nombre):
     if error:
         return {"error": error}
     try:
-        hecha, aviso = img.traer(ruta, CARPETA_MAPAS, img.nombre_para(nombre, "_mapa"), lado=LADO_MAPA)
+        hecha, aviso = img.traer(ruta, carpeta or CARPETA_MAPAS, img.nombre_para(nombre, "_mapa"), lado=LADO_MAPA)
     finally:
         borrar_temporal(temporal)
     if not hecha:
         return {"error": "No he podido traerla: " + aviso}
-    return _hecha(RAIZ / CARPETA_MAPAS / Path(hecha).name, aviso)
+    return _hecha(RAIZ / (carpeta or CARPETA_MAPAS) / Path(hecha).name, aviso)
 
 
 # ---- A LA ESCALA COMÚN (herramientas/0-comun/mapas_mundo.py) ----
@@ -1298,9 +1360,39 @@ def titulo_por_defecto(nombre):
     return "Mapa " + articulo + nombre
 
 
+def nuevo_mapa_de_campana(peticion, clave):
+    """El mapa de una campaña: en mapas-rol/<campaña>/, con su imagen en
+    mapas-rol/<campaña>/imagenes/ (sin escala común ni página de la wiki)."""
+    campana = next((c for c in campanas_que_hay() if c["clave"] == clave), None)
+    if not campana:
+        return {"error": "No hay ninguna campaña «%s»." % clave}
+    titulo = str(peticion.get("titulo") or "").strip() or "Mapamundi de " + re.sub(
+        r"^campaña de\s+", "", campana["nombre"], flags=re.I).strip()
+    malos = [c for c in titulo if c in npw.PROHIBIDO]
+    if malos:
+        return {"error": "El título no puede llevar %s: es también el nombre del archivo." % " ".join(malos)}
+    destino = MAPAS_ROL / clave / (titulo + ".cmap")
+    if destino.exists():
+        return {"error": "Ya hay un mapa así: %s. Ábrelo desde la lista de mapas." % relativo_de_mapa(destino)}
+    imagen = traer_imagen_de_mapa(peticion, titulo, "mapas-rol/%s/imagenes" % clave)
+    if imagen.get("error"):
+        return imagen
+    datos = {"version": "1.0", "title": titulo, "campaign": clave,
+             "width": imagen["ancho"], "height": imagen["alto"],
+             "layers": [{"id": "base", "name": "Mapa", "image": imagen["nombre"], "opacity": 1,
+                         "zIndex": 0, "visible": True}],
+             "pins": [], "shapes": [], "lines": []}
+    destino.parent.mkdir(parents=True, exist_ok=True)
+    escribir_texto(destino, json.dumps(datos, ensure_ascii=False, indent=2) + "\n")
+    return {"ok": True, "mapa": leer_mapa(destino), "aviso": imagen.get("aviso", "")}
+
+
 def nuevo_mapa(peticion):
     """Un .cmap nuevo con una imagen de fondo y nada encima, en la carpeta
-    de su página (o en la raíz de la bóveda si no es de ninguna)."""
+    de su página (o en la raíz de la bóveda si no es de ninguna). Con
+    «campana», el de una campaña (nuevo_mapa_de_campana)."""
+    if str(peticion.get("campana") or "").strip():
+        return nuevo_mapa_de_campana(peticion, str(peticion["campana"]).strip())
     pagina = str(peticion.get("pagina") or "").strip()
     titulo = str(peticion.get("titulo") or "").strip()
     archivo_pagina = npw.pagina_llamada(pagina) if pagina else None
@@ -1343,7 +1435,8 @@ def nuevo_mapa(peticion):
 # =========================================
 
 PASAR_LOCK = threading.Lock()
-SCRIPTS_DE_PASAR = ("3-generadores/generar-mundo.py", "3-generadores/actualizar-cabeceras.py")
+SCRIPTS_DE_PASAR = ("3-generadores/generar-mundo.py", "3-generadores/generar-mapas-rol.py",
+                    "3-generadores/actualizar-cabeceras.py")
 # Lo que se apuntó la última vez (cuántas líneas escribió cada script y
 # cuánto tardó), para que la barra de progreso sepa cuánto le queda.
 ULTIMA_PASADA = Path(tempfile.gettempdir()) / "editor-wiki-ultima-pasada.json"
@@ -1377,8 +1470,9 @@ def pasar_a_la_web(al_avanzar=None):
         # Cuánto de la barra le toca a cada script: lo que tardó la última
         # vez (la primera, más o menos lo de siempre: el primero tarda más).
         pesos = ([tiempos[s] / total_tiempo for s in SCRIPTS_DE_PASAR] if total_tiempo > 0 and all(tiempos.values())
-                 else [0.65, 0.35])
+                 else [0.6, 0.08, 0.32])
         nombres = {"generar-mundo.py": "Montando las páginas de la wiki",
+                   "generar-mapas-rol.py": "Pintando los mapas de las campañas",
                    "actualizar-cabeceras.py": "Poniendo las cabeceras y los menús"}
         salida, apuntado, hecho_antes = [], {}, 0.0
         entorno = dict(os.environ, PYTHONUNBUFFERED="1", PYTHONIOENCODING="utf-8")
@@ -1451,7 +1545,9 @@ def empezar_a_pasar(peticion):
             hecho = pasar_a_la_web(avanzar)
             if nombre:
                 hecho["url"] = url_de_la_pagina(nombre)
-            if mapa:
+            if mapa and es_de_campana(mapa):
+                hecho["url"] = leer_mapa(mapa).get("url", "")
+            elif mapa:
                 datos = _leer_cmap(mapa) or {}
                 hecho["url"] = url_de_la_pagina(str(datos.get("title") or mapa.stem))
         except Exception as error:  # que el editor lo cuente y no se quede esperando
@@ -1542,7 +1638,7 @@ class Editor(SimpleHTTPRequestHandler):
                 nombre = (pregunta.get("nombre") or [""])[0]
                 return self._json({"url": url_de_imagen(nombre)})
             if url.path == "/api/mapas":
-                return self._json({"mapas": mapas_que_hay()})
+                return self._json({"mapas": mapas_que_hay(), "campanas": campanas_que_hay()})
             if url.path == "/api/mapa/ayudas":
                 return self._json(ayudas_de_mapas())
             if url.path == "/api/mapa":
@@ -1629,7 +1725,9 @@ class Editor(SimpleHTTPRequestHandler):
                 if not archivo:
                     return self._json({"error": "Ese mapa ya no está."})
                 if url.path == "/api/mapa/imagen":
-                    return self._json(traer_imagen_de_mapa(peticion, archivo.stem))
+                    return self._json(traer_imagen_de_mapa(
+                        peticion, archivo.stem,
+                        "mapas-rol/%s/imagenes" % archivo.parent.name if es_de_campana(archivo) else None))
                 return self._json(guardar_mapa(archivo, peticion.get("datos")))
             if url.path == "/api/pasar":
                 return self._json(empezar_a_pasar(peticion))

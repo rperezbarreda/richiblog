@@ -455,6 +455,9 @@ GENERADORES = (
     "3-generadores/generar-personajes.py",
     # Las recetas: el índice y la página de cada una, de su JSON.
     "3-generadores/generar-recetas.py",
+    # Los mapas de las campañas (mapas-rol/): su página y el botón «el
+    # mapamundi» de la campaña. Antes del sitemap y del buscador.
+    "3-generadores/generar-mapas-rol.py",
     # Los comentarios de explicación de las plantillas, fuera de lo
     # publicado (los borradores se quedan con su guía). Después de
     # generar-archivo, que escribe páginas nuevas desde una plantilla.

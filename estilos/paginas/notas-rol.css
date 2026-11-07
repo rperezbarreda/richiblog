@@ -1106,6 +1106,134 @@
     width: min(44rem, 100%);
 }
 
+/* LAS IMÁGENES Y LOS DOCUMENTOS DE LA CAMPAÑA (notas-rol.js:
+   llenarLasImagenes, llenarLosDocumentos): una rejilla de fotos que se
+   pulsan para verlas en grande, y cada documento con sus fotos y, plegado,
+   lo que pone. */
+.modal-galeria .modal-ventana {
+    width: min(52rem, 100%);
+}
+
+.campana-galeria-intro {
+    margin: 0 0 14px;
+    color: var(--muted);
+    font-family: var(--fuente-mono);
+    font-size: 0.8125rem;
+}
+
+.campana-galeria {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 13rem), 1fr));
+    gap: 18px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.campana-galeria-cosa {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    min-width: 0;
+}
+
+.campana-foto {
+    display: block;
+    width: 100%;
+    padding: 0;
+    border: 2px solid var(--yellow);
+    background: var(--purple);
+    cursor: zoom-in;
+}
+
+.campana-foto img {
+    display: block;
+    width: 100%;
+    height: auto;
+    aspect-ratio: 4 / 3;
+    object-fit: cover;
+}
+
+.campana-foto:hover,
+.campana-foto:focus-visible {
+    outline: 3px solid var(--white);
+    outline-offset: 2px;
+}
+
+.campana-galeria-pie {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    margin: 0;
+    line-height: 1.35;
+}
+
+.campana-galeria-datos {
+    margin: 0;
+    color: var(--muted);
+    font-family: var(--fuente-mono);
+    font-size: 0.8125rem;
+}
+
+.campana-galeria-nota {
+    margin: 0;
+    font-size: 0.9375rem;
+    line-height: 1.5;
+}
+
+.campana-documentos {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.campana-documento + .campana-documento {
+    margin-top: 20px;
+    padding-top: 16px;
+    border-top: 2px dashed var(--border);
+}
+
+.campana-documento-titulo {
+    margin: 0 0 4px;
+    color: var(--yellow);
+    font-size: 1.125rem;
+}
+
+.campana-documento-fotos {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-top: 10px;
+}
+
+.campana-documento-fotos .campana-foto {
+    width: min(11rem, 45%);
+}
+
+.campana-documento-texto {
+    margin-top: 10px;
+}
+
+.campana-documento-texto summary {
+    color: var(--yellow);
+    font-family: var(--fuente-mono);
+    font-size: 0.875rem;
+    cursor: pointer;
+}
+
+.campana-documento-texto summary:focus-visible {
+    outline: 2px solid var(--yellow);
+    outline-offset: 2px;
+}
+
+.campana-documento-texto p {
+    margin: 8px 0 0;
+    padding-left: 12px;
+    border-left: 3px solid var(--yellow);
+    font-style: italic;
+    line-height: 1.6;
+}
+
 /* LA HISTORIA HASTA AHORA: una sesión detrás de otra, separadas por una
    raya, cada una con su resumen y «lo que pasó» (con un icono de adorno
    delante de cada cosa: el texto ya dice qué es). */

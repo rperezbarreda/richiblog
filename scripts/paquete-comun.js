@@ -1493,6 +1493,7 @@ function initializeLightbox() {
             return;
         }
         if (event.key === "Escape") {
+            event.preventDefault();
             closeLightbox();
         } else if (lightboxGrupo.length > 1 && (event.key === "ArrowLeft" || event.key === "ArrowRight")) {
             event.preventDefault();

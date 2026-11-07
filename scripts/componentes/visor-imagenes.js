@@ -42,6 +42,9 @@ function initializeLightbox() {
             return;
         }
         if (event.key === "Escape") {
+            // Que no cierre también la ventana de debajo (una galería
+            // dentro de una ventana modal): el Escape es solo para esto.
+            event.preventDefault();
             closeLightbox();
         } else if (lightboxGrupo.length > 1 && (event.key === "ArrowLeft" || event.key === "ArrowRight")) {
             event.preventDefault();

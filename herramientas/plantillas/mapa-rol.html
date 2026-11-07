@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-aDtzI6QgHfitL7afCewTh/rpYprDOJvupEIYVZKPk8Y='; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self' https://script.google.com https://script.googleusercontent.com; object-src 'none'; base-uri 'self'; form-action 'self'">
+    <!-- ==== TEMA ==== -->
+    <meta name="theme-color" content="#12091c">
+    <script>
+      (function () {
+        document.documentElement.classList.add("js");
+        try {
+          var temas = {
+            "claro": ["light", "#f3e1d6"],
+            "oscuro-puro": ["puro-oscuro", "#000000"],
+            "claro-puro": ["puro-claro", "#ffffff"],
+            "tranquilo": ["tranquilo", "#f2efe9"],
+            "tranquilo-oscuro": ["tranquilo-oscuro", "#1b1e22"],
+            "terminal-verde": ["terminal-verde", "#000000"],
+            "terminal-azul": ["terminal-azul", "#000000"],
+            "terminal-rojo": ["terminal-rojo", "#000000"],
+            "terminal-ambar": ["terminal-ambar", "#000000"]
+          };
+          var guardado = localStorage.getItem("richi-theme");
+          var elegido = temas[guardado];
+          if (!elegido && !guardado &&
+              window.matchMedia("(prefers-color-scheme: light)").matches) {
+            elegido = temas.claro;
+          }
+          if (elegido) {
+            document.documentElement.setAttribute("data-theme", elegido[0]);
+            var barra = document.querySelector('meta[name="theme-color"]');
+            if (barra) { barra.setAttribute("content", elegido[1]); }
+          }
+          if (localStorage.getItem("richi-lateral") === "plegada") {
+            document.documentElement.classList.add("lateral-plegada");
+          }
+        } catch (e) {}
+      })();
+    </script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{TITULO}} · {{CAMPANA}} · El Blog de Richi</title>
+    <!-- Cómo se ve el enlace al compartirlo (Bluesky, Discord, Ko-fi…).
+         Sin esto solo sale la URL pelada, sin título ni imagen. Las rutas
+         van absolutas a propósito: las redes no resuelven las relativas. -->
+    <meta name="description" content="{{DESCRIPCION}}">
+    <link rel="canonical" href="https://richi.blog{{URL}}">
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="El Blog de Richi">
+    <meta property="og:locale" content="es_ES">
+    <meta property="og:title" content="{{TITULO}} · {{CAMPANA}} · El Blog de Richi">
+    <meta property="og:description" content="{{DESCRIPCION}}">
+    <meta property="og:url" content="https://richi.blog{{URL}}">
+    <meta property="og:image" content="https://richi.blog/imagenes/meta/og.webp">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta property="og:image:alt" content="El Blog de Richi — ilustración de Richi sobre fondo morado">
+    <meta name="twitter:card" content="summary_large_image">
+    <link rel="icon" type="image/x-icon" href="/imagenes/favicon.ico">
+    <!-- La única fuente que se precarga. Medido con la red frenada: sin esto el
+         navegador no la descubre hasta parsear el CSS (~800 ms) y el texto baila al
+         cambiar de tipografía; así llega antes del primer pintado y no se nota el
+         cambio. Precargar más fuentes empeoraba el primer pintado 150-210 ms, porque
+         compiten por el ancho de banda con lo que hace falta para pintar. -->
+    <link rel="preload" href="/tipografias/space-grotesk-400.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="alternate" type="application/rss+xml" title="El Blog de Richi — blog, relatos y rol" href="/blog/rss.xml">
+    <!-- ==== CSS ==== -->
+    <link rel="stylesheet" href="/estilos/paquete-comun.css?v=458b08aa">
+    <link rel="stylesheet" href="/ligero/estilos/paginas/mundo.css?v=d124f7d8">
+    <link rel="stylesheet" href="/ligero/estilos/paginas/mundo-mapa.css?v=9b0c554e">
+    <link rel="stylesheet" href="/ligero/estilos/paginas/mundo.responsive.css?v=ea708468">
+    <link rel="stylesheet" href="/ligero/estilos/paginas/mundo-mapa.responsive.css?v=415f52c2">
+    <link rel="stylesheet" href="/estilos/paquete-cierre.css?v=a49d87f4">
+    <!-- ==== fin del CSS ==== -->
+    <script src="/ligero/scripts/cargador-scripts.js?v=218b9040"></script>
+    <!-- ==== JS ==== -->
+    <script defer src="/scripts/paquete-comun.js?v=1c4b4e97"></script>
+    <script defer src="/ligero/scripts/paginas/mundo-mapa.js?v=dc59120a"></script>
+    <!-- ==== fin del JS ==== -->
+    </head>
+<body>
+    <!-- ==== SIDEBAR / NAVEGACIÓN ==== -->
+    <a class="skip-link" href="#main-content">Saltar al contenido</a>
+    <div id="sidebar-container"></div>
+    <!-- ==== CONTENIDO PRINCIPAL ==== -->
+
+    <main id="main-content">
+        <!-- ==== HOME ==== -->
+        <section id="home" class="home mundo-page mundo-mapa-page">
+            <!-- ESTA PÁGINA NO SE EDITA A MANO.
+                 Es el mapa de una campaña de rol (su mapamundi), y la
+                 escribe entera herramientas/3-generadores/generar-mapas-rol.py
+                 a partir de su .cmap, en mapas-rol/<campaña>/, que se dibuja
+                 con el editor de mapas (editor-wiki.py → Mapas). Es igual
+                 que un mapa de la wiki, pero sin la wiki: vuelve a las
+                 notas de la campaña.
+                 Esta misma página es la plantilla: lo que está entre llaves
+                 dobles lo rellena el generador. -->
+            <div class="mundo-cabecera">
+                <a class="mundo-volver" href="{{VOLVER_URL}}">{{VOLVER}}</a>
+                <h1 class="mundo-titulo">{{TITULO}}</h1>
+                <p class="mundo-subtitulo">mapa · {{CUANTOS}}</p>
+            </div>
+
+            <div class="mapa-caja" data-mapa>
+                <!-- EL ZOOM Y LAS CAPAS. Sin JavaScript no hacen nada, así
+                     que no se ven: los esconde mundo-mapa.css con
+                     html:not(.js). El mapa se sigue viendo entero. -->
+                {{MANDOS}}
+
+                <!-- EL DIBUJO. Un SVG metido en la propia página: cada
+                     región es un enlace de verdad, se ve sin JavaScript y
+                     se imprime. Va con aria-hidden a propósito, porque
+                     todo lo que hay dentro está debajo en la lista, que es
+                     el mapa en texto; el porqué, en mundo_mapas.py.
+
+                     La caja se desplaza sola (overflow: auto), así que con
+                     el zoom puesto el mapa se mueve con el dedo, con la
+                     rueda, con la barra o con las flechas del teclado sin
+                     que haga falta JavaScript para nada de eso. -->
+                <div class="mapa-lienzo" data-mapa-lienzo tabindex="0" role="region"
+                     aria-label="El mapa dibujado. Debajo está en lista todo lo que hay en él.">
+                    {{MAPA}}
+                </div>
+
+                <!-- LA LEYENDA: con JavaScript, un panel encima del mapa que
+                     abre el botón «leyenda»; sin él, aquí debajo. -->
+                {{LEYENDA}}
+            </div>
+
+            <p class="mapa-ayuda">
+                La rueda del ratón acerca y aleja; se arrastra con el dedo
+                o con el ratón. Con el teclado: las flechas lo mueven y
+                <kbd>+</kbd> y <kbd>−</kbd> acercan y alejan.
+            </p>
+
+            <!-- LA LISTA DE SITIOS: el mapa en texto, con los mismos
+                 enlaces y en orden alfabético. -->
+            {{SITIOS}}
+
+            <a class="mundo-volver mundo-volver-abajo" href="{{VOLVER_URL}}">{{VOLVER}}</a>
+        </section>
+    </main>
+</body>
+</html>

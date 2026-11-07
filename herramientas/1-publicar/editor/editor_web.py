@@ -1425,6 +1425,41 @@ def colecciones():
                          C("descripcion", "Qué hace (al desplegarlo en la web)", "largo", vacio="quitar",
                            si=con_descripcion, ayuda="El hechizo o el objeto, entero. Un párrafo por línea."),
                      ]}]},
+        {"id": "imagenes-campana", "apartado": "campanas", "corto": "Fotos de dibujos y demás.",
+         "titulo": "Las imágenes de una campaña", "por_campana": True,
+         "ayuda": "Las fotos que sacamos de dibujos y demás para la campaña. Salen en la ventana «imágenes» del"
+                  " índice de la campaña, de la sesión más reciente a la más vieja, y se ven en grande al pulsarlas.",
+         "archivo": "datos/notas_rol/campana-{campana}.json", "despues": None,
+         "partes": [{"id": "imagenes", "camino": ["imagenes"], "titulo": "Las imágenes", "nombre_de": "titulo",
+                     "detalle": ["de", "quien"], "nuevas_arriba": True, "campos": [
+                         C("titulo", "Qué es", obligatorio=True, ayuda="«El dragón de la torre», «Mapa de la mina»…"),
+                         C("imagen", "La foto", "imagen", sitio="rol-imagen", obligatorio=True),
+                         C("de", "De qué sesión", "elegir", numerico=True, vacio="quitar"),
+                         C("quien", "De quién es el dibujo", vacio="quitar", ayuda="Opcional: «Andrea», «Nacho»…"),
+                         C("nota", "Una nota", "largo", vacio="quitar"),
+                     ]}]},
+        {"id": "documentos-campana", "apartado": "campanas", "corto": "Cartas, libros, carteles… que encontramos.",
+         "titulo": "Los documentos de una campaña", "por_campana": True,
+         "ayuda": "Lo que encontramos escrito: cartas, libros, carteles, diarios… Con su foto (hasta tres: por"
+                  " delante, por detrás, otra página) y, si quieres, lo que pone. Salen en la ventana «documentos» del"
+                  " índice de la campaña.",
+         "archivo": "datos/notas_rol/campana-{campana}.json", "despues": None,
+         "partes": [{"id": "documentos", "camino": ["documentos"], "titulo": "Los documentos", "nombre_de": "titulo",
+                     "detalle": ["tipo", "de"], "nuevas_arriba": True, "campos": [
+                         C("titulo", "Qué es", obligatorio=True, ayuda="«La carta de Sigil», «El diario del capitán»…"),
+                         C("tipo", "Tipo", "elegir", libre=True, vacio="quitar",
+                           opciones=_opciones(["carta", "libro", "diario", "cartel", "nota", "mapa", "contrato",
+                                               "pergamino"])),
+                         C("de", "De qué sesión", "elegir", numerico=True, vacio="quitar"),
+                         C("donde", "Dónde lo encontramos", vacio="quitar",
+                           ayuda="«En el cuerpo del bandido», «nos lo dio Sigil»…"),
+                         C("imagen", "La foto", "imagen", sitio="rol-documento", vacio="quitar"),
+                         C("imagen_2", "Otra foto (por detrás, otra página…)", "imagen", sitio="rol-documento",
+                           vacio="quitar"),
+                         C("imagen_3", "Otra más", "imagen", sitio="rol-documento", vacio="quitar"),
+                         C("texto", "Lo que pone", "largo", vacio="quitar", grande=True,
+                           ayuda="Opcional: copiado tal cual. En la web va plegado debajo de las fotos."),
+                     ]}]},
         {"id": "dinero", "apartado": "campanas", "corto": "Lo que entra y sale, y lo de cada uno.", "titulo": "El dinero de una campaña", "por_campana": True,
          "ayuda": "Lo que entra y lo que sale de la bolsa del grupo, con su concepto y su sesión. La web lo suma por"
                   " monedas, lo pasa a oro y lo enseña en la ventana «el dinero» del índice, con lo que lleva cada"
@@ -2033,6 +2068,8 @@ def opciones_de(col, clave_campana, datos):
                                      if isinstance(p, dict) and p.get("nombre")])
         salida["_grupo"] = _opciones([m.get("nombre", "") for m in (datos or {}).get("misiones") or []
                                       if isinstance(m, dict) and m.get("nombre")])
+    if col["id"] in ("imagenes-campana", "documentos-campana"):
+        salida["de"] = _sesiones_de(campana)
     if col["id"] == "dinero":
         salida["de"] = _sesiones_de(campana)
         salida["quien"] = _opciones([p.get("nombre", "") for p in (campana or {}).get("personajes") or []

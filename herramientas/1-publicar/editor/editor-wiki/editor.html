@@ -566,6 +566,14 @@
                     poner sitios y pintar. Si es de una página, se guarda junto a ella y esa página sale en la
                     web con un botón para explorarlo.</p>
                 <div class="campo">
+                    <label for="mapa-nuevo-de">Para qué es</label>
+                    <p class="ayuda" id="ayuda-mapa-de">Uno de una campaña (su mapamundi) no es de la wiki: sale en las
+                        notas de esa campaña, con el botón «el mapamundi».</p>
+                    <select id="mapa-nuevo-de" aria-describedby="ayuda-mapa-de" data-mapa-nuevo-de>
+                        <option value="">la wiki de Cralëa</option>
+                    </select>
+                </div>
+                <div class="campo" data-mapa-solo-wiki>
                     <label for="mapa-nuevo-pagina">De qué página es <span class="opcional">(opcional)</span></label>
                     <input id="mapa-nuevo-pagina" list="lista-paginas" autocomplete="off" spellcheck="false">
                 </div>
@@ -583,7 +591,7 @@
                     <label for="mapa-nuevo-ruta">…o pega su ruta <span class="opcional">(e:\Descargas\mapa.png)</span></label>
                     <input id="mapa-nuevo-ruta" autocomplete="off" spellcheck="false">
                 </div>
-                <fieldset class="opciones campo">
+                <fieldset class="opciones campo" data-mapa-solo-wiki>
                     <legend>Para juntarlo luego con otros</legend>
                     <label class="opcion"><input type="checkbox" id="mapa-nuevo-escala" checked> Buscarlo en el mapamundi y
                         ponerlo a la escala común</label>

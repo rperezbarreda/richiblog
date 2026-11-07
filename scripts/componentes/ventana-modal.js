@@ -106,7 +106,10 @@ function asegurarVentanaModal() {
     document.body.appendChild(MODAL.caja);
 
     document.addEventListener("keydown", (evento) => {
-        if (window.ventanaModal.abierta() && evento.key === "Escape") {
+        // Con una imagen en grande encima (el visor), el Escape es para
+        // ella: la ventana se queda.
+        if (window.ventanaModal.abierta() && evento.key === "Escape" && !evento.defaultPrevented
+            && !document.body.classList.contains("lightbox-open")) {
             cerrarVentanaModal();
         }
     });

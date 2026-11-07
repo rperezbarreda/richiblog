@@ -67,16 +67,46 @@
             "texto": "El dominio de la espada larga te permite añadir tu bonificador por competencia a la tirada de ataque de cualquier ataque que realices con ella.\n\nEsta arma tiene la siguiente propiedad de maestría. Para utilizarla, debes tener un rasgo que te permita hacerlo.\n\n***Debilitar.*** Si impactas a una criatura con esta arma, dicha criatura tiene desventaja en su siguiente tirada de ataque antes del comienzo de tu siguiente turno."
         },
         {
+            "nombre": "Espada larga plateada",
+            "original": "Silvered Longsword",
+            "datos": "Común",
+            "texto": "An alchemical process has bonded silver to this magic weapon. When you score a Critical Hit with it against a creature that is shape-shifted, the weapon deals one additional die of damage.\n\nMastery: Sap. If you hit a creature with this weapon, that creature has Disadvantage on its next attack roll before the start of your next turn."
+        },
+        {
+            "nombre": "Guanteletes de poder de ogro",
+            "original": "Gauntlets of Ogre Power",
+            "datos": "Poco común · requiere sintonización",
+            "texto": "Your Strength score is 19 while you wear these gauntlets. They have no effect on you if your Strength is 19 or higher without them."
+        },
+        {
             "nombre": "Lanza",
             "original": "Spear",
             "datos": "Arma · lo lleva puesto",
             "texto": "Proficiency with a Spear allows you to add your proficiency bonus to the attack roll for any attack you make with it.\n\nThis weapon has the following mastery property. To use this property, you must have a feature that lets you use it.\n\n***Sap.*** If you hit a creature with this weapon, that creature has Disadvantage on its next attack roll before the start of your next turn."
         },
         {
+            "nombre": "Periapto de cerrar heridas",
+            "original": "Periapt of Wound Closure",
+            "datos": "Poco común · requiere sintonización",
+            "texto": "While wearing this pendant, you gain the following benefits.\n\nLife Preservation. Whenever you make a Death Saving Throw, you can change a roll of 9 or lower to a 10, turning a failed save into a successful one.\n\nNatural Healing Boost. Whenever you roll a Hit Point Dice to regain Hit Points, double the number of Hit Points it restores."
+        },
+        {
             "nombre": "Piedras Mensajeras",
             "original": "Sending Stones",
             "datos": "Objeto maravilloso · poco común · lo lleva puesto",
             "texto": "**Piedras mensajeras** vienen en parejas, y cada piedra lisa está tallada para coincidir con la otra, de modo que resulta fácil reconocer cuáles forman una pareja. Mientras toques una de las piedras, puedes utilizar una acción para lanzar el conjuro *enviar* a través de ella. El objetivo es quien lleve la otra piedra. Si ninguna criatura lleva la otra piedra, lo sabes en cuanto utilizas la tuya y no lanzas el conjuro.\n\nUna vez lanzado *enviar* a través de las piedras, no pueden volver a utilizarse hasta el siguiente amanecer. Si una de las piedras de una pareja es destruida, la otra pierde sus propiedades mágicas."
+        },
+        {
+            "nombre": "Poción de curación",
+            "original": "Potion of Healing",
+            "datos": "Común",
+            "texto": "This potion is a magic item. As a Bonus Action, you can drink it or administer it to another creature within 5 feet of yourself. The creature that drinks the magical red fluid in this vial regains 2d4 + 2 Hit Points. The potion's red liquid glimmers when agitated."
+        },
+        {
+            "nombre": "Semiplacas hechizada (nivel 1)",
+            "original": "Enspelled (Level 1) Half Plate Armor",
+            "datos": "Poco común · requiere sintonización",
+            "texto": "Bound into this armor is a level 1 spell. The spell is determined when the armor is created and must belong to the Abjuration or Illusion school of magic. The armor has 6 charges and regains 1d6 expended charges daily at dawn. While wearing the armor, you can expend 1 charge to cast its spell.\n\nThe spell's saving throw DC is 13, and its attack bonus is +5."
         }
     ]
 }

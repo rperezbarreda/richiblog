@@ -317,6 +317,42 @@ function prepararBotones(campana) {
         );
     }
 
+    // LAS IMÁGENES (fotos de dibujos y demás) y LOS DOCUMENTOS que
+    // encontramos: cada uno en su ventana, y las fotos se ven en grande
+    // con el visor del sitio (‹ › entre unas y otras).
+    const imagenes = listaDeCampana(campana.imagenes).filter((x) => x.imagen);
+    const botonImagenes = document.querySelector("[data-campana-imagenes-abrir]");
+    if (botonImagenes && imagenes.length) {
+        botonImagenes.hidden = false;
+        botonImagenes.addEventListener("click", () =>
+            window.ventanaModal.abrir({
+                titulo: "imagenes.dir",
+                clase: "modal-galeria",
+                devolverA: botonImagenes,
+                llenar: (cuerpo) => llenarLasImagenes(cuerpo, imagenes),
+            })
+        );
+    }
+    const documentos = listaDeCampana(campana.documentos).filter((x) => x.titulo);
+    const botonDocumentos = document.querySelector("[data-campana-documentos-abrir]");
+    if (botonDocumentos && documentos.length) {
+        botonDocumentos.hidden = false;
+        botonDocumentos.addEventListener("click", () =>
+            window.ventanaModal.abrir({
+                titulo: "documentos.dir",
+                clase: "modal-galeria",
+                devolverA: botonDocumentos,
+                llenar: (cuerpo) => llenarLosDocumentos(cuerpo, documentos),
+            })
+        );
+    }
+    // EL MAPAMUNDI: un enlace a su página, si la campaña tiene.
+    const botonMapa = document.querySelector("[data-campana-mapa]");
+    if (botonMapa && campana.mapa) {
+        botonMapa.href = rutaSeguraNotas(String(campana.mapa));
+        botonMapa.hidden = false;
+    }
+
     const misiones = misionesDe(campana);
     const botonMisiones = document.querySelector("[data-campana-misiones-abrir]");
     if (botonMisiones && misiones.length) {
@@ -1898,6 +1934,137 @@ function listaDelResumen(sesion) {
     });
     return lista;
 }
+
+// =========================================
+// LAS IMÁGENES Y LOS DOCUMENTOS DE LA CAMPAÑA
+// =========================================
+// "imagenes": [{titulo, imagen, de (sesión), quien (de quién es el
+// dibujo), nota}] y "documentos": [{titulo, tipo, de, donde (dónde lo
+// encontramos), imagen, imagen_2, imagen_3, texto (lo que pone)}], en el
+// JSON de la campaña (se llevan en el editor: Campañas → «Las imágenes»
+// y «Los documentos»). De la sesión más reciente a la más vieja.
+
+function listaDeCampana(lista) {
+    return (Array.isArray(lista) ? lista : [])
+        .filter((x) => x && typeof x === "object")
+        .map((x, i) => Object.assign({ _orden: i }, x))
+        .sort((a, b) => (Number(b.de) || 0) - (Number(a.de) || 0) || a._orden - b._orden);
+}
+
+function pieDeFoto(cosa, extra) {
+    return [cosa.titulo, extra, Number(cosa.de) ? "sesión " + Number(cosa.de) : ""]
+        .filter((x) => x && String(x).trim()).join(" · ");
+}
+
+// Una foto que se pulsa para verla en grande (el visor: .lightbox-trigger).
+function fotoQueSeAmplia(ruta, pie, alt) {
+    const boton = document.createElement("button");
+    boton.type = "button";
+    boton.className = "lightbox-trigger campana-foto";
+    boton.setAttribute("data-completa", rutaSeguraNotas(ruta));
+    boton.setAttribute("data-pie", pie);
+    boton.setAttribute("aria-label", "Ver en grande: " + pie);
+    const img = document.createElement("img");
+    img.src = rutaSeguraNotas(ruta);
+    img.alt = alt || "";
+    img.loading = "lazy";
+    img.decoding = "async";
+    boton.appendChild(img);
+    return boton;
+}
+
+function llenarLasImagenes(cuerpo, imagenes) {
+    const intro = document.createElement("p");
+    intro.className = "campana-galeria-intro";
+    intro.textContent = (imagenes.length === 1 ? "1 imagen" : imagenes.length + " imágenes")
+        + ". Pulsa una para verla en grande.";
+    cuerpo.appendChild(intro);
+    const rejilla = document.createElement("ul");
+    rejilla.className = "campana-galeria";
+    rejilla.setAttribute("data-visor-grupo", "");
+    imagenes.forEach((cosa) => {
+        const li = document.createElement("li");
+        li.className = "campana-galeria-cosa";
+        const pie = pieDeFoto(cosa, cosa.quien ? "de " + cosa.quien : "");
+        li.appendChild(fotoQueSeAmplia(cosa.imagen, pie || "imagen", ""));
+        const texto = document.createElement("p");
+        texto.className = "campana-galeria-pie";
+        const titulo = document.createElement("strong");
+        titulo.textContent = cosa.titulo || "sin título";
+        texto.appendChild(titulo);
+        const datos = [cosa.quien ? "de " + cosa.quien : "", Number(cosa.de) ? "sesión " + Number(cosa.de) : ""]
+            .filter(Boolean).join(" · ");
+        if (datos) {
+            const span = document.createElement("span");
+            span.className = "campana-galeria-datos";
+            span.textContent = datos;
+            texto.appendChild(span);
+        }
+        li.appendChild(texto);
+        if (cosa.nota) {
+            const nota = document.createElement("p");
+            nota.className = "campana-galeria-nota";
+            nota.textContent = cosa.nota;
+            li.appendChild(nota);
+        }
+        rejilla.appendChild(li);
+    });
+    cuerpo.appendChild(rejilla);
+}
+
+function llenarLosDocumentos(cuerpo, documentos) {
+    const intro = document.createElement("p");
+    intro.className = "campana-galeria-intro";
+    intro.textContent = (documentos.length === 1 ? "1 documento" : documentos.length + " documentos")
+        + " de los que nos hemos encontrado.";
+    cuerpo.appendChild(intro);
+    const lista = document.createElement("ul");
+    lista.className = "campana-documentos";
+    documentos.forEach((doc) => {
+        const li = document.createElement("li");
+        li.className = "campana-documento";
+        const cabeza = document.createElement("h3");
+        cabeza.className = "campana-documento-titulo";
+        cabeza.textContent = doc.titulo;
+        li.appendChild(cabeza);
+        const datos = [doc.tipo, Number(doc.de) ? "sesión " + Number(doc.de) : "", doc.donde]
+            .filter((x) => x && String(x).trim()).join(" · ");
+        if (datos) {
+            const p = document.createElement("p");
+            p.className = "campana-galeria-datos";
+            p.textContent = datos;
+            li.appendChild(p);
+        }
+        const fotos = ["imagen", "imagen_2", "imagen_3"].map((k) => doc[k]).filter(Boolean);
+        if (fotos.length) {
+            const tira = document.createElement("div");
+            tira.className = "campana-documento-fotos";
+            // Las fotos de un documento, su propio grupo en el visor.
+            tira.setAttribute("data-visor-grupo", "");
+            fotos.forEach((ruta, i) => {
+                const pie = pieDeFoto(doc, fotos.length > 1 ? (i + 1) + " de " + fotos.length : "");
+                tira.appendChild(fotoQueSeAmplia(ruta, pie, ""));
+            });
+            li.appendChild(tira);
+        }
+        if (doc.texto && String(doc.texto).trim()) {
+            const pliegue = document.createElement("details");
+            pliegue.className = "campana-documento-texto";
+            const resumen = document.createElement("summary");
+            resumen.textContent = "lo que pone";
+            pliegue.appendChild(resumen);
+            String(doc.texto).split(/\n\s*\n|\n/).filter((x) => x.trim()).forEach((parrafo) => {
+                const p = document.createElement("p");
+                p.textContent = parrafo.trim();
+                pliegue.appendChild(p);
+            });
+            li.appendChild(pliegue);
+        }
+        lista.appendChild(li);
+    });
+    cuerpo.appendChild(lista);
+}
+
 
 // =========================================
 // LA HISTORIA HASTA AHORA (la crónica de la campaña)

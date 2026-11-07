@@ -11,9 +11,21 @@
             "texto": "Puedes lanzar cualquier conjuro como ritual si tiene la etiqueta Ritual y está en tu libro de conjuros. No necesitas tener el conjuro preparado, pero debes leerlo del libro para lanzarlo de este modo."
         },
         {
+            "nombre": "Armor of Faith",
+            "original": "Armor of Faith",
+            "datos": "",
+            "texto": "Your divine connection shields you from harm. You gain one of the following benefits of your choice.\n\nAnointed Armor. You have training with Medium armor. While you are wearing armor, you can add your Wisdom modifier, instead of your Dexterity modifier, to your Armor Class.\n\nUnarmored Defense. While you aren't wearing any armor, your base Armor Class equals 10 plus your Dexterity and Wisdom modifiers. You can use a Shield and still gain this benefit."
+        },
+        {
             "nombre": "Arquetipo de Explorador",
             "original": "Ranger Archetype",
             "texto": "A nivel 3, eliges un arquetipo que te esfuerzas por emular: el Cazador, descrito al final de la descripción de la clase, u otro procedente de una fuente diferente. Tu elección te otorga rasgos a nivel 3 y, de nuevo, a niveles 7, 11 y 15."
+        },
+        {
+            "nombre": "Ataque adicional",
+            "original": "Extra Attack",
+            "datos": "",
+            "texto": "You can attack twice instead of once whenever you take the Attack action on your turn."
         },
         {
             "nombre": "Aumentos de puntuación de característica",
@@ -21,9 +33,21 @@
             "texto": "Al determinar las puntuaciones de característica de tu personaje, aumenta una puntuación en 2 y otra diferente en 1, o aumenta tres puntuaciones en 1. Ninguno de estos aumentos puede elevar una puntuación por encima de 20."
         },
         {
+            "nombre": "Balm",
+            "original": "Balm",
+            "datos": "",
+            "texto": "When you use your Miraculous Healing, you can choose one creature you can see within 60 feet of yourself. The target regains 1d8 for each Hit Point Dice you expend with Miraculous Healing and you can end one of the following conditions on the target: Blinded, Deafened, or Poisoned."
+        },
+        {
             "nombre": "Bónus de Competencia",
             "original": "Bonus Proficiencies",
             "texto": "Cuando te unes al Colegio del Saber a nivel 3, obtienes competencia en tres habilidades de tu elección."
+        },
+        {
+            "nombre": "Burden of Mercy Spells",
+            "original": "Burden of Mercy Spells",
+            "datos": "",
+            "texto": "Your mortal burden ensures you always have certain spells ready. When you reach a Martyr level specified in the Mercy Spells table, you thereafter always have the listed spells prepared.\n\nMercy Spells\n- Martyr Level · Spells\n- 3 · Cure Wounds, Protection from Evil and Good\n- 5 · Lesser Restoration, Prayer of Healing\n- 9 · Remove Curse, Revivify\n- 13 · Aura of Life, Death Ward\n- 17 · Mass Cure Wounds, Raise Dead"
         },
         {
             "nombre": "Canción de descanso",
@@ -127,6 +151,12 @@
             "texto": "Obtienes competencia en una habilidad de tu elección."
         },
         {
+            "nombre": "Habilidoso",
+            "original": "Skillful",
+            "datos": "",
+            "texto": "You gain proficiency in one skill of your choice."
+        },
+        {
             "nombre": "Hechizos de Juramento",
             "original": "Oath Spells",
             "texto": "Obtienes conjuros de juramento en los niveles de paladín indicados en la tabla de Conjuros del Juramento de Redención. Consulta el rasgo de clase Juramento sagrado para saber cómo funcionan los conjuros de juramento.\n\n**Conjuros del Juramento de Redención**\n\n- Nivel de paladín · Conjuros\n- 3.º · *Santuario*, *Dormir*\n- 5.º · *Calmar emociones*, *Inmovilizar persona*\n- 9.º · *Contrahechizo*, *Patrón hipnótico*\n- 13.º · *Esfera resiliente de Otiluke*, *Piel pétrea*\n- 17.º · *Inmovilizar monstruo*, *Muro de fuerza*"
@@ -145,6 +175,12 @@
             "nombre": "Imposición de manos",
             "original": "Lay on Hands",
             "texto": "Tu toque bendito puede sanar heridas. Tienes una reserva de poder curativo que se recarga cuando terminas un descanso largo. Con esa reserva, puedes restaurar un número total de puntos de golpe igual a tu nivel de paladín × 5.\n\nComo acción, puedes tocar a una criatura y extraer poder de la reserva para restaurarle una cantidad de puntos de golpe, hasta el máximo que quede en tu reserva.\n\nComo alternativa, puedes gastar 5 puntos de golpe de tu reserva de curación para curar al objetivo de una enfermedad o neutralizar un veneno que lo afecte. Puedes curar varias enfermedades y neutralizar varios venenos con un solo uso de Imposición de manos, gastando puntos de golpe por separado para cada uno.\n\nEste rasgo no tiene efecto sobre los muertos vivientes ni los constructos."
+        },
+        {
+            "nombre": "Ingenioso",
+            "original": "Resourceful",
+            "datos": "",
+            "texto": "You gain Heroic Inspiration whenever you finish a Long Rest."
         },
         {
             "nombre": "Iniciado en Magia (Bardo)",
@@ -185,6 +221,12 @@
             "nombre": "Linaje feérico",
             "original": "Fey Ancestry",
             "texto": "Tienes ventaja en las tiradas de salvación que realices para evitar o poner fin a la condición de hechizado."
+        },
+        {
+            "nombre": "Maestría con armas",
+            "original": "Weapon Mastery",
+            "datos": "",
+            "texto": "Your training with weapons allows you to use the weapon mastery properties of two kinds of weapons of your choice with which you have proficiency, such as Javelin and Longsword.\n\nWhenever you finish a Long Rest, you can change the kinds of weapons you chose."
         },
         {
             "nombre": "Magia Circular (Inteligencia)",
@@ -235,9 +277,21 @@
             "texto": "Siempre que termines un descanso corto, puedes estudiar tu libro de conjuros y sustituir uno de los conjuros de nivel 1 o superior que tengas preparados para tu rasgo de Lanzamiento de conjuros por otro conjuro de nivel 1 o superior del libro."
         },
         {
+            "nombre": "Merciful Healing",
+            "original": "Merciful Healing",
+            "datos": "",
+            "texto": "You don't take Radiant damage from casting spells listed on the Mercy Spells table."
+        },
+        {
             "nombre": "Metamagia",
             "original": "Metamagic",
             "texto": "A nivel 3, obtienes la capacidad de modificar tus conjuros para adaptarlos a tus necesidades. Obtienes dos opciones de Metamagia de tu elección. Obtienes otra opción más a nivel 10 y otra a nivel 17.\n\nSolo puedes usar una opción de Metamagia en un conjuro cuando lo lanzas, a menos que se indique lo contrario."
+        },
+        {
+            "nombre": "Miraculous Healing",
+            "original": "Miraculous Healing",
+            "datos": "",
+            "texto": "As a Bonus Action, you can heal your own wounds. Roll one of your unexpended Hit Point Dice and regain a number of Hit Points equal to the roll's total plus your Constitution modifier. This die is then expended.\n\nAs you gain Martyr levels, you can expend more dice each time you use this feature, adding your Constitution modifier to each Hit Point Dice you roll. The number of Hit Point Dice you can expend equals half your Martyr level, round down."
         },
         {
             "nombre": "Ojos de la Oscuridad",
@@ -296,9 +350,33 @@
             "texto": "Como personaje de nivel 1:\n\n- Obtienes todos los rasgos de la tabla de Rasgos básicos del mago.\n- Obtienes los rasgos de nivel 1 del mago.\n\nRasgos básicos del mago\n- Característica principal · Inteligencia\n- Dado de puntos de golpe · D6 por cada nivel de mago\n- Competencias en tiradas de salvación · Inteligencia y Sabiduría\n- Competencias en habilidades · *Elige 2:* Arcanos, Historia, Perspicacia, Investigación, Medicina, Naturaleza o Religión\n- Competencias con armas · Armas sencillas\n- Entrenamiento con armaduras · Ninguno\n- Equipo inicial · *Elige A o B:* (A) 2 dagas, foco arcano (bastón), túnica, libro de conjuros, equipo de erudito y 5 po; o (B) 55 po"
         },
         {
+            "nombre": "Reprisal",
+            "original": "Reprisal",
+            "datos": "",
+            "texto": "When you take damage from a creature you can see within 5 feet of yourself, you can take a Reaction to halve the damage taken. The creature takes 1d6 Necrotic or Radiant damage (your choice).\n\nAt Higher Levels. The damage increases by 1d6 when you reach Martyr levels 5 (2d6), 11 (3d6), and 17 (4d6)."
+        },
+        {
+            "nombre": "Sacrifice",
+            "original": "Sacrifice",
+            "datos": "",
+            "texto": "The gods demand that you undergo trials to curry their favor, granting you the following benefits.\n\nSacrificial Strike. When you deal damage to a creature with a Melee weapon or Unarmed Strike, you can take a Bonus Action to enhance the strike. You take 5 Radiant damage and the target takes an extra 10 Radiant damage. This damage ignores your Resistance and Immunity, and bypasses your Temporary Hit Points.\n\nSacrificial Skill. Once per turn when you fail a D20 Test, you can take 10 Radiant damage to gain a +5 bonus to that roll, potentially turning it into a success. This damage ignores your Resistance and Immunity, and bypasses your Temporary Hit Points. If the test still fails, you don't take this Radiant damage."
+        },
+        {
+            "nombre": "Sacrifice Foe",
+            "original": "Sacrifice Foe",
+            "datos": "",
+            "texto": "When you make an attack or damage roll that is improved by your Sacrifice feature, and the attack reduces an enemy to 0 Hit Points, you don't take Radiant damage from using the feature."
+        },
+        {
             "nombre": "Salud Divina",
             "original": "Divine Health",
             "texto": "A nivel 3, la magia divina que fluye a través de ti te vuelve inmune a las enfermedades."
+        },
+        {
+            "nombre": "Sanador",
+            "original": "Healer",
+            "datos": "",
+            "texto": "*Origin Feat*\n\nYou gain the following benefits.\n\nBattle Medic. If you have a Healer's Kit, you can expend one use of it and tend to a creature within 5 feet of yourself as a Utilize action. That creature can expend one of its Hit Point Dice, and you then roll that die. The creature regains a number of Hit Points equal to the roll plus your Proficiency.\n\nHealing Rerolls. Whenever you roll a die to determine the number of Hit Points you restore with a spell or with this feat's Battle Medic benefit, you can reroll the die if it rolls a 1, and you must use the new roll."
         },
         {
             "nombre": "Sentidos agudos",
@@ -307,6 +385,12 @@
                 "Sentidos agudizados"
             ],
             "texto": "Tienes competencia en la habilidad de Perspicacia, Percepción o Supervivencia."
+        },
+        {
+            "nombre": "Spellfire Spark",
+            "original": "Spellfire Spark",
+            "datos": "",
+            "texto": "*Origin Feat*\n\nYou gain the following benefits.\n\nMagic Absorption. Once per turn, when you take damage from a spell or magical effect, you reduce the total damage taken by 1d4. You can't use this benefit if you have the Incapacitated condition.\n\nSpellfire Flame. You learn the Sacred Flame cantrip. Intelligence, Wisdom, or Charisma is your spellcasting ability for this spell (choose when you select this feat). You can also cast this cantrip as a Bonus Action a number of times equal to your Proficiency, and you regain all expended uses when you finish a Long Rest."
         },
         {
             "nombre": "Subclase de Druida",
@@ -327,6 +411,18 @@
             "nombre": "Trance",
             "original": "Trance",
             "texto": "No necesitas dormir y la magia no puede hacer que te duermas. Puedes terminar un descanso largo en 4 horas si pasas ese tiempo en una meditación similar al trance, durante la cual permaneces consciente."
+        },
+        {
+            "nombre": "Versátil",
+            "original": "Versatile",
+            "datos": "",
+            "texto": "You gain an Origin feat of your choice."
+        },
+        {
+            "nombre": "Virtuous Blessings",
+            "original": "Virtuous Blessings",
+            "datos": "",
+            "texto": "When you finish a Long Rest, choose a number of creatures you can see up to your Wisdom modifier (minimum of 1) to receive one of the following blessings of your choice. Each creature need not receive the same blessing. An unused blessing is expended when a blessed creature finishes a Long Rest.\n\nBlessing of Alacrity. The creature can expend this blessing to increase its Speed by 30 feet until the end of the current turn (no action required).\n\nBlessing of Eloquence. The creature can expend this blessing to gain Advantage on a D20 Test using Wisdom or Charisma (no action required).\n\nBlessing of Vigilance. The creature can expend this blessing to gain Advantage on an Initiative roll (no action required)."
         },
         {
             "nombre": "Visión en la oscuridad",
