@@ -1202,8 +1202,8 @@
   EL BOTÍN ACUMULADO
 
   Lo que el grupo va juntando. Va en "botin", también en el JSON de la
-  campaña, y sale en una ventana que abre el botón «el botín →» del
-  índice. No sale de las notas, porque hay que apuntar también lo que se
+  campaña, y sale en una ventana que abre el botón «💰 botín» del
+  índice (con el dinero en otra pestaña). No sale de las notas, porque hay que apuntar también lo que se
   gasta: en una sesión se consiguen tres cosas y se gastan dos, y eso lo
   sabe quien estuvo allí. LO MÁS CÓMODO ES LA HERRAMIENTA:
 
@@ -1327,10 +1327,10 @@
       20»; «Cada uno: 5» vale para toda la mesa; lo que no se reparte es
       del grupo. El post-it suma «Lo que lleva cada uno» (y «Del grupo»
       si queda algo sin repartir) y la tabla lo pone bajo el concepto. Se
-      lleva en Rol → «El dinero de una campaña». Tiene SU PROPIO BOTÓN en
-      el índice de la campaña («el dinero →», sale si hay algo apuntado),
-      LA HISTORIA HASTA AHORA (desde el 27-10-2026): el botón «la
-      historia hasta ahora →» del índice de la campaña abre la crónica
+      lleva en Rol → «El dinero de una campaña». Sale en el índice de la
+      campaña, en la pestaña «el dinero» de «💰 botín» (si hay algo apuntado),
+      LA HISTORIA HASTA AHORA (desde el 27-10-2026): el botón «📖 resumen
+      de la campaña» (arriba de las sesiones) del índice de la campaña abre la crónica
       entera, de la primera sesión publicada a la última: de cada una, su
       resumen y «lo que pasó» según el resto del JSON (misiones nuevas,
       cumplidas y fallidas; lo conseguido del botín; el dinero que entró
@@ -1378,22 +1378,45 @@
       python herramientas/3-generadores/generar-buscador.py
 
 
+  LOS BOTONES DEL ÍNDICE DE UNA CAMPAÑA (07-11-2026)
+
+  En una sola fila, cada uno con su emoji encima, y cada uno sale solo si
+  hay algo que enseñar:
+
+      👥 npcs        la página de los NPC
+      💰 botín       lo que llevamos y, en otra pestaña, el dinero (si hay
+                     las dos cosas; si no, solo la que haya)
+      📌 quest       las misiones pendientes
+      📜 documentos  lo que encontramos escrito (en el móvil pone «docs»:
+                     «documentos» no cabe; el lector lee siempre el
+                     nombre entero)
+      ✨ extra       las imágenes y, arriba, el enlace al mapamundi
+
+  El RESUMEN DE TODA LA CAMPAÑA (la crónica) va aparte: un botón ancho,
+  «📖 resumen de la campaña», arriba del todo de las notas de las
+  sesiones. Los botones están en herramientas/plantillas/campana-rol.html
+  Y en web/notas_rol/ragna/index_ragna.html (esa página se hizo a mano:
+  hay que cambiar las dos). Lo que hay dentro de cada ventana lo pone
+  notas-rol.js (prepararBotones, llenarBotinYDinero, llenarLoExtra).
+
+
   LAS IMÁGENES, LOS DOCUMENTOS Y EL MAPAMUNDI DE UNA CAMPAÑA
 
-  Tres botones más en el índice de la campaña, que salen solo si hay algo:
+  Van en las ventanas de «documentos» y «extra» (ver justo arriba):
 
-    · «imágenes →»: las fotos que sacamos de dibujos y demás. Una
+    · las imágenes: las fotos que sacamos de dibujos y demás. Una
       rejilla, de la sesión más reciente a la más vieja; cada una se ve en
       grande al pulsarla (con ‹ › entre unas y otras). Se llevan en el
       editor: Campañas → «🖼️ Las imágenes de una campaña» (qué es, la
       foto, de qué sesión, de quién es el dibujo y una nota). Van a
       imagenes/notas_rol/<campaña>/imagenes/ (sitio «rol-imagen»).
-    · «documentos →»: lo que encontramos escrito (cartas, libros,
+    · los documentos: lo que encontramos escrito (cartas, libros,
       carteles, diarios…). Cada uno con su tipo, su sesión, dónde lo
       encontramos, hasta tres fotos (por delante, por detrás, otra
       página) y, plegado, «lo que pone». Campañas → «📃 Los documentos de
       una campaña»; las fotos, a imagenes/notas_rol/<campaña>/documentos/.
-    · «el mapamundi →»: lleva a la página de su mapa (ver abajo).
+    · el mapamundi: un enlace, arriba de las imágenes, a la página de
+      su mapa (ver abajo).
   En el JSON: "imagenes": [{titulo, imagen, de, quien, nota}] y
   "documentos": [{titulo, tipo, de, donde, imagen, imagen_2, imagen_3,
   texto}] (notas-rol.js: llenarLasImagenes, llenarLosDocumentos).
@@ -1424,7 +1447,7 @@
   Lo que el grupo tiene a medias: a quién hay que ir a ver, qué hay
   que llevar a dónde, qué prometió alguien. Va en "misiones", en el
   JSON de la campaña, y sale en la ventana que abre el botón
-  «pendientes →» del índice.
+  «📌 quest» del índice.
 
       "misiones": [
           {
@@ -1507,7 +1530,7 @@
   edita el JSON y ya está.
 
   NO ESTÁ EN EL MENÚ, y es a propósito: no es una sección del sitio,
-  es una parte de la campaña. Se entra por el botón «npcs →» del índice
+  es una parte de la campaña. Se entra por el botón «👥 npcs» del índice
   de su campaña. Con dos campañas, el menú tendría cuatro líneas para
   dos cosas y la mitad no querría decir nada para quien llega de fuera.
 

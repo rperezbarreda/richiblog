@@ -162,39 +162,14 @@ function prepararBotones(campana) {
     const dinero = movimientosDeDinero(campana);
     ponerBotinDeLaMesa(campana);
     const botonBotin = document.querySelector("[data-campana-botin-abrir]");
-    if (botonBotin && cosas.length) {
+    if (botonBotin && (cosas.length || dinero.length)) {
         botonBotin.hidden = false;
         botonBotin.addEventListener("click", () =>
             window.ventanaModal.abrir({
                 titulo: "botin.lst",
-                clase: "modal-botin",
+                clase: dinero.length ? "modal-dinero" : "modal-botin",
                 devolverA: botonBotin,
-                llenar: (cuerpo) => llenarElBotin(cuerpo, cosas),
-            })
-        );
-    }
-    const botonDinero = document.querySelector("[data-campana-dinero-abrir]");
-    if (botonDinero && dinero.length) {
-        botonDinero.hidden = false;
-        botonDinero.addEventListener("click", () =>
-            window.ventanaModal.abrir({
-                titulo: "bolsa.txt",
-                clase: "modal-dinero",
-                devolverA: botonDinero,
-                llenar: (cuerpo) => llenarElDinero(cuerpo, dinero, nombresDeLaMesa(campana)),
-            })
-        );
-    }
-    const imagenes = listaDeCampana(campana.imagenes).filter((x) => x.imagen);
-    const botonImagenes = document.querySelector("[data-campana-imagenes-abrir]");
-    if (botonImagenes && imagenes.length) {
-        botonImagenes.hidden = false;
-        botonImagenes.addEventListener("click", () =>
-            window.ventanaModal.abrir({
-                titulo: "imagenes.dir",
-                clase: "modal-galeria",
-                devolverA: botonImagenes,
-                llenar: (cuerpo) => llenarLasImagenes(cuerpo, imagenes),
+                llenar: (cuerpo) => llenarBotinYDinero(cuerpo, cosas, dinero, nombresDeLaMesa(campana)),
             })
         );
     }
@@ -211,10 +186,19 @@ function prepararBotones(campana) {
             })
         );
     }
-    const botonMapa = document.querySelector("[data-campana-mapa]");
-    if (botonMapa && campana.mapa) {
-        botonMapa.href = rutaSeguraNotas(String(campana.mapa));
-        botonMapa.hidden = false;
+    const imagenes = listaDeCampana(campana.imagenes).filter((x) => x.imagen);
+    const mapa = campana.mapa ? rutaSeguraNotas(String(campana.mapa)) : "";
+    const botonExtra = document.querySelector("[data-campana-extra-abrir]");
+    if (botonExtra && (imagenes.length || mapa)) {
+        botonExtra.hidden = false;
+        botonExtra.addEventListener("click", () =>
+            window.ventanaModal.abrir({
+                titulo: "extra.dir",
+                clase: "modal-galeria",
+                devolverA: botonExtra,
+                llenar: (cuerpo) => llenarLoExtra(cuerpo, imagenes, mapa),
+            })
+        );
     }
     const misiones = misionesDe(campana);
     const botonMisiones = document.querySelector("[data-campana-misiones-abrir]");
@@ -1390,6 +1374,57 @@ function fotoQueSeAmplia(ruta, pie, alt) {
     img.decoding = "async";
     boton.appendChild(img);
     return boton;
+}
+function llenarBotinYDinero(cuerpo, cosas, dinero, mesa) {
+    const partes = [];
+    if (cosas.length) {
+        partes.push(["💰", "lo que llevamos", (caja) => llenarElBotin(caja, cosas)]);
+    }
+    if (dinero.length) {
+        partes.push(["🪙", "el dinero", (caja) => llenarElDinero(caja, dinero, mesa)]);
+    }
+    if (partes.length === 1) {
+        partes[0][2](cuerpo);
+        return;
+    }
+    const pestanas = document.createElement("div");
+    pestanas.className = "campana-botin-modos campana-botin-pestanas";
+    pestanas.setAttribute("role", "group");
+    pestanas.setAttribute("aria-label", "Qué ver");
+    const vista = document.createElement("div");
+    const botones = partes.map(([emoji, texto, llenar], n) => {
+        const b = document.createElement("button");
+        b.type = "button";
+        b.className = "campana-botin-modo";
+        b.textContent = emoji + " " + texto;
+        b.setAttribute("aria-pressed", n === 0 ? "true" : "false");
+        b.addEventListener("click", () => {
+            botones.forEach((x) => x.setAttribute("aria-pressed", x === b ? "true" : "false"));
+            vista.textContent = "";
+            llenar(vista);
+        });
+        pestanas.appendChild(b);
+        return b;
+    });
+    cuerpo.appendChild(pestanas);
+    cuerpo.appendChild(vista);
+    partes[0][2](vista);
+}
+function llenarLoExtra(cuerpo, imagenes, mapa) {
+    if (mapa) {
+        const enlace = document.createElement("a");
+        enlace.className = "campana-boton";
+        enlace.href = rutaSeguraNotas(String(mapa));
+        enlace.innerHTML = '<span class="campana-boton-emoji" aria-hidden="true">🗺️</span>'
+            + '<span class="campana-boton-texto">el mapamundi →</span>';
+        const p = document.createElement("p");
+        p.className = "campana-extra-arriba";
+        p.appendChild(enlace);
+        cuerpo.appendChild(p);
+    }
+    if (imagenes.length) {
+        llenarLasImagenes(cuerpo, imagenes);
+    }
 }
 function llenarLasImagenes(cuerpo, imagenes) {
     const intro = document.createElement("p");

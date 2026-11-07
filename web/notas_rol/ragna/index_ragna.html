@@ -57,9 +57,9 @@
     <link rel="alternate" type="application/rss+xml" title="El Blog de Richi — blog, relatos y rol" href="/blog/rss.xml">
     <!-- ==== CSS ==== -->
     <link rel="stylesheet" href="/estilos/paquete-comun.css?v=458b08aa">
-    <link rel="stylesheet" href="/ligero/estilos/paginas/notas-rol.css?v=7b8cbe9b">
+    <link rel="stylesheet" href="/ligero/estilos/paginas/notas-rol.css?v=47f11b90">
     <link rel="stylesheet" href="/ligero/estilos/componentes/postit.css?v=c6f04f61">
-    <link rel="stylesheet" href="/ligero/estilos/paginas/notas-rol.responsive.css?v=9c1d26db">
+    <link rel="stylesheet" href="/ligero/estilos/paginas/notas-rol.responsive.css?v=c88d13ff">
     <link rel="stylesheet" href="/ligero/estilos/componentes/ventana-modal.css?v=95db68e9">
     <link rel="stylesheet" href="/ligero/estilos/componentes/ventana-modal.responsive.css?v=e927767d">
     <link rel="stylesheet" href="/ligero/estilos/componentes/lupa.css?v=bd5208ae">
@@ -70,7 +70,7 @@
     <script defer src="/scripts/paquete-comun.js?v=1c4b4e97"></script>
     <script defer src="/ligero/scripts/componentes/ventana-modal.js?v=696073b4"></script>
     <script defer src="/ligero/scripts/componentes/lupa.js?v=cce10cd1"></script>
-    <script defer src="/ligero/scripts/paginas/notas-rol.js?v=4bc2b377"></script>
+    <script defer src="/ligero/scripts/paginas/notas-rol.js?v=2d83f774"></script>
     <!-- ==== fin del JS ==== -->
   </head>
 <body>
@@ -363,20 +363,15 @@
                 <p class="campana-intro" data-campana-intro>Las notas que tomo después de cada partida.</p>
 
                 <p class="campana-botones">
-                    <a class="campana-boton" data-campana-npcs href="/web/notas_rol/ragna/npcs_ragna.html">npcs →</a>
+                    <a class="campana-boton" data-campana-npcs href="/web/notas_rol/ragna/npcs_ragna.html"><span class="campana-boton-emoji" aria-hidden="true">👥</span><span class="campana-boton-texto">npcs</span></a>
                     <button class="campana-boton" type="button"
-                            data-campana-botin-abrir aria-haspopup="dialog" data-por-ver>el botín →</button>
+                            data-campana-botin-abrir aria-haspopup="dialog" data-por-ver><span class="campana-boton-emoji" aria-hidden="true">💰</span><span class="campana-boton-texto">botín</span></button>
                     <button class="campana-boton" type="button"
-                            data-campana-misiones-abrir aria-haspopup="dialog" data-por-ver>pendientes →</button>
+                            data-campana-misiones-abrir aria-haspopup="dialog" data-por-ver><span class="campana-boton-emoji" aria-hidden="true">📌</span><span class="campana-boton-texto">quest</span></button>
                     <button class="campana-boton" type="button"
-                            data-campana-dinero-abrir aria-haspopup="dialog" data-por-ver>el dinero →</button>
+                            data-campana-documentos-abrir aria-haspopup="dialog" aria-label="documentos" data-por-ver><span class="campana-boton-emoji" aria-hidden="true">📜</span><span class="campana-boton-texto"><span class="campana-boton-largo">documentos</span><span class="campana-boton-corto">docs</span></span></button>
                     <button class="campana-boton" type="button"
-                            data-campana-cronica-abrir aria-haspopup="dialog" data-por-ver>la historia hasta ahora →</button>
-                    <button class="campana-boton" type="button"
-                            data-campana-imagenes-abrir aria-haspopup="dialog" data-por-ver>imágenes →</button>
-                    <button class="campana-boton" type="button"
-                            data-campana-documentos-abrir aria-haspopup="dialog" data-por-ver>documentos →</button>
-                    <a class="campana-boton" data-campana-mapa href="#" data-por-ver>el mapamundi →</a>
+                            data-campana-extra-abrir aria-haspopup="dialog" data-por-ver><span class="campana-boton-emoji" aria-hidden="true">✨</span><span class="campana-boton-texto">extra</span></button>
                 </p>
             </div>
 
@@ -393,6 +388,12 @@
                     <h2>sesiones.lst</h2>
                     <div class="window-controls window-controls-small" data-window-controls aria-hidden="true"></div>
                 </div>
+                <!-- EL RESUMEN DE TODA LA CAMPAÑA (la historia hasta ahora), arriba
+                     de las sesiones: sale si hay alguna publicada. -->
+                <p class="campana-sesiones-arriba">
+                    <button class="campana-boton campana-boton-resumen" type="button"
+                            data-campana-cronica-abrir aria-haspopup="dialog" data-por-ver><span class="campana-boton-emoji" aria-hidden="true">📖</span><span class="campana-boton-texto">resumen de la campaña</span></button>
+                </p>
                 <div class="campana-card-body" tabindex="0" role="region" aria-label="Sesiones de la campaña, con scroll">
                     <ol class="campana-sesiones" data-campana-sesiones data-campana-datos="/datos/notas_rol/campana-ragna.json">
                         <li class="entries-loading">Cargando las sesiones…</li>

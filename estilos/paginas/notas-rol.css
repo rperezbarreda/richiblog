@@ -93,11 +93,74 @@
    distingue "ir a otra página" de "abrir una ventana" no es el color, es
    lo que pasa al pulsarlos, y eso ya lo anuncia el aria-haspopup. Hacer
    dos estilos sería dar a entender una diferencia que no hay que mirar. */
+/* EN UNA SOLA FILA, CADA UNO CON SU EMOJI ENCIMA (npcs, botín, quest,
+   documentos, extra): tantas columnas iguales como botones se vean, así
+   que caben también en el móvil. */
 .campana-botones {
-    display: flex;
-    flex-wrap: wrap;
+    display: grid;
+    grid-auto-columns: minmax(0, 1fr);
+    grid-auto-flow: column;
     gap: 8px;
     margin: 0;
+}
+
+.campana-botones .campana-boton {
+    flex-direction: column;
+    justify-content: center;
+    gap: 4px;
+    min-width: 0;
+    padding: 8px 0;
+    text-align: center;
+}
+
+.campana-boton-emoji {
+    font-size: 1.375rem;
+    line-height: 1;
+}
+
+/* El nombre en una línea y sin partir («documentos» partido en dos se
+   leía mal). La fila no pasa de unos 430px ni en el ordenador, así que
+   cada botón tiene unos 75px: «documentos» cabe justo con esta letra.
+   En el móvil no cabe ni encogiéndola, y ahí sale «docs» (ver
+   notas-rol.responsive.css; el lector lee siempre «documentos», que es
+   el aria-label del botón). */
+.campana-botones .campana-boton-texto {
+    max-width: 100%;
+    overflow: hidden;
+    font-size: 0.5625rem;
+    letter-spacing: 0;
+    white-space: nowrap;
+}
+
+.campana-boton-corto {
+    display: none;
+}
+
+/* El resumen de toda la campaña, arriba de las sesiones. El hueco lo
+   pone el botón (no su párrafo): si no sale, no queda una franja vacía. */
+.campana-sesiones-arriba {
+    margin: 0;
+}
+
+.campana-boton-resumen {
+    width: calc(100% - 40px);
+    margin: 14px 20px 0;
+    justify-content: center;
+}
+
+/* En EXTRA, el enlace al mapamundi, encima de las imágenes. */
+.campana-extra-arriba {
+    margin: 0 0 16px;
+}
+
+/* El botín y el dinero, en la misma ventana: sus dos pestañas. */
+.campana-botin-pestanas {
+    padding-bottom: 10px;
+    border-bottom: 2px dashed var(--border);
+}
+
+.campana-botin-pestanas .campana-botin-modo {
+    font-size: 0.875rem;
 }
 
 /* La trampa de siempre: [hidden] pesa lo mismo que esta clase y carga

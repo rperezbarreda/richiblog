@@ -355,4 +355,13 @@
         width: 100%;
         max-width: 6rem;
     }
+
+    /* Los botones de arriba: «documentos» no cabe en su quinto de fila. */
+    .campana-boton-largo {
+        display: none;
+    }
+
+    .campana-boton-corto {
+        display: inline;
+    }
 }

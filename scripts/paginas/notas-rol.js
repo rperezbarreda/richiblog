@@ -289,50 +289,26 @@ function prepararBotones(campana) {
     const cosas = cosasDelBotin(campana);
     const dinero = movimientosDeDinero(campana);
     ponerBotinDeLaMesa(campana);
+    // EL BOTÍN, CON EL DINERO DENTRO: una ventana con dos pestañas, «lo
+    // que llevamos» (el botín) y «el dinero» (la bolsa en un post-it, la
+    // tabla de entradas y gastos y el conversor). Con una sola de las dos,
+    // sin pestañas.
     const botonBotin = document.querySelector("[data-campana-botin-abrir]");
-    if (botonBotin && cosas.length) {
+    if (botonBotin && (cosas.length || dinero.length)) {
         botonBotin.hidden = false;
         botonBotin.addEventListener("click", () =>
             window.ventanaModal.abrir({
                 titulo: "botin.lst",
-                clase: "modal-botin",
+                clase: dinero.length ? "modal-dinero" : "modal-botin",
                 devolverA: botonBotin,
-                llenar: (cuerpo) => llenarElBotin(cuerpo, cosas),
+                llenar: (cuerpo) => llenarBotinYDinero(cuerpo, cosas, dinero, nombresDeLaMesa(campana)),
             })
         );
     }
 
-    // EL DINERO, con su botón: la bolsa en un post-it, la tabla de
-    // entradas y gastos y el conversor de monedas.
-    const botonDinero = document.querySelector("[data-campana-dinero-abrir]");
-    if (botonDinero && dinero.length) {
-        botonDinero.hidden = false;
-        botonDinero.addEventListener("click", () =>
-            window.ventanaModal.abrir({
-                titulo: "bolsa.txt",
-                clase: "modal-dinero",
-                devolverA: botonDinero,
-                llenar: (cuerpo) => llenarElDinero(cuerpo, dinero, nombresDeLaMesa(campana)),
-            })
-        );
-    }
-
-    // LAS IMÁGENES (fotos de dibujos y demás) y LOS DOCUMENTOS que
-    // encontramos: cada uno en su ventana, y las fotos se ven en grande
-    // con el visor del sitio (‹ › entre unas y otras).
-    const imagenes = listaDeCampana(campana.imagenes).filter((x) => x.imagen);
-    const botonImagenes = document.querySelector("[data-campana-imagenes-abrir]");
-    if (botonImagenes && imagenes.length) {
-        botonImagenes.hidden = false;
-        botonImagenes.addEventListener("click", () =>
-            window.ventanaModal.abrir({
-                titulo: "imagenes.dir",
-                clase: "modal-galeria",
-                devolverA: botonImagenes,
-                llenar: (cuerpo) => llenarLasImagenes(cuerpo, imagenes),
-            })
-        );
-    }
+    // LOS DOCUMENTOS que encontramos, y en EXTRA las imágenes (fotos de
+    // dibujos y demás) y el mapamundi. Las fotos se ven en grande con el
+    // visor del sitio (‹ › entre unas y otras).
     const documentos = listaDeCampana(campana.documentos).filter((x) => x.titulo);
     const botonDocumentos = document.querySelector("[data-campana-documentos-abrir]");
     if (botonDocumentos && documentos.length) {
@@ -346,11 +322,19 @@ function prepararBotones(campana) {
             })
         );
     }
-    // EL MAPAMUNDI: un enlace a su página, si la campaña tiene.
-    const botonMapa = document.querySelector("[data-campana-mapa]");
-    if (botonMapa && campana.mapa) {
-        botonMapa.href = rutaSeguraNotas(String(campana.mapa));
-        botonMapa.hidden = false;
+    const imagenes = listaDeCampana(campana.imagenes).filter((x) => x.imagen);
+    const mapa = campana.mapa ? rutaSeguraNotas(String(campana.mapa)) : "";
+    const botonExtra = document.querySelector("[data-campana-extra-abrir]");
+    if (botonExtra && (imagenes.length || mapa)) {
+        botonExtra.hidden = false;
+        botonExtra.addEventListener("click", () =>
+            window.ventanaModal.abrir({
+                titulo: "extra.dir",
+                clase: "modal-galeria",
+                devolverA: botonExtra,
+                llenar: (cuerpo) => llenarLoExtra(cuerpo, imagenes, mapa),
+            })
+        );
     }
 
     const misiones = misionesDe(campana);
@@ -1971,6 +1955,63 @@ function fotoQueSeAmplia(ruta, pie, alt) {
     img.decoding = "async";
     boton.appendChild(img);
     return boton;
+}
+
+// El botín y el dinero en la misma ventana: dos pestañas si hay de los
+// dos (botones que se quedan apretados, aria-pressed, como los de «por
+// apartado / por quién lo lleva»).
+function llenarBotinYDinero(cuerpo, cosas, dinero, mesa) {
+    const partes = [];
+    if (cosas.length) {
+        partes.push(["💰", "lo que llevamos", (caja) => llenarElBotin(caja, cosas)]);
+    }
+    if (dinero.length) {
+        partes.push(["🪙", "el dinero", (caja) => llenarElDinero(caja, dinero, mesa)]);
+    }
+    if (partes.length === 1) {
+        partes[0][2](cuerpo);
+        return;
+    }
+    const pestanas = document.createElement("div");
+    pestanas.className = "campana-botin-modos campana-botin-pestanas";
+    pestanas.setAttribute("role", "group");
+    pestanas.setAttribute("aria-label", "Qué ver");
+    const vista = document.createElement("div");
+    const botones = partes.map(([emoji, texto, llenar], n) => {
+        const b = document.createElement("button");
+        b.type = "button";
+        b.className = "campana-botin-modo";
+        b.textContent = emoji + " " + texto;
+        b.setAttribute("aria-pressed", n === 0 ? "true" : "false");
+        b.addEventListener("click", () => {
+            botones.forEach((x) => x.setAttribute("aria-pressed", x === b ? "true" : "false"));
+            vista.textContent = "";
+            llenar(vista);
+        });
+        pestanas.appendChild(b);
+        return b;
+    });
+    cuerpo.appendChild(pestanas);
+    cuerpo.appendChild(vista);
+    partes[0][2](vista);
+}
+
+// EXTRA: el mapamundi (un enlace a su página) y las imágenes.
+function llenarLoExtra(cuerpo, imagenes, mapa) {
+    if (mapa) {
+        const enlace = document.createElement("a");
+        enlace.className = "campana-boton";
+        enlace.href = rutaSeguraNotas(String(mapa));
+        enlace.innerHTML = '<span class="campana-boton-emoji" aria-hidden="true">🗺️</span>'
+            + '<span class="campana-boton-texto">el mapamundi →</span>';
+        const p = document.createElement("p");
+        p.className = "campana-extra-arriba";
+        p.appendChild(enlace);
+        cuerpo.appendChild(p);
+    }
+    if (imagenes.length) {
+        llenarLasImagenes(cuerpo, imagenes);
+    }
 }
 
 function llenarLasImagenes(cuerpo, imagenes) {

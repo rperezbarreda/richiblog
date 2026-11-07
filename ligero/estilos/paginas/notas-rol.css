@@ -41,10 +41,51 @@
     max-width: 720px;
 }
 .campana-botones {
-    display: flex;
-    flex-wrap: wrap;
+    display: grid;
+    grid-auto-columns: minmax(0, 1fr);
+    grid-auto-flow: column;
     gap: 8px;
     margin: 0;
+}
+.campana-botones .campana-boton {
+    flex-direction: column;
+    justify-content: center;
+    gap: 4px;
+    min-width: 0;
+    padding: 8px 0;
+    text-align: center;
+}
+.campana-boton-emoji {
+    font-size: 1.375rem;
+    line-height: 1;
+}
+.campana-botones .campana-boton-texto {
+    max-width: 100%;
+    overflow: hidden;
+    font-size: 0.5625rem;
+    letter-spacing: 0;
+    white-space: nowrap;
+}
+.campana-boton-corto {
+    display: none;
+}
+.campana-sesiones-arriba {
+    margin: 0;
+}
+.campana-boton-resumen {
+    width: calc(100% - 40px);
+    margin: 14px 20px 0;
+    justify-content: center;
+}
+.campana-extra-arriba {
+    margin: 0 0 16px;
+}
+.campana-botin-pestanas {
+    padding-bottom: 10px;
+    border-bottom: 2px dashed var(--border);
+}
+.campana-botin-pestanas .campana-botin-modo {
+    font-size: 0.875rem;
 }
 .campana-boton[hidden] {
     display: none;
