@@ -2440,10 +2440,16 @@ def pestanas(p, c, datos, personajes, avisos):
     que saltan a cada parte y se ven todas, una debajo de otra, con su
     título; con él (personajes.js), solo la elegida."""
     nombre = str(p.get("nombre") or c)
+    # LO QUE NO SE ENSEÑA («ocultar», en el editor: «Lo que NO se enseña en
+    # su página»): esas partes no salen ni en el menú ni en la página. Valen
+    # las de PESTANAS y las de la ficha (SUBPESTANAS_DE_FICHA) sueltas.
+    ocultas = {str(x).strip() for x in (p.get("ocultar") or []) if str(x).strip()}
     partes_ficha = (apartado_ficha(p, c, personajes, avisos) if sistemas_rol.es_dnd(p)
                     else hoja_de_otro_sistema(p, c, personajes, avisos))
+    partes_ficha = [x for x in partes_ficha if x[0] not in ocultas]
     contenido = {
-        "historia": con_menciones(markdown(p.get("historia"), c, personajes, avisos, True), grupos_de(datos, "gente", c),
+        "historia": con_menciones(markdown(p.get("historia"), c, personajes, avisos, True),
+                                  [] if "gente" in ocultas else grupos_de(datos, "gente", c),
                                   [nombre, str(p.get("nombre_completo") or ""), c]),
         "gente": apartado_gente(grupos_de(datos, "gente", c), c, personajes, avisos, p),
         "frases": apartado_frases(p),
@@ -2467,6 +2473,8 @@ def pestanas(p, c, datos, personajes, avisos):
             '                        <ul class="oc-menu-lista">']
     cajas = ['                    <div class="oc-partes" data-oc-partes>']
     for ident, emoji, texto in PESTANAS:
+        if ident in ocultas or (ident == "ficha" and not partes_ficha and ocultas & {g for g, _, _ in SUBPESTANAS_DE_FICHA}):
+            continue
         # Las criaturas, las frases y la inspiración solo salen si tiene algo.
         if ident in PESTANAS_SI_HAY and not contenido[ident]:
             continue

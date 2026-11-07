@@ -585,6 +585,35 @@ function casillaDeFichaWeb(dentro, f, c, base, parte, alCambiar) {
         dentro.appendChild(l);
         return;
     }
+    if (c.tipo === "varios") {
+        // Varias casillas (las opciones), y el valor es la lista de las
+        // marcadas: «Lo que NO se enseña» de uno de mis personajes.
+        const grupo = crearEditor("fieldset", "opciones campo campo-varios");
+        grupo.appendChild(crearEditor("legend", "", c.nombre));
+        if (ayuda) {
+            const p = crearEditor("p", "ayuda", ayuda);
+            p.id = id + "-ayuda";
+            grupo.setAttribute("aria-describedby", p.id);
+            grupo.appendChild(p);
+        }
+        const marcadas = new Set((Array.isArray(valor) ? valor : []).map(String));
+        const casillas = [];
+        opciones.forEach(([clave, texto], n) => {
+            const l = crearEditor("label", "opcion" + (/^\s/.test(String(texto)) ? " es-dentro" : ""));
+            const casilla = document.createElement("input");
+            casilla.type = "checkbox";
+            casilla.id = id + "-" + n;
+            casilla.value = String(clave);
+            casilla.checked = marcadas.has(String(clave));
+            casilla.addEventListener("change", () => cambiar(casillas.filter((x) => x.checked).map((x) => x.value)));
+            casillas.push(casilla);
+            l.appendChild(casilla);
+            l.appendChild(document.createTextNode(" " + String(texto).trim()));
+            grupo.appendChild(l);
+        });
+        dentro.appendChild(grupo);
+        return;
+    }
     const nombre = c.nombre;
     if (c.tipo === "accion") {
         // Un botón que hace algo con la ficha (ACCIONES_DE_FICHA), no una

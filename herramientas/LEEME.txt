@@ -4371,6 +4371,14 @@
   negrita («**Los Äestere**») sale como título, y las negritas con el
   espacio por dentro («**Faëlar **nunca») se arreglan (texto_pegado;
   mundo_formato.py: arreglar_enfasis).
+  ESCONDER PARTES: en el editor, en la pestaña «datos» de cada uno, «Lo
+  que NO se enseña en su página»: las partes marcadas (historia, la ficha
+  entera o solo alguna de sus partes —conjuros, inventario…—, npcs,
+  imágenes, extra, iniciativa, notas, reglas…) no salen ni en el menú ni
+  en la página. Lo escrito no se borra: desmarcándolas vuelven. En el
+  JSON, "ocultar": ["conjuros", "gente", "extra"] (generar-personajes.py:
+  pestanas; las claves, en editor_web.py: SECCIONES_OCULTABLES). Con los
+  npcs escondidos, sus nombres en la historia no llevan a ninguna parte.
   En «EXTRA», cada título (y lo que tiene debajo) SE PLIEGA pulsándolo;
   empiezan abiertos (secciones_plegables; .oc-seccion en personajes.css).
   💬 FRASES: una por línea en «Frases suyas» (pestaña «frases y música»

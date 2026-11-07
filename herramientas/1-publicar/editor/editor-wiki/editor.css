@@ -661,6 +661,18 @@ textarea {
     accent-color: var(--acento);
 }
 
+/* Varias casillas en un campo («Lo que NO se enseña» de uno de mis
+   personajes): la ayuda, a lo ancho; las partes de la ficha, con el borde
+   a trazos (van dentro de «la ficha entera»). */
+.campo-varios > .ayuda {
+    flex-basis: 100%;
+    margin: 0;
+}
+
+.campo-varios .opcion.es-dentro {
+    border-style: dashed;
+}
+
 /* LAS QUE FALTAN */
 .faltan {
     display: flex;

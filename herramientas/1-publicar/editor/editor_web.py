@@ -1249,6 +1249,21 @@ def _campana(clave):
     return None, None
 
 
+# Las partes de la página de uno de mis personajes que se pueden esconder
+# (el campo «ocultar»; generar-personajes.py las quita del menú y de la
+# página). Las de la ficha de D&D, por separado.
+SECCIONES_OCULTABLES = (
+    ("historia", "📖 historia"), ("ficha", "📋 la ficha entera"),
+    ("combate", "  📊 ficha: combate"), ("habilidades", "  🎯 ficha: habilidades"),
+    ("acciones", "  ⚔️ ficha: acciones"), ("combos", "  ⚡ ficha: combos"), ("conjuros", "  ✨ ficha: conjuros"),
+    ("inventario", "  🎒 ficha: inventario"), ("rasgos", "  🧬 ficha: rasgos"),
+    ("competencias", "  🗣️ ficha: competencias"), ("trasfondo", "  📜 ficha: trasfondo"),
+    ("criaturas", "🐾 criaturas"), ("gente", "👥 npcs"), ("frases", "💬 frases"), ("imagenes", "🖼️ imágenes"),
+    ("inspiracion", "🎨 inspiración"), ("extra", "📎 extra"), ("iniciativa", "⏱️ iniciativa"),
+    ("notas", "📝 notas"), ("reglas", "📚 reglas"),
+)
+
+
 def colecciones():
     """Las colecciones, con lo que hace falta para pintar sus casillas.
     Las opciones que dependen de lo que haya (las categorías, las sesiones
@@ -1502,7 +1517,7 @@ def colecciones():
               "pestanas": [
                   {"id": "datos", "emoji": "📇", "texto": "datos", "campos": [
                       "nombre", "nombre_completo", "clave", "icono", "etiquetas", "color", "sistema", "raza", "clase",
-                      "nivel", "lema", "aspecto_dados", "dndbeyond", "ficha"]},
+                      "nivel", "lema", "aspecto_dados", "dndbeyond", "ficha", "ocultar"]},
                   {"id": "hoja", "emoji": "🎲", "texto": "hoja", "si": no_es_dnd, "campos": [
                       "tirada", "conceptos", "atributos", "pericias", "recursos", "armas", "poderes", "equipo"]},
                   {"id": "stats", "emoji": "📊", "texto": "stats", "si": es_dnd, "campos": [
@@ -1533,6 +1548,10 @@ def colecciones():
                     ayuda="Abre su ficha en otra pestaña con lo que hay escrito ahora, aunque no esté guardado."),
                   C("nombre", "Nombre", obligatorio=True, ayuda="El corto, el que va en grande en el redondel."),
                   C("nombre_completo", "Nombre completo", siempre=True, ayuda="«Yorel Telvet»: el de la etiqueta."),
+                  C("ocultar", "Lo que NO se enseña en su página", "varios", vacio="quitar",
+                    opciones=[[k, t] for k, t in SECCIONES_OCULTABLES],
+                    ayuda="Marca las partes que no quieres que salgan (en el menú y en la página). Lo escrito no se"
+                          " borra: desmarcándolas vuelven."),
                   C("clave", "Su dirección", vacio="quitar",
                     ayuda="El nombre de su carpeta y de su página (yorel). Si lo dejas en blanco, sale del nombre."
                           " Mejor no cambiarlo después: cambiaría su dirección."),
@@ -2144,6 +2163,12 @@ def _valor(campo, crudo, ficha_nombre):
     """El valor de una casilla tal y como va al JSON (o QUITAR)."""
     tipo = campo["tipo"]
     donde = "«%s»%s" % (campo["nombre"], (" de «%s»" % ficha_nombre) if ficha_nombre else "")
+    if tipo == "varios":
+        # Varias casillas: la lista de las marcadas (de las que hay), en su orden.
+        validas = [str(o[0]) for o in campo.get("opciones") or []]
+        marcadas = {str(x) for x in (crudo if isinstance(crudo, list) else [])}
+        lista = [v for v in validas if v in marcadas] if validas else sorted(marcadas)
+        return lista if lista or campo.get("vacio") != "quitar" else QUITAR
     if tipo == "si-no":
         valor = bool(crudo)
         return valor if (valor or campo.get("vacio") != "quitar") else QUITAR
