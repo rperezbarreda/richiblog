@@ -1703,6 +1703,12 @@
     font-size: 0.8125rem;
 }
 
+/* «la ruta en el mapa», debajo de «leer las notas». */
+.campana-resumen-ruta {
+    display: table;
+    margin-top: 8px;
+}
+
 .campana-resumen-leer:focus-visible {
     outline: 2px solid var(--yellow);
     outline-offset: 2px;

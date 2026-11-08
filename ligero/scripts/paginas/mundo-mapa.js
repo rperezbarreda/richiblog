@@ -92,6 +92,39 @@ function initializeMundoMapa() {
     fijarMigasDeMapa();
     ponerZoomDeMapa(mando, 1);
     centrarMapa(mando);
+    prepararSesionesDeMapa(mando);
+}
+function prepararSesionesDeMapa(mando) {
+    const casillas = [...mando.caja.querySelectorAll("[data-mapa-sesion-casilla]")];
+    if (!casillas.length) {
+        return;
+    }
+    const rutas = [...mando.dibujo.querySelectorAll("[data-mapa-sesion]")];
+    const elegir = (valor, ir) => {
+        rutas.forEach((r) => r.classList.toggle("es-apagada", Boolean(valor) && r.getAttribute("data-mapa-sesion") !== valor));
+        const suya = valor && rutas.find((r) => r.getAttribute("data-mapa-sesion") === valor);
+        if (suya && ir) {
+            irASitioDeMapa(mando, suya);
+        }
+    };
+    casillas.forEach((casilla) => {
+        casilla.addEventListener("change", () => {
+            if (casilla.checked) {
+                elegir(casilla.value, true);
+            }
+        });
+    });
+    let pedida = "";
+    try {
+        pedida = String(Number(new URLSearchParams(window.location.search).get("sesion")) || "");
+    } catch (error) {
+        pedida = "";
+    }
+    const casilla = pedida && casillas.find((c) => c.value === pedida);
+    if (casilla) {
+        casilla.checked = true;
+        requestAnimationFrame(() => elegir(pedida, true));
+    }
 }
 function ruedaDeMapa(evento) {
     const cuanto = evento.deltaY || 0;

@@ -491,6 +491,7 @@ html:not(.js) .mapa-ayuda {
 .mapa-dibujos > .es-oculta,
 .mapa-pines.es-apagada,
 .mapa-lineas.es-apagada,
+.mapa-linea-sitio.es-apagada,
 .mapa-textos.es-apagada,
 .mapa-pin-nombre.es-apagada {
     display: none;

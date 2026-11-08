@@ -1453,6 +1453,16 @@
       índice de la campaña, «✨ extra» enseña las zonas debajo del
       mapamundi ("zonas" en el JSON, lo escribe el script).
 
+  LAS RUTAS DE CADA SESIÓN: dibuja una raya «Ruta de viaje» por donde
+  fuisteis y, en «Lo elegido» → «De la sesión», elige cuál (en el .cmap,
+  "session": 3). Puede haber varias rayas de la misma sesión, y cada una
+  con su color. Sin nombre, se llama «Sesión 3 · <su título>».
+    - En la página del mapa, «capas» → «rutas de las sesiones»: todas o
+      solo la de una (y el mapa va a ella).
+    - Las notas de esa sesión (abajo, junto a «npcs») y su resumen en el
+      índice llevan «la ruta en el mapa», que abre el mapa con solo esa
+      ruta ("ruta" en cada sesión del JSON, lo escribe el script).
+
 
   LAS MISIONES PENDIENTES
 

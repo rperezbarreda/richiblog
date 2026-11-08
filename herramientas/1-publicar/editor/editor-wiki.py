@@ -708,6 +708,22 @@ def es_de_campana(archivo):
         return False
 
 
+def sesiones_de_campana(clave):
+    """Las sesiones de una campaña, [{numero, titulo}]: para decir de cuál
+    es cada ruta de viaje en sus mapas."""
+    try:
+        datos = json.loads((RAIZ / "datos" / "notas_rol" / ("campana-%s.json" % clave)).read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        return []
+    salida = []
+    for s in datos.get("sesiones") or []:
+        try:
+            salida.append({"numero": int(s.get("numero")), "titulo": str(s.get("titulo") or "")})
+        except (TypeError, ValueError, AttributeError):
+            continue
+    return salida
+
+
 def campanas_que_hay():
     """Las campañas (datos/notas_rol/campana-<clave>.json): [{clave, nombre}]."""
     salida = []
@@ -1079,7 +1095,7 @@ def leer_mapa(archivo):
         clave = archivo.parent.name
         return {"archivo": relativo_de_mapa(archivo), "datos": datos, "imagenes": imagenes, "vecinos": [],
                 "url": "/web/notas_rol/%s/mapa_%s.html" % (clave, slug_de_mapa_rol(datos, archivo)),
-                "campana": clave}
+                "campana": clave, "sesiones": sesiones_de_campana(clave)}
     return {"archivo": archivo.relative_to(VAULT).as_posix(), "datos": datos,
             "imagenes": imagenes, "vecinos": vecinos_de(archivo, datos),
             "url": url_de_la_pagina(str(datos.get("title") or archivo.stem))}

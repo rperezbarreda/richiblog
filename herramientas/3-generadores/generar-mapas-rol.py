@@ -36,6 +36,13 @@
 #   - En el JSON, "zonas": [{titulo, url}], que salen en «extra» debajo del
 #     mapamundi.
 #
+# LAS RUTAS DE CADA SESIÓN. Una raya «Ruta de viaje» puede decir de qué
+# sesión es (en el editor, «De la sesión»; en el .cmap, "session": 3). En
+# la página del mapa se ven todas o solo la de una (en «capas», «rutas de
+# las sesiones»), y si no tiene nombre se llama «sesión 3 · <su título>».
+# En el JSON, cada sesión con ruta lleva "ruta": el mapa con ?sesion=3,
+# que es el enlace «la ruta en el mapa» de sus notas y de su resumen.
+#
 # Lo de pintar es lo mismo que en la wiki (0-comun/mundo_mapas.py), así
 # que todo lo que se puede hacer allí se puede hacer aquí; lo que no hay es
 # a dónde enlazar (las páginas de la wiki), así que un sitio que diga que
@@ -198,10 +205,42 @@ def enlazar_zonas(mapas):
     return mundo
 
 
+def corto_de_sesion(sesion):
+    """El título de una sesión sin el «Sesión 3 ·» de delante."""
+    return re.sub(r"^\s*sesi[oó]n\s*\d+\s*(?:[·.:\-–—]\s*)?", "", str(sesion.get("titulo") or ""),
+                  flags=re.I).strip()
+
+
+def poner_sesiones(m):
+    """Las rutas de viaje con sesión: les pone nombre si no lo tienen y
+    devuelve [(número, texto)] de las sesiones que hay en este mapa."""
+    sesiones = {}
+    for s in m["campana"].get("sesiones") or []:
+        try:
+            sesiones[int(s.get("numero"))] = s
+        except (TypeError, ValueError, AttributeError):
+            continue
+    hay = {}
+    for linea in m["leido"].get("lineas") or []:
+        numero = linea.get("sesion") or 0
+        if not numero:
+            continue
+        corto = corto_de_sesion(sesiones.get(numero) or {})
+        texto = "sesión %d" % numero + (" · " + corto if corto else "")
+        if numero not in sesiones:
+            m["avisos"].di("la ruta «%s» es de la sesión %d, que no está en la campaña"
+                           % (linea.get("etiqueta") or "sin nombre", numero))
+        if not linea.get("etiqueta"):
+            linea["etiqueta"] = texto[0].upper() + texto[1:]
+        hay[numero] = texto
+    return sorted(hay.items())
+
+
 def un_mapa(m, probar):
     """Pinta un .cmap de una campaña (ya leído, ver leer_uno) y escribe su
     página. Devuelve (clave, título, url)."""
     archivo, clave, campana, leido, avisos = m["archivo"], m["clave"], m["campana"], m["leido"], m["avisos"]
+    m["sesiones"] = poner_sesiones(m)
     suyas = MAPAS_ROL / clave / "imagenes"
     salida_img = RAIZ / "imagenes" / "notas_rol" / clave / "mapa"
     url_img = "/imagenes/notas_rol/%s/mapa/" % clave
@@ -245,7 +284,7 @@ def un_mapa(m, probar):
                                        hecho.get("hay_nombres", False), hecho.get("todas_de_salida", False),
                                        hecho.get("hay_escala", False), bool(hecho.get("leyenda")),
                                        hecho.get("hay_ruta", False), hecho.get("hay_rosa", False),
-                                       hecho.get("hay_zonas_regionales", False))
+                                       hecho.get("hay_zonas_regionales", False), sesiones=m["sesiones"])
     titulo, url = m["titulo"], m["url"]
     # Una zona vuelve a su mapamundi; el mapamundi, a la campaña.
     mundo = m["mundo"]
@@ -296,12 +335,20 @@ def main():
     hechos = []
     por_campana = {}
     zonas_de = {}
+    rutas_de = {}
     for clave, mapas in leidos.items():
         mundo = enlazar_zonas(mapas)
         por_campana[clave] = mundo["url"]
         zonas_de[clave] = [{"titulo": m["titulo"], "url": m["url"]} for m in mapas if m is not mundo]
         for m in mapas:
             hechos.append(un_mapa(m, args.probar))
+        # Dónde está la ruta de cada sesión: en el mapamundi si sale allí;
+        # si no, en la primera zona donde salga.
+        rutas = {}
+        for m in sorted(mapas, key=lambda x: x is not mundo):
+            for numero, _ in m["sesiones"]:
+                rutas.setdefault(numero, "%s?sesion=%d" % (m["url"], numero))
+        rutas_de[clave] = rutas
     # El botón «el mapamundi →» de cada campaña: "mapa" en su JSON, y sus
     # zonas en "zonas"; o fuera si ya no tiene.
     for archivo in sorted((RAIZ / "datos" / "notas_rol").glob("campana-*.json")):
@@ -311,18 +358,32 @@ def main():
             continue
         quiere = por_campana.get(clave)
         zonas = zonas_de.get(clave) or []
-        antes = (datos.get("mapa"), datos.get("zonas") or [])
-        if antes == (quiere, zonas):
+        rutas = rutas_de.get(clave) or {}
+        sesiones = [s for s in datos.get("sesiones") or [] if isinstance(s, dict)]
+
+        def ruta_de(s):
+            try:
+                return rutas.get(int(s.get("numero")))
+            except (TypeError, ValueError):
+                return None
+        antes = (datos.get("mapa"), datos.get("zonas") or [], [s.get("ruta") for s in sesiones])
+        if antes == (quiere, zonas, [ruta_de(s) for s in sesiones]):
             continue
         for nombre, valor in (("mapa", quiere), ("zonas", zonas)):
             if valor:
                 datos[nombre] = valor
             else:
                 datos.pop(nombre, None)
+        for s in sesiones:
+            if ruta_de(s):
+                s["ruta"] = ruta_de(s)
+            else:
+                s.pop("ruta", None)
         if not args.probar:
             escribir_texto(archivo, json.dumps(datos, ensure_ascii=False, indent=4) + "\n")
         print("  %s: el mapamundi %s%s" % (archivo.relative_to(RAIZ), "→ " + quiere if quiere else "quitado",
-                                          ", %d zona(s)" % len(zonas) if zonas else ""))
+                                          (", %d zona(s)" % len(zonas) if zonas else "")
+                                          + (", ruta de %d sesión(es)" % len(rutas) if rutas else "")))
     print("\n  %d mapa(s) de campaña." % len(hechos))
     return 0
 

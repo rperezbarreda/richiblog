@@ -171,6 +171,49 @@ function initializeMundoMapa() {
     fijarMigasDeMapa();
     ponerZoomDeMapa(mando, 1);
     centrarMapa(mando);
+    prepararSesionesDeMapa(mando);
+}
+
+
+// =========================================
+// LAS RUTAS DE CADA SESIÓN (mapas de campaña)
+// =========================================
+// En «capas», «rutas de las sesiones»: todas o solo la de una. Elegida una,
+// las demás se apagan y el mapa va a la suya. Con ?sesion=3 en la
+// dirección (el enlace «la ruta en el mapa» de las notas) sale ya elegida.
+
+function prepararSesionesDeMapa(mando) {
+    const casillas = [...mando.caja.querySelectorAll("[data-mapa-sesion-casilla]")];
+    if (!casillas.length) {
+        return;
+    }
+    const rutas = [...mando.dibujo.querySelectorAll("[data-mapa-sesion]")];
+    const elegir = (valor, ir) => {
+        rutas.forEach((r) => r.classList.toggle("es-apagada", Boolean(valor) && r.getAttribute("data-mapa-sesion") !== valor));
+        const suya = valor && rutas.find((r) => r.getAttribute("data-mapa-sesion") === valor);
+        if (suya && ir) {
+            irASitioDeMapa(mando, suya);
+        }
+    };
+    casillas.forEach((casilla) => {
+        casilla.addEventListener("change", () => {
+            if (casilla.checked) {
+                elegir(casilla.value, true);
+            }
+        });
+    });
+    let pedida = "";
+    try {
+        pedida = String(Number(new URLSearchParams(window.location.search).get("sesion")) || "");
+    } catch (error) {
+        pedida = "";
+    }
+    const casilla = pedida && casillas.find((c) => c.value === pedida);
+    if (casilla) {
+        casilla.checked = true;
+        // Cuando el mapa ya tiene su tamaño (si no, no sabe dónde centrar).
+        requestAnimationFrame(() => elegir(pedida, true));
+    }
 }
 
 

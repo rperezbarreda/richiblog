@@ -1899,6 +1899,21 @@ function llenarElResumen(cuerpo, sesion) {
     leer.href = rutaSeguraNotas(sesion.url);
     leer.textContent = "leer las notas enteras →";
     cuerpo.appendChild(leer);
+    ponerRutaDeLaSesion(cuerpo, sesion);
+}
+
+// «la ruta en el mapa»: si en el mapamundi (o en una zona) hay una ruta de
+// esta sesión. "ruta" lo apunta generar-mapas-rol.py.
+function ponerRutaDeLaSesion(caja, sesion) {
+    const ruta = (sesion.ruta || "").toString().trim();
+    if (!ruta) {
+        return;
+    }
+    const enlace = document.createElement("a");
+    enlace.className = "campana-resumen-leer campana-resumen-ruta";
+    enlace.href = rutaSeguraNotas(ruta);
+    enlace.textContent = "🗺️ la ruta en el mapa →";
+    caja.appendChild(enlace);
 }
 
 // Las líneas de un resumen: «Escena: lo que pasó», con la escena en negrita.
@@ -2239,6 +2254,7 @@ function llenarLaCronica(cuerpo, campana, sesiones) {
         leer.href = rutaSeguraNotas(sesion.url);
         leer.textContent = "leer las notas de la sesión " + n + " →";
         caja.appendChild(leer);
+        ponerRutaDeLaSesion(caja, sesion);
         cuerpo.appendChild(caja);
     });
 }

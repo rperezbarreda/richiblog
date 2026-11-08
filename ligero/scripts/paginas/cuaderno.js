@@ -233,6 +233,10 @@ async function montarPieDeNotas() {
     if (reparto && /^\//.test(reparto)) {
         pie.appendChild(botonDeReparto(reparto));
     }
+    const ruta = (sesiones[donde].ruta || "").toString().trim();
+    if (ruta && /^\/(?!\/)/.test(ruta)) {
+        pie.appendChild(botonDeRutaDeLaSesion(ruta));
+    }
     if (anterior || siguiente) {
         pie.appendChild(navDeSaltos(anterior, siguiente));
     }
@@ -267,6 +271,20 @@ function botonDeReparto(url) {
     enlace.appendChild(flecha);
     const texto = document.createElement("span");
     texto.textContent = "npcs";
+    enlace.appendChild(texto);
+    return enlace;
+}
+function botonDeRutaDeLaSesion(url) {
+    const enlace = document.createElement("a");
+    enlace.className = "cuaderno-pdf";
+    enlace.href = url;
+    const flecha = document.createElement("span");
+    flecha.className = "cuaderno-pdf-flecha";
+    flecha.setAttribute("aria-hidden", "true");
+    flecha.textContent = "→";
+    enlace.appendChild(flecha);
+    const texto = document.createElement("span");
+    texto.textContent = "la ruta en el mapa";
     enlace.appendChild(texto);
     return enlace;
 }

@@ -742,7 +742,19 @@ def _linea(crudo):
         "trazo": str(crudo.get("dash") or "").strip().lower() if str(crudo.get("dash") or "").strip().lower()
         in TRAZOS_DE_RAYA else "",
         "hueco": _entre(_numero(crudo.get("gap"), None), 1, 80),
+        # La sesión de la campaña en la que se hizo (las rutas de viaje de
+        # los mapas de campaña: "session", lo pone el editor).
+        "sesion": _sesion_valida(crudo.get("session")),
     }
+
+
+def _sesion_valida(valor):
+    """El número de sesión de una raya (1, 2…), o 0 si no tiene."""
+    try:
+        numero = int(str(valor).strip())
+    except (TypeError, ValueError):
+        return 0
+    return numero if 0 < numero < 10000 else 0
 
 
 def _entre(valor, menos, mas):
@@ -2011,6 +2023,10 @@ def pintar(mapa, pagina_a, mapa_a, imagen_a, detalle=None, avisar=None, region_d
                                que=TIPOS_DE_LINEA[linea["tipo"]]))
         elegido = next((d for d in destinos if d["url"]), destinos[0])
         datos = _datos_del_globo(nombre, TIPOS_DE_LINEA[linea["tipo"]], "")
+        if linea.get("sesion"):
+            # Las rutas de cada sesión se ven una a una (pintar_mandos,
+            # «rutas de las sesiones», y mundo-mapa.js).
+            datos += ' data-mapa-sesion="%d"' % linea["sesion"]
         # Una raya fina es difícil de acertar con el ratón: debajo va otra
         # gorda y transparente, que es la que recibe el puntero.
         tocar = ('<path class="mapa-linea-toque%s" d="%s" stroke-width="%d" fill="none"></path>'
@@ -2491,7 +2507,7 @@ def pintar_lista(sitios, titulo_id="mapa-sitios-titulo"):
 
 def pintar_mandos(capas, hay_formas=True, hay_pines=False, hay_niveles=False, hay_lineas=False,
                   hay_nombres=False, todas_de_salida=False, hay_escala=False, hay_leyenda=False, hay_ruta=False,
-                  hay_rosa=False, hay_zonas_regionales=False):
+                  hay_rosa=False, hay_zonas_regionales=False, sesiones=None):
     trozos = ['<div class="mapa-mandos" data-mapa-mandos>']
     trozos.append(
         '<div class="mapa-zoom" role="group" aria-label="Zoom del mapa">'
@@ -2602,6 +2618,18 @@ def pintar_mandos(capas, hay_formas=True, hay_pines=False, hay_niveles=False, ha
         trozos.append('<fieldset class="mapa-capas">'
                       '<legend class="mapa-capas-titulo">ver</legend>%s</fieldset>'
                       % "".join(casillas))
+    # LAS RUTAS DE CADA SESIÓN (mapas de campaña): todas o solo la de una.
+    # sesiones: [(número, texto)]. Lo hace mundo-mapa.js; ?sesion=N en la
+    # dirección la deja elegida (los enlaces de las notas de cada sesión).
+    if sesiones:
+        opciones = ['<label class="mapa-capa-casilla"><input type="radio" name="mapa-sesion" value=""'
+                    ' data-mapa-sesion-casilla checked> todas</label>']
+        for numero, texto in sesiones:
+            opciones.append('<label class="mapa-capa-casilla"><input type="radio" name="mapa-sesion" value="%d"'
+                            ' data-mapa-sesion-casilla> %s</label>' % (numero, html.escape(texto)))
+        trozos.append('<fieldset class="mapa-capas mapa-sesiones">'
+                      '<legend class="mapa-capas-titulo">rutas de las sesiones</legend>%s</fieldset>'
+                      % "".join(opciones))
     # LAS ZONAS, UNA A UNA O POR CLASES (lagos, bosques, países vecinos…):
     # un desplegable que llena mundo-mapa.js con las que haya en el dibujo.
     if hay_formas:

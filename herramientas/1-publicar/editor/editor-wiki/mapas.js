@@ -732,6 +732,34 @@ function pasarEmblemasASitios(d) {
     return viejos.length;
 }
 
+// DE QUÉ SESIÓN ES UNA RUTA DE VIAJE (en un mapa de campaña): "session".
+// En la web se ven las rutas de todas las sesiones o solo la de una, y las
+// notas de esa sesión enlazan a la suya (generar-mapas-rol.py).
+function ponerSesionDeLaRaya(lista, cosa) {
+    const caja = $('[data-mapa-p-caja="sesion"]');
+    caja.hidden = !(estadoMapa.campana && lista === "lines" && cosa.kind === "ruta");
+    if (caja.hidden) {
+        return;
+    }
+    const elegir = $("#mapa-p-sesion");
+    elegir.textContent = "";
+    const opciones = [["", "De ninguna"]].concat(estadoMapa.sesiones.map((s) => {
+        const corto = String(s.titulo || "").replace(/^\s*sesi[oó]n\s*\d+\s*(?:[·.:\-–—]\s*)?/i, "").trim();
+        return [String(s.numero), "Sesión " + s.numero + (corto ? " · " + corto : "")];
+    }));
+    const tiene = cosa.session ? String(cosa.session) : "";
+    if (tiene && !opciones.some((o) => o[0] === tiene)) {
+        opciones.push([tiene, "Sesión " + tiene + " (no está en la campaña)"]);
+    }
+    opciones.forEach((o) => {
+        const opcion = document.createElement("option");
+        opcion.value = o[0];
+        opcion.textContent = o[1];
+        elegir.appendChild(opcion);
+    });
+    elegir.value = tiene;
+}
+
 // LOS OTROS MAPAS DE LA CAMPAÑA (los de las zonas): en un mapa de campaña,
 // un sitio o una región no lleva a una página de la wiki sino a otro mapa
 // suyo («Lleva al mapa»). Sus títulos, para elegir.
@@ -762,6 +790,7 @@ function ponerMapa(mapa) {
         cambiado: false, elegido: null, dibujo: null, capasOcultas: {}, cuantasRegiones: d.shapes.length,
         medida: [], tramoEscala: [], ratonMedida: null, iman: null, ultimoCampo: null, varios: [], curvaPara: null,
         cajaEleccion: null, vecinos: Array.isArray(mapa.vecinos) ? mapa.vecinos : [], campana: mapa.campana || "",
+        sesiones: Array.isArray(mapa.sesiones) ? mapa.sesiones : [],
     });
     ponerCasillaDeVecinos();
     ponerMapasDeLaCampana();
@@ -2527,6 +2556,7 @@ function pintarPropiedadesMapa() {
     $("#mapa-p-nombre").value = cosa.label || "";
     $("#mapa-p-pagina").value = cosa.targetPage || "";
     $("#mapa-p-mapa").value = cosa.targetMap || "";
+    ponerSesionDeLaRaya(lista, cosa);
     const tipo = $("#mapa-p-tipo");
     tipo.textContent = "";
     let opciones = [];
@@ -2733,6 +2763,13 @@ function cambiarPropiedadMapa(campo, valor) {
         }
         cosa.fontSize = Math.round(n);
         delete cosa.size;
+    } else if (campo === "session") {
+        const n = Number(valor);
+        if (Number.isInteger(n) && n > 0) {
+            cosa.session = n;
+        } else {
+            delete cosa.session;
+        }
     } else if (campo === "italic") {
         if (valor) {
             delete cosa.italic;
@@ -2778,6 +2815,7 @@ function cambiarPropiedadMapa(campo, valor) {
         pintarListaDeCosas();
         if (campo === "kind") {
             vestirCapital(cosa);
+            ponerSesionDeLaRaya(el.lista, cosa);
             $("[data-mapa-que]").textContent = nombreDeCosa(el.lista, cosa).que.replace(/^./, (c) => c.toUpperCase());
             $('[data-mapa-p-caja="taper"]').hidden = !(el.lista === "lines" && cosa.kind === "rio");
         }
