@@ -263,7 +263,7 @@ function botonDePdf(url) {
 function botonDeReparto(url) {
     const enlace = document.createElement("a");
     enlace.className = "cuaderno-pdf";
-    enlace.href = url;
+    enlace.href = rutaSeguraCuaderno(url);
     const flecha = document.createElement("span");
     flecha.className = "cuaderno-pdf-flecha";
     flecha.setAttribute("aria-hidden", "true");
@@ -277,7 +277,7 @@ function botonDeReparto(url) {
 function botonDeRutaDeLaSesion(url) {
     const enlace = document.createElement("a");
     enlace.className = "cuaderno-pdf";
-    enlace.href = url;
+    enlace.href = rutaSeguraCuaderno(url);
     const flecha = document.createElement("span");
     flecha.className = "cuaderno-pdf-flecha";
     flecha.setAttribute("aria-hidden", "true");

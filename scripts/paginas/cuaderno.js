@@ -472,7 +472,7 @@ function botonDeReparto(url) {
     // Misma pinta que el botón del PDF: son los dos enlaces del pie y
     // uno al lado del otro tienen que verse como lo mismo.
     enlace.className = "cuaderno-pdf";
-    enlace.href = url;
+    enlace.href = rutaSeguraCuaderno(url);
 
     const flecha = document.createElement("span");
     flecha.className = "cuaderno-pdf-flecha";
@@ -490,7 +490,7 @@ function botonDeRutaDeLaSesion(url) {
     const enlace = document.createElement("a");
     // Como los otros enlaces del pie.
     enlace.className = "cuaderno-pdf";
-    enlace.href = url;
+    enlace.href = rutaSeguraCuaderno(url);
 
     const flecha = document.createElement("span");
     flecha.className = "cuaderno-pdf-flecha";
