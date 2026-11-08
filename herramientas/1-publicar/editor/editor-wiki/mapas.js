@@ -732,6 +732,28 @@ function pasarEmblemasASitios(d) {
     return viejos.length;
 }
 
+// LOS OTROS MAPAS DE LA CAMPAÑA (los de las zonas): en un mapa de campaña,
+// un sitio o una región no lleva a una página de la wiki sino a otro mapa
+// suyo («Lleva al mapa»). Sus títulos, para elegir.
+async function ponerMapasDeLaCampana() {
+    const lista = $("#lista-mapas-campana");
+    lista.textContent = "";
+    const clave = estadoMapa.campana;
+    if (!clave) {
+        return;
+    }
+    const hay = await pedirEditor("/api/mapas");
+    if (hay.error || estadoMapa.campana !== clave) {
+        return;
+    }
+    const prefijo = "@campañas/" + clave + "/";
+    hay.mapas.filter((m) => m.archivo.startsWith(prefijo) && m.archivo !== estadoMapa.archivo).forEach((m) => {
+        const opcion = document.createElement("option");
+        opcion.value = m.titulo;
+        lista.appendChild(opcion);
+    });
+}
+
 function ponerMapa(mapa) {
     const d = completarDatosMapa(mapa.datos);
     const pasados = pasarEmblemasASitios(d);
@@ -739,9 +761,10 @@ function ponerMapa(mapa) {
         archivo: mapa.archivo, datos: d, imagenes: mapa.imagenes || {}, url: mapa.url || "",
         cambiado: false, elegido: null, dibujo: null, capasOcultas: {}, cuantasRegiones: d.shapes.length,
         medida: [], tramoEscala: [], ratonMedida: null, iman: null, ultimoCampo: null, varios: [], curvaPara: null,
-        cajaEleccion: null, vecinos: Array.isArray(mapa.vecinos) ? mapa.vecinos : [],
+        cajaEleccion: null, vecinos: Array.isArray(mapa.vecinos) ? mapa.vecinos : [], campana: mapa.campana || "",
     });
     ponerCasillaDeVecinos();
+    ponerMapasDeLaCampana();
     // El tamaño de los textos nuevos, de salida: el de un texto mediano.
     $("#mapa-tamano-nuevo").value = Math.round(Math.max(d.width, d.height) / 70);
     historiaMapa.atras = [];
@@ -2503,6 +2526,7 @@ function pintarPropiedadesMapa() {
     $("[data-mapa-p-nombre-que]").textContent = lista === "labels" ? "Texto" : "Nombre";
     $("#mapa-p-nombre").value = cosa.label || "";
     $("#mapa-p-pagina").value = cosa.targetPage || "";
+    $("#mapa-p-mapa").value = cosa.targetMap || "";
     const tipo = $("#mapa-p-tipo");
     tipo.textContent = "";
     let opciones = [];
@@ -2540,7 +2564,9 @@ function pintarPropiedadesMapa() {
         $("#mapa-p-tamano").value = Math.round(tamanoDeTexto(cosa));
         $('[data-mapa-p="italic"]').checked = cosa.italic !== false;
     }
-    $('[data-mapa-p-caja="pagina"]').hidden = lista === "labels";
+    // En los de una campaña no hay páginas: se lleva a otro mapa suyo.
+    $('[data-mapa-p-caja="pagina"]').hidden = lista === "labels" || Boolean(estadoMapa.campana);
+    $('[data-mapa-p-caja="mapa"]').hidden = lista === "labels" || !estadoMapa.campana;
     $('[data-mapa-p-caja="xy"]').hidden = !esMovible(lista);
     $('[data-mapa-p-caja="giro"]').hidden = lista !== "labels" || tieneCurva(cosa);
     // Un texto se puede poner sobre una curva (y quitársela).
@@ -2748,7 +2774,7 @@ function cambiarPropiedadMapa(campo, valor) {
     if (campo === "image" && valor && !estadoMapa.imagenes[valor]) {
         urlDeImagenMapa(valor).then(() => repintarCosa(el.lista, el.i));
     }
-    if (campo === "label" || campo === "kind" || campo === "targetPage") {
+    if (campo === "label" || campo === "kind" || campo === "targetPage" || campo === "targetMap") {
         pintarListaDeCosas();
         if (campo === "kind") {
             vestirCapital(cosa);

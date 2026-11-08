@@ -153,6 +153,21 @@
     margin: 0 0 16px;
 }
 
+/* Los mapas de las zonas, debajo del mapamundi. */
+.campana-extra-zonas-titulo {
+    margin: 0 0 8px;
+    font-size: 1rem;
+}
+
+.campana-extra-zonas {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin: 0 0 16px;
+    padding: 0;
+    list-style: none;
+}
+
 /* El botín y el dinero, en la misma ventana: sus dos pestañas. */
 .campana-botin-pestanas {
     padding-bottom: 10px;

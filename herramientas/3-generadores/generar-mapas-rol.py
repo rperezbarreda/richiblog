@@ -23,8 +23,18 @@
 #                                                  para acercarse mucho)
 #
 # y en el JSON de la campaña, "mapa": la dirección de su página, que es lo
-# que enciende el botón «el mapamundi →» del índice de la campaña. Si una
-# campaña tiene varios, el botón lleva al primero (por el título).
+# que enciende el botón «el mapamundi →» del índice de la campaña.
+#
+# LOS MAPAS DE ZONA (los pueblos de una comarca…). Una campaña puede tener
+# varios mapas: uno es EL MAPAMUNDI (el que lleve «mapamundi» en el título;
+# si ninguno, el que no lo enlaza ningún otro; si no, el primero por el
+# título) y los demás son zonas. No se juntan: son mapas aparte, enlazados.
+#   - En el mapamundi, un sitio o una región lleva a una zona si en el
+#     editor tiene «Lleva al mapa» (targetMap) con su título, o, sin eso, si
+#     se llama igual que ella.
+#   - La página de una zona vuelve al mapamundi («← volver al mapamundi»).
+#   - En el JSON, "zonas": [{titulo, url}], que salen en «extra» debajo del
+#     mapamundi.
 #
 # Lo de pintar es lo mismo que en la wiki (0-comun/mundo_mapas.py), así
 # que todo lo que se puede hacer allí se puede hacer aquí; lo que no hay es
@@ -120,9 +130,9 @@ def nombre_de_campana(clave):
         return None, archivo
 
 
-def un_mapa(archivo, probar):
-    """Pinta un .cmap de una campaña y escribe su página. Devuelve
-    (clave, título, url) o None."""
+def leer_uno(archivo):
+    """Lee un .cmap de una campaña: {archivo, clave, campana, leido,
+    avisos, titulo, url} o None."""
     clave = archivo.parent.name
     campana, _ = nombre_de_campana(clave)
     if campana is None:
@@ -135,6 +145,63 @@ def un_mapa(archivo, probar):
     if leido is None:
         print("  OJO: no entiendo %s: %s" % (archivo.relative_to(RAIZ), "; ".join(avisos.lista) or "no es un mapa"))
         return None
+    slug = slug_de({"title": leido["titulo"]}, archivo)
+    return {"archivo": archivo, "clave": clave, "campana": campana, "leido": leido, "avisos": avisos,
+            "titulo": leido["titulo"] or archivo.stem, "url": "/web/notas_rol/%s/mapa_%s.html" % (clave, slug)}
+
+
+# Lo que puede llevar a otro sitio en un mapa (los textos sueltos no).
+COSAS_QUE_LLEVAN = ("pines", "formas", "lineas", "emblemas")
+
+
+def _clave_de(nombre):
+    return sin_tildes(str(nombre or "")).strip().lower()
+
+
+def enlazar_zonas(mapas):
+    """Los mapas de UNA campaña: cuál es el mapamundi y a dónde lleva cada
+    cosa. Pone "mapa" (el título del otro mapa) en lo que lleva a otro: lo
+    que ya lo tenía (targetMap) y lo que se llama igual que uno, o que dice
+    llevar a una «página» que es en realidad un mapa suyo. Devuelve el
+    mapamundi."""
+    por_titulo = {}
+    for m in mapas:
+        por_titulo.setdefault(_clave_de(m["titulo"]), m)
+        por_titulo.setdefault(_clave_de(m["archivo"].stem), m)
+    enlazados = set()
+    for m in mapas:
+        for lista in COSAS_QUE_LLEVAN:
+            for cosa in m["leido"].get(lista) or []:
+                if not isinstance(cosa, dict):
+                    continue
+                if not cosa.get("mapa"):
+                    for posible in (cosa.get("pagina"), cosa.get("etiqueta")):
+                        otro = por_titulo.get(_clave_de(posible)) if posible else None
+                        if otro is not None and otro is not m:
+                            cosa["mapa"] = otro["titulo"]
+                            if posible == cosa.get("pagina"):
+                                cosa["pagina"] = ""
+                            break
+                otro = por_titulo.get(_clave_de(cosa.get("mapa"))) if cosa.get("mapa") else None
+                if otro is not None and otro is not m:
+                    enlazados.add(id(otro))
+    con_nombre = [m for m in mapas if "mapamundi" in _clave_de(m["titulo"])]
+    sueltos = [m for m in mapas if id(m) not in enlazados]
+    mundo = (con_nombre or sueltos or mapas)[0]
+
+    def mapa_a(nombre):
+        otro = por_titulo.get(_clave_de(nombre))
+        return (otro["url"], True) if otro is not None else ("", False)
+    for m in mapas:
+        m["mapa_a"] = mapa_a
+        m["mundo"] = mundo
+    return mundo
+
+
+def un_mapa(m, probar):
+    """Pinta un .cmap de una campaña (ya leído, ver leer_uno) y escribe su
+    página. Devuelve (clave, título, url)."""
+    archivo, clave, campana, leido, avisos = m["archivo"], m["clave"], m["campana"], m["leido"], m["avisos"]
     suyas = MAPAS_ROL / clave / "imagenes"
     salida_img = RAIZ / "imagenes" / "notas_rol" / clave / "mapa"
     url_img = "/imagenes/notas_rol/%s/mapa/" % clave
@@ -159,7 +226,7 @@ def un_mapa(archivo, probar):
             shutil.copy2(origen, salida_img / origen.name)
         return url_img + origen.name
 
-    hecho = mundo_mapas.pintar(leido, lambda n: ("", False), lambda n: ("", False), de_imagen,
+    hecho = mundo_mapas.pintar(leido, lambda n: ("", False), m["mapa_a"], de_imagen,
                                detalle=None, avisar=avisos.di, region_de={}, emblema_a=de_emblema)
     svg = hecho["svg"]
 
@@ -179,9 +246,9 @@ def un_mapa(archivo, probar):
                                        hecho.get("hay_escala", False), bool(hecho.get("leyenda")),
                                        hecho.get("hay_ruta", False), hecho.get("hay_rosa", False),
                                        hecho.get("hay_zonas_regionales", False))
-    titulo = leido["titulo"] or archivo.stem
-    slug = slug_de({"title": leido["titulo"]}, archivo)
-    url = "/web/notas_rol/%s/mapa_%s.html" % (clave, slug)
+    titulo, url = m["titulo"], m["url"]
+    # Una zona vuelve a su mapamundi; el mapamundi, a la campaña.
+    mundo = m["mundo"]
     ids = {s.get("id") or s["nombre"] for s in hecho["sitios"]}
     cuantos = len(ids)
     nombres = list(dict.fromkeys(s["nombre"] for s in hecho["sitios"]))[:8]
@@ -198,9 +265,9 @@ def un_mapa(archivo, probar):
         ("{{MAPA}}", svg),
         ("{{SITIOS}}", mundo_mapas.pintar_lista(hecho["sitios"])),
         ("{{LEYENDA}}", hecho.get("leyenda", "")),
-        ("{{VOLVER}}", html.escape("← volver a la " + nombre_campana)),
-        ("{{VOLVER_URL}}", html.escape(str(campana.get("pagina") or "/web/notas_rol/%s/index_%s.html" % (clave, clave)),
-                                       quote=True)),
+        ("{{VOLVER}}", html.escape("← volver a la " + nombre_campana if mundo is m else "← volver al " + mundo["titulo"])),
+        ("{{VOLVER_URL}}", html.escape(str(campana.get("pagina") or "/web/notas_rol/%s/index_%s.html" % (clave, clave))
+                                       if mundo is m else mundo["url"], quote=True)),
         ("{{CUANTOS}}", "1 sitio" if cuantos == 1 else "%d sitios" % cuantos),
     ):
         molde = molde.replace(marca, valor)
@@ -218,32 +285,44 @@ def main():
     parser = argparse.ArgumentParser(description="Los mapas de las campañas de rol (mapas-rol/).")
     parser.add_argument("--probar", action="store_true", help="dice lo que haría sin escribir nada")
     args = parser.parse_args()
-    hechos = []
+    # Primero se leen todos: para saber a dónde lleva cada cosa hay que
+    # conocer antes los otros mapas de su campaña.
+    leidos = {}
     for archivo in sorted(MAPAS_ROL.glob("*/*.cmap"), key=lambda a: (a.parent.name, a.stem.lower())) \
             if MAPAS_ROL.is_dir() else []:
-        hecho = un_mapa(archivo, args.probar)
-        if hecho:
-            hechos.append(hecho)
-    # El botón «el mapamundi →» de cada campaña: "mapa" en su JSON (el
-    # primero por el título), o fuera si ya no tiene ninguno.
+        m = leer_uno(archivo)
+        if m:
+            leidos.setdefault(m["clave"], []).append(m)
+    hechos = []
     por_campana = {}
-    for clave, titulo, url in hechos:
-        por_campana.setdefault(clave, url)
+    zonas_de = {}
+    for clave, mapas in leidos.items():
+        mundo = enlazar_zonas(mapas)
+        por_campana[clave] = mundo["url"]
+        zonas_de[clave] = [{"titulo": m["titulo"], "url": m["url"]} for m in mapas if m is not mundo]
+        for m in mapas:
+            hechos.append(un_mapa(m, args.probar))
+    # El botón «el mapamundi →» de cada campaña: "mapa" en su JSON, y sus
+    # zonas en "zonas"; o fuera si ya no tiene.
     for archivo in sorted((RAIZ / "datos" / "notas_rol").glob("campana-*.json")):
         clave = archivo.stem[len("campana-"):]
         datos, _ = nombre_de_campana(clave)
         if datos is None:
             continue
         quiere = por_campana.get(clave)
-        if datos.get("mapa") == quiere or (quiere is None and "mapa" not in datos):
+        zonas = zonas_de.get(clave) or []
+        antes = (datos.get("mapa"), datos.get("zonas") or [])
+        if antes == (quiere, zonas):
             continue
-        if quiere:
-            datos["mapa"] = quiere
-        else:
-            datos.pop("mapa", None)
+        for nombre, valor in (("mapa", quiere), ("zonas", zonas)):
+            if valor:
+                datos[nombre] = valor
+            else:
+                datos.pop(nombre, None)
         if not args.probar:
             escribir_texto(archivo, json.dumps(datos, ensure_ascii=False, indent=4) + "\n")
-        print("  %s: el mapamundi %s" % (archivo.relative_to(RAIZ), "→ " + quiere if quiere else "quitado"))
+        print("  %s: el mapamundi %s%s" % (archivo.relative_to(RAIZ), "→ " + quiere if quiere else "quitado",
+                                          ", %d zona(s)" % len(zonas) if zonas else ""))
     print("\n  %d mapa(s) de campaña." % len(hechos))
     return 0
 

@@ -1441,6 +1441,18 @@
 
       python herramientas/3-generadores/generar-mapas-rol.py
 
+  MAPAS DE ZONA (los pueblos de una comarca…): otro mapa nuevo de la
+  misma campaña, con su propia imagen y su título («Valle de Utan»). No
+  se juntan con el mapamundi: van enlazados.
+    - El mapamundi es el que lleva «mapamundi» en el título (si ninguno,
+      el que no enlaza ningún otro).
+    - En el mapamundi, un sitio o una región lleva a la zona si en «Lo
+      elegido» → «Lleva al mapa» pones su título, o si se llama igual
+      que ella (entonces no hace falta poner nada).
+    - La página de la zona tiene «← volver al Mapamundi de …», y en el
+      índice de la campaña, «✨ extra» enseña las zonas debajo del
+      mapamundi ("zonas" en el JSON, lo escribe el script).
+
 
   LAS MISIONES PENDIENTES
 

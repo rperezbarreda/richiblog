@@ -80,6 +80,18 @@
 .campana-extra-arriba {
     margin: 0 0 16px;
 }
+.campana-extra-zonas-titulo {
+    margin: 0 0 8px;
+    font-size: 1rem;
+}
+.campana-extra-zonas {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin: 0 0 16px;
+    padding: 0;
+    list-style: none;
+}
 .campana-botin-pestanas {
     padding-bottom: 10px;
     border-bottom: 2px dashed var(--border);

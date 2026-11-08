@@ -324,6 +324,8 @@ function prepararBotones(campana) {
     }
     const imagenes = listaDeCampana(campana.imagenes).filter((x) => x.imagen);
     const mapa = campana.mapa ? rutaSeguraNotas(String(campana.mapa)) : "";
+    // Los mapas de las zonas (los pueblos…), los escribe generar-mapas-rol.py.
+    const zonas = mapa ? listaDeCampana(campana.zonas).filter((z) => z && z.url && z.titulo) : [];
     const botonExtra = document.querySelector("[data-campana-extra-abrir]");
     if (botonExtra && (imagenes.length || mapa)) {
         botonExtra.hidden = false;
@@ -332,7 +334,7 @@ function prepararBotones(campana) {
                 titulo: "extra.dir",
                 clase: "modal-galeria",
                 devolverA: botonExtra,
-                llenar: (cuerpo) => llenarLoExtra(cuerpo, imagenes, mapa),
+                llenar: (cuerpo) => llenarLoExtra(cuerpo, imagenes, mapa, zonas),
             })
         );
     }
@@ -1996,18 +1998,41 @@ function llenarBotinYDinero(cuerpo, cosas, dinero, mesa) {
     partes[0][2](vista);
 }
 
-// EXTRA: el mapamundi (un enlace a su página) y las imágenes.
-function llenarLoExtra(cuerpo, imagenes, mapa) {
-    if (mapa) {
+// EXTRA: el mapamundi y los mapas de sus zonas (enlaces a sus páginas) y
+// las imágenes.
+function llenarLoExtra(cuerpo, imagenes, mapa, zonas) {
+    const botonDeMapa = (url, emoji, texto) => {
         const enlace = document.createElement("a");
         enlace.className = "campana-boton";
-        enlace.href = rutaSeguraNotas(String(mapa));
-        enlace.innerHTML = '<span class="campana-boton-emoji" aria-hidden="true">🗺️</span>'
-            + '<span class="campana-boton-texto">el mapamundi →</span>';
+        enlace.href = rutaSeguraNotas(String(url));
+        const icono = document.createElement("span");
+        icono.className = "campana-boton-emoji";
+        icono.setAttribute("aria-hidden", "true");
+        icono.textContent = emoji;
+        const letras = document.createElement("span");
+        letras.className = "campana-boton-texto";
+        letras.textContent = texto;
+        enlace.append(icono, letras);
+        return enlace;
+    };
+    if (mapa) {
         const p = document.createElement("p");
         p.className = "campana-extra-arriba";
-        p.appendChild(enlace);
+        p.appendChild(botonDeMapa(mapa, "🗺️", "el mapamundi →"));
         cuerpo.appendChild(p);
+    }
+    if (zonas && zonas.length) {
+        const titulo = document.createElement("h3");
+        titulo.className = "campana-extra-zonas-titulo";
+        titulo.textContent = "Los mapas de las zonas";
+        const lista = document.createElement("ul");
+        lista.className = "campana-extra-zonas";
+        zonas.forEach((z) => {
+            const li = document.createElement("li");
+            li.appendChild(botonDeMapa(z.url, "📍", String(z.titulo) + " →"));
+            lista.appendChild(li);
+        });
+        cuerpo.append(titulo, lista);
     }
     if (imagenes.length) {
         llenarLasImagenes(cuerpo, imagenes);

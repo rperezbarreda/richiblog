@@ -793,6 +793,13 @@
                             <input id="mapa-p-pagina" list="lista-paginas" autocomplete="off" spellcheck="false"
                                    data-mapa-p="targetPage">
                         </div>
+                        <div class="campo" data-mapa-p-caja="mapa" hidden>
+                            <label for="mapa-p-mapa">Lleva al mapa</label>
+                            <input id="mapa-p-mapa" list="lista-mapas-campana" autocomplete="off" spellcheck="false"
+                                   data-mapa-p="targetMap" aria-describedby="ayuda-mapa-p-mapa">
+                            <p class="ayuda" id="ayuda-mapa-p-mapa">El título de otro mapa de esta campaña (el de una
+                                zona). Vacío: si se llama igual que uno, lleva a ese.</p>
+                        </div>
                         <div class="campo" data-mapa-p-caja="kind">
                             <label for="mapa-p-tipo" data-mapa-p-tipo-que>Qué es</label>
                             <select id="mapa-p-tipo" data-mapa-p="kind"></select>
@@ -1142,6 +1149,7 @@
     </footer>
 
     <datalist id="lista-paginas"></datalist>
+    <datalist id="lista-mapas-campana"></datalist>
     <datalist id="lista-imagenes"></datalist>
 </body>
 </html>
