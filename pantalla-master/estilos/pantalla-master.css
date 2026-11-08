@@ -4640,6 +4640,26 @@
     color: var(--white);
 }
 
+/* El aviso de la web, encima de la entrada. */
+.master-aviso-web {
+    z-index: 2001;
+    background-color: color-mix(in srgb, var(--purple) 85%, transparent);
+}
+
+.master-aviso-web-marca {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 12px;
+    cursor: pointer;
+}
+
+.master-aviso-web-marca input {
+    width: 1.1em;
+    height: 1.1em;
+    accent-color: var(--yellow);
+}
+
 .master-entrada-icono {
     display: block;
     width: 72px;

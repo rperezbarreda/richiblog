@@ -17525,6 +17525,87 @@
         });
         document.body.appendChild(fondo);
         (fondo.querySelector(".master-entrada-campana") || input).focus();
+        verAvisoWeb(fondo);
+    }
+
+    // EL AVISO DE LA WEB: al abrirla desde la web (no con el ejecutable),
+    // encima de la entrada, se recomienda bajar la app. Se puede no volver
+    // a enseñar.
+    const CLAVE_AVISO_WEB = "richi-master-aviso-web";
+    function verAvisoWeb(entrada) {
+        if (location.hostname === "127.0.0.1" && location.port === "47321") {
+            return;
+        }
+        try {
+            if (localStorage.getItem(CLAVE_AVISO_WEB) === "no") {
+                return;
+            }
+        } catch (e) {
+            // Sin almacenamiento: se enseña siempre.
+        }
+        const volverA = document.activeElement;
+        const fondo = crear("div", "master-entrada master-aviso-web");
+        fondo.setAttribute("role", "alertdialog");
+        fondo.setAttribute("aria-modal", "true");
+        fondo.setAttribute("aria-labelledby", "master-aviso-web-titulo");
+        fondo.setAttribute("aria-describedby", "master-aviso-web-texto");
+        const caja = crear("div", "master-entrada-caja");
+        const titulo = crear("h2", "master-entrada-titulo", "⬇️ Mejor, la app");
+        titulo.id = "master-aviso-web-titulo";
+        const texto = crear("div");
+        texto.id = "master-aviso-web-texto";
+        texto.append(crear("p", "master-entrada-texto", "Recomiendo descargar la aplicación en vez de usar la versión web,"
+            + " por el simple hecho de que la web está alojada en Cloudflare y los días de fútbol queda inutilizada."),
+        crear("p", "oc-hoja-nota", "Para Windows, macOS y Linux: descomprime el .zip y ábrela con doble clic. Si ya tienes"
+            + " algo guardado aquí, haz una copia de seguridad (⚙ opciones) e impórtala en la app."));
+        const bajar = crear("a", "oc-vida-accion", "⬇️ descargar la app");
+        bajar.href = "https://github.com/rperezbarreda/pantalla_master/releases/latest";
+        bajar.target = "_blank";
+        bajar.rel = "noopener noreferrer";
+        bajar.setAttribute("aria-label", "Descargar la app para Windows, macOS o Linux (se abre aparte, en GitHub)");
+        const seguir = botonDe("oc-vida-accion", "seguir en la web", () => cerrarAviso());
+        const botones = crear("div", "master-anadir-otras");
+        botones.append(bajar, seguir);
+        const marca = crear("label", "master-aviso-web-marca");
+        const casilla = crear("input");
+        casilla.type = "checkbox";
+        marca.append(casilla, document.createTextNode(" no volver a enseñar este aviso"));
+        caja.append(titulo, texto, botones, marca);
+        fondo.appendChild(caja);
+        entrada.inert = true;
+        function cerrarAviso() {
+            if (casilla.checked) {
+                try {
+                    localStorage.setItem(CLAVE_AVISO_WEB, "no");
+                } catch (e) {
+                    // Sin almacenamiento: volverá a salir.
+                }
+            }
+            entrada.inert = false;
+            fondo.remove();
+            if (volverA && volverA.focus) {
+                volverA.focus();
+            }
+        }
+        fondo.addEventListener("keydown", (e) => {
+            if (e.key === "Escape") {
+                e.preventDefault();
+                e.stopPropagation();
+                cerrarAviso();
+            } else if (e.key === "Tab") {
+                const cosas = [bajar, seguir, casilla];
+                const i = cosas.indexOf(document.activeElement);
+                if (e.shiftKey && i <= 0) {
+                    e.preventDefault();
+                    cosas[cosas.length - 1].focus();
+                } else if (!e.shiftKey && i === cosas.length - 1) {
+                    e.preventDefault();
+                    cosas[0].focus();
+                }
+            }
+        });
+        document.body.appendChild(fondo);
+        bajar.focus();
     }
 
     // DUPLICAR UNA CAMPAÑA: una copia entera (tableros, ventanas, party,
