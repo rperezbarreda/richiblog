@@ -523,6 +523,51 @@ function regionesDeGrandeAPequena() {
     return formas.map((s, i) => [i, areaMapa(s.points || [])]).sort((a, b) => b[1] - a[1]).map((x) => x[0]);
 }
 
+// ---- LOS MAPAS DE LA WIKI O LOS DE LAS CAMPAÑAS ----
+// La misma vista «Mapas» sirve para los dos: desde Wiki salen todos y el
+// mapa nuevo es de la wiki; desde Campañas («Los mapas de una campaña»),
+// solo los de las campañas y el nuevo ya es de una. El modo lo pone el
+// botón por el que se llega (data-mapas-modo) o, al volver de un mapa, si
+// ese mapa era de una campaña.
+window.modoMapasEditor = "wiki";
+
+function ponerModoDeMapas(modo) {
+    window.modoMapasEditor = modo === "campana" ? "campana" : "wiki";
+    const deCampana = window.modoMapasEditor === "campana";
+    const titulo = $("[data-mapas-titulo]");
+    if (titulo) {
+        titulo.textContent = deCampana ? "Los mapas de las campañas" : "Mapas";
+    }
+    // Los textos del mapa nuevo, los de cada uno (se guardan los de la wiki).
+    const intro = $("[data-mapa-nuevo-intro]");
+    const etiqueta = $("[data-mapa-nuevo-de-etiqueta]");
+    if (intro && etiqueta) {
+        intro.dataset.wiki = intro.dataset.wiki || intro.textContent;
+        etiqueta.dataset.wiki = etiqueta.dataset.wiki || etiqueta.textContent;
+        intro.textContent = deCampana ? "La imagen de un mapa de la campaña: su mapamundi o el de una zona (para"
+            + " ver los pueblos). El que lleve «mapamundi» en el título es el principal; los demás son zonas,"
+            + " enlazadas desde él." : intro.dataset.wiki;
+        etiqueta.textContent = deCampana ? "De qué campaña" : etiqueta.dataset.wiki;
+    }
+    const elegir = $("#mapa-nuevo-de");
+    const wiki = $("[data-mapa-de-wiki]");
+    if (wiki) {
+        wiki.hidden = deCampana;
+        wiki.disabled = deCampana;
+    }
+    if (elegir) {
+        if (deCampana && !elegir.value) {
+            const primera = [...elegir.options].find((o) => o.value);
+            if (primera) {
+                elegir.value = primera.value;
+            }
+        } else if (!deCampana) {
+            elegir.value = "";
+        }
+        mostrarLoDeLaWikiEnElMapaNuevo();
+    }
+}
+
 // ---- LA LISTA DE MAPAS ----
 // En «Un mapa nuevo», lo de la wiki (de qué página es, la escala común)
 // solo si no es de una campaña.
@@ -549,6 +594,8 @@ function ponerCampanasEnElMapaNuevo(campanas) {
         elegir.appendChild(opcion);
     });
     elegir.addEventListener("change", mostrarLoDeLaWikiEnElMapaNuevo);
+    // Llegadas las campañas, el modo puede elegir ya la primera.
+    ponerModoDeMapas(window.modoMapasEditor);
 }
 
 async function pintarListaDeMapas() {
@@ -560,12 +607,15 @@ async function pintarListaDeMapas() {
         return;
     }
     ponerCampanasEnElMapaNuevo(hay.campanas);
-    if (!hay.mapas.length) {
-        lista.appendChild(crearEditor("li", "", "Aún no hay ninguno."));
+    const mapas = window.modoMapasEditor === "campana"
+        ? hay.mapas.filter((m) => m.archivo.startsWith("@campañas/")) : hay.mapas;
+    if (!mapas.length) {
+        lista.appendChild(crearEditor("li", "", window.modoMapasEditor === "campana"
+            ? "Aún no hay ninguno de una campaña: hazlo aquí abajo." : "Aún no hay ninguno."));
         return;
     }
     // Por carpetas, como están en wiki/ (el mapamundi, suelto arriba).
-    pintarArbolWeb(lista, hay.mapas.map((m) => ({ carpeta: m.archivo.split("/").slice(0, -1), fila: () => {
+    pintarArbolWeb(lista, mapas.map((m) => ({ carpeta: m.archivo.split("/").slice(0, -1), fila: () => {
         const li = document.createElement("li");
         const texto = crearEditor("span");
         texto.appendChild(crearEditor("span", "faltan-nombre", m.titulo));
@@ -794,6 +844,8 @@ function ponerMapa(mapa) {
     });
     ponerCasillaDeVecinos();
     ponerMapasDeLaCampana();
+    // «Estás en»: un mapa de una campaña cuelga de Campañas.
+    window.modoMapasEditor = estadoMapa.campana ? "campana" : "wiki";
     // El tamaño de los textos nuevos, de salida: el de un texto mediano.
     $("#mapa-tamano-nuevo").value = Math.round(Math.max(d.width, d.height) / 70);
     historiaMapa.atras = [];
@@ -5337,6 +5389,11 @@ function empezarMapas() {
     }
     window.addEventListener("resize", apuntarAlto);
 
+    // El modo, antes que nada (en captura): «Estás en» lo necesita ya.
+    document.querySelectorAll('[data-ir="mapas"]').forEach((b) => b.addEventListener("click", () => {
+        const modo = b.getAttribute("data-mapas-modo");
+        ponerModoDeMapas(modo || (estadoMapa.campana ? "campana" : "wiki"));
+    }, true));
     document.querySelectorAll('[data-ir="mapas"]').forEach((b) => b.addEventListener("click", pintarListaDeMapas));
     $("[data-mapa-nuevo]").addEventListener("submit", (e) => {
         e.preventDefault();

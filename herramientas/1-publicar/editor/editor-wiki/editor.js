@@ -424,6 +424,10 @@ const APARTADO_DE_FICHAS_EDITOR = { escribir: "escribir", campanas: "campanas", 
 const ESTADO_DONDE_EDITOR = { vista: "inicio" };
 
 function caminoDeVistaEditor(vista) {
+    // Los mapas de las campañas cuelgan de «Campañas» (mapas.js pone el modo).
+    if ((vista === "mapas" || vista === "mapa") && window.modoMapasEditor === "campana") {
+        return vista === "mapas" ? ["campanas"] : ["campanas", "mapas"];
+    }
     if (vista === "fichas" && typeof estadoFichas !== "undefined") {
         const col = (estadoFichas.colecciones || []).find((c) => c.id === estadoFichas.id);
         return [APARTADO_DE_FICHAS_EDITOR[col && col.apartado] || "inicio"];

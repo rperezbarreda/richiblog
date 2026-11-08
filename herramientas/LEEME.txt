@@ -1439,7 +1439,10 @@
   No va en wiki/ porque importar-mundo.py deja la bóveda igual que
   Chronicler y lo borraría. mapas-rol/ no se sube a Neocities (como wiki/):
   se sube lo que escribe generar-mapas-rol.py. SE HACE EN EL EDITOR:
-  Mapas → «Un mapa nuevo» → «Para qué es: una campaña: …», la imagen y,
+  Campañas → «🗺️ Los mapas de una campaña» (solo salen los de las
+  campañas, y el mapa nuevo ya es de una; es la misma vista que Wiki →
+  «Los mapas», que los enseña todos) → «Un mapa nuevo» → «De qué
+  campaña», la imagen y,
   si quieres, el título (si no, «Mapamundi de Ragna»). Sale en la lista
   de mapas en «@campañas/<campaña>» y se dibuja con las mismas
   herramientas. «Guardar y pasar a la web» lo publica, y apunta "mapa" en

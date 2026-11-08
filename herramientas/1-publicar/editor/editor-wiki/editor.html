@@ -205,6 +205,12 @@
                     <span class="grande-titulo"><span class="grande-emoji" aria-hidden="true">📓</span>Apuntar las notas de una partida</span>
                     <span class="grande-que">Elige la campaña y deja el cuaderno listo para escribir. Nace como borrador.</span>
                 </button>
+                <!-- Los mismos mapas que en Wiki → «Los mapas», pero solo los de
+                     las campañas (y el mapa nuevo, ya de una campaña). -->
+                <button type="button" class="grande" data-ir="mapas" data-mapas-modo="campana">
+                    <span class="grande-titulo"><span class="grande-emoji" aria-hidden="true">🗺️</span>Los mapas de una campaña</span>
+                    <span class="grande-que">El mapamundi, los mapas de zona y las rutas de cada sesión, o hacer uno nuevo.</span>
+                </button>
             </div>
             <section class="bloque" aria-labelledby="t-notas-rol">
                 <h2 id="t-notas-rol"><span aria-hidden="true">📓</span> Las notas de las partidas</h2>
@@ -243,7 +249,7 @@
                     <span class="grande-titulo"><span class="grande-emoji" aria-hidden="true">🧩</span>Crear una de las que faltan</span>
                     <span class="grande-que">Las que ya se nombran en otras páginas y aún no existen (en rojo en la web).</span>
                 </button>
-                <button type="button" class="grande" data-ir="mapas">
+                <button type="button" class="grande" data-ir="mapas" data-mapas-modo="wiki">
                     <span class="grande-titulo"><span class="grande-emoji" aria-hidden="true">🗺️</span>Los mapas</span>
                     <span class="grande-que">Poner ciudades, pueblos y fortalezas, pintar regiones, caminos y ríos, o hacer un mapa nuevo.</span>
                 </button>
@@ -555,22 +561,22 @@
 
         <!-- LOS MAPAS -->
         <section class="vista" data-vista="mapas" aria-labelledby="t-mapas" hidden>
-            <h1 id="t-mapas">Mapas</h1>
+            <h1 id="t-mapas" data-mapas-titulo>Mapas</h1>
             <section class="bloque" aria-labelledby="t-mapas-hay">
                 <h2 id="t-mapas-hay">Los que hay</h2>
                 <ul class="faltan" data-mapas-lista></ul>
             </section>
             <form class="bloque" data-mapa-nuevo novalidate aria-labelledby="t-mapa-nuevo">
                 <h2 id="t-mapa-nuevo">Un mapa nuevo</h2>
-                <p class="ayuda">Una imagen (un mapa dibujado, un trozo ampliado del mapamundi…) sobre la que
+                <p class="ayuda" data-mapa-nuevo-intro>Una imagen (un mapa dibujado, un trozo ampliado del mapamundi…) sobre la que
                     poner sitios y pintar. Si es de una página, se guarda junto a ella y esa página sale en la
                     web con un botón para explorarlo.</p>
                 <div class="campo">
-                    <label for="mapa-nuevo-de">Para qué es</label>
+                    <label for="mapa-nuevo-de" data-mapa-nuevo-de-etiqueta>Para qué es</label>
                     <p class="ayuda" id="ayuda-mapa-de">Uno de una campaña (su mapamundi) no es de la wiki: sale en las
                         notas de esa campaña, con el botón «el mapamundi».</p>
                     <select id="mapa-nuevo-de" aria-describedby="ayuda-mapa-de" data-mapa-nuevo-de>
-                        <option value="">la wiki de Cralëa</option>
+                        <option value="" data-mapa-de-wiki>la wiki de Cralëa</option>
                     </select>
                 </div>
                 <div class="campo" data-mapa-solo-wiki>
