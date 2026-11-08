@@ -2159,6 +2159,23 @@ body.en-mapa .saltar {
     font-style: normal;
 }
 
+/* Un documento encontrado: en la web sale plegado, con el primer párrafo
+   de título (cuaderno.js); aquí, una caja de puntos. */
+.redactor-area blockquote.cuaderno-documento {
+    padding: 6px 14px;
+    border: 2px dashed var(--acento);
+}
+
+.redactor-area .cuaderno-documento::before {
+    content: "📜 Documento encontrado (el primer párrafo es su título)";
+    display: block;
+    color: var(--acento);
+    font-family: var(--mono);
+    font-size: 0.8em;
+    font-weight: 700;
+    font-style: normal;
+}
+
 .redactor-area .cuaderno-descubrimiento::before {
     content: "Lo que descubrimos";
     display: block;

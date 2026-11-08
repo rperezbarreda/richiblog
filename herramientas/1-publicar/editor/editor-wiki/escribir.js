@@ -928,7 +928,7 @@ function pintarCuadernoWeb(enfocar) {
                 caja2.appendChild(abierta);
             }
             const r = crearRedactor({ etiqueta: b.tipo === "escena" ? "Lo que pasó en " + (b.nombre || "la escena")
-                : "Texto suelto de la hoja " + (i + 1), clases: /^(pj-[a-z]+|cuaderno-(objetos|flavor|mecanica|descubrimiento))$/,
+                : "Texto suelto de la hoja " + (i + 1), clases: /^(pj-[a-z]+|cuaderno-(objetos|flavor|mecanica|descubrimiento|documento))$/,
             extras: extrasDelCuadernoWeb(e), enlaces: (datos) => enlacesDelCuadernoWeb(e, datos),
             gente: (datos) => enlacesDelCuadernoWeb(e, datos).slice(0, 2),
             avisos: (area, avisar) => avisosDeNombresWeb(area, e, avisar),
@@ -1452,6 +1452,10 @@ function extrasDelCuadernoWeb(e) {
         ayuda: "Lo de donde está el cursor (o lo elegido), en una caja aparte: lo que sacamos de un interrogatorio,"
             + " una pista… Otra vez, lo saca de la caja",
         hacer: (r) => r.envolverBloque("blockquote", "cuaderno-descubrimiento") });
+    extras.push({ texto: "Documento encontrado", icono: "documento",
+        ayuda: "Lo elegido (el título en el primer párrafo y el texto debajo), como un documento que encontramos:"
+            + " en la web sale plegado. Otra vez, lo saca de la caja",
+        hacer: (r) => r.envolverBloque("blockquote", "cuaderno-documento") });
     extras.push({ texto: "Pasar al botín", icono: "alBotin",
         ayuda: "Lo de la lista de objetos de este texto (o lo elegido, una cosa por línea), al botín de la campaña;"
             + " las monedas, al dinero",

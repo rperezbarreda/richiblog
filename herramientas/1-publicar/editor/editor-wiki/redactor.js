@@ -78,6 +78,7 @@ const ICONOS_DEL_REDACTOR = {
     // Un dado: la regla de juego.
     regla: '<path d="M12 2l9 5v10l-9 5-9-5V7z"/><path d="M12 22V12M21 7l-9 5-9-5"/>',
     // Una lupa sobre un papel: lo que descubrimos.
+    documento: '<path d="M6 3h12v18H6z"/><path d="M9 8h6M9 12h6M9 16h4"/>',
     descubrimiento: '<path d="M5 3h10l4 4v6"/><path d="M5 3v18h7"/><circle cx="16.5" cy="16.5" r="3"/><path d="M18.7 18.7L22 22"/>',
     // Una bolsa con una flecha hacia dentro: pasar los objetos al botín.
     alBotin: '<path d="M5 9h14l-1.2 11H6.2z"/><path d="M9 9V7a3 3 0 0 1 6 0v2"/><path d="M12 12v5M9.5 14.5L12 17l2.5-2.5"/>',

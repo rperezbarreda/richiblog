@@ -68,8 +68,8 @@
         "titulo": "Blog 2026",
         "seccion": "blog",
         "fecha": "20-09-2026",
-        "actualizada": "06-11-2026",
-        "resumen": "4f8cc921"
+        "actualizada": "08-11-2026",
+        "resumen": "7b887ebc"
     },
     {
         "url": "/web/blog/diario.html",
@@ -160,6 +160,14 @@
         "resumen": "ab436d23"
     },
     {
+        "url": "/web/notas_rol/ragna/sesion-03.html",
+        "titulo": "Sesión 3 — La guarida de los Colmillo de Lobo",
+        "seccion": "notas de rol",
+        "fecha": "07-11-2026",
+        "actualizada": "07-11-2026",
+        "resumen": "2db0e6c0"
+    },
+    {
         "url": "/web/notas_rol/ragna/sesion-02.html",
         "titulo": "Sesión 2 — Rumbo hacia las montañas",
         "seccion": "notas de rol",
@@ -172,8 +180,8 @@
         "titulo": "Campaña de Ragna",
         "seccion": "notas de rol",
         "fecha": "05-10-2026",
-        "actualizada": "07-11-2026",
-        "resumen": "8eb24347"
+        "actualizada": "08-11-2026",
+        "resumen": "b3a44ec1"
     },
     {
         "url": "/web/notas_rol/ragna/npcs_ragna.html",

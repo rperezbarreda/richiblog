@@ -194,6 +194,15 @@
             "pdf": "",
             "resumen": "Salida nocturna: El grupo descansa en casa de Rise, mientras Faëlar vigila el pueblo y descubre enormes marcas de garras que indican la presencia cercana del osobúho.\nDesayuno en Chitxia: El grupo descubre el doloroso pasado de Rise y sus pinturas sombrías, mientras Faëlar informa sobre el osobúho y consiguen negociar el carro por 75 monedas de oro.\nLlegan bandidos a Chitxia:  Los Colmillo de Lobo llegan a Chitxia para extorsionar al pueblo, y Mellissa intenta hacerse pasar por su nueva protectora sin éxito.\nCombate en Chitxia:  El grupo derrota a los Colmillo de Lobo pese a su poderosa magia; Denelia y Faëlar caen en combate, pero logran capturar a su líder, Björn.\nInterrogatorio a Björn y salida de Chitxia:\nLo que descubrimos: El grupo interroga a Björn y descubre una entrada secreta al campamento bandido; Rise les regala el carro y les pide recuperar las riquezas robadas, incluidos recuerdos de su esposa.\nCementerio de gigantes: El grupo viaja hacia las montañas, descubre antiguas tumbas de gigantes con inscripciones misteriosas y Faëlar envía un halcón a explorar la entrada secreta antes de continuar de noche.\nFantasmas en la noche: Faëlar percibe presencias extrañas en las tumbas y Thenarys descubre que el cementerio está profanado por magia necrótica; después, Denelia averigua más sobre su devoción a Tyr y su vínculo con la caravana.\nLlegamos a la montaña: El grupo confirma la entrada secreta a la montaña gracias al halcón, abandona el carromato para avanzar sin ser detectado y ejecuta a Björn para evitar que escape.",
             "resumen_auto": false
+        },
+        {
+            "numero": 3,
+            "fecha": "07-11-2026",
+            "titulo": "La guarida de los Colmillo de Lobo",
+            "url": "/web/notas_rol/ragna/sesion-03.html",
+            "pdf": "",
+            "resumen": "La entrada secreta: Gracias al águila, el grupo encuentra la entrada secreta de la guarida y avanza por una pasarela sobre la cueva, donde Mellissa desactiva un cable trampa.\nDisfrazados de bandidos: Mita descubre la armería, el grupo se disfraza con la ropa de los bandidos y llega hasta unas enormes puertas con runas gigantes de protección.\nNuevos reclutas: Haciéndose pasar por reclutas, Mellissa y Faëlar engañan al líder, que les manda a Desliz a recoger una caja de un encapuchado con el nombre en clave Mier.\nLa sala de las puertas gigantes: El grupo recupera la mercancía robada de la caravana, unas joyas y varios pergaminos, y encuentra algo encerrado en hielo perpetuo y las inscripciones de un gigante sobre Vorrak.\nSacando la mercancía: Mellissa saca la mercancía a escondidas hasta el carromato mientras el resto espera, disfrazado, a algún bandido importante que no llega.\nEl plan del osobúho: Por la noche aparece el osobúho y el grupo decide atraerlo con ayuda de Mita hasta el campamento de los bandidos.\nCaos en la cueva: Con el osobúho agrandado por Faëlar y la Bola de fuego de Thenarys caen casi todos los bandidos; capturan al líder y Mellissa mata a su lobo, que parecía controlado mentalmente.\nEl botín de los bandidos: Entre el botín, una cimitarra +1, y en el despacho, las rutas de los mercaderes de Sirevia y cartas sobre un pergamino de Geas; a Sigil no le suena Mier.\nDe vuelta a Chitxia: El líder capturado se suicida durante la noche, Denelia descubre que Thenarys es un elfo marino del Reino Carsa y el grupo sube de nivel.",
+            "resumen_auto": false
         }
     ],
     "dinero": {
@@ -223,5 +232,23 @@
                 ]
             }
         ]
-    }
+    },
+    "documentos": [
+        {
+            "titulo": "Las inscripciones de la pared",
+            "tipo": "inscripciones",
+            "de": 3,
+            "donde": "la sala de las puertas gigantes, en la guarida de los Colmillo de Lobo",
+            "texto": "PRIMERA INSCRIPCIÓN:\nLos pasos de mis hermanos hacen temblar la tierra. Nunca había visto tantos gigantes abandonar sus hogares al mismo tiempo. Desde las montañas del norte hasta las tierras heladas del sur, todos marchan en la misma dirección.\nLa guerra contra la gente pequeña ha convertido nuestras tierras en campos de batalla. Los humanos, enanos, elfos y demás criaturas se multiplican como ratas. Creen que pueden disputarnos territorios que nuestros antepasados conquistaron mucho antes de que sus reinos tuvieran nombre.\nNo todos están de acuerdo con la migración. Algunos prefieren quedarse y luchar. Yo mismo no sé qué pensar. Pero incluso los más orgullosos han comenzado a marcharse.\nSEGUNDA INSCRIPCIÓN:\nHe visto algo extraño en el camino.\nUn grupo de gigantes sigue a un individuo llamado Vorrak. No sé qué clase de criatura es, ni de dónde viene, pero hay algo en él que me hiela la sangre más que estas montañas.\nLos gigantes que lo acompañan parecen haber perdido el juicio. No cuestionan sus órdenes, no hablan entre ellos y apenas parecen conscientes de lo que sucede a su alrededor.\n¿Acaso no ven lo que yo veo? ¿No sienten su presencia?\nSon gigantes, por los dioses. ¡Gigantes!\nY aun así caminan detrás de él como cachorros detrás de su madre.\nNo quiero acercarme a ese ser. Espero no volver a cruzarme con él.\nTERCERA INSCRIPCIÓN:\n¡MALDITOS SEAN!\n¡Alimañas!\nEso es lo que son, y siempre lo serán.\nDurante demasiado tiempo hemos permitido que se sienten a nuestra mesa, que comercien con nosotros, que nos hablen como si fuéramos iguales.\nSus lenguas de plata y sus mentes afiladas son sus únicas armas, y con ellas consiguen lo que nunca podrían arrebatarnos por la fuerza.\n¡Nunca más!\nNo se puede confiar en la gente pequeña. No importa cuánto sonrían, cuánto prometan o cuántas palabras dulces pronuncien. Siempre esconden algo detrás de sus dientes.\nAhora lo entiendo.\nNo debe volver a sus manos.\nCualquier hermano que encuentre esto. No permitas que llegue a sus manos.\nSiempre lo he entendido, pero me negaba a verlo.\nVorrak tenía razón"
+        }
+    ],
+    "imagenes": [
+        {
+            "titulo": "Esperando a que se desate el caos",
+            "imagen": "/imagenes/notas_rol/ragna/imagenes/esperando-al-osobuho.webp",
+            "de": 3,
+            "quien": "",
+            "nota": "El grupo escondido entre los arbustos mientras el osobúho entra en la cueva de los bandidos."
+        }
+    ]
 }

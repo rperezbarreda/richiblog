@@ -1596,6 +1596,56 @@ body:has(.cuaderno-page) main {
 .cuaderno-descubrimiento > ul {
     margin: 0;
 }
+.cuaderno-hoja-cuerpo .cuaderno-documento {
+    margin: 0;
+    padding: 0.2em 0.8em;
+    border: 2px dashed var(--yellow);
+}
+.cuaderno-documento-titulo {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 0 0.5em;
+    color: var(--yellow);
+    cursor: pointer;
+    font-family: var(--fuente-mono);
+    font-size: 1rem;
+    letter-spacing: 1px;
+    list-style: none;
+}
+.cuaderno-documento-titulo::-webkit-details-marker {
+    display: none;
+}
+.cuaderno-documento-titulo:hover .cuaderno-documento-nombre,
+.cuaderno-documento-titulo:focus-visible .cuaderno-documento-nombre {
+    text-decoration: underline;
+    text-underline-offset: 3px;
+}
+.cuaderno-documento-titulo:focus-visible {
+    outline: 2px solid var(--yellow);
+    outline-offset: 2px;
+}
+.cuaderno-documento[open] > .cuaderno-documento-titulo .cuaderno-escena-flecha {
+    transform: translateY(-0.22em) rotate(135deg);
+}
+.cuaderno-documento-nombre {
+    min-width: 0;
+    overflow-wrap: break-word;
+}
+.cuaderno-documento-tipo {
+    color: var(--muted);
+    font-size: 0.75em;
+    letter-spacing: 0;
+    text-transform: uppercase;
+}
+.cuaderno-documento-cuerpo,
+blockquote.cuaderno-documento {
+    font-style: italic;
+}
+.cuaderno-documento-cuerpo h4,
+blockquote.cuaderno-documento h4 {
+    font-style: normal;
+}
 .cuaderno-hoja-cuerpo h2,
 .cuaderno-hoja-cuerpo h3,
 .cuaderno-hoja-cuerpo h4 {

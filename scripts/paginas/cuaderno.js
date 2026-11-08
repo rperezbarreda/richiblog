@@ -15,6 +15,7 @@
 //      post-it.
 //   5. La gente del texto: su token al pasar el ratón y su ficha al
 //      pulsar el nombre.
+//   6. Los documentos encontrados (cartas, inscripciones…), plegados.
 //
 // LAS CASILLAS DE LAS COSAS PENDIENTES NO ESTÁN AQUÍ: las monta
 // scripts/componentes/tareas.js. Se sacaron a un componente el día que
@@ -51,6 +52,7 @@ function initializeCuaderno() {
         // que quite las flechas, que ahí mentirían.
         document.documentElement.setAttribute("data-sin-plegar", "");
     } else {
+        montarDocumentosCuaderno(cuaderno);
         montarPlegarTodo(cuaderno);
         prepararImpresionCuaderno();
     }
@@ -582,6 +584,49 @@ function nombreDeSesion(sesion, publicada) {
 
 
 // =========================================
+// LOS DOCUMENTOS ENCONTRADOS: lo que encontramos escrito (una carta, unas
+// inscripciones…), copiado en las notas. En el HTML es una caja,
+// <blockquote class="cuaderno-documento">, con el título en su primer
+// párrafo y el texto debajo: así lo deja (y lo puede tocar) el editor de
+// las notas, que no sabe de <details>. Aquí se convierte en un desplegable
+// plegado: «📜 Las inscripciones · documento encontrado». Sin JavaScript se
+// queda la caja, con todo a la vista. Al imprimir se abren (como las
+// escenas: ver prepararImpresionCuaderno).
+function montarDocumentosCuaderno(cuaderno) {
+    cuaderno.querySelectorAll("blockquote.cuaderno-documento").forEach((caja) => {
+        const primero = caja.firstElementChild;
+        let titulo = "Un documento";
+        if (primero && primero.tagName === "P" && primero.textContent.trim()) {
+            titulo = primero.textContent.trim();
+            primero.remove();
+        }
+        const pliegue = document.createElement("details");
+        pliegue.className = "cuaderno-documento";
+        const tirador = document.createElement("summary");
+        tirador.className = "cuaderno-documento-titulo";
+        const flecha = document.createElement("span");
+        flecha.className = "cuaderno-escena-flecha";
+        flecha.setAttribute("aria-hidden", "true");
+        const icono = document.createElement("span");
+        icono.setAttribute("aria-hidden", "true");
+        icono.textContent = "📜";
+        const nombre = document.createElement("span");
+        nombre.className = "cuaderno-documento-nombre";
+        nombre.textContent = titulo;
+        const tipo = document.createElement("span");
+        tipo.className = "cuaderno-documento-tipo";
+        tipo.textContent = "documento encontrado";
+        tirador.append(flecha, icono, nombre, tipo);
+        const dentro = document.createElement("div");
+        dentro.className = "cuaderno-documento-cuerpo";
+        while (caja.firstChild) {
+            dentro.appendChild(caja.firstChild);
+        }
+        pliegue.append(tirador, dentro);
+        caja.replaceWith(pliegue);
+    });
+}
+
 // ¿SABE EL NAVEGADOR PLEGAR UN <details>?
 // =========================================
 // Se comprueba de verdad, midiendo, y no preguntando si existe la
@@ -702,7 +747,7 @@ function prepararImpresionCuaderno() {
     let cerradas = [];
 
     const antes = () => {
-        cerradas = [...document.querySelectorAll(".cuaderno-escena")].filter(
+        cerradas = [...document.querySelectorAll(".cuaderno-escena, details.cuaderno-documento")].filter(
             (escena) => !escena.open
         );
         cerradas.forEach((escena) => {

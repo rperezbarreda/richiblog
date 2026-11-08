@@ -1417,6 +1417,12 @@
       una campaña»; las fotos, a imagenes/notas_rol/<campaña>/documentos/.
     · el mapamundi: un enlace, arriba de las imágenes, a la página de
       su mapa (ver abajo).
+  UN DOCUMENTO DENTRO DE LAS NOTAS de una sesión (lo que pone, copiado):
+  en el editor de las notas, elige el título (primer párrafo) y el texto
+  y pulsa «Documento encontrado». Queda <blockquote class=
+  "cuaderno-documento">, y en la web sale plegado como «📜 <título> ·
+  documento encontrado» (cuaderno.js, montarDocumentosCuaderno). Para que
+  salga también en «📜 documentos», apúntalo además en la campaña.
   En el JSON: "imagenes": [{titulo, imagen, de, quien, nota}] y
   "documentos": [{titulo, tipo, de, donde, imagen, imagen_2, imagen_3,
   texto}] (notas-rol.js: llenarLasImagenes, llenarLosDocumentos).

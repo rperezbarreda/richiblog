@@ -13,6 +13,7 @@ function initializeCuaderno() {
     if (!sePliega) {
         document.documentElement.setAttribute("data-sin-plegar", "");
     } else {
+        montarDocumentosCuaderno(cuaderno);
         montarPlegarTodo(cuaderno);
         prepararImpresionCuaderno();
     }
@@ -341,6 +342,40 @@ function nombreDeSesion(sesion, publicada) {
     const corto = (sesion.titulo || "").toString().trim();
     return "Sesión " + numero + (corto ? " — " + corto : "");
 }
+function montarDocumentosCuaderno(cuaderno) {
+    cuaderno.querySelectorAll("blockquote.cuaderno-documento").forEach((caja) => {
+        const primero = caja.firstElementChild;
+        let titulo = "Un documento";
+        if (primero && primero.tagName === "P" && primero.textContent.trim()) {
+            titulo = primero.textContent.trim();
+            primero.remove();
+        }
+        const pliegue = document.createElement("details");
+        pliegue.className = "cuaderno-documento";
+        const tirador = document.createElement("summary");
+        tirador.className = "cuaderno-documento-titulo";
+        const flecha = document.createElement("span");
+        flecha.className = "cuaderno-escena-flecha";
+        flecha.setAttribute("aria-hidden", "true");
+        const icono = document.createElement("span");
+        icono.setAttribute("aria-hidden", "true");
+        icono.textContent = "📜";
+        const nombre = document.createElement("span");
+        nombre.className = "cuaderno-documento-nombre";
+        nombre.textContent = titulo;
+        const tipo = document.createElement("span");
+        tipo.className = "cuaderno-documento-tipo";
+        tipo.textContent = "documento encontrado";
+        tirador.append(flecha, icono, nombre, tipo);
+        const dentro = document.createElement("div");
+        dentro.className = "cuaderno-documento-cuerpo";
+        while (caja.firstChild) {
+            dentro.appendChild(caja.firstChild);
+        }
+        pliegue.append(tirador, dentro);
+        caja.replaceWith(pliegue);
+    });
+}
 function elNavegadorSabePlegar() {
     try {
         const prueba = document.createElement("details");
@@ -410,7 +445,7 @@ function montarPlegarTodo(cuaderno) {
 function prepararImpresionCuaderno() {
     let cerradas = [];
     const antes = () => {
-        cerradas = [...document.querySelectorAll(".cuaderno-escena")].filter(
+        cerradas = [...document.querySelectorAll(".cuaderno-escena, details.cuaderno-documento")].filter(
             (escena) => !escena.open
         );
         cerradas.forEach((escena) => {

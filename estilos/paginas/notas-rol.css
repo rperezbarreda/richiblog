@@ -2461,6 +2461,72 @@ body:has(.cuaderno-page) main {
     margin: 0;
 }
 
+/* UN DOCUMENTO ENCONTRADO (.cuaderno-documento): lo que encontramos
+   escrito, copiado tal cual. En el HTML es un <blockquote> con el título
+   en el primer párrafo; cuaderno.js lo cambia por un <details> plegado
+   (montarDocumentosCuaderno). Un papel aparte: borde de puntos, el texto
+   en cursiva y su etiqueta «documento encontrado». */
+.cuaderno-hoja-cuerpo .cuaderno-documento {
+    margin: 0;
+    padding: 0.2em 0.8em;
+    border: 2px dashed var(--yellow);
+}
+
+.cuaderno-documento-titulo {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 0 0.5em;
+    color: var(--yellow);
+    cursor: pointer;
+    font-family: var(--fuente-mono);
+    font-size: 1rem;
+    letter-spacing: 1px;
+    list-style: none;
+}
+
+.cuaderno-documento-titulo::-webkit-details-marker {
+    display: none;
+}
+
+.cuaderno-documento-titulo:hover .cuaderno-documento-nombre,
+.cuaderno-documento-titulo:focus-visible .cuaderno-documento-nombre {
+    text-decoration: underline;
+    text-underline-offset: 3px;
+}
+
+.cuaderno-documento-titulo:focus-visible {
+    outline: 2px solid var(--yellow);
+    outline-offset: 2px;
+}
+
+.cuaderno-documento[open] > .cuaderno-documento-titulo .cuaderno-escena-flecha {
+    transform: translateY(-0.22em) rotate(135deg);
+}
+
+.cuaderno-documento-nombre {
+    min-width: 0;
+    overflow-wrap: break-word;
+}
+
+.cuaderno-documento-tipo {
+    color: var(--muted);
+    font-size: 0.75em;
+    letter-spacing: 0;
+    text-transform: uppercase;
+}
+
+/* Lo que pone: en cursiva, como algo copiado de otra mano. */
+.cuaderno-documento-cuerpo,
+blockquote.cuaderno-documento {
+    font-style: italic;
+}
+
+.cuaderno-documento-cuerpo h4,
+blockquote.cuaderno-documento h4 {
+    font-style: normal;
+}
+
 /* Un apartado dentro de la hoja. Mismo tamaño que el texto (ver arriba:
    cambiarlo rompería los renglones) y se distingue por la letra de
    máquina, las mayúsculas y el subrayado, que es como se marca un

@@ -1,0 +1,677 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-aDtzI6QgHfitL7afCewTh/rpYprDOJvupEIYVZKPk8Y='; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self' https://script.google.com https://script.googleusercontent.com; object-src 'none'; base-uri 'self'; form-action 'self'">
+    <!-- ==== TEMA ==== -->
+    <meta name="theme-color" content="#12091c">
+    <script>
+      (function () {
+        document.documentElement.classList.add("js");
+        try {
+          var temas = {
+            "claro": ["light", "#f3e1d6"],
+            "oscuro-puro": ["puro-oscuro", "#000000"],
+            "claro-puro": ["puro-claro", "#ffffff"],
+            "tranquilo": ["tranquilo", "#f2efe9"],
+            "tranquilo-oscuro": ["tranquilo-oscuro", "#1b1e22"],
+            "terminal-verde": ["terminal-verde", "#000000"],
+            "terminal-azul": ["terminal-azul", "#000000"],
+            "terminal-rojo": ["terminal-rojo", "#000000"],
+            "terminal-ambar": ["terminal-ambar", "#000000"]
+          };
+          var guardado = localStorage.getItem("richi-theme");
+          var elegido = temas[guardado];
+          if (!elegido && !guardado &&
+              window.matchMedia("(prefers-color-scheme: light)").matches) {
+            elegido = temas.claro;
+          }
+          if (elegido) {
+            document.documentElement.setAttribute("data-theme", elegido[0]);
+            var barra = document.querySelector('meta[name="theme-color"]');
+            if (barra) { barra.setAttribute("content", elegido[1]); }
+          }
+          if (localStorage.getItem("richi-lateral") === "plegada") {
+            document.documentElement.classList.add("lateral-plegada");
+          }
+        } catch (e) {}
+      })();
+    </script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sesión 3 — La guarida de los Colmillo de Lobo · campaña de Ragna · El Blog de Richi</title>
+    <meta name="description" content="Notas de la sesión 3 de la campaña de Ragna, jugada el 07-11-2026.">
+    <link rel="canonical" href="https://richi.blog/web/notas_rol/ragna/sesion-03.html">
+    <meta property="og:type" content="article">
+    <meta property="og:site_name" content="El Blog de Richi">
+    <meta property="og:locale" content="es_ES">
+    <meta property="og:title" content="Sesión 3 — La guarida de los Colmillo de Lobo · campaña de Ragna · El Blog de Richi">
+    <meta property="og:description" content="Notas de la sesión 3 de la campaña de Ragna, jugada el 07-11-2026.">
+    <meta property="og:url" content="https://richi.blog/web/notas_rol/ragna/sesion-03.html">
+    <meta property="og:image" content="https://richi.blog/imagenes/meta/og.webp">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta property="og:image:alt" content="El Blog de Richi — ilustración de Richi sobre fondo morado">
+    <meta name="twitter:card" content="summary_large_image">
+    <link rel="icon" type="image/x-icon" href="/imagenes/favicon.ico">
+    <link rel="preload" href="/tipografias/space-grotesk-400.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="alternate" type="application/rss+xml" title="El Blog de Richi — blog, relatos y rol" href="/blog/rss.xml">
+    <!-- ==== CSS ==== -->
+    <link rel="stylesheet" href="/estilos/paquete-comun.css?v=458b08aa">
+    <link rel="stylesheet" href="/ligero/estilos/paginas/notas-rol.css?v=747cfb15">
+    <link rel="stylesheet" href="/ligero/estilos/componentes/postit.css?v=c6f04f61">
+    <link rel="stylesheet" href="/ligero/estilos/paginas/notas-rol.responsive.css?v=c88d13ff">
+    <link rel="stylesheet" href="/ligero/estilos/componentes/ventana-modal.css?v=95db68e9">
+    <link rel="stylesheet" href="/ligero/estilos/componentes/ventana-modal.responsive.css?v=e927767d">
+    <link rel="stylesheet" href="/ligero/estilos/componentes/lupa.css?v=bd5208ae">
+    <link rel="stylesheet" href="/ligero/estilos/paginas/npcs-rol.css?v=a61f4568">
+    <link rel="stylesheet" href="/ligero/estilos/paginas/npcs-rol.responsive.css?v=ef3f8639">
+    <link rel="stylesheet" href="/estilos/paquete-cierre.css?v=a49d87f4">
+    <!-- ==== fin del CSS ==== -->
+    <script src="/ligero/scripts/cargador-scripts.js?v=218b9040"></script>
+    <!-- ==== JS ==== -->
+    <script defer src="/scripts/paquete-comun.js?v=1c4b4e97"></script>
+    <script defer src="/ligero/scripts/componentes/tareas.js?v=38f87599"></script>
+    <script defer src="/ligero/scripts/componentes/ventana-modal.js?v=696073b4"></script>
+    <script defer src="/ligero/scripts/componentes/lupa.js?v=cce10cd1"></script>
+    <script defer src="/ligero/scripts/paginas/notas-rol.js?v=90c81486"></script>
+    <script defer src="/ligero/scripts/paginas/npcs-rol.js?v=978cb50e"></script>
+    <script defer src="/ligero/scripts/paginas/cuaderno.js?v=a1f291af"></script>
+    <!-- ==== fin del JS ==== -->
+  </head>
+<body>
+    <a class="skip-link" href="#main-content">Saltar al contenido</a>
+    <div id="sidebar-container" data-fragmento="barra-lateral">
+<!-- ==== FRAGMENTO barra-lateral ==== -->
+<header class="mobile-topbar">
+    <button id="sidebar-toggle" class="sidebar-toggle" type="button" aria-expanded="false" aria-controls="sidebar">
+        <span aria-hidden="true">☰</span>
+        <span class="visually-hidden">Abrir menú</span>
+    </button>
+    <p class="mobile-topbar-title"><span aria-hidden="true">·🜏·</span> EL BLOG DE RICHI</p>
+</header>
+
+<button class="ajustes-abrir" type="button" data-ajustes-abrir
+        aria-haspopup="dialog">
+    <span class="ajustes-abrir-aa" aria-hidden="true">Aa</span>
+    <span class="ajustes-abrir-texto">ACCESIBILIDAD</span>
+</button>
+
+<dialog class="ajustes" data-ajustes aria-labelledby="ajustes-titulo">
+    <div class="ajustes-barra">
+        <h2 id="ajustes-titulo">accesibilidad.cfg</h2>
+        <button class="ajustes-cerrar" type="button" data-ajustes-cerrar>
+            <svg class="window-btn-icono" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                <path d="M5.5 5.5L18.5 18.5M18.5 5.5L5.5 18.5" fill="none"
+                      stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
+            </svg>
+            <span class="visually-hidden">Cerrar los ajustes</span>
+        </button>
+    </div>
+
+    <div class="ajustes-cuerpo">
+        <div class="ajustes-fila">
+            <label class="ajustes-nombre" for="ajustes-tamano">tamaño del texto</label>
+            <div class="ajustes-deslizador">
+                <span class="ajustes-aa ajustes-aa-pequena" aria-hidden="true">Aa</span>
+                <input class="ajustes-rango" type="range" id="ajustes-tamano"
+                       min="0" max="4" step="1" value="1"
+                       list="ajustes-tamano-marcas" data-tamano-rango>
+                <datalist id="ajustes-tamano-marcas">
+                    <option value="0"></option>
+                    <option value="1"></option>
+                    <option value="2"></option>
+                    <option value="3"></option>
+                    <option value="4"></option>
+                </datalist>
+                <span class="ajustes-aa ajustes-aa-grande" aria-hidden="true">Aa</span>
+            </div>
+            <p class="ajustes-valor" role="status">
+                <span class="visually-hidden">Texto al </span><span data-tamano-valor>100%</span>
+            </p>
+        </div>
+
+        <div class="ajustes-fila">
+            <p class="ajustes-nombre" id="ajustes-interlineado-nombre">separación entre líneas</p>
+            <div class="ajustes-mandos" role="group" aria-labelledby="ajustes-interlineado-nombre">
+                <button class="ajustes-opcion" type="button" data-interlineado="" aria-pressed="true">por defecto</button>
+                <button class="ajustes-opcion" type="button" data-interlineado="amplio" aria-pressed="false">amplia</button>
+                <button class="ajustes-opcion" type="button" data-interlineado="muy-amplio" aria-pressed="false">muy amplia</button>
+            </div>
+        </div>
+
+        <div class="ajustes-fila">
+            <p class="ajustes-nombre" id="ajustes-letra-nombre">la letra</p>
+            <div class="ajustes-mandos" role="group" aria-labelledby="ajustes-letra-nombre">
+                <button class="ajustes-opcion" type="button" data-letra="" aria-pressed="true">por defecto</button>
+                <button class="ajustes-opcion" type="button" data-letra="legible" aria-pressed="false">más legible</button>
+            </div>
+        </div>
+
+        <div class="ajustes-fila">
+            <p class="ajustes-nombre" id="ajustes-voz-nombre">velocidad de la voz</p>
+            <div class="ajustes-mandos" role="group" aria-labelledby="ajustes-voz-nombre">
+                <button class="ajustes-opcion" type="button" data-voz="lenta" aria-pressed="false">lenta</button>
+                <button class="ajustes-opcion" type="button" data-voz="" aria-pressed="true">normal</button>
+                <button class="ajustes-opcion" type="button" data-voz="rapida" aria-pressed="false">rápida</button>
+            </div>
+        </div>
+
+        <div class="ajustes-fila">
+            <p class="ajustes-nombre" id="ajustes-tema-nombre">color de tema</p>
+            <p class="ajustes-grupo-titulo" id="ajustes-tema-leer">para leer</p>
+            <div class="ajustes-mandos ajustes-temas" role="group" aria-labelledby="ajustes-tema-nombre ajustes-tema-leer">
+                <button class="ajustes-opcion" type="button" data-tema="oscuro" aria-pressed="true">
+                    <span class="ajustes-emoji" aria-hidden="true">🌙</span>oscuro</button>
+                <button class="ajustes-opcion" type="button" data-tema="claro" aria-pressed="false">
+                    <span class="ajustes-emoji" aria-hidden="true">☀️</span>claro</button>
+                <button class="ajustes-opcion" type="button" data-tema="oscuro-puro" aria-pressed="false">
+                    <span class="ajustes-emoji" aria-hidden="true">🌑</span>oscuro puro</button>
+                <button class="ajustes-opcion" type="button" data-tema="claro-puro" aria-pressed="false">
+                    <span class="ajustes-emoji" aria-hidden="true">🌕</span>claro puro</button>
+                <button class="ajustes-opcion" type="button" data-tema="tranquilo-oscuro" aria-pressed="false">
+                    <span class="ajustes-emoji" aria-hidden="true">🌿</span>tranquilo oscuro</button>
+                <button class="ajustes-opcion" type="button" data-tema="tranquilo" aria-pressed="false">
+                    <span class="ajustes-emoji" aria-hidden="true">🍃</span>tranquilo</button>
+            </div>
+
+            <p class="ajustes-grupo-titulo" id="ajustes-tema-adorno">de adorno</p>
+            <div class="ajustes-mandos ajustes-temas" role="group" aria-labelledby="ajustes-tema-nombre ajustes-tema-adorno">
+                <button class="ajustes-opcion" type="button" data-tema="terminal-verde" aria-pressed="false">
+                    <span class="ajustes-emoji" aria-hidden="true">🟢</span>terminal verde</button>
+                <button class="ajustes-opcion" type="button" data-tema="terminal-azul" aria-pressed="false">
+                    <span class="ajustes-emoji" aria-hidden="true">🔵</span>terminal azul</button>
+                <button class="ajustes-opcion" type="button" data-tema="terminal-rojo" aria-pressed="false">
+                    <span class="ajustes-emoji" aria-hidden="true">🔴</span>terminal rojo</button>
+                <button class="ajustes-opcion" type="button" data-tema="terminal-ambar" aria-pressed="false">
+                    <span class="ajustes-emoji" aria-hidden="true">🟡</span>terminal ámbar</button>
+            </div>
+            <p class="ajustes-grupo-nota">
+                Estas opciones de consola antigua no respetan el contraste mínimo de
+                accesibilidad, son meramente estéticas.
+            </p>
+        </div>
+
+        <div class="ajustes-fila">
+            <p class="ajustes-nombre">efectos visuales</p>
+            <div class="ajustes-mandos ajustes-mandos-anchos">
+                <button id="cursor-trail-toggle" class="theme-toggle" type="button" aria-pressed="true">
+                    <span class="theme-toggle-icon" aria-hidden="true">✦</span>
+                    <span class="cursor-trail-toggle-text">BRILLITO: ON</span>
+                </button>
+                <button class="theme-toggle" type="button" data-crt-boton aria-pressed="false">
+                    <span class="theme-toggle-icon" aria-hidden="true">▧</span>
+                    <span class="ajustes-crt-texto">FILTRO <abbr title="Cathode Ray Tube: los monitores de tubo de antes, con sus rayas y las esquinas apagadas">CRT</abbr>: <span data-crt-estado>OFF</span></span>
+                </button>
+            </div>
+        </div>
+
+        <div class="ajustes-fila">
+            <p class="ajustes-nombre" id="ajustes-movimiento-nombre">animaciones</p>
+            <div class="ajustes-mandos" role="group" aria-labelledby="ajustes-movimiento-nombre">
+                <button class="ajustes-opcion" type="button" data-movimiento="" aria-pressed="true">normal</button>
+                <button class="ajustes-opcion" type="button" data-movimiento="quieto" aria-pressed="false">sin animaciones</button>
+            </div>
+        </div>
+    </div>
+</dialog>
+
+<div id="sidebar-backdrop" class="sidebar-backdrop" hidden></div>
+
+<aside class="sidebar" id="sidebar">
+    <div class="sidebar-logo">
+        <p><span aria-hidden="true">·🜏·</span> EL BLOG DE RICHI</p>
+    </div>
+    <button id="lateral-plegar" class="lateral-plegar" type="button"
+            aria-expanded="true" aria-controls="sidebar-menu" title="Plegar el menú">
+        <span aria-hidden="true">☰</span>
+        <span class="visually-hidden">Menú</span>
+    </button>
+    <button class="buscar-flotante" type="button" data-buscar-lupa
+            aria-haspopup="dialog" title="Buscar en toda la web">
+        <span class="buscar-lupa" aria-hidden="true"></span>
+        <span class="visually-hidden">Buscar</span>
+    </button>
+    <div class="sidebar-top" id="sidebar-menu">
+        <nav>
+        <a href="/index.html">home</a>
+            <div class="nav-group">
+                <button class="nav-toggle" type="button" aria-expanded="false">
+                    <span>mis movidas</span>
+                    <span class="arrow" aria-hidden="true">+</span>
+                </button>
+
+                <div class="submenu">
+                    <a href="/web/mis_movidas/relatos/index_relatos.html">relatos</a>
+                    <a href="/web/mis_movidas/recetas/index_recetas.html">recetas</a>
+                </div>
+            </div>
+
+            <div class="nav-group">
+                <button class="nav-toggle" type="button" aria-expanded="false">
+                    <span>blog</span>
+                    <span class="arrow" aria-hidden="true">+</span>
+                </button>
+
+                <div class="submenu">
+                    <a href="/web/blog/diario.html">diario</a>
+                    <a href="/web/blog/2026/index_2026.html">2026</a>
+                </div>
+            </div>
+
+            <div class="nav-group open">
+                <button class="nav-toggle" type="button" aria-expanded="true">
+                    <span>roleito</span>
+                    <span class="arrow" aria-hidden="true">−</span>
+                </button>
+
+                <div class="submenu">
+                    <div class="nav-group open">
+                        <button class="nav-toggle" type="button" aria-expanded="true">
+                            <span>notas de rol</span>
+                            <span class="arrow" aria-hidden="true">−</span>
+                        </button>
+
+                        <div class="submenu">
+                            <a class="active" href="/web/notas_rol/ragna/index_ragna.html" aria-current="true">campaña de Ragna</a>
+                        </div>
+                    </div>
+
+                    <a href="/web/personajes/index_personajes.html">mis personajes</a>
+                    <a href="/web/mis_movidas/rol/index_rol.html">recursos de rol</a>
+                    <a href="/pantalla-master/">pantalla de máster</a>
+                    <a href="/web/wiki/index_wiki.html">wiki cralëa</a>
+                </div>
+            </div>
+
+            <div class="nav-group">
+                <button class="nav-toggle" type="button" aria-expanded="false">
+                    <span>mi rincón</span>
+                    <span class="arrow" aria-hidden="true">+</span>
+                </button>
+
+                <div class="submenu">
+                    <a href="/web/sobre_mi/sobre_mi.html">quién soy</a>
+                    <a href="/web/en_lo_que_ando/en_lo_que_ando.html">en lo que ando</a>
+                    <a href="/web/santuarios/index_santuarios.html">santuarios</a>
+                    <a href="/web/recomendaciones/recomendaciones.html">recomendaciones</a>
+                </div>
+            </div>
+
+        <a href="/web/contacto/contacto.html">contacto y guestbook</a>
+        <a href="/web/accesibilidad/accesibilidad.html">accesibilidad</a>
+        </nav>
+
+        <button class="buscar-lupa-boton" type="button" data-buscar-lupa
+                aria-haspopup="dialog">
+            <span class="buscar-lupa" aria-hidden="true"></span>
+            <span class="buscar-lupa-texto">buscar</span>
+        </button>
+    </div>
+
+    <div class="gatin-random" data-gatin-random hidden>
+        <div class="gatin-random-header">
+            <h2>gatin_random.exe</h2>
+            <div class="window-controls window-controls-small" data-window-controls aria-hidden="true"></div>
+        </div>
+        <div class="gatin-random-body" data-gatin-body></div>
+    </div>
+
+</aside>
+
+<dialog class="buscar-modal" data-buscar-modal aria-labelledby="buscar-modal-titulo">
+    <div class="ajustes-barra">
+        <h2 id="buscar-modal-titulo">buscador.exe</h2>
+        <button class="ajustes-cerrar" type="button" data-buscar-modal-cerrar>
+            <svg class="window-btn-icono" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                <path d="M5.5 5.5L18.5 18.5M18.5 5.5L5.5 18.5" fill="none"
+                      stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
+            </svg>
+            <span class="visually-hidden">Cerrar la búsqueda</span>
+        </button>
+    </div>
+    <div class="buscar-modal-cuerpo">
+        <form class="buscar-form" role="search" method="get"
+              action="/web/buscar/buscar.html">
+            <label class="buscar-form-label" for="buscar-modal-campo">buscar en toda la web:</label>
+            <div class="buscar-form-caja">
+                <input class="buscar-form-campo" type="search"
+                       id="buscar-modal-campo" name="q"
+                       placeholder="una palabra, un título…"
+                       autocomplete="off" spellcheck="false">
+                <button class="buscar-form-enviar" type="submit">
+                    <span class="buscar-lupa" aria-hidden="true"></span>
+                    <span class="buscar-form-enviar-texto">buscar</span>
+                </button>
+            </div>
+            <p class="buscar-ayuda">
+                Mira el título, la sección, las categorías y
+                <strong>lo que pone dentro</strong> de las entradas y los
+                relatos. Da igual con tildes o sin ellas.
+            </p>
+        </form>
+    </div>
+</dialog>
+<!-- ==== fin del FRAGMENTO barra-lateral ==== -->
+    </div>
+
+    <main id="main-content">
+        <section id="home" class="home cuaderno-page">
+            <article class="cuaderno-post" data-campana="ragna">
+                <div class="cuaderno-post-header">
+                    <h1 class="cuaderno-post-title">Sesión 3 — La guarida de los Colmillo de Lobo</h1>
+                    <div class="cuaderno-post-header-meta">
+                        <p class="cuaderno-post-date"><time datetime="2026-11-07">07 nov 2026</time></p>
+                        <button class="cuaderno-plegar-todo" type="button" aria-pressed="false" data-plegar-todo><span class="cuaderno-plegar-todo-flecha" aria-hidden="true"></span><span>plegar las escenas</span></button>
+                        <a class="cuaderno-post-back" href="/web/notas_rol/ragna/index_ragna.html">← volver a la campaña</a>
+                    </div>
+                </div>
+
+                <div class="cuaderno-post-body-wrap">
+                    <div class="cuaderno-reparto">
+                        <div class="cuaderno-columna">
+                            <div class="cuaderno">
+                            <div class="cuaderno-hoja">
+                                <div class="cuaderno-hoja-cabecera" aria-hidden="true">
+                                    <p class="cuaderno-hoja-titulo">Sesión 3 — 07-11-2026</p>
+                                    <p class="cuaderno-hoja-numero">1</p>
+                                </div>
+                                <div class="cuaderno-hoja-cuerpo" tabindex="0" role="region"
+                                     aria-label="Hoja 1, con scroll">
+                                    <details class="cuaderno-escena" open>
+                                        <summary class="cuaderno-escena-titulo">
+                                            <span class="cuaderno-escena-flecha" aria-hidden="true"></span>
+                                            <span class="cuaderno-escena-nombre">La entrada secreta</span>
+                                        </summary>
+                                        <div class="cuaderno-escena-cuerpo">
+                                            <ul>
+                                                <li>Subimos por la montaña por un sendero estrecho; gracias al águila que nos ha ayudado por el camino encontramos la entrada secreta que usan los bandidos para entrar a su base.</li>
+                                                <li>Por si acaso, <strong class="pj-verde">Faëlar</strong> envía a <strong data-npc="Mita">Mita</strong> a explorar antes de adentrarnos. Usando sus sentidos, <strong class="pj-verde">Faëlar</strong> le describe al grupo lo que ve.</li>
+                                                <li>Los bandidos se encuentran en una enorme cueva, acampados y relajados. Por nuestra entrada hay una pasarela que pasa por encima de la cueva a gran altura, por lo que les será difícil detectarnos.</li>
+                                                <li>Como <strong data-npc="Mita">Mita</strong> no puede alejarse mucho de <strong class="pj-verde">Faëlar</strong> sin perder el vínculo, decidimos adentrarnos hasta llegar a la pasarela y luego seguir explorando.</li>
+                                                <li>Al pasar, <strong class="pj-azul">Mellissa</strong> encuentra un cable trampa que podría alertar a los bandidos y logra desactivarlo.</li>
+                                            </ul>
+                                        </div>
+                                    </details>
+                                </div>
+                            </div>
+                            <div class="cuaderno-hoja">
+                                <div class="cuaderno-hoja-cabecera" aria-hidden="true">
+                                    <p class="cuaderno-hoja-titulo">Sesión 3 — 07-11-2026</p>
+                                    <p class="cuaderno-hoja-numero">2</p>
+                                </div>
+                                <div class="cuaderno-hoja-cuerpo" tabindex="0" role="region"
+                                     aria-label="Hoja 2, con scroll">
+                                    <details class="cuaderno-escena" open>
+                                        <summary class="cuaderno-escena-titulo">
+                                            <span class="cuaderno-escena-flecha" aria-hidden="true"></span>
+                                            <span class="cuaderno-escena-nombre">Disfrazados de bandidos</span>
+                                        </summary>
+                                        <div class="cuaderno-escena-cuerpo">
+                                            <ul>
+                                                <li>Ahora que estamos más cerca podemos ver cómo en la parte inferior, donde están unos quince bandidos, hay varias cavidades: una salida grande al exterior, una habitación que parece de suministros y por la que están sacando alcohol, y otras dos cavidades que aún no sabemos qué son.</li>
+                                                <li>Sobrevolando la zona, <strong data-npc="Mita">Mita</strong> encuentra una apertura natural para bajar a una de estas últimas salas. Aunque el acceso es difícil, parece dar a una armería donde los bandidos guardan su equipamiento.</li>
+                                                <li>Tras discutirlo entre todos, decidimos hacernos con su indumentaria y disfrazarnos de ellos.</li>
+                                                <li>Como <strong class="pj-rojo">Thenarys</strong> podría hacer mucho ruido con la armadura y desentona con lo que llevan el resto de bandidos, <strong class="pj-morado">Denelia</strong> va a lanzarle invisibilidad para que no sea tan fácil detectarlo, y <strong class="pj-azul">Mellissa</strong> y <strong class="pj-verde">Faëlar</strong> escalarán hasta la armería para poder disfrazarnos.</li>
+                                                <li>Al descender <strong class="pj-azul">Mellissa</strong> hace un poco de ruido, pero gracias a la magia ilusoria de <strong class="pj-morado">Denelia</strong> los guardias pasan de largo y nos hacemos con su ropa.</li>
+                                                <li>Seguimos avanzando por la pasarela superior hasta las estancias interiores. Estas dan a una zona algo más vigilada y con guardias armados.</li>
+                                                <li>La pasarela llega hasta el interior de otra habitación y, justo enfrente, una gran cavidad en la que hay unas enormes puertas con runas de gigantes.</li>
+                                                <li><strong class="pj-verde">Faëlar</strong> dibuja las runas en el suelo mirando a través de <strong data-npc="Mita">Mita</strong> y, gracias a los conocimientos de <strong class="pj-morado">Denelia</strong>, descubre que se trata de runas de protección.</li>
+                                            </ul>
+                                        </div>
+                                    </details>
+                                </div>
+                            </div>
+                            <div class="cuaderno-hoja">
+                                <div class="cuaderno-hoja-cabecera" aria-hidden="true">
+                                    <p class="cuaderno-hoja-titulo">Sesión 3 — 07-11-2026</p>
+                                    <p class="cuaderno-hoja-numero">3</p>
+                                </div>
+                                <div class="cuaderno-hoja-cuerpo" tabindex="0" role="region"
+                                     aria-label="Hoja 3, con scroll">
+                                    <details class="cuaderno-escena" open>
+                                        <summary class="cuaderno-escena-titulo">
+                                            <span class="cuaderno-escena-flecha" aria-hidden="true"></span>
+                                            <span class="cuaderno-escena-nombre">Nuevos reclutas</span>
+                                        </summary>
+                                        <div class="cuaderno-escena-cuerpo">
+                                            <ul>
+                                                <li>Decidimos seguir adelante y adentrarnos en la sala donde termina la pasarela. Gracias a <strong data-npc="Mita">Mita</strong> vemos que es la estancia donde está el líder, trabajando con un montón de papeles y con su lobo mascota al lado.</li>
+                                                <li>Para obtener algo de información, <strong class="pj-azul">Mellissa</strong> y <strong class="pj-verde">Faëlar</strong> bajan, con la ayuda de <strong class="pj-rojo">Thenarys</strong>, de la pasarela hasta el suelo para hablar con el líder de los bandidos, haciéndose pasar por nuevos reclutas.</li>
+                                                <li><strong class="pj-morado">Denelia</strong> y <strong class="pj-rojo">Thenarys</strong> se quedan arriba, esperando para hacer una emboscada por la entrada de la pasarela por si las cosas se tuercen.</li>
+                                                <li>Después de llamar a la puerta, el líder de la banda sospecha un poco de <strong class="pj-verde">Faëlar</strong> y <strong class="pj-azul">Mellissa</strong>, pero conseguimos convencerle de que somos reclutas nuevos diciendo que somos parte del grupo de <strong data-npc="Björn">Björn</strong>, pero que este ha desertado tras atacar <em>Chitxia</em>.</li>
+                                                <li>El líder regresa un momento a su cuarto para sellar con un hechizo la pared hacia la pasarela (sin enterarse de que <strong class="pj-rojo">Thenarys</strong> y <strong class="pj-morado">Denelia</strong> están al otro lado) y nos enseña un mapa con un punto marcado.</li>
+                                            </ul>
+                                            <blockquote class="cuaderno-descubrimiento">
+                                                <ul>
+                                                    <li>Nos ordena ir a ver a un intermediario: una persona encapuchada nos dará una caja en <em>Desliz</em>, un pueblo minero al norte de <em>Sirevia</em>.</li>
+                                                    <li>Debemos mencionar el nombre en clave de <strong>Mier</strong> y nos dará la caja.</li>
+                                                </ul>
+                                            </blockquote>
+                                        </div>
+                                    </details>
+                                </div>
+                            </div>
+                            <div class="cuaderno-hoja">
+                                <div class="cuaderno-hoja-cabecera" aria-hidden="true">
+                                    <p class="cuaderno-hoja-titulo">Sesión 3 — 07-11-2026</p>
+                                    <p class="cuaderno-hoja-numero">4</p>
+                                </div>
+                                <div class="cuaderno-hoja-cuerpo" tabindex="0" role="region"
+                                     aria-label="Hoja 4, con scroll">
+                                    <details class="cuaderno-escena" open>
+                                        <summary class="cuaderno-escena-titulo">
+                                            <span class="cuaderno-escena-flecha" aria-hidden="true"></span>
+                                            <span class="cuaderno-escena-nombre">La sala de las puertas gigantes</span>
+                                        </summary>
+                                        <div class="cuaderno-escena-cuerpo">
+                                            <ul>
+                                                <li>El líder nos manda partir de inmediato y vuelve a sus cosas. Nos reunimos todos y decidimos explorar la sala de las puertas gigantes mientras seguimos sin ser detectados como intrusos.</li>
+                                                <li>Parece que han sacado algún artefacto de su interior, y dentro de la estancia, decorada con runas gigantes, vemos montones de cajas de mercancía.</li>
+                                                <li>Encontramos la mercancía robada de la Caravana de <strong data-npc="Sigil">Sigil</strong>, así como la caja fuerte de <strong class="pj-morado">Denelia</strong> y la caja con una X marcada que <strong data-npc="Sigil">Sigil</strong> le encargó a <strong class="pj-azul">Mellissa</strong>, y <strong class="pj-rojo">Thenarys</strong> encuentra varias joyas, entre ellas la que cree que es el colgante de la esposa de <strong data-npc="Rise">Rise</strong>.</li>
+                                                <li>Mientras el resto sigue investigando la mercancía robada de los bandidos, <strong class="pj-verde">Faëlar</strong> se dedica a montar guardia por si se acerca algún bandido.</li>
+                                                <li>Encontramos las siguientes cosas de valor:</li>
+                                            </ul>
+                                            <ul class="cuaderno-objetos">
+                                                <li><strong>300 monedas de oro</strong> en joyas</li>
+                                                <li><strong>Pergaminos mágicos</strong>: Mano de mago, Bola de fuego, Rayo de escarcha, Hoja atronadora, Escudo y Misil mágico</li>
+                                            </ul>
+                                            <ul>
+                                                <li><strong class="pj-morado">Denelia</strong> detecta algo mágico en uno de los cofres: se trata de algo encerrado en un hielo perpetuo de gigantes.</li>
+                                                <li><strong class="pj-rojo">Thenarys</strong> cree que quizá lo hayan sacado de la tumba que visitamos el día anterior y lo han traído aquí por algún motivo.</li>
+                                                <li><strong class="pj-morado">Denelia</strong> se fija en las inscripciones de las paredes: parecen el diario de algún gigante.</li>
+                                            </ul>
+                                            <blockquote class="cuaderno-descubrimiento">
+                                                <ul>
+                                                    <li>Narran un poco lo ocurrido cuando la gente pequeña y los gigantes estaban en guerra.</li>
+                                                    <li>Al parecer, los gigantes seguían a un tal <strong>Vorrak</strong>, que parece influenciarlos de alguna forma.</li>
+                                                    <li>Es tal la influencia de <strong>Vorrak</strong> que hasta el propio autor termina dándole la razón y aborreciendo a la gente pequeña.</li>
+                                                </ul>
+                                            </blockquote>
+                                            <blockquote class="cuaderno-documento">
+                                                <p>Las inscripciones de la pared</p>
+                                                <h4>Primera inscripción</h4>
+                                                <p>Los pasos de mis hermanos hacen temblar la tierra. Nunca había visto tantos gigantes abandonar sus hogares al mismo tiempo. Desde las montañas del norte hasta las tierras heladas del sur, todos marchan en la misma dirección.</p>
+                                                <p>La guerra contra la gente pequeña ha convertido nuestras tierras en campos de batalla. Los humanos, enanos, elfos y demás criaturas se multiplican como ratas. Creen que pueden disputarnos territorios que nuestros antepasados conquistaron mucho antes de que sus reinos tuvieran nombre.</p>
+                                                <p>No todos están de acuerdo con la migración. Algunos prefieren quedarse y luchar. Yo mismo no sé qué pensar. Pero incluso los más orgullosos han comenzado a marcharse.</p>
+                                                <h4>Segunda inscripción</h4>
+                                                <p>He visto algo extraño en el camino.</p>
+                                                <p>Un grupo de gigantes sigue a un individuo llamado Vorrak. No sé qué clase de criatura es, ni de dónde viene, pero hay algo en él que me hiela la sangre más que estas montañas.</p>
+                                                <p>Los gigantes que lo acompañan parecen haber perdido el juicio. No cuestionan sus órdenes, no hablan entre ellos y apenas parecen conscientes de lo que sucede a su alrededor.</p>
+                                                <p>¿Acaso no ven lo que yo veo? ¿No sienten su presencia?</p>
+                                                <p>Son gigantes, por los dioses. ¡Gigantes!</p>
+                                                <p>Y aun así caminan detrás de él como cachorros detrás de su madre.</p>
+                                                <p>No quiero acercarme a ese ser. Espero no volver a cruzarme con él.</p>
+                                                <h4>Tercera inscripción</h4>
+                                                <p>¡MALDITOS SEAN!</p>
+                                                <p>¡Alimañas!</p>
+                                                <p>Eso es lo que son, y siempre lo serán.</p>
+                                                <p>Durante demasiado tiempo hemos permitido que se sienten a nuestra mesa, que comercien con nosotros, que nos hablen como si fuéramos iguales.</p>
+                                                <p>Sus lenguas de plata y sus mentes afiladas son sus únicas armas, y con ellas consiguen lo que nunca podrían arrebatarnos por la fuerza.</p>
+                                                <p>¡Nunca más!</p>
+                                                <p>No se puede confiar en la gente pequeña. No importa cuánto sonrían, cuánto prometan o cuántas palabras dulces pronuncien. Siempre esconden algo detrás de sus dientes.</p>
+                                                <p>Ahora lo entiendo.</p>
+                                                <p>No debe volver a sus manos.</p>
+                                                <p>Cualquier hermano que encuentre esto. No permitas que llegue a sus manos.</p>
+                                                <p>Siempre lo he entendido, pero me negaba a verlo.</p>
+                                                <p>Vorrak tenía razón</p>
+                                            </blockquote>
+                                        </div>
+                                    </details>
+                                </div>
+                            </div>
+                            <div class="cuaderno-hoja">
+                                <div class="cuaderno-hoja-cabecera" aria-hidden="true">
+                                    <p class="cuaderno-hoja-titulo">Sesión 3 — 07-11-2026</p>
+                                    <p class="cuaderno-hoja-numero">5</p>
+                                </div>
+                                <div class="cuaderno-hoja-cuerpo" tabindex="0" role="region"
+                                     aria-label="Hoja 5, con scroll">
+                                    <details class="cuaderno-escena" open>
+                                        <summary class="cuaderno-escena-titulo">
+                                            <span class="cuaderno-escena-flecha" aria-hidden="true"></span>
+                                            <span class="cuaderno-escena-nombre">Sacando la mercancía</span>
+                                        </summary>
+                                        <div class="cuaderno-escena-cuerpo">
+                                            <ul>
+                                                <li>Tras toda esta investigación decidimos ir sacando la mercancía poco a poco y sin ser detectados. <strong class="pj-azul">Mellissa</strong> nos comenta que es muy importante llevarnos el hierro, ya que hay mucha escasez en el mundo.</li>
+                                                <li><strong class="pj-azul">Mellissa</strong> irá por la pasarela en sigilo para ir dejando la mercancía poco a poco y bajarla por la cueva escondida, mientras el resto, haciéndonos pasar por bandidos, iremos por la entrada principal.</li>
+                                                <li>La idea es, haciendo como que cumplimos las órdenes del líder, secuestrar a algún bandido para sonsacarle información.</li>
+                                                <li><strong class="pj-azul">Mellissa</strong> consigue pasar desapercibida y va dejando la mercancía en el carromato oculto en el bosque, mientras el resto espera a que llegue algún miembro importante de la banda para engañarle.</li>
+                                                <li>Llega la noche y no aparece nadie, así que <strong class="pj-verde">Faëlar</strong>, para no dejar sola a <strong class="pj-azul">Mellissa</strong>, se adentra en el bosque para asegurarse de que está bien, mientras <strong class="pj-rojo">Thenarys</strong> y <strong class="pj-morado">Denelia</strong> siguen esperando en la entrada de la cueva.</li>
+                                            </ul>
+                                        </div>
+                                    </details>
+                                </div>
+                            </div>
+                            <div class="cuaderno-hoja">
+                                <div class="cuaderno-hoja-cabecera" aria-hidden="true">
+                                    <p class="cuaderno-hoja-titulo">Sesión 3 — 07-11-2026</p>
+                                    <p class="cuaderno-hoja-numero">6</p>
+                                </div>
+                                <div class="cuaderno-hoja-cuerpo" tabindex="0" role="region"
+                                     aria-label="Hoja 6, con scroll">
+                                    <details class="cuaderno-escena" open>
+                                        <summary class="cuaderno-escena-titulo">
+                                            <span class="cuaderno-escena-flecha" aria-hidden="true"></span>
+                                            <span class="cuaderno-escena-nombre">El plan del osobúho</span>
+                                        </summary>
+                                        <div class="cuaderno-escena-cuerpo">
+                                            <ul>
+                                                <li>Cuando <strong class="pj-verde">Faëlar</strong> llega con <strong class="pj-azul">Mellissa</strong> ya es de noche; le explica que aún no hemos visto a nadie y se queda con ella para hacer guardia.</li>
+                                                <li>Por la noche <strong class="pj-verde">Faëlar</strong> detecta al osobúho en las inmediaciones y alerta a <strong class="pj-azul">Mellissa</strong>. Con ayuda de <strong data-npc="Mita">Mita</strong> y las hierbas aromáticas recuperadas de la mercancía podría atraer al monstruo para alejarlo.</li>
+                                                <li><strong class="pj-azul">Mellissa</strong> propone que quizá sea mejor idea atraer al osobúho hacia el campamento de bandidos para que se deshaga de ellos. A <strong class="pj-verde">Faëlar</strong> le parece bien.</li>
+                                                <li>Mientras <strong data-npc="Mita">Mita</strong> atrae al monstruo por el bosque, <strong class="pj-azul">Mellissa</strong> y <strong class="pj-verde">Faëlar</strong> van corriendo hacia la cueva para avisar a <strong class="pj-rojo">Thenarys</strong> y <strong class="pj-morado">Denelia</strong> del plan.</li>
+                                                <li>Nos ocultamos entre los arbustos a la espera de que se desate el caos en el campamento de bandidos.</li>
+                                            </ul>
+                                            <figure class="img-centro">
+                                                <img src="/imagenes/notas_rol/ragna/notas/esperando-al-osobuho.webp" alt="Dibujo a lápiz: Thenarys, Denelia, Mellissa y Faëlar asoman entre los arbustos mientras el osobúho avanza hacia la cueva" width="889" height="430" loading="lazy" decoding="async">
+                                                <figcaption>Esperando a que se desate el caos</figcaption>
+                                            </figure>
+                                        </div>
+                                    </details>
+                                </div>
+                            </div>
+                            <div class="cuaderno-hoja">
+                                <div class="cuaderno-hoja-cabecera" aria-hidden="true">
+                                    <p class="cuaderno-hoja-titulo">Sesión 3 — 07-11-2026</p>
+                                    <p class="cuaderno-hoja-numero">7</p>
+                                </div>
+                                <div class="cuaderno-hoja-cuerpo" tabindex="0" role="region"
+                                     aria-label="Hoja 7, con scroll">
+                                    <details class="cuaderno-escena" open>
+                                        <summary class="cuaderno-escena-titulo">
+                                            <span class="cuaderno-escena-flecha" aria-hidden="true"></span>
+                                            <span class="cuaderno-escena-nombre">Caos en la cueva</span>
+                                        </summary>
+                                        <div class="cuaderno-escena-cuerpo">
+                                            <ul>
+                                                <li>El osobúho irrumpe en mitad de la cueva de los bandidos; a la mayoría les pilla desprevenidos y desarmados, por lo que parte de ellos lucha mientras el resto va a alertar a los demás y a armarse.</li>
+                                                <li>Para añadir más caos entre los bandidos, <strong class="pj-verde">Faëlar</strong> utiliza su magia tanto para agrandar al osobúho como para sanar sus heridas.</li>
+                                                <li>Cuando todos los bandidos ya armados se juntan para combatir aparece el líder para organizarlos, junto a su lobo invernal, que se encara con el osobúho.</li>
+                                                <li>Aprovechando que están todos juntos, <strong class="pj-rojo">Thenarys</strong> utiliza el pergamino de Bola de fuego que obtuvimos antes para aniquilar a casi todos los bandidos.</li>
+                                                <li>Mientras el osobúho lucha contra el lobo, <strong class="pj-azul">Mellissa</strong> y <strong class="pj-morado">Denelia</strong> entran en la cueva para capturar al líder de los bandidos, que es bastante escurridizo.</li>
+                                                <li>Finalmente capturamos al jefe, pero el osobúho muere a manos del lobo, que, malherido, arremete contra nosotros. <strong class="pj-azul">Mellissa</strong> termina con su vida, no sin antes fijarse en que el lobo parecía controlado mentalmente.</li>
+                                            </ul>
+                                        </div>
+                                    </details>
+                                </div>
+                            </div>
+                            <div class="cuaderno-hoja">
+                                <div class="cuaderno-hoja-cabecera" aria-hidden="true">
+                                    <p class="cuaderno-hoja-titulo">Sesión 3 — 07-11-2026</p>
+                                    <p class="cuaderno-hoja-numero">8</p>
+                                </div>
+                                <div class="cuaderno-hoja-cuerpo" tabindex="0" role="region"
+                                     aria-label="Hoja 8, con scroll">
+                                    <details class="cuaderno-escena" open>
+                                        <summary class="cuaderno-escena-titulo">
+                                            <span class="cuaderno-escena-flecha" aria-hidden="true"></span>
+                                            <span class="cuaderno-escena-nombre">El botín de los bandidos</span>
+                                        </summary>
+                                        <div class="cuaderno-escena-cuerpo">
+                                            <ul>
+                                                <li>Tras revisar a fondo a los bandidos obtenemos:</li>
+                                            </ul>
+                                            <ul class="cuaderno-objetos">
+                                                <li><strong>75 monedas de oro</strong> y otras 75 en monedas varias</li>
+                                                <li><strong>Cimitarra mágica</strong> (Cimitarra +1)</li>
+                                                <li><strong>Armas y armaduras varias</strong> (25 de oro)</li>
+                                                <li><strong>3 pergaminos de Misil mágico</strong></li>
+                                                <li><strong>Piel y garras de lobo</strong> en muy buen estado</li>
+                                                <li><strong>2 raciones</strong> (de osobúho)</li>
+                                            </ul>
+                                            <blockquote class="cuaderno-descubrimiento">
+                                                <ul>
+                                                    <li>En el despacho del líder encontramos, escrita en jerga de ladrones, un montón de información muy detallada de las rutas de los mercaderes que salen de <em>Sirevia</em>.</li>
+                                                    <li>También cartas sobre los pergaminos que han ido llegando; nos llama la atención en particular uno del hechizo <strong>Geas</strong>, que controla mentalmente durante 30 días.</li>
+                                                </ul>
+                                            </blockquote>
+                                            <ul>
+                                                <li><strong class="pj-azul">Mellissa</strong> informa a <strong data-npc="Sigil">Sigil</strong> de nuestros logros y nos insta a regresar, pero no le suena nada la palabra clave <strong>Mier</strong> del contacto bandido al norte de <em>Sirevia</em>.</li>
+                                            </ul>
+                                        </div>
+                                    </details>
+                                </div>
+                            </div>
+                            <div class="cuaderno-hoja">
+                                <div class="cuaderno-hoja-cabecera" aria-hidden="true">
+                                    <p class="cuaderno-hoja-titulo">Sesión 3 — 07-11-2026</p>
+                                    <p class="cuaderno-hoja-numero">9</p>
+                                </div>
+                                <div class="cuaderno-hoja-cuerpo" tabindex="0" role="region"
+                                     aria-label="Hoja 9, con scroll">
+                                    <details class="cuaderno-escena" open>
+                                        <summary class="cuaderno-escena-titulo">
+                                            <span class="cuaderno-escena-flecha" aria-hidden="true"></span>
+                                            <span class="cuaderno-escena-nombre">De vuelta a Chitxia</span>
+                                        </summary>
+                                        <div class="cuaderno-escena-cuerpo">
+                                            <ul>
+                                                <li>Descansamos de camino a <em>Chitxia</em>, pero durante la noche el líder de los bandidos que llevamos escoltado se suicida sin que nos demos cuenta.</li>
+                                                <li>Mientras planeamos qué hacer a continuación y nos preparamos para el día, <strong class="pj-morado">Denelia</strong> se fija en las orejas picudas de <strong class="pj-rojo">Thenarys</strong> y descubre que se trata de un elfo marino, seguramente del <em>Reino Carsa</em>.</li>
+                                                <li>Terminamos la sesión y <strong>¡SUBIMOS DE NIVEL!</strong></li>
+                                            </ul>
+                                        </div>
+                                    </details>
+                                </div>
+                            </div>
+                            </div>
+                        </div>
+
+                        <div class="cuaderno-lateral">
+                            <aside class="cuaderno-postit" role="note" aria-labelledby="cuaderno-postit-titulo">
+                                <h2 class="cuaderno-postit-titulo" id="cuaderno-postit-titulo">Cosas pendientes</h2>
+                                <ul class="cuaderno-tareas">
+                                </ul>
+                            </aside>
+
+                            <div class="cuaderno-pie" data-cuaderno-pie
+                                 data-campana-datos="/datos/notas_rol/campana-ragna.json"></div>
+                        </div>
+                    </div>
+                </div>
+            </article>
+        </section>
+    </main>
+</body>
+</html>
