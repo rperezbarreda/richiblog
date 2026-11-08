@@ -1,0 +1,155 @@
+{
+  "version": "1.0",
+  "title": "Mapamundi",
+  "campaign": "ragna",
+  "width": 2048,
+  "height": 1536,
+  "layers": [
+    {
+      "id": "base",
+      "name": "Mapa",
+      "image": "mapamundi_mapa.webp",
+      "opacity": 1,
+      "zIndex": 0,
+      "visible": true
+    }
+  ],
+  "pins": [
+    {
+      "id": "f66667759b8b4902",
+      "x": 1219.8,
+      "y": 1172.5,
+      "label": "Sirevia",
+      "kind": "ciudad",
+      "color": "#52fff3"
+    },
+    {
+      "id": "c1d56a0447c20273",
+      "x": 1396.8,
+      "y": 1161.2,
+      "label": "Chixia",
+      "kind": "pueblo",
+      "color": "#52fff3"
+    },
+    {
+      "id": "1c4777e3614e11d7",
+      "x": 1380.9,
+      "y": 1231.5,
+      "label": "Tumba de los Gigantes",
+      "kind": "ruina",
+      "color": "#d1d1d1"
+    },
+    {
+      "id": "a53d47a092928a46",
+      "x": 1428.5,
+      "y": 1257.2,
+      "label": "Guarida de los Colmillo de Lobo",
+      "kind": "cueva",
+      "color": "#ff0000"
+    },
+    {
+      "id": "5a6135ff10327538",
+      "x": 1138.7,
+      "y": 1096.4,
+      "label": "Desliz",
+      "kind": "ciudad",
+      "color": "#d1d1d1"
+    }
+  ],
+  "shapes": [],
+  "lines": [
+    {
+      "id": "94f5a781b9a1390d",
+      "kind": "ruta",
+      "points": [
+        {
+          "x": 1219.8,
+          "y": 1172.5
+        },
+        {
+          "x": 1306.3,
+          "y": 1167.9
+        },
+        {
+          "x": 1328.3,
+          "y": 1152.4
+        },
+        {
+          "x": 1354.3,
+          "y": 1150.1
+        },
+        {
+          "x": 1396.8,
+          "y": 1161.2
+        }
+      ],
+      "session": 1
+    },
+    {
+      "id": "96e5a67fd5008c97",
+      "kind": "ruta",
+      "points": [
+        {
+          "x": 1396.8,
+          "y": 1161.2
+        },
+        {
+          "x": 1413.5,
+          "y": 1175.7
+        },
+        {
+          "x": 1418.6,
+          "y": 1191.9
+        },
+        {
+          "x": 1402.7,
+          "y": 1207.8
+        },
+        {
+          "x": 1391.9,
+          "y": 1215.2
+        },
+        {
+          "x": 1380.9,
+          "y": 1231.5
+        },
+        {
+          "x": 1395.3,
+          "y": 1236.8
+        },
+        {
+          "x": 1407,
+          "y": 1229.1
+        }
+      ],
+      "session": 2
+    },
+    {
+      "id": "7cc1ae6f1337a160",
+      "kind": "ruta",
+      "points": [
+        {
+          "x": 1407,
+          "y": 1229.1
+        },
+        {
+          "x": 1417.8,
+          "y": 1233
+        },
+        {
+          "x": 1428.5,
+          "y": 1257.2
+        },
+        {
+          "x": 1417.8,
+          "y": 1233
+        },
+        {
+          "x": 1432.8,
+          "y": 1203.1
+        }
+      ],
+      "session": 3
+    }
+  ]
+}

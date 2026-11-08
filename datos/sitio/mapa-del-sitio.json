@@ -69,7 +69,7 @@
         "seccion": "blog",
         "fecha": "20-09-2026",
         "actualizada": "08-11-2026",
-        "resumen": "7b887ebc"
+        "resumen": "4f8cc921"
     },
     {
         "url": "/web/blog/diario.html",
@@ -158,6 +158,14 @@
         "fecha": "06-11-2026",
         "actualizada": "06-11-2026",
         "resumen": "ab436d23"
+    },
+    {
+        "url": "/web/notas_rol/ragna/mapa_mapamundi.html",
+        "titulo": "Mapamundi",
+        "seccion": "notas de rol",
+        "fecha": "08-11-2026",
+        "actualizada": "08-11-2026",
+        "resumen": "0c2a8c61"
     },
     {
         "url": "/web/notas_rol/ragna/sesion-03.html",
@@ -268,1328 +276,1328 @@
         "titulo": "Mapa del Reino de Neclaverna",
         "seccion": "wiki cralëa",
         "fecha": "03-11-2026",
-        "actualizada": "06-11-2026",
-        "resumen": "931c8a66"
+        "actualizada": "08-11-2026",
+        "resumen": "cf9a1f17"
     },
     {
         "url": "/web/wiki/mapamundi/azarasia/reino_de_telzaria/mapa_reino_de_telzaria.html",
         "titulo": "Mapa del Reino de Telzaria",
         "seccion": "wiki cralëa",
         "fecha": "02-11-2026",
-        "actualizada": "06-11-2026",
-        "resumen": "e5702d13"
+        "actualizada": "08-11-2026",
+        "resumen": "52088f6b"
     },
     {
         "url": "/web/wiki/mapamundi/azarasia/condado_de_burcrelle/condado_de_burcrelle.html",
         "titulo": "Condado de Burcrelle",
         "seccion": "wiki cralëa",
         "fecha": "22-10-2026",
-        "actualizada": "06-11-2026",
-        "resumen": "565d13db"
+        "actualizada": "08-11-2026",
+        "resumen": "0295e032"
     },
     {
         "url": "/web/wiki/mapamundi/azarasia/reino_de_neclaverna/reino_de_neclaverna.html",
         "titulo": "Reino de Neclaverna",
         "seccion": "wiki cralëa",
         "fecha": "22-10-2026",
-        "actualizada": "06-11-2026",
-        "resumen": "6b015078"
+        "actualizada": "08-11-2026",
+        "resumen": "8a2702de"
     },
     {
         "url": "/web/wiki/mapamundi/azarasia/reino_de_telzaria/reino_de_telzaria.html",
         "titulo": "Reino de Telzaria",
         "seccion": "wiki cralëa",
         "fecha": "22-10-2026",
-        "actualizada": "06-11-2026",
-        "resumen": "87a92f89"
+        "actualizada": "08-11-2026",
+        "resumen": "cdb40b2a"
     },
     {
         "url": "/web/wiki/mapamundi/archipielagos/archipielago_de_las_costras/ac_atapec/ac_atapec.html",
         "titulo": "Ac&#x27;atapec",
         "seccion": "wiki cralëa",
         "fecha": "18-10-2026",
-        "actualizada": "06-11-2026",
-        "resumen": "d93a34a0"
+        "actualizada": "08-11-2026",
+        "resumen": "d771379a"
     },
     {
         "url": "/web/wiki/mapamundi/partaria/academia_de_rosamica/academia_de_rosamica.html",
         "titulo": "Academia de Rosamica",
         "seccion": "wiki cralëa",
         "fecha": "18-10-2026",
-        "actualizada": "06-11-2026",
-        "resumen": "f2d09b34"
+        "actualizada": "08-11-2026",
+        "resumen": "28ea699b"
     },
     {
         "url": "/web/wiki/mapamundi/archipielagos/faros_del_mar_ciego/ahiu/ahiu.html",
         "titulo": "Ahíu",
         "seccion": "wiki cralëa",
         "fecha": "18-10-2026",
-        "actualizada": "06-11-2026",
-        "resumen": "05c367a9"
+        "actualizada": "08-11-2026",
+        "resumen": "ede9eb09"
     },
     {
         "url": "/web/wiki/mapamundi/partaria/alianza_de_sepon/alianza_de_sepon.html",
         "titulo": "Alianza de Sepón",
         "seccion": "wiki cralëa",
         "fecha": "18-10-2026",
-        "actualizada": "06-11-2026",
-        "resumen": "2fb27f03"
+        "actualizada": "08-11-2026",
+        "resumen": "3a9adc91"
     },
     {
         "url": "/web/wiki/mapamundi/archipielagos/archipielago_de_las_costras/amequeleke/amequeleke.html",
         "titulo": "Amequeleke",
         "seccion": "wiki cralëa",
         "fecha": "18-10-2026",
-        "actualizada": "06-11-2026",
-        "resumen": "956af4ba"
+        "actualizada": "08-11-2026",
+        "resumen": "37461c73"
     },
     {
         "url": "/web/wiki/mapamundi/archipielagos/faros_del_mar_ciego/aruta/aruta.html",
         "titulo": "Aruta",
         "seccion": "wiki cralëa",
         "fecha": "18-10-2026",
-        "actualizada": "06-11-2026",
-        "resumen": "ed03af02"
+        "actualizada": "08-11-2026",
+        "resumen": "aa5a570a"
     },
     {
         "url": "/web/wiki/mapamundi/archipielagos/archipielago_de_lunas/baronia_de_ronco/baronia_de_ronco.html",
         "titulo": "Baronía de Ronco",
         "seccion": "wiki cralëa",
         "fecha": "18-10-2026",
-        "actualizada": "06-11-2026",
-        "resumen": "717aa40d"
+        "actualizada": "08-11-2026",
+        "resumen": "bc4ebbc4"
     },
     {
         "url": "/web/wiki/mapamundi/partaria/bosque_de_utalis/bosque_de_utalis.html",
         "titulo": "Bosque de Utalis",
         "seccion": "wiki cralëa",
         "fecha": "18-10-2026",
-        "actualizada": "06-11-2026",
-        "resumen": "ca535109"
+        "actualizada": "08-11-2026",
+        "resumen": "c03dbdbf"
     },
     {
         "url": "/web/wiki/mapamundi/azarasia/califato_de_jhel_zadir/califato_de_jhel_zadir.html",
         "titulo": "Califato de Jhel&#x27;Zadir",
         "seccion": "wiki cralëa",
         "fecha": "18-10-2026",
-        "actualizada": "06-11-2026",
-        "resumen": "038990aa"
+        "actualizada": "08-11-2026",
+        "resumen": "d2176a3a"
     },
     {
         "url": "/web/wiki/mapamundi/azarasia/canton_de_piedraspuras/canton_de_piedraspuras.html",
         "titulo": "Cantón de Piedraspuras",
         "seccion": "wiki cralëa",
         "fecha": "18-10-2026",
-        "actualizada": "06-11-2026",
-        "resumen": "1a1f07eb"
+        "actualizada": "08-11-2026",
+        "resumen": "2cca7fa1"
     },
     {
         "url": "/web/wiki/mapamundi/partaria/ciudad_santa_de_ablanamaz/ciudad_santa_de_ablanamaz.html",
         "titulo": "Ciudad Santa de Ablanamaz",
         "seccion": "wiki cralëa",
         "fecha": "18-10-2026",
-        "actualizada": "06-11-2026",
-        "resumen": "432c29f8"
+        "actualizada": "08-11-2026",
+        "resumen": "49065d60"
     },
     {
         "url": "/web/wiki/mapamundi/archipielagos/archipielago_de_lunas/corona_de_mogla/corona_de_mogla.html",
         "titulo": "Corona de Mogla",
         "seccion": "wiki cralëa",
         "fecha": "18-10-2026",
-        "actualizada": "06-11-2026",
-        "resumen": "6cf7fd60"
+        "actualizada": "08-11-2026",
+        "resumen": "1dfd9aa3"
     },
     {
         "url": "/web/wiki/mapamundi/partaria/coronas_del_viento/coronas_del_viento.html",
         "titulo": "Coronas del Viento",
         "seccion": "wiki cralëa",
         "fecha": "18-10-2026",
-        "actualizada": "06-11-2026",
-        "resumen": "82857f75"
+        "actualizada": "08-11-2026",
+        "resumen": "ee657516"
     },
     {
         "url": "/web/wiki/mapamundi/archipielagos/islas_de_labros/corte_de_labros/corte_de_labros.html",
         "titulo": "Corte de Labros",
         "seccion": "wiki cralëa",
         "fecha": "18-10-2026",
-        "actualizada": "06-11-2026",
-        "resumen": "38712654"
+        "actualizada": "08-11-2026",
+        "resumen": "bed6a978"
     },
     {
         "url": "/web/wiki/mapamundi/archipielagos/tierras_encantadas/archipielago_fragmentado/costa_de_vlasquie/costa_de_vlasquie.html",
         "titulo": "Costa de Vlasquie",
         "seccion": "wiki cralëa",
         "fecha": "18-10-2026",
-        "actualizada": "06-11-2026",
-        "resumen": "70bb69ac"
+        "actualizada": "08-11-2026",
+        "resumen": "eabbc665"
     },
     {
         "url": "/web/wiki/mapamundi/partaria/cumbres_de_ath/cumbres_de_ath.html",
         "titulo": "Cumbres de Ath",
         "seccion": "wiki cralëa",
         "fecha": "18-10-2026",
-        "actualizada": "06-11-2026",
-        "resumen": "2f8e2eae"
+        "actualizada": "08-11-2026",
+        "resumen": "d2b6a7dd"
     },
     {
         "url": "/web/wiki/mapamundi/archipielagos/cuna_de_quimeras/cuna_de_quimeras.html",
         "titulo": "Cuna de Quimeras",
         "seccion": "wiki cralëa",
         "fecha": "18-10-2026",
-        "actualizada": "06-11-2026",
-        "resumen": "f0a1c9d7"
+        "actualizada": "08-11-2026",
+        "resumen": "111960f7"
     },
     {
         "url": "/web/wiki/mapamundi/partaria/custodios_de_parta/custodios_de_parta.html",
         "titulo": "Custodios de Parta",
         "seccion": "wiki cralëa",
         "fecha": "18-10-2026",
-        "actualizada": "06-11-2026",
-        "resumen": "ea169d6e"
+        "actualizada": "08-11-2026",
+        "resumen": "609ccb08"
     },
     {
         "url": "/web/wiki/mapamundi/archipielagos/tierras_encantadas/archipielago_fragmentado/dominio_de_lyca/dominio_de_lyca.html",
         "titulo": "Dominio de Lyca",
         "seccion": "wiki cralëa",
         "fecha": "18-10-2026",
-        "actualizada": "06-11-2026",
-        "resumen": "96ced794"
+        "actualizada": "08-11-2026",
+        "resumen": "bb4efb2b"
     },
     {
         "url": "/web/wiki/mapamundi/azarasia/dominios_de_bor_korr_el_sanguinario/dominios_de_bor_korr_el_sanguinario.html",
         "titulo": "Dominios de Bor&#x27;Korr el Sanguinario",
         "seccion": "wiki cralëa",
         "fecha": "18-10-2026",
-        "actualizada": "06-11-2026",
-        "resumen": "dc2ace58"
+        "actualizada": "08-11-2026",
+        "resumen": "60071672"
     },
     {
         "url": "/web/wiki/mapamundi/azarasia/emirato_de_adrash/emirato_de_adrash.html",
         "titulo": "Emirato de Adrash",
         "seccion": "wiki cralëa",
         "fecha": "18-10-2026",
-        "actualizada": "06-11-2026",
-        "resumen": "67376421"
+        "actualizada": "08-11-2026",
+        "resumen": "a7f16b81"
     },
     {
         "url": "/web/wiki/mapamundi/archipielagos/tierras_encantadas/archipielago_fragmentado/forja_de_aureb/forja_de_aureb.html",
         "titulo": "Forja de Aureb",
         "seccion": "wiki cralëa",
         "fecha": "18-10-2026",
-        "actualizada": "06-11-2026",
-        "resumen": "29dec406"
+        "actualizada": "08-11-2026",
+        "resumen": "bcbbecc2"
     },
     {
         "url": "/web/wiki/mapamundi/archipielagos/tierras_encantadas/franja_de_turia/franja_de_turia.html",
         "titulo": "Franja de Turia",
         "seccion": "wiki cralëa",
         "fecha": "18-10-2026",
-        "actualizada": "06-11-2026",
-        "resumen": "438d0d22"
+        "actualizada": "08-11-2026",
+        "resumen": "5468297f"
     },
     {
         "url": "/web/wiki/mapamundi/azarasia/gran_condado_de_marturia/gran_condado_de_marturia.html",
         "titulo": "Gran Condado de Marturia",
         "seccion": "wiki cralëa",
         "fecha": "18-10-2026",
-        "actualizada": "06-11-2026",
-        "resumen": "c256b58d"
+        "actualizada": "08-11-2026",
+        "resumen": "ade6b38f"
     },
     {
         "url": "/web/wiki/mapamundi/archipielagos/faros_del_mar_ciego/haluka/haluka.html",
         "titulo": "Haluka",
         "seccion": "wiki cralëa",
         "fecha": "18-10-2026",
-        "actualizada": "06-11-2026",
-        "resumen": "5e36a6be"
+        "actualizada": "08-11-2026",
+        "resumen": "af9b6442"
     },
     {
         "url": "/web/wiki/mapamundi/archipielagos/faros_del_mar_ciego/hokupuko/hokupuko.html",
         "titulo": "Hokupuko",
         "seccion": "wiki cralëa",
         "fecha": "18-10-2026",
-        "actualizada": "06-11-2026",
-        "resumen": "4022a9f6"
+        "actualizada": "08-11-2026",
+        "resumen": "ae4eead4"
     },
     {
         "url": "/web/wiki/mapamundi/archipielagos/tierras_encantadas/archipielago_fragmentado/horda_quebrada/horda_quebrada.html",
         "titulo": "Horda Quebrada",
         "seccion": "wiki cralëa",
         "fecha": "18-10-2026",
-        "actualizada": "06-11-2026",
-        "resumen": "c24d6749"
+        "actualizada": "08-11-2026",
+        "resumen": "80c5da7f"
     },
     {
         "url": "/web/wiki/mapamundi/archipielagos/tierras_encantadas/horda_de_uspan/horda_de_uspan.html",
         "titulo": "Horda de Uspán",
         "seccion": "wiki cralëa",
         "fecha": "18-10-2026",
-        "actualizada": "06-11-2026",
-        "resumen": "e6d53764"
+        "actualizada": "08-11-2026",
+        "resumen": "73be97d7"
     },
     {
         "url": "/web/wiki/mapamundi/azarasia/horda_de_yerzhal/horda_de_yerzhal.html",
         "titulo": "Horda de Yerzhal",
         "seccion": "wiki cralëa",
         "fecha": "18-10-2026",
-        "actualizada": "06-11-2026",
-        "resumen": "d734fde4"
+        "actualizada": "08-11-2026",
+        "resumen": "bb5b163d"
     },
     {
         "url": "/web/wiki/mapamundi/partaria/imperio_friscadio/imperio_friscadio.html",
         "titulo": "Imperio Friscadio",
         "seccion": "wiki cralëa",
         "fecha": "18-10-2026",
-        "actualizada": "06-11-2026",
-        "resumen": "3c368328"
+        "actualizada": "08-11-2026",
+        "resumen": "59183376"
     },
     {
         "url": "/web/wiki/mapamundi/archipielagos/tierras_encantadas/imperio_de_lezeris/imperio_de_lezeris.html",
         "titulo": "Imperio de Lezeris",
         "seccion": "wiki cralëa",
         "fecha": "18-10-2026",
-        "actualizada": "06-11-2026",
-        "resumen": "d24a5bdc"
+        "actualizada": "08-11-2026",
+        "resumen": "0ad58bb9"
     },
     {
         "url": "/web/wiki/mapamundi/azarasia/imperio_de_nueva_valindra/imperio_de_nueva_valindra.html",
         "titulo": "Imperio de Nueva Valindra",
         "seccion": "wiki cralëa",
         "fecha": "18-10-2026",
-        "actualizada": "06-11-2026",
-        "resumen": "6ce566ce"
+        "actualizada": "08-11-2026",
+        "resumen": "89a57ec9"
     },
     {
         "url": "/web/wiki/mapamundi/archipielagos/tierras_encantadas/infierno_frondoso/infierno_frondoso.html",
         "titulo": "Infierno Frondoso",
         "seccion": "wiki cralëa",
         "fecha": "18-10-2026",
-        "actualizada": "06-11-2026",
-        "resumen": "0d452d60"
+        "actualizada": "08-11-2026",
+        "resumen": "45f3685f"
     },
     {
         "url": "/web/wiki/mapamundi/archipielagos/isla_de_telvetia/isla_de_telvetia.html",
         "titulo": "Isla de Telvetia",
         "seccion": "wiki cralëa",
         "fecha": "18-10-2026",
-        "actualizada": "06-11-2026",
-        "resumen": "4b6f75ba"
+        "actualizada": "08-11-2026",
+        "resumen": "a83abcbc"
     },
     {
         "url": "/web/wiki/mapamundi/archipielagos/archipielago_de_las_costras/itzalcal/itzalcal.html",
         "titulo": "Itzalcál",
         "seccion": "wiki cralëa",
         "fecha": "18-10-2026",
-        "actualizada": "06-11-2026",
-        "resumen": "79a6da2c"
+        "actualizada": "08-11-2026",
+        "resumen": "56013a2e"
     },
     {
         "url": "/web/wiki/mapamundi/archipielagos/faros_del_mar_ciego/kaelova/kaelova.html",
         "titulo": "Kaelova",
         "seccion": "wiki cralëa",
         "fecha": "18-10-2026",
-        "actualizada": "06-11-2026",
-        "resumen": "315da7ea"
+        "actualizada": "08-11-2026",
+        "resumen": "a8d5fd46"
     },
     {
         "url": "/web/wiki/mapamundi/archipielagos/archipielago_de_las_costras/kukulna/kukulna.html",
         "titulo": "Kukulna",
         "seccion": "wiki cralëa",
         "fecha": "18-10-2026",
-        "actualizada": "06-11-2026",
-        "resumen": "9bfe230f"
+        "actualizada": "08-11-2026",
+        "resumen": "e645c65c"
     },
     {
         "url": "/web/wiki/mapamundi/archipielagos/tierras_encantadas/liga_de_golota/liga_de_golota.html",
         "titulo": "Liga de Golota",
         "seccion": "wiki cralëa",
         "fecha": "18-10-2026",
-        "actualizada": "06-11-2026",
-        "resumen": "4eccca67"
+        "actualizada": "08-11-2026",
+        "resumen": "54694835"
     },
     {
         "url": "/web/wiki/mapamundi/partaria/maharato_de_sulkaladesh/maharato_de_sulkaladesh.html",
         "titulo": "Maharato de Sulkaladésh",
         "seccion": "wiki cralëa",
         "fecha": "18-10-2026",
-        "actualizada": "06-11-2026",
-        "resumen": "803f433a"
+        "actualizada": "08-11-2026",
+        "resumen": "1690d82e"
     },
     {
         "url": "/web/wiki/mapamundi/partaria/mandato_de_acratang/mandato_de_acratang.html",
         "titulo": "Mandato de Acratang",
         "seccion": "wiki cralëa",
         "fecha": "18-10-2026",
-        "actualizada": "06-11-2026",
-        "resumen": "f14384ed"
+        "actualizada": "08-11-2026",
+        "resumen": "fafa91cf"
     },
     {
         "url": "/web/wiki/mapamundi/partaria/mandato_de_nisi/mandato_de_nisi.html",
         "titulo": "Mandato de Nisi",
         "seccion": "wiki cralëa",
         "fecha": "18-10-2026",
-        "actualizada": "06-11-2026",
-        "resumen": "0730b48b"
+        "actualizada": "08-11-2026",
+        "resumen": "3077cbb9"
     },
     {
         "url": "/web/wiki/mapamundi/partaria/mandato_de_panchan/mandato_de_panchan.html",
         "titulo": "Mandato de Panchan",
         "seccion": "wiki cralëa",
         "fecha": "18-10-2026",
-        "actualizada": "06-11-2026",
-        "resumen": "0fba9668"
+        "actualizada": "08-11-2026",
+        "resumen": "d9a9b1e1"
     },
     {
         "url": "/web/wiki/mapamundi/partaria/mandato_de_taz_ju/mandato_de_taz_ju.html",
         "titulo": "Mandato de Taz-Ju",
         "seccion": "wiki cralëa",
         "fecha": "18-10-2026",
-        "actualizada": "06-11-2026",
-        "resumen": "749b83ac"
+        "actualizada": "08-11-2026",
+        "resumen": "8110f65e"
     },
     {
         "url": "/web/wiki/mapamundi/partaria/mandato_de_zo/mandato_de_zo.html",
         "titulo": "Mandato de Zó",
         "seccion": "wiki cralëa",
         "fecha": "18-10-2026",
-        "actualizada": "06-11-2026",
-        "resumen": "d12672e3"
+        "actualizada": "08-11-2026",
+        "resumen": "00ac71ad"
     },
     {
         "url": "/web/wiki/mapamundi/azarasia/reino_de_prunia/mapa_reino_de_prunia.html",
         "titulo": "Mapa del Reino de Prunia",
         "seccion": "wiki cralëa",
         "fecha": "18-10-2026",
-        "actualizada": "06-11-2026",
-        "resumen": "b970d7cf"
+        "actualizada": "08-11-2026",
+        "resumen": "eefa24c7"
     },
     {
         "url": "/web/wiki/mapamundi/azarasia/marca_de_elyarath/marca_de_elyarath.html",
         "titulo": "Marca de Elyarath",
         "seccion": "wiki cralëa",
         "fecha": "18-10-2026",
-        "actualizada": "06-11-2026",
-        "resumen": "b0b3bb75"
+        "actualizada": "08-11-2026",
+        "resumen": "0ba1fa6a"
     },
     {
         "url": "/web/wiki/mapamundi/archipielagos/archipielago_de_lunas/marquesado_de_al_daris/marquesado_de_al_daris.html",
         "titulo": "Marquesado de Al-Darís",
         "seccion": "wiki cralëa",
         "fecha": "18-10-2026",
-        "actualizada": "06-11-2026",
-        "resumen": "ce40fdb9"
+        "actualizada": "08-11-2026",
+        "resumen": "26de2bd9"
     },
     {
         "url": "/web/wiki/mapamundi/azarasia/marquesado_de_setra/marquesado_de_setra.html",
         "titulo": "Marquesado de Setra",
         "seccion": "wiki cralëa",
         "fecha": "18-10-2026",
-        "actualizada": "06-11-2026",
-        "resumen": "b6d266d8"
+        "actualizada": "08-11-2026",
+        "resumen": "83068a20"
     },
     {
         "url": "/web/wiki/mapamundi/partaria/mercado_de_dao_yeni/mercado_de_dao_yeni.html",
         "titulo": "Mercado de Dao-Yeni",
         "seccion": "wiki cralëa",
         "fecha": "18-10-2026",
-        "actualizada": "06-11-2026",
-        "resumen": "bfb462d0"
+        "actualizada": "08-11-2026",
+        "resumen": "63e819b5"
     },
     {
         "url": "/web/wiki/mapamundi/archipielagos/tierras_encantadas/archipielago_fragmentado/morada_de_eeli/morada_de_eeli.html",
         "titulo": "Morada de Eeli",
         "seccion": "wiki cralëa",
         "fecha": "18-10-2026",
-        "actualizada": "06-11-2026",
-        "resumen": "4abd857e"
+        "actualizada": "08-11-2026",
+        "resumen": "31027288"
     },
     {
         "url": "/web/wiki/mapamundi/archipielagos/archipielago_de_las_costras/mulz_aka/mulz_aka.html",
         "titulo": "Mulz&#x27;aka",
         "seccion": "wiki cralëa",
         "fecha": "18-10-2026",
-        "actualizada": "06-11-2026",
-        "resumen": "cae1f596"
+        "actualizada": "08-11-2026",
+        "resumen": "7b09b4ff"
     },
     {
         "url": "/web/wiki/mapamundi/archipielagos/archipielago_de_las_costras/nahuatzal/nahuatzal.html",
         "titulo": "Nahuatzal",
         "seccion": "wiki cralëa",
         "fecha": "18-10-2026",
-        "actualizada": "06-11-2026",
-        "resumen": "119f4193"
+        "actualizada": "08-11-2026",
+        "resumen": "8c9da45b"
     },
     {
         "url": "/web/wiki/mapamundi/archipielagos/archipielago_de_las_costras/nalchalcoatl/nalchalcoatl.html",
         "titulo": "Nalchalcoatl",
         "seccion": "wiki cralëa",
         "fecha": "18-10-2026",
-        "actualizada": "06-11-2026",
-        "resumen": "d2678215"
+        "actualizada": "08-11-2026",
+        "resumen": "e4ae4596"
     },
     {
         "url": "/web/wiki/mapamundi/archipielagos/faros_del_mar_ciego/nalu_ele/nalu_ele.html",
         "titulo": "Nalu&#x27;elé",
         "seccion": "wiki cralëa",
         "fecha": "18-10-2026",
-        "actualizada": "06-11-2026",
-        "resumen": "7d851d00"
+        "actualizada": "08-11-2026",
+        "resumen": "68365639"
     },
     {
         "url": "/web/wiki/mapamundi/archipielagos/faros_del_mar_ciego/nara_mana/nara_mana.html",
         "titulo": "Nara-Mana",
         "seccion": "wiki cralëa",
         "fecha": "18-10-2026",
-        "actualizada": "06-11-2026",
-        "resumen": "bc076a34"
+        "actualizada": "08-11-2026",
+        "resumen": "2e7ffbd9"
     },
     {
         "url": "/web/wiki/mapamundi/archipielagos/archipielago_de_las_costras/nictebrakka/nictebrakka.html",
         "titulo": "Níctebrakka",
         "seccion": "wiki cralëa",
         "fecha": "18-10-2026",
-        "actualizada": "06-11-2026",
-        "resumen": "5f75884b"
+        "actualizada": "08-11-2026",
+        "resumen": "81d4abbd"
     },
     {
         "url": "/web/wiki/mapamundi/azarasia/obispado_de_habaza/obispado_de_habaza.html",
         "titulo": "Obispado de Habaza",
         "seccion": "wiki cralëa",
         "fecha": "18-10-2026",
-        "actualizada": "06-11-2026",
-        "resumen": "99209b1f"
+        "actualizada": "08-11-2026",
+        "resumen": "5942e565"
     },
     {
         "url": "/web/wiki/mapamundi/archipielagos/tierras_encantadas/ojo_de_aglas/ojo_de_aglas.html",
         "titulo": "Ojo de Aglas",
         "seccion": "wiki cralëa",
         "fecha": "18-10-2026",
-        "actualizada": "06-11-2026",
-        "resumen": "401f1551"
+        "actualizada": "08-11-2026",
+        "resumen": "2d9c1ebf"
     },
     {
         "url": "/web/wiki/mapamundi/azarasia/orden_de_clodia/orden_de_clodia.html",
         "titulo": "Orden de Clodia",
         "seccion": "wiki cralëa",
         "fecha": "18-10-2026",
-        "actualizada": "06-11-2026",
-        "resumen": "db0eb7b0"
+        "actualizada": "08-11-2026",
+        "resumen": "c8d08952"
     },
     {
         "url": "/web/wiki/mapamundi/archipielagos/tierras_encantadas/palacio_de_jan/palacio_de_jan.html",
         "titulo": "Palacio de Jan",
         "seccion": "wiki cralëa",
         "fecha": "18-10-2026",
-        "actualizada": "06-11-2026",
-        "resumen": "aff9ef80"
+        "actualizada": "08-11-2026",
+        "resumen": "b12f233a"
     },
     {
         "url": "/web/wiki/mapamundi/archipielagos/tierras_encantadas/archipielago_fragmentado/paraje_de_cereno/paraje_de_cereno.html",
         "titulo": "Paraje de Cereno",
         "seccion": "wiki cralëa",
         "fecha": "18-10-2026",
-        "actualizada": "06-11-2026",
-        "resumen": "1d2c28fb"
+        "actualizada": "08-11-2026",
+        "resumen": "8a783826"
     },
     {
         "url": "/web/wiki/mapamundi/archipielagos/islas_de_labros/paraje_de_agrimar/paraje_de_agrimar.html",
         "titulo": "Paraje de Ágrimar",
         "seccion": "wiki cralëa",
         "fecha": "18-10-2026",
-        "actualizada": "06-11-2026",
-        "resumen": "cf393ca1"
+        "actualizada": "08-11-2026",
+        "resumen": "e6c1b408"
     },
     {
         "url": "/web/wiki/mapamundi/archipielagos/faros_del_mar_ciego/popalola/popalola.html",
         "titulo": "Popalola",
         "seccion": "wiki cralëa",
         "fecha": "18-10-2026",
-        "actualizada": "06-11-2026",
-        "resumen": "e93d3e9b"
+        "actualizada": "08-11-2026",
+        "resumen": "2515ff7c"
     },
     {
         "url": "/web/wiki/mapamundi/azarasia/principado_de_lunica/principado_de_lunica.html",
         "titulo": "Principado de Lúnica",
         "seccion": "wiki cralëa",
         "fecha": "18-10-2026",
-        "actualizada": "06-11-2026",
-        "resumen": "e12e6eaf"
+        "actualizada": "08-11-2026",
+        "resumen": "0b6be3f9"
     },
     {
         "url": "/web/wiki/mapamundi/archipielagos/tierras_encantadas/archipielago_fragmentado/paramo_de_esnirma/paramo_de_esnirma.html",
         "titulo": "Páramo de Esnirma",
         "seccion": "wiki cralëa",
         "fecha": "18-10-2026",
-        "actualizada": "06-11-2026",
-        "resumen": "9f80dc42"
+        "actualizada": "08-11-2026",
+        "resumen": "1ec14a55"
     },
     {
         "url": "/web/wiki/mapamundi/partaria/paramo_de_parta/paramo_de_parta.html",
         "titulo": "Páramo de Parta",
         "seccion": "wiki cralëa",
         "fecha": "18-10-2026",
-        "actualizada": "06-11-2026",
-        "resumen": "bf92e3df"
+        "actualizada": "08-11-2026",
+        "resumen": "0876c26d"
     },
     {
         "url": "/web/wiki/mapamundi/archipielagos/isla_de_arbenia/reino_de_donotebra/reino_de_donotebra.html",
         "titulo": "Reino de Donotebra",
         "seccion": "wiki cralëa",
         "fecha": "18-10-2026",
-        "actualizada": "06-11-2026",
-        "resumen": "6847db88"
+        "actualizada": "08-11-2026",
+        "resumen": "47f2857d"
     },
     {
         "url": "/web/wiki/mapamundi/azarasia/reino_de_dreustan/reino_de_dreustan.html",
         "titulo": "Reino de Dreustán",
         "seccion": "wiki cralëa",
         "fecha": "18-10-2026",
-        "actualizada": "06-11-2026",
-        "resumen": "f2b2f63c"
+        "actualizada": "08-11-2026",
+        "resumen": "c5800907"
     },
     {
         "url": "/web/wiki/mapamundi/partaria/reino_de_kasa/reino_de_kasa.html",
         "titulo": "Reino de Kasa",
         "seccion": "wiki cralëa",
         "fecha": "18-10-2026",
-        "actualizada": "06-11-2026",
-        "resumen": "d7fd3696"
+        "actualizada": "08-11-2026",
+        "resumen": "48156c06"
     },
     {
         "url": "/web/wiki/mapamundi/azarasia/reino_de_oritania/reino_de_oritania.html",
         "titulo": "Reino de Oritania",
         "seccion": "wiki cralëa",
         "fecha": "18-10-2026",
-        "actualizada": "06-11-2026",
-        "resumen": "8576708b"
+        "actualizada": "08-11-2026",
+        "resumen": "d2a92ca4"
     },
     {
         "url": "/web/wiki/mapamundi/azarasia/reino_de_prunia/reino_de_prunia.html",
         "titulo": "Reino de Prunia",
         "seccion": "wiki cralëa",
         "fecha": "18-10-2026",
-        "actualizada": "06-11-2026",
-        "resumen": "47769df6"
+        "actualizada": "08-11-2026",
+        "resumen": "329d7420"
     },
     {
         "url": "/web/wiki/mapamundi/azarasia/reino_de_solazada/reino_de_solazada.html",
         "titulo": "Reino de Solazada",
         "seccion": "wiki cralëa",
         "fecha": "18-10-2026",
-        "actualizada": "06-11-2026",
-        "resumen": "9a68b263"
+        "actualizada": "08-11-2026",
+        "resumen": "4ddc78db"
     },
     {
         "url": "/web/wiki/mapamundi/archipielagos/archipielago_de_lunas/reino_de_yor/reino_de_yor.html",
         "titulo": "Reino de Yor",
         "seccion": "wiki cralëa",
         "fecha": "18-10-2026",
-        "actualizada": "06-11-2026",
-        "resumen": "7f4b0285"
+        "actualizada": "08-11-2026",
+        "resumen": "2ea6df13"
     },
     {
         "url": "/web/wiki/mapamundi/archipielagos/reino_de_zaustilla/reino_de_zaustilla.html",
         "titulo": "Reino de Zaustilla",
         "seccion": "wiki cralëa",
         "fecha": "18-10-2026",
-        "actualizada": "06-11-2026",
-        "resumen": "dfec7c0b"
+        "actualizada": "08-11-2026",
+        "resumen": "c02fafdb"
     },
     {
         "url": "/web/wiki/mapamundi/archipielagos/tierras_encantadas/reino_de_opalis/reino_de_opalis.html",
         "titulo": "Reino de Ópalis",
         "seccion": "wiki cralëa",
         "fecha": "18-10-2026",
-        "actualizada": "06-11-2026",
-        "resumen": "5a98274b"
+        "actualizada": "08-11-2026",
+        "resumen": "2c66cc24"
     },
     {
         "url": "/web/wiki/mapamundi/azarasia/republica_mercantil_de_denatria/republica_mercantil_de_denatria.html",
         "titulo": "República Mercantil de Denatria",
         "seccion": "wiki cralëa",
         "fecha": "18-10-2026",
-        "actualizada": "06-11-2026",
-        "resumen": "d4918e63"
+        "actualizada": "08-11-2026",
+        "resumen": "61d6cb8b"
     },
     {
         "url": "/web/wiki/mapamundi/partaria/ruinas_de_goa/ruinas_de_goa.html",
         "titulo": "Ruinas de Goa",
         "seccion": "wiki cralëa",
         "fecha": "18-10-2026",
-        "actualizada": "06-11-2026",
-        "resumen": "3a5fa9b2"
+        "actualizada": "08-11-2026",
+        "resumen": "120a7195"
     },
     {
         "url": "/web/wiki/mapamundi/archipielagos/tierras_encantadas/ruinas_de_nereth/ruinas_de_nereth.html",
         "titulo": "Ruinas de Nereth",
         "seccion": "wiki cralëa",
         "fecha": "18-10-2026",
-        "actualizada": "06-11-2026",
-        "resumen": "66aa523f"
+        "actualizada": "08-11-2026",
+        "resumen": "1748f7b9"
     },
     {
         "url": "/web/wiki/mapamundi/archipielagos/tierras_encantadas/archipielago_fragmentado/ruinas_de_thalvyr/ruinas_de_thalvyr.html",
         "titulo": "Ruinas de Thalvyr",
         "seccion": "wiki cralëa",
         "fecha": "18-10-2026",
-        "actualizada": "06-11-2026",
-        "resumen": "c565a796"
+        "actualizada": "08-11-2026",
+        "resumen": "55b4be81"
     },
     {
         "url": "/web/wiki/mapamundi/archipielagos/tierras_encantadas/santo_camino_de_kada/santo_camino_de_kada.html",
         "titulo": "Santo Camino de Kada",
         "seccion": "wiki cralëa",
         "fecha": "18-10-2026",
-        "actualizada": "06-11-2026",
-        "resumen": "4bd29e62"
+        "actualizada": "08-11-2026",
+        "resumen": "4cea6d49"
     },
     {
         "url": "/web/wiki/mapamundi/archipielagos/isla_de_arbenia/senorio_de_pizaria/senorio_de_pizaria.html",
         "titulo": "Señorío de Pizaria",
         "seccion": "wiki cralëa",
         "fecha": "18-10-2026",
-        "actualizada": "06-11-2026",
-        "resumen": "36404ec5"
+        "actualizada": "08-11-2026",
+        "resumen": "898fc66a"
     },
     {
         "url": "/web/wiki/mapamundi/azarasia/sultanato_de_doresia/sultanato_de_doresia.html",
         "titulo": "Sultanato de Doresia",
         "seccion": "wiki cralëa",
         "fecha": "18-10-2026",
-        "actualizada": "06-11-2026",
-        "resumen": "96a73562"
+        "actualizada": "08-11-2026",
+        "resumen": "5e34913e"
     },
     {
         "url": "/web/wiki/mapamundi/archipielagos/faros_del_mar_ciego/talaiva/talaiva.html",
         "titulo": "Talaiva",
         "seccion": "wiki cralëa",
         "fecha": "18-10-2026",
-        "actualizada": "06-11-2026",
-        "resumen": "062c2ec5"
+        "actualizada": "08-11-2026",
+        "resumen": "c97bdeda"
     },
     {
         "url": "/web/wiki/mapamundi/archipielagos/tierras_encantadas/archipielago_fragmentado/techo_de_az_nu/techo_de_az_nu.html",
         "titulo": "Techo de Az&#x27;Nu",
         "seccion": "wiki cralëa",
         "fecha": "18-10-2026",
-        "actualizada": "06-11-2026",
-        "resumen": "4d6e2cde"
+        "actualizada": "08-11-2026",
+        "resumen": "1a74a0c6"
     },
     {
         "url": "/web/wiki/mapamundi/archipielagos/isla_de_arbenia/territorios_unidos_de_arbenia/territorios_unidos_de_arbenia.html",
         "titulo": "Territorios Unidos de Arbenia",
         "seccion": "wiki cralëa",
         "fecha": "18-10-2026",
-        "actualizada": "06-11-2026",
-        "resumen": "309bdeca"
+        "actualizada": "08-11-2026",
+        "resumen": "b652cb1b"
     },
     {
         "url": "/web/wiki/mapamundi/partaria/tierras_reflejadas/tierras_reflejadas.html",
         "titulo": "Tierras Reflejadas",
         "seccion": "wiki cralëa",
         "fecha": "18-10-2026",
-        "actualizada": "06-11-2026",
-        "resumen": "5dbc9e7b"
+        "actualizada": "08-11-2026",
+        "resumen": "5e40d538"
     },
     {
         "url": "/web/wiki/mapamundi/azarasia/tierras_de_traena/tierras_de_traena.html",
         "titulo": "Tierras de Traena",
         "seccion": "wiki cralëa",
         "fecha": "18-10-2026",
-        "actualizada": "06-11-2026",
-        "resumen": "c9a2b929"
+        "actualizada": "08-11-2026",
+        "resumen": "ce7d718a"
     },
     {
         "url": "/web/wiki/mapamundi/partaria/tribu_boscalise/tribu_boscalise.html",
         "titulo": "Tribu Boscalise",
         "seccion": "wiki cralëa",
         "fecha": "18-10-2026",
-        "actualizada": "06-11-2026",
-        "resumen": "2487ebc2"
+        "actualizada": "08-11-2026",
+        "resumen": "279bbe57"
     },
     {
         "url": "/web/wiki/mapamundi/partaria/tribu_gogango/tribu_gogango.html",
         "titulo": "Tribu Gogango",
         "seccion": "wiki cralëa",
         "fecha": "18-10-2026",
-        "actualizada": "06-11-2026",
-        "resumen": "03c8df63"
+        "actualizada": "08-11-2026",
+        "resumen": "bae827ff"
     },
     {
         "url": "/web/wiki/mapamundi/partaria/tribu_kranimos/tribu_kranimos.html",
         "titulo": "Tribu Kránimos",
         "seccion": "wiki cralëa",
         "fecha": "18-10-2026",
-        "actualizada": "06-11-2026",
-        "resumen": "a82f918a"
+        "actualizada": "08-11-2026",
+        "resumen": "bdf48e90"
     },
     {
         "url": "/web/wiki/mapamundi/partaria/tribu_molosgo/tribu_molosgo.html",
         "titulo": "Tribu Molosgo",
         "seccion": "wiki cralëa",
         "fecha": "18-10-2026",
-        "actualizada": "06-11-2026",
-        "resumen": "1a2a6eee"
+        "actualizada": "08-11-2026",
+        "resumen": "44da6c89"
     },
     {
         "url": "/web/wiki/mapamundi/partaria/tribu_ordasco/tribu_ordasco.html",
         "titulo": "Tribu Ordasco",
         "seccion": "wiki cralëa",
         "fecha": "18-10-2026",
-        "actualizada": "06-11-2026",
-        "resumen": "89bd4e13"
+        "actualizada": "08-11-2026",
+        "resumen": "d6132472"
     },
     {
         "url": "/web/wiki/mapamundi/partaria/tribu_tuzno/tribu_tuzno.html",
         "titulo": "Tribu Tuzno",
         "seccion": "wiki cralëa",
         "fecha": "18-10-2026",
-        "actualizada": "06-11-2026",
-        "resumen": "5bfbb6ea"
+        "actualizada": "08-11-2026",
+        "resumen": "c1d1634b"
     },
     {
         "url": "/web/wiki/mapamundi/partaria/tribu_utna/tribu_utna.html",
         "titulo": "Tribu Utná",
         "seccion": "wiki cralëa",
         "fecha": "18-10-2026",
-        "actualizada": "06-11-2026",
-        "resumen": "af6989e9"
+        "actualizada": "08-11-2026",
+        "resumen": "d0d7fea8"
     },
     {
         "url": "/web/wiki/mapamundi/partaria/tribu_vadalacra/tribu_vadalacra.html",
         "titulo": "Tribu Vadalacra",
         "seccion": "wiki cralëa",
         "fecha": "18-10-2026",
-        "actualizada": "06-11-2026",
-        "resumen": "e43cae1b"
+        "actualizada": "08-11-2026",
+        "resumen": "b3232938"
     },
     {
         "url": "/web/wiki/mapamundi/archipielagos/archipielago_de_las_costras/tzeibalba/tzeibalba.html",
         "titulo": "Tzeibalba",
         "seccion": "wiki cralëa",
         "fecha": "18-10-2026",
-        "actualizada": "06-11-2026",
-        "resumen": "5267265e"
+        "actualizada": "08-11-2026",
+        "resumen": "cc167b8d"
     },
     {
         "url": "/web/wiki/mapamundi/archipielagos/archipielago_de_las_costras/tzintara/tzintara.html",
         "titulo": "Tzintara",
         "seccion": "wiki cralëa",
         "fecha": "18-10-2026",
-        "actualizada": "06-11-2026",
-        "resumen": "ea75eb91"
+        "actualizada": "08-11-2026",
+        "resumen": "b6a2736a"
     },
     {
         "url": "/web/wiki/mapamundi/archipielagos/archipielago_de_las_costras/tzompoc/tzompoc.html",
         "titulo": "Tzompoc",
         "seccion": "wiki cralëa",
         "fecha": "18-10-2026",
-        "actualizada": "06-11-2026",
-        "resumen": "51cd760d"
+        "actualizada": "08-11-2026",
+        "resumen": "fed09b53"
     },
     {
         "url": "/web/wiki/mapamundi/archipielagos/faros_del_mar_ciego/uluka/uluka.html",
         "titulo": "Uluka",
         "seccion": "wiki cralëa",
         "fecha": "18-10-2026",
-        "actualizada": "06-11-2026",
-        "resumen": "a665c983"
+        "actualizada": "08-11-2026",
+        "resumen": "771a743b"
     },
     {
         "url": "/web/wiki/mapamundi/azarasia/union_de_cuerza/union_de_cuerza.html",
         "titulo": "Unión de Cuerza",
         "seccion": "wiki cralëa",
         "fecha": "18-10-2026",
-        "actualizada": "06-11-2026",
-        "resumen": "9579ada9"
+        "actualizada": "08-11-2026",
+        "resumen": "c614081b"
     },
     {
         "url": "/web/wiki/mapamundi/azarasia/union_de_las_cumbres_calcinadas/union_de_las_cumbres_calcinadas.html",
         "titulo": "Unión de las Cumbres Calcinadas",
         "seccion": "wiki cralëa",
         "fecha": "18-10-2026",
-        "actualizada": "06-11-2026",
-        "resumen": "19e89d34"
+        "actualizada": "08-11-2026",
+        "resumen": "32da667f"
     },
     {
         "url": "/web/wiki/mapamundi/partaria/valle_de_utan/valle_de_utan.html",
         "titulo": "Valle de Után",
         "seccion": "wiki cralëa",
         "fecha": "18-10-2026",
-        "actualizada": "06-11-2026",
-        "resumen": "f3b51056"
+        "actualizada": "08-11-2026",
+        "resumen": "d79fbfbb"
     },
     {
         "url": "/web/wiki/mapamundi/archipielagos/faros_del_mar_ciego/vanu_reki/vanu_reki.html",
         "titulo": "Vanu Reki",
         "seccion": "wiki cralëa",
         "fecha": "18-10-2026",
-        "actualizada": "06-11-2026",
-        "resumen": "6f2dbfef"
+        "actualizada": "08-11-2026",
+        "resumen": "f16353f8"
     },
     {
         "url": "/web/wiki/mapamundi/archipielagos/faros_del_mar_ciego/varamo_a/varamo_a.html",
         "titulo": "Varamo&#x27;a",
         "seccion": "wiki cralëa",
         "fecha": "18-10-2026",
-        "actualizada": "06-11-2026",
-        "resumen": "bc8923da"
+        "actualizada": "08-11-2026",
+        "resumen": "a44515e5"
     },
     {
         "url": "/web/wiki/mapamundi/archipielagos/archipielago_de_las_costras/yaxch_umekte/yaxch_umekte.html",
         "titulo": "Yaxch&#x27;umekte",
         "seccion": "wiki cralëa",
         "fecha": "18-10-2026",
-        "actualizada": "06-11-2026",
-        "resumen": "42690ae1"
+        "actualizada": "08-11-2026",
+        "resumen": "e4355e01"
     },
     {
         "url": "/web/wiki/religiones/panteon/aglas.html",
         "titulo": "Aglas",
         "seccion": "wiki cralëa",
         "fecha": "16-10-2026",
-        "actualizada": "06-11-2026",
-        "resumen": "539e7a7c"
+        "actualizada": "08-11-2026",
+        "resumen": "9ce6c657"
     },
     {
         "url": "/web/wiki/religiones/panteon/azaras.html",
         "titulo": "Azaras",
         "seccion": "wiki cralëa",
         "fecha": "16-10-2026",
-        "actualizada": "06-11-2026",
-        "resumen": "d983cd49"
+        "actualizada": "08-11-2026",
+        "resumen": "7d0d5fc0"
     },
     {
         "url": "/web/wiki/religiones/panteon/bagros.html",
         "titulo": "Bagros",
         "seccion": "wiki cralëa",
         "fecha": "16-10-2026",
-        "actualizada": "06-11-2026",
-        "resumen": "3c535cb7"
+        "actualizada": "08-11-2026",
+        "resumen": "2da00cb9"
     },
     {
         "url": "/web/wiki/religiones/panteon/cahir.html",
         "titulo": "Cahir",
         "seccion": "wiki cralëa",
         "fecha": "16-10-2026",
-        "actualizada": "06-11-2026",
-        "resumen": "f1c4036f"
+        "actualizada": "08-11-2026",
+        "resumen": "93f23026"
     },
     {
         "url": "/web/wiki/religiones/panteon/calad.html",
         "titulo": "Calad",
         "seccion": "wiki cralëa",
         "fecha": "16-10-2026",
-        "actualizada": "06-11-2026",
-        "resumen": "ac567fe1"
+        "actualizada": "08-11-2026",
+        "resumen": "6ac81e8e"
     },
     {
         "url": "/web/wiki/religiones/panteon/clodia.html",
         "titulo": "Clodia",
         "seccion": "wiki cralëa",
         "fecha": "16-10-2026",
-        "actualizada": "06-11-2026",
-        "resumen": "a04d6dbb"
+        "actualizada": "08-11-2026",
+        "resumen": "e050e1dd"
     },
     {
         "url": "/web/wiki/utilidades/conversor_de_fechas.html",
         "titulo": "Conversor de fechas",
         "seccion": "wiki cralëa",
         "fecha": "16-10-2026",
-        "actualizada": "06-11-2026",
-        "resumen": "cd89e031"
+        "actualizada": "08-11-2026",
+        "resumen": "5715d16e"
     },
     {
         "url": "/web/wiki/religiones/panteon/demadia.html",
         "titulo": "Demadia",
         "seccion": "wiki cralëa",
         "fecha": "16-10-2026",
-        "actualizada": "06-11-2026",
-        "resumen": "4fb0b586"
+        "actualizada": "08-11-2026",
+        "resumen": "0ce74a32"
     },
     {
         "url": "/web/wiki/utilidades/diccionario.html",
         "titulo": "Diccionario",
         "seccion": "wiki cralëa",
         "fecha": "16-10-2026",
-        "actualizada": "06-11-2026",
-        "resumen": "b89153c7"
+        "actualizada": "08-11-2026",
+        "resumen": "6af5ab7e"
     },
     {
         "url": "/web/wiki/religiones/panteon/el_panteon_de_cralea.html",
         "titulo": "El Panteón de Cralëa",
         "seccion": "wiki cralëa",
         "fecha": "16-10-2026",
-        "actualizada": "06-11-2026",
-        "resumen": "8ae553e6"
+        "actualizada": "08-11-2026",
+        "resumen": "c1e11a3c"
     },
     {
         "url": "/web/wiki/religiones/panteon/elvir.html",
         "titulo": "Elvir",
         "seccion": "wiki cralëa",
         "fecha": "16-10-2026",
-        "actualizada": "06-11-2026",
-        "resumen": "1a556039"
+        "actualizada": "08-11-2026",
+        "resumen": "29aec6aa"
     },
     {
         "url": "/web/wiki/utilidades/generador_de_nombres.html",
         "titulo": "Generador de nombres",
         "seccion": "wiki cralëa",
         "fecha": "16-10-2026",
-        "actualizada": "06-11-2026",
-        "resumen": "b12c111f"
+        "actualizada": "08-11-2026",
+        "resumen": "c6b062fe"
     },
     {
         "url": "/web/wiki/religiones/panteon/imedia.html",
         "titulo": "Imedia",
         "seccion": "wiki cralëa",
         "fecha": "16-10-2026",
-        "actualizada": "06-11-2026",
-        "resumen": "a03e25e8"
+        "actualizada": "08-11-2026",
+        "resumen": "1ae06081"
     },
     {
         "url": "/web/wiki/religiones/panteon/la_mesa_del_orden_natural.html",
         "titulo": "La Mesa del Orden Natural",
         "seccion": "wiki cralëa",
         "fecha": "16-10-2026",
-        "actualizada": "06-11-2026",
-        "resumen": "a5656269"
+        "actualizada": "08-11-2026",
+        "resumen": "2ef2c940"
     },
     {
         "url": "/web/wiki/religiones/panteon/labros.html",
         "titulo": "Labros",
         "seccion": "wiki cralëa",
         "fecha": "16-10-2026",
-        "actualizada": "06-11-2026",
-        "resumen": "a7ae031c"
+        "actualizada": "08-11-2026",
+        "resumen": "f9cbb053"
     },
     {
         "url": "/web/wiki/religiones/panteon/los_arcontes_primordiales.html",
         "titulo": "Los Arcontes Primordiales",
         "seccion": "wiki cralëa",
         "fecha": "16-10-2026",
-        "actualizada": "06-11-2026",
-        "resumen": "f366c3b9"
+        "actualizada": "08-11-2026",
+        "resumen": "c3375a0c"
     },
     {
         "url": "/web/wiki/religiones/panteon/los_heraldos_de_la_virtud_y_la_ruina.html",
         "titulo": "Los Heraldos de la Virtud y la Ruina",
         "seccion": "wiki cralëa",
         "fecha": "16-10-2026",
-        "actualizada": "06-11-2026",
-        "resumen": "76483d22"
+        "actualizada": "08-11-2026",
+        "resumen": "fa045d2c"
     },
     {
         "url": "/web/wiki/religiones/panteon/lusdra.html",
         "titulo": "Lusdra",
         "seccion": "wiki cralëa",
         "fecha": "16-10-2026",
-        "actualizada": "06-11-2026",
-        "resumen": "9d862bf6"
+        "actualizada": "08-11-2026",
+        "resumen": "65dcecf4"
     },
     {
         "url": "/web/wiki/religiones/panteon/metra.html",
         "titulo": "Metra",
         "seccion": "wiki cralëa",
         "fecha": "16-10-2026",
-        "actualizada": "06-11-2026",
-        "resumen": "96f15eeb"
+        "actualizada": "08-11-2026",
+        "resumen": "5d5e8827"
     },
     {
         "url": "/web/wiki/religiones/panteon/morlon.html",
         "titulo": "Morlon",
         "seccion": "wiki cralëa",
         "fecha": "16-10-2026",
-        "actualizada": "06-11-2026",
-        "resumen": "91d158c2"
+        "actualizada": "08-11-2026",
+        "resumen": "52a3e650"
     },
     {
         "url": "/web/wiki/religiones/panteon/naria.html",
         "titulo": "Naria",
         "seccion": "wiki cralëa",
         "fecha": "16-10-2026",
-        "actualizada": "06-11-2026",
-        "resumen": "04c95a19"
+        "actualizada": "08-11-2026",
+        "resumen": "e351391d"
     },
     {
         "url": "/web/wiki/religiones/panteon/parta.html",
         "titulo": "Parta",
         "seccion": "wiki cralëa",
         "fecha": "16-10-2026",
-        "actualizada": "06-11-2026",
-        "resumen": "4a512232"
+        "actualizada": "08-11-2026",
+        "resumen": "e7f42510"
     },
     {
         "url": "/web/wiki/utilidades/relaciones.html",
         "titulo": "Relaciones",
         "seccion": "wiki cralëa",
         "fecha": "16-10-2026",
-        "actualizada": "06-11-2026",
-        "resumen": "5c8676d6"
+        "actualizada": "08-11-2026",
+        "resumen": "50ff9f4a"
     },
     {
         "url": "/web/wiki/religiones/panteon/runis.html",
         "titulo": "Runis",
         "seccion": "wiki cralëa",
         "fecha": "16-10-2026",
-        "actualizada": "06-11-2026",
-        "resumen": "bacadb94"
+        "actualizada": "08-11-2026",
+        "resumen": "ae8e3a14"
     },
     {
         "url": "/web/wiki/religiones/panteon/sedril.html",
         "titulo": "Sedril",
         "seccion": "wiki cralëa",
         "fecha": "16-10-2026",
-        "actualizada": "06-11-2026",
-        "resumen": "8e8261e3"
+        "actualizada": "08-11-2026",
+        "resumen": "18acc68a"
     },
     {
         "url": "/web/wiki/religiones/panteon/verdos.html",
         "titulo": "Verdos",
         "seccion": "wiki cralëa",
         "fecha": "16-10-2026",
-        "actualizada": "06-11-2026",
-        "resumen": "c79e4080"
+        "actualizada": "08-11-2026",
+        "resumen": "0bec16e8"
     },
     {
         "url": "/web/wiki/mapamundi/archipielagos/tierras_encantadas/archipielago_fragmentado/archipielago_fragmentado.html",
         "titulo": "Archipiélago Fragmentado",
         "seccion": "wiki cralëa",
         "fecha": "15-10-2026",
-        "actualizada": "06-11-2026",
-        "resumen": "ea751669"
+        "actualizada": "08-11-2026",
+        "resumen": "29db1aa7"
     },
     {
         "url": "/web/wiki/calendario/el_ciclo_de_los_heraldos.html",
         "titulo": "El Ciclo de los Heraldos",
         "seccion": "wiki cralëa",
         "fecha": "15-10-2026",
-        "actualizada": "06-11-2026",
-        "resumen": "3035e7ed"
+        "actualizada": "08-11-2026",
+        "resumen": "e9b6d12b"
     },
     {
         "url": "/web/wiki/cosmologia/el_sol.html",
         "titulo": "El Sol",
         "seccion": "wiki cralëa",
         "fecha": "15-10-2026",
-        "actualizada": "06-11-2026",
-        "resumen": "6b0b1a7b"
+        "actualizada": "08-11-2026",
+        "resumen": "96ad8ce8"
     },
     {
         "url": "/web/wiki/cosmologia/gomath.html",
         "titulo": "Gomath",
         "seccion": "wiki cralëa",
         "fecha": "15-10-2026",
-        "actualizada": "06-11-2026",
-        "resumen": "a75b5073"
+        "actualizada": "08-11-2026",
+        "resumen": "aaeee8fb"
     },
     {
         "url": "/web/wiki/mapamundi/archipielagos/isla_de_arbenia/isla_de_arbenia.html",
         "titulo": "Isla de Arbenia",
         "seccion": "wiki cralëa",
         "fecha": "15-10-2026",
-        "actualizada": "06-11-2026",
-        "resumen": "d4cf0380"
+        "actualizada": "08-11-2026",
+        "resumen": "4955bfe3"
     },
     {
         "url": "/web/wiki/mapamundi/archipielagos/islas_de_labros/islas_de_labros.html",
         "titulo": "Islas de Labros",
         "seccion": "wiki cralëa",
         "fecha": "15-10-2026",
-        "actualizada": "06-11-2026",
-        "resumen": "fa43e455"
+        "actualizada": "08-11-2026",
+        "resumen": "2ac232eb"
     },
     {
         "url": "/web/wiki/cosmologia/la_cosmologia_de_cralea.html",
         "titulo": "La Cosmología de Cralëa",
         "seccion": "wiki cralëa",
         "fecha": "15-10-2026",
-        "actualizada": "06-11-2026",
-        "resumen": "22ecdb75"
+        "actualizada": "08-11-2026",
+        "resumen": "422f4be4"
     },
     {
         "url": "/web/wiki/cosmologia/la_luna.html",
         "titulo": "La Luna",
         "seccion": "wiki cralëa",
         "fecha": "15-10-2026",
-        "actualizada": "06-11-2026",
-        "resumen": "819eddca"
+        "actualizada": "08-11-2026",
+        "resumen": "f4f351d2"
     },
     {
         "url": "/web/wiki/cosmologia/lurmeri.html",
         "titulo": "Lurmeri",
         "seccion": "wiki cralëa",
         "fecha": "15-10-2026",
-        "actualizada": "06-11-2026",
-        "resumen": "b54cd369"
+        "actualizada": "08-11-2026",
+        "resumen": "84470f04"
     },
     {
         "url": "/web/wiki/cosmologia/nevadra.html",
         "titulo": "Nevadra",
         "seccion": "wiki cralëa",
         "fecha": "15-10-2026",
-        "actualizada": "06-11-2026",
-        "resumen": "6241fe47"
+        "actualizada": "08-11-2026",
+        "resumen": "36d12614"
     },
     {
         "url": "/web/wiki/mapamundi/archipielagos/tierras_encantadas/tierras_encantadas.html",
         "titulo": "Tierras Encantadas",
         "seccion": "wiki cralëa",
         "fecha": "15-10-2026",
-        "actualizada": "06-11-2026",
-        "resumen": "96742c05"
+        "actualizada": "08-11-2026",
+        "resumen": "ae9999ca"
     },
     {
         "url": "/web/wiki/mapamundi/archipielagos/archipielago_de_las_costras/archipielago_de_las_costras.html",
         "titulo": "Archipielago de las Costras",
         "seccion": "wiki cralëa",
         "fecha": "11-10-2026",
-        "actualizada": "06-11-2026",
-        "resumen": "3720b4b2"
+        "actualizada": "08-11-2026",
+        "resumen": "fc4539e6"
     },
     {
         "url": "/web/wiki/mapamundi/archipielagos/archipielago_de_lunas/archipielago_de_lunas.html",
         "titulo": "Archipiélago de Lunas",
         "seccion": "wiki cralëa",
         "fecha": "11-10-2026",
-        "actualizada": "06-11-2026",
-        "resumen": "0a6bb61a"
+        "actualizada": "08-11-2026",
+        "resumen": "4bc29d9e"
     },
     {
         "url": "/web/wiki/mapamundi/azarasia/azarasia.html",
         "titulo": "Azarasia",
         "seccion": "wiki cralëa",
         "fecha": "11-10-2026",
-        "actualizada": "06-11-2026",
-        "resumen": "974e2a02"
+        "actualizada": "08-11-2026",
+        "resumen": "0382b737"
     },
     {
         "url": "/web/wiki/linea-de-tiempo/evento_cataclismo_de_aiszag_y_despertar_de_los_mirakhalim.html",
         "titulo": "Cataclismo de Aiszág y despertar de los Mirakhalim",
         "seccion": "wiki cralëa",
         "fecha": "11-10-2026",
-        "actualizada": "06-11-2026",
-        "resumen": "cffd58ec"
+        "actualizada": "08-11-2026",
+        "resumen": "bce78854"
     },
     {
         "url": "/web/wiki/linea-de-tiempo/evento_comienzo_del_exilio_de_la_herida.html",
         "titulo": "Comienzo del Exilio de La Herida",
         "seccion": "wiki cralëa",
         "fecha": "11-10-2026",
-        "actualizada": "06-11-2026",
-        "resumen": "1b593ee1"
+        "actualizada": "08-11-2026",
+        "resumen": "619a0ef4"
     },
     {
         "url": "/web/wiki/linea-de-tiempo/evento_conflicto_de_la_primera_disonancia.html",
         "titulo": "Conflicto de la Primera Disonancia",
         "seccion": "wiki cralëa",
         "fecha": "11-10-2026",
-        "actualizada": "06-11-2026",
-        "resumen": "39168d75"
+        "actualizada": "08-11-2026",
+        "resumen": "a04a890e"
     },
     {
         "url": "/web/wiki/linea-de-tiempo/evento_creacion_del_jardin_del_ultimo_canto.html",
         "titulo": "Creación del Jardín del Último Canto",
         "seccion": "wiki cralëa",
         "fecha": "11-10-2026",
-        "actualizada": "06-11-2026",
-        "resumen": "41972156"
+        "actualizada": "08-11-2026",
+        "resumen": "c68881aa"
     },
     {
         "url": "/web/wiki/linea-de-tiempo/evento_destierro_de_los_mirakhalim.html",
         "titulo": "Destierro de los Mirakhalim",
         "seccion": "wiki cralëa",
         "fecha": "11-10-2026",
-        "actualizada": "06-11-2026",
-        "resumen": "2fd4dbec"
+        "actualizada": "08-11-2026",
+        "resumen": "d237e771"
     },
     {
         "url": "/web/wiki/mapamundi/archipielagos/faros_del_mar_ciego/faros_del_mar_ciego.html",
         "titulo": "Faros del Mar Ciego",
         "seccion": "wiki cralëa",
         "fecha": "11-10-2026",
-        "actualizada": "06-11-2026",
-        "resumen": "1d13952f"
+        "actualizada": "08-11-2026",
+        "resumen": "fd325208"
     },
     {
         "url": "/web/wiki/linea-de-tiempo/evento_fin_del_conflicto_y_nacimiento_de_cralea.html",
         "titulo": "Fin del conflicto y Nacimiento de Cralëa",
         "seccion": "wiki cralëa",
         "fecha": "11-10-2026",
-        "actualizada": "06-11-2026",
-        "resumen": "bb625539"
+        "actualizada": "08-11-2026",
+        "resumen": "e7a7c431"
     },
     {
         "url": "/web/wiki/linea-de-tiempo/evento_los_kurghar_redactan_la_vista_de_la_primera_luz.html",
         "titulo": "Los Kurghar redactan la Vista de la Primera Luz",
         "seccion": "wiki cralëa",
         "fecha": "11-10-2026",
-        "actualizada": "06-11-2026",
-        "resumen": "3335f4d7"
+        "actualizada": "08-11-2026",
+        "resumen": "636f4f9e"
     },
     {
         "url": "/web/wiki/linea-de-tiempo/linea_de_tiempo.html",
         "titulo": "Línea de tiempo",
         "seccion": "wiki cralëa",
         "fecha": "11-10-2026",
-        "actualizada": "06-11-2026",
-        "resumen": "b5aeb55f"
+        "actualizada": "08-11-2026",
+        "resumen": "f61da80f"
     },
     {
         "url": "/web/wiki/linea-de-tiempo/evento_nacimiento_azaras_y_parta.html",
         "titulo": "Nacimiento Azaras y Parta",
         "seccion": "wiki cralëa",
         "fecha": "11-10-2026",
-        "actualizada": "06-11-2026",
-        "resumen": "9e9e36ee"
+        "actualizada": "08-11-2026",
+        "resumen": "4c271dc3"
     },
     {
         "url": "/web/wiki/mapamundi/partaria/partaria.html",
         "titulo": "Partaria",
         "seccion": "wiki cralëa",
         "fecha": "11-10-2026",
-        "actualizada": "06-11-2026",
-        "resumen": "a3b65e75"
+        "actualizada": "08-11-2026",
+        "resumen": "b1664139"
     },
     {
         "url": "/web/wiki/linea-de-tiempo/evento_primeros_registros_nithir_conocidos.html",
         "titulo": "Primeros registros Nithir conocidos",
         "seccion": "wiki cralëa",
         "fecha": "11-10-2026",
-        "actualizada": "06-11-2026",
-        "resumen": "55f35a5e"
+        "actualizada": "08-11-2026",
+        "resumen": "df6d5802"
     },
     {
         "url": "/web/wiki/linea-de-tiempo/evento_surgimiento_arcontes_primordiales.html",
         "titulo": "Surgimiento Arcontes Primordiales",
         "seccion": "wiki cralëa",
         "fecha": "11-10-2026",
-        "actualizada": "06-11-2026",
-        "resumen": "2e550176"
+        "actualizada": "08-11-2026",
+        "resumen": "2275c643"
     },
     {
         "url": "/web/wiki/linea-de-tiempo/evento_ultimos_registros_y_fin_de_la_civilizacion_nithir.html",
         "titulo": "Últimos registros y fin de la Civilización Nithir",
         "seccion": "wiki cralëa",
         "fecha": "11-10-2026",
-        "actualizada": "06-11-2026",
-        "resumen": "c873df04"
+        "actualizada": "08-11-2026",
+        "resumen": "b196b60f"
     },
     {
         "url": "/web/wiki/mapa_mapamundi_de_cralea.html",
         "titulo": "Mapamundi de Cralëa",
         "seccion": "wiki cralëa",
         "fecha": "10-10-2026",
-        "actualizada": "06-11-2026",
-        "resumen": "db9c07cf"
+        "actualizada": "08-11-2026",
+        "resumen": "09c5a714"
     },
     {
         "url": "/web/wiki/como_se_escribe_esto.html",
         "titulo": "Cómo se escribe esto",
         "seccion": "wiki cralëa",
         "fecha": "09-10-2026",
-        "actualizada": "06-11-2026",
-        "resumen": "9fcc04a3"
+        "actualizada": "08-11-2026",
+        "resumen": "37655131"
     },
     {
         "url": "/web/wiki/index_wiki.html",

@@ -357,7 +357,8 @@
             "url": "/web/notas_rol/ragna/sesion-01.html",
             "pdf": "https://drive.google.com/file/d/16_wFkaKOxEd0Vv8o1ryuvdAEbBqWJWNb/view?usp=sharing",
             "resumen": "Las ventas de Denelia: La Gran Caravana llega a Sirevia, donde Denelia vende magia y Sigil le pide buscar a Thenarys.\nEl Sueño del Elemental: Thenarys descubre el descontento de los cazadores con Apaaka y Denelia lo lleva junto a Sigil.\nExploración en el bosque: Faëlar explora el bosque, descubre la amenaza de un osobúho y detecta bandidos acercándose a la caravana.\nReunión familiar: Mellissa se reúne con su familia y descubre problemas de hierro, bandidos y descontento con Apaaka, hasta que Mita alerta de un robo en la caravana.\nAsalto de los bandidos: Los bandidos roban mercancías usando pergaminos de teletransporte, pero el grupo logra derrotarlos y capturar a su líder; Sozil sigue desaparecido.\nPreparativos del viaje: Por orden de Sigil Mellissa organiza una misión secreta para recuperar la mercancía robada, descubre el campamento de unos cuarenta bandidos y su lider puede ser un mago.\nRumbo a las montañas: El grupo reúne provisiones, prepara cuatro caballos y parte de noche en secreto hacia el campamento bandido, alejándose para evitar que los sigan.\nEmboscada de los lobos: El grupo sufre una emboscada de lobos liderados por uno gigante y ártico, logra vencerlos y acampa para recuperarse, aprovechando sus pieles y carne.\nDescanso en el bosque: Denelia conoce mejor a Thenarys, quien revela tener una deuda con Sigil, mientras Faëlar caza un zorro ártico y regala a Denelia un gorro con su piel.\nEncuentro con el ermitaño: Faëlar encuentra al ermitaño, quien advierte que el lobo ártico era un espíritu protector del bosque y que matarlo podría enfurecer a otros espíritus.\nLlegada a Chitxia: El grupo llega a Chitxia, donde ayuda a Rise a reparar el carro y recuperar los cultivos a cambio de alojamiento y una rebaja, mientras investiga los peligros de la zona.",
-            "resumen_auto": false
+            "resumen_auto": false,
+            "ruta": "/web/notas_rol/ragna/mapa_mapamundi.html?sesion=1"
         },
         {
             "numero": 2,
@@ -366,7 +367,8 @@
             "url": "/web/notas_rol/ragna/sesion-02.html",
             "pdf": "",
             "resumen": "Salida nocturna: El grupo descansa en casa de Rise, mientras Faëlar vigila el pueblo y descubre enormes marcas de garras que indican la presencia cercana del osobúho.\nDesayuno en Chitxia: El grupo descubre el doloroso pasado de Rise y sus pinturas sombrías, mientras Faëlar informa sobre el osobúho y consiguen negociar el carro por 75 monedas de oro.\nLlegan bandidos a Chitxia:  Los Colmillo de Lobo llegan a Chitxia para extorsionar al pueblo, y Mellissa intenta hacerse pasar por su nueva protectora sin éxito.\nCombate en Chitxia:  El grupo derrota a los Colmillo de Lobo pese a su poderosa magia; Denelia y Faëlar caen en combate, pero logran capturar a su líder, Björn.\nInterrogatorio a Björn y salida de Chitxia:\nLo que descubrimos: El grupo interroga a Björn y descubre una entrada secreta al campamento bandido; Rise les regala el carro y les pide recuperar las riquezas robadas, incluidos recuerdos de su esposa.\nCementerio de gigantes: El grupo viaja hacia las montañas, descubre antiguas tumbas de gigantes con inscripciones misteriosas y Faëlar envía un halcón a explorar la entrada secreta antes de continuar de noche.\nFantasmas en la noche: Faëlar percibe presencias extrañas en las tumbas y Thenarys descubre que el cementerio está profanado por magia necrótica; después, Denelia averigua más sobre su devoción a Tyr y su vínculo con la caravana.\nLlegamos a la montaña: El grupo confirma la entrada secreta a la montaña gracias al halcón, abandona el carromato para avanzar sin ser detectado y ejecuta a Björn para evitar que escape.",
-            "resumen_auto": false
+            "resumen_auto": false,
+            "ruta": "/web/notas_rol/ragna/mapa_mapamundi.html?sesion=2"
         },
         {
             "numero": 3,
@@ -375,7 +377,8 @@
             "url": "/web/notas_rol/ragna/sesion-03.html",
             "pdf": "",
             "resumen": "La entrada secreta: Gracias al águila, el grupo encuentra la entrada secreta de la guarida y avanza por una pasarela sobre la cueva, donde Mellissa desactiva un cable trampa.\nDisfrazados de bandidos: Mita descubre la armería, el grupo se disfraza con la ropa de los bandidos y llega hasta unas enormes puertas con runas gigantes de protección.\nNuevos reclutas: Haciéndose pasar por reclutas, Mellissa y Faëlar engañan al líder, que les manda a Desliz a recoger una caja de un encapuchado con el nombre en clave Mier.\nLa sala de las puertas gigantes: El grupo recupera la mercancía robada de la caravana, unas joyas y varios pergaminos, y encuentra algo encerrado en hielo perpetuo y las inscripciones de un gigante sobre Vorrak.\nSacando la mercancía: Mellissa saca la mercancía a escondidas hasta el carromato mientras el resto espera, disfrazado, a algún bandido importante que no llega.\nEl plan del osobúho: Por la noche aparece el osobúho y el grupo decide atraerlo con ayuda de Mita hasta el campamento de los bandidos.\nCaos en la cueva: Con el osobúho agrandado por Faëlar y la Bola de fuego de Thenarys caen casi todos los bandidos; capturan al líder y Mellissa mata a su lobo, que parecía controlado mentalmente.\nEl botín de los bandidos: Entre el botín, una cimitarra +1, y en el despacho, las rutas de los mercaderes de Sirevia y cartas sobre un pergamino de Geas; a Sigil no le suena Mier.\nDe vuelta a Chitxia: El líder capturado se suicida durante la noche, Denelia descubre que Thenarys es un elfo marino del Reino Carsa y el grupo sube de nivel.",
-            "resumen_auto": false
+            "resumen_auto": false,
+            "ruta": "/web/notas_rol/ragna/mapa_mapamundi.html?sesion=3"
         }
     ],
     "dinero": {
@@ -421,11 +424,20 @@
     ],
     "imagenes": [
         {
+            "titulo": "Mapa de Chitxia",
+            "imagen": "/imagenes/notas_rol/ragna/imagenes/mapa-de-chitxia.webp"
+        },
+        {
+            "titulo": "Mapa de Sirevia",
+            "imagen": "/imagenes/notas_rol/ragna/imagenes/mapa-de-sirevia.webp"
+        },
+        {
             "titulo": "Esperando a que se desate el caos",
             "imagen": "/imagenes/notas_rol/ragna/imagenes/esperando-al-osobuho.webp",
             "de": 3,
             "quien": "Julia",
             "nota": "El grupo escondido entre los arbustos mientras el osobúho entra en la cueva de los bandidos. Lo dibujó Julia durante la partida."
         }
-    ]
+    ],
+    "mapa": "/web/notas_rol/ragna/mapa_mapamundi.html"
 }
