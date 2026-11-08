@@ -1,0 +1,453 @@
+/* =========================================
+   EL DISEÑO «WINDOWS 98»
+   =========================================
+   La tercera forma de ver la app (Aa → «diseño»), como un Windows de los
+   de antes: el escritorio verde azulado, las ventanas grises con relieve
+   (luz arriba a la izquierda, sombra abajo a la derecha), la barra de
+   título azul marino en degradado con la letra blanca, los botones
+   grises que se hunden al pulsarlos y los campos blancos hundidos.
+
+   Lo pone data-estilo="windows" en el <html> (scripts/arranque.js desde
+   «richi-estilo»; lo cambia scripts/ajustes.js). LOS COLORES VAN CON EL
+   TEMA: con el claro, el Windows 98 de siempre (gris, azul marino y el
+   escritorio verde azulado); con el oscuro, un Windows 98 oscuro; con los
+   de terminal, una consola (negro y el color del tema, como el cmd); con
+   los demás (puros, tranquilos), el gris y el azul salen de los colores
+   de ese tema. Todo lo de abajo usa las --w-…, que se ponen aquí.
+
+   La letra es la del sistema (Tahoma, la de Windows; si no está, la sin
+   remates que haya): no se descarga ninguna. Con «más legible» manda la
+   Atkinson, como siempre.
+
+   El relieve va con box-shadow por dentro (cuatro rayas de un píxel) y
+   no con border: outset, que cada navegador pinta a su manera. */
+
+/* Sus letras (OFL, solo se descargan si se elige este diseño): Pixelify
+   Sans para las barras de título, que imita las letras de píxeles de
+   Windows; VT323, la de los terminales, para los temas de terminal (el
+   cmd). El texto, la del sistema (Tahoma). */
+@font-face {
+    font-family: "Pixelify Sans";
+    src: url("../tipografias/pixelify-sans-700.woff2") format("woff2");
+    font-weight: 700;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: "VT323";
+    src: url("../tipografias/vt323-400.woff2") format("woff2");
+    font-weight: 400;
+    font-style: normal;
+    font-display: swap;
+}
+
+:root[data-estilo="windows"] {
+    --fuente-texto: Tahoma, "Segoe UI", Verdana, "DejaVu Sans", sans-serif;
+    --fuente-mono: var(--fuente-texto);
+    --fuente-ventana: "Pixelify Sans", var(--fuente-texto);
+    --fuente-titular: var(--fuente-texto);
+    --bg-texture: none;
+    /* De serie (puros, tranquilos): sacados de los colores del tema. */
+    --w-gris: var(--purple-lighter);
+    --w-texto: var(--white);
+    --w-luz: color-mix(in srgb, var(--purple-lighter) 45%, #ffffff);
+    --w-media-luz: color-mix(in srgb, var(--purple-lighter) 75%, #ffffff);
+    --w-sombra: color-mix(in srgb, var(--purple-lighter) 55%, #000000);
+    --w-negro: color-mix(in srgb, var(--purple-lighter) 15%, #000000);
+    --w-azul: var(--yellow);
+    --w-azul-claro: color-mix(in srgb, var(--yellow) 60%, var(--purple-lighter));
+    --w-titulo: var(--yellow-contrast);
+    --w-campo: var(--purple);
+    --w-escritorio: var(--purple);
+    --w-relieve: inset -1px -1px var(--w-negro), inset 1px 1px var(--w-luz), inset -2px -2px var(--w-sombra),
+        inset 2px 2px var(--w-media-luz);
+    --w-hundido: inset -1px -1px var(--w-luz), inset 1px 1px var(--w-sombra), inset -2px -2px var(--w-media-luz),
+        inset 2px 2px var(--w-negro);
+    --w-borde: var(--w-media-luz) var(--w-negro) var(--w-negro) var(--w-media-luz);
+}
+
+:root[data-letra="legible"][data-estilo="windows"] {
+    --fuente-texto: "Atkinson Hyperlegible", Tahoma, sans-serif;
+    --fuente-ventana: var(--fuente-texto);
+}
+
+/* Con los de terminal, todo con la letra de consola. VT323 es pequeña de
+   por sí: font-size-adjust la iguala en altura a las demás (con
+   cualquier tamaño de texto). */
+:root[data-estilo="windows"][data-theme^="terminal-"]:not([data-letra="legible"]) {
+    --fuente-texto: "VT323", "DejaVu Sans Mono", monospace;
+    --fuente-ventana: "VT323", monospace;
+}
+
+:root[data-estilo="windows"][data-theme^="terminal-"]:not([data-letra="legible"]) body {
+    font-size-adjust: 0.56;
+}
+
+/* CON EL TEMA CLARO: el Windows 98 de siempre. Negro sobre el gris da
+   12:1 y el azul marino sobre el gris, 11:1. */
+:root[data-estilo="windows"][data-theme="light"] {
+    color-scheme: light;
+    --w-gris: #c0c0c0;
+    --w-texto: #000000;
+    --w-luz: #ffffff;
+    --w-media-luz: #dfdfdf;
+    --w-sombra: #808080;
+    --w-negro: #0a0a0a;
+    --w-azul: #000080;
+    --w-azul-claro: #1084d0;
+    --w-titulo: #ffffff;
+    --w-campo: #ffffff;
+    --w-escritorio: #008080;
+    --purple: #ffffff;
+    --purple-lighter: #c0c0c0;
+    --surface: #c0c0c0;
+    --yellow: #000080;
+    --yellow-contrast: #ffffff;
+    --yellow-glow-strong: rgba(0, 0, 128, 0.35);
+    --white: #000000;
+    --muted: #202020;
+    --border: #808080;
+    --error: #a00000;
+}
+
+/* CON EL OSCURO (el de fábrica, sin data-theme): un Windows 98 de noche,
+   gris carbón con el relieve en grises y la barra azul más viva. El texto
+   claro sobre el gris da 11:1; el azul de los enlaces, 7:1. */
+:root[data-estilo="windows"]:not([data-theme]) {
+    color-scheme: dark;
+    --w-gris: #3a3a3e;
+    --w-texto: #f2f2f2;
+    --w-luz: #6c6c72;
+    --w-media-luz: #4e4e54;
+    --w-sombra: #1f1f22;
+    --w-negro: #000000;
+    --w-azul: #1c3a8f;
+    --w-azul-claro: #3f74d6;
+    --w-titulo: #ffffff;
+    --w-campo: #202024;
+    --w-escritorio: #0f3a3a;
+    --purple: #202024;
+    --purple-lighter: #3a3a3e;
+    --surface: #3a3a3e;
+    --yellow: #9cc0ff;
+    --yellow-contrast: #000000;
+    --yellow-glow-strong: rgba(156, 192, 255, 0.35);
+    --white: #f2f2f2;
+    --muted: #d6d6d6;
+    --border: #6c6c72;
+    --error: #ff9b94;
+}
+
+/* CON LOS DE TERMINAL: una consola, el cmd. Todo negro, el relieve y el
+   texto del color del tema y la barra de título llena de ese color. */
+:root[data-estilo="windows"][data-theme^="terminal-"] {
+    --w-gris: #000000;
+    --w-texto: var(--yellow);
+    --w-luz: var(--yellow);
+    --w-media-luz: color-mix(in srgb, var(--yellow) 55%, #000000);
+    --w-sombra: color-mix(in srgb, var(--yellow) 35%, #000000);
+    --w-negro: color-mix(in srgb, var(--yellow) 20%, #000000);
+    --w-azul: var(--yellow);
+    --w-azul-claro: var(--yellow);
+    --w-titulo: #000000;
+    --w-campo: #000000;
+    --w-escritorio: #000000;
+}
+
+/* CON LOS PUROS: las rayas del relieve, del color del texto (en alto
+   contraste, una sombra a medias no separa nada). */
+:root[data-estilo="windows"][data-theme^="puro-"] {
+    --w-gris: var(--purple);
+    --w-texto: var(--white);
+    --w-luz: var(--white);
+    --w-media-luz: var(--purple);
+    --w-sombra: var(--white);
+    --w-negro: var(--white);
+    --w-azul: var(--white);
+    --w-azul-claro: var(--white);
+    --w-titulo: var(--purple);
+    --w-campo: var(--purple);
+    --w-escritorio: var(--purple);
+}
+
+:root[data-estilo="windows"] body * {
+    letter-spacing: normal !important;
+    text-transform: none !important;
+}
+
+:root[data-estilo="windows"] body {
+    background: var(--w-escritorio);
+}
+
+/* Nada redondo (menos lo que es un círculo de verdad, que lleva su
+   propia regla y gana a ésta, de peso 0). */
+:where(:root[data-estilo="windows"]) :where(button, select, textarea, input) {
+    border-radius: 0;
+}
+
+/* ---- LAS VENTANAS: grises, con relieve, y la barra de título dentro
+   del marco, separada dos píxeles. ---- */
+:root[data-estilo="windows"] :is(.master-ventana, .master-ventana.con-color, .oc-menu-ventana, .ajustes, .master-entrada-caja,
+    .master-buscador-lista, .oc-panel, .oc-hoja-caja, .oc-dados, .oc-carta, .oc-resultado, .app-actualizar) {
+    border: 2px solid;
+    border-color: var(--w-borde);
+    border-radius: 0;
+    background: var(--w-gris);
+    box-shadow: inset -1px -1px var(--w-sombra), inset 1px 1px var(--w-luz), 1px 1px 0 var(--w-negro);
+}
+
+:root[data-estilo="windows"] :is(.oc-menu-ventana, .ajustes) {
+    padding: 3px;
+}
+
+/* Las ventanas del tablero tienen 16px de relleno y la barra se sale
+   hasta el borde con márgenes negativos: aquí se queda a 3px del marco,
+   como en Windows. */
+:root[data-estilo="windows"] .master-ventana-barra {
+    margin: -13px -13px 13px;
+}
+
+:root[data-estilo="windows"] .master-ventana.es-arrastrada {
+    box-shadow: inset -1px -1px var(--w-sombra), inset 1px 1px var(--w-luz), 4px 4px 0 rgba(0, 0, 0, 0.45);
+}
+
+:root[data-estilo="windows"] .ajustes.ajustes-a-mano {
+    box-shadow: 0 0 0 100vmax rgba(0, 0, 0, 0.5);
+}
+
+/* El marco grande de la app: un escritorio con la barra arriba. */
+:root[data-estilo="windows"] .app .app-principal {
+    border: 2px solid;
+    border-color: var(--w-borde);
+    border-radius: 0;
+    background: var(--w-escritorio);
+    box-shadow: none;
+}
+
+:root[data-estilo="windows"] .master-barra {
+    border-bottom-color: var(--w-sombra);
+    background: var(--w-gris);
+    box-shadow: inset 0 1px var(--w-luz);
+}
+
+/* La barra de título: azul marino en degradado, letra blanca en
+   negrita. Con un color propio de la ventana, en ese color. */
+:root[data-estilo="windows"] :is(.master-ventana-barra, .oc-menu-ventana-barra, .ajustes-barra) {
+    min-height: 0;
+    padding: 3px 3px 3px 6px;
+    border: 0;
+    background: linear-gradient(90deg, var(--w-azul), var(--w-azul-claro));
+    color: var(--w-titulo);
+    font-family: var(--fuente-ventana);
+    font-size: 0.875rem;
+    font-weight: 700;
+}
+
+:root[data-estilo="windows"] .master-ventana.con-color .master-ventana-barra {
+    background: linear-gradient(90deg, var(--postit), color-mix(in srgb, var(--postit) 55%, #ffffff));
+    color: var(--postit-tinta, #14101a);
+}
+
+/* Los botones de la barra (✎ − ✕ y la ✕ de las ventanas que se abren
+   encima): cuadraditos grises con el dibujo en negro. */
+:root[data-estilo="windows"] :is(.master-ventana-mando, .oc-menu-ventana-cerrar, .ajustes-barra button) {
+    width: 22px;
+    min-width: 22px;
+    height: 20px;
+    min-height: 0;
+    padding: 0;
+    border: 0;
+    border-radius: 0;
+    background: var(--w-gris);
+    box-shadow: var(--w-relieve);
+    color: var(--w-texto);
+    font-size: 0.6875rem;
+    font-weight: 700;
+}
+
+:root[data-estilo="windows"] :is(.master-ventana-mando, .oc-menu-ventana-cerrar, .ajustes-barra button):active {
+    box-shadow: var(--w-hundido);
+}
+
+:root[data-estilo="windows"] :is(.master-ventana-mando, .oc-menu-ventana-cerrar, .ajustes-barra button):hover {
+    background: var(--w-gris);
+    color: var(--w-texto);
+}
+
+/* ---- LOS BOTONES: grises con relieve; al pulsarlos (o si están
+   elegidos), hundidos. El principal lleva el reborde negro del botón
+   «por defecto». ---- */
+:root[data-estilo="windows"] :is(.oc-vida-accion, .master-pestana-mando, .master-opcion, .ajustes-opcion, .oc-boton,
+    .master-anadir-tarjeta, .master-conjuro, .oc-regla-boton, .master-nombre-boton) {
+    border: 0;
+    border-radius: 0;
+    background: var(--w-gris);
+    box-shadow: var(--w-relieve);
+    color: var(--w-texto);
+    font-weight: 400;
+}
+
+:root[data-estilo="windows"] :is(.oc-vida-accion, .master-pestana-mando, .master-opcion, .ajustes-opcion, .oc-boton,
+    .master-anadir-tarjeta, .master-conjuro, .oc-regla-boton):hover:not(:disabled) {
+    background: var(--w-gris);
+    color: var(--w-texto);
+}
+
+:root[data-estilo="windows"] :is(.oc-vida-accion, .master-pestana-mando, .master-opcion, .ajustes-opcion, .oc-boton,
+    .master-anadir-tarjeta, .master-conjuro, .oc-regla-boton):active:not(:disabled),
+:root[data-estilo="windows"] :is(.master-opcion, .ajustes-opcion)[aria-pressed="true"],
+:root[data-estilo="windows"] .oc-boton[aria-expanded="true"] {
+    background: var(--w-media-luz);
+    box-shadow: var(--w-hundido);
+    color: var(--w-texto);
+    font-weight: 700;
+}
+
+:root[data-estilo="windows"] .oc-vida-accion.es-principal {
+    background: var(--w-gris);
+    box-shadow: 0 0 0 1px var(--w-negro), var(--w-relieve);
+    color: var(--w-texto);
+    font-weight: 700;
+}
+
+:root[data-estilo="windows"] :is(.oc-vida-accion, .master-pestana-mando):disabled {
+    color: var(--w-sombra);
+    text-shadow: 1px 1px var(--w-luz);
+}
+
+/* El foco: la raya de puntos de Windows, por dentro. */
+:root[data-estilo="windows"] :is(button, a, select, input, textarea, summary):focus-visible {
+    outline: 1px dotted var(--w-texto);
+    outline-offset: -4px;
+}
+
+/* El de los dados (el redondo de abajo): un botón gris cuadrado. */
+:root[data-estilo="windows"] .app .oc-boton.oc-boton-dados.es-redondo {
+    border: 0;
+    border-radius: 0;
+    background: var(--w-gris);
+    box-shadow: var(--w-relieve), 2px 2px 0 var(--w-negro);
+    color: var(--w-texto);
+}
+
+/* ---- LOS CAMPOS: blancos y hundidos. ---- */
+:root[data-estilo="windows"] :is(.oc-dados-texto, .master-elegir, .oc-dados-elegir, .oc-notas-texto) {
+    border: 0;
+    border-radius: 0;
+    background: var(--w-campo);
+    box-shadow: var(--w-hundido);
+    color: var(--w-texto);
+}
+
+:root[data-estilo="windows"] .oc-dados-etiqueta {
+    color: var(--w-texto);
+    font-size: 0.8125rem;
+}
+
+/* ---- LAS PESTAÑAS: de las de arriba de un cuadro de diálogo. La
+   elegida, un poco más alta y en negrita. ---- */
+:root[data-estilo="windows"] .master-pestanas {
+    clip-path: none;
+    border-radius: 0;
+    background: transparent;
+}
+
+:root[data-estilo="windows"] :is(.master-pestana, .master-bicho-pestana) {
+    border: 0;
+    border-radius: 0;
+    background: var(--w-gris);
+    box-shadow: inset 1px 1px var(--w-luz), inset -1px 0 var(--w-negro), inset -2px 0 var(--w-sombra);
+    color: var(--w-texto);
+}
+
+:root[data-estilo="windows"] :is(.master-pestana, .master-bicho-pestana)[aria-selected="true"],
+:root[data-estilo="windows"] .master-bicho-pestana[aria-pressed="true"] {
+    background: var(--w-gris);
+    color: var(--w-texto);
+    font-weight: 700;
+    transform: translateY(-2px);
+}
+
+/* Las de un color propio se quedan con su color, con el relieve. */
+:root[data-estilo="windows"] .master-pestana.con-color {
+    background: var(--pestana-color);
+    color: var(--pestana-tinta);
+}
+
+:root[data-estilo="windows"] .master-grupo-pestana {
+    border-radius: 0;
+    font-size: 0.75rem;
+}
+
+/* ---- EL TABLERO: el escritorio (si el perfil no tiene su color). ---- */
+:root[data-estilo="windows"] .master-lienzo.con-lienzo {
+    border: 0;
+}
+
+:root[data-estilo="windows"] .master-lienzo.con-lienzo:not(.con-tablero) {
+    background-color: var(--w-escritorio);
+    background-image: none;
+}
+
+/* Las barras de desplazamiento, grises y con relieve. */
+:root[data-estilo="windows"] ::-webkit-scrollbar {
+    width: 16px;
+    height: 16px;
+    background: var(--w-media-luz);
+}
+
+:root[data-estilo="windows"] ::-webkit-scrollbar-thumb {
+    border: 0;
+    background: var(--w-gris);
+    box-shadow: var(--w-relieve);
+}
+
+/* ---- LAS PESTAÑAS DE DENTRO: las de una ventana agrupada (en su barra
+   de título) y las de «preparar / combate» de la iniciativa. ---- */
+:root[data-estilo="windows"] .master-ventana-barra.es-grupo {
+    padding: 3px 3px 0 4px;
+}
+
+:root[data-estilo="windows"] .master-ventana-barra.es-grupo .master-ventana-mandos {
+    margin-bottom: 3px;
+}
+
+:root[data-estilo="windows"] :is(.master-grupo-pestana, .oc-ini-modo) {
+    min-height: 26px;
+    border: 0;
+    border-radius: 0;
+    background: var(--w-gris);
+    box-shadow: inset 1px 1px var(--w-luz), inset -1px 0 var(--w-negro), inset -2px 0 var(--w-sombra);
+    color: var(--w-texto);
+    font-weight: 400;
+}
+
+:root[data-estilo="windows"] :is(.master-grupo-pestana, .oc-ini-modo)[aria-selected="true"] {
+    background: var(--w-gris);
+    box-shadow: inset 1px 1px var(--w-luz), inset -1px 0 var(--w-negro), inset -2px 0 var(--w-sombra);
+    color: var(--w-texto);
+    font-weight: 700;
+}
+
+:root[data-estilo="windows"] .master-grupo-pestana.con-color {
+    background: var(--pestana-color);
+    color: var(--pestana-tinta);
+}
+
+:root[data-estilo="windows"] .master-grupo-pestana.con-color[aria-selected="true"] {
+    box-shadow: inset 1px 1px var(--w-luz), inset -1px 0 var(--w-negro), inset 0 -3px var(--w-azul);
+}
+
+/* Fuera de la barra azul, las de la iniciativa se juntan como las de un
+   cuadro de diálogo: la elegida, más alta. */
+:root[data-estilo="windows"] .oc-ini-modos {
+    gap: 0;
+    align-items: flex-end;
+    border-bottom: 1px solid var(--w-luz);
+    box-shadow: 0 1px 0 var(--w-sombra);
+}
+
+:root[data-estilo="windows"] .oc-ini-modo[aria-selected="true"] {
+    min-height: 30px;
+}

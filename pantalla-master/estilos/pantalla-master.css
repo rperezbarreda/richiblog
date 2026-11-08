@@ -1001,6 +1001,8 @@
 /* De dónde salen las reglas. */
 .master-fuente {
     margin-top: 12px;
+    /* El crédito del SRD 5.1 lleva direcciones largas: que partan. */
+    overflow-wrap: anywhere;
 }
 
 /* EL BESTIARIO: el buscador lleva tres campos (nombre, VD y tipo); el
@@ -5511,4 +5513,34 @@
 
 .master-musica-punto input {
     width: 9ch;
+}
+
+/* LAS MEDIDAS al crear una campaña: dos opciones, una por línea. */
+.master-unidades {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    min-width: 0;
+    margin: 4px 0;
+    padding: 0;
+    border: 0;
+}
+
+.master-campana-form .master-unidades {
+    flex-basis: 100%;
+}
+
+.master-unidades-opcion {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-height: 40px;
+    cursor: pointer;
+}
+
+.master-unidades-opcion input {
+    width: 20px;
+    height: 20px;
+    flex: none;
+    accent-color: var(--yellow);
 }

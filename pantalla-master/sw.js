@@ -5,30 +5,37 @@
 // en herramientas/sw-plantilla.js. La versión cambia sola cuando cambia
 // cualquier archivo, y entonces la app avisa de que hay una nueva.
 // =========================================
-const VERSION = "87ff7bff583b";
+const VERSION = "6f26ff310f06";
 const CACHE = "pantalla-master-" + VERSION;
 const ARCHIVOS = [
     "./",
+    "datos/personajes/compendio/2014/bestiario.json",
+    "datos/personajes/compendio/2014/conjuros-srd.json",
+    "datos/personajes/compendio/2014/reglas.json",
+    "datos/personajes/compendio/2014/tienda.json",
     "datos/personajes/compendio/bestiario.json",
     "datos/personajes/compendio/conjuros-srd.json",
     "datos/personajes/compendio/idiomas.json",
     "datos/personajes/compendio/master-tablas.json",
     "datos/personajes/compendio/nombres.json",
     "datos/personajes/compendio/rasgos-srd.json",
+    "datos/personajes/compendio/reglas.json",
     "datos/personajes/compendio/tienda.json",
     "datos/personajes/dnd-es.json",
-    "datos/personajes/reglas-dnd.json",
     "estilos/ajustes.css",
     "estilos/app.css",
     "estilos/base.css",
     "estilos/base.responsive.css",
     "estilos/cabecera-ventana.css",
     "estilos/jugadores.css",
+    "estilos/lapiz.css",
+    "estilos/moderno.css",
     "estilos/pantalla-master.css",
     "estilos/personajes.css",
     "estilos/personajes.responsive.css",
     "estilos/reproductor.css",
     "estilos/sin-movimiento.css",
+    "estilos/windows.css",
     "imagenes/dark_bg.webp",
     "imagenes/guia/formulario.webp",
     "imagenes/guia/pegar.webp",
@@ -58,8 +65,10 @@ const ARCHIVOS = [
     "tipografias/atkinson-mono-400-italica.woff2",
     "tipografias/atkinson-mono-400.woff2",
     "tipografias/atkinson-mono-700.woff2",
+    "tipografias/caveat-700.woff2",
     "tipografias/dm-mono-400.woff2",
     "tipografias/dm-mono-500.woff2",
+    "tipografias/inter-variable.woff2",
     "tipografias/jersey-10-400.woff2",
     "tipografias/noto-bamum.woff2",
     "tipografias/noto-glagolitic.woff2",
@@ -78,9 +87,12 @@ const ARCHIVOS = [
     "tipografias/noto-shavian.woff2",
     "tipografias/noto-tifinagh.woff2",
     "tipografias/pangolin-400.woff2",
+    "tipografias/patrick-hand-400.woff2",
+    "tipografias/pixelify-sans-700.woff2",
     "tipografias/space-grotesk-400.woff2",
     "tipografias/space-grotesk-500.woff2",
-    "tipografias/space-grotesk-600.woff2"
+    "tipografias/space-grotesk-600.woff2",
+    "tipografias/vt323-400.woff2"
 ];
 
 self.addEventListener("install", (e) => {

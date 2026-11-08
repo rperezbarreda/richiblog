@@ -168,10 +168,31 @@
 
     // Los JSON de la web, una vez cada uno.
     const pedidos = {};
+    const REGLAS = window.ocReglas.RUTA;
+    // LA EDICIÓN de cada campaña: 2024 (SRD 5.2, lo de siempre) o 2014 (SRD
+    // 5.1: sus reglas, sus monstruos y sus conjuros, en
+    // datos/personajes/compendio/2014/). Va en la campaña («edicion»; sin
+    // ella, 2024), se elige al crearla y se cambia en ⚙ opciones. Lo tuyo
+    // (tus monstruos, conjuros, reglas propias…) vale para las dos.
+    let edicionAhora = "2024";
+    const DE_2014 = { "datos/personajes/compendio/bestiario.json": "datos/personajes/compendio/2014/bestiario.json",
+        "datos/personajes/compendio/conjuros-srd.json": "datos/personajes/compendio/2014/conjuros-srd.json",
+        "datos/personajes/compendio/tienda.json": "datos/personajes/compendio/2014/tienda.json" };
+    const NOMBRES = "datos/personajes/compendio/nombres.json";
 
     function pedir(ruta) {
-        if (!pedidos[ruta]) {
-            pedidos[ruta] = fetch(ruta).then((r) => {
+        // Las reglas, con lo que hayas cambiado (window.ocReglas, en
+        // personajes.js); los nombres, igual (pedirNombres).
+        if (ruta === REGLAS) {
+            return window.ocReglas.cargar();
+        }
+        if (ruta === NOMBRES) {
+            return pedirNombres();
+        }
+        // En una campaña de 2014, los monstruos y los conjuros del SRD 5.1.
+        const real = (edicionAhora === "2014" && DE_2014[ruta]) || ruta;
+        if (!pedidos[real]) {
+            pedidos[real] = fetch(real).then((r) => {
                 if (!r.ok) {
                     throw new Error(r.status);
                 }
@@ -180,10 +201,10 @@
         }
         const k = PROPIOS_EN[ruta];
         if (!k) {
-            return pedidos[ruta];
+            return pedidos[real];
         }
         // Con lo tuyo (si hay) al final.
-        return pedidos[ruta].then((d) => {
+        return pedidos[real].then((d) => {
             const tuyos = leerPropios()[k];
             if (!tuyos.length) {
                 return d;
@@ -416,16 +437,108 @@
             cerrar();
             anadir("ficha", { titulo: r.nombre, datos: { que: r.propia ? "propia" : "regla", id: r.id || r.nombre } });
         }, "Poner " + r.nombre + " en el tablero");
-        cuerpo.appendChild(fijar);
+        const barra = crear("div", "master-creador-barra");
+        barra.appendChild(fijar);
+        // Las del JSON se pueden cambiar (y volver a como venían).
+        if (r.id && !r.propia) {
+            barra.appendChild(botonDe("oc-vida-accion", "✎ cambiar", () => {
+                cerrar();
+                editarRegla(r, vuelta);
+            }, "Cambiar " + r.nombre));
+            if (r.cambiada) {
+                cuerpo.appendChild(crear("p", "oc-hoja-nota", "✎ Cambiada por ti (la original: «" + r.original.nombre + "»)."));
+                barra.appendChild(botonDe("oc-vida-accion", "↺ volver a la original", () => {
+                    window.ocReglas.guardarCambio(r.id, null);
+                    avisar(r.original.nombre + ": otra vez como venía.");
+                    cerrar();
+                }, "Volver a la original de " + r.nombre));
+            }
+        }
+        cuerpo.appendChild(barra);
         const cerrar = window.ocVentana.abrir({ titulo: r.nombre, cuerpo, vuelta, clase: "es-regla" });
+    }
+
+    // De dónde sale una regla: las opcionales son texto propio.
+    const fuenteDeRegla = (r, fuente) => (r.opcional ? "Regla opcional: texto propio, no del SRD." : fuente);
+
+    // Cambiar una regla del JSON: lo cambiado va a «richi-master-reglas»
+    // (window.ocReglas) y el archivo no se toca. Si es la de una marca de
+    // la iniciativa, también su resumen corto.
+    function editarRegla(r, vuelta) {
+        const base = r.original || r;
+        window.ocReglas.cargar().then((d) => {
+            const marcas = (d.marcas || []).filter((mk) => mk.regla === r.id);
+            const form = crear("form", "master-homebrew-form");
+            const campo = (k, texto, etiqueta, valor) => {
+                const et = crear("label", "oc-dados-etiqueta", texto);
+                const x = crear(etiqueta || "input", "oc-dados-texto" + (etiqueta === "textarea" ? " oc-notas-texto" : ""));
+                x.id = "master-regla-" + k;
+                et.htmlFor = x.id;
+                x.value = valor || "";
+                if (etiqueta !== "textarea") {
+                    x.autocomplete = "off";
+                }
+                form.append(et, x);
+                return x;
+            };
+            const nombre = campo("nombre", "nombre", null, r.nombre);
+            nombre.maxLength = 80;
+            nombre.required = true;
+            const icono = campo("icono", "dibujo (un emoji)", null, r.icono);
+            icono.maxLength = 4;
+            const alias = campo("alias", "también se busca por (opcional)", null, r.alias);
+            const texto = campo("texto", "la regla (con **negrita**, *cursiva*, «- » para listas y «| a | b |» para tablas)",
+                "textarea", r.texto);
+            texto.rows = 10;
+            const corto = marcas.length ? campo("corto", "resumen corto (sale en la iniciativa al pasar por la marca "
+                + marcas.map((mk) => "«" + mk.marca + "»").join(", ") + ")", "textarea", marcas[0].corto) : null;
+            if (corto) {
+                corto.rows = 3;
+                corto.classList.remove("oc-notas-texto");
+            }
+            const barra = crear("div", "master-anadir-otras");
+            const listo = crear("button", "oc-vida-accion es-principal", "guardar");
+            listo.type = "submit";
+            barra.append(listo, botonDe("oc-vida-accion", "cancelar", () => cerrar()));
+            form.append(barra, crear("p", "oc-hoja-nota", "Se guarda con tus cosas (⚙ → exportar se lo lleva); el archivo"
+                + " de las reglas no cambia. Para dejarla como venía: «↺ volver a la original»."));
+            form.addEventListener("submit", (e) => {
+                e.preventDefault();
+                const n = nombre.value.trim();
+                if (!n) {
+                    nombre.focus();
+                    return;
+                }
+                // Solo lo que es distinto de la original.
+                const cambio = {};
+                [["nombre", n], ["icono", icono.value.trim()], ["alias", alias.value.trim()], ["texto", texto.value.trim()]]
+                    .forEach(([k, v]) => {
+                        if (v !== String(base[k] || "")) {
+                            cambio[k] = v;
+                        }
+                    });
+                const cortoOriginal = corto ? (marcas[0].cortoOriginal !== undefined ? marcas[0].cortoOriginal : marcas[0].corto) : "";
+                if (corto && corto.value.trim() && corto.value.trim() !== cortoOriginal) {
+                    cambio.corto = corto.value.trim();
+                }
+                if (!window.ocReglas.guardarCambio(r.id, Object.keys(cambio).length ? cambio : null)) {
+                    avisar("No se ha podido guardar.");
+                    return;
+                }
+                avisar(Object.keys(cambio).length ? "Guardada: " + n + "." : n + ": como venía.");
+                cerrar();
+            });
+            const cerrar = window.ocVentana.abrir({ titulo: "✎ " + r.nombre, cuerpo: form, vuelta, clase: "es-regla" });
+            nombre.focus();
+        });
     }
 
     function montarReglas(dentro, m, soloGrupo) {
         m.datos = m.datos || {};
         dentro.appendChild(crear("p", "oc-hoja-nota", "Cargando las reglas…"));
-        pedir("datos/personajes/reglas-dnd.json").then((datos) => {
-            const pintar = () => {
-                const propias = soloGrupo ? [] : leerHomebrew().map((r) => Object.assign({ grupo: "🏠 Reglas propias" }, r));
+        const pintar = (datos) => {
+                const propias = soloGrupo ? [] : leerHomebrew().map((r) => Object.assign({ grupo: "🏠 Reglas propias",
+                    propia: true }, r));
                 const reglas = (datos.reglas || []).filter((r) => !soloGrupo || r.grupo === soloGrupo).concat(propias);
                 const caja = crear("div", "oc-reglas");
                 const grupos = {};
@@ -461,18 +574,26 @@
                         grupos[r.grupo] = lista;
                     }
                     const li = crear("li", "oc-regla");
+                    li.dataset.id = (r.propia ? "propia:" : "") + (r.id || r.nombre);
                     const detalles = crear("details");
                     const resumen = crear("summary");
                     if (r.icono) {
                         resumen.appendChild(crear("span", "oc-regla-icono", r.icono));
                     }
-                    resumen.appendChild(crear("span", "oc-regla-nombre", r.nombre + (r.alias ? " (" + r.alias + ")" : "")));
+                    resumen.appendChild(crear("span", "oc-regla-nombre", r.nombre + (r.alias ? " (" + r.alias + ")" : "")
+                        + (r.cambiada ? " ✎" : "")));
                     detalles.append(resumen, markdown(r.texto));
                     li.appendChild(detalles);
                     grupos[r.grupo].appendChild(li);
                 });
                 dentro.replaceChildren(caja);
-                window.ocMontar.reglas(caja, "master-buscar-" + m.id);
+                // Cada una se abre con abrirRegla (con «✎ cambiar»).
+                window.ocMontar.reglas(caja, "master-buscar-" + m.id, (id, b) => {
+                    const r = reglas.find((x) => (x.propia ? "propia:" : "") + (x.id || x.nombre) === id);
+                    if (r) {
+                        abrirRegla(r, b, r.propia ? null : fuenteDeRegla(r, datos.fuente));
+                    }
+                });
                 // Al buscar, se ven todos los grupos (los plegados también).
                 const buscar = caja.querySelector("input[type=search]");
                 if (buscar) {
@@ -485,16 +606,19 @@
                     });
                 }
                 if (datos.fuente) {
-                    dentro.appendChild(crear("p", "oc-hoja-nota master-fuente", datos.fuente));
+                    dentro.appendChild(crear("p", "oc-hoja-nota master-fuente", datos.fuente
+                        + (reglas.some((r) => r.opcional) ? " Las opcionales (como el flanqueo), texto propio." : "")
+                        + " Cualquiera se cambia con «✎ cambiar» al abrirla."));
                 }
-            };
-            pintar();
-            if (!soloGrupo) {
-                mientrasEste(dentro, "master:homebrew", pintar);
-            }
-        }).catch(() => {
+        };
+        const cargar = () => pedir(REGLAS).then(pintar).catch(() => {
             dentro.replaceChildren(crear("p", "oc-vacio", "No he podido cargar las reglas."));
         });
+        cargar();
+        mientrasEste(dentro, "oc:reglas", cargar);
+        if (!soloGrupo) {
+            mientrasEste(dentro, "master:homebrew", cargar);
+        }
     }
 
     function montarHomebrew(dentro) {
@@ -845,7 +969,7 @@
             }).catch(() => poner(null));
             return;
         }
-        const ruta = { conjuro: CONJUROS_SRD, regla: "datos/personajes/reglas-dnd.json",
+        const ruta = { conjuro: CONJUROS_SRD, regla: REGLAS,
             objeto: "datos/personajes/compendio/tienda.json" }[que];
         if (!ruta) {
             poner(null);
@@ -856,7 +980,9 @@
                 const c = (datos.conjuros || []).find((x) => x.en === id);
                 poner(c ? cuerpoConjuro(c, datos.fuente) : null);
             } else if (que === "regla") {
-                const r = (datos.reglas || []).find((x) => x.nombre === id);
+                // Por su id (o por el nombre, en las de antes).
+                const r = (datos.reglas || []).find((x) => x.id === id) || (datos.reglas || []).find((x) => x.nombre === id
+                    || (x.original && x.original.nombre === id));
                 const t = r ? markdown(r.texto) : null;
                 if (t && window.ocDadosEnTexto) {
                     window.ocDadosEnTexto(t);
@@ -4338,8 +4464,9 @@
     // ---- EL GENERADOR DE NOMBRES: personajes por especie y género (de
     // sílabas, con su apellido) y lugares (pueblos, tabernas, parajes y
     // mazmorras), de datos/personajes/compendio/nombres.json. Cada nombre,
-    // con «copiar». ----
-    const NOMBRES = "datos/personajes/compendio/nombres.json";
+    // con «copiar». Y TUS TABLAS DE NOMBRES: nobles de un reino, una
+    // ciudad, una cultura… (nombres enteros, uno por línea) y lo que cambies
+    // de las de siempre; van en «richi-master-nombres» (pedirNombres). ----
 
     function alAzar(lista) {
         const u = new Uint32Array(1);
@@ -4347,8 +4474,98 @@
         return lista[u[0] % lista.length];
     }
 
+    // ---- TUS TABLAS DE NOMBRES («richi-master-nombres»): {propias:
+    // [{id, nombre, tipo: "personaje"|"lugar", delante, f, m, n,
+    // apellidos, primera, segunda}] (listas de nombres enteros), cambios:
+    // {"especies/humano": {ini: […], …}, "apellidos/humano": {…},
+    // "lugares/pueblo": {…}}} (lo que cambias de nombres.json; el archivo
+    // no se toca). pedir(NOMBRES) da nombres.json con los cambios puestos
+    // y las tuyas en «propias»: así los PNJ, los negocios y los dungeons
+    // también usan lo cambiado. ----
+    const CLAVE_NOMBRES = "richi-master-nombres";
+    let nombresCrudo = null;
+    function leerNombresTuyos() {
+        let x = {};
+        try {
+            x = JSON.parse(localStorage.getItem(CLAVE_NOMBRES) || "{}") || {};
+        } catch (e) {
+            x = {};
+        }
+        return { propias: Array.isArray(x.propias) ? x.propias : [], cambios: x.cambios && typeof x.cambios === "object" ? x.cambios : {} };
+    }
+    function guardarNombresTuyos(x) {
+        try {
+            localStorage.setItem(CLAVE_NOMBRES, JSON.stringify(x));
+        } catch (e) {
+            avisar("No se ha podido guardar.");
+            return false;
+        }
+        document.dispatchEvent(new CustomEvent("master:nombres"));
+        return true;
+    }
+    function pedirNombres() {
+        if (!nombresCrudo) {
+            nombresCrudo = fetch(NOMBRES).then((r) => {
+                if (!r.ok) {
+                    throw new Error(r.status);
+                }
+                return r.json();
+            });
+        }
+        return nombresCrudo.then((d) => {
+            const tuyo = leerNombresTuyos();
+            const x = Object.assign({}, d, { propias: tuyo.propias, cambiadas: {} });
+            ["especies", "apellidos", "lugares"].forEach((g) => {
+                x[g] = Object.assign({}, d[g]);
+            });
+            Object.keys(tuyo.cambios).forEach((clave) => {
+                const [g, k] = clave.split("/");
+                if (x[g] && x[g][k] && tuyo.cambios[clave]) {
+                    x[g][k] = Object.assign({}, x[g][k], tuyo.cambios[clave]);
+                    x.cambiadas[clave] = true;
+                }
+            });
+            x.original = d;
+            return x;
+        });
+    }
+    const listaDe = (texto) => String(texto || "").split("\n").map((l) => l.trim()).filter(Boolean);
+    // «Sir | Lady»: masculino | femenino (el neutro, el último); «-»,
+    // nada (para que no todos lleven título).
+    function delanteDe(linea, g) {
+        const partes = linea.split("|").map((s) => s.trim());
+        const sale = partes.length < 2 ? partes[0] : g === "f" ? partes[1] : g === "n" ? partes[partes.length - 1] : partes[0];
+        return /^[-—–]$/.test(sale) ? "" : sale;
+    }
+    function nombrePropio(t, genero, conApellido) {
+        const hay = ["f", "m", "n"].filter((g) => (t[g] || []).length);
+        if (!hay.length) {
+            return "";
+        }
+        const g = hay.indexOf(genero) >= 0 ? genero : alAzar(hay);
+        let nombre = alAzar(t[g]);
+        if ((t.delante || []).length) {
+            const d = delanteDe(alAzar(t.delante), g);
+            nombre = d ? d + " " + nombre : nombre;
+        }
+        if (conApellido && (t.apellidos || []).length) {
+            nombre += " " + alAzar(t.apellidos);
+        }
+        return nombre;
+    }
+    function lugarPropio(t) {
+        const a = (t.primera || []).length ? alAzar(t.primera) : "";
+        const b = (t.segunda || []).length ? alAzar(t.segunda) : "";
+        return (a + " " + b).trim();
+    }
+    const propiaDe = (datos, clave) => (datos.propias || []).find((t) => "propia:" + t.id === clave);
+
     function nombreDe(datos, especie, genero, conApellido) {
-        const e = datos.especies[especie];
+        const tuya = propiaDe(datos, especie);
+        if (tuya) {
+            return nombrePropio(tuya, genero, conApellido);
+        }
+        const e = datos.especies[especie] || datos.especies.humano;
         const g = genero === "cualquiera" ? alAzar(["m", "f", "n"]) : genero;
         let nombre = alAzar(e.ini) + alAzar(e[g]);
         // Los tiflin, a veces, con un nombre de virtud.
@@ -4365,6 +4582,10 @@
     }
 
     function lugarDe(datos, tipo) {
+        const tuya = propiaDe(datos, tipo);
+        if (tuya) {
+            return lugarPropio(tuya);
+        }
         const l = datos.lugares[tipo];
         if (tipo === "taberna") {
             const [sust, g] = alAzar(l.sust);
@@ -4431,21 +4652,41 @@
         return { n, es: nombre, idioma: idioma.id };
     }
 
+    // Los nombres de los campos de nombres.json, para cambiarlos.
+    const CAMPOS_NOMBRES = { ini: "principios (sílabas)", f: "finales femeninos", m: "finales masculinos", n: "finales neutros",
+        fin: "segunda parte", pre: "principio (va pegado al final)", adj: "final (va pegado al principio)",
+        base: "lo primero", de: "lo de después", sust: "el nombre y su género («La Jarra | f»)" };
+    const CAMPOS_TABERNA = { adj: "lo de después, masculino | femenino («Dorado | Dorada»)" };
+
     function montarNombres(dentro, m) {
         m.datos = m.datos || {};
+        const d = m.datos;
         dentro.appendChild(crear("p", "oc-hoja-nota", "Cargando…"));
-        Promise.all([pedir(NOMBRES), pedir(IDIOMAS)]).then(([datos, lenguas]) => {
-            const d = m.datos;
+        let lenguas = null;
+        // Al guardar una tabla se vuelve a montar todo: el foco, a «generar».
+        let alGenerar = false;
+        const cargar = () => Promise.all([pedir(NOMBRES), lenguas || pedir(IDIOMAS)]).then(([datos, l]) => {
+            lenguas = l;
+            montar(datos);
+        }).catch(() => {
+            dentro.replaceChildren(crear("p", "oc-vacio", "No he podido cargar los nombres."));
+        });
+        function montar(datos) {
             const otras = lenguas.idiomas.filter((x) => x.id !== "comun");
             const lenguaDe = (id) => otras.find((x) => x.id === id);
+            const tuyas = datos.propias || [];
+            const conTuyas = (tipo) => tuyas.filter((x) => x.tipo === tipo).map((x) => ["propia:" + x.id, "⭐ " + x.nombre]);
             // Lo que sale y lo guardado: un texto, o {n, es, idioma} si es
             // un lugar en otro idioma.
             const nombreDe_ = (x) => (typeof x === "string" ? x : x.n);
             const tipos = [["personaje", "👤 personaje"]].concat(Object.keys(datos.lugares)
-                .map((k) => [k, ({ pueblo: "🏘️ ", taberna: "🍺 ", region: "🏔️ ", mazmorra: "🕳️ " }[k] || "") + datos.lugares[k].nombre]));
-            const que = elegirDe("master-nombres-que-" + m.id, "qué", tipos, d.que || "personaje");
-            const especie = elegirDe("master-nombres-especie-" + m.id, "especie",
-                Object.keys(datos.especies).map((k) => [k, datos.especies[k].nombre]), d.especie || "humano");
+                .map((k) => [k, ({ pueblo: "🏘️ ", taberna: "🍺 ", region: "🏔️ ", mazmorra: "🕳️ " }[k] || "") + datos.lugares[k].nombre]),
+            conTuyas("lugar"));
+            const vale = (lista, v) => (lista.some((x) => x[0] === v) ? v : lista[0][0]);
+            const que = elegirDe("master-nombres-que-" + m.id, "qué", tipos, vale(tipos, d.que || "personaje"));
+            const especies = Object.keys(datos.especies).map((k) => [k, datos.especies[k].nombre]).concat(conTuyas("personaje"));
+            const especie = elegirDe("master-nombres-especie-" + m.id, "especie (o tu tabla)", especies,
+                vale(especies, d.especie || "humano"));
             const genero = botonesDe("género", [["cualquiera", "cualquiera"], ["f", "♀ femenino"], ["m", "♂ masculino"],
                 ["n", "⚪ neutro"]], d.genero || "cualquiera", (v) => {
                 d.genero = v;
@@ -4462,14 +4703,18 @@
             const etGen = crear("p", "oc-dados-etiqueta", "género");
             etGen.setAttribute("aria-hidden", "true");
             persona.append(especie, etAp, etGen, genero);
+            const recordar = () => Object.assign(d, { que: que.elegir.value, especie: especie.elegir.value, genero: genero.valor(),
+                apellido: ap.checked, lengua: lengua.elegir.value });
             const generar = botonDe("oc-vida-accion es-principal master-nombres-generar", "🎲 generar 8", () => {
-                Object.assign(d, { que: que.elegir.value, especie: especie.elegir.value, genero: genero.valor(),
-                    apellido: ap.checked, lengua: lengua.elegir.value });
+                recordar();
                 const salen = new Map();
                 const enOtra = d.que !== "personaje" && lenguaDe(d.lengua);
                 for (let i = 0; i < 40 && salen.size < 8; i++) {
                     const x = d.que === "personaje" ? nombreDe(datos, d.especie, d.genero, d.apellido)
                         : lugarDe(datos, d.que);
+                    if (!x) {
+                        continue;
+                    }
                     const sale = enOtra ? lugarEn(x, enOtra) : x;
                     salen.set(nombreDe_(sale), sale);
                 }
@@ -4518,19 +4763,252 @@
                 guardados.replaceChildren(...(d.guardados || []).map((n) => fila(n, true)));
                 guardadosT.hidden = guardados.hidden = !guardados.children.length;
             };
+
+            // ---- TUS TABLAS: crear una, cambiar la elegida (la tuya o una
+            // de las de siempre) y quitar la tuya. ----
+            const elegida = () => (que.elegir.value === "personaje" ? especie.elegir.value : que.elegir.value);
+            const nueva = botonDe("oc-vida-accion", "＋ tabla de nombres", () => editarTuya(null), "Crear una tabla de nombres tuya");
+            const cambiar = botonDe("oc-vida-accion", "✎ cambiar esta", () => {
+                const k = elegida();
+                const tuya = propiaDe(datos, k);
+                if (tuya) {
+                    editarTuya(tuya);
+                } else {
+                    editarDeSiempre(k);
+                }
+            }, "Cambiar la tabla elegida");
+            const original = botonDe("oc-vida-accion", "↺ como venía", () => {
+                const tuyo = leerNombresTuyos();
+                claves(elegida()).forEach((c) => delete tuyo.cambios[c]);
+                alGenerar = true;
+                guardarNombresTuyos(tuyo);
+                avisar("Otra vez como venía.");
+            }, "Dejar la tabla elegida como venía");
+            const quitar = botonDe("oc-vida-accion", "🗑️ quitar", () => {
+                const tuya = propiaDe(datos, elegida());
+                if (!tuya) {
+                    return;
+                }
+                if (quitar.dataset.seguro !== "1") {
+                    quitar.dataset.seguro = "1";
+                    quitar.textContent = "🗑️ ¿seguro? pulsa otra vez";
+                    return;
+                }
+                const tuyo = leerNombresTuyos();
+                tuyo.propias = tuyo.propias.filter((x) => x.id !== tuya.id);
+                alGenerar = true;
+                guardarNombresTuyos(tuyo);
+                avisar("Quitada la tabla «" + tuya.nombre + "».");
+            }, "Quitar tu tabla elegida");
+            const barra = crear("div", "master-creador-barra");
+            barra.append(nueva, cambiar, original, quitar);
+            const form = crear("form", "master-tablas-editar");
+            form.hidden = true;
+            // Las claves de «cambios» de una de las de siempre.
+            function claves(k) {
+                if (que.elegir.value !== "personaje") {
+                    return ["lugares/" + k];
+                }
+                const e = datos.especies[k];
+                return ["especies/" + k].concat(e && e.apellido ? ["apellidos/" + e.apellido] : []);
+            }
+            const ajustarBarra = () => {
+                const k = elegida();
+                const tuya = !!propiaDe(datos, k);
+                quitar.hidden = !tuya;
+                delete quitar.dataset.seguro;
+                quitar.textContent = "🗑️ quitar";
+                original.hidden = tuya || !claves(k).some((c) => datos.cambiadas && datos.cambiadas[c]);
+            };
+            // Un textarea (una cosa por línea) con su etiqueta.
+            const area = (id, texto, valor, filas) => {
+                const et = crear("label", "oc-dados-etiqueta", texto);
+                const x = crear("textarea", "oc-dados-texto");
+                x.id = "master-nombres-" + id + "-" + m.id;
+                x.rows = filas || 4;
+                x.value = valor || "";
+                et.htmlFor = x.id;
+                form.append(et, x);
+                return x;
+            };
+            const cerrarForm = (vuelta) => {
+                form.hidden = true;
+                form.replaceChildren();
+                (vuelta || cambiar).focus();
+            };
+            const botonesForm = (vuelta) => {
+                const ok = crear("button", "oc-vida-accion es-principal", "✓ guardar");
+                ok.type = "submit";
+                const b = crear("div", "master-creador-barra");
+                b.append(ok, botonDe("oc-vida-accion", "cancelar", () => cerrarForm(vuelta)));
+                form.appendChild(b);
+            };
+            function editarTuya(t) {
+                form.replaceChildren(crear("h3", "master-nombres-titulo", t ? "✎ " + t.nombre : "＋ tabla de nombres"));
+                const etN = crear("label", "oc-dados-etiqueta", "nombre de la tabla");
+                const nombre = crear("input", "oc-dados-texto");
+                nombre.id = "master-nombres-tnombre-" + m.id;
+                nombre.maxLength = 60;
+                nombre.placeholder = "Nobles de Cralea";
+                nombre.value = t ? t.nombre : "";
+                etN.htmlFor = nombre.id;
+                let tipo = t ? t.tipo : (que.elegir.value === "personaje" ? "personaje" : "lugar");
+                const tipoB = botonesDe("de qué es", [["personaje", "👤 personas"], ["lugar", "🏘️ lugares"]], tipo, (v) => {
+                    tipo = v;
+                    ajustarTipo();
+                });
+                form.append(etN, nombre, tipoB);
+                const j = (k) => (t && t[k] ? t[k].join("\n") : "");
+                const persona = [area("delante", "delante, si quieres (títulos: «Sir | Lady» = masculino | femenino; «-» = sin título)",
+                    j("delante"), 3),
+                    area("f", "nombres femeninos (uno por línea)", j("f")), area("m", "nombres masculinos", j("m")),
+                    area("n", "nombres neutros (si quieres)", j("n"), 3), area("apellidos", "apellidos o casas (si quieres)", j("apellidos"))];
+                const lugar = [area("primera", "nombres o primera parte (uno por línea)", j("primera")),
+                    area("segunda", "segunda parte, si quieres (se pone detrás: «del Norte»)", j("segunda"))];
+                // Cada textarea va con su etiqueta justo delante.
+                const ajustarTipo = () => {
+                    persona.forEach((x) => {
+                        x.hidden = x.previousSibling.hidden = tipo !== "personaje";
+                    });
+                    lugar.forEach((x) => {
+                        x.hidden = x.previousSibling.hidden = tipo !== "lugar";
+                    });
+                };
+                ajustarTipo();
+                botonesForm(t ? cambiar : nueva);
+                form.onsubmit = (e) => {
+                    e.preventDefault();
+                    const n = nombre.value.trim();
+                    const x = { id: t ? t.id : idDoc("n"), nombre: n, tipo };
+                    const campos = tipo === "personaje" ? [["delante", 0], ["f", 1], ["m", 2], ["n", 3], ["apellidos", 4]]
+                        : [["primera", 0], ["segunda", 1]];
+                    campos.forEach(([k, i]) => {
+                        x[k] = listaDe((tipo === "personaje" ? persona : lugar)[i].value);
+                    });
+                    const hay = tipo === "personaje" ? x.f.length + x.m.length + x.n.length : x.primera.length;
+                    if (!n || !hay) {
+                        avisar(n ? (tipo === "personaje" ? "Pon al menos un nombre." : "Pon al menos un nombre o una primera parte.")
+                            : "Ponle nombre a la tabla.");
+                        (n ? (tipo === "personaje" ? persona[1] : lugar[0]) : nombre).focus();
+                        return;
+                    }
+                    const tuyo = leerNombresTuyos();
+                    const i = tuyo.propias.findIndex((y) => y.id === x.id);
+                    if (i >= 0) {
+                        tuyo.propias[i] = x;
+                    } else {
+                        tuyo.propias.push(x);
+                    }
+                    if (tipo === "personaje") {
+                        d.que = "personaje";
+                        d.especie = "propia:" + x.id;
+                    } else {
+                        d.que = "propia:" + x.id;
+                    }
+                    guardar();
+                    alGenerar = true;
+                    if (guardarNombresTuyos(tuyo)) {
+                        avisar("Tabla guardada: " + n + ".");
+                    }
+                };
+                form.hidden = false;
+                nombre.focus();
+            }
+            // Una de las de siempre (sílabas y trozos de nombres.json): cada
+            // lista, un textarea; se guarda solo lo que cambia.
+            function editarDeSiempre(k) {
+                const esPersona = que.elegir.value === "personaje";
+                const partes = claves(k).map((c) => {
+                    const [g, kk] = c.split("/");
+                    return { c, g, actual: datos[g][kk], orig: datos.original[g][kk] };
+                }).filter((x) => x.actual);
+                const titulo = esPersona ? datos.especies[k].nombre : datos.lugares[k].nombre;
+                form.replaceChildren(crear("h3", "master-nombres-titulo", "✎ " + titulo + " (la de siempre)"),
+                    crear("p", "oc-hoja-nota", "Una cosa por línea. Lo cambiado se guarda con tus cosas y lo usan también los PNJ,"
+                        + " los negocios y los dungeons; «↺ como venía» lo deshace."
+                        + (esPersona ? " Los apellidos son de todas las especies que los comparten." : "")));
+                const campos = [];
+                partes.forEach((p) => {
+                    Object.keys(p.actual).forEach((campo) => {
+                        const v = p.actual[campo];
+                        if (!Array.isArray(v)) {
+                            return;
+                        }
+                        const pares = v.some(Array.isArray);
+                        const etiqueta = (p.g === "apellidos" ? "apellido: " : "") + ((k === "taberna" && CAMPOS_TABERNA[campo])
+                            || (p.g === "apellidos" && campo === "ini" ? "primera parte" : CAMPOS_NOMBRES[campo]) || campo);
+                        const x = area(p.c.replace("/", "-") + "-" + campo, etiqueta,
+                            v.map((e) => (Array.isArray(e) ? e.join(" | ") : e)).join("\n"), Math.round(Math.min(6, Math.max(3, v.length / 4))));
+                        campos.push({ p, campo, pares, x });
+                    });
+                });
+                botonesForm(cambiar);
+                form.onsubmit = (e) => {
+                    e.preventDefault();
+                    const tuyo = leerNombresTuyos();
+                    for (const f of campos) {
+                        const lista = listaDe(f.x.value).map((l) => (f.pares ? l.split("|").map((s) => s.trim()) : l));
+                        if (!lista.length || (f.pares && lista.some((x) => x.length < 2))) {
+                            avisar(lista.length ? "En «" + f.x.previousSibling.textContent + "», cada línea con sus dos partes: «a | b»."
+                                : "«" + f.x.previousSibling.textContent + "» no puede quedarse vacío.");
+                            f.x.focus();
+                            return;
+                        }
+                        const igual = JSON.stringify(lista) === JSON.stringify(f.p.orig[f.campo]);
+                        const c = tuyo.cambios[f.p.c] = tuyo.cambios[f.p.c] || {};
+                        if (igual) {
+                            delete c[f.campo];
+                        } else {
+                            c[f.campo] = lista;
+                        }
+                    }
+                    Object.keys(tuyo.cambios).forEach((c) => {
+                        if (!Object.keys(tuyo.cambios[c]).length) {
+                            delete tuyo.cambios[c];
+                        }
+                    });
+                    alGenerar = true;
+                    if (guardarNombresTuyos(tuyo)) {
+                        avisar("Guardado: " + titulo + ".");
+                    }
+                };
+                form.hidden = false;
+                const primero = form.querySelector("textarea");
+                if (primero) {
+                    primero.focus();
+                }
+            }
+
             const ajustar = () => {
                 persona.hidden = que.elegir.value !== "personaje";
                 lengua.hidden = !persona.hidden;
+                // Las tuyas de personas: el apellido, solo si tienen.
+                const tuya = propiaDe(datos, especie.elegir.value);
+                etAp.hidden = !!tuya && !(tuya.apellidos || []).length;
+                ajustarBarra();
             };
-            que.elegir.addEventListener("change", ajustar);
+            que.elegir.addEventListener("change", () => {
+                recordar();
+                guardar();
+                ajustar();
+            });
+            especie.elegir.addEventListener("change", () => {
+                recordar();
+                guardar();
+                ajustar();
+            });
             const arriba = crear("div", "master-nombres-form");
             arriba.append(que, persona, lengua, generar);
-            dentro.replaceChildren(arriba, lista, guardadosT, guardados);
+            dentro.replaceChildren(arriba, lista, guardadosT, guardados, barra, form);
             ajustar();
             pintar();
-        }).catch(() => {
-            dentro.replaceChildren(crear("p", "oc-vacio", "No he podido cargar los nombres."));
-        });
+            if (alGenerar) {
+                alGenerar = false;
+                generar.focus();
+            }
+        }
+        cargar();
+        mientrasEste(dentro, "master:nombres", cargar);
     }
 
     // ---- NOTAS EN OTROS IDIOMAS: se escribe (o se saca al azar) lo que
@@ -5192,7 +5670,7 @@
                         const b = porEn[g.en];
                         for (let i = 0; i < g.n && b; i++) {
                             entran.push(meterEnIniciativa(iniDeBicho(b),
-                                (nombres, renombrar) => conNumero(b.nombre, nombres, renombrar)));
+                                (nombres, renombrar) => conNumero(b.nombre, nombres, renombrar), b.nombre));
                         }
                     });
                     avisar("A la iniciativa: " + entran.filter(Boolean).join(", ") + ".");
@@ -7839,7 +8317,7 @@
                                 const b = porEn[g.en];
                                 for (let k = 0; k < g.n && b; k++) {
                                     entran.push(meterEnIniciativa(iniDeBicho(b),
-                                        (nombres, renombrar) => conNumero(b.nombre, nombres, renombrar)));
+                                        (nombres, renombrar) => conNumero(b.nombre, nombres, renombrar), b.nombre));
                                 }
                             });
                             avisar("A la iniciativa: " + entran.filter(Boolean).join(", ") + ".");
@@ -8609,7 +9087,10 @@
     // Apuntar a alguien en la iniciativa («richi-oc-iniciativa»): tira
     // 1d20 + su bono y avisa a la ventana de la iniciativa. «c»: {nombre,
     // bono, ca, pg, color}. Devuelve el nombre con el que entra, o null.
-    function meterEnIniciativa(c, numerar) {
+    // «agrupar» (el nombre sin número: «Lobo»): si ya hay otros iguales
+    // (Lobo 1, Lobo 2…), entra en su grupo, con su iniciativa y detrás de
+    // ellos, sin tirar (en la iniciativa, 🔓 lo separa).
+    function meterEnIniciativa(c, numerar, agrupar) {
         const CLAVE_INI = "richi-oc-iniciativa";
         let datos = { lista: [], turno: -1, ronda: 1 };
         try {
@@ -8631,10 +9112,18 @@
             return null;
         }
         const bono = parseInt(c.bono, 10) || 0;
-        const r = window.ocDados ? window.ocDados.tirar("1d20" + (bono ? (bono > 0 ? "+" : "") + bono : ""),
-            "iniciativa de " + nombre) : null;
+        const patron = agrupar ? new RegExp("^" + agrupar.replace(/[.*+?^${}()|[\]\\]/g, "\\$&") + "(?: \\d+)?$") : null;
+        const iguales = patron ? datos.lista.filter((x) => !x.pj && patron.test(x.nombre)) : [];
+        const con = iguales.length ? iguales[iguales.length - 1] : null;
+        const r = con || !window.ocDados ? null : window.ocDados.tirar("1d20" + (bono ? (bono > 0 ? "+" : "") + bono : ""),
+            "iniciativa de " + nombre);
         const entra = { id: Date.now().toString(36) + Math.random().toString(36).slice(2, 6), nombre, color: c.color,
-            ini: r ? r.total : 10 + bono, ca: parseInt(c.ca, 10) || "", pg: c.pg === undefined ? "" : c.pg };
+            ini: con ? con.ini : r ? r.total : 10 + bono, ca: parseInt(c.ca, 10) || "", pg: c.pg === undefined ? "" : c.pg };
+        if (con) {
+            const g = con.grupo || "g" + con.id;
+            con.grupo = g;
+            entra.grupo = g;
+        }
         // De la party (para llevar sus PG a su ficha), sus acciones
         // legendarias y su bono a la salvación de Constitución (concentración).
         ["pj", "leg", "con"].forEach((k) => {
@@ -8642,7 +9131,16 @@
                 entra[k] = c[k];
             }
         });
-        datos.lista.push(entra);
+        if (con) {
+            // Detrás del último de su grupo.
+            let i = datos.lista.indexOf(con);
+            while (i + 1 < datos.lista.length && datos.lista[i + 1].grupo === entra.grupo) {
+                i += 1;
+            }
+            datos.lista.splice(i + 1, 0, entra);
+        } else {
+            datos.lista.push(entra);
+        }
         try {
             localStorage.setItem(CLAVE_INI, JSON.stringify(datos));
         } catch (e) {
@@ -8673,8 +9171,8 @@
     function aLaIniciativa(b, boton, nombreBase) {
         // Una del tablero va con su nombre («Lobo 2», «Elminster») si no
         // está ya; si no, con número si se repite (Lobo 1, Lobo 2…).
-        const nombre = meterEnIniciativa(Object.assign(iniDeBicho(b), { nombre: nombreBase || b.nombre }), (nombres, renombrar) => (nombreBase && nombres.indexOf(nombreBase) < 0 ? nombreBase
-            : conNumero(b.nombre, nombres, renombrar)));
+        const nombre = meterEnIniciativa(Object.assign(iniDeBicho(b), { nombre: nombreBase || b.nombre }), (nombres, renombrar) => (nombreBase && nombreBase !== b.nombre && nombres.indexOf(nombreBase) < 0 ? nombreBase
+            : conNumero(b.nombre, nombres, renombrar)), b.nombre);
         avisar("A la iniciativa: " + nombre + ".");
         if (boton) {
             boton.focus();
@@ -14845,18 +15343,23 @@
     let todo = todas.campanas.find((c) => c.id === todas.activa) || todas.campanas[0];
     let estado = todo.perfiles.find((pf) => pf.id === todo.activo) || todo.perfiles[0];
 
+    // Lo que se guarda de una campaña (sin lo de la pantalla, como el
+    // elemento de cada ventana). También lo usa duplicarCampana.
+    const campanaGuardable = (c) => ({ id: c.id, nombre: c.nombre, activo: c.activo,
+        pjs: c.pjs, docs: c.docs, musica: c.musica, inventario: c.inventario, conParty: c.conParty, unidades: c.unidades,
+        edicion: c.edicion, jugadores: c.jugadores, linea: c.linea, relaciones: c.relaciones,
+        perfiles: c.perfiles.map((pf) => ({ id: pf.id, nombre: pf.nombre, color: pf.color || "",
+            colorPestana: pf.colorPestana, zoom: pf.zoom || 1,
+            modulos: pf.modulos.map((m) => ({ id: m.id, tipo: m.tipo, x: m.x, y: m.y, w: m.w, h: m.h,
+                titulo: m.titulo || "", color: m.color || "", plegado: !!m.plegado,
+                escala: m.escala || 1, grupo: m.grupo || undefined, delante: m.grupo ? !!m.delante : undefined,
+                datos: m.datos })) })) });
     function guardar() {
         if (sinGuardarTodavia) {
             return true;
         }
         todo.activo = estado.id;
-        const salida = { activa: todo.id, campanas: todas.campanas.map((c) => ({ id: c.id, nombre: c.nombre, activo: c.activo,
-            pjs: c.pjs, docs: c.docs, musica: c.musica, inventario: c.inventario, conParty: c.conParty, jugadores: c.jugadores, linea: c.linea, relaciones: c.relaciones, perfiles: c.perfiles.map((pf) => ({ id: pf.id, nombre: pf.nombre, color: pf.color || "",
-                colorPestana: pf.colorPestana, zoom: pf.zoom || 1,
-                modulos: pf.modulos.map((m) => ({ id: m.id, tipo: m.tipo, x: m.x, y: m.y, w: m.w, h: m.h,
-                    titulo: m.titulo || "", color: m.color || "", plegado: !!m.plegado,
-                    escala: m.escala || 1, grupo: m.grupo || undefined, delante: m.grupo ? !!m.delante : undefined,
-                    datos: m.datos })) })) })) };
+        const salida = { activa: todo.id, campanas: todas.campanas.map(campanaGuardable) };
         try {
             localStorage.setItem(CLAVE, JSON.stringify(salida));
             return true;
@@ -15603,11 +16106,14 @@
     document.addEventListener("master:propios", () => {
         indice = null;
     });
+    document.addEventListener("oc:reglas", () => {
+        indice = null;
+    });
 
     function cargarIndice() {
         if (!indice) {
             indice = Promise.all([pedir(CONJUROS_SRD), pedir("datos/personajes/compendio/bestiario.json"),
-                pedir("datos/personajes/reglas-dnd.json"), pedir("datos/personajes/compendio/tienda.json"),
+                pedir(REGLAS), pedir("datos/personajes/compendio/tienda.json"),
                 pedir(RASGOS_SRD).catch(() => ({ rasgos: [] }))])
                 .then(([conj, best, reg, tienda, ras]) => {
                     const cosas = [];
@@ -15629,7 +16135,7 @@
                         abrir: (v) => abrirBicho(b, v, best.fuente) }));
                     (reg.reglas || []).forEach((r) => cosas.push({ tipo: "regla", emoji: r.icono || "📚", nombre: r.nombre,
                         detalle: "Regla · " + r.grupo, buscar: llano(r.nombre + " " + (r.alias || "")),
-                        abrir: (v) => abrirRegla(r, v, reg.fuente) }));
+                        abrir: (v) => abrirRegla(r, v, fuenteDeRegla(r, reg.fuente)) }));
                     (tienda.objetos || []).forEach((o) => cosas.push({ tipo: "objeto", emoji: "💰", nombre: o.nombre,
                         detalle: "Objeto · " + o.cat + (o.rareza ? " · " + o.rareza : "") + (o.propio ? " · 🛠️ tuyo" : ""), buscar: llano(o.nombre + " " + o.en),
                         abrir: (v) => abrirObjeto(o, v, tienda.fuente) }));
@@ -15846,7 +16352,7 @@
     // perfiles con sus ventanas, la iniciativa, las marcas propias y las
     // tiradas guardadas) a un archivo .json, y de vuelta. Para guardarlo,
     // pasarlo a otro navegador o compartir un tablero montado. ----
-    const CLAVES = (k) => k === CLAVE || k === CLAVE_HOMEBREW || k === CLAVE_IMAGENES || k === CLAVE_PLANTILLAS || k === CLAVE_PROPIOS || k === CLAVE_ASPECTOS || k === CLAVE_TABLAS || /^richi-oc-(iniciativa|marcas|partida-pantalla-master)/.test(k);
+    const CLAVES = (k) => k === CLAVE || k === CLAVE_HOMEBREW || k === CLAVE_IMAGENES || k === CLAVE_PLANTILLAS || k === CLAVE_PROPIOS || k === CLAVE_ASPECTOS || k === CLAVE_TABLAS || k === CLAVE_NOMBRES || k === window.ocReglas.CLAVE || /^richi-oc-(iniciativa|marcas|partida-pantalla-master)/.test(k);
 
     function copias(alTerminar) {
         const caja = crear("div", "master-anadir-otras");
@@ -16530,6 +17036,8 @@
         botonCampana.textContent = "📚";
         botonCampana.setAttribute("aria-label", "Campaña: " + todo.nombre + " (cambiar de campaña)");
         botonCampana.title = "Campaña: " + todo.nombre + " — cambiar, crear o renombrar";
+        aplicarUnidades();
+        aplicarEdicion();
     }
     function activarCampana(c) {
         estado.modulos.forEach((m) => {
@@ -16649,13 +17157,149 @@
                 w: 410, h: 540, titulo, color, plegado: false, escala: 1, datos: { html } })) };
     }
     // Una campaña nueva: el tutorial y luego las plantillas de tableros.
-    function crearCampana(nombre) {
+    function crearCampana(nombre, unidades, edicion) {
         const c = { id: "c" + siguienteCampana++, nombre: nombre || "campaña " + (todas.campanas.length + 1), pjs: [],
+            unidades: unidades === "metrico" ? "metrico" : "imperial", edicion: edicion === "2014" ? "2014" : "2024",
             perfiles: [perfilTutorial()].concat(perfilesDeSerie()).map((pf) => Object.assign(pf, { id: "p" + siguientePerfil++,
                 modulos: pf.modulos.map((m) => Object.assign(m, { id: "m" + siguienteId++ })) })) };
         c.activo = c.perfiles[0].id;
         c.conParty = true;
         return c;
+    }
+
+    // ---- LAS MEDIDAS DE CADA CAMPAÑA: imperial (pies, libras, millas:
+    // como vienen el SRD y las tablas) o métrico (metros, kilos y
+    // kilómetros, con la equivalencia de los manuales en español: 5 pies =
+    // 1,5 m, 1 libra = 0,5 kg, 1 milla = 1,5 km). Va en la campaña
+    // («unidades»: "imperial" o "metrico"; sin ella, imperial). Se elige al
+    // crearla y se cambia en ⚙ opciones.
+    // En métrico no se toca ningún dato: lo que se pinta en la pantalla se
+    // pasa al vuelo (un MutationObserver sobre la página), y al volver a
+    // imperial se deja como estaba. Lo que escribes tú (las notas, los
+    // campos) no se toca nunca. ----
+    const MEDIDAS = [["imperial", "📏 imperial: pies, libras y millas"], ["metrico", "📐 métrico: metros, kilos y kilómetros"]];
+    const unidadesDe = (c) => (c && c.unidades === "metrico" ? "metrico" : "imperial");
+    // (Sin una letra, un número ni una coma delante: «2d4 pies» se queda.)
+    const NUM = "\\d+(?:[.,]\\d+)*";
+    const SUELTO = "(?<![\\w.,])";
+    const RE_PIES = new RegExp(SUELTO + "(" + NUM + "(?:\\s*(?:\\/|×|x|por)\\s*" + NUM + ")*)(\\s*)(?:ft\\.?(?![a-záéíóúñ])|pies\\b|pie\\b)", "gi");
+    const RE_LIBRAS = new RegExp(SUELTO + "(" + NUM + ")(\\s*)(?:lb\\.?(?![a-záéíóúñ])|libras?\\b)", "gi");
+    const RE_MILLAS = new RegExp(SUELTO + "(" + NUM + ")(\\s*)millas?\\b", "gi");
+    function numeroLeido(x) {
+        if (x.indexOf(",") >= 0) {
+            return parseFloat(x.replace(/\./g, "").replace(",", "."));
+        }
+        return /^\d{1,3}(\.\d{3})+$/.test(x) ? parseFloat(x.replace(/\./g, "")) : parseFloat(x);
+    }
+    const numeroEscrito = (n) => n.toLocaleString("es-ES", { maximumFractionDigits: 2 });
+    const pasarNumeros = (grupo, por) => grupo.replace(new RegExp(NUM, "g"), (x) => numeroEscrito(numeroLeido(x) * por));
+    function aMetrico(texto) {
+        return texto.replace(RE_PIES, (x, n, esp) => pasarNumeros(n, 0.3) + (esp || " ") + "m")
+            .replace(RE_LIBRAS, (x, n, esp) => pasarNumeros(n, 0.5) + (esp || " ") + "kg")
+            .replace(RE_MILLAS, (x, n, esp) => pasarNumeros(n, 1.5) + (esp || " ") + "km");
+    }
+    // Los textos pasados: nodo → [lo de antes, lo de ahora].
+    const pasados = new Map();
+    let enMetrico = false;
+    // (Ni lo que habla de las propias medidas: data-sin-medidas.)
+    const NO_TOCAR = "script, style, textarea, [contenteditable], .master-entrada, .ajustes, [data-sin-medidas]";
+    function pasarNodo(n) {
+        const ya = pasados.get(n);
+        if (ya && n.data === ya[1]) {
+            return;
+        }
+        if (!/\d/.test(n.data) || !n.parentElement || n.parentElement.closest(NO_TOCAR)) {
+            return;
+        }
+        const nuevo = aMetrico(n.data);
+        if (nuevo !== n.data) {
+            pasados.set(n, [n.data, nuevo]);
+            n.data = nuevo;
+        }
+    }
+    function pasarDentro(raiz) {
+        if (raiz.nodeType === 3) {
+            pasarNodo(raiz);
+            return;
+        }
+        if (raiz.nodeType !== 1 || raiz.closest(NO_TOCAR)) {
+            return;
+        }
+        const w = document.createTreeWalker(raiz, NodeFilter.SHOW_TEXT);
+        const nodos = [];
+        while (w.nextNode()) {
+            nodos.push(w.currentNode);
+        }
+        nodos.forEach(pasarNodo);
+    }
+    const vigilante = new MutationObserver((cambios) => {
+        cambios.forEach((c) => {
+            if (c.type === "characterData") {
+                pasarNodo(c.target);
+            } else {
+                c.addedNodes.forEach(pasarDentro);
+            }
+        });
+    });
+    const EDICIONES = [["2024", "📕 2024 (D&D de 2024, SRD 5.2)"], ["2014", "📗 2014 (D&D de 2014, SRD 5.1)"]];
+    const edicionDe = (c) => (c && c.edicion === "2014" ? "2014" : "2024");
+    // Al cambiar de edición: las reglas, el buscador y las ventanas, otra vez.
+    function aplicarEdicion() {
+        const e = edicionDe(todo);
+        document.documentElement.dataset.edicion = e;
+        window.ocReglas.usarEdicion(e);
+        if (e === edicionAhora) {
+            return;
+        }
+        edicionAhora = e;
+        indice = null;
+        estado.modulos.forEach((m) => {
+            m.el = null;
+        });
+        pintarTodo();
+    }
+    function aplicarUnidades() {
+        const metrico = unidadesDe(todo) === "metrico";
+        document.documentElement.dataset.unidades = metrico ? "metrico" : "imperial";
+        if (metrico === enMetrico) {
+            return;
+        }
+        enMetrico = metrico;
+        if (metrico) {
+            pasarDentro(document.body);
+            vigilante.observe(document.body, { childList: true, subtree: true, characterData: true });
+        } else {
+            vigilante.disconnect();
+            pasados.forEach(([antes, ahora], n) => {
+                if (n.isConnected && n.data === ahora) {
+                    n.data = antes;
+                }
+            });
+            pasados.clear();
+        }
+    }
+    // Elegir las medidas o la edición (al crear una campaña): las opciones,
+    // sin ninguna marcada, para que se elija. .valor() da la elegida o "".
+    const elegirUnidades = (id) => elegirUna(id, "¿qué medidas usáis?", MEDIDAS);
+    const elegirEdicion = (id) => elegirUna(id, "¿con qué reglas jugáis?", EDICIONES);
+    function elegirUna(id, leyenda, opciones) {
+        const caja = crear("fieldset", "master-unidades");
+        caja.appendChild(crear("legend", "oc-dados-etiqueta", leyenda));
+        const radios = opciones.map(([v, texto]) => {
+            const et = crear("label", "master-unidades-opcion");
+            const r = crear("input");
+            r.type = "radio";
+            r.name = id;
+            r.value = v;
+            r.id = id + "-" + v;
+            et.htmlFor = r.id;
+            et.append(r, document.createTextNode(" " + texto));
+            caja.appendChild(et);
+            return r;
+        });
+        caja.valor = () => (radios.find((r) => r.checked) || {}).value || "";
+        caja.foco = () => radios[0].focus();
+        return caja;
     }
 
     // LICENCIAS Y CRÉDITOS: lo que hay que decir del SRD, los sonidos, las
@@ -16668,11 +17312,18 @@
             + " oficial. Los rasgos y dotes se han preparado a partir de 5e-bits/5e-database (MIT).",
         [["el SRD 5.2", "https://www.dndbeyond.com/srd"], ["la licencia CC BY 4.0", "https://creativecommons.org/licenses/by/4.0/deed.es"],
             ["5e-database", "https://github.com/5e-bits/5e-database"]]],
+        ["📗 Reglas, monstruos, conjuros y objetos de 2014", "Esta obra incluye materiales extraídos del Documento de referencia del"
+            + " sistema 5.1 («SRD 5.1») de Wizards of the Coast LLC, que está disponible en"
+            + " https://dnd.wizards.com/es/resources/systems-reference-document. El SRD 5.1 tiene la licencia Creative Commons"
+            + " Atribución/Reconocimiento 4.0 Licencia Pública Internacional, que está disponible en"
+            + " https://creativecommons.org/licenses/by/4.0/legalcode.es.",
+        [["el SRD 5.1", "https://dnd.wizards.com/es/resources/systems-reference-document"],
+            ["la licencia CC BY 4.0", "https://creativecommons.org/licenses/by/4.0/legalcode.es"]]],
         ["🔊 Sonidos", "Las grabaciones de sonido ambiente y efectos (cuando vienen con la app) son de la Google Sound Library,"
             + " con licencia CC BY 4.0. Tus propios audios son tuyos y se quedan en tu dispositivo.",
         [["Google Sound Library", "https://developers.google.com/assistant/tools/sound-library"],
             ["la licencia CC BY 4.0", "https://creativecommons.org/licenses/by/4.0/deed.es"]]],
-        ["🔤 Tipografías", "Space Grotesk, DM Mono, Jersey 10, Pangolin, Atkinson Hyperlegible y Noto, con licencia SIL Open Font"
+        ["🔤 Tipografías", "Space Grotesk, DM Mono, Jersey 10, Pangolin, Patrick Hand, Caveat, Inter, Pixelify Sans, VT323, Atkinson Hyperlegible y Noto, con licencia SIL Open Font"
             + " License 1.1.", [["la licencia OFL", "https://openfontlicense.org"]]],
         ["🧩 La app", "Pantalla de máster, de Richi (rperezbarreda). El código tiene licencia MIT. Dungeons & Dragons y D&D son"
             + " marcas de Wizards of the Coast; esta app no está afiliada ni respaldada por ellos.",
@@ -16766,7 +17417,9 @@
         et.htmlFor = input.id;
         const crearB = crear("button", "oc-vida-accion es-principal", "＋ crear y empezar");
         crearB.type = "submit";
-        form.append(et, input, crearB, crear("p", "oc-hoja-nota", "Viene con un tablero de tutorial que explica las opciones,"
+        const medidas = elegirUnidades("master-entrada-unidades");
+        const edicion = elegirEdicion("master-entrada-edicion");
+        form.append(et, input, edicion, medidas, crearB, crear("p", "oc-hoja-nota", "Viene con un tablero de tutorial que explica las opciones,"
             + " y con tableros de ejemplo para combate, tiendas, PNJ…"));
         form.addEventListener("submit", (e) => {
             e.preventDefault();
@@ -16776,7 +17429,17 @@
                 input.focus();
                 return;
             }
-            const c = crearCampana(n);
+            if (!edicion.valor()) {
+                avisar("Elige con qué reglas jugáis: las de 2024 o las de 2014. Se puede cambiar luego en ⚙ opciones.");
+                edicion.foco();
+                return;
+            }
+            if (!medidas.valor()) {
+                avisar("Elige qué medidas usáis: imperial (pies) o métrico (metros). Se puede cambiar luego en ⚙ opciones.");
+                medidas.foco();
+                return;
+            }
+            const c = crearCampana(n, medidas.valor(), edicion.valor());
             if (sinGuardarTodavia) {
                 todas.campanas = [c];
                 sinGuardarTodavia = false;
@@ -16864,6 +17527,44 @@
         (fondo.querySelector(".master-entrada-campana") || input).focus();
     }
 
+    // DUPLICAR UNA CAMPAÑA: una copia entera (tableros, ventanas, party,
+    // documentos, música, línea temporal, relaciones…) con ids nuevos. Los
+    // archivos que usa (imágenes, PDF, audios: «a…», «f…», «j…») se copian
+    // también con id nuevo: si no, al borrar uno en una campaña se iría
+    // de la otra.
+    function duplicarCampana(c) {
+        guardar();
+        let texto = JSON.stringify(campanaGuardable(c));
+        const ids = Array.from(new Set(texto.match(/\b[afj](?=[a-z0-9]*\d)[a-z0-9]{9,}\b/g) || []));
+        return Promise.all(ids.map((id) => archivoLeer(id).catch(() => undefined).then((blob) => {
+            if (!blob) {
+                return null;
+            }
+            const nuevo = idDoc(id.charAt(0));
+            return archivoGuardar(nuevo, blob).then(() => [id, nuevo]).catch(() => null);
+        }))).then((pares) => {
+            pares.filter(Boolean).forEach(([viejo, nuevo]) => {
+                texto = texto.split(viejo).join(nuevo);
+            });
+            const x = JSON.parse(texto);
+            x.id = "c" + siguienteCampana++;
+            x.nombre = (c.nombre + " (copia)").slice(0, 40);
+            const perfiles = {};
+            x.perfiles.forEach((pf) => {
+                const nuevo = "p" + siguientePerfil++;
+                perfiles[pf.id] = nuevo;
+                pf.id = nuevo;
+                pf.modulos.forEach((m) => {
+                    m.id = "m" + siguienteId++;
+                });
+            });
+            x.activo = perfiles[x.activo] || x.perfiles[0].id;
+            todas.campanas.push(x);
+            guardar();
+            return x;
+        });
+    }
+
     function verCampanas() {
         const cuerpo = crear("div", "master-campanas");
         cuerpo.appendChild(crear("p", "oc-hoja-nota", "Cada campaña tiene sus pestañas, sus ventanas y su party: no se mezclan."));
@@ -16908,8 +17609,20 @@
             });
             return f;
         };
+        const medidasNueva = elegirUnidades("master-campana-unidades");
+        const edicionNueva = elegirEdicion("master-campana-edicion");
         const nueva = formulario("master-campana-nueva", "campaña nueva", "campaña " + (todas.campanas.length + 1), "＋ crear", (n) => {
-            const c = crearCampana(n);
+            if (!edicionNueva.valor()) {
+                avisar("Elige con qué reglas jugáis: las de 2024 o las de 2014.");
+                edicionNueva.foco();
+                return;
+            }
+            if (!medidasNueva.valor()) {
+                avisar("Elige qué medidas usáis: imperial (pies) o métrico (metros).");
+                medidasNueva.foco();
+                return;
+            }
+            const c = crearCampana(n, medidasNueva.valor(), edicionNueva.valor());
             todas.campanas.push(c);
             cerrar();
             activarCampana(c);
@@ -16942,7 +17655,25 @@
             avisar("Borrada la campaña " + nombre + ".");
         });
         borrar.disabled = todas.campanas.length < 2;
-        cuerpo.append(ul, nueva, renombrarla, borrar);
+        nueva.insertBefore(edicionNueva, nueva.querySelector("button"));
+        nueva.insertBefore(medidasNueva, nueva.querySelector("button"));
+        const duplicar = botonDe("oc-vida-accion", "⧉ duplicar esta campaña", () => {
+            duplicar.disabled = true;
+            duplicar.textContent = "⧉ duplicando…";
+            duplicarCampana(todo).then((x) => {
+                cerrar();
+                activarCampana(x);
+                botonCampana.focus();
+                avisar("Duplicada: ahora estás en «" + x.nombre + "» (la original sigue igual).");
+            }).catch(() => {
+                duplicar.disabled = false;
+                duplicar.textContent = "⧉ duplicar esta campaña";
+                avisar("No se ha podido duplicar.");
+            });
+        }, "Duplicar la campaña " + todo.nombre + " (con sus tableros, party y documentos)");
+        const botonesC = crear("div", "master-anadir-otras");
+        botonesC.append(duplicar, borrar);
+        cuerpo.append(ul, nueva, renombrarla, botonesC);
         const cerrar = window.ocVentana.abrir({ titulo: "campañas", cuerpo, vuelta: botonCampana, clase: "es-ancha" });
     }
     pintarCampana();
@@ -17030,6 +17761,24 @@
             }), vaciar);
             fila("Las ventanas de esta pestaña", otras);
         }
+        const notaMedidas = crear("p", "oc-hoja-nota", "En métrico, lo que sale en pantalla (monstruos, conjuros, reglas, objetos,"
+            + " generadores…) se pasa con la equivalencia de los manuales en español: 5 pies = 1,5 m, 1 libra = 0,5 kg,"
+            + " 1 milla = 1,5 km. Lo que escribes tú no se toca.");
+        notaMedidas.dataset.sinMedidas = "";
+        fila("Reglas de esta campaña", botonesDe("edición", EDICIONES, edicionDe(todo), (v) => {
+            todo.edicion = v;
+            guardar();
+            aplicarEdicion();
+            avisar(v === "2014" ? "Reglas, monstruos y conjuros de 2014 (SRD 5.1)." : "Reglas, monstruos y conjuros de 2024 (SRD 5.2).");
+        }), crear("p", "oc-hoja-nota", "Cambia las reglas (estados, acciones, descansos…), el bestiario, los conjuros y los objetos"
+            + " (el equipo y los objetos mágicos de la tienda y del botín). Lo tuyo (tus monstruos, conjuros, objetos y reglas"
+            + " propias) sale con las dos."));
+        fila("Medidas de esta campaña", botonesDe("medidas", MEDIDAS, unidadesDe(todo), (v) => {
+            todo.unidades = v;
+            guardar();
+            aplicarUnidades();
+            avisar(v === "metrico" ? "Medidas en metros, kilos y kilómetros." : "Medidas en pies, libras y millas.");
+        }), notaMedidas);
         fila("Copia de seguridad", copias(() => cerrar()));
         // En la web (no en el ejecutable, que ya es la app en el
         // ordenador): de dónde bajarla para usarla sin el navegador.

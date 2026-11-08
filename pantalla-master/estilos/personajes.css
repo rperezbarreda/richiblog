@@ -4313,6 +4313,23 @@ button.oc-casilla[data-estado="libre"]:hover {
     outline-offset: 1px;
 }
 
+.oc-ini-grupo {
+    padding: 0 6px;
+    white-space: nowrap;
+    border: 1px dashed currentColor;
+    color: var(--muted);
+    font-family: var(--fuente-mono);
+    font-size: 0.6875rem;
+}
+
+/* LOS GRUPOS: los de debajo del primero, metidos un poco y pegados a él
+   (sin hueco entre filas), para que se vea que van juntos. */
+.oc-ini-fila.es-del-grupo {
+    margin-top: -6px;
+    margin-left: 18px;
+    border-top-style: dashed;
+}
+
 .oc-ini-le-toca {
     padding: 0 6px;
     background: var(--yellow);
@@ -4359,7 +4376,12 @@ button.oc-casilla[data-estado="libre"]:hover {
 .oc-ini-mandos {
     grid-area: mandos;
     display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
     gap: 4px;
+    /* Con 🔗 son cinco: en una ventana estrecha bajan a otra fila y el
+       nombre no se queda sin sitio. */
+    max-width: calc(3 * 36px + 2 * 4px);
 }
 
 .oc-ini-mando {

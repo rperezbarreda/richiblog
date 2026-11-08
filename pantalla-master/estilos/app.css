@@ -179,3 +179,10 @@ body.app {
         padding-top: 6px;
     }
 }
+
+/* Los controles, con la letra de la app: el navegador les pone la suya si
+   nadie dice nada (los nombres del bestiario salían en Arial). Con peso
+   0, lo que ya diga cada uno manda. */
+:where(button, input, select, textarea) {
+    font-family: inherit;
+}

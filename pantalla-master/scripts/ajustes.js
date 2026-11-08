@@ -17,6 +17,7 @@
 //     --escala           multiplica el tamaño de raíz (base.css)
 //     data-interlineado  la separación del texto largo (ajustes.css)
 //     data-letra         cambia las cinco fuentes de golpe (base.css)
+//     data-estilo        el diseño: retro (sin él), moderno (moderno.css), windows (windows.css) o a lápiz (lapiz.css)
 //     data-theme         el tema, de siempre (tema.js)
 //     data-crt           el filtro CRT (ajustes.css)
 //     data-voz           a qué velocidad lee (leer-en-voz.js)
@@ -52,6 +53,7 @@ const AJUSTES_TAMANOS = [0.9, 1, 1.15, 1.3, 1.5];
 const AJUSTES_GUARDADO_TAMANO = "richi-texto";
 const AJUSTES_GUARDADO_INTERLINEADO = "richi-interlineado";
 const AJUSTES_GUARDADO_LETRA = "richi-letra";
+const AJUSTES_GUARDADO_ESTILO = "richi-estilo";
 const AJUSTES_GUARDADO_CRT = "richi-crt";
 const AJUSTES_GUARDADO_VOZ = "richi-voz";
 const AJUSTES_GUARDADO_MOVIMIENTO = "richi-movimiento";
@@ -148,6 +150,7 @@ function initializeAjustes() {
     // ---- separación entre líneas y letra ----
     engancharAjustesOpciones("interlineado");
     engancharAjustesOpciones("letra");
+    engancharAjustesOpciones("estilo");
     engancharAjustesOpciones("voz");
     engancharAjustesOpciones("movimiento");
     pintarAjustesOpciones();
@@ -718,6 +721,7 @@ function ponerAjuste(cual, valor, guardar) {
         const claves = {
             interlineado: AJUSTES_GUARDADO_INTERLINEADO,
             letra: AJUSTES_GUARDADO_LETRA,
+            estilo: AJUSTES_GUARDADO_ESTILO,
             voz: AJUSTES_GUARDADO_VOZ,
             movimiento: AJUSTES_GUARDADO_MOVIMIENTO,
         };
@@ -733,10 +737,11 @@ function pintarAjustesOpciones() {
     const ahora = {
         interlineado: raiz.getAttribute("data-interlineado") || "",
         letra: raiz.getAttribute("data-letra") || "",
+        estilo: raiz.getAttribute("data-estilo") || "",
         voz: raiz.getAttribute("data-voz") || "",
         movimiento: raiz.getAttribute("data-movimiento") || "",
     };
-    ["interlineado", "letra", "voz", "movimiento"].forEach((cual) => {
+    ["interlineado", "letra", "estilo", "voz", "movimiento"].forEach((cual) => {
         AJUSTES.ventana.querySelectorAll(`[data-${cual}]`).forEach((boton) => {
             const suyo = boton.getAttribute(`data-${cual}`);
             boton.setAttribute("aria-pressed", suyo === ahora[cual] ? "true" : "false");
@@ -809,6 +814,7 @@ function reiniciarAjustes() {
     aplicarAjustesTamano(AJUSTES_TAMANOS.indexOf(1), true);
     ponerAjuste("interlineado", "", true);
     ponerAjuste("letra", "", true);
+    ponerAjuste("estilo", "", true);
     ponerAjuste("voz", "", true);
     ponerAjuste("movimiento", "", true);
     ponerAjustesCrt(false, true);

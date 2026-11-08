@@ -1,0 +1,232 @@
+/* =========================================
+   EL DISEÑO «MODERNO»
+   =========================================
+   La otra forma de ver la app (Aa → «diseño»): el de siempre es retro
+   (letra pixelada en las barras, monoespaciada en botones y etiquetas,
+   MAYÚSCULAS, esquinas rectas y sombras duras desplazadas); éste es
+   liso: una sola letra de texto, sin mayúsculas forzadas, esquinas
+   redondeadas, bordes finos y sombras difuminadas.
+
+   Lo pone data-estilo="moderno" en el <html> (lo deja puesto
+   scripts/arranque.js antes de pintar, desde «richi-estilo»; lo cambia
+   scripts/ajustes.js). Solo cambia la FORMA: los colores siguen siendo
+   los del tema elegido (base.css), así que vale con todos, y el tamaño,
+   la separación y la letra «más legible» siguen mandando.
+
+   Va el último en el <head> para ganar a lo de siempre a igualdad de
+   peso. Las esquinas de los controles van con :where() (peso 0): así
+   lo que ya tenía su forma (los botones redondos, las fotos en círculo)
+   se queda como está. */
+
+/* Su letra: Inter (OFL), variable (todos los grosores en un archivo).
+   Solo se descarga si se elige este diseño. */
+@font-face {
+    font-family: "Inter";
+    src: url("../tipografias/inter-variable.woff2") format("woff2");
+    font-weight: 100 900;
+    font-style: normal;
+    font-display: swap;
+}
+
+:root[data-estilo="moderno"] {
+    /* Una sola letra: Inter (o la Atkinson, con «más legible»). */
+    --fuente-texto: "Inter", "Segoe UI", system-ui, sans-serif;
+    --fuente-mono: var(--fuente-texto);
+    --fuente-ventana: var(--fuente-texto);
+    --fuente-titular: var(--fuente-texto);
+    --bg-texture: none;
+    --moderno-radio: 14px;
+    --moderno-radio-peque: 8px;
+    --moderno-borde: color-mix(in srgb, var(--white) 18%, transparent);
+    --moderno-borde-fuerte: color-mix(in srgb, var(--yellow) 60%, transparent);
+    --moderno-sombra: 0 12px 32px rgba(0, 0, 0, 0.28), 0 2px 8px rgba(0, 0, 0, 0.16);
+    --moderno-sombra-suave: 0 4px 14px rgba(0, 0, 0, 0.2);
+}
+
+:root[data-letra="legible"][data-estilo="moderno"] {
+    --fuente-texto: "Atkinson Hyperlegible", "Inter", sans-serif;
+}
+
+/* En los temas claros, la sombra más suave (sobre crema, la oscura
+   ensucia). */
+:root[data-estilo="moderno"]:is([data-theme="light"], [data-theme="tranquilo"], [data-theme="puro-claro"]) {
+    --moderno-sombra: 0 10px 28px rgba(40, 24, 10, 0.16), 0 2px 6px rgba(40, 24, 10, 0.1);
+    --moderno-sombra-suave: 0 3px 12px rgba(40, 24, 10, 0.12);
+}
+
+/* En los puros y los de terminal, los bordes se quedan enteros: ahí
+   un borde a medias no separa nada. */
+:root[data-estilo="moderno"]:is([data-theme="puro-oscuro"], [data-theme="puro-claro"], [data-theme^="terminal-"]) {
+    --moderno-borde: var(--border);
+    --moderno-borde-fuerte: var(--yellow);
+}
+
+/* Sin MAYÚSCULAS forzadas ni letras separadas (eran de la monoespaciada);
+   los números, eso sí, del mismo ancho, para que las columnas cuadren. */
+:root[data-estilo="moderno"] body * {
+    letter-spacing: normal !important;
+    text-transform: none !important;
+}
+
+:root[data-estilo="moderno"] body {
+    font-variant-numeric: tabular-nums;
+}
+
+/* ---- LAS ESQUINAS ---- */
+:where(:root[data-estilo="moderno"]) :where(button, select, textarea,
+    input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="color"])) {
+    border-radius: var(--moderno-radio-peque);
+}
+
+/* ---- LAS VENTANAS DEL TABLERO ---- */
+:root[data-estilo="moderno"] .master-ventana {
+    border-width: 1px;
+    border-radius: var(--moderno-radio);
+    box-shadow: var(--moderno-sombra);
+}
+
+:root[data-estilo="moderno"] .master-ventana.con-color {
+    border-color: color-mix(in srgb, var(--postit) 70%, transparent);
+    box-shadow: var(--moderno-sombra);
+}
+
+:root[data-estilo="moderno"] .master-ventana.es-arrastrada {
+    box-shadow: 0 22px 48px rgba(0, 0, 0, 0.35);
+}
+
+:root[data-estilo="moderno"] .master-ventana-barra {
+    border-bottom-width: 1px;
+    font-size: 0.9375rem;
+    font-weight: 600;
+}
+
+/* Las cajas y paneles que tenían la sombra dura desplazada. */
+:root[data-estilo="moderno"] :is(.oc-panel, .oc-hoja-caja, .oc-dados, .oc-carta, .oc-menu-ventana,
+    .master-entrada-caja, .master-buscador-lista, .app-actualizar, .ajustes, .ajustes-ejemplo) {
+    border-width: 1px;
+    border-radius: var(--moderno-radio);
+    box-shadow: var(--moderno-sombra);
+}
+
+:root[data-estilo="moderno"] .app .app-principal {
+    border-width: 1px;
+    border-radius: var(--moderno-radio);
+    box-shadow: var(--moderno-sombra-suave);
+}
+
+:root[data-estilo="moderno"] .ajustes.ajustes-a-mano {
+    box-shadow: var(--moderno-sombra), 0 0 0 100vmax rgba(0, 0, 0, 0.6);
+}
+
+:root[data-estilo="moderno"] .oc-resultado {
+    border-radius: var(--moderno-radio);
+    box-shadow: var(--moderno-sombra);
+}
+
+:root[data-estilo="moderno"] .oc-ini-fila.es-arrastrado {
+    box-shadow: var(--moderno-sombra);
+}
+
+:root[data-estilo="moderno"] :is(.oc-boton, .master-anadir-tarjeta) {
+    border-width: 1px;
+    border-radius: var(--moderno-radio-peque);
+    box-shadow: none;
+}
+
+:root[data-estilo="moderno"] .master-anadir-tarjeta:hover:not(:disabled) {
+    box-shadow: var(--moderno-sombra-suave);
+}
+
+:root[data-estilo="moderno"] .app .oc-boton.oc-boton-dados.es-redondo {
+    box-shadow: var(--moderno-sombra);
+}
+
+/* ---- LOS BOTONES: los normales, con un fondo tenue del acento y el
+   borde a medias; el principal, lleno. ---- */
+:root[data-estilo="moderno"] :is(.oc-vida-accion, .master-pestana-mando, .master-opcion, .ajustes-opcion) {
+    border-width: 1px;
+    border-color: var(--moderno-borde-fuerte);
+    background: color-mix(in srgb, var(--yellow) 10%, transparent);
+    font-weight: 600;
+}
+
+:root[data-estilo="moderno"] :is(.oc-vida-accion:hover, .oc-vida-accion.es-principal, .master-pestana-mando:hover:not(:disabled),
+    .master-opcion[aria-pressed="true"], .ajustes-opcion[aria-pressed="true"]) {
+    border-color: var(--yellow);
+    background: var(--yellow);
+    color: var(--yellow-contrast);
+}
+
+:root[data-estilo="moderno"] .oc-vida-accion:disabled {
+    border-color: var(--moderno-borde);
+    background: transparent;
+    color: var(--muted);
+}
+
+/* Los de las listas (monstruos, conjuros, reglas…): una tarjeta. */
+:root[data-estilo="moderno"] :is(.master-conjuro, .oc-regla-boton) {
+    border-width: 1px;
+    border-color: var(--moderno-borde-fuerte);
+    border-radius: 10px;
+}
+
+:root[data-estilo="moderno"] :is(.master-conjuro, .oc-regla-boton):hover {
+    border-color: var(--yellow);
+    box-shadow: var(--moderno-sombra-suave);
+}
+
+/* ---- LOS CAMPOS ---- */
+:root[data-estilo="moderno"] :is(.oc-dados-texto, .master-elegir, .oc-dados-elegir) {
+    border-width: 1px;
+    border-color: var(--moderno-borde);
+    background: color-mix(in srgb, var(--purple) 70%, transparent);
+}
+
+:root[data-estilo="moderno"] :is(.oc-dados-texto, .master-elegir, .oc-dados-elegir):hover {
+    border-color: var(--moderno-borde-fuerte);
+}
+
+/* Las etiquetas: sin mayúsculas, un poco más grandes y en negrita. */
+:root[data-estilo="moderno"] .oc-dados-etiqueta {
+    font-size: 0.8125rem;
+    font-weight: 600;
+}
+
+/* ---- LAS PESTAÑAS DE ARRIBA: sin el corte en diagonal, como píldoras. ---- */
+:root[data-estilo="moderno"] .master-pestanas {
+    clip-path: none;
+    padding: 4px 6px;
+    border-radius: var(--moderno-radio);
+    align-items: center;
+}
+
+:root[data-estilo="moderno"] .master-barra .master-pestanas,
+:root[data-estilo="moderno"] .master-barra-mandos {
+    border-radius: var(--moderno-radio);
+}
+
+:root[data-estilo="moderno"] :is(.master-pestana, .master-bicho-pestana) {
+    border-width: 1px;
+    border-bottom: 1px solid var(--border);
+    border-radius: 999px;
+}
+
+/* Las pestañas de dentro de una ventana (las agrupadas): la letra del
+   texto es más ancha que la pixelada, así que un punto más pequeña para
+   que quepan los nombres. */
+:root[data-estilo="moderno"] .master-grupo-pestana {
+    padding: 4px 10px;
+    border-radius: 999px;
+    font-size: 0.8125rem;
+}
+
+:root[data-estilo="moderno"] .master-pestana.con-color[aria-selected="true"] {
+    box-shadow: 0 0 0 2px var(--yellow);
+}
+
+/* ---- EL TABLERO: la cuadrícula, más suave. ---- */
+:root[data-estilo="moderno"] .master-lienzo.con-lienzo {
+    border-width: 1px;
+    border-style: solid;
+    border-radius: var(--moderno-radio);
+}
