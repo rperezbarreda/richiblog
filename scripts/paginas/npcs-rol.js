@@ -381,8 +381,8 @@ function leerCerradosNpc() {
     }
 }
 
-function recordarApartadoNpc(bloque, caja) {
-    const nombre = bloque.getAttribute("data-npc-apartado");
+function recordarApartadoNpc(bloque, caja, clave) {
+    const nombre = clave || bloque.getAttribute("data-npc-apartado");
     // Mientras se busca o se filtra, los apartados se abren solos (ver
     // repasarGruposNpc); eso no lo ha decidido quien mira, así que no se
     // guarda. data-npc-forzado es lo que distingue "lo he abierto yo" de
@@ -412,6 +412,15 @@ function bloqueDeGrupoNpc(grupo, gente, datos, nivel, sinTitulo) {
     if (nivel === 3) {
         titulo.classList.add("es-de-dentro");
     }
+    // Con título, el grupo también se pliega (como los apartados): su
+    // flecha va delante del nombre.
+    if (!sinTitulo) {
+        const flecha = document.createElement("span");
+        flecha.className = "npc-grupo-flecha";
+        flecha.setAttribute("aria-hidden", "true");
+        flecha.textContent = "▾";
+        titulo.appendChild(flecha);
+    }
     const nombre = document.createElement("span");
     nombre.textContent = grupo;
     titulo.appendChild(nombre);
@@ -425,8 +434,6 @@ function bloqueDeGrupoNpc(grupo, gente, datos, nivel, sinTitulo) {
     if (sinTitulo) {
         titulo.classList.add("visually-hidden");
     }
-    bloque.appendChild(titulo);
-
     const rejilla = document.createElement("ul");
     rejilla.className = "npc-rejilla";
     gente.forEach((quien) => {
@@ -442,7 +449,23 @@ function bloqueDeGrupoNpc(grupo, gente, datos, nivel, sinTitulo) {
         celda.appendChild(tokenDeNpc(quien, datos));
         rejilla.appendChild(celda);
     });
-    bloque.appendChild(rejilla);
+    if (sinTitulo) {
+        bloque.append(titulo, rejilla);
+        return bloque;
+    }
+    // UN GRUPO SE PLIEGA: lo mismo que un apartado (bloqueDeApartadoNpc),
+    // un <details> con el encabezado dentro del <summary>. Se recuerda en
+    // la misma lista, con «grupo:» delante para no confundirlo con un
+    // apartado que se llame igual.
+    const caja = document.createElement("details");
+    caja.className = "npc-grupo-caja";
+    caja.open = !NPC_CERRADOS.has("grupo:" + grupo);
+    caja.addEventListener("toggle", () => recordarApartadoNpc(bloque, caja, "grupo:" + grupo));
+    const tirador = document.createElement("summary");
+    tirador.className = "npc-apartado-tirador npc-grupo-tirador";
+    tirador.appendChild(titulo);
+    caja.append(tirador, rejilla);
+    bloque.appendChild(caja);
     return bloque;
 }
 
@@ -568,6 +591,10 @@ document.addEventListener("filtros:cambiado", repasarGruposNpc);
 document.addEventListener("filtros:actualizar", repasarGruposNpc);
 
 function repasarGruposNpc() {
+    const buscandoAlgo = !!(window.buscador && window.buscador.texto)
+        || [...document.querySelectorAll(".filtro-btn")]
+            .some((b) => b.getAttribute("aria-pressed") === "true"
+                && b.getAttribute("data-categoria") !== "todas");
     document.querySelectorAll(".npc-grupo").forEach((grupo) => {
         const celdas = [...grupo.querySelectorAll(".npc-celda")];
         const vivas = celdas.filter((celda) => !celda.hidden).length;
@@ -575,6 +602,18 @@ function repasarGruposNpc() {
         const cuenta = grupo.querySelector("[data-npc-cuenta]");
         if (cuenta) {
             cuenta.textContent = vivas === 1 ? "1 ficha" : vivas + " fichas";
+        }
+        // Plegado, se abre solo mientras se busca (como los apartados).
+        const caja = grupo.querySelector(".npc-grupo-caja");
+        if (!caja) {
+            return;
+        }
+        if (buscandoAlgo && vivas && !caja.open) {
+            grupo.setAttribute("data-npc-forzado", "");
+            caja.open = true;
+        } else if (!buscandoAlgo && grupo.hasAttribute("data-npc-forzado")) {
+            caja.open = false;
+            grupo.removeAttribute("data-npc-forzado");
         }
     });
 
@@ -586,10 +625,7 @@ function repasarGruposNpc() {
     // se abren solos: encontrar a alguien y que no se vea porque su región
     // estaba cerrada es peor que no encontrarlo. Al terminar la búsqueda
     // vuelven a como estaban. Lo mismo que hace la wiki.
-    const rebuscando = !!(window.buscador && window.buscador.texto)
-        || [...document.querySelectorAll(".filtro-btn")]
-            .some((b) => b.getAttribute("aria-pressed") === "true"
-                && b.getAttribute("data-categoria") !== "todas");
+    const rebuscando = buscandoAlgo;
 
     document.querySelectorAll(".npc-apartado").forEach((apartado) => {
         const celdas = [...apartado.querySelectorAll(".npc-celda")]

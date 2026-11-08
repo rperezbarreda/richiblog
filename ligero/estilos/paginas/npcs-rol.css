@@ -159,6 +159,26 @@
     content: "↳ ";
     color: var(--yellow);
 }
+.npc-grupo-caja {
+    display: block;
+}
+.npc-grupo-caja > .npc-rejilla {
+    margin-top: 14px;
+}
+.npc-grupo-tirador:hover .npc-grupo-titulo,
+.npc-grupo-tirador:focus-visible .npc-grupo-titulo {
+    background: var(--purple-lighter);
+}
+.npc-grupo-flecha {
+    display: inline-block;
+    color: var(--yellow);
+    font-family: var(--fuente-mono);
+    font-style: normal;
+    transition: transform 0.15s ease;
+}
+.npc-grupo-caja:not([open]) .npc-grupo-flecha {
+    transform: rotate(-90deg);
+}
 .npc-grupo-titulo {
     display: flex;
     flex-wrap: wrap;

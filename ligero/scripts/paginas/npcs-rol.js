@@ -188,8 +188,8 @@ function leerCerradosNpc() {
         return new Set();
     }
 }
-function recordarApartadoNpc(bloque, caja) {
-    const nombre = bloque.getAttribute("data-npc-apartado");
+function recordarApartadoNpc(bloque, caja, clave) {
+    const nombre = clave || bloque.getAttribute("data-npc-apartado");
     if (bloque.hasAttribute("data-npc-forzado")) {
         return;
     }
@@ -212,6 +212,13 @@ function bloqueDeGrupoNpc(grupo, gente, datos, nivel, sinTitulo) {
     if (nivel === 3) {
         titulo.classList.add("es-de-dentro");
     }
+    if (!sinTitulo) {
+        const flecha = document.createElement("span");
+        flecha.className = "npc-grupo-flecha";
+        flecha.setAttribute("aria-hidden", "true");
+        flecha.textContent = "▾";
+        titulo.appendChild(flecha);
+    }
     const nombre = document.createElement("span");
     nombre.textContent = grupo;
     titulo.appendChild(nombre);
@@ -222,7 +229,6 @@ function bloqueDeGrupoNpc(grupo, gente, datos, nivel, sinTitulo) {
     if (sinTitulo) {
         titulo.classList.add("visually-hidden");
     }
-    bloque.appendChild(titulo);
     const rejilla = document.createElement("ul");
     rejilla.className = "npc-rejilla";
     gente.forEach((quien) => {
@@ -233,7 +239,19 @@ function bloqueDeGrupoNpc(grupo, gente, datos, nivel, sinTitulo) {
         celda.appendChild(tokenDeNpc(quien, datos));
         rejilla.appendChild(celda);
     });
-    bloque.appendChild(rejilla);
+    if (sinTitulo) {
+        bloque.append(titulo, rejilla);
+        return bloque;
+    }
+    const caja = document.createElement("details");
+    caja.className = "npc-grupo-caja";
+    caja.open = !NPC_CERRADOS.has("grupo:" + grupo);
+    caja.addEventListener("toggle", () => recordarApartadoNpc(bloque, caja, "grupo:" + grupo));
+    const tirador = document.createElement("summary");
+    tirador.className = "npc-apartado-tirador npc-grupo-tirador";
+    tirador.appendChild(titulo);
+    caja.append(tirador, rejilla);
+    bloque.appendChild(caja);
     return bloque;
 }
 function tokenDeNpc(quien, datos) {
@@ -304,6 +322,10 @@ function retratoNpc(ruta, nombre, claseImg, claseMono, respaldo) {
 document.addEventListener("filtros:cambiado", repasarGruposNpc);
 document.addEventListener("filtros:actualizar", repasarGruposNpc);
 function repasarGruposNpc() {
+    const buscandoAlgo = !!(window.buscador && window.buscador.texto)
+        || [...document.querySelectorAll(".filtro-btn")]
+            .some((b) => b.getAttribute("aria-pressed") === "true"
+                && b.getAttribute("data-categoria") !== "todas");
     document.querySelectorAll(".npc-grupo").forEach((grupo) => {
         const celdas = [...grupo.querySelectorAll(".npc-celda")];
         const vivas = celdas.filter((celda) => !celda.hidden).length;
@@ -312,11 +334,19 @@ function repasarGruposNpc() {
         if (cuenta) {
             cuenta.textContent = vivas === 1 ? "1 ficha" : vivas + " fichas";
         }
+        const caja = grupo.querySelector(".npc-grupo-caja");
+        if (!caja) {
+            return;
+        }
+        if (buscandoAlgo && vivas && !caja.open) {
+            grupo.setAttribute("data-npc-forzado", "");
+            caja.open = true;
+        } else if (!buscandoAlgo && grupo.hasAttribute("data-npc-forzado")) {
+            caja.open = false;
+            grupo.removeAttribute("data-npc-forzado");
+        }
     });
-    const rebuscando = !!(window.buscador && window.buscador.texto)
-        || [...document.querySelectorAll(".filtro-btn")]
-            .some((b) => b.getAttribute("aria-pressed") === "true"
-                && b.getAttribute("data-categoria") !== "todas");
+    const rebuscando = buscandoAlgo;
     document.querySelectorAll(".npc-apartado").forEach((apartado) => {
         const celdas = [...apartado.querySelectorAll(".npc-celda")]
             .filter((celda) => !celda.hidden);
