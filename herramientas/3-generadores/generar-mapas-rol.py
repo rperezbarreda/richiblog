@@ -36,6 +36,11 @@
 #   - En el JSON, "zonas": [{titulo, url}], que salen en «extra» debajo del
 #     mapamundi.
 #
+# LAS IMÁGENES AL PULSAR: un sitio que se llama como una imagen de la
+# campaña (Sirevia y «Mapa de Sirevia», en «✨ extra»: se quita el «Mapa
+# de» y las tildes) la enseña en grande al pulsarlo, en el mapa y en la
+# lista de debajo.
+#
 # LAS RUTAS DE CADA SESIÓN. Una raya «Ruta de viaje» puede decir de qué
 # sesión es (en el editor, «De la sesión»; en el .cmap, "session": 3). En
 # la página del mapa se ven todas o solo la de una (en «capas», «rutas de
@@ -236,11 +241,29 @@ def poner_sesiones(m):
     return sorted(hay.items())
 
 
+def poner_imagenes_al_pulsar(m):
+    """Un sitio que se llama como una imagen de la campaña («Sirevia» y
+    «Mapa de Sirevia», en «✨ extra»), al pulsarlo enseña esa imagen. Va en
+    "ver" de cada pin: {url, titulo} (lo pinta mundo_mapas.py)."""
+    def llano(texto):
+        texto = _clave_de(texto)
+        return re.sub(r"^(mapa|plano)\s+(de\s+la|de\s+los|de\s+las|del|de)\s+", "", texto).strip()
+    imagenes = {}
+    for im in m["campana"].get("imagenes") or []:
+        if isinstance(im, dict) and im.get("imagen") and im.get("titulo"):
+            imagenes.setdefault(llano(im["titulo"]), {"url": str(im["imagen"]), "titulo": str(im["titulo"])})
+    for pin in m["leido"].get("pines") or []:
+        nombre = llano(pin.get("etiqueta"))
+        if nombre and nombre in imagenes:
+            pin["ver"] = imagenes[nombre]
+
+
 def un_mapa(m, probar):
     """Pinta un .cmap de una campaña (ya leído, ver leer_uno) y escribe su
     página. Devuelve (clave, título, url)."""
     archivo, clave, campana, leido, avisos = m["archivo"], m["clave"], m["campana"], m["leido"], m["avisos"]
     m["sesiones"] = poner_sesiones(m)
+    poner_imagenes_al_pulsar(m)
     suyas = MAPAS_ROL / clave / "imagenes"
     salida_img = RAIZ / "imagenes" / "notas_rol" / clave / "mapa"
     url_img = "/imagenes/notas_rol/%s/mapa/" % clave

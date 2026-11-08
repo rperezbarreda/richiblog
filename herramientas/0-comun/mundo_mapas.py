@@ -2112,13 +2112,21 @@ def pintar(mapa, pagina_a, mapa_a, imagen_a, detalle=None, avisar=None, region_d
             que_es = ""
         if pin["etiqueta"] or pin["pagina"] or pin["mapa"]:
             para_la_red.append({"x": pin["x"], "y": pin["y"], "nombre": nombre, "cual": cual})
+        # LA IMAGEN AL PULSAR (los mapas de campaña: el plano de un pueblo
+        # o una ciudad; lo pone generar-mapas-rol.py en "ver"). Solo en un
+        # sitio que no lleve ya a otra parte.
+        ver = pin.get("ver") if not any(d["url"] for d in destinos) else None
         for uno in destinos:
             sitios.append(dict(uno, id=cual, nombre=nombre, color=pin["color"],
-                               tipo="pin", icono=pin["icono"] or simbolo_lista, que=que_es))
+                               tipo="pin", icono=pin["icono"] or simbolo_lista, que=que_es, ver=ver))
         elegido = next((d for d in destinos if d["url"]), destinos[0])
         url = elegido["url"]
-        nota = " · ".join(x for x in (que_es, _nota(elegido["destino"], url)) if x)
+        nota = " · ".join(x for x in (que_es, _nota(elegido["destino"], url),
+                                      "pulsa para ver su mapa" if ver else "") if x)
         datos = _datos_del_globo(nombre, nota, "" if pin["tipo"] else pin["icono"])
+        if ver:
+            datos += ' data-mapa-ver="%s" data-mapa-ver-titulo="%s"' % (
+                html.escape(ver["url"], quote=True), html.escape(ver["titulo"], quote=True))
         # LA CHINCHETA SE DIBUJA EN EL CENTRO Y SE COLOCA CON UN transform.
         # Así mundo-mapa.js puede añadirle un "scale" para que el pin mida
         # lo mismo en pantalla con cualquier zoom, sin recalcular nada: un
@@ -2482,8 +2490,18 @@ def pintar_lista(sitios, titulo_id="mapa-sitios-titulo"):
         if not aviso and sitio.get("region"):
             aviso = "región"
         nota = ('<span class="mapa-sitio-nota">%s</span>' % aviso) if aviso else ""
+        ver = sitio.get("ver")
+        if ver and not sitio["url"]:
+            nota = '<span class="mapa-sitio-nota">%s</span>' % " · ".join(x for x in (aviso, "ver su mapa") if x)
         dentro = marca + icono + nombre + nota
-        if sitio["url"]:
+        if ver and not sitio["url"]:
+            # Abre su imagen en el visor (visor-imagenes.js), como el pin.
+            filas.append('<li class="mapa-sitio-item"><button type="button" class="mapa-sitio es-enlace lightbox-trigger"'
+                         ' data-mapa-sitio="%s" data-completa="%s" data-pie="%s">%s'
+                         '<img src="%s" alt="%s" hidden></button></li>'
+                         % (sitio["id"], html.escape(ver["url"], quote=True), html.escape(ver["titulo"], quote=True),
+                            dentro, html.escape(ver["url"], quote=True), html.escape(ver["titulo"], quote=True)))
+        elif sitio["url"]:
             filas.append('<li class="mapa-sitio-item"><a class="mapa-sitio es-enlace"'
                          ' href="%s" data-mapa-sitio="%s">%s</a></li>'
                          % (html.escape(sitio["url"], quote=True), sitio["id"], dentro))

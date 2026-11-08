@@ -93,6 +93,40 @@ function initializeMundoMapa() {
     ponerZoomDeMapa(mando, 1);
     centrarMapa(mando);
     prepararSesionesDeMapa(mando);
+    prepararImagenesDeMapa(mando);
+}
+function prepararImagenesDeMapa(mando) {
+    if (!mando.dibujo.querySelector("[data-mapa-ver]") || typeof openLightbox !== "function") {
+        return;
+    }
+    const boton = document.createElement("button");
+    boton.type = "button";
+    boton.className = "lightbox-trigger visually-hidden";
+    boton.tabIndex = -1;
+    const img = document.createElement("img");
+    img.alt = "";
+    boton.appendChild(img);
+    mando.caja.appendChild(boton);
+    mando.lienzo.addEventListener("click", (evento) => {
+        const pin = evento.target.closest("[data-mapa-ver]");
+        if (!pin || !mando.lienzo.contains(pin)) {
+            return;
+        }
+        const url = pin.getAttribute("data-mapa-ver") || "";
+        if (!/^\/(?!\/)/.test(url)) {
+            return;
+        }
+        evento.preventDefault();
+        const titulo = pin.getAttribute("data-mapa-ver-titulo") || "";
+        img.src = url;
+        img.alt = titulo;
+        boton.dataset.completa = url;
+        boton.dataset.pie = titulo;
+        if (mando.globo) {
+            mando.globo.hidden = true;
+        }
+        openLightbox(boton);
+    });
 }
 function prepararSesionesDeMapa(mando) {
     const casillas = [...mando.caja.querySelectorAll("[data-mapa-sesion-casilla]")];

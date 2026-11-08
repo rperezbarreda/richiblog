@@ -172,6 +172,53 @@ function initializeMundoMapa() {
     ponerZoomDeMapa(mando, 1);
     centrarMapa(mando);
     prepararSesionesDeMapa(mando);
+    prepararImagenesDeMapa(mando);
+}
+
+
+// =========================================
+// LA IMAGEN DE UN SITIO, AL PULSARLO (mapas de campaña)
+// =========================================
+// Un pin con data-mapa-ver (el plano de un pueblo o una ciudad, ver
+// generar-mapas-rol.py) la enseña en el visor de imágenes del sitio
+// (visor-imagenes.js) al pulsarlo. Arrastrar no cuenta (eso lo para antes
+// prepararArrastreDeMapa). Con el teclado, desde la lista de debajo, que
+// tiene su botón.
+
+function prepararImagenesDeMapa(mando) {
+    if (!mando.dibujo.querySelector("[data-mapa-ver]") || typeof openLightbox !== "function") {
+        return;
+    }
+    // Un botón del visor, escondido y reutilizado: el visor lee la imagen
+    // de dentro y, al cerrar, devuelve el foco aquí, en el mapa.
+    const boton = document.createElement("button");
+    boton.type = "button";
+    boton.className = "lightbox-trigger visually-hidden";
+    boton.tabIndex = -1;
+    const img = document.createElement("img");
+    img.alt = "";
+    boton.appendChild(img);
+    mando.caja.appendChild(boton);
+    mando.lienzo.addEventListener("click", (evento) => {
+        const pin = evento.target.closest("[data-mapa-ver]");
+        if (!pin || !mando.lienzo.contains(pin)) {
+            return;
+        }
+        const url = pin.getAttribute("data-mapa-ver") || "";
+        if (!/^\/(?!\/)/.test(url)) {
+            return;
+        }
+        evento.preventDefault();
+        const titulo = pin.getAttribute("data-mapa-ver-titulo") || "";
+        img.src = url;
+        img.alt = titulo;
+        boton.dataset.completa = url;
+        boton.dataset.pie = titulo;
+        if (mando.globo) {
+            mando.globo.hidden = true;
+        }
+        openLightbox(boton);
+    });
 }
 
 

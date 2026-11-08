@@ -2025,3 +2025,22 @@ html.con-mapa-a-pantalla body {
 .pines-solo-nombre .mapa-pin > :not(.mapa-pin-nombre) {
     display: none;
 }
+
+/* Un sitio que enseña su imagen al pulsarlo (mapas de campaña). */
+[data-mapa-ver] {
+    cursor: pointer;
+}
+
+/* En la lista, es un botón: que no se note (es una fila más, con lo de
+   .mapa-sitio; el botón solo trae su fondo y su alineación). */
+button.mapa-sitio {
+    width: 100%;
+    background: none;
+    text-align: left;
+    cursor: pointer;
+}
+
+/* La imagen va dentro solo para el visor (la lee de ahí): no se ve. */
+button.mapa-sitio > img {
+    display: none;
+}

@@ -1462,6 +1462,14 @@
       índice de la campaña, «✨ extra» enseña las zonas debajo del
       mapamundi ("zonas" en el JSON, lo escribe el script).
 
+  UN SITIO QUE ENSEÑA SU IMAGEN AL PULSARLO (el plano de un pueblo o de
+  una ciudad, sin hacerle un mapa de zona): sube la imagen a la campaña
+  (Campañas → «🖼️ Las imágenes de una campaña») con el título «Mapa de
+  Sirevia» y llama al sitio del mapamundi «Sirevia». Al pulsar el pin (o su
+  fila en «Lo que hay en el mapa») sale en grande. Se compara sin tildes
+  ni mayúsculas y sin el «Mapa de» de delante (generar-mapas-rol.py,
+  poner_imagenes_al_pulsar).
+
   LAS RUTAS DE CADA SESIÓN: dibuja una raya «Ruta de viaje» por donde
   fuisteis y, en «Lo elegido» → «De la sesión», elige cuál (en el .cmap,
   "session": 3). Puede haber varias rayas de la misma sesión, y cada una

@@ -1433,3 +1433,15 @@ html.con-mapa-a-pantalla body {
 .pines-solo-nombre .mapa-pin > :not(.mapa-pin-nombre) {
     display: none;
 }
+[data-mapa-ver] {
+    cursor: pointer;
+}
+button.mapa-sitio {
+    width: 100%;
+    background: none;
+    text-align: left;
+    cursor: pointer;
+}
+button.mapa-sitio > img {
+    display: none;
+}
