@@ -204,8 +204,8 @@ function prepararImagenesDeMapa(mando) {
         if (!pin || !mando.lienzo.contains(pin)) {
             return;
         }
-        const url = pin.getAttribute("data-mapa-ver") || "";
-        if (!/^\/(?!\/)/.test(url)) {
+        const url = banderaSeguraDeMapa(pin.getAttribute("data-mapa-ver"));
+        if (!url) {
             return;
         }
         evento.preventDefault();
