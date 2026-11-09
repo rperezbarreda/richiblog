@@ -124,14 +124,16 @@
             "de": 3,
             "quien": "Thenarys",
             "valor": 300,
-            "efecto": "Unas 300 po en joyas, sin vender"
+            "efecto": "Unas 300 po en joyas, sin vender",
+            "imagen": "/imagenes/notas_rol/ragna/botin/joyas.webp"
         },
         {
             "que": "Colgante de la esposa de Rise",
             "tipo": "otras cosas",
             "de": 3,
             "quien": "Thenarys",
-            "efecto": "Thenarys cree que es el suyo: hay que devolvérselo a Rise"
+            "efecto": "Thenarys cree que es el suyo: hay que devolvérselo a Rise",
+            "imagen": "/imagenes/notas_rol/ragna/botin/colgante-de-la-esposa-de-rise.webp"
         },
         {
             "que": "Pergamino: Mano de mago",
@@ -145,24 +147,8 @@
             "duracion": "1 minuto",
             "descripcion": "Aparece una mano espectral flotando en un punto que elijas dentro del alcance. Dura lo que el conjuro, o hasta que la descartes con una acción; desaparece si se aleja más de 30 pies de ti o si vuelves a lanzar el conjuro.\nCon tu acción puedes controlarla: manipular un objeto, abrir una puerta o un recipiente que no esté cerrado con llave, guardar o sacar algo de un recipiente abierto o verter lo que haya en un frasco. Cada vez que la usas puedes moverla hasta 30 pies.\nNo puede atacar, activar objetos mágicos ni cargar con más de 10 libras.\nAl leer el pergamino, se deshace en polvo.",
             "cantidad": 1,
-            "inicial": 1
-        },
-        {
-            "que": "Pergamino: Bola de fuego",
-            "tipo": "pergaminos",
-            "de": 3,
-            "hechizo": "Bola de fuego (Fireball)",
-            "nivel": 3,
-            "escuela": "evocación",
-            "lanzamiento": "1 acción",
-            "alcance": "150 pies",
-            "duracion": "Instantánea",
-            "tirada": "salvación de DES CD 15",
-            "descripcion": "Un destello brillante sale disparado de tu dedo hacia un punto que elijas dentro del alcance y estalla en llamas con un rugido grave. Cada criatura en una esfera de 20 pies de radio centrada en ese punto hace una tirada de salvación de Destreza: si la falla recibe 8d6 de daño de fuego, y la mitad si la supera.\nEl fuego dobla las esquinas y prende los objetos inflamables de la zona que nadie lleve puestos ni encima.\nAl leer el pergamino, se deshace en polvo.",
-            "quien": "Thenarys",
-            "cantidad": 0,
             "inicial": 1,
-            "gastado": true
+            "imagen": "/imagenes/notas_rol/ragna/botin/pergamino-escudo.webp"
         },
         {
             "que": "Pergamino: Rayo de escarcha",
@@ -177,7 +163,8 @@
             "tirada": "ataque de conjuro a distancia +5",
             "descripcion": "Un rayo helado de luz blanquiazul sale disparado hacia una criatura dentro del alcance. Si aciertas, recibe 1d8 de daño de frío y su velocidad se reduce en 10 pies hasta el principio de tu siguiente turno.\nAl leer el pergamino, se deshace en polvo.",
             "cantidad": 1,
-            "inicial": 1
+            "inicial": 1,
+            "imagen": "/imagenes/notas_rol/ragna/botin/pergamino-escudo.webp"
         },
         {
             "que": "Pergamino: Hoja atronadora",
@@ -191,7 +178,8 @@
             "duracion": "1 asalto",
             "descripcion": "Blandes el arma con la que lanzas el conjuro y haces un ataque cuerpo a cuerpo contra una criatura a 5 pies de ti o menos. Si aciertas, recibe los efectos normales del ataque y queda envuelta en energía atronadora hasta el principio de tu siguiente turno.\nSi antes de eso se mueve por su propia voluntad, recibe 1d8 de daño de trueno y el conjuro termina.\nAl leer el pergamino, se deshace en polvo.",
             "cantidad": 1,
-            "inicial": 1
+            "inicial": 1,
+            "imagen": "/imagenes/notas_rol/ragna/botin/pergamino-escudo.webp"
         },
         {
             "que": "Pergamino: Escudo",
@@ -205,7 +193,8 @@
             "duracion": "1 asalto",
             "descripcion": "Una barrera invisible de fuerza mágica aparece y te protege.\nHasta el principio de tu siguiente turno tienes +5 a la CA, también contra el ataque que la ha provocado, y no recibes daño de proyectil mágico.\nAl leer el pergamino, se deshace en polvo.",
             "cantidad": 1,
-            "inicial": 1
+            "inicial": 1,
+            "imagen": "/imagenes/notas_rol/ragna/botin/pergamino-escudo.webp"
         },
         {
             "que": "Pergamino: Misil mágico",
@@ -219,7 +208,8 @@
             "duracion": "Instantánea",
             "descripcion": "Creas tres dardos brillantes de fuerza mágica. Cada uno impacta en una criatura que puedas ver dentro del alcance y le hace 1d4 + 1 de daño de fuerza. Los dardos aciertan siempre y golpean todos a la vez: pueden ir a la misma criatura o a varias.\nAl leer el pergamino, se deshace en polvo.",
             "cantidad": 4,
-            "inicial": 4
+            "inicial": 4,
+            "imagen": "/imagenes/notas_rol/ragna/botin/pergamino-escudo.webp"
         },
         {
             "que": "Cimitarra +1",
@@ -227,7 +217,8 @@
             "de": 3,
             "efecto": "+1 a las tiradas de ataque y de daño",
             "rareza": "poco común",
-            "descripcion": "Arma mágica. Tienes un bonificador de +1 a las tiradas de ataque y de daño que hagas con ella."
+            "descripcion": "Arma mágica. Tienes un bonificador de +1 a las tiradas de ataque y de daño que hagas con ella.",
+            "imagen": "/imagenes/notas_rol/ragna/botin/cimitarra-1.webp"
         },
         {
             "que": "Armas y armaduras varias",
@@ -235,22 +226,16 @@
             "de": 3,
             "quien": "el carro",
             "valor": 25,
-            "efecto": "Las de los bandidos, para vender"
+            "efecto": "Las de los bandidos, para vender",
+            "imagen": "/imagenes/notas_rol/ragna/botin/armas-y-armaduras-varias.webp"
         },
         {
             "que": "Piel y garras de lobo",
             "tipo": "otras cosas",
             "de": 3,
             "quien": "el carro",
-            "efecto": "En muy buen estado"
-        },
-        {
-            "que": "Raciones de osobúho",
-            "tipo": "equipo",
-            "de": 3,
-            "quien": "el carro",
-            "cantidad": 2,
-            "inicial": 2
+            "efecto": "En muy buen estado",
+            "imagen": "/imagenes/notas_rol/ragna/botin/piel-y-garras-de-lobo.webp"
         }
     ],
     "misiones": [
