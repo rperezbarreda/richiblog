@@ -966,6 +966,21 @@ function volverAlPaso(desde, hacia, que) {
         estadoMapa.varios = [];
     }
     pintarDatosGenerales();
+    // Si cambia el tamaño (deshacer una ampliación), lo de los vecinos
+    // vuelve con él (ver pasarAImagenNueva).
+    if (anterior.width && anterior.height
+        && (anterior.width !== estadoMapa.datos.width || anterior.height !== estadoMapa.datos.height)) {
+        const fx = estadoMapa.datos.width / anterior.width;
+        const fy = estadoMapa.datos.height / anterior.height;
+        const escalar = (p) => {
+            p.x = redondoMapa(p.x * fx);
+            p.y = redondoMapa(p.y * fy);
+        };
+        (estadoMapa.vecinos || []).forEach((v) => {
+            v.sitios.forEach(escalar);
+            v.rayas.forEach((r) => r.points.forEach(escalar));
+        });
+    }
     if (anterior.width !== estadoMapa.datos.width || anterior.height !== estadoMapa.datos.height
         || JSON.stringify(anterior.layers) !== JSON.stringify(estadoMapa.datos.layers)) {
         pintarTodoElMapa();
@@ -4022,6 +4037,13 @@ function pasarAImagenNueva(hecha) {
     if (d.scale && d.scale.pixels) {
         d.scale.pixels = redondoMapa(d.scale.pixels * (fx + fy) / 2);
     }
+    // Lo de los vecinos (en gris) viene del servidor ya en las medidas de
+    // este mapa (vecinos_de, editor-wiki.py): con la imagen nueva, a las
+    // nuevas, o se queda pequeño en una esquina hasta volver a abrirlo.
+    (estadoMapa.vecinos || []).forEach((v) => {
+        v.sitios.forEach(escalar);
+        v.rayas.forEach((r) => r.points.forEach(escalar));
+    });
     d.width = hecha.ancho;
     d.height = hecha.alto;
     d.layers[0].image = hecha.nombre;
