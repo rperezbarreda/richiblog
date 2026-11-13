@@ -427,7 +427,11 @@ const AJUSTES_BANDERAS = {
         + '<rect y="6.67" width="30" height="2.22"/><rect y="11.11" width="30" height="2.22"/><rect y="15.56" width="30" height="2.22"/></g>',
     eu: '<rect width="30" height="20" fill="#d52b1e"/><path d="M0 0L30 20M30 0L0 20" stroke="#009b48" stroke-width="3"/>'
         + '<path d="M15 0V20M0 10H30" stroke="#fff" stroke-width="3"/>',
-    gl: '<rect width="30" height="20" fill="#fff"/><path d="M0 0L30 20" stroke="#0099cc" stroke-width="4"/>'
+    gl: '<rect width="30" height="20" fill="#fff"/><path d="M0 0L30 20" stroke="#0099cc" stroke-width="4"/>',
+    // El Reino Unido (la Union Jack).
+    en: '<rect width="30" height="20" fill="#012169"/><path d="M0 0L30 20M30 0L0 20" stroke="#fff" stroke-width="4"/>'
+        + '<path d="M0 0L15 10M30 20L15 10M30 0L15 10M0 20L15 10" stroke="#c8102e" stroke-width="1.6"/>'
+        + '<path d="M15 0V20M0 10H30" stroke="#fff" stroke-width="6"/><path d="M15 0V20M0 10H30" stroke="#c8102e" stroke-width="3.6"/>'
 };
 window.ocBandera = function (codigo) {
     const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");

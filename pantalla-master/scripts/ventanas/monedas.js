@@ -13,7 +13,7 @@
             const n = Math.floor(resto / v);
             resto -= n * v;
             if (n) {
-                trozos.push(n.toLocaleString("es-ES") + " " + k);
+                trozos.push(n.toLocaleString(window.ocLocale) + " " + k);
             }
         });
         return trozos.join(" ") || ocT("0 pc");
@@ -67,9 +67,9 @@
             const n = Math.max(1, parseInt(entre.value, 10) || 1);
             m.datos.entre = n;
             PM.guardar();
-            const filas = [["Total", enMonedas(cp, true)], [ocT("En oro"), ocT("{toLocaleString} po", { toLocaleString: (cp / 100).toLocaleString("es-ES", { maximumFractionDigits: 2 }) })],
-                [ocT("En plata"), ocT("{toLocaleString} pp", { toLocaleString: (cp / 10).toLocaleString("es-ES", { maximumFractionDigits: 1 }) })],
-                [ocT("En cobre"), ocT("{toLocaleString} pc", { toLocaleString: cp.toLocaleString("es-ES") })]];
+            const filas = [["Total", enMonedas(cp, true)], [ocT("En oro"), ocT("{toLocaleString} po", { toLocaleString: (cp / 100).toLocaleString(window.ocLocale, { maximumFractionDigits: 2 }) })],
+                [ocT("En plata"), ocT("{toLocaleString} pp", { toLocaleString: (cp / 10).toLocaleString(window.ocLocale, { maximumFractionDigits: 1 }) })],
+                [ocT("En cobre"), ocT("{toLocaleString} pc", { toLocaleString: cp.toLocaleString(window.ocLocale) })]];
             if (n > 1) {
                 const cada = Math.floor(cp / n);
                 filas.push([ocT("Para cada uno ({n})", { n: n }), enMonedas(cada, false)]);

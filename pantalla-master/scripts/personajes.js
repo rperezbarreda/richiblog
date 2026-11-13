@@ -1666,8 +1666,8 @@ document.querySelectorAll(".oc-ataques th[data-oc-desc]").forEach((th) => {
     }
 
     // LA ESCALERA DE FATE (la misma que en sistemas_rol.py).
-    const ESCALERA = { 8: "Legendario", 7: "Épico", 6: "Fantástico", 5: "Soberbio", 4: "Grande", 3: "Bueno",
-        2: "Normal", 1: "Mediano", 0: "Mediocre", "-1": "Malo", "-2": "Terrible" };
+    const ESCALERA = { 8: ocT("Legendario"), 7: ocT("Épico"), 6: ocT("Fantástico"), 5: ocT("Soberbio"), 4: ocT("Grande"), 3: ocT("Bueno"),
+        2: ocT("Normal"), 1: ocT("Mediano"), 0: ocT("Mediocre"), "-1": ocT("Malo"), "-2": ocT("Terrible") };
 
     function escalera(n) {
         return ESCALERA[Math.max(-2, Math.min(8, n))] || "";
@@ -1689,8 +1689,8 @@ document.querySelectorAll(".oc-ataques th[data-oc-desc]").forEach((th) => {
         const dieces = todos.filter((x) => x === 10).length;
         const parejas = Math.floor(dieces / 2);
         const exitos = todos.filter((x) => x >= 6).length + parejas * 2;
-        const r = guardarTirada({ que: que || "reserva", formula: formula || "v5:" + n, total: exitos,
-            unidad: exitos === 1 ? "éxito" : "éxitos", partes: [], d20: null,
+        const r = guardarTirada({ que: que || ocT("reserva"), formula: formula || "v5:" + n, total: exitos,
+            unidad: exitos === 1 ? ocT("éxito") : ocT("éxitos"), partes: [], d20: null,
             dados3d: normales.map((v) => ({ caras: 10, valor: v, color: "vampiro" }))
                 .concat(deHambre.map((v) => ({ caras: 10, valor: v, color: "hambre" }))) });
         r.desglose = n + "d10 [" + (normales.join(", ") || "—") + "]" + (hambre ? ocT(" · hambre [{n}]", { n: deHambre.join(", ") }) : "");
@@ -1699,7 +1699,7 @@ document.querySelectorAll(".oc-ataques th[data-oc-desc]").forEach((th) => {
         const bestial = deHambre.includes(1);
         r.critico = parejas > 0 && !sucio;
         r.pifia = !!sucio || (bestial && !exitos);
-        r.nota = [parejas ? (sucio ? ocT("crítico sucio") : "crítico") : "",
+        r.nota = [parejas ? (sucio ? ocT("crítico sucio") : ocT("crítico")) : "",
             bestial ? (exitos ? ocT("un 1 de hambre: si no llega, fallo bestial") : ocT("fallo bestial")) : ""]
             .filter(Boolean).join("; ");
         return terminar(r);
@@ -1771,7 +1771,7 @@ document.querySelectorAll(".oc-ataques th[data-oc-desc]").forEach((th) => {
             sonarFinal(r.critico);
         }
         pintarHistorial();
-        avisar(dicho(r).replace(r.que + ":", r.que + " con " + modo + ":") + ". " + r.desglose);
+        avisar(dicho(r).replace(r.que + ":", r.que + ocT(" con ") + modo + ":") + ". " + r.desglose);
         const li = historial.querySelector('[data-id="' + r.id + '"] .oc-dados-repetir');
         if (li) {
             li.focus();
@@ -3421,7 +3421,7 @@ window.ocMontar.notas = function (sitio, opciones) {
     const fecha = crear("button", "oc-vida-accion", ocT("📅 poner la fecha"));
     fecha.type = "button";
     fecha.addEventListener("click", () => {
-        const hoy = new Date().toLocaleDateString("es-ES", { day: "numeric", month: "long", year: "numeric" });
+        const hoy = new Date().toLocaleDateString(window.ocLocale, { day: "numeric", month: "long", year: "numeric" });
         texto.value = (texto.value.trim() ? texto.value.replace(/\s*$/, "") + "\n\n" : "") + "## " + hoy + "\n";
         partida.guardar("notas", texto.value);
         texto.focus();
@@ -3626,7 +3626,7 @@ window.ocTurnos = (function () {
                 }
                 mk.r -= 1;
                 if (mk.r <= 0) {
-                    acabadas.push(mk.t + " en " + c.nombre);
+                    acabadas.push(ocT("{t} en {nombre}", { t: window.ocTd(mk.t), nombre: c.nombre }));
                     return false;
                 }
                 return true;
@@ -3953,9 +3953,9 @@ window.ocMontar.iniciativa = function (sitio, opciones) {
         form.appendChild(caja);
         return i;
     };
-    const nombre = campo("oc-ini-nombre", "nombre", "text", "es-nombre");
+    const nombre = campo("oc-ini-nombre", ocT("nombre"), "text", "es-nombre");
     nombre.autocomplete = "off";
-    const ini = campo("oc-ini-ini", "ini", "number");
+    const ini = campo("oc-ini-ini", ocT("ini"), "number");
     const ca = campo("oc-ini-ca", ocT("CA"), "number");
     const pg = campo("oc-ini-pg", ocT("PG"), "number");
     const colores = crear("div", "oc-ini-colores");
@@ -4132,7 +4132,7 @@ window.ocMontar.iniciativa = function (sitio, opciones) {
         }
     };
     const marcasDe = (c) => (Array.isArray(c.marcas) ? c.marcas : (c.marcas = []));
-    const textoMarca = (mk) => mk.t + (mk.r ? " (" + mk.r + (mk.r === 1 ? ocT(" ronda") : ocT(" rondas")) + ")" : "");
+    const textoMarca = (mk) => window.ocTd(mk.t) + (mk.r ? " (" + mk.r + (mk.r === 1 ? ocT(" ronda") : ocT(" rondas")) + ")" : "");
 
     // El dibujo de una marca: el emoji de las de siempre, o su forma de su
     // color en las propias.
@@ -4226,7 +4226,7 @@ window.ocMontar.iniciativa = function (sitio, opciones) {
             guardar();
             cerrar();
             pintar();
-            avisar(ocT("Quitada: {t} de {nombre}.", { t: mk.t, nombre: c.nombre }));
+            avisar(ocT("Quitada: {t} de {nombre}.", { t: window.ocTd(mk.t), nombre: c.nombre }));
             const visible = Array.from(caja.querySelectorAll('.oc-ini-fila[data-id="' + CSS.escape(c.id) + '"] .es-marcas'))
                 .find((x) => x.offsetParent);
             (visible || vuelta).focus();
@@ -4249,8 +4249,8 @@ window.ocMontar.iniciativa = function (sitio, opciones) {
                         guardar();
                         rehacer();
                         pintar();
-                        avisar(ocT("Quitada: {t}.", { t: mk.t }));
-                    }, ocT("Quitar la marca {t}", { t: mk.t })));
+                        avisar(ocT("Quitada: {t}.", { t: window.ocTd(mk.t) }));
+                    }, ocT("Quitar la marca {t}", { t: window.ocTd(mk.t) })));
                 return li;
             }));
             if (!marcasDe(c).length) {
@@ -4272,7 +4272,7 @@ window.ocMontar.iniciativa = function (sitio, opciones) {
         function hacerRapidas() {
             const q = String(buscar.value || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim();
             const todas = MARCAS.map(([t]) => ({ t })).concat(propias.map((p) => ({ t: p.t, c: p.c, f: p.f, propia: true })));
-            rapidas = todas.filter((x) => !q || x.t.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().includes(q))
+            rapidas = todas.filter((x) => !q || (x.t + " " + window.ocTd(x.t)).normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().includes(q))
                 .map((x) => {
                     const b = botonDe("oc-ini-marca-rapida", "", () => {
                         const i = marcasDe(c).findIndex((mk) => mk.t === x.t);
@@ -4293,7 +4293,7 @@ window.ocMontar.iniciativa = function (sitio, opciones) {
                     if (d) {
                         b.appendChild(d);
                     }
-                    b.appendChild(document.createTextNode(x.t));
+                    b.appendChild(document.createTextNode(window.ocTd(x.t)));
                     b.dataset.marca = x.t;
                     b.setAttribute("aria-pressed", marcasDe(c).some((mk) => mk.t === x.t) ? "true" : "false");
                     return b;
@@ -5391,10 +5391,10 @@ window.ocMontar.reglas = function (sitio, idBuscar, abrir) {
         }
         nodos.forEach((n) => {
             // El bono de ataque: el texto que va justo detrás de
-            // «Ataque …:» (en cursiva).
+            // «Ataque …:» (en cursiva; en inglés, «Melee …:» o «Ranged …:»).
             const antes = n.previousSibling;
             const m = ATAQUE.exec(n.nodeValue);
-            if (m && antes && antes.nodeType === 1 && /^Ataque\b.*:$/.test(antes.textContent.trim())) {
+            if (m && antes && antes.nodeType === 1 && /^(Ataque|Melee|Ranged)\b.*:$/.test(antes.textContent.trim())) {
                 const resto = document.createTextNode(n.nodeValue.slice(m[0].length));
                 n.replaceWith(document.createTextNode(m[1]), boton(m[2], "1d20" + limpia(m[2]).replace(/^\+?/, "+").replace("+-", "-"), "ataque"), resto);
                 trocear(resto);

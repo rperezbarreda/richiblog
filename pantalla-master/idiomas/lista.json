@@ -12,6 +12,12 @@
     "compendio": 0
   },
   {
+    "codigo": "en",
+    "nombre": "English",
+    "interfaz": 97,
+    "compendio": 96
+  },
+  {
     "codigo": "eu",
     "nombre": "Euskara",
     "interfaz": 0,

@@ -29,17 +29,17 @@
             vd.id = "master-bichos-vd-" + m.id;
             etVd.htmlFor = vd.id;
             [""].concat(VDS).forEach((v) => {
-                const o = PM.crear("option", "", v || "todos");
+                const o = PM.crear("option", "", v || ocT("todos"));
                 o.value = v;
                 vd.appendChild(o);
             });
-            const etTipo = PM.crear("label", "oc-dados-etiqueta", "tipo");
+            const etTipo = PM.crear("label", "oc-dados-etiqueta", ocT("tipo"));
             const tipo = PM.crear("select", "oc-dados-elegir");
             tipo.id = "master-bichos-tipo-" + m.id;
             etTipo.htmlFor = tipo.id;
             const tipos = Array.from(new Set(bichos.map((x) => x.b.tipo.split(/[ (]/)[0]))).sort();
             [""].concat(tipos).forEach((v) => {
-                const o = PM.crear("option", "", v || "todos");
+                const o = PM.crear("option", "", v ? PM.verDato(v) : ocT("todos"));
                 o.value = v;
                 tipo.appendChild(o);
             });
@@ -57,7 +57,7 @@
                     b.setAttribute("aria-haspopup", "dialog");
                     b.classList.add("con-token");
                     b.append(PM.tokenDe(x.b), PM.crear("span", "master-conjuro-nombre", x.b.nombre),
-                        PM.crear("span", "master-conjuro-datos", ocT("VD {cr} · {tipo} · CA {parseInt} · {pg} PG", { cr: x.b.cr, tipo: x.b.tipo, parseInt: parseInt(x.b.ca, 10), pg: x.b.pg })));
+                        PM.crear("span", "master-conjuro-datos", ocT("VD {cr} · {tipo} · CA {parseInt} · {pg} PG", { cr: x.b.cr, tipo: PM.verDato(x.b.tipo), parseInt: parseInt(x.b.ca, 10), pg: x.b.pg })));
                     li.appendChild(b);
                     return li;
                 }));

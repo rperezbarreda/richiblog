@@ -317,7 +317,7 @@
             Promise.all(buenos.map((f) => {
                 const id = PM.idDoc("a");
                 return PM.archivoGuardar(id, f).then(() => {
-                    mu.canciones.push({ id, archivo: id, nombre: f.name.replace(/\.[^.]+$/, "").slice(0, 80) || "canción",
+                    mu.canciones.push({ id, archivo: id, nombre: f.name.replace(/\.[^.]+$/, "").slice(0, 80) || ocT("canción"),
                         carpeta: destino || "" });
                 });
             })).then(() => {

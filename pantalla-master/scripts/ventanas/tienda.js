@@ -24,11 +24,11 @@
                 sel.value = valor || "";
                 return [et, sel];
             };
-            const [etTienda, tienda] = elegir("master-tienda-", "tienda",
-                [["", ocT("todas")]].concat((datos.tiendas || []).map((t) => [t, t])), m.datos.tienda);
-            const [etCat, cat] = elegir("master-tienda-cat-", "categoría", [["", ocT("todas")]], "");
-            const [etRareza, rareza] = elegir("master-tienda-rareza-", "rareza",
-                [["", ocT("todas")]].concat(PM.RAREZAS.map((r) => [r, r])), m.datos.rareza);
+            const [etTienda, tienda] = elegir("master-tienda-", ocT("tienda"),
+                [["", ocT("todas")]].concat((datos.tiendas || []).map((t) => [t, PM.verDato(t)])), m.datos.tienda);
+            const [etCat, cat] = elegir("master-tienda-cat-", ocT("categoría"), [["", ocT("todas")]], "");
+            const [etRareza, rareza] = elegir("master-tienda-rareza-", ocT("rareza"),
+                [["", ocT("todas")]].concat(PM.RAREZAS.map((r) => [r, PM.verDato(r)])), m.datos.rareza);
             // El precio de la tienda, en %: 100 es lo normal; 80, un 20 % más
             // barato; 150, la mitad más caro. (Lo de antes, ×1,5…, pasa a %.)
             if (m.datos.porc === undefined && m.datos.precio) {
@@ -101,7 +101,7 @@
             const tabla = PM.crear("table", "master-tienda-tabla");
             const cap = PM.crear("caption", "visually-hidden", ocT("Objetos y precios"));
             const cab = PM.crear("tr");
-            [["Objeto", ""], ["Precio", "es-precio"]].forEach(([t, c]) => {
+            [[ocT("Objeto"), ""], [ocT("Precio"), "es-precio"]].forEach(([t, c]) => {
                 const th = PM.crear("th", c, t);
                 th.scope = "col";
                 cab.appendChild(th);
@@ -124,7 +124,7 @@
                 const antes = cat.value;
                 const hay = Array.from(new Set(objetos.filter((x) => !tienda.value || x.o.tiendas.indexOf(tienda.value) >= 0)
                     .map((x) => x.o.cat))).sort();
-                cat.replaceChildren(...[["", ocT("todas")]].concat(hay.map((c) => [c, c])).map(([v, t]) => {
+                cat.replaceChildren(...[["", ocT("todas")]].concat(hay.map((c) => [c, PM.verDato(c)])).map(([v, t]) => {
                     const op = PM.crear("option", "", t);
                     op.value = v;
                     return op;
@@ -192,7 +192,7 @@
                     const b = PM.botonDe("master-tienda-nombre", x.o.nombre, () => ficha(x.o, b));
                     b.setAttribute("aria-haspopup", "dialog");
                     td.appendChild(b);
-                    const extra = [x.o.cat, x.o.rareza, x.o.sint ? ocT("requiere sintonía") : "", x.o.det, x.o.peso, x.o.nota]
+                    const extra = [PM.verDato(x.o.cat), PM.verDato(x.o.rareza), x.o.sint ? ocT("requiere sintonía") : "", x.o.det, x.o.peso, x.o.nota]
                         .filter(Boolean).join(" · ");
                     td.appendChild(PM.crear("span", "master-tienda-datos", extra));
                     const tdP = PM.crear("td", "es-precio", x.o.cp ? PM.moneda(x.o.cp * veces) : "—");

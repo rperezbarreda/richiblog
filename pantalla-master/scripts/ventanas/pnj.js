@@ -18,8 +18,8 @@
     // ---- PNJ RÁPIDOS: nombre (del generador de nombres), especie,
     // oficio, aspecto, carácter, manía al hablar, qué quiere y un secreto.
     // Cada cosa se puede volver a tirar suelta (🎲); ☆ lo guarda. ----
-    const PNJ_CAMPOS = [["oficio", "Oficio", "oficios"], ["aspecto", "Aspecto", "aspecto"], ["rasgo", "Carácter", "rasgos"],
-        ["mania", ocT("Al hablar"), "manias"], ["quiere", "Quiere", "quiere"], ["secreto", "Secreto", "secretos"]];
+    const PNJ_CAMPOS = [["oficio", ocT("Oficio"), "oficios"], ["aspecto", ocT("Aspecto"), "aspecto"], ["rasgo", ocT("Carácter"), "rasgos"],
+        ["mania", ocT("Al hablar"), "manias"], ["quiere", ocT("Quiere"), "quiere"], ["secreto", ocT("Secreto"), "secretos"]];
 
     function montarPnj(dentro, m) {
         m.datos = m.datos || {};

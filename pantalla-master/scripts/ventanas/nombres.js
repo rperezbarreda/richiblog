@@ -27,10 +27,10 @@
     }
 
     // Los nombres de los campos de nombres.json, para cambiarlos.
-    const CAMPOS_NOMBRES = { ini: "principios (sílabas)", f: "finales femeninos", m: "finales masculinos", n: "finales neutros",
-        fin: "segunda parte", pre: "principio (va pegado al final)", adj: "final (va pegado al principio)",
-        base: "lo primero", de: "lo de después", sust: "el nombre y su género («La Jarra | f»)" };
-    const CAMPOS_TABERNA = { adj: "lo de después, masculino | femenino («Dorado | Dorada»)" };
+    const CAMPOS_NOMBRES = { ini: ocT("principios (sílabas)"), f: ocT("finales femeninos"), m: ocT("finales masculinos"), n: ocT("finales neutros"),
+        fin: ocT("segunda parte"), pre: ocT("principio (va pegado al final)"), adj: ocT("final (va pegado al principio)"),
+        base: ocT("lo primero"), de: ocT("lo de después"), sust: ocT("el nombre y su género («La Jarra | f»)") };
+    const CAMPOS_TABERNA = { adj: ocT("lo de después, masculino | femenino («Dorado | Dorada»)") };
 
     function montarNombres(dentro, m) {
         m.datos = m.datos || {};
@@ -122,7 +122,7 @@
                     pintar();
                     PM.avisar(guardado ? ocT("Quitado: {n}.", { n: n }) : ocT("Guardado: {n}.", { n: n }));
                 }, (guardado ? ocT("Quitar de guardados: ") : ocT("Guardar: ")) + n);
-                marcar.title = guardado ? "Quitar" : "Guardar";
+                marcar.title = guardado ? ocT("Quitar") : ocT("Guardar");
                 const copiar = PM.botonDe("master-nombre-boton", "⧉", () => PM.copiarTexto(n, ocT("Copiado: {n}.", { n: n })), ocT("Copiar {n}", { n: n }));
                 copiar.title = ocT("Copiar");
                 li.append(marcar, copiar);
@@ -290,6 +290,9 @@
             }
             // Una de las de siempre (sílabas y trozos de nombres.json): cada
             // lista, un textarea; se guarda solo lo que cambia.
+            // Las segundas partes («del Roble») son fijas en los datos: se
+            // enseñan en el idioma de la app.
+            const verDe = (campo, e) => (campo === "de" && typeof e === "string" ? PM.verDato(e) : e);
             function editarDeSiempre(k) {
                 const esPersona = que.elegir.value === "personaje";
                 const partes = claves(k).map((c) => {
@@ -307,10 +310,10 @@
                             return;
                         }
                         const pares = v.some(Array.isArray);
-                        const etiqueta = (p.g === "apellidos" ? "apellido: " : "") + ((k === "taberna" && CAMPOS_TABERNA[campo])
+                        const etiqueta = (p.g === "apellidos" ? ocT("apellido: ") : "") + ((k === "taberna" && CAMPOS_TABERNA[campo])
                             || (p.g === "apellidos" && campo === "ini" ? ocT("primera parte") : CAMPOS_NOMBRES[campo]) || campo);
                         const x = area(p.c.replace("/", "-") + "-" + campo, etiqueta,
-                            v.map((e) => (Array.isArray(e) ? e.join(" | ") : e)).join("\n"), Math.round(Math.min(6, Math.max(3, v.length / 4))));
+                            v.map((e) => (Array.isArray(e) ? e.join(" | ") : verDe(campo, e))).join("\n"), Math.round(Math.min(6, Math.max(3, v.length / 4))));
                         campos.push({ p, campo, pares, x });
                     });
                 });
@@ -326,7 +329,7 @@
                             f.x.focus();
                             return;
                         }
-                        const igual = JSON.stringify(lista) === JSON.stringify(f.p.orig[f.campo]);
+                        const igual = JSON.stringify(lista) === JSON.stringify(f.p.orig[f.campo].map((e) => verDe(f.campo, e)));
                         const c = tuyo.cambios[f.p.c] = tuyo.cambios[f.p.c] || {};
                         if (igual) {
                             delete c[f.campo];

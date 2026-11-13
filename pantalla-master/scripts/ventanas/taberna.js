@@ -16,6 +16,8 @@
     // que sean; la de magia, hasta una rareza) y el resto es de tablas
     // propias (master-tablas.json, «negocios»). Se copia, se guarda como
     // texto o como imagen. ----
+    const ESTILO_EN = { miserable: "Squalid", pobre: "Poor", modesta: "Modest", "cómoda": "Comfortable", rica: "Wealthy",
+        "aristocrática": "Aristocratic" };
     function descargarArchivo(blob, archivo) {
         const a = PM.crear("a");
         const archivoBlob = URL.createObjectURL(blob);
@@ -169,7 +171,7 @@
                 d.tipo = tipo.elegir.value;
                 PM.guardar();
             });
-            const calidad = PM.botonesDe(ocT("lo bueno que es"), Object.keys(N.calidades).map((k) => [k, k]),
+            const calidad = PM.botonesDe(ocT("lo bueno que es"), Object.keys(N.calidades).map((k) => [k, PM.verDato(k)]),
                 d.calidad || "modesta", (v) => {
                     d.calidad = v;
                     PM.guardar();
@@ -188,7 +190,7 @@
             };
             const objetoDe = (nombre) => (tienda.objetos || []).find((o) => o.nombre === nombre);
             const conjuroDe = (en) => (conjuros.conjuros || []).find((c) => c.en === en);
-            const fila = (o) => [o.nombre, o.cp, o.rareza || "", "o"];
+            const fila = (o) => [o.nombre, o.cp, PM.verDato(o.rareza) || "", "o"];
             const asalariados = { cualificado: "Skilled Hireling", sin: "Untrained Hireling", mensajero: "Messenger" };
             // Los servicios: asalariados y conjuros (tabla «Servicios de
             // lanzamiento de conjuros» del SRD, más lo que cueste el
@@ -217,8 +219,10 @@
                 if (k === "taberna") {
                     const tc = t.calidades[cal];
                     const deLaTaberna = (tienda.objetos || []).filter((o) => (o.tiendas || []).includes("Taberna"));
-                    const deSuNivel = (o) => !/\(/.test(o.nombre) || /\(jarra|hogaza|cuña|1 día|botella\)/.test(o.nombre) ||
-                        tc.estilos.some((e) => o.nombre.endsWith("(" + e + ")"));
+                    // Las comidas y las noches de posada, sólo las de su nivel
+                    // (por el nombre en inglés: el otro cambia con el idioma).
+                    const deSuNivel = (o) => !/^(Meal|Inn Stay) - /.test(o.en || "") ||
+                        tc.estilos.some((e) => (o.en || "").endsWith(" - " + ESTILO_EN[e]));
                     const fino = cal === "acomodada" || cal === "lujosa";
                     const comer = deLaTaberna.filter((o) => o.cat !== "alojamiento" && deSuNivel(o) && (fino || o.en !== "Fine Wine (bottle)"))
                         .sort(caro).map(fila);
@@ -235,8 +239,7 @@
                     let nombre;
                     if (PM.alAzar([0, 1])) {
                         const [sust, gs] = PM.alAzar(tp.sust);
-                        const adj = PM.alAzar(nombres.lugares.taberna.adj);
-                        nombre = sust + " " + (gs === "f" ? adj[1] : adj[0]);
+                        nombre = PM.nombreConAdjetivo(sust, gs, PM.alAzar(nombres.lugares.taberna.adj));
                     } else {
                         nombre = PM.alAzar(tp.plantillas).replace("{d}", dueno);
                     }

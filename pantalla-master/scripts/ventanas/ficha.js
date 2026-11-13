@@ -28,7 +28,7 @@
                 const x = PM.leerPropios().otros.find((y) => y.id === id);
                 const caja = x ? PM.crear("div") : null;
                 if (x) {
-                    caja.append(PM.crear("p", "oc-hoja-nota", x.cat), PM.markdown(x.texto), PM.crear("p", "oc-hoja-nota master-fuente", PM.fuenteDe(x)));
+                    caja.append(PM.crear("p", "oc-hoja-nota", PM.verDato(x.cat)), PM.markdown(x.texto), PM.crear("p", "oc-hoja-nota master-fuente", PM.fuenteDe(x)));
                 }
                 poner(caja);
             };

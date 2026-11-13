@@ -1004,5 +1004,155 @@
    ]
   }
  },
- "nota": "Sílabas y palabras inventadas para la pantalla de máster (no salen de ningún libro)."
+ "nota": "Sílabas y palabras inventadas para la pantalla de máster (no salen de ningún libro).",
+ "en": {
+  "nota": "In English: the surnames (their pieces aren't translated, they're glued together).",
+  "apellidos": {
+   "humano": {
+    "ini": [
+     "Stone",
+     "Oak",
+     "Iron",
+     "Hill",
+     "Ford",
+     "Mist",
+     "Ash",
+     "Dawn",
+     "Well",
+     "Tower",
+     "Meadow",
+     "Raven",
+     "Gold",
+     "Salt",
+     "Crag",
+     "Dale"
+    ],
+    "fin": [
+     "wood",
+     "field",
+     "ford",
+     "well",
+     "worth",
+     "ley",
+     "ton",
+     "brook",
+     "hart"
+    ]
+   },
+   "enano": {
+    "ini": [
+     "Beard",
+     "Pick",
+     "Rock",
+     "Forge",
+     "Anvil",
+     "Axe",
+     "Mine",
+     "Stone",
+     "Shield",
+     "Hammer"
+    ],
+    "fin": [
+     "grey",
+     "strong",
+     "fire",
+     "fast",
+     "true",
+     "fierce",
+     "dread",
+     "swift"
+    ]
+   },
+   "mediano": {
+    "ini": [
+     "Good",
+     "Tall",
+     "Leaf",
+     "Thistle",
+     "Branch",
+     "Clover",
+     "Honey",
+     "Foot",
+     "Basket",
+     "Bread"
+    ],
+    "fin": [
+     "barrel",
+     "grass",
+     "green",
+     "sweet",
+     "hill",
+     "shade",
+     "boot",
+     "light",
+     "bottom"
+    ]
+   },
+   "gnomo": {
+    "ini": [
+     "Gear",
+     "Spark",
+     "Nut",
+     "Lens",
+     "Spring",
+     "Wheel",
+     "Coil",
+     "Bobbin"
+    ],
+    "fin": [
+     "swift",
+     "merry",
+     "happy",
+     "keen",
+     "nimble",
+     "gentle",
+     "bold"
+    ]
+   },
+   "orco": {
+    "ini": [
+     "Break",
+     "Bite",
+     "Split",
+     "Crush",
+     "Topple",
+     "Rip",
+     "Stomp",
+     "Gulp"
+    ],
+    "fin": [
+     "bones",
+     "skulls",
+     "stones",
+     "shields",
+     "walls",
+     "teeth",
+     "spears",
+     "horns"
+    ]
+   },
+   "goliat": {
+    "ini": [
+     "Bear",
+     "Peak",
+     "Cloud",
+     "Storm",
+     "Snow",
+     "Eagle",
+     "Wind",
+     "Stone"
+    ],
+    "fin": [
+     "hunter",
+     "runner",
+     "treader",
+     "weaver",
+     "seeker",
+     "lifter",
+     "leaper",
+     "watcher"
+    ]
+   }
+  }
+ }
 }

@@ -10,7 +10,7 @@
     // aguanta la party. El presupuesto, una cuenta propia: por cada PJ,
     // los PX de un monstruo de VD igual a su nivel, por 0,25 (bajo), 0,4
     // (moderado) o 0,6 (alto).
-    const DIFICULTADES = [["baja", "baja", 0.25], ["moderada", "moderada", 0.4], ["alta", "alta", 0.6]];
+    const DIFICULTADES = [["baja", ocT("baja"), 0.25], ["moderada", ocT("moderada"), 0.4], ["alta", ocT("alta"), 0.6]];
 
     // Lo que aguanta cada PJ según su nivel (baja, moderada, alta).
     const PX_PJ = [[50, 75, 100], [100, 150, 200], [150, 225, 400], [250, 375, 500], [500, 750, 1100], [600, 1000, 1400],
@@ -30,9 +30,9 @@
                 porEn[b.en] = b;
             });
             const habitats = Array.from(new Set(bichos.flatMap((b) => b.habitat || []))).filter((h) => h !== "cualquiera")
-                .sort((a, b) => a.localeCompare(b, "es"));
+                .sort((a, b) => PM.verDato(a).localeCompare(PM.verDato(b), window.ocLocale));
             const habitat = PM.elegirDe("master-encuentro-habitat-" + m.id, ocT("dónde"),
-                [["", ocT("cualquier sitio")]].concat(habitats.map((h) => [h, h])), d.habitat || "");
+                [["", ocT("cualquier sitio")]].concat(habitats.map((h) => [h, PM.verDato(h)])), d.habitat || "");
             const enParty = PM.estado.modulos.filter((x) => x.tipo === "party")
                 .reduce((t, x) => t + ((x.datos && x.datos.pjs) || []).length, 0);
             const numero = (id, texto, valor, min, max) => {
@@ -109,7 +109,7 @@
                     const li = PM.crear("li", "master-botin-cosa");
                     const ver = PM.botonDe("master-botin-objeto", (g.n > 1 ? ocT("{n} × ", { n: g.n }) : "") + b.nombre, () => PM.abrirBicho(b, ver, datos.fuente),
                         ocT("Ver {nombre}", { nombre: b.nombre }));
-                    li.append(PM.tokenDe(b), ver, PM.crear("span", "master-botin-valor", ocT("VD {cr} · {toLocaleString} PX", { cr: b.cr, toLocaleString: (g.n * PM.pxDe(b)).toLocaleString("es-ES") })));
+                    li.append(PM.tokenDe(b), ver, PM.crear("span", "master-botin-valor", ocT("VD {cr} · {toLocaleString} PX", { cr: b.cr, toLocaleString: (g.n * PM.pxDe(b)).toLocaleString(window.ocLocale) })));
                     lista.appendChild(li);
                 });
                 const todos = PM.botonDe("oc-vida-accion es-principal", ocT("⚔️ todos a la iniciativa"), () => {
@@ -128,16 +128,16 @@
                 let cuanDificil = "";
                 if (nv.length) {
                     const [baja, mod, alta] = presupuestosDe(nv);
-                    cuanDificil = ocT(" Para tu party ({n} PJ): {n2} (baja {toLocaleString} · moderada {toLocaleString2} · alta {toLocaleString3}).", { n: nv.length, n2: px <= baja ? "baja" : px <= mod ? "moderada" : px <= alta
-                        ? "alta" : ocT("más que alta, ¡ojo!"), toLocaleString: baja.toLocaleString("es-ES"), toLocaleString2: mod.toLocaleString("es-ES"), toLocaleString3: alta.toLocaleString("es-ES") });
+                    cuanDificil = ocT(" Para tu party ({n} PJ): {n2} (baja {toLocaleString} · moderada {toLocaleString2} · alta {toLocaleString3}).", { n: nv.length, n2: px <= baja ? ocT("baja") : px <= mod ? ocT("moderada") : px <= alta
+                        ? ocT("alta") : ocT("más que alta, ¡ojo!"), toLocaleString: baja.toLocaleString(window.ocLocale), toLocaleString2: mod.toLocaleString(window.ocLocale), toLocaleString3: alta.toLocaleString(window.ocLocale) });
                 }
                 const darPxB = PM.botonDe("oc-vida-accion", ocT("🏆 dar sus PX a la party"), () => PM.darPx(px, null, darPxB),
-                    ocT("Repartir los {toLocaleString} PX de este encuentro entre la party", { toLocaleString: px.toLocaleString("es-ES") }));
+                    ocT("Repartir los {toLocaleString} PX de este encuentro entre la party", { toLocaleString: px.toLocaleString(window.ocLocale) }));
                 darPxB.hidden = !nv.length;
                 const botonesE = PM.crear("div", "master-creador-barra");
                 botonesE.append(todos, darPxB);
                 sale.append(PM.crear("p", "master-encuentro-hacen", ocT("Están {hacen}.", { hacen: r.hacen })), lista,
-                    PM.crear("p", "master-botin-total", ocT("{toLocaleString} PX de {toLocaleString2} que aguanta la party.{cuanDificil}", { toLocaleString: px.toLocaleString("es-ES"), toLocaleString2: r.presupuesto.toLocaleString("es-ES"), cuanDificil: cuanDificil })), botonesE);
+                    PM.crear("p", "master-botin-total", ocT("{toLocaleString} PX de {toLocaleString2} que aguanta la party.{cuanDificil}", { toLocaleString: px.toLocaleString(window.ocLocale), toLocaleString2: r.presupuesto.toLocaleString(window.ocLocale), cuanDificil: cuanDificil })), botonesE);
             };
             const generar = PM.botonDe("oc-vida-accion es-principal master-nombres-generar", ocT("🎲 generar encuentro"), () => {
                 d.habitat = habitat.elegir.value;

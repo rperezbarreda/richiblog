@@ -35,9 +35,9 @@
             const nivel = campo(elegir([["", ocT("todos")], ["0", ocT("trucos")]].concat([1, 2, 3, 4, 5, 6, 7, 8, 9].map((n) => [String(n), ocT("nivel {n}", { n: n })]))),
                 ocT("nivel"), "master-conjuros-nivel-");
             const escuelas = Array.from(new Set(conjuros.map((x) => x.c.escuela))).sort();
-            const escuela = campo(elegir([["", ocT("todas")]].concat(escuelas.map((e) => [e, e]))), ocT("escuela"), "master-conjuros-escuela-");
+            const escuela = campo(elegir([["", ocT("todas")]].concat(escuelas.map((e) => [e, PM.verDato(e)]))), ocT("escuela"), "master-conjuros-escuela-");
             const clases = Array.from(new Set(conjuros.flatMap((x) => x.c.clases || []))).sort();
-            const clase = campo(elegir([["", ocT("todas")]].concat(clases.map((e) => [e, e]))), ocT("clase"), "master-conjuros-clase-");
+            const clase = campo(elegir([["", ocT("todas")]].concat(clases.map((e) => [e, PM.verDato(e)]))), ocT("clase"), "master-conjuros-clase-");
             campo(input, ocT("buscar"), "master-conjuros-");
             const cuantos = PM.crear("p", "oc-hoja-nota");
             cuantos.setAttribute("role", "status");
@@ -52,7 +52,7 @@
                     const b = PM.botonDe("master-conjuro", "", () => PM.abrirConjuro(x.c, b, datos.fuente));
                     b.setAttribute("aria-haspopup", "dialog");
                     b.append(PM.crear("span", "master-conjuro-nombre", x.c.nombre),
-                        PM.crear("span", "master-conjuro-datos", [PM.nivelDe(x.c), x.c.escuela, x.c.tiempo].join(" · ")
+                        PM.crear("span", "master-conjuro-datos", [PM.nivelDe(x.c), PM.verDato(x.c.escuela), x.c.tiempo].join(" · ")
                             + (x.c.ingles ? ocT(" · (en inglés)") : "")));
                     li.appendChild(b);
                     return li;

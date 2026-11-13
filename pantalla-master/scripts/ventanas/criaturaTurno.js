@@ -134,7 +134,7 @@
         }
         const pgV = enIni && enIni.pg !== "" && enIni.pg !== undefined ? enIni.pg : PM.numPj(pj.pg) === null ? PM.numPj(pj.pgmax) : PM.numPj(pj.pg);
         const datos = PM.crear("div", "master-turnos-datos");
-        [["PG", pgV, PM.numPj(pj.pgmax)], ["CA", pj.ca], [ocT("vel."), pj.velocidad]].forEach(([k, v, max]) => {
+        [["PG", pgV, PM.numPj(pj.pgmax)], ["CA", pj.ca], ["vel", pj.velocidad]].forEach(([k, v, max]) => {
             if (v === "" || v === undefined || v === null) {
                 return;
             }
@@ -143,7 +143,7 @@
             if (k === "PG") {
                 valor.dataset.pgTurno = "";
             }
-            chapa.append(PM.crear("span", "master-turnos-chapa-et", k), document.createTextNode(" "), valor,
+            chapa.append(PM.crear("span", "master-turnos-chapa-et", { PG: ocT("PG"), CA: ocT("CA"), vel: ocT("vel.") }[k]), document.createTextNode(" "), valor,
                 document.createTextNode(max !== null && max !== undefined ? " / " + max : ""));
             datos.appendChild(chapa);
         });

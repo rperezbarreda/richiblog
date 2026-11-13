@@ -9,8 +9,8 @@
     // ---- EL MAPA DE RELACIONES de la campaña: quién es quién (PNJ, PJ,
     // facciones, lugares) y cómo se llevan, con un dibujo que se ordena
     // arrastrando y la misma información en una lista. ----
-    const TIPOS_NODO = [["pnj", "🧑", "PNJ"], ["pj", "🛡️", "PJ"], ["faccion", "🏰", "facción"], ["lugar", "📍", "lugar"],
-        ["otro", "✳️", "otro"]];
+    const TIPOS_NODO = [["pnj", "🧑", ocT("PNJ")], ["pj", "🛡️", ocT("PJ")], ["faccion", "🏰", ocT("facción")], ["lugar", "📍", ocT("lugar")],
+        ["otro", "✳️", ocT("otro")]];
     const TIPOS_LAZO = [["aliado", ocT("es aliado de"), "#3fae5a"], ["enemigo", ocT("es enemigo de"), "#d23b3b"], ["familia", ocT("es familia de"), "#e6c229"],
         ["trabaja", ocT("trabaja para"), "#3b7ddd"], ["ama", ocT("está enamorado de"), "#e05aa8"], ["desconfia", ocT("desconfía de"), "#e88a2a"],
         ["otro", ocT("está relacionado con"), "#8a8a99"]];

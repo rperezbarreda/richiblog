@@ -7,24 +7,24 @@
     const PM = window.ocPM = window.ocPM || {};
 
     const NOTAS_AL_AZAR = [
-        "Nos vemos en {taberna} cuando suene la {hora} campanada. Ven solo.",
-        "{nombre} sabe lo que hiciste. Paga {numero} piezas de oro o hablará.",
-        "La entrada está bajo {pueblo}. No pises la tercera losa.",
-        "Aquí yace {nombre}, que entró sin llamar.",
-        "Prohibido el paso. Los intrusos serán devorados.",
-        "El cargamento cruza {region} dentro de {numero} días. Que nadie lo vea.",
-        "Si lees esto, ya es tarde.",
-        "No te fíes de {nombre}. Lleva el anillo.",
-        "{nombre}: la llave está en {mazmorra}. Quema esta nota.",
-        "Tres pasos al norte, dos al este, y cava.",
-        "Hemos perdido a {numero}. Los túneles cambian de sitio.",
-        "Por orden de {nombre}, nadie sale de {pueblo} hasta la luna nueva.",
-        "Lo que duerme bajo {region} no debe despertar.",
-        "Debo {numero} monedas en {taberna}. Si no vuelvo, que las pague {nombre}.",
-        "Al portador: dadle cama, comida y silencio.",
-        "Cuidado: el puente no aguanta a más de dos.",
-        "La puerta solo se abre a quien dice su nombre verdadero.",
-        "{nombre} no murió en {mazmorra}. Lo he visto en {pueblo}.",
+        ocT("Nos vemos en {taberna} cuando suene la {hora} campanada. Ven solo."),
+        ocT("{nombre} sabe lo que hiciste. Paga {numero} piezas de oro o hablará."),
+        ocT("La entrada está bajo {pueblo}. No pises la tercera losa."),
+        ocT("Aquí yace {nombre}, que entró sin llamar."),
+        ocT("Prohibido el paso. Los intrusos serán devorados."),
+        ocT("El cargamento cruza {region} dentro de {numero} días. Que nadie lo vea."),
+        ocT("Si lees esto, ya es tarde."),
+        ocT("No te fíes de {nombre}. Lleva el anillo."),
+        ocT("{nombre}: la llave está en {mazmorra}. Quema esta nota."),
+        ocT("Tres pasos al norte, dos al este, y cava."),
+        ocT("Hemos perdido a {numero}. Los túneles cambian de sitio."),
+        ocT("Por orden de {nombre}, nadie sale de {pueblo} hasta la luna nueva."),
+        ocT("Lo que duerme bajo {region} no debe despertar."),
+        ocT("Debo {numero} monedas en {taberna}. Si no vuelvo, que las pague {nombre}."),
+        ocT("Al portador: dadle cama, comida y silencio."),
+        ocT("Cuidado: el puente no aguanta a más de dos."),
+        ocT("La puerta solo se abre a quien dice su nombre verdadero."),
+        ocT("{nombre} no murió en {mazmorra}. Lo he visto en {pueblo}."),
     ];
 
     function notaAlAzar(nombres) {
@@ -37,7 +37,7 @@
                 return String(PM.alAzar([2, 3, 5, 7, 12, 20, 50, 100]));
             }
             if (que === "hora") {
-                return PM.alAzar(["primera", "tercera", "sexta", "novena", "duodécima"]);
+                return PM.alAzar([ocT("primera"), ocT("tercera"), ocT("sexta"), ocT("novena"), ocT("duodécima")]);
             }
             return nombres.lugares[que] ? lugar(que) : x;
         });

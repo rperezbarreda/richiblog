@@ -149,11 +149,11 @@
                     vitales.append(dt, PM.crear("dd", "", String(valor)));
                 };
                 const pgAhora = numero(pj.pg) !== "" ? numero(pj.pg) : numero(pj.pgmax);
-                vital("PG", pgAhora === "" ? "—" : pgAhora + (numero(pj.pgmax) !== "" ? " / " + numero(pj.pgmax) : "")
+                vital(ocT("PG"), pgAhora === "" ? "—" : pgAhora + (numero(pj.pgmax) !== "" ? " / " + numero(pj.pgmax) : "")
                     + (numero(pj.pgtemp) ? ocT(" (+{numero} temp.)", { numero: numero(pj.pgtemp) }) : ""), ocT("Puntos de golpe"));
-                vital("CA", numero(pj.ca), ocT("Clase de armadura"));
-                vital("PX", (PM.numPj(pj.px) || 0).toLocaleString("es-ES") + ((PM.numPj(pj.nivel) || 1) < 20 ? " / "
-                    + PM.pxParaSubir(pj).toLocaleString("es-ES") : ""), ocT("Puntos de experiencia (y los que necesita para subir)"));
+                vital(ocT("CA"), numero(pj.ca), ocT("Clase de armadura"));
+                vital(ocT("PX"), (PM.numPj(pj.px) || 0).toLocaleString(window.ocLocale) + ((PM.numPj(pj.nivel) || 1) < 20 ? " / "
+                    + PM.pxParaSubir(pj).toLocaleString(window.ocLocale) : ""), ocT("Puntos de experiencia (y los que necesita para subir)"));
                 PASIVAS.forEach(([k, texto, emoji]) => vital(emoji, PM.pasivaPj(pj, k) === null ? "" : PM.pasivaPj(pj, k), texto));
                 vitales.querySelectorAll("dt").forEach((dt) => {
                     if (/\p{Extended_Pictographic}/u.test(dt.textContent)) {
@@ -173,7 +173,7 @@
                         return;
                     }
                     const c = PM.crear("li", "master-party-c");
-                    c.appendChild(PM.crear("span", "master-party-et", k));
+                    c.appendChild(PM.crear("span", "master-party-et", ocT(k)));
                     c.appendChild(PM.crear("span", "master-party-valor", String(n)));
                     c.appendChild(window.ocDadoBoton ? window.ocDadoBoton(conSigno(mod(n)), "1d20" + (mod(n) >= 0 ? "+" : "")
                         + mod(n), ocT("{k} de {quien}", { k: k, quien: quien })) : document.createTextNode(conSigno(mod(n))));
@@ -202,7 +202,7 @@
             Object.keys(PM.NOMBRES_CAR).forEach((k) => opc("s:" + k, ocT("salvación de {n}", { n: PM.CAR_VER[k] }), gS));
             const gH = PM.crear("optgroup");
             gH.label = ocT("habilidades");
-            PM.HABILIDADES_PJ.forEach(([n]) => opc("h:" + n, n, gH));
+            PM.HABILIDADES_PJ.forEach(([n]) => opc("h:" + n, PM.verHab(n), gH));
             const gC = PM.crear("optgroup");
             gC.label = ocT("características");
             Object.keys(PM.NOMBRES_CAR).forEach((k) => opc("c:" + k, PM.CAR_VER[k], gC));
@@ -306,8 +306,8 @@
                 const li = PM.crear("li", "master-party-pj");
                 const quien = quienEs(pj, i);
                 const arriba = PM.crear("div", "master-party-fila");
-                arriba.append(campo(pj, i, "nombre", "nombre", "text", "es-nombre"), campo(pj, i, "raza", "especie", "text", "es-clase"),
-                    campo(pj, i, "clase", "clase", "text", "es-clase"), campo(pj, i, "nivel", "nv"), campo(pj, i, "pg", "PG"), campo(pj, i, "pgmax", "máx"), campo(pj, i, "ca", "CA"));
+                arriba.append(campo(pj, i, "nombre", ocT("nombre"), "text", "es-nombre"), campo(pj, i, "raza", ocT("especie"), "text", "es-clase"),
+                    campo(pj, i, "clase", ocT("clase"), "text", "es-clase"), campo(pj, i, "nivel", ocT("nv")), campo(pj, i, "pg", ocT("PG")), campo(pj, i, "pgmax", ocT("máx")), campo(pj, i, "ca", ocT("CA")));
                 let seguro = false;
                 const quitar = PM.botonDe("master-party-quitar", "✕", () => {
                     if (!seguro) {

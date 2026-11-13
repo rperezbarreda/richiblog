@@ -14,12 +14,15 @@
         if (!n) {
             return null;
         }
-        const salen = lista.filter((r) => limpio(r.nombre) === n || limpio(r.en) === n || PM.llano(r.nombre) === PM.llano(nombre));
+        // (Y por su traducción: un nombre guardado en castellano con la app en otro idioma.)
+        const n2 = limpio(window.ocTd(String(nombre || "")));
+        const salen = lista.filter((r) => limpio(r.nombre) === n || limpio(r.en) === n || PM.llano(r.nombre) === PM.llano(nombre)
+            || limpio(r.nombre) === n2);
         if (salen.length < 2) {
             return salen[0] || null;
         }
         const p = PM.llano(pista || "");
-        return salen.find((r) => r.propio) || salen.find((r) => p && PM.llano(r.de || "").split(/[ ,()]+/).some((w) => w.length > 3
+        return salen.find((r) => r.propio) || salen.find((r) => p && PM.llano((r.de || "") + " " + PM.verDato(r.de || "")).split(/[ ,()]+/).some((w) => w.length > 3
             && p.includes(w))) || salen[0];
     }
 
@@ -40,7 +43,7 @@
             // Sin el compendio: se quedan en negrita.
         });
     }
-    const NIVELES_COMP = ["", "competente", "pericia"];
+    const NIVELES_COMP = ["", ocT("competente"), ocT("pericia")];
     // Los tipos de acción (lo de antes de «:» en pj.acciones, en llano) y
     // su título.
     const TIPOS_ACCION = [[/^accion$|^action$/, ocT("🌀 Acciones")], [/adicional|bonus/, ocT("⚡ Acciones adicionales")],
@@ -91,14 +94,14 @@
                 return;
             }
             const de = (mt[2] || "").trim();
-            const nivel = /^(.*?),\s*(nivel \d+)$/i.exec(de);
+            const nivel = /^(.*?),\s*((?:nivel|level) \d+)$/i.exec(de);
             const llano = PM.llano(de);
             let g = ocT("⭐ Otros rasgos");
             let resto = "";
             if (nivel) {
                 g = ocT("⚔️ Clase: {clase}", { clase: nivel[1] });
                 resto = nivel[2];
-            } else if (/^(especie|raza|race)$/.test(llano) || igual(de, pj.raza)) {
+            } else if (/^(especie|raza|race|species)$/.test(llano) || igual(de, pj.raza)) {
                 g = ocT("🧬 Especie");
             } else if (/^(clase|class)$/.test(llano) || igual(de, pj.clase)) {
                 g = ocT("⚔️ Clase");
@@ -303,7 +306,7 @@
             });
             pgCaja.append(pgInput, document.createTextNode(PM.numPj(pj.pgmax) !== null ? " / " + PM.numPj(pj.pgmax) : ""));
             const d = car("des");
-            panelFicha.appendChild(datosDe([["CA", pj.ca], ["PG", visor ? null : pgCaja], [ocT("PG temporales"), PM.numPj(pj.pgtemp) || ""],
+            panelFicha.appendChild(datosDe([[ocT("CA"), pj.ca], [ocT("PG"), visor ? null : pgCaja], [ocT("PG temporales"), PM.numPj(pj.pgtemp) || ""],
                 [ocT("Iniciativa"), d !== null ? PM.dadoPj(PM.modDe(d), ocT("Iniciativa de {quien}", { quien: quien })) : ""], [ocT("Velocidad"), pj.velocidad],
                 [ocT("Competencia"), PM.signo(prof)], [ocT("Dados de golpe"), pj.dadosGolpe]]));
             const cars = PM.crear("ul", "master-pj-caracteristicas");
@@ -333,8 +336,8 @@
             panelHab.appendChild(listaDe(PM.HABILIDADES_PJ.filter(([, k]) => car(k) !== null).map(([nombre, k]) => {
                 const nv = pj.habilidades[nombre] || 0;
                 return [PM.crear("span", "master-pj-marca-comp", nv === 2 ? "◆" : nv === 1 ? "●" : "○"),
-                    PM.crear("span", "", nombre + " (" + PM.CAR_ABR[k] + ")" + (nv ? " · " + NIVELES_COMP[nv] : "")),
-                    PM.dadoPj(PM.bonoHabPj(pj, nombre), ocT("{nombre} de {quien}", { nombre: nombre, quien: quien }))];
+                    PM.crear("span", "", PM.verHab(nombre) + " (" + PM.CAR_ABR[k] + ")" + (nv ? " · " + NIVELES_COMP[nv] : "")),
+                    PM.dadoPj(PM.bonoHabPj(pj, nombre), ocT("{nombre} de {quien}", { nombre: PM.verHab(nombre), quien: quien }))];
             }), ocT("Habilidades de {quien}", { quien: quien })));
             panelHab.appendChild(datosDe([[ocT("👁️ Percepción pasiva"), PM.pasivaPj(pj, "per")], [ocT("🔍 Investigación pasiva"),
                 PM.pasivaPj(pj, "inv")], [ocT("💭 Perspicacia pasiva"), PM.pasivaPj(pj, "persp")], [ocT("Sentidos"), pj.sentidos],
@@ -550,7 +553,7 @@
             const pintarInv = () => {
                 listaInv.replaceChildren(...pj.objetos.map((o, i) => {
                     const li = PM.crear("li");
-                    const srdO = objetosSrd[PM.llano(o.nombre)];
+                    const srdO = PM.deSrd(objetosSrd, o.nombre);
                     const nombre = srdO ? PM.botonDe("master-conjuro-boton", o.nombre, () => PM.abrirObjeto(srdO, li.firstChild, tienda.fuente))
                         : PM.crear("span", "", o.nombre);
                     li.append(nombre, PM.crear("span", "master-pj-marca", ocT("×{n}{n2}", { n: PM.numPj(o.cant) || 1, n2: o.equipado ? ocT(" · equipado") : "" })));
@@ -1259,10 +1262,10 @@
         pF.appendChild(fsS);
         const hs = grupo(ocT("Habilidades"));
         destino = pC;
-        const habs = PM.HABILIDADES_PJ.map(([nom, k]) => [nom, campo(hs, nom + " (" + PM.CAR_ABR[k] + ")", pj.habilidades[nom] || 0,
-            { opciones: [["0", "—"], ["1", "competente"], ["2", "pericia"]] })]);
-        const leerAtaques = filasDe(ocT("Ataques"), pj.ataques, [["nombre", ocT("arma o ataque")], ["bono", "bono", { ayuda: "+5" }],
-            ["dano", "daño", { ayuda: ocT("1d8+3 cortante") }]], () => ({ nombre: "", bono: "", dano: "" }));
+        const habs = PM.HABILIDADES_PJ.map(([nom, k]) => [nom, campo(hs, PM.verHab(nom) + " (" + PM.CAR_ABR[k] + ")", pj.habilidades[nom] || 0,
+            { opciones: [["0", "—"], ["1", ocT("competente")], ["2", ocT("pericia")]] })]);
+        const leerAtaques = filasDe(ocT("Ataques"), pj.ataques, [["nombre", ocT("arma o ataque")], ["bono", ocT("bono"), { ayuda: "+5" }],
+            ["dano", ocT("daño"), { ayuda: ocT("1d8+3 cortante") }]], () => ({ nombre: "", bono: "", dano: "" }));
         const acc = campo(grupo(ocT("Acciones especiales")), ocT("una por línea"), pj.acciones.join("\n"), { filas: 3, ancho: true,
             ayuda: ocT("Acción adicional: Forma salvaje (2 usos, descanso corto)") });
         destino = pM;

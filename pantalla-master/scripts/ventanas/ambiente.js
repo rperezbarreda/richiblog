@@ -6,20 +6,20 @@
 (function () {
     const PM = window.ocPM = window.ocPM || {};
 
-    const SONIDOS = [["lluvia", "🌧️", "lluvia", ["weather/rain_on_roof"]],
-        ["tormenta", "⛈️", "tormenta", ["weather/thunderstorm_long"]],
-        ["viento", "💨", "viento", ["weather/strong_wind"]],
-        ["hoguera", "🔥", "hoguera", ["ambiences/fire"]],
-        ["rio", "🏞️", "río", ["water/small_stream_flowing"]],
-        ["mar", "🌊", "mar", ["water/waves_crashing_on_rock_beach"]],
+    const SONIDOS = [["lluvia", "🌧️", ocT("lluvia"), ["weather/rain_on_roof"]],
+        ["tormenta", "⛈️", ocT("tormenta"), ["weather/thunderstorm_long"]],
+        ["viento", "💨", ocT("viento"), ["weather/strong_wind"]],
+        ["hoguera", "🔥", ocT("hoguera"), ["ambiences/fire"]],
+        ["rio", "🏞️", ocT("río"), ["water/small_stream_flowing"]],
+        ["mar", "🌊", ocT("mar"), ["water/waves_crashing_on_rock_beach"]],
         ["carro", "🐴", ocT("carro en marcha"), ["transportation/horse_and_carriage"]],
-        ["mercado", "🛒", "mercado", ["ambiences/small_outdoor_marketplace"]],
-        ["taberna", "🍺", "taberna", ["crowds/murmuring_and_talking_men"]],
-        ["noche", "🦗", "noche", ["ambiences/outside_night"]],
-        ["bosque", "🐦", "bosque", ["ambiences/spring_day_forest"]],
+        ["mercado", "🛒", ocT("mercado"), ["ambiences/small_outdoor_marketplace"]],
+        ["taberna", "🍺", ocT("taberna"), ["crowds/murmuring_and_talking_men"]],
+        ["noche", "🦗", ocT("noche"), ["ambiences/outside_night"]],
+        ["bosque", "🐦", ocT("bosque"), ["ambiences/spring_day_forest"]],
         ["mazmorra", "🕳️", ocT("mazmorra (viento y goteo)"), ["horror/hallow_wind", "water/water_leak"]],
         ["barco", "⛵", ocT("barco (madera que cruje)"), ["transportation/wood_creak_on_old_ship_series"]],
-        ["granja", "🐓", "granja", ["ambiences/morning_farm"]]];
+        ["granja", "🐓", ocT("granja"), ["ambiences/morning_farm"]]];
     // Subir o bajar el volumen de unos <audio> poco a poco.
     function fundir(audios, hasta, alAcabar) {
         const pasos = 12;

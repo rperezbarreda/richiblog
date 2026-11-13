@@ -27,10 +27,10 @@
         ["#2e7d32", ocT("verde")], ["#ef6c00", ocT("naranja")], ["#6a1b9a", ocT("morado")], ["#8d6e63", ocT("marrón")], ["#fdd835", ocT("amarillo")],
         ["#9e9e9e", ocT("gris")]];
     // [id, emoji, nombre, tecla]
-    const DIBUJO_HERRAMIENTAS = [["lapiz", "✏️", "Lápiz", "b"], ["goma", "🧽", "Goma", "e"], ["bote", "🪣", ocT("Bote de pintura"), "g"],
+    const DIBUJO_HERRAMIENTAS = [["lapiz", "✏️", ocT("Lápiz"), "b"], ["goma", "🧽", ocT("Goma"), "e"], ["bote", "🪣", ocT("Bote de pintura"), "g"],
         ["seleccionar", "⬚", ocT("Seleccionar y mover"), "m"], ["cuentagotas", "💧", ocT("Cuentagotas (coger un color)"), "i"],
-        ["linea", "╱", ocT("Línea recta"), "l"], ["rectangulo", "▭", "Rectángulo", "u"], ["elipse", "◯", "Elipse", "o"],
-        ["texto", "T", "Texto", "t"]];
+        ["linea", "╱", ocT("Línea recta"), "l"], ["rectangulo", "▭", ocT("Rectángulo"), "u"], ["elipse", "◯", ocT("Elipse"), "o"],
+        ["texto", "T", ocT("Texto"), "t"]];
     const DIBUJO_FUENTES = [["Pangolin", ocT("a mano")], ["Space Grotesk", ocT("normal")], ["Georgia, serif", ocT("con serifa")],
         ["DM Mono", ocT("de máquina")], ["Jersey 10", ocT("de píxeles")]];
 
@@ -1267,7 +1267,7 @@
                 PM.avisar((n.visible ? ocT("Se ve: ") : ocT("Escondida: ")) + n.nombre + ".");
             }, (n.visible ? ocT("Esconder ") : ocT("Enseñar ")) + n.nombre);
             ojo.setAttribute("aria-pressed", String(!!n.visible));
-            ojo.title = n.visible ? "Esconder" : "Enseñar";
+            ojo.title = n.visible ? ocT("Esconder") : ocT("Enseñar");
             li.appendChild(ojo);
             if (n.tipo === "carpeta") {
                 const plegar = PM.botonDe("master-nombre-boton", n.abierta ? "▾" : "▸", () => {

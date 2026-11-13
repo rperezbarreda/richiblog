@@ -32,8 +32,8 @@
                 if (!r) {
                     return "";
                 }
-                lineas.push(ocT("Monedas: {join}", { join: r.monedas.filter((x) => x[1]).map((x) => x[1].toLocaleString("es-ES") + " " + x[0]).join(", ") }));
-                r.cosas.forEach((c) => lineas.push(ocT("{n} ({toLocaleString} po{n2})", { n: (c.n > 1 ? ocT("{n} × ", { n: c.n }) : "") + c.texto, toLocaleString: c.valor.toLocaleString("es-ES"), n2: c.n > 1 ? ocT(" cada {n}", { n: c.que === "gema" ? "una" : "uno" }) : "" })));
+                lineas.push(ocT("Monedas: {join}", { join: r.monedas.filter((x) => x[1]).map((x) => x[1].toLocaleString(window.ocLocale) + " " + x[0]).join(", ") }));
+                r.cosas.forEach((c) => lineas.push(ocT("{n} ({toLocaleString} po{n2})", { n: (c.n > 1 ? ocT("{n} × ", { n: c.n }) : "") + c.texto, toLocaleString: c.valor.toLocaleString(window.ocLocale), n2: c.n > 1 ? ocT(" cada {n}", { n: c.que === "gema" ? "una" : "uno" }) : "" })));
                 r.objetos.forEach((en) => lineas.push((porEn[en] || { nombre: en }).nombre));
                 return lineas.join("\n");
             };
@@ -48,15 +48,15 @@
                 const monedas = r.monedas.filter((x) => x[1]);
                 const li = PM.crear("li", "master-botin-cosa es-monedas");
                 li.append(PM.crear("span", "master-botin-icono", "🪙"), PM.crear("span", "",
-                    monedas.map((x) => x[1].toLocaleString("es-ES") + " " + x[0]).join(" · ")));
+                    monedas.map((x) => x[1].toLocaleString(window.ocLocale) + " " + x[0]).join(" · ")));
                 li.querySelector("span:last-child").setAttribute("aria-label", ocT("Monedas: {join}", { join: monedas.map((x) =>
-                    x[1].toLocaleString("es-ES") + " " + (PM.MONEDAS.find((y) => y[0] === x[0]) || [0, x[0]])[1]).join(", ") }));
+                    x[1].toLocaleString(window.ocLocale) + " " + (PM.MONEDAS.find((y) => y[0] === x[0]) || [0, x[0]])[1]).join(", ") }));
                 lista.appendChild(li);
                 r.cosas.forEach((c) => {
                     const x = PM.crear("li", "master-botin-cosa");
                     x.append(PM.crear("span", "master-botin-icono", c.que === "gema" ? "💎" : "🏺"),
                         PM.crear("span", "", (c.n > 1 ? ocT("{n} × ", { n: c.n }) : "") + c.texto),
-                        PM.crear("span", "master-botin-valor", ocT("{toLocaleString} po{n}", { toLocaleString: c.valor.toLocaleString("es-ES"), n: c.n > 1 ? ocT(" c/u") : "" })));
+                        PM.crear("span", "master-botin-valor", ocT("{toLocaleString} po{n}", { toLocaleString: c.valor.toLocaleString(window.ocLocale), n: c.n > 1 ? ocT(" c/u") : "" })));
                     lista.appendChild(x);
                 });
                 r.objetos.forEach((en) => {
@@ -66,14 +66,14 @@
                     }
                     const x = PM.crear("li", "master-botin-cosa es-magico");
                     const b = PM.botonDe("master-botin-objeto", o.nombre, () => PM.abrirObjeto(o, b, tienda.fuente), ocT("Ver {nombre}", { nombre: o.nombre }));
-                    x.append(PM.crear("span", "master-botin-icono", "✨"), b, PM.crear("span", "master-botin-valor", o.rareza));
+                    x.append(PM.crear("span", "master-botin-icono", "✨"), b, PM.crear("span", "master-botin-valor", PM.verDato(o.rareza)));
                     lista.appendChild(x);
                 });
                 let total = monedas.reduce((t, x) => t + x[1] * VALOR_MONEDA[x[0]], 0) / 100;
                 r.cosas.forEach((c) => {
                     total += c.n * c.valor;
                 });
-                sale.append(lista, PM.crear("p", "master-botin-total", ocT("Monedas, gemas y arte: unas {toLocaleString} po{n}", { toLocaleString: Math.round(total).toLocaleString("es-ES"), n: r.objetos.length ? ocT(", más {n}{n2}", { n: r.objetos.length, n2: r.objetos.length > 1 ? ocT(" objetos mágicos.") : ocT(" objeto mágico.") }) : "." })));
+                sale.append(lista, PM.crear("p", "master-botin-total", ocT("Monedas, gemas y arte: unas {toLocaleString} po{n}", { toLocaleString: Math.round(total).toLocaleString(window.ocLocale), n: r.objetos.length ? ocT(", más {n}{n2}", { n: r.objetos.length, n2: r.objetos.length > 1 ? ocT(" objetos mágicos.") : ocT(" objeto mágico.") }) : "." })));
             };
             const generar = PM.botonDe("oc-vida-accion es-principal master-nombres-generar", ocT("🎲 generar botín"), () => {
                 d.franja = franja.elegir.value;

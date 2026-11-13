@@ -254,7 +254,7 @@
                 ctx.textAlign = "center";
                 ctx.textBaseline = "middle";
                 ctx.fillStyle = "#fdfaf0";
-                ctx.fillText({ secreta: "S", cerrada: "C", atrancada: "A" }[p.tipo], x + c / 2, y + c / 2 + 1);
+                ctx.fillText({ secreta: ocT("S"), cerrada: ocT("C"), atrancada: ocT("A") }[p.tipo], x + c / 2, y + c / 2 + 1);
             }
         });
         if (jug) {
@@ -386,7 +386,7 @@
                 PM.avisar(ocT("Dungeon nuevo: {nombre} de {n} salas.", { nombre: tm.nombre, n: salas.length }));
             };
             const botinTexto = (r) => {
-                const partes = r.monedas.filter((x) => x[1]).map((x) => x[1].toLocaleString("es-ES") + " " + x[0]);
+                const partes = r.monedas.filter((x) => x[1]).map((x) => x[1].toLocaleString(window.ocLocale) + " " + x[0]);
                 r.cosas.forEach((c) => partes.push(ocT("{n} ({valor} po)", { n: (c.n > 1 ? ocT("{n} × ", { n: c.n }) : "") + c.texto, valor: c.valor })));
                 return partes.join(", ");
             };

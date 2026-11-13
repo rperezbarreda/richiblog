@@ -11,9 +11,12 @@
     // nombres, en master-tablas.json) o uno propio (meses y días de la
     // semana a mano: el de Cralëa, por ejemplo). Con la fecha y la hora de
     // la partida (y botones para que pase el tiempo) y apuntes por día. ----
-    const MESES_GREGORIANO = ["enero", "febrero", "marzo", "abril", "mayo", "junio", "julio", "agosto", "septiembre", "octubre",
-        "noviembre", "diciembre"];
-    const SEMANA_GREGORIANO = ["lun", "mar", "mié", "jue", "vie", "sáb", "dom"];
+    const MESES_GREGORIANO = [ocT("enero"), ocT("febrero"), ocT("marzo"), ocT("abril"), ocT("mayo"), ocT("junio"), ocT("julio"), ocT("agosto"), ocT("septiembre"), ocT("octubre"),
+        ocT("noviembre"), ocT("diciembre")];
+    // Las tres primeras letras de cada día («mar» sería «mar» de agua en
+    // otros sitios de la app).
+    const SEMANA_GREGORIANO = [ocT("lunes"), ocT("martes"), ocT("miércoles"), ocT("jueves"), ocT("viernes"), ocT("sábado"), ocT("domingo")]
+        .map((d) => d.slice(0, 3));
 
     function montarCalendario(dentro, m) {
         m.datos = m.datos || {};
@@ -78,7 +81,7 @@
                 if (mes.fiesta) {
                     return ocT("{nombre} de {anio}{sufijo}", { nombre: mes.nombre, anio: f.anio, sufijo: sufijo() });
                 }
-                const dia = d.tipo === "gregoriano" ? ["lunes", "martes", "miércoles", "jueves", "viernes", "sábado", "domingo"][diaSemana(f)]
+                const dia = d.tipo === "gregoriano" ? [ocT("lunes"), ocT("martes"), ocT("miércoles"), ocT("jueves"), ocT("viernes"), ocT("sábado"), ocT("domingo")][diaSemana(f)]
                     + " " + f.dia : d.tipo === "harptos" ? ocT("día {dia}", { dia: f.dia }) : f.dia + " (" + semana()[diaSemana(f)] + ")";
                 return ocT("{dia} de {nombre} de {anio}{sufijo}", { dia: dia, nombre: mes.nombre, anio: f.anio, sufijo: sufijo() });
             };

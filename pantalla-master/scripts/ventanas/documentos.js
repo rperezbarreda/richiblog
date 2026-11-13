@@ -190,7 +190,7 @@
         const lista = (padre, nivel) => {
             const { carpetas, notas } = PM.docsDe();
             const ul = PM.crear("ul", "master-docs-lista");
-            carpetas.filter((c) => (c.padre || null) === padre).sort((a, b) => a.nombre.localeCompare(b.nombre, "es")).forEach((c) => {
+            carpetas.filter((c) => (c.padre || null) === padre).sort((a, b) => a.nombre.localeCompare(b.nombre, window.ocLocale)).forEach((c) => {
                 const li = PM.crear("li", "master-docs-fila es-carpeta");
                 const abierta = d.abiertas.indexOf(c.id) >= 0;
                 const b = PM.botonDe("master-docs-abrir", "", () => {
@@ -247,7 +247,7 @@
                 }
                 ul.appendChild(li);
             });
-            notas.filter((x) => (x.carpeta || null) === padre).sort((a, b) => a.titulo.localeCompare(b.titulo, "es"))
+            notas.filter((x) => (x.carpeta || null) === padre).sort((a, b) => a.titulo.localeCompare(b.titulo, window.ocLocale))
                 .forEach((x) => ul.appendChild(filaNota(x)));
             return ul;
         };

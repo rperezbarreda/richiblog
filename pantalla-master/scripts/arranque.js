@@ -187,6 +187,8 @@
     } catch (e) {
         prueba = null;
     }
+    // El idioma para fechas, números (1.000 o 1,000) y ordenar.
+    window.ocLocale = codigo === "es" ? "es-ES" : codigo;
     if (prueba && (typeof prueba !== "object" || prueba.codigo !== codigo || !prueba.textos)) {
         prueba = null;
     }
@@ -195,9 +197,11 @@
     var pedido = null;
     // Los campos del compendio que no se traducen: nombres en inglés,
     // identificadores, rutas, trozos de nombres inventados y las categorías
-    // con las que el programa filtra (clases, rarezas, escuelas…).
+    // con las que el programa filtra (clases, rarezas, escuelas…). Éstas se
+    // traducen sólo al enseñarlas, con window.ocTd. La «fuente» (de dónde
+    // sale cada archivo) sí, salvo la de idiomas.json (una tipografía).
     var FIJOS = { en: 1, id: 1, fuente: 1, url: 1, clave: 1, silabas: 1, emoji: 1, icono: 1, ilus: 1, ilusDe: 1,
-        apellido: 1, glifos: 1, conjuros: 1, asalariados: 1, donde: 1, cr: 1, clases: 1, tiendas: 1, tienda: 1,
+        apellido: 1, glifos: 1, asalariados: 1, donde: 1, cr: 1, clases: 1, tiendas: 1, tienda: 1,
         cat: 1, rareza: 1, escuela: 1, tipo: 1, de: 1, habitat: 1, marca: 1, regla: 1, tipos: 1, estilos: 1, et: 1 };
     // En nombres.json, las piezas con las que se inventan los nombres.
     var PIEZAS = { ini: 1, m: 1, f: 1, n: 1, fin: 1 };
@@ -213,11 +217,22 @@
             return tiene.call(vars, k) && vars[k] !== undefined && vars[k] !== null ? String(vars[k]) : todo;
         });
     }
+    // Un dato del compendio que se guarda en castellano (categorías,
+    // rarezas, escuelas, tipos…), en el idioma de la app, para enseñarlo.
+    window.ocTd = function (texto) {
+        if (codigo === "es" || typeof texto !== "string" || !compendio) {
+            return texto;
+        }
+        return buscar(compendio, texto);
+    };
     window.ocT = function (texto, vars) {
         return rellenar(codigo === "es" ? texto : buscar(interfaz, texto), vars);
     };
     function recorrer(x, campo, conPiezas) {
         if (typeof x === "string") {
+            if (campo === "fuente" && x.indexOf(" ") > 0) {
+                return buscar(compendio, x);
+            }
             return FIJOS[campo] || (conPiezas && PIEZAS[campo]) || !LETRAS.test(x) ? x : buscar(compendio, x);
         }
         if (Array.isArray(x)) {
@@ -229,7 +244,10 @@
         if (x && typeof x === "object") {
             var piezas = conPiezas || tiene.call(x, "especies") || tiene.call(x, "apellidos");
             for (var k in x) {
-                if (tiene.call(x, k) && !FIJOS[k]) {
+                // De los fijos, se entra en la «fuente» (si no es una
+                // tipografía) y en «tipos» cuando son los negocios (un
+                // objeto, no la lista de tipos de monstruo).
+                if (tiene.call(x, k) && (!FIJOS[k] || k === "fuente" || k === "tipos" && x[k] && typeof x[k] === "object" && !Array.isArray(x[k]))) {
                     x[k] = recorrer(x[k], k, piezas);
                 }
             }

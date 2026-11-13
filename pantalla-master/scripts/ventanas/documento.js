@@ -115,7 +115,7 @@
         fila.append(cajaT, carpeta);
         const cuando = PM.crear("p", "oc-hoja-nota master-doc-cuando");
         const pintarCuando = () => {
-            cuando.textContent = ocT("{n} · en 📁 {rutaDe}{n2}", { n: (esNota ? ocT("Cambiada: ") : ocT("Añadido: ")) + new Date(n.cambiada || Date.now()).toLocaleString("es-ES",
+            cuando.textContent = ocT("{n} · en 📁 {rutaDe}{n2}", { n: (esNota ? ocT("Cambiada: ") : ocT("Añadido: ")) + new Date(n.cambiada || Date.now()).toLocaleString(window.ocLocale,
                 { day: "numeric", month: "long", hour: "2-digit", minute: "2-digit" }), rutaDe: PM.rutaDe(n.carpeta), n2: n.tamano ? " · " + tamanoBonito(n.tamano) : "" });
         };
         pintarCuando();

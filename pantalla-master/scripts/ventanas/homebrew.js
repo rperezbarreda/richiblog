@@ -89,7 +89,7 @@
             lista.replaceChildren(...todas.map((r) => {
                 const li = PM.crear("li", "master-homebrew-regla");
                 const ver = PM.botonDe("oc-regla-boton", "", () => PM.abrirRegla(Object.assign({ propia: true,
-                    grupo: "🏠 Reglas propias" }, r), ver));
+                    grupo: ocT("🏠 Reglas propias") }, r), ver));
                 ver.setAttribute("aria-haspopup", "dialog");
                 const d = PM.crear("span", "oc-regla-dibujo", r.icono || "🏠");
                 d.setAttribute("aria-hidden", "true");

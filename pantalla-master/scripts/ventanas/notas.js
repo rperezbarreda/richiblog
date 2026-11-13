@@ -27,7 +27,7 @@
         area.classList.add("es-notas");
         area.innerHTML = PM.sanearHtml(m.datos.html) || "<p><br></p>";
         const fecha = PM.botonDe("oc-vida-accion", ocT("📅 poner la fecha"), () => {
-            const hoy = new Date().toLocaleDateString("es-ES", { day: "numeric", month: "long", year: "numeric" });
+            const hoy = new Date().toLocaleDateString(window.ocLocale, { day: "numeric", month: "long", year: "numeric" });
             const h = PM.crear("h3", "", hoy);
             const p = PM.crear("p");
             p.appendChild(PM.crear("br"));

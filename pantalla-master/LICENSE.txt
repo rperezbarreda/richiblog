@@ -44,6 +44,17 @@ licenses:
   Pública Internacional, que está disponible en
   https://creativecommons.org/licenses/by/4.0/legalcode.es.» Distances and
   weights converted from metres and kilograms to feet and pounds.
+- traducciones/en.json and idiomas/en.json (the English compendium) include
+  material from the System Reference Document 5.2 ("SRD 5.2") by Wizards of
+  the Coast LLC, available at https://www.dndbeyond.com/srd, and from the
+  System Reference Document 5.1 ("SRD 5.1") by Wizards of the Coast LLC,
+  available at https://dnd.wizards.com/resources/systems-reference-document,
+  both licensed under the Creative Commons Attribution 4.0 International
+  License (https://creativecommons.org/licenses/by/4.0/legalcode). The
+  original English text was taken from the open5e data
+  (https://github.com/open5e/open5e-api), the SRD 5.2.1 reForged markdown
+  (https://github.com/oldmanumby/dnd.srd.5.2) and 5e-bits/5e-database
+  (https://github.com/5e-bits/5e-database, MIT).
 - tipografias/*.woff2: Space Grotesk, DM Mono, Jersey 10, Pangolin, Patrick Hand, Caveat, Inter,
   Pixelify Sans, VT323, Atkinson
   Hyperlegible and Noto, under the SIL Open Font License 1.1
