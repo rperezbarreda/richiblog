@@ -20,7 +20,7 @@
 #
 # QUÉ SE TRAE: las páginas (index, jugadores, reproductor), el
 # manifest, el service worker (sw.js: la app se instala y va sin
-# conexión también desde la web) y las carpetas estilos, scripts, datos,
+# conexión también desde la web) y las carpetas estilos, scripts, datos, idiomas,
 # tipografias, imagenes y sonidos. La licencia, como LICENSE.txt
 # (Neocities no deja subir archivos sin extensión). Lo demás (el
 # lanzador, los ejecutables, las herramientas) no hace falta en la web.
@@ -35,6 +35,7 @@
 
 import io
 import shutil
+import re
 import sys
 import urllib.request
 import zipfile
@@ -47,7 +48,7 @@ DESTINO = RAIZ / "pantalla-master"
 ZIP_GITHUB = "https://codeload.github.com/rperezbarreda/pantalla_master/zip/refs/heads/main"
 
 SUELTOS = ["index.html", "jugadores.html", "reproductor.html", "manifest.webmanifest", "sw.js"]
-CARPETAS = ["estilos", "scripts", "datos", "tipografias", "imagenes", "sonidos"]
+CARPETAS = ["estilos", "scripts", "datos", "idiomas", "tipografias", "imagenes", "sonidos"]
 # La documentación de la app no hace falta en la web.
 NO = {".md", ".py", ".txt"}
 SOLO_DE_PAGO = {".ogg", ".mp3", ".wav", ".m4a", ".flac"}
@@ -137,6 +138,14 @@ def main():
     if de_pago:
         print(f"\n  OJO: {len(de_pago)} sonido(s) que la cuenta gratis de Neocities no deja subir "
               f"(p. ej. {de_pago[0]}). Sin ellos, la app de la web no se instala para ir sin conexión.")
+    # Todo lo que el service worker quiere guardar tiene que estar: si falta
+    # uno (una carpeta nueva de la app que no está en CARPETAS), no se
+    # instala y la web no va sin conexión.
+    lista = re.findall(r'^\s*"([^"]+)",?\s*$', nuevos.get("sw.js", b"").decode("utf-8", "replace"), re.M)
+    sin = [r for r in lista if r not in ("./",) and r not in nuevos]
+    if sin:
+        print(f"\n  OJO: el service worker pide {len(sin)} archivo(s) que no se han traído (p. ej. {sin[0]}):"
+              " añade su carpeta a CARPETAS, arriba de este archivo. Sin ellos no se instala.")
     print("\n  Listo. Pruébala en el servidor local: http://localhost:8000/pantalla-master/")
     return 0
 

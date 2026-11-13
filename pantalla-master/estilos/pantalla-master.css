@@ -76,6 +76,74 @@
     }
 }
 
+/* EN VERTICAL (estrecho): en vez de las pestañas, el desplegable con los
+   tableros, y todo en una sola línea (el buscador se encoge). En el
+   móvil, si aun así no cabe, vuelve a partirse. */
+.master-tableros-elegir {
+    display: none;
+}
+
+@media (max-width: 900px) {
+    .master-barra {
+        flex-wrap: nowrap;
+    }
+
+    .master-barra .master-pestanas {
+        flex: 1 1 auto;
+        flex-wrap: nowrap;
+        align-items: center;
+        padding: 4px 6px;
+        border-radius: 10px 10px 0 0;
+        clip-path: none;
+    }
+
+    .master-barra .master-pestanas-marco {
+        display: none;
+    }
+
+    .master-tableros-elegir {
+        display: block;
+        flex: 1 1 7rem;
+        min-width: 5rem;
+        max-width: 16rem;
+        height: 36px;
+        padding: 0 6px;
+        border: 2px solid var(--yellow);
+        background: var(--purple-lighter);
+        color: var(--white);
+        font: inherit;
+        cursor: pointer;
+    }
+
+    .master-tableros-elegir:focus-visible {
+        outline: 3px solid var(--yellow);
+        outline-offset: 2px;
+    }
+
+    .master-barra-mandos {
+        flex: 0 1 auto;
+        flex-wrap: nowrap;
+        align-self: stretch;
+        min-width: 0;
+    }
+
+    .master-buscador {
+        flex: 1 1 7rem;
+        width: auto;
+        min-width: 4rem;
+    }
+}
+
+@media (max-width: 640px) {
+    .master-barra {
+        flex-wrap: wrap;
+    }
+
+    .master-barra-mandos {
+        flex: 1 1 100%;
+    }
+}
+
 .master-buscador-texto {
     width: 100%;
     min-height: 40px;
@@ -294,11 +362,12 @@
 }
 
 /* Mantener pulsada una pestaña la coge para moverla: que no seleccione
-   texto ni saque el menú del sistema, y que el dedo no deslice la fila
-   (para eso están las flechas ‹ ›). */
+   texto ni saque el menú del sistema. Sin cogerla, el dedo desliza la
+   fila de lado (además de las flechas ‹ ›); cogida, ya no (lo frena el
+   script). */
 .master-pestana {
     -webkit-touch-callout: none;
-    touch-action: none;
+    touch-action: pan-x;
     user-select: none;
 }
 
@@ -356,6 +425,14 @@
 .master-pestana-caja:hover .master-pestana-cerrar,
 .master-pestana-cerrar.es-seguro {
     opacity: 1;
+}
+
+/* Con el dedo no hay «pasar por encima»: la ✕ que no se ve tampoco se
+   toca (un toque ahí elige la pestaña, no empieza a cerrarla). */
+@media (hover: none) {
+    .master-pestana-caja:not(.es-elegida) .master-pestana-cerrar:not(.es-seguro) {
+        pointer-events: none;
+    }
 }
 
 .master-pestana-cerrar:hover {
@@ -472,8 +549,8 @@
 .master-lienzo {
     position: relative;
     min-height: 400px;
-    /* Los dos dedos en el fondo son el zoom del tablero, no el de la
-       página. */
+    /* Los dos dedos en el tablero son su zoom, no el de la página (ver el
+       pellizco en pantalla-master.js). */
     touch-action: pan-x pan-y;
     overflow-x: auto;
     overflow-y: hidden;
@@ -638,11 +715,33 @@
     touch-action: none;
 }
 
+/* Con el dedo (pantallas táctiles): más grande, que se coja bien. */
+@media (pointer: coarse) {
+    .master-ventana-tamano {
+        width: 40px;
+        height: 40px;
+    }
+}
+
 .master-ventana.es-plegada .master-ventana-tamano {
     display: none;
 }
 
+/* Las ventanas que no están a la vista no se pintan (el navegador se las
+   salta hasta que asoman): con muchas ventanas, mover una, hacer zoom o
+   desplazar el tablero va mucho más suelto. Ya recortan lo que se sale
+   (overflow: hidden) y tienen su tamaño puesto, así que no cambia nada
+   más; «auto 400px» por si una no lo tuviera. */
+@media (min-width: 861px) {
+    .master-lienzo.con-lienzo > .master-ventana {
+        content-visibility: auto;
+        contain-intrinsic-size: auto 400px;
+    }
+}
+
 .master-ventana.es-arrastrada {
+    /* Mientras se arrastra va en su propia capa (se mueve con transform). */
+    will-change: transform;
     opacity: 0.92;
     box-shadow: 10px 10px 0 var(--oc-color);
 }
@@ -875,6 +974,32 @@
 /* ⚙ LAS OPCIONES DEL TABLERO: por partes, cada una con su título. */
 .master-opciones-fila {
     margin-bottom: 14px;
+}
+
+/* El manifiesto del final: por qué es gratis. */
+.master-manifiesto {
+    padding: 4px 0 4px 14px;
+    border-left: 3px solid var(--yellow);
+    line-height: 1.6;
+}
+
+.master-manifiesto p {
+    margin: 0 0 10px;
+}
+
+.master-manifiesto a:not(.oc-vida-accion) {
+    color: var(--yellow);
+    text-underline-offset: 3px;
+}
+
+.master-manifiesto a:not(.oc-vida-accion):focus-visible {
+    outline: 3px solid var(--yellow);
+    outline-offset: 2px;
+}
+
+.master-manifiesto-firma {
+    font-style: italic;
+    text-align: right;
 }
 
 .master-opciones-titulo {
@@ -1858,6 +1983,20 @@
 
 .master-pj-recordar[hidden] {
     display: none;
+}
+
+/* Los apartados plegables de la ficha: el título es el que se pulsa. */
+.master-pj-plegable > summary {
+    cursor: pointer;
+}
+
+.master-pj-plegable > summary > .master-pj-titulo {
+    display: inline;
+}
+
+.master-pj-plegable > summary:focus-visible {
+    outline: 3px solid var(--yellow);
+    outline-offset: 2px;
 }
 
 .master-pj-titulo {
@@ -3765,6 +3904,12 @@
     .master-ventana-barra {
         cursor: default;
     }
+
+    /* Aquí el tablero no tiene zoom: dos dedos amplían la página, como
+       en cualquier web. */
+    .master-lienzo {
+        touch-action: auto;
+    }
 }
 
 /* LOS DOCUMENTOS: el árbol de carpetas y notas (cada fila: abrir, ✎ y
@@ -4309,6 +4454,59 @@
     min-width: 0;
 }
 
+/* Lo de cada pestaña del compendio, en grupos: lo de base (SRD) y lo
+   tuyo por categorías (el libro), cada uno con su título. */
+.master-creador-grupos {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.master-creador-cat {
+    display: inline;
+    margin: 0;
+    font-size: 0.95rem;
+}
+
+/* Cada grupo, plegable por su título. */
+.master-creador-cat-grupo > summary {
+    margin-bottom: 6px;
+    padding-bottom: 2px;
+    border-bottom: 2px solid var(--yellow);
+    cursor: pointer;
+}
+
+.master-creador-cat-grupo > summary:focus-visible {
+    outline: 3px solid var(--yellow);
+    outline-offset: 2px;
+}
+
+/* Buscar y «de dónde», en una fila (si caben). */
+.master-creador-buscador {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 10px;
+}
+
+.master-creador-buscador > .master-creador-campo {
+    flex: 1 1 12rem;
+}
+
+/* La ventana de la categoría al guardar: una opción por línea. */
+.master-creador-cats {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    margin: 0 0 12px;
+    padding: 8px 12px;
+    border: 2px dashed var(--border);
+}
+
+.master-creador-cats legend {
+    padding: 0 6px;
+}
+
 .master-creador-lista {
     display: flex;
     flex-direction: column;
@@ -4505,6 +4703,7 @@
 
 /* PEGAR UN BLOQUE y SU GUÍA (tus creaciones). */
 .master-pegar {
+    position: relative;
     display: flex;
     flex-direction: column;
     gap: 6px;
@@ -4675,9 +4874,59 @@
     color: var(--yellow);
 }
 
+/* Los idiomas: una banderita y su nombre. */
+.master-entrada-idiomas {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 6px;
+    margin: 0 0 14px;
+}
+
+.master-entrada-idioma {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 10px;
+    border: 2px solid var(--yellow);
+    background: transparent;
+    color: var(--white);
+    font: inherit;
+    font-size: 0.9rem;
+    cursor: pointer;
+}
+
+.master-entrada-idioma[aria-pressed="true"],
+.master-entrada-idioma:hover,
+.master-entrada-idioma:focus-visible {
+    background: var(--yellow);
+    color: var(--yellow-contrast);
+}
+
+.master-entrada-idioma:focus-visible {
+    outline: 3px solid var(--white);
+    outline-offset: 2px;
+}
+
+
 .master-entrada-texto {
     margin: 0 0 12px;
     text-align: center;
+}
+
+/* Lo que se esconde de la entrada (mientras se pide la carpeta). */
+.master-entrada-caja > [hidden] {
+    display: none;
+}
+
+.master-entrada-texto a {
+    color: var(--yellow);
+    text-underline-offset: 3px;
+}
+
+.master-entrada-texto a:focus-visible {
+    outline: 3px solid var(--yellow);
+    outline-offset: 2px;
 }
 
 .master-entrada-lista {
@@ -4762,6 +5011,41 @@
     padding: calc(10px + env(safe-area-inset-top, 0px)) 16px 10px;
     border-bottom: 3px solid var(--yellow);
     background: var(--purple-lighter);
+}
+
+/* Qué hacer (añadir, editar, borrar): tres botones juntos, arriba a la
+   derecha, antes de «volver»; el elegido, relleno. */
+.master-compendio-acciones {
+    display: flex;
+    flex-wrap: wrap;
+    margin-left: auto;
+}
+
+.master-compendio-accion {
+    min-height: 40px;
+    padding: 4px 12px;
+    border: 2px solid var(--yellow);
+    background: transparent;
+    color: var(--white);
+    font: inherit;
+    cursor: pointer;
+}
+
+.master-compendio-accion + .master-compendio-accion {
+    margin-left: -2px;
+}
+
+.master-compendio-accion[aria-pressed="true"] {
+    background: var(--yellow);
+    color: var(--yellow-contrast);
+    font-weight: 700;
+}
+
+.master-compendio-accion:hover,
+.master-compendio-accion:focus-visible {
+    position: relative;
+    outline: 3px solid var(--white);
+    outline-offset: 2px;
 }
 
 .master-compendio-titulo {
@@ -5563,4 +5847,833 @@
     height: 20px;
     flex: none;
     accent-color: var(--yellow);
+}
+
+/* =========================================
+   LOS MODOS: una rejilla fija (12 × 6) que llena lo que queda de
+   pantalla; cada ventana en su hueco, sin arrastrar. Las sueltas van
+   encima, como en un tablero. En estrecho, una debajo de otra.
+   ========================================= */
+.master-lienzo.es-modo {
+    display: grid;
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    grid-template-rows: repeat(6, minmax(0, 1fr));
+    gap: 12px;
+    overflow: hidden;
+    touch-action: auto;
+}
+
+.master-lienzo.es-modo > .master-ventana.es-en-hueco {
+    position: relative;
+    min-width: 0;
+    min-height: 0;
+}
+
+.master-lienzo.es-modo > .master-ventana.es-en-hueco.es-plegada {
+    align-self: start;
+}
+
+.master-ventana.es-en-hueco .master-ventana-tamano {
+    display: none;
+}
+
+.master-ventana.es-en-hueco .master-ventana-barra {
+    cursor: default;
+}
+
+/* Un hueco vacío: un reborde a rayas con «＋ elegir ventana». */
+.master-hueco {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 0;
+    border: 2px dashed var(--border);
+}
+
+@media (max-width: 860px) {
+    .master-lienzo.es-modo {
+        display: flex;
+        flex-direction: column;
+        gap: 18px;
+        height: auto;
+        overflow: visible;
+    }
+
+    .master-lienzo.es-modo > .master-ventana.es-en-hueco {
+        position: static;
+        max-height: 80vh;
+    }
+
+    .master-hueco {
+        min-height: 6rem;
+    }
+}
+
+/* EL MENÚ DE LOS MODOS: un botón abajo a la izquierda (o donde se haya
+   dejado: left y top en línea, con .es-movido) que despliega la lista de
+   los modos encima (o debajo, si está arriba: .es-hacia-abajo). */
+.master-modos {
+    position: fixed;
+    left: calc(18px + env(safe-area-inset-left, 0px));
+    bottom: calc(18px + env(safe-area-inset-bottom, 0px));
+    z-index: 940;
+    max-width: min(14rem, calc(100vw - 36px));
+    color: var(--white);
+}
+
+/* Con el compendio o la entrada encima, el menú no hace falta (y taparía
+   sus botones). */
+body:has(.master-compendio, .master-entrada) .master-modos {
+    display: none;
+}
+
+.master-modos.es-movido {
+    bottom: auto;
+}
+
+.master-modos-abrir {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    max-width: 100%;
+    min-height: 44px;
+    padding: 4px 12px;
+    border: 2px solid var(--yellow);
+    background: var(--purple-lighter);
+    color: var(--white);
+    box-shadow: 4px 4px 0 var(--yellow);
+    font: inherit;
+    cursor: pointer;
+    touch-action: none;
+    user-select: none;
+    -webkit-user-select: none;
+}
+
+.master-modos-que {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.master-modos-abrir:hover,
+.master-modos-abrir:focus-visible {
+    outline: 3px solid var(--yellow);
+    outline-offset: 2px;
+}
+
+/* Cogido (para moverlo): a rayas, como las ventanas. */
+.master-modos.es-cogido .master-modos-abrir {
+    border-style: dashed;
+    cursor: grabbing;
+    box-shadow: 6px 6px 0 var(--yellow);
+}
+
+.master-modos-lista {
+    position: absolute;
+    left: 0;
+    bottom: calc(100% + 8px);
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    width: max-content;
+    min-width: 100%;
+    max-width: min(16rem, calc(100vw - 36px));
+    max-height: calc(100vh - 7rem);
+    margin: 0;
+    padding: 6px;
+    overflow: auto;
+    list-style: none;
+    border: 2px solid var(--yellow);
+    background: var(--purple-lighter);
+    box-shadow: 4px 4px 0 var(--yellow);
+}
+
+.master-modos.es-hacia-abajo .master-modos-lista {
+    top: calc(100% + 8px);
+    bottom: auto;
+}
+
+.master-modos-lista[hidden] {
+    display: none;
+}
+
+.master-modos-boton {
+    width: 100%;
+    min-height: 40px;
+    padding: 2px 10px;
+    border: 2px solid var(--yellow);
+    background: transparent;
+    color: var(--white);
+    font: inherit;
+    text-align: left;
+    cursor: pointer;
+}
+
+/* Cada modo con su ✎ al lado. */
+.master-modos-con-editar {
+    display: flex;
+    gap: 3px;
+}
+
+.master-modos-editar {
+    flex: none;
+    width: 40px;
+    min-height: 40px;
+    padding: 0;
+    border: 2px solid var(--yellow);
+    background: transparent;
+    color: var(--white);
+    font: inherit;
+    cursor: pointer;
+}
+
+.master-modos-editar:hover,
+.master-modos-editar:focus-visible {
+    outline: 3px solid var(--yellow);
+    outline-offset: 2px;
+}
+
+.master-modos-boton[aria-current="true"] {
+    background: var(--yellow);
+    color: var(--yellow-contrast);
+    font-weight: 700;
+}
+
+.master-modos-boton:hover,
+.master-modos-boton:focus-visible {
+    outline: 3px solid var(--yellow);
+    outline-offset: 2px;
+}
+
+/* Las rejillas, para elegir (con un dibujito de sus huecos). */
+.master-rejillas {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(11rem, 1fr));
+    gap: 8px;
+}
+
+.master-rejillas[hidden] {
+    display: none;
+}
+
+.master-rejilla {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    align-items: center;
+    gap: 4px 8px;
+    padding: 6px;
+    border: 2px solid var(--border);
+    cursor: pointer;
+}
+
+.master-rejilla:has(input:checked) {
+    border-color: var(--yellow);
+}
+
+.master-rejilla > span:last-child {
+    grid-column: 1 / -1;
+    font-size: 0.8125rem;
+}
+
+.master-rejilla-dibujo {
+    display: grid;
+    grid-template-columns: repeat(12, 1fr);
+    grid-template-rows: repeat(6, 1fr);
+    gap: 2px;
+    width: 6rem;
+    height: 3rem;
+}
+
+.master-rejilla-dibujo > span {
+    border: 1px solid var(--yellow);
+    background: color-mix(in srgb, var(--yellow) 25%, transparent);
+}
+
+/* ⏩ TURNOS: a quién le toca (en grande), los que van después y los
+   botones de pasar abajo, siempre a mano. */
+.master-turnos {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    min-height: 100%;
+}
+
+.master-turnos-ronda {
+    margin: 0;
+    font-family: var(--fuente-mono);
+    font-size: 0.875rem;
+    text-transform: uppercase;
+}
+
+.master-turnos-le {
+    margin: 0 0 4px;
+    color: var(--muted);
+    font-size: 0.875rem;
+}
+
+.master-turnos-ahora {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.master-turnos-fila {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding: 8px 100px 8px 10px;
+    border: 2px solid var(--border);
+    border-left: 8px solid var(--turno-color, var(--yellow));
+}
+
+.master-turnos-fila.es-ahora {
+    padding: 12px 104px 12px 12px;
+    border-color: var(--yellow);
+    border-left-color: var(--turno-color, var(--yellow));
+}
+
+.master-turnos-nombre {
+    overflow-wrap: anywhere;
+}
+
+/* ✎ editar a uno: arriba a la derecha de su fila (en un grupo, uno con el
+   nombre de cada uno, debajo). */
+.master-turnos-editar {
+    min-width: 40px;
+    min-height: 40px;
+    padding: 4px 8px;
+    border: 2px solid var(--yellow);
+    background: transparent;
+    color: var(--white);
+    font: inherit;
+    cursor: pointer;
+}
+
+.master-turnos-fila > .master-turnos-uno {
+    position: absolute;
+    top: 6px;
+    right: 6px;
+    display: flex;
+    gap: 4px;
+}
+
+.master-turnos-editar:hover,
+.master-turnos-editar:focus-visible {
+    background: var(--yellow);
+    color: var(--yellow-contrast);
+}
+
+.master-turnos-editar:focus-visible {
+    outline: 3px solid var(--white);
+    outline-offset: 2px;
+}
+
+.master-turnos-cada {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.master-turnos-fila.es-ahora .master-turnos-nombre {
+    font-size: 1.5rem;
+}
+
+.master-turnos-datos {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px 6px;
+    margin: 0;
+}
+
+.master-turnos-chapa {
+    padding: 1px 6px;
+    border: 1px solid var(--border);
+    font-family: var(--fuente-mono);
+    font-size: 0.8125rem;
+}
+
+.master-turnos-chapa-et {
+    color: var(--muted);
+}
+
+.master-turnos-lista {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.master-turnos-separa {
+    color: var(--muted);
+    font-family: var(--fuente-mono);
+    font-size: 0.8125rem;
+    text-align: center;
+    text-transform: uppercase;
+}
+
+.master-turnos-mandos {
+    position: sticky;
+    bottom: -4px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: auto;
+    padding: 8px 0 4px;
+    background: var(--fondo-pestana, var(--purple-lighter));
+}
+
+.master-turnos-mandos > button {
+    flex: 1 1 7rem;
+}
+
+/* 🔔 (con o sin sonido) y ⏭️ (saltar a los caídos): pequeños, al final
+   (si no caben, debajo). */
+.master-turnos-mandos > .master-turnos-sonido {
+    flex: 0 0 auto;
+    padding-inline: 10px;
+}
+
+/* 🐲 LA CRIATURA DEL TURNO y la ficha resumida de un PJ. */
+.master-turno-criatura,
+.master-turno-pj {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+/* 🧝 EL VISOR DE LA PARTY: los personajes arriba y, debajo, la ficha como
+   el visor del blog: la tarjeta, el menú y la sección. */
+.master-visor-elegir {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 10px;
+}
+
+.master-visor-pj {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    min-height: 44px;
+    padding: 4px 10px 4px 4px;
+    border: 2px solid var(--yellow);
+    background: transparent;
+    color: var(--white);
+    font: inherit;
+    cursor: pointer;
+}
+
+.master-visor-pj[aria-pressed="true"] {
+    background: var(--yellow);
+    color: var(--yellow-contrast);
+    font-weight: 700;
+}
+
+.master-visor-pj:hover,
+.master-visor-pj:focus-visible {
+    outline: 3px solid var(--yellow);
+    outline-offset: 2px;
+}
+
+/* Tras los personajes: ＋, ✎ y 🗑 (los del elegido) y 📥. */
+.master-visor-mas {
+    min-width: 44px;
+    min-height: 44px;
+    padding: 0 8px;
+    border: 2px solid var(--yellow);
+    background: transparent;
+    color: var(--white);
+    font: inherit;
+    cursor: pointer;
+}
+
+.master-visor-mas.es-seguro {
+    background: var(--red, #b3261e);
+    color: #fff;
+}
+
+.master-visor-mas:hover,
+.master-visor-mas:focus-visible {
+    position: relative;
+    outline: 3px solid var(--yellow);
+    outline-offset: 2px;
+}
+
+.master-visor-mini {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border: 1px solid currentColor;
+    object-fit: cover;
+    font-weight: 700;
+}
+
+.master-visor {
+    display: grid;
+    grid-template-columns: minmax(13rem, 16rem) minmax(10rem, 13rem) minmax(0, 1fr);
+    align-items: start;
+    gap: 14px;
+}
+
+.master-visor-tarjeta {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 8px;
+    background: var(--yellow);
+    color: var(--yellow-contrast);
+}
+
+.master-visor-nombre,
+.master-visor-pg,
+.master-visor-ca {
+    padding: 6px 8px;
+    border: 2px solid var(--yellow-contrast);
+    background: var(--purple-lighter);
+    color: var(--white);
+}
+
+.master-visor-quien {
+    margin: 0;
+    font-size: 1.5rem;
+}
+
+.master-visor-completo {
+    margin: 0;
+    font-family: var(--fuente-mono);
+    font-size: 0.8125rem;
+}
+
+.master-visor-clase {
+    display: inline-block;
+    padding: 0 6px;
+    background: var(--yellow);
+    color: var(--yellow-contrast);
+    font-weight: 700;
+}
+
+.master-visor-nombre .master-visor-clase {
+    float: right;
+}
+
+.master-visor-pg {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.master-visor-pg .master-party-input {
+    width: 4.5rem;
+    font-size: 1.25rem;
+    text-align: center;
+}
+
+.master-visor-et {
+    font-family: var(--fuente-mono);
+    font-size: 0.8125rem;
+    text-transform: uppercase;
+    text-decoration: none;
+}
+
+.master-visor-max {
+    font-family: var(--fuente-mono);
+    font-size: 0.875rem;
+}
+
+.master-visor-fila {
+    display: flex;
+    gap: 8px;
+}
+
+.master-visor-fila > * {
+    flex: 1 1 0;
+}
+
+.master-visor-ca {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    margin: 0;
+    font-size: 1.25rem;
+}
+
+.master-visor-retrato {
+    position: relative;
+    border: 2px solid var(--yellow-contrast);
+    background: var(--purple-lighter);
+    aspect-ratio: 1;
+}
+
+.master-visor-foto {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.master-visor-inicial {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    color: var(--white);
+    font-size: 4rem;
+}
+
+.master-visor-retrato .master-visor-clase {
+    position: absolute;
+    right: 6px;
+    bottom: 6px;
+    border: 2px solid var(--purple-lighter);
+}
+
+/* Sin retrato, la inicial en una franja (no un cuadrado enorme). */
+.master-visor-retrato:has(.master-visor-inicial) {
+    aspect-ratio: 3 / 1;
+}
+
+.master-visor-retrato:has(.master-visor-inicial) .master-visor-inicial {
+    font-size: 2.5rem;
+}
+
+/* Los botones de la tarjeta, del color de las cajas (sobre el fondo de la
+   tarjeta no se verían). */
+/* (Con :root y :not delante, también por encima de lo de cada diseño:
+   el moderno y el de lápiz los dejan casi transparentes.) */
+:root .master-visor-tarjeta :is(.oc-vida-accion, .master-pestana-mando):not(.es-principal) {
+    border-color: var(--yellow);
+    background: var(--purple-lighter);
+    color: var(--white);
+}
+
+:root .master-visor-tarjeta .oc-vida-accion.es-principal:not(:disabled) {
+    background: var(--yellow-contrast);
+    color: var(--yellow);
+}
+
+.master-visor-tarjeta .master-creador-barra {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.master-visor-especie {
+    margin: 0;
+    font-weight: 700;
+    text-align: center;
+}
+
+.master-visor-cars {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 4px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.master-visor-cars > li {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    padding: 4px 2px;
+    border: 2px solid var(--yellow-contrast);
+    background: var(--purple-lighter);
+    color: var(--white);
+}
+
+.master-visor-menu ul {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.master-visor-menu ul ul {
+    margin: 2px 0 4px 14px;
+}
+
+.master-visor-menu ul ul[hidden] {
+    display: none;
+}
+
+.master-visor-sec {
+    width: 100%;
+    min-height: 40px;
+    padding: 4px 8px;
+    border: 0;
+    border-left: 4px solid transparent;
+    background: transparent;
+    color: var(--white);
+    font: inherit;
+    font-weight: 700;
+    text-align: left;
+    cursor: pointer;
+}
+
+.master-visor-sec[aria-current="true"] {
+    border-left-color: var(--yellow-contrast);
+    background: var(--yellow);
+    color: var(--yellow-contrast);
+}
+
+.master-visor-sec:hover,
+.master-visor-sec:focus-visible {
+    outline: 3px solid var(--yellow);
+    outline-offset: -3px;
+}
+
+.master-visor-contenido {
+    min-width: 0;
+    padding-left: 14px;
+    border-left: 2px solid var(--yellow);
+}
+
+.master-visor-contenido:focus {
+    outline: none;
+}
+
+.master-visor-titulo {
+    margin: 0 0 8px;
+}
+
+/* En una ventana estrecha, la tarjeta y el menú arriba, uno al lado del
+   otro; en más estrecho, todo seguido. */
+@container (max-width: 760px) {
+    .master-visor {
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    }
+
+    .master-visor-contenido {
+        grid-column: 1 / -1;
+        padding-left: 0;
+        border-left: 0;
+    }
+}
+
+@container (max-width: 480px) {
+    .master-visor {
+        grid-template-columns: minmax(0, 1fr);
+    }
+}
+
+.master-visor-ficha {
+    container-type: inline-size;
+}
+
+/* Las criaturas de un PJ (desplegables) y sus imágenes. */
+.master-pj-criaturas {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.master-pj-criatura {
+    padding: 6px 8px;
+    border: 2px solid var(--border);
+}
+
+.master-pj-criatura > summary {
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.master-pj-imagenes {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(9rem, 1fr));
+    gap: 10px;
+    margin: 0 0 10px;
+    padding: 0;
+    list-style: none;
+}
+
+.master-pj-imagenes > li {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.master-pj-imagenes .master-pj-foto-boton {
+    float: none;
+    margin: 0;
+}
+
+.master-pj-imagenes img {
+    display: block;
+    width: 100%;
+    aspect-ratio: 1;
+    object-fit: cover;
+}
+
+/* IMPORTAR UN PERSONAJE: el aviso de internet y la pantalla de carga
+   (encima del formulario mientras se trae). */
+.master-importar-red {
+    margin: 0 0 10px;
+    padding: 6px 10px;
+    border-left: 4px solid var(--yellow);
+}
+
+.master-cargando {
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    background: color-mix(in srgb, var(--purple-lighter) 92%, transparent);
+}
+
+.master-cargando[hidden] {
+    display: none;
+}
+
+.master-cargando-rueda {
+    width: 44px;
+    height: 44px;
+    border: 5px solid color-mix(in srgb, var(--yellow) 30%, transparent);
+    border-top-color: var(--yellow);
+    border-radius: 50%;
+    animation: master-girar 0.9s linear infinite;
+}
+
+.master-cargando-texto {
+    margin: 0;
+    font-weight: 700;
+    text-align: center;
+}
+
+@keyframes master-girar {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .master-cargando-rueda {
+        animation-duration: 3s;
+    }
+}
+
+/* 💀 En la ficha de un PJ a 0 PG (en el visor, como la caja de los PG). */
+.master-pj-muerte {
+    margin: 8px 0;
+}
+
+.master-visor-tarjeta > .master-pj-muerte {
+    margin: 0;
+    padding: 4px 8px 8px;
+    border: 2px solid var(--yellow-contrast);
+    background: var(--purple-lighter);
+    color: var(--white);
 }

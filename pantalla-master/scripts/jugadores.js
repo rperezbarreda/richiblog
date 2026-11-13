@@ -25,7 +25,7 @@
         return x;
     };
     if (!("BroadcastChannel" in window)) {
-        aviso.textContent = "Este navegador no puede hablar con la pantalla de máster.";
+        aviso.textContent = ocT("Este navegador no puede hablar con la pantalla de máster.");
         return;
     }
     const canal = new BroadcastChannel("pantalla-master-jugadores");
@@ -76,9 +76,9 @@
             }
         }
         document.body.dataset.modo = e.modo || "espera";
-        titulo.textContent = e.titulo || "Pantalla de jugadores";
+        titulo.textContent = e.titulo || ocT("Pantalla de jugadores");
         titulo.classList.toggle("visually-hidden", !e.titulo);
-        document.title = (e.titulo ? e.titulo + " · " : "") + "Pantalla de jugadores";
+        document.title = ocT("{n}Pantalla de jugadores", { n: e.titulo ? e.titulo + " · " : "" });
         if (e.modo === "imagen" && e.imagen) {
             const img = crear("img", "jug-imagen");
             img.alt = e.titulo || "Imagen";
@@ -89,24 +89,24 @@
         } else if (e.modo === "iniciativa") {
             const ini = e.ini || { lista: [] };
             if (!ini.lista.length) {
-                dentro.replaceChildren(crear("p", "jug-vacio", "Todavía no hay nadie en la iniciativa."));
+                dentro.replaceChildren(crear("p", "jug-vacio", ocT("Todavía no hay nadie en la iniciativa.")));
                 return;
             }
-            const ronda = crear("p", "jug-ronda", ini.combate ? "Ronda " + ini.ronda : "Preparando el combate");
+            const ronda = crear("p", "jug-ronda", ini.combate ? ocT("Ronda {ronda}", { ronda: ini.ronda }) : ocT("Preparando el combate"));
             const ol = crear("ol", "jug-ini");
             ini.lista.forEach((c, i) => {
                 const li = crear("li", "jug-ini-fila" + (ini.combate && i === ini.turno ? " es-su-turno" : ""));
                 li.style.borderLeftColor = c.color || "";
                 if (ini.combate && i === ini.turno) {
                     li.setAttribute("aria-current", "true");
-                    li.appendChild(crear("span", "jug-le-toca", "▶ le toca"));
+                    li.appendChild(crear("span", "jug-le-toca", ocT("▶ le toca")));
                 }
                 li.appendChild(crear("span", "jug-ini-nombre", c.nombre));
                 if (c.marcas && c.marcas.length) {
                     li.appendChild(crear("span", "jug-ini-marcas", c.marcas.join(" ")));
                 }
                 if (c.pg !== undefined && c.pg !== "") {
-                    li.appendChild(crear("span", "jug-ini-pg", c.pg + (c.pgmax ? " / " + c.pgmax : "") + " PG"));
+                    li.appendChild(crear("span", "jug-ini-pg", ocT("{n} PG", { n: c.pg + (c.pgmax ? " / " + c.pgmax : "") })));
                 }
                 ol.appendChild(li);
             });
@@ -127,7 +127,7 @@
         if (Date.now() - ultimo > 4000) {
             canal.postMessage({ t: "hola" });
             if (Date.now() - ultimo > 6000) {
-                aviso.textContent = "No encuentro la pantalla de máster: ábrela en este mismo navegador.";
+                aviso.textContent = ocT("No encuentro la pantalla de máster: ábrela en este mismo navegador.");
             }
         }
     }, 2000);

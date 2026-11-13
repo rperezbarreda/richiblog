@@ -72,7 +72,7 @@
                     if (navigator.serviceWorker.controller) {
                         mostrarActualizar(nuevo);
                     } else {
-                        aviso.textContent = "Lista para usarse sin conexión.";
+                        aviso.textContent = ocT("Lista para usarse sin conexión.");
                     }
                 });
             });
@@ -94,16 +94,16 @@
         caja.className = "app-actualizar";
         caja.setAttribute("role", "status");
         const texto = document.createElement("p");
-        texto.textContent = "Hay una versión nueva de la pantalla de máster.";
+        texto.textContent = ocT("Hay una versión nueva de la pantalla de máster.");
         const si = document.createElement("button");
         si.type = "button";
         si.className = "oc-vida-accion es-principal";
-        si.textContent = "↻ actualizar";
+        si.textContent = ocT("↻ actualizar");
         si.addEventListener("click", () => nuevo.postMessage("activar"));
         const no = document.createElement("button");
         no.type = "button";
         no.className = "oc-vida-accion";
-        no.textContent = "luego";
+        no.textContent = ocT("luego");
         no.addEventListener("click", () => caja.remove());
         caja.append(texto, si, no);
         document.body.appendChild(caja);

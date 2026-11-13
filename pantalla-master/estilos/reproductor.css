@@ -193,6 +193,17 @@
     pointer-events: none;
 }
 
+/* Con el dedo no hay «pasar por encima»: el primer toque los enseña
+   (el :hover se queda tras tocar) y el segundo ya los pulsa; nunca se
+   pulsa uno que no se ve. */
+@media (hover: none) {
+    .repro.es-limpio:not(:hover):not(:focus-within) .repro-mandos,
+    .repro.es-limpio:not(:hover):not(:focus-within) .repro-abajo,
+    .repro.es-limpio:not(:hover):not(:focus-within) .repro-limpio {
+        pointer-events: none;
+    }
+}
+
 .repro.es-limpio:hover .repro-barra,
 .repro.es-limpio:focus-within .repro-barra {
     pointer-events: auto;

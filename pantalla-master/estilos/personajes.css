@@ -4846,6 +4846,52 @@ button.oc-casilla[data-estado="libre"]:hover {
     padding: 4px 6px;
 }
 
+/* La vida (❤️): lo que tiene, cuánto y los tres botones. */
+.oc-ini-vida {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.oc-ini-vida-ahora {
+    margin: 0;
+    font-size: 1.25rem;
+    font-weight: 700;
+}
+
+.oc-ini-vida-numero {
+    max-width: 10rem;
+    font-size: 1.5rem;
+}
+
+.oc-ini-vida-botones {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+/* Editar a uno (✎): sus datos en una rejilla y sus estados debajo. */
+.oc-ini-editar {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.oc-ini-editar-campos {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(7rem, 1fr));
+    gap: 10px;
+}
+
+.oc-ini-editar-campos .oc-ini-campo:first-child {
+    grid-column: 1 / -1;
+}
+
+.oc-ini-editar-estados {
+    padding-top: 10px;
+    border-top: 2px solid var(--border);
+}
+
 .oc-ini-pie {
     grid-column: 1 / -1;
     display: flex;
@@ -5223,3 +5269,26 @@ button.oc-casilla[data-estado="libre"]:hover {
     outline-offset: -3px;
 }
 
+
+/* ⏭️ saltar a los caídos: pulsado, relleno. */
+.oc-ini-saltar[aria-pressed="true"] {
+    background: var(--yellow);
+    color: var(--yellow-contrast);
+}
+
+/* 💀 Las salvaciones de muerte de un PJ a 0 PG (en el combate y en su
+   ficha). */
+.oc-muerte {
+    margin-top: 8px;
+}
+
+.oc-muerte-estado {
+    margin: 0;
+    color: var(--white);
+    font-family: var(--fuente-mono);
+    font-size: 0.8125rem;
+}
+
+.oc-muerte-estado:empty {
+    display: none;
+}

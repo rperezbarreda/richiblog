@@ -52,7 +52,7 @@ window.ocReglas = (function () {
                 if (!r.ok) {
                     throw new Error(r.status);
                 }
-                return r.json();
+                return r.json().then(window.ocIdioma.datos);
             });
         }
         return crudos[ruta].then((d) => {
@@ -189,7 +189,7 @@ window.ocReglas = (function () {
             cerrar.type = "button";
             cerrar.className = "oc-menu-ventana-cerrar";
             cerrar.textContent = "✕";
-            cerrar.setAttribute("aria-label", "Cerrar");
+            cerrar.setAttribute("aria-label", ocT("Cerrar"));
             barra.append(titulo, cerrar);
             const cuerpo = document.createElement("div");
             cuerpo.className = "oc-menu-ventana-cuerpo";
@@ -281,7 +281,7 @@ window.ocReglas = (function () {
     // teclado para desplazarlo (aunque no tenga nada que se pueda pulsar).
     contenedor.tabIndex = 0;
     contenedor.setAttribute("role", "region");
-    contenedor.setAttribute("aria-label", "Lo elegido del menú");
+    contenedor.setAttribute("aria-label", ocT("Lo elegido del menú"));
     const enMovil = window.matchMedia ? window.matchMedia("(max-width: 860px)") : { matches: false };
     const pagina = document.querySelector(".oc-ficha-page");
     const lateral = document.querySelector(".oc-lateral");
@@ -340,7 +340,7 @@ window.ocReglas = (function () {
         const emoji = a.querySelector(".oc-menu-emoji");
         const texto = a.querySelector(".oc-menu-texto");
         const deFicha = ficha && sub && sub.contains(a);
-        return [emoji ? emoji.textContent : "", (deFicha ? "ficha · " : "") + (texto ? texto.textContent : "")];
+        return [emoji ? emoji.textContent : "", (deFicha ? ocT("ficha · ") : "") + (texto ? texto.textContent : "")];
     }
 
     function mostrar(id, conFoco, apuntar) {
@@ -437,7 +437,7 @@ window.ocReglas = (function () {
         flecha.setAttribute("aria-hidden", "true");
         flecha.textContent = "▾";
         botonMovil.replaceChildren(icono, nombre, flecha);
-        botonMovil.setAttribute("aria-label", "Partes de la ficha (ahora: " + texto + ")");
+        botonMovil.setAttribute("aria-label", ocT("Partes de la ficha (ahora: {texto})", { texto: texto }));
     }
 
     function medirTira() {
@@ -499,7 +499,7 @@ window.ocReglas = (function () {
         cerrar.type = "button";
         cerrar.className = "oc-menu-ventana-cerrar";
         cerrar.textContent = "✕";
-        cerrar.setAttribute("aria-label", "Cerrar");
+        cerrar.setAttribute("aria-label", ocT("Cerrar"));
         cerrar.addEventListener("click", () => cerrarVentana(true));
         barra.append(titulo, cerrar);
         const cuerpo = document.createElement("div");
@@ -507,7 +507,7 @@ window.ocReglas = (function () {
         const lista = document.createElement("ul");
         lista.className = "oc-menu-ventana-lista";
         if (lateral) {
-            opcion(lista, RESUMEN, "📇", "resumen");
+            opcion(lista, RESUMEN, "📇", ocT("resumen"));
         }
         // Las del menú, en su orden; las de la ficha, en su grupo.
         Array.from(menu.querySelectorAll(".oc-menu-lista > li")).forEach((li) => {
@@ -919,24 +919,24 @@ document.querySelectorAll(".oc-ataques th[data-oc-desc]").forEach((th) => {
     // mismas que en el editor (editor_web.py: ASPECTOS_DE_DADOS); «tema» es
     // el de los colores del tema elegido.
     const ASPECTOS = {
-        tema: { nombre: "el del tema" },
-        hueso: { nombre: "hueso", cuerpo: [236, 226, 200], tinta: [52, 38, 28], borde: [140, 118, 92],
+        tema: { nombre: ocT("el del tema") },
+        hueso: { nombre: ocT("hueso"), cuerpo: [236, 226, 200], tinta: [52, 38, 28], borde: [140, 118, 92],
             fuente: "Georgia, serif" },
-        obsidiana: { nombre: "obsidiana", cuerpo: [30, 26, 38], tinta: [228, 186, 84], borde: [150, 120, 60],
+        obsidiana: { nombre: ocT("obsidiana"), cuerpo: [30, 26, 38], tinta: [228, 186, 84], borde: [150, 120, 60],
             acabado: "brillo", fuente: "Georgia, serif" },
-        sangre: { nombre: "sangre", cuerpo: [112, 8, 22], tinta: [248, 228, 205], borde: [50, 0, 8], acabado: "brillo" },
-        oro: { nombre: "oro", cuerpo: [214, 166, 58], tinta: [74, 44, 6], borde: [128, 86, 14], acabado: "metal" },
-        plata: { nombre: "plata", cuerpo: [192, 198, 208], tinta: [32, 36, 48], borde: [96, 100, 116], acabado: "metal" },
+        sangre: { nombre: ocT("sangre"), cuerpo: [112, 8, 22], tinta: [248, 228, 205], borde: [50, 0, 8], acabado: "brillo" },
+        oro: { nombre: ocT("oro"), cuerpo: [214, 166, 58], tinta: [74, 44, 6], borde: [128, 86, 14], acabado: "metal" },
+        plata: { nombre: ocT("plata"), cuerpo: [192, 198, 208], tinta: [32, 36, 48], borde: [96, 100, 116], acabado: "metal" },
         cristal: { nombre: "cristal", cuerpo: [110, 196, 255], tinta: [255, 255, 255], borde: [225, 246, 255],
             acabado: "cristal" },
-        marmol: { nombre: "mármol", cuerpo: [238, 236, 232], tinta: [34, 34, 42], borde: [150, 150, 162],
+        marmol: { nombre: ocT("mármol"), cuerpo: [238, 236, 232], tinta: [34, 34, 42], borde: [150, 150, 162],
             acabado: "vetas", vetas: [128, 128, 142] },
         madera: { nombre: "madera", cuerpo: [158, 104, 60], tinta: [248, 234, 205], borde: [86, 52, 24],
             acabado: "madera", vetas: [112, 70, 38], fuente: "Georgia, serif" },
         galaxia: { nombre: "galaxia", cuerpo: [44, 22, 86], tinta: [255, 238, 176], borde: [156, 118, 255],
             acabado: "galaxia" },
-        neon: { nombre: "neón", cuerpo: [16, 14, 24], tinta: [70, 255, 210], borde: [70, 255, 210], acabado: "neon" },
-        arcoiris: { nombre: "arcoíris", tinta: [255, 255, 255], borde: [255, 255, 255], acabado: "arcoiris" },
+        neon: { nombre: ocT("neón"), cuerpo: [16, 14, 24], tinta: [70, 255, 210], borde: [70, 255, 210], acabado: "neon" },
+        arcoiris: { nombre: ocT("arcoíris"), tinta: [255, 255, 255], borde: [255, 255, 255], acabado: "arcoiris" },
     };
 
     function hsl(h) {
@@ -1632,7 +1632,7 @@ document.querySelectorAll(".oc-ataques th[data-oc-desc]").forEach((th) => {
         let critico = false;
         lista.forEach((x, i) => {
             const r = tirar(i > 0 && critico ? doblarDados(x.formula) : x.formula,
-                i > 0 && critico ? x.que + " (crítico)" : x.que);
+                i > 0 && critico ? ocT("{que} (crítico)", { que: x.que }) : x.que);
             if (i === 0 && r && r.critico && r.d20) {
                 critico = true;
             }
@@ -1693,14 +1693,14 @@ document.querySelectorAll(".oc-ataques th[data-oc-desc]").forEach((th) => {
             unidad: exitos === 1 ? "éxito" : "éxitos", partes: [], d20: null,
             dados3d: normales.map((v) => ({ caras: 10, valor: v, color: "vampiro" }))
                 .concat(deHambre.map((v) => ({ caras: 10, valor: v, color: "hambre" }))) });
-        r.desglose = n + "d10 [" + (normales.join(", ") || "—") + "]" + (hambre ? " · hambre [" + deHambre.join(", ") + "]" : "");
-        r.formulaVista = n + " dados" + (hambre ? ", " + hambre + " de hambre" : "");
+        r.desglose = n + "d10 [" + (normales.join(", ") || "—") + "]" + (hambre ? ocT(" · hambre [{n}]", { n: deHambre.join(", ") }) : "");
+        r.formulaVista = ocT("{n} dados{n2}", { n: n, n2: hambre ? ocT(", {hambre} de hambre", { hambre: hambre }) : "" });
         const sucio = parejas && deHambre.includes(10);
         const bestial = deHambre.includes(1);
         r.critico = parejas > 0 && !sucio;
         r.pifia = !!sucio || (bestial && !exitos);
-        r.nota = [parejas ? (sucio ? "crítico sucio" : "crítico") : "",
-            bestial ? (exitos ? "un 1 de hambre: si no llega, fallo bestial" : "fallo bestial") : ""]
+        r.nota = [parejas ? (sucio ? ocT("crítico sucio") : "crítico") : "",
+            bestial ? (exitos ? ocT("un 1 de hambre: si no llega, fallo bestial") : ocT("fallo bestial")) : ""]
             .filter(Boolean).join("; ");
         return terminar(r);
     }
@@ -1718,7 +1718,7 @@ document.querySelectorAll(".oc-ataques th[data-oc-desc]").forEach((th) => {
         r.formulaVista = "1d10" + (base ? (base > 0 ? " + " : " − ") + Math.abs(base) : "");
         r.critico = d === 10;
         r.pifia = d === 1;
-        r.nota = d === 10 ? "¡crítico! (+" + otro + ")" : d === 1 ? "pifia (−" + otro + ")" : "";
+        r.nota = d === 10 ? ocT("¡crítico! (+{otro})", { otro: otro }) : d === 1 ? ocT("pifia (−{otro})", { otro: otro }) : "";
         return terminar(r);
     }
 
@@ -1740,12 +1740,12 @@ document.querySelectorAll(".oc-ataques th[data-oc-desc]").forEach((th) => {
                 return p.texto;
             }
             return p.prefijo + "1d20 [" + (p.modo === "normal" ? p.queda
-                : p.queda + " (" + p.valores.join(" y ") + ", " + p.modo + ")") + "]";
+                : p.queda + " (" + p.valores.join(ocT(" y ")) + ", " + p.modo + ")") + "]";
         }).join(" ");
         r.critico = !!r.d20 && r.d20.queda === 20;
         r.pifia = !!r.d20 && r.d20.queda === 1;
         if (r.d20) {
-            r.nota = r.critico ? "¡20 natural!" : r.pifia ? "pifia (1 natural)" : "";
+            r.nota = r.critico ? ocT("¡20 natural!") : r.pifia ? ocT("pifia (1 natural)") : "";
         }
     }
 
@@ -1860,7 +1860,7 @@ document.querySelectorAll(".oc-ataques th[data-oc-desc]").forEach((th) => {
         if (!estado.mano[c] && enPasos) {
             volverA.focus();
         }
-        avisar(estado.mano[c] ? "Llevas " + estado.mano[c] + "d" + c + "." : "Sin d" + c + ".");
+        avisar(estado.mano[c] ? ocT("Llevas {n}d{c}.", { n: estado.mano[c], c: c }) : ocT("Sin d{c}.", { c: c }));
     }
 
     function pintarMano() {
@@ -1873,10 +1873,10 @@ document.querySelectorAll(".oc-ataques th[data-oc-desc]").forEach((th) => {
             x.celda.classList.toggle("tiene", n > 0);
             x.cuantos.textContent = n ? "×" + n : "";
             x.pasos.hidden = !n;
-            x.boton.setAttribute("aria-label", "Añadir un d" + c + (n ? " (hay " + n + ")" : ""));
+            x.boton.setAttribute("aria-label", ocT("Añadir un d{c}{n}", { c: c, n: n ? ocT(" (hay {n})", { n: n }) : "" }));
         });
         const hay = CARAS.some((c) => estado.mano[c]);
-        manoTexto.textContent = hay ? formulaDeLaMano() : "elige los dados de arriba";
+        manoTexto.textContent = hay ? formulaDeLaMano() : ocT("elige los dados de arriba");
         tirarBoton.disabled = !hay;
     }
 
@@ -1884,7 +1884,7 @@ document.querySelectorAll(".oc-ataques th[data-oc-desc]").forEach((th) => {
         ventana = crear("div", "oc-dados");
         ventana.id = "oc-dados";
         ventana.setAttribute("role", "region");
-        ventana.setAttribute("aria-label", "Lanzador de dados");
+        ventana.setAttribute("aria-label", ocT("Lanzador de dados"));
         ventana.hidden = true;
 
         // La barra (por ella se arrastra la ventana). Con su clase propia
@@ -1892,7 +1892,7 @@ document.querySelectorAll(".oc-ataques th[data-oc-desc]").forEach((th) => {
         // ventanas-plegables.js y la convierte en un botón de plegar
         // entero, que tapaba la ✕.
         const barra = crear("div", "oc-dados-barra");
-        barra.title = "Arrástrala para moverla";
+        barra.title = ocT("Arrástrala para moverla");
         const titulo = crear("h2", "oc-dados-titulo");
         const emoji = crear("span", "oc-dados-emoji", "🎲");
         emoji.setAttribute("aria-hidden", "true");
@@ -1902,9 +1902,9 @@ document.querySelectorAll(".oc-ataques th[data-oc-desc]").forEach((th) => {
             sonido.textContent = estado.sonido ? "🔊" : "🔇";
             sonido.setAttribute("aria-pressed", estado.sonido ? "true" : "false");
             guardar("richi-dados-sonido", estado.sonido ? "si" : "no");
-        }, "Sonido al tirar");
+        }, ocT("Sonido al tirar"));
         sonido.setAttribute("aria-pressed", estado.sonido ? "true" : "false");
-        const tresD = botonDe("oc-dados-mando es-3d", "3D", () => {
+        const tresD = botonDe("oc-dados-mando es-3d", ocT("3D"), () => {
             estado.tresD = !estado.tresD;
             tresD.setAttribute("aria-pressed", estado.tresD ? "true" : "false");
             const fila = document.getElementById("oc-dados-aspecto");
@@ -1912,9 +1912,9 @@ document.querySelectorAll(".oc-ataques th[data-oc-desc]").forEach((th) => {
                 fila.parentNode.hidden = !estado.tresD;
             }
             guardar("richi-dados-3d", estado.tresD ? "si" : "no");
-        }, "Dados en 3D");
+        }, ocT("Dados en 3D"));
         tresD.setAttribute("aria-pressed", estado.tresD ? "true" : "false");
-        const cerrar = botonDe("oc-dados-mando", "✕", () => abrir(false, true), "Cerrar los dados");
+        const cerrar = botonDe("oc-dados-mando", "✕", () => abrir(false, true), ocT("Cerrar los dados"));
         const mandos = crear("div", "oc-dados-mandos");
         mandos.append(tresD, sonido, cerrar);
         barra.append(titulo, mandos);
@@ -1928,21 +1928,21 @@ document.querySelectorAll(".oc-ataques th[data-oc-desc]").forEach((th) => {
         const cuerpo = crear("div", "oc-dados-cuerpo");
         const bandeja = crear("div", "oc-dados-bandeja");
         bandeja.setAttribute("role", "group");
-        bandeja.setAttribute("aria-label", "Añadir dados");
+        bandeja.setAttribute("aria-label", ocT("Añadir dados"));
         // Cada dado, en su casilla: el botón grande (su silueta y su
         // nombre) añade uno; en cuanto hay alguno, salen debajo, en la misma
         // casilla, «−» y «+» con cuántos hay en medio.
         CARAS.forEach((c) => {
             const celda = crear("div", "oc-dados-celda");
-            const b = botonDe("oc-dados-cara", undefined, () => cambiarDado(c, 1, b), "Añadir un d" + c);
+            const b = botonDe("oc-dados-cara", undefined, () => cambiarDado(c, 1, b), ocT("Añadir un d{c}", { c: c }));
             const cuantos = crear("span", "oc-dados-cuantos");
             cuantos.setAttribute("aria-hidden", "true");
-            b.append(silueta(c), crear("span", "oc-dados-cara-nombre", "d" + c), cuantos);
+            b.append(silueta(c), crear("span", "oc-dados-cara-nombre", ocT("d{c}", { c: c })), cuantos);
             const pasos = crear("div", "oc-dados-cara-pasos");
             pasos.hidden = true;
             pasos.append(
-                botonDe("oc-dados-cara-paso", "−", () => cambiarDado(c, -1, b), "Quitar un d" + c),
-                botonDe("oc-dados-cara-paso", "+", () => cambiarDado(c, 1, b), "Añadir otro d" + c));
+                botonDe("oc-dados-cara-paso", "−", () => cambiarDado(c, -1, b), ocT("Quitar un d{c}", { c: c })),
+                botonDe("oc-dados-cara-paso", "+", () => cambiarDado(c, 1, b), ocT("Añadir otro d{c}", { c: c })));
             celda.append(b, pasos);
             celdas[c] = { celda, boton: b, cuantos, pasos };
             bandeja.appendChild(celda);
@@ -1952,7 +1952,7 @@ document.querySelectorAll(".oc-ataques th[data-oc-desc]").forEach((th) => {
 
         // El modificador: el número, con − y + a los lados.
         const fila = crear("div", "oc-dados-fila");
-        const etiqueta = crear("label", "oc-dados-etiqueta", "modificador");
+        const etiqueta = crear("label", "oc-dados-etiqueta", ocT("modificador"));
         modInput = crear("input", "oc-dados-mod");
         modInput.type = "number";
         modInput.id = "oc-dados-mod";
@@ -1964,15 +1964,15 @@ document.querySelectorAll(".oc-ataques th[data-oc-desc]").forEach((th) => {
             modInput.value = String(modificador() + n);
             pintarMano();
         };
-        const menos = botonDe("oc-dados-paso", "−", () => cambiar(-1), "Restar 1 al modificador");
-        const mas = botonDe("oc-dados-paso", "+", () => cambiar(1), "Sumar 1 al modificador");
+        const menos = botonDe("oc-dados-paso", "−", () => cambiar(-1), ocT("Restar 1 al modificador"));
+        const mas = botonDe("oc-dados-paso", "+", () => cambiar(1), ocT("Sumar 1 al modificador"));
         const caja = crear("div", "oc-dados-mod-caja");
         caja.append(menos, modInput, mas);
         fila.append(etiqueta, caja);
 
         const modos = crear("div", "oc-dados-modos");
         modos.setAttribute("role", "group");
-        modos.setAttribute("aria-label", "Ventaja o desventaja (para lo que se tira con un d20)");
+        modos.setAttribute("aria-label", ocT("Ventaja o desventaja (para lo que se tira con un d20)"));
         const botonesModo = ["normal", "ventaja", "desventaja"].map((m) => {
             const b = botonDe("oc-dados-modo", m, () => {
                 estado.modo = m;
@@ -1984,21 +1984,21 @@ document.querySelectorAll(".oc-ataques th[data-oc-desc]").forEach((th) => {
         });
 
         const acciones = crear("div", "oc-dados-acciones");
-        tirarBoton = botonDe("oc-dados-tirar", "tirar", () => tirar(formulaDeLaMano(), "bandeja"));
-        const vaciar = botonDe("oc-dados-vaciar", "vaciar", () => {
+        tirarBoton = botonDe("oc-dados-tirar", ocT("tirar"), () => tirar(formulaDeLaMano(), ocT("bandeja")));
+        const vaciar = botonDe("oc-dados-vaciar", ocT("vaciar"), () => {
             estado.mano = {};
-            avisar("Bandeja vacía.");
+            avisar(ocT("Bandeja vacía."));
             modInput.value = "0";
             pintarMano();
-        }, "Vaciar la bandeja");
+        }, ocT("Vaciar la bandeja"));
         acciones.append(tirarBoton, vaciar);
         // Fate y Cyberpunk RED: su tirada de siempre con el modificador.
         if (SISTEMA === "fate" || SISTEMA === "cpred") {
             const fate = SISTEMA === "fate";
-            acciones.appendChild(botonDe("oc-dados-tirar es-del-sistema", fate ? "tirar 4dF" : "tirar 1d10", () => {
+            acciones.appendChild(botonDe("oc-dados-tirar es-del-sistema", fate ? ocT("tirar 4dF") : ocT("tirar 1d10"), () => {
                 const mod = modificador();
                 tirar(fate ? "4dF" + (mod ? (mod > 0 ? "+" : "") + mod : "") : "cp:" + mod, fate ? "4dF" : "1d10");
-            }, fate ? "Tirar 4dF más el modificador" : "Tirar 1d10 más el modificador (con críticos y pifias)"));
+            }, fate ? ocT("Tirar 4dF más el modificador") : ocT("Tirar 1d10 más el modificador (con críticos y pifias)")));
         }
         const reserva = SISTEMA === "vtm5" ? montarReserva() : null;
 
@@ -2007,7 +2007,7 @@ document.querySelectorAll(".oc-ataques th[data-oc-desc]").forEach((th) => {
         // El aspecto de los dados en 3D. Al cambiarlo, sale un d20 de
         // muestra.
         const filaAspecto = crear("div", "oc-dados-fila");
-        const etiquetaAspecto = crear("label", "oc-dados-etiqueta", "aspecto");
+        const etiquetaAspecto = crear("label", "oc-dados-etiqueta", ocT("aspecto"));
         const elegirAspecto = crear("select", "oc-dados-elegir");
         elegirAspecto.id = "oc-dados-aspecto";
         etiquetaAspecto.htmlFor = elegirAspecto.id;
@@ -2030,12 +2030,12 @@ document.querySelectorAll(".oc-ataques th[data-oc-desc]").forEach((th) => {
         filaAspecto.hidden = !estado.tresD;
 
         const cabeza = crear("div", "oc-dados-cabeza-historial");
-        cabeza.appendChild(crear("h3", "oc-dados-subtitulo", "tiradas"));
-        borrarTodo = botonDe("oc-dados-borrar-todo", "borrar todo", () => {
+        cabeza.appendChild(crear("h3", "oc-dados-subtitulo", ocT("tiradas")));
+        borrarTodo = botonDe("oc-dados-borrar-todo", ocT("borrar todo"), () => {
             estado.tiradas = [];
             pintarHistorial();
-            avisar("Tiradas borradas.");
-        }, "Borrar todas las tiradas");
+            avisar(ocT("Tiradas borradas."));
+        }, ocT("Borrar todas las tiradas"));
         cabeza.appendChild(borrarTodo);
         historial = crear("ol", "oc-dados-historial");
         aviso = crear("p", "visually-hidden");
@@ -2092,11 +2092,11 @@ document.querySelectorAll(".oc-ataques th[data-oc-desc]").forEach((th) => {
         const r = estado.reserva;
         const trozos = [r.atributo, r.habilidad].filter(Boolean).map((x) => x[0] + " " + x[1]);
         if (r.extra) {
-            trozos.push((r.extra > 0 ? "+" : "−") + Math.abs(r.extra) + " de más");
+            trozos.push(ocT("{n} de más", { n: (r.extra > 0 ? "+" : "−") + Math.abs(r.extra) }));
         }
         const n = Math.max(0, cuantosEnReserva());
-        return (trozos.join(" + ") || "nada") + ": " + n + (n === 1 ? " dado" : " dados")
-            + (n ? ", " + Math.min(r.hambre, n) + " de hambre" : "");
+        return (trozos.join(" + ") || "nada") + ": " + n + (n === 1 ? ocT(" dado") : ocT(" dados"))
+            + (n ? ocT(", {min} de hambre", { min: Math.min(r.hambre, n) }) : "");
     }
 
     function pintarReserva() {
@@ -2114,7 +2114,7 @@ document.querySelectorAll(".oc-ataques th[data-oc-desc]").forEach((th) => {
         const caja = crear("div", "oc-dados-reserva");
         caja.setAttribute("role", "group");
         caja.setAttribute("aria-labelledby", "oc-reserva-titulo");
-        const titulo = crear("h3", "oc-dados-subtitulo", "reserva");
+        const titulo = crear("h3", "oc-dados-subtitulo", ocT("reserva"));
         titulo.id = "oc-reserva-titulo";
         caja.appendChild(titulo);
         [["atributo", "atributo"], ["habilidad", "habilidad"]].forEach(([tipo, texto]) => {
@@ -2123,7 +2123,7 @@ document.querySelectorAll(".oc-ataques th[data-oc-desc]").forEach((th) => {
             const sel = crear("select", "oc-dados-elegir");
             sel.id = "oc-reserva-" + tipo;
             etiqueta.htmlFor = sel.id;
-            const ninguno = crear("option", "", "— ninguno —");
+            const ninguno = crear("option", "", ocT("— ninguno —"));
             ninguno.value = "";
             sel.appendChild(ninguno);
             const opciones = opcionesDe(tipo);
@@ -2164,18 +2164,18 @@ document.querySelectorAll(".oc-ataques th[data-oc-desc]").forEach((th) => {
             caja.appendChild(fila);
             return input;
         };
-        numero("oc-reserva-extra", "dados de más", () => estado.reserva.extra, (n) => {
+        numero("oc-reserva-extra", ocT("dados de más"), () => estado.reserva.extra, (n) => {
             estado.reserva.extra = Math.max(-20, Math.min(20, n));
-        }, ["Un dado menos", "Un dado más"]);
+        }, [ocT("Un dado menos"), ocT("Un dado más")]);
         hambreInput = numero("oc-reserva-hambre", "hambre", () => estado.reserva.hambre, (n) => {
             estado.reserva.hambre = Math.max(0, Math.min(5, n));
             if (window.ocPartida) {
                 window.ocPartida.guardar("hambre", estado.reserva.hambre);
             }
-        }, ["Un punto menos de hambre", "Un punto más de hambre"]);
+        }, [ocT("Un punto menos de hambre"), ocT("Un punto más de hambre")]);
         reservaTexto = crear("p", "oc-dados-mano");
         caja.appendChild(reservaTexto);
-        const tirarla = botonDe("oc-dados-tirar es-del-sistema", "tirar reserva", () => {
+        const tirarla = botonDe("oc-dados-tirar es-del-sistema", ocT("tirar reserva"), () => {
             const r = estado.reserva;
             const que = [r.atributo, r.habilidad].filter(Boolean).map((x) => x[0]).join(" + ") || "reserva";
             tirarReserva(cuantosEnReserva(), que);
@@ -2193,7 +2193,7 @@ document.querySelectorAll(".oc-ataques th[data-oc-desc]").forEach((th) => {
         if (ventana.hidden) {
             abrir(true, false);
         }
-        avisar("Reserva: " + textoDeReserva() + ". Tírala con «tirar reserva», en los dados.");
+        avisar(ocT("Reserva: {textoDeReserva}. Tírala con «tirar reserva», en los dados.", { textoDeReserva: textoDeReserva() }));
     }
 
     // ---- MOVERLA ARRASTRANDO LA BARRA ----
@@ -2326,7 +2326,7 @@ document.querySelectorAll(".oc-ataques th[data-oc-desc]").forEach((th) => {
             window.ocPartida.guardar("guardadas", todas.slice(-30));
         }
         pintarGuardadas();
-        avisar("Guardada: " + nombre + ".");
+        avisar(ocT("Guardada: {nombre}.", { nombre: nombre }));
     }
 
     function pintarGuardadas() {
@@ -2343,16 +2343,16 @@ document.querySelectorAll(".oc-ataques th[data-oc-desc]").forEach((th) => {
                 } else {
                     tirarVarias(g.formulas, g.nombre);
                 }
-            }, "Tirar " + g.nombre + " (" + que + ")");
+            }, ocT("Tirar {nombre} ({que})", { nombre: g.nombre, que: que }));
             tirarla.append(crear("span", "oc-guardada-nombre", g.nombre), crear("span", "oc-guardada-formula", que));
             const quitarla = botonDe("oc-dados-quitar", "✕", () => {
                 const quedan = leerGuardadas().filter((_, j) => j !== i);
                 window.ocPartida.guardar("guardadas", quedan);
                 pintarGuardadas();
-                avisar("Quitada: " + g.nombre + ".");
+                avisar(ocT("Quitada: {nombre}.", { nombre: g.nombre }));
                 (listaGuardadas.querySelectorAll(".oc-guardada-tirar")[Math.min(i, quedan.length - 1)]
                     || nuevaNombre).focus();
-            }, "Quitar la guardada: " + g.nombre);
+            }, ocT("Quitar la guardada: {nombre}", { nombre: g.nombre }));
             li.append(tirarla, quitarla);
             return li;
         }));
@@ -2363,31 +2363,31 @@ document.querySelectorAll(".oc-ataques th[data-oc-desc]").forEach((th) => {
 
     function montarGuardadas() {
         const caja = crear("div", "oc-dados-guardadas");
-        const cabeza = crear("h3", "oc-dados-subtitulo", "guardadas");
+        const cabeza = crear("h3", "oc-dados-subtitulo", ocT("guardadas"));
         cabeza.id = "oc-guardadas-titulo";
         listaGuardadas = crear("ul", "oc-guardadas");
         listaGuardadas.setAttribute("aria-labelledby", cabeza.id);
         // Escribir una nueva: plegado detrás de un botón.
         const detalles = crear("details", "oc-guardada-nueva");
-        const resumen = crear("summary", "", "＋ nueva");
+        const resumen = crear("summary", "", ocT("＋ nueva"));
         nuevaNombre = crear("input", "oc-dados-texto");
         nuevaNombre.id = "oc-guardada-nombre";
-        nuevaNombre.placeholder = "ataque con espada";
+        nuevaNombre.placeholder = ocT("ataque con espada");
         const etNombre = crear("label", "oc-dados-etiqueta", "nombre");
         etNombre.htmlFor = nuevaNombre.id;
         const formulas = crear("input", "oc-dados-texto");
         formulas.id = "oc-guardada-formulas";
         formulas.placeholder = "1d20+5; 1d8+3";
         formulas.setAttribute("aria-describedby", "oc-guardada-ayuda");
-        const etFormulas = crear("label", "oc-dados-etiqueta", "dados");
+        const etFormulas = crear("label", "oc-dados-etiqueta", ocT("dados"));
         etFormulas.htmlFor = formulas.id;
-        const ayuda = crear("p", "oc-dados-ayuda", "Varias, separadas por «;», se tiran a la vez.");
+        const ayuda = crear("p", "oc-dados-ayuda", ocT("Varias, separadas por «;», se tiran a la vez."));
         ayuda.id = "oc-guardada-ayuda";
-        const guardarla = botonDe("oc-dados-vaciar", "guardar", () => {
+        const guardarla = botonDe("oc-dados-vaciar", ocT("guardar"), () => {
             const lista = formulas.value.split(";").map((x) => x.trim()).filter((x) => /^(v5|cp):-?\d+$/.test(x)
                 || /\d*d(\d+|F)/i.test(x));
             if (!lista.length) {
-                avisar("Escribe los dados: «1d20+5; 1d8+3».");
+                avisar(ocT("Escribe los dados: «1d20+5; 1d8+3»."));
                 formulas.focus();
                 return;
             }
@@ -2417,7 +2417,7 @@ document.querySelectorAll(".oc-ataques th[data-oc-desc]").forEach((th) => {
         flotante = crear("div", "oc-resultado");
         flotante.hidden = true;
         flotante.setAttribute("role", "region");
-        flotante.setAttribute("aria-label", "Resultado de la tirada");
+        flotante.setAttribute("aria-label", ocT("Resultado de la tirada"));
         const quedarse = () => clearTimeout(flotanteVa);
         const irse = () => {
             clearTimeout(flotanteVa);
@@ -2489,13 +2489,13 @@ document.querySelectorAll(".oc-ataques th[data-oc-desc]").forEach((th) => {
             lista.forEach((r) => filas.push(bloqueDeResultado(r, lista.length > 1)));
             const botones = crear("div", "oc-resultado-botones");
             botones.append(
-                botonDe("oc-resultado-ver", "ver tiradas", () => {
+                botonDe("oc-resultado-ver", ocT("ver tiradas"), () => {
                     cerrarResultado();
                     abrir(true, false);
                     const repetir = historial.querySelector(".oc-dados-repetir");
                     (repetir || ventana).focus();
-                }, "Ver todas las tiradas (abre los dados)"),
-                botonDe("oc-resultado-cerrar", "✕", cerrarResultado, "Cerrar el resultado"));
+                }, ocT("Ver todas las tiradas (abre los dados)")),
+                botonDe("oc-resultado-cerrar", "✕", cerrarResultado, ocT("Cerrar el resultado")));
             filas.push(botones);
             flotante.replaceChildren(...filas);
             // Debajo de lo fijo de arriba (la barra del sitio y, en el móvil,
@@ -2540,16 +2540,16 @@ document.querySelectorAll(".oc-ataques th[data-oc-desc]").forEach((th) => {
         // desventaja (sin tirar otra vez lo demás).
         if (r.d20 && r.d20.modo === "normal") {
             botones.append(
-                botonDe("oc-dados-ventaja", "▲ ventaja", () => cambiarModo(r, "ventaja"),
-                    "Añadir ventaja a: " + r.que + ", " + r.total),
-                botonDe("oc-dados-ventaja", "▼ desventaja", () => cambiarModo(r, "desventaja"),
-                    "Añadir desventaja a: " + r.que + ", " + r.total));
+                botonDe("oc-dados-ventaja", ocT("▲ ventaja"), () => cambiarModo(r, "ventaja"),
+                    ocT("Añadir ventaja a: {que}, {total}", { que: r.que, total: r.total })),
+                botonDe("oc-dados-ventaja", ocT("▼ desventaja"), () => cambiarModo(r, "desventaja"),
+                    ocT("Añadir desventaja a: {que}, {total}", { que: r.que, total: r.total })));
         }
         botones.append(
             botonDe("oc-dados-guardar", "☆", () => apuntarGuardada(r.que, [{ formula: r.formula, que: r.que }]),
-                "Guardar esta tirada: " + r.que),
-            botonDe("oc-dados-repetir", "↻ repetir", () => tirar(r.formula, r.que), "Repetir: " + r.que),
-            botonDe("oc-dados-quitar", "✕", () => alQuitar(r.id, i), "Borrar esta tirada: " + r.que + ", " + r.total));
+                ocT("Guardar esta tirada: {que}", { que: r.que })),
+            botonDe("oc-dados-repetir", ocT("↻ repetir"), () => tirar(r.formula, r.que), ocT("Repetir: {que}", { que: r.que })),
+            botonDe("oc-dados-quitar", "✕", () => alQuitar(r.id, i), ocT("Borrar esta tirada: {que}, {total}", { que: r.que, total: r.total })));
         li.append(cabeza, total);
         if (tipos.childNodes.length) {
             li.appendChild(tipos);
@@ -2568,7 +2568,7 @@ document.querySelectorAll(".oc-ataques th[data-oc-desc]").forEach((th) => {
     function quitar(id, i) {
         estado.tiradas = estado.tiradas.filter((r) => r.id !== id);
         pintarHistorial();
-        avisar("Tirada borrada.");
+        avisar(ocT("Tirada borrada."));
         // El foco, a la tirada que queda en su sitio (o a la de antes).
         const quedan = historial.querySelectorAll(".oc-dados-quitar");
         (quedan[Math.min(i, quedan.length - 1)] || tirarBoton).focus();
@@ -2586,15 +2586,15 @@ document.querySelectorAll(".oc-ataques th[data-oc-desc]").forEach((th) => {
         // el nombre, para el lector y al pasar por encima.
         boton = crear("button", "oc-boton oc-boton-dados");
         boton.type = "button";
-        boton.title = "Lanzador de dados";
+        boton.title = ocT("Lanzador de dados");
         // El dibujo, el de un d20 (el de la bandeja).
-        boton.append(silueta(20), crear("span", "visually-hidden", "dados"));
+        boton.append(silueta(20), crear("span", "visually-hidden", ocT("dados")));
         boton.setAttribute("aria-controls", "oc-dados");
         boton.setAttribute("aria-expanded", "false");
         boton.addEventListener("click", () => abrir(ventana.hidden, false));
         if (ACOPLADA) {
             boton.classList.add("es-redondo");
-            boton.title = "Dados (D)";
+            boton.title = ocT("Dados (D)");
             boton.setAttribute("aria-keyshortcuts", "D");
             document.body.appendChild(boton);
         }
@@ -2628,12 +2628,11 @@ document.querySelectorAll(".oc-ataques th[data-oc-desc]").forEach((th) => {
         }
         b.innerHTML = m.innerHTML;
         if (m.dataset.reserva && SISTEMA === "vtm5") {
-            b.setAttribute("aria-label", m.dataset.que + ", " + m.dataset.valor + ": a la reserva de dados");
-            b.title = "A la reserva de los dados";
+            b.setAttribute("aria-label", ocT("{que}, {valor}: a la reserva de dados", { que: m.dataset.que, valor: m.dataset.valor }));
+            b.title = ocT("A la reserva de los dados");
         } else {
-            b.setAttribute("aria-label", m.textContent.trim() + ", tirar " + (m.dataset.que || m.dataset.dados)
-                + " (" + formulaParaVer(m.dataset.dados).replace(/−/g, "menos") + ")");
-            b.title = "Tirar " + formulaParaVer(m.dataset.dados);
+            b.setAttribute("aria-label", ocT("{trim}, tirar {n} ({replace})", { trim: m.textContent.trim(), n: m.dataset.que || m.dataset.dados, replace: formulaParaVer(m.dataset.dados).replace(/−/g, "menos") }));
+            b.title = ocT("Tirar {formulaParaVer}", { formulaParaVer: formulaParaVer(m.dataset.dados) });
         }
         m.replaceWith(b);
     });
@@ -2645,7 +2644,7 @@ document.querySelectorAll(".oc-ataques th[data-oc-desc]").forEach((th) => {
         if (!conLasDos.length) {
             return;
         }
-        const th = crear("th", "", "a la vez");
+        const th = crear("th", "", ocT("a la vez"));
         th.scope = "col";
         tabla.querySelector("thead tr").appendChild(th);
         tabla.querySelectorAll("tr.oc-ataque-desc td[colspan]").forEach((td) => {
@@ -2660,8 +2659,8 @@ document.querySelectorAll(".oc-ataques th[data-oc-desc]").forEach((th) => {
                 const b = botonDe("oc-ataque-ambas-boton", "🎲🎲", () => tirarVarias([
                     { formula: ataque.dataset.dados, que: ataque.dataset.que },
                     { formula: dano.dataset.dados, que: dano.dataset.que }], nombre),
-                "Tirar ataque y daño a la vez: " + nombre);
-                b.title = "Ataque y daño a la vez";
+                ocT("Tirar ataque y daño a la vez: {nombre}", { nombre: nombre }));
+                b.title = ocT("Ataque y daño a la vez");
                 td.appendChild(b);
             }
             tr.appendChild(td);
@@ -2682,7 +2681,7 @@ document.querySelectorAll(".oc-ataques th[data-oc-desc]").forEach((th) => {
             return estado.tiradas.map((r, i) => filaDeTirada(r, i, (id) => {
                 estado.tiradas = estado.tiradas.filter((x) => x.id !== id);
                 pintarHistorial();
-                avisar("Tirada borrada.");
+                avisar(ocT("Tirada borrada."));
                 if (alQuitar) {
                     alQuitar(i);
                 }
@@ -2691,7 +2690,7 @@ document.querySelectorAll(".oc-ataques th[data-oc-desc]").forEach((th) => {
         borrarRegistro() {
             estado.tiradas = [];
             pintarHistorial();
-            avisar("Tiradas borradas.");
+            avisar(ocT("Tiradas borradas."));
         },
         reiniciarHambre() {
             estado.reserva.hambre = parseInt((sitioDelBoton && sitioDelBoton.dataset.ocHambre) || "0", 10) || 0;
@@ -2785,7 +2784,7 @@ document.querySelectorAll(".oc-ataques th[data-oc-desc]").forEach((th) => {
             const b = document.createElement("button");
             b.type = "button";
             b.className = "oc-casilla";
-            const nombre = que + ": " + (i + 1) + " de " + sueltas.length;
+            const nombre = ocT("{que}: {n} de {length}", { que: que, n: i + 1, length: sueltas.length });
             const deInicio = s.classList.contains("es-marcada") ? 1 : 0;
             const empieza = Array.isArray(antes) && antes.length === sueltas.length ? antes[i] : deInicio;
             if (tres) {
@@ -2803,7 +2802,7 @@ document.querySelectorAll(".oc-ataques th[data-oc-desc]").forEach((th) => {
             } else {
                 b.poner = (cual) => b.setAttribute("aria-pressed", cual ? "true" : "false");
                 b.poner(empieza);
-                b.setAttribute("aria-label", nombre + ", gastado");
+                b.setAttribute("aria-label", ocT("{nombre}, gastado", { nombre: nombre }));
                 b.addEventListener("click", () => {
                     b.setAttribute("aria-pressed", b.getAttribute("aria-pressed") === "true" ? "false" : "true");
                     guardar();
@@ -2858,7 +2857,7 @@ document.querySelectorAll(".oc-ataques th[data-oc-desc]").forEach((th) => {
     const cerrar = document.createElement("button");
     cerrar.type = "button";
     cerrar.className = "oc-modal-cerrar";
-    cerrar.setAttribute("aria-label", "Cerrar");
+    cerrar.setAttribute("aria-label", ocT("Cerrar"));
     cerrar.textContent = "✕";
     const cuerpo = document.createElement("div");
     cuerpo.className = "oc-modal-cuerpo";
@@ -2960,8 +2959,8 @@ document.querySelectorAll(".oc-ataques th[data-oc-desc]").forEach((th) => {
     icono.className = "oc-boton-icono";
     icono.setAttribute("aria-hidden", "true");
     icono.textContent = "📄";
-    b.append(icono, document.createTextNode(" ficha en pdf"));
-    b.title = "Abre imprimir: elige «Guardar como PDF»";
+    b.append(icono, document.createTextNode(ocT(" ficha en pdf")));
+    b.title = ocT("Abre imprimir: elige «Guardar como PDF»");
     b.addEventListener("click", () => window.print());
     sitio.appendChild(b);
 })();
@@ -2985,13 +2984,13 @@ document.querySelectorAll(".oc-ataques th[data-oc-desc]").forEach((th) => {
         const b = document.createElement("button");
         b.type = "button";
         b.className = "oc-cancion-escuchar";
-        b.textContent = "▶ escuchar aquí";
-        b.setAttribute("aria-label", "Escuchar aquí: " + titulo + " (carga el reproductor de Spotify)");
+        b.textContent = ocT("▶ escuchar aquí");
+        b.setAttribute("aria-label", ocT("Escuchar aquí: {titulo} (carga el reproductor de Spotify)", { titulo: titulo }));
         b.addEventListener("click", () => {
             const marco = document.createElement("iframe");
             marco.className = "oc-cancion-reproductor";
             marco.src = "https://open.spotify.com/embed/" + encodeURIComponent(tipo) + "/" + encodeURIComponent(id);
-            marco.title = "Reproductor de Spotify: " + titulo;
+            marco.title = ocT("Reproductor de Spotify: {titulo}", { titulo: titulo });
             marco.height = tipo === "track" || tipo === "episode" ? "152" : "352";
             marco.loading = "lazy";
             marco.setAttribute("allow", "autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture");
@@ -3054,13 +3053,12 @@ document.querySelectorAll(".oc-ataques th[data-oc-desc]").forEach((th) => {
 
     function pintarBoton() {
         boton.replaceChildren(document.createTextNode(String(vida.actual)),
-            crear("span", "oc-vida-max", "/" + maximo), crear("span", "oc-vital-corto", "PG"));
+            crear("span", "oc-vida-max", "/" + maximo), crear("span", "oc-vital-corto", ocT("PG")));
         if (vida.temp) {
             boton.appendChild(crear("span", "oc-vida-temp", "+" + vida.temp));
         }
         boton.classList.toggle("es-caido", vida.actual <= 0);
-        boton.setAttribute("aria-label", "Puntos de golpe: " + vida.actual + " de " + maximo
-            + (vida.temp ? ", y " + vida.temp + " temporales" : "") + ". Abrir la vida");
+        boton.setAttribute("aria-label", ocT("Puntos de golpe: {actual} de {maximo}{n}. Abrir la vida", { actual: vida.actual, maximo: maximo, n: vida.temp ? ocT(", y {temp} temporales", { temp: vida.temp }) : "" }));
     }
 
     let pintarVentana = null;
@@ -3078,7 +3076,7 @@ document.querySelectorAll(".oc-ataques th[data-oc-desc]").forEach((th) => {
 
     function cambiar(tipo, n) {
         if (!(n > 0)) {
-            avisar("Pon cuánto.");
+            avisar(ocT("Pon cuánto."));
             return;
         }
         if (tipo === "dano") {
@@ -3090,8 +3088,7 @@ document.querySelectorAll(".oc-ataques th[data-oc-desc]").forEach((th) => {
             if (antes === 0 && n - deTemp > 0) {
                 vida.fallos = Math.min(3, vida.fallos + 1);
             }
-            avisar(n + " de daño" + (deTemp ? " (" + deTemp + " de los temporales)" : "") + ". Quedan "
-                + vida.actual + (vida.actual === 0 ? ": a 0, tiradas de muerte." : "."));
+            avisar(ocT("{n} de daño{n2}. Quedan {actual}{n3}", { n: n, n2: deTemp ? ocT(" ({deTemp} de los temporales)", { deTemp: deTemp }) : "", actual: vida.actual, n3: vida.actual === 0 ? ocT(": a 0, tiradas de muerte.") : "." }));
         } else if (tipo === "curar") {
             const desde0 = vida.actual === 0;
             vida.actual = Math.min(maximo, vida.actual + n);
@@ -3099,11 +3096,11 @@ document.querySelectorAll(".oc-ataques th[data-oc-desc]").forEach((th) => {
                 vida.exitos = 0;
                 vida.fallos = 0;
             }
-            avisar("Curados " + n + ". Tiene " + vida.actual + " de " + maximo + ".");
+            avisar(ocT("Curados {n}. Tiene {actual} de {maximo}.", { n: n, actual: vida.actual, maximo: maximo }));
         } else {
             // Los temporales no se suman: se queda el más alto.
             vida.temp = Math.max(vida.temp, n);
-            avisar("Temporales: " + vida.temp + ".");
+            avisar(ocT("Temporales: {temp}.", { temp: vida.temp }));
         }
         guardar();
     }
@@ -3112,22 +3109,22 @@ document.querySelectorAll(".oc-ataques th[data-oc-desc]").forEach((th) => {
         if (!window.ocDados) {
             return;
         }
-        const r = window.ocDados.tirar("1d20", "salvación de muerte");
+        const r = window.ocDados.tirar("1d20", ocT("salvación de muerte"));
         const d = r && r.d20 ? r.d20.queda : r ? r.total : 0;
         if (d === 20) {
             vida.actual = 1;
             vida.exitos = 0;
             vida.fallos = 0;
-            avisar("¡20 natural! Recupera 1 PG.");
+            avisar(ocT("¡20 natural! Recupera 1 PG."));
         } else if (d === 1) {
             vida.fallos = Math.min(3, vida.fallos + 2);
-            avisar("1 natural: dos fallos.");
+            avisar(ocT("1 natural: dos fallos."));
         } else if (d >= 10) {
             vida.exitos = Math.min(3, vida.exitos + 1);
-            avisar(d + ": éxito." + (vida.exitos === 3 ? " Estable." : ""));
+            avisar(d + ocT(": éxito.") + (vida.exitos === 3 ? ocT(" Estable.") : ""));
         } else {
             vida.fallos = Math.min(3, vida.fallos + 1);
-            avisar(d + ": fallo." + (vida.fallos === 3 ? " Muere." : ""));
+            avisar(d + ocT(": fallo.") + (vida.fallos === 3 ? ocT(" Muere.") : ""));
         }
         guardar();
     }
@@ -3144,9 +3141,8 @@ document.querySelectorAll(".oc-ataques th[data-oc-desc]").forEach((th) => {
             partida.guardar("dadosGolpe", {});
         }
         guardar();
-        avisar(tipo === "largo" ? "Descanso largo: PG al máximo y todo recargado."
-            : "Descanso corto: " + (cuantas ? "recargado lo que se recarga con él." : "nada que recargar.")
-            + " Los dados de golpe, en la ficha.");
+        avisar(tipo === "largo" ? ocT("Descanso largo: PG al máximo y todo recargado.")
+            : ocT("Descanso corto: {n} Los dados de golpe, en la ficha.", { n: cuantas ? ocT("recargado lo que se recarga con él.") : ocT("nada que recargar.") }));
     }
 
     // Las casillas de las salvaciones: tres de cada, que se marcan al
@@ -3159,7 +3155,7 @@ document.querySelectorAll(".oc-ataques th[data-oc-desc]").forEach((th) => {
             const b = crear("button", "oc-casilla");
             b.type = "button";
             b.setAttribute("aria-pressed", vida[campo] >= i ? "true" : "false");
-            b.setAttribute("aria-label", que + ": " + i + " de 3");
+            b.setAttribute("aria-label", ocT("{que}: {i} de 3", { que: que, i: i }));
             b.addEventListener("click", () => {
                 vida[campo] = vida[campo] >= i ? i - 1 : i;
                 guardar();
@@ -3178,11 +3174,11 @@ document.querySelectorAll(".oc-ataques th[data-oc-desc]").forEach((th) => {
         cantidad.min = "0";
         cantidad.id = "oc-vida-cantidad";
         cantidad.inputMode = "numeric";
-        const etiqueta = crear("label", "oc-dados-etiqueta", "cuánto");
+        const etiqueta = crear("label", "oc-dados-etiqueta", ocT("cuánto"));
         etiqueta.htmlFor = cantidad.id;
         const fila = crear("div", "oc-vida-fila");
         const acciones = crear("div", "oc-vida-acciones");
-        [["dano", "💥 daño"], ["curar", "💚 curar"], ["temp", "🛡️ temporales"]].forEach(([tipo, texto]) => {
+        [["dano", ocT("💥 daño")], ["curar", ocT("💚 curar")], ["temp", ocT("🛡️ temporales")]].forEach(([tipo, texto]) => {
             const b = crear("button", "oc-vida-accion es-" + tipo, texto);
             b.type = "button";
             b.addEventListener("click", () => {
@@ -3194,14 +3190,14 @@ document.querySelectorAll(".oc-ataques th[data-oc-desc]").forEach((th) => {
         });
         fila.append(etiqueta, cantidad);
         const muerte = crear("fieldset", "oc-vida-muerte");
-        muerte.appendChild(crear("legend", "", "salvaciones de muerte"));
+        muerte.appendChild(crear("legend", "", ocT("salvaciones de muerte")));
         const dentroMuerte = crear("div", "");
-        const tirarla = crear("button", "oc-vida-accion", "🎲 tirar salvación");
+        const tirarla = crear("button", "oc-vida-accion", ocT("🎲 tirar salvación"));
         tirarla.type = "button";
         tirarla.addEventListener("click", tirarMuerte);
         muerte.append(dentroMuerte, tirarla);
         const descansos = crear("div", "oc-vida-descansos");
-        [["corto", "☕ descanso corto"], ["largo", "🛏️ descanso largo"]].forEach(([tipo, texto]) => {
+        [["corto", ocT("☕ descanso corto")], ["largo", ocT("🛏️ descanso largo")]].forEach(([tipo, texto]) => {
             const b = crear("button", "oc-vida-accion", texto);
             b.type = "button";
             b.addEventListener("click", () => descansar(tipo));
@@ -3212,19 +3208,19 @@ document.querySelectorAll(".oc-ataques th[data-oc-desc]").forEach((th) => {
         cuerpo.append(grande, fila, acciones, muerte, descansos, aviso);
         pintarVentana = () => {
             grande.replaceChildren(crear("span", "oc-vida-actual", String(vida.actual)),
-                document.createTextNode(" / " + maximo + " PG"));
+                document.createTextNode(ocT(" / {maximo} PG", { maximo: maximo })));
             if (vida.temp) {
-                grande.appendChild(crear("span", "oc-vida-temp", "+" + vida.temp + " temporales"));
+                grande.appendChild(crear("span", "oc-vida-temp", ocT("+{temp} temporales", { temp: vida.temp })));
             }
             const foco = document.activeElement;
             const enMuerte = dentroMuerte.contains(foco);
-            dentroMuerte.replaceChildren(marcas("éxitos", "exitos"), marcas("fallos", "fallos"));
+            dentroMuerte.replaceChildren(marcas(ocT("éxitos"), "exitos"), marcas(ocT("fallos"), "fallos"));
             if (enMuerte) {
                 tirarla.focus();
             }
         };
         pintarVentana();
-        window.ocVentana.abrir({ titulo: "vida", cuerpo, vuelta: boton, foco: cantidad, clase: "es-vida",
+        window.ocVentana.abrir({ titulo: ocT("vida"), cuerpo, vuelta: boton, foco: cantidad, clase: "es-vida",
             alCerrar: () => {
                 pintarVentana = null;
                 aviso = null;
@@ -3244,7 +3240,7 @@ document.querySelectorAll(".oc-ataques th[data-oc-desc]").forEach((th) => {
     const con = parseInt(botones.dataset.ocCon || "0", 10) || 0;
     const huecoDescanso = document.createElement("div");
     huecoDescanso.className = "oc-vital es-descanso";
-    const dtDescanso = crear("dt", "visually-hidden", "Descansos");
+    const dtDescanso = crear("dt", "visually-hidden", ocT("Descansos"));
     const ddDescanso = document.createElement("dd");
     const botonDescanso = crear("button", "oc-descanso-boton");
     botonDescanso.type = "button";
@@ -3261,11 +3257,11 @@ document.querySelectorAll(".oc-ataques th[data-oc-desc]").forEach((th) => {
         const vidaAhora = crear("p", "oc-vida-grande");
         const pintarVida = () => {
             vidaAhora.replaceChildren(crear("span", "oc-vida-actual", String(vida.actual)),
-                document.createTextNode(" / " + maximo + " PG"));
+                document.createTextNode(ocT(" / {maximo} PG", { maximo: maximo })));
         };
         pintarVida();
         const corto = crear("fieldset", "oc-vida-muerte");
-        corto.appendChild(crear("legend", "", "☕ descanso corto (1 hora)"));
+        corto.appendChild(crear("legend", "", ocT("☕ descanso corto (1 hora)")));
         const usados = partida.leer("dadosGolpe", {});
         dg.forEach((g) => {
             const fila = crear("div", "oc-vida-fila es-dados-golpe");
@@ -3274,15 +3270,15 @@ document.querySelectorAll(".oc-ataques th[data-oc-desc]").forEach((th) => {
             const gastar = crear("button", "oc-vida-accion");
             gastar.type = "button";
             const pintarDg = () => {
-                texto.textContent = "d" + g.caras + ": " + quedan() + " de " + g.cuantos;
-                gastar.textContent = "🎲 gastar un d" + g.caras + (con ? (con > 0 ? " + " : " − ") + Math.abs(con) : "");
+                texto.textContent = ocT("d{caras}: {n} de {cuantos}", { caras: g.caras, n: quedan(), cuantos: g.cuantos });
+                gastar.textContent = ocT("🎲 gastar un d{caras}{n}", { caras: g.caras, n: con ? (con > 0 ? " + " : " − ") + Math.abs(con) : "" });
                 gastar.disabled = quedan() <= 0;
             };
             gastar.addEventListener("click", () => {
                 if (quedan() <= 0 || !window.ocDados) {
                     return;
                 }
-                const r = window.ocDados.tirar("1d" + g.caras + (con ? (con > 0 ? "+" : "") + con : ""), "dado de golpe");
+                const r = window.ocDados.tirar("1d" + g.caras + (con ? (con > 0 ? "+" : "") + con : ""), ocT("dado de golpe"));
                 const cura = Math.max(0, r ? r.total : 0);
                 usados["d" + g.caras] = (usados["d" + g.caras] || 0) + 1;
                 partida.guardar("dadosGolpe", usados);
@@ -3290,7 +3286,7 @@ document.querySelectorAll(".oc-ataques th[data-oc-desc]").forEach((th) => {
                 guardar();
                 pintarDg();
                 pintarVida();
-                avisarDescanso("Cura " + cura + ". Tiene " + vida.actual + " de " + maximo + ".");
+                avisarDescanso(ocT("Cura {cura}. Tiene {actual} de {maximo}.", { cura: cura, actual: vida.actual, maximo: maximo }));
                 if (gastar.disabled) {
                     terminarCorto.focus();
                 }
@@ -3300,26 +3296,25 @@ document.querySelectorAll(".oc-ataques th[data-oc-desc]").forEach((th) => {
             corto.appendChild(fila);
         });
         if (!dg.length) {
-            corto.appendChild(crear("p", "oc-hoja-nota", "Sin dados de golpe apuntados en su ficha."));
+            corto.appendChild(crear("p", "oc-hoja-nota", ocT("Sin dados de golpe apuntados en su ficha.")));
         }
-        const terminarCorto = crear("button", "oc-vida-accion es-principal", "terminar el descanso corto");
+        const terminarCorto = crear("button", "oc-vida-accion es-principal", ocT("terminar el descanso corto"));
         terminarCorto.type = "button";
         terminarCorto.addEventListener("click", () => {
             descansar("corto");
-            avisarDescanso("Descanso corto: recargado lo que se recarga con él.");
+            avisarDescanso(ocT("Descanso corto: recargado lo que se recarga con él."));
         });
         corto.appendChild(terminarCorto);
         const largo = crear("fieldset", "oc-vida-muerte");
-        largo.appendChild(crear("legend", "", "🛏️ descanso largo (8 horas)"));
-        largo.appendChild(crear("p", "oc-hoja-nota", "Todo recargado, la vida al máximo, sin temporales ni"
-            + " salvaciones de muerte, y los dados de golpe de vuelta (en 2014, solo la mitad)."));
-        const hacerLargo = crear("button", "oc-vida-accion es-principal", "hacer el descanso largo");
+        largo.appendChild(crear("legend", "", ocT("🛏️ descanso largo (8 horas)")));
+        largo.appendChild(crear("p", "oc-hoja-nota", ocT("Todo recargado, la vida al máximo, sin temporales ni salvaciones de muerte, y los dados de golpe de vuelta (en 2014, solo la mitad).")));
+        const hacerLargo = crear("button", "oc-vida-accion es-principal", ocT("hacer el descanso largo"));
         hacerLargo.type = "button";
         hacerLargo.addEventListener("click", () => {
             descansar("largo");
             Object.keys(usados).forEach((k) => delete usados[k]);
             cerrarDescansos();
-            avisarFuera("Descanso largo hecho: " + vida.actual + " PG.");
+            avisarFuera(ocT("Descanso largo hecho: {actual} PG.", { actual: vida.actual }));
         });
         largo.appendChild(hacerLargo);
         const avisoDescanso = crear("p", "oc-vida-aviso");
@@ -3332,7 +3327,7 @@ document.querySelectorAll(".oc-ataques th[data-oc-desc]").forEach((th) => {
         };
         cuerpo.append(vidaAhora, corto, largo, avisoDescanso);
         const primero = corto.querySelector("button:not([disabled])") || terminarCorto;
-        const cerrarDescansos = window.ocVentana.abrir({ titulo: "descansos", cuerpo, vuelta: botonDescanso,
+        const cerrarDescansos = window.ocVentana.abrir({ titulo: ocT("descansos"), cuerpo, vuelta: botonDescanso,
             foco: primero, clase: "es-vida" });
     }
 
@@ -3412,7 +3407,7 @@ window.ocMontar.notas = function (sitio, opciones) {
         }, 50);
     };
 
-    const etiqueta = crear("label", "oc-notas-etiqueta", "Lo que pasa en la sesión (se guarda solo)");
+    const etiqueta = crear("label", "oc-notas-etiqueta", ocT("Lo que pasa en la sesión (se guarda solo)"));
     const texto = crear("textarea", "oc-notas-texto");
     texto.id = "oc-notas-texto";
     etiqueta.htmlFor = texto.id;
@@ -3423,7 +3418,7 @@ window.ocMontar.notas = function (sitio, opciones) {
         clearTimeout(espera);
         espera = setTimeout(() => partida.guardar("notas", texto.value), 400);
     });
-    const fecha = crear("button", "oc-vida-accion", "📅 poner la fecha");
+    const fecha = crear("button", "oc-vida-accion", ocT("📅 poner la fecha"));
     fecha.type = "button";
     fecha.addEventListener("click", () => {
         const hoy = new Date().toLocaleDateString("es-ES", { day: "numeric", month: "long", year: "numeric" });
@@ -3432,7 +3427,7 @@ window.ocMontar.notas = function (sitio, opciones) {
         texto.focus();
         texto.selectionStart = texto.selectionEnd = texto.value.length;
     });
-    const bajar = crear("button", "oc-vida-accion", "💾 descargar");
+    const bajar = crear("button", "oc-vida-accion", ocT("💾 descargar"));
     bajar.type = "button";
     bajar.addEventListener("click", () => {
         const a = document.createElement("a");
@@ -3446,24 +3441,24 @@ window.ocMontar.notas = function (sitio, opciones) {
         setTimeout(() => URL.revokeObjectURL(a.href), 1000);
     });
     // Borrar, en dos pasos (sin ventanas del navegador, que se bloquean).
-    const borrar = crear("button", "oc-vida-accion", "🗑️ borrar");
+    const borrar = crear("button", "oc-vida-accion", ocT("🗑️ borrar"));
     borrar.type = "button";
     let seguro = false;
     borrar.addEventListener("click", () => {
         if (!seguro) {
             seguro = true;
-            borrar.textContent = "🗑️ ¿seguro? pulsa otra vez";
+            borrar.textContent = ocT("🗑️ ¿seguro? pulsa otra vez");
             setTimeout(() => {
                 seguro = false;
-                borrar.textContent = "🗑️ borrar";
+                borrar.textContent = ocT("🗑️ borrar");
             }, 4000);
             return;
         }
         texto.value = "";
         partida.guardar("notas", "");
         seguro = false;
-        borrar.textContent = "🗑️ borrar";
-        avisar("Notas borradas.");
+        borrar.textContent = ocT("🗑️ borrar");
+        avisar(ocT("Notas borradas."));
         texto.focus();
     });
     const filaNotas = crear("div", "oc-vida-descansos");
@@ -3487,28 +3482,28 @@ window.ocMontar.notas = function (sitio, opciones) {
         }
     };
     if (esDnd) {
-        boton("☕ descanso corto", () => {
+        boton(ocT("☕ descanso corto"), () => {
             descansar("corto");
-            avisar("Descanso corto: recargado lo que se recarga con él.");
+            avisar(ocT("Descanso corto: recargado lo que se recarga con él."));
         });
-        boton("🛏️ descanso largo", () => {
+        boton(ocT("🛏️ descanso largo"), () => {
             descansar("largo");
-            avisar("Descanso largo: todo recargado y la vida al máximo.");
+            avisar(ocT("Descanso largo: todo recargado y la vida al máximo."));
         });
     }
     let deCero = false;
-    const cero = boton("🔄 empezar de cero", () => {
+    const cero = boton(ocT("🔄 empezar de cero"), () => {
         if (!deCero) {
             deCero = true;
-            cero.textContent = "🔄 ¿seguro? pulsa otra vez";
+            cero.textContent = ocT("🔄 ¿seguro? pulsa otra vez");
             setTimeout(() => {
                 deCero = false;
-                cero.textContent = "🔄 empezar de cero";
+                cero.textContent = ocT("🔄 empezar de cero");
             }, 4000);
             return;
         }
         deCero = false;
-        cero.textContent = "🔄 empezar de cero";
+        cero.textContent = ocT("🔄 empezar de cero");
         if (window.ocCasillas) {
             window.ocCasillas.descansar("todo");
         }
@@ -3518,19 +3513,18 @@ window.ocMontar.notas = function (sitio, opciones) {
         if (window.ocDados && window.ocDados.reiniciarHambre) {
             window.ocDados.reiniciarHambre();
         }
-        avisar("Partida de cero: todo desmarcado y la vida al máximo. Las notas se quedan.");
+        avisar(ocT("Partida de cero: todo desmarcado y la vida al máximo. Las notas se quedan."));
     });
     if (soloNotas) {
         // En la pantalla de máster: solo el cuaderno (el módulo ya es su
         // ventanita).
-        etiqueta.textContent = "Notas del máster (se guardan solas)";
+        etiqueta.textContent = ocT("Notas del máster (se guardan solas)");
         caja.className = "oc-notas-sueltas";
         caja.append(etiqueta, texto, filaNotas, aviso);
     } else {
         caja.append(
             ventanita("notas-de-" + (partida.clave || "sesion") + ".txt", "📝", [etiqueta, texto, filaNotas]),
-            ventanita("partida.dat", "🎲", [crear("p", "oc-hoja-nota", "Lo que marcas en la ficha de " + nombre
-                + " (usos, espacios, la vida…) se guarda en este navegador."), filaPartida, aviso]));
+            ventanita("partida.dat", "🎲", [crear("p", "oc-hoja-nota", ocT("Lo que marcas en la ficha de {nombre} (usos, espacios, la vida…) se guarda en este navegador.", { nombre: nombre })), filaPartida, aviso]));
     }
     sitio.replaceChildren(caja);
 };
@@ -3556,6 +3550,329 @@ window.ocMontar.notas = function (sitio, opciones) {
 // window.ocMontar.iniciativa(sitio): la monta en un sitio (en la ficha, la
 // pestaña; en la pantalla de máster, su módulo).
 
+// LOS TURNOS, sin pantalla: leer y guardar la iniciativa, quién tiene el
+// turno (él solo o su grupo) y pasar de turno. Los usa la iniciativa y,
+// en la pantalla de máster, la ventana de «turnos» y la de la criatura
+// del turno (así pasan de turno igual). Guardar avisa con
+// «oc-iniciativa:guardada» y «oc-iniciativa:cambio» (la iniciativa se
+// vuelve a leer con este).
+window.ocTurnos = (function () {
+    const CLAVE = "richi-oc-iniciativa";
+    // Las iniciativas montadas (cada una sabe editar a los suyos). Si no
+    // hay ninguna a la vista, se monta una escondida para editar.
+    const editores = [];
+    let escondida = null;
+    function instancia() {
+        let ed = editores.find((x) => x.caja.isConnected) || escondida;
+        if (!ed && window.ocMontar && window.ocMontar.iniciativa) {
+            const antes = editores.length;
+            window.ocMontar.iniciativa(document.createElement("div"), { suelta: true });
+            ed = escondida = editores[antes] || null;
+        }
+        return ed;
+    }
+    const editar = (id, vuelta) => (instancia() ? instancia().editar(id, vuelta) : false);
+    const vida = (id, vuelta) => (instancia() ? instancia().vida(id, vuelta) : false);
+    // Las marcas de uno, con su dibujo, que se pulsan (como en la iniciativa).
+    const chapas = (id) => (instancia() ? instancia().chapas(id) : null);
+    const grupoDe = (c) => (c && c.grupo) || "";
+    const marcasDe = (c) => (Array.isArray(c.marcas) ? c.marcas : (c.marcas = []));
+    function leer() {
+        let d = { lista: [], turno: -1, ronda: 1 };
+        try {
+            d = Object.assign(d, JSON.parse(localStorage.getItem(CLAVE) || "{}"));
+        } catch (e) {
+            // Sin almacenamiento: vacía.
+        }
+        d.lista = Array.isArray(d.lista) ? d.lista : [];
+        return d;
+    }
+    function guardar(d, avisarIniciativa) {
+        try {
+            localStorage.setItem(CLAVE, JSON.stringify(d));
+        } catch (e) {
+            // Sin almacenamiento: da igual.
+        }
+        document.dispatchEvent(new CustomEvent("oc-iniciativa:guardada", { detail: { ronda: d.ronda, modo: d.modo } }));
+        if (avisarIniciativa) {
+            document.dispatchEvent(new CustomEvent("oc-iniciativa:cambio"));
+        }
+    }
+    function inicioDe(d, i) {
+        const g = grupoDe(d.lista[i]);
+        while (g && i > 0 && grupoDe(d.lista[i - 1]) === g) {
+            i -= 1;
+        }
+        return i;
+    }
+    function finDe(d, i) {
+        const g = grupoDe(d.lista[i]);
+        while (g && i < d.lista.length - 1 && grupoDe(d.lista[i + 1]) === g) {
+            i += 1;
+        }
+        return i;
+    }
+    // Los del turno de «i» (él solo, o todo su grupo).
+    const delTurno = (d, i) => (i < 0 || i >= d.lista.length ? [] : d.lista.slice(inicioDe(d, i), finDe(d, i) + 1));
+    const nombresDe = (cs) => (cs.length < 2 ? (cs[0] ? cs[0].nombre : "") : ocT("{join} y {nombre}", { join: cs.slice(0, -1).map((c) => c.nombre).join(", "), nombre: cs[cs.length - 1].nombre }));
+    // Al acabar una ronda, las marcas con rondas pierden una (y las que
+    // llegan a cero se van).
+    function gastarRonda(d) {
+        const acabadas = [];
+        d.lista.forEach((c) => {
+            c.marcas = marcasDe(c).filter((mk) => {
+                if (!mk.r) {
+                    return true;
+                }
+                mk.r -= 1;
+                if (mk.r <= 0) {
+                    acabadas.push(mk.t + " en " + c.nombre);
+                    return false;
+                }
+                return true;
+            });
+        });
+        return acabadas;
+    }
+    // Pasar de turno (paso 1) o volver al anterior (paso −1). Un grupo es
+    // un solo turno: se salta de grupo en grupo. Devuelve los del turno
+    // nuevo y las marcas que se han acabado.
+    // EL SONIDO AL PASAR: dos notas al cambiar de turno y tres (subiendo)
+    // al empezar una ronda, hechas aquí (sin archivos). Se calla con
+    // «richi-oc-iniciativa-sonido» = "no" (🔔 en ⏩ turnos).
+    let audio = null;
+    function conSonido() {
+        try {
+            return localStorage.getItem("richi-oc-iniciativa-sonido") !== "no";
+        } catch (e) {
+            return true;
+        }
+    }
+    function sonar(que) {
+        if (!conSonido()) {
+            return;
+        }
+        try {
+            audio = audio || new (window.AudioContext || window.webkitAudioContext)();
+            if (audio.state === "suspended") {
+                audio.resume();
+            }
+            const notas = que === "ronda" ? [523.25, 659.25, 783.99] : [659.25, 880];
+            const t0 = audio.currentTime + 0.02;
+            notas.forEach((f, i) => {
+                const o = audio.createOscillator();
+                const g = audio.createGain();
+                o.type = "triangle";
+                o.frequency.value = f;
+                const t = t0 + i * 0.11;
+                const largo = i === notas.length - 1 ? (que === "ronda" ? 0.5 : 0.25) : 0.14;
+                g.gain.setValueAtTime(0, t);
+                g.gain.linearRampToValueAtTime(0.18, t + 0.015);
+                g.gain.exponentialRampToValueAtTime(0.001, t + largo);
+                o.connect(g).connect(audio.destination);
+                o.start(t);
+                o.stop(t + largo + 0.05);
+            });
+        } catch (e) {
+            // Sin audio: en silencio.
+        }
+    }
+    function pasar(d, paso) {
+        const rondaAntes = d.ronda;
+        try {
+            return pasarSin(d, paso);
+        } finally {
+            if (d.lista.length) {
+                sonar(d.ronda > rondaAntes ? "ronda" : "turno");
+            }
+        }
+    }
+    // Con «d.saltarCaidos», se salta a los que no son de la party y están a
+    // 0 PG (un grupo, si lo están todos).
+    function pasarSin(d, paso) {
+        let r = pasarUno(d, paso);
+        for (let n = 0; d.saltarCaidos && n < d.lista.length && r.turno.length && r.turno.every((c) => !c.pj && caido(c)); n++) {
+            const otro = pasarUno(d, paso);
+            r = { turno: otro.turno, acabadas: r.acabadas.concat(otro.acabadas) };
+        }
+        return r;
+    }
+    function pasarUno(d, paso) {
+        let acabadas = [];
+        if (!d.lista.length) {
+            return { turno: [], acabadas };
+        }
+        const ahora = Math.max(0, Math.min(d.turno, d.lista.length - 1));
+        if (paso > 0) {
+            d.turno = d.turno < 0 ? 0 : finDe(d, ahora) + 1;
+            if (d.turno >= d.lista.length) {
+                d.turno = 0;
+                d.ronda += 1;
+                acabadas = gastarRonda(d);
+            }
+        } else {
+            d.turno = inicioDe(d, ahora) - 1;
+            if (d.turno < 0) {
+                if (d.ronda > 1) {
+                    d.turno = d.lista.length - 1;
+                    d.ronda -= 1;
+                } else {
+                    d.turno = 0;
+                }
+            }
+            d.turno = inicioDe(d, d.turno);
+        }
+        const turno = delTurno(d, d.turno);
+        if (paso > 0) {
+            turno.forEach((c) => {
+                c.usado = {};
+                c.legUsadas = 0;
+            });
+        }
+        return { turno, acabadas };
+    }
+    // LAS SALVACIONES DE MUERTE de un PJ a 0 PG: tres éxitos y tres fallos
+    // (casillas que se pulsan) y 🎲 tirar (10 o más, éxito; 1, dos fallos;
+    // 20, recupera 1 PG). «estado»: {exitos, fallos}; «alCambiar(estado,
+    // revive)» lo guarda (revive: el 20, vuelve a 1 PG). «clave»: para
+    // devolver el foco a la misma casilla si se repinta todo.
+    function cajaMuerte(estado, nombre, alCambiar, clave) {
+        const el = (tag, clase, texto) => {
+            const x = document.createElement(tag);
+            x.className = clase || "";
+            if (texto !== undefined) {
+                x.textContent = texto;
+            }
+            return x;
+        };
+        const caja = el("fieldset", "oc-vida-muerte oc-muerte");
+        caja.appendChild(el("legend", "", ocT("💀 salvaciones de muerte de {nombre}", { nombre: nombre })));
+        const estadoP = el("p", "oc-muerte-estado");
+        estadoP.setAttribute("role", "status");
+        const enfocar = (raiz, foco) => {
+            const x = raiz.querySelector('[data-muerte="' + CSS.escape(clave + ":" + foco) + '"]');
+            if (x) {
+                x.focus();
+            }
+            return !!x;
+        };
+        const cambiar = (revive, texto, foco) => {
+            alCambiar(estado, revive);
+            pintarCasillas();
+            estadoP.textContent = texto || "";
+            enfocar(caja, foco);
+            // Si quien la tiene ha repintado todo, a la misma casilla.
+            setTimeout(() => {
+                const a = document.activeElement;
+                if (!a || a === document.body || !a.isConnected) {
+                    enfocar(document, foco);
+                }
+            }, 80);
+        };
+        const filas = el("div", "");
+        const pintarCasillas = () => {
+            filas.replaceChildren(...[["exitos", ocT("éxitos")], ["fallos", ocT("fallos")]].map(([campo, que]) => {
+                const fila = el("div", "oc-vida-muerte-fila");
+                fila.appendChild(el("span", "oc-vida-muerte-nombre", que));
+                for (let i = 1; i <= 3; i++) {
+                    const b = el("button", "oc-casilla");
+                    b.type = "button";
+                    b.dataset.muerte = clave + ":" + campo + i;
+                    b.setAttribute("aria-pressed", (estado[campo] || 0) >= i ? "true" : "false");
+                    b.setAttribute("aria-label", ocT("{que}: {i} de 3", { que: que, i: i }));
+                    b.addEventListener("click", () => {
+                        estado[campo] = (estado[campo] || 0) >= i ? i - 1 : i;
+                        cambiar(false, estado.exitos >= 3 ? ocT("{nombre} está estable.", { nombre: nombre })
+                            : estado.fallos >= 3 ? ocT("{nombre} muere.", { nombre: nombre }) : "", campo + i);
+                    });
+                    fila.appendChild(b);
+                }
+                return fila;
+            }));
+            if (estado.exitos >= 3) {
+                estadoP.textContent = ocT("{nombre} está estable.", { nombre: nombre });
+            } else if (estado.fallos >= 3) {
+                estadoP.textContent = ocT("{nombre} muere.", { nombre: nombre });
+            }
+        };
+        pintarCasillas();
+        caja.append(filas);
+        if (window.ocDados) {
+            const tirar = el("button", "oc-vida-accion", ocT("🎲 tirar la salvación"));
+            tirar.type = "button";
+            tirar.dataset.muerte = clave + ":tirar";
+            tirar.setAttribute("aria-label", ocT("Tirar la salvación de muerte de {nombre}", { nombre: nombre }));
+            tirar.addEventListener("click", () => {
+                const r = window.ocDados.tirar("1d20", ocT("salvación de muerte de {nombre}", { nombre: nombre }));
+                const d = r && r.d20 ? r.d20.queda : r ? r.total : 0;
+                if (!d) {
+                    return;
+                }
+                let texto;
+                if (d === 20) {
+                    estado.exitos = 0;
+                    estado.fallos = 0;
+                    cambiar(true, ocT("¡20 natural! {nombre} recupera 1 PG.", { nombre: nombre }), "tirar");
+                    return;
+                }
+                if (d === 1) {
+                    estado.fallos = Math.min(3, (estado.fallos || 0) + 2);
+                    texto = ocT("1 natural: dos fallos.");
+                } else if (d >= 10) {
+                    estado.exitos = Math.min(3, (estado.exitos || 0) + 1);
+                    texto = d + ocT(": éxito.") + (estado.exitos === 3 ? ocT(" Estable.") : "");
+                } else {
+                    estado.fallos = Math.min(3, (estado.fallos || 0) + 1);
+                    texto = d + ocT(": fallo.") + (estado.fallos === 3 ? ocT(" Muere.") : "");
+                }
+                cambiar(false, texto, "tirar");
+            });
+            caja.appendChild(tirar);
+        }
+        caja.appendChild(estadoP);
+        return caja;
+    }
+    // ¿Está a 0 PG (con PG apuntados)?
+    const caido = (c) => c && c.pg !== "" && c.pg !== null && c.pg !== undefined && !isNaN(parseInt(c.pg, 10)) && parseInt(c.pg, 10) <= 0;
+    // Las de un PJ de la iniciativa (las de la party van también a su ficha).
+    function muerte(id) {
+        const d = leer();
+        const c = d.lista.find((x) => x.id === id);
+        if (!c || !c.pj || !caido(c)) {
+            return null;
+        }
+        const estado = Object.assign({ exitos: 0, fallos: 0 }, c.muerte || {});
+        return cajaMuerte(estado, c.nombre, (e, revive) => {
+            const x = leer();
+            const y = x.lista.find((z) => z.id === id);
+            if (!y) {
+                return;
+            }
+            if (revive) {
+                y.pg = 1;
+                delete y.muerte;
+            } else {
+                y.muerte = { exitos: e.exitos || 0, fallos: e.fallos || 0 };
+            }
+            guardar(x, true);
+            document.dispatchEvent(new CustomEvent("oc-iniciativa:pg", { detail: { pj: y.pj, pg: y.pg, muerte: y.muerte || null } }));
+        }, "ini-" + id);
+    }
+
+    // Empezar el combate: ronda 1, le toca al primero.
+    function empezar(d) {
+        d.modo = "combate";
+        d.turno = 0;
+        d.ronda = 1;
+        d.lista.forEach((c) => {
+            c.usado = {};
+            c.legUsadas = 0;
+            delete c.concCD;
+        });
+    }
+    return { CLAVE, editores, editar, vida, chapas, cajaMuerte, muerte, caido, sonar, conSonido, leer, guardar, grupoDe, marcasDe, inicioDe, finDe, delTurno, nombresDe, gastarRonda, pasar, empezar };
+})();
+
 window.ocMontar.iniciativa = function (sitio, opciones) {
     // Suelta (en un módulo de la pantalla de máster, que ya es su
     // ventanita): sin sus dos ventanitas de dentro.
@@ -3563,12 +3880,12 @@ window.ocMontar.iniciativa = function (sitio, opciones) {
     const CLAVE = "richi-oc-iniciativa";
     // Los colores para distinguirlos (o uno a mano): el nombre es para el
     // lector de pantalla.
-    const COLORES = [["#3fae5a", "verde"], ["#3b7ddd", "azul"], ["#d23b3b", "rojo"], ["#8e5bd6", "morado"],
-        ["#e88a2a", "naranja"], ["#e6c229", "amarillo"], ["#e05aa8", "rosa"], ["#8a8a99", "gris"]];
+    const COLORES = [["#3fae5a", ocT("verde")], ["#3b7ddd", ocT("azul")], ["#d23b3b", ocT("rojo")], ["#8e5bd6", ocT("morado")],
+        ["#e88a2a", ocT("naranja")], ["#e6c229", ocT("amarillo")], ["#e05aa8", ocT("rosa")], ["#8a8a99", ocT("gris")]];
     // Los de antes (con tipo), a su color.
     const DE_TIPO = { personaje: "#3fae5a", npc: "#3b7ddd", monstruo: "#d23b3b" };
     const colorDe = (c) => (/^#[0-9a-f]{6}$/i.test(c.color || "") ? c.color : DE_TIPO[c.tipo] || COLORES[0][0]);
-    const nombreDeColor = (hex) => (COLORES.find((x) => x[0] === hex) || [hex, "a medida"])[1];
+    const nombreDeColor = (hex) => (COLORES.find((x) => x[0] === hex) || [hex, ocT("a medida")])[1];
     let datos = { lista: [], turno: -1, ronda: 1 };
     try {
         datos = Object.assign(datos, JSON.parse(localStorage.getItem(CLAVE) || "{}"));
@@ -3584,7 +3901,11 @@ window.ocMontar.iniciativa = function (sitio, opciones) {
         // Para quien quiera enterarse (los efectos con duración de la
         // pantalla de máster cuentan las rondas con esto).
         document.dispatchEvent(new CustomEvent("oc-iniciativa:guardada", { detail: { ronda: datos.ronda, modo: datos.modo } }));
+        // Y las otras iniciativas abiertas (en otra ventana, o la que edita
+        // desde ⏩ turnos), que se vuelvan a leer; ésta no («desde: esta»).
+        document.dispatchEvent(new CustomEvent("oc-iniciativa:cambio", { detail: { desde: esta } }));
     };
+    const esta = {};
     const crear = (tag, clase, texto) => {
         const x = document.createElement(tag);
         if (clase) {
@@ -3635,11 +3956,11 @@ window.ocMontar.iniciativa = function (sitio, opciones) {
     const nombre = campo("oc-ini-nombre", "nombre", "text", "es-nombre");
     nombre.autocomplete = "off";
     const ini = campo("oc-ini-ini", "ini", "number");
-    const ca = campo("oc-ini-ca", "CA", "number");
-    const pg = campo("oc-ini-pg", "PG", "number");
+    const ca = campo("oc-ini-ca", ocT("CA"), "number");
+    const pg = campo("oc-ini-pg", ocT("PG"), "number");
     const colores = crear("div", "oc-ini-colores");
     colores.setAttribute("role", "radiogroup");
-    colores.setAttribute("aria-label", "Color");
+    colores.setAttribute("aria-label", ocT("Color"));
     let elegido = COLORES[2][0];
     const muestras = [];
     const marcar = (hex) => {
@@ -3671,15 +3992,15 @@ window.ocMontar.iniciativa = function (sitio, opciones) {
     const aMedida = crear("input", "oc-ini-color-medida");
     aMedida.type = "color";
     aMedida.value = "#ffffff";
-    aMedida.setAttribute("aria-label", "Otro color, a medida");
-    aMedida.title = "Otro color";
+    aMedida.setAttribute("aria-label", ocT("Otro color, a medida"));
+    aMedida.title = ocT("Otro color");
     aMedida.addEventListener("input", () => {
         elegido = aMedida.value;
         muestras.forEach((b) => b.setAttribute("aria-checked", "false"));
     });
     colores.appendChild(aMedida);
     marcar(elegido);
-    const anadir = crear("button", "oc-vida-accion es-principal", "＋ añadir");
+    const anadir = crear("button", "oc-vida-accion es-principal", ocT("＋ añadir"));
     anadir.type = "submit";
     const pie = crear("div", "oc-ini-pie");
     pie.append(colores, anadir);
@@ -3687,12 +4008,12 @@ window.ocMontar.iniciativa = function (sitio, opciones) {
     form.addEventListener("submit", (e) => {
         e.preventDefault();
         if (!nombre.value.trim()) {
-            avisar("Ponle nombre.");
+            avisar(ocT("Ponle nombre."));
             nombre.focus();
             return;
         }
         meter({ nombre: nombre.value.trim(), color: elegido, ini: numeroDe(ini.value), ca: numeroDe(ca.value),
-            pg: numeroDe(pg.value) });
+            pg: numeroDe(pg.value), pgMax: numeroDe(pg.value) });
         nombre.value = "";
         ini.value = "";
         ca.value = "";
@@ -3705,10 +4026,10 @@ window.ocMontar.iniciativa = function (sitio, opciones) {
     const yo = botones && botones.dataset.ocNombre;
     let anadirme = null;
     if (yo) {
-        anadirme = botonDe("oc-vida-accion", "＋ " + yo + " (tirar su iniciativa)", () => {
+        anadirme = botonDe("oc-vida-accion", ocT("＋ {yo} (tirar su iniciativa)", { yo: yo }), () => {
             const bono = parseInt(botones.dataset.ocIni || "0", 10) || 0;
             const r = window.ocDados ? window.ocDados.tirar("1d20" + (bono ? (bono > 0 ? "+" : "") + bono : ""),
-                "iniciativa de " + yo) : null;
+                ocT("iniciativa de {yo}", { yo: yo })) : null;
             const vida = window.ocPartida && window.ocPartida.leer("vida");
             meter({ nombre: yo, color: COLORES[0][0], ini: r ? r.total : "", ca: numeroDe(botones.dataset.ocCa),
                 pg: vida && vida.actual !== undefined ? vida.actual : numeroDe(botones.dataset.ocPg) });
@@ -3720,7 +4041,7 @@ window.ocMontar.iniciativa = function (sitio, opciones) {
         datos.lista.push(c);
         guardar();
         pintar();
-        avisar("Añadido: " + c.nombre + (c.ini !== "" ? ", iniciativa " + c.ini : "") + ".");
+        avisar(ocT("Añadido: {nombre}{n}.", { nombre: c.nombre, n: c.ini !== "" ? ocT(", iniciativa {ini}", { ini: c.ini }) : "" }));
     }
 
     // ---- LAS MARCAS: lo que lleva encima cada uno (un estado, la
@@ -3755,6 +4076,8 @@ window.ocMontar.iniciativa = function (sitio, opciones) {
             if (caja.isConnected) {
                 pintar();
             }
+            // Ya hay dibujos para las marcas: que se repinten los de fuera.
+            document.dispatchEvent(new CustomEvent("oc-iniciativa:iconos"));
         }).catch(() => {
             // Sin el JSON: las marcas, sin dibujo ni resumen.
         });
@@ -3792,9 +4115,9 @@ window.ocMontar.iniciativa = function (sitio, opciones) {
     }
     // Las propias (las que se crean a mano), con su color y su forma, se
     // guardan para otra vez («richi-oc-marcas»).
-    const FORMAS = [["●", "círculo"], ["■", "cuadrado"], ["▲", "triángulo"], ["◆", "rombo"], ["★", "estrella"], ["♥", "corazón"]];
-    const COLORES_MARCA = [["#ffe873", "amarillo"], ["#ffb870", "naranja"], ["#ff8f8f", "rojo"], ["#ffa6d5", "rosa"],
-        ["#c9a2ff", "morado"], ["#8fb8ff", "azul"], ["#7fdcff", "celeste"], ["#8fe8a2", "verde"]];
+    const FORMAS = [["●", ocT("círculo")], ["■", ocT("cuadrado")], ["▲", ocT("triángulo")], ["◆", ocT("rombo")], ["★", ocT("estrella")], ["♥", ocT("corazón")]];
+    const COLORES_MARCA = [["#ffe873", ocT("amarillo")], ["#ffb870", ocT("naranja")], ["#ff8f8f", ocT("rojo")], ["#ffa6d5", ocT("rosa")],
+        ["#c9a2ff", ocT("morado")], ["#8fb8ff", ocT("azul")], ["#7fdcff", ocT("celeste")], ["#8fe8a2", ocT("verde")]];
     let propias = [];
     try {
         propias = JSON.parse(localStorage.getItem("richi-oc-marcas") || "[]");
@@ -3809,7 +4132,7 @@ window.ocMontar.iniciativa = function (sitio, opciones) {
         }
     };
     const marcasDe = (c) => (Array.isArray(c.marcas) ? c.marcas : (c.marcas = []));
-    const textoMarca = (mk) => mk.t + (mk.r ? " (" + mk.r + (mk.r === 1 ? " ronda" : " rondas") + ")" : "");
+    const textoMarca = (mk) => mk.t + (mk.r ? " (" + mk.r + (mk.r === 1 ? ocT(" ronda") : ocT(" rondas")) + ")" : "");
 
     // El dibujo de una marca: el emoji de las de siempre, o su forma de su
     // color en las propias.
@@ -3864,7 +4187,7 @@ window.ocMontar.iniciativa = function (sitio, opciones) {
 
     function chapasDe(c) {
         const ul = crear("ul", "oc-ini-marcas");
-        ul.setAttribute("aria-label", "Marcas de " + c.nombre);
+        ul.setAttribute("aria-label", ocT("Marcas de {nombre}", { nombre: c.nombre }));
         marcasDe(c).forEach((mk) => ul.appendChild(chapaCorta(mk, c)));
         ul.hidden = !marcasDe(c).length;
         return ul;
@@ -3881,10 +4204,10 @@ window.ocMontar.iniciativa = function (sitio, opciones) {
             grande.appendChild(d);
         }
         cuerpo.appendChild(grande);
-        cuerpo.appendChild(crear("p", "oc-hoja-nota", c.nombre + (mk.r ? " · le quedan " + mk.r + (mk.r === 1 ? " ronda" : " rondas")
-            : " · sin límite de rondas")));
+        cuerpo.appendChild(crear("p", "oc-hoja-nota", c.nombre + (mk.r ? ocT(" · le quedan {r}{n}", { r: mk.r, n: mk.r === 1 ? ocT(" ronda") : ocT(" rondas") })
+            : ocT(" · sin límite de rondas"))));
         const texto = crear("div", "oc-ini-marca-que");
-        texto.appendChild(crear("p", "", queEs(mk) || "Una marca propia, sin descripción."));
+        texto.appendChild(crear("p", "", queEs(mk) || ocT("Una marca propia, sin descripción.")));
         cuerpo.appendChild(texto);
         const regla = REGLA_DE[mk.t];
         if (regla && !mk.d) {
@@ -3895,7 +4218,7 @@ window.ocMontar.iniciativa = function (sitio, opciones) {
                 }
             });
         }
-        const quitarla = botonDe("oc-vida-accion", "✕ quitar la marca", () => {
+        const quitarla = botonDe("oc-vida-accion", ocT("✕ quitar la marca"), () => {
             const i = marcasDe(c).indexOf(mk);
             if (i >= 0) {
                 marcasDe(c).splice(i, 1);
@@ -3903,7 +4226,7 @@ window.ocMontar.iniciativa = function (sitio, opciones) {
             guardar();
             cerrar();
             pintar();
-            avisar("Quitada: " + mk.t + " de " + c.nombre + ".");
+            avisar(ocT("Quitada: {t} de {nombre}.", { t: mk.t, nombre: c.nombre }));
             const visible = Array.from(caja.querySelectorAll('.oc-ini-fila[data-id="' + CSS.escape(c.id) + '"] .es-marcas'))
                 .find((x) => x.offsetParent);
             (visible || vuelta).focus();
@@ -3912,7 +4235,9 @@ window.ocMontar.iniciativa = function (sitio, opciones) {
         const cerrar = window.ocVentana.abrir({ titulo: textoMarca(mk), cuerpo, vuelta, clase: "es-regla" });
     }
 
-    function editarMarcas(c, vuelta) {
+    // «dentroDe»: en vez de en su ventana, dentro de otra cosa (el editor de
+    // una criatura, que ya es una ventana).
+    function editarMarcas(c, vuelta, dentroDe) {
         const cuerpo = crear("div", "oc-ini-marcas-ventana");
         const actuales = crear("ul", "oc-ini-marcas-actuales");
         const rehacer = () => {
@@ -3924,12 +4249,12 @@ window.ocMontar.iniciativa = function (sitio, opciones) {
                         guardar();
                         rehacer();
                         pintar();
-                        avisar("Quitada: " + mk.t + ".");
-                    }, "Quitar la marca " + mk.t));
+                        avisar(ocT("Quitada: {t}.", { t: mk.t }));
+                    }, ocT("Quitar la marca {t}", { t: mk.t })));
                 return li;
             }));
             if (!marcasDe(c).length) {
-                actuales.appendChild(crear("li", "oc-vacio", "Sin marcas."));
+                actuales.appendChild(crear("li", "oc-vacio", ocT("Sin marcas.")));
             }
             hacerRapidas();
         };
@@ -3938,9 +4263,9 @@ window.ocMontar.iniciativa = function (sitio, opciones) {
         const buscar = crear("input", "oc-dados-texto");
         buscar.type = "search";
         buscar.id = "oc-ini-marca-buscar";
-        buscar.placeholder = "envenenado, bendecido…";
+        buscar.placeholder = ocT("envenenado, bendecido…");
         buscar.autocomplete = "off";
-        const etBuscar = crear("label", "oc-dados-etiqueta", "buscar");
+        const etBuscar = crear("label", "oc-dados-etiqueta", ocT("buscar"));
         etBuscar.htmlFor = buscar.id;
         const rapidasCaja = crear("div", "oc-ini-marcas-rapidas");
         let rapidas = [];
@@ -3975,36 +4300,36 @@ window.ocMontar.iniciativa = function (sitio, opciones) {
                 });
             rapidasCaja.replaceChildren(...rapidas);
             if (!rapidas.length) {
-                rapidasCaja.appendChild(crear("p", "oc-vacio", "Ninguna con eso: créala abajo."));
+                rapidasCaja.appendChild(crear("p", "oc-vacio", ocT("Ninguna con eso: créala abajo.")));
             }
         }
         buscar.addEventListener("input", hacerRapidas);
         // Una a mano: «Bendición», «Escudo de fe», «-2 CA»…
         const form = crear("form", "oc-ini-marca-nueva");
-        const etT = crear("label", "oc-dados-etiqueta", "otra marca");
+        const etT = crear("label", "oc-dados-etiqueta", ocT("otra marca"));
         const texto = crear("input", "oc-dados-texto");
         texto.id = "oc-ini-marca-texto";
-        texto.placeholder = "Escudo de fe, +2 CA, quemándose…";
+        texto.placeholder = ocT("Escudo de fe, +2 CA, quemándose…");
         texto.autocomplete = "off";
         etT.htmlFor = texto.id;
-        const etR = crear("label", "oc-dados-etiqueta", "rondas");
+        const etR = crear("label", "oc-dados-etiqueta", ocT("rondas"));
         const rondas = crear("input", "oc-dados-texto");
         rondas.id = "oc-ini-marca-rondas";
         rondas.type = "number";
         rondas.min = "1";
         rondas.inputMode = "numeric";
         etR.htmlFor = rondas.id;
-        const etD = crear("label", "oc-dados-etiqueta es-desc", "qué hace (opcional)");
+        const etD = crear("label", "oc-dados-etiqueta es-desc", ocT("qué hace (opcional)"));
         const desc = crear("input", "oc-dados-texto es-desc");
         desc.id = "oc-ini-marca-desc";
-        desc.placeholder = "+2 a la CA mientras rece…";
+        desc.placeholder = ocT("+2 a la CA mientras rece…");
         desc.autocomplete = "off";
         etD.htmlFor = desc.id;
-        const poner = crear("button", "oc-vida-accion es-principal", "＋ poner");
+        const poner = crear("button", "oc-vida-accion es-principal", ocT("＋ poner"));
         poner.type = "submit";
         // Su color y su forma (para las nuevas).
         const aspecto = crear("fieldset", "oc-ini-marca-aspecto");
-        aspecto.appendChild(crear("legend", "oc-dados-etiqueta", "color y forma (para una nueva)"));
+        aspecto.appendChild(crear("legend", "oc-dados-etiqueta", ocT("color y forma (para una nueva)")));
         let color = COLORES_MARCA[2][0];
         let forma = FORMAS[0][0];
         const muestrasC = COLORES_MARCA.map(([hex, nombre]) => {
@@ -4036,7 +4361,7 @@ window.ocMontar.iniciativa = function (sitio, opciones) {
         const guardarla = crear("input");
         guardarla.type = "checkbox";
         guardarla.checked = true;
-        etGuardar.append(guardarla, document.createTextNode(" guardarla para otra vez"));
+        etGuardar.append(guardarla, document.createTextNode(ocT(" guardarla para otra vez")));
         aspecto.append(filaC, filaF, etGuardar);
         form.append(etT, texto, etR, rondas, etD, desc, poner, aspecto);
         form.addEventListener("submit", (e) => {
@@ -4063,58 +4388,33 @@ window.ocMontar.iniciativa = function (sitio, opciones) {
             guardar();
             rehacer();
             pintar();
-            avisar("Puesta: " + t + ".");
+            avisar(ocT("Puesta: {t}.", { t: t }));
             texto.focus();
         });
         const buscarCaja = crear("div", "oc-ini-marca-buscador");
         buscarCaja.append(etBuscar, buscar);
-        cuerpo.append(crear("p", "oc-hoja-nota", "Las rondas son opcionales y valen también para las de un toque."),
-            buscarCaja, rapidasCaja, form, crear("h3", "oc-ini-marcas-titulo", "Lleva ahora"), actuales);
+        cuerpo.append(crear("p", "oc-hoja-nota", ocT("Las rondas son opcionales y valen también para las de un toque.")),
+            buscarCaja, rapidasCaja, form, crear("h3", "oc-ini-marcas-titulo", ocT("Lleva ahora")), actuales);
         rehacer();
-        window.ocVentana.abrir({ titulo: "marcas de " + c.nombre, cuerpo, vuelta, foco: buscar });
+        if (dentroDe) {
+            dentroDe.appendChild(cuerpo);
+            return;
+        }
+        window.ocVentana.abrir({ titulo: ocT("marcas de {nombre}", { nombre: c.nombre }), cuerpo, vuelta, foco: buscar });
     }
 
     // Al empezar una ronda, a cada marca con rondas se le quita una.
-    function gastarRonda() {
-        const acabadas = [];
-        datos.lista.forEach((c) => {
-            c.marcas = marcasDe(c).filter((mk) => {
-                if (!mk.r) {
-                    return true;
-                }
-                mk.r -= 1;
-                if (mk.r <= 0) {
-                    acabadas.push(mk.t + " en " + c.nombre);
-                    return false;
-                }
-                return true;
-            });
-        });
-        return acabadas;
-    }
 
     // ---- LOS GRUPOS: varios (los cuatro goblins) con la misma iniciativa,
     // que van juntos y actúan en el mismo turno. Cada uno lleva «grupo» (el
     // mismo texto en todos); en la lista van seguidos. ----
-    const grupoDe = (c) => (c && c.grupo) || "";
-    function inicioDe(i) {
-        const g = grupoDe(datos.lista[i]);
-        while (g && i > 0 && grupoDe(datos.lista[i - 1]) === g) {
-            i -= 1;
-        }
-        return i;
-    }
-    function finDe(i) {
-        const g = grupoDe(datos.lista[i]);
-        while (g && i < datos.lista.length - 1 && grupoDe(datos.lista[i + 1]) === g) {
-            i += 1;
-        }
-        return i;
-    }
-    // Los del turno de «i» (él solo, o todo su grupo).
-    const delTurno = (i) => (i < 0 || i >= datos.lista.length ? [] : datos.lista.slice(inicioDe(i), finDe(i) + 1));
-    const nombresDe = (cs) => (cs.length < 2 ? (cs[0] ? cs[0].nombre : "") : cs.slice(0, -1).map((c) => c.nombre).join(", ")
-        + " y " + cs[cs.length - 1].nombre);
+    // (Las cuentas, en window.ocTurnos: las mismas para la ventana de
+    // turnos de la pantalla de máster.)
+    const grupoDe = window.ocTurnos.grupoDe;
+    const inicioDe = (i) => window.ocTurnos.inicioDe(datos, i);
+    const finDe = (i) => window.ocTurnos.finDe(datos, i);
+    const delTurno = (i) => window.ocTurnos.delTurno(datos, i);
+    const nombresDe = window.ocTurnos.nombresDe;
     // Que cada grupo vaya seguido y tenga al menos dos; y todos con la
     // iniciativa del primero.
     function arreglarGrupos() {
@@ -4167,7 +4467,7 @@ window.ocMontar.iniciativa = function (sitio, opciones) {
         arreglarGrupos();
         guardar();
         pintar();
-        avisar(c.nombre + " va ahora con " + nombresDe(delTurno(i).filter((x) => x !== c)) + " (misma iniciativa, mismo turno).");
+        avisar(ocT("{nombre} va ahora con {nombresDe} (misma iniciativa, mismo turno).", { nombre: c.nombre, nombresDe: nombresDe(delTurno(i).filter((x) => x !== c)) }));
     }
     function separar(i) {
         const c = datos.lista[i];
@@ -4181,83 +4481,57 @@ window.ocMontar.iniciativa = function (sitio, opciones) {
         arreglarGrupos();
         guardar();
         pintar();
-        avisar(c.nombre + " va ahora solo.");
+        avisar(ocT("{nombre} va ahora solo.", { nombre: c.nombre }));
     }
 
     // ---- LA LISTA ----
     const ronda = crear("p", "oc-ini-ronda");
     const lista = crear("ol", "oc-ini-lista");
-    lista.setAttribute("aria-label", "Orden de los turnos");
+    lista.setAttribute("aria-label", ocT("Orden de los turnos"));
     const pasar = (paso) => {
         if (!datos.lista.length) {
             return;
         }
-        let acabadas = [];
-        // Un grupo es un solo turno: se salta de grupo en grupo.
-        const ahora = Math.max(0, Math.min(datos.turno, datos.lista.length - 1));
-        if (paso > 0) {
-            datos.turno = datos.turno < 0 ? 0 : finDe(ahora) + 1;
-            if (datos.turno >= datos.lista.length) {
-                datos.turno = 0;
-                datos.ronda += 1;
-                acabadas = gastarRonda();
-            }
-        } else {
-            datos.turno = inicioDe(ahora) - 1;
-            if (datos.turno < 0) {
-                if (datos.ronda > 1) {
-                    datos.turno = datos.lista.length - 1;
-                    datos.ronda -= 1;
-                } else {
-                    datos.turno = 0;
-                }
-            }
-            datos.turno = inicioDe(datos.turno);
-        }
-        const turno = delTurno(datos.turno);
-        if (paso > 0) {
-            turno.forEach((c) => {
-                c.usado = {};
-                c.legUsadas = 0;
-            });
-        }
+        const { turno, acabadas } = window.ocTurnos.pasar(datos, paso);
         guardar();
         pintar();
-        avisar("Ronda " + datos.ronda + ": le toca a " + nombresDe(turno) + "."
-            + (acabadas.length ? " Se acaba: " + acabadas.join(", ") + "." : ""));
+        avisar(ocT("Ronda {ronda}: le toca a {nombresDe}.{n}", { ronda: datos.ronda, nombresDe: nombresDe(turno), n: acabadas.length ? ocT(" Se acaba: {join}.", { join: acabadas.join(", ") }) : "" }));
     };
-    const siguiente = botonDe("oc-vida-accion es-principal", "siguiente ▶", () => pasar(1));
-    const anterior = botonDe("oc-vida-accion", "◀ anterior", () => pasar(-1));
+    const siguiente = botonDe("oc-vida-accion es-principal", ocT("siguiente ▶"), () => pasar(1));
+    // ⏭️: al pasar, saltarse a los que no son de la party y están a 0 PG.
+    const saltar = botonDe("oc-vida-accion oc-ini-saltar", ocT("⏭️ saltar a los caídos"), () => {
+        datos.saltarCaidos = !datos.saltarCaidos;
+        guardar();
+        pintarSaltar();
+        avisar(datos.saltarCaidos ? ocT("Al pasar de turno, se salta a los que no son de la party y están a 0 PG.")
+            : ocT("Al pasar de turno, no se salta a nadie."));
+    });
+    saltar.title = ocT("Saltarse en los turnos a los que no son de la party y están a 0 PG");
+    const pintarSaltar = () => saltar.setAttribute("aria-pressed", String(!!datos.saltarCaidos));
+    const anterior = botonDe("oc-vida-accion", ocT("◀ anterior"), () => pasar(-1));
     // Las dos pantallas: preparar (añadir, ordenar, quitar) y combate
     // (quién va, avanzar y retroceder, los PG y las marcas).
-    const empezar = botonDe("oc-vida-accion es-principal", "⚔️ empezar el combate", () => {
+    const empezar = botonDe("oc-vida-accion es-principal", ocT("⚔️ empezar el combate"), () => {
         if (!datos.lista.length) {
-            avisar("Primero añade a alguien.");
+            avisar(ocT("Primero añade a alguien."));
             return;
         }
-        datos.modo = "combate";
-        datos.turno = 0;
-        datos.ronda = 1;
-        datos.lista.forEach((c) => {
-            c.usado = {};
-            c.legUsadas = 0;
-            delete c.concCD;
-        });
+        window.ocTurnos.empezar(datos);
         guardar();
         pintar();
-        avisar("¡Combate! Ronda 1: le toca a " + nombresDe(delTurno(0)) + ".");
+        avisar(ocT("¡Combate! Ronda 1: le toca a {nombresDe}.", { nombresDe: nombresDe(delTurno(0)) }));
         pestanas[1].focus();
     });
-    const terminar = botonDe("oc-vida-accion", "🏁 terminar el combate", () => {
+    const terminar = botonDe("oc-vida-accion", ocT("🏁 terminar el combate"), () => {
         datos.modo = "preparar";
         datos.turno = -1;
         datos.ronda = 1;
         guardar();
         pintar();
-        avisar("Combate terminado.");
+        avisar(ocT("Combate terminado."));
         pestanas[0].focus();
     });
-    const ordenar = botonDe("oc-vida-accion", "⇅ por iniciativa", () => {
+    const ordenar = botonDe("oc-vida-accion", ocT("⇅ por iniciativa"), () => {
         const deAhora = datos.lista[datos.turno];
         // Los de un grupo, juntos (tienen la misma iniciativa; si empata
         // con otro, no se mezclan).
@@ -4275,25 +4549,25 @@ window.ocMontar.iniciativa = function (sitio, opciones) {
         arreglarGrupos();
         guardar();
         pintar();
-        avisar("Ordenados por iniciativa.");
+        avisar(ocT("Ordenados por iniciativa."));
     });
     let seguro = false;
-    const vaciar = botonDe("oc-vida-accion", "🗑️ vaciar", () => {
+    const vaciar = botonDe("oc-vida-accion", ocT("🗑️ vaciar"), () => {
         if (!seguro) {
             seguro = true;
-            vaciar.textContent = "🗑️ ¿seguro? pulsa otra vez";
+            vaciar.textContent = ocT("🗑️ ¿seguro? pulsa otra vez");
             setTimeout(() => {
                 seguro = false;
-                vaciar.textContent = "🗑️ vaciar";
+                vaciar.textContent = ocT("🗑️ vaciar");
             }, 4000);
             return;
         }
         seguro = false;
-        vaciar.textContent = "🗑️ vaciar";
+        vaciar.textContent = ocT("🗑️ vaciar");
         datos = { lista: [], turno: -1, ronda: 1 };
         guardar();
         pintar();
-        avisar("Combate vacío.");
+        avisar(ocT("Combate vacío."));
     });
 
     function mover(desde, hasta, foco) {
@@ -4307,7 +4581,7 @@ window.ocMontar.iniciativa = function (sitio, opciones) {
         arreglarGrupos();
         guardar();
         pintar();
-        avisar(c.nombre + ": puesto " + (hasta + 1) + " de " + datos.lista.length + ".");
+        avisar(ocT("{nombre}: puesto {n} de {length}.", { nombre: c.nombre, n: hasta + 1, length: datos.lista.length }));
         if (foco) {
             const b = lista.querySelectorAll(foco)[hasta];
             if (b) {
@@ -4323,7 +4597,7 @@ window.ocMontar.iniciativa = function (sitio, opciones) {
         input.type = "number";
         input.inputMode = "numeric";
         input.value = c[campoN] === "" || c[campoN] === undefined ? "" : String(c[campoN]);
-        input.setAttribute("aria-label", texto + " de " + c.nombre);
+        input.setAttribute("aria-label", ocT("{texto} de {nombre}", { texto: texto, nombre: c.nombre }));
         input.addEventListener("change", () => {
             if (campoN === "pg") {
                 ponerPg(c, numeroDe(input.value));
@@ -4345,29 +4619,221 @@ window.ocMontar.iniciativa = function (sitio, opciones) {
         return caja;
     }
 
+    // ---- EDITAR A UNO: su nombre, iniciativa, PG y CA, y sus estados y
+    // marcas, en una ventana. Cada criatura de la iniciativa es única: lo
+    // que se cambia aquí es sólo suyo (no del bestiario ni de las demás del
+    // mismo tipo). Se abre con ✎ en el combate, y desde ⏩ turnos y 🐲 la
+    // criatura del turno de la pantalla de máster. ----
+    function editarCriatura(id, vuelta) {
+        const de = () => datos.lista.find((x) => x.id === id);
+        const c = de();
+        if (!c) {
+            return false;
+        }
+        const cuerpo = crear("div", "oc-ini-editar");
+        cuerpo.appendChild(crear("p", "oc-hoja-nota", ocT("Cada criatura de la iniciativa es única: lo que cambies aquí sólo le afecta a ella, no al bestiario ni a las demás del mismo tipo.")));
+        const campos = crear("div", "oc-ini-editar-campos");
+        const campoE = (clave, texto, numero) => {
+            const caja = crear("div", "oc-ini-campo");
+            const input = crear("input", "oc-dados-texto");
+            input.id = "oc-ini-editar-" + clave;
+            input.value = c[clave] === undefined || c[clave] === null ? "" : String(c[clave]);
+            input.autocomplete = "off";
+            if (numero) {
+                input.type = "number";
+                input.inputMode = "numeric";
+            }
+            const l = crear("label", "oc-dados-etiqueta", texto);
+            l.htmlFor = input.id;
+            input.addEventListener("change", () => {
+                const x = de();
+                if (!x) {
+                    return;
+                }
+                if (clave === "nombre") {
+                    const nuevo = input.value.trim();
+                    if (!nuevo) {
+                        input.value = x.nombre;
+                        return;
+                    }
+                    x.nombre = nuevo;
+                } else if (clave === "pg") {
+                    ponerPg(x, numeroDe(input.value));
+                    avisar(ocT("{nombre}: {pg} PG.", { nombre: x.nombre, pg: x.pg === "" ? "—" : x.pg }));
+                    return;
+                } else {
+                    x[clave] = numeroDe(input.value);
+                    // En un grupo, la iniciativa es de todos.
+                    if (clave === "ini" && grupoDe(x)) {
+                        datos.lista.filter((y) => grupoDe(y) === grupoDe(x)).forEach((y) => {
+                            y.ini = x.ini;
+                        });
+                    }
+                }
+                guardar();
+                pintar();
+                avisar(ocT("Cambiado: {texto} de {nombre}.", { texto, nombre: x.nombre }));
+            });
+            caja.append(l, input);
+            return caja;
+        };
+        campos.append(campoE("nombre", ocT("nombre")), campoE("ini", ocT("iniciativa"), true), campoE("pg", ocT("PG"), true),
+            campoE("pgMax", ocT("PG máximos"), true), campoE("ca", ocT("CA"), true));
+        cuerpo.appendChild(campos);
+        // Sus estados y marcas: los de siempre a un toque, uno a mano y los
+        // que lleva (lo mismo que ⭐, aquí dentro).
+        const estados = crear("div", "oc-ini-editar-estados");
+        estados.appendChild(crear("h3", "oc-ini-marcas-titulo", ocT("Estados y marcas")));
+        editarMarcas(c, null, estados);
+        cuerpo.appendChild(estados);
+        window.ocVentana.abrir({ titulo: ocT("✎ {nombre}", { nombre: c.nombre }), cuerpo, vuelta,
+            foco: cuerpo.querySelector("#oc-ini-editar-pg") });
+        return true;
+    }
+
+    // Las salvaciones de muerte de un PJ a 0 PG (en su fila del combate).
+    function muerteDe(c) {
+        const estado = Object.assign({ exitos: 0, fallos: 0 }, c.muerte || {});
+        return window.ocTurnos.cajaMuerte(estado, c.nombre, (e, revive) => {
+            const x = datos.lista.find((y) => y.id === c.id);
+            if (!x) {
+                return;
+            }
+            if (revive) {
+                ponerPg(x, 1);
+                return;
+            }
+            x.muerte = { exitos: e.exitos || 0, fallos: e.fallos || 0 };
+            guardar();
+            document.dispatchEvent(new CustomEvent("oc-iniciativa:pg", { detail: { pj: x.pj, pg: x.pg, muerte: x.muerte } }));
+        }, "ini-" + c.id);
+    }
+
+    // ---- LA VIDA: un número y tres botones (daño, cura, vida temporal).
+    // El daño se lleva primero la vida temporal; la temporal no se suma
+    // (se queda la mayor). ----
+    function cambiarVida(id, vuelta) {
+        const de = () => datos.lista.find((x) => x.id === id);
+        const c = de();
+        if (!c) {
+            return false;
+        }
+        const cuerpo = crear("form", "oc-ini-vida");
+        const ahora = crear("p", "oc-ini-vida-ahora");
+        const pintarAhora = () => {
+            const x = de() || c;
+            ahora.textContent = ocT("PG: {pg}{temp}", { pg: (x.pg === "" || x.pg === undefined ? "—" : x.pg) + (numeroDe(x.pgMax) ? " / " + x.pgMax : ""),
+                temp: numeroDe(x.temp) ? ocT(" (+{n} temporales)", { n: x.temp }) : "" });
+        };
+        pintarAhora();
+        const et = crear("label", "oc-dados-etiqueta", ocT("cuánto"));
+        const cant = crear("input", "oc-dados-texto oc-ini-vida-numero");
+        cant.id = "oc-ini-vida-cuanto";
+        cant.type = "number";
+        cant.min = "0";
+        cant.inputMode = "numeric";
+        cant.autocomplete = "off";
+        et.htmlFor = cant.id;
+        const botones = crear("div", "oc-ini-vida-botones");
+        let cerrar = () => {};
+        const hacer = (que) => {
+            const x = de();
+            const n = Math.abs(parseInt(cant.value, 10) || 0);
+            if (!x || !n) {
+                avisar(ocT("Escribe cuánto."));
+                cant.focus();
+                return;
+            }
+            const pg = numeroDe(x.pg) || 0;
+            const temp = numeroDe(x.temp) || 0;
+            // Primero se cierra (si hay alerta de concentración, va en otra).
+            cerrar();
+            if (que === "temp") {
+                x.temp = Math.max(temp, n);
+                guardar();
+                pintar();
+                avisar(ocT("{nombre}: {n} PG temporales.", { nombre: x.nombre, n: x.temp }));
+            } else if (que === "cura") {
+                // Sin pasar de sus PG máximos (si se saben).
+                const max = numeroDe(x.pgMax);
+                ponerPg(x, max ? Math.max(pg, Math.min(max, pg + n)) : pg + n);
+                avisar(ocT("{nombre} se cura {n}: {pg} PG.", { nombre: x.nombre, n, pg: x.pg })
+                    + (max && x.pg === max ? ocT(" (Al máximo.)") : ""));
+            } else {
+                const aTemp = Math.min(temp, n);
+                x.temp = temp - aTemp || "";
+                ponerPg(x, Math.max(0, pg - (n - aTemp)), n);
+                if (!x.concCD) {
+                    avisar(ocT("{nombre} recibe {n} de daño: {pg} PG.", { nombre: x.nombre, n, pg: x.pg })
+                        + (aTemp ? ocT(" (La vida temporal ha parado {n}.)", { n: aTemp }) : ""));
+                }
+            }
+        };
+        botones.append(botonDe("oc-vida-accion", ocT("🗡 daño"), () => hacer("dano")),
+            botonDe("oc-vida-accion", ocT("💚 cura"), () => hacer("cura")),
+            botonDe("oc-vida-accion", ocT("🛡 vida temporal"), () => hacer("temp")));
+        // Intro: daño (lo más habitual).
+        cuerpo.addEventListener("submit", (e) => {
+            e.preventDefault();
+            hacer("dano");
+        });
+        cuerpo.append(ahora, et, cant, botones);
+        cerrar = window.ocVentana.abrir({ titulo: ocT("❤️ {nombre}", { nombre: c.nombre }), cuerpo, vuelta, foco: cant }) || (() => {});
+        return true;
+    }
+
     // ---- LOS PG: al bajar, si se concentra, toca su salvación (CD 10 o la
     // mitad del daño); y si es un PJ de la party, se apunta en su ficha. ----
-    function ponerPg(c, nuevo) {
+    // «dano»: el daño de verdad (con lo que paró la vida temporal), para la
+    // CD; si no se da, lo que bajan los PG.
+    function ponerPg(c, nuevo, dano) {
         const antes = numeroDe(c.pg);
         c.pg = nuevo;
-        if (antes !== "" && nuevo !== "" && nuevo < antes && marcasDe(c).some((mk) => mk.t === "concentración")) {
-            c.concCD = Math.min(30, Math.max(10, Math.floor((antes - nuevo) / 2)));
-            avisar("¡" + c.nombre + " se concentra! Salvación de Constitución CD " + c.concCD + ".");
+        let alerta = false;
+        const recibido = dano || (antes !== "" && nuevo !== "" && nuevo < antes ? antes - nuevo : 0);
+        // Un PJ: con PG, sin salvaciones de muerte; y daño estando a 0, un
+        // fallo.
+        if (c.pj && numeroDe(nuevo) > 0) {
+            delete c.muerte;
+        } else if (c.pj && antes === 0 && recibido > 0) {
+            c.muerte = Object.assign({ exitos: 0, fallos: 0 }, c.muerte);
+            c.muerte.fallos = Math.min(3, c.muerte.fallos + 1);
+            avisar(ocT("{nombre} recibe daño a 0 PG: un fallo de salvación de muerte.", { nombre: c.nombre }));
+        }
+        if (recibido > 0 && marcasDe(c).some((mk) => mk.t === "concentración")) {
+            c.concCD = Math.min(30, Math.max(10, Math.floor(recibido / 2)));
+            avisar(ocT("¡{nombre} se concentra! Salvación de Constitución CD {concCD}.", { nombre: c.nombre, concCD: c.concCD }));
+            alerta = true;
         }
         guardar();
         if (c.pj) {
-            document.dispatchEvent(new CustomEvent("oc-iniciativa:pg", { detail: { pj: c.pj, pg: c.pg } }));
+            document.dispatchEvent(new CustomEvent("oc-iniciativa:pg", { detail: { pj: c.pj, pg: c.pg, muerte: c.muerte || null } }));
         }
         pintar();
+        if (alerta) {
+            alertaConcentracion(c);
+        }
+    }
+
+    // La alerta: una ventana con la tirada de concentración (tirar, o decir
+    // si la mantiene o la pierde). Al acabar, el foco vuelve donde estaba.
+    function alertaConcentracion(c) {
+        const vuelta = document.activeElement && document.activeElement !== document.body ? document.activeElement : null;
+        const cuerpo = crear("div", "oc-ini-conc-alerta");
+        cuerpo.appendChild(crear("p", "oc-ini-vida-ahora", ocT("¡{nombre} se concentra y ha recibido daño!", { nombre: c.nombre })));
+        cuerpo.appendChild(crear("p", "oc-hoja-nota", ocT("Tiene que superar una salvación de Constitución CD {concCD} (10 o la mitad del daño, la mayor) o pierde la concentración.", { concCD: c.concCD })));
+        let cerrar = () => {};
+        cuerpo.appendChild(avisoConcentracion(c, () => cerrar()));
+        cerrar = window.ocVentana.abrir({ titulo: ocT("🧘 Concentración"), cuerpo, vuelta, clase: "es-regla" }) || (() => {});
     }
 
     // El aviso de concentración: tirar la salvación (si se sabe su bono) o
     // decir a mano si la mantiene o la pierde.
-    function avisoConcentracion(c) {
+    function avisoConcentracion(c, alAcabar) {
         const caja = crear("div", "oc-ini-conc");
         caja.setAttribute("role", "group");
-        caja.setAttribute("aria-label", "Concentración de " + c.nombre);
-        caja.appendChild(crear("span", "oc-ini-conc-texto", "🧘 Salvación de Con CD " + c.concCD));
+        caja.setAttribute("aria-label", ocT("Concentración de {nombre}", { nombre: c.nombre }));
+        caja.appendChild(crear("span", "oc-ini-conc-texto", ocT("🧘 Salvación de Con CD {concCD}", { concCD: c.concCD })));
         const acabar = (pierde) => {
             delete c.concCD;
             if (pierde) {
@@ -4375,43 +4841,47 @@ window.ocMontar.iniciativa = function (sitio, opciones) {
             }
             guardar();
             pintar();
-            avisar(c.nombre + (pierde ? " pierde la concentración." : " mantiene la concentración."));
+            avisar(c.nombre + (pierde ? ocT(" pierde la concentración.") : ocT(" mantiene la concentración.")));
+            if (alAcabar) {
+                alAcabar();
+            }
         };
         if (window.ocDados && c.con !== undefined && c.con !== "") {
             const bono = parseInt(c.con, 10) || 0;
-            caja.appendChild(botonDe("oc-ini-conc-boton", "🎲 tirar (" + (bono >= 0 ? "+" : "") + bono + ")", () => {
-                const r = window.ocDados.tirar("1d20" + (bono ? (bono > 0 ? "+" : "") + bono : ""), "concentración de " + c.nombre);
+            caja.appendChild(botonDe("oc-ini-conc-boton", ocT("🎲 tirar ({n}{bono})", { n: bono >= 0 ? "+" : "", bono: bono }), () => {
+                const r = window.ocDados.tirar("1d20" + (bono ? (bono > 0 ? "+" : "") + bono : ""), ocT("concentración de {nombre}", { nombre: c.nombre }));
                 if (r) {
                     acabar(r.total < c.concCD);
                 }
-            }, "Tirar la salvación de concentración de " + c.nombre));
+            }, ocT("Tirar la salvación de concentración de {nombre}", { nombre: c.nombre })));
         }
-        caja.append(botonDe("oc-ini-conc-boton", "✓ la mantiene", () => acabar(false), c.nombre + " mantiene la concentración"),
-            botonDe("oc-ini-conc-boton", "✕ la pierde", () => acabar(true), c.nombre + " pierde la concentración"));
+        caja.append(botonDe("oc-ini-conc-boton", ocT("✓ la mantiene"), () => acabar(false), ocT("{nombre} mantiene la concentración", { nombre: c.nombre })),
+            botonDe("oc-ini-conc-boton", ocT("✕ la pierde"), () => acabar(true), ocT("{nombre} pierde la concentración", { nombre: c.nombre })));
         return caja;
     }
 
     // ---- LO GASTADO EN SU TURNO: acción, acción adicional y reacción (y las
     // legendarias de los monstruos que las tienen). Se recupera al empezar
     // su turno. ----
-    const USOS = [["a", "⚔️", "acción"], ["b", "⚡", "adicional"], ["r", "↩️", "reacción"]];
+    const USOS = [["a", "⚔️", ocT("acción"), ocT("Acción")], ["b", "⚡", ocT("adicional"), ocT("Acción adicional")],
+        ["r", "↩️", ocT("reacción"), ocT("Reacción")]];
     function usosDe(c) {
         const caja = crear("div", "oc-ini-usos");
         caja.setAttribute("role", "group");
-        caja.setAttribute("aria-label", "Lo gastado por " + c.nombre + " este turno");
+        caja.setAttribute("aria-label", ocT("Lo gastado por {nombre} este turno", { nombre: c.nombre }));
         c.usado = c.usado || {};
-        USOS.forEach(([k, emoji, texto]) => {
+        USOS.forEach(([k, emoji, texto, largo]) => {
             const b = botonDe("oc-ini-uso", "", () => {
                 c.usado[k] = !c.usado[k];
                 guardar();
                 b.setAttribute("aria-pressed", c.usado[k] ? "true" : "false");
-                avisar(c.nombre + ": " + texto + (c.usado[k] ? " gastada." : " libre."));
-            }, (texto === "acción" ? "Acción" : texto === "adicional" ? "Acción adicional" : "Reacción") + " de " + c.nombre);
+                avisar(c.nombre + ": " + texto + (c.usado[k] ? ocT(" gastada.") : ocT(" libre.")));
+            }, ocT("{n} de {nombre}", { n: largo, nombre: c.nombre }));
             const em = crear("span", "", emoji);
             em.setAttribute("aria-hidden", "true");
             b.append(em, crear("span", "oc-ini-uso-texto", texto));
             b.setAttribute("aria-pressed", c.usado[k] ? "true" : "false");
-            b.title = "Pulsa al gastarla; vuelve al empezar su turno";
+            b.title = ocT("Pulsa al gastarla; vuelve al empezar su turno");
             caja.appendChild(b);
         });
         const leg = parseInt(c.leg, 10) || 0;
@@ -4420,20 +4890,20 @@ window.ocMontar.iniciativa = function (sitio, opciones) {
             const legC = crear("span", "oc-ini-leg");
             const em = crear("span", "", "🐉");
             em.setAttribute("aria-hidden", "true");
-            legC.append(em, crear("span", "oc-ini-uso-texto", "legendarias " + (leg - usadas) + "/" + leg));
+            legC.append(em, crear("span", "oc-ini-uso-texto", ocT("legendarias {n}/{leg}", { n: leg - usadas, leg: leg })));
             const menos = botonDe("oc-ini-uso es-leg", "−1", () => {
                 c.legUsadas = Math.min(leg, usadas + 1);
                 guardar();
                 pintar();
-                avisar(c.nombre + ": le quedan " + (leg - c.legUsadas) + " acciones legendarias.");
-            }, "Gastar una acción legendaria de " + c.nombre + " (le quedan " + (leg - usadas) + " de " + leg + ")");
+                avisar(ocT("{nombre}: le quedan {n} acciones legendarias.", { nombre: c.nombre, n: leg - c.legUsadas }));
+            }, ocT("Gastar una acción legendaria de {nombre} (le quedan {n} de {leg})", { nombre: c.nombre, n: leg - usadas, leg: leg }));
             menos.disabled = usadas >= leg;
             const vuelve = botonDe("oc-ini-uso es-leg", "↺", () => {
                 c.legUsadas = 0;
                 guardar();
                 pintar();
-                avisar(c.nombre + ": vuelve a tener " + leg + " acciones legendarias.");
-            }, "Recuperar las acciones legendarias de " + c.nombre);
+                avisar(ocT("{nombre}: vuelve a tener {leg} acciones legendarias.", { nombre: c.nombre, leg: leg }));
+            }, ocT("Recuperar las acciones legendarias de {nombre}", { nombre: c.nombre }));
             caja.append(legC, menos, vuelve);
         }
         return caja;
@@ -4464,7 +4934,7 @@ window.ocMontar.iniciativa = function (sitio, opciones) {
             }
             const asa = crear("span", "oc-ini-asa", "⠿");
             asa.setAttribute("aria-hidden", "true");
-            asa.title = "Arrástralo para cambiarlo de sitio";
+            asa.title = ocT("Arrástralo para cambiarlo de sitio");
             asa.addEventListener("pointerdown", (e) => empezarArrastre(e, li, i));
             const quien = crear("div", "oc-ini-quien");
             // El nombre se cambia aquí mismo (el «Mago» del bestiario puede
@@ -4473,7 +4943,7 @@ window.ocMontar.iniciativa = function (sitio, opciones) {
             n.value = c.nombre;
             n.maxLength = 60;
             n.autocomplete = "off";
-            n.setAttribute("aria-label", "Nombre (" + nombreDeColor(colorDe(c)) + ")");
+            n.setAttribute("aria-label", ocT("Nombre ({nombreDeColor})", { nombreDeColor: nombreDeColor(colorDe(c)) }));
             n.addEventListener("change", () => {
                 const nuevo = n.value.trim();
                 if (!nuevo) {
@@ -4482,29 +4952,28 @@ window.ocMontar.iniciativa = function (sitio, opciones) {
                 }
                 c.nombre = nuevo;
                 guardar();
-                avisar("Ahora se llama " + nuevo + ".");
+                avisar(ocT("Ahora se llama {nuevo}.", { nuevo: nuevo }));
             });
             quien.append(n, chapasDe(c));
             if (g && !conArriba) {
-                quien.prepend(crear("span", "oc-ini-grupo", "🔗 grupo de " + delTurno(i).length));
+                quien.prepend(crear("span", "oc-ini-grupo", ocT("🔗 grupo de {n}", { n: delTurno(i).length })));
             }
             if (i === datos.turno) {
-                quien.prepend(crear("span", "oc-ini-le-toca", "▶ le toca"));
+                quien.prepend(crear("span", "oc-ini-le-toca", ocT("▶ le toca")));
             }
             const datosC = crear("div", "oc-ini-datos");
-            datosC.append(numeroEn(c, "ini", "ini", i), numeroEn(c, "ca", "CA", i), numeroEn(c, "pg", "PG", i));
+            datosC.append(numeroEn(c, "ini", "ini", i), numeroEn(c, "ca", ocT("CA"), i), numeroEn(c, "pg", ocT("PG"), i));
             const mandos = crear("div", "oc-ini-mandos");
-            const bMarcas = botonDe("oc-ini-mando es-marcas", "⭐", () => editarMarcas(c, bMarcas), "Marcas de " + c.nombre);
+            const bMarcas = botonDe("oc-ini-mando es-marcas", "⭐", () => editarMarcas(c, bMarcas), ocT("Marcas de {nombre}", { nombre: c.nombre }));
             bMarcas.setAttribute("aria-haspopup", "dialog");
             // 🔗 con el de arriba (mismo turno) o 🔓 separarlo.
-            const bGrupo = g ? botonDe("oc-ini-mando es-grupo", "🔓", () => separar(i), "Separar a " + c.nombre + " de su grupo")
-                : botonDe("oc-ini-mando es-grupo", "🔗", () => unirArriba(i), i > 0 ? "Juntar a " + c.nombre + " con "
-                    + datos.lista[i - 1].nombre + " (misma iniciativa, mismo turno)" : "Juntar con el de arriba");
-            bGrupo.title = g ? "Separar del grupo" : "Juntar con el de arriba: misma iniciativa y mismo turno";
+            const bGrupo = g ? botonDe("oc-ini-mando es-grupo", "🔓", () => separar(i), ocT("Separar a {nombre} de su grupo", { nombre: c.nombre }))
+                : botonDe("oc-ini-mando es-grupo", "🔗", () => unirArriba(i), i > 0 ? ocT("Juntar a {nombre} con {nombre2} (misma iniciativa, mismo turno)", { nombre: c.nombre, nombre2: datos.lista[i - 1].nombre }) : ocT("Juntar con el de arriba"));
+            bGrupo.title = g ? ocT("Separar del grupo") : ocT("Juntar con el de arriba: misma iniciativa y mismo turno");
             bGrupo.disabled = !g && i === 0;
             mandos.append(bMarcas, bGrupo,
-                botonDe("oc-ini-mando es-subir", "↑", () => mover(i, i - 1, ".es-subir"), "Subir a " + c.nombre),
-                botonDe("oc-ini-mando es-bajar", "↓", () => mover(i, i + 1, ".es-bajar"), "Bajar a " + c.nombre),
+                botonDe("oc-ini-mando es-subir", "↑", () => mover(i, i - 1, ".es-subir"), ocT("Subir a {nombre}", { nombre: c.nombre })),
+                botonDe("oc-ini-mando es-bajar", "↓", () => mover(i, i + 1, ".es-bajar"), ocT("Bajar a {nombre}", { nombre: c.nombre })),
                 botonDe("oc-ini-mando es-quitar", "✕", () => {
                     const deAhora = datos.lista[datos.turno];
                     datos.lista.splice(i, 1);
@@ -4512,9 +4981,9 @@ window.ocMontar.iniciativa = function (sitio, opciones) {
                     arreglarGrupos();
                     guardar();
                     pintar();
-                    avisar("Quitado: " + c.nombre + ".");
+                    avisar(ocT("Quitado: {nombre}.", { nombre: c.nombre }));
                     (lista.querySelectorAll(".es-quitar")[Math.min(i, datos.lista.length - 1)] || nombre).focus();
-                }, "Quitar a " + c.nombre));
+                }, ocT("Quitar a {nombre}", { nombre: c.nombre })));
             li.append(asa, quien, datosC, mandos);
             return li;
         }));
@@ -4529,7 +4998,7 @@ window.ocMontar.iniciativa = function (sitio, opciones) {
     const toca = crear("p", "oc-ini-combate-toca");
     toca.setAttribute("aria-live", "polite");
     const listaC = crear("ol", "oc-ini-lista es-combate");
-    listaC.setAttribute("aria-label", "Orden de los turnos");
+    listaC.setAttribute("aria-label", ocT("Orden de los turnos"));
 
     function pintarCombate() {
         if (datos.turno < 0 || datos.turno >= datos.lista.length) {
@@ -4538,8 +5007,9 @@ window.ocMontar.iniciativa = function (sitio, opciones) {
         datos.turno = inicioDe(datos.turno);
         const ahora = datos.lista[datos.turno];
         const turno = delTurno(datos.turno);
-        rondaC.textContent = "Ronda " + datos.ronda;
-        toca.replaceChildren(crear("span", "oc-ini-combate-le", "le toca a "), crear("strong", "", nombresDe(turno)),
+        rondaC.textContent = ocT("Ronda {ronda}", { ronda: datos.ronda });
+        pintarSaltar();
+        toca.replaceChildren(crear("span", "oc-ini-combate-le", ocT("le toca a ")), crear("strong", "", nombresDe(turno)),
             turno.length < 2 ? chapasDe(ahora) : document.createTextNode(""));
         toca.style.borderLeftColor = colorDe(ahora);
         listaC.replaceChildren(...datos.lista.map((c, i) => {
@@ -4558,47 +5028,37 @@ window.ocMontar.iniciativa = function (sitio, opciones) {
             n.appendChild(crear("span", "visually-hidden", " (" + nombreDeColor(colorDe(c)) + ")"));
             quien.append(n, chapasDe(c));
             if (g && !conArriba) {
-                quien.prepend(crear("span", "oc-ini-grupo", "🔗 grupo de " + delTurno(i).length));
+                quien.prepend(crear("span", "oc-ini-grupo", ocT("🔗 grupo de {n}", { n: delTurno(i).length })));
             }
             if (leToca) {
-                quien.prepend(crear("span", "oc-ini-le-toca", "▶ le toca"));
+                quien.prepend(crear("span", "oc-ini-le-toca", ocT("▶ le toca")));
             }
             const datosC = crear("div", "oc-ini-datos es-combate");
-            datosC.appendChild(crear("span", "oc-ini-fijo", "ini " + (c.ini === "" || c.ini === undefined ? "—" : c.ini)
-                + " · CA " + (c.ca === "" || c.ca === undefined ? "—" : c.ca)));
-            const pgCaja = numeroEn(c, "pg", "PG", i);
-            const sumar = (d) => {
-                ponerPg(c, (numeroDe(c.pg) || 0) + d);
-                avisar(c.nombre + ": " + c.pg + " PG.");
-                const otra = Array.from(listaC.querySelectorAll('.oc-ini-fila[data-id="' + CSS.escape(c.id) + '"] .oc-ini-cantidad'))[0];
-                if (otra) {
-                    otra.focus();
-                }
-            };
-            // Daño o curación de una vez: el número y 🗡 o 💚.
-            const cant = crear("input", "oc-ini-numero oc-ini-cantidad");
-            cant.type = "number";
-            cant.min = "0";
-            cant.inputMode = "numeric";
-            cant.placeholder = "±";
-            cant.setAttribute("aria-label", "Cuánto daño o curación a " + c.nombre);
-            const cuanto = () => Math.abs(parseInt(cant.value, 10) || 1);
-            cant.addEventListener("keydown", (e) => {
-                if (e.key === "Enter") {
-                    e.preventDefault();
-                    sumar(-cuanto());
-                }
-            });
-            datosC.append(pgCaja, cant, botonDe("oc-ini-mando", "🗡", () => sumar(-cuanto()),
-                "Daño a " + c.nombre + " (lo escrito, o 1)"), botonDe("oc-ini-mando", "💚", () => sumar(cuanto()),
-                "Curar a " + c.nombre + " (lo escrito, o 1)"));
-            const bMarcas = botonDe("oc-ini-mando es-marcas", "⭐", () => editarMarcas(c, bMarcas), "Marcas de " + c.nombre);
+            datosC.appendChild(crear("span", "oc-ini-fijo", ocT("ini {n} · CA {n2}", { n: c.ini === "" || c.ini === undefined ? "—" : c.ini, n2: c.ca === "" || c.ca === undefined ? "—" : c.ca })));
+            const pgCaja = numeroEn(c, "pg", ocT("PG"), i);
+            // Daño, cura o vida temporal: en su ventana (❤️).
+            const bVida = botonDe("oc-ini-mando es-vida", "❤️", () => cambiarVida(c.id, { focus: () => {
+                const otro = listaC.querySelector('.oc-ini-fila[data-id="' + CSS.escape(c.id) + '"] .es-vida');
+                (otro || listaC).focus();
+            } }), ocT("Daño, cura o vida temporal a {nombre}", { nombre: c.nombre }));
+            bVida.setAttribute("aria-haspopup", "dialog");
+            datosC.append(pgCaja);
+            if (numeroDe(c.temp)) {
+                datosC.appendChild(crear("span", "oc-ini-fijo", ocT("+{n} temp.", { n: c.temp })));
+            }
+            datosC.appendChild(bVida);
+            const bMarcas = botonDe("oc-ini-mando es-marcas", "⭐", () => editarMarcas(c, bMarcas), ocT("Marcas de {nombre}", { nombre: c.nombre }));
             bMarcas.setAttribute("aria-haspopup", "dialog");
+            const bEditar = botonDe("oc-ini-mando", "✎", () => editarCriatura(c.id, bEditar), ocT("Editar a {nombre}", { nombre: c.nombre }));
+            bEditar.setAttribute("aria-haspopup", "dialog");
             const mandos = crear("div", "oc-ini-mandos");
-            mandos.appendChild(bMarcas);
+            mandos.append(bEditar, bMarcas);
             li.append(quien, datosC, mandos, usosDe(c));
             if (c.concCD) {
                 li.appendChild(avisoConcentracion(c));
+            }
+            if (c.pj && window.ocTurnos.caido(c)) {
+                li.appendChild(muerteDe(c));
             }
             return li;
         }));
@@ -4644,7 +5104,7 @@ window.ocMontar.iniciativa = function (sitio, opciones) {
         document.addEventListener("pointercancel", fin);
     }
 
-    const vacio = crear("p", "oc-vacio", "Todavía no hay nadie en el combate.");
+    const vacio = crear("p", "oc-vacio", ocT("Todavía no hay nadie en el combate."));
     const caja = crear("div", suelta ? "oc-ini-suelta" : "oc-hoja");
     const ventanita = (titulo, emoji, dentro) => {
         if (suelta) {
@@ -4667,18 +5127,17 @@ window.ocMontar.iniciativa = function (sitio, opciones) {
     const mandos = crear("div", "oc-vida-descansos");
     mandos.append(empezar, ordenar, vaciar);
     if (opciones && typeof opciones.traerParty === "function") {
-        mandos.prepend(botonDe("oc-vida-accion", "🛡️ ＋ la party", () => {
+        mandos.prepend(botonDe("oc-vida-accion", ocT("🛡️ ＋ la party"), () => {
             const n = opciones.traerParty();
-            avisar(n ? "A la iniciativa: " + n + "." : "La party ya estaba (o no hay nadie en ella).");
-        }, "Poner a toda la party en la iniciativa (tira su iniciativa)"));
+            avisar(n ? ocT("A la iniciativa: {n}.", { n: n }) : ocT("La party ya estaba (o no hay nadie en ella)."));
+        }, ocT("Poner a toda la party en la iniciativa (tira su iniciativa)")));
     }
-    const leyenda = crear("p", "oc-hoja-nota", "Arrastra por el ⠿ (o usa ↑ y ↓) para cambiar el orden. Iniciativa, CA y"
-        + " PG son opcionales; ⭐ pone marcas (estados, concentración, conjuros…).");
+    const leyenda = crear("p", "oc-hoja-nota", ocT("Arrastra por el ⠿ (o usa ↑ y ↓) para cambiar el orden. Iniciativa, CA y PG son opcionales; ⭐ pone marcas (estados, concentración, conjuros…)."));
     // Las dos pestañas: preparar y combate.
     const barraModos = crear("div", "oc-ini-modos");
     barraModos.setAttribute("role", "tablist");
-    barraModos.setAttribute("aria-label", "Iniciativa");
-    const pestanas = [["preparar", "🛠️ preparar"], ["combate", "⚔️ combate"]].map(([modo, texto], i) => {
+    barraModos.setAttribute("aria-label", ocT("Iniciativa"));
+    const pestanas = [["preparar", ocT("🛠️ preparar")], ["combate", ocT("⚔️ combate")]].map(([modo, texto], i) => {
         const b = botonDe("oc-ini-modo", texto, () => {
             if (modo === "combate" && datos.modo !== "combate") {
                 empezar.click();
@@ -4710,11 +5169,11 @@ window.ocMontar.iniciativa = function (sitio, opciones) {
         b.setAttribute("aria-controls", p.id);
     });
     const mandosC = crear("div", "oc-vida-descansos oc-ini-combate-mandos");
-    mandosC.append(anterior, siguiente, terminar);
+    mandosC.append(anterior, siguiente, saltar, terminar);
     panelPreparar.append(
         ventanita("combate.ini", "⏱️", [ronda, mandos, vacio, lista, leyenda]),
         ventanita("añadir.txt", "＋", anadirme ? [form, anadirme] : [form]));
-    panelCombate.append(ventanita("¡combate!", "⚔️", [rondaC, toca, mandosC, listaC]));
+    panelCombate.append(ventanita(ocT("¡combate!"), "⚔️", [rondaC, toca, mandosC, listaC]));
     caja.append(barraModos, panelPreparar, panelCombate);
     sitio.replaceChildren(caja, aviso);
     arreglarGrupos();
@@ -4723,7 +5182,7 @@ window.ocMontar.iniciativa = function (sitio, opciones) {
     document.addEventListener("oc:reglas", cargarReglas);
     // Si otro (el bestiario de la pantalla de máster) mete a alguien en
     // «richi-oc-iniciativa», avisa con este evento y se vuelve a leer.
-    document.addEventListener("oc-iniciativa:cambio", () => {
+    function releer() {
         try {
             datos = Object.assign({ lista: [], turno: -1, ronda: 1 }, JSON.parse(localStorage.getItem(CLAVE) || "{}"));
         } catch (e) {
@@ -4731,7 +5190,36 @@ window.ocMontar.iniciativa = function (sitio, opciones) {
         }
         arreglarGrupos();
         pintar();
+    }
+    document.addEventListener("oc-iniciativa:cambio", (e) => {
+        if (!(e.detail && e.detail.desde === esta)) {
+            releer();
+        }
     });
+    // Para editar a alguien desde fuera (⏩ turnos, 🐲 criatura del turno):
+    // ver window.ocTurnos.editar.
+    // Lo de fuera (las chapas) se pinta a menudo: sólo se vuelve a leer si
+    // lo guardado ha cambiado.
+    const releerSiCambia = () => {
+        try {
+            if (localStorage.getItem(CLAVE) !== JSON.stringify(datos)) {
+                releer();
+            }
+        } catch (e) {
+            // Sin almacenamiento: con lo que hay.
+        }
+    };
+    window.ocTurnos.editores.push({ caja, editar: (id, vuelta) => {
+        releer();
+        return editarCriatura(id, vuelta);
+    }, vida: (id, vuelta) => {
+        releer();
+        return cambiarVida(id, vuelta);
+    }, chapas: (id) => {
+        releerSiCambia();
+        const c = datos.lista.find((x) => x.id === id);
+        return c ? chapasDe(c) : null;
+    } });
 };
 
 (function () {
@@ -4800,12 +5288,12 @@ window.ocMontar.reglas = function (sitio, idBuscar, abrir) {
     caja.className = "oc-reglas-buscar";
     const etiqueta = document.createElement("label");
     etiqueta.className = "oc-dados-etiqueta";
-    etiqueta.textContent = "buscar";
+    etiqueta.textContent = ocT("buscar");
     const input = document.createElement("input");
     input.type = "search";
     input.id = idBuscar || "oc-reglas-buscar";
     input.className = "oc-dados-texto";
-    input.placeholder = "concentración, derribado, cobertura…";
+    input.placeholder = ocT("concentración, derribado, cobertura…");
     etiqueta.htmlFor = input.id;
     const cuantas = document.createElement("p");
     cuantas.className = "oc-hoja-nota";
@@ -4828,7 +5316,7 @@ window.ocMontar.reglas = function (sitio, idBuscar, abrir) {
             grupos.forEach((g) => {
                 g.hidden = !g.querySelector(".oc-regla:not([hidden])");
             });
-            cuantas.textContent = q ? (n ? n + (n === 1 ? " regla" : " reglas") : "Ninguna regla con eso.") : "";
+            cuantas.textContent = q ? (n ? n + (n === 1 ? ocT(" regla") : ocT(" reglas")) : ocT("Ninguna regla con eso.")) : "";
         }, 150);
     });
 };
@@ -4863,7 +5351,7 @@ window.ocMontar.reglas = function (sitio, idBuscar, abrir) {
         if (que) {
             b.dataset.que = que;
         }
-        b.setAttribute("aria-label", "Tirar " + texto + (que ? " (" + que + ")" : ""));
+        b.setAttribute("aria-label", ocT("Tirar {texto}{n}", { texto: texto, n: que ? " (" + que + ")" : "" }));
         return b;
     }
     const limpia = (f) => f.replace(/\s+/g, "").replace(/−/g, "-");

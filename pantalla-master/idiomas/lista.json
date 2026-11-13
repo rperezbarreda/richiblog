@@ -1,0 +1,26 @@
+[
+  {
+    "codigo": "es",
+    "nombre": "Castellano",
+    "interfaz": 100,
+    "compendio": 100
+  },
+  {
+    "codigo": "ca",
+    "nombre": "Català",
+    "interfaz": 0,
+    "compendio": 0
+  },
+  {
+    "codigo": "eu",
+    "nombre": "Euskara",
+    "interfaz": 0,
+    "compendio": 0
+  },
+  {
+    "codigo": "gl",
+    "nombre": "Galego",
+    "interfaz": 0,
+    "compendio": 0
+  }
+]

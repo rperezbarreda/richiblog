@@ -753,19 +753,23 @@
     line-height: 1.7;
 }
 
-.ajustes-pie a {
+.ajustes-pie a,
+.ajustes-grupo-nota a {
     color: var(--yellow);
     text-decoration: underline;
     text-underline-offset: 3px;
 }
 
 .ajustes-pie a:hover,
-.ajustes-pie a:focus-visible {
+.ajustes-pie a:focus-visible,
+.ajustes-grupo-nota a:hover,
+.ajustes-grupo-nota a:focus-visible {
     color: var(--yellow-contrast);
     background: var(--yellow);
 }
 
-.ajustes-pie a:focus-visible {
+.ajustes-pie a:focus-visible,
+.ajustes-grupo-nota a:focus-visible {
     outline: 2px solid var(--yellow);
     outline-offset: 2px;
 }
@@ -1221,4 +1225,12 @@
     :root[data-theme^="terminal-"] .gatin-random-header h2::after {
         animation: none;
     }
+}
+
+/* La bandera de un idioma (Aa y la entrada de la pantalla de máster). */
+.oc-bandera {
+    flex: none;
+    width: 1.5em;
+    height: 1em;
+    vertical-align: -0.12em;
 }

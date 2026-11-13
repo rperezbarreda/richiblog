@@ -29,7 +29,7 @@
     const aleatorio = $("[data-repro-aleatorio]");
 
     if (!("BroadcastChannel" in window)) {
-        aviso.textContent = "Este navegador no puede hablar con la pantalla de máster.";
+        aviso.textContent = ocT("Este navegador no puede hablar con la pantalla de máster.");
         return;
     }
     const canal = new BroadcastChannel("pantalla-master-musica");
@@ -51,16 +51,16 @@
             }
         }
         const hay = !!e.nombre;
-        document.title = hay ? (e.suena ? "▶ " : "⏸ ") + e.nombre + " · Música" : "Música · Pantalla de máster";
-        titulo.textContent = hay ? e.nombre : "Nada sonando.";
-        carpeta.textContent = hay ? [e.carpeta ? "📁 " + e.carpeta : "", e.total ? (e.pos + 1) + " de " + e.total : ""]
+        document.title = hay ? ocT("{n} · Música", { n: (e.suena ? "▶ " : "⏸ ") + e.nombre }) : ocT("Música · Pantalla de máster");
+        titulo.textContent = hay ? e.nombre : ocT("Nada sonando.");
+        carpeta.textContent = hay ? [e.carpeta ? "📁 " + e.carpeta : "", e.total ? ocT("{n} de {total}", { n: e.pos + 1, total: e.total }) : ""]
             .filter(Boolean).join(" · ") : "";
         tocar.textContent = e.suena ? "⏸" : "▶";
         tocar.setAttribute("aria-label", e.suena ? "Pausa" : "Reproducir");
         if (!arrastrando) {
             barra.value = e.duracion ? Math.round(e.actual / e.duracion * 1000) : 0;
         }
-        barra.setAttribute("aria-valuetext", minutos(e.actual) + " de " + minutos(e.duracion));
+        barra.setAttribute("aria-valuetext", minutos(e.actual) + ocT(" de ") + minutos(e.duracion));
         tiempo.textContent = minutos(e.actual) + " / " + minutos(e.duracion);
         if (document.activeElement !== volumen) {
             volumen.value = Math.round((e.volumen || 0) * 100);
@@ -146,7 +146,7 @@
         if (Date.now() - ultimo > 4000) {
             mandar({ t: "hola" });
             if (Date.now() - ultimo > 6000) {
-                aviso.textContent = "No encuentro la pantalla de máster: ábrela en este mismo navegador.";
+                aviso.textContent = ocT("No encuentro la pantalla de máster: ábrela en este mismo navegador.");
             }
         }
     }, 2000);

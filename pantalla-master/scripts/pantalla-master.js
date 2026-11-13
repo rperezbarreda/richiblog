@@ -22,6 +22,9 @@
 // carga antes.
 
 (function () {
+    // Lo compartido con las ventanas (scripts/ventanas/*.js): ver LEEME.
+    const PM = window.ocPM = window.ocPM || {};
+    Object.assign(PM, { aSuAlfabeto, abrirBicho, abrirConjuro, abrirFichaPj, abrirImportarPj, abrirObjeto, abrirRasgo, abrirRegla, alAzar, alFrente, anadir, avisar, bajarJson, bonoHabPj, botonAspectoSonido, botonDe, botonesDe, cancionesDe, conNumero, conjuroPj, conjurosPj, copiarTexto, crear, cuerpoConjuro, cuerpoRasgo, darPx, datosIni, datosObjeto, dialogoAspecto, editorRico, efectosCambian, elegirDe, enlazarConjuros, fotoPj, guardar, guardarEnDocumentos, hacerBotin, hacerEncuentro, iconoSonido, imagenMusica, iniDeBicho, iniDePj, inventar, inventarioParty, leerHomebrew, leerNombresTuyos, leerPropios, lugarDe, markdown, meterEnIniciativa, mientrasEste, moneda, mostrarAJugadores, motorAudio, musicaAjustar, musicaAlternar, musicaAnterior, musicaBucle, musicaCarpeta, musicaDe, musicaParar, musicaPoner, musicaSiguiente, musicaVol, nombreDe, normalizarPj, nuevoIdPj, nuevoPj, olvidarAspecto, opcionesCarpetas, pasivaPj, pedir, pedirNombreDoc, perfil, personalizar, pestanasDe, ponerTitulo, rutaDe, sanearHtml, tiradaSuelta, tokenDe, urlImagenSegura, urlSonidoSegura, verEnGrupo, verSubidas });
     const lienzo = document.querySelector("[data-master-lienzo]");
     const barra = document.querySelector("[data-master-barra]");
     if (!lienzo || !barra || !window.ocMontar) {
@@ -63,6 +66,7 @@
     }
 
     const llano = (t) => String(t || "").normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
+    Object.assign(PM, { llano });
 
     // ---- UN MARKDOWN PEQUEÑITO (para las reglas, los conjuros y las
     // tarjetas): párrafos, listas con «- », «## títulos», **negrita** y
@@ -169,6 +173,7 @@
     // Los JSON de la web, una vez cada uno.
     const pedidos = {};
     const REGLAS = window.ocReglas.RUTA;
+    Object.assign(PM, { REGLAS });
     // LA EDICIÓN de cada campaña: 2024 (SRD 5.2, lo de siempre) o 2014 (SRD
     // 5.1: sus reglas, sus monstruos y sus conjuros, en
     // datos/personajes/compendio/2014/). Va en la campaña («edicion»; sin
@@ -179,6 +184,7 @@
         "datos/personajes/compendio/conjuros-srd.json": "datos/personajes/compendio/2014/conjuros-srd.json",
         "datos/personajes/compendio/tienda.json": "datos/personajes/compendio/2014/tienda.json" };
     const NOMBRES = "datos/personajes/compendio/nombres.json";
+    Object.assign(PM, { NOMBRES });
 
     function pedir(ruta) {
         // Las reglas, con lo que hayas cambiado (window.ocReglas, en
@@ -196,21 +202,24 @@
                 if (!r.ok) {
                     throw new Error(r.status);
                 }
-                return r.json();
+                return r.json().then(window.ocIdioma.datos);
             });
         }
         const k = PROPIOS_EN[ruta];
         if (!k) {
             return pedidos[real];
         }
-        // Con lo tuyo (si hay) al final.
+        // Con lo tuyo (si hay) al final; sin los del SRD que has cambiado
+        // (va tu versión) o borrado («ocultos»).
         return pedidos[real].then((d) => {
-            const tuyos = leerPropios()[k];
-            if (!tuyos.length) {
+            const p = leerPropios();
+            const tuyos = p[k];
+            const fuera = new Set(((p.ocultos || {})[k] || []).concat(tuyos.filter((y) => y.cambia).map((y) => y.cambia)));
+            if (!tuyos.length && !fuera.size) {
                 return d;
             }
             const x = Object.assign({}, d);
-            x[k] = (d[k] || []).concat(tuyos);
+            x[k] = (d[k] || []).filter((y) => !fuera.has(claveSrd(k, y))).concat(tuyos);
             return x;
         });
     }
@@ -223,6 +232,9 @@
     // bestiario, los encuentros, la tienda, el botín, los conjuros y el
     // buscador sin tocar nada más. Cada uno lleva «propio: true». ----
     const CLAVE_PROPIOS = "richi-master-propios";
+    // Cómo se reconoce uno del SRD (para cambiarlo o borrarlo): su nombre
+    // original; los rasgos, además, de quién son.
+    const claveSrd = (k, x) => (k === "rasgos" ? x.en + "|" + x.de : x.en);
     const PROPIOS_EN = { "datos/personajes/compendio/bestiario.json": "monstruos",
         "datos/personajes/compendio/conjuros-srd.json": "conjuros", "datos/personajes/compendio/tienda.json": "objetos",
         "datos/personajes/compendio/rasgos-srd.json": "rasgos" };
@@ -251,8 +263,9 @@
     }
 
     // De dónde sale (en vez del crédito del SRD).
-    const fuenteDe = (x, f) => (x && x.propio ? "🛠️ Creado por ti" + (x.libro ? " · " + x.libro : "")
-        + ". Se guarda sólo en este navegador." : f);
+    const fuenteDe = (x, f) => (x && x.propio ? (x.cambia ? ocT("✎ Cambiado por ti (del SRD){n}. Se guarda sólo en este navegador.", { n: x.libro ? " · " + x.libro : "" })
+        : ocT("🛠️ Creado por ti{n}. Se guarda sólo en este navegador.", { n: x.libro ? " · " + x.libro : "" })) : f);
+    Object.assign(PM, { fuenteDe });
 
     // EL TRADUCTOR DE TÉRMINOS: pasa al español (el del SRD 5.2 en
     // español) lo que se repite en los bloques de estadísticas y las
@@ -370,7 +383,7 @@
         }
         const tam = (x) => (T_TAMANOS.find(([en]) => en === x) || [x, x])[1];
         const tipo = (T_TIPOS.find(([en]) => en === m[3]) || [m[3], m[3]])[1];
-        return tipo + traducir(m[4]) + " " + tam(m[1]) + (m[2] ? " o " + tam(m[2]) : "");
+        return tipo + traducir(m[4]) + " " + tam(m[1]) + (m[2] ? ocT(" o {tam}", { tam: tam(m[2]) }) : "");
     }
 
     // ---- LAS REGLAS (o solo las de un grupo: las condiciones son
@@ -380,6 +393,7 @@
     // las mismas en todos los perfiles. Salen en su ventana, al final de
     // «todas las reglas» y en el buscador de arriba. ----
     const CLAVE_HOMEBREW = "richi-master-homebrew";
+    Object.assign(PM, { CLAVE_HOMEBREW });
     const CLAVE_IMAGENES = "richi-master-imagenes";
     const CLAVE_PLANTILLAS = "richi-master-plantillas";
 
@@ -390,15 +404,6 @@
         } catch (e) {
             return [];
         }
-    }
-
-    function guardarHomebrew(lista) {
-        try {
-            localStorage.setItem(CLAVE_HOMEBREW, JSON.stringify(lista));
-        } catch (e) {
-            // Sin almacenamiento: solo mientras esté abierta.
-        }
-        document.dispatchEvent(new CustomEvent("master:homebrew"));
     }
 
     // Escucha un evento mientras «dentro» siga en la página.
@@ -424,7 +429,7 @@
             cuerpo.appendChild(grande);
         }
         if (r.grupo) {
-            cuerpo.appendChild(crear("p", "oc-hoja-nota", r.grupo + (r.alias ? " · también: " + r.alias : "")));
+            cuerpo.appendChild(crear("p", "oc-hoja-nota", r.grupo + (r.alias ? ocT(" · también: {alias}", { alias: r.alias }) : "")));
         }
         cuerpo.appendChild(markdown(r.texto));
         if (fuente) {
@@ -433,25 +438,25 @@
         if (window.ocDadosEnTexto) {
             window.ocDadosEnTexto(cuerpo);
         }
-        const fijar = botonDe("oc-vida-accion", "📌 al tablero", () => {
+        const fijar = botonDe("oc-vida-accion", ocT("📌 al tablero"), () => {
             cerrar();
             anadir("ficha", { titulo: r.nombre, datos: { que: r.propia ? "propia" : "regla", id: r.id || r.nombre } });
-        }, "Poner " + r.nombre + " en el tablero");
+        }, ocT("Poner {nombre} en el tablero", { nombre: r.nombre }));
         const barra = crear("div", "master-creador-barra");
         barra.appendChild(fijar);
         // Las del JSON se pueden cambiar (y volver a como venían).
         if (r.id && !r.propia) {
-            barra.appendChild(botonDe("oc-vida-accion", "✎ cambiar", () => {
+            barra.appendChild(botonDe("oc-vida-accion", ocT("✎ cambiar"), () => {
                 cerrar();
                 editarRegla(r, vuelta);
-            }, "Cambiar " + r.nombre));
+            }, ocT("Cambiar {nombre}", { nombre: r.nombre })));
             if (r.cambiada) {
-                cuerpo.appendChild(crear("p", "oc-hoja-nota", "✎ Cambiada por ti (la original: «" + r.original.nombre + "»)."));
-                barra.appendChild(botonDe("oc-vida-accion", "↺ volver a la original", () => {
+                cuerpo.appendChild(crear("p", "oc-hoja-nota", ocT("✎ Cambiada por ti (la original: «{nombre}»).", { nombre: r.original.nombre })));
+                barra.appendChild(botonDe("oc-vida-accion", ocT("↺ volver a la original"), () => {
                     window.ocReglas.guardarCambio(r.id, null);
-                    avisar(r.original.nombre + ": otra vez como venía.");
+                    avisar(r.original.nombre + ocT(": otra vez como venía."));
                     cerrar();
-                }, "Volver a la original de " + r.nombre));
+                }, ocT("Volver a la original de {nombre}", { nombre: r.nombre })));
             }
         }
         cuerpo.appendChild(barra);
@@ -459,7 +464,7 @@
     }
 
     // De dónde sale una regla: las opcionales son texto propio.
-    const fuenteDeRegla = (r, fuente) => (r.opcional ? "Regla opcional: texto propio, no del SRD." : fuente);
+    const fuenteDeRegla = (r, fuente) => (r.opcional ? ocT("Regla opcional: texto propio, no del SRD.") : fuente);
 
     // Cambiar una regla del JSON: lo cambiado va a «richi-master-reglas»
     // (window.ocReglas) y el archivo no se toca. Si es la de una marca de
@@ -481,27 +486,25 @@
                 form.append(et, x);
                 return x;
             };
-            const nombre = campo("nombre", "nombre", null, r.nombre);
+            const nombre = campo("nombre", ocT("nombre"), null, r.nombre);
             nombre.maxLength = 80;
             nombre.required = true;
-            const icono = campo("icono", "dibujo (un emoji)", null, r.icono);
+            const icono = campo("icono", ocT("dibujo (un emoji)"), null, r.icono);
             icono.maxLength = 4;
-            const alias = campo("alias", "también se busca por (opcional)", null, r.alias);
-            const texto = campo("texto", "la regla (con **negrita**, *cursiva*, «- » para listas y «| a | b |» para tablas)",
+            const alias = campo("alias", ocT("también se busca por (opcional)"), null, r.alias);
+            const texto = campo("texto", ocT("la regla (con **negrita**, *cursiva*, «- » para listas y «| a | b |» para tablas)"),
                 "textarea", r.texto);
             texto.rows = 10;
-            const corto = marcas.length ? campo("corto", "resumen corto (sale en la iniciativa al pasar por la marca "
-                + marcas.map((mk) => "«" + mk.marca + "»").join(", ") + ")", "textarea", marcas[0].corto) : null;
+            const corto = marcas.length ? campo("corto", ocT("resumen corto (sale en la iniciativa al pasar por la marca {join})", { join: marcas.map((mk) => "«" + mk.marca + "»").join(", ") }), "textarea", marcas[0].corto) : null;
             if (corto) {
                 corto.rows = 3;
                 corto.classList.remove("oc-notas-texto");
             }
             const barra = crear("div", "master-anadir-otras");
-            const listo = crear("button", "oc-vida-accion es-principal", "guardar");
+            const listo = crear("button", "oc-vida-accion es-principal", ocT("guardar"));
             listo.type = "submit";
-            barra.append(listo, botonDe("oc-vida-accion", "cancelar", () => cerrar()));
-            form.append(barra, crear("p", "oc-hoja-nota", "Se guarda con tus cosas (⚙ → exportar se lo lleva); el archivo"
-                + " de las reglas no cambia. Para dejarla como venía: «↺ volver a la original»."));
+            barra.append(listo, botonDe("oc-vida-accion", ocT("cancelar"), () => cerrar()));
+            form.append(barra, crear("p", "oc-hoja-nota", ocT("Se guarda con tus cosas (⚙ → exportar se lo lleva); el archivo de las reglas no cambia. Para dejarla como venía: «↺ volver a la original».")));
             form.addEventListener("submit", (e) => {
                 e.preventDefault();
                 const n = nombre.value.trim();
@@ -522,10 +525,10 @@
                     cambio.corto = corto.value.trim();
                 }
                 if (!window.ocReglas.guardarCambio(r.id, Object.keys(cambio).length ? cambio : null)) {
-                    avisar("No se ha podido guardar.");
+                    avisar(ocT("No se ha podido guardar."));
                     return;
                 }
-                avisar(Object.keys(cambio).length ? "Guardada: " + n + "." : n + ": como venía.");
+                avisar(Object.keys(cambio).length ? ocT("Guardada: {n}.", { n: n }) : n + ocT(": como venía."));
                 cerrar();
             });
             const cerrar = window.ocVentana.abrir({ titulo: "✎ " + r.nombre, cuerpo: form, vuelta, clase: "es-regla" });
@@ -535,7 +538,7 @@
 
     function montarReglas(dentro, m, soloGrupo) {
         m.datos = m.datos || {};
-        dentro.appendChild(crear("p", "oc-hoja-nota", "Cargando las reglas…"));
+        dentro.appendChild(crear("p", "oc-hoja-nota", ocT("Cargando las reglas…")));
         const pintar = (datos) => {
                 const propias = soloGrupo ? [] : leerHomebrew().map((r) => Object.assign({ grupo: "🏠 Reglas propias",
                     propia: true }, r));
@@ -606,13 +609,12 @@
                     });
                 }
                 if (datos.fuente) {
-                    dentro.appendChild(crear("p", "oc-hoja-nota master-fuente", datos.fuente
-                        + (reglas.some((r) => r.opcional) ? " Las opcionales (como el flanqueo), texto propio." : "")
-                        + " Cualquiera se cambia con «✎ cambiar» al abrirla."));
+                    dentro.appendChild(crear("p", "oc-hoja-nota master-fuente", ocT("{n} Cualquiera se cambia con «✎ cambiar» al abrirla.", { n: datos.fuente
+                        + (reglas.some((r) => r.opcional) ? ocT(" Las opcionales (como el flanqueo), texto propio.") : "") })));
                 }
         };
         const cargar = () => pedir(REGLAS).then(pintar).catch(() => {
-            dentro.replaceChildren(crear("p", "oc-vacio", "No he podido cargar las reglas."));
+            dentro.replaceChildren(crear("p", "oc-vacio", ocT("No he podido cargar las reglas.")));
         });
         cargar();
         mientrasEste(dentro, "oc:reglas", cargar);
@@ -621,120 +623,20 @@
         }
     }
 
-    function montarHomebrew(dentro) {
-        const lista = crear("ul", "master-homebrew");
-        lista.setAttribute("aria-label", "Reglas propias");
-        const vacio = crear("p", "oc-vacio", "Todavía no hay reglas propias.");
-        // El formulario: para una nueva o para cambiar una.
-        const form = crear("form", "master-homebrew-form");
-        form.hidden = true;
-        const campo = (id, texto, etiqueta) => {
-            const et = crear("label", "oc-dados-etiqueta", texto);
-            const x = crear(etiqueta || "input", "oc-dados-texto" + (etiqueta === "textarea" ? " oc-notas-texto" : ""));
-            x.id = "master-homebrew-" + id;
-            et.htmlFor = x.id;
-            if (etiqueta !== "textarea") {
-                x.autocomplete = "off";
-            }
-            form.append(et, x);
-            return x;
-        };
-        const nombre = campo("nombre", "nombre");
-        nombre.maxLength = 60;
-        nombre.required = true;
-        const icono = campo("icono", "dibujo (un emoji, si quieres)");
-        icono.maxLength = 4;
-        icono.placeholder = "🍺";
-        const texto = campo("texto", "la regla (con **negrita**, *cursiva*, «- » para listas y «| a | b |» para tablas)",
-            "textarea");
-        texto.rows = 8;
-        const botones = crear("div", "master-anadir-otras");
-        const listo = crear("button", "oc-vida-accion es-principal", "guardar");
-        listo.type = "submit";
-        let editando = null;
-        const cancelar = botonDe("oc-vida-accion", "cancelar", () => cerrarForm());
-        botones.append(listo, cancelar);
-        form.appendChild(botones);
-        const nueva = botonDe("oc-vida-accion es-principal", "＋ regla propia", () => abrirForm(null));
-        function abrirForm(r) {
-            editando = r;
-            nombre.value = r ? r.nombre : "";
-            icono.value = r ? r.icono || "" : "";
-            texto.value = r ? r.texto : "";
-            form.hidden = false;
-            nueva.hidden = true;
-            nombre.focus();
-        }
-        function cerrarForm() {
-            form.hidden = true;
-            nueva.hidden = false;
-            nueva.focus();
-        }
-        form.addEventListener("submit", (e) => {
-            e.preventDefault();
-            const todas = leerHomebrew();
-            const datos = { nombre: nombre.value.trim(), icono: icono.value.trim(), texto: texto.value.trim() };
-            if (!datos.nombre) {
-                nombre.focus();
-                return;
-            }
-            if (editando) {
-                const i = todas.findIndex((x) => x.id === editando.id);
-                if (i >= 0) {
-                    todas[i] = Object.assign(todas[i], datos);
-                }
-            } else {
-                todas.push(Object.assign({ id: "h" + Date.now().toString(36) }, datos));
-            }
-            guardarHomebrew(todas);
-            avisar("Guardada: " + datos.nombre + ".");
-            cerrarForm();
-        });
-        const pintar = () => {
-            const todas = leerHomebrew();
-            lista.replaceChildren(...todas.map((r) => {
-                const li = crear("li", "master-homebrew-regla");
-                const ver = botonDe("oc-regla-boton", "", () => abrirRegla(Object.assign({ propia: true,
-                    grupo: "🏠 Reglas propias" }, r), ver));
-                ver.setAttribute("aria-haspopup", "dialog");
-                const d = crear("span", "oc-regla-dibujo", r.icono || "🏠");
-                d.setAttribute("aria-hidden", "true");
-                ver.append(d, crear("span", "oc-regla-texto", r.nombre));
-                const cambiar = botonDe("master-party-quitar", "✎", () => abrirForm(r), "Cambiar " + r.nombre);
-                let seguro = false;
-                const quitar = botonDe("master-party-quitar", "✕", () => {
-                    if (!seguro) {
-                        seguro = true;
-                        quitar.setAttribute("aria-label", "¿Seguro? Pulsa otra vez para borrar " + r.nombre);
-                        avisar("Pulsa otra vez para borrar " + r.nombre + ".");
-                        return;
-                    }
-                    guardarHomebrew(leerHomebrew().filter((x) => x.id !== r.id));
-                    avisar("Borrada: " + r.nombre + ".");
-                    nueva.focus();
-                }, "Borrar " + r.nombre);
-                li.append(ver, cambiar, quitar);
-                return li;
-            }));
-            vacio.hidden = !!todas.length;
-        };
-        mientrasEste(dentro, "master:homebrew", pintar);
-        dentro.append(lista, vacio, nueva, form);
-        pintar();
-    }
-
     // ---- LOS CONJUROS: los 339 del SRD 5.2 (D&D 2024), en
     // datos/personajes/compendio/conjuros-srd.json. Cada uno abre su
     // ventana (abrirConjuro), desde el buscador o desde un monstruo. ----
     const CONJUROS_SRD = "datos/personajes/compendio/conjuros-srd.json";
-    const nivelDe = (c) => (c.nivel ? "Nivel " + c.nivel : "Truco");
+    Object.assign(PM, { CONJUROS_SRD });
+    const nivelDe = (c) => (c.nivel ? ocT("Nivel {nivel}", { nivel: c.nivel }) : "Truco");
+    Object.assign(PM, { nivelDe });
 
     function abrirConjuro(c, vuelta, fuente) {
         const cuerpo = cuerpoConjuro(c, fuente);
-        const fijar = botonDe("oc-vida-accion", "📌 al tablero", () => {
+        const fijar = botonDe("oc-vida-accion", ocT("📌 al tablero"), () => {
             cerrar();
             anadir("ficha", { titulo: c.nombre, datos: { que: "conjuro", id: c.en } });
-        }, "Poner " + c.nombre + " en el tablero");
+        }, ocT("Poner {nombre} en el tablero", { nombre: c.nombre }));
         cuerpo.appendChild(fijar);
         const cerrar = window.ocVentana.abrir({ titulo: c.nombre, cuerpo, vuelta, clase: "es-regla" });
     }
@@ -754,7 +656,7 @@
         });
         cuerpo.append(chapas, dl);
         if (c.ingles) {
-            cuerpo.appendChild(crear("p", "oc-hoja-nota", "Este todavía no está traducido: va en inglés."));
+            cuerpo.appendChild(crear("p", "oc-hoja-nota", ocT("Este todavía no está traducido: va en inglés.")));
         }
         cuerpo.appendChild(markdown(c.texto));
         if (c.superior) {
@@ -818,21 +720,20 @@
     function panelImagen(clave, nombre) {
         const caja = crear("div", "master-imagen");
         const img = crear("img", "master-imagen-propia");
-        img.alt = "Tu imagen de " + nombre;
+        img.alt = ocT("Tu imagen de {nombre}", { nombre: nombre });
         img.hidden = true;
         const subir = crear("input");
         subir.type = "file";
         subir.accept = "image/*";
         subir.hidden = true;
-        const poner = botonDe("oc-vida-accion", "🖼️ poner una imagen", () => subir.click(), "Poner una imagen de " + nombre
-            + " (de tu dispositivo)");
-        const grande = botonDe("oc-vida-accion", "🔍 en grande", () => {
+        const poner = botonDe("oc-vida-accion", ocT("🖼️ poner una imagen"), () => subir.click(), ocT("Poner una imagen de {nombre} (de tu dispositivo)", { nombre: nombre }));
+        const grande = botonDe("oc-vida-accion", ocT("🔍 en grande"), () => {
             const g = crear("img", "master-imagen-grande");
             g.alt = img.alt;
             ponerImagenGuardada(g, leerImagenes()[clave]);
             window.ocVentana.abrir({ titulo: nombre, cuerpo: g, vuelta: grande, clase: "es-ancha" });
-        }, "Ver tu imagen de " + nombre + " en grande");
-        const quitar = botonDe("oc-vida-accion", "✕ quitar", () => {
+        }, ocT("Ver tu imagen de {nombre} en grande", { nombre: nombre }));
+        const quitar = botonDe("oc-vida-accion", ocT("✕ quitar"), () => {
             const todas = leerImagenes();
             const v = String(todas[clave] || "");
             if (v.indexOf("archivo:") === 0) {
@@ -841,12 +742,12 @@
             delete todas[clave];
             guardarImagenes(todas);
             pintar();
-            avisar("Imagen quitada.");
+            avisar(ocT("Imagen quitada."));
             poner.focus();
-        }, "Quitar tu imagen de " + nombre);
+        }, ocT("Quitar tu imagen de {nombre}", { nombre: nombre }));
         const botones = crear("div", "master-imagen-botones");
         botones.append(poner, grande, quitar);
-        const nota = crear("p", "oc-hoja-nota", "Una imagen de tu dispositivo: se queda sólo en él (⚙ → exportar para llevarla).");
+        const nota = crear("p", "oc-hoja-nota", ocT("Una imagen de tu dispositivo: se queda sólo en él (⚙ → exportar para llevarla)."));
         function pintar() {
             const v = leerImagenes()[clave];
             img.removeAttribute("src");
@@ -866,7 +767,7 @@
             const f = subir.files && subir.files[0];
             subir.value = "";
             if (!f || !/^image\//.test(f.type) || f.size > MAX_ARCHIVO) {
-                avisar("Sólo imágenes de hasta 50 MB.");
+                avisar(ocT("Sólo imágenes de hasta 50 MB."));
                 return;
             }
             const id = idDoc("a");
@@ -879,8 +780,8 @@
                 todas[clave] = "archivo:" + id;
                 guardarImagenes(todas);
                 pintar();
-                avisar("Imagen puesta.");
-            }).catch(() => avisar("No se ha podido guardar la imagen."));
+                avisar(ocT("Imagen puesta."));
+            }).catch(() => avisar(ocT("No se ha podido guardar la imagen.")));
         });
         caja.append(img, botones, subir, nota);
         pintar();
@@ -896,15 +797,15 @@
                 dl.append(crear("dt", "", que), crear("dd", "", String(valor)));
             }
         };
-        fila("Categoría", o.cat);
-        fila("Rareza", o.rareza);
-        fila("Sintonía", o.sint ? "la requiere" : "");
-        fila("Detalles", o.det);
-        fila("Peso", o.peso);
-        fila("Nota", o.nota);
-        fila("Precio", o.cp ? moneda(o.cp) : "");
-        fila("Se vende en", (o.tiendas || []).join(", ").toLowerCase());
-        fila("En inglés", o.en);
+        fila(ocT("Categoría"), o.cat);
+        fila(ocT("Rareza"), o.rareza);
+        fila(ocT("Sintonía"), o.sint ? ocT("la requiere") : "");
+        fila(ocT("Detalles"), o.det);
+        fila(ocT("Peso"), o.peso);
+        fila(ocT("Nota"), o.nota);
+        fila(ocT("Precio"), o.cp ? moneda(o.cp) : "");
+        fila(ocT("Se vende en"), (o.tiendas || []).join(", ").toLowerCase());
+        fila(ocT("En inglés"), o.en);
         cuerpo.appendChild(dl);
         if (o.texto) {
             const que = markdown(o.texto);
@@ -915,7 +816,7 @@
             }
             enlazarConjuros(que);
         }
-        cuerpo.append(crear("h3", "master-imagen-titulo", "🖼️ imagen"), panelImagen("objeto:" + o.en, o.nombre));
+        cuerpo.append(crear("h3", "master-imagen-titulo", ocT("🖼️ imagen")), panelImagen("objeto:" + o.en, o.nombre));
         return cuerpo;
     }
 
@@ -925,74 +826,11 @@
         if (fuente) {
             cuerpo.appendChild(crear("p", "oc-hoja-nota master-fuente", fuente));
         }
-        cuerpo.appendChild(botonDe("oc-vida-accion", "📌 al tablero", () => {
+        cuerpo.appendChild(botonDe("oc-vida-accion", ocT("📌 al tablero"), () => {
             cerrar();
             anadir("ficha", { titulo: o.nombre, datos: { que: "objeto", id: o.en } });
-        }, "Poner " + o.nombre + " en el tablero"));
+        }, ocT("Poner {nombre} en el tablero", { nombre: o.nombre })));
         const cerrar = window.ocVentana.abrir({ titulo: o.nombre, cuerpo, vuelta, clase: "es-regla" });
-    }
-
-    // UNA FICHA EN EL TABLERO (📌): un conjuro, una regla (del SRD o
-    // propia) o un objeto, en su ventana. «datos»: {que, id}.
-    function montarFicha(dentro, m) {
-        m.datos = m.datos || {};
-        const que = m.datos.que;
-        const id = m.datos.id;
-        const poner = (x) => dentro.replaceChildren(x || crear("p", "oc-vacio", "Ya no está."));
-        dentro.appendChild(crear("p", "oc-hoja-nota", "Cargando…"));
-        if (que === "propia") {
-            const pintar = () => {
-                const r = leerHomebrew().find((x) => x.id === id);
-                poner(r ? markdown(r.texto) : null);
-            };
-            pintar();
-            mientrasEste(dentro, "master:homebrew", pintar);
-            return;
-        }
-        if (que === "otro") {
-            const pintar = () => {
-                const x = leerPropios().otros.find((y) => y.id === id);
-                const caja = x ? crear("div") : null;
-                if (x) {
-                    caja.append(crear("p", "oc-hoja-nota", x.cat), markdown(x.texto), crear("p", "oc-hoja-nota master-fuente", fuenteDe(x)));
-                }
-                poner(caja);
-            };
-            pintar();
-            mientrasEste(dentro, "master:propios", pintar);
-            return;
-        }
-        if (que === "rasgo") {
-            pedir(RASGOS_SRD).then((datos) => {
-                const r = (datos.rasgos || []).find((x) => idRasgo(x) === id);
-                poner(r ? cuerpoRasgo(r, datos.fuente) : null);
-            }).catch(() => poner(null));
-            return;
-        }
-        const ruta = { conjuro: CONJUROS_SRD, regla: REGLAS,
-            objeto: "datos/personajes/compendio/tienda.json" }[que];
-        if (!ruta) {
-            poner(null);
-            return;
-        }
-        pedir(ruta).then((datos) => {
-            if (que === "conjuro") {
-                const c = (datos.conjuros || []).find((x) => x.en === id);
-                poner(c ? cuerpoConjuro(c, datos.fuente) : null);
-            } else if (que === "regla") {
-                // Por su id (o por el nombre, en las de antes).
-                const r = (datos.reglas || []).find((x) => x.id === id) || (datos.reglas || []).find((x) => x.nombre === id
-                    || (x.original && x.original.nombre === id));
-                const t = r ? markdown(r.texto) : null;
-                if (t && window.ocDadosEnTexto) {
-                    window.ocDadosEnTexto(t);
-                }
-                poner(t);
-            } else {
-                const o = (datos.objetos || []).find((x) => x.en === id);
-                poner(o ? datosObjeto(o) : null);
-            }
-        }).catch(() => poner(crear("p", "oc-vacio", "No he podido cargarlo.")));
     }
 
     // Un botón con el nombre de un conjuro que abre su ventana.
@@ -1027,8 +865,11 @@
     // (＋ compendio → rasgos y dotes). En la ficha, cada rasgo en negrita
     // («- **Furia** (Bárbaro)») se abre con su texto. ----
     const RASGOS_SRD = "datos/personajes/compendio/rasgos-srd.json";
+    Object.assign(PM, { RASGOS_SRD });
     const idRasgo = (r) => (r.propio ? r.id : r.en + "|" + r.de);
-    const datosRasgo = (r) => [r.tipo, r.de && r.de !== "dote" ? r.de : "", r.nivel ? "nivel " + r.nivel : ""].filter(Boolean);
+    Object.assign(PM, { idRasgo });
+    const datosRasgo = (r) => [r.tipo, r.de && r.de !== "dote" ? r.de : "", r.nivel ? ocT("nivel {nivel}", { nivel: r.nivel }) : ""].filter(Boolean);
+    Object.assign(PM, { datosRasgo });
 
     function cuerpoRasgo(r, fuenteSrd) {
         const cuerpo = crear("div", "oc-regla-ventana");
@@ -1046,185 +887,11 @@
 
     function abrirRasgo(r, vuelta, fuente) {
         const cuerpo = cuerpoRasgo(r, fuente);
-        cuerpo.appendChild(botonDe("oc-vida-accion", "📌 al tablero", () => {
+        cuerpo.appendChild(botonDe("oc-vida-accion", ocT("📌 al tablero"), () => {
             cerrar();
             anadir("ficha", { titulo: r.nombre, datos: { que: "rasgo", id: idRasgo(r) } });
-        }, "Poner " + r.nombre + " en el tablero"));
+        }, ocT("Poner {nombre} en el tablero", { nombre: r.nombre })));
         const cerrar = window.ocVentana.abrir({ titulo: r.nombre, cuerpo, vuelta, clase: "es-regla" });
-    }
-
-    // El rasgo de ese nombre (en español o en inglés, sin lo de entre
-    // paréntesis); si hay varios (los de cada clase), el de su clase o especie.
-    function rasgoDe(lista, nombre, pista) {
-        const limpio = (t) => llano(String(t || "").replace(/\s*\([^)]*\)\s*$/, "").replace(/^\d+:\s*/, "").trim());
-        const n = limpio(nombre);
-        if (!n) {
-            return null;
-        }
-        const salen = lista.filter((r) => limpio(r.nombre) === n || limpio(r.en) === n || llano(r.nombre) === llano(nombre));
-        if (salen.length < 2) {
-            return salen[0] || null;
-        }
-        const p = llano(pista || "");
-        return salen.find((r) => r.propio) || salen.find((r) => p && llano(r.de || "").split(/[ ,()]+/).some((w) => w.length > 3
-            && p.includes(w))) || salen[0];
-    }
-
-    // En un texto ya montado, cada nombre en negrita que sea un rasgo o
-    // una dote pasa a ser su botón («pista»: la clase y la especie del PJ).
-    function enlazarRasgos(raiz, pista) {
-        pedir(RASGOS_SRD).then((datos) => {
-            const lista = datos.rasgos || [];
-            raiz.querySelectorAll("strong").forEach((st) => {
-                const r = !st.closest("button") && rasgoDe(lista, st.textContent, pista);
-                if (r) {
-                    const b = botonDe("master-conjuro-enlace master-rasgo-enlace", st.textContent, () => abrirRasgo(r, b, datos.fuente));
-                    b.setAttribute("aria-haspopup", "dialog");
-                    st.replaceWith(b);
-                }
-            });
-        }).catch(() => {
-            // Sin el compendio: se quedan en negrita.
-        });
-    }
-
-    // El buscador de rasgos y dotes (un widget, como el de conjuros).
-    function montarRasgos(dentro, m) {
-        dentro.appendChild(crear("p", "oc-hoja-nota", "Cargando los rasgos…"));
-        const pintarTodo = () => pedir(RASGOS_SRD).then((datos) => {
-            const todos = (datos.rasgos || []).map((r) => ({ r, buscar: llano(r.nombre + " " + r.en + " " + (r.de || "") + " " + r.tipo) }));
-            const fila = crear("div", "master-tienda-campos");
-            const campo = (control, texto, id) => {
-                const caja = crear("div", "master-tienda-campo" + (control.tagName === "INPUT" ? " es-ancho" : ""));
-                const et = crear("label", "oc-dados-etiqueta", texto);
-                control.id = id + m.id;
-                et.htmlFor = control.id;
-                caja.append(et, control);
-                fila.appendChild(caja);
-                return control;
-            };
-            const elegir = (opciones) => {
-                const sel = crear("select", "oc-dados-elegir");
-                opciones.forEach(([v, t]) => {
-                    const o = crear("option", "", t);
-                    o.value = v;
-                    sel.appendChild(o);
-                });
-                return sel;
-            };
-            const tipos = Array.from(new Set(todos.map((x) => x.r.tipo))).sort();
-            const tipo = campo(elegir([["", "todos"]].concat(tipos.map((t) => [t, t]))), "qué", "master-rasgos-tipo-");
-            const des = Array.from(new Set(todos.filter((x) => x.r.tipo !== "rasgo de clase" || !/\(/.test(x.r.de))
-                .flatMap((x) => String(x.r.de || "").replace(/ \(.*$/, "").split(/,\s*/)).filter((d) => d && d !== "dote"))).sort((a, b) =>
-                a.localeCompare(b, "es"));
-            const de = campo(elegir([["", "todas"]].concat(des.map((t) => [t, t]))), "clase o especie", "master-rasgos-de-");
-            const input = campo(Object.assign(crear("input", "oc-dados-texto"), { type: "search", placeholder: "furia, alerta, sneak attack…" }),
-                "buscar", "master-rasgos-");
-            const cuantos = crear("p", "oc-hoja-nota");
-            cuantos.setAttribute("role", "status");
-            const lista = crear("ul", "master-conjuros");
-            lista.setAttribute("aria-label", "Rasgos y dotes");
-            const pintar = () => {
-                const q = llano(input.value.trim());
-                const d = llano(de.value);
-                const salen = todos.filter((x) => (!q || x.buscar.includes(q)) && (!tipo.value || x.r.tipo === tipo.value)
-                    && (!d || llano(x.r.de || "").includes(d)));
-                lista.replaceChildren(...salen.slice(0, 80).map((x) => {
-                    const li = crear("li");
-                    const b = botonDe("master-conjuro", "", () => abrirRasgo(x.r, b, datos.fuente));
-                    b.setAttribute("aria-haspopup", "dialog");
-                    b.append(crear("span", "master-conjuro-nombre", x.r.nombre), crear("span", "master-conjuro-datos",
-                        datosRasgo(x.r).join(" · ") + (x.r.propio ? " · 🛠️ tuyo" : "")));
-                    li.appendChild(b);
-                    return li;
-                }));
-                cuantos.textContent = salen.length ? salen.length + (salen.length === 1 ? " resultado" : " resultados")
-                    + (salen.length > 80 ? " (salen los 80 primeros)" : "") : "Nada con eso.";
-            };
-            let espera = 0;
-            input.addEventListener("input", () => {
-                clearTimeout(espera);
-                espera = setTimeout(pintar, 150);
-            });
-            [tipo, de].forEach((c) => c.addEventListener("change", pintar));
-            dentro.replaceChildren(fila, cuantos, lista, crear("p", "oc-hoja-nota master-fuente", datos.fuente || ""));
-            pintar();
-        }).catch(() => {
-            dentro.replaceChildren(crear("p", "oc-vacio", "No he podido cargar los rasgos."));
-        });
-        pintarTodo();
-        mientrasEste(dentro, "master:propios", () => {
-            if (!dentro.contains(document.activeElement)) {
-                pintarTodo();
-            }
-        });
-    }
-
-    function montarConjuros(dentro, m) {
-        dentro.appendChild(crear("p", "oc-hoja-nota", "Cargando los conjuros…"));
-        pedir(CONJUROS_SRD).then((datos) => {
-            const conjuros = (datos.conjuros || []).map((c) => ({ c, buscar: llano(c.nombre + " " + c.en + " " + c.escuela) }));
-            const fila = crear("div", "master-tienda-campos");
-            const campo = (control, texto, id) => {
-                const caja = crear("div", "master-tienda-campo" + (control.tagName === "INPUT" ? " es-ancho" : ""));
-                const et = crear("label", "oc-dados-etiqueta", texto);
-                control.id = id + m.id;
-                et.htmlFor = control.id;
-                caja.append(et, control);
-                fila.appendChild(caja);
-                return control;
-            };
-            const elegir = (opciones) => {
-                const sel = crear("select", "oc-dados-elegir");
-                opciones.forEach(([v, t]) => {
-                    const o = crear("option", "", t);
-                    o.value = v;
-                    sel.appendChild(o);
-                });
-                return sel;
-            };
-            const input = crear("input", "oc-dados-texto");
-            input.type = "search";
-            input.placeholder = "bola de fuego, fireball…";
-            const nivel = campo(elegir([["", "todos"], ["0", "trucos"]].concat([1, 2, 3, 4, 5, 6, 7, 8, 9].map((n) => [String(n), "nivel " + n]))),
-                "nivel", "master-conjuros-nivel-");
-            const escuelas = Array.from(new Set(conjuros.map((x) => x.c.escuela))).sort();
-            const escuela = campo(elegir([["", "todas"]].concat(escuelas.map((e) => [e, e]))), "escuela", "master-conjuros-escuela-");
-            const clases = Array.from(new Set(conjuros.flatMap((x) => x.c.clases || []))).sort();
-            const clase = campo(elegir([["", "todas"]].concat(clases.map((e) => [e, e]))), "clase", "master-conjuros-clase-");
-            campo(input, "buscar", "master-conjuros-");
-            const cuantos = crear("p", "oc-hoja-nota");
-            cuantos.setAttribute("role", "status");
-            const lista = crear("ul", "master-conjuros");
-            const pintar = () => {
-                const q = llano(input.value.trim());
-                const n = nivel.value === "" ? null : parseInt(nivel.value, 10);
-                const salen = conjuros.filter((x) => (!q || x.buscar.includes(q)) && (n === null || x.c.nivel === n)
-                    && (!escuela.value || x.c.escuela === escuela.value) && (!clase.value || (x.c.clases || []).indexOf(clase.value) >= 0));
-                lista.replaceChildren(...salen.slice(0, 80).map((x) => {
-                    const li = crear("li");
-                    const b = botonDe("master-conjuro", "", () => abrirConjuro(x.c, b, datos.fuente));
-                    b.setAttribute("aria-haspopup", "dialog");
-                    b.append(crear("span", "master-conjuro-nombre", x.c.nombre),
-                        crear("span", "master-conjuro-datos", [nivelDe(x.c), x.c.escuela, x.c.tiempo].join(" · ")
-                            + (x.c.ingles ? " · (en inglés)" : "")));
-                    li.appendChild(b);
-                    return li;
-                }));
-                cuantos.textContent = salen.length ? salen.length + (salen.length === 1 ? " conjuro" : " conjuros")
-                    + (salen.length > 80 ? " (salen los 80 primeros)" : "") : "Ningún conjuro con eso.";
-            };
-            let espera = 0;
-            input.addEventListener("input", () => {
-                clearTimeout(espera);
-                espera = setTimeout(pintar, 150);
-            });
-            [nivel, escuela, clase].forEach((c) => c.addEventListener("change", pintar));
-            dentro.replaceChildren(fila, cuantos, lista, crear("p", "oc-hoja-nota master-fuente", datos.fuente || ""));
-            pintar();
-        }).catch(() => {
-            dentro.replaceChildren(crear("p", "oc-vacio", "No he podido cargar los conjuros."));
-        });
     }
 
     // ---- LA FICHA DE UN PJ: en su ventana del tablero, con pestañas
@@ -1236,7 +903,16 @@
         ["Historia", "int"], ["Interpretación", "car"], ["Intimidación", "car"], ["Investigación", "int"], ["Juego de manos", "des"],
         ["Medicina", "sab"], ["Naturaleza", "int"], ["Percepción", "sab"], ["Perspicacia", "sab"], ["Persuasión", "car"],
         ["Religión", "int"], ["Sigilo", "des"], ["Supervivencia", "sab"], ["Trato con animales", "sab"]];
+    Object.assign(PM, { HABILIDADES_PJ });
     const NOMBRES_CAR = { fue: "Fuerza", des: "Destreza", con: "Constitución", int: "Inteligencia", sab: "Sabiduría", car: "Carisma" };
+    Object.assign(PM, { NOMBRES_CAR });
+    // Lo mismo para enseñar (traducido); NOMBRES_CAR es para leer fichas en castellano.
+    // Y sus abreviaturas (FUE, DES…), para enseñar.
+    const CAR_ABR = { fue: ocT("FUE"), des: ocT("DES"), con: ocT("CON"), int: ocT("INT"), sab: ocT("SAB"), car: ocT("CAR") };
+    Object.assign(PM, { CAR_ABR });
+    const CAR_VER = { fue: ocT("Fuerza"), des: ocT("Destreza"), con: ocT("Constitución"), int: ocT("Inteligencia"), sab: ocT("Sabiduría"),
+        car: ocT("Carisma") };
+    Object.assign(PM, { CAR_VER });
 
     function nuevoIdPj() {
         const u = new Uint32Array(2);
@@ -1325,23 +1001,41 @@
     // cambian, «master:pjs» (con quién lo cambió, para no repintarse a sí
     // mismo). ----
     const SALVACIONES_PJ = ["fue", "des", "con", "int", "sab", "car"];
-    const NIVELES_COMP = ["", "competente", "pericia"];
+    Object.assign(PM, { SALVACIONES_PJ });
     const MONEDAS_PJ = [["pc", "pc", "cobre"], ["pp", "pp", "plata"], ["pe", "pe", "electro"], ["po", "po", "oro"], ["pt", "ppt", "platino"]];
-    const ORO_DE_MONEDA = { pc: 0.01, pp: 0.1, pe: 0.5, po: 1, pt: 10 };
+    Object.assign(PM, { MONEDAS_PJ });
     const avisarPjs = (desde) => document.dispatchEvent(new CustomEvent("master:pjs", { detail: { desde } }));
+    Object.assign(PM, { avisarPjs });
     // LA PARTY Y LA INICIATIVA, A LA PAR: lo que se cambia en una (los PG)
     // se apunta en la otra.
     document.addEventListener("oc-iniciativa:pg", (e) => {
         const pj = todo && todo.pjs.find((x) => x.id === (e.detail || {}).pj);
-        if (!pj || String(pj.pg) === String(e.detail.pg)) {
+        if (!pj) {
+            return;
+        }
+        // Sus PG y sus salvaciones de muerte (si vienen).
+        const muerte = e.detail.muerte === undefined ? pj.muerte : e.detail.muerte || undefined;
+        if (String(pj.pg) === String(e.detail.pg) && JSON.stringify(pj.muerte) === JSON.stringify(muerte)) {
             return;
         }
         pj.pg = e.detail.pg;
+        if (muerte) {
+            pj.muerte = muerte;
+        } else {
+            delete pj.muerte;
+        }
         guardar();
         avisarPjs("ini");
     });
+    // Lo de la party a la iniciativa (sus PG, CA, PG máximos y salvaciones
+    // de muerte): al cambiar la party y al empezar.
     document.addEventListener("master:pjs", (e) => {
-        if ((e.detail || {}).desde === "ini" || !todo) {
+        if ((e.detail || {}).desde !== "ini") {
+            iniDesdeParty();
+        }
+    });
+    function iniDesdeParty() {
+        if (!todo || !Array.isArray(todo.pjs)) {
             return;
         }
         let ini;
@@ -1369,6 +1063,19 @@
                 c.ca = ca;
                 cambia = true;
             }
+            const max = numPj(pj.pgmax);
+            if (max !== null && max !== c.pgMax) {
+                c.pgMax = max;
+                cambia = true;
+            }
+            if (JSON.stringify(pj.muerte || null) !== JSON.stringify(c.muerte || null)) {
+                if (pj.muerte) {
+                    c.muerte = pj.muerte;
+                } else {
+                    delete c.muerte;
+                }
+                cambia = true;
+            }
         });
         if (cambia) {
             try {
@@ -1378,7 +1085,7 @@
             }
             document.dispatchEvent(new CustomEvent("oc-iniciativa:cambio"));
         }
-    });
+    }
 
     // Lo de antes (texto suelto) a lo de ahora (listas y marcas).
     function normalizarPj(pj) {
@@ -1404,10 +1111,10 @@
         if (pj.historia === undefined && pj.historiaTxt) {
             pj.historia = pj.historiaTxt;
         }
-        ["ataques", "objetos", "pnjs", "acciones"].forEach((k) => {
+        ["ataques", "objetos", "pnjs", "acciones", "criaturas", "imagenes"].forEach((k) => {
             pj[k] = Array.isArray(pj[k]) ? pj[k] : [];
         });
-        ["espacios", "dinero", "apuntes"].forEach((k) => {
+        ["espacios", "dinero", "apuntes", "accionesDe"].forEach((k) => {
             pj[k] = pj[k] && typeof pj[k] === "object" && !Array.isArray(pj[k]) ? pj[k] : {};
         });
         pj.conjuros = Array.isArray(pj.conjuros) ? pj.conjuros : [];
@@ -1418,9 +1125,13 @@
         const n = parseInt(v, 10);
         return isNaN(n) ? null : n;
     };
+    Object.assign(PM, { numPj });
     const modDe = (n) => Math.floor((n - 10) / 2);
+    Object.assign(PM, { modDe });
     const signo = (n) => (n >= 0 ? "+" : "−") + Math.abs(n);
+    Object.assign(PM, { signo });
     const competenciaPj = (pj) => 2 + Math.floor((Math.max(1, numPj(pj.nivel) || 1) - 1) / 4);
+    Object.assign(PM, { competenciaPj });
     function bonoHabPj(pj, nombre) {
         const h = HABILIDADES_PJ.find((x) => x[0] === nombre);
         const c = h ? numPj(pj[h[1]]) : null;
@@ -1437,9 +1148,10 @@
     }
     const dadoPj = (n, que) => (window.ocDadoBoton ? window.ocDadoBoton(signo(n), "1d20" + (n >= 0 ? "+" : "") + n, que)
         : document.createTextNode(signo(n)));
+    Object.assign(PM, { dadoPj });
 
     function nuevoPj(datos) {
-        const pj = normalizarPj(Object.assign({ nombre: "Personaje nuevo", nivel: 1, fue: 10, des: 10, con: 10, int: 10, sab: 10,
+        const pj = normalizarPj(Object.assign({ nombre: ocT("Personaje nuevo"), nivel: 1, fue: 10, des: 10, con: 10, int: 10, sab: 10,
             car: 10 }, datos || {}));
         todo.pjs = todo.pjs || [];
         todo.pjs.push(pj);
@@ -1454,7 +1166,9 @@
     const PX_NIVEL = [300, 900, 2700, 6500, 14000, 23000, 34000, 48000, 64000, 85000, 100000, 120000, 140000, 165000, 195000,
         225000, 265000, 305000, 355000];
     const pxParaSubir = (pj) => PX_NIVEL[Math.min(19, Math.max(1, numPj(pj.nivel) || 1)) - 1];
+    Object.assign(PM, { pxParaSubir });
     const puedeSubir = (pj) => (numPj(pj.nivel) || 1) < 20 && (numPj(pj.px) || 0) >= pxParaSubir(pj);
+    Object.assign(PM, { puedeSubir });
     // Los rasgos de clase del SRD de un nivel (los de su clase y, si la
     // tiene, su subclase).
     function rasgosDeNivel(lista, clase, nivel) {
@@ -1475,8 +1189,7 @@
             const nuevos = rasgosDeNivel(datos.rasgos || [], pj.clase, nuevo).filter((r) => !llano(pj.rasgos || "")
                 .includes("**" + llano(r.nombre) + "**"));
             if (nuevos.length) {
-                pj.rasgos = (String(pj.rasgos || "").replace(/\s+$/, "") + "\n" + nuevos.map((r) => "- **" + r.nombre + "** (" + r.de
-                    + ", nivel " + nuevo + ")").join("\n")).trim();
+                pj.rasgos = (String(pj.rasgos || "").replace(/\s+$/, "") + "\n" + nuevos.map((r) => ocT("- **{nombre}** ({de}, nivel {nuevo})", { nombre: r.nombre, de: r.de, nuevo: nuevo })).join("\n")).trim();
             }
             guardar();
             avisarPjs("");
@@ -1496,37 +1209,34 @@
         guardar();
         avisarPjs("");
         const suben = pjs.filter(puedeSubir);
-        avisar(cada.toLocaleString("es-ES") + " PX para cada uno (" + pjs.length + ")." + (suben.length ? " Pueden subir de nivel: "
-            + suben.map((pj) => pj.nombre).join(", ") + "." : ""));
+        avisar(ocT("{toLocaleString} PX para cada uno ({n}).{n2}", { toLocaleString: cada.toLocaleString("es-ES"), n: pjs.length, n2: suben.length ? ocT(" Pueden subir de nivel: {join}.", { join: suben.map((pj) => pj.nombre).join(", ") }) : "" }));
         if (suben.length && vuelta) {
             verSubidas(suben, vuelta);
         }
     }
     function verSubidas(suben, vuelta) {
         const cuerpo = crear("div", "master-subidas");
-        cuerpo.appendChild(crear("p", "", "Tienen PX para subir de nivel:"));
+        cuerpo.appendChild(crear("p", "", ocT("Tienen PX para subir de nivel:")));
         const ul = crear("ul", "master-subidas-lista");
         suben.forEach((pj) => {
             const li = crear("li");
-            const que = crear("span", "", (pj.nombre || "Sin nombre") + ": nivel " + (numPj(pj.nivel) || 1) + " → "
-                + ((numPj(pj.nivel) || 1) + 1) + " ");
-            const b = botonDe("oc-vida-accion es-principal", "⬆ subir", () => {
+            const que = crear("span", "", ocT("{n}: nivel {n2} → {n3} ", { n: pj.nombre || ocT("Sin nombre"), n2: numPj(pj.nivel) || 1, n3: (numPj(pj.nivel) || 1) + 1 }));
+            const b = botonDe("oc-vida-accion es-principal", ocT("⬆ subir"), () => {
                 b.disabled = true;
                 subirNivel(pj).then((nuevos) => {
-                    que.textContent = (pj.nombre || "Sin nombre") + ": ya es nivel " + pj.nivel + ". ";
+                    que.textContent = ocT("{n}: ya es nivel {nivel}. ", { n: pj.nombre || ocT("Sin nombre"), nivel: pj.nivel });
                     b.remove();
-                    li.appendChild(crear("span", "oc-hoja-nota", nuevos.length ? "Rasgos nuevos: " + nuevos.map((r) => r.nombre).join(", ")
-                        + ". Súbele los PG máximos a mano (✎ editar ficha)." : "Súbele los PG máximos a mano (✎ editar ficha)."));
-                    avisar((pj.nombre || "") + " sube a nivel " + pj.nivel + ".");
+                    li.appendChild(crear("span", "oc-hoja-nota", nuevos.length ? ocT("Rasgos nuevos: {join}. Súbele los PG máximos a mano (✎ editar ficha).", { join: nuevos.map((r) => r.nombre).join(", ") }) : ocT("Súbele los PG máximos a mano (✎ editar ficha).")));
+                    avisar(ocT("{n} sube a nivel {nivel}.", { n: pj.nombre || "", nivel: pj.nivel }));
                     li.tabIndex = -1;
                     li.focus();
                 });
-            }, "Subir a " + (pj.nombre || "este personaje") + " a nivel " + ((numPj(pj.nivel) || 1) + 1));
+            }, ocT("Subir a {n} a nivel {n2}", { n: pj.nombre || ocT("este personaje"), n2: (numPj(pj.nivel) || 1) + 1 }));
             li.append(que, b);
             ul.appendChild(li);
         });
         cuerpo.appendChild(ul);
-        window.ocVentana.abrir({ titulo: "subir de nivel", cuerpo, vuelta });
+        window.ocVentana.abrir({ titulo: ocT("subir de nivel"), cuerpo, vuelta });
     }
 
     // LA FOTO de un personaje: la suya (guardada en este dispositivo) o,
@@ -1569,7 +1279,7 @@
             } catch (e) {
                 blob = null;
             }
-        } else if (/^https:\/\//.test(u) && EN_CARPETA) {
+        } else if (/^https:\/\//.test(u) && CON_RED) {
             blob = fetch("__imagen?url=" + encodeURIComponent(u), { cache: "no-store" }).then((r) => (r.ok ? r.blob() : null));
         }
         if (!/^https:\/\//.test(u)) {
@@ -1588,931 +1298,6 @@
                 delete nuevo.fotoUrl;
             });
         }).catch(() => null);
-    }
-
-    function montarPj(dentro, m) {
-        m.datos = m.datos || {};
-        const pj = (todo.pjs || []).find((x) => x.id === m.datos.pj);
-        if (!pj) {
-            dentro.appendChild(crear("p", "oc-vacio", "Este personaje ya no está en la party de esta campaña."));
-            return;
-        }
-        normalizarPj(pj);
-        const repintar = () => {
-            dentro.replaceChildren();
-            montarPj(dentro, m);
-        };
-        mientrasEste(dentro, "master:pjs", (e) => {
-            if (!(e.detail && e.detail.desde === m.id) && !dentro.querySelector(".master-creador-form")) {
-                repintar();
-            }
-        });
-        if (m.datos.editar) {
-            delete m.datos.editar;
-            guardar();
-            editarPj(dentro, m, pj, repintar);
-            return;
-        }
-        dentro.appendChild(crear("p", "oc-hoja-nota", "Cargando…"));
-        Promise.all([pedir(CONJUROS_SRD), pedir(TIENDA).catch(() => ({ objetos: [] }))]).then(([conj, tienda]) => {
-            const srd = {};
-            (conj.conjuros || []).forEach((c) => {
-                srd[llano(c.nombre)] = c;
-            });
-            const objetosSrd = {};
-            (tienda.objetos || []).forEach((o) => {
-                objetosSrd[llano(o.nombre)] = o;
-            });
-            const apuntes = pj.apuntes;
-            const uid = "master-pj-" + m.id;
-            const quien = pj.nombre || "PJ";
-            const car = (k) => numPj(pj[k]);
-            const prof = competenciaPj(pj);
-            let espera = 0;
-            const cambiado = () => {
-                guardar();
-                avisarPjs(m.id);
-            };
-            const area = (obj, clave, texto, filas, alCambiar) => {
-                const caja = crear("div", "master-campo");
-                const et = crear("label", "oc-dados-etiqueta", texto);
-                const t = crear("textarea", "oc-notas-texto es-corta");
-                t.id = uid + "-" + clave;
-                et.htmlFor = t.id;
-                t.rows = filas || 4;
-                t.value = obj[clave] || "";
-                t.addEventListener("input", () => {
-                    obj[clave] = t.value;
-                    clearTimeout(espera);
-                    espera = setTimeout(guardar, 400);
-                    if (alCambiar) {
-                        alCambiar();
-                    }
-                });
-                caja.append(et, t);
-                return caja;
-            };
-            const titulo = (panel, texto) => panel.appendChild(crear("h3", "master-pj-titulo", texto));
-            const listaDe = (cosas, etiqueta) => {
-                const ul = crear("ul", "master-pj-lista");
-                if (etiqueta) {
-                    ul.setAttribute("aria-label", etiqueta);
-                }
-                cosas.forEach((x) => {
-                    const li = crear("li");
-                    li.append(...[].concat(x));
-                    ul.appendChild(li);
-                });
-                return ul;
-            };
-            const datosDe = (filas) => {
-                const dl = crear("dl", "master-pj-datos");
-                filas.filter(([, v]) => v !== null && v !== undefined && v !== "").forEach(([k, v]) => {
-                    const dd = crear("dd");
-                    dd.append(...[].concat(typeof v === "string" || typeof v === "number" ? String(v) : v));
-                    dl.append(crear("dt", "", k), dd);
-                });
-                return dl;
-            };
-            const texto = (t) => {
-                const x = markdown(t || "");
-                if (window.ocDadosEnTexto) {
-                    window.ocDadosEnTexto(x);
-                }
-                enlazarConjuros(x);
-                return x;
-            };
-
-            // CABECERA: quién es, sus botones y lo que no hay que olvidar.
-            const cabeza = crear("div", "master-pj-cabeza");
-            const foto = fotoPj(pj, "master-pj-foto", "");
-            if (foto) {
-                const verFoto = botonDe("master-pj-foto-boton", "", () => {
-                    const grande = fotoPj(pj, "master-pj-foto-grande", "Retrato de " + quien);
-                    window.ocVentana.abrir({ titulo: quien, cuerpo: grande, vuelta: verFoto });
-                }, "Ver la foto de " + quien);
-                verFoto.appendChild(foto);
-                cabeza.appendChild(verFoto);
-            }
-            const queEs = [pj.raza, pj.clase, numPj(pj.nivel) ? "nivel " + numPj(pj.nivel) : "", pj.trasfondoNombre, pj.alineamiento]
-                .filter(Boolean).join(" · ");
-            cabeza.appendChild(crear("p", "master-pj-que", queEs || "Sin raza ni clase todavía: pulsa «✎ editar ficha»."));
-            const botones = crear("div", "master-creador-barra");
-            const editarB = botonDe("oc-vida-accion es-principal", "✎ editar ficha", () => editarPj(dentro, m, pj, repintar),
-                "Editar la ficha de " + quien);
-            const ddb = botonDe("oc-vida-accion", "📥 actualizar", () => abrirImportarPj(ddb, pj),
-                "Actualizar a " + quien + " desde D&D Beyond, Nivel20 o Foundry VTT");
-            ddb.setAttribute("aria-haspopup", "dialog");
-            const ini = botonDe("oc-vida-accion", "＋ iniciativa", () => {
-                const n = meterEnIniciativa(iniDePj(pj, quien));
-                avisar(n ? "A la iniciativa: " + n + "." : quien + " ya está en la iniciativa.");
-            }, "Poner a " + quien + " en la iniciativa (tira su iniciativa)");
-            botones.append(editarB, ddb, ini);
-            cabeza.appendChild(botones);
-            const recordar = crear("p", "master-pj-recordar");
-            const pintarRecordar = () => {
-                recordar.replaceChildren(crear("strong", "", "😨 Miedos: "), document.createTextNode(apuntes.miedos || ""));
-                recordar.hidden = !(apuntes.miedos || "").trim();
-            };
-            pintarRecordar();
-            cabeza.appendChild(recordar);
-
-            // 1. FICHA: lo de combate, las características (con su
-            // salvación), las habilidades y las pasivas.
-            const panelFicha = crear("div");
-            const pgCaja = crear("span", "master-pj-pg");
-            const pgInput = crear("input", "master-party-input");
-            pgInput.type = "number";
-            pgInput.inputMode = "numeric";
-            pgInput.value = numPj(pj.pg) === null ? (numPj(pj.pgmax) === null ? "" : numPj(pj.pgmax)) : numPj(pj.pg);
-            pgInput.setAttribute("aria-label", "Puntos de golpe actuales de " + quien);
-            pgInput.addEventListener("change", () => {
-                pj.pg = numPj(pgInput.value);
-                cambiado();
-            });
-            pgCaja.append(pgInput, document.createTextNode(numPj(pj.pgmax) !== null ? " / " + numPj(pj.pgmax) : ""));
-            const d = car("des");
-            panelFicha.appendChild(datosDe([["CA", pj.ca], ["PG", pgCaja], ["PG temporales", numPj(pj.pgtemp) || ""],
-                ["Iniciativa", d !== null ? dadoPj(modDe(d), "Iniciativa de " + quien) : ""], ["Velocidad", pj.velocidad],
-                ["Competencia", signo(prof)], ["Dados de golpe", pj.dadosGolpe]]));
-            const cars = crear("ul", "master-pj-caracteristicas");
-            cars.setAttribute("aria-label", "Características y salvaciones de " + quien);
-            SALVACIONES_PJ.forEach((k) => {
-                const n = car(k);
-                if (n === null) {
-                    return;
-                }
-                const comp = pj.salvaciones.includes(k);
-                const li = crear("li", "master-pj-c" + (comp ? " es-competente" : ""));
-                li.append(crear("span", "master-party-et", NOMBRES_CAR[k]), crear("span", "master-party-valor", String(n)),
-                    dadoPj(modDe(n), NOMBRES_CAR[k] + " de " + quien));
-                const s = crear("span", "master-pj-salv");
-                s.append(crear("span", "", (comp ? "● " : "○ ") + "salvación "), dadoPj(modDe(n) + (comp ? prof : 0),
-                    "Salvación de " + NOMBRES_CAR[k] + " de " + quien));
-                if (comp) {
-                    s.title = "Competente en la salvación";
-                }
-                li.appendChild(s);
-                cars.appendChild(li);
-            });
-            panelFicha.appendChild(cars);
-            titulo(panelFicha, "🎯 Habilidades");
-            panelFicha.appendChild(listaDe(HABILIDADES_PJ.filter(([, k]) => car(k) !== null).map(([nombre, k]) => {
-                const nv = pj.habilidades[nombre] || 0;
-                return [crear("span", "master-pj-marca-comp", nv === 2 ? "◆" : nv === 1 ? "●" : "○"),
-                    crear("span", "", nombre + " (" + k.toUpperCase() + ")" + (nv ? " · " + NIVELES_COMP[nv] : "")),
-                    dadoPj(bonoHabPj(pj, nombre), nombre + " de " + quien)];
-            }), "Habilidades de " + quien));
-            panelFicha.appendChild(datosDe([["👁️ Percepción pasiva", pasivaPj(pj, "per")], ["🔍 Investigación pasiva",
-                pasivaPj(pj, "inv")], ["💭 Perspicacia pasiva", pasivaPj(pj, "persp")], ["Sentidos", pj.sentidos],
-                ["Defensas", pj.defensas]]));
-
-            // 2. COMBATE: los ataques (bono y daño, con sus dados) y las
-            // acciones.
-            const panelCombate = crear("div");
-            if (pj.ataques.length) {
-                const tabla = crear("table", "master-informe-tabla master-pj-ataques");
-                tabla.appendChild(crear("caption", "visually-hidden", "Ataques de " + quien));
-                const cab = crear("tr");
-                ["Ataque", "Bono", "Daño"].forEach((t) => {
-                    const th = crear("th", "", t);
-                    th.scope = "col";
-                    cab.appendChild(th);
-                });
-                const thead = crear("thead");
-                thead.appendChild(cab);
-                const tbody = crear("tbody");
-                pj.ataques.forEach((a) => {
-                    const tr = crear("tr");
-                    const th = crear("th", "", a.nombre || "—");
-                    th.scope = "row";
-                    const b = numPj(String(a.bono || "").replace("−", "-"));
-                    const tdB = crear("td");
-                    tdB.appendChild(b === null ? document.createTextNode(a.bono || "") : dadoPj(b, a.nombre + " · ataque"));
-                    const tdD = crear("td");
-                    const dm = /^(\d+d\d+(?:\s*[+−-]\s*\d+)?)\s*(.*)$/.exec(String(a.dano || "").trim());
-                    if (dm && window.ocDadoBoton) {
-                        tdD.append(window.ocDadoBoton(dm[1], dm[1].replace(/\s+/g, "").replace("−", "-"), a.nombre + " · daño"),
-                            document.createTextNode(dm[2] ? " " + dm[2] : ""));
-                    } else {
-                        tdD.textContent = a.dano || "";
-                    }
-                    tr.append(th, tdB, tdD);
-                    tbody.appendChild(tr);
-                });
-                tabla.append(thead, tbody);
-                panelCombate.appendChild(tabla);
-            } else {
-                panelCombate.appendChild(crear("p", "oc-vacio", "Sin ataques apuntados (se ponen en «✎ editar ficha»)."));
-            }
-            if (pj.acciones.length) {
-                titulo(panelCombate, "🌀 Acciones");
-                panelCombate.appendChild(listaDe(pj.acciones.map((a) => a), "Acciones de " + quien));
-            }
-            if ((pj.armasTxt || "").trim()) {
-                panelCombate.appendChild(area(pj, "armasTxt", "apuntes de armas (de antes)", 3));
-            }
-
-            // 3. CONJUROS: aptitud, CD y ataque; los espacios (casillas que
-            // se gastan) y la lista por nivel; cada uno se abre.
-            const panelConj = crear("div");
-            const aptitud = pj.aptitud;
-            if (aptitud && car(aptitud) !== null) {
-                const bono = modDe(car(aptitud)) + prof;
-                panelConj.appendChild(datosDe([["Aptitud", NOMBRES_CAR[aptitud] || aptitud], ["CD de salvación", 8 + bono],
-                    ["Ataque de conjuro", dadoPj(bono, "Ataque de conjuro de " + quien)]]));
-            }
-            const niveles = Object.keys(pj.espacios).filter((n) => (numPj(pj.espacios[n].max) || 0) > 0).sort((a, b) => a - b);
-            if (niveles.length) {
-                titulo(panelConj, "🔮 Espacios de conjuro");
-                const ul = crear("ul", "master-pj-espacios");
-                ul.setAttribute("aria-label", "Espacios de conjuro de " + quien);
-                niveles.forEach((n) => {
-                    const e = pj.espacios[n];
-                    const li = crear("li");
-                    const grupo = crear("span", "master-pj-casillas");
-                    grupo.setAttribute("role", "group");
-                    grupo.setAttribute("aria-label", "Nivel " + n);
-                    for (let i = 0; i < numPj(e.max); i++) {
-                        const c = crear("input");
-                        c.type = "checkbox";
-                        c.checked = i < (numPj(e.usados) || 0);
-                        c.setAttribute("aria-label", "Espacio " + (i + 1) + " de nivel " + n + (c.checked ? ", gastado" : ""));
-                        c.addEventListener("change", () => {
-                            e.usados = Array.from(grupo.querySelectorAll("input")).filter((x) => x.checked).length;
-                            c.setAttribute("aria-label", "Espacio " + (i + 1) + " de nivel " + n + (c.checked ? ", gastado" : ""));
-                            guardar();
-                        });
-                        grupo.appendChild(c);
-                    }
-                    li.append(crear("span", "master-pj-marca", "nivel " + n), grupo);
-                    ul.appendChild(li);
-                });
-                const descanso = botonDe("oc-vida-accion", "↺ descanso largo", () => {
-                    niveles.forEach((n) => {
-                        pj.espacios[n].usados = 0;
-                    });
-                    guardar();
-                    ul.querySelectorAll("input").forEach((c) => {
-                        c.checked = false;
-                    });
-                    avisar("Espacios de conjuro recuperados.");
-                }, "Recuperar todos los espacios de conjuro de " + quien);
-                panelConj.append(ul, descanso);
-            }
-            const listaConj = crear("div");
-            const nuevoConj = crear("input", "oc-dados-texto");
-            const pintarConj = () => {
-                listaConj.replaceChildren();
-                const todos = conjurosPj(pj, srd);
-                if (!todos.length) {
-                    listaConj.appendChild(crear("p", "oc-vacio", "No tiene conjuros apuntados."));
-                }
-                const nvs = Array.from(new Set(todos.map((c) => c.nivel))).sort((a, b) => (a === null) - (b === null) || a - b);
-                nvs.forEach((n) => {
-                    titulo(listaConj, n === null ? "Otros" : n === 0 ? "Trucos" : "Nivel " + n);
-                    listaConj.appendChild(listaDe(todos.filter((c) => c.nivel === n).map((c) => [conjuroPj(c.nombre, srd, conj.fuente),
-                        botonDe("master-party-quitar", "✕", () => {
-                            pj.conjuros = pj.conjuros.filter((x) => x !== c.nombre);
-                            guardar();
-                            pintarConj();
-                            avisar("Quitado: " + c.nombre + ".");
-                            nuevoConj.focus();
-                        }, "Quitar " + c.nombre)]), (n === null ? "Otros conjuros" : n === 0 ? "Trucos" : "Conjuros de nivel " + n)
-                        + " de " + quien));
-                });
-            };
-            const form = crear("form", "master-pj-anadir");
-            const et = crear("label", "oc-dados-etiqueta", "añadir un conjuro (los del SRD y los tuyos salen solos)");
-            nuevoConj.id = uid + "-conj";
-            et.htmlFor = nuevoConj.id;
-            nuevoConj.autocomplete = "off";
-            const dl = crear("datalist");
-            dl.id = uid + "-conj-lista";
-            (conj.conjuros || []).forEach((c) => {
-                const o = crear("option");
-                o.value = c.nombre;
-                dl.appendChild(o);
-            });
-            nuevoConj.setAttribute("list", dl.id);
-            const anadirB = crear("button", "oc-vida-accion", "＋ añadir");
-            anadirB.type = "submit";
-            form.append(et, nuevoConj, dl, anadirB);
-            form.addEventListener("submit", (e) => {
-                e.preventDefault();
-                const v = nuevoConj.value.trim();
-                if (!v) {
-                    return;
-                }
-                const c = srd[llano(v)];
-                pj.conjuros = pj.conjuros.concat(c ? c.nombre : v);
-                nuevoConj.value = "";
-                guardar();
-                pintarConj();
-                avisar("Añadido: " + (c ? c.nombre : v) + ".");
-            });
-            panelConj.append(form, listaConj);
-            pintarConj();
-
-            // 4. INVENTARIO: lo suyo (lo del SRD se abre) y su dinero; cada
-            // cosa se puede pasar al inventario común de la party.
-            const panelInv = crear("div");
-            const listaInv = crear("ul", "master-pj-lista");
-            listaInv.setAttribute("aria-label", "Inventario de " + quien);
-            const pintarInv = () => {
-                listaInv.replaceChildren(...pj.objetos.map((o, i) => {
-                    const li = crear("li");
-                    const srdO = objetosSrd[llano(o.nombre)];
-                    const nombre = srdO ? botonDe("master-conjuro-boton", o.nombre, () => abrirObjeto(srdO, li.firstChild, tienda.fuente))
-                        : crear("span", "", o.nombre);
-                    li.append(nombre, crear("span", "master-pj-marca", "×" + (numPj(o.cant) || 1) + (o.equipado ? " · equipado" : "")));
-                    li.appendChild(botonDe("master-party-quitar", "→ party", () => {
-                        const inv = inventarioParty();
-                        const ya = inv.objetos.find((x) => llano(x.nombre) === llano(o.nombre));
-                        if (ya) {
-                            ya.cant = (numPj(ya.cant) || 1) + (numPj(o.cant) || 1);
-                        } else {
-                            inv.objetos.push({ id: nuevoIdPj(), nombre: o.nombre, cant: numPj(o.cant) || 1 });
-                        }
-                        pj.objetos.splice(i, 1);
-                        guardar();
-                        avisarPjs("");
-                        avisar(o.nombre + ": al inventario de la party.");
-                    }, "Pasar " + o.nombre + " al inventario común de la party"));
-                    return li;
-                }));
-                if (!pj.objetos.length) {
-                    listaInv.appendChild(crear("li", "oc-vacio", "Sin objetos apuntados (se ponen en «✎ editar ficha»)."));
-                }
-            };
-            pintarInv();
-            const monedas = MONEDAS_PJ.filter(([k]) => numPj(pj.dinero[k])).map(([k, abr]) => numPj(pj.dinero[k]) + " " + abr);
-            panelInv.append(listaInv, datosDe([["💰 Dinero", monedas.join(", ") || "nada"]]));
-            if ((pj.objetosTxt || "").trim()) {
-                panelInv.appendChild(area(pj, "objetosTxt", "apuntes de objetos (de antes)", 3));
-            }
-
-            // 5. RASGOS: rasgos y dotes, competencias e idiomas.
-            const panelRasgos = crear("div");
-            const exportarR = botonDe("oc-vida-accion", "⬇ exportar rasgos (.json)", () => {
-                pedir(RASGOS_SRD).catch(() => ({ rasgos: [] })).then((datos) => {
-                    const pista = (pj.clase || "") + " " + (pj.raza || "");
-                    const lineas = String(pj.rasgos || "").split("\n").map((l) => l.trim()).filter(Boolean);
-                    const rasgos = lineas.map((l) => {
-                        const m2 = /^[-*•]?\s*(?:\*\*(.+?)\*\*|([^(]+?))\s*(?:\((.*)\))?\s*$/.exec(l) || [];
-                        const nombre = (m2[1] || m2[2] || l).trim();
-                        const r = rasgoDe(datos.rasgos || [], nombre, pista);
-                        const o = { nombre, de: (m2[3] || "").trim() };
-                        if (r) {
-                            Object.assign(o, { tipo: r.tipo, en: r.en, texto: r.texto, fuente: r.propio ? fuenteDe(r) : "SRD 5.2 (CC BY 4.0)" });
-                        }
-                        return o;
-                    });
-                    bajarJson({ personaje: pj.nombreCompleto || pj.nombre, clase: pj.clase || "", especie: pj.raza || "",
-                        nivel: numPj(pj.nivel), rasgos, competencias: pj.competencias || "", idiomas: pj.idiomas || "" },
-                    "rasgos-" + llano(pj.nombre || "pj").replace(/[^a-z0-9]+/g, "-") + ".json");
-                    avisar("Bajados los rasgos de " + quien + " (" + rasgos.length + ").");
-                });
-            }, "Bajar los rasgos y dotes de " + quien + " a un archivo .json");
-            const barraR = crear("div", "master-creador-barra");
-            barraR.appendChild(exportarR);
-            if ((pj.rasgos || "").trim()) {
-                const tr = texto(pj.rasgos);
-                enlazarRasgos(tr, (pj.clase || "") + " " + (pj.raza || ""));
-                panelRasgos.append(crear("p", "oc-hoja-nota", "Pulsa un rasgo para leerlo (los del SRD y los tuyos)."), tr, barraR);
-            } else {
-                panelRasgos.appendChild(crear("p", "oc-vacio", "Sin rasgos apuntados."));
-            }
-            panelRasgos.appendChild(datosDe([["Competencias", pj.competencias], ["Idiomas", pj.idiomas]]));
-
-            // 6. HISTORIA: cómo es y de dónde viene (se escribe aquí mismo).
-            const panelHist = crear("div");
-            panelHist.append(area(pj, "aspecto", "aspecto (cómo es)", 3), area(pj, "personalidad", "personalidad", 2),
-                area(pj, "ideales", "ideales", 2), area(pj, "vinculos", "vínculos", 2), area(pj, "defectos", "defectos", 2),
-                area(pj, "historia", "su historia", 8));
-            if ((pj.trasfondo || "").trim()) {
-                panelHist.appendChild(area(pj, "trasfondo", "trasfondo (de antes)", 3));
-            }
-
-            // 7. PNJ Y NOTAS: la gente que conoce y lo que apunta el jugador.
-            const panelPnj = crear("div");
-            const listaPnj = crear("ul", "master-pj-pnjs");
-            listaPnj.setAttribute("aria-label", "PNJ que conoce " + quien);
-            const formPnj = crear("form", "master-pj-anadir");
-            const pnjNombre = crear("input", "oc-dados-texto");
-            const pnjRel = crear("input", "oc-dados-texto");
-            const pintarPnj = () => {
-                listaPnj.replaceChildren(...pj.pnjs.map((p, i) => {
-                    const li = crear("li");
-                    const cab2 = crear("p", "master-pj-pnj");
-                    cab2.append(crear("strong", "", p.nombre), document.createTextNode(p.relacion ? " · " + p.relacion : ""));
-                    const nota = crear("textarea", "oc-notas-texto es-corta");
-                    nota.rows = 2;
-                    nota.value = p.nota || "";
-                    nota.setAttribute("aria-label", "Nota sobre " + p.nombre);
-                    nota.addEventListener("input", () => {
-                        p.nota = nota.value;
-                        clearTimeout(espera);
-                        espera = setTimeout(guardar, 400);
-                    });
-                    const q = botonDe("master-party-quitar", "✕", () => {
-                        pj.pnjs.splice(i, 1);
-                        guardar();
-                        pintarPnj();
-                        pnjNombre.focus();
-                        avisar("Quitado: " + p.nombre + ".");
-                    }, "Quitar a " + p.nombre);
-                    cab2.appendChild(q);
-                    li.append(cab2, nota);
-                    return li;
-                }));
-            };
-            [[pnjNombre, "nombre del PNJ"], [pnjRel, "quién es para él (amigo, rival, deudor…)"]].forEach(([x, t], i) => {
-                x.id = uid + "-pnj" + i;
-                x.autocomplete = "off";
-                const e2 = crear("label", "oc-dados-etiqueta", t);
-                e2.htmlFor = x.id;
-                formPnj.append(e2, x);
-            });
-            const pnjB = crear("button", "oc-vida-accion", "＋ PNJ");
-            pnjB.type = "submit";
-            formPnj.appendChild(pnjB);
-            formPnj.addEventListener("submit", (e) => {
-                e.preventDefault();
-                if (!pnjNombre.value.trim()) {
-                    pnjNombre.focus();
-                    return;
-                }
-                pj.pnjs.push({ nombre: pnjNombre.value.trim(), relacion: pnjRel.value.trim(), nota: "" });
-                pnjNombre.value = "";
-                pnjRel.value = "";
-                guardar();
-                pintarPnj();
-                pnjNombre.focus();
-            });
-            pintarPnj();
-            titulo(panelPnj, "👥 PNJ que conoce");
-            panelPnj.append(listaPnj, formPnj);
-            titulo(panelPnj, "📝 Notas");
-            panelPnj.appendChild(area(pj, "notas", "notas del personaje (misiones, pistas, lo que recuerda…)", 6));
-
-            // 8. MÁSTER: lo que sólo ve el máster.
-            const panelMaster = crear("div");
-            panelMaster.append(area(apuntes, "miedos", "miedos (salen arriba, en todas las pestañas)", 2, pintarRecordar),
-                area(apuntes, "secretos", "secretos (sólo para el máster)", 3), area(apuntes, "ganchos", "ganchos para la historia", 3),
-                area(apuntes, "relaciones", "relaciones (con otros PJ, facciones…)", 3), area(apuntes, "deudas",
-                    "deudas, promesas y rencores", 2), area(apuntes, "notas", "otras notas", 3));
-
-            const paneles = [["📋 ficha", panelFicha], ["⚔️ combate", panelCombate], ["✨ conjuros", panelConj],
-                ["🎒 inventario", panelInv], ["⭐ rasgos", panelRasgos], ["📜 historia", panelHist], ["👥 PNJ y notas", panelPnj],
-                ["🎭 máster", panelMaster]];
-            const { lista, elegir } = pestanasDe(paneles, "Ficha de " + quien, uid, (i) => {
-                m.datos.pestana = i;
-                guardar();
-            });
-            dentro.replaceChildren(cabeza, lista, ...paneles.map(([, x]) => x));
-            elegir(Math.min(m.datos.pestana || 0, paneles.length - 1), false);
-        }).catch(() => {
-            dentro.replaceChildren(crear("p", "oc-vacio", "No he podido cargar su ficha."));
-        });
-    }
-
-    // EL FORMULARIO DE LA FICHA: todo lo que no se escribe en las
-    // pestañas (los números, las competencias, los ataques, los objetos,
-    // los conjuros…). Al guardar, la ficha (y la party) se repintan.
-    function editarPj(dentro, m, pj, alTerminar) {
-        const uid = "master-pjf-" + m.id;
-        const form = crear("form", "master-creador-form");
-        // Por pestañas, como la ficha: cada grupo va a la suya.
-        const pF = crear("div");
-        const pC = crear("div");
-        const pM = crear("div");
-        const pI = crear("div");
-        const pR = crear("div");
-        let destino = pF;
-        let n = 0;
-        function campo(caja, etiqueta, valor, op) {
-            const o = op || {};
-            n += 1;
-            const id = uid + "-c" + n;
-            const et = crear("label", "oc-dados-etiqueta", etiqueta);
-            et.htmlFor = id;
-            let x;
-            if (o.opciones) {
-                x = crear("select", "master-elegir");
-                o.opciones.forEach(([v, t]) => {
-                    const op2 = crear("option", "", t);
-                    op2.value = v;
-                    x.appendChild(op2);
-                });
-                x.value = valor === undefined || valor === null ? "" : String(valor);
-            } else if (o.filas) {
-                x = crear("textarea", "oc-dados-texto master-creador-area");
-                x.rows = o.filas;
-                x.value = valor || "";
-            } else {
-                x = crear("input", "oc-dados-texto");
-                x.type = o.tipo || "text";
-                if (o.tipo === "number") {
-                    x.min = o.min === undefined ? 0 : o.min;
-                    x.max = o.max === undefined ? 9999 : o.max;
-                    x.inputMode = "numeric";
-                }
-                x.value = valor === undefined || valor === null ? "" : String(valor);
-                x.autocomplete = "off";
-                if (o.lista) {
-                    x.setAttribute("list", o.lista);
-                }
-            }
-            x.id = id;
-            if (o.ayuda) {
-                x.placeholder = o.ayuda;
-            }
-            const div = crear("div", "master-creador-campo" + (o.ancho ? " es-ancho" : ""));
-            div.append(et, x);
-            caja.appendChild(div);
-            return x;
-        }
-        function grupo(titulo) {
-            const fs = crear("fieldset", "master-creador-grupo");
-            fs.appendChild(crear("legend", "", titulo));
-            const rejilla = crear("div", "master-creador-rejilla");
-            fs.appendChild(rejilla);
-            destino.appendChild(fs);
-            return rejilla;
-        }
-        // Filas repetibles (ataques, objetos): cada una con sus campos y ✕.
-        function filasDe(titulo, lista, campos, nueva) {
-            const fs = crear("fieldset", "master-creador-grupo");
-            fs.appendChild(crear("legend", "", titulo));
-            const ol = crear("ol", "master-creador-entradas");
-            const filas = [];
-            const fila = (x, foco) => {
-                const li = crear("li", "master-pjf-fila");
-                const ins = campos.map(([clave, et, op]) => {
-                    if (op && op.casilla) {
-                        const lab = crear("label", "master-creador-check");
-                        const c = crear("input");
-                        c.type = "checkbox";
-                        c.checked = !!x[clave];
-                        lab.append(c, " " + et);
-                        li.appendChild(lab);
-                        return [clave, c];
-                    }
-                    return [clave, campo(li, et, x[clave], op)];
-                });
-                const reg = { li, ins };
-                const q = botonDe("master-docs-mando", "✕", () => {
-                    filas.splice(filas.indexOf(reg), 1);
-                    li.remove();
-                    mas.focus();
-                }, "Quitar esta fila de " + titulo.toLowerCase());
-                li.appendChild(q);
-                filas.push(reg);
-                ol.appendChild(li);
-                if (foco) {
-                    ins[0][1].focus();
-                }
-            };
-            lista.forEach((x) => fila(x));
-            const mas = botonDe("oc-vida-accion", "＋ añadir", () => fila(nueva(), true), "Añadir a " + titulo.toLowerCase());
-            fs.append(ol, mas);
-            destino.appendChild(fs);
-            return () => filas.map((r) => {
-                const o = {};
-                r.ins.forEach(([k, el]) => {
-                    o[k] = el.type === "checkbox" ? el.checked : el.value.trim();
-                });
-                return o;
-            });
-        }
-        // La foto: la suya, una nueva o ninguna (se guarda al guardar).
-        const fsFoto = crear("fieldset", "master-creador-grupo master-pjf-foto");
-        fsFoto.appendChild(crear("legend", "", "Foto"));
-        const vistaFoto = crear("div", "master-pjf-foto-vista");
-        let fotoNueva = null;
-        let sinFoto = false;
-        let urlNueva = "";
-        const pintarFoto = () => {
-            vistaFoto.replaceChildren();
-            if (fotoNueva) {
-                const img = crear("img", "master-pj-foto");
-                img.alt = "La foto nueva";
-                img.src = urlNueva;
-                vistaFoto.appendChild(img);
-            } else if (!sinFoto && (pj.foto || pj.fotoUrl)) {
-                vistaFoto.appendChild(fotoPj(pj, "master-pj-foto", "La foto de ahora"));
-            } else {
-                vistaFoto.appendChild(crear("p", "oc-hoja-nota", "Sin foto."));
-            }
-            quitarFoto.hidden = !(fotoNueva || (!sinFoto && (pj.foto || pj.fotoUrl)));
-        };
-        const subirFoto = crear("input");
-        subirFoto.type = "file";
-        subirFoto.accept = "image/*";
-        subirFoto.hidden = true;
-        subirFoto.addEventListener("change", () => {
-            const f = subirFoto.files && subirFoto.files[0];
-            subirFoto.value = "";
-            if (!f) {
-                return;
-            }
-            if (!/^image\//.test(f.type) || f.size > 10 * 1024 * 1024) {
-                avisar("Tiene que ser una imagen de hasta 10 MB.");
-                return;
-            }
-            if (urlNueva) {
-                URL.revokeObjectURL(urlNueva);
-            }
-            fotoNueva = f;
-            urlNueva = URL.createObjectURL(f);
-            sinFoto = false;
-            pintarFoto();
-            avisar("Foto elegida: se guarda al pulsar «✓ guardar».");
-        });
-        const elegirFoto = botonDe("oc-vida-accion", "📷 elegir foto", () => subirFoto.click(), "Elegir una foto de " + (pj.nombre
-            || "este personaje") + " (de tu dispositivo)");
-        const quitarFoto = botonDe("oc-vida-accion", "✕ quitar", () => {
-            fotoNueva = null;
-            sinFoto = true;
-            pintarFoto();
-            elegirFoto.focus();
-        }, "Quitar la foto");
-        const botonesFoto = crear("div", "master-creador-barra");
-        botonesFoto.append(elegirFoto, quitarFoto);
-        fsFoto.append(vistaFoto, botonesFoto, subirFoto);
-        pintarFoto();
-        pF.appendChild(fsFoto);
-        const b = grupo("Quién es");
-        const nombre = campo(b, "nombre", pj.nombre);
-        const completo = campo(b, "nombre completo", pj.nombreCompleto, { ayuda: "opcional" });
-        const jugador = campo(b, "jugador", pj.jugador, { ayuda: "quién lo lleva" });
-        const raza = campo(b, "especie", pj.raza);
-        const clase = campo(b, "clase (y subclase)", pj.clase);
-        const nivel = campo(b, "nivel", pj.nivel, { tipo: "number", min: 1, max: 20 });
-        const fondo = campo(b, "trasfondo", pj.trasfondoNombre);
-        const alin = campo(b, "alineamiento", pj.alineamiento);
-        const pxC = campo(b, "PX (experiencia)", pj.px, { tipo: "number", min: 0 });
-        destino = pC;
-        const c = grupo("Combate");
-        const ca = campo(c, "CA", pj.ca);
-        const pgmax = campo(c, "PG máximos", pj.pgmax, { tipo: "number" });
-        const pg = campo(c, "PG actuales", pj.pg, { tipo: "number" });
-        const pgtemp = campo(c, "PG temporales", pj.pgtemp, { tipo: "number" });
-        const vel = campo(c, "velocidad", pj.velocidad, { ayuda: "30 pies" });
-        const dg = campo(c, "dados de golpe", pj.dadosGolpe, { ayuda: "3d8" });
-        destino = pF;
-        const cs = grupo("Características");
-        const cars = {};
-        SALVACIONES_PJ.forEach((k) => {
-            cars[k] = campo(cs, NOMBRES_CAR[k], pj[k], { tipo: "number", min: 1, max: 30 });
-        });
-        const fsS = crear("fieldset", "master-creador-grupo");
-        fsS.appendChild(crear("legend", "", "Salvaciones con competencia"));
-        const cajaS = crear("div", "master-creador-casillas");
-        const salv = SALVACIONES_PJ.map((k) => {
-            const lab = crear("label", "master-creador-check");
-            const x = crear("input");
-            x.type = "checkbox";
-            x.checked = pj.salvaciones.includes(k);
-            lab.append(x, " " + NOMBRES_CAR[k]);
-            cajaS.appendChild(lab);
-            return [k, x];
-        });
-        fsS.appendChild(cajaS);
-        pF.appendChild(fsS);
-        const hs = grupo("Habilidades");
-        destino = pC;
-        const habs = HABILIDADES_PJ.map(([nom, k]) => [nom, campo(hs, nom + " (" + k.toUpperCase() + ")", pj.habilidades[nom] || 0,
-            { opciones: [["0", "—"], ["1", "competente"], ["2", "pericia"]] })]);
-        const leerAtaques = filasDe("Ataques", pj.ataques, [["nombre", "arma o ataque"], ["bono", "bono", { ayuda: "+5" }],
-            ["dano", "daño", { ayuda: "1d8+3 cortante" }]], () => ({ nombre: "", bono: "", dano: "" }));
-        const acc = campo(grupo("Acciones especiales"), "una por línea", pj.acciones.join("\n"), { filas: 3, ancho: true,
-            ayuda: "Acción adicional: Forma salvaje (2 usos, descanso corto)" });
-        destino = pM;
-        const mg = grupo("Magia");
-        const apt = campo(mg, "aptitud mágica", pj.aptitud || "", { opciones: [["", "ninguna"]].concat(SALVACIONES_PJ.map((k) =>
-            [k, NOMBRES_CAR[k]])) });
-        const espacios = {};
-        for (let i = 1; i <= 9; i++) {
-            espacios[i] = campo(mg, "espacios de nivel " + i, (pj.espacios[i] || {}).max || "", { tipo: "number", max: 9 });
-        }
-        const conjs = campo(grupo("Conjuros"), "uno por línea (los del SRD se enlazan solos)", pj.conjuros.join("\n"),
-            { filas: 6, ancho: true });
-        destino = pI;
-        const leerObjetos = filasDe("Inventario", pj.objetos, [["nombre", "objeto"], ["cant", "cantidad", { tipo: "number" }],
-            ["equipado", "equipado", { casilla: true }]], () => ({ nombre: "", cant: 1, equipado: false }));
-        const din = grupo("Dinero");
-        const monedas = {};
-        MONEDAS_PJ.forEach(([k, abr, nom]) => {
-            monedas[k] = campo(din, nom + " (" + abr + ")", pj.dinero[k] || "", { tipo: "number", max: 9999999 });
-        });
-        destino = pR;
-        const ot = grupo("Rasgos y competencias");
-        const rasgos = campo(ot, "rasgos y dotes", pj.rasgos, { filas: 6, ancho: true,
-            ayuda: "- **Visión en la oscuridad** (especie)\n- **Ataque furtivo** (Pícaro, nivel 1)" });
-        // Añadirlos del SRD (o de los tuyos): uno a uno, o todos los de su
-        // clase (hasta su nivel) y su especie.
-        const cajaSrd = crear("div", "master-pjf-srd");
-        const etSrd = crear("label", "oc-dados-etiqueta", "añadir uno del SRD o de los tuyos");
-        const buscaSrd = crear("input", "oc-dados-texto");
-        buscaSrd.id = uid + "-srd";
-        buscaSrd.setAttribute("list", uid + "-srd-lista");
-        buscaSrd.autocomplete = "off";
-        buscaSrd.placeholder = "Furia, Alerta, Linaje feérico…";
-        etSrd.htmlFor = buscaSrd.id;
-        const listaSrd = crear("datalist");
-        listaSrd.id = uid + "-srd-lista";
-        let todosRasgos = [];
-        pedir(RASGOS_SRD).then((datos) => {
-            todosRasgos = (datos.rasgos || []).filter((r) => r.tipo !== "habilidad");
-            const vistos = new Set();
-            listaSrd.replaceChildren(...todosRasgos.filter((r) => {
-                const k = r.nombre + "|" + r.de;
-                const ya = vistos.has(k);
-                vistos.add(k);
-                return !ya;
-            }).map((r) => {
-                const o = crear("option");
-                o.value = r.nombre + (r.de && r.de !== "dote" ? " — " + r.de : "");
-                return o;
-            }));
-        }).catch(() => null);
-        const lineaDe = (r) => "- **" + r.nombre + "** (" + (r.tipo === "rasgo de clase" ? r.de + (r.nivel ? ", nivel " + r.nivel : "")
-            : r.tipo === "rasgo de especie" ? (r.de.split(/,\s*/).find((d) => llano(raza.value).includes(llano(d))) || r.de.split(",")[0])
-                : r.tipo) + ")";
-        const yaEsta = (r) => String(rasgos.value).split("\n").some((l) => llano(l).includes("**" + llano(r.nombre) + "**"));
-        const poner = (lista) => {
-            const nuevas = lista.filter((r) => !yaEsta(r)).map(lineaDe);
-            if (nuevas.length) {
-                rasgos.value = (rasgos.value.trim() ? rasgos.value.replace(/\s+$/, "") + "\n" : "") + nuevas.join("\n");
-            }
-            return nuevas.length;
-        };
-        const anadirUno = botonDe("oc-vida-accion", "＋ añadir", () => {
-            const [n, de] = buscaSrd.value.split(" — ");
-            const r = todosRasgos.find((x) => llano(x.nombre) === llano(n || "") && (!de || x.de === de.trim()))
-                || rasgoDe(todosRasgos, n || "", clase.value + " " + raza.value);
-            if (!r) {
-                avisar("No encuentro «" + buscaSrd.value + "» entre los rasgos y dotes.");
-                buscaSrd.focus();
-                return;
-            }
-            avisar(poner([r]) ? "Añadido: " + r.nombre + "." : r.nombre + " ya estaba.");
-            buscaSrd.value = "";
-            buscaSrd.focus();
-        }, "Añadir a la lista de rasgos el que has escrito");
-        buscaSrd.addEventListener("keydown", (e) => {
-            if (e.key === "Enter") {
-                e.preventDefault();
-                anadirUno.click();
-            }
-        });
-        const deSuClase = botonDe("oc-vida-accion", "＋ los de su clase y especie", () => {
-            const cl = llano(clase.value);
-            const base = cl.split(/[ (/]+/)[0];
-            const nv = Number(nivel.value) || 1;
-            const es = llano(raza.value);
-            const vistos = new Set();
-            const elegidos = todosRasgos.filter((r) => {
-                if (r.tipo === "rasgo de clase") {
-                    const m = /^(.*?)(?: \((.*)\))?$/.exec(r.de || "") || [];
-                    return base && llano(m[1] || "") === base && (r.nivel || 0) <= nv && (!m[2] || cl.includes(llano(m[2])))
-                        && !/^subclase de /i.test(r.nombre);
-                }
-                if (r.tipo === "rasgo de especie") {
-                    const k = llano(r.nombre.replace(/\s*\(.*$/, ""));
-                    const ok = es && !/:/.test(r.nombre) && llano(r.de || "").split(/,\s*/).some((d) => d && es.includes(d)) && !vistos.has(k);
-                    if (ok) {
-                        vistos.add(k);
-                    }
-                    return ok;
-                }
-                return false;
-            }).sort((a, b) => (a.tipo === b.tipo ? (a.nivel || 0) - (b.nivel || 0) : a.tipo === "rasgo de especie" ? -1 : 1));
-            if (!elegidos.length) {
-                avisar("No encuentro rasgos del SRD para «" + (clase.value || "sin clase") + "» y «" + (raza.value || "sin especie")
-                    + "». Mira la clase y la especie (en 📋 ficha).");
-                return;
-            }
-            const n = poner(elegidos);
-            avisar(n ? "Añadidos " + n + " rasgos (repásalos: los de elegir una opción, como el linaje, van todos)." : "Ya estaban todos.");
-        }, "Añadir los rasgos del SRD de su clase (hasta su nivel) y de su especie");
-        const filaSrd = crear("div", "master-creador-barra");
-        filaSrd.append(anadirUno, deSuClase);
-        cajaSrd.append(etSrd, buscaSrd, listaSrd, filaSrd);
-        ot.appendChild(cajaSrd);
-        const comp = campo(ot, "competencias (armas, armaduras, herramientas)", pj.competencias, { ancho: true });
-        const idiomas = campo(ot, "idiomas", pj.idiomas, { ancho: true });
-        const sentidos = campo(ot, "sentidos", pj.sentidos, { ancho: true, ayuda: "Visión en la oscuridad 60 pies" });
-        const defensas = campo(ot, "resistencias e inmunidades", pj.defensas, { ancho: true });
-        const final = crear("div", "master-creador-barra master-creador-final");
-        const ok = crear("button", "oc-vida-accion es-principal", "✓ guardar");
-        ok.type = "submit";
-        const no = botonDe("oc-vida-accion", "cancelar", () => alTerminar());
-        final.append(ok, no);
-        const paneles = [["📋 ficha", pF], ["⚔️ combate", pC], ["✨ conjuros", pM], ["🎒 inventario", pI], ["⭐ rasgos", pR]];
-        const { lista: pestanas, elegir } = pestanasDe(paneles, "Editar la ficha de " + (pj.nombre || "personaje"), uid + "-tab",
-            (i) => {
-                m.datos.pestana = i;
-            });
-        form.append(crear("h3", "master-creador-titulo", "✎ " + (pj.nombre || "personaje")), pestanas, ...paneles.map(([, x]) => x),
-            final);
-        form.addEventListener("submit", (e) => {
-            e.preventDefault();
-            ok.disabled = true;
-            const idFoto = fotoNueva ? idDoc("f") : "";
-            (fotoNueva ? archivoGuardar(idFoto, fotoNueva) : Promise.resolve()).then(() => {
-                if (fotoNueva || sinFoto) {
-                    if (pj.foto) {
-                        archivoBorrar(pj.foto);
-                    }
-                    pj.foto = fotoNueva ? idFoto : "";
-                    delete pj.fotoUrl;
-                }
-                if (urlNueva) {
-                    URL.revokeObjectURL(urlNueva);
-                }
-                guardarFicha();
-            }).catch(() => {
-                ok.disabled = false;
-                avisar("No se ha podido guardar la foto (¿no queda sitio?).");
-            });
-        });
-        function guardarFicha() {
-            pj.nombre = nombre.value.trim() || pj.nombre || "Sin nombre";
-            pj.nombreCompleto = completo.value.trim();
-            pj.jugador = jugador.value.trim();
-            pj.raza = raza.value.trim();
-            pj.clase = clase.value.trim();
-            pj.nivel = numPj(nivel.value);
-            pj.trasfondoNombre = fondo.value.trim();
-            pj.alineamiento = alin.value.trim();
-            pj.px = numPj(pxC.value) || 0;
-            pj.ca = ca.value.trim();
-            pj.pgmax = numPj(pgmax.value);
-            pj.pg = numPj(pg.value) === null ? pj.pgmax : numPj(pg.value);
-            pj.pgtemp = numPj(pgtemp.value);
-            pj.velocidad = vel.value.trim();
-            pj.dadosGolpe = dg.value.trim();
-            SALVACIONES_PJ.forEach((k) => {
-                pj[k] = numPj(cars[k].value);
-            });
-            pj.salvaciones = salv.filter(([, x]) => x.checked).map(([k]) => k);
-            pj.habilidades = {};
-            habs.forEach(([nom, x]) => {
-                if (Number(x.value)) {
-                    pj.habilidades[nom] = Number(x.value);
-                }
-            });
-            pj.ataques = leerAtaques().filter((a) => a.nombre || a.dano);
-            pj.acciones = acc.value.split("\n").map((s) => s.trim()).filter(Boolean);
-            pj.aptitud = apt.value;
-            const antes = pj.espacios;
-            pj.espacios = {};
-            for (let i = 1; i <= 9; i++) {
-                const max = numPj(espacios[i].value);
-                if (max) {
-                    pj.espacios[i] = { max, usados: Math.min(max, numPj((antes[i] || {}).usados) || 0) };
-                }
-            }
-            pj.conjuros = conjs.value.split("\n").map((s) => s.trim()).filter(Boolean);
-            pj.objetos = leerObjetos().filter((o) => o.nombre).map((o) => ({ nombre: o.nombre, cant: numPj(o.cant) || 1,
-                equipado: !!o.equipado }));
-            pj.dinero = {};
-            MONEDAS_PJ.forEach(([k]) => {
-                if (numPj(monedas[k].value)) {
-                    pj.dinero[k] = numPj(monedas[k].value);
-                }
-            });
-            pj.rasgos = rasgos.value;
-            pj.competencias = comp.value.trim();
-            pj.idiomas = idiomas.value.trim();
-            pj.sentidos = sentidos.value.trim();
-            pj.defensas = defensas.value.trim();
-            m.titulo = pj.nombre;
-            ponerTitulo(m);
-            guardar();
-            avisarPjs(m.id);
-            avisar("Ficha guardada: " + pj.nombre + ".");
-            alTerminar();
-        }
-        form.addEventListener("keydown", (e) => {
-            if (e.key === "Escape" && e.target.tagName !== "SELECT") {
-                e.preventDefault();
-                alTerminar();
-            }
-        });
-        dentro.replaceChildren(form);
-        dentro.scrollTop = 0;
-        const antes = m.datos.pestana || 0;
-        const empieza = antes < paneles.length ? antes : 0;
-        elegir(empieza, false);
-        if (empieza === 0) {
-            nombre.focus();
-        } else {
-            pestanas.querySelector("[aria-selected=true]").focus();
-        }
     }
 
     // ---- DE D&D BEYOND: el personaje (su JSON) a una ficha de aquí. Lo
@@ -2577,7 +1362,7 @@
     function deDdb(crudo, t) {
         const d = crudo && crudo.data && crudo.data.stats ? crudo.data : crudo;
         if (!d || !Array.isArray(d.stats)) {
-            throw new Error("Eso no parece la ficha de un personaje de D&D Beyond.");
+            throw new Error(ocT("Eso no parece la ficha de un personaje de D&D Beyond."));
         }
         const avisos = [];
         const inventario = Array.isArray(d.inventory) ? d.inventory : [];
@@ -2628,7 +1413,7 @@
         const nivel = clases.reduce((s, c) => s + (Number(c.level) || 0), 0) || 1;
         const comp = 2 + Math.floor((Math.min(nivel, 20) - 1) / 4);
         pj.nombreCompleto = String(d.name || "").trim();
-        pj.nombre = pj.nombreCompleto.split(" ")[0] || "Sin nombre";
+        pj.nombre = pj.nombreCompleto.split(" ")[0] || ocT("Sin nombre");
         const raza = (d.race || {}).fullName || (d.race || {}).baseName || "";
         pj.raza = t(raza);
         pj.clase = clases.map((c) => {
@@ -2669,7 +1454,7 @@
         ca += escudo + cuentan.filter((mm) => mm.type === "bonus" && mm.subType === "armor-class").reduce((s, mm) => s + (mm.value || 0), 0);
         pj.ca = String(ca);
         if (!armadura && clases.some((c) => /barbarian|monk/i.test((c.definition || {}).name || ""))) {
-            avisos.push("La CA puede ser otra: «Defensa sin armadura» no la cuento. Repásala.");
+            avisos.push(ocT("La CA puede ser otra: «Defensa sin armadura» no la cuento. Repásala."));
         }
         let pies = ((((d.race || {}).weightSpeeds || {}).normal || {}).walk) || 30;
         cuentan.forEach((mm) => {
@@ -2682,7 +1467,7 @@
                 pies += mm.value;
             }
         });
-        pj.velocidad = pies + " pies";
+        pj.velocidad = ocT("{pies} pies", { pies: pies });
         pj.dadosGolpe = clases.filter((c) => (c.definition || {}).hitDice).map((c) => (c.level || 0) + "d" + c.definition.hitDice).join(" + ");
         // Competencias.
         pj.salvaciones = [];
@@ -2728,7 +1513,7 @@
                     }
                 });
             } else if (clases.length > 1) {
-                avisos.push("Lleva varias clases: los espacios de conjuro los tienes que poner tú.");
+                avisos.push(ocT("Lleva varias clases: los espacios de conjuro los tienes que poner tú."));
             }
             (d.spellSlots || []).forEach((s) => {
                 if (pj.espacios[s.level] && s.used) {
@@ -2772,25 +1557,26 @@
         (((d.race || {}).racialTraits) || []).forEach((r) => {
             const nm = ((r || {}).definition || {}).name;
             if (nm && !SOBRAN_DDB.includes(nm.toLowerCase())) {
-                rasgos.push("- **" + t(nm) + "** (especie)");
+                rasgos.push(ocT("- **{t}** (especie)", { t: t(nm) }));
             }
         });
         clases.forEach((c) => (c.classFeatures || []).forEach((f) => {
             const df = (f || {}).definition || {};
             if (df.name && (Number(df.requiredLevel) || 1) <= (Number(c.level) || 0) && !SOBRAN_DDB.includes(df.name.toLowerCase())
                 && df.name !== "TBD" && !/^core .* traits$| subclass$|ability score improvement/i.test(df.name)) {
-                rasgos.push("- **" + t(df.name) + "** (" + t((c.definition || {}).name) + ", nivel " + (df.requiredLevel || 1) + ")");
+                rasgos.push(ocT("- **{t}** ({t2}, nivel {n})", { t: t(df.name), t2: t((c.definition || {}).name), n: df.requiredLevel || 1 }));
             }
         }));
         (d.feats || []).forEach((f) => {
             const nm = ((f || {}).definition || {}).name;
             if (nm) {
-                rasgos.push("- **" + t(nm) + "** (dote)");
+                rasgos.push(ocT("- **{t}** (dote)", { t: t(nm) }));
             }
         });
         pj.rasgos = Array.from(new Set(rasgos)).join("\n");
         // Acciones con usos.
         pj.acciones = [];
+        pj.accionesDe = {};
         Object.values(d.actions || {}).forEach((l) => (l || []).forEach((a) => {
             const nm = String((a || {}).name || "").trim();
             if (!nm) {
@@ -2799,9 +1585,15 @@
             const usos = (a.limitedUse || {}).maxUses;
             const rec = RECARGA_DDB[(a.limitedUse || {}).resetType] || "";
             const x = (ACCION_DDB[(a.activation || {}).activationType] || "Otras") + ": " + t(nm)
-                + (usos ? " (" + usos + (usos === 1 ? " uso" : " usos") + (rec ? ", " + rec : "") + ")" : "");
+                + (usos ? " (" + usos + (usos === 1 ? ocT(" uso") : ocT(" usos")) + (rec ? ", " + rec : "") + ")" : "");
             if (!pj.acciones.includes(x)) {
                 pj.acciones.push(x);
+                // Su texto (sin el HTML), para abrirla desde la ficha.
+                const desc = new DOMParser().parseFromString(String(a.description || a.snippet || ""), "text/html").body.textContent
+                    .replace(/\{\{[^}]*\}\}/g, "").replace(/[ \t]+/g, " ").replace(/\n\s*\n+/g, "\n\n").trim();
+                if (desc) {
+                    pj.accionesDe[x] = desc;
+                }
             }
         }));
         // Sentidos y defensas.
@@ -2813,7 +1605,7 @@
         cuentan.forEach((mm) => {
             const sub = String(mm.subType || "");
             if ((mm.type === "set-base" || mm.type === "sense") && SENT[sub] && mm.value) {
-                const x = SENT[sub] + " " + mm.value + " pies";
+                const x = ocT("{n} {value} pies", { n: SENT[sub], value: mm.value });
                 if (!sentidos.includes(x)) {
                     sentidos.push(x);
                 }
@@ -2843,7 +1635,7 @@
         pj.fotoUrl = String(((d.decorations || {}).avatarUrl) || d.avatarUrl || "");
         pj.dndbeyond = d.readonlyUrl || (d.id ? "https://www.dndbeyond.com/characters/" + d.id : "");
         if (t.sin.length) {
-            avisos.push("Sin traducir (cámbialo a mano si quieres): " + t.sin.slice(0, 30).join("; ") + (t.sin.length > 30 ? "…" : ""));
+            avisos.push(ocT("Sin traducir (cámbialo a mano si quieres): {join}{n}", { join: t.sin.slice(0, 30).join("; "), n: t.sin.length > 30 ? "…" : "" }));
         }
         return { pj, avisos };
     }
@@ -2861,12 +1653,12 @@
         const desc = doc.querySelector(".character-desc");
         const info = doc.querySelector("#panel-info");
         if (!desc || !info) {
-            throw new Error("Eso no parece la página de un personaje de Nivel20.");
+            throw new Error(ocT("Eso no parece la página de un personaje de Nivel20."));
         }
         const avisos = [];
         const pj = {};
         const filas = desc.querySelectorAll(".col-12");
-        pj.nombreCompleto = txt(desc.querySelector("h4")) || "Sin nombre";
+        pj.nombreCompleto = txt(desc.querySelector("h4")) || ocT("Sin nombre");
         pj.nombre = pj.nombreCompleto.split(" ")[0];
         const razaEl = desc.querySelector("a[href*='field=race']");
         pj.raza = txt(razaEl);
@@ -2892,7 +1684,7 @@
                 pj.ca = String(num(txt(v)) || "");
             } else if (nombre.startsWith("velocidad")) {
                 const d = v && v.querySelector("[data-value]");
-                pj.velocidad = (d ? parseFloat(d.getAttribute("data-value")) : num(txt(v))) + " pies";
+                pj.velocidad = ocT("{n} pies", { n: d ? parseFloat(d.getAttribute("data-value")) : num(txt(v)) });
             }
         });
         const comp = 2 + Math.floor((Math.min(pj.nivel, 20) - 1) / 4);
@@ -2984,7 +1776,7 @@
         pj.clase = claseTxt.replace(/\s+\d+\s*$/, "") + (subclase ? " (" + subclase + ")" : "");
         if (/\//.test(claseTxt)) {
             pj.clase = claseTxt;
-            avisos.push("Lleva varias clases: repasa los espacios de conjuro.");
+            avisos.push(ocT("Lleva varias clases: repasa los espacios de conjuro."));
         }
         // Objetos: los equipados y los demás.
         pj.objetos = [];
@@ -3036,7 +1828,7 @@
             });
             pj.conjuros = vistos.sort((a, b) => a[0] - b[0] || a[1].localeCompare(b[1], "es")).map((x) => x[1]);
             if (magia.querySelector(".load-more-container button")) {
-                avisos.push("Nivel20 enseña los conjuros por partes: si te falta alguno, añádelo a mano.");
+                avisos.push(ocT("Nivel20 enseña los conjuros por partes: si te falta alguno, añádelo a mano."));
             }
         }
         const og = doc.querySelector("meta[property='og:image']");
@@ -3115,10 +1907,10 @@
     function deFoundry(actor, t) {
         const s = actor && actor.system;
         if (!s || !s.abilities || !Array.isArray(actor.items)) {
-            throw new Error("Eso no parece un personaje exportado de Foundry VTT.");
+            throw new Error(ocT("Eso no parece un personaje exportado de Foundry VTT."));
         }
         if (actor.type && actor.type !== "character" && actor.type !== "npc") {
-            throw new Error("Ese JSON de Foundry no es un personaje.");
+            throw new Error(ocT("Ese JSON de Foundry no es un personaje."));
         }
         const avisos = [];
         const items = actor.items;
@@ -3157,7 +1949,7 @@
         const subclases = de("subclass");
         const nivel = clases.reduce((n, c) => n + (Number(sis(c).levels) || 0), 0) || Number((s.details || {}).level) || 1;
         const comp = 2 + Math.floor((Math.min(nivel, 20) - 1) / 4);
-        pj.nombreCompleto = String(actor.name || "").trim() || "Sin nombre";
+        pj.nombreCompleto = String(actor.name || "").trim() || ocT("Sin nombre");
         pj.nombre = pj.nombreCompleto.split(" ")[0];
         pj.nivel = nivel;
         pj.clase = clases.map((c) => {
@@ -3224,13 +2016,13 @@
         const mov = at.movement || {};
         const pies = Number(mov.walk) || Number((mov.speeds || {}).walk) || Number(((sis(raza || {}).movement || {}).walk))
             || Number((((sis(raza || {}).movement || {}).speeds || {}).walk)) || 30;
-        pj.velocidad = pies + " pies";
+        pj.velocidad = ocT("{pies} pies", { pies: pies });
         const SENT = { darkvision: "Visión en la oscuridad", blindsight: "Vista ciega", tremorsense: "Sentido de la vibración",
             truesight: "Visión verdadera" };
         const sentidos = [];
         [(at.senses || {}), (at.senses || {}).ranges || {}, (sis(raza || {}).senses || {}), ((sis(raza || {}).senses || {}).ranges || {})]
             .forEach((o) => Object.keys(SENT).forEach((k) => {
-                const x = SENT[k] + " " + o[k] + " pies";
+                const x = ocT("{n} {n2} pies", { n: SENT[k], n2: o[k] });
                 if (Number(o[k]) && !sentidos.some((y) => y.startsWith(SENT[k]))) {
                     sentidos.push(x);
                 }
@@ -3252,7 +2044,7 @@
         const otras = lista(tr.armorProf, COMP_FVTT).concat(lista(tr.weaponProf, COMP_FVTT))
             .concat(de("tool").filter((i) => Number(sis(i).proficient) >= 1 || sis(i).proficient === undefined).map((i) => t(i.name)));
         pj.competencias = Array.from(new Set(otras)).join(", ");
-        const DEF = [["dr", "Resistencia"], ["di", "Inmunidad"], ["dv", "Vulnerabilidad"], ["ci", "Inmune a"]];
+        const DEF = [["dr", "Resistencia"], ["di", "Inmunidad"], ["dv", "Vulnerabilidad"], ["ci", ocT("Inmune a")]];
         pj.defensas = DEF.map(([k, n]) => [n, lista(tr[k], DANO_FVTT)]).filter(([, l]) => l.length).map(([n, l]) => n + ": " + l.join(", "))
             .join("; ");
         // Magia: aptitud, espacios (los suyos o los de su clase) y conjuros.
@@ -3278,7 +2070,7 @@
         }
         const pacto = sp.pact || {};
         if (Number(pacto.max) || Number(pacto.override)) {
-            avisos.push("Tiene espacios de pacto (" + (pacto.override || pacto.max) + "): apúntalos tú si los quieres en la ficha.");
+            avisos.push(ocT("Tiene espacios de pacto ({n}): apúntalos tú si los quieres en la ficha.", { n: pacto.override || pacto.max }));
         }
         const conjuros = [];
         de("spell").forEach((i) => {
@@ -3311,7 +2103,7 @@
             const dado = base.custom && base.custom.enabled ? String(base.custom.formula || "") : base.denomination
                 ? (base.number || 1) + "d" + base.denomination : "";
             const extra = mods[k] + magia;
-            const tiposD = (base.types || []).map((d) => DANO_FVTT[d] || t(d)).join(" o ");
+            const tiposD = (base.types || []).map((d) => DANO_FVTT[d] || t(d)).join(ocT(" o "));
             return { nombre: t(i.name), bono: signo((competente ? comp : 0) + mods[k] + magia),
                 dano: (dado || "1") + (extra ? signo(extra).replace("−", "-") : "") + (tiposD ? " " + tiposD : "") };
         });
@@ -3350,10 +2142,10 @@
         const img = String(actor.img || "");
         pj.fotoUrl = /^(https:\/\/|data:image\/)/.test(img) ? img : "";
         if (img && !pj.fotoUrl && !/mystery-man|systems\/dnd5e\/|icons\//.test(img)) {
-            avisos.push("Su foto se queda en tu Foundry: ponla con «✎ editar ficha» → 📷.");
+            avisos.push(ocT("Su foto se queda en tu Foundry: ponla con «✎ editar ficha» → 📷."));
         }
         if (t.sin.length) {
-            avisos.push("Sin traducir (cámbialo a mano si quieres): " + t.sin.slice(0, 30).join("; ") + (t.sin.length > 30 ? "…" : ""));
+            avisos.push(ocT("Sin traducir (cámbialo a mano si quieres): {join}{n}", { join: t.sin.slice(0, 30).join("; "), n: t.sin.length > 30 ? "…" : "" }));
         }
         return { pj, avisos };
     }
@@ -3368,10 +2160,10 @@
     function traerDeNivel20(ruta) {
         return fetch("__nivel20?ruta=" + encodeURIComponent(ruta), { cache: "no-store" }).then((r) => {
             if (r.status === 404 || r.status === 403 || r.status === 401) {
-                throw new Error("Nivel20 no me deja verla (" + r.status + "). ¿Es pública la ficha?");
+                throw new Error(ocT("Nivel20 no me deja verla ({status}). ¿Es pública la ficha?", { status: r.status }));
             }
             if (!r.ok) {
-                throw new Error("No he podido hablar con Nivel20 (" + r.status + "). Prueba con su página guardada.");
+                throw new Error(ocT("No he podido hablar con Nivel20 ({status}). Prueba con su página guardada.", { status: r.status }));
             }
             return r.text();
         });
@@ -3412,7 +2204,7 @@
             try {
                 datos = JSON.parse(v);
             } catch (e) {
-                return Promise.reject(new Error("Eso no se puede leer: ¿está entero el JSON?"));
+                return Promise.reject(new Error(ocT("Eso no se puede leer: ¿está entero el JSON?")));
             }
             if (datos && datos.system && datos.system.abilities) {
                 return Promise.resolve(Object.assign(deFoundry(datos, t), { origen: "foundry" }));
@@ -3424,13 +2216,12 @@
             const canon = doc.querySelector("link[rel=canonical], meta[property='og:url']");
             const url = canon ? canon.getAttribute("href") || canon.getAttribute("content") : "";
             const r = deNivel20(doc, url);
-            r.avisos = r.avisos.map((a) => (/por partes/.test(a) ? a + " (con el programa, pegando el enlace, se traen todos)" : a));
+            r.avisos = r.avisos.map((a) => (/por partes/.test(a) ? ocT("{a} (con el programa o la app de Android, pegando el enlace, se traen todos)", { a: a }) : a));
             return Promise.resolve(Object.assign(r, { origen: "nivel20" }));
         }
         if (n20) {
-            if (!EN_CARPETA) {
-                return Promise.reject(new Error("Desde el navegador no puedo preguntar a Nivel20: guarda su página (Ctrl+S) y elígela"
-                    + " con «📄 desde un archivo», o usa el programa."));
+            if (!CON_RED) {
+                return Promise.reject(new Error(ocT("Desde el navegador no puedo preguntar a Nivel20: guarda su página (Ctrl+S) y elígela con «📄 desde un archivo», o usa el programa o la app de Android.")));
             }
             const ruta = n20[1].toLowerCase();
             return traerDeNivel20(ruta).then((html) => {
@@ -3440,58 +2231,82 @@
             });
         }
         if (ddbNum) {
-            if (!EN_CARPETA) {
-                return Promise.reject(new Error("Desde el navegador no puedo preguntar a D&D Beyond: pega el JSON."));
+            if (!CON_RED) {
+                return Promise.reject(new Error(ocT("Desde el navegador no puedo preguntar a D&D Beyond: pega el JSON.")));
             }
             return fetch("__ddb?id=" + (ddbNum[1] || ddbNum[2]), { cache: "no-store" }).then((r) => {
                 if (r.status === 403 || r.status === 404 || r.status === 401) {
-                    throw new Error("D&D Beyond no me deja verla (" + r.status + "). ¿Es pública la ficha?");
+                    throw new Error(ocT("D&D Beyond no me deja verla ({status}). ¿Es pública la ficha?", { status: r.status }));
                 }
                 if (!r.ok) {
-                    throw new Error("No he podido hablar con D&D Beyond (" + r.status + "). Prueba a pegar el JSON.");
+                    throw new Error(ocT("No he podido hablar con D&D Beyond ({status}). Prueba a pegar el JSON.", { status: r.status }));
                 }
                 return r.json();
             }).then((datos) => Object.assign(deDdb(datos, t), { origen: "ddb" }));
         }
-        return Promise.reject(new Error("No reconozco eso: pega el enlace de la ficha, su JSON o la página de Nivel20."));
+        return Promise.reject(new Error(ocT("No reconozco eso: pega el enlace de la ficha, su JSON o la página de Nivel20.")));
     }
 
     function abrirImportarPj(vuelta, pj) {
         const cuerpo = crear("form", "master-pegar");
         const ayuda = crear("ul", "master-importar-de");
-        [["D&D Beyond", EN_CARPETA ? "el enlace de la ficha (tiene que ser pública) o su JSON"
-            : "el JSON de character-service.dndbeyond.com/character/v5/character/ + su número (ficha pública)"],
-        ["Nivel20", EN_CARPETA ? "el enlace de la ficha (pública)" : "su página guardada (Ctrl+S → «sólo HTML») con «📄 desde un archivo»"],
-        ["Foundry VTT", "el JSON del personaje (clic derecho en el actor → «Exportar datos»), con «📄 desde un archivo»"]]
+        [[ocT("D&D Beyond"), CON_RED ? ocT("el enlace de la ficha (tiene que ser pública) o su JSON")
+            : ocT("el JSON de character-service.dndbeyond.com/character/v5/character/ + su número (ficha pública)")],
+        ["Nivel20", CON_RED ? ocT("el enlace de la ficha (pública)") : ocT("su página guardada (Ctrl+S → «sólo HTML») con «📄 desde un archivo»")],
+        [ocT("Foundry VTT"), ocT("el JSON del personaje (clic derecho en el actor → «Exportar datos»), con «📄 desde un archivo»")]]
             .forEach(([de, como]) => {
                 const li = crear("li");
                 li.append(crear("strong", "", de + ": "), document.createTextNode(como + "."));
                 ayuda.appendChild(li);
             });
-        cuerpo.append(crear("p", "oc-hoja-nota", "Puedes traerlo de:"), ayuda);
-        const et = crear("label", "oc-dados-etiqueta", "enlace, JSON o página");
+        cuerpo.append(crear("p", "oc-hoja-nota", ocT("Puedes traerlo de:")), ayuda,
+            crear("p", "master-importar-red", ocT("🌐 Con un enlace (D&D Beyond, Nivel20) hace falta conexión a internet: la ficha se trae de su página. Desde un archivo, no.")));
+        const et = crear("label", "oc-dados-etiqueta", ocT("enlace, JSON o página"));
         const area = crear("textarea", "oc-dados-texto master-pegar-area");
         area.id = "master-importar-texto";
         area.rows = 4;
         et.htmlFor = area.id;
+        // Si se trajo de un enlace, se recuerda: actualizarla es un toque.
+        if (pj && pj.importadoDe) {
+            area.value = pj.importadoDe;
+        }
         const estado = crear("p", "oc-hoja-nota");
         estado.setAttribute("role", "status");
-        const ok = crear("button", "oc-vida-accion es-principal", "📥 traer");
+        const ok = crear("button", "oc-vida-accion es-principal", ocT("📥 traer"));
         ok.type = "submit";
         const archivo = crear("input");
         archivo.type = "file";
         archivo.accept = ".json,.html,.htm,application/json,text/html";
         archivo.hidden = true;
-        const elegir = botonDe("oc-vida-accion", "📄 desde un archivo", () => archivo.click(),
-            "Elegir un archivo: el JSON de Foundry o de D&D Beyond, o la página guardada de Nivel20");
+        const elegir = botonDe("oc-vida-accion", ocT("📄 desde un archivo"), () => archivo.click(),
+            ocT("Elegir un archivo: el JSON de Foundry o de D&D Beyond, o la página guardada de Nivel20"));
         const fila = crear("div", "master-creador-barra");
         fila.append(ok, elegir);
-        cuerpo.append(et, area, fila, archivo, estado, crear("p", "oc-hoja-nota", "Se traen sus números, competencias, conjuros,"
-            + " objetos, dinero e historia, y los rasgos por su nombre (no sus textos). Se queda en este dispositivo."));
+        // Mientras se trae: la pantalla de carga (encima del formulario).
+        const cargando = crear("div", "master-cargando");
+        cargando.hidden = true;
+        const rueda = crear("span", "master-cargando-rueda");
+        rueda.setAttribute("aria-hidden", "true");
+        const cargandoTexto = crear("p", "master-cargando-texto");
+        cargando.append(rueda, cargandoTexto);
+        cuerpo.append(et, area, fila, archivo, estado, cargando, crear("p", "oc-hoja-nota", ocT("Se traen sus números, competencias, conjuros, objetos, dinero e historia, y los rasgos por su nombre (no sus textos). Se queda en este dispositivo.")));
         const traer = (texto) => {
+            const url = /^https?:\/\/\S+$/i.test(String(texto).trim()) ? String(texto).trim() : "";
+            if (url && navigator.onLine === false) {
+                estado.textContent = ocT("⚠️ No hay conexión a internet: para traerla de un enlace hace falta. Conéctate o usa «📄 desde un archivo».");
+                return;
+            }
             ok.disabled = true;
             elegir.disabled = true;
-            estado.textContent = "Trayendo…";
+            estado.textContent = ocT("Trayendo…");
+            cargandoTexto.textContent = url ? ocT("Trayendo la ficha de {sitio}…", { sitio: url.replace(/^https?:\/\/(www\.)?/i, "").split("/")[0] })
+                : ocT("Leyendo la ficha…");
+            cargando.hidden = false;
+            cuerpo.setAttribute("aria-busy", "true");
+            const acabar = () => {
+                cargando.hidden = true;
+                cuerpo.removeAttribute("aria-busy");
+            };
             traductorDdb().then((t) => leerPjDe(texto, t)).then((r) => {
                 if (pj && (pj.foto || pj.fotoUrl)) {
                     delete r.pj.fotoUrl;
@@ -3499,9 +2314,16 @@
                 }
                 return guardarFotoImportada(r.pj).then(() => r);
             }).then(({ pj: nuevo, avisos, origen }) => {
+                acabar();
                 let quien;
+                if (url) {
+                    nuevo.importadoDe = url;
+                }
                 if (pj) {
-                    const guarda = { id: pj.id, apuntes: pj.apuntes, notas: pj.notas, pnjs: pj.pnjs };
+                    const guarda = { id: pj.id, apuntes: pj.apuntes, notas: pj.notas, pnjs: pj.pnjs, secretos: pj.secretos };
+                    if (!url && pj.importadoDe) {
+                        guarda.importadoDe = pj.importadoDe;
+                    }
                     if (pj.foto || pj.fotoUrl) {
                         Object.assign(guarda, { foto: pj.foto, fotoUrl: pj.fotoUrl });
                     }
@@ -3517,12 +2339,13 @@
                 if (!pj) {
                     abrirFichaPj(quien, quien.nombre);
                 }
-                avisar("Traído de " + ORIGENES_PJ[origen] + ": " + quien.nombre + "." + (avisos.length ? " " + avisos.join(" ") : ""));
+                avisar(ocT("Traído de {n}: {nombre}.{n2}", { n: ORIGENES_PJ[origen], nombre: quien.nombre, n2: avisos.length ? " " + avisos.join(" ") : "" }));
             }).catch((err) => {
+                acabar();
                 ok.disabled = false;
                 elegir.disabled = false;
-                estado.textContent = "⚠️ " + (err && err.message && !/JSON/.test(err.name) ? err.message
-                    : "Eso no se puede leer: ¿está entero?");
+                estado.textContent = "⚠️ " + (url && err instanceof TypeError ? ocT("No he podido llegar a la página: ¿hay conexión a internet?")
+                    : err && err.message && !/JSON/.test(err.name) ? err.message : ocT("Eso no se puede leer: ¿está entero?"));
             });
         };
         cuerpo.addEventListener("submit", (e) => {
@@ -3540,12 +2363,12 @@
                 return;
             }
             if (f.size > 30 * 1024 * 1024) {
-                estado.textContent = "⚠️ Ese archivo es demasiado grande.";
+                estado.textContent = ocT("⚠️ Ese archivo es demasiado grande.");
                 return;
             }
             f.text().then(traer);
         });
-        const cerrar = window.ocVentana.abrir({ titulo: pj ? "actualizar la ficha" : "traer un personaje", cuerpo, vuelta, foco: area });
+        const cerrar = window.ocVentana.abrir({ titulo: pj ? ocT("actualizar la ficha") : ocT("traer un personaje"), cuerpo, vuelta, foco: area });
     }
 
     // ---- EL INVENTARIO COMÚN DE LA PARTY (todo.inventario): lo que llevan
@@ -3555,524 +2378,6 @@
             : { objetos: [], dinero: {}, notas: "" };
         todo.inventario.dinero = todo.inventario.dinero || {};
         return todo.inventario;
-    }
-
-    function montarInventario(dentro, m) {
-        const uid = "master-inv-" + m.id;
-        const pintar = () => {
-            dentro.replaceChildren(crear("p", "oc-hoja-nota", "Cargando…"));
-            pedir(TIENDA).catch(() => ({ objetos: [] })).then((tienda) => {
-                const inv = inventarioParty();
-                const objetosSrd = {};
-                (tienda.objetos || []).forEach((o) => {
-                    objetosSrd[llano(o.nombre)] = o;
-                });
-                // El dinero: cinco casillas y el total en oro.
-                const din = crear("fieldset", "master-creador-grupo");
-                din.appendChild(crear("legend", "", "💰 Dinero de la party"));
-                const fila = crear("div", "master-inv-monedas");
-                const total = crear("p", "oc-hoja-nota");
-                const pintarTotal = () => {
-                    const po = MONEDAS_PJ.reduce((s, [k]) => s + (numPj(inv.dinero[k]) || 0) * ORO_DE_MONEDA[k], 0);
-                    total.textContent = "En total: " + (Math.round(po * 100) / 100).toLocaleString("es-ES") + " po";
-                };
-                MONEDAS_PJ.forEach(([k, abr, nom]) => {
-                    const lab = crear("label", "master-inv-moneda");
-                    const x = crear("input", "master-party-input");
-                    x.type = "number";
-                    x.min = 0;
-                    x.inputMode = "numeric";
-                    x.value = numPj(inv.dinero[k]) || "";
-                    x.setAttribute("aria-label", "Monedas de " + nom);
-                    x.addEventListener("change", () => {
-                        inv.dinero[k] = numPj(x.value) || 0;
-                        guardar();
-                        pintarTotal();
-                    });
-                    lab.append(crear("span", "master-party-et", abr), x);
-                    fila.appendChild(lab);
-                });
-                pintarTotal();
-                din.append(fila, total);
-                // Añadir: nombre (con los del SRD sugeridos) y cuántos.
-                const form = crear("form", "master-pj-anadir");
-                const nom = crear("input", "oc-dados-texto");
-                nom.id = uid + "-nombre";
-                nom.autocomplete = "off";
-                const dl = crear("datalist");
-                dl.id = uid + "-lista";
-                (tienda.objetos || []).forEach((o) => {
-                    const op = crear("option");
-                    op.value = o.nombre;
-                    dl.appendChild(op);
-                });
-                nom.setAttribute("list", dl.id);
-                const etN = crear("label", "oc-dados-etiqueta", "añadir un objeto");
-                etN.htmlFor = nom.id;
-                const cant = crear("input", "master-party-input");
-                cant.type = "number";
-                cant.min = 1;
-                cant.value = 1;
-                cant.id = uid + "-cant";
-                const etC = crear("label", "oc-dados-etiqueta", "cuántos");
-                etC.htmlFor = cant.id;
-                const ok = crear("button", "oc-vida-accion", "＋ añadir");
-                ok.type = "submit";
-                form.append(etN, nom, dl, etC, cant, ok);
-                form.addEventListener("submit", (e) => {
-                    e.preventDefault();
-                    const v = nom.value.trim();
-                    if (!v) {
-                        nom.focus();
-                        return;
-                    }
-                    const s = objetosSrd[llano(v)];
-                    const n2 = numPj(cant.value) || 1;
-                    const ya = inv.objetos.find((x) => llano(x.nombre) === llano(s ? s.nombre : v));
-                    if (ya) {
-                        ya.cant = (numPj(ya.cant) || 1) + n2;
-                    } else {
-                        inv.objetos.push({ id: nuevoIdPj(), nombre: s ? s.nombre : v, cant: n2 });
-                    }
-                    guardar();
-                    avisarPjs(m.id);
-                    pintar();
-                    avisar("Añadido: " + (s ? s.nombre : v) + " ×" + n2 + ".");
-                    const nuevoNom = document.getElementById(uid + "-nombre");
-                    if (nuevoNom) {
-                        nuevoNom.focus();
-                    }
-                });
-                // La lista.
-                const ul = crear("ul", "master-inv-lista");
-                ul.setAttribute("aria-label", "Inventario común de la party");
-                inv.objetos.forEach((o) => {
-                    const li = crear("li", "master-inv-objeto");
-                    const s = objetosSrd[llano(o.nombre)];
-                    const nombre = s ? botonDe("master-conjuro-boton", o.nombre, () => abrirObjeto(s, nombre, tienda.fuente))
-                        : crear("span", "master-inv-nombre", o.nombre);
-                    const menos = botonDe("master-docs-mando", "−", () => {
-                        o.cant = Math.max(0, (numPj(o.cant) || 1) - 1);
-                        if (!o.cant) {
-                            inv.objetos.splice(inv.objetos.indexOf(o), 1);
-                            avisar("Gastado: " + o.nombre + ".");
-                        }
-                        guardar();
-                        pintar();
-                    }, "Uno menos de " + o.nombre);
-                    const cuantos = crear("span", "master-inv-cant", "×" + (numPj(o.cant) || 1));
-                    const mas = botonDe("master-docs-mando", "＋", () => {
-                        o.cant = (numPj(o.cant) || 1) + 1;
-                        guardar();
-                        cuantos.textContent = "×" + o.cant;
-                    }, "Uno más de " + o.nombre);
-                    const dar = crear("select", "master-elegir master-inv-dar");
-                    dar.setAttribute("aria-label", "Dar " + o.nombre + " a…");
-                    [["", "dar a…"]].concat((todo.pjs || []).map((p) => [p.id, p.nombre || "sin nombre"])).forEach(([v, tx]) => {
-                        const op = crear("option", "", tx);
-                        op.value = v;
-                        dar.appendChild(op);
-                    });
-                    dar.disabled = !(todo.pjs || []).length;
-                    dar.addEventListener("change", () => {
-                        const p = (todo.pjs || []).find((x) => x.id === dar.value);
-                        if (!p) {
-                            return;
-                        }
-                        normalizarPj(p);
-                        p.objetos.push({ nombre: o.nombre, cant: 1, equipado: false });
-                        o.cant = (numPj(o.cant) || 1) - 1;
-                        if (o.cant <= 0) {
-                            inv.objetos.splice(inv.objetos.indexOf(o), 1);
-                        }
-                        guardar();
-                        avisarPjs(m.id);
-                        avisar(o.nombre + ": se lo queda " + p.nombre + ".");
-                        pintar();
-                    });
-                    let seguro = false;
-                    const quitar = botonDe("master-docs-mando", "✕", () => {
-                        if (!seguro) {
-                            seguro = true;
-                            quitar.classList.add("es-seguro");
-                            avisar("Pulsa otra vez para quitar " + o.nombre + ".");
-                            return;
-                        }
-                        inv.objetos.splice(inv.objetos.indexOf(o), 1);
-                        guardar();
-                        pintar();
-                        avisar("Quitado: " + o.nombre + ".");
-                    }, "Quitar " + o.nombre);
-                    li.append(nombre, menos, cuantos, mas, dar, quitar);
-                    ul.appendChild(li);
-                });
-                const vacio = crear("p", "oc-vacio", "La party no lleva nada en común todavía.");
-                vacio.hidden = !!inv.objetos.length;
-                const notas = crear("textarea", "oc-notas-texto es-corta");
-                notas.id = uid + "-notas";
-                notas.rows = 3;
-                notas.value = inv.notas || "";
-                const etNotas = crear("label", "oc-dados-etiqueta", "notas (dónde lo guardan, quién lo carga…)");
-                etNotas.htmlFor = notas.id;
-                let espera = 0;
-                notas.addEventListener("input", () => {
-                    inv.notas = notas.value;
-                    clearTimeout(espera);
-                    espera = setTimeout(guardar, 400);
-                });
-                dentro.replaceChildren(din, form, vacio, ul, etNotas, notas);
-            });
-        };
-        pintar();
-        mientrasEste(dentro, "master:pjs", (e) => {
-            if (!(e.detail && e.detail.desde === m.id) && !dentro.contains(document.activeElement)) {
-                pintar();
-            }
-        });
-    }
-
-    // ---- LA PARTY: los jugadores, a mano y deprisa: nombre, clase, PG,
-    // CA, las seis características (su bono tira 1d20+bono) y las
-    // pasivas (Percepción, Investigación y Perspicacia). ----
-    const CARACTERISTICAS = ["FUE", "DES", "CON", "INT", "SAB", "CAR"];
-    const PASIVAS = [["per", "Percepción pasiva", "👁️"], ["inv", "Investigación pasiva", "🔍"],
-        ["persp", "Perspicacia pasiva", "💭"]];
-
-    function montarParty(dentro, m) {
-        m.datos = m.datos || {};
-        // Los PJ son de la campaña (todo.pjs), no de esta ventana.
-        const pjsDe = () => todo.pjs;
-        const numero = (v) => (v === "" || v === undefined || v === null || isNaN(parseInt(v, 10)) ? "" : parseInt(v, 10));
-        const mod = (n) => Math.floor((n - 10) / 2);
-        const conSigno = (n) => (n >= 0 ? "+" : "−") + Math.abs(n);
-        const quienEs = (pj, i) => pj.nombre || "jugador " + (i + 1);
-        const uid = "master-party-" + m.id;
-
-        pjsDe().forEach((pj) => {
-            pj.id = pj.id || nuevoIdPj();
-        });
-        // ---- las pestañas: la lista (para mirar), el editor y los
-        // hechizos de todos ----
-        const panelLista = crear("div");
-        const panelEditor = crear("div");
-        const panelConjuros = crear("div");
-        const { lista: pestanas, elegir } = pestanasDe([["👥 la party", panelLista], ["✏️ editar", panelEditor],
-            ["✨ hechizos", panelConjuros]], "Party", uid, (i) => {
-            m.datos.pestana = i;
-            guardar();
-            [pintarLista, pintarEditor, pintarConjuros][i]();
-        });
-
-        // ---- LOS HECHIZOS DE TODOS: por jugador; cada uno se abre ----
-        function pintarConjuros() {
-            panelConjuros.replaceChildren(crear("p", "oc-hoja-nota", "Cargando…"));
-            pedir(CONJUROS_SRD).then((conj) => {
-                const srd = {};
-                (conj.conjuros || []).forEach((c) => {
-                    srd[llano(c.nombre)] = c;
-                });
-                panelConjuros.replaceChildren();
-                let alguno = false;
-                pjsDe().forEach((pj, i) => {
-                    const todos = conjurosPj(pj, srd).sort((x, y) => (x.nivel === null) - (y.nivel === null) || x.nivel - y.nivel);
-                    if (!todos.length) {
-                        return;
-                    }
-                    alguno = true;
-                    panelConjuros.appendChild(crear("h3", "master-pj-titulo", quienEs(pj, i)));
-                    const ul = crear("ul", "master-pj-lista");
-                    ul.setAttribute("aria-label", "Hechizos de " + quienEs(pj, i));
-                    todos.forEach((c) => {
-                        const li = crear("li");
-                        li.append(crear("span", "master-pj-marca", c.nivel === null ? "¿?" : c.nivel === 0 ? "truco" : "nv " + c.nivel),
-                            conjuroPj(c.nombre, srd, conj.fuente));
-                        ul.appendChild(li);
-                    });
-                    panelConjuros.appendChild(ul);
-                });
-                if (!alguno) {
-                    panelConjuros.appendChild(crear("p", "oc-vacio", "Nadie tiene hechizos apuntados (se ponen en la ficha de cada uno)."));
-                }
-            }).catch(() => panelConjuros.replaceChildren(crear("p", "oc-vacio", "No he podido cargar los hechizos.")));
-        }
-
-        // ---- LA LISTA: de un vistazo, sin campos; con sus dados y «a la
-        // iniciativa» (tira 1d20 + su bono de Destreza) ----
-        const alIni = (pj, i) => {
-            return meterEnIniciativa(iniDePj(pj, quienEs(pj, i)));
-        };
-        // Crear (una ficha vacía, abierta para rellenar) o importar uno.
-        const crearPj = crear("div", "master-creador-barra");
-        const nuevoB = botonDe("oc-vida-accion es-principal", "＋ personaje", () => {
-            const pj = nuevoPj();
-            anadir("pj", { titulo: pj.nombre, datos: { pj: pj.id, editar: true } });
-        }, "Crear un personaje nuevo (con su ficha, para rellenar)");
-        const ddbB = botonDe("oc-vida-accion", "📥 importar", () => abrirImportarPj(ddbB),
-            "Importar un personaje de D&D Beyond, Nivel20 o Foundry VTT");
-        ddbB.setAttribute("aria-haspopup", "dialog");
-        crearPj.append(nuevoB, ddbB);
-        function pintarLista() {
-            const pjs = pjsDe();
-            panelLista.replaceChildren(crearPj);
-            if (!pjs.length) {
-                panelLista.appendChild(crear("p", "oc-vacio", "Todavía no hay personajes: crea uno o impórtalo (D&D Beyond,"
-                    + " Nivel20 o Foundry VTT)."));
-                return;
-            }
-            const todos = botonDe("oc-vida-accion es-principal", "⚔️ todos a la iniciativa", () => {
-                const entran = pjs.map((pj, i) => alIni(pj, i)).filter(Boolean);
-                avisar(entran.length ? "A la iniciativa: " + entran.join(", ") + "." : "Ya estaban todos en la iniciativa.");
-            }, "Poner a toda la party en la iniciativa (tira su iniciativa)");
-            const resumen = crear("p", "master-party-resumen");
-            const trozos = PASIVAS.map(([k, texto]) => {
-                const con = pjs.filter((pj) => pasivaPj(normalizarPj(pj), k) !== null);
-                if (!con.length) {
-                    return "";
-                }
-                const mejor = con.reduce((a, b) => (pasivaPj(b, k) > pasivaPj(a, k) ? b : a));
-                return texto.replace(" pasiva", "") + " " + pasivaPj(mejor, k) + " (" + (mejor.nombre || "sin nombre") + ")";
-            }).filter(Boolean);
-            resumen.textContent = trozos.length ? "La más alta: " + trozos.join(" · ") : "";
-            resumen.hidden = !trozos.length;
-            const ul = crear("ul", "master-party es-lista");
-            ul.dataset.queSolo = "si";
-            ul.setAttribute("aria-label", "Jugadores");
-            pjs.forEach((pj, i) => {
-                const quien = quienEs(pj, i);
-                const li = crear("li", "master-party-pj es-lista");
-                const cabeza = crear("div", "master-party-cabeza");
-                const nombre = crear("p", "master-party-nombre");
-                const cara = fotoPj(pj, "master-party-foto", "");
-                if (cara) {
-                    nombre.appendChild(cara);
-                }
-                nombre.appendChild(crear("strong", "", quien));
-                if (pj.clase) {
-                    nombre.appendChild(crear("span", "master-party-clase", pj.clase));
-                }
-                const ini = botonDe("oc-vida-accion", "＋ iniciativa", () => {
-                    const n = alIni(pj, i);
-                    avisar(n ? "A la iniciativa: " + n + "." : quien + " ya está en la iniciativa.");
-                }, "Poner a " + quien + " en la iniciativa (tira su iniciativa)");
-                const ficha = botonDe("oc-vida-accion", "📖 ficha", () => abrirFichaPj(pj, quien),
-                    "Abrir la ficha de " + quien + " (habilidades, armas, hechizos, historia…)");
-                const botones = crear("div", "master-pj-botones");
-                botones.append(ficha, ini);
-                if (puedeSubir(pj)) {
-                    const sube = botonDe("oc-vida-accion es-principal", "⬆ nivel " + ((numPj(pj.nivel) || 1) + 1), () => verSubidas([pj], sube),
-                        quien + " tiene PX para subir a nivel " + ((numPj(pj.nivel) || 1) + 1));
-                    sube.setAttribute("aria-haspopup", "dialog");
-                    botones.prepend(sube);
-                }
-                cabeza.append(nombre, botones);
-                const vitales = crear("dl", "master-party-vitales");
-                const vital = (et, valor, titulo) => {
-                    if (valor === "" || valor === undefined) {
-                        return;
-                    }
-                    const dt = crear("dt", "", et);
-                    dt.title = titulo;
-                    vitales.append(dt, crear("dd", "", String(valor)));
-                };
-                const pgAhora = numero(pj.pg) !== "" ? numero(pj.pg) : numero(pj.pgmax);
-                vital("PG", pgAhora === "" ? "—" : pgAhora + (numero(pj.pgmax) !== "" ? " / " + numero(pj.pgmax) : "")
-                    + (numero(pj.pgtemp) ? " (+" + numero(pj.pgtemp) + " temp.)" : ""), "Puntos de golpe");
-                vital("CA", numero(pj.ca), "Clase de armadura");
-                vital("PX", (numPj(pj.px) || 0).toLocaleString("es-ES") + ((numPj(pj.nivel) || 1) < 20 ? " / "
-                    + pxParaSubir(pj).toLocaleString("es-ES") : ""), "Puntos de experiencia (y los que necesita para subir)");
-                PASIVAS.forEach(([k, texto, emoji]) => vital(emoji, pasivaPj(pj, k) === null ? "" : pasivaPj(pj, k), texto));
-                vitales.querySelectorAll("dt").forEach((dt) => {
-                    if (/\p{Extended_Pictographic}/u.test(dt.textContent)) {
-                        const t = dt.title;
-                        const e = dt.textContent;
-                        dt.textContent = "";
-                        const em = crear("span", "", e);
-                        em.setAttribute("aria-hidden", "true");
-                        dt.append(em, crear("span", "visually-hidden", t));
-                    }
-                });
-                const car = crear("ul", "master-party-caracteristicas");
-                car.setAttribute("aria-label", "Características de " + quien);
-                CARACTERISTICAS.forEach((k) => {
-                    const n = numero(pj[k.toLowerCase()]);
-                    if (n === "") {
-                        return;
-                    }
-                    const c = crear("li", "master-party-c");
-                    c.appendChild(crear("span", "master-party-et", k));
-                    c.appendChild(crear("span", "master-party-valor", String(n)));
-                    c.appendChild(window.ocDadoBoton ? window.ocDadoBoton(conSigno(mod(n)), "1d20" + (mod(n) >= 0 ? "+" : "")
-                        + mod(n), k + " de " + quien) : document.createTextNode(conSigno(mod(n))));
-                    car.appendChild(c);
-                });
-                li.append(cabeza, vitales);
-                if (car.children.length) {
-                    li.appendChild(car);
-                }
-                ul.appendChild(li);
-            });
-            // TIRADA DE GRUPO: una salvación, una habilidad o la iniciativa
-            // de todos a la vez (por ejemplo, Percepción para ver quién lo nota).
-            const grupo = crear("form", "master-party-grupo");
-            const etG = crear("label", "oc-dados-etiqueta", "🎲 tirada de grupo");
-            const queG = crear("select", "oc-dados-elegir");
-            queG.id = "master-party-grupo-" + m.id;
-            etG.htmlFor = queG.id;
-            const opc = (v, t, padre) => {
-                const o = crear("option", "", t);
-                o.value = v;
-                padre.appendChild(o);
-            };
-            const gS = crear("optgroup");
-            gS.label = "salvaciones";
-            Object.keys(NOMBRES_CAR).forEach((k) => opc("s:" + k, "salvación de " + NOMBRES_CAR[k], gS));
-            const gH = crear("optgroup");
-            gH.label = "habilidades";
-            HABILIDADES_PJ.forEach(([n]) => opc("h:" + n, n, gH));
-            const gC = crear("optgroup");
-            gC.label = "características";
-            Object.keys(NOMBRES_CAR).forEach((k) => opc("c:" + k, NOMBRES_CAR[k], gC));
-            queG.append(gS, gH, gC);
-            queG.value = "h:Percepción";
-            const tirarG = crear("button", "oc-vida-accion es-principal", "tirar");
-            tirarG.type = "submit";
-            const resultadoG = crear("ol", "master-party-grupo-resultado");
-            resultadoG.setAttribute("aria-label", "Resultados de la tirada de grupo");
-            resultadoG.hidden = true;
-            const vivoG = crear("p", "visually-hidden");
-            vivoG.setAttribute("aria-live", "polite");
-            grupo.addEventListener("submit", (e) => {
-                e.preventDefault();
-                if (!window.ocDados) {
-                    return;
-                }
-                const [tipo, k] = queG.value.split(/:(.*)/);
-                const textoQue = queG.options[queG.selectedIndex].textContent;
-                const filas = pjs.map((pj, i) => {
-                    normalizarPj(pj);
-                    let bono = 0;
-                    if (tipo === "h") {
-                        bono = bonoHabPj(pj, k);
-                    } else {
-                        const n = numPj(pj[k]);
-                        bono = (n === null ? 0 : modDe(n)) + (tipo === "s" && (pj.salvaciones || []).includes(k) ? competenciaPj(pj) : 0);
-                    }
-                    bono = bono === null ? 0 : bono;
-                    const r = window.ocDados.tirar("1d20" + (bono ? (bono > 0 ? "+" : "") + bono : ""), textoQue + " de " + quienEs(pj, i));
-                    return { quien: quienEs(pj, i), total: r ? r.total : 0, d20: r && r.d20 ? r.d20.queda : null, bono };
-                }).sort((a, b) => b.total - a.total);
-                resultadoG.replaceChildren(...filas.map((f) => {
-                    const li = crear("li", f.d20 === 20 ? "es-critico" : f.d20 === 1 ? "es-pifia" : "");
-                    li.append(crear("strong", "", String(f.total)), document.createTextNode(" " + f.quien + " (d20"
-                        + (f.d20 !== null ? " " + f.d20 : "") + " " + signo(f.bono) + ")" + (f.d20 === 20 ? " ¡20!" : f.d20 === 1 ? " ¡1!" : "")));
-                    return li;
-                }));
-                resultadoG.hidden = false;
-                vivoG.textContent = textoQue + ": " + filas.map((f) => f.quien + " " + f.total).join(", ") + ".";
-            });
-            grupo.append(etG, queG, tirarG);
-            const pxForm = crear("form", "master-party-grupo");
-            const etPx = crear("label", "oc-dados-etiqueta", "🏆 repartir PX (a partes iguales)");
-            const pxIn = crear("input", "oc-dados-texto");
-            pxIn.type = "number";
-            pxIn.min = "1";
-            pxIn.inputMode = "numeric";
-            pxIn.id = "master-party-px-" + m.id;
-            pxIn.placeholder = "PX en total";
-            etPx.htmlFor = pxIn.id;
-            const darB = crear("button", "oc-vida-accion es-principal", "repartir");
-            darB.type = "submit";
-            pxForm.append(etPx, pxIn, darB);
-            pxForm.addEventListener("submit", (e) => {
-                e.preventDefault();
-                const n = parseInt(pxIn.value, 10);
-                if (!(n > 0)) {
-                    pxIn.focus();
-                    return;
-                }
-                pxIn.value = "";
-                darPx(n, null, darB);
-            });
-            panelLista.append(todos, grupo, resultadoG, vivoG, pxForm, resumen, ul);
-        }
-
-        // ---- EL EDITOR: una tarjeta con campos por jugador ----
-        const lista = crear("ul", "master-party");
-        lista.setAttribute("aria-label", "Jugadores (editar)");
-        lista.dataset.queSolo = "si";
-        const campo = (pj, i, clave, texto, tipo, clase) => {
-            const et = crear("label", "master-party-campo" + (clase ? " " + clase : ""));
-            et.appendChild(crear("span", "master-party-et", texto));
-            const input = crear("input", "master-party-input");
-            input.type = tipo || "number";
-            if (input.type === "number") {
-                input.inputMode = "numeric";
-            } else {
-                input.autocomplete = "off";
-                input.maxLength = 40;
-            }
-            input.id = uid + "-" + i + "-" + clave;
-            input.value = pj[clave] === undefined ? "" : String(pj[clave]);
-            input.addEventListener("change", () => {
-                pj[clave] = input.type === "number" ? numero(input.value) : input.value.trim();
-                guardar();
-                avisarPjs(m.id);
-            });
-            et.appendChild(input);
-            return et;
-        };
-        const vacio = crear("p", "oc-vacio", "Todavía no hay jugadores.");
-        const nuevo = botonDe("oc-vida-accion es-principal", "＋ personaje", () => {
-            nuevoPj({ nombre: "" });
-            pintarEditor();
-            const inputs = lista.querySelectorAll(".es-nombre input");
-            inputs[inputs.length - 1].focus();
-        }, "Añadir un jugador");
-        function pintarEditor(foco) {
-            lista.replaceChildren(...pjsDe().map((pj, i) => {
-                const li = crear("li", "master-party-pj");
-                const quien = quienEs(pj, i);
-                const arriba = crear("div", "master-party-fila");
-                arriba.append(campo(pj, i, "nombre", "nombre", "text", "es-nombre"), campo(pj, i, "raza", "especie", "text", "es-clase"),
-                    campo(pj, i, "clase", "clase", "text", "es-clase"), campo(pj, i, "nivel", "nv"), campo(pj, i, "pg", "PG"), campo(pj, i, "pgmax", "máx"), campo(pj, i, "ca", "CA"));
-                let seguro = false;
-                const quitar = botonDe("master-party-quitar", "✕", () => {
-                    if (!seguro) {
-                        seguro = true;
-                        quitar.setAttribute("aria-label", "¿Seguro? Pulsa otra vez para quitar a " + quien);
-                        avisar("Pulsa otra vez para quitar a " + quien + ".");
-                        return;
-                    }
-                    pjsDe().splice(i, 1);
-                    guardar();
-                    pintarEditor(Math.min(i, pjsDe().length - 1));
-                    avisar("Quitado: " + quien + ".");
-                }, "Quitar a " + quien);
-                arriba.appendChild(quitar);
-                const car = crear("div", "master-party-fila");
-                CARACTERISTICAS.forEach((k) => {
-                    const c = crear("div", "master-party-car");
-                    c.appendChild(campo(pj, i, k.toLowerCase(), k, "number", "es-car"));
-                    car.appendChild(c);
-                });
-                li.append(arriba, car);
-                return li;
-            }));
-            vacio.hidden = !!pjsDe().length;
-            if (typeof foco === "number") {
-                const q = foco >= 0 ? lista.querySelectorAll(".master-party-quitar")[foco] : null;
-                (q || nuevo).focus();
-            }
-        }
-        panelEditor.append(lista, vacio, nuevo);
-        dentro.append(pestanas, panelLista, panelEditor, panelConjuros);
-        // Lo que cambie en otra ventana (una ficha, una importación…), aquí.
-        mientrasEste(dentro, "master:pjs", () => {
-            if (!dentro.contains(document.activeElement) || panelLista.contains(document.activeElement)) {
-                [pintarLista, pintarEditor, pintarConjuros][m.datos.pestana || 0]();
-            }
-        });
-        elegir(typeof m.datos.pestana === "number" ? Math.min(m.datos.pestana, 2) : 0, false);
     }
 
     // ---- UN POST-IT: texto con formato, como en un procesador de textos
@@ -4147,10 +2452,10 @@
         return caja.innerHTML;
     }
 
-    const COLORES_LETRA = [["", "la del tema"], ["#d23b3b", "rojo"], ["#e07a1f", "naranja"], ["#2f9e4f", "verde"],
-        ["#3b7ddd", "azul"], ["#8e5bd6", "morado"]];
-    const COLORES_RESALTE = [["", "sin resaltar"], ["#ffe873", "amarillo"], ["#8fe8a2", "verde"], ["#7fdcff", "celeste"],
-        ["#ffa6d5", "rosa"], ["#ffb870", "naranja"]];
+    const COLORES_LETRA = [["", ocT("la del tema")], ["#d23b3b", ocT("rojo")], ["#e07a1f", ocT("naranja")], ["#2f9e4f", ocT("verde")],
+        ["#3b7ddd", ocT("azul")], ["#8e5bd6", ocT("morado")]];
+    const COLORES_RESALTE = [["", ocT("sin resaltar")], ["#ffe873", ocT("amarillo")], ["#8fe8a2", ocT("verde")], ["#7fdcff", ocT("celeste")],
+        ["#ffa6d5", ocT("rosa")], ["#ffb870", ocT("naranja")]];
 
     // EL EDITOR CON FORMATO (como un procesador de textos), el de los
     // post-its y las notas: una barra de herramientas y un texto
@@ -4165,7 +2470,7 @@
         // ---- la barra de herramientas ----
         const barra = crear("div", "master-postit-barra");
         barra.setAttribute("role", "toolbar");
-        barra.setAttribute("aria-label", "Formato del texto");
+        barra.setAttribute("aria-label", ocT("Formato del texto"));
         const estados = [];
         const orden = (cmd, valor) => {
             area.focus();
@@ -4236,8 +2541,8 @@
             return sel;
         };
         const parrafo = crear("select", "master-postit-elegir");
-        parrafo.setAttribute("aria-label", "Tipo de párrafo");
-        parrafo.title = "Tipo de párrafo";
+        parrafo.setAttribute("aria-label", ocT("Tipo de párrafo"));
+        parrafo.title = ocT("Tipo de párrafo");
         [["P", "párrafo"], ["H3", "título"], ["H4", "subtítulo"], ["BLOCKQUOTE", "cita"]].forEach(([v, n]) => {
             const o = crear("option", "", n);
             o.value = v;
@@ -4245,9 +2550,9 @@
         });
         parrafo.addEventListener("change", () => orden("formatBlock", parrafo.value));
         const tamano = crear("select", "master-postit-elegir");
-        tamano.setAttribute("aria-label", "Tamaño de la letra");
-        tamano.title = "Tamaño de la letra";
-        [["-", "🗚 tamaño"], ["2", "pequeña"], ["3", "normal"], ["5", "grande"], ["6", "enorme"]].forEach(([v, n]) => {
+        tamano.setAttribute("aria-label", ocT("Tamaño de la letra"));
+        tamano.title = ocT("Tamaño de la letra");
+        [["-", ocT("🗚 tamaño")], ["2", "pequeña"], ["3", "normal"], ["5", "grande"], ["6", "enorme"]].forEach(([v, n]) => {
             const o = crear("option", "", n);
             o.value = v;
             tamano.appendChild(o);
@@ -4259,19 +2564,19 @@
             tamano.value = "-";
         });
         barra.append(
-            grupo(herramienta("B", "Negrita", "bold", null, "es-negrita", "Ctrl+B"),
-                herramienta("I", "Cursiva", "italic", null, "es-cursiva", "Ctrl+I"),
-                herramienta("U", "Subrayado", "underline", null, "es-subrayado", "Ctrl+U"),
-                herramienta("S", "Tachado", "strikeThrough", null, "es-tachado")),
+            grupo(herramienta("B", ocT("Negrita"), "bold", null, "es-negrita", "Ctrl+B"),
+                herramienta("I", ocT("Cursiva"), "italic", null, "es-cursiva", "Ctrl+I"),
+                herramienta("U", ocT("Subrayado"), "underline", null, "es-subrayado", "Ctrl+U"),
+                herramienta("S", ocT("Tachado"), "strikeThrough", null, "es-tachado")),
             grupo(parrafo),
             grupo(tamano),
-            grupo(herramienta("•", "Lista", "insertUnorderedList"), herramienta("1.", "Lista numerada", "insertOrderedList"),
-                herramienta("→", "Más sangría", "indent"), herramienta("←", "Menos sangría", "outdent")),
-            grupo(herramienta("⇤", "Alinear a la izquierda", "justifyLeft"), herramienta("↔", "Centrar", "justifyCenter"),
-                herramienta("⇥", "Alinear a la derecha", "justifyRight")),
-            grupo(elegir("🎨 letra", COLORES_LETRA, "foreColor", "Color de la letra"), elegir("🖍️ resaltar", COLORES_RESALTE, "hiliteColor", "Resaltar")),
-            grupo(herramienta("―", "Línea de separación", "insertHorizontalRule"), herramienta("⌫", "Quitar el formato", "removeFormat"), herramienta("↶", "Deshacer", "undo", null, "", "Ctrl+Z"),
-                herramienta("↷", "Rehacer", "redo", null, "", "Ctrl+Y")));
+            grupo(herramienta("•", ocT("Lista"), "insertUnorderedList"), herramienta("1.", ocT("Lista numerada"), "insertOrderedList"),
+                herramienta("→", ocT("Más sangría"), "indent"), herramienta("←", ocT("Menos sangría"), "outdent")),
+            grupo(herramienta("⇤", ocT("Alinear a la izquierda"), "justifyLeft"), herramienta("↔", ocT("Centrar"), "justifyCenter"),
+                herramienta("⇥", ocT("Alinear a la derecha"), "justifyRight")),
+            grupo(elegir(ocT("🎨 letra"), COLORES_LETRA, "foreColor", ocT("Color de la letra")), elegir(ocT("🖍️ resaltar"), COLORES_RESALTE, "hiliteColor", "Resaltar")),
+            grupo(herramienta("―", ocT("Línea de separación"), "insertHorizontalRule"), herramienta("⌫", ocT("Quitar el formato"), "removeFormat"), herramienta("↶", ocT("Deshacer"), "undo", null, "", "Ctrl+Z"),
+                herramienta("↷", ocT("Rehacer"), "redo", null, "", "Ctrl+Y")));
         // Las flechas mueven el foco por la barra (como en un procesador).
         barra.addEventListener("keydown", (e) => {
             if (e.key !== "ArrowRight" && e.key !== "ArrowLeft" || e.target.tagName === "SELECT") {
@@ -4328,139 +2633,6 @@
         return { area, barra, leer: () => sanearHtml(area.innerHTML) };
     }
 
-    function montarTarjeta(dentro, m) {
-        m.datos = m.datos || {};
-        if (m.datos.html === undefined && m.datos.texto) {
-            m.datos.html = sanearHtml(markdown(m.datos.texto).innerHTML);
-        }
-        const ver = crear("div", "oc-texto master-postit");
-        let espera = 0;
-        const { area, barra, leer } = editorRico("Texto del post-it", () => {
-            clearTimeout(espera);
-            espera = setTimeout(() => {
-                m.datos.html = leer();
-                delete m.datos.texto;
-                guardar();
-            }, 400);
-        });
-        area.hidden = true;
-        barra.hidden = true;
-        const pintar = () => {
-            ver.innerHTML = sanearHtml(m.datos.html || "");
-            if (!ver.textContent.trim()) {
-                ver.replaceChildren(crear("p", "oc-vacio", "Vacío: pulsa «editar» y escribe lo que quieras tener a mano."));
-            } else if (window.ocDadosEnTexto) {
-                window.ocDadosEnTexto(ver);
-            }
-        };
-        const boton = botonDe("oc-vida-accion", "✏️ editar", () => {
-            const editando = area.hidden;
-            if (editando) {
-                area.innerHTML = sanearHtml(m.datos.html || "") || "<p><br></p>";
-                area.hidden = false;
-                barra.hidden = false;
-                ver.hidden = true;
-                boton.textContent = "✔ listo";
-                area.focus();
-            } else {
-                clearTimeout(espera);
-                m.datos.html = leer();
-                delete m.datos.texto;
-                guardar();
-                area.hidden = true;
-                barra.hidden = true;
-                ver.hidden = false;
-                boton.textContent = "✏️ editar";
-                pintar();
-                boton.focus();
-            }
-        });
-        boton.classList.add("master-postit-editar");
-        dentro.append(barra, ver, area, boton);
-        pintar();
-    }
-
-    // ---- LAS NOTAS DEL MÁSTER: el editor con formato siempre abierto,
-    // con «poner la fecha», «descargar» (un .html que abre Word o el
-    // navegador) y «borrar». Lo de antes (texto suelto de ocPartida,
-    // «notas») pasa solo la primera vez. ----
-    function montarNotas(dentro, m) {
-        m.datos = m.datos || {};
-        if (m.datos.html === undefined) {
-            const antes = window.ocPartida && window.ocPartida.leer ? window.ocPartida.leer("notas", "") : "";
-            m.datos.html = antes ? sanearHtml(markdown(antes).innerHTML) : "";
-        }
-        let espera = 0;
-        const { area, barra, leer } = editorRico("Notas del máster (se guardan solas)", () => {
-            clearTimeout(espera);
-            espera = setTimeout(() => {
-                m.datos.html = leer();
-                guardar();
-            }, 400);
-        });
-        area.classList.add("es-notas");
-        area.innerHTML = sanearHtml(m.datos.html) || "<p><br></p>";
-        const fecha = botonDe("oc-vida-accion", "📅 poner la fecha", () => {
-            const hoy = new Date().toLocaleDateString("es-ES", { day: "numeric", month: "long", year: "numeric" });
-            const h = crear("h3", "", hoy);
-            const p = crear("p");
-            p.appendChild(crear("br"));
-            area.append(h, p);
-            m.datos.html = leer();
-            guardar();
-            area.focus();
-            const rango = document.createRange();
-            rango.setStart(p, 0);
-            rango.collapse(true);
-            const sel = document.getSelection();
-            sel.removeAllRanges();
-            sel.addRange(rango);
-            avisar("Fecha puesta: " + hoy + ".");
-        });
-        const aDocs = botonDe("oc-vida-accion", "📁 guardar en documentos", () => {
-            m.datos.html = leer();
-            guardarEnDocumentos(aDocs, m.datos.doc, () => ({ tipo: "nota", titulo: "notas de la sesión", html: leer() }), (id) => {
-                m.datos.doc = id;
-            });
-        });
-        aDocs.setAttribute("aria-haspopup", "dialog");
-        const bajar = botonDe("oc-vida-accion", "💾 descargar", () => {
-            const pagina = "<!doctype html><html lang=\"es\"><head><meta charset=\"utf-8\"><title>Notas del máster</title></head><body>" +
-                leer() + "</body></html>";
-            const a = crear("a");
-            // Una dirección blob: que hace el propio navegador con el archivo.
-            const archivoBlob = URL.createObjectURL(new Blob([pagina], { type: "text/html;charset=utf-8" }));
-            a.href = archivoBlob;
-            a.download = "notas-del-master-" + new Date().toISOString().slice(0, 10) + ".html";
-            document.body.appendChild(a);
-            a.click();
-            a.remove();
-            setTimeout(() => URL.revokeObjectURL(archivoBlob), 1000);
-            avisar("Descargado: " + a.download + " (se abre con Word o el navegador).");
-        }, "Descargar las notas (.html, con su formato)");
-        let seguro = false;
-        const borrar = botonDe("oc-vida-accion", "🗑️ borrar", () => {
-            if (!seguro) {
-                seguro = true;
-                borrar.textContent = "🗑️ ¿seguro? pulsa otra vez";
-                setTimeout(() => {
-                    seguro = false;
-                    borrar.textContent = "🗑️ borrar";
-                }, 4000);
-                return;
-            }
-            seguro = false;
-            borrar.textContent = "🗑️ borrar";
-            area.innerHTML = "<p><br></p>";
-            m.datos.html = "";
-            guardar();
-            avisar("Notas borradas.");
-        });
-        const botones = crear("div", "master-notas-botones");
-        botones.append(fecha, aDocs, bajar, borrar);
-        dentro.append(barra, area, botones);
-    }
-
     // ---- EL GENERADOR DE NOMBRES: personajes por especie y género (de
     // sílabas, con su apellido) y lugares (pueblos, tabernas, parajes y
     // mazmorras), de datos/personajes/compendio/nombres.json. Cada nombre,
@@ -4483,6 +2655,7 @@
     // y las tuyas en «propias»: así los PNJ, los negocios y los dungeons
     // también usan lo cambiado. ----
     const CLAVE_NOMBRES = "richi-master-nombres";
+    Object.assign(PM, { CLAVE_NOMBRES });
     let nombresCrudo = null;
     function leerNombresTuyos() {
         let x = {};
@@ -4493,23 +2666,13 @@
         }
         return { propias: Array.isArray(x.propias) ? x.propias : [], cambios: x.cambios && typeof x.cambios === "object" ? x.cambios : {} };
     }
-    function guardarNombresTuyos(x) {
-        try {
-            localStorage.setItem(CLAVE_NOMBRES, JSON.stringify(x));
-        } catch (e) {
-            avisar("No se ha podido guardar.");
-            return false;
-        }
-        document.dispatchEvent(new CustomEvent("master:nombres"));
-        return true;
-    }
     function pedirNombres() {
         if (!nombresCrudo) {
             nombresCrudo = fetch(NOMBRES).then((r) => {
                 if (!r.ok) {
                     throw new Error(r.status);
                 }
-                return r.json();
+                return r.json().then(window.ocIdioma.datos);
             });
         }
         return nombresCrudo.then((d) => {
@@ -4529,7 +2692,6 @@
             return x;
         });
     }
-    const listaDe = (texto) => String(texto || "").split("\n").map((l) => l.trim()).filter(Boolean);
     // «Sir | Lady»: masculino | femenino (el neutro, el último); «-»,
     // nada (para que no todos lleven título).
     function delanteDe(linea, g) {
@@ -4559,6 +2721,7 @@
         return (a + " " + b).trim();
     }
     const propiaDe = (datos, clave) => (datos.propias || []).find((t) => "propia:" + t.id === clave);
+    Object.assign(PM, { propiaDe });
 
     function nombreDe(datos, especie, genero, conApellido) {
         const tuya = propiaDe(datos, especie);
@@ -4640,375 +2803,8 @@
 
     function copiarTexto(texto, aviso) {
         if (navigator.clipboard) {
-            navigator.clipboard.writeText(texto).then(() => avisar(aviso || "Copiado.")).catch(() => avisar("No se ha podido copiar."));
+            navigator.clipboard.writeText(texto).then(() => avisar(aviso || "Copiado.")).catch(() => avisar(ocT("No se ha podido copiar.")));
         }
-    }
-
-    // Un lugar en otro idioma: el nombre en español, sin «de», «la»…, y
-    // cada palabra a una del idioma (siempre la misma, como en las notas).
-    function lugarEn(nombre, idioma) {
-        const sin = nombre.split(/\s+/).filter((p) => !/^(de|del|la|el|los|las|y|en)$/i.test(p)).join(" ");
-        const n = inventar(sin, idioma, 3).replace(/(^|\s)(\p{Ll})/gu, (x, a, b) => a + b.toUpperCase());
-        return { n, es: nombre, idioma: idioma.id };
-    }
-
-    // Los nombres de los campos de nombres.json, para cambiarlos.
-    const CAMPOS_NOMBRES = { ini: "principios (sílabas)", f: "finales femeninos", m: "finales masculinos", n: "finales neutros",
-        fin: "segunda parte", pre: "principio (va pegado al final)", adj: "final (va pegado al principio)",
-        base: "lo primero", de: "lo de después", sust: "el nombre y su género («La Jarra | f»)" };
-    const CAMPOS_TABERNA = { adj: "lo de después, masculino | femenino («Dorado | Dorada»)" };
-
-    function montarNombres(dentro, m) {
-        m.datos = m.datos || {};
-        const d = m.datos;
-        dentro.appendChild(crear("p", "oc-hoja-nota", "Cargando…"));
-        let lenguas = null;
-        // Al guardar una tabla se vuelve a montar todo: el foco, a «generar».
-        let alGenerar = false;
-        const cargar = () => Promise.all([pedir(NOMBRES), lenguas || pedir(IDIOMAS)]).then(([datos, l]) => {
-            lenguas = l;
-            montar(datos);
-        }).catch(() => {
-            dentro.replaceChildren(crear("p", "oc-vacio", "No he podido cargar los nombres."));
-        });
-        function montar(datos) {
-            const otras = lenguas.idiomas.filter((x) => x.id !== "comun");
-            const lenguaDe = (id) => otras.find((x) => x.id === id);
-            const tuyas = datos.propias || [];
-            const conTuyas = (tipo) => tuyas.filter((x) => x.tipo === tipo).map((x) => ["propia:" + x.id, "⭐ " + x.nombre]);
-            // Lo que sale y lo guardado: un texto, o {n, es, idioma} si es
-            // un lugar en otro idioma.
-            const nombreDe_ = (x) => (typeof x === "string" ? x : x.n);
-            const tipos = [["personaje", "👤 personaje"]].concat(Object.keys(datos.lugares)
-                .map((k) => [k, ({ pueblo: "🏘️ ", taberna: "🍺 ", region: "🏔️ ", mazmorra: "🕳️ " }[k] || "") + datos.lugares[k].nombre]),
-            conTuyas("lugar"));
-            const vale = (lista, v) => (lista.some((x) => x[0] === v) ? v : lista[0][0]);
-            const que = elegirDe("master-nombres-que-" + m.id, "qué", tipos, vale(tipos, d.que || "personaje"));
-            const especies = Object.keys(datos.especies).map((k) => [k, datos.especies[k].nombre]).concat(conTuyas("personaje"));
-            const especie = elegirDe("master-nombres-especie-" + m.id, "especie (o tu tabla)", especies,
-                vale(especies, d.especie || "humano"));
-            const genero = botonesDe("género", [["cualquiera", "cualquiera"], ["f", "♀ femenino"], ["m", "♂ masculino"],
-                ["n", "⚪ neutro"]], d.genero || "cualquiera", (v) => {
-                d.genero = v;
-                guardar();
-            });
-            const lengua = elegirDe("master-nombres-lengua-" + m.id, "en qué idioma",
-                [["", "común (en español)"]].concat(otras.map((x) => [x.id, x.nombre])), d.lengua || "");
-            const etAp = crear("label", "master-nombres-apellido");
-            const ap = crear("input");
-            ap.type = "checkbox";
-            ap.checked = d.apellido !== false;
-            etAp.append(ap, document.createTextNode(" con apellido"));
-            const persona = crear("div", "master-nombres-persona");
-            const etGen = crear("p", "oc-dados-etiqueta", "género");
-            etGen.setAttribute("aria-hidden", "true");
-            persona.append(especie, etAp, etGen, genero);
-            const recordar = () => Object.assign(d, { que: que.elegir.value, especie: especie.elegir.value, genero: genero.valor(),
-                apellido: ap.checked, lengua: lengua.elegir.value });
-            const generar = botonDe("oc-vida-accion es-principal master-nombres-generar", "🎲 generar 8", () => {
-                recordar();
-                const salen = new Map();
-                const enOtra = d.que !== "personaje" && lenguaDe(d.lengua);
-                for (let i = 0; i < 40 && salen.size < 8; i++) {
-                    const x = d.que === "personaje" ? nombreDe(datos, d.especie, d.genero, d.apellido)
-                        : lugarDe(datos, d.que);
-                    if (!x) {
-                        continue;
-                    }
-                    const sale = enOtra ? lugarEn(x, enOtra) : x;
-                    salen.set(nombreDe_(sale), sale);
-                }
-                d.salen = Array.from(salen.values());
-                guardar();
-                pintar();
-                avisar(d.salen.length + " nombres nuevos.");
-            });
-            const lista = crear("ul", "master-nombres");
-            lista.setAttribute("aria-label", "Nombres que han salido");
-            const guardadosT = crear("h3", "master-nombres-titulo", "⭐ guardados");
-            const guardados = crear("ul", "master-nombres es-guardados");
-            guardados.setAttribute("aria-label", "Nombres guardados");
-            const fila = (x, guardado) => {
-                const n = nombreDe_(x);
-                const li = crear("li", "master-nombre");
-                const texto = crear("span", "master-nombre-texto", n);
-                const otra = typeof x === "string" ? null : lenguaDe(x.idioma);
-                if (otra) {
-                    const glifos = crear("span", "master-nombre-glifos es-" + otra.id, aSuAlfabeto(n, otra));
-                    glifos.setAttribute("aria-hidden", "true");
-                    texto.append(glifos, crear("span", "master-nombre-es", "«" + x.es + "» en " + otra.nombre.toLowerCase()));
-                }
-                li.appendChild(texto);
-                const marcar = botonDe("master-nombre-boton", guardado ? "✕" : "☆", () => {
-                    d.guardados = (d.guardados || []).filter((y) => nombreDe_(y) !== n);
-                    if (!guardado) {
-                        d.guardados.push(x);
-                    }
-                    guardar();
-                    pintar();
-                    avisar(guardado ? "Quitado: " + n + "." : "Guardado: " + n + ".");
-                }, (guardado ? "Quitar de guardados: " : "Guardar: ") + n);
-                marcar.title = guardado ? "Quitar" : "Guardar";
-                const copiar = botonDe("master-nombre-boton", "⧉", () => copiarTexto(n, "Copiado: " + n + "."), "Copiar " + n);
-                copiar.title = "Copiar";
-                li.append(marcar, copiar);
-                return li;
-            };
-            const pintar = () => {
-                const ya = new Set((d.guardados || []).map(nombreDe_));
-                lista.replaceChildren(...(d.salen || []).filter((x) => !ya.has(nombreDe_(x))).map((x) => fila(x, false)));
-                if (!lista.children.length) {
-                    lista.appendChild(crear("li", "oc-vacio", d.salen ? "Todos guardados. Genera más." : "Pulsa «generar»."));
-                }
-                guardados.replaceChildren(...(d.guardados || []).map((n) => fila(n, true)));
-                guardadosT.hidden = guardados.hidden = !guardados.children.length;
-            };
-
-            // ---- TUS TABLAS: crear una, cambiar la elegida (la tuya o una
-            // de las de siempre) y quitar la tuya. ----
-            const elegida = () => (que.elegir.value === "personaje" ? especie.elegir.value : que.elegir.value);
-            const nueva = botonDe("oc-vida-accion", "＋ tabla de nombres", () => editarTuya(null), "Crear una tabla de nombres tuya");
-            const cambiar = botonDe("oc-vida-accion", "✎ cambiar esta", () => {
-                const k = elegida();
-                const tuya = propiaDe(datos, k);
-                if (tuya) {
-                    editarTuya(tuya);
-                } else {
-                    editarDeSiempre(k);
-                }
-            }, "Cambiar la tabla elegida");
-            const original = botonDe("oc-vida-accion", "↺ como venía", () => {
-                const tuyo = leerNombresTuyos();
-                claves(elegida()).forEach((c) => delete tuyo.cambios[c]);
-                alGenerar = true;
-                guardarNombresTuyos(tuyo);
-                avisar("Otra vez como venía.");
-            }, "Dejar la tabla elegida como venía");
-            const quitar = botonDe("oc-vida-accion", "🗑️ quitar", () => {
-                const tuya = propiaDe(datos, elegida());
-                if (!tuya) {
-                    return;
-                }
-                if (quitar.dataset.seguro !== "1") {
-                    quitar.dataset.seguro = "1";
-                    quitar.textContent = "🗑️ ¿seguro? pulsa otra vez";
-                    return;
-                }
-                const tuyo = leerNombresTuyos();
-                tuyo.propias = tuyo.propias.filter((x) => x.id !== tuya.id);
-                alGenerar = true;
-                guardarNombresTuyos(tuyo);
-                avisar("Quitada la tabla «" + tuya.nombre + "».");
-            }, "Quitar tu tabla elegida");
-            const barra = crear("div", "master-creador-barra");
-            barra.append(nueva, cambiar, original, quitar);
-            const form = crear("form", "master-tablas-editar");
-            form.hidden = true;
-            // Las claves de «cambios» de una de las de siempre.
-            function claves(k) {
-                if (que.elegir.value !== "personaje") {
-                    return ["lugares/" + k];
-                }
-                const e = datos.especies[k];
-                return ["especies/" + k].concat(e && e.apellido ? ["apellidos/" + e.apellido] : []);
-            }
-            const ajustarBarra = () => {
-                const k = elegida();
-                const tuya = !!propiaDe(datos, k);
-                quitar.hidden = !tuya;
-                delete quitar.dataset.seguro;
-                quitar.textContent = "🗑️ quitar";
-                original.hidden = tuya || !claves(k).some((c) => datos.cambiadas && datos.cambiadas[c]);
-            };
-            // Un textarea (una cosa por línea) con su etiqueta.
-            const area = (id, texto, valor, filas) => {
-                const et = crear("label", "oc-dados-etiqueta", texto);
-                const x = crear("textarea", "oc-dados-texto");
-                x.id = "master-nombres-" + id + "-" + m.id;
-                x.rows = filas || 4;
-                x.value = valor || "";
-                et.htmlFor = x.id;
-                form.append(et, x);
-                return x;
-            };
-            const cerrarForm = (vuelta) => {
-                form.hidden = true;
-                form.replaceChildren();
-                (vuelta || cambiar).focus();
-            };
-            const botonesForm = (vuelta) => {
-                const ok = crear("button", "oc-vida-accion es-principal", "✓ guardar");
-                ok.type = "submit";
-                const b = crear("div", "master-creador-barra");
-                b.append(ok, botonDe("oc-vida-accion", "cancelar", () => cerrarForm(vuelta)));
-                form.appendChild(b);
-            };
-            function editarTuya(t) {
-                form.replaceChildren(crear("h3", "master-nombres-titulo", t ? "✎ " + t.nombre : "＋ tabla de nombres"));
-                const etN = crear("label", "oc-dados-etiqueta", "nombre de la tabla");
-                const nombre = crear("input", "oc-dados-texto");
-                nombre.id = "master-nombres-tnombre-" + m.id;
-                nombre.maxLength = 60;
-                nombre.placeholder = "Nobles de Cralea";
-                nombre.value = t ? t.nombre : "";
-                etN.htmlFor = nombre.id;
-                let tipo = t ? t.tipo : (que.elegir.value === "personaje" ? "personaje" : "lugar");
-                const tipoB = botonesDe("de qué es", [["personaje", "👤 personas"], ["lugar", "🏘️ lugares"]], tipo, (v) => {
-                    tipo = v;
-                    ajustarTipo();
-                });
-                form.append(etN, nombre, tipoB);
-                const j = (k) => (t && t[k] ? t[k].join("\n") : "");
-                const persona = [area("delante", "delante, si quieres (títulos: «Sir | Lady» = masculino | femenino; «-» = sin título)",
-                    j("delante"), 3),
-                    area("f", "nombres femeninos (uno por línea)", j("f")), area("m", "nombres masculinos", j("m")),
-                    area("n", "nombres neutros (si quieres)", j("n"), 3), area("apellidos", "apellidos o casas (si quieres)", j("apellidos"))];
-                const lugar = [area("primera", "nombres o primera parte (uno por línea)", j("primera")),
-                    area("segunda", "segunda parte, si quieres (se pone detrás: «del Norte»)", j("segunda"))];
-                // Cada textarea va con su etiqueta justo delante.
-                const ajustarTipo = () => {
-                    persona.forEach((x) => {
-                        x.hidden = x.previousSibling.hidden = tipo !== "personaje";
-                    });
-                    lugar.forEach((x) => {
-                        x.hidden = x.previousSibling.hidden = tipo !== "lugar";
-                    });
-                };
-                ajustarTipo();
-                botonesForm(t ? cambiar : nueva);
-                form.onsubmit = (e) => {
-                    e.preventDefault();
-                    const n = nombre.value.trim();
-                    const x = { id: t ? t.id : idDoc("n"), nombre: n, tipo };
-                    const campos = tipo === "personaje" ? [["delante", 0], ["f", 1], ["m", 2], ["n", 3], ["apellidos", 4]]
-                        : [["primera", 0], ["segunda", 1]];
-                    campos.forEach(([k, i]) => {
-                        x[k] = listaDe((tipo === "personaje" ? persona : lugar)[i].value);
-                    });
-                    const hay = tipo === "personaje" ? x.f.length + x.m.length + x.n.length : x.primera.length;
-                    if (!n || !hay) {
-                        avisar(n ? (tipo === "personaje" ? "Pon al menos un nombre." : "Pon al menos un nombre o una primera parte.")
-                            : "Ponle nombre a la tabla.");
-                        (n ? (tipo === "personaje" ? persona[1] : lugar[0]) : nombre).focus();
-                        return;
-                    }
-                    const tuyo = leerNombresTuyos();
-                    const i = tuyo.propias.findIndex((y) => y.id === x.id);
-                    if (i >= 0) {
-                        tuyo.propias[i] = x;
-                    } else {
-                        tuyo.propias.push(x);
-                    }
-                    if (tipo === "personaje") {
-                        d.que = "personaje";
-                        d.especie = "propia:" + x.id;
-                    } else {
-                        d.que = "propia:" + x.id;
-                    }
-                    guardar();
-                    alGenerar = true;
-                    if (guardarNombresTuyos(tuyo)) {
-                        avisar("Tabla guardada: " + n + ".");
-                    }
-                };
-                form.hidden = false;
-                nombre.focus();
-            }
-            // Una de las de siempre (sílabas y trozos de nombres.json): cada
-            // lista, un textarea; se guarda solo lo que cambia.
-            function editarDeSiempre(k) {
-                const esPersona = que.elegir.value === "personaje";
-                const partes = claves(k).map((c) => {
-                    const [g, kk] = c.split("/");
-                    return { c, g, actual: datos[g][kk], orig: datos.original[g][kk] };
-                }).filter((x) => x.actual);
-                const titulo = esPersona ? datos.especies[k].nombre : datos.lugares[k].nombre;
-                form.replaceChildren(crear("h3", "master-nombres-titulo", "✎ " + titulo + " (la de siempre)"),
-                    crear("p", "oc-hoja-nota", "Una cosa por línea. Lo cambiado se guarda con tus cosas y lo usan también los PNJ,"
-                        + " los negocios y los dungeons; «↺ como venía» lo deshace."
-                        + (esPersona ? " Los apellidos son de todas las especies que los comparten." : "")));
-                const campos = [];
-                partes.forEach((p) => {
-                    Object.keys(p.actual).forEach((campo) => {
-                        const v = p.actual[campo];
-                        if (!Array.isArray(v)) {
-                            return;
-                        }
-                        const pares = v.some(Array.isArray);
-                        const etiqueta = (p.g === "apellidos" ? "apellido: " : "") + ((k === "taberna" && CAMPOS_TABERNA[campo])
-                            || (p.g === "apellidos" && campo === "ini" ? "primera parte" : CAMPOS_NOMBRES[campo]) || campo);
-                        const x = area(p.c.replace("/", "-") + "-" + campo, etiqueta,
-                            v.map((e) => (Array.isArray(e) ? e.join(" | ") : e)).join("\n"), Math.round(Math.min(6, Math.max(3, v.length / 4))));
-                        campos.push({ p, campo, pares, x });
-                    });
-                });
-                botonesForm(cambiar);
-                form.onsubmit = (e) => {
-                    e.preventDefault();
-                    const tuyo = leerNombresTuyos();
-                    for (const f of campos) {
-                        const lista = listaDe(f.x.value).map((l) => (f.pares ? l.split("|").map((s) => s.trim()) : l));
-                        if (!lista.length || (f.pares && lista.some((x) => x.length < 2))) {
-                            avisar(lista.length ? "En «" + f.x.previousSibling.textContent + "», cada línea con sus dos partes: «a | b»."
-                                : "«" + f.x.previousSibling.textContent + "» no puede quedarse vacío.");
-                            f.x.focus();
-                            return;
-                        }
-                        const igual = JSON.stringify(lista) === JSON.stringify(f.p.orig[f.campo]);
-                        const c = tuyo.cambios[f.p.c] = tuyo.cambios[f.p.c] || {};
-                        if (igual) {
-                            delete c[f.campo];
-                        } else {
-                            c[f.campo] = lista;
-                        }
-                    }
-                    Object.keys(tuyo.cambios).forEach((c) => {
-                        if (!Object.keys(tuyo.cambios[c]).length) {
-                            delete tuyo.cambios[c];
-                        }
-                    });
-                    alGenerar = true;
-                    if (guardarNombresTuyos(tuyo)) {
-                        avisar("Guardado: " + titulo + ".");
-                    }
-                };
-                form.hidden = false;
-                const primero = form.querySelector("textarea");
-                if (primero) {
-                    primero.focus();
-                }
-            }
-
-            const ajustar = () => {
-                persona.hidden = que.elegir.value !== "personaje";
-                lengua.hidden = !persona.hidden;
-                // Las tuyas de personas: el apellido, solo si tienen.
-                const tuya = propiaDe(datos, especie.elegir.value);
-                etAp.hidden = !!tuya && !(tuya.apellidos || []).length;
-                ajustarBarra();
-            };
-            que.elegir.addEventListener("change", () => {
-                recordar();
-                guardar();
-                ajustar();
-            });
-            especie.elegir.addEventListener("change", () => {
-                recordar();
-                guardar();
-                ajustar();
-            });
-            const arriba = crear("div", "master-nombres-form");
-            arriba.append(que, persona, lengua, generar);
-            dentro.replaceChildren(arriba, lista, guardadosT, guardados, barra, form);
-            ajustar();
-            pintar();
-            if (alGenerar) {
-                alGenerar = false;
-                generar.focus();
-            }
-        }
-        cargar();
-        mientrasEste(dentro, "master:nombres", cargar);
     }
 
     // ---- NOTAS EN OTROS IDIOMAS: se escribe (o se saca al azar) lo que
@@ -5019,26 +2815,7 @@
     // «letra a letra» (se puede descifrar) o «palabras inventadas» (cada
     // palabra pasa a una del idioma, siempre la misma). ----
     const IDIOMAS = "datos/personajes/compendio/idiomas.json";
-    const NOTAS_AL_AZAR = [
-        "Nos vemos en {taberna} cuando suene la {hora} campanada. Ven solo.",
-        "{nombre} sabe lo que hiciste. Paga {numero} piezas de oro o hablará.",
-        "La entrada está bajo {pueblo}. No pises la tercera losa.",
-        "Aquí yace {nombre}, que entró sin llamar.",
-        "Prohibido el paso. Los intrusos serán devorados.",
-        "El cargamento cruza {region} dentro de {numero} días. Que nadie lo vea.",
-        "Si lees esto, ya es tarde.",
-        "No te fíes de {nombre}. Lleva el anillo.",
-        "{nombre}: la llave está en {mazmorra}. Quema esta nota.",
-        "Tres pasos al norte, dos al este, y cava.",
-        "Hemos perdido a {numero}. Los túneles cambian de sitio.",
-        "Por orden de {nombre}, nadie sale de {pueblo} hasta la luna nueva.",
-        "Lo que duerme bajo {region} no debe despertar.",
-        "Debo {numero} monedas en {taberna}. Si no vuelvo, que las pague {nombre}.",
-        "Al portador: dadle cama, comida y silencio.",
-        "Cuidado: el puente no aguanta a más de dos.",
-        "La puerta solo se abre a quien dice su nombre verdadero.",
-        "{nombre} no murió en {mazmorra}. Lo he visto en {pueblo}.",
-    ];
+    Object.assign(PM, { IDIOMAS });
 
     // Un número que sale siempre igual para el mismo texto.
     function huella(texto) {
@@ -5091,240 +2868,14 @@
             }).join("");
     }
 
-    function notaAlAzar(nombres) {
-        const lugar = (t) => lugarDe(nombres, t);
-        return alAzar(NOTAS_AL_AZAR).replace(/\{(\w+)\}/g, (x, que) => {
-            if (que === "nombre") {
-                return nombreDe(nombres, alAzar(Object.keys(nombres.especies)), "cualquiera", alAzar([true, false]));
-            }
-            if (que === "numero") {
-                return String(alAzar([2, 3, 5, 7, 12, 20, 50, 100]));
-            }
-            if (que === "hora") {
-                return alAzar(["primera", "tercera", "sexta", "novena", "duodécima"]);
-            }
-            return nombres.lugares[que] ? lugar(que) : x;
-        });
-    }
-
-    // La nota escrita en una imagen PNG (para enseñarla o pasarla).
-    function notaEnImagen(texto, idioma, familia) {
-        const tam = 44;
-        const fuente = tam + "px \"" + familia + "\", \"Pangolin\", sans-serif";
-        return document.fonts.load(fuente, texto).then(() => {
-            const lienzo = document.createElement("canvas");
-            const ctx = lienzo.getContext("2d");
-            ctx.font = fuente;
-            const ancho = 900;
-            const lineas = [];
-            texto.split("\n").forEach((parrafo) => {
-                let linea = "";
-                parrafo.split(" ").forEach((p) => {
-                    const prueba = linea ? linea + " " + p : p;
-                    if (linea && ctx.measureText(prueba).width > ancho) {
-                        lineas.push(linea);
-                        linea = p;
-                    } else {
-                        linea = prueba;
-                    }
-                });
-                lineas.push(linea);
-            });
-            const alto = Math.round(tam * 1.6);
-            lienzo.width = ancho + 120;
-            lienzo.height = lineas.length * alto + 120;
-            ctx.fillStyle = "#efe2bf";
-            ctx.fillRect(0, 0, lienzo.width, lienzo.height);
-            ctx.strokeStyle = "#8a6a3a";
-            ctx.lineWidth = 6;
-            ctx.strokeRect(12, 12, lienzo.width - 24, lienzo.height - 24);
-            ctx.fillStyle = "#3b2a17";
-            ctx.font = fuente;
-            ctx.textBaseline = "top";
-            lineas.forEach((l, i) => ctx.fillText(l, 60, 60 + i * alto));
-            return new Promise((hecho) => lienzo.toBlob(hecho, "image/png"));
-        }).then((blob) => {
-            const a = crear("a");
-            const archivoBlob = URL.createObjectURL(blob);
-            a.href = archivoBlob;
-            a.download = "nota-" + idioma.id + ".png";
-            document.body.appendChild(a);
-            a.click();
-            a.remove();
-            setTimeout(() => URL.revokeObjectURL(archivoBlob), 1000);
-            avisar("Descargada la imagen: " + a.download + ".");
-        });
-    }
-
-    // El alfabeto de referencia de un idioma: cada letra con su símbolo.
-    // El símbolo, escondido al lector de pantalla (no dice nada); la
-    // letra, no.
-    function claveDe(idioma, clase) {
-        const lista = crear("ul", "master-idioma-clave " + clase + " es-" + idioma.id);
-        lista.setAttribute("aria-label", "Alfabeto " + idioma.nombre.toLowerCase());
-        const glifos = Array.from(idioma.glifos || "");
-        "abcdefghijklmnopqrstuvwxyzñ".split("").forEach((letra, i) => {
-            const li = crear("li", "master-idioma-letra");
-            const g = crear("span", "master-idioma-glifo", glifos[i] || "");
-            g.setAttribute("aria-hidden", "true");
-            li.append(g, crear("span", "master-idioma-latina", letra));
-            lista.appendChild(li);
-        });
-        return lista;
-    }
-
-    function montarIdiomas(dentro, m) {
-        m.datos = m.datos || {};
-        dentro.appendChild(crear("p", "oc-hoja-nota", "Cargando…"));
-        Promise.all([pedir(IDIOMAS), pedir(NOMBRES)]).then(([datos, nombres]) => {
-            const d = m.datos;
-            const de = (id) => datos.idiomas.find((x) => x.id === id) || datos.idiomas[1];
-            const idioma = elegirDe("master-idioma-que-" + m.id, "idioma",
-                datos.idiomas.map((x) => [x.id, x.nombre + " (" + x.alfabeto + ")"]), de(d.idioma).id);
-            const como = botonesDe("cómo se escribe", [["letras", "🔤 letra a letra"], ["inventado", "🗣️ palabras inventadas"]],
-                d.como || "letras", (v) => {
-                    d.como = v;
-                    guardar();
-                    pintar();
-                });
-            como.title = "Letra a letra: se puede descifrar. Palabras inventadas: cada palabra pasa a una de ese idioma.";
-            const etT = crear("label", "oc-dados-etiqueta", "lo que pone");
-            const texto = crear("textarea", "oc-notas-texto es-corta");
-            texto.id = "master-idioma-texto-" + m.id;
-            texto.rows = 3;
-            texto.value = d.texto || "";
-            etT.htmlFor = texto.id;
-            const azar = botonDe("oc-vida-accion", "🎲 nota al azar", () => {
-                texto.value = notaAlAzar(nombres);
-                d.texto = texto.value;
-                guardar();
-                pintar();
-                avisar("Nota nueva: " + texto.value);
-            });
-            const hoja = crear("div", "master-idioma-hoja");
-            hoja.setAttribute("role", "img");
-            const dice = crear("p", "master-idioma-dice");
-            const ver = crear("label", "master-nombres-apellido");
-            const verCaja = crear("input");
-            verCaja.type = "checkbox";
-            verCaja.checked = d.ver !== false;
-            ver.append(verCaja, document.createTextNode(" ver lo que pone debajo"));
-            const tam = d.tam || 2;
-            hoja.style.setProperty("--tam", tam + "rem");
-            const cambiaTam = (mas) => {
-                d.tam = Math.min(4, Math.max(1, (d.tam || 2) + mas));
-                hoja.style.setProperty("--tam", d.tam + "rem");
-                guardar();
-                avisar("Tamaño " + Math.round(d.tam * 50) + " %.");
-            };
-            const menos = botonDe("master-nombre-boton", "A−", () => cambiaTam(-0.25), "Letra más pequeña");
-            const mas = botonDe("master-nombre-boton", "A+", () => cambiaTam(0.25), "Letra más grande");
-            const escrito = () => {
-                const id = de(idioma.elegir.value);
-                const palabras = (d.como || "letras") === "inventado" ? inventar(texto.value, id) : texto.value;
-                return { id, palabras, letras: aSuAlfabeto(palabras, id) };
-            };
-            const ensenar = botonDe("oc-vida-accion es-principal", "👁️ enseñar", () => {
-                const e = escrito();
-                const grande = crear("div", "master-idioma-hoja es-grande es-" + e.id.id);
-                grande.textContent = e.letras;
-                grande.setAttribute("role", "img");
-                grande.setAttribute("aria-label", "Nota en " + e.id.nombre + ". Pone: " + texto.value);
-                window.ocVentana.abrir({ titulo: "Nota en " + e.id.nombre.toLowerCase(), cuerpo: grande, vuelta: ensenar,
-                    clase: "es-ancha" });
-            }, "Enseñar la nota en grande");
-            const copiar = botonDe("oc-vida-accion", "⧉ copiar", () => copiarTexto(escrito().letras, "Copiada la nota."),
-                "Copiar la nota en su alfabeto");
-            const imagen = botonDe("oc-vida-accion", "🖼️ imagen", () => {
-                const e = escrito();
-                notaEnImagen(e.letras || " ", e.id, e.id.glifos ? "Richi " + e.id.fuente : "Pangolin")
-                    .catch(() => avisar("No se ha podido hacer la imagen."));
-            }, "Descargar la nota como imagen");
-            const clave = crear("div", "master-idioma-panel");
-            clave.id = "master-idioma-clave-" + m.id;
-            const verClave = botonDe("oc-vida-accion", "🔑 alfabeto", () => {
-                d.clave = !d.clave;
-                guardar();
-                pintar();
-            }, "Alfabeto de referencia");
-            verClave.setAttribute("aria-controls", clave.id);
-            const pintarClave = (id) => {
-                verClave.hidden = !id.glifos;
-                verClave.setAttribute("aria-expanded", String(!!d.clave));
-                clave.hidden = !d.clave || !id.glifos;
-                if (clave.hidden) {
-                    clave.replaceChildren();
-                    return;
-                }
-                const grande = botonDe("oc-vida-accion", "👁️ enseñar el alfabeto", () => {
-                    window.ocVentana.abrir({ titulo: "Alfabeto " + id.nombre.toLowerCase() + " (" + id.alfabeto + ")",
-                        cuerpo: claveDe(id, "es-grande"), vuelta: grande, clase: "es-ancha" });
-                });
-                clave.replaceChildren(claveDe(id, ""), grande);
-                if (Array.from(new Set(Array.from(id.glifos))).length < 27) {
-                    clave.insertBefore(crear("p", "oc-hoja-nota", "Este alfabeto tiene menos símbolos: algunas letras comparten el mismo."),
-                        grande);
-                }
-            };
-            const pintar = () => {
-                const e = escrito();
-                pintarClave(e.id);
-                hoja.className = "master-idioma-hoja es-" + e.id.id;
-                hoja.textContent = e.letras || "…";
-                hoja.setAttribute("aria-label", "Nota en " + e.id.nombre + " (" + e.id.alfabeto + "). Pone: " +
-                    (texto.value || "nada todavía"));
-                dice.replaceChildren();
-                if (verCaja.checked && texto.value) {
-                    dice.append(crear("strong", "", "Pone: "), document.createTextNode(texto.value));
-                    if (e.palabras !== texto.value) {
-                        dice.append(crear("br"), crear("strong", "", "Suena: "), document.createTextNode(e.palabras));
-                    }
-                }
-                dice.hidden = !dice.childNodes.length;
-            };
-            let espera = 0;
-            texto.addEventListener("input", () => {
-                pintar();
-                clearTimeout(espera);
-                espera = setTimeout(() => {
-                    d.texto = texto.value;
-                    guardar();
-                }, 400);
-            });
-            idioma.elegir.addEventListener("change", () => {
-                d.idioma = idioma.elegir.value;
-                guardar();
-                pintar();
-            });
-            verCaja.addEventListener("change", () => {
-                d.ver = verCaja.checked;
-                guardar();
-                pintar();
-            });
-            const arriba = crear("div", "master-nombres-form");
-            arriba.append(idioma, como);
-            const escribir = crear("div", "master-idioma-escribir");
-            escribir.append(etT, texto, azar);
-            const tamanos = crear("div", "master-idioma-tam");
-            tamanos.setAttribute("role", "group");
-            tamanos.setAttribute("aria-label", "Tamaño de la letra");
-            tamanos.append(menos, mas);
-            const botones = crear("div", "master-idioma-botones");
-            botones.append(ensenar, copiar, imagen, verClave, tamanos);
-            dentro.replaceChildren(arriba, escribir, hoja, ver, dice, botones, clave);
-            pintar();
-        }).catch(() => {
-            dentro.replaceChildren(crear("p", "oc-vacio", "No he podido cargar los idiomas."));
-        });
-    }
-
     // ---- BOTÍN Y ENCUENTROS: generadores PROPIOS (las tablas de la DMG y
     // la Xanathar's no son del SRD). Las monedas, gemas y obras de arte,
     // en tablas inventadas aquí; los objetos mágicos y los monstruos, del
     // SRD (tienda.json y bestiario.json). ----
     const TIENDA = "datos/personajes/compendio/tienda.json";
+    Object.assign(PM, { TIENDA });
     const BESTIARIO = "datos/personajes/compendio/bestiario.json";
-    const FRANJAS = [["0", "VD 0–4"], ["1", "VD 5–10"], ["2", "VD 11–16"], ["3", "VD 17 o más"]];
+    Object.assign(PM, { BESTIARIO });
 
     // «3d6» a un número, sin pasar por el registro de tiradas.
     function tiradaSuelta(formula) {
@@ -5346,29 +2897,29 @@
             [["po", "4d6", 500], ["ppt", "2d6", 50]], [["po", "6d6", 2000], ["ppt", "4d6", 500]]],
     };
     const BOTIN_GEMAS = {
-        10: ["ágata", "cuarzo azul", "hematites", "lapislázuli", "malaquita", "obsidiana", "ojo de tigre", "turquesa"],
-        50: ["calcedonia", "citrino", "cornalina", "jaspe sanguíneo", "ónice", "piedra de luna", "cuarzo rosa", "circón"],
-        100: ["ámbar", "amatista", "coral rojo", "granate", "jade", "perla", "espinela", "turmalina"],
-        500: ["aguamarina", "alejandrita", "perla negra", "peridoto", "topacio dorado", "espinela azul"],
-        1000: ["ópalo negro", "ópalo de fuego", "zafiro azul", "esmeralda", "zafiro estrella", "rubí estrella"],
-        5000: ["diamante", "rubí sangre", "zafiro negro", "jacinto", "esmeralda sin defecto"],
+        10: ["ágata", ocT("cuarzo azul"), "hematites", "lapislázuli", "malaquita", "obsidiana", ocT("ojo de tigre"), "turquesa"],
+        50: ["calcedonia", "citrino", "cornalina", ocT("jaspe sanguíneo"), "ónice", ocT("piedra de luna"), ocT("cuarzo rosa"), "circón"],
+        100: ["ámbar", "amatista", ocT("coral rojo"), "granate", "jade", "perla", "espinela", "turmalina"],
+        500: ["aguamarina", "alejandrita", ocT("perla negra"), "peridoto", ocT("topacio dorado"), ocT("espinela azul")],
+        1000: [ocT("ópalo negro"), ocT("ópalo de fuego"), ocT("zafiro azul"), "esmeralda", ocT("zafiro estrella"), ocT("rubí estrella")],
+        5000: ["diamante", ocT("rubí sangre"), ocT("zafiro negro"), "jacinto", ocT("esmeralda sin defecto")],
     };
     const BOTIN_ARTE = {
-        25: ["un aguamanil de cobre con asas de serpiente", "una baraja de naipes pintados a mano",
-            "un espejo de mano con marco de plata", "una figurita de hueso tallado de un búho", "un par de dados de marfil",
-            "un incensario de latón", "un pañuelo de seda bordado", "una pipa de brezo con boquilla de ámbar"],
-        250: ["una copa de plata con incrustaciones de ámbar", "un tapiz pequeño de una cacería",
-            "un broche de oro con forma de hoja", "una caja de música de nogal", "una máscara ceremonial de bronce",
-            "un catalejo de latón grabado", "un anillo de sello de oro", "un cuadro al óleo de un puerto"],
-        750: ["una corona de plata con perlas", "un cáliz de oro con granates", "una daga ceremonial con empuñadura de jade",
-            "un tablero de ajedrez de ébano y marfil", "un collar de cuentas de amatista",
-            "una estatuilla de oro de un dragón dormido"],
-        2500: ["un brazalete de platino con zafiros", "un ídolo de jade del tamaño de un puño",
-            "una diadema de oro con esmeraldas", "un relicario de oro con un retrato en miniatura",
-            "un tapiz enorme tejido con hilo de oro"],
-        7500: ["una corona de oro con rubíes", "un cetro de platino con un diamante en la punta",
-            "una armadura ceremonial dorada, de adorno", "una estatua de mithral de una diosa",
-            "un huevo de oro con joyas incrustadas"],
+        25: [ocT("un aguamanil de cobre con asas de serpiente"), ocT("una baraja de naipes pintados a mano"),
+            ocT("un espejo de mano con marco de plata"), ocT("una figurita de hueso tallado de un búho"), ocT("un par de dados de marfil"),
+            ocT("un incensario de latón"), ocT("un pañuelo de seda bordado"), ocT("una pipa de brezo con boquilla de ámbar")],
+        250: [ocT("una copa de plata con incrustaciones de ámbar"), ocT("un tapiz pequeño de una cacería"),
+            ocT("un broche de oro con forma de hoja"), ocT("una caja de música de nogal"), ocT("una máscara ceremonial de bronce"),
+            ocT("un catalejo de latón grabado"), ocT("un anillo de sello de oro"), ocT("un cuadro al óleo de un puerto")],
+        750: [ocT("una corona de plata con perlas"), ocT("un cáliz de oro con granates"), ocT("una daga ceremonial con empuñadura de jade"),
+            ocT("un tablero de ajedrez de ébano y marfil"), ocT("un collar de cuentas de amatista"),
+            ocT("una estatuilla de oro de un dragón dormido")],
+        2500: [ocT("un brazalete de platino con zafiros"), ocT("un ídolo de jade del tamaño de un puño"),
+            ocT("una diadema de oro con esmeraldas"), ocT("un relicario de oro con un retrato en miniatura"),
+            ocT("un tapiz enorme tejido con hilo de oro")],
+        7500: [ocT("una corona de oro con rubíes"), ocT("un cetro de platino con un diamante en la punta"),
+            ocT("una armadura ceremonial dorada, de adorno"), ocT("una estatua de mithral de una diosa"),
+            ocT("un huevo de oro con joyas incrustadas")],
     };
     // En un tesoro, por franja: cuántas gemas u obras de arte, de qué
     // valores, y cuántos objetos mágicos y de qué rareza (con su peso).
@@ -5382,7 +2933,6 @@
         { cuantas: "2d4", gemas: [1000, 5000], arte: [2500, 7500], magicos: "1d6", menos: -1,
             rarezas: [["rara", 25], ["muy rara", 45], ["legendaria", 30]] },
     ];
-    const VALOR_MONEDA = { pc: 1, pp: 10, pe: 50, po: 100, ppt: 1000 };
 
     function conPeso(lista) {
         const total = lista.reduce((t, x) => t + x[1], 0);
@@ -5438,100 +2988,6 @@
         }
         return sale;
     }
-
-    function montarBotin(dentro, m) {
-        m.datos = m.datos || {};
-        dentro.appendChild(crear("p", "oc-hoja-nota", "Cargando…"));
-        pedir(TIENDA).then((tienda) => {
-            const d = m.datos;
-            const porEn = {};
-            tienda.objetos.forEach((o) => {
-                porEn[o.en] = o;
-            });
-            const franja = elegirDe("master-botin-franja-" + m.id, "de quién (su valor de desafío)", FRANJAS, d.franja || "0");
-            const tipo = botonesDe("qué", [["uno", "👤 lo que lleva encima uno"], ["tesoro", "💎 un tesoro"]], d.tipo || "tesoro",
-                (v) => {
-                    d.tipo = v;
-                    guardar();
-                });
-            const sale = crear("div", "master-botin");
-            sale.setAttribute("aria-live", "polite");
-            const texto = () => {
-                const r = d.sale;
-                const lineas = [];
-                if (!r) {
-                    return "";
-                }
-                lineas.push("Monedas: " + r.monedas.filter((x) => x[1]).map((x) => x[1].toLocaleString("es-ES") + " " + x[0]).join(", "));
-                r.cosas.forEach((c) => lineas.push((c.n > 1 ? c.n + " × " : "") + c.texto + " (" + c.valor.toLocaleString("es-ES") +
-                    " po" + (c.n > 1 ? " cada " + (c.que === "gema" ? "una" : "uno") : "") + ")"));
-                r.objetos.forEach((en) => lineas.push((porEn[en] || { nombre: en }).nombre));
-                return lineas.join("\n");
-            };
-            const pintar = () => {
-                const r = d.sale;
-                sale.replaceChildren();
-                if (!r) {
-                    sale.appendChild(crear("p", "oc-vacio", "Elige y pulsa «generar»."));
-                    return;
-                }
-                const lista = crear("ul", "master-botin-lista");
-                const monedas = r.monedas.filter((x) => x[1]);
-                const li = crear("li", "master-botin-cosa es-monedas");
-                li.append(crear("span", "master-botin-icono", "🪙"), crear("span", "",
-                    monedas.map((x) => x[1].toLocaleString("es-ES") + " " + x[0]).join(" · ")));
-                li.querySelector("span:last-child").setAttribute("aria-label", "Monedas: " + monedas.map((x) =>
-                    x[1].toLocaleString("es-ES") + " " + (MONEDAS.find((y) => y[0] === x[0]) || [0, x[0]])[1]).join(", "));
-                lista.appendChild(li);
-                r.cosas.forEach((c) => {
-                    const x = crear("li", "master-botin-cosa");
-                    x.append(crear("span", "master-botin-icono", c.que === "gema" ? "💎" : "🏺"),
-                        crear("span", "", (c.n > 1 ? c.n + " × " : "") + c.texto),
-                        crear("span", "master-botin-valor", c.valor.toLocaleString("es-ES") + " po" + (c.n > 1 ? " c/u" : "")));
-                    lista.appendChild(x);
-                });
-                r.objetos.forEach((en) => {
-                    const o = porEn[en];
-                    if (!o) {
-                        return;
-                    }
-                    const x = crear("li", "master-botin-cosa es-magico");
-                    const b = botonDe("master-botin-objeto", o.nombre, () => abrirObjeto(o, b, tienda.fuente), "Ver " + o.nombre);
-                    x.append(crear("span", "master-botin-icono", "✨"), b, crear("span", "master-botin-valor", o.rareza));
-                    lista.appendChild(x);
-                });
-                let total = monedas.reduce((t, x) => t + x[1] * VALOR_MONEDA[x[0]], 0) / 100;
-                r.cosas.forEach((c) => {
-                    total += c.n * c.valor;
-                });
-                sale.append(lista, crear("p", "master-botin-total", "Monedas, gemas y arte: unas " +
-                    Math.round(total).toLocaleString("es-ES") + " po" + (r.objetos.length ? ", más " + r.objetos.length +
-                    (r.objetos.length > 1 ? " objetos mágicos." : " objeto mágico.") : ".")));
-            };
-            const generar = botonDe("oc-vida-accion es-principal master-nombres-generar", "🎲 generar botín", () => {
-                d.franja = franja.elegir.value;
-                d.tipo = tipo.valor();
-                d.sale = hacerBotin(tienda.objetos, parseInt(d.franja, 10), d.tipo);
-                guardar();
-                pintar();
-                avisar("Botín nuevo: " + texto().replace(/\n/g, ". ") + ".");
-            });
-            const copiar = botonDe("oc-vida-accion", "⧉ copiar", () => copiarTexto(texto(), "Copiado el botín."), "Copiar el botín");
-            const arriba = crear("div", "master-nombres-form");
-            arriba.append(franja, tipo, generar);
-            dentro.replaceChildren(arriba, sale, copiar,
-                crear("p", "oc-hoja-nota master-fuente", "Monedas, gemas y arte: tablas propias. Objetos: SRD 5.2 (CC BY 4.0)."));
-            pintar();
-        }).catch(() => {
-            dentro.replaceChildren(crear("p", "oc-vacio", "No he podido cargar los objetos."));
-        });
-    }
-
-    // ENCUENTROS: monstruos del SRD de un hábitat que quepan en lo que
-    // aguanta la party. El presupuesto, una cuenta propia: por cada PJ,
-    // los PX de un monstruo de VD igual a su nivel, por 0,25 (bajo), 0,4
-    // (moderado) o 0,6 (alto).
-    const DIFICULTADES = [["baja", "baja", 0.25], ["moderada", "moderada", 0.4], ["alta", "alta", 0.6]];
     const QUE_HACEN = ["acampando alrededor de una hoguera", "de caza", "peleándose entre ellos", "persiguiendo a alguien",
         "vigilando algo que no quieren que se vea", "durmiendo (casi todos)", "de paso, sin prisa", "preparando una emboscada",
         "huyendo de algo peor", "repartiéndose un botín", "perdidos", "buscando a los PJ"];
@@ -5542,14 +2998,8 @@
         const m = /\(([\d.]+) PX/.exec(b.vd || "");
         return m ? parseInt(m[1].replace(/\./g, ""), 10) : 0;
     };
+    Object.assign(PM, { pxDe });
     const vdNum = (vd) => (vd.indexOf("/") >= 0 ? 1 / parseInt(vd.split("/")[1], 10) : parseFloat(vd));
-
-    // Lo que aguanta cada PJ según su nivel (baja, moderada, alta).
-    const PX_PJ = [[50, 75, 100], [100, 150, 200], [150, 225, 400], [250, 375, 500], [500, 750, 1100], [600, 1000, 1400],
-        [750, 1300, 1700], [1000, 1700, 2100], [1300, 2000, 2600], [1600, 2300, 3100], [1900, 2900, 4100], [2200, 3700, 4700],
-        [2600, 4200, 5400], [2900, 4900, 6200], [3300, 5400, 7800], [3800, 6100, 9800], [4500, 7200, 11700], [5000, 8700, 14200],
-        [5500, 10700, 17200], [6400, 13200, 22000]];
-    const presupuestosDe = (niveles) => [0, 1, 2].map((i) => niveles.reduce((t, n) => t + PX_PJ[Math.min(20, Math.max(1, n)) - 1][i], 0));
     function hacerEncuentro(bichos, habitat, nivel, pjs, factor, fijo) {
         const presupuesto = fijo || Math.round(pjs * PX_POR_VD[Math.min(20, Math.max(1, nivel)) - 1] * factor);
         const de = bichos.filter((b) => pxDe(b) && (habitat === "" || (b.habitat || []).some((h) => h === habitat || h === "cualquiera"))
@@ -5570,3500 +3020,16 @@
         return { presupuesto, grupos, hacen: alAzar(QUE_HACEN) };
     }
 
-    function montarEncuentros(dentro, m) {
-        m.datos = m.datos || {};
-        dentro.appendChild(crear("p", "oc-hoja-nota", "Cargando…"));
-        pedir(BESTIARIO).then((datos) => {
-            const d = m.datos;
-            const bichos = datos.monstruos;
-            const porEn = {};
-            bichos.forEach((b) => {
-                porEn[b.en] = b;
-            });
-            const habitats = Array.from(new Set(bichos.flatMap((b) => b.habitat || []))).filter((h) => h !== "cualquiera")
-                .sort((a, b) => a.localeCompare(b, "es"));
-            const habitat = elegirDe("master-encuentro-habitat-" + m.id, "dónde",
-                [["", "cualquier sitio"]].concat(habitats.map((h) => [h, h])), d.habitat || "");
-            const enParty = estado.modulos.filter((x) => x.tipo === "party")
-                .reduce((t, x) => t + ((x.datos && x.datos.pjs) || []).length, 0);
-            const numero = (id, texto, valor, min, max) => {
-                const caja = crear("div", "master-campo");
-                const et = crear("label", "oc-dados-etiqueta", texto);
-                const x = crear("input", "master-elegir");
-                x.type = "number";
-                x.min = min;
-                x.max = max;
-                x.value = valor;
-                x.id = id + m.id;
-                et.htmlFor = x.id;
-                caja.append(et, x);
-                caja.elegir = x;
-                return caja;
-            };
-            const nivel = numero("master-encuentro-nivel-", "nivel de la party", d.nivel || 3, 1, 20);
-            const pjs = numero("master-encuentro-pjs-", "cuántos PJ" + (enParty ? " (en la party hay " + enParty + ")" : ""),
-                d.pjs || enParty || 4, 1, 10);
-            const fila = crear("div", "master-encuentro-fila");
-            fila.append(nivel, pjs);
-            // Con la party de la campaña: sus niveles de verdad.
-            const nivelesParty = () => (todo.pjs || []).map((pj) => numPj(pj.nivel) || 1);
-            const conParty = crear("label", "master-encuentro-party");
-            const conPartyC = crear("input");
-            conPartyC.type = "checkbox";
-            conPartyC.checked = d.conParty !== undefined ? !!d.conParty : nivelesParty().length > 0;
-            const conPartyT = crear("span");
-            conParty.append(conPartyC, conPartyT);
-            const pintarParty = () => {
-                const nv = nivelesParty();
-                conPartyC.disabled = !nv.length;
-                if (!nv.length) {
-                    conPartyC.checked = false;
-                }
-                conPartyT.textContent = nv.length ? " con la party de la campaña (" + nv.length + " PJ, niveles " + nv.join(", ") + ")"
-                    : " con la party de la campaña (no hay nadie todavía)";
-                fila.hidden = conPartyC.checked;
-            };
-            conPartyC.addEventListener("change", () => {
-                d.conParty = conPartyC.checked;
-                guardar();
-                pintarParty();
-            });
-            pintarParty();
-            mientrasEste(dentro, "master:pjs", pintarParty);
-            const dificultad = botonesDe("dificultad", DIFICULTADES.map((x) => [x[0], x[1]]), d.dificultad || "moderada", (v) => {
-                d.dificultad = v;
-                guardar();
-            });
-            const etDif = crear("p", "oc-dados-etiqueta", "dificultad");
-            etDif.setAttribute("aria-hidden", "true");
-            const sale = crear("div", "master-botin");
-            sale.setAttribute("aria-live", "polite");
-            const pintar = () => {
-                const r = d.sale;
-                sale.replaceChildren();
-                if (!r) {
-                    sale.appendChild(crear("p", "oc-vacio", "Elige y pulsa «generar»."));
-                    return;
-                }
-                if (!r.grupos.length) {
-                    sale.appendChild(crear("p", "oc-vacio", "No cabe ningún monstruo de ese sitio. Prueba con otro o sube la dificultad."));
-                    return;
-                }
-                const lista = crear("ul", "master-botin-lista");
-                let px = 0;
-                r.grupos.forEach((g) => {
-                    const b = porEn[g.en];
-                    if (!b) {
-                        return;
-                    }
-                    px += g.n * pxDe(b);
-                    const li = crear("li", "master-botin-cosa");
-                    const ver = botonDe("master-botin-objeto", (g.n > 1 ? g.n + " × " : "") + b.nombre, () => abrirBicho(b, ver, datos.fuente),
-                        "Ver " + b.nombre);
-                    li.append(tokenDe(b), ver, crear("span", "master-botin-valor", "VD " + b.cr + " · " +
-                        (g.n * pxDe(b)).toLocaleString("es-ES") + " PX"));
-                    lista.appendChild(li);
-                });
-                const todos = botonDe("oc-vida-accion es-principal", "⚔️ todos a la iniciativa", () => {
-                    const entran = [];
-                    r.grupos.forEach((g) => {
-                        const b = porEn[g.en];
-                        for (let i = 0; i < g.n && b; i++) {
-                            entran.push(meterEnIniciativa(iniDeBicho(b),
-                                (nombres, renombrar) => conNumero(b.nombre, nombres, renombrar), b.nombre));
-                        }
-                    });
-                    avisar("A la iniciativa: " + entran.filter(Boolean).join(", ") + ".");
-                });
-                // Qué tal le va a la party de verdad (si la hay).
-                const nv = nivelesParty();
-                let cuanDificil = "";
-                if (nv.length) {
-                    const [baja, mod, alta] = presupuestosDe(nv);
-                    cuanDificil = " Para tu party (" + nv.length + " PJ): " + (px <= baja ? "baja" : px <= mod ? "moderada" : px <= alta
-                        ? "alta" : "más que alta, ¡ojo!") + " (baja " + baja.toLocaleString("es-ES") + " · moderada "
-                        + mod.toLocaleString("es-ES") + " · alta " + alta.toLocaleString("es-ES") + ").";
-                }
-                const darPxB = botonDe("oc-vida-accion", "🏆 dar sus PX a la party", () => darPx(px, null, darPxB),
-                    "Repartir los " + px.toLocaleString("es-ES") + " PX de este encuentro entre la party");
-                darPxB.hidden = !nv.length;
-                const botonesE = crear("div", "master-creador-barra");
-                botonesE.append(todos, darPxB);
-                sale.append(crear("p", "master-encuentro-hacen", "Están " + r.hacen + "."), lista,
-                    crear("p", "master-botin-total", px.toLocaleString("es-ES") + " PX de " +
-                        r.presupuesto.toLocaleString("es-ES") + " que aguanta la party." + cuanDificil), botonesE);
-            };
-            const generar = botonDe("oc-vida-accion es-principal master-nombres-generar", "🎲 generar encuentro", () => {
-                d.habitat = habitat.elegir.value;
-                d.nivel = Math.min(20, Math.max(1, parseInt(nivel.elegir.value, 10) || 1));
-                d.pjs = Math.min(10, Math.max(1, parseInt(pjs.elegir.value, 10) || 1));
-                d.dificultad = dificultad.valor();
-                const f = (DIFICULTADES.find((x) => x[0] === d.dificultad) || DIFICULTADES[1])[2];
-                const nv = conPartyC.checked ? nivelesParty() : [];
-                const iDif = Math.max(0, DIFICULTADES.findIndex((x) => x[0] === d.dificultad));
-                d.sale = nv.length ? hacerEncuentro(bichos, d.habitat, Math.round(nv.reduce((a, b) => a + b, 0) / nv.length), nv.length, f,
-                    presupuestosDe(nv)[iDif]) : hacerEncuentro(bichos, d.habitat, d.nivel, d.pjs, f);
-                guardar();
-                pintar();
-                avisar(d.sale.grupos.length ? "Encuentro: " + d.sale.grupos.map((g) => g.n + " " + (porEn[g.en] || {}).nombre)
-                    .join(" y ") + ", " + d.sale.hacen + "." : "No cabe ningún monstruo.");
-            });
-            const arriba = crear("div", "master-nombres-form");
-            arriba.append(habitat, conParty, fila, etDif, dificultad, generar);
-            dentro.replaceChildren(arriba, sale, crear("p", "oc-hoja-nota master-fuente",
-                "Monstruos: SRD 5.2 (CC BY 4.0). La dificultad, con la party, según los PX que aguanta cada PJ por su nivel; sin ella, una cuenta"
-                + " propia aproximada."));
-            pintar();
-        }).catch(() => {
-            dentro.replaceChildren(crear("p", "oc-vacio", "No he podido cargar el bestiario."));
-        });
-    }
-
-    // ---- EL DIBUJO: un Paint con capas. A la izquierda, las
-    // herramientas (lápiz, goma, bote, seleccionar y mover, cuentagotas,
-    // línea, rectángulo y elipse), los colores (los de siempre y uno a
-    // elegir) y los grosores; en medio, el lienzo; a la derecha, las capas
-    // y carpetas (como el Photoshop) y la rejilla de rol.
-    //
-    // Cómo va: cada capa es un <canvas> de DIBUJO_ANCHO × DIBUJO_ALTO,
-    // transparente; lo que se ve es «vista», que pinta el papel y encima
-    // las capas visibles (de abajo arriba). Lo que se está haciendo (la
-    // selección, la línea que aún no se ha soltado, la rejilla) va en
-    // «encima», otro canvas pegado sobre la vista, que es el que recibe
-    // el ratón o el dedo. Se guarda en m.datos: «capas» (el árbol: capas
-    // y carpetas, la de arriba primero; cada capa con su imagen WebP),
-    // «activa», «rejilla» y las herramientas. ----
-    const DIBUJO_ANCHO = 1000;
-    const DIBUJO_ALTO = 750;
-    const DIBUJO_PAPEL = "#fdfaf0";
-    const DIBUJO_COLORES = [["#1d1b26", "negro"], ["#ffffff", "blanco"], ["#c62828", "rojo"], ["#1565c0", "azul"],
-        ["#2e7d32", "verde"], ["#ef6c00", "naranja"], ["#6a1b9a", "morado"], ["#8d6e63", "marrón"], ["#fdd835", "amarillo"],
-        ["#9e9e9e", "gris"]];
-    // [id, emoji, nombre, tecla]
-    const DIBUJO_HERRAMIENTAS = [["lapiz", "✏️", "Lápiz", "b"], ["goma", "🧽", "Goma", "e"], ["bote", "🪣", "Bote de pintura", "g"],
-        ["seleccionar", "⬚", "Seleccionar y mover", "m"], ["cuentagotas", "💧", "Cuentagotas (coger un color)", "i"],
-        ["linea", "╱", "Línea recta", "l"], ["rectangulo", "▭", "Rectángulo", "u"], ["elipse", "◯", "Elipse", "o"],
-        ["texto", "T", "Texto", "t"]];
-    const DIBUJO_FUENTES = [["Pangolin", "a mano"], ["Space Grotesk", "normal"], ["Georgia, serif", "con serifa"],
-        ["DM Mono", "de máquina"], ["Jersey 10", "de píxeles"]];
-
-    // Solo imágenes metidas en la propia dirección (data:image/…): lo
-    // único que lee el dibujo (lo que guarda él y los archivos que se
-    // pegan). Cualquier otra cosa, nada.
-    function imagenSegura(url) {
-        return /^data:image\/(png|jpeg|gif|webp|bmp|svg\+xml|avif);base64,[A-Za-z0-9+/=]+$/.test(String(url || "")) ? url : "";
-    }
-
-    function lienzoNuevo(ancho, alto) {
-        const c = document.createElement("canvas");
-        c.width = ancho || DIBUJO_ANCHO;
-        c.height = alto || DIBUJO_ALTO;
-        return c;
-    }
-
-    // «#rrggbb» a [r, g, b].
-    const rgbDe = (hex) => [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16));
-
-    // EL BOTE: rellena la zona del mismo color (con algo de margen) que
-    // hay alrededor del punto, en los píxeles de «datos» (ImageData).
-    function rellenar(datos, x, y, color, margen) {
-        const w = datos.width;
-        const h = datos.height;
-        const px = datos.data;
-        const i0 = (y * w + x) * 4;
-        const base = [px[i0], px[i0 + 1], px[i0 + 2], px[i0 + 3]];
-        const [r, g, b] = rgbDe(color);
-        if (base[0] === r && base[1] === g && base[2] === b && base[3] === 255) {
-            return false;
-        }
-        margen = margen === undefined ? 40 : margen;
-        const igual = (i) => Math.abs(px[i] - base[0]) <= margen && Math.abs(px[i + 1] - base[1]) <= margen &&
-            Math.abs(px[i + 2] - base[2]) <= margen && Math.abs(px[i + 3] - base[3]) <= margen;
-        const hecho = new Uint8Array(w * h);
-        const pila = [[x, y]];
-        while (pila.length) {
-            let [cx, cy] = pila.pop();
-            while (cx >= 0 && !hecho[cy * w + cx] && igual((cy * w + cx) * 4)) {
-                cx--;
-            }
-            cx++;
-            let arriba = false;
-            let abajo = false;
-            while (cx < w && !hecho[cy * w + cx] && igual((cy * w + cx) * 4)) {
-                const i = (cy * w + cx) * 4;
-                px[i] = r;
-                px[i + 1] = g;
-                px[i + 2] = b;
-                px[i + 3] = 255;
-                hecho[cy * w + cx] = 1;
-                if (cy > 0) {
-                    const sigue = !hecho[(cy - 1) * w + cx] && igual(((cy - 1) * w + cx) * 4);
-                    if (sigue && !arriba) {
-                        pila.push([cx, cy - 1]);
-                    }
-                    arriba = sigue;
-                }
-                if (cy < h - 1) {
-                    const sigue = !hecho[(cy + 1) * w + cx] && igual(((cy + 1) * w + cx) * 4);
-                    if (sigue && !abajo) {
-                        pila.push([cx, cy + 1]);
-                    }
-                    abajo = sigue;
-                }
-                cx++;
-            }
-        }
-        return true;
-    }
-
-    // LA REJILLA: cuadrada o de hexágonos, con su tamaño de casilla.
-    function pintarRejilla(ctx, r) {
-        const t = Math.max(10, parseInt(r.tam, 10) || 50);
-        ctx.save();
-        ctx.globalAlpha = Math.min(1, Math.max(0.05, (parseInt(r.opacidad, 10) || 40) / 100));
-        ctx.strokeStyle = /^#[0-9a-f]{6}$/i.test(r.color || "") ? r.color : "#000000";
-        ctx.lineWidth = 1.5;
-        ctx.beginPath();
-        if (r.tipo === "hex") {
-            // Hexágonos con la punta arriba, de «t» de ancho.
-            const radio = t / Math.sqrt(3);
-            const alto = radio * 1.5;
-            for (let fila = -1; fila * alto < ctx.canvas.height + alto; fila++) {
-                for (let col = -1; col * t < ctx.canvas.width + t; col++) {
-                    const cx = col * t + (fila % 2 ? t / 2 : 0);
-                    const cy = fila * alto;
-                    for (let k = 0; k <= 6; k++) {
-                        const a = Math.PI / 180 * (60 * k - 90);
-                        const x = cx + radio * Math.cos(a);
-                        const y = cy + radio * Math.sin(a);
-                        if (k) {
-                            ctx.lineTo(x, y);
-                        } else {
-                            ctx.moveTo(x, y);
-                        }
-                    }
-                }
-            }
-        } else {
-            for (let x = 0; x <= ctx.canvas.width; x += t) {
-                ctx.moveTo(x, 0);
-                ctx.lineTo(x, ctx.canvas.height);
-            }
-            for (let y = 0; y <= ctx.canvas.height; y += t) {
-                ctx.moveTo(0, y);
-                ctx.lineTo(ctx.canvas.width, y);
-            }
-        }
-        ctx.stroke();
-        ctx.restore();
-    }
-
-    function montarDibujo(dentro, m) {
-        m.datos = m.datos || {};
-        const d = m.datos;
-        // El tamaño del lienzo (se puede cambiar: «tamaño del lienzo»).
-        let ANCHO = Math.min(3000, Math.max(200, parseInt(d.ancho, 10) || DIBUJO_ANCHO));
-        let ALTO = Math.min(3000, Math.max(200, parseInt(d.alto, 10) || DIBUJO_ALTO));
-        let cuenta = 1;
-        const nuevoId = () => "c" + Date.now().toString(36) + (cuenta++);
-        // Lo de antes (una sola imagen): pasa a ser la primera capa.
-        if (!Array.isArray(d.capas)) {
-            d.capas = [{ id: nuevoId(), tipo: "capa", nombre: "capa 1", visible: true, opacidad: 100, imagen: d.imagen || "" }];
-            delete d.imagen;
-        }
-        d.rejilla = Object.assign({ ver: false, tipo: "cuadrada", tam: 50, color: "#000000", opacidad: 40, bajar: false },
-            d.rejilla || {});
-        // Todo lo del árbol, recorrido: [nodo, lista en la que está, padre].
-        const recorrer = (f, lista = d.capas, padre = null) => {
-            for (const n of lista) {
-                if (f(n, lista, padre) === false) {
-                    return false;
-                }
-                if (n.tipo === "carpeta" && recorrer(f, n.hijos, n) === false) {
-                    return false;
-                }
-            }
-            return true;
-        };
-        const buscar = (id) => {
-            let sale = null;
-            recorrer((n, lista, padre) => {
-                if (n.id === id) {
-                    sale = { n, lista, padre };
-                    return false;
-                }
-                return true;
-            });
-            return sale;
-        };
-        const lienzos = {};
-        recorrer((n) => {
-            if (n.tipo === "carpeta") {
-                n.hijos = n.hijos || [];
-            } else {
-                lienzos[n.id] = lienzoNuevo(ANCHO, ALTO);
-            }
-        });
-        let activa = buscar(d.activa) ? d.activa : null;
-        if (!activa) {
-            recorrer((n) => {
-                if (n.tipo === "capa") {
-                    activa = n.id;
-                    return false;
-                }
-                return true;
-            });
-        }
-
-        // LOS DOS LIENZOS: la vista y lo de encima.
-        const marco = crear("div", "master-dibujo-marco");
-        const vista = lienzoNuevo(ANCHO, ALTO);
-        vista.className = "master-dibujo";
-        const encima = lienzoNuevo(ANCHO, ALTO);
-        encima.className = "master-dibujo-encima";
-        encima.tabIndex = 0;
-        encima.setAttribute("role", "img");
-        marco.append(vista, encima);
-        const cv = vista.getContext("2d");
-        const ce = encima.getContext("2d");
-        const etiqueta = () => {
-            encima.setAttribute("aria-label", "Dibujo" + (d.desc ? ": " + d.desc : " (sin descripción)") +
-                ". Se dibuja con el ratón, el dedo o un lápiz; Ctrl+V pega una imagen.");
-        };
-        etiqueta();
-
-        let herramienta = DIBUJO_HERRAMIENTAS.some((h) => h[0] === d.herramienta) ? d.herramienta : "lapiz";
-        let color = /^#[0-9a-f]{6}$/i.test(d.color || "") ? d.color : DIBUJO_COLORES[0][0];
-        let grosor = parseInt(d.grosor, 10) || 8;
-        let sel = null; // {x, y, w, h}
-        let flotante = null; // {lienzo, x, y, w, h}: lo seleccionado, levantado
-        let figura = null; // la línea o la figura que aún no se ha soltado
-
-        // Lo que se ve: el papel y las capas visibles (de abajo arriba).
-        const componer = (ctx, conFlotante) => {
-            ctx.globalAlpha = 1;
-            ctx.fillStyle = DIBUJO_PAPEL;
-            ctx.fillRect(0, 0, ANCHO, ALTO);
-            const pintar = (lista, alfa) => {
-                for (let i = lista.length - 1; i >= 0; i--) {
-                    const n = lista[i];
-                    if (!n.visible) {
-                        continue;
-                    }
-                    const a = alfa * (n.opacidad === undefined ? 1 : n.opacidad / 100);
-                    if (n.tipo === "carpeta") {
-                        pintar(n.hijos, a);
-                        continue;
-                    }
-                    ctx.globalAlpha = a;
-                    ctx.drawImage(lienzos[n.id], 0, 0);
-                    if (conFlotante && flotante && n.id === activa) {
-                        ctx.drawImage(flotante.lienzo, flotante.x, flotante.y, flotante.w, flotante.h);
-                    }
-                }
-            };
-            pintar(d.capas, 1);
-            ctx.globalAlpha = 1;
-        };
-        // Lo de encima: la rejilla, la figura a medias y la selección.
-        const pintarEncima = () => {
-            ce.clearRect(0, 0, ANCHO, ALTO);
-            if (d.rejilla.ver) {
-                pintarRejilla(ce, d.rejilla);
-            }
-            if (figura) {
-                trazarFigura(ce, figura);
-            }
-            if (sel) {
-                ce.save();
-                ce.lineWidth = 2;
-                ce.setLineDash([8, 6]);
-                ce.strokeStyle = "#000000";
-                ce.strokeRect(sel.x, sel.y, sel.w, sel.h);
-                ce.lineDashOffset = 7;
-                ce.strokeStyle = "#ffffff";
-                ce.strokeRect(sel.x, sel.y, sel.w, sel.h);
-                // Las asas para cambiar el tamaño.
-                if (herramienta === "seleccionar") {
-                    const t = tolerancia() * 0.9;
-                    ce.setLineDash([]);
-                    ce.lineWidth = 2;
-                    asas().forEach(([, x, y]) => {
-                        ce.fillStyle = "#ffffff";
-                        ce.fillRect(x - t / 2, y - t / 2, t, t);
-                        ce.strokeStyle = "#000000";
-                        ce.strokeRect(x - t / 2, y - t / 2, t, t);
-                    });
-                }
-                ce.restore();
-            }
-        };
-        let pendiente = 0;
-        const repintar = () => {
-            if (pendiente) {
-                return;
-            }
-            pendiente = requestAnimationFrame(() => {
-                pendiente = 0;
-                componer(cv, true);
-                pintarEncima();
-            });
-        };
-
-        // GUARDAR (las capas tocadas, como WebP con su transparencia).
-        const tocadas = new Set();
-        let espera = 0;
-        const fotoDe = (c) => {
-            const webp = c.toDataURL("image/webp", 0.9);
-            return webp.indexOf("data:image/webp") === 0 ? webp : c.toDataURL("image/png");
-        };
-        // Las capas tocadas, a sus imágenes (ya, sin esperar).
-        const volcar = () => {
-            clearTimeout(espera);
-            tocadas.forEach((x) => {
-                const b = buscar(x);
-                if (b && lienzos[x]) {
-                    b.n.imagen = fotoDe(lienzos[x]);
-                }
-            });
-            tocadas.clear();
-            pintarMinis();
-            d.activa = activa;
-        };
-        const guardarDibujo = (id) => {
-            if (id) {
-                tocadas.add(id);
-            }
-            clearTimeout(espera);
-            espera = setTimeout(() => {
-                volcar();
-                if (!guardar()) {
-                    avisar("No se ha podido guardar el dibujo: no cabe. Quita alguna imagen o capa, o descárgalo.");
-                }
-            }, 400);
-        };
-
-        // DESHACER: por capa, cómo estaban sus píxeles antes de cada cambio.
-        const atras = [];
-        const adelante = [];
-        const recordar = (id) => {
-            if (!lienzos[id]) {
-                return;
-            }
-            atras.push({ id, px: lienzos[id].getContext("2d").getImageData(0, 0, ANCHO, ALTO) });
-            if (atras.length > 20) {
-                atras.shift();
-            }
-            adelante.length = 0;
-            pintarMandos();
-        };
-        const volverA = (de, a) => {
-            soltarFlotante(false);
-            while (de.length) {
-                const x = de.pop();
-                if (!lienzos[x.id]) {
-                    continue;
-                }
-                const c = lienzos[x.id].getContext("2d");
-                a.push({ id: x.id, px: c.getImageData(0, 0, ANCHO, ALTO) });
-                c.putImageData(x.px, 0, 0);
-                guardarDibujo(x.id);
-                break;
-            }
-            sel = null;
-            repintar();
-            pintarMandos();
-        };
-
-        const capaActiva = () => {
-            const b = buscar(activa);
-            return b && b.n.tipo === "capa" ? b.n : null;
-        };
-        // ¿Se puede pintar en la activa? (No, si está escondida ella o su
-        // carpeta: se avisa.)
-        const sePuede = () => {
-            const c = capaActiva();
-            if (!c) {
-                avisar("Elige una capa (no una carpeta) para pintar.");
-                return null;
-            }
-            let ve = true;
-            let b = buscar(c.id);
-            while (b) {
-                ve = ve && b.n.visible;
-                b = b.padre ? buscar(b.padre.id) : null;
-            }
-            if (!ve) {
-                avisar("La capa «" + c.nombre + "» está escondida: enséñala para pintar en ella.");
-                return null;
-            }
-            return c;
-        };
-
-        const punto = (e) => {
-            const r = encima.getBoundingClientRect();
-            return [Math.round((e.clientX - r.left) * ANCHO / r.width), Math.round((e.clientY - r.top) * ALTO / r.height)];
-        };
-        // Las ocho asas de la selección: [cuál, x, y]. «tolerancia»: cuánto
-        // mide un asa en píxeles del lienzo (unos 14 de pantalla).
-        const tolerancia = () => 14 * ANCHO / Math.max(1, encima.getBoundingClientRect().width);
-        const asas = () => {
-            if (!sel) {
-                return [];
-            }
-            const { x, y, w, h } = sel;
-            return [["nw", x, y], ["n", x + w / 2, y], ["ne", x + w, y], ["e", x + w, y + h / 2], ["se", x + w, y + h],
-                ["s", x + w / 2, y + h], ["sw", x, y + h], ["w", x, y + h / 2]];
-        };
-        const asaEn = (p) => {
-            const t = tolerancia();
-            const a = asas().find(([, x, y]) => Math.abs(p[0] - x) <= t && Math.abs(p[1] - y) <= t);
-            return a ? a[0] : null;
-        };
-        const dentroDe = (p, s) => s && p[0] >= s.x && p[0] <= s.x + s.w && p[1] >= s.y && p[1] <= s.y + s.h;
-        // Una figura (línea, rectángulo o elipse) de «a» a «b».
-        function trazarFigura(ctx, f) {
-            ctx.save();
-            ctx.strokeStyle = f.color;
-            ctx.lineWidth = f.grosor;
-            ctx.lineCap = "round";
-            ctx.lineJoin = "round";
-            ctx.beginPath();
-            const [x0, y0] = f.a;
-            const [x1, y1] = f.b;
-            if (f.que === "linea") {
-                ctx.moveTo(x0, y0);
-                ctx.lineTo(x1, y1);
-            } else if (f.que === "rectangulo") {
-                ctx.rect(Math.min(x0, x1), Math.min(y0, y1), Math.abs(x1 - x0), Math.abs(y1 - y0));
-            } else {
-                ctx.ellipse((x0 + x1) / 2, (y0 + y1) / 2, Math.abs(x1 - x0) / 2, Math.abs(y1 - y0) / 2, 0, 0, Math.PI * 2);
-            }
-            ctx.stroke();
-            ctx.restore();
-        }
-
-        // LA SELECCIÓN: levantar lo seleccionado (para moverlo) y dejarlo.
-        const levantar = () => {
-            const c = sePuede();
-            if (!c || !sel || flotante) {
-                return !!flotante;
-            }
-            recordar(c.id);
-            const l = lienzoNuevo(ANCHO, ALTO);
-            l.width = Math.max(1, sel.w);
-            l.height = Math.max(1, sel.h);
-            const capa = lienzos[c.id].getContext("2d");
-            l.getContext("2d").drawImage(lienzos[c.id], sel.x, sel.y, sel.w, sel.h, 0, 0, sel.w, sel.h);
-            capa.clearRect(sel.x, sel.y, sel.w, sel.h);
-            flotante = { lienzo: l, x: sel.x, y: sel.y, w: sel.w, h: sel.h, capa: c.id };
-            return true;
-        };
-        function soltarFlotante(dejar) {
-            if (!flotante) {
-                return;
-            }
-            if (dejar !== false && lienzos[flotante.capa]) {
-                lienzos[flotante.capa].getContext("2d").drawImage(flotante.lienzo, flotante.x, flotante.y, flotante.w, flotante.h);
-                guardarDibujo(flotante.capa);
-            }
-            flotante = null;
-        }
-        const quitarSeleccion = () => {
-            soltarFlotante();
-            sel = null;
-            repintar();
-        };
-
-        // EL TEXTO: al pinchar sale un cuadro para escribir encima del
-        // lienzo, donde se ha pinchado; Intro (o pinchar fuera) lo deja
-        // en la capa, Mayús+Intro hace otra línea y Esc lo deja estar.
-        let escribiendo = null;
-        const letraDe = () => (d.texto.negrita ? "bold " : "") + d.texto.tam + "px " +
-            (d.texto.fuente.indexOf(",") >= 0 ? d.texto.fuente : "\"" + d.texto.fuente + "\"");
-        function empezarTexto(c, p) {
-            acabarTexto(true);
-            const caja = crear("textarea", "master-dibujo-texto");
-            caja.rows = 1;
-            caja.setAttribute("aria-label", "Texto para el dibujo (Intro lo pone; Esc lo quita)");
-            const k = encima.getBoundingClientRect().width / ANCHO;
-            caja.style.left = (p[0] / ANCHO * 100) + "%";
-            caja.style.top = (p[1] / ALTO * 100) + "%";
-            caja.style.font = (d.texto.negrita ? "bold " : "") + (d.texto.tam * k) + "px " +
-                (d.texto.fuente.indexOf(",") >= 0 ? d.texto.fuente : "\"" + d.texto.fuente + "\"");
-            caja.style.color = color;
-            marco.appendChild(caja);
-            escribiendo = { caja, capa: c.id, x: p[0], y: p[1], color };
-            caja.addEventListener("keydown", (e) => {
-                if (e.key === "Enter" && !e.shiftKey) {
-                    e.preventDefault();
-                    acabarTexto(true);
-                    encima.focus();
-                } else if (e.key === "Escape") {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    acabarTexto(false);
-                    encima.focus();
-                }
-            });
-            caja.addEventListener("input", () => {
-                caja.rows = Math.max(1, caja.value.split("\n").length);
-            });
-            caja.addEventListener("blur", () => setTimeout(() => acabarTexto(true), 0));
-            setTimeout(() => caja.focus(), 0);
-        }
-        function acabarTexto(dejar) {
-            if (!escribiendo) {
-                return;
-            }
-            const e = escribiendo;
-            escribiendo = null;
-            const texto = e.caja.value;
-            e.caja.remove();
-            if (!dejar || !texto.trim() || !lienzos[e.capa]) {
-                return;
-            }
-            recordar(e.capa);
-            const letra = letraDe();
-            const tam = d.texto.tam;
-            // La letra tiene que estar cargada para pintarla en el canvas.
-            const cargada = document.fonts && document.fonts.load ? document.fonts.load(letra, texto) : Promise.resolve();
-            cargada.catch(() => {}).then(() => {
-                if (!lienzos[e.capa]) {
-                    return;
-                }
-                const ctx = lienzos[e.capa].getContext("2d");
-                ctx.save();
-                ctx.font = letra;
-                ctx.fillStyle = e.color;
-                ctx.textBaseline = "top";
-                texto.split("\n").forEach((linea, i) => ctx.fillText(linea, e.x, e.y + i * tam * 1.25));
-                ctx.restore();
-                guardarDibujo(e.capa);
-                repintar();
-                avisar("Texto puesto: " + texto.replace(/\n/g, " ") + ".");
-            });
-        }
-
-        // EL RATÓN (o el dedo, o el lápiz) sobre el lienzo.
-        let gesto = null;
-        encima.addEventListener("pointerdown", (e) => {
-            if (e.button !== 0 && e.pointerType === "mouse") {
-                return;
-            }
-            e.preventDefault();
-            encima.focus();
-            const p = punto(e);
-            if (herramienta === "cuentagotas") {
-                componer(cv, true);
-                const px = cv.getImageData(Math.min(ANCHO - 1, Math.max(0, p[0])), Math.min(ALTO - 1, Math.max(0, p[1])),
-                    1, 1).data;
-                ponerColor("#" + [px[0], px[1], px[2]].map((x) => x.toString(16).padStart(2, "0")).join(""));
-                avisar("Color cogido: " + color + ".");
-                elegirHerramienta("lapiz");
-                return;
-            }
-            if (herramienta === "seleccionar") {
-                encima.setPointerCapture(e.pointerId);
-                const asa = asaEn(p);
-                if (asa && levantar()) {
-                    gesto = { que: "tamano", asa, desde: p, antes: Object.assign({}, sel) };
-                } else if (dentroDe(p, sel) && levantar()) {
-                    gesto = { que: "mover", desde: p, x: flotante.x, y: flotante.y, sx: sel.x, sy: sel.y };
-                } else {
-                    soltarFlotante();
-                    sel = null;
-                    gesto = { que: "elegir", desde: p };
-                }
-                repintar();
-                return;
-            }
-            soltarFlotante();
-            sel = null;
-            const c = sePuede();
-            if (!c) {
-                return;
-            }
-            if (herramienta === "texto") {
-                empezarTexto(c, p);
-                return;
-            }
-            if (herramienta === "bote") {
-                const x = Math.min(ANCHO - 1, Math.max(0, p[0]));
-                const y = Math.min(ALTO - 1, Math.max(0, p[1]));
-                const ctx = lienzos[c.id].getContext("2d");
-                const datos = ctx.getImageData(0, 0, ANCHO, ALTO);
-                const antes = ctx.getImageData(0, 0, ANCHO, ALTO);
-                if (rellenar(datos, x, y, color, margenBote)) {
-                    atras.push({ id: c.id, px: antes });
-                    adelante.length = 0;
-                    ctx.putImageData(datos, 0, 0);
-                    guardarDibujo(c.id);
-                    pintarMandos();
-                    repintar();
-                }
-                return;
-            }
-            encima.setPointerCapture(e.pointerId);
-            recordar(c.id);
-            if (herramienta === "lapiz" || herramienta === "goma") {
-                const ctx = lienzos[c.id].getContext("2d");
-                ctx.globalCompositeOperation = herramienta === "goma" ? "destination-out" : "source-over";
-                ctx.strokeStyle = color;
-                ctx.lineWidth = herramienta === "goma" ? grosor * 3 : grosor;
-                ctx.lineCap = "round";
-                ctx.lineJoin = "round";
-                ctx.beginPath();
-                ctx.moveTo(p[0], p[1]);
-                ctx.lineTo(p[0] + 0.1, p[1] + 0.1);
-                ctx.stroke();
-                gesto = { que: "trazo", ultimo: p, ctx, capa: c.id };
-            } else {
-                figura = { que: herramienta, a: p, b: p, color, grosor };
-                gesto = { que: "figura", capa: c.id };
-            }
-            repintar();
-        });
-        const CURSOR_ASA = { nw: "nwse-resize", se: "nwse-resize", ne: "nesw-resize", sw: "nesw-resize", n: "ns-resize", s: "ns-resize",
-            e: "ew-resize", w: "ew-resize" };
-        encima.addEventListener("pointermove", (e) => {
-            if (!gesto) {
-                if (herramienta === "seleccionar") {
-                    const p = punto(e);
-                    const asa = asaEn(p);
-                    encima.style.cursor = asa ? CURSOR_ASA[asa] : dentroDe(p, sel) ? "move" : "";
-                }
-                return;
-            }
-            const eventos = gesto.que === "trazo" && e.getCoalescedEvents ? e.getCoalescedEvents() : [];
-            const p = punto(e);
-            if (gesto.que === "trazo") {
-                const ctx = gesto.ctx;
-                ctx.beginPath();
-                ctx.moveTo(gesto.ultimo[0], gesto.ultimo[1]);
-                (eventos.length ? eventos : [e]).forEach((x) => {
-                    gesto.ultimo = punto(x);
-                    ctx.lineTo(gesto.ultimo[0], gesto.ultimo[1]);
-                });
-                ctx.stroke();
-            } else if (gesto.que === "figura") {
-                figura.b = p;
-            } else if (gesto.que === "elegir") {
-                const [x0, y0] = gesto.desde;
-                const x = Math.max(0, Math.min(x0, p[0]));
-                const y = Math.max(0, Math.min(y0, p[1]));
-                sel = { x, y, w: Math.min(ANCHO, Math.max(x0, p[0])) - x, h: Math.min(ALTO, Math.max(y0, p[1])) - y };
-            } else if (gesto.que === "tamano") {
-                // Cambiar el tamaño desde un asa (con Mayús, sin deformar).
-                const a = gesto.antes;
-                const dx = p[0] - gesto.desde[0];
-                const dy = p[1] - gesto.desde[1];
-                let { x, y, w, h } = a;
-                if (gesto.asa.indexOf("w") >= 0) {
-                    x = Math.min(a.x + a.w - 4, a.x + dx);
-                    w = a.x + a.w - x;
-                }
-                if (gesto.asa.indexOf("e") >= 0) {
-                    w = Math.max(4, a.w + dx);
-                }
-                if (gesto.asa.indexOf("n") >= 0) {
-                    y = Math.min(a.y + a.h - 4, a.y + dy);
-                    h = a.y + a.h - y;
-                }
-                if (gesto.asa.indexOf("s") >= 0) {
-                    h = Math.max(4, a.h + dy);
-                }
-                if (e.shiftKey && gesto.asa.length === 2) {
-                    const k = Math.max(w / a.w, h / a.h);
-                    const nw = a.w * k;
-                    const nh = a.h * k;
-                    x = gesto.asa.indexOf("w") >= 0 ? a.x + a.w - nw : a.x;
-                    y = gesto.asa.indexOf("n") >= 0 ? a.y + a.h - nh : a.y;
-                    w = nw;
-                    h = nh;
-                }
-                sel = { x, y, w, h };
-                Object.assign(flotante, { x, y, w, h });
-            } else if (gesto.que === "mover") {
-                const dx = p[0] - gesto.desde[0];
-                const dy = p[1] - gesto.desde[1];
-                flotante.x = gesto.x + dx;
-                flotante.y = gesto.y + dy;
-                sel.x = gesto.sx + dx;
-                sel.y = gesto.sy + dy;
-            }
-            repintar();
-        });
-        const acabar = () => {
-            if (!gesto) {
-                return;
-            }
-            if (gesto.que === "trazo") {
-                gesto.ctx.globalCompositeOperation = "source-over";
-                guardarDibujo(gesto.capa);
-            } else if (gesto.que === "figura") {
-                trazarFigura(lienzos[gesto.capa].getContext("2d"), figura);
-                figura = null;
-                guardarDibujo(gesto.capa);
-            } else if (gesto.que === "elegir" && sel && (sel.w < 3 || sel.h < 3)) {
-                sel = null;
-            } else if (gesto.que === "elegir" && sel) {
-                avisar("Seleccionado. Arrástralo o muévelo con las flechas; las asas o + y − cambian el tamaño; Supr lo borra, Esc lo suelta.");
-            }
-            gesto = null;
-            repintar();
-        };
-        encima.addEventListener("pointerup", acabar);
-        encima.addEventListener("pointercancel", acabar);
-
-        // EL TECLADO, con el foco en el lienzo: las herramientas con su
-        // letra (como el Photoshop), Ctrl+Z / Ctrl+Y, y la selección con
-        // las flechas, Supr y Esc.
-        encima.addEventListener("keydown", (e) => {
-            const k = e.key.toLowerCase();
-            if ((e.ctrlKey || e.metaKey) && (k === "z" || k === "y")) {
-                e.preventDefault();
-                if (k === "z" && !e.shiftKey) {
-                    volverA(atras, adelante);
-                } else {
-                    volverA(adelante, atras);
-                }
-                return;
-            }
-            if (e.ctrlKey || e.metaKey || e.altKey) {
-                return;
-            }
-            if (sel && /^Arrow/.test(e.key)) {
-                e.preventDefault();
-                if (!levantar()) {
-                    return;
-                }
-                const paso = e.shiftKey ? 10 : 1;
-                const dx = { ArrowLeft: -paso, ArrowRight: paso }[e.key] || 0;
-                const dy = { ArrowUp: -paso, ArrowDown: paso }[e.key] || 0;
-                flotante.x += dx;
-                flotante.y += dy;
-                sel.x += dx;
-                sel.y += dy;
-                repintar();
-                return;
-            }
-            if (sel && (e.key === "+" || e.key === "-")) {
-                // Más grande o más pequeño (un 10 %), desde el centro.
-                e.preventDefault();
-                if (!levantar()) {
-                    return;
-                }
-                const k = e.key === "+" ? 1.1 : 1 / 1.1;
-                const w = Math.max(4, sel.w * k);
-                const h = Math.max(4, sel.h * k);
-                sel = { x: sel.x + (sel.w - w) / 2, y: sel.y + (sel.h - h) / 2, w, h };
-                Object.assign(flotante, sel);
-                repintar();
-                avisar("Tamaño: " + Math.round(w) + " × " + Math.round(h) + ".");
-                return;
-            }
-            if (sel && (e.key === "Delete" || e.key === "Backspace")) {
-                e.preventDefault();
-                if (flotante) {
-                    flotante = null;
-                } else {
-                    const c = sePuede();
-                    if (c) {
-                        recordar(c.id);
-                        lienzos[c.id].getContext("2d").clearRect(sel.x, sel.y, sel.w, sel.h);
-                        guardarDibujo(c.id);
-                    }
-                }
-                sel = null;
-                repintar();
-                avisar("Borrado lo seleccionado.");
-                return;
-            }
-            if (sel && e.key === "Escape") {
-                e.preventDefault();
-                e.stopPropagation();
-                quitarSeleccion();
-                avisar("Selección soltada.");
-                return;
-            }
-            const h = DIBUJO_HERRAMIENTAS.find((x) => x[3] === k);
-            if (h) {
-                e.preventDefault();
-                elegirHerramienta(h[0]);
-                avisar(h[2] + ".");
-            }
-        });
-
-        // PEGAR O ARRASTRAR IMÁGENES: en una capa nueva, encogidas para que
-        // quepan (como mucho el 80 % del lienzo), y seleccionadas para
-        // moverlas.
-        const pegar = (archivo, x, y) => {
-            if (!archivo || !/^image\//.test(archivo.type)) {
-                avisar("Eso no es una imagen.");
-                return;
-            }
-            const lector = new FileReader();
-            lector.onload = () => {
-                const img = new Image();
-                img.onload = () => {
-                    const escala = Math.min(1, ANCHO * 0.8 / img.width, ALTO * 0.8 / img.height);
-                    const w = Math.round(img.width * escala);
-                    const h = Math.round(img.height * escala);
-                    const cx = x === undefined ? ANCHO / 2 : x;
-                    const cy = y === undefined ? ALTO / 2 : y;
-                    const px = Math.round(Math.max(0, Math.min(ANCHO - w, cx - w / 2)));
-                    const py = Math.round(Math.max(0, Math.min(ALTO - h, cy - h / 2)));
-                    soltarFlotante();
-                    const c = nuevaCapa("imagen");
-                    lienzos[c.id].getContext("2d").drawImage(img, px, py, w, h);
-                    guardarDibujo(c.id);
-                    elegirHerramienta("seleccionar");
-                    sel = { x: px, y: py, w, h };
-                    repintar();
-                    avisar("Imagen pegada en una capa nueva, seleccionada para moverla.");
-                };
-                img.onerror = () => avisar("No he podido abrir esa imagen.");
-                img.src = imagenSegura(lector.result);
-            };
-            lector.readAsDataURL(archivo);
-        };
-        const alPegar = (e) => {
-            if (!dentro.isConnected) {
-                document.removeEventListener("paste", alPegar);
-                return;
-            }
-            if (!dentro.contains(document.activeElement) || document.activeElement.matches("input, textarea")) {
-                return;
-            }
-            const archivo = Array.from((e.clipboardData && e.clipboardData.files) || [])[0];
-            if (archivo) {
-                e.preventDefault();
-                pegar(archivo);
-            }
-        };
-        document.addEventListener("paste", alPegar);
-        encima.addEventListener("dragover", (e) => {
-            e.preventDefault();
-            marco.classList.add("es-encima");
-        });
-        encima.addEventListener("dragleave", () => marco.classList.remove("es-encima"));
-        encima.addEventListener("drop", (e) => {
-            e.preventDefault();
-            marco.classList.remove("es-encima");
-            const [x, y] = punto(e);
-            pegar(Array.from(e.dataTransfer.files || [])[0], x, y);
-        });
-
-        // ---- LA BARRA DE LA IZQUIERDA ----
-        const barra = crear("div", "master-postit-barra es-dibujo");
-        barra.setAttribute("role", "toolbar");
-        barra.setAttribute("aria-label", "Herramientas del dibujo");
-        const grupo = (...cosas) => {
-            const g = crear("span", "master-postit-grupo");
-            g.append(...cosas);
-            barra.appendChild(g);
-            return g;
-        };
-        const botonesH = DIBUJO_HERRAMIENTAS.map(([id, emoji, nombre, tecla]) => {
-            const b = botonDe("master-postit-boton", emoji, () => elegirHerramienta(id), nombre);
-            b.title = nombre + " (" + tecla.toUpperCase() + ")";
-            b.setAttribute("aria-keyshortcuts", tecla.toUpperCase());
-            b.dataset.herramienta = id;
-            return b;
-        });
-        function elegirHerramienta(h) {
-            if (h !== "seleccionar") {
-                quitarSeleccion();
-            }
-            herramienta = h;
-            d.herramienta = h;
-            botonesH.forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.herramienta === h)));
-            encima.dataset.herramienta = h;
-            pintarOpciones();
-            acabarTexto(true);
-            guardar();
-        }
-        grupo(...botonesH);
-        // Los colores: los de siempre y el selector del navegador.
-        const muestras = DIBUJO_COLORES.map(([hex, nombre]) => {
-            const b = botonDe("master-postit-boton master-dibujo-color", "", () => {
-                ponerColor(hex);
-                if (herramienta === "goma" || herramienta === "seleccionar" || herramienta === "cuentagotas") {
-                    elegirHerramienta("lapiz");
-                }
-            }, "Color " + nombre);
-            b.title = nombre;
-            b.dataset.hex = hex;
-            b.style.setProperty("--muestra", hex);
-            return b;
-        });
-        const elegirColor = crear("input", "master-dibujo-selector");
-        elegirColor.type = "color";
-        elegirColor.title = "Cualquier color";
-        elegirColor.setAttribute("aria-label", "Elegir cualquier color");
-        elegirColor.addEventListener("input", () => ponerColor(elegirColor.value));
-        function ponerColor(hex) {
-            color = hex.toLowerCase();
-            d.color = color;
-            elegirColor.value = color;
-            muestras.forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.hex === color)));
-            guardar();
-        }
-        grupo(...muestras);
-        const conSelector = grupo(elegirColor);
-        conSelector.classList.add("es-selector");
-        // ---- LAS OPCIONES (arriba del lienzo, como el Paint): las de la
-        // herramienta (grosor; letra y tamaño del texto; margen del bote) y
-        // deshacer, imagen, descargar y rejilla. ----
-        const opciones = crear("div", "master-dibujo-opciones");
-        opciones.setAttribute("role", "toolbar");
-        opciones.setAttribute("aria-label", "Opciones del dibujo");
-        const deslizador = (texto, min, max, valor, alCambiar, unidad) => {
-            const et = crear("label", "master-dibujo-deslizador");
-            const r = crear("input");
-            r.type = "range";
-            r.min = min;
-            r.max = max;
-            r.value = valor;
-            const v = crear("span", "master-dibujo-valor", valor + (unidad || ""));
-            v.setAttribute("aria-hidden", "true");
-            r.setAttribute("aria-valuetext", valor + (unidad || ""));
-            r.addEventListener("input", () => {
-                v.textContent = r.value + (unidad || "");
-                r.setAttribute("aria-valuetext", r.value + (unidad || ""));
-                alCambiar(parseInt(r.value, 10));
-            });
-            et.append(crear("span", "oc-dados-etiqueta", texto), r, v);
-            return et;
-        };
-        const opGrosor = deslizador("grosor", 1, 80, grosor, (x) => {
-            grosor = x;
-            d.grosor = x;
-            guardar();
-        }, " px");
-        let margenBote = parseInt(d.margen, 10) || 40;
-        const opMargen = deslizador("margen del bote", 0, 160, margenBote, (x) => {
-            margenBote = x;
-            d.margen = x;
-            guardar();
-        });
-        opMargen.title = "Cuánto se puede parecer un color al de donde pinchas para que también se rellene";
-        // El texto: letra, tamaño y negrita.
-        d.texto = Object.assign({ fuente: "Pangolin", tam: 40, negrita: false }, d.texto || {});
-        const opTexto = crear("span", "master-dibujo-optexto");
-        const fuente = crear("select", "master-postit-elegir");
-        fuente.setAttribute("aria-label", "Letra del texto");
-        DIBUJO_FUENTES.forEach(([f, n]) => {
-            const o = crear("option", "", n);
-            o.value = f;
-            fuente.appendChild(o);
-        });
-        fuente.value = d.texto.fuente;
-        const tamTexto = crear("input", "master-dibujo-numero");
-        tamTexto.type = "number";
-        tamTexto.min = 8;
-        tamTexto.max = 300;
-        tamTexto.value = d.texto.tam;
-        tamTexto.setAttribute("aria-label", "Tamaño del texto");
-        tamTexto.title = "Tamaño del texto";
-        const negrita = botonDe("master-postit-boton es-negrita", "B", () => {
-            d.texto.negrita = !d.texto.negrita;
-            negrita.setAttribute("aria-pressed", String(d.texto.negrita));
-            guardar();
-        }, "Texto en negrita");
-        negrita.setAttribute("aria-pressed", String(!!d.texto.negrita));
-        fuente.addEventListener("change", () => {
-            d.texto.fuente = fuente.value;
-            guardar();
-        });
-        tamTexto.addEventListener("change", () => {
-            d.texto.tam = Math.min(300, Math.max(8, parseInt(tamTexto.value, 10) || 40));
-            guardar();
-        });
-        opTexto.append(fuente, tamTexto, negrita);
-        const pintarOpciones = () => {
-            opGrosor.hidden = ["lapiz", "goma", "linea", "rectangulo", "elipse"].indexOf(herramienta) < 0;
-            opMargen.hidden = herramienta !== "bote";
-            opTexto.hidden = herramienta !== "texto";
-        };
-        const deshacer = botonDe("master-postit-boton", "↶", () => volverA(atras, adelante), "Deshacer");
-        const rehacer = botonDe("master-postit-boton", "↷", () => volverA(adelante, atras), "Rehacer");
-        deshacer.title = "Deshacer (Ctrl+Z)";
-        rehacer.title = "Rehacer (Ctrl+Y)";
-        const archivo = crear("input");
-        archivo.type = "file";
-        archivo.accept = "image/*";
-        archivo.hidden = true;
-        archivo.addEventListener("change", () => {
-            pegar(archivo.files && archivo.files[0]);
-            archivo.value = "";
-        });
-        const imagen = botonDe("master-postit-boton", "🖼️", () => archivo.click(), "Poner una imagen");
-        imagen.title = "Poner una imagen en una capa nueva (o pégala con Ctrl+V)";
-        const bajar = botonDe("master-postit-boton", "⬇", () => {
-            soltarFlotante();
-            const l = lienzoNuevo(ANCHO, ALTO);
-            const c = l.getContext("2d");
-            componer(c, false);
-            if (d.rejilla.ver && d.rejilla.bajar) {
-                pintarRejilla(c, d.rejilla);
-            }
-            const a = crear("a");
-            a.href = l.toDataURL("image/png");
-            a.download = (m.titulo || "dibujo").replace(/[^\p{L}\p{N}]+/gu, "-") + ".png";
-            document.body.appendChild(a);
-            a.click();
-            a.remove();
-            avisar("Descargado: " + a.download + ".");
-        }, "Descargar el dibujo");
-        bajar.title = "Descargar como PNG (todas las capas que se ven)";
-        const aJugadores = botonDe("master-postit-boton", "📺", () => {
-            soltarFlotante();
-            const l = lienzoNuevo(ANCHO, ALTO);
-            const c = l.getContext("2d");
-            componer(c, false);
-            if (d.rejilla.ver && d.rejilla.bajar) {
-                pintarRejilla(c, d.rejilla);
-            }
-            l.toBlob((blob) => {
-                if (blob) {
-                    mostrarAJugadores({ modo: "imagen", titulo: "" }, blob).then(() => avisar("Los jugadores ven el dibujo."));
-                }
-            }, "image/png");
-        }, "Enseñar este dibujo en la pantalla de jugadores");
-        aJugadores.title = "Enseñar el dibujo en la pantalla de jugadores (lo que se ve ahora)";
-        const botonRejilla = crear("button", "master-postit-boton", "#");
-        botonRejilla.type = "button";
-        botonRejilla.setAttribute("aria-label", "Rejilla de rol");
-        botonRejilla.title = "Enseñar o esconder la rejilla";
-
-        // GUARDAR EN DOCUMENTOS: el dibujo entero (con sus capas), para
-        // abrirlo otra vez desde «documentos» y seguir dibujando.
-        const aDocs = botonDe("master-postit-boton", "📁", () => {
-            soltarFlotante();
-            volcar();
-            guardarEnDocumentos(aDocs, d.doc, () => {
-                const copia = JSON.parse(JSON.stringify(d));
-                delete copia.doc;
-                delete copia.zoom;
-                return { tipo: "dibujo", titulo: m.titulo || "dibujo", datos: copia };
-            }, (id) => {
-                d.doc = id;
-            });
-        }, "Guardar en documentos (con sus capas)");
-        aDocs.title = "Guardar en documentos (con sus capas)";
-        aDocs.setAttribute("aria-haspopup", "dialog");
-
-        // EL ZOOM DEL LIENZO (d.zoom): − 100 % +, y Ctrl + rueda encima. A
-        // más del 100 %, el lienzo se desliza dentro de su visor.
-        const ZOOMS_DIBUJO = [0.5, 0.75, 1, 1.5, 2, 3, 4];
-        let zoomD = ZOOMS_DIBUJO.indexOf(Number(d.zoom)) >= 0 ? Number(d.zoom) : 1;
-        const visor = crear("div", "master-dibujo-visor");
-        const valorZoom = botonDe("master-postit-boton master-dibujo-zoom-valor", "100 %", () => ponerZoomD(1, true),
-            "Zoom del lienzo al 100 %");
-        const menosZoom = botonDe("master-postit-boton", "－", () => pasoZoomD(-1), "Alejar el lienzo");
-        const masZoom = botonDe("master-postit-boton", "＋", () => pasoZoomD(1), "Acercar el lienzo");
-        menosZoom.title = "Alejar (Ctrl + rueda)";
-        masZoom.title = "Acercar (Ctrl + rueda)";
-        function ponerZoomD(z, decirlo) {
-            zoomD = z;
-            d.zoom = z === 1 ? undefined : z;
-            marco.style.width = z === 1 ? "" : (z * 100) + "%";
-            valorZoom.textContent = Math.round(z * 100) + " %";
-            valorZoom.setAttribute("aria-label", "Zoom del lienzo: " + Math.round(z * 100) + " % (pulsa para el 100 %)");
-            menosZoom.disabled = z <= ZOOMS_DIBUJO[0];
-            masZoom.disabled = z >= ZOOMS_DIBUJO[ZOOMS_DIBUJO.length - 1];
-            pintarEncima();
-            guardar();
-            if (decirlo) {
-                avisar("Zoom del lienzo: " + Math.round(z * 100) + " %.");
-            }
-        }
-        const pasoZoomD = (s) => {
-            const sig = s > 0 ? ZOOMS_DIBUJO.find((x) => x > zoomD) : ZOOMS_DIBUJO.slice().reverse().find((x) => x < zoomD);
-            if (sig) {
-                ponerZoomD(sig, true);
-            }
-        };
-        encima.addEventListener("wheel", (e) => {
-            if (!e.ctrlKey) {
-                return;
-            }
-            e.preventDefault();
-            e.stopPropagation();
-            pasoZoomD(e.deltaY < 0 ? 1 : -1);
-        }, { passive: false });
-
-        // Debajo de las herramientas de pintar: deshacer, el zoom y la
-        // rejilla, y lo de guardar (imagen, descargar y documentos).
-        const titulado = (texto, ...cosas) => {
-            const g = grupo(...cosas);
-            g.setAttribute("role", "group");
-            g.setAttribute("aria-label", texto);
-            return g;
-        };
-        titulado("Deshacer y rehacer", deshacer, rehacer);
-        titulado("Zoom del lienzo", menosZoom, masZoom);
-        titulado("Zoom actual", valorZoom).classList.add("es-selector");
-        titulado("Rejilla", botonRejilla);
-        titulado("Guardar", imagen, bajar, aDocs, aJugadores).classList.add("es-guardar");
-        opciones.append(opGrosor, opMargen, opTexto);
-
-        // ---- LAS CAPAS (a la derecha) ----
-        const panel = crear("div", "master-dibujo-panel");
-        const tituloCapas = crear("h3", "master-dibujo-titulo", "capas");
-        const listaCapas = crear("ul", "master-dibujo-capas");
-        // Las miniaturas de cada capa, para repintarlas al guardar.
-        let minis = {};
-        function pintarMinis() {
-            Object.keys(minis).forEach((id) => {
-                if (!lienzos[id]) {
-                    return;
-                }
-                const mc = minis[id].getContext("2d");
-                mc.fillStyle = DIBUJO_PAPEL;
-                mc.fillRect(0, 0, 40, 30);
-                const k = Math.min(40 / ANCHO, 30 / ALTO);
-                mc.drawImage(lienzos[id], (40 - ANCHO * k) / 2, (30 - ALTO * k) / 2, ANCHO * k, ALTO * k);
-            });
-        }
-        listaCapas.setAttribute("aria-label", "Capas y carpetas (la de arriba se ve encima)");
-        function nuevaCapa(nombre) {
-            const c = { id: nuevoId(), tipo: "capa", nombre: nombre || "capa " + (Object.keys(lienzos).length + 1), visible: true,
-                opacidad: 100, imagen: "" };
-            lienzos[c.id] = lienzoNuevo(ANCHO, ALTO);
-            // Encima de la activa, en su misma carpeta.
-            const b = buscar(activa);
-            const lista = b ? b.lista : d.capas;
-            lista.splice(b ? lista.indexOf(b.n) : 0, 0, c);
-            activa = c.id;
-            d.activa = activa;
-            pintarCapas();
-            guardar();
-            return c;
-        }
-        const masCapa = botonDe("oc-vida-accion", "＋ capa", () => {
-            const c = nuevaCapa();
-            avisar("Capa nueva: " + c.nombre + ".");
-        }, "Capa nueva");
-        const masCarpeta = botonDe("oc-vida-accion", "📁 carpeta", () => {
-            const n = { id: nuevoId(), tipo: "carpeta", nombre: "carpeta", visible: true, opacidad: 100, abierta: true, hijos: [] };
-            const b = buscar(activa);
-            const lista = b ? b.lista : d.capas;
-            lista.splice(b ? lista.indexOf(b.n) : 0, 0, n);
-            activa = n.id;
-            pintarCapas();
-            guardar();
-            avisar("Carpeta nueva. Mete capas en ella con «⇥ a la carpeta».");
-        }, "Carpeta nueva");
-        const nuevas = crear("div", "master-dibujo-nuevas");
-        nuevas.append(masCapa, masCarpeta);
-        const fila = (n, nivel) => {
-            const li = crear("li", "master-dibujo-capa" + (n.id === activa ? " es-activa" : "") + (n.tipo === "carpeta" ? " es-carpeta" : ""));
-            li.style.setProperty("--nivel", nivel);
-            const ojo = botonDe("master-nombre-boton", n.visible ? "👁" : "—", () => {
-                n.visible = !n.visible;
-                pintarCapas();
-                repintar();
-                guardar();
-                avisar((n.visible ? "Se ve: " : "Escondida: ") + n.nombre + ".");
-            }, (n.visible ? "Esconder " : "Enseñar ") + n.nombre);
-            ojo.setAttribute("aria-pressed", String(!!n.visible));
-            ojo.title = n.visible ? "Esconder" : "Enseñar";
-            li.appendChild(ojo);
-            if (n.tipo === "carpeta") {
-                const plegar = botonDe("master-nombre-boton", n.abierta ? "▾" : "▸", () => {
-                    n.abierta = !n.abierta;
-                    pintarCapas();
-                    guardar();
-                }, (n.abierta ? "Cerrar " : "Abrir ") + "la carpeta " + n.nombre);
-                plegar.setAttribute("aria-expanded", String(!!n.abierta));
-                li.appendChild(plegar);
-            }
-            const nombre = botonDe("master-dibujo-capa-nombre", (n.tipo === "carpeta" ? "📁 " : "") + n.nombre, () => {
-                soltarFlotante();
-                sel = null;
-                activa = n.id;
-                d.activa = activa;
-                pintarCapas();
-                repintar();
-                guardar();
-            }, (n.tipo === "carpeta" ? "Carpeta " : "Capa ") + n.nombre + (n.visible ? "" : " (escondida)"));
-            if (n.id === activa) {
-                nombre.setAttribute("aria-current", "true");
-            }
-            if (n.tipo === "capa" && lienzos[n.id]) {
-                const mini = lienzoNuevo(ANCHO, ALTO);
-                mini.width = 40;
-                mini.height = 30;
-                mini.className = "master-dibujo-mini";
-                mini.setAttribute("aria-hidden", "true");
-                minis[n.id] = mini;
-                nombre.prepend(mini);
-            }
-            li.appendChild(nombre);
-            return li;
-        };
-        // Lo que se puede hacer con la activa: subir, bajar, meterla en la
-        // carpeta de encima, sacarla, renombrar, duplicar, opacidad, borrar.
-        const mandos = crear("div", "master-dibujo-mandos");
-        const mando = (texto, nombre, f) => {
-            const b = botonDe("master-postit-boton", texto, f, nombre);
-            b.title = nombre;
-            mandos.appendChild(b);
-            return b;
-        };
-        const mover = (paso) => {
-            const b = buscar(activa);
-            if (!b) {
-                return;
-            }
-            const i = b.lista.indexOf(b.n);
-            const j = i + paso;
-            if (j < 0 || j >= b.lista.length) {
-                return;
-            }
-            b.lista.splice(i, 1);
-            b.lista.splice(j, 0, b.n);
-            pintarCapas();
-            repintar();
-            guardar();
-            avisar((paso < 0 ? "Subida: " : "Bajada: ") + b.n.nombre + ".");
-        };
-        const subir = mando("↑", "Subir (que se vea más encima)", () => mover(-1));
-        const bajarCapa = mando("↓", "Bajar (que se vea más debajo)", () => mover(1));
-        const aCarpeta = mando("⇥", "Meterla en la carpeta de encima", () => {
-            const b = buscar(activa);
-            if (!b) {
-                return;
-            }
-            const i = b.lista.indexOf(b.n);
-            const carpeta = b.lista.slice(0, i).reverse().find((x) => x.tipo === "carpeta" && x !== b.n);
-            if (!carpeta) {
-                avisar("No hay ninguna carpeta encima de esta, al mismo nivel.");
-                return;
-            }
-            b.lista.splice(i, 1);
-            carpeta.hijos.push(b.n);
-            carpeta.abierta = true;
-            pintarCapas();
-            repintar();
-            guardar();
-            avisar(b.n.nombre + " va ahora en la carpeta " + carpeta.nombre + ".");
-        });
-        const fuera = mando("⇤", "Sacarla de su carpeta", () => {
-            const b = buscar(activa);
-            if (!b || !b.padre) {
-                return;
-            }
-            const arriba = buscar(b.padre.id);
-            b.lista.splice(b.lista.indexOf(b.n), 1);
-            arriba.lista.splice(arriba.lista.indexOf(b.padre), 0, b.n);
-            pintarCapas();
-            repintar();
-            guardar();
-            avisar(b.n.nombre + " ya no va en " + b.padre.nombre + ".");
-        });
-        const renombrar = mando("✎", "Cambiarle el nombre", () => {
-            const b = buscar(activa);
-            if (!b) {
-                return;
-            }
-            const campo = crear("input", "master-elegir master-dibujo-renombrar");
-            campo.value = b.n.nombre;
-            campo.setAttribute("aria-label", "Nombre de " + b.n.nombre);
-            const actual = listaCapas.querySelector(".es-activa .master-dibujo-capa-nombre");
-            if (!actual) {
-                return;
-            }
-            actual.replaceWith(campo);
-            campo.focus();
-            campo.select();
-            let hecho = false;
-            const acabarNombre = (vale) => {
-                if (hecho) {
-                    return;
-                }
-                hecho = true;
-                if (vale && campo.value.trim()) {
-                    b.n.nombre = campo.value.trim().slice(0, 40);
-                    guardar();
-                }
-                pintarCapas();
-                renombrar.focus();
-            };
-            campo.addEventListener("keydown", (e) => {
-                if (e.key === "Enter") {
-                    e.preventDefault();
-                    acabarNombre(true);
-                } else if (e.key === "Escape") {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    acabarNombre(false);
-                }
-            });
-            campo.addEventListener("blur", () => acabarNombre(true));
-        });
-        const duplicar = mando("⧉", "Duplicar la capa", () => {
-            const c = capaActiva();
-            if (!c) {
-                avisar("Solo se pueden duplicar capas.");
-                return;
-            }
-            soltarFlotante();
-            const original = lienzos[c.id];
-            const copia = nuevaCapa(c.nombre + " (copia)");
-            lienzos[copia.id].getContext("2d").drawImage(original, 0, 0);
-            copia.opacidad = c.opacidad;
-            guardarDibujo(copia.id);
-            pintarCapas();
-            repintar();
-        });
-        let seguro = false;
-        const borrarCapa = mando("🗑️", "Borrar la capa o carpeta", () => {
-            const b = buscar(activa);
-            if (!b) {
-                return;
-            }
-            let capas = 0;
-            recorrer((n) => {
-                capas += n.tipo === "capa" ? 1 : 0;
-            });
-            const dentroHay = [];
-            recorrer((n) => {
-                if (n.tipo === "capa") {
-                    dentroHay.push(n.id);
-                }
-            }, b.n.tipo === "carpeta" ? b.n.hijos : [b.n]);
-            if (capas - dentroHay.length < 1) {
-                avisar("Tiene que quedar al menos una capa.");
-                return;
-            }
-            if (!seguro) {
-                seguro = true;
-                borrarCapa.textContent = "⚠️";
-                borrarCapa.setAttribute("aria-label", "¿Seguro? Pulsa otra vez para borrar " + b.n.nombre);
-                avisar("Pulsa otra vez para borrar " + b.n.nombre + (b.n.tipo === "carpeta" ? " y todo lo que tiene" : "") +
-                    ". No se puede deshacer.");
-                setTimeout(() => {
-                    seguro = false;
-                    borrarCapa.textContent = "🗑️";
-                    borrarCapa.setAttribute("aria-label", "Borrar la capa o carpeta");
-                }, 4000);
-                return;
-            }
-            seguro = false;
-            borrarCapa.textContent = "🗑️";
-            borrarCapa.setAttribute("aria-label", "Borrar la capa o carpeta");
-            soltarFlotante(false);
-            sel = null;
-            const i = b.lista.indexOf(b.n);
-            b.lista.splice(i, 1);
-            dentroHay.forEach((id) => {
-                delete lienzos[id];
-            });
-            const siguiente = b.lista[Math.min(i, b.lista.length - 1)] || b.padre;
-            activa = siguiente ? siguiente.id : null;
-            if (!activa) {
-                recorrer((n) => {
-                    if (n.tipo === "capa") {
-                        activa = n.id;
-                        return false;
-                    }
-                    return true;
-                });
-            }
-            d.activa = activa;
-            pintarCapas();
-            repintar();
-            guardar();
-            avisar("Borrada: " + b.n.nombre + ".");
-        });
-        const etOpa = crear("label", "oc-dados-etiqueta master-dibujo-opacidad");
-        const opacidad = crear("input");
-        opacidad.type = "range";
-        opacidad.min = 0;
-        opacidad.max = 100;
-        opacidad.step = 5;
-        const valorOpa = crear("span", "", "");
-        etOpa.append(document.createTextNode("opacidad "), valorOpa, opacidad);
-        opacidad.addEventListener("input", () => {
-            const b = buscar(activa);
-            if (!b) {
-                return;
-            }
-            b.n.opacidad = parseInt(opacidad.value, 10);
-            valorOpa.textContent = b.n.opacidad + " %";
-            repintar();
-            guardar();
-        });
-        function pintarMandos() {
-            deshacer.disabled = !atras.length;
-            rehacer.disabled = !adelante.length;
-            const b = buscar(activa);
-            const i = b ? b.lista.indexOf(b.n) : -1;
-            subir.disabled = !b || i <= 0;
-            bajarCapa.disabled = !b || i >= b.lista.length - 1;
-            aCarpeta.disabled = !b || !b.lista.slice(0, i).some((x) => x.tipo === "carpeta");
-            fuera.disabled = !b || !b.padre;
-            renombrar.disabled = !b;
-            duplicar.disabled = !b || b.n.tipo !== "capa";
-            borrarCapa.disabled = !b;
-            opacidad.disabled = !b;
-            opacidad.value = b ? (b.n.opacidad === undefined ? 100 : b.n.opacidad) : 100;
-            valorOpa.textContent = opacidad.value + " %";
-            opacidad.setAttribute("aria-valuetext", opacidad.value + " %");
-        }
-        function pintarCapas() {
-            const filas = [];
-            const pasar = (lista, nivel) => lista.forEach((n) => {
-                filas.push(fila(n, nivel));
-                if (n.tipo === "carpeta" && n.abierta) {
-                    pasar(n.hijos, nivel + 1);
-                    if (!n.hijos.length) {
-                        const vacia = crear("li", "master-dibujo-capa es-vacia", "(vacía)");
-                        vacia.style.setProperty("--nivel", nivel + 1);
-                        filas.push(vacia);
-                    }
-                }
-            });
-            minis = {};
-            pasar(d.capas, 0);
-            listaCapas.replaceChildren(...filas);
-            pintarMinis();
-            pintarMandos();
-        }
-        // ---- LA REJILLA ----
-        const rejilla = crear("div", "master-dibujo-rejilla");
-        // Los ajustes, plegados; «#» en la barra la enseña o la esconde.
-        const tituloR = crear("h3", "master-dibujo-titulo");
-        const plegarR = botonDe("master-dibujo-plegar", (d.rejilla.abierta ? "▾" : "▸") + " rejilla de rol", () => {
-            d.rejilla.abierta = !d.rejilla.abierta;
-            plegarR.textContent = (d.rejilla.abierta ? "▾" : "▸") + " rejilla de rol";
-            plegarR.setAttribute("aria-expanded", String(!!d.rejilla.abierta));
-            ajustesR.hidden = !d.rejilla.abierta;
-            guardar();
-        });
-        plegarR.setAttribute("aria-expanded", String(!!d.rejilla.abierta));
-        tituloR.appendChild(plegarR);
-        const ajustesR = crear("div", "master-dibujo-ajustes");
-        ajustesR.hidden = !d.rejilla.abierta;
-        const caja = (texto, control) => {
-            const et = crear("label", "master-dibujo-campo");
-            et.append(crear("span", "oc-dados-etiqueta", texto), control);
-            return et;
-        };
-        const ver = crear("input");
-        ver.type = "checkbox";
-        ver.checked = !!d.rejilla.ver;
-        const etVer = crear("label", "master-nombres-apellido");
-        etVer.append(ver, document.createTextNode(" enseñar la rejilla"));
-        const tipo = crear("select", "master-elegir");
-        [["cuadrada", "cuadrada"], ["hex", "hexagonal"]].forEach(([v, n]) => {
-            const o = crear("option", "", n);
-            o.value = v;
-            tipo.appendChild(o);
-        });
-        tipo.value = d.rejilla.tipo;
-        const tam = crear("input", "master-elegir");
-        tam.type = "number";
-        tam.min = 10;
-        tam.max = 250;
-        tam.step = 5;
-        tam.value = d.rejilla.tam;
-        const colorR = crear("input", "master-dibujo-selector");
-        colorR.type = "color";
-        colorR.value = d.rejilla.color;
-        const opaR = crear("input");
-        opaR.type = "range";
-        opaR.min = 10;
-        opaR.max = 100;
-        opaR.step = 5;
-        opaR.value = d.rejilla.opacidad;
-        const bajarR = crear("input");
-        bajarR.type = "checkbox";
-        bajarR.checked = !!d.rejilla.bajar;
-        const etBajar = crear("label", "master-nombres-apellido");
-        etBajar.append(bajarR, document.createTextNode(" en la imagen al descargar"));
-        const cambiarRejilla = () => {
-            Object.assign(d.rejilla, { ver: ver.checked, tipo: tipo.value, tam: Math.min(250, Math.max(10, parseInt(tam.value, 10) || 50)),
-                color: colorR.value, opacidad: parseInt(opaR.value, 10), bajar: bajarR.checked });
-            opaR.setAttribute("aria-valuetext", opaR.value + " %");
-            botonRejilla.setAttribute("aria-pressed", String(ver.checked));
-            repintar();
-            guardar();
-        };
-        [ver, tipo, tam, colorR, opaR, bajarR].forEach((x) => x.addEventListener(x.type === "range" || x.type === "color" ? "input" : "change",
-            cambiarRejilla));
-        ajustesR.append(etVer, caja("forma", tipo), caja("casilla (de 1000 de ancho)", tam), caja("color", colorR),
-            caja("cuánto se ve", opaR), etBajar);
-        rejilla.append(tituloR, ajustesR);
-        botonRejilla.addEventListener("click", () => {
-            ver.checked = !ver.checked;
-            cambiarRejilla();
-            avisar(ver.checked ? "Rejilla a la vista." : "Rejilla escondida.");
-        });
-        botonRejilla.setAttribute("aria-pressed", String(!!d.rejilla.ver));
-        // ---- EL TAMAÑO DEL LIENZO (plegado): unos cuantos ya hechos o el
-        // que se quiera, y si lo dibujado se estira o se queda como está
-        // (y se recorta o sobra sitio). ----
-        const tamanoL = crear("div", "master-dibujo-rejilla");
-        const tituloT = crear("h3", "master-dibujo-titulo");
-        const ajustesT = crear("div", "master-dibujo-ajustes");
-        ajustesT.hidden = true;
-        const plegarT = botonDe("master-dibujo-plegar", "▸ tamaño del lienzo", () => {
-            ajustesT.hidden = !ajustesT.hidden;
-            plegarT.textContent = (ajustesT.hidden ? "▸" : "▾") + " tamaño del lienzo";
-            plegarT.setAttribute("aria-expanded", String(!ajustesT.hidden));
-        });
-        plegarT.setAttribute("aria-expanded", "false");
-        tituloT.appendChild(plegarT);
-        const hechos = crear("select", "master-elegir");
-        [["", "a medida"], ["1000x750", "normal (1000 × 750)"], ["1200x1200", "cuadrado (1200 × 1200)"],
-            ["1600x900", "panorámico (1600 × 900)"], ["750x1000", "de pie (750 × 1000)"], ["2000x1500", "grande (2000 × 1500)"]]
-            .forEach(([v, n]) => {
-                const o = crear("option", "", n);
-                o.value = v;
-                hechos.appendChild(o);
-            });
-        const numero = (valor) => {
-            const x = crear("input", "master-elegir");
-            x.type = "number";
-            x.min = 200;
-            x.max = 3000;
-            x.step = 50;
-            x.value = valor;
-            return x;
-        };
-        const anchoT = numero(ANCHO);
-        const altoT = numero(ALTO);
-        hechos.value = hechos.querySelector("option[value='" + ANCHO + "x" + ALTO + "']") ? ANCHO + "x" + ALTO : "";
-        hechos.addEventListener("change", () => {
-            if (hechos.value) {
-                [anchoT.value, altoT.value] = hechos.value.split("x");
-            }
-        });
-        const estirar = crear("input");
-        estirar.type = "checkbox";
-        const etEstirar = crear("label", "master-nombres-apellido");
-        etEstirar.append(estirar, document.createTextNode(" estirar lo dibujado"));
-        const cambiarT = botonDe("oc-vida-accion", "↔ cambiar el tamaño", () => {
-            const w = Math.min(3000, Math.max(200, parseInt(anchoT.value, 10) || ANCHO));
-            const h = Math.min(3000, Math.max(200, parseInt(altoT.value, 10) || ALTO));
-            if (w === ANCHO && h === ALTO) {
-                return;
-            }
-            acabarTexto(true);
-            soltarFlotante();
-            sel = null;
-            Object.keys(lienzos).forEach((id) => {
-                const nuevo = lienzoNuevo(w, h);
-                if (estirar.checked) {
-                    nuevo.getContext("2d").drawImage(lienzos[id], 0, 0, w, h);
-                } else {
-                    nuevo.getContext("2d").drawImage(lienzos[id], 0, 0);
-                }
-                lienzos[id] = nuevo;
-                tocadas.add(id);
-            });
-            ANCHO = w;
-            ALTO = h;
-            d.ancho = w;
-            d.alto = h;
-            [vista, encima].forEach((c) => {
-                c.width = w;
-                c.height = h;
-            });
-            atras.length = 0;
-            adelante.length = 0;
-            guardarDibujo();
-            pintarCapas();
-            repintar();
-            avisar("El lienzo mide ahora " + w + " × " + h + ". (Esto no se deshace.)");
-        });
-        ajustesT.append(caja("ya hecho", hechos), caja("ancho", anchoT), caja("alto", altoT), etEstirar, cambiarT);
-        tamanoL.append(tituloT, ajustesT);
-        panel.append(tituloCapas, nuevas, listaCapas, mandos, etOpa, rejilla, tamanoL);
-
-        // Lo que es el dibujo, para quien no lo ve.
-        const etD = crear("label", "oc-dados-etiqueta", "de qué es (para el lector de pantalla)");
-        const desc = crear("input", "master-elegir");
-        desc.id = "master-dibujo-desc-" + m.id;
-        desc.value = d.desc || "";
-        etD.htmlFor = desc.id;
-        desc.addEventListener("input", () => {
-            d.desc = desc.value;
-            etiqueta();
-            guardar();
-        });
-
-        // Como el Paint: herramientas a la izquierda, el lienzo en medio y
-        // las capas a la derecha (debajo, si no cabe).
-        const centro = crear("div", "master-dibujo-centro");
-        visor.appendChild(marco);
-        centro.append(opciones, visor);
-        const zona = crear("div", "master-dibujo-zona");
-        zona.append(barra, centro, panel);
-        // Si la ventana es estrecha, las herramientas pasan arriba, en
-        // fila, y las capas abajo: se ve bien a cualquier tamaño.
-        if (window.ResizeObserver) {
-            const mirar = new ResizeObserver(() => {
-                zona.classList.toggle("es-estrecha", zona.clientWidth < 620);
-            });
-            mirar.observe(zona);
-        }
-        dentro.append(zona, archivo, etD, desc);
-
-        // Cargar las capas guardadas (de una en una) y pintar.
-        const cargas = [];
-        recorrer((n) => {
-            if (n.tipo === "capa" && n.imagen) {
-                cargas.push(new Promise((hecho) => {
-                    const img = new Image();
-                    img.onload = () => {
-                        lienzos[n.id].getContext("2d").drawImage(img, 0, 0, ANCHO, ALTO);
-                        hecho();
-                    };
-                    img.onerror = hecho;
-                    img.src = imagenSegura(n.imagen);
-                }));
-            }
-        });
-        Promise.all(cargas).then(() => {
-            pintarCapas();
-            repintar();
-        });
-        elegirHerramienta(herramienta);
-        ponerColor(color);
-        ponerZoomD(zoomD, false);
-        vista.width = encima.width = ANCHO;
-        vista.height = encima.height = ALTO;
-        pintarCapas();
-        repintar();
-    }
-
     // ---- LAS TABLAS PROPIAS (datos/personajes/compendio/master-tablas.json):
     // PNJ, dungeons y calendarios. Todo inventado aquí. ----
     const TABLAS = "datos/personajes/compendio/master-tablas.json";
-
-    // «posadero|posadera»: la forma de su género (n, cualquiera de las dos).
-    const segunGenero = (texto, genero) => {
-        const [m, f] = String(texto).split("|");
-        if (f === undefined) {
-            return m;
-        }
-        return genero === "f" ? f : genero === "m" ? m : alAzar([m, f]);
-    };
-
-    // ---- PNJ RÁPIDOS: nombre (del generador de nombres), especie,
-    // oficio, aspecto, carácter, manía al hablar, qué quiere y un secreto.
-    // Cada cosa se puede volver a tirar suelta (🎲); ☆ lo guarda. ----
-    const PNJ_CAMPOS = [["oficio", "Oficio", "oficios"], ["aspecto", "Aspecto", "aspecto"], ["rasgo", "Carácter", "rasgos"],
-        ["mania", "Al hablar", "manias"], ["quiere", "Quiere", "quiere"], ["secreto", "Secreto", "secretos"]];
-
-    function montarPnj(dentro, m) {
-        m.datos = m.datos || {};
-        dentro.appendChild(crear("p", "oc-hoja-nota", "Cargando…"));
-        Promise.all([pedir(TABLAS), pedir(NOMBRES)]).then(([tablas, nombres]) => {
-            const d = m.datos;
-            const t = tablas.pnj;
-            const especie = elegirDe("master-pnj-especie-" + m.id, "especie",
-                [["", "al azar"]].concat(Object.keys(nombres.especies).map((k) => [k, nombres.especies[k].nombre])), d.especie || "");
-            const genero = botonesDe("género", [["cualquiera", "cualquiera"], ["f", "♀"], ["m", "♂"], ["n", "⚪ neutro"]],
-                d.genero || "cualquiera", (v) => {
-                    d.genero = v;
-                    guardar();
-                });
-            const etGen = crear("p", "oc-dados-etiqueta", "género");
-            etGen.setAttribute("aria-hidden", "true");
-            const nuevo = () => {
-                const esp = especie.elegir.value || alAzar(Object.keys(nombres.especies));
-                const g = genero.valor() === "cualquiera" ? alAzar(["f", "m", "n"]) : genero.valor();
-                const p = { nombre: nombreDe(nombres, esp, g, true), especie: nombres.especies[esp].nombre, genero: g };
-                PNJ_CAMPOS.forEach(([k, , lista]) => {
-                    p[k] = segunGenero(alAzar(t[lista]), g);
-                });
-                return p;
-            };
-            const ficha = crear("div", "master-pnj");
-            ficha.setAttribute("aria-live", "polite");
-            const guardados = crear("ul", "master-pnj-guardados");
-            guardados.setAttribute("aria-label", "PNJ guardados");
-            const tituloG = crear("h3", "master-nombres-titulo", "⭐ guardados");
-            const texto = (p) => p.nombre + " (" + p.especie + ")\n" + PNJ_CAMPOS.map(([k, n]) => n + ": " + p[k]).join("\n");
-            const pintarFicha = () => {
-                const p = d.pnj;
-                ficha.replaceChildren();
-                if (!p) {
-                    ficha.appendChild(crear("p", "oc-vacio", "Pulsa «generar»."));
-                    return;
-                }
-                const cab = crear("div", "master-pnj-cabeza");
-                const h = crear("h3", "master-pnj-nombre", p.nombre);
-                cab.append(h, crear("span", "master-pnj-especie", p.especie + " · " + ({ f: "♀", m: "♂", n: "neutro" }[p.genero] || "")));
-                const dl = crear("dl", "master-pnj-datos");
-                PNJ_CAMPOS.forEach(([k, nombre, lista]) => {
-                    const dd = crear("dd", "", p[k]);
-                    const otra = botonDe("master-nombre-boton", "🎲", () => {
-                        p[k] = segunGenero(alAzar(t[lista]), p.genero);
-                        guardar();
-                        pintarFicha();
-                        avisar(nombre + ": " + p[k] + ".");
-                    }, "Otro valor para " + nombre.toLowerCase());
-                    otra.title = "Otro";
-                    dd.appendChild(otra);
-                    dl.append(crear("dt", "", nombre), dd);
-                });
-                const botones = crear("div", "master-pnj-botones");
-                botones.append(
-                    botonDe("oc-vida-accion", "☆ guardar", () => {
-                        d.guardados = (d.guardados || []).concat([Object.assign({}, p)]);
-                        guardar();
-                        pintarGuardados();
-                        avisar("Guardado: " + p.nombre + ".");
-                    }, "Guardar a " + p.nombre),
-                    botonDe("oc-vida-accion", "⧉ copiar", () => copiarTexto(texto(p), "Copiado: " + p.nombre + "."), "Copiar a " + p.nombre));
-                ficha.append(cab, dl, botones);
-            };
-            const pintarGuardados = () => {
-                const lista = d.guardados || [];
-                guardados.replaceChildren(...lista.map((p, i) => {
-                    const li = crear("li", "master-nombre");
-                    const ver = botonDe("master-botin-objeto", p.nombre + " · " + p.oficio, () => {
-                        d.pnj = Object.assign({}, p);
-                        guardar();
-                        pintarFicha();
-                        avisar("PNJ: " + p.nombre + ", " + p.oficio + ".");
-                    }, "Ver a " + p.nombre);
-                    const quitar = botonDe("master-nombre-boton", "✕", () => {
-                        lista.splice(i, 1);
-                        guardar();
-                        pintarGuardados();
-                        avisar("Quitado: " + p.nombre + ".");
-                    }, "Quitar a " + p.nombre + " de guardados");
-                    li.append(ver, quitar);
-                    return li;
-                }));
-                tituloG.hidden = guardados.hidden = !lista.length;
-            };
-            const generar = botonDe("oc-vida-accion es-principal master-nombres-generar", "🎲 generar PNJ", () => {
-                d.especie = especie.elegir.value;
-                d.pnj = nuevo();
-                guardar();
-                pintarFicha();
-                avisar("PNJ: " + d.pnj.nombre + ", " + d.pnj.oficio + ".");
-            });
-            const arriba = crear("div", "master-nombres-form");
-            arriba.append(especie, etGen, genero, generar);
-            dentro.replaceChildren(arriba, ficha, tituloG, guardados);
-            pintarFicha();
-            pintarGuardados();
-        }).catch(() => {
-            dentro.replaceChildren(crear("p", "oc-vacio", "No he podido cargar las tablas."));
-        });
-    }
+    Object.assign(PM, { TABLAS });
 
     // ---- LOS RELOJES (de progreso): un círculo partido en 4 a 12 trozos
     // que se van llenando (una amenaza que avanza, una cuenta atrás…).
     // Varios por ventana; − y + (o pinchar en un trozo) los mueven. ----
     const SVG = "http://www.w3.org/2000/svg";
-
-    function dibujoReloj(partes, llenas, alPinchar) {
-        const svg = document.createElementNS(SVG, "svg");
-        svg.setAttribute("viewBox", "-52 -52 104 104");
-        svg.setAttribute("class", "master-reloj-dibujo");
-        svg.setAttribute("aria-hidden", "true");
-        for (let i = 0; i < partes; i++) {
-            const a0 = (i / partes) * Math.PI * 2 - Math.PI / 2;
-            const a1 = ((i + 1) / partes) * Math.PI * 2 - Math.PI / 2;
-            const trozo = document.createElementNS(SVG, "path");
-            trozo.setAttribute("d", "M0 0 L" + (48 * Math.cos(a0)).toFixed(2) + " " + (48 * Math.sin(a0)).toFixed(2) + " A48 48 0 0 1 " +
-                (48 * Math.cos(a1)).toFixed(2) + " " + (48 * Math.sin(a1)).toFixed(2) + " Z");
-            trozo.setAttribute("class", "master-reloj-trozo" + (i < llenas ? " es-lleno" : ""));
-            trozo.addEventListener("click", () => alPinchar(i));
-            svg.appendChild(trozo);
-        }
-        return svg;
-    }
-
-    function montarRelojes(dentro, m) {
-        m.datos = m.datos || {};
-        const d = m.datos;
-        d.relojes = Array.isArray(d.relojes) ? d.relojes : [];
-        const lista = crear("ul", "master-relojes");
-        lista.setAttribute("aria-label", "Relojes");
-        const pintar = () => {
-            lista.replaceChildren(...d.relojes.map((r, i) => {
-                const li = crear("li", "master-reloj" + (r.llenas >= r.partes ? " es-lleno" : ""));
-                const nombre = crear("input", "master-elegir master-reloj-nombre");
-                nombre.value = r.nombre;
-                nombre.setAttribute("aria-label", "Nombre del reloj");
-                nombre.addEventListener("change", () => {
-                    r.nombre = nombre.value.trim() || "reloj";
-                    guardar();
-                });
-                const poner = (n) => {
-                    const antes = r.llenas;
-                    r.llenas = Math.min(r.partes, Math.max(0, n));
-                    guardar();
-                    pintar();
-                    const foco = lista.children[i] && lista.children[i].querySelector(n > antes ? ".es-mas" : ".es-menos");
-                    if (foco) {
-                        foco.focus();
-                    }
-                    avisar(r.nombre + ": " + r.llenas + " de " + r.partes + (r.llenas >= r.partes ? ". ¡Lleno!" : "."));
-                };
-                const barra = crear("div", "master-reloj-cuenta");
-                barra.setAttribute("role", "meter");
-                barra.setAttribute("aria-valuemin", "0");
-                barra.setAttribute("aria-valuemax", String(r.partes));
-                barra.setAttribute("aria-valuenow", String(r.llenas));
-                barra.setAttribute("aria-label", r.nombre);
-                barra.append(dibujoReloj(r.partes, r.llenas, (j) => poner(j + 1 === r.llenas ? j : j + 1)),
-                    crear("span", "master-reloj-numero", r.llenas + "/" + r.partes));
-                const menos = botonDe("master-pestana-mando es-menos", "−", () => poner(r.llenas - 1), "Vaciar un trozo de " + r.nombre);
-                const mas = botonDe("master-pestana-mando es-mas", "+", () => poner(r.llenas + 1), "Llenar un trozo de " + r.nombre);
-                menos.disabled = r.llenas <= 0;
-                mas.disabled = r.llenas >= r.partes;
-                const partes = crear("select", "master-postit-elegir");
-                partes.setAttribute("aria-label", "Trozos de " + r.nombre);
-                [4, 6, 8, 10, 12].forEach((n) => {
-                    const o = crear("option", "", n + " trozos");
-                    o.value = n;
-                    partes.appendChild(o);
-                });
-                partes.value = r.partes;
-                partes.addEventListener("change", () => {
-                    r.partes = parseInt(partes.value, 10);
-                    r.llenas = Math.min(r.llenas, r.partes);
-                    guardar();
-                    pintar();
-                });
-                const quitar = botonDe("master-nombre-boton", "✕", () => {
-                    d.relojes.splice(i, 1);
-                    guardar();
-                    pintar();
-                    avisar("Quitado: " + r.nombre + ".");
-                    nuevoNombre.focus();
-                }, "Quitar el reloj " + r.nombre);
-                const mandos = crear("div", "master-reloj-mandos");
-                mandos.append(menos, mas, partes, quitar);
-                li.append(nombre, barra, mandos);
-                return li;
-            }));
-            if (!d.relojes.length) {
-                lista.appendChild(crear("li", "oc-vacio", "Sin relojes todavía."));
-            }
-        };
-        const form = crear("form", "master-reloj-nuevo");
-        const nuevoNombre = crear("input", "master-elegir");
-        nuevoNombre.placeholder = "la guardia llega, el ritual se completa…";
-        nuevoNombre.setAttribute("aria-label", "Nombre del reloj nuevo");
-        const nuevoPartes = crear("select", "master-postit-elegir");
-        nuevoPartes.setAttribute("aria-label", "Trozos del reloj nuevo");
-        [4, 6, 8, 10, 12].forEach((n) => {
-            const o = crear("option", "", n + " trozos");
-            o.value = n;
-            nuevoPartes.appendChild(o);
-        });
-        nuevoPartes.value = "6";
-        const anadirReloj = crear("button", "oc-vida-accion es-principal", "＋ reloj");
-        anadirReloj.type = "submit";
-        form.append(nuevoNombre, nuevoPartes, anadirReloj);
-        form.addEventListener("submit", (e) => {
-            e.preventDefault();
-            const r = { nombre: nuevoNombre.value.trim() || "reloj " + (d.relojes.length + 1), partes: parseInt(nuevoPartes.value, 10), llenas: 0 };
-            d.relojes.push(r);
-            nuevoNombre.value = "";
-            guardar();
-            pintar();
-            avisar("Reloj nuevo: " + r.nombre + ", de " + r.partes + " trozos.");
-        });
-        dentro.append(form, lista);
-        pintar();
-    }
-
-    // ---- EL CALENDARIO de la partida: gregoriano, el de Harptos (el de
-    // los Reinos Olvidados: meses de 30 días, decanarios y fiestas; los
-    // nombres, en master-tablas.json) o uno propio (meses y días de la
-    // semana a mano: el de Cralëa, por ejemplo). Con la fecha y la hora de
-    // la partida (y botones para que pase el tiempo) y apuntes por día. ----
-    const MESES_GREGORIANO = ["enero", "febrero", "marzo", "abril", "mayo", "junio", "julio", "agosto", "septiembre", "octubre",
-        "noviembre", "diciembre"];
-    const SEMANA_GREGORIANO = ["lun", "mar", "mié", "jue", "vie", "sáb", "dom"];
-
-    function montarCalendario(dentro, m) {
-        m.datos = m.datos || {};
-        dentro.appendChild(crear("p", "oc-hoja-nota", "Cargando…"));
-        pedir(TABLAS).then((tablas) => {
-            const d = m.datos;
-            const hoyReal = new Date();
-            d.tipo = d.tipo || "gregoriano";
-            d.propio = Object.assign({ nombre: "propio", anio: "", meses: "Primero: 30\nSegundo: 30\nTercero: 30\nCuarto: 30",
-                semana: "uno, dos, tres, cuatro, cinco, seis, siete" }, d.propio || {});
-            d.apuntes = d.apuntes || {};
-            const harptos = tablas.calendarios.harptos;
-            // Los meses de un año (con sus días; las fiestas, de 1 día).
-            const mesesDe = (anio) => {
-                if (d.tipo === "gregoriano") {
-                    return MESES_GREGORIANO.map((nombre, i) => ({ nombre, dias: new Date(anio, i + 1, 0).getDate() }));
-                }
-                if (d.tipo === "harptos") {
-                    return harptos.meses.filter((x) => !x.cada || anio % x.cada === 0);
-                }
-                return d.propio.meses.split("\n").map((l) => l.split(":")).filter((x) => x[0].trim())
-                    .map(([nombre, dias]) => ({ nombre: nombre.trim(), dias: Math.max(1, Math.min(100, parseInt(dias, 10) || 30)) }));
-            };
-            const semana = () => (d.tipo === "gregoriano" ? SEMANA_GREGORIANO : d.tipo === "harptos" ? harptos.dias
-                : d.propio.semana.split(",").map((x) => x.trim()).filter(Boolean));
-            const sufijo = () => (d.tipo === "harptos" ? " " + harptos.anio : d.tipo === "propio" && d.propio.anio ? " " + d.propio.anio : "");
-            // Qué día de la semana es (0…): el gregoriano, por el de verdad;
-            // el de Harptos, el decanario empieza cada mes; el propio, seguido.
-            const diaSemana = (f) => {
-                if (d.tipo === "gregoriano") {
-                    return (new Date(f.anio, f.mes, f.dia).getDay() + 6) % 7;
-                }
-                if (d.tipo === "harptos") {
-                    return (f.dia - 1) % 10;
-                }
-                const meses = mesesDe(f.anio);
-                const largo = meses.reduce((t, x) => t + x.dias, 0);
-                let n = (f.anio - 1) * largo;
-                for (let i = 0; i < f.mes; i++) {
-                    n += meses[i].dias;
-                }
-                n += f.dia - 1;
-                const s = semana().length || 7;
-                return ((n % s) + s) % s;
-            };
-            const arreglar = (f) => {
-                const meses = mesesDe(f.anio);
-                f.mes = Math.min(Math.max(0, f.mes), meses.length - 1);
-                f.dia = Math.min(Math.max(1, f.dia), meses[f.mes].dias);
-                return f;
-            };
-            if (!d.fecha) {
-                d.fecha = d.tipo === "gregoriano" ? { anio: hoyReal.getFullYear(), mes: hoyReal.getMonth(), dia: hoyReal.getDate() }
-                    : { anio: 1492, mes: 0, dia: 1 };
-                d.hora = 8;
-            }
-            arreglar(d.fecha);
-            d.viendo = d.viendo || { anio: d.fecha.anio, mes: d.fecha.mes };
-            const clave = (f) => d.tipo + ":" + f.anio + "-" + f.mes + "-" + f.dia;
-            const nombreFecha = (f) => {
-                const mes = mesesDe(f.anio)[f.mes];
-                if (mes.fiesta) {
-                    return mes.nombre + " de " + f.anio + sufijo();
-                }
-                const dia = d.tipo === "gregoriano" ? ["lunes", "martes", "miércoles", "jueves", "viernes", "sábado", "domingo"][diaSemana(f)]
-                    + " " + f.dia : d.tipo === "harptos" ? "día " + f.dia : f.dia + " (" + semana()[diaSemana(f)] + ")";
-                return dia + " de " + mes.nombre + " de " + f.anio + sufijo();
-            };
-            const momento = (h) => (h < 6 ? "de madrugada" : h < 12 ? "por la mañana" : h < 14 ? "a mediodía" : h < 20 ? "por la tarde"
-                : "por la noche");
-            // Que pase el tiempo (en horas; con días si se pasa de 24).
-            const pasar = (horas) => {
-                let h = (d.hora || 0) + horas;
-                let dias = Math.floor(h / 24);
-                h = ((h % 24) + 24) % 24;
-                d.hora = h;
-                const f = d.fecha;
-                while (dias > 0) {
-                    f.dia++;
-                    if (f.dia > mesesDe(f.anio)[f.mes].dias) {
-                        f.dia = 1;
-                        f.mes++;
-                        if (f.mes >= mesesDe(f.anio).length) {
-                            f.mes = 0;
-                            f.anio++;
-                        }
-                    }
-                    dias--;
-                }
-                while (dias < 0) {
-                    f.dia--;
-                    if (f.dia < 1) {
-                        f.mes--;
-                        if (f.mes < 0) {
-                            f.anio--;
-                            f.mes = mesesDe(f.anio).length - 1;
-                        }
-                        f.dia = mesesDe(f.anio)[f.mes].dias;
-                    }
-                    dias++;
-                }
-                d.viendo = { anio: f.anio, mes: f.mes };
-                guardar();
-                pintar();
-                avisar("Ahora: " + nombreFecha(f) + ", a las " + d.hora + ":00 (" + momento(d.hora) + ").");
-                // Para los efectos con duración (que cuentan las horas).
-                document.dispatchEvent(new CustomEvent("master:tiempo", { detail: { horas } }));
-            };
-            // ARRIBA: qué calendario, la fecha de la partida y el tiempo.
-            const tipo = elegirDe("master-cal-tipo-" + m.id, "calendario", [["gregoriano", "gregoriano"], ["harptos", harptos.nombre],
-                ["propio", "propio"]], d.tipo);
-            tipo.elegir.addEventListener("change", () => {
-                d.tipo = tipo.elegir.value;
-                d.fecha = d.tipo === "gregoriano" ? { anio: hoyReal.getFullYear(), mes: hoyReal.getMonth(), dia: hoyReal.getDate() }
-                    : { anio: d.tipo === "harptos" ? 1492 : 1, mes: 0, dia: 1 };
-                d.viendo = { anio: d.fecha.anio, mes: d.fecha.mes };
-                guardar();
-                pintar();
-                avisar("Calendario " + tipo.elegir.selectedOptions[0].textContent + ".");
-            });
-            const ahora = crear("p", "master-cal-ahora");
-            ahora.setAttribute("aria-live", "polite");
-            const tiempo = crear("div", "master-cal-tiempo");
-            tiempo.setAttribute("role", "group");
-            tiempo.setAttribute("aria-label", "Que pase el tiempo");
-            [["−1 día", -24], ["+1 h", 1], ["+8 h (descanso largo)", 8], ["+1 día", 24], ["+1 semana", 0]].forEach(([texto, h]) => {
-                tiempo.appendChild(botonDe("oc-vida-accion", texto, () => pasar(h || 24 * (semana().length || 7))));
-            });
-            // EL PROPIO: meses (uno por línea, «nombre: días»), días de la
-            // semana y lo que va detrás del año.
-            const propio = crear("div", "master-cal-propio");
-            const etMeses = crear("label", "oc-dados-etiqueta", "meses (uno por línea: «nombre: días»)");
-            const meses = crear("textarea", "oc-notas-texto es-corta");
-            meses.id = "master-cal-meses-" + m.id;
-            etMeses.htmlFor = meses.id;
-            meses.value = d.propio.meses;
-            const etSemana = crear("label", "oc-dados-etiqueta", "días de la semana (separados por comas)");
-            const sem = crear("input", "master-elegir");
-            sem.id = "master-cal-semana-" + m.id;
-            etSemana.htmlFor = sem.id;
-            sem.value = d.propio.semana;
-            const etAnio = crear("label", "oc-dados-etiqueta", "detrás del año (DEM, AEM…)");
-            const anio = crear("input", "master-elegir");
-            anio.id = "master-cal-anio-" + m.id;
-            etAnio.htmlFor = anio.id;
-            anio.value = d.propio.anio;
-            const etNum = crear("label", "oc-dados-etiqueta", "año de la partida");
-            const numAnio = crear("input", "master-elegir");
-            numAnio.type = "number";
-            numAnio.id = "master-cal-num-" + m.id;
-            etNum.htmlFor = numAnio.id;
-            const usar = botonDe("oc-vida-accion", "✔ usar", () => {
-                Object.assign(d.propio, { meses: meses.value, semana: sem.value, anio: anio.value.trim() });
-                d.fecha.anio = parseInt(numAnio.value, 10) || d.fecha.anio;
-                arreglar(d.fecha);
-                d.viendo = { anio: d.fecha.anio, mes: d.fecha.mes };
-                guardar();
-                pintar();
-                avisar("Calendario propio puesto.");
-            });
-            propio.append(etMeses, meses, etSemana, sem, etAnio, anio, etNum, numAnio, usar);
-            // EL MES: en rejilla, con ‹ › para cambiar de mes.
-            const cabeza = crear("div", "master-cal-cabeza");
-            const titulo = crear("h3", "master-cal-mes");
-            titulo.setAttribute("aria-live", "polite");
-            const verMes = (paso) => {
-                let { anio: a, mes: me } = d.viendo;
-                me += paso;
-                if (me < 0) {
-                    a--;
-                    me = mesesDe(a).length - 1;
-                } else if (me >= mesesDe(a).length) {
-                    a++;
-                    me = 0;
-                }
-                d.viendo = { anio: a, mes: me };
-                guardar();
-                pintarMes();
-            };
-            const antes = botonDe("master-pestana-mando", "‹", () => verMes(-1), "Mes anterior");
-            const despues = botonDe("master-pestana-mando", "›", () => verMes(1), "Mes siguiente");
-            const volver = botonDe("oc-vida-accion", "hoy", () => {
-                d.viendo = { anio: d.fecha.anio, mes: d.fecha.mes };
-                guardar();
-                pintarMes();
-            }, "Volver al mes de la partida");
-            cabeza.append(antes, titulo, despues, volver);
-            const rejilla = crear("table", "master-cal-rejilla");
-            // El día elegido y sus apuntes.
-            let elegido = Object.assign({}, d.fecha);
-            const etDia = crear("label", "oc-dados-etiqueta");
-            const apunte = crear("textarea", "oc-notas-texto es-corta");
-            apunte.id = "master-cal-apunte-" + m.id;
-            etDia.htmlFor = apunte.id;
-            apunte.rows = 3;
-            const esHoy = botonDe("oc-vida-accion", "📍 que la partida esté en este día", () => {
-                d.fecha = Object.assign({}, elegido);
-                guardar();
-                pintar();
-                avisar("La partida está en " + nombreFecha(d.fecha) + ".");
-            });
-            let espera = 0;
-            apunte.addEventListener("input", () => {
-                clearTimeout(espera);
-                espera = setTimeout(() => {
-                    if (apunte.value.trim()) {
-                        d.apuntes[clave(elegido)] = apunte.value;
-                    } else {
-                        delete d.apuntes[clave(elegido)];
-                    }
-                    guardar();
-                    pintarMes();
-                }, 400);
-            });
-            const pintarDia = () => {
-                etDia.textContent = "apuntes del " + nombreFecha(elegido);
-                apunte.value = d.apuntes[clave(elegido)] || "";
-            };
-            function pintarMes() {
-                const { anio: a, mes: me } = d.viendo;
-                const lista = mesesDe(a);
-                const mes = lista[Math.min(me, lista.length - 1)];
-                titulo.textContent = mes.nombre + " de " + a + sufijo();
-                const dias = semana();
-                const cols = Math.max(1, dias.length);
-                const cab = crear("tr");
-                dias.forEach((x) => cab.appendChild(crear("th", "", x)));
-                const filas = [cab];
-                let fila = crear("tr");
-                const hueco = mes.fiesta ? 0 : diaSemana({ anio: a, mes: me, dia: 1 });
-                for (let i = 0; i < hueco; i++) {
-                    fila.appendChild(crear("td"));
-                }
-                for (let dia = 1; dia <= mes.dias; dia++) {
-                    const f = { anio: a, mes: me, dia };
-                    const td = crear("td");
-                    const b = botonDe("master-cal-dia", String(dia), () => {
-                        elegido = f;
-                        pintarMes();
-                        pintarDia();
-                        apunte.focus();
-                    }, nombreFecha(f) + (d.apuntes[clave(f)] ? " (con apuntes)" : ""));
-                    if (a === d.fecha.anio && me === d.fecha.mes && dia === d.fecha.dia) {
-                        b.classList.add("es-hoy");
-                        b.setAttribute("aria-current", "date");
-                    }
-                    if (a === elegido.anio && me === elegido.mes && dia === elegido.dia) {
-                        b.classList.add("es-elegido");
-                    }
-                    if (d.apuntes[clave(f)]) {
-                        b.classList.add("con-apunte");
-                    }
-                    td.appendChild(b);
-                    fila.appendChild(td);
-                    if (fila.children.length === cols || mes.fiesta) {
-                        filas.push(fila);
-                        fila = crear("tr");
-                    }
-                }
-                if (fila.children.length) {
-                    filas.push(fila);
-                }
-                rejilla.replaceChildren(...filas);
-                rejilla.setAttribute("aria-label", titulo.textContent);
-            }
-            function pintar() {
-                // La fecha, en texto, para quien la quiera (la línea temporal).
-                d.textoHoy = nombreFecha(d.fecha);
-                ahora.replaceChildren(crear("strong", "", "En la partida: "), document.createTextNode(nombreFecha(d.fecha) + ", a las " +
-                    (d.hora || 0) + ":00 (" + momento(d.hora || 0) + ")"));
-                propio.hidden = d.tipo !== "propio";
-                numAnio.value = d.fecha.anio;
-                elegido = Object.assign({}, d.fecha);
-                pintarMes();
-                pintarDia();
-            }
-            const arriba = crear("div", "master-nombres-form");
-            arriba.append(tipo, propio, ahora, tiempo);
-            dentro.replaceChildren(arriba, cabeza, rejilla, etDia, apunte, esHoy);
-            pintar();
-        }).catch(() => {
-            dentro.replaceChildren(crear("p", "oc-vacio", "No he podido cargar los calendarios."));
-        });
-    }
-
-    // ---- EL GENERADOR DE DUNGEONS: un mapa sencillo en cuadrícula (salas
-    // y pasillos al azar) y, para cada sala, qué es, un detalle, y lo que
-    // hay: monstruos del SRD (con la cuenta de los encuentros), una trampa
-    // (tablas propias) o un botín (el del generador de botín). El mapa va
-    // en un canvas (de colores fijos, como un pergamino) y la lista de
-    // salas es lo que lee el lector de pantalla. «🎨 al dibujo» lo pasa a
-    // una ventana de dibujo, con su rejilla, para pintar encima. ----
-    const DUNGEON_ANCHO = 48;
-    const DUNGEON_ALTO = 36;
-    const DUNGEON_CELDA = 20;
-    const DUNGEON_TAMANOS = [["5", "pequeño (5 salas)"], ["8", "mediano (8 salas)"], ["12", "grande (12 salas)"]];
-    // La trampa según el nivel: CD y daño (cuenta propia).
-    const DUNGEON_TRAMPA = [[4, 12, "2d10"], [10, 14, "4d10"], [16, 16, "8d10"], [99, 18, "10d10"]];
-
-    // EL MAPA: salas al azar en una cuadrícula de 48 × 36 sin que se
-    // toquen, unidas por pasillos en L (cada una con la siguiente y una o
-    // dos más; la primera de esas, SECRETA). Estilo «salas» (rectángulos,
-    // con puertas: normales, cerradas con llave, atrancadas o secretas) o
-    // «cavernas» (manchas irregulares y pasillos que se ensanchan, sin
-    // puertas). En «filas», cada casilla: 0 roca, 1 sala, 2 pasillo, 3
-    // pasillo secreto; en «zonas», de qué sala es (en base 36; «.» ninguna).
-    function hacerMapa(salasQuiero, estilo, cds) {
-        const celdas = Array.from({ length: DUNGEON_ALTO }, () => new Array(DUNGEON_ANCHO).fill(0));
-        const zonas = Array.from({ length: DUNGEON_ALTO }, () => new Array(DUNGEON_ANCHO).fill("."));
-        const salas = [];
-        const azar = (a, b) => a + tiradaSuelta("1d" + (b - a + 1)) - 1;
-        const cavernas = estilo === "cavernas";
-        for (let intento = 0; intento < 400 && salas.length < salasQuiero; intento++) {
-            const w = azar(4, cavernas ? 10 : 9);
-            const h = azar(3, cavernas ? 8 : 7);
-            const x = azar(1, DUNGEON_ANCHO - w - 2);
-            const y = azar(1, DUNGEON_ALTO - h - 2);
-            if (salas.some((s) => x < s.x + s.w + 2 && s.x < x + w + 2 && y < s.y + s.h + 2 && s.y < y + h + 2)) {
-                continue;
-            }
-            salas.push({ x, y, w, h });
-        }
-        salas.sort((a, b) => (a.x + a.w / 2) - (b.x + b.w / 2));
-        salas.forEach((s, n) => {
-            const rx = s.w / 2;
-            const ry = s.h / 2;
-            s.cx = Math.floor(s.x + rx);
-            s.cy = Math.floor(s.y + ry);
-            for (let j = s.y; j < s.y + s.h; j++) {
-                for (let i = s.x; i < s.x + s.w; i++) {
-                    // En las cavernas, una mancha: una elipse con los bordes
-                    // mordidos al azar (el centro, siempre).
-                    const dx = (i + 0.5 - s.x - rx) / rx;
-                    const dy = (j + 0.5 - s.y - ry) / ry;
-                    const dentro = !cavernas || (i === s.cx && j === s.cy) || dx * dx + dy * dy <= 0.75 + tiradaSuelta("1d40") / 100;
-                    if (dentro) {
-                        celdas[j][i] = 1;
-                        zonas[j][i] = n.toString(36);
-                    }
-                }
-            }
-        });
-        const pasillos = [];
-        const puertas = [];
-        const pasillo = (a, b, secreto) => {
-            const sa = salas[a];
-            const sb = salas[b];
-            const [x0, y0, x1, y1] = [sa.cx, sa.cy, sb.cx, sb.cy];
-            const camino = [];
-            const tramo = (desde, hasta, fijo, horizontal) => {
-                const paso = desde <= hasta ? 1 : -1;
-                for (let k = desde; k !== hasta + paso; k += paso) {
-                    camino.push(horizontal ? [k, fijo] : [fijo, k]);
-                }
-            };
-            if (tiradaSuelta("1d2") === 1) {
-                tramo(x0, x1, y0, true);
-                tramo(y0, y1, x1, false);
-            } else {
-                tramo(y0, y1, x0, false);
-                tramo(x0, x1, y1, true);
-            }
-            const celdasP = [];
-            const n = pasillos.length;
-            camino.forEach(([i, j], k) => {
-                if (celdas[j][i] !== 1) {
-                    // Todo lo que pisa fuera de las salas (también lo que ya
-                    // era de otro pasillo): así se ve entero.
-                    celdasP.push([i, j]);
-                }
-                if (celdas[j][i] === 0) {
-                    celdas[j][i] = secreto ? 3 : 2;
-                    // En las cavernas, a veces se ensancha.
-                    if (cavernas && tiradaSuelta("1d3") === 1) {
-                        const [di, dj] = alAzar([[1, 0], [0, 1], [-1, 0], [0, -1]]);
-                        const ni = i + di;
-                        const nj = j + dj;
-                        if (ni > 0 && nj > 0 && ni < DUNGEON_ANCHO - 1 && nj < DUNGEON_ALTO - 1 && celdas[nj][ni] === 0) {
-                            celdas[nj][ni] = secreto ? 3 : 2;
-                            celdasP.push([ni, nj]);
-                        }
-                    }
-                }
-                // Las puertas: donde el camino sale de una sala o entra en
-                // ella (la casilla de fuera). En las cavernas no hay.
-                if (cavernas || celdas[j][i] === 1) {
-                    return;
-                }
-                // Una por cada punta del pasillo (al salir de «a» y al entrar
-                // en «b»), no en las salas que cruza por el camino.
-                const vecinas = [camino[k - 1], camino[k + 1]].filter(Boolean);
-                const sala = vecinas.find(([vi, vj]) => zonas[vj][vi] !== "." && [a, b].indexOf(parseInt(zonas[vj][vi], 36)) >= 0);
-                if (!sala || puertas.some((p) => (p.x === i && p.y === j) ||
-                    (p.pasillo === n && p.sala === parseInt(zonas[sala[1]][sala[0]], 36)))) {
-                    return;
-                }
-                let tipo = "normal";
-                const r = tiradaSuelta("1d20");
-                if (secreto) {
-                    tipo = "secreta";
-                } else if (r >= 17) {
-                    tipo = "cerrada";
-                } else if (r >= 15) {
-                    tipo = "atrancada";
-                }
-                puertas.push({ x: i, y: j, tipo, cd: cds[tipo] || 0, sala: parseInt(zonas[sala[1]][sala[0]], 36),
-                    vertical: sala[1] === j, pasillo: n });
-            });
-            pasillos.push({ a, b, secreto: !!secreto, celdas: celdasP });
-        };
-        for (let i = 1; i < salas.length; i++) {
-            pasillo(i - 1, i, false);
-        }
-        for (let k = 0; k < Math.min(2, salas.length - 2); k++) {
-            const a = azar(0, salas.length - 1);
-            let b = azar(0, salas.length - 2);
-            b = b >= a ? b + 1 : b;
-            pasillo(a, b, k === 0);
-        }
-        // En las cavernas, se suaviza: la roca rodeada de suelo pasa a ser
-        // suelo (así no quedan picos sueltos).
-        if (cavernas) {
-            for (let vuelta = 0; vuelta < 2; vuelta++) {
-                const antes = celdas.map((f) => f.slice());
-                for (let j = 1; j < DUNGEON_ALTO - 1; j++) {
-                    for (let i = 1; i < DUNGEON_ANCHO - 1; i++) {
-                        if (antes[j][i] !== 0) {
-                            continue;
-                        }
-                        let suelo = 0;
-                        for (let dj = -1; dj <= 1; dj++) {
-                            for (let di = -1; di <= 1; di++) {
-                                suelo += antes[j + dj][i + di] === 1 || antes[j + dj][i + di] === 2 ? 1 : 0;
-                            }
-                        }
-                        if (suelo >= 5) {
-                            celdas[j][i] = 2;
-                            const cerca = [[i - 1, j], [i + 1, j], [i, j - 1], [i, j + 1]].find(([a, b]) => zonas[b][a] !== ".");
-                            if (cerca) {
-                                celdas[j][i] = 1;
-                                zonas[j][i] = zonas[cerca[1]][cerca[0]];
-                            }
-                        }
-                    }
-                }
-            }
-        }
-        return { estilo: cavernas ? "cavernas" : "salas", filas: celdas.map((f) => f.join("")), zonas: zonas.map((f) => f.join("")),
-            salas: salas.map(({ x, y, w, h, cx, cy }) => ({ x, y, w, h, cx, cy })), pasillos, puertas };
-    }
-
-    // EL MAPA EN UN CANVAS (de colores fijos, como un pergamino). Para el
-    // máster, todo: los números, la entrada, los pasillos secretos (a rayas
-    // rojas) y las puertas con lo que son. Para los jugadores («vistas»:
-    // las salas descubiertas; «encontrados»: los pasillos secretos que ya
-    // se saben), solo lo descubierto, sin números ni secretos.
-    function pintarMapa(lienzoMapa, mapa, op) {
-        op = op || {};
-        const jug = !!op.jugadores;
-        const vistas = new Set(op.vistas || []);
-        const encontrados = new Set(op.encontrados || []);
-        const c = DUNGEON_CELDA;
-        lienzoMapa.width = DUNGEON_ANCHO * c;
-        lienzoMapa.height = DUNGEON_ALTO * c;
-        const ctx = lienzoMapa.getContext("2d");
-        ctx.fillStyle = "#3a332b";
-        ctx.fillRect(0, 0, lienzoMapa.width, lienzoMapa.height);
-        // Qué se ve: en el del máster, todo.
-        const pasilloVisto = (p, i) => (!p.secreto || encontrados.has(i)) && (vistas.has(p.a) || vistas.has(p.b));
-        const vista = new Set();
-        if (jug) {
-            (mapa.pasillos || []).forEach((p, i) => {
-                if (pasilloVisto(p, i)) {
-                    p.celdas.forEach(([x, y]) => vista.add(x + "," + y));
-                }
-            });
-        }
-        const seVe = (i, j, v) => {
-            if (!jug) {
-                return true;
-            }
-            if (v === "1") {
-                return vistas.has(parseInt(mapa.zonas[j][i], 36));
-            }
-            return vista.has(i + "," + j);
-        };
-        const pisables = [];
-        mapa.filas.forEach((fila, j) => {
-            Array.from(fila).forEach((v, i) => {
-                if (v === "0" || !seVe(i, j, v)) {
-                    return;
-                }
-                ctx.fillStyle = v === "1" ? "#efe2bf" : v === "3" && !jug ? "#e3c3a8" : "#d9c79c";
-                ctx.fillRect(i * c, j * c, c, c);
-                pisables.push([i, j, v]);
-            });
-        });
-        ctx.strokeStyle = "rgba(59, 42, 23, 0.25)";
-        ctx.lineWidth = 1;
-        ctx.beginPath();
-        pisables.forEach(([i, j]) => ctx.rect(i * c + 0.5, j * c + 0.5, c - 1, c - 1));
-        ctx.stroke();
-        // Los pasillos secretos, a rayas rojas (solo el máster).
-        if (!jug) {
-            ctx.strokeStyle = "#a3261a";
-            ctx.lineWidth = 2;
-            ctx.setLineDash([4, 4]);
-            pisables.filter((x) => x[2] === "3").forEach(([i, j]) => ctx.strokeRect(i * c + 3, j * c + 3, c - 6, c - 6));
-            ctx.setLineDash([]);
-        }
-        // Las puertas.
-        (mapa.puertas || []).forEach((p) => {
-            const secreta = p.tipo === "secreta";
-            if (jug && (!vista.has(p.x + "," + p.y) || (secreta && !encontrados.has(p.pasillo)))) {
-                return;
-            }
-            const x = p.x * c;
-            const y = p.y * c;
-            ctx.fillStyle = secreta && !jug ? "#a3261a" : "#6b4423";
-            if (p.vertical) {
-                ctx.fillRect(x + c * 0.35, y + 1, c * 0.3, c - 2);
-            } else {
-                ctx.fillRect(x + 1, y + c * 0.35, c - 2, c * 0.3);
-            }
-            // Lo que es (solo el máster): C cerrada con llave, A atrancada,
-            // S secreta.
-            if (!jug && p.tipo !== "normal") {
-                ctx.fillStyle = "#1d1b26";
-                ctx.fillRect(x + c * 0.15, y + c * 0.15, c * 0.7, c * 0.7);
-                ctx.font = "bold " + Math.round(c * 0.6) + "px sans-serif";
-                ctx.textAlign = "center";
-                ctx.textBaseline = "middle";
-                ctx.fillStyle = "#fdfaf0";
-                ctx.fillText({ secreta: "S", cerrada: "C", atrancada: "A" }[p.tipo], x + c / 2, y + c / 2 + 1);
-            }
-        });
-        if (jug) {
-            return;
-        }
-        ctx.textAlign = "center";
-        ctx.textBaseline = "middle";
-        mapa.salas.forEach((s, i) => {
-            const x = (s.cx + 0.5) * c;
-            const y = (s.cy + 0.5) * c;
-            ctx.fillStyle = "#7a1c12";
-            ctx.beginPath();
-            ctx.arc(x, y, c * 0.8, 0, Math.PI * 2);
-            ctx.fill();
-            ctx.fillStyle = "#fdfaf0";
-            ctx.font = "bold " + Math.round(c * 0.85) + "px sans-serif";
-            ctx.fillText(String(i + 1), x, y + 1);
-        });
-        if (mapa.salas[0]) {
-            const s = mapa.salas[0];
-            ctx.fillStyle = "#2e7d32";
-            ctx.font = "bold " + Math.round(c * 0.7) + "px sans-serif";
-            ctx.fillText("entrada", (s.x + s.w / 2) * c, (s.y + s.h) * c - c * 0.6);
-        }
-    }
-
-    function montarDungeon(dentro, m) {
-        m.datos = m.datos || {};
-        dentro.appendChild(crear("p", "oc-hoja-nota", "Cargando…"));
-        Promise.all([pedir(TABLAS), pedir(BESTIARIO), pedir(TIENDA)]).then(([tablas, best, tienda]) => {
-            const d = m.datos;
-            const t = tablas.dungeon;
-            const porEn = {};
-            best.monstruos.forEach((b) => {
-                porEn[b.en] = b;
-            });
-            const objetos = {};
-            tienda.objetos.forEach((o) => {
-                objetos[o.en] = o;
-            });
-            const tema = elegirDe("master-dungeon-tema-" + m.id, "qué es", Object.keys(t.temas).map((k) => [k, t.temas[k].emoji + " " +
-                t.temas[k].nombre]), d.tema || "cripta");
-            const tamano = elegirDe("master-dungeon-tam-" + m.id, "tamaño", DUNGEON_TAMANOS, d.salas || "8");
-            const enParty = estado.modulos.filter((x) => x.tipo === "party").reduce((n, x) => n + ((x.datos && x.datos.pjs) || []).length, 0);
-            const numero = (id, texto, valor, min, max) => {
-                const caja = crear("div", "master-campo");
-                const et = crear("label", "oc-dados-etiqueta", texto);
-                const x = crear("input", "master-elegir");
-                x.type = "number";
-                x.min = min;
-                x.max = max;
-                x.value = valor;
-                x.id = id + m.id;
-                et.htmlFor = x.id;
-                caja.append(et, x);
-                caja.elegir = x;
-                return caja;
-            };
-            const nivel = numero("master-dungeon-nivel-", "nivel de la party", d.nivel || 3, 1, 20);
-            const pjs = numero("master-dungeon-pjs-", "cuántos PJ", d.pjs || enParty || 4, 1, 10);
-            const estilo = elegirDe("master-dungeon-estilo-" + m.id, "estilo del mapa", [["", "según el sitio"], ["salas", "salas y puertas"],
-                ["cavernas", "cavernas"]], d.estilo || "");
-            const fila = crear("div", "master-encuentro-fila");
-            fila.append(tema, tamano, nivel, pjs, estilo);
-            // El del máster (todo) o el de los jugadores (lo descubierto).
-            const vista = botonesDe("qué mapa se ve", [["master", "🧙 el del máster"], ["jugadores", "👥 el de los jugadores"]],
-                d.vista || "master", (v) => {
-                    d.vista = v;
-                    guardar();
-                    pintar();
-                });
-            const mapaLienzo = crear("canvas", "master-dungeon-mapa");
-            mapaLienzo.setAttribute("role", "img");
-            const salasLista = crear("ol", "master-dungeon-salas");
-            salasLista.setAttribute("aria-label", "Las salas");
-            const botones = crear("div", "master-notas-botones");
-
-            const generar = () => {
-                d.tema = tema.elegir.value;
-                d.salas = tamano.elegir.value;
-                d.nivel = Math.min(20, Math.max(1, parseInt(nivel.elegir.value, 10) || 1));
-                d.pjs = Math.min(10, Math.max(1, parseInt(pjs.elegir.value, 10) || 1));
-                const tm = t.temas[d.tema];
-                d.estilo = estilo.elegir.value;
-                const [, cdBase] = DUNGEON_TRAMPA.find((x) => d.nivel <= x[0]);
-                const mapa = hacerMapa(parseInt(d.salas, 10), d.estilo || (d.tema === "cueva" ? "cavernas" : "salas"),
-                    { cerrada: cdBase + 1, atrancada: cdBase + 2, secreta: cdBase });
-                d.vistas = [0];
-                d.encontrados = [];
-                // Los monstruos que pegan con el sitio (por tipo y hábitat);
-                // si son pocos, también los de su hábitat.
-                let bichos = best.monstruos.filter((b) => tm.tipos.some((x) => b.tipo.indexOf(x) === 0) &&
-                    (!tm.habitat || (b.habitat || []).some((h) => h === tm.habitat || h === "cualquiera")));
-                if (bichos.length < 8) {
-                    bichos = best.monstruos.filter((b) => tm.tipos.some((x) => b.tipo.indexOf(x) === 0));
-                }
-                const franja = d.nivel <= 4 ? 0 : d.nivel <= 10 ? 1 : d.nivel <= 16 ? 2 : 3;
-                const [, cd, dano] = DUNGEON_TRAMPA.find((x) => d.nivel <= x[0]);
-                const usadas = new Set();
-                const unaDe = (lista) => {
-                    const libres = lista.filter((x) => !usadas.has(x));
-                    const x = alAzar(libres.length ? libres : lista);
-                    usadas.add(x);
-                    return x;
-                };
-                const salas = mapa.salas.map((s, i) => {
-                    const ultima = i === mapa.salas.length - 1;
-                    const sala = { que: unaDe(tm.salas), detalle: alAzar(tm.detalles) };
-                    const tirada = i === 0 ? 6 : tiradaSuelta("1d6");
-                    if (ultima || tirada <= 2 || tirada === 4) {
-                        const enc = hacerEncuentro(bichos, "", d.nivel, d.pjs, ultima ? 0.6 : 0.3);
-                        sala.bichos = enc.grupos;
-                        sala.hacen = enc.hacen;
-                    }
-                    if (tirada === 3 || (tirada === 5 && tiradaSuelta("1d2") === 1)) {
-                        const tr = alAzar(t.trampas);
-                        sala.trampa = { nombre: tr.nombre, texto: tr.texto.replace(/\{cd\}/g, cd).replace(/\{dano\}/g, dano) };
-                    }
-                    if (ultima || tirada === 4 || tirada === 5) {
-                        sala.botin = hacerBotin(tienda.objetos, franja, ultima || tirada === 5 ? "tesoro" : "uno");
-                        sala.donde = alAzar(t.tesoros_sala);
-                    }
-                    return sala;
-                });
-                d.mapa = mapa;
-                d.contenido = salas;
-                guardar();
-                pintar();
-                avisar("Dungeon nuevo: " + tm.nombre + " de " + salas.length + " salas.");
-            };
-            const botinTexto = (r) => {
-                const partes = r.monedas.filter((x) => x[1]).map((x) => x[1].toLocaleString("es-ES") + " " + x[0]);
-                r.cosas.forEach((c) => partes.push((c.n > 1 ? c.n + " × " : "") + c.texto + " (" + c.valor + " po)"));
-                return partes.join(", ");
-            };
-            function pintar() {
-                if (!d.mapa) {
-                    mapaLienzo.hidden = true;
-                    salasLista.replaceChildren(crear("li", "oc-vacio", "Elige y pulsa «generar»."));
-                    botones.hidden = true;
-                    leyenda.hidden = true;
-                    return;
-                }
-                mapaLienzo.hidden = false;
-                botones.hidden = false;
-                d.vistas = d.vistas || [0];
-                d.encontrados = d.encontrados || [];
-                const deJugadores = d.vista === "jugadores";
-                pintarVista();
-                leyenda.hidden = deJugadores || d.mapa.estilo === "cavernas";
-                descubrir.hidden = tapar.hidden = !deJugadores;
-                salasLista.replaceChildren(...d.contenido.map((s, i) => {
-                    const li = crear("li", "master-dungeon-sala");
-                    const h = crear("h3", "master-dungeon-sala-titulo", "Sala " + (i + 1) + (i === 0 ? " (entrada)" : "") +
-                        (i === d.contenido.length - 1 ? " (la última)" : ""));
-                    const desc = crear("p", "", "Es " + s.que + "; " + s.detalle + ".");
-                    // ¿La han descubierto ya? (Sale en el mapa de los jugadores.)
-                    const etVista = crear("label", "master-nombres-apellido");
-                    const caja = crear("input");
-                    caja.type = "checkbox";
-                    caja.checked = d.vistas.indexOf(i) >= 0;
-                    caja.addEventListener("change", () => {
-                        d.vistas = d.vistas.filter((x) => x !== i).concat(caja.checked ? [i] : []);
-                        guardar();
-                        pintarVista();
-                        avisar("Sala " + (i + 1) + (caja.checked ? " descubierta." : " tapada."));
-                    });
-                    etVista.append(caja, document.createTextNode(" descubierta (sale en el mapa de los jugadores)"));
-                    li.append(h, desc, etVista);
-                    if (s.bichos && s.bichos.length) {
-                        const p = crear("p", "master-dungeon-cosa");
-                        p.append(crear("strong", "", "Monstruos: "));
-                        s.bichos.forEach((g, k) => {
-                            const b = porEn[g.en];
-                            if (!b) {
-                                return;
-                            }
-                            if (k) {
-                                p.appendChild(document.createTextNode(" y "));
-                            }
-                            const ver = botonDe("master-botin-objeto", (g.n > 1 ? g.n + " × " : "") + b.nombre, () => abrirBicho(b, ver, best.fuente),
-                                "Ver " + b.nombre);
-                            p.appendChild(ver);
-                        });
-                        p.appendChild(document.createTextNode(" (están " + s.hacen + ")."));
-                        const ini = botonDe("oc-vida-accion", "⚔️ a la iniciativa", () => {
-                            const entran = [];
-                            s.bichos.forEach((g) => {
-                                const b = porEn[g.en];
-                                for (let k = 0; k < g.n && b; k++) {
-                                    entran.push(meterEnIniciativa(iniDeBicho(b),
-                                        (nombres, renombrar) => conNumero(b.nombre, nombres, renombrar), b.nombre));
-                                }
-                            });
-                            avisar("A la iniciativa: " + entran.filter(Boolean).join(", ") + ".");
-                        }, "Los monstruos de la sala " + (i + 1) + " a la iniciativa");
-                        li.append(p, ini);
-                    }
-                    if (s.trampa) {
-                        const p = crear("p", "master-dungeon-cosa");
-                        p.append(crear("strong", "", "Trampa: " + s.trampa.nombre + ". "), document.createTextNode(s.trampa.texto));
-                        if (window.ocDadosEnTexto) {
-                            window.ocDadosEnTexto(p);
-                        }
-                        li.appendChild(p);
-                    }
-                    if (s.botin) {
-                        const p = crear("p", "master-dungeon-cosa");
-                        p.append(crear("strong", "", "Botín (" + s.donde + "): "), document.createTextNode(botinTexto(s.botin)));
-                        s.botin.objetos.forEach((en) => {
-                            const o = objetos[en];
-                            if (!o) {
-                                return;
-                            }
-                            p.appendChild(document.createTextNode(", "));
-                            const ver = botonDe("master-botin-objeto", "✨ " + o.nombre, () => abrirObjeto(o, ver, tienda.fuente), "Ver " + o.nombre);
-                            p.appendChild(ver);
-                        });
-                        p.appendChild(document.createTextNode("."));
-                        li.appendChild(p);
-                    }
-                    if (!s.bichos && !s.trampa && !s.botin) {
-                        li.appendChild(crear("p", "master-dungeon-cosa", "No hay nada más (o eso parece)."));
-                    }
-                    // Sus puertas especiales (cerradas, atrancadas, secretas).
-                    (d.mapa.puertas || []).filter((pu) => pu.sala === i && pu.tipo !== "normal").forEach((pu) => {
-                        const pas = d.mapa.pasillos[pu.pasillo] || {};
-                        const otra = pas.a === i ? pas.b : pas.a;
-                        const p = crear("p", "master-dungeon-cosa");
-                        const que = {
-                            cerrada: "Puerta cerrada con llave hacia la sala " + (otra + 1) + ": se abre con herramientas de ladrón (Destreza CD " +
-                                pu.cd + ") o se echa abajo (Fuerza (Atletismo) CD " + (pu.cd + 2) + ").",
-                            atrancada: "Puerta atrancada por el otro lado (hacia la sala " + (otra + 1) + "): Fuerza (Atletismo) CD " + pu.cd +
-                                " para forzarla; hace ruido.",
-                            secreta: "Puerta secreta a un pasillo oculto que lleva a la sala " + (otra + 1) + ": Sabiduría (Percepción) CD " +
-                                pu.cd + " para verla.",
-                        }[pu.tipo];
-                        p.append(crear("strong", "", "🚪 "), document.createTextNode(que));
-                        li.appendChild(p);
-                        if (pu.tipo === "secreta") {
-                            const etE = crear("label", "master-nombres-apellido");
-                            const enc = crear("input");
-                            enc.type = "checkbox";
-                            enc.checked = d.encontrados.indexOf(pu.pasillo) >= 0;
-                            enc.addEventListener("change", () => {
-                                d.encontrados = d.encontrados.filter((x) => x !== pu.pasillo).concat(enc.checked ? [pu.pasillo] : []);
-                                guardar();
-                                pintarVista();
-                                avisar(enc.checked ? "Pasillo secreto encontrado." : "Pasillo secreto escondido otra vez.");
-                            });
-                            etE.append(enc, document.createTextNode(" la han encontrado"));
-                            li.appendChild(etE);
-                        }
-                    });
-                    return li;
-                }));
-            }
-            // El mapa que toca (el del máster o el de los jugadores).
-            function pintarVista() {
-                // (Los de antes no tienen zonas: solo el del máster.)
-                const deJugadores = d.vista === "jugadores" && !!d.mapa.zonas;
-                pintarMapa(mapaLienzo, d.mapa, deJugadores ? { jugadores: true, vistas: d.vistas, encontrados: d.encontrados } : {});
-                const tm = t.temas[d.tema] || { nombre: "dungeon" };
-                mapaLienzo.setAttribute("aria-label", deJugadores ? "Mapa de los jugadores: se ven " + d.vistas.length + " de " +
-                    d.mapa.salas.length + " salas, sin números ni secretos." : "Mapa de " + tm.nombre + ": " + d.mapa.salas.length +
-                    " salas numeradas unidas por pasillos; la 1 es la entrada. Lo que hay en cada una, en la lista de debajo.");
-            }
-            const boton = botonDe("oc-vida-accion es-principal master-nombres-generar", "🎲 generar dungeon", generar);
-            const alDibujo = botonDe("oc-vida-accion", "🎨 al dibujo", () => {
-                const l = crear("canvas");
-                pintarMapa(l, d.mapa);
-                anadir("dibujo", { titulo: "mapa: " + ((t.temas[d.tema] || {}).nombre || "dungeon"), w: 900, h: 700,
-                    datos: { ancho: l.width, alto: l.height, capas: [{ id: "c1", tipo: "capa", nombre: "mapa", visible: true, opacidad: 100,
-                        imagen: l.toDataURL("image/png") }, { id: "c2", tipo: "capa", nombre: "notas", visible: true, opacidad: 100, imagen: "" }],
-                    activa: "c2", rejilla: { ver: false, tipo: "cuadrada", tam: DUNGEON_CELDA, color: "#000000", opacidad: 40 } } });
-            }, "Pasar el mapa a una ventana de dibujo, para pintar encima");
-            const copiar = botonDe("oc-vida-accion", "⧉ copiar las salas", () => copiarTexto(Array.from(salasLista.children).map((li) => li.innerText)
-                .join("\n\n"), "Copiado el dungeon."), "Copiar las salas (texto)");
-            // La imagen del mapa: copiarla (para pegarla en otro sitio) o
-            // descargarla en PNG.
-            const copiarImagen = botonDe("oc-vida-accion", "🖼️ copiar la imagen", () => {
-                if (!window.ClipboardItem || !navigator.clipboard || !navigator.clipboard.write) {
-                    avisar("Este navegador no deja copiar imágenes: descárgala.");
-                    return;
-                }
-                mapaLienzo.toBlob((blob) => {
-                    navigator.clipboard.write([new ClipboardItem({ "image/png": blob })])
-                        .then(() => avisar("Copiada la imagen del mapa."))
-                        .catch(() => avisar("No se ha podido copiar la imagen: descárgala."));
-                }, "image/png");
-            }, "Copiar la imagen del mapa");
-            const bajarImagen = botonDe("oc-vida-accion", "⬇ descargar la imagen", () => {
-                const a = crear("a");
-                a.href = mapaLienzo.toDataURL("image/png");
-                a.download = "dungeon-" + (d.tema || "mapa") + ".png";
-                document.body.appendChild(a);
-                a.click();
-                a.remove();
-                avisar("Descargado: " + a.download + ".");
-            }, "Descargar la imagen del mapa (PNG)");
-            const ensenar = botonDe("oc-vida-accion es-principal", "👁️ enseñar a la mesa", () => {
-                const l = crear("canvas", "master-dungeon-mapa es-grande");
-                pintarMapa(l, d.mapa, { jugadores: true, vistas: d.vistas, encontrados: d.encontrados });
-                l.setAttribute("role", "img");
-                l.setAttribute("aria-label", "Mapa de los jugadores: lo descubierto.");
-                window.ocVentana.abrir({ titulo: "el mapa", cuerpo: l, vuelta: ensenar, clase: "es-ancha" });
-            }, "Enseñar en grande el mapa de los jugadores (solo lo descubierto)");
-            const descubrir = botonDe("oc-vida-accion", "☀️ descubrir todas", () => {
-                d.vistas = d.mapa.salas.map((x, i) => i);
-                guardar();
-                pintar();
-                avisar("Todas las salas descubiertas.");
-            });
-            const tapar = botonDe("oc-vida-accion", "🌑 tapar todas", () => {
-                d.vistas = [0];
-                guardar();
-                pintar();
-                avisar("Tapadas todas menos la entrada.");
-            });
-            botones.append(ensenar, copiarImagen, bajarImagen, alDibujo, copiar, descubrir, tapar);
-            const leyenda = crear("p", "oc-hoja-nota master-dungeon-leyenda",
-                "Puertas: C cerrada con llave, A atrancada, S secreta; a rayas rojas, el pasillo secreto. Copiar y descargar, el mapa que se ve.");
-            const arriba = crear("div", "master-nombres-form");
-            arriba.append(fila, boton, vista);
-            dentro.replaceChildren(arriba, mapaLienzo, leyenda, botones, salasLista,
-                crear("p", "oc-hoja-nota master-fuente", "Salas, trampas, gemas y arte: tablas propias. Monstruos y objetos: SRD 5.2 (CC BY 4.0)."));
-            pintar();
-        }).catch(() => {
-            dentro.replaceChildren(crear("p", "oc-vacio", "No he podido cargar las tablas."));
-        });
-    }
-
-    // ---- LOS EFECTOS CON DURACIÓN: «Bendecir en Thia, 1 minuto»,
-    // «Armadura de mago, 8 horas»… Se cuentan en segundos de juego (una
-    // ronda, 6) y se descuentan solos: con las rondas de la iniciativa (el
-    // evento «oc-iniciativa:guardada» de personajes.js) y con el tiempo
-    // del calendario («master:tiempo»); también a mano. Escribiendo el
-    // nombre de un conjuro del SRD, se pone solo su duración. ----
-    const UNIDADES = [["rondas", "rondas", 6], ["minutos", "minutos", 60], ["horas", "horas", 3600], ["dias", "días", 86400]];
-
-    // «Concentración, hasta 10 minutos» → {n: 10, unidad: "minutos", conc}.
-    function duracionDe(texto) {
-        const t = llano(texto);
-        const m = /(\d+)\s*(asalto|ronda|minuto|hora|dia)/.exec(t);
-        if (!m) {
-            return null;
-        }
-        const unidad = { asalto: "rondas", ronda: "rondas", minuto: "minutos", hora: "horas", dia: "dias" }[m[2]];
-        return { n: parseInt(m[1], 10), unidad, conc: t.indexOf("concentracion") >= 0 };
-    }
-
-    function cuantoQueda(seg) {
-        if (seg <= 0) {
-            return "se ha acabado";
-        }
-        if (seg < 60) {
-            const r = Math.ceil(seg / 6);
-            return r + (r === 1 ? " ronda" : " rondas");
-        }
-        if (seg < 3600) {
-            const mi = Math.ceil(seg / 60);
-            return mi + (mi === 1 ? " minuto" : " minutos") + (mi <= 10 ? " (" + Math.ceil(seg / 6) + " rondas)" : "");
-        }
-        if (seg < 86400) {
-            const minutos = Math.ceil(seg / 60);
-            const h = Math.floor(minutos / 60);
-            const mi = minutos % 60;
-            return h + " h" + (mi ? " " + mi + " min" : "");
-        }
-        const horas = Math.ceil(seg / 3600);
-        const di = Math.floor(horas / 24);
-        const h = horas % 24;
-        return di + (di === 1 ? " día" : " días") + (h ? " " + h + " h" : "");
-    }
-
-    function montarEfectos(dentro, m) {
-        m.datos = m.datos || {};
-        const d = m.datos;
-        d.efectos = Array.isArray(d.efectos) ? d.efectos : [];
-        const leerIni = () => {
-            try {
-                return JSON.parse(localStorage.getItem("richi-oc-iniciativa") || "{}");
-            } catch (e) {
-                return {};
-            }
-        };
-        if (d.ronda === undefined) {
-            d.ronda = leerIni().ronda || 1;
-        }
-        // EL FORMULARIO: nombre (con los conjuros), sobre quién, cuánto
-        // dura y si es de concentración.
-        const form = crear("form", "master-efecto-nuevo");
-        const etN = crear("label", "oc-dados-etiqueta", "qué es (un conjuro del SRD pone su duración)");
-        const nombre = crear("input", "master-elegir");
-        nombre.id = "master-efecto-nombre-" + m.id;
-        etN.htmlFor = nombre.id;
-        nombre.placeholder = "Bendecir, Armadura de mago, veneno…";
-        const lista = crear("datalist");
-        lista.id = "master-efecto-conjuros-" + m.id;
-        nombre.setAttribute("list", lista.id);
-        const sobre = elegirDe("master-efecto-sobre-" + m.id, "sobre quién", [["", "—"]], "");
-        const numero = crear("input", "master-elegir");
-        numero.type = "number";
-        numero.min = 1;
-        numero.value = 1;
-        numero.setAttribute("aria-label", "Cuánto dura");
-        const unidad = crear("select", "master-elegir");
-        unidad.setAttribute("aria-label", "En qué");
-        UNIDADES.forEach(([v, n]) => {
-            const o = crear("option", "", n);
-            o.value = v;
-            unidad.appendChild(o);
-        });
-        unidad.value = "minutos";
-        const etDura = crear("p", "oc-dados-etiqueta", "cuánto dura");
-        etDura.setAttribute("aria-hidden", "true");
-        const dura = crear("div", "master-efecto-dura");
-        dura.append(numero, unidad);
-        const etConc = crear("label", "master-nombres-apellido");
-        const conc = crear("input");
-        conc.type = "checkbox";
-        etConc.append(conc, document.createTextNode(" de concentración"));
-        const anadirE = crear("button", "oc-vida-accion es-principal", "＋ efecto");
-        anadirE.type = "submit";
-        form.append(etN, nombre, lista, sobre, etDura, dura, etConc, anadirE);
-        let conjuros = [];
-        pedir(CONJUROS_SRD).then((c) => {
-            conjuros = c.conjuros || [];
-            conjuros.filter((x) => duracionDe(x.dur || "")).forEach((x) => {
-                const o = crear("option");
-                o.value = x.nombre;
-                lista.appendChild(o);
-            });
-        }).catch(() => {});
-        nombre.addEventListener("change", () => {
-            const c = conjuros.find((x) => llano(x.nombre) === llano(nombre.value));
-            const du = c && duracionDe(c.dur || "");
-            if (du) {
-                numero.value = du.n;
-                unidad.value = du.unidad;
-                conc.checked = du.conc;
-                avisar(c.nombre + ": " + c.dur + ".");
-            }
-        });
-        // Los de la iniciativa, para «sobre quién».
-        const pintarQuien = () => {
-            const ahora = sobre.elegir.value;
-            const nombres = (leerIni().lista || []).map((x) => x.nombre);
-            sobre.elegir.replaceChildren(...[["", "—"]].concat(nombres.map((x) => [x, x])).map(([v, n]) => {
-                const o = crear("option", "", n);
-                o.value = v;
-                return o;
-            }));
-            sobre.elegir.value = nombres.indexOf(ahora) >= 0 ? ahora : "";
-        };
-        form.addEventListener("submit", (e) => {
-            e.preventDefault();
-            const n = Math.max(1, parseInt(numero.value, 10) || 1);
-            const seg = n * UNIDADES.find((x) => x[0] === unidad.value)[2];
-            const ef = { id: Date.now().toString(36), nombre: nombre.value.trim() || "efecto", sobre: sobre.elegir.value, quedan: seg,
-                total: seg, conc: conc.checked };
-            d.efectos.push(ef);
-            nombre.value = "";
-            conc.checked = false;
-            guardar();
-            pintar();
-            avisar("Efecto: " + ef.nombre + (ef.sobre ? " en " + ef.sobre : "") + ", " + cuantoQueda(seg) + ".");
-        });
-        // QUE PASE EL TIEMPO (en segundos): se descuenta a todos.
-        const pasar = (seg, porque) => {
-            const acaban = [];
-            d.efectos.forEach((ef) => {
-                if (ef.quedan > 0) {
-                    ef.quedan = Math.max(0, ef.quedan - seg);
-                    if (!ef.quedan) {
-                        acaban.push(ef.nombre + (ef.sobre ? " en " + ef.sobre : ""));
-                    }
-                }
-            });
-            guardar();
-            pintar();
-            if (acaban.length) {
-                avisar("Se acaba: " + acaban.join(", ") + ".");
-            } else if (porque) {
-                avisar(porque);
-            }
-        };
-        const aMano = crear("div", "master-cal-tiempo");
-        aMano.setAttribute("role", "group");
-        aMano.setAttribute("aria-label", "Que pase el tiempo a mano");
-        [["+1 ronda", 6], ["+1 minuto", 60], ["+10 minutos", 600], ["+1 hora", 3600]].forEach(([t, seg]) => {
-            aMano.appendChild(botonDe("oc-vida-accion", t, () => pasar(seg, "Pasa " + t.slice(1) + ".")));
-        });
-        const listaE = crear("ul", "master-efectos");
-        listaE.setAttribute("aria-label", "Efectos");
-        const quitarAcabados = botonDe("oc-vida-accion", "🧹 quitar los acabados", () => {
-            d.efectos = d.efectos.filter((x) => x.quedan > 0);
-            guardar();
-            pintar();
-            avisar("Quitados los que se habían acabado.");
-        });
-        function pintar() {
-            listaE.replaceChildren(...d.efectos.map((ef, i) => {
-                const li = crear("li", "master-efecto" + (ef.quedan <= 0 ? " es-acabado" : ""));
-                const cab = crear("p", "master-efecto-nombre");
-                cab.append(crear("strong", "", ef.nombre), document.createTextNode((ef.sobre ? " · " + ef.sobre : "") + (ef.conc ? " · 🧠 concentración" : "")));
-                const barra = crear("div", "master-efecto-barra");
-                barra.setAttribute("role", "meter");
-                barra.setAttribute("aria-valuemin", "0");
-                barra.setAttribute("aria-valuemax", String(ef.total));
-                barra.setAttribute("aria-valuenow", String(ef.quedan));
-                barra.setAttribute("aria-valuetext", "Queda: " + cuantoQueda(ef.quedan));
-                barra.setAttribute("aria-label", ef.nombre);
-                const lleno = crear("span", "master-efecto-lleno");
-                lleno.style.setProperty("--parte", Math.round(100 * ef.quedan / Math.max(1, ef.total)) + "%");
-                barra.appendChild(lleno);
-                const queda = crear("p", "master-efecto-queda", ef.quedan > 0 ? "Queda: " + cuantoQueda(ef.quedan) : "⌛ Se ha acabado");
-                const quitar = botonDe("master-nombre-boton", "✕", () => {
-                    d.efectos.splice(i, 1);
-                    guardar();
-                    pintar();
-                    avisar("Quitado: " + ef.nombre + ".");
-                    nombre.focus();
-                }, "Quitar " + ef.nombre);
-                const fila = crear("div", "master-efecto-fila");
-                fila.append(cab, quitar);
-                li.append(fila, barra, queda);
-                return li;
-            }));
-            if (!d.efectos.length) {
-                listaE.appendChild(crear("li", "oc-vacio", "Sin efectos. Añade uno arriba."));
-            }
-            quitarAcabados.hidden = !d.efectos.some((x) => x.quedan <= 0);
-        }
-        // Con la iniciativa: cada ronda que pasa, 6 segundos.
-        const alIni = (e) => {
-            if (!dentro.isConnected) {
-                document.removeEventListener("oc-iniciativa:guardada", alIni);
-                document.removeEventListener("master:tiempo", alTiempo);
-                return;
-            }
-            const r = (e.detail && e.detail.ronda) || 1;
-            const antes = d.ronda || 1;
-            d.ronda = r;
-            pintarQuien();
-            if (r > antes) {
-                pasar((r - antes) * 6, "Ronda " + r + ".");
-            } else {
-                guardar();
-            }
-        };
-        // Con el calendario: las horas que pasan.
-        const alTiempo = (e) => {
-            if (!dentro.isConnected) {
-                return;
-            }
-            const h = (e.detail && e.detail.horas) || 0;
-            if (h > 0) {
-                pasar(h * 3600);
-            }
-        };
-        document.addEventListener("oc-iniciativa:guardada", alIni);
-        document.addEventListener("master:tiempo", alTiempo);
-        document.addEventListener("oc-iniciativa:cambio", pintarQuien);
-        const etTiempo = crear("p", "oc-hoja-nota", "Se descuentan solos con las rondas de la iniciativa y el tiempo del calendario; o a mano:");
-        dentro.append(form, etTiempo, aMano, listaE, quitarAcabados);
-        pintarQuien();
-        pintar();
-    }
-
-    // ---- NEGOCIOS: tabernas y posadas, tiendas y servicios, según lo
-    // buenos que sean (pobre, modesta, acomodada, lujosa): nombre (del
-    // generador o con el nombre de quien lo lleva), ambiente, quién está
-    // al frente (un PNJ rápido), lo que vende con su precio, servicios y
-    // un gancho. La taberna, con su carta, sus habitaciones y un rumor
-    // (master-tablas.json, «taberna»); las tiendas venden los objetos del
-    // SRD de tienda.json (lo de su tienda, hasta un tope según lo buenas
-    // que sean; la de magia, hasta una rareza) y el resto es de tablas
-    // propias (master-tablas.json, «negocios»). Se copia, se guarda como
-    // texto o como imagen. ----
-    function descargarArchivo(blob, archivo) {
-        const a = crear("a");
-        const archivoBlob = URL.createObjectURL(blob);
-        a.href = archivoBlob;
-        a.download = archivo;
-        document.body.appendChild(a);
-        a.click();
-        a.remove();
-        setTimeout(() => URL.revokeObjectURL(archivoBlob), 1000);
-        avisar("Descargado: " + archivo + ".");
-    }
-
-    const precioDe = (cp) => (cp ? moneda(cp) : "a convenir");
-
-    // Un negocio de antes (sólo taberna, en m.datos.taberna) al de ahora.
-    function negocioDeTaberna(x) {
-        return {
-            tipo: "taberna", calidad: x.calidad, nombre: x.nombre, emoji: "🍺", ambiente: x.ambiente, quien: x.quien,
-            destacado: ["⭐ Especialidad de la casa:", x.especialidad[0] + " — " + moneda(x.especialidad[1])],
-            secciones: [{ titulo: "🍷 Bebidas", filas: x.bebidas }, { titulo: "🍲 Comidas", filas: x.comidas },
-                { titulo: "🛏️ Habitaciones (por noche)", filas: x.habitaciones }],
-            gancho: ["👂 Se oye que", x.rumor + "."],
-        };
-    }
-
-    function negocioEnTexto(x, nombreTipo) {
-        const lineas = [x.nombre + " — " + nombreTipo + " (" + x.calidad + ")", "",
-            x.ambiente.charAt(0).toUpperCase() + x.ambiente.slice(1) + ".", "Al frente: " + x.quien + "."];
-        if (x.destacado) {
-            lineas.push("", x.destacado.join(" "));
-        }
-        x.secciones.forEach((s) => {
-            lineas.push("", s.titulo.replace(/^\S+\s/u, "").toUpperCase());
-            s.filas.forEach(([n, cp, extra]) => lineas.push("· " + n + ": " + precioDe(cp) + (extra ? " (" + extra + ")" : "")));
-        });
-        lineas.push("", x.gancho.join(" "));
-        return lineas.join("\n");
-    }
-
-    // La ficha en un canvas de colores fijos (pergamino), para bajarla.
-    function negocioEnLienzo(x, nombreTipo) {
-        const lienzo = crear("canvas");
-        const ctx = lienzo.getContext("2d");
-        const ancho = 820;
-        const margen = 54;
-        const util = ancho - margen * 2;
-        const letra = (tam, estilo) => estilo + " " + tam + "px Georgia, 'Times New Roman', serif";
-        const pasos = [];
-        let y = margen;
-        const trocear = (texto, max) => {
-            const salen = [];
-            let linea = "";
-            texto.split(" ").forEach((p) => {
-                const prueba = linea ? linea + " " + p : p;
-                if (linea && ctx.measureText(prueba).width > max) {
-                    salen.push(linea);
-                    linea = p;
-                } else {
-                    linea = prueba;
-                }
-            });
-            salen.push(linea);
-            return salen;
-        };
-        const parrafo = (texto, tam, estilo, color) => {
-            ctx.font = letra(tam, estilo);
-            trocear(texto, util).forEach((l) => {
-                pasos.push({ texto: l, x: margen, y, font: ctx.font, color });
-                y += Math.round(tam * 1.4);
-            });
-        };
-        parrafo(x.emoji + " " + x.nombre, 34, "bold", "#3b2a17");
-        parrafo(nombreTipo + " · " + x.calidad, 18, "italic", "#6b4e2a");
-        y += 10;
-        parrafo(x.ambiente.charAt(0).toUpperCase() + x.ambiente.slice(1) + ". Al frente: " + x.quien + ".", 18, "normal", "#3b2a17");
-        if (x.destacado) {
-            y += 6;
-            parrafo(x.destacado.join(" "), 18, "bold", "#3b2a17");
-        }
-        x.secciones.forEach((s) => {
-            y += 18;
-            parrafo(s.titulo, 22, "bold", "#7a1f12");
-            pasos.push({ raya: true, y: y - 4 });
-            y += 6;
-            s.filas.forEach(([n, cp, extra]) => {
-                ctx.font = letra(18, "bold");
-                const precio = precioDe(cp);
-                const anchoPrecio = ctx.measureText(precio).width;
-                ctx.font = letra(18, "normal");
-                const lineas = trocear(n, util - anchoPrecio - 24);
-                pasos.push({ texto: precio, x: ancho - margen, y, font: letra(18, "bold"), color: "#3b2a17", derecha: true });
-                lineas.forEach((l) => {
-                    pasos.push({ texto: l, x: margen, y, font: letra(18, "normal"), color: "#3b2a17" });
-                    y += 26;
-                });
-                if (extra) {
-                    ctx.font = letra(15, "italic");
-                    trocear(extra, util - anchoPrecio - 24).forEach((l) => {
-                        pasos.push({ texto: l, x: margen + 14, y, font: ctx.font, color: "#6b4e2a" });
-                        y += 21;
-                    });
-                }
-                y += 4;
-            });
-        });
-        y += 14;
-        parrafo(x.gancho.join(" "), 18, "italic", "#3b2a17");
-        lienzo.width = ancho;
-        lienzo.height = y + margen;
-        ctx.fillStyle = "#efe2bf";
-        ctx.fillRect(0, 0, lienzo.width, lienzo.height);
-        ctx.strokeStyle = "#8a6a3a";
-        ctx.lineWidth = 6;
-        ctx.strokeRect(14, 14, lienzo.width - 28, lienzo.height - 28);
-        ctx.textBaseline = "top";
-        pasos.forEach((p) => {
-            if (p.raya) {
-                ctx.strokeStyle = "#8a6a3a";
-                ctx.lineWidth = 1;
-                ctx.beginPath();
-                ctx.moveTo(margen, p.y);
-                ctx.lineTo(ancho - margen, p.y);
-                ctx.stroke();
-                return;
-            }
-            ctx.font = p.font;
-            ctx.fillStyle = p.color;
-            ctx.textAlign = p.derecha ? "right" : "left";
-            ctx.fillText(p.texto, p.x, p.y);
-        });
-        return lienzo;
-    }
-
-    // Servicios de lanzamiento de conjuros (SRD 5.2), en pc, por nivel.
-    const PRECIO_CONJURO = [3000, 5000, 20000, 30000, 200000, 200000, 2000000, 2000000, 2000000, 10000000];
-
-    function montarNegocio(dentro, m) {
-        m.datos = m.datos || {};
-        dentro.appendChild(crear("p", "oc-hoja-nota", "Cargando…"));
-        Promise.all([pedir(TABLAS), pedir(NOMBRES), pedir(TIENDA), pedir(CONJUROS_SRD)]).then(([tablas, nombres, tienda, conjuros]) => {
-            const d = m.datos;
-            if (d.taberna && !d.negocio) {
-                d.negocio = negocioDeTaberna(d.taberna);
-                delete d.taberna;
-            }
-            const t = tablas.taberna;
-            const N = tablas.negocios;
-            const tipo = elegirDe("master-negocio-tipo-" + m.id, "qué negocio",
-                Object.keys(N.tipos).map((k) => [k, N.tipos[k].emoji + " " + N.tipos[k].nombre]), d.tipo || "taberna");
-            tipo.elegir.addEventListener("change", () => {
-                d.tipo = tipo.elegir.value;
-                guardar();
-            });
-            const calidad = botonesDe("lo bueno que es", Object.keys(N.calidades).map((k) => [k, k]),
-                d.calidad || "modesta", (v) => {
-                    d.calidad = v;
-                    guardar();
-                });
-            const etCal = crear("p", "oc-dados-etiqueta", "lo bueno que es");
-            etCal.setAttribute("aria-hidden", "true");
-            const sale = crear("div", "master-negocio");
-            sale.setAttribute("aria-live", "polite");
-            const variosDe = (lista, n) => {
-                const copia = lista.slice();
-                const salen = [];
-                while (copia.length && salen.length < n) {
-                    salen.push(copia.splice(tiradaSuelta("1d" + copia.length) - 1, 1)[0]);
-                }
-                return salen;
-            };
-            const objetoDe = (nombre) => (tienda.objetos || []).find((o) => o.nombre === nombre);
-            const conjuroDe = (en) => (conjuros.conjuros || []).find((c) => c.en === en);
-            const fila = (o) => [o.nombre, o.cp, o.rareza || "", "o"];
-            const asalariados = { cualificado: "Skilled Hireling", sin: "Untrained Hireling", mensajero: "Messenger" };
-            // Los servicios: asalariados y conjuros (tabla «Servicios de
-            // lanzamiento de conjuros» del SRD, más lo que cueste el
-            // componente), hasta el nivel que haya según lo bueno que sea.
-            const servicios = (tp, nivel) => {
-                const filas = (tp.asalariados || []).map((k) => (tienda.objetos || []).find((o) => o.en === asalariados[k]))
-                    .filter(Boolean).map(fila);
-                (tp.conjuros || []).map(conjuroDe).filter((c) => c && c.nivel <= nivel).forEach((c) => {
-                    const componente = /(\d[\d.]*) po/.exec(c.comp || "");
-                    const extra = componente ? Number(componente[1].replace(/\./g, "")) * 100 : 0;
-                    filas.push(["Lanzar " + c.nombre, PRECIO_CONJURO[c.nivel] + extra, (c.nivel ? "nivel " + c.nivel : "truco") +
-                        (extra ? "; con el componente (" + moneda(extra) + ")" : ""), "c:" + c.en]);
-                });
-                return filas;
-            };
-            const generar = () => {
-                const k = tipo.elegir.value;
-                const tp = N.tipos[k];
-                const cal = calidad.valor();
-                const nc = N.calidades[cal];
-                const g = alAzar(["f", "m"]);
-                const especie = alAzar(Object.keys(nombres.especies));
-                const dueno = nombreDe(nombres, especie, g, false);
-                const quien = dueno + " (" + nombres.especies[especie].nombre + "), que " + alAzar(tablas.pnj.rasgos);
-                const caro = (a, b) => a.cp - b.cp;
-                if (k === "taberna") {
-                    const tc = t.calidades[cal];
-                    const deLaTaberna = (tienda.objetos || []).filter((o) => (o.tiendas || []).includes("Taberna"));
-                    const deSuNivel = (o) => !/\(/.test(o.nombre) || /\(jarra|hogaza|cuña|1 día|botella\)/.test(o.nombre) ||
-                        tc.estilos.some((e) => o.nombre.endsWith("(" + e + ")"));
-                    const fino = cal === "acomodada" || cal === "lujosa";
-                    const comer = deLaTaberna.filter((o) => o.cat !== "alojamiento" && deSuNivel(o) && (fino || o.en !== "Fine Wine (bottle)"))
-                        .sort(caro).map(fila);
-                    const dormir = deLaTaberna.filter((o) => o.cat === "alojamiento" && deSuNivel(o)).sort(caro).map(fila);
-                    const rumor = alAzar(t.rumores);
-                    d.negocio = {
-                        tipo: k, calidad: cal, nombre: lugarDe(nombres, "taberna"), emoji: tp.emoji, ambiente: alAzar(tc.ambiente), quien,
-                        destacado: null, secciones: [{ titulo: "🍺 Comida y bebida", filas: comer },
-                            { titulo: "🛏️ Alojamiento (por noche)", filas: dormir },
-                            { titulo: "🛠️ Servicios", filas: servicios(tp, nc.nivel) }],
-                        gancho: ["👂 Se oye que", rumor + "."],
-                    };
-                } else {
-                    let nombre;
-                    if (alAzar([0, 1])) {
-                        const [sust, gs] = alAzar(tp.sust);
-                        const adj = alAzar(nombres.lugares.taberna.adj);
-                        nombre = sust + " " + (gs === "f" ? adj[1] : adj[0]);
-                    } else {
-                        nombre = alAzar(tp.plantillas).replace("{d}", dueno);
-                    }
-                    const secciones = [];
-                    const hay = (tienda.objetos || []).filter((o) => o.cp && (tp.objetos ? tp.objetos.includes(o.nombre)
-                        : (o.tiendas || []).includes(tp.tienda)) && (k === "magia"
-                        ? RAREZAS.indexOf(o.rareza) > -1 && RAREZAS.indexOf(o.rareza) < nc.rareza : !nc.tope || o.cp <= nc.tope));
-                    if (hay.length) {
-                        secciones.push({ titulo: "🛒 Lo que vende", filas: variosDe(hay, nc.cuantos).sort(caro).map(fila) });
-                    }
-                    const sv = servicios(tp, nc.nivel);
-                    if (sv.length) {
-                        secciones.push({ titulo: "🛠️ Servicios", filas: sv });
-                    }
-                    const gancho = alAzar(tp.ganchos);
-                    d.negocio = {
-                        tipo: k, calidad: cal, nombre, emoji: tp.emoji, ambiente: alAzar(tp.ambiente) + "; " + alAzar(nc.ambiente), quien,
-                        destacado: null, secciones, gancho: ["🪝 Gancho:", gancho.charAt(0).toUpperCase() + gancho.slice(1) + "."],
-                    };
-                }
-                guardar();
-                pintar();
-                avisar(tp.nombre.charAt(0).toUpperCase() + tp.nombre.slice(1) + ": " + d.negocio.nombre + ".");
-            };
-            const nombreTipo = () => (N.tipos[(d.negocio || {}).tipo] || N.tipos.taberna).nombre;
-            const carta = (s) => {
-                const sec = crear("div", "master-negocio-carta");
-                sec.appendChild(crear("h4", "master-negocio-titulo", s.titulo));
-                const dl = crear("dl", "master-negocio-lista");
-                s.filas.forEach(([n, cp, extra, ref]) => {
-                    const dt = crear("dt");
-                    const c = typeof ref === "string" && ref.startsWith("c:") ? conjuroDe(ref.slice(2)) : null;
-                    const o = !c && ref ? objetoDe(n) : null;
-                    if (c) {
-                        const ver = botonDe("master-botin-objeto", n, () => abrirConjuro(c, ver, conjuros.fuente), "Ver el conjuro " + c.nombre);
-                        dt.appendChild(ver);
-                    } else if (o) {
-                        const ver = botonDe("master-botin-objeto", n, () => abrirObjeto(o, ver, tienda.fuente), "Ver " + n);
-                        dt.appendChild(ver);
-                    } else {
-                        dt.textContent = n;
-                    }
-                    if (extra) {
-                        dt.appendChild(crear("span", "master-negocio-extra", extra));
-                    }
-                    dl.append(dt, crear("dd", "", precioDe(cp)));
-                });
-                sec.appendChild(dl);
-                return sec;
-            };
-            const acciones = crear("div", "master-negocio-acciones");
-            function pintar() {
-                const x = d.negocio;
-                sale.replaceChildren();
-                acciones.hidden = !x;
-                if (!x) {
-                    sale.appendChild(crear("p", "oc-vacio", "Elige el negocio, cómo es y pulsa «generar»."));
-                    return;
-                }
-                const cab = crear("h3", "master-negocio-nombre", x.emoji + " " + x.nombre);
-                const sub = crear("p", "master-negocio-tipo", nombreTipo() + " · " + x.calidad);
-                const amb = crear("p", "master-negocio-ambiente", x.ambiente.charAt(0).toUpperCase() + x.ambiente.slice(1) +
-                    ". Al frente: " + x.quien + ".");
-                sale.append(cab, sub, amb);
-                if (x.destacado) {
-                    const esp = crear("p", "master-negocio-ambiente");
-                    esp.append(crear("strong", "", x.destacado[0] + " "), document.createTextNode(x.destacado[1]));
-                    sale.appendChild(esp);
-                }
-                x.secciones.forEach((s) => sale.appendChild(carta(s)));
-                const gancho = crear("p", "master-negocio-ambiente");
-                gancho.append(crear("strong", "", x.gancho[0] + " "), document.createTextNode(x.gancho[1]));
-                sale.appendChild(gancho);
-            }
-            const archivo = (ext) => (d.negocio.nombre || "negocio").replace(/[^\p{L}\p{N}]+/gu, "-").toLowerCase() + "." + ext;
-            acciones.append(
-                botonDe("oc-vida-accion", "⧉ copiar", () => copiarTexto(negocioEnTexto(d.negocio, nombreTipo()), "Copiado."),
-                    "Copiar el negocio como texto"),
-                botonDe("oc-vida-accion", "📄 guardar como texto", () => descargarArchivo(new Blob([negocioEnTexto(d.negocio,
-                    nombreTipo())], { type: "text/plain;charset=utf-8" }), archivo("txt"))),
-                botonDe("oc-vida-accion", "🖼️ guardar como imagen", () => negocioEnLienzo(d.negocio, nombreTipo())
-                    .toBlob((blob) => descargarArchivo(blob, archivo("png")), "image/png")));
-            const boton = botonDe("oc-vida-accion es-principal master-nombres-generar", "🎲 generar negocio", generar);
-            const arriba = crear("div", "master-nombres-form");
-            arriba.append(tipo, etCal, calidad, boton);
-            dentro.replaceChildren(arriba, sale, acciones, crear("p", "oc-hoja-nota master-fuente",
-                "Lo que venden, los servicios y sus precios: SRD 5.2 (CC BY 4.0). Nombres, ambientes, rumores y ganchos: tablas propias."));
-            pintar();
-        }).catch(() => {
-            dentro.replaceChildren(crear("p", "oc-vacio", "No he podido cargar las tablas."));
-        });
-    }
-
-    // ---- UNA TABLA PARA TIRAR: una cosa por línea; «tirar» saca una al
-    // azar (encuentros, nombres, el tiempo que hace…) ----
-    function montarTabla(dentro, m) {
-        m.datos = m.datos || {};
-        const etX = crear("label", "oc-dados-etiqueta", "lo que puede salir (una cosa por línea)");
-        const texto = crear("textarea", "oc-notas-texto es-corta");
-        texto.id = "master-tabla-texto-" + m.id;
-        texto.rows = 6;
-        texto.value = m.datos.texto || "";
-        etX.htmlFor = texto.id;
-        const sale = crear("p", "master-tabla-sale");
-        sale.setAttribute("role", "status");
-        let espera = 0;
-        const alEscribir = () => {
-            clearTimeout(espera);
-            espera = setTimeout(() => {
-                m.datos.texto = texto.value;
-                guardar();
-            }, 400);
-        };
-        texto.addEventListener("input", alEscribir);
-        const tirar = botonDe("oc-vida-accion es-principal", "🎲 tirar en la tabla", () => {
-            const cosas = texto.value.split("\n").map((x) => x.trim()).filter(Boolean);
-            if (!cosas.length) {
-                sale.textContent = "Escribe primero lo que puede salir.";
-                return;
-            }
-            const u = new Uint32Array(1);
-            crypto.getRandomValues(u);
-            const i = u[0] % cosas.length;
-            sale.textContent = "";
-            setTimeout(() => {
-                sale.textContent = (i + 1) + " de " + cosas.length + ": " + cosas[i];
-            }, 50);
-        });
-        dentro.append(etX, texto, tirar, sale);
-    }
-
-    // ---- EL BESTIARIO: los monstruos del SRD 5.2 (D&D 2024), traducidos
-    // (datos/personajes/compendio/bestiario.json). Se buscan por nombre
-    // (en español o en inglés), VD y tipo; cada uno abre su perfil en una
-    // ventana, con «＋ a la iniciativa» (tira su iniciativa y lo apunta con
-    // su CA y sus PG en «richi-oc-iniciativa»). ----
-    const VDS = ["0", "1/8", "1/4", "1/2"].concat(Array.from({ length: 30 }, (x, i) => String(i + 1)));
+    Object.assign(PM, { SVG });
 
     // «Lobo», y si ya hay uno, «Lobo 1» y «Lobo 2» (y «Lobo 3»…). «lista»
     // son los nombres que ya hay; «renombrar(viejo, nuevo)» cambia el que
@@ -9116,7 +3082,7 @@
         const iguales = patron ? datos.lista.filter((x) => !x.pj && patron.test(x.nombre)) : [];
         const con = iguales.length ? iguales[iguales.length - 1] : null;
         const r = con || !window.ocDados ? null : window.ocDados.tirar("1d20" + (bono ? (bono > 0 ? "+" : "") + bono : ""),
-            "iniciativa de " + nombre);
+            ocT("iniciativa de {nombre}", { nombre: nombre }));
         const entra = { id: Date.now().toString(36) + Math.random().toString(36).slice(2, 6), nombre, color: c.color,
             ini: con ? con.ini : r ? r.total : 10 + bono, ca: parseInt(c.ca, 10) || "", pg: c.pg === undefined ? "" : c.pg };
         if (con) {
@@ -9126,7 +3092,9 @@
         }
         // De la party (para llevar sus PG a su ficha), sus acciones
         // legendarias y su bono a la salvación de Constitución (concentración).
-        ["pj", "leg", "con"].forEach((k) => {
+        // Sus PG máximos: los suyos o, si no, con los que entra.
+        entra.pgMax = numPj(c.pgMax) !== null ? numPj(c.pgMax) : numPj(entra.pg) !== null ? numPj(entra.pg) : "";
+        ["pj", "leg", "con", "bicho"].forEach((k) => {
             if (c[k] !== undefined && c[k] !== "" && c[k] !== null) {
                 entra[k] = c[k];
             }
@@ -9157,14 +3125,17 @@
             || [])[1], 10) || 3 : 0;
         const salv = /Con ([+−-]\d+)/.exec(b.salv || "");
         const con = salv ? parseInt(salv[1].replace("−", "-"), 10) : b.car && b.car.Con ? modDe(Number(b.car.Con)) : undefined;
-        return { nombre: b.nombre, bono: b.ini, ca: b.ca, pg: b.pg || "", color: "#d23b3b", leg: leg || undefined, con };
+        // «bicho»: quién es en el bestiario (para la ventana de la criatura
+        // del turno).
+        return { nombre: b.nombre, bono: b.ini, ca: b.ca, pg: b.pg || "", color: "#d23b3b", leg: leg || undefined, con,
+            bicho: b.en || b.nombre };
     }
     // Y de un PJ: su ficha (para sus PG) y su salvación de Constitución.
     function iniDePj(pj, nombre) {
         const d = numPj(pj.des);
         const con = numPj(pj.con);
         const salvaCon = (pj.salvaciones || []).includes("con");
-        return { nombre, bono: d === null ? 0 : modDe(d), ca: pj.ca, pg: numPj(pj.pg) === null ? numPj(pj.pgmax) : numPj(pj.pg),
+        return { nombre, bono: d === null ? 0 : modDe(d), ca: pj.ca, pg: numPj(pj.pg) === null ? numPj(pj.pgmax) : numPj(pj.pg), pgMax: numPj(pj.pgmax),
             color: "#3fae5a", pj: pj.id, con: con === null ? undefined : modDe(con) + (salvaCon ? competenciaPj(pj) : 0) };
     }
 
@@ -9173,7 +3144,7 @@
         // está ya; si no, con número si se repite (Lobo 1, Lobo 2…).
         const nombre = meterEnIniciativa(Object.assign(iniDeBicho(b), { nombre: nombreBase || b.nombre }), (nombres, renombrar) => (nombreBase && nombreBase !== b.nombre && nombres.indexOf(nombreBase) < 0 ? nombreBase
             : conNumero(b.nombre, nombres, renombrar)), b.nombre);
-        avisar("A la iniciativa: " + nombre + ".");
+        avisar(ocT("A la iniciativa: {nombre}.", { nombre: nombre }));
         if (boton) {
             boton.focus();
         }
@@ -9193,7 +3164,7 @@
             }
             dd.appendChild(document.createTextNode(m[1] + " "));
             const n = parseInt(m[2].replace("−", "-"), 10);
-            dd.appendChild(window.ocDadoBoton(m[2], "1d20" + (n >= 0 ? "+" : "") + n, que + " de " + m[1]));
+            dd.appendChild(window.ocDadoBoton(m[2], "1d20" + (n >= 0 ? "+" : "") + n, ocT("{que} de {n}", { que: que, n: m[1] })));
         });
         return dd;
     }
@@ -9205,7 +3176,7 @@
     function casillas(usos, clave, n, que, alCambiar) {
         const caja = crear("span", "master-usos");
         caja.setAttribute("role", "group");
-        caja.setAttribute("aria-label", "Usos de " + que);
+        caja.setAttribute("aria-label", ocT("Usos de {que}", { que: que }));
         const pintar = () => {
             caja.replaceChildren(...Array.from({ length: n }, (x, i) => {
                 const gastado = i < (usos[clave] || 0);
@@ -9214,8 +3185,8 @@
                     pintar();
                     alCambiar();
                     caja.querySelectorAll(".master-uso")[i].focus();
-                    avisar(que + ": " + (usos[clave] || 0) + " de " + n + " gastados.");
-                }, que + ", uso " + (i + 1) + " de " + n);
+                    avisar(ocT("{que}: {n} de {n2} gastados.", { que: que, n: usos[clave] || 0, n2: n }));
+                }, ocT("{que}, uso {n} de {n2}", { que: que, n: i + 1, n2: n }));
                 b.setAttribute("aria-pressed", gastado ? "true" : "false");
                 return b;
             }));
@@ -9243,9 +3214,9 @@
             return null;
         }
         const tabla = crear("table", "master-ataques");
-        tabla.appendChild(crear("caption", "visually-hidden", "Ataques"));
+        tabla.appendChild(crear("caption", "visually-hidden", ocT("Ataques")));
         const cab = crear("tr");
-        ["Ataque", "Bono", "Alcance", "Daño"].forEach((t) => {
+        [ocT("Ataque"), ocT("Bono"), ocT("Alcance"), ocT("Daño")].forEach((t) => {
             const th = crear("th", "", t);
             th.scope = "col";
             cab.appendChild(th);
@@ -9260,7 +3231,7 @@
             th.append(crear("strong", "", x.r.n), crear("span", "master-ataque-tipo", x.tipo));
             const n = parseInt(x.bono.replace("−", "-"), 10);
             const tdB = crear("td");
-            tdB.appendChild(window.ocDadoBoton ? window.ocDadoBoton(x.bono, "1d20" + (n >= 0 ? "+" : "") + n, x.r.n + " · ataque")
+            tdB.appendChild(window.ocDadoBoton ? window.ocDadoBoton(x.bono, "1d20" + (n >= 0 ? "+" : "") + n, ocT("{n} · ataque", { n: x.r.n }))
                 : document.createTextNode(x.bono));
             const tdA = crear("td", "", x.alcance);
             const tdD = crear("td", "master-ataque-dano");
@@ -9270,8 +3241,8 @@
             const d = /^(\d+) \(([^()]+)\) (?:de )?daño (?:de )?([^.,]+?)([.,].*)?$/s.exec(x.dano.trim());
             if (d && window.ocDadoBoton) {
                 const linea = crear("p", "master-ataque-dado");
-                linea.append(window.ocDadoBoton(d[2], d[2].replace(/\s+/g, "").replace("−", "-"), x.r.n + " · daño"),
-                    crear("span", "master-ataque-media", " " + d[3] + " · media " + d[1]));
+                linea.append(window.ocDadoBoton(d[2], d[2].replace(/\s+/g, "").replace("−", "-"), ocT("{n} · daño", { n: x.r.n })),
+                    crear("span", "master-ataque-media", ocT(" {n} · media {n2}", { n: d[3], n2: d[1] })));
                 tdD.appendChild(linea);
                 if (window.ocDadosEnTexto) {
                     window.ocDadosEnTexto(linea.lastChild);
@@ -9320,8 +3291,8 @@
         if (guardado && guardado.nombre) {
             // En el tablero, qué es de verdad (si se le ha cambiado el
             // nombre) y un botón para cambiárselo.
-            const cambiar = botonDe("master-bicho-renombrar", "✎ nombre", () => guardado.renombrar(cambiar),
-                "Cambiar el nombre de " + quien());
+            const cambiar = botonDe("master-bicho-renombrar", ocT("✎ nombre"), () => guardado.renombrar(cambiar),
+                ocT("Cambiar el nombre de {quien}", { quien: quien() }));
             cambiar.setAttribute("aria-haspopup", "dialog");
             tipo.prepend(crear("strong", "", b.nombre + " · "));
             tipo.appendChild(cambiar);
@@ -9332,31 +3303,31 @@
             }
             dl.append(crear("dt", "", que), crear("dd", "", String(valor)));
         };
-        const sumar = botonDe("oc-vida-accion es-principal", "＋ a la iniciativa", () => aLaIniciativa(b, sumar, quien()),
-            "Añadir " + quien() + " a la iniciativa (tira su iniciativa)");
+        const sumar = botonDe("oc-vida-accion es-principal", ocT("＋ a la iniciativa"), () => aLaIniciativa(b, sumar, quien()),
+            ocT("Añadir {quien} a la iniciativa (tira su iniciativa)", { quien: quien() }));
         const botones = crear("div", "master-bicho-botones");
         botones.appendChild(sumar);
         if (alTablero) {
-            botones.appendChild(botonDe("oc-vida-accion", "📌 al tablero", alTablero, "Poner " + b.nombre + " en el tablero, como una ventana"));
+            botones.appendChild(botonDe("oc-vida-accion", ocT("📌 al tablero"), alTablero, ocT("Poner {nombre} en el tablero, como una ventana", { nombre: b.nombre })));
         }
-        const recuperar = botonDe("oc-vida-accion", "↺ recuperar usos", () => {
+        const recuperar = botonDe("oc-vida-accion", ocT("↺ recuperar usos"), () => {
             Object.keys(usos).forEach((k) => delete usos[k]);
             repintables.forEach((r) => r.repintar());
             alCambiar();
-            avisar("Usos recuperados.");
-        }, "Recuperar todos los usos (descanso largo)");
+            avisar(ocT("Usos recuperados."));
+        }, ocT("Recuperar todos los usos (descanso largo)"));
         botones.appendChild(recuperar);
         caja.appendChild(botones);
 
         // ---- estadísticas ----
         const stats = crear("div", "master-bicho-panel");
         const arriba = crear("dl", "master-bicho-datos");
-        fila(arriba, "CA", b.ca);
-        fila(arriba, "Iniciativa", b.ini);
-        fila(arriba, "PG", b.pg + (b.pgf ? " (" + b.pgf + ")" : ""));
-        fila(arriba, "Velocidad", b.vel);
+        fila(arriba, ocT("CA"), b.ca);
+        fila(arriba, ocT("Iniciativa"), b.ini);
+        fila(arriba, ocT("PG"), b.pg + (b.pgf ? " (" + b.pgf + ")" : ""));
+        fila(arriba, ocT("Velocidad"), b.vel);
         const tabla = crear("table", "master-bicho-car");
-        tabla.appendChild(crear("caption", "visually-hidden", "Características"));
+        tabla.appendChild(crear("caption", "visually-hidden", ocT("Características")));
         const cab = crear("tr");
         const val = crear("tr");
         Object.keys(b.car).forEach((k) => {
@@ -9368,7 +3339,7 @@
             const td = crear("td", "", n + " ");
             const bono = (mo >= 0 ? "+" : "−") + Math.abs(mo);
             td.appendChild(window.ocDadoBoton ? window.ocDadoBoton("(" + bono + ")", "1d20" + (mo >= 0 ? "+" : "") + mo,
-                "prueba de " + k) : document.createTextNode("(" + bono + ")"));
+                ocT("prueba de {k}", { k: k })) : document.createTextNode("(" + bono + ")"));
             val.appendChild(td);
         });
         const thead = crear("thead");
@@ -9378,19 +3349,19 @@
         tabla.append(thead, tbody);
         const abajo = crear("dl", "master-bicho-datos");
         if (b.salv) {
-            abajo.append(crear("dt", "", "Salvaciones"), bonosQueSeTiran(b.salv, "salvación"));
+            abajo.append(crear("dt", "", ocT("Salvaciones")), bonosQueSeTiran(b.salv, ocT("salvación")));
         }
         if (b.hab) {
-            abajo.append(crear("dt", "", "Habilidades"), bonosQueSeTiran(b.hab, "prueba"));
+            abajo.append(crear("dt", "", ocT("Habilidades")), bonosQueSeTiran(b.hab, ocT("prueba")));
         }
-        fila(abajo, "Vulnerabilidades", b.vuln);
-        fila(abajo, "Resistencias", b.res);
-        fila(abajo, "Inmunidades", [b.inm, b.inmE].filter(Boolean).join("; "));
-        fila(abajo, "Equipo", b.equipo);
-        fila(abajo, "Sentidos", b.sent);
-        fila(abajo, "Idiomas", b.idio);
-        fila(abajo, "VD", b.vd);
-        fila(abajo, "Hábitat", (b.habitat || []).join(", "));
+        fila(abajo, ocT("Vulnerabilidades"), b.vuln);
+        fila(abajo, ocT("Resistencias"), b.res);
+        fila(abajo, ocT("Inmunidades"), [b.inm, b.inmE].filter(Boolean).join("; "));
+        fila(abajo, ocT("Equipo"), b.equipo);
+        fila(abajo, ocT("Sentidos"), b.sent);
+        fila(abajo, ocT("Idiomas"), b.idio);
+        fila(abajo, ocT("VD"), b.vd);
+        fila(abajo, ocT("Hábitat"), (b.habitat || []).join(", "));
         stats.append(arriba, tabla, abajo);
 
         // Un rasgo o acción: su nombre en negrita (con sus casillas si se
@@ -9406,17 +3377,17 @@
                 const c = casillas(usos, clave, 1, r.n, alCambiar);
                 repintables.push(c);
                 const desde = parseInt(rec[1], 10);
-                const tirarRecarga = botonDe("master-recarga", "🎲 recarga", () => {
-                    const t = window.ocDados ? window.ocDados.tirar("1d6", "recarga de " + r.n) : null;
+                const tirarRecarga = botonDe("master-recarga", ocT("🎲 recarga"), () => {
+                    const t = window.ocDados ? window.ocDados.tirar("1d6", ocT("recarga de {n}", { n: r.n })) : null;
                     if (t && t.total >= desde) {
                         usos[clave] = 0;
                         c.repintar();
                         alCambiar();
-                        avisar(r.n + ": recargada (" + t.total + ").");
+                        avisar(ocT("{n}: recargada ({total}).", { n: r.n, total: t.total }));
                     } else if (t) {
-                        avisar(r.n + ": sin recargar (" + t.total + ").");
+                        avisar(ocT("{n}: sin recargar ({total}).", { n: r.n, total: t.total }));
                     }
-                }, "Tirar la recarga de " + r.n + " (" + desde + " o más en 1d6)");
+                }, ocT("Tirar la recarga de {n} ({desde} o más en 1d6)", { n: r.n, desde: desde }));
                 cabeza.append(c, tirarRecarga);
             } else if (dia) {
                 const c = casillas(usos, seccion + ":" + r.n, parseInt(dia[1], 10), r.n, alCambiar);
@@ -9426,17 +3397,17 @@
             div.append(cabeza, markdown(r.t));
             return div;
         };
-        const paneles = [["estadísticas", stats]];
+        const paneles = [[ocT("estadísticas"), stats]];
         if (b.rasgos && b.rasgos.length) {
             const panel = crear("div", "master-bicho-panel");
             b.rasgos.forEach((r) => panel.appendChild(entrada(r, "rasgos")));
-            paneles.push(["rasgos", panel]);
+            paneles.push([ocT("rasgos"), panel]);
         }
         // LAS ACCIONES: acciones, adicionales, reacciones y legendarias en
         // una pestaña, con un desplegable para elegir cuáles se ven.
         const partes = [];
-        [["acciones", "acciones"], ["adicionales", "acciones adicionales"], ["reacciones", "reacciones"],
-            ["legendarias", "legendarias"]].forEach(([k, titulo]) => {
+        [["acciones", ocT("acciones")], ["adicionales", ocT("acciones adicionales")], ["reacciones", ocT("reacciones")],
+            ["legendarias", ocT("legendarias")]].forEach(([k, titulo]) => {
             if (!b[k] || !b[k].length) {
                 return;
             }
@@ -9445,7 +3416,7 @@
             if (k === "legendarias" && b.legInfo) {
                 const cuantas = parseInt((/Usos de acción legendaria:\* (\d+)/.exec(b.legInfo) || [])[1], 10) || 3;
                 const p = crear("p", "master-bicho-nombre");
-                p.appendChild(crear("strong", "", "Usos"));
+                p.appendChild(crear("strong", "", ocT("Usos")));
                 const c = casillas(usos, "legendarias", cuantas, "acciones legendarias", alCambiar);
                 repintables.push(c);
                 p.appendChild(c);
@@ -9470,7 +3441,7 @@
             }
             if (partes.length > 1) {
                 const fila = crear("div", "master-bicho-ver");
-                const etVer = crear("label", "oc-dados-etiqueta", "ver");
+                const etVer = crear("label", "oc-dados-etiqueta", ocT("ver"));
                 const ver = crear("select", "oc-dados-elegir");
                 ver.id = uid + "-ver";
                 etVer.htmlFor = ver.id;
@@ -9497,12 +3468,12 @@
                 parte.hidden = j !== deAhora;
                 panel.appendChild(parte);
             });
-            paneles.push(["acciones", panel]);
+            paneles.push([ocT("acciones"), panel]);
         }
         if (b.conjuros) {
             const panel = crear("div", "master-bicho-panel");
             panel.appendChild(markdown(b.conjuros.t));
-            panel.appendChild(crear("p", "oc-hoja-nota", "Se lanzan como " + b.conjuros.donde + "."));
+            panel.appendChild(crear("p", "oc-hoja-nota", ocT("Se lanzan como {donde}.", { donde: b.conjuros.donde })));
             b.conjuros.listas.forEach((l, i) => {
                 const div = crear("div", "master-bicho-entrada");
                 const cabeza = crear("p", "master-bicho-nombre");
@@ -9544,10 +3515,10 @@
                     }
                 });
             }).catch(() => {});
-            paneles.push(["hechizos", panel]);
+            paneles.push([ocT("hechizos"), panel]);
         }
 
-        paneles.push(["imagen", panelImagen("monstruo:" + b.en, b.nombre)]);
+        paneles.push([ocT("imagen"), panelImagen("monstruo:" + b.en, b.nombre)]);
 
         // LAS PESTAÑAS: estadísticas, rasgos, acciones, hechizos (las que
         // tenga) e imagen, con las flechas para ir de una a otra.
@@ -9557,7 +3528,7 @@
         }
         const lista = crear("div", "master-bicho-pestanas");
         lista.setAttribute("role", "tablist");
-        lista.setAttribute("aria-label", "Partes del perfil de " + quien());
+        lista.setAttribute("aria-label", ocT("Partes del perfil de {quien}", { quien: quien() }));
         const pestanas = paneles.map(([titulo, panel], i) => {
             const t = botonDe("master-bicho-pestana", titulo, () => elegir(i, false));
             t.setAttribute("role", "tab");
@@ -9605,37 +3576,38 @@
         return caja;
     }
 
-    // Una criatura del bestiario puesta en el tablero (📌): su perfil en
-    // una ventana, a mano durante el combate.
-    function montarCriatura(dentro, m) {
-        m.datos = m.datos || {};
-        dentro.appendChild(crear("p", "oc-hoja-nota", "Cargando…"));
-        pedir("datos/personajes/compendio/bestiario.json").then((datos) => {
-            const b = (datos.monstruos || []).find((x) => x.en === m.datos.en);
-            const guardado = { usos: m.datos.usos || {}, pestana: m.datos.pestana || 0, parte: m.datos.parte || 0,
-                guardar() {
-                    m.datos.usos = guardado.usos;
-                    m.datos.pestana = guardado.pestana;
-                    m.datos.parte = guardado.parte;
-                    guardar();
-                },
-                // Su nombre es el título de la ventana (✎ nombre lo cambia,
-                // como el ✎ de la barra).
-                nombre: () => m.titulo || (b && b.nombre) || "",
-                renombrar: (vuelta) => personalizar(m, vuelta) };
-            const pintarla = () => {
-                const foco = dentro.contains(document.activeElement) ? document.activeElement.className : "";
-                dentro.replaceChildren(b ? perfil(b, "", null, guardado) : crear("p", "oc-vacio", "No encuentro esa criatura."));
-                const otro = foco && dentro.querySelector("." + foco.split(" ")[0]);
-                if (otro) {
-                    otro.focus();
-                }
-            };
-            m.alRenombrar = pintarla;
-            pintarla();
-        }).catch(() => {
-            dentro.replaceChildren(crear("p", "oc-vacio", "No he podido cargar el bestiario."));
+    // ---- TURNO A TURNO: la iniciativa vista de otra manera (para el modo
+    // combate). Leen y guardan lo mismo que ⏱️ iniciativa (window.ocTurnos,
+    // en personajes.js), así que pasar de turno aquí o allí es lo mismo. ----
+    const colorIni = (c) => (/^#[0-9a-f]{6}$/i.test(c.color || "") ? c.color
+        : { personaje: "#3fae5a", npc: "#3b7ddd", monstruo: "#d23b3b" }[c.tipo] || "#3fae5a");
+    Object.assign(PM, { colorIni });
+    const textoMarcaIni = (mk) => mk.t + (mk.r ? " (" + mk.r + (mk.r === 1 ? ocT(" ronda") : ocT(" rondas")) + ")" : "");
+    // Lo de un combatiente que se ve de un vistazo: iniciativa, CA, PG y
+    // sus marcas (cegado, concentrado…).
+    function datosIni(c, conMarcas) {
+        const caja = crear("div", "master-turnos-datos");
+        const temp = parseInt(c.temp, 10) > 0 ? ocT(" (+{n} temp.)", { n: c.temp }) : "";
+        [[ocT("ini"), c.ini], [ocT("CA"), c.ca], [ocT("PG"), c.pg === "" || c.pg === undefined || c.pg === null ? c.pg : c.pg + temp]].forEach(([k, v]) => {
+            if (v === "" || v === undefined || v === null) {
+                return;
+            }
+            const chapa = crear("span", "master-turnos-chapa");
+            chapa.append(crear("span", "master-turnos-chapa-et", k), document.createTextNode(" " + v));
+            caja.appendChild(chapa);
         });
+        const marcas = Array.isArray(c.marcas) ? c.marcas : [];
+        // Con su dibujo y que se pulsan (las de la iniciativa: ocTurnos).
+        const chapas = conMarcas && marcas.length && c.id && window.ocTurnos.chapas ? window.ocTurnos.chapas(c.id) : null;
+        if (chapas) {
+            caja.appendChild(chapas);
+        } else if (conMarcas && marcas.length) {
+            const ul = crear("ul", "oc-ini-marcas");
+            ul.setAttribute("aria-label", ocT("Marcas de {nombre}", { nombre: c.nombre }));
+            marcas.forEach((mk) => ul.appendChild(crear("li", "oc-ini-marca", textoMarcaIni(mk))));
+            caja.appendChild(ul);
+        }
+        return caja;
     }
 
     // EL TOKEN DE UN MONSTRUO: una ficha redonda hecha aquí (no son las
@@ -9676,77 +3648,12 @@
             }) });
     }
 
-    function montarBestiario(dentro, m) {
-        dentro.appendChild(crear("p", "oc-hoja-nota", "Cargando el bestiario…"));
-        pedir("datos/personajes/compendio/bestiario.json").then((datos) => {
-            const bichos = (datos.monstruos || []).map((b) => ({ b, buscar: llano(b.nombre + " " + b.en + " " + b.tipo) }));
-            const fila = crear("div", "master-conjuros-buscar es-bestiario");
-            const et = crear("label", "oc-dados-etiqueta", "buscar");
-            const input = crear("input", "oc-dados-texto");
-            input.type = "search";
-            input.id = "master-bichos-" + m.id;
-            input.placeholder = "goblin, dragón, owlbear…";
-            et.htmlFor = input.id;
-            const etVd = crear("label", "oc-dados-etiqueta", "VD");
-            const vd = crear("select", "oc-dados-elegir");
-            vd.id = "master-bichos-vd-" + m.id;
-            etVd.htmlFor = vd.id;
-            [""].concat(VDS).forEach((v) => {
-                const o = crear("option", "", v || "todos");
-                o.value = v;
-                vd.appendChild(o);
-            });
-            const etTipo = crear("label", "oc-dados-etiqueta", "tipo");
-            const tipo = crear("select", "oc-dados-elegir");
-            tipo.id = "master-bichos-tipo-" + m.id;
-            etTipo.htmlFor = tipo.id;
-            const tipos = Array.from(new Set(bichos.map((x) => x.b.tipo.split(/[ (]/)[0]))).sort();
-            [""].concat(tipos).forEach((v) => {
-                const o = crear("option", "", v || "todos");
-                o.value = v;
-                tipo.appendChild(o);
-            });
-            const cuantos = crear("p", "oc-hoja-nota");
-            cuantos.setAttribute("role", "status");
-            const lista = crear("ul", "master-conjuros");
-            fila.append(et, input, etVd, vd, etTipo, tipo);
-            const pintar = () => {
-                const q = llano(input.value.trim());
-                const salen = bichos.filter((x) => (!q || x.buscar.includes(q)) && (!vd.value || x.b.cr === vd.value)
-                    && (!tipo.value || x.b.tipo.indexOf(tipo.value) === 0));
-                lista.replaceChildren(...salen.slice(0, 60).map((x) => {
-                    const li = crear("li");
-                    const b = botonDe("master-conjuro", "", () => abrirBicho(x.b, b, datos.fuente));
-                    b.setAttribute("aria-haspopup", "dialog");
-                    b.classList.add("con-token");
-                    b.append(tokenDe(x.b), crear("span", "master-conjuro-nombre", x.b.nombre),
-                        crear("span", "master-conjuro-datos", "VD " + x.b.cr + " · " + x.b.tipo + " · CA " + parseInt(x.b.ca, 10)
-                            + " · " + x.b.pg + " PG"));
-                    li.appendChild(b);
-                    return li;
-                }));
-                cuantos.textContent = salen.length ? salen.length + (salen.length === 1 ? " monstruo" : " monstruos")
-                    + (salen.length > 60 ? " (salen los 60 primeros)" : "") : "Ningún monstruo con eso.";
-            };
-            let espera = 0;
-            input.addEventListener("input", () => {
-                clearTimeout(espera);
-                espera = setTimeout(pintar, 150);
-            });
-            vd.addEventListener("change", pintar);
-            tipo.addEventListener("change", pintar);
-            dentro.replaceChildren(fila, cuantos, lista, crear("p", "oc-hoja-nota master-fuente", datos.fuente || ""));
-            pintar();
-        }).catch(() => {
-            dentro.replaceChildren(crear("p", "oc-vacio", "No he podido cargar el bestiario."));
-        });
-    }
-
     // ---- LA TIENDA: los objetos del SRD 5.2 con su precio
     // (datos/personajes/compendio/tienda.json), por tienda, categoría y
     // rareza, con los precios al gusto (de saldo… abusivos) y un «surtido
     // al azar» que se queda guardado (lo que hay hoy en esa tienda). ----
     const RAREZAS = ["común", "poco común", "rara", "muy rara", "legendaria"];
+    Object.assign(PM, { RAREZAS });
 
     function moneda(cp) {
         const total = Math.round(cp);
@@ -9755,327 +3662,21 @@
         const pc = total % 10;
         const trozos = [];
         if (po) {
-            trozos.push(po.toLocaleString("es-ES") + " po");
+            trozos.push(ocT("{toLocaleString} po", { toLocaleString: po.toLocaleString("es-ES") }));
         }
         if (pp) {
-            trozos.push(pp + " pp");
+            trozos.push(ocT("{pp} pp", { pp: pp }));
         }
         if (pc || !trozos.length) {
-            trozos.push(pc + " pc");
+            trozos.push(ocT("{pc} pc", { pc: pc }));
         }
         return trozos.join(" ");
-    }
-
-    function montarTienda(dentro, m) {
-        m.datos = m.datos || {};
-        dentro.appendChild(crear("p", "oc-hoja-nota", "Abriendo la tienda…"));
-        pedir("datos/personajes/compendio/tienda.json").then((datos) => {
-            const objetos = (datos.objetos || []).map((o) => ({ o, buscar: llano(o.nombre + " " + o.en + " " + o.cat) }));
-            const elegir = (id, texto, opciones, valor) => {
-                const et = crear("label", "oc-dados-etiqueta", texto);
-                const sel = crear("select", "oc-dados-elegir");
-                sel.id = id + m.id;
-                et.htmlFor = sel.id;
-                opciones.forEach(([v, t]) => {
-                    const op = crear("option", "", t);
-                    op.value = v;
-                    sel.appendChild(op);
-                });
-                sel.value = valor || "";
-                return [et, sel];
-            };
-            const [etTienda, tienda] = elegir("master-tienda-", "tienda",
-                [["", "todas"]].concat((datos.tiendas || []).map((t) => [t, t])), m.datos.tienda);
-            const [etCat, cat] = elegir("master-tienda-cat-", "categoría", [["", "todas"]], "");
-            const [etRareza, rareza] = elegir("master-tienda-rareza-", "rareza",
-                [["", "todas"]].concat(RAREZAS.map((r) => [r, r])), m.datos.rareza);
-            // El precio de la tienda, en %: 100 es lo normal; 80, un 20 % más
-            // barato; 150, la mitad más caro. (Lo de antes, ×1,5…, pasa a %.)
-            if (m.datos.porc === undefined && m.datos.precio) {
-                m.datos.porc = Math.round(parseFloat(m.datos.precio) * 100) || 100;
-            }
-            const etPrecio = crear("label", "oc-dados-etiqueta", "precios (%)");
-            const precio = crear("input", "oc-dados-texto");
-            precio.type = "number";
-            precio.min = "0";
-            precio.max = "1000";
-            precio.step = "5";
-            precio.inputMode = "numeric";
-            precio.value = String(m.datos.porc || 100);
-            precio.id = "master-tienda-precio-" + m.id;
-            precio.setAttribute("aria-describedby", "master-tienda-precio-ayuda-" + m.id);
-            etPrecio.htmlFor = precio.id;
-            const ayudaPrecio = crear("p", "oc-hoja-nota master-tienda-ayuda", "100 = normal; 80 = un 20 % más barato; 150 = la mitad más caro.");
-            ayudaPrecio.id = "master-tienda-precio-ayuda-" + m.id;
-            const etBuscar = crear("label", "oc-dados-etiqueta", "buscar");
-            const buscar = crear("input", "oc-dados-texto");
-            buscar.type = "search";
-            buscar.id = "master-tienda-buscar-" + m.id;
-            buscar.placeholder = "cuerda, poción, espada…";
-            etBuscar.htmlFor = buscar.id;
-            const campos = crear("div", "master-tienda-campos");
-            [[etTienda, tienda], [etCat, cat], [etRareza, rareza], [etPrecio, precio], [etBuscar, buscar]].forEach(([e, c]) => {
-                const caja = crear("div", "master-tienda-campo" + (c === buscar ? " es-ancho" : ""));
-                caja.append(e, c);
-                if (c === precio) {
-                    caja.appendChild(ayudaPrecio);
-                }
-                campos.appendChild(caja);
-            });
-            // El surtido: unos cuantos al azar de lo que se ve (y se guarda).
-            const cuantosAzar = crear("input", "oc-dados-texto master-tienda-cuantos");
-            cuantosAzar.type = "number";
-            cuantosAzar.min = "1";
-            cuantosAzar.max = "40";
-            cuantosAzar.value = String(m.datos.cuantos || 8);
-            cuantosAzar.id = "master-tienda-cuantos-" + m.id;
-            const etCuantos = crear("label", "oc-dados-etiqueta", "cuántos");
-            etCuantos.htmlFor = cuantosAzar.id;
-            const azar = botonDe("oc-vida-accion es-principal", "🎲 surtido al azar", () => {
-                const n = Math.max(1, Math.min(40, parseInt(cuantosAzar.value, 10) || 8));
-                const pool = filtrados(false).slice();
-                const u = new Uint32Array(pool.length);
-                crypto.getRandomValues(u);
-                for (let i = pool.length - 1; i > 0; i -= 1) {
-                    const j = u[i] % (i + 1);
-                    [pool[i], pool[j]] = [pool[j], pool[i]];
-                }
-                m.datos.surtido = pool.slice(0, n).map((x) => x.o.en);
-                m.datos.cuantos = n;
-                guardar();
-                pintar();
-                avisar("Surtido nuevo: " + m.datos.surtido.length + " objetos.");
-            });
-            const todo = botonDe("oc-vida-accion", "ver todo", () => {
-                delete m.datos.surtido;
-                guardar();
-                pintar();
-                avisar("Se ve todo.");
-            });
-            const surtidoFila = crear("div", "master-tienda-azar");
-            const cajaCuantos = crear("div", "master-tienda-campo");
-            cajaCuantos.append(etCuantos, cuantosAzar);
-            surtidoFila.append(cajaCuantos, azar, todo);
-            const cuantos = crear("p", "oc-hoja-nota");
-            cuantos.setAttribute("role", "status");
-            const tabla = crear("table", "master-tienda-tabla");
-            const cap = crear("caption", "visually-hidden", "Objetos y precios");
-            const cab = crear("tr");
-            [["Objeto", ""], ["Precio", "es-precio"]].forEach(([t, c]) => {
-                const th = crear("th", c, t);
-                th.scope = "col";
-                cab.appendChild(th);
-            });
-            const thead = crear("thead");
-            thead.appendChild(cab);
-            const cuerpo = crear("tbody");
-            tabla.append(cap, thead, cuerpo);
-
-            function filtrados(conSurtido) {
-                const q = llano(buscar.value.trim());
-                const enSurtido = conSurtido && m.datos.surtido ? new Set(m.datos.surtido) : null;
-                return objetos.filter((x) => (!tienda.value || x.o.tiendas.indexOf(tienda.value) >= 0)
-                    && (!cat.value || x.o.cat === cat.value) && (!rareza.value || x.o.rareza === rareza.value)
-                    && (!q || x.buscar.includes(q)) && (!enSurtido || enSurtido.has(x.o.en)));
-            }
-
-            // Las categorías que hay en la tienda elegida.
-            function categorias() {
-                const antes = cat.value;
-                const hay = Array.from(new Set(objetos.filter((x) => !tienda.value || x.o.tiendas.indexOf(tienda.value) >= 0)
-                    .map((x) => x.o.cat))).sort();
-                cat.replaceChildren(...[["", "todas"]].concat(hay.map((c) => [c, c])).map(([v, t]) => {
-                    const op = crear("option", "", t);
-                    op.value = v;
-                    return op;
-                }));
-                cat.value = hay.indexOf(antes) >= 0 ? antes : "";
-            }
-
-            const porcentaje = () => Math.max(0, parseFloat(precio.value) || 0) / 100 || (precio.value === "0" ? 0 : 1);
-
-            // La ventana de cada objeto: sus datos, el precio de lista, el de
-            // la tienda y el regateo (un % propio, con lo que queda).
-            function ficha(o, vuelta) {
-                const cuerpo = datosObjeto(Object.assign({}, o, { cp: 0 }));
-                if (o.cp) {
-                    const precios = crear("dl", "master-bicho-datos master-objeto-precios");
-                    const tiendaP = Math.round(porcentaje() * 100);
-                    precios.append(crear("dt", "", "De lista"), crear("dd", "", moneda(o.cp)),
-                        crear("dt", "", "En esta tienda (" + tiendaP + " %)"), crear("dd", "", moneda(o.cp * porcentaje())));
-                    const form = crear("form", "master-regateo");
-                    const et = crear("label", "oc-dados-etiqueta", "regatear: precio final (%)");
-                    const pct = crear("input", "oc-dados-texto");
-                    pct.type = "number";
-                    pct.min = "0";
-                    pct.max = "1000";
-                    pct.step = "5";
-                    pct.inputMode = "numeric";
-                    pct.id = "master-regateo-" + m.id;
-                    pct.value = String(tiendaP);
-                    et.htmlFor = pct.id;
-                    const queda = crear("p", "master-regateo-queda");
-                    queda.setAttribute("aria-live", "polite");
-                    const echar = () => {
-                        const v = Math.max(0, parseFloat(pct.value) || 0);
-                        queda.textContent = "Queda en " + moneda(o.cp * v / 100) + " (" + v + " % del precio de lista).";
-                    };
-                    pct.addEventListener("input", echar);
-                    const rapidos = crear("div", "master-regateo-rapidos");
-                    [-20, -10, -5, 5, 10, 20].forEach((d) => {
-                        rapidos.appendChild(botonDe("oc-vida-accion", (d > 0 ? "+" : "−") + Math.abs(d) + " %", () => {
-                            pct.value = String(Math.max(0, (parseFloat(pct.value) || 0) + d));
-                            echar();
-                        }, (d > 0 ? "Subir " : "Bajar ") + Math.abs(d) + " puntos"));
-                    });
-                    form.addEventListener("submit", (e) => {
-                        e.preventDefault();
-                        echar();
-                    });
-                    form.append(et, pct, rapidos, queda);
-                    echar();
-                    cuerpo.append(precios, form);
-                } else {
-                    cuerpo.appendChild(crear("p", "oc-hoja-nota", "No tiene precio: lo pone el DM."));
-                }
-                cuerpo.appendChild(crear("p", "oc-hoja-nota master-fuente", datos.fuente || ""));
-                window.ocVentana.abrir({ titulo: o.nombre, cuerpo, vuelta, clase: "es-regla" });
-            }
-
-            function pintar() {
-                const veces = porcentaje();
-                const salen = filtrados(true);
-                todo.hidden = !m.datos.surtido;
-                cuerpo.replaceChildren(...salen.slice(0, 100).map((x) => {
-                    const tr = crear("tr");
-                    const td = crear("td");
-                    const b = botonDe("master-tienda-nombre", x.o.nombre, () => ficha(x.o, b));
-                    b.setAttribute("aria-haspopup", "dialog");
-                    td.appendChild(b);
-                    const extra = [x.o.cat, x.o.rareza, x.o.sint ? "requiere sintonía" : "", x.o.det, x.o.peso, x.o.nota]
-                        .filter(Boolean).join(" · ");
-                    td.appendChild(crear("span", "master-tienda-datos", extra));
-                    const tdP = crear("td", "es-precio", x.o.cp ? moneda(x.o.cp * veces) : "—");
-                    tr.append(td, tdP);
-                    return tr;
-                }));
-                cuantos.textContent = (m.datos.surtido ? "Surtido de hoy: " : "") + (salen.length
-                    ? salen.length + (salen.length === 1 ? " objeto" : " objetos") + (salen.length > 100 ? " (salen los 100 primeros)" : "")
-                    : "Nada con eso.");
-            }
-
-            const alCambiar = () => {
-                m.datos.tienda = tienda.value;
-                m.datos.rareza = rareza.value;
-                m.datos.porc = parseFloat(precio.value) || 0;
-                delete m.datos.precio;
-                guardar();
-                pintar();
-            };
-            tienda.addEventListener("change", () => {
-                categorias();
-                alCambiar();
-            });
-            [cat, rareza].forEach((c) => c.addEventListener("change", alCambiar));
-            precio.addEventListener("input", alCambiar);
-            let espera = 0;
-            buscar.addEventListener("input", () => {
-                clearTimeout(espera);
-                espera = setTimeout(pintar, 150);
-            });
-            categorias();
-            dentro.replaceChildren(campos, surtidoFila, cuantos, tabla, crear("p", "oc-hoja-nota master-fuente", datos.fuente || ""));
-            pintar();
-        }).catch(() => {
-            dentro.replaceChildren(crear("p", "oc-vacio", "No he podido abrir la tienda."));
-        });
     }
 
     // ---- EL CONVERSOR DE MONEDAS: cuánto es en cada moneda, y repartir
     // entre varios (1 ppt = 10 po; 1 po = 2 pe = 10 pp = 100 pc). ----
     const MONEDAS = [["ppt", "platino", 1000], ["po", "oro", 100], ["pe", "electro", 50], ["pp", "plata", 10], ["pc", "cobre", 1]];
-
-    function enMonedas(cp, conPlatino) {
-        const trozos = [];
-        let resto = Math.floor(cp);
-        MONEDAS.filter((x) => x[0] !== "pe" && (conPlatino || x[0] !== "ppt")).forEach(([k, , v]) => {
-            const n = Math.floor(resto / v);
-            resto -= n * v;
-            if (n) {
-                trozos.push(n.toLocaleString("es-ES") + " " + k);
-            }
-        });
-        return trozos.join(" ") || "0 pc";
-    }
-
-    function montarMonedas(dentro, m) {
-        m.datos = m.datos || {};
-        const form = crear("form", "master-monedas");
-        const campos = {};
-        MONEDAS.forEach(([k, nombre]) => {
-            const caja = crear("div", "master-tienda-campo");
-            const et = crear("label", "oc-dados-etiqueta", k + " (" + nombre + ")");
-            const i = crear("input", "oc-dados-texto");
-            i.type = "number";
-            i.min = "0";
-            i.inputMode = "numeric";
-            i.id = "master-monedas-" + k + "-" + m.id;
-            i.value = m.datos[k] ? String(m.datos[k]) : "";
-            et.htmlFor = i.id;
-            caja.append(et, i);
-            form.appendChild(caja);
-            campos[k] = i;
-        });
-        const entreCaja = crear("div", "master-tienda-campo");
-        const etEntre = crear("label", "oc-dados-etiqueta", "repartir entre");
-        const entre = crear("input", "oc-dados-texto");
-        entre.type = "number";
-        entre.min = "1";
-        entre.inputMode = "numeric";
-        entre.id = "master-monedas-entre-" + m.id;
-        entre.value = String(m.datos.entre || 1);
-        etEntre.htmlFor = entre.id;
-        entreCaja.append(etEntre, entre);
-        form.appendChild(entreCaja);
-        const salida = crear("dl", "master-bicho-datos master-monedas-salida");
-        salida.setAttribute("aria-live", "polite");
-        const vaciar = botonDe("oc-vida-accion", "🗑️ vaciar", () => {
-            MONEDAS.forEach(([k]) => {
-                campos[k].value = "";
-            });
-            calcular();
-            campos.po.focus();
-        });
-        function calcular() {
-            let cp = 0;
-            MONEDAS.forEach(([k, , v]) => {
-                const n = Math.max(0, parseFloat(campos[k].value) || 0);
-                m.datos[k] = n;
-                cp += n * v;
-            });
-            const n = Math.max(1, parseInt(entre.value, 10) || 1);
-            m.datos.entre = n;
-            guardar();
-            const filas = [["Total", enMonedas(cp, true)], ["En oro", (cp / 100).toLocaleString("es-ES", { maximumFractionDigits: 2 }) + " po"],
-                ["En plata", (cp / 10).toLocaleString("es-ES", { maximumFractionDigits: 1 }) + " pp"],
-                ["En cobre", cp.toLocaleString("es-ES") + " pc"]];
-            if (n > 1) {
-                const cada = Math.floor(cp / n);
-                filas.push(["Para cada uno (" + n + ")", enMonedas(cada, false)]);
-                if (cp - cada * n) {
-                    filas.push(["Sobra", enMonedas(cp - cada * n, false)]);
-                }
-            }
-            salida.replaceChildren(...filas.flatMap(([a, b]) => [crear("dt", "", a), crear("dd", "", b)]));
-        }
-        form.addEventListener("input", calcular);
-        form.addEventListener("submit", (e) => {
-            e.preventDefault();
-            calcular();
-        });
-        dentro.append(form, salida, vaciar);
-        calcular();
-    }
+    Object.assign(PM, { MONEDAS });
 
     // LOS MÓDULOS QUE HAY: su nombre, su dibujo, cómo se montan, su
     // tamaño al añadirlos y si solo puede haber uno.
@@ -10090,14 +3691,11 @@
         todo.docs = todo.docs || { carpetas: [], notas: [] };
         return todo.docs;
     };
+    Object.assign(PM, { docsDe });
     const idDoc = (pre) => pre + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+    Object.assign(PM, { idDoc });
     const avisarDocs = () => document.dispatchEvent(new CustomEvent("master:documentos"));
-    // El texto de una nota (sin formato), para buscar.
-    function textoDeHtml(html) {
-        const t = document.createElement("template");
-        t.innerHTML = sanearHtml(html);
-        return (t.content.textContent || "").replace(/\s+/g, " ").trim();
-    }
+    Object.assign(PM, { avisarDocs });
     // «Carpeta / subcarpeta» de una carpeta (o «documentos», la raíz).
     function rutaDe(idCarpeta) {
         const { carpetas } = docsDe();
@@ -10109,19 +3707,10 @@
         }
         return trozos.length ? trozos.join(" / ") : "documentos";
     }
-    // Todas las carpetas de dentro (para no meter una carpeta en sí misma).
-    function dentroDe(idCarpeta) {
-        const { carpetas } = docsDe();
-        const salen = [idCarpeta];
-        for (let i = 0; i < salen.length; i += 1) {
-            carpetas.filter((c) => c.padre === salen[i]).forEach((c) => salen.push(c.id));
-        }
-        return salen;
-    }
     // Las carpetas como opciones de un desplegable, con sangría.
     function opcionesCarpetas(sin) {
         const { carpetas } = docsDe();
-        const salen = [["", "📁 documentos (fuera de carpetas)"]];
+        const salen = [["", ocT("📁 documentos (fuera de carpetas)")]];
         const bajar = (padre, nivel) => carpetas.filter((c) => (c.padre || null) === padre && sin.indexOf(c.id) < 0)
             .sort((a, b) => a.nombre.localeCompare(b.nombre, "es")).forEach((c) => {
                 salen.push([c.id, "  ".repeat(nivel) + "📁 " + c.nombre]);
@@ -10138,10 +3727,11 @@
     // o un PDF de otra web) son {tipo: "enlace", url, clase}. ----
     const BASE_ARCHIVOS = "richi-master-archivos";
     const MAX_ARCHIVO = 50 * 1024 * 1024;
+    Object.assign(PM, { MAX_ARCHIVO });
     function baseArchivos() {
         return new Promise((hecho, fallo) => {
             if (!window.indexedDB) {
-                fallo(new Error("sin IndexedDB"));
+                fallo(new Error(ocT("sin IndexedDB")));
                 return;
             }
             const pet = indexedDB.open(BASE_ARCHIVOS, 1);
@@ -10166,21 +3756,74 @@
     // CON EL EJECUTABLE, en su carpeta «mis-datos/archivos» (como lo demás:
     // ver arranque.js y lanzador/almacen.go).
     const EN_CARPETA = !!(window.ocAlmacen && window.ocAlmacen.enCarpeta);
-    const rutaArchivo = (id) => "__archivos/" + encodeURIComponent(id);
-    const carpetaGuardar = (id, blob) => fetch(rutaArchivo(id), { method: "PUT", body: blob,
-        headers: { "Content-Type": blob.type || "application/octet-stream" } }).then((r) => {
-        if (!r.ok) {
-            throw new Error("no se ha guardado");
+    // Quién puede preguntar a otras webs (para importar un personaje por su
+    // enlace): el programa de escritorio y la app de Android; el navegador no.
+    const CON_RED = EN_CARPETA || !!window.ocAndroid;
+    // Dentro de la app de Android (android/: window.ocAndroid lo pone ella).
+    const EN_ANDROID = !!window.ocAndroid;
+    Object.assign(PM, { EN_ANDROID });
+
+    // LA PANTALLA ENCENDIDA durante la partida (⚙ opciones): en la app de
+    // Android, con la propia app (por defecto, sí); en un navegador que
+    // sepa hacerlo, con el «wake lock» (por defecto, no), y sólo mientras
+    // la página está a la vista.
+    const CLAVE_ENCENDIDA = "richi-master-pantalla-encendida";
+    const PUEDE_ENCENDIDA = EN_ANDROID || !!(navigator.wakeLock && navigator.wakeLock.request);
+    let cerrojoPantalla = null;
+    function encendidaElegida() {
+        let v = null;
+        try {
+            v = localStorage.getItem(CLAVE_ENCENDIDA);
+        } catch (e) {
+            v = null;
         }
-    });
+        return v === null ? EN_ANDROID : v === "si";
+    }
+    function aplicarEncendida() {
+        const si = encendidaElegida();
+        if (EN_ANDROID) {
+            window.ocAndroid.encendida(si);
+            return;
+        }
+        if (!PUEDE_ENCENDIDA) {
+            return;
+        }
+        if (si && document.visibilityState === "visible" && !cerrojoPantalla) {
+            navigator.wakeLock.request("screen").then((c) => {
+                cerrojoPantalla = c;
+                c.addEventListener("release", () => {
+                    cerrojoPantalla = null;
+                });
+            }).catch(() => {});
+        } else if (!si && cerrojoPantalla) {
+            cerrojoPantalla.release().catch(() => {});
+            cerrojoPantalla = null;
+        }
+    }
+    document.addEventListener("visibilitychange", aplicarEncendida);
+    aplicarEncendida();
+    const rutaArchivo = (id) => "__archivos/" + encodeURIComponent(id);
+    // En la app de Android, la carpeta se escribe por su puente (android.js);
+    // leer es igual que en el programa (GET __archivos).
+    const carpetaGuardar = (id, blob) => (window.ocAlmacen && window.ocAlmacen.guardarArchivo
+        ? window.ocAlmacen.guardarArchivo(id, blob)
+        : fetch(rutaArchivo(id), { method: "PUT", body: blob,
+            headers: { "Content-Type": blob.type || "application/octet-stream" } }).then((r) => {
+            if (!r.ok) {
+                throw new Error(ocT("no se ha guardado"));
+            }
+        }));
     const carpetaLeer = (id) => fetch(rutaArchivo(id), { cache: "no-store" }).then((r) => (r.ok ? r.blob() : undefined));
     const archivoGuardar = (id, blob) => (EN_CARPETA ? carpetaGuardar(id, blob) : idbGuardar(id, blob));
+    Object.assign(PM, { archivoGuardar });
     const archivoLeer = (id) => (EN_CARPETA ? carpetaLeer(id) : idbLeer(id));
-    const archivoBorrar = (id) => (EN_CARPETA ? fetch(rutaArchivo(id), { method: "DELETE" }).catch(() => {})
+    Object.assign(PM, { archivoLeer });
+    const archivoBorrar = (id) => (EN_CARPETA ? (window.ocAlmacen.borrarArchivo ? window.ocAlmacen.borrarArchivo(id)
+        : fetch(rutaArchivo(id), { method: "DELETE" })).catch(() => {})
         : enArchivos("readwrite", (a) => a.delete(id)).catch(() => {}));
+    Object.assign(PM, { archivoBorrar });
     const todosLosArchivos = () => (EN_CARPETA ? fetch("__archivos", { cache: "no-store" }).then((r) => r.json())
         .then((lista) => Promise.all(lista.map((x) => carpetaLeer(x.id).then((blob) => [x.id, blob])))) : idbTodos());
-    const tamanoBonito = (b) => (b > 1048576 ? (b / 1048576).toFixed(1).replace(".", ",") + " MB" : Math.max(1, Math.round(b / 1024)) + " KB");
     // Un Blob a «data:…» (para exportar) y de vuelta (sin fetch: la página
     // no deja pedir direcciones data:).
     const blobADatos = (blob) => new Promise((hecho) => {
@@ -10200,35 +3843,6 @@
         }
         return new Blob([bytes], { type: m[1] });
     }
-    // Una dirección para un enlace: https, o un blob: del propio
-    // navegador (los archivos subidos); si no, a ninguna parte.
-    function direccionSegura(h) {
-        return /^blob:https?:\/\/[^\s"'<>]+$/.test(String(h || "")) ? h : urlImagenSegura(h) || "#";
-    }
-    const iconoDoc = (n) => (n.tipo === "dibujo" ? "🖼️" : n.tipo === "archivo" ? (/pdf/.test(n.mime || "") ? "📕" : "🏞️")
-        : n.tipo === "enlace" ? (n.clase === "pdf" ? "🔗📕" : "🔗🏞️") : "📄");
-
-    function abrirDocumento(id) {
-        const n = docsDe().notas.find((x) => x.id === id);
-        const esDibujo = n && n.tipo === "dibujo";
-        const ya = estado.modulos.find((x) => x.datos && (esDibujo ? x.tipo === "dibujo" && x.datos.doc === id
-            : x.tipo === "documento" && x.datos.nota === id));
-        if (ya && ya.grupo && !ya.delante) {
-            verEnGrupo(ya, false);
-        }
-        if (ya && ya.el) {
-            alFrente(ya);
-            ya.el.scrollIntoView({ block: "nearest" });
-            focoDe(ya).focus();
-            return;
-        }
-        if (esDibujo) {
-            // Una copia, para dibujar en ella (y «📁» la guarda encima).
-            anadir("dibujo", { titulo: n.titulo, datos: Object.assign(JSON.parse(JSON.stringify(n.datos || {})), { doc: id }) });
-            return;
-        }
-        anadir("documento", { titulo: n ? n.titulo : "", datos: { nota: id } });
-    }
 
     // Un nombre (de carpeta o nota) en una ventanita: «alGuardar(nombre,
     // carpeta)»; con «carpetas», también dónde va.
@@ -10244,10 +3858,10 @@
         cuerpo.append(et, input);
         let donde = null;
         if (conCarpeta) {
-            donde = elegirDe("master-doc-donde", "dentro de", opcionesCarpetas(conCarpeta.sin), conCarpeta.valor || "");
+            donde = elegirDe("master-doc-donde", ocT("dentro de"), opcionesCarpetas(conCarpeta.sin), conCarpeta.valor || "");
             cuerpo.appendChild(donde);
         }
-        const listo = crear("button", "oc-vida-accion es-principal", "guardar");
+        const listo = crear("button", "oc-vida-accion es-principal", ocT("guardar"));
         listo.type = "submit";
         cuerpo.appendChild(listo);
         cuerpo.addEventListener("submit", (e) => {
@@ -10277,10 +3891,10 @@
             }
             deshacer();
             guardar();
-            avisar("No cabe en el almacenamiento del navegador: descárgalo o borra algún documento grande.");
+            avisar(ocT("No cabe en el almacenamiento del navegador: descárgalo o borra algún documento grande."));
             return false;
         };
-        const nuevo = () => pedirNombreDoc("guardar en documentos", ya ? ya.titulo + " (copia)" : hacer().titulo, vuelta, (nombre, carpeta) => {
+        const nuevo = () => pedirNombreDoc(ocT("guardar en documentos"), ya ? ocT("{titulo} (copia)", { titulo: ya.titulo }) : hacer().titulo, vuelta, (nombre, carpeta) => {
             const n = Object.assign({ id: idDoc("n"), carpeta, cambiada: Date.now() }, hacer(), { titulo: nombre });
             docs.notas.push(n);
             if (!cabe(() => docs.notas.splice(docs.notas.indexOf(n), 1))) {
@@ -10289,16 +3903,16 @@
             alGuardar(n.id);
             guardar();
             avisarDocs();
-            avisar("Guardado en 📁 " + rutaDe(carpeta) + ": " + nombre + ".");
+            avisar(ocT("Guardado en 📁 {rutaDe}: {nombre}.", { rutaDe: rutaDe(carpeta), nombre: nombre }));
         }, { sin: [], valor: (ya && ya.carpeta) || "" });
         if (!ya) {
             nuevo();
             return;
         }
         const cuerpo = crear("div", "master-docs-guardar");
-        cuerpo.appendChild(crear("p", "", "Viene de «" + ya.titulo + "» (📁 " + rutaDe(ya.carpeta) + ")."));
+        cuerpo.appendChild(crear("p", "", ocT("Viene de «{titulo}» (📁 {rutaDe}).", { titulo: ya.titulo, rutaDe: rutaDe(ya.carpeta) })));
         const botones = crear("div", "master-docs-botones");
-        const encima = botonDe("oc-vida-accion es-principal", "💾 guardar encima", () => {
+        const encima = botonDe("oc-vida-accion es-principal", ocT("💾 guardar encima"), () => {
             const antes = Object.assign({}, ya);
             Object.assign(ya, hacer(), { titulo: ya.titulo, cambiada: Date.now() });
             cerrar();
@@ -10307,491 +3921,16 @@
                 Object.assign(ya, antes);
             })) {
                 avisarDocs();
-                avisar("Guardado: " + ya.titulo + ".");
+                avisar(ocT("Guardado: {titulo}.", { titulo: ya.titulo }));
             }
         });
-        const otro = botonDe("oc-vida-accion", "📄 guardar como uno nuevo…", () => {
+        const otro = botonDe("oc-vida-accion", ocT("📄 guardar como uno nuevo…"), () => {
             cerrar();
             nuevo();
         });
         botones.append(encima, otro);
         cuerpo.appendChild(botones);
-        const cerrar = window.ocVentana.abrir({ titulo: "guardar en documentos", cuerpo, vuelta });
-    }
-
-    function montarDocumentos(dentro, m) {
-        m.datos = m.datos || {};
-        const d = m.datos;
-        d.abiertas = Array.isArray(d.abiertas) ? d.abiertas : [];
-        const uid = "master-docs-" + m.id;
-        // Dónde se crean las nuevas: la carpeta elegida (o la raíz).
-        let aqui = d.aqui || null;
-        const etBuscar = crear("label", "oc-dados-etiqueta", "buscar en los nombres y en lo escrito");
-        const buscar = crear("input", "oc-dados-texto");
-        buscar.type = "search";
-        buscar.id = uid + "-buscar";
-        buscar.placeholder = "taberna, Elara, deuda…";
-        buscar.autocomplete = "off";
-        etBuscar.htmlFor = buscar.id;
-        const donde = crear("p", "master-docs-donde");
-        const nuevaCarpeta = botonDe("oc-vida-accion", "＋ 📁 carpeta", () => {
-            pedirNombreDoc("carpeta nueva", "", nuevaCarpeta, (n) => {
-                const c = { id: idDoc("c"), nombre: n, padre: aqui };
-                docsDe().carpetas.push(c);
-                if (aqui && d.abiertas.indexOf(aqui) < 0) {
-                    d.abiertas.push(aqui);
-                }
-                guardar();
-                avisarDocs();
-                avisar("Carpeta nueva: " + n + ".");
-            });
-        });
-        const nuevaNota = botonDe("oc-vida-accion es-principal", "＋ 📄 nota", () => {
-            const n = { id: idDoc("n"), titulo: "nota sin título", carpeta: aqui, html: "", cambiada: Date.now() };
-            docsDe().notas.push(n);
-            if (aqui && d.abiertas.indexOf(aqui) < 0) {
-                d.abiertas.push(aqui);
-            }
-            guardar();
-            avisarDocs();
-            abrirDocumento(n.id);
-        });
-        // SUBIR imágenes o PDF (uno o varios), a la carpeta de ahora.
-        const subir = crear("input");
-        subir.type = "file";
-        subir.accept = "image/*,application/pdf";
-        subir.multiple = true;
-        subir.hidden = true;
-        const nuevoArchivo = botonDe("oc-vida-accion", "＋ 📎 archivo", () => subir.click(), "Subir una imagen o un PDF");
-        nuevoArchivo.title = "Una imagen o un PDF de tu ordenador (se guarda en este navegador)";
-        subir.addEventListener("change", () => {
-            const lista = Array.from(subir.files || []);
-            subir.value = "";
-            const valen = lista.filter((f) => /^image\/|^application\/pdf$/.test(f.type) && f.size <= MAX_ARCHIVO);
-            if (valen.length < lista.length) {
-                avisar("Sólo imágenes y PDF de hasta 50 MB.");
-            }
-            Promise.all(valen.map((f) => {
-                const id = idDoc("a");
-                return archivoGuardar(id, f).then(() => {
-                    docsDe().notas.push({ id: idDoc("n"), tipo: "archivo", titulo: f.name.replace(/\.[^.]+$/, "") || f.name, carpeta: aqui,
-                        archivo: id, mime: f.type, tamano: f.size, cambiada: Date.now() });
-                    return f.name;
-                });
-            })).then((nombres) => {
-                if (!nombres.length) {
-                    return;
-                }
-                if (aqui && d.abiertas.indexOf(aqui) < 0) {
-                    d.abiertas.push(aqui);
-                }
-                guardar();
-                avisarDocs();
-                avisar("Subido a 📁 " + rutaDe(aqui) + ": " + nombres.join(", ") + ". Se queda sólo en este navegador: para no"
-                    + " perderlo, ⚙ → exportar.");
-            }).catch(() => avisar("No se ha podido guardar el archivo (este navegador no deja, o no cabe)."));
-        });
-        const botones = crear("div", "master-docs-botones");
-        botones.append(nuevaNota, nuevaCarpeta, nuevoArchivo, subir);
-        // Dónde se quedan las cosas (no en la web).
-        const privado = crear("p", "oc-hoja-nota master-docs-aviso");
-        privado.append(crear("strong", "", "🔒 Todo se queda en este navegador: "),
-            document.createTextNode("las notas, los dibujos y lo que subes no se suben a la web ni los ve nadie más. Tampoco pasan"
-                + " solos a otro ordenador, y se pierden si se borran los datos del navegador: para guardarlos o llevarlos, ⚙ →"
-                + " exportar (y luego importar)."));
-
-        const arbol = crear("div", "master-docs-arbol");
-        const cuantos = crear("p", "visually-hidden");
-        cuantos.setAttribute("role", "status");
-
-        // Un botón pequeño de las filas (✎ y ✕).
-        const mando = (texto, etiqueta, alPulsar) => {
-            const b = botonDe("master-docs-mando", texto, alPulsar, etiqueta);
-            b.title = etiqueta;
-            return b;
-        };
-        // Borrar pide pulsar dos veces.
-        const borrador = (etiqueta, alBorrar) => {
-            let seguro = false;
-            const b = mando("✕", etiqueta, () => {
-                if (!seguro) {
-                    seguro = true;
-                    b.classList.add("es-seguro");
-                    b.setAttribute("aria-label", "¿Seguro? Pulsa otra vez: " + etiqueta);
-                    avisar("Pulsa otra vez para borrar.");
-                    return;
-                }
-                alBorrar();
-            });
-            return b;
-        };
-        const filaNota = (n, conRuta, trozo) => {
-            const li = crear("li", "master-docs-fila es-nota");
-            const abrir = botonDe("master-docs-abrir", "", () => abrirDocumento(n.id), "Abrir la nota " + n.titulo);
-            const em = crear("span", "master-docs-icono", iconoDoc(n));
-            em.setAttribute("aria-hidden", "true");
-            abrir.append(em, crear("span", "master-docs-nombre", n.titulo));
-            if (n.tipo === "dibujo") {
-                abrir.setAttribute("aria-label", "Abrir el dibujo " + n.titulo);
-            } else if (n.tipo === "archivo" || n.tipo === "enlace") {
-                abrir.setAttribute("aria-label", "Abrir " + (n.tipo === "enlace" ? "el enlace " : (/pdf/.test(n.mime || "")
-                    ? "el PDF " : "la imagen ")) + n.titulo);
-            }
-            if (conRuta) {
-                abrir.appendChild(crear("span", "master-docs-ruta", rutaDe(n.carpeta)));
-            }
-            if (trozo) {
-                abrir.appendChild(crear("span", "master-docs-trozo", trozo));
-            }
-            const quitar = borrador("Borrar la nota " + n.titulo, () => {
-                docsDe().notas = docsDe().notas.filter((x) => x !== n);
-                if (n.tipo === "archivo" && n.archivo) {
-                    archivoBorrar(n.archivo);
-                }
-                // Sus ventanas, fuera.
-                estado.modulos.filter((x) => x.tipo === "documento" && x.datos && x.datos.nota === n.id).forEach((x) => {
-                    x.datos.nota = null;
-                });
-                estado.modulos.filter((x) => x.datos && x.datos.doc === n.id).forEach((x) => {
-                    delete x.datos.doc;
-                });
-                guardar();
-                avisarDocs();
-                avisar("Borrada la nota " + n.titulo + ".");
-                buscar.focus();
-            });
-            li.append(abrir, quitar);
-            return li;
-        };
-        const lista = (padre, nivel) => {
-            const { carpetas, notas } = docsDe();
-            const ul = crear("ul", "master-docs-lista");
-            carpetas.filter((c) => (c.padre || null) === padre).sort((a, b) => a.nombre.localeCompare(b.nombre, "es")).forEach((c) => {
-                const li = crear("li", "master-docs-fila es-carpeta");
-                const abierta = d.abiertas.indexOf(c.id) >= 0;
-                const b = botonDe("master-docs-abrir", "", () => {
-                    const i = d.abiertas.indexOf(c.id);
-                    if (i >= 0 && aqui === c.id) {
-                        d.abiertas.splice(i, 1);
-                    } else if (i < 0) {
-                        d.abiertas.push(c.id);
-                    }
-                    aqui = c.id;
-                    d.aqui = aqui;
-                    guardar();
-                    pintar(c.id);
-                });
-                b.setAttribute("aria-expanded", abierta ? "true" : "false");
-                b.dataset.carpeta = c.id;
-                if (aqui === c.id) {
-                    b.setAttribute("aria-current", "true");
-                }
-                const em = crear("span", "master-docs-icono", abierta ? "📂" : "📁");
-                em.setAttribute("aria-hidden", "true");
-                const n = notas.filter((x) => x.carpeta === c.id).length;
-                b.append(em, crear("span", "master-docs-nombre", c.nombre), crear("span", "master-docs-ruta", n + (n === 1 ? " documento" : " documentos")));
-                const cambiar = mando("✎", "Renombrar o mover la carpeta " + c.nombre, () => {
-                    pedirNombreDoc("carpeta", c.nombre, cambiar, (nombre, padreNuevo) => {
-                        c.nombre = nombre;
-                        c.padre = padreNuevo;
-                        guardar();
-                        avisarDocs();
-                    }, { sin: dentroDe(c.id), valor: c.padre || "" });
-                });
-                cambiar.setAttribute("aria-haspopup", "dialog");
-                const quitar = borrador("Borrar la carpeta " + c.nombre + " (lo de dentro sube un nivel)", () => {
-                    const docs = docsDe();
-                    docs.carpetas.filter((x) => x.padre === c.id).forEach((x) => {
-                        x.padre = c.padre || null;
-                    });
-                    docs.notas.filter((x) => x.carpeta === c.id).forEach((x) => {
-                        x.carpeta = c.padre || null;
-                    });
-                    docs.carpetas = docs.carpetas.filter((x) => x !== c);
-                    if (aqui === c.id) {
-                        aqui = c.padre || null;
-                        d.aqui = aqui;
-                    }
-                    guardar();
-                    avisarDocs();
-                    avisar("Borrada la carpeta " + c.nombre + "; lo de dentro, un nivel más arriba.");
-                    buscar.focus();
-                });
-                li.append(b, cambiar, quitar);
-                if (abierta) {
-                    li.appendChild(lista(c.id, nivel + 1));
-                }
-                ul.appendChild(li);
-            });
-            notas.filter((x) => (x.carpeta || null) === padre).sort((a, b) => a.titulo.localeCompare(b.titulo, "es"))
-                .forEach((x) => ul.appendChild(filaNota(x)));
-            return ul;
-        };
-        // Un trozo de lo escrito alrededor de lo que se busca.
-        const trozoDe = (texto, q) => {
-            let plano = "";
-            const mapa = [];
-            Array.from(texto).forEach((ch, i) => {
-                Array.from(llano(ch)).forEach((x) => {
-                    plano += x;
-                    mapa.push(i);
-                });
-            });
-            const k = plano.indexOf(q);
-            if (k < 0) {
-                return "";
-            }
-            const letras = Array.from(texto);
-            const a = Math.max(0, mapa[k] - 40);
-            const b = Math.min(letras.length, mapa[Math.min(mapa.length - 1, k + q.length)] + 60);
-            return (a ? "…" : "") + letras.slice(a, b).join("") + (b < letras.length ? "…" : "");
-        };
-        function pintar(foco) {
-            const q = llano(buscar.value.trim());
-            donde.replaceChildren(crear("strong", "", "Las nuevas van en: "), document.createTextNode("📁 " + rutaDe(aqui)));
-            if (aqui) {
-                const raiz = botonDe("master-docs-mando es-texto", "↑ fuera", () => {
-                    aqui = null;
-                    d.aqui = null;
-                    guardar();
-                    pintar();
-                }, "Que las nuevas vayan fuera de las carpetas");
-                donde.append(" ", raiz);
-            }
-            const docs = docsDe();
-            if (!q) {
-                arbol.replaceChildren(docs.carpetas.length || docs.notas.length ? lista(null, 0)
-                    : crear("p", "oc-vacio", "Todavía no hay nada: crea una nota o una carpeta, o sube una imagen o un PDF."));
-                cuantos.textContent = "";
-            } else {
-                const ul = crear("ul", "master-docs-lista");
-                let n = 0;
-                docs.carpetas.filter((c) => llano(c.nombre).includes(q)).forEach((c) => {
-                    n += 1;
-                    const li = crear("li", "master-docs-fila es-carpeta");
-                    const b = botonDe("master-docs-abrir", "", () => {
-                        // A la carpeta: sin buscar, abierta (y las de fuera).
-                        let x = c;
-                        while (x) {
-                            if (d.abiertas.indexOf(x.id) < 0) {
-                                d.abiertas.push(x.id);
-                            }
-                            x = docs.carpetas.find((y) => y.id === x.padre);
-                        }
-                        aqui = c.id;
-                        d.aqui = aqui;
-                        buscar.value = "";
-                        guardar();
-                        pintar(c.id);
-                    });
-                    const em = crear("span", "master-docs-icono", "📁");
-                    em.setAttribute("aria-hidden", "true");
-                    b.append(em, crear("span", "master-docs-nombre", c.nombre), crear("span", "master-docs-ruta", rutaDe(c.padre)));
-                    li.appendChild(b);
-                    ul.appendChild(li);
-                });
-                docs.notas.forEach((x) => {
-                    const enNombre = llano(x.titulo).includes(q);
-                    const trozo = trozoDe(x.tipo === "dibujo" ? (x.datos && x.datos.desc) || "" : x.tipo === "enlace" ? x.url || ""
-                        : x.tipo === "archivo" ? "" : textoDeHtml(x.html), q);
-                    if (enNombre || trozo) {
-                        n += 1;
-                        ul.appendChild(filaNota(x, true, trozo));
-                    }
-                });
-                arbol.replaceChildren(n ? ul : crear("p", "oc-vacio", "Nada con eso."));
-                cuantos.textContent = n ? n + (n === 1 ? " resultado" : " resultados") : "Nada con eso.";
-            }
-            if (foco) {
-                const b = arbol.querySelector("[data-carpeta='" + foco + "']");
-                if (b) {
-                    b.focus();
-                }
-            }
-        }
-        let espera = 0;
-        buscar.addEventListener("input", () => {
-            clearTimeout(espera);
-            espera = setTimeout(() => pintar(), 150);
-        });
-        dentro.append(etBuscar, buscar, botones, privado, donde, cuantos, arbol);
-        pintar();
-        mientrasEste(dentro, "master:documentos", () => pintar());
-    }
-
-    // Lo de dentro de un archivo o un enlace: la imagen (con su texto
-    // alternativo, el nombre), o el PDF en un marco (los subidos: el visor
-    // del navegador) y, siempre, abrirlo en otra pestaña y descargarlo.
-    function montarArchivoDoc(n) {
-        const caja = crear("div", "master-doc-archivo");
-        const mandos = crear("div", "master-docs-botones");
-        const enlace = (texto, href, etiqueta, descargar) => {
-            const a = crear("a", "oc-vida-accion", texto);
-            a.href = direccionSegura(href);
-            if (descargar) {
-                a.download = descargar;
-            } else {
-                a.target = "_blank";
-                a.rel = "noopener noreferrer";
-            }
-            a.setAttribute("aria-label", etiqueta);
-            return a;
-        };
-        if (n.tipo === "enlace") {
-            const u = urlImagenSegura(n.url);
-            if (!u) {
-                caja.appendChild(crear("p", "oc-vacio", "La dirección no vale."));
-                return caja;
-            }
-            if (n.clase === "pdf") {
-                caja.appendChild(crear("p", "oc-hoja-nota", "Los PDF de otras webs no se pueden ver aquí dentro: se abren en otra pestaña."));
-            } else {
-                const img = crear("img", "master-doc-imagen");
-                img.alt = n.titulo;
-                img.referrerPolicy = "no-referrer";
-                img.loading = "lazy";
-                img.src = urlImagenSegura(n.url);
-                img.addEventListener("error", () => img.replaceWith(crear("p", "oc-vacio", "No se ha podido cargar la imagen.")));
-                caja.appendChild(img);
-            }
-            mandos.appendChild(enlace("↗ abrir el original", u, "Abrir " + n.titulo + " en otra pestaña"));
-            caja.appendChild(mandos);
-            return caja;
-        }
-        caja.appendChild(crear("p", "oc-hoja-nota", "Cargando…"));
-        archivoLeer(n.archivo).then((blob) => {
-            if (!blob) {
-                caja.replaceChildren(crear("p", "oc-vacio", "El archivo no está en este navegador (¿se importó sin él, o se borró?)."));
-                return;
-            }
-            // Una dirección blob: que hace el propio navegador con el archivo.
-            const archivoBlob = URL.createObjectURL(blob);
-            const esPdf = /pdf/.test(blob.type || n.mime || "");
-            caja.replaceChildren();
-            if (esPdf) {
-                const marco = crear("iframe", "master-doc-pdf");
-                marco.title = "PDF: " + n.titulo;
-                marco.src = archivoBlob;
-                caja.appendChild(marco);
-            } else {
-                const img = crear("img", "master-doc-imagen");
-                img.alt = n.titulo;
-                img.src = archivoBlob;
-                caja.appendChild(img);
-            }
-            const ext = esPdf ? ".pdf" : "." + ((blob.type.split("/")[1] || "png").replace("jpeg", "jpg").replace("svg+xml", "svg"));
-            mandos.append(enlace("↗ abrir en otra pestaña", archivoBlob, "Abrir " + n.titulo + " en otra pestaña"),
-                enlace("⬇ descargar", archivoBlob, "Descargar " + n.titulo, (n.titulo || "archivo").replace(/[^\p{L}\p{N} _-]+/gu, "") + ext));
-            caja.appendChild(mandos);
-        }).catch(() => caja.replaceChildren(crear("p", "oc-vacio", "Este navegador no deja leer los archivos guardados.")));
-        return caja;
-    }
-
-    // UNA NOTA, en su ventana: el título, en qué carpeta va y lo escrito
-    // (con la barra de formato). Se guarda sola.
-    function montarDocumento(dentro, m) {
-        m.datos = m.datos || {};
-        const n = docsDe().notas.find((x) => x.id === m.datos.nota && x.tipo !== "dibujo");
-        const esNota = n && n.tipo !== "archivo" && n.tipo !== "enlace";
-        // Para el lector, qué es (dos con el mismo nombre no se confunden).
-        const h2 = m.el && m.el.querySelector(".master-ventana-titulo");
-        if (n && h2 && !h2.querySelector(".visually-hidden")) {
-            h2.appendChild(crear("span", "visually-hidden", n.tipo === "enlace" ? " (enlace)" : n.tipo === "archivo"
-                ? (/pdf/.test(n.mime || "") ? " (PDF)" : " (imagen)") : " (nota)"));
-        }
-        if (!n) {
-            dentro.appendChild(crear("p", "oc-vacio", "Esta nota ya no está (se ha borrado, o es de otra campaña)."));
-            return;
-        }
-        const uid = "master-doc-" + m.id;
-        const fila = crear("div", "master-doc-cabeza");
-        const etT = crear("label", "oc-dados-etiqueta", "título");
-        const titulo = crear("input", "oc-dados-texto");
-        titulo.id = uid + "-titulo";
-        titulo.value = n.titulo;
-        titulo.maxLength = 80;
-        titulo.autocomplete = "off";
-        etT.htmlFor = titulo.id;
-        const cajaT = crear("div", "master-campo");
-        cajaT.append(etT, titulo);
-        const carpeta = elegirDe(uid + "-carpeta", "carpeta", opcionesCarpetas([]), n.carpeta || "");
-        fila.append(cajaT, carpeta);
-        const cuando = crear("p", "oc-hoja-nota master-doc-cuando");
-        const pintarCuando = () => {
-            cuando.textContent = (esNota ? "Cambiada: " : "Añadido: ") + new Date(n.cambiada || Date.now()).toLocaleString("es-ES",
-                { day: "numeric", month: "long", hour: "2-digit", minute: "2-digit" }) + " · en 📁 " + rutaDe(n.carpeta) +
-                (n.tamano ? " · " + tamanoBonito(n.tamano) : "");
-        };
-        pintarCuando();
-        let espera = 0;
-        if (!esNota) {
-            const ver = montarArchivoDoc(n);
-            titulo.addEventListener("input", () => {
-                n.titulo = titulo.value.trim() || "sin nombre";
-                m.titulo = n.titulo;
-                ponerTitulo(m);
-                clearTimeout(espera);
-                espera = setTimeout(() => {
-                    guardar();
-                    avisarDocs();
-                }, 400);
-            });
-            carpeta.elegir.addEventListener("change", () => {
-                n.carpeta = carpeta.elegir.value || null;
-                pintarCuando();
-                guardar();
-                avisarDocs();
-                avisar("Ahora en: " + rutaDe(n.carpeta) + ".");
-            });
-            dentro.append(fila, cuando, ver);
-            return;
-        }
-        const { area, barra, leer } = editorRico("Lo que pone la nota " + n.titulo + " (se guarda sola)", () => {
-            clearTimeout(espera);
-            espera = setTimeout(() => {
-                n.html = leer();
-                n.cambiada = Date.now();
-                pintarCuando();
-                guardar();
-                avisarDocs();
-            }, 500);
-        });
-        area.classList.add("es-notas");
-        area.innerHTML = sanearHtml(n.html) || "<p><br></p>";
-        titulo.addEventListener("input", () => {
-            n.titulo = titulo.value.trim() || "nota sin título";
-            n.cambiada = Date.now();
-            m.titulo = n.titulo;
-            ponerTitulo(m);
-            clearTimeout(espera);
-            espera = setTimeout(() => {
-                guardar();
-                avisarDocs();
-            }, 400);
-        });
-        carpeta.elegir.addEventListener("change", () => {
-            n.carpeta = carpeta.elegir.value || null;
-            n.cambiada = Date.now();
-            pintarCuando();
-            guardar();
-            avisarDocs();
-            avisar("Ahora en: " + rutaDe(n.carpeta) + ".");
-        });
-        // Si cambian las carpetas (en «documentos»), el desplegable al día.
-        mientrasEste(dentro, "master:documentos", () => {
-            if (!docsDe().notas.includes(n)) {
-                dentro.replaceChildren(crear("p", "oc-vacio", "Esta nota se ha borrado."));
-                return;
-            }
-            const valor = n.carpeta || "";
-            carpeta.elegir.replaceChildren(...opcionesCarpetas([]).map(([v, t]) => {
-                const o = crear("option", "", t);
-                o.value = v;
-                return o;
-            }));
-            carpeta.elegir.value = valor;
-        });
-        dentro.append(fila, cuando, barra, area);
+        const cerrar = window.ocVentana.abrir({ titulo: ocT("guardar en documentos"), cuerpo, vuelta });
     }
 
     // ---- EL SONIDO AMBIENTE: grabaciones de verdad, en bucle, de la
@@ -10810,21 +3949,9 @@
     const sonidosListos = fetch("sonidos/indice.json").then((r) => (r.ok ? r.json() : { rutas: [] })).then((x) => {
         sonidosHay = new Set(Array.isArray(x.rutas) ? x.rutas : []);
     }).catch(() => {});
+    Object.assign(PM, { sonidosListos });
     const sonidoEsta = (rutas) => rutas.every((r) => sonidosHay.has(r));
-    const SONIDOS = [["lluvia", "🌧️", "lluvia", ["weather/rain_on_roof"]],
-        ["tormenta", "⛈️", "tormenta", ["weather/thunderstorm_long"]],
-        ["viento", "💨", "viento", ["weather/strong_wind"]],
-        ["hoguera", "🔥", "hoguera", ["ambiences/fire"]],
-        ["rio", "🏞️", "río", ["water/small_stream_flowing"]],
-        ["mar", "🌊", "mar", ["water/waves_crashing_on_rock_beach"]],
-        ["carro", "🐴", "carro en marcha", ["transportation/horse_and_carriage"]],
-        ["mercado", "🛒", "mercado", ["ambiences/small_outdoor_marketplace"]],
-        ["taberna", "🍺", "taberna", ["crowds/murmuring_and_talking_men"]],
-        ["noche", "🦗", "noche", ["ambiences/outside_night"]],
-        ["bosque", "🐦", "bosque", ["ambiences/spring_day_forest"]],
-        ["mazmorra", "🕳️", "mazmorra (viento y goteo)", ["horror/hallow_wind", "water/water_leak"]],
-        ["barco", "⛵", "barco (madera que cruje)", ["transportation/wood_creak_on_old_ship_series"]],
-        ["granja", "🐓", "granja", ["ambiences/morning_farm"]]];
+    Object.assign(PM, { sonidoEsta });
     // Sólo las de esa biblioteca.
     function urlSonidoSegura(ruta) {
         const u = SONIDOS_DE + ruta + ".ogg";
@@ -10832,6 +3959,7 @@
     }
     // El motor: uno para toda la página. «activos»: id → {parar, volumen}.
     const AMBIENTE = { ctx: null, general: null, nivel: 0.8, activos: {}, vigila: 0 };
+    Object.assign(PM, { AMBIENTE });
     // Web Audio, sólo para los sonidos propios (se descodifican aquí).
     function motorAudio() {
         if (!AMBIENTE.ctx) {
@@ -10846,581 +3974,9 @@
         }
         return AMBIENTE;
     }
-    // Subir o bajar el volumen de unos <audio> poco a poco.
-    function fundir(audios, hasta, alAcabar) {
-        const pasos = 12;
-        const desde = audios.map((a) => a.volume);
-        let i = 0;
-        const t = setInterval(() => {
-            i += 1;
-            audios.forEach((a, k) => {
-                a.volume = Math.max(0, Math.min(1, desde[k] + (hasta - desde[k]) * i / pasos));
-            });
-            if (i >= pasos) {
-                clearInterval(t);
-                if (alAcabar) {
-                    alAcabar();
-                }
-            }
-        }, 50);
-    }
-    // Una grabación de la biblioteca (o varias a la vez), en bucle.
-    function sonarGrabacion(id, rutas, vol, alFallar) {
-        if (AMBIENTE.activos[id]) {
-            return;
-        }
-        const audios = rutas.map((r) => {
-            const a = new Audio();
-            a.loop = true;
-            a.preload = "auto";
-            a.volume = 0;
-            a.src = urlSonidoSegura(r);
-            a.addEventListener("error", () => {
-                if (AMBIENTE.activos[id]) {
-                    callar(id);
-                    alFallar();
-                }
-            });
-            a.play().catch(() => {
-                if (AMBIENTE.activos[id]) {
-                    callar(id);
-                    alFallar();
-                }
-            });
-            return a;
-        });
-        let mio = vol;
-        fundir(audios, mio * AMBIENTE.nivel);
-        AMBIENTE.activos[id] = {
-            volumen(v) {
-                mio = v === undefined ? mio : v;
-                audios.forEach((a) => {
-                    a.volume = Math.max(0, Math.min(1, mio * AMBIENTE.nivel));
-                });
-            },
-            parar() {
-                fundir(audios, 0, () => audios.forEach((a) => {
-                    a.pause();
-                    a.removeAttribute("src");
-                    a.load();
-                }));
-            },
-        };
-        vigilarAmbiente();
-    }
-    // Un sonido propio (descodificado con Web Audio: bucle sin cortes).
-    function sonarPropio(id, audio, vol) {
-        const A = motorAudio();
-        if (AMBIENTE.activos[id]) {
-            return;
-        }
-        const salida = A.ctx.createGain();
-        salida.gain.value = 0;
-        salida.connect(A.general);
-        salida.gain.setTargetAtTime(vol, A.ctx.currentTime, 0.3);
-        const s = A.ctx.createBufferSource();
-        s.buffer = audio;
-        s.loop = true;
-        s.connect(salida);
-        s.start();
-        AMBIENTE.activos[id] = {
-            volumen(v) {
-                if (v !== undefined) {
-                    salida.gain.setTargetAtTime(v, A.ctx.currentTime, 0.1);
-                }
-            },
-            parar() {
-                salida.gain.setTargetAtTime(0, A.ctx.currentTime, 0.2);
-                setTimeout(() => {
-                    try {
-                        s.stop();
-                    } catch (e) {
-                        // Ya parado.
-                    }
-                    salida.disconnect();
-                }, 900);
-            },
-        };
-        vigilarAmbiente();
-    }
-    function volumenGeneral(v) {
-        AMBIENTE.nivel = v;
-        if (AMBIENTE.general) {
-            AMBIENTE.general.gain.setTargetAtTime(v, AMBIENTE.ctx.currentTime, 0.1);
-        }
-        Object.values(AMBIENTE.activos).forEach((x) => x.volumen());
-    }
-    function callar(id) {
-        const x = AMBIENTE.activos[id];
-        if (x) {
-            x.parar();
-            delete AMBIENTE.activos[id];
-        }
-    }
-    const callarTodo = () => Object.keys(AMBIENTE.activos).forEach(callar);
-    // Si ya no queda ninguna ventana de sonido en la campaña, silencio.
-    function vigilarAmbiente() {
-        if (AMBIENTE.vigila) {
-            return;
-        }
-        AMBIENTE.vigila = setInterval(() => {
-            const hay = todo.perfiles.some((pf) => pf.modulos.some((x) => x.tipo === "ambiente"));
-            if (!hay || !Object.keys(AMBIENTE.activos).length) {
-                if (!hay) {
-                    callarTodo();
-                }
-                clearInterval(AMBIENTE.vigila);
-                AMBIENTE.vigila = 0;
-            }
-        }, 1500);
-    }
-
-    function montarAmbiente(dentro, m) {
-        m.datos = m.datos || {};
-        const d = m.datos;
-        d.vol = d.vol || {};
-        d.propios = Array.isArray(d.propios) ? d.propios : [];
-        if (!window.Audio) {
-            dentro.appendChild(crear("p", "oc-vacio", "Este navegador no puede poner sonidos."));
-            return;
-        }
-        // EL VOLUMEN GENERAL y parar todo.
-        const arriba = crear("div", "master-ambiente-arriba");
-        const etG = crear("label", "master-ambiente-general");
-        const general = crear("input");
-        general.type = "range";
-        general.min = 0;
-        general.max = 100;
-        general.value = d.general === undefined ? 80 : d.general;
-        general.setAttribute("aria-label", "Volumen general");
-        general.setAttribute("aria-valuetext", general.value + " %");
-        etG.append(crear("span", "", "🔊 general"), general);
-        const ponerGeneral = () => volumenGeneral(general.value / 100);
-        AMBIENTE.nivel = general.value / 100;
-        general.addEventListener("input", () => {
-            d.general = Number(general.value);
-            general.setAttribute("aria-valuetext", general.value + " %");
-            ponerGeneral();
-            guardar();
-        });
-        const parar = botonDe("oc-vida-accion", "■ silencio", () => {
-            callarTodo();
-            d.sonando = [];
-            guardar();
-            pintar();
-            avisar("Silencio.");
-        }, "Parar todos los sonidos");
-        arriba.append(etG, parar);
-        // Lo que sonaba antes de recargar (el navegador no deja que suene
-        // solo: hay que pulsar).
-        const volver = botonDe("oc-vida-accion es-principal", "", () => {
-            (d.sonando || []).forEach((id) => encender(id));
-            volver.hidden = true;
-            pintar();
-        });
-        const lista = crear("ul", "master-ambiente-lista");
-        lista.setAttribute("aria-label", "Sonidos");
-        const filas = [];
-        const datosDe = (id) => {
-            const p = d.propios.find((x) => "propio-" + x.id === id);
-            return p ? ["🎵", p.nombre] : (SONIDOS.find((s) => s[0] === id) || []).slice(1, 3);
-        };
-        function encender(id) {
-            const vol = (d.vol[id] === undefined ? 70 : d.vol[id]) / 100;
-            ponerGeneral();
-            const p = d.propios.find((x) => "propio-" + x.id === id);
-            if (p) {
-                motorAudio();
-                return archivoLeer(p.archivo).then((blob) => (blob ? blob.arrayBuffer() : null)).then((buf) => (buf
-                    ? AMBIENTE.ctx.decodeAudioData(buf) : null)).then((audio) => {
-                    if (!audio) {
-                        avisar("Ese sonido ya no está en este navegador.");
-                        return;
-                    }
-                    sonarPropio(id, audio, vol);
-                    d.sonando = Array.from(new Set((d.sonando || []).concat(id)));
-                    guardar();
-                    pintar();
-                }).catch(() => avisar("No se ha podido poner ese sonido."));
-            }
-            const s = SONIDOS.find((x) => x[0] === id);
-            if (s) {
-                sonarGrabacion(id, s[3], vol, () => {
-                    d.sonando = (d.sonando || []).filter((x) => x !== id);
-                    guardar();
-                    pintar();
-                    avisar("No se ha podido poner «" + s[2] + "»: ¿hay conexión a internet?");
-                });
-                d.sonando = Array.from(new Set((d.sonando || []).concat(id)));
-                guardar();
-            }
-            return Promise.resolve();
-        }
-        function fila(id) {
-            const [emoji, nombre] = datosDe(id);
-            const li = crear("li", "master-ambiente-fila");
-            const b = botonDe("master-ambiente-boton", "", () => {
-                if (AMBIENTE.activos[id]) {
-                    callar(id);
-                    d.sonando = (d.sonando || []).filter((x) => x !== id);
-                    guardar();
-                    avisar("Parado: " + nombre + ".");
-                } else {
-                    encender(id);
-                    avisar("Suena: " + nombre + ".");
-                }
-                pintar();
-            });
-            b.append(iconoSonido("amb:" + id, emoji), crear("span", "", nombre));
-            const r = crear("input", "master-ambiente-volumen");
-            r.type = "range";
-            r.min = 0;
-            r.max = 100;
-            r.value = d.vol[id] === undefined ? 70 : d.vol[id];
-            r.setAttribute("aria-label", "Volumen de " + nombre);
-            r.setAttribute("aria-valuetext", r.value + " %");
-            r.addEventListener("input", () => {
-                d.vol[id] = Number(r.value);
-                r.setAttribute("aria-valuetext", r.value + " %");
-                const x = AMBIENTE.activos[id];
-                if (x) {
-                    x.volumen(r.value / 100);
-                }
-                guardar();
-            });
-            li.append(b, r, botonAspectoSonido("amb:" + id, emoji, nombre, b));
-            if (id.indexOf("propio-") === 0) {
-                const p = d.propios.find((x) => "propio-" + x.id === id);
-                let seguro = false;
-                const quitar = botonDe("master-docs-mando master-ambiente-quitar", "✕", () => {
-                    if (!seguro) {
-                        seguro = true;
-                        quitar.classList.add("es-seguro");
-                        avisar("Pulsa otra vez para quitar " + nombre + ".");
-                        return;
-                    }
-                    callar(id);
-                    archivoBorrar(p.archivo);
-                    olvidarAspecto("amb:" + id);
-                    d.propios = d.propios.filter((x) => x !== p);
-                    guardar();
-                    pintarFilas();
-                    avisar("Quitado: " + nombre + ".");
-                    otro.focus();
-                }, "Quitar el sonido " + nombre);
-                li.appendChild(quitar);
-            }
-            filas.push({ id, b, li });
-            return li;
-        }
-        function pintarFilas() {
-            filas.length = 0;
-            lista.replaceChildren(...SONIDOS.filter((x) => sonidoEsta(x[3])).map(([id]) => fila(id)),
-                ...d.propios.map((p) => fila("propio-" + p.id)));
-            sinGrabaciones.hidden = SONIDOS.some((x) => sonidoEsta(x[3]));
-            pintar();
-        }
-        function pintar() {
-            filas.forEach(({ id, b, li }) => {
-                const suena = !!AMBIENTE.activos[id];
-                b.setAttribute("aria-pressed", suena ? "true" : "false");
-                li.classList.toggle("es-sonando", suena);
-            });
-            const antes = (d.sonando || []).filter((id) => !AMBIENTE.activos[id] && datosDe(id).length);
-            volver.textContent = "▶ volver a poner lo de antes (" + antes.map((id) => datosDe(id)[1]).join(", ") + ")";
-            volver.hidden = !antes.length || Object.keys(AMBIENTE.activos).length > 0;
-        }
-        // LOS PROPIOS: un audio del ordenador, en bucle.
-        const subir = crear("input");
-        subir.type = "file";
-        subir.accept = "audio/*";
-        subir.hidden = true;
-        const otro = botonDe("oc-vida-accion", "＋ 🎵 tu sonido", () => subir.click(), "Añadir un sonido tuyo (un audio, en bucle)");
-        otro.title = "Un audio de tu ordenador, en bucle (se queda sólo en este navegador)";
-        subir.addEventListener("change", () => {
-            const f = subir.files && subir.files[0];
-            subir.value = "";
-            if (!f || !/^audio\//.test(f.type) || f.size > MAX_ARCHIVO) {
-                avisar("Sólo audios de hasta 50 MB.");
-                return;
-            }
-            const id = idDoc("a");
-            archivoGuardar(id, f).then(() => {
-                d.propios.push({ id, archivo: id, nombre: f.name.replace(/\.[^.]+$/, "").slice(0, 40) || "sonido" });
-                guardar();
-                pintarFilas();
-                avisar("Añadido: " + f.name + ". Se queda sólo en este navegador (⚙ → exportar para no perderlo).");
-            }).catch(() => avisar("No se ha podido guardar el sonido."));
-        });
-        const nota = crear("p", "oc-hoja-nota master-fuente");
-        const enlaceG = crear("a", "", "Google Sound Library");
-        enlaceG.href = "https://developers.google.com/assistant/tools/sound-library";
-        enlaceG.target = "_blank";
-        enlaceG.rel = "noopener noreferrer";
-        enlaceG.setAttribute("aria-label", "Google Sound Library (se abre en otra pestaña)");
-        nota.append("Grabaciones de la ", enlaceG, " (Google, CC BY 4.0), incluidas en la app: suenan sin conexión. Se mezclan"
-            + " y siguen sonando al cambiar de pestaña; al quitar esta ventana, se paran. Los tuyos se quedan sólo en este"
-            + " dispositivo.");
-        const sinGrabaciones = crear("p", "oc-vacio", "Aún no hay grabaciones incluidas en la app. Añade las tuyas con «＋ 🎵 tu"
-            + " sonido».");
-        sinGrabaciones.hidden = true;
-        dentro.append(arriba, volver, sinGrabaciones, lista, otro, subir, nota);
-        pintarFilas();
-        sonidosListos.then(pintarFilas);
-    }
-
-    // ---- EFECTOS DE SONIDO: suenan una vez al pulsar (una puerta que cruje,
-    // un tajo, un conjuro, un grito…). Grabaciones de la misma biblioteca
-    // (Google Sound Library, CC BY 4.0), enlazadas, no alojadas; y los
-    // tuyos, guardados sólo en este navegador. ----
-    const EFECTOS_SONOROS = [
-        ["🚪 Puertas y cerrojos", [["🚪", "puerta que cruje", "doors/creaking_wooden_door"],
-            ["🚪", "abrir una puerta", "doors/wood_door_open"], ["💥", "portazo", "doors/wood_door_close_hard"],
-            ["🏰", "portón pesado", "doors/heavy_door_close"], ["✊", "llamar a la puerta", "doors/knock_on_wooden_door"],
-            ["🗝️", "llave en la cerradura", "doors/key_in_lock"], ["🔒", "puerta cerrada (forcejeo)", "doors/locked_doorknob_jiggle"],
-            ["🔩", "cerrojo", "doors/deadbolt_lock"], ["📦", "tapa de cofre", "doors/lid_close_wood"]]],
-        ["⚔️ Combate", [["🌬️", "tajo al aire", "horror/swoosh"], ["🪓", "hachazo", "impacts/chop"],
-            ["🔨", "golpe de maza", "impacts/hit_with_club"], ["🛡️", "golpe en el escudo", "impacts/metal_strike_on_wood"],
-            ["⚔️", "choque de metal", "impacts/metal_crash"], ["🗡️", "estocada", "horror/puncture_pop"],
-            ["🥩", "golpe en carne", "horror/meat_punch"], ["👊", "puñetazos", "impacts/body_punch_series"],
-            ["🦴", "hueso roto", "horror/leg_bone_break"], ["🔪", "arma que cae", "impacts/knife_drop"],
-            ["⛓️", "cadenas", "impacts/chain_jingle"], ["💣", "cañonazo", "weapons/howitzer_cannon_fire"]]],
-        ["✨ Magia y explosiones", [["⚡", "rayo", "science_fiction/alien_beam"], ["🌀", "portal", "science_fiction/sci_fi_vortex"],
-            ["🔮", "encantamiento", "science_fiction/windchime_drone"], ["🌫️", "susurro mágico", "science_fiction/dream_breath"],
-            ["📉", "conjuro que se apaga", "science_fiction/high_to_low_sweep"], ["👁️", "presagio", "science_fiction/forboding_resonance"],
-            ["💨", "nube de humo", "weapons/smoke_bomb"], ["🔥", "bola de fuego", "weapons/explosion_hiss_bop_bang"],
-            ["💥", "explosión lejana", "weapons/big_explosion_distant"], ["🌩️", "trueno", "weather/thunder_crack"],
-            ["🪨", "derrumbe", "impacts/rubble_crash"], ["🪟", "cristal que estalla", "impacts/glass_shatters_into_debris"]]],
-        ["😱 Gritos y voces", [["😱", "grito de muerte", "human_voices/death_impact_yell_single"],
-            ["😵", "varios gritos", "human_voices/death_impact_yell_multiple"], ["💀", "último aliento", "human_voices/death_rattle_breath"],
-            ["📣", "grito de guerra", "crowds/battle_cry_high_pitch"], ["🙌", "gente que grita", "crowds/human_group_cry_out"],
-            ["😠", "multitud enfadada", "crowds/voices_angry"], ["🎉", "vítores", "crowds/battle_crowd_celebration"],
-            ["🤕", "heridos que gimen", "crowds/battle_agony_moans"], ["😏", "risita", "human_voices/male_chuckling"],
-            ["😂", "carcajada", "human_voices/man_laugh_and_knee_slap"]]],
-        ["🐺 Monstruos y animales", [["🧟", "zombi", "horror/aggressive_zombie_snarls"],
-            ["👹", "rugido de monstruo", "horror/female_monster_growls"], ["😾", "gruñido", "horror/monster_alien_growl_tense"],
-            ["🐍", "siseo", "horror/monster_alien_grunt_hiss"], ["🐕", "perro que gruñe", "animals/dog_growling"],
-            ["🪱", "cascabel de serpiente", "animals/animal_hiss_and_rattle"], ["🦉", "búho", "animals/owl_hooting"],
-            ["🐦", "cuervo", "animals/crow_call"], ["🐝", "enjambre", "animals/swarming_bees"],
-            ["🐙", "tentáculo", "animals/tentacle_flop_down"], ["🐀", "ratas", "animals/mouse_squeaking"],
-            ["🐎", "caballos", "transportation/horse_team"]]],
-        ["🎲 Otros", [["🪙", "monedas", "impacts/loose_change_on_wood"], ["🥂", "brindis", "impacts/silverware_on_glass_toast"],
-            ["🌲", "rama que se parte", "impacts/forest_wood_snapping"], ["🪵", "crujido de madera", "impacts/stress_creak"],
-            ["⚰️", "tierra sobre un ataúd", "impacts/dirt_on_coffin_lid"], ["💦", "algo cae al agua", "water/rocks_into_water"]]],
-    ];
     // Lo que está sonando ahora (para pararlo todo de golpe).
     const EFECTOS_SUENAN = new Set();
-    let salidaEfectos = null;
-    function tocarEfecto(ruta, vol, alAcabar) {
-        const a = new Audio();
-        a.preload = "auto";
-        a.volume = Math.max(0, Math.min(1, vol));
-        a.src = urlSonidoSegura(ruta);
-        const fin = () => {
-            EFECTOS_SUENAN.delete(a);
-            efectosCambian();
-            alAcabar();
-        };
-        a.addEventListener("ended", fin);
-        EFECTOS_SUENAN.add(a);
-        efectosCambian();
-        return a.play().catch((e) => {
-            fin();
-            throw e;
-        });
-    }
-    // Los propios: descodificados con Web Audio (sin pasar por la red).
-    function tocarEfectoPropio(audio, vol, alAcabar) {
-        const A = motorAudio();
-        if (!salidaEfectos) {
-            salidaEfectos = A.ctx.createGain();
-            salidaEfectos.connect(A.ctx.destination);
-        }
-        salidaEfectos.gain.value = vol;
-        const s = A.ctx.createBufferSource();
-        s.buffer = audio;
-        s.connect(salidaEfectos);
-        const x = { pause: () => {
-            try {
-                s.stop();
-            } catch (e) {
-                // Ya parado.
-            }
-        } };
-        s.addEventListener("ended", () => {
-            EFECTOS_SUENAN.delete(x);
-            efectosCambian();
-            alAcabar();
-        });
-        EFECTOS_SUENAN.add(x);
-        efectosCambian();
-        s.start();
-    }
-
-    function montarSonidos(dentro, m) {
-        m.datos = m.datos || {};
-        const d = m.datos;
-        d.propios = Array.isArray(d.propios) ? d.propios : [];
-        if (!window.Audio) {
-            dentro.appendChild(crear("p", "oc-vacio", "Este navegador no puede poner sonidos."));
-            return;
-        }
-        const arriba = crear("div", "master-ambiente-arriba");
-        const etG = crear("label", "master-ambiente-general");
-        const general = crear("input");
-        general.type = "range";
-        general.min = 0;
-        general.max = 100;
-        general.value = d.general === undefined ? 80 : d.general;
-        general.setAttribute("aria-label", "Volumen de los efectos");
-        general.setAttribute("aria-valuetext", general.value + " %");
-        etG.append(crear("span", "", "🔊 volumen"), general);
-        general.addEventListener("input", () => {
-            d.general = Number(general.value);
-            general.setAttribute("aria-valuetext", general.value + " %");
-            guardar();
-        });
-        const parar = botonDe("oc-vida-accion", "■ parar", () => {
-            EFECTOS_SUENAN.forEach((a) => a.pause());
-            EFECTOS_SUENAN.clear();
-            efectosCambian();
-            dentro.querySelectorAll(".master-ambiente-fila.es-sonando").forEach((li) => li.classList.remove("es-sonando"));
-            avisar("Parados los efectos.");
-        }, "Parar los efectos que estén sonando");
-        arriba.append(etG, parar);
-        const vol = () => general.value / 100;
-        function tarjeta(emoji, nombre, alPulsar, clave) {
-            const li = crear("li", "master-ambiente-fila");
-            const b = botonDe("master-ambiente-boton", "", () => {
-                li.classList.add("es-sonando");
-                alPulsar(() => li.classList.remove("es-sonando"));
-            });
-            b.append(iconoSonido(clave, emoji), crear("span", "", nombre));
-            li.append(b, botonAspectoSonido(clave, emoji, nombre, b));
-            return li;
-        }
-        // Cada sección se pliega (y se acuerda: d.plegadas).
-        d.plegadas = Array.isArray(d.plegadas) ? d.plegadas : [];
-        function seccion(titulo, ...cosas) {
-            const h = crear("h3", "master-sonidos-seccion");
-            const caja = crear("div", "master-sonidos-caja");
-            caja.id = "master-sonidos-" + m.id + "-" + titulo.replace(/[^a-z]/gi, "").toLowerCase();
-            const abierta = !d.plegadas.includes(titulo);
-            caja.hidden = !abierta;
-            const b = botonDe("master-sonidos-plegar", "", () => {
-                const ya = d.plegadas.includes(titulo);
-                d.plegadas = ya ? d.plegadas.filter((x) => x !== titulo) : d.plegadas.concat(titulo);
-                caja.hidden = !ya;
-                b.setAttribute("aria-expanded", ya ? "true" : "false");
-                guardar();
-            });
-            b.setAttribute("aria-expanded", abierta ? "true" : "false");
-            b.setAttribute("aria-controls", caja.id);
-            const flecha = crear("span", "master-musica-flecha", "▸");
-            flecha.setAttribute("aria-hidden", "true");
-            b.append(flecha, crear("span", "", titulo));
-            h.appendChild(b);
-            caja.append(...cosas);
-            return [h, caja];
-        }
-        const partes = crear("div");
-        const sinEfectos = crear("p", "oc-vacio", "Aún no hay grabaciones incluidas en la app. Añade las tuyas abajo, en «Los tuyos».");
-        sinEfectos.hidden = true;
-        sonidosListos.then(() => EFECTOS_SONOROS.forEach(([tituloS, todos]) => {
-            const lista = todos.filter((x) => sonidoEsta([x[2]]));
-            if (!lista.length) {
-                return;
-            }
-            const titulo = tituloS;
-            const ul = crear("ul", "master-ambiente-lista master-sonidos-lista");
-            ul.setAttribute("aria-label", titulo.replace(/^\S+\s/, ""));
-            lista.forEach(([emoji, nombre, ruta]) => {
-                ul.appendChild(tarjeta(emoji, nombre, (acabar) => {
-                    tocarEfecto(ruta, vol(), acabar).catch(() => {
-                        acabar();
-                        avisar("No se ha podido poner «" + nombre + "».");
-                    });
-                }, "efe:" + ruta));
-            });
-            partes.append(...seccion(titulo, ul));
-        })).then(() => {
-            sinEfectos.hidden = !!partes.childElementCount;
-        });
-        // LOS PROPIOS.
-        const listaP = crear("ul", "master-ambiente-lista master-sonidos-lista");
-        listaP.setAttribute("aria-label", "Los tuyos");
-        const vacioP = crear("p", "oc-hoja-nota", "Aún no hay. Añade un audio de tu ordenador: sonará una vez al pulsarlo.");
-        function pintarPropios() {
-            listaP.replaceChildren(...d.propios.map((p) => {
-                const li = tarjeta("🎵", p.nombre, (acabar) => {
-                    motorAudio();
-                    archivoLeer(p.archivo).then((blob) => (blob ? blob.arrayBuffer() : null)).then((buf) => (buf
-                        ? AMBIENTE.ctx.decodeAudioData(buf) : null)).then((audio) => {
-                        if (!audio) {
-                            acabar();
-                            avisar("Ese sonido ya no está en este navegador.");
-                            return;
-                        }
-                        tocarEfectoPropio(audio, vol(), acabar);
-                    }).catch(() => {
-                        acabar();
-                        avisar("No se ha podido poner ese sonido.");
-                    });
-                }, "prop:" + p.id);
-                let seguro = false;
-                const quitar = botonDe("master-docs-mando master-ambiente-quitar", "✕", () => {
-                    if (!seguro) {
-                        seguro = true;
-                        quitar.classList.add("es-seguro");
-                        avisar("Pulsa otra vez para quitar " + p.nombre + ".");
-                        return;
-                    }
-                    archivoBorrar(p.archivo);
-                    olvidarAspecto("prop:" + p.id);
-                    d.propios = d.propios.filter((x) => x !== p);
-                    guardar();
-                    pintarPropios();
-                    avisar("Quitado: " + p.nombre + ".");
-                    otro.focus();
-                }, "Quitar el sonido " + p.nombre);
-                li.appendChild(quitar);
-                return li;
-            }));
-            listaP.hidden = !d.propios.length;
-            vacioP.hidden = !!d.propios.length;
-        }
-        const subir = crear("input");
-        subir.type = "file";
-        subir.accept = "audio/*";
-        subir.hidden = true;
-        const otro = botonDe("oc-vida-accion", "＋ 🎵 tu efecto", () => subir.click(), "Añadir un efecto tuyo (un audio que suena una vez)");
-        otro.title = "Un audio de tu ordenador (se queda sólo en este navegador)";
-        subir.addEventListener("change", () => {
-            const f = subir.files && subir.files[0];
-            subir.value = "";
-            if (!f || !/^audio\//.test(f.type) || f.size > MAX_ARCHIVO) {
-                avisar("Sólo audios de hasta 50 MB.");
-                return;
-            }
-            const id = idDoc("a");
-            archivoGuardar(id, f).then(() => {
-                d.propios.push({ id, archivo: id, nombre: f.name.replace(/\.[^.]+$/, "").slice(0, 40) || "sonido" });
-                guardar();
-                pintarPropios();
-                avisar("Añadido: " + f.name + ". Se queda sólo en este navegador (⚙ → exportar para no perderlo).");
-            }).catch(() => avisar("No se ha podido guardar el sonido."));
-        });
-        const nota = crear("p", "oc-hoja-nota master-fuente");
-        const enlaceG = crear("a", "", "Google Sound Library");
-        enlaceG.href = "https://developers.google.com/assistant/tools/sound-library";
-        enlaceG.target = "_blank";
-        enlaceG.rel = "noopener noreferrer";
-        enlaceG.setAttribute("aria-label", "Google Sound Library (se abre en otra pestaña)");
-        nota.append("Grabaciones de la ", enlaceG, " (Google, CC BY 4.0), incluidas en la app: suenan sin conexión. Cada una"
-            + " suena una vez; se pueden pisar unas con otras. Los tuyos se quedan sólo en este dispositivo.");
-        dentro.append(arriba, sinEfectos, partes, ...seccion("🎵 Los tuyos", vacioP, listaP, otro, subir), nota);
-        pintarPropios();
-    }
+    Object.assign(PM, { EFECTOS_SUENAN });
 
     // ---- LA MÚSICA: las canciones de cada uno (audios del ordenador,
     // guardados sólo en este navegador, en IndexedDB como los documentos),
@@ -11436,6 +3992,7 @@
     const MUSICA = { audio: null, cola: [], pos: -1, modo: "carpeta", origen: "", alCambiar: null, vigila: 0, url: "", volumen: 0.8,
         // fade: el fundido (0-1); duck: lo que se baja con los efectos (0-1).
         fade: 1, duck: 1, fundido: 2, agachar: 0.4, aleatorio: false, orden: null, cambio: 0, saliendo: false, acabando: false };
+    Object.assign(PM, { MUSICA });
     // El volumen que suena: el elegido × el fundido × lo bajado por efectos.
     function musicaVol() {
         if (MUSICA.audio) {
@@ -11535,7 +4092,7 @@
             if (todas.length) {
                 musicaCarpeta(todas, "");
             } else {
-                avisar("Aún no hay canciones.");
+                avisar(ocT("Aún no hay canciones."));
             }
         } else if (MUSICA.audio.paused || MUSICA.pausando) {
             musicaReanudar();
@@ -11546,7 +4103,9 @@
     // El volumen y cómo se repite: en el reproductor y en las ventanas de
     // música (se guardan en ellas).
     const FUNDIDOS = [0, 1, 2, 3, 5];
-    const AGACHAR = [[1, "no se baja"], [0.6, "baja un poco"], [0.4, "baja bastante"], [0.15, "baja mucho"]];
+    Object.assign(PM, { FUNDIDOS });
+    const AGACHAR = [[1, ocT("no se baja")], [0.6, ocT("baja un poco")], [0.4, ocT("baja bastante")], [0.15, ocT("baja mucho")]];
+    Object.assign(PM, { AGACHAR });
     // El bucle de una canción: el del navegador (sin cortes) si se repite
     // entera; con puntos de inicio o final, lo hace musicaAlAcabar.
     function musicaBucle() {
@@ -11685,6 +4244,7 @@
         musicaAviso();
     }
     const musicaActual = () => MUSICA.cola[MUSICA.pos] || null;
+    Object.assign(PM, { musicaActual });
     function musicaPoner(cola, pos, origen) {
         const c = cola[pos];
         if (!c) {
@@ -11731,7 +4291,7 @@
                 return;
             }
             if (!blob) {
-                avisar("«" + c.nombre + "» ya no está en este navegador.");
+                avisar(ocT("«{nombre}» ya no está en este navegador.", { nombre: c.nombre }));
                 return;
             }
             if (MUSICA.url) {
@@ -11762,7 +4322,7 @@
                 vigilarMusica();
                 musicaAviso();
             });
-        }).catch(() => avisar("No se ha podido poner «" + c.nombre + "»."));
+        }).catch(() => avisar(ocT("No se ha podido poner «{nombre}».", { nombre: c.nombre })));
         }
     }
     // Hacia el final (el suyo o el que le has puesto), se va apagando; al
@@ -11886,19 +4446,6 @@
             }
         }, 1500);
     }
-    const minutos = (s) => (isFinite(s) ? Math.floor(s / 60) + ":" + String(Math.floor(s % 60)).padStart(2, "0") : "0:00");
-    // «1:30», «90» o «1:30.5» → segundos (0 si está en blanco, null si no se entiende).
-    function segundosDe(texto) {
-        const t = String(texto || "").trim().replace(",", ".");
-        if (!t) {
-            return 0;
-        }
-        const m = /^(?:(\d+):)?(\d+(?:\.\d+)?)$/.exec(t);
-        if (!m) {
-            return null;
-        }
-        return Math.round(((parseInt(m[1] || "0", 10) * 60) + parseFloat(m[2])) * 10) / 10;
-    }
 
     // 🎨 EL ASPECTO de una tarjeta (música, sonido ambiente, efectos): un
     // emoji (escrito o de los de muestra) o una imagen tuya (en el
@@ -11909,7 +4456,7 @@
     function dialogoAspecto(cosa, titulo, alGuardar) {
         const vuelta = document.activeElement;
         const cuerpo = crear("form", "master-pegar");
-        const et = crear("label", "oc-dados-etiqueta", "emoji (o escribe el tuyo)");
+        const et = crear("label", "oc-dados-etiqueta", ocT("emoji (o escribe el tuyo)"));
         const input = crear("input", "oc-dados-texto");
         input.id = "master-musica-emoji";
         input.maxLength = 8;
@@ -11918,38 +4465,38 @@
         et.htmlFor = input.id;
         const muestras = crear("div", "master-musica-emojis");
         muestras.setAttribute("role", "group");
-        muestras.setAttribute("aria-label", "Emojis de muestra");
+        muestras.setAttribute("aria-label", ocT("Emojis de muestra"));
         EMOJIS_MUSICA.forEach((e2) => muestras.appendChild(botonDe("master-musica-emoji", e2, () => {
             input.value = e2;
             input.focus();
-        }, "Usar " + e2)));
+        }, ocT("Usar {e2}", { e2: e2 }))));
         const subirImg = crear("input");
         subirImg.type = "file";
         subirImg.accept = "image/*";
         subirImg.hidden = true;
-        const estado = crear("p", "oc-hoja-nota", cosa.imagen ? "Tiene una imagen tuya (va por delante del emoji)." : "Sin imagen.");
+        const estado = crear("p", "oc-hoja-nota", cosa.imagen ? ocT("Tiene una imagen tuya (va por delante del emoji).") : ocT("Sin imagen."));
         estado.setAttribute("role", "status");
         let imagen = cosa.imagen || "";
         let nuevaImagen = null;
-        const ponerImg = botonDe("oc-vida-accion", "🖼️ poner una imagen", () => subirImg.click(), "Poner una imagen de tu dispositivo");
-        const quitarImg = botonDe("oc-vida-accion", "✕ quitar la imagen", () => {
+        const ponerImg = botonDe("oc-vida-accion", ocT("🖼️ poner una imagen"), () => subirImg.click(), ocT("Poner una imagen de tu dispositivo"));
+        const quitarImg = botonDe("oc-vida-accion", ocT("✕ quitar la imagen"), () => {
             imagen = "";
             nuevaImagen = null;
-            estado.textContent = "Sin imagen (se verá el emoji).";
+            estado.textContent = ocT("Sin imagen (se verá el emoji).");
         });
         subirImg.addEventListener("change", () => {
             const f = subirImg.files && subirImg.files[0];
             subirImg.value = "";
             if (!f || !/^image\//.test(f.type) || f.size > 10 * 1024 * 1024) {
-                estado.textContent = "Sólo imágenes de hasta 10 MB.";
+                estado.textContent = ocT("Sólo imágenes de hasta 10 MB.");
                 return;
             }
             nuevaImagen = f;
-            estado.textContent = "Imagen elegida: " + f.name + ". Pulsa «✓ guardar».";
+            estado.textContent = ocT("Imagen elegida: {name}. Pulsa «✓ guardar».", { name: f.name });
         });
         const fila = crear("div", "master-creador-barra");
         fila.append(ponerImg, quitarImg, subirImg);
-        const ok = crear("button", "oc-vida-accion es-principal", "✓ guardar");
+        const ok = crear("button", "oc-vida-accion es-principal", ocT("✓ guardar"));
         ok.type = "submit";
         cuerpo.append(et, input, muestras, fila, estado, ok);
         cuerpo.addEventListener("submit", (e) => {
@@ -11958,7 +4505,7 @@
                 cosa.icono = input.value.trim();
                 cerrar();
                 alGuardar();
-                avisar("Aspecto guardado: " + cosa.nombre + ".");
+                avisar(ocT("Aspecto guardado: {nombre}.", { nombre: cosa.nombre }));
             };
             const antes = cosa.imagen;
             if (nuevaImagen) {
@@ -11970,7 +4517,7 @@
                     cosa.imagen = id;
                     fin();
                 }).catch(() => {
-                    estado.textContent = "No se ha podido guardar la imagen.";
+                    estado.textContent = ocT("No se ha podido guardar la imagen.");
                 });
             } else {
                 if (antes && !imagen) {
@@ -12036,7 +4583,7 @@
         return botonDe("master-docs-mando master-ambiente-aspecto", "🎨", () => {
             const todos = leerAspectos();
             const cosa = Object.assign({ nombre }, todos[clave] || {});
-            dialogoAspecto(cosa, "aspecto de " + nombre, () => {
+            dialogoAspecto(cosa, ocT("aspecto de {nombre}", { nombre: nombre }), () => {
                 const t = leerAspectos();
                 if (cosa.icono || cosa.imagen) {
                     t[clave] = { icono: cosa.icono || "", imagen: cosa.imagen || "" };
@@ -12046,13 +4593,13 @@
                 try {
                     localStorage.setItem(CLAVE_ASPECTOS, JSON.stringify(t));
                 } catch (e) {
-                    avisar("No se ha podido guardar.");
+                    avisar(ocT("No se ha podido guardar."));
                 }
                 const viejo = boton.querySelector(".master-ambiente-emoji");
                 viejo.replaceWith(iconoSonido(clave, emoji));
                 boton.focus();
             });
-        }, "Poner un emoji o una imagen a " + nombre);
+        }, ocT("Poner un emoji o una imagen a {nombre}", { nombre: nombre }));
     }
 
     const IMAGENES_MUSICA = new Map();
@@ -12061,781 +4608,6 @@
             IMAGENES_MUSICA.set(id, archivoLeer(id).then((blob) => (blob ? URL.createObjectURL(blob) : "")).catch(() => ""));
         }
         return IMAGENES_MUSICA.get(id);
-    }
-
-    function montarMusica(dentro, m) {
-        m.datos = m.datos || {};
-        const d = m.datos;
-        d.plegadas = Array.isArray(d.plegadas) ? d.plegadas : [];
-        d.modo = ["una", "carpeta", "nada"].includes(d.modo) ? d.modo : "carpeta";
-        MUSICA.modo = d.modo;
-        MUSICA.aleatorio = !!d.aleatorio;
-        MUSICA.fundido = FUNDIDOS.includes(d.fundido) ? d.fundido : 2;
-        MUSICA.agachar = AGACHAR.some((x) => x[0] === d.agachar) ? d.agachar : 0.4;
-        const mu = musicaDe();
-        if (!window.Audio) {
-            dentro.appendChild(crear("p", "oc-vacio", "Este navegador no puede poner música."));
-            return;
-        }
-        // EL REPRODUCTOR.
-        const repro = crear("div", "master-musica-repro");
-        const ahora = crear("p", "master-musica-ahora");
-        const mandos = crear("div", "master-musica-mandos");
-        const ant = botonDe("master-musica-mando", "⏮", musicaAnterior, "Anterior");
-        const tocar = botonDe("master-musica-mando es-grande", "▶", musicaAlternar, "Reproducir");
-        const sig = botonDe("master-musica-mando", "⏭", () => musicaSiguiente(false), "Siguiente");
-        const parar = botonDe("master-musica-mando", "■", () => {
-            musicaParar(true);
-            avisar("Música parada.");
-        }, "Parar");
-        const barra = crear("input", "master-musica-barra");
-        barra.type = "range";
-        barra.min = 0;
-        barra.max = 1000;
-        barra.value = 0;
-        barra.setAttribute("aria-label", "Por dónde va");
-        // Mientras se arrastra con el ratón o el dedo, no se repinta (si no,
-        // salta); al soltar, vuelve a seguir a la canción.
-        let arrastrando = false;
-        barra.addEventListener("pointerdown", () => {
-            arrastrando = true;
-        });
-        const soltar = () => {
-            arrastrando = false;
-        };
-        barra.addEventListener("pointerup", soltar);
-        barra.addEventListener("pointercancel", soltar);
-        barra.addEventListener("change", soltar);
-        barra.addEventListener("input", () => {
-            const a = MUSICA.audio;
-            if (a && isFinite(a.duration)) {
-                a.currentTime = a.duration * barra.value / 1000;
-            }
-        });
-        const tiempo = crear("span", "master-musica-tiempo", "0:00 / 0:00");
-        tiempo.setAttribute("aria-hidden", "true");
-        mandos.append(ant, tocar, sig, parar, barra, tiempo);
-        // Volumen y cómo se repite.
-        const abajo = crear("div", "master-ambiente-arriba");
-        const etV = crear("label", "master-ambiente-general");
-        const vol = crear("input");
-        vol.type = "range";
-        vol.min = 0;
-        vol.max = 100;
-        vol.value = d.vol === undefined ? 80 : d.vol;
-        vol.setAttribute("aria-label", "Volumen de la música");
-        vol.setAttribute("aria-valuetext", vol.value + " %");
-        etV.append(crear("span", "", "🔊 volumen"), vol);
-        const ponerVol = () => {
-            MUSICA.volumen = vol.value / 100;
-            musicaVol();
-        };
-        vol.addEventListener("input", () => {
-            d.vol = Number(vol.value);
-            vol.setAttribute("aria-valuetext", vol.value + " %");
-            ponerVol();
-            guardar();
-        });
-        const modos = crear("div", "master-musica-modos");
-        modos.setAttribute("role", "group");
-        modos.setAttribute("aria-label", "Repetir");
-        const botonesModo = [["una", "🔂 la canción"], ["carpeta", "🔁 la carpeta"], ["nada", "➡️ sin repetir"]].map(([v, t]) => {
-            const b = botonDe("master-musica-modo", t, () => {
-                d.modo = v;
-                MUSICA.modo = v;
-                musicaBucle();
-                guardar();
-                pintarModo();
-                avisar(v === "una" ? "Se repite la canción." : v === "carpeta" ? "Se repite la carpeta entera." : "Sin repetir: al acabar la carpeta, se para.");
-            });
-            b.dataset.modo = v;
-            return b;
-        });
-        modos.append(...botonesModo);
-        function pintarModo() {
-            botonesModo.forEach((b) => b.setAttribute("aria-pressed", b.dataset.modo === d.modo ? "true" : "false"));
-        }
-        // Sacar el reproductor a su ventana (para compartirla en Discord
-        // u OBS sin enseñar la pantalla).
-        const fuera = botonDe("oc-vida-accion", "🪟 en otra ventana", () => {
-            const w = window.open("reproductor.html", "pantalla-master-reproductor", "popup,width=440,height=640");
-            if (w) {
-                w.focus();
-                avisar("El reproductor, en su ventana: compártela en Discord u OBS. La música sigue sonando aquí.");
-            } else {
-                avisar("El navegador no ha dejado abrir la ventana: permite las ventanas emergentes de esta página.");
-            }
-        }, "Abrir el reproductor en una ventana aparte (para compartirla en Discord u OBS)");
-        // 🔀 aleatorio, el fundido y cuánto baja con los efectos.
-        const alAzar = botonDe("master-musica-modo", "🔀 aleatorio", () => {
-            musicaAjustar({ aleatorio: !MUSICA.aleatorio });
-            avisar(MUSICA.aleatorio ? "En aleatorio." : "En orden.");
-        }, "Aleatorio");
-        const elegirAjuste = (id, texto, opciones, valor, cambio) => {
-            const caja = crear("label", "master-musica-ajuste");
-            const sel = crear("select", "oc-dados-elegir");
-            sel.id = id + m.id;
-            opciones.forEach(([v, t]) => {
-                const o = crear("option", "", t);
-                o.value = String(v);
-                sel.appendChild(o);
-            });
-            sel.value = String(valor);
-            sel.addEventListener("change", () => cambio(Number(sel.value)));
-            caja.append(crear("span", "", texto), sel);
-            caja.sel = sel;
-            return caja;
-        };
-        const fundidoS = elegirAjuste("master-musica-fundido-", "🌫️ fundido", FUNDIDOS.map((x) => [x, x ? x + " s" : "sin fundido"]),
-            MUSICA.fundido, (v) => musicaAjustar({ fundido: v }));
-        const agacharS = elegirAjuste("master-musica-agachar-", "💥 con efectos", AGACHAR, MUSICA.agachar,
-            (v) => musicaAjustar({ agachar: v }));
-        const ajustes = crear("div", "master-musica-ajustes");
-        ajustes.append(alAzar, fundidoS, agacharS);
-        abajo.append(etV, modos, fuera);
-        repro.append(ahora, mandos, abajo, ajustes);
-
-        // LAS CARPETAS Y CANCIONES.
-        const herramientas = crear("div", "master-musica-herramientas");
-        const nuevaCarpeta = botonDe("oc-vida-accion", "＋ 📁 carpeta", () => formulario({ tipo: "carpeta", padre: "" }),
-            "Nueva carpeta");
-        const subirRaiz = botonDe("oc-vida-accion", "＋ 🎵 canciones", () => subirA(""), "Añadir canciones (te pregunto la carpeta)");
-        // Dos vistas: TARJETAS (como un panel de sonidos: cada carpeta y
-        // canción, un botón grande con su imagen o su emoji) y LISTA (el
-        // árbol). Se recuerda en d.vista.
-        const vistas = crear("div", "master-musica-modos");
-        vistas.setAttribute("role", "group");
-        vistas.setAttribute("aria-label", "Vista");
-        const botonesVista = [["tarjetas", "▦ tarjetas"], ["lista", "☰ lista"]].map(([v, t]) => {
-            const b = botonDe("master-musica-modo", t, () => {
-                d.vista = v;
-                guardar();
-                pintarArbol();
-            });
-            b.dataset.vista = v;
-            return b;
-        });
-        vistas.append(...botonesVista);
-        herramientas.append(nuevaCarpeta, subirRaiz, vistas);
-        // 🔍 BUSCAR una canción en todas las carpetas.
-        const busca = crear("div", "master-musica-busca");
-        const buscar = crear("input", "oc-dados-texto");
-        buscar.type = "search";
-        buscar.id = "master-musica-buscar-" + m.id;
-        buscar.placeholder = "🔍 buscar una canción…";
-        buscar.autocomplete = "off";
-        const etBusca = crear("label", "visually-hidden", "Buscar una canción");
-        etBusca.htmlFor = buscar.id;
-        busca.append(etBusca, buscar);
-        const resultados = crear("ul", "master-musica-resultados");
-        resultados.setAttribute("aria-label", "Canciones encontradas");
-        resultados.hidden = true;
-        const cuantos = crear("p", "visually-hidden");
-        cuantos.setAttribute("role", "status");
-        buscar.addEventListener("input", () => pintarArbol());
-        buscar.addEventListener("keydown", (e) => {
-            if (e.key === "Escape" && buscar.value) {
-                e.preventDefault();
-                buscar.value = "";
-                pintarArbol();
-            }
-        });
-        const rutaDe = (id) => {
-            const pasos = [];
-            let x = mu.carpetas.find((c) => c.id === id);
-            while (x) {
-                pasos.unshift(x.nombre);
-                x = mu.carpetas.find((c) => c.id === x.padre);
-            }
-            return pasos.join(" › ");
-        };
-        function pintarResultados(q) {
-            const vistas2 = mu.canciones.filter((c) => llano(c.nombre + " " + rutaDe(c.carpeta || "")).includes(q)).slice(0, 60);
-            resultados.replaceChildren(...vistas2.map((c) => {
-                const li = crear("li", "master-musica-cancion");
-                const b = botonDe("master-musica-tocar", "", () => {
-                    const actual = musicaActual();
-                    if (actual && actual.id === c.id) {
-                        musicaAlternar();
-                        return;
-                    }
-                    const cola = cancionesDe(c.carpeta || "");
-                    musicaPoner(cola, cola.indexOf(c), c.carpeta || "");
-                    avisar("Suena: " + c.nombre + ".");
-                });
-                b.dataset.cancion = c.id;
-                const em = crear("span", "master-ambiente-emoji", c.icono || "🎵");
-                em.setAttribute("aria-hidden", "true");
-                const ruta = rutaDe(c.carpeta || "");
-                b.append(em, crear("span", "", c.nombre), crear("span", "master-musica-cuenta", ruta ? " · 📁 " + ruta : ""));
-                li.append(b, botonDe("master-docs-mando", "✎", () => formulario({ tipo: "cancion", id: c.id }),
-                    "Cambiar el nombre, la carpeta o los puntos de " + c.nombre));
-                return li;
-            }));
-            if (!vistas2.length) {
-                resultados.appendChild(crear("li", "oc-vacio", "Ninguna canción con eso."));
-            }
-            cuantos.textContent = vistas2.length + (vistas2.length === 1 ? " canción encontrada." : " canciones encontradas.");
-        }
-        const form = crear("form", "master-musica-form");
-        form.hidden = true;
-        const arbol = crear("ul", "master-musica-arbol");
-        arbol.setAttribute("aria-label", "Carpetas y canciones");
-        const vacio = crear("p", "oc-hoja-nota", "Aún no hay canciones. Haz carpetas (por ejemplo «combate» o «tabernas»,"
-            + " con subcarpetas) y añade tus audios.");
-        const subir = crear("input");
-        subir.type = "file";
-        subir.accept = "audio/*";
-        subir.multiple = true;
-        subir.hidden = true;
-        let destino = "";
-        // Las canciones van siempre en una carpeta: sin ella, se pregunta
-        // (una de las que hay o una nueva) y luego se eligen los audios.
-        function subirA(carpeta) {
-            if (carpeta) {
-                destino = carpeta;
-                subir.click();
-                return;
-            }
-            volverA = document.activeElement;
-            const titulo = crear("p", "master-musica-form-titulo", "＋ 🎵 ¿en qué carpeta van?");
-            const nueva = "__nueva";
-            const donde = elegirDe("master-musica-destino", "carpeta", opcionesDeCarpeta("").slice(1)
-                .concat([[nueva, "＋ 📁 una carpeta nueva…"]]), mu.carpetas.length ? opcionesDeCarpeta("")[1][0] : nueva);
-            const etN = crear("label", "oc-dados-etiqueta", "nombre de la carpeta nueva");
-            const nombre = crear("input", "oc-dados-texto");
-            nombre.id = "master-musica-destino-nombre";
-            nombre.maxLength = 80;
-            nombre.autocomplete = "off";
-            etN.htmlFor = nombre.id;
-            const cajaN = crear("div", "master-campo");
-            cajaN.append(etN, nombre);
-            const verNueva = () => {
-                cajaN.hidden = donde.elegir.value !== nueva;
-            };
-            donde.elegir.addEventListener("change", verNueva);
-            verNueva();
-            const ok = crear("button", "oc-vida-accion es-principal", "🎵 elegir los audios");
-            ok.type = "submit";
-            const fila = crear("div", "master-musica-form-botones");
-            fila.append(ok, botonDe("oc-vida-accion", "cancelar", cerrar));
-            form.replaceChildren(titulo, donde, cajaN, fila);
-            form.onsubmit = (e) => {
-                e.preventDefault();
-                let id = donde.elegir.value;
-                if (id === nueva) {
-                    const n = nombre.value.trim();
-                    if (!n) {
-                        avisar("Ponle un nombre a la carpeta.");
-                        nombre.focus();
-                        return;
-                    }
-                    id = idDoc("m");
-                    mu.carpetas.push({ id, nombre: n, padre: "" });
-                    guardar();
-                    pintarArbol();
-                    avisar("Carpeta creada: " + n + ".");
-                }
-                form.hidden = true;
-                destino = id;
-                subir.click();
-            };
-            form.onkeydown = (e) => {
-                if (e.key === "Escape") {
-                    e.preventDefault();
-                    cerrar();
-                }
-            };
-            form.hidden = false;
-            donde.elegir.focus();
-        }
-        subir.addEventListener("change", () => {
-            const fs = Array.from(subir.files || []);
-            subir.value = "";
-            const buenos = fs.filter((f) => /^audio\//.test(f.type) && f.size <= MAX_ARCHIVO);
-            if (buenos.length < fs.length) {
-                avisar("Sólo audios de hasta 50 MB cada uno.");
-            }
-            Promise.all(buenos.map((f) => {
-                const id = idDoc("a");
-                return archivoGuardar(id, f).then(() => {
-                    mu.canciones.push({ id, archivo: id, nombre: f.name.replace(/\.[^.]+$/, "").slice(0, 80) || "canción",
-                        carpeta: destino || "" });
-                });
-            })).then(() => {
-                if (!buenos.length) {
-                    return;
-                }
-                d.plegadas = d.plegadas.filter((x) => x !== destino);
-                guardar();
-                pintarArbol();
-                avisar("Añadidas " + buenos.length + " canciones (con ✎ les cambias el nombre). Se quedan sólo en este"
-                    + " dispositivo (⚙ → exportar para no perderlas).");
-            }).catch(() => avisar("No se han podido guardar (¿no queda sitio en el navegador?)."));
-        });
-        // Las carpetas para elegir dónde va algo (sin la propia ni las de dentro).
-        function opcionesDeCarpeta(sin) {
-            const salida = [["", "— ninguna (arriba del todo)"]];
-            const meter = (padre, nivel) => mu.carpetas.filter((c) => (c.padre || "") === padre && c.id !== sin).forEach((c) => {
-                salida.push([c.id, "  ".repeat(nivel) + "📁 " + c.nombre]);
-                meter(c.id, nivel + 1);
-            });
-            meter("", 0);
-            return salida;
-        }
-        // Crear o cambiar una carpeta o una canción: el nombre y dónde va.
-        let volverA = null;
-        function formulario(x) {
-            volverA = document.activeElement;
-            const esCarpeta = x.tipo === "carpeta";
-            const cosa = x.id ? (esCarpeta ? mu.carpetas : mu.canciones).find((c) => c.id === x.id) : null;
-            const titulo = crear("p", "master-musica-form-titulo", cosa ? "✎ " + cosa.nombre : "＋ 📁 nueva carpeta");
-            const et = crear("label", "oc-dados-etiqueta", "nombre");
-            const input = crear("input", "oc-dados-texto");
-            input.id = "master-musica-nombre";
-            input.maxLength = 80;
-            input.autocomplete = "off";
-            input.value = cosa ? cosa.nombre : "";
-            et.htmlFor = input.id;
-            const sitios = opcionesDeCarpeta(esCarpeta && cosa ? cosa.id : "");
-            if (!esCarpeta && cosa && cosa.carpeta && sitios.length > 1) {
-                sitios.shift();
-            }
-            const donde = elegirDe("master-musica-donde", esCarpeta ? "dentro de" : "en la carpeta", sitios,
-                cosa ? (esCarpeta ? cosa.padre : cosa.carpeta) || "" : x.padre || "");
-            const ok = crear("button", "oc-vida-accion es-principal", "✓ guardar");
-            ok.type = "submit";
-            const no = botonDe("oc-vida-accion", "cancelar", cerrar);
-            const fila = crear("div", "master-musica-form-botones");
-            fila.append(ok, no);
-            // Los puntos de inicio y final de una canción (para saltarse
-            // una intro larga o un silencio al final).
-            const puntos = crear("fieldset", "master-musica-puntos");
-            const campos = {};
-            if (!esCarpeta && cosa) {
-                const suena = () => musicaActual() && musicaActual().id === cosa.id && MUSICA.audio;
-                puntos.appendChild(crear("legend", "", "⏱ por dónde empieza y acaba (min:seg)"));
-                [["inicio", "empieza en", "0:00"], ["fin", "acaba en", "hasta el final"]].forEach(([k, t, ph]) => {
-                    const caja = crear("div", "master-musica-punto");
-                    const etP = crear("label", "oc-dados-etiqueta", t);
-                    const inp = crear("input", "oc-dados-texto");
-                    inp.id = "master-musica-" + k + "-" + m.id;
-                    inp.inputMode = "decimal";
-                    inp.autocomplete = "off";
-                    inp.placeholder = ph;
-                    inp.value = cosa[k] ? minutos(cosa[k]) : "";
-                    etP.htmlFor = inp.id;
-                    const yaB = botonDe("master-docs-mando es-texto", "⏱ ahora", () => {
-                        if (!suena()) {
-                            avisar("Pon esta canción para coger el punto por donde va.");
-                            return;
-                        }
-                        inp.value = minutos(MUSICA.audio.currentTime);
-                        avisar(t + ": " + inp.value + ".");
-                    }, t + ": por donde va ahora la canción");
-                    caja.append(etP, inp, yaB);
-                    puntos.appendChild(caja);
-                    campos[k] = inp;
-                });
-            }
-            form.replaceChildren(titulo, et, input, donde);
-            if (campos.inicio) {
-                form.appendChild(puntos);
-            }
-            form.appendChild(fila);
-            form.onsubmit = (e) => {
-                e.preventDefault();
-                const nombre = input.value.trim();
-                if (!nombre) {
-                    avisar("Ponle un nombre.");
-                    input.focus();
-                    return;
-                }
-                const sitio = donde.elegir.value;
-                let id = x.id;
-                if (campos.inicio) {
-                    const ini = segundosDe(campos.inicio.value);
-                    const fin = segundosDe(campos.fin.value);
-                    if (ini === null || fin === null) {
-                        avisar("Escribe los puntos como 1:30 (minutos y segundos) o déjalos en blanco.");
-                        (ini === null ? campos.inicio : campos.fin).focus();
-                        return;
-                    }
-                    if (fin && fin <= ini + 1) {
-                        avisar("El final tiene que ir después del inicio.");
-                        campos.fin.focus();
-                        return;
-                    }
-                    ["inicio", "fin"].forEach((k, i) => {
-                        const v = [ini, fin][i];
-                        if (v) {
-                            cosa[k] = v;
-                        } else {
-                            delete cosa[k];
-                        }
-                    });
-                    musicaBucle();
-                }
-                if (cosa) {
-                    cosa.nombre = nombre;
-                    cosa[esCarpeta ? "padre" : "carpeta"] = sitio;
-                } else {
-                    id = idDoc("m");
-                    mu.carpetas.push({ id, nombre, padre: sitio });
-                }
-                d.plegadas = d.plegadas.filter((p) => p !== sitio);
-                guardar();
-                form.hidden = true;
-                pintarArbol();
-                avisar((cosa ? "Guardado: " : "Carpeta creada: ") + nombre + ".");
-                const b = dentro.querySelector("[data-foco='" + id + "']:not([hidden] *)");
-                (b || nuevaCarpeta).focus();
-            };
-            form.onkeydown = (e) => {
-                if (e.key === "Escape") {
-                    e.preventDefault();
-                    cerrar();
-                }
-            };
-            form.hidden = false;
-            input.focus();
-        }
-        function cerrar() {
-            form.hidden = true;
-            if (volverA && volverA.isConnected) {
-                volverA.focus();
-            } else {
-                nuevaCarpeta.focus();
-            }
-        }
-        // Borrar con dos pulsaciones.
-        function botonQuitar(nombre, hacer) {
-            let seguro = false;
-            const b = botonDe("master-docs-mando", "✕", () => {
-                if (!seguro) {
-                    seguro = true;
-                    b.classList.add("es-seguro");
-                    avisar("Pulsa otra vez para quitar " + nombre + ".");
-                    return;
-                }
-                hacer();
-            }, "Quitar " + nombre);
-            return b;
-        }
-        function quitarCarpeta(c) {
-            const ids = [];
-            const juntar = (id) => {
-                ids.push(id);
-                mu.carpetas.filter((x) => x.padre === id).forEach((x) => juntar(x.id));
-            };
-            juntar(c.id);
-            const fuera = mu.canciones.filter((x) => ids.includes(x.carpeta));
-            fuera.forEach((x) => archivoBorrar(x.archivo));
-            if (fuera.some((x) => musicaActual() && musicaActual().id === x.id)) {
-                musicaParar();
-            }
-            mu.canciones = mu.canciones.filter((x) => !ids.includes(x.carpeta));
-            mu.carpetas = mu.carpetas.filter((x) => !ids.includes(x.id));
-            guardar();
-            pintarArbol();
-            avisar("Quitada la carpeta " + c.nombre + (fuera.length ? " y sus " + fuera.length + " canciones." : "."));
-            nuevaCarpeta.focus();
-        }
-        function filaCancion(c) {
-            const li = crear("li", "master-musica-cancion");
-            const b = botonDe("master-musica-tocar", "", () => {
-                const cola = cancionesDe(c.carpeta || "");
-                musicaPoner(cola, cola.indexOf(c), c.carpeta || "");
-                avisar("Suena: " + c.nombre + ".");
-            });
-            b.dataset.foco = c.id;
-            b.dataset.cancion = c.id;
-            const em = crear("span", "master-ambiente-emoji", "🎵");
-            em.setAttribute("aria-hidden", "true");
-            b.append(em, crear("span", "", c.nombre));
-            const editar = botonDe("master-docs-mando", "✎", () => formulario({ tipo: "cancion", id: c.id }),
-                "Cambiar el nombre, la carpeta o los puntos de " + c.nombre);
-            const quitar = botonQuitar(c.nombre, () => {
-                if (musicaActual() && musicaActual().id === c.id) {
-                    musicaParar();
-                }
-                archivoBorrar(c.archivo);
-                mu.canciones = mu.canciones.filter((x) => x !== c);
-                guardar();
-                pintarArbol();
-                avisar("Quitada: " + c.nombre + ".");
-                nuevaCarpeta.focus();
-            });
-            li.append(b, editar, quitar);
-            return li;
-        }
-        function filaCarpeta(c) {
-            const li = crear("li", "master-musica-carpeta");
-            const cab = crear("div", "master-musica-cabeza");
-            const abierta = !d.plegadas.includes(c.id);
-            const total = cancionesDe(c.id).length;
-            const dentroUl = crear("ul", "master-musica-dentro");
-            dentroUl.id = "master-musica-" + m.id + "-" + c.id;
-            dentroUl.hidden = !abierta;
-            const plegar = botonDe("master-musica-plegar", "", () => {
-                const ya = d.plegadas.includes(c.id);
-                d.plegadas = ya ? d.plegadas.filter((x) => x !== c.id) : d.plegadas.concat(c.id);
-                dentroUl.hidden = !ya;
-                plegar.setAttribute("aria-expanded", ya ? "true" : "false");
-                guardar();
-            });
-            plegar.dataset.foco = c.id;
-            plegar.setAttribute("aria-expanded", abierta ? "true" : "false");
-            plegar.setAttribute("aria-controls", dentroUl.id);
-            const flecha = crear("span", "master-musica-flecha", "▸");
-            flecha.setAttribute("aria-hidden", "true");
-            plegar.append(flecha, crear("span", "", "📁 " + c.nombre), crear("span", "master-musica-cuenta", " (" + total + ")"));
-            const tocarC = botonDe("master-docs-mando", "▶", () => {
-                const cola = cancionesDe(c.id);
-                if (!cola.length) {
-                    avisar("La carpeta " + c.nombre + " está vacía.");
-                    return;
-                }
-                musicaCarpeta(cola, c.id);
-                avisar("Suena la carpeta " + c.nombre + ": " + cola.length + " canciones.");
-            }, "Reproducir la carpeta " + c.nombre);
-            const mas = botonDe("master-docs-mando es-texto", "＋🎵", () => subirA(c.id), "Añadir canciones a " + c.nombre);
-            const sub = botonDe("master-docs-mando es-texto", "＋📁", () => formulario({ tipo: "carpeta", padre: c.id }),
-                "Nueva subcarpeta en " + c.nombre);
-            const editar = botonDe("master-docs-mando", "✎", () => formulario({ tipo: "carpeta", id: c.id }),
-                "Cambiar el nombre o el sitio de " + c.nombre);
-            cab.append(plegar, tocarC, mas, sub, editar, botonQuitar("la carpeta " + c.nombre, () => quitarCarpeta(c)));
-            dentroUl.append(...ramas(c.id));
-            li.append(cab, dentroUl);
-            return li;
-        }
-        const ramas = (padre) => mu.carpetas.filter((c) => (c.padre || "") === padre).map(filaCarpeta)
-            .concat(mu.canciones.filter((c) => (c.carpeta || "") === padre).map(filaCancion));
-        // ---- LA VISTA DE TARJETAS: la carpeta en la que se está (con su
-        // camino arriba para volver), sus subcarpetas y sus canciones. Al
-        // pulsar una carpeta se entra; ▶ la pone entera. Al pulsar una
-        // canción suena (o se pausa, si ya sonaba). 🎨 le pone un emoji o
-        // una imagen tuya. ----
-        const tarjetas = crear("div", "master-musica-tarjetas-caja");
-        const camino = crear("nav", "master-musica-camino");
-        camino.setAttribute("aria-label", "Dónde estás");
-        const rejilla = crear("ul", "master-musica-tarjetas");
-        const enCarpeta = crear("div", "master-creador-barra");
-        tarjetas.append(camino, enCarpeta, rejilla);
-        function aspecto(cosa, emojiDe) {
-            const caja = crear("span", "master-musica-icono");
-            caja.setAttribute("aria-hidden", "true");
-            if (cosa.imagen) {
-                const img = crear("img");
-                img.alt = "";
-                imagenMusica(cosa.imagen).then((u) => {
-                    if (u) {
-                        const archivoBlob = u;
-                        img.src = archivoBlob;
-                    } else {
-                        caja.textContent = cosa.icono || emojiDe;
-                    }
-                });
-                caja.appendChild(img);
-            } else {
-                caja.textContent = cosa.icono || emojiDe;
-            }
-            return caja;
-        }
-        function pintarTarjetas() {
-            const aqui = d.carpeta && mu.carpetas.find((c) => c.id === d.carpeta) ? d.carpeta : "";
-            // El camino: 🏠 › Combate › Jefes.
-            const pasos = [];
-            let x = mu.carpetas.find((c) => c.id === aqui);
-            while (x) {
-                pasos.unshift(x);
-                x = mu.carpetas.find((c) => c.id === x.padre);
-            }
-            const ir = (id, texto, actual) => {
-                const b = botonDe("master-musica-paso", texto, () => {
-                    d.carpeta = id;
-                    guardar();
-                    pintarArbol();
-                    const p = camino.querySelector("[aria-current]");
-                    (rejilla.querySelector("button") || p || nuevaCarpeta).focus();
-                });
-                if (actual) {
-                    b.setAttribute("aria-current", "location");
-                }
-                return b;
-            };
-            camino.replaceChildren(ir("", "🏠 toda la música", !aqui), ...pasos.flatMap((c, i) => [crear("span", "master-musica-sep",
-                "›"), ir(c.id, c.nombre, i === pasos.length - 1)]));
-            camino.querySelectorAll(".master-musica-sep").forEach((sp) => sp.setAttribute("aria-hidden", "true"));
-            // Lo de esta carpeta.
-            const todas = cancionesDe(aqui);
-            const aquiNombre = aqui ? mu.carpetas.find((c) => c.id === aqui).nombre : "toda la música";
-            enCarpeta.replaceChildren(botonDe("oc-vida-accion", "▶ " + (aqui ? "esta carpeta" : "todo"), () => {
-                if (!todas.length) {
-                    avisar("Aquí no hay canciones.");
-                    return;
-                }
-                musicaCarpeta(todas, aqui);
-                avisar("Suena " + aquiNombre + ": " + todas.length + " canciones.");
-            }, "Poner " + aquiNombre + " entera (" + todas.length + " canciones)"),
-            botonDe("oc-vida-accion", "＋ 🎵 aquí", () => subirA(aqui), aqui ? "Añadir canciones a " + aquiNombre : "Añadir canciones (te pregunto la carpeta)"),
-            botonDe("oc-vida-accion", "＋ 📁 aquí", () => formulario({ tipo: "carpeta", padre: aqui }), "Nueva carpeta en " + aquiNombre));
-            rejilla.setAttribute("aria-label", "Carpetas y canciones de " + aquiNombre);
-            const items = [];
-            mu.carpetas.filter((c) => (c.padre || "") === aqui).forEach((c) => {
-                const li = crear("li", "master-musica-tarjeta es-carpeta");
-                const n = cancionesDe(c.id).length;
-                const b = botonDe("master-musica-tarjeta-boton", "", () => {
-                    d.carpeta = c.id;
-                    guardar();
-                    pintarArbol();
-                    (rejilla.querySelector("button") || camino.querySelector("[aria-current]")).focus();
-                }, "Abrir la carpeta " + c.nombre + " (" + n + " canciones)");
-                b.dataset.foco = c.id;
-                b.append(aspecto(c, "📁"), crear("span", "master-musica-tarjeta-nombre", c.nombre), crear("span",
-                    "master-musica-cuenta", n + (n === 1 ? " canción" : " canciones")));
-                const mandos2 = crear("div", "master-musica-tarjeta-mandos");
-                mandos2.append(botonDe("master-docs-mando", "▶", () => {
-                    const cola = cancionesDe(c.id);
-                    if (!cola.length) {
-                        avisar("La carpeta " + c.nombre + " está vacía.");
-                        return;
-                    }
-                    musicaCarpeta(cola, c.id);
-                    avisar("Suena la carpeta " + c.nombre + ".");
-                }, "Poner la carpeta " + c.nombre + " entera"), botonDe("master-docs-mando", "🎨", () => cambiarAspecto(c, "carpeta"),
-                    "Poner un emoji o una imagen a " + c.nombre), botonDe("master-docs-mando", "✎", () => formulario({ tipo: "carpeta",
-                    id: c.id }), "Cambiar el nombre o el sitio de " + c.nombre), botonQuitar("la carpeta " + c.nombre,
-                    () => quitarCarpeta(c)));
-                li.append(b, mandos2);
-                items.push(li);
-            });
-            mu.canciones.filter((c) => (c.carpeta || "") === aqui).forEach((c) => {
-                const li = crear("li", "master-musica-tarjeta");
-                const b = botonDe("master-musica-tarjeta-boton", "", () => {
-                    const actual = musicaActual();
-                    if (actual && actual.id === c.id && MUSICA.audio) {
-                        musicaAlternar();
-                        return;
-                    }
-                    const cola = cancionesDe(c.carpeta || "");
-                    musicaPoner(cola, cola.indexOf(c), c.carpeta || "");
-                    avisar("Suena: " + c.nombre + ".");
-                });
-                b.dataset.foco = c.id;
-                b.dataset.cancion = c.id;
-                b.append(aspecto(c, "🎵"), crear("span", "master-musica-tarjeta-nombre", c.nombre));
-                const mandos2 = crear("div", "master-musica-tarjeta-mandos");
-                mandos2.append(botonDe("master-docs-mando", "🎨", () => cambiarAspecto(c, "cancion"), "Poner un emoji o una imagen a "
-                    + c.nombre), botonDe("master-docs-mando", "✎", () => formulario({ tipo: "cancion", id: c.id }),
-                    "Cambiar el nombre, la carpeta o los puntos de " + c.nombre), botonQuitar(c.nombre, () => {
-                    if (musicaActual() && musicaActual().id === c.id) {
-                        musicaParar();
-                    }
-                    archivoBorrar(c.archivo);
-                    if (c.imagen) {
-                        archivoBorrar(c.imagen);
-                    }
-                    mu.canciones = mu.canciones.filter((x) => x !== c);
-                    guardar();
-                    pintarArbol();
-                    avisar("Quitada: " + c.nombre + ".");
-                    nuevaCarpeta.focus();
-                }));
-                li.append(b, mandos2);
-                items.push(li);
-            });
-            rejilla.replaceChildren(...items);
-            if (!items.length) {
-                rejilla.appendChild(crear("li", "oc-vacio", "Carpeta vacía: añade canciones o subcarpetas con los botones de arriba."));
-            }
-        }
-        function cambiarAspecto(cosa, tipo) {
-            dialogoAspecto(cosa, "aspecto de " + cosa.nombre + (tipo === "carpeta" ? " (carpeta)" : ""), () => {
-                guardar();
-                pintarArbol();
-                const b = dentro.querySelector("[data-foco='" + cosa.id + "']:not([hidden] *)");
-                if (b) {
-                    b.focus();
-                }
-            });
-        }
-
-        function pintarArbol() {
-            const enTarjetas = d.vista !== "lista";
-            botonesVista.forEach((b) => b.setAttribute("aria-pressed", b.dataset.vista === (enTarjetas ? "tarjetas" : "lista")
-                ? "true" : "false"));
-            const hay = mu.carpetas.length || mu.canciones.length;
-            if (enTarjetas) {
-                arbol.replaceChildren();
-                pintarTarjetas();
-            } else {
-                arbol.replaceChildren(...ramas(""));
-            }
-            const q = llano(buscar.value.trim());
-            arbol.hidden = !hay || enTarjetas || !!q;
-            tarjetas.hidden = !hay || !enTarjetas || !!q;
-            vacio.hidden = !!hay;
-            busca.hidden = !mu.canciones.length;
-            resultados.hidden = !q;
-            if (q) {
-                pintarResultados(q);
-            } else {
-                cuantos.textContent = "";
-            }
-            pintar();
-        }
-        // Lo que suena ahora, por dónde va y qué canción está marcada.
-        function pintar() {
-            if (!dentro.isConnected) {
-                return;
-            }
-            const c = musicaActual();
-            const a = MUSICA.audio;
-            const suena = !!(c && a && !a.paused);
-            const carpeta = c && mu.carpetas.find((x) => x.id === MUSICA.origen);
-            ahora.textContent = c ? (suena ? "▶ " : "⏸ ") + c.nombre + (carpeta ? " · 📁 " + carpeta.nombre : "")
-                + " (" + (MUSICA.pos + 1) + " de " + MUSICA.cola.length + ")" : "Nada sonando.";
-            tocar.textContent = suena ? "⏸" : "▶";
-            tocar.setAttribute("aria-label", suena ? "Pausa" : "Reproducir");
-            // Lo que se cambie desde la ventana aparte (volumen y repetir).
-            if (document.activeElement !== vol && Math.round(MUSICA.volumen * 100) !== Number(vol.value)) {
-                vol.value = Math.round(MUSICA.volumen * 100);
-            }
-            d.modo = MUSICA.modo;
-            pintarModo();
-            alAzar.setAttribute("aria-pressed", MUSICA.aleatorio ? "true" : "false");
-            if (document.activeElement !== fundidoS.sel) {
-                fundidoS.sel.value = String(MUSICA.fundido);
-            }
-            if (document.activeElement !== agacharS.sel) {
-                agacharS.sel.value = String(MUSICA.agachar);
-            }
-            const dur = a && isFinite(a.duration) ? a.duration : 0;
-            const t = a && c ? a.currentTime : 0;
-            if (!arrastrando) {
-                barra.value = dur ? Math.round(t / dur * 1000) : 0;
-            }
-            barra.setAttribute("aria-valuetext", minutos(t) + " de " + minutos(dur));
-            tiempo.textContent = minutos(t) + " / " + minutos(dur);
-            dentro.querySelectorAll("[data-cancion]").forEach((b) => {
-                const es = !!c && b.dataset.cancion === c.id;
-                b.closest("li").classList.toggle("es-sonando", es);
-                if (es) {
-                    b.setAttribute("aria-current", "true");
-                } else {
-                    b.removeAttribute("aria-current");
-                }
-            });
-        }
-        MUSICA.alCambiar = pintar;
-        ponerVol();
-        const nota = crear("p", "oc-hoja-nota master-fuente", "Tus canciones (y sus imágenes) se quedan sólo en este dispositivo: no"
-            + " se suben a ningún sitio. Para no perderlas (o llevarlas a otro ordenador), ⚙ → exportar. Siguen sonando al cambiar de pestaña;"
-            + " al quitar esta ventana, se paran.");
-        dentro.append(repro, herramientas, busca, cuantos, form, vacio, resultados, tarjetas, arbol, subir, nota);
-        pintarModo();
-        pintarArbol();
     }
 
     // ---- 🛠️ TUS CREACIONES: crear, cambiar, copiar (de uno del SRD),
@@ -12849,7 +4621,7 @@
     function vdDe(cr) {
         const n = cr.indexOf("/") > 0 ? 0 : parseInt(cr, 10) || 0;
         const bc = n < 5 ? 2 : Math.min(9, 2 + Math.ceil((n - 4) / 4));
-        return cr + " (" + (CR_PX[cr] || 0).toLocaleString("es-ES") + " PX; BC +" + bc + ")";
+        return ocT("{cr} ({toLocaleString} PX; BC +{bc})", { cr: cr, toLocaleString: (CR_PX[cr] || 0).toLocaleString("es-ES"), bc: bc });
     }
     const PROPIO_TIPOS = ["Aberración", "Autómata", "Bestia", "Celestial", "Cieno", "Dragón", "Elemental", "Enjambre", "Feérico",
         "Gigante", "Humanoide", "Infernal", "Monstruosidad", "Muerto viviente", "Planta"];
@@ -12870,8 +4642,8 @@
     const PROPIO_RASGOS = ["rasgo de clase", "rasgo de especie", "dote de origen", "dote general", "estilo de combate", "don épico",
         "rasgo de trasfondo", "otro rasgo"];
     const PROPIO_OTROS = ["especie", "trasfondo", "dote", "clase", "subclase", "rasgo de clase", "regla", "lugar", "deidad", "otro"];
-    const SECCIONES_BICHO = [["rasgos", "Rasgos"], ["acciones", "Acciones"], ["adicionales", "Acciones adicionales"],
-        ["reacciones", "Reacciones"], ["legendarias", "Acciones legendarias"]];
+    const SECCIONES_BICHO = [["rasgos", ocT("Rasgos")], ["acciones", ocT("Acciones")], ["adicionales", ocT("Acciones adicionales")],
+        ["reacciones", ocT("Reacciones")], ["legendarias", ocT("Acciones legendarias")]];
 
     // Lo que entra (de un archivo o del formulario), limpio: sólo lo que
     // se usa, textos con tope y números de verdad. Sin nombre, nada.
@@ -12890,6 +4662,10 @@
         }
         const o = { id: /^p[a-z0-9]{4,20}$/.test(x.id || "") ? x.id : idDoc("p"), propio: true, nombre,
             en: txt(x.en, 120) || nombre, libro: txt(x.libro, 160) };
+        // Tu versión de uno del SRD: el que sustituye.
+        if (typeof x.cambia === "string" && x.cambia.trim()) {
+            o.cambia = x.cambia.slice(0, 300);
+        }
         const entradas = (v) => (Array.isArray(v) ? v : []).slice(0, 60).map((r) => ({ n: txt(r && r.n, 160), t: txt(r && r.t, 6000) }))
             .filter((r) => r.n || r.t);
         if (tipo === "monstruos") {
@@ -12899,10 +4675,10 @@
                     o[k] = v;
                 }
             });
-            o.tipo = o.tipo || "Monstruosidad Mediano";
+            o.tipo = o.tipo || ocT("Monstruosidad Mediano");
             o.alin = o.alin || "neutral";
             o.ca = o.ca || "10";
-            o.vel = o.vel || "30 ft.";
+            o.vel = o.vel || ocT("30 ft.");
             o.pg = num(x.pg, 1, 9999, 10);
             const c = x.car && typeof x.car === "object" ? x.car : {};
             o.car = {};
@@ -12915,7 +4691,7 @@
                 const d = Math.floor((o.car.Des - 10) / 2);
                 o.ini = (d >= 0 ? "+" : "−") + Math.abs(d) + " (" + (10 + d) + ")";
             }
-            o.sent = o.sent || "Percepción pasiva " + (10 + Math.floor((o.car.Sab - 10) / 2));
+            o.sent = o.sent || ocT("Percepción pasiva {n}", { n: 10 + Math.floor((o.car.Sab - 10) / 2) });
             o.idio = o.idio || "—";
             o.habitat = (Array.isArray(x.habitat) ? x.habitat : []).map((h) => txt(h, 60)).filter(Boolean).slice(0, 20);
             SECCIONES_BICHO.forEach(([k]) => {
@@ -13029,10 +4805,10 @@
         }
         enlazarConjuros(t);
         cuerpo.appendChild(crear("p", "oc-hoja-nota master-fuente", fuenteDe(x)));
-        cuerpo.appendChild(botonDe("oc-vida-accion", "📌 al tablero", () => {
+        cuerpo.appendChild(botonDe("oc-vida-accion", ocT("📌 al tablero"), () => {
             cerrar();
             anadir("ficha", { titulo: x.nombre, datos: { que: "otro", id: x.id } });
-        }, "Poner " + x.nombre + " en el tablero"));
+        }, ocT("Poner {nombre} en el tablero", { nombre: x.nombre })));
         const cerrar = window.ocVentana.abrir({ titulo: x.nombre, cuerpo, vuelta, clase: "es-regla" });
     }
 
@@ -13050,25 +4826,25 @@
 
     // La plantilla: un ejemplo de cada (inventados), con todos los campos.
     const PLANTILLA_PROPIOS = { pantallaDeMasterPropios: 1,
-        ayuda: "Rellena las listas y cárgalo con ⬆ importar. Sólo «nombre» es obligatorio. Los textos admiten *cursiva* y **negrita**. Los ataques, con el formato «*Ataque cuerpo a cuerpo:* +4, alcance 5 ft. *Impacto:* 5 (1d6 + 2) de daño cortante.» salen en tabla con sus dados. Si algo va en inglés, se traducen los términos de reglas al importar.",
-        monstruos: [{ nombre: "Rata de alcantarilla gigante", en: "Giant Sewer Rat", libro: "inventado", tipo: "Bestia Pequeño",
-            alin: "sin alineamiento", ca: "12", pg: 9, pgf: "2d6 + 2", vel: "30 ft., trepar 20 ft.",
-            car: { Fue: 7, Des: 15, Con: 12, Int: 2, Sab: 10, Car: 4 }, hab: "Sigilo +4", sent: "visión en la oscuridad 60 ft.; Percepción pasiva 10",
+        ayuda: ocT("Rellena las listas y cárgalo con ⬆ importar. Sólo «nombre» es obligatorio. Los textos admiten *cursiva* y **negrita**. Los ataques, con el formato «*Ataque cuerpo a cuerpo:* +4, alcance 5 ft. *Impacto:* 5 (1d6 + 2) de daño cortante.» salen en tabla con sus dados. Si algo va en inglés, se traducen los términos de reglas al importar."),
+        monstruos: [{ nombre: ocT("Rata de alcantarilla gigante"), en: "Giant Sewer Rat", libro: "inventado", tipo: "Bestia Pequeño",
+            alin: "sin alineamiento", ca: "12", pg: 9, pgf: "2d6 + 2", vel: ocT("30 ft., trepar 20 ft."),
+            car: { Fue: 7, Des: 15, Con: 12, Int: 2, Sab: 10, Car: 4 }, hab: ocT("Sigilo +4"), sent: ocT("visión en la oscuridad 60 ft.; Percepción pasiva 10"),
             idio: "—", cr: "1/4", habitat: ["ciudad"],
-            rasgos: [{ n: "Olfato agudo", t: "La rata tiene ventaja en las pruebas de Sabiduría (Percepción) que dependen del olfato." }],
-            acciones: [{ n: "Mordisco", t: "*Ataque cuerpo a cuerpo:* +4, alcance 5 ft. *Impacto:* 4 (1d4 + 2) de daño perforante. Si el objetivo es una criatura, *Tirada de salvación de Constitución:* CD 11. *Fallo:* queda envenenado hasta el final de su siguiente turno." }],
-            reacciones: [{ n: "Escabullirse", t: "*Desencadenante:* Una criatura falla un ataque contra la rata. *Respuesta:* La rata se mueve 10 ft. sin provocar ataques de oportunidad." }] }],
-        objetos: [{ nombre: "Farol del vigía", en: "Watchman's Lantern", libro: "inventado", cat: "objeto maravilloso", rareza: "poco común",
-            sint: false, cp: 25000, peso: "2 lb.", tiendas: ["Tienda de magia"],
-            texto: "Mientras está encendido, las criaturas invisibles a 30 ft. o menos del farol dejan ver su silueta. Se enciende y se apaga con una acción adicional." }],
-        conjuros: [{ nombre: "Paso de niebla gris", en: "Grey Mist Step", libro: "inventado", nivel: 2, escuela: "Conjuración",
-            tiempo: "1 acción adicional", alcance: "Personal", comp: "V", dur: "Instantánea", clases: ["brujo", "hechicero", "mago"],
-            ritual: false, conc: false, texto: "Te envuelve una niebla gris y te teletransportas hasta 30 ft. a un espacio desocupado que veas. Cada criatura a 5 ft. del sitio del que te vas recibe 1d6 de daño de frío.",
-            superior: "**Con un espacio de nivel superior.** El daño aumenta en 1d6 por cada nivel por encima de 2." }],
-        rasgos: [{ nombre: "Marinero curtido", en: "Seasoned Sailor", libro: "inventado", tipo: "dote general", de: "dote",
-            texto: "**Piernas de mar.** No tienes desventaja por el balanceo de un barco.\n\n**Nudos.** Tienes ventaja en las pruebas para atar o desatar nudos." }],
-        otros: [{ nombre: "Dote: Centinela del puerto", libro: "inventado", cat: "dote",
-            texto: "*Requisito: nivel 4 o más.*\n\n**Ojo de marino.** Tienes ventaja en las pruebas de Sabiduría (Percepción) en barcos y muelles.\n\n**Amarre firme.** No pueden derribarte mientras estés sobre una cubierta." }] };
+            rasgos: [{ n: ocT("Olfato agudo"), t: ocT("La rata tiene ventaja en las pruebas de Sabiduría (Percepción) que dependen del olfato.") }],
+            acciones: [{ n: "Mordisco", t: ocT("*Ataque cuerpo a cuerpo:* +4, alcance 5 ft. *Impacto:* 4 (1d4 + 2) de daño perforante. Si el objetivo es una criatura, *Tirada de salvación de Constitución:* CD 11. *Fallo:* queda envenenado hasta el final de su siguiente turno.") }],
+            reacciones: [{ n: "Escabullirse", t: ocT("*Desencadenante:* Una criatura falla un ataque contra la rata. *Respuesta:* La rata se mueve 10 ft. sin provocar ataques de oportunidad.") }] }],
+        objetos: [{ nombre: ocT("Farol del vigía"), en: "Watchman's Lantern", libro: "inventado", cat: "objeto maravilloso", rareza: "poco común",
+            sint: false, cp: 25000, peso: ocT("2 lb."), tiendas: ["Tienda de magia"],
+            texto: ocT("Mientras está encendido, las criaturas invisibles a 30 ft. o menos del farol dejan ver su silueta. Se enciende y se apaga con una acción adicional.") }],
+        conjuros: [{ nombre: ocT("Paso de niebla gris"), en: "Grey Mist Step", libro: "inventado", nivel: 2, escuela: "Conjuración",
+            tiempo: ocT("1 acción adicional"), alcance: "Personal", comp: "V", dur: "Instantánea", clases: ["brujo", "hechicero", "mago"],
+            ritual: false, conc: false, texto: ocT("Te envuelve una niebla gris y te teletransportas hasta 30 ft. a un espacio desocupado que veas. Cada criatura a 5 ft. del sitio del que te vas recibe 1d6 de daño de frío."),
+            superior: ocT("**Con un espacio de nivel superior.** El daño aumenta en 1d6 por cada nivel por encima de 2.") }],
+        rasgos: [{ nombre: ocT("Marinero curtido"), en: "Seasoned Sailor", libro: "inventado", tipo: "dote general", de: "dote",
+            texto: ocT("**Piernas de mar.** No tienes desventaja por el balanceo de un barco.\n\n**Nudos.** Tienes ventaja en las pruebas para atar o desatar nudos.") }],
+        otros: [{ nombre: ocT("Dote: Centinela del puerto"), libro: "inventado", cat: "dote",
+            texto: ocT("*Requisito: nivel 4 o más.*\n\n**Ojo de marino.** Tienes ventaja en las pruebas de Sabiduría (Percepción) en barcos y muelles.\n\n**Amarre firme.** No pueden derribarte mientras estés sobre una cubierta.") }] };
 
 
     // ---- PEGAR UN BLOQUE: lo copiado de una página (D&D Beyond, un PDF…),
@@ -13370,56 +5146,48 @@
         // que hay que seleccionar marcado.
         const bloque = crear("div", "master-guia-bloque");
         bloque.setAttribute("role", "img");
-        bloque.setAttribute("aria-label", "Ejemplo: un bloque de estadísticas seleccionado entero, desde el nombre del monstruo"
-            + " hasta la última acción.");
-        const filas = [["es-nombre", "Rata de alcantarilla gigante"], ["es-cursiva", "Small Beast, Unaligned"],
-            ["", "AC 12   Initiative +2 (12)"], ["", "HP 9 (2d6 + 2)"], ["", "Speed 30 ft., Climb 20 ft."],
-            ["es-tabla", "Str 7 −2 −2 · Dex 15 +2 +2 · Con 12 +1 +1 …"], ["", "Senses Darkvision 60 ft.; Passive Perception 10"],
-            ["", "CR 1/4 (XP 50; PB +2)"], ["es-seccion", "Actions"],
-            ["", "Bite. Melee Attack Roll: +4, reach 5 ft. Hit: 4 (1d4 + 2) Piercing damage."]];
+        bloque.setAttribute("aria-label", ocT("Ejemplo: un bloque de estadísticas seleccionado entero, desde el nombre del monstruo hasta la última acción."));
+        const filas = [["es-nombre", ocT("Rata de alcantarilla gigante")], ["es-cursiva", ocT("Small Beast, Unaligned")],
+            ["", ocT("AC 12   Initiative +2 (12)")], ["", ocT("HP 9 (2d6 + 2)")], ["", ocT("Speed 30 ft., Climb 20 ft.")],
+            ["es-tabla", ocT("Str 7 −2 −2 · Dex 15 +2 +2 · Con 12 +1 +1 …")], ["", ocT("Senses Darkvision 60 ft.; Passive Perception 10")],
+            ["", ocT("CR 1/4 (XP 50; PB +2)")], ["es-seccion", "Actions"],
+            ["", ocT("Bite. Melee Attack Roll: +4, reach 5 ft. Hit: 4 (1d4 + 2) Piercing damage.")]];
         filas.forEach(([c, t]) => {
             const f = crear("p", "master-guia-fila " + c, t);
             f.setAttribute("aria-hidden", "true");
             bloque.appendChild(f);
         });
-        const desde = crear("span", "master-guia-marca es-desde", "▶ desde aquí");
-        const hasta = crear("span", "master-guia-marca es-hasta", "hasta aquí ◀");
+        const desde = crear("span", "master-guia-marca es-desde", ocT("▶ desde aquí"));
+        const hasta = crear("span", "master-guia-marca es-hasta", ocT("hasta aquí ◀"));
         desde.setAttribute("aria-hidden", "true");
         hasta.setAttribute("aria-hidden", "true");
         bloque.prepend(desde);
         bloque.appendChild(hasta);
-        cuerpo.appendChild(p("Para traer a tu mesa monstruos, objetos y conjuros de los libros que tienes en D&D Beyond (o de"
-            + " un PDF tuyo) sin escribirlos campo a campo. Se quedan sólo en este dispositivo."));
-        paso(1, "Ábrelo en D&D Beyond", p("Entra con tu cuenta y abre la página del monstruo, el objeto o el conjuro (de un libro"
-            + " que tengas)."));
-        paso(2, "Selecciona el bloque entero y cópialo", p("Arrastra desde el nombre hasta el final de la última acción (o del"
-            + " texto, en un objeto o un conjuro) y cópialo: Ctrl + C (en un Mac, ⌘ + C; en una tablet, mantén pulsado →"
-            + " Copiar)."), bloque, p("Si se cuela algo de más (botones, notas), no pasa nada: lo que no se reconoce se salta o"
-            + " se queda en el texto para repasarlo."));
-        paso(3, "Pégalo aquí", p("En 🛠️ tus creaciones, en la pestaña que toque (🐉 monstruos, 💰 objetos o ✨ conjuros), pulsa"
-            + " «📋 pegar un bloque», pega con Ctrl + V y pulsa «✓ rellenar»."), img("imagenes/guia/pegar.webp",
-            "La ventana «pegar un bloque» con el texto de un monstruo pegado y el botón «rellenar»."));
-        paso(4, "Repásalo y guarda", p("Se abre el formulario ya relleno, con los términos de reglas pasados al español si está"
-            + " marcado «🌐 traducir» (las frases se quedan en inglés: cámbialas si quieres). Mira el tipo, el tamaño y el VD,"
-            + " pon de qué libro sale y pulsa «✓ guardar»."), img("imagenes/guia/formulario.webp",
-            "El formulario de un monstruo relleno solo: nombre, tipo, tamaño, VD, CA, PG y sus acciones."));
-        paso(5, "Ya está en tu mesa", p("Sale en el bestiario, los encuentros, el buscador… como los del SRD, con «🛠️ tuyo». Los"
-            + " ataques, en su tabla con los dados para tirar."), img("imagenes/guia/resultado.webp",
-            "El monstruo en su ventana, con la tabla de ataques y los dados."));
-        window.ocVentana.abrir({ titulo: "cómo pegar desde D&D Beyond", cuerpo, vuelta, clase: "es-ancha" });
+        cuerpo.appendChild(p(ocT("Para traer a tu mesa monstruos, objetos y conjuros de los libros que tienes en D&D Beyond (o de un PDF tuyo) sin escribirlos campo a campo. Se quedan sólo en este dispositivo.")));
+        paso(1, ocT("Ábrelo en D&D Beyond"), p(ocT("Entra con tu cuenta y abre la página del monstruo, el objeto o el conjuro (de un libro que tengas).")));
+        paso(2, ocT("Selecciona el bloque entero y cópialo"), p(ocT("Arrastra desde el nombre hasta el final de la última acción (o del texto, en un objeto o un conjuro) y cópialo: Ctrl + C (en un Mac, ⌘ + C; en una tablet, mantén pulsado → Copiar).")), bloque, p(ocT("Si se cuela algo de más (botones, notas), no pasa nada: lo que no se reconoce se salta o se queda en el texto para repasarlo.")));
+        paso(3, ocT("Pégalo aquí"), p(ocT("En 🛠️ tus creaciones, en la pestaña que toque (🐉 monstruos, 💰 objetos o ✨ conjuros), pulsa «📋 pegar un bloque», pega con Ctrl + V y pulsa «✓ rellenar».")), img("imagenes/guia/pegar.webp",
+            ocT("La ventana «pegar un bloque» con el texto de un monstruo pegado y el botón «rellenar».")));
+        paso(4, ocT("Repásalo y guarda"), p(ocT("Se abre el formulario ya relleno, con los términos de reglas pasados al español si está marcado «🌐 traducir» (las frases se quedan en inglés: cámbialas si quieres). Mira el tipo, el tamaño y el VD, pon de qué libro sale y pulsa «✓ guardar».")), img("imagenes/guia/formulario.webp",
+            ocT("El formulario de un monstruo relleno solo: nombre, tipo, tamaño, VD, CA, PG y sus acciones.")));
+        paso(5, ocT("Ya está en tu mesa"), p(ocT("Sale en el bestiario, los encuentros, el buscador… como los del SRD, con «🛠️ tuyo». Los ataques, en su tabla con los dados para tirar.")), img("imagenes/guia/resultado.webp",
+            ocT("El monstruo en su ventana, con la tabla de ataques y los dados.")));
+        window.ocVentana.abrir({ titulo: ocT("cómo pegar desde D&D Beyond"), cuerpo, vuelta, clase: "es-ancha" });
     }
 
     function montarCreador(dentro, m) {
         m.datos = m.datos || {};
         const d = m.datos;
-        const TIPOS = [["monstruos", "🐉 monstruos", "monstruo"], ["objetos", "💰 objetos", "objeto"], ["conjuros", "✨ conjuros", "conjuro"],
-            ["rasgos", "⭐ rasgos y dotes", "rasgo"], ["otros", "📜 más cosas", "cosa"]];
+        const TIPOS = [["monstruos", ocT("🐉 monstruos"), "monstruo"], ["objetos", ocT("💰 objetos"), "objeto"], ["conjuros", ocT("✨ conjuros"), "conjuro"],
+            ["rasgos", ocT("⭐ rasgos y dotes"), "rasgo"], ["otros", ocT("📜 más cosas"), "cosa"]];
         const RUTA_DE = { monstruos: "datos/personajes/compendio/bestiario.json", objetos: "datos/personajes/compendio/tienda.json",
             conjuros: "datos/personajes/compendio/conjuros-srd.json", rasgos: RASGOS_SRD };
         const uid = "master-creador-" + m.id;
         // Lo del SRD de cada tipo (para copiar uno y para que no se repitan).
         const srd = { monstruos: [], objetos: [], conjuros: [], rasgos: [], otros: [] };
-        const cargado = Promise.all(Object.keys(RUTA_DE).map((k) => pedidos[RUTA_DE[k]] || pedir(RUTA_DE[k]))).then((xs) => {
+        // (Los originales, sin tus cambios ni tus borrados.)
+        const crudo = (ruta) => pedir(ruta).then(() => pedidos[(edicionAhora === "2014" && DE_2014[ruta]) || ruta]);
+        const cargado = Promise.all(Object.keys(RUTA_DE).map((k) => crudo(RUTA_DE[k]))).then((xs) => {
             Object.keys(RUTA_DE).forEach((k, i) => {
                 srd[k] = (xs[i][k] || []).filter((x) => !x.propio);
             });
@@ -13427,29 +5195,27 @@
 
         // ARRIBA: el aviso, importar, exportar y la plantilla.
         const vista = crear("div", "master-creador-vista");
-        const nota = crear("p", "oc-hoja-nota", "Monstruos, objetos, conjuros y más cosas de otros manuales (cópialos de tu libro)"
-            + " o inventados. Salen en el bestiario, los encuentros, la tienda, el botín, los conjuros y el buscador, como los del SRD."
-            + " Se quedan sólo en este navegador: no se suben a la web. Para no perderlos o pasárselos a otro máster, ⬇ exportar.");
+        const nota = crear("p", "oc-hoja-nota", ocT("Monstruos, objetos, conjuros y más cosas de otros manuales (cópialos de tu libro) o inventados. Salen en el bestiario, los encuentros, la tienda, el botín, los conjuros y el buscador, como los del SRD. Se quedan sólo en este navegador: no se suben a la web. Para no perderlos o pasárselos a otro máster, ⬇ exportar."));
         const barra = crear("div", "master-creador-barra");
         const archivo = crear("input");
         archivo.type = "file";
         archivo.accept = ".json,application/json";
         archivo.hidden = true;
-        const importar = botonDe("oc-vida-accion", "⬆ importar .json", () => archivo.click(), "Importar creaciones desde un archivo .json");
-        const exportar = botonDe("oc-vida-accion", "⬇ exportar", () => {
+        const importar = botonDe("oc-vida-accion", ocT("⬆ importar .json"), () => archivo.click(), ocT("Importar creaciones desde un archivo .json"));
+        const exportar = botonDe("oc-vida-accion", ocT("⬇ exportar"), () => {
             const p = leerPropios();
             const n = p.monstruos.length + p.objetos.length + p.conjuros.length + p.rasgos.length + p.otros.length;
             if (!n) {
-                avisar("Aún no hay nada tuyo que exportar.");
+                avisar(ocT("Aún no hay nada tuyo que exportar."));
                 return;
             }
             bajarJson(Object.assign({ pantallaDeMasterPropios: 1 }, p), "mis-creaciones-" + new Date().toISOString().slice(0, 10) + ".json");
-            avisar("Exportadas " + n + " creaciones.");
+            avisar(ocT("Exportadas {n} creaciones.", { n: n }));
         }, "Exportar todas tus creaciones a un archivo .json");
-        const plantilla = botonDe("oc-vida-accion", "📄 plantilla", () => {
+        const plantilla = botonDe("oc-vida-accion", ocT("📄 plantilla"), () => {
             bajarJson(PLANTILLA_PROPIOS, "plantilla-creaciones.json");
-            avisar("Bajada la plantilla, con un ejemplo de cada.");
-        }, "Bajar una plantilla .json de ejemplo para rellenar");
+            avisar(ocT("Bajada la plantilla, con un ejemplo de cada."));
+        }, ocT("Bajar una plantilla .json de ejemplo para rellenar"));
         const etTr = crear("label", "master-creador-check");
         const conTraducir = crear("input");
         conTraducir.type = "checkbox";
@@ -13458,7 +5224,7 @@
             d.traducir = conTraducir.checked;
             guardar();
         });
-        etTr.append(conTraducir, " 🌐 traducir los términos al importar");
+        etTr.append(conTraducir, ocT(" 🌐 traducir los términos al importar"));
         barra.append(importar, exportar, plantilla, etTr, archivo);
         archivo.addEventListener("change", () => {
             const f = archivo.files && archivo.files[0];
@@ -13472,12 +5238,11 @@
                 try {
                     datos = JSON.parse(texto);
                 } catch (e) {
-                    informe.error = "No es un .json válido (no se puede leer).";
+                    informe.error = ocT("No es un .json válido (no se puede leer).");
                     return;
                 }
                 if (!datos || typeof datos !== "object" || Array.isArray(datos) || !TIPOS.some(([k]) => Array.isArray(datos[k]))) {
-                    informe.error = "No tiene el formato de la plantilla: no trae ninguna lista «monstruos», «objetos»,"
-                        + " «conjuros», «rasgos» ni «otros». Mira la 📄 plantilla para ver cómo tiene que ser.";
+                    informe.error = ocT("No tiene el formato de la plantilla: no trae ninguna lista «monstruos», «objetos», «conjuros», «rasgos» ni «otros». Mira la 📄 plantilla para ver cómo tiene que ser.");
                     return;
                 }
                 const p = leerPropios();
@@ -13519,16 +5284,16 @@
                 });
                 const total = Object.values(informe.tipos).reduce((n, t) => n + t.nuevos.length + t.cambiados.length, 0);
                 if (!total) {
-                    informe.error = "No había nada que se pudiera importar: a todo le faltaba el nombre o no se entendía.";
+                    informe.error = ocT("No había nada que se pudiera importar: a todo le faltaba el nombre o no se entendía.");
                     return;
                 }
                 if (!guardarPropios(p)) {
-                    informe.error = "No se ha podido guardar: no queda sitio en este navegador. No se ha importado nada.";
+                    informe.error = ocT("No se ha podido guardar: no queda sitio en este navegador. No se ha importado nada.");
                     return;
                 }
                 pintarListas();
             }).catch(() => {
-                informe.error = informe.error || "No se ha podido leer el archivo.";
+                informe.error = informe.error || ocT("No se ha podido leer el archivo.");
             }).then(() => verInforme(informe));
         });
 
@@ -13542,15 +5307,14 @@
             const cambiados = tipos.reduce((n, t) => n + t.cambiados.length, 0);
             const bien = !informe.error;
             const estado = crear("p", "master-informe-estado " + (bien ? "es-bien" : "es-mal"),
-                bien ? "✅ Importado: " + nuevos + (nuevos === 1 ? " nuevo" : " nuevos")
-                    + (cambiados ? " y " + cambiados + (cambiados === 1 ? " cambiado" : " cambiados") : "") + "."
-                    : "⚠️ No se ha importado nada.");
-            cuerpo.append(estado, crear("p", "oc-hoja-nota", "Archivo: " + informe.archivo));
+                bien ? ocT("✅ Importado: {nuevos}{n}{n2}.", { nuevos: nuevos, n: nuevos === 1 ? ocT(" nuevo") : ocT(" nuevos"), n2: cambiados ? ocT(" y {cambiados}{n}", { cambiados: cambiados, n: cambiados === 1 ? ocT(" cambiado") : ocT(" cambiados") }) : "" })
+                    : ocT("⚠️ No se ha importado nada."));
+            cuerpo.append(estado, crear("p", "oc-hoja-nota", ocT("Archivo: {archivo}", { archivo: informe.archivo })));
             if (!bien) {
                 cuerpo.appendChild(crear("p", "", informe.error));
             } else {
                 const tabla = crear("table", "master-informe-tabla");
-                tabla.appendChild(crear("caption", "visually-hidden", "Resumen de la importación"));
+                tabla.appendChild(crear("caption", "visually-hidden", ocT("Resumen de la importación")));
                 const cab = crear("tr");
                 ["qué", "nuevos", "cambiados", "saltados"].forEach((x) => {
                     const th = crear("th", "", x);
@@ -13573,11 +5337,10 @@
                 const saltados = tipos.reduce((n, t) => n + t.saltados, 0);
                 const demasiados = tipos.reduce((n, t) => n + t.demasiados, 0);
                 if (saltados) {
-                    cuerpo.appendChild(crear("p", "oc-hoja-nota", "Saltados: " + saltados + " sin nombre o que no se entendían."));
+                    cuerpo.appendChild(crear("p", "oc-hoja-nota", ocT("Saltados: {saltados} sin nombre o que no se entendían.", { saltados: saltados })));
                 }
                 if (demasiados) {
-                    cuerpo.appendChild(crear("p", "oc-hoja-nota", "Sólo entran 2.000 de cada tipo por archivo: " + demasiados
-                        + " se han quedado fuera."));
+                    cuerpo.appendChild(crear("p", "oc-hoja-nota", ocT("Sólo entran 2.000 de cada tipo por archivo: {demasiados} se han quedado fuera.", { demasiados: demasiados })));
                 }
                 tipos.forEach((t) => {
                     const lista = t.nuevos.concat(t.cambiados);
@@ -13589,17 +5352,17 @@
                     const ul = crear("ul");
                     lista.slice(0, 200).forEach((nombre) => ul.appendChild(crear("li", "", nombre)));
                     if (lista.length > 200) {
-                        ul.appendChild(crear("li", "", "…y " + (lista.length - 200) + " más."));
+                        ul.appendChild(crear("li", "", ocT("…y {n} más.", { n: lista.length - 200 })));
                     }
                     det.appendChild(ul);
                     cuerpo.appendChild(det);
                 });
                 if (conTraducir.checked) {
-                    cuerpo.appendChild(crear("p", "oc-hoja-nota", "🌐 Con los términos de reglas pasados al español."));
+                    cuerpo.appendChild(crear("p", "oc-hoja-nota", ocT("🌐 Con los términos de reglas pasados al español.")));
                 }
             }
             avisar(estado.textContent);
-            window.ocVentana.abrir({ titulo: "importar: " + (bien ? "hecho" : "no ha podido ser"), cuerpo, vuelta: importar });
+            window.ocVentana.abrir({ titulo: "importar: " + (bien ? "hecho" : ocT("no ha podido ser")), cuerpo, vuelta: importar });
         }
 
         // LAS LISTAS, una por pestaña.
@@ -13608,14 +5371,13 @@
         const paneles = TIPOS.map(([k, titulo, uno]) => {
             const panel = crear("div", "master-creador-panel");
             const botones = crear("div", "master-creador-barra");
-            botones.appendChild(botonDe("oc-vida-accion es-principal", "＋ " + uno + " nuevo", () => editar(k, null), "Crear " +
-                (k === "otros" ? "una cosa nueva (especie, dote…)" : "un " + uno + " nuevo")));
+            botones.appendChild(botonDe("oc-vida-accion es-principal", ocT("＋ {uno} nuevo", { uno: uno }), () => editar(k, null), ocT("Crear {n}", { n: k === "otros" ? ocT("una cosa nueva (especie, dote…)") : ocT("un {uno} nuevo", { uno: uno }) })));
             if (k !== "otros" && k !== "rasgos") {
-                const pegar = botonDe("oc-vida-accion", "📋 pegar un bloque", () => abrirPegar(k, pegar),
-                    "Pegar un bloque copiado (de D&D Beyond, un PDF…) para rellenar " + (k === "monstruos" ? "un monstruo"
-                        : k === "objetos" ? "un objeto" : "un conjuro"));
+                const pegar = botonDe("oc-vida-accion", ocT("📋 pegar un bloque"), () => abrirPegar(k, pegar),
+                    ocT("Pegar un bloque copiado (de D&D Beyond, un PDF…) para rellenar {n}", { n: k === "monstruos" ? ocT("un monstruo")
+                        : k === "objetos" ? ocT("un objeto") : ocT("un conjuro") }));
                 pegar.setAttribute("aria-haspopup", "dialog");
-                const guia = botonDe("oc-vida-accion", "❓ cómo", () => abrirGuiaPegar(guia), "Cómo pegar desde D&D Beyond (guía)");
+                const guia = botonDe("oc-vida-accion", ocT("❓ cómo"), () => abrirGuiaPegar(guia), ocT("Cómo pegar desde D&D Beyond (guía)"));
                 guia.setAttribute("aria-haspopup", "dialog");
                 botones.append(pegar, guia);
             }
@@ -13623,7 +5385,7 @@
                 // Partir de uno del SRD (para hacer una versión).
                 const sel = crear("select", "master-elegir");
                 sel.id = uid + "-base-" + k;
-                const etSel = crear("label", "oc-dados-etiqueta", "o partir de uno del SRD");
+                const etSel = crear("label", "oc-dados-etiqueta", ocT("o partir de uno del SRD"));
                 etSel.htmlFor = sel.id;
                 cargado.then(() => {
                     const clave = (x) => (k === "rasgos" ? x.en + "|" + x.de : x.en);
@@ -13633,45 +5395,46 @@
                         return o;
                     }));
                 });
-                const copiar = botonDe("oc-vida-accion", "⧉ copiar", () => {
+                const copiar = botonDe("oc-vida-accion", ocT("⧉ copiar"), () => {
                     const base = srd[k].find((x) => (k === "rasgos" ? x.en + "|" + x.de : x.en) === sel.value);
                     if (base) {
                         const x = JSON.parse(JSON.stringify(base));
                         delete x.ilus;
                         delete x.ilusDe;
                         x.libro = "";
-                        x.nombre = base.nombre + " (versión)";
-                        x.en = base.en + " (versión)";
+                        x.nombre = ocT("{nombre} (versión)", { nombre: base.nombre });
+                        x.en = ocT("{en} (versión)", { en: base.en });
                         editar(k, x, true);
                     }
-                }, "Copiar el elegido para hacer tu versión");
+                }, ocT("Copiar el elegido para hacer tu versión"));
                 const caja = crear("div", "master-creador-base");
                 caja.append(etSel, sel, copiar);
                 botones.appendChild(caja);
             }
-            const etF = crear("label", "oc-dados-etiqueta", "buscar entre los tuyos");
+            const etF = crear("label", "oc-dados-etiqueta", ocT("buscar entre los tuyos"));
             const filtro = crear("input", "oc-dados-texto");
             filtro.type = "search";
             filtro.id = uid + "-filtro-" + k;
             etF.htmlFor = filtro.id;
             filtro.addEventListener("input", () => pintarLista(k));
             filtros[k] = filtro;
-            const ul = crear("ul", "master-creador-lista");
-            ul.setAttribute("aria-label", titulo.replace(/^\S+\s/, "") + " tuyos");
+            const ul = crear("div", "master-creador-grupos");
+            ul.setAttribute("role", "region");
+            ul.setAttribute("aria-label", ocT("{replace} tuyos", { replace: titulo.replace(/^\S+\s/, "") }));
             listas[k] = ul;
             panel.append(botones, etF, filtro, ul);
             if (k === "rasgos") {
                 // Los del SRD (rasgos de clase y especie, dotes y
                 // habilidades), para leerlos aquí mismo.
                 const srdCaja = crear("details", "master-creador-srd");
-                const resumen = crear("summary", "", "📖 los del SRD");
-                const etS = crear("label", "oc-dados-etiqueta", "buscar entre los del SRD");
+                const resumen = crear("summary", "", ocT("📖 los del SRD"));
+                const etS = crear("label", "oc-dados-etiqueta", ocT("buscar entre los del SRD"));
                 const buscaS = crear("input", "oc-dados-texto");
                 buscaS.type = "search";
                 buscaS.id = uid + "-srd-" + k;
                 etS.htmlFor = buscaS.id;
                 const ulS = crear("ul", "master-conjuros");
-                ulS.setAttribute("aria-label", "Rasgos, dotes y habilidades del SRD");
+                ulS.setAttribute("aria-label", ocT("Rasgos, dotes y habilidades del SRD"));
                 const pintarS = () => {
                     const q = llano(buscaS.value.trim());
                     const salen = srd.rasgos.filter((r) => !q || llano(r.nombre + " " + r.en + " " + r.de + " " + r.tipo).includes(q));
@@ -13684,7 +5447,7 @@
                         li.appendChild(b);
                         return li;
                     }));
-                    resumen.textContent = "📖 los del SRD (" + srd.rasgos.length + ")" + (q ? " · " + salen.length + " con eso" : "");
+                    resumen.textContent = ocT("📖 los del SRD ({n}){n2}", { n: srd.rasgos.length, n2: q ? ocT(" · {n} con eso", { n: salen.length }) : "" });
                 };
                 buscaS.addEventListener("input", pintarS);
                 cargado.then(pintarS);
@@ -13693,10 +5456,16 @@
             }
             return [titulo, panel];
         });
-        // La primera pestaña: cómo añadir cosas (el tutorial).
-        paneles.unshift(["❓ cómo añadir", panelTutorial()]);
+        // La primera pestaña: cómo añadir cosas (el tutorial). Para editar
+        // o borrar, en cada pestaña un buscador con todo (del SRD y tuyo).
+        const repintar = [];
+        if (d.accion === "editar" || d.accion === "borrar") {
+            paneles.splice(0, paneles.length, ...TIPOS.map(([k, titulo]) => [titulo, panelBuscar(k)]));
+        } else {
+            paneles.unshift([ocT("❓ cómo añadir"), panelTutorial()]);
+        }
         const elegido = Math.min(d.pestana || 0, paneles.length - 1);
-        const { lista: pestanas, elegir } = pestanasDe(paneles, "Qué crear", uid, (i) => {
+        const { lista: pestanas, elegir } = pestanasDe(paneles, ocT("Qué crear"), uid, (i) => {
             d.pestana = i;
             guardar();
         });
@@ -13720,30 +5489,20 @@
                 return x;
             };
             const ir = (i, texto) => botonDe("oc-vida-accion", texto, () => elegir(i, true));
-            panel.appendChild(p("Aquí amplías los compendios con lo tuyo: monstruos, objetos, conjuros y más cosas (especies,"
-                + " dotes, trasfondos…), inventados o pasados de tus libros. Después salen en toda la app como los del SRD."));
+            panel.appendChild(p(ocT("Aquí amplías los compendios con lo tuyo: monstruos, objetos, conjuros y más cosas (especies, dotes, trasfondos…), inventados o pasados de tus libros. Después salen en toda la app como los del SRD.")));
             const irA = crear("div", "master-creador-barra");
-            irA.append(ir(1, "🐉 monstruos"), ir(2, "💰 objetos"), ir(3, "✨ conjuros"), ir(4, "📜 más cosas"));
-            paso(1, "Elige qué quieres añadir", p("Cada tipo tiene su pestaña aquí arriba, con la lista de lo que ya has añadido."),
+            irA.append(ir(1, ocT("🐉 monstruos")), ir(2, ocT("💰 objetos")), ir(3, ocT("✨ conjuros")), ir(4, ocT("📜 más cosas")));
+            paso(1, ocT("Elige qué quieres añadir"), p(ocT("Cada tipo tiene su pestaña aquí arriba, con la lista de lo que ya has añadido.")),
                 irA);
-            const guia = botonDe("oc-vida-accion", "❓ cómo pegar desde D&D Beyond", () => abrirGuiaPegar(guia));
+            const guia = botonDe("oc-vida-accion", ocT("❓ cómo pegar desde D&D Beyond"), () => abrirGuiaPegar(guia));
             guia.setAttribute("aria-haspopup", "dialog");
-            paso(2, "Añádelo de una de estas tres formas", p("<strong>＋ nuevo</strong>: rellenas el formulario desde cero.<br>"
-                + "<strong>⧉ copiar</strong> (partir de uno del SRD): una copia para hacer tu versión, con otros números o"
-                + " ataques.<br><strong>📋 pegar un bloque</strong>: pegas el bloque copiado de D&D Beyond o de un PDF y el"
-                + " formulario se rellena solo."), guia);
-            paso(3, "Repásalo y guarda", p("En el formulario, mira sobre todo el tipo, el tamaño y el VD (los encuentros los"
-                + " usan), pon <strong>de dónde sale</strong> y pulsa <strong>✓ guardar</strong>. Si algo viene en inglés,"
-                + " <strong>🌐 traducir términos</strong> pasa al español los de reglas (daños, estados, «Melee Attack Roll»…)."),
-                img2("imagenes/guia/formulario.webp", "El formulario de un monstruo relleno."));
-            paso(4, "Muchos a la vez: importar", p("Baja la <strong>📄 plantilla</strong> (un ejemplo de cada), rellénala y"
-                + " cárgala con <strong>⬆ importar .json</strong>: una ventana te dice qué ha entrado y qué no."
-                + " <strong>⬇ exportar</strong> guarda todo lo tuyo en un archivo, para tener copia o pasárselo a otro máster."));
-            paso(5, "Dónde sale", p("En el bestiario, los encuentros, la tienda y los negocios, el botín, los conjuros, la party"
-                + " y el buscador, con «🛠️ tuyo». Los ataques, en su tabla con los dados."),
-                img2("imagenes/guia/resultado.webp", "Un monstruo añadido, en su ventana con la tabla de ataques."));
-            paso(6, "Sólo en este dispositivo", p("Lo que añades se queda aquí: no se sube a ningún sitio. Los mismos en todas tus"
-                + " campañas."));
+            paso(2, ocT("Añádelo de una de estas tres formas"), p(ocT("<strong>＋ nuevo</strong>: rellenas el formulario desde cero.<br><strong>⧉ copiar</strong> (partir de uno del SRD): una copia para hacer tu versión, con otros números o ataques.<br><strong>📋 pegar un bloque</strong>: pegas el bloque copiado de D&D Beyond o de un PDF y el formulario se rellena solo.")), guia);
+            paso(3, ocT("Repásalo y guarda"), p(ocT("En el formulario, mira sobre todo el tipo, el tamaño y el VD (los encuentros los usan), pon <strong>de dónde sale</strong> y pulsa <strong>✓ guardar</strong>. Si algo viene en inglés, <strong>🌐 traducir términos</strong> pasa al español los de reglas (daños, estados, «Melee Attack Roll»…).")),
+                img2("imagenes/guia/formulario.webp", ocT("El formulario de un monstruo relleno.")));
+            paso(4, ocT("Muchos a la vez: importar"), p(ocT("Baja la <strong>📄 plantilla</strong> (un ejemplo de cada), rellénala y cárgala con <strong>⬆ importar .json</strong>: una ventana te dice qué ha entrado y qué no. <strong>⬇ exportar</strong> guarda todo lo tuyo en un archivo, para tener copia o pasárselo a otro máster.")));
+            paso(5, ocT("Dónde sale"), p(ocT("En el bestiario, los encuentros, la tienda y los negocios, el botín, los conjuros, la party y el buscador, con «🛠️ tuyo». Los ataques, en su tabla con los dados.")),
+                img2("imagenes/guia/resultado.webp", ocT("Un monstruo añadido, en su ventana con la tabla de ataques.")));
+            paso(6, ocT("Sólo en este dispositivo"), p(ocT("Lo que añades se queda aquí: no se sube a ningún sitio. Los mismos en todas tus campañas.")));
             return panel;
         }
         function img2(src, alt) {
@@ -13756,7 +5515,7 @@
 
         function detalleDe(k, x) {
             if (k === "monstruos") {
-                return "VD " + x.cr + " · " + x.tipo;
+                return ocT("VD {cr} · {tipo}", { cr: x.cr, tipo: x.tipo });
             }
             if (k === "objetos") {
                 return x.cat + (x.rareza ? " · " + x.rareza : "");
@@ -13782,53 +5541,383 @@
                 } else {
                     abrirOtro(x, vuelta);
                 }
-            }).catch(() => (k === "otros" ? abrirOtro(x, vuelta) : avisar("No he podido cargarlo.")));
+            }).catch(() => (k === "otros" ? abrirOtro(x, vuelta) : avisar(ocT("No he podido cargarlo."))));
         }
+        // LAS CATEGORÍAS: el libro de cada cosa tuya («La caldera de Tasha»,
+        // «Inventado»…), las de todos los tipos, para elegir y ordenar.
+        function categoriasPropias() {
+            const p = leerPropios();
+            const todas = new Set();
+            TIPOS.forEach(([k]) => p[k].forEach((x) => {
+                if ((x.libro || "").trim()) {
+                    todas.add(x.libro.trim());
+                }
+            }));
+            return Array.from(todas).sort((a, b) => a.localeCompare(b, "es"));
+        }
+        // Lo tuyo de una lista, por categorías: [[categoría, [cosas]], …].
+        function porCategorias(lista) {
+            const grupos = new Map();
+            lista.forEach((x) => {
+                const c = (x.libro || "").trim() || ocT("sin categoría");
+                if (!grupos.has(c)) {
+                    grupos.set(c, []);
+                }
+                grupos.get(c).push(x);
+            });
+            return Array.from(grupos.entries()).sort((a, b) => a[0].localeCompare(b[0], "es"));
+        }
+        // Un grupo con su título y su lista, plegable (el que se cierra
+        // sigue cerrado al repintar).
+        const cerradas = new Set();
+        function grupoCategoria(titulo, filas, extra, total) {
+            const caja = crear("details", "master-creador-cat-grupo");
+            caja.open = !cerradas.has(titulo);
+            caja.addEventListener("toggle", () => {
+                cerradas[caja.open ? "delete" : "add"](titulo);
+            });
+            const resumen = crear("summary");
+            resumen.appendChild(crear("h4", "master-creador-cat", ocT("{titulo} ({n})", { titulo, n: total || filas.length })));
+            const ul = crear("ul", "master-creador-lista");
+            ul.setAttribute("aria-label", titulo);
+            ul.append(...filas);
+            caja.append(resumen, ul);
+            if (extra) {
+                caja.appendChild(extra);
+            }
+            return caja;
+        }
+        // AL GUARDAR: en qué categoría (una de las tuyas, una nueva o
+        // ninguna). «alElegir(categoría)».
+        function elegirCategoria(actual, vuelta, alElegir) {
+            const cats = categoriasPropias();
+            const cuerpo = crear("form");
+            const fs = crear("fieldset", "master-creador-cats");
+            fs.appendChild(crear("legend", "", ocT("¿En qué categoría (de qué libro) lo guardo?")));
+            const radios = [];
+            const opcion = (valor, texto) => {
+                const et = crear("label", "master-creador-check");
+                const r = crear("input");
+                r.type = "radio";
+                r.name = uid + "-cat";
+                r.value = valor;
+                et.append(r, " " + texto);
+                fs.appendChild(et);
+                radios.push(r);
+                return r;
+            };
+            cats.forEach((c) => opcion(c, "📕 " + c));
+            const sin = opcion("", ocT("sin categoría"));
+            const nueva = opcion("\u0000", ocT("una nueva:"));
+            const etN = crear("label", "visually-hidden", ocT("nombre de la categoría nueva"));
+            const nombreN = crear("input", "oc-dados-texto");
+            nombreN.id = uid + "-cat-nueva";
+            nombreN.autocomplete = "off";
+            nombreN.placeholder = ocT("«La caldera de Tasha», «Inventado»…");
+            etN.htmlFor = nombreN.id;
+            nombreN.addEventListener("input", () => {
+                nueva.checked = true;
+            });
+            fs.append(etN, nombreN);
+            const ya = radios.find((r) => r.value === (actual || "").trim());
+            if (ya) {
+                ya.checked = true;
+            } else if ((actual || "").trim()) {
+                nueva.checked = true;
+                nombreN.value = actual.trim();
+            } else if (cats.length) {
+                sin.checked = true;
+            } else {
+                nueva.checked = true;
+            }
+            const botones = crear("div", "master-creador-barra");
+            const ok = crear("button", "oc-vida-accion es-principal", ocT("✓ guardar aquí"));
+            ok.type = "submit";
+            let cerrarV = () => {};
+            botones.append(ok, botonDe("oc-vida-accion", ocT("cancelar"), () => cerrarV()));
+            cuerpo.append(fs, botones);
+            cuerpo.addEventListener("submit", (e) => {
+                e.preventDefault();
+                const elegida = radios.find((r) => r.checked);
+                let cat = elegida ? elegida.value : "";
+                if (cat === "\u0000") {
+                    cat = nombreN.value.trim();
+                    if (!cat) {
+                        avisar(ocT("Escribe el nombre de la categoría nueva."));
+                        nombreN.focus();
+                        return;
+                    }
+                }
+                cerrarV();
+                alElegir(cat);
+            });
+            const foco = nueva.checked && !nombreN.value ? nombreN : radios.find((r) => r.checked);
+            cerrarV = window.ocVentana.abrir({ titulo: ocT("📕 categoría"), cuerpo, vuelta, foco }) || (() => {});
+        }
+        // EL AVISO AL TOCAR EL SRD: antes de cambiar o borrar algo del
+        // contenido de base, cuidado (se puede pedir que no salga más:
+        // «richi-master-aviso-srd»).
+        function conAvisoSrd(que, nombre, vuelta, hacer) {
+            let saltar = false;
+            try {
+                saltar = localStorage.getItem("richi-master-aviso-srd") === "no";
+            } catch (e) {
+                saltar = false;
+            }
+            if (saltar) {
+                hacer();
+                return;
+            }
+            const cuerpo = crear("div");
+            cuerpo.append(crear("p", "master-informe-estado es-mal", que === "borrar"
+                ? ocT("⚠️ Vas a borrar «{nombre}», del contenido de base (el SRD).", { nombre })
+                : ocT("⚠️ Vas a cambiar «{nombre}», del contenido de base (el SRD).", { nombre })),
+            crear("p", "", ocT("Lo que cambies o borres del SRD cambia en toda la app: el bestiario, los encuentros, la tienda, los conjuros, el buscador… Ten cuidado: si te equivocas, en «✎ editar» lo puedes dejar como era (↺) y en «🗑️ borrar» recuperarlo («borrados del SRD»), pero lo que hubieras escrito en tu versión se pierde.")));
+            const et = crear("label", "master-creador-check");
+            const recordar = crear("input");
+            recordar.type = "checkbox";
+            et.append(recordar, ocT(" no volver a avisar"));
+            const botones = crear("div", "master-creador-barra");
+            let cerrar = () => {};
+            const seguir = botonDe("oc-vida-accion es-principal", que === "borrar" ? ocT("🗑️ sí, borrar") : ocT("✎ sí, cambiar"), () => {
+                if (recordar.checked) {
+                    try {
+                        localStorage.setItem("richi-master-aviso-srd", "no");
+                    } catch (e) {
+                        // Sin guardar: avisa la próxima vez.
+                    }
+                }
+                cerrar();
+                hacer();
+            });
+            botones.append(seguir, botonDe("oc-vida-accion", ocT("cancelar"), () => cerrar()));
+            cuerpo.append(et, botones);
+            cerrar = window.ocVentana.abrir({ titulo: ocT("cuidado con el SRD"), cuerpo, vuelta, foco: seguir });
+        }
+
         function pintarLista(k) {
             const ul = listas[k];
             const q = llano(filtros[k].value.trim());
             const todos = leerPropios()[k].slice().sort((a, b) => a.nombre.localeCompare(b.nombre, "es"));
             const salen = todos.filter((x) => !q || llano(x.nombre + " " + x.en + " " + (x.libro || "")).includes(q));
-            ul.replaceChildren(...salen.map((x) => {
+            const filas = new Map();
+            salen.forEach((x) => {
                 const li = crear("li", "master-creador-fila");
                 const ver = botonDe("master-creador-ver", "", () => abrirUno(k, x, ver));
                 ver.dataset.id = x.id;
                 ver.setAttribute("aria-haspopup", "dialog");
                 ver.append(crear("span", "master-creador-nombre", x.nombre), crear("span", "master-creador-detalle",
                     detalleDe(k, x) + (x.libro ? " · " + x.libro : "")));
-                const cambiar = botonDe("master-docs-mando", "✎", () => editar(k, x), "Cambiar " + x.nombre);
+                const cambiar = botonDe("master-docs-mando", "✎", () => editar(k, x), ocT("Cambiar {nombre}", { nombre: x.nombre }));
                 const duplicar = botonDe("master-docs-mando", "⧉", () => {
                     const y = JSON.parse(JSON.stringify(x));
                     delete y.id;
-                    y.nombre = x.nombre + " (copia)";
-                    y.en = x.en + " (copia)";
+                    y.nombre = ocT("{nombre} (copia)", { nombre: x.nombre });
+                    y.en = ocT("{en} (copia)", { en: x.en });
                     editar(k, y, true);
-                }, "Hacer una copia de " + x.nombre);
+                }, ocT("Hacer una copia de {nombre}", { nombre: x.nombre }));
                 let seguro = false;
                 const quitar = botonDe("master-docs-mando", "✕", () => {
                     if (!seguro) {
                         seguro = true;
                         quitar.classList.add("es-seguro");
-                        avisar("Pulsa otra vez para quitar " + x.nombre + ".");
+                        avisar(ocT("Pulsa otra vez para quitar {nombre}.", { nombre: x.nombre }));
                         return;
                     }
                     const p = leerPropios();
                     p[k] = p[k].filter((y) => y.id !== x.id);
                     guardarPropios(p);
                     pintarLista(k);
-                    avisar("Quitado: " + x.nombre + ".");
+                    avisar(ocT("Quitado: {nombre}.", { nombre: x.nombre }));
                     filtros[k].focus();
-                }, "Quitar " + x.nombre);
+                }, ocT("Quitar {nombre}", { nombre: x.nombre }));
                 li.append(ver, cambiar, duplicar, quitar);
-                return li;
-            }));
+                filas.set(x, li);
+            });
+            // Por categorías (el libro de cada uno).
+            ul.replaceChildren(...porCategorias(salen).map(([cat, xs]) => grupoCategoria("📕 " + cat, xs.map((x) => filas.get(x)))));
             if (!salen.length) {
-                ul.appendChild(crear("li", "oc-vacio", todos.length ? "Nada con eso." : "Aún no hay. Crea uno, copia uno del SRD"
-                    + " o importa un .json."));
+                ul.appendChild(crear("p", "oc-vacio", todos.length ? ocT("Nada con eso.") : ocT("Aún no hay. Crea uno, copia uno del SRD o importa un .json.")));
             }
         }
         function pintarListas() {
-            TIPOS.forEach(([k]) => pintarLista(k));
+            TIPOS.forEach(([k]) => {
+                if (listas[k].isConnected) {
+                    pintarLista(k);
+                }
+            });
+            repintar.forEach((f) => f());
+        }
+
+        // EDITAR O BORRAR LO QUE YA HAY: un buscador con todo lo de su tipo
+        // (del SRD y tuyo). Cambiar uno del SRD guarda tu versión («cambia»:
+        // cuál sustituye), que sale en su lugar en toda la app; ↺ lo deja
+        // como era. Borrar uno del SRD no lo borra del archivo: deja de
+        // salir («ocultos») y se puede recuperar.
+        function panelBuscar(k) {
+            const borrar = d.accion === "borrar";
+            const panel = crear("div", "master-creador-panel");
+            panel.appendChild(crear("p", "oc-hoja-nota", borrar
+                ? ocT("Busca lo que quieras quitar (del SRD o tuyo) y pulsa ✕ dos veces. Lo del SRD no se borra de verdad: deja de salir en la app, y lo recuperas abajo.")
+                : ocT("Busca lo que quieras cambiar (del SRD o tuyo) y pulsa ✎. Si es del SRD, se guarda tu versión, que sale en su lugar en toda la app; ↺ lo deja como era.")));
+            const etB = crear("label", "oc-dados-etiqueta", ocT("buscar"));
+            const busca = crear("input", "oc-dados-texto");
+            busca.type = "search";
+            busca.id = uid + "-" + d.accion + "-" + k;
+            busca.autocomplete = "off";
+            etB.htmlFor = busca.id;
+            // Y de dónde: todo, el SRD, todo lo tuyo o una categoría tuya.
+            const etF = crear("label", "oc-dados-etiqueta", ocT("de dónde"));
+            const filtro = crear("select", "master-elegir");
+            filtro.id = busca.id + "-de";
+            etF.htmlFor = filtro.id;
+            const pintarFiltro = () => {
+                const antes = filtro.value || "*";
+                const ops = [["*", ocT("todo")], ["srd", ocT("📖 sólo el SRD")], ["tuyo", ocT("🛠️ sólo lo tuyo")]]
+                    .concat(categoriasPropias().map((c) => ["cat:" + c, "📕 " + c]));
+                filtro.replaceChildren(...ops.map(([v, t]) => {
+                    const o = crear("option", "", t);
+                    o.value = v;
+                    return o;
+                }));
+                filtro.value = ops.some(([v]) => v === antes) ? antes : "*";
+            };
+            pintarFiltro();
+            const buscador = crear("div", "master-creador-buscador");
+            const cajaB = crear("div", "master-creador-campo");
+            const cajaF = crear("div", "master-creador-campo");
+            cajaB.append(etB, busca);
+            cajaF.append(etF, filtro);
+            buscador.append(cajaB, cajaF);
+            const ul = crear("div", "master-creador-grupos");
+            ul.setAttribute("role", "region");
+            ul.setAttribute("aria-label", ocT("Resultados"));
+            const borrados = crear("details", "master-creador-srd");
+            panel.append(buscador, ul);
+            if (borrar && k !== "otros") {
+                panel.appendChild(borrados);
+            }
+            const dosVeces = (b, nombre, alSeguro) => {
+                let seguro = false;
+                b.addEventListener("click", () => {
+                    if (!seguro) {
+                        seguro = true;
+                        b.classList.add("es-seguro");
+                        avisar(ocT("Pulsa otra vez para seguir: {nombre}.", { nombre }));
+                        return;
+                    }
+                    alSeguro();
+                });
+            };
+            function guardarYPintar(p, aviso) {
+                if (!guardarPropios(p)) {
+                    avisar(ocT("No se ha podido guardar: ¿no queda sitio en el navegador?"));
+                    return;
+                }
+                pintar();
+                avisar(aviso);
+                busca.focus();
+            }
+            function fila(y) {
+                const li = crear("li", "master-creador-fila");
+                const ver = botonDe("master-creador-ver", "", () => abrirUno(k, y, ver));
+                ver.setAttribute("aria-haspopup", "dialog");
+                if (y.id) {
+                    ver.dataset.id = y.id;
+                }
+                const de = y.cambia ? ocT("✎ cambiado") : y.propio ? ocT("🛠️ tuyo") : "SRD";
+                ver.append(crear("span", "master-creador-nombre", y.nombre), crear("span", "master-creador-detalle",
+                    detalleDe(k, y) + " · " + de));
+                li.appendChild(ver);
+                if (!borrar) {
+                    const cambiarB = botonDe("master-docs-mando", "✎", () => (y.propio ? editar(k, y)
+                        : conAvisoSrd("editar", y.nombre, cambiarB, () => editar(k, Object.assign(JSON.parse(JSON.stringify(y)),
+                            { cambia: claveSrd(k, y) })))), ocT("Cambiar {nombre}", { nombre: y.nombre }));
+                    li.appendChild(cambiarB);
+                    if (y.cambia) {
+                        const original = botonDe("master-docs-mando", "↺", null, ocT("Dejar {nombre} como era en el SRD", { nombre: y.nombre }));
+                        dosVeces(original, ocT("dejarlo como era"), () => {
+                            const p = leerPropios();
+                            p[k] = p[k].filter((z) => z.id !== y.id);
+                            guardarYPintar(p, ocT("{nombre}, como era en el SRD.", { nombre: y.nombre }));
+                        });
+                        li.appendChild(original);
+                    }
+                    return li;
+                }
+                const quitar = botonDe("master-docs-mando", "✕", null, ocT("Borrar {nombre}", { nombre: y.nombre }));
+                const borrarYa = () => {
+                    const p = leerPropios();
+                    p.ocultos = p.ocultos || {};
+                    const ocultos = p.ocultos[k] = Array.isArray(p.ocultos[k]) ? p.ocultos[k] : [];
+                    if (y.propio) {
+                        p[k] = p[k].filter((z) => z.id !== y.id);
+                    }
+                    const clave = y.cambia || (!y.propio && claveSrd(k, y));
+                    if (clave && !ocultos.includes(clave)) {
+                        ocultos.push(clave);
+                    }
+                    guardarYPintar(p, ocT("Borrado: {nombre}.", { nombre: y.nombre }));
+                };
+                // Lo tuyo, pulsando dos veces; lo del SRD (o tu versión de
+                // uno), con el aviso.
+                if (y.propio && !y.cambia) {
+                    dosVeces(quitar, ocT("borrar {nombre}", { nombre: y.nombre }), borrarYa);
+                } else {
+                    quitar.addEventListener("click", () => conAvisoSrd("borrar", y.nombre, quitar, borrarYa));
+                }
+                li.appendChild(quitar);
+                return li;
+            }
+            function pintar() {
+                const p = leerPropios();
+                const ocultos = new Set((p.ocultos && p.ocultos[k]) || []);
+                const cambios = new Map(p[k].filter((y) => y.cambia).map((y) => [y.cambia, y]));
+                const todos = srd[k].filter((y) => !ocultos.has(claveSrd(k, y))).map((y) => cambios.get(claveSrd(k, y)) || y)
+                    .concat(p[k].filter((y) => !y.cambia));
+                pintarFiltro();
+                const q = llano(busca.value.trim());
+                const f = filtro.value;
+                const salen = todos.filter((y) => !q || llano(y.nombre + " " + (y.en || "") + " " + (y.libro || "")).includes(q))
+                    .filter((y) => f === "*" || (f === "srd" ? !y.propio : f === "tuyo" ? y.propio : y.propio && (y.libro || "").trim() === f.slice(4)))
+                    .sort((a, b) => a.nombre.localeCompare(b.nombre, "es"));
+                // Separados: lo tuyo primero (por categorías; con tus
+                // versiones del SRD) y lo de base (el SRD, tal cual; los
+                // 100 primeros).
+                const base = salen.filter((y) => !y.propio);
+                const tuyos = salen.filter((y) => y.propio);
+                const grupos = [];
+                porCategorias(tuyos).forEach(([cat, xs]) => grupos.push(grupoCategoria(ocT("🛠️ tuyo · {cat}", { cat }), xs.map(fila))));
+                if (base.length) {
+                    grupos.push(grupoCategoria(ocT("📖 contenido de base (SRD)"), base.slice(0, 100).map(fila), base.length > 100
+                        ? crear("p", "oc-vacio", ocT("…y {n} más: escribe para encontrarlo.", { n: base.length - 100 })) : null, base.length));
+                }
+                ul.replaceChildren(...grupos);
+                if (!salen.length) {
+                    ul.appendChild(crear("p", "oc-vacio", ocT("Nada con eso.")));
+                }
+                // Lo borrado del SRD, para recuperarlo.
+                const quitados = srd[k].filter((y) => ocultos.has(claveSrd(k, y)));
+                const lista = crear("ul", "master-creador-lista");
+                lista.append(...quitados.map((y) => {
+                    const li = crear("li", "master-creador-fila");
+                    li.append(crear("span", "master-creador-nombre", y.nombre), botonDe("master-docs-mando", "↺", () => {
+                        const p2 = leerPropios();
+                        p2.ocultos[k] = (p2.ocultos[k] || []).filter((c) => c !== claveSrd(k, y));
+                        guardarYPintar(p2, ocT("Recuperado: {nombre}.", { nombre: y.nombre }));
+                    }, ocT("Recuperar {nombre}", { nombre: y.nombre })));
+                    return li;
+                }));
+                if (!quitados.length) {
+                    lista.appendChild(crear("li", "oc-vacio", ocT("Ninguno.")));
+                }
+                borrados.replaceChildren(crear("summary", "", ocT("🗑️ borrados del SRD ({n})", { n: quitados.length })), lista);
+            }
+            busca.addEventListener("input", pintar);
+            filtro.addEventListener("change", pintar);
+            cargado.then(pintar);
+            repintar.push(pintar);
+            return panel;
         }
 
         // EL FORMULARIO (crear o cambiar).
@@ -13926,14 +6015,14 @@
             const filas = [];
             const fila = (r, foco) => {
                 const li = crear("li", "master-creador-entrada");
-                const nom = campo(li, "nombre", r.n);
-                const tex = campo(li, "texto", r.t, { filas: 3, ancho: true });
+                const nom = campo(li, ocT("nombre"), r.n);
+                const tex = campo(li, ocT("texto"), r.t, { filas: 3, ancho: true });
                 const quitar = botonDe("master-docs-mando", "✕", () => {
                     filas.splice(filas.indexOf(x), 1);
                     li.remove();
                     mas.focus();
-                    avisar("Quitado de " + titulo.toLowerCase() + ".");
-                }, "Quitar esta entrada de " + titulo.toLowerCase());
+                    avisar(ocT("Quitado de {toLowerCase}.", { toLowerCase: titulo.toLowerCase() }));
+                }, ocT("Quitar esta entrada de {toLowerCase}", { toLowerCase: titulo.toLowerCase() }));
                 li.appendChild(quitar);
                 const x = { nom, tex };
                 filas.push(x);
@@ -13944,15 +6033,15 @@
             };
             (lista || []).forEach((r) => fila(r));
             const botones = crear("div", "master-creador-barra");
-            const mas = botonDe("oc-vida-accion", "＋ añadir", () => fila({ n: "", t: "" }, true), "Añadir a " + titulo.toLowerCase());
+            const mas = botonDe("oc-vida-accion", ocT("＋ añadir"), () => fila({ n: "", t: "" }, true), ocT("Añadir a {toLowerCase}", { toLowerCase: titulo.toLowerCase() }));
             botones.appendChild(mas);
             if (conAtaque) {
-                botones.appendChild(botonDe("oc-vida-accion", "＋ ataque", () => fila({ n: "Ataque",
-                    t: "*Ataque cuerpo a cuerpo:* +4, alcance 5 ft. *Impacto:* 5 (1d6 + 2) de daño cortante." }, true),
-                "Añadir un ataque (con el formato que sale en tabla)"));
-                botones.appendChild(botonDe("oc-vida-accion", "＋ salvación", () => fila({ n: "Aliento",
-                    t: "*Tirada de salvación de Destreza:* CD 13, cada criatura en un cono de 15 ft. *Fallo:* 14 (4d6) de daño de fuego. *Éxito:* la mitad del daño." }, true),
-                "Añadir un efecto con tirada de salvación"));
+                botones.appendChild(botonDe("oc-vida-accion", ocT("＋ ataque"), () => fila({ n: "Ataque",
+                    t: ocT("*Ataque cuerpo a cuerpo:* +4, alcance 5 ft. *Impacto:* 5 (1d6 + 2) de daño cortante.") }, true),
+                ocT("Añadir un ataque (con el formato que sale en tabla)")));
+                botones.appendChild(botonDe("oc-vida-accion", ocT("＋ salvación"), () => fila({ n: "Aliento",
+                    t: ocT("*Tirada de salvación de Destreza:* CD 13, cada criatura en un cono de 15 ft. *Fallo:* 14 (4d6) de daño de fuego. *Éxito:* la mitad del daño.") }, true),
+                ocT("Añadir un efecto con tirada de salvación")));
             }
             fs.append(ul, botones);
             editor.appendChild(fs);
@@ -13962,26 +6051,26 @@
         // Pegar un bloque y, con lo que se entienda, el formulario relleno.
         function abrirPegar(k, vuelta) {
             const cuerpo = crear("form", "master-pegar");
-            const et = crear("label", "oc-dados-etiqueta", "pega aquí el bloque");
+            const et = crear("label", "oc-dados-etiqueta", ocT("pega aquí el bloque"));
             const area = crear("textarea", "oc-dados-texto master-pegar-area");
             area.id = uid + "-pegar";
             area.rows = 14;
-            area.placeholder = k === "monstruos" ? "Goblin Warrior\nSmall Fey (Goblinoid), Chaotic Neutral\nAC 15  Initiative +2…"
-                : k === "conjuros" ? "Fireball\nLevel 3 Evocation (Sorcerer, Wizard)\nCasting Time: Action…"
-                    : "Bag of Holding\nWondrous Item, Uncommon\nThis bag has…";
+            area.placeholder = k === "monstruos" ? ocT("Goblin Warrior\nSmall Fey (Goblinoid), Chaotic Neutral\nAC 15  Initiative +2…")
+                : k === "conjuros" ? ocT("Fireball\nLevel 3 Evocation (Sorcerer, Wizard)\nCasting Time: Action…")
+                    : ocT("Bag of Holding\nWondrous Item, Uncommon\nThis bag has…");
             et.htmlFor = area.id;
-            const nota = crear("p", "oc-hoja-nota", conTraducir.checked ? "🌐 Los términos de reglas en inglés se pasan al español."
-                : "Tal cual (sin traducir: está desmarcado «🌐 traducir»).");
-            const ok = crear("button", "oc-vida-accion es-principal", "✓ rellenar");
+            const nota = crear("p", "oc-hoja-nota", conTraducir.checked ? ocT("🌐 Los términos de reglas en inglés se pasan al español.")
+                : ocT("Tal cual (sin traducir: está desmarcado «🌐 traducir»)."));
+            const ok = crear("button", "oc-vida-accion es-principal", ocT("✓ rellenar"));
             ok.type = "submit";
-            const guia = botonDe("oc-vida-accion", "❓ cómo", () => abrirGuiaPegar(guia), "Cómo pegar desde D&D Beyond (guía)");
+            const guia = botonDe("oc-vida-accion", ocT("❓ cómo"), () => abrirGuiaPegar(guia), ocT("Cómo pegar desde D&D Beyond (guía)"));
             const fila = crear("div", "master-creador-barra");
             fila.append(ok, guia);
             cuerpo.append(et, area, nota, fila);
             cuerpo.addEventListener("submit", (e) => {
                 e.preventDefault();
                 if (!area.value.trim()) {
-                    avisar("Pega primero el bloque.");
+                    avisar(ocT("Pega primero el bloque."));
                     area.focus();
                     return;
                 }
@@ -13992,9 +6081,9 @@
                 }
                 cerrarPegar();
                 editar(k, x, true);
-                avisar("Relleno con lo pegado: repásalo y guarda.");
+                avisar(ocT("Relleno con lo pegado: repásalo y guarda."));
             });
-            const cerrarPegar = window.ocVentana.abrir({ titulo: "pegar un bloque", cuerpo, vuelta, foco: area });
+            const cerrarPegar = window.ocVentana.abrir({ titulo: ocT("pegar un bloque"), cuerpo, vuelta, foco: area });
         }
 
         function editar(k, x, esNuevo) {
@@ -14004,48 +6093,50 @@
             n = 0;
             editor.replaceChildren();
             const uno = TIPOS.find((t) => t[0] === k)[2];
-            editor.appendChild(crear("h3", "master-creador-titulo", actual ? "✎ " + actual.nombre : "＋ " + (k === "otros" ? "cosa nueva"
-                : uno + " nuevo")));
-            const base = grupo("Lo básico");
-            const nombre = campo(base, "nombre (en español)", v.nombre, { obligatorio: true });
-            const en = k === "otros" ? null : campo(base, "nombre original", v.en === v.nombre ? "" : v.en, { ayuda: "opcional" });
-            const libro = campo(base, "de dónde sale", v.libro, { ayuda: "Monster Manual 2025, p. 12 · inventado…" });
+            editor.appendChild(crear("h3", "master-creador-titulo", actual ? "✎ " + actual.nombre : "＋ " + (k === "otros" ? ocT("cosa nueva")
+                : ocT("{uno} nuevo", { uno: uno }))));
+            const base = grupo(ocT("Lo básico"));
+            const nombre = campo(base, ocT("nombre (en español)"), v.nombre, { obligatorio: true });
+            const en = k === "otros" ? null : campo(base, ocT("nombre original"), v.en === v.nombre ? "" : v.en, { ayuda: ocT("opcional") });
+            // La categoría (de qué libro), al guardar: en su ventana.
+            const libro = { value: v.libro || "" };
             const leer = { comun: () => ({ nombre: nombre.value, en: (en && en.value.trim()) || nombre.value, libro: libro.value }) };
             if (k === "monstruos") {
                 const t = /^(.+?)(?: \(([^)]*)\))? ((?:Diminuto|Pequeño|Mediano|Grande|Enorme|Gargantuesco)(?: o \S+)?)$/
                     .exec(v.tipo || "") || [];
-                const tipo = campo(base, "tipo", t[1] || (v.tipo ? v.tipo : "Monstruosidad"), { opciones: PROPIO_TIPOS });
-                const etiqueta = campo(base, "etiqueta", t[2] || "", { ayuda: "opcional: goblinoide…" });
-                const tam = campo(base, "tamaño", t[3] || (v.tipo ? "" : "Mediano"), { opciones: PROPIO_TAMANOS });
-                const alin = campo(base, "alineamiento", v.alin || "neutral", { opciones: PROPIO_ALIN });
-                const cr = campo(base, "VD", v.cr || "1", { opciones: CR_LISTA });
-                const comb = grupo("Combate");
-                const ca = campo(comb, "CA", v.ca, { ayuda: "15 (cota de mallas)" });
-                const pg = campo(comb, "PG", v.pg, { tipo: "number", min: 1 });
-                const pgf = campo(comb, "dados de PG", v.pgf, { ayuda: "4d8 + 4" });
-                const ini = campo(comb, "iniciativa", v.ini, { ayuda: "vacío: la de su Destreza" });
-                const vel = campo(comb, "velocidad", v.vel, { ayuda: "30 ft., vuelo 60 ft.", ancho: true });
-                const ca2 = grupo("Características");
+                const tipo = campo(base, ocT("tipo"), t[1] || (v.tipo ? v.tipo : "Monstruosidad"), { opciones: PROPIO_TIPOS });
+                const etiqueta = campo(base, ocT("etiqueta"), t[2] || "", { ayuda: ocT("opcional: goblinoide…") });
+                const tam = campo(base, ocT("tamaño"), t[3] || (v.tipo ? "" : "Mediano"), { opciones: PROPIO_TAMANOS });
+                const alin = campo(base, ocT("alineamiento"), v.alin || "neutral", { opciones: PROPIO_ALIN });
+                const cr = campo(base, ocT("VD"), v.cr || "1", { opciones: CR_LISTA });
+                const comb = grupo(ocT("Combate"));
+                const ca = campo(comb, ocT("CA"), v.ca, { ayuda: ocT("15 (cota de mallas)") });
+                const pg = campo(comb, ocT("PG"), v.pg, { tipo: "number", min: 1 });
+                const pgf = campo(comb, ocT("dados de PG"), v.pgf, { ayuda: "4d8 + 4" });
+                const ini = campo(comb, ocT("iniciativa"), v.ini, { ayuda: ocT("vacío: la de su Destreza") });
+                const vel = campo(comb, ocT("velocidad"), v.vel, { ayuda: ocT("30 ft., vuelo 60 ft."), ancho: true });
+                const ca2 = grupo(ocT("Características"));
                 const car = {};
+                const VER_CAR = { Fue: ocT("Fue"), Des: ocT("Des"), Con: ocT("Con"), Int: ocT("Int"), Sab: ocT("Sab"), Car: ocT("Car") };
                 ["Fue", "Des", "Con", "Int", "Sab", "Car"].forEach((c) => {
-                    car[c] = campo(ca2, c, (v.car || {})[c] || 10, { tipo: "number", min: 1, max: 30 });
+                    car[c] = campo(ca2, VER_CAR[c], (v.car || {})[c] || 10, { tipo: "number", min: 1, max: 30 });
                 });
-                const mas = grupo("Más datos");
+                const mas = grupo(ocT("Más datos"));
                 const otros = {};
-                [["salv", "salvaciones", "Des +5, Sab +3"], ["hab", "habilidades", "Percepción +4, Sigilo +6"],
-                    ["vuln", "vulnerabilidades", "fuego"], ["res", "resistencias", "frío; contundente"],
-                    ["inm", "inmunidades al daño", "veneno"], ["inmE", "inmunidades a estados", "envenenado, asustado"],
-                    ["sent", "sentidos", "visión en la oscuridad 60 ft.; Percepción pasiva 12"], ["idio", "idiomas", "común, dracónico"],
-                    ["equipo", "equipo", "espada larga, escudo"]].forEach(([c, et, ayuda]) => {
+                [["salv", ocT("salvaciones"), ocT("Des +5, Sab +3")], ["hab", ocT("habilidades"), ocT("Percepción +4, Sigilo +6")],
+                    ["vuln", ocT("vulnerabilidades"), ocT("fuego")], ["res", ocT("resistencias"), ocT("frío; contundente")],
+                    ["inm", ocT("inmunidades al daño"), ocT("veneno")], ["inmE", ocT("inmunidades a estados"), ocT("envenenado, asustado")],
+                    ["sent", ocT("sentidos"), ocT("visión en la oscuridad 60 ft.; Percepción pasiva 12")], ["idio", ocT("idiomas"), ocT("común, dracónico")],
+                    ["equipo", ocT("equipo"), ocT("espada larga, escudo")]].forEach(([c, et, ayuda]) => {
                     otros[c] = campo(mas, et, v[c], { ayuda, ancho: true });
                 });
-                const habitat = marcasDe("Hábitat (para los encuentros)", PROPIO_HABITATS, v.habitat);
+                const habitat = marcasDe(ocT("Hábitat (para los encuentros)"), PROPIO_HABITATS, v.habitat);
                 const secc = {};
                 SECCIONES_BICHO.forEach(([c, titulo]) => {
                     secc[c] = entradas(titulo, v[c], c === "acciones" || c === "adicionales" || c === "legendarias");
                 });
-                const legInfo = campo(grupo("Uso de las legendarias (si tiene)"), "cómo se usan", v.legInfo, { filas: 2, ancho: true,
-                    ayuda: "*Usos de acción legendaria:* 3. Justo después del turno de otra criatura, puede gastar un uso…" });
+                const legInfo = campo(grupo(ocT("Uso de las legendarias (si tiene)")), ocT("cómo se usan"), v.legInfo, { filas: 2, ancho: true,
+                    ayuda: ocT("*Usos de acción legendaria:* 3. Justo después del turno de otra criatura, puede gastar un uso…") });
                 leer.resto = () => {
                     const o = { tipo: tipo.value + (etiqueta.value.trim() ? " (" + etiqueta.value.trim() + ")" : "") + " " + tam.value,
                         alin: alin.value, cr: cr.value, vd: v.cr === cr.value ? v.vd : "", ca: ca.value, pg: pg.value, pgf: pgf.value,
@@ -14062,31 +6153,31 @@
                     return o;
                 };
             } else if (k === "objetos") {
-                const cat = campo(base, "categoría", v.cat || "objeto maravilloso", { lista: PROPIO_CATS });
-                const rareza = campo(base, "rareza", v.rareza || "", { opciones: [["", "— (no mágico)"]].concat(PROPIO_RAREZAS) });
-                const precio = campo(base, "precio (po)", v.cp ? v.cp / 100 : "", { tipo: "number", paso: "any" });
-                const peso = campo(base, "peso", v.peso, { ayuda: "2 lb." });
-                const det = campo(base, "detalles", v.det, { ayuda: "1d8 cortante, versátil…", ancho: true });
-                const nota2 = campo(base, "nota", v.nota, { ancho: true });
+                const cat = campo(base, ocT("categoría"), v.cat || "objeto maravilloso", { lista: PROPIO_CATS });
+                const rareza = campo(base, ocT("rareza"), v.rareza || "", { opciones: [["", ocT("— (no mágico)")]].concat(PROPIO_RAREZAS) });
+                const precio = campo(base, ocT("precio (po)"), v.cp ? v.cp / 100 : "", { tipo: "number", paso: "any" });
+                const peso = campo(base, ocT("peso"), v.peso, { ayuda: ocT("2 lb.") });
+                const det = campo(base, ocT("detalles"), v.det, { ayuda: ocT("1d8 cortante, versátil…"), ancho: true });
+                const nota2 = campo(base, ocT("nota"), v.nota, { ancho: true });
                 const etS = crear("label", "master-creador-check");
                 const sint = crear("input");
                 sint.type = "checkbox";
                 sint.checked = !!v.sint;
-                etS.append(sint, " requiere sintonía");
+                etS.append(sint, ocT(" requiere sintonía"));
                 base.appendChild(etS);
-                const tiendas = marcasDe("Se vende en (para la tienda y los negocios)", PROPIO_TIENDAS, v.tiendas);
-                const texto = campo(grupo("Qué hace"), "texto", v.texto, { filas: 8, ancho: true,
-                    ayuda: "Admite *cursiva* y **negrita**; los conjuros en cursiva se enlazan." });
+                const tiendas = marcasDe(ocT("Se vende en (para la tienda y los negocios)"), PROPIO_TIENDAS, v.tiendas);
+                const texto = campo(grupo(ocT("Qué hace")), ocT("texto"), v.texto, { filas: 8, ancho: true,
+                    ayuda: ocT("Admite *cursiva* y **negrita**; los conjuros en cursiva se enlazan.") });
                 leer.resto = () => ({ cat: cat.value, rareza: rareza.value, cp: Math.round((Number(precio.value) || 0) * 100),
                     peso: peso.value, det: det.value, nota: nota2.value, sint: sint.checked, tiendas: tiendas(), texto: texto.value });
             } else if (k === "conjuros") {
-                const nivel = campo(base, "nivel", v.nivel === undefined ? 1 : v.nivel, { opciones: [["0", "truco"]]
-                    .concat(Array.from({ length: 9 }, (x2, i) => [String(i + 1), "nivel " + (i + 1)])) });
-                const escuela = campo(base, "escuela", v.escuela || "Evocación", { opciones: PROPIO_ESCUELAS });
-                const tiempo = campo(base, "lanzamiento", v.tiempo, { ayuda: "1 acción" });
-                const alcance = campo(base, "alcance", v.alcance, { ayuda: "60 ft." });
-                const comp = campo(base, "componentes", v.comp, { ayuda: "V, S, M (una pluma)" });
-                const dur = campo(base, "duración", v.dur, { ayuda: "Concentración, hasta 1 minuto" });
+                const nivel = campo(base, ocT("nivel"), v.nivel === undefined ? 1 : v.nivel, { opciones: [["0", ocT("truco")]]
+                    .concat(Array.from({ length: 9 }, (x2, i) => [String(i + 1), ocT("nivel {n}", { n: i + 1 })])) });
+                const escuela = campo(base, ocT("escuela"), v.escuela || "Evocación", { opciones: PROPIO_ESCUELAS });
+                const tiempo = campo(base, ocT("lanzamiento"), v.tiempo, { ayuda: ocT("1 acción") });
+                const alcance = campo(base, ocT("alcance"), v.alcance, { ayuda: ocT("60 ft.") });
+                const comp = campo(base, ocT("componentes"), v.comp, { ayuda: ocT("V, S, M (una pluma)") });
+                const dur = campo(base, ocT("duración"), v.dur, { ayuda: ocT("Concentración, hasta 1 minuto") });
                 const marcas = crear("div", "master-creador-barra");
                 const caja = (texto, valor) => {
                     const et = crear("label", "master-creador-check");
@@ -14098,64 +6189,71 @@
                     return c;
                 };
                 const ritual = caja("ritual", v.ritual);
-                const conc = caja("concentración", v.conc);
+                const conc = caja(ocT("concentración"), v.conc);
                 base.appendChild(marcas);
                 const otrasClases = (v.clases || []).filter((c) => !PROPIO_CLASES.includes(c));
-                const clases = marcasDe("Clases", PROPIO_CLASES, v.clases);
-                const mas = campo(grupo("Otras clases o subclases"), "separadas por comas", otrasClases.join(", "), { ancho: true });
-                const tx = grupo("Qué hace");
-                const texto = campo(tx, "texto", v.texto, { filas: 8, ancho: true });
-                const superior = campo(tx, "a nivel superior / mejora del truco", v.superior, { filas: 2, ancho: true });
+                const clases = marcasDe(ocT("Clases"), PROPIO_CLASES, v.clases);
+                const mas = campo(grupo(ocT("Otras clases o subclases")), ocT("separadas por comas"), otrasClases.join(", "), { ancho: true });
+                const tx = grupo(ocT("Qué hace"));
+                const texto = campo(tx, ocT("texto"), v.texto, { filas: 8, ancho: true });
+                const superior = campo(tx, ocT("a nivel superior / mejora del truco"), v.superior, { filas: 2, ancho: true });
                 leer.resto = () => ({ nivel: nivel.value, escuela: escuela.value, tiempo: tiempo.value, alcance: alcance.value,
                     comp: comp.value, dur: dur.value, ritual: ritual.checked, conc: conc.checked,
                     clases: clases().concat(mas.value.split(",").map((c) => c.trim()).filter(Boolean)), texto: texto.value,
                     superior: superior.value });
             } else if (k === "rasgos") {
-                const tipo = campo(base, "qué es", v.tipo || "dote general", { opciones: PROPIO_RASGOS.map((t) => [t, t]) });
-                const de = campo(base, "de quién (clase, subclase o especie)", v.de === "dote" ? "" : v.de, { ayuda: "Pícaro (Ladrón) · Elfo" });
-                const nivel = campo(base, "nivel (si es de clase)", v.nivel || "", { tipo: "number", min: 0, max: 20 });
-                const texto = campo(grupo("Qué hace"), "texto", v.texto, { filas: 10, ancho: true,
-                    ayuda: "Admite **negrita**, *cursiva* (los conjuros en cursiva se enlazan), listas con «- » y párrafos." });
+                const tipo = campo(base, ocT("qué es"), v.tipo || "dote general", { opciones: PROPIO_RASGOS.map((t) => [t, t]) });
+                const de = campo(base, ocT("de quién (clase, subclase o especie)"), v.de === "dote" ? "" : v.de, { ayuda: ocT("Pícaro (Ladrón) · Elfo") });
+                const nivel = campo(base, ocT("nivel (si es de clase)"), v.nivel || "", { tipo: "number", min: 0, max: 20 });
+                const texto = campo(grupo(ocT("Qué hace")), ocT("texto"), v.texto, { filas: 10, ancho: true,
+                    ayuda: ocT("Admite **negrita**, *cursiva* (los conjuros en cursiva se enlazan), listas con «- » y párrafos.") });
                 leer.resto = () => ({ tipo: tipo.value, de: de.value.trim() || (/dote|estilo|don/.test(tipo.value) ? "dote" : ""),
                     nivel: nivel.value, texto: texto.value });
             } else {
-                const cat = campo(base, "qué es", v.cat || "dote", { lista: PROPIO_OTROS });
-                const texto = campo(grupo("Texto"), "texto", v.texto, { filas: 12, ancho: true,
-                    ayuda: "Admite **negrita**, *cursiva*, listas con «- » y párrafos." });
+                const cat = campo(base, ocT("qué es"), v.cat || "dote", { lista: PROPIO_OTROS });
+                const texto = campo(grupo(ocT("Texto")), ocT("texto"), v.texto, { filas: 12, ancho: true,
+                    ayuda: ocT("Admite **negrita**, *cursiva*, listas con «- » y párrafos.") });
                 leer.resto = () => ({ cat: cat.value, texto: texto.value });
             }
             // Los botones, abajo.
             const botones = crear("div", "master-creador-barra master-creador-final");
-            const ok = crear("button", "oc-vida-accion es-principal", "✓ guardar");
+            const ok = crear("button", "oc-vida-accion es-principal", ocT("✓ guardar"));
             ok.type = "submit";
-            const traducirB = botonDe("oc-vida-accion", "🌐 traducir términos", () => {
+            const traducirB = botonDe("oc-vida-accion", ocT("🌐 traducir términos"), () => {
                 editor.querySelectorAll("input[type=text], input:not([type]), textarea").forEach((c) => {
                     if (c !== nombre && c !== en && c !== libro) {
                         c.value = traducir(c.value);
                     }
                 });
                 if (k === "monstruos") {
-                    avisar("Términos traducidos. El tipo y el tamaño, en sus desplegables.");
+                    avisar(ocT("Términos traducidos. El tipo y el tamaño, en sus desplegables."));
                 } else {
-                    avisar("Términos traducidos (las frases se quedan como estaban).");
+                    avisar(ocT("Términos traducidos (las frases se quedan como estaban)."));
                 }
-            }, "Traducir al español los términos de reglas en inglés de este formulario");
-            const no = botonDe("oc-vida-accion", "cancelar", cerrar);
+            }, ocT("Traducir al español los términos de reglas en inglés de este formulario"));
+            const no = botonDe("oc-vida-accion", ocT("cancelar"), cerrar);
             botones.append(ok, traducirB, no);
             editor.appendChild(botones);
             editor.onsubmit = (e) => {
                 e.preventDefault();
                 if (!nombre.value.trim()) {
-                    avisar("Ponle un nombre.");
+                    avisar(ocT("Ponle un nombre."));
                     nombre.focus();
                     return;
                 }
+                elegirCategoria(libro.value, ok, (cat) => {
+                    libro.value = cat;
+                    guardarYa();
+                });
+            };
+            const guardarYa = () => {
                 const datos = Object.assign(leer.comun(), leer.resto());
                 if (actual) {
                     datos.id = actual.id;
+                    datos.cambia = actual.cambia;
                 }
                 const o = limpiarPropio(k, datos);
-                if (k !== "otros") {
+                if (k !== "otros" && !o.cambia) {
                     enUnico(k, o, srd[k]);
                 }
                 const p = leerPropios();
@@ -14166,11 +6264,11 @@
                     p[k].push(o);
                 }
                 if (!guardarPropios(p)) {
-                    avisar("No se ha podido guardar: ¿no queda sitio en el navegador?");
+                    avisar(ocT("No se ha podido guardar: ¿no queda sitio en el navegador?"));
                     return;
                 }
                 cerrar(o.id);
-                avisar("Guardado: " + o.nombre + ".");
+                avisar(ocT("Guardado: {nombre}.", { nombre: o.nombre }));
             };
             editor.onkeydown = (e) => {
                 if (e.key === "Escape" && e.target.tagName !== "SELECT") {
@@ -14226,13 +6324,40 @@
         fondo.setAttribute("aria-modal", "true");
         fondo.setAttribute("aria-labelledby", "master-compendio-titulo");
         const cabeza = crear("div", "master-compendio-cabeza");
-        const titulo = crear("h2", "master-compendio-titulo", "＋ añadir al compendio");
+        const titulo = crear("h2", "master-compendio-titulo");
         titulo.id = "master-compendio-titulo";
-        const volver = botonDe("oc-vida-accion", "✕ volver al tablero", cerrar, "Cerrar el compendio y volver al tablero");
-        volver.title = "Volver al tablero (Esc)";
-        cabeza.append(titulo, volver);
+        const volver = botonDe("oc-vida-accion", ocT("✕ volver al tablero"), cerrar, ocT("Cerrar el compendio y volver al tablero"));
+        volver.title = ocT("Volver al tablero (Esc)");
+        // Arriba a la derecha, qué hacer: añadir, editar lo que hay o borrar.
+        const ACCIONES = [["anadir", ocT("＋ añadir"), ocT("＋ añadir al compendio")], ["editar", ocT("✎ editar"), ocT("✎ editar el compendio")],
+            ["borrar", ocT("🗑️ borrar"), ocT("🗑️ borrar del compendio")]];
+        const acciones = crear("div", "master-compendio-acciones");
+        acciones.setAttribute("role", "group");
+        acciones.setAttribute("aria-label", ocT("Qué hacer con el compendio"));
+        const botonesAccion = ACCIONES.map(([clave, corto, largo]) => {
+            const b = botonDe("master-compendio-accion", corto, () => {
+                if (datos.accion !== clave) {
+                    ponerAccion(clave);
+                    avisar(largo + ".");
+                }
+            }, largo);
+            b.dataset.accion = clave;
+            return b;
+        });
+        acciones.append(...botonesAccion);
+        cabeza.append(titulo, acciones, volver);
         const cuerpo = crear("div", "master-compendio-cuerpo");
         fondo.append(cabeza, cuerpo);
+        function ponerAccion(clave) {
+            datos.accion = ACCIONES.some((a) => a[0] === clave) ? clave : "anadir";
+            titulo.textContent = ACCIONES.find((a) => a[0] === datos.accion)[2];
+            botonesAccion.forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.accion === datos.accion)));
+            // Cada vez, uno nuevo (el de antes se va con sus escuchas).
+            const dentro = crear("div");
+            cuerpo.replaceChildren(dentro);
+            montarCreador(dentro, m);
+            recordar();
+        }
         const principal = document.querySelector(".app-principal") || lienzo.closest("main");
         if (principal) {
             principal.inert = true;
@@ -14243,10 +6368,11 @@
             cambiado = true;
         };
         document.addEventListener("master:propios", alCambiar);
-        montarCreador(cuerpo, m);
+        ponerAccion(datos.accion);
         function recordar() {
             try {
-                localStorage.setItem(CLAVE_COMPENDIO, JSON.stringify({ pestana: m.datos.pestana || 0, traducir: m.datos.traducir }));
+                localStorage.setItem(CLAVE_COMPENDIO, JSON.stringify({ pestana: m.datos.pestana || 0, traducir: m.datos.traducir,
+                    accion: m.datos.accion }));
             } catch (e) {
                 // Sin almacenamiento: no se recuerda.
             }
@@ -14261,7 +6387,7 @@
             // Al salir, la app se vuelve a cargar (como con F5), para que lo
             // nuevo salga en todas partes. Se guarda antes, y al volver no se
             // pregunta la campaña: sigue la misma.
-            avisar("Recargando…");
+            avisar(ocT("Recargando…"));
             try {
                 sessionStorage.setItem(CLAVE_RECARGA, "1");
             } catch (e) {
@@ -14295,7 +6421,7 @@
         fondo.addEventListener("click", () => setTimeout(recordar, 0));
         const tab = fondo.querySelector("[role=tab][aria-selected=true]");
         (tab || volver).focus();
-        avisar("Compendio abierto. Esc para volver al tablero.");
+        avisar(ocT("Compendio abierto. Esc para volver al tablero."));
     }
 
     // ---- LA PANTALLA DE JUGADORES (jugadores.html): una ventana aparte
@@ -14313,6 +6439,7 @@
         j.conPg = !!j.conPg;
         return j;
     };
+    Object.assign(PM, { datosJug });
     function iniParaJugadores(conPg) {
         let ini;
         try {
@@ -14372,19 +6499,10 @@
                 }
                 cambio.imagen = id;
                 hecho();
-            }).catch(() => avisar("No se ha podido guardar la imagen."));
+            }).catch(() => avisar(ocT("No se ha podido guardar la imagen.")));
         }
         hecho();
         return Promise.resolve();
-    }
-    function abrirJugadores() {
-        const w = window.open("jugadores.html", "pantalla-master-jugadores", "popup,width=1100,height=720");
-        if (w) {
-            w.focus();
-            avisar("Pantalla de jugadores abierta: llévala a la tele o compártela.");
-        } else {
-            avisar("El navegador no ha dejado abrir la ventana: permite las ventanas emergentes de esta página.");
-        }
     }
     if (CANAL_JUG) {
         CANAL_JUG.addEventListener("message", (ev) => {
@@ -14399,643 +6517,15 @@
         }));
     }
 
-    function montarJugadores(dentro, m) {
-        const j = datosJug();
-        const abrir = botonDe("oc-vida-accion es-principal", "🪟 abrir la pantalla de jugadores", abrirJugadores,
-            "Abrir la pantalla de jugadores (una ventana aparte para la tele, Discord u OBS)");
-        const ahora = crear("p", "master-jug-ahora");
-        ahora.setAttribute("aria-live", "polite");
-        const MODOS = [["espera", "⏸ espera"], ["imagen", "🖼️ imagen"], ["texto", "📜 texto"], ["iniciativa", "⏱️ iniciativa"]];
-        const modos = crear("div", "master-musica-modos");
-        modos.setAttribute("role", "group");
-        modos.setAttribute("aria-label", "Qué ven los jugadores");
-        const bModos = MODOS.map(([v, t]) => {
-            const b = botonDe("master-musica-modo", t, () => mostrarAJugadores({ modo: v }).then(pintar));
-            b.dataset.modo = v;
-            modos.appendChild(b);
-            return b;
-        });
-        const campoDe = (texto, control, id) => {
-            const caja = crear("div", "master-campo");
-            const et = crear("label", "oc-dados-etiqueta", texto);
-            control.id = id + m.id;
-            et.htmlFor = control.id;
-            caja.append(et, control);
-            return caja;
-        };
-        const tit = crear("input", "oc-dados-texto");
-        tit.maxLength = 120;
-        tit.autocomplete = "off";
-        tit.placeholder = "La cripta olvidada";
-        const txt = crear("textarea", "oc-dados-texto");
-        txt.rows = 5;
-        txt.placeholder = "Lo que leen (admite **negrita**, *cursiva* y listas «- »). En espera: lo que se ve en grande.";
-        const poner = crear("button", "oc-vida-accion es-principal", "📺 enseñar el título y el texto");
-        poner.type = "submit";
-        const form = crear("form", "master-jug-form");
-        form.append(campoDe("título (arriba, en grande; opcional)", tit, "master-jug-titulo-"), campoDe("texto", txt, "master-jug-texto-"),
-            poner);
-        form.addEventListener("submit", (e) => {
-            e.preventDefault();
-            mostrarAJugadores({ titulo: tit.value.trim(), texto: txt.value, modo: j.modo === "imagen" || j.modo === "iniciativa" ? j.modo
-                : txt.value.trim() ? "texto" : "espera" }).then(pintar);
-            avisar("Enseñado.");
-        });
-        const archivo = crear("input");
-        archivo.type = "file";
-        archivo.accept = "image/*";
-        archivo.hidden = true;
-        archivo.addEventListener("change", () => {
-            const f = archivo.files && archivo.files[0];
-            archivo.value = "";
-            if (!f || !/^image\//.test(f.type)) {
-                return;
-            }
-            mostrarAJugadores({ modo: "imagen" }, f).then(pintar);
-        });
-        const elegirImg = botonDe("oc-vida-accion", "🖼️ enseñar una imagen", () => archivo.click(),
-            "Enseñar una imagen de tu dispositivo a los jugadores");
-        const etPg = crear("label", "master-jug-pg");
-        const conPg = crear("input");
-        conPg.type = "checkbox";
-        conPg.checked = !!j.conPg;
-        conPg.addEventListener("change", () => mostrarAJugadores({ conPg: conPg.checked }));
-        etPg.append(conPg, document.createTextNode(" en la iniciativa, los PG de la party (nunca los de los monstruos)"));
-        const botones = crear("div", "master-creador-barra");
-        botones.append(elegirImg, archivo);
-        function pintar() {
-            bModos.forEach((b) => b.setAttribute("aria-pressed", b.dataset.modo === j.modo ? "true" : "false"));
-            const t = (MODOS.find((x) => x[0] === j.modo) || MODOS[0])[1];
-            ahora.textContent = "Ahora ven: " + t + (j.titulo ? " · «" + j.titulo + "»" : "") + (j.modo === "imagen" && !j.imagen
-                ? " (todavía no hay imagen: elige una o usa 📺 en un dibujo)" : "");
-            if (document.activeElement !== tit) {
-                tit.value = j.titulo || "";
-            }
-            if (document.activeElement !== txt) {
-                txt.value = j.texto || "";
-            }
-        }
-        dentro.replaceChildren(abrir, ahora, modos, botones, form, etPg, crear("p", "oc-hoja-nota", "Lo que elijas aquí es lo único"
-            + " que se ve en esa ventana: cambia de tablero tranquilamente. En un 🎨 dibujo, 📺 lo manda tal cual (sin las capas"
-            + " escondidas)."));
-        pintar();
-        mientrasEste(dentro, "master:jugadores", pintar);
-    }
-
     // ---- TABLAS ALEATORIAS PROPIAS: una entrada por línea («3× » delante
     // para que salga más; «{2d6}» dentro se tira al salir). Para todas las
     // campañas («richi-master-tablas»). ----
     const CLAVE_TABLAS = "richi-master-tablas";
-    const leerTablas = () => {
-        try {
-            const x = JSON.parse(localStorage.getItem(CLAVE_TABLAS) || "[]");
-            return Array.isArray(x) ? x : [];
-        } catch (e) {
-            return [];
-        }
-    };
-    const guardarTablas = (x) => {
-        try {
-            localStorage.setItem(CLAVE_TABLAS, JSON.stringify(x));
-        } catch (e) {
-            avisar("No se ha podido guardar la tabla.");
-        }
-        document.dispatchEvent(new CustomEvent("master:tablas"));
-    };
-    const entradasDe = (t) => String(t.texto || "").split("\n").map((l) => l.trim()).filter(Boolean).map((l) => {
-        const m = /^(\d+)\s*[×x]\s+(.*)$/i.exec(l);
-        return m ? { peso: Math.max(1, Math.min(100, parseInt(m[1], 10))), t: m[2] } : { peso: 1, t: l };
-    });
-    function tirarTabla(t) {
-        const es = entradasDe(t);
-        const total = es.reduce((a, e) => a + e.peso, 0);
-        if (!total) {
-            return null;
-        }
-        const r = window.ocDados ? window.ocDados.tirar("1d" + total, t.nombre) : null;
-        let n = r ? r.total : 1 + Math.floor(Math.random() * total);
-        const e = es.find((x) => {
-            n -= x.peso;
-            return n <= 0;
-        }) || es[es.length - 1];
-        // Los dados de dentro: «{2d6}», «{1d4+1}».
-        const texto = e.t.replace(/\{(\d*d\d+(?:[+-]\d+)?)\}/gi, (x, f) => String(tiradaSuelta(f.toLowerCase().startsWith("d") ? "1" + f : f)));
-        return { texto, n: r ? r.total : null, de: total };
-    }
-    function montarTablas(dentro, m) {
-        const d = m.datos = m.datos || {};
-        d.hist = Array.isArray(d.hist) ? d.hist : [];
-        const sel = crear("select", "oc-dados-elegir");
-        sel.id = "master-tablas-" + m.id;
-        const etSel = crear("label", "oc-dados-etiqueta", "tabla");
-        etSel.htmlFor = sel.id;
-        const tirar = crear("button", "oc-vida-accion es-principal", "🎲 tirar");
-        tirar.type = "submit";
-        const fila = crear("form", "master-tablas-fila");
-        fila.append(etSel, sel, tirar);
-        const sale = crear("p", "master-tablas-sale");
-        sale.setAttribute("aria-live", "polite");
-        const hist = crear("ol", "master-tablas-hist");
-        hist.setAttribute("aria-label", "Lo que ha salido antes");
-        const nueva = botonDe("oc-vida-accion", "＋ tabla nueva", () => editar(null), "Crear una tabla nueva");
-        const editarB = botonDe("oc-vida-accion", "✎ editar", () => editar(leerTablas().find((t) => t.id === sel.value)), "Editar la tabla elegida");
-        const quitar = botonDe("oc-vida-accion", "🗑️ quitar", () => {
-            const t = leerTablas().find((x) => x.id === sel.value);
-            if (!t) {
-                return;
-            }
-            if (quitar.dataset.seguro !== "1") {
-                quitar.dataset.seguro = "1";
-                quitar.textContent = "🗑️ ¿seguro? pulsa otra vez";
-                return;
-            }
-            delete quitar.dataset.seguro;
-            quitar.textContent = "🗑️ quitar";
-            guardarTablas(leerTablas().filter((x) => x.id !== t.id));
-            avisar("Quitada la tabla «" + t.nombre + "».");
-        }, "Quitar la tabla elegida");
-        const botones = crear("div", "master-creador-barra");
-        botones.append(nueva, editarB, quitar);
-        const form = crear("form", "master-tablas-editar");
-        form.hidden = true;
-        function editar(t) {
-            const nombre = crear("input", "oc-dados-texto");
-            nombre.id = "master-tablas-nombre-" + m.id;
-            nombre.maxLength = 80;
-            nombre.value = t ? t.nombre : "";
-            nombre.placeholder = "Rumores de la taberna";
-            const etN = crear("label", "oc-dados-etiqueta", "nombre");
-            etN.htmlFor = nombre.id;
-            const texto = crear("textarea", "oc-dados-texto");
-            texto.id = "master-tablas-texto-" + m.id;
-            texto.rows = 8;
-            texto.value = t ? t.texto : "";
-            texto.placeholder = "El molinero esconde algo.\n2× Han visto lobos en el camino del norte.\nUn mercader paga {2d6} po por noticias.";
-            const etT = crear("label", "oc-dados-etiqueta", "una entrada por línea («3× » delante: sale más; «{2d6}»: se tira)");
-            etT.htmlFor = texto.id;
-            const ok = crear("button", "oc-vida-accion es-principal", "✓ guardar");
-            ok.type = "submit";
-            const no = botonDe("oc-vida-accion", "cancelar", () => {
-                form.hidden = true;
-                (t ? editarB : nueva).focus();
-            });
-            const barra = crear("div", "master-creador-barra");
-            barra.append(ok, no);
-            form.replaceChildren(etN, nombre, etT, texto, barra);
-            form.onsubmit = (e) => {
-                e.preventDefault();
-                const n = nombre.value.trim();
-                if (!n || !entradasDe({ texto: texto.value }).length) {
-                    avisar("Ponle nombre y al menos una entrada.");
-                    (n ? texto : nombre).focus();
-                    return;
-                }
-                const todas = leerTablas();
-                const id = t ? t.id : idDoc("t");
-                const x = { id, nombre: n, texto: texto.value };
-                const i = todas.findIndex((y) => y.id === id);
-                if (i >= 0) {
-                    todas[i] = x;
-                } else {
-                    todas.push(x);
-                }
-                d.tabla = id;
-                guardar();
-                form.hidden = true;
-                guardarTablas(todas);
-                avisar("Tabla guardada: " + n + " (" + entradasDe(x).length + " entradas).");
-                tirar.focus();
-            };
-            form.hidden = false;
-            nombre.focus();
-        }
-        fila.addEventListener("submit", (e) => {
-            e.preventDefault();
-            const t = leerTablas().find((x) => x.id === sel.value);
-            if (!t) {
-                avisar("Primero crea una tabla.");
-                return;
-            }
-            const r = tirarTabla(t);
-            if (!r) {
-                return;
-            }
-            d.tabla = t.id;
-            d.hist.unshift((r.n ? r.n + "/" + r.de + " · " : "") + t.nombre + ": " + r.texto);
-            d.hist = d.hist.slice(0, 12);
-            guardar();
-            pintarHist();
-            sale.replaceChildren(crear("span", "master-tablas-de", t.nombre + (r.n ? " (" + r.n + " de " + r.de + ")" : "")),
-                crear("strong", "", r.texto));
-        });
-        const pintarHist = () => {
-            hist.replaceChildren(...d.hist.slice(1).map((h) => crear("li", "", h)));
-            hist.hidden = d.hist.length < 2;
-        };
-        function pintar() {
-            const ts = leerTablas();
-            sel.replaceChildren(...ts.map((t) => {
-                const o = crear("option", "", t.nombre + " (" + entradasDe(t).length + ")");
-                o.value = t.id;
-                return o;
-            }));
-            if (ts.some((t) => t.id === d.tabla)) {
-                sel.value = d.tabla;
-            }
-            fila.hidden = !ts.length;
-            editarB.hidden = !ts.length;
-            quitar.hidden = !ts.length;
-            if (!ts.length) {
-                sale.textContent = "Todavía no tienes tablas: crea una (rumores, clima, encuentros de una zona…).";
-            }
-        }
-        dentro.replaceChildren(fila, sale, hist, botones, form);
-        pintar();
-        pintarHist();
-        mientrasEste(dentro, "master:tablas", pintar);
-    }
-
-    // ---- LA LÍNEA TEMPORAL de la campaña: lo que pasa (sesiones y
-    // sucesos) en orden, con cuándo (a mano o la fecha del calendario). ----
-    function fechaDelCalendario() {
-        for (const pf of todo.perfiles) {
-            const c = pf.modulos.find((x) => x.tipo === "calendario" && x.datos && x.datos.textoHoy);
-            if (c) {
-                return c.datos.textoHoy;
-            }
-        }
-        return "";
-    }
-    function montarLinea(dentro, m) {
-        todo.linea = Array.isArray(todo.linea) ? todo.linea : [];
-        const form = crear("form", "master-linea-form");
-        const campoDe = (texto, control, id) => {
-            const caja = crear("div", "master-campo");
-            const et = crear("label", "oc-dados-etiqueta", texto);
-            control.id = id + m.id;
-            et.htmlFor = control.id;
-            caja.append(et, control);
-            return caja;
-        };
-        const cuando = crear("input", "oc-dados-texto");
-        cuando.maxLength = 80;
-        cuando.placeholder = "Sesión 4 · 3 de Mirtul de 1492";
-        const hoy = botonDe("oc-vida-accion", "📅 la del calendario", () => {
-            const f = fechaDelCalendario();
-            if (f) {
-                cuando.value = f;
-            } else {
-                avisar("No hay ningún calendario con fecha en los tableros.");
-            }
-        }, "Poner la fecha de la partida del calendario");
-        const titulo = crear("input", "oc-dados-texto");
-        titulo.maxLength = 120;
-        titulo.placeholder = "Llegan a Phandalin";
-        const texto = crear("textarea", "oc-dados-texto");
-        texto.rows = 3;
-        texto.placeholder = "Qué pasó (opcional)";
-        const sesion = crear("label", "master-linea-sesion");
-        const sesionC = crear("input");
-        sesionC.type = "checkbox";
-        sesion.append(sesionC, document.createTextNode(" es una sesión (resumen de la partida)"));
-        const ok = crear("button", "oc-vida-accion es-principal", "＋ apuntar");
-        ok.type = "submit";
-        const filaC = crear("div", "master-linea-cuando");
-        filaC.append(campoDe("cuándo", cuando, "master-linea-cuando-"), hoy);
-        form.append(filaC, campoDe("qué", titulo, "master-linea-titulo-"), campoDe("detalles", texto, "master-linea-texto-"), sesion, ok);
-        let editando = null;
-        form.addEventListener("submit", (e) => {
-            e.preventDefault();
-            if (!titulo.value.trim()) {
-                avisar("Ponle qué pasó.");
-                titulo.focus();
-                return;
-            }
-            const x = { id: editando ? editando.id : idDoc("l"), cuando: cuando.value.trim(), titulo: titulo.value.trim(),
-                texto: texto.value.trim(), sesion: sesionC.checked };
-            if (editando) {
-                Object.assign(editando, x);
-            } else {
-                todo.linea.push(x);
-            }
-            editando = null;
-            ok.textContent = "＋ apuntar";
-            titulo.value = "";
-            texto.value = "";
-            sesionC.checked = false;
-            guardar();
-            pintar();
-            avisar("Apuntado: " + x.titulo + ".");
-            titulo.focus();
-        });
-        const buscar = crear("input", "oc-dados-texto");
-        buscar.type = "search";
-        buscar.placeholder = "buscar en la línea…";
-        buscar.addEventListener("input", () => pintar());
-        const copiar = botonDe("oc-vida-accion", "⧉ copiar como texto", () => copiarTexto(todo.linea.map((x) => "- " + (x.cuando ? "**"
-            + x.cuando + "** · " : "") + (x.sesion ? "🎲 " : "") + x.titulo + (x.texto ? ": " + x.texto.replace(/\n+/g, " ") : ""))
-            .join("\n"), "Copiada la línea temporal."), "Copiar la línea temporal como texto");
-        const ol = crear("ol", "master-linea");
-        ol.setAttribute("aria-label", "Línea temporal");
-        function pintar() {
-            const q = llano(buscar.value.trim());
-            const ver = todo.linea.filter((x) => !q || llano(x.cuando + " " + x.titulo + " " + x.texto).includes(q));
-            ol.replaceChildren(...ver.map((x) => {
-                const i = todo.linea.indexOf(x);
-                const li = crear("li", "master-linea-paso" + (x.sesion ? " es-sesion" : ""));
-                const cab = crear("p", "master-linea-cab");
-                if (x.cuando) {
-                    cab.appendChild(crear("span", "master-linea-cuandoes", x.cuando));
-                }
-                cab.appendChild(crear("strong", "", (x.sesion ? "🎲 " : "") + x.titulo));
-                li.appendChild(cab);
-                if (x.texto) {
-                    li.appendChild(markdown(x.texto));
-                }
-                const mandos = crear("div", "master-linea-mandos");
-                mandos.append(botonDe("master-docs-mando", "↑", () => mover(i, -1), "Subir: " + x.titulo),
-                    botonDe("master-docs-mando", "↓", () => mover(i, 1), "Bajar: " + x.titulo),
-                    botonDe("master-docs-mando", "✎", () => {
-                        editando = x;
-                        cuando.value = x.cuando;
-                        titulo.value = x.titulo;
-                        texto.value = x.texto;
-                        sesionC.checked = !!x.sesion;
-                        ok.textContent = "✓ guardar el cambio";
-                        titulo.focus();
-                    }, "Cambiar: " + x.titulo),
-                    botonDe("master-docs-mando", "✕", () => {
-                        todo.linea.splice(i, 1);
-                        guardar();
-                        pintar();
-                        avisar("Quitado: " + x.titulo + ".");
-                    }, "Quitar: " + x.titulo));
-                li.appendChild(mandos);
-                return li;
-            }));
-            if (!ver.length) {
-                ol.appendChild(crear("li", "oc-vacio", todo.linea.length ? "Nada con eso." : "Todavía no hay nada: apunta la primera sesión."));
-            }
-        }
-        function mover(i, paso) {
-            const j = i + paso;
-            if (j < 0 || j >= todo.linea.length) {
-                return;
-            }
-            const [x] = todo.linea.splice(i, 1);
-            todo.linea.splice(j, 0, x);
-            guardar();
-            pintar();
-            const b = ol.querySelectorAll(".master-linea-paso")[j];
-            if (b) {
-                b.querySelectorAll("button")[paso < 0 ? 0 : 1].focus();
-            }
-        }
-        const etB = crear("label", "visually-hidden", "Buscar en la línea temporal");
-        buscar.id = "master-linea-buscar-" + m.id;
-        etB.htmlFor = buscar.id;
-        const barra = crear("div", "master-creador-barra");
-        barra.append(etB, buscar, copiar);
-        dentro.replaceChildren(form, barra, ol);
-        pintar();
-    }
-
-    // ---- EL MAPA DE RELACIONES de la campaña: quién es quién (PNJ, PJ,
-    // facciones, lugares) y cómo se llevan, con un dibujo que se ordena
-    // arrastrando y la misma información en una lista. ----
-    const TIPOS_NODO = [["pnj", "🧑", "PNJ"], ["pj", "🛡️", "PJ"], ["faccion", "🏰", "facción"], ["lugar", "📍", "lugar"],
-        ["otro", "✳️", "otro"]];
-    const TIPOS_LAZO = [["aliado", "es aliado de", "#3fae5a"], ["enemigo", "es enemigo de", "#d23b3b"], ["familia", "es familia de", "#e6c229"],
-        ["trabaja", "trabaja para", "#3b7ddd"], ["ama", "está enamorado de", "#e05aa8"], ["desconfia", "desconfía de", "#e88a2a"],
-        ["otro", "está relacionado con", "#8a8a99"]];
-    function montarRelaciones(dentro, m) {
-        const r = todo.relaciones = todo.relaciones || {};
-        r.nodos = Array.isArray(r.nodos) ? r.nodos : [];
-        r.lazos = Array.isArray(r.lazos) ? r.lazos : [];
-        const NS = "http://www.w3.org/2000/svg";
-        const svg = document.createElementNS(NS, "svg");
-        svg.setAttribute("class", "master-rel-mapa");
-        svg.setAttribute("viewBox", "0 0 1000 640");
-        svg.setAttribute("aria-hidden", "true");
-        const tipoN = (k) => TIPOS_NODO.find((t) => t[0] === k) || TIPOS_NODO[4];
-        const tipoL = (k) => TIPOS_LAZO.find((t) => t[0] === k) || TIPOS_LAZO[6];
-        const nodo = (id) => r.nodos.find((n) => n.id === id);
-        function colocar(n) {
-            const i = r.nodos.indexOf(n);
-            const a = i * 2.39996;
-            n.x = Math.round(500 + Math.cos(a) * (120 + (i % 4) * 60));
-            n.y = Math.round(320 + Math.sin(a) * (90 + (i % 4) * 45));
-        }
-        function dibujar() {
-            const el = (tag, at) => {
-                const x = document.createElementNS(NS, tag);
-                Object.keys(at).forEach((k) => x.setAttribute(k, at[k]));
-                return x;
-            };
-            const cosas = [];
-            r.lazos.forEach((l) => {
-                const a = nodo(l.de);
-                const b = nodo(l.a);
-                if (!a || !b) {
-                    return;
-                }
-                const col = tipoL(l.tipo)[2];
-                cosas.push(el("line", { x1: a.x, y1: a.y, x2: b.x, y2: b.y, stroke: col, "stroke-width": 4, "marker-end": "" }));
-                const t = el("text", { x: (a.x + b.x) / 2, y: (a.y + b.y) / 2 - 6, "text-anchor": "middle", class: "master-rel-lazo-texto" });
-                t.textContent = l.texto || tipoL(l.tipo)[1].replace(/^(es|está) /, "");
-                cosas.push(t);
-            });
-            r.nodos.forEach((n) => {
-                const g = el("g", { class: "master-rel-nodo", transform: "translate(" + n.x + " " + n.y + ")" });
-                g.appendChild(el("circle", { r: 40, class: "master-rel-circulo es-" + n.tipo }));
-                const e = el("text", { y: 12, "text-anchor": "middle", class: "master-rel-emoji" });
-                e.textContent = tipoN(n.tipo)[1];
-                const t = el("text", { y: 68, "text-anchor": "middle", class: "master-rel-nombre" });
-                t.textContent = n.nombre;
-                g.append(e, t);
-                g.addEventListener("pointerdown", (ev) => arrastrar(ev, n, g));
-                cosas.push(g);
-            });
-            svg.replaceChildren(...cosas);
-        }
-        function arrastrar(ev, n, g) {
-            ev.preventDefault();
-            const caja = svg.getBoundingClientRect();
-            const escala = 1000 / caja.width;
-            const mover = (e) => {
-                n.x = Math.max(40, Math.min(960, Math.round((e.clientX - caja.left) * escala)));
-                n.y = Math.max(40, Math.min(600, Math.round((e.clientY - caja.top) * escala)));
-                dibujar();
-            };
-            const soltar = () => {
-                document.removeEventListener("pointermove", mover);
-                document.removeEventListener("pointerup", soltar);
-                guardar();
-            };
-            document.addEventListener("pointermove", mover);
-            document.addEventListener("pointerup", soltar);
-        }
-        // Añadir: alguien o algo, y un lazo entre dos.
-        const elegir = (opciones, id, texto) => {
-            const sel = crear("select", "oc-dados-elegir");
-            sel.id = id + m.id;
-            opciones.forEach(([v, t]) => {
-                const o = crear("option", "", t);
-                o.value = v;
-                sel.appendChild(o);
-            });
-            const caja = crear("div", "master-campo");
-            const et = crear("label", "oc-dados-etiqueta", texto);
-            et.htmlFor = sel.id;
-            caja.append(et, sel);
-            caja.sel = sel;
-            return caja;
-        };
-        const formN = crear("form", "master-rel-form");
-        const nombreN = crear("input", "oc-dados-texto");
-        nombreN.id = "master-rel-nombre-" + m.id;
-        nombreN.maxLength = 60;
-        nombreN.placeholder = "Sildar, los Capas Rojas, Phandalin…";
-        const etN = crear("label", "oc-dados-etiqueta", "quién o qué");
-        etN.htmlFor = nombreN.id;
-        const cajaN = crear("div", "master-campo");
-        cajaN.append(etN, nombreN);
-        const tipoNsel = elegir(TIPOS_NODO.map(([k, e, t]) => [k, e + " " + t]), "master-rel-tipo-", "es");
-        const okN = crear("button", "oc-vida-accion es-principal", "＋ añadir");
-        okN.type = "submit";
-        const party = botonDe("oc-vida-accion", "🛡️ ＋ la party", () => {
-            let n = 0;
-            (todo.pjs || []).forEach((pj) => {
-                if (pj.nombre && !r.nodos.some((x) => x.pjId === pj.id)) {
-                    const x = { id: idDoc("n"), nombre: pj.nombre, tipo: "pj", pjId: pj.id };
-                    r.nodos.push(x);
-                    colocar(x);
-                    n++;
-                }
-            });
-            guardar();
-            pintar();
-            avisar(n ? "Añadidos " + n + " PJ." : "La party ya estaba.");
-        }, "Añadir a los PJ de la party");
-        formN.append(cajaN, tipoNsel, okN, party);
-        formN.addEventListener("submit", (e) => {
-            e.preventDefault();
-            const nm = nombreN.value.trim();
-            if (!nm) {
-                nombreN.focus();
-                return;
-            }
-            const x = { id: idDoc("n"), nombre: nm, tipo: tipoNsel.sel.value };
-            r.nodos.push(x);
-            colocar(x);
-            nombreN.value = "";
-            guardar();
-            pintar();
-            avisar("Añadido: " + nm + ".");
-            nombreN.focus();
-        });
-        const formL = crear("form", "master-rel-form");
-        const deSel = elegir([], "master-rel-de-", "de");
-        const tipoLsel = elegir(TIPOS_LAZO.map(([k, t]) => [k, t]), "master-rel-lazo-", "es");
-        const aSel = elegir([], "master-rel-a-", "a");
-        const notaL = crear("input", "oc-dados-texto");
-        notaL.id = "master-rel-nota-" + m.id;
-        notaL.maxLength = 60;
-        notaL.placeholder = "le debe dinero, su hermana…";
-        const etL = crear("label", "oc-dados-etiqueta", "en corto (opcional)");
-        etL.htmlFor = notaL.id;
-        const cajaL = crear("div", "master-campo");
-        cajaL.append(etL, notaL);
-        const okL = crear("button", "oc-vida-accion es-principal", "＋ unir");
-        okL.type = "submit";
-        formL.append(deSel, tipoLsel, aSel, cajaL, okL);
-        formL.addEventListener("submit", (e) => {
-            e.preventDefault();
-            if (!deSel.sel.value || !aSel.sel.value || deSel.sel.value === aSel.sel.value) {
-                avisar("Elige a dos distintos.");
-                return;
-            }
-            r.lazos.push({ id: idDoc("z"), de: deSel.sel.value, a: aSel.sel.value, tipo: tipoLsel.sel.value, texto: notaL.value.trim() });
-            notaL.value = "";
-            guardar();
-            pintar();
-            avisar("Unidos: " + nodo(r.lazos[r.lazos.length - 1].de).nombre + " y " + nodo(r.lazos[r.lazos.length - 1].a).nombre + ".");
-        });
-        // La lista (lo mismo que el dibujo, para leerlo y quitar).
-        const lista = crear("ul", "master-rel-lista");
-        lista.setAttribute("aria-label", "Relaciones");
-        function pintar() {
-            const ops = r.nodos.map((n) => [n.id, tipoN(n.tipo)[1] + " " + n.nombre]);
-            [deSel.sel, aSel.sel].forEach((sel, k) => {
-                const antes = sel.value;
-                sel.replaceChildren(...ops.map(([v, t]) => {
-                    const o = crear("option", "", t);
-                    o.value = v;
-                    return o;
-                }));
-                if (ops.some((o) => o[0] === antes)) {
-                    sel.value = antes;
-                } else if (ops[k]) {
-                    sel.value = ops[k][0];
-                }
-            });
-            formL.hidden = r.nodos.length < 2;
-            lista.replaceChildren(...r.nodos.map((n) => {
-                const li = crear("li", "master-rel-quien");
-                const cab = crear("p", "master-rel-cab");
-                cab.append(crear("strong", "", tipoN(n.tipo)[1] + " " + n.nombre), crear("span", "oc-hoja-nota", " (" + tipoN(n.tipo)[2] + ")"),
-                    botonDe("master-docs-mando", "✕", () => {
-                        r.nodos = r.nodos.filter((x) => x !== n);
-                        r.lazos = r.lazos.filter((l) => l.de !== n.id && l.a !== n.id);
-                        guardar();
-                        pintar();
-                        avisar("Quitado: " + n.nombre + " (y sus lazos).");
-                    }, "Quitar a " + n.nombre + " y sus lazos"));
-                li.appendChild(cab);
-                const suyos = r.lazos.filter((l) => l.de === n.id || l.a === n.id);
-                if (suyos.length) {
-                    const ul = crear("ul", "master-rel-lazos");
-                    suyos.forEach((l) => {
-                        const otro = nodo(l.de === n.id ? l.a : l.de);
-                        if (!otro) {
-                            return;
-                        }
-                        const lli = crear("li");
-                        const marca = crear("span", "master-rel-marca");
-                        marca.style.backgroundColor = tipoL(l.tipo)[2];
-                        marca.setAttribute("aria-hidden", "true");
-                        const frase = l.de === n.id ? tipoL(l.tipo)[1] + " " + otro.nombre : otro.nombre + " " + tipoL(l.tipo)[1] + " " + n.nombre;
-                        lli.append(marca, document.createTextNode(" " + frase + (l.texto ? " — " + l.texto : "") + " "),
-                            botonDe("master-docs-mando", "✕", () => {
-                                r.lazos = r.lazos.filter((x) => x !== l);
-                                guardar();
-                                pintar();
-                                avisar("Quitado el lazo.");
-                            }, "Quitar el lazo: " + n.nombre + " y " + otro.nombre));
-                        ul.appendChild(lli);
-                    });
-                    li.appendChild(ul);
-                }
-                return li;
-            }));
-            if (!r.nodos.length) {
-                lista.appendChild(crear("li", "oc-vacio", "Todavía no hay nadie: añade PNJ, facciones, lugares o la party."));
-            }
-            dibujar();
-        }
-        r.nodos.forEach((n) => {
-            if (typeof n.x !== "number") {
-                colocar(n);
-            }
-        });
-        dentro.replaceChildren(formN, formL, svg, crear("p", "oc-hoja-nota", "Arrastra los círculos para ordenarlos. Debajo, lo mismo"
-            + " en una lista."), lista);
-        pintar();
-    }
+    Object.assign(PM, { CLAVE_TABLAS });
 
     const MODULOS = {
         iniciativa: { nombre: "iniciativa", emoji: "⏱️", grupo: "combate", unico: true, w: 420, h: 520,
-            desc: "El orden de turnos, con rondas, PG y marcas.",
+            desc: ocT("El orden de turnos, con rondas, PG y marcas."),
             montar: (d) => window.ocMontar.iniciativa(d, { suelta: true, traerParty: () => {
                 const leer = () => {
                     try {
@@ -15046,89 +6536,100 @@
                 };
                 const ya = leer().map((x) => x.pj);
                 return todo.pjs.filter((pj) => !ya.includes(pj.id)).map((pj, i) => meterEnIniciativa(iniDePj(normalizarPj(pj),
-                    pj.nombre || "jugador " + (i + 1)))).filter(Boolean).join(", ");
+                    pj.nombre || ocT("jugador {n}", { n: i + 1 })))).filter(Boolean).join(", ");
             } }) },
-        condiciones: { nombre: "condiciones", emoji: "🙈", grupo: "combate", unico: true, w: 460, h: 420,
-            desc: "Los estados: agarrado, cegado, derribado…", montar: (d, m) => montarReglas(d, m, "Estados") },
+        condiciones: { nombre: ocT("condiciones"), emoji: "🙈", grupo: "combate", unico: true, w: 460, h: 420,
+            desc: ocT("Los estados: agarrado, cegado, derribado…"), montar: (d, m) => montarReglas(d, m, "Estados") },
         acciones: { nombre: "acciones", emoji: "⚔️", grupo: "combate", unico: true, w: 460, h: 420,
-            desc: "Lo que se puede hacer en un turno.", montar: (d, m) => montarReglas(d, m, "Acciones") },
-        reglas: { nombre: "todas las reglas", emoji: "📚", grupo: "consulta", unico: true, w: 480, h: 520,
-            desc: "Las reglas del SRD 5.2, por temas.", montar: (d, m) => montarReglas(d, m, null) },
-        homebrew: { nombre: "reglas propias", emoji: "🏠", grupo: "consulta", unico: true, w: 460, h: 460,
-            desc: "Las reglas de tu mesa (homebrew).", montar: montarHomebrew },
-        rasgos: { nombre: "rasgos, dotes y habilidades", emoji: "⭐", grupo: "consulta", unico: true, w: 440, h: 520,
-            desc: "Los rasgos de clase y especie, las dotes y las habilidades del SRD, y los tuyos.", montar: montarRasgos },
+            desc: ocT("Lo que se puede hacer en un turno."), montar: (d, m) => montarReglas(d, m, "Acciones") },
+        tiradas: { nombre: ocT("registro de tiradas"), emoji: "🎲", grupo: "mesa", unico: true, w: 380, h: 480,
+            desc: ocT("Las tiradas de los dados, una debajo de otra, siempre a la vista (las mismas que en la ventana de los dados)."),
+            montar: PM.montarTiradas },
+        turnos: { nombre: ocT("turnos"), emoji: "⏩", grupo: "turno", unico: true, w: 380, h: 640,
+            desc: ocT("A quién le toca, en grande; quién va después, y pasar al turno siguiente o al anterior."), montar: PM.montarTurnos },
+        criaturaTurno: { nombre: ocT("criatura del turno"), emoji: "🐲", grupo: "turno", unico: true, w: 520, h: 640,
+            desc: ocT("El perfil de quien tiene el turno: su bloque del bestiario o la ficha resumida del personaje."),
+            montar: PM.montarCriaturaTurno },
+        reglas: { nombre: ocT("todas las reglas"), emoji: "📚", grupo: "consulta", unico: true, w: 480, h: 520,
+            desc: ocT("Las reglas del SRD 5.2, por temas."), montar: (d, m) => montarReglas(d, m, null) },
+        homebrew: { nombre: ocT("reglas propias"), emoji: "🏠", grupo: "consulta", unico: true, w: 460, h: 460,
+            desc: ocT("Las reglas de tu mesa (homebrew)."), montar: PM.montarHomebrew },
+        rasgos: { nombre: ocT("rasgos, dotes y habilidades"), emoji: "⭐", grupo: "consulta", unico: true, w: 440, h: 520,
+            desc: ocT("Los rasgos de clase y especie, las dotes y las habilidades del SRD, y los tuyos."), montar: PM.montarRasgos },
         conjuros: { nombre: "conjuros", emoji: "✨", grupo: "consulta", unico: true, w: 420, h: 480,
-            desc: "Los 339 del SRD, por nivel, escuela y clase.", montar: montarConjuros },
-        bestiario: { nombre: "bestiario", emoji: "🐉", grupo: "consulta", unico: true, w: 460, h: 520,
-            desc: "Los 330 monstruos del SRD, con su perfil.", montar: montarBestiario },
-        party: { nombre: "party (jugadores)", emoji: "🛡️", grupo: "mesa", unico: true, w: 600, h: 440,
-            desc: "Los personajes de los jugadores: de un vistazo, sus hechizos y su ficha entera (con pestañas).", montar: montarParty },
-        tienda: { nombre: "tienda", emoji: "💰", grupo: "mundo", w: 520, h: 560, desc: "Precios, rarezas y regateo.",
-            montar: montarTienda },
-        monedas: { nombre: "conversor de monedas", emoji: "🪙", grupo: "mundo", w: 420, h: 440,
-            desc: "Cambiar y repartir el botín.", montar: montarMonedas },
-        nombres: { nombre: "generador de nombres", emoji: "🎭", grupo: "mundo", w: 440, h: 560,
-            desc: "Personajes por especie y género, y lugares.", montar: montarNombres },
-        botin: { nombre: "botín", emoji: "💰", grupo: "mundo", w: 440, h: 560,
-            desc: "Monedas, gemas, arte y objetos mágicos según el VD.", montar: montarBotin },
-        encuentros: { nombre: "encuentros", emoji: "🗺️", grupo: "combate", w: 440, h: 620,
-            desc: "Monstruos del SRD por hábitat para tu party.", montar: montarEncuentros },
-        pnj: { nombre: "PNJ rápidos", emoji: "🧑", grupo: "mundo", w: 460, h: 620,
-            desc: "Un PNJ con oficio, aspecto, carácter, manía, lo que quiere y un secreto.", montar: montarPnj },
-        dungeon: { nombre: "generador de dungeons", emoji: "🗝️", grupo: "mundo", w: 680, h: 780,
-            desc: "Un mapa en cuadrícula con sus salas, monstruos, trampas y botín.", montar: montarDungeon },
+            desc: ocT("Los 339 del SRD, por nivel, escuela y clase."), montar: PM.montarConjuros },
+        bestiario: { nombre: ocT("bestiario"), emoji: "🐉", grupo: "consulta", unico: true, w: 460, h: 520,
+            desc: ocT("Los 330 monstruos del SRD, con su perfil."), montar: PM.montarBestiario },
+        visor: { nombre: ocT("fichas de la party"), emoji: "🧝", grupo: "mesa", unico: true, w: 1000, h: 640,
+            desc: ocT("Cada personaje con su ficha entera, como un libro: historia, ficha, criaturas, PNJ, imágenes, extra…"),
+            montar: PM.montarVisor },
+        party: { nombre: ocT("party (jugadores)"), emoji: "🛡️", grupo: "mesa", unico: true, w: 600, h: 440,
+            desc: ocT("Los personajes de los jugadores: de un vistazo, sus hechizos y su ficha entera (con pestañas)."), montar: PM.montarParty },
+        tienda: { nombre: ocT("tienda"), emoji: "💰", grupo: "mundo", w: 520, h: 560, desc: ocT("Precios, rarezas y regateo."),
+            montar: PM.montarTienda },
+        monedas: { nombre: ocT("conversor de monedas"), emoji: "🪙", grupo: "mundo", w: 420, h: 440,
+            desc: ocT("Cambiar y repartir el botín."), montar: PM.montarMonedas },
+        nombres: { nombre: ocT("generador de nombres"), emoji: "🎭", grupo: "mundo", w: 440, h: 560,
+            desc: ocT("Personajes por especie y género, y lugares."), montar: PM.montarNombres },
+        botin: { nombre: ocT("botín"), emoji: "💰", grupo: "mundo", w: 440, h: 560,
+            desc: ocT("Monedas, gemas, arte y objetos mágicos según el VD."), montar: PM.montarBotin },
+        encuentros: { nombre: ocT("encuentros"), emoji: "🗺️", grupo: "combate", w: 440, h: 620,
+            desc: ocT("Monstruos del SRD por hábitat para tu party."), montar: PM.montarEncuentros },
+        pnj: { nombre: ocT("PNJ rápidos"), emoji: "🧑", grupo: "mundo", w: 460, h: 620,
+            desc: ocT("Un PNJ con oficio, aspecto, carácter, manía, lo que quiere y un secreto."), montar: PM.montarPnj },
+        dungeon: { nombre: ocT("generador de dungeons"), emoji: "🗝️", grupo: "mundo", w: 680, h: 780,
+            desc: ocT("Un mapa en cuadrícula con sus salas, monstruos, trampas y botín."), montar: PM.montarDungeon },
         calendario: { nombre: "calendario", emoji: "📅", grupo: "mundo", w: 520, h: 720,
-            desc: "Gregoriano, el de Harptos o uno propio, con la hora y apuntes.", montar: montarCalendario },
-        efectos: { nombre: "efectos con duración", emoji: "⌛", grupo: "combate", w: 460, h: 620,
-            desc: "Bendecir 1 minuto, Armadura de mago 8 horas…: se descuentan solos.", montar: montarEfectos },
-        taberna: { nombre: "negocios", emoji: "🏪", grupo: "mundo", w: 500, h: 760,
-            desc: "Tabernas y posadas, tiendas, templos, establos…: con lo que venden, sus precios y un gancho.", montar: montarNegocio },
-        ambiente: { nombre: "sonido ambiente", emoji: "🎧", grupo: "mesa", unico: true, w: 440, h: 640,
-            desc: "Lluvia, viento, hoguera, mercado, carro…: grabaciones de verdad en bucle, mezcladas (y tus audios).",
-            montar: montarAmbiente },
-        sonidos: { nombre: "efectos de sonido", emoji: "🔔", grupo: "mesa", unico: true, w: 560, h: 680,
-            desc: "Puertas, tajos, conjuros, gritos, monstruos…: suenan una vez al pulsar (y tus audios).",
-            montar: montarSonidos },
-        tablas: { nombre: "tablas aleatorias", emoji: "🎲", grupo: "mundo", w: 460, h: 560,
-            desc: "Tus tablas (rumores, clima, encuentros de una zona…) y tirarlas con un clic.", montar: montarTablas },
-        linea: { nombre: "línea temporal", emoji: "🗓️", grupo: "apuntes", unico: true, w: 520, h: 680,
-            desc: "Las sesiones y lo que pasa en la campaña, en orden y con su fecha.", montar: montarLinea },
-        relaciones: { nombre: "mapa de relaciones", emoji: "🕸️", grupo: "apuntes", unico: true, w: 760, h: 760,
-            desc: "PNJ, facciones, lugares y la party, y cómo se llevan.", montar: montarRelaciones },
-        jugadores: { nombre: "pantalla de jugadores", emoji: "📺", grupo: "mesa", unico: true, w: 460, h: 620,
-            desc: "Una ventana aparte para la tele, Discord u OBS con sólo lo que tú elijas.", montar: montarJugadores },
-        musica: { nombre: "música", emoji: "🎶", grupo: "mesa", unico: true, w: 560, h: 720,
-            desc: "Tus canciones en carpetas y subcarpetas: una en bucle o la carpeta entera (se quedan en tu navegador).",
-            montar: montarMusica },
-        relojes: { nombre: "relojes", emoji: "⏳", grupo: "mesa", w: 440, h: 480,
-            desc: "Relojes de progreso: amenazas que avanzan, cuentas atrás…", montar: montarRelojes },
-        idiomas: { nombre: "notas en otros idiomas", emoji: "🪶", grupo: "mundo", w: 480, h: 680,
-            desc: "Escribe una nota y mírala en élfico, enano, infernal…", montar: montarIdiomas },
-        tarjeta: { nombre: "post-it", emoji: "🗒️", grupo: "apuntes", w: 420, h: 340,
-            desc: "Un texto con formato: negrita, listas, colores…", montar: montarTarjeta },
+            desc: ocT("Gregoriano, el de Harptos o uno propio, con la hora y apuntes."), montar: PM.montarCalendario },
+        efectos: { nombre: ocT("efectos con duración"), emoji: "⌛", grupo: "combate", w: 460, h: 620,
+            desc: ocT("Bendecir 1 minuto, Armadura de mago 8 horas…: se descuentan solos."), montar: PM.montarEfectos },
+        taberna: { nombre: ocT("negocios"), emoji: "🏪", grupo: "mundo", w: 500, h: 760,
+            desc: ocT("Tabernas y posadas, tiendas, templos, establos…: con lo que venden, sus precios y un gancho."), montar: PM.montarNegocio },
+        ambiente: { nombre: ocT("sonido ambiente"), emoji: "🎧", grupo: "mesa", unico: true, w: 440, h: 640,
+            desc: ocT("Lluvia, viento, hoguera, mercado, carro…: grabaciones de verdad en bucle, mezcladas (y tus audios)."),
+            montar: PM.montarAmbiente },
+        sonidos: { nombre: ocT("efectos de sonido"), emoji: "🔔", grupo: "mesa", unico: true, w: 560, h: 680,
+            desc: ocT("Puertas, tajos, conjuros, gritos, monstruos…: suenan una vez al pulsar (y tus audios)."),
+            montar: PM.montarSonidos },
+        tablas: { nombre: ocT("tablas aleatorias"), emoji: "🎲", grupo: "mundo", w: 460, h: 560,
+            desc: ocT("Tus tablas (rumores, clima, encuentros de una zona…) y tirarlas con un clic."), montar: PM.montarTablas },
+        linea: { nombre: ocT("línea temporal"), emoji: "🗓️", grupo: "apuntes", unico: true, w: 520, h: 680,
+            desc: ocT("Las sesiones y lo que pasa en la campaña, en orden y con su fecha."), montar: PM.montarLinea },
+        relaciones: { nombre: ocT("mapa de relaciones"), emoji: "🕸️", grupo: "apuntes", unico: true, w: 760, h: 760,
+            desc: ocT("PNJ, facciones, lugares y la party, y cómo se llevan."), montar: PM.montarRelaciones },
+        jugadores: { nombre: ocT("pantalla de jugadores"), emoji: "📺", grupo: "mesa", unico: true, w: 460, h: 620,
+            desc: ocT("Una ventana aparte para la tele, Discord u OBS con sólo lo que tú elijas."), montar: PM.montarJugadores },
+        musica: { nombre: ocT("música"), emoji: "🎶", grupo: "mesa", unico: true, w: 560, h: 720,
+            desc: ocT("Tus canciones en carpetas y subcarpetas: una en bucle o la carpeta entera (se quedan en tu navegador)."),
+            montar: PM.montarMusica },
+        relojes: { nombre: ocT("relojes"), emoji: "⏳", grupo: "mesa", w: 440, h: 480,
+            desc: ocT("Relojes de progreso: amenazas que avanzan, cuentas atrás…"), montar: PM.montarRelojes },
+        idiomas: { nombre: ocT("notas en otros idiomas"), emoji: "🪶", grupo: "mundo", w: 480, h: 680,
+            desc: ocT("Escribe una nota y mírala en élfico, enano, infernal…"), montar: PM.montarIdiomas },
+        tarjeta: { nombre: ocT("post-it"), emoji: "🗒️", grupo: "apuntes", w: 420, h: 340,
+            desc: ocT("Un texto con formato: negrita, listas, colores…"), montar: PM.montarTarjeta },
         dibujo: { nombre: "dibujo", emoji: "🎨", grupo: "apuntes", w: 900, h: 660,
-            desc: "Un Paint con capas, bote, selección y rejilla de rol.", montar: montarDibujo },
-        notas: { nombre: "notas", emoji: "📝", grupo: "apuntes", unico: true, w: 520, h: 480,
-            desc: "Las notas de la sesión, con formato (como un Word).", montar: montarNotas },
-        documentos: { nombre: "documentos", emoji: "🗂️", grupo: "apuntes", w: 420, h: 560,
-            desc: "Tus carpetas y notas: búscalas (nombre y contenido) y ábrelas en el tablero.", montar: montarDocumentos },
-        tabla: { nombre: "tabla para tirar", emoji: "🔮", grupo: "apuntes", w: 360, h: 380,
-            desc: "Una lista de la que sale una cosa al azar.", montar: montarTabla },
-        criatura: { nombre: "criatura", emoji: "🐾", oculto: true, w: 440, h: 520, montar: montarCriatura },
-        ficha: { nombre: "ficha", emoji: "📖", oculto: true, w: 420, h: 420, montar: montarFicha },
-        pj: { nombre: "ficha de personaje", emoji: "🧝", oculto: true, w: 620, h: 720, montar: montarPj },
-        inventario: { nombre: "inventario de la party", emoji: "🎒", grupo: "mesa", unico: true, w: 520, h: 600,
-            desc: "Lo que lleva la party en común y su dinero; «dar a…» un personaje.", montar: montarInventario },
-        documento: { nombre: "nota", emoji: "📄", oculto: true, w: 560, h: 560, montar: montarDocumento },
+            desc: ocT("Un Paint con capas, bote, selección y rejilla de rol."), montar: PM.montarDibujo },
+        notas: { nombre: ocT("notas"), emoji: "📝", grupo: "apuntes", unico: true, w: 520, h: 480,
+            desc: ocT("Las notas de la sesión, con formato (como un Word)."), montar: PM.montarNotas },
+        documentos: { nombre: ocT("documentos"), emoji: "🗂️", grupo: "apuntes", w: 420, h: 560,
+            desc: ocT("Tus carpetas y notas: búscalas (nombre y contenido) y ábrelas en el tablero."), montar: PM.montarDocumentos },
+        tabla: { nombre: ocT("tabla para tirar"), emoji: "🔮", grupo: "apuntes", w: 360, h: 380,
+            desc: ocT("Una lista de la que sale una cosa al azar."), montar: PM.montarTabla },
+        criatura: { nombre: "criatura", emoji: "🐾", oculto: true, w: 440, h: 520, montar: PM.montarCriatura },
+        ficha: { nombre: ocT("ficha"), emoji: "📖", oculto: true, w: 420, h: 420, montar: PM.montarFicha },
+        pj: { nombre: ocT("ficha de personaje"), emoji: "🧝", oculto: true, w: 620, h: 720, montar: PM.montarPj },
+        inventario: { nombre: ocT("inventario de la party"), emoji: "🎒", grupo: "mesa", unico: true, w: 520, h: 600,
+            desc: ocT("Lo que lleva la party en común y su dinero; «dar a…» un personaje."), montar: PM.montarInventario },
+        documento: { nombre: ocT("nota"), emoji: "📄", oculto: true, w: 560, h: 560, montar: PM.montarDocumento },
     };
-    const GRUPOS = [["combate", "⚔️ combate"], ["consulta", "📚 consulta"], ["mesa", "🛡️ la mesa"], ["mundo", "🌍 el mundo"],
-        ["apuntes", "🗒️ apuntes"]];
+    const GRUPOS = [["combate", ocT("⚔️ combate")], ["turno", ocT("▶️ turno a turno")], ["consulta", ocT("📚 consulta")], ["mesa", ocT("🛡️ la mesa")], ["mundo", ocT("🌍 el mundo")],
+        ["apuntes", ocT("🗒️ apuntes")]];
 
     // ---- EL ESTADO (lo que se guarda) ----
     // Los colores de las ventanas, como post-its: fijos, iguales en todos
     // los temas de la web (la barra de ese color con letra oscura).
-    const COLORES = [["", "sin color"], ["amarillo", "amarillo", "#ffe873"], ["naranja", "naranja", "#ffb870"],
+    const COLORES = [["", ocT("sin color")], ["amarillo", "amarillo", "#ffe873"], ["naranja", "naranja", "#ffb870"],
         ["melocoton", "melocotón", "#ffcfa8"], ["rojo", "rojo", "#ff8f8f"], ["coral", "coral", "#ff7f6e"], ["rosa", "rosa", "#ffa6d5"],
         ["fucsia", "fucsia", "#ff6fcf"], ["morado", "morado", "#c9a2ff"], ["lavanda", "lavanda", "#ddd0ff"], ["azul", "azul", "#8fb8ff"],
         ["celeste", "celeste", "#7fdcff"], ["turquesa", "turquesa", "#5fe0c8"], ["menta", "menta", "#b8f5d0"], ["verde", "verde", "#8fe8a2"],
@@ -15151,15 +6652,15 @@
     // tapetes: fijos, iguales en todos los temas (o uno propio). Las rayas
     // de la cuadrícula, claras u oscuras según el fondo. La pestaña de
     // arriba se pinta del mismo color.
-    const TABLEROS = [["", "el del tema"], ["tapete", "tapete verde", "#1f4d36"], ["bosque", "bosque", "#2d5a27"],
-        ["musgo", "musgo", "#4a5d23"], ["vino", "rojo vino", "#5a1f2a"], ["carmesi", "carmesí", "#8b1e2d"],
-        ["teja", "teja", "#9c4a2f"], ["noche", "azul noche", "#1d2b4f"], ["oceano", "océano", "#1f5f7a"],
+    const TABLEROS = [["", ocT("el del tema")], ["tapete", ocT("tapete verde"), "#1f4d36"], ["bosque", "bosque", "#2d5a27"],
+        ["musgo", "musgo", "#4a5d23"], ["vino", ocT("rojo vino"), "#5a1f2a"], ["carmesi", "carmesí", "#8b1e2d"],
+        ["teja", "teja", "#9c4a2f"], ["noche", ocT("azul noche"), "#1d2b4f"], ["oceano", "océano", "#1f5f7a"],
         ["madera", "madera", "#5b3b22"], ["pizarra", "pizarra", "#2f3438"], ["ceniza", "ceniza", "#5c5c66"],
         ["negro", "negro", "#121212"], ["uva", "morado", "#3d2552"], ["pergamino", "pergamino", "#e8dcc0"],
         ["arena", "arena", "#d9c7a3"], ["crema", "crema", "#f4ecd8"], ["cielo", "cielo", "#bfd6e6"], ["menta", "menta", "#cde8d5"]];
     const hexTablero = (c) => hexPropio(c) || (TABLEROS.find((x) => x[0] === c) || [])[2] || "";
     // Las pestañas: los colores de los tableros y los de las ventanas.
-    const COLORES_PESTANA = [["", "sin color"]].concat(TABLEROS.slice(1),
+    const COLORES_PESTANA = [["", ocT("sin color")]].concat(TABLEROS.slice(1),
         COLORES.slice(1).filter((c) => !TABLEROS.some((t) => t[0] === c[0])));
     const hexPestana = (c) => hexPropio(c) || (COLORES_PESTANA.find((x) => x[0] === c) || [])[2] || "";
     // La de antes (sin su color propio) lleva el de su tablero.
@@ -15192,7 +6693,7 @@
         otro.id = idOtro;
         otro.value = hexPropio(elegido) || "#8fb8ff";
         etOtro.htmlFor = otro.id;
-        etOtro.append(otro, crear("span", "", "🎨 otro"));
+        etOtro.append(otro, crear("span", "", ocT("🎨 otro")));
         otro.addEventListener("input", () => {
             elegido = otro.value;
             marcar();
@@ -15251,12 +6752,107 @@
             ["ambiente", 1401, 20, 432, 688, "azul", 0, 1]
         ]]
     ];
+    // En la app de Android, la disposición de Richi para la tableta
+    // (hecha en una Galaxy Tab A7: 1333 × 800 en apaisado). Tras las
+    // ventanas, el zoom del tablero si no es 100 %.
+    const PERFILES_ANDROID = [
+        ["⭐home", "#000000", "", [
+            ["acciones", 910, 13, 596, 712, "#ad1f1f", 1, 1, "gm90", 1], ["reglas", 902, 126, 595, 706, "naranja", 1, 1, "gm89", 0],
+            ["conjuros", 910, 13, 596, 712, "celeste", 1, 1, "gm90", 0], ["notas", 6, 14, 827, 547, "#1b1818", 0, 1, "gm49", 1],
+            ["homebrew", 902, 126, 595, 706, "blanco", 1, 1, "gm89", 0], ["calendario", 902, 126, 595, 706, "gris", 1, 0.8, "gm89", 1],
+            ["bestiario", 904, 238, 600, 440, "#151619", 0, 1, "gm82", 0], ["party", 904, 238, 600, 440, "rosa", 0, 1, "gm82", 1],
+            ["dibujo", 6, 14, 827, 547, "blanco", 0, 1, "gm49", 0], ["condiciones", 910, 13, 596, 712, "coral", 1, 1, "gm90", 0],
+            ["rasgos", 910, 13, 596, 712, "amarillo", 1, 1, "gm90", 0]
+        ], 0.83],
+        ["📝notas", "noche", "oceano", [
+            ["dibujo", 375, 19, 900, 607, "arena", 0, 1, "gm76", 1], ["idiomas", 375, 19, 900, 607, "", 0, 1, "gm76", 0],
+            ["documentos", 1, 10, 362, 616, "", 0, 1], ["notas", 375, 19, 900, 607, "#575b60", 0, 1, "gm76", 0]
+        ]],
+        ["❌combate", "vino", "carmesi", [
+            ["iniciativa", 0, 0, 358, 625, "#ca1c1c", 0, 1, "gm43", 1], ["condiciones", 906, 0, 399, 609, "morado", 0, 1, "gm76", 1],
+            ["acciones", 906, 0, 399, 609, "fucsia", 0, 1, "gm76", 0], ["bestiario", 390, 0, 472, 617, "#000000", 0, 1, "gm72", 1],
+            ["relojes", 0, 0, 358, 625, "lavanda", 0, 1, "gm43", 0], ["encuentros", 390, 0, 472, 617, "turquesa", 0, 1, "gm72", 0],
+            ["party", 390, 0, 472, 617, "blanco", 0, 1, "gm72", 0]
+        ]],
+        ["💰tiendas", "uva", "arena", [
+            ["tienda", 0, 0, 488, 540, "coral", 0, 1, "gm81", 1], ["monedas", 0, 0, 488, 540, "amarillo", 0, 1, "gm81", 0],
+            ["taberna", 532, 0, 679, 542, "morado", 0, 1]
+        ]],
+        ["🧙‍♂️npcs", "bosque", null, [
+            ["nombres", 476, 4, 422, 549, "azul", 0, 1, "gm70", 1], ["pnj", 476, 4, 422, 549, "marron", 0, 1, "gm70", 0],
+            ["bestiario", 1, 0, 457, 554, "rojo", 0, 1], ["tarjeta", 950, 12, 317, 533, "amarillo", 0, 1, "gm75", 1],
+            ["tarjeta", 950, 12, 317, 533, "turquesa", 0, 1, "gm75", 0], ["tarjeta", 950, 12, 317, 533, "azul", 0, 1, "gm75", 0],
+            ["tarjeta", 950, 12, 317, 533, "morado", 0, 1, "gm75", 0], ["tarjeta", 950, 12, 317, 533, "coral", 0, 1, "gm75", 0]
+        ]],
+        ["🛡️party", "verde", null, [
+            ["party", 0, 0, 502, 645, "verde", 0, 1, "gm92", 0], ["inventario", 0, 0, 502, 645, "melocoton", 0, 1, "gm92", 1]
+        ]],
+        ["🎲generadores", "pizarra", null, [
+            ["dungeon", 0, 0, 814, 580, "gris", 0, 1], ["botin", 865, 13, 440, 456, "naranja", 0, 1, "gm95", 0],
+            ["nombres", 865, 13, 440, 456, "verde", 0, 1, "gm95", 1]
+        ]],
+        ["🎵música", "", "uva", [
+            ["musica", 5, 24, 1173, 588, "celeste", 0, 1, "gm97", 0], ["sonidos", 5, 24, 1173, 588, "marron", 0, 1, "gm97", 1],
+            ["ambiente", 5, 24, 1173, 588, "azul", 0, 1, "gm97", 0]
+        ]]
+    ];
     function perfilesDeSerie() {
-        return PERFILES_DE_SERIE.map(([nombre, color, colorPestana, ventanas]) => ({ nombre, color,
+        return (EN_ANDROID ? PERFILES_ANDROID : PERFILES_DE_SERIE).map(([nombre, color, colorPestana, ventanas, zoom]) => Object.assign({
+            nombre, color,
             colorPestana: colorPestana === null ? color : colorPestana,
             modulos: ventanas.filter((v) => MODULOS[v[0]]).map(([tipo, x, y, w, h, c, plegado, escala, grupo, delante]) => Object.assign(
-                { tipo, x, y, w, h, color: c, plegado: !!plegado, escala }, grupo ? { grupo, delante: !!delante } : {})) }));
+                { tipo, x, y, w, h, color: c, plegado: !!plegado, escala }, grupo ? { grupo, delante: !!delante } : {})) },
+            zoom ? { zoom } : {}));
     }
+
+    // LOS MODOS: además de los tableros (donde las ventanas van donde se
+    // las deja), disposiciones fijas que llenan la pantalla, sin arrastrar
+    // nada: una rejilla de 12 columnas × 6 filas con sus huecos, y en cada
+    // hueco una ventana (o varias, en pestañas). Se cambia de modo con el
+    // menú de abajo a la derecha. Un modo es como un perfil, con «rejilla»
+    // (y sus ventanas, con «hueco»: su número en la rejilla); se guardan en
+    // la campaña (todo.modos) y el de ahora, en todo.modoActivo.
+    // Cada hueco: [columna, fila, ancho, alto] (de 1).
+    const REJILLAS = {
+        combate: { nombre: ocT("combate: lista, perfil y dos a la derecha"),
+            huecos: [[1, 1, 3, 6], [4, 1, 5, 6], [9, 1, 4, 2], [9, 3, 4, 4]] },
+        combate3: { nombre: ocT("combate: lista, perfil y pestañas"), huecos: [[1, 1, 3, 6], [4, 1, 5, 6], [9, 1, 4, 6]] },
+        notas: { nombre: ocT("lateral y seis"), huecos: [[1, 1, 3, 6], [4, 1, 3, 3], [7, 1, 3, 3], [10, 1, 3, 3], [4, 4, 3, 3],
+            [7, 4, 3, 3], [10, 4, 3, 3]] },
+        una: { nombre: ocT("una, a toda la pantalla"), huecos: [[1, 1, 12, 6]] },
+        dos: { nombre: ocT("dos columnas"), huecos: [[1, 1, 6, 6], [7, 1, 6, 6]] },
+        tres: { nombre: ocT("tres columnas"), huecos: [[1, 1, 4, 6], [5, 1, 4, 6], [9, 1, 4, 6]] },
+        lateral: { nombre: ocT("lateral y dos"), huecos: [[1, 1, 4, 6], [5, 1, 8, 3], [5, 4, 8, 3]] },
+        cuatro: { nombre: ocT("cuatro (2 × 2)"), huecos: [[1, 1, 6, 3], [7, 1, 6, 3], [1, 4, 6, 3], [7, 4, 6, 3]] },
+        seis: { nombre: ocT("seis (3 × 2)"), huecos: [[1, 1, 4, 3], [5, 1, 4, 3], [9, 1, 4, 3], [1, 4, 4, 3], [5, 4, 4, 3],
+            [9, 4, 4, 3]] }
+    };
+    const esModo = (pf) => !!(pf && pf.rejilla);
+    // Los de serie (los de Richi): [emoji, nombre, rejilla, ventanas], cada
+    // ventana [tipo, hueco, color, grupo, delante].
+    const MODOS_DE_SERIE = [
+        ["📝", ocT("notas"), "notas", [["documentos", 0, ""], ["tarjeta", 1, "amarillo"], ["tarjeta", 2, "verde"], ["tarjeta", 3, "celeste"],
+            ["tarjeta", 4, "coral"], ["tarjeta", 5, "rosa"], ["tarjeta", 6, "lima"]]],
+        ["🛡️", ocT("party"), "una", [["visor", 0, "verde"]]],
+        // Combate, en tres: los turnos; la criatura del turno (con la party
+        // y el bestiario en pestañas); y la iniciativa con las condiciones,
+        // las acciones y las reglas, en pestañas.
+        ["⚔️", ocT("combate"), "combate3", [["turnos", 0, "#ca1c1c"], ["criaturaTurno", 1, "#151619", "gct", 1],
+            ["party", 1, "verde", "gct", 0], ["bestiario", 1, "rojo", "gct", 0], ["iniciativa", 2, "lavanda", "gmc", 1],
+            ["condiciones", 2, "morado", "gmc", 0], ["acciones", 2, "fucsia", "gmc", 0], ["reglas", 2, "naranja", "gmc", 0]]]
+    ];
+    // El combate de antes (cuatro huecos), tal y como venía: si nadie lo ha
+    // tocado, se cambia por el de ahora.
+    const COMBATE_DE_ANTES = "turnos:0,criaturaTurno:1,condiciones:2,acciones:2,reglas:2,iniciativa:3";
+    function modosDeSerie() {
+        return MODOS_DE_SERIE.map(([emoji, nombre, rejilla, ventanas]) => ({ nombre, emoji, rejilla,
+            modulos: ventanas.filter((v) => MODULOS[v[0]]).map(([tipo, hueco, color, grupo, delante]) => Object.assign({ tipo, hueco,
+                x: 0, y: 0, w: MODULOS[tipo].w, h: MODULOS[tipo].h, color, plegado: false, escala: 1 },
+            grupo ? { grupo, delante: !!delante } : {})) }));
+    }
+    // El hueco que se está llenando (desde «＋ elegir ventana» o el ✎ de
+    // una ventana de un hueco): lo usa «anadir».
+    let huecoPendiente = null;
 
     // CAMPAÑAS: configuraciones separadas (dos campañas, dos partys que
     // no se mezclan). Cada una con sus PERFILES (las pestañas de arriba,
@@ -15270,21 +6866,22 @@
     }
     if (todas && Array.isArray(todas.modulos) && !todas.perfiles && !todas.campanas) {
         // Lo de antes de las pestañas: su primera pestaña.
-        todas = { perfiles: [{ id: "p1", nombre: "principal", modulos: todas.modulos }], activo: "p1" };
+        todas = { perfiles: [{ id: "p1", nombre: ocT("principal"), modulos: todas.modulos }], activo: "p1" };
     }
     if (todas && Array.isArray(todas.perfiles) && !todas.campanas) {
         // Lo de antes de las campañas: todo en la primera.
-        todas = { activa: "c1", campanas: [{ id: "c1", nombre: "mi campaña", activo: todas.activo, perfiles: todas.perfiles }] };
+        todas = { activa: "c1", campanas: [{ id: "c1", nombre: ocT("mi campaña"), activo: todas.activo, perfiles: todas.perfiles }] };
     }
     // La primera vez (sin nada guardado) no hay campañas: la entrada obliga
     // a crear una. Mientras, una de relleno que no se guarda.
     const sinCampanas = !todas || !Array.isArray(todas.campanas) || !todas.campanas.length;
     let sinGuardarTodavia = sinCampanas;
     if (sinCampanas) {
-        todas = { activa: "c1", campanas: [{ id: "c1", nombre: "mi campaña", perfiles: perfilesDeSerie() }] };
+        todas = { activa: "c1", campanas: [{ id: "c1", nombre: ocT("mi campaña"), perfiles: perfilesDeSerie() }] };
     }
     let siguienteId = 1;
     let siguientePerfil = 1;
+    let siguienteModo = 1;
     let siguienteCampana = 1;
     todas.campanas.forEach((c) => {
         c.id = c.id || "c" + siguienteCampana;
@@ -15319,10 +6916,36 @@
                 }
             });
         });
+        // Los modos (los de serie, la primera vez).
+        if (!c.conModos) {
+            c.modos = (Array.isArray(c.modos) ? c.modos : []).concat(modosDeSerie());
+            c.conModos = true;
+        }
+        c.modos = (Array.isArray(c.modos) ? c.modos : []).filter((mo) => mo && typeof mo === "object");
+        c.modos = c.modos.map((mo) => (mo.rejilla === "combate" && Array.isArray(mo.modulos)
+            && mo.modulos.map((m) => m.tipo + ":" + m.hueco).join(",") === COMBATE_DE_ANTES
+            ? Object.assign(modosDeSerie().find((x) => x.rejilla === "combate3"), { id: mo.id, nombre: mo.nombre, emoji: mo.emoji }) : mo));
+        c.modos.forEach((mo) => {
+            mo.id = /^o\d+$/.test(mo.id || "") ? mo.id : "o" + siguienteModo++;
+            siguienteModo = Math.max(siguienteModo, parseInt(mo.id.slice(1), 10) + 1);
+            mo.nombre = mo.nombre || "modo";
+            mo.emoji = mo.emoji || "🧩";
+            mo.rejilla = REJILLAS[mo.rejilla] ? mo.rejilla : "dos";
+            const cuantos = REJILLAS[mo.rejilla].huecos.length;
+            mo.modulos = (Array.isArray(mo.modulos) ? mo.modulos : []).filter((m) => MODULOS[m.tipo]);
+            mo.modulos.forEach((m) => {
+                m.color = hexDe(m.color) ? m.color : "";
+                m.id = m.id || "m" + siguienteId++;
+                siguienteId = Math.max(siguienteId, parseInt(String(m.id).slice(1), 10) + 1 || siguienteId);
+                if (!(Number.isInteger(m.hueco) && m.hueco >= 0 && m.hueco < cuantos)) {
+                    delete m.hueco;
+                }
+            });
+        });
     });
     // Los grupos de ventanas que se hayan quedado con una sola (o sin la
     // de delante), arreglados.
-    todas.campanas.forEach((c) => c.perfiles.forEach((pf) => {
+    todas.campanas.forEach((c) => c.perfiles.concat(c.modos).forEach((pf) => {
         const grupos = {};
         pf.modulos.filter((m) => m.grupo).forEach((m) => {
             (grupos[m.grupo] = grupos[m.grupo] || []).push(m);
@@ -15341,24 +6964,35 @@
         });
     }));
     let todo = todas.campanas.find((c) => c.id === todas.activa) || todas.campanas[0];
-    let estado = todo.perfiles.find((pf) => pf.id === todo.activo) || todo.perfiles[0];
+    Object.defineProperty(PM, "todo", { configurable: true, get: () => todo, set: (v) => { todo = v; } });
+    setTimeout(iniDesdeParty, 0);
+    let estado = (todo.modoActivo && todo.modos.find((mo) => mo.id === todo.modoActivo))
+        || todo.perfiles.find((pf) => pf.id === todo.activo) || todo.perfiles[0];
+    Object.defineProperty(PM, "estado", { configurable: true, get: () => estado, set: (v) => { estado = v; } });
 
     // Lo que se guarda de una campaña (sin lo de la pantalla, como el
     // elemento de cada ventana). También lo usa duplicarCampana.
-    const campanaGuardable = (c) => ({ id: c.id, nombre: c.nombre, activo: c.activo,
-        pjs: c.pjs, docs: c.docs, musica: c.musica, inventario: c.inventario, conParty: c.conParty, unidades: c.unidades,
-        edicion: c.edicion, jugadores: c.jugadores, linea: c.linea, relaciones: c.relaciones,
+    const moduloGuardable = (m) => ({ id: m.id, tipo: m.tipo, x: m.x, y: m.y, w: m.w, h: m.h,
+        titulo: m.titulo || "", color: m.color || "", plegado: !!m.plegado,
+        escala: m.escala || 1, grupo: m.grupo || undefined, delante: m.grupo ? !!m.delante : undefined,
+        hueco: Number.isInteger(m.hueco) ? m.hueco : undefined, datos: m.datos });
+    const campanaGuardable = (c) => ({ id: c.id, nombre: c.nombre, activo: c.activo, modoActivo: c.modoActivo || "",
+        pjs: c.pjs, docs: c.docs, musica: c.musica, inventario: c.inventario, conParty: c.conParty, conModos: c.conModos,
+        unidades: c.unidades, edicion: c.edicion, jugadores: c.jugadores, linea: c.linea, relaciones: c.relaciones,
         perfiles: c.perfiles.map((pf) => ({ id: pf.id, nombre: pf.nombre, color: pf.color || "",
-            colorPestana: pf.colorPestana, zoom: pf.zoom || 1,
-            modulos: pf.modulos.map((m) => ({ id: m.id, tipo: m.tipo, x: m.x, y: m.y, w: m.w, h: m.h,
-                titulo: m.titulo || "", color: m.color || "", plegado: !!m.plegado,
-                escala: m.escala || 1, grupo: m.grupo || undefined, delante: m.grupo ? !!m.delante : undefined,
-                datos: m.datos })) })) });
+            colorPestana: pf.colorPestana, zoom: pf.zoom || 1, modulos: pf.modulos.map(moduloGuardable) })),
+        modos: (c.modos || []).map((mo) => ({ id: mo.id, nombre: mo.nombre, emoji: mo.emoji, rejilla: mo.rejilla,
+            modulos: mo.modulos.map(moduloGuardable) })) });
     function guardar() {
         if (sinGuardarTodavia) {
             return true;
         }
-        todo.activo = estado.id;
+        if (esModo(estado)) {
+            todo.modoActivo = estado.id;
+        } else {
+            todo.activo = estado.id;
+            todo.modoActivo = "";
+        }
         const salida = { activa: todo.id, campanas: todas.campanas.map(campanaGuardable) };
         try {
             localStorage.setItem(CLAVE, JSON.stringify(salida));
@@ -15375,7 +7009,7 @@
     // EL ZOOM del tablero (zoom de CSS en el lienzo; por perfil, en
     // «zoom»). El ancho del lienzo, en sus píxeles: con zoom de menos cabe
     // más; con zoom de más, el de siempre (y se desliza de lado).
-    const zoomAhora = () => (enMovil.matches || !HAY_ZOOM ? 1 : estado.zoom || 1);
+    const zoomAhora = () => (enMovil.matches || !HAY_ZOOM || esModo(estado) ? 1 : estado.zoom || 1);
     function anchoLienzo() {
         return Math.max(lienzo.clientWidth, Math.round(lienzo.getBoundingClientRect().width));
     }
@@ -15424,7 +7058,7 @@
     function personalizar(m, vuelta) {
         const def = MODULOS[m.tipo];
         const cuerpo = crear("form", "master-personalizar");
-        const et = crear("label", "oc-dados-etiqueta", "título");
+        const et = crear("label", "oc-dados-etiqueta", ocT("título"));
         const input = crear("input", "oc-dados-texto");
         input.id = "master-personalizar-" + m.id;
         input.value = m.titulo || "";
@@ -15435,7 +7069,7 @@
         const grupo = muestrasDe("color", COLORES, m.color || "", "master-personalizar-otro-" + m.id);
         // El tamaño de lo de dentro: se ve al momento.
         const tam = crear("fieldset", "master-colores master-escala");
-        tam.appendChild(crear("legend", "oc-dados-etiqueta", "tamaño del contenido"));
+        tam.appendChild(crear("legend", "oc-dados-etiqueta", ocT("tamaño del contenido")));
         const valor = crear("output", "master-escala-valor", Math.round((m.escala || 1) * 100) + " %");
         const paso = (d) => {
             m.escala = (m.escala || 1) + d;
@@ -15444,15 +7078,15 @@
             menos.disabled = e <= 0.6;
             mas.disabled = e >= 2;
             guardar();
-            avisar("Contenido al " + Math.round(e * 100) + " %.");
+            avisar(ocT("Contenido al {round} %.", { round: Math.round(e * 100) }));
         };
-        const menos = botonDe("master-pestana-mando", "A−", () => paso(-0.1), "Contenido más pequeño");
-        const mas = botonDe("master-pestana-mando", "A+", () => paso(0.1), "Contenido más grande");
-        const igual = botonDe("oc-vida-accion", "100 %", () => paso(1 - (m.escala || 1)), "Contenido a su tamaño normal");
+        const menos = botonDe("master-pestana-mando", ocT("A−"), () => paso(-0.1), ocT("Contenido más pequeño"));
+        const mas = botonDe("master-pestana-mando", ocT("A+"), () => paso(0.1), ocT("Contenido más grande"));
+        const igual = botonDe("oc-vida-accion", "100 %", () => paso(1 - (m.escala || 1)), ocT("Contenido a su tamaño normal"));
         menos.disabled = (m.escala || 1) <= 0.6;
         mas.disabled = (m.escala || 1) >= 2;
         tam.append(menos, valor, mas, igual);
-        const listo = crear("button", "oc-vida-accion es-principal", "guardar");
+        const listo = crear("button", "oc-vida-accion es-principal", ocT("guardar"));
         listo.type = "submit";
         // En pestañas, como un navegador: título, color y tamaño.
         const pTitulo = crear("div");
@@ -15465,9 +7099,9 @@
         const pGrupo = crear("div");
         const otras = estado.modulos.filter((x) => x !== m && (!x.grupo || x.delante) && (!m.grupo || x.grupo !== m.grupo));
         if (otras.length) {
-            const con = elegirDe("master-agrupar-" + m.id, "juntarla en pestañas con", otras.map((x) => [x.id, MODULOS[x.tipo].emoji + " "
-                + nombreDeVentana(x) + (x.grupo ? " (y las de su grupo)" : "")]), otras[0].id);
-            const juntar = botonDe("oc-vida-accion", "🗂️ agrupar", () => {
+            const con = elegirDe("master-agrupar-" + m.id, ocT("juntarla en pestañas con"), otras.map((x) => [x.id, MODULOS[x.tipo].emoji + " "
+                + nombreDeVentana(x) + (x.grupo ? ocT(" (y las de su grupo)") : "")]), otras[0].id);
+            const juntar = botonDe("oc-vida-accion", ocT("🗂️ agrupar"), () => {
                 const d = estado.modulos.find((x) => x.id === con.elegir.value);
                 cerrar();
                 if (d) {
@@ -15476,18 +7110,55 @@
             });
             pGrupo.append(con, juntar);
         } else {
-            pGrupo.appendChild(crear("p", "oc-hoja-nota", "No hay otras ventanas en esta pestaña."));
+            pGrupo.appendChild(crear("p", "oc-hoja-nota", ocT("No hay otras ventanas en esta pestaña.")));
         }
         if (m.grupo) {
-            pGrupo.appendChild(botonDe("oc-vida-accion", "⇱ sacarla del grupo", () => {
+            pGrupo.appendChild(botonDe("oc-vida-accion", ocT("⇱ sacarla del grupo"), () => {
                 cerrar();
                 sacarDelGrupo(m);
             }));
         }
-        pGrupo.appendChild(crear("p", "oc-hoja-nota", "También: mantén pulsada su barra y suéltala sobre la barra de otra."));
-        const { lista: pestanas, elegir } = pestanasDe([["📝 título", pTitulo], ["🎨 color", pColor], ["🔠 tamaño", pTam],
-            ["🗂️ agrupar", pGrupo]], "Opciones de la ventana", "master-personalizar-" + m.id);
-        cuerpo.append(pestanas, pTitulo, pColor, pTam, pGrupo, listo);
+        pGrupo.appendChild(crear("p", "oc-hoja-nota", ocT("También: mantén pulsada su barra y suéltala sobre la barra de otra.")));
+        const opciones = [[ocT("📝 título"), pTitulo], [ocT("🎨 color"), pColor], [ocT("🔠 tamaño"), pTam], [ocT("🗂️ agrupar"), pGrupo]];
+        // En un modo: cambiarla por otra, ponerle otra en pestaña, o
+        // meterla en un hueco (las que van sueltas).
+        if (esModo(estado)) {
+            const pHueco = crear("div");
+            const acciones = crear("div", "master-anadir-otras");
+            if (Number.isInteger(m.hueco)) {
+                pHueco.appendChild(crear("p", "oc-hoja-nota", ocT("Está en el hueco {n} de {n2} del modo «{nombre}».", { n: m.hueco + 1, n2: huecosDe(estado).length, nombre: estado.nombre })));
+                acciones.append(botonDe("oc-vida-accion", ocT("🔁 cambiarla por otra"), () => {
+                    cerrar();
+                    elegirParaHueco({ hueco: m.hueco, reemplazar: m, vuelta: focoDe(m) });
+                }), botonDe("oc-vida-accion", ocT("＋ otra aquí, en pestaña"), () => {
+                    cerrar();
+                    elegirParaHueco({ hueco: m.hueco, grupoCon: m, vuelta: focoDe(m) });
+                }));
+            } else {
+                const libres = huecosDe(estado).map((h, i) => i).filter((i) => !estado.modulos.some((x) => x !== m && x.hueco === i));
+                if (libres.length) {
+                    const donde = elegirDe("master-a-hueco-" + m.id, ocT("a qué hueco"), libres.map((i) => [String(i), ocT("hueco {n}", { n: i + 1 })]),
+                        String(libres[0]));
+                    acciones.append(donde, botonDe("oc-vida-accion", ocT("📌 meterla en el hueco"), () => {
+                        cerrar();
+                        delGrupo(m).forEach((x) => {
+                            x.hueco = Number(donde.elegir.value);
+                            x.el = null;
+                        });
+                        pintarTodo();
+                        guardar();
+                        focoDe(m).focus();
+                        avisar(ocT("{n}: en el hueco {n2}.", { n: nombreDeVentana(m), n2: m.hueco + 1 }));
+                    }));
+                } else {
+                    pHueco.appendChild(crear("p", "oc-hoja-nota", ocT("Todos los huecos de este modo están llenos: júntala en pestañas con una de ellas (🗂️ agrupar).")));
+                }
+            }
+            pHueco.appendChild(acciones);
+            opciones.push([ocT("🧩 hueco"), pHueco]);
+        }
+        const { lista: pestanas, elegir } = pestanasDe(opciones, ocT("Opciones de la ventana"), "master-personalizar-" + m.id);
+        cuerpo.append(pestanas, ...opciones.map((x) => x[1]), listo);
         elegir(0, false);
         cuerpo.addEventListener("submit", (e) => {
             e.preventDefault();
@@ -15509,9 +7180,9 @@
             if (m.alRenombrar) {
                 m.alRenombrar();
             }
-            avisar("Guardado.");
+            avisar(ocT("Guardado."));
         });
-        const cerrar = window.ocVentana.abrir({ titulo: "opciones de la ventana", cuerpo, vuelta, foco: input });
+        const cerrar = window.ocVentana.abrir({ titulo: ocT("opciones de la ventana"), cuerpo, vuelta, foco: input });
     }
 
     function colocar(m) {
@@ -15519,15 +7190,35 @@
             delGrupo(m).forEach((x) => {
                 if (x !== m) {
                     Object.assign(x, { x: m.x, y: m.y, w: m.w, h: m.h });
+                    if (Number.isInteger(m.hueco)) {
+                        x.hueco = m.hueco;
+                    } else {
+                        delete x.hueco;
+                    }
                 }
             });
         }
-        if (enMovil.matches) {
+        const deHueco = enHueco(m);
+        m.el.classList.toggle("es-en-hueco", deHueco);
+        if (enMovil.matches || deHueco) {
             m.el.style.left = "";
             m.el.style.top = "";
             m.el.style.width = "";
             m.el.style.height = "";
+            if (deHueco) {
+                const [col, fila, ancho, alto] = huecosDe(estado)[m.hueco];
+                m.el.style.gridArea = fila + " / " + col + " / span " + alto + " / span " + ancho;
+            } else {
+                m.el.style.gridArea = "";
+            }
             return;
+        }
+        m.el.style.gridArea = "";
+        if (esModo(estado)) {
+            // Suelta encima de un modo: que no se salga de la pantalla.
+            const alto = lienzo.clientHeight || 600;
+            m.y = Math.min(m.y, Math.max(0, alto - 160));
+            m.h = Math.min(m.h, Math.max(160, alto - m.y - 8));
         }
         m.el.style.left = m.x + "px";
         m.el.style.top = m.y + "px";
@@ -15550,18 +7241,19 @@
     const delGrupo = (m) => (m.grupo ? estado.modulos.filter((x) => x.grupo === m.grupo) : [m]);
     // Lo que se enfoca de una ventana: su nombre o, en un grupo, su pestaña.
     const focoDe = (m) => m.el.querySelector(".master-grupo-pestana[aria-selected='true']") || m.el.querySelector(".master-ventana-nombre");
+    Object.assign(PM, { focoDe });
     // Moverla con las flechas (con Mayús, más deprisa; con Alt, el tamaño).
     function moverConTeclas(m, e) {
         const paso = e.shiftKey ? 60 : 20;
         const d = { ArrowLeft: [-paso, 0], ArrowRight: [paso, 0], ArrowUp: [0, -paso], ArrowDown: [0, paso] }[e.key];
-        if (!d || enMovil.matches) {
+        if (!d || enMovil.matches || enHueco(m)) {
             return false;
         }
         e.preventDefault();
         if (e.altKey) {
             m.w = Math.max(240, Math.min(anchoLienzo() - m.x - 4, m.w + d[0]));
             m.h = Math.max(120, m.h + d[1]);
-            avisar(m.w + " por " + m.h + " píxeles.");
+            avisar(ocT("{w} por {h} píxeles.", { w: m.w, h: m.h }));
         } else {
             m.x = Math.min(topeX(m), Math.max(0, m.x + d[0]));
             m.y = Math.max(0, m.y + d[1]);
@@ -15599,19 +7291,36 @@
         juntas.forEach((x) => {
             Object.assign(x, { grupo: g, x: destino.x, y: destino.y, w: destino.w, h: destino.h, plegado: !!destino.plegado,
                 delante: x === m });
+            if (Number.isInteger(destino.hueco)) {
+                x.hueco = destino.hueco;
+            } else {
+                delete x.hueco;
+            }
             x.el = null;
         });
         pintarTodo();
         guardar();
         alFrente(m);
         m.el.querySelector(".master-grupo-pestana[aria-selected='true']").focus();
-        avisar("Juntas en pestañas: " + juntas.map(nombreDeVentana).join(", ") + ".");
+        avisar(ocT("Juntas en pestañas: {join}.", { join: juntas.map(nombreDeVentana).join(", ") }));
     }
     function sacarDelGrupo(m, sitio) {
         const resto = delGrupo(m).filter((x) => x !== m);
         delete m.grupo;
         delete m.delante;
-        if (sitio) {
+        if (esModo(estado)) {
+            delete m.hueco;
+            const libre = huecoLibre();
+            if (libre >= 0 && !sitio) {
+                m.hueco = libre;
+            } else if (!sitio) {
+                m.x = 40;
+                m.y = 40;
+            }
+        }
+        if (Number.isInteger(m.hueco)) {
+            // (va a un hueco libre)
+        } else if (sitio) {
             m.x = Math.min(topeX(m), Math.max(0, sitio.x));
             m.y = Math.max(0, sitio.y);
         } else {
@@ -15631,7 +7340,7 @@
         guardar();
         alFrente(m);
         focoDe(m).focus();
-        avisar("Sacada del grupo: " + nombreDeVentana(m) + ".");
+        avisar(ocT("Sacada del grupo: {nombreDeVentana}.", { nombreDeVentana: nombreDeVentana(m) }));
     }
     // SEPARAR ARRASTRANDO: mantener pulsada la pestaña de una ventana de un
     // grupo la coge; soltada fuera de la barra, sale del grupo (donde se
@@ -15753,7 +7462,8 @@
             plegar.click();
         });
         titulo.append(em, nombre);
-        nombre.title = "Clic: plegar o desplegar · mantener pulsado: moverla · flechas: moverla (con Alt, el tamaño)";
+        nombre.title = Number.isInteger(m.hueco) && esModo(estado) ? ocT("Clic: plegar o desplegar")
+            : ocT("Clic: plegar o desplegar · mantener pulsado: moverla · flechas: moverla (con Alt, el tamaño)");
         // Con el teclado, las flechas en su nombre la mueven (con Mayús,
         // más deprisa; con Alt, cambian su tamaño).
         nombre.addEventListener("keydown", (e) => moverConTeclas(m, e));
@@ -15777,7 +7487,7 @@
             colocar(m);
             crecerLienzo();
             guardar();
-        }, "Plegar o desplegar");
+        }, ocT("Plegar o desplegar"));
         plegar.setAttribute("aria-expanded", m.plegado ? "false" : "true");
         nombre.setAttribute("aria-expanded", m.plegado ? "false" : "true");
         const quitar = botonDe("master-ventana-mando", "✕", () => {
@@ -15799,13 +7509,19 @@
                 pintarTodo();
             }
             guardar();
-            avisar("Quitado: " + (m.titulo || def.nombre) + ".");
+            avisar(ocT("Quitado: {n}.", { n: m.titulo || def.nombre }));
             const sigue = resto[0] && resto[0].el;
+            if (!sigue && esModo(estado) && Number.isInteger(m.hueco)) {
+                pintarTodo();
+                const vacio = lienzo.querySelector(".master-hueco[data-hueco='" + m.hueco + "'] button");
+                (vacio || botonAnadir).focus();
+                return;
+            }
             (sigue ? focoDe(resto[0]) : botonAnadir).focus();
-        }, "Quitar esta ventana");
+        }, ocT("Quitar esta ventana"));
         const cambiar = botonDe("master-ventana-mando", "✎", () => personalizar(m, cambiar),
-            "Opciones: título, color y tamaño del contenido");
-        cambiar.title = "Título, color y tamaño del contenido";
+            ocT("Opciones: título, color y tamaño del contenido"));
+        cambiar.title = ocT("Título, color y tamaño del contenido");
         cambiar.setAttribute("aria-haspopup", "dialog");
         const mandos = crear("div", "master-ventana-mandos");
         mandos.append(cambiar, plegar, quitar);
@@ -15823,7 +7539,7 @@
             titulo.replaceChildren(document.createTextNode(nombreDeVentana(m)));
             const tiras = crear("div", "master-grupo-pestanas");
             tiras.setAttribute("role", "tablist");
-            tiras.setAttribute("aria-label", "Ventanas juntas");
+            tiras.setAttribute("aria-label", ocT("Ventanas juntas"));
             const juntas = delGrupo(m);
             juntas.forEach((x, i) => {
                 const d = MODULOS[x.tipo];
@@ -15841,7 +7557,7 @@
                 const e2 = crear("span", "master-grupo-emoji", d.emoji);
                 e2.setAttribute("aria-hidden", "true");
                 t.append(e2, crear("span", "master-grupo-nombre", nombreDeVentana(x)));
-                t.title = nombreDeVentana(x) + (ahora ? " (clic: plegar; mantener y sacar: separarla)" : " (mantener y sacar: separarla)");
+                t.title = nombreDeVentana(x) + (ahora ? ocT(" (clic: plegar; mantener y sacar: separarla)") : ocT(" (mantener y sacar: separarla)"));
                 t.setAttribute("role", "tab");
                 // El nombre entero, también en las que sólo enseñan el icono.
                 t.setAttribute("aria-label", nombreDeVentana(x));
@@ -15892,9 +7608,9 @@
         // dedo o el lápiz (en las tabletas no vale el «resize» de CSS).
         const esquina = crear("span", "master-ventana-tamano");
         esquina.setAttribute("aria-hidden", "true");
-        esquina.title = "Arrastra para cambiar el tamaño";
+        esquina.title = ocT("Arrastra para cambiar el tamaño");
         esquina.addEventListener("pointerdown", (e) => {
-            if (enMovil.matches || m.plegado || e.button > 0) {
+            if (enMovil.matches || m.plegado || e.button > 0 || enHueco(m)) {
                 return;
             }
             e.preventDefault();
@@ -15902,9 +7618,12 @@
             alFrente(m);
             const w0 = v.offsetWidth;
             const h0 = v.offsetHeight;
+            // El ancho del lienzo, una vez: medirlo en cada fotograma obliga
+            // al navegador a recolocar la página antes de tiempo.
+            const ancho = anchoLienzo();
             v.classList.add("es-arrastrada");
             arrastrar(e, esquina, (dx, dy) => {
-                m.w = Math.max(240, Math.min(anchoLienzo() - m.x - 4, Math.round(w0 + dx)));
+                m.w = Math.max(240, Math.min(ancho - m.x - 4, Math.round(w0 + dx)));
                 m.h = Math.max(120, Math.round(h0 + dy));
                 colocar(m);
             }, () => v.classList.remove("es-arrastrada"));
@@ -15916,14 +7635,16 @@
         // momento (ESPERA_COGER) la coge (reborde a rayas) y se mueve
         // hasta soltar. Si el puntero se va antes, no pasa nada.
         cabeza.addEventListener("pointerdown", (e) => {
-            if (enMovil.matches || e.button > 0 || e.target.closest(".master-ventana-mandos, .master-grupo-pestana")) {
+            if (enMovil.matches || enHueco(m) || e.button > 0 || e.target.closest(".master-ventana-mandos, .master-grupo-pestana")) {
                 return;
             }
             alFrente(m);
             const x0 = e.clientX;
             const y0 = e.clientY;
+            // Con el dedo, más margen: nunca se queda del todo quieto.
+            const margenQuieto = e.pointerType === "touch" ? 14 : 8;
             const quieto = (ev) => {
-                if (Math.abs(ev.clientX - x0) + Math.abs(ev.clientY - y0) > 8) {
+                if (Math.abs(ev.clientX - x0) + Math.abs(ev.clientY - y0) > margenQuieto) {
                     dejar();
                 }
             };
@@ -15939,6 +7660,10 @@
                 const my = m.y;
                 v.dataset.recienMovida = "si";
                 v.classList.add("es-arrastrada", "es-cogida");
+                // Con el dedo, un toque de vibración: ya se puede arrastrar.
+                if (e.pointerType === "touch" && navigator.vibrate) {
+                    navigator.vibrate(20);
+                }
                 // Soltarla sobre la barra de otra: se juntan en pestañas
                 // (la de debajo se marca mientras).
                 let destino = null;
@@ -15951,15 +7676,33 @@
                         destino.el.classList.add("es-destino");
                     }
                 };
+                // Mientras se mueve, con «transform»: no recoloca la página
+                // (va fluido también en tabletas modestas); al soltar, a su
+                // sitio de verdad. Qué ventana hay debajo, como mucho diez
+                // veces por segundo.
+                let mirado = 0;
+                const tope = topeX(m);
                 arrastrar(e, cabeza, (dx, dy, ev) => {
-                    m.x = Math.min(topeX(m), Math.max(0, mx + dx));
+                    m.x = Math.min(tope, Math.max(0, mx + dx));
                     m.y = Math.max(0, my + dy);
-                    colocar(m);
+                    v.style.transform = "translate(" + (m.x - mx) + "px, " + (m.y - my) + "px)";
+                    const ahora = performance.now();
+                    if (ahora - mirado < 100) {
+                        return;
+                    }
+                    mirado = ahora;
                     const d = ventanaBajo(ev.clientX, ev.clientY, v);
                     if (d !== destino && !(d && m.grupo && d.grupo === m.grupo)) {
                         marcar(d);
                     }
-                }, () => {
+                }, (ev) => {
+                    v.style.transform = "";
+                    colocar(m);
+                    // Lo de debajo, mirado otra vez justo donde se suelta.
+                    const d = ev ? ventanaBajo(ev.clientX, ev.clientY, v) : null;
+                    if (d !== destino && !(d && m.grupo && d.grupo === m.grupo)) {
+                        marcar(d);
+                    }
                     v.classList.remove("es-arrastrada", "es-cogida");
                     setTimeout(() => delete v.dataset.recienMovida, 0);
                     if (destino) {
@@ -16005,10 +7748,23 @@
             lienzo.style.height = "";
             return;
         }
+        // Un modo, de alto lo que queda de pantalla debajo de la barra.
+        if (esModo(estado)) {
+            const arriba = lienzo.getBoundingClientRect().top + window.scrollY;
+            // Con el menú de los modos en su sitio (abajo), le deja hueco
+            // debajo para que no tape nada.
+            const menu = menuModos.isConnected && !menuModos.classList.contains("es-movido") ? menuModos.offsetHeight + 22 : 0;
+            lienzo.style.height = Math.max(420, Math.round(window.innerHeight - arriba - 14 - menu)) + "px";
+            return;
+        }
         const fondo = Math.max(480, ...estado.modulos.map((m) => m.y + (m.plegado ? 60 : m.h) + 240));
         const ahora = parseInt(lienzo.style.height, 10) || 0;
-        if (!soloCrecer || fondo > ahora) {
+        if (!soloCrecer) {
             lienzo.style.height = fondo + "px";
+        } else if (fondo > ahora) {
+            // Mientras se arrastra, a saltos: cambiar el alto recoloca todo
+            // el tablero, y hacerlo en cada fotograma da tirones.
+            lienzo.style.height = fondo + 400 + "px";
         }
     }
 
@@ -16089,12 +7845,66 @@
     }
 
     function pintarTodo() {
+        const modo = esModo(estado);
+        lienzo.classList.toggle("es-modo", modo);
+        lienzo.classList.toggle("con-lienzo", !modo);
+        if (modo) {
+            pintarModoAhora();
+            return;
+        }
         // En el móvil, en orden de lectura (de arriba abajo y de izquierda
         // a derecha); en el ordenador, también (así el tabulador va igual).
         const orden = estado.modulos.slice().sort((a, b) => (a.y - b.y) || (a.x - b.x));
         lienzo.replaceChildren(...orden.map((m) => m.el || ventanaDe(m)));
         orden.forEach(colocar);
         crecerLienzo();
+    }
+    // UN MODO: su rejilla, con las ventanas de sus huecos (en el orden de
+    // lectura de la rejilla), los huecos vacíos («＋ elegir ventana») y,
+    // encima, las que vayan sueltas.
+    const huecosDe = (mo) => REJILLAS[mo.rejilla].huecos;
+    const enHueco = (m) => esModo(estado) && Number.isInteger(m.hueco);
+    function huecoLibre() {
+        return huecosDe(estado).findIndex((h, i) => !estado.modulos.some((m) => m.hueco === i));
+    }
+    function pintarModoAhora() {
+        const huecos = huecosDe(estado);
+        estado.modulos.forEach((m) => {
+            if (Number.isInteger(m.hueco) && m.hueco >= huecos.length) {
+                delete m.hueco;
+            }
+        });
+        const filas = [];
+        huecos.forEach(([col, fila], i) => {
+            const de = estado.modulos.filter((m) => m.hueco === i);
+            if (de.length) {
+                de.forEach((m) => filas.push([fila, col, m.el || ventanaDe(m)]));
+            } else {
+                filas.push([fila, col, huecoVacio(i)]);
+            }
+        });
+        filas.sort((a, b) => (a[0] - b[0]) || (a[1] - b[1]));
+        const sueltas = estado.modulos.filter((m) => !Number.isInteger(m.hueco)).sort((a, b) => (a.y - b.y) || (a.x - b.x));
+        lienzo.replaceChildren(...filas.map((x) => x[2]), ...sueltas.map((m) => m.el || ventanaDe(m)));
+        estado.modulos.forEach(colocar);
+        crecerLienzo();
+    }
+    function huecoVacio(i) {
+        const caja = crear("div", "master-hueco");
+        caja.dataset.hueco = String(i);
+        const [col, fila, ancho, alto] = huecosDe(estado)[i];
+        caja.style.gridArea = fila + " / " + col + " / span " + alto + " / span " + ancho;
+        const b = botonDe("oc-vida-accion", ocT("＋ elegir ventana"), () => elegirParaHueco({ hueco: i, vuelta: b }),
+            ocT("Hueco {n} de {n2}, vacío: elegir qué ventana va aquí", { n: i + 1, n2: huecosDe(estado).length }));
+        b.setAttribute("aria-haspopup", "dialog");
+        caja.appendChild(b);
+        return caja;
+    }
+    // Abrir 🧰 para llenar un hueco (o cambiar la ventana de uno, o
+    // ponerle otra en pestaña).
+    function elegirParaHueco(destino) {
+        huecoPendiente = destino;
+        botonAnadir.click();
     }
 
     // ---- EL BUSCADOR DE ARRIBA: busca a la vez en los conjuros, los
@@ -16125,19 +7935,19 @@
                         vistos.add(k);
                         return !ya;
                     }).forEach((r) => deRasgos.push({ tipo: "rasgo", emoji: "⭐", nombre: r.nombre,
-                        detalle: datosRasgo(r).join(" · ") + (r.propio ? " · 🛠️ tuyo" : ""), buscar: llano(r.nombre + " " + r.en),
+                        detalle: datosRasgo(r).join(" · ") + (r.propio ? ocT(" · 🛠️ tuyo") : ""), buscar: llano(r.nombre + " " + r.en),
                         abrir: (v) => abrirRasgo(r, v, ras.fuente) }));
                     (conj.conjuros || []).forEach((c) => cosas.push({ tipo: "conjuro", emoji: "✨", nombre: c.nombre,
-                        detalle: nivelDe(c) + " · " + c.escuela + (c.propio ? " · 🛠️ tuyo" : ""), buscar: llano(c.nombre + " " + c.en),
+                        detalle: nivelDe(c) + " · " + c.escuela + (c.propio ? ocT(" · 🛠️ tuyo") : ""), buscar: llano(c.nombre + " " + c.en),
                         abrir: (v) => abrirConjuro(c, v, conj.fuente) }));
                     (best.monstruos || []).forEach((b) => cosas.push({ tipo: "monstruo", emoji: tokenDe(b).textContent, nombre: b.nombre,
-                        detalle: "VD " + b.cr + " · " + b.tipo + (b.propio ? " · 🛠️ tuyo" : ""), buscar: llano(b.nombre + " " + b.en),
+                        detalle: ocT("VD {cr} · {tipo}{n}", { cr: b.cr, tipo: b.tipo, n: b.propio ? ocT(" · 🛠️ tuyo") : "" }), buscar: llano(b.nombre + " " + b.en),
                         abrir: (v) => abrirBicho(b, v, best.fuente) }));
                     (reg.reglas || []).forEach((r) => cosas.push({ tipo: "regla", emoji: r.icono || "📚", nombre: r.nombre,
-                        detalle: "Regla · " + r.grupo, buscar: llano(r.nombre + " " + (r.alias || "")),
+                        detalle: ocT("Regla · {grupo}", { grupo: r.grupo }), buscar: llano(r.nombre + " " + (r.alias || "")),
                         abrir: (v) => abrirRegla(r, v, fuenteDeRegla(r, reg.fuente)) }));
                     (tienda.objetos || []).forEach((o) => cosas.push({ tipo: "objeto", emoji: "💰", nombre: o.nombre,
-                        detalle: "Objeto · " + o.cat + (o.rareza ? " · " + o.rareza : "") + (o.propio ? " · 🛠️ tuyo" : ""), buscar: llano(o.nombre + " " + o.en),
+                        detalle: ocT("Objeto · {cat}{n}{n2}", { cat: o.cat, n: o.rareza ? " · " + o.rareza : "", n2: o.propio ? ocT(" · 🛠️ tuyo") : "" }), buscar: llano(o.nombre + " " + o.en),
                         abrir: (v) => abrirObjeto(o, v, tienda.fuente) }));
                     return cosas.concat(deRasgos);
                 });
@@ -16148,11 +7958,11 @@
     function montarBuscador() {
         const caja = crear("div", "master-buscador");
         caja.setAttribute("role", "search");
-        const et = crear("label", "visually-hidden", "Buscar conjuros, monstruos, reglas, objetos, rasgos o dotes");
+        const et = crear("label", "visually-hidden", ocT("Buscar conjuros, monstruos, reglas, objetos, rasgos o dotes"));
         const input = crear("input", "master-buscador-texto");
         input.type = "search";
         input.id = "master-buscador";
-        input.placeholder = "buscar: bola de fuego, goblin, derribado…";
+        input.placeholder = ocT("buscar: bola de fuego, goblin, derribado…");
         input.autocomplete = "off";
         input.setAttribute("role", "combobox");
         input.setAttribute("aria-autocomplete", "list");
@@ -16162,7 +7972,7 @@
         const lista = crear("ul", "master-buscador-lista");
         lista.id = "master-buscador-lista";
         lista.setAttribute("role", "listbox");
-        lista.setAttribute("aria-label", "Resultados");
+        lista.setAttribute("aria-label", ocT("Resultados"));
         lista.hidden = true;
         const cuantos = crear("p", "visually-hidden");
         cuantos.setAttribute("role", "status");
@@ -16197,10 +8007,10 @@
             }
             cargarIndice().then((cosas) => {
                 const propias = leerHomebrew().map((r) => ({ tipo: "propia", emoji: r.icono || "🏠", nombre: r.nombre,
-                    detalle: "Regla propia", buscar: llano(r.nombre),
+                    detalle: ocT("Regla propia"), buscar: llano(r.nombre),
                     abrir: (v) => abrirRegla(Object.assign({ propia: true, grupo: "🏠 Reglas propias" }, r), v) }));
                 const otras = leerPropios().otros.map((x) => ({ tipo: "otro", emoji: "📜", nombre: x.nombre,
-                    detalle: x.cat + " · 🛠️ tuyo", buscar: llano(x.nombre + " " + x.cat), abrir: (v) => abrirOtro(x, v) }));
+                    detalle: ocT("{cat} · 🛠️ tuyo", { cat: x.cat }), buscar: llano(x.nombre + " " + x.cat), abrir: (v) => abrirOtro(x, v) }));
                 const todas = propias.concat(otras, cosas);
                 // Primero lo que empieza por lo buscado; luego lo que lo lleva.
                 const empieza = todas.filter((x) => x.buscar.startsWith(q));
@@ -16220,14 +8030,13 @@
                     return li;
                 }));
                 if (!salen.length) {
-                    const li = crear("li", "master-buscador-nada", "Nada con eso.");
+                    const li = crear("li", "master-buscador-nada", ocT("Nada con eso."));
                     lista.appendChild(li);
                 }
                 lista.hidden = false;
                 input.setAttribute("aria-expanded", "true");
                 activo = -1;
-                cuantos.textContent = salen.length ? salen.length + (salen.length === 1 ? " resultado" : " resultados")
-                    + "; con las flechas se elige" : "Nada con eso.";
+                cuantos.textContent = salen.length ? ocT("{n}; con las flechas se elige", { n: salen.length + (salen.length === 1 ? ocT(" resultado") : ocT(" resultados")) }) : ocT("Nada con eso.");
             });
         };
         input.addEventListener("input", () => {
@@ -16261,15 +8070,15 @@
     // ---- EL BOTÓN DE AÑADIR (y el de los dados, que pone personajes.js).
     // Su ventana tiene también «ordenar» y «quitar todas». ----
     let pestanaAnadir = 0;
-    const botonAnadir = botonDe("oc-vida-accion es-principal", "＋ añadir", () => {
+    const botonAnadir = botonDe("oc-vida-accion es-principal", ocT("＋ añadir"), () => {
         const cuerpo = crear("div", "master-anadir");
         // Un filtro arriba y las ventanas por grupos, como tarjetas con su
         // dibujo, su nombre y para qué son.
-        const etFiltro = crear("label", "oc-dados-etiqueta", "filtrar");
+        const etFiltro = crear("label", "oc-dados-etiqueta", ocT("filtrar"));
         const filtro = crear("input", "oc-dados-texto");
         filtro.type = "search";
         filtro.id = "master-anadir-filtro";
-        filtro.placeholder = "dados, monstruos, nombres…";
+        filtro.placeholder = ocT("dados, monstruos, nombres…");
         filtro.autocomplete = "off";
         etFiltro.htmlFor = filtro.id;
         const cuantas = crear("p", "visually-hidden");
@@ -16294,7 +8103,7 @@
                 const em = crear("span", "master-anadir-emoji", def.emoji);
                 em.setAttribute("aria-hidden", "true");
                 const nombre = crear("span", "master-anadir-nombre", def.nombre);
-                const desc = crear("span", "master-anadir-desc", ya ? "Ya está en el tablero." : def.desc);
+                const desc = crear("span", "master-anadir-desc", ya ? ocT("Ya está en el tablero.") : def.desc);
                 b.append(em, nombre, desc);
                 b.disabled = ya;
                 li.appendChild(b);
@@ -16304,7 +8113,7 @@
             seccion.appendChild(lista);
             return [titulo, seccion];
         });
-        const { lista: pestanasAnadir, elegir: elegirAnadir } = pestanasDe(paneles, "Grupos de ventanas", "master-anadir",
+        const { lista: pestanasAnadir, elegir: elegirAnadir } = pestanasDe(paneles, ocT("Grupos de ventanas"), "master-anadir",
             (i) => {
                 pestanaAnadir = i;
             });
@@ -16317,7 +8126,7 @@
                 t.li.hidden = !!q && !t.texto.includes(q);
                 n += t.li.hidden ? 0 : 1;
             });
-            cuantas.textContent = q ? (n ? n + (n === 1 ? " ventana" : " ventanas") : "Ninguna con eso.") : "";
+            cuantas.textContent = q ? (n ? n + (n === 1 ? ocT(" ventana") : ocT(" ventanas")) : ocT("Ninguna con eso.")) : "";
             // Filtrando: todos los grupos a la vista, sin pestañas.
             pestanasAnadir.hidden = !!q;
             if (q) {
@@ -16343,8 +8152,13 @@
             }
         });
         elegirAnadir(Math.min(pestanaAnadir, paneles.length - 1), false);
-        const cerrar = window.ocVentana.abrir({ titulo: "añadir una ventana", cuerpo, vuelta: botonAnadir, foco: filtro,
-            clase: "es-ancha" });
+        // Para un hueco de un modo: lo dice el título; si se cierra sin
+        // elegir, el hueco se olvida (después de «anadir», que va antes).
+        const paraHueco = huecoPendiente && esModo(estado);
+        const cerrar = window.ocVentana.abrir({ titulo: paraHueco ? ocT("elegir la ventana del hueco {n} ({nombre})", { n: huecoPendiente.hueco + 1, nombre: estado.nombre }) : ocT("añadir una ventana"), cuerpo, vuelta: (paraHueco && huecoPendiente.vuelta) || botonAnadir,
+        foco: filtro, clase: "es-ancha", alCerrar: () => setTimeout(() => {
+            huecoPendiente = null;
+        }, 0) });
     });
     botonAnadir.setAttribute("aria-haspopup", "dialog");
 
@@ -16352,34 +8166,338 @@
     // perfiles con sus ventanas, la iniciativa, las marcas propias y las
     // tiradas guardadas) a un archivo .json, y de vuelta. Para guardarlo,
     // pasarlo a otro navegador o compartir un tablero montado. ----
-    const CLAVES = (k) => k === CLAVE || k === CLAVE_HOMEBREW || k === CLAVE_IMAGENES || k === CLAVE_PLANTILLAS || k === CLAVE_PROPIOS || k === CLAVE_ASPECTOS || k === CLAVE_TABLAS || k === CLAVE_NOMBRES || k === window.ocReglas.CLAVE || /^richi-oc-(iniciativa|marcas|partida-pantalla-master)/.test(k);
+    const CLAVES = (k) => k === CLAVE || k === CLAVE_HOMEBREW || k === CLAVE_IMAGENES || k === CLAVE_PLANTILLAS || k === CLAVE_PROPIOS || k === CLAVE_ASPECTOS || k === CLAVE_TABLAS || k === CLAVE_NOMBRES || k === window.ocReglas.CLAVE || k === CLAVE_ENCENDIDA || k === CLAVE_COPIA || k === "richi-master-modos-sitio" || k === "richi-master-carpeta-no" || k === "richi-master-aviso-srd" || k === "richi-idioma" || k === "richi-idioma-prueba" || /^richi-oc-(iniciativa|marcas|partida-pantalla-master)/.test(k);
+
+    // UNA COPIA DE SEGURIDAD: lo guardado (las claves de CLAVES) y, si se
+    // pide, los archivos (imágenes, PDF, música) en «data:». La usan
+    // exportar, la copia automática de la app de Android (sin archivos: ya
+    // están en la carpeta) y «Abrir con» (importarla).
+    function datosDeCopia(conArchivos) {
+        guardar();
+        const claves = {};
+        try {
+            for (let i = 0; i < localStorage.length; i++) {
+                const k = localStorage.key(i);
+                if (CLAVES(k)) {
+                    claves[k] = localStorage.getItem(k);
+                }
+            }
+        } catch (e) {
+            return Promise.reject(new Error(ocT("sin almacenamiento")));
+        }
+        const datos = { pantallaDeMaster: 1, fecha: new Date().toISOString(), claves };
+        if (!conArchivos) {
+            return Promise.resolve(datos);
+        }
+        return todosLosArchivos().catch(() => []).then((lista) => Promise.all(lista.filter(([, b]) => b)
+            .map(([id, b]) => blobADatos(b).then((x) => [id, x])))).then((lista) => {
+            if (lista.length) {
+                datos.archivos = {};
+                lista.forEach(([id, x]) => {
+                    datos.archivos[id] = x;
+                });
+            }
+            return datos;
+        });
+    }
+    const esCopia = (datos) => !!datos && datos.pantallaDeMaster === 1 && !!datos.claves && typeof datos.claves === "object";
+    // Importarla: reemplaza lo de ahora y recarga.
+    function importarCopia(datos) {
+        Object.keys(datos.claves).filter(CLAVES).forEach((k) => {
+            localStorage.setItem(k, String(datos.claves[k]));
+        });
+        const archivos = datos.archivos && typeof datos.archivos === "object" ? Object.keys(datos.archivos) : [];
+        return Promise.all(archivos.map((id) => {
+            const blob = /^a[a-z0-9]+$/.test(id) ? datosABlob(datos.archivos[id]) : null;
+            return blob ? archivoGuardar(id, blob).catch(() => {}) : null;
+        })).then(() => (window.ocAlmacen ? window.ocAlmacen.guardarYa() : null)).then(() => {
+            location.reload();
+        });
+    }
+    // Cuándo se hizo la última copia (exportar, o la automática), para
+    // recordarlo en la app de Android cuando se guarda dentro de ella.
+    const CLAVE_COPIA = "richi-master-copia";
+    function marcarCopia() {
+        try {
+            const c = JSON.parse(localStorage.getItem(CLAVE_COPIA) || "{}");
+            c.ultima = Date.now();
+            localStorage.setItem(CLAVE_COPIA, JSON.stringify(c));
+        } catch (e) {
+            // Sin guardar: se recordará otra vez.
+        }
+    }
+
+    // ---- LA CARPETA ORDENADA: cuando se guarda en una carpeta (el programa
+    // del ordenador o la app de Android), además de almacen.json y
+    // «archivos» (lo que lee la app, con números), «ordenado»: lo mismo con
+    // sus nombres, para mirarlo o llevárselo (cada campaña con sus tableros,
+    // modos, personajes, documentos y música; el compendio por tipos y
+    // categorías; las reglas propias; las traducciones…). La app no lo lee:
+    // cambiar algo ahí no cambia la app. Se rehace cada poco, sólo lo que
+    // cambia; lo que ya hay se apunta en CLAVE_ORDENADO ({ruta: huella}:
+    // no va en CLAVES, porque dice qué hay en esta carpeta, no es de la
+    // partida). ----
+    const CLAVE_ORDENADO = "richi-master-ordenado";
+    const ORDENADO = EN_CARPETA && window.ocAlmacen.ordenado ? window.ocAlmacen.ordenado : null;
+    // Un nombre que valga para un archivo en cualquier sistema.
+    function nombreOrdenado(t) {
+        let n = String(t || "").replace(/[\\/:*?"<>|\u0000-\u001f]+/g, "-").replace(/\s+/g, " ").trim().slice(0, 80)
+            .replace(/[. ]+$/, "");
+        if (/^(con|prn|aux|nul|com\d|lpt\d)$/i.test(n)) {
+            n += "_";
+        }
+        return n || ocT("sin nombre");
+    }
+    const EXTENSIONES = { "image/jpeg": "jpg", "image/svg+xml": "svg", "audio/mpeg": "mp3", "audio/mp4": "m4a", "audio/x-m4a": "m4a",
+        "audio/x-wav": "wav", "audio/wave": "wav", "application/pdf": "pdf", "text/plain": "txt", "text/markdown": "md" };
+    const extensionDe = (tipo) => EXTENSIONES[tipo] || ((/^[a-z]+\/([a-z0-9]{2,5})$/.exec(tipo || "") || [])[1]) || "bin";
+    // La huella de un texto (para saber si ha cambiado).
+    function huella(t) {
+        let h = 0x811c9dc5;
+        for (let i = 0; i < t.length; i++) {
+            h ^= t.charCodeAt(i);
+            h = Math.imul(h, 0x01000193);
+        }
+        return (h >>> 0).toString(36) + "-" + t.length;
+    }
+    // Todo lo que va en «ordenado»: Map(ruta → {texto} o {archivo: id}).
+    function contenidoOrdenado(archivos, traducciones) {
+        const sale = new Map();
+        const nombres = new Map();
+        const tipos = new Map(archivos.map((a) => [a.id, a.tipo || ""]));
+        const colocados = new Set();
+        // Uno en su carpeta, con su nombre (y «(2)» si se repite).
+        const poner = (dir, nombre, ext, valor) => {
+            const base = nombreOrdenado(nombre);
+            const ya = nombres.get(dir) || new Set();
+            nombres.set(dir, ya);
+            let n = base + (ext ? "." + ext : "");
+            for (let i = 2; ya.has(n.toLowerCase()); i++) {
+                n = base + " (" + i + ")" + (ext ? "." + ext : "");
+            }
+            ya.add(n.toLowerCase());
+            sale.set((dir ? dir + "/" : "") + n, valor);
+            return n;
+        };
+        const json = (x) => ({ texto: JSON.stringify(x, null, 2) + "\n" });
+        const archivo = (dir, nombre, id) => {
+            if (!tipos.has(id)) {
+                return;
+            }
+            colocados.add(id);
+            poner(dir, nombre, extensionDe(tipos.get(id)), { archivo: id });
+        };
+        // Las carpetas de los documentos y de la música: «Una/Otra».
+        const rutaCarpeta = (carpetas, id) => {
+            const trozos = [];
+            let c = carpetas.find((x) => x.id === id);
+            for (let i = 0; c && i < 20; i++) {
+                trozos.unshift(nombreOrdenado(c.nombre));
+                c = carpetas.find((x) => x.id === c.padre);
+            }
+            return trozos.join("/");
+        };
+        const leer = (k) => {
+            try {
+                return JSON.parse(localStorage.getItem(k) || "null");
+            } catch (e) {
+                return null;
+            }
+        };
+        poner("", ocT("LEEME"), "txt", { texto: ocT("Esta carpeta es una copia de lo de la pantalla de máster con sus nombres, para mirarlo o llevártelo: cada campaña con sus tableros, modos, personajes, documentos y música; tu compendio por tipos y categorías; tus reglas propias y las traducciones.\n\nLa app no la lee: lo que cambies aquí no cambia en la app (lo que usa está en almacen.json y en la carpeta «archivos»). Se rehace sola cada poco.\n") + "\n" });
+        // CADA CAMPAÑA.
+        const todas2 = leer(CLAVE) || { campanas: [] };
+        const dirCampana = ocT("campañas");
+        (todas2.campanas || []).forEach((c) => {
+            const dir = dirCampana + "/" + poner(dirCampana, c.nombre || ocT("campaña"), "", null);
+            sale.delete(dir);
+            const resto = Object.assign({}, c);
+            ["perfiles", "modos", "pjs", "docs", "musica"].forEach((k) => delete resto[k]);
+            poner(dir, ocT("campaña"), "json", json(resto));
+            (c.perfiles || []).forEach((pf) => poner(dir + "/" + ocT("tableros"), pf.nombre, "json", json(pf)));
+            (c.modos || []).forEach((mo) => poner(dir + "/" + ocT("modos"), ((mo.emoji || "") + " " + (mo.nombre || "")).trim(), "json", json(mo)));
+            (c.pjs || []).forEach((pj) => {
+                const n = poner(dir + "/" + ocT("personajes"), pj.nombre || ocT("personaje"), "json", json(pj)).replace(/\.json$/, "");
+                (pj.imagenes || []).forEach((im) => archivo(dir + "/" + ocT("personajes") + "/" + n, im.titulo || ocT("imagen"), im.archivo));
+            });
+            const docs = c.docs || {};
+            (docs.notas || []).forEach((nota) => {
+                const d = dir + "/" + ocT("documentos") + (nota.carpeta ? "/" + rutaCarpeta(docs.carpetas || [], nota.carpeta) : "");
+                if (nota.archivo) {
+                    archivo(d, nota.titulo, nota.archivo);
+                } else {
+                    const t = String(nota.titulo || "").replace(/[<&]/g, (x) => (x === "<" ? "&lt;" : "&amp;"));
+                    poner(d, nota.titulo, "html", { texto: "<!doctype html>\n<meta charset=\"utf-8\">\n<title>" + t + "</title>\n<h1>" + t
+                        + "</h1>\n" + (nota.html || "") + "\n" });
+                }
+            });
+            const mu = c.musica || {};
+            (mu.canciones || []).forEach((cn) => archivo(dir + "/" + ocT("música") + (cn.carpeta ? "/" + rutaCarpeta(mu.carpetas || [], cn.carpeta) : ""),
+                cn.nombre, cn.archivo));
+        });
+        // EL COMPENDIO: lo tuyo, por tipos y categorías (y tus cambios del
+        // SRD aparte).
+        const propios = leer(CLAVE_PROPIOS) || {};
+        const TIPOS_ORDENADO = { monstruos: ocT("monstruos"), objetos: ocT("objetos"), conjuros: ocT("conjuros"), rasgos: ocT("rasgos y dotes"),
+            otros: ocT("más cosas") };
+        Object.keys(TIPOS_ORDENADO).forEach((k) => {
+            const dir = ocT("compendio") + "/" + TIPOS_ORDENADO[k];
+            (Array.isArray(propios[k]) ? propios[k] : []).forEach((x) => {
+                const cat = x.cambia ? ocT("✎ cambiados del SRD") : (x.libro || "").trim() || ocT("sin categoría");
+                poner(dir + "/" + nombreOrdenado(cat), x.nombre, "json", json(x));
+            });
+            const ocultos = propios.ocultos && Array.isArray(propios.ocultos[k]) ? propios.ocultos[k] : [];
+            if (ocultos.length) {
+                poner(dir, ocT("borrados del SRD"), "json", json(ocultos));
+            }
+        });
+        // LAS REGLAS PROPIAS, en texto.
+        (leer(CLAVE_HOMEBREW) || []).forEach((r) => {
+            if (r && r.nombre) {
+                poner(ocT("reglas propias"), ((r.icono || "") + " " + r.nombre).trim(), "md", { texto: "# " + r.nombre + "\n\n" + (r.texto || "") + "\n" });
+            }
+        });
+        // LO DEMÁS que se guarda (las imágenes de los monstruos, las tablas,
+        // la iniciativa…), tal cual, y sus archivos con su nombre.
+        try {
+            for (let i = 0; i < localStorage.length; i++) {
+                const k = localStorage.key(i);
+                if (CLAVES(k) && ![CLAVE, CLAVE_PROPIOS, CLAVE_HOMEBREW].includes(k)) {
+                    const v = localStorage.getItem(k);
+                    let x = v;
+                    try {
+                        x = JSON.parse(v);
+                    } catch (e) {
+                        x = v;
+                    }
+                    poner(ocT("otros"), k.replace(/^richi-(master-)?/, ""), "json", json(x));
+                }
+            }
+        } catch (e) {
+            // Sin poder leerlo: lo demás.
+        }
+        const imagenes = leer(CLAVE_IMAGENES) || {};
+        Object.keys(imagenes).forEach((clave) => {
+            const v = String(imagenes[clave] || "");
+            if (v.indexOf("archivo:") === 0 && !colocados.has(v.slice(8))) {
+                archivo(ocT("imágenes"), clave, v.slice(8));
+            }
+        });
+        // Los archivos que quedan (los sonidos propios, retratos…): con el
+        // nombre con el que se apuntaron, si se sabe.
+        const nombreDe = new Map();
+        const buscar = (x, n) => {
+            if (n > 12 || !x || typeof x !== "object") {
+                return;
+            }
+            if (typeof x.archivo === "string" && (x.titulo || x.nombre)) {
+                nombreDe.set(x.archivo, x.titulo || x.nombre);
+            }
+            Object.keys(x).forEach((k) => buscar(x[k], n + 1));
+        };
+        buscar(todas2, 0);
+        archivos.filter((a) => !colocados.has(a.id)).forEach((a) => archivo(ocT("archivos"), nombreDe.get(a.id) || a.id, a.id));
+        // LAS TRADUCCIONES (para quien quiera ayudar: ver Aa → idioma).
+        if (traducciones) {
+            traducciones.forEach(([codigo, texto]) => poner(ocT("traducciones"), codigo, "json", { texto }));
+            poner(ocT("traducciones"), ocT("LEEME"), "txt", { texto: ocT("Las traducciones de la app: un archivo por idioma (es.json es el original, en castellano). A la izquierda, el texto en castellano; a la derecha, su traducción (lo vacío aún no está traducido). Lo de entre llaves, {nombre} o {n}, se deja igual.\n\nPara probar la tuya: Aa → idioma → «probar un archivo de traducción». Para mandarla: a contacto@richi.blog o con un pull request en GitHub (rperezbarreda/pantalla_master, carpeta «traducciones»). ¡Gracias!\n") + "\n" });
+        }
+        return sale;
+    }
+    // Rehacer lo que haya cambiado (y quitar lo que ya no está).
+    // «traducciones»: sólo la primera vez de cada sesión (son grandes).
+    let ordenadoAntes = "";
+    let ordenadoTraducciones = false;
+    let ordenando = null;
+    function ordenarCarpeta(forzar) {
+        if (!ORDENADO || ordenando) {
+            return ordenando || Promise.resolve();
+        }
+        // Si no ha cambiado nada guardado, nada.
+        let ahora = "";
+        try {
+            for (let i = 0; i < localStorage.length; i++) {
+                const k = localStorage.key(i);
+                if (CLAVES(k)) {
+                    ahora += k + "\u0000" + huella(localStorage.getItem(k) || "") + "\u0000";
+                }
+            }
+        } catch (e) {
+            return Promise.resolve();
+        }
+        if (!forzar && ahora === ordenadoAntes && ordenadoTraducciones) {
+            return Promise.resolve();
+        }
+        const conTraducciones = !ordenadoTraducciones || forzar;
+        const traducciones = conTraducciones ? fetch("idiomas/lista.json").then((r) => r.json())
+            .then((lista) => Promise.all(lista.map((x) => fetch("traducciones/" + x.codigo + ".json").then((r) => (r.ok ? r.text() : null))
+                .then((t) => [x.codigo, t]).catch(() => [x.codigo, null]))))
+            .then((l) => l.filter(([, t]) => t)).catch(() => null) : Promise.resolve(null);
+        ordenando = Promise.all([fetch("__archivos", { cache: "no-store" }).then((r) => r.json()).catch(() => []), traducciones])
+            .then(([archivos, trad]) => {
+                const sale = contenidoOrdenado(Array.isArray(archivos) ? archivos : [], trad);
+                let indice = {};
+                try {
+                    indice = forzar ? {} : JSON.parse(localStorage.getItem(CLAVE_ORDENADO) || "{}") || {};
+                } catch (e) {
+                    indice = {};
+                }
+                const dirTrad = ocT("traducciones") + "/";
+                const cola = [];
+                sale.forEach((v, ruta) => {
+                    const h = v.archivo ? "a:" + v.archivo : huella(v.texto);
+                    if (indice[ruta] !== h) {
+                        cola.push(() => (v.archivo ? ORDENADO.copiar(ruta, v.archivo) : ORDENADO.escribir(ruta, v.texto)));
+                        indice[ruta] = h;
+                    }
+                });
+                Object.keys(indice).forEach((ruta) => {
+                    // Lo de antes que ya no está (las traducciones, si esta
+                    // vez no se han mirado, se quedan).
+                    if (!sale.has(ruta) && !(!trad && ruta.indexOf(dirTrad) === 0)) {
+                        cola.push(() => ORDENADO.borrar(ruta));
+                        delete indice[ruta];
+                    }
+                });
+                if (trad) {
+                    ordenadoTraducciones = true;
+                }
+                ordenadoAntes = ahora;
+                return cola.reduce((p, f) => p.then(f).catch(() => {}), Promise.resolve()).then(() => {
+                    try {
+                        localStorage.setItem(CLAVE_ORDENADO, JSON.stringify(indice));
+                    } catch (e) {
+                        // Sin guardar: la próxima vez se mira todo.
+                    }
+                    return cola.length;
+                });
+            }).finally(() => {
+                ordenando = null;
+            });
+        return ordenando;
+    }
+    if (ORDENADO) {
+        setTimeout(ordenarCarpeta, 4000);
+        setInterval(ordenarCarpeta, 20000);
+        document.addEventListener("visibilitychange", () => {
+            if (document.visibilityState === "hidden") {
+                ordenarCarpeta();
+            }
+        });
+    }
 
     function copias(alTerminar) {
         const caja = crear("div", "master-anadir-otras");
-        const exportar = botonDe("oc-vida-accion", "⬇ exportar", () => {
-            guardar();
-            const claves = {};
-            try {
-                for (let i = 0; i < localStorage.length; i++) {
-                    const k = localStorage.key(i);
-                    if (CLAVES(k)) {
-                        claves[k] = localStorage.getItem(k);
-                    }
+        const exportar = botonDe("oc-vida-accion", ocT("⬇ exportar"), () => {
+            datosDeCopia(true).catch(() => {
+                avisar(ocT("Este navegador no deja leer lo guardado."));
+                return null;
+            }).then((datos) => {
+                if (!datos) {
+                    return;
                 }
-            } catch (e) {
-                avisar("Este navegador no deja leer lo guardado.");
-                return;
-            }
-            const datos = { pantallaDeMaster: 1, fecha: new Date().toISOString(), claves };
-            // Con los archivos de los documentos (imágenes y PDF), en «data:».
-            todosLosArchivos().catch(() => []).then((lista) => Promise.all(lista.filter(([, b]) => b)
-                .map(([id, b]) => blobADatos(b).then((x) => [id, x])))).then((lista) => {
-                if (lista.length) {
-                    datos.archivos = {};
-                    lista.forEach(([id, x]) => {
-                        datos.archivos[id] = x;
-                    });
-                }
+                const lista = Object.keys(datos.archivos || {});
+                marcarCopia();
                 const a = crear("a");
                 // Una dirección blob: que hace el propio navegador con el archivo.
                 const archivoBlob = URL.createObjectURL(new Blob([JSON.stringify(datos, null, 1)], { type: "application/json" }));
@@ -16389,24 +8507,24 @@
                 a.click();
                 a.remove();
                 setTimeout(() => URL.revokeObjectURL(archivoBlob), 1000);
-                avisar("Exportado: " + a.download + (lista.length ? " (con " + lista.length + " archivos)." : "."));
+                avisar(ocT("Exportado: {download}{n}", { download: a.download, n: lista.length ? ocT(" (con {n} archivos).", { n: lista.length }) : "." }));
             });
-        }, "Exportar todo a un archivo");
+        }, ocT("Exportar todo a un archivo"));
         exportar.title = "Guarda los perfiles, sus ventanas y la iniciativa en un archivo .json";
         const archivo = crear("input");
         archivo.type = "file";
         archivo.accept = ".json,application/json";
         archivo.hidden = true;
         let seguro = false;
-        const importar = botonDe("oc-vida-accion", "⬆ importar", () => {
+        const importar = botonDe("oc-vida-accion", ocT("⬆ importar"), () => {
             if (!seguro) {
                 seguro = true;
-                importar.textContent = "⬆ ¿reemplazar todo? pulsa otra vez";
+                importar.textContent = ocT("⬆ ¿reemplazar todo? pulsa otra vez");
                 return;
             }
             archivo.click();
-        }, "Importar desde un archivo (reemplaza lo de ahora)");
-        importar.title = "Carga un archivo exportado; reemplaza lo que hay ahora";
+        }, ocT("Importar desde un archivo (reemplaza lo de ahora)"));
+        importar.title = ocT("Carga un archivo exportado; reemplaza lo que hay ahora");
         archivo.addEventListener("change", () => {
             const f = archivo.files && archivo.files[0];
             if (!f) {
@@ -16414,23 +8532,14 @@
             }
             f.text().then((texto) => {
                 const datos = JSON.parse(texto);
-                if (!datos || datos.pantallaDeMaster !== 1 || typeof datos.claves !== "object") {
-                    throw new Error("no es");
+                if (!esCopia(datos)) {
+                    throw new Error(ocT("no es"));
                 }
-                Object.keys(datos.claves).filter(CLAVES).forEach((k) => {
-                    localStorage.setItem(k, String(datos.claves[k]));
-                });
-                const archivos = datos.archivos && typeof datos.archivos === "object" ? Object.keys(datos.archivos) : [];
-                return Promise.all(archivos.map((id) => {
-                    const blob = /^a[a-z0-9]+$/.test(id) ? datosABlob(datos.archivos[id]) : null;
-                    return blob ? archivoGuardar(id, blob).catch(() => {}) : null;
-                })).then(() => (window.ocAlmacen ? window.ocAlmacen.guardarYa() : null)).then(() => {
-                    alTerminar();
-                    location.reload();
-                });
+                alTerminar();
+                return importarCopia(datos);
             }).catch(() => {
-                avisar("Ese archivo no es una exportación de la pantalla de máster.");
-                importar.textContent = "⬆ importar";
+                avisar(ocT("Ese archivo no es una exportación de la pantalla de máster."));
+                importar.textContent = ocT("⬆ importar");
                 seguro = false;
             });
         });
@@ -16438,21 +8547,166 @@
         return caja;
     }
 
+    // ABRIR CON LA APP (Android: «Compartir» o «Abrir con» desde otra app;
+    // los pasa android.js). Una copia de seguridad se importa (preguntando
+    // antes: lo reemplaza todo), las imágenes y los PDF van a los
+    // documentos (arriba del todo) y los audios a la música (a la carpeta
+    // «recibidas»).
+    function recibirArchivos(archivos) {
+        const lista = Array.from(archivos || []);
+        const json = lista.filter((f) => /json|text\/plain/.test(f.type) || /\.json$/i.test(f.name));
+        const docs = lista.filter((f) => /^image\/|^application\/pdf$/.test(f.type) && f.size <= MAX_ARCHIVO);
+        const audios = lista.filter((f) => /^audio\//.test(f.type) && f.size <= MAX_ARCHIVO);
+        const fuera = lista.length - json.length - docs.length - audios.length;
+        const hechos = { docs: [], audios: [] };
+        const docsListos = Promise.all(docs.map((f) => {
+            const id = idDoc("a");
+            return archivoGuardar(id, f).then(() => {
+                docsDe().notas.push({ id: idDoc("n"), tipo: "archivo", titulo: f.name.replace(/\.[^.]+$/, "") || f.name, carpeta: "",
+                    archivo: id, mime: f.type, tamano: f.size, cambiada: Date.now() });
+                hechos.docs.push(f.name);
+            }).catch(() => {});
+        }));
+        const audiosListos = Promise.all(audios.map((f) => {
+            const mu = musicaDe();
+            let carpeta = mu.carpetas.find((c) => c.nombre === "recibidas" && !c.padre);
+            if (!carpeta) {
+                carpeta = { id: idDoc("m"), nombre: "recibidas", padre: "" };
+                mu.carpetas.push(carpeta);
+            }
+            const id = idDoc("a");
+            return archivoGuardar(id, f).then(() => {
+                mu.canciones.push({ id, archivo: id, nombre: f.name.replace(/\.[^.]+$/, "").slice(0, 80) || "canción",
+                    carpeta: carpeta.id });
+                hechos.audios.push(f.name);
+            }).catch(() => {});
+        }));
+        Promise.all([docsListos, audiosListos]).then(() => {
+            if (docs.length || audios.length) {
+                guardar();
+                avisarDocs();
+                document.dispatchEvent(new CustomEvent("master:musica"));
+            }
+            const partes = [];
+            const donde = [];
+            if (hechos.docs.length) {
+                donde.push(ocT("{join} en 📂 documentos", { join: hechos.docs.join(", ") }));
+            }
+            if (hechos.audios.length) {
+                donde.push(ocT("{join} en 🎵 música (carpeta «recibidas»)", { join: hechos.audios.join(", ") }));
+            }
+            if (donde.length) {
+                partes.push(ocT("Recibido: {join}.", { join: donde.join("; ") }));
+            }
+            if (fuera > 0) {
+                partes.push(ocT("Sólo valen imágenes, PDF y audios de hasta 50 MB, y copias de seguridad."));
+            }
+            if (partes.length) {
+                avisar(partes.join(" "));
+            }
+        });
+        json.slice(0, 1).forEach((f) => f.text().then((texto) => {
+            const datos = JSON.parse(texto);
+            if (!esCopia(datos)) {
+                throw new Error(ocT("no es"));
+            }
+            const cuerpo = crear("div", "master-anadir-otras");
+            const fecha = new Date(datos.fecha);
+            const texto2 = crear("p", "oc-hoja-nota", ocT("«{name}» es una copia de seguridad{n}. Importarla reemplaza todo lo que hay ahora (haz antes una copia si no quieres perderlo).", { name: f.name, n: isNaN(fecha) ? "" : ocT(" del {toLocaleDateString}", { toLocaleDateString: fecha.toLocaleDateString("es-ES", { day: "numeric", month: "long", year: "numeric" }) }) }));
+            const vuelta = document.activeElement;
+            let cerrar = () => {};
+            const si = botonDe("oc-vida-accion", ocT("⬆ importar (reemplaza todo)"), () => {
+                si.disabled = true;
+                importarCopia(datos).catch(() => avisar(ocT("No se ha podido importar.")));
+            });
+            const no = botonDe("oc-vida-accion", ocT("cancelar"), () => cerrar());
+            cuerpo.append(texto2, si, no);
+            // Con la entrada abierta (al abrir la app), la pregunta va dentro
+            // de ella, arriba; si no, en una ventanita.
+            // (al final, donde la entrada ya ofrece importar copias).
+            const entrada = document.querySelector(".master-entrada-caja");
+            if (entrada) {
+                const caja = crear("div", "master-entrada-traer");
+                caja.setAttribute("role", "group");
+                caja.setAttribute("aria-label", ocT("Importar una copia de seguridad"));
+                const botones = crear("div", "master-anadir-otras");
+                botones.append(si, no);
+                caja.append(texto2, botones);
+                entrada.insertBefore(caja, entrada.querySelector(".master-entrada-privado"));
+                cerrar = () => {
+                    caja.remove();
+                    if (vuelta && vuelta.isConnected) {
+                        vuelta.focus();
+                    }
+                };
+                si.focus();
+                return;
+            }
+            cerrar = window.ocVentana.abrir({ titulo: ocT("importar una copia de seguridad"), cuerpo, vuelta, foco: si });
+        }).catch(() => avisar(ocT("«{name}» no es una copia de seguridad de la pantalla de máster. Si es un personaje de D&D Beyond, tráelo desde la party con «📄 desde un archivo».", { name: f.name }))));
+    }
+
     function anadir(tipo, extra) {
         const def = MODULOS[tipo];
         const w = (extra && extra.w) || def.w;
         const h = (extra && extra.h) || def.h;
-        const sitio = enMovil.matches ? { x: 0, y: 0 } : hueco(w, h);
+        // En un modo: al hueco que se está llenando, o al primero libre; si
+        // no hay, suelta encima.
+        const destino = huecoPendiente;
+        huecoPendiente = null;
+        let enEl = null;
+        if (esModo(estado)) {
+            if (destino && destino.reemplazar) {
+                const viejo = destino.reemplazar;
+                const resto = delGrupo(viejo).filter((x) => x !== viejo);
+                estado.modulos = estado.modulos.filter((x) => x !== viejo);
+                if (resto.length) {
+                    enEl = { grupo: viejo.grupo, delante: !!viejo.delante, deGrupo: resto[0] };
+                }
+            }
+            enEl = enEl || {};
+            enEl.hueco = destino ? destino.hueco : huecoLibre();
+        }
+        const sueltas = estado.modulos.filter((x) => !Number.isInteger(x.hueco)).length;
+        const sitio = enMovil.matches ? { x: 0, y: 0 } : esModo(estado) ? { x: 30 + 30 * (sueltas % 5), y: 30 + 30 * (sueltas % 5) }
+            : hueco(w, h);
         const m = Object.assign({ id: "m" + siguienteId++, tipo, x: sitio.x, y: sitio.y, w, h }, extra || {});
+        if (enEl && enEl.hueco >= 0) {
+            m.hueco = enEl.hueco;
+            if (enEl.grupo) {
+                // Cambiada dentro de un grupo: ocupa su sitio en él.
+                m.grupo = enEl.grupo;
+                m.delante = true;
+                delGrupo(enEl.deGrupo).forEach((x) => {
+                    x.delante = false;
+                });
+                delGrupo(enEl.deGrupo).forEach((x) => {
+                    x.el = null;
+                });
+            }
+        }
         estado.modulos.push(m);
+        if (m.grupo) {
+            // Si el grupo se ha quedado sin la de delante, ésta.
+            if (!delGrupo(m).some((x) => x.delante)) {
+                m.delante = true;
+            }
+            if (delGrupo(m).length < 2) {
+                delete m.grupo;
+                delete m.delante;
+            }
+        }
         pintarTodo();
+        if (destino && destino.grupoCon && estado.modulos.includes(destino.grupoCon)) {
+            agrupar(m, destino.grupoCon);
+        }
         guardar();
         alFrente(m);
         m.el.scrollIntoView({ block: "nearest" });
         const primero = m.el.querySelector(".master-ventana-cuerpo button, .master-ventana-cuerpo input, .master-ventana-cuerpo textarea")
             || m.el.querySelector(".master-ventana-nombre");
         primero.focus();
-        avisar("Añadido: " + (m.titulo || def.nombre) + ".");
+        avisar(ocT("Añadido: {n}.", { n: m.titulo || def.nombre }));
     }
 
     // EL PRIMER HUECO LIBRE para una ventana de w × h: empezando por lo
@@ -16515,58 +8769,72 @@
     const pestanas = crear("div", "master-pestanas");
     const tablist = crear("div", "master-pestanas-lista");
     tablist.setAttribute("role", "tablist");
-    tablist.setAttribute("aria-label", "Perfiles de la pantalla de máster");
+    tablist.setAttribute("aria-label", ocT("Perfiles de la pantalla de máster"));
     lienzo.setAttribute("role", "tabpanel");
 
     // Los mandos del zoom (− 100 % +): el del medio lo deja en 100 %.
     const HAY_ZOOM = !!(window.CSS && CSS.supports && CSS.supports("zoom", "2"));
-    const menosZoom = botonDe("master-pestana-mando", "－", () => pasoZoom(-1), "Alejar el tablero");
-    const masZoom = botonDe("master-pestana-mando", "＋", () => pasoZoom(1), "Acercar el tablero");
-    const botonZoom = botonDe("master-zoom-valor", "100 %", () => ponerZoom(1, true), "Dejar el zoom del tablero en 100 %");
-    menosZoom.title = "Alejar (Ctrl + rueda)";
-    masZoom.title = "Acercar (Ctrl + rueda)";
-    botonZoom.title = "Volver al 100 %";
+    const menosZoom = botonDe("master-pestana-mando", "－", () => pasoZoom(-1), ocT("Alejar el tablero"));
+    const masZoom = botonDe("master-pestana-mando", "＋", () => pasoZoom(1), ocT("Acercar el tablero"));
+    const botonZoom = botonDe("master-zoom-valor", "100 %", () => ponerZoom(1, true), ocT("Dejar el zoom del tablero en 100 %"));
+    menosZoom.title = ocT("Alejar (Ctrl + rueda)");
+    masZoom.title = ocT("Acercar (Ctrl + rueda)");
+    botonZoom.title = ocT("Volver al 100 %");
     // Ctrl + rueda (o el pellizco del panel táctil) sobre el tablero.
     lienzo.addEventListener("wheel", (e) => {
-        if (!e.ctrlKey || !HAY_ZOOM || enMovil.matches) {
+        if (!e.ctrlKey || !HAY_ZOOM || enMovil.matches || esModo(estado)) {
             return;
         }
         e.preventDefault();
-        ponerZoom((estado.zoom || 1) * Math.exp(-e.deltaY * 0.002), false);
+        verZoom((estado.zoom || 1) * Math.exp(-e.deltaY * 0.002));
         clearTimeout(lienzo.esperaZoom);
         lienzo.esperaZoom = setTimeout(() => ponerZoom(estado.zoom, true), 300);
     }, { passive: false });
-    // El pellizco con dos dedos en el fondo del tablero (en la tableta).
-    const dedos = new Map();
+    // El pellizco con dos dedos en el tablero (en la tableta), también
+    // encima de las ventanas, menos donde el dedo ya hace otra cosa
+    // (dibujar, el mapa de relaciones, mover o cambiar el tamaño de una
+    // ventana, escribir). Con eventos táctiles y no de puntero: los dedos
+    // nunca llegan a la vez y, si el primero ya ha empezado a desplazar el
+    // tablero, el navegador cancela sus punteros pero los toques siguen
+    // llegando (entonces desplaza y amplía a la vez; si aún no desplazaba,
+    // sólo amplía).
+    const GESTO_PROPIO = ".master-dibujo-encima, .master-rel-mapa, .master-ventana-barra, .master-ventana-tamano,"
+        + " input, textarea, select, [contenteditable]";
     let pellizco = null;
-    lienzo.addEventListener("pointerdown", (e) => {
-        if (e.pointerType !== "touch" || e.target !== lienzo || !HAY_ZOOM || enMovil.matches) {
+    const separacion = (t) => Math.hypot(t[0].clientX - t[1].clientX, t[0].clientY - t[1].clientY) || 1;
+    lienzo.addEventListener("touchstart", (e) => {
+        pellizco = null;
+        if (e.touches.length !== 2 || !HAY_ZOOM || enMovil.matches || esModo(estado)) {
             return;
         }
-        dedos.set(e.pointerId, [e.clientX, e.clientY]);
-        if (dedos.size === 2) {
-            const [a, b] = Array.from(dedos.values());
-            pellizco = { d: Math.hypot(a[0] - b[0], a[1] - b[1]) || 1, z: estado.zoom || 1 };
-        }
-    });
-    lienzo.addEventListener("pointermove", (e) => {
-        if (!dedos.has(e.pointerId)) {
+        const t = Array.from(e.touches);
+        if (t.some((x) => !(x.target instanceof Element) || !lienzo.contains(x.target) || x.target.closest(GESTO_PROPIO))) {
             return;
         }
-        dedos.set(e.pointerId, [e.clientX, e.clientY]);
-        if (pellizco && dedos.size === 2) {
-            const [a, b] = Array.from(dedos.values());
-            ponerZoom(pellizco.z * Math.hypot(a[0] - b[0], a[1] - b[1]) / pellizco.d, false);
+        pellizco = { d: separacion(t), z: estado.zoom || 1 };
+        // Sólo mientras dura el pellizco: un «touchmove» que no es pasivo
+        // hace que el navegador espere al JavaScript antes de desplazar, y
+        // el desplazamiento normal con un dedo daría tirones.
+        lienzo.addEventListener("touchmove", alPellizcar, { passive: false });
+    }, { passive: true });
+    function alPellizcar(e) {
+        if (!pellizco || e.touches.length !== 2) {
+            return;
         }
-    });
-    const sinDedo = (e) => {
-        if (dedos.delete(e.pointerId) && pellizco && dedos.size < 2) {
+        if (e.cancelable) {
+            e.preventDefault();
+        }
+        verZoom(pellizco.z * separacion(Array.from(e.touches)) / pellizco.d);
+    }
+    const sinDedos = (e) => {
+        if (pellizco && e.touches.length < 2) {
             pellizco = null;
+            lienzo.removeEventListener("touchmove", alPellizcar);
             ponerZoom(estado.zoom, true);
         }
     };
-    lienzo.addEventListener("pointerup", sinDedo);
-    lienzo.addEventListener("pointercancel", sinDedo);
+    lienzo.addEventListener("touchend", sinDedos);
+    lienzo.addEventListener("touchcancel", sinDedos);
 
     function colorTablero() {
         const t = hexTablero(estado.color);
@@ -16584,7 +8852,31 @@
 
     // Los niveles de zoom, y ponerlo (con aviso si lo ha pedido alguien).
     const ZOOMS = [0.25, 0.33, 0.5, 0.67, 0.75, 0.9, 1, 1.1, 1.25, 1.5, 1.75, 2];
+    // Mientras dura el gesto (la rueda o el pellizco), el zoom se enseña con
+    // «transform», que no recoloca nada (va fluido también en tabletas
+    // modestas); al acabar, ponerZoom lo pone de verdad, desde la misma
+    // esquina, así que no salta.
+    let zoomBase = 0;
+    function verZoom(z) {
+        z = Math.min(2, Math.max(0.25, Math.round(z * 100) / 100));
+        if (!zoomBase) {
+            zoomBase = zoomAhora();
+            lienzo.style.transformOrigin = "0 0";
+            lienzo.style.willChange = "transform";
+        }
+        estado.zoom = z;
+        lienzo.style.transform = "scale(" + zoomAhora() / zoomBase + ")";
+        if (botonZoom) {
+            botonZoom.textContent = Math.round(z * 100) + " %";
+        }
+    }
     function ponerZoom(z, decirlo) {
+        if (zoomBase) {
+            zoomBase = 0;
+            lienzo.style.transform = "";
+            lienzo.style.transformOrigin = "";
+            lienzo.style.willChange = "";
+        }
         z = Math.min(2, Math.max(0.25, Math.round(z * 100) / 100));
         estado.zoom = z;
         lienzo.style.zoom = zoomAhora() === 1 ? "" : String(zoomAhora());
@@ -16596,7 +8888,7 @@
         crecerLienzo();
         if (decirlo) {
             guardar();
-            avisar("Zoom del tablero: " + Math.round(z * 100) + " %.");
+            avisar(ocT("Zoom del tablero: {round} %.", { round: Math.round(z * 100) }));
         }
     }
     const pasoZoom = (sentido) => {
@@ -16617,9 +8909,11 @@
         colorTablero();
         pintarPestanas(foco);
         pintarTodo();
+        pintarModos();
     }
 
     function pintarPestanas(foco) {
+        pintarElegirTablero();
         tablist.replaceChildren(...todo.perfiles.map((pf, i) => {
             const b = botonDe("master-pestana", pf.nombre, () => {
                 if (pestanaMovida) {
@@ -16627,7 +8921,7 @@
                 }
                 if (pf !== estado) {
                     activar(pf, true);
-                    avisar("Perfil: " + pf.nombre + ".");
+                    avisar(ocT("Perfil: {nombre}.", { nombre: pf.nombre }));
                 }
             });
             b.setAttribute("role", "tab");
@@ -16672,7 +8966,7 @@
             x.type = "button";
             x.tabIndex = -1;
             x.setAttribute("aria-hidden", "true");
-            x.title = "Cerrar «" + pf.nombre + "» (pulsa dos veces)";
+            x.title = ocT("Cerrar «{nombre}» (pulsa dos veces)", { nombre: pf.nombre });
             x.hidden = todo.perfiles.length < 2;
             x.addEventListener("click", (e) => {
                 e.stopPropagation();
@@ -16684,8 +8978,17 @@
             caja.append(b, x);
             return caja;
         }));
-        lienzo.setAttribute("aria-labelledby", "master-pestana-" + estado.id);
         const activa = tablist.querySelector(".es-elegida");
+        if (!activa) {
+            // En un modo: ninguna elegida, pero se llega con el tabulador.
+            const primera = tablist.querySelector("[role=tab]");
+            if (primera) {
+                primera.tabIndex = 0;
+            }
+            pintarFlechas();
+            return;
+        }
+        lienzo.setAttribute("aria-labelledby", "master-pestana-" + estado.id);
         // Que se vea la elegida (sin mover la página arriba y abajo).
         const izq = activa.offsetLeft - tablist.offsetLeft;
         if (izq < tablist.scrollLeft) {
@@ -16716,7 +9019,7 @@
         guardar();
         pintarPestanas(false);
         document.getElementById("master-pestana-" + pf.id).focus();
-        avisar(pf.nombre + ": pestaña " + (k + 1) + " de " + todo.perfiles.length + ".");
+        avisar(ocT("{nombre}: pestaña {n} de {length}.", { nombre: pf.nombre, n: k + 1, length: todo.perfiles.length }));
     }
     function cogerPestana(e, b) {
         if (e.button > 0 || todo.perfiles.length < 2) {
@@ -16724,8 +9027,9 @@
         }
         const x0 = e.clientX;
         const y0 = e.clientY;
+        const margenQuieto = e.pointerType === "touch" ? 14 : 8;
         const quieto = (ev) => {
-            if (Math.abs(ev.clientX - x0) + Math.abs(ev.clientY - y0) > 8) {
+            if (Math.abs(ev.clientX - x0) + Math.abs(ev.clientY - y0) > margenQuieto) {
                 dejar();
             }
         };
@@ -16737,6 +9041,9 @@
         };
         const reloj = setTimeout(() => {
             dejar();
+            if (e.pointerType === "touch" && navigator.vibrate) {
+                navigator.vibrate(20);
+            }
             arrastrarPestana(e, b);
         }, ESPERA_COGER);
         document.addEventListener("pointermove", quieto);
@@ -16749,6 +9056,21 @@
         } catch (err) {
             // Sin captura: siguen llegando al documento.
         }
+        // Cogida con el dedo, que al moverlo no deslice la fila (sin coger,
+        // sí: ver .master-pestana en el CSS).
+        const quieta = (ev) => {
+            if (ev.cancelable) {
+                ev.preventDefault();
+            }
+        };
+        b.addEventListener("touchmove", quieta, { passive: false });
+        const soltarDedo = () => {
+            b.removeEventListener("touchmove", quieta);
+            b.removeEventListener("lostpointercapture", soltarDedo);
+            document.removeEventListener("pointerup", soltarDedo);
+        };
+        b.addEventListener("lostpointercapture", soltarDedo);
+        document.addEventListener("pointerup", soltarDedo);
         pestanaMovida = true;
         b.classList.add("es-cogida");
         const yo = b.parentNode;
@@ -16801,7 +9123,7 @@
                 pestanaMovida = false;
                 pintarPestanas(false);
                 if (pf) {
-                    avisar(pf.nombre + ": pestaña " + (todo.perfiles.indexOf(pf) + 1) + " de " + todo.perfiles.length + ".");
+                    avisar(ocT("{nombre}: pestaña {n} de {length}.", { nombre: pf.nombre, n: todo.perfiles.indexOf(pf) + 1, length: todo.perfiles.length }));
                 }
             }, 0);
         };
@@ -16812,31 +9134,31 @@
 
     function renombrar() {
         const cuerpo = crear("form", "master-personalizar");
-        const et = crear("label", "oc-dados-etiqueta", "nombre del perfil");
+        const et = crear("label", "oc-dados-etiqueta", ocT("nombre del perfil"));
         // Dos colores, por separado: el de la pestaña y el del fondo del
         // tablero.
-        const grupoPestana = muestrasDe("color de la pestaña", COLORES_PESTANA, colorDePestana(estado), "master-perfil-otro-pestana");
-        const grupo = muestrasDe("color del fondo del tablero", TABLEROS, estado.color || "", "master-perfil-otro");
+        const grupoPestana = muestrasDe(ocT("color de la pestaña"), COLORES_PESTANA, colorDePestana(estado), "master-perfil-otro-pestana");
+        const grupo = muestrasDe(ocT("color del fondo del tablero"), TABLEROS, estado.color || "", "master-perfil-otro");
         const input = crear("input", "oc-dados-texto");
         input.id = "master-perfil-nombre";
         input.value = estado.nombre;
         input.maxLength = 30;
         input.autocomplete = "off";
         et.htmlFor = input.id;
-        const listo = crear("button", "oc-vida-accion es-principal", "guardar");
+        const listo = crear("button", "oc-vida-accion es-principal", ocT("guardar"));
         listo.type = "submit";
-        const comoPlantilla = botonDe("oc-vida-accion", "💾 guardar como plantilla", () => {
+        const comoPlantilla = botonDe("oc-vida-accion", ocT("💾 guardar como plantilla"), () => {
             const lista = leerPlantillas();
             lista.push({ id: Date.now().toString(36), nombre: input.value.trim() || estado.nombre,
                 ventanas: estado.modulos.map((x) => ({ tipo: x.tipo, x: x.x, y: x.y, w: x.w, h: x.h, titulo: x.titulo || "",
                     color: x.color || "", escala: x.escala || 1, plegado: !!x.plegado, grupo: x.grupo, delante: x.delante })) });
             guardarPlantillas(lista);
-            avisar("Guardada la plantilla «" + (input.value.trim() || estado.nombre) + "»: sale al crear un perfil con ＋.");
-        }, "Guardar las ventanas de este perfil como plantilla");
-        comoPlantilla.title = "Las ventanas, donde están, sin lo que tienen dentro";
-        const cerrarEsta = botonDe("oc-vida-accion", "🗑️ cerrar esta pestaña", () => {
+            avisar(ocT("Guardada la plantilla «{n}»: sale al crear un perfil con ＋.", { n: input.value.trim() || estado.nombre }));
+        }, ocT("Guardar las ventanas de este perfil como plantilla"));
+        comoPlantilla.title = ocT("Las ventanas, donde están, sin lo que tienen dentro");
+        const cerrarEsta = botonDe("oc-vida-accion", ocT("🗑️ cerrar esta pestaña"), () => {
             if (porCerrar !== estado) {
-                cerrarEsta.textContent = "🗑️ ¿seguro? pulsa otra vez";
+                cerrarEsta.textContent = ocT("🗑️ ¿seguro? pulsa otra vez");
             } else {
                 cerrar();
             }
@@ -16855,18 +9177,17 @@
             guardar();
             cerrar();
             pintarPestanas(true);
-            avisar("Perfil: " + estado.nombre + ".");
+            avisar(ocT("Perfil: {nombre}.", { nombre: estado.nombre }));
         });
-        const cerrar = window.ocVentana.abrir({ titulo: "nombre y colores de la pestaña", cuerpo, vuelta: botonRenombrar, foco: input });
+        const cerrar = window.ocVentana.abrir({ titulo: ocT("nombre y colores de la pestaña"), cuerpo, vuelta: botonRenombrar, foco: input });
     }
 
     // LAS PLANTILLAS DE PERFIL: las de aquí (unas ventanas que se ponen
     // ordenadas) y las propias («💾 guardar como plantilla» en el ✎ del
     // perfil: sus ventanas, donde estaban, sin lo que tienen dentro;
     // «richi-master-plantillas»).
-    const PLANTILLAS = [["vacio", "⬜ vacío", "Sin ventanas.", -1]].concat(PERFILES_DE_SERIE.map(([nombre, color, , ventanas], i) =>
-        ["serie" + i, nombre, ventanas.length + " ventanas, donde van" + (color ? " · tablero " +
-            ((TABLEROS.find((t) => t[0] === color) || [])[1] || color) : "") + ".", i]));
+    const PLANTILLAS = [["vacio", ocT("⬜ vacío"), ocT("Sin ventanas."), -1]].concat(PERFILES_DE_SERIE.map(([nombre, color, , ventanas], i) =>
+        ["serie" + i, nombre, ocT("{n} ventanas, donde van{n2}.", { n: ventanas.length, n2: color ? ocT(" · tablero {n}", { n: (TABLEROS.find((t) => t[0] === color) || [])[1] || color }) : "" }), i]));
     const leerPlantillas = () => {
         try {
             const x = JSON.parse(localStorage.getItem(CLAVE_PLANTILLAS) || "[]");
@@ -16879,16 +9200,16 @@
         try {
             localStorage.setItem(CLAVE_PLANTILLAS, JSON.stringify(lista));
         } catch (e) {
-            avisar("No se ha podido guardar la plantilla.");
+            avisar(ocT("No se ha podido guardar la plantilla."));
         }
     };
 
     function perfilNuevo() {
         const cuerpo = crear("form", "master-personalizar");
-        const et = crear("label", "oc-dados-etiqueta", "nombre del perfil");
+        const et = crear("label", "oc-dados-etiqueta", ocT("nombre del perfil"));
         const input = crear("input", "oc-dados-texto");
         input.id = "master-perfil-nuevo";
-        input.value = "perfil " + (todo.perfiles.length + 1);
+        input.value = ocT("perfil ") + (todo.perfiles.length + 1);
         input.maxLength = 30;
         input.autocomplete = "off";
         et.htmlFor = input.id;
@@ -16898,7 +9219,7 @@
             nombreTocado = true;
         });
         const grupo = crear("fieldset", "master-plantillas");
-        grupo.appendChild(crear("legend", "oc-dados-etiqueta", "con qué ventanas"));
+        grupo.appendChild(crear("legend", "oc-dados-etiqueta", ocT("con qué ventanas")));
         const propias = leerPlantillas();
         const opcion = (valor, nombre, desc, borrable) => {
             const caja = crear("div", "master-plantilla");
@@ -16915,24 +9236,24 @@
                 const quitar = botonDe("master-nombre-boton", "✕", () => {
                     guardarPlantillas(leerPlantillas().filter((x) => x.id !== borrable));
                     caja.remove();
-                    avisar("Plantilla quitada: " + nombre + ".");
-                }, "Quitar la plantilla " + nombre);
+                    avisar(ocT("Plantilla quitada: {nombre}.", { nombre: nombre }));
+                }, ocT("Quitar la plantilla {nombre}", { nombre: nombre }));
                 caja.appendChild(quitar);
             }
             grupo.appendChild(caja);
             return radio;
         };
         const radios = PLANTILLAS.map(([v, n, desc]) => opcion(v, n, desc));
-        propias.forEach((pl) => radios.push(opcion("propia-" + pl.id, "💾 " + pl.nombre, pl.ventanas.length + " ventanas, donde las dejaste.",
+        propias.forEach((pl) => radios.push(opcion("propia-" + pl.id, "💾 " + pl.nombre, ocT("{n} ventanas, donde las dejaste.", { n: pl.ventanas.length }),
             pl.id)));
         radios[0].checked = true;
-        const listo = crear("button", "oc-vida-accion es-principal", "＋ crear");
+        const listo = crear("button", "oc-vida-accion es-principal", ocT("＋ crear"));
         listo.type = "submit";
         cuerpo.append(et, input, grupo, listo);
         cuerpo.addEventListener("submit", (e) => {
             e.preventDefault();
             const elegida = (grupo.querySelector("input:checked") || radios[0]).value;
-            const pf = { id: "p" + siguientePerfil++, nombre: input.value.trim() || "perfil " + (todo.perfiles.length + 1), modulos: [] };
+            const pf = { id: "p" + siguientePerfil++, nombre: input.value.trim() || ocT("perfil {n}", { n: todo.perfiles.length + 1 }), modulos: [] };
             const propia = propias.find((x) => "propia-" + x.id === elegida);
             if (propia) {
                 pf.modulos = propia.ventanas.filter((v) => MODULOS[v.tipo]).map((v) => Object.assign({}, v, { id: "m" + siguienteId++ }));
@@ -16951,15 +9272,16 @@
             cerrar();
             todo.perfiles.push(pf);
             activar(pf, true);
-            avisar("Perfil nuevo: " + pf.nombre + (pf.modulos.length ? ", con " + pf.modulos.length + " ventanas." : "."));
+            avisar(ocT("Perfil nuevo: {nombre}{n}", { nombre: pf.nombre, n: pf.modulos.length ? ocT(", con {n} ventanas.", { n: pf.modulos.length }) : "." }));
         });
-        const cerrar = window.ocVentana.abrir({ titulo: "perfil nuevo", cuerpo, vuelta: botonNueva, foco: input });
+        const cerrar = window.ocVentana.abrir({ titulo: ocT("perfil nuevo"), cuerpo, vuelta: botonNueva, foco: input });
     }
 
-    const botonNueva = botonDe("master-pestana-mando", "＋", () => perfilNuevo(), "Perfil nuevo");
-    botonNueva.title = "Perfil nuevo";
-    const botonRenombrar = botonDe("master-pestana-mando", "✎", renombrar, "Nombre y colores de esta pestaña");
-    botonRenombrar.title = "Nombre, color de la pestaña y fondo del tablero";
+    const botonNueva = botonDe("master-pestana-mando", "＋", () => perfilNuevo(), ocT("Perfil nuevo"));
+    botonNueva.title = ocT("Perfil nuevo");
+    const botonRenombrar = botonDe("master-pestana-mando", "✎", () => (esModo(estado) ? editarModo(estado, botonRenombrar) : renombrar()),
+        ocT("Nombre y colores de esta pestaña"));
+    botonRenombrar.title = ocT("Nombre, color de la pestaña y fondo del tablero");
     botonRenombrar.setAttribute("aria-haspopup", "dialog");
     // CERRAR UNA PESTAÑA (la ✕ de cada una, Supr o «cerrar» en su ✎):
     // pide pulsar dos veces; la última no se cierra.
@@ -16967,7 +9289,7 @@
     let esperaCerrar = 0;
     function cerrarPerfil(pf, quien) {
         if (todo.perfiles.length < 2) {
-            avisar("Es la única pestaña: no se puede cerrar.");
+            avisar(ocT("Es la única pestaña: no se puede cerrar."));
             return;
         }
         if (porCerrar !== pf) {
@@ -16975,7 +9297,7 @@
             if (quien) {
                 quien.classList.add("es-seguro");
             }
-            avisar("Pulsa otra vez para cerrar la pestaña " + pf.nombre + " y sus ventanas.");
+            avisar(ocT("Pulsa otra vez para cerrar la pestaña {nombre} y sus ventanas.", { nombre: pf.nombre }));
             clearTimeout(esperaCerrar);
             esperaCerrar = setTimeout(() => {
                 porCerrar = null;
@@ -16997,7 +9319,7 @@
         }
         guardar();
         pintarPestanas(true);
-        avisar("Cerrada: " + pf.nombre + ".");
+        avisar(ocT("Cerrada: {nombre}.", { nombre: pf.nombre }));
     }
     const mandosPestanas = crear("div", "master-pestanas-mandos");
     mandosPestanas.append(botonNueva, botonRenombrar);
@@ -17008,10 +9330,10 @@
         const reducir = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
         tablist.scrollBy({ left: s * Math.max(120, Math.round(tablist.clientWidth * 0.7)), behavior: reducir ? "auto" : "smooth" });
     };
-    const flechaIzq = botonDe("master-pestana-mando master-pestanas-flecha", "‹", () => desliza(-1), "Ver las pestañas de la izquierda");
-    const flechaDer = botonDe("master-pestana-mando master-pestanas-flecha", "›", () => desliza(1), "Ver las pestañas de la derecha");
-    flechaIzq.title = "Pestañas de la izquierda";
-    flechaDer.title = "Pestañas de la derecha";
+    const flechaIzq = botonDe("master-pestana-mando master-pestanas-flecha", "‹", () => desliza(-1), ocT("Ver las pestañas de la izquierda"));
+    const flechaDer = botonDe("master-pestana-mando master-pestanas-flecha", "›", () => desliza(1), ocT("Ver las pestañas de la derecha"));
+    flechaIzq.title = ocT("Pestañas de la izquierda");
+    flechaDer.title = ocT("Pestañas de la derecha");
     function pintarFlechas() {
         const sobra = tablist.scrollWidth > tablist.clientWidth + 1;
         flechaIzq.hidden = !sobra;
@@ -17025,6 +9347,436 @@
     }
     const marco = crear("div", "master-pestanas-marco");
     marco.append(flechaIzq, tablist, flechaDer);
+    // En vertical (estrecho), en vez de las pestañas, un desplegable con los
+    // tableros: así la barra cabe en una línea. (El CSS enseña uno u otro.)
+    const elegirTablero = crear("select", "master-tableros-elegir");
+    elegirTablero.setAttribute("aria-label", ocT("Tablero"));
+    elegirTablero.addEventListener("change", () => {
+        const pf = todo.perfiles.find((x) => x.id === elegirTablero.value);
+        if (pf && pf !== estado) {
+            activar(pf, false);
+            avisar(ocT("Perfil: {nombre}.", { nombre: pf.nombre }));
+        }
+    });
+    function pintarElegirTablero() {
+        const opciones = todo.perfiles.map((pf) => {
+            const o = crear("option", "", pf.nombre);
+            o.value = pf.id;
+            return o;
+        });
+        if (esModo(estado)) {
+            const o = crear("option", "", estado.emoji + " " + estado.nombre);
+            o.value = "";
+            o.disabled = true;
+            opciones.unshift(o);
+        }
+        elegirTablero.replaceChildren(...opciones);
+        elegirTablero.value = esModo(estado) ? "" : estado.id;
+    }
+
+    // ---- EL MENÚ DE LOS MODOS: un botón (abajo a la izquierda, o donde se
+    // haya dejado) con el modo de ahora; al pulsarlo, la lista con todos los
+    // modos de la campaña, «▦ tableros» para volver a las pestañas, «＋» para
+    // uno nuevo y «✥ mover» para llevarlo a otro sitio con el teclado.
+    // Manteniéndolo pulsado (ESPERA_COGER) se coge y se arrastra donde se
+    // quiera; se recuerda («richi-master-modos-sitio»). ----
+    const CLAVE_MODOS_SITIO = "richi-master-modos-sitio";
+    const menuModos = crear("nav", "master-modos");
+    menuModos.setAttribute("aria-label", ocT("Modos"));
+    const listaModos = crear("ul", "master-modos-lista");
+    listaModos.id = "master-modos-lista";
+    listaModos.hidden = true;
+    const abrirModos = botonDe("master-modos-abrir", "", () => {
+        if (menuModos.dataset.cogido) {
+            return;
+        }
+        verListaModos(listaModos.hidden);
+    });
+    abrirModos.setAttribute("aria-controls", listaModos.id);
+    abrirModos.setAttribute("aria-expanded", "false");
+    abrirModos.title = ocT("Los modos (mantén pulsado para moverlo)");
+    menuModos.append(listaModos, abrirModos);
+    function verListaModos(ver, sinFoco) {
+        listaModos.hidden = !ver;
+        abrirModos.setAttribute("aria-expanded", String(ver));
+        menuModos.classList.toggle("es-abierto", ver);
+        if (ver) {
+            // Hacia arriba o hacia abajo, según dónde quepa.
+            const r = menuModos.getBoundingClientRect();
+            menuModos.classList.toggle("es-hacia-abajo", r.top < window.innerHeight / 2);
+            const actual = listaModos.querySelector("[aria-current=true]") || listaModos.querySelector("button");
+            if (actual && !sinFoco) {
+                actual.focus();
+            }
+        }
+    }
+    menuModos.addEventListener("keydown", (e) => {
+        if (e.key === "Escape" && !listaModos.hidden) {
+            e.stopPropagation();
+            verListaModos(false);
+            abrirModos.focus();
+        }
+    });
+    document.addEventListener("pointerdown", (e) => {
+        if (!listaModos.hidden && !menuModos.contains(e.target)) {
+            verListaModos(false);
+        }
+    });
+
+    // Dónde está: guardado como su esquina de arriba a la izquierda (sin
+    // salirse de la pantalla). Sin guardar, abajo a la izquierda (el CSS).
+    function sitioModos() {
+        try {
+            const x = JSON.parse(localStorage.getItem(CLAVE_MODOS_SITIO) || "null");
+            return x && isFinite(x.x) && isFinite(x.y) ? x : null;
+        } catch (e) {
+            return null;
+        }
+    }
+    function ponerSitioModos(sitio, guardarlo) {
+        if (esModo(estado)) {
+            requestAnimationFrame(() => crecerLienzo());
+        }
+        if (!sitio) {
+            menuModos.style.left = "";
+            menuModos.style.top = "";
+            menuModos.classList.remove("es-movido");
+            if (guardarlo) {
+                try {
+                    localStorage.removeItem(CLAVE_MODOS_SITIO);
+                } catch (e) {
+                    // Sin guardar: vale para esta vez.
+                }
+            }
+            return;
+        }
+        const w = menuModos.offsetWidth || 120;
+        const h = abrirModos.offsetHeight || 44;
+        const x = Math.max(4, Math.min(window.innerWidth - w - 4, Math.round(sitio.x)));
+        const y = Math.max(4, Math.min(window.innerHeight - h - 4, Math.round(sitio.y)));
+        menuModos.classList.add("es-movido");
+        menuModos.style.left = x + "px";
+        menuModos.style.top = y + "px";
+        if (guardarlo) {
+            try {
+                localStorage.setItem(CLAVE_MODOS_SITIO, JSON.stringify({ x, y }));
+            } catch (e) {
+                // Sin guardar: vale para esta vez.
+            }
+        }
+    }
+    window.addEventListener("resize", () => ponerSitioModos(sitioModos(), false));
+    // Cogerlo: mantener pulsado el botón (sin moverse) y arrastrar.
+    abrirModos.addEventListener("pointerdown", (e) => {
+        if (e.button !== 0) {
+            return;
+        }
+        const x0 = e.clientX;
+        const y0 = e.clientY;
+        const r = menuModos.getBoundingClientRect();
+        let cogido = false;
+        const quieto = (ev) => {
+            if (Math.abs(ev.clientX - x0) + Math.abs(ev.clientY - y0) > 8) {
+                soltar();
+            }
+        };
+        const mover = (ev) => {
+            ev.preventDefault();
+            ponerSitioModos({ x: r.left + ev.clientX - x0, y: r.top + ev.clientY - y0 }, false);
+        };
+        const soltar = () => {
+            clearTimeout(espera);
+            document.removeEventListener("pointermove", quieto);
+            document.removeEventListener("pointermove", mover);
+            document.removeEventListener("pointerup", soltar);
+            document.removeEventListener("pointercancel", soltar);
+            if (cogido) {
+                menuModos.classList.remove("es-cogido");
+                const ahora = menuModos.getBoundingClientRect();
+                ponerSitioModos({ x: ahora.left, y: ahora.top }, true);
+                avisar(ocT("Menú de los modos movido."));
+                // El «click» de después de soltar no abre la lista.
+                setTimeout(() => {
+                    delete menuModos.dataset.cogido;
+                }, 0);
+            }
+        };
+        const espera = setTimeout(() => {
+            cogido = true;
+            menuModos.dataset.cogido = "1";
+            verListaModos(false);
+            menuModos.classList.add("es-cogido");
+            if (navigator.vibrate) {
+                navigator.vibrate(15);
+            }
+            document.removeEventListener("pointermove", quieto);
+            document.addEventListener("pointermove", mover);
+            try {
+                abrirModos.setPointerCapture(e.pointerId);
+            } catch (err) {
+                // Sin captura: sigue funcionando con el documento.
+            }
+        }, ESPERA_COGER);
+        document.addEventListener("pointermove", quieto);
+        document.addEventListener("pointerup", soltar);
+        document.addEventListener("pointercancel", soltar);
+    });
+    // Con el teclado: «✥ mover» y las flechas (Mayús: más deprisa); Intro o
+    // Escape lo dejan ahí.
+    function moverModosConTeclado() {
+        verListaModos(false);
+        menuModos.classList.add("es-cogido");
+        abrirModos.focus();
+        avisar(ocT("Mueve el menú de los modos con las flechas; Intro o Escape para dejarlo."));
+        const tecla = (e) => {
+            const paso = e.shiftKey ? 60 : 15;
+            const d = { ArrowLeft: [-paso, 0], ArrowRight: [paso, 0], ArrowUp: [0, -paso], ArrowDown: [0, paso] }[e.key];
+            if (d) {
+                e.preventDefault();
+                const r = menuModos.getBoundingClientRect();
+                ponerSitioModos({ x: r.left + d[0], y: r.top + d[1] }, true);
+                return;
+            }
+            if (e.key === "Enter" || e.key === "Escape" || e.key === "Tab") {
+                if (e.key !== "Tab") {
+                    e.preventDefault();
+                    e.stopPropagation();
+                }
+                acabar();
+            }
+        };
+        const acabar = () => {
+            menuModos.classList.remove("es-cogido");
+            abrirModos.removeEventListener("keydown", tecla, true);
+            abrirModos.removeEventListener("blur", acabar);
+            avisar(ocT("Menú de los modos colocado."));
+        };
+        abrirModos.addEventListener("keydown", tecla, true);
+        abrirModos.addEventListener("blur", acabar);
+    }
+
+    function pintarModos() {
+        const ahora = esModo(estado);
+        const foco = listaModos.contains(document.activeElement) ? document.activeElement.dataset.modo : null;
+        abrirModos.replaceChildren(crear("span", "master-modos-que", ahora ? estado.emoji + " " + estado.nombre : ocT("▦ tableros")),
+            crear("span", "master-modos-flecha", "▾"));
+        abrirModos.lastChild.setAttribute("aria-hidden", "true");
+        abrirModos.setAttribute("aria-label", ocT("Modos ({que}): elegir otro", { que: ahora ? estado.nombre : ocT("tableros") }));
+        const boton = (texto, alPulsar, etiqueta, actual, clave) => {
+            const li = crear("li");
+            const b = botonDe("master-modos-boton", texto, () => {
+                verListaModos(false);
+                alPulsar();
+            }, etiqueta);
+            if (actual) {
+                b.setAttribute("aria-current", "true");
+            }
+            b.dataset.modo = clave;
+            li.appendChild(b);
+            return li;
+        };
+        listaModos.replaceChildren(...todo.modos.map((mo) => {
+            const li = boton(mo.emoji + " " + mo.nombre, () => activarModo(mo), ocT("Modo {nombre}", { nombre: mo.nombre }), estado === mo, mo.id);
+            li.firstChild.id = "master-modo-b-" + mo.id;
+            // ✎: su nombre, su dibujo, su rejilla, o borrarlo.
+            const cambiar = botonDe("master-modos-editar", "✎", () => {
+                verListaModos(false);
+                editarModo(mo, abrirModos);
+            }, ocT("Cambiar o borrar el modo {nombre}", { nombre: mo.nombre }));
+            cambiar.dataset.modo = "editar-" + mo.id;
+            cambiar.setAttribute("aria-haspopup", "dialog");
+            li.classList.add("master-modos-con-editar");
+            li.appendChild(cambiar);
+            return li;
+        }), boton(ocT("▦ tableros"), volverATableros, ocT("Volver a los tableros (las pestañas de arriba)"), !ahora, "tableros"),
+        boton(ocT("＋ modo nuevo"), () => editarModo(null, abrirModos), ocT("Crear un modo nuevo"), false, "nuevo"),
+        boton(ocT("✥ mover este menú"), moverModosConTeclado, ocT("Mover este menú con las flechas"), false, "mover"));
+        listaModos.querySelector("[data-modo=nuevo]").setAttribute("aria-haspopup", "dialog");
+        if (sitioModos()) {
+            listaModos.appendChild(boton(ocT("↺ a su sitio"), () => {
+                ponerSitioModos(null, true);
+                abrirModos.focus();
+                avisar(ocT("Menú de los modos en su sitio: abajo a la izquierda."));
+            }, ocT("Volver a poner el menú abajo a la izquierda"), false, "sitio"));
+        }
+        if (foco) {
+            const b = listaModos.querySelector("[data-modo='" + foco + "']");
+            if (b) {
+                b.focus();
+            }
+        }
+        // El lienzo: en un modo, una región con el nombre del modo; en un
+        // tablero, el panel de su pestaña.
+        lienzo.setAttribute("role", ahora ? "region" : "tabpanel");
+        if (ahora) {
+            lienzo.setAttribute("aria-label", ocT("Modo {nombre}", { nombre: estado.nombre }));
+            lienzo.removeAttribute("aria-labelledby");
+        } else {
+            lienzo.removeAttribute("aria-label");
+        }
+        botonRenombrar.setAttribute("aria-label", ahora ? ocT("Nombre, dibujo y huecos de este modo") : ocT("Nombre y colores de esta pestaña"));
+        botonRenombrar.title = ahora ? ocT("Este modo: nombre, dibujo y huecos") : ocT("Esta pestaña: nombre y colores");
+    }
+    function activarModo(mo) {
+        if (estado === mo) {
+            return;
+        }
+        activar(mo, false);
+        window.scrollTo(0, 0);
+        crecerLienzo();
+        avisar(ocT("Modo {nombre}.", { nombre: mo.nombre }));
+    }
+    function volverATableros() {
+        if (!esModo(estado)) {
+            return;
+        }
+        const pf = todo.perfiles.find((x) => x.id === todo.activo) || todo.perfiles[0];
+        activar(pf, false);
+        avisar(ocT("Tablero: {nombre}.", { nombre: pf.nombre }));
+    }
+    // CREAR O CAMBIAR UN MODO: su nombre, su dibujo y su rejilla (con un
+    // dibujito de cada una); al crearlo, también desde uno de serie. Al
+    // cambiar la rejilla, las ventanas de los huecos que ya no hay quedan
+    // sueltas encima. Borrarlo pide pulsar dos veces.
+    function editarModo(mo, vuelta) {
+        const nuevo = !mo;
+        const cuerpo = crear("form", "master-personalizar");
+        const uid = "master-modo-" + (mo ? mo.id : "nuevo");
+        const campo = (texto, valor, max, sufijo) => {
+            const et = crear("label", "oc-dados-etiqueta", texto);
+            const x = crear("input", "oc-dados-texto");
+            x.id = uid + "-" + sufijo;
+            x.value = valor;
+            x.maxLength = max;
+            x.autocomplete = "off";
+            et.htmlFor = x.id;
+            cuerpo.append(et, x);
+            return x;
+        };
+        const nombre = campo(ocT("nombre del modo"), mo ? mo.nombre : "", 24, "nombre");
+        const emoji = campo(ocT("dibujo (un emoji)"), mo ? mo.emoji : "🧩", 8, "emoji");
+        let desde = null;
+        if (nuevo) {
+            desde = elegirDe(uid + "-desde", ocT("empezar"), [["", ocT("vacío (eliges la rejilla y luego sus ventanas)")]].concat(MODOS_DE_SERIE
+                .map((x, i) => [String(i), ocT("como el de serie: {n} {n2}", { n: x[0], n2: x[1] })])), "");
+            cuerpo.appendChild(desde);
+        }
+        const rejillas = crear("fieldset", "master-colores master-rejillas");
+        rejillas.appendChild(crear("legend", "oc-dados-etiqueta", ocT("huecos")));
+        let elegida = mo ? mo.rejilla : "dos";
+        Object.keys(REJILLAS).forEach((k) => {
+            const op = crear("label", "master-rejilla");
+            const radio = crear("input");
+            radio.type = "radio";
+            radio.name = uid + "-rejilla";
+            radio.value = k;
+            radio.checked = k === elegida;
+            radio.addEventListener("change", () => {
+                elegida = k;
+            });
+            const dibujo = crear("span", "master-rejilla-dibujo");
+            dibujo.setAttribute("aria-hidden", "true");
+            REJILLAS[k].huecos.forEach(([col, fila, ancho, alto]) => {
+                const h = crear("span");
+                h.style.gridArea = fila + " / " + col + " / span " + alto + " / span " + ancho;
+                dibujo.appendChild(h);
+            });
+            op.append(radio, dibujo, crear("span", "", REJILLAS[k].nombre + " (" + REJILLAS[k].huecos.length
+                + (REJILLAS[k].huecos.length === 1 ? ocT(" hueco)") : ocT(" huecos)"))));
+            rejillas.appendChild(op);
+        });
+        cuerpo.appendChild(rejillas);
+        if (desde) {
+            // Con uno de serie, su rejilla.
+            desde.elegir.addEventListener("change", () => {
+                const x = MODOS_DE_SERIE[Number(desde.elegir.value)];
+                rejillas.hidden = !!x;
+                if (x) {
+                    elegida = x[2];
+                    if (!nombre.value.trim()) {
+                        nombre.value = x[1];
+                    }
+                    emoji.value = x[0];
+                }
+            });
+        }
+        const botones = crear("div", "master-anadir-otras");
+        const listo = crear("button", "oc-vida-accion es-principal", nuevo ? ocT("＋ crear el modo") : "guardar");
+        listo.type = "submit";
+        botones.appendChild(listo);
+        if (!nuevo) {
+            let seguro = false;
+            const borrar = botonDe("oc-vida-accion", ocT("🗑️ borrar este modo"), () => {
+                if (!seguro) {
+                    seguro = true;
+                    borrar.textContent = ocT("🗑️ ¿seguro? pulsa otra vez");
+                    avisar(ocT("Pulsa otra vez para borrar el modo {nombre} (con sus ventanas).", { nombre: mo.nombre }));
+                    return;
+                }
+                cerrar();
+                todo.modos = todo.modos.filter((x) => x !== mo);
+                if (estado === mo) {
+                    estado.modulos.forEach((m) => {
+                        m.el = null;
+                    });
+                    estado = todo.perfiles.find((x) => x.id === todo.activo) || todo.perfiles[0];
+                    colorTablero();
+                    pintarPestanas(false);
+                    pintarTodo();
+                }
+                guardar();
+                pintarModos();
+                abrirModos.focus();
+                avisar(ocT("Modo borrado: {nombre}.", { nombre: mo.nombre }));
+            });
+            botones.appendChild(borrar);
+        }
+        cuerpo.appendChild(botones);
+        cuerpo.addEventListener("submit", (e) => {
+            e.preventDefault();
+            const n = nombre.value.trim();
+            if (!n) {
+                avisar(ocT("Ponle un nombre."));
+                nombre.focus();
+                return;
+            }
+            const dibujo = emoji.value.trim() || "🧩";
+            cerrar();
+            if (nuevo) {
+                const serie = desde && desde.elegir.value !== "" ? modosDeSerie()[Number(desde.elegir.value)] : null;
+                const x = Object.assign(serie || { rejilla: elegida, modulos: [] }, { id: "o" + siguienteModo++, nombre: n, emoji: dibujo });
+                x.modulos.forEach((m) => {
+                    m.id = "m" + siguienteId++;
+                });
+                todo.modos.push(x);
+                activarModo(x);
+                avisar(ocT("Modo creado: {n}{n2}", { n: n, n2: x.modulos.length ? "." : ocT(". Pulsa «＋ elegir ventana» en cada hueco.") }));
+                return;
+            }
+            mo.nombre = n;
+            mo.emoji = dibujo;
+            if (elegida !== mo.rejilla) {
+                mo.rejilla = elegida;
+                const cuantos = REJILLAS[elegida].huecos.length;
+                mo.modulos.filter((m) => Number.isInteger(m.hueco) && m.hueco >= cuantos).forEach((m, i) => {
+                    delete m.hueco;
+                    m.x = 30 + 30 * (i % 5);
+                    m.y = 30 + 30 * (i % 5);
+                });
+                mo.modulos.forEach((m) => {
+                    m.el = null;
+                });
+            }
+            guardar();
+            if (estado === mo) {
+                pintarTodo();
+            }
+            pintarModos();
+            avisar(ocT("Guardado: {nombre}.", { nombre: mo.nombre }));
+        });
+        const cerrar = window.ocVentana.abrir({ titulo: nuevo ? ocT("modo nuevo") : ocT("el modo {nombre}", { nombre: mo.nombre }), cuerpo,
+            vuelta: vuelta || botonRenombrar, foco: nombre });
+    }
 
     // ---- LAS CAMPAÑAS: el botón de la izquierda del todo. Cada campaña
     // tiene sus pestañas, sus ventanas y su party (no se mezclan): se
@@ -17034,8 +9786,8 @@
     botonCampana.setAttribute("aria-keyshortcuts", "C");
     function pintarCampana() {
         botonCampana.textContent = "📚";
-        botonCampana.setAttribute("aria-label", "Campaña: " + todo.nombre + " (cambiar de campaña)");
-        botonCampana.title = "Campaña: " + todo.nombre + " — cambiar, crear o renombrar";
+        botonCampana.setAttribute("aria-label", ocT("Campaña: {nombre} (cambiar de campaña)", { nombre: todo.nombre }));
+        botonCampana.title = ocT("Campaña: {nombre} — cambiar, crear o renombrar", { nombre: todo.nombre });
         aplicarUnidades();
         aplicarEdicion();
     }
@@ -17044,82 +9796,110 @@
             m.el = null;
         });
         todo = c;
-        estado = c.perfiles.find((pf) => pf.id === c.activo) || c.perfiles[0];
+        estado = (c.modoActivo && c.modos.find((mo) => mo.id === c.modoActivo)) || c.perfiles.find((pf) => pf.id === c.activo)
+            || c.perfiles[0];
         guardar();
         colorTablero();
         pintarCampana();
         pintarPestanas(false);
         pintarTodo();
-        avisar("Campaña: " + c.nombre + ".");
+        pintarModos();
+        avisar(ocT("Campaña: {nombre}.", { nombre: c.nombre }));
     }
     // EL TABLERO DE TUTORIAL: unos post-its que explican las opciones. Va
     // el primero en cada campaña nueva (se puede quitar como cualquiera).
-    const TUTORIAL = [
-        ["👋 Bienvenida", "amarillo", "<p>Esto es tu <strong>pantalla de máster</strong>: un tablero con ventanas que pones, mueves y"
-            + " quitas a tu gusto.</p><ul><li>Las <strong>pestañas de arriba</strong> son tus tableros (por ejemplo, uno para"
-            + " combate y otro para la ciudad).</li><li>Cada ventana es una herramienta: la iniciativa, el bestiario, las"
-            + " reglas, notas…</li><li>Este tablero es el tutorial: cuando ya no lo necesites, quítalo con <strong>✎</strong>"
-            + " (arriba, junto a las pestañas).</li></ul>"],
-        ["🪟 Las ventanas", "celeste", "<ul><li><strong>Toca la barra</strong> de una ventana para plegarla o desplegarla.</li>"
-            + "<li><strong>Mantén pulsada la barra</strong> y arrastra para moverla.</li><li>La esquina de abajo a la derecha"
-            + " cambia su <strong>tamaño</strong>.</li><li><strong>✎</strong> le cambia el nombre, el color y el tamaño de la"
-            + " letra; <strong>−</strong> la pliega y <strong>✕</strong> la quita.</li><li>Suelta una ventana sobre la barra"
-            + " de otra y se <strong>juntan en pestañas</strong>; ⇱ la vuelve a sacar.</li></ul>"],
-        ["🗂️ Tableros y campañas", "verde", "<ul><li><strong>＋</strong> (junto a las pestañas) crea un tablero nuevo, vacío o"
-            + " desde una plantilla; <strong>✎</strong> cambia el de ahora: nombre, colores o quitarlo.</li><li>Mantén pulsada"
-            + " una pestaña para <strong>cambiarla de sitio</strong>.</li><li><strong>📚</strong> son tus campañas: cada una con"
-            + " sus tableros, su party y sus documentos, sin mezclarse.</li></ul>"],
-        ["🧰 Añadir herramientas", "naranja", "<p>El botón <strong>🧰</strong> (arriba a la izquierda) abre todas las"
-            + " ventanas que puedes poner, por grupos:</p><ul><li><strong>combate</strong>: iniciativa, condiciones,"
-            + " encuentros…</li><li><strong>consulta</strong>: reglas, conjuros, bestiario, tienda…</li>"
-            + "<li><strong>mesa</strong>: la party, sonido ambiente, efectos de sonido, música…</li><li><strong>mundo</strong>:"
-            + " generadores de nombres, PNJ, dungeons, negocios, botín…</li><li><strong>apuntes</strong>: post-its, dibujo,"
-            + " documentos…</li></ul>"],
-        ["🔍 Buscar, crear y ajustes", "morado", "<ul><li>El <strong>buscador</strong> de arriba encuentra conjuros,"
-            + " monstruos, reglas, objetos, rasgos, dotes y habilidades a la vez (también lo que añadas tú).</li>"
-            + "<li><strong>⚙</strong>: zoom, ordenar o quitar ventanas, atajos y las <strong>copias de seguridad</strong>"
-            + " (exportar e importar).</li><li><strong>Aa</strong>: tamaño del texto, letra más legible y los"
-            + " temas de color.</li></ul>"],
-        ["🛠️ Crear contenido nuevo", "turquesa", "<p>El botón <strong>🛠️</strong> (arriba a la izquierda, junto a 📚) abre"
-            + " el <strong>compendio</strong>: ahí añades monstruos, objetos, conjuros y más cosas (especies, dotes…).</p><ul>"
-            + "<li><strong>＋ nuevo</strong>: rellenas un formulario.</li><li><strong>⧉ copiar</strong> uno del SRD y"
-            + " cambiarlo, para tu versión.</li><li><strong>📋 pegar un bloque</strong> copiado de D&amp;D Beyond o de un PDF:"
-            + " el formulario se rellena solo.</li><li><strong>⬆ importar</strong> muchos a la vez con la plantilla.</li></ul>"
-            + "<p>Luego salen en el bestiario, los encuentros, la tienda, los conjuros y el buscador, con «🛠️ tuyo». Su"
-            + " primera pestaña, <strong>❓ cómo añadir</strong>, lo explica paso a paso.</p>"],
-        ["🎲 Los dados", "rosa", "<ul><li>El <strong>botón redondo</strong> de abajo a la derecha (o la tecla"
-            + " <strong>D</strong>) abre los dados; pulsándolo otra vez se pliegan.</li><li>Toca los dados que quieras,"
-            + " pon el modificador y <strong>tirar</strong>. Con ventaja o desventaja, el d20 se tira dos veces.</li>"
-            + "<li>Las últimas tiradas quedan debajo, para repetirlas.</li><li>En las fichas, los números con dados también"
-            + " se tiran tocándolos: prueba aquí con 1d20+5.</li></ul>"],
-        ["💾 Tus datos", "gris", "<ul><li>Todo lo que haces se guarda <strong>sólo en este dispositivo</strong>: no se"
-            + " sube a ningún sitio.</li><li>Si borras los datos del navegador, se pierde: haz de vez en cuando una copia con"
-            + " <strong>⚙ → exportar</strong>.</li><li>Para llevarlo a otro dispositivo: exportar aquí e"
-            + " <strong>importar</strong> allí.</li></ul>"],
-        ["⌨️ Atajos", "azul", "<p>Con teclado va todo más rápido (pulsa <strong>?</strong> para verlos todos):</p><ul>"
-            + "<li><strong>/</strong> buscar · <strong>A</strong> añadir una ventana · <strong>N</strong> post-it nuevo</li>"
-            + "<li><strong>D</strong> dados · <strong>I</strong> iniciativa · <strong>C</strong> campañas</li>"
-            + "<li><strong>[</strong> y <strong>]</strong> tablero anterior y siguiente</li><li><strong>+</strong> y"
-            + " <strong>−</strong> zoom del tablero</li></ul>"],
+    // Uno para el ordenador y otro para la tableta (la app de Android: con
+    // el dedo, sin teclado), con las tarjetas en el mismo orden.
+    // Las de los modos, iguales en los dos.
+    const TARJETAS_MODOS = [
+        [ocT("🧩 Los modos"), "lima", ocT("<p>Además de los tableros, están los <strong>modos</strong>: pantallas fijas que se llenan solas, sin arrastrar ni colocar nada (pensadas para la tablet).</p><ul><li>El menú de los modos está <strong>abajo a la izquierda</strong>: tócalo y elige un modo de la lista. <strong>Mantenlo pulsado</strong> para llevarlo a otro sitio (o «✥ mover este menú»).</li><li><strong>▦ tableros</strong> vuelve a las pestañas de siempre.</li><li>En un hueco vacío, <strong>＋ elegir ventana</strong>. En el <strong>✎</strong> de una ventana, la pestaña <strong>🧩 hueco</strong> la cambia por otra o le pone otra al lado, en pestañas.</li><li>El <strong>✎</strong> de cada modo en la lista le cambia el nombre o lo borra.</li><li><strong>＋</strong> crea un modo tuyo: vacío con la rejilla que elijas o copiando uno de serie. El <strong>✎</strong> de junto a las pestañas le cambia el nombre, el dibujo o la rejilla, o lo borra.</li></ul>")],
+        [ocT("⚔️ Modo combate"), "rojo", ocT("<ul><li><strong>⏩ turnos</strong>: a quién le toca, en grande, y quién va después. <strong>◀ anterior</strong> y <strong>siguiente ▶</strong> pasan el turno (van a la par con la iniciativa).</li><li><strong>🐲 criatura del turno</strong>: el bloque del bestiario de quien le toca, o su ficha resumida si es de la party.</li><li>En pestañas: con la criatura del turno, la <strong>party</strong> y el <strong>bestiario</strong>; a la derecha, la <strong>⏱️ iniciativa</strong> con las condiciones, las acciones y las reglas.</li><li><strong>❤️</strong> en cada uno: un número y <strong>daño</strong>, <strong>cura</strong> o <strong>vida temporal</strong> (la cura no pasa de sus PG máximos). Si se estaba concentrando, salta la tirada de concentración; un PJ a 0 PG, sus <strong>salvaciones de muerte</strong>.</li><li><strong>✎</strong> cambia sus PG, su iniciativa, su nombre y sus <strong>estados</strong> (sus dibujos se pulsan para leerlos): cada criatura es única.</li><li>Suena al pasar de turno y de ronda (🔔 lo calla); <strong>⏭️</strong> se salta a los enemigos a 0 PG.</li><li>Las dos primeras también se pueden poner en cualquier tablero: <strong>🧰 → ▶️ turno a turno</strong>.</li></ul>")],
+        [ocT("🛡️ Modo party"), "verde", ocT("<p><strong>🧝 Fichas de la party</strong>: elige un personaje arriba y su ficha se abre como un libro. Al final, <strong>＋</strong> añade otro, <strong>✎</strong> edita la ficha del elegido, <strong>🗑</strong> lo quita y <strong>📥</strong> lo trae de D&amp;D Beyond o Nivel20 (y se recuerda de dónde, para actualizarlo).</p><ul><li>La tarjeta: retrato, <strong>PG</strong> (se cambian ahí mismo), CA y características; a 0 PG, sus salvaciones de muerte.</li><li>Las secciones: historia, la ficha (combate, habilidades, acciones por tipo, conjuros por nivel, inventario, rasgos por especie, clase y dotes: se pulsan para leerlos), sus <strong>criaturas</strong> (compañeros y monturas, con su perfil del bestiario), PNJ y notas, <strong>imágenes</strong>, extra y lo del máster.</li><li>También está en <strong>🧰 → mesa</strong>, para ponerla en un tablero.</li></ul><p>Y el modo <strong>📝 notas</strong>: tus documentos y seis post-its.</p>")]
     ];
+    // Las de los modos son más largas: van en la última fila, más altas.
+    const ALTO_MODOS = 1290;
+    // Lo que decían antes algunas tarjetas: si siguen así (nadie las ha
+    // tocado), se cambian por lo de ahora.
+    const TUTORIAL_VIEJO = {
+        "🧩 Los modos": ["<p>Abajo a la derecha está el menú de los <strong>modos</strong>: pantallas que se llenan solas, sin mover ventanas.</p><ul><li><strong>⚔️ combate</strong>: a quién le toca y quién va después, el perfil de la criatura del turno, condiciones y reglas, y la iniciativa.</li><li><strong>📝 notas</strong>: tus documentos y seis post-its.</li><li><strong>🛡️ party</strong>: la ficha de cada personaje, como un libro.</li><li>En un hueco vacío, <strong>＋ elegir ventana</strong>; en el ✎ de una ventana, «🧩 hueco» la cambia por otra o le pone otra en pestaña.</li><li><strong>＋</strong> crea un modo tuyo, <strong>✎</strong> (junto a las pestañas) cambia el de ahora y <strong>▦ tableros</strong> vuelve a las pestañas.</li></ul>", "<p>Además de los tableros, están los <strong>modos</strong>: pantallas fijas que se llenan solas, sin arrastrar ni colocar nada (pensadas para la tablet).</p><ul><li>El menú de los modos está <strong>abajo a la derecha</strong>: toca uno para entrar; <strong>−</strong> lo pliega.</li><li><strong>▦ tableros</strong> vuelve a las pestañas de siempre.</li><li>En un hueco vacío, <strong>＋ elegir ventana</strong>. En el <strong>✎</strong> de una ventana, la pestaña <strong>🧩 hueco</strong> la cambia por otra o le pone otra al lado, en pestañas.</li><li><strong>＋</strong> crea un modo tuyo: vacío con la rejilla que elijas o copiando uno de serie. El <strong>✎</strong> de junto a las pestañas le cambia el nombre, el dibujo o la rejilla, o lo borra.</li></ul>", "<p>Además de los tableros, están los <strong>modos</strong>: pantallas fijas que se llenan solas, sin arrastrar ni colocar nada (pensadas para la tablet).</p><ul><li>El menú de los modos está <strong>abajo a la izquierda</strong>: tócalo y elige un modo de la lista. <strong>Mantenlo pulsado</strong> para llevarlo a otro sitio (o «✥ mover este menú»).</li><li><strong>▦ tableros</strong> vuelve a las pestañas de siempre.</li><li>En un hueco vacío, <strong>＋ elegir ventana</strong>. En el <strong>✎</strong> de una ventana, la pestaña <strong>🧩 hueco</strong> la cambia por otra o le pone otra al lado, en pestañas.</li><li><strong>＋</strong> crea un modo tuyo: vacío con la rejilla que elijas o copiando uno de serie. El <strong>✎</strong> de junto a las pestañas le cambia el nombre, el dibujo o la rejilla, o lo borra.</li></ul>"],
+        "🧰 Añadir herramientas": ["<p>El botón <strong>🧰</strong> (arriba a la izquierda) abre todas las ventanas que puedes poner, por grupos:</p><ul><li><strong>combate</strong>: iniciativa, condiciones, encuentros…</li><li><strong>consulta</strong>: reglas, conjuros, bestiario, tienda…</li><li><strong>mesa</strong>: la party, sonido ambiente, efectos de sonido, música…</li><li><strong>mundo</strong>: generadores de nombres, PNJ, dungeons, negocios, botín…</li><li><strong>apuntes</strong>: post-its, dibujo, documentos…</li></ul>"],
+        "🔍 Buscar, crear y ajustes": ["<ul><li>El <strong>buscador</strong> de arriba encuentra conjuros, monstruos, reglas, objetos, rasgos, dotes y habilidades a la vez (también lo que añadas tú).</li><li><strong>⚙</strong>: zoom, ordenar o quitar ventanas, atajos y las <strong>copias de seguridad</strong> (exportar e importar).</li><li><strong>Aa</strong>: tamaño del texto, letra más legible y los temas de color.</li></ul>", "<ul><li>El <strong>buscador</strong> de arriba encuentra conjuros, monstruos, reglas, objetos, rasgos, dotes y habilidades a la vez (también lo que añadas tú).</li><li><strong>⚙</strong>: zoom, ordenar o quitar ventanas, las <strong>copias de seguridad</strong>, dónde se guarda, que la pantalla no se apague y buscar actualizaciones.</li><li><strong>Aa</strong>: tamaño del texto, letra más legible y los temas de color.</li></ul>"],
+        "⚔️ Modo combate": ["<ul><li><strong>⏩ turnos</strong>: a quién le toca, en grande, y quién va después. <strong>◀ anterior</strong> y <strong>siguiente ▶</strong> pasan el turno (van a la par con la iniciativa).</li><li><strong>🐲 criatura del turno</strong>: el bloque del bestiario de quien le toca, o su ficha resumida si es de la party.</li><li>En pestañas: con la criatura del turno, la <strong>party</strong> y el <strong>bestiario</strong>; a la derecha, la <strong>⏱️ iniciativa</strong> con las condiciones, las acciones y las reglas.</li><li><strong>❤️</strong> en cada uno: un número y <strong>daño</strong>, <strong>cura</strong> o <strong>vida temporal</strong>. Si se estaba concentrando, salta la tirada de concentración.</li><li><strong>✎</strong> cambia sus PG, su iniciativa, su nombre y sus <strong>estados</strong> (sus dibujos se pulsan para leerlos): cada criatura es única.</li><li>Suena al pasar de turno y de ronda (🔔 lo calla).</li><li>Las dos primeras también se pueden poner en cualquier tablero: <strong>🧰 → ▶️ turno a turno</strong>.</li></ul>", "<ul><li><strong>⏩ turnos</strong>: a quién le toca, en grande, y quién va después. <strong>◀ anterior</strong> y <strong>siguiente ▶</strong> pasan el turno (van a la par con la iniciativa).</li><li><strong>🐲 criatura del turno</strong>: el bloque del bestiario de quien le toca, o su ficha resumida si es de la party.</li><li>Las <strong>condiciones</strong> y las <strong>reglas</strong>, juntas en pestañas, y la <strong>⏱️ iniciativa</strong> para añadir o quitar a alguien.</li><li>Las dos primeras también se pueden poner en cualquier tablero: <strong>🧰 → ▶️ turno a turno</strong>.</li></ul>", "<ul><li><strong>⏩ turnos</strong>: a quién le toca, en grande, y quién va después. <strong>◀ anterior</strong> y <strong>siguiente ▶</strong> pasan el turno (van a la par con la iniciativa).</li><li><strong>🐲 criatura del turno</strong>: el bloque del bestiario de quien le toca, o su ficha resumida si es de la party.</li><li>Las <strong>condiciones</strong> y las <strong>reglas</strong>, juntas en pestañas, y la <strong>⏱️ iniciativa</strong> para añadir o quitar a alguien.</li><li><strong>✎</strong> en cada uno (en los turnos, la criatura del turno y la iniciativa) cambia sus PG, su iniciativa, su nombre y sus <strong>estados</strong>: cada criatura es única.</li><li>Las dos primeras también se pueden poner en cualquier tablero: <strong>🧰 → ▶️ turno a turno</strong>.</li></ul>"],
+        "🛠️ Crear contenido nuevo": ["<p>El botón <strong>🛠️</strong> (arriba a la izquierda, junto a 📚) abre el <strong>compendio</strong>: ahí añades monstruos, objetos, conjuros y más cosas (especies, dotes…).</p><ul><li><strong>＋ nuevo</strong>: rellenas un formulario.</li><li><strong>⧉ copiar</strong> uno del SRD y cambiarlo, para tu versión.</li><li><strong>📋 pegar un bloque</strong> copiado de D&amp;D Beyond o de un PDF: el formulario se rellena solo.</li><li><strong>⬆ importar</strong> muchos a la vez con la plantilla.</li></ul><p>Arriba a la derecha eliges qué hacer: <strong>＋ añadir</strong>, <strong>✎ editar</strong> lo que ya hay (también lo del SRD: se guarda tu versión) o <strong>🗑️ borrar</strong> (lo del SRD se puede recuperar).</p><p>Luego salen en el bestiario, los encuentros, la tienda, los conjuros y el buscador, con «🛠️ tuyo». Su primera pestaña, <strong>❓ cómo añadir</strong>, lo explica paso a paso.</p>", "<p>El botón <strong>🛠️</strong> (arriba a la izquierda, junto a 📚) abre el <strong>compendio</strong>: ahí añades monstruos, objetos, conjuros y más cosas (especies, dotes…).</p><ul><li><strong>＋ nuevo</strong>: rellenas un formulario.</li><li><strong>⧉ copiar</strong> uno del SRD y cambiarlo, para tu versión.</li><li><strong>📋 pegar un bloque</strong> copiado de D&amp;D Beyond o de un PDF: el formulario se rellena solo.</li><li><strong>⬆ importar</strong> muchos a la vez con la plantilla.</li></ul><p>Luego salen en el bestiario, los encuentros, la tienda, los conjuros y el buscador, con «🛠️ tuyo». Su primera pestaña, <strong>❓ cómo añadir</strong>, lo explica paso a paso.</p>"],
+        "🛡️ Modo party": ["<p><strong>🧝 Fichas de la party</strong>: elige un personaje arriba y su ficha se abre como un libro. Al lado de cada uno, <strong>✎</strong> edita su ficha y <strong>🗑</strong> lo quita; <strong>＋</strong> añade otro y <strong>📥</strong> lo trae de D&amp;D Beyond o Nivel20 (y se recuerda de dónde, para actualizarlo).</p><ul><li>La tarjeta: retrato, <strong>PG</strong> (se cambian ahí mismo), CA y características.</li><li>Las secciones: historia, la ficha (combate, habilidades, acciones, conjuros, inventario, rasgos), sus <strong>criaturas</strong> (compañeros y monturas, con su perfil del bestiario), PNJ y notas, <strong>imágenes</strong>, extra y lo del máster.</li><li>También está en <strong>🧰 → mesa</strong>, para ponerla en un tablero.</li></ul><p>Y el modo <strong>📝 notas</strong>: tus documentos y seis post-its.</p>", "<p><strong>🧝 Fichas de la party</strong>: elige un personaje arriba y su ficha se abre como un libro.</p><ul><li>La tarjeta: retrato, <strong>PG</strong> (se cambian ahí mismo), CA y características.</li><li>Las secciones: historia, la ficha (combate, habilidades, acciones, conjuros, inventario, rasgos), sus <strong>criaturas</strong> (compañeros y monturas, con su perfil del bestiario), PNJ y notas, <strong>imágenes</strong>, extra y lo del máster.</li><li>También está en <strong>🧰 → mesa</strong>, para ponerla en un tablero.</li></ul><p>Y el modo <strong>📝 notas</strong>: tus documentos y seis post-its.</p>"]
+    };
+    const TUTORIAL_ORDENADOR = [
+        [ocT("👋 Bienvenida"), "amarillo", ocT("<p>Esto es tu <strong>pantalla de máster</strong>: un tablero con ventanas que pones, mueves y quitas a tu gusto.</p><ul><li>Las <strong>pestañas de arriba</strong> son tus tableros (por ejemplo, uno para combate y otro para la ciudad).</li><li>Cada ventana es una herramienta: la iniciativa, el bestiario, las reglas, notas…</li><li>Este tablero es el tutorial: cuando ya no lo necesites, quítalo con <strong>✎</strong> (arriba, junto a las pestañas).</li></ul>")],
+        [ocT("🪟 Las ventanas"), "celeste", ocT("<ul><li><strong>Toca la barra</strong> de una ventana para plegarla o desplegarla.</li><li><strong>Mantén pulsada la barra</strong> y arrastra para moverla.</li><li>La esquina de abajo a la derecha cambia su <strong>tamaño</strong>.</li><li><strong>✎</strong> le cambia el nombre, el color y el tamaño de la letra; <strong>−</strong> la pliega y <strong>✕</strong> la quita.</li><li>Suelta una ventana sobre la barra de otra y se <strong>juntan en pestañas</strong>; ⇱ la vuelve a sacar.</li></ul>")],
+        [ocT("🗂️ Tableros y campañas"), "verde", ocT("<ul><li><strong>＋</strong> (junto a las pestañas) crea un tablero nuevo, vacío o desde una plantilla; <strong>✎</strong> cambia el de ahora: nombre, colores o quitarlo.</li><li>Mantén pulsada una pestaña para <strong>cambiarla de sitio</strong>.</li><li><strong>📚</strong> son tus campañas: cada una con sus tableros, su party y sus documentos, sin mezclarse.</li></ul>")],
+        [ocT("🧰 Añadir herramientas"), "naranja", ocT("<p>El botón <strong>🧰</strong> (arriba a la izquierda) abre todas las ventanas que puedes poner, por grupos:</p><ul><li><strong>combate</strong>: iniciativa, condiciones, encuentros…</li><li><strong>▶️ turno a turno</strong>: los turnos y la criatura del turno.</li><li><strong>consulta</strong>: reglas, conjuros, bestiario, tienda…</li><li><strong>mesa</strong>: la party, las fichas de la party, sonido ambiente, efectos de sonido, música…</li><li><strong>mundo</strong>: generadores de nombres, PNJ, dungeons, negocios, botín…</li><li><strong>apuntes</strong>: post-its, dibujo, documentos…</li></ul>")],
+        [ocT("🔍 Buscar, crear y ajustes"), "morado", ocT("<ul><li>El <strong>buscador</strong> de arriba encuentra conjuros, monstruos, reglas, objetos, rasgos, dotes y habilidades a la vez (también lo que añadas tú).</li><li><strong>⚙</strong>: zoom, ordenar o quitar ventanas, atajos y las <strong>copias de seguridad</strong> (exportar e importar).</li><li><strong>Aa</strong>: tamaño del texto, letra más legible, los temas de color y el <strong>🌐 idioma</strong>.</li></ul>")],
+        [ocT("🛠️ Crear contenido nuevo"), "turquesa", ocT("<p>El botón <strong>🛠️</strong> (arriba a la izquierda, junto a 📚) abre el <strong>compendio</strong>: ahí añades monstruos, objetos, conjuros y más cosas (especies, dotes…).</p><ul><li><strong>＋ nuevo</strong>: rellenas un formulario.</li><li><strong>⧉ copiar</strong> uno del SRD y cambiarlo, para tu versión.</li><li><strong>📋 pegar un bloque</strong> copiado de D&amp;D Beyond o de un PDF: el formulario se rellena solo.</li><li><strong>⬆ importar</strong> muchos a la vez con la plantilla.</li></ul><p>Arriba a la derecha eliges qué hacer: <strong>＋ añadir</strong>, <strong>✎ editar</strong> lo que ya hay (también lo del SRD: se guarda tu versión) o <strong>🗑️ borrar</strong> (lo del SRD se puede recuperar), con lo tuyo por categorías. Al guardar, eliges su <strong>categoría</strong> (de qué libro).</p><p>Luego salen en el bestiario, los encuentros, la tienda, los conjuros y el buscador, con «🛠️ tuyo». Su primera pestaña, <strong>❓ cómo añadir</strong>, lo explica paso a paso.</p>")],
+        [ocT("🎲 Los dados"), "rosa", ocT("<ul><li>El <strong>botón redondo</strong> de abajo a la derecha (o la tecla <strong>D</strong>) abre los dados; pulsándolo otra vez se pliegan.</li><li>Toca los dados que quieras, pon el modificador y <strong>tirar</strong>. Con ventaja o desventaja, el d20 se tira dos veces.</li><li>Las últimas tiradas quedan debajo, para repetirlas.</li><li>En las fichas, los números con dados también se tiran tocándolos: prueba aquí con 1d20+5.</li></ul>")],
+        [ocT("💾 Tus datos"), "gris", ocT("<ul><li>Todo lo que haces se guarda <strong>sólo en este dispositivo</strong>: no se sube a ningún sitio.</li><li>Si borras los datos del navegador, se pierde: haz de vez en cuando una copia con <strong>⚙ → exportar</strong>.</li><li>Para llevarlo a otro dispositivo: exportar aquí e <strong>importar</strong> allí.</li></ul>")],
+        [ocT("⌨️ Atajos"), "azul", ocT("<p>Con teclado va todo más rápido (pulsa <strong>?</strong> para verlos todos):</p><ul><li><strong>/</strong> buscar · <strong>A</strong> añadir una ventana · <strong>N</strong> post-it nuevo</li><li><strong>D</strong> dados · <strong>I</strong> iniciativa · <strong>C</strong> campañas</li><li><strong>[</strong> y <strong>]</strong> tablero anterior y siguiente</li><li><strong>+</strong> y <strong>−</strong> zoom del tablero</li></ul>")],
+        ...TARJETAS_MODOS,
+    ];
+    const TUTORIAL_TABLETA = [
+        [ocT("👋 Bienvenida"), "amarillo", ocT("<p>Esto es tu <strong>pantalla de máster</strong>: un tablero con ventanas que pones, mueves y quitas a tu gusto.</p><ul><li>Las <strong>pestañas de arriba</strong> son tus tableros (uno para combate, otro para la ciudad…); desliza la fila con el dedo para ver todas.</li><li>Cada ventana es una herramienta: la iniciativa, el bestiario, las reglas, notas…</li><li>Este tablero es el tutorial: cuando ya no lo necesites, quítalo con <strong>✎</strong> (arriba, junto a las pestañas).</li></ul>")],
+        [ocT("✋ Con el dedo"), "celeste", ocT("<ul><li><strong>Desliza</strong> para moverte por el tablero; con <strong>dos dedos</strong>, pellizcando, lo acercas o lo alejas (también en los dibujos).</li><li><strong>Toca la barra</strong> de una ventana para plegarla o desplegarla.</li><li>Para moverla, <strong>deja el dedo quieto en su barra</strong> hasta que la tablet vibre y la barra se marque, y arrastra.</li><li>La <strong>esquina de abajo a la derecha</strong> cambia su tamaño.</li><li>Suelta una ventana sobre la barra de otra y se <strong>juntan en pestañas</strong>; ⇱ la vuelve a sacar.</li><li><strong>✎</strong> le cambia el nombre, el color y la letra; <strong>−</strong> la pliega y <strong>✕</strong> la quita. El botón <strong>atrás</strong> cierra lo que tengas abierto.</li></ul>")],
+        [ocT("🗂️ Tableros y campañas"), "verde", ocT("<ul><li><strong>＋</strong> (junto a las pestañas) crea un tablero nuevo, vacío o desde una plantilla; <strong>✎</strong> cambia el de ahora: nombre, colores o quitarlo.</li><li>Deja el dedo sobre una pestaña para <strong>cambiarla de sitio</strong>.</li><li><strong>📚</strong> son tus campañas: cada una con sus tableros, su party y sus documentos, sin mezclarse.</li></ul>")],
+        TUTORIAL_ORDENADOR[3],
+        [ocT("🔍 Buscar, crear y ajustes"), "morado", ocT("<ul><li>El <strong>buscador</strong> de arriba encuentra conjuros, monstruos, reglas, objetos, rasgos, dotes y habilidades a la vez (también lo que añadas tú).</li><li><strong>⚙</strong>: zoom, ordenar o quitar ventanas, las <strong>copias de seguridad</strong>, dónde se guarda, que la pantalla no se apague y buscar actualizaciones.</li><li><strong>Aa</strong>: tamaño del texto, letra más legible, los temas de color y el <strong>🌐 idioma</strong>.</li></ul>")],
+        TUTORIAL_ORDENADOR[5],
+        [ocT("🎲 Los dados"), "rosa", ocT("<ul><li>El <strong>botón redondo</strong> de abajo a la derecha abre los dados; tocándolo otra vez se pliegan.</li><li>Toca los dados que quieras, pon el modificador y <strong>tirar</strong>. Con ventaja o desventaja, el d20 se tira dos veces.</li><li>Las últimas tiradas quedan debajo, para repetirlas.</li><li>En las fichas, los números con dados también se tiran tocándolos: prueba aquí con 1d20+5.</li></ul>")],
+        [ocT("💾 Tus datos"), "gris", ocT("<ul><li>Todo se guarda <strong>sólo en esta tablet</strong>: no se sube a ningún sitio.</li><li>Dentro de la app, si la desinstalas, se pierde. Mejor en una <strong>carpeta</strong> (⚙ → dónde se guarda): sigue ahí, se puede copiar al ordenador y la app deja una copia al día.</li><li>Haz de vez en cuando una copia con <strong>⚙ → exportar</strong>; para llevarlo a otro sitio, <strong>importar</strong> allí.</li><li>Desde otras apps, <strong>Compartir</strong> o <strong>Abrir con</strong> trae copias, imágenes, PDF y audios.</li></ul>")],
+        [ocT("📺 En la mesa"), "azul", ocT("<ul><li>La <strong>pantalla de jugadores</strong> sale en la tele o el monitor si los conectas por cable; si no, en otra ventana, al lado si cabe.</li><li>La <strong>música</strong> sigue sonando aunque dejes la app detrás o apagues la pantalla, y los botones de volumen son los suyos.</li><li>Mientras la app está a la vista, <strong>la pantalla no se apaga</strong> (se cambia en ⚙).</li></ul>")],
+        ...TARJETAS_MODOS,
+    ];
+    const TUTORIAL = EN_ANDROID ? TUTORIAL_TABLETA : TUTORIAL_ORDENADOR;
     // Los tableros de tutorial de antes: la nota nueva del compendio, y la
     // de «buscar» sin lo del ＋ de al lado del buscador (que ya no está).
     function ponerAlDiaTutorial() {
-        const nueva = TUTORIAL.find((t) => t[0] === "🛠️ Crear contenido nuevo");
-        const buscar = TUTORIAL.find((t) => t[0] === "🔍 Buscar, crear y ajustes");
+        const nueva = TUTORIAL.find((t) => t[0] === ocT("🛠️ Crear contenido nuevo"));
+        const buscar = TUTORIAL.find((t) => t[0] === ocT("🔍 Buscar, crear y ajustes"));
         let algo = false;
         todas.campanas.forEach((c) => c.perfiles.filter((pf) => pf.nombre === "📖 tutorial").forEach((pf) => {
-            pf.modulos.filter((m) => m.tipo === "tarjeta" && m.titulo === "🔍 Buscar, crear y ajustes" && m.datos
+            // En la app de Android, las tarjetas del de ordenador que siguen
+            // como venían pasan a las de la tableta (las tocadas, no).
+            if (EN_ANDROID) {
+                pf.modulos.forEach((m) => {
+                    const i = m.tipo === "tarjeta" && m.datos ? TUTORIAL_ORDENADOR.findIndex((t) => t[2] === m.datos.html) : -1;
+                    if (i >= 0 && TUTORIAL_TABLETA[i] !== TUTORIAL_ORDENADOR[i]) {
+                        [m.titulo, m.color, m.datos.html] = TUTORIAL_TABLETA[i];
+                        algo = true;
+                    }
+                });
+            }
+            pf.modulos.filter((m) => m.tipo === "tarjeta" && m.titulo === ocT("🔍 Buscar, crear y ajustes") && m.datos
                 && /tus\s+creaciones/.test(m.datos.html || "")).forEach((m) => {
                 m.datos.html = buscar[2];
                 algo = true;
             });
-            if (!pf.modulos.some((m) => m.titulo === nueva[0])) {
-                const y = Math.max(0, ...pf.modulos.map((m) => m.y + m.h)) + 20;
-                pf.modulos.push({ id: "m" + siguienteId++, tipo: "tarjeta", x: 10, y, w: 410, h: 540, titulo: nueva[0],
-                    color: nueva[1], plegado: false, escala: 1, datos: { html: nueva[2] } });
-                algo = true;
-            }
+            // Las que siguen como venían, a lo de ahora.
+            pf.modulos.forEach((m) => {
+                const viejas = m.tipo === "tarjeta" && m.datos && TUTORIAL_VIEJO[m.titulo];
+                const ahora = viejas && viejas.includes(m.datos.html) && TUTORIAL.find((t) => t[0] === ocT(m.titulo));
+                if (ahora) {
+                    [m.titulo, m.color, m.datos.html] = ahora;
+                    if (TARJETAS_MODOS.includes(ahora)) {
+                        m.h = Math.max(m.h, ALTO_MODOS);
+                    }
+                    algo = true;
+                }
+            });
+            // Las que faltan, en una fila debajo de todo.
+            const y = Math.max(0, ...pf.modulos.map((m) => m.y + m.h)) + 20;
+            let x = 10;
+            [nueva, ...TARJETAS_MODOS].forEach((t) => {
+                if (t && !pf.modulos.some((m) => m.titulo === t[0])) {
+                    pf.modulos.push({ id: "m" + siguienteId++, tipo: "tarjeta", x, y, w: 410,
+                        h: TARJETAS_MODOS.includes(t) ? ALTO_MODOS : 540, titulo: t[0],
+                        color: t[1], plegado: false, escala: 1, datos: { html: t[2] } });
+                    x += 430;
+                    algo = true;
+                }
+            });
         }));
         if (algo) {
             guardar();
@@ -17153,17 +9933,23 @@
     }
     function perfilTutorial() {
         return { nombre: "📖 tutorial", color: "", colorPestana: "",
-            modulos: TUTORIAL.map(([titulo, color, html], i) => ({ tipo: "tarjeta", x: (i % 4) * 430, y: Math.floor(i / 4) * 560,
-                w: 410, h: 540, titulo, color, plegado: false, escala: 1, datos: { html } })) };
+            // En filas de cuatro (en la tableta, de tres: lo que cabe).
+            modulos: TUTORIAL.map(([titulo, color, html], i) => ({ tipo: "tarjeta", x: (i % (EN_ANDROID ? 3 : 4)) * 430,
+                y: Math.floor(i / (EN_ANDROID ? 3 : 4)) * 560,
+                w: 410, h: TARJETAS_MODOS.includes(TUTORIAL[i]) ? ALTO_MODOS : 540, titulo, color, plegado: false, escala: 1,
+                datos: { html } })) };
     }
     // Una campaña nueva: el tutorial y luego las plantillas de tableros.
     function crearCampana(nombre, unidades, edicion) {
-        const c = { id: "c" + siguienteCampana++, nombre: nombre || "campaña " + (todas.campanas.length + 1), pjs: [],
+        const c = { id: "c" + siguienteCampana++, nombre: nombre || ocT("campaña {n}", { n: todas.campanas.length + 1 }), pjs: [],
             unidades: unidades === "metrico" ? "metrico" : "imperial", edicion: edicion === "2014" ? "2014" : "2024",
             perfiles: [perfilTutorial()].concat(perfilesDeSerie()).map((pf) => Object.assign(pf, { id: "p" + siguientePerfil++,
                 modulos: pf.modulos.map((m) => Object.assign(m, { id: "m" + siguienteId++ })) })) };
         c.activo = c.perfiles[0].id;
         c.conParty = true;
+        c.modos = modosDeSerie().map((mo) => Object.assign(mo, { id: "o" + siguienteModo++,
+            modulos: mo.modulos.map((m) => Object.assign(m, { id: "m" + siguienteId++ })) }));
+        c.conModos = true;
         return c;
     }
 
@@ -17177,7 +9963,7 @@
     // pasa al vuelo (un MutationObserver sobre la página), y al volver a
     // imperial se deja como estaba. Lo que escribes tú (las notas, los
     // campos) no se toca nunca. ----
-    const MEDIDAS = [["imperial", "📏 imperial: pies, libras y millas"], ["metrico", "📐 métrico: metros, kilos y kilómetros"]];
+    const MEDIDAS = [["imperial", ocT("📏 imperial: pies, libras y millas")], ["metrico", ocT("📐 métrico: metros, kilos y kilómetros")]];
     const unidadesDe = (c) => (c && c.unidades === "metrico" ? "metrico" : "imperial");
     // (Sin una letra, un número ni una coma delante: «2d4 pies» se queda.)
     const NUM = "\\d+(?:[.,]\\d+)*";
@@ -17241,7 +10027,7 @@
             }
         });
     });
-    const EDICIONES = [["2024", "📕 2024 (D&D de 2024, SRD 5.2)"], ["2014", "📗 2014 (D&D de 2014, SRD 5.1)"]];
+    const EDICIONES = [["2024", ocT("📕 2024 (D&D de 2024, SRD 5.2)")], ["2014", ocT("📗 2014 (D&D de 2014, SRD 5.1)")]];
     const edicionDe = (c) => (c && c.edicion === "2014" ? "2014" : "2024");
     // Al cambiar de edición: las reglas, el buscador y las ventanas, otra vez.
     function aplicarEdicion() {
@@ -17280,8 +10066,8 @@
     }
     // Elegir las medidas o la edición (al crear una campaña): las opciones,
     // sin ninguna marcada, para que se elija. .valor() da la elegida o "".
-    const elegirUnidades = (id) => elegirUna(id, "¿qué medidas usáis?", MEDIDAS);
-    const elegirEdicion = (id) => elegirUna(id, "¿con qué reglas jugáis?", EDICIONES);
+    const elegirUnidades = (id) => elegirUna(id, ocT("¿qué medidas usáis?"), MEDIDAS);
+    const elegirEdicion = (id) => elegirUna(id, ocT("¿con qué reglas jugáis?"), EDICIONES);
     function elegirUna(id, leyenda, opciones) {
         const caja = crear("fieldset", "master-unidades");
         caja.appendChild(crear("legend", "oc-dados-etiqueta", leyenda));
@@ -17306,28 +10092,18 @@
     // letras y la propia app. Salen en la entrada y en ⚙ opciones, con
     // enlaces para verlas en la web.
     const CREDITOS = [
-        ["📖 Reglas, monstruos, conjuros, objetos, rasgos y dotes", "Este trabajo incluye material del System Reference"
-            + " Document 5.2 («SRD 5.2») de Wizards of the Coast LLC, disponible en dndbeyond.com/srd. El SRD 5.2 tiene licencia"
-            + " Creative Commons Reconocimiento 4.0 Internacional (CC BY 4.0). Está traducido al español: no es una traducción"
-            + " oficial. Los rasgos y dotes se han preparado a partir de 5e-bits/5e-database (MIT).",
-        [["el SRD 5.2", "https://www.dndbeyond.com/srd"], ["la licencia CC BY 4.0", "https://creativecommons.org/licenses/by/4.0/deed.es"],
+        ["📖 Reglas, monstruos, conjuros, objetos, rasgos y dotes", ocT("Este trabajo incluye material del System Reference Document 5.2 («SRD 5.2») de Wizards of the Coast LLC, disponible en dndbeyond.com/srd. El SRD 5.2 tiene licencia Creative Commons Reconocimiento 4.0 Internacional (CC BY 4.0). Está traducido al español: no es una traducción oficial. Los rasgos y dotes se han preparado a partir de 5e-bits/5e-database (MIT)."),
+        [[ocT("el SRD 5.2"), "https://www.dndbeyond.com/srd"], [ocT("la licencia CC BY 4.0"), "https://creativecommons.org/licenses/by/4.0/deed.es"],
             ["5e-database", "https://github.com/5e-bits/5e-database"]]],
-        ["📗 Reglas, monstruos, conjuros y objetos de 2014", "Esta obra incluye materiales extraídos del Documento de referencia del"
-            + " sistema 5.1 («SRD 5.1») de Wizards of the Coast LLC, que está disponible en"
-            + " https://dnd.wizards.com/es/resources/systems-reference-document. El SRD 5.1 tiene la licencia Creative Commons"
-            + " Atribución/Reconocimiento 4.0 Licencia Pública Internacional, que está disponible en"
-            + " https://creativecommons.org/licenses/by/4.0/legalcode.es.",
-        [["el SRD 5.1", "https://dnd.wizards.com/es/resources/systems-reference-document"],
-            ["la licencia CC BY 4.0", "https://creativecommons.org/licenses/by/4.0/legalcode.es"]]],
-        ["🔊 Sonidos", "Las grabaciones de sonido ambiente y efectos (cuando vienen con la app) son de la Google Sound Library,"
-            + " con licencia CC BY 4.0. Tus propios audios son tuyos y se quedan en tu dispositivo.",
-        [["Google Sound Library", "https://developers.google.com/assistant/tools/sound-library"],
-            ["la licencia CC BY 4.0", "https://creativecommons.org/licenses/by/4.0/deed.es"]]],
-        ["🔤 Tipografías", "Space Grotesk, DM Mono, Jersey 10, Pangolin, Patrick Hand, Caveat, Inter, Pixelify Sans, VT323, Atkinson Hyperlegible y Noto, con licencia SIL Open Font"
-            + " License 1.1.", [["la licencia OFL", "https://openfontlicense.org"]]],
-        ["🧩 La app", "Pantalla de máster, de Richi (rperezbarreda). El código tiene licencia MIT. Dungeons & Dragons y D&D son"
-            + " marcas de Wizards of the Coast; esta app no está afiliada ni respaldada por ellos.",
-        [["la licencia MIT", "https://opensource.org/license/mit"]]]
+        ["📗 Reglas, monstruos, conjuros y objetos de 2014", ocT("Esta obra incluye materiales extraídos del Documento de referencia del sistema 5.1 («SRD 5.1») de Wizards of the Coast LLC, que está disponible en https://dnd.wizards.com/es/resources/systems-reference-document. El SRD 5.1 tiene la licencia Creative Commons Atribución/Reconocimiento 4.0 Licencia Pública Internacional, que está disponible en https://creativecommons.org/licenses/by/4.0/legalcode.es."),
+        [[ocT("el SRD 5.1"), "https://dnd.wizards.com/es/resources/systems-reference-document"],
+            [ocT("la licencia CC BY 4.0"), "https://creativecommons.org/licenses/by/4.0/legalcode.es"]]],
+        ["🔊 Sonidos", ocT("Las grabaciones de sonido ambiente y efectos (cuando vienen con la app) son de la Google Sound Library, con licencia CC BY 4.0. Tus propios audios son tuyos y se quedan en tu dispositivo."),
+        [[ocT("Google Sound Library"), "https://developers.google.com/assistant/tools/sound-library"],
+            [ocT("la licencia CC BY 4.0"), "https://creativecommons.org/licenses/by/4.0/deed.es"]]],
+        ["🔤 Tipografías", ocT("Space Grotesk, DM Mono, Jersey 10, Pangolin, Patrick Hand, Caveat, Inter, Pixelify Sans, VT323, Atkinson Hyperlegible y Noto, con licencia SIL Open Font License 1.1."), [[ocT("la licencia OFL"), "https://openfontlicense.org"]]],
+        ["🧩 La app", ocT("Pantalla de máster, de Richi (rperezbarreda). El código tiene licencia MIT. Dungeons & Dragons y D&D son marcas de Wizards of the Coast; esta app no está afiliada ni respaldada por ellos."),
+        [[ocT("la licencia MIT"), "https://opensource.org/license/mit"]]]
     ];
     function cuerpoCreditos() {
         const cuerpo = crear("div", "master-creditos");
@@ -17340,7 +10116,7 @@
                 a.href = url;
                 a.target = "_blank";
                 a.rel = "noopener noreferrer";
-                a.setAttribute("aria-label", "Ver " + nombre + " en la web (se abre aparte)");
+                a.setAttribute("aria-label", ocT("Ver {nombre} en la web (se abre aparte)", { nombre: nombre }));
                 fila.appendChild(a);
             });
             sec.appendChild(fila);
@@ -17349,7 +10125,128 @@
         return cuerpo;
     }
     function verCreditos(vuelta) {
-        window.ocVentana.abrir({ titulo: "licencias y créditos", cuerpo: cuerpoCreditos(), vuelta, clase: "es-ancha" });
+        window.ocVentana.abrir({ titulo: ocT("licencias y créditos"), cuerpo: cuerpoCreditos(), vuelta, clase: "es-ancha" });
+    }
+
+    // LOS IDIOMAS EN LA ENTRADA: una banderita por idioma (los de
+    // idiomas/lista.json). El que aún no tiene nada traducido no cambia:
+    // avisa de que falta la traducción y de cómo ayudar con ella.
+    const IDIOMA_EN_CASTELLANO = { es: "castellano", ca: "catalán", eu: "euskera", gl: "gallego" };
+    const TRADUCCIONES_URL = "https://github.com/rperezbarreda/pantalla_master/tree/main/traducciones";
+    // La bandera de un idioma (el dibujo está en ajustes.js: también la
+    // usa Aa).
+    const banderaDe = (codigo) => window.ocBandera(codigo);
+    function idiomasDeEntrada(entrada) {
+        const caja = crear("div", "master-entrada-idiomas");
+        caja.setAttribute("role", "group");
+        caja.setAttribute("aria-label", ocT("Idioma de la app"));
+        const ahora = window.ocIdioma ? window.ocIdioma.codigo : "es";
+        const pintar = (lista) => {
+            caja.replaceChildren(...lista.map((x) => {
+                const b = botonDe("master-entrada-idioma", "", () => elegirIdiomaEntrada(x, ahora, entrada, b));
+                b.setAttribute("aria-pressed", x.codigo === ahora ? "true" : "false");
+                const nombre = crear("span", "", x.nombre);
+                nombre.lang = x.codigo;
+                b.append(banderaDe(x.codigo), nombre);
+                return b;
+            }));
+        };
+        pintar([{ codigo: "es", nombre: "Castellano", interfaz: 100 }, { codigo: "ca", nombre: "Català", interfaz: 0 },
+            { codigo: "eu", nombre: "Euskara", interfaz: 0 }, { codigo: "gl", nombre: "Galego", interfaz: 0 }]);
+        fetch("idiomas/lista.json").then((r) => (r.ok ? r.json() : null)).then((lista) => {
+            if (Array.isArray(lista) && lista.length) {
+                pintar(lista.filter((x) => x && typeof x.codigo === "string" && typeof x.nombre === "string"));
+            }
+        }).catch(() => {});
+        return caja;
+    }
+    function elegirIdiomaEntrada(x, ahora, entrada, boton) {
+        if (x.codigo === ahora) {
+            return;
+        }
+        if (x.codigo !== "es" && !(x.interfaz > 0)) {
+            avisoSinTraducir(x, entrada, boton);
+            return;
+        }
+        try {
+            if (x.codigo === "es") {
+                localStorage.removeItem("richi-idioma");
+            } else {
+                localStorage.setItem("richi-idioma", x.codigo);
+            }
+        } catch (e) {
+            return;
+        }
+        avisar(ocT("Cambiando de idioma…"));
+        const almacen = window.ocAlmacen;
+        (almacen && almacen.guardarYa ? almacen.guardarYa().catch(() => null) : Promise.resolve()).then(() => location.reload());
+    }
+    // El aviso de que un idioma aún no está traducido, encima de la entrada.
+    function avisoSinTraducir(x, entrada, volverA) {
+        const idioma = IDIOMA_EN_CASTELLANO[x.codigo] || x.nombre;
+        const fondo = crear("div", "master-entrada master-aviso-web");
+        fondo.setAttribute("role", "alertdialog");
+        fondo.setAttribute("aria-modal", "true");
+        fondo.setAttribute("aria-labelledby", "master-sin-traducir-titulo");
+        fondo.setAttribute("aria-describedby", "master-sin-traducir-texto");
+        const caja = crear("div", "master-entrada-caja");
+        const titulo = crear("h2", "master-entrada-titulo", ocT("Todavía sin traducir"));
+        titulo.id = "master-sin-traducir-titulo";
+        titulo.prepend(banderaDe(x.codigo), " ");
+        const texto = crear("div");
+        texto.id = "master-sin-traducir-texto";
+        const correo = crear("a", "", "contacto@richi.blog");
+        correo.href = "mailto:contacto@richi.blog";
+        const partes = ocT("Para cualquier duda o para colaborar, escríbeme a {correo}.").split("{correo}");
+        const pCorreo = crear("p", "master-entrada-texto", partes[0]);
+        pCorreo.append(correo, partes.slice(1).join(""));
+        texto.append(
+            crear("p", "master-entrada-texto", ocT("La traducción al {idioma} aún no está hecha: de momento, la app sólo está en castellano.", { idioma })),
+            crear("p", "master-entrada-texto", ocT("Si quieres ayudar a traducirla, usa las herramientas de la propia app: en Aa → 🌐 idioma eliges el idioma y, con «🧪 probar un archivo de traducción…», ves tu traducción en la app mientras la haces.")),
+            crear("p", "master-entrada-texto", ocT("Toda ayuda es bienvenida: no conozco estos idiomas y no quiero usar traducciones automáticas.")),
+            pCorreo);
+        const ayuda = crear("a", "oc-vida-accion", ocT("📖 cómo ayudar a traducir"));
+        ayuda.href = TRADUCCIONES_URL;
+        ayuda.target = "_blank";
+        ayuda.rel = "noopener noreferrer";
+        ayuda.setAttribute("aria-label", ocT("Cómo ayudar a traducir la app (se abre aparte, en GitHub)"));
+        const vale = botonDe("oc-vida-accion es-principal", ocT("entendido"), () => cerrar());
+        const botones = crear("div", "master-anadir-otras");
+        botones.append(vale, ayuda);
+        caja.append(titulo, texto, botones);
+        fondo.appendChild(caja);
+        entrada.inert = true;
+        function cerrar() {
+            entrada.inert = false;
+            fondo.remove();
+            if (volverA && volverA.focus) {
+                volverA.focus();
+            }
+        }
+        fondo.addEventListener("keydown", (e) => {
+            if (e.key === "Escape") {
+                e.preventDefault();
+                e.stopPropagation();
+                cerrar();
+            } else if (e.key === "Tab") {
+                const cosas = [correo, vale, ayuda];
+                const i = cosas.indexOf(document.activeElement);
+                if (e.shiftKey && i <= 0) {
+                    e.preventDefault();
+                    cosas[cosas.length - 1].focus();
+                } else if (!e.shiftKey && i === cosas.length - 1) {
+                    e.preventDefault();
+                    cosas[0].focus();
+                }
+            }
+        });
+        fondo.addEventListener("click", (e) => {
+            if (e.target === fondo) {
+                cerrar();
+            }
+        });
+        document.body.appendChild(fondo);
+        vale.focus();
     }
 
     // LA ENTRADA: al abrir la app, con qué campaña se juega (como un
@@ -17363,9 +10260,9 @@
         const icono = crear("img", "master-entrada-icono");
         icono.src = "imagenes/icono.svg";
         icono.alt = "";
-        const titulo = crear("h2", "master-entrada-titulo", "Pantalla de máster");
+        const titulo = crear("h2", "master-entrada-titulo", ocT("Pantalla de máster"));
         titulo.id = "master-entrada-titulo";
-        caja.append(icono, titulo);
+        caja.append(icono, titulo, idiomasDeEntrada(fondo));
         const principal = document.querySelector(".app-principal") || lienzo.closest("main");
         const dados = document.querySelector(".oc-boton-dados");
         const fuera = [principal, dados].filter(Boolean);
@@ -17380,62 +10277,60 @@
             if (c !== todo || sinGuardarTodavia) {
                 activarCampana(c);
             } else {
-                avisar("Campaña: " + c.nombre + ".");
+                avisar(ocT("Campaña: {nombre}.", { nombre: c.nombre }));
             }
             const p = document.getElementById("master-pestana-" + estado.id);
             (p || botonCampana).focus();
         }
         if (!sinGuardarTodavia) {
-            caja.appendChild(crear("p", "master-entrada-texto", "¿Con qué campaña jugáis hoy?"));
+            caja.appendChild(crear("p", "master-entrada-texto", ocT("¿Con qué campaña jugáis hoy?")));
             const ul = crear("ul", "master-entrada-lista");
-            ul.setAttribute("aria-label", "Tus campañas");
+            ul.setAttribute("aria-label", ocT("Tus campañas"));
             todas.campanas.forEach((c) => {
                 const li = crear("li");
                 const b = botonDe("master-entrada-campana", "", () => entrar(c));
                 b.append(crear("span", "master-entrada-nombre", "📚 " + c.nombre), crear("span", "master-entrada-detalle",
-                    c.perfiles.length + (c.perfiles.length === 1 ? " tablero" : " tableros") + " · " + c.pjs.length
-                    + (c.pjs.length === 1 ? " personaje" : " personajes") + (c === todo ? " · la última" : "")));
+                    c.perfiles.length + (c.perfiles.length === 1 ? ocT(" tablero") : ocT(" tableros")) + " · " + c.pjs.length
+                    + (c.pjs.length === 1 ? ocT(" personaje") : ocT(" personajes")) + (c === todo ? ocT(" · la última") : "")));
                 li.appendChild(b);
                 ul.appendChild(li);
             });
             caja.appendChild(ul);
         } else {
-            caja.appendChild(crear("p", "master-entrada-texto", "¡Hola! Para empezar, crea tu primera campaña: ponle el nombre"
-                + " que quieras (lo puedes cambiar luego)."));
+            caja.appendChild(crear("p", "master-entrada-texto", ocT("¡Hola! Para empezar, crea tu primera campaña: ponle el nombre que quieras (lo puedes cambiar luego).")));
         }
         const form = crear("form", "master-entrada-form");
-        const et = crear("label", "oc-dados-etiqueta", sinGuardarTodavia ? "nombre de la campaña" : "o crea una nueva");
+        const et = crear("label", "oc-dados-etiqueta", sinGuardarTodavia ? ocT("nombre de la campaña") : ocT("o crea una nueva"));
         const input = crear("input", "oc-dados-texto");
         input.id = "master-entrada-nombre";
         input.maxLength = 40;
         input.autocomplete = "off";
-        input.placeholder = "La maldición de la torre, Los de los martes…";
+        input.placeholder = ocT("La maldición de la torre, Los de los martes…");
         if (sinGuardarTodavia) {
             input.required = true;
             input.setAttribute("aria-required", "true");
         }
         et.htmlFor = input.id;
-        const crearB = crear("button", "oc-vida-accion es-principal", "＋ crear y empezar");
+        const crearB = crear("button", "oc-vida-accion es-principal", ocT("＋ crear y empezar"));
         crearB.type = "submit";
         const medidas = elegirUnidades("master-entrada-unidades");
         const edicion = elegirEdicion("master-entrada-edicion");
-        form.append(et, input, edicion, medidas, crearB, crear("p", "oc-hoja-nota", "Viene con un tablero de tutorial que explica las opciones,"
-            + " y con tableros de ejemplo para combate, tiendas, PNJ…"));
+        form.append(et, input, edicion, medidas, crearB, crear("p", "oc-hoja-nota", ocT("Viene con un tablero de tutorial que explica las opciones, y con tableros de ejemplo para combate, tiendas, PNJ…")));
         form.addEventListener("submit", (e) => {
             e.preventDefault();
             const n = input.value.trim();
             if (!n) {
-                avisar("Ponle un nombre a la campaña.");
+                avisar(ocT("Ponle un nombre a la campaña."));
                 input.focus();
                 return;
             }
             if (!edicion.valor()) {
-                avisar("Elige con qué reglas jugáis: las de 2024 o las de 2014. Se puede cambiar luego en ⚙ opciones.");
+                avisar(ocT("Elige con qué reglas jugáis: las de 2024 o las de 2014. Se puede cambiar luego en ⚙ opciones."));
                 edicion.foco();
                 return;
             }
             if (!medidas.valor()) {
-                avisar("Elige qué medidas usáis: imperial (pies) o métrico (metros). Se puede cambiar luego en ⚙ opciones.");
+                avisar(ocT("Elige qué medidas usáis: imperial (pies) o métrico (metros). Se puede cambiar luego en ⚙ opciones."));
                 medidas.foco();
                 return;
             }
@@ -17447,7 +10342,7 @@
                 todas.campanas.push(c);
             }
             entrar(c);
-            avisar("Campaña creada: " + n + ". Empieza por el tablero «tutorial».");
+            avisar(ocT("Campaña creada: {n}. Empieza por el tablero «tutorial».", { n: n }));
         });
         caja.appendChild(form);
         // Con el ejecutable, la carpeta empieza vacía; si este navegador tiene
@@ -17460,7 +10355,7 @@
         }
         if (antes) {
             const caja2 = crear("div", "master-entrada-traer");
-            const traerB = botonDe("oc-vida-accion", "📥 traer lo de antes", () => {
+            const traerB = botonDe("oc-vida-accion", ocT("📥 traer lo de antes"), () => {
                 traerB.disabled = true;
                 const nav = window.ocAlmacen.navegador;
                 for (let i = 0; i < nav.length; i++) {
@@ -17473,17 +10368,17 @@
                     .then(() => window.ocAlmacen.guardarYa()).then(() => location.reload())
                     .catch(() => {
                         traerB.disabled = false;
-                        avisar("No se ha podido traer todo.");
+                        avisar(ocT("No se ha podido traer todo."));
                     });
             });
-            caja2.append(crear("p", "oc-hoja-nota", "Este ordenador tiene guardado lo de una versión anterior de la pantalla"
-                + " (en el navegador). Esta carpeta empieza vacía; si quieres seguir con aquello, tráelo aquí:"), traerB);
+            caja2.append(crear("p", "oc-hoja-nota", EN_ANDROID
+                ? ocT("Esta app tiene guardado lo de antes de elegir la carpeta (dentro de la app). La carpeta empieza vacía; si quieres seguir con aquello, tráelo aquí:")
+                : ocT("Este ordenador tiene guardado lo de una versión anterior de la pantalla (en el navegador). Esta carpeta empieza vacía; si quieres seguir con aquello, tráelo aquí:")), traerB);
             caja.appendChild(caja2);
         }
         if (sinGuardarTodavia) {
             const traer = crear("div", "master-entrada-traer");
-            traer.append(crear("p", "oc-hoja-nota", "¿Tienes una copia de seguridad (de esta app o de la pantalla de máster del"
-                + " blog)? Impórtala:"), copias(() => {}));
+            traer.append(crear("p", "oc-hoja-nota", ocT("¿Tienes una copia de seguridad (de esta app o de la pantalla de máster del blog)? Impórtala:")), copias(() => {}));
             traer.querySelectorAll("button").forEach((b) => {
                 if (/exportar/.test(b.textContent)) {
                     b.remove();
@@ -17491,12 +10386,37 @@
             });
             caja.appendChild(traer);
         }
-        caja.appendChild(crear("p", "oc-hoja-nota master-entrada-privado", EN_CARPETA
-            ? "🔒 Todo se guarda en la carpeta «mis-datos», junto al programa." : "🔒 Todo se guarda sólo en este dispositivo."));
+        // En la app de Android, guardando dentro de ella (se pierde al
+        // desinstalarla): si la última copia es de hace más de dos semanas
+        // (o no hay ninguna), se recuerda.
+        if (EN_ANDROID && !EN_CARPETA && !sinGuardarTodavia) {
+            let c = {};
+            try {
+                c = JSON.parse(localStorage.getItem(CLAVE_COPIA) || "{}") || {};
+                if (!c.desde) {
+                    c.desde = Date.now();
+                    localStorage.setItem(CLAVE_COPIA, JSON.stringify(c));
+                }
+            } catch (e) {
+                c = {};
+            }
+            const dias = Math.floor((Date.now() - (c.ultima || c.desde || Date.now())) / 86400000);
+            if (dias >= 14) {
+                const recuerdo = crear("div", "master-entrada-traer");
+                const otras = crear("div", "master-anadir-otras");
+                otras.append(copias(() => {}).querySelector("button"), botonDe("oc-vida-accion", ocT("📁 guardar en una carpeta"),
+                    () => window.ocAndroid.elegirCarpeta()));
+                recuerdo.append(crear("p", "oc-hoja-nota", ocT("{n} Lo guardas dentro de la app: si la desinstalas, se pierde. Exporta una copia, o guárdalo en una carpeta (sigue ahí aunque desinstales).", { n: c.ultima ? ocT("💾 Tu última copia de seguridad es de hace {dias} días.", { dias: dias }) : ocT("💾 Aún no has hecho ninguna copia de seguridad.") })),
+                otras);
+                caja.appendChild(recuerdo);
+            }
+        }
+        caja.appendChild(crear("p", "oc-hoja-nota master-entrada-privado", EN_CARPETA && EN_ANDROID
+            ? ocT("🔒 Todo se guarda en tu carpeta «{nombre}», en este dispositivo.", { nombre: window.ocAlmacen.nombre })
+            : EN_CARPETA ? ocT("🔒 Todo se guarda en la carpeta «mis-datos», junto al programa.") : ocT("🔒 Todo se guarda sólo en este dispositivo.")));
         // El aviso de licencias, plegado (también en ⚙ opciones).
         const avisoLic = crear("details", "master-entrada-licencias");
-        avisoLic.append(crear("summary", "", "📜 Incluye material del SRD 5.2 de Wizards of the Coast (CC BY 4.0) · licencias y"
-            + " créditos"), cuerpoCreditos());
+        avisoLic.append(crear("summary", "", ocT("📜 Incluye material del SRD 5.2 de Wizards of the Coast (CC BY 4.0) · licencias y créditos")), cuerpoCreditos());
         caja.appendChild(avisoLic);
         fondo.appendChild(caja);
         fondo.addEventListener("keydown", (e) => {
@@ -17524,7 +10444,43 @@
             }
         });
         document.body.appendChild(fondo);
-        (fondo.querySelector(".master-entrada-campana") || input).focus();
+        // En la app de Android, la primera vez: antes de nada, la carpeta
+        // donde se guarda todo (ordenado y a salvo aunque se desinstale).
+        // Hasta elegirla (o decir que dentro de la app), sólo este paso.
+        let sinCarpeta = false;
+        try {
+            sinCarpeta = EN_ANDROID && !EN_CARPETA && sinGuardarTodavia && localStorage.getItem("richi-master-carpeta-no") !== "si";
+        } catch (e) {
+            sinCarpeta = false;
+        }
+        if (sinCarpeta) {
+            const resto = Array.from(caja.children).filter((x) => x !== icono && x !== titulo && !x.classList.contains("master-entrada-idiomas"));
+            resto.forEach((x) => {
+                x.hidden = true;
+            });
+            const paso = crear("div");
+            const elegir = botonDe("oc-vida-accion es-principal", ocT("📁 elegir o crear la carpeta"), () => window.ocAndroid.elegirCarpeta());
+            const dentro = botonDe("oc-vida-accion", ocT("📱 prefiero guardarlo dentro de la app"), () => {
+                try {
+                    localStorage.setItem("richi-master-carpeta-no", "si");
+                } catch (e) {
+                    // Sin guardar: se vuelve a preguntar la próxima vez.
+                }
+                paso.remove();
+                resto.forEach((x) => {
+                    x.hidden = false;
+                });
+                input.focus();
+            });
+            const botones = crear("div", "master-anadir-otras");
+            botones.append(elegir, dentro);
+            paso.append(crear("p", "master-entrada-texto", ocT("¡Hola! Antes de empezar, elige una carpeta para guardarlo todo (por ejemplo, «Documentos/Pantalla de máster»): tus campañas, imágenes, PDF y música, ordenados y a salvo aunque desinstales la app. También se puede copiar al ordenador.")),
+                botones, crear("p", "oc-hoja-nota", ocT("Si lo guardas dentro de la app, se borra al desinstalarla. Se puede cambiar cuando quieras en ⚙ opciones.")));
+            titulo.after(paso);
+            elegir.focus();
+        } else {
+            (fondo.querySelector(".master-entrada-campana") || input).focus();
+        }
         verAvisoWeb(fondo);
     }
 
@@ -17533,7 +10489,7 @@
     // a enseñar.
     const CLAVE_AVISO_WEB = "richi-master-aviso-web";
     function verAvisoWeb(entrada) {
-        if (location.hostname === "127.0.0.1" && location.port === "47321") {
+        if ((location.hostname === "127.0.0.1" && location.port === "47321") || EN_ANDROID) {
             return;
         }
         try {
@@ -17550,26 +10506,24 @@
         fondo.setAttribute("aria-labelledby", "master-aviso-web-titulo");
         fondo.setAttribute("aria-describedby", "master-aviso-web-texto");
         const caja = crear("div", "master-entrada-caja");
-        const titulo = crear("h2", "master-entrada-titulo", "⬇️ Mejor, la app");
+        const titulo = crear("h2", "master-entrada-titulo", ocT("⬇️ Mejor, la app"));
         titulo.id = "master-aviso-web-titulo";
         const texto = crear("div");
         texto.id = "master-aviso-web-texto";
-        texto.append(crear("p", "master-entrada-texto", "Recomiendo descargar la aplicación en vez de usar la versión web,"
-            + " por el simple hecho de que la web está alojada en Cloudflare y los días de fútbol queda inutilizada."),
-        crear("p", "oc-hoja-nota", "Para Windows, macOS y Linux: descomprime el .zip y ábrela con doble clic. Si ya tienes"
-            + " algo guardado aquí, haz una copia de seguridad (⚙ opciones) e impórtala en la app."));
-        const bajar = crear("a", "oc-vida-accion", "⬇️ descargar la app");
+        texto.append(crear("p", "master-entrada-texto", ocT("Recomiendo descargar la aplicación en vez de usar la versión web, por el simple hecho de que la web está alojada en Cloudflare y los días de fútbol queda inutilizada.")),
+        crear("p", "oc-hoja-nota", ocT("Gratis y sin conexión. Para Windows, macOS y Linux: descomprime el .zip y ábrela con doble clic. Para tablets Android: el .apk. Si ya tienes algo guardado aquí, haz una copia de seguridad (⚙ opciones) e impórtala en la app.")));
+        const bajar = crear("a", "oc-vida-accion", ocT("⬇️ descargar la app"));
         bajar.href = "https://github.com/rperezbarreda/pantalla_master/releases/latest";
         bajar.target = "_blank";
         bajar.rel = "noopener noreferrer";
-        bajar.setAttribute("aria-label", "Descargar la app para Windows, macOS o Linux (se abre aparte, en GitHub)");
-        const seguir = botonDe("oc-vida-accion", "seguir en la web", () => cerrarAviso());
+        bajar.setAttribute("aria-label", ocT("Descargar la app para Windows, macOS, Linux o tablets Android (se abre aparte, en GitHub)"));
+        const seguir = botonDe("oc-vida-accion", ocT("seguir en la web"), () => cerrarAviso());
         const botones = crear("div", "master-anadir-otras");
         botones.append(bajar, seguir);
         const marca = crear("label", "master-aviso-web-marca");
         const casilla = crear("input");
         casilla.type = "checkbox";
-        marca.append(casilla, document.createTextNode(" no volver a enseñar este aviso"));
+        marca.append(casilla, document.createTextNode(ocT(" no volver a enseñar este aviso")));
         caja.append(titulo, texto, botones, marca);
         fondo.appendChild(caja);
         entrada.inert = true;
@@ -17629,7 +10583,7 @@
             });
             const x = JSON.parse(texto);
             x.id = "c" + siguienteCampana++;
-            x.nombre = (c.nombre + " (copia)").slice(0, 40);
+            x.nombre = (ocT("{nombre} (copia)", { nombre: c.nombre })).slice(0, 40);
             const perfiles = {};
             x.perfiles.forEach((pf) => {
                 const nuevo = "p" + siguientePerfil++;
@@ -17640,6 +10594,13 @@
                 });
             });
             x.activo = perfiles[x.activo] || x.perfiles[0].id;
+            (x.modos || []).forEach((mo) => {
+                mo.id = "o" + siguienteModo++;
+                mo.modulos.forEach((m) => {
+                    m.id = "m" + siguienteId++;
+                });
+            });
+            x.modoActivo = "";
             todas.campanas.push(x);
             guardar();
             return x;
@@ -17648,9 +10609,9 @@
 
     function verCampanas() {
         const cuerpo = crear("div", "master-campanas");
-        cuerpo.appendChild(crear("p", "oc-hoja-nota", "Cada campaña tiene sus pestañas, sus ventanas y su party: no se mezclan."));
+        cuerpo.appendChild(crear("p", "oc-hoja-nota", ocT("Cada campaña tiene sus pestañas, sus ventanas y su party: no se mezclan.")));
         const ul = crear("ul", "master-anadir-lista");
-        ul.setAttribute("aria-label", "Campañas");
+        ul.setAttribute("aria-label", ocT("Campañas"));
         todas.campanas.forEach((c) => {
             const li = crear("li");
             const ahora = c === todo;
@@ -17664,8 +10625,8 @@
             const em = crear("span", "master-anadir-emoji", ahora ? "📖" : "📚");
             em.setAttribute("aria-hidden", "true");
             b.append(em, crear("span", "master-anadir-nombre", c.nombre), crear("span", "master-anadir-desc",
-                c.perfiles.length + (c.perfiles.length === 1 ? " pestaña" : " pestañas") + " · " + c.pjs.length +
-                (c.pjs.length === 1 ? " personaje" : " personajes") + (ahora ? " · la de ahora" : "")));
+                c.perfiles.length + (c.perfiles.length === 1 ? ocT(" pestaña") : ocT(" pestañas")) + " · " + c.pjs.length +
+                (c.pjs.length === 1 ? ocT(" personaje") : ocT(" personajes")) + (ahora ? ocT(" · la de ahora") : "")));
             if (ahora) {
                 b.setAttribute("aria-current", "true");
             }
@@ -17692,14 +10653,14 @@
         };
         const medidasNueva = elegirUnidades("master-campana-unidades");
         const edicionNueva = elegirEdicion("master-campana-edicion");
-        const nueva = formulario("master-campana-nueva", "campaña nueva", "campaña " + (todas.campanas.length + 1), "＋ crear", (n) => {
+        const nueva = formulario("master-campana-nueva", ocT("campaña nueva"), ocT("campaña {n}", { n: todas.campanas.length + 1 }), ocT("＋ crear"), (n) => {
             if (!edicionNueva.valor()) {
-                avisar("Elige con qué reglas jugáis: las de 2024 o las de 2014.");
+                avisar(ocT("Elige con qué reglas jugáis: las de 2024 o las de 2014."));
                 edicionNueva.foco();
                 return;
             }
             if (!medidasNueva.valor()) {
-                avisar("Elige qué medidas usáis: imperial (pies) o métrico (metros).");
+                avisar(ocT("Elige qué medidas usáis: imperial (pies) o métrico (metros)."));
                 medidasNueva.foco();
                 return;
             }
@@ -17709,7 +10670,7 @@
             activarCampana(c);
             botonCampana.focus();
         });
-        const renombrarla = formulario("master-campana-nombre", "nombre de esta campaña", todo.nombre, "guardar", (n) => {
+        const renombrarla = formulario("master-campana-nombre", ocT("nombre de esta campaña"), todo.nombre, "guardar", (n) => {
             if (!n) {
                 return;
             }
@@ -17718,13 +10679,13 @@
             pintarCampana();
             cerrar();
             botonCampana.focus();
-            avisar("Campaña: " + n + ".");
+            avisar(ocT("Campaña: {n}.", { n: n }));
         });
         let seguro = false;
-        const borrar = botonDe("oc-vida-accion", "🗑️ borrar esta campaña", () => {
+        const borrar = botonDe("oc-vida-accion", ocT("🗑️ borrar esta campaña"), () => {
             if (!seguro) {
                 seguro = true;
-                borrar.textContent = "🗑️ ¿seguro? se borran sus pestañas, ventanas y party: pulsa otra vez";
+                borrar.textContent = ocT("🗑️ ¿seguro? se borran sus pestañas, ventanas y party: pulsa otra vez");
                 return;
             }
             const i = todas.campanas.indexOf(todo);
@@ -17733,29 +10694,29 @@
             cerrar();
             activarCampana(todas.campanas[Math.max(0, i - 1)]);
             botonCampana.focus();
-            avisar("Borrada la campaña " + nombre + ".");
+            avisar(ocT("Borrada la campaña {nombre}.", { nombre: nombre }));
         });
         borrar.disabled = todas.campanas.length < 2;
         nueva.insertBefore(edicionNueva, nueva.querySelector("button"));
         nueva.insertBefore(medidasNueva, nueva.querySelector("button"));
-        const duplicar = botonDe("oc-vida-accion", "⧉ duplicar esta campaña", () => {
+        const duplicar = botonDe("oc-vida-accion", ocT("⧉ duplicar esta campaña"), () => {
             duplicar.disabled = true;
-            duplicar.textContent = "⧉ duplicando…";
+            duplicar.textContent = ocT("⧉ duplicando…");
             duplicarCampana(todo).then((x) => {
                 cerrar();
                 activarCampana(x);
                 botonCampana.focus();
-                avisar("Duplicada: ahora estás en «" + x.nombre + "» (la original sigue igual).");
+                avisar(ocT("Duplicada: ahora estás en «{nombre}» (la original sigue igual).", { nombre: x.nombre }));
             }).catch(() => {
                 duplicar.disabled = false;
-                duplicar.textContent = "⧉ duplicar esta campaña";
-                avisar("No se ha podido duplicar.");
+                duplicar.textContent = ocT("⧉ duplicar esta campaña");
+                avisar(ocT("No se ha podido duplicar."));
             });
-        }, "Duplicar la campaña " + todo.nombre + " (con sus tableros, party y documentos)");
+        }, ocT("Duplicar la campaña {nombre} (con sus tableros, party y documentos)", { nombre: todo.nombre }));
         const botonesC = crear("div", "master-anadir-otras");
         botonesC.append(duplicar, borrar);
         cuerpo.append(ul, nueva, renombrarla, botonesC);
-        const cerrar = window.ocVentana.abrir({ titulo: "campañas", cuerpo, vuelta: botonCampana, clase: "es-ancha" });
+        const cerrar = window.ocVentana.abrir({ titulo: ocT("campañas"), cuerpo, vuelta: botonCampana, clase: "es-ancha" });
     }
     pintarCampana();
     // LA BARRA, como un navegador: a la izquierda, pegado al tablero, 🧰
@@ -17765,20 +10726,20 @@
     // importar).
     botonAnadir.className = "master-pestana-mando master-herramientas";
     botonAnadir.textContent = "🧰";
-    botonAnadir.setAttribute("aria-label", "Añadir una ventana (herramientas)");
+    botonAnadir.setAttribute("aria-label", ocT("Añadir una ventana (herramientas)"));
     botonAnadir.setAttribute("aria-keyshortcuts", "A");
-    botonAnadir.title = "Herramientas: añadir una ventana (A)";
+    botonAnadir.title = ocT("Herramientas: añadir una ventana (A)");
     // ＋: el compendio (añadir monstruos, objetos, conjuros…), aparte.
     const botonCompendio = botonDe("master-crear", "🛠️", () => abrirCompendio(botonCompendio),
-        "Añadir al compendio: monstruos, objetos, conjuros…");
-    botonCompendio.title = "Añadir al compendio: monstruos, objetos, conjuros y más (con tutorial)";
+        ocT("Añadir al compendio: monstruos, objetos, conjuros…"));
+    botonCompendio.title = ocT("Añadir al compendio: monstruos, objetos, conjuros y más (con tutorial)");
     botonCompendio.setAttribute("aria-haspopup", "dialog");
-    pestanas.append(botonAnadir, botonCampana, botonCompendio, marco, mandosPestanas);
+    pestanas.append(botonAnadir, botonCampana, botonCompendio, marco, elegirTablero, mandosPestanas);
 
     const mandos = crear("div", "master-barra-mandos");
     const zoomCaja = crear("div", "master-zoom");
     zoomCaja.setAttribute("role", "group");
-    zoomCaja.setAttribute("aria-label", "Zoom del tablero");
+    zoomCaja.setAttribute("aria-label", ocT("Zoom del tablero"));
     zoomCaja.append(menosZoom, botonZoom, masZoom);
     zoomCaja.hidden = !HAY_ZOOM;
     const buscador = montarBuscador();
@@ -17789,10 +10750,10 @@
         if (input.value.trim()) {
             input.dispatchEvent(new Event("input", { bubbles: true }));
         }
-    }, "Buscar");
-    botonBuscar.title = "Buscar (/)";
-    const botonOpciones = botonDe("master-pestana-mando master-opciones-boton", "⚙", () => verOpciones(), "Opciones del tablero");
-    botonOpciones.title = "Opciones: zoom, dados, atajos, ordenar, exportar…";
+    }, ocT("Buscar"));
+    botonBuscar.title = ocT("Buscar (/)");
+    const botonOpciones = botonDe("master-pestana-mando master-opciones-boton", "⚙", () => verOpciones(), ocT("Opciones del tablero"));
+    botonOpciones.title = ocT("Opciones: zoom, dados, atajos, ordenar, exportar…");
     botonOpciones.setAttribute("aria-haspopup", "dialog");
     mandos.append(buscador, botonBuscar, botonOpciones);
     barra.prepend(pestanas, mandos);
@@ -17804,108 +10765,223 @@
             sec.append(crear("h3", "master-opciones-titulo", titulo), ...cosas);
             cuerpo.appendChild(sec);
         };
-        if (HAY_ZOOM && !enMovil.matches) {
-            fila("Zoom del tablero", zoomCaja);
+        if (HAY_ZOOM && !enMovil.matches && !esModo(estado)) {
+            fila(ocT("Zoom del tablero"), zoomCaja);
         }
         const accion = (texto, alPulsar) => botonDe("oc-vida-accion", texto, () => {
             cerrar();
             alPulsar();
         });
         const herramientas = crear("div", "master-anadir-otras");
-        herramientas.append(accion("🎲 dados (D)", () => {
+        herramientas.append(accion(ocT("🎲 dados (D)"), () => {
             const d = document.querySelector(".oc-boton-dados");
             if (d) {
                 d.click();
             }
-        }), accion("⌨ atajos de teclado (?)", () => verAtajos()));
-        fila("A mano", herramientas);
-        if (estado.modulos.length) {
+        }), accion(ocT("⌨ atajos de teclado (?)"), () => verAtajos()));
+        fila(ocT("A mano"), herramientas);
+        if (estado.modulos.length && !esModo(estado)) {
             const otras = crear("div", "master-anadir-otras");
             let seguro = false;
-            const vaciar = botonDe("oc-vida-accion", "🗑️ quitar todas", () => {
+            const vaciar = botonDe("oc-vida-accion", ocT("🗑️ quitar todas"), () => {
                 if (!seguro) {
                     seguro = true;
-                    vaciar.textContent = "🗑️ ¿seguro? pulsa otra vez";
+                    vaciar.textContent = ocT("🗑️ ¿seguro? pulsa otra vez");
                     return;
                 }
                 cerrar();
                 estado.modulos = [];
                 pintarTodo();
                 guardar();
-                avisar("Pestaña vacía.");
+                avisar(ocT("Pestaña vacía."));
             });
-            otras.append(accion("▦ ordenar las ventanas", () => {
+            otras.append(accion(ocT("▦ ordenar las ventanas"), () => {
                 ordenar();
                 pintarTodo();
                 guardar();
-                avisar("Ordenadas.");
+                avisar(ocT("Ordenadas."));
             }), vaciar);
-            fila("Las ventanas de esta pestaña", otras);
+            fila(ocT("Las ventanas de esta pestaña"), otras);
         }
-        const notaMedidas = crear("p", "oc-hoja-nota", "En métrico, lo que sale en pantalla (monstruos, conjuros, reglas, objetos,"
-            + " generadores…) se pasa con la equivalencia de los manuales en español: 5 pies = 1,5 m, 1 libra = 0,5 kg,"
-            + " 1 milla = 1,5 km. Lo que escribes tú no se toca.");
+        const notaMedidas = crear("p", "oc-hoja-nota", ocT("En métrico, lo que sale en pantalla (monstruos, conjuros, reglas, objetos, generadores…) se pasa con la equivalencia de los manuales en español: 5 pies = 1,5 m, 1 libra = 0,5 kg, 1 milla = 1,5 km. Lo que escribes tú no se toca."));
         notaMedidas.dataset.sinMedidas = "";
-        fila("Reglas de esta campaña", botonesDe("edición", EDICIONES, edicionDe(todo), (v) => {
+        fila(ocT("Reglas de esta campaña"), botonesDe(ocT("edición"), EDICIONES, edicionDe(todo), (v) => {
             todo.edicion = v;
             guardar();
             aplicarEdicion();
-            avisar(v === "2014" ? "Reglas, monstruos y conjuros de 2014 (SRD 5.1)." : "Reglas, monstruos y conjuros de 2024 (SRD 5.2).");
-        }), crear("p", "oc-hoja-nota", "Cambia las reglas (estados, acciones, descansos…), el bestiario, los conjuros y los objetos"
-            + " (el equipo y los objetos mágicos de la tienda y del botín). Lo tuyo (tus monstruos, conjuros, objetos y reglas"
-            + " propias) sale con las dos."));
-        fila("Medidas de esta campaña", botonesDe("medidas", MEDIDAS, unidadesDe(todo), (v) => {
+            avisar(v === "2014" ? ocT("Reglas, monstruos y conjuros de 2014 (SRD 5.1).") : ocT("Reglas, monstruos y conjuros de 2024 (SRD 5.2)."));
+        }), crear("p", "oc-hoja-nota", ocT("Cambia las reglas (estados, acciones, descansos…), el bestiario, los conjuros y los objetos (el equipo y los objetos mágicos de la tienda y del botín). Lo tuyo (tus monstruos, conjuros, objetos y reglas propias) sale con las dos.")));
+        fila(ocT("Medidas de esta campaña"), botonesDe(ocT("medidas"), MEDIDAS, unidadesDe(todo), (v) => {
             todo.unidades = v;
             guardar();
             aplicarUnidades();
-            avisar(v === "metrico" ? "Medidas en metros, kilos y kilómetros." : "Medidas en pies, libras y millas.");
+            avisar(v === "metrico" ? ocT("Medidas en metros, kilos y kilómetros.") : ocT("Medidas en pies, libras y millas."));
         }), notaMedidas);
-        fila("Copia de seguridad", copias(() => cerrar()));
-        // En la web (no en el ejecutable, que ya es la app en el
-        // ordenador): de dónde bajarla para usarla sin el navegador.
-        if (!(location.hostname === "127.0.0.1" && location.port === "47321")) {
-            const bajar = crear("a", "oc-vida-accion", "⬇️ descargar la app");
+        fila(ocT("Copia de seguridad"), copias(() => cerrar()));
+        if (ORDENADO) {
+            const rehacer = botonDe("oc-vida-accion", ocT("🔄 rehacerla entera"), () => {
+                rehacer.disabled = true;
+                avisar(ocT("Rehaciendo la carpeta «ordenado»…"));
+                ordenarCarpeta(true).then((n) => {
+                    rehacer.disabled = false;
+                    avisar(ocT("Carpeta «ordenado» rehecha ({n} archivos).", { n: n || 0 }));
+                }).catch(() => {
+                    rehacer.disabled = false;
+                    avisar(ocT("No se ha podido rehacer la carpeta «ordenado»."));
+                });
+            });
+            const caja = crear("div", "master-anadir-otras");
+            caja.appendChild(rehacer);
+            fila(ocT("La carpeta «ordenado»"), crear("p", "oc-hoja-nota", ocT("Junto a lo que usa la app, en tu carpeta está «ordenado»: lo mismo con sus nombres, para mirarlo o llevártelo (cada campaña con sus tableros, personajes, documentos y música; tu compendio por categorías; las traducciones…). Se rehace sola; la app no la lee.")), caja);
+        }
+        if (EN_ANDROID) {
+            // Dónde se guarda: dentro de la app o en una carpeta (como
+            // «mis-datos» en el programa; ver android/…/Carpeta.java).
+            const donde = crear("div", "master-anadir-otras");
+            donde.append(botonDe("oc-vida-accion", EN_CARPETA ? ocT("📁 cambiar de carpeta") : ocT("📁 guardar en una carpeta"), () => {
+                cerrar();
+                window.ocAndroid.elegirCarpeta();
+            }));
+            if (EN_CARPETA) {
+                donde.append(botonDe("oc-vida-accion", ocT("📱 guardarlo dentro de la app"), () => {
+                    cerrar();
+                    window.ocAndroid.quitarCarpeta();
+                }));
+            }
+            fila(ocT("Dónde se guarda"), crear("p", "oc-hoja-nota", EN_CARPETA
+                ? ocT("En tu carpeta «{nombre}»: almacen.json y la carpeta «archivos» (imágenes, PDF y música), como «mis-datos» en el programa del ordenador. Sigue ahí aunque desinstales la app, y se puede copiar al ordenador y al revés.", { nombre: window.ocAlmacen.nombre })
+                : ocT("{n}Dentro de la app: si la desinstalas, se borra. En una carpeta (por ejemplo, «Documentos/Pantalla de máster») sigue ahí aunque desinstales la app y se puede copiar al ordenador: es como «mis-datos» en el programa.", { n: window.ocAndroid.carpetaPerdida ? ocT("La carpeta que elegiste ya no se puede usar (¿se borró o se movió?): ahora se guarda dentro de la app. ") : "" })), donde);
+        }
+        if (PUEDE_ENCENDIDA) {
+            fila(ocT("La pantalla, durante la partida"), botonesDe(ocT("pantalla"), [["si", ocT("💡 siempre encendida")],
+                ["no", ocT("se apaga como siempre")]], encendidaElegida() ? "si" : "no", (v) => {
+                try {
+                    localStorage.setItem(CLAVE_ENCENDIDA, v);
+                } catch (e) {
+                    // Sin guardar: vale para esta vez.
+                }
+                aplicarEncendida();
+                avisar(v === "si" ? ocT("La pantalla no se apagará sola mientras la pantalla de máster esté a la vista.")
+                    : ocT("La pantalla se apagará como siempre."));
+            }), crear("p", "oc-hoja-nota", ocT("Con «siempre encendida», mientras la pantalla de máster está a la vista el dispositivo no se bloquea solo.")));
+        }
+        if (EN_ANDROID) {
+            // ¿Hay versión nueva? Sólo se mira en GitHub al pulsar.
+            const notaVersion = crear("p", "oc-hoja-nota", ocT("Tienes la versión {version}. Mira en GitHub si hay una nueva (sólo cuando lo pulses).", { version: window.ocAndroid.version }));
+            const versiones = crear("div", "master-anadir-otras");
+            const buscarVersion = botonDe("oc-vida-accion", ocT("🔄 buscar actualizaciones"), () => {
+                buscarVersion.disabled = true;
+                avisar(ocT("Mirando en GitHub…"));
+                fetch("__actualizacion", { cache: "no-store" }).then((r) => r.json()).then((x) => {
+                    buscarVersion.disabled = false;
+                    let dicho;
+                    if (x.error) {
+                        dicho = ocT("No se ha podido mirar: {error}.", { error: x.error });
+                    } else if (x.prueba) {
+                        dicho = ocT("Es una versión de prueba: la última publicada es la {n}. Las de prueba se bajan de GitHub Actions.", { n: x.ultima || "?" });
+                    } else if (!x.hay) {
+                        dicho = ocT("Tienes la última versión ({actual}).", { actual: x.actual });
+                    } else {
+                        dicho = ocT("Hay una versión nueva: la {ultima} (tienes la {actual}). Bájala, ábrela y Android la instala encima, sin perder lo guardado.", { ultima: x.ultima, actual: x.actual });
+                        const bajar = botonDe("oc-vida-accion", ocT("⬇️ bajar la versión {ultima}", { ultima: x.ultima }), () => {
+                            window.ocAndroid.abrirFuera(x.url);
+                        });
+                        bajar.setAttribute("aria-label", ocT("Bajar la versión {ultima} (se abre en el navegador)", { ultima: x.ultima }));
+                        versiones.querySelectorAll("[data-bajar]").forEach((b) => b.remove());
+                        bajar.dataset.bajar = "";
+                        versiones.append(bajar);
+                    }
+                    notaVersion.textContent = dicho;
+                    avisar(dicho);
+                }).catch(() => {
+                    buscarVersion.disabled = false;
+                    notaVersion.textContent = ocT("No se ha podido mirar (¿sin conexión?).");
+                    avisar(notaVersion.textContent);
+                });
+            });
+            versiones.append(buscarVersion);
+            fila(ocT("Actualizaciones"), notaVersion, versiones);
+        }
+        // En la web (no en el ejecutable ni en la app de Android, que ya
+        // son la app): de dónde bajarla para usarla sin el navegador.
+        if (!(location.hostname === "127.0.0.1" && location.port === "47321") && !EN_ANDROID) {
+            const bajar = crear("a", "oc-vida-accion", ocT("⬇️ descargar la app"));
             bajar.href = "https://github.com/rperezbarreda/pantalla_master/releases/latest";
             bajar.target = "_blank";
             bajar.rel = "noopener noreferrer";
-            bajar.setAttribute("aria-label", "Descargar la app para Windows, macOS o Linux (se abre aparte, en GitHub)");
+            bajar.setAttribute("aria-label", ocT("Descargar la app para Windows, macOS, Linux o tablets Android (se abre aparte, en GitHub)"));
             const otras = crear("div", "master-anadir-otras");
             otras.append(bajar);
-            fila("La app en tu ordenador", crear("p", "oc-hoja-nota", "Para Windows, macOS y Linux: descomprime el .zip y"
-                + " ábrela con doble clic. Lo guardado va en su carpeta, no en el navegador: para llevarte lo de aquí,"
-                + " haz antes una copia de seguridad e impórtala allí."), otras);
+            fila(ocT("La app, sin el navegador"), crear("p", "oc-hoja-nota", ocT("Gratis y sin conexión. Para Windows, macOS y Linux: descomprime el .zip y ábrela con doble clic. Para tablets Android: el .apk. Lo guardado va en la app, no en el navegador: para llevarte lo de aquí, haz antes una copia de seguridad e impórtala allí.")), otras);
         }
+        // Más cosas de rol, en el blog (se abre aparte; en Android, en el
+        // navegador).
+        const blog = crear("a", "oc-vida-accion", ocT("🎲 recursos de rol en richi.blog"));
+        blog.href = "https://richi.blog/web/mis_movidas/rol/index_rol.html";
+        blog.target = "_blank";
+        blog.rel = "noopener noreferrer";
+        blog.setAttribute("aria-label", ocT("Recursos de rol en richi.blog (se abre aparte, en el navegador)"));
+        const masRol = crear("div", "master-anadir-otras");
+        masRol.append(blog);
+        fila(ocT("Más de rol"), crear("p", "oc-hoja-nota", ocT("Más cosas para tus partidas en El Blog de Richi.")), masRol);
         const lic = crear("div", "master-anadir-otras");
-        const web = crear("a", "oc-vida-accion", "🌐 el SRD en la web");
+        const web = crear("a", "oc-vida-accion", ocT("🌐 el SRD en la web"));
         web.href = "https://www.dndbeyond.com/srd";
         web.target = "_blank";
         web.rel = "noopener noreferrer";
-        web.setAttribute("aria-label", "Ver el SRD 5.2 en la web (se abre aparte)");
-        lic.append(accion("📜 licencias y créditos", () => verCreditos(botonOpciones)), web);
-        fila("Licencias y créditos", crear("p", "oc-hoja-nota", "SRD 5.2 de Wizards of the Coast (CC BY 4.0), sonidos de la Google"
-            + " Sound Library (CC BY 4.0), tipografías OFL y la app con licencia MIT."), lic);
-        const cerrar = window.ocVentana.abrir({ titulo: "opciones", cuerpo, vuelta: botonOpciones });
+        web.setAttribute("aria-label", ocT("Ver el SRD 5.2 en la web (se abre aparte)"));
+        lic.append(accion(ocT("📜 licencias y créditos"), () => verCreditos(botonOpciones)), web);
+        fila(ocT("Licencias y créditos"), crear("p", "oc-hoja-nota", ocT("SRD 5.2 de Wizards of the Coast (CC BY 4.0), sonidos de la Google Sound Library (CC BY 4.0), tipografías OFL y la app con licencia MIT.")), lic);
+        // Por qué es gratis: lo último, como una carta.
+        const manifiesto = crear("div", "master-manifiesto");
+        [ocT("Esta aplicación es y será siempre **totalmente gratuita**, sin anuncios ni compras, y de **código libre** (licencia MIT). La he programado con ayuda de la inteligencia artificial y no me parece lícito lucrarme con ello."),
+            ocT("**No recoge ningún dato**: todo lo que haces se queda en tu dispositivo, sin cuentas, sin rastreadores y sin nada que se suba a ningún sitio."),
+            ocT("Está pensada para que la pueda usar **todo el mundo**: con teclado, con lector de pantalla, con el texto más grande y con temas de alto contraste. Si algo no te funciona, dímelo."),
+            ocT("Te agradezco mucho que la compartas. Y si quieres aportar algo, lo mejor es que ese dinero vaya a algún **refugio de animales de tu zona**: seguro que le dan mucho mejor uso que yo."),
+            ocT("Cualquiera es libre de clonar la aplicación y su código y cambiarlos a su gusto."),
+            ocT("Eso sí: aunque la app permite crear y ampliar los compendios, te recomiendo **no publicar contenido de terceros** (manuales, aventuras, suplementos…). La app usa el SRD y las reglas básicas porque son de libre uso.")]
+            .forEach((t) => {
+                const parrafo = crear("p");
+                parrafo.append(...enLinea(t));
+                manifiesto.appendChild(parrafo);
+            });
+        // El correo, con su enlace.
+        const correo = crear("a", "", "contacto@richi.blog");
+        correo.href = "mailto:contacto@richi.blog";
+        const partes = ocT("Ideas, fallos o ganas de colaborar: {correo}.").split("{correo}");
+        const contacto = crear("p", "", partes[0]);
+        contacto.append(correo, partes.slice(1).join(""));
+        manifiesto.appendChild(contacto);
+        const firma = crear("p", "master-manifiesto-firma", ocT("— Richi"));
+        const codigo = crear("a", "oc-vida-accion", ocT("📂 el código, en GitHub"));
+        codigo.href = "https://github.com/rperezbarreda/pantalla_master";
+        codigo.target = "_blank";
+        codigo.rel = "noopener noreferrer";
+        codigo.setAttribute("aria-label", ocT("El código de la app, en GitHub (se abre aparte)"));
+        manifiesto.append(firma, codigo);
+        fila(ocT("💛 Gratis y libre"), manifiesto);
+        const cerrar = window.ocVentana.abrir({ titulo: ocT("opciones"), cuerpo, vuelta: botonOpciones });
     }
 
     // ---- LOS ATAJOS DE TECLADO (fuera de los campos de texto y sin
     // ventana modal abierta): «?» o ⌨ los enseña todos. ----
     const ATAJOS = [
-        ["El tablero", [["/", "ir al buscador"], ["A", "añadir una ventana"], ["N", "post-it nuevo"], ["D", "los dados"],
-            ["I", "la iniciativa (la abre si no está)"], ["+ / −", "acercar o alejar el tablero"], ["0", "el tablero al 100 %"],
-            ["[ / ]", "perfil anterior o siguiente"], ["Alt + ← / Alt + →", "mover la pestaña elegida"],
-            ["mantener pulsada una pestaña", "arrastrarla a otro sitio"], ["C", "campañas (cambiar, crear…)"],
-            ["?", "estos atajos"]]],
-        ["Las ventanas", [["clic en la barra", "plegarla o desplegarla"], ["mantener pulsada la barra", "cogerla y moverla"],
-            ["soltarla sobre la barra de otra", "juntarlas en pestañas (⇱ la saca)"],
-            ["Intro en el nombre", "plegarla o desplegarla"], ["flechas en el nombre", "moverla (con Mayús, más deprisa)"],
-            ["Alt + flechas en el nombre", "cambiar su tamaño"], ["Esc", "cerrar una ventana modal"]]],
-        ["El dibujo (con el foco en el lienzo)", [["B", "lápiz"], ["E", "goma"], ["G", "bote"], ["M", "seleccionar y mover"],
-            ["I", "cuentagotas"], ["L", "línea"], ["U", "rectángulo"], ["O", "elipse"], ["T", "texto"], ["Ctrl+Z / Ctrl+Y", "deshacer y rehacer"],
-            ["flechas", "mover la selección (Mayús: de 10 en 10)"], ["+ / −", "agrandar o encoger la selección"],
-            ["Supr", "borrar la selección"], ["Esc", "soltar la selección"], ["Ctrl+V", "pegar una imagen"]]],
-        ["Post-its y notas", [["Ctrl+B / I / U", "negrita, cursiva, subrayado"], ["Ctrl+Z / Ctrl+Y", "deshacer y rehacer"],
-            ["← → en la barra", "ir de un botón a otro"]]],
-        ["El buscador", [["↓ ↑", "por los resultados"], ["Intro", "abrir el elegido"], ["Esc", "cerrar"]]],
+        ["El tablero", [["/", ocT("ir al buscador")], ["A", ocT("añadir una ventana")], ["N", ocT("post-it nuevo")], ["D", ocT("los dados")],
+            ["I", ocT("la iniciativa (la abre si no está)")], ["+ / −", ocT("acercar o alejar el tablero")], ["0", ocT("el tablero al 100 %")],
+            ["[ / ]", ocT("perfil anterior o siguiente")], [ocT("Alt + ← / Alt + →"), ocT("mover la pestaña elegida")],
+            [ocT("mantener pulsada una pestaña"), ocT("arrastrarla a otro sitio")], ["C", ocT("campañas (cambiar, crear…)")],
+            ["?", ocT("estos atajos")]]],
+        ["Las ventanas", [[ocT("clic en la barra"), ocT("plegarla o desplegarla")], [ocT("mantener pulsada la barra"), ocT("cogerla y moverla")],
+            [ocT("soltarla sobre la barra de otra"), ocT("juntarlas en pestañas (⇱ la saca)")],
+            [ocT("Intro en el nombre"), ocT("plegarla o desplegarla")], [ocT("flechas en el nombre"), ocT("moverla (con Mayús, más deprisa)")],
+            [ocT("Alt + flechas en el nombre"), ocT("cambiar su tamaño")], ["Esc", ocT("cerrar una ventana modal")]]],
+        ["El dibujo (con el foco en el lienzo)", [["B", ocT("lápiz")], ["E", ocT("goma")], ["G", ocT("bote")], ["M", ocT("seleccionar y mover")],
+            ["I", ocT("cuentagotas")], ["L", ocT("línea")], ["U", ocT("rectángulo")], ["O", ocT("elipse")], ["T", ocT("texto")], [ocT("Ctrl+Z / Ctrl+Y"), ocT("deshacer y rehacer")],
+            ["flechas", ocT("mover la selección (Mayús: de 10 en 10)")], ["+ / −", ocT("agrandar o encoger la selección")],
+            ["Supr", ocT("borrar la selección")], ["Esc", ocT("soltar la selección")], ["Ctrl+V", ocT("pegar una imagen")]]],
+        ["Post-its y notas", [[ocT("Ctrl+B / I / U"), ocT("negrita, cursiva, subrayado")], [ocT("Ctrl+Z / Ctrl+Y"), ocT("deshacer y rehacer")],
+            [ocT("← → en la barra"), ocT("ir de un botón a otro")]]],
+        ["El buscador", [["↓ ↑", ocT("por los resultados")], ["Intro", ocT("abrir el elegido")], ["Esc", ocT("cerrar")]]],
     ];
 
     function verAtajos() {
@@ -17925,7 +11001,7 @@
             });
             cuerpo.appendChild(dl);
         });
-        window.ocVentana.abrir({ titulo: "atajos de teclado", cuerpo, vuelta: botonOpciones, clase: "es-ancha" });
+        window.ocVentana.abrir({ titulo: ocT("atajos de teclado"), cuerpo, vuelta: botonOpciones, clase: "es-ancha" });
     }
 
     document.addEventListener("keydown", (e) => {
@@ -17988,7 +11064,7 @@
         const pf = todo.perfiles[(i + paso + todo.perfiles.length) % todo.perfiles.length];
         if (pf !== estado) {
             activar(pf, true);
-            avisar("Perfil: " + pf.nombre + ".");
+            avisar(ocT("Perfil: {nombre}.", { nombre: pf.nombre }));
         }
     }
 
@@ -17998,6 +11074,16 @@
     colorTablero();
     pintarPestanas(false);
     pintarTodo();
+    // El menú de los modos (fuera del tablero, abajo a la derecha). Un
+    // modo llena la pantalla: al cambiar su tamaño, su alto también.
+    document.body.appendChild(menuModos);
+    pintarModos();
+    ponerSitioModos(sitioModos(), false);
+    window.addEventListener("resize", () => {
+        if (esModo(estado)) {
+            crecerLienzo();
+        }
+    });
     // Al abrir: con qué campaña (o crear la primera). Si es la recarga al
     // salir del compendio, se sigue con la que estaba.
     let recargado = false;
@@ -18012,5 +11098,20 @@
     }
     if (enMovil.addEventListener) {
         enMovil.addEventListener("change", pintarTodo);
+    }
+    // En la app de Android: lo que llegue con «Abrir con» (ahora o luego) y,
+    // guardando en una carpeta, una copia automática al día en su «copias/»
+    // (sin los archivos, que ya están en la carpeta; se quedan las cinco
+    // últimas). Se importan como cualquier copia (⚙ → importar).
+    if (EN_ANDROID) {
+        window.ocRecibir = recibirArchivos;
+        window.ocAndroid.hayRecibidos();
+        if (EN_CARPETA && window.ocAndroid.copiaFalta()) {
+            setTimeout(() => datosDeCopia(false).then((datos) => {
+                if (Object.keys(datos.claves).length && window.ocAndroid.guardarCopia(JSON.stringify(datos, null, 1))) {
+                    marcarCopia();
+                }
+            }).catch(() => {}), 3000);
+        }
     }
 })();
