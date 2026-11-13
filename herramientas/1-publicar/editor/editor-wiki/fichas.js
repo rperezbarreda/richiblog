@@ -3,10 +3,10 @@
 // =========================================
 // Lo que vive en un JSON de datos/ y llevaban las herramientas de
 // 1-publicar con preguntas: los recursos de rol, los NPC y el botín, las
-// recomendaciones, «en lo que ando», el calendario, la línea de tiempo,
-// el diccionario, las palabras del reto y las fotos de los gatos. Cada una
-// es una COLECCIÓN (las describe editor_web.colecciones: sus partes, sus
-// casillas y de qué tipo es cada una), y aquí se pinta igual para todas:
+// recomendaciones, «en lo que ando», las palabras del reto y las fotos de
+// los gatos. Cada una es una COLECCIÓN (las describe
+// editor_web.colecciones: sus partes, sus casillas y de qué tipo es cada
+// una), y aquí se pinta igual para todas:
 // la lista de fichas, y al elegir una, sus casillas debajo.
 //
 // Lo que se cambia se queda aquí hasta «Guardar», que manda la colección
@@ -24,8 +24,8 @@ const estadoFichas = { colecciones: [], campanas: [], sitios: [], col: null, id:
 // lee el título). Una nueva sin emoji aquí sale con 📋.
 const EMOJIS_DE_COLECCIONES = {
     rol: "🎒", npcs: "👥", campana: "📜", misiones: "📌", botin: "🗡️", dinero: "💰", "imagenes-campana": "🖼️", "documentos-campana": "📃", personajes: "🧙",
-    recomendaciones: "⭐", "en-lo-que-ando": "📝", gatos: "🐱", reto: "🗓️", recetas: "🍳", calendario: "📆", linea: "⏳",
-    diccionario: "🔤", "compendio-conjuros": "✨", "compendio-objetos": "🎁", "compendio-rasgos": "🧬",
+    recomendaciones: "⭐", "en-lo-que-ando": "📝", gatos: "🐱", reto: "🗓️", recetas: "🍳",
+    "compendio-conjuros": "✨", "compendio-objetos": "🎁", "compendio-rasgos": "🧬",
     "compendio-acciones": "⚔️", "reglas-dnd": "📚",
 };
 
@@ -38,8 +38,8 @@ async function cargarColeccionesWeb() {
     estadoFichas.colecciones = datos.colecciones;
     estadoFichas.campanas = datos.campanas;
     estadoFichas.sitios = datos.sitios;
-    // Un botón grande por colección, en su apartado (Rol, Mi rincón, la
-    // wiki, escribir).
+    // Un botón grande por colección, en su apartado (Rol, Mi rincón,
+    // escribir).
     // Detrás de los botones que ya trae la rejilla (los de escribir una
     // entrada, crear una página…): esos no se tocan.
     document.querySelectorAll("[data-fichas-de]").forEach((caja) => {
@@ -839,8 +839,8 @@ function casillaDeFichaWeb(dentro, f, c, base, parte, alCambiar) {
         el.after(fila);
     }
     if (c.markdown) {
-        // Texto con formato (el Markdown de la wiki): los botones encima.
-        // Con c.imagenes (a dónde van: «evento»…), también el botón de
+        // Texto con formato (Markdown): los botones encima.
+        // Con c.imagenes (a dónde van: «oc-imagen»…), también el botón de
         // meter una imagen.
         el.before(crearBarraMarkdown(el, nombre, null,
             c.imagenes ? { imagenes: () => ({ sitio: c.imagenes, campos: { campana: estadoFichas.campana,
@@ -1324,6 +1324,22 @@ async function abrirNeocitiesWeb(modo) {
     avisarEditor("Abierto en su ventana de comandos: " + hecho.titulo + ". Contesta allí lo que pregunte.");
 }
 
+// «Traer a la web lo de otros repos» (en Rol): el botón dice qué script
+// (data-traer-repo) y se abre su opción del menú, la misma que en «Comandos».
+async function traerAWeb(script) {
+    const datos = await pedirEditor("/api/web/comandos");
+    if (datos.error) {
+        avisarEditor(datos.error, true);
+        return;
+    }
+    const opcion = datos.apartados.flatMap((a) => a.opciones).find((o) => o.script === script);
+    if (!opcion) {
+        avisarEditor("No encuentro " + script + " en el menú (herramientas/menu.py).", true);
+        return;
+    }
+    abrirComandoWeb(opcion.cual);
+}
+
 async function abrirComandoWeb(cual) {
     const hecho = await pedirEditor("/api/web/comando", { cual });
     if (hecho.error) {
@@ -1342,6 +1358,8 @@ function empezarFichasWeb() {
     $("[data-git-mirar]").addEventListener("click", pintarGitWeb);
     $("#git-mensaje").addEventListener("input", pintarPasosDeGitWeb);
     $("[data-comando-menu]").addEventListener("click", () => abrirComandoWeb(""));
+    document.querySelectorAll("[data-traer-repo]").forEach((b) => b.addEventListener("click",
+        () => traerAWeb(b.getAttribute("data-traer-repo"))));
     cargarColeccionesWeb();
     $("[data-fichas-guardar]").addEventListener("click", guardarFichasWeb);
     $("#fichas-campana").addEventListener("change", (e) => {

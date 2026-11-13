@@ -63,12 +63,14 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "0-comun"))
 import re
 from html.parser import HTMLParser
 
-from comun import APPS_APARTE, RAIZ, es_borrador, escribir_json, leer_json, limpiar_html
+from comun import APPS_APARTE, APPS_QUE_SE_BUSCAN, RAIZ, es_borrador, escribir_json, leer_json, limpiar_html
 
 SALIDA = RAIZ / "datos" / "sitio" / "buscador.json"
 
 EXCLUIDOS = {"not_found.html"}
-CARPETAS_EXCLUIDAS = {"herramientas", "fragmentos"} | APPS_APARTE
+# Las apps que van tal cual (comun.py) no, salvo la wiki de Cralëa
+# (APPS_QUE_SE_BUSCAN): sus páginas sí se encuentran desde el blog.
+CARPETAS_EXCLUIDAS = {"herramientas", "fragmentos"} | (APPS_APARTE - APPS_QUE_SE_BUSCAN)
 
 # Las páginas que son solo un listado de otras cosas: salen en la
 # búsqueda (alguien puede buscar "mapa"), pero sin texto, porque su texto
@@ -246,7 +248,8 @@ def seccion_de(url):
         return "santuarios"
     if url.startswith("/web/recomendaciones/"):
         return "recomendaciones"
-    if url.startswith("/web/wiki/"):
+    # La wiki de Cralëa, que va tal cual en /wiki/ (traer-wiki.py).
+    if url.startswith("/wiki/"):
         return "wiki cralëa"
     return "otras"
 
@@ -255,7 +258,8 @@ def titulo_de(texto, url):
     crudo = RE_TITULO.search(texto)
     if crudo:
         limpio = limpiar_html(crudo.group(1))
-        # "Blog 2026 · El Blog de Richi" -> "Blog 2026"
+        # "Blog 2026 · El Blog de Richi" -> "Blog 2026" (y "Reino de
+        # Prunia · Wiki Cralëa" -> "Reino de Prunia")
         return limpio.split("·")[0].strip() or limpio
     uno = RE_H1.search(texto)
     if uno:
@@ -480,7 +484,11 @@ def generar(probar=False):
 
     for archivo in sorted(RAIZ.rglob("*.html")):
         relativo = archivo.relative_to(RAIZ)
-        if set(relativo.parts) & CARPETAS_EXCLUIDAS:
+        # Solo las apps de arriba del todo (wiki/, pantalla-master/): una
+        # carpeta «wiki» dentro de otra cosa no es la wiki.
+        if relativo.parts[0] in APPS_APARTE and relativo.parts[0] not in APPS_QUE_SE_BUSCAN:
+            continue
+        if set(relativo.parts) & (CARPETAS_EXCLUIDAS - APPS_APARTE):
             continue
         if relativo.name in EXCLUIDOS or es_borrador(archivo):
             continue

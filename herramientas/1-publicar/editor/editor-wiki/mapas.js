@@ -523,64 +523,8 @@ function regionesDeGrandeAPequena() {
     return formas.map((s, i) => [i, areaMapa(s.points || [])]).sort((a, b) => b[1] - a[1]).map((x) => x[0]);
 }
 
-// ---- LOS MAPAS DE LA WIKI O LOS DE LAS CAMPAÑAS ----
-// La misma vista «Mapas» sirve para los dos: desde Wiki salen todos y el
-// mapa nuevo es de la wiki; desde Campañas («Los mapas de una campaña»),
-// solo los de las campañas y el nuevo ya es de una. El modo lo pone el
-// botón por el que se llega (data-mapas-modo) o, al volver de un mapa, si
-// ese mapa era de una campaña.
-window.modoMapasEditor = "wiki";
-
-function ponerModoDeMapas(modo) {
-    window.modoMapasEditor = modo === "campana" ? "campana" : "wiki";
-    const deCampana = window.modoMapasEditor === "campana";
-    const titulo = $("[data-mapas-titulo]");
-    if (titulo) {
-        titulo.textContent = deCampana ? "Los mapas de las campañas" : "Mapas";
-    }
-    // Los textos del mapa nuevo, los de cada uno (se guardan los de la wiki).
-    const intro = $("[data-mapa-nuevo-intro]");
-    const etiqueta = $("[data-mapa-nuevo-de-etiqueta]");
-    if (intro && etiqueta) {
-        intro.dataset.wiki = intro.dataset.wiki || intro.textContent;
-        etiqueta.dataset.wiki = etiqueta.dataset.wiki || etiqueta.textContent;
-        intro.textContent = deCampana ? "La imagen de un mapa de la campaña: su mapamundi o el de una zona (para"
-            + " ver los pueblos). El que lleve «mapamundi» en el título es el principal; los demás son zonas,"
-            + " enlazadas desde él." : intro.dataset.wiki;
-        etiqueta.textContent = deCampana ? "De qué campaña" : etiqueta.dataset.wiki;
-    }
-    const elegir = $("#mapa-nuevo-de");
-    const wiki = $("[data-mapa-de-wiki]");
-    if (wiki) {
-        wiki.hidden = deCampana;
-        wiki.disabled = deCampana;
-    }
-    if (elegir) {
-        if (deCampana && !elegir.value) {
-            const primera = [...elegir.options].find((o) => o.value);
-            if (primera) {
-                elegir.value = primera.value;
-            }
-        } else if (!deCampana) {
-            elegir.value = "";
-        }
-        mostrarLoDeLaWikiEnElMapaNuevo();
-    }
-}
-
-// ---- LA LISTA DE MAPAS ----
-// En «Un mapa nuevo», lo de la wiki (de qué página es, la escala común)
-// solo si no es de una campaña.
-function mostrarLoDeLaWikiEnElMapaNuevo() {
-    const deCampana = Boolean($("#mapa-nuevo-de").value);
-    document.querySelectorAll("[data-mapa-solo-wiki]").forEach((x) => {
-        x.hidden = deCampana;
-    });
-    $("#ayuda-mapa-titulo").textContent = deCampana
-        ? "Si lo dejas vacío: «Mapamundi de» y el nombre de la campaña."
-        : "Si lo dejas vacío: «Mapa del» o «Mapa de» y el nombre de la página («Mapa del Reino de Prunia»).";
-}
-
+// ---- LA LISTA DE MAPAS (los de las campañas) ----
+// (Los de la wiki de Cralëa están en su propio repo, wiki_cralea.)
 function ponerCampanasEnElMapaNuevo(campanas) {
     const elegir = $("#mapa-nuevo-de");
     if (!elegir || elegir.dataset.listo) {
@@ -590,12 +534,9 @@ function ponerCampanasEnElMapaNuevo(campanas) {
     (campanas || []).forEach((c) => {
         const opcion = document.createElement("option");
         opcion.value = c.clave;
-        opcion.textContent = "una campaña: " + c.nombre;
+        opcion.textContent = c.nombre;
         elegir.appendChild(opcion);
     });
-    elegir.addEventListener("change", mostrarLoDeLaWikiEnElMapaNuevo);
-    // Llegadas las campañas, el modo puede elegir ya la primera.
-    ponerModoDeMapas(window.modoMapasEditor);
 }
 
 async function pintarListaDeMapas() {
@@ -607,15 +548,17 @@ async function pintarListaDeMapas() {
         return;
     }
     ponerCampanasEnElMapaNuevo(hay.campanas);
-    const mapas = window.modoMapasEditor === "campana"
-        ? hay.mapas.filter((m) => m.archivo.startsWith("@campañas/")) : hay.mapas;
-    if (!mapas.length) {
-        lista.appendChild(crearEditor("li", "", window.modoMapasEditor === "campana"
-            ? "Aún no hay ninguno de una campaña: hazlo aquí abajo." : "Aún no hay ninguno."));
+    if (!hay.mapas.length) {
+        lista.appendChild(crearEditor("li", "", "Aún no hay ninguno: hazlo aquí abajo."));
         return;
     }
-    // Por carpetas, como están en wiki/ (el mapamundi, suelto arriba).
-    pintarArbolWeb(lista, mapas.map((m) => ({ carpeta: m.archivo.split("/").slice(0, -1), fila: () => {
+    // Por carpetas: una por campaña («@campañas/ragna/…» va en la de Ragna).
+    const nombres = new Map((hay.campanas || []).map((c) => [c.clave, c.nombre]));
+    const campanaDe = (m) => {
+        const clave = m.archivo.split("/").slice(-2, -1)[0] || "";
+        return nombres.get(clave) || clave;
+    };
+    pintarArbolWeb(lista, hay.mapas.map((m) => ({ carpeta: [campanaDe(m)], fila: () => {
         const li = document.createElement("li");
         const texto = crearEditor("span");
         texto.appendChild(crearEditor("span", "faltan-nombre", m.titulo));
@@ -623,8 +566,7 @@ async function pintarListaDeMapas() {
         const cuenta = [m.pines + (m.pines === 1 ? " sitio" : " sitios"),
             m.regiones + (m.regiones === 1 ? " región" : " regiones"),
             m.rayas + (m.rayas === 1 ? " camino, río…" : " caminos, ríos…")].join(" · ");
-        texto.appendChild(crearEditor("span", "faltan-veces",
-            (m.pagina ? "de " + m.pagina + " · " : "") + cuenta));
+        texto.appendChild(crearEditor("span", "faltan-veces", cuenta));
         const boton = crearEditor("button", "", "Editar");
         boton.type = "button";
         boton.setAttribute("aria-label", "Editar " + m.titulo);
@@ -634,32 +576,6 @@ async function pintarListaDeMapas() {
         return li;
     } })), { memoria: "mapas:", unidad: ["mapa", "mapas"] });
 }
-
-// En la página que se está escribiendo: su mapa, o cómo hacerle uno.
-function pintarMapasDePagina(pagina) {
-    const caja = $("[data-pagina-mapas]");
-    caja.textContent = "";
-    (pagina.mapas || []).forEach((m) => {
-        const boton = crearEditor("button", "", "🗺 Editar su mapa: " + m.titulo);
-        boton.type = "button";
-        boton.addEventListener("click", () => abrirMapa(m.archivo));
-        caja.appendChild(boton);
-    });
-    if (!(pagina.mapas || []).length) {
-        const boton = crearEditor("button", "", "🗺 Hacerle un mapa");
-        boton.type = "button";
-        boton.addEventListener("click", () => {
-            irAEditor("mapas");
-            if (!$('[data-vista="mapas"]').hidden) {
-                pintarListaDeMapas();
-                $("#mapa-nuevo-pagina").value = pagina.nombre;
-                $("#mapa-nuevo-titulo").focus();
-            }
-        });
-        caja.appendChild(boton);
-    }
-}
-window.pintarMapasDePagina = pintarMapasDePagina;
 
 function leerImagenMapa(input) {
     return new Promise((resolver) => {
@@ -687,46 +603,22 @@ async function hacerMapaNuevo() {
     const boton = $('[data-mapa-nuevo] button[type="submit"]');
     boton.disabled = true;
     avisarEditor("Preparando la imagen y el mapa…");
-    // El de una campaña: ni página de la wiki ni escala común.
-    const campana = $("#mapa-nuevo-de").value;
-    if (campana) {
-        const hecho = await pedirEditor("/api/mapa/nuevo", Object.assign({
-            campana, titulo: $("#mapa-nuevo-titulo").value.trim(),
-        }, imagen || { ruta }));
-        boton.disabled = false;
-        if (hecho.error) {
-            avisarEditor(hecho.error, true);
-            return;
-        }
-        $("[data-mapa-nuevo]").reset();
-        mostrarLoDeLaWikiEnElMapaNuevo();
-        $("[data-mapa-nuevo-elegida]").textContent = "";
-        ponerMapa(hecho.mapa);
-        irAEditor("mapa");
-        avisarEditor("Hecho: " + hecho.mapa.archivo + ". " + (hecho.aviso ? hecho.aviso + " " : "")
-            + "Ya puedes poner sitios y pintar.");
-        return;
-    }
-    const aEscala = $("#mapa-nuevo-escala").checked;
-    if (aEscala) {
-        avisarEditor("Buscándolo en el mapamundi y ampliándolo" + ($("#mapa-nuevo-ia").checked ? " con IA" : "")
-            + "… (puede tardar un poco)");
-    }
     const hecho = await pedirEditor("/api/mapa/nuevo", Object.assign({
-        pagina: $("#mapa-nuevo-pagina").value.trim(), titulo: $("#mapa-nuevo-titulo").value.trim(),
-        escala_comun: aEscala, ia: $("#mapa-nuevo-ia").checked, modelo: $("#mapa-nuevo-modelo").value,
+        campana: $("#mapa-nuevo-de").value, titulo: $("#mapa-nuevo-titulo").value.trim(),
     }, imagen || { ruta }));
     boton.disabled = false;
     if (hecho.error) {
         avisarEditor(hecho.error, true);
         return;
     }
+    const campana = $("#mapa-nuevo-de").value;
     $("[data-mapa-nuevo]").reset();
+    $("#mapa-nuevo-de").value = campana;
     $("[data-mapa-nuevo-elegida]").textContent = "";
     ponerMapa(hecho.mapa);
     irAEditor("mapa");
     avisarEditor("Hecho: " + hecho.mapa.archivo + ". " + (hecho.aviso ? hecho.aviso + " " : "")
-        + "Ya puedes poner sitios y pintar.", /OJO|No lo he puesto/.test(hecho.aviso || ""));
+        + "Ya puedes poner sitios y pintar.");
 }
 
 // ---- ABRIR UN MAPA ----
@@ -839,13 +731,10 @@ function ponerMapa(mapa) {
         archivo: mapa.archivo, datos: d, imagenes: mapa.imagenes || {}, url: mapa.url || "",
         cambiado: false, elegido: null, dibujo: null, capasOcultas: {}, cuantasRegiones: d.shapes.length,
         medida: [], tramoEscala: [], ratonMedida: null, iman: null, ultimoCampo: null, varios: [], curvaPara: null,
-        cajaEleccion: null, vecinos: Array.isArray(mapa.vecinos) ? mapa.vecinos : [], campana: mapa.campana || "",
+        cajaEleccion: null, campana: mapa.campana || "",
         sesiones: Array.isArray(mapa.sesiones) ? mapa.sesiones : [],
     });
-    ponerCasillaDeVecinos();
     ponerMapasDeLaCampana();
-    // «Estás en»: un mapa de una campaña cuelga de Campañas.
-    window.modoMapasEditor = estadoMapa.campana ? "campana" : "wiki";
     // El tamaño de los textos nuevos, de salida: el de un texto mediano.
     $("#mapa-tamano-nuevo").value = Math.round(Math.max(d.width, d.height) / 70);
     historiaMapa.atras = [];
@@ -876,13 +765,13 @@ function ponerMapa(mapa) {
 
 function pintarDatosGenerales() {
     const d = estadoMapa.datos;
-    $("[data-mapa-archivo]").textContent = "En wiki/" + estadoMapa.archivo + " · " + d.width + " × " + d.height + " px";
+    $("[data-mapa-archivo]").textContent = "En mapas-rol/" + estadoMapa.archivo.replace(/^@campañas\//, "") + " · "
+        + d.width + " × " + d.height + " px";
     $("#mapa-titulo").value = d.title || "";
-    $("#mapa-pagina").value = d.page || "";
     $("#mapa-rosa").value = typeof d.compass === "string" ? d.compass : "";
     $("[data-mapa-cambiar-imagen]").hidden = d.layers.length !== 1;
     pintarTituloMapa();
-    pintarMundoDelMapa();
+    pintarMedidaDeAmpliar();
 }
 
 function pintarTituloMapa() {
@@ -966,21 +855,6 @@ function volverAlPaso(desde, hacia, que) {
         estadoMapa.varios = [];
     }
     pintarDatosGenerales();
-    // Si cambia el tamaño (deshacer una ampliación), lo de los vecinos
-    // vuelve con él (ver pasarAImagenNueva).
-    if (anterior.width && anterior.height
-        && (anterior.width !== estadoMapa.datos.width || anterior.height !== estadoMapa.datos.height)) {
-        const fx = estadoMapa.datos.width / anterior.width;
-        const fy = estadoMapa.datos.height / anterior.height;
-        const escalar = (p) => {
-            p.x = redondoMapa(p.x * fx);
-            p.y = redondoMapa(p.y * fy);
-        };
-        (estadoMapa.vecinos || []).forEach((v) => {
-            v.sitios.forEach(escalar);
-            v.rayas.forEach((r) => r.points.forEach(escalar));
-        });
-    }
     if (anterior.width !== estadoMapa.datos.width || anterior.height !== estadoMapa.datos.height
         || JSON.stringify(anterior.layers) !== JSON.stringify(estadoMapa.datos.layers)) {
         pintarTodoElMapa();
@@ -1175,13 +1049,6 @@ function imantar(p, evitar) {
         }));
     });
     (estadoMapa.dibujo ? estadoMapa.dibujo.puntos.slice(0, -1) : []).forEach(mirar);
-    // Y lo de los mapas vecinos (sus sitios y los puntos de sus rayas).
-    if (hayVecinosAVista()) {
-        estadoMapa.vecinos.forEach((v) => {
-            v.sitios.forEach(mirar);
-            v.rayas.forEach((rr) => rr.points.forEach(mirar));
-        });
-    }
     if (mejor) {
         return { p: { x: mejor.x, y: mejor.y }, pegado: "punto" };
     }
@@ -1214,27 +1081,6 @@ function imantar(p, evitar) {
             }
         });
     });
-    if (hayVecinosAVista()) {
-        estadoMapa.vecinos.forEach((v) => v.rayas.forEach((rr) => {
-            for (let n = 0; n < rr.points.length - 1; n++) {
-                const a = rr.points[n];
-                const b = rr.points[n + 1];
-                const dx = b.x - a.x;
-                const dy = b.y - a.y;
-                const largo = dx * dx + dy * dy;
-                if (!largo) {
-                    continue;
-                }
-                const f = Math.max(0, Math.min(1, ((p.x - a.x) * dx + (p.y - a.y) * dy) / largo));
-                const q = { x: a.x + dx * f, y: a.y + dy * f };
-                const dist = Math.hypot(q.x - p.x, q.y - p.y);
-                if (dist < lejos) {
-                    lejos = dist;
-                    sobre = q;
-                }
-            }
-        }));
-    }
     if (sobre) {
         return { p: { x: redondoMapa(sobre.x), y: redondoMapa(sobre.y) }, pegado: "borde" };
     }
@@ -1254,219 +1100,12 @@ function pintarTodoElMapa() {
     defs.innerHTML = TIPOS_DE_ZONA.map((z) => '<pattern id="ed-trama-' + z[0] + '" patternUnits="userSpaceOnUse" width="'
         + redondoMapa(s) + '" height="' + redondoMapa(s) + '">' + tramaDeZona(z[0], s) + "</pattern>").join("");
     svg.appendChild(defs);
-    ["fondo", "regiones", "vecinos", "rayas", "puentes", "textos", "rosa", "emblemas", "sitios", "dibujo", "asas"].forEach((g) => {
+    ["fondo", "regiones", "rayas", "puentes", "textos", "rosa", "emblemas", "sitios", "dibujo", "asas"].forEach((g) => {
         svg.appendChild(svgMapa("g", { "data-capa-mapa": g }));
     });
     pintarFondoMapa();
-    pintarVecinosMapa();
     pintarCosasMapa();
     pintarRosaMapa();
-}
-
-// ---- LOS MAPAS VECINOS ----
-// Los regionales que se pisan con éste en el mapamundi (los manda el
-// servidor ya en las medidas de este mapa: vecinos_de, editor-wiki.py).
-// Sus rayas y sus sitios, en gris y sin poder tocarlos: están para ver por
-// dónde sigue un río o un camino al otro lado de la frontera y que el imán
-// enganche a ellos. En la web, lo que se toca se junta (el río sigue
-// siendo uno y la ruta pasa de un reino a otro).
-const GRIS_VECINO = { rio: [4, null], camino: [4, null], sendero: [2.5, [5, 5]], ruta: [2.5, [9, 6]],
-    frontera: [2.5, [12, 5, 2, 5]], maritima: [3, [0.5, 8]], viaje: [2.5, [9, 6]] };
-
-function hayVecinosAVista() {
-    return estadoMapa.vecinos && estadoMapa.vecinos.length && $("#mapa-vecinos").checked;
-}
-
-function ponerCasillaDeVecinos() {
-    const caja = $("[data-mapa-vecinos-caja]");
-    const hay = estadoMapa.vecinos && estadoMapa.vecinos.length;
-    caja.hidden = !hay;
-    $("[data-mapa-traer-caja]").hidden = !hay;
-    pintarEstadoDeLoTraido();
-    if (hay) {
-        const nombres = estadoMapa.vecinos.map((v) => v.titulo).join(", ");
-        caja.title = "En gris, lo de " + nombres + ": el imán engancha a sus rayas y sus sitios, para seguir un río o"
-            + " un camino que pasa al otro lado.";
-        $("[data-mapa-vecinos-ayuda]").textContent = "En gris, las rayas y los sitios de " + nombres
-            + ". El imán engancha a ellos.";
-    }
-}
-
-// ---- TRAER LOS CAMINOS Y RÍOS DE LOS VECINOS ----
-// Se copian a este mapa, recortados a su borde, como rayas suyas con
-// "fromMap" (el .cmap de donde vienen) y "fromLine" (su id allí). Así:
-// se pueden retocar; volver a traerlos rehace lo traído (no se duplica);
-// en el mapamundi no salen dos veces (juntar_regionales se salta las que
-// llevan "fromMap": allí va la de su mapa); y los vecinos no se traen las
-// copias de vuelta (vecinos_de, editor-wiki.py).
-
-// Lo que queda de una raya dentro del rectángulo del mapa: puede salir en
-// varios trozos (sale y vuelve a entrar). Cada tramo, con Liang-Barsky.
-function recortarRayaAlMapa(puntos, ancho, alto) {
-    const trozos = [];
-    let actual = [];
-    const igual = (p, q) => Math.abs(p.x - q.x) < 0.05 && Math.abs(p.y - q.y) < 0.05;
-    for (let i = 0; i < puntos.length - 1; i++) {
-        const a = puntos[i];
-        const b = puntos[i + 1];
-        const dx = b.x - a.x;
-        const dy = b.y - a.y;
-        let t0 = 0;
-        let t1 = 1;
-        const lados = [[-dx, a.x], [dx, ancho - a.x], [-dy, a.y], [dy, alto - a.y]];
-        let fuera = false;
-        for (const [pp, q] of lados) {
-            if (pp === 0) {
-                if (q < 0) {
-                    fuera = true;
-                    break;
-                }
-                continue;
-            }
-            const t = q / pp;
-            if (pp < 0) {
-                t0 = Math.max(t0, t);
-            } else {
-                t1 = Math.min(t1, t);
-            }
-            if (t0 > t1) {
-                fuera = true;
-                break;
-            }
-        }
-        if (fuera) {
-            if (actual.length > 1) {
-                trozos.push(actual);
-            }
-            actual = [];
-            continue;
-        }
-        const ini = { x: redondoMapa(a.x + dx * t0), y: redondoMapa(a.y + dy * t0) };
-        const fin = { x: redondoMapa(a.x + dx * t1), y: redondoMapa(a.y + dy * t1) };
-        if (!actual.length || !igual(actual[actual.length - 1], ini)) {
-            if (actual.length > 1) {
-                trozos.push(actual);
-            }
-            actual = [ini];
-        }
-        actual.push(fin);
-        if (t1 < 1) {
-            trozos.push(actual);
-            actual = [];
-        }
-    }
-    if (actual.length > 1) {
-        trozos.push(actual);
-    }
-    return trozos;
-}
-
-function pintarEstadoDeLoTraido() {
-    const d = estadoMapa.datos;
-    if (!d) {
-        return;
-    }
-    const traidas = d.lines.filter((l) => l.fromMap).length;
-    $("[data-mapa-traer-quitar]").hidden = !traidas;
-    $("[data-mapa-traer-estado]").textContent = (estadoMapa.vecinos || []).length
-        ? "De " + estadoMapa.vecinos.map((v) => v.titulo).join(", ") + ". "
-            + (traidas ? "Ahora hay " + traidas + (traidas === 1 ? " raya traída." : " rayas traídas.") : "Aún no hay nada traído.")
-        : "";
-}
-
-function traerDeLosVecinos() {
-    const d = estadoMapa.datos;
-    const tipos = Array.from(document.querySelectorAll("[data-mapa-traer]:checked")).map((c) => c.getAttribute("data-mapa-traer"));
-    if (!d || !tipos.length) {
-        avisarEditor("Marca qué traer: ríos, caminos o senderos.", true);
-        return;
-    }
-    apuntarPaso();
-    // Lo traído antes de esas clases, fuera: se rehace con lo de ahora.
-    const antes = d.lines.length;
-    d.lines = d.lines.filter((l) => !(l.fromMap && tipos.includes(l.kind)));
-    const quitadas = antes - d.lines.length;
-    let traidas = 0;
-    // Lo que este mapa ya tiene dibujado (la misma clase y el mismo nombre:
-    // el Río Negro de los dos lados) no se trae: saldría doble.
-    const suyas = new Set(d.lines.filter((l) => !l.fromMap && l.label).map((l) => l.kind + "|" + l.label.trim().toLowerCase()));
-    const yaTiene = new Set();
-    estadoMapa.vecinos.forEach((v) => v.rayas.forEach((r) => {
-        if (!tipos.includes(r.kind)) {
-            return;
-        }
-        if (r.label && suyas.has(r.kind + "|" + r.label.trim().toLowerCase())) {
-            yaTiene.add(r.label);
-            return;
-        }
-        recortarRayaAlMapa(r.points, d.width, d.height).forEach((puntos) => {
-            const raya = { id: idNuevoMapa(), kind: r.kind, points: puntos, fromMap: v.archivo, fromLine: r.id };
-            if (r.label) {
-                raya.label = r.label;
-            }
-            d.lines.push(raya);
-            traidas++;
-        });
-    }));
-    estadoMapa.elegido = null;
-    estadoMapa.varios = [];
-    pintarCosasMapa();
-    pintarEstadoDeLoTraido();
-    const nota = yaTiene.size ? " No se traen " + Array.from(yaTiene).join(", ") + ": ya están dibujados aquí." : "";
-    avisarEditor((traidas ? "Traídas " + traidas + (traidas === 1 ? " raya" : " rayas") + " de los vecinos"
-        + (quitadas ? " (en lugar de las " + quitadas + " de antes)." : ".") : "Los vecinos no tienen nada de eso dentro de este mapa.")
-        + nota);
-}
-
-function quitarLoTraido() {
-    const d = estadoMapa.datos;
-    const traidas = d.lines.filter((l) => l.fromMap).length;
-    if (!traidas) {
-        return;
-    }
-    apuntarPaso();
-    d.lines = d.lines.filter((l) => !l.fromMap);
-    estadoMapa.elegido = null;
-    estadoMapa.varios = [];
-    pintarCosasMapa();
-    pintarEstadoDeLoTraido();
-    avisarEditor("Quitadas las " + traidas + " rayas traídas de los vecinos (Ctrl+Z las devuelve).");
-}
-
-function pintarVecinosMapa() {
-    const g = capaMapa("vecinos");
-    if (!g) {
-        return;
-    }
-    g.textContent = "";
-    if (!hayVecinosAVista()) {
-        return;
-    }
-    const comun = { fill: "none", "stroke-linejoin": "round", "stroke-linecap": "round", "vector-effect": "non-scaling-stroke",
-        "pointer-events": "none" };
-    estadoMapa.vecinos.forEach((v) => {
-        v.rayas.forEach((r) => {
-            const [ancho, trazos] = GRIS_VECINO[r.kind] || [2.5, null];
-            const d = trazoMapa(r.points, false);
-            g.appendChild(svgMapa("path", Object.assign({ d, class: "mapa-ed-vecino-borde", "stroke-width": ancho + 3 }, comun)));
-            g.appendChild(svgMapa("path", Object.assign({
-                d, class: "mapa-ed-vecino" + (r.kind === "rio" ? " es-rio" : ""), "stroke-width": ancho,
-                "stroke-dasharray": trazos ? trazos.join(" ") : "none",
-            }, comun)));
-        });
-        // Los sitios: un punto y su nombre, del mismo tamaño a cualquier
-        // zoom (como las marcas: escalarMarcasMapa).
-        v.sitios.forEach((s) => {
-            const m = svgMapa("g", { class: "mapa-ed-marca", "data-x": s.x, "data-y": s.y, "pointer-events": "none" });
-            m.appendChild(svgMapa("circle", { r: 4.5, class: "mapa-ed-vecino-sitio" }));
-            if (s.label) {
-                const t = svgMapa("text", { x: 8, y: 4, class: "mapa-ed-vecino-nombre" });
-                t.textContent = s.label;
-                m.appendChild(t);
-            }
-            g.appendChild(m);
-        });
-    });
 }
 
 function capaMapa(nombre) {
@@ -1519,7 +1158,6 @@ function pintarCosasMapa() {
     pintarAsasMapa();
     escalarMarcasMapa();
     pintarListaDeCosas();
-    pintarEstadoDeLoTraido();
 }
 
 // Vuelve a pintar una sola cosa (mientras se arrastra: el mapamundi
@@ -1724,18 +1362,11 @@ function quitarPinesDePuente() {
 // ---- EL REPASO ----
 // Lo que se ha quedado suelto, en el panel «Repaso»: sitios y textos sin
 // nombre, caminos que acaban casi en un sitio o casi en otro camino (y no
-// se tocan: la ruta de la web no pasaría por ahí), regiones sin página y
-// enlaces a páginas que no existen. Cada aviso lleva a lo suyo (lo elige
+// se tocan: la ruta de la web no pasaría por ahí) y regiones sin nombre.
+// Cada aviso lleva a lo suyo (lo elige
 // y lo centra) y los caminos que casi llegan se arreglan con un botón.
 // Se rehace al abrir el panel y cada vez que cambia algo, si está abierto.
 const RAYAS_QUE_LLEGAN = ["camino", "sendero"];
-
-function paginasDeLaWiki() {
-    // (estadoEditor es de editor.js: un const, no cuelga de window)
-    const datos = typeof estadoEditor !== "undefined" && estadoEditor.datos;
-    const lista = (datos && datos.paginas) || [];
-    return new Set(lista.map((n) => String(n).trim().toLowerCase()));
-}
 
 // El punto más cercano a p de una raya: { x, y, distancia }.
 function puntoMasCercanoDeRaya(puntos, p) {
@@ -1785,8 +1416,6 @@ function sitioDeAviso(lista, cosa) {
 
 function repasoDelMapa() {
     const d = estadoMapa.datos;
-    const paginas = paginasDeLaWiki();
-    const hayPaginas = paginas.size > 0;
     const cerca = Math.max(d.width, d.height) / 60;
     // Lo que la web ya cuenta como el mismo punto (junto en
     // _red_de_caminos, mundo_mapas.py): tan cerca no se nota.
@@ -1877,35 +1506,12 @@ function repasoDelMapa() {
         });
     });
 
-    const regiones = grupo("Regiones sin página", hayPaginas
-        ? "Ni llevan a una página («Lleva a la página») ni se llaman como ninguna de la wiki. Los bosques, lagos y"
-            + " demás zonas no siempre la necesitan." : "");
+    const regiones = grupo("Regiones sin nombre", "Los bosques, lagos y demás zonas no siempre lo necesitan.");
     d.shapes.forEach((r, i) => {
-        if (r.targetPage) {
-            return;
-        }
-        const nombre = (r.label || "").trim();
-        if (!nombre || (hayPaginas && !paginas.has(nombre.toLowerCase()))) {
-            const aviso = conNombre("shapes", r, i);
-            if (nombre) {
-                aviso.texto += " (no hay ninguna página «" + nombre + "»)";
-            }
-            regiones.avisos.push(aviso);
+        if (!(r.label || "").trim() && !r.targetPage) {
+            regiones.avisos.push(conNombre("shapes", r, i));
         }
     });
-    const rotos = grupo("Enlaces a páginas que no existen", "Llevan a una página que todavía no está en la wiki: en la web"
-        + " salen como enlace pendiente. Escríbela o cambia «Lleva a la página».");
-    if (hayPaginas) {
-        ["pins", "lines", "shapes"].forEach((lista) => {
-            d[lista].forEach((c, i) => {
-                if (c.targetPage && !paginas.has(String(c.targetPage).trim().toLowerCase())) {
-                    const aviso = conNombre(lista, c, i);
-                    aviso.texto += " → «" + c.targetPage + "»";
-                    rotos.avisos.push(aviso);
-                }
-            });
-        });
-    }
     return grupos.filter((g) => g.avisos.length);
 }
 
@@ -1919,7 +1525,7 @@ function pintarRepasoMapa() {
     const total = grupos.reduce((s, g) => s + g.avisos.length, 0);
     $("[data-mapa-repaso-resumen]").textContent = total
         ? (total === 1 ? "Hay 1 cosa suelta." : "Hay " + total + " cosas sueltas.") + " Pulsa una para ir a ella."
-        : "Nada suelto: todo tiene nombre, los caminos llegan y las regiones tienen página.";
+        : "Nada suelto: todo tiene nombre y los caminos llegan.";
     // Lo que estaba plegado se queda plegado al rehacerlo.
     const plegados = new Set([...caja.querySelectorAll("details:not([open])")].map((x) => x.getAttribute("data-grupo")));
     caja.textContent = "";
@@ -2621,7 +2227,6 @@ function pintarPropiedadesMapa() {
     $("[data-mapa-que]").textContent = que[0].toUpperCase() + que.slice(1);
     $("[data-mapa-p-nombre-que]").textContent = lista === "labels" ? "Texto" : "Nombre";
     $("#mapa-p-nombre").value = cosa.label || "";
-    $("#mapa-p-pagina").value = cosa.targetPage || "";
     $("#mapa-p-mapa").value = cosa.targetMap || "";
     ponerSesionDeLaRaya(lista, cosa);
     const tipo = $("#mapa-p-tipo");
@@ -2661,9 +2266,8 @@ function pintarPropiedadesMapa() {
         $("#mapa-p-tamano").value = Math.round(tamanoDeTexto(cosa));
         $('[data-mapa-p="italic"]').checked = cosa.italic !== false;
     }
-    // En los de una campaña no hay páginas: se lleva a otro mapa suyo.
-    $('[data-mapa-p-caja="pagina"]').hidden = lista === "labels" || Boolean(estadoMapa.campana);
-    $('[data-mapa-p-caja="mapa"]').hidden = lista === "labels" || !estadoMapa.campana;
+    // No hay páginas: un sitio o una región lleva a otro mapa de la campaña.
+    $('[data-mapa-p-caja="mapa"]').hidden = lista === "labels";
     $('[data-mapa-p-caja="xy"]').hidden = !esMovible(lista);
     $('[data-mapa-p-caja="giro"]').hidden = lista !== "labels" || tieneCurva(cosa);
     // Un texto se puede poner sobre una curva (y quitársela).
@@ -3327,7 +2931,7 @@ async function subirImagenDeEmblema(input) {
         return;
     }
     avisarEditor("Preparando la imagen…");
-    const hecha = await pedirEditor("/api/mapa/emblema", Object.assign({
+    const hecha = await pedirEditor("/api/mapa/emblema", Object.assign({ mapa: estadoMapa.archivo,
         nombre: cosa.label || cosa.targetPage || estadoMapa.datos.title || "emblema" }, imagen));
     if (hecha.error) {
         avisarEditor(hecha.error, true);
@@ -3342,62 +2946,16 @@ async function subirImagenDeEmblema(input) {
     avisarEditor("Imagen lista: " + hecha.nombre + ". Recuerda guardar.");
 }
 
-// La bandera, el blasón o el escudo de la ficha de la página del emblema.
-async function usarImagenDeLaPagina() {
-    const cosa = cosaElegida();
-    if (!cosa) {
-        return;
-    }
-    if (!cosa.targetPage) {
-        avisarEditor("Primero escribe a qué página lleva el emblema.", true);
-        $("#mapa-p-pagina").focus();
-        return;
-    }
-    const pagina = await pedirEditor("/api/pagina?nombre=" + encodeURIComponent(cosa.targetPage));
-    if (pagina.error) {
-        avisarEditor(pagina.error, true);
-        return;
-    }
-    const campo = (pagina.campos || []).find((c) => /^(bandera|blas[oó]n|escudo)$/i.test(c.clave) && c.valor);
-    if (!campo) {
-        avisarEditor("La ficha de " + pagina.nombre + " no tiene bandera, blasón ni escudo.", true);
-        return;
-    }
-    const nombre = campo.valor.replace(/^!?\[\[|\]\]$/g, "").split("|")[0].trim();
-    ponerImagenDeEmblema(nombre);
-    await urlDeImagenMapa(nombre);
-    repintarCosa(estadoMapa.elegido.lista, estadoMapa.elegido.i);
-    avisarEditor("Puesta la " + campo.clave + " de " + pagina.nombre + ": " + nombre + ".");
-}
-
-// LA CAPITAL, SIEMPRE CON SU BANDERA: al poner una (o cambiar un sitio a
-// capital), si no tiene imagen, se le pone de emblema (escudo, grande, si
-// no tenía forma) la bandera, el blasón o el escudo de la ficha de la
-// página del mapa (el reino), y si no, de la página a la que lleva.
-async function vestirCapital(cosa) {
+// LA CAPITAL, COMO UN ESCUDO: al poner una (o cambiar un sitio a capital),
+// si no tiene imagen ni forma, se queda con forma de escudo y grande (la
+// imagen se le pone a mano: «Subir una imagen»).
+function vestirCapital(cosa) {
     if (!cosa || cosa.kind !== "capital" || cosa.image) {
         return;
     }
     if (!cosa.shape) {
         cosa.shape = "escudo";
         cosa.size = cosa.size || "grande";
-    }
-    const deDonde = [estadoMapa.datos.page, cosa.targetPage].filter(Boolean);
-    let puesta = "";
-    for (const nombrePagina of deDonde) {
-        const pagina = await pedirEditor("/api/pagina?nombre=" + encodeURIComponent(nombrePagina));
-        const campo = pagina && !pagina.error
-            && (pagina.campos || []).find((c) => /^(bandera|blas[oó]n|escudo)$/i.test(c.clave) && c.valor);
-        if (campo) {
-            puesta = campo.valor.replace(/^!?\[\[|\]\]$/g, "").split("|")[0].trim();
-            await urlDeImagenMapa(puesta);
-            avisarEditor("A la capital le he puesto la " + campo.clave + " de " + pagina.nombre + ".");
-            break;
-        }
-    }
-    if (puesta && !cosa.image) {
-        cosa.image = puesta;
-        estadoMapa.cambiado = true;
     }
     // Se repinta y, si sigue elegida, se ponen en el panel su forma, su
     // tamaño y su imagen (solo esos campos: rehacer el panel entero le
@@ -4018,8 +3576,8 @@ async function cambiarImagenMapa(input) {
 
 // El mapa, con otra imagen de fondo (otra medida, el mismo encuadre): lo
 // puesto, a la medida nueva. Si la imagen es el doble de grande, cada
-// coordenada, el doble (y la escala, igual). Su sitio en el mapamundi no
-// cambia: es el mismo trozo. Devuelve un aviso si no tiene la misma forma.
+// coordenada, el doble (y la escala, igual). Devuelve un aviso si no
+// tiene la misma forma.
 function pasarAImagenNueva(hecha) {
     apuntarPaso();
     const d = estadoMapa.datos;
@@ -4037,13 +3595,6 @@ function pasarAImagenNueva(hecha) {
     if (d.scale && d.scale.pixels) {
         d.scale.pixels = redondoMapa(d.scale.pixels * (fx + fy) / 2);
     }
-    // Lo de los vecinos (en gris) viene del servidor ya en las medidas de
-    // este mapa (vecinos_de, editor-wiki.py): con la imagen nueva, a las
-    // nuevas, o se queda pequeño en una esquina hasta volver a abrirlo.
-    (estadoMapa.vecinos || []).forEach((v) => {
-        v.sitios.forEach(escalar);
-        v.rayas.forEach((r) => r.points.forEach(escalar));
-    });
     d.width = hecha.ancho;
     d.height = hecha.alto;
     d.layers[0].image = hecha.nombre;
@@ -4058,13 +3609,10 @@ function pasarAImagenNueva(hecha) {
     return Math.abs(fx - fy) > 0.02 ? " OJO: no tiene la misma forma que la otra, así que lo puesto se ha estirado." : "";
 }
 
-// ---- EN EL MAPAMUNDI, Y AMPLIAR ----
-// Dónde cae este mapa en el mapamundi ("world", en unidades del
-// mapamundi) y a qué escala va, para poder juntarlo luego con otros: todos
-// los regionales a la ESCALA COMÚN (8 píxeles por unidad del mapamundi,
-// la de Prunia). Buscarlo solo (OpenCV, en el servidor), retocarlo a
-// mano, llevarlo a la escala común y ampliar la imagen (con IA si está
-// instalada: herramientas/0-comun/mapas_mundo.py).
+// ---- AMPLIAR LA IMAGEN ----
+// Más grande, con IA si está instalada (herramientas/0-comun/mapas_mundo.py:
+// «Instalar las ayudas de los mapas», en el menú → Imágenes); lo puesto se
+// queda en su sitio (pasarAImagenNueva).
 const MODELOS_DE_IMAGEN = [["pintado", "Pintada o con texturas (la mayoría)"], ["dibujo", "Dibujo de líneas limpias"]];
 let ayudasDeMapas = null;
 
@@ -4074,204 +3622,49 @@ async function cargarAyudasDeMapas() {
         return;
     }
     ayudasDeMapas = r;
-    const faltan = [];
-    if (!r.opencv) {
-        faltan.push("buscarlo en el mapamundi");
-    }
-    if (!r.ampliador) {
-        faltan.push("ampliar con IA");
-    }
-    $("[data-mapa-ayudas-estado]").textContent = faltan.length
-        ? "Para " + faltan.join(" y ") + " hay que instalar una vez las ayudas de los mapas (menú → Imágenes →"
-            + " «Instalar las ayudas de los mapas»). Sin ellas el mapa se hace igual" + (r.ampliador ? "." : ", ampliado sin IA.")
-        : "Todo a punto: lo busca en el mapamundi y lo amplía con IA hasta " + r.escala + " píxeles por unidad del mapamundi.";
     if (estadoMapa.datos) {
-        pintarMundoDelMapa();
+        pintarMedidaDeAmpliar();
     }
-}
-
-function escalaComunMapa() {
-    return (ayudasDeMapas && ayudasDeMapas.escala) || 8;
 }
 
 function ladoMaximoMapa() {
     return (ayudasDeMapas && ayudasDeMapas.lado_maximo) || 8192;
 }
 
-// Lo que mediría la imagen a la escala común (sin pasar del máximo).
-function medidaComunMapa() {
-    const d = estadoMapa.datos;
-    const w = d.world;
-    if (!w || !(w.w > 0)) {
-        return null;
-    }
-    let ancho = Math.round(w.w * escalaComunMapa());
-    if (Math.max(ancho, ancho * d.height / d.width) > ladoMaximoMapa()) {
-        ancho = Math.floor(ladoMaximoMapa() * Math.min(1, d.width / d.height));
-    }
-    return { ancho, alto: Math.round(ancho * d.height / d.width) };
-}
-
-// El mapamundi mismo: la referencia de los demás. Sus coordenadas no
-// cambian nunca (los mapas regionales guardan su sitio en ellas): al
-// ampliarlo solo cambia la imagen, y no se sitúa en sí mismo.
-function esElMapamundi() {
-    const mundo = ayudasDeMapas && ayudasDeMapas.mapamundi;
-    return !!mundo && (estadoMapa.archivo || "").toLowerCase() === String(mundo.archivo).toLowerCase();
-}
-
-function pintarMundoDelMapa(sinCasillas) {
-    const d = estadoMapa.datos;
-    $("[data-mapa-mundo-caja]").hidden = esElMapamundi();
-    const w = d.world;
-    const estado = $("[data-mapa-mundo-estado]");
-    const boton = $("[data-mapa-mundo-escala]");
-    if (!w || !(w.w > 0)) {
-        estado.textContent = "No está situado en el mapamundi. «Buscarlo» lo encuentra solo si sale de un trozo del"
-            + " mapamundi (aunque esté retocado); si está dibujado de cero, pon X, Y y el ancho a mano.";
-        boton.hidden = true;
-    } else {
-        const escala = d.width / w.w;
-        const comun = medidaComunMapa();
-        const yaEsta = comun && Math.abs(comun.ancho - d.width) <= 2;
-        estado.textContent = "Está en el mapamundi en " + cifraMapa(w.x, 1) + ", " + cifraMapa(w.y, 1) + " ("
-            + cifraMapa(w.w, 1) + " × " + cifraMapa(w.h, 1) + " unidades). Va a " + cifraMapa(escala, 1)
-            + " píxeles por unidad" + (yaEsta ? ": la escala común. Se podrá juntar con los demás."
-                : "; la escala común es " + escalaComunMapa() + ".");
-        boton.hidden = !comun || yaEsta;
-        if (comun) {
-            boton.textContent = "Llevarlo a la escala común (" + comun.ancho + " × " + comun.alto + " px)";
-        }
-    }
-    if (!sinCasillas) {
-        ["x", "y", "w"].forEach((k) => {
-            $("#mapa-mundo-" + k).value = w && Number.isFinite(Number(w[k])) ? String(Math.round(w[k] * 10) / 10) : "";
-        });
-    }
-    // La vista: el mapamundi en pequeño con el recuadro de este mapa.
-    const vista = $("[data-mapa-mundo-vista]");
-    const mundo = ayudasDeMapas && ayudasDeMapas.mapamundi;
-    vista.hidden = !mundo || !mundo.url || !w || !(w.w > 0);
-    if (!vista.hidden) {
-        const img = $("[data-mapa-mundo-imagen]");
-        if (img.getAttribute("src") !== mundo.url) {
-            img.setAttribute("src", mundo.url);
-        }
-        const marco = $("[data-mapa-mundo-marco]");
-        marco.style.left = (w.x / mundo.ancho * 100) + "%";
-        marco.style.top = (w.y / mundo.alto * 100) + "%";
-        marco.style.width = (w.w / mundo.ancho * 100) + "%";
-        marco.style.height = (w.h / mundo.alto * 100) + "%";
-    }
-    pintarMedidaDeAmpliar();
-}
-
 function pintarMedidaDeAmpliar() {
     const d = estadoMapa.datos;
     const f = Number($("#mapa-ampliar-cuanto").value) || 2;
-    if (esElMapamundi()) {
-        $("[data-mapa-ampliar-medida]").textContent = "En el mapamundi solo cambia la imagen (por " + cifraMapa(f)
-            + "); sus coordenadas no, así que los mapas regionales siguen en su sitio. Como mucho "
-            + ladoMaximoMapa() + " píxeles de lado.";
-        $("[data-mapa-ampliar]").disabled = false;
-        return;
-    }
     const ancho = Math.round(d.width * f);
     const alto = Math.round(d.height * f);
     const cabe = Math.max(ancho, alto) <= ladoMaximoMapa();
     $("[data-mapa-ampliar-medida]").textContent = "Ahora mide " + d.width + " × " + d.height + " px; saldría de "
-        + ancho + " × " + alto + "." + (cabe ? "" : " Es demasiado: como mucho " + ladoMaximoMapa() + " de lado.");
+        + ancho + " × " + alto + "." + (cabe ? "" : " Es demasiado: como mucho " + ladoMaximoMapa() + " de lado.")
+        + (ayudasDeMapas && !ayudasDeMapas.ampliador ? " (Sin IA: para ampliar con ella, instala una vez el ampliador"
+            + " de los mapas, en el menú → Imágenes.)" : "");
     $("[data-mapa-ampliar]").disabled = !cabe;
 }
 
-function cambiarMundoAMano() {
-    const d = estadoMapa.datos;
-    const x = parseFloat($("#mapa-mundo-x").value);
-    const y = parseFloat($("#mapa-mundo-y").value);
-    const w = parseFloat($("#mapa-mundo-w").value);
-    if (![x, y, w].every(Number.isFinite) || w <= 0) {
-        return;
-    }
-    apuntarPaso("mundo");
-    d.world = { map: (ayudasDeMapas && ayudasDeMapas.mapamundi && ayudasDeMapas.mapamundi.archivo)
-        || (d.world && d.world.map) || "Mapamundi de Cralëa.cmap",
-    x, y, w, h: Math.round(w * d.height / d.width * 10) / 10 };
-    pintarMundoDelMapa(true);
-}
-
-async function buscarEnElMapamundi() {
-    const boton = $("[data-mapa-mundo-buscar]");
-    boton.disabled = true;
-    avisarEditor("Buscándolo en el mapamundi…");
-    const r = await pedirEditor("/api/mapa/situar", { mapa: estadoMapa.archivo, imagen: estadoMapa.datos.layers[0]
-        && estadoMapa.datos.layers[0].image });
-    boton.disabled = false;
-    if (r.error) {
-        avisarEditor(r.error, true);
-        return;
-    }
-    apuntarPaso();
-    estadoMapa.datos.world = r.world;
-    pintarMundoDelMapa();
-    avisarEditor("Encontrado en el mapamundi (" + r.seguridad + " puntos que coinciden). Recuerda guardar.");
-}
-
 async function ampliarImagenDelMapa(ancho, alto, ia, modelo) {
-    const botones = [$("[data-mapa-ampliar]"), $("[data-mapa-mundo-escala]")];
-    botones.forEach((b) => {
-        b.disabled = true;
-    });
+    const boton = $("[data-mapa-ampliar]");
+    boton.disabled = true;
     avisarEditor("Ampliando la imagen" + (ia ? " con IA" : "") + " a " + ancho + " × " + alto + "… (puede tardar un poco)");
     const hecha = await pedirEditor("/api/mapa/ampliar", { mapa: estadoMapa.archivo, ancho, alto, ia, modelo,
         imagen: estadoMapa.datos.layers[0] && estadoMapa.datos.layers[0].image });
-    botones.forEach((b) => {
-        b.disabled = false;
-    });
+    boton.disabled = false;
     if (hecha.error) {
         avisarEditor(hecha.error, true);
         return;
     }
     const raro = pasarAImagenNueva(hecha);
-    pintarMundoDelMapa();
+    pintarMedidaDeAmpliar();
     avisarEditor("Imagen ampliada" + (hecha.con_ia ? " con IA" : "") + ": " + hecha.nombre + " (" + hecha.ancho + " × "
         + hecha.alto + ")." + (hecha.aviso ? " " + hecha.aviso + "." : "") + raro + " Recuerda guardar.",
     !!raro || (ia && !hecha.con_ia));
 }
 
-function llevarAEscalaComun() {
-    const comun = medidaComunMapa();
-    if (comun) {
-        ampliarImagenDelMapa(comun.ancho, comun.alto, $("#mapa-ampliar-ia").checked, $("#mapa-ampliar-modelo").value);
-    }
-}
-
-async function ampliarElMapamundi(f, ia, modelo) {
-    const boton = $("[data-mapa-ampliar]");
-    boton.disabled = true;
-    avisarEditor("Ampliando la imagen del mapamundi" + (ia ? " con IA" : "") + "… (puede tardar un poco)");
-    const hecha = await pedirEditor("/api/mapa/ampliar", { mapa: estadoMapa.archivo, factor: f, ia, modelo,
-        imagen: estadoMapa.datos.layers[0] && estadoMapa.datos.layers[0].image });
-    boton.disabled = false;
-    if (hecha.error) {
-        avisarEditor(hecha.error, true);
-        return;
-    }
-    apuntarPaso();
-    estadoMapa.datos.layers[0].image = hecha.nombre;
-    estadoMapa.imagenes[hecha.nombre] = hecha.url;
-    pintarFondoMapa();
-    avisarEditor("Imagen del mapamundi ampliada" + (hecha.con_ia ? " con IA" : "") + ": " + hecha.nombre + " ("
-        + hecha.ancho + " × " + hecha.alto + "). Sus coordenadas no cambian." + (hecha.aviso ? " " + hecha.aviso + "." : "")
-        + " Recuerda guardar.", ia && !hecha.con_ia);
-}
-
 function ampliarPorFactor() {
     const d = estadoMapa.datos;
     const f = Number($("#mapa-ampliar-cuanto").value) || 2;
-    if (esElMapamundi()) {
-        ampliarElMapamundi(f, $("#mapa-ampliar-ia").checked, $("#mapa-ampliar-modelo").value);
-        return;
-    }
     ampliarImagenDelMapa(Math.round(d.width * f), Math.round(d.height * f), $("#mapa-ampliar-ia").checked,
         $("#mapa-ampliar-modelo").value);
 }
@@ -5373,12 +4766,6 @@ function empezarMapas() {
     });
     $("[data-mapa-curva-quitar]").addEventListener("click", quitarCurvaDelTexto);
     $("#mapa-curva-nueva").addEventListener("change", () => ponerHerramienta(estadoMapa.herramienta));
-    $("[data-mapa-traer-boton]").addEventListener("click", traerDeLosVecinos);
-    $("[data-mapa-traer-quitar]").addEventListener("click", quitarLoTraido);
-    $("#mapa-vecinos").addEventListener("change", () => {
-        pintarVecinosMapa();
-        escalarMarcasMapa();
-    });
     document.querySelectorAll("[data-mapa-letras]").forEach((s) => opcionesMapa(s, LETRAS_DE_TEXTO, false));
     document.querySelectorAll("[data-mapa-formas-emblema]").forEach((s) => opcionesMapa(s, FORMAS_DE_EMBLEMA, false));
     document.querySelectorAll("[data-mapa-tamanos-emblema]").forEach((s) => {
@@ -5387,20 +4774,11 @@ function empezarMapas() {
     });
     $("#mapa-p-imagen-subir").addEventListener("change", (e) => subirImagenDeEmblema(e.target));
     $("#mapa-forma-nueva").addEventListener("change", pintarOpcionesDeSitio);
-    $("[data-mapa-emblema-pagina]").addEventListener("click", usarImagenDeLaPagina);
     $("[data-mapa-escala-otro]").addEventListener("click", empezarOtraMedida);
     $("[data-mapa-quitar-pines-puente]").addEventListener("click", quitarPinesDePuente);
     document.querySelectorAll("[data-mapa-modelos]").forEach((s) => opcionesMapa(s, MODELOS_DE_IMAGEN, false));
-    $("[data-mapa-mundo-buscar]").addEventListener("click", buscarEnElMapamundi);
-    $("[data-mapa-mundo-escala]").addEventListener("click", llevarAEscalaComun);
     $("[data-mapa-ampliar]").addEventListener("click", ampliarPorFactor);
     $("#mapa-ampliar-cuanto").addEventListener("change", pintarMedidaDeAmpliar);
-    document.querySelectorAll("[data-mapa-mundo]").forEach((c) => {
-        c.addEventListener("input", cambiarMundoAMano);
-        c.addEventListener("blur", () => {
-            estadoMapa.ultimoCampo = null;
-        });
-    });
     cargarAyudasDeMapas();
     // La barra de abajo crece con los avisos: lo que mide se apunta en
     // --alto-barra (hasta ahí llegan el mapa y los paneles).
@@ -5411,11 +4789,6 @@ function empezarMapas() {
     }
     window.addEventListener("resize", apuntarAlto);
 
-    // El modo, antes que nada (en captura): «Estás en» lo necesita ya.
-    document.querySelectorAll('[data-ir="mapas"]').forEach((b) => b.addEventListener("click", () => {
-        const modo = b.getAttribute("data-mapas-modo");
-        ponerModoDeMapas(modo || (estadoMapa.campana ? "campana" : "wiki"));
-    }, true));
     document.querySelectorAll('[data-ir="mapas"]').forEach((b) => b.addEventListener("click", pintarListaDeMapas));
     $("[data-mapa-nuevo]").addEventListener("submit", (e) => {
         e.preventDefault();

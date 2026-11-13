@@ -29,6 +29,8 @@ from pathlib import Path
 # Dos pisos hacia arriba: este archivo vive en
 # herramientas/4-comprobar/. (Éste no usa comun.py: se vale solo.)
 RAIZ = Path(__file__).resolve().parents[2]
+# Las mismas que APPS_APARTE de comun.py (éste se vale solo).
+APPS_APARTE = {"pantalla-master", "wiki"}
 
 
 def entre(texto, desde, hasta):
@@ -61,9 +63,12 @@ def main():
     ajustes = (RAIZ / "estilos/componentes/ajustes.css").read_text(encoding="utf-8")
     lateral = (RAIZ / "fragmentos/ajustes.html").read_text(encoding="utf-8")
 
+    # Las apps que van tal cual (pantalla-master/, wiki/) llevan su propio
+    # pre-pintado y se comprueban en su repo.
     paginas = [
         f for f in sorted(RAIZ.rglob("*.html"))
         if "originales-sustituidas" not in f.as_posix()
+        and f.relative_to(RAIZ).parts[0] not in APPS_APARTE
         and "var temas = {" in f.read_text(encoding="utf-8")
     ]
 

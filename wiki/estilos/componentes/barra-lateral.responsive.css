@@ -1,0 +1,152 @@
+/* RESPONSIVE — sidebar como cajón deslizante en móvil */
+
+.mobile-topbar {
+    display: none;
+}
+
+.sidebar-toggle {
+    display: none;
+}
+
+.sidebar-backdrop {
+    display: none;
+}
+
+@media (max-width: 860px) {
+    .mobile-topbar {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        z-index: 110;
+        height: var(--barra-alto);
+        /* A la derecha se deja el hueco del botón de accesibilidad, que
+           flota encima de esta barra (está en ajustes.css: 2.4rem de
+           ancho y pegado a 14px del borde). Sin este hueco el título no
+           sabe que tiene algo delante y se le mete por debajo: con el
+           texto al 150% "EL BLOG DE RICHI" acababa pasando por detrás
+           del botón. Con el hueco se corta con sus puntos suspensivos,
+           que es justo para lo que está el overflow de aquí abajo.
+           Los 24px son los 14 del botón más 10 de aire. */
+        padding: 0 calc(2.4rem + 24px) 0 14px;
+        background: var(--yellow);
+    }
+
+    .mobile-topbar-title {
+        margin: 0;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        color: var(--yellow-contrast);
+        font-family: var(--fuente-mono);
+        font-size: 0.75rem;
+        font-weight: 500;
+    }
+
+    .sidebar-toggle {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        width: 2.4rem;
+        height: 2.4rem;
+        border: 2px solid var(--yellow-contrast);
+        background: var(--yellow-contrast);
+        color: var(--yellow);
+        font-size: 1.1rem;
+    }
+
+    .sidebar-toggle:focus-visible {
+        outline: 2px solid var(--yellow-contrast);
+        outline-offset: 2px;
+    }
+
+    /* El logo de dentro del cajón ya no hace falta: la barra fija hace su función */
+    .sidebar-logo {
+        display: none;
+    }
+
+    /* Ni el botón de plegar la barra: en móvil la barra ya es un cajón. */
+    .lateral-plegar {
+        display: none;
+    }
+
+    .sidebar {
+        top: var(--barra-alto);
+        /* dvh y no vh: en un móvil, vh cuenta la pantalla entera aunque
+           la barra del navegador esté tapando un trozo. Y el relleno de
+           abajo es para que el final del menú no quede debajo de los
+           botones del propio teléfono (ver --hueco-abajo en
+           estilos/base.css). */
+        height: calc(100dvh - var(--barra-alto));
+        padding-bottom: calc(15px + var(--hueco-abajo));
+        /* El cajón crece con el texto, pero en un móvil no puede
+           comerse la pantalla entera: por ancha que se ponga la barra,
+           siempre queda a la vista un trozo de la página de detrás para
+           saber que es un cajón y poder cerrarlo tocando fuera.
+           Con el max() por delante para que en una pantalla de 320 y
+           el texto de siempre siga midiendo los 280px de antes: el 88%
+           de 320 son 281 y el cajón habría encogido 8px sin que nadie
+           lo pidiera. */
+        max-width: max(88vw, 280px);
+        transform: translateX(-100%);
+        z-index: 100;
+        transition: transform 0.2s ease;
+        /* En escritorio la barra se reparte el alto (space-between) y
+           quien scrollea es <nav> por dentro. En un móvil eso no cabe:
+           medido en una pantalla de 320x568, a la lista de enlaces le
+           quedaban 36px de alto porque la foto del gatín y los botones
+           se llevaban el resto, y había que scrollear un menú del
+           tamaño de una línea. Aquí el cajón entero pasa a ser una
+           columna normal que se desplaza de arriba abajo, como
+           cualquier menú de móvil. */
+        justify-content: flex-start;
+        overflow-y: auto;
+        overscroll-behavior: contain;
+    }
+
+    .sidebar-top {
+        flex: 0 0 auto;
+    }
+
+    /* El scroll ahora es del cajón: <nav> se enseña entero. */
+    .sidebar nav {
+        flex: 0 0 auto;
+        min-height: auto;
+        overflow: visible;
+        padding-bottom: 4px;
+    }
+
+    /* La sombra que avisaba de que <nav> seguía hacia abajo ya no pinta
+       nada, y encima quedaría flotando en medio del menú. */
+    .sidebar-top::after {
+        display: none;
+    }
+
+    .sidebar.open {
+        transform: translateX(0);
+    }
+
+    .sidebar-backdrop:not([hidden]) {
+        display: block;
+        position: fixed;
+        top: var(--barra-alto);
+        left: 0;
+        right: 0;
+        bottom: 0;
+        z-index: 90;
+        background: rgba(0, 0, 0, 0.5);
+    }
+
+    /* (Los botones de la ventana de accesibilidad, en móvil, están con
+       ella: estilos/componentes/ajustes.css.) */
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .sidebar {
+        transition: none;
+    }
+}

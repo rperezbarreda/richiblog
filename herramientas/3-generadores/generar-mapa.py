@@ -71,6 +71,7 @@ import re
 
 from comun import (
     APPS_APARTE,
+    APPS_QUE_SE_BUSCAN,
     MESES_CORTOS,
     RAIZ,
     es_borrador,
@@ -89,7 +90,9 @@ LISTADOS = (
 # Lo mismo que se queda fuera del sitemap: lo que no es una página de la
 # web que alguien pueda visitar.
 EXCLUIDOS = {"not_found.html"}
-CARPETAS_EXCLUIDAS = {"herramientas", "fragmentos"} | APPS_APARTE
+# Las apps que van tal cual tampoco, salvo la wiki de Cralëa (como en el
+# buscador: APPS_QUE_SE_BUSCAN, en comun.py).
+CARPETAS_EXCLUIDAS = {"herramientas", "fragmentos"}
 
 # El orden en que salen las secciones en la tabla. Lo que no esté aquí
 # va al final, por orden alfabético.
@@ -151,7 +154,7 @@ def seccion_de(url):
     # La wiki del mundo: una sección propia y no "otras". Son muchas
     # páginas y se buscan juntas. Lo que se lee es el nombre de la wiki,
     # no el de la carpeta.
-    if url.startswith("/web/wiki/"):
+    if url.startswith("/wiki/"):
         return "wiki cralëa"
     return "otras"
 
@@ -212,6 +215,8 @@ def generar(probar=False):
     for archivo in sorted(RAIZ.rglob("*.html")):
         relativo = archivo.relative_to(RAIZ)
         if set(relativo.parts) & CARPETAS_EXCLUIDAS:
+            continue
+        if relativo.parts[0] in APPS_APARTE and relativo.parts[0] not in APPS_QUE_SE_BUSCAN:
             continue
         if relativo.name in EXCLUIDOS:
             continue

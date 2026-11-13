@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # =========================================
-# EL EDITOR DE LA WEB — todo lo que no es la wiki
+# EL EDITOR DE LA WEB — todo lo que no son los mapas
 # =========================================
 # Lo que le añade a editor-wiki.py (que es quien lo sirve: esto no se
 # ejecuta suelto) para llevar EL RESTO DE LA WEB desde el navegador, con
@@ -15,22 +15,20 @@
 #     borrador (lo mismo que publicar.py).
 #   · LAS FICHAS: lo que vive en un JSON de datos/ y llevan las demás
 #     herramientas de 1-publicar: los recursos de rol, los NPC y el botín
-#     de cada campaña, las recomendaciones, «en lo que ando», el
-#     calendario, la línea de tiempo, el diccionario, las palabras del reto
-#     y las fotos de los gatos. Cada una es una lista de fichas con sus
+#     de cada campaña, las recomendaciones, «en lo que ando», las palabras
+#     del reto y las fotos de los gatos. Cada una es una lista de fichas con sus
 #     casillas (COLECCIONES, abajo).
 #   · LAS IMÁGENES (traerlas de tu ordenador, como traer-imagen.py) y
 #     REPASAR EL SITIO (las cinco comprobaciones) o volver a generarlo.
 #
 # NO HACE NADA DISTINTO de las herramientas de siempre: usa sus mismas
-# funciones (las de nuevo.py, publicar.py, imagenes.py, calendario.py,
-# linea-de-tiempo.py…) y, al terminar, pasa los mismos generadores que
-# pasarían ellas. Lo que se guarda queda igual que si se hubiera hecho a
+# funciones (las de nuevo.py, publicar.py, imagenes.py…) y, al terminar,
+# pasa los mismos generadores que pasarían ellas. Lo que se guarda queda igual que si se hubiera hecho a
 # mano o con ellas.
 #
 # LO QUE TARDA (crear, publicar, pasar los generadores) va en otro hilo, y
 # el editor pregunta a /api/web/tarea cómo va para enseñar la barra de
-# progreso, como al pasar la wiki.
+# progreso, como al pasar un mapa a la web.
 
 import base64
 import datetime as dt
@@ -104,7 +102,7 @@ def _sin_salir(funcion, *args):
 # Una tarea es una lista de pasos [(qué se ve, la orden, de quién)]. Cada
 # paso es un script de las herramientas; se cuenta cuánto va por el TIEMPO
 # que lleva comparado con lo que tardó la última vez (como al pasar la
-# wiki en editor-wiki.py), y nunca pasa de 99 hasta que termina.
+# un mapa en editor-wiki.py), y nunca pasa de 99 hasta que termina.
 
 TAREA = {"activa": False, "fase": "", "porcentaje": 0, "terminado": True, "resultado": None, "registro": []}
 
@@ -152,8 +150,6 @@ NOMBRES_DE_PASOS = {
     "actualizar-cabeceras.py": "Las cabeceras y los menús",
     "css-sano.py": "Mirando las hojas de estilo",
     "temas-completos.py": "Mirando los temas de color",
-    "generar-linea-tiempo.py": "La línea de tiempo",
-    "generar-mundo.py": "La wiki",
     "generar-galeria.py": "Las miniaturas de la galería",
     "enlaces-rotos.py": "Enlaces rotos",
     "nombres-repetidos.py": "Nombres repetidos",
@@ -1229,14 +1225,6 @@ def _opciones(lista):
     return [[x, x] for x in lista]
 
 
-def _paginas_de_la_wiki():
-    try:
-        sys.path.insert(0, str(PUBLICAR))
-        return [a.stem for a in herramienta("nueva-pagina-wiki").paginas_de_la_wiki()]
-    except Exception:
-        return []
-
-
 def _sesiones_de(campana):
     return [[s.get("numero"), "Sesión %s%s" % (s.get("numero"), (" — " + s["titulo"]) if s.get("titulo") else "")]
             for s in (campana or {}).get("sesiones") or [] if isinstance(s, dict) and s.get("numero")]
@@ -1496,7 +1484,7 @@ def colecciones():
                      ]}]},
         {"id": "personajes", "apartado": "personajes", "corto": "Mis OC, aparte de las campañas: ficha, historia, gente e imágenes.", "titulo": "Mis personajes",
          "ayuda": "Mis OC: el índice de redondeles y la ficha de cada uno (historia, npcs, imágenes, extra, la foto con"
-                  " sus características y su PDF). Va aparte de las campañas y de la wiki.",
+                  " sus características y su PDF). Va aparte de las campañas.",
          "archivo": "datos/personajes/personajes.json", "despues": "personajes",
          "partes": [
              {"id": "datos", "tipo": "objeto", "camino": [], "titulo": "La página de mis personajes", "campos": [
@@ -1919,74 +1907,6 @@ def colecciones():
                   C("dia", "Día", "ver"), C("fecha", "Fecha", "fecha"), C("palabra", "Palabra"),
                   C("titulo", "Título de lo escrito", "ver"), C("url", "Dónde está", "ver")]},
          ]},
-        {"id": "calendario", "apartado": "wiki", "corto": "Festividades y eventos de Cralëa.", "titulo": "El calendario de la wiki",
-         "ayuda": "Las festividades y los eventos que salen marcados en el calendario de la portada de la wiki.",
-         "archivo": "datos/wiki/calendario.json", "herramienta": "calendario", "despues": None,
-         "partes": [
-             {"id": "hoy", "tipo": "objeto", "camino": ["hoy"], "titulo": "El día de hoy en Cralëa",
-              "ayuda": "Se marca, y el calendario abre en su mes. Vacío: ninguno.", "campos": [
-                  C("mes", "Mes", "elegir", numerico=True, vacio="quitar"),
-                  C("dia", "Día", "numero", minimo=1, maximo=28, vacio="quitar")]},
-             {"id": "eventos", "camino": ["eventos"], "titulo": "Lo marcado", "nombre_de": "nombre",
-              "detalle": ["mes", "dia"], "campos": [
-                  C("nombre", "Nombre", obligatorio=True),
-                  C("tipo", "Qué es", "elegir", opciones=[["festividad", "festividad (se repite cada año)"],
-                                                          ["evento", "evento (pasó o pasará una vez)"]]),
-                  C("mes", "Mes", "elegir", numerico=True, obligatorio=True),
-                  C("dia", "Día", "numero", minimo=1, maximo=28, obligatorio=True,
-                    ayuda="De 1 a 28; en el Fin del Ciclo, de 1 a 4."),
-                  C("anyo", "Año", vacio="quitar", ayuda="Si pasó un año concreto, como se lea: «1340 DEM»."),
-                  C("resumen", "Resumen", "largo"),
-                  C("enlace", "Enlace", vacio="quitar",
-                    ayuda="Una página de la wiki: su nombre entre corchetes ([[La Gran Sequía]]) o /web/wiki/…"),
-              ]},
-         ]},
-        {"id": "linea", "apartado": "wiki", "corto": "Los eventos y las eras.", "titulo": "La línea de tiempo",
-         "ayuda": "Los eventos (cada uno con su página) y las eras. Se ordenan solos por el año.",
-         "archivo": "datos/wiki/linea-de-tiempo.json", "herramienta": "linea-de-tiempo", "despues": "linea",
-         "partes": [
-             {"id": "ajustes", "tipo": "objeto", "camino": [], "titulo": "La página", "campos": [
-                 C("titulo", "Título"), C("intro", "Entradilla", "largo"),
-                 C("hoy", "El año de hoy", ayuda="Como se lea: «1340 DEM».")]},
-             {"id": "eventos", "camino": ["eventos"], "titulo": "Los eventos", "nombre_de": "nombre",
-              "detalle": ["fecha"], "campos": [
-                  C("nombre", "Nombre", obligatorio=True,
-                    ayuda="Es también cómo se le enlaza desde la wiki: [[así]]."),
-                  C("fecha", "Año", obligatorio=True, anyo=True,
-                    ayuda="Un número (negativo antes del año 0) o como se escriba: «800.000.000 AEM»."),
-                  C("hasta", "Hasta", anyo=True, vacio="quitar", ayuda="Si dura varios años."),
-                  C("fecha_texto", "Cómo se lee el año", vacio="quitar",
-                    ayuda="Si se dice de otra manera: «hace mucho»."),
-                  C("resumen", "Resumen", "largo", maximo_letras=180,
-                    ayuda="Para la tarjeta de la línea: mejor por debajo de 180 letras."),
-                  C("texto", "Su página", "largo", grande=True, vacio="quitar", markdown=True, imagenes="evento",
-                    ayuda="En el mismo formato que la wiki: **negrita**, listas, [[enlaces]]. Los botones de"
-                          " encima lo ponen. Con dos títulos o más sale el «Contenido» a un lado."),
-                  C("imagen", "Imagen", "imagen", sitio="evento", vacio="quitar"),
-              ]},
-             {"id": "eras", "camino": ["eras"], "titulo": "Las eras", "nombre_de": "nombre", "detalle": ["desde"],
-              "campos": [
-                  C("nombre", "Nombre", obligatorio=True),
-                  C("desde", "Desde", obligatorio=True, anyo=True),
-                  C("hasta", "Hasta", anyo=True, vacio="quitar",
-                    ayuda="Si no, dura hasta que empieza la siguiente."),
-                  C("resumen", "Resumen", "largo", vacio="quitar"),
-                  C("color", "Color", "color", vacio="quitar"),
-              ]},
-         ]},
-        {"id": "diccionario", "apartado": "wiki", "corto": "Las palabras de las lenguas del mundo.", "titulo": "El diccionario",
-         "ayuda": "Las palabras de las lenguas del mundo (y del generador de nombres).",
-         "archivo": "datos/wiki/diccionario.json", "herramienta": "diccionario", "despues": "mundo",
-         "partes": [{"id": "palabras", "camino": ["palabras"], "titulo": "Las palabras", "nombre_de": "palabra",
-                     "detalle": ["idioma", "significado"], "campos": [
-                         C("palabra", "Palabra", obligatorio=True),
-                         C("idioma", "Idioma", "elegir", libre=True, obligatorio=True,
-                           ayuda="El nombre de la página del idioma, si la tiene."),
-                         C("significado", "Significado", obligatorio=True),
-                         C("notas", "Notas", ayuda="De dónde viene, cómo se pronuncia…"),
-                         C("pagina", "Página de la wiki", "elegir", libre=True,
-                           ayuda="Una página donde se explica (opcional)."),
-                     ]}]},
     ]
 
 
@@ -2003,11 +1923,7 @@ def _archivo_de(col, clave):
 
 def _cargar_datos(col, archivo):
     if col.get("herramienta"):
-        datos = _sin_salir(herramienta(col["herramienta"]).cargar)
-        if col["id"] == "linea":
-            # Para entender los años con su calendario («800.000.000 AEM»).
-            herramienta("linea-de-tiempo").mundo_linea.poner_calendario(datos.get("calendario"))
-        return datos
+        return _sin_salir(herramienta(col["herramienta"]).cargar)
     return leer_json(archivo, None)
 
 
@@ -2103,14 +2019,6 @@ def opciones_de(col, clave_campana, datos):
         salida["oc"] = salida["_grupo"]
     if col["id"] == "recomendaciones":
         salida["_grupo"] = [[g.get("clave"), g.get("nombre")] for g in datos or [] if isinstance(g, dict)]
-    if col["id"] == "calendario":
-        meses = [[i + 1, m.get("nombre") or "Mes %d" % (i + 1)] for i, m in enumerate(datos.get("meses") or [])]
-        if datos.get("fin"):
-            meses.append([len(meses) + 1, (datos["fin"] or {}).get("nombre") or "Fin del Ciclo"])
-        salida["mes"] = meses
-    if col["id"] == "diccionario":
-        salida["idioma"] = _opciones(sorted({str(p.get("idioma") or "") for p in datos.get("palabras") or []} - {""}))
-        salida["pagina"] = _opciones(_paginas_de_la_wiki())
     return salida
 
 
@@ -2208,13 +2116,6 @@ def _valor(campo, crudo, ficha_nombre):
         raise ValueError("%s tiene que ser un PDF del sitio: súbelo con su botón" % donde)
     if tipo == "imagen" and not (texto.startswith("/") and not texto.startswith("//")):
         raise ValueError("%s tiene que ser una imagen del sitio (/imagenes/…): súbela con su botón" % donde)
-    if campo.get("anyo"):
-        linea = herramienta("linea-de-tiempo").mundo_linea
-        if linea.leer_fecha(texto) is None:
-            raise ValueError("no entiendo el año de %s («%s»)" % (donde, texto))
-        crudo_numero = re.fullmatch(r"[−-]?\d+", texto)
-        if crudo_numero:
-            return int(texto.replace("−", "-"))
     if campo.get("maximo_letras") and len(texto) > campo["maximo_letras"]:
         raise ValueError("%s tiene %d letras: mejor por debajo de %d, que si no estira la tarjeta"
                          % (donde, len(texto), campo["maximo_letras"]))
@@ -2357,9 +2258,6 @@ def _mezclar_partes(col, archivo, datos, llegan):
         if col["id"] == "rol":
             conocidas = {c for c, _ in opciones_de(col, "", viejas).get("subcategory", [])}
             nuevas_categorias = sorted({str(f.get("subcategory") or "") for f in nuevas} - conocidas - {""})
-        if col["id"] == "calendario" and parte["id"] == "eventos":
-            for f in nuevas:
-                _arreglar_evento_del_calendario(datos, f)
         lista[:] = nuevas
     if col["id"] == "personajes":
         _arreglar_personajes(datos)
@@ -2375,12 +2273,6 @@ def _mezclar_partes(col, archivo, datos, llegan):
             for cosa in (apartado or {}).get("cosas") or [] if isinstance(apartado, dict) else []:
                 if isinstance(cosa, dict) and cosa.get("estado") and not cosa.get("hasta") and ultima:
                     cosa["hasta"] = ultima
-    if col["id"] == "calendario":
-        hoy = datos.get("hoy")
-        if isinstance(hoy, dict) and not (hoy.get("mes") and hoy.get("dia")):
-            if hoy.get("mes") or hoy.get("dia"):
-                raise ValueError("el día de hoy necesita el mes y el día (o ninguno de los dos)")
-            datos["hoy"] = None
     return nuevas_categorias
 
 
@@ -2412,24 +2304,6 @@ def guardar_coleccion(peticion):
         return empezar_tarea(pasos, fin=lambda r: {"coleccion": leer_coleccion(col["id"], clave_campana)},
                              primero="Guardado; pasando")
     return {"ok": True, "coleccion": leer_coleccion(col["id"], clave_campana)}
-
-
-def _arreglar_evento_del_calendario(datos, evento):
-    """El día, dentro de su mes (el Fin del Ciclo tiene 4), y el enlace:
-    un [[nombre]] de la wiki pasa a su dirección (como calendario.py)."""
-    calendario = herramienta("calendario")
-    dias = calendario.dias_de(datos, int(evento.get("mes") or 1))
-    if int(evento.get("dia") or 0) > dias:
-        raise ValueError("«%s» cae el día %s, y ese mes tiene %d" % (evento.get("nombre"), evento.get("dia"), dias))
-    enlace = str(evento.get("enlace") or "").strip()
-    if enlace and not enlace.startswith("/web/"):
-        nombre = enlace.strip("[] ")
-        url = calendario.paginas_de_la_wiki().get(calendario.llano(nombre))
-        if not url:
-            raise ValueError("no hay ninguna página de la wiki que se llame «%s»" % nombre)
-        evento["enlace"] = url
-    elif enlace and not (RAIZ / enlace.lstrip("/").split("#")[0]).is_file():
-        raise ValueError("el enlace de «%s» lleva a una página que no existe" % evento.get("nombre"))
 
 
 def _clave_oc(p):
@@ -2727,8 +2601,6 @@ def pasos_despues(que):
     if que == "npcs":
         return [paso(s) for s in ("2-imagenes/tokens-pequenos.py", "3-generadores/textos-npcs.py",
                                   "3-generadores/generar-posts.py", "3-generadores/generar-buscador.py")]
-    if que == "linea":
-        return [paso("3-generadores/generar-linea-tiempo.py")]
     if que == "personajes":
         return [paso(s) for s in ("3-generadores/generar-personajes.py", "3-generadores/quitar-comentarios.py",
                                   "3-generadores/generar-sitemap.py", "3-generadores/generar-buscador.py",
@@ -2738,8 +2610,6 @@ def pasos_despues(que):
                                   "3-generadores/generar-rss.py", "3-generadores/generar-sitemap.py",
                                   "3-generadores/generar-buscador.py", "3-generadores/generar-mapa.py",
                                   "3-generadores/actualizar-cabeceras.py")]
-    if que == "mundo":
-        return [paso("3-generadores/generar-mundo.py"), paso("3-generadores/actualizar-cabeceras.py")]
     return []
 
 
@@ -2786,12 +2656,13 @@ def regenerar():
 # =========================================
 # LO QUE SE PUEDE ENLAZAR ESCRIBIENDO [[
 # =========================================
-# Las páginas de la wiki (de mundo.json, que lo escribe generar-mundo) y los
-# NPC de cada campaña, para el buscador que sale al escribir [[.
+# Las páginas de la wiki de Cralëa (de su wiki/datos/mundo.json, que llega
+# con traer-wiki.py) y los NPC de cada campaña, para el buscador que sale
+# al escribir [[.
 
 def enlazables():
     paginas = []
-    for f in leer_json(RAIZ / "datos" / "wiki" / "mundo.json", []) or []:
+    for f in leer_json(RAIZ / "wiki" / "datos" / "mundo.json", []) or []:
         if isinstance(f, dict) and f.get("titulo") and f.get("url"):
             paginas.append({"nombre": str(f["titulo"]), "url": str(f["url"]), "que": str(f.get("que") or "")})
     npcs, grupos = {}, {}
@@ -3039,7 +2910,7 @@ def git_estado():
 # ordenador, nunca en la web ni en el proyecto). Si se cierra la ventana o
 # se va la luz, al volver a abrir esa entrada o esa página el editor
 # ofrece recuperarlo. Al guardar de verdad, se borra.
-#   clave: «entrada:web/blog/…html» o «wiki:Nombre de la página»
+#   clave: «entrada:web/blog/…html»
 
 BORRADORES = Path(tempfile.gettempdir()) / "editor-web-borradores"
 
@@ -3095,7 +2966,7 @@ def comandos():
     menu = _menu()
     apartados = []
     for n, (nombre, de_que, opciones) in enumerate(menu.APARTADOS, start=1):
-        lista = [{"cual": "%d.%d" % (n, i), "titulo": titulo, "pista": pista}
+        lista = [{"cual": "%d.%d" % (n, i), "titulo": titulo, "pista": pista, "script": script}
                  for i, (titulo, script, _, pista) in enumerate(opciones, start=1) if script != menu.EDITOR]
         apartados.append({"nombre": nombre, "de_que": de_que, "opciones": lista})
     return {"apartados": apartados}

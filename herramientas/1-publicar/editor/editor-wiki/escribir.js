@@ -229,19 +229,18 @@ function pintarArbolDeEntradasWeb(lista, entradas, abrirTodo) {
         fila: () => filaDeEntradaWeb(e) })), { abrirTodo, memoria: "" });
 }
 
-// UN ÁRBOL DE CARPETAS PLEGABLES (lo que hay en Escribir, las páginas de la
-// wiki). cosas: [{carpeta: ["blog", "2026"], fila: () => <li>}], en su
-// orden; las carpetas salen en el orden de lo primero que llevan.
+// UN ÁRBOL DE CARPETAS PLEGABLES (lo que hay en Escribir, los mapas, las
+// cosas de un mapa). cosas: [{carpeta: ["blog", "2026"], fila: () => <li>}],
+// en su orden; las carpetas salen en el orden de lo primero que llevan.
 // opciones: abrirTodo (al buscar), memoria (el prefijo con que se
-// recuerda lo plegado), vacias (carpetas sin nada que también salen, como
-// listas de nombres), unidad ([«cosa», «cosas»]), abrir (carpetas que salen
-// abiertas sí o sí, como «Sitios/Capital/»: la de lo elegido).
+// recuerda lo plegado), unidad ([«cosa», «cosas»]), abrir (carpetas que
+// salen abiertas sí o sí, como «Sitios/Capital/»: la de lo elegido).
 function pintarArbolWeb(lista, cosas, opciones) {
     const o = opciones || {};
     const unidad = o.unidad || ["cosa", "cosas"];
     lista.textContent = "";
     lista.classList.add("arbol");
-    if (!cosas.length && !(o.vacias || []).length) {
+    if (!cosas.length) {
         lista.appendChild(crearEditor("li", "ayuda", "Nada con eso."));
         return;
     }
@@ -256,13 +255,7 @@ function pintarArbolWeb(lista, cosas, opciones) {
         });
         return aqui;
     };
-    // Con carpetasPrimero, las carpetas en el orden de «vacias» (las de la
-    // wiki, por orden alfabético) y luego lo de dentro.
-    if (o.carpetasPrimero) {
-        (o.vacias || []).forEach((v) => bajar(v));
-    }
     cosas.forEach((c) => bajar(c.carpeta).cosas.push(c));
-    (o.vacias || []).forEach((v) => bajar(v));
     const cuantas = (nodo) => nodo.cosas.length + [...nodo.hijas.values()].reduce((n, h) => n + cuantas(h), 0);
     const cerradas = carpetasCerradasWeb();
     const pintar = (nodo, dentro, ruta) => {
@@ -280,14 +273,10 @@ function pintarArbolWeb(lista, cosas, opciones) {
             cabeza.appendChild(iconoRedactor("carpeta"));
             cabeza.appendChild(crearEditor("span", "arbol-nombre", nombre));
             const n = cuantas(hija);
-            cabeza.appendChild(crearEditor("span", "faltan-veces", n ? (n === 1 ? "1 " + unidad[0] : n + " " + unidad[1])
-                : "vacía"));
+            cabeza.appendChild(crearEditor("span", "faltan-veces", n === 1 ? "1 " + unidad[0] : n + " " + unidad[1]));
             pliegue.appendChild(cabeza);
             const ul = crearEditor("ul", "arbol-dentro");
             pintar(hija, ul, suya);
-            if (!n) {
-                ul.appendChild(crearEditor("li", "ayuda", o.vaciaDice || "Aún no hay nada aquí."));
-            }
             pliegue.appendChild(ul);
             pliegue.addEventListener("toggle", () => {
                 if (!o.abrirTodo) {
@@ -326,7 +315,7 @@ function sinTildesWeb(texto) {
 // (editor_web.apuntar_borrador lo deja en la carpeta temporal del
 // ordenador). Al abrir otra vez esa entrada o esa página, si hay uno
 // distinto de lo guardado, se ofrece recuperarlo. Al guardar, se borra.
-// Hay un hueco por cosa abierta: «entrada» y «wiki».
+// Hay un hueco por cosa abierta (ahora solo «entrada»).
 const BORRADORES_WEB = {};
 
 // recoger: () => los datos sin guardar (o null si no hay nada que apuntar).

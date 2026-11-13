@@ -1,0 +1,172 @@
+/* Copia sin comentarios. La escribe actualizar-cabeceras.py: no se edita.
+   fuente: /wiki/estilos/componentes/lupa.css
+*/
+.lupa {
+    position: fixed;
+    inset: 0;
+    z-index: 1200;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    padding: 24px;
+    background: var(--surface);
+}
+.lupa-img {
+    max-width: min(96vw, 1400px);
+    max-height: 78vh;
+    object-fit: contain;
+    border: 2px solid var(--yellow);
+    background: var(--purple-lighter);
+}
+.lupa-pie {
+    margin: 0;
+    color: var(--white);
+    font-family: var(--fuente-mono);
+    font-size: 0.9375rem;
+    text-align: center;
+}
+.lupa-cerrar {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 44px;
+    min-height: 44px;
+    border: 2px solid var(--yellow);
+    background: var(--purple);
+    color: var(--yellow);
+    font-family: var(--fuente-mono);
+    font-size: 1.125rem;
+    line-height: 1;
+    cursor: pointer;
+}
+.lupa-cerrar:hover,
+.lupa-cerrar:focus-visible {
+    background: var(--yellow);
+    color: var(--yellow-contrast);
+}
+.lupa-cerrar:focus-visible {
+    outline: 2px solid var(--yellow);
+    outline-offset: 2px;
+}
+.lupa.es-mapa {
+    justify-content: flex-start;
+    overflow-y: auto;
+    background: var(--purple);
+}
+.lupa-mapa {
+    position: relative;
+    flex: 0 0 auto;
+    width: min(94vw, 1200px, calc(66vh * 1.5));
+    margin-top: 52px;
+}
+.lupa-mapa-svg {
+    display: block;
+    width: 100%;
+    height: auto;
+    aspect-ratio: 3 / 2;
+    border: 2px solid var(--yellow);
+    background: var(--purple-lighter);
+}
+.lupa-mapa-vecino path {
+    fill: transparent;
+    stroke: transparent;
+    stroke-width: 3px;
+    cursor: pointer;
+}
+.lupa-mapa-vecino:hover path,
+.lupa-mapa-vecino:focus path,
+.lupa-mapa-vecino.es-resaltado path {
+    fill: var(--yellow);
+    fill-opacity: 0.32;
+    stroke: var(--yellow);
+}
+.lupa-mapa-yo {
+    fill: none;
+    stroke: none;
+    pointer-events: none;
+}
+.lupa-mapa-globo {
+    position: absolute;
+    z-index: 2;
+    max-width: min(20rem, 70%);
+    padding: 6px 10px;
+    border: 2px solid var(--yellow);
+    background: var(--purple);
+    font-family: var(--fuente-mono);
+    font-size: 0.875rem;
+    line-height: 1.35;
+    pointer-events: none;
+}
+.lupa-mapa-globo[hidden] {
+    display: none;
+}
+.lupa-mapa-globo-bandera {
+    display: block;
+    width: 7.5rem;
+    height: auto;
+    aspect-ratio: 3 / 2;
+    margin-bottom: 6px;
+    object-fit: cover;
+    border: 1px solid var(--border);
+}
+.lupa-mapa-globo-nombre {
+    color: var(--yellow);
+    font-weight: 400;
+}
+.lupa-mapa-globo-que {
+    display: block;
+    color: var(--muted);
+    font-size: 0.75rem;
+}
+.lupa-mapa-vecinos {
+    flex: 0 0 auto;
+    width: min(94vw, 1200px, calc(66vh * 1.5));
+}
+.lupa-mapa-titulo {
+    margin: 0 0 8px;
+    color: var(--muted);
+    font-family: var(--fuente-mono);
+    font-size: 0.875rem;
+}
+.lupa-mapa-lista {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 18px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+.lupa-mapa-lista a {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 0;
+    color: var(--yellow);
+    font-size: 1rem;
+    text-underline-offset: 3px;
+}
+.lupa-mapa-lista-bandera {
+    flex: 0 0 auto;
+    width: 30px;
+    height: 20px;
+    object-fit: cover;
+    border: 1px solid var(--border);
+}
+@media (forced-colors: active) {
+    .lupa {
+        background: Canvas;
+    }
+    .lupa-img {
+        border-color: CanvasText;
+    }
+}
+@media print {
+    .lupa {
+        display: none;
+    }
+}

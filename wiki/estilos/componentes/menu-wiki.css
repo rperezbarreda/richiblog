@@ -1,0 +1,123 @@
+/* =========================================
+   EL MENÚ DE LA WIKI
+   =========================================
+   Es la barra lateral de siempre (barra-lateral.css: se pliega con ☰ y en
+   el móvil es un cajón), con lo de la wiki dentro; el HTML lo escribe
+   herramientas/3-generadores/generar-menu-wiki.py. Aquí solo va lo que el
+   menú del blog no tiene: el buscador de arriba y el enlace de abajo. */
+
+/* BUSCAR EN LA WIKI: un formulario de verdad que manda a la portada con
+   ?buscar=. El campo y la lupa van en una fila, como un solo control. */
+.menu-wiki-buscar {
+    display: flex;
+    margin: 0 0 10px;
+}
+
+.menu-wiki-buscar input {
+    flex: 1 1 auto;
+    min-width: 0;
+    box-sizing: border-box;
+    padding: 7px 10px;
+    border: 1px solid var(--muted);
+    border-right: 0;
+    border-radius: 0;
+    background: var(--purple);
+    color: var(--white);
+    font-family: var(--fuente-mono);
+    font-size: 0.875rem;
+}
+
+.menu-wiki-buscar input::placeholder {
+    color: var(--muted);
+    opacity: 1;
+}
+
+.menu-wiki-buscar button {
+    flex: 0 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.4rem;
+    padding: 0;
+    border: 1px solid var(--muted);
+    border-radius: 0;
+    background: var(--purple-lighter);
+    color: var(--white);
+    font-size: 0.9375rem;
+    cursor: pointer;
+}
+
+/* La lupa, dibujada con dos trazos (un aro y el mango) en el color del
+   texto: así sigue el tema y no depende de ninguna letra de iconos. */
+.buscar-lupa {
+    position: relative;
+    display: inline-block;
+    width: 1em;
+    height: 1em;
+    vertical-align: -0.12em;
+}
+
+.buscar-lupa::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 0.68em;
+    height: 0.68em;
+    border: 2px solid currentColor;
+    border-radius: 50%;
+}
+
+.buscar-lupa::after {
+    content: "";
+    position: absolute;
+    top: 0.58em;
+    left: 0.56em;
+    width: 2px;
+    height: 0.38em;
+    background: currentColor;
+    transform: rotate(-45deg);
+    transform-origin: top center;
+}
+
+.menu-wiki-buscar button:hover {
+    border-color: var(--yellow);
+    color: var(--yellow);
+}
+
+.menu-wiki-buscar input:focus-visible,
+.menu-wiki-buscar button:focus-visible {
+    outline: 2px solid var(--yellow);
+    outline-offset: 2px;
+    /* Que el recuadro del foco no lo tape el vecino. */
+    position: relative;
+    z-index: 1;
+}
+
+/* VOLVER AL BLOG: lo único del blog que hay en la wiki. Abajo del todo y
+   en pequeño, separado del menú por una raya. */
+.menu-wiki-blog {
+    margin: auto 0 0;
+    padding-top: 10px;
+    border-top: 1px solid var(--border);
+    font-family: var(--fuente-mono);
+    font-size: 0.8125rem;
+}
+
+.menu-wiki-blog a {
+    display: block;
+    padding: 6px 10px;
+    color: var(--muted);
+    text-decoration: none;
+}
+
+.menu-wiki-blog a:hover,
+.menu-wiki-blog a:focus-visible {
+    color: var(--yellow);
+    background-color: var(--purple-lighter);
+}
+
+.menu-wiki-blog a:focus-visible {
+    outline: 2px solid var(--yellow);
+    outline-offset: 2px;
+}

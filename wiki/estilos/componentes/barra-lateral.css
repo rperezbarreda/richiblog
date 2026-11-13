@@ -1,0 +1,428 @@
+/* SIDEBAR */
+
+.sidebar {
+    position: fixed;
+    left: 0;
+    top: 0;
+    width: var(--lateral-ancho);
+    height: 100vh;
+    padding: 15px 20px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    z-index: 50;
+}
+
+.sidebar-top {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 auto;
+    min-height: 0;
+}
+
+.sidebar-top::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 24px;
+    background: linear-gradient(to bottom, transparent, var(--surface));
+    opacity: 0;
+    transition: opacity 0.1s linear;
+    pointer-events: none;
+}
+
+.sidebar-top.has-scroll::after {
+    opacity: 1;
+}
+
+.sidebar-logo {
+    margin-bottom: 10px;
+}
+
+.sidebar-logo p {
+    display: block;
+    width: 100%;
+    box-sizing: border-box;
+    text-align: center;
+    background: var(--yellow);
+    color: var(--yellow-contrast);
+    padding: 6px 8px;
+    font-family: var(--fuente-mono);
+    font-size: 0.7rem;
+    font-weight: 500;
+    letter-spacing: 0.15px;
+    line-height: 1.4;
+    overflow-wrap: break-word;
+}
+
+/* EL BOTÓN DE PLEGAR LA BARRA (☰). Montado en el borde derecho de la
+   barra, mitad dentro y mitad en el hueco que la separa del contenido, a
+   la altura del título. Solo en escritorio: en móvil se esconde (en
+   barra-lateral.responsive.css), porque ahí la barra ya es un cajón que
+   se abre y se cierra con el botón de arriba.
+
+   Plegada, la barra se queda en una tira estrecha, el botón sigue montado
+   en su borde y el contenido se queda con el sitio (main se coloca con
+   --lateral-hueco, en estilos/base.css). La clase "lateral-plegada" va en
+   el <html> y la pone el script del tema ANTES de pintar, para que al
+   cambiar de página no se vea la barra entera un instante y luego
+   plegarse.
+
+   Medidas: 48px de botón (antes 1.6rem, y se pidió más grande para
+   pulsarlo bien), que sale 31px por fuera del borde: empieza justo
+   detrás del título y deja unos 6px hasta el marco del contenido. En
+   píxeles y no en rem a propósito: el hueco hasta el marco es fijo, y
+   con la letra grande un botón en rem se metía encima del marco.
+
+   Con el DOBLE REBORDE del botón «Aa» (estilos/componentes/ajustes.css):
+   el borde amarillo y, por fuera, un anillo del color del fondo, que lo
+   despega de lo que tenga detrás (el borde de la barra, la rejilla). La
+   lupa flotante de debajo (estilos/paginas/buscar.css) va igual. */
+.lateral-plegar {
+    position: absolute;
+    top: 14px;
+    right: -31px;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 48px;
+    height: 48px;
+    margin: 0;
+    padding: 0;
+    border: 2px solid var(--yellow);
+    box-shadow: 0 0 0 3px var(--purple);
+    /* Opaco: el borde de la barra pasa por debajo y no tiene que verse a
+       través del botón. */
+    background: var(--purple);
+    color: var(--yellow);
+    font-size: 1.35rem;
+    line-height: 1;
+    cursor: pointer;
+}
+
+.lateral-plegar:hover,
+.lateral-plegar:focus-visible {
+    background: var(--yellow);
+    color: var(--yellow-contrast);
+}
+
+.lateral-plegar:focus-visible {
+    outline: 2px solid var(--yellow);
+    outline-offset: 5px;
+}
+
+/* Con un corte de escritorio y no a pelo: la clase se queda puesta si se
+   estrecha la ventana, y en móvil no tiene que hacer nada (si no, el
+   cajón saldría vacío). */
+@media (min-width: 861px) {
+    :root.lateral-plegada {
+        /* La tira: lo justo para que el botón, montado en su borde, quede
+           a 8px del borde de la pantalla: los 48px que mide, menos los 31
+           que sale por fuera, más esos 8 (48 − 31 + 8 = 25). */
+        --lateral-hueco: 25px;
+    }
+
+    .lateral-plegada .sidebar {
+        width: var(--lateral-hueco);
+        padding: 0;
+    }
+
+    .lateral-plegada .sidebar-logo,
+    .lateral-plegada .sidebar-top,
+    .lateral-plegada .gatin-random {
+        display: none;
+    }
+}
+
+.sidebar-logo strong {
+    font-weight: 500;
+}
+
+nav {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    margin-top: 4px;
+    padding-left: 6px;
+    padding-bottom: 16px;
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+    overflow-x: hidden;
+    /* El hueco de la barra, reservado siempre: sin esto el menú se
+       ensanchaba y encogía al aparecer y desaparecer la barra. El
+       color y el grosor los pone base.css para todo el sitio. */
+    scrollbar-gutter: stable;
+    direction: rtl;
+}
+
+nav * {
+    direction: ltr;
+}
+
+nav a {
+    position: relative;
+    display: block;
+    width: 100%;
+    box-sizing: border-box;
+    /* Última red: si una palabra sola no cabe (con el texto muy grande
+       en una pantalla muy estrecha, "accesibilidad"), que se parta en
+       dos líneas en vez de salirse y quedar cortada a medias. */
+    overflow-wrap: break-word;
+    padding: 6px 10px 6px 1.15rem;
+    border-radius: 0;
+    color: var(--muted);
+    text-decoration: none;
+    font-family: var(--fuente-mono);
+    font-size: 0.9375rem;
+    letter-spacing: 0.5px;
+    transition: color 0.1s linear, background-color 0.1s linear;
+}
+
+nav a::before {
+    content: "↪";
+    position: absolute;
+    left: 0.2rem;
+    top: 50%;
+    color: var(--yellow);
+    opacity: 0;
+    transform: translate(-4px, -50%);
+    transition: opacity 0.1s linear, transform 0.1s linear;
+}
+
+nav a:hover,
+nav a:focus-visible,
+nav a.active {
+    color: var(--yellow);
+    background-color: var(--purple-lighter);
+}
+
+nav a:focus-visible {
+    outline: 2px solid var(--yellow);
+    outline-offset: 2px;
+}
+
+nav a:hover::before,
+nav a:focus-visible::before,
+nav a.active::before {
+    opacity: 1;
+    transform: translate(0, -50%);
+}
+
+.nav-group {
+    display: flex;
+    flex-direction: column;
+    align-self: stretch;
+}
+
+.nav-toggle {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 6px 10px 6px 1.15rem;
+    border-radius: 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: none;
+    border: none;
+    color: var(--muted);
+    font-family: inherit;
+    font-size: 0.9375rem;
+    text-align: left;
+    cursor: pointer;
+    transition: color 0.1s linear, background-color 0.1s linear;
+}
+
+.nav-toggle:hover,
+.nav-toggle:focus-visible {
+    color: var(--yellow);
+    background-color: var(--purple-lighter);
+}
+
+.nav-toggle:focus-visible {
+    outline: 2px solid var(--yellow);
+    outline-offset: 2px;
+}
+
+.arrow {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.3rem;
+    height: 1.3rem;
+    flex-shrink: 0;
+    border-radius: 0;
+    background: var(--purple-lighter);
+    color: var(--yellow);
+    font-family: var(--fuente-mono);
+    font-size: 0.9375rem;
+    font-weight: 700;
+    line-height: 1;
+    transition: background-color 0.1s linear, color 0.1s linear;
+}
+
+.nav-toggle:hover .arrow,
+.nav-toggle:focus-visible .arrow {
+    background: var(--yellow);
+    color: var(--yellow-contrast);
+}
+
+.submenu {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-top: 0;
+    margin-left: 1.15rem;
+    max-height: 0;
+    opacity: 0;
+    visibility: hidden;
+    overflow: hidden;
+    transition: max-height 0.15s linear, opacity 0.1s linear, margin-top 0.15s linear, visibility 0s linear 0.15s;
+}
+
+/* 800px y no 500: un submenú puede llevar OTRO grupo dentro (roleito →
+   notas de rol → campañas), y al abrir el de dentro el de fuera tiene que
+   dar de sí para los dos. Es un tope, no una altura: lo que no llega no
+   deja hueco. */
+.nav-group.open > .submenu {
+    max-height: 800px;
+    opacity: 1;
+    visibility: visible;
+    margin-top: 10px;
+    transition: max-height 0.15s linear, opacity 0.1s linear, margin-top 0.15s linear;
+}
+
+.submenu a {
+    padding: 4px 10px 4px 1.15rem;
+    border-radius: 0;
+    color: var(--muted);
+    font-size: 0.75rem;
+    text-decoration: none;
+    transition: color 0.1s linear, background-color 0.1s linear;
+}
+
+.submenu a:hover,
+.submenu a:focus-visible {
+    color: var(--yellow);
+    background-color: var(--purple-lighter);
+}
+
+.submenu a:focus-visible {
+    outline: 2px solid var(--yellow);
+    outline-offset: 2px;
+}
+
+/* UN GRUPO DENTRO DE OTRO (roleito → notas de rol). El botón de dentro se
+   viste como los enlaces de su alrededor —más pequeño y en gris— porque
+   está al mismo nivel que ellos: lo único que lo distingue es que, en vez
+   de llevar a una página, abre otras dos. */
+.submenu .nav-toggle {
+    font-size: 0.75rem;
+    padding: 4px 10px 4px 1.15rem;
+}
+
+.submenu .arrow {
+    width: 1.05rem;
+    height: 1.05rem;
+    font-size: 0.75rem;
+}
+
+/* Y lo que cuelga de él, un poco más adentro todavía, para que se vea de
+   dónde cuelga sin tener que abrirlo y cerrarlo. */
+.submenu .submenu {
+    margin-left: 0.9rem;
+}
+
+/* SIDEBAR — GATÍN ALEATORIO */
+
+/* Ventanita con una foto del santuario al azar, entre la navegación y
+   los botones de abajo. flex-shrink: 0 para que no la aplaste el menú
+   cuando tiene muchos enlaces: lo que cede espacio es <nav>, que ya
+   lleva su propio scroll. */
+.gatin-random {
+    position: relative;
+    flex-shrink: 0;
+    margin-top: 14px;
+    background: var(--purple-lighter);
+    border: 2px solid var(--yellow);
+    overflow: hidden;
+}
+
+.gatin-random[hidden] {
+    display: none;
+}
+
+.gatin-random-header {
+    position: relative;
+    padding: 6px 48px 5px 10px;
+    background: var(--purple);
+    border-bottom: 2px solid var(--yellow);
+    color: var(--yellow);
+    font-family: var(--fuente-ventana);
+    font-size: 1rem;
+    letter-spacing: 0.2px;
+}
+
+.gatin-random-header h2 {
+    min-width: 0;
+    margin: 0;
+    /* "gatin_random.exe" es una sola palabra para el navegador (ni el
+       guion bajo ni el punto son sitios donde partir), y en una barra
+       lateral de ancho fijo con el texto al 150% no cabe: se salía por
+       la derecha en vez de partirse. Con esto parte donde haga falta y
+       la ventanita crece a dos líneas, que es lo que tiene que pasar. */
+    overflow-wrap: anywhere;
+    font: inherit;
+    color: inherit;
+}
+
+/* Los −◼✖ de .window-controls-small se colocan contando desde arriba
+   con la cabecera grande de las tarjetas; esta es más baja, así que
+   se recentran aquí. */
+.gatin-random .window-controls-small {
+    top: 50%;
+    right: 8px;
+    transform: translateY(-50%);
+}
+
+/* Ancla del botón de recargar, que va encima de la foto. */
+
+/* Botón de "otra foto", abajo a la izquierda y por encima de la
+   imagen. Es hermano del .lightbox-trigger, no va dentro, así que
+   pulsarlo no abre el visor (ver scripts/componentes/visor-imagenes.js, que busca
+   el .lightbox-trigger más cercano al elemento pulsado). */
+
+/* Gira solo el dibujo, no el botón: si girase el botón se le vería dar
+   vueltas al recuadro y al borde. */
+
+/* Los botones de la ventana de accesibilidad (.theme-toggle: el
+   brillito y el filtro CRT) estaban aquí de cuando vivían en la barra.
+   Ahora están con su ventana, en estilos/componentes/ajustes.css: así
+   valen también en las páginas sin barra lateral (el 404). */
+
+@media (prefers-reduced-motion: reduce) {
+    nav a,
+    nav a::before,
+    .submenu {
+        transition: none;
+    }
+}
+
+/* Ventanas bajas: en un portátil de 768 de alto el menú necesita 396px
+   y solo tenía 282, así que las dos últimas entradas —contacto y
+   accesibilidad— se quedaban fuera de la vista. La foto del gatín es
+   lo único de la barra que se puede encoger sin perder nada, así que
+   en pantallas bajas se recorta y el menú vuelve a caber entero.
+   Medido: a 1366x768 pasa de verse 5 de 7 entradas a verse las 7. Por
+   debajo de eso (1280x720, 1024x650) sigue haciendo falta desplazar un
+   poco, pero ahora la barra se ve.
+   Va al final del archivo a propósito: la regla que le da el tamaño a
+   la foto (.gatin-random-foto img) está más arriba y, con la misma
+   especificidad, gana la última. */
+

@@ -1364,8 +1364,8 @@ function contadorDeTextoRedactor(leer, revisar) {
 // =========================================
 // LOS MISMOS BOTONES, PARA UN TEXTO EN MARKDOWN
 // =========================================
-// Las páginas de la wiki (y el texto de un evento de la línea de tiempo)
-// se escriben en el Markdown de Chronicler: **negrita**, ## Título, - lista…
+// Los textos largos de algunas fichas (los de mis personajes, el
+// compendio…) se escriben en Markdown: **negrita**, ## Título, - lista…
 // Ahí no se ve cómo queda, pero los botones son los mismos: ponen las
 // marcas alrededor de lo elegido, o al principio de las líneas. Van con
 // insertText, que es lo que deja deshacerlo con Ctrl+Z.

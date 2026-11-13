@@ -1,31 +1,23 @@
 #!/usr/bin/env python3
-"""Lee el formato de Chronicler: el frontmatter y el Markdown.
+"""Lee el Markdown de Chronicler y lo pasa a HTML.
 
 QUÉ ES ESTO
 -----------
-Chronicler (la aplicación de wiki donde está escrito el mundo) guarda cada
-página como un archivo .md con dos partes:
-
-    ---
-    title: Valderín
-    tags: [ciudad, comercio]
-    ---
-
-    El cuerpo, en **Markdown**, con [[enlaces a otras páginas]].
-
-Esto convierte las dos partes: el frontmatter a un diccionario y el cuerpo
-a HTML. Lo usa herramientas/3-generadores/generar-mundo.py, que es quien
-decide qué hacer con el resultado.
+Es el Markdown de Chronicler (la aplicación de wiki donde se escribió la
+wiki de Cralëa, que ahora vive en su propio repo, wiki_cralea): **negrita**,
+## títulos, [[enlaces a otras páginas]]… Aquí se quedó para los textos
+largos de generar-personajes.py y generar-recetas.py (y los avisos, para
+generar-mapas-rol.py). Quien llama decide qué hacer con el resultado.
 
 POR QUÉ ESTÁ ESCRITO A MANO Y NO CON UNA LIBRERÍA
 -------------------------------------------------
 Por lo mismo que el resto del sitio: aquí no hay ni una dependencia, y no
-la va a haber por esto. Instalar PyYAML y un parser de Markdown sería
-pedirle a quien use esto que mantenga dos librerías más, y el día que una
+la va a haber por esto. Instalar un parser de Markdown sería pedirle a
+quien use esto que mantenga una librería más, y el día que una
 cambie de versión se rompe la web.
 
-A cambio, ESTO NO ENTIENDE TODO EL MARKDOWN NI TODO EL YAML: entiende el
-trozo que usa Chronicler, que está documentado y es acotado. Lo que no
+A cambio, ESTO NO ENTIENDE TODO EL MARKDOWN: entiende el trozo que usa
+Chronicler, que está documentado y es acotado. Lo que no
 sepa convertir NO lo adivina: lo deja como está y lo apunta en una lista
 de avisos, para que al pasar el generador salga por pantalla y se vea.
 Eso es a propósito: una conversión que se calla lo que no ha entendido es
@@ -33,11 +25,7 @@ peor que una que falla, porque el agujero aparece meses después.
 
 LO QUE ENTIENDE
 ---------------
-Del frontmatter: valores sueltos, listas en una línea ([a, b]), listas de
-listas (para los carruseles con pie de foto), textos de varias líneas
-(clave: |) y el bloque "layout" de la infobox.
-
-Del cuerpo: encabezados, negrita, cursiva, tachado, código, citas, listas
+Encabezados, negrita, cursiva, tachado, código, citas, listas
 (anidadas), tablas con alineación, reglas, enlaces y imágenes de Markdown,
 wikilinks en sus cuatro formas, imágenes ![[asi]], spoilers ||asi||,
 inserciones de página y notas al pie.
@@ -45,7 +33,7 @@ inserciones de página y notas al pie.
 TODO EL TEXTO SE ESCAPA ANTES DE CONVERTIRLO. Las etiquetas HTML se meten
 después, una a una, sobre texto que ya no puede ser HTML. Es la misma
 regla que sigue el JavaScript del sitio y la razón de que esto no sea una
-forma de colar código en la web escribiendo una página del mundo.
+forma de colar código en la web escribiendo un texto.
 """
 
 import html
@@ -70,10 +58,8 @@ class Avisos:
 
 
 # =========================================
-# EL FRONTMATTER
+# LAS INSERCIONES
 # =========================================
-
-RE_FRONTMATTER = re.compile(r"\A---[ \t]*\r?\n(.*?)\r?\n---[ \t]*(?:\r?\n|\Z)", re.S)
 
 # Las opciones de {{insert: …}} que sabemos pintar, con su clase escrita
 # entera (ver el porqué donde se usan).
@@ -81,231 +67,6 @@ OPCIONES_DE_INSERCION = {
     "centered": "es-centered",
     "borderless": "es-borderless",
 }
-
-
-# LAS NOTAS ESCONDIDAS: <!-- lo que sea --> en el cuerpo de una página no
-# sale en la web. Es lo que usan las plantillas de página
-# (wiki/_system/templates/) para decir qué va en cada apartado sin que se
-# publique, igual que los comentarios ocultos de las wikis de verdad. Se
-# quitan aquí, antes de nada, para que tampoco cuenten como el primer
-# párrafo (el resumen de la portada y del buscador).
-RE_NOTA_EN_SU_LINEA = re.compile(r"^[ \t]*<!--.*?-->[ \t]*(?:\n|\Z)", re.S | re.M)
-RE_NOTA_ESCONDIDA = re.compile(r"<!--.*?-->", re.S)
-
-
-def sin_notas_escondidas(texto):
-    """Primero las que ocupan sus propias líneas (se van con su salto de
-    línea, para no dejar huecos) y luego las que van en medio de una frase."""
-    return RE_NOTA_ESCONDIDA.sub("", RE_NOTA_EN_SU_LINEA.sub("", texto))
-
-
-RE_ENCABEZADO = re.compile(r"^(#{1,6})\s+\S")
-
-
-def sin_apartados_vacios(texto):
-    """LOS APARTADOS SIN NADA NO SALEN. Una plantilla trae todos los
-    apartados que suele tener esa clase de página (Historia, Geografía,
-    Rumores y leyendas…), y hasta que se escriben están vacíos: un título
-    con nada debajo, y el mismo título en el cuadro de contenido. Un
-    apartado se queda si debajo tiene algo antes del siguiente título de
-    su nivel o de uno más alto; si solo tiene un subapartado con algo, se
-    queda también, porque ese algo es suyo."""
-    lineas = texto.split("\n")
-    titulos = []          # (índice, nivel)
-    en_codigo = False
-    for i, linea in enumerate(lineas):
-        if linea.strip().startswith("```"):
-            en_codigo = not en_codigo
-            continue
-        if not en_codigo:
-            m = RE_ENCABEZADO.match(linea)
-            if m:
-                titulos.append((i, len(m.group(1))))
-    if not titulos:
-        return texto
-    fuera = set()
-    for n, (i, nivel) in enumerate(titulos):
-        fin = len(lineas)
-        for j, otro in titulos[n + 1:]:
-            if otro <= nivel:
-                fin = j
-                break
-        dentro = [k for k in range(i + 1, fin)
-                  if lineas[k].strip() and not any(k == t for t, _ in titulos)]
-        if not dentro:
-            fuera.add(i)
-    return "\n".join(l for k, l in enumerate(lineas) if k not in fuera)
-
-
-def partir(texto):
-    """(frontmatter como texto, cuerpo). Sin frontmatter, el primero es ''.
-    El cuerpo, ya sin las notas escondidas ni los apartados vacíos."""
-    m = RE_FRONTMATTER.match(texto)
-    if not m:
-        return "", sin_apartados_vacios(sin_notas_escondidas(texto))
-    return m.group(1), sin_apartados_vacios(sin_notas_escondidas(texto[m.end():]))
-
-
-def leer_frontmatter(crudo, avisos=None):
-    """El frontmatter a un diccionario, conservando el orden en que está
-    escrito: ese orden es el que manda en la infobox.
-
-    Entiende lo que escribe Chronicler y nada más:
-
-        clave: valor                      un valor suelto
-        clave: 'con [[enlaces]] dentro'   entre comillas, para no romper el YAML
-        clave: [a, b]                     una lista en la misma línea
-        clave: [[a.jpg, "pie"], [b, "x"]] una lista de listas (el carrusel)
-        clave: |                          un texto de varias líneas, sangrado
-          lo que sea
-        layout:                           la única lista de bloques que hay
-          - type: header
-            text: Lo que sea
-    """
-    datos = {}
-    lineas = crudo.split("\n")
-    i = 0
-    while i < len(lineas):
-        linea = lineas[i]
-        if not linea.strip() or linea.lstrip().startswith("#"):
-            i += 1
-            continue
-        if linea[:1] in (" ", "\t"):
-            # Una línea sangrada aquí arriba es la continuación de algo que
-            # ya se ha comido quien la abrió; si llega hasta aquí, sobra.
-            if avisos:
-                avisos.di("línea sangrada que no cuelga de ninguna clave", linea.strip()[:50])
-            i += 1
-            continue
-
-        if ":" not in linea:
-            if avisos:
-                avisos.di("línea del frontmatter sin dos puntos", linea.strip()[:50])
-            i += 1
-            continue
-
-        clave, _, resto = linea.partition(":")
-        clave = clave.strip()
-        resto = resto.strip()
-
-        # clave: |   -> un texto de varias líneas, todas sangradas
-        if resto in ("|", "|-", ">", ">-"):
-            trozos = []
-            i += 1
-            while i < len(lineas) and (not lineas[i].strip() or lineas[i][:1] in (" ", "\t")):
-                trozos.append(re.sub(r"^[ \t]{1,4}", "", lineas[i]))
-                i += 1
-            junto = "\n".join(trozos).strip("\n")
-            # Con ">" los saltos de línea se juntan en un párrafo; con "|"
-            # se quedan como están.
-            datos[clave] = re.sub(r"\s*\n\s*", " ", junto) if resto.startswith(">") else junto
-            continue
-
-        # layout:   -> la lista de reglas de la infobox
-        if clave == "layout" and not resto:
-            reglas, i = _leer_lista_de_bloques(lineas, i + 1, avisos)
-            datos["layout"] = reglas
-            continue
-
-        if not resto:
-            # clave:   sin nada detrás. Puede ser una lista con guiones.
-            if i + 1 < len(lineas) and lineas[i + 1].lstrip().startswith("- "):
-                items, i = _leer_lista_con_guiones(lineas, i + 1)
-                datos[clave] = items
-                continue
-            datos[clave] = ""
-            i += 1
-            continue
-
-        datos[clave] = _valor(resto)
-        i += 1
-    return datos
-
-
-def _leer_lista_con_guiones(lineas, i):
-    items = []
-    while i < len(lineas) and lineas[i].lstrip().startswith("- "):
-        items.append(_valor(lineas[i].lstrip()[2:].strip()))
-        i += 1
-    return items, i
-
-
-def _leer_lista_de_bloques(lineas, i, avisos=None):
-    """La lista de reglas de "layout": cada una empieza por "- " y sigue con
-    líneas sangradas de "clave: valor"."""
-    reglas = []
-    actual = None
-    while i < len(lineas):
-        linea = lineas[i]
-        if linea.strip() and not linea[:1] in (" ", "\t"):
-            break  # se acabó el bloque: otra clave de primer nivel
-        pelada = linea.strip()
-        if not pelada:
-            i += 1
-            continue
-        if pelada.startswith("- "):
-            actual = {}
-            reglas.append(actual)
-            pelada = pelada[2:].strip()
-        if actual is None:
-            if avisos:
-                avisos.di("regla de layout sin guion delante", pelada[:50])
-            i += 1
-            continue
-        if ":" in pelada:
-            c, _, v = pelada.partition(":")
-            actual[c.strip()] = _valor(v.strip())
-        elif avisos:
-            avisos.di("línea de layout que no entiendo", pelada[:50])
-        i += 1
-    return reglas, i
-
-
-def _valor(texto):
-    """Un valor del frontmatter: una lista, un texto entre comillas o un
-    texto suelto."""
-    texto = texto.strip()
-    if not texto:
-        return ""
-    # Entre comillas: se queda tal cual lo de dentro. Esto es lo que usa
-    # Chronicler para meter [[enlaces]] o barras sin romper el YAML, así
-    # que hay que mirarlo ANTES que los corchetes.
-    if len(texto) >= 2 and texto[0] == texto[-1] and texto[0] in "'\"":
-        return texto[1:-1]
-    if texto.startswith("[") and texto.endswith("]"):
-        return _lista(texto[1:-1])
-    return texto
-
-
-def _lista(dentro):
-    """Los elementos de una lista escrita en una línea, respetando los
-    corchetes de dentro (las sublistas del carrusel) y las comillas."""
-    items = []
-    trozo = ""
-    hondo = 0
-    comilla = ""
-    for c in dentro:
-        if comilla:
-            if c == comilla:
-                comilla = ""
-            trozo += c
-            continue
-        if c in "'\"":
-            comilla = c
-            trozo += c
-            continue
-        if c == "[":
-            hondo += 1
-        elif c == "]":
-            hondo -= 1
-        if c == "," and hondo == 0:
-            items.append(trozo)
-            trozo = ""
-            continue
-        trozo += c
-    if trozo.strip():
-        items.append(trozo)
-    return [_valor(t) for t in items]
 
 
 # =========================================
@@ -530,7 +291,7 @@ class Conversor:
                  "float-left", "float-right", "small", "large",
                  "portrait", "landscape",
                  # Las piezas que pone el generador en su sitio (ver
-                 # con_piezas en generar-mundo.py).
+                 # con_piezas en el generar-mundo.py de wiki_cralea).
                  "pieza-relaciones", "pieza-panteon", "pieza-diccionario",
                  "pieza-conversor", "pieza-nombres"}
 

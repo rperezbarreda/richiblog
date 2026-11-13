@@ -1,0 +1,3769 @@
+[
+    {
+        "titulo": "Azarasia",
+        "url": "/wiki/mapamundi/azarasia/azarasia.html",
+        "carpeta": "Mapamundi/Azarasia",
+        "etiquetas": [
+            "Mapamundi",
+            "Azarasia"
+        ],
+        "grupo": "Mapamundi",
+        "sub": [
+            "Azarasia"
+        ],
+        "que": "",
+        "resumen": "Azarasia es uno de los continentes del mundo.",
+        "region": "",
+        "filtros": {},
+        "subraza_de": "",
+        "relleno": false,
+        "bandera": "",
+        "miniatura": "/wiki/imagenes/situacion/peque/azarasia.webp"
+    },
+    {
+        "titulo": "Califato de Jhel'Zadir",
+        "url": "/wiki/mapamundi/azarasia/califato_de_jhel_zadir/califato_de_jhel_zadir.html",
+        "carpeta": "Mapamundi/Azarasia/Califato de Jhel'Zadir",
+        "etiquetas": [
+            "Mapamundi",
+            "Azarasia"
+        ],
+        "grupo": "Mapamundi",
+        "sub": [
+            "Azarasia"
+        ],
+        "que": "País",
+        "resumen": "Califato de Jhel'Zadir está en Azarasia.",
+        "region": "Azarasia",
+        "filtros": {
+            "qué es": "País"
+        },
+        "subraza_de": "",
+        "relleno": true,
+        "bandera": "/wiki/imagenes/califato_jhelzadir.webp",
+        "miniatura": ""
+    },
+    {
+        "titulo": "Cantón de Piedraspuras",
+        "url": "/wiki/mapamundi/azarasia/canton_de_piedraspuras/canton_de_piedraspuras.html",
+        "carpeta": "Mapamundi/Azarasia/Cantón de Piedraspuras",
+        "etiquetas": [
+            "Mapamundi",
+            "Azarasia"
+        ],
+        "grupo": "Mapamundi",
+        "sub": [
+            "Azarasia"
+        ],
+        "que": "País",
+        "resumen": "Cantón de Piedraspuras está en Azarasia.",
+        "region": "Azarasia",
+        "filtros": {
+            "qué es": "País"
+        },
+        "subraza_de": "",
+        "relleno": true,
+        "bandera": "/wiki/imagenes/canton_piedraspuras.webp",
+        "miniatura": ""
+    },
+    {
+        "titulo": "Condado de Burcrelle",
+        "url": "/wiki/mapamundi/azarasia/condado_de_burcrelle/condado_de_burcrelle.html",
+        "carpeta": "Mapamundi/Azarasia/Condado de Burcrelle",
+        "etiquetas": [
+            "Mapamundi",
+            "Azarasia"
+        ],
+        "grupo": "Mapamundi",
+        "sub": [
+            "Azarasia"
+        ],
+        "que": "País",
+        "resumen": "Condado de Burcrelle está en Azarasia.",
+        "region": "Azarasia",
+        "filtros": {
+            "qué es": "País"
+        },
+        "subraza_de": "",
+        "relleno": true,
+        "bandera": "/wiki/imagenes/condado_burcrelle.webp",
+        "miniatura": ""
+    },
+    {
+        "titulo": "Dominios de Bor'Korr el Sanguinario",
+        "url": "/wiki/mapamundi/azarasia/dominios_de_bor_korr_el_sanguinario/dominios_de_bor_korr_el_sanguinario.html",
+        "carpeta": "Mapamundi/Azarasia/Dominios de Bor'Korr el Sanguinario",
+        "etiquetas": [
+            "Mapamundi",
+            "Azarasia"
+        ],
+        "grupo": "Mapamundi",
+        "sub": [
+            "Azarasia"
+        ],
+        "que": "País",
+        "resumen": "Dominios de Bor'Korr el Sanguinario está en Azarasia.",
+        "region": "Azarasia",
+        "filtros": {
+            "qué es": "País"
+        },
+        "subraza_de": "",
+        "relleno": true,
+        "bandera": "/wiki/imagenes/dominios_borkorr.webp",
+        "miniatura": ""
+    },
+    {
+        "titulo": "Emirato de Adrash",
+        "url": "/wiki/mapamundi/azarasia/emirato_de_adrash/emirato_de_adrash.html",
+        "carpeta": "Mapamundi/Azarasia/Emirato de Adrash",
+        "etiquetas": [
+            "Mapamundi",
+            "Azarasia"
+        ],
+        "grupo": "Mapamundi",
+        "sub": [
+            "Azarasia"
+        ],
+        "que": "País",
+        "resumen": "Emirato de Adrash está en Azarasia.",
+        "region": "Azarasia",
+        "filtros": {
+            "qué es": "País"
+        },
+        "subraza_de": "",
+        "relleno": true,
+        "bandera": "/wiki/imagenes/emirato_adrash.webp",
+        "miniatura": ""
+    },
+    {
+        "titulo": "Gran Condado de Marturia",
+        "url": "/wiki/mapamundi/azarasia/gran_condado_de_marturia/gran_condado_de_marturia.html",
+        "carpeta": "Mapamundi/Azarasia/Gran Condado de Marturia",
+        "etiquetas": [
+            "Mapamundi",
+            "Azarasia"
+        ],
+        "grupo": "Mapamundi",
+        "sub": [
+            "Azarasia"
+        ],
+        "que": "País",
+        "resumen": "Gran Condado de Marturia está en Azarasia.",
+        "region": "Azarasia",
+        "filtros": {
+            "qué es": "País"
+        },
+        "subraza_de": "",
+        "relleno": true,
+        "bandera": "/wiki/imagenes/gran_condado_marturia.webp",
+        "miniatura": ""
+    },
+    {
+        "titulo": "Horda de Yerzhal",
+        "url": "/wiki/mapamundi/azarasia/horda_de_yerzhal/horda_de_yerzhal.html",
+        "carpeta": "Mapamundi/Azarasia/Horda de Yerzhal",
+        "etiquetas": [
+            "Mapamundi",
+            "Azarasia"
+        ],
+        "grupo": "Mapamundi",
+        "sub": [
+            "Azarasia"
+        ],
+        "que": "País",
+        "resumen": "Horda de Yerzhal está en Azarasia.",
+        "region": "Azarasia",
+        "filtros": {
+            "qué es": "País"
+        },
+        "subraza_de": "",
+        "relleno": true,
+        "bandera": "/wiki/imagenes/horda_yerzhal.webp",
+        "miniatura": ""
+    },
+    {
+        "titulo": "Imperio de Nueva Valindra",
+        "url": "/wiki/mapamundi/azarasia/imperio_de_nueva_valindra/imperio_de_nueva_valindra.html",
+        "carpeta": "Mapamundi/Azarasia/Imperio de Nueva Valindra",
+        "etiquetas": [
+            "Mapamundi",
+            "Azarasia"
+        ],
+        "grupo": "Mapamundi",
+        "sub": [
+            "Azarasia"
+        ],
+        "que": "País",
+        "resumen": "Imperio de Nueva Valindra está en Azarasia.",
+        "region": "Azarasia",
+        "filtros": {
+            "qué es": "País"
+        },
+        "subraza_de": "",
+        "relleno": true,
+        "bandera": "/wiki/imagenes/imperio_nueva_valindra.webp",
+        "miniatura": ""
+    },
+    {
+        "titulo": "Marca de Elyarath",
+        "url": "/wiki/mapamundi/azarasia/marca_de_elyarath/marca_de_elyarath.html",
+        "carpeta": "Mapamundi/Azarasia/Marca de Elyarath",
+        "etiquetas": [
+            "Mapamundi",
+            "Azarasia"
+        ],
+        "grupo": "Mapamundi",
+        "sub": [
+            "Azarasia"
+        ],
+        "que": "País",
+        "resumen": "Marca de Elyarath está en Azarasia.",
+        "region": "Azarasia",
+        "filtros": {
+            "qué es": "País"
+        },
+        "subraza_de": "",
+        "relleno": true,
+        "bandera": "/wiki/imagenes/marca_elyarath.webp",
+        "miniatura": ""
+    },
+    {
+        "titulo": "Marquesado de Setra",
+        "url": "/wiki/mapamundi/azarasia/marquesado_de_setra/marquesado_de_setra.html",
+        "carpeta": "Mapamundi/Azarasia/Marquesado de Setra",
+        "etiquetas": [
+            "Mapamundi",
+            "Azarasia"
+        ],
+        "grupo": "Mapamundi",
+        "sub": [
+            "Azarasia"
+        ],
+        "que": "País",
+        "resumen": "Marquesado de Setra está en Azarasia.",
+        "region": "Azarasia",
+        "filtros": {
+            "qué es": "País"
+        },
+        "subraza_de": "",
+        "relleno": true,
+        "bandera": "/wiki/imagenes/marquesado_setra.webp",
+        "miniatura": ""
+    },
+    {
+        "titulo": "Obispado de Habaza",
+        "url": "/wiki/mapamundi/azarasia/obispado_de_habaza/obispado_de_habaza.html",
+        "carpeta": "Mapamundi/Azarasia/Obispado de Habaza",
+        "etiquetas": [
+            "Mapamundi",
+            "Azarasia"
+        ],
+        "grupo": "Mapamundi",
+        "sub": [
+            "Azarasia"
+        ],
+        "que": "País",
+        "resumen": "Obispado de Habaza está en Azarasia.",
+        "region": "Azarasia",
+        "filtros": {
+            "qué es": "País"
+        },
+        "subraza_de": "",
+        "relleno": true,
+        "bandera": "/wiki/imagenes/obispado_habaza.webp",
+        "miniatura": ""
+    },
+    {
+        "titulo": "Orden de Clodia",
+        "url": "/wiki/mapamundi/azarasia/orden_de_clodia/orden_de_clodia.html",
+        "carpeta": "Mapamundi/Azarasia/Orden de Clodia",
+        "etiquetas": [
+            "Mapamundi",
+            "Azarasia"
+        ],
+        "grupo": "Mapamundi",
+        "sub": [
+            "Azarasia"
+        ],
+        "que": "País",
+        "resumen": "Orden de Clodia está en Azarasia.",
+        "region": "Azarasia",
+        "filtros": {
+            "qué es": "País"
+        },
+        "subraza_de": "",
+        "relleno": true,
+        "bandera": "/wiki/imagenes/orden_clodia.webp",
+        "miniatura": ""
+    },
+    {
+        "titulo": "Principado de Lúnica",
+        "url": "/wiki/mapamundi/azarasia/principado_de_lunica/principado_de_lunica.html",
+        "carpeta": "Mapamundi/Azarasia/Principado de Lúnica",
+        "etiquetas": [
+            "Mapamundi",
+            "Azarasia"
+        ],
+        "grupo": "Mapamundi",
+        "sub": [
+            "Azarasia"
+        ],
+        "que": "País",
+        "resumen": "Principado de Lúnica está en Azarasia.",
+        "region": "Azarasia",
+        "filtros": {
+            "qué es": "País"
+        },
+        "subraza_de": "",
+        "relleno": true,
+        "bandera": "/wiki/imagenes/principado_lunica.webp",
+        "miniatura": ""
+    },
+    {
+        "titulo": "Reino de Dreustán",
+        "url": "/wiki/mapamundi/azarasia/reino_de_dreustan/reino_de_dreustan.html",
+        "carpeta": "Mapamundi/Azarasia/Reino de Dreustán",
+        "etiquetas": [
+            "Mapamundi",
+            "Azarasia"
+        ],
+        "grupo": "Mapamundi",
+        "sub": [
+            "Azarasia"
+        ],
+        "que": "País",
+        "resumen": "Reino de Dreustán está en Azarasia.",
+        "region": "Azarasia",
+        "filtros": {
+            "qué es": "País"
+        },
+        "subraza_de": "",
+        "relleno": true,
+        "bandera": "/wiki/imagenes/reino_dreustan.webp",
+        "miniatura": ""
+    },
+    {
+        "titulo": "Reino de Neclaverna",
+        "url": "/wiki/mapamundi/azarasia/reino_de_neclaverna/reino_de_neclaverna.html",
+        "carpeta": "Mapamundi/Azarasia/Reino de Neclaverna",
+        "etiquetas": [
+            "Mapamundi",
+            "Azarasia"
+        ],
+        "grupo": "Mapamundi",
+        "sub": [
+            "Azarasia"
+        ],
+        "que": "País",
+        "resumen": "Reino de Neclaverna está en Azarasia.",
+        "region": "Azarasia",
+        "filtros": {
+            "qué es": "País"
+        },
+        "subraza_de": "",
+        "relleno": true,
+        "bandera": "/wiki/imagenes/reino_neclaverna.webp",
+        "miniatura": ""
+    },
+    {
+        "titulo": "Reino de Oritania",
+        "url": "/wiki/mapamundi/azarasia/reino_de_oritania/reino_de_oritania.html",
+        "carpeta": "Mapamundi/Azarasia/Reino de Oritania",
+        "etiquetas": [
+            "Mapamundi",
+            "Azarasia"
+        ],
+        "grupo": "Mapamundi",
+        "sub": [
+            "Azarasia"
+        ],
+        "que": "País",
+        "resumen": "Reino de Oritania está en Azarasia.",
+        "region": "Azarasia",
+        "filtros": {
+            "qué es": "País"
+        },
+        "subraza_de": "",
+        "relleno": true,
+        "bandera": "/wiki/imagenes/reino_oritania.webp",
+        "miniatura": ""
+    },
+    {
+        "titulo": "Reino de Prunia",
+        "url": "/wiki/mapamundi/azarasia/reino_de_prunia/reino_de_prunia.html",
+        "carpeta": "Mapamundi/Azarasia/Reino de Prunia",
+        "etiquetas": [
+            "Mapamundi",
+            "Azarasia"
+        ],
+        "grupo": "Mapamundi",
+        "sub": [
+            "Azarasia"
+        ],
+        "que": "País",
+        "resumen": "Reino de Prunia está en Azarasia.",
+        "region": "Azarasia",
+        "filtros": {
+            "qué es": "País"
+        },
+        "subraza_de": "",
+        "relleno": true,
+        "bandera": "/wiki/imagenes/reino_prunia.webp",
+        "miniatura": ""
+    },
+    {
+        "titulo": "Reino de Solazada",
+        "url": "/wiki/mapamundi/azarasia/reino_de_solazada/reino_de_solazada.html",
+        "carpeta": "Mapamundi/Azarasia/Reino de Solazada",
+        "etiquetas": [
+            "Mapamundi",
+            "Azarasia"
+        ],
+        "grupo": "Mapamundi",
+        "sub": [
+            "Azarasia"
+        ],
+        "que": "País",
+        "resumen": "Reino de Solazada está en Azarasia.",
+        "region": "Azarasia",
+        "filtros": {
+            "qué es": "País"
+        },
+        "subraza_de": "",
+        "relleno": true,
+        "bandera": "/wiki/imagenes/reino_solazada.webp",
+        "miniatura": ""
+    },
+    {
+        "titulo": "Reino de Telzaria",
+        "url": "/wiki/mapamundi/azarasia/reino_de_telzaria/reino_de_telzaria.html",
+        "carpeta": "Mapamundi/Azarasia/Reino de Telzaria",
+        "etiquetas": [
+            "Mapamundi",
+            "Azarasia"
+        ],
+        "grupo": "Mapamundi",
+        "sub": [
+            "Azarasia"
+        ],
+        "que": "País",
+        "resumen": "Reino de Telzaria está en Azarasia.",
+        "region": "Azarasia",
+        "filtros": {
+            "qué es": "País"
+        },
+        "subraza_de": "",
+        "relleno": true,
+        "bandera": "/wiki/imagenes/reino_telzaria.webp",
+        "miniatura": ""
+    },
+    {
+        "titulo": "República Mercantil de Denatria",
+        "url": "/wiki/mapamundi/azarasia/republica_mercantil_de_denatria/republica_mercantil_de_denatria.html",
+        "carpeta": "Mapamundi/Azarasia/República Mercantil de Denatria",
+        "etiquetas": [
+            "Mapamundi",
+            "Azarasia"
+        ],
+        "grupo": "Mapamundi",
+        "sub": [
+            "Azarasia"
+        ],
+        "que": "País",
+        "resumen": "República Mercantil de Denatria está en Azarasia.",
+        "region": "Azarasia",
+        "filtros": {
+            "qué es": "País"
+        },
+        "subraza_de": "",
+        "relleno": true,
+        "bandera": "/wiki/imagenes/republica_denatria.webp",
+        "miniatura": ""
+    },
+    {
+        "titulo": "Sultanato de Doresia",
+        "url": "/wiki/mapamundi/azarasia/sultanato_de_doresia/sultanato_de_doresia.html",
+        "carpeta": "Mapamundi/Azarasia/Sultanato de Doresia",
+        "etiquetas": [
+            "Mapamundi",
+            "Azarasia"
+        ],
+        "grupo": "Mapamundi",
+        "sub": [
+            "Azarasia"
+        ],
+        "que": "País",
+        "resumen": "Sultanato de Doresia está en Azarasia.",
+        "region": "Azarasia",
+        "filtros": {
+            "qué es": "País"
+        },
+        "subraza_de": "",
+        "relleno": true,
+        "bandera": "/wiki/imagenes/sultanato_doresia.webp",
+        "miniatura": ""
+    },
+    {
+        "titulo": "Tierras de Traena",
+        "url": "/wiki/mapamundi/azarasia/tierras_de_traena/tierras_de_traena.html",
+        "carpeta": "Mapamundi/Azarasia/Tierras de Traena",
+        "etiquetas": [
+            "Mapamundi",
+            "Azarasia"
+        ],
+        "grupo": "Mapamundi",
+        "sub": [
+            "Azarasia"
+        ],
+        "que": "País",
+        "resumen": "Tierras de Traena está en Azarasia.",
+        "region": "Azarasia",
+        "filtros": {
+            "qué es": "País"
+        },
+        "subraza_de": "",
+        "relleno": true,
+        "bandera": "/wiki/imagenes/tierras_traena.webp",
+        "miniatura": ""
+    },
+    {
+        "titulo": "Unión de Cuerza",
+        "url": "/wiki/mapamundi/azarasia/union_de_cuerza/union_de_cuerza.html",
+        "carpeta": "Mapamundi/Azarasia/Unión de Cuerza",
+        "etiquetas": [
+            "Mapamundi",
+            "Azarasia"
+        ],
+        "grupo": "Mapamundi",
+        "sub": [
+            "Azarasia"
+        ],
+        "que": "País",
+        "resumen": "Unión de Cuerza está en Azarasia.",
+        "region": "Azarasia",
+        "filtros": {
+            "qué es": "País"
+        },
+        "subraza_de": "",
+        "relleno": true,
+        "bandera": "/wiki/imagenes/union_de_cuerza.webp",
+        "miniatura": ""
+    },
+    {
+        "titulo": "Unión de las Cumbres Calcinadas",
+        "url": "/wiki/mapamundi/azarasia/union_de_las_cumbres_calcinadas/union_de_las_cumbres_calcinadas.html",
+        "carpeta": "Mapamundi/Azarasia/Unión de las Cumbres Calcinadas",
+        "etiquetas": [
+            "Mapamundi",
+            "Azarasia"
+        ],
+        "grupo": "Mapamundi",
+        "sub": [
+            "Azarasia"
+        ],
+        "que": "País",
+        "resumen": "Unión de las Cumbres Calcinadas está en Azarasia.",
+        "region": "Azarasia",
+        "filtros": {
+            "qué es": "País"
+        },
+        "subraza_de": "",
+        "relleno": true,
+        "bandera": "/wiki/imagenes/cumbres_calcinadas.webp",
+        "miniatura": ""
+    },
+    {
+        "titulo": "Academia de Rosamica",
+        "url": "/wiki/mapamundi/partaria/academia_de_rosamica/academia_de_rosamica.html",
+        "carpeta": "Mapamundi/Partaria/Academia de Rosamica",
+        "etiquetas": [
+            "Mapamundi",
+            "Partaria"
+        ],
+        "grupo": "Mapamundi",
+        "sub": [
+            "Partaria"
+        ],
+        "que": "País",
+        "resumen": "Academia de Rosamica está en Partaria.",
+        "region": "Partaria",
+        "filtros": {
+            "qué es": "País"
+        },
+        "subraza_de": "",
+        "relleno": true,
+        "bandera": "/wiki/imagenes/academia_de_rosamica.webp",
+        "miniatura": ""
+    },
+    {
+        "titulo": "Alianza de Sepón",
+        "url": "/wiki/mapamundi/partaria/alianza_de_sepon/alianza_de_sepon.html",
+        "carpeta": "Mapamundi/Partaria/Alianza de Sepón",
+        "etiquetas": [
+            "Mapamundi",
+            "Partaria"
+        ],
+        "grupo": "Mapamundi",
+        "sub": [
+            "Partaria"
+        ],
+        "que": "País",
+        "resumen": "Alianza de Sepón está en Partaria.",
+        "region": "Partaria",
+        "filtros": {
+            "qué es": "País"
+        },
+        "subraza_de": "",
+        "relleno": true,
+        "bandera": "/wiki/imagenes/alianza_de_sepon.webp",
+        "miniatura": ""
+    },
+    {
+        "titulo": "Bosque de Utalis",
+        "url": "/wiki/mapamundi/partaria/bosque_de_utalis/bosque_de_utalis.html",
+        "carpeta": "Mapamundi/Partaria/Bosque de Utalis",
+        "etiquetas": [
+            "Mapamundi",
+            "Partaria"
+        ],
+        "grupo": "Mapamundi",
+        "sub": [
+            "Partaria"
+        ],
+        "que": "País",
+        "resumen": "Bosque de Utalis está en Partaria.",
+        "region": "Partaria",
+        "filtros": {
+            "qué es": "País"
+        },
+        "subraza_de": "",
+        "relleno": true,
+        "bandera": "/wiki/imagenes/bosque_de_utalis.webp",
+        "miniatura": ""
+    },
+    {
+        "titulo": "Ciudad Santa de Ablanamaz",
+        "url": "/wiki/mapamundi/partaria/ciudad_santa_de_ablanamaz/ciudad_santa_de_ablanamaz.html",
+        "carpeta": "Mapamundi/Partaria/Ciudad Santa de Ablanamaz",
+        "etiquetas": [
+            "Mapamundi",
+            "Partaria"
+        ],
+        "grupo": "Mapamundi",
+        "sub": [
+            "Partaria"
+        ],
+        "que": "País",
+        "resumen": "Ciudad Santa de Ablanamaz está en Partaria.",
+        "region": "Partaria",
+        "filtros": {
+            "qué es": "País"
+        },
+        "subraza_de": "",
+        "relleno": true,
+        "bandera": "/wiki/imagenes/ciudad_santa_de_ablanamaz.webp",
+        "miniatura": ""
+    },
+    {
+        "titulo": "Coronas del Viento",
+        "url": "/wiki/mapamundi/partaria/coronas_del_viento/coronas_del_viento.html",
+        "carpeta": "Mapamundi/Partaria/Coronas del Viento",
+        "etiquetas": [
+            "Mapamundi",
+            "Partaria"
+        ],
+        "grupo": "Mapamundi",
+        "sub": [
+            "Partaria"
+        ],
+        "que": "País",
+        "resumen": "Coronas del Viento está en Partaria.",
+        "region": "Partaria",
+        "filtros": {
+            "qué es": "País"
+        },
+        "subraza_de": "",
+        "relleno": true,
+        "bandera": "/wiki/imagenes/coronas_del_viento.webp",
+        "miniatura": ""
+    },
+    {
+        "titulo": "Cumbres de Ath",
+        "url": "/wiki/mapamundi/partaria/cumbres_de_ath/cumbres_de_ath.html",
+        "carpeta": "Mapamundi/Partaria/Cumbres de Ath",
+        "etiquetas": [
+            "Mapamundi",
+            "Partaria"
+        ],
+        "grupo": "Mapamundi",
+        "sub": [
+            "Partaria"
+        ],
+        "que": "País",
+        "resumen": "Cumbres de Ath está en Partaria.",
+        "region": "Partaria",
+        "filtros": {
+            "qué es": "País"
+        },
+        "subraza_de": "",
+        "relleno": true,
+        "bandera": "/wiki/imagenes/cumbres_de_ath.webp",
+        "miniatura": ""
+    },
+    {
+        "titulo": "Custodios de Parta",
+        "url": "/wiki/mapamundi/partaria/custodios_de_parta/custodios_de_parta.html",
+        "carpeta": "Mapamundi/Partaria/Custodios de Parta",
+        "etiquetas": [
+            "Mapamundi",
+            "Partaria"
+        ],
+        "grupo": "Mapamundi",
+        "sub": [
+            "Partaria"
+        ],
+        "que": "País",
+        "resumen": "Custodios de Parta está en Partaria.",
+        "region": "Partaria",
+        "filtros": {
+            "qué es": "País"
+        },
+        "subraza_de": "",
+        "relleno": true,
+        "bandera": "/wiki/imagenes/custodios_de_parta.webp",
+        "miniatura": ""
+    },
+    {
+        "titulo": "Imperio Friscadio",
+        "url": "/wiki/mapamundi/partaria/imperio_friscadio/imperio_friscadio.html",
+        "carpeta": "Mapamundi/Partaria/Imperio Friscadio",
+        "etiquetas": [
+            "Mapamundi",
+            "Partaria"
+        ],
+        "grupo": "Mapamundi",
+        "sub": [
+            "Partaria"
+        ],
+        "que": "País",
+        "resumen": "Imperio Friscadio está en Partaria.",
+        "region": "Partaria",
+        "filtros": {
+            "qué es": "País"
+        },
+        "subraza_de": "",
+        "relleno": true,
+        "bandera": "/wiki/imagenes/imperio_friscadio.webp",
+        "miniatura": ""
+    },
+    {
+        "titulo": "Maharato de Sulkaladésh",
+        "url": "/wiki/mapamundi/partaria/maharato_de_sulkaladesh/maharato_de_sulkaladesh.html",
+        "carpeta": "Mapamundi/Partaria/Maharato de Sulkaladésh",
+        "etiquetas": [
+            "Mapamundi",
+            "Partaria"
+        ],
+        "grupo": "Mapamundi",
+        "sub": [
+            "Partaria"
+        ],
+        "que": "País",
+        "resumen": "Maharato de Sulkaladésh está en Partaria.",
+        "region": "Partaria",
+        "filtros": {
+            "qué es": "País"
+        },
+        "subraza_de": "",
+        "relleno": true,
+        "bandera": "/wiki/imagenes/maharato_de_sulkaladesh.webp",
+        "miniatura": ""
+    },
+    {
+        "titulo": "Mandato de Acratang",
+        "url": "/wiki/mapamundi/partaria/mandato_de_acratang/mandato_de_acratang.html",
+        "carpeta": "Mapamundi/Partaria/Mandato de Acratang",
+        "etiquetas": [
+            "Mapamundi",
+            "Partaria"
+        ],
+        "grupo": "Mapamundi",
+        "sub": [
+            "Partaria"
+        ],
+        "que": "País",
+        "resumen": "Mandato de Acratang está en Partaria.",
+        "region": "Partaria",
+        "filtros": {
+            "qué es": "País"
+        },
+        "subraza_de": "",
+        "relleno": true,
+        "bandera": "/wiki/imagenes/mandato_de_acratang.webp",
+        "miniatura": ""
+    },
+    {
+        "titulo": "Mandato de Nisi",
+        "url": "/wiki/mapamundi/partaria/mandato_de_nisi/mandato_de_nisi.html",
+        "carpeta": "Mapamundi/Partaria/Mandato de Nisi",
+        "etiquetas": [
+            "Mapamundi",
+            "Partaria"
+        ],
+        "grupo": "Mapamundi",
+        "sub": [
+            "Partaria"
+        ],
+        "que": "País",
+        "resumen": "Mandato de Nisi está en Partaria.",
+        "region": "Partaria",
+        "filtros": {
+            "qué es": "País"
+        },
+        "subraza_de": "",
+        "relleno": true,
+        "bandera": "/wiki/imagenes/mandato_de_nisi.webp",
+        "miniatura": ""
+    },
+    {
+        "titulo": "Mandato de Panchan",
+        "url": "/wiki/mapamundi/partaria/mandato_de_panchan/mandato_de_panchan.html",
+        "carpeta": "Mapamundi/Partaria/Mandato de Panchan",
+        "etiquetas": [
+            "Mapamundi",
+            "Partaria"
+        ],
+        "grupo": "Mapamundi",
+        "sub": [
+            "Partaria"
+        ],
+        "que": "País",
+        "resumen": "Mandato de Panchan está en Partaria.",
+        "region": "Partaria",
+        "filtros": {
+            "qué es": "País"
+        },
+        "subraza_de": "",
+        "relleno": true,
+        "bandera": "/wiki/imagenes/mandato_de_panchan.webp",
+        "miniatura": ""
+    },
+    {
+        "titulo": "Mandato de Taz-Ju",
+        "url": "/wiki/mapamundi/partaria/mandato_de_taz_ju/mandato_de_taz_ju.html",
+        "carpeta": "Mapamundi/Partaria/Mandato de Taz-Ju",
+        "etiquetas": [
+            "Mapamundi",
+            "Partaria"
+        ],
+        "grupo": "Mapamundi",
+        "sub": [
+            "Partaria"
+        ],
+        "que": "País",
+        "resumen": "Mandato de Taz-Ju está en Partaria.",
+        "region": "Partaria",
+        "filtros": {
+            "qué es": "País"
+        },
+        "subraza_de": "",
+        "relleno": true,
+        "bandera": "/wiki/imagenes/mandato_de_taz_ju.webp",
+        "miniatura": ""
+    },
+    {
+        "titulo": "Mandato de Zó",
+        "url": "/wiki/mapamundi/partaria/mandato_de_zo/mandato_de_zo.html",
+        "carpeta": "Mapamundi/Partaria/Mandato de Zó",
+        "etiquetas": [
+            "Mapamundi",
+            "Partaria"
+        ],
+        "grupo": "Mapamundi",
+        "sub": [
+            "Partaria"
+        ],
+        "que": "País",
+        "resumen": "Mandato de Zó está en Partaria.",
+        "region": "Partaria",
+        "filtros": {
+            "qué es": "País"
+        },
+        "subraza_de": "",
+        "relleno": true,
+        "bandera": "/wiki/imagenes/mandato_de_zo.webp",
+        "miniatura": ""
+    },
+    {
+        "titulo": "Mercado de Dao-Yeni",
+        "url": "/wiki/mapamundi/partaria/mercado_de_dao_yeni/mercado_de_dao_yeni.html",
+        "carpeta": "Mapamundi/Partaria/Mercado de Dao-Yeni",
+        "etiquetas": [
+            "Mapamundi",
+            "Partaria"
+        ],
+        "grupo": "Mapamundi",
+        "sub": [
+            "Partaria"
+        ],
+        "que": "País",
+        "resumen": "Mercado de Dao-Yeni está en Partaria.",
+        "region": "Partaria",
+        "filtros": {
+            "qué es": "País"
+        },
+        "subraza_de": "",
+        "relleno": true,
+        "bandera": "/wiki/imagenes/mercado_de_dao_yeni.webp",
+        "miniatura": ""
+    },
+    {
+        "titulo": "Partaria",
+        "url": "/wiki/mapamundi/partaria/partaria.html",
+        "carpeta": "Mapamundi/Partaria",
+        "etiquetas": [
+            "Mapamundi",
+            "Partaria"
+        ],
+        "grupo": "Mapamundi",
+        "sub": [
+            "Partaria"
+        ],
+        "que": "",
+        "resumen": "Partaria es uno de los continentes del mundo.",
+        "region": "",
+        "filtros": {},
+        "subraza_de": "",
+        "relleno": false,
+        "bandera": "",
+        "miniatura": "/wiki/imagenes/situacion/peque/partaria.webp"
+    },
+    {
+        "titulo": "Páramo de Parta",
+        "url": "/wiki/mapamundi/partaria/paramo_de_parta/paramo_de_parta.html",
+        "carpeta": "Mapamundi/Partaria/Páramo de Parta",
+        "etiquetas": [
+            "Mapamundi",
+            "Partaria"
+        ],
+        "grupo": "Mapamundi",
+        "sub": [
+            "Partaria"
+        ],
+        "que": "País",
+        "resumen": "Páramo de Parta está en Partaria.",
+        "region": "Partaria",
+        "filtros": {
+            "qué es": "País"
+        },
+        "subraza_de": "",
+        "relleno": true,
+        "bandera": "/wiki/imagenes/paramo_de_parta.webp",
+        "miniatura": ""
+    },
+    {
+        "titulo": "Reino de Kasa",
+        "url": "/wiki/mapamundi/partaria/reino_de_kasa/reino_de_kasa.html",
+        "carpeta": "Mapamundi/Partaria/Reino de Kasa",
+        "etiquetas": [
+            "Mapamundi",
+            "Partaria"
+        ],
+        "grupo": "Mapamundi",
+        "sub": [
+            "Partaria"
+        ],
+        "que": "País",
+        "resumen": "Reino de Kasa está en Partaria.",
+        "region": "Partaria",
+        "filtros": {
+            "qué es": "País"
+        },
+        "subraza_de": "",
+        "relleno": true,
+        "bandera": "/wiki/imagenes/reino_de_kasa.webp",
+        "miniatura": ""
+    },
+    {
+        "titulo": "Ruinas de Goa",
+        "url": "/wiki/mapamundi/partaria/ruinas_de_goa/ruinas_de_goa.html",
+        "carpeta": "Mapamundi/Partaria/Ruinas de Goa",
+        "etiquetas": [
+            "Mapamundi",
+            "Partaria"
+        ],
+        "grupo": "Mapamundi",
+        "sub": [
+            "Partaria"
+        ],
+        "que": "País",
+        "resumen": "Ruinas de Goa está en Partaria.",
+        "region": "Partaria",
+        "filtros": {
+            "qué es": "País"
+        },
+        "subraza_de": "",
+        "relleno": true,
+        "bandera": "/wiki/imagenes/ruinas_de_goa.webp",
+        "miniatura": ""
+    },
+    {
+        "titulo": "Tierras Reflejadas",
+        "url": "/wiki/mapamundi/partaria/tierras_reflejadas/tierras_reflejadas.html",
+        "carpeta": "Mapamundi/Partaria/Tierras Reflejadas",
+        "etiquetas": [
+            "Mapamundi",
+            "Partaria"
+        ],
+        "grupo": "Mapamundi",
+        "sub": [
+            "Partaria"
+        ],
+        "que": "País",
+        "resumen": "Tierras Reflejadas está en Partaria.",
+        "region": "Partaria",
+        "filtros": {
+            "qué es": "País"
+        },
+        "subraza_de": "",
+        "relleno": true,
+        "bandera": "/wiki/imagenes/tierras_reflejadas.webp",
+        "miniatura": ""
+    },
+    {
+        "titulo": "Tribu Boscalise",
+        "url": "/wiki/mapamundi/partaria/tribu_boscalise/tribu_boscalise.html",
+        "carpeta": "Mapamundi/Partaria/Tribu Boscalise",
+        "etiquetas": [
+            "Mapamundi",
+            "Partaria"
+        ],
+        "grupo": "Mapamundi",
+        "sub": [
+            "Partaria"
+        ],
+        "que": "País",
+        "resumen": "Tribu Boscalise está en Partaria.",
+        "region": "Partaria",
+        "filtros": {
+            "qué es": "País"
+        },
+        "subraza_de": "",
+        "relleno": true,
+        "bandera": "/wiki/imagenes/tribu_boscalise.webp",
+        "miniatura": ""
+    },
+    {
+        "titulo": "Tribu Gogango",
+        "url": "/wiki/mapamundi/partaria/tribu_gogango/tribu_gogango.html",
+        "carpeta": "Mapamundi/Partaria/Tribu Gogango",
+        "etiquetas": [
+            "Mapamundi",
+            "Partaria"
+        ],
+        "grupo": "Mapamundi",
+        "sub": [
+            "Partaria"
+        ],
+        "que": "País",
+        "resumen": "Tribu Gogango está en Partaria.",
+        "region": "Partaria",
+        "filtros": {
+            "qué es": "País"
+        },
+        "subraza_de": "",
+        "relleno": true,
+        "bandera": "/wiki/imagenes/tribu_gogango.webp",
+        "miniatura": ""
+    },
+    {
+        "titulo": "Tribu Kránimos",
+        "url": "/wiki/mapamundi/partaria/tribu_kranimos/tribu_kranimos.html",
+        "carpeta": "Mapamundi/Partaria/Tribu Kránimos",
+        "etiquetas": [
+            "Mapamundi",
+            "Partaria"
+        ],
+        "grupo": "Mapamundi",
+        "sub": [
+            "Partaria"
+        ],
+        "que": "País",
+        "resumen": "Tribu Kránimos está en Partaria.",
+        "region": "Partaria",
+        "filtros": {
+            "qué es": "País"
+        },
+        "subraza_de": "",
+        "relleno": true,
+        "bandera": "/wiki/imagenes/tribu_kranimos.webp",
+        "miniatura": ""
+    },
+    {
+        "titulo": "Tribu Molosgo",
+        "url": "/wiki/mapamundi/partaria/tribu_molosgo/tribu_molosgo.html",
+        "carpeta": "Mapamundi/Partaria/Tribu Molosgo",
+        "etiquetas": [
+            "Mapamundi",
+            "Partaria"
+        ],
+        "grupo": "Mapamundi",
+        "sub": [
+            "Partaria"
+        ],
+        "que": "País",
+        "resumen": "Tribu Molosgo está en Partaria.",
+        "region": "Partaria",
+        "filtros": {
+            "qué es": "País"
+        },
+        "subraza_de": "",
+        "relleno": true,
+        "bandera": "/wiki/imagenes/tribu_molosgo.webp",
+        "miniatura": ""
+    },
+    {
+        "titulo": "Tribu Ordasco",
+        "url": "/wiki/mapamundi/partaria/tribu_ordasco/tribu_ordasco.html",
+        "carpeta": "Mapamundi/Partaria/Tribu Ordasco",
+        "etiquetas": [
+            "Mapamundi",
+            "Partaria"
+        ],
+        "grupo": "Mapamundi",
+        "sub": [
+            "Partaria"
+        ],
+        "que": "País",
+        "resumen": "Tribu Ordasco está en Partaria.",
+        "region": "Partaria",
+        "filtros": {
+            "qué es": "País"
+        },
+        "subraza_de": "",
+        "relleno": true,
+        "bandera": "/wiki/imagenes/tribu_ordasco.webp",
+        "miniatura": ""
+    },
+    {
+        "titulo": "Tribu Tuzno",
+        "url": "/wiki/mapamundi/partaria/tribu_tuzno/tribu_tuzno.html",
+        "carpeta": "Mapamundi/Partaria/Tribu Tuzno",
+        "etiquetas": [
+            "Mapamundi",
+            "Partaria"
+        ],
+        "grupo": "Mapamundi",
+        "sub": [
+            "Partaria"
+        ],
+        "que": "País",
+        "resumen": "Tribu Tuzno está en Partaria.",
+        "region": "Partaria",
+        "filtros": {
+            "qué es": "País"
+        },
+        "subraza_de": "",
+        "relleno": true,
+        "bandera": "/wiki/imagenes/tribu_tuzno.webp",
+        "miniatura": ""
+    },
+    {
+        "titulo": "Tribu Utná",
+        "url": "/wiki/mapamundi/partaria/tribu_utna/tribu_utna.html",
+        "carpeta": "Mapamundi/Partaria/Tribu Utná",
+        "etiquetas": [
+            "Mapamundi",
+            "Partaria"
+        ],
+        "grupo": "Mapamundi",
+        "sub": [
+            "Partaria"
+        ],
+        "que": "País",
+        "resumen": "Tribu Utná está en Partaria.",
+        "region": "Partaria",
+        "filtros": {
+            "qué es": "País"
+        },
+        "subraza_de": "",
+        "relleno": true,
+        "bandera": "/wiki/imagenes/tribu_utna.webp",
+        "miniatura": ""
+    },
+    {
+        "titulo": "Tribu Vadalacra",
+        "url": "/wiki/mapamundi/partaria/tribu_vadalacra/tribu_vadalacra.html",
+        "carpeta": "Mapamundi/Partaria/Tribu Vadalacra",
+        "etiquetas": [
+            "Mapamundi",
+            "Partaria"
+        ],
+        "grupo": "Mapamundi",
+        "sub": [
+            "Partaria"
+        ],
+        "que": "País",
+        "resumen": "Tribu Vadalacra está en Partaria.",
+        "region": "Partaria",
+        "filtros": {
+            "qué es": "País"
+        },
+        "subraza_de": "",
+        "relleno": true,
+        "bandera": "/wiki/imagenes/tribu_vadalacra.webp",
+        "miniatura": ""
+    },
+    {
+        "titulo": "Valle de Után",
+        "url": "/wiki/mapamundi/partaria/valle_de_utan/valle_de_utan.html",
+        "carpeta": "Mapamundi/Partaria/Valle de Után",
+        "etiquetas": [
+            "Mapamundi",
+            "Partaria"
+        ],
+        "grupo": "Mapamundi",
+        "sub": [
+            "Partaria"
+        ],
+        "que": "País",
+        "resumen": "Valle de Után está en Partaria.",
+        "region": "Partaria",
+        "filtros": {
+            "qué es": "País"
+        },
+        "subraza_de": "",
+        "relleno": true,
+        "bandera": "/wiki/imagenes/valle_de_utan.webp",
+        "miniatura": ""
+    },
+    {
+        "titulo": "Ac'atapec",
+        "url": "/wiki/mapamundi/archipielagos/archipielago_de_las_costras/ac_atapec/ac_atapec.html",
+        "carpeta": "Mapamundi/Archipiélagos/Archipielago de las Costras/Ac'atapec",
+        "etiquetas": [
+            "Mapamundi",
+            "Archipiélagos"
+        ],
+        "grupo": "Mapamundi",
+        "sub": [
+            "Archipiélagos"
+        ],
+        "que": "País",
+        "resumen": "Ac'atapec está en el Archipielago de las Costras.",
+        "region": "Archipielago de las Costras",
+        "filtros": {
+            "qué es": "País"
+        },
+        "subraza_de": "",
+        "relleno": true,
+        "bandera": "/wiki/imagenes/ac_atapec.webp",
+        "miniatura": ""
+    },
+    {
+        "titulo": "Ahíu",
+        "url": "/wiki/mapamundi/archipielagos/faros_del_mar_ciego/ahiu/ahiu.html",
+        "carpeta": "Mapamundi/Archipiélagos/Faros del Mar Ciego/Ahíu",
+        "etiquetas": [
+            "Mapamundi",
+            "Archipiélagos"
+        ],
+        "grupo": "Mapamundi",
+        "sub": [
+            "Archipiélagos"
+        ],
+        "que": "País",
+        "resumen": "Ahíu está en los Faros del Mar Ciego.",
+        "region": "Faros del Mar Ciego",
+        "filtros": {
+            "qué es": "País"
+        },
+        "subraza_de": "",
+        "relleno": true,
+        "bandera": "/wiki/imagenes/ahiu.webp",
+        "miniatura": ""
+    },
+    {
+        "titulo": "Amequeleke",
+        "url": "/wiki/mapamundi/archipielagos/archipielago_de_las_costras/amequeleke/amequeleke.html",
+        "carpeta": "Mapamundi/Archipiélagos/Archipielago de las Costras/Amequeleke",
+        "etiquetas": [
+            "Mapamundi",
+            "Archipiélagos"
+        ],
+        "grupo": "Mapamundi",
+        "sub": [
+            "Archipiélagos"
+        ],
+        "que": "País",
+        "resumen": "Amequeleke está en el Archipielago de las Costras.",
+        "region": "Archipielago de las Costras",
+        "filtros": {
+            "qué es": "País"
+        },
+        "subraza_de": "",
+        "relleno": true,
+        "bandera": "/wiki/imagenes/amequeleke.webp",
+        "miniatura": ""
+    },
+    {
+        "titulo": "Archipielago de las Costras",
+        "url": "/wiki/mapamundi/archipielagos/archipielago_de_las_costras/archipielago_de_las_costras.html",
+        "carpeta": "Mapamundi/Archipiélagos/Archipielago de las Costras",
+        "etiquetas": [
+            "Mapamundi",
+            "Archipiélagos"
+        ],
+        "grupo": "Mapamundi",
+        "sub": [
+            "Archipiélagos"
+        ],
+        "que": "",
+        "resumen": "Archipielago de las Costras es una región del mapamundi.",
+        "region": "",
+        "filtros": {},
+        "subraza_de": "",
+        "relleno": false,
+        "bandera": "",
+        "miniatura": "/wiki/imagenes/situacion/peque/archipielago_de_las_costras.webp"
+    },
+    {
+        "titulo": "Archipiélago de Lunas",
+        "url": "/wiki/mapamundi/archipielagos/archipielago_de_lunas/archipielago_de_lunas.html",
+        "carpeta": "Mapamundi/Archipiélagos/Archipiélago de Lunas",
+        "etiquetas": [
+            "Mapamundi",
+            "Archipiélagos"
+        ],
+        "grupo": "Mapamundi",
+        "sub": [
+            "Archipiélagos"
+        ],
+        "que": "",
+        "resumen": "Archipiélago de Lunas es una región del mapamundi.",
+        "region": "",
+        "filtros": {},
+        "subraza_de": "",
+        "relleno": false,
+        "bandera": "",
+        "miniatura": "/wiki/imagenes/situacion/peque/archipielago_de_lunas.webp"
+    },
+    {
+        "titulo": "Archipiélago Fragmentado",
+        "url": "/wiki/mapamundi/archipielagos/tierras_encantadas/archipielago_fragmentado/archipielago_fragmentado.html",
+        "carpeta": "Mapamundi/Archipiélagos/Tierras Encantadas/Archipiélago Fragmentado",
+        "etiquetas": [
+            "Mapamundi",
+            "Archipiélagos"
+        ],
+        "grupo": "Mapamundi",
+        "sub": [
+            "Archipiélagos"
+        ],
+        "que": "",
+        "resumen": "El Archipiélago Fragmentado es una región de las Tierras Encantadas.",
+        "region": "Tierras Encantadas",
+        "filtros": {},
+        "subraza_de": "",
+        "relleno": false,
+        "bandera": "",
+        "miniatura": "/wiki/imagenes/situacion/peque/archipielago_fragmentado.webp"
+    },
+    {
+        "titulo": "Aruta",
+        "url": "/wiki/mapamundi/archipielagos/faros_del_mar_ciego/aruta/aruta.html",
+        "carpeta": "Mapamundi/Archipiélagos/Faros del Mar Ciego/Aruta",
+        "etiquetas": [
+            "Mapamundi",
+            "Archipiélagos"
+        ],
+        "grupo": "Mapamundi",
+        "sub": [
+            "Archipiélagos"
+        ],
+        "que": "País",
+        "resumen": "Aruta está en los Faros del Mar Ciego.",
+        "region": "Faros del Mar Ciego",
+        "filtros": {
+            "qué es": "País"
+        },
+        "subraza_de": "",
+        "relleno": true,
+        "bandera": "/wiki/imagenes/aruta.webp",
+        "miniatura": ""
+    },
+    {
+        "titulo": "Baronía de Ronco",
+        "url": "/wiki/mapamundi/archipielagos/archipielago_de_lunas/baronia_de_ronco/baronia_de_ronco.html",
+        "carpeta": "Mapamundi/Archipiélagos/Archipiélago de Lunas/Baronía de Ronco",
+        "etiquetas": [
+            "Mapamundi",
+            "Archipiélagos"
+        ],
+        "grupo": "Mapamundi",
+        "sub": [
+            "Archipiélagos"
+        ],
+        "que": "País",
+        "resumen": "Baronía de Ronco está en el Archipiélago de Lunas.",
+        "region": "Archipiélago de Lunas",
+        "filtros": {
+            "qué es": "País"
+        },
+        "subraza_de": "",
+        "relleno": true,
+        "bandera": "/wiki/imagenes/baronia_ronco.webp",
+        "miniatura": ""
+    },
+    {
+        "titulo": "Corona de Mogla",
+        "url": "/wiki/mapamundi/archipielagos/archipielago_de_lunas/corona_de_mogla/corona_de_mogla.html",
+        "carpeta": "Mapamundi/Archipiélagos/Archipiélago de Lunas/Corona de Mogla",
+        "etiquetas": [
+            "Mapamundi",
+            "Archipiélagos"
+        ],
+        "grupo": "Mapamundi",
+        "sub": [
+            "Archipiélagos"
+        ],
+        "que": "País",
+        "resumen": "Corona de Mogla está en el Archipiélago de Lunas.",
+        "region": "Archipiélago de Lunas",
+        "filtros": {
+            "qué es": "País"
+        },
+        "subraza_de": "",
+        "relleno": true,
+        "bandera": "/wiki/imagenes/corona_mogla.webp",
+        "miniatura": ""
+    },
+    {
+        "titulo": "Corte de Labros",
+        "url": "/wiki/mapamundi/archipielagos/islas_de_labros/corte_de_labros/corte_de_labros.html",
+        "carpeta": "Mapamundi/Archipiélagos/Islas de Labros/Corte de Labros",
+        "etiquetas": [
+            "Mapamundi",
+            "Archipiélagos"
+        ],
+        "grupo": "Mapamundi",
+        "sub": [
+            "Archipiélagos"
+        ],
+        "que": "País",
+        "resumen": "Corte de Labros está en las Islas de Labros.",
+        "region": "Islas de Labros",
+        "filtros": {
+            "qué es": "País"
+        },
+        "subraza_de": "",
+        "relleno": true,
+        "bandera": "/wiki/imagenes/corte_labros.webp",
+        "miniatura": ""
+    },
+    {
+        "titulo": "Costa de Vlasquie",
+        "url": "/wiki/mapamundi/archipielagos/tierras_encantadas/archipielago_fragmentado/costa_de_vlasquie/costa_de_vlasquie.html",
+        "carpeta": "Mapamundi/Archipiélagos/Tierras Encantadas/Archipiélago Fragmentado/Costa de Vlasquie",
+        "etiquetas": [
+            "Mapamundi",
+            "Archipiélagos"
+        ],
+        "grupo": "Mapamundi",
+        "sub": [
+            "Archipiélagos"
+        ],
+        "que": "País",
+        "resumen": "Costa de Vlasquie está en el Archipiélago Fragmentado, en las Tierras Encantadas.",
+        "region": "Archipiélago Fragmentado",
+        "filtros": {
+            "qué es": "País"
+        },
+        "subraza_de": "",
+        "relleno": true,
+        "bandera": "/wiki/imagenes/costa_de_vlasquie.webp",
+        "miniatura": ""
+    },
+    {
+        "titulo": "Cuna de Quimeras",
+        "url": "/wiki/mapamundi/archipielagos/cuna_de_quimeras/cuna_de_quimeras.html",
+        "carpeta": "Mapamundi/Archipiélagos/Cuna de Quimeras",
+        "etiquetas": [
+            "Mapamundi",
+            "Archipiélagos"
+        ],
+        "grupo": "Mapamundi",
+        "sub": [
+            "Archipiélagos"
+        ],
+        "que": "País",
+        "resumen": "Cuna de Quimeras es una isla grande e independiente.",
+        "region": "",
+        "filtros": {
+            "qué es": "País"
+        },
+        "subraza_de": "",
+        "relleno": true,
+        "bandera": "/wiki/imagenes/cuna_de_quimeras.webp",
+        "miniatura": ""
+    },
+    {
+        "titulo": "Dominio de Lyca",
+        "url": "/wiki/mapamundi/archipielagos/tierras_encantadas/archipielago_fragmentado/dominio_de_lyca/dominio_de_lyca.html",
+        "carpeta": "Mapamundi/Archipiélagos/Tierras Encantadas/Archipiélago Fragmentado/Dominio de Lyca",
+        "etiquetas": [
+            "Mapamundi",
+            "Archipiélagos"
+        ],
+        "grupo": "Mapamundi",
+        "sub": [
+            "Archipiélagos"
+        ],
+        "que": "País",
+        "resumen": "Dominio de Lyca está en el Archipiélago Fragmentado, en las Tierras Encantadas.",
+        "region": "Archipiélago Fragmentado",
+        "filtros": {
+            "qué es": "País"
+        },
+        "subraza_de": "",
+        "relleno": true,
+        "bandera": "/wiki/imagenes/dominio_de_lyca.webp",
+        "miniatura": ""
+    },
+    {
+        "titulo": "Faros del Mar Ciego",
+        "url": "/wiki/mapamundi/archipielagos/faros_del_mar_ciego/faros_del_mar_ciego.html",
+        "carpeta": "Mapamundi/Archipiélagos/Faros del Mar Ciego",
+        "etiquetas": [
+            "Mapamundi",
+            "Archipiélagos"
+        ],
+        "grupo": "Mapamundi",
+        "sub": [
+            "Archipiélagos"
+        ],
+        "que": "",
+        "resumen": "Faros del Mar Ciego es una región del mapamundi.",
+        "region": "",
+        "filtros": {},
+        "subraza_de": "",
+        "relleno": false,
+        "bandera": "",
+        "miniatura": "/wiki/imagenes/situacion/peque/faros_del_mar_ciego.webp"
+    },
+    {
+        "titulo": "Forja de Aureb",
+        "url": "/wiki/mapamundi/archipielagos/tierras_encantadas/archipielago_fragmentado/forja_de_aureb/forja_de_aureb.html",
+        "carpeta": "Mapamundi/Archipiélagos/Tierras Encantadas/Archipiélago Fragmentado/Forja de Aureb",
+        "etiquetas": [
+            "Mapamundi",
+            "Archipiélagos"
+        ],
+        "grupo": "Mapamundi",
+        "sub": [
+            "Archipiélagos"
+        ],
+        "que": "País",
+        "resumen": "Forja de Aureb está en el Archipiélago Fragmentado, en las Tierras Encantadas.",
+        "region": "Archipiélago Fragmentado",
+        "filtros": {
+            "qué es": "País"
+        },
+        "subraza_de": "",
+        "relleno": true,
+        "bandera": "/wiki/imagenes/forja_de_aureb.webp",
+        "miniatura": ""
+    },
+    {
+        "titulo": "Franja de Turia",
+        "url": "/wiki/mapamundi/archipielagos/tierras_encantadas/franja_de_turia/franja_de_turia.html",
+        "carpeta": "Mapamundi/Archipiélagos/Tierras Encantadas/Franja de Turia",
+        "etiquetas": [
+            "Mapamundi",
+            "Archipiélagos"
+        ],
+        "grupo": "Mapamundi",
+        "sub": [
+            "Archipiélagos"
+        ],
+        "que": "País",
+        "resumen": "Franja de Turia está en las Tierras Encantadas.",
+        "region": "Tierras Encantadas",
+        "filtros": {
+            "qué es": "País"
+        },
+        "subraza_de": "",
+        "relleno": true,
+        "bandera": "/wiki/imagenes/franja_de_turia.webp",
+        "miniatura": ""
+    },
+    {
+        "titulo": "Haluka",
+        "url": "/wiki/mapamundi/archipielagos/faros_del_mar_ciego/haluka/haluka.html",
+        "carpeta": "Mapamundi/Archipiélagos/Faros del Mar Ciego/Haluka",
+        "etiquetas": [
+            "Mapamundi",
+            "Archipiélagos"
+        ],
+        "grupo": "Mapamundi",
+        "sub": [
+            "Archipiélagos"
+        ],
+        "que": "País",
+        "resumen": "Haluka está en los Faros del Mar Ciego.",
+        "region": "Faros del Mar Ciego",
+        "filtros": {
+            "qué es": "País"
+        },
+        "subraza_de": "",
+        "relleno": true,
+        "bandera": "/wiki/imagenes/haluka.webp",
+        "miniatura": ""
+    },
+    {
+        "titulo": "Hokupuko",
+        "url": "/wiki/mapamundi/archipielagos/faros_del_mar_ciego/hokupuko/hokupuko.html",
+        "carpeta": "Mapamundi/Archipiélagos/Faros del Mar Ciego/Hokupuko",
+        "etiquetas": [
+            "Mapamundi",
+            "Archipiélagos"
+        ],
+        "grupo": "Mapamundi",
+        "sub": [
+            "Archipiélagos"
+        ],
+        "que": "País",
+        "resumen": "Hokupuko está en los Faros del Mar Ciego.",
+        "region": "Faros del Mar Ciego",
+        "filtros": {
+            "qué es": "País"
+        },
+        "subraza_de": "",
+        "relleno": true,
+        "bandera": "/wiki/imagenes/hokupuko.webp",
+        "miniatura": ""
+    },
+    {
+        "titulo": "Horda de Uspán",
+        "url": "/wiki/mapamundi/archipielagos/tierras_encantadas/horda_de_uspan/horda_de_uspan.html",
+        "carpeta": "Mapamundi/Archipiélagos/Tierras Encantadas/Horda de Uspán",
+        "etiquetas": [
+            "Mapamundi",
+            "Archipiélagos"
+        ],
+        "grupo": "Mapamundi",
+        "sub": [
+            "Archipiélagos"
+        ],
+        "que": "País",
+        "resumen": "Horda de Uspán está en las Tierras Encantadas.",
+        "region": "Tierras Encantadas",
+        "filtros": {
+            "qué es": "País"
+        },
+        "subraza_de": "",
+        "relleno": true,
+        "bandera": "/wiki/imagenes/horda_de_uspan.webp",
+        "miniatura": ""
+    },
+    {
+        "titulo": "Horda Quebrada",
+        "url": "/wiki/mapamundi/archipielagos/tierras_encantadas/archipielago_fragmentado/horda_quebrada/horda_quebrada.html",
+        "carpeta": "Mapamundi/Archipiélagos/Tierras Encantadas/Archipiélago Fragmentado/Horda Quebrada",
+        "etiquetas": [
+            "Mapamundi",
+            "Archipiélagos"
+        ],
+        "grupo": "Mapamundi",
+        "sub": [
+            "Archipiélagos"
+        ],
+        "que": "País",
+        "resumen": "Horda Quebrada está en el Archipiélago Fragmentado, en las Tierras Encantadas.",
+        "region": "Archipiélago Fragmentado",
+        "filtros": {
+            "qué es": "País"
+        },
+        "subraza_de": "",
+        "relleno": true,
+        "bandera": "/wiki/imagenes/horda_quebrada.webp",
+        "miniatura": ""
+    },
+    {
+        "titulo": "Imperio de Lezeris",
+        "url": "/wiki/mapamundi/archipielagos/tierras_encantadas/imperio_de_lezeris/imperio_de_lezeris.html",
+        "carpeta": "Mapamundi/Archipiélagos/Tierras Encantadas/Imperio de Lezeris",
+        "etiquetas": [
+            "Mapamundi",
+            "Archipiélagos"
+        ],
+        "grupo": "Mapamundi",
+        "sub": [
+            "Archipiélagos"
+        ],
+        "que": "País",
+        "resumen": "Imperio de Lezeris está en las Tierras Encantadas.",
+        "region": "Tierras Encantadas",
+        "filtros": {
+            "qué es": "País"
+        },
+        "subraza_de": "",
+        "relleno": true,
+        "bandera": "/wiki/imagenes/imperio_de_lezeris.webp",
+        "miniatura": ""
+    },
+    {
+        "titulo": "Infierno Frondoso",
+        "url": "/wiki/mapamundi/archipielagos/tierras_encantadas/infierno_frondoso/infierno_frondoso.html",
+        "carpeta": "Mapamundi/Archipiélagos/Tierras Encantadas/Infierno Frondoso",
+        "etiquetas": [
+            "Mapamundi",
+            "Archipiélagos"
+        ],
+        "grupo": "Mapamundi",
+        "sub": [
+            "Archipiélagos"
+        ],
+        "que": "País",
+        "resumen": "Infierno Frondoso está en las Tierras Encantadas.",
+        "region": "Tierras Encantadas",
+        "filtros": {
+            "qué es": "País"
+        },
+        "subraza_de": "",
+        "relleno": true,
+        "bandera": "/wiki/imagenes/infierno_frondoso.webp",
+        "miniatura": ""
+    },
+    {
+        "titulo": "Isla de Arbenia",
+        "url": "/wiki/mapamundi/archipielagos/isla_de_arbenia/isla_de_arbenia.html",
+        "carpeta": "Mapamundi/Archipiélagos/Isla de Arbenia",
+        "etiquetas": [
+            "Mapamundi",
+            "Archipiélagos"
+        ],
+        "grupo": "Mapamundi",
+        "sub": [
+            "Archipiélagos"
+        ],
+        "que": "",
+        "resumen": "Isla de Arbenia es una región del mapamundi.",
+        "region": "",
+        "filtros": {},
+        "subraza_de": "",
+        "relleno": false,
+        "bandera": "",
+        "miniatura": "/wiki/imagenes/situacion/peque/isla_de_arbenia.webp"
+    },
+    {
+        "titulo": "Isla de Telvetia",
+        "url": "/wiki/mapamundi/archipielagos/isla_de_telvetia/isla_de_telvetia.html",
+        "carpeta": "Mapamundi/Archipiélagos/Isla de Telvetia",
+        "etiquetas": [
+            "Mapamundi",
+            "Archipiélagos"
+        ],
+        "grupo": "Mapamundi",
+        "sub": [
+            "Archipiélagos"
+        ],
+        "que": "País",
+        "resumen": "Isla de Telvetia es una isla grande e independiente.",
+        "region": "",
+        "filtros": {
+            "qué es": "País"
+        },
+        "subraza_de": "",
+        "relleno": true,
+        "bandera": "/wiki/imagenes/isla_de_telvetia.webp",
+        "miniatura": ""
+    },
+    {
+        "titulo": "Islas de Labros",
+        "url": "/wiki/mapamundi/archipielagos/islas_de_labros/islas_de_labros.html",
+        "carpeta": "Mapamundi/Archipiélagos/Islas de Labros",
+        "etiquetas": [
+            "Mapamundi",
+            "Archipiélagos"
+        ],
+        "grupo": "Mapamundi",
+        "sub": [
+            "Archipiélagos"
+        ],
+        "que": "",
+        "resumen": "Islas de Labros es una región del mapamundi.",
+        "region": "",
+        "filtros": {},
+        "subraza_de": "",
+        "relleno": false,
+        "bandera": "",
+        "miniatura": "/wiki/imagenes/situacion/peque/islas_de_labros.webp"
+    },
+    {
+        "titulo": "Itzalcál",
+        "url": "/wiki/mapamundi/archipielagos/archipielago_de_las_costras/itzalcal/itzalcal.html",
+        "carpeta": "Mapamundi/Archipiélagos/Archipielago de las Costras/Itzalcál",
+        "etiquetas": [
+            "Mapamundi",
+            "Archipiélagos"
+        ],
+        "grupo": "Mapamundi",
+        "sub": [
+            "Archipiélagos"
+        ],
+        "que": "País",
+        "resumen": "Itzalcál está en el Archipielago de las Costras.",
+        "region": "Archipielago de las Costras",
+        "filtros": {
+            "qué es": "País"
+        },
+        "subraza_de": "",
+        "relleno": true,
+        "bandera": "/wiki/imagenes/itzalcal.webp",
+        "miniatura": ""
+    },
+    {
+        "titulo": "Kaelova",
+        "url": "/wiki/mapamundi/archipielagos/faros_del_mar_ciego/kaelova/kaelova.html",
+        "carpeta": "Mapamundi/Archipiélagos/Faros del Mar Ciego/Kaelova",
+        "etiquetas": [
+            "Mapamundi",
+            "Archipiélagos"
+        ],
+        "grupo": "Mapamundi",
+        "sub": [
+            "Archipiélagos"
+        ],
+        "que": "País",
+        "resumen": "Kaelova está en los Faros del Mar Ciego.",
+        "region": "Faros del Mar Ciego",
+        "filtros": {
+            "qué es": "País"
+        },
+        "subraza_de": "",
+        "relleno": true,
+        "bandera": "/wiki/imagenes/kaelova.webp",
+        "miniatura": ""
+    },
+    {
+        "titulo": "Kukulna",
+        "url": "/wiki/mapamundi/archipielagos/archipielago_de_las_costras/kukulna/kukulna.html",
+        "carpeta": "Mapamundi/Archipiélagos/Archipielago de las Costras/Kukulna",
+        "etiquetas": [
+            "Mapamundi",
+            "Archipiélagos"
+        ],
+        "grupo": "Mapamundi",
+        "sub": [
+            "Archipiélagos"
+        ],
+        "que": "País",
+        "resumen": "Kukulna está en el Archipielago de las Costras.",
+        "region": "Archipielago de las Costras",
+        "filtros": {
+            "qué es": "País"
+        },
+        "subraza_de": "",
+        "relleno": true,
+        "bandera": "/wiki/imagenes/kukulna.webp",
+        "miniatura": ""
+    },
+    {
+        "titulo": "Liga de Golota",
+        "url": "/wiki/mapamundi/archipielagos/tierras_encantadas/liga_de_golota/liga_de_golota.html",
+        "carpeta": "Mapamundi/Archipiélagos/Tierras Encantadas/Liga de Golota",
+        "etiquetas": [
+            "Mapamundi",
+            "Archipiélagos"
+        ],
+        "grupo": "Mapamundi",
+        "sub": [
+            "Archipiélagos"
+        ],
+        "que": "País",
+        "resumen": "Liga de Golota está en las Tierras Encantadas.",
+        "region": "Tierras Encantadas",
+        "filtros": {
+            "qué es": "País"
+        },
+        "subraza_de": "",
+        "relleno": true,
+        "bandera": "/wiki/imagenes/liga_de_golota.webp",
+        "miniatura": ""
+    },
+    {
+        "titulo": "Marquesado de Al-Darís",
+        "url": "/wiki/mapamundi/archipielagos/archipielago_de_lunas/marquesado_de_al_daris/marquesado_de_al_daris.html",
+        "carpeta": "Mapamundi/Archipiélagos/Archipiélago de Lunas/Marquesado de Al-Darís",
+        "etiquetas": [
+            "Mapamundi",
+            "Archipiélagos"
+        ],
+        "grupo": "Mapamundi",
+        "sub": [
+            "Archipiélagos"
+        ],
+        "que": "País",
+        "resumen": "Marquesado de Al-Darís está en el Archipiélago de Lunas.",
+        "region": "Archipiélago de Lunas",
+        "filtros": {
+            "qué es": "País"
+        },
+        "subraza_de": "",
+        "relleno": true,
+        "bandera": "/wiki/imagenes/marquesado_aldaris.webp",
+        "miniatura": ""
+    },
+    {
+        "titulo": "Morada de Eeli",
+        "url": "/wiki/mapamundi/archipielagos/tierras_encantadas/archipielago_fragmentado/morada_de_eeli/morada_de_eeli.html",
+        "carpeta": "Mapamundi/Archipiélagos/Tierras Encantadas/Archipiélago Fragmentado/Morada de Eeli",
+        "etiquetas": [
+            "Mapamundi",
+            "Archipiélagos"
+        ],
+        "grupo": "Mapamundi",
+        "sub": [
+            "Archipiélagos"
+        ],
+        "que": "País",
+        "resumen": "Morada de Eeli está en el Archipiélago Fragmentado, en las Tierras Encantadas.",
+        "region": "Archipiélago Fragmentado",
+        "filtros": {
+            "qué es": "País"
+        },
+        "subraza_de": "",
+        "relleno": true,
+        "bandera": "/wiki/imagenes/morada_de_eeli.webp",
+        "miniatura": ""
+    },
+    {
+        "titulo": "Mulz'aka",
+        "url": "/wiki/mapamundi/archipielagos/archipielago_de_las_costras/mulz_aka/mulz_aka.html",
+        "carpeta": "Mapamundi/Archipiélagos/Archipielago de las Costras/Mulz'aka",
+        "etiquetas": [
+            "Mapamundi",
+            "Archipiélagos"
+        ],
+        "grupo": "Mapamundi",
+        "sub": [
+            "Archipiélagos"
+        ],
+        "que": "País",
+        "resumen": "Mulz'aka está en el Archipielago de las Costras.",
+        "region": "Archipielago de las Costras",
+        "filtros": {
+            "qué es": "País"
+        },
+        "subraza_de": "",
+        "relleno": true,
+        "bandera": "/wiki/imagenes/mulz_aka.webp",
+        "miniatura": ""
+    },
+    {
+        "titulo": "Nahuatzal",
+        "url": "/wiki/mapamundi/archipielagos/archipielago_de_las_costras/nahuatzal/nahuatzal.html",
+        "carpeta": "Mapamundi/Archipiélagos/Archipielago de las Costras/Nahuatzal",
+        "etiquetas": [
+            "Mapamundi",
+            "Archipiélagos"
+        ],
+        "grupo": "Mapamundi",
+        "sub": [
+            "Archipiélagos"
+        ],
+        "que": "País",
+        "resumen": "Nahuatzal está en el Archipielago de las Costras.",
+        "region": "Archipielago de las Costras",
+        "filtros": {
+            "qué es": "País"
+        },
+        "subraza_de": "",
+        "relleno": true,
+        "bandera": "/wiki/imagenes/nahuatzal.webp",
+        "miniatura": ""
+    },
+    {
+        "titulo": "Nalchalcoatl",
+        "url": "/wiki/mapamundi/archipielagos/archipielago_de_las_costras/nalchalcoatl/nalchalcoatl.html",
+        "carpeta": "Mapamundi/Archipiélagos/Archipielago de las Costras/Nalchalcoatl",
+        "etiquetas": [
+            "Mapamundi",
+            "Archipiélagos"
+        ],
+        "grupo": "Mapamundi",
+        "sub": [
+            "Archipiélagos"
+        ],
+        "que": "País",
+        "resumen": "Nalchalcoatl está en el Archipielago de las Costras.",
+        "region": "Archipielago de las Costras",
+        "filtros": {
+            "qué es": "País"
+        },
+        "subraza_de": "",
+        "relleno": true,
+        "bandera": "/wiki/imagenes/nalchalcoatl.webp",
+        "miniatura": ""
+    },
+    {
+        "titulo": "Nalu'elé",
+        "url": "/wiki/mapamundi/archipielagos/faros_del_mar_ciego/nalu_ele/nalu_ele.html",
+        "carpeta": "Mapamundi/Archipiélagos/Faros del Mar Ciego/Nalu'elé",
+        "etiquetas": [
+            "Mapamundi",
+            "Archipiélagos"
+        ],
+        "grupo": "Mapamundi",
+        "sub": [
+            "Archipiélagos"
+        ],
+        "que": "País",
+        "resumen": "Nalu'elé está en los Faros del Mar Ciego.",
+        "region": "Faros del Mar Ciego",
+        "filtros": {
+            "qué es": "País"
+        },
+        "subraza_de": "",
+        "relleno": true,
+        "bandera": "/wiki/imagenes/nalu_ele.webp",
+        "miniatura": ""
+    },
+    {
+        "titulo": "Nara-Mana",
+        "url": "/wiki/mapamundi/archipielagos/faros_del_mar_ciego/nara_mana/nara_mana.html",
+        "carpeta": "Mapamundi/Archipiélagos/Faros del Mar Ciego/Nara-Mana",
+        "etiquetas": [
+            "Mapamundi",
+            "Archipiélagos"
+        ],
+        "grupo": "Mapamundi",
+        "sub": [
+            "Archipiélagos"
+        ],
+        "que": "País",
+        "resumen": "Nara-Mana está en los Faros del Mar Ciego.",
+        "region": "Faros del Mar Ciego",
+        "filtros": {
+            "qué es": "País"
+        },
+        "subraza_de": "",
+        "relleno": true,
+        "bandera": "/wiki/imagenes/nara_mana.webp",
+        "miniatura": ""
+    },
+    {
+        "titulo": "Níctebrakka",
+        "url": "/wiki/mapamundi/archipielagos/archipielago_de_las_costras/nictebrakka/nictebrakka.html",
+        "carpeta": "Mapamundi/Archipiélagos/Archipielago de las Costras/Níctebrakka",
+        "etiquetas": [
+            "Mapamundi",
+            "Archipiélagos"
+        ],
+        "grupo": "Mapamundi",
+        "sub": [
+            "Archipiélagos"
+        ],
+        "que": "País",
+        "resumen": "Níctebrakka está en el Archipielago de las Costras.",
+        "region": "Archipielago de las Costras",
+        "filtros": {
+            "qué es": "País"
+        },
+        "subraza_de": "",
+        "relleno": true,
+        "bandera": "/wiki/imagenes/nictebrakka.webp",
+        "miniatura": ""
+    },
+    {
+        "titulo": "Ojo de Aglas",
+        "url": "/wiki/mapamundi/archipielagos/tierras_encantadas/ojo_de_aglas/ojo_de_aglas.html",
+        "carpeta": "Mapamundi/Archipiélagos/Tierras Encantadas/Ojo de Aglas",
+        "etiquetas": [
+            "Mapamundi",
+            "Archipiélagos"
+        ],
+        "grupo": "Mapamundi",
+        "sub": [
+            "Archipiélagos"
+        ],
+        "que": "País",
+        "resumen": "Ojo de Aglas está en las Tierras Encantadas.",
+        "region": "Tierras Encantadas",
+        "filtros": {
+            "qué es": "País"
+        },
+        "subraza_de": "",
+        "relleno": true,
+        "bandera": "/wiki/imagenes/ojo_de_aglas.webp",
+        "miniatura": ""
+    },
+    {
+        "titulo": "Palacio de Jan",
+        "url": "/wiki/mapamundi/archipielagos/tierras_encantadas/palacio_de_jan/palacio_de_jan.html",
+        "carpeta": "Mapamundi/Archipiélagos/Tierras Encantadas/Palacio de Jan",
+        "etiquetas": [
+            "Mapamundi",
+            "Archipiélagos"
+        ],
+        "grupo": "Mapamundi",
+        "sub": [
+            "Archipiélagos"
+        ],
+        "que": "País",
+        "resumen": "Palacio de Jan está en las Tierras Encantadas.",
+        "region": "Tierras Encantadas",
+        "filtros": {
+            "qué es": "País"
+        },
+        "subraza_de": "",
+        "relleno": true,
+        "bandera": "/wiki/imagenes/palacio_de_jan.webp",
+        "miniatura": ""
+    },
+    {
+        "titulo": "Paraje de Cereno",
+        "url": "/wiki/mapamundi/archipielagos/tierras_encantadas/archipielago_fragmentado/paraje_de_cereno/paraje_de_cereno.html",
+        "carpeta": "Mapamundi/Archipiélagos/Tierras Encantadas/Archipiélago Fragmentado/Paraje de Cereno",
+        "etiquetas": [
+            "Mapamundi",
+            "Archipiélagos"
+        ],
+        "grupo": "Mapamundi",
+        "sub": [
+            "Archipiélagos"
+        ],
+        "que": "País",
+        "resumen": "Paraje de Cereno está en el Archipiélago Fragmentado, en las Tierras Encantadas.",
+        "region": "Archipiélago Fragmentado",
+        "filtros": {
+            "qué es": "País"
+        },
+        "subraza_de": "",
+        "relleno": true,
+        "bandera": "/wiki/imagenes/paraje_de_cereno.webp",
+        "miniatura": ""
+    },
+    {
+        "titulo": "Paraje de Ágrimar",
+        "url": "/wiki/mapamundi/archipielagos/islas_de_labros/paraje_de_agrimar/paraje_de_agrimar.html",
+        "carpeta": "Mapamundi/Archipiélagos/Islas de Labros/Paraje de Ágrimar",
+        "etiquetas": [
+            "Mapamundi",
+            "Archipiélagos"
+        ],
+        "grupo": "Mapamundi",
+        "sub": [
+            "Archipiélagos"
+        ],
+        "que": "País",
+        "resumen": "Paraje de Ágrimar está en las Islas de Labros.",
+        "region": "Islas de Labros",
+        "filtros": {
+            "qué es": "País"
+        },
+        "subraza_de": "",
+        "relleno": true,
+        "bandera": "/wiki/imagenes/paraje_agrimar.webp",
+        "miniatura": ""
+    },
+    {
+        "titulo": "Popalola",
+        "url": "/wiki/mapamundi/archipielagos/faros_del_mar_ciego/popalola/popalola.html",
+        "carpeta": "Mapamundi/Archipiélagos/Faros del Mar Ciego/Popalola",
+        "etiquetas": [
+            "Mapamundi",
+            "Archipiélagos"
+        ],
+        "grupo": "Mapamundi",
+        "sub": [
+            "Archipiélagos"
+        ],
+        "que": "País",
+        "resumen": "Popalola está en los Faros del Mar Ciego.",
+        "region": "Faros del Mar Ciego",
+        "filtros": {
+            "qué es": "País"
+        },
+        "subraza_de": "",
+        "relleno": true,
+        "bandera": "/wiki/imagenes/popalola.webp",
+        "miniatura": ""
+    },
+    {
+        "titulo": "Páramo de Esnirma",
+        "url": "/wiki/mapamundi/archipielagos/tierras_encantadas/archipielago_fragmentado/paramo_de_esnirma/paramo_de_esnirma.html",
+        "carpeta": "Mapamundi/Archipiélagos/Tierras Encantadas/Archipiélago Fragmentado/Páramo de Esnirma",
+        "etiquetas": [
+            "Mapamundi",
+            "Archipiélagos"
+        ],
+        "grupo": "Mapamundi",
+        "sub": [
+            "Archipiélagos"
+        ],
+        "que": "País",
+        "resumen": "Páramo de Esnirma está en el Archipiélago Fragmentado, en las Tierras Encantadas.",
+        "region": "Archipiélago Fragmentado",
+        "filtros": {
+            "qué es": "País"
+        },
+        "subraza_de": "",
+        "relleno": true,
+        "bandera": "/wiki/imagenes/paramo_de_esnirma.webp",
+        "miniatura": ""
+    },
+    {
+        "titulo": "Reino de Donotebra",
+        "url": "/wiki/mapamundi/archipielagos/isla_de_arbenia/reino_de_donotebra/reino_de_donotebra.html",
+        "carpeta": "Mapamundi/Archipiélagos/Isla de Arbenia/Reino de Donotebra",
+        "etiquetas": [
+            "Mapamundi",
+            "Archipiélagos"
+        ],
+        "grupo": "Mapamundi",
+        "sub": [
+            "Archipiélagos"
+        ],
+        "que": "País",
+        "resumen": "Reino de Donotebra está en la Isla de Arbenia.",
+        "region": "Isla de Arbenia",
+        "filtros": {
+            "qué es": "País"
+        },
+        "subraza_de": "",
+        "relleno": true,
+        "bandera": "/wiki/imagenes/reino_donotebra.webp",
+        "miniatura": ""
+    },
+    {
+        "titulo": "Reino de Yor",
+        "url": "/wiki/mapamundi/archipielagos/archipielago_de_lunas/reino_de_yor/reino_de_yor.html",
+        "carpeta": "Mapamundi/Archipiélagos/Archipiélago de Lunas/Reino de Yor",
+        "etiquetas": [
+            "Mapamundi",
+            "Archipiélagos"
+        ],
+        "grupo": "Mapamundi",
+        "sub": [
+            "Archipiélagos"
+        ],
+        "que": "País",
+        "resumen": "Reino de Yor está en el Archipiélago de Lunas.",
+        "region": "Archipiélago de Lunas",
+        "filtros": {
+            "qué es": "País"
+        },
+        "subraza_de": "",
+        "relleno": true,
+        "bandera": "/wiki/imagenes/reino_yor.webp",
+        "miniatura": ""
+    },
+    {
+        "titulo": "Reino de Zaustilla",
+        "url": "/wiki/mapamundi/archipielagos/reino_de_zaustilla/reino_de_zaustilla.html",
+        "carpeta": "Mapamundi/Archipiélagos/Reino de Zaustilla",
+        "etiquetas": [
+            "Mapamundi",
+            "Archipiélagos"
+        ],
+        "grupo": "Mapamundi",
+        "sub": [
+            "Archipiélagos"
+        ],
+        "que": "País",
+        "resumen": "Reino de Zaustilla es una isla grande e independiente.",
+        "region": "",
+        "filtros": {
+            "qué es": "País"
+        },
+        "subraza_de": "",
+        "relleno": true,
+        "bandera": "/wiki/imagenes/reino_de_zaustilla.webp",
+        "miniatura": ""
+    },
+    {
+        "titulo": "Reino de Ópalis",
+        "url": "/wiki/mapamundi/archipielagos/tierras_encantadas/reino_de_opalis/reino_de_opalis.html",
+        "carpeta": "Mapamundi/Archipiélagos/Tierras Encantadas/Reino de Ópalis",
+        "etiquetas": [
+            "Mapamundi",
+            "Archipiélagos"
+        ],
+        "grupo": "Mapamundi",
+        "sub": [
+            "Archipiélagos"
+        ],
+        "que": "País",
+        "resumen": "Reino de Ópalis está en las Tierras Encantadas.",
+        "region": "Tierras Encantadas",
+        "filtros": {
+            "qué es": "País"
+        },
+        "subraza_de": "",
+        "relleno": true,
+        "bandera": "/wiki/imagenes/reino_de_opalis.webp",
+        "miniatura": ""
+    },
+    {
+        "titulo": "Ruinas de Nereth",
+        "url": "/wiki/mapamundi/archipielagos/tierras_encantadas/ruinas_de_nereth/ruinas_de_nereth.html",
+        "carpeta": "Mapamundi/Archipiélagos/Tierras Encantadas/Ruinas de Nereth",
+        "etiquetas": [
+            "Mapamundi",
+            "Archipiélagos"
+        ],
+        "grupo": "Mapamundi",
+        "sub": [
+            "Archipiélagos"
+        ],
+        "que": "País",
+        "resumen": "Ruinas de Nereth está en las Tierras Encantadas.",
+        "region": "Tierras Encantadas",
+        "filtros": {
+            "qué es": "País"
+        },
+        "subraza_de": "",
+        "relleno": true,
+        "bandera": "/wiki/imagenes/ruinas_de_nereth.webp",
+        "miniatura": ""
+    },
+    {
+        "titulo": "Ruinas de Thalvyr",
+        "url": "/wiki/mapamundi/archipielagos/tierras_encantadas/archipielago_fragmentado/ruinas_de_thalvyr/ruinas_de_thalvyr.html",
+        "carpeta": "Mapamundi/Archipiélagos/Tierras Encantadas/Archipiélago Fragmentado/Ruinas de Thalvyr",
+        "etiquetas": [
+            "Mapamundi",
+            "Archipiélagos"
+        ],
+        "grupo": "Mapamundi",
+        "sub": [
+            "Archipiélagos"
+        ],
+        "que": "País",
+        "resumen": "Ruinas de Thalvyr está en el Archipiélago Fragmentado, en las Tierras Encantadas.",
+        "region": "Archipiélago Fragmentado",
+        "filtros": {
+            "qué es": "País"
+        },
+        "subraza_de": "",
+        "relleno": true,
+        "bandera": "/wiki/imagenes/ruinas_de_thalvyr.webp",
+        "miniatura": ""
+    },
+    {
+        "titulo": "Santo Camino de Kada",
+        "url": "/wiki/mapamundi/archipielagos/tierras_encantadas/santo_camino_de_kada/santo_camino_de_kada.html",
+        "carpeta": "Mapamundi/Archipiélagos/Tierras Encantadas/Santo Camino de Kada",
+        "etiquetas": [
+            "Mapamundi",
+            "Archipiélagos"
+        ],
+        "grupo": "Mapamundi",
+        "sub": [
+            "Archipiélagos"
+        ],
+        "que": "País",
+        "resumen": "Santo Camino de Kada está en las Tierras Encantadas.",
+        "region": "Tierras Encantadas",
+        "filtros": {
+            "qué es": "País"
+        },
+        "subraza_de": "",
+        "relleno": true,
+        "bandera": "/wiki/imagenes/santo_camino_de_kada.webp",
+        "miniatura": ""
+    },
+    {
+        "titulo": "Señorío de Pizaria",
+        "url": "/wiki/mapamundi/archipielagos/isla_de_arbenia/senorio_de_pizaria/senorio_de_pizaria.html",
+        "carpeta": "Mapamundi/Archipiélagos/Isla de Arbenia/Señorío de Pizaria",
+        "etiquetas": [
+            "Mapamundi",
+            "Archipiélagos"
+        ],
+        "grupo": "Mapamundi",
+        "sub": [
+            "Archipiélagos"
+        ],
+        "que": "País",
+        "resumen": "Señorío de Pizaria está en la Isla de Arbenia.",
+        "region": "Isla de Arbenia",
+        "filtros": {
+            "qué es": "País"
+        },
+        "subraza_de": "",
+        "relleno": true,
+        "bandera": "/wiki/imagenes/senorio_pizaria.webp",
+        "miniatura": ""
+    },
+    {
+        "titulo": "Talaiva",
+        "url": "/wiki/mapamundi/archipielagos/faros_del_mar_ciego/talaiva/talaiva.html",
+        "carpeta": "Mapamundi/Archipiélagos/Faros del Mar Ciego/Talaiva",
+        "etiquetas": [
+            "Mapamundi",
+            "Archipiélagos"
+        ],
+        "grupo": "Mapamundi",
+        "sub": [
+            "Archipiélagos"
+        ],
+        "que": "País",
+        "resumen": "Talaiva está en los Faros del Mar Ciego.",
+        "region": "Faros del Mar Ciego",
+        "filtros": {
+            "qué es": "País"
+        },
+        "subraza_de": "",
+        "relleno": true,
+        "bandera": "/wiki/imagenes/talaiva.webp",
+        "miniatura": ""
+    },
+    {
+        "titulo": "Techo de Az'Nu",
+        "url": "/wiki/mapamundi/archipielagos/tierras_encantadas/archipielago_fragmentado/techo_de_az_nu/techo_de_az_nu.html",
+        "carpeta": "Mapamundi/Archipiélagos/Tierras Encantadas/Archipiélago Fragmentado/Techo de Az'Nu",
+        "etiquetas": [
+            "Mapamundi",
+            "Archipiélagos"
+        ],
+        "grupo": "Mapamundi",
+        "sub": [
+            "Archipiélagos"
+        ],
+        "que": "País",
+        "resumen": "Techo de Az'Nu está en el Archipiélago Fragmentado, en las Tierras Encantadas.",
+        "region": "Archipiélago Fragmentado",
+        "filtros": {
+            "qué es": "País"
+        },
+        "subraza_de": "",
+        "relleno": true,
+        "bandera": "/wiki/imagenes/techo_de_az_nu.webp",
+        "miniatura": ""
+    },
+    {
+        "titulo": "Territorios Unidos de Arbenia",
+        "url": "/wiki/mapamundi/archipielagos/isla_de_arbenia/territorios_unidos_de_arbenia/territorios_unidos_de_arbenia.html",
+        "carpeta": "Mapamundi/Archipiélagos/Isla de Arbenia/Territorios Unidos de Arbenia",
+        "etiquetas": [
+            "Mapamundi",
+            "Archipiélagos"
+        ],
+        "grupo": "Mapamundi",
+        "sub": [
+            "Archipiélagos"
+        ],
+        "que": "País",
+        "resumen": "Territorios Unidos de Arbenia está en la Isla de Arbenia.",
+        "region": "Isla de Arbenia",
+        "filtros": {
+            "qué es": "País"
+        },
+        "subraza_de": "",
+        "relleno": true,
+        "bandera": "/wiki/imagenes/territorios_unidos_arbenia.webp",
+        "miniatura": ""
+    },
+    {
+        "titulo": "Tierras Encantadas",
+        "url": "/wiki/mapamundi/archipielagos/tierras_encantadas/tierras_encantadas.html",
+        "carpeta": "Mapamundi/Archipiélagos/Tierras Encantadas",
+        "etiquetas": [
+            "Mapamundi",
+            "Archipiélagos"
+        ],
+        "grupo": "Mapamundi",
+        "sub": [
+            "Archipiélagos"
+        ],
+        "que": "",
+        "resumen": "Las Tierras Encantadas son la zona norte del mundo, al lado de Partaria.",
+        "region": "",
+        "filtros": {},
+        "subraza_de": "",
+        "relleno": false,
+        "bandera": "",
+        "miniatura": "/wiki/imagenes/situacion/peque/tierras_encantadas.webp"
+    },
+    {
+        "titulo": "Tzeibalba",
+        "url": "/wiki/mapamundi/archipielagos/archipielago_de_las_costras/tzeibalba/tzeibalba.html",
+        "carpeta": "Mapamundi/Archipiélagos/Archipielago de las Costras/Tzeibalba",
+        "etiquetas": [
+            "Mapamundi",
+            "Archipiélagos"
+        ],
+        "grupo": "Mapamundi",
+        "sub": [
+            "Archipiélagos"
+        ],
+        "que": "País",
+        "resumen": "Tzeibalba está en el Archipielago de las Costras.",
+        "region": "Archipielago de las Costras",
+        "filtros": {
+            "qué es": "País"
+        },
+        "subraza_de": "",
+        "relleno": true,
+        "bandera": "/wiki/imagenes/tzeibalba.webp",
+        "miniatura": ""
+    },
+    {
+        "titulo": "Tzintara",
+        "url": "/wiki/mapamundi/archipielagos/archipielago_de_las_costras/tzintara/tzintara.html",
+        "carpeta": "Mapamundi/Archipiélagos/Archipielago de las Costras/Tzintara",
+        "etiquetas": [
+            "Mapamundi",
+            "Archipiélagos"
+        ],
+        "grupo": "Mapamundi",
+        "sub": [
+            "Archipiélagos"
+        ],
+        "que": "País",
+        "resumen": "Tzintara está en el Archipielago de las Costras.",
+        "region": "Archipielago de las Costras",
+        "filtros": {
+            "qué es": "País"
+        },
+        "subraza_de": "",
+        "relleno": true,
+        "bandera": "/wiki/imagenes/tzintara.webp",
+        "miniatura": ""
+    },
+    {
+        "titulo": "Tzompoc",
+        "url": "/wiki/mapamundi/archipielagos/archipielago_de_las_costras/tzompoc/tzompoc.html",
+        "carpeta": "Mapamundi/Archipiélagos/Archipielago de las Costras/Tzompoc",
+        "etiquetas": [
+            "Mapamundi",
+            "Archipiélagos"
+        ],
+        "grupo": "Mapamundi",
+        "sub": [
+            "Archipiélagos"
+        ],
+        "que": "País",
+        "resumen": "Tzompoc está en el Archipielago de las Costras.",
+        "region": "Archipielago de las Costras",
+        "filtros": {
+            "qué es": "País"
+        },
+        "subraza_de": "",
+        "relleno": true,
+        "bandera": "/wiki/imagenes/tzompoc.webp",
+        "miniatura": ""
+    },
+    {
+        "titulo": "Uluka",
+        "url": "/wiki/mapamundi/archipielagos/faros_del_mar_ciego/uluka/uluka.html",
+        "carpeta": "Mapamundi/Archipiélagos/Faros del Mar Ciego/Uluka",
+        "etiquetas": [
+            "Mapamundi",
+            "Archipiélagos"
+        ],
+        "grupo": "Mapamundi",
+        "sub": [
+            "Archipiélagos"
+        ],
+        "que": "País",
+        "resumen": "Uluka está en los Faros del Mar Ciego.",
+        "region": "Faros del Mar Ciego",
+        "filtros": {
+            "qué es": "País"
+        },
+        "subraza_de": "",
+        "relleno": true,
+        "bandera": "/wiki/imagenes/uluka.webp",
+        "miniatura": ""
+    },
+    {
+        "titulo": "Vanu Reki",
+        "url": "/wiki/mapamundi/archipielagos/faros_del_mar_ciego/vanu_reki/vanu_reki.html",
+        "carpeta": "Mapamundi/Archipiélagos/Faros del Mar Ciego/Vanu Reki",
+        "etiquetas": [
+            "Mapamundi",
+            "Archipiélagos"
+        ],
+        "grupo": "Mapamundi",
+        "sub": [
+            "Archipiélagos"
+        ],
+        "que": "País",
+        "resumen": "Vanu Reki está en los Faros del Mar Ciego.",
+        "region": "Faros del Mar Ciego",
+        "filtros": {
+            "qué es": "País"
+        },
+        "subraza_de": "",
+        "relleno": true,
+        "bandera": "/wiki/imagenes/vanu_reki.webp",
+        "miniatura": ""
+    },
+    {
+        "titulo": "Varamo'a",
+        "url": "/wiki/mapamundi/archipielagos/faros_del_mar_ciego/varamo_a/varamo_a.html",
+        "carpeta": "Mapamundi/Archipiélagos/Faros del Mar Ciego/Varamo'a",
+        "etiquetas": [
+            "Mapamundi",
+            "Archipiélagos"
+        ],
+        "grupo": "Mapamundi",
+        "sub": [
+            "Archipiélagos"
+        ],
+        "que": "País",
+        "resumen": "Varamo'a está en los Faros del Mar Ciego.",
+        "region": "Faros del Mar Ciego",
+        "filtros": {
+            "qué es": "País"
+        },
+        "subraza_de": "",
+        "relleno": true,
+        "bandera": "/wiki/imagenes/varamo_a.webp",
+        "miniatura": ""
+    },
+    {
+        "titulo": "Yaxch'umekte",
+        "url": "/wiki/mapamundi/archipielagos/archipielago_de_las_costras/yaxch_umekte/yaxch_umekte.html",
+        "carpeta": "Mapamundi/Archipiélagos/Archipielago de las Costras/Yaxch'umekte",
+        "etiquetas": [
+            "Mapamundi",
+            "Archipiélagos"
+        ],
+        "grupo": "Mapamundi",
+        "sub": [
+            "Archipiélagos"
+        ],
+        "que": "País",
+        "resumen": "Yaxch'umekte está en el Archipielago de las Costras.",
+        "region": "Archipielago de las Costras",
+        "filtros": {
+            "qué es": "País"
+        },
+        "subraza_de": "",
+        "relleno": true,
+        "bandera": "/wiki/imagenes/yaxch_umekte.webp",
+        "miniatura": ""
+    },
+    {
+        "titulo": "La Cosmología de Cralëa",
+        "url": "/wiki/cosmologia/la_cosmologia_de_cralea.html",
+        "carpeta": "Cosmología",
+        "etiquetas": [
+            "Cosmología"
+        ],
+        "grupo": "cosmología",
+        "sub": [],
+        "que": "El Jardín del Último Canto",
+        "resumen": "Cuando la Sinfonía Estelar se quebró en el último choque entre Azaras y Parta, no solo nació el mundo: murió para siempre la armonía perfecta del cosmos. De la fusión de ambos Arcontes surgió Cralëa, un mundo formado…",
+        "region": "",
+        "filtros": {
+            "qué es": "El firmamento de Cralëa"
+        },
+        "subraza_de": "",
+        "relleno": false,
+        "bandera": "",
+        "miniatura": ""
+    },
+    {
+        "titulo": "El Sol",
+        "url": "/wiki/cosmologia/el_sol.html",
+        "carpeta": "Cosmología",
+        "etiquetas": [
+            "Cosmología",
+            "Astros"
+        ],
+        "grupo": "cosmología",
+        "sub": [
+            "Astros"
+        ],
+        "que": "Söh-hgol · la Herida Dolorosa",
+        "resumen": "El Sol fue llamado por los Nithir Söh-hgol, «la Herida Dolorosa», nombre que con los siglos se transformó en Sol. No es una estrella, sino una herida abierta en el firmamento, el desgarro que quedó cuando el Canto se…",
+        "region": "",
+        "filtros": {
+            "qué es": "La Herida del cielo"
+        },
+        "subraza_de": "",
+        "relleno": false,
+        "bandera": "",
+        "miniatura": ""
+    },
+    {
+        "titulo": "La Luna",
+        "url": "/wiki/cosmologia/la_luna.html",
+        "carpeta": "Cosmología",
+        "etiquetas": [
+            "Cosmología",
+            "Astros"
+        ],
+        "grupo": "cosmología",
+        "sub": [
+            "Astros"
+        ],
+        "que": "Lunaah · la Lápida y el Corazón",
+        "resumen": "La Luna fue llamada por los Nithir Lunaah, palabra que en su lengua significaba a la vez Lápida y Corazón. No es un simple satélite, sino la piedra funeraria del Canto y el último latido compartido de Azaras y Parta.",
+        "region": "",
+        "filtros": {
+            "qué es": "Satélite de Cralëa"
+        },
+        "subraza_de": "",
+        "relleno": false,
+        "bandera": "",
+        "miniatura": ""
+    },
+    {
+        "titulo": "Gomath",
+        "url": "/wiki/cosmologia/gomath.html",
+        "carpeta": "Cosmología",
+        "etiquetas": [
+            "Cosmología",
+            "Mundos tributo"
+        ],
+        "grupo": "cosmología",
+        "sub": [
+            "Mundos tributo"
+        ],
+        "que": "el Sufrimiento",
+        "resumen": "Envuelto en púrpuras oscuros y brumas densas, Gomath presenta una superficie inestable, como si el planeta entero se retorciera lentamente.",
+        "region": "",
+        "filtros": {
+            "qué es": "Mundo tributo"
+        },
+        "subraza_de": "",
+        "relleno": false,
+        "bandera": "",
+        "miniatura": ""
+    },
+    {
+        "titulo": "Lurmeri",
+        "url": "/wiki/cosmologia/lurmeri.html",
+        "carpeta": "Cosmología",
+        "etiquetas": [
+            "Cosmología",
+            "Mundos tributo"
+        ],
+        "grupo": "cosmología",
+        "sub": [
+            "Mundos tributo"
+        ],
+        "que": "el Pantano",
+        "resumen": "Lurmeri no es un mundo fértil, aunque así lo sugieran sus tonos verdosos y dorados. Es, en realidad, un gigante gaseoso, cubierto por capas densas de nubes pesadas que se arremolinan lentamente en espirales interminab…",
+        "region": "",
+        "filtros": {
+            "qué es": "Mundo tributo"
+        },
+        "subraza_de": "",
+        "relleno": false,
+        "bandera": "",
+        "miniatura": ""
+    },
+    {
+        "titulo": "Nevadra",
+        "url": "/wiki/cosmologia/nevadra.html",
+        "carpeta": "Cosmología",
+        "etiquetas": [
+            "Cosmología",
+            "Mundos tributo"
+        ],
+        "grupo": "cosmología",
+        "sub": [
+            "Mundos tributo"
+        ],
+        "que": "la Tormenta",
+        "resumen": "Nevadra es el mundo más cercano y está cubierto casi por completo por océanos profundos y cielos perpetuamente agitados. Desde Cralëa se observa como una esfera azulada y blanquecina, surcada por vetas de nubes que ja…",
+        "region": "",
+        "filtros": {
+            "qué es": "Mundo tributo"
+        },
+        "subraza_de": "",
+        "relleno": false,
+        "bandera": "",
+        "miniatura": ""
+    },
+    {
+        "titulo": "El Ciclo de los Heraldos",
+        "url": "/wiki/calendario/el_ciclo_de_los_heraldos.html",
+        "carpeta": "Calendario",
+        "etiquetas": [
+            "Cosmología",
+            "Calendario"
+        ],
+        "grupo": "cosmología",
+        "sub": [
+            "Calendario"
+        ],
+        "que": "El calendario de Cralëa",
+        "resumen": "El mundo sigue un calendario de 12 meses de 28 días, cada uno asociado a una virtud o un concepto vinculado a los Heraldos de la Virtud y la Ruina. Al final del año hay cuatro días sagrados dedicados a la Mesa del Ord…",
+        "region": "",
+        "filtros": {
+            "qué es": "Calendario"
+        },
+        "subraza_de": "",
+        "relleno": false,
+        "bandera": "",
+        "miniatura": ""
+    },
+    {
+        "titulo": "Aglas",
+        "url": "/wiki/religiones/panteon/aglas.html",
+        "carpeta": "Religiones/Panteón",
+        "etiquetas": [
+            "Religión",
+            "Panteón"
+        ],
+        "grupo": "religiones",
+        "sub": [
+            "Panteón"
+        ],
+        "que": "Heraldo",
+        "resumen": "Aglas, el Sabio, es uno de los Heraldos de la Virtud y la Ruina.",
+        "region": "",
+        "filtros": {
+            "qué es": "Heraldo"
+        },
+        "subraza_de": "",
+        "relleno": false,
+        "bandera": "",
+        "miniatura": ""
+    },
+    {
+        "titulo": "Azaras",
+        "url": "/wiki/religiones/panteon/azaras.html",
+        "carpeta": "Religiones/Panteón",
+        "etiquetas": [
+            "Religión",
+            "Panteón"
+        ],
+        "grupo": "religiones",
+        "sub": [
+            "Panteón"
+        ],
+        "que": "Arconte Primordial",
+        "resumen": "Azaras es uno de los Arcontes Primordiales. Su último choque con Parta rompió la Sinfonía Estelar, y de la fusión de los dos surgió Cralëa.",
+        "region": "",
+        "filtros": {
+            "qué es": "Arconte Primordial"
+        },
+        "subraza_de": "",
+        "relleno": false,
+        "bandera": "",
+        "miniatura": ""
+    },
+    {
+        "titulo": "Bagros",
+        "url": "/wiki/religiones/panteon/bagros.html",
+        "carpeta": "Religiones/Panteón",
+        "etiquetas": [
+            "Religión",
+            "Panteón"
+        ],
+        "grupo": "religiones",
+        "sub": [
+            "Panteón"
+        ],
+        "que": "Heraldo",
+        "resumen": "Bagros, el Mártir, es uno de los Heraldos de la Virtud y la Ruina.",
+        "region": "",
+        "filtros": {
+            "qué es": "Heraldo"
+        },
+        "subraza_de": "",
+        "relleno": false,
+        "bandera": "",
+        "miniatura": ""
+    },
+    {
+        "titulo": "Cahir",
+        "url": "/wiki/religiones/panteon/cahir.html",
+        "carpeta": "Religiones/Panteón",
+        "etiquetas": [
+            "Religión",
+            "Panteón"
+        ],
+        "grupo": "religiones",
+        "sub": [
+            "Panteón"
+        ],
+        "que": "Heraldo",
+        "resumen": "Cahir, el Esclavo, es uno de los Heraldos de la Virtud y la Ruina.",
+        "region": "",
+        "filtros": {
+            "qué es": "Heraldo"
+        },
+        "subraza_de": "",
+        "relleno": false,
+        "bandera": "",
+        "miniatura": ""
+    },
+    {
+        "titulo": "Calad",
+        "url": "/wiki/religiones/panteon/calad.html",
+        "carpeta": "Religiones/Panteón",
+        "etiquetas": [
+            "Religión",
+            "Panteón"
+        ],
+        "grupo": "religiones",
+        "sub": [
+            "Panteón"
+        ],
+        "que": "Heraldo",
+        "resumen": "Calad, la Destrucción y la Renovación, es uno de los cuatro Heraldos de la Mesa del Orden Natural. Su día es el Día del Cambio, en el Fin del Ciclo.",
+        "region": "",
+        "filtros": {
+            "qué es": "Heraldo"
+        },
+        "subraza_de": "",
+        "relleno": false,
+        "bandera": "",
+        "miniatura": ""
+    },
+    {
+        "titulo": "Clodia",
+        "url": "/wiki/religiones/panteon/clodia.html",
+        "carpeta": "Religiones/Panteón",
+        "etiquetas": [
+            "Religión",
+            "Panteón"
+        ],
+        "grupo": "religiones",
+        "sub": [
+            "Panteón"
+        ],
+        "que": "Heraldo",
+        "resumen": "Clodia, la Madre del Valor, es uno de los Heraldos de la Virtud y la Ruina.",
+        "region": "",
+        "filtros": {
+            "qué es": "Heraldo"
+        },
+        "subraza_de": "",
+        "relleno": false,
+        "bandera": "",
+        "miniatura": ""
+    },
+    {
+        "titulo": "Demadia",
+        "url": "/wiki/religiones/panteon/demadia.html",
+        "carpeta": "Religiones/Panteón",
+        "etiquetas": [
+            "Religión",
+            "Panteón"
+        ],
+        "grupo": "religiones",
+        "sub": [
+            "Panteón"
+        ],
+        "que": "Heraldo",
+        "resumen": "Demadia, la Dama Caritativa, es uno de los Heraldos de la Virtud y la Ruina.",
+        "region": "",
+        "filtros": {
+            "qué es": "Heraldo"
+        },
+        "subraza_de": "",
+        "relleno": false,
+        "bandera": "",
+        "miniatura": ""
+    },
+    {
+        "titulo": "El Panteón de Cralëa",
+        "url": "/wiki/religiones/panteon/el_panteon_de_cralea.html",
+        "carpeta": "Religiones/Panteón",
+        "etiquetas": [
+            "Religión",
+            "Panteón"
+        ],
+        "grupo": "religiones",
+        "sub": [
+            "Panteón"
+        ],
+        "que": "Panteón",
+        "resumen": "El Panteón de Cralëa son los poderes que están por encima del mundo: los Arcontes Primordiales, de cuyo choque nació Cralëa; los Heraldos de la Virtud y la Ruina, que dan nombre a los meses de El Ciclo de los Heraldos…",
+        "region": "",
+        "filtros": {
+            "qué es": "Panteón"
+        },
+        "subraza_de": "",
+        "relleno": false,
+        "bandera": "",
+        "miniatura": ""
+    },
+    {
+        "titulo": "Elvir",
+        "url": "/wiki/religiones/panteon/elvir.html",
+        "carpeta": "Religiones/Panteón",
+        "etiquetas": [
+            "Religión",
+            "Panteón"
+        ],
+        "grupo": "religiones",
+        "sub": [
+            "Panteón"
+        ],
+        "que": "Heraldo",
+        "resumen": "Elvir, la Muerte y el Descanso, es uno de los cuatro Heraldos de la Mesa del Orden Natural. Su día es el Día del Sendero, en el Fin del Ciclo.",
+        "region": "",
+        "filtros": {
+            "qué es": "Heraldo"
+        },
+        "subraza_de": "",
+        "relleno": false,
+        "bandera": "",
+        "miniatura": ""
+    },
+    {
+        "titulo": "Imedia",
+        "url": "/wiki/religiones/panteon/imedia.html",
+        "carpeta": "Religiones/Panteón",
+        "etiquetas": [
+            "Religión",
+            "Panteón"
+        ],
+        "grupo": "religiones",
+        "sub": [
+            "Panteón"
+        ],
+        "que": "Heraldo",
+        "resumen": "Imedia, la Peste y la Decadencia, es uno de los cuatro Heraldos de la Mesa del Orden Natural. Su día es el Día de la Purga, en el Fin del Ciclo.",
+        "region": "",
+        "filtros": {
+            "qué es": "Heraldo"
+        },
+        "subraza_de": "",
+        "relleno": false,
+        "bandera": "",
+        "miniatura": ""
+    },
+    {
+        "titulo": "La Mesa del Orden Natural",
+        "url": "/wiki/religiones/panteon/la_mesa_del_orden_natural.html",
+        "carpeta": "Religiones/Panteón",
+        "etiquetas": [
+            "Religión",
+            "Panteón"
+        ],
+        "grupo": "religiones",
+        "sub": [
+            "Panteón"
+        ],
+        "que": "Grupo de deidades",
+        "resumen": "La Mesa del Orden Natural gobierna la existencia durante los cuatro días sagrados del Fin del Ciclo, cuando el conflicto entre la Virtud y la Ruina se suspende. Cada uno de sus cuatro Heraldos tiene su día (ver El Cic…",
+        "region": "",
+        "filtros": {
+            "qué es": "Grupo de deidades"
+        },
+        "subraza_de": "",
+        "relleno": false,
+        "bandera": "",
+        "miniatura": ""
+    },
+    {
+        "titulo": "Labros",
+        "url": "/wiki/religiones/panteon/labros.html",
+        "carpeta": "Religiones/Panteón",
+        "etiquetas": [
+            "Religión",
+            "Panteón"
+        ],
+        "grupo": "religiones",
+        "sub": [
+            "Panteón"
+        ],
+        "que": "Heraldo",
+        "resumen": "Labros, el Juez, es uno de los Heraldos de la Virtud y la Ruina.",
+        "region": "",
+        "filtros": {
+            "qué es": "Heraldo"
+        },
+        "subraza_de": "",
+        "relleno": false,
+        "bandera": "",
+        "miniatura": ""
+    },
+    {
+        "titulo": "Los Arcontes Primordiales",
+        "url": "/wiki/religiones/panteon/los_arcontes_primordiales.html",
+        "carpeta": "Religiones/Panteón",
+        "etiquetas": [
+            "Religión",
+            "Panteón"
+        ],
+        "grupo": "religiones",
+        "sub": [
+            "Panteón"
+        ],
+        "que": "Grupo de deidades",
+        "resumen": "Los Arcontes Primordiales son los seres de la Sinfonía Estelar. Del último choque entre dos de ellos, Azaras y Parta, nació Cralëa; los demás no intervinieron, y alrededor de su tumba dispusieron los astros como ofren…",
+        "region": "",
+        "filtros": {
+            "qué es": "Grupo de deidades"
+        },
+        "subraza_de": "",
+        "relleno": false,
+        "bandera": "",
+        "miniatura": ""
+    },
+    {
+        "titulo": "Los Heraldos de la Virtud y la Ruina",
+        "url": "/wiki/religiones/panteon/los_heraldos_de_la_virtud_y_la_ruina.html",
+        "carpeta": "Religiones/Panteón",
+        "etiquetas": [
+            "Religión",
+            "Panteón"
+        ],
+        "grupo": "religiones",
+        "sub": [
+            "Panteón"
+        ],
+        "que": "Grupo de deidades",
+        "resumen": "Los Heraldos de la Virtud y la Ruina son los doce que dan nombre a los meses de El Ciclo de los Heraldos. Su conflicto solo se suspende durante los cuatro días del Fin del Ciclo, cuando gobierna la Mesa del Orden Natu…",
+        "region": "",
+        "filtros": {
+            "qué es": "Grupo de deidades"
+        },
+        "subraza_de": "",
+        "relleno": false,
+        "bandera": "",
+        "miniatura": ""
+    },
+    {
+        "titulo": "Lusdra",
+        "url": "/wiki/religiones/panteon/lusdra.html",
+        "carpeta": "Religiones/Panteón",
+        "etiquetas": [
+            "Religión",
+            "Panteón"
+        ],
+        "grupo": "religiones",
+        "sub": [
+            "Panteón"
+        ],
+        "que": "Heraldo",
+        "resumen": "Lusdra, la Vida y la Suerte, es uno de los cuatro Heraldos de la Mesa del Orden Natural. Su día es el Día del Renacer, en el Fin del Ciclo.",
+        "region": "",
+        "filtros": {
+            "qué es": "Heraldo"
+        },
+        "subraza_de": "",
+        "relleno": false,
+        "bandera": "",
+        "miniatura": ""
+    },
+    {
+        "titulo": "Metra",
+        "url": "/wiki/religiones/panteon/metra.html",
+        "carpeta": "Religiones/Panteón",
+        "etiquetas": [
+            "Religión",
+            "Panteón"
+        ],
+        "grupo": "religiones",
+        "sub": [
+            "Panteón"
+        ],
+        "que": "Heraldo",
+        "resumen": "Metra, el Forjador, es uno de los Heraldos de la Virtud y la Ruina.",
+        "region": "",
+        "filtros": {
+            "qué es": "Heraldo"
+        },
+        "subraza_de": "",
+        "relleno": false,
+        "bandera": "",
+        "miniatura": ""
+    },
+    {
+        "titulo": "Morlon",
+        "url": "/wiki/religiones/panteon/morlon.html",
+        "carpeta": "Religiones/Panteón",
+        "etiquetas": [
+            "Religión",
+            "Panteón"
+        ],
+        "grupo": "religiones",
+        "sub": [
+            "Panteón"
+        ],
+        "que": "Heraldo",
+        "resumen": "Morlon, el Rufián, es uno de los Heraldos de la Virtud y la Ruina.",
+        "region": "",
+        "filtros": {
+            "qué es": "Heraldo"
+        },
+        "subraza_de": "",
+        "relleno": false,
+        "bandera": "",
+        "miniatura": ""
+    },
+    {
+        "titulo": "Naria",
+        "url": "/wiki/religiones/panteon/naria.html",
+        "carpeta": "Religiones/Panteón",
+        "etiquetas": [
+            "Religión",
+            "Panteón"
+        ],
+        "grupo": "religiones",
+        "sub": [
+            "Panteón"
+        ],
+        "que": "Heraldo",
+        "resumen": "Naria, la Sombría, es uno de los Heraldos de la Virtud y la Ruina.",
+        "region": "",
+        "filtros": {
+            "qué es": "Heraldo"
+        },
+        "subraza_de": "",
+        "relleno": false,
+        "bandera": "",
+        "miniatura": ""
+    },
+    {
+        "titulo": "Parta",
+        "url": "/wiki/religiones/panteon/parta.html",
+        "carpeta": "Religiones/Panteón",
+        "etiquetas": [
+            "Religión",
+            "Panteón"
+        ],
+        "grupo": "religiones",
+        "sub": [
+            "Panteón"
+        ],
+        "que": "Arconte Primordial",
+        "resumen": "Parta es uno de los Arcontes Primordiales. Su último choque con Azaras rompió la Sinfonía Estelar, y de la fusión de los dos surgió Cralëa.",
+        "region": "",
+        "filtros": {
+            "qué es": "Arconte Primordial"
+        },
+        "subraza_de": "",
+        "relleno": false,
+        "bandera": "",
+        "miniatura": ""
+    },
+    {
+        "titulo": "Runis",
+        "url": "/wiki/religiones/panteon/runis.html",
+        "carpeta": "Religiones/Panteón",
+        "etiquetas": [
+            "Religión",
+            "Panteón"
+        ],
+        "grupo": "religiones",
+        "sub": [
+            "Panteón"
+        ],
+        "que": "Heraldo",
+        "resumen": "Runis, la Dama Cruel, es uno de los Heraldos de la Virtud y la Ruina.",
+        "region": "",
+        "filtros": {
+            "qué es": "Heraldo"
+        },
+        "subraza_de": "",
+        "relleno": false,
+        "bandera": "",
+        "miniatura": ""
+    },
+    {
+        "titulo": "Sedril",
+        "url": "/wiki/religiones/panteon/sedril.html",
+        "carpeta": "Religiones/Panteón",
+        "etiquetas": [
+            "Religión",
+            "Panteón"
+        ],
+        "grupo": "religiones",
+        "sub": [
+            "Panteón"
+        ],
+        "que": "Heraldo",
+        "resumen": "Sedril, el Custodio, es uno de los Heraldos de la Virtud y la Ruina.",
+        "region": "",
+        "filtros": {
+            "qué es": "Heraldo"
+        },
+        "subraza_de": "",
+        "relleno": false,
+        "bandera": "",
+        "miniatura": ""
+    },
+    {
+        "titulo": "Verdos",
+        "url": "/wiki/religiones/panteon/verdos.html",
+        "carpeta": "Religiones/Panteón",
+        "etiquetas": [
+            "Religión",
+            "Panteón"
+        ],
+        "grupo": "religiones",
+        "sub": [
+            "Panteón"
+        ],
+        "que": "Heraldo",
+        "resumen": "Verdos, el Padre de Mentiras, es uno de los Heraldos de la Virtud y la Ruina.",
+        "region": "",
+        "filtros": {
+            "qué es": "Heraldo"
+        },
+        "subraza_de": "",
+        "relleno": false,
+        "bandera": "",
+        "miniatura": ""
+    },
+    {
+        "titulo": "Mapamundi de Cralëa",
+        "url": "/wiki/mapa_mapamundi_de_cralea.html",
+        "carpeta": "mapas",
+        "etiquetas": [
+            "mapa"
+        ],
+        "grupo": "mapas",
+        "sub": [],
+        "que": "mapa interactivo",
+        "vista": "/wiki/imagenes/vista_mapa_mapamundi_de_cralea.svg",
+        "resumen": ""
+    },
+    {
+        "titulo": "Conversor de fechas",
+        "url": "/wiki/utilidades/conversor_de_fechas.html",
+        "carpeta": "Utilidades",
+        "etiquetas": [
+            "Herramientas"
+        ],
+        "grupo": "herramientas",
+        "sub": [],
+        "que": "Qué día es, en qué era cae y cuánto falta",
+        "resumen": "Elige un año, un mes y un día de El Ciclo de los Heraldos y te dice qué día de la semana es, en qué era de la Línea de tiempo cae, cómo está la luna, qué se celebra y cuánto ha pasado (o falta) desde hoy en Cralëa.",
+        "region": "",
+        "filtros": {},
+        "subraza_de": "",
+        "relleno": false,
+        "bandera": "",
+        "miniatura": ""
+    },
+    {
+        "titulo": "Diccionario",
+        "url": "/wiki/utilidades/diccionario.html",
+        "carpeta": "Utilidades",
+        "etiquetas": [
+            "Herramientas"
+        ],
+        "grupo": "herramientas",
+        "sub": [],
+        "que": "Las palabras de las lenguas del mundo",
+        "resumen": "Las palabras de las lenguas de Cralëa que salen en la wiki, con lo que significan. Cada idioma que tenga su página enseña además las suyas en su apartado «Vocabulario».",
+        "region": "",
+        "filtros": {},
+        "subraza_de": "",
+        "relleno": false,
+        "bandera": "",
+        "miniatura": ""
+    },
+    {
+        "titulo": "Generador de nombres",
+        "url": "/wiki/utilidades/generador_de_nombres.html",
+        "carpeta": "Utilidades",
+        "etiquetas": [
+            "Herramientas"
+        ],
+        "grupo": "herramientas",
+        "sub": [],
+        "que": "Nombres que suenan a cada rincón del mundo",
+        "resumen": "Para sacar un tabernero, una aldea o un barco en mitad de una partida. Cada estilo aprende cómo suenan los nombres que ya hay en la wiki (los países de cada región, las palabras de cada idioma del Diccionario…) y se i…",
+        "region": "",
+        "filtros": {},
+        "subraza_de": "",
+        "relleno": false,
+        "bandera": "",
+        "miniatura": ""
+    },
+    {
+        "titulo": "Relaciones",
+        "url": "/wiki/utilidades/relaciones.html",
+        "carpeta": "Utilidades",
+        "etiquetas": [
+            "Herramientas"
+        ],
+        "grupo": "herramientas",
+        "sub": [],
+        "que": "Quién es aliado y enemigo de quién",
+        "resumen": "Todos los países, facciones, órdenes y dioses que tienen apuntados aliados o enemigos en su ficha, en un solo dibujo. Cada uno enseña además los suyos en su página, en el apartado «Relaciones».",
+        "region": "",
+        "filtros": {},
+        "subraza_de": "",
+        "relleno": false,
+        "bandera": "",
+        "miniatura": ""
+    },
+    {
+        "titulo": "Línea de tiempo",
+        "url": "/wiki/linea-de-tiempo/linea_de_tiempo.html",
+        "carpeta": "historia",
+        "etiquetas": [
+            "línea de tiempo"
+        ],
+        "grupo": "historia",
+        "sub": [],
+        "que": "11 eventos, de 800.000.000 AEM a 753 DEM · 5 eras",
+        "mini": {
+            "alto": 122.95,
+            "cosas": [
+                {
+                    "tipo": "era",
+                    "y": 0.0,
+                    "hasta": 22.5,
+                    "nombre": "Sinfonía Estelar en armonía",
+                    "fechas": "de 800.000.000 AEM a 400.000.000 AEM",
+                    "url": "/wiki/linea-de-tiempo/linea_de_tiempo.html#era_sinfonia_estelar_en_armonia",
+                    "par": true,
+                    "color": "#0042ff"
+                },
+                {
+                    "tipo": "evento",
+                    "y": 6.5,
+                    "nombre": "Surgimiento Arcontes Primordiales",
+                    "fecha": "800.000.000 AEM",
+                    "url": "/wiki/linea-de-tiempo/evento_surgimiento_arcontes_primordiales.html",
+                    "lado": "izquierda"
+                },
+                {
+                    "tipo": "corte",
+                    "y": 10.5
+                },
+                {
+                    "tipo": "evento",
+                    "y": 14.5,
+                    "nombre": "Nacimiento Azaras y Parta",
+                    "fecha": "650.000.000 AEM",
+                    "url": "/wiki/linea-de-tiempo/evento_nacimiento_azaras_y_parta.html",
+                    "lado": "derecha"
+                },
+                {
+                    "tipo": "corte",
+                    "y": 18.5
+                },
+                {
+                    "tipo": "era",
+                    "y": 22.5,
+                    "hasta": 37.0,
+                    "nombre": "Era de los Desgarros",
+                    "fechas": "de 400.000.000 AEM a 140.000.000 AEM",
+                    "url": "/wiki/linea-de-tiempo/linea_de_tiempo.html#era_era_de_los_desgarros",
+                    "par": false,
+                    "color": "#a31b8b"
+                },
+                {
+                    "tipo": "evento",
+                    "y": 29.0,
+                    "nombre": "Conflicto de la Primera Disonancia",
+                    "fecha": "400.000.000 AEM",
+                    "url": "/wiki/linea-de-tiempo/evento_conflicto_de_la_primera_disonancia.html",
+                    "lado": "izquierda"
+                },
+                {
+                    "tipo": "corte",
+                    "y": 33.0
+                },
+                {
+                    "tipo": "era",
+                    "y": 37.0,
+                    "hasta": 82.45,
+                    "nombre": "Era Pútrida",
+                    "fechas": "de 140.000.000 AEM a 0 AEM",
+                    "url": "/wiki/linea-de-tiempo/linea_de_tiempo.html#era_era_putrida",
+                    "par": true,
+                    "color": "#4eaf23"
+                },
+                {
+                    "tipo": "evento",
+                    "y": 43.5,
+                    "nombre": "Fin del conflicto y Nacimiento de Cralëa",
+                    "fecha": "140.000.000 AEM",
+                    "url": "/wiki/linea-de-tiempo/evento_fin_del_conflicto_y_nacimiento_de_cralea.html",
+                    "lado": "derecha"
+                },
+                {
+                    "tipo": "evento",
+                    "y": 61.45,
+                    "nombre": "Creación del Jardín del Último Canto",
+                    "fecha": "135.000.000 AEM",
+                    "url": "/wiki/linea-de-tiempo/evento_creacion_del_jardin_del_ultimo_canto.html",
+                    "lado": "izquierda"
+                },
+                {
+                    "tipo": "corte",
+                    "y": 65.45
+                },
+                {
+                    "tipo": "evento",
+                    "y": 69.45,
+                    "nombre": "Primeros registros Nithir conocidos",
+                    "fecha": "14.000 AEM",
+                    "url": "/wiki/linea-de-tiempo/evento_primeros_registros_nithir_conocidos.html",
+                    "lado": "derecha"
+                },
+                {
+                    "tipo": "evento",
+                    "y": 75.95,
+                    "nombre": "Cataclismo de Aiszág y despertar de los Mirakhalim",
+                    "fecha": "24 AEM",
+                    "url": "/wiki/linea-de-tiempo/evento_cataclismo_de_aiszag_y_despertar_de_los_mirakhalim.html",
+                    "lado": "izquierda"
+                },
+                {
+                    "tipo": "era",
+                    "y": 82.45,
+                    "hasta": 103.45,
+                    "nombre": "Era Muda",
+                    "fechas": "de 0 AEM a 0 DEM",
+                    "url": "/wiki/linea-de-tiempo/linea_de_tiempo.html#era_era_muda",
+                    "par": false,
+                    "color": "#636363"
+                },
+                {
+                    "tipo": "evento",
+                    "y": 88.95,
+                    "nombre": "Últimos registros y fin de la Civilización Nithir",
+                    "fecha": "0 AEM",
+                    "url": "/wiki/linea-de-tiempo/evento_ultimos_registros_y_fin_de_la_civilizacion_nithir.html",
+                    "lado": "derecha"
+                },
+                {
+                    "tipo": "corte",
+                    "y": 92.95
+                },
+                {
+                    "tipo": "evento",
+                    "y": 96.95,
+                    "nombre": "Destierro de los Mirakhalim",
+                    "fecha": "−13.000 DEM",
+                    "url": "/wiki/linea-de-tiempo/evento_destierro_de_los_mirakhalim.html",
+                    "lado": "izquierda"
+                },
+                {
+                    "tipo": "era",
+                    "y": 103.45,
+                    "hasta": 122.95,
+                    "nombre": "Era del Expolio",
+                    "fechas": "de 0 DEM a hoy",
+                    "url": "/wiki/linea-de-tiempo/linea_de_tiempo.html#era_era_del_expolio",
+                    "par": true,
+                    "color": "#ecde41"
+                },
+                {
+                    "tipo": "evento",
+                    "y": 109.95,
+                    "nombre": "Los Kurghar redactan la Vista de la Primera Luz",
+                    "fecha": "0 DEM",
+                    "url": "/wiki/linea-de-tiempo/evento_los_kurghar_redactan_la_vista_de_la_primera_luz.html",
+                    "lado": "derecha"
+                },
+                {
+                    "tipo": "evento",
+                    "y": 116.45,
+                    "nombre": "Comienzo del Exilio de La Herida",
+                    "fecha": "753 DEM",
+                    "url": "/wiki/linea-de-tiempo/evento_comienzo_del_exilio_de_la_herida.html",
+                    "lado": "izquierda"
+                },
+                {
+                    "tipo": "hoy",
+                    "y": 122.95,
+                    "texto": "hoy · 1340 DEM"
+                }
+            ]
+        },
+        "resumen": "",
+        "linea": true
+    },
+    {
+        "titulo": "Surgimiento Arcontes Primordiales",
+        "url": "/wiki/linea-de-tiempo/evento_surgimiento_arcontes_primordiales.html",
+        "carpeta": "historia",
+        "etiquetas": [
+            "evento"
+        ],
+        "grupo": "historia",
+        "sub": [
+            "evento"
+        ],
+        "que": "año 800.000.000 AEM · Sinfonía Estelar en armonía",
+        "resumen": "",
+        "linea": true
+    },
+    {
+        "titulo": "Nacimiento Azaras y Parta",
+        "url": "/wiki/linea-de-tiempo/evento_nacimiento_azaras_y_parta.html",
+        "carpeta": "historia",
+        "etiquetas": [
+            "evento"
+        ],
+        "grupo": "historia",
+        "sub": [
+            "evento"
+        ],
+        "que": "año 650.000.000 AEM · Sinfonía Estelar en armonía",
+        "resumen": "",
+        "linea": true
+    },
+    {
+        "titulo": "Conflicto de la Primera Disonancia",
+        "url": "/wiki/linea-de-tiempo/evento_conflicto_de_la_primera_disonancia.html",
+        "carpeta": "historia",
+        "etiquetas": [
+            "evento"
+        ],
+        "grupo": "historia",
+        "sub": [
+            "evento"
+        ],
+        "que": "año 400.000.000 AEM · Era de los Desgarros",
+        "resumen": "",
+        "linea": true
+    },
+    {
+        "titulo": "Fin del conflicto y Nacimiento de Cralëa",
+        "url": "/wiki/linea-de-tiempo/evento_fin_del_conflicto_y_nacimiento_de_cralea.html",
+        "carpeta": "historia",
+        "etiquetas": [
+            "evento"
+        ],
+        "grupo": "historia",
+        "sub": [
+            "evento"
+        ],
+        "que": "año 140.000.000 AEM · Era Pútrida",
+        "resumen": "",
+        "linea": true
+    },
+    {
+        "titulo": "Creación del Jardín del Último Canto",
+        "url": "/wiki/linea-de-tiempo/evento_creacion_del_jardin_del_ultimo_canto.html",
+        "carpeta": "historia",
+        "etiquetas": [
+            "evento"
+        ],
+        "grupo": "historia",
+        "sub": [
+            "evento"
+        ],
+        "que": "año 135.000.000 AEM · Era Pútrida",
+        "resumen": "",
+        "linea": true
+    },
+    {
+        "titulo": "Primeros registros Nithir conocidos",
+        "url": "/wiki/linea-de-tiempo/evento_primeros_registros_nithir_conocidos.html",
+        "carpeta": "historia",
+        "etiquetas": [
+            "evento"
+        ],
+        "grupo": "historia",
+        "sub": [
+            "evento"
+        ],
+        "que": "año 14.000 AEM · Era Pútrida",
+        "resumen": "",
+        "linea": true
+    },
+    {
+        "titulo": "Cataclismo de Aiszág y despertar de los Mirakhalim",
+        "url": "/wiki/linea-de-tiempo/evento_cataclismo_de_aiszag_y_despertar_de_los_mirakhalim.html",
+        "carpeta": "historia",
+        "etiquetas": [
+            "evento"
+        ],
+        "grupo": "historia",
+        "sub": [
+            "evento"
+        ],
+        "que": "año 24 AEM · Era Pútrida",
+        "resumen": "",
+        "linea": true
+    },
+    {
+        "titulo": "Últimos registros y fin de la Civilización Nithir",
+        "url": "/wiki/linea-de-tiempo/evento_ultimos_registros_y_fin_de_la_civilizacion_nithir.html",
+        "carpeta": "historia",
+        "etiquetas": [
+            "evento"
+        ],
+        "grupo": "historia",
+        "sub": [
+            "evento"
+        ],
+        "que": "año 0 AEM · Era Muda",
+        "resumen": "",
+        "linea": true
+    },
+    {
+        "titulo": "Destierro de los Mirakhalim",
+        "url": "/wiki/linea-de-tiempo/evento_destierro_de_los_mirakhalim.html",
+        "carpeta": "historia",
+        "etiquetas": [
+            "evento"
+        ],
+        "grupo": "historia",
+        "sub": [
+            "evento"
+        ],
+        "que": "año −13.000 DEM · Era Muda",
+        "resumen": "",
+        "linea": true
+    },
+    {
+        "titulo": "Los Kurghar redactan la Vista de la Primera Luz",
+        "url": "/wiki/linea-de-tiempo/evento_los_kurghar_redactan_la_vista_de_la_primera_luz.html",
+        "carpeta": "historia",
+        "etiquetas": [
+            "evento"
+        ],
+        "grupo": "historia",
+        "sub": [
+            "evento"
+        ],
+        "que": "año 0 DEM · Era del Expolio",
+        "resumen": "",
+        "linea": true
+    },
+    {
+        "titulo": "Comienzo del Exilio de La Herida",
+        "url": "/wiki/linea-de-tiempo/evento_comienzo_del_exilio_de_la_herida.html",
+        "carpeta": "historia",
+        "etiquetas": [
+            "evento"
+        ],
+        "grupo": "historia",
+        "sub": [
+            "evento"
+        ],
+        "que": "año 753 DEM · Era del Expolio",
+        "resumen": "",
+        "linea": true
+    },
+    {
+        "titulo": "Cómo se escribe esto",
+        "url": "/wiki/como_se_escribe_esto.html",
+        "carpeta": "sin carpeta",
+        "etiquetas": [
+            "ejemplo"
+        ],
+        "grupo": "lo demás",
+        "sub": [
+            "ejemplo"
+        ],
+        "que": "La chuleta del formato",
+        "resumen": "Esta página no cuenta nada del mundo: está para ver cómo queda cada cosa y qué se puede escribir. Bórrala cuando ya no haga falta.",
+        "region": "",
+        "filtros": {
+            "qué es": "Página de ejemplo"
+        },
+        "subraza_de": "",
+        "relleno": false,
+        "bandera": "",
+        "miniatura": ""
+    }
+]

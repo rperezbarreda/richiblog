@@ -1,0 +1,102 @@
+<header class="mobile-topbar">
+    <button id="sidebar-toggle" class="sidebar-toggle" type="button" aria-expanded="false" aria-controls="sidebar">
+        <span aria-hidden="true">☰</span>
+        <span class="visually-hidden">Abrir menú</span>
+    </button>
+    <p class="mobile-topbar-title"><span aria-hidden="true">·🜏·</span> WIKI CRALËA</p>
+</header>
+<!--! fragmento: ajustes -->
+<div id="sidebar-backdrop" class="sidebar-backdrop" hidden></div>
+<aside class="sidebar" id="sidebar" aria-label="Menú de la wiki">
+    <div class="sidebar-logo">
+        <p><span aria-hidden="true">·🜏·</span> WIKI CRALËA</p>
+    </div>
+    <button id="lateral-plegar" class="lateral-plegar" type="button"
+            aria-expanded="true" aria-controls="sidebar-menu" title="Plegar el menú">
+        <span aria-hidden="true">☰</span>
+        <span class="visually-hidden">Menú</span>
+    </button>
+    <div class="sidebar-top" id="sidebar-menu">
+        <form class="menu-wiki-buscar" role="search" action="/wiki/index.html" method="get">
+            <label class="visually-hidden" for="menu-wiki-q">Buscar en la wiki</label>
+            <input id="menu-wiki-q" name="buscar" type="search" placeholder="buscar…"
+                   autocomplete="off" spellcheck="false">
+            <button type="submit">
+                <span class="buscar-lupa" aria-hidden="true"></span>
+                <span class="visually-hidden">Buscar</span>
+            </button>
+        </form>
+        <nav>
+            <a href="/wiki/index.html">portada</a>
+            <div class="nav-group">
+                <button class="nav-toggle" type="button" aria-expanded="false">
+                    <span>el mundo</span>
+                    <span class="arrow" aria-hidden="true">+</span>
+                </button>
+
+                <div class="submenu">
+                    <a href="/wiki/mapamundi/azarasia/azarasia.html">Azarasia</a>
+                    <a href="/wiki/mapamundi/partaria/partaria.html">Partaria</a>
+                    <a href="/wiki/index.html#mundo-archipielagos" data-marca="/wiki/mapamundi/archipielagos/">Archipiélagos</a>
+                </div>
+            </div>
+
+            <div class="nav-group">
+                <button class="nav-toggle" type="button" aria-expanded="false">
+                    <span>secciones</span>
+                    <span class="arrow" aria-hidden="true">+</span>
+                </button>
+
+                <div class="submenu">
+                    <a href="/wiki/index.html#seccion-cosmologia" data-marca="/wiki/cosmologia/">cosmología</a>
+                    <a href="/wiki/index.html#seccion-historia" data-marca="/wiki/linea-de-tiempo/">historia</a>
+                    <a href="/wiki/index.html#seccion-religiones" data-marca="/wiki/religiones/panteon/">religiones</a>
+                </div>
+            </div>
+
+            <div class="nav-group">
+                <button class="nav-toggle" type="button" aria-expanded="false">
+                    <span>el tiempo</span>
+                    <span class="arrow" aria-hidden="true">+</span>
+                </button>
+
+                <div class="submenu">
+                    <a href="/wiki/linea-de-tiempo/linea_de_tiempo.html">línea de tiempo</a>
+                    <a href="/wiki/calendario/el_ciclo_de_los_heraldos.html">calendario</a>
+                    <a href="/wiki/utilidades/conversor_de_fechas.html">conversor de fechas</a>
+                </div>
+            </div>
+
+            <div class="nav-group">
+                <button class="nav-toggle" type="button" aria-expanded="false">
+                    <span>mapas</span>
+                    <span class="arrow" aria-hidden="true">+</span>
+                </button>
+
+                <div class="submenu">
+                    <a href="/wiki/mapa_mapamundi_de_cralea.html">Mapamundi de Cralëa</a>
+                    <a href="/wiki/mapamundi/azarasia/orden_de_clodia/mapa_orden_de_clodia.html">Orden de Clodia</a>
+                    <a href="/wiki/mapamundi/azarasia/reino_de_neclaverna/mapa_reino_de_neclaverna.html">Reino de Neclaverna</a>
+                    <a href="/wiki/mapamundi/azarasia/reino_de_prunia/mapa_reino_de_prunia.html">Reino de Prunia</a>
+                    <a href="/wiki/mapamundi/azarasia/reino_de_telzaria/mapa_reino_de_telzaria.html">Reino de Telzaria</a>
+                </div>
+            </div>
+
+            <div class="nav-group">
+                <button class="nav-toggle" type="button" aria-expanded="false">
+                    <span>herramientas</span>
+                    <span class="arrow" aria-hidden="true">+</span>
+                </button>
+
+                <div class="submenu">
+                    <a href="/wiki/utilidades/diccionario.html">diccionario</a>
+                    <a href="/wiki/utilidades/generador_de_nombres.html">generador de nombres</a>
+                    <a href="/wiki/utilidades/relaciones.html">relaciones</a>
+                    <a href="/wiki/como_se_escribe_esto.html">cómo se escribe esto</a>
+                </div>
+            </div>
+
+        </nav>
+        <p class="menu-wiki-blog"><a href="/"><span aria-hidden="true">← </span>richi.blog</a></p>
+    </div>
+</aside>

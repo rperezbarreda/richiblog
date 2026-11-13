@@ -12,7 +12,7 @@
 # 9 KB del menú, que se pide en TODAS.
 #
 # Así que esto los quita de lo publicado. Lo pasan solos nuevo.py y
-# publicar.py (va en GENERADORES, en comun.py) y generar-mundo.py.
+# publicar.py (va en GENERADORES, en comun.py).
 #
 #     python herramientas/3-generadores/quitar-comentarios.py
 #     python herramientas/3-generadores/quitar-comentarios.py --probar
@@ -40,7 +40,7 @@
 #
 # LA REGLA DE QUÉ SE QUEDA está en comun.py (limpiar_comentarios_html),
 # porque la usan también los generadores que escriben páginas desde una
-# plantilla (generar-archivo.py, generar-mundo.py): así ya las escriben
+# plantilla (generar-archivo.py): así ya las escriben
 # limpias.
 
 import sys

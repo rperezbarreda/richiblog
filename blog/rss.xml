@@ -5,8 +5,17 @@
         <link>https://richi.blog/</link>
         <description>Todo lo que voy publicando: entradas del blog, relatos y material de rol.</description>
         <language>es</language>
-        <lastBuildDate>Sat, 07 Nov 2026 00:00:00 +0000</lastBuildDate>
+        <lastBuildDate>Wed, 11 Nov 2026 00:00:00 +0000</lastBuildDate>
         <atom:link href="https://richi.blog/blog/rss.xml" rel="self" type="application/rss+xml"/>
+        <item>
+            <title>Diario del búnker, de Kevin Brooks</title>
+            <link>https://richi.blog/web/blog/2026/noviembre/diario-del-bunker-de-kevin-brooks.html</link>
+            <guid isPermaLink="true">https://richi.blog/web/blog/2026/noviembre/diario-del-bunker-de-kevin-brooks.html</guid>
+            <pubDate>Wed, 11 Nov 2026 00:00:00 +0000</pubDate>
+            <category>blog</category>
+            <category>libros</category>
+            <description>Tengo sentimientos encontrados con este libro. Por un lado me parece que está bastante bien narrado teniendo en cuenta que intenta emular los pensamientos de un adolescente y cómo los plasma en el papel y, por otro, un libro muy mediocre con una buena premisa pero horriblemente ejecutada.</description>
+        </item>
         <item>
             <title>Sesión 3 — La guarida de los Colmillo de Lobo</title>
             <link>https://richi.blog/web/notas_rol/ragna/sesion-03.html</link>

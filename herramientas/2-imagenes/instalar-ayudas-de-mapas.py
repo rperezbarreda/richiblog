@@ -1,23 +1,18 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-INSTALAR LAS AYUDAS DE LOS MAPAS (una vez en cada ordenador)
+INSTALAR EL AMPLIADOR DE LOS MAPAS (una vez en cada ordenador)
 
     python herramientas/2-imagenes/instalar-ayudas-de-mapas.py
     python herramientas/2-imagenes/instalar-ayudas-de-mapas.py --comprobar
 
-Dos cosas que el editor de mapas usa si están (ver herramientas/0-comun/mapas_mundo.py):
-
-  1. OPENCV, para BUSCAR SOLO dónde cae un mapa regional en el mapamundi.
-     Se instala con pip (opencv-python-headless, unos 40 MB).
-
-  2. EL AMPLIADOR CON IA (Real-ESRGAN, realesrgan-ncnn-vulkan), para
-     agrandar la imagen de un mapa sin que salga borrosa. Es un programa
-     suelto de unos 45 MB: se baja de su página de GitHub
-     (github.com/xinntao/Real-ESRGAN, la versión 0.2.5.0) y se deja en
-     herramientas/programas/realesrgan/, que NO va a GitHub ni a
-     Neocities (.gitignore). Usa la tarjeta gráfica (Vulkan; vale la
-     integrada de casi cualquier ordenador de los últimos años).
+Lo que el editor de mapas usa si está (ver herramientas/0-comun/mapas_mundo.py):
+EL AMPLIADOR CON IA (Real-ESRGAN, realesrgan-ncnn-vulkan), para agrandar
+la imagen de un mapa sin que salga borrosa. Es un programa suelto de unos
+45 MB: se baja de su página de GitHub (github.com/xinntao/Real-ESRGAN, la
+versión 0.2.5.0) y se deja en herramientas/programas/realesrgan/, que NO
+va a GitHub ni a Neocities (.gitignore). Usa la tarjeta gráfica (Vulkan;
+vale la integrada de casi cualquier ordenador de los últimos años).
 
 Con --comprobar no instala nada: dice qué hay y amplía una imagen de
 prueba pequeña para ver que el ampliador funciona en este ordenador.
@@ -26,7 +21,6 @@ prueba pequeña para ver que el ampliador funciona en este ordenador.
 import io
 import platform
 import shutil
-import subprocess
 import sys
 import tempfile
 import urllib.request
@@ -47,20 +41,6 @@ ZIPS = {
 URL = "https://github.com/xinntao/Real-ESRGAN/releases/download/%s/%s"
 # Lo que trae el zip y no hace falta (vídeos y fotos de ejemplo).
 SOBRA = (".mp4", ".jpg", ".jpeg", ".md")
-
-
-def instalar_opencv():
-    if mapas_mundo.hay_opencv():
-        print("  OpenCV: ya estaba.")
-        return True
-    print("  Instalando OpenCV (opencv-python-headless)…")
-    for extra in ([], ["--user"]):
-        hecho = subprocess.run([sys.executable, "-m", "pip", "install", "opencv-python-headless"] + extra)
-        if hecho.returncode == 0:
-            print("  OpenCV: instalado.")
-            return True
-    print("  No se ha podido instalar OpenCV. Prueba a mano:  python -m pip install opencv-python-headless")
-    return False
 
 
 def bajar(url):
@@ -118,7 +98,6 @@ def instalar_ampliador():
 
 
 def comprobar():
-    print(f"  OpenCV: {'sí' if mapas_mundo.hay_opencv() else 'no'}")
     programa = mapas_mundo.ampliador()
     print(f"  Ampliador con IA: {programa or 'no'}")
     if not programa:
@@ -134,13 +113,12 @@ def comprobar():
 
 
 def principal():
-    print("\n  LAS AYUDAS DE LOS MAPAS\n")
+    print("\n  EL AMPLIADOR DE LOS MAPAS\n")
     if "--comprobar" in sys.argv:
         comprobar()
         print()
         return 0
-    bien = instalar_opencv()
-    bien = instalar_ampliador() and bien
+    bien = instalar_ampliador()
     print()
     comprobar()
     print("\n  " + ("Listo." if bien else "Ha faltado algo (mira arriba). Lo demás funciona igual.") + "\n")

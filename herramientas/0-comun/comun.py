@@ -29,12 +29,17 @@ from pathlib import Path
 # desde dónde ejecutes la herramienta.
 RAIZ = Path(__file__).resolve().parents[2]
 HERRAMIENTAS = RAIZ / "herramientas"
-# Apps que van TAL CUAL dentro del sitio, con sus propias páginas, su CSS y
-# su JS (sin el menú ni las cabeceras del blog): la pantalla de máster, que
-# es una app aparte y se copia con 1-publicar/traer-pantalla-master.py.
-# Los generadores (cabeceras, buscador, mapa del sitio) y las
-# comprobaciones no entran en ellas.
-APPS_APARTE = {"pantalla-master"}
+# Lo que va TAL CUAL dentro del sitio, con sus propias páginas, su CSS y su
+# JS (sin el menú ni las cabeceras del blog), copiado de su propio repo:
+#   - pantalla-master/: la app, con 1-publicar/traer-pantalla-master.py.
+#   - wiki/: la wiki de Cralëa (sitio/wiki/ de wiki_cralea), con
+#     1-publicar/traer-wiki.py.
+# Los generadores (cabeceras, mapa del sitio, quitar comentarios) y las
+# comprobaciones no entran en ellas. El sitemap enseña la portada de cada
+# una y, de las que van en APPS_QUE_SE_BUSCAN, también sus páginas, que
+# además salen en el buscador del blog.
+APPS_APARTE = {"pantalla-master", "wiki"}
+APPS_QUE_SE_BUSCAN = {"wiki"}
 PLANTILLAS = HERRAMIENTAS / "plantillas"
 
 # Los meses, como los escribe la web. MESES_CORTOS es lo que se pinta en
@@ -279,106 +284,6 @@ def paginas(carpeta, patron="*.html"):
         if es_borrador(p):
             continue
         yield p
-
-
-# =========================================
-# LA BÓVEDA DEL MUNDO
-# =========================================
-# Qué es el mundo y qué es la aplicación, dentro de una bóveda de
-# Chronicler. Vive aquí porque lo usan DOS herramientas y tienen que estar
-# de acuerdo: 1-publicar/importar-mundo.py, que se trae la bóveda, y
-# 3-generadores/generar-mundo.py, que la publica. Si la que trae se trajera
-# algo que la que publica ignora, quedaría ocupando sitio en wiki/; y al
-# revés es peor, porque entonces se publica.
-
-# Carpetas que no son el mundo, miren donde miren dentro de la bóveda.
-CARPETAS_QUE_NO_SON_EL_MUNDO = {
-    ".git", ".obsidian", ".trash", ".DS_Store", "__pycache__", "node_modules",
-    # Lo de Chronicler: sus copias de trabajo y lo que guarda en caché.
-    ".chronicler", ".chronicler-cache", ".cache",
-}
-
-# Y esto por la ruta entera, contando desde la raíz de la bóveda:
-# _system/templates son las PLANTILLAS de Chronicler —los moldes para
-# crear páginas nuevas, con sus huecos sin rellenar—, no páginas del
-# mundo. Publicarlas sería publicar un formulario en blanco.
-RUTAS_QUE_NO_SON_EL_MUNDO = ("_system/templates",)
-
-ARCHIVOS_QUE_NO_SON_EL_MUNDO = {".DS_Store", "Thumbs.db", "desktop.ini"}
-
-
-def es_del_mundo(archivo, boveda):
-    """Si un archivo de la bóveda es del mundo (y se trae y se publica) o
-    es de la aplicación (y no se toca)."""
-    nombre = archivo.name
-    if nombre in ARCHIVOS_QUE_NO_SON_EL_MUNDO or nombre.startswith("._"):
-        return False
-    try:
-        partes = archivo.relative_to(boveda).parts
-    except ValueError:
-        return False
-    for parte in partes[:-1]:
-        # Cualquier carpeta que empiece por punto: las esconde el sistema
-        # porque no son para que las mires, y eso vale igual aquí.
-        if parte in CARPETAS_QUE_NO_SON_EL_MUNDO or parte.startswith("."):
-            return False
-    camino = "/".join(partes)
-    for ruta in RUTAS_QUE_NO_SON_EL_MUNDO:
-        if camino == ruta or camino.startswith(ruta + "/"):
-            return False
-    return not nombre.startswith(".")
-
-
-# LO QUE TÚ DEJAS FUERA. Lo de arriba es lo que no es del mundo; esto es lo
-# que SÍ es del mundo pero no quieres publicar todavía: una página a medio
-# escribir, un sitio que aún no ha salido en la partida. Se elige con
-#
-#     python herramientas/1-publicar/importar-mundo.py --elegir
-#
-# y se apunta en herramientas/0-comun/datos/wiki-fuera.txt, una ruta por línea, contando
-# desde la raíz de la bóveda. Lo leen las DOS herramientas, por lo mismo
-# que es_del_mundo: si solo lo supiera el importador, el generador volvería
-# a publicar la página en cuanto Chronicler escribiera directamente en
-# wiki/ (pasó: se quitaron seis páginas a mano y volvieron al generar).
-#
-# Se puede escribir a mano. Una línea que acabe en "/" deja fuera la
-# carpeta entera, con lo que se añada a ella en el futuro incluido. Las
-# mayúsculas dan igual, como en Windows.
-WIKI_FUERA = HERRAMIENTAS / "0-comun" / "datos" / "wiki-fuera.txt"
-
-
-def wiki_fuera():
-    """Las líneas de wiki-fuera.txt, tal y como están escritas."""
-    if not WIKI_FUERA.is_file():
-        return []
-    reglas = []
-    for linea in WIKI_FUERA.read_text(encoding="utf-8").splitlines():
-        linea = linea.strip().replace("\\", "/").lstrip("/")
-        if linea and not linea.startswith("#"):
-            reglas.append(linea)
-    return reglas
-
-
-def esta_fuera(relativo, reglas):
-    """Si un archivo de la bóveda (su ruta desde la raíz de la bóveda) está
-    en la lista de lo que se deja fuera."""
-    ruta = str(relativo).replace("\\", "/").lower()
-    for regla in reglas:
-        regla = regla.lower()
-        if ruta == regla or (regla.endswith("/") and ruta.startswith(regla)):
-            return True
-    return False
-
-
-def guardar_wiki_fuera(reglas):
-    lineas = [
-        "# Lo que NO entra en la wiki aunque esté en la bóveda de Chronicler.",
-        "# Una ruta por línea, desde la raíz de la bóveda. Si acaba en \"/\",",
-        "# la carpeta entera. Lo escribe importar-mundo.py --elegir y lo leen",
-        "# él y generar-mundo.py. Se puede tocar a mano.",
-    ]
-    WIKI_FUERA.write_text("\n".join(lineas + sorted(reglas, key=str.lower)) + "\n",
-                          encoding="utf-8")
 
 
 # =========================================

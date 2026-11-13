@@ -205,15 +205,8 @@ def hojas_de(ruta):
     # pendientes, el mismo que el de las notas de una partida. De ahí que
     # lleve el componente del post-it sin ser una página de rol.
     es_ando = "/en_lo_que_ando/" in ruta
-    # La wiki del mundo. Son TRES páginas distintas: la portada, que lleva
-    # buscador y filtros; cada artículo, que no lleva ninguno de los dos; y
-    # cada mapa, que lleva lo suyo (el zoom, las capas y el dibujo).
-    es_mundo = "/web/wiki/" in ruta or es_mapa_rol
-    es_mundo_indice = ruta.endswith("/wiki/index_wiki.html")
-    es_mundo_mapa = bool(re.search(r"/wiki/(?:.+/)?mapa_[^/]+\.html$", ruta)) or es_mapa_rol
-    # Y la línea de tiempo, que es un artículo más con su propia hoja (la
-    # escribe generar-linea-tiempo.py; los eventos son artículos normales).
-    es_mundo_linea = es_mundo and ruta.endswith("/linea_de_tiempo.html")
+    # (La wiki de Cralëa ya no es del blog: va tal cual en wiki/, copiada
+    # de su repo, y no pasa por aquí. Ver APPS_APARTE en comun.py.)
     es_404 = ruta.endswith("/not_found.html")
     # La página de un reto de escritura: vive en una subcarpeta de
     # relatos/ y se llama index_<loquesea>.html. No es una página de
@@ -389,32 +382,15 @@ def hojas_de(ruta):
             "/estilos/componentes/filtros.css",
             "/estilos/componentes/filtros.responsive.css",
         ]
-    elif es_mundo:
-        # Marcos propios, como el changelog o las recomendaciones.
-        hojas += ["/estilos/paginas/mundo.css"]
-        if es_mundo_indice:
-            # Solo el buscador: los botones de etiquetas se quitaron (eran
-            # treinta y no ayudaban a encontrar nada que no encuentre él).
-            hojas += ["/estilos/componentes/buscador.css"]
-            # Y la ventana: cada sección de la portada (el mapamundi, la
-            # historia…) se abre en ella.
-            hojas += [
-                "/estilos/componentes/ventana-modal.css",
-                "/estilos/componentes/ventana-modal.responsive.css",
-            ]
-        if es_mundo_mapa:
-            hojas += ["/estilos/paginas/mundo-mapa.css"]
-        if es_mundo_linea:
-            hojas += ["/estilos/paginas/mundo-linea.css"]
-        # Un ARTÍCULO lleva la lupa: sus imágenes (el mapa de situación,
-        # las fotos de la ficha) se ven en grande al pulsarlas.
-        if not (es_mundo_indice or es_mundo_mapa or es_mundo_linea):
-            hojas += ["/estilos/componentes/lupa.css"]
-        hojas += ["/estilos/paginas/mundo.responsive.css"]
-        if es_mundo_mapa:
-            hojas += ["/estilos/paginas/mundo-mapa.responsive.css"]
-        if es_mundo_linea:
-            hojas += ["/estilos/paginas/mundo-linea.responsive.css"]
+    elif es_mapa_rol:
+        # Marcos propios (mundo.css: la página de un mapa) y lo del mapa
+        # (el zoom, las capas y el dibujo).
+        hojas += [
+            "/estilos/paginas/mundo.css",
+            "/estilos/paginas/mundo-mapa.css",
+            "/estilos/paginas/mundo.responsive.css",
+            "/estilos/paginas/mundo-mapa.responsive.css",
+        ]
     elif es_ando:
         # Marcos propios, como el changelog o las recomendaciones. Y el
         # post-it, que aquí es un bloque más de la rejilla.
@@ -524,9 +500,6 @@ def scripts_de(ruta):
     es_buscar = "/buscar/" in camino
     es_recomendaciones = "/recomendaciones/" in camino
     es_ando = "/en_lo_que_ando/" in camino
-    es_mundo = "/web/wiki/" in camino or es_mapa_rol
-    es_mundo_indice = camino.endswith("/wiki/index_wiki")
-    es_mundo_mapa = bool(re.search(r"/wiki/(?:.+/)?mapa_[^/]+$", camino)) or es_mapa_rol
     # Páginas de lectura: una entrada del blog (no el archivo del año)
     # o un relato (no su índice). Ahí va la ventana de "sigue leyendo".
     es_lectura = bool(
@@ -542,7 +515,7 @@ def scripts_de(ruta):
         # El 404 no lleva barra lateral ni componentes de navegación.
         return [
             # Lo primero: si lo pedido es una dirección vieja de algo que
-            # se ha movido (la wiki era mundo/), se va a la nueva.
+            # se ha movido (la wiki, que ahora está en /wiki/), se va a la nueva.
             "/scripts/paginas/redirecciones.js",
             # El botón Aa y su ventana (fragmentos/ajustes.html, que el
             # 404 pide suelto: no tiene menú). tema.js antes, que los
@@ -728,24 +701,9 @@ def scripts_de(ruta):
             "/scripts/componentes/filtros.js",
             "/scripts/paginas/recomendaciones.js",
         ]
-    elif es_mundo:
-        # La portada lleva el índice, el buscador y los filtros; un
-        # artículo solo necesita lo de los spoilers, que está en el mismo
-        # archivo y no hace nada si no hay ninguno.
-        #
-        # Un MAPA no lleva mundo.js: no tiene índice que pintar ni
-        # spoilers que destapar, y lo suyo está en mundo-mapa.js.
-        if es_mundo_mapa:
-            js.append("/scripts/paginas/mundo-mapa.js")
-        else:
-            if es_mundo_indice:
-                js += ["/scripts/componentes/buscador.js",
-                       "/scripts/componentes/ventana-modal.js"]
-            elif not camino.endswith("/linea_de_tiempo"):
-                # La lupa, ANTES que mundo.js: es él quien la usa para
-                # ampliar las imágenes, y mira si está nada más cargar.
-                js += ["/scripts/componentes/lupa.js"]
-            js.append("/scripts/paginas/mundo.js")
+    elif es_mapa_rol:
+        # El mapa de una campaña: el zoom, las capas y el dibujo.
+        js.append("/scripts/paginas/mundo-mapa.js")
     elif es_ando:
         # tareas.js ANTES que el de la página: ése pinta la lista de
         # pendientes cuando le llega el JSON y ahí mismo avisa

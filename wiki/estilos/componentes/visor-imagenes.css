@@ -1,0 +1,154 @@
+/* LIGHTBOX — visor de imágenes ampliadas */
+
+body.lightbox-open {
+    overflow: hidden;
+}
+
+.lightbox-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 600;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 60px 40px;
+    background: rgba(18, 9, 28, 0.92);
+}
+
+.lightbox-overlay[hidden] {
+    display: none;
+}
+
+.lightbox-image {
+    max-width: 90vw;
+    max-height: 85vh;
+    border: 3px solid var(--yellow);
+    box-shadow: 8px 8px 0 var(--yellow);
+    object-fit: contain;
+}
+
+.lightbox-close {
+    position: fixed;
+    top: 24px;
+    right: 32px;
+    width: 44px;
+    height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid var(--yellow);
+    background: var(--yellow);
+    color: var(--yellow-contrast);
+    /* La tipografía venía del bloque duplicado que había en base.css:
+       la cascada va propiedad a propiedad, así que de aquel bloque solo
+       se perdían las que no estuvieran también aquí. Al borrarlo, la ✕
+       se quedó con la fuente heredada. */
+    font-family: var(--fuente-mono);
+    font-size: 1.125rem;
+    font-weight: 500;
+    cursor: pointer;
+}
+
+.lightbox-close:hover,
+.lightbox-close:focus-visible {
+    background: transparent;
+    color: var(--yellow);
+}
+
+.lightbox-close:focus-visible {
+    outline: 2px solid var(--yellow);
+    outline-offset: 3px;
+}
+
+/* Galerías: la imagen con su pie debajo, y ‹ › a los lados. */
+.lightbox-marco {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 14px;
+    max-width: 90vw;
+}
+
+.lightbox-marco .lightbox-image {
+    max-height: 78vh;
+}
+
+.lightbox-pie {
+    margin: 0;
+    max-width: 70ch;
+    padding: 4px 10px;
+    /* Con fondo propio: el del visor es oscuro en todos los temas, y el
+       --yellow de los claros es oscuro también. */
+    background: var(--yellow);
+    color: var(--yellow-contrast);
+    font-family: var(--fuente-mono);
+    font-size: 0.9rem;
+    text-align: center;
+}
+
+.lightbox-pie[hidden],
+.lightbox-paso[hidden] {
+    display: none;
+}
+
+.lightbox-paso {
+    position: fixed;
+    top: 50%;
+    width: 48px;
+    height: 64px;
+    transform: translateY(-50%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid var(--yellow);
+    background: var(--yellow);
+    color: var(--yellow-contrast);
+    font-family: var(--fuente-mono);
+    font-size: 2rem;
+    line-height: 1;
+    cursor: pointer;
+}
+
+.lightbox-anterior {
+    left: 16px;
+}
+
+.lightbox-siguiente {
+    right: 16px;
+}
+
+.lightbox-paso:hover,
+.lightbox-paso:focus-visible {
+    background: transparent;
+    color: var(--yellow);
+}
+
+.lightbox-paso:focus-visible {
+    outline: 2px solid var(--yellow);
+    outline-offset: 3px;
+}
+
+@media (max-width: 640px) {
+    /* En el móvil, ‹ › abajo, para no tapar la imagen. */
+    .lightbox-paso {
+        top: auto;
+        bottom: calc(16px + var(--hueco-abajo));
+        transform: none;
+        height: 48px;
+    }
+
+    .lightbox-marco .lightbox-image {
+        max-height: 62vh;
+    }
+
+    .lightbox-overlay {
+        /* Los 80 de abajo (sitio para ‹ › de las galerías), más el hueco de los botones del teléfono
+           (ver --hueco-abajo en estilos/base.css). */
+        padding: 70px 16px calc(80px + var(--hueco-abajo));
+    }
+
+    .lightbox-close {
+        top: 16px;
+        right: 16px;
+    }
+}

@@ -1,0 +1,45 @@
+{
+    "hoy": {
+        "anyo": "1340 DEM",
+        "era": "Era del Expolio",
+        "url": "/wiki/linea-de-tiempo/linea_de_tiempo.html"
+    },
+    "cambios": [
+        {
+            "titulo": "Relaciones",
+            "url": "/wiki/utilidades/relaciones.html",
+            "fecha": "2026-11-13"
+        },
+        {
+            "titulo": "Generador de nombres",
+            "url": "/wiki/utilidades/generador_de_nombres.html",
+            "fecha": "2026-11-13"
+        },
+        {
+            "titulo": "Diccionario",
+            "url": "/wiki/utilidades/diccionario.html",
+            "fecha": "2026-11-13"
+        },
+        {
+            "titulo": "Conversor de fechas",
+            "url": "/wiki/utilidades/conversor_de_fechas.html",
+            "fecha": "2026-11-13"
+        },
+        {
+            "titulo": "Verdos",
+            "url": "/wiki/religiones/panteon/verdos.html",
+            "fecha": "2026-11-13"
+        },
+        {
+            "titulo": "Sedril",
+            "url": "/wiki/religiones/panteon/sedril.html",
+            "fecha": "2026-11-13"
+        }
+    ],
+    "progreso": {
+        "paginas": 146,
+        "escritas": 39,
+        "campos": 2174,
+        "decididos": 462
+    }
+}

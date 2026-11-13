@@ -37,7 +37,7 @@ from datetime import datetime, timezone
 
 SITIO = "https://richi.blog"
 
-from comun import APPS_APARTE, RAIZ, es_borrador
+from comun import APPS_APARTE, APPS_QUE_SE_BUSCAN, RAIZ, es_borrador
 SALIDA = RAIZ / "sitemap.xml"
 
 EXCLUIDOS = {"not_found.html"}
@@ -67,10 +67,11 @@ def generar():
             continue
         if relativo.name in EXCLUIDOS:
             continue
-        # De las apps que van tal cual (la pantalla de máster), solo su
-        # entrada: las demás páginas son ventanas suyas (la de jugadores,
-        # el reproductor).
-        if relativo.parts[0] in APPS_APARTE and relativo.parts[1:] != ("index.html",):
+        # De las apps que van tal cual, la pantalla de máster solo con su
+        # entrada (las demás páginas son ventanas suyas: la de jugadores,
+        # el reproductor); la wiki de Cralëa (APPS_QUE_SE_BUSCAN), entera.
+        if (relativo.parts[0] in APPS_APARTE and relativo.parts[0] not in APPS_QUE_SE_BUSCAN
+                and relativo.parts[1:] != ("index.html",)):
             continue
         if es_borrador(archivo):
             continue

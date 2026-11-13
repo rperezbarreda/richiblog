@@ -2,14 +2,14 @@
 # =========================================
 # LOS MAPAS DE LAS CAMPAÑAS DE ROL
 # =========================================
-# El mapamundi de una campaña (el de Ragna…) es un mapa como los de la
-# wiki —sitios, caminos, ríos, regiones, escala, leyenda, medir—, pero no
-# es de la wiki: va con las notas de su campaña.
+# El mapamundi de una campaña (el de Ragna…) y los de sus zonas: sitios,
+# caminos, ríos, regiones, escala, leyenda, medir… Van con las notas de
+# su campaña.
 #
 #     mapas-rol/<campaña>/<Título>.cmap          lo que se dibuja (el editor
 #                                                de mapas: editor-wiki.py →
-#                                                Mapas → «Un mapa nuevo» →
-#                                                «Para qué es: una campaña»)
+#                                                Campañas → Los mapas →
+#                                                «Un mapa nuevo»)
 #     mapas-rol/<campaña>/imagenes/              sus imágenes, tal cual llegan
 #                                                (no se suben a la web)
 #
@@ -48,9 +48,9 @@
 # En el JSON, cada sesión con ruta lleva "ruta": el mapa con ?sesion=3,
 # que es el enlace «la ruta en el mapa» de sus notas y de su resumen.
 #
-# Lo de pintar es lo mismo que en la wiki (0-comun/mundo_mapas.py), así
-# que todo lo que se puede hacer allí se puede hacer aquí; lo que no hay es
-# a dónde enlazar (las páginas de la wiki), así que un sitio que diga que
+# Lo de pintar está en 0-comun/mundo_mapas.py (es de cuando la wiki de
+# Cralëa vivía aquí y sus mapas se pintaban igual). Lo que no hay es a
+# dónde enlazar páginas («targetPage»), así que un sitio que diga que
 # lleva a una página sale sin enlace.
 #
 #     python herramientas/3-generadores/generar-mapas-rol.py
@@ -76,7 +76,8 @@ except ImportError:  # sin Pillow, las imágenes van tal cual
 
 MAPAS_ROL = RAIZ / "mapas-rol"
 PLANTILLA = RAIZ / "herramientas" / "plantillas" / "mapa-rol.html"
-# Los mismos tamaños que los mapas de la wiki (generar-mundo.py).
+# El ancho de la imagen de cada capa en la web (más grande, sale con
+# su versión «máxima» aparte: ver preparar_capa).
 ANCHO_DE_CAPA = 2560
 
 
@@ -279,8 +280,8 @@ def un_mapa(m, probar):
         return url_img + final
 
     def de_emblema(nombre):
-        # Las banderas y blasones: los sube el editor a wiki/_imagenes/banderas/.
-        origen = buscar(nombre, [suyas, RAIZ / "wiki" / "_imagenes" / "banderas"])
+        # Las banderas y blasones: los sube el editor a las imágenes de la campaña.
+        origen = buscar(nombre, [suyas])
         if origen is None:
             return ""
         if not probar:

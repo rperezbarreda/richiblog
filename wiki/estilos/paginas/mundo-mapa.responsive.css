@@ -1,0 +1,56 @@
+/* EL MAPA EN PANTALLAS ESTRECHAS */
+
+/* Un mapa es lo peor que se puede meter en un móvil, así que lo que se
+   hace aquí es dejarle sitio sin que se coma la pantalla: la ventana del
+   mapa se queda en una proporción razonable y la lista de sitios, que es
+   por donde de verdad se navega en un teléfono, queda a un dedo de
+   distancia. */
+
+@media (max-width: 860px) {
+    .mapa-mandos {
+        /* El zoom en una fila y las capas en la siguiente: los dos grupos
+           enteros, sin partirse por la mitad. */
+        gap: 6px 12px;
+        padding: 8px 10px;
+    }
+
+    .mapa-capas {
+        /* Que ocupe su propia fila: una casilla de capa cortada a medias
+           detrás de los botones del zoom no se entiende. */
+        flex-basis: 100%;
+    }
+
+    .mapa-lienzo {
+        /* En vertical, 70vh era más de media pantalla y la lista se
+           quedaba siempre debajo del pliegue. Se cambia la propiedad y no
+           el max-height: así el dibujo de dentro se ajusta con ella (el
+           porqué, en mundo-mapa.css). */
+        --mapa-alto: 50vh;
+    }
+}
+
+@media (max-width: 480px) {
+    .mapa-lienzo {
+        --mapa-alto: 45vh;
+    }
+
+    .mapa-zoom-cifra {
+        /* En 320px, cinco caracteres más los tres botones no caben en la
+           fila; con el porcentaje pegado al botón, sí. */
+        min-width: 4ch;
+        font-size: 0.8125rem;
+    }
+
+    .mapa-sitio {
+        font-size: 0.875rem;
+    }
+}
+
+/* EN HORIZONTAL EN UN MÓVIL la pantalla mide 360 de alto: ahí 45vh son
+   160px de mapa, que no es un mapa. Se le da más, que para eso se ha
+   girado el teléfono, y lo demás se desplaza. */
+@media (max-height: 520px) and (orientation: landscape) {
+    .mapa-lienzo {
+        --mapa-alto: 75vh;
+    }
+}

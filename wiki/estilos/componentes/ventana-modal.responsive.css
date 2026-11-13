@@ -1,0 +1,19 @@
+/* LA VENTANA MODAL EN PANTALLAS ESTRECHAS */
+
+@media (max-width: 760px) {
+    .modal {
+        padding: 24px 14px;
+    }
+}
+
+@media (max-width: 480px) {
+    .modal {
+        /* Los 16 de abajo, más el hueco de los botones del teléfono
+           (ver --hueco-abajo en estilos/base.css). */
+        padding: 16px 10px calc(16px + var(--hueco-abajo));
+    }
+
+    .modal-cuerpo {
+        padding: 16px;
+    }
+}

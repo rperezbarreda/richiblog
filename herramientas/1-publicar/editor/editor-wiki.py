@@ -2,9 +2,10 @@
 # =========================================
 # EL EDITOR DE LA WEB (en el navegador)
 # =========================================
-# Empezó siendo el de la wiki (y sigue siéndolo: lo de abajo), y desde el
-# 18-10-2026 lleva también EL RESTO DE LA WEB, cada cosa en su apartado
-# del menú de arriba:
+# Empezó siendo el de la wiki de Cralëa (de ahí el nombre del archivo),
+# pero la wiki se fue a su propio repo (github.com/rperezbarreda/
+# wiki_cralea; aquí llega con traer-wiki.py) y esto lleva EL RESTO DE LA
+# WEB, cada cosa en su apartado del menú de arriba:
 #
 #   · ESCRIBIR: las entradas del blog, los relatos, los días del reto y
 #     las notas de las partidas. Hacer una nueva (nace como borrador) o
@@ -13,74 +14,34 @@
 #     se puede). Las notas de partida, hoja a hoja y escena a escena, con
 #     un botón para los personajes de la mesa (de su color). Guardar,
 #     Publicar o Volver a borrador, y Ver cómo queda.
-#   · ROL, WIKI CRALËA Y MI RINCÓN: las fichas de lo que va en un JSON
-#     (las campañas y los recursos de rol, los NPC, el botín, el
-#     calendario, la línea de tiempo, el diccionario, las
-#     recomendaciones, «en lo que ando», el reto y las fotos de los
-#     gatos): una lista para elegir, añadir, cambiar, ordenar o quitar.
+#   · ROL Y MI RINCÓN: las fichas de lo que va en un JSON (las campañas y
+#     los recursos de rol, los NPC, el botín, las recomendaciones, «en lo
+#     que ando», el reto y las fotos de los gatos): una lista para elegir,
+#     añadir, cambiar, ordenar o quitar. Y traer a la web lo de otros repos
+#     (la pantalla de máster y la wiki de Cralëa).
+#   · LOS MAPAS DE LAS CAMPAÑAS (los .cmap de mapas-rol/): poner sitios,
+#     pintar regiones y rayas (caminos, ríos, fronteras, rutas de viaje de
+#     cada sesión…), escribir textos en el mapa, moverlos o borrarlos (con
+#     imán, y con deshacer), medir distancias, hacer un mapa nuevo a
+#     partir de una imagen y ampliar su imagen (con IA si está).
 #   · IMÁGENES Y REPASAR: traer una imagen suelta, repasar el sitio
 #     entero y volver a generar.
-#
-# Lo de escribir y las fichas lo hace editor_web.py (aquí al lado), con
-# las mismas herramientas de siempre por debajo (nuevo.py, publicar.py,
-# calendario.py…), así que el resultado es igual que con ellas.
-#
-#     python herramientas/1-publicar/editor/editor-wiki.py [--en escribir]
-#
-# o, igual, python herramientas/menu.py, que desde el 18-10-2026 abre esto
-# (el menú de texto de antes, con menu.py --texto). --en
-# escribir|rol|wiki|rincon|repasar|comandos lo abre ya en ese apartado.
-#
 #   · COMANDOS: lo de menu.py, cada cosa con un botón que la abre en su
 #     propia ventana de comandos (menu.abrir_en_ventana), y la guía de
 #     comandos para guardar en GitHub (editor_web.git_estado).
-#   · Y además (ver el LEEME, EL EDITOR DE LA WEB): [[ para enlazar, el
-#     contador, el borrador automático, la vista previa de la wiki
-#     (vista_previa), mover o renombrar páginas (mover_pagina), hacer NPC
-#     desde las notas, la ficha de la campaña, y la letra y el contraste.
 #
-# LA WIKI:
-# Lo mismo que nueva-pagina-wiki.py, pero con ventanas en vez de
-# preguntas, y además para SEGUIR escribiendo una página que ya existe sin
-# tener que abrir el .md: cada dato de la ficha es una casilla y cada
-# apartado del texto, un recuadro donde escribir, con la nota de la
-# plantilla encima diciendo qué va ahí.
+# Lo de escribir y las fichas lo hace editor_web.py (aquí al lado), con
+# las mismas herramientas de siempre por debajo (nuevo.py, publicar.py…),
+# así que el resultado es igual que con ellas. Aquí, los mapas y el
+# servidor.
 #
-#     python herramientas/1-publicar/editor/editor-wiki.py
+#     python herramientas/1-publicar/editor/editor-wiki.py [--en escribir]
 #
-# (o desde el menú: Wiki Cralëa → Escribir en la wiki con el editor). Se
-# abre solo en el navegador; si no, la dirección sale aquí escrita. Para
-# cerrarlo, Ctrl+C aquí o cerrar esta ventana.
-#
-# QUÉ HACE
-#
-#   · CREAR una página nueva: el nombre, el tipo (con las plantillas de
-#     wiki/_system/templates/, las mismas de nueva-pagina-wiki.py) y lo que
-#     pregunte cada plantilla, con las páginas que ya hay para elegir.
-#     También se puede crear directamente una de las PÁGINAS QUE FALTAN
-#     (las que se enlazan y aún no existen: salen en rojo en la web).
-#   · SEGUIR CON UNA que ya hay: se busca por el nombre.
-#   · Mientras se escribe: un botón para poner un [[enlace]] a otra página
-#     donde esté el cursor, y para las imágenes de la ficha (image,
-#     bandera, blasón), SUBIR UNA de tu ordenador: la pasa a WebP, a su
-#     tamaño y sin los datos del móvil, a wiki/_imagenes/ (lo mismo que
-#     traer-imagen.py), y pone su nombre en la casilla.
-#   · LOS MAPAS (los .cmap): poner sitios (capital, ciudad, pueblo,
-#     fortaleza, ruina, puerto, templo…), pintar regiones y rayas (caminos,
-#     ríos, fronteras, rutas…), escribir textos en el mapa, ponerles nombre
-#     y la página a la que llevan, moverlos o borrarlos (con imán, y con
-#     deshacer), y medir distancias con su escala y sus días de viaje.
-#     También hacer un mapa nuevo para una página a partir de una imagen:
-#     se guarda junto a la página y esa página sale en la web con un botón
-#     para explorarlo.
-#   · GUARDAR (Ctrl+S) escribe el .md. GUARDAR Y PASAR A LA WEB además
-#     pasa la wiki (generar-mundo.py y actualizar-cabeceras.py), con una
-#     barra de progreso mientras tanto, y deja un
-#     enlace para VER CÓMO QUEDA, aquí mismo, en el navegador.
-#
-# LO QUE NO TOCA: las notas escondidas (<!-- así -->) de cada apartado se
-# quedan donde estaban, igual que los comentarios de la cabecera (# así)
-# y el «layout» de la ficha. Solo cambia lo que cambies.
+# o, igual, python herramientas/menu.py, que abre esto (el menú de texto
+# de antes, con menu.py --texto). --en escribir|campanas|rol|rincon|
+# repasar|comandos lo abre ya en ese apartado. Se abre solo en el
+# navegador; si no, la dirección sale aquí escrita. Para cerrarlo, Ctrl+C
+# aquí o cerrar esta ventana.
 #
 # SOLO PARA TI: escucha en 127.0.0.1 (este ordenador y nadie más), y cada
 # vez que se abre inventa una contraseña que va en la dirección; sin ella
@@ -89,13 +50,11 @@
 #
 # Los archivos de la página del editor están en
 # herramientas/1-publicar/editor/editor-wiki/: editor.html, editor.css,
-# editor.js (lo común y la wiki), mapas.js (el editor de mapas),
-# redactor.js (el «Word»), escribir.js (las entradas) y fichas.js (las
-# fichas y lo de imágenes y repasar).
+# editor.js (lo común), mapas.js (el editor de mapas), redactor.js (el
+# «Word»), escribir.js (las entradas) y fichas.js (las fichas y lo de
+# imágenes y repasar).
 
 import base64
-import difflib
-import importlib.util
 import json
 import os
 import re
@@ -114,8 +73,7 @@ from pathlib import Path
 HERRAMIENTAS = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(HERRAMIENTAS / "0-comun"))
 
-from comun import (RAIZ, esta_fuera, escribir_como_estaba, escribir_texto,  # noqa: E402
-                   guardar_wiki_fuera, leer_json, leer_texto, sin_tildes, wiki_fuera)
+from comun import RAIZ, escribir_como_estaba, escribir_texto, sin_tildes  # noqa: E402
 
 # Lo del resto de la web (el blog, los relatos, el rol, las fichas de
 # datos/…): está en editor_web.py, junto a esto; aquí solo se le pasan las
@@ -123,496 +81,14 @@ from comun import (RAIZ, esta_fuera, escribir_como_estaba, escribir_texto,  # no
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import editor_web  # noqa: E402
 
-# La herramienta de siempre, para no repetir cómo se leen y rellenan las
-# plantillas: se carga por su ruta porque lleva guiones en el nombre.
-_spec = importlib.util.spec_from_file_location(
-    "nueva_pagina_wiki", HERRAMIENTAS / "1-publicar" / "nueva-pagina-wiki.py")
-npw = importlib.util.module_from_spec(_spec)
-_spec.loader.exec_module(npw)
-
-VAULT = RAIZ / "wiki"
-IMAGENES = VAULT / "_imagenes"
 CARPETA_EDITOR = Path(__file__).resolve().parent / "editor-wiki"
-MUNDO_JSON = RAIZ / "datos" / "wiki" / "mundo.json"
 TOKEN = secrets.token_urlsafe(18)
-RE_ENLACE = re.compile(r"\[\[([^\]|#]+)(?:#[^\]|]*)?(?:\|[^\]]*)?\]\]")
-RE_TITULO = re.compile(r"^(#{2,6})\s+(.*?)\s*#*\s*$")
-RE_NOTA = re.compile(r"<!--.*?-->", re.S)
-IMAGEN = (".webp", ".png", ".jpg", ".jpeg", ".gif", ".svg")
-# Los datos de la cabecera que son una imagen: llevan el botón de subir.
-CAMPOS_DE_IMAGEN = ("image", "bandera", "blasón", "blason", "escudo")
-# Lo de la cabecera que no es una casilla de la ficha: el título es el
-# nombre del archivo, y estas tres tienen la suya propia arriba.
-APARTE = ("title", "subtitle", "infobox", "tags")
-# Cómo se llama cada una en el editor (las demás, como en la ficha).
-NOMBRES = {"subtitle": "Subtítulo", "infobox": "Qué es (sale arriba de la ficha)",
-           "tags": "Etiquetas (separadas por comas)", "image": "Imagen de la ficha"}
+# Lo que no puede llevar el nombre de un archivo (en Windows).
+PROHIBIDO = '<>:"/\\|?*'
 
 
 # =========================================
-# LAS PÁGINAS QUE HAY
-# =========================================
-
-def todas():
-    return sorted(npw.paginas_de_la_wiki(), key=lambda a: a.stem.lower())
-
-
-def arbol_de_la_wiki():
-    """Las carpetas de wiki/ (también las vacías: las de cada tipo de cosa,
-    donde irán sus páginas) y cada página en la suya. Sin lo de la
-    aplicación (_system, _imagenes, lo que empieza por punto)."""
-    carpetas = sorted(c.relative_to(VAULT).as_posix() for c in VAULT.rglob("*")
-                      if c.is_dir() and not any(p.startswith(("_", ".")) for p in c.relative_to(VAULT).parts))
-    paginas = [{"carpeta": a.parent.relative_to(VAULT).as_posix() if a.parent != VAULT else "",
-                "nombre": a.stem} for a in todas()]
-    return {"carpetas": carpetas, "paginas": paginas}
-
-
-def imagenes_que_hay():
-    if not IMAGENES.is_dir():
-        return []
-    return sorted({a.name for a in IMAGENES.rglob("*") if a.suffix.lower() in IMAGEN}, key=str.lower)
-
-
-def paginas_que_faltan():
-    """[(nombre, cuántas la nombran)] de los [[enlaces]] a páginas que no
-    existen, de la más nombrada a la que menos."""
-    existen = {sin_tildes(a.stem).lower() for a in todas()}
-    existen |= {sin_tildes(a.stem).lower() for a in VAULT.rglob("*.cmap")}
-    linea = leer_json(RAIZ / "datos" / "wiki" / "linea-de-tiempo.json", {}) or {}
-    for grupo in ("eventos", "eras"):
-        existen |= {sin_tildes(str(e.get("nombre", ""))).lower() for e in linea.get(grupo, []) or []}
-    existen.add("linea de tiempo")
-    cuantas = {}
-    for archivo in todas():
-        texto = RE_NOTA.sub("", leer_texto(archivo)[0])
-        texto = "\n".join(l for l in texto.split("\n") if not l.lstrip().startswith("#"))
-        for m in RE_ENLACE.finditer(texto):
-            nombre = m.group(1).strip()
-            if re.search(r"\.(webp|png|jpe?g|gif|svg)$", nombre, re.I) or not nombre:
-                continue
-            if sin_tildes(nombre).lower() not in existen:
-                cuantas.setdefault(nombre, set()).add(archivo.stem)
-    return sorted(((n, len(d)) for n, d in cuantas.items()), key=lambda x: (-x[1], x[0].lower()))
-
-
-def url_de_la_pagina(nombre):
-    """Dónde sale publicada, mirando mundo.json (lo escribe generar-mundo)."""
-    for f in leer_json(MUNDO_JSON, []) or []:
-        if isinstance(f, dict) and sin_tildes(str(f.get("titulo", ""))).lower() == sin_tildes(nombre).lower():
-            return str(f.get("url") or "")
-    return ""
-
-
-# =========================================
-# LEER UNA PÁGINA EN TROZOS, Y VOLVER A JUNTARLA
-# =========================================
-# La cabecera (entre los dos ---) se lee línea a línea: cada «clave: valor»
-# de primer nivel es una casilla; los comentarios (# así) se enseñan como
-# ayuda de las casillas que vienen detrás; lo sangrado (el layout, una
-# lista con guiones) se queda tal cual, sin casilla. El texto se parte por
-# los títulos (## y más): cada trozo es un recuadro, y sus notas
-# escondidas (<!-- así -->) se enseñan encima y se guardan donde estaban.
-
-def partir(texto):
-    if texto.startswith("---\n"):
-        fin = texto.find("\n---", 4)
-        if fin != -1:
-            despues = texto.find("\n", fin + 1)
-            despues = len(texto) if despues == -1 else despues + 1
-            return texto[4:fin], texto[despues:], True
-    return "", texto, False
-
-
-def sin_comillas(valor):
-    """Como lo lee el generador (mundo_formato._valor): lo de dentro de las
-    comillas, tal cual."""
-    v = valor.strip()
-    if len(v) >= 2 and v[0] == v[-1] and v[0] in "\"'":
-        return v[1:-1]
-    return v
-
-
-def leer_cabecera(cabecera):
-    """[{clave, valor, crudo, nota, aparte, fija}] en orden. fija: algo que
-    no tiene casilla (una lista sangrada, el layout)."""
-    lineas = cabecera.split("\n")
-    salida, nota = [], []
-    i = 0
-    while i < len(lineas):
-        linea = lineas[i]
-        if linea.lstrip().startswith("#"):
-            nota.append(linea.lstrip()[1:].strip())
-            i += 1
-            continue
-        m = re.match(r"^([^\s#:][^:]*):(.*)$", linea)
-        if not m:
-            i += 1
-            continue
-        clave, resto = m.group(1).strip(), m.group(2)
-        # Lo sangrado de debajo es suyo (layout, una lista con guiones, un
-        # texto de varias líneas): no lleva casilla.
-        j = i + 1
-        while j < len(lineas) and (lineas[j][:1] in (" ", "\t") or lineas[j].lstrip().startswith("- ")) \
-                and lineas[j].strip():
-            j += 1
-        fija = j > i + 1 or resto.strip() in ("|", "|-", ">", ">-")
-        valor = resto.strip()
-        if clave == "tags" and valor.startswith("[") and valor.endswith("]"):
-            valor = ", ".join(sin_comillas(e) for e in valor[1:-1].split(",") if e.strip())
-        elif not (valor.startswith("[") and not valor.startswith("[[")):
-            valor = sin_comillas(valor)
-        salida.append({"clave": clave, "valor": "" if fija else valor, "crudo": linea,
-                       "nota": " ".join(nota).strip(), "fija": fija,
-                       "imagen": clave.lower() in CAMPOS_DE_IMAGEN,
-                       "nombre": NOMBRES.get(clave, clave[:1].upper() + clave[1:])})
-        nota = []
-        i = j
-    return salida
-
-
-def leer_cuerpo(cuerpo):
-    """[{nivel, titulo, nota, texto}]. El primero (nivel 0) es lo de antes
-    del primer título: la entradilla."""
-    trozos = [{"nivel": 0, "titulo": "", "lineas": []}]
-    en_codigo = False
-    for linea in cuerpo.split("\n"):
-        if linea.strip().startswith("```"):
-            en_codigo = not en_codigo
-        m = None if en_codigo else RE_TITULO.match(linea)
-        if m:
-            trozos.append({"nivel": len(m.group(1)), "titulo": m.group(2), "lineas": [], "linea": linea})
-        else:
-            trozos[-1]["lineas"].append(linea)
-    salida = []
-    for t in trozos:
-        texto = "\n".join(t["lineas"])
-        notas = RE_NOTA.findall(texto)
-        limpio = RE_NOTA.sub("", texto).strip("\n")
-        salida.append({"nivel": t["nivel"], "titulo": t["titulo"], "linea": t.get("linea", ""),
-                       "lineas": t["lineas"], "notas": notas,
-                       "nota": " ".join(re.sub(r"\s+", " ", n[4:-3]).strip() for n in notas),
-                       "texto": limpio.strip()})
-    return salida
-
-
-def leer_pagina(archivo):
-    texto, _ = leer_texto(archivo)
-    cabecera, cuerpo, tiene = partir(texto)
-    return {"nombre": archivo.stem,
-            "archivo": archivo.relative_to(RAIZ).as_posix(),
-            "campos": leer_cabecera(cabecera) if tiene else [],
-            "apartados": leer_cuerpo(cuerpo),
-            "url": url_de_la_pagina(archivo.stem)}
-
-
-def entre_comillas(valor):
-    """Entre comillas dobles; si lleva alguna, entre simples; y si lleva
-    de las dos, las dobles pasan a ser las de imprenta (el generador no
-    entiende las comillas escapadas con \\)."""
-    if '"' not in valor:
-        return '"%s"' % valor
-    if "'" not in valor:
-        return "'%s'" % valor
-    return '"%s"' % re.sub(r'"([^"]*)"', "“\\1”", valor).replace('"', "”")
-
-
-def escribir_valor(clave, valor):
-    valor = (valor or "").replace("\r", "").replace("\n", " ").strip()
-    if not valor:
-        return clave + ":"
-    if clave == "tags":
-        partes = [p.strip() for p in valor.strip("[]").split(",") if p.strip()]
-        return "tags: [%s]" % ", ".join(partes)
-    # Una lista escrita a mano ([a.webp, b.webp]) va tal cual; un [[enlace]]
-    # o cualquier otra cosa, entre comillas, para que un «:» no rompa nada.
-    if valor.startswith("[") and valor.endswith("]") and not valor.startswith("[["):
-        return "%s: %s" % (clave, valor)
-    return "%s: %s" % (clave, entre_comillas(valor))
-
-
-def _quitar_de_la_cabecera(lineas, quitar):
-    """Las líneas de la cabecera sin los datos de «quitar» (con las notas
-    # de encima, que eran suyas). Un título del layout que iba encima de
-    uno quitado («above: capital») pasa al siguiente dato que quede; si no
-    queda ninguno detrás, se va también."""
-    if not quitar:
-        return lineas
-    datos = leer_cabecera("\n".join(lineas))
-    # Solo los datos de verdad (no el layout ni las listas sangradas).
-    orden = [c["clave"] for c in datos if not c["fija"]]
-    quedan = [k for k in orden if k not in quitar]
-    salida, notas = [], []
-    for linea in lineas:
-        if linea.lstrip().startswith("#") and not linea.startswith((" ", "\t")):
-            notas.append(linea)
-            continue
-        m = re.match(r"^([^\s#:][^:]*):", linea)
-        if m and m.group(1).strip() in quitar:
-            notas = []
-            continue
-        salida += notas + [linea]
-        notas = []
-    salida += notas
-    # El layout: cada regla empieza por «  - »; las que apuntan a uno quitado.
-    hecho, regla = [], []
-
-    def cerrar():
-        if not regla:
-            return
-        cuerpo = "\n".join(regla)
-        for donde in ("above", "below"):
-            m = re.search(r"^(\s*%s:\s*)(.+?)\s*$" % donde, cuerpo, re.M)
-            if m and sin_comillas(m.group(2)) in quitar:
-                vieja = sin_comillas(m.group(2))
-                i = orden.index(vieja) if vieja in orden else -1
-                otra = next((k for k in orden[i + 1:] if k in quedan), None) if donde == "above" else \
-                    next((k for k in reversed(orden[:max(i, 0)]) if k in quedan), None)
-                if not otra:
-                    return
-                cuerpo = cuerpo[:m.start(2)] + otra + cuerpo[m.end(2):]
-        hecho.extend(cuerpo.split("\n"))
-
-    en_layout = False
-    for linea in salida:
-        if re.match(r"^layout\s*:\s*$", linea):
-            en_layout = True
-            hecho.append(linea)
-            continue
-        if en_layout and linea[:1] in (" ", "\t", "-"):
-            if linea.lstrip().startswith("- "):
-                cerrar()
-                regla = [linea]
-            else:
-                regla.append(linea)
-            continue
-        if en_layout:
-            cerrar()
-            regla = []
-            en_layout = False
-        hecho.append(linea)
-    if en_layout:
-        cerrar()
-    # Un «layout:» que se ha quedado sin reglas, fuera.
-    return [l for n, l in enumerate(hecho)
-            if not (re.match(r"^layout\s*:\s*$", l) and not (n + 1 < len(hecho) and hecho[n + 1][:1] in (" ", "\t", "-")))]
-
-
-def juntar(archivo, campos_nuevos, apartados_nuevos, quitar=(), anadidos=()):
-    """El .md con lo nuevo: campos_nuevos {clave: valor}; apartados_nuevos
-    [texto] en el mismo orden en que se leyeron (None: ese apartado, con
-    su título, se quita); quitar: los datos de la ficha que se van;
-    anadidos: apartados añadidos [{titulo, nivel, texto, despues}], donde
-    despues es el número del apartado tras el que va (-1: al final)."""
-    texto, crlf = leer_texto(archivo)
-    cabecera, cuerpo, tiene = partir(texto)
-    quitar = {str(q).strip() for q in quitar or () if str(q).strip() and str(q).strip() != "title"}
-    if tiene:
-        lineas = _quitar_de_la_cabecera(cabecera.split("\n"), quitar)
-        viejos = {c["crudo"]: c for c in leer_cabecera(cabecera)}
-        salida = []
-        for linea in lineas:
-            c = viejos.get(linea)
-            if c and not c["fija"] and c["clave"] in campos_nuevos:
-                nuevo = campos_nuevos[c["clave"]]
-                # Si no ha cambiado, la línea de siempre (con sus comillas o
-                # sin ellas): que el .md no cambie por nada.
-                salida.append(linea if nuevo.strip() == c["valor"].strip() else escribir_valor(c["clave"], nuevo))
-            else:
-                salida.append(linea)
-        # Los campos nuevos (los que se han añadido desde el editor), al
-        # final de la ficha: antes del «layout» si lo hay, que es un bloque
-        # sangrado y no una fila.
-        ya = {c["clave"] for c in viejos.values()}
-        nuevos = [escribir_valor(clave.strip(), valor) for clave, valor in campos_nuevos.items()
-                  if clave not in ya and clave not in quitar and clave.strip() and valor.strip()]
-        donde = next((n for n, l in enumerate(salida) if re.match(r"^layout\s*:\s*$", l)), len(salida))
-        salida[donde:donde] = nuevos
-        nueva_cabecera = "---\n" + "\n".join(salida) + "\n---\n"
-    else:
-        nueva_cabecera = ""
-    # El texto: los apartados que no han cambiado, tal cual estaban (con
-    # sus líneas en blanco); los que sí, con su título, sus notas y lo
-    # nuevo, respetando si llevaba una línea en blanco debajo del título y
-    # otra antes del siguiente.
-    lineas = []
-
-    def meter_nuevos(n):
-        # Los apartados añadidos en el editor que van detrás del n.
-        for extra in [x for x in nuevos_apartados if x["despues"] == n]:
-            while lineas and not lineas[-1].strip():
-                lineas.pop()
-            if lineas:
-                lineas.append("")
-            lineas.append("#" * extra["nivel"] + " " + extra["titulo"])
-            lineas.append("")
-            if extra["texto"].strip():
-                lineas.extend(extra["texto"].strip("\n").split("\n"))
-                lineas.append("")
-
-    nuevos_apartados = []
-    for x in anadidos or []:
-        if not isinstance(x, dict):
-            continue
-        titulo = " ".join(str(x.get("titulo") or "").split())
-        if not titulo:
-            continue
-        try:
-            nivel = min(6, max(1, int(x.get("nivel") or 2)))
-            despues = int(x.get("despues", -1))
-        except (TypeError, ValueError):
-            continue
-        nuevos_apartados.append({"titulo": titulo, "nivel": nivel, "despues": despues,
-                                 "texto": str(x.get("texto") or "").replace("\r", "")})
-    trozos = leer_cuerpo(cuerpo)
-    for n, ap in enumerate(trozos):
-        propias = ([ap["linea"]] if ap["nivel"] else []) + ap["lineas"]
-        nuevo = apartados_nuevos[n] if n < len(apartados_nuevos) else ap["texto"]
-        if nuevo is None and ap["nivel"]:
-            # Quitado: ni su título ni su texto (ni sus notas).
-            meter_nuevos(n)
-            continue
-        nuevo = (nuevo or "").replace("\r", "").strip("\n")
-        if nuevo.strip() == ap["texto"].strip():
-            lineas += propias
-            meter_nuevos(n)
-            continue
-        hecho = [ap["linea"]] if ap["nivel"] else []
-        if ap["lineas"] and not ap["lineas"][0].strip():
-            hecho.append("")
-        for nota in ap["notas"]:
-            hecho += nota.split("\n")
-        if nuevo.strip():
-            hecho += nuevo.split("\n")
-        # Una en blanco antes del siguiente título (o al final).
-        hecho.append("")
-        lineas += hecho
-        meter_nuevos(n)
-    # Los que digan «al final» (o un sitio que ya no está).
-    sueltos = [x for x in nuevos_apartados if not 0 <= x["despues"] < len(trozos)]
-    for x in sueltos:
-        x["despues"] = -99
-    meter_nuevos(-99)
-    nuevo_cuerpo = "\n".join(lineas)
-    if not nuevo_cuerpo.endswith("\n"):
-        nuevo_cuerpo += "\n"
-    return nueva_cabecera + nuevo_cuerpo, crlf
-
-
-# =========================================
-# CREAR
-# =========================================
-
-def plantillas():
-    salida = []
-    for p in npw.leer_plantillas():
-        preguntas = []
-        for tipo, clave, texto in p["preguntas"]:
-            una = {"tipo": tipo, "clave": clave, "texto": texto}
-            if tipo == "elige":
-                trozos = [t.strip() for t in texto.split("|")]
-                una["texto"] = trozos[0]
-                una["opciones"] = [{"valor": (o.split("=", 1) + [o])[0], "uno": (o.split("=", 1) + [o])[1]}
-                                   for o in trozos[1:] if o]
-            preguntas.append(una)
-        salida.append({"id": p["archivo"].name, "nombre": p["nombre"], "para": p["para"],
-                       "oculta": p["oculta"], "especial": p["especial"], "preguntas": preguntas})
-    return salida
-
-
-def nombre_valido(nombre):
-    nombre = (nombre or "").strip()
-    if not nombre:
-        return "Hace falta un nombre."
-    malos = [c for c in nombre if c in npw.PROHIBIDO]
-    if malos:
-        return "El nombre no puede llevar %s: es también el nombre del archivo." % " ".join(malos)
-    if npw.pagina_llamada(nombre):
-        return "Ya hay una página que se llama así."
-    return ""
-
-
-def crear_desde(plantilla, nombre, respuestas, fijos=None):
-    valores = {"nombre": nombre}
-    valores.update(fijos or {})
-    sin_enlace = set()
-    for tipo, clave, texto in plantilla["preguntas"]:
-        if clave in valores:
-            continue
-        valor = str(respuestas.get(clave, "") or "").strip().strip("[]").strip()
-        if tipo == "elige":
-            valores[clave] = valor
-            valores[clave + "_uno"] = str(respuestas.get(clave + "_uno", "") or valor).strip()
-            continue
-        otra = npw.pagina_llamada(valor) if valor else None
-        if otra:
-            valores[clave] = otra.stem
-        else:
-            valores[clave] = valor
-            if valor and tipo == "busca":
-                sin_enlace.add(clave)
-    carpeta = npw.carpeta_de(plantilla, valores)
-    texto = npw.rellenar(plantilla, valores, sin_enlace)
-    subtitulo = str(respuestas.get("_subtitulo", "") or "").strip()
-    return carpeta, npw.con_subtitulo(texto, subtitulo)
-
-
-def escribir_nueva(nombre, carpeta, texto):
-    destino = VAULT / carpeta / (nombre + ".md")
-    destino.parent.mkdir(parents=True, exist_ok=True)
-    escribir_texto(destino, texto)
-    # Si estaba en la lista de lo que no se publica, fuera de ella (lo
-    # mismo que nueva-pagina-wiki.py).
-    relativo = destino.relative_to(VAULT).as_posix()
-    reglas = wiki_fuera()
-    if esta_fuera(relativo, reglas):
-        quedan = [r for r in reglas if r.lower() != relativo.lower()]
-        if not esta_fuera(relativo, quedan):
-            guardar_wiki_fuera(quedan)
-    return destino
-
-
-def crear(peticion):
-    nombre = str(peticion.get("nombre") or "").strip()
-    malo = nombre_valido(nombre)
-    if malo:
-        return {"error": malo}
-    respuestas = peticion.get("respuestas") or {}
-    lista = npw.leer_plantillas()
-    elegida = next((p for p in lista if p["archivo"].name == peticion.get("plantilla")), None)
-    if elegida is None:
-        carpeta = "otros"
-        etiqueta = str(respuestas.get("_etiqueta") or "lugar").strip()
-        texto = npw.esqueleto(nombre, etiqueta, str(respuestas.get("_subtitulo") or "").strip(),
-                              str(respuestas.get("_que") or "").strip())
-        return {"ok": True, "archivo": escribir_nueva(nombre, carpeta, texto).relative_to(RAIZ).as_posix()}
-    creadas = []
-    if elegida["especial"] == "raza":
-        # Raza o subraza (ver flujo_de_raza en nueva-pagina-wiki.py).
-        modo = str(respuestas.get("_raza_modo") or "raza")
-        subraza = next((p for p in lista if p["especial"] == "subraza"), None)
-        if modo != "raza" and subraza:
-            raza = str(respuestas.get("_raza_de") or "").strip()
-            if modo == "nueva":
-                malo = nombre_valido(raza)
-                if malo:
-                    return {"error": "La raza nueva: " + malo}
-                carpeta_r, texto_r = crear_desde(elegida, raza, {})
-                creadas.append(escribir_nueva(raza, carpeta_r, texto_r))
-            elif not npw.pagina_llamada(raza):
-                return {"error": "Elige de qué raza es."}
-            else:
-                raza = npw.pagina_llamada(raza).stem
-            elegida, respuestas = subraza, dict(respuestas, raza=raza)
-    carpeta, texto = crear_desde(elegida, nombre, respuestas,
-                                 {"raza": respuestas.get("raza", "")} if elegida["especial"] == "subraza" else None)
-    destino = escribir_nueva(nombre, carpeta, texto)
-    return {"ok": True, "archivo": destino.relative_to(RAIZ).as_posix(),
-            "tambien": [c.relative_to(RAIZ).as_posix() for c in creadas]}
-
-
-# =========================================
-# LAS IMÁGENES
+# LAS IMÁGENES QUE LLEGAN
 # =========================================
 
 def archivo_temporal(crudo, sufijo):
@@ -637,76 +113,31 @@ def borrar_temporal(temporal):
             pass
 
 
-def subir_imagen(peticion):
-    try:
-        import imagenes as img
-    except ImportError:
-        return {"error": "No encuentro herramientas/0-comun/imagenes.py."}
-    campo = str(peticion.get("campo") or "image").lower()
-    titulo = str(peticion.get("pagina") or "imagen")
-    carpeta = "wiki/_imagenes/banderas" if campo in ("bandera", "blasón", "blason", "escudo") else "wiki/_imagenes"
-    sufijo = "" if campo in ("image",) else ("_" + sin_tildes(campo).lower())
-    nombre = img.nombre_para(titulo, sufijo)
-    ruta = str(peticion.get("ruta") or "").strip()
-    temporal = None
-    try:
-        if not ruta:
-            datos = str(peticion.get("datos") or "")
-            original = str(peticion.get("archivo") or "imagen.png")
-            if "," in datos:
-                datos = datos.split(",", 1)[1]
-            try:
-                crudo = base64.b64decode(datos, validate=True)
-            except ValueError:
-                return {"error": "La imagen no ha llegado bien."}
-            if len(crudo) > 40 * 1024 * 1024:
-                return {"error": "Es demasiado grande (más de 40 MB)."}
-            temporal = archivo_temporal(crudo, Path(original).suffix.lower() or ".png")
-            ruta = str(temporal)
-        hecha, aviso = img.traer(ruta, carpeta, nombre, lado=1600)
-    finally:
-        borrar_temporal(temporal)
-    if not hecha:
-        return {"error": "No he podido traerla: " + aviso}
-    return {"ok": True, "nombre": Path(hecha).name, "aviso": aviso}
-
-
 # =========================================
 # LOS MAPAS
 # =========================================
-# Los .cmap de la bóveda (el formato está explicado en
-# herramientas/0-comun/mundo_mapas.py). El editor los lee enteros y
-# los devuelve enteros: lo que no conoce (lo que escribió Chronicler) va y
-# vuelve sin tocar. Aquí solo se comprueba que lo que llega es un mapa y
-# que se escribe dentro de la bóveda.
-
-CARPETA_MAPAS = "wiki/_imagenes/mapas"
-# LOS MAPAS DE LAS CAMPAÑAS (el mapamundi de Ragna…): no son de la wiki,
-# así que no van en la bóveda (importar-mundo.py la deja como Chronicler y
-# los borraría). Van en mapas-rol/<campaña>/, con sus imágenes en
+# Los .cmap de las campañas (el formato está explicado en
+# herramientas/0-comun/mundo_mapas.py): el mapamundi de Ragna, los de sus
+# zonas… Van en mapas-rol/<campaña>/, con sus imágenes en
 # mapas-rol/<campaña>/imagenes/ (la carpeta no se sube: lo que se publica
 # lo escribe generar-mapas-rol.py). En el editor salen como
-# «@campañas/<campaña>/<Título>.cmap».
+# «@campañas/<campaña>/<Título>.cmap». El editor los lee enteros y los
+# devuelve enteros: lo que no conoce va y vuelve sin tocar. Aquí solo se
+# comprueba que lo que llega es un mapa y que se escribe dentro de
+# mapas-rol/.
+
 MAPAS_ROL = RAIZ / "mapas-rol"
 PREFIJO_ROL = "@campañas/"
 
 
 def relativo_de_mapa(archivo):
-    """Cómo se llama un .cmap en el editor: su ruta en la bóveda, o
-    «@campañas/<campaña>/<archivo>» si es de una campaña."""
-    try:
-        return PREFIJO_ROL + archivo.relative_to(MAPAS_ROL).as_posix()
-    except ValueError:
-        return archivo.relative_to(VAULT).as_posix()
+    """Cómo se llama un .cmap en el editor: «@campañas/<campaña>/<archivo>»."""
+    return PREFIJO_ROL + archivo.relative_to(MAPAS_ROL).as_posix()
 
 
-def es_de_campana(archivo):
-    try:
-        archivo.resolve().relative_to(MAPAS_ROL.resolve())
-        return True
-    except ValueError:
-        return False
-
+def carpeta_de_imagenes(archivo):
+    """Dónde van las imágenes de un mapa (relativo a la raíz): las de su campaña."""
+    return "mapas-rol/%s/imagenes" % archivo.parent.name
 
 def sesiones_de_campana(clave):
     """Las sesiones de una campaña, [{numero, titulo}]: para decir de cuál
@@ -751,331 +182,40 @@ def _leer_cmap(archivo):
 def mapas_que_hay():
     salida = []
     de_rol = sorted(MAPAS_ROL.glob("*/*.cmap"), key=lambda a: a.stem.lower()) if MAPAS_ROL.is_dir() else []
-    for archivo in sorted(VAULT.rglob("*.cmap"), key=lambda a: a.stem.lower()) + de_rol:
+    for archivo in de_rol:
         datos = _leer_cmap(archivo)
         if datos is None:
             continue
         salida.append({"archivo": relativo_de_mapa(archivo),
                        "titulo": str(datos.get("title") or archivo.stem),
-                       "pagina": str(datos.get("page") or ""),
                        "pines": len(datos.get("pins") or []),
                        "regiones": len(datos.get("shapes") or []),
                        "rayas": len(datos.get("lines") or [])})
     return salida
 
 
-def mapas_de(nombre):
-    """Los mapas que dicen ser de esta página ("page")."""
-    clave = sin_tildes(nombre).lower()
-    return [m for m in mapas_que_hay() if sin_tildes(m["pagina"]).lower() == clave]
-
-
 def ruta_de_mapa(relativo):
-    """El .cmap que se pide, si es un .cmap de dentro de la bóveda."""
+    """El .cmap que se pide, si es un .cmap de dentro de mapas-rol/."""
     relativo = str(relativo or "").replace("\\", "/").strip("/")
-    if not relativo.lower().endswith(".cmap"):
+    if not relativo.lower().endswith(".cmap") or not relativo.startswith(PREFIJO_ROL):
         return None
-    base = VAULT
-    if relativo.startswith(PREFIJO_ROL):
-        base, relativo = MAPAS_ROL, relativo[len(PREFIJO_ROL):]
-    archivo = (base / relativo).resolve()
+    archivo = (MAPAS_ROL / relativo[len(PREFIJO_ROL):]).resolve()
     try:
-        archivo.relative_to(base.resolve())
+        archivo.relative_to(MAPAS_ROL.resolve())
     except ValueError:
         return None
     return archivo if archivo.is_file() else None
 
 
 def url_de_imagen(nombre):
-    """Dónde la sirve el editor: se busca por el nombre en wiki/_imagenes/
-    (igual que hace generar-mundo con las capas)."""
+    """Dónde la sirve el editor: se busca por el nombre en mapas-rol/."""
     nombre = str(nombre or "").replace("\\", "/").split("/")[-1].lower()
-    if not nombre:
+    if not nombre or not MAPAS_ROL.is_dir():
         return ""
-    # Las de la wiki y, detrás, las de los mapas de las campañas.
-    donde = [IMAGENES] + ([MAPAS_ROL] if MAPAS_ROL.is_dir() else [])
-    for carpeta in donde:
-        if not carpeta.is_dir():
-            continue
-        for archivo in sorted(carpeta.rglob("*")):
-            if archivo.name.lower() == nombre and archivo.is_file():
-                return "/" + urllib.parse.quote(archivo.relative_to(RAIZ).as_posix())
+    for archivo in sorted(MAPAS_ROL.rglob("*")):
+        if archivo.name.lower() == nombre and archivo.is_file():
+            return "/" + urllib.parse.quote(archivo.relative_to(RAIZ).as_posix())
     return ""
-
-
-# =========================================
-# MOVER O RENOMBRAR UNA PÁGINA
-# =========================================
-# La página (y lo que se llame como ella al lado: su .cmap) va a su nueva
-# carpeta o con su nuevo nombre. Si vive en su propia carpeta (un país:
-# Reino de Prunia/Reino de Prunia.md) y se renombra sin cambiarla de
-# sitio, la carpeta se renombra con ella y se lleva lo de dentro. Al
-# renombrar se cambian los [[enlaces]] que la nombran: en las páginas, en
-# los mapas (page, targetPage, y las regiones que la enlazaban por llamarse
-# igual), y en la línea de tiempo, el calendario y el diccionario. Las
-# direcciones viejas de la web se apuntan en redirecciones.js.
-
-REDIRECCIONES_JS = RAIZ / "scripts" / "paginas" / "redirecciones.js"
-DATOS_QUE_NOMBRAN = [RAIZ / "datos" / "wiki" / n for n in ("linea-de-tiempo.json", "calendario.json",
-                                                            "diccionario.json")]
-
-
-def _slug_web(texto):
-    plano = "".join(c for c in __import__("unicodedata").normalize("NFD", (texto or "").lower())
-                    if __import__("unicodedata").category(c) != "Mn")
-    return re.sub(r"^_+|_+$", "", re.sub(r"[^a-z0-9]+", "_", plano)) or "pagina"
-
-
-def _url_de(md):
-    """La dirección que le dará generar-mundo (mismo cálculo: cada trozo
-    de la carpeta y el nombre por slug)."""
-    trozos = [_slug_web(t) for t in md.parent.relative_to(VAULT).parts]
-    return "/web/wiki/" + "".join(t + "/" for t in trozos) + _slug_web(md.stem) + ".html"
-
-
-def _cambiar_enlaces(texto, viejo, nuevo):
-    """[[viejo]], [[viejo|lo que se lee]] y [[viejo#apartado]] → nuevo
-    (sin mirar mayúsculas ni tildes). Las imágenes ![[…]] no."""
-    llano = sin_tildes(viejo).lower()
-
-    def cambiar(m):
-        if m.group(1):
-            return m.group(0)
-        dentro = m.group(2)
-        nombre = re.split(r"[|#]", dentro, 1)[0]
-        if sin_tildes(nombre.strip()).lower() != llano:
-            return m.group(0)
-        return "[[" + nuevo + dentro[len(nombre):] + "]]"
-    return re.sub(r"(!?)\[\[([^\]\n]+)\]\]", lambda m: cambiar(m) if not m.group(1) else m.group(0), texto)
-
-
-def _cambiar_en_json(dato, viejo, nuevo, claves=("page", "targetPage", "pagina", "idioma", "enlace")):
-    llano = sin_tildes(viejo).lower()
-    if isinstance(dato, dict):
-        salida = {}
-        for k, v in dato.items():
-            if isinstance(v, str) and k in claves and sin_tildes(v.strip()).lower() == llano:
-                salida[k] = nuevo
-            else:
-                salida[k] = _cambiar_en_json(v, viejo, nuevo, claves)
-        # Una región que llevaba a la página por llamarse igual, sin
-        # targetPage: ahora lo lleva puesto.
-        if (isinstance(salida.get("label"), str) and sin_tildes(salida["label"].strip()).lower() == llano
-                and "points" in salida and not salida.get("targetPage")):
-            salida["targetPage"] = nuevo
-        return salida
-    if isinstance(dato, list):
-        return [_cambiar_en_json(v, viejo, nuevo, claves) for v in dato]
-    if isinstance(dato, str) and "[[" in dato:
-        return _cambiar_enlaces(dato, viejo, nuevo)
-    return dato
-
-
-def _apuntar_redirecciones(pares):
-    """Las mudanzas, al principio de la lista de redirecciones.js. Las que
-    ya llevaban a una dirección que ahora se muda, a la nueva."""
-    if not pares or not REDIRECCIONES_JS.is_file():
-        return
-    texto, crlf = leer_texto(REDIRECCIONES_JS)
-    for viejo, nuevo in pares:
-        texto = texto.replace('", "%s"]' % viejo, '", "%s"]' % nuevo)
-    lineas = "".join('        ["%s", "%s"],\n' % (v, n) for v, n in pares if v != n)
-    marca = "    const REDIRECCIONES = [\n"
-    if marca in texto:
-        texto = texto.replace(marca, marca + "        // Movida o renombrada desde el editor.\n" + lineas, 1)
-        escribir_texto(REDIRECCIONES_JS, texto, crlf)
-
-
-def mover_pagina(peticion):
-    archivo = npw.pagina_llamada(str(peticion.get("nombre") or ""))
-    if not archivo:
-        return {"error": "Esa página ya no está."}
-    viejo = archivo.stem
-    nuevo = str(peticion.get("nuevo") or "").strip() or viejo
-    carpeta = str(peticion.get("carpeta") or "").strip().replace("\\", "/").strip("/")
-    if any(t in ("", ".", "..") or t.startswith(("_", ".")) for t in carpeta.split("/") if carpeta) \
-            or re.search(r'[<>:"|?*]', carpeta):
-        return {"error": "Esa carpeta no vale: escríbela como en wiki/ (Mapamundi/Azarasia), sin «..» ni _ delante."}
-    if nuevo != viejo:
-        malo = nombre_valido(nuevo) if sin_tildes(nuevo).lower() != sin_tildes(viejo).lower() else ""
-        if malo:
-            return {"error": malo}
-    actual = archivo.parent.relative_to(VAULT).as_posix() if archivo.parent != VAULT else ""
-    if nuevo == viejo and carpeta == actual:
-        return {"error": "Es el mismo nombre y la misma carpeta: no hay nada que mover."}
-    # Lo que se muda: la página y lo suyo; o, si vive en su propia carpeta y
-    # solo cambia de nombre, la carpeta entera.
-    mudanzas = []   # (de, a) de archivos .md y .cmap, para las direcciones
-    propia = archivo.parent.name == viejo and archivo.parent != VAULT
-    if propia and carpeta == actual:
-        vieja_carpeta = archivo.parent
-        nueva_carpeta = vieja_carpeta.parent / nuevo
-        if nueva_carpeta.exists() and nueva_carpeta != vieja_carpeta:
-            return {"error": "Ya hay una carpeta que se llama «%s» ahí." % nuevo}
-        antes = sorted(vieja_carpeta.rglob("*"))
-        vieja_carpeta.rename(nueva_carpeta) if nueva_carpeta != vieja_carpeta else None
-        for f in antes:
-            if f.suffix.lower() in (".md", ".cmap"):
-                mudanzas.append((f, nueva_carpeta / f.relative_to(vieja_carpeta)))
-        # La página y su mapa, con el nombre nuevo.
-        for f in list(nueva_carpeta.glob(viejo + ".*")):
-            destino = nueva_carpeta / (nuevo + f.suffix)
-            if f != destino:
-                f.rename(destino)
-                mudanzas = [(a, destino if b == f else b) for a, b in mudanzas]
-    else:
-        destino_dir = VAULT / carpeta if carpeta else VAULT
-        if (destino_dir / (nuevo + ".md")).exists() and (destino_dir / (nuevo + ".md")) != archivo:
-            return {"error": "Ya hay una página «%s» en esa carpeta." % nuevo}
-        destino_dir.mkdir(parents=True, exist_ok=True)
-        for f in sorted(archivo.parent.glob(viejo + ".*")):
-            if f.suffix.lower() not in (".md", ".cmap"):
-                continue
-            destino = destino_dir / (nuevo + f.suffix)
-            f.rename(destino)
-            mudanzas.append((f, destino))
-    # Los enlaces, si cambia el nombre.
-    tocadas = 0
-    if nuevo != viejo:
-        for md in sorted(VAULT.rglob("*.md")):
-            if "_system" in md.parts:
-                continue
-            texto, crlf = leer_texto(md)
-            cambiado = _cambiar_enlaces(texto, viejo, nuevo)
-            if md.stem == nuevo:
-                # Su propio título, si era el nombre viejo.
-                cambiado = re.sub(r'^(title:\s*)(["\']?)%s\2\s*$' % re.escape(viejo),
-                                  lambda m: m.group(1) + '"' + nuevo + '"', cambiado, count=1, flags=re.M)
-            if cambiado != texto:
-                escribir_texto(md, cambiado, crlf)
-                tocadas += 1
-        for archivo_json in sorted(VAULT.rglob("*.cmap")) + DATOS_QUE_NOMBRAN:
-            if not archivo_json.is_file():
-                continue
-            texto, crlf = leer_texto(archivo_json)
-            try:
-                dato = json.loads(texto)
-            except ValueError:
-                continue
-            otro = _cambiar_en_json(dato, viejo, nuevo)
-            if otro != dato:
-                final = "\n" if texto.endswith("\n") else ""
-                escribir_texto(archivo_json, json.dumps(otro, ensure_ascii=False, indent=4 if archivo_json.suffix
-                                                         == ".json" else 2) + final, crlf)
-                tocadas += 1
-    # Las direcciones viejas de la web, a las nuevas.
-    pares = []
-    for de, a in mudanzas:
-        if de.suffix.lower() == ".md":
-            pares.append((_url_de(de), _url_de(a)))
-        else:
-            pares.append((_url_de(de).rsplit("/", 1)[0] + "/mapa_" + _slug_web(de.stem) + ".html",
-                          _url_de(a).rsplit("/", 1)[0] + "/mapa_" + _slug_web(a.stem) + ".html"))
-    _apuntar_redirecciones([p for p in pares if p[0] != p[1]])
-    nuevo_archivo = npw.pagina_llamada(nuevo)
-    return {"ok": True, "nombre": nuevo, "archivo": nuevo_archivo.relative_to(RAIZ).as_posix() if nuevo_archivo else "",
-            "tocadas": tocadas, "mudanzas": len(pares)}
-
-
-# =========================================
-# LA VISTA PREVIA (lo escrito, pasado a HTML como en la web)
-# =========================================
-# Con el mismo conversor que generar-mundo (mundo_formato.Conversor): los
-# [[enlaces]] van a la página si existe (en mundo.json) y, si no, salen
-# como en la web, en rojo. Las imágenes, desde wiki/_imagenes/. Devuelve
-# también lo que el conversor no ha entendido (sus avisos).
-
-def vista_previa(cuerpo):
-    sys.path.insert(0, str(HERRAMIENTAS / "3-generadores"))
-    from mundo_formato import Avisos, Conversor
-    direcciones = {}
-    for f in leer_json(MUNDO_JSON, []) or []:
-        if isinstance(f, dict) and f.get("titulo"):
-            direcciones[sin_tildes(str(f["titulo"])).lower()] = str(f.get("url") or "")
-    existen = {sin_tildes(a.stem).lower() for a in todas()}
-
-    def enlace_a(nombre):
-        clave = sin_tildes(str(nombre or "").strip()).lower()
-        if clave in direcciones:
-            return direcciones[clave], True
-        # Escrita pero aún sin pasar a la web: se marca como enlace igual.
-        return ("#", clave in existen)
-
-    avisos = Avisos()
-    try:
-        html_ = Conversor(enlace_a, url_de_imagen, avisos, None).a_html(str(cuerpo or ""))
-    except Exception as error:  # noqa: BLE001 (que la vista previa no tumbe el editor)
-        return {"error": "No he podido pintarla: %s" % error}
-    return {"html": html_, "avisos": ["%s%s" % (que, (": " + donde) if donde else "") for que, donde in avisos.lista]}
-
-
-# LOS MAPAS VECINOS: los regionales situados en el mapamundi ("world")
-# cuyo recuadro se pisa con el de éste. Sus rayas y sus sitios, pasados a
-# las medidas de ESTE mapa, para verlos en gris en el editor y que el imán
-# enganche a ellos: así un río o un camino que sigue en el reino de al
-# lado se dibuja hasta tocar el suyo, y en la web (el mapamundi) se juntan
-# (mundo_mapas.juntar_regionales y la red de caminos).
-RAYAS_VECINAS = {"rio", "camino", "sendero", "ruta", "frontera", "maritima", "viaje"}
-
-
-def _numero(x):
-    return isinstance(x, (int, float)) and not isinstance(x, bool)
-
-
-def _sitio_en_el_mundo(datos):
-    w = datos.get("world")
-    if not isinstance(w, dict) or not all(_numero(w.get(k)) for k in ("x", "y", "w", "h")):
-        return None
-    if not _numero(datos.get("width")) or not _numero(datos.get("height")) or not datos["width"] or not datos["height"]:
-        return None
-    return w
-
-
-def vecinos_de(archivo, datos):
-    yo = _sitio_en_el_mundo(datos)
-    if not yo:
-        return []
-    fx, fy = datos["width"] / yo["w"], datos["height"] / yo["h"]
-
-    def aqui(x, y):
-        return {"x": round((x - yo["x"]) * fx, 1), "y": round((y - yo["y"]) * fy, 1)}
-
-    salida = []
-    for otro in sorted(VAULT.rglob("*.cmap"), key=lambda a: a.stem.lower()):
-        if otro.resolve() == archivo.resolve():
-            continue
-        suyos = _leer_cmap(otro)
-        el = _sitio_en_el_mundo(suyos) if suyos else None
-        if not el:
-            continue
-        # ¿Se pisan los dos recuadros (con un poco de margen)?
-        m = max(yo["w"], yo["h"]) * 0.05
-        if (el["x"] > yo["x"] + yo["w"] + m or el["x"] + el["w"] < yo["x"] - m
-                or el["y"] > yo["y"] + yo["h"] + m or el["y"] + el["h"] < yo["y"] - m):
-            continue
-        gx, gy = el["w"] / suyos["width"], el["h"] / suyos["height"]
-
-        def mundo(p):
-            return el["x"] + p["x"] * gx, el["y"] + p["y"] * gy
-
-        rayas = []
-        for linea in suyos.get("lines") or []:
-            if not isinstance(linea, dict) or linea.get("kind") not in RAYAS_VECINAS or not _lista_de_puntos(linea.get("points")):
-                continue
-            # Las que ese mapa trajo a su vez de otro, no (serían copias de
-            # copias, y la de verdad ya sale de su mapa).
-            if linea.get("fromMap"):
-                continue
-            rayas.append({"kind": linea["kind"], "label": str(linea.get("label") or ""), "id": str(linea.get("id") or ""),
-                          "points": [aqui(*mundo(p)) for p in linea["points"]]})
-        sitios = []
-        for pin in suyos.get("pins") or []:
-            if isinstance(pin, dict) and _numero(pin.get("x")) and _numero(pin.get("y")) and not pin.get("hidden"):
-                sitios.append(dict(aqui(*mundo(pin)), label=str(pin.get("label") or ""), kind=str(pin.get("kind") or "")))
-        if rayas or sitios:
-            salida.append({"titulo": str(suyos.get("title") or otro.stem), "archivo": otro.relative_to(VAULT).as_posix(),
-                           "rayas": rayas, "sitios": sitios})
-    return salida
 
 
 def leer_mapa(archivo):
@@ -1089,16 +229,11 @@ def leer_mapa(archivo):
     for em in (datos.get("emblems") or []) + (datos.get("pins") or []):
         if isinstance(em, dict) and em.get("image"):
             imagenes[str(em["image"])] = url_de_imagen(em["image"])
-    if es_de_campana(archivo):
-        # Uno de una campaña: sin vecinos ni página de la wiki; su página
-        # es la que escribe generar-mapas-rol.py.
-        clave = archivo.parent.name
-        return {"archivo": relativo_de_mapa(archivo), "datos": datos, "imagenes": imagenes, "vecinos": [],
-                "url": "/web/notas_rol/%s/mapa_%s.html" % (clave, slug_de_mapa_rol(datos, archivo)),
-                "campana": clave, "sesiones": sesiones_de_campana(clave)}
-    return {"archivo": archivo.relative_to(VAULT).as_posix(), "datos": datos,
-            "imagenes": imagenes, "vecinos": vecinos_de(archivo, datos),
-            "url": url_de_la_pagina(str(datos.get("title") or archivo.stem))}
+    # Su página es la que escribe generar-mapas-rol.py.
+    clave = archivo.parent.name
+    return {"archivo": relativo_de_mapa(archivo), "datos": datos, "imagenes": imagenes,
+            "url": "/web/notas_rol/%s/mapa_%s.html" % (clave, slug_de_mapa_rol(datos, archivo)),
+            "campana": clave, "sesiones": sesiones_de_campana(clave)}
 
 
 def slug_de_mapa_rol(datos, archivo):
@@ -1142,32 +277,21 @@ def guardar_mapa(archivo, datos):
 
 
 def traer_emblema(peticion):
-    """La imagen de un emblema (una bandera, un blasón) a
-    wiki/_imagenes/banderas/, a 512 px como mucho. {nombre, url}."""
+    """La imagen de un emblema (una bandera, un blasón) a las imágenes de
+    la campaña del mapa, a 512 px como mucho. {nombre, url}."""
     try:
         import imagenes as img
     except ImportError:
         return {"error": "No encuentro herramientas/0-comun/imagenes.py."}
+    mapa = ruta_de_mapa(peticion.get("mapa"))
+    if not mapa:
+        return {"error": "Ese mapa ya no está."}
     nombre = str(peticion.get("nombre") or "").strip() or "emblema"
-    ruta = str(peticion.get("ruta") or "").strip()
-    temporal = None
+    ruta, temporal, error = _imagen_que_llega(peticion, "emblema.png", 20)
+    if error:
+        return {"error": error}
     try:
-        if not ruta:
-            datos = str(peticion.get("datos") or "")
-            if not datos:
-                return {"error": "Falta la imagen."}
-            original = str(peticion.get("archivo") or "emblema.png")
-            if "," in datos:
-                datos = datos.split(",", 1)[1]
-            try:
-                crudo = base64.b64decode(datos, validate=True)
-            except ValueError:
-                return {"error": "La imagen no ha llegado bien."}
-            if len(crudo) > 20 * 1024 * 1024:
-                return {"error": "Es demasiado grande (más de 20 MB)."}
-            temporal = archivo_temporal(crudo, Path(original).suffix.lower() or ".png")
-            ruta = str(temporal)
-        hecha, aviso = img.traer(ruta, "wiki/_imagenes/banderas", img.nombre_para(nombre, "_emblema"), lado=512)
+        hecha, aviso = img.traer(ruta, carpeta_de_imagenes(mapa), img.nombre_para(nombre, "_emblema"), lado=512)
     finally:
         borrar_temporal(temporal)
     if not hecha:
@@ -1175,7 +299,7 @@ def traer_emblema(peticion):
     return {"ok": True, "nombre": Path(hecha).name, "url": url_de_imagen(Path(hecha).name), "aviso": aviso}
 
 
-def _imagen_que_llega(peticion):
+def _imagen_que_llega(peticion, por_defecto="mapa.png", megas=40):
     """La imagen que manda el editor: subida (datos en base64) o por su
     ruta. Devuelve (ruta, temporal, error); el temporal hay que borrarlo
     (borrar_temporal) al acabar."""
@@ -1184,16 +308,16 @@ def _imagen_que_llega(peticion):
         return ruta, None, ""
     datos = str(peticion.get("datos") or "")
     if not datos:
-        return "", None, "Falta la imagen del mapa."
-    original = str(peticion.get("archivo") or "mapa.png")
+        return "", None, "Falta la imagen."
+    original = str(peticion.get("archivo") or por_defecto)
     if "," in datos:
         datos = datos.split(",", 1)[1]
     try:
         crudo = base64.b64decode(datos, validate=True)
     except ValueError:
         return "", None, "La imagen no ha llegado bien."
-    if len(crudo) > 40 * 1024 * 1024:
-        return "", None, "Es demasiado grande (más de 40 MB)."
+    if len(crudo) > megas * 1024 * 1024:
+        return "", None, "Es demasiado grande (más de %d MB)." % megas
     temporal = archivo_temporal(crudo, Path(original).suffix.lower() or ".png")
     return str(temporal), temporal, ""
 
@@ -1213,10 +337,9 @@ def _hecha(archivo, aviso="", **mas):
                  "url": url_de_imagen(archivo.name), "aviso": aviso}, **mas)
 
 
-def traer_imagen_de_mapa(peticion, nombre, carpeta=None):
-    """La imagen que llega (subida o por su ruta) a wiki/_imagenes/mapas/
-    (o a la «carpeta» que se diga: la de una campaña).
-    Devuelve {nombre, ancho, alto, url} o {error}."""
+def traer_imagen_de_mapa(peticion, nombre, carpeta):
+    """La imagen que llega (subida o por su ruta) a «carpeta» (la de las
+    imágenes de una campaña). Devuelve {nombre, ancho, alto, url} o {error}."""
     try:
         import imagenes as img
     except ImportError:
@@ -1225,60 +348,21 @@ def traer_imagen_de_mapa(peticion, nombre, carpeta=None):
     if error:
         return {"error": error}
     try:
-        hecha, aviso = img.traer(ruta, carpeta or CARPETA_MAPAS, img.nombre_para(nombre, "_mapa"), lado=LADO_MAPA)
+        hecha, aviso = img.traer(ruta, carpeta, img.nombre_para(nombre, "_mapa"), lado=LADO_MAPA)
     finally:
         borrar_temporal(temporal)
     if not hecha:
         return {"error": "No he podido traerla: " + aviso}
-    return _hecha(RAIZ / (carpeta or CARPETA_MAPAS) / Path(hecha).name, aviso)
+    return _hecha(RAIZ / carpeta / Path(hecha).name, aviso)
 
 
-# ---- A LA ESCALA COMÚN (herramientas/0-comun/mapas_mundo.py) ----
-# Un mapa regional nuevo se busca en el mapamundi y su imagen se agranda
-# (con IA si está) hasta la escala común: así todos los regionales se
-# pueden juntar luego sin estirar nada. Su sitio queda en "world".
+# ---- AMPLIAR LA IMAGEN (herramientas/0-comun/mapas_mundo.py) ----
+# La imagen de fondo de un mapa, más grande (con IA si está el ampliador):
+# para que no se vea borrosa al acercarse.
 
 def _mapas_mundo():
     import mapas_mundo
     return mapas_mundo
-
-
-def imagen_de_mapa_a_escala(peticion, nombre):
-    """Como traer_imagen_de_mapa, pero buscándola en el mapamundi y
-    llevándola a la escala común. Si no la encuentra, la trae tal cual y
-    lo dice. Devuelve lo de _hecha más "world" (o sin él) y "con_ia"."""
-    try:
-        import imagenes as img
-        mm = _mapas_mundo()
-    except ImportError as error:
-        return {"error": "Falta una herramienta: %s" % error}
-    ruta, temporal, error = _imagen_que_llega(peticion)
-    if error:
-        return {"error": error}
-    try:
-        fuente = img.resolver(ruta)
-        if fuente is None:
-            return {"error": "No encuentro el archivo %s." % ruta}
-        sitio = mm.situar(fuente)
-        if sitio.get("error"):
-            hecha = traer_imagen_de_mapa(dict(peticion, ruta=str(fuente), datos=""), nombre)
-            if hecha.get("ok"):
-                hecha["aviso"] = ("No lo he puesto a la escala común: " + sitio["error"]
-                                  + " Cuando lo sitúes (en «El mapa en sí»), podrás llevarlo a ella.")
-            return hecha
-        ancho, alto = _medidas(fuente)
-        nuevo_ancho, nuevo_alto, escala = mm.medida_comun(sitio, ancho, alto)
-        destino = img.sin_pisar(RAIZ / CARPETA_MAPAS, img.nombre_para(nombre, "_mapa"))
-        con_ia, aviso = mm.a_medida(fuente, destino, nuevo_ancho, nuevo_alto,
-                                    ia=peticion.get("ia") is not False, modelo=str(peticion.get("modelo") or "pintado"))
-    finally:
-        borrar_temporal(temporal)
-    mundo = {k: sitio[k] for k in ("map", "x", "y", "w", "h")}
-    texto = "Situado en el mapamundi y puesto a la escala común (%s × %s px%s)." % (
-        nuevo_ancho, nuevo_alto, ", ampliado con IA" if con_ia else "")
-    if escala != mm.ESCALA_COMUN:
-        texto += " OJO: es tan grande que no cabe a la escala común; va a %.1f px por unidad." % escala
-    return _hecha(destino, texto + (" " + aviso if aviso else ""), world=mundo, con_ia=con_ia)
 
 
 def _imagen_del_mapa(archivo, nombre=""):
@@ -1293,31 +377,15 @@ def _imagen_del_mapa(archivo, nombre=""):
     if not capas and not nombre:
         return None, datos
     nombre = str(nombre or capas[0]["image"]).replace("\\", "/").split("/")[-1].lower()
-    for imagen in sorted(IMAGENES.rglob("*")):
-        if imagen.name.lower() == nombre:
+    for imagen in sorted(MAPAS_ROL.rglob("*")):
+        if imagen.name.lower() == nombre and imagen.is_file():
             return imagen, datos
     return None, datos
 
 
 def ayudas_de_mapas():
     mm = _mapas_mundo()
-    mundo = mm.mapamundi()
-    salida = {"opencv": mm.hay_opencv(), "ampliador": bool(mm.ampliador()), "escala": mm.ESCALA_COMUN,
-              "lado_maximo": mm.LADO_MAXIMO}
-    if mundo:
-        salida["mapamundi"] = {"archivo": mundo["nombre"], "ancho": mundo["ancho"], "alto": mundo["alto"],
-                               "url": url_de_imagen(mundo["imagen"].name)}
-    return salida
-
-
-def situar_mapa(archivo, peticion):
-    imagen, _ = _imagen_del_mapa(archivo, peticion.get("imagen"))
-    if not imagen:
-        return {"error": "Este mapa no tiene imagen de fondo que buscar."}
-    sitio = _mapas_mundo().situar(imagen)
-    if sitio.get("error"):
-        return sitio
-    return {"ok": True, "world": {k: sitio[k] for k in ("map", "x", "y", "w", "h")}, "seguridad": sitio["seguridad"]}
+    return {"ampliador": bool(mm.ampliador()), "lado_maximo": mm.LADO_MAXIMO}
 
 
 def ampliar_mapa(archivo, peticion):
@@ -1345,46 +413,23 @@ def ampliar_mapa(archivo, peticion):
     if not (1 <= ancho <= mm.LADO_MAXIMO and 1 <= alto <= mm.LADO_MAXIMO):
         return {"error": "Saldría de %d × %d, y como mucho son %d píxeles de lado. Prueba con menos."
                          % (ancho, alto, mm.LADO_MAXIMO)}
-    destino = img.sin_pisar(RAIZ / CARPETA_MAPAS, img.nombre_para(archivo.stem, "_mapa"))
+    destino = img.sin_pisar(RAIZ / carpeta_de_imagenes(archivo), img.nombre_para(archivo.stem, "_mapa"))
     con_ia, aviso = mm.a_medida(imagen, destino, ancho, alto, ia=peticion.get("ia") is not False,
                                 modelo=str(peticion.get("modelo") or "pintado"))
     return _hecha(destino, aviso, con_ia=con_ia)
 
 
-# Con artículo si empieza por un nombre común: «Mapa del Reino de
-# Prunia», «Mapa de la Unión de Cuerza», «Mapa de la Tribu Utná», pero
-# «Mapa de Azarasia». Es nombre común si es uno de éstos o si va seguido
-# de «de» («Paraje de Cereno»). Femeninas las acabadas en -a, -ión, -dad
-# y -tad, y las de FEMENINAS.
-COMUNES = {"reino", "república", "imperio", "principado", "sultanato", "unión", "cantón", "tribu",
-           "archipiélago", "alianza", "liga", "horda", "mandato", "maharato", "páramo", "valle", "isla",
-           "ciudad", "bosque", "montaña", "desierto", "mar", "costa", "ducado", "condado", "baronía",
-           "marquesado", "señorío", "corona", "territorio", "dominio", "confederación", "federación"}
-FEMENINAS = {"tribu", "costa", "torre", "fuente", "corte", "cuna"}
-
-
-def titulo_por_defecto(nombre):
-    palabras = nombre.split()
-    primera = palabras[0].lower() if palabras else ""
-    sin_plural = primera[:-1] if primera.endswith("s") and len(primera) > 3 else primera
-    comun = sin_plural in COMUNES or (len(palabras) >= 3 and palabras[1].lower() in ("de", "del"))
-    if not comun:
-        return "Mapa de " + nombre
-    singular = sin_plural
-    femenina = (singular in FEMENINAS or singular.endswith(("a", "ión", "dad", "tad")))
-    articulo = ("de las " if femenina else "de los ") if singular != primera else ("de la " if femenina else "del ")
-    return "Mapa " + articulo + nombre
-
-
-def nuevo_mapa_de_campana(peticion, clave):
+def nuevo_mapa(peticion):
     """El mapa de una campaña: en mapas-rol/<campaña>/, con su imagen en
-    mapas-rol/<campaña>/imagenes/ (sin escala común ni página de la wiki)."""
+    mapas-rol/<campaña>/imagenes/. Un .cmap con la imagen de fondo y nada
+    encima."""
+    clave = str(peticion.get("campana") or "").strip()
     campana = next((c for c in campanas_que_hay() if c["clave"] == clave), None)
     if not campana:
-        return {"error": "No hay ninguna campaña «%s»." % clave}
+        return {"error": "No hay ninguna campaña «%s»." % clave if clave else "Falta de qué campaña es el mapa."}
     titulo = str(peticion.get("titulo") or "").strip() or "Mapamundi de " + re.sub(
         r"^campaña de\s+", "", campana["nombre"], flags=re.I).strip()
-    malos = [c for c in titulo if c in npw.PROHIBIDO]
+    malos = [c for c in titulo if c in PROHIBIDO]
     if malos:
         return {"error": "El título no puede llevar %s: es también el nombre del archivo." % " ".join(malos)}
     destino = MAPAS_ROL / clave / (titulo + ".cmap")
@@ -1403,56 +448,12 @@ def nuevo_mapa_de_campana(peticion, clave):
     return {"ok": True, "mapa": leer_mapa(destino), "aviso": imagen.get("aviso", "")}
 
 
-def nuevo_mapa(peticion):
-    """Un .cmap nuevo con una imagen de fondo y nada encima, en la carpeta
-    de su página (o en la raíz de la bóveda si no es de ninguna). Con
-    «campana», el de una campaña (nuevo_mapa_de_campana)."""
-    if str(peticion.get("campana") or "").strip():
-        return nuevo_mapa_de_campana(peticion, str(peticion["campana"]).strip())
-    pagina = str(peticion.get("pagina") or "").strip()
-    titulo = str(peticion.get("titulo") or "").strip()
-    archivo_pagina = npw.pagina_llamada(pagina) if pagina else None
-    if pagina and not archivo_pagina:
-        return {"error": "No hay ninguna página que se llame «%s»." % pagina}
-    if archivo_pagina:
-        pagina = archivo_pagina.stem
-    nombre = pagina or titulo
-    if not nombre:
-        return {"error": "Hace falta la página del mapa o, si no es de ninguna, su título."}
-    malos = [c for c in nombre if c in npw.PROHIBIDO]
-    if malos:
-        return {"error": "El título no puede llevar %s: es también el nombre del archivo." % " ".join(malos)}
-    carpeta = archivo_pagina.parent if archivo_pagina else VAULT
-    destino = carpeta / (nombre + ".cmap")
-    if destino.exists():
-        return {"error": "Ya hay un mapa así: %s. Ábrelo desde la lista de mapas."
-                % destino.relative_to(VAULT).as_posix()}
-    if peticion.get("escala_comun") is not False:
-        imagen = imagen_de_mapa_a_escala(peticion, nombre)
-    else:
-        imagen = traer_imagen_de_mapa(peticion, nombre)
-    if imagen.get("error"):
-        return imagen
-    datos = {"version": "1.0", "title": titulo or titulo_por_defecto(nombre)}
-    if pagina:
-        datos["page"] = pagina
-    datos.update({"width": imagen["ancho"], "height": imagen["alto"],
-                  "layers": [{"id": "base", "name": "Mapa", "image": imagen["nombre"], "opacity": 1,
-                              "zIndex": 0, "visible": True}],
-                  "pins": [], "shapes": [], "lines": []})
-    if imagen.get("world"):
-        datos["world"] = imagen["world"]
-    escribir_texto(destino, json.dumps(datos, ensure_ascii=False, indent=2) + "\n")
-    return {"ok": True, "mapa": leer_mapa(destino), "aviso": imagen.get("aviso", "")}
-
-
 # =========================================
 # PASAR A LA WEB
 # =========================================
 
 PASAR_LOCK = threading.Lock()
-SCRIPTS_DE_PASAR = ("3-generadores/generar-mundo.py", "3-generadores/generar-mapas-rol.py",
-                    "3-generadores/actualizar-cabeceras.py")
+SCRIPTS_DE_PASAR = ("3-generadores/generar-mapas-rol.py", "3-generadores/actualizar-cabeceras.py")
 # Lo que se apuntó la última vez (cuántas líneas escribió cada script y
 # cuánto tardó), para que la barra de progreso sepa cuánto le queda.
 ULTIMA_PASADA = Path(tempfile.gettempdir()) / "editor-wiki-ultima-pasada.json"
@@ -1469,7 +470,8 @@ def _ultima_pasada():
 
 
 def pasar_a_la_web(al_avanzar=None):
-    """Pasa la wiki a la web (generar-mundo.py y actualizar-cabeceras.py)
+    """Pasa los mapas de las campañas a la web (generar-mapas-rol.py y
+    actualizar-cabeceras.py)
     leyendo lo que escriben según lo escriben. al_avanzar(fase,
     porcentaje): cuánto va. Se cuenta por el TIEMPO que lleva cada script
     comparado con lo que tardó la última vez (y por las líneas que lleva
@@ -1477,7 +479,7 @@ def pasar_a_la_web(al_avanzar=None):
     saltos, porque los scripts escriben casi todo al final. La primera
     vez, a ojo. Nunca pasa de 99 hasta que termina de verdad."""
     if not PASAR_LOCK.acquire(blocking=False):
-        return {"error": "Ya se está pasando la wiki; espera a que termine."}
+        return {"error": "Ya se está pasando a la web; espera a que termine."}
     try:
         antes = _ultima_pasada()
         lineas_antes = {s: int(antes.get(s, {}).get("lineas") or 0) for s in SCRIPTS_DE_PASAR}
@@ -1486,9 +488,8 @@ def pasar_a_la_web(al_avanzar=None):
         # Cuánto de la barra le toca a cada script: lo que tardó la última
         # vez (la primera, más o menos lo de siempre: el primero tarda más).
         pesos = ([tiempos[s] / total_tiempo for s in SCRIPTS_DE_PASAR] if total_tiempo > 0 and all(tiempos.values())
-                 else [0.6, 0.08, 0.32])
-        nombres = {"generar-mundo.py": "Montando las páginas de la wiki",
-                   "generar-mapas-rol.py": "Pintando los mapas de las campañas",
+                 else [0.3, 0.7])
+        nombres = {"generar-mapas-rol.py": "Pintando los mapas de las campañas",
                    "actualizar-cabeceras.py": "Poniendo las cabeceras y los menús"}
         salida, apuntado, hecho_antes = [], {}, 0.0
         entorno = dict(os.environ, PYTHONUNBUFFERED="1", PYTHONIOENCODING="utf-8")
@@ -1533,7 +534,7 @@ def pasar_a_la_web(al_avanzar=None):
             utiles = [l for l in lineas if l.strip()]
             salida.append(nombre + ":\n" + "\n".join(utiles[-12:]))
             if proceso.returncode:
-                return {"error": "Algo ha fallado al pasar la wiki.", "salida": "\n\n".join(salida)}
+                return {"error": "Algo ha fallado al pasarlo a la web.", "salida": "\n\n".join(salida)}
         try:
             ULTIMA_PASADA.write_text(json.dumps(apuntado), encoding="utf-8")
         except OSError:
@@ -1544,11 +545,10 @@ def pasar_a_la_web(al_avanzar=None):
 
 
 def empezar_a_pasar(peticion):
-    """Pasa la wiki en otro hilo y vuelve enseguida: el editor va
+    """Pasa el mapa en otro hilo y vuelve enseguida: el editor va
     preguntando a /api/pasar/estado cómo va (para la barra de progreso)."""
     if PASADA["activa"]:
         return {"empezado": True, "ya": True}
-    nombre = str(peticion.get("nombre") or "")
     mapa = ruta_de_mapa(peticion.get("mapa"))
     PASADA.update({"activa": True, "fase": "Empezando", "porcentaje": 0, "terminado": False, "resultado": None,
                    "registro": []})
@@ -1559,13 +559,8 @@ def empezar_a_pasar(peticion):
     def trabajar():
         try:
             hecho = pasar_a_la_web(avanzar)
-            if nombre:
-                hecho["url"] = url_de_la_pagina(nombre)
-            if mapa and es_de_campana(mapa):
+            if mapa and hecho.get("ok"):
                 hecho["url"] = leer_mapa(mapa).get("url", "")
-            elif mapa:
-                datos = _leer_cmap(mapa) or {}
-                hecho["url"] = url_de_la_pagina(str(datos.get("title") or mapa.stem))
         except Exception as error:  # que el editor lo cuente y no se quede esperando
             hecho = {"error": "Algo ha fallado: %s" % error}
         PASADA.update({"activa": False, "terminado": True, "porcentaje": 100, "resultado": hecho})
@@ -1631,23 +626,6 @@ class Editor(SimpleHTTPRequestHandler):
                     return self._json({"error": "Algo ha fallado: %s" % error}, 500)
                 return self._json(contestado if contestado is not None else {"error": "no existe"},
                                   200 if contestado is not None else 404)
-            if url.path == "/api/inicio":
-                return self._json({
-                    "plantillas": plantillas(),
-                    "paginas": [a.stem for a in todas()],
-                    "razas": npw.razas_que_hay(),
-                    "faltan": [{"nombre": n, "veces": v} for n, v in paginas_que_faltan()[:200]],
-                    "imagenes": imagenes_que_hay(),
-                    "arbol": arbol_de_la_wiki(),
-                })
-            if url.path == "/api/pagina":
-                nombre = (pregunta.get("nombre") or [""])[0]
-                archivo = npw.pagina_llamada(nombre)
-                if not archivo:
-                    parecidas = difflib.get_close_matches(nombre, [a.stem for a in todas()], 5, 0.5)
-                    return self._json({"error": "No hay ninguna página que se llame «%s»." % nombre,
-                                       "parecidas": parecidas}, 404)
-                return self._json(dict(leer_pagina(archivo), mapas=mapas_de(archivo.stem)))
             if url.path == "/api/pasar/estado":
                 return self._json(editor_web.estado_con_registro(PASADA, (pregunta.get("desde") or [""])[0]))
             if url.path == "/api/imagen-url":
@@ -1682,10 +660,7 @@ class Editor(SimpleHTTPRequestHandler):
             self.wfile.write(cuerpo)
             return None
         # El sitio: sin las herramientas ni lo escondido.
-        # (Las imágenes de la wiki sí: el editor enseña la que pone cada
-        # casilla.)
-        if url.path.startswith(("/herramientas", "/.git")) or (
-                url.path.startswith("/wiki/") and not url.path.startswith("/wiki/_imagenes/")):
+        if url.path.startswith(("/herramientas", "/.git")):
             return self._json({"error": "no existe"}, 404)
         return super().do_GET()
 
@@ -1705,34 +680,14 @@ class Editor(SimpleHTTPRequestHandler):
                 contestado = editor_web.atender_post(url.path, peticion)
                 if contestado is not None:
                     return self._json(contestado)
-            if url.path == "/api/crear":
-                return self._json(crear(peticion))
-            if url.path == "/api/mover":
-                return self._json(mover_pagina(peticion))
-            if url.path == "/api/vista-previa":
-                return self._json(vista_previa(peticion.get("cuerpo")))
-            if url.path == "/api/guardar":
-                archivo = npw.pagina_llamada(str(peticion.get("nombre") or ""))
-                if not archivo:
-                    return self._json({"error": "Esa página ya no está."})
-                campos = {str(k): str(v) for k, v in (peticion.get("campos") or {}).items()}
-                apartados = [None if t is None else str(t) for t in peticion.get("apartados") or []]
-                texto, crlf = juntar(archivo, campos, apartados, peticion.get("quitar") or [],
-                                     peticion.get("nuevos") or [])
-                escribir_texto(archivo, texto, crlf)
-                return self._json({"ok": True, "pagina": leer_pagina(archivo)})
-            if url.path == "/api/imagen":
-                return self._json(subir_imagen(peticion))
             if url.path == "/api/mapa/emblema":
                 return self._json(traer_emblema(peticion))
             if url.path == "/api/mapa/nuevo":
                 return self._json(nuevo_mapa(peticion))
-            if url.path in ("/api/mapa/situar", "/api/mapa/ampliar"):
+            if url.path == "/api/mapa/ampliar":
                 archivo = ruta_de_mapa(peticion.get("mapa"))
                 if not archivo:
                     return self._json({"error": "Ese mapa ya no está."})
-                if url.path == "/api/mapa/situar":
-                    return self._json(situar_mapa(archivo, peticion))
                 return self._json(ampliar_mapa(archivo, peticion))
             if url.path in ("/api/mapa/guardar", "/api/mapa/imagen"):
                 # (En la de la imagen, «archivo» es cómo se llamaba la
@@ -1741,9 +696,7 @@ class Editor(SimpleHTTPRequestHandler):
                 if not archivo:
                     return self._json({"error": "Ese mapa ya no está."})
                 if url.path == "/api/mapa/imagen":
-                    return self._json(traer_imagen_de_mapa(
-                        peticion, archivo.stem,
-                        "mapas-rol/%s/imagenes" % archivo.parent.name if es_de_campana(archivo) else None))
+                    return self._json(traer_imagen_de_mapa(peticion, archivo.stem, carpeta_de_imagenes(archivo)))
                 return self._json(guardar_mapa(archivo, peticion.get("datos")))
             if url.path == "/api/pasar":
                 return self._json(empezar_a_pasar(peticion))
@@ -1785,7 +738,7 @@ def main():
     puerto = puerto_libre()
     servidor = ThreadingHTTPServer(("127.0.0.1", puerto), Editor)
     direccion = "http://127.0.0.1:%d/editor/" % servidor.server_address[1]
-    # --en escribir|campanas|rol|wiki|rincon|repasar|neocities|github|comandos: abre ya en ese apartado.
+    # --en escribir|campanas|rol|rincon|repasar|neocities|github|comandos: abre ya en ese apartado.
     if "--en" in sys.argv[:-1]:
         direccion += "#" + sys.argv[sys.argv.index("--en") + 1]
     print("\n  ==================================")

@@ -1,0 +1,242 @@
+/* COMPONENTE: LA LUPA (una imagen a pantalla completa)
+
+   Una imagen grande encima de todo lo demás, con su nombre debajo. La
+   monta scripts/componentes/lupa.js y la quita al cerrarse; ahí está el
+   porqué de no ser otra ventana modal.
+
+   Estaba dentro de estilos/paginas/npcs-rol.css, que es donde se estrenó
+   (el retrato de un NPC en grande). Se sacó aquí el día que el botín de
+   una campaña quiso lo mismo con las fotos de los objetos. Las clases
+   perdieron el "npc-" de delante al mudarse: aquí ya no es de los npcs.
+
+       <div class="lupa">
+           <button class="lupa-cerrar">✕</button>
+           <img class="lupa-img">
+           <p class="lupa-pie">Sigil</p>
+       </div>
+*/
+
+.lupa {
+    position: fixed;
+    inset: 0;
+    /* Por encima de la ventana modal, que es lo que hay debajo. */
+    z-index: 1200;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    padding: 24px;
+    /* El fondo del propio tema, casi opaco. La primera versión era un
+       negro fijo y se veía bien... hasta el tema claro: el nombre de
+       debajo usa el color de texto del tema, que ahí es casi negro, y
+       quedaba negro sobre negro. Lo de alrededor tiene que ser del tema
+       para que el texto de encima siga valiendo. */
+    background: var(--surface);
+}
+
+.lupa-img {
+    max-width: min(96vw, 1400px);
+    /* Lo que quede de alto quitando el botón de cerrar y el nombre. */
+    max-height: 78vh;
+    object-fit: contain;
+    border: 2px solid var(--yellow);
+    background: var(--purple-lighter);
+}
+
+.lupa-pie {
+    margin: 0;
+    color: var(--white);
+    font-family: var(--fuente-mono);
+    font-size: 0.9375rem;
+    text-align: center;
+}
+
+.lupa-cerrar {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    /* 44px: lo que mide un dedo, como el resto de los botones del sitio. */
+    min-width: 44px;
+    min-height: 44px;
+    border: 2px solid var(--yellow);
+    background: var(--purple);
+    color: var(--yellow);
+    font-family: var(--fuente-mono);
+    font-size: 1.125rem;
+    line-height: 1;
+    cursor: pointer;
+}
+
+.lupa-cerrar:hover,
+.lupa-cerrar:focus-visible {
+    background: var(--yellow);
+    color: var(--yellow-contrast);
+}
+
+.lupa-cerrar:focus-visible {
+    outline: 2px solid var(--yellow);
+    outline-offset: 2px;
+}
+
+/* EL MAPA DE SITUACIÓN DE LA WIKI, PARA PULSAR (lo monta
+   scripts/paginas/mundo.js): el dibujo con las formas de los vecinos
+   encima, cada una un enlace, y debajo la misma lista en texto.
+
+       <div class="lupa-mapa"><svg class="lupa-mapa-svg">…</svg>
+           <div class="lupa-mapa-globo">la bandera y el nombre</div></div>
+       <nav class="lupa-mapa-vecinos"><p class="lupa-mapa-titulo">…</p>
+           <ul class="lupa-mapa-lista">…</ul></nav>
+
+   La lupa entera se desplaza si no cabe (en un móvil, el mapa y una lista
+   larga de vecinos). Con una clase y no con :has(), que no va en el
+   navegador de Richi. */
+.lupa.es-mapa {
+    justify-content: flex-start;
+    overflow-y: auto;
+    /* Opaco: con texto y enlaces encima, lo de debajo transparentándose
+       se leía mezclado con la lista. */
+    background: var(--purple);
+}
+
+.lupa-mapa {
+    position: relative;
+    flex: 0 0 auto;
+    /* El dibujo es 3:2; lo más grande que quepa a lo ancho y dejando
+       sitio a la lista de debajo. */
+    width: min(94vw, 1200px, calc(66vh * 1.5));
+    margin-top: 52px;
+}
+
+.lupa-mapa-svg {
+    display: block;
+    width: 100%;
+    height: auto;
+    aspect-ratio: 3 / 2;
+    border: 2px solid var(--yellow);
+    background: var(--purple-lighter);
+}
+
+.lupa-mapa-vecino path {
+    fill: transparent;
+    stroke: transparent;
+    stroke-width: 3px;
+    cursor: pointer;
+}
+
+.lupa-mapa-vecino:hover path,
+.lupa-mapa-vecino:focus path,
+.lupa-mapa-vecino.es-resaltado path {
+    fill: var(--yellow);
+    fill-opacity: 0.32;
+    stroke: var(--yellow);
+}
+
+.lupa-mapa-yo {
+    fill: none;
+    stroke: none;
+    pointer-events: none;
+}
+
+/* EL GLOBO del país por el que se pasa, como el del mapamundi
+   (estilos/paginas/mundo-mapa.css, .mapa-globo): su bandera, su nombre
+   y su subtítulo. Opaco, porque va encima del dibujo, y sin comerse el
+   ratón, para que no se tape a sí mismo y parpadee. */
+.lupa-mapa-globo {
+    position: absolute;
+    z-index: 2;
+    max-width: min(20rem, 70%);
+    padding: 6px 10px;
+    border: 2px solid var(--yellow);
+    background: var(--purple);
+    font-family: var(--fuente-mono);
+    font-size: 0.875rem;
+    line-height: 1.35;
+    pointer-events: none;
+}
+
+.lupa-mapa-globo[hidden] {
+    display: none;
+}
+
+.lupa-mapa-globo-bandera {
+    display: block;
+    width: 7.5rem;
+    height: auto;
+    aspect-ratio: 3 / 2;
+    margin-bottom: 6px;
+    object-fit: cover;
+    border: 1px solid var(--border);
+}
+
+.lupa-mapa-globo-nombre {
+    color: var(--yellow);
+    font-weight: 400;
+}
+
+.lupa-mapa-globo-que {
+    display: block;
+    color: var(--muted);
+    font-size: 0.75rem;
+}
+
+.lupa-mapa-vecinos {
+    flex: 0 0 auto;
+    width: min(94vw, 1200px, calc(66vh * 1.5));
+}
+
+.lupa-mapa-titulo {
+    margin: 0 0 8px;
+    color: var(--muted);
+    font-family: var(--fuente-mono);
+    font-size: 0.875rem;
+}
+
+.lupa-mapa-lista {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 18px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.lupa-mapa-lista a {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 0;
+    color: var(--yellow);
+    font-size: 1rem;
+    text-underline-offset: 3px;
+}
+
+.lupa-mapa-lista-bandera {
+    flex: 0 0 auto;
+    width: 30px;
+    height: 20px;
+    object-fit: cover;
+    border: 1px solid var(--border);
+}
+
+/* En alto contraste, el fondo casi negro lo repinta el sistema; lo que
+   hace falta es que el marco del dibujo siga viéndose. */
+@media (forced-colors: active) {
+    .lupa {
+        background: Canvas;
+    }
+
+    .lupa-img {
+        border-color: CanvasText;
+    }
+}
+
+/* No se imprime: es una capa de la pantalla. */
+@media print {
+    .lupa {
+        display: none;
+    }
+}

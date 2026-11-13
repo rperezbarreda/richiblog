@@ -1,9 +1,9 @@
 /* EL MAPA DE UN MUNDO — la página de un .cmap de Chronicler */
 
-/* La escribe herramientas/3-generadores/generar-mundo.py con la plantilla
-   herramientas/plantillas/mundo-mapa.html. La página lleva ADEMÁS
-   mundo.css, porque la cabecera, el título y los botones de volver son los
-   mismos que en un artículo de la wiki: aquí solo está el mapa.
+/* La escribe herramientas/3-generadores/generar-mapas-rol.py con la
+   plantilla herramientas/plantillas/mapa-rol.html (los mapas de las
+   campañas). La página lleva ADEMÁS mundo.css: la cabecera, el título y
+   los botones de volver. Aquí solo está el mapa.
 
    CÓMO ESTÁ MONTADO, QUE ES LO QUE EXPLICA CASI TODO LO DE ABAJO:
 
@@ -469,18 +469,6 @@ html:not(.js) .mapa-ayuda {
    ninguna región (es-suelto; ver mundo-mapa.js). */
 .mapa-paises.es-solo-sueltos > .mapa-forma:not(.es-suelto) {
     display: none;
-}
-
-/* LAS MIGAS, FIJAS: al bajar por la página se quedan arriba (las fija
-   mundo-mapa.js con position: fixed, nada de sticky), para poder volver a
-   la página del país en cualquier momento. */
-.mundo-migas.es-fija {
-    position: fixed;
-    z-index: 30;
-    padding: 8px 12px;
-    border-bottom: 2px solid var(--yellow);
-    background: var(--surface);
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.25);
 }
 
 .mapa-dibujos.es-apagada,

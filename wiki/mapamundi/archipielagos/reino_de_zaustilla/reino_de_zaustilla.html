@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-aDtzI6QgHfitL7afCewTh/rpYprDOJvupEIYVZKPk8Y='; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-src 'none'">
+    <!-- ==== TEMA ==== -->
+    <meta name="theme-color" content="#12091c">
+    <script>
+      (function () {
+        document.documentElement.classList.add("js");
+        try {
+          var temas = {
+            "claro": ["light", "#f3e1d6"],
+            "oscuro-puro": ["puro-oscuro", "#000000"],
+            "claro-puro": ["puro-claro", "#ffffff"],
+            "tranquilo": ["tranquilo", "#f2efe9"],
+            "tranquilo-oscuro": ["tranquilo-oscuro", "#1b1e22"],
+            "terminal-verde": ["terminal-verde", "#000000"],
+            "terminal-azul": ["terminal-azul", "#000000"],
+            "terminal-rojo": ["terminal-rojo", "#000000"],
+            "terminal-ambar": ["terminal-ambar", "#000000"]
+          };
+          var guardado = localStorage.getItem("richi-theme");
+          var elegido = temas[guardado];
+          if (!elegido && !guardado &&
+              window.matchMedia("(prefers-color-scheme: light)").matches) {
+            elegido = temas.claro;
+          }
+          if (elegido) {
+            document.documentElement.setAttribute("data-theme", elegido[0]);
+            var barra = document.querySelector('meta[name="theme-color"]');
+            if (barra) { barra.setAttribute("content", elegido[1]); }
+          }
+          if (localStorage.getItem("richi-lateral") === "plegada") {
+            document.documentElement.classList.add("lateral-plegada");
+          }
+        } catch (e) {}
+      })();
+    </script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reino de Zaustilla · Wiki Cralëa</title>
+    <meta name="description" content="Reino de Zaustilla es una isla grande e independiente.">
+    <link rel="canonical" href="https://richi.blog/wiki/mapamundi/archipielagos/reino_de_zaustilla/reino_de_zaustilla.html">
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="Wiki Cralëa">
+    <meta property="og:locale" content="es_ES">
+    <meta property="og:title" content="Reino de Zaustilla · Wiki Cralëa">
+    <meta property="og:description" content="Reino de Zaustilla es una isla grande e independiente.">
+    <meta property="og:url" content="https://richi.blog/wiki/mapamundi/archipielagos/reino_de_zaustilla/reino_de_zaustilla.html">
+    <meta property="og:image" content="https://richi.blog/wiki/imagenes/og.webp">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta property="og:image:alt" content="El mapamundi de Cralëa">
+    <meta name="twitter:card" content="summary_large_image">
+    <link rel="icon" type="image/x-icon" href="/wiki/imagenes/favicon.ico">
+    <link rel="preload" href="/wiki/tipografias/space-grotesk-400.woff2" as="font" type="font/woff2" crossorigin>
+    <!-- ==== CSS ==== -->
+    <link rel="stylesheet" href="/wiki/estilos/paquete-comun.css?v=77554dfa">
+    <link rel="stylesheet" href="/wiki/ligero/estilos/paginas/mundo.css?v=9183d02b">
+    <link rel="stylesheet" href="/wiki/ligero/estilos/componentes/lupa.css?v=64c1261a">
+    <link rel="stylesheet" href="/wiki/ligero/estilos/paginas/mundo.responsive.css?v=bfc68480">
+    <link rel="stylesheet" href="/wiki/estilos/paquete-cierre.css?v=40bef96c">
+    <!-- ==== fin del CSS ==== -->
+    <script src="/wiki/ligero/scripts/cargador-scripts.js?v=844503e7"></script>
+    <!-- ==== JS ==== -->
+    <script defer src="/wiki/scripts/paquete-comun.js?v=b9d49d50"></script>
+    <script defer src="/wiki/ligero/scripts/componentes/lupa.js?v=6c5d04d4"></script>
+    <script defer src="/wiki/ligero/scripts/paginas/mundo.js?v=2aabcb23"></script>
+    <!-- ==== fin del JS ==== -->
+    </head>
+<body>
+    <a class="skip-link" href="#main-content">Saltar al contenido</a>
+    <div id="sidebar-container" data-fragmento="barra-lateral">
+<!-- ==== FRAGMENTO barra-lateral ==== -->
+<header class="mobile-topbar">
+    <button id="sidebar-toggle" class="sidebar-toggle" type="button" aria-expanded="false" aria-controls="sidebar">
+        <span aria-hidden="true">☰</span>
+        <span class="visually-hidden">Abrir menú</span>
+    </button>
+    <p class="mobile-topbar-title"><span aria-hidden="true">·🜏·</span> WIKI CRALËA</p>
+</header>
+<button class="ajustes-abrir" type="button" data-ajustes-abrir
+        aria-haspopup="dialog">
+    <span class="ajustes-abrir-aa" aria-hidden="true">Aa</span>
+    <span class="ajustes-abrir-texto">ACCESIBILIDAD</span>
+</button>
+
+<dialog class="ajustes" data-ajustes aria-labelledby="ajustes-titulo">
+    <div class="ajustes-barra">
+        <h2 id="ajustes-titulo">accesibilidad.cfg</h2>
+        <button class="ajustes-cerrar" type="button" data-ajustes-cerrar>
+            <svg class="window-btn-icono" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                <path d="M5.5 5.5L18.5 18.5M18.5 5.5L5.5 18.5" fill="none"
+                      stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
+            </svg>
+            <span class="visually-hidden">Cerrar los ajustes</span>
+        </button>
+    </div>
+
+    <div class="ajustes-cuerpo">
+        <div class="ajustes-fila">
+            <label class="ajustes-nombre" for="ajustes-tamano">tamaño del texto</label>
+            <div class="ajustes-deslizador">
+                <span class="ajustes-aa ajustes-aa-pequena" aria-hidden="true">Aa</span>
+                <input class="ajustes-rango" type="range" id="ajustes-tamano"
+                       min="0" max="4" step="1" value="1"
+                       list="ajustes-tamano-marcas" data-tamano-rango>
+                <datalist id="ajustes-tamano-marcas">
+                    <option value="0"></option>
+                    <option value="1"></option>
+                    <option value="2"></option>
+                    <option value="3"></option>
+                    <option value="4"></option>
+                </datalist>
+                <span class="ajustes-aa ajustes-aa-grande" aria-hidden="true">Aa</span>
+            </div>
+            <p class="ajustes-valor" role="status">
+                <span class="visually-hidden">Texto al </span><span data-tamano-valor>100%</span>
+            </p>
+        </div>
+
+        <div class="ajustes-fila">
+            <p class="ajustes-nombre" id="ajustes-interlineado-nombre">separación entre líneas</p>
+            <div class="ajustes-mandos" role="group" aria-labelledby="ajustes-interlineado-nombre">
+                <button class="ajustes-opcion" type="button" data-interlineado="" aria-pressed="true">por defecto</button>
+                <button class="ajustes-opcion" type="button" data-interlineado="amplio" aria-pressed="false">amplia</button>
+                <button class="ajustes-opcion" type="button" data-interlineado="muy-amplio" aria-pressed="false">muy amplia</button>
+            </div>
+        </div>
+
+        <div class="ajustes-fila">
+            <p class="ajustes-nombre" id="ajustes-letra-nombre">la letra</p>
+            <div class="ajustes-mandos" role="group" aria-labelledby="ajustes-letra-nombre">
+                <button class="ajustes-opcion" type="button" data-letra="" aria-pressed="true">por defecto</button>
+                <button class="ajustes-opcion" type="button" data-letra="legible" aria-pressed="false">más legible</button>
+            </div>
+        </div>
+
+        <div class="ajustes-fila">
+            <p class="ajustes-nombre" id="ajustes-tema-nombre">color de tema</p>
+            <p class="ajustes-grupo-titulo" id="ajustes-tema-leer">para leer</p>
+            <div class="ajustes-mandos ajustes-temas" role="group" aria-labelledby="ajustes-tema-nombre ajustes-tema-leer">
+                <button class="ajustes-opcion" type="button" data-tema="oscuro" aria-pressed="true">
+                    <span class="ajustes-emoji" aria-hidden="true">🌙</span>oscuro</button>
+                <button class="ajustes-opcion" type="button" data-tema="claro" aria-pressed="false">
+                    <span class="ajustes-emoji" aria-hidden="true">☀️</span>claro</button>
+                <button class="ajustes-opcion" type="button" data-tema="oscuro-puro" aria-pressed="false">
+                    <span class="ajustes-emoji" aria-hidden="true">🌑</span>oscuro puro</button>
+                <button class="ajustes-opcion" type="button" data-tema="claro-puro" aria-pressed="false">
+                    <span class="ajustes-emoji" aria-hidden="true">🌕</span>claro puro</button>
+                <button class="ajustes-opcion" type="button" data-tema="tranquilo-oscuro" aria-pressed="false">
+                    <span class="ajustes-emoji" aria-hidden="true">🌿</span>tranquilo oscuro</button>
+                <button class="ajustes-opcion" type="button" data-tema="tranquilo" aria-pressed="false">
+                    <span class="ajustes-emoji" aria-hidden="true">🍃</span>tranquilo</button>
+            </div>
+
+            <p class="ajustes-grupo-titulo" id="ajustes-tema-adorno">de adorno</p>
+            <div class="ajustes-mandos ajustes-temas" role="group" aria-labelledby="ajustes-tema-nombre ajustes-tema-adorno">
+                <button class="ajustes-opcion" type="button" data-tema="terminal-verde" aria-pressed="false">
+                    <span class="ajustes-emoji" aria-hidden="true">🟢</span>terminal verde</button>
+                <button class="ajustes-opcion" type="button" data-tema="terminal-azul" aria-pressed="false">
+                    <span class="ajustes-emoji" aria-hidden="true">🔵</span>terminal azul</button>
+                <button class="ajustes-opcion" type="button" data-tema="terminal-rojo" aria-pressed="false">
+                    <span class="ajustes-emoji" aria-hidden="true">🔴</span>terminal rojo</button>
+                <button class="ajustes-opcion" type="button" data-tema="terminal-ambar" aria-pressed="false">
+                    <span class="ajustes-emoji" aria-hidden="true">🟡</span>terminal ámbar</button>
+            </div>
+            <p class="ajustes-grupo-nota">
+                Estas opciones de consola antigua no respetan el contraste mínimo de
+                accesibilidad, son meramente estéticas.
+            </p>
+        </div>
+
+        <div class="ajustes-fila">
+            <p class="ajustes-nombre">efectos visuales</p>
+            <div class="ajustes-mandos ajustes-mandos-anchos">
+                <button id="cursor-trail-toggle" class="theme-toggle" type="button" aria-pressed="true">
+                    <span class="theme-toggle-icon" aria-hidden="true">✦</span>
+                    <span class="cursor-trail-toggle-text">BRILLITO: ON</span>
+                </button>
+                <button class="theme-toggle" type="button" data-crt-boton aria-pressed="false">
+                    <span class="theme-toggle-icon" aria-hidden="true">▧</span>
+                    <span class="ajustes-crt-texto">FILTRO <abbr title="Cathode Ray Tube: los monitores de tubo de antes, con sus rayas y las esquinas apagadas">CRT</abbr>: <span data-crt-estado>OFF</span></span>
+                </button>
+            </div>
+        </div>
+
+        <div class="ajustes-fila">
+            <p class="ajustes-nombre" id="ajustes-movimiento-nombre">animaciones</p>
+            <div class="ajustes-mandos" role="group" aria-labelledby="ajustes-movimiento-nombre">
+                <button class="ajustes-opcion" type="button" data-movimiento="" aria-pressed="true">normal</button>
+                <button class="ajustes-opcion" type="button" data-movimiento="quieto" aria-pressed="false">sin animaciones</button>
+            </div>
+        </div>
+    </div>
+</dialog>
+<div id="sidebar-backdrop" class="sidebar-backdrop" hidden></div>
+<aside class="sidebar" id="sidebar" aria-label="Menú de la wiki">
+    <div class="sidebar-logo">
+        <p><span aria-hidden="true">·🜏·</span> WIKI CRALËA</p>
+    </div>
+    <button id="lateral-plegar" class="lateral-plegar" type="button"
+            aria-expanded="true" aria-controls="sidebar-menu" title="Plegar el menú">
+        <span aria-hidden="true">☰</span>
+        <span class="visually-hidden">Menú</span>
+    </button>
+    <div class="sidebar-top" id="sidebar-menu">
+        <form class="menu-wiki-buscar" role="search" action="/wiki/index.html" method="get">
+            <label class="visually-hidden" for="menu-wiki-q">Buscar en la wiki</label>
+            <input id="menu-wiki-q" name="buscar" type="search" placeholder="buscar…"
+                   autocomplete="off" spellcheck="false">
+            <button type="submit">
+                <span class="buscar-lupa" aria-hidden="true"></span>
+                <span class="visually-hidden">Buscar</span>
+            </button>
+        </form>
+        <nav>
+            <a href="/wiki/index.html">portada</a>
+            <div class="nav-group open">
+                <button class="nav-toggle" type="button" aria-expanded="true">
+                    <span>el mundo</span>
+                    <span class="arrow" aria-hidden="true">−</span>
+                </button>
+
+                <div class="submenu">
+                    <a href="/wiki/mapamundi/azarasia/azarasia.html">Azarasia</a>
+                    <a href="/wiki/mapamundi/partaria/partaria.html">Partaria</a>
+                    <a class="active" href="/wiki/index.html#mundo-archipielagos" data-marca="/wiki/mapamundi/archipielagos/" aria-current="true">Archipiélagos</a>
+                </div>
+            </div>
+
+            <div class="nav-group">
+                <button class="nav-toggle" type="button" aria-expanded="false">
+                    <span>secciones</span>
+                    <span class="arrow" aria-hidden="true">+</span>
+                </button>
+
+                <div class="submenu">
+                    <a href="/wiki/index.html#seccion-cosmologia" data-marca="/wiki/cosmologia/">cosmología</a>
+                    <a href="/wiki/index.html#seccion-historia" data-marca="/wiki/linea-de-tiempo/">historia</a>
+                    <a href="/wiki/index.html#seccion-religiones" data-marca="/wiki/religiones/panteon/">religiones</a>
+                </div>
+            </div>
+
+            <div class="nav-group">
+                <button class="nav-toggle" type="button" aria-expanded="false">
+                    <span>el tiempo</span>
+                    <span class="arrow" aria-hidden="true">+</span>
+                </button>
+
+                <div class="submenu">
+                    <a href="/wiki/linea-de-tiempo/linea_de_tiempo.html">línea de tiempo</a>
+                    <a href="/wiki/calendario/el_ciclo_de_los_heraldos.html">calendario</a>
+                    <a href="/wiki/utilidades/conversor_de_fechas.html">conversor de fechas</a>
+                </div>
+            </div>
+
+            <div class="nav-group">
+                <button class="nav-toggle" type="button" aria-expanded="false">
+                    <span>mapas</span>
+                    <span class="arrow" aria-hidden="true">+</span>
+                </button>
+
+                <div class="submenu">
+                    <a href="/wiki/mapa_mapamundi_de_cralea.html">Mapamundi de Cralëa</a>
+                    <a href="/wiki/mapamundi/azarasia/orden_de_clodia/mapa_orden_de_clodia.html">Orden de Clodia</a>
+                    <a href="/wiki/mapamundi/azarasia/reino_de_neclaverna/mapa_reino_de_neclaverna.html">Reino de Neclaverna</a>
+                    <a href="/wiki/mapamundi/azarasia/reino_de_prunia/mapa_reino_de_prunia.html">Reino de Prunia</a>
+                    <a href="/wiki/mapamundi/azarasia/reino_de_telzaria/mapa_reino_de_telzaria.html">Reino de Telzaria</a>
+                </div>
+            </div>
+
+            <div class="nav-group">
+                <button class="nav-toggle" type="button" aria-expanded="false">
+                    <span>herramientas</span>
+                    <span class="arrow" aria-hidden="true">+</span>
+                </button>
+
+                <div class="submenu">
+                    <a href="/wiki/utilidades/diccionario.html">diccionario</a>
+                    <a href="/wiki/utilidades/generador_de_nombres.html">generador de nombres</a>
+                    <a href="/wiki/utilidades/relaciones.html">relaciones</a>
+                    <a href="/wiki/como_se_escribe_esto.html">cómo se escribe esto</a>
+                </div>
+            </div>
+
+        </nav>
+        <p class="menu-wiki-blog"><a href="/"><span aria-hidden="true">← </span>richi.blog</a></p>
+    </div>
+</aside>
+<!-- ==== fin del FRAGMENTO barra-lateral ==== -->
+    </div>
+
+    <main id="main-content">
+        <section id="home" class="home mundo-page">
+            <div class="mundo-cabecera">
+                <div class="mundo-migas" role="navigation" aria-label="Dónde estás"><ol><li><a href="/wiki/index.html">Wiki Cralëa</a></li><li><a href="/wiki/index.html#mundo-regiones-titulo">Mapamundi</a></li><li><a href="/wiki/index.html#mundo-archipielagos">Archipiélagos</a></li><li aria-current="page">Reino de Zaustilla</li></ol></div>
+                <h1 class="mundo-titulo">Reino de Zaustilla</h1>
+                
+                <p class="mundo-etiquetas"><span class="mundo-etiquetas-label">etiquetas:</span><a class="mundo-etiqueta" href="/wiki/index.html?buscar=Mapamundi">Mapamundi</a><a class="mundo-etiqueta" href="/wiki/index.html?buscar=Archipi%C3%A9lagos">Archipiélagos</a></p>
+            </div>
+
+            <div class="mundo-columnas">
+                <article class="mundo-articulo"><div class="mundo-esbozo" role="note"><span class="mundo-esbozo-icono" aria-hidden="true">✎</span><div class="mundo-esbozo-texto"><p><strong>Esta página es un esbozo.</strong> Le falta:</p><ul><li>escribir 4 apartados, que aún tienen el texto de relleno</li><li>decidir 16 de los 16 datos de la ficha</li></ul></div></div><p><strong>Reino de Zaustilla</strong> es una isla grande e independiente.</p>
+<h2 id="historia">Historia</h2>
+<p><em>Texto de relleno.</em> Aquí irá la historia de Reino de Zaustilla: cómo empezó, quién la ha gobernado y qué la ha cambiado con los siglos.</p>
+<h3 id="origenes">Orígenes</h3>
+<p><em>Texto de relleno.</em> De dónde viene su gente, cuándo se asentó aquí y qué queda de aquellos primeros tiempos.</p>
+<h2 id="gobierno_y_sociedad">Gobierno y sociedad</h2>
+<p><em>Texto de relleno.</em> Quién manda en Reino de Zaustilla, cómo se eligen sus líderes y cómo vive la gente corriente.</p>
+<h2 id="cultura">Cultura</h2>
+<p><em>Texto de relleno.</em> Sus costumbres, sus fiestas, lo que comen y lo que cuentan de sí mismos.</p></article>
+
+                <div class="mundo-lateral"><div class="mundo-contenido" role="navigation" aria-labelledby="mundo-contenido-titulo"><details class="mundo-contenido-plegable" open data-mundo-contenido><summary class="mundo-contenido-cabecera"><span class="mundo-sub-flecha" aria-hidden="true">▾</span><h2 class="mundo-contenido-titulo" id="mundo-contenido-titulo">Contenido</h2></summary><ol><li><a href="#historia">Historia</a><ol><li><a href="#origenes">Orígenes</a></li></ol></li><li><a href="#gobierno_y_sociedad">Gobierno y sociedad</a></li><li><a href="#cultura">Cultura</a></li><li><a href="#mundo-backlinks-titulo">Se habla de esto en</a></li></ol></details></div><aside class="mundo-ficha" role="note" aria-labelledby="mundo-ficha-titulo"><div class="mundo-emblemas" data-mundo-emblemas><ul class="mundo-emblemas-lista"><li class="mundo-emblema" data-mundo-emblema="Bandera"><figure><img class="mundo-emblema-img" src="/wiki/imagenes/reino_de_zaustilla.webp" alt="Bandera de Reino de Zaustilla" loading="lazy" decoding="async"><figcaption>Bandera</figcaption></figure></li><li class="mundo-emblema" data-mundo-emblema="Mapa" data-mundo-pulsar="/wiki/datos/situacion/reino_de_zaustilla.json"><figure><img class="mundo-emblema-img" src="/wiki/imagenes/situacion/reino_de_zaustilla.webp" alt="Mapa de situación: Reino de Zaustilla resaltado en el Mapamundi de Cralëa" loading="lazy" decoding="async"><figcaption>Mapa</figcaption></figure></li></ul></div><h2 class="mundo-ficha-titulo" id="mundo-ficha-titulo">Reino de Zaustilla</h2><p class="mundo-ficha-que">País</p><dl class="mundo-ficha-datos"><div class="mundo-ficha-fila"><dt>nombre oficial</dt><dd><em>por decidir</em></dd></div><div class="mundo-ficha-fila"><dt>gentilicio</dt><dd><em>por decidir</em></dd></div><div class="mundo-ficha-apartado"><dt>Gobierno</dt><dd></dd></div><div class="mundo-ficha-fila"><dt>capital</dt><dd><em>por decidir</em></dd></div><div class="mundo-ficha-fila"><dt>forma de gobierno</dt><dd><em>por decidir</em></dd></div><div class="mundo-ficha-fila"><dt>gobernante</dt><dd><em>por decidir</em></dd></div><div class="mundo-ficha-fila"><dt>heredero</dt><dd><em>por decidir</em></dd></div><div class="mundo-ficha-fila"><dt>casa reinante</dt><dd><em>por decidir</em></dd></div><div class="mundo-ficha-apartado"><dt>Gentes</dt><dd></dd></div><div class="mundo-ficha-fila"><dt>población</dt><dd><em>por decidir</em></dd></div><div class="mundo-ficha-fila"><dt>pueblos</dt><dd><em>por decidir</em></dd></div><div class="mundo-ficha-fila"><dt>lenguas</dt><dd><em>por decidir</em></dd></div><div class="mundo-ficha-fila"><dt>religión</dt><dd><em>por decidir</em></dd></div><div class="mundo-ficha-fila"><dt>moneda</dt><dd><em>por decidir</em></dd></div><div class="mundo-ficha-apartado"><dt>Historia</dt><dd></dd></div><div class="mundo-ficha-fila"><dt>fundación</dt><dd><em>por decidir</em></dd></div><div class="mundo-ficha-fila"><dt>lema</dt><dd><em>por decidir</em></dd></div><div class="mundo-ficha-apartado"><dt>Relaciones</dt><dd></dd></div><div class="mundo-ficha-fila"><dt>aliados</dt><dd><em>por decidir</em></dd></div><div class="mundo-ficha-fila"><dt>enemigos</dt><dd><em>por decidir</em></dd></div></dl></aside></div>
+            </div>
+
+            <nav class="mundo-backlinks" aria-labelledby="mundo-backlinks-titulo"><h2 id="mundo-backlinks-titulo">Se habla de esto en</h2><ul><li><a class="mundo-enlace" href="/wiki/mapa_mapamundi_de_cralea.html">Mapamundi de Cralëa</a><span class="mundo-backlink-nota">mapa</span></li></ul></nav>
+
+            <a class="mundo-volver mundo-volver-abajo" href="/wiki/index.html">← volver a la wiki</a>
+        </section>
+    </main>
+</body>
+</html>

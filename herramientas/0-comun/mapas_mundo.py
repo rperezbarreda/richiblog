@@ -1,28 +1,11 @@
 #!/usr/bin/env python3
 # =========================================
-# LOS MAPAS REGIONALES, A LA MISMA ESCALA
+# AMPLIAR LA IMAGEN DE UN MAPA
 # =========================================
-# Esto NO se ejecuta solo: lo usa el editor de mapas (editor-wiki.py) al
-# hacer un mapa nuevo y en «El mapa en sí» → «En el mapamundi».
-#
-# LA ESCALA COMÚN. Todos los mapas regionales van a la MISMA escala: 8
-# píxeles de imagen por cada unidad del mapamundi (el .cmap del mapamundi
-# mide 1920 × 1080; su imagen, 2560 × 1440). Es la del mapa de Prunia,
-# que se hizo así. Con todos iguales, juntarlos en un mapa grande es poner
-# cada uno en su sitio, sin estirar ni encoger nada.
-#
-# SU SITIO EN EL MAPAMUNDI va en el .cmap del mapa regional, en "world":
-#
-#     "world": { "map": "Mapamundi de Cralëa.cmap",
-#                "x": 331.1, "y": 235.1, "w": 348, "h": 202.3 }
-#
-# en unidades del mapamundi (lo que mide su .cmap). Chronicler no lo usa
-# y no le molesta. Lo encuentra SOLO situar(): busca la imagen del mapa
-# regional dentro de la del mapamundi (OpenCV, SIFT: puntos que se
-# parecen en las dos y la mejor forma de encajarlos). Funciona con los
-# mapas que salen de recortar y ampliar el mapamundi, aunque estén
-# retocados; un mapa dibujado de cero no se parece y hay que situarlo a
-# mano en el editor.
+# Esto NO se ejecuta solo: lo usa el editor de mapas (editor-wiki.py) en
+# «El mapa en sí» → «Ampliar la imagen», para los mapas de las campañas.
+# (Se llama así porque empezó con los mapas de la wiki de Cralëa, que
+# también los situaba en el mapamundi; la wiki se fue a su propio repo.)
 #
 # AMPLIAR SIN PERDER CALIDAD. Agrandar una imagen con la cuenta de siempre
 # (Lanczos) solo la estira: los bordes salen borrosos. Con IA (Real-ESRGAN,
@@ -32,13 +15,7 @@
 # herramientas/programas/realesrgan/, que no va a GitHub. Usa la tarjeta
 # gráfica (Vulkan; vale la integrada): son segundos. Si no está, o falla,
 # se amplía con Lanczos y un poco de nitidez, y se avisa.
-#
-# OpenCV tampoco viene con Python: lo instala la misma herramienta
-# (pip install opencv-python-headless). Sin él, situar() lo dice y no
-# rompe nada.
 
-import json
-import math
 import platform
 import shutil
 import subprocess
@@ -46,12 +23,8 @@ import tempfile
 from pathlib import Path
 
 RAIZ = Path(__file__).resolve().parents[2]
-VAULT = RAIZ / "wiki"
-NOMBRE_DEL_MAPAMUNDI = "Mapamundi de Cralëa.cmap"
 CARPETA_DEL_AMPLIADOR = RAIZ / "herramientas" / "programas" / "realesrgan"
 
-# Píxeles de imagen regional por unidad del mapamundi.
-ESCALA_COMUN = 8
 # Más que esto de lado no lo abre bien casi nada (ni el navegador).
 LADO_MAXIMO = 8192
 CALIDAD = 90
@@ -59,133 +32,6 @@ CALIDAD = 90
 # dibujos de líneas limpias.
 MODELOS = {"pintado": "realesrgan-x4plus", "dibujo": "realesrgan-x4plus-anime"}
 
-
-# =========================================
-# EL MAPAMUNDI
-# =========================================
-
-def mapamundi():
-    """{"archivo", "nombre", "ancho", "alto", "imagen": Path} del
-    mapamundi, o None si no está."""
-    archivo = VAULT / NOMBRE_DEL_MAPAMUNDI
-    try:
-        datos = json.loads(archivo.read_text(encoding="utf-8"))
-    except (OSError, ValueError):
-        return None
-    capas = sorted(datos.get("layers") or [], key=lambda c: float(c.get("zIndex") or 0))
-    imagen = None
-    for capa in capas:
-        nombre = str(capa.get("image") or "")
-        for sitio in (VAULT / "_imagenes" / nombre, VAULT / "_imagenes" / "mapas" / nombre):
-            if nombre and sitio.is_file():
-                imagen = sitio
-                break
-        if imagen:
-            break
-    if not imagen:
-        return None
-    return {"archivo": archivo, "nombre": NOMBRE_DEL_MAPAMUNDI, "ancho": float(datos.get("width") or 0),
-            "alto": float(datos.get("height") or 0), "imagen": imagen}
-
-
-def hay_opencv():
-    try:
-        import cv2  # noqa: F401
-        return True
-    except ImportError:
-        return False
-
-
-# =========================================
-# SITUAR UN MAPA EN EL MAPAMUNDI
-# =========================================
-
-def situar(ruta_imagen):
-    """Dónde cae la imagen de un mapa regional en el mapamundi.
-    Devuelve {"x", "y", "w", "h", "map", "seguridad"} (en unidades del
-    mapamundi) o {"error": por qué no}."""
-    try:
-        import cv2
-        import numpy as np
-        from PIL import Image
-    except ImportError:
-        return {"error": "Para buscarlo solo hace falta OpenCV. Instálalo una vez con"
-                         " herramientas/2-imagenes/instalar-ayudas-de-mapas.py."}
-    mundo = mapamundi()
-    if not mundo:
-        return {"error": "No encuentro el mapamundi (wiki/%s) o su imagen." % NOMBRE_DEL_MAPAMUNDI}
-
-    def gris(ruta, lado, minimo=0):
-        with Image.open(ruta) as abierta:
-            plano = abierta.convert("L")
-            # Muy grande, se encoge (va más rápido); muy pequeña, se agranda
-            # un poco: en una imagen de 200 px apenas hay puntos que buscar.
-            f = min(1.0, lado / max(plano.size))
-            if minimo and max(plano.size) < minimo:
-                f = minimo / max(plano.size)
-            if f != 1:
-                plano = plano.resize((round(plano.width * f), round(plano.height * f)), Image.LANCZOS)
-            return np.array(plano), f
-
-    try:
-        regional, f1 = gris(ruta_imagen, 3000, minimo=900)
-        grande, f2 = gris(mundo["imagen"], 4000)
-    except OSError as error:
-        return {"error": "No he podido abrir la imagen: %s" % error}
-    sift = cv2.SIFT_create()
-    k1, d1 = sift.detectAndCompute(regional, None)
-    k2, d2 = sift.detectAndCompute(grande, None)
-    if d1 is None or d2 is None or len(k1) < 10:
-        return {"error": "La imagen no tiene detalles con los que buscarla."}
-    pares = cv2.BFMatcher().knnMatch(d1, d2, k=2)
-    buenos = [a for a, *b in pares if b and a.distance < 0.8 * b[0].distance]
-    if len(buenos) < 12:
-        return {"error": "No se parece a ningún trozo del mapamundi (¿está dibujado de cero?). Sitúalo a mano."}
-    origen = np.float32([k1[a.queryIdx].pt for a in buenos])
-    destino = np.float32([k2[a.trainIdx].pt for a in buenos])
-    matriz, dentro = cv2.estimateAffinePartial2D(origen, destino, ransacReprojThreshold=4)
-    seguridad = int(dentro.sum()) if dentro is not None else 0
-    if matriz is None or seguridad < 12:
-        return {"error": "No he encontrado dónde cae con seguridad. Sitúalo a mano."}
-    escala = math.hypot(matriz[0, 0], matriz[1, 0])
-    giro = math.degrees(math.atan2(matriz[1, 0], matriz[0, 0]))
-    if abs(giro) > 3:
-        return {"error": "Parece que está girado respecto al mapamundi (%.0f°). Sitúalo a mano." % giro}
-    # De píxeles de la imagen regional (la de verdad) a píxeles de la
-    # imagen del mapamundi (la de verdad), y de ahí a unidades del
-    # mapamundi (su .cmap).
-    with Image.open(ruta_imagen) as abierta:
-        ancho, alto = abierta.size
-    with Image.open(mundo["imagen"]) as abierta:
-        ancho_mundo_img = abierta.size[0]
-    por_unidad = ancho_mundo_img / mundo["ancho"]
-    x = (matriz[0, 2] / f2) / por_unidad
-    y = (matriz[1, 2] / f2) / por_unidad
-    w = ancho * f1 * escala / f2 / por_unidad
-    h = alto * f1 * escala / f2 / por_unidad
-    redondo = lambda n: round(float(n), 1)  # noqa: E731
-    return {"map": mundo["nombre"], "x": redondo(x), "y": redondo(y), "w": redondo(w), "h": redondo(h),
-            "seguridad": seguridad}
-
-
-def medida_comun(mundo_rect, ancho, alto):
-    """Lo que debería medir la imagen de un mapa situado en mundo_rect para
-    ir a la escala común (sin pasar de LADO_MAXIMO). Devuelve (ancho,
-    alto, escala_de_verdad)."""
-    escala = ESCALA_COMUN
-    w, h = float(mundo_rect["w"]) * escala, float(mundo_rect["h"]) * escala
-    if max(w, h) > LADO_MAXIMO:
-        escala = escala * LADO_MAXIMO / max(w, h)
-        w, h = float(mundo_rect["w"]) * escala, float(mundo_rect["h"]) * escala
-    # Con la forma de la imagen (el ancho manda: el alto, en proporción).
-    nuevo_ancho = max(1, round(w))
-    nuevo_alto = max(1, round(nuevo_ancho * alto / ancho))
-    return nuevo_ancho, nuevo_alto, escala
-
-
-# =========================================
-# AMPLIAR (O ENCOGER) A UNA MEDIDA
-# =========================================
 
 def ampliador():
     """El programa de Real-ESRGAN, si está instalado."""
@@ -256,7 +102,4 @@ def a_medida(origen, destino, ancho, alto, ia=True, modelo="pintado"):
 
 
 if __name__ == "__main__":
-    import sys
-    if len(sys.argv) > 1:
-        print(json.dumps(situar(sys.argv[1]), ensure_ascii=False))
-    print("OpenCV:", "sí" if hay_opencv() else "no", "· ampliador con IA:", ampliador() or "no")
+    print("Ampliador con IA:", ampliador() or "no")

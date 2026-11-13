@@ -16,10 +16,8 @@ huella. Así subir después de cambiar una entrada son unos pocos archivos
 y no los 23 MB del sitio.
 
 QUÉ SE SUBE: todo lo de la carpeta del sitio MENOS mapas-rol/ (el origen
-de los mapas de las campañas), herramientas/ (es
-solo para ti), wiki/ (el origen de la wiki: ninguna página la pide; lo
-que se sube es lo que genera, en web/wiki/, imagenes/wiki/ y
-datos/wiki/), .git y lo que empieza por punto, y la basurilla
+de los mapas de las campañas), herramientas/ (es solo para ti), .git y
+lo que empieza por punto, y la basurilla
 (__pycache__, Thumbs.db, desktop.ini, .DS_Store). Lo mismo que dice el
 LEEME.
 
@@ -63,9 +61,10 @@ RAIZ = Path(__file__).resolve().parent.parent.parent
 API = os.environ.get("NEOCITIES_URL_API", "https://neocities.org/api").rstrip("/")
 ARCHIVO_DE_CLAVE = Path.home() / ".richiblog-neocities"
 
-# mapas-rol/ es como wiki/: el origen de los mapas de las campañas; lo que
-# se publica lo escribe generar-mapas-rol.py.
-CARPETAS_QUE_NO = {"herramientas", "wiki", "mapas-rol"}
+# mapas-rol/ es el origen de los mapas de las campañas; lo que se publica
+# lo escribe generar-mapas-rol.py. (wiki/ SÍ se sube: es la wiki
+# publicada, que trae traer-wiki.py de su repo.)
+CARPETAS_QUE_NO = {"herramientas", "mapas-rol"}
 BASURA = {"__pycache__", "Thumbs.db", "desktop.ini", ".DS_Store"}
 EXTENSIONES_QUE_NO = {".pyc", ".py"}
 # Lo que una cuenta gratis de Neocities no deja subir (de lo que puede

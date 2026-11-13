@@ -3,7 +3,7 @@
 // =========================================
 // El zoom, el arrastre y las capas de la página de un mapa
 // (web/wiki/mapa_<loquesea>.html, que escribe
-// herramientas/3-generadores/generar-mundo.py a partir de un .cmap de
+// herramientas/3-generadores/generar-mapas-rol.py a partir de un .cmap de
 // Chronicler).
 //
 // ESTO ES UN AÑADIDO, NO EL MAPA. El mapa es un SVG que está en el HTML:
@@ -168,7 +168,6 @@ function initializeMundoMapa() {
     prepararLeyendaDeMapa(mando);
     prepararRutaDeMapa(mando);
     prepararBuscadorDeMapa(mando);
-    fijarMigasDeMapa();
     ponerZoomDeMapa(mando, 1);
     centrarMapa(mando);
     prepararSesionesDeMapa(mando);
@@ -1438,7 +1437,7 @@ function prepararSitiosDeMapa() {
 // LA IMAGEN GRANDE, SOLO CUANDO HACE FALTA
 // =========================================
 // El dibujo del mapa llega en pequeño (1280 de ancho: un cuarto de lo que
-// pesa el de 2560, ver preparar_capas en generar-mundo.py), que es lo que
+// pesa el de 2560, ver preparar_capa en generar-mapas-rol.py), que es lo que
 // se ve en un móvil y en la mayoría de pantallas con el mapa entero. En
 // cuanto lo que se pinta pide más puntos de los que tiene —al acercar el
 // mapa, o en una pantalla muy grande o de mucha densidad— se baja el
@@ -2409,60 +2408,4 @@ function prepararRutaDeMapa(mando) {
         pintar();
     }, true);
     pintar();
-}
-
-
-// =========================================
-// LAS MIGAS, FIJAS ARRIBA
-// =========================================
-// Al bajar por la página, las migas (Wiki Cralëa › … › Reino de Prunia ›
-// Mapa) se quedan arriba, para poder volver al país en cualquier momento.
-// Sin sticky (no va en el navegador de Richi): cuando su sitio se sale
-// por arriba, pasan a position: fixed en lo alto de la caja que se
-// desplaza (.home), con su ancho; y dejan en su sitio un hueco de su alto
-// para que lo de debajo no salte.
-
-function fijarMigasDeMapa() {
-    const migas = document.querySelector(".mundo-migas");
-    if (!migas) {
-        return;
-    }
-    const home = migas.closest(".home");
-    const hueco = document.createElement("div");
-    hueco.className = "mundo-migas-hueco";
-    migas.before(hueco);
-    hueco.appendChild(migas);
-    const colocar = () => {
-        // Arriba del todo de lo que se ve: el borde de .home si es ella la
-        // que se desplaza; si no (en un móvil se desplaza la página), la
-        // ventana.
-        const seDesplaza = home && home.scrollHeight > home.clientHeight + 1
-            && /(auto|scroll)/.test(getComputedStyle(home).overflowY);
-        const arriba = seDesplaza ? Math.max(0, home.getBoundingClientRect().top) : 0;
-        const sitio = hueco.getBoundingClientRect();
-        const fija = sitio.top < arriba;
-        if (fija) {
-            hueco.style.minHeight = migas.offsetHeight + "px";
-            migas.classList.add("es-fija");
-            migas.style.top = arriba + "px";
-            migas.style.left = sitio.left + "px";
-            // De lado a lado de la página (con el mismo margen a los dos
-            // lados), no lo que mida su hueco, que es más estrecho.
-            const caja = home ? home.getBoundingClientRect() : { left: 0, right: window.innerWidth };
-            const margen = Math.max(0, sitio.left - caja.left);
-            migas.style.width = Math.max(sitio.width, caja.right - caja.left - 2 * margen) + "px";
-        } else {
-            migas.classList.remove("es-fija");
-            hueco.style.minHeight = "";
-            migas.style.top = "";
-            migas.style.left = "";
-            migas.style.width = "";
-        }
-    };
-    if (home) {
-        home.addEventListener("scroll", colocar, { passive: true });
-    }
-    window.addEventListener("scroll", colocar, { passive: true });
-    window.addEventListener("resize", colocar);
-    colocar();
 }

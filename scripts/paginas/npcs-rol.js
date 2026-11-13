@@ -298,7 +298,7 @@ function repartirPorApartadosNpc(lista, orden, porGrupo, datos) {
 // UN APARTADO SE PLIEGA Y SE DESPLIEGA. Por dentro es un <details>, que
 // lo hace solo —con el ratón, con el teclado y diciéndolo un lector de
 // pantalla— sin que haya que escribir nada de eso a mano. Es lo mismo que
-// hacen los apartados de la wiki (scripts/paginas/mundo.js).
+// hacían los apartados de la wiki de Cralëa cuando vivía aquí.
 //
 // El <details> va DENTRO del <li> y no es el <li>: la lista de apartados
 // es un <ul> y lo único que puede colgar de un <ul> es un <li>. El <li>
@@ -366,7 +366,7 @@ function bloqueDeApartadoNpc(apartado, categorias, porGrupo, datos) {
 // de los abiertos: así un apartado nuevo —uno que aparezca al añadir una
 // región al JSON— nace abierto, que es lo que se espera.
 //
-// La caja es la misma idea que la de la wiki pero con su propia llave:
+// Con su propia llave (la wiki de Cralëa, en /wiki/, tiene la suya):
 // cerrar «Sirevia» en los npcs no tiene por qué cerrar nada en la wiki.
 const NPC_CERRADOS = leerCerradosNpc();
 
@@ -624,7 +624,7 @@ function repasarGruposNpc() {
     // ¿Se está buscando o filtrando algo? Entonces los apartados plegados
     // se abren solos: encontrar a alguien y que no se vea porque su región
     // estaba cerrada es peor que no encontrarlo. Al terminar la búsqueda
-    // vuelven a como estaban. Lo mismo que hace la wiki.
+    // vuelven a como estaban.
     const rebuscando = buscandoAlgo;
 
     document.querySelectorAll(".npc-apartado").forEach((apartado) => {

@@ -89,7 +89,6 @@ function initializeMundoMapa() {
     prepararLeyendaDeMapa(mando);
     prepararRutaDeMapa(mando);
     prepararBuscadorDeMapa(mando);
-    fijarMigasDeMapa();
     ponerZoomDeMapa(mando, 1);
     centrarMapa(mando);
     prepararSesionesDeMapa(mando);
@@ -1833,43 +1832,4 @@ function prepararRutaDeMapa(mando) {
         pintar();
     }, true);
     pintar();
-}
-function fijarMigasDeMapa() {
-    const migas = document.querySelector(".mundo-migas");
-    if (!migas) {
-        return;
-    }
-    const home = migas.closest(".home");
-    const hueco = document.createElement("div");
-    hueco.className = "mundo-migas-hueco";
-    migas.before(hueco);
-    hueco.appendChild(migas);
-    const colocar = () => {
-        const seDesplaza = home && home.scrollHeight > home.clientHeight + 1
-            && /(auto|scroll)/.test(getComputedStyle(home).overflowY);
-        const arriba = seDesplaza ? Math.max(0, home.getBoundingClientRect().top) : 0;
-        const sitio = hueco.getBoundingClientRect();
-        const fija = sitio.top < arriba;
-        if (fija) {
-            hueco.style.minHeight = migas.offsetHeight + "px";
-            migas.classList.add("es-fija");
-            migas.style.top = arriba + "px";
-            migas.style.left = sitio.left + "px";
-            const caja = home ? home.getBoundingClientRect() : { left: 0, right: window.innerWidth };
-            const margen = Math.max(0, sitio.left - caja.left);
-            migas.style.width = Math.max(sitio.width, caja.right - caja.left - 2 * margen) + "px";
-        } else {
-            migas.classList.remove("es-fija");
-            hueco.style.minHeight = "";
-            migas.style.top = "";
-            migas.style.left = "";
-            migas.style.width = "";
-        }
-    };
-    if (home) {
-        home.addEventListener("scroll", colocar, { passive: true });
-    }
-    window.addEventListener("scroll", colocar, { passive: true });
-    window.addEventListener("resize", colocar);
-    colocar();
 }

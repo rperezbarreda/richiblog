@@ -1,0 +1,20 @@
+[
+    {
+        "nombre": "Azarasia",
+        "url": "/wiki/mapamundi/azarasia/azarasia.html",
+        "imagen": "/wiki/imagenes/situacion/peque/azarasia.webp",
+        "cuenta": 25
+    },
+    {
+        "nombre": "Partaria",
+        "url": "/wiki/mapamundi/partaria/partaria.html",
+        "imagen": "/wiki/imagenes/situacion/peque/partaria.webp",
+        "cuenta": 29
+    },
+    {
+        "nombre": "Archipiélagos",
+        "url": "",
+        "imagen": "/wiki/imagenes/situacion/peque/archipielagos.webp",
+        "cuenta": 62
+    }
+]

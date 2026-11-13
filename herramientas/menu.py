@@ -15,7 +15,7 @@
 #     python herramientas/menu.py --texto
 #
 # y sale una lista de APARTADOS, los mismos que el menú de la web: blog,
-# mis movidas, rol, la wiki, mi rincón… Eliges uno y dentro están sus
+# mis movidas, rol, mi rincón… Eliges uno y dentro están sus
 # herramientas. Lo de rol con lo de rol, lo del blog con lo del blog.
 #
 # Si ya sabes a dónde vas, se puede escribir directamente el apartado y la
@@ -109,32 +109,11 @@ APARTADOS = [
         ("Traer la pantalla de máster a la web",
          "1-publicar/traer-pantalla-master.py", [],
          "Copia la última versión de la app (de GitHub) en pantalla-master/, tal cual."),
+        ("Traer la wiki de Cralëa a la web",
+         "1-publicar/traer-wiki.py", [],
+         "Copia la wiki publicada (sitio/wiki/ de wiki_cralea, en GitHub) en wiki/, tal cual."),
         PUBLICAR,
         editor("campanas", "Las notas de partida, los NPC, el botín y lo demás de las campañas, con fichas."),
-    ]),
-
-    ("Wiki Cralëa", "escribir sus páginas, la línea de tiempo y pasarla a la web", [
-        ("Escribir en la wiki con el editor (en el navegador)",
-         EDITOR, ["--en", "wiki"],
-         "Páginas, mapas, línea de tiempo, calendario y diccionario; y pasarla a la web."),
-        ("Escribir una página nueva de la wiki (aquí, con preguntas)",
-         "1-publicar/nueva-pagina-wiki.py", [],
-         "Elige el tipo (país, personaje, monstruo…) y crea el .md con su plantilla."),
-        ("Llevar la línea de tiempo",
-         "1-publicar/linea-de-tiempo.py", [],
-         "Añadir, cambiar o quitar eventos. Cada uno tiene su página."),
-        ("Llevar el calendario (festividades y eventos)",
-         "1-publicar/calendario.py", [],
-         "Lo que sale marcado en el calendario de la portada de la wiki."),
-        ("Llevar el diccionario",
-         "1-publicar/diccionario.py", [],
-         "Las palabras de las lenguas del mundo (y del generador de nombres)."),
-        ("Ver lo que falta en la wiki",
-         "5-consulta/pendientes-wiki.py", [],
-         "Páginas por escribir, campos «por decidir», relleno e imágenes."),
-        ("Pasar la wiki a la web",
-         "3-generadores/generar-mundo.py", [],
-         "Convierte los .md y el mapa de la carpeta wiki/ en páginas."),
     ]),
 
     ("Mi rincón", "en lo que ando, recomendaciones y los gatos", [
@@ -160,9 +139,9 @@ APARTADOS = [
         ("Sacar los tamaños del dibujo de la portada",
          "2-imagenes/tamanos-portada.py", [],
          "Solo si has cambiado el dibujo de la portada."),
-        ("Instalar las ayudas de los mapas (una vez)",
+        ("Instalar el ampliador de los mapas (una vez)",
          "2-imagenes/instalar-ayudas-de-mapas.py", [],
-         "Para que el editor busque los mapas en el mapamundi y los amplíe con IA sin que salgan borrosos."),
+         "Para que el editor amplíe las imágenes de los mapas con IA sin que salgan borrosas."),
         editor("repasar", "Elegir la imagen en una ventana en vez de pegar la ruta."),
     ]),
 

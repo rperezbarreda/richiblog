@@ -39,10 +39,7 @@
 #   montan con ${...}, porque hasta que no corre el navegador no se sabe
 #   cómo quedan.
 # - Las anclas (#algo) se comprueban también, mirando si existe ese id
-#   en la página de destino o en los fragmentos que se inyectan. En la
-#   portada de la wiki, además, los apartados de la lista («#mundo-
-#   archipielagos», al que llevan las migas) los pone mundo.js al cargar:
-#   valen los de las carpetas de web/wiki/ (ver ids_de_la_portada_wiki).
+#   en la página de destino o en los fragmentos que se inyectan.
 # - El ?v= de las direcciones se ignora: es la marca anti-caché que pone
 #   actualizar-cabeceras.py, no parte del nombre del archivo.
 # - Al final lista los archivos a los que no apunta nadie. Ojo con esa
@@ -51,7 +48,6 @@
 #   de una prueba.
 
 import sys
-import unicodedata
 from pathlib import Path
 
 # comun.py vive un piso más arriba, en herramientas/, y Python solo busca
@@ -109,19 +105,6 @@ CARPETAS_HUERFANOS = ("imagenes", "estilos", "scripts", "tipografias", "fragment
 # es una herramienta y no el navegador. Sin esto salen en la lista de "no
 # apunta nadie" cada vez, y una lista con ruido se deja de mirar.
 LOS_LEEN_LAS_HERRAMIENTAS = {
-    # Los apartados de la portada del mundo: los lee
-    # 3-generadores/generar-mundo.py al escribir datos/wiki/mundo.json.
-    "datos/wiki/mundo-categorias.json",
-    # Los eventos de la línea de tiempo: los leen
-    # 3-generadores/generar-linea-tiempo.py y 1-publicar/linea-de-tiempo.py.
-    "datos/wiki/linea-de-tiempo.json",
-    # Las palabras del diccionario: las lee 3-generadores/generar-mundo.py
-    # (las pone en la página Diccionario) y 1-publicar/diccionario.py.
-    "datos/wiki/diccionario.json",
-    # Las hojas de la página de la línea de tiempo. Mientras no haya ningún
-    # evento esa página no existe, y nadie las pide; con el primero, sí.
-    "estilos/paginas/mundo-linea.css",
-    "estilos/paginas/mundo-linea.responsive.css",
     # Las recetas: su JSON lo leen 3-generadores/generar-recetas.py (que
     # escribe las páginas) y generar-posts.py; su script lo piden las
     # páginas de cada receta, y mientras no haya ninguna nadie lo pide.
@@ -442,26 +425,6 @@ def ids_de_fragmentos():
     return ids
 
 
-PORTADA_WIKI = "web/wiki/index_wiki.html"
-
-
-def ids_de_la_portada_wiki():
-    """Los id que mundo.js pone a cada apartado de la lista de la
-    portada de la wiki (idDeSubMundo: «mundo-» y el nombre sin tildes,
-    con guiones). Las migas de una página sin página de su parte
-    (Archipiélagos) llevan ahí, y esa parte sale de su carpeta, así que
-    valen los nombres de las carpetas de web/wiki/."""
-    ids = set()
-    base = RAIZ / "web" / "wiki"
-    if base.is_dir():
-        for carpeta in base.rglob("*"):
-            if carpeta.is_dir():
-                nombre = unicodedata.normalize("NFD", carpeta.name)
-                nombre = "".join(c for c in nombre if not unicodedata.combining(c)).lower()
-                ids.add("mundo-" + re.sub(r"[^a-z0-9]+", "-", nombre).strip("-"))
-    return ids
-
-
 # =========================================
 # RECORRER EL SITIO
 # =========================================
@@ -470,8 +433,13 @@ def archivos_del_sitio():
     for ruta in sorted(RAIZ.rglob("*")):
         if not ruta.is_file():
             continue
-        partes = set(ruta.relative_to(RAIZ).parts)
-        if partes & FUERA:
+        relativa = ruta.relative_to(RAIZ).parts
+        if set(relativa) & FUERA:
+            continue
+        # Las apps que van tal cual (pantalla-master/, wiki/) se miran en
+        # su repo: aquí solo cuenta que lo del blog que apunta a ellas
+        # exista.
+        if relativa[0] in APPS_APARTE:
             continue
         yield ruta
 
@@ -552,7 +520,6 @@ def revisar(mirar_externos=False):
     medias_rutas = set()
 
     ids_inyectados = ids_de_fragmentos()
-    ids_portada_wiki = ids_de_la_portada_wiki()
 
     for ruta, linea, ref, queja in referencias(medias_rutas):
         if queja:
@@ -580,8 +547,7 @@ def revisar(mirar_externos=False):
             usados.add(real)
 
         if ancla and real.suffix.lower() == ".html":
-            de_mundo = (real.relative_to(RAIZ).as_posix() == PORTADA_WIKI and ancla in ids_portada_wiki)
-            if ancla not in ids_de(real) and ancla not in ids_inyectados and not de_mundo:
+            if ancla not in ids_de(real) and ancla not in ids_inyectados:
                 anclas.append((ruta, linea, ref))
 
     # --- lo que no usa nadie ---
@@ -608,11 +574,10 @@ def revisar(mirar_externos=False):
             continue
         if pagina.relative_to(RAIZ).as_posix() in ENTRADAS:
             continue
-        # Las ventanas de las apps que van tal cual (la de jugadores y el
-        # reproductor de la pantalla de máster): las abre la app desde
-        # su JS, no un enlace.
+        # Las apps que van tal cual (pantalla-master/, wiki/): sus páginas
+        # las enlaza la propia app (su menú, sus ventanas), no el blog.
         partes = pagina.relative_to(RAIZ).parts
-        if partes[0] in APPS_APARTE and partes[1:] != ("index.html",):
+        if partes[0] in APPS_APARTE:
             continue
         huerfanos.append(pagina)
 

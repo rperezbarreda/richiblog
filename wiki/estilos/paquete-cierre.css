@@ -1,0 +1,695 @@
+/* ARCHIVO GENERADO — NO LO EDITES.
+   Lo escribe herramientas/3-generadores/actualizar-cabeceras.py
+   pegando los archivos de abajo, que son los que lleva TODA
+   página del sitio. Para cambiar algo se toca el archivo de
+   verdad y se vuelve a pasar la herramienta.
+
+   fuente: /wiki/estilos/componentes/barra-lateral.css
+   fuente: /wiki/estilos/componentes/barra-lateral.responsive.css
+   fuente: /wiki/estilos/componentes/menu-wiki.css
+   fuente: /wiki/estilos/componentes/ventanas-plegables.css
+   fuente: /wiki/estilos/componentes/impresion.css
+   fuente: /wiki/estilos/componentes/sin-movimiento.css
+*/
+
+/* ======== /wiki/estilos/componentes/barra-lateral.css ======== */
+.sidebar {
+    position: fixed;
+    left: 0;
+    top: 0;
+    width: var(--lateral-ancho);
+    height: 100vh;
+    padding: 15px 20px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    z-index: 50;
+}
+.sidebar-top {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 auto;
+    min-height: 0;
+}
+.sidebar-top::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 24px;
+    background: linear-gradient(to bottom, transparent, var(--surface));
+    opacity: 0;
+    transition: opacity 0.1s linear;
+    pointer-events: none;
+}
+.sidebar-top.has-scroll::after {
+    opacity: 1;
+}
+.sidebar-logo {
+    margin-bottom: 10px;
+}
+.sidebar-logo p {
+    display: block;
+    width: 100%;
+    box-sizing: border-box;
+    text-align: center;
+    background: var(--yellow);
+    color: var(--yellow-contrast);
+    padding: 6px 8px;
+    font-family: var(--fuente-mono);
+    font-size: 0.7rem;
+    font-weight: 500;
+    letter-spacing: 0.15px;
+    line-height: 1.4;
+    overflow-wrap: break-word;
+}
+.lateral-plegar {
+    position: absolute;
+    top: 14px;
+    right: -31px;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 48px;
+    height: 48px;
+    margin: 0;
+    padding: 0;
+    border: 2px solid var(--yellow);
+    box-shadow: 0 0 0 3px var(--purple);
+    background: var(--purple);
+    color: var(--yellow);
+    font-size: 1.35rem;
+    line-height: 1;
+    cursor: pointer;
+}
+.lateral-plegar:hover,
+.lateral-plegar:focus-visible {
+    background: var(--yellow);
+    color: var(--yellow-contrast);
+}
+.lateral-plegar:focus-visible {
+    outline: 2px solid var(--yellow);
+    outline-offset: 5px;
+}
+@media (min-width: 861px) {
+    :root.lateral-plegada {
+        --lateral-hueco: 25px;
+    }
+    .lateral-plegada .sidebar {
+        width: var(--lateral-hueco);
+        padding: 0;
+    }
+    .lateral-plegada .sidebar-logo,
+    .lateral-plegada .sidebar-top,
+    .lateral-plegada .gatin-random {
+        display: none;
+    }
+}
+.sidebar-logo strong {
+    font-weight: 500;
+}
+nav {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    margin-top: 4px;
+    padding-left: 6px;
+    padding-bottom: 16px;
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+    overflow-x: hidden;
+    scrollbar-gutter: stable;
+    direction: rtl;
+}
+nav * {
+    direction: ltr;
+}
+nav a {
+    position: relative;
+    display: block;
+    width: 100%;
+    box-sizing: border-box;
+    overflow-wrap: break-word;
+    padding: 6px 10px 6px 1.15rem;
+    border-radius: 0;
+    color: var(--muted);
+    text-decoration: none;
+    font-family: var(--fuente-mono);
+    font-size: 0.9375rem;
+    letter-spacing: 0.5px;
+    transition: color 0.1s linear, background-color 0.1s linear;
+}
+nav a::before {
+    content: "↪";
+    position: absolute;
+    left: 0.2rem;
+    top: 50%;
+    color: var(--yellow);
+    opacity: 0;
+    transform: translate(-4px, -50%);
+    transition: opacity 0.1s linear, transform 0.1s linear;
+}
+nav a:hover,
+nav a:focus-visible,
+nav a.active {
+    color: var(--yellow);
+    background-color: var(--purple-lighter);
+}
+nav a:focus-visible {
+    outline: 2px solid var(--yellow);
+    outline-offset: 2px;
+}
+nav a:hover::before,
+nav a:focus-visible::before,
+nav a.active::before {
+    opacity: 1;
+    transform: translate(0, -50%);
+}
+.nav-group {
+    display: flex;
+    flex-direction: column;
+    align-self: stretch;
+}
+.nav-toggle {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 6px 10px 6px 1.15rem;
+    border-radius: 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: none;
+    border: none;
+    color: var(--muted);
+    font-family: inherit;
+    font-size: 0.9375rem;
+    text-align: left;
+    cursor: pointer;
+    transition: color 0.1s linear, background-color 0.1s linear;
+}
+.nav-toggle:hover,
+.nav-toggle:focus-visible {
+    color: var(--yellow);
+    background-color: var(--purple-lighter);
+}
+.nav-toggle:focus-visible {
+    outline: 2px solid var(--yellow);
+    outline-offset: 2px;
+}
+.arrow {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.3rem;
+    height: 1.3rem;
+    flex-shrink: 0;
+    border-radius: 0;
+    background: var(--purple-lighter);
+    color: var(--yellow);
+    font-family: var(--fuente-mono);
+    font-size: 0.9375rem;
+    font-weight: 700;
+    line-height: 1;
+    transition: background-color 0.1s linear, color 0.1s linear;
+}
+.nav-toggle:hover .arrow,
+.nav-toggle:focus-visible .arrow {
+    background: var(--yellow);
+    color: var(--yellow-contrast);
+}
+.submenu {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-top: 0;
+    margin-left: 1.15rem;
+    max-height: 0;
+    opacity: 0;
+    visibility: hidden;
+    overflow: hidden;
+    transition: max-height 0.15s linear, opacity 0.1s linear, margin-top 0.15s linear, visibility 0s linear 0.15s;
+}
+.nav-group.open > .submenu {
+    max-height: 800px;
+    opacity: 1;
+    visibility: visible;
+    margin-top: 10px;
+    transition: max-height 0.15s linear, opacity 0.1s linear, margin-top 0.15s linear;
+}
+.submenu a {
+    padding: 4px 10px 4px 1.15rem;
+    border-radius: 0;
+    color: var(--muted);
+    font-size: 0.75rem;
+    text-decoration: none;
+    transition: color 0.1s linear, background-color 0.1s linear;
+}
+.submenu a:hover,
+.submenu a:focus-visible {
+    color: var(--yellow);
+    background-color: var(--purple-lighter);
+}
+.submenu a:focus-visible {
+    outline: 2px solid var(--yellow);
+    outline-offset: 2px;
+}
+.submenu .nav-toggle {
+    font-size: 0.75rem;
+    padding: 4px 10px 4px 1.15rem;
+}
+.submenu .arrow {
+    width: 1.05rem;
+    height: 1.05rem;
+    font-size: 0.75rem;
+}
+.submenu .submenu {
+    margin-left: 0.9rem;
+}
+.gatin-random {
+    position: relative;
+    flex-shrink: 0;
+    margin-top: 14px;
+    background: var(--purple-lighter);
+    border: 2px solid var(--yellow);
+    overflow: hidden;
+}
+.gatin-random[hidden] {
+    display: none;
+}
+.gatin-random-header {
+    position: relative;
+    padding: 6px 48px 5px 10px;
+    background: var(--purple);
+    border-bottom: 2px solid var(--yellow);
+    color: var(--yellow);
+    font-family: var(--fuente-ventana);
+    font-size: 1rem;
+    letter-spacing: 0.2px;
+}
+.gatin-random-header h2 {
+    min-width: 0;
+    margin: 0;
+    overflow-wrap: anywhere;
+    font: inherit;
+    color: inherit;
+}
+.gatin-random .window-controls-small {
+    top: 50%;
+    right: 8px;
+    transform: translateY(-50%);
+}
+@media (prefers-reduced-motion: reduce) {
+    nav a,
+    nav a::before,
+    .submenu {
+        transition: none;
+    }
+}
+
+/* ======== /wiki/estilos/componentes/barra-lateral.responsive.css ======== */
+.mobile-topbar {
+    display: none;
+}
+.sidebar-toggle {
+    display: none;
+}
+.sidebar-backdrop {
+    display: none;
+}
+@media (max-width: 860px) {
+    .mobile-topbar {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        z-index: 110;
+        height: var(--barra-alto);
+        padding: 0 calc(2.4rem + 24px) 0 14px;
+        background: var(--yellow);
+    }
+    .mobile-topbar-title {
+        margin: 0;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        color: var(--yellow-contrast);
+        font-family: var(--fuente-mono);
+        font-size: 0.75rem;
+        font-weight: 500;
+    }
+    .sidebar-toggle {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        width: 2.4rem;
+        height: 2.4rem;
+        border: 2px solid var(--yellow-contrast);
+        background: var(--yellow-contrast);
+        color: var(--yellow);
+        font-size: 1.1rem;
+    }
+    .sidebar-toggle:focus-visible {
+        outline: 2px solid var(--yellow-contrast);
+        outline-offset: 2px;
+    }
+    .sidebar-logo {
+        display: none;
+    }
+    .lateral-plegar {
+        display: none;
+    }
+    .sidebar {
+        top: var(--barra-alto);
+        height: calc(100dvh - var(--barra-alto));
+        padding-bottom: calc(15px + var(--hueco-abajo));
+        max-width: max(88vw, 280px);
+        transform: translateX(-100%);
+        z-index: 100;
+        transition: transform 0.2s ease;
+        justify-content: flex-start;
+        overflow-y: auto;
+        overscroll-behavior: contain;
+    }
+    .sidebar-top {
+        flex: 0 0 auto;
+    }
+    .sidebar nav {
+        flex: 0 0 auto;
+        min-height: auto;
+        overflow: visible;
+        padding-bottom: 4px;
+    }
+    .sidebar-top::after {
+        display: none;
+    }
+    .sidebar.open {
+        transform: translateX(0);
+    }
+    .sidebar-backdrop:not([hidden]) {
+        display: block;
+        position: fixed;
+        top: var(--barra-alto);
+        left: 0;
+        right: 0;
+        bottom: 0;
+        z-index: 90;
+        background: rgba(0, 0, 0, 0.5);
+    }
+}
+@media (prefers-reduced-motion: reduce) {
+    .sidebar {
+        transition: none;
+    }
+}
+
+/* ======== /wiki/estilos/componentes/menu-wiki.css ======== */
+.menu-wiki-buscar {
+    display: flex;
+    margin: 0 0 10px;
+}
+.menu-wiki-buscar input {
+    flex: 1 1 auto;
+    min-width: 0;
+    box-sizing: border-box;
+    padding: 7px 10px;
+    border: 1px solid var(--muted);
+    border-right: 0;
+    border-radius: 0;
+    background: var(--purple);
+    color: var(--white);
+    font-family: var(--fuente-mono);
+    font-size: 0.875rem;
+}
+.menu-wiki-buscar input::placeholder {
+    color: var(--muted);
+    opacity: 1;
+}
+.menu-wiki-buscar button {
+    flex: 0 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.4rem;
+    padding: 0;
+    border: 1px solid var(--muted);
+    border-radius: 0;
+    background: var(--purple-lighter);
+    color: var(--white);
+    font-size: 0.9375rem;
+    cursor: pointer;
+}
+.buscar-lupa {
+    position: relative;
+    display: inline-block;
+    width: 1em;
+    height: 1em;
+    vertical-align: -0.12em;
+}
+.buscar-lupa::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 0.68em;
+    height: 0.68em;
+    border: 2px solid currentColor;
+    border-radius: 50%;
+}
+.buscar-lupa::after {
+    content: "";
+    position: absolute;
+    top: 0.58em;
+    left: 0.56em;
+    width: 2px;
+    height: 0.38em;
+    background: currentColor;
+    transform: rotate(-45deg);
+    transform-origin: top center;
+}
+.menu-wiki-buscar button:hover {
+    border-color: var(--yellow);
+    color: var(--yellow);
+}
+.menu-wiki-buscar input:focus-visible,
+.menu-wiki-buscar button:focus-visible {
+    outline: 2px solid var(--yellow);
+    outline-offset: 2px;
+    position: relative;
+    z-index: 1;
+}
+.menu-wiki-blog {
+    margin: auto 0 0;
+    padding-top: 10px;
+    border-top: 1px solid var(--border);
+    font-family: var(--fuente-mono);
+    font-size: 0.8125rem;
+}
+.menu-wiki-blog a {
+    display: block;
+    padding: 6px 10px;
+    color: var(--muted);
+    text-decoration: none;
+}
+.menu-wiki-blog a:hover,
+.menu-wiki-blog a:focus-visible {
+    color: var(--yellow);
+    background-color: var(--purple-lighter);
+}
+.menu-wiki-blog a:focus-visible {
+    outline: 2px solid var(--yellow);
+    outline-offset: 2px;
+}
+
+/* ======== /wiki/estilos/componentes/ventanas-plegables.css ======== */
+.ventana-barra {
+    cursor: pointer;
+    user-select: none;
+}
+.ventana-barra-mando {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    width: 100%;
+    margin: 0;
+    padding: 0;
+    background: none;
+    border: 0;
+    color: inherit;
+    font: inherit;
+    cursor: pointer;
+}
+.ventana-barra-mando:focus-visible {
+    outline: 2px solid currentColor;
+    outline-offset: -4px;
+}
+.ventana-plegable[data-plegada="si"] > :not(.ventana-barra) {
+    display: none;
+}
+.ventana-plegable[data-plegada="si"] {
+    height: auto;
+    min-height: 0;
+    max-height: none;
+    padding-bottom: 0;
+}
+.ventana-plegable[data-plegada="si"] > .ventana-barra {
+    margin-bottom: 0;
+    padding-right: 4.4rem;
+}
+.ventana-plegable:not([data-plegada="si"]) > .ventana-barra [data-ventana-accion="desplegar"],
+.ventana-plegable[data-plegada="si"] > .ventana-barra [data-ventana-accion="plegar"] {
+    background: transparent;
+    color: var(--window-btn-tinta);
+}
+.ventana-barra [data-ventana-accion="plegar"]:hover,
+.ventana-barra [data-ventana-accion="desplegar"]:hover {
+    background: var(--window-btn-tinta);
+    color: var(--window-btn-fondo);
+}
+
+/* ======== /wiki/estilos/componentes/impresion.css ======== */
+@media print {
+    @page {
+        margin: 2cm;
+    }
+    :root,
+    :root[data-theme] {
+        --bg-texture: none;
+        --purple: #000000;
+        --purple-lighter: #000000;
+        --surface: #000000;
+        --white: #000000;
+        --yellow: #000000;
+        --yellow-contrast: #000000;
+        --border: #000000;
+        --error: #000000;
+        --yellow-glow-strong: transparent;
+        --muted: #3a3a3a;
+    }
+    body {
+        background: #ffffff;
+        color: #000000;
+    }
+    :root body *,
+    :root body *::before,
+    :root body *::after {
+        background-image: none;
+        background-color: transparent;
+        box-shadow: none;
+        text-shadow: none;
+    }
+    :root body [aria-pressed="true"],
+    :root body [aria-pressed="true"]::before,
+    :root body [aria-pressed="true"]::after {
+        background-color: transparent;
+    }
+    :root[data-crt="si"]::after {
+        display: none;
+    }
+    .skip-link,
+    .mobile-topbar,
+    .sidebar,
+    .sidebar-backdrop,
+    .ajustes-abrir,
+    .ajustes,
+    .notice,
+    #quotes-container,
+    .subir,
+    .window-controls,
+    .window-controls-small,
+    .buscador,
+    .filtros,
+    .gatin-random,
+    .nav-toggle,
+    .modal,
+    [data-otras-caja],
+    [data-otras-entradas] {
+        display: none;
+    }
+    main,
+    #main-content {
+        max-width: none;
+        margin: 0;
+        padding: 0;
+    }
+    body {
+        font-size: 11pt;
+        line-height: 1.5;
+    }
+    main p a[href]::after,
+    main li a[href]::after,
+    main blockquote a[href]::after {
+        content: " (" attr(href) ")";
+        background: none;
+        -webkit-mask: none;
+        mask: none;
+        width: auto;
+        height: auto;
+        margin: 0;
+        font-size: 0.85em;
+        word-break: break-all;
+    }
+    main a[href^="#"]::after,
+    main a[href^="mailto:"]::after {
+        content: "";
+    }
+    h1,
+    h2,
+    h3,
+    h4 {
+        break-after: avoid;
+        page-break-after: avoid;
+    }
+    figure,
+    img,
+    blockquote,
+    pre,
+    table {
+        break-inside: avoid;
+        page-break-inside: avoid;
+    }
+    p,
+    li {
+        orphans: 3;
+        widows: 3;
+    }
+    .home,
+    main > section {
+        border: 0;
+        padding-left: 0;
+        padding-right: 0;
+    }
+    .recent-entries-header,
+    .gatin-random-header,
+    .pet-window-header {
+        padding: 0;
+        border: 0;
+        background: none;
+    }
+}
+
+/* ======== /wiki/estilos/componentes/sin-movimiento.css ======== */
+:root[data-movimiento="quieto"] *,
+:root[data-movimiento="quieto"] *::before,
+:root[data-movimiento="quieto"] *::after {
+    animation-duration: 1ms;
+    animation-iteration-count: 1;
+    transition-duration: 1ms;
+    scroll-behavior: auto;
+}
+:root[data-movimiento="quieto"][data-crt="si"]::after {
+    animation: none;
+}
+:root[data-movimiento="quieto"][data-theme^="terminal-"] .recent-entries-header h2::after,
+:root[data-movimiento="quieto"][data-theme^="terminal-"] .gatin-random-header h2::after {
+    animation: none;
+}
