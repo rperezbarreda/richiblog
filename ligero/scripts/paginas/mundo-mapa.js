@@ -26,9 +26,7 @@ function initializeMundoMapa() {
         lienzo: lienzo,
         dibujo: dibujo,
         zoom: 1,
-        maximo: parseFloat(dibujo.getAttribute("data-mapa-zoom-maximo")) || ZOOM_MAXIMO_DE_MAPA,
-        cerca: parseFloat(dibujo.getAttribute("data-mapa-cerca")) || 2,
-        pin: parseFloat(dibujo.getAttribute("data-mapa-pin")) || PIN_EN_PANTALLA,
+        maximo: ZOOM_MAXIMO_DE_MAPA,
         cifra: caja.querySelector("[data-mapa-cifra]"),
         mas: caja.querySelector("[data-mapa-mas]"),
         menos: caja.querySelector("[data-mapa-menos]"),
@@ -186,7 +184,7 @@ function moverZoomDeMapa(mando, hacia) {
 function ponerZoomDeMapa(mando, quiere, anclaX, anclaY) {
     const lienzo = mando.lienzo;
     const antes = mando.zoom || 1;
-    const ahora = Math.max(1, Math.min(mando.maximo || ZOOM_MAXIMO_DE_MAPA, quiere || 1));
+    const ahora = Math.max(1, Math.min(mando.maximo, quiere || 1));
     const caja = lienzo.getBoundingClientRect();
     const haciaX = anclaX === undefined ? lienzo.clientWidth / 2 : anclaX - caja.left;
     const haciaY = anclaY === undefined ? lienzo.clientHeight / 2 : anclaY - caja.top;
@@ -197,8 +195,7 @@ function ponerZoomDeMapa(mando, quiere, anclaX, anclaY) {
     lienzo.style.setProperty("--mapa-zoom", ahora);
     const margen = margenDeMapa(mando);
     lienzo.classList.toggle("se-puede-arrastrar", ahora > 1.0005 || conMargenDeMapa());
-    lienzo.classList.toggle("esta-cerca", ahora >= (mando.cerca || 2) - 0.005);
-    lienzo.classList.toggle("esta-medio", ahora >= 1.995);
+    lienzo.classList.toggle("esta-cerca", ahora >= 1.995);
     if (Math.abs(ahora - antes) > 0.0005) {
         const cuanto = ahora / antes;
         lienzo.scrollLeft = (puntoX - antesMargen.x) * cuanto + margen.x - haciaX;
@@ -216,7 +213,7 @@ function ponerZoomDeMapa(mando, quiere, anclaX, anclaY) {
         mando.menos.disabled = abajo;
     }
     if (mando.mas) {
-        mando.mas.disabled = ahora >= (mando.maximo || ZOOM_MAXIMO_DE_MAPA) - 0.0005;
+        mando.mas.disabled = ahora >= mando.maximo - 0.0005;
     }
     if (mando.ajustar) {
         mando.ajustar.disabled = abajo && !conMargenDeMapa();
@@ -666,7 +663,6 @@ function prepararRegionesDeMapa(caja) {
         }
     });
     apagarConCasilla(caja, "[data-mapa-nombres]", ".mapa-textos");
-    apagarConCasilla(caja, "[data-mapa-zonas-regionales]", ".mapa-zonas-regionales");
     apagarConCasilla(caja, "[data-mapa-rosa]", ".mapa-rosa");
     prepararNivelesDeMapa(caja);
     prepararZonasDeMapa(caja);
@@ -683,7 +679,7 @@ function prepararZonasDeMapa(caja) {
         const suyas = formas.filter((f) => f.getAttribute("data-mapa-zona") === clase);
         const dibujo = clase === "otra"
             ? [...caja.querySelectorAll(".mapa-dibujos > .mapa-dibujo:not([class*='es-zona-'])")]
-            : [...caja.querySelectorAll(".mapa-dibujos > .es-zona-" + clase + ", .mapa-zonas-regionales > .es-zona-" + clase)];
+            : [...caja.querySelectorAll(".mapa-dibujos > .es-zona-" + clase)];
         if (!suyas.length && !dibujo.length) {
             return;
         }
@@ -896,7 +892,7 @@ function escalarPinesDeMapa(mando) {
     }
     const anchoReal = Math.min(caja.width, caja.height * (ancho / alto));
     const porUnidad = anchoReal / ancho;
-    const cuanto = Math.max(0.05, Math.min(8, (mando.pin || PIN_EN_PANTALLA) / (radio * porUnidad)));
+    const cuanto = Math.max(0.05, Math.min(8, PIN_EN_PANTALLA / (radio * porUnidad)));
     dibujo.querySelectorAll("[data-mapa-xy]").forEach((pin) => {
         const sitio = pin.getAttribute("data-mapa-xy");
         const giro = pin.getAttribute("data-mapa-giro");
@@ -1437,9 +1433,7 @@ function irASitioDeMapa(mando, el) {
     const xy = el.getAttribute("data-mapa-xy");
     if (xy) {
         [x, y] = xy.split(",").map(parseFloat);
-        const regional = el.classList.contains("es-regional");
-        const importante = el.classList.contains("es-capital") || el.classList.contains("es-ciudad");
-        zoom = regional ? (importante ? 3 : Math.max(mando.cerca || 2, 4)) : Math.max(mando.zoom, 2);
+        zoom = Math.max(mando.zoom, 2);
     } else {
         let caja;
         try {
@@ -1452,7 +1446,7 @@ function irASitioDeMapa(mando, el) {
         const cabe = Math.min(lados[2] / Math.max(caja.width, 1), lados[3] / Math.max(caja.height, 1));
         zoom = Math.max(1, cabe * 0.6);
     }
-    ponerZoomDeMapa(mando, Math.min(zoom, mando.maximo || ZOOM_MAXIMO_DE_MAPA));
+    ponerZoomDeMapa(mando, Math.min(zoom, mando.maximo));
     escalarPinesDeMapa(mando);
     const matriz = mando.dibujo.getScreenCTM && mando.dibujo.getScreenCTM();
     if (matriz) {

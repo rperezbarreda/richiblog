@@ -1,8 +1,8 @@
 // =========================================
-// EL MAPA DE UN MUNDO
+// EL MAPA DE UNA CAMPAÑA
 // =========================================
 // El zoom, el arrastre y las capas de la página de un mapa
-// (web/wiki/mapa_<loquesea>.html, que escribe
+// (web/notas_rol/<campaña>/mapa_<loquesea>.html, que escribe
 // herramientas/3-generadores/generar-mapas-rol.py a partir de un .cmap de
 // Chronicler).
 //
@@ -30,8 +30,7 @@
 // sentido dejar huecos a los lados. La rueda del ratón no va a saltos,
 // va suave, pero se mueve entre los mismos topes.
 const ZOOMS_DE_MAPA = [1, 1.5, 2, 3, 4, 6, 8, 12, 16];
-// El tope de siempre; un mapa puede pedir más (el mapamundi con lo de los
-// mapas regionales dentro: data-mapa-zoom-maximo en su SVG).
+// El tope del zoom.
 const ZOOM_MAXIMO_DE_MAPA = 6;
 
 // El radio que se quiere ver de un pin, en píxeles de pantalla (ver
@@ -79,12 +78,7 @@ function initializeMundoMapa() {
         lienzo: lienzo,
         dibujo: dibujo,
         zoom: 1,
-        maximo: parseFloat(dibujo.getAttribute("data-mapa-zoom-maximo")) || ZOOM_MAXIMO_DE_MAPA,
-        // Desde qué zoom se escriben los nombres de los pueblos y demás.
-        cerca: parseFloat(dibujo.getAttribute("data-mapa-cerca")) || 2,
-        // Lo que mide un pin en pantalla (el mapamundi con lo regional
-        // dentro los lleva más pequeños: data-mapa-pin).
-        pin: parseFloat(dibujo.getAttribute("data-mapa-pin")) || PIN_EN_PANTALLA,
+        maximo: ZOOM_MAXIMO_DE_MAPA,
         cifra: caja.querySelector("[data-mapa-cifra]"),
         mas: caja.querySelector("[data-mapa-mas]"),
         menos: caja.querySelector("[data-mapa-menos]"),
@@ -305,7 +299,7 @@ function moverZoomDeMapa(mando, hacia) {
 function ponerZoomDeMapa(mando, quiere, anclaX, anclaY) {
     const lienzo = mando.lienzo;
     const antes = mando.zoom || 1;
-    const ahora = Math.max(1, Math.min(mando.maximo || ZOOM_MAXIMO_DE_MAPA, quiere || 1));
+    const ahora = Math.max(1, Math.min(mando.maximo, quiere || 1));
 
     // DÓNDE SE ESTABA MIRANDO, para seguir mirando ahí después. Sin esto,
     // al acercar el mapa salta a la esquina de arriba a la izquierda y hay
@@ -330,10 +324,7 @@ function ponerZoomDeMapa(mando, quiere, anclaX, anclaY) {
     lienzo.classList.toggle("se-puede-arrastrar", ahora > 1.0005 || conMargenDeMapa());
     // De cerca (al 200% o más) se escriben también los nombres de los
     // pueblos, las fortalezas…: con el mapa entero serían una sopa.
-    lienzo.classList.toggle("esta-cerca", ahora >= (mando.cerca || 2) - 0.005);
-    // A medio camino (desde el 200%): en el mapamundi, las capitales y las
-    // ciudades de los mapas regionales; los demás sitios, ya de cerca.
-    lienzo.classList.toggle("esta-medio", ahora >= 1.995);
+    lienzo.classList.toggle("esta-cerca", ahora >= 1.995);
 
     if (Math.abs(ahora - antes) > 0.0005) {
         const cuanto = ahora / antes;
@@ -356,7 +347,7 @@ function ponerZoomDeMapa(mando, quiere, anclaX, anclaY) {
         mando.menos.disabled = abajo;
     }
     if (mando.mas) {
-        mando.mas.disabled = ahora >= (mando.maximo || ZOOM_MAXIMO_DE_MAPA) - 0.0005;
+        mando.mas.disabled = ahora >= mando.maximo - 0.0005;
     }
     if (mando.ajustar) {
         // Al 100% con margen también vale: vuelve a centrar el mapa.
@@ -968,7 +959,6 @@ function prepararRegionesDeMapa(caja) {
         }
     });
     apagarConCasilla(caja, "[data-mapa-nombres]", ".mapa-textos");
-    apagarConCasilla(caja, "[data-mapa-zonas-regionales]", ".mapa-zonas-regionales");
     apagarConCasilla(caja, "[data-mapa-rosa]", ".mapa-rosa");
     prepararNivelesDeMapa(caja);
     prepararZonasDeMapa(caja);
@@ -994,7 +984,7 @@ function prepararZonasDeMapa(caja) {
         // Las de sin nombre de esa clase (el dibujo y su trama).
         const dibujo = clase === "otra"
             ? [...caja.querySelectorAll(".mapa-dibujos > .mapa-dibujo:not([class*='es-zona-'])")]
-            : [...caja.querySelectorAll(".mapa-dibujos > .es-zona-" + clase + ", .mapa-zonas-regionales > .es-zona-" + clase)];
+            : [...caja.querySelectorAll(".mapa-dibujos > .es-zona-" + clase)];
         if (!suyas.length && !dibujo.length) {
             return;
         }
@@ -1010,8 +1000,7 @@ function prepararZonasDeMapa(caja) {
         todas.appendChild(document.createTextNode(" " + nombre + " (" + (suyas.length + dibujo.length) + ")"));
         grupo.appendChild(todas);
         const sueltas = [];
-        // Una forma puede salir dos veces (si lleva a una página y a otro
-        // mapa), así que se agrupan por su nombre.
+        // Se agrupan por su nombre (dos zonas pueden llamarse igual).
         const porNombre = new Map();
         suyas.forEach((f) => {
             const n = f.getAttribute("data-mapa-nombre") || "";
@@ -1257,7 +1246,7 @@ function escalarPinesDeMapa(mando) {
     // quepa: a lo ancho o a lo alto, lo que primero toque.
     const anchoReal = Math.min(caja.width, caja.height * (ancho / alto));
     const porUnidad = anchoReal / ancho;
-    const cuanto = Math.max(0.05, Math.min(8, (mando.pin || PIN_EN_PANTALLA) / (radio * porUnidad)));
+    const cuanto = Math.max(0.05, Math.min(8, PIN_EN_PANTALLA / (radio * porUnidad)));
     dibujo.querySelectorAll("[data-mapa-xy]").forEach((pin) => {
         const sitio = pin.getAttribute("data-mapa-xy");
         const giro = pin.getAttribute("data-mapa-giro");
@@ -1279,7 +1268,7 @@ function escalarPinesDeMapa(mando) {
 // cabe más que una línea. Así que cuando hay JavaScript se quitan los
 // <title> —si no, saldrían los dos— y se enseña éste, que es HTML normal:
 // la tipografía del sitio, el color del tema y sitio para decir que el
-// sitio lleva a otro mapa o que todavía no tiene página.
+// sitio lleva a otro mapa o que ese mapa todavía no existe.
 //
 // Va con aria-hidden porque no cuenta nada nuevo: lo mismo está en la
 // lista de abajo, que es la que se recorre con el teclado.
@@ -1495,7 +1484,7 @@ function mejorarImagenDeMapa(mando) {
 // JavaScript, que crece con el zoom y se sale) se esconde.
 //
 // Y MEDIR: con el botón «medir» pulsado, cada clic en el mapa pone un
-// punto (también encima de un sitio, que entonces no lleva a su página) y
+// punto (también encima de un sitio, que entonces no lleva a su mapa) y
 // abajo dice cuánto hay y los días de viaje. Los puntos llevan
 // data-mapa-xy, así que miden lo mismo a cualquier zoom, como los pines.
 
@@ -1883,8 +1872,7 @@ function caminoMasCortoDeMapa(red, desde, hasta) {
 // El buscador de arriba: se escribe un trozo del nombre de un sitio, una
 // región o una raya (sale la lista de los que coinciden, un <datalist>) y,
 // al elegir uno, el mapa se acerca a él, lo pone en medio y lo resalta un
-// momento. Lo que solo sale de cerca (lo regional del mapamundi) se busca
-// con el zoom al que sale.
+// momento.
 
 function prepararBuscadorDeMapa(mando) {
     const caja = mando.buscador;
@@ -1952,9 +1940,8 @@ function prepararBuscadorDeMapa(mando) {
     });
 }
 
-// Acercarse a algo del mapa y ponerlo en medio. Un pin, a lo que haga falta
-// para que se vea (lo regional, de cerca); una región o una raya, a lo que
-// quepa entera.
+// Acercarse a algo del mapa y ponerlo en medio. Un pin, al 200% por lo
+// menos; una región o una raya, a lo que quepa entera.
 function irASitioDeMapa(mando, el) {
     const lados = (mando.dibujo.getAttribute("viewBox") || "").split(/[\s,]+/).map(parseFloat);
     let x;
@@ -1963,9 +1950,7 @@ function irASitioDeMapa(mando, el) {
     const xy = el.getAttribute("data-mapa-xy");
     if (xy) {
         [x, y] = xy.split(",").map(parseFloat);
-        const regional = el.classList.contains("es-regional");
-        const importante = el.classList.contains("es-capital") || el.classList.contains("es-ciudad");
-        zoom = regional ? (importante ? 3 : Math.max(mando.cerca || 2, 4)) : Math.max(mando.zoom, 2);
+        zoom = Math.max(mando.zoom, 2);
     } else {
         let caja;
         try {
@@ -1978,7 +1963,7 @@ function irASitioDeMapa(mando, el) {
         const cabe = Math.min(lados[2] / Math.max(caja.width, 1), lados[3] / Math.max(caja.height, 1));
         zoom = Math.max(1, cabe * 0.6);
     }
-    ponerZoomDeMapa(mando, Math.min(zoom, mando.maximo || ZOOM_MAXIMO_DE_MAPA));
+    ponerZoomDeMapa(mando, Math.min(zoom, mando.maximo));
     escalarPinesDeMapa(mando);
     // Ponerlo en medio: dónde cae ahora en la pantalla y cuánto falta.
     const matriz = mando.dibujo.getScreenCTM && mando.dibujo.getScreenCTM();
@@ -2375,7 +2360,7 @@ function prepararRutaDeMapa(mando) {
     });
     // Con el panel abierto, pulsar en el mapa elige un extremo (el primero,
     // «desde»; el segundo, «hasta»; el tercero empieza otra) en vez de
-    // llevar a la página del sitio. Un sitio de la red, ese; cualquier otro
+    // llevar a donde lleve el sitio. Un sitio de la red, ese; cualquier otro
     // punto, el camino más cercano. En captura, antes que el enlace.
     mando.lienzo.addEventListener("click", (evento) => {
         // (Un clic que es el final de un arrastre ya lo ha marcado como

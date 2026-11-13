@@ -1404,18 +1404,6 @@ html.con-mapa-a-pantalla,
 html.con-mapa-a-pantalla body {
     overflow: hidden;
 }
-.mapa-svg .mapa-pin.es-regional,
-.mapa-svg path.es-regional,
-.mapa-svg .mapa-lineas.es-puentes.es-regional {
-    display: none;
-}
-.esta-medio .mapa-svg path.es-regional,
-.esta-medio .mapa-svg .mapa-pin.es-regional.es-capital,
-.esta-medio .mapa-svg .mapa-pin.es-regional.es-ciudad,
-.esta-cerca .mapa-svg .mapa-pin.es-regional,
-.esta-cerca .mapa-svg .mapa-lineas.es-puentes.es-regional {
-    display: inline;
-}
 .mapa-caja .mapa-lienzo .mapa-svg .mapa-pin.es-filtrada {
     display: none;
 }

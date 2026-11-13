@@ -11,7 +11,7 @@
 // Brumas») son del mapa: crecen con el zoom, como en la web.
 //
 // El .cmap se guarda ENTERO: llega del servidor, se cambian aquí solo las
-// cosas que se tocan (label, targetPage, kind, color, x/y, points, size,
+// cosas que se tocan (label, targetMap, kind, color, x/y, points, size,
 // angle, taper, scale) y vuelve tal cual con lo que traiga de Chronicler.
 // El formato está explicado en herramientas/0-comun/mundo_mapas.py.
 // Usa $, crearEditor, pedirEditor, avisarEditor e irAEditor de editor.js.
@@ -703,8 +703,8 @@ function ponerSesionDeLaRaya(lista, cosa) {
 }
 
 // LOS OTROS MAPAS DE LA CAMPAÑA (los de las zonas): en un mapa de campaña,
-// un sitio o una región no lleva a una página de la wiki sino a otro mapa
-// suyo («Lleva al mapa»). Sus títulos, para elegir.
+// un sitio o una región puede llevar a otro mapa suyo («Lleva al mapa»).
+// Sus títulos, para elegir.
 async function ponerMapasDeLaCampana() {
     const lista = $("#lista-mapas-campana");
     lista.textContent = "";
@@ -1325,7 +1325,7 @@ function pinesDePuenteQueSobran() {
     const puentes = estadoMapa.puentes || [];
     const salen = [];
     d.pins.forEach((p, i) => {
-        if (p.kind === "puente" && !(p.label || "").trim() && !p.targetPage
+        if (p.kind === "puente" && !(p.label || "").trim() && !p.targetMap
             && puentes.some((q) => Math.hypot(q.x - p.x, q.y - p.y) <= cerca)) {
             salen.push(i);
         }
@@ -1435,7 +1435,7 @@ function repasoDelMapa() {
 
     const sinNombre = grupo("Sitios sin nombre", "No salen en la lista de la web ni en el globo al pasar por encima.");
     d.pins.forEach((p, i) => {
-        if (!(p.label || "").trim() && !p.targetPage && p.kind !== "puente") {
+        if (!(p.label || "").trim() && !p.targetMap && p.kind !== "puente") {
             sinNombre.avisos.push(conNombre("pins", p, i));
         }
     });
@@ -1508,7 +1508,7 @@ function repasoDelMapa() {
 
     const regiones = grupo("Regiones sin nombre", "Los bosques, lagos y demás zonas no siempre lo necesitan.");
     d.shapes.forEach((r, i) => {
-        if (!(r.label || "").trim() && !r.targetPage) {
+        if (!(r.label || "").trim() && !r.targetMap) {
             regiones.avisos.push(conNombre("shapes", r, i));
         }
     });
@@ -1692,7 +1692,7 @@ function dibujoDeCosa(lista, cosa, i) {
         const d = trazoMapa(cosa.points || [], true);
         g.appendChild(svgMapa("path", {
             d, fill: color,
-            "fill-opacity": zona ? Math.max(0.12, OPACIDAD_DE_ZONA[zona[0]]) : (cosa.label || cosa.targetPage ? 0.35 : 0.18),
+            "fill-opacity": zona ? Math.max(0.12, OPACIDAD_DE_ZONA[zona[0]]) : (cosa.label || cosa.targetMap ? 0.35 : 0.18),
             stroke: elegido ? "#ffffff" : color, "stroke-width": elegido ? 4 : 2, "vector-effect": "non-scaling-stroke",
             "stroke-dasharray": zona && (zona[0] === "vecino" || zona[0] === "provincia") ? "12 7" : "none",
             class: "mapa-ed-region",
@@ -1797,9 +1797,9 @@ function dibujoDeCosa(lista, cosa, i) {
         }
         g.appendChild(marca);
     }
-    if (cosa.label || cosa.targetPage) {
+    if (cosa.label || cosa.targetMap) {
         const titulo = svgMapa("title");
-        titulo.textContent = cosa.label || cosa.targetPage;
+        titulo.textContent = cosa.label || cosa.targetMap;
         g.appendChild(titulo);
     }
     return g;
@@ -1900,7 +1900,7 @@ function escalarMarcasMapa() {
 
 // ---- LA LISTA DE LO QUE HAY ----
 function nombreDeCosa(lista, cosa) {
-    const nombre = cosa.label || cosa.targetPage || "";
+    const nombre = cosa.label || cosa.targetMap || "";
     let que;
     if (lista === "pins") {
         const tipo = tipoDeSitioMapa(cosa.kind);
@@ -1945,7 +1945,7 @@ function pintarListaDeCosas() {
         return [lista === "emblems" ? "Emblemas" : "Textos"];
     };
     const orden = ["pins", "emblems", "lines", "labels", "shapes"];
-    const sinNombre = d.shapes.filter((c) => !c.label && !c.targetPage).length;
+    const sinNombre = d.shapes.filter((c) => !c.label && !c.targetMap).length;
     const cosas = [];
     let abrir = [];
     const elegido = estadoMapa.elegido;
@@ -2482,7 +2482,7 @@ function cambiarPropiedadMapa(campo, valor) {
     if (campo === "image" && valor && !estadoMapa.imagenes[valor]) {
         urlDeImagenMapa(valor).then(() => repintarCosa(el.lista, el.i));
     }
-    if (campo === "label" || campo === "kind" || campo === "targetPage" || campo === "targetMap") {
+    if (campo === "label" || campo === "kind" || campo === "targetMap") {
         pintarListaDeCosas();
         if (campo === "kind") {
             vestirCapital(cosa);
@@ -2932,7 +2932,7 @@ async function subirImagenDeEmblema(input) {
     }
     avisarEditor("Preparando la imagen…");
     const hecha = await pedirEditor("/api/mapa/emblema", Object.assign({ mapa: estadoMapa.archivo,
-        nombre: cosa.label || cosa.targetPage || estadoMapa.datos.title || "emblema" }, imagen));
+        nombre: cosa.label || cosa.targetMap || estadoMapa.datos.title || "emblema" }, imagen));
     if (hecha.error) {
         avisarEditor(hecha.error, true);
         return;
@@ -4179,7 +4179,7 @@ async function descargarImagenMapa() {
         const color = s.color || (zona ? zona[2] : "#f5ce6c");
         rayaEnLienzo(ctx, puntos, k);
         ctx.closePath();
-        ctx.globalAlpha = zona ? Math.max(0.12, OPACIDAD_DE_ZONA[zona[0]]) : (s.label || s.targetPage ? 0.35 : 0.18);
+        ctx.globalAlpha = zona ? Math.max(0.12, OPACIDAD_DE_ZONA[zona[0]]) : (s.label || s.targetMap ? 0.35 : 0.18);
         ctx.fillStyle = color;
         ctx.fill();
         if (zona && tramas[zona[0]]) {
@@ -4412,7 +4412,7 @@ async function guardarMapa(yPasar) {
     } else {
         estadoMapa.cambiado = false;
         if (!yPasar) {
-            avisarEditor("Guardado en wiki/" + estadoMapa.archivo + ".");
+            avisarEditor("Guardado en mapas-rol/" + estadoMapa.archivo.replace(/^@campañas\//, "") + ".");
         } else {
             const pasado = await pasarALaWebEditor({ mapa: estadoMapa.archivo });
             if (pasado.error) {

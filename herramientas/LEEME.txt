@@ -1914,7 +1914,7 @@
   distinguen por la forma de la raya. Miden lo mismo en pantalla a
   cualquier zoom (vector-effect: non-scaling-stroke: en un mapa visto
   entero, las rayas del grosor del mapa salían de un píxel). Con nombre
-  salen en la lista y, si llevan a una página, se pulsan. Se apagan con
+  salen en la lista y, si llevan a otro mapa, se pulsan. Se apagan con
   el interruptor de «caminos y ríos».
 
   CAMINO PRINCIPAL Y SENDERO: el camino principal, seguido y gordo con
@@ -1956,7 +1956,7 @@
 
   MEDIR EN LA WEB: los mapas con escala llevan el botón «medir». Con él
   pulsado, cada clic pone un punto (encima de un sitio también, que
-  entonces no lleva a su página) y encima del mapa, abajo, sale cuánto
+  entonces no lleva a su mapa) y encima del mapa, abajo, sale cuánto
   hay y los días de viaje a pie y a caballo; «borrar la medida» empieza
   otra y Esc deja de medir. Lo medido va encima del mapa y no en la fila
   de los mandos: ahí la fila crecía y el mapa bajaba mientras se pulsaba.
@@ -1966,7 +1966,7 @@
   una imagen dentro (una bandera, un blasón) o, sin ella, con el símbolo
   de su tipo en el color de su tipo; marco dorado y el nombre debajo. Va
   en el propio pin: "shape", "size" e "image". Miden lo mismo en pantalla
-  a cualquier zoom, se apagan con los pines, llevan a su página, salen en
+  a cualquier zoom, se apagan con los pines, llevan a su mapa, salen en
   la lista y en la leyenda (por su tipo). Las imágenes se copian a
   imagenes/notas_rol/<campaña>/mapa/ (generar-mapas-rol: de_emblema).
   Los «emblems» sueltos de antes (17-10-2026) se leen igual, como sitios
@@ -2251,7 +2251,7 @@
       o un río, los puentes se mueven con él. En «El mapa en sí» dice
       cuántos hay, y si quedan sitios «Puente» SIN NOMBRE puestos a mano
       encima de uno automático, un botón los quita todos de una vez
-      (Ctrl+Z los devuelve). Los que tienen nombre o página se quedan.
+      (Ctrl+Z los devuelve). Los que tienen nombre o mapa se quedan.
     - EL REPASO (pestaña «Repaso», desde el 22-10-2026): lo que se ha
       quedado suelto, por grupos plegables. SITIOS SIN NOMBRE (menos los
       «Puente»), TEXTOS VACÍOS, CAMINOS QUE CASI LLEGAN (una punta de

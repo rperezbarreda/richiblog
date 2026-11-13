@@ -7,7 +7,7 @@ Un JSON. Éste es uno de verdad, recortado:
 
     {
       "version": "1.0",
-      "title": "Mapamundi de Cralëa",
+      "title": "Mapamundi",
       "width": 7680, "height": 4320,
       "layers": [
         { "id": "de8d…", "name": "Mapa Político",
@@ -23,18 +23,20 @@ Un JSON. Éste es uno de verdad, recortado:
           "points": [ {"x": 2463, "y": 2136}, … ],
           "color": "#e74c3c",
           "label": "Azarasia",
-          "targetPage": "Azarasia",      <- lleva a una página de la wiki
-          "targetMap": "Partaria del Sur",  <- o a otro mapa
+          "targetMap": "Partaria del Sur",  <- lleva a otro mapa
           "layerId": "base" }
       ]
     }
+
+(Chronicler también guarda "targetPage", a qué página de su wiki lleva:
+aquí no hay wiki, así que no se lee. Esto empezó con los mapas de la
+wiki de Cralëa, que se fue a su propio repo, wiki_cralea; ahora lo usan
+los mapas de las campañas, herramientas/3-generadores/generar-mapas-rol.py.)
 
 LO QUE AÑADE ESTA WEB AL FORMATO (lo escribe el editor de mapas,
 herramientas/1-publicar/editor/editor-wiki.py; Chronicler no lo conoce y, si
 abres el mapa allí y lo guardas, puede perderlo):
 
-    "page": "Reino de Prunia"          de qué página es el mapa: esa
-                                        página lleva un botón para abrirlo
     pins[].kind: "capital" | "ciudad" | "pueblo" | "fortaleza" | "ruina"
                                         el tipo de sitio: cada uno se
                                         dibuja con su símbolo
@@ -43,13 +45,11 @@ abres el mapa allí y lo guardas, puede perderlo):
     "lines": [ { "id": "…", "kind": "camino" | "rio" | "frontera" |
                          "maritima" | "muralla" | "ruta",
                  "points": [ {"x": 10, "y": 20}, … ],
-                 "label": "Río Lorem", "targetPage": "Río Lorem",
-                 "taper": false, "width": 3, "dash": "dotted", "gap": 8,
-                 "fromMap": "Mapamundi/…/Reino de Prunia.cmap", "fromLine": "…" } ]
-                                        (fromMap y fromLine: traída de un
-                                        mapa vecino desde el editor; en
-                                        el mapamundi no pasa)
-                                        rayas abiertas. Los ríos se
+                 "label": "Río Lorem", "session": 3,
+                 "taper": false, "width": 3, "dash": "dotted", "gap": 8 } ]
+                                        rayas abiertas (session: en qué
+                                        sesión de la campaña se hizo esa
+                                        ruta de viaje). Los ríos se
                                         ensanchan hacia el final (la
                                         desembocadura) salvo con
                                         "taper": false; las rutas llevan
@@ -64,7 +64,7 @@ abres el mapa allí y lo guardas, puede perderlo):
                                         texto suelto en el mapa, del
                                         tamaño del mapa (crece con el zoom)
     "emblems": [ { "id": "…", "x": 900, "y": 300, "label": "Casa Vardán",
-                   "targetPage": "Casa Vardán", "image": "vardan_bandera.webp",
+                   "image": "vardan_bandera.webp",
                    "shape": "escudo" | "bandera" | "redondo",
                    "size": "pequeno" | "mediano" | "grande", "color": "#…" } ]
                                         emblemas: un escudo (o una bandera,
@@ -215,7 +215,7 @@ def leer_cmap(texto, avisar=None):
     for em in (_emblema(uno) for uno in crudo.get("emblems") or []):
         if em:
             pines.append({"x": em["x"], "y": em["y"], "etiqueta": em["etiqueta"], "color": em["color"],
-                          "icono": "", "pagina": em["pagina"], "mapa": em["mapa"], "capa": "",
+                          "icono": "", "mapa": em["mapa"], "capa": "",
                           "escondido": False, "tipo": "", "forma": em["forma"], "tamano": em["tamano"],
                           "imagen": em["imagen"]})
 
@@ -240,31 +240,15 @@ def leer_cmap(texto, avisar=None):
         "textos": textos,
         "emblemas": emblemas,
         "escala": _escala(crudo.get("scale")),
-        "pagina": str(crudo.get("page") or "").strip(),
         "rosa": _rosa_valida(crudo.get("compass")),
-        # Dónde cae en el mapamundi (si es un mapa regional situado; lo
-        # pone el editor de mapas, ver herramientas/0-comun/mapas_mundo.py).
-        "mundo": _mundo(crudo.get("world")),
     }
-
-
-def _mundo(crudo):
-    """{"mapa", "x", "y", "w", "h"} (en unidades del mapamundi) o None."""
-    if not isinstance(crudo, dict):
-        return None
-    numeros = [_numero(crudo.get(k), None) for k in ("x", "y", "w", "h")]
-    if any(n is None for n in numeros) or numeros[2] <= 0 or numeros[3] <= 0:
-        return None
-    x, y, w, h = numeros
-    return {"mapa": str(crudo.get("map") or "").strip(), "x": x, "y": y, "w": w, "h": h}
 
 
 def _quien(crudo, n):
     """Cómo llamar a una región o a un pin en un aviso: por su nombre, y si
     no tiene, por el sitio que ocupa en el archivo."""
     if isinstance(crudo, dict):
-        nombre = (crudo.get("label") or crudo.get("name")
-                  or crudo.get("targetPage") or crudo.get("targetMap") or "")
+        nombre = crudo.get("label") or crudo.get("name") or crudo.get("targetMap") or ""
         if str(nombre).strip():
             return str(nombre).strip()
     return "el número %d del archivo" % (n + 1)
@@ -285,7 +269,7 @@ def _pin(crudo):
     lleva. Así lo guarda Chronicler, comprobado en un mapa de verdad:
 
         { "id": "9ea0…", "x": 494.5, "y": 314,
-          "targetPage": "Reino de Prunia", "label": "Reino de Prunia",
+          "targetMap": "Reino de Prunia", "label": "Reino de Prunia",
           "color": "#3498db", "icon": "🏰", "invisible": false }
 
     La posición se acepta también dentro de un "position", que es la otra
@@ -302,7 +286,6 @@ def _pin(crudo):
         "etiqueta": str(crudo.get("label") or crudo.get("name") or "").strip(),
         "color": _color(crudo.get("color")),
         "icono": str(crudo.get("icon") or crudo.get("emoji") or "").strip(),
-        "pagina": str(crudo.get("targetPage") or "").strip(),
         "mapa": str(crudo.get("targetMap") or "").strip(),
         "capa": str(crudo.get("layerId") or "").strip(),
         # Un pin que en Chronicler está escondido. Se respeta: ni se
@@ -421,15 +404,9 @@ def _linea(crudo):
         "puntos": puntos,
         "tipo": tipo if tipo in TIPOS_DE_LINEA else "camino",
         "etiqueta": str(crudo.get("label") or "").strip(),
-        "pagina": str(crudo.get("targetPage") or "").strip(),
         "mapa": str(crudo.get("targetMap") or "").strip(),
         "color": _color(crudo.get("color")),
         "ensancha": crudo.get("taper") is not False,
-        # Traída de un mapa vecino (en el editor: «Los caminos y ríos de los
-        # vecinos»): en el mapamundi no pasa, que allí va la de su mapa.
-        "copia": bool(crudo.get("fromMap")),
-        "id": str(crudo.get("id") or ""),
-        "de_linea": str(crudo.get("fromLine") or ""),
         # Su estilo propio, si lo tiene (si no, el de su tipo).
         "ancho": _entre(_numero(crudo.get("width"), None), 0.5, 20),
         "trazo": str(crudo.get("dash") or "").strip().lower() if str(crudo.get("dash") or "").strip().lower()
@@ -516,8 +493,7 @@ def _emblema(crudo):
     tamano = str(crudo.get("size") or "mediano").strip().lower()
     return {"x": x, "y": y,
             "etiqueta": str(crudo.get("label") or "").strip(),
-            "pagina": str(crudo.get("targetPage") or "").strip(),
-            "mapa": str(crudo.get("targetMap") or "").strip(),
+                "mapa": str(crudo.get("targetMap") or "").strip(),
             "imagen": str(crudo.get("image") or "").strip(),
             "forma": forma if forma in FORMAS_DE_EMBLEMA else "escudo",
             "tamano": tamano if tamano in TAMANOS_DE_EMBLEMA else "mediano",
@@ -1030,13 +1006,6 @@ def _red_de_caminos(lineas, sitios, ancho, alto, radio, detalle=0):
     # Un camino que se queda a nada de otro (a menos de medio pin) es que
     # quería llegar a él: se engancha.
     sin_salida = max(junto, radio * 0.45)
-    # Con caminos de mapas regionales (juntar_regionales), las tolerancias
-    # de su escala, que es más fina: con las del mapamundi se juntarían
-    # cruces que no lo son y saldrían atajos.
-    finos = [linea["escala_de"] for linea in lineas if linea.get("escala_de")]
-    if finos:
-        fino = min(1.0, min(finos))
-        junto, cerca, sin_salida = junto * fino, cerca * fino, sin_salida * fino
     nodos = []
     celdas = {}
 
@@ -1056,7 +1025,7 @@ def _red_de_caminos(lineas, sitios, ancho, alto, radio, detalle=0):
     for linea in lineas:
         if linea["tipo"] not in RAYAS_DE_VIAJE:
             continue
-        cuales = [nodo(x, y) for x, y in simplificar(linea["puntos"], min(detalle, linea.get("detalle") or detalle) / 2)]
+        cuales = [nodo(x, y) for x, y in simplificar(linea["puntos"], detalle / 2)]
         for a, b in zip(cuales, cuales[1:]):
             if a != b:
                 tramos.add((min(a, b), max(a, b)))
@@ -1209,7 +1178,6 @@ def _forma(crudo):
         "puntos": puntos,
         "color": _color(crudo.get("color")),
         "etiqueta": str(crudo.get("label") or "").strip(),
-        "pagina": str(crudo.get("targetPage") or "").strip(),
         "mapa": str(crudo.get("targetMap") or "").strip(),
         "capa": str(crudo.get("layerId") or "").strip(),
         "tipo": _tipo_de_zona(crudo.get("kind")),
@@ -1357,12 +1325,6 @@ def _area(puntos):
     return abs(a) / 2
 
 
-def _caja(puntos):
-    xs = [p[0] for p in puntos]
-    ys = [p[1] for p in puntos]
-    return min(xs), min(ys), max(xs), max(ys)
-
-
 def _dentro(punto, puntos):
     x, y = punto
     dentro = False
@@ -1376,44 +1338,15 @@ def _dentro(punto, puntos):
     return dentro
 
 
-def niveles(formas, region_de=None):
+def niveles(formas):
     """{índice de la forma: "region" | "pais" | "suelto"} para las formas
     con nombre. "suelto" es un país que no está en ninguna región.
 
-    QUIÉN MANDA: las páginas de la wiki. Si alguna página dice en su ficha
-    «región: [[Partaria]]», region_de lo trae ({"reino de kasa": "partaria"})
-    y eso decide: Partaria es una región y el Reino de Kasa un país suyo.
-    Así se corrige a mano lo que el dibujo no deja claro (unas islas que
-    asoman fuera de la raya de su archipiélago).
-
-    Sin ninguna página que lo diga, se adivina por el dibujo:
-    Una forma B está dentro de otra A si A es más grande y la mayoría de
-    una muestra de puntos de B (y su centro) caen dentro de A. Con muestra y
-    no con todos los puntos: el mapamundi tiene 29.000 y compararlos todos
-    con todos tardaba minutos."""
-    con_nombre = [(i, f) for i, f in enumerate(formas)
-                  if f["etiqueta"] or f["pagina"] or f["mapa"]]
-    # Las páginas mandan solo si hablan de ALGUNA de estas formas: en el
-    # mapa de un reino, con sus comarcas y sus valles, las páginas del
-    # mapamundi no dicen nada, y entonces se mira el dibujo.
-    if region_de:
-        regiones = set(region_de.values())
-        if not any((f["etiqueta"] or f["pagina"] or f["mapa"]).strip().lower() in regiones
-                   or (f["etiqueta"] or f["pagina"] or f["mapa"]).strip().lower() in region_de
-                   for _, f in con_nombre):
-            region_de = None
-    if region_de:
-        regiones = set(region_de.values())
-        salida = {}
-        for i, f in con_nombre:
-            nombre = (f["etiqueta"] or f["pagina"] or f["mapa"]).strip().lower()
-            if nombre in regiones:
-                salida[i] = "region"
-            elif nombre in region_de:
-                salida[i] = "pais"
-            else:
-                salida[i] = "suelto"
-        return salida
+    Se mira el dibujo: una forma B está dentro de otra A si A es más
+    grande y la mayoría de una muestra de puntos de B (y su centro) caen
+    dentro de A. Con muestra y no con todos los puntos: un mapamundi puede
+    tener 29.000 y compararlos todos con todos tardaba minutos."""
+    con_nombre = [(i, f) for i, f in enumerate(formas) if f["etiqueta"] or f["mapa"]]
     datos = {}
     for i, f in con_nombre:
         pts = f["puntos"]
@@ -1447,13 +1380,14 @@ def niveles(formas, region_de=None):
     return salida
 
 
-def pintar(mapa, pagina_a, mapa_a, imagen_a, detalle=None, avisar=None, region_de=None, emblema_a=None):
+def pintar(mapa, mapa_a, imagen_a, detalle=None, avisar=None, emblema_a=None):
     """El HTML de un mapa.
 
-    pagina_a(nombre) y mapa_a(nombre) devuelven (dirección, existe); si
-    existe es False, el sitio sale en la lista marcado como «falta», que es
-    el enlace rojo de las wikis. imagen_a(nombre) devuelve la dirección de
-    una imagen de la bóveda, o "" si no está.
+    mapa_a(nombre) devuelve (dirección, existe) del mapa al que lleva un
+    sitio («Lleva al mapa»); si existe es False, el sitio sale en la lista
+    marcado como «falta el mapa». imagen_a(nombre) y emblema_a(nombre)
+    devuelven la dirección de una imagen de capa o de emblema, o "" si no
+    está.
     """
     def di(que, donde=""):
         if avisar:
@@ -1521,11 +1455,8 @@ def pintar(mapa, pagina_a, mapa_a, imagen_a, detalle=None, avisar=None, region_d
     # manda el último: un polígono decorativo pintado encima de una región
     # enlazada se comería los clics.
     dibujo, vivas, vivas_regiones = [], [], []
-    nivel_de = niveles(mapa["formas"], region_de)
+    nivel_de = niveles(mapa["formas"])
     hay_niveles = "region" in nivel_de.values()
-    # El mapa de una página (con "page") enseña de salida TODAS las zonas,
-    # las grandes y las de dentro a la vez; el mapamundi, los países.
-    todas_de_salida = bool(mapa.get("pagina"))
     cuantas = 0
     # DE LA MÁS GRANDE A LA MÁS PEQUEÑA: en SVG lo último tapa a lo de
     # antes, así que una zona dentro de otra se pinta después y queda
@@ -1540,8 +1471,8 @@ def pintar(mapa, pagina_a, mapa_a, imagen_a, detalle=None, avisar=None, region_d
         trozos.append("<defs>%s</defs>" % tramas)
     for indice in orden:
         forma = mapa["formas"][indice]
-        nombre = forma["etiqueta"] or forma["pagina"] or forma["mapa"]
-        destinos = _destinos(forma, pagina_a, mapa_a)
+        nombre = forma["etiqueta"] or forma["mapa"]
+        destinos = _destinos(forma, mapa_a)
 
         antes = forma["puntos"]
         despues = simplificar(antes, detalle)
@@ -1570,11 +1501,7 @@ def pintar(mapa, pagina_a, mapa_a, imagen_a, detalle=None, avisar=None, region_d
         for uno in destinos:
             sitios.append(dict(uno, id=cual, nombre=nombre, color=color,
                                tipo="forma", icono="", region=(nivel == "region"), que=que_zona))
-        # El polígono lleva al primero que exista. Si la región apunta a una
-        # página Y a otro mapa —que es raro pero pasa—, el dibujo lleva a la
-        # página y el mapa sale como una fila más de la lista, que es la
-        # única manera de no esconder uno de los dos.
-        elegido = next((d for d in destinos if d["url"]), destinos[0])
+        elegido = destinos[0]
         url = elegido["url"]
         poligono = ('<path d="%s"%s stroke-width="%d"></path>%s'
                     % (coordenadas, _pintura(color), grosor, trama))
@@ -1606,67 +1533,22 @@ def pintar(mapa, pagina_a, mapa_a, imagen_a, detalle=None, avisar=None, region_d
         # Sin JavaScript se quedan así, que es lo más útil (los países son
         # lo que más se busca, y las regiones están en la lista de abajo).
         trozos.append('<g class="mapa-formas mapa-regiones%s" data-mapa-nivel="regiones">'
-                      '%s</g>' % ("" if todas_de_salida else " es-apagada", "".join(vivas_regiones)))
+                      '%s</g>' % (" es-apagada", "".join(vivas_regiones)))
         trozos.append('<g class="mapa-formas mapa-paises" data-mapa-nivel="paises">%s</g>'
                       % "".join(vivas))
     else:
         trozos.append('<g class="mapa-formas">%s</g>' % "".join(vivas))
 
-    # ---- LAS ZONAS DE LOS MAPAS REGIONALES ----
-    # En el mapamundi, los bosques, montañas, lagos… de cada mapa regional
-    # situado (juntar_regionales), con su trama a la escala de su mapa. Van
-    # en su propio grupo (casilla «zonas naturales»), aparte de los
-    # países: se ven también con «solo la imagen».
-    if mapa.get("zonas_regionales"):
-        lados = {}
-        for zona in mapa["zonas_regionales"]:
-            lados.setdefault(zona["tipo"], zona["lado_trama"])
-        trozos.append("<defs>%s</defs>" % "".join(
-            _trama(tipo, lado, "mapa-trama-r-" + tipo) for tipo, lado in sorted(lados.items())))
-        zonas = []
-        for zona in sorted(mapa["zonas_regionales"], key=lambda z: -_area(z["puntos"])):
-            coordenadas = _trazo(simplificar(zona["puntos"], min(detalle, zona.get("detalle") or detalle)))
-            tipo_zona = zona["tipo"]
-            color = zona["color"] or TIPOS_DE_ZONA[tipo_zona][1]
-            grueso = ' stroke-width="%s"' % _cifra(max(0.2, zona.get("grueso") or grosor))
-            trama = ('<path class="mapa-trama es-zona-%s" d="%s" fill="url(#mapa-trama-r-%s)"></path>'
-                     % (tipo_zona, coordenadas, tipo_zona))
-            nombre = zona["etiqueta"] or zona["pagina"]
-            if not nombre:
-                zonas.append('<path class="mapa-dibujo es-zona-%s" d="%s"%s%s></path>%s'
-                             % (tipo_zona, coordenadas, _pintura(color), grueso, trama))
-                continue
-            cuantas += 1
-            cual = "s%d" % cuantas
-            destinos = _destinos(zona, pagina_a, mapa_a)
-            que_zona = TIPOS_DE_ZONA[tipo_zona][0]
-            for uno in destinos:
-                sitios.append(dict(uno, id=cual, nombre=nombre, color=color, tipo="forma", icono="",
-                                   region=False, que=que_zona))
-            elegido = next((d for d in destinos if d["url"]), destinos[0])
-            url = elegido["url"]
-            datos = _datos_del_globo(nombre, " · ".join(x for x in (que_zona, _nota(elegido["destino"], url)) if x), "")
-            datos += ' data-mapa-zona="%s"' % tipo_zona
-            poligono = ('<title>%s</title><path d="%s"%s%s></path>%s'
-                        % (html.escape(nombre), coordenadas, _pintura(color), grueso, trama))
-            if url:
-                zonas.append('<a class="mapa-forma es-enlace es-zona-%s" href="%s" data-mapa-sitio="%s"%s'
-                             ' tabindex="-1">%s</a>' % (tipo_zona, html.escape(url, quote=True), cual, datos, poligono))
-            else:
-                zonas.append('<g class="mapa-forma es-zona-%s" data-mapa-sitio="%s"%s>%s</g>'
-                             % (tipo_zona, cual, datos, poligono))
-        trozos.append('<g class="mapa-zonas-regionales">%s</g>' % "".join(zonas))
-
     # ---- LOS CAMINOS Y LOS RÍOS ----
     # Rayas abiertas, debajo de los pines. Los ríos azules y más gordos,
     # los caminos a trazos: se distinguen por la forma de la raya y no
     # solo por el color. Con nombre, salen en la lista como cualquier
-    # sitio, y si llevan a una página, se pueden pulsar.
+    # sitio, y si llevan a otro mapa, se pueden pulsar.
     rayas = {}
     for linea in mapa.get("lineas") or []:
-        simple = simplificar(linea["puntos"], min(detalle, linea.get("detalle") or detalle) / 2)
+        simple = simplificar(linea["puntos"], detalle / 2)
         coordenadas = _trazo_abierto(simple)
-        clase = "mapa-linea es-" + linea["tipo"] + (" es-regional" if linea.get("regional") else "")
+        clase = "mapa-linea es-" + linea["tipo"]
         color = (' stroke="%s"' % linea["color"]) if linea["color"] else ""
         # (grueso y no «ancho», que es lo que mide el mapa y se usa abajo)
         grueso = grosor * (3 if linea["tipo"] == "rio" else 2)
@@ -1678,18 +1560,18 @@ def pintar(mapa, pagina_a, mapa_a, imagen_a, detalle=None, avisar=None, region_d
                     % (clase, coordenadas, color, grueso, _estilo_de_raya(linea)))
         if linea["tipo"] == "ruta":
             raya += _flechas(simple, radio, linea["color"])
-        nombre = linea["etiqueta"] or linea["pagina"]
+        nombre = linea["etiqueta"] or linea["mapa"]
         if not nombre:
             grupo.append(raya)
             continue
         cuantas += 1
         cual = "s%d" % cuantas
-        destinos = _destinos(linea, pagina_a, mapa_a)
+        destinos = _destinos(linea, mapa_a)
         for uno in destinos:
             sitios.append(dict(uno, id=cual, nombre=nombre, color=linea["color"], tipo="linea",
                                icono="〰" if linea["tipo"] == "rio" else "┅",
                                que=TIPOS_DE_LINEA[linea["tipo"]]))
-        elegido = next((d for d in destinos if d["url"]), destinos[0])
+        elegido = destinos[0]
         datos = _datos_del_globo(nombre, TIPOS_DE_LINEA[linea["tipo"]], "")
         if linea.get("sesion"):
             # Las rutas de cada sesión se ven una a una (pintar_mandos,
@@ -1697,8 +1579,8 @@ def pintar(mapa, pagina_a, mapa_a, imagen_a, detalle=None, avisar=None, region_d
             datos += ' data-mapa-sesion="%d"' % linea["sesion"]
         # Una raya fina es difícil de acertar con el ratón: debajo va otra
         # gorda y transparente, que es la que recibe el puntero.
-        tocar = ('<path class="mapa-linea-toque%s" d="%s" stroke-width="%d" fill="none"></path>'
-                 % (" es-regional" if linea.get("regional") else "", coordenadas, grosor * 8))
+        tocar = ('<path class="mapa-linea-toque" d="%s" stroke-width="%d" fill="none"></path>'
+                 % (coordenadas, grosor * 8))
         if elegido["url"]:
             grupo.append('<a class="mapa-linea-sitio es-enlace" href="%s" data-mapa-sitio="%s"%s'
                          ' tabindex="-1"><title>%s</title>%s%s</a>'
@@ -1715,10 +1597,7 @@ def pintar(mapa, pagina_a, mapa_a, imagen_a, detalle=None, avisar=None, region_d
     # Los puentes, encima de todas las rayas; se apagan con los caminos.
     con_puente = _puentes_svg(mapa.get("lineas") or [], radio)
     if con_puente:
-        # (En el mapamundi, los de los mapas regionales: salen de cerca.)
-        trozos.append('<g class="mapa-lineas es-caminos es-puentes%s">%s</g>'
-                      % (" es-regional" if mapa.get("regionales") else "",
-                         con_puente))
+        trozos.append('<g class="mapa-lineas es-caminos es-puentes">%s</g>' % con_puente)
 
     # ---- LOS TEXTOS SUELTOS ----
     # «Mar de las Brumas», «Montes Grises»: escritos en el mapa, del tamaño
@@ -1752,10 +1631,6 @@ def pintar(mapa, pagina_a, mapa_a, imagen_a, detalle=None, avisar=None, region_d
 
     # ---- LOS PINES ----
     pines = []
-    # Con los pines más pequeños (el mapamundi con lo regional dentro), los
-    # nombres se escriben más grandes dentro del pin, para que en pantalla
-    # midan lo mismo que en los demás mapas y se lean igual.
-    letra = 15 / (mapa.get("pin_en_pantalla") or 15)
     escondidos = 0
     recortes = 0
     # Los sitios con nombre, para la red de caminos (las rutas).
@@ -1768,26 +1643,26 @@ def pintar(mapa, pagina_a, mapa_a, imagen_a, detalle=None, avisar=None, region_d
             escondidos += 1
             continue
         # Sin nombre, su tipo («Puente»), y no «sin nombre».
-        sin_nombre = not (pin["etiqueta"] or pin["pagina"] or pin["mapa"])
-        nombre = (pin["etiqueta"] or pin["pagina"] or pin["mapa"]
+        sin_nombre = not (pin["etiqueta"] or pin["mapa"])
+        nombre = (pin["etiqueta"] or pin["mapa"]
                   or (TIPOS_DE_PIN[pin["tipo"]][1].capitalize() if pin["tipo"] in TIPOS_DE_PIN else "sin nombre"))
-        destinos = _destinos(pin, pagina_a, mapa_a)
+        destinos = _destinos(pin, mapa_a)
         cuantas += 1
         cual = "s%d" % cuantas
         simbolo_lista, que_es = TIPOS_DE_PIN.get(pin["tipo"], ("", ""))
         if sin_nombre:
             # Ya se llama como su tipo: «Puente», y no «Puente · puente».
             que_es = ""
-        if pin["etiqueta"] or pin["pagina"] or pin["mapa"]:
+        if pin["etiqueta"] or pin["mapa"]:
             para_la_red.append({"x": pin["x"], "y": pin["y"], "nombre": nombre, "cual": cual})
         # LA IMAGEN AL PULSAR (los mapas de campaña: el plano de un pueblo
         # o una ciudad; lo pone generar-mapas-rol.py en "ver"). Solo en un
         # sitio que no lleve ya a otra parte.
-        ver = pin.get("ver") if not any(d["url"] for d in destinos) else None
+        ver = pin.get("ver") if not destinos[0]["url"] else None
         for uno in destinos:
             sitios.append(dict(uno, id=cual, nombre=nombre, color=pin["color"],
                                tipo="pin", icono=pin["icono"] or simbolo_lista, que=que_es, ver=ver))
-        elegido = next((d for d in destinos if d["url"]), destinos[0])
+        elegido = destinos[0]
         url = elegido["url"]
         nota = " · ".join(x for x in (que_es, _nota(elegido["destino"], url),
                                       "pulsa para ver su mapa" if ver else "") if x)
@@ -1832,10 +1707,9 @@ def pintar(mapa, pagina_a, mapa_a, imagen_a, detalle=None, avisar=None, region_d
                 de_cerca = "" if pin["tipo"] in SIEMPRE_CON_NOMBRE else " es-de-cerca"
                 dentro.append('<text class="mapa-pin-nombre%s" x="0" y="%s" font-size="%s" stroke-width="%s"'
                               ' text-anchor="middle" dominant-baseline="hanging">%s</text>'
-                              % (de_cerca, _cifra(bajo + radio * 0.35), _cifra(radio * 1.05 * letra),
-                                 _cifra(radio * 0.28 * letra), html.escape(pin["etiqueta"])))
+                              % (de_cerca, _cifra(bajo + radio * 0.35), _cifra(radio * 1.05),
+                                 _cifra(radio * 0.28), html.escape(pin["etiqueta"])))
             de_tipo = " mapa-emblema" + ((" con-tipo es-" + pin["tipo"]) if pin["tipo"] else "")
-            de_tipo += " es-regional" if pin.get("regional") else ""
             if url:
                 pines.append('<a class="mapa-pin es-enlace%s" href="%s" data-mapa-sitio="%s"%s%s'
                              ' tabindex="-1">%s</a>'
@@ -1866,10 +1740,9 @@ def pintar(mapa, pagina_a, mapa_a, imagen_a, detalle=None, avisar=None, region_d
             de_cerca = "" if pin["tipo"] in SIEMPRE_CON_NOMBRE else " es-de-cerca"
             dentro.append('<text class="mapa-pin-nombre%s" x="%s" y="0" font-size="%s"'
                           ' stroke-width="%s" dominant-baseline="central">%s</text>'
-                          % (de_cerca, _cifra(radio * 1.4), _cifra(radio * 1.05 * letra),
-                             _cifra(radio * 0.28 * letra), html.escape(pin["etiqueta"])))
+                          % (de_cerca, _cifra(radio * 1.4), _cifra(radio * 1.05),
+                             _cifra(radio * 0.28), html.escape(pin["etiqueta"])))
         de_tipo = (" con-tipo es-" + pin["tipo"]) if pin["tipo"] else ""
-        de_tipo += " es-regional" if pin.get("regional") else ""
         if url:
             pines.append('<a class="mapa-pin es-enlace%s" href="%s" data-mapa-sitio="%s"%s%s'
                          ' tabindex="-1">%s</a>'
@@ -1913,14 +1786,6 @@ def pintar(mapa, pagina_a, mapa_a, imagen_a, detalle=None, avisar=None, region_d
                         html.escape(json.dumps(escala["viaje"], ensure_ascii=False), quote=True)))
     trozos[0] = trozos[0].replace('<svg class="mapa-svg"', '<svg class="mapa-svg" data-mapa-radio="%d"%s'
                                   % (radio, de_escala), 1)
-    # Con los mapas regionales dentro (juntar_regionales): más zoom, y los
-    # nombres de los pueblos desde más cerca (lo lee mundo-mapa.js).
-    if mapa.get("zoom_maximo"):
-        trozos[0] = trozos[0].replace('<svg class="mapa-svg"', '<svg class="mapa-svg" data-mapa-zoom-maximo="%s"'
-                                      ' data-mapa-cerca="%s" data-mapa-pin="%s"'
-                                      % (mapa["zoom_maximo"], mapa.get("cerca") or 2,
-                                         mapa.get("pin_en_pantalla") or 15), 1)
-
     sitios.sort(key=lambda s: (_sin_tildes(s["nombre"]), s["id"]))
     # LA LEYENDA: los tipos de sitio y de raya que salen en ESTE mapa.
     # La marca de cada tipo, COMO SE VE EN ESTE MAPA: si sus sitios van como
@@ -1938,7 +1803,7 @@ def pintar(mapa, pagina_a, mapa_a, imagen_a, detalle=None, avisar=None, region_d
             usados.append(("linea es-" + tipo, "", nombre))
     # Las clases de zona, con su color y su trama.
     for tipo, (nombre, color) in TIPOS_DE_ZONA.items():
-        suyas = [f for f in mapa["formas"] + (mapa.get("zonas_regionales") or []) if f["tipo"] == tipo]
+        suyas = [f for f in mapa["formas"] if f["tipo"] == tipo]
         if suyas:
             usados.append(("zona es-" + tipo, "", nombre))
             marcas["zona-" + tipo] = _muestra_de_zona(tipo, next((f["color"] for f in suyas if f["color"]), color),
@@ -1969,7 +1834,6 @@ def pintar(mapa, pagina_a, mapa_a, imagen_a, detalle=None, avisar=None, region_d
         "hay_escala": bool(escala),
         "hay_ruta": bool(red),
         "hay_rosa": bool(mapa.get("rosa")),
-        "hay_zonas_regionales": bool(mapa.get("zonas_regionales")),
         # Los textos sueltos (mares, cordilleras…): su casilla. Los nombres de
         # los sitios van aparte, en «sitios» (mundo-mapa.js).
         "hay_nombres": bool(letreros),
@@ -1979,7 +1843,6 @@ def pintar(mapa, pagina_a, mapa_a, imagen_a, detalle=None, avisar=None, region_d
         "puntos": (puntos_antes, puntos_despues),
         "dibujo": len(dibujo),
         "niveles": hay_niveles,
-        "todas_de_salida": todas_de_salida,
         "escondidos": escondidos,
     }
 
@@ -1996,8 +1859,6 @@ def _nota(destino, url):
         return "otro mapa" if destino == "mapa" else ""
     if destino == "mapa":
         return "falta el mapa"
-    if destino == "pagina":
-        return "sin página"
     return ""
 
 
@@ -2037,35 +1898,18 @@ def _trazo(puntos):
     return "M%d %dl%sZ" % (round(puntos[0][0]), round(puntos[0][1]), ",".join(saltos))
 
 
-def _destinos(crudo, pagina_a, mapa_a):
-    """A dónde lleva una región o un pin. Normalmente a un sitio, pero
-    puede llevar a una página Y a otro mapa, así que esto devuelve una
-    lista y no un sitio suelto.
-
-    Cada uno sale como {destino, apunta_a, url, existe}, con url vacía si
-    lo que enlaza no existe todavía: eso no es un error, es el enlace rojo
-    de las wikis y acaba en la lista de lo que falta por escribir."""
-    cosas = []
-    for destino, nombre in (("pagina", crudo["pagina"]), ("mapa", crudo["mapa"])):
-        if not nombre:
-            continue
-        url, existe = (pagina_a if destino == "pagina" else mapa_a)(nombre)
-        cosas.append({"destino": destino, "apunta_a": nombre,
-                      "url": url if existe else "", "existe": existe})
-    if not cosas and crudo.get("etiqueta"):
-        # Sin «lleva a» puesto en el mapa, pero con nombre: si hay una
-        # página de la wiki que se llama igual, lleva a ella. Así no hace
-        # falta enlazar a mano en Chronicler cada una de las 120 regiones,
-        # y una página nueva queda enlazada desde el mapa en cuanto existe.
-        url, existe = pagina_a(crudo["etiqueta"])
-        if existe:
-            cosas.append({"destino": "pagina", "apunta_a": crudo["etiqueta"],
-                          "url": url, "existe": True})
-    if not cosas:
-        # Tiene nombre pero no lleva a ninguna parte: es un sitio del mapa
-        # que está dibujado y nada más. Sale en la lista igual.
-        cosas.append({"destino": "", "apunta_a": "", "url": "", "existe": True})
-    return cosas
+def _destinos(crudo, mapa_a):
+    """A dónde lleva una región, una raya o un pin: a otro mapa («Lleva al
+    mapa», "targetMap") o a ninguna parte. Una lista de uno (era una lista
+    cuando también podía llevar a una página de la wiki):
+    [{destino, apunta_a, url, existe}], con url vacía si ese mapa no existe
+    todavía (sale en la lista como «falta el mapa»)."""
+    if crudo["mapa"]:
+        url, existe = mapa_a(crudo["mapa"])
+        return [{"destino": "mapa", "apunta_a": crudo["mapa"], "url": url if existe else "", "existe": existe}]
+    # Tiene nombre pero no lleva a ninguna parte: es un sitio del mapa que
+    # está dibujado y nada más. Sale en la lista igual.
+    return [{"destino": "", "apunta_a": "", "url": "", "existe": True}]
 
 
 def _cifra(numero):
@@ -2152,8 +1996,8 @@ def pintar_lista(sitios, titulo_id="mapa-sitios-titulo"):
 # guardadas en Chronicler.
 
 def pintar_mandos(capas, hay_formas=True, hay_pines=False, hay_niveles=False, hay_lineas=False,
-                  hay_nombres=False, todas_de_salida=False, hay_escala=False, hay_leyenda=False, hay_ruta=False,
-                  hay_rosa=False, hay_zonas_regionales=False, sesiones=None):
+                  hay_nombres=False, hay_escala=False, hay_leyenda=False, hay_ruta=False,
+                  hay_rosa=False, sesiones=None):
     trozos = ['<div class="mapa-mandos" data-mapa-mandos>']
     trozos.append(
         '<div class="mapa-zoom" role="group" aria-label="Zoom del mapa">'
@@ -2208,14 +2052,9 @@ def pintar_mandos(capas, hay_formas=True, hay_pines=False, hay_niveles=False, ha
     casillas = []
     if hay_formas and hay_niveles:
         # Países o regiones (ver niveles()), las dos cosas a la vez (las de
-        # dentro encima), o nada encima de la imagen. En el mapa de una
-        # página se habla de zonas y se empieza viéndolas todas.
-        if todas_de_salida:
-            opciones = (("todo", "todas las zonas", True), ("regiones", "solo las grandes", False),
-                        ("paises", "solo las de dentro", False), ("nada", "solo la imagen", False))
-        else:
-            opciones = (("paises", "países", True), ("regiones", "regiones", False),
-                        ("todo", "las dos", False), ("nada", "solo la imagen", False))
+        # dentro encima), o nada encima de la imagen.
+        opciones = (("paises", "países", True), ("regiones", "regiones", False),
+                    ("todo", "las dos", False), ("nada", "solo la imagen", False))
         for valor, texto, marcado in opciones:
             casillas.append(
                 '<label class="mapa-capa-casilla"><input type="radio" name="mapa-nivel"'
@@ -2225,12 +2064,6 @@ def pintar_mandos(capas, hay_formas=True, hay_pines=False, hay_niveles=False, ha
         casillas.append(
             '<label class="mapa-capa-casilla"><input type="checkbox"'
             ' data-mapa-regiones checked> regiones</label>')
-    # Los bosques, montañas, lagos… de los mapas regionales (en el
-    # mapamundi): aparte de los países, para verlos con «solo la imagen».
-    if hay_zonas_regionales:
-        casillas.append(
-            '<label class="mapa-capa-casilla"><input type="checkbox"'
-            ' data-mapa-zonas-regionales checked> zonas naturales</label>')
     if hay_pines:
         casillas.append(
             '<label class="mapa-capa-casilla"><input type="checkbox"'

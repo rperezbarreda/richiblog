@@ -1,4 +1,4 @@
-/* EL MAPA DE UN MUNDO — la página de un .cmap de Chronicler */
+/* EL MAPA DE UNA CAMPAÑA — la página de un .cmap de Chronicler */
 
 /* La escribe herramientas/3-generadores/generar-mapas-rol.py con la
    plantilla herramientas/plantillas/mapa-rol.html (los mapas de las
@@ -1978,26 +1978,6 @@ html.con-mapa-a-pantalla body {
 /* ====================================================================
    LOS SITIOS: CUÁNDO Y CÓMO SE VEN
    ==================================================================== */
-
-/* EN EL MAPAMUNDI, lo de los mapas regionales (es-regional) sale al
-   acercarse: las capitales y las ciudades desde el 200% (esta-medio), lo
-   demás y los puentes desde el 400% (esta-cerca, data-mapa-cerca). Con el
-   mundo entero a la vista serían una sopa de puntos. */
-.mapa-svg .mapa-pin.es-regional,
-.mapa-svg path.es-regional,
-.mapa-svg .mapa-lineas.es-puentes.es-regional {
-    display: none;
-}
-
-/* (Sus caminos y ríos, también desde el 200%: con el mundo entero, una
-   mancha; miden lo mismo en pantalla a cualquier zoom.) */
-.esta-medio .mapa-svg path.es-regional,
-.esta-medio .mapa-svg .mapa-pin.es-regional.es-capital,
-.esta-medio .mapa-svg .mapa-pin.es-regional.es-ciudad,
-.esta-cerca .mapa-svg .mapa-pin.es-regional,
-.esta-cerca .mapa-svg .mapa-lineas.es-puentes.es-regional {
-    display: inline;
-}
 
 /* Los que se quitan con «tipos de sitio» o «solo países y capitales». */
 .mapa-caja .mapa-lienzo .mapa-svg .mapa-pin.es-filtrada {

@@ -48,10 +48,9 @@
 # En el JSON, cada sesión con ruta lleva "ruta": el mapa con ?sesion=3,
 # que es el enlace «la ruta en el mapa» de sus notas y de su resumen.
 #
-# Lo de pintar está en 0-comun/mundo_mapas.py (es de cuando la wiki de
-# Cralëa vivía aquí y sus mapas se pintaban igual). Lo que no hay es a
-# dónde enlazar páginas («targetPage»), así que un sitio que diga que
-# lleva a una página sale sin enlace.
+# Lo de pintar está en 0-comun/mundo_mapas.py. Un sitio lleva a otro mapa
+# de la campaña («Lleva al mapa», o si se llama igual que él: ver
+# enlazar_zonas); a páginas no (eso era de la wiki de Cralëa).
 #
 #     python herramientas/3-generadores/generar-mapas-rol.py
 #     python herramientas/3-generadores/generar-mapas-rol.py --probar   (sin escribir)
@@ -262,7 +261,7 @@ def poner_imagenes_al_pulsar(m):
 def un_mapa(m, probar):
     """Pinta un .cmap de una campaña (ya leído, ver leer_uno) y escribe su
     página. Devuelve (clave, título, url)."""
-    archivo, clave, campana, leido, avisos = m["archivo"], m["clave"], m["campana"], m["leido"], m["avisos"]
+    clave, campana, leido, avisos = m["clave"], m["campana"], m["leido"], m["avisos"]
     m["sesiones"] = poner_sesiones(m)
     poner_imagenes_al_pulsar(m)
     suyas = MAPAS_ROL / clave / "imagenes"
@@ -289,8 +288,8 @@ def un_mapa(m, probar):
             shutil.copy2(origen, salida_img / origen.name)
         return url_img + origen.name
 
-    hecho = mundo_mapas.pintar(leido, lambda n: ("", False), m["mapa_a"], de_imagen,
-                               detalle=None, avisar=avisos.di, region_de={}, emblema_a=de_emblema)
+    hecho = mundo_mapas.pintar(leido, m["mapa_a"], de_imagen, detalle=None, avisar=avisos.di,
+                               emblema_a=de_emblema)
     svg = hecho["svg"]
 
     def con_maxima(m):
@@ -305,10 +304,9 @@ def un_mapa(m, probar):
     hay_pines = any(s["tipo"] == "pin" for s in hecho["sitios"])
     mandos = mundo_mapas.pintar_mandos(hecho["capas"], hay_formas, hay_pines,
                                        hecho.get("niveles", False), hecho.get("hay_lineas", False),
-                                       hecho.get("hay_nombres", False), hecho.get("todas_de_salida", False),
-                                       hecho.get("hay_escala", False), bool(hecho.get("leyenda")),
-                                       hecho.get("hay_ruta", False), hecho.get("hay_rosa", False),
-                                       hecho.get("hay_zonas_regionales", False), sesiones=m["sesiones"])
+                                       hecho.get("hay_nombres", False), hecho.get("hay_escala", False),
+                                       bool(hecho.get("leyenda")), hecho.get("hay_ruta", False),
+                                       hecho.get("hay_rosa", False), sesiones=m["sesiones"])
     titulo, url = m["titulo"], m["url"]
     # Una zona vuelve a su mapamundi; el mapamundi, a la campaña.
     mundo = m["mundo"]
