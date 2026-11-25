@@ -10560,7 +10560,91 @@
         } else {
             (fondo.querySelector(".master-entrada-campana") || input).focus();
         }
-        verAvisoWeb(fondo);
+        if (sinGuardarTodavia) {
+            verManifiesto(fondo, () => verAvisoWeb(fondo));
+        } else {
+            verAvisoWeb(fondo);
+        }
+    }
+
+    // EL MANIFIESTO: por qué es gratis y libre, y que está hecha con ayuda
+    // de la IA. Al final de las opciones y, la primera vez, en una ventana
+    // antes de crear la campaña.
+    function manifiestoDe() {
+        const manifiesto = crear("div", "master-manifiesto");
+        [ocT("Esta aplicación es y será siempre **totalmente gratuita**, sin anuncios ni compras, y de **código libre** (licencia MIT). La he programado con ayuda de la inteligencia artificial y no me parece lícito lucrarme con ello."),
+            ocT("**No recoge ningún dato**: todo lo que haces se queda en tu dispositivo, sin cuentas, sin rastreadores y sin nada que se suba a ningún sitio."),
+            ocT("Está pensada para que la pueda usar **todo el mundo**: con teclado, con lector de pantalla, con el texto más grande y con temas de alto contraste. Si algo no te funciona, dímelo."),
+            ocT("Te agradezco mucho que la compartas. Y si quieres aportar algo, lo mejor es que ese dinero vaya a algún **refugio de animales de tu zona**: seguro que le dan mucho mejor uso que yo."),
+            ocT("Cualquiera es libre de clonar la aplicación y su código y cambiarlos a su gusto."),
+            ocT("Eso sí: aunque la app permite crear y ampliar los compendios, te recomiendo **no publicar contenido de terceros** (manuales, aventuras, suplementos…). La app usa el SRD y las reglas básicas porque son de libre uso.")]
+            .forEach((t) => {
+                const parrafo = crear("p");
+                parrafo.append(...enLinea(t));
+                manifiesto.appendChild(parrafo);
+            });
+        // El correo, con su enlace.
+        const correo = crear("a", "", "contacto@richi.blog");
+        correo.href = "mailto:contacto@richi.blog";
+        const partes = ocT("Ideas, fallos o ganas de colaborar: {correo}.").split("{correo}");
+        const contacto = crear("p", "", partes[0]);
+        contacto.append(correo, partes.slice(1).join(""));
+        manifiesto.appendChild(contacto);
+        const firma = crear("p", "master-manifiesto-firma", ocT("— Richi"));
+        const codigo = crear("a", "oc-vida-accion", ocT("📂 el código, en GitHub"));
+        codigo.href = "https://github.com/rperezbarreda/pantalla_master";
+        codigo.target = "_blank";
+        codigo.rel = "noopener noreferrer";
+        codigo.setAttribute("aria-label", ocT("El código de la app, en GitHub (se abre aparte)"));
+        manifiesto.append(firma, codigo);
+        return manifiesto;
+    }
+
+    // La primera vez (sin nada guardado), antes de crear la campaña: el
+    // manifiesto en su ventana, encima de la entrada. Al cerrarla, «despues».
+    function verManifiesto(entrada, despues) {
+        const volverA = document.activeElement;
+        const fondo = crear("div", "master-entrada master-aviso-web");
+        fondo.setAttribute("role", "dialog");
+        fondo.setAttribute("aria-modal", "true");
+        fondo.setAttribute("aria-labelledby", "master-manifiesto-titulo");
+        const caja = crear("div", "master-entrada-caja");
+        const titulo = crear("h2", "master-entrada-titulo", ocT("💛 Gratis, libre y hecha con IA"));
+        titulo.id = "master-manifiesto-titulo";
+        const vale = botonDe("oc-vida-accion es-principal", ocT("entendido"), () => cerrar());
+        const botones = crear("div", "master-anadir-otras");
+        botones.appendChild(vale);
+        caja.append(titulo, manifiestoDe(), botones);
+        fondo.appendChild(caja);
+        entrada.inert = true;
+        function cerrar() {
+            entrada.inert = false;
+            fondo.remove();
+            if (volverA && volverA.focus) {
+                volverA.focus();
+            }
+            despues();
+        }
+        fondo.addEventListener("keydown", (e) => {
+            if (e.key === "Escape") {
+                e.preventDefault();
+                e.stopPropagation();
+                cerrar();
+            } else if (e.key === "Tab") {
+                const cosas = Array.from(fondo.querySelectorAll("a[href], button"));
+                const i = cosas.indexOf(document.activeElement);
+                if (e.shiftKey && i <= 0) {
+                    e.preventDefault();
+                    cosas[cosas.length - 1].focus();
+                } else if (!e.shiftKey && i === cosas.length - 1) {
+                    e.preventDefault();
+                    cosas[0].focus();
+                }
+            }
+        });
+        document.body.appendChild(fondo);
+        caja.scrollTop = 0;
+        vale.focus({ preventScroll: true });
     }
 
     // EL AVISO DE LA WEB: al abrirla desde la web (no con el ejecutable),
@@ -11012,33 +11096,7 @@
         lic.append(accion(ocT("📜 licencias y créditos"), () => verCreditos(botonOpciones)), web);
         fila(ocT("Licencias y créditos"), crear("p", "oc-hoja-nota", ocT("SRD 5.2 de Wizards of the Coast (CC BY 4.0), sonidos de la Google Sound Library (CC BY 4.0), tipografías OFL y la app con licencia MIT.")), lic);
         // Por qué es gratis: lo último, como una carta.
-        const manifiesto = crear("div", "master-manifiesto");
-        [ocT("Esta aplicación es y será siempre **totalmente gratuita**, sin anuncios ni compras, y de **código libre** (licencia MIT). La he programado con ayuda de la inteligencia artificial y no me parece lícito lucrarme con ello."),
-            ocT("**No recoge ningún dato**: todo lo que haces se queda en tu dispositivo, sin cuentas, sin rastreadores y sin nada que se suba a ningún sitio."),
-            ocT("Está pensada para que la pueda usar **todo el mundo**: con teclado, con lector de pantalla, con el texto más grande y con temas de alto contraste. Si algo no te funciona, dímelo."),
-            ocT("Te agradezco mucho que la compartas. Y si quieres aportar algo, lo mejor es que ese dinero vaya a algún **refugio de animales de tu zona**: seguro que le dan mucho mejor uso que yo."),
-            ocT("Cualquiera es libre de clonar la aplicación y su código y cambiarlos a su gusto."),
-            ocT("Eso sí: aunque la app permite crear y ampliar los compendios, te recomiendo **no publicar contenido de terceros** (manuales, aventuras, suplementos…). La app usa el SRD y las reglas básicas porque son de libre uso.")]
-            .forEach((t) => {
-                const parrafo = crear("p");
-                parrafo.append(...enLinea(t));
-                manifiesto.appendChild(parrafo);
-            });
-        // El correo, con su enlace.
-        const correo = crear("a", "", "contacto@richi.blog");
-        correo.href = "mailto:contacto@richi.blog";
-        const partes = ocT("Ideas, fallos o ganas de colaborar: {correo}.").split("{correo}");
-        const contacto = crear("p", "", partes[0]);
-        contacto.append(correo, partes.slice(1).join(""));
-        manifiesto.appendChild(contacto);
-        const firma = crear("p", "master-manifiesto-firma", ocT("— Richi"));
-        const codigo = crear("a", "oc-vida-accion", ocT("📂 el código, en GitHub"));
-        codigo.href = "https://github.com/rperezbarreda/pantalla_master";
-        codigo.target = "_blank";
-        codigo.rel = "noopener noreferrer";
-        codigo.setAttribute("aria-label", ocT("El código de la app, en GitHub (se abre aparte)"));
-        manifiesto.append(firma, codigo);
-        fila(ocT("💛 Gratis y libre"), manifiesto);
+        fila(ocT("💛 Gratis y libre"), manifiestoDe());
         const cerrar = window.ocVentana.abrir({ titulo: ocT("opciones"), cuerpo, vuelta: botonOpciones });
     }
 

@@ -2876,6 +2876,7 @@ window.ocIdioma.poner({
 "💚 cura": "💚 heal",
 "💚 curar": "💚 heal",
 "💛 Gratis y libre": "💛 Free and open",
+"💛 Gratis, libre y hecha con IA": "💛 Free, open and made with AI",
 "💡 siempre encendida": "💡 always on",
 "💥 con efectos": "💥 with effects",
 "💥 daño": "💥 damage",
